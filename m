@@ -1,32 +1,44 @@
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:9923 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726285AbfIQJA7 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 17 Sep 2019 05:00:59 -0400
-Received: from G08CNEXCHPEKD01.g08.fujitsu.local (unknown [10.167.33.80])
-        by cn.fujitsu.com (Postfix) with ESMTP id AF1F04CE0C9C
-        for <fstests@vger.kernel.org>; Tue, 17 Sep 2019 17:00:40 +0800 (CST)
-From: "Xu, Yang" <xuyang2018.jy@cn.fujitsu.com>
-Subject: question of xfs/148 and xfs/149
-Date: Tue, 17 Sep 2019 09:00:57 +0000
-Message-ID: <4BF2FD5A942B1C4B828DDAF5635768C1041AB0E2@G08CNEXMBPEKD02.g08.fujitsu.local>
-Content-Language: ja-JP
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Received: from aserp2120.oracle.com ([141.146.126.78]:40964 "EHLO
+        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727168AbfIQQjm (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 17 Sep 2019 12:39:42 -0400
+Date: Tue, 17 Sep 2019 09:39:33 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: question of xfs/148 and xfs/149
+Message-ID: <20190917163933.GC736475@magnolia>
+References: <4BF2FD5A942B1C4B828DDAF5635768C1041AB0E2@G08CNEXMBPEKD02.g08.fujitsu.local>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <4BF2FD5A942B1C4B828DDAF5635768C1041AB0E2@G08CNEXMBPEKD02.g08.fujitsu.local>
 Sender: fstests-owner@vger.kernel.org
-To: "fstests@vger.kernel.org" <fstests@vger.kernel.org>
+To: "Xu, Yang" <xuyang2018.jy@cn.fujitsu.com>
+Cc: "fstests@vger.kernel.org" <fstests@vger.kernel.org>, xfs <linux-xfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-SEkgQWxsDQoNCldoZW4gSSBpbnZlc3RpZ2F0ZWQgeGZzLzAzMCBmYWlsdXJl
-IG9uIHVwc3RyZWFtIGtlcm5lbCBhZnRlciBtZXJpbmcgeGZzdGVzdHMgY29t
-bWl0IGQwZTQ4NGFjNjk5Zg0KKCJjaGVjazogd2lwZSBzY3JhdGNoIGRldmlj
-ZXMgYmV0d2VlbiB0ZXN0cyIpLCBJIGZvdW5kIHR3byBzaW1pbGFyIGNhc2Vz
-KHhmcy8xNDgseGZzLzE0OSkuDQoNCnhmcy8xNDggaXMgYSBjbG9uZSBvZiB0
-ZXN0IDAzMCB1c2luZyB4ZnNfcHJlcGFpcjY0IGluc3RlYWQgb2YgeGZzX3Jl
-cGFpci4NCnhmcy8xNDkgaXMgYSBjbG9uZSBvZiB0ZXN0IDAzMSB1c2luZyB4
-ZnNfcHJlcGFpciBpbnN0ZWFkIG9mIHhmc19yZXBhaXINCg0KQnV0IEkgZG9u
-J3QgZmluZCB0aGVzZSB0d28gY29tbWFuZHMgYW5kIGtub3cgbm90aGluZyBh
-Ym91dCB0aGVtLiAgSWYgdGhlc2UgY29tbWFuZHMgaGF2ZSBiZWVuDQpvYnNv
-bGV0ZWQgbG9uZyB0aW1lIGFnbywgSSB0aGluayB3ZSBjYW4gcmVtb3ZlIHRo
-ZSB0d28gY2FzZXMuIE9yIG1heSBJIG1pc3Mgc29tZXRoaW5nPw0KDQpUaGFu
-a3MNCllhbmcgWHUNCgoK
+[add linux-xfs to cc]
+
+On Tue, Sep 17, 2019 at 09:00:57AM +0000, Xu, Yang wrote:
+> HI All
+> 
+> When I investigated xfs/030 failure on upstream kernel after mering
+> xfstests commit d0e484ac699f ("check: wipe scratch devices between
+> tests"), I found two similar cases(xfs/148,xfs/149).
+> 
+> xfs/148 is a clone of test 030 using xfs_prepair64 instead of xfs_repair.
+> xfs/149 is a clone of test 031 using xfs_prepair instead of xfs_repair
+> 
+> But I don't find these two commands and know nothing about them.  If
+> these commands have been obsoleted long time ago, I think we can
+> remove the two cases. Or may I miss something?
+
+<shrug> I think your analysis is correct, but let's see what the xfs
+list thinks.
+
+--D
+
+> 
+> Thanks
+> Yang Xu
+> 
+> 
