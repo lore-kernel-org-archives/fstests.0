@@ -1,11 +1,11 @@
-Received: from mga04.intel.com ([192.55.52.120]:2419 "EHLO mga04.intel.com"
+Received: from mga03.intel.com ([134.134.136.65]:23920 "EHLO mga03.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725903AbfIREQJ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 18 Sep 2019 00:16:09 -0400
+        id S1725903AbfIREQK (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 18 Sep 2019 00:16:10 -0400
 From: ira.weiny@intel.com
-Subject: [PATCH 05/13] src/locktest.c: Clean up client command passing
-Date: Tue, 17 Sep 2019 21:15:50 -0700
-Message-Id: <20190918041558.2621-6-ira.weiny@intel.com>
+Subject: [PATCH 06/13] src/locktest.c: Fix return code if last test fails
+Date: Tue, 17 Sep 2019 21:15:51 -0700
+Message-Id: <20190918041558.2621-7-ira.weiny@intel.com>
 In-Reply-To: <20190918041558.2621-1-ira.weiny@intel.com>
 References: <20190918041558.2621-1-ira.weiny@intel.com>
 MIME-Version: 1.0
@@ -17,98 +17,70 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Ira Weiny <ira.weiny@intel.com>
 
-The client was using the test index rather than the values being passed
-to it for a command.  While this technically worked it is cleaner to
-fully initialize the command message and use the values in that message.
+If anything but the first step of the last test fails, the exit code
+(fail_count) was not properly set.  Fix this such that follow on patches
+will be able to save error output and correctly inform the script that a
+failure has occurred rather than just expecting random output to fail
+the diff check.
+
+The issue is last_test is not properly tracking which test the loop is
+currently on.  Therefore fail_count would not be incremented correctly.
+
+Remove the special case of checking for the end of the steps array and
+track last_test properly.  Then adjust test_count to be correct for the
+new code.
 
 Signed-off-by: Ira Weiny <ira.weiny@intel.com>
 ---
- src/locktest.c | 36 +++++++++++++++++++++++-------------
- 1 file changed, 23 insertions(+), 13 deletions(-)
+ src/locktest.c | 21 +++++++++------------
+ 1 file changed, 9 insertions(+), 12 deletions(-)
 
 diff --git a/src/locktest.c b/src/locktest.c
-index 825d9df3ddf8..3abb91120144 100644
+index 3abb91120144..241e7c451724 100644
 --- a/src/locktest.c
 +++ b/src/locktest.c
-@@ -670,6 +670,17 @@ int do_close(void)
-     return PASS;
- }
+@@ -963,7 +963,7 @@ main(int argc, char *argv[])
+     int end = 0;
+     int result = 0;
+     int last_test = 0;
+-    int test_count = 0;
++    int test_count = -1;
+     int fail_flag = 0;
+     while(!end) {
+ 	if (server) {
+@@ -1058,15 +1058,13 @@ main(int argc, char *argv[])
+ 		    }
+ 		}
+ 	    }
+-	    if(tests[index][TEST_NUM] != 0) {
+-		if(last_test != tests[index][TEST_NUM]) {
+-		    test_count++;
+-		    if(fail_flag)
+-			fail_count++;
+-		    fail_flag = 0;
  
-+static void init_ctl(int32_t index)
-+{
-+    ctl.test= (int32_t)tests[index][TEST_NUM];
-+    ctl.command = (int32_t)tests[index][COMMAND];
-+    ctl.offset = tests[index][OFFSET];
-+    ctl.length = tests[index][LENGTH];
-+    ctl.index = index;
-+    ctl.result = (int32_t)tests[index][RESULT];
-+    ctl.error = 0;
-+}
-+
- void
- send_ctl(void)
- {
-@@ -1018,6 +1029,8 @@ main(int argc, char *argv[])
- 		    ctl.test = 0;
- 		    end=1;
- 		} 
-+		/* get the client to do something */
-+		init_ctl(index);
- 		if(debug > 1)
- 		    fprintf(stderr, "Sending command to client (%d) - %s - %lld:%lld\n", 
- 					index,
-@@ -1074,20 +1087,16 @@ main(int argc, char *argv[])
- 		end = 1;
- 		break;
+-		}
+-		last_test = tests[index][TEST_NUM];
++	    if(last_test != tests[index][TEST_NUM]) {
++	        test_count++;
++	        if(fail_flag)
++		    fail_count++;
++	        fail_flag = 0;
++	        last_test = tests[index][TEST_NUM];
  	    }
--		
- 
--	    ctl.command = tests[index][COMMAND];
--	    ctl.offset = tests[index][OFFSET];
--	    ctl.length = tests[index][LENGTH];
--	    switch(tests[index][COMMAND]) {
-+	    switch(ctl.command) {
- 		case CMD_WRLOCK:
--		    result = do_lock(F_SETLK, F_WRLCK, tests[index][OFFSET], tests[index][LENGTH]);
-+		    result = do_lock(F_SETLK, F_WRLCK, ctl.offset, ctl.length);
- 		    break;
- 		case CMD_RDLOCK:
--		    result = do_lock(F_SETLK, F_RDLCK, tests[index][OFFSET], tests[index][LENGTH]);
-+		    result = do_lock(F_SETLK, F_RDLCK, ctl.offset, ctl.length);
- 		    break;
- 		case CMD_UNLOCK:
--		    result = do_lock(F_SETLK, F_UNLCK, tests[index][OFFSET], tests[index][LENGTH]);
-+		    result = do_lock(F_SETLK, F_UNLCK, ctl.offset, ctl.length);
- 		    break;
- 		case CMD_CLOSE:
- 		    result = do_close();
-@@ -1096,21 +1105,22 @@ main(int argc, char *argv[])
- 		    result = do_open(tests[index][FLAGS]);
- 		    break;
- 		case CMD_WRTEST:
--		    result = do_lock(F_GETLK, F_WRLCK, tests[index][OFFSET], tests[index][LENGTH]);
-+		    result = do_lock(F_GETLK, F_WRLCK, ctl.offset, ctl.length);
- 		    break;
- 		case CMD_RDTEST:
--		    result = do_lock(F_GETLK, F_RDLCK, tests[index][OFFSET], tests[index][LENGTH]);
-+		    result = do_lock(F_GETLK, F_RDLCK, ctl.offset, ctl.length);
- 		    break;
- 	    }
--	    if( result != tests[index][RESULT] ) {
-+	    if( result != ctl.result ) {
- 		if(debug)
--		    fprintf(stderr,"Got %d, wanted %lld\n", result,
--					(long long)tests[index][RESULT]);
-+		    fprintf(stderr,"Got %d, wanted %d\n",
-+				result, ctl.result);
- 		ctl.result = FAIL;
- 		ctl.error = saved_errno;
- 		fail_count++;
- 	    } else {
- 		ctl.result = PASS;
-+		ctl.error = 0;
- 	    }
- 	    if(debug > 2)
+ 		
+ 	    index++;
+@@ -1126,9 +1124,8 @@ main(int argc, char *argv[])
  		fprintf(stderr,"client: sending result to server (%d)\n", ctl.index);
+ 	    /* Send result to the server */
+ 	    send_ctl();
+-	    if(tests[index][TEST_NUM] != 0) {
+-		if(last_test != tests[index][TEST_NUM])
+-		    test_count++;
++	    if(last_test != tests[index][TEST_NUM]) {
++		test_count++;
+ 		last_test = tests[index][TEST_NUM];
+ 	    }
+ 	}
 -- 
 2.20.1
