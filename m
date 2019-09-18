@@ -1,11 +1,11 @@
-Received: from mga07.intel.com ([134.134.136.100]:45400 "EHLO mga07.intel.com"
+Received: from mga11.intel.com ([192.55.52.93]:18673 "EHLO mga11.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725903AbfIREQQ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 18 Sep 2019 00:16:16 -0400
+        id S1725903AbfIREQS (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 18 Sep 2019 00:16:18 -0400
 From: ira.weiny@intel.com
-Subject: [PATCH 11/13] src/locktest: Add truncate lease tests
-Date: Tue, 17 Sep 2019 21:15:56 -0700
-Message-Id: <20190918041558.2621-12-ira.weiny@intel.com>
+Subject: [PATCH 12/13] src/locktest: Clean up error output
+Date: Tue, 17 Sep 2019 21:15:57 -0700
+Message-Id: <20190918041558.2621-13-ira.weiny@intel.com>
 In-Reply-To: <20190918041558.2621-1-ira.weiny@intel.com>
 References: <20190918041558.2621-1-ira.weiny@intel.com>
 MIME-Version: 1.0
@@ -17,118 +17,110 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Ira Weiny <ira.weiny@intel.com>
 
-Add verification of signal reception on truncate:
-
-	/* 41 */"Write lease gets SIGIO on truncate",
-	/* 42 */"Read lease gets SIGIO on truncate",
+Add some debugging
+Make sure all errors go to stderr
+Clean up formatting and make failures stand out
+Report test results for the client not just the server
 
 Signed-off-by: Ira Weiny <ira.weiny@intel.com>
 ---
- src/locktest.c | 50 ++++++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 50 insertions(+)
+ src/locktest.c | 45 ++++++++++++++++++++++-----------------------
+ 1 file changed, 22 insertions(+), 23 deletions(-)
 
 diff --git a/src/locktest.c b/src/locktest.c
-index b1388336e318..b469a2270f82 100644
+index b469a2270f82..debae04f7753 100644
 --- a/src/locktest.c
 +++ b/src/locktest.c
-@@ -102,6 +102,7 @@ static HANDLE	f_fd = INVALID_HANDLE;	/* shared file      */
- #define 	CMD_GETLEASE	8
- #define		CMD_SIGIO	9
- #define		CMD_WAIT_SIGIO	10
-+#define		CMD_TRUNCATE	11
- 
- #define		PASS 	1
- #define		FAIL	0
-@@ -133,6 +134,7 @@ static char *get_cmd_str(int cmd)
- 		case CMD_GETLEASE: return "Get Lease"; break;
- 		case CMD_SIGIO:    return "Setup SIGIO"; break;
- 		case CMD_WAIT_SIGIO: return "Wait for SIGIO"; break;
-+		case CMD_TRUNCATE: return "Truncate"; break;
- 	}
- 	return "unknown";
- }
-@@ -203,6 +205,8 @@ char *descriptions[] = {
-     /* 38 */"Write lease gets SIGIO on read open",
-     /* 39 */"Read lease does _not_ get SIGIO on read open",
-     /* 40 */"Read lease gets SIGIO on write open",
-+    /* 41 */"Write lease gets SIGIO on truncate",
-+    /* 42 */"Read lease gets SIGIO on truncate",
- };
- 
- static int64_t tests[][6] =
-@@ -640,6 +644,25 @@ static int64_t tests[][6] =
- 		{40,	CMD_CLOSE,	0,		0,	PASS,		SERVER	},
- 		{40,	CMD_CLOSE,	0,		0,	PASS,		CLIENT	},
- 
-+	/* Get SIGIO when Write lease is broken by Truncate */
-+		{41,	CMD_OPEN,	O_RDWR,		0,	PASS,		CLIENT	},
-+		{41,	CMD_SETLEASE,	F_WRLCK,	0,	PASS,		CLIENT	},
-+		{41,	CMD_GETLEASE,	F_WRLCK,	0,	PASS,		CLIENT	},
-+		{41,	CMD_SIGIO,	0,		0,	PASS,		CLIENT	},
-+		{41,	CMD_TRUNCATE,	FILE_SIZE/2,	0,	PASS,		CLIENT	},
-+		{41,	CMD_WAIT_SIGIO,	5,		0,	PASS,		CLIENT	},
-+		{41,	CMD_CLOSE,	0,		0,	PASS,		CLIENT	},
-+
-+	/* Get SIGIO when Read lease is broken by Truncate */
-+		{42,	CMD_OPEN,	O_RDONLY,	0,	PASS,		CLIENT	},
-+		{42,	CMD_SETLEASE,	F_RDLCK,	0,	PASS,		CLIENT	},
-+		{42,	CMD_GETLEASE,	F_RDLCK,	0,	PASS,		CLIENT	},
-+		{42,	CMD_SIGIO,	0,		0,	PASS,		CLIENT	},
-+		{42,	CMD_TRUNCATE,	FILE_SIZE/2,	0,	PASS,		SERVER	},
-+		{42,	CMD_WAIT_SIGIO,	5,		0,	PASS,		CLIENT	},
-+		{42,	CMD_CLOSE,	0,		0,	PASS,		CLIENT	},
-+
-+
- 	/* indicate end of array */
- 		{0,0,0,0,0,SERVER},
- 		{0,0,0,0,0,CLIENT}
-@@ -703,6 +726,27 @@ initialize(HANDLE fd)
+@@ -1057,6 +1057,8 @@ main(int argc, char *argv[])
      }
- }
  
-+static int do_truncate(size_t length)
-+{
-+    int rc;
-+
-+    if (debug > 1)
-+	fprintf(stderr, "truncating to %ld\n", length);
-+
-+again:
-+    rc = truncate(filename, length);
-+    if (rc && errno == EINTR)
-+	goto again;
-+
-+    saved_errno = errno;
-+
-+    if (debug && rc)
-+	fprintf(stderr, "%s %d : %s\n",
-+		__FILE__, errno, strerror(errno));
-+
-+    return (rc == 0 ? PASS:FAIL);
-+}
-+
- void release_lease(int fd)
- {
- 	int rc;
-@@ -1205,6 +1249,9 @@ main(int argc, char *argv[])
- 			case CMD_WAIT_SIGIO:
- 			    result = do_wait_sigio(tests[index][TIME]);
- 			    break;
-+			case CMD_TRUNCATE:
-+			    result = do_truncate(tests[index][OFFSET]);
-+			    break;
- 		    }
+     filename=argv[optind];
++    if (debug)
++	fprintf(stderr, "Working on file : %s\n", filename);
+     if (do_open(O_RDWR) == FAIL)
+ 	exit(1);
+ 
+@@ -1135,10 +1137,10 @@ main(int argc, char *argv[])
+         struct hostent  *servInfo;
+ 
+         if ((servInfo = gethostbyname(host)) == NULL) {
+-	    printf("Couldn't get hostbyname for %s", host);
++	    fprintf(stderr, "Couldn't get hostbyname for %s", host);
+ 	    if (h_errno == HOST_NOT_FOUND)
+-		printf(": host not found");
+-	    printf("\n");
++		fprintf(stderr, ": host not found");
++	    fprintf(stderr, "\n");
+             exit(1);
+             /*NOTREACHED*/
+         }
+@@ -1256,16 +1258,14 @@ main(int argc, char *argv[])
  		    if( result != tests[index][RESULT]) {
  			fail_flag++;
-@@ -1319,6 +1366,9 @@ main(int argc, char *argv[])
- 		case CMD_WAIT_SIGIO:
- 		    result = do_wait_sigio(ctl.offset);
+ 			/* We have a failure */
+-			if(debug)
+-			    fprintf(stderr, "Server failure in test %d, while %sing using offset %lld, length %lld - err = %d:%s\n", 
+-					ctl.test,
+-					get_cmd_str(tests[index][COMMAND]),
+-						(long long)tests[index][OFFSET],
+-						(long long)tests[index][LENGTH],
+-						saved_errno, strerror(saved_errno));
+-			fprintf(stderr, "Server failure in %lld:%s\n",
+-					(long long)tests[index][TEST_NUM],
+-					descriptions[tests[index][TEST_NUM] - 1]);
++			fprintf(stderr, "     ***** Server failure *****\n");
++			fprintf(stderr, "     in test %d, while %sing using offset %lld, length %lld - err = %d:%s\n", 
++				ctl.test, get_cmd_str(tests[index][COMMAND]),
++				(long long)tests[index][OFFSET],
++				(long long)tests[index][LENGTH],
++				saved_errno, strerror(saved_errno));
++			fprintf(stderr, "     %d:%s\n",
++					ctl.test, descriptions[ctl.test - 1]);
+ 		    }
+ 		}
+ 	    /* else send it off to the client */
+@@ -1292,14 +1292,13 @@ main(int argc, char *argv[])
+ 		     * not what the command returned */
+ 		    if( ctl.result == FAIL ) {
+ 			fail_flag++;
+-			if(debug)
+-			    fprintf(stderr, "Client failure in test %d, while %sing using offset %lld, length %lld - err = %d:%s\n",
++			fprintf(stderr, "     ***** Client failure *****\n");
++			fprintf(stderr, "     in test %d, while %sing using offset %lld, length %lld - err = %d:%s\n",
+ 					ctl.test, get_cmd_str(ctl.command),
+ 					(long long)ctl.offset, (long long)ctl.length,
+ 					ctl.error, strerror(ctl.error));
+-			fprintf(stderr, "Client failure in %lld:%s\n",
+-					(long long)tests[index][TEST_NUM],
+-					descriptions[tests[index][TEST_NUM] - 1]);
++			fprintf(stderr, "     %d:%s\n",
++					ctl.test, descriptions[ctl.test - 1]);
+ 		    }
+ 		}
+ 	    }
+@@ -1371,9 +1370,10 @@ main(int argc, char *argv[])
  		    break;
-+		case CMD_TRUNCATE:
-+		    result = do_truncate(ctl.offset);
-+		    break;
  	    }
  	    if( result != ctl.result ) {
- 		if(debug)
+-		if(debug)
+-		    fprintf(stderr,"Got %d, wanted %d\n",
+-				result, ctl.result);
++		fprintf(stderr,"Failure in %d:%s\n",
++			ctl.test, descriptions[ctl.test - 1]);
++		fprintf(stderr,"     Got %d, wanted %d\n",
++			result, ctl.result);
+ 		ctl.result = FAIL;
+ 		ctl.error = saved_errno;
+ 		fail_count++;
+@@ -1391,8 +1391,7 @@ main(int argc, char *argv[])
+ 	    }
+ 	}
+     }
+-    if(server)
+-	printf("%d tests run, %d failed\n", test_count, fail_count);
++    fprintf(stderr, "%d tests run, %d failed\n", test_count, fail_count);
+ }   
+     
+     exit(fail_count);
 -- 
 2.20.1
