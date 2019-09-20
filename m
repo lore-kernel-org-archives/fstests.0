@@ -1,110 +1,58 @@
-Received: from mail.kernel.org ([198.145.29.99]:41826 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.99]:55042 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2393239AbfITAiF (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 19 Sep 2019 20:38:05 -0400
-From: Eric Biggers <ebiggers@kernel.org>
-Subject: [PATCH v2 9/9] generic: verify ciphertext of v2 encryption policies with Adiantum
-Date: Thu, 19 Sep 2019 17:37:53 -0700
-Message-Id: <20190920003753.40281-10-ebiggers@kernel.org>
-In-Reply-To: <20190920003753.40281-1-ebiggers@kernel.org>
-References: <20190920003753.40281-1-ebiggers@kernel.org>
+        id S1725842AbfITNMO (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 20 Sep 2019 09:12:14 -0400
+Message-ID: <ce1e299cee340dcb3f6c6446392f186b95492547.camel@kernel.org>
+Subject: Re: [PATCH 00/13] Fix locktest and add lease testing to it
+From: Jeff Layton <jlayton@kernel.org>
+Date: Fri, 20 Sep 2019 09:12:11 -0400
+In-Reply-To: <20190918041558.2621-1-ira.weiny@intel.com>
+References: <20190918041558.2621-1-ira.weiny@intel.com>
+Content-Type: text/plain; charset="UTF-8"
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-fscrypt@vger.kernel.org
+To: ira.weiny@intel.com, fstests@vger.kernel.org, Eryu Guan <guaneryu@gmail.com>
+Cc: john.hubbard@gmail.com, Dave Chinner <david@fromorbit.com>, Jason Gunthorpe <jgg@ziepe.ca>, Jan Kara <jack@suse.cz>, dan.j.williams@intel.com
 List-ID: <fstests@vger.kernel.org>
 
-From: Eric Biggers <ebiggers@google.com>
+On Tue, 2019-09-17 at 21:15 -0700, ira.weiny@intel.com wrote:
+> From: Ira Weiny <ira.weiny@intel.com>
+> 
+> Rather than have a separate lease test, combine the previously proposed lease
+> tests[1] directly to locktest because they share so much code.
+> 
+> To make things cleaner update the lock test code and test script.  This
+> includes fixing a rather serious bug.
+> 
+> Finally update the error output to help identify any steps which fail during
+> testing.
+> 
+> Ira
+> 
+> [1] https://www.spinics.net/lists/fstests/msg12467.html
+> 
+> Ira Weiny (13):
+>   src/locktest: Remove unnecessary sleep
+>   src/locktest: Remove OPEN macro
+>   src/locktest: Change command macro names
+>   src/locktest: Add get_cmd_str
+>   src/locktest.c: Clean up client command passing
+>   src/locktest.c: Fix return code if last test fails
+>   generic/131: Clean up pid variables
+>   generic/131: Save stderr for debugging
+>   src/locktest: Add simple lease testing
+>   src/locktest: Add lease testing for basic signal reception
+>   src/locktest: Add truncate lease tests
+>   src/locktest: Clean up error output
+>   src/locktest: Audit all debug output
+> 
+>  src/locktest.c    | 957 ++++++++++++++++++++++++++++++----------------
+>  tests/generic/131 |  72 ++--
+>  2 files changed, 666 insertions(+), 363 deletions(-)
+> 
 
-Verify ciphertext for v2 encryption policies that use Adiantum to
-encrypt file contents and file names.
+Nice work, Ira. This all looks like good cleanup (and at least one
+important bugfix).
 
-Signed-off-by: Eric Biggers <ebiggers@google.com>
----
- tests/generic/804     | 45 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/804.out | 11 +++++++++++
- tests/generic/group   |  1 +
- 3 files changed, 57 insertions(+)
- create mode 100755 tests/generic/804
- create mode 100644 tests/generic/804.out
-
-diff --git a/tests/generic/804 b/tests/generic/804
-new file mode 100755
-index 00000000..72e7b025
---- /dev/null
-+++ b/tests/generic/804
-@@ -0,0 +1,45 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright 2019 Google LLC
-+#
-+# FS QA Test generic/804
-+#
-+# Verify ciphertext for v2 encryption policies that use Adiantum to encrypt file
-+# contents and file names.
-+#
-+# This is the same as generic/550, except using v2 policies.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/encrypt
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+
-+# Test both with and without the DIRECT_KEY flag.
-+_verify_ciphertext_for_encryption_policy Adiantum Adiantum v2
-+_verify_ciphertext_for_encryption_policy Adiantum Adiantum v2 direct
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/804.out b/tests/generic/804.out
-new file mode 100644
-index 00000000..726376b2
---- /dev/null
-+++ b/tests/generic/804.out
-@@ -0,0 +1,11 @@
-+QA output created by 804
-+
-+Verifying ciphertext with parameters:
-+	contents_encryption_mode: Adiantum
-+	filenames_encryption_mode: Adiantum
-+	options: v2
-+
-+Verifying ciphertext with parameters:
-+	contents_encryption_mode: Adiantum
-+	filenames_encryption_mode: Adiantum
-+	options: v2 direct
-diff --git a/tests/generic/group b/tests/generic/group
-index 08a79b21..94838ab5 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -574,3 +574,4 @@
- 801 auto quick encrypt
- 802 auto quick encrypt
- 803 auto quick encrypt
-+804 auto quick encrypt
--- 
-2.23.0.351.gc4317032e6-goog
+Reviewed-by: Jeff Layton <jlayton@kernel.org>
