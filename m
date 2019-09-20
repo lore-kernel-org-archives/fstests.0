@@ -1,137 +1,98 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:46358 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2390723AbfITEbf (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 20 Sep 2019 00:31:35 -0400
-Date: Thu, 19 Sep 2019 21:29:22 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] common/xfs: wipe the XFS superblock of each AGs
-Message-ID: <20190920042922.GQ2229799@magnolia>
-References: <20190919150024.8346-1-zlang@redhat.com>
- <66503981-2ff3-f28b-fd06-9d6360c930fe@cn.fujitsu.com>
- <20190920024836.GO2229799@magnolia>
- <20190920043139.GO7239@dhcp-12-102.nay.redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:47474 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S2389222AbfITGXe (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 20 Sep 2019 02:23:34 -0400
+From: Zorro Lang <zlang@redhat.com>
+Subject: [PATCH v2] common/xfs: wipe the XFS superblock of each AGs
+Date: Fri, 20 Sep 2019 14:23:27 +0800
+Message-Id: <20190920062327.14747-1-zlang@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20190920043139.GO7239@dhcp-12-102.nay.redhat.com>
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Sep 20, 2019 at 12:31:39PM +0800, Zorro Lang wrote:
-> On Thu, Sep 19, 2019 at 07:48:36PM -0700, Darrick J. Wong wrote:
-> > On Fri, Sep 20, 2019 at 09:52:11AM +0800, Yang Xu wrote:
-> > > 
-> > > 
-> > > on 2019/09/19 23:00, Zorro Lang wrote:
-> > > > xfs/030 always fails after d0e484ac699f ("check: wipe scratch devices
-> > > > between tests") get merged.
-> > > > 
-> > > > Due to xfs/030 does a sized(100m) mkfs. Before we merge above commit,
-> > > > mkfs.xfs detects an old primary superblock, it will write zeroes to
-> > > > all superblocks before formatting the new filesystem. But this won't
-> > > > be done if we wipe the first superblock(by merging above commit).
-> > > > 
-> > > > That means if we make a (smaller) sized xfs after wipefs, those *old*
-> > > > superblocks which created by last time mkfs.xfs will be left on disk.
-> > > > Then when we do xfs_repair, if xfs_repair can't find the first SB, it
-> > > > will go to find those *old* SB at first. When it finds them,
-> > > > everyting goes wrong.
-> > > > 
-> > > > So I try to get XFS AG geometry(by default) and then try to erase all
-> > > > superblocks. Thanks Darrick J. Wong helped to analyze this issue.
-> > > Feel free to add Reported-by.
-> > > > 
-> > > > Signed-off-by: Zorro Lang <zlang@redhat.com>
-> > > > ---
-> > > >   common/rc  |  4 ++++
-> > > >   common/xfs | 23 +++++++++++++++++++++++
-> > > >   2 files changed, 27 insertions(+)
-> > > > 
-> > > > diff --git a/common/rc b/common/rc
-> > > > index 66c7fd4d..fe13f659 100644
-> > > > --- a/common/rc
-> > > > +++ b/common/rc
-> > > > @@ -4048,6 +4048,10 @@ _try_wipe_scratch_devs()
-> > > >   	for dev in $SCRATCH_DEV_POOL $SCRATCH_DEV $SCRATCH_LOGDEV $SCRATCH_RTDEV; do
-> > > >   		test -b $dev && $WIPEFS_PROG -a $dev
-> > > >   	done
-> > > > +
-> > > > +	if [ "$FSTYP" = "xfs" ];then
-> > > > +		try_wipe_scratch_xfs
-> > > I think we should add a simple comment for why we add it.
-> > > 
-> > > ps:_scratch_mkfs_xfs also can make case pass. We can use it and add comment.
-> > > the  try_wipe_scratch_xfs method and the _scratch_mkfs_xfs method are all
-> > > acceptable for me.
-> > 
-> > Yes, I suppose formatting and then wiping per below would also achieve
-> > our means, but it would come at the extra cost of zeroing the log.  I'm
-> > not too eager to increase xfstest runtime even more.
-> > 
-> > Hmmm, I wonder if xfs_db could just grow a 'wipe all superblocks'
-> > command....
-> 
-> Haha, I was thinking about that too, and I tried this:
-> --
-> agc=`_scratch_xfs_get_sb_field agcount`
-> wipe_xfs_cmd="$XFS_DB_PROG -x"
-> for ((i=0; i<agc; i++)); do
-> 	wipe_xfs_cmd="$wipe_xfs_cmd -c \"sb $i\" -c \"write -c magicnum 0x00000000\""
-> done
-> wipe_xfs_cmd="$wipe_xfs_cmd $SCRATCH_DEV"
-> eval $wipe_xfs_cmd
-> --
-> 
-> The only one problem about this, I think it's the max length of bash command:)
+xfs/030 always fails after d0e484ac699f ("check: wipe scratch devices
+between tests") get merged.
 
-Yeah... I mean, the downside of all this is that a filesystme could have
-thousands of AGs, though I don't imagine there are many people who set
-up a 1PB array just to run xfstests ;)
+Due to xfs/030 does a sized(100m) mkfs. Before we merge above commit,
+mkfs.xfs detects an old primary superblock, it will write zeroes to
+all superblocks before formatting the new filesystem. But this won't
+be done if we wipe the first superblock(by merging above commit).
 
---D
+That means if we make a (smaller) sized xfs after wipefs, those *old*
+superblocks which created by last time mkfs.xfs will be left on disk.
+Then when we do xfs_repair, if xfs_repair can't find the first SB, it
+will go to find those *old* SB at first. When it finds them,
+everyting goes wrong.
 
-> Thanks,
-> Zorro
-> 
-> > 
-> > --D
-> > 
-> > > > +	fi
-> > > >   }
-> > > >   # Only run this on xfs if xfs_scrub is available and has the unicode checker
-> > > > diff --git a/common/xfs b/common/xfs
-> > > > index 1bce3c18..34516f82 100644
-> > > > --- a/common/xfs
-> > > > +++ b/common/xfs
-> > > > @@ -884,3 +884,26 @@ _xfs_mount_agcount()
-> > > >   {
-> > > >   	$XFS_INFO_PROG "$1" | grep agcount= | sed -e 's/^.*agcount=\([0-9]*\),.*$/\1/g'
-> > > >   }
-> > > > +
-> > > > +# wipe the superblock of each XFS AGs
-> > > > +try_wipe_scratch_xfs()
-> > > > +{
-> > > > +	local tmp=`mktemp -u`
-> > > > +
-> > > > +	_scratch_mkfs_xfs -N 2>/dev/null | perl -ne '
-> > > > +		if (/^meta-data=.*\s+agcount=(\d+), agsize=(\d+) blks/) {
-> > > > +			print STDOUT "agcount=$1\nagsize=$2\n";
-> > > > +		}
-> > > > +		if (/^data\s+=\s+bsize=(\d+)\s/) {
-> > > > +			print STDOUT "dbsize=$1\n";
-> > > > +		}' > $tmp.mkfs
-> > > > +
-> > > > +	. $tmp.mkfs
-> > > > +	if [ -n "$agcount" -a -n "$agsize" -a -n "$dbsize" ];then
-> > > > +		for ((i = 0; i < agcount; i++)); do
-> > > > +			$XFS_IO_PROG -c "pwrite $((i * dbsize * agsize)) $dbsize" \
-> > > > +				$SCRATCH_DEV >/dev/null;
-> > > > +		done
-> > > > +       fi
-> > > > +       rm -f $tmp.mkfs
-> > > > +}
-> > > > 
-> > > 
-> > > 
+So I try to get XFS AG geometry(by default) and then try to erase all
+superblocks. Thanks Darrick J. Wong helped to analyze this issue.
+
+Reported-by: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+Signed-off-by: Zorro Lang <zlang@redhat.com>
+---
+
+Hi,
+
+V2 did below changes:
+1) Use xfs_db to detect the real xfs geometry
+2) Do a $FSTYP specified wipe before trying to wipefs all scratch devices
+
+Thanks,
+Zorro
+
+ common/rc  |  8 ++++++++
+ common/xfs | 20 ++++++++++++++++++++
+ 2 files changed, 28 insertions(+)
+
+diff --git a/common/rc b/common/rc
+index 66c7fd4d..56329747 100644
+--- a/common/rc
++++ b/common/rc
+@@ -4045,6 +4045,14 @@ _try_wipe_scratch_devs()
+ {
+ 	test -x "$WIPEFS_PROG" || return 0
+ 
++	# Do specified filesystem wipe at first
++	case "$FSTYP" in
++	"xfs")
++		_try_wipe_scratch_xfs
++		;;
++	esac
++
++	# Then do wipefs on all scratch devices
+ 	for dev in $SCRATCH_DEV_POOL $SCRATCH_DEV $SCRATCH_LOGDEV $SCRATCH_RTDEV; do
+ 		test -b $dev && $WIPEFS_PROG -a $dev
+ 	done
+diff --git a/common/xfs b/common/xfs
+index 1bce3c18..082a1744 100644
+--- a/common/xfs
++++ b/common/xfs
+@@ -884,3 +884,23 @@ _xfs_mount_agcount()
+ {
+ 	$XFS_INFO_PROG "$1" | grep agcount= | sed -e 's/^.*agcount=\([0-9]*\),.*$/\1/g'
+ }
++
++# Wipe the superblock of each XFS AGs
++_try_wipe_scratch_xfs()
++{
++	local num='^[0-9]+$'
++	local agcount
++	local agsize
++	local dbsize
++
++	agcount=`_scratch_xfs_get_sb_field agcount 2>/dev/null`
++	agsize=`_scratch_xfs_get_sb_field agblocks 2>/dev/null`
++	dbsize=`_scratch_xfs_get_sb_field blocksize 2>/dev/null`
++
++	if [[ $agcount =~ $num && $agsize =~ $num && $dbsize =~ $num ]];then
++		for ((i = 0; i < agcount; i++)); do
++			$XFS_IO_PROG -c "pwrite $((i * dbsize * agsize)) $dbsize" \
++				$SCRATCH_DEV >/dev/null;
++		done
++	fi
++}
+-- 
+2.20.1
