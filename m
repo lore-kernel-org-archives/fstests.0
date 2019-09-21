@@ -1,110 +1,80 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:35994 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2404022AbfITPev (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 20 Sep 2019 11:34:51 -0400
-Date: Fri, 20 Sep 2019 08:34:43 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH v2] common/xfs: wipe the XFS superblock of each AGs
-Message-ID: <20190920153443.GR2229799@magnolia>
-References: <20190920062327.14747-1-zlang@redhat.com>
+Received: from mail-pf1-f193.google.com ([209.85.210.193]:35910 "EHLO
+        mail-pf1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2407729AbfIUQU4 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 21 Sep 2019 12:20:56 -0400
+Received: by mail-pf1-f193.google.com with SMTP id y22so6516938pfr.3
+        for <fstests@vger.kernel.org>; Sat, 21 Sep 2019 09:20:56 -0700 (PDT)
+Date: Sun, 22 Sep 2019 00:20:48 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH 00/13] Fix locktest and add lease testing to it
+Message-ID: <20190921162048.GP2622@desktop>
+References: <20190918041558.2621-1-ira.weiny@intel.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190920062327.14747-1-zlang@redhat.com>
+In-Reply-To: <20190918041558.2621-1-ira.weiny@intel.com>
 Sender: fstests-owner@vger.kernel.org
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: ira.weiny@intel.com
+Cc: fstests@vger.kernel.org, john.hubbard@gmail.com, Dave Chinner <david@fromorbit.com>, Jason Gunthorpe <jgg@ziepe.ca>, Jan Kara <jack@suse.cz>, dan.j.williams@intel.com, Jeff Layton <jlayton@kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Sep 20, 2019 at 02:23:27PM +0800, Zorro Lang wrote:
-> xfs/030 always fails after d0e484ac699f ("check: wipe scratch devices
-> between tests") get merged.
+On Tue, Sep 17, 2019 at 09:15:45PM -0700, ira.weiny@intel.com wrote:
+> From: Ira Weiny <ira.weiny@intel.com>
 > 
-> Due to xfs/030 does a sized(100m) mkfs. Before we merge above commit,
-> mkfs.xfs detects an old primary superblock, it will write zeroes to
-> all superblocks before formatting the new filesystem. But this won't
-> be done if we wipe the first superblock(by merging above commit).
-> 
-> That means if we make a (smaller) sized xfs after wipefs, those *old*
-> superblocks which created by last time mkfs.xfs will be left on disk.
-> Then when we do xfs_repair, if xfs_repair can't find the first SB, it
-> will go to find those *old* SB at first. When it finds them,
-> everyting goes wrong.
-> 
-> So I try to get XFS AG geometry(by default) and then try to erase all
-> superblocks. Thanks Darrick J. Wong helped to analyze this issue.
-> 
-> Reported-by: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
-> Signed-off-by: Zorro Lang <zlang@redhat.com>
-> ---
-> 
-> Hi,
-> 
-> V2 did below changes:
-> 1) Use xfs_db to detect the real xfs geometry
-> 2) Do a $FSTYP specified wipe before trying to wipefs all scratch devices
-> 
-> Thanks,
-> Zorro
-> 
->  common/rc  |  8 ++++++++
->  common/xfs | 20 ++++++++++++++++++++
->  2 files changed, 28 insertions(+)
-> 
-> diff --git a/common/rc b/common/rc
-> index 66c7fd4d..56329747 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -4045,6 +4045,14 @@ _try_wipe_scratch_devs()
->  {
->  	test -x "$WIPEFS_PROG" || return 0
->  
-> +	# Do specified filesystem wipe at first
-> +	case "$FSTYP" in
-> +	"xfs")
-> +		_try_wipe_scratch_xfs
-> +		;;
-> +	esac
-> +
-> +	# Then do wipefs on all scratch devices
->  	for dev in $SCRATCH_DEV_POOL $SCRATCH_DEV $SCRATCH_LOGDEV $SCRATCH_RTDEV; do
->  		test -b $dev && $WIPEFS_PROG -a $dev
->  	done
-> diff --git a/common/xfs b/common/xfs
-> index 1bce3c18..082a1744 100644
-> --- a/common/xfs
-> +++ b/common/xfs
-> @@ -884,3 +884,23 @@ _xfs_mount_agcount()
->  {
->  	$XFS_INFO_PROG "$1" | grep agcount= | sed -e 's/^.*agcount=\([0-9]*\),.*$/\1/g'
->  }
-> +
-> +# Wipe the superblock of each XFS AGs
-> +_try_wipe_scratch_xfs()
-> +{
-> +	local num='^[0-9]+$'
-> +	local agcount
-> +	local agsize
-> +	local dbsize
-> +
-> +	agcount=`_scratch_xfs_get_sb_field agcount 2>/dev/null`
-> +	agsize=`_scratch_xfs_get_sb_field agblocks 2>/dev/null`
-> +	dbsize=`_scratch_xfs_get_sb_field blocksize 2>/dev/null`
-> +
-> +	if [[ $agcount =~ $num && $agsize =~ $num && $dbsize =~ $num ]];then
-> +		for ((i = 0; i < agcount; i++)); do
-> +			$XFS_IO_PROG -c "pwrite $((i * dbsize * agsize)) $dbsize" \
-> +				$SCRATCH_DEV >/dev/null;
-> +		done
-> +	fi
+> Rather than have a separate lease test, combine the previously proposed lease
+> tests[1] directly to locktest because they share so much code.
 
-What happened to the loop that simulates a _scratch_mkfs_xfs run (to get
-the AG geometry) and then zaps that too?  You need both zeroing loops to
-make sure xfs/030 doesn't trip over old superblocks, right?
+Firstly, thanks for the revised version!
 
---D
+Then, I'm so sorry if I didn't explain clearly in previous review, we do
+need a separate lease test, e.g. a new generic/568 test, and don't want
+locktest.c to test both lock and lease in the same generic/131 case.
+But reuse & extend the src/locktest.c to test lease as well, and call
+src/locktest in the new generic/568 case.
 
-> +}
+e.g. introduce two test arrays, one for lock test and one for lease
+test, and add new commandline switch to src/locktest.c and use the
+correct test array according to the given commandline option.
+
+> 
+> To make things cleaner update the lock test code and test script.  This
+> includes fixing a rather serious bug.
+> 
+> Finally update the error output to help identify any steps which fail during
+> testing.
+> 
+> Ira
+> 
+> [1] https://www.spinics.net/lists/fstests/msg12467.html
+> 
+> Ira Weiny (13):
+>   src/locktest: Remove unnecessary sleep
+>   src/locktest: Remove OPEN macro
+>   src/locktest: Change command macro names
+>   src/locktest: Add get_cmd_str
+>   src/locktest.c: Clean up client command passing
+>   src/locktest.c: Fix return code if last test fails
+>   generic/131: Clean up pid variables
+>   generic/131: Save stderr for debugging
+
+Looks like above cleanups and bugfixes can be merged independently, but
+I'm not sure if you need to update them as well when introducing new
+test array and new test case, so I leave them unmerged for now.
+
+Thanks!
+
+Eryu
+
+>   src/locktest: Add simple lease testing
+>   src/locktest: Add lease testing for basic signal reception
+>   src/locktest: Add truncate lease tests
+>   src/locktest: Clean up error output
+>   src/locktest: Audit all debug output
+> 
+>  src/locktest.c    | 957 ++++++++++++++++++++++++++++++----------------
+>  tests/generic/131 |  72 ++--
+>  2 files changed, 666 insertions(+), 363 deletions(-)
+> 
 > -- 
 > 2.20.1
 > 
