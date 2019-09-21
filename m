@@ -1,52 +1,185 @@
-Received: from mail-pg1-f176.google.com ([209.85.215.176]:46373 "EHLO
-        mail-pg1-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727789AbfIVHwa (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 22 Sep 2019 03:52:30 -0400
-Received: by mail-pg1-f176.google.com with SMTP id a3so6108003pgm.13
-        for <fstests@vger.kernel.org>; Sun, 22 Sep 2019 00:52:30 -0700 (PDT)
-Date: Sun, 22 Sep 2019 15:52:24 +0800
+Received: from mail-pg1-f194.google.com ([209.85.215.194]:38860 "EHLO
+        mail-pg1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2393543AbfIUOez (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 21 Sep 2019 10:34:55 -0400
+Date: Sat, 21 Sep 2019 22:34:47 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH 00/13] Fix locktest and add lease testing to it
-Message-ID: <20190922075224.GQ2622@desktop>
-References: <20190918041558.2621-1-ira.weiny@intel.com>
- <20190921162048.GP2622@desktop>
- <2807E5FD2F6FDA4886F6618EAC48510E8991612A@CRSMSX101.amr.corp.intel.com>
+Subject: Re: [PATCH v3 1/2] common: check if a given rename flag is supported
+ in _requires_renameat2
+Message-ID: <20190921143443.GO2622@desktop>
+References: <7d4b6a1d-98a1-1fcb-5ccf-991e537df77c@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <2807E5FD2F6FDA4886F6618EAC48510E8991612A@CRSMSX101.amr.corp.intel.com>
+In-Reply-To: <7d4b6a1d-98a1-1fcb-5ccf-991e537df77c@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: "Weiny, Ira" <ira.weiny@intel.com>
-Cc: "fstests@vger.kernel.org" <fstests@vger.kernel.org>, "john.hubbard@gmail.com" <john.hubbard@gmail.com>, Dave Chinner <david@fromorbit.com>, Jason Gunthorpe <jgg@ziepe.ca>, Jan Kara <jack@suse.cz>, "Williams, Dan J" <dan.j.williams@intel.com>, Jeff Layton <jlayton@kernel.org>
+To: kaixuxia <xiakaixu1987@gmail.com>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org, "Darrick J. Wong" <darrick.wong@oracle.com>, newtongao@tencent.com, jasperwang@tencent.com
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Sep 22, 2019 at 02:01:49AM +0000, Weiny, Ira wrote:
-> > On Tue, Sep 17, 2019 at 09:15:45PM -0700, ira.weiny@intel.com wrote:
-> > > From: Ira Weiny <ira.weiny@intel.com>
-> > >
-> > > Rather than have a separate lease test, combine the previously
-> > > proposed lease tests[1] directly to locktest because they share so much
-> > code.
-> > 
-> > Firstly, thanks for the revised version!
-> > 
-> > Then, I'm so sorry if I didn't explain clearly in previous review, we do need a
-> > separate lease test, e.g. a new generic/568 test, and don't want locktest.c to
-> > test both lock and lease in the same generic/131 case.
-> > But reuse & extend the src/locktest.c to test lease as well, and call
-> > src/locktest in the new generic/568 case.
+On Wed, Sep 18, 2019 at 07:47:47PM +0800, kaixuxia wrote:
+> Some testcases may require a special rename flag, such as RENAME_WHITEOUT,
+> so add support check for if a given rename flag is supported in
+> _requires_renameat2.
 > 
-> I can do that.  IMO, this work was needed regardless.
-> 
-> > 
-> > e.g. introduce two test arrays, one for lock test and one for lease test, and
-> > add new commandline switch to src/locktest.c and use the correct test array
-> > according to the given commandline option.
-> 
-> Sure I can do that without too much trouble.
-> 
-> Just to be clear are you ok with overloading the fields such that the test array format is the same?  That will be easiest.
+> Signed-off-by: kaixuxia <kaixuxia@tencent.com>
 
-Yeah, I'm fine with that. Thanks!
+Nice improvement, thanks for the patch!
 
+> ---
+>  common/renameat2  | 30 +++++++++++++++++++++++++++++-
+>  tests/generic/024 | 13 +++----------
+>  tests/generic/025 | 13 +++----------
+>  tests/generic/078 | 13 +++----------
+>  4 files changed, 38 insertions(+), 31 deletions(-)
+> 
+> diff --git a/common/renameat2 b/common/renameat2
+> index f8d6d4f..9625d8c 100644
+> --- a/common/renameat2
+> +++ b/common/renameat2
+> @@ -103,10 +103,38 @@ _rename_tests()
+>  #
+>  _requires_renameat2()
+
+I renamed the function to _require_renameat2 while we're at it, since
+no other _require rules are named as "_requires".
+
+>  {
+> +	local flags=$1
+> +	local rename_dir=$TEST_DIR/$$
+> +	local cmd=""
+> +
+>  	if test ! -x src/renameat2; then
+>  		_notrun "renameat2 binary not found"
+>  	fi
+> -	if ! src/renameat2 -t; then
+> +
+> +	mkdir $rename_dir
+> +	touch $rename_dir/foo
+> +	case $flags in
+> +	"noreplace")
+> +		cmd="-n $rename_dir/foo $rename_dir/bar"
+> +		;;
+> +	"exchange")
+> +		touch $rename_dir/bar
+> +		cmd="-x $rename_dir/foo $rename_dir/bar"
+> +		;;
+> +	"whiteout")
+> +		touch $rename_dir/bar
+> +		cmd="-w $rename_dir/foo $rename_dir/bar"
+> +		;;
+> +	"")
+
+I added 'cmd=""' here as Brian suggested.
+
+> +		;;
+> +	*)
+> +		rm -rf $rename_dir
+> +		_notrun "only support noreplace,exchange,whiteout rename flags, please check."
+
+I changed this to a _fail, as that indicates a test bug in helper usage.
+
+> +		;;
+> +	esac
+> +	if ! src/renameat2 -t $cmd; then
+> +		rm -rf $rename_dir
+>  		_notrun "kernel doesn't support renameat2 syscall"
+>  	fi
+> +	rm -rf $rename_dir
+>  }
+> diff --git a/tests/generic/024 b/tests/generic/024
+> index 2888c66..9c1161a 100755
+> --- a/tests/generic/024
+> +++ b/tests/generic/024
+
+I also changed generic/398 and generic/419 to check for 'exchange' as
+they use RENAME_EXCHANGE.
+
+Thanks,
 Eryu
+
+> @@ -29,20 +29,13 @@ _supported_fs generic
+>  _supported_os Linux
+>  
+>  _require_test
+> -_requires_renameat2
+> +_requires_renameat2 noreplace
+>  _require_test_symlinks
+>  
+> -rename_dir=$TEST_DIR/$$
+> -mkdir $rename_dir
+> -touch $rename_dir/foo
+> -if ! src/renameat2 -t -n $rename_dir/foo $rename_dir/bar; then
+> -    rm -f $rename_dir/foo $rename_dir/bar; rmdir $rename_dir
+> -    _notrun "fs doesn't support RENAME_NOREPLACE"
+> -fi
+> -rm -f $rename_dir/foo $rename_dir/bar
+> -
+>  # real QA test starts here
+>  
+> +rename_dir=$TEST_DIR/$$
+> +mkdir $rename_dir
+>  _rename_tests $rename_dir -n
+>  rmdir $rename_dir
+>  
+> diff --git a/tests/generic/025 b/tests/generic/025
+> index 0310efa..1ee9ad6 100755
+> --- a/tests/generic/025
+> +++ b/tests/generic/025
+> @@ -29,20 +29,13 @@ _supported_fs generic
+>  _supported_os Linux
+>  
+>  _require_test
+> -_requires_renameat2
+> +_requires_renameat2 exchange
+>  _require_test_symlinks
+>  
+> -rename_dir=$TEST_DIR/$$
+> -mkdir $rename_dir
+> -touch $rename_dir/foo $rename_dir/bar
+> -if ! src/renameat2 -t -x $rename_dir/foo $rename_dir/bar; then
+> -    rm -f $rename_dir/foo $rename_dir/bar; rmdir $rename_dir
+> -    _notrun "fs doesn't support RENAME_EXCHANGE"
+> -fi
+> -rm -f $rename_dir/foo $rename_dir/bar
+> -
+>  # real QA test starts here
+>  
+> +rename_dir=$TEST_DIR/$$
+> +mkdir $rename_dir
+>  _rename_tests $rename_dir -x
+>  rmdir $rename_dir
+>  
+> diff --git a/tests/generic/078 b/tests/generic/078
+> index 9608574..37f3201 100755
+> --- a/tests/generic/078
+> +++ b/tests/generic/078
+> @@ -29,20 +29,13 @@ _supported_fs generic
+>  _supported_os Linux
+>  
+>  _require_test
+> -_requires_renameat2
+> +_requires_renameat2 whiteout
+>  _require_test_symlinks
+>  
+> -rename_dir=$TEST_DIR/$$
+> -mkdir $rename_dir
+> -touch $rename_dir/foo $rename_dir/bar
+> -if ! src/renameat2 -t -w $rename_dir/foo $rename_dir/bar; then
+> -    rm -f $rename_dir/foo $rename_dir/bar; rmdir $rename_dir
+> -    _notrun "fs doesn't support RENAME_WHITEOUT"
+> -fi
+> -rm -f $rename_dir/foo $rename_dir/bar
+> -
+>  # real QA test starts here
+>  
+> +rename_dir=$TEST_DIR/$$
+> +mkdir $rename_dir
+>  _rename_tests $rename_dir -w
+>  rmdir $rename_dir
+>  
+> -- 
+> 1.8.3.1
+> 
+> -- 
+> kaixuxia
