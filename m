@@ -1,185 +1,143 @@
-Received: from mail-pg1-f194.google.com ([209.85.215.194]:38860 "EHLO
-        mail-pg1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2393543AbfIUOez (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 21 Sep 2019 10:34:55 -0400
-Date: Sat, 21 Sep 2019 22:34:47 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH v3 1/2] common: check if a given rename flag is supported
- in _requires_renameat2
-Message-ID: <20190921143443.GO2622@desktop>
-References: <7d4b6a1d-98a1-1fcb-5ccf-991e537df77c@gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:35274 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1728508AbfIVLRn (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 22 Sep 2019 07:17:43 -0400
+Date: Sun, 22 Sep 2019 19:25:12 +0800
+From: Zorro Lang <zlang@redhat.com>
+Subject: Re: [PATCH v2] common/xfs: wipe the XFS superblock of each AGs
+Message-ID: <20190922112512.GP7239@dhcp-12-102.nay.redhat.com>
+References: <20190920062327.14747-1-zlang@redhat.com>
+ <20190920153443.GR2229799@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <7d4b6a1d-98a1-1fcb-5ccf-991e537df77c@gmail.com>
+In-Reply-To: <20190920153443.GR2229799@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: kaixuxia <xiakaixu1987@gmail.com>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org, "Darrick J. Wong" <darrick.wong@oracle.com>, newtongao@tencent.com, jasperwang@tencent.com
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Sep 18, 2019 at 07:47:47PM +0800, kaixuxia wrote:
-> Some testcases may require a special rename flag, such as RENAME_WHITEOUT,
-> so add support check for if a given rename flag is supported in
-> _requires_renameat2.
+On Fri, Sep 20, 2019 at 08:34:43AM -0700, Darrick J. Wong wrote:
+> On Fri, Sep 20, 2019 at 02:23:27PM +0800, Zorro Lang wrote:
+> > xfs/030 always fails after d0e484ac699f ("check: wipe scratch devices
+> > between tests") get merged.
+> > 
+> > Due to xfs/030 does a sized(100m) mkfs. Before we merge above commit,
+> > mkfs.xfs detects an old primary superblock, it will write zeroes to
+> > all superblocks before formatting the new filesystem. But this won't
+> > be done if we wipe the first superblock(by merging above commit).
+> > 
+> > That means if we make a (smaller) sized xfs after wipefs, those *old*
+> > superblocks which created by last time mkfs.xfs will be left on disk.
+> > Then when we do xfs_repair, if xfs_repair can't find the first SB, it
+> > will go to find those *old* SB at first. When it finds them,
+> > everyting goes wrong.
+> > 
+> > So I try to get XFS AG geometry(by default) and then try to erase all
+> > superblocks. Thanks Darrick J. Wong helped to analyze this issue.
+> > 
+> > Reported-by: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+> > Signed-off-by: Zorro Lang <zlang@redhat.com>
+> > ---
+> > 
+> > Hi,
+> > 
+> > V2 did below changes:
+> > 1) Use xfs_db to detect the real xfs geometry
+> > 2) Do a $FSTYP specified wipe before trying to wipefs all scratch devices
+> > 
+> > Thanks,
+> > Zorro
+> > 
+> >  common/rc  |  8 ++++++++
+> >  common/xfs | 20 ++++++++++++++++++++
+> >  2 files changed, 28 insertions(+)
+> > 
+> > diff --git a/common/rc b/common/rc
+> > index 66c7fd4d..56329747 100644
+> > --- a/common/rc
+> > +++ b/common/rc
+> > @@ -4045,6 +4045,14 @@ _try_wipe_scratch_devs()
+> >  {
+> >  	test -x "$WIPEFS_PROG" || return 0
+> >  
+> > +	# Do specified filesystem wipe at first
+> > +	case "$FSTYP" in
+> > +	"xfs")
+> > +		_try_wipe_scratch_xfs
+> > +		;;
+> > +	esac
+> > +
+> > +	# Then do wipefs on all scratch devices
+> >  	for dev in $SCRATCH_DEV_POOL $SCRATCH_DEV $SCRATCH_LOGDEV $SCRATCH_RTDEV; do
+> >  		test -b $dev && $WIPEFS_PROG -a $dev
+> >  	done
+> > diff --git a/common/xfs b/common/xfs
+> > index 1bce3c18..082a1744 100644
+> > --- a/common/xfs
+> > +++ b/common/xfs
+> > @@ -884,3 +884,23 @@ _xfs_mount_agcount()
+> >  {
+> >  	$XFS_INFO_PROG "$1" | grep agcount= | sed -e 's/^.*agcount=\([0-9]*\),.*$/\1/g'
+> >  }
+> > +
+> > +# Wipe the superblock of each XFS AGs
+> > +_try_wipe_scratch_xfs()
+> > +{
+> > +	local num='^[0-9]+$'
+> > +	local agcount
+> > +	local agsize
+> > +	local dbsize
+> > +
+> > +	agcount=`_scratch_xfs_get_sb_field agcount 2>/dev/null`
+> > +	agsize=`_scratch_xfs_get_sb_field agblocks 2>/dev/null`
+> > +	dbsize=`_scratch_xfs_get_sb_field blocksize 2>/dev/null`
+> > +
+> > +	if [[ $agcount =~ $num && $agsize =~ $num && $dbsize =~ $num ]];then
+> > +		for ((i = 0; i < agcount; i++)); do
+> > +			$XFS_IO_PROG -c "pwrite $((i * dbsize * agsize)) $dbsize" \
+> > +				$SCRATCH_DEV >/dev/null;
+> > +		done
+> > +	fi
 > 
-> Signed-off-by: kaixuxia <kaixuxia@tencent.com>
+> What happened to the loop that simulates a _scratch_mkfs_xfs run (to get
+> the AG geometry) and then zaps that too?  You need both zeroing loops to
+> make sure xfs/030 doesn't trip over old superblocks, right?
 
-Nice improvement, thanks for the patch!
+Hi,
 
-> ---
->  common/renameat2  | 30 +++++++++++++++++++++++++++++-
->  tests/generic/024 | 13 +++----------
->  tests/generic/025 | 13 +++----------
->  tests/generic/078 | 13 +++----------
->  4 files changed, 38 insertions(+), 31 deletions(-)
-> 
-> diff --git a/common/renameat2 b/common/renameat2
-> index f8d6d4f..9625d8c 100644
-> --- a/common/renameat2
-> +++ b/common/renameat2
-> @@ -103,10 +103,38 @@ _rename_tests()
->  #
->  _requires_renameat2()
-
-I renamed the function to _require_renameat2 while we're at it, since
-no other _require rules are named as "_requires".
-
->  {
-> +	local flags=$1
-> +	local rename_dir=$TEST_DIR/$$
-> +	local cmd=""
-> +
->  	if test ! -x src/renameat2; then
->  		_notrun "renameat2 binary not found"
->  	fi
-> -	if ! src/renameat2 -t; then
-> +
-> +	mkdir $rename_dir
-> +	touch $rename_dir/foo
-> +	case $flags in
-> +	"noreplace")
-> +		cmd="-n $rename_dir/foo $rename_dir/bar"
-> +		;;
-> +	"exchange")
-> +		touch $rename_dir/bar
-> +		cmd="-x $rename_dir/foo $rename_dir/bar"
-> +		;;
-> +	"whiteout")
-> +		touch $rename_dir/bar
-> +		cmd="-w $rename_dir/foo $rename_dir/bar"
-> +		;;
-> +	"")
-
-I added 'cmd=""' here as Brian suggested.
-
-> +		;;
-> +	*)
-> +		rm -rf $rename_dir
-> +		_notrun "only support noreplace,exchange,whiteout rename flags, please check."
-
-I changed this to a _fail, as that indicates a test bug in helper usage.
-
-> +		;;
-> +	esac
-> +	if ! src/renameat2 -t $cmd; then
-> +		rm -rf $rename_dir
->  		_notrun "kernel doesn't support renameat2 syscall"
->  	fi
-> +	rm -rf $rename_dir
->  }
-> diff --git a/tests/generic/024 b/tests/generic/024
-> index 2888c66..9c1161a 100755
-> --- a/tests/generic/024
-> +++ b/tests/generic/024
-
-I also changed generic/398 and generic/419 to check for 'exchange' as
-they use RENAME_EXCHANGE.
+Sorry I'm not sure what you mean. Do you mean I'd better to do two zeroing
+loops, one is as above, the other is for default mkfs.xfs geometry as
+below[1]?
 
 Thanks,
-Eryu
+Zorro
 
-> @@ -29,20 +29,13 @@ _supported_fs generic
->  _supported_os Linux
->  
->  _require_test
-> -_requires_renameat2
-> +_requires_renameat2 noreplace
->  _require_test_symlinks
->  
-> -rename_dir=$TEST_DIR/$$
-> -mkdir $rename_dir
-> -touch $rename_dir/foo
-> -if ! src/renameat2 -t -n $rename_dir/foo $rename_dir/bar; then
-> -    rm -f $rename_dir/foo $rename_dir/bar; rmdir $rename_dir
-> -    _notrun "fs doesn't support RENAME_NOREPLACE"
-> -fi
-> -rm -f $rename_dir/foo $rename_dir/bar
-> -
->  # real QA test starts here
->  
-> +rename_dir=$TEST_DIR/$$
-> +mkdir $rename_dir
->  _rename_tests $rename_dir -n
->  rmdir $rename_dir
->  
-> diff --git a/tests/generic/025 b/tests/generic/025
-> index 0310efa..1ee9ad6 100755
-> --- a/tests/generic/025
-> +++ b/tests/generic/025
-> @@ -29,20 +29,13 @@ _supported_fs generic
->  _supported_os Linux
->  
->  _require_test
-> -_requires_renameat2
-> +_requires_renameat2 exchange
->  _require_test_symlinks
->  
-> -rename_dir=$TEST_DIR/$$
-> -mkdir $rename_dir
-> -touch $rename_dir/foo $rename_dir/bar
-> -if ! src/renameat2 -t -x $rename_dir/foo $rename_dir/bar; then
-> -    rm -f $rename_dir/foo $rename_dir/bar; rmdir $rename_dir
-> -    _notrun "fs doesn't support RENAME_EXCHANGE"
-> -fi
-> -rm -f $rename_dir/foo $rename_dir/bar
-> -
->  # real QA test starts here
->  
-> +rename_dir=$TEST_DIR/$$
-> +mkdir $rename_dir
->  _rename_tests $rename_dir -x
->  rmdir $rename_dir
->  
-> diff --git a/tests/generic/078 b/tests/generic/078
-> index 9608574..37f3201 100755
-> --- a/tests/generic/078
-> +++ b/tests/generic/078
-> @@ -29,20 +29,13 @@ _supported_fs generic
->  _supported_os Linux
->  
->  _require_test
-> -_requires_renameat2
-> +_requires_renameat2 whiteout
->  _require_test_symlinks
->  
-> -rename_dir=$TEST_DIR/$$
-> -mkdir $rename_dir
-> -touch $rename_dir/foo $rename_dir/bar
-> -if ! src/renameat2 -t -w $rename_dir/foo $rename_dir/bar; then
-> -    rm -f $rename_dir/foo $rename_dir/bar; rmdir $rename_dir
-> -    _notrun "fs doesn't support RENAME_WHITEOUT"
-> -fi
-> -rm -f $rename_dir/foo $rename_dir/bar
-> -
->  # real QA test starts here
->  
-> +rename_dir=$TEST_DIR/$$
-> +mkdir $rename_dir
->  _rename_tests $rename_dir -w
->  rmdir $rename_dir
->  
-> -- 
-> 1.8.3.1
+[1]
+  local tmp=`mktemp -u`
+  _scratch_mkfs_xfs -N 2>/dev/null | perl -ne '
+    if (/^meta-data=.*\s+agcount=(\d+), agsize=(\d+) blks/) {
+      print STDOUT "agcount=$1\nagsize=$2\n";
+    }
+    if (/^data\s+=\s+bsize=(\d+)\s/) {
+      print STDOUT "dbsize=$1\n";
+    }' > $tmp.mkfs
+
+  . $tmp.mkfs
+  if [ -n "$agcount" -a -n "$agsize" -a -n "$dbsize" ];then
+    for ((i = 0; i < agcount; i++)); do
+      $XFS_IO_PROG -c "pwrite $((i * dbsize * agsize)) $dbsize" \
+         $SCRATCH_DEV >/dev/null;
+    done
+  fi
+  rm -f $tmp.mkfs
+
+
+
 > 
-> -- 
-> kaixuxia
+> --D
+> 
+> > +}
+> > -- 
+> > 2.20.1
+> > 
