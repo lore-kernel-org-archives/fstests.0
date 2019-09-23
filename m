@@ -1,11 +1,11 @@
-Received: from mga14.intel.com ([192.55.52.115]:39308 "EHLO mga14.intel.com"
+Received: from mga06.intel.com ([134.134.136.31]:32885 "EHLO mga06.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2394221AbfIWRxj (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 23 Sep 2019 13:53:39 -0400
+        id S2394221AbfIWRxk (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 23 Sep 2019 13:53:40 -0400
 From: ira.weiny@intel.com
-Subject: [PATCH V2 01/16] src/locktest: Remove unnecessary sleep
-Date: Mon, 23 Sep 2019 10:53:21 -0700
-Message-Id: <20190923175336.2287-2-ira.weiny@intel.com>
+Subject: [PATCH V2 02/16] src/locktest: Remove OPEN macro
+Date: Mon, 23 Sep 2019 10:53:22 -0700
+Message-Id: <20190923175336.2287-3-ira.weiny@intel.com>
 In-Reply-To: <20190923175336.2287-1-ira.weiny@intel.com>
 References: <20190923175336.2287-1-ira.weiny@intel.com>
 MIME-Version: 1.0
@@ -17,37 +17,45 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Ira Weiny <ira.weiny@intel.com>
 
-There is no need to sleep because we asked for debugging.  Remove extra
-sleep code.
+The code is much cleaner without this macro.  While here add extra debug
+output as well.
 
 Reviewed-by: Jeff Layton <jlayton@kernel.org>
 Signed-off-by: Ira Weiny <ira.weiny@intel.com>
 ---
- src/locktest.c | 5 -----
- 1 file changed, 5 deletions(-)
+ src/locktest.c | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
 
 diff --git a/src/locktest.c b/src/locktest.c
-index 8e27e922668e..29e914febdf9 100644
+index 29e914febdf9..b5e1cf7669d8 100644
 --- a/src/locktest.c
 +++ b/src/locktest.c
-@@ -69,7 +69,6 @@ extern int h_errno;
+@@ -61,7 +61,6 @@ extern int h_errno;
+        
+ #define HANDLE              int
+ #define INVALID_HANDLE      -1
+-#define OPEN(N,F)           (open(N, F|O_CREAT|O_BINARY, 0644))
+ #define SEEK(H, O)          (lseek(H, O, SEEK_SET))
+ #define READ(H, B, L)       (read(H, B, L))
+ #define WRITE(H, B, L)      (write(H, B, L))
+@@ -598,12 +597,16 @@ initialize(HANDLE fd)
  
- #define RAND()              (rand())
- #define SRAND(s)            (srand(s))
--#define SLEEP(s)            (sleep(s))
+ int do_open(int flag)
+ {
+-    if ((f_fd = OPEN(filename, flag)) == INVALID_HANDLE) {
++    int flags = flag|O_CREAT|O_BINARY;
++
++    if(debug > 1)
++	fprintf(stderr, "do_open %s 0x%x\n", filename, flags);
++
++    if ((f_fd = open(filename, flags, 0666)) == INVALID_HANDLE) {
+ 	perror("shared file create");
+ 	return FAIL;
+ 	/*NOTREACHED*/
+     }
+-
+     return PASS;
+ }
  
- #define MIN(A,B)            (((A)<(B))?(A):(B))
- #define MAX(A,B)            (((A)>(B))?(A):(B))
-@@ -1037,10 +1036,6 @@ main(int argc, char *argv[])
- 		    }
- 		}
- 	    }
--	    if (debug > 1) {
--		fprintf(stderr, "server sleeping ...\n");
--		SLEEP(1);
--	    }
- 	    if(tests[index][TEST_NUM] != 0) {
- 		if(last_test != tests[index][TEST_NUM]) {
- 		    test_count++;
 -- 
 2.20.1
