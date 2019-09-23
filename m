@@ -1,11 +1,11 @@
-Received: from mga05.intel.com ([192.55.52.43]:53958 "EHLO mga05.intel.com"
+Received: from mga02.intel.com ([134.134.136.20]:33973 "EHLO mga02.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2394221AbfIWRxq (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 23 Sep 2019 13:53:46 -0400
+        id S2394221AbfIWRxr (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 23 Sep 2019 13:53:47 -0400
 From: ira.weiny@intel.com
-Subject: [PATCH V2 10/16] src/locktest: Audit all debug output
-Date: Mon, 23 Sep 2019 10:53:30 -0700
-Message-Id: <20190923175336.2287-11-ira.weiny@intel.com>
+Subject: [PATCH V2 11/16] src/locktest: Add run() function
+Date: Mon, 23 Sep 2019 10:53:31 -0700
+Message-Id: <20190923175336.2287-12-ira.weiny@intel.com>
 In-Reply-To: <20190923175336.2287-1-ira.weiny@intel.com>
 References: <20190923175336.2287-1-ira.weiny@intel.com>
 MIME-Version: 1.0
@@ -17,133 +17,113 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Ira Weiny <ira.weiny@intel.com>
 
-Audit all the debug output to be clear on what failed so that we can
-remove the debug flag from the script.
+Separate the functionality of main() into socket set up and run().  Pass
+the test information to run() rather than have it be gloabal.  This is
+in preparation for adding a separate lease test array.
 
-Specifically, remove the need for a debug flag on system call error
-output.  This helps to indicate what happened when an individual test
-step fails.
-
-Reviewed-by: Jeff Layton <jlayton@kernel.org>
 Signed-off-by: Ira Weiny <ira.weiny@intel.com>
 
 ---
 Changes from V1:
-	Moved earlier in the series
+	New patch for this series
 
- src/locktest.c    | 19 +++++++++++--------
- tests/generic/131 |  5 ++---
- 2 files changed, 13 insertions(+), 11 deletions(-)
+ src/locktest.c | 30 ++++++++++++++++++------------
+ 1 file changed, 18 insertions(+), 12 deletions(-)
 
 diff --git a/src/locktest.c b/src/locktest.c
-index 159d13291f79..3dc74947f100 100644
+index 3dc74947f100..076781badaa1 100644
 --- a/src/locktest.c
 +++ b/src/locktest.c
-@@ -647,7 +647,7 @@ static int do_lock(int cmd, int type, int start, int length)
-     ret = fcntl(filedes, cmd, &fl);
-     saved_errno = errno;	    
+@@ -146,7 +146,7 @@ static char *get_cmd_str(int cmd)
+  * (or vice versa)
+  */
  
--    if(debug > 1 && ret)
-+    if(ret)
- 	fprintf(stderr, "do_lock: ret = %d, errno = %d (%s)\n", ret, errno, strerror(errno));
+-char *descriptions[] = {
++char *lock_descriptions[] = {
+     /* 1 */"Add a lock to an empty lock list",
+     /* 2 */"Add a lock to the start and end of a list - no overlaps",
+     /* 3 */"Add a lock to the middle of a list - no overlap",
+@@ -183,7 +183,7 @@ char *descriptions[] = {
+     #endif
+ };
  
-     return(ret==0?PASS:FAIL);
-@@ -665,8 +665,11 @@ int do_close(void)
- 
-     saved_errno = errno;	    
- 	
--    if (errno)
-+    if (errno) {
-+	fprintf(stderr, "%s errno = %d (%s)\n",
-+		__FILE__, errno, strerror(errno));
- 	return FAIL;
-+    }
+-static int64_t tests[][6] =
++static int64_t lock_tests[][6] =
+ 	/*	test #	Action	[offset|flags]	length		expected	server/client */
+ 	{ 	
+ 	/* Various simple tests exercising the list */
+@@ -673,7 +673,7 @@ int do_close(void)
      return PASS;
  }
  
-@@ -686,7 +689,7 @@ send_ctl(void)
+-static void init_ctl(int32_t index)
++static void init_ctl(int64_t tests[][6], int32_t index)
  {
-     int         nwrite;
- 
--    if (debug > 1) {
-+    if (debug) {
- 	fprintf(stderr, "send_ctl: test=%d, command=%d offset=%"LL"d, length=%"LL"d, result=%d, error=%d\n", 
-                 ctl.test, ctl.command, (long long)ctl.offset, (long long)ctl.length,ctl.result, ctl.error);
-     }
-@@ -741,7 +744,7 @@ void recv_ctl(void)
-     ctl.index= bswap_uint32(ctl.index);
-     ctl.error= bswap_uint32(ctl.error);
- 
--    if (debug > 1) {
-+    if (debug) {
- 	fprintf(stderr, "recv_ctl: test=%d, command=%d offset=%"LL"d, length=%"LL"d, result=%d, error=%d\n", 
-                 ctl.test, ctl.command, (long long)ctl.offset, (long long)ctl.length, ctl.result, ctl.error);
-     }
-@@ -977,7 +980,7 @@ main(int argc, char *argv[])
- 	    }
- 	    /* If we have a server command, deal with it */
- 	    if(tests[index][WHO] == SERVER) {
--		if(debug>1)
-+		if(debug)
- 		    fprintf(stderr, "Got a server command (%d)\n", index);
- 		if(tests[index][TEST_NUM] == 0) {
- 		    index++;
-@@ -1031,7 +1034,7 @@ main(int argc, char *argv[])
- 		} 
- 		/* get the client to do something */
- 		init_ctl(index);
--		if(debug > 1)
-+		if(debug)
- 		    fprintf(stderr, "Sending command to client (%d) - %s - %lld:%lld\n", 
- 					index,
- 					get_cmd_str(ctl.command),
-@@ -1068,7 +1071,7 @@ main(int argc, char *argv[])
- 		
- 	    index++;
- 	} else { /* CLIENT */
--	    if(debug > 2)
-+	    if(debug)
- 		fprintf(stderr,"client: waiting...\n");
- 	    /* wait for the server to do something */
- 	    recv_ctl();
-@@ -1120,7 +1123,7 @@ main(int argc, char *argv[])
- 		ctl.result = PASS;
- 		ctl.error = 0;
- 	    }
--	    if(debug > 2)
-+	    if(debug)
- 		fprintf(stderr,"client: sending result to server (%d)\n", ctl.index);
- 	    /* Send result to the server */
- 	    send_ctl();
-diff --git a/tests/generic/131 b/tests/generic/131
-index 4d90411d4a19..9990f38b26a3 100755
---- a/tests/generic/131
-+++ b/tests/generic/131
-@@ -14,7 +14,6 @@ here=`pwd`
- tmp=/tmp/$$
- status=1	# failure is the default!
- trap "_cleanup; exit \$status" 0 1 2 3 15
--debug="-d"
- 
- TESTFILE=$TEST_DIR/lock_file
- 
-@@ -63,7 +62,7 @@ function dump_logs_fail()
+     ctl.test= (int32_t)tests[index][TEST_NUM];
+     ctl.command = (int32_t)tests[index][COMMAND];
+@@ -765,6 +765,9 @@ cleanup(void)
+     PLATFORM_CLEANUP();
  }
  
- # Start the server
--src/locktest $debug $TESTFILE 2> $SERVER_LOG 1> $SERVER_PORT &
-+src/locktest $TESTFILE 2> $SERVER_LOG 1> $SERVER_PORT &
- server_pid=$!
++int
++run(int64_t tests[][6], char *descriptions[]);
++
+ int
+ main(int argc, char *argv[])
+ {
+@@ -778,7 +781,7 @@ main(int argc, char *argv[])
+     char	*p;
+     extern char	*optarg;
+     extern int	optind;
+-    int fail_count = 0;; 
++    int fail_count = 0;
+     
+     atexit(cleanup);
+     
+@@ -962,7 +965,13 @@ main(int argc, char *argv[])
+      *
+      * real work is in here ...
+      */
+-    i = 0;
++    fail_count = run(lock_tests, lock_descriptions);
++
++    exit(fail_count);
++    /*NOTREACHED*/
++}
++
++int run(int64_t tests[][6], char *descriptions[])
+ {
+     int index = 0;
+     int end = 0;
+@@ -970,6 +979,7 @@ main(int argc, char *argv[])
+     int last_test = 0;
+     int test_count = -1;
+     int fail_flag = 0;
++    int fail_count = 0;
+     while(!end) {
+ 	if (server) {
+ 	    if(testnumber > 0) {
+@@ -1033,7 +1043,7 @@ main(int argc, char *argv[])
+ 		    end=1;
+ 		} 
+ 		/* get the client to do something */
+-		init_ctl(index);
++		init_ctl(tests, index);
+ 		if(debug)
+ 		    fprintf(stderr, "Sending command to client (%d) - %s - %lld:%lld\n", 
+ 					index,
+@@ -1134,10 +1144,6 @@ main(int argc, char *argv[])
+ 	}
+     }
+     fprintf(stderr, "%d tests run, %d failed\n", test_count, fail_count);
+-}   
+-    
+-    exit(fail_count);
+-    /*NOTREACHED*/
+-}
+-
  
- timeout=30
-@@ -89,7 +88,7 @@ fi
- 
- # Start the client
- 
--src/locktest $debug -p $PORT -h localhost $TESTFILE 2> $CLIENT_LOG
-+src/locktest -p $PORT -h localhost $TESTFILE 2> $CLIENT_LOG
- client_result=$?
- client_pid=$!
- if [ $client_result -ne 0 ]; then
++    return fail_count;
++}
 -- 
 2.20.1
