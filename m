@@ -1,13 +1,11 @@
-Received: from mga04.intel.com ([192.55.52.120]:33084 "EHLO mga04.intel.com"
+Received: from mga03.intel.com ([134.134.136.65]:6679 "EHLO mga03.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2440226AbfIWRwU (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 23 Sep 2019 13:52:20 -0400
+        id S2502187AbfIWRxj (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 23 Sep 2019 13:53:39 -0400
 From: ira.weiny@intel.com
-Subject: [PATCH V2 11/16] src/locktest: Add run() function
-Date: Mon, 23 Sep 2019 10:51:59 -0700
-Message-Id: <20190923175204.2139-12-ira.weiny@intel.com>
-In-Reply-To: <20190923175204.2139-1-ira.weiny@intel.com>
-References: <20190923175204.2139-1-ira.weiny@intel.com>
+Subject: [PATCH V2 00/16] Fix locktest and add lease testing to it
+Date: Mon, 23 Sep 2019 10:53:20 -0700
+Message-Id: <20190923175336.2287-1-ira.weiny@intel.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
@@ -17,113 +15,54 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Ira Weiny <ira.weiny@intel.com>
 
-Separate the functionality of main() into socket set up and run().  Pass
-the test information to run() rather than have it be gloabal.  This is
-in preparation for adding a separate lease test array.
+Add lease tests[1] to locktest because they share so much code.  Make running
+of lease tests separate as an '-L' option.
 
-Signed-off-by: Ira Weiny <ira.weiny@intel.com>
+To make things cleaner update the lock test code and test script.  This
+includes fixing a rather serious bug.                                                                                                                 
 
----
+Finally update the error output to help identify any steps which fail during
+testing.                                                                                                                                              
+
 Changes from V1:
-	New patch for this series
+	Create a new option '-L' to run lease testing
+	Created 568 test script which shared common code with 131
+	Moved 2 patches earlier in the series
+		[PATCH V2 09/16] src/locktest: Clean up error output
+		[PATCH V2 10/16] src/locktest: Audit all debug output
+	Added 3 patches
+		[PATCH V2 11/16] src/locktest: Add run() function
+		[PATCH V2 15/16] common/locktest: Add common locktest functions
+		[PATCH V2 16/16] generic/568: Add lease testing
 
- src/locktest.c | 30 ++++++++++++++++++------------
- 1 file changed, 18 insertions(+), 12 deletions(-)
+Ira Weiny (16):
+  src/locktest: Remove unnecessary sleep
+  src/locktest: Remove OPEN macro
+  src/locktest: Change command macro names
+  src/locktest: Add get_cmd_str
+  src/locktest.c: Clean up client command passing
+  src/locktest.c: Fix return code if last test fails
+  generic/131: Clean up pid variables
+  generic/131: Save stderr for debugging
+  src/locktest: Clean up error output
+  src/locktest: Audit all debug output
+  src/locktest: Add run() function
+  src/locktest: Add simple lease testing
+  src/locktest: Add lease testing for basic signal reception
+  src/locktest: Add truncate lease tests
+  common/locktest: Add common locktest functions
+  generic/568: Add lease testing
 
-diff --git a/src/locktest.c b/src/locktest.c
-index 3dc74947f100..076781badaa1 100644
---- a/src/locktest.c
-+++ b/src/locktest.c
-@@ -146,7 +146,7 @@ static char *get_cmd_str(int cmd)
-  * (or vice versa)
-  */
- 
--char *descriptions[] = {
-+char *lock_descriptions[] = {
-     /* 1 */"Add a lock to an empty lock list",
-     /* 2 */"Add a lock to the start and end of a list - no overlaps",
-     /* 3 */"Add a lock to the middle of a list - no overlap",
-@@ -183,7 +183,7 @@ char *descriptions[] = {
-     #endif
- };
- 
--static int64_t tests[][6] =
-+static int64_t lock_tests[][6] =
- 	/*	test #	Action	[offset|flags]	length		expected	server/client */
- 	{ 	
- 	/* Various simple tests exercising the list */
-@@ -673,7 +673,7 @@ int do_close(void)
-     return PASS;
- }
- 
--static void init_ctl(int32_t index)
-+static void init_ctl(int64_t tests[][6], int32_t index)
- {
-     ctl.test= (int32_t)tests[index][TEST_NUM];
-     ctl.command = (int32_t)tests[index][COMMAND];
-@@ -765,6 +765,9 @@ cleanup(void)
-     PLATFORM_CLEANUP();
- }
- 
-+int
-+run(int64_t tests[][6], char *descriptions[]);
-+
- int
- main(int argc, char *argv[])
- {
-@@ -778,7 +781,7 @@ main(int argc, char *argv[])
-     char	*p;
-     extern char	*optarg;
-     extern int	optind;
--    int fail_count = 0;; 
-+    int fail_count = 0;
-     
-     atexit(cleanup);
-     
-@@ -962,7 +965,13 @@ main(int argc, char *argv[])
-      *
-      * real work is in here ...
-      */
--    i = 0;
-+    fail_count = run(lock_tests, lock_descriptions);
-+
-+    exit(fail_count);
-+    /*NOTREACHED*/
-+}
-+
-+int run(int64_t tests[][6], char *descriptions[])
- {
-     int index = 0;
-     int end = 0;
-@@ -970,6 +979,7 @@ main(int argc, char *argv[])
-     int last_test = 0;
-     int test_count = -1;
-     int fail_flag = 0;
-+    int fail_count = 0;
-     while(!end) {
- 	if (server) {
- 	    if(testnumber > 0) {
-@@ -1033,7 +1043,7 @@ main(int argc, char *argv[])
- 		    end=1;
- 		} 
- 		/* get the client to do something */
--		init_ctl(index);
-+		init_ctl(tests, index);
- 		if(debug)
- 		    fprintf(stderr, "Sending command to client (%d) - %s - %lld:%lld\n", 
- 					index,
-@@ -1134,10 +1144,6 @@ main(int argc, char *argv[])
- 	}
-     }
-     fprintf(stderr, "%d tests run, %d failed\n", test_count, fail_count);
--}   
--    
--    exit(fail_count);
--    /*NOTREACHED*/
--}
--
- 
-+    return fail_count;
-+}
+ common/locktest       |  95 ++++
+ src/locktest.c        | 999 +++++++++++++++++++++++++++---------------
+ tests/generic/131     |  54 +--
+ tests/generic/568     |  32 ++
+ tests/generic/568.out |   2 +
+ tests/generic/group   |   1 +
+ 6 files changed, 786 insertions(+), 397 deletions(-)
+ create mode 100644 common/locktest
+ create mode 100755 tests/generic/568
+ create mode 100644 tests/generic/568.out
+
 -- 
 2.20.1
