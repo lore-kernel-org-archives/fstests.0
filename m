@@ -1,105 +1,37 @@
-Received: from mga02.intel.com ([134.134.136.20]:34525 "EHLO mga02.intel.com"
+Received: from fieldses.org ([173.255.197.46]:57986 "EHLO fieldses.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2393421AbfIWSAJ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 23 Sep 2019 14:00:09 -0400
-From: ira.weiny@intel.com
-Subject: [PATCH V2 16/16] generic/568: Add lease testing
-Date: Mon, 23 Sep 2019 10:59:59 -0700
-Message-Id: <20190923175959.2802-2-ira.weiny@intel.com>
-In-Reply-To: <20190923175959.2802-1-ira.weiny@intel.com>
-References: <20190923175336.2287-1-ira.weiny@intel.com>
- <20190923175959.2802-1-ira.weiny@intel.com>
+        id S1726777AbfIWUAg (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 23 Sep 2019 16:00:36 -0400
+Date: Mon, 23 Sep 2019 16:00:36 -0400
+Subject: generic/495: swap on sparse file over NFS
+Message-ID: <20190923200036.GA5085@fieldses.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+From: bfields@fieldses.org (J. Bruce Fields)
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org, Eryu Guan <guaneryu@gmail.com>
-Cc: john.hubbard@gmail.com, Dave Chinner <david@fromorbit.com>, Jan Kara <jack@suse.cz>, Jason Gunthorpe <jgg@ziepe.ca>, dan.j.williams@intel.com, Jeff Layton <jlayton@kernel.org>, Ira Weiny <ira.weiny@intel.com>
+To: fstests@vger.kernel.org
+Cc: linux-nfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Ira Weiny <ira.weiny@intel.com>
+I'm updating to a newer xfstests and seeing:
 
-Create a new lease test script.
+generic/495     - output mismatch (see
+/root/xfstests-dev/results//generic/495.out.bad)
+    --- tests/generic/495.out   2019-09-18 17:28:00.834721480 -0400
+    +++ /root/xfstests-dev/results//generic/495.out.bad 2019-09-20 13:34:01.1568
+89741 -0400
+    @@ -1,5 +1,4 @@
+     QA output created by 495
+     File with holes
+    -swapon: Invalid argument
+     Empty swap file (only swap header)
+     swapon: Invalid argument
 
-Signed-off-by: Ira Weiny <ira.weiny@intel.com>
+If I understand correctly, it's requiring swapon to fail on a sparse
+file, which isn't going to happen on NFS, where the sparsenes of the
+file isn't really the client's concern.
 
----
-Changes from V1:
-	New patch for this series.
+Is it really correct to *require* swapon to fail in this case?
 
- common/locktest       |  4 ++++
- tests/generic/568     | 32 ++++++++++++++++++++++++++++++++
- tests/generic/568.out |  2 ++
- tests/generic/group   |  1 +
- 4 files changed, 39 insertions(+)
- create mode 100755 tests/generic/568
- create mode 100644 tests/generic/568.out
-
-diff --git a/common/locktest b/common/locktest
-index c41f5054c523..1da5fbb1eb62 100644
---- a/common/locktest
-+++ b/common/locktest
-@@ -89,3 +89,7 @@ _run_generic() {
- _run_locktest() {
- 	_run_generic ""
- }
-+
-+_run_leasetest() {
-+	_run_generic "-L"
-+}
-diff --git a/tests/generic/568 b/tests/generic/568
-new file mode 100755
-index 000000000000..0d52c384cbd1
---- /dev/null
-+++ b/tests/generic/568
-@@ -0,0 +1,32 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2019 Intel, Corp.  All Rights Reserved.
-+#
-+# FSQA Test No. 568
-+#
-+# lease test
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/locktest
-+
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_test
-+_require_test_fcntl_advisory_locks
-+
-+_run_leasetest
-+
-+exit
-diff --git a/tests/generic/568.out b/tests/generic/568.out
-new file mode 100644
-index 000000000000..5efccbbc6194
---- /dev/null
-+++ b/tests/generic/568.out
-@@ -0,0 +1,2 @@
-+QA output created by 568
-+success!
-diff --git a/tests/generic/group b/tests/generic/group
-index 7cf4f6c48b2f..c773d6b52a99 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -570,3 +570,4 @@
- 565 auto quick copy_range
- 566 auto quick quota metadata
- 567 auto quick rw punch
-+568 auto quick
--- 
-2.20.1
+--b.
