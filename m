@@ -1,11 +1,11 @@
-Received: from mga02.intel.com ([134.134.136.20]:33973 "EHLO mga02.intel.com"
+Received: from mga17.intel.com ([192.55.52.151]:1416 "EHLO mga17.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2394221AbfIWRxr (ORCPT <rfc822;fstests@vger.kernel.org>);
+        id S2502234AbfIWRxr (ORCPT <rfc822;fstests@vger.kernel.org>);
         Mon, 23 Sep 2019 13:53:47 -0400
 From: ira.weiny@intel.com
-Subject: [PATCH V2 11/16] src/locktest: Add run() function
-Date: Mon, 23 Sep 2019 10:53:31 -0700
-Message-Id: <20190923175336.2287-12-ira.weiny@intel.com>
+Subject: [PATCH V2 12/16] src/locktest: Add simple lease testing
+Date: Mon, 23 Sep 2019 10:53:32 -0700
+Message-Id: <20190923175336.2287-13-ira.weiny@intel.com>
 In-Reply-To: <20190923175336.2287-1-ira.weiny@intel.com>
 References: <20190923175336.2287-1-ira.weiny@intel.com>
 MIME-Version: 1.0
@@ -17,113 +17,219 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Ira Weiny <ira.weiny@intel.com>
 
-Separate the functionality of main() into socket set up and run().  Pass
-the test information to run() rather than have it be gloabal.  This is
-in preparation for adding a separate lease test array.
+	/*  1 */"Take Read Lease",
+	/*  2 */"Take Write Lease",
+	/*  3 */"Fail Write Lease if file is open somewhere else",
+	/*  4 */"Fail Read Lease if opened with write permissions",
 
 Signed-off-by: Ira Weiny <ira.weiny@intel.com>
 
 ---
 Changes from V1:
-	New patch for this series
+	Tests are now a separate array and are run with '-L' option.
 
- src/locktest.c | 30 ++++++++++++++++++------------
- 1 file changed, 18 insertions(+), 12 deletions(-)
+ src/locktest.c | 109 +++++++++++++++++++++++++++++++++++++++++++++++--
+ 1 file changed, 106 insertions(+), 3 deletions(-)
 
 diff --git a/src/locktest.c b/src/locktest.c
-index 3dc74947f100..076781badaa1 100644
+index 076781badaa1..2147acc67ef7 100644
 --- a/src/locktest.c
 +++ b/src/locktest.c
-@@ -146,7 +146,7 @@ static char *get_cmd_str(int cmd)
-  * (or vice versa)
+@@ -1,11 +1,12 @@
+ // SPDX-License-Identifier: GPL-2.0
+ /*
+  * Copyright (c) 2000-2003 Silicon Graphics, Inc.
++ * Copyright (c) 2019 Intel Corp.
+  * All Rights Reserved.
   */
  
--char *descriptions[] = {
-+char *lock_descriptions[] = {
-     /* 1 */"Add a lock to an empty lock list",
-     /* 2 */"Add a lock to the start and end of a list - no overlaps",
-     /* 3 */"Add a lock to the middle of a list - no overlap",
-@@ -183,7 +183,7 @@ char *descriptions[] = {
-     #endif
- };
+ /*
+- * Synchronized byte range lock exerciser
++ * Synchronized byte range lock and lease exerciser
+  */
  
--static int64_t tests[][6] =
-+static int64_t lock_tests[][6] =
- 	/*	test #	Action	[offset|flags]	length		expected	server/client */
- 	{ 	
- 	/* Various simple tests exercising the list */
-@@ -673,7 +673,7 @@ int do_close(void)
-     return PASS;
- }
+ #include <stdio.h>
+@@ -94,6 +95,8 @@ static HANDLE	f_fd = INVALID_HANDLE;	/* shared file      */
+ #define		CMD_OPEN	4
+ #define		CMD_WRTEST	5
+ #define		CMD_RDTEST	6
++#define 	CMD_SETLEASE	7
++#define 	CMD_GETLEASE	8
  
--static void init_ctl(int32_t index)
-+static void init_ctl(int64_t tests[][6], int32_t index)
+ #define		PASS 	1
+ #define		FAIL	0
+@@ -108,6 +111,7 @@ static HANDLE	f_fd = INVALID_HANDLE;	/* shared file      */
+ #define		RESULT		4
+ #define		WHO		5
+ #define		FLAGS		2 /* index 2 is also used for do_open() flag, see below */
++#define		ARG		FLAGS /* Arguments for Lease operations */
+ 
+ static char *get_cmd_str(int cmd)
  {
-     ctl.test= (int32_t)tests[index][TEST_NUM];
-     ctl.command = (int32_t)tests[index][COMMAND];
-@@ -765,6 +765,9 @@ cleanup(void)
-     PLATFORM_CLEANUP();
+@@ -119,6 +123,8 @@ static char *get_cmd_str(int cmd)
+ 		case CMD_OPEN:   return "open"; break;
+ 		case CMD_WRTEST: return "Wait for SIGIO"; break;
+ 		case CMD_RDTEST: return "Truncate"; break;
++		case CMD_SETLEASE: return "Set Lease"; break;
++		case CMD_GETLEASE: return "Get Lease"; break;
+ 	}
+ 	return "unknown";
  }
- 
-+int
-+run(int64_t tests[][6], char *descriptions[]);
+@@ -544,6 +550,56 @@ static int64_t lock_tests[][6] =
+ 		{32,	CMD_OPEN,	O_RDWR,		0,		PASS,		SERVER,	},
+ 		{32,	CMD_OPEN,	O_RDWR,		0,		PASS,		CLIENT,	},
+ #endif /* macosx */
 +
- int
- main(int argc, char *argv[])
- {
-@@ -778,7 +781,7 @@ main(int argc, char *argv[])
-     char	*p;
++	/* indicate end of array */
++		{0,0,0,0,0,SERVER},
++		{0,0,0,0,0,CLIENT}
++	};
++
++
++char *lease_descriptions[] = {
++    /*  1 */"Take Read Lease",
++    /*  2 */"Take Write Lease",
++    /*  3 */"Fail Write Lease if file is open somewhere else",
++    /*  4 */"Fail Read Lease if opened with write permissions",
++};
++
++static int64_t lease_tests[][6] =
++	/*	test #	Action	[offset|flags|arg]	length		expected	server/client */
++	{
++	/* Various tests to exercise leases */
++
++/* SECTION 1: Simple verification of being able to take leases */
++	/* Take Read Lease */
++		{1,	CMD_CLOSE,	0,		0,	PASS,		CLIENT	},
++		{1,	CMD_OPEN,	O_RDONLY,	0,	PASS,		CLIENT	},
++		{1,	CMD_CLOSE,	0,		0,	PASS,		SERVER	},
++		{1,	CMD_OPEN,	O_RDONLY,	0,	PASS,		SERVER	},
++		{1,	CMD_SETLEASE,	F_RDLCK,	0,	PASS,		SERVER	},
++		{1,	CMD_GETLEASE,	F_RDLCK,	0,	PASS,		SERVER	},
++		{1,	CMD_SETLEASE,	F_UNLCK,	0,	PASS,		SERVER	},
++		{1,	CMD_CLOSE,	0,		0,	PASS,		SERVER	},
++		{1,	CMD_CLOSE,	0,		0,	PASS,		CLIENT	},
++
++	/* Take Write Lease */
++		{2,	CMD_OPEN,	O_RDWR,		0,	PASS,		SERVER	},
++		{2,	CMD_SETLEASE,	F_WRLCK,	0,	PASS,		SERVER	},
++		{2,	CMD_GETLEASE,	F_WRLCK,	0,	PASS,		SERVER	},
++		{2,	CMD_SETLEASE,	F_UNLCK,	0,	PASS,		SERVER	},
++		{2,	CMD_CLOSE,	0,		0,	PASS,		SERVER	},
++	/* Fail Write Lease with other users */
++		{3,	CMD_OPEN,	O_RDONLY,	0,	PASS,		CLIENT  },
++		{3,	CMD_OPEN,	O_RDWR,		0,	PASS,		SERVER	},
++		{3,	CMD_SETLEASE,	F_WRLCK,	0,	FAIL,		SERVER	},
++		{3,	CMD_GETLEASE,	F_WRLCK,	0,	FAIL,		SERVER	},
++		{3,	CMD_CLOSE,	0,		0,	PASS,		SERVER	},
++		{3,	CMD_CLOSE,	0,		0,	PASS,		CLIENT	},
++	/* Fail Read Lease if opened for write */
++		{4,	CMD_OPEN,	O_RDWR,		0,	PASS,		SERVER	},
++		{4,	CMD_SETLEASE,	F_RDLCK,	0,	FAIL,		SERVER	},
++		{4,	CMD_GETLEASE,	F_RDLCK,	0,	FAIL,		SERVER	},
++		{4,	CMD_CLOSE,	0,		0,	PASS,		SERVER	},
++
+ 	/* indicate end of array */
+ 		{0,0,0,0,0,SERVER},
+ 		{0,0,0,0,0,CLIENT}
+@@ -653,6 +709,32 @@ static int do_lock(int cmd, int type, int start, int length)
+     return(ret==0?PASS:FAIL);
+ }
+ 
++static int do_lease(int cmd, int arg, int expected)
++{
++    int ret;
++
++    if(debug > 1)
++	fprintf(stderr, "do_lease: cmd=%d arg=%d exp=%X\n",
++		cmd, arg, expected);
++
++    if (f_fd < 0)
++	return f_fd;
++
++    errno = 0;
++
++    ret = fcntl(f_fd, cmd, arg);
++    saved_errno = errno;
++
++    if (expected && (expected == ret))
++	ret = 0;
++
++    if(ret)
++	fprintf(stderr, "%s do_lease: ret = %d, errno = %d (%s)\n",
++		__FILE__, ret, errno, strerror(errno));
++
++    return(ret==0?PASS:FAIL);
++}
++
+ int do_close(void)
+ {	
+     if(debug > 1) {
+@@ -782,6 +864,7 @@ main(int argc, char *argv[])
      extern char	*optarg;
      extern int	optind;
--    int fail_count = 0;; 
-+    int fail_count = 0;
+     int fail_count = 0;
++    int run_leases = 0;
      
      atexit(cleanup);
      
-@@ -962,7 +965,13 @@ main(int argc, char *argv[])
+@@ -794,13 +877,17 @@ main(int argc, char *argv[])
+ 	    prog = p+1;
+     }
+ 
+-    while ((c = getopt(argc, argv, "dn:h:p:?")) != EOF) {
++    while ((c = getopt(argc, argv, "dLn:h:p:?")) != EOF) {
+ 	switch (c) {
+ 
+ 	case 'd':	/* debug flag */
+ 	    debug++;
+ 	    break;
+ 
++	case 'L':	/* Lease testing */
++	    run_leases = 1;
++	    break;
++
+ 	case 'h':	/* (server) hostname */
+ 	    server = 0;
+ 	    host = optarg;
+@@ -965,7 +1052,10 @@ main(int argc, char *argv[])
       *
       * real work is in here ...
       */
--    i = 0;
-+    fail_count = run(lock_tests, lock_descriptions);
-+
-+    exit(fail_count);
-+    /*NOTREACHED*/
-+}
-+
-+int run(int64_t tests[][6], char *descriptions[])
- {
-     int index = 0;
-     int end = 0;
-@@ -970,6 +979,7 @@ main(int argc, char *argv[])
-     int last_test = 0;
-     int test_count = -1;
-     int fail_flag = 0;
-+    int fail_count = 0;
-     while(!end) {
- 	if (server) {
- 	    if(testnumber > 0) {
-@@ -1033,7 +1043,7 @@ main(int argc, char *argv[])
- 		    end=1;
- 		} 
- 		/* get the client to do something */
--		init_ctl(index);
-+		init_ctl(tests, index);
- 		if(debug)
- 		    fprintf(stderr, "Sending command to client (%d) - %s - %lld:%lld\n", 
- 					index,
-@@ -1134,10 +1144,6 @@ main(int argc, char *argv[])
- 	}
-     }
-     fprintf(stderr, "%d tests run, %d failed\n", test_count, fail_count);
--}   
--    
--    exit(fail_count);
--    /*NOTREACHED*/
--}
--
+-    fail_count = run(lock_tests, lock_descriptions);
++    if (run_leases)
++	fail_count = run(lease_tests, lease_descriptions);
++    else
++	fail_count = run(lock_tests, lock_descriptions);
  
-+    return fail_count;
-+}
+     exit(fail_count);
+     /*NOTREACHED*/
+@@ -1022,6 +1112,12 @@ int run(int64_t tests[][6], char *descriptions[])
+ 			case CMD_RDTEST:
+ 			    result = do_lock(F_GETLK, F_RDLCK, tests[index][OFFSET], tests[index][LENGTH]);
+ 			    break;
++			case CMD_SETLEASE:
++			    result = do_lease(F_SETLEASE, tests[index][ARG], 0);
++			    break;
++			case CMD_GETLEASE:
++			    result = do_lease(F_GETLEASE, tests[index][ARG], tests[index][ARG]);
++			    break;
+ 		    }
+ 		    if( result != tests[index][RESULT]) {
+ 			fail_flag++;
+@@ -1120,6 +1216,13 @@ int run(int64_t tests[][6], char *descriptions[])
+ 		case CMD_RDTEST:
+ 		    result = do_lock(F_GETLK, F_RDLCK, ctl.offset, ctl.length);
+ 		    break;
++		/* NOTE offset carries the argument values */
++		case CMD_SETLEASE:
++		    result = do_lease(F_SETLEASE, ctl.offset, 0);
++		    break;
++		case CMD_GETLEASE:
++		    result = do_lease(F_GETLEASE, ctl.offset, ctl.offset);
++		    break;
+ 	    }
+ 	    if( result != ctl.result ) {
+ 		fprintf(stderr,"Failure in %d:%s\n",
 -- 
 2.20.1
