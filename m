@@ -1,11 +1,11 @@
-Received: from mga17.intel.com ([192.55.52.151]:1416 "EHLO mga17.intel.com"
+Received: from mga05.intel.com ([192.55.52.43]:53958 "EHLO mga05.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2502234AbfIWRxr (ORCPT <rfc822;fstests@vger.kernel.org>);
+        id S2502237AbfIWRxr (ORCPT <rfc822;fstests@vger.kernel.org>);
         Mon, 23 Sep 2019 13:53:47 -0400
 From: ira.weiny@intel.com
-Subject: [PATCH V2 12/16] src/locktest: Add simple lease testing
-Date: Mon, 23 Sep 2019 10:53:32 -0700
-Message-Id: <20190923175336.2287-13-ira.weiny@intel.com>
+Subject: [PATCH V2 13/16] src/locktest: Add lease testing for basic signal reception
+Date: Mon, 23 Sep 2019 10:53:33 -0700
+Message-Id: <20190923175336.2287-14-ira.weiny@intel.com>
 In-Reply-To: <20190923175336.2287-1-ira.weiny@intel.com>
 References: <20190923175336.2287-1-ira.weiny@intel.com>
 MIME-Version: 1.0
@@ -17,10 +17,10 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Ira Weiny <ira.weiny@intel.com>
 
-	/*  1 */"Take Read Lease",
-	/*  2 */"Take Write Lease",
-	/*  3 */"Fail Write Lease if file is open somewhere else",
-	/*  4 */"Fail Read Lease if opened with write permissions",
+	/* 5 */"Read lease gets SIGIO on write open",
+	/* 6 */"Write lease gets SIGIO on read open",
+	/* 7 */"Read lease does _not_ get SIGIO on read open",
+	/* 8 */"Read lease gets SIGIO on write open",
 
 Signed-off-by: Ira Weiny <ira.weiny@intel.com>
 
@@ -28,205 +28,229 @@ Signed-off-by: Ira Weiny <ira.weiny@intel.com>
 Changes from V1:
 	Tests are now a separate array and are run with '-L' option.
 
- src/locktest.c | 109 +++++++++++++++++++++++++++++++++++++++++++++++--
- 1 file changed, 106 insertions(+), 3 deletions(-)
+ src/locktest.c | 137 ++++++++++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 135 insertions(+), 2 deletions(-)
 
 diff --git a/src/locktest.c b/src/locktest.c
-index 076781badaa1..2147acc67ef7 100644
+index 2147acc67ef7..9f8a892a21a0 100644
 --- a/src/locktest.c
 +++ b/src/locktest.c
-@@ -1,11 +1,12 @@
- // SPDX-License-Identifier: GPL-2.0
- /*
-  * Copyright (c) 2000-2003 Silicon Graphics, Inc.
-+ * Copyright (c) 2019 Intel Corp.
-  * All Rights Reserved.
-  */
+@@ -27,6 +27,8 @@
+ #include <byteswap.h>
+ #include <errno.h>
+ #include <string.h>
++#include <signal.h>
++
+ #define     HEX_2_ASC(x)    ((x) > 9) ? (x)-10+'a' : (x)+'0'
+ #define 	FILE_SIZE	1024
+ #define PLATFORM_INIT()     /*no-op*/
+@@ -83,6 +85,7 @@ static int	server = 1;
+ static int	port = 0;
+ static int 	testnumber = -1;
+ static int	saved_errno = 0;
++static int      got_sigio = 0;
  
- /*
-- * Synchronized byte range lock exerciser
-+ * Synchronized byte range lock and lease exerciser
-  */
- 
- #include <stdio.h>
-@@ -94,6 +95,8 @@ static HANDLE	f_fd = INVALID_HANDLE;	/* shared file      */
- #define		CMD_OPEN	4
- #define		CMD_WRTEST	5
+ static SOCKET	s_fd = -1;              /* listen socket    */
+ static SOCKET	c_fd = -1;	        /* IPC socket       */
+@@ -97,6 +100,8 @@ static HANDLE	f_fd = INVALID_HANDLE;	/* shared file      */
  #define		CMD_RDTEST	6
-+#define 	CMD_SETLEASE	7
-+#define 	CMD_GETLEASE	8
+ #define 	CMD_SETLEASE	7
+ #define 	CMD_GETLEASE	8
++#define		CMD_SIGIO	9
++#define		CMD_WAIT_SIGIO	10
  
  #define		PASS 	1
  #define		FAIL	0
-@@ -108,6 +111,7 @@ static HANDLE	f_fd = INVALID_HANDLE;	/* shared file      */
- #define		RESULT		4
+@@ -112,6 +117,7 @@ static HANDLE	f_fd = INVALID_HANDLE;	/* shared file      */
  #define		WHO		5
  #define		FLAGS		2 /* index 2 is also used for do_open() flag, see below */
-+#define		ARG		FLAGS /* Arguments for Lease operations */
+ #define		ARG		FLAGS /* Arguments for Lease operations */
++#define		TIME		FLAGS /* Time for waiting on sigio */
  
  static char *get_cmd_str(int cmd)
  {
-@@ -119,6 +123,8 @@ static char *get_cmd_str(int cmd)
- 		case CMD_OPEN:   return "open"; break;
- 		case CMD_WRTEST: return "Wait for SIGIO"; break;
+@@ -125,6 +131,8 @@ static char *get_cmd_str(int cmd)
  		case CMD_RDTEST: return "Truncate"; break;
-+		case CMD_SETLEASE: return "Set Lease"; break;
-+		case CMD_GETLEASE: return "Get Lease"; break;
+ 		case CMD_SETLEASE: return "Set Lease"; break;
+ 		case CMD_GETLEASE: return "Get Lease"; break;
++		case CMD_SIGIO:    return "Setup SIGIO"; break;
++		case CMD_WAIT_SIGIO: return "Wait for SIGIO"; break;
  	}
  	return "unknown";
  }
-@@ -544,6 +550,56 @@ static int64_t lock_tests[][6] =
- 		{32,	CMD_OPEN,	O_RDWR,		0,		PASS,		SERVER,	},
- 		{32,	CMD_OPEN,	O_RDWR,		0,		PASS,		CLIENT,	},
- #endif /* macosx */
+@@ -562,10 +570,15 @@ char *lease_descriptions[] = {
+     /*  2 */"Take Write Lease",
+     /*  3 */"Fail Write Lease if file is open somewhere else",
+     /*  4 */"Fail Read Lease if opened with write permissions",
++    /*  5 */"Read lease gets SIGIO on write open",
++    /*  6 */"Write lease gets SIGIO on read open",
++    /*  7 */"Read lease does _not_ get SIGIO on read open",
++    /*  8 */"Read lease gets SIGIO on write open",
+ };
+ 
+ static int64_t lease_tests[][6] =
+ 	/*	test #	Action	[offset|flags|arg]	length		expected	server/client */
++	/*			[sigio_wait_time]						*/
+ 	{
+ 	/* Various tests to exercise leases */
+ 
+@@ -600,6 +613,47 @@ static int64_t lease_tests[][6] =
+ 		{4,	CMD_GETLEASE,	F_RDLCK,	0,	FAIL,		SERVER	},
+ 		{4,	CMD_CLOSE,	0,		0,	PASS,		SERVER	},
+ 
++/* SECTION 2: Proper SIGIO notifications */
++	/* Get SIGIO when read lease is broken by write */
++		{5,	CMD_OPEN,	O_RDONLY,	0,	PASS,		CLIENT	},
++		{5,	CMD_SETLEASE,	F_RDLCK,	0,	PASS,		CLIENT	},
++		{5,	CMD_GETLEASE,	F_RDLCK,	0,	PASS,		CLIENT	},
++		{5,	CMD_SIGIO,	0,		0,	PASS,		CLIENT	},
++		{5,	CMD_OPEN,	O_RDWR,		0,	PASS,		SERVER	},
++		{5,	CMD_WAIT_SIGIO,	5,		0,	PASS,		CLIENT	},
++		{5,	CMD_CLOSE,	0,		0,	PASS,		SERVER	},
++		{5,	CMD_CLOSE,	0,		0,	PASS,		CLIENT	},
 +
-+	/* indicate end of array */
-+		{0,0,0,0,0,SERVER},
-+		{0,0,0,0,0,CLIENT}
-+	};
++	/* Get SIGIO when write lease is broken by read */
++		{6,	CMD_OPEN,	O_RDWR,		0,	PASS,		CLIENT	},
++		{6,	CMD_SETLEASE,	F_WRLCK,	0,	PASS,		CLIENT	},
++		{6,	CMD_GETLEASE,	F_WRLCK,	0,	PASS,		CLIENT	},
++		{6,	CMD_SIGIO,	0,		0,	PASS,		CLIENT	},
++		{6,	CMD_OPEN,	O_RDONLY,	0,	PASS,		SERVER	},
++		{6,	CMD_WAIT_SIGIO,	5,		0,	PASS,		CLIENT	},
++		{6,	CMD_CLOSE,	0,		0,	PASS,		SERVER	},
++		{6,	CMD_CLOSE,	0,		0,	PASS,		CLIENT	},
 +
++	/* Don't get SIGIO when read lease is taken by read */
++		{7,	CMD_OPEN,	O_RDONLY,	0,	PASS,		CLIENT	},
++		{7,	CMD_SETLEASE,	F_RDLCK,	0,	PASS,		CLIENT	},
++		{7,	CMD_GETLEASE,	F_RDLCK,	0,	PASS,		CLIENT	},
++		{7,	CMD_SIGIO,	0,		0,	PASS,		CLIENT	},
++		{7,	CMD_OPEN,	O_RDONLY,	0,	PASS,		SERVER	},
++		{7,	CMD_WAIT_SIGIO,	5,		0,	FAIL,		CLIENT	},
++		{7,	CMD_CLOSE,	0,		0,	PASS,		SERVER	},
++		{7,	CMD_CLOSE,	0,		0,	PASS,		CLIENT	},
 +
-+char *lease_descriptions[] = {
-+    /*  1 */"Take Read Lease",
-+    /*  2 */"Take Write Lease",
-+    /*  3 */"Fail Write Lease if file is open somewhere else",
-+    /*  4 */"Fail Read Lease if opened with write permissions",
-+};
-+
-+static int64_t lease_tests[][6] =
-+	/*	test #	Action	[offset|flags|arg]	length		expected	server/client */
-+	{
-+	/* Various tests to exercise leases */
-+
-+/* SECTION 1: Simple verification of being able to take leases */
-+	/* Take Read Lease */
-+		{1,	CMD_CLOSE,	0,		0,	PASS,		CLIENT	},
-+		{1,	CMD_OPEN,	O_RDONLY,	0,	PASS,		CLIENT	},
-+		{1,	CMD_CLOSE,	0,		0,	PASS,		SERVER	},
-+		{1,	CMD_OPEN,	O_RDONLY,	0,	PASS,		SERVER	},
-+		{1,	CMD_SETLEASE,	F_RDLCK,	0,	PASS,		SERVER	},
-+		{1,	CMD_GETLEASE,	F_RDLCK,	0,	PASS,		SERVER	},
-+		{1,	CMD_SETLEASE,	F_UNLCK,	0,	PASS,		SERVER	},
-+		{1,	CMD_CLOSE,	0,		0,	PASS,		SERVER	},
-+		{1,	CMD_CLOSE,	0,		0,	PASS,		CLIENT	},
-+
-+	/* Take Write Lease */
-+		{2,	CMD_OPEN,	O_RDWR,		0,	PASS,		SERVER	},
-+		{2,	CMD_SETLEASE,	F_WRLCK,	0,	PASS,		SERVER	},
-+		{2,	CMD_GETLEASE,	F_WRLCK,	0,	PASS,		SERVER	},
-+		{2,	CMD_SETLEASE,	F_UNLCK,	0,	PASS,		SERVER	},
-+		{2,	CMD_CLOSE,	0,		0,	PASS,		SERVER	},
-+	/* Fail Write Lease with other users */
-+		{3,	CMD_OPEN,	O_RDONLY,	0,	PASS,		CLIENT  },
-+		{3,	CMD_OPEN,	O_RDWR,		0,	PASS,		SERVER	},
-+		{3,	CMD_SETLEASE,	F_WRLCK,	0,	FAIL,		SERVER	},
-+		{3,	CMD_GETLEASE,	F_WRLCK,	0,	FAIL,		SERVER	},
-+		{3,	CMD_CLOSE,	0,		0,	PASS,		SERVER	},
-+		{3,	CMD_CLOSE,	0,		0,	PASS,		CLIENT	},
-+	/* Fail Read Lease if opened for write */
-+		{4,	CMD_OPEN,	O_RDWR,		0,	PASS,		SERVER	},
-+		{4,	CMD_SETLEASE,	F_RDLCK,	0,	FAIL,		SERVER	},
-+		{4,	CMD_GETLEASE,	F_RDLCK,	0,	FAIL,		SERVER	},
-+		{4,	CMD_CLOSE,	0,		0,	PASS,		SERVER	},
++	/* Get SIGIO when Read lease is broken by Write */
++		{8,	CMD_OPEN,	O_RDONLY,	0,	PASS,		CLIENT	},
++		{8,	CMD_SETLEASE,	F_RDLCK,	0,	PASS,		CLIENT	},
++		{8,	CMD_GETLEASE,	F_RDLCK,	0,	PASS,		CLIENT	},
++		{8,	CMD_SIGIO,	0,		0,	PASS,		CLIENT	},
++		{8,	CMD_OPEN,	O_RDWR,		0,	PASS,		SERVER	},
++		{8,	CMD_WAIT_SIGIO,	5,		0,	PASS,		CLIENT	},
++		{8,	CMD_CLOSE,	0,		0,	PASS,		SERVER	},
++		{8,	CMD_CLOSE,	0,		0,	PASS,		CLIENT	},
 +
  	/* indicate end of array */
  		{0,0,0,0,0,SERVER},
  		{0,0,0,0,0,CLIENT}
-@@ -653,6 +709,32 @@ static int do_lock(int cmd, int type, int start, int length)
-     return(ret==0?PASS:FAIL);
+@@ -663,6 +717,70 @@ initialize(HANDLE fd)
+     }
  }
  
-+static int do_lease(int cmd, int arg, int expected)
++void release_lease(int fd)
 +{
-+    int ret;
++	int rc;
 +
-+    if(debug > 1)
-+	fprintf(stderr, "do_lease: cmd=%d arg=%d exp=%X\n",
-+		cmd, arg, expected);
-+
-+    if (f_fd < 0)
-+	return f_fd;
-+
-+    errno = 0;
-+
-+    ret = fcntl(f_fd, cmd, arg);
-+    saved_errno = errno;
-+
-+    if (expected && (expected == ret))
-+	ret = 0;
-+
-+    if(ret)
-+	fprintf(stderr, "%s do_lease: ret = %d, errno = %d (%s)\n",
-+		__FILE__, ret, errno, strerror(errno));
-+
-+    return(ret==0?PASS:FAIL);
++	rc = fcntl(fd, F_SETLEASE, F_UNLCK);
++	if (rc != 0)
++		fprintf(stderr, "%s Failed to remove lease %d : %d %s\n",
++			__FILE__, rc, errno, strerror(errno));
 +}
 +
- int do_close(void)
- {	
-     if(debug > 1) {
-@@ -782,6 +864,7 @@ main(int argc, char *argv[])
-     extern char	*optarg;
-     extern int	optind;
-     int fail_count = 0;
-+    int run_leases = 0;
-     
-     atexit(cleanup);
-     
-@@ -794,13 +877,17 @@ main(int argc, char *argv[])
- 	    prog = p+1;
-     }
- 
--    while ((c = getopt(argc, argv, "dn:h:p:?")) != EOF) {
-+    while ((c = getopt(argc, argv, "dLn:h:p:?")) != EOF) {
- 	switch (c) {
- 
- 	case 'd':	/* debug flag */
- 	    debug++;
- 	    break;
- 
-+	case 'L':	/* Lease testing */
-+	    run_leases = 1;
-+	    break;
++void lease_break(int sig, siginfo_t *info, void *p)
++{
++    if (debug)
++	fprintf(stderr, "lease break %d %p fd %d\n",
++		sig, info, info->si_fd);
++    got_sigio = 1;
++    release_lease(f_fd);
++}
 +
- 	case 'h':	/* (server) hostname */
- 	    server = 0;
- 	    host = optarg;
-@@ -965,7 +1052,10 @@ main(int argc, char *argv[])
-      *
-      * real work is in here ...
-      */
--    fail_count = run(lock_tests, lock_descriptions);
-+    if (run_leases)
-+	fail_count = run(lease_tests, lease_descriptions);
-+    else
-+	fail_count = run(lock_tests, lock_descriptions);
++struct sigaction lease_break_action = {
++	.sa_sigaction = lease_break,
++	.sa_flags = SA_SIGINFO,
++};
++
++int do_setup_sigio(int fd)
++{
++	int rc;
++
++	got_sigio = 0;
++
++	rc = sigaction(SIGIO, &lease_break_action, NULL);
++	if (rc != 0) {
++		fprintf(stderr, "%s Set '%s' sigaction failed %d\n",
++			__FILE__, strsignal(SIGIO), rc);
++		return FAIL;
++	}
++
++	if (debug)
++		fprintf(stderr, "Set '%s' sigaction on %d\n",
++			strsignal(SIGIO), fd);
++
++	rc = fcntl(fd, F_SETSIG, SIGIO);
++	if (rc)
++		fprintf(stderr, "%s Set '%s' sigaction failed %d\n",
++			__FILE__, strsignal(SIGIO), rc);
++
++	return (rc == 0 ? PASS : FAIL);
++}
++
++int do_wait_sigio(int32_t time)
++{
++    if (time <= 0)
++	return FAIL;
++
++    while (!got_sigio && time--) {
++	sleep(1);
++    }
++
++    if (debug > 1 && !got_sigio)
++	fprintf(stderr, "%s failed to get sigio\n",
++		__FILE__);
++
++    return (got_sigio ? PASS: FAIL);
++}
  
-     exit(fail_count);
-     /*NOTREACHED*/
-@@ -1022,6 +1112,12 @@ int run(int64_t tests[][6], char *descriptions[])
- 			case CMD_RDTEST:
- 			    result = do_lock(F_GETLK, F_RDLCK, tests[index][OFFSET], tests[index][LENGTH]);
+ int do_open(int flag)
+ {
+@@ -807,10 +925,13 @@ void recv_ctl(void)
+ {
+     int         nread;
+ 
++again:
+     if ((nread = SOCKET_READ(c_fd, (char*)&ctl, sizeof(ctl))) != sizeof(ctl)) {
+-        if (nread < 0)
++        if (nread < 0) {
++	    if (errno == EINTR)
++		goto again;
+             perror("recv_ctl: read");
+-        else {
++        } else {
+             fprintf(stderr, "recv_ctl[%d]: read() returns %d, not %zu as expected\n", 
+                     ctl.test, nread, sizeof(ctl));
+ 	    fprintf(stderr, "socket might has been closed by other locktest\n");
+@@ -1118,6 +1239,12 @@ int run(int64_t tests[][6], char *descriptions[])
+ 			case CMD_GETLEASE:
+ 			    result = do_lease(F_GETLEASE, tests[index][ARG], tests[index][ARG]);
  			    break;
-+			case CMD_SETLEASE:
-+			    result = do_lease(F_SETLEASE, tests[index][ARG], 0);
++			case CMD_SIGIO:
++			    result = do_setup_sigio(f_fd);
 +			    break;
-+			case CMD_GETLEASE:
-+			    result = do_lease(F_GETLEASE, tests[index][ARG], tests[index][ARG]);
++			case CMD_WAIT_SIGIO:
++			    result = do_wait_sigio(tests[index][TIME]);
 +			    break;
  		    }
  		    if( result != tests[index][RESULT]) {
  			fail_flag++;
-@@ -1120,6 +1216,13 @@ int run(int64_t tests[][6], char *descriptions[])
- 		case CMD_RDTEST:
- 		    result = do_lock(F_GETLK, F_RDLCK, ctl.offset, ctl.length);
+@@ -1223,6 +1350,12 @@ int run(int64_t tests[][6], char *descriptions[])
+ 		case CMD_GETLEASE:
+ 		    result = do_lease(F_GETLEASE, ctl.offset, ctl.offset);
  		    break;
-+		/* NOTE offset carries the argument values */
-+		case CMD_SETLEASE:
-+		    result = do_lease(F_SETLEASE, ctl.offset, 0);
++		case CMD_SIGIO:
++		    result = do_setup_sigio(f_fd);
 +		    break;
-+		case CMD_GETLEASE:
-+		    result = do_lease(F_GETLEASE, ctl.offset, ctl.offset);
++		case CMD_WAIT_SIGIO:
++		    result = do_wait_sigio(ctl.offset);
 +		    break;
  	    }
  	    if( result != ctl.result ) {
