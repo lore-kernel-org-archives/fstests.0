@@ -1,11 +1,13 @@
-Received: from mga03.intel.com ([134.134.136.65]:6679 "EHLO mga03.intel.com"
+Received: from mga14.intel.com ([192.55.52.115]:39308 "EHLO mga14.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2502187AbfIWRxj (ORCPT <rfc822;fstests@vger.kernel.org>);
+        id S2394221AbfIWRxj (ORCPT <rfc822;fstests@vger.kernel.org>);
         Mon, 23 Sep 2019 13:53:39 -0400
 From: ira.weiny@intel.com
-Subject: [PATCH V2 00/16] Fix locktest and add lease testing to it
-Date: Mon, 23 Sep 2019 10:53:20 -0700
-Message-Id: <20190923175336.2287-1-ira.weiny@intel.com>
+Subject: [PATCH V2 01/16] src/locktest: Remove unnecessary sleep
+Date: Mon, 23 Sep 2019 10:53:21 -0700
+Message-Id: <20190923175336.2287-2-ira.weiny@intel.com>
+In-Reply-To: <20190923175336.2287-1-ira.weiny@intel.com>
+References: <20190923175336.2287-1-ira.weiny@intel.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
@@ -15,54 +17,37 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Ira Weiny <ira.weiny@intel.com>
 
-Add lease tests[1] to locktest because they share so much code.  Make running
-of lease tests separate as an '-L' option.
+There is no need to sleep because we asked for debugging.  Remove extra
+sleep code.
 
-To make things cleaner update the lock test code and test script.  This
-includes fixing a rather serious bug.                                                                                                                 
+Reviewed-by: Jeff Layton <jlayton@kernel.org>
+Signed-off-by: Ira Weiny <ira.weiny@intel.com>
+---
+ src/locktest.c | 5 -----
+ 1 file changed, 5 deletions(-)
 
-Finally update the error output to help identify any steps which fail during
-testing.                                                                                                                                              
-
-Changes from V1:
-	Create a new option '-L' to run lease testing
-	Created 568 test script which shared common code with 131
-	Moved 2 patches earlier in the series
-		[PATCH V2 09/16] src/locktest: Clean up error output
-		[PATCH V2 10/16] src/locktest: Audit all debug output
-	Added 3 patches
-		[PATCH V2 11/16] src/locktest: Add run() function
-		[PATCH V2 15/16] common/locktest: Add common locktest functions
-		[PATCH V2 16/16] generic/568: Add lease testing
-
-Ira Weiny (16):
-  src/locktest: Remove unnecessary sleep
-  src/locktest: Remove OPEN macro
-  src/locktest: Change command macro names
-  src/locktest: Add get_cmd_str
-  src/locktest.c: Clean up client command passing
-  src/locktest.c: Fix return code if last test fails
-  generic/131: Clean up pid variables
-  generic/131: Save stderr for debugging
-  src/locktest: Clean up error output
-  src/locktest: Audit all debug output
-  src/locktest: Add run() function
-  src/locktest: Add simple lease testing
-  src/locktest: Add lease testing for basic signal reception
-  src/locktest: Add truncate lease tests
-  common/locktest: Add common locktest functions
-  generic/568: Add lease testing
-
- common/locktest       |  95 ++++
- src/locktest.c        | 999 +++++++++++++++++++++++++++---------------
- tests/generic/131     |  54 +--
- tests/generic/568     |  32 ++
- tests/generic/568.out |   2 +
- tests/generic/group   |   1 +
- 6 files changed, 786 insertions(+), 397 deletions(-)
- create mode 100644 common/locktest
- create mode 100755 tests/generic/568
- create mode 100644 tests/generic/568.out
-
+diff --git a/src/locktest.c b/src/locktest.c
+index 8e27e922668e..29e914febdf9 100644
+--- a/src/locktest.c
++++ b/src/locktest.c
+@@ -69,7 +69,6 @@ extern int h_errno;
+ 
+ #define RAND()              (rand())
+ #define SRAND(s)            (srand(s))
+-#define SLEEP(s)            (sleep(s))
+ 
+ #define MIN(A,B)            (((A)<(B))?(A):(B))
+ #define MAX(A,B)            (((A)>(B))?(A):(B))
+@@ -1037,10 +1036,6 @@ main(int argc, char *argv[])
+ 		    }
+ 		}
+ 	    }
+-	    if (debug > 1) {
+-		fprintf(stderr, "server sleeping ...\n");
+-		SLEEP(1);
+-	    }
+ 	    if(tests[index][TEST_NUM] != 0) {
+ 		if(last_test != tests[index][TEST_NUM]) {
+ 		    test_count++;
 -- 
 2.20.1
