@@ -1,11 +1,11 @@
-Received: from mga04.intel.com ([192.55.52.120]:33175 "EHLO mga04.intel.com"
+Received: from mga18.intel.com ([134.134.136.126]:15071 "EHLO mga18.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2502228AbfIWRxm (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 23 Sep 2019 13:53:42 -0400
+        id S2394221AbfIWRxn (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 23 Sep 2019 13:53:43 -0400
 From: ira.weiny@intel.com
-Subject: [PATCH V2 04/16] src/locktest: Add get_cmd_str
-Date: Mon, 23 Sep 2019 10:53:24 -0700
-Message-Id: <20190923175336.2287-5-ira.weiny@intel.com>
+Subject: [PATCH V2 05/16] src/locktest.c: Clean up client command passing
+Date: Mon, 23 Sep 2019 10:53:25 -0700
+Message-Id: <20190923175336.2287-6-ira.weiny@intel.com>
 In-Reply-To: <20190923175336.2287-1-ira.weiny@intel.com>
 References: <20190923175336.2287-1-ira.weiny@intel.com>
 MIME-Version: 1.0
@@ -17,75 +17,99 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Ira Weiny <ira.weiny@intel.com>
 
-Rather than open code printing the strings, use a helper function.
+The client was using the test index rather than the values being passed
+to it for a command.  While this technically worked it is cleaner to
+fully initialize the command message and use the values in that message.
 
 Reviewed-by: Jeff Layton <jlayton@kernel.org>
 Signed-off-by: Ira Weiny <ira.weiny@intel.com>
 ---
- src/locktest.c | 30 ++++++++++++++++++------------
- 1 file changed, 18 insertions(+), 12 deletions(-)
+ src/locktest.c | 36 +++++++++++++++++++++++-------------
+ 1 file changed, 23 insertions(+), 13 deletions(-)
 
 diff --git a/src/locktest.c b/src/locktest.c
-index ce04ecba6205..825d9df3ddf8 100644
+index 825d9df3ddf8..3abb91120144 100644
 --- a/src/locktest.c
 +++ b/src/locktest.c
-@@ -109,6 +109,19 @@ static HANDLE	f_fd = INVALID_HANDLE;	/* shared file      */
- #define		WHO		5
- #define		FLAGS		2 /* index 2 is also used for do_open() flag, see below */
+@@ -670,6 +670,17 @@ int do_close(void)
+     return PASS;
+ }
  
-+static char *get_cmd_str(int cmd)
++static void init_ctl(int32_t index)
 +{
-+	switch (cmd) {
-+		case CMD_WRLOCK: return "write lock"; break;
-+		case CMD_RDLOCK: return "read lock"; break;
-+		case CMD_UNLOCK: return "unlock"; break;
-+		case CMD_CLOSE:  return "close"; break;
-+		case CMD_OPEN:   return "open"; break;
-+		case CMD_WRTEST: return "Wait for SIGIO"; break;
-+		case CMD_RDTEST: return "Truncate"; break;
-+	}
-+	return "unknown";
++    ctl.test= (int32_t)tests[index][TEST_NUM];
++    ctl.command = (int32_t)tests[index][COMMAND];
++    ctl.offset = tests[index][OFFSET];
++    ctl.length = tests[index][LENGTH];
++    ctl.index = index;
++    ctl.result = (int32_t)tests[index][RESULT];
++    ctl.error = 0;
 +}
- /* 
-  * flags for Mac OS X do_open() 
-  * O_RDONLY	0x0000
-@@ -989,10 +1002,8 @@ main(int argc, char *argv[])
- 			/* We have a failure */
- 			if(debug)
- 			    fprintf(stderr, "Server failure in test %d, while %sing using offset %lld, length %lld - err = %d:%s\n", 
--					ctl.test, tests[index][COMMAND]==CMD_WRLOCK?"write lock":
--						tests[index][COMMAND]==CMD_RDLOCK?"read lock":
--						tests[index][COMMAND]==CMD_UNLOCK?"unlock":
--						tests[index][COMMAND]==CMD_OPEN?"open":"clos", 
-+					ctl.test,
-+					get_cmd_str(tests[index][COMMAND]),
- 						(long long)tests[index][OFFSET],
- 						(long long)tests[index][LENGTH],
- 						saved_errno, strerror(saved_errno));
-@@ -1009,10 +1020,8 @@ main(int argc, char *argv[])
++
+ void
+ send_ctl(void)
+ {
+@@ -1018,6 +1029,8 @@ main(int argc, char *argv[])
+ 		    ctl.test = 0;
+ 		    end=1;
  		} 
++		/* get the client to do something */
++		init_ctl(index);
  		if(debug > 1)
  		    fprintf(stderr, "Sending command to client (%d) - %s - %lld:%lld\n", 
--					index, tests[index][COMMAND]==CMD_WRLOCK?"write lock":
--					tests[index][COMMAND]==CMD_RDLOCK?"read lock":
--					tests[index][COMMAND]==CMD_UNLOCK?"unlock": 
--					tests[index][COMMAND]==CMD_OPEN?"open":"clos", 
-+					index,
-+					get_cmd_str(ctl.command),
- 					(long long)tests[index][OFFSET],
- 					(long long)tests[index][LENGTH]);
- 		/* get the client to do something */
-@@ -1027,10 +1036,7 @@ main(int argc, char *argv[])
- 			fail_flag++;
- 			if(debug)
- 			    fprintf(stderr, "Client failure in test %d, while %sing using offset %lld, length %lld - err = %d:%s\n",
--					ctl.test, ctl.command==CMD_WRLOCK?"write lock":
--					ctl.command==CMD_RDLOCK?"read lock":
--					ctl.command==CMD_UNLOCK?"unlock":
--					ctl.command==CMD_OPEN?"open":"clos",
-+					ctl.test, get_cmd_str(ctl.command),
- 					(long long)ctl.offset, (long long)ctl.length,
- 					ctl.error, strerror(ctl.error));
- 			fprintf(stderr, "Client failure in %lld:%s\n",
+ 					index,
+@@ -1074,20 +1087,16 @@ main(int argc, char *argv[])
+ 		end = 1;
+ 		break;
+ 	    }
+-		
+ 
+-	    ctl.command = tests[index][COMMAND];
+-	    ctl.offset = tests[index][OFFSET];
+-	    ctl.length = tests[index][LENGTH];
+-	    switch(tests[index][COMMAND]) {
++	    switch(ctl.command) {
+ 		case CMD_WRLOCK:
+-		    result = do_lock(F_SETLK, F_WRLCK, tests[index][OFFSET], tests[index][LENGTH]);
++		    result = do_lock(F_SETLK, F_WRLCK, ctl.offset, ctl.length);
+ 		    break;
+ 		case CMD_RDLOCK:
+-		    result = do_lock(F_SETLK, F_RDLCK, tests[index][OFFSET], tests[index][LENGTH]);
++		    result = do_lock(F_SETLK, F_RDLCK, ctl.offset, ctl.length);
+ 		    break;
+ 		case CMD_UNLOCK:
+-		    result = do_lock(F_SETLK, F_UNLCK, tests[index][OFFSET], tests[index][LENGTH]);
++		    result = do_lock(F_SETLK, F_UNLCK, ctl.offset, ctl.length);
+ 		    break;
+ 		case CMD_CLOSE:
+ 		    result = do_close();
+@@ -1096,21 +1105,22 @@ main(int argc, char *argv[])
+ 		    result = do_open(tests[index][FLAGS]);
+ 		    break;
+ 		case CMD_WRTEST:
+-		    result = do_lock(F_GETLK, F_WRLCK, tests[index][OFFSET], tests[index][LENGTH]);
++		    result = do_lock(F_GETLK, F_WRLCK, ctl.offset, ctl.length);
+ 		    break;
+ 		case CMD_RDTEST:
+-		    result = do_lock(F_GETLK, F_RDLCK, tests[index][OFFSET], tests[index][LENGTH]);
++		    result = do_lock(F_GETLK, F_RDLCK, ctl.offset, ctl.length);
+ 		    break;
+ 	    }
+-	    if( result != tests[index][RESULT] ) {
++	    if( result != ctl.result ) {
+ 		if(debug)
+-		    fprintf(stderr,"Got %d, wanted %lld\n", result,
+-					(long long)tests[index][RESULT]);
++		    fprintf(stderr,"Got %d, wanted %d\n",
++				result, ctl.result);
+ 		ctl.result = FAIL;
+ 		ctl.error = saved_errno;
+ 		fail_count++;
+ 	    } else {
+ 		ctl.result = PASS;
++		ctl.error = 0;
+ 	    }
+ 	    if(debug > 2)
+ 		fprintf(stderr,"client: sending result to server (%d)\n", ctl.index);
 -- 
 2.20.1
