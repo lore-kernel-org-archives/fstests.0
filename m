@@ -1,11 +1,11 @@
-Received: from mga07.intel.com ([134.134.136.100]:65387 "EHLO mga07.intel.com"
+Received: from mga11.intel.com ([192.55.52.93]:51636 "EHLO mga11.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2440202AbfIWRwQ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 23 Sep 2019 13:52:16 -0400
+        id S2440202AbfIWRwR (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 23 Sep 2019 13:52:17 -0400
 From: ira.weiny@intel.com
-Subject: [PATCH V2 06/16] src/locktest.c: Fix return code if last test fails
-Date: Mon, 23 Sep 2019 10:51:54 -0700
-Message-Id: <20190923175204.2139-7-ira.weiny@intel.com>
+Subject: [PATCH V2 07/16] generic/131: Clean up pid variables
+Date: Mon, 23 Sep 2019 10:51:55 -0700
+Message-Id: <20190923175204.2139-8-ira.weiny@intel.com>
 In-Reply-To: <20190923175204.2139-1-ira.weiny@intel.com>
 References: <20190923175204.2139-1-ira.weiny@intel.com>
 MIME-Version: 1.0
@@ -17,71 +17,56 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Ira Weiny <ira.weiny@intel.com>
 
-If anything but the first step of the last test fails, the exit code
-(fail_count) was not properly set.  Fix this such that follow on patches
-will be able to save error output and correctly inform the script that a
-failure has occurred rather than just expecting random output to fail
-the diff check.
-
-The issue is last_test is not properly tracking which test the loop is
-currently on.  Therefore fail_count would not be incremented correctly.
-
-Remove the special case of checking for the end of the steps array and
-track last_test properly.  Then adjust test_count to be correct for the
-new code.
+Change the name of the variables to reflect the client vs server.  This
+will help in future patches.
 
 Reviewed-by: Jeff Layton <jlayton@kernel.org>
 Signed-off-by: Ira Weiny <ira.weiny@intel.com>
 ---
- src/locktest.c | 21 +++++++++------------
- 1 file changed, 9 insertions(+), 12 deletions(-)
+ tests/generic/131 | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
 
-diff --git a/src/locktest.c b/src/locktest.c
-index 3abb91120144..241e7c451724 100644
---- a/src/locktest.c
-+++ b/src/locktest.c
-@@ -963,7 +963,7 @@ main(int argc, char *argv[])
-     int end = 0;
-     int result = 0;
-     int last_test = 0;
--    int test_count = 0;
-+    int test_count = -1;
-     int fail_flag = 0;
-     while(!end) {
- 	if (server) {
-@@ -1058,15 +1058,13 @@ main(int argc, char *argv[])
- 		    }
- 		}
- 	    }
--	    if(tests[index][TEST_NUM] != 0) {
--		if(last_test != tests[index][TEST_NUM]) {
--		    test_count++;
--		    if(fail_flag)
--			fail_count++;
--		    fail_flag = 0;
+diff --git a/tests/generic/131 b/tests/generic/131
+index e8cdd48e8667..c333e676e8f9 100755
+--- a/tests/generic/131
++++ b/tests/generic/131
+@@ -17,8 +17,8 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
  
--		}
--		last_test = tests[index][TEST_NUM];
-+	    if(last_test != tests[index][TEST_NUM]) {
-+	        test_count++;
-+	        if(fail_flag)
-+		    fail_count++;
-+	        fail_flag = 0;
-+	        last_test = tests[index][TEST_NUM];
- 	    }
- 		
- 	    index++;
-@@ -1126,9 +1124,8 @@ main(int argc, char *argv[])
- 		fprintf(stderr,"client: sending result to server (%d)\n", ctl.index);
- 	    /* Send result to the server */
- 	    send_ctl();
--	    if(tests[index][TEST_NUM] != 0) {
--		if(last_test != tests[index][TEST_NUM])
--		    test_count++;
-+	    if(last_test != tests[index][TEST_NUM]) {
-+		test_count++;
- 		last_test = tests[index][TEST_NUM];
- 	    }
- 	}
+ _cleanup()
+ {
+-    kill $locktest_pid2 > /dev/null 2>&1
+-    kill $locktest_pid1 > /dev/null 2>&1
++	kill $client_pid > /dev/null 2>&1
++	kill $server_pid > /dev/null 2>&1
+ }
+ 
+ # get standard environment, filters and checks
+@@ -38,7 +38,7 @@ touch $TEST_DIR/server.out
+ 
+ # Start the server
+ src/locktest $TESTFILE 2>&1 > $TEST_DIR/server.out &
+-locktest_pid1=$!
++server_pid=$!
+ 
+ timeout=30
+ while [ $timeout -gt 0 ]; do
+@@ -50,7 +50,7 @@ while [ $timeout -gt 0 ]; do
+ 	fi
+ 
+ 	# check the existence of server process
+-	if ! kill -s 0 $locktest_pid1 >/dev/null 2>&1; then
++	if ! kill -s 0 $server_pid >/dev/null 2>&1; then
+ 		echo "Server died abnormally"
+ 		exit 1
+ 	fi
+@@ -65,7 +65,7 @@ fi
+ 
+ # Start the client
+ src/locktest -p $PORT -h localhost $TESTFILE 2>&1 > $TEST_DIR/client.out
+-locktest_pid2=$!
++client_pid=$!
+ result=$?
+ if [ $result -eq 0 ]; then
+ 	echo success!
 -- 
 2.20.1
