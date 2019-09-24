@@ -1,378 +1,64 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:33384 "EHLO
+Received: from userp2130.oracle.com ([156.151.31.86]:33292 "EHLO
         userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2390919AbfIXQjn (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 24 Sep 2019 12:39:43 -0400
-Date: Tue, 24 Sep 2019 09:39:37 -0700
+        with ESMTP id S2410594AbfIXWrt (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 24 Sep 2019 18:47:49 -0400
+Date: Tue, 24 Sep 2019 15:47:44 -0700
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: [PATCH] generic: check that we can't write to swap files
-Message-ID: <20190924163937.GE736475@magnolia>
+Subject: Re: [RFC PATCH 3/8] xfs_io/encrypt: add new encryption modes
+Message-ID: <20190924224744.GD2229799@magnolia>
+References: <20190812175635.34186-1-ebiggers@kernel.org>
+ <20190812175635.34186-4-ebiggers@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <20190812175635.34186-4-ebiggers@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>
+To: Eric Biggers <ebiggers@kernel.org>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Darrick J. Wong <darrick.wong@oracle.com>
+On Mon, Aug 12, 2019 at 10:56:29AM -0700, Eric Biggers wrote:
+> From: Eric Biggers <ebiggers@google.com>
+> 
+> Add new encryption modes: AES-128-CBC and AES-128-CTS (supported since
+> Linux v4.11), and Adiantum (supported since Linux v5.0).
+> 
+> Signed-off-by: Eric Biggers <ebiggers@google.com>
+> ---
+>  io/encrypt.c | 5 ++++-
+>  1 file changed, 4 insertions(+), 1 deletion(-)
+> 
+> diff --git a/io/encrypt.c b/io/encrypt.c
+> index ac473ed7..11eb4a3e 100644
+> --- a/io/encrypt.c
+> +++ b/io/encrypt.c
+> @@ -156,7 +156,7 @@ set_encpolicy_help(void)
+>  " -v VERSION -- version of policy structure\n"
+>  "\n"
+>  " MODE can be numeric or one of the following predefined values:\n"
+> -"    AES-256-XTS, AES-256-CTS\n"
+> +"    AES-256-XTS, AES-256-CTS, AES-128-CBC, AES-128-CTS, Adiantum\n"
 
-While active, the media backing a swap file is leased to the kernel.
-Userspace has no business writing to it.  Make sure we can't do this.
+What do you think of generating the list of predefined values from
+the available_modes[] array?  Then you wouldn't have to keep the help
+text in sync with the C definitions, since it's not like there's a
+meaningful translation for them anyway.
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
----
- src/swapon.c          |  135 ++++++++++++++++++++++++++++++++++++++++++++++++-
- tests/generic/717     |   70 +++++++++++++++++++++++++
- tests/generic/717.out |   14 +++++
- tests/generic/718     |   55 ++++++++++++++++++++
- tests/generic/718.out |   12 ++++
- tests/generic/group   |    2 +
- 6 files changed, 284 insertions(+), 4 deletions(-)
- create mode 100755 tests/generic/717
- create mode 100644 tests/generic/717.out
- create mode 100755 tests/generic/718
- create mode 100644 tests/generic/718.out
+--D
 
-diff --git a/src/swapon.c b/src/swapon.c
-index 0cb7108a..afaed405 100644
---- a/src/swapon.c
-+++ b/src/swapon.c
-@@ -3,22 +3,149 @@
- #include <stdio.h>
- #include <stdlib.h>
- #include <unistd.h>
-+#include <string.h>
- #include <sys/swap.h>
-+#include <sys/types.h>
-+#include <sys/stat.h>
-+#include <sys/mman.h>
-+#include <fcntl.h>
-+#include <signal.h>
-+
-+static void usage(const char *prog)
-+{
-+	fprintf(stderr, "usage: %s [-v verb] PATH\n", prog);
-+	exit(EXIT_FAILURE);
-+}
-+
-+enum verbs {
-+	TEST_SWAPON = 0,
-+	TEST_WRITE,
-+	TEST_MWRITE_AFTER,
-+	TEST_MWRITE_BEFORE_AND_MWRITE_AFTER,
-+	TEST_MWRITE_BEFORE,
-+	MAX_TEST_VERBS,
-+};
-+
-+#define BUF_SIZE 262144
-+static char buf[BUF_SIZE];
-+
-+static void handle_signal(int signal)
-+{
-+	fprintf(stderr, "Caught signal %d, terminating...\n", signal);
-+	exit(EXIT_FAILURE);
-+}
- 
- int main(int argc, char **argv)
- {
--	int ret;
-+	struct sigaction act = {
-+		.sa_handler	= handle_signal,
-+	};
-+	enum verbs verb = TEST_SWAPON;
-+	void *p;
-+	ssize_t sz;
-+	int fd = -1;
-+	int ret, c;
-+
-+	memset(buf, 0x58, BUF_SIZE);
-+
-+	while ((c = getopt(argc, argv, "v:")) != -1) {
-+		switch (c) {
-+		case 'v':
-+			verb = atoi(optarg);
-+			if (verb < TEST_SWAPON || verb >= MAX_TEST_VERBS) {
-+				fprintf(stderr, "Verbs must be 0-%d.\n",
-+						MAX_TEST_VERBS - 1);
-+				usage(argv[0]);
-+			}
-+			break;
-+		default:
-+			usage(argv[0]);
-+			break;
-+		}
-+	}
- 
--	if (argc != 2) {
--		fprintf(stderr, "usage: %s PATH\n", argv[0]);
-+	ret = sigaction(SIGSEGV, &act, NULL);
-+	if (ret) {
-+		perror("sigsegv action");
- 		return EXIT_FAILURE;
- 	}
- 
--	ret = swapon(argv[1], 0);
-+	ret = sigaction(SIGBUS, &act, NULL);
-+	if (ret) {
-+		perror("sigbus action");
-+		return EXIT_FAILURE;
-+	}
-+
-+	switch (verb) {
-+	case TEST_WRITE:
-+	case TEST_MWRITE_AFTER:
-+	case TEST_MWRITE_BEFORE_AND_MWRITE_AFTER:
-+	case TEST_MWRITE_BEFORE:
-+		fd = open(argv[optind], O_RDWR);
-+		if (fd < 0) {
-+			perror(argv[optind]);
-+			return EXIT_FAILURE;
-+		}
-+		break;
-+	default:
-+		break;
-+	}
-+
-+	switch (verb) {
-+	case TEST_MWRITE_BEFORE_AND_MWRITE_AFTER:
-+	case TEST_MWRITE_BEFORE:
-+		p = mmap(NULL, BUF_SIZE, PROT_WRITE | PROT_READ, MAP_SHARED,
-+				fd, 65536);
-+		if (p == MAP_FAILED) {
-+			perror("mmap");
-+			return EXIT_FAILURE;
-+		}
-+		memcpy(p, buf, BUF_SIZE);
-+		break;
-+	default:
-+		break;
-+	}
-+
-+	if (optind != argc - 1)
-+		usage(argv[0]);
-+
-+	ret = swapon(argv[optind], 0);
- 	if (ret) {
- 		perror("swapon");
- 		return EXIT_FAILURE;
- 	}
- 
-+	switch (verb) {
-+	case TEST_WRITE:
-+		sz = pwrite(fd, buf, BUF_SIZE, 65536);
-+		if (sz < 0) {
-+			perror("pwrite");
-+			return EXIT_FAILURE;
-+		}
-+		break;
-+	case TEST_MWRITE_AFTER:
-+		p = mmap(NULL, BUF_SIZE, PROT_WRITE | PROT_READ, MAP_SHARED,
-+				fd, 65536);
-+		if (p == MAP_FAILED) {
-+			perror("mmap");
-+			return EXIT_FAILURE;
-+		}
-+		/* fall through */
-+	case TEST_MWRITE_BEFORE_AND_MWRITE_AFTER:
-+		memcpy(p, buf, BUF_SIZE);
-+		break;
-+	default:
-+		break;
-+	}
-+
-+	if (fd >= 0) {
-+		ret = fsync(fd);
-+		if (ret)
-+			perror("fsync");
-+		ret = close(fd);
-+		if (ret)
-+			perror("close");
-+	}
-+
- 	return EXIT_SUCCESS;
- }
-diff --git a/tests/generic/717 b/tests/generic/717
-new file mode 100755
-index 00000000..92073dbb
---- /dev/null
-+++ b/tests/generic/717
-@@ -0,0 +1,70 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0-or-newer
-+# Copyright (c) 2019, Oracle and/or its affiliates.  All Rights Reserved.
-+#
-+# FS QA Test No. 717
-+#
-+# Check that we can't modify a file that's an active swap file.
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	swapoff $testfile
-+	rm -rf $tmp.* $testfile
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_os Linux
-+_supported_fs generic
-+_require_test_program swapon
-+_require_scratch_swapfile
-+
-+rm -f $seqres.full
-+
-+_scratch_mkfs > $seqres.full 2>&1
-+_scratch_mount >> $seqres.full 2>&1
-+
-+testfile=$SCRATCH_MNT/$seq.swap
-+
-+_format_swapfile $testfile 20m
-+
-+# Can you modify the swapfile via previously open file descriptors?
-+for verb in 1 2 3 4; do
-+	echo "verb $verb"
-+	"$here/src/swapon" -v $verb $testfile
-+	swapoff $testfile
-+done
-+
-+# Now try writing with a new file descriptor.
-+swapon $testfile 2>&1 | _filter_scratch
-+
-+# Can we write to it?
-+$XFS_IO_PROG -c 'pwrite -S 0x59 64k 64k' $testfile
-+$XFS_IO_PROG -d -c 'pwrite -S 0x60 64k 64k' $testfile
-+$XFS_IO_PROG -c 'mmap -rw 64k 64k' -c 'mwrite -S 0x61 64k 64k' $testfile
-+
-+# Can we change the file size?
-+$XFS_IO_PROG -c 'truncate 18m' $testfile
-+
-+# Can you fallocate the file?
-+$XFS_IO_PROG -c 'falloc 0 32m' $testfile
-+
-+# We test that you can't reflink, dedupe, or copy_file_range into a swapfile
-+# in other tests.
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/717.out b/tests/generic/717.out
-new file mode 100644
-index 00000000..59345ca1
---- /dev/null
-+++ b/tests/generic/717.out
-@@ -0,0 +1,14 @@
-+QA output created by 717
-+verb 1
-+pwrite: Text file busy
-+verb 2
-+mmap: Text file busy
-+verb 3
-+Caught signal 7, terminating...
-+verb 4
-+pwrite: Text file busy
-+pwrite: Text file busy
-+mmap: Text file busy
-+no mapped regions, try 'help mmap'
-+ftruncate: Text file busy
-+fallocate: Text file busy
-diff --git a/tests/generic/718 b/tests/generic/718
-new file mode 100755
-index 00000000..504022e1
---- /dev/null
-+++ b/tests/generic/718
-@@ -0,0 +1,55 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0-or-newer
-+# Copyright (c) 2019, Oracle and/or its affiliates.  All Rights Reserved.
-+#
-+# FS QA Test No. 718
-+#
-+# Check that we can't modify a block device that's an active swap device.
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	swapoff $SCRATCH_DEV
-+	rm -rf $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_os Linux
-+_supported_fs generic
-+_require_test_program swapon
-+_require_scratch_nocheck
-+
-+rm -f $seqres.full
-+
-+$MKSWAP_PROG "$SCRATCH_DEV" >> $seqres.full
-+
-+# Can you modify the swap dev via previously open file descriptors?
-+for verb in 1 2 3 4; do
-+	echo "verb $verb"
-+	"$here/src/swapon" -v $verb $SCRATCH_DEV
-+	swapoff $SCRATCH_DEV
-+done
-+
-+swapon $SCRATCH_DEV 2>&1 | _filter_scratch
-+
-+# Can we write to it?
-+$XFS_IO_PROG -c 'pwrite -S 0x59 64k 64k' $SCRATCH_DEV
-+$XFS_IO_PROG -d -c 'pwrite -S 0x60 64k 64k' $SCRATCH_DEV
-+$XFS_IO_PROG -c 'mmap -rw 64k 64k' -c 'mwrite -S 0x61 64k 64k' $SCRATCH_DEV
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/718.out b/tests/generic/718.out
-new file mode 100644
-index 00000000..88d5cf3e
---- /dev/null
-+++ b/tests/generic/718.out
-@@ -0,0 +1,12 @@
-+QA output created by 718
-+verb 1
-+pwrite: Text file busy
-+verb 2
-+mmap: Text file busy
-+verb 3
-+Caught signal 7, terminating...
-+verb 4
-+pwrite: Text file busy
-+pwrite: Text file busy
-+mmap: Text file busy
-+no mapped regions, try 'help mmap'
-diff --git a/tests/generic/group b/tests/generic/group
-index 7cf4f6c4..5da2bd81 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -570,3 +570,5 @@
- 565 auto quick copy_range
- 566 auto quick quota metadata
- 567 auto quick rw punch
-+717 auto quick rw swap
-+718 auto quick rw swap
+>  " FLAGS and VERSION must be numeric.\n"
+>  "\n"
+>  " Note that it's only possible to set an encryption policy on an empty\n"
+> @@ -170,6 +170,9 @@ static const struct {
+>  } available_modes[] = {
+>  	{FSCRYPT_MODE_AES_256_XTS, "AES-256-XTS"},
+>  	{FSCRYPT_MODE_AES_256_CTS, "AES-256-CTS"},
+> +	{FSCRYPT_MODE_AES_128_CBC, "AES-128-CBC"},
+> +	{FSCRYPT_MODE_AES_128_CTS, "AES-128-CTS"},
+> +	{FSCRYPT_MODE_ADIANTUM, "Adiantum"},
+>  };
+>  
+>  static bool
+> -- 
+> 2.23.0.rc1.153.gdeed80330f-goog
+> 
