@@ -1,61 +1,211 @@
-Received: from mail-pf1-f195.google.com ([209.85.210.195]:38821 "EHLO
-        mail-pf1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2388199AbfIYNId (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 25 Sep 2019 09:08:33 -0400
-Received: by mail-pf1-f195.google.com with SMTP id h195so3391594pfe.5
-        for <fstests@vger.kernel.org>; Wed, 25 Sep 2019 06:08:32 -0700 (PDT)
-Date: Wed, 25 Sep 2019 21:08:26 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] generic/442: add sync before dmsetup remove
-Message-ID: <20190925130824.GU2622@desktop>
-References: <1569400158-5297-1-git-send-email-suyj.fnst@cn.fujitsu.com>
+Received: from sandeen.net ([63.231.237.45]:43462 "EHLO sandeen.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S2505155AbfIYRX2 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 25 Sep 2019 13:23:28 -0400
+Subject: Re: [RFC PATCH 4/8] xfs_io/encrypt: extend 'get_encpolicy' to support
+ v2 policies
+References: <20190812175635.34186-1-ebiggers@kernel.org>
+ <20190812175635.34186-5-ebiggers@kernel.org>
+From: Eric Sandeen <sandeen@sandeen.net>
+Message-ID: <93a8536c-191d-340e-2d18-2ef87d0dcd5d@sandeen.net>
+Date: Wed, 25 Sep 2019 12:23:25 -0500
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1569400158-5297-1-git-send-email-suyj.fnst@cn.fujitsu.com>
+In-Reply-To: <20190812175635.34186-5-ebiggers@kernel.org>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Su Yanjun <suyj.fnst@cn.fujitsu.com>
-Cc: fstests@vger.kernel.org
+To: Eric Biggers <ebiggers@kernel.org>, linux-xfs@vger.kernel.org
+Cc: fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Sep 25, 2019 at 04:29:18PM +0800, Su Yanjun wrote:
-> This test case sometime fails. Because "dmsetup remove error-test" may
-> fail when some writeback is going on.
+On 8/12/19 12:56 PM, Eric Biggers wrote:
+> From: Eric Biggers <ebiggers@google.com>
 > 
-> This patch adds sync before dmsetup remove operation.
-> 
-> Signed-off-by: Su Yanjun <suyj.fnst@cn.fujitsu.com>
-> ---
->  tests/generic/442 | 1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/tests/generic/442 b/tests/generic/442
-> index fe6d460..d48ca36 100755
-> --- a/tests/generic/442
-> +++ b/tests/generic/442
-> @@ -43,6 +43,7 @@ $here/src/fsync-err -d $here/src/dmerror $DMERROR_DEV
+> get_encpolicy uses the FS_IOC_GET_ENCRYPTION_POLICY ioctl to retrieve
+> the file's encryption policy, then displays it.  But that only works for
+> v1 encryption policies.  A new ioctl, FS_IOC_GET_ENCRYPTION_POLICY_EX,
+> has been introduced which is more flexible and can retrieve both v1 and
+> v2 encryption policies.
 
-fsync-err should have flipped $DMERROR_DEV to working mode and fsync
-each open fd before exit if fsync-err didn't report any failure. So
-there should be no on-going writeback.
+...
 
+> +static void
+> +test_for_v2_policy_support(void)
+> +{
+> +	struct fscrypt_get_policy_ex_arg arg;
+> +
+> +	arg.policy_size = sizeof(arg.policy);
+> +
+> +	if (ioctl(file->fd, FS_IOC_GET_ENCRYPTION_POLICY_EX, &arg) == 0 ||
+> +	    errno == ENODATA /* file unencrypted */) {
+> +		printf("supported\n");
+> +		return;
+> +	}
+> +	if (errno == ENOTTY) {
+> +		printf("unsupported\n");
+> +		return;
+> +	}
+> +	fprintf(stderr,
+> +		"%s: unexpected error checking for FS_IOC_GET_ENCRYPTION_POLICY_EX support: %s\n",
+
+Darrick also mentioned to me off-list that the io/encrypt.c code is chock full of
+strings that really need to be _("translatable")
+
+-Eric
+
+> +		file->name, strerror(errno));
+> +	exitcode = 1;
+> +}
+> +
+> +static void
+> +show_v1_encryption_policy(const struct fscrypt_policy_v1 *policy)
+> +{
+> +	printf("Encryption policy for %s:\n", file->name);
+> +	printf("\tPolicy version: %u\n", policy->version);
+> +	printf("\tMaster key descriptor: %s\n",
+> +	       keydesc2str(policy->master_key_descriptor));
+> +	printf("\tContents encryption mode: %u (%s)\n",
+> +	       policy->contents_encryption_mode,
+> +	       mode2str(policy->contents_encryption_mode));
+> +	printf("\tFilenames encryption mode: %u (%s)\n",
+> +	       policy->filenames_encryption_mode,
+> +	       mode2str(policy->filenames_encryption_mode));
+> +	printf("\tFlags: 0x%02x\n", policy->flags);
+> +}
+> +
+> +static void
+> +show_v2_encryption_policy(const struct fscrypt_policy_v2 *policy)
+> +{
+> +	printf("Encryption policy for %s:\n", file->name);
+> +	printf("\tPolicy version: %u\n", policy->version);
+> +	printf("\tMaster key identifier: %s\n",
+> +	       keyid2str(policy->master_key_identifier));
+> +	printf("\tContents encryption mode: %u (%s)\n",
+> +	       policy->contents_encryption_mode,
+> +	       mode2str(policy->contents_encryption_mode));
+> +	printf("\tFilenames encryption mode: %u (%s)\n",
+> +	       policy->filenames_encryption_mode,
+> +	       mode2str(policy->filenames_encryption_mode));
+> +	printf("\tFlags: 0x%02x\n", policy->flags);
+> +}
+> +
+>  static int
+>  get_encpolicy_f(int argc, char **argv)
+>  {
+> -	struct fscrypt_policy policy;
+> +	int c;
+> +	struct fscrypt_get_policy_ex_arg arg;
+> +	bool only_use_v1_ioctl = false;
+> +	int res;
 >  
->  # success, all done
->  _dmerror_load_working_table
-> +sync
->  _dmerror_cleanup
-
-And _dmerror_cleanup umount $DMERROR_DEV first, then tear down the dm
-device. Could you check if fsync-err returns successfully and umount
-succeeds as well?
-
-Thanks,
-Eryu
-
->  _scratch_mkfs > $seqres.full 2>&1
->  status=0
-> -- 
-> 2.7.4
-> 
-> 
+> -	if (ioctl(file->fd, FS_IOC_GET_ENCRYPTION_POLICY, &policy) < 0) {
+> +	while ((c = getopt(argc, argv, "1t")) != EOF) {
+> +		switch (c) {
+> +		case '1':
+> +			only_use_v1_ioctl = true;
+> +			break;
+> +		case 't':
+> +			test_for_v2_policy_support();
+> +			return 0;
+> +		default:
+> +			return command_usage(&get_encpolicy_cmd);
+> +		}
+> +	}
+> +	argc -= optind;
+> +	argv += optind;
+> +
+> +	if (argc != 0)
+> +		return command_usage(&get_encpolicy_cmd);
+> +
+> +	/* first try the new ioctl */
+> +	if (only_use_v1_ioctl) {
+> +		res = -1;
+> +		errno = ENOTTY;
+> +	} else {
+> +		arg.policy_size = sizeof(arg.policy);
+> +		res = ioctl(file->fd, FS_IOC_GET_ENCRYPTION_POLICY_EX, &arg);
+> +	}
+> +
+> +	/* fall back to the old ioctl */
+> +	if (res != 0 && errno == ENOTTY)
+> +		res = ioctl(file->fd, FS_IOC_GET_ENCRYPTION_POLICY,
+> +			    &arg.policy.v1);
+> +
+> +	if (res != 0) {
+>  		fprintf(stderr, "%s: failed to get encryption policy: %s\n",
+>  			file->name, strerror(errno));
+>  		exitcode = 1;
+>  		return 0;
+>  	}
+>  
+> -	printf("Encryption policy for %s:\n", file->name);
+> -	printf("\tPolicy version: %u\n", policy.version);
+> -	printf("\tMaster key descriptor: %s\n",
+> -	       keydesc2str(policy.master_key_descriptor));
+> -	printf("\tContents encryption mode: %u (%s)\n",
+> -	       policy.contents_encryption_mode,
+> -	       mode2str(policy.contents_encryption_mode));
+> -	printf("\tFilenames encryption mode: %u (%s)\n",
+> -	       policy.filenames_encryption_mode,
+> -	       mode2str(policy.filenames_encryption_mode));
+> -	printf("\tFlags: 0x%02x\n", policy.flags);
+> +	switch (arg.policy.version) {
+> +	case FSCRYPT_POLICY_V1:
+> +		show_v1_encryption_policy(&arg.policy.v1);
+> +		break;
+> +	case FSCRYPT_POLICY_V2:
+> +		show_v2_encryption_policy(&arg.policy.v2);
+> +		break;
+> +	default:
+> +		printf("Encryption policy for %s:\n", file->name);
+> +		printf("\tPolicy version: %u (unknown)\n", arg.policy.version);
+> +		break;
+> +	}
+>  	return 0;
+>  }
+>  
+> @@ -351,11 +467,13 @@ encrypt_init(void)
+>  {
+>  	get_encpolicy_cmd.name = "get_encpolicy";
+>  	get_encpolicy_cmd.cfunc = get_encpolicy_f;
+> +	get_encpolicy_cmd.args = _("[-1] [-t]");
+>  	get_encpolicy_cmd.argmin = 0;
+> -	get_encpolicy_cmd.argmax = 0;
+> +	get_encpolicy_cmd.argmax = -1;
+>  	get_encpolicy_cmd.flags = CMD_NOMAP_OK | CMD_FOREIGN_OK;
+>  	get_encpolicy_cmd.oneline =
+>  		_("display the encryption policy of the current file");
+> +	get_encpolicy_cmd.help = get_encpolicy_help;
+>  
+>  	set_encpolicy_cmd.name = "set_encpolicy";
+>  	set_encpolicy_cmd.cfunc = set_encpolicy_f;
+> diff --git a/man/man8/xfs_io.8 b/man/man8/xfs_io.8
+> index 6e064bdd..3dd34a0c 100644
+> --- a/man/man8/xfs_io.8
+> +++ b/man/man8/xfs_io.8
+> @@ -724,10 +724,21 @@ version of policy structure (numeric)
+>  .RE
+>  .PD
+>  .TP
+> -.BR get_encpolicy
+> +.BI "get_encpolicy [ \-1 ] [ \-t ]"
+>  On filesystems that support encryption, display the encryption policy of the
+>  current file.
+> -
+> +.RS 1.0i
+> +.PD 0
+> +.TP 0.4i
+> +.BI \-1
+> +Use only the old ioctl to get the encryption policy.  This only works if the
+> +file has a v1 encryption policy.
+> +.TP
+> +.BI \-t
+> +Test whether v2 encryption policies are supported.  Prints "supported",
+> +"unsupported", or an error message.
+> +.RE
+> +.PD
+>  .TP
+>  .BR lsattr " [ " \-R " | " \-D " | " \-a " | " \-v " ]"
+>  List extended inode flags on the currently open file. If the
 > 
