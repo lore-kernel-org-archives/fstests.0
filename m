@@ -1,95 +1,79 @@
-Received: from szxga04-in.huawei.com ([45.249.212.190]:2714 "EHLO huawei.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S2406280AbfIYD1t (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 24 Sep 2019 23:27:49 -0400
-Subject: Re: [PATCH xfstests v2] overlay: Enable character device to be the
- base fs partition
-References: <1569376448-53998-1-git-send-email-chengzhihao1@huawei.com>
- <20190925030550.GA9913@magnolia> <20190925031733.GB9913@magnolia>
-From: Zhihao Cheng <chengzhihao1@huawei.com>
-Message-ID: <46aa2daf-4c4a-ea74-2300-bb32fdfbdbcc@huawei.com>
-Date: Wed, 25 Sep 2019 11:27:32 +0800
+Received: from mail-pg1-f193.google.com ([209.85.215.193]:39290 "EHLO
+        mail-pg1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726421AbfIYJrb (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 25 Sep 2019 05:47:31 -0400
+Received: by mail-pg1-f193.google.com with SMTP id u17so2899763pgi.6
+        for <fstests@vger.kernel.org>; Wed, 25 Sep 2019 02:47:30 -0700 (PDT)
+Date: Wed, 25 Sep 2019 17:47:24 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH] generic/465: fix a read bug when encounter EOF
+Message-ID: <20190925094720.GS2622@desktop>
+References: <1568611466-100970-1-git-send-email-suyj.fnst@cn.fujitsu.com>
 MIME-Version: 1.0
-In-Reply-To: <20190925031733.GB9913@magnolia>
-Content-Type: text/plain; charset="gbk"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1568611466-100970-1-git-send-email-suyj.fnst@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: guaneryu@gmail.com, amir73il@gmail.com, david.oberhollenzer@sigma-star.at, ebiggers@google.com, yi.zhang@huawei.com, fstests@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Su Yanjun <suyj.fnst@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-There are indeed many '-b' options in xfstests. I only confirmed the line=
- of overlay test. Other -b test options I need to reconfirm later.
+On Mon, Sep 16, 2019 at 01:24:26PM +0800, Su Yanjun wrote:
+> In nfs test, if the writer has not written enough data for reader reading,
+> then reader only get partial data and test fails.
+> 
+> We can continue reading until read enough data.
+> 
+> Signed-off-by: Su Yanjun <suyj.fnst@cn.fujitsu.com>
 
-=D4=DA 2019/9/25 11:17, Darrick J. Wong =D0=B4=B5=C0:
-> On Tue, Sep 24, 2019 at 08:05:50PM -0700, Darrick J. Wong wrote:
->> On Wed, Sep 25, 2019 at 09:54:08AM +0800, Zhihao Cheng wrote:
->>> There is a message in _supported_fs():
->>>     _notrun "not suitable for this filesystem type: $FSTYP"
->>> for when overlay usecases are executed on a chararcter device based b=
-ase
->>
->> You can do that?
->>
->> What does that even look like?
->=20
-> OH, ubifs.  Ok.
->=20
-> /me wonders if there are more places in xfstests with test -b that need=
-s
-> fixing...
->=20
-> --D
->=20
->> --D
->>
->>> fs. _overay_config_override() detects that the current base fs partit=
-ion
->>> is not a block device, and FSTYP won't be overwritten as 'overlay' be=
-fore
->>> executing usecases which results in all overlay usecases become 'notr=
-un'.
->>> In addition, all generic usecases are based on base fs rather than ov=
-erlay.
->>>
->>> We want to rewrite FSTYP to 'overlay' before running the usecases. To=
- do
->>> this, we need to add additional character device judgments for TEST_D=
-EV
->>> and SCRATCH_DEV in _overay_config_override().
->>>
->>> Signed-off-by: Zhihao Cheng <chengzhihao1@huawei.com>
->>> ---
->>>  common/config | 4 ++--
->>>  1 file changed, 2 insertions(+), 2 deletions(-)
->>>
->>> diff --git a/common/config b/common/config
->>> index 4c86a49..a22acdb 100644
->>> --- a/common/config
->>> +++ b/common/config
->>> @@ -550,7 +550,7 @@ _overlay_config_override()
->>>  	#    the new OVL_BASE_SCRATCH/TEST_DEV/MNT vars are set to the valu=
-es
->>>  	#    of the configured base fs and SCRATCH/TEST_DEV vars are set to=
- the
->>>  	#    overlayfs base and mount dirs inside base fs mount.
->>> -	[ -b "$TEST_DEV" ] || return 0
->>> +	[ -b "$TEST_DEV" ] || [ -c "$TEST_DEV" ] || return 0
->>> =20
->>>  	# Config file may specify base fs type, but we obay -overlay flag
->>>  	[ "$FSTYP" =3D=3D overlay ] || export OVL_BASE_FSTYP=3D"$FSTYP"
->>> @@ -570,7 +570,7 @@ _overlay_config_override()
->>>  	export TEST_DIR=3D"$OVL_BASE_TEST_DIR/$OVL_MNT"
->>>  	export MOUNT_OPTIONS=3D"$OVERLAY_MOUNT_OPTIONS"
->>> =20
->>> -	[ -b "$SCRATCH_DEV" ] || return 0
->>> +	[ -b "$SCRATCH_DEV" ] || [ -c "$SCRATCH_DEV" ] || return 0
->>> =20
->>>  	# Store original base fs vars
->>>  	export OVL_BASE_SCRATCH_DEV=3D"$SCRATCH_DEV"
->>> --=20
->>> 2.7.4
->>>
->=20
-> .
->=20
+Would you please provide more info on the actual failure you've seen? I
+think the partial read issue should have been addressed by commit
+2428c08a6025 ("generic/465: just check the actual read data under dio
+read/write")
+
+Thanks,
+Eryu
+
+> ---
+>  src/aio-dio-regress/aio-dio-append-write-read-race.c | 17 +++++++++++++++--
+>  1 file changed, 15 insertions(+), 2 deletions(-)
+> 
+> diff --git a/src/aio-dio-regress/aio-dio-append-write-read-race.c b/src/aio-dio-regress/aio-dio-append-write-read-race.c
+> index 911f272..f28ef3c 100644
+> --- a/src/aio-dio-regress/aio-dio-append-write-read-race.c
+> +++ b/src/aio-dio-regress/aio-dio-append-write-read-race.c
+> @@ -44,14 +44,27 @@ static void usage(const char *prog)
+>  static void *reader(void *arg)
+>  {
+>  	struct io_data *data = (struct io_data *)arg;
+> +	size_t blksize = data->blksize;
+> +	size_t offset = data->offset;
+> +	char   *buf = data->buf;
+>  
+>  	memset(data->buf, 'b', data->blksize);
+>  	reader_ready = 1;
+>  	do {
+> -		data->read_sz = pread(data->fd, data->buf, data->blksize,
+> -				      data->offset);
+> +		data->read_sz = pread(data->fd, buf, blksize,
+> +				      offset);
+>  		if (data->read_sz < 0)
+>  			perror("read file");
+> +
+> +		if (data->read_sz > 0) {
+> +			blksize -= data->read_sz;
+> +			offset  += data->read_sz;
+> +			buf	+= data->read_sz;
+> +			data->read_sz = 0;
+> +		}
+> +
+> +		if (blksize <= 0)
+> +			break;
+>  	} while (data->read_sz <= 0);
+>  
+>  	return NULL;
+> -- 
+> 2.7.4
+> 
+> 
+> 
