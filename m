@@ -1,54 +1,80 @@
-Received: from mail-pg1-f196.google.com ([209.85.215.196]:42022 "EHLO
-        mail-pg1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727635AbfIYJ3U (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 25 Sep 2019 05:29:20 -0400
-Date: Wed, 25 Sep 2019 17:29:13 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH xfstests v3] overlay: Enable character device to be the
- base fs partition
-Message-ID: <20190925092913.GR2622@desktop>
-References: <1569393333-128141-1-git-send-email-chengzhihao1@huawei.com>
- <CAOQ4uxjfko0+G_BUOt=fL1iTXdnWA=-=Kn-bgszF08g7yj4zqQ@mail.gmail.com>
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:37792 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S2390825AbfIYHTq (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 25 Sep 2019 03:19:46 -0400
+From: Su Yanjun <suyj.fnst@cn.fujitsu.com>
+Subject: [PATCH] fsx: add more check for copy_file_range
+Date: Wed, 25 Sep 2019 15:16:55 +0800
+Message-ID: <1569395815-4657-1-git-send-email-suyj.fnst@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAOQ4uxjfko0+G_BUOt=fL1iTXdnWA=-=Kn-bgszF08g7yj4zqQ@mail.gmail.com>
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Zhihao Cheng <chengzhihao1@huawei.com>, David Oberhollenzer <david.oberhollenzer@sigma-star.at>, Eric Biggers <ebiggers@google.com>, "zhangyi (F)" <yi.zhang@huawei.com>, fstests <fstests@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>
+To: guaneryu@gmail.com
+Cc: fstests@vger.kernel.org, suyj.fnst@cn.fujitsu.com
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Sep 25, 2019 at 10:18:39AM +0300, Amir Goldstein wrote:
-> On Wed, Sep 25, 2019 at 9:29 AM Zhihao Cheng <chengzhihao1@huawei.com> wrote:
-> >
-> > When running overlay tests using character devices as base fs partitions,
-> > all overlay usecase results become 'notrun'. Function
-> > '_overay_config_override' (common/config) detects that the current base
-> > fs partition is not a block device and will set FSTYP to base fs. The
-> > overlay usecase will check the current FSTYP, and if it is not 'overlay'
-> > or 'generic', it will skip the execution.
-> >
-> > For example, using UBIFS as base fs skips all overlay usecases:
-> >
-> >   FSTYP         -- ubifs       # FSTYP should be overridden as 'overlay'
-> >   MKFS_OPTIONS  -- /dev/ubi0_1 # Character device
-> >   MOUNT_OPTIONS -- -t ubifs /dev/ubi0_1 /tmp/scratch
-> >
-> >   overlay/001   [not run] not suitable for this filesystem type: ubifs
-> >   overlay/002   [not run] not suitable for this filesystem type: ubifs
-> >   overlay/003   [not run] not suitable for this filesystem type: ubifs
-> >
-> > When checking that the base fs partition is a block/character device,
-> > FSTYP is overwritten as 'overlay'. This patch allows the base fs
-> > partition to be a character device that can also execute overlay
-> > usecases (such as ubifs).
-> >
-> > Signed-off-by: Zhihao Cheng <chengzhihao1@huawei.com>
-> > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> 
-> Looks fine.
-> Eryu, you may change this to Reviewed-by
+On some linux distros(RHEL7, centos 7) copy_file_range uses
+general implementation (splice interface). splice interace
+uses pipe_to_file. pipe_to_file only work for different page.
+The userspace cant's be  aware of such error because copy_file_range
+returns ok too.
+So for such case when copy_file_range return we read back data
+then check it.
 
-Sure, thanks for the review!
+Signed-off-by: Su Yanjun <suyj.fnst@cn.fujitsu.com>
+---
+ ltp/fsx.c | 32 ++++++++++++++++++++++++++++++++
+ 1 file changed, 32 insertions(+)
 
-Eryu
+diff --git a/ltp/fsx.c b/ltp/fsx.c
+index 06d08e4..0439430 100644
+--- a/ltp/fsx.c
++++ b/ltp/fsx.c
+@@ -1602,6 +1602,7 @@ do_copy_range(unsigned offset, unsigned length, unsigned dest)
+ 	size_t olen;
+ 	ssize_t nr;
+ 	int tries = 0;
++	int ret = 0;
+ 
+ 	if (length == 0) {
+ 		if (!quiet && testcalls > simulatedopcount)
+@@ -1665,6 +1666,37 @@ do_copy_range(unsigned offset, unsigned length, unsigned dest)
+ 		memset(good_buf + file_size, '\0', dest - file_size);
+ 	if (dest + length > file_size)
+ 		file_size = dest + length;
++	/*
++	 * Although copy_file_range returns ok 
++	 * for some linux distros that use general implementation 
++	 * (splice interface) such as RHEL 7, centos 7 that use 
++	 * pipe_to_file will cause test fail.
++	 *
++	 * Here we add a little more check here for copy_file_range
++	 * We read copied data then check it. If check fail here 
++	 * then report it.
++	 */
++	ret = lseek(fd, (off_t)dest, SEEK_SET);
++	if (ret == (off_t)-1) {
++		prterr("doread: lseek");
++		report_failure(140);
++	}
++	ret = fsxread(fd, temp_buf, length, dest);
++	if (ret != length) {
++		if (ret == -1)
++				prterr("doread: read");
++		else
++				prt("short read: 0x%x bytes instead of 0x%x\n",
++					ret, length);
++		report_failure(141);
++	}
++	if (memcmp(good_buf+dest, temp_buf, length) != 0) {
++		prt("copy range: 0x%x to 0x%x at 0x%x\n", offset,
++				offset + length, dest);
++		prterr("do_copy_range:");
++		report_failure(161);
++
++	}
+ }
+ 
+ #else
+-- 
+2.7.4
