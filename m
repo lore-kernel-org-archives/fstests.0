@@ -1,52 +1,61 @@
-Received: from mail.kernel.org ([198.145.29.99]:57200 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.99]:36212 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725821AbfIYXLu (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 25 Sep 2019 19:11:50 -0400
-Date: Wed, 25 Sep 2019 16:11:48 -0700
+        id S1731427AbfIYX2M (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 25 Sep 2019 19:28:12 -0400
+Date: Wed, 25 Sep 2019 16:28:09 -0700
 From: Eric Biggers <ebiggers@kernel.org>
-Subject: Re: [RFC PATCH 3/8] xfs_io/encrypt: add new encryption modes
-Message-ID: <20190925231147.GB3163@gmail.com>
+Subject: Re: [RFC PATCH 4/8] xfs_io/encrypt: extend 'get_encpolicy' to
+ support v2 policies
+Message-ID: <20190925232809.GC3163@gmail.com>
 References: <20190812175635.34186-1-ebiggers@kernel.org>
- <20190812175635.34186-4-ebiggers@kernel.org>
- <20190924224744.GD2229799@magnolia>
+ <20190812175635.34186-5-ebiggers@kernel.org>
+ <93a8536c-191d-340e-2d18-2ef87d0dcd5d@sandeen.net>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190924224744.GD2229799@magnolia>
+In-Reply-To: <93a8536c-191d-340e-2d18-2ef87d0dcd5d@sandeen.net>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
+To: Eric Sandeen <sandeen@sandeen.net>
 Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Sep 24, 2019 at 03:47:44PM -0700, Darrick J. Wong wrote:
-> On Mon, Aug 12, 2019 at 10:56:29AM -0700, Eric Biggers wrote:
+On Wed, Sep 25, 2019 at 12:23:25PM -0500, Eric Sandeen wrote:
+> On 8/12/19 12:56 PM, Eric Biggers wrote:
 > > From: Eric Biggers <ebiggers@google.com>
 > > 
-> > Add new encryption modes: AES-128-CBC and AES-128-CTS (supported since
-> > Linux v4.11), and Adiantum (supported since Linux v5.0).
-> > 
-> > Signed-off-by: Eric Biggers <ebiggers@google.com>
-> > ---
-> >  io/encrypt.c | 5 ++++-
-> >  1 file changed, 4 insertions(+), 1 deletion(-)
-> > 
-> > diff --git a/io/encrypt.c b/io/encrypt.c
-> > index ac473ed7..11eb4a3e 100644
-> > --- a/io/encrypt.c
-> > +++ b/io/encrypt.c
-> > @@ -156,7 +156,7 @@ set_encpolicy_help(void)
-> >  " -v VERSION -- version of policy structure\n"
-> >  "\n"
-> >  " MODE can be numeric or one of the following predefined values:\n"
-> > -"    AES-256-XTS, AES-256-CTS\n"
-> > +"    AES-256-XTS, AES-256-CTS, AES-128-CBC, AES-128-CTS, Adiantum\n"
+> > get_encpolicy uses the FS_IOC_GET_ENCRYPTION_POLICY ioctl to retrieve
+> > the file's encryption policy, then displays it.  But that only works for
+> > v1 encryption policies.  A new ioctl, FS_IOC_GET_ENCRYPTION_POLICY_EX,
+> > has been introduced which is more flexible and can retrieve both v1 and
+> > v2 encryption policies.
 > 
-> What do you think of generating the list of predefined values from
-> the available_modes[] array?  Then you wouldn't have to keep the help
-> text in sync with the C definitions, since it's not like there's a
-> meaningful translation for them anyway.
+> ...
+> 
+> > +static void
+> > +test_for_v2_policy_support(void)
+> > +{
+> > +	struct fscrypt_get_policy_ex_arg arg;
+> > +
+> > +	arg.policy_size = sizeof(arg.policy);
+> > +
+> > +	if (ioctl(file->fd, FS_IOC_GET_ENCRYPTION_POLICY_EX, &arg) == 0 ||
+> > +	    errno == ENODATA /* file unencrypted */) {
+> > +		printf("supported\n");
+> > +		return;
+> > +	}
+> > +	if (errno == ENOTTY) {
+> > +		printf("unsupported\n");
+> > +		return;
+> > +	}
+> > +	fprintf(stderr,
+> > +		"%s: unexpected error checking for FS_IOC_GET_ENCRYPTION_POLICY_EX support: %s\n",
+> 
+> Darrick also mentioned to me off-list that the io/encrypt.c code is chock full of
+> strings that really need to be _("translatable")
 > 
 
-Yes, good idea.  I'll do that.
+Sure, I can do that, though is this really something that people want?  These
+commands are only intended for testing, and the xfsprogs translations don't seem
+actively maintained (only 1 language was updated in the last 10 years?).
 
 - Eric
