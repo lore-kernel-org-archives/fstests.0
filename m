@@ -1,44 +1,34 @@
-Received: from mout.gmx.net ([212.227.17.21]:48965 "EHLO mout.gmx.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729340AbfIZHuf (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 26 Sep 2019 03:50:35 -0400
+Received: from mail-pg1-f194.google.com ([209.85.215.194]:43131 "EHLO
+        mail-pg1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726257AbfIZIMk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 26 Sep 2019 04:12:40 -0400
+Date: Thu, 26 Sep 2019 16:12:32 +0800
+From: Eryu Guan <guaneryu@gmail.com>
 Subject: Re: [PATCH] btrfs: Add regression test for SINGLE profile conversion
+Message-ID: <20190926081230.GX2622@desktop>
 References: <20190926072635.9310-1-nborisov@suse.com>
-From: Qu Wenruo <quwenruo.btrfs@gmx.com>
-Message-ID: <6a8d0118-86a6-b187-1183-4e47a260b0a6@gmx.com>
-Date: Thu, 26 Sep 2019 15:50:22 +0800
 MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 In-Reply-To: <20190926072635.9310-1-nborisov@suse.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: quoted-printable
 Sender: fstests-owner@vger.kernel.org
-To: Nikolay Borisov <nborisov@suse.com>, fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, wqu@suse.com, guaneryu@gmail.com
+To: Nikolay Borisov <nborisov@suse.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, wqu@suse.com
 List-ID: <fstests@vger.kernel.org>
 
-
-
-On 2019/9/26 =E4=B8=8B=E5=8D=883:26, Nikolay Borisov wrote:
+On Thu, Sep 26, 2019 at 10:26:35AM +0300, Nikolay Borisov wrote:
 > This is a regression test for the bug fixed by
 > 'btrfs: Fix a regression which we can't convert to SINGLE profile'
->
+> 
 > Signed-off-by: Nikolay Borisov <nborisov@suse.com>
-
-Reviewed-by: Qu Wenruo <wqu@suse.com>
-
-Thanks,
-Qu
-
 > ---
->  tests/btrfs/194     | 52 ++++++++++++++++++++++++++++++++++++++++++++++=
-++++++
+>  tests/btrfs/194     | 52 ++++++++++++++++++++++++++++++++++++++++++++++++++++
 >  tests/btrfs/194.out |  2 ++
 >  tests/btrfs/group   |  1 +
 >  3 files changed, 55 insertions(+)
 >  create mode 100755 tests/btrfs/194
 >  create mode 100644 tests/btrfs/194.out
->
+> 
 > diff --git a/tests/btrfs/194 b/tests/btrfs/194
 > new file mode 100755
 > index 000000000000..8935defd3f5e
@@ -51,18 +41,16 @@ Qu
 > +#
 > +# FS QA Test 194
 > +#
-> +# Test that block groups profile can be converted to SINGLE. This is a =
-regression
-> +# test for 'btrfs: Fix a regression which we can't convert to SINGLE pr=
-ofile'
+> +# Test that block groups profile can be converted to SINGLE. This is a regression
+> +# test for 'btrfs: Fix a regression which we can't convert to SINGLE profile'
 > +#
-> +seq=3D`basename $0`
-> +seqres=3D$RESULT_DIR/$seq
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
 > +echo "QA output created by $seq"
 > +
-> +here=3D`pwd`
-> +tmp=3D/tmp/$$
-> +status=3D1	# failure is the default!
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
 > +trap "_cleanup; exit \$status" 0 1 2 3 15
 > +
 > +_cleanup()
@@ -88,17 +76,65 @@ ofile'
 > +_scratch_dev_pool_get 2
 > +_scratch_pool_mkfs -draid1
 > +
-> +_scratch_mount
+> +_scratch_mount 
 > +
-> +$BTRFS_UTIL_PROG balance start -dconvert=3Dsingle $SCRATCH_MNT > $seqre=
-s.full 2>&1
+> +$BTRFS_UTIL_PROG balance start -dconvert=single $SCRATCH_MNT > $seqres.full 2>&1
 > +[ $? -eq 0 ] || _fail "Convert failed"
+
+This indicates we're missing profile conversion tests in fstests. I
+think it's better to add a test framework/helpers and a full set of
+profile conversion tests instead of this raid1->single special case.
+
+e.g.
+
+Define a test case array, which describes what's the src/dst of this
+conversion and how many devices this case requires, e.g.
+
+test_cases=(
+        # $nr_dev_min:$metadata:$data:$metadata_convert:$data_convert
+        "2:single:single:raid0:raid0"
+        "2:single:single:raid1:raid1"
+        "2:single:single:raid1:raid0"
+        "3:single:single:raid5:raid5"
+        "4:single:single:raid6:raid6"
+        "4:single:single:raid10:raid10"
+        "2:raid0:raid0:raid1:raid0"
+        "2:raid0:raid0:raid1:raid1"
+        "3:raid0:raid0:raid5:raid5"
+        "4:raid0:raid0:raid6:raid6"
+        "4:raid0:raid0:raid10:raid10"
+        "2:raid1:raid0:raid1:raid1"
+        "3:raid1:raid0:raid5:raid5"
+        "4:raid1:raid0:raid6:raid6"
+        "4:raid1:raid1:raid10:raid10"
+        "4:raid5:raid5:raid1:raid1"
+        "4:raid5:raid5:raid6:raid6"
+        "4:raid5:raid5:raid10:raid10"
+        "4:raid6:raid6:raid1:raid1"
+        "4:raid6:raid6:raid5:raid5"
+        "4:raid6:raid6:raid10:raid10"
+        "4:raid10:raid10:raid5:raid5"
+        "4:raid10:raid10:raid6:raid6"
+	<adding more cases>
+)
+
+Then, create btrfs in source profile and populate fs with different
+kinds of files, compute sha1 digests of these files(fssum?), start
+conversion, after conversion compare sha1 digests.
+
+And perhaps we could split the test cases into group and add them to
+different tests, in case putting all cases in a single test makes the
+test time too long.
+
+Thanks,
+Eryu
+
 > +
 > +_scratch_umount
 > +_scratch_dev_pool_put
 > +
 > +echo "Silence is golden"
-> +status=3D0
+> +status=0
 > +exit
 > diff --git a/tests/btrfs/194.out b/tests/btrfs/194.out
 > new file mode 100644
@@ -117,4 +153,6 @@ s.full 2>&1
 >  192 auto replay snapshot stress
 >  193 auto quick qgroup enospc limit
 > +194 auto quick volume balance
->
+> -- 
+> 2.7.4
+> 
