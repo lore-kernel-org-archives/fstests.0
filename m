@@ -1,12 +1,12 @@
-Received: from out30-54.freemail.mail.aliyun.com ([115.124.30.54]:51159 "EHLO
-        out30-54.freemail.mail.aliyun.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1725554AbfIZJY3 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 26 Sep 2019 05:24:29 -0400
-Date: Thu, 26 Sep 2019 17:24:26 +0800
-From: Eryu Guan <eguan@linux.alibaba.com>
+Received: from mx1.redhat.com ([209.132.183.28]:45870 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1727038AbfIZOhF (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 26 Sep 2019 10:37:05 -0400
+Date: Thu, 26 Sep 2019 10:37:02 -0400
+From: Brian Foster <bfoster@redhat.com>
 Subject: Re: [PATCH v2] ltp/fsx: avoid infinite loop while finding offset2 in
  clone/dedupe/copy range ops
-Message-ID: <20190926092426.GB67926@e18g06458.et15sqa>
+Message-ID: <20190926143702.GF26832@bfoster>
 References: <20190824144107.27748-1-guaneryu@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
@@ -14,7 +14,7 @@ Content-Disposition: inline
 In-Reply-To: <20190824144107.27748-1-guaneryu@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <guaneryu@gmail.com>
-Cc: fstests@vger.kernel.org
+Cc: fstests@vger.kernel.org, Eryu Guan <eguan@linux.alibaba.com>
 List-ID: <fstests@vger.kernel.org>
 
 On Sat, Aug 24, 2019 at 10:41:07PM +0800, Eryu Guan wrote:
@@ -34,11 +34,6 @@ On Sat, Aug 24, 2019 at 10:41:07PM +0800, Eryu Guan wrote:
 > 'size' bytes from 'offset2', and just skip this operation if not.
 > 
 > Signed-off-by: Eryu Guan <eguan@linux.alibaba.com>
-
-Ping on this patch.
-
-Eryu
-
 > ---
 > v2:
 > - don't use macro with ugly hacks, use an inline function instead
@@ -59,10 +54,30 @@ Eryu
 > +			       unsigned long len, unsigned long size)
 > +{
 > +	bool ret = ((off + len * 2) <= size);
+
+A more self-documenting name than ret would be helpful, though I'd
+probably just do something like:
+
+	if ((off + len * 2) > size) {
+		log5(op, off, len, -1, FL_SKIPPED);
+		return false;
+	}
+	...
+	return true;
+
 > +	if (!ret)
 > +		log5(op, off, len, -1, FL_SKIPPED);
 > +	return ret;
 > +}
+
+Instead of offloading just this check, could we factor out the
+associated offset2 loop into this function as well (and probably rename
+it)? I.e., this function can return true if it assigned offset2 or false
+and let the caller jump out. It could also take an optional max loop
+count for the dedupe case.
+
+Brian
+
 >  
 >  int
 >  test(void)
@@ -95,3 +110,4 @@ Eryu
 >  			TRIM_OFF(offset2, maxfilelen);
 > -- 
 > 2.21.0
+> 
