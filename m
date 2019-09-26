@@ -1,152 +1,97 @@
-Received: from mail.kernel.org ([198.145.29.99]:49304 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726762AbfI1ADr (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 27 Sep 2019 20:03:47 -0400
-From: Eric Biggers <ebiggers@kernel.org>
-Subject: [PATCH v3 9/9] xfs_io/encrypt: add 'enckey_status' command
-Date: Fri, 27 Sep 2019 17:02:43 -0700
-Message-Id: <20190928000243.77634-10-ebiggers@kernel.org>
-In-Reply-To: <20190928000243.77634-1-ebiggers@kernel.org>
-References: <20190928000243.77634-1-ebiggers@kernel.org>
+Received: from out30-54.freemail.mail.aliyun.com ([115.124.30.54]:51159 "EHLO
+        out30-54.freemail.mail.aliyun.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1725554AbfIZJY3 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 26 Sep 2019 05:24:29 -0400
+Date: Thu, 26 Sep 2019 17:24:26 +0800
+From: Eryu Guan <eguan@linux.alibaba.com>
+Subject: Re: [PATCH v2] ltp/fsx: avoid infinite loop while finding offset2 in
+ clone/dedupe/copy range ops
+Message-ID: <20190926092426.GB67926@e18g06458.et15sqa>
+References: <20190824144107.27748-1-guaneryu@gmail.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190824144107.27748-1-guaneryu@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: linux-xfs@vger.kernel.org
-Cc: fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Eric Biggers <ebiggers@google.com>
+On Sat, Aug 24, 2019 at 10:41:07PM +0800, Eryu Guan wrote:
+> From: Eryu Guan <eguan@linux.alibaba.com>
+> 
+> In CLONE/DEDUPE/COPY RANGE operations, we pick a "offset" and "size"
+> first, then find a suitable "offset2" by looping if there's overlap
+> (|offset2-offset| < size) or final file size is greater than max
+> file size (offset2 + size > maxfilelen).
+> 
+> But it's possible that there's no such suitable offset2 and we loop
+> forever. e.g. block_size = 4096, offset = 0, size = 4096 and
+> maxfilelen is a value smaller than 8212 (which could be set via '-l'
+> option).
+> 
+> Fix it by making sure maxfilelen/file_size is big enough to hold
+> 'size' bytes from 'offset2', and just skip this operation if not.
+> 
+> Signed-off-by: Eryu Guan <eguan@linux.alibaba.com>
 
-Add an 'enckey_status' command to xfs_io, to provide a command-line
-interface to the FS_IOC_GET_ENCRYPTION_KEY_STATUS ioctl.
+Ping on this patch.
 
-Signed-off-by: Eric Biggers <ebiggers@google.com>
----
- io/encrypt.c      | 71 +++++++++++++++++++++++++++++++++++++++++++++++
- man/man8/xfs_io.8 |  6 ++++
- 2 files changed, 77 insertions(+)
+Eryu
 
-diff --git a/io/encrypt.c b/io/encrypt.c
-index e87ac393..17d61cfb 100644
---- a/io/encrypt.c
-+++ b/io/encrypt.c
-@@ -151,6 +151,7 @@ static cmdinfo_t get_encpolicy_cmd;
- static cmdinfo_t set_encpolicy_cmd;
- static cmdinfo_t add_enckey_cmd;
- static cmdinfo_t rm_enckey_cmd;
-+static cmdinfo_t enckey_status_cmd;
- 
- static void
- get_encpolicy_help(void)
-@@ -236,6 +237,19 @@ rm_enckey_help(void)
- "\n"));
- }
- 
-+static void
-+enckey_status_help(void)
-+{
-+	printf(_(
-+"\n"
-+" get the status of a filesystem encryption key\n"
-+"\n"
-+" Examples:\n"
-+" 'enckey_status 0000111122223333' - get status of v1 policy key\n"
-+" 'enckey_status 00001111222233334444555566667777' - get status of v2 policy key\n"
-+"\n"));
-+}
-+
- static bool
- parse_byte_value(const char *arg, __u8 *value_ret)
- {
-@@ -769,6 +783,52 @@ rm_enckey_f(int argc, char **argv)
- 	return 0;
- }
- 
-+static int
-+enckey_status_f(int argc, char **argv)
-+{
-+	struct fscrypt_get_key_status_arg arg;
-+
-+	memset(&arg, 0, sizeof(arg));
-+
-+	if (str2keyspec(argv[1], -1, &arg.key_spec) < 0)
-+		return 0;
-+
-+	if (ioctl(file->fd, FS_IOC_GET_ENCRYPTION_KEY_STATUS, &arg) != 0) {
-+		fprintf(stderr, _("Error getting encryption key status: %s\n"),
-+			strerror(errno));
-+		exitcode = 1;
-+		return 0;
-+	}
-+
-+	switch (arg.status) {
-+	case FSCRYPT_KEY_STATUS_PRESENT:
-+		printf(_("Present"));
-+		if (arg.user_count || arg.status_flags) {
-+			printf(" (user_count=%u", arg.user_count);
-+			if (arg.status_flags &
-+			    FSCRYPT_KEY_STATUS_FLAG_ADDED_BY_SELF)
-+				printf(", added_by_self");
-+			arg.status_flags &=
-+				~FSCRYPT_KEY_STATUS_FLAG_ADDED_BY_SELF;
-+			if (arg.status_flags)
-+				printf(", unknown_flags=0x%08x",
-+				       arg.status_flags);
-+			printf(")");
-+		}
-+		printf("\n");
-+		return 0;
-+	case FSCRYPT_KEY_STATUS_ABSENT:
-+		printf(_("Absent\n"));
-+		return 0;
-+	case FSCRYPT_KEY_STATUS_INCOMPLETELY_REMOVED:
-+		printf(_("Incompletely removed\n"));
-+		return 0;
-+	default:
-+		printf(_("Unknown status (%u)\n"), arg.status);
-+		return 0;
-+	}
-+}
-+
- void
- encrypt_init(void)
- {
-@@ -812,8 +872,19 @@ encrypt_init(void)
- 		_("remove an encryption key from the filesystem");
- 	rm_enckey_cmd.help = rm_enckey_help;
- 
-+	enckey_status_cmd.name = "enckey_status";
-+	enckey_status_cmd.cfunc = enckey_status_f;
-+	enckey_status_cmd.args = _("keyspec");
-+	enckey_status_cmd.argmin = 1;
-+	enckey_status_cmd.argmax = 1;
-+	enckey_status_cmd.flags = CMD_NOMAP_OK | CMD_FOREIGN_OK;
-+	enckey_status_cmd.oneline =
-+		_("get the status of a filesystem encryption key");
-+	enckey_status_cmd.help = enckey_status_help;
-+
- 	add_command(&get_encpolicy_cmd);
- 	add_command(&set_encpolicy_cmd);
- 	add_command(&add_enckey_cmd);
- 	add_command(&rm_enckey_cmd);
-+	add_command(&enckey_status_cmd);
- }
-diff --git a/man/man8/xfs_io.8 b/man/man8/xfs_io.8
-index be90905a..2db071e9 100644
---- a/man/man8/xfs_io.8
-+++ b/man/man8/xfs_io.8
-@@ -779,6 +779,12 @@ is a privileged operation.
- .RE
- .PD
- .TP
-+.BI "enckey_status " keyspec
-+On filesystems that support encryption, display the status of an encryption key.
-+.I keyspec
-+is a hex string specifying the key for which to display the status, as a
-+16-character "key descriptor" or a 32-character "key identifier".
-+.TP
- .BR lsattr " [ " \-R " | " \-D " | " \-a " | " \-v " ]"
- List extended inode flags on the currently open file. If the
- .B \-R
--- 
-2.23.0.444.g18eeb5a265-goog
+> ---
+> v2:
+> - don't use macro with ugly hacks, use an inline function instead
+> 
+>  ltp/fsx.c | 15 +++++++++++++++
+>  1 file changed, 15 insertions(+)
+> 
+> diff --git a/ltp/fsx.c b/ltp/fsx.c
+> index 06d08e4e93f3..890666ab6140 100644
+> --- a/ltp/fsx.c
+> +++ b/ltp/fsx.c
+> @@ -1911,6 +1911,15 @@ fail:
+>  	return 0;
+>  }
+>  
+> +/* Check if range operations are possible to find a suitable offset */
+> +static inline bool check_range(unsigned long op, unsigned long off,
+> +			       unsigned long len, unsigned long size)
+> +{
+> +	bool ret = ((off + len * 2) <= size);
+> +	if (!ret)
+> +		log5(op, off, len, -1, FL_SKIPPED);
+> +	return ret;
+> +}
+>  
+>  int
+>  test(void)
+> @@ -1989,6 +1998,8 @@ test(void)
+>  		TRIM_OFF_LEN(offset, size, file_size);
+>  		offset = offset & ~(block_size - 1);
+>  		size = size & ~(block_size - 1);
+> +		if (!check_range(op, offset, size, maxfilelen))
+> +			goto out;
+>  		do {
+>  			offset2 = random();
+>  			TRIM_OFF(offset2, maxfilelen);
+> @@ -2003,6 +2014,8 @@ test(void)
+>  			TRIM_OFF_LEN(offset, size, file_size);
+>  			offset = offset & ~(block_size - 1);
+>  			size = size & ~(block_size - 1);
+> +			if (!check_range(op, offset, size, file_size))
+> +				goto out;
+>  			do {
+>  				if (tries++ >= 30) {
+>  					size = 0;
+> @@ -2020,6 +2033,8 @@ test(void)
+>  		offset -= offset % readbdy;
+>  		if (o_direct)
+>  			size -= size % readbdy;
+> +		if (!check_range(op, offset, size, maxfilelen))
+> +			goto out;
+>  		do {
+>  			offset2 = random();
+>  			TRIM_OFF(offset2, maxfilelen);
+> -- 
+> 2.21.0
