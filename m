@@ -1,61 +1,42 @@
-Received: from mail.kernel.org ([198.145.29.99]:36212 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1731427AbfIYX2M (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 25 Sep 2019 19:28:12 -0400
-Date: Wed, 25 Sep 2019 16:28:09 -0700
-From: Eric Biggers <ebiggers@kernel.org>
-Subject: Re: [RFC PATCH 4/8] xfs_io/encrypt: extend 'get_encpolicy' to
- support v2 policies
-Message-ID: <20190925232809.GC3163@gmail.com>
-References: <20190812175635.34186-1-ebiggers@kernel.org>
- <20190812175635.34186-5-ebiggers@kernel.org>
- <93a8536c-191d-340e-2d18-2ef87d0dcd5d@sandeen.net>
+Received: from smtp1.linuxfoundation.org ([140.211.169.13]:51910 "EHLO
+        smtp1.linuxfoundation.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726824AbfIZC4S (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 25 Sep 2019 22:56:18 -0400
+Subject: [Kernel.org Helpdesk #79165] please add fstests@vger.kernel.org to lore.kernel.org
+From: "Chris Hoy Poy via RT" <kernel-helpdesk@rt.linuxfoundation.org>
+Reply-To: kernel-helpdesk@rt.linuxfoundation.org
+In-Reply-To: <20190903231702.GA5339@magnolia>
+References: <RT-Ticket-79165@linuxfoundation> <20190903231702.GA5339@magnolia>
+Message-ID: <rt-4.4.0-1780-1569466036-1450.79165-6-0@linuxfoundation>
+Content-Type: text/plain; charset="utf-8"
+Date: Wed, 25 Sep 2019 22:47:16 -0400
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <93a8536c-191d-340e-2d18-2ef87d0dcd5d@sandeen.net>
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: Eric Sandeen <sandeen@sandeen.net>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org
+To: djwong@kernel.org
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Sep 25, 2019 at 12:23:25PM -0500, Eric Sandeen wrote:
-> On 8/12/19 12:56 PM, Eric Biggers wrote:
-> > From: Eric Biggers <ebiggers@google.com>
-> > 
-> > get_encpolicy uses the FS_IOC_GET_ENCRYPTION_POLICY ioctl to retrieve
-> > the file's encryption policy, then displays it.  But that only works for
-> > v1 encryption policies.  A new ioctl, FS_IOC_GET_ENCRYPTION_POLICY_EX,
-> > has been introduced which is more flexible and can retrieve both v1 and
-> > v2 encryption policies.
-> 
-> ...
-> 
-> > +static void
-> > +test_for_v2_policy_support(void)
-> > +{
-> > +	struct fscrypt_get_policy_ex_arg arg;
-> > +
-> > +	arg.policy_size = sizeof(arg.policy);
-> > +
-> > +	if (ioctl(file->fd, FS_IOC_GET_ENCRYPTION_POLICY_EX, &arg) == 0 ||
-> > +	    errno == ENODATA /* file unencrypted */) {
-> > +		printf("supported\n");
-> > +		return;
-> > +	}
-> > +	if (errno == ENOTTY) {
-> > +		printf("unsupported\n");
-> > +		return;
-> > +	}
-> > +	fprintf(stderr,
-> > +		"%s: unexpected error checking for FS_IOC_GET_ENCRYPTION_POLICY_EX support: %s\n",
-> 
-> Darrick also mentioned to me off-list that the io/encrypt.c code is chock full of
-> strings that really need to be _("translatable")
-> 
+Hi,
 
-Sure, I can do that, though is this really something that people want?  These
-commands are only intended for testing, and the xfsprogs translations don't seem
-actively maintained (only 1 language was updated in the last 10 years?).
+Please feel free to throw some archives my way (choypoy@linuxfoundation.org) and I'll import them and set this up :) 
 
-- Eric
+cheers
+/Chris
+
+On Wed Sep 04 07:17:07 2019, djwong@kernel.org wrote:
+> Hi, could you please start archiving the fstests@vger.kernel.org mailing
+> list on lore.kernel.org?
+> 
+> (And now that I have actual experience running list-archive-maker.py I
+> can supply archives fairly quickly unlike linux-xfs...)
+> 
+> Thank you!
+> 
+> --Darrick
+
+
+-- 
+Chris Hoy Poy
+Collaborative Projects IT
+The Linux Foundation
