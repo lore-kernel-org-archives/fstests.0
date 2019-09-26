@@ -1,83 +1,102 @@
-Received: from mail-pf1-f194.google.com ([209.85.210.194]:39162 "EHLO
-        mail-pf1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1730826AbfIZFv0 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 26 Sep 2019 01:51:26 -0400
-Received: by mail-pf1-f194.google.com with SMTP id v4so1133880pff.6
-        for <fstests@vger.kernel.org>; Wed, 25 Sep 2019 22:51:25 -0700 (PDT)
-Date: Thu, 26 Sep 2019 13:51:19 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] generic/442: add sync before dmsetup remove
-Message-ID: <20190926055119.GV2622@desktop>
-References: <1569400158-5297-1-git-send-email-suyj.fnst@cn.fujitsu.com>
- <20190925130824.GU2622@desktop>
- <7f33fe1f-fe48-6a21-a92a-ca922265cdea@cn.fujitsu.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <7f33fe1f-fe48-6a21-a92a-ca922265cdea@cn.fujitsu.com>
+Received: from mx2.suse.de ([195.135.220.15]:46918 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726521AbfIZH0j (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 26 Sep 2019 03:26:39 -0400
+From: Nikolay Borisov <nborisov@suse.com>
+Subject: [PATCH] btrfs: Add regression test for SINGLE profile conversion
+Date: Thu, 26 Sep 2019 10:26:35 +0300
+Message-Id: <20190926072635.9310-1-nborisov@suse.com>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: Su Yanjun <suyj.fnst@cn.fujitsu.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, wqu@suse.com, guaneryu@gmail.com, Nikolay Borisov <nborisov@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Sep 26, 2019 at 11:05:13AM +0800, Su Yanjun wrote:
->=20
-> =E5=9C=A8 2019/9/25 21:08, Eryu Guan =E5=86=99=E9=81=93:
-> > On Wed, Sep 25, 2019 at 04:29:18PM +0800, Su Yanjun wrote:
-> > > This test case sometime fails. Because "dmsetup remove error-test" =
-may
-> > > fail when some writeback is going on.
-> > >=20
-> > > This patch adds sync before dmsetup remove operation.
-> > >=20
-> > > Signed-off-by: Su Yanjun <suyj.fnst@cn.fujitsu.com>
-> > > ---
-> > >   tests/generic/442 | 1 +
-> > >   1 file changed, 1 insertion(+)
-> > >=20
-> > > diff --git a/tests/generic/442 b/tests/generic/442
-> > > index fe6d460..d48ca36 100755
-> > > --- a/tests/generic/442
-> > > +++ b/tests/generic/442
-> > > @@ -43,6 +43,7 @@ $here/src/fsync-err -d $here/src/dmerror $DMERROR=
-_DEV
-> > fsync-err should have flipped $DMERROR_DEV to working mode and fsync
-> > each open fd before exit if fsync-err didn't report any failure. So
-> > there should be no on-going writeback.
-> > >   # success, all done
-> > >   _dmerror_load_working_table
-> > > +sync
-> > >   _dmerror_cleanup
-> > And _dmerror_cleanup umount $DMERROR_DEV first, then tear down the dm
-> > device. Could you check if fsync-err returns successfully and umount
-> > succeeds as well?
->=20
-> I cant find any mount info for $DMERROR_DEV in this test. fsync-err=C2=A0=
- just
-> does write or sync test with the raw logical dm device.
->=20
-> Am i missing something?
+This is a regression test for the bug fixed by
+'btrfs: Fix a regression which we can't convert to SINGLE profile'
 
-Ah, sorry, I missed that the test uses raw block device..
+Signed-off-by: Nikolay Borisov <nborisov@suse.com>
+---
+ tests/btrfs/194     | 52 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/194.out |  2 ++
+ tests/btrfs/group   |  1 +
+ 3 files changed, 55 insertions(+)
+ create mode 100755 tests/btrfs/194
+ create mode 100644 tests/btrfs/194.out
 
->=20
-> mkfs.xfs: cannot open /dev/sda11: Device or resource busy
-> device-mapper: remove ioctl on error-test=C2=A0 failed: Device or resou=
-rce busy
-> Command failed.
-> _check_xfs_filesystem: filesystem on /dev/sda11 has dirty log
-> *** xfs_logprint -t output ***
-> xfs_logprint: logprint.c:230: main: Assertion `x.logBBsize <=3D 0x7ffff=
-fff'
-> failed.
-> *** end xfs_logprint output
->=20
-> From above log, dmsetup remove failed with "Device or resource busy".
-
-I can't reproduce above failure with v5.3 kernel, neither xfs nor ext4.
-Does ext4 pass in your setup? I suspect it's a kernel bug that still
-holds the block device.
-
-Thanks,
-Eryu
+diff --git a/tests/btrfs/194 b/tests/btrfs/194
+new file mode 100755
+index 000000000000..8935defd3f5e
+--- /dev/null
++++ b/tests/btrfs/194
+@@ -0,0 +1,52 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2019 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test 194
++#
++# Test that block groups profile can be converted to SINGLE. This is a regression
++# test for 'btrfs: Fix a regression which we can't convert to SINGLE profile'
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch_dev_pool 2
++
++_scratch_dev_pool_get 2
++_scratch_pool_mkfs -draid1
++
++_scratch_mount 
++
++$BTRFS_UTIL_PROG balance start -dconvert=single $SCRATCH_MNT > $seqres.full 2>&1
++[ $? -eq 0 ] || _fail "Convert failed"
++
++_scratch_umount
++_scratch_dev_pool_put
++
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/btrfs/194.out b/tests/btrfs/194.out
+new file mode 100644
+index 000000000000..7bfd50ffb5a4
+--- /dev/null
++++ b/tests/btrfs/194.out
+@@ -0,0 +1,2 @@
++QA output created by 194
++Silence is golden
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index b92cb12ca66f..6a11eb1b8230 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -196,3 +196,4 @@
+ 191 auto quick send dedupe
+ 192 auto replay snapshot stress
+ 193 auto quick qgroup enospc limit
++194 auto quick volume balance
+-- 
+2.7.4
