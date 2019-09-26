@@ -1,56 +1,79 @@
-Received: from szxga04-in.huawei.com ([45.249.212.190]:2712 "EHLO huawei.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1727329AbfIYBr1 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 24 Sep 2019 21:47:27 -0400
-From: Zhihao Cheng <chengzhihao1@huawei.com>
-Subject: [PATCH xfstests v2] overlay: Enable character device to be the base fs partition
-Date: Wed, 25 Sep 2019 09:54:08 +0800
-Message-ID: <1569376448-53998-1-git-send-email-chengzhihao1@huawei.com>
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:25259 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1733188AbfIZDFX (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 25 Sep 2019 23:05:23 -0400
+Subject: Re: [PATCH] generic/442: add sync before dmsetup remove
+References: <1569400158-5297-1-git-send-email-suyj.fnst@cn.fujitsu.com>
+ <20190925130824.GU2622@desktop>
+From: Su Yanjun <suyj.fnst@cn.fujitsu.com>
+Message-ID: <7f33fe1f-fe48-6a21-a92a-ca922265cdea@cn.fujitsu.com>
+Date: Thu, 26 Sep 2019 11:05:13 +0800
 MIME-Version: 1.0
-Content-Type: text/plain
+In-Reply-To: <20190925130824.GU2622@desktop>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
 Sender: fstests-owner@vger.kernel.org
-To: guaneryu@gmail.com, amir73il@gmail.com, david.oberhollenzer@sigma-star.at, ebiggers@google.com, yi.zhang@huawei.com
-Cc: fstests@vger.kernel.org, linux-kernel@vger.kernel.org, chengzhihao1@huawei.com
+Content-Transfer-Encoding: quoted-printable
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-There is a message in _supported_fs():
-    _notrun "not suitable for this filesystem type: $FSTYP"
-for when overlay usecases are executed on a chararcter device based base
-fs. _overay_config_override() detects that the current base fs partition
-is not a block device, and FSTYP won't be overwritten as 'overlay' before
-executing usecases which results in all overlay usecases become 'notrun'.
-In addition, all generic usecases are based on base fs rather than overlay.
 
-We want to rewrite FSTYP to 'overlay' before running the usecases. To do
-this, we need to add additional character device judgments for TEST_DEV
-and SCRATCH_DEV in _overay_config_override().
+=E5=9C=A8 2019/9/25 21:08, Eryu Guan =E5=86=99=E9=81=93:
+> On Wed, Sep 25, 2019 at 04:29:18PM +0800, Su Yanjun wrote:
+>> This test case sometime fails. Because "dmsetup remove error-test" may
+>> fail when some writeback is going on.
+>>
+>> This patch adds sync before dmsetup remove operation.
+>>
+>> Signed-off-by: Su Yanjun <suyj.fnst@cn.fujitsu.com>
+>> ---
+>>   tests/generic/442 | 1 +
+>>   1 file changed, 1 insertion(+)
+>>
+>> diff --git a/tests/generic/442 b/tests/generic/442
+>> index fe6d460..d48ca36 100755
+>> --- a/tests/generic/442
+>> +++ b/tests/generic/442
+>> @@ -43,6 +43,7 @@ $here/src/fsync-err -d $here/src/dmerror $DMERROR_DE=
+V
+> fsync-err should have flipped $DMERROR_DEV to working mode and fsync
+> each open fd before exit if fsync-err didn't report any failure. So
+> there should be no on-going writeback.
+>>  =20
+>>   # success, all done
+>>   _dmerror_load_working_table
+>> +sync
+>>   _dmerror_cleanup
+> And _dmerror_cleanup umount $DMERROR_DEV first, then tear down the dm
+> device. Could you check if fsync-err returns successfully and umount
+> succeeds as well?
 
-Signed-off-by: Zhihao Cheng <chengzhihao1@huawei.com>
----
- common/config | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+I cant find any mount info for $DMERROR_DEV in this test. fsync-err=C2=A0=
+=20
+just does write or sync test with the raw logical dm device.
 
-diff --git a/common/config b/common/config
-index 4c86a49..a22acdb 100644
---- a/common/config
-+++ b/common/config
-@@ -550,7 +550,7 @@ _overlay_config_override()
- 	#    the new OVL_BASE_SCRATCH/TEST_DEV/MNT vars are set to the values
- 	#    of the configured base fs and SCRATCH/TEST_DEV vars are set to the
- 	#    overlayfs base and mount dirs inside base fs mount.
--	[ -b "$TEST_DEV" ] || return 0
-+	[ -b "$TEST_DEV" ] || [ -c "$TEST_DEV" ] || return 0
- 
- 	# Config file may specify base fs type, but we obay -overlay flag
- 	[ "$FSTYP" == overlay ] || export OVL_BASE_FSTYP="$FSTYP"
-@@ -570,7 +570,7 @@ _overlay_config_override()
- 	export TEST_DIR="$OVL_BASE_TEST_DIR/$OVL_MNT"
- 	export MOUNT_OPTIONS="$OVERLAY_MOUNT_OPTIONS"
- 
--	[ -b "$SCRATCH_DEV" ] || return 0
-+	[ -b "$SCRATCH_DEV" ] || [ -c "$SCRATCH_DEV" ] || return 0
- 
- 	# Store original base fs vars
- 	export OVL_BASE_SCRATCH_DEV="$SCRATCH_DEV"
--- 
-2.7.4
+Am i missing something?
+
+mkfs.xfs: cannot open /dev/sda11: Device or resource busy
+device-mapper: remove ioctl on error-test=C2=A0 failed: Device or resourc=
+e busy
+Command failed.
+_check_xfs_filesystem: filesystem on /dev/sda11 has dirty log
+*** xfs_logprint -t output ***
+xfs_logprint: logprint.c:230: main: Assertion `x.logBBsize <=3D=20
+0x7fffffff' failed.
+*** end xfs_logprint output
+
+ From above log, dmsetup remove failed with "Device or resource busy".
+
+> Thanks,
+> Eryu
+>
+>>   _scratch_mkfs > $seqres.full 2>&1
+>>   status=3D0
+>> --=20
+>> 2.7.4
+>>
+>>
+>>
+>
