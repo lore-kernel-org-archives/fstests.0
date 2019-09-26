@@ -1,113 +1,83 @@
-Received: from mx1.redhat.com ([209.132.183.28]:45870 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727038AbfIZOhF (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 26 Sep 2019 10:37:05 -0400
-Date: Thu, 26 Sep 2019 10:37:02 -0400
-From: Brian Foster <bfoster@redhat.com>
-Subject: Re: [PATCH v2] ltp/fsx: avoid infinite loop while finding offset2 in
- clone/dedupe/copy range ops
-Message-ID: <20190926143702.GF26832@bfoster>
-References: <20190824144107.27748-1-guaneryu@gmail.com>
+Received: from mail-pf1-f194.google.com ([209.85.210.194]:39162 "EHLO
+        mail-pf1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1730826AbfIZFv0 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 26 Sep 2019 01:51:26 -0400
+Received: by mail-pf1-f194.google.com with SMTP id v4so1133880pff.6
+        for <fstests@vger.kernel.org>; Wed, 25 Sep 2019 22:51:25 -0700 (PDT)
+Date: Thu, 26 Sep 2019 13:51:19 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH] generic/442: add sync before dmsetup remove
+Message-ID: <20190926055119.GV2622@desktop>
+References: <1569400158-5297-1-git-send-email-suyj.fnst@cn.fujitsu.com>
+ <20190925130824.GU2622@desktop>
+ <7f33fe1f-fe48-6a21-a92a-ca922265cdea@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20190824144107.27748-1-guaneryu@gmail.com>
+In-Reply-To: <7f33fe1f-fe48-6a21-a92a-ca922265cdea@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: fstests@vger.kernel.org, Eryu Guan <eguan@linux.alibaba.com>
+Content-Transfer-Encoding: quoted-printable
+To: Su Yanjun <suyj.fnst@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sat, Aug 24, 2019 at 10:41:07PM +0800, Eryu Guan wrote:
-> From: Eryu Guan <eguan@linux.alibaba.com>
-> 
-> In CLONE/DEDUPE/COPY RANGE operations, we pick a "offset" and "size"
-> first, then find a suitable "offset2" by looping if there's overlap
-> (|offset2-offset| < size) or final file size is greater than max
-> file size (offset2 + size > maxfilelen).
-> 
-> But it's possible that there's no such suitable offset2 and we loop
-> forever. e.g. block_size = 4096, offset = 0, size = 4096 and
-> maxfilelen is a value smaller than 8212 (which could be set via '-l'
-> option).
-> 
-> Fix it by making sure maxfilelen/file_size is big enough to hold
-> 'size' bytes from 'offset2', and just skip this operation if not.
-> 
-> Signed-off-by: Eryu Guan <eguan@linux.alibaba.com>
-> ---
-> v2:
-> - don't use macro with ugly hacks, use an inline function instead
-> 
->  ltp/fsx.c | 15 +++++++++++++++
->  1 file changed, 15 insertions(+)
-> 
-> diff --git a/ltp/fsx.c b/ltp/fsx.c
-> index 06d08e4e93f3..890666ab6140 100644
-> --- a/ltp/fsx.c
-> +++ b/ltp/fsx.c
-> @@ -1911,6 +1911,15 @@ fail:
->  	return 0;
->  }
->  
-> +/* Check if range operations are possible to find a suitable offset */
-> +static inline bool check_range(unsigned long op, unsigned long off,
-> +			       unsigned long len, unsigned long size)
-> +{
-> +	bool ret = ((off + len * 2) <= size);
+On Thu, Sep 26, 2019 at 11:05:13AM +0800, Su Yanjun wrote:
+>=20
+> =E5=9C=A8 2019/9/25 21:08, Eryu Guan =E5=86=99=E9=81=93:
+> > On Wed, Sep 25, 2019 at 04:29:18PM +0800, Su Yanjun wrote:
+> > > This test case sometime fails. Because "dmsetup remove error-test" =
+may
+> > > fail when some writeback is going on.
+> > >=20
+> > > This patch adds sync before dmsetup remove operation.
+> > >=20
+> > > Signed-off-by: Su Yanjun <suyj.fnst@cn.fujitsu.com>
+> > > ---
+> > >   tests/generic/442 | 1 +
+> > >   1 file changed, 1 insertion(+)
+> > >=20
+> > > diff --git a/tests/generic/442 b/tests/generic/442
+> > > index fe6d460..d48ca36 100755
+> > > --- a/tests/generic/442
+> > > +++ b/tests/generic/442
+> > > @@ -43,6 +43,7 @@ $here/src/fsync-err -d $here/src/dmerror $DMERROR=
+_DEV
+> > fsync-err should have flipped $DMERROR_DEV to working mode and fsync
+> > each open fd before exit if fsync-err didn't report any failure. So
+> > there should be no on-going writeback.
+> > >   # success, all done
+> > >   _dmerror_load_working_table
+> > > +sync
+> > >   _dmerror_cleanup
+> > And _dmerror_cleanup umount $DMERROR_DEV first, then tear down the dm
+> > device. Could you check if fsync-err returns successfully and umount
+> > succeeds as well?
+>=20
+> I cant find any mount info for $DMERROR_DEV in this test. fsync-err=C2=A0=
+ just
+> does write or sync test with the raw logical dm device.
+>=20
+> Am i missing something?
 
-A more self-documenting name than ret would be helpful, though I'd
-probably just do something like:
+Ah, sorry, I missed that the test uses raw block device..
 
-	if ((off + len * 2) > size) {
-		log5(op, off, len, -1, FL_SKIPPED);
-		return false;
-	}
-	...
-	return true;
+>=20
+> mkfs.xfs: cannot open /dev/sda11: Device or resource busy
+> device-mapper: remove ioctl on error-test=C2=A0 failed: Device or resou=
+rce busy
+> Command failed.
+> _check_xfs_filesystem: filesystem on /dev/sda11 has dirty log
+> *** xfs_logprint -t output ***
+> xfs_logprint: logprint.c:230: main: Assertion `x.logBBsize <=3D 0x7ffff=
+fff'
+> failed.
+> *** end xfs_logprint output
+>=20
+> From above log, dmsetup remove failed with "Device or resource busy".
 
-> +	if (!ret)
-> +		log5(op, off, len, -1, FL_SKIPPED);
-> +	return ret;
-> +}
+I can't reproduce above failure with v5.3 kernel, neither xfs nor ext4.
+Does ext4 pass in your setup? I suspect it's a kernel bug that still
+holds the block device.
 
-Instead of offloading just this check, could we factor out the
-associated offset2 loop into this function as well (and probably rename
-it)? I.e., this function can return true if it assigned offset2 or false
-and let the caller jump out. It could also take an optional max loop
-count for the dedupe case.
-
-Brian
-
->  
->  int
->  test(void)
-> @@ -1989,6 +1998,8 @@ test(void)
->  		TRIM_OFF_LEN(offset, size, file_size);
->  		offset = offset & ~(block_size - 1);
->  		size = size & ~(block_size - 1);
-> +		if (!check_range(op, offset, size, maxfilelen))
-> +			goto out;
->  		do {
->  			offset2 = random();
->  			TRIM_OFF(offset2, maxfilelen);
-> @@ -2003,6 +2014,8 @@ test(void)
->  			TRIM_OFF_LEN(offset, size, file_size);
->  			offset = offset & ~(block_size - 1);
->  			size = size & ~(block_size - 1);
-> +			if (!check_range(op, offset, size, file_size))
-> +				goto out;
->  			do {
->  				if (tries++ >= 30) {
->  					size = 0;
-> @@ -2020,6 +2033,8 @@ test(void)
->  		offset -= offset % readbdy;
->  		if (o_direct)
->  			size -= size % readbdy;
-> +		if (!check_range(op, offset, size, maxfilelen))
-> +			goto out;
->  		do {
->  			offset2 = random();
->  			TRIM_OFF(offset2, maxfilelen);
-> -- 
-> 2.21.0
-> 
+Thanks,
+Eryu
