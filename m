@@ -2,127 +2,141 @@ Return-Path: <SRS0=31Kr=XW=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 00CE5C4360C
-	for <linux-fstests@archiver.kernel.org>; Fri, 27 Sep 2019 01:47:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 57B9FC4360C
+	for <linux-fstests@archiver.kernel.org>; Fri, 27 Sep 2019 01:56:32 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id CF82B206B7
-	for <linux-fstests@archiver.kernel.org>; Fri, 27 Sep 2019 01:47:04 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2F5D8206B7
+	for <linux-fstests@archiver.kernel.org>; Fri, 27 Sep 2019 01:56:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727542AbfI0BrE (ORCPT
+        id S1727895AbfI0B4b (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 26 Sep 2019 21:47:04 -0400
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:58250 "EHLO
+        Thu, 26 Sep 2019 21:56:31 -0400
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:47687 "EHLO
         heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726140AbfI0BrE (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 26 Sep 2019 21:47:04 -0400
+        with ESMTP id S1726145AbfI0B4b (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 26 Sep 2019 21:56:31 -0400
 X-IronPort-AV: E=Sophos;i="5.64,553,1559491200"; 
-   d="scan'208";a="76088491"
+   d="scan'208";a="76089014"
 Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
-  by heian.cn.fujitsu.com with ESMTP; 27 Sep 2019 09:47:02 +0800
+  by heian.cn.fujitsu.com with ESMTP; 27 Sep 2019 09:56:30 +0800
 Received: from G08CNEXCHPEKD03.g08.fujitsu.local (unknown [10.167.33.85])
-        by cn.fujitsu.com (Postfix) with ESMTP id 76B574CE14F7;
-        Fri, 27 Sep 2019 09:47:05 +0800 (CST)
-Received: from [10.167.226.33] (10.167.226.33) by
+        by cn.fujitsu.com (Postfix) with ESMTP id 8BCD14CE14F7;
+        Fri, 27 Sep 2019 09:56:29 +0800 (CST)
+Received: from localhost.localdomain (10.167.226.33) by
  G08CNEXCHPEKD03.g08.fujitsu.local (10.167.33.89) with Microsoft SMTP Server
- (TLS) id 14.3.439.0; Fri, 27 Sep 2019 09:47:05 +0800
-Subject: Re: [PATCH] generic/465: fix a read bug when encounter EOF
-To:     Eryu Guan <guaneryu@gmail.com>
-CC:     <fstests@vger.kernel.org>
-References: <1568611466-100970-1-git-send-email-suyj.fnst@cn.fujitsu.com>
- <20190925094720.GS2622@desktop>
+ (TLS) id 14.3.439.0; Fri, 27 Sep 2019 09:56:32 +0800
 From:   Su Yanjun <suyj.fnst@cn.fujitsu.com>
-Message-ID: <ecd1ae6e-295c-bc27-6c41-20c8a929f81c@cn.fujitsu.com>
-Date:   Fri, 27 Sep 2019 09:46:59 +0800
-User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:60.0) Gecko/20100101
- Thunderbird/60.7.0
+To:     <guaneryu@gmail.com>
+CC:     <fstests@vger.kernel.org>, <suyj.fnst@cn.fujitsu.com>
+Subject: [PATCH v2] fsx: add more check for copy_file_range
+Date:   Fri, 27 Sep 2019 09:53:54 +0800
+Message-ID: <1569549234-13096-1-git-send-email-suyj.fnst@cn.fujitsu.com>
+X-Mailer: git-send-email 2.7.4
 MIME-Version: 1.0
-In-Reply-To: <20190925094720.GS2622@desktop>
-Content-Type: text/plain; charset="UTF-8"; format="flowed"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
 X-Originating-IP: [10.167.226.33]
-X-yoursite-MailScanner-ID: 76B574CE14F7.AC15E
+X-yoursite-MailScanner-ID: 8BCD14CE14F7.A1522
 X-yoursite-MailScanner: Found to be clean
 X-yoursite-MailScanner-From: suyj.fnst@cn.fujitsu.com
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
-Message-ID: <20190927014659.VHl9T8QwVn6F3-V26BopSEovhRNfPmElg-766ZUC4y8@z>
+Message-ID: <20190927015354.AVx1fDTytjssYlmnD-nAAjv44R_nEuSc080WVj7DDNk@z>
 
+On some linux distros(RHEL7, centos 7) copy_file_range uses
+general implementation (splice interface). splice interace
+uses pipe_to_file. pipe_to_file only work for different page.
+The userspace cant's be  aware of such error because copy_file_range
+returns ok too.
+So for such case when copy_file_range return we read back data
+then check it.
 
-在 2019/9/25 17:47, Eryu Guan 写道:
-> On Mon, Sep 16, 2019 at 01:24:26PM +0800, Su Yanjun wrote:
->> In nfs test, if the writer has not written enough data for reader reading,
->> then reader only get partial data and test fails.
->>
->> We can continue reading until read enough data.
->>
->> Signed-off-by: Su Yanjun <suyj.fnst@cn.fujitsu.com>
-> Would you please provide more info on the actual failure you've seen? I
-> think the partial read issue should have been addressed by commit
-> 2428c08a6025 ("generic/465: just check the actual read data under dio
-> read/write")
+Also add check for do_clone_range following Eryu's advice.
 
-I rechecked my patch and my patch is not needed at all.
+Signed-off-by: Su Yanjun <suyj.fnst@cn.fujitsu.com>
+---
+v2:
+- Use check_buffers instead memcmp code
+- Add check for do_clone_range
+- Fix return unique error number for the check code
+---
+ ltp/fsx.c | 35 +++++++++++++++++++++++++++++++++++
+ 1 file changed, 35 insertions(+)
 
-It's  only workaround of a kernel bug of nfs. In some cases nfs returns 
-wrong data to userspace, but the return value is ok.
+diff --git a/ltp/fsx.c b/ltp/fsx.c
+index 06d08e4..714bebc 100644
+--- a/ltp/fsx.c
++++ b/ltp/fsx.c
+@@ -1378,6 +1378,7 @@ test_clone_range(void)
+ void
+ do_clone_range(unsigned offset, unsigned length, unsigned dest)
+ {
++	int ret = 0;
+ 	struct file_clone_range	fcr = {
+ 		.src_fd = fd,
+ 		.src_offset = offset,
+@@ -1429,6 +1430,23 @@ do_clone_range(unsigned offset, unsigned length, unsigned dest)
+ 		memset(good_buf + file_size, '\0', dest - file_size);
+ 	if (dest + length > file_size)
+ 		file_size = dest + length;
++
++	ret = lseek(fd, (off_t)dest, SEEK_SET);
++	if (ret == (off_t)-1) {
++		prterr("do_clone_range: lseek");
++		report_failure(162);
++	}
++	ret = fsxread(fd, temp_buf, length, dest);
++	if (ret != length) {
++		if (ret == -1)
++			prterr("do_clone_range: read");
++		else
++			prt("short read: 0x%x bytes instead of 0x%x\n",
++				ret, length);
++		report_failure(163);
++	}
++	check_buffers(temp_buf, dest, length);
++
+ }
+ 
+ #else
+@@ -1602,6 +1620,7 @@ do_copy_range(unsigned offset, unsigned length, unsigned dest)
+ 	size_t olen;
+ 	ssize_t nr;
+ 	int tries = 0;
++	int ret = 0;
+ 
+ 	if (length == 0) {
+ 		if (!quiet && testcalls > simulatedopcount)
+@@ -1665,6 +1684,22 @@ do_copy_range(unsigned offset, unsigned length, unsigned dest)
+ 		memset(good_buf + file_size, '\0', dest - file_size);
+ 	if (dest + length > file_size)
+ 		file_size = dest + length;
++
++	ret = lseek(fd, (off_t)dest, SEEK_SET);
++	if (ret == (off_t)-1) {
++		prterr("do_copy_range: lseek");
++		report_failure(162);
++	}
++	ret = fsxread(fd, temp_buf, length, dest);
++	if (ret != length) {
++		if (ret == -1)
++			prterr("do_copy_range: read");
++		else
++			prt("short read: 0x%x bytes instead of 0x%x\n",
++				ret, length);
++		report_failure(163);
++	}
++	check_buffers(temp_buf, dest, length);
+ }
+ 
+ #else
+-- 
+2.7.4
 
-I will send a kernel patch to nfs mailist.
-
-Thanks a lot.
-
->
-> Thanks,
-> Eryu
->
->> ---
->>   src/aio-dio-regress/aio-dio-append-write-read-race.c | 17 +++++++++++++++--
->>   1 file changed, 15 insertions(+), 2 deletions(-)
->>
->> diff --git a/src/aio-dio-regress/aio-dio-append-write-read-race.c b/src/aio-dio-regress/aio-dio-append-write-read-race.c
->> index 911f272..f28ef3c 100644
->> --- a/src/aio-dio-regress/aio-dio-append-write-read-race.c
->> +++ b/src/aio-dio-regress/aio-dio-append-write-read-race.c
->> @@ -44,14 +44,27 @@ static void usage(const char *prog)
->>   static void *reader(void *arg)
->>   {
->>   	struct io_data *data = (struct io_data *)arg;
->> +	size_t blksize = data->blksize;
->> +	size_t offset = data->offset;
->> +	char   *buf = data->buf;
->>   
->>   	memset(data->buf, 'b', data->blksize);
->>   	reader_ready = 1;
->>   	do {
->> -		data->read_sz = pread(data->fd, data->buf, data->blksize,
->> -				      data->offset);
->> +		data->read_sz = pread(data->fd, buf, blksize,
->> +				      offset);
->>   		if (data->read_sz < 0)
->>   			perror("read file");
->> +
->> +		if (data->read_sz > 0) {
->> +			blksize -= data->read_sz;
->> +			offset  += data->read_sz;
->> +			buf	+= data->read_sz;
->> +			data->read_sz = 0;
->> +		}
->> +
->> +		if (blksize <= 0)
->> +			break;
->>   	} while (data->read_sz <= 0);
->>   
->>   	return NULL;
->> -- 
->> 2.7.4
->>
->>
->>
->
 
 
