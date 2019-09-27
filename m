@@ -1,197 +1,156 @@
-Received: from mx1.redhat.com ([209.132.183.28]:44532 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725882AbfI0JQb (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 27 Sep 2019 05:16:31 -0400
-Subject: Re: [PATCH v2] generic: fallocate two bytes at block boundary
-References: <20190926165145.9161-1-mreitz@redhat.com>
- <20190927013744.GY2622@desktop>
-From: Max Reitz <mreitz@redhat.com>
-Message-ID: <56045f7d-8f28-9af0-3508-bdb7630288ba@redhat.com>
-Date: Fri, 27 Sep 2019 11:16:28 +0200
+Received: from mx2.suse.de ([195.135.220.15]:50144 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1725946AbfI0J6t (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 27 Sep 2019 05:58:49 -0400
+From: Qu Wenruo <wqu@suse.com>
+Subject: [PATCH v2] fstests: btrfs/011: Fill the fs to ensure we have enough data for dev-replace
+Date: Fri, 27 Sep 2019 17:58:43 +0800
+Message-Id: <20190927095843.20595-1-wqu@suse.com>
 MIME-Version: 1.0
-In-Reply-To: <20190927013744.GY2622@desktop>
-Content-Type: multipart/signed; micalg=pgp-sha256;
- protocol="application/pgp-signature";
- boundary="an3LoQyepypX6ZYGRfcNokLbT4cmV3xgW"
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---an3LoQyepypX6ZYGRfcNokLbT4cmV3xgW
-Content-Type: multipart/mixed; boundary="Cu7jaTGUu4sOgWwLeVFbxsRGQtFXCN89Z"
+[BUG]
+When btrfs/011 is executed on a fast enough system (fully memory backed
+VM, with test device has unsafe cache mode), the test can fail like
+this:
 
---Cu7jaTGUu4sOgWwLeVFbxsRGQtFXCN89Z
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: quoted-printable
+  btrfs/011 43s ... [failed, exit status 1]- output mismatch (see /home/adam/xfstests-dev/results//btrfs/011.out.bad)
+    --- tests/btrfs/011.out     2019-07-22 14:13:44.643333326 +0800
+    +++ /home/adam/xfstests-dev/results//btrfs/011.out.bad      2019-09-18 14:49:28.308798022 +0800
+    @@ -1,3 +1,4 @@
+     QA output created by 011
+     *** test btrfs replace
+    -*** done
+    +failed: '/usr/bin/btrfs replace cancel /mnt/scratch'
+    +(see /home/adam/xfstests-dev/results//btrfs/011.full for details)
+    ...
 
-On 27.09.19 03:37, Eryu Guan wrote:
-> On Thu, Sep 26, 2019 at 06:51:45PM +0200, Max Reitz wrote:
->> Allocating two bytes at a block boundary with fallocate should allocat=
-e
->> both blocks involved.  Test this by writing data to both bytes
->> afterwards and see whether the on-disk size increases (it should not).=
+[CAUSE]
+Looking into the full output, it shows:
+  ...
+  Replace from /dev/mapper/test-scratch1 to /dev/mapper/test-scratch2
 
->>
->> Signed-off-by: Max Reitz <mreitz@redhat.com>
->=20
-> I notice that XFS fails this test with v5.3 kernel, so I guess this is =
-a
-> targeted regression test? Do you have a (pending) patch/commit that
-> could be referenced in the commit log and/or test description? So we
-> could know which patch/commit fixed this particular failure.
+  # /usr/bin/btrfs replace start -f /dev/mapper/test-scratch1 /dev/mapper/test-scratch2 /mnt/scratch
+  # /usr/bin/btrfs replace cancel /mnt/scratch
+  INFO: ioctl(DEV_REPLACE_CANCEL)"/mnt/scratch": not started
+  failed: '/usr/bin/btrfs replace cancel /mnt/scratch'
 
-Yes, exactly.  It=E2=80=99s "xfs: Fix tail rounding in xfs_alloc_file_spa=
-ce()=E2=80=8B=E2=80=9D
-(https://www.spinics.net/lists/linux-xfs/msg32174.html).  I=E2=80=99ll ad=
-d it to
-the commit message in v3.
+So this means the replace is already finished before we cancel it.
+For fast system, it's very common.
 
->> ---
->> v2:
->> - Use _get_file_block_size instead of manual stat -fc '%S'
->> - Use xfs_io instead of fallocate/dd
->>   (and require falloc support)
->> - Add the ' B' that was missing as allocated_size_after's unit in the
->>   error message
->> ---
->>  tests/generic/568     | 63 ++++++++++++++++++++++++++++++++++++++++++=
+[FIX]
+In fill_scratch() after all the original file creations, do a timer
+based direct IO write.
+The extra write will take 2 * $wait_time, utilizing direct IO with 64K
+block size, the write performance should be very comparable (although a
+little faster) to replace performance.
+
+So later cancel should be able to really cancel the dev-replace without
+it finished too early.
+
+Also, do extra check about the above write. If we hit ENOSPC we just
+skip the test as the system is really too fast and the fs is not large
+enough.
+
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+---
+changelog
+v2:
+- Remove one confusing comment
+- Change the _notrun message to focus on too small fs
+---
+ tests/btrfs/011 | 42 +++++++++++++++++++++++++++++++++++-------
+ 1 file changed, 35 insertions(+), 7 deletions(-)
+
+diff --git a/tests/btrfs/011 b/tests/btrfs/011
+index 89bb4d11..de424f87 100755
+--- a/tests/btrfs/011
++++ b/tests/btrfs/011
+@@ -34,7 +34,7 @@ _cleanup()
+ 		kill -TERM $noise_pid
+ 	fi
+ 	wait
+-	rm -f $tmp.tmp
++	rm -f $tmp.*
+ 	# we need this umount and couldn't rely on _require_scratch to umount
+ 	# it from next test, because we would replace SCRATCH_DEV, which is
+ 	# needed by _require_scratch, and make it umounted.
+@@ -54,13 +54,17 @@ _require_scratch_dev_pool_equal_size
+ _require_command "$WIPEFS_PROG" wipefs
+ 
+ rm -f $seqres.full
+-rm -f $tmp.tmp
++rm -f $tmp.*
+ 
+ echo "*** test btrfs replace"
+ 
++# In seconds
++wait_time=1
 +
->>  tests/generic/568.out |  4 +++
->>  tests/generic/group   |  1 +
->>  3 files changed, 68 insertions(+)
->>  create mode 100755 tests/generic/568
->>  create mode 100644 tests/generic/568.out
->>
->> diff --git a/tests/generic/568 b/tests/generic/568
->> new file mode 100755
->> index 00000000..df67daf4
->> --- /dev/null
->> +++ b/tests/generic/568
->> @@ -0,0 +1,63 @@
->> +#! /bin/bash
->> +# SPDX-License-Identifier: GPL-2.0
->> +# Copyright (c) 2019 Red Hat, Inc.  All Rights Reserved.
->> +#
->> +# FS QA Test No. generic/568
->> +#
->> +# Test that fallocating an unaligned range allocates all blocks
->> +# touched by that range
->> +#
->> +seq=3D$(basename $0)
->> +seqres=3D"$RESULT_DIR/$seq"
->> +echo "QA output created by $seq"
->> +
->> +here=3D$PWD
->> +tmp=3D/tmp/$$
->> +status=3D1	# failure is the default!
->> +trap "_cleanup; exit \$status" 0 1 2 3 15
->> +
->> +_cleanup()
->> +{
->> +	cd /
->> +	rm -f "$tmp".*
->> +}
->> +
->> +# get standard environment, filters and checks
->> +. ./common/rc
->> +. ./common/filter
->> +
->> +# real QA test starts here
->> +_supported_fs generic
->> +_supported_os Linux
->> +_require_scratch
->> +_require_xfs_io_command "falloc"
->> +
->> +testfile=3D"$SCRATCH_MNT/testfile"
->> +
->> +_scratch_mkfs > /dev/null 2>&1
->> +_scratch_mount
->=20
-> Seems you don't need $SCRATCH_DEV at all. Just create the test file on
-> $TEST_DEV in $TEST_DIR, e.g.
->=20
-> testfile=3D"$TEST_DIR"/falloctest-$seq
-> rm -f $testfile
-
-OK, sure.
-
->> +
->> +# Fallocate 2 bytes across a block boundary
->> +block_size=3D$(_get_file_block_size "$SCRATCH_MNT")
->> +$XFS_IO_PROG -f -c "falloc $((block_size - 1)) 2" "$testfile"
->> +
->> +# Both the first blocks should be allocated now.  Check that by
->> +# inquiring whether the file grows when we write to the two bytes we
->> +# have just fallocated.
->> +
->> +allocated_size_before=3D$(($(stat -c '%b * %B' "$testfile")))
->> +
->> +$XFS_IO_PROG -c "pwrite $((block_size - 1)) 2" "$testfile" \
->> +	| _filter_xfs_io | sed -e "s/$((block_size - 1))/block_size - 1/"
->> +
->> +allocated_size_after=3D$(($(stat -c '%b * %B' "$testfile")))
->> +
->> +if [ $allocated_size_after -gt $allocated_size_before ]; then
->> +	echo "ERROR: File grew from ${allocated_size_before} B to" \
->> +	     "${allocated_size_after} B when writing to the fallocated range=
-=2E"
->> +else
->> +	echo "OK: File did not grow."
->> +fi
->> +
->> +status=3D0
->> +exit
->> diff --git a/tests/generic/568.out b/tests/generic/568.out
->> new file mode 100644
->> index 00000000..435a9630
->> --- /dev/null
->> +++ b/tests/generic/568.out
->> @@ -0,0 +1,4 @@
->> +QA output created by 568
->> +wrote 2/2 bytes at offset block_size - 1
->> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
->> +OK: File did not grow.
->> diff --git a/tests/generic/group b/tests/generic/group
->> index 7cf4f6c4..24ab29bc 100644
->> --- a/tests/generic/group
->> +++ b/tests/generic/group
->> @@ -570,3 +570,4 @@
->>  565 auto quick copy_range
->>  566 auto quick quota metadata
->>  567 auto quick rw punch
->> +568 auto quick rw
->=20
-> Add 'prealloc' group as well.
-
-Will do.
-
-> Thanks for the test!
-
-Thanks for reviewing,
-
-Max
-
-
---Cu7jaTGUu4sOgWwLeVFbxsRGQtFXCN89Z--
-
---an3LoQyepypX6ZYGRfcNokLbT4cmV3xgW
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAEBCAAdFiEEkb62CjDbPohX0Rgp9AfbAGHVz0AFAl2N02wACgkQ9AfbAGHV
-z0Cfcwf+OM5lJ28DbVjwjhU0Eo8BReQ3nnvDAFm3L7TG5xXPO8vHvA8MaWpYQh4K
-bGKoQt3m50nVmrJ9f3yNznAhkA4ZeuzjPOxq77v8z/kE2qHCwXoBww8CpCjdq5Ka
-vFA5/9NZ6oH9dzGVJ2v8ETmnCav+F2bZAK3hvbZgKlL+ZEPLSPlP11/udtOQogr+
-d3vRVeTVWv4Cl7/nrNGtdm06JXlYBC+fQS7EPS4SodVp3PwiSBn7mefAmn6faNfb
-jsN7Ukj8SlpCM6LZEKpAU5f1I7AwGVNJ/AW/qRG3ArHmgC09Of8DaOKm1H7bXrWZ
-MtXJAyD8x+ff5DASXc/0PEUR8xn2Uw==
-=8/by
------END PGP SIGNATURE-----
-
---an3LoQyepypX6ZYGRfcNokLbT4cmV3xgW--
+ fill_scratch()
+ {
+ 	local fssize=$1
++	local filler_pid
+ 
+ 	# Fill inline extents.
+ 	for i in `seq 1 500`; do
+@@ -75,6 +79,30 @@ fill_scratch()
+ 	for i in `seq $fssize`; do
+ 		cp $SCRATCH_MNT/t0 $SCRATCH_MNT/t$i || _fail "cp failed"
+ 	done > /dev/null 2>> $seqres.full
++
++	# Ensure we have enough data so that dev-replace would take at least
++	# 2 * $wait_time, allowing we cancel the running replace.
++	# Some extra points:
++	# - Use XFS_IO_PROG instead of dd
++	#   fstests wraps dd, making it pretty hard to kill the real dd pid
++	# - Use 64K block size with Direct IO
++	#   64K is the same stripe size used in replace/scrub. Using Direct IO
++	#   ensure the IO speed is near device limit and comparable to replace
++	#   speed.
++	$XFS_IO_PROG -f -d -c "pwrite -b 64k 0 1E" "$SCRATCH_MNT/t_filler" &>\
++		$tmp.filler_result &
++	filler_pid=$!
++	sleep $((2 * $wait_time))
++	kill -KILL $filler_pid &> /dev/null
++	wait $filler_pid &> /dev/null
++
++	# If the system is too fast and the fs is too small, then skip the test
++	if grep -q "No space left" $tmp.filler_result; then
++		ls -alh $SCRATCH_MNT >> $seqres.full
++		cat $tmp.filler_result >> $seqres.full
++		_notrun "fs too small for this test"
++	fi
++	cat $tmp.filler_result
+ 	sync; sync
+ }
+ 
+@@ -147,7 +175,7 @@ btrfs_replace_test()
+ 	if [ "${with_cancel}Q" = "cancelQ" ]; then
+ 		# background the replace operation (no '-B' option given)
+ 		_run_btrfs_util_prog replace start -f $replace_options $source_dev $target_dev $SCRATCH_MNT
+-		sleep 1
++		sleep $wait_time
+ 		_run_btrfs_util_prog replace cancel $SCRATCH_MNT
+ 
+ 		# 'replace status' waits for the replace operation to finish
+@@ -157,10 +185,10 @@ btrfs_replace_test()
+ 		grep -q canceled $tmp.tmp || _fail "btrfs replace status (canceled) failed"
+ 	else
+ 		if [ "${quick}Q" = "thoroughQ" ]; then
+-			# On current hardware, the thorough test runs
+-			# more than a second. This is a chance to force
+-			# a sync in the middle of the replace operation.
+-			(sleep 1; sync) > /dev/null 2>&1 &
++			# The thorough test runs around 2 * $wait_time seconds.
++			# This is a chance to force a sync in the middle of the
++			# replace operation.
++			(sleep $wait_time; sync) > /dev/null 2>&1 &
+ 		fi
+ 		_run_btrfs_util_prog replace start -Bf $replace_options $source_dev $target_dev $SCRATCH_MNT
+ 
+-- 
+2.22.0
