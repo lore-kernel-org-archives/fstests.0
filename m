@@ -1,16 +1,16 @@
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:58250 "EHLO
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:50123 "EHLO
         heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726140AbfI0BrE (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 26 Sep 2019 21:47:04 -0400
-Subject: Re: [PATCH] generic/465: fix a read bug when encounter EOF
-References: <1568611466-100970-1-git-send-email-suyj.fnst@cn.fujitsu.com>
- <20190925094720.GS2622@desktop>
+        with ESMTP id S1726029AbfI0Bif (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 26 Sep 2019 21:38:35 -0400
+Subject: Re: [PATCH] fsx: add more check for copy_file_range
+References: <1569395815-4657-1-git-send-email-suyj.fnst@cn.fujitsu.com>
+ <20190925130809.GT2622@desktop>
 From: Su Yanjun <suyj.fnst@cn.fujitsu.com>
-Message-ID: <ecd1ae6e-295c-bc27-6c41-20c8a929f81c@cn.fujitsu.com>
-Date: Fri, 27 Sep 2019 09:46:59 +0800
+Message-ID: <5307926c-1fdb-5283-5053-b6f4f7d23a41@cn.fujitsu.com>
+Date: Fri, 27 Sep 2019 09:38:27 +0800
 MIME-Version: 1.0
-In-Reply-To: <20190925094720.GS2622@desktop>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
+In-Reply-To: <20190925130809.GT2622@desktop>
+Content-Type: text/plain; charset="gbk"; format=flowed
 Sender: fstests-owner@vger.kernel.org
 Content-Transfer-Encoding: quoted-printable
 To: Eryu Guan <guaneryu@gmail.com>
@@ -18,74 +18,99 @@ Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
 
-=E5=9C=A8 2019/9/25 17:47, Eryu Guan =E5=86=99=E9=81=93:
-> On Mon, Sep 16, 2019 at 01:24:26PM +0800, Su Yanjun wrote:
->> In nfs test, if the writer has not written enough data for reader read=
-ing,
->> then reader only get partial data and test fails.
->>
->> We can continue reading until read enough data.
->>
+=D4=DA 2019/9/25 21:08, Eryu Guan =D0=B4=B5=C0:
+> On Wed, Sep 25, 2019 at 03:16:55PM +0800, Su Yanjun wrote:
+>> On some linux distros(RHEL7, centos 7) copy_file_range uses
+>> general implementation (splice interface). splice interace
+>> uses pipe_to_file. pipe_to_file only work for different page.
+>> The userspace cant's be  aware of such error because copy_file_range
+>> returns ok too.
+> This looks like a kernel bug to me.
+Yes, it's RHEL kernel 3.10's bug. The new kernel is ok.
+>> So for such case when copy_file_range return we read back data
+>> then check it.
+> Yeah, I think we should make sure the data copied is correct.
+>
 >> Signed-off-by: Su Yanjun <suyj.fnst@cn.fujitsu.com>
-> Would you please provide more info on the actual failure you've seen? I
-> think the partial read issue should have been addressed by commit
-> 2428c08a6025 ("generic/465: just check the actual read data under dio
-> read/write")
+>> ---
+>>   ltp/fsx.c | 32 ++++++++++++++++++++++++++++++++
+>>   1 file changed, 32 insertions(+)
+>>
+>> diff --git a/ltp/fsx.c b/ltp/fsx.c
+>> index 06d08e4..0439430 100644
+>> --- a/ltp/fsx.c
+>> +++ b/ltp/fsx.c
+>> @@ -1602,6 +1602,7 @@ do_copy_range(unsigned offset, unsigned length, =
+unsigned dest)
+>>   	size_t olen;
+>>   	ssize_t nr;
+>>   	int tries =3D 0;
+>> +	int ret =3D 0;
+>>  =20
+>>   	if (length =3D=3D 0) {
+>>   		if (!quiet && testcalls > simulatedopcount)
+>> @@ -1665,6 +1666,37 @@ do_copy_range(unsigned offset, unsigned length,=
+ unsigned dest)
+>>   		memset(good_buf + file_size, '\0', dest - file_size);
+>>   	if (dest + length > file_size)
+>>   		file_size =3D dest + length;
+>> +	/*
+>> +	 * Although copy_file_range returns ok
+>> +	 * for some linux distros that use general implementation
+>> +	 * (splice interface) such as RHEL 7, centos 7 that use
+>> +	 * pipe_to_file will cause test fail.
+>> +	 *
+>> +	 * Here we add a little more check here for copy_file_range
+>> +	 * We read copied data then check it. If check fail here
+>> +	 * then report it.
+>> +	 */
+> Above comments seem like not necessary, the content check is inspired b=
+y
+> Rthis HEL7 issue, but not the main purpose.
+>
+>> +	ret =3D lseek(fd, (off_t)dest, SEEK_SET);
+>> +	if (ret =3D=3D (off_t)-1) {
+>> +		prterr("doread: lseek");
+>                          ^^^^^^^ not doread
+>
+>> +		report_failure(140);
+> Use a different failure number than that in doread, i.e. don't copy the
+> code from doread.
+>
+>> +	}
+>> +	ret =3D fsxread(fd, temp_buf, length, dest);
+>> +	if (ret !=3D length) {
+>> +		if (ret =3D=3D -1)
+>> +				prterr("doread: read");
+>> +		else
+>> +				prt("short read: 0x%x bytes instead of 0x%x\n",
+>> +					ret, length);
+> Same here, not doread, and weired indention above.
+>
+>> +		report_failure(141);
+>> +	}
+>> +	if (memcmp(good_buf+dest, temp_buf, length) !=3D 0) {
+>> +		prt("copy range: 0x%x to 0x%x at 0x%x\n", offset,
+>> +				offset + length, dest);
+>> +		prterr("do_copy_range:");
+>> +		report_failure(161);
+> I think we could take use of check_buffers().
+>
+> And similar check could be added to do_clone_range as well, I think.
 
-I rechecked my patch and my patch is not needed at all.
+Ok, i'll send patch v2 later.
 
-It's=C2=A0 only workaround of a kernel bug of nfs. In some cases nfs retu=
-rns=20
-wrong data to userspace, but the return value is ok.
-
-I will send a kernel patch to nfs mailist.
-
-Thanks a lot.
+Thanks
 
 >
 > Thanks,
 > Eryu
 >
->> ---
->>   src/aio-dio-regress/aio-dio-append-write-read-race.c | 17 ++++++++++=
-+++++--
->>   1 file changed, 15 insertions(+), 2 deletions(-)
->>
->> diff --git a/src/aio-dio-regress/aio-dio-append-write-read-race.c b/sr=
-c/aio-dio-regress/aio-dio-append-write-read-race.c
->> index 911f272..f28ef3c 100644
->> --- a/src/aio-dio-regress/aio-dio-append-write-read-race.c
->> +++ b/src/aio-dio-regress/aio-dio-append-write-read-race.c
->> @@ -44,14 +44,27 @@ static void usage(const char *prog)
->>   static void *reader(void *arg)
->>   {
->>   	struct io_data *data =3D (struct io_data *)arg;
->> +	size_t blksize =3D data->blksize;
->> +	size_t offset =3D data->offset;
->> +	char   *buf =3D data->buf;
->>  =20
->>   	memset(data->buf, 'b', data->blksize);
->>   	reader_ready =3D 1;
->>   	do {
->> -		data->read_sz =3D pread(data->fd, data->buf, data->blksize,
->> -				      data->offset);
->> +		data->read_sz =3D pread(data->fd, buf, blksize,
->> +				      offset);
->>   		if (data->read_sz < 0)
->>   			perror("read file");
 >> +
->> +		if (data->read_sz > 0) {
->> +			blksize -=3D data->read_sz;
->> +			offset  +=3D data->read_sz;
->> +			buf	+=3D data->read_sz;
->> +			data->read_sz =3D 0;
->> +		}
->> +
->> +		if (blksize <=3D 0)
->> +			break;
->>   	} while (data->read_sz <=3D 0);
+>> +	}
+>>   }
 >>  =20
->>   	return NULL;
+>>   #else
 >> --=20
 >> 2.7.4
 >>
