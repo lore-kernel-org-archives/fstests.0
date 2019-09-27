@@ -1,89 +1,151 @@
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:1966 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1725808AbfI0Bks (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 26 Sep 2019 21:40:48 -0400
-From: Su Yanjun <suyj.fnst@cn.fujitsu.com>
-Subject: Re: [PATCH] generic/442: add sync before dmsetup remove
-References: <1569400158-5297-1-git-send-email-suyj.fnst@cn.fujitsu.com>
- <20190925130824.GU2622@desktop>
- <7f33fe1f-fe48-6a21-a92a-ca922265cdea@cn.fujitsu.com>
- <20190926055119.GV2622@desktop>
-Message-ID: <19be84d6-25a4-bfa9-ed60-1b9105bca1ec@cn.fujitsu.com>
-Date: Fri, 27 Sep 2019 09:40:43 +0800
+Received: from mail-pg1-f195.google.com ([209.85.215.195]:46889 "EHLO
+        mail-pg1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726029AbfI0Bhy (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 26 Sep 2019 21:37:54 -0400
+Received: by mail-pg1-f195.google.com with SMTP id a3so2505189pgm.13
+        for <fstests@vger.kernel.org>; Thu, 26 Sep 2019 18:37:53 -0700 (PDT)
+Date: Fri, 27 Sep 2019 09:37:46 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH v2] generic: fallocate two bytes at block boundary
+Message-ID: <20190927013744.GY2622@desktop>
+References: <20190926165145.9161-1-mreitz@redhat.com>
 MIME-Version: 1.0
-In-Reply-To: <20190926055119.GV2622@desktop>
-Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190926165145.9161-1-mreitz@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: Eryu Guan <guaneryu@gmail.com>
+To: Max Reitz <mreitz@redhat.com>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+On Thu, Sep 26, 2019 at 06:51:45PM +0200, Max Reitz wrote:
+> Allocating two bytes at a block boundary with fallocate should allocate
+> both blocks involved.  Test this by writing data to both bytes
+> afterwards and see whether the on-disk size increases (it should not).
+> 
+> Signed-off-by: Max Reitz <mreitz@redhat.com>
 
-=E5=9C=A8 2019/9/26 13:51, Eryu Guan =E5=86=99=E9=81=93:
-> On Thu, Sep 26, 2019 at 11:05:13AM +0800, Su Yanjun wrote:
->> =E5=9C=A8 2019/9/25 21:08, Eryu Guan =E5=86=99=E9=81=93:
->>> On Wed, Sep 25, 2019 at 04:29:18PM +0800, Su Yanjun wrote:
->>>> This test case sometime fails. Because "dmsetup remove error-test" m=
-ay
->>>> fail when some writeback is going on.
->>>>
->>>> This patch adds sync before dmsetup remove operation.
->>>>
->>>> Signed-off-by: Su Yanjun<suyj.fnst@cn.fujitsu.com>
->>>> ---
->>>>    tests/generic/442 | 1 +
->>>>    1 file changed, 1 insertion(+)
->>>>
->>>> diff --git a/tests/generic/442 b/tests/generic/442
->>>> index fe6d460..d48ca36 100755
->>>> --- a/tests/generic/442
->>>> +++ b/tests/generic/442
->>>> @@ -43,6 +43,7 @@ $here/src/fsync-err -d $here/src/dmerror $DMERROR_=
-DEV
->>> fsync-err should have flipped $DMERROR_DEV to working mode and fsync
->>> each open fd before exit if fsync-err didn't report any failure. So
->>> there should be no on-going writeback.
->>>>    # success, all done
->>>>    _dmerror_load_working_table
->>>> +sync
->>>>    _dmerror_cleanup
->>> And _dmerror_cleanup umount $DMERROR_DEV first, then tear down the dm
->>> device. Could you check if fsync-err returns successfully and umount
->>> succeeds as well?
->> I cant find any mount info for $DMERROR_DEV in this test. fsync-err=C2=
-=A0 just
->> does write or sync test with the raw logical dm device.
->>
->> Am i missing something?
-> Ah, sorry, I missed that the test uses raw block device..
->
->> mkfs.xfs: cannot open /dev/sda11: Device or resource busy
->> device-mapper: remove ioctl on error-test=C2=A0 failed: Device or reso=
-urce busy
->> Command failed.
->> _check_xfs_filesystem: filesystem on /dev/sda11 has dirty log
->> *** xfs_logprint -t output ***
->> xfs_logprint: logprint.c:230: main: Assertion `x.logBBsize <=3D 0x7fff=
-ffff'
->> failed.
->> *** end xfs_logprint output
->>
->>  From above log, dmsetup remove failed with "Device or resource busy".
-> I can't reproduce above failure with v5.3 kernel, neither xfs nor ext4.
-> Does ext4 pass in your setup? I suspect it's a kernel bug that still
-> holds the block device.
+I notice that XFS fails this test with v5.3 kernel, so I guess this is a
+targeted regression test? Do you have a (pending) patch/commit that
+could be referenced in the commit log and/or test description? So we
+could know which patch/commit fixed this particular failure.
 
-Yes, ext4 can pass. Only in RHEL release it tests failed.
+> ---
+> v2:
+> - Use _get_file_block_size instead of manual stat -fc '%S'
+> - Use xfs_io instead of fallocate/dd
+>   (and require falloc support)
+> - Add the ' B' that was missing as allocated_size_after's unit in the
+>   error message
+> ---
+>  tests/generic/568     | 63 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/568.out |  4 +++
+>  tests/generic/group   |  1 +
+>  3 files changed, 68 insertions(+)
+>  create mode 100755 tests/generic/568
+>  create mode 100644 tests/generic/568.out
+> 
+> diff --git a/tests/generic/568 b/tests/generic/568
+> new file mode 100755
+> index 00000000..df67daf4
+> --- /dev/null
+> +++ b/tests/generic/568
+> @@ -0,0 +1,63 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2019 Red Hat, Inc.  All Rights Reserved.
+> +#
+> +# FS QA Test No. generic/568
+> +#
+> +# Test that fallocating an unaligned range allocates all blocks
+> +# touched by that range
+> +#
+> +seq=$(basename $0)
+> +seqres="$RESULT_DIR/$seq"
+> +echo "QA output created by $seq"
+> +
+> +here=$PWD
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f "$tmp".*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_fs generic
+> +_supported_os Linux
+> +_require_scratch
+> +_require_xfs_io_command "falloc"
+> +
+> +testfile="$SCRATCH_MNT/testfile"
+> +
+> +_scratch_mkfs > /dev/null 2>&1
+> +_scratch_mount
 
-Maybe "sync" is only a workaround for the the case, the root cause is=20
-unknown.
+Seems you don't need $SCRATCH_DEV at all. Just create the test file on
+$TEST_DEV in $TEST_DIR, e.g.
 
-It may need more time to analysis.
+testfile="$TEST_DIR"/falloctest-$seq
+rm -f $testfile
 
-Thanks
+> +
+> +# Fallocate 2 bytes across a block boundary
+> +block_size=$(_get_file_block_size "$SCRATCH_MNT")
+> +$XFS_IO_PROG -f -c "falloc $((block_size - 1)) 2" "$testfile"
+> +
+> +# Both the first blocks should be allocated now.  Check that by
+> +# inquiring whether the file grows when we write to the two bytes we
+> +# have just fallocated.
+> +
+> +allocated_size_before=$(($(stat -c '%b * %B' "$testfile")))
+> +
+> +$XFS_IO_PROG -c "pwrite $((block_size - 1)) 2" "$testfile" \
+> +	| _filter_xfs_io | sed -e "s/$((block_size - 1))/block_size - 1/"
+> +
+> +allocated_size_after=$(($(stat -c '%b * %B' "$testfile")))
+> +
+> +if [ $allocated_size_after -gt $allocated_size_before ]; then
+> +	echo "ERROR: File grew from ${allocated_size_before} B to" \
+> +	     "${allocated_size_after} B when writing to the fallocated range."
+> +else
+> +	echo "OK: File did not grow."
+> +fi
+> +
+> +status=0
+> +exit
+> diff --git a/tests/generic/568.out b/tests/generic/568.out
+> new file mode 100644
+> index 00000000..435a9630
+> --- /dev/null
+> +++ b/tests/generic/568.out
+> @@ -0,0 +1,4 @@
+> +QA output created by 568
+> +wrote 2/2 bytes at offset block_size - 1
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +OK: File did not grow.
+> diff --git a/tests/generic/group b/tests/generic/group
+> index 7cf4f6c4..24ab29bc 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -570,3 +570,4 @@
+>  565 auto quick copy_range
+>  566 auto quick quota metadata
+>  567 auto quick rw punch
+> +568 auto quick rw
 
-> Thanks,
-> Eryu
->
->
+Add 'prealloc' group as well.
+
+Thanks for the test!
+
+Eryu
+> -- 
+> 2.21.0
+> 
