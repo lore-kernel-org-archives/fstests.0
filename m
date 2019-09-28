@@ -1,152 +1,277 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:44204 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726029AbfIZQIV (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 26 Sep 2019 12:08:21 -0400
-Date: Thu, 26 Sep 2019 09:06:13 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] generic: fallocate two bytes at block boundary
-Message-ID: <20190926160613.GF9913@magnolia>
-References: <20190926152927.2331-1-mreitz@redhat.com>
- <20190926155513.GE9913@magnolia>
- <c8cf492f-e3e0-e96f-f8f9-49b42b546cf0@redhat.com>
+Received: from mail.kernel.org ([198.145.29.99]:49236 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726033AbfI1ADq (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 27 Sep 2019 20:03:46 -0400
+From: Eric Biggers <ebiggers@kernel.org>
+Subject: [PATCH v3 5/9] xfs_io/encrypt: extend 'get_encpolicy' to support v2 policies
+Date: Fri, 27 Sep 2019 17:02:39 -0700
+Message-Id: <20190928000243.77634-6-ebiggers@kernel.org>
+In-Reply-To: <20190928000243.77634-1-ebiggers@kernel.org>
+References: <20190928000243.77634-1-ebiggers@kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <c8cf492f-e3e0-e96f-f8f9-49b42b546cf0@redhat.com>
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: Max Reitz <mreitz@redhat.com>
-Cc: fstests@vger.kernel.org
+To: linux-xfs@vger.kernel.org
+Cc: fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Sep 26, 2019 at 06:02:17PM +0200, Max Reitz wrote:
-> On 26.09.19 17:55, Darrick J. Wong wrote:
-> > On Thu, Sep 26, 2019 at 05:29:27PM +0200, Max Reitz wrote:
-> >> Allocating two bytes at a block boundary with fallocate should alloc=
-ate
-> >> both blocks involved.  Test this by writing both bytes with dd
-> >> afterwards and see whether the on-disk size increases (it should not=
-).
-> >>
-> >> Signed-off-by: Max Reitz <mreitz@redhat.com>
-> >> ---
-> >>  tests/generic/568     | 63 ++++++++++++++++++++++++++++++++++++++++=
-+++
-> >>  tests/generic/568.out |  2 ++
-> >>  tests/generic/group   |  1 +
-> >>  3 files changed, 66 insertions(+)
-> >>  create mode 100755 tests/generic/568
-> >>  create mode 100644 tests/generic/568.out
-> >>
-> >> diff --git a/tests/generic/568 b/tests/generic/568
-> >> new file mode 100755
-> >> index 00000000..8fbdcda0
-> >> --- /dev/null
-> >> +++ b/tests/generic/568
-> >> @@ -0,0 +1,63 @@
-> >> +#! /bin/bash
-> >> +# SPDX-License-Identifier: GPL-2.0
-> >> +# Copyright (c) 2019 Red Hat, Inc.  All Rights Reserved.
-> >> +#
-> >> +# FS QA Test No. generic/568
-> >> +#
-> >> +# Test that fallocating an unaligned range allocates all blocks
-> >> +# touched by that range
-> >> +#
-> >> +seq=3D$(basename $0)
-> >> +seqres=3D"$RESULT_DIR/$seq"
-> >> +echo "QA output created by $seq"
-> >> +
-> >> +here=3D$PWD
-> >> +tmp=3D/tmp/$$
-> >> +status=3D1	# failure is the default!
-> >> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> >> +
-> >> +_cleanup()
-> >> +{
-> >> +	cd /
-> >> +	rm -f "$tmp".*
-> >> +}
-> >> +
-> >> +# get standard environment, filters and checks
-> >> +. ./common/rc
-> >> +. ./common/filter
-> >> +
-> >> +# real QA test starts here
-> >> +_supported_fs generic
-> >> +_supported_os Linux
-> >> +_require_scratch
-> >> +
-> >> +testfile=3D"$SCRATCH_MNT/testfile"
-> >> +
-> >> +_scratch_mkfs > /dev/null 2>&1
-> >> +_scratch_mount
-> >> +
-> >> +# Fallocate 2 bytes across a block boundary
-> >> +block_size=3D$(stat -fc '%S' "$SCRATCH_MNT")
-> >=20
-> > block_size=3D$(_get_file_block_size $SCRATCH_MNT)
->=20
-> Ah, nice.
->=20
-> >> +fallocate -o $((block_size - 1)) -l 2 "$testfile"
-> >=20
-> > If you're going to use an external program, you need to gate the test=
- on
-> > whether or not the program's installed, by calling _require_command.
->=20
-> OK.
->=20
-> > Though probably the easier way would be to use xfs_io since fstests
-> > requires that xfsprogs be installed:
-> >=20
-> > 	$XFS_IO_PROG -f -c "falloc $((block_size - 1)) 2" $testfile
-> >=20
-> > Though you do still have to put at the top of the test:
-> >=20
-> > 	_require_xfs_io_command "falloc"
-> >=20
-> > Because not all filesystems support fallocate.
->=20
-> So I suppose as long as one doesn=E2=80=99t use special XFS commands, x=
-fs_io is
-> filesystem-agnostic?
+From: Eric Biggers <ebiggers@google.com>
 
-Right.  At this point xfs_io is largely a testing vehicle for fstests
-scripts to call various system calls or ioctls, some of which aren't
-even supported on XFS itself. :P
+get_encpolicy uses the FS_IOC_GET_ENCRYPTION_POLICY ioctl to retrieve
+the file's encryption policy, then displays it.  But that only works for
+v1 encryption policies.  A new ioctl, FS_IOC_GET_ENCRYPTION_POLICY_EX,
+has been introduced which is more flexible and can retrieve both v1 and
+v2 encryption policies.
 
---D
+Make get_encpolicy use the new ioctl if the kernel supports it and
+display the resulting the v1 or v2 encryption policy.  Otherwise, fall
+back to the old ioctl and display the v1 policy.
 
-> >> +
-> >> +# Both the first blocks should be allocated now.  Check that by
-> >> +# inquiring whether the file grows when we write to the two bytes w=
-e
-> >> +# have just fallocated.
-> >> +
-> >> +allocated_size_before=3D$(($(stat -c '%b * %B' "$testfile")))
-> >> +
-> >> +dd if=3D/dev/zero of=3D"$testfile" bs=3D1 conv=3Dnotrunc \
-> >> +    seek=3D$((block_size - 1)) count=3D2 \
-> >> +    2>&1 | _filter_dd
-> >=20
-> > $XFS_IO_PROG -c "pwrite $((block_size - 1)) 2" $testfile
-> >=20
-> >> +
-> >> +allocated_size_after=3D$(($(stat -c '%b * %B' "$testfile")))
-> >> +
-> >> +if [ $allocated_size_after -gt $allocated_size_before ]; then
-> >> +	echo "ERROR: File grew from ${allocated_size_before} B to" \
-> >> +	     "${allocated_size_after} when writing to the fallocated range=
-."
-> >> +else
-> >> +	echo "OK: File did not grow."
-> >=20
-> > Other than that, the logic makes sense to me.  Thanks for writing thi=
-s
-> > up!
->=20
-> OK, thanks, I=E2=80=99ll prepare a v2.
->=20
-> Max
->=20
+Also add new options:
+
+  -1: Use the old ioctl only.  This will be used to test the old ioctl
+      even when the kernel supports the new one.
+
+  -t: Test whether the new ioctl is supported.  This will be useful to
+      determine whether v2 policies should be tested or not.
+
+Signed-off-by: Eric Biggers <ebiggers@google.com>
+---
+ io/encrypt.c      | 153 ++++++++++++++++++++++++++++++++++++++++------
+ man/man8/xfs_io.8 |  15 ++++-
+ 2 files changed, 149 insertions(+), 19 deletions(-)
+
+diff --git a/io/encrypt.c b/io/encrypt.c
+index 8a511379..0b45e93f 100644
+--- a/io/encrypt.c
++++ b/io/encrypt.c
+@@ -1,6 +1,6 @@
+ // SPDX-License-Identifier: GPL-2.0
+ /*
+- * Copyright (c) 2016 Google, Inc.  All Rights Reserved.
++ * Copyright 2016, 2019 Google LLC
+  * Author: Eric Biggers <ebiggers@google.com>
+  */
+ 
+@@ -150,6 +150,20 @@ static const struct {
+ static cmdinfo_t get_encpolicy_cmd;
+ static cmdinfo_t set_encpolicy_cmd;
+ 
++static void
++get_encpolicy_help(void)
++{
++	printf(_(
++"\n"
++" display the encryption policy of the current file\n"
++"\n"
++" -1 -- Use only the old ioctl to get the encryption policy.\n"
++"       This only works if the file has a v1 encryption policy.\n"
++" -t -- Test whether v2 encryption policies are supported.\n"
++"       Prints \"supported\", \"unsupported\", or an error message.\n"
++"\n"));
++}
++
+ static void
+ set_encpolicy_help(void)
+ {
+@@ -227,7 +241,7 @@ mode2str(__u8 mode)
+ }
+ 
+ static const char *
+-keydesc2str(__u8 master_key_descriptor[FSCRYPT_KEY_DESCRIPTOR_SIZE])
++keydesc2str(const __u8 master_key_descriptor[FSCRYPT_KEY_DESCRIPTOR_SIZE])
+ {
+ 	static char buf[2 * FSCRYPT_KEY_DESCRIPTOR_SIZE + 1];
+ 	int i;
+@@ -238,29 +252,132 @@ keydesc2str(__u8 master_key_descriptor[FSCRYPT_KEY_DESCRIPTOR_SIZE])
+ 	return buf;
+ }
+ 
++static const char *
++keyid2str(const __u8 master_key_identifier[FSCRYPT_KEY_IDENTIFIER_SIZE])
++{
++	static char buf[2 * FSCRYPT_KEY_IDENTIFIER_SIZE + 1];
++	int i;
++
++	for (i = 0; i < FSCRYPT_KEY_IDENTIFIER_SIZE; i++)
++		sprintf(&buf[2 * i], "%02x", master_key_identifier[i]);
++
++	return buf;
++}
++
++static void
++test_for_v2_policy_support(void)
++{
++	struct fscrypt_get_policy_ex_arg arg;
++
++	arg.policy_size = sizeof(arg.policy);
++
++	if (ioctl(file->fd, FS_IOC_GET_ENCRYPTION_POLICY_EX, &arg) == 0 ||
++	    errno == ENODATA /* file unencrypted */) {
++		printf(_("supported\n"));
++		return;
++	}
++	if (errno == ENOTTY) {
++		printf(_("unsupported\n"));
++		return;
++	}
++	fprintf(stderr,
++		_("%s: unexpected error checking for FS_IOC_GET_ENCRYPTION_POLICY_EX support: %s\n"),
++		file->name, strerror(errno));
++	exitcode = 1;
++}
++
++static void
++show_v1_encryption_policy(const struct fscrypt_policy_v1 *policy)
++{
++	printf(_("Encryption policy for %s:\n"), file->name);
++	printf(_("\tPolicy version: %u\n"), policy->version);
++	printf(_("\tMaster key descriptor: %s\n"),
++	       keydesc2str(policy->master_key_descriptor));
++	printf(_("\tContents encryption mode: %u (%s)\n"),
++	       policy->contents_encryption_mode,
++	       mode2str(policy->contents_encryption_mode));
++	printf(_("\tFilenames encryption mode: %u (%s)\n"),
++	       policy->filenames_encryption_mode,
++	       mode2str(policy->filenames_encryption_mode));
++	printf(_("\tFlags: 0x%02x\n"), policy->flags);
++}
++
++static void
++show_v2_encryption_policy(const struct fscrypt_policy_v2 *policy)
++{
++	printf(_("Encryption policy for %s:\n"), file->name);
++	printf(_("\tPolicy version: %u\n"), policy->version);
++	printf(_("\tMaster key identifier: %s\n"),
++	       keyid2str(policy->master_key_identifier));
++	printf(_("\tContents encryption mode: %u (%s)\n"),
++	       policy->contents_encryption_mode,
++	       mode2str(policy->contents_encryption_mode));
++	printf(_("\tFilenames encryption mode: %u (%s)\n"),
++	       policy->filenames_encryption_mode,
++	       mode2str(policy->filenames_encryption_mode));
++	printf(_("\tFlags: 0x%02x\n"), policy->flags);
++}
++
+ static int
+ get_encpolicy_f(int argc, char **argv)
+ {
+-	struct fscrypt_policy policy;
++	int c;
++	struct fscrypt_get_policy_ex_arg arg;
++	bool only_use_v1_ioctl = false;
++	int res;
++
++	while ((c = getopt(argc, argv, "1t")) != EOF) {
++		switch (c) {
++		case '1':
++			only_use_v1_ioctl = true;
++			break;
++		case 't':
++			test_for_v2_policy_support();
++			return 0;
++		default:
++			return command_usage(&get_encpolicy_cmd);
++		}
++	}
++	argc -= optind;
++	argv += optind;
++
++	if (argc != 0)
++		return command_usage(&get_encpolicy_cmd);
++
++	/* first try the new ioctl */
++	if (only_use_v1_ioctl) {
++		res = -1;
++		errno = ENOTTY;
++	} else {
++		arg.policy_size = sizeof(arg.policy);
++		res = ioctl(file->fd, FS_IOC_GET_ENCRYPTION_POLICY_EX, &arg);
++	}
++
++	/* fall back to the old ioctl */
++	if (res != 0 && errno == ENOTTY)
++		res = ioctl(file->fd, FS_IOC_GET_ENCRYPTION_POLICY,
++			    &arg.policy.v1);
+ 
+-	if (ioctl(file->fd, FS_IOC_GET_ENCRYPTION_POLICY, &policy) < 0) {
+-		fprintf(stderr, "%s: failed to get encryption policy: %s\n",
++	if (res != 0) {
++		fprintf(stderr, _("%s: failed to get encryption policy: %s\n"),
+ 			file->name, strerror(errno));
+ 		exitcode = 1;
+ 		return 0;
+ 	}
+ 
+-	printf("Encryption policy for %s:\n", file->name);
+-	printf("\tPolicy version: %u\n", policy.version);
+-	printf("\tMaster key descriptor: %s\n",
+-	       keydesc2str(policy.master_key_descriptor));
+-	printf("\tContents encryption mode: %u (%s)\n",
+-	       policy.contents_encryption_mode,
+-	       mode2str(policy.contents_encryption_mode));
+-	printf("\tFilenames encryption mode: %u (%s)\n",
+-	       policy.filenames_encryption_mode,
+-	       mode2str(policy.filenames_encryption_mode));
+-	printf("\tFlags: 0x%02x\n", policy.flags);
++	switch (arg.policy.version) {
++	case FSCRYPT_POLICY_V1:
++		show_v1_encryption_policy(&arg.policy.v1);
++		break;
++	case FSCRYPT_POLICY_V2:
++		show_v2_encryption_policy(&arg.policy.v2);
++		break;
++	default:
++		printf(_("Encryption policy for %s:\n"), file->name);
++		printf(_("\tPolicy version: %u (unknown)\n"),
++		       arg.policy.version);
++		break;
++	}
+ 	return 0;
+ }
+ 
+@@ -360,11 +477,13 @@ encrypt_init(void)
+ {
+ 	get_encpolicy_cmd.name = "get_encpolicy";
+ 	get_encpolicy_cmd.cfunc = get_encpolicy_f;
++	get_encpolicy_cmd.args = _("[-1] [-t]");
+ 	get_encpolicy_cmd.argmin = 0;
+-	get_encpolicy_cmd.argmax = 0;
++	get_encpolicy_cmd.argmax = -1;
+ 	get_encpolicy_cmd.flags = CMD_NOMAP_OK | CMD_FOREIGN_OK;
+ 	get_encpolicy_cmd.oneline =
+ 		_("display the encryption policy of the current file");
++	get_encpolicy_cmd.help = get_encpolicy_help;
+ 
+ 	set_encpolicy_cmd.name = "set_encpolicy";
+ 	set_encpolicy_cmd.cfunc = set_encpolicy_f;
+diff --git a/man/man8/xfs_io.8 b/man/man8/xfs_io.8
+index 6e064bdd..3dd34a0c 100644
+--- a/man/man8/xfs_io.8
++++ b/man/man8/xfs_io.8
+@@ -724,10 +724,21 @@ version of policy structure (numeric)
+ .RE
+ .PD
+ .TP
+-.BR get_encpolicy
++.BI "get_encpolicy [ \-1 ] [ \-t ]"
+ On filesystems that support encryption, display the encryption policy of the
+ current file.
+-
++.RS 1.0i
++.PD 0
++.TP 0.4i
++.BI \-1
++Use only the old ioctl to get the encryption policy.  This only works if the
++file has a v1 encryption policy.
++.TP
++.BI \-t
++Test whether v2 encryption policies are supported.  Prints "supported",
++"unsupported", or an error message.
++.RE
++.PD
+ .TP
+ .BR lsattr " [ " \-R " | " \-D " | " \-a " | " \-v " ]"
+ List extended inode flags on the currently open file. If the
+-- 
+2.23.0.444.g18eeb5a265-goog
