@@ -1,141 +1,130 @@
-Received: from aserp2120.oracle.com ([141.146.126.78]:47834 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728666AbfI2DTL (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 28 Sep 2019 23:19:11 -0400
-Date: Sat, 28 Sep 2019 20:18:50 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH v3] generic: fallocate two bytes at block boundary
-Message-ID: <20190929031850.GG9913@magnolia>
-References: <20190927103846.21296-1-mreitz@redhat.com>
+Received: from mx2.suse.de ([195.135.220.15]:45240 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726425AbfI3Iiy (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 30 Sep 2019 04:38:54 -0400
+From: Qu Wenruo <wqu@suse.com>
+Subject: [PATCH] fstests: btrfs: Add regression test to check if btrfs can handle high devid
+Date: Mon, 30 Sep 2019 16:37:35 +0800
+Message-Id: <20190930083735.21284-1-wqu@suse.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20190927103846.21296-1-mreitz@redhat.com>
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: Max Reitz <mreitz@redhat.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Sep 27, 2019 at 12:38:46PM +0200, Max Reitz wrote:
-> Allocating two bytes at a block boundary with fallocate should allocate
-> both blocks involved.  Test this by writing data to both bytes
-> afterwards and see whether the on-disk size increases (it should not).
-> 
-> This is a regression test for the kernel patch "xfs: Fix tail rounding
-> in xfs_alloc_file_space()".
-> 
-> Signed-off-by: Max Reitz <mreitz@redhat.com>
+Add a regression test to check if btrfs can handle high devid.
 
-Looks ok,
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+The test will add and remove devices to a btrfs fs, so that the devid
+will increase to uncommon but still valid values.
 
---D
+The regression is introduced by kernel commit ab4ba2e13346 ("btrfs:
+tree-checker: Verify dev item").
+The fix is titled "btrfs: tree-checker: Fix wrong check on max devid".
 
-> ---
-> v3:
-> - Use test directory instead of scratch mount
-> - Add reference to the corresponding XFS patch to the commit message
-> - Add test to the "prealloc" group
-> 
-> v2:
-> - Use _get_file_block_size instead of manual stat -fc '%S'
-> - Use xfs_io instead of fallocate/dd
->   (and require falloc support)
-> - Add the ' B' that was missing as allocated_size_after's unit in the
->   error message
-> ---
->  tests/generic/568     | 60 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/568.out |  4 +++
->  tests/generic/group   |  1 +
->  3 files changed, 65 insertions(+)
->  create mode 100755 tests/generic/568
->  create mode 100644 tests/generic/568.out
-> 
-> diff --git a/tests/generic/568 b/tests/generic/568
-> new file mode 100755
-> index 00000000..a3c0b4ae
-> --- /dev/null
-> +++ b/tests/generic/568
-> @@ -0,0 +1,60 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2019 Red Hat, Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test No. generic/568
-> +#
-> +# Test that fallocating an unaligned range allocates all blocks
-> +# touched by that range
-> +#
-> +seq=$(basename $0)
-> +seqres="$RESULT_DIR/$seq"
-> +echo "QA output created by $seq"
-> +
-> +here=$PWD
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f "$tmp".*
-> +	rm -f "$TEST_DIR/falloctest-$seq"
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +_supported_fs generic
-> +_supported_os Linux
-> +_require_xfs_io_command "falloc"
-> +
-> +testfile="$TEST_DIR/falloctest-$seq"
-> +
-> +# Fallocate 2 bytes across a block boundary
-> +block_size=$(_get_file_block_size "$TEST_DIR")
-> +$XFS_IO_PROG -f -c "falloc $((block_size - 1)) 2" "$testfile"
-> +
-> +# Both the first blocks should be allocated now.  Check that by
-> +# inquiring whether the file grows when we write to the two bytes we
-> +# have just fallocated.
-> +
-> +allocated_size_before=$(($(stat -c '%b * %B' "$testfile")))
-> +
-> +$XFS_IO_PROG -c "pwrite $((block_size - 1)) 2" "$testfile" \
-> +	| _filter_xfs_io | sed -e "s/$((block_size - 1))/block_size - 1/"
-> +
-> +allocated_size_after=$(($(stat -c '%b * %B' "$testfile")))
-> +
-> +if [ $allocated_size_after -gt $allocated_size_before ]; then
-> +	echo "ERROR: File grew from ${allocated_size_before} B to" \
-> +	     "${allocated_size_after} B when writing to the fallocated range."
-> +else
-> +	echo "OK: File did not grow."
-> +fi
-> +
-> +status=0
-> +exit
-> diff --git a/tests/generic/568.out b/tests/generic/568.out
-> new file mode 100644
-> index 00000000..435a9630
-> --- /dev/null
-> +++ b/tests/generic/568.out
-> @@ -0,0 +1,4 @@
-> +QA output created by 568
-> +wrote 2/2 bytes at offset block_size - 1
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +OK: File did not grow.
-> diff --git a/tests/generic/group b/tests/generic/group
-> index 7cf4f6c4..dd971f0c 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -570,3 +570,4 @@
->  565 auto quick copy_range
->  566 auto quick quota metadata
->  567 auto quick rw punch
-> +568 auto quick rw prealloc
-> -- 
-> 2.21.0
-> 
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+---
+ tests/btrfs/194     | 73 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/194.out |  2 ++
+ tests/btrfs/group   |  1 +
+ 3 files changed, 76 insertions(+)
+ create mode 100755 tests/btrfs/194
+ create mode 100644 tests/btrfs/194.out
+
+diff --git a/tests/btrfs/194 b/tests/btrfs/194
+new file mode 100755
+index 00000000..7a52ed86
+--- /dev/null
++++ b/tests/btrfs/194
+@@ -0,0 +1,73 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test 194
++#
++# Test if btrfs can handle large device ids.
++#
++# The regression is introduced by kernel commit ab4ba2e13346 ("btrfs:
++# tree-checker: Verify dev item").
++# The fix is titlted: "btrfs: tree-checker: Fix wrong check on max devid"
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch_dev_pool 2
++_scratch_dev_pool_get 2
++
++# The wrong check limit is based on node size, to reduce runtime, we only
++# support 4K page size system for now
++if [ $(get_page_size) != 4096 ]; then
++	_notrun "This test need 4k page size"
++fi
++
++device_1=$(echo $SCRATCH_DEV_POOL | awk '{print $1}')
++device_2=$(echo $SCRATCH_DEV_POOL | awk '{print $2}')
++
++echo device_1=$device_1 device_2=$device_2 >> $seqres.full
++
++# Use 4K nodesize to reduce runtime
++_scratch_mkfs -n 4k >> $seqres.full
++_scratch_mount
++
++# Add and remove device in a loop, one loop will increase devid by 2.
++# for 4k nodesize, the wrong check will be triggered at devid 123.
++# here 64 is enough to trigger such regression
++for (( i = 0; i < 64; i++ )); do
++	$BTRFS_UTIL_PROG device add -f $device_2 $SCRATCH_MNT
++	$BTRFS_UTIL_PROG device del $device_1 $SCRATCH_MNT
++	$BTRFS_UTIL_PROG device add -f $device_1 $SCRATCH_MNT
++	$BTRFS_UTIL_PROG device del $device_2 $SCRATCH_MNT
++done
++_scratch_dev_pool_put
++
++echo "Silence is golden"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/194.out b/tests/btrfs/194.out
+new file mode 100644
+index 00000000..7bfd50ff
+--- /dev/null
++++ b/tests/btrfs/194.out
+@@ -0,0 +1,2 @@
++QA output created by 194
++Silence is golden
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index b92cb12c..ef1f0e1b 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -196,3 +196,4 @@
+ 191 auto quick send dedupe
+ 192 auto replay snapshot stress
+ 193 auto quick qgroup enospc limit
++194 auto
+-- 
+2.22.0
