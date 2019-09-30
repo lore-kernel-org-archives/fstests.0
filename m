@@ -2,58 +2,48 @@ Return-Path: <SRS0=U1nr=XZ=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.6 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 23834C32792
-	for <linux-fstests@archiver.kernel.org>; Mon, 30 Sep 2019 21:00:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0D261C32792
+	for <linux-fstests@archiver.kernel.org>; Mon, 30 Sep 2019 21:01:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id E5D6622509
-	for <linux-fstests@archiver.kernel.org>; Mon, 30 Sep 2019 21:00:53 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1569877254;
-	bh=m109fHkGrJk8QpHK8ApHjNfwnB7x/ujAvp+zlrIQ2ac=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=ZQflC0w9J6kz8QOCYfH49v/oERnPLCQkCXKOjr0X1z5CIUIgT2r+OM7TMMw36WGNj
-	 6DRDWDD4uaYLFLvU/K+71xAUVyuY5H/7PupPWei8AAzMkTMrwezS1fDj8ANPSuBCMj
-	 IbUhL2sBmRQQ0vdWt4GHMBxoe1PffLJ5+88vgU28=
+	by mail.kernel.org (Postfix) with ESMTP id CE246224FE
+	for <linux-fstests@archiver.kernel.org>; Mon, 30 Sep 2019 21:01:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727146AbfI3VAx (ORCPT
+        id S1726425AbfI3VBT (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 30 Sep 2019 17:00:53 -0400
-Received: from mail.kernel.org ([198.145.29.99]:42338 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726504AbfI3VAx (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 30 Sep 2019 17:00:53 -0400
-Received: from localhost (c-67-161-8-12.hsd1.ca.comcast.net [67.161.8.12])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 15F64224EF;
-        Mon, 30 Sep 2019 19:43:16 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1569872596;
-        bh=m109fHkGrJk8QpHK8ApHjNfwnB7x/ujAvp+zlrIQ2ac=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=WIsz9ZhouX37qshMP+opptxUpHPVGeQJx5nKTKMPt8cQvkEtwDLautGp+K5UCoTmN
-         WNLcgMWhGe4LLROpzgXDfKLqMCZYI4ywAdi+/ENDg0B/FdA06mJlxwEbd6fk8fSQ+R
-         iKIG882BqWa2n9ZGaHNqL9GYAWQeGuNJIljGF1Zc=
-Date:   Mon, 30 Sep 2019 12:43:15 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     choypoy@linuxfoundation.org
-Cc:     Chris Hoy Poy via RT <kernel-helpdesk@rt.linuxfoundation.org>,
-        djwong@kernel.org, fstests@vger.kernel.org
-Subject: Re: [Kernel.org Helpdesk #79165] please add fstests@vger.kernel.org
- to lore.kernel.org
-Message-ID: <20190930194315.GA13097@magnolia>
+        Mon, 30 Sep 2019 17:01:19 -0400
+Received: from smtp1.linuxfoundation.org ([140.211.169.13]:56424 "EHLO
+        smtp1.linuxfoundation.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726504AbfI3VBT (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 30 Sep 2019 17:01:19 -0400
+Received: from rt.cvo.linuxfoundation.org (rt.cvo.linuxfoundation.org [172.17.192.131])
+        by smtp1.linuxfoundation.org (Postfix) with ESMTPS id 72F018AD
+        for <fstests@vger.kernel.org>; Mon, 30 Sep 2019 19:43:17 +0000 (UTC)
+Received: by rt.cvo.linuxfoundation.org (Postfix, from userid 48)
+        id 6CCB26FE; Mon, 30 Sep 2019 19:43:17 +0000 (UTC)
+Subject: Re: [Kernel.org Helpdesk #79165] please add fstests@vger.kernel.org to lore.kernel.org
+From:   "Darrick J. Wong via RT" <kernel-helpdesk@rt.linuxfoundation.org>
+Reply-To: kernel-helpdesk@rt.linuxfoundation.org
+In-Reply-To: <20190930194315.GA13097@magnolia>
 References: <RT-Ticket-79165@linuxfoundation>
  <20190903231702.GA5339@magnolia>
  <rt-4.4.0-1780-1569466036-1450.79165-6-0@linuxfoundation>
+ <20190930194315.GA13097@magnolia>
+Message-ID: <rt-4.4.0-5374-1569872597-1891.79165-6-0@linuxfoundation>
+X-RT-Loop-Prevention: linuxfoundation.org
+X-RT-Ticket: linuxfoundation.org #79165
+X-Managed-BY: RT 4.4.0 (http://www.bestpractical.com/rt/)
+X-RT-Originator: djwong@kernel.org
+CC:     fstests@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+X-RT-Original-Encoding: utf-8
+Date:   Mon, 30 Sep 2019 15:43:17 -0400
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <rt-4.4.0-1780-1569466036-1450.79165-6-0@linuxfoundation>
-User-Agent: Mutt/1.9.4 (2018-02-28)
+Content-Transfer-Encoding: 8bit
+To:     unlisted-recipients:; (no To-header on input)
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
@@ -99,3 +89,4 @@ I've been able to collect.
 > Chris Hoy Poy
 > Collaborative Projects IT
 > The Linux Foundation
+
