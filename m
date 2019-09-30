@@ -1,7 +1,8 @@
 From: Eric Biggers <ebiggers@kernel.org>
-Subject: [PATCH v4 1/8] common/filter: add _filter_xfs_io_fiemap()
-Date: Mon, 30 Sep 2019 14:15:46 -0700
-Message-ID: <20190930211553.64208-2-ebiggers@kernel.org>
+Subject: [PATCH v4 3/8] generic: test general behavior of verity
+ files
+Date: Mon, 30 Sep 2019 14:15:48 -0700
+Message-ID: <20190930211553.64208-4-ebiggers@kernel.org>
 References: <20190930211553.64208-1-ebiggers@kernel.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -22,48 +23,315 @@ List-Id: fstests@vger.kernel.org
 
 From: Eric Biggers <ebiggers@google.com>
 
-Add _filter_xfs_io_fiemap() to clean up the output of
-'xfs_io -c fiemap'.  This will be used by a function in common/verity.
+This is a basic fs-verity test which verifies:
+
+- conditions for enabling verity
+- verity files have expected contents and size
+- can't change contents of verity files, but can change metadata
+- can retrieve a verity file's measurement via FS_IOC_MEASURE_VERITY
 
 Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- common/filter | 24 ++++++++++++++++++++++++
- 1 file changed, 24 insertions(+)
+ tests/generic/900     | 199 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/900.out |  74 ++++++++++++++++
+ tests/generic/group   |   1 +
+ 3 files changed, 274 insertions(+)
+ create mode 100755 tests/generic/900
+ create mode 100644 tests/generic/900.out
 
-diff --git a/common/filter b/common/filter
-index 26fc2132..2477f386 100644
---- a/common/filter
-+++ b/common/filter
-@@ -541,6 +541,30 @@ _filter_filefrag()
- 	      $flags, "\n"'
- }
- 
-+# Clean up the extents list output of 'xfs_io -c fiemap', e.g.
+diff --git a/tests/generic/900 b/tests/generic/900
+new file mode 100755
+index 00000000..04cbcfdf
+--- /dev/null
++++ b/tests/generic/900
+@@ -0,0 +1,199 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright 2018 Google LLC
 +#
-+#	file:
-+#		0: [0..79]: 628365312..628365391
-+#		1: [80..159]: hole
-+#		2: [160..319]: 628365472..628365631
-+# =>
-+#	0  79   628365312  628365391
-+#	160  319   628365472  628365631
++# FS QA Test generic/900
 +#
-+# The fields are:
++# This is a basic fs-verity test which verifies:
 +#
-+#	first_logical_block last_logical_block first_physical_block last_physical_block
++# - conditions for enabling verity
++# - verity files have correct contents and size
++# - can't change contents of verity files, but can change metadata
++# - can retrieve a verity file's measurement via FS_IOC_MEASURE_VERITY
 +#
-+# Blocks are 512 bytes, and holes are omitted.
-+#
-+_filter_xfs_io_fiemap()
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
 +{
-+	 grep -E '^[[:space:]]+[0-9]+:' \
-+		 | grep -v '\<hole\>' \
-+		 | sed -E 's/^[[:space:]]+[0-9]+://' \
-+		 | tr '][.:' ' '
++	cd /
++	rm -f $tmp.*
 +}
 +
- # We generate WARNINGs on purpose when applications mix buffered/mmap IO with
- # direct IO on the same file. This is a helper for _check_dmesg() to filter out
- # such warnings.
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/verity
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_scratch_verity
++
++_scratch_mkfs_verity &>> $seqres.full
++_scratch_mount
++fsv_orig_file=$SCRATCH_MNT/file
++fsv_file=$SCRATCH_MNT/file.fsv
++
++verify_data_readable()
++{
++	local file=$1
++
++	md5sum $file > /dev/null
++}
++
++verify_data_unreadable()
++{
++	local file=$1
++
++	# try both reading just the first data block, and reading until EOF
++	head -c $FSV_BLOCK_SIZE $file 2>&1 >/dev/null | _filter_scratch
++	md5sum $file |& _filter_scratch
++}
++
++_fsv_scratch_begin_subtest "Enabling verity on file with verity already enabled fails with EEXIST"
++_fsv_create_enable_file $fsv_file
++echo "(trying again)"
++_fsv_enable $fsv_file |& _filter_scratch
++
++_fsv_scratch_begin_subtest "Enabling verity with invalid hash algorithm fails with EINVAL"
++_fsv_create_enable_file $fsv_file --hash-alg=257 |& _filter_scratch
++verify_data_readable $fsv_file
++
++_fsv_scratch_begin_subtest "Enabling verity with invalid block size fails with EINVAL"
++_fsv_create_enable_file $fsv_file --block-size=1 |& _filter_scratch
++verify_data_readable $fsv_file
++
++_fsv_scratch_begin_subtest "Enabling verity on directory fails with EISDIR"
++mkdir $SCRATCH_MNT/dir
++_fsv_enable $SCRATCH_MNT/dir |& _filter_scratch
++
++_fsv_scratch_begin_subtest "Enabling verity with too-long salt fails with EMSGSIZE"
++_fsv_create_enable_file $fsv_file --salt=$(perl -e 'print "A" x 1000') |& _filter_scratch
++verify_data_readable $fsv_file
++
++_fsv_scratch_begin_subtest "Enabling verity on file on read-only filesystem fails with EROFS"
++echo foo > $fsv_file
++_scratch_remount ro
++_fsv_enable $fsv_file |& _filter_scratch
++_scratch_remount rw
++
++_fsv_scratch_begin_subtest "Enabling verity on file open for writing fails with ETXTBSY"
++echo foo > $fsv_file
++exec 3<> $fsv_file
++_fsv_enable $fsv_file |& _filter_scratch
++exec 3<&-
++verify_data_readable $fsv_file
++
++_fsv_scratch_begin_subtest "Enabling verity can be interrupted"
++dd if=/dev/zero of=$fsv_file bs=1 count=0 seek=$((1 << 34)) status=none
++start_time=$(date +%s)
++$FSVERITY_PROG enable $fsv_file &
++sleep 0.5
++kill %1
++wait
++elapsed=$(( $(date +%s) - start_time ))
++if (( elapsed > 5 )); then
++	echo "Failed to interrupt FS_IOC_ENABLE_VERITY ($elapsed seconds elapsed)"
++fi
++
++_fsv_scratch_begin_subtest "Enabling verity on file with verity already being enabled fails with EBUSY"
++dd if=/dev/zero of=$fsv_file bs=1 count=0 seek=$((1 << 34)) status=none
++start_time=$(date +%s)
++$FSVERITY_PROG enable $fsv_file &
++sleep 0.5
++_fsv_enable $fsv_file |& _filter_scratch
++kill %1
++wait
++
++_fsv_scratch_begin_subtest "verity file can't be opened for writing"
++_fsv_create_enable_file $fsv_file >> $seqres.full
++echo "* reading"
++$XFS_IO_PROG -r $fsv_file -c ''
++echo "* xfs_io writing, should be O_RDWR"
++$XFS_IO_PROG $fsv_file -c '' |& _filter_scratch
++echo "* bash >>, should be O_APPEND"
++bash -c "echo >> $fsv_file" |& _filter_scratch
++echo "* bash >, should be O_WRONLY|O_CREAT|O_TRUNC"
++bash -c "echo > $fsv_file" |& _filter_scratch
++
++_fsv_scratch_begin_subtest "verity file can be read"
++_fsv_create_enable_file $fsv_file >> $seqres.full
++verify_data_readable $fsv_file
++
++_fsv_scratch_begin_subtest "verity file can be measured"
++_fsv_create_enable_file $fsv_file >> $seqres.full
++_fsv_measure $fsv_file
++
++_fsv_scratch_begin_subtest "verity file can be renamed"
++_fsv_create_enable_file $fsv_file
++mv $fsv_file $fsv_file.newname
++
++_fsv_scratch_begin_subtest "verity file can be unlinked"
++_fsv_create_enable_file $fsv_file
++rm $fsv_file
++
++_fsv_scratch_begin_subtest "verity file can be linked to"
++_fsv_create_enable_file $fsv_file
++ln $fsv_file $fsv_file.newname
++
++_fsv_scratch_begin_subtest "verity file can be chmodded"
++_fsv_create_enable_file $fsv_file
++chmod 777 $fsv_file
++chmod 444 $fsv_file
++
++_fsv_scratch_begin_subtest "verity file can be chowned"
++_fsv_create_enable_file $fsv_file
++chown 1:1 $fsv_file
++chown 0:0 $fsv_file
++
++_fsv_scratch_begin_subtest "verity file has correct contents and size"
++head -c 100000 /dev/urandom > $fsv_orig_file
++cp $fsv_orig_file $fsv_file
++_fsv_enable $fsv_file >> $seqres.full
++cmp $fsv_file $fsv_orig_file
++stat -c %s $fsv_file
++_scratch_cycle_mount
++cmp $fsv_file $fsv_orig_file
++stat -c %s $fsv_file
++
++_fsv_scratch_begin_subtest "Trying to measure non-verity file fails with ENODATA"
++echo foo > $fsv_file
++_fsv_measure $fsv_file |& _filter_scratch
++verify_data_readable $fsv_file
++
++# Test files <= 1 block in size.  These are a bit of a special case since there
++# are no hash blocks; the root hash is calculated directly over the data block.
++for size in 1 $((FSV_BLOCK_SIZE - 1)) $FSV_BLOCK_SIZE; do
++	_fsv_scratch_begin_subtest "verity on $size-byte file"
++	head -c $size /dev/urandom > $fsv_orig_file
++	cp $fsv_orig_file $fsv_file
++	_fsv_enable $fsv_file
++	cmp $fsv_orig_file $fsv_file && echo "Files matched"
++	rm -f $fsv_file
++done
++
++_fsv_scratch_begin_subtest "verity on 100M file (multiple levels in hash tree)"
++head -c 100000000 /dev/urandom > $fsv_orig_file
++cp $fsv_orig_file $fsv_file
++_fsv_enable $fsv_file
++cmp $fsv_orig_file $fsv_file && echo "Files matched"
++
++_fsv_scratch_begin_subtest "verity on sparse file"
++dd if=/dev/zero of=$fsv_orig_file bs=1 count=1 seek=1000000 status=none
++cp $fsv_orig_file $fsv_file
++_fsv_enable $fsv_file
++cmp $fsv_orig_file $fsv_file && echo "Files matched"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/900.out b/tests/generic/900.out
+new file mode 100644
+index 00000000..93f91f27
+--- /dev/null
++++ b/tests/generic/900.out
+@@ -0,0 +1,74 @@
++QA output created by 900
++
++# Enabling verity on file with verity already enabled fails with EEXIST
++(trying again)
++ERROR: FS_IOC_ENABLE_VERITY failed on 'SCRATCH_MNT/file.fsv': File exists
++
++# Enabling verity with invalid hash algorithm fails with EINVAL
++ERROR: FS_IOC_ENABLE_VERITY failed on 'SCRATCH_MNT/file.fsv': Invalid argument
++
++# Enabling verity with invalid block size fails with EINVAL
++ERROR: FS_IOC_ENABLE_VERITY failed on 'SCRATCH_MNT/file.fsv': Invalid argument
++
++# Enabling verity on directory fails with EISDIR
++ERROR: FS_IOC_ENABLE_VERITY failed on 'SCRATCH_MNT/dir': Is a directory
++
++# Enabling verity with too-long salt fails with EMSGSIZE
++ERROR: FS_IOC_ENABLE_VERITY failed on 'SCRATCH_MNT/file.fsv': Message too long
++
++# Enabling verity on file on read-only filesystem fails with EROFS
++ERROR: FS_IOC_ENABLE_VERITY failed on 'SCRATCH_MNT/file.fsv': Read-only file system
++
++# Enabling verity on file open for writing fails with ETXTBSY
++ERROR: FS_IOC_ENABLE_VERITY failed on 'SCRATCH_MNT/file.fsv': Text file busy
++
++# Enabling verity can be interrupted
++
++# Enabling verity on file with verity already being enabled fails with EBUSY
++ERROR: FS_IOC_ENABLE_VERITY failed on 'SCRATCH_MNT/file.fsv': Device or resource busy
++
++# verity file can't be opened for writing
++* reading
++* xfs_io writing, should be O_RDWR
++SCRATCH_MNT/file.fsv: Operation not permitted
++* bash >>, should be O_APPEND
++bash: SCRATCH_MNT/file.fsv: Operation not permitted
++* bash >, should be O_WRONLY|O_CREAT|O_TRUNC
++bash: SCRATCH_MNT/file.fsv: Operation not permitted
++
++# verity file can be read
++
++# verity file can be measured
++sha256:be54121da3877f8852c65136d731784f134c4dd9d95071502e80d7be9f99b263
++
++# verity file can be renamed
++
++# verity file can be unlinked
++
++# verity file can be linked to
++
++# verity file can be chmodded
++
++# verity file can be chowned
++
++# verity file has correct contents and size
++100000
++100000
++
++# Trying to measure non-verity file fails with ENODATA
++ERROR: FS_IOC_MEASURE_VERITY failed on 'SCRATCH_MNT/file.fsv': No data available
++
++# verity on 1-byte file
++Files matched
++
++# verity on 4095-byte file
++Files matched
++
++# verity on 4096-byte file
++Files matched
++
++# verity on 100M file (multiple levels in hash tree)
++Files matched
++
++# verity on sparse file
++Files matched
+diff --git a/tests/generic/group b/tests/generic/group
+index 7cf4f6c4..8c5212a1 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -570,3 +570,4 @@
+ 565 auto quick copy_range
+ 566 auto quick quota metadata
+ 567 auto quick rw punch
++900 auto quick verity
 -- 
 2.23.0.444.g18eeb5a265-goog
