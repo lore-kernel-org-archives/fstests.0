@@ -2,91 +2,109 @@ Return-Path: <SRS0=U1nr=XZ=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0D261C32792
-	for <linux-fstests@archiver.kernel.org>; Mon, 30 Sep 2019 21:01:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2439DC32792
+	for <linux-fstests@archiver.kernel.org>; Mon, 30 Sep 2019 21:19:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id CE246224FE
-	for <linux-fstests@archiver.kernel.org>; Mon, 30 Sep 2019 21:01:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DF4B821924
+	for <linux-fstests@archiver.kernel.org>; Mon, 30 Sep 2019 21:19:26 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1569878367;
+	bh=vrx6r+SGfrTyFSiHE5OHRltvBYxK9kX4SHueCOiMXmE=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
+	b=kuVfmaVXT+JYkGyLGJiOyYdvxP/MoHAvqTGtxxprqyBpdb7+P+YFKVb6jgoMlu0AW
+	 Vf+aBEAOCWgYP5StWFOi4k01v4X8DIAmGBuHWweY8O0lPtiXqp1ewfZJRjr4vLBxfB
+	 NTlU3GvbuygXjjT2QEMEgjDBwhQg2TGm/v8Gab7I=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726425AbfI3VBT (ORCPT
+        id S1731991AbfI3VT0 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 30 Sep 2019 17:01:19 -0400
-Received: from smtp1.linuxfoundation.org ([140.211.169.13]:56424 "EHLO
-        smtp1.linuxfoundation.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726504AbfI3VBT (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 30 Sep 2019 17:01:19 -0400
-Received: from rt.cvo.linuxfoundation.org (rt.cvo.linuxfoundation.org [172.17.192.131])
-        by smtp1.linuxfoundation.org (Postfix) with ESMTPS id 72F018AD
-        for <fstests@vger.kernel.org>; Mon, 30 Sep 2019 19:43:17 +0000 (UTC)
-Received: by rt.cvo.linuxfoundation.org (Postfix, from userid 48)
-        id 6CCB26FE; Mon, 30 Sep 2019 19:43:17 +0000 (UTC)
-Subject: Re: [Kernel.org Helpdesk #79165] please add fstests@vger.kernel.org to lore.kernel.org
-From:   "Darrick J. Wong via RT" <kernel-helpdesk@rt.linuxfoundation.org>
-Reply-To: kernel-helpdesk@rt.linuxfoundation.org
-In-Reply-To: <20190930194315.GA13097@magnolia>
-References: <RT-Ticket-79165@linuxfoundation>
- <20190903231702.GA5339@magnolia>
- <rt-4.4.0-1780-1569466036-1450.79165-6-0@linuxfoundation>
- <20190930194315.GA13097@magnolia>
-Message-ID: <rt-4.4.0-5374-1569872597-1891.79165-6-0@linuxfoundation>
-X-RT-Loop-Prevention: linuxfoundation.org
-X-RT-Ticket: linuxfoundation.org #79165
-X-Managed-BY: RT 4.4.0 (http://www.bestpractical.com/rt/)
-X-RT-Originator: djwong@kernel.org
-CC:     fstests@vger.kernel.org
-Content-Type: text/plain; charset="utf-8"
-X-RT-Original-Encoding: utf-8
-Date:   Mon, 30 Sep 2019 15:43:17 -0400
+        Mon, 30 Sep 2019 17:19:26 -0400
+Received: from mail.kernel.org ([198.145.29.99]:47220 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1731206AbfI3VT0 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 30 Sep 2019 17:19:26 -0400
+Received: from ebiggers-linuxstation.mtv.corp.google.com (unknown [104.132.1.77])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 92FA921855;
+        Mon, 30 Sep 2019 21:19:25 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1569878365;
+        bh=vrx6r+SGfrTyFSiHE5OHRltvBYxK9kX4SHueCOiMXmE=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=kCBgjUOHkr02WThgME0Yy4+Mefza47yGqPOkgp0zAnQ81ZR2EO+TnpIV1GHfcLbYf
+         Efmkgpwee/BTVol0SZaCHPrapw8opKPbne2URif9cU6ddGj2kMbenTS84x6BhVFRcz
+         fOLPsFLVKsDXtF3gLEovbn5YoJ+VvakO+A0vXVng=
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     fstests@vger.kernel.org
+Cc:     linux-fscrypt@vger.kernel.org, linux-ext4@vger.kernel.org,
+        linux-f2fs-devel@lists.sourceforge.net,
+        Jaegeuk Kim <jaegeuk@kernel.org>,
+        "Theodore Y . Ts'o" <tytso@mit.edu>
+Subject: [PATCH v4 1/8] common/filter: add _filter_xfs_io_fiemap()
+Date:   Mon, 30 Sep 2019 14:15:46 -0700
+Message-Id: <20190930211553.64208-2-ebiggers@kernel.org>
+X-Mailer: git-send-email 2.23.0.444.g18eeb5a265-goog
+In-Reply-To: <20190930211553.64208-1-ebiggers@kernel.org>
+References: <20190930211553.64208-1-ebiggers@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-To:     unlisted-recipients:; (no To-header on input)
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Message-ID: <20190930211546.DqF1dIQAeqC47zWNjk0ajNPSV_W_PvT3KUecB3sLQ1E@z>
 
-Hi Chris,
+From: Eric Biggers <ebiggers@google.com>
 
-On Wed, Sep 25, 2019 at 10:47:16PM -0400, Chris Hoy Poy via RT wrote:
-> Hi,
-> 
-> Please feel free to throw some archives my way
-> (choypoy@linuxfoundation.org) and I'll import them and set this up :) 
+Add _filter_xfs_io_fiemap() to clean up the output of
+'xfs_io -c fiemap'.  This will be used by a function in common/verity.
 
-Ok, here's what I've been able to package so far:
+Signed-off-by: Eric Biggers <ebiggers@google.com>
+---
+ common/filter | 24 ++++++++++++++++++++++++
+ 1 file changed, 24 insertions(+)
 
-https://djwong.org/docs/fstests.tar.xz
-
-With sha256sum of:
-
-905192de19298a4a21dafdd3a715183320f12ea02c0b16a96aa0c792eb810262  fstests.tar.xz
-
-I think the list history goes further back than May 2014, but that's all
-I've been able to collect.
-
---D
-
-> cheers
-> /Chris
-> 
-> On Wed Sep 04 07:17:07 2019, djwong@kernel.org wrote:
-> > Hi, could you please start archiving the fstests@vger.kernel.org mailing
-> > list on lore.kernel.org?
-> > 
-> > (And now that I have actual experience running list-archive-maker.py I
-> > can supply archives fairly quickly unlike linux-xfs...)
-> > 
-> > Thank you!
-> > 
-> > --Darrick
-> 
-> 
-> -- 
-> Chris Hoy Poy
-> Collaborative Projects IT
-> The Linux Foundation
+diff --git a/common/filter b/common/filter
+index 26fc2132..2477f386 100644
+--- a/common/filter
++++ b/common/filter
+@@ -541,6 +541,30 @@ _filter_filefrag()
+ 	      $flags, "\n"'
+ }
+ 
++# Clean up the extents list output of 'xfs_io -c fiemap', e.g.
++#
++#	file:
++#		0: [0..79]: 628365312..628365391
++#		1: [80..159]: hole
++#		2: [160..319]: 628365472..628365631
++# =>
++#	0  79   628365312  628365391
++#	160  319   628365472  628365631
++#
++# The fields are:
++#
++#	first_logical_block last_logical_block first_physical_block last_physical_block
++#
++# Blocks are 512 bytes, and holes are omitted.
++#
++_filter_xfs_io_fiemap()
++{
++	 grep -E '^[[:space:]]+[0-9]+:' \
++		 | grep -v '\<hole\>' \
++		 | sed -E 's/^[[:space:]]+[0-9]+://' \
++		 | tr '][.:' ' '
++}
++
+ # We generate WARNINGs on purpose when applications mix buffered/mmap IO with
+ # direct IO on the same file. This is a helper for _check_dmesg() to filter out
+ # such warnings.
+-- 
+2.23.0.444.g18eeb5a265-goog
 
