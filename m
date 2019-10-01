@@ -2,112 +2,71 @@ Return-Path: <SRS0=ibZJ=X2=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9873AECE589
-	for <linux-fstests@archiver.kernel.org>; Tue,  1 Oct 2019 08:23:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A8E73C388F3
+	for <linux-fstests@archiver.kernel.org>; Tue,  1 Oct 2019 09:04:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 6ED5A21783
-	for <linux-fstests@archiver.kernel.org>; Tue,  1 Oct 2019 08:23:22 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8013621920
+	for <linux-fstests@archiver.kernel.org>; Tue,  1 Oct 2019 09:04:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726672AbfJAIXW (ORCPT
+        id S1729876AbfJAJEY (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 1 Oct 2019 04:23:22 -0400
-Received: from smtp1.linuxfoundation.org ([140.211.169.13]:49942 "EHLO
-        smtp1.linuxfoundation.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726148AbfJAIXV (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 1 Oct 2019 04:23:21 -0400
-Received: from rt.cvo.linuxfoundation.org (rt.cvo.linuxfoundation.org [172.17.192.131])
-        by smtp1.linuxfoundation.org (Postfix) with ESMTPS id 0E4291FB;
-        Tue,  1 Oct 2019 08:23:21 +0000 (UTC)
-Received: by rt.cvo.linuxfoundation.org (Postfix, from userid 48)
-        id F37136F2; Tue,  1 Oct 2019 08:23:20 +0000 (UTC)
-Subject: [Kernel.org Helpdesk #79165] please add fstests@vger.kernel.org to lore.kernel.org
-From:   "Chris Hoy Poy via RT" <kernel-helpdesk@rt.linuxfoundation.org>
-Reply-To: kernel-helpdesk@rt.linuxfoundation.org
-In-Reply-To: <rt-4.4.0-5374-1569872597-133.79165-6-0@linuxfoundation>
-References: <RT-Ticket-79165@linuxfoundation>
- <20190903231702.GA5339@magnolia>
- <rt-4.4.0-1780-1569466036-1450.79165-6-0@linuxfoundation>
- <20190930194315.GA13097@magnolia>
- <rt-4.4.0-5374-1569872597-133.79165-6-0@linuxfoundation>
-Message-ID: <rt-4.4.0-12635-1569918200-1370.79165-6-0@linuxfoundation>
-X-RT-Loop-Prevention: linuxfoundation.org
-X-RT-Ticket: linuxfoundation.org #79165
-X-Managed-BY: RT 4.4.0 (http://www.bestpractical.com/rt/)
-X-RT-Originator: choypoy@linuxfoundation.org
-To:     djwong@kernel.org
-CC:     fstests@vger.kernel.org
-Content-Type: text/plain; charset="utf-8"
-X-RT-Original-Encoding: utf-8
-Date:   Tue, 01 Oct 2019 04:23:20 -0400
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+        Tue, 1 Oct 2019 05:04:24 -0400
+Received: from mx2.suse.de ([195.135.220.15]:49548 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1729642AbfJAJEX (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 1 Oct 2019 05:04:23 -0400
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+Received: from relay2.suse.de (unknown [195.135.220.254])
+        by mx1.suse.de (Postfix) with ESMTP id 4C68CAC31;
+        Tue,  1 Oct 2019 09:04:22 +0000 (UTC)
+From:   Nikolay Borisov <nborisov@suse.com>
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, Nikolay Borisov <nborisov@suse.com>
+Subject: [PATCH v2 1/2] common/rc: Remove special handing of 'dup' argument for btrfs
+Date:   Tue,  1 Oct 2019 12:04:18 +0300
+Message-Id: <20191001090419.22153-1-nborisov@suse.com>
+X-Mailer: git-send-email 2.17.1
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Hi Darrick,
+_scratch_pool_mkfs special cases the command executed when 'dup' option
+is used when creating a filesystem. This is wrong since 'dup' works
+for all profiles and number of devices. This bug manifested while
+exercising btrfs' balance argument combinations test.
 
-I've set this up now - 
+Signed-off-by: Nikolay Borisov <nborisov@suse.com>
+---
+V2:
+ * No change since v1
 
-https://lore.kernel.org/fstests
+ common/rc | 8 +-------
+ 1 file changed, 1 insertion(+), 7 deletions(-)
 
-cheers
-/Chris
-
-On Tue Oct 01 03:43:17 2019, djwong@kernel.org wrote:
-> Hi Chris,
-> 
-> On Wed, Sep 25, 2019 at 10:47:16PM -0400, Chris Hoy Poy via RT wrote:
-> > Hi,
-> >
-> > Please feel free to throw some archives my way
-> >  (choypoy@linuxfoundation.org) and I'll import them and set this up
-> > :)
-> 
-> Ok, here's what I've been able to package so far:
-> 
-> https://djwong.org/docs/fstests.tar.xz
-> 
-> With sha256sum of:
-> 
-> 905192de19298a4a21dafdd3a715183320f12ea02c0b16a96aa0c792eb810262
-> fstests.tar.xz
-> 
-> I think the list history goes further back than May 2014, but that's
-> all
-> I've been able to collect.
-> 
-> --D
-> 
-> > cheers
-> > /Chris
-> >
-> > On Wed Sep 04 07:17:07 2019, djwong@kernel.org wrote:
-> > > Hi, could you please start archiving the fstests@vger.kernel.org
-> > > mailing
-> > > list on lore.kernel.org?
-> > >
-> > > (And now that I have actual experience running list-archive-
-> > > maker.py I
-> > > can supply archives fairly quickly unlike linux-xfs...)
-> > >
-> > > Thank you!
-> > >
-> > > --Darrick
-> >
-> >
-> > --
-> > Chris Hoy Poy
-> > Collaborative Projects IT
-> > The Linux Foundation
-
-
+diff --git a/common/rc b/common/rc
+index 9f2c252e5aa5..1b150cbad2f6 100644
+--- a/common/rc
++++ b/common/rc
+@@ -885,13 +885,7 @@ _scratch_pool_mkfs()
+ {
+     case $FSTYP in
+     btrfs)
+-        # if dup profile is in mkfs options call _scratch_mkfs instead
+-        # because dup profile only works with single device
+-        if [[ "$*" =~ dup ]]; then
+-            _scratch_mkfs $*
+-        else
+-            $MKFS_BTRFS_PROG $MKFS_OPTIONS $* $SCRATCH_DEV_POOL > /dev/null
+-        fi
++        $MKFS_BTRFS_PROG $MKFS_OPTIONS $* $SCRATCH_DEV_POOL > /dev/null
+         ;;
+     *)
+         echo "_scratch_pool_mkfs is not implemented for $FSTYP" 1>&2
 -- 
-Chris Hoy Poy
-Collaborative Projects IT
-The Linux Foundation
+2.7.4
+
