@@ -2,100 +2,216 @@ Return-Path: <SRS0=ibZJ=X2=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 07FE0C352AA
-	for <linux-fstests@archiver.kernel.org>; Tue,  1 Oct 2019 09:05:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 341C3C352AA
+	for <linux-fstests@archiver.kernel.org>; Tue,  1 Oct 2019 20:05:55 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id D686B21783
-	for <linux-fstests@archiver.kernel.org>; Tue,  1 Oct 2019 09:05:15 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 04B6C2168B
+	for <linux-fstests@archiver.kernel.org>; Tue,  1 Oct 2019 20:05:55 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="wKwmSJK2"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729878AbfJAJFP (ORCPT
+        id S1726368AbfJAUFy (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 1 Oct 2019 05:05:15 -0400
-Received: from mx2.suse.de ([195.135.220.15]:49928 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1729642AbfJAJFP (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 1 Oct 2019 05:05:15 -0400
-X-Virus-Scanned: by amavisd-new at test-mx.suse.de
-Received: from relay2.suse.de (unknown [195.135.220.254])
-        by mx1.suse.de (Postfix) with ESMTP id 0DD9FAFF4;
-        Tue,  1 Oct 2019 09:05:13 +0000 (UTC)
-Subject: Re: [PATCH v2 2/2] btrfs: Add test for btrfs balance convert
- functionality
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org
-References: <20191001090419.22153-1-nborisov@suse.com>
- <20191001090419.22153-2-nborisov@suse.com>
-From:   Nikolay Borisov <nborisov@suse.com>
-Openpgp: preference=signencrypt
-Autocrypt: addr=nborisov@suse.com; prefer-encrypt=mutual; keydata=
- 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
-Message-ID: <8aa2a36b-01b9-a207-e031-63029b4b5058@suse.com>
-Date:   Tue, 1 Oct 2019 12:05:11 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101
- Thunderbird/60.8.0
+        Tue, 1 Oct 2019 16:05:54 -0400
+Received: from mail-qt1-f195.google.com ([209.85.160.195]:40643 "EHLO
+        mail-qt1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725991AbfJAUFy (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 1 Oct 2019 16:05:54 -0400
+Received: by mail-qt1-f195.google.com with SMTP id f7so23283165qtq.7
+        for <fstests@vger.kernel.org>; Tue, 01 Oct 2019 13:05:53 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=iDToH36jGrSgUXlhVovm1t2tVCj5/o7XLeE1yAcWNV4=;
+        b=wKwmSJK2Xo9blIHVQN+8tRRGs4c8M/iCTM06VFp511+9Eg7n3M/TbTu7DZERArPphu
+         ++iA8KgJHiQTAGUDV3JvcQaF6fjjKP8DezAx4TgDX886mUZ1KtxaY4f7O0UWrV++srUX
+         FMeVmXr0N3yD3g8aEB1nyPOHkOuUer3yQH0VRka/gA3W7cDB7piSZFQfcNrPLiIuguGR
+         t+czq5r6/aW1CBMnwoopWGi7zgdhRHi7dGlHH9SpCMc7MFwrZZ1iQdEVc4866TAGBJ7j
+         Fks6MP3SbxEg7PC7ajSMijkvPIP4lNl4uTKbp0OReC7qIczUWRMrofTFgsi62eBN1RUV
+         DaVw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=iDToH36jGrSgUXlhVovm1t2tVCj5/o7XLeE1yAcWNV4=;
+        b=dExDq3dYDvpxheL23tXn8cKNu2DRsZ2AkB0Q097TygAp0mtV8YxZkJxAtPwV+zDzmb
+         rfonpuefberdRHMcPyzJt0nqCAgP6qJi8/SvQoWWcmo40glPinIZYR/Z4g0ZvvZAoy5f
+         3b9pXHwJf737uhCMiA3E9L3alaCiwOywrAPehKlsW1joBc6E6Sb6yFP0R8PeY/ZPffM2
+         bAN3K/+t7R5t0+2qqggyc4YrStUJVc8QXvXpvbjHI1K1iZbeP3KFheKlR/bmd9BSL38m
+         FlWgLBr5o/KXBVCknE1XfirBYbUiJMr96Kr8qI1UnRSrCdE0Eouc2Y4RPiQ4h5zAsnE2
+         BgwQ==
+X-Gm-Message-State: APjAAAUQ1OatHlW9MSYJkgYhBVvJsRNV/fswL+8+IbQl6iM71yuvWO42
+        2/3KPpr1YcpUCBa8RcoR27cpmg==
+X-Google-Smtp-Source: APXvYqz7ZQsQRXb0LfObvCx3O4iwO27roc866AiE/TUsasbf8IXk5iTCWr+bI6bn8eczkHvEpx1YiA==
+X-Received: by 2002:ac8:2bf7:: with SMTP id n52mr54244qtn.310.1569960353244;
+        Tue, 01 Oct 2019 13:05:53 -0700 (PDT)
+Received: from localhost ([107.15.81.208])
+        by smtp.gmail.com with ESMTPSA id y26sm11919157qtk.22.2019.10.01.13.05.52
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 01 Oct 2019 13:05:52 -0700 (PDT)
+From:   Josef Bacik <josef@toxicpanda.com>
+To:     linux-btrfs@vger.kernel.org, kernel-team@fb.com,
+        fstests@vger.kernel.org
+Cc:     Josef Bacik <jbacik@fb.com>
+Subject: [PATCH] btrfs/194: add a test for multi-subvolume fsyncing
+Date:   Tue,  1 Oct 2019 16:05:51 -0400
+Message-Id: <20191001200551.1513-1-josef@toxicpanda.com>
+X-Mailer: git-send-email 2.21.0
 MIME-Version: 1.0
-In-Reply-To: <20191001090419.22153-2-nborisov@suse.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
 Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+From: Josef Bacik <jbacik@fb.com>
 
+I discovered a problem in btrfs where we'd end up pointing at a block we
+hadn't written out yet.  This is triggered by a race when two different
+files on two different subvolumes fsync.  This test exercises this path
+with dm-log-writes, and then replays the log at every FUA to verify the
+file system is still mountable and the log is replayable.
 
-On 1.10.19 г. 12:04 ч., Nikolay Borisov wrote:
-> Add basic test to ensure btrfs conversion functionality is tested. This test
-> exercies conversion to all possible types of the data portion. This is sufficient
-> since from the POV of relocation we are only moving blockgroups. 
-> 
-> Signed-off-by: Nikolay Borisov <nborisov@suse.com>
+Signed-off-by: Josef Bacik <josef@toxicpanda.com>
+---
+ tests/btrfs/194     | 102 ++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/194.out |   2 +
+ tests/btrfs/group   |   1 +
+ 3 files changed, 105 insertions(+)
+ create mode 100755 tests/btrfs/194
+ create mode 100644 tests/btrfs/194.out
 
-V2:
- * Only test all possible destination profiles, this reduces the
-test run times massively.
+diff --git a/tests/btrfs/194 b/tests/btrfs/194
+new file mode 100755
+index 00000000..d5edb313
+--- /dev/null
++++ b/tests/btrfs/194
+@@ -0,0 +1,102 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2019 Facebook.  All Rights Reserved.
++#
++# FS QA Test 194
++#
++# Test multi subvolume fsync to test a bug where we'd end up pointing at a block
++# we haven't written.
++#
++# Will do log replay and check the filesystem.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++fio_config=$tmp.fio
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	$KILLALL_PROG -KILL -q $FSSTRESS_PROG &> /dev/null
++	_log_writes_cleanup &> /dev/null
++	_dmthin_cleanup
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/dmthin
++. ./common/dmlogwrites
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs generic
++_supported_os Linux
++
++# Use thin device as replay device, which requires $SCRATCH_DEV
++_require_scratch_nocheck
++# and we need extra device as log device
++_require_log_writes
++_require_dm_target thin-pool
++
++_require_fio
++
++# Use a thin device to provide deterministic discard behavior. Discards are used
++# by the log replay tool for fast zeroing to prevent out-of-order replay issues.
++_test_unmount
++_dmthin_init $devsize $devsize $csize $lowspace
++_log_writes_init $DMTHIN_VOL_DEV
++_log_writes_mkfs >> $seqres.full 2>&1
++_log_writes_mark mkfs
++
++_log_writes_mount
++
++# First create all the subvolumes
++for i in $(seq 0 49)
++do
++	$BTRFS_UTIL_PROG subvolume create "$SCRATCH_MNT/sub$i" > /dev/null
++done
++
++# Then run 100 fio jobs in parallel
++for i in $(seq 0 49)
++do
++	fio --name=seq --readwrite=write --fallocate=none --bs=4k --fsync=1 \
++		--size=64k --filename="$SCRATCH_MNT/sub$i/file" \
++		> /dev/null 2>&1 &
++done
++wait
++_log_writes_unmount
++
++_log_writes_remove
++prev=$(_log_writes_mark_to_entry_number mkfs)
++[ -z "$prev" ] && _fail "failed to locate entry mark 'mkfs'"
++cur=$(_log_writes_find_next_fua $prev)
++[ -z "$cur" ] && _fail "failed to locate next FUA write"
++
++while [ ! -z "$cur" ]; do
++	_log_writes_replay_log_range $cur $DMTHIN_VOL_DEV >> $seqres.full
++
++	# We need to mount the fs because btrfsck won't bother checking the log.
++	_dmthin_mount
++	_dmthin_check_fs
++
++	prev=$cur
++	cur=$(_log_writes_find_next_fua $(($cur + 1)))
++	[ -z "$cur" ] && break
++done
++
++echo "Silence is golden"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/194.out b/tests/btrfs/194.out
+new file mode 100644
+index 00000000..7bfd50ff
+--- /dev/null
++++ b/tests/btrfs/194.out
+@@ -0,0 +1,2 @@
++QA output created by 194
++Silence is golden
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index b92cb12c..0d0e1bba 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -196,3 +196,4 @@
+ 191 auto quick send dedupe
+ 192 auto replay snapshot stress
+ 193 auto quick qgroup enospc limit
++194 auto metadata log volume
+-- 
+2.21.0
+
