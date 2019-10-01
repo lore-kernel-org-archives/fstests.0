@@ -2,216 +2,111 @@ Return-Path: <SRS0=ibZJ=X2=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-2.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 341C3C352AA
-	for <linux-fstests@archiver.kernel.org>; Tue,  1 Oct 2019 20:05:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 858EAECE58A
+	for <linux-fstests@archiver.kernel.org>; Tue,  1 Oct 2019 21:54:12 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 04B6C2168B
-	for <linux-fstests@archiver.kernel.org>; Tue,  1 Oct 2019 20:05:55 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="wKwmSJK2"
+	by mail.kernel.org (Postfix) with ESMTP id 640BF21924
+	for <linux-fstests@archiver.kernel.org>; Tue,  1 Oct 2019 21:54:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726368AbfJAUFy (ORCPT
+        id S1728352AbfJAVyL (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 1 Oct 2019 16:05:54 -0400
-Received: from mail-qt1-f195.google.com ([209.85.160.195]:40643 "EHLO
-        mail-qt1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725991AbfJAUFy (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 1 Oct 2019 16:05:54 -0400
-Received: by mail-qt1-f195.google.com with SMTP id f7so23283165qtq.7
-        for <fstests@vger.kernel.org>; Tue, 01 Oct 2019 13:05:53 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=iDToH36jGrSgUXlhVovm1t2tVCj5/o7XLeE1yAcWNV4=;
-        b=wKwmSJK2Xo9blIHVQN+8tRRGs4c8M/iCTM06VFp511+9Eg7n3M/TbTu7DZERArPphu
-         ++iA8KgJHiQTAGUDV3JvcQaF6fjjKP8DezAx4TgDX886mUZ1KtxaY4f7O0UWrV++srUX
-         FMeVmXr0N3yD3g8aEB1nyPOHkOuUer3yQH0VRka/gA3W7cDB7piSZFQfcNrPLiIuguGR
-         t+czq5r6/aW1CBMnwoopWGi7zgdhRHi7dGlHH9SpCMc7MFwrZZ1iQdEVc4866TAGBJ7j
-         Fks6MP3SbxEg7PC7ajSMijkvPIP4lNl4uTKbp0OReC7qIczUWRMrofTFgsi62eBN1RUV
-         DaVw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=iDToH36jGrSgUXlhVovm1t2tVCj5/o7XLeE1yAcWNV4=;
-        b=dExDq3dYDvpxheL23tXn8cKNu2DRsZ2AkB0Q097TygAp0mtV8YxZkJxAtPwV+zDzmb
-         rfonpuefberdRHMcPyzJt0nqCAgP6qJi8/SvQoWWcmo40glPinIZYR/Z4g0ZvvZAoy5f
-         3b9pXHwJf737uhCMiA3E9L3alaCiwOywrAPehKlsW1joBc6E6Sb6yFP0R8PeY/ZPffM2
-         bAN3K/+t7R5t0+2qqggyc4YrStUJVc8QXvXpvbjHI1K1iZbeP3KFheKlR/bmd9BSL38m
-         FlWgLBr5o/KXBVCknE1XfirBYbUiJMr96Kr8qI1UnRSrCdE0Eouc2Y4RPiQ4h5zAsnE2
-         BgwQ==
-X-Gm-Message-State: APjAAAUQ1OatHlW9MSYJkgYhBVvJsRNV/fswL+8+IbQl6iM71yuvWO42
-        2/3KPpr1YcpUCBa8RcoR27cpmg==
-X-Google-Smtp-Source: APXvYqz7ZQsQRXb0LfObvCx3O4iwO27roc866AiE/TUsasbf8IXk5iTCWr+bI6bn8eczkHvEpx1YiA==
-X-Received: by 2002:ac8:2bf7:: with SMTP id n52mr54244qtn.310.1569960353244;
-        Tue, 01 Oct 2019 13:05:53 -0700 (PDT)
-Received: from localhost ([107.15.81.208])
-        by smtp.gmail.com with ESMTPSA id y26sm11919157qtk.22.2019.10.01.13.05.52
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 01 Oct 2019 13:05:52 -0700 (PDT)
-From:   Josef Bacik <josef@toxicpanda.com>
-To:     linux-btrfs@vger.kernel.org, kernel-team@fb.com,
-        fstests@vger.kernel.org
-Cc:     Josef Bacik <jbacik@fb.com>
-Subject: [PATCH] btrfs/194: add a test for multi-subvolume fsyncing
-Date:   Tue,  1 Oct 2019 16:05:51 -0400
-Message-Id: <20191001200551.1513-1-josef@toxicpanda.com>
-X-Mailer: git-send-email 2.21.0
+        Tue, 1 Oct 2019 17:54:11 -0400
+Received: from mga09.intel.com ([134.134.136.24]:56720 "EHLO mga09.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1728237AbfJAVyL (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 1 Oct 2019 17:54:11 -0400
+X-Amp-Result: UNKNOWN
+X-Amp-Original-Verdict: FILE UNKNOWN
+X-Amp-File-Uploaded: False
+Received: from fmsmga004.fm.intel.com ([10.253.24.48])
+  by orsmga102.jf.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 01 Oct 2019 14:54:11 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.64,572,1559545200"; 
+   d="scan'208";a="216225645"
+Received: from iweiny-desk2.sc.intel.com ([10.3.52.157])
+  by fmsmga004.fm.intel.com with ESMTP; 01 Oct 2019 14:54:10 -0700
+Date:   Tue, 1 Oct 2019 14:54:10 -0700
+From:   Ira Weiny <ira.weiny@intel.com>
+To:     fstests@vger.kernel.org, Eryu Guan <guaneryu@gmail.com>
+Cc:     john.hubbard@gmail.com, Dave Chinner <david@fromorbit.com>,
+        Jan Kara <jack@suse.cz>, Jason Gunthorpe <jgg@ziepe.ca>,
+        dan.j.williams@intel.com, Jeff Layton <jlayton@kernel.org>
+Subject: Re: [PATCH V2 00/16] Fix locktest and add lease testing to it
+Message-ID: <20191001215410.GA8840@iweiny-DESK2.sc.intel.com>
+References: <20190923175336.2287-1-ira.weiny@intel.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190923175336.2287-1-ira.weiny@intel.com>
+User-Agent: Mutt/1.11.1 (2018-12-01)
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Josef Bacik <jbacik@fb.com>
+On Mon, Sep 23, 2019 at 10:53:20AM -0700, 'Ira Weiny' wrote:
+> From: Ira Weiny <ira.weiny@intel.com>
+> 
+> Add lease tests[1] to locktest because they share so much code.  Make running
+> of lease tests separate as an '-L' option.
+> 
+> To make things cleaner update the lock test code and test script.  This
+> includes fixing a rather serious bug.                                                                                                                 
+> 
+> Finally update the error output to help identify any steps which fail during
+> testing.                                                                                                                                            
+>
 
-I discovered a problem in btrfs where we'd end up pointing at a block we
-hadn't written out yet.  This is triggered by a race when two different
-files on two different subvolumes fsync.  This test exercises this path
-with dm-log-writes, and then replays the log at every FUA to verify the
-file system is still mountable and the log is replayable.
+Was there any further feedback on this series?  Did it get mangled too bad to
+apply?
 
-Signed-off-by: Josef Bacik <josef@toxicpanda.com>
----
- tests/btrfs/194     | 102 ++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/194.out |   2 +
- tests/btrfs/group   |   1 +
- 3 files changed, 105 insertions(+)
- create mode 100755 tests/btrfs/194
- create mode 100644 tests/btrfs/194.out
+Ira
 
-diff --git a/tests/btrfs/194 b/tests/btrfs/194
-new file mode 100755
-index 00000000..d5edb313
---- /dev/null
-+++ b/tests/btrfs/194
-@@ -0,0 +1,102 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2019 Facebook.  All Rights Reserved.
-+#
-+# FS QA Test 194
-+#
-+# Test multi subvolume fsync to test a bug where we'd end up pointing at a block
-+# we haven't written.
-+#
-+# Will do log replay and check the filesystem.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+fio_config=$tmp.fio
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	$KILLALL_PROG -KILL -q $FSSTRESS_PROG &> /dev/null
-+	_log_writes_cleanup &> /dev/null
-+	_dmthin_cleanup
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/dmthin
-+. ./common/dmlogwrites
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs generic
-+_supported_os Linux
-+
-+# Use thin device as replay device, which requires $SCRATCH_DEV
-+_require_scratch_nocheck
-+# and we need extra device as log device
-+_require_log_writes
-+_require_dm_target thin-pool
-+
-+_require_fio
-+
-+# Use a thin device to provide deterministic discard behavior. Discards are used
-+# by the log replay tool for fast zeroing to prevent out-of-order replay issues.
-+_test_unmount
-+_dmthin_init $devsize $devsize $csize $lowspace
-+_log_writes_init $DMTHIN_VOL_DEV
-+_log_writes_mkfs >> $seqres.full 2>&1
-+_log_writes_mark mkfs
-+
-+_log_writes_mount
-+
-+# First create all the subvolumes
-+for i in $(seq 0 49)
-+do
-+	$BTRFS_UTIL_PROG subvolume create "$SCRATCH_MNT/sub$i" > /dev/null
-+done
-+
-+# Then run 100 fio jobs in parallel
-+for i in $(seq 0 49)
-+do
-+	fio --name=seq --readwrite=write --fallocate=none --bs=4k --fsync=1 \
-+		--size=64k --filename="$SCRATCH_MNT/sub$i/file" \
-+		> /dev/null 2>&1 &
-+done
-+wait
-+_log_writes_unmount
-+
-+_log_writes_remove
-+prev=$(_log_writes_mark_to_entry_number mkfs)
-+[ -z "$prev" ] && _fail "failed to locate entry mark 'mkfs'"
-+cur=$(_log_writes_find_next_fua $prev)
-+[ -z "$cur" ] && _fail "failed to locate next FUA write"
-+
-+while [ ! -z "$cur" ]; do
-+	_log_writes_replay_log_range $cur $DMTHIN_VOL_DEV >> $seqres.full
-+
-+	# We need to mount the fs because btrfsck won't bother checking the log.
-+	_dmthin_mount
-+	_dmthin_check_fs
-+
-+	prev=$cur
-+	cur=$(_log_writes_find_next_fua $(($cur + 1)))
-+	[ -z "$cur" ] && break
-+done
-+
-+echo "Silence is golden"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/194.out b/tests/btrfs/194.out
-new file mode 100644
-index 00000000..7bfd50ff
---- /dev/null
-+++ b/tests/btrfs/194.out
-@@ -0,0 +1,2 @@
-+QA output created by 194
-+Silence is golden
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index b92cb12c..0d0e1bba 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -196,3 +196,4 @@
- 191 auto quick send dedupe
- 192 auto replay snapshot stress
- 193 auto quick qgroup enospc limit
-+194 auto metadata log volume
--- 
-2.21.0
-
+> 
+> Changes from V1:
+> 	Create a new option '-L' to run lease testing
+> 	Created 568 test script which shared common code with 131
+> 	Moved 2 patches earlier in the series
+> 		[PATCH V2 09/16] src/locktest: Clean up error output
+> 		[PATCH V2 10/16] src/locktest: Audit all debug output
+> 	Added 3 patches
+> 		[PATCH V2 11/16] src/locktest: Add run() function
+> 		[PATCH V2 15/16] common/locktest: Add common locktest functions
+> 		[PATCH V2 16/16] generic/568: Add lease testing
+> 
+> Ira Weiny (16):
+>   src/locktest: Remove unnecessary sleep
+>   src/locktest: Remove OPEN macro
+>   src/locktest: Change command macro names
+>   src/locktest: Add get_cmd_str
+>   src/locktest.c: Clean up client command passing
+>   src/locktest.c: Fix return code if last test fails
+>   generic/131: Clean up pid variables
+>   generic/131: Save stderr for debugging
+>   src/locktest: Clean up error output
+>   src/locktest: Audit all debug output
+>   src/locktest: Add run() function
+>   src/locktest: Add simple lease testing
+>   src/locktest: Add lease testing for basic signal reception
+>   src/locktest: Add truncate lease tests
+>   common/locktest: Add common locktest functions
+>   generic/568: Add lease testing
+> 
+>  common/locktest       |  95 ++++
+>  src/locktest.c        | 999 +++++++++++++++++++++++++++---------------
+>  tests/generic/131     |  54 +--
+>  tests/generic/568     |  32 ++
+>  tests/generic/568.out |   2 +
+>  tests/generic/group   |   1 +
+>  6 files changed, 786 insertions(+), 397 deletions(-)
+>  create mode 100644 common/locktest
+>  create mode 100755 tests/generic/568
+>  create mode 100644 tests/generic/568.out
+> 
+> -- 
+> 2.20.1
+> 
