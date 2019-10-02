@@ -3,171 +3,225 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
 X-Spam-Status: No, score=-8.3 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9DA16C352AA
-	for <linux-fstests@archiver.kernel.org>; Wed,  2 Oct 2019 11:02:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 03280C35280
+	for <linux-fstests@archiver.kernel.org>; Wed,  2 Oct 2019 13:56:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 71A2720700
-	for <linux-fstests@archiver.kernel.org>; Wed,  2 Oct 2019 11:02:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BD81321920
+	for <linux-fstests@archiver.kernel.org>; Wed,  2 Oct 2019 13:56:38 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="itG7mWnb"
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="wnUT9hMB"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727499AbfJBLCK (ORCPT
+        id S1726635AbfJBN4i (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 2 Oct 2019 07:02:10 -0400
-Received: from mail-pf1-f194.google.com ([209.85.210.194]:39361 "EHLO
-        mail-pf1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726157AbfJBLCK (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 2 Oct 2019 07:02:10 -0400
-Received: by mail-pf1-f194.google.com with SMTP id v4so10139552pff.6
-        for <fstests@vger.kernel.org>; Wed, 02 Oct 2019 04:02:09 -0700 (PDT)
+        Wed, 2 Oct 2019 09:56:38 -0400
+Received: from mail-qt1-f193.google.com ([209.85.160.193]:39930 "EHLO
+        mail-qt1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726272AbfJBN4i (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 2 Oct 2019 09:56:38 -0400
+Received: by mail-qt1-f193.google.com with SMTP id n7so26428014qtb.6
+        for <fstests@vger.kernel.org>; Wed, 02 Oct 2019 06:56:37 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
+        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
         h=date:from:to:cc:subject:message-id:references:mime-version
          :content-disposition:in-reply-to:user-agent;
-        bh=j6o4yPi8TFZlClyYCLPHHBwXitDVfUmizCEZ+a1ceTo=;
-        b=itG7mWnbepx82cVwNHzqDoi5psu+n6GHUlPPhkhAmRBGVzTxA6oHSF/KuvHFDdWeK3
-         eu2ydoFAJFozQlWgUNpmC31IRr/N81vvfRuLzoAuKNjbGZbVToGs/e0ynVL8GONTv06u
-         6utHXsnIeg8OfRM+VZNuw786KGkHX2YbjJiQPMcYi8o4g4J4h3xTAqtqQwdFJHMgnleA
-         +IM7IvEdaeZyarI9b/5sowyEJlt1yG+eBQVontAK8hb4vteEVBMLgP/U/d4rWlPD42uF
-         WPBcf4mylQuwtz2LyiR5cOH4v5qBoOS611PN1OpzYbednrngbJWvN3DLxXh/agSzMeGD
-         QxBg==
+        bh=caTB1vW5LRmcHzONFL04Q7uf8Sb93YSgD3YPZxfz35k=;
+        b=wnUT9hMBrZNOsqy8GikHNcP3Bx9f/XacI3sdFGM5o+Ev2OobT1uO1FwwIMSq0AXlYC
+         BlAoM+AxDFZJ91wLx398kmrvm+GvZbiLsVZ9zfCLnz5tw6XzTgyXP/aOz9ypZQSFrjhk
+         YKwo3mkmVOvbBs3CfAh6GAbi6iBvXyn1Y9+9PKVhkhSE/lXH3eOgerid2+4uEPX+oYKU
+         ZqVtHKq1remeRjj6n9+/h3ncfPQU1+gxIRXPfwhxXAyf5F/EkWE1+YxVepV6UuXjQN+t
+         2Z3TzfFvelohOZai2++Z30hOVW8rDgxHRKhJ5UpUC6x4ZOpzJsc00EJTzJnekPYVXCJs
+         tdIg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to:user-agent;
-        bh=j6o4yPi8TFZlClyYCLPHHBwXitDVfUmizCEZ+a1ceTo=;
-        b=FPjbdTC9qVFeeB/asB3TAK7CSOAcxdRaWHZbtx3Nvz6q+G6WCFSzeDod6URolvn9E3
-         sYkJonAC/OTSO6L5bBE+U/TwZzgy5Ug99Ex3dsisKV3v5kVn7FbBu4ZJfHvtB1V24Auc
-         Gnv8gaa0oH6KvqiwGzwOqh7Q6IpQd0gst+d2TuJGF7bFT221IoYeR1rYlxb6bqP0aTnj
-         SIPeMxKc5BkUpF8FrDmppiiynP54LDV3nDomO1c1kCgv2jEJUtTtthVi3XLJ+EluPOnZ
-         SzhVi/DoKtc78MfnLSQcaYzkMojjR5b39P0h9XcUN9LgOKyrzMS02aItHq0lkU+OZ7k9
-         dIAw==
-X-Gm-Message-State: APjAAAVj5awRvoI2/NjzyntScYft7n+PcJlQ2l25JggY1XVumgeFx6gV
-        hnobKxHoGJVm8D9M+EaUh+Q=
-X-Google-Smtp-Source: APXvYqyiNBAGa4Ary9vzGlmDT2vxi02JK7mrDeXly6cLc3pyIaMAybPINpr95R1gM7FQsk+eONZo3Q==
-X-Received: by 2002:a63:1f23:: with SMTP id f35mr2926384pgf.298.1570014129301;
-        Wed, 02 Oct 2019 04:02:09 -0700 (PDT)
-Received: from localhost ([178.128.102.47])
-        by smtp.gmail.com with ESMTPSA id l6sm10707315pje.28.2019.10.02.04.02.07
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 02 Oct 2019 04:02:08 -0700 (PDT)
-Date:   Wed, 2 Oct 2019 19:02:02 +0800
-From:   Eryu Guan <guaneryu@gmail.com>
-To:     Chao Yu <yuchao0@huawei.com>
-Cc:     fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net
-Subject: Re: [PATCH] common/rc: generalize _get_filesize()
-Message-ID: <20191002110200.GA2622@desktop>
-References: <20190927100742.9266-1-yuchao0@huawei.com>
+        bh=caTB1vW5LRmcHzONFL04Q7uf8Sb93YSgD3YPZxfz35k=;
+        b=dSKOBdr67KndREcrDjRvVjIGTKJ+vZqDYcJM0T1xvhv1AWovJlPPp7SyEstS645hgH
+         GObjt/NeRo0t8+keR4tD8pXphkx3AAn5m0NesPG7LzdA5WntNXodwE6nlvfddn46/XZM
+         s59tUz3Zaycl15QJrf85CECKYAt5X4jpP+Sa+9pgPKgW6hVSgqTfES7YZT69YKm6hsRN
+         pn+wW6CwvwDs/V4cPMI0ajqmvo/a6dGa4Vi7HWRceUJsIPuUTM8D3F1huTY01ktqGPiZ
+         te/6Co8rGqlInsGk1DYrOD18GD6RTqlswMjqmnSYIkWolTetPFony6MUIwg9uzWevSKD
+         bbqg==
+X-Gm-Message-State: APjAAAU+B1/6IZkYUWL6NvDVtJUqLsBFbWSAsUqXZ5aNcyOrFGtSg5gg
+        M5McQOAlH4j2C3p1D5Kmao5Gtw==
+X-Google-Smtp-Source: APXvYqzt++XWOKmcg50h5pIywcxgP2qEJmcn+jk/CFdNMl1NjmBiFrGfC6cug4YrW+FQGyq9WZEOiw==
+X-Received: by 2002:ac8:33d3:: with SMTP id d19mr4095798qtb.60.1570024596844;
+        Wed, 02 Oct 2019 06:56:36 -0700 (PDT)
+Received: from localhost ([107.15.81.208])
+        by smtp.gmail.com with ESMTPSA id l48sm12781869qtb.50.2019.10.02.06.56.35
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Wed, 02 Oct 2019 06:56:36 -0700 (PDT)
+Date:   Wed, 2 Oct 2019 09:56:34 -0400
+From:   Josef Bacik <josef@toxicpanda.com>
+To:     Filipe Manana <fdmanana@gmail.com>
+Cc:     Josef Bacik <josef@toxicpanda.com>,
+        linux-btrfs <linux-btrfs@vger.kernel.org>, kernel-team@fb.com,
+        fstests <fstests@vger.kernel.org>, Josef Bacik <jbacik@fb.com>
+Subject: Re: [PATCH] btrfs/194: add a test for multi-subvolume fsyncing
+Message-ID: <20191002135633.qeurdguga57r4mza@MacBook-Pro-91.local>
+References: <20191001200551.1513-1-josef@toxicpanda.com>
+ <CAL3q7H4CD8A+WjQbeT=MZ_k7ibiT9fe_+NvPpQ2m2=+99Mt9FQ@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190927100742.9266-1-yuchao0@huawei.com>
-User-Agent: Mutt/1.12.1 (2019-06-15)
+In-Reply-To: <CAL3q7H4CD8A+WjQbeT=MZ_k7ibiT9fe_+NvPpQ2m2=+99Mt9FQ@mail.gmail.com>
+User-Agent: NeoMutt/20180716
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Sep 27, 2019 at 06:07:42PM +0800, Chao Yu wrote:
-> There are some testcases use below command to get file size, generalize
-> it as global function _get_filesize()
+On Wed, Oct 02, 2019 at 11:22:40AM +0100, Filipe Manana wrote:
+> On Wed, Oct 2, 2019 at 5:29 AM Josef Bacik <josef@toxicpanda.com> wrote:
+> >
+> > From: Josef Bacik <jbacik@fb.com>
+> >
+> > I discovered a problem in btrfs where we'd end up pointing at a block we
+> > hadn't written out yet.  This is triggered by a race when two different
+> > files on two different subvolumes fsync.  This test exercises this path
+> > with dm-log-writes, and then replays the log at every FUA to verify the
+> > file system is still mountable and the log is replayable.
 > 
-> ls -l $1 | $AWK_PROG '{print $5}'
+> Please mention in the changelog, or in the test's description, the
+> subject of the patch that fixes the problem.
+> Otherwise people running the test and seeing failures will have a hard
+> time figuring things out (think of QA teams
+> for example, or anyone some weeks or months after, where context is
+> lost and mailing list search is not that great).
 > 
-> - adjust common/defrag, generic/275 and generic/315 to use it
-> - remove unused _filesize in generic/013
+> >
+> > Signed-off-by: Josef Bacik <josef@toxicpanda.com>
+> > ---
+> >  tests/btrfs/194     | 102 ++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/btrfs/194.out |   2 +
+> >  tests/btrfs/group   |   1 +
+> >  3 files changed, 105 insertions(+)
+> >  create mode 100755 tests/btrfs/194
+> >  create mode 100644 tests/btrfs/194.out
+> >
+> > diff --git a/tests/btrfs/194 b/tests/btrfs/194
+> > new file mode 100755
+> > index 00000000..d5edb313
+> > --- /dev/null
+> > +++ b/tests/btrfs/194
+> > @@ -0,0 +1,102 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (c) 2019 Facebook.  All Rights Reserved.
+> > +#
+> > +# FS QA Test 194
+> > +#
+> > +# Test multi subvolume fsync to test a bug where we'd end up pointing at a block
+> > +# we haven't written.
+> > +#
+> > +# Will do log replay and check the filesystem.
+> > +#
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +
+> > +here=`pwd`
+> > +tmp=/tmp/$$
+> > +fio_config=$tmp.fio
 > 
-> Signed-off-by: Chao Yu <yuchao0@huawei.com>
-> ---
->  common/defrag     | 2 +-
->  common/rc         | 5 +++++
->  tests/generic/013 | 5 -----
->  tests/generic/275 | 2 +-
->  tests/generic/315 | 2 +-
->  5 files changed, 8 insertions(+), 8 deletions(-)
+> This isn't used anywhere.
 > 
-> diff --git a/common/defrag b/common/defrag
-> index 9866d3da..50596f70 100644
-> --- a/common/defrag
-> +++ b/common/defrag
-> @@ -145,7 +145,7 @@ _defrag()
->  	STAT_BEFORE=`stat -c "a: %x m: %y c: %z" $1`
->  
->  	if [ $FSTYP == "f2fs" ]; then
-> -		_filesize=`ls -l $1 | $AWK_PROG '{print $5}'`
-> +		_filesize=`_get_filesize $1`
->  		$DEFRAG_PROG 0 $_filesize $1 >> $seqres.full 2>&1
->  	else
->  		$DEFRAG_PROG -v $1 >> $seqres.full 2>&1
-> diff --git a/common/rc b/common/rc
-> index 66c7fd4d..69735ae6 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -165,6 +165,11 @@ if [ ! -z "$REPORT_LIST" ]; then
->  	_assert_report_list
->  fi
->  
-> +_get_filesize()
-> +{
-> +    echo `ls -l $1 | $AWK_PROG '{print $5}'`
+> > +status=1       # failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +       cd /
+> > +       $KILLALL_PROG -KILL -q $FSSTRESS_PROG &> /dev/null
+> 
+> This line can go away, the test doesn't use fsstress.
+> 
+> > +       _log_writes_cleanup &> /dev/null
+> > +       _dmthin_cleanup
+> > +       rm -f $tmp.*
+> > +}
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/filter
+> > +. ./common/dmthin
+> > +. ./common/dmlogwrites
+> > +
+> > +# remove previous $seqres.full before test
+> > +rm -f $seqres.full
+> > +
+> > +# real QA test starts here
+> > +
+> > +# Modify as appropriate.
+> > +_supported_fs generic
+> > +_supported_os Linux
+> > +
+> > +# Use thin device as replay device, which requires $SCRATCH_DEV
+> > +_require_scratch_nocheck
+> > +# and we need extra device as log device
+> > +_require_log_writes
+> > +_require_dm_target thin-pool
+> > +
+> > +_require_fio
+> 
+> All existing tests I could see, do "_require_fio $fio_config", where
+> $fio_config is not empty.
+> 
 
-Ah, you could update _get_filesize to use "stat -c %s" version then.
+Yeah you can pass in a config or not, if you don't it just checks to make sure
+you have fio available.  I originally intended to do a config, but just went
+with the commandline since it's easier to do the individual files and I'm not
+using any esoteric fio options.
 
-Thanks,
-Eryu
+<snip>
 
-> +}
-> +
->  _mount()
->  {
->      $MOUNT_PROG `_mount_ops_filter $*`
-> diff --git a/tests/generic/013 b/tests/generic/013
-> index 9e533ee8..bc596102 100755
-> --- a/tests/generic/013
-> +++ b/tests/generic/013
-> @@ -24,11 +24,6 @@ _cleanup()
->      rm -rf $TEST_DIR/fsstress.$$.*
->  }
->  
-> -_filesize()
-> -{
-> -    ls -l $1 | $AWK_PROG '{print "    filesize = " $5}'
-> -}
-> -
->  # get standard environment, filters and checks
->  . ./common/rc
->  . ./common/filter
-> diff --git a/tests/generic/275 b/tests/generic/275
-> index a934c19c..adc82856 100755
-> --- a/tests/generic/275
-> +++ b/tests/generic/275
-> @@ -73,7 +73,7 @@ echo "Bytes written until ENOSPC:" >>$seqres.full
->  du $SCRATCH_MNT/tmp1 >>$seqres.full
->  
->  # And at least some of it should succeed.
-> -_filesize=`ls -l $SCRATCH_MNT/tmp1 | awk '{print $5}'`
-> +_filesize=`_get_filesize $SCRATCH_MNT/tmp1`
->  [ $_filesize -lt $((128 * 1024)) ] && \
->  	_fail "Partial write until enospc failed; wrote $_filesize bytes."
->  
-> diff --git a/tests/generic/315 b/tests/generic/315
-> index fd49b579..808d7d74 100755
-> --- a/tests/generic/315
-> +++ b/tests/generic/315
-> @@ -52,7 +52,7 @@ $XFS_IO_PROG -f -c 'falloc -k 0 $(($avail_begin/2))' \
->  	$TEST_DIR/testfile.$seq >>$seqres.full 2>&1
->  
->  # Verify the file size, it should keep unchanged as 0 in this case
-> -fsize=`ls -l $TEST_DIR/testfile.$seq | awk '{print $5}'`
-> +fsize=`_get_filesize $TEST_DIR/testfile.$seq`
->  [ "$fsize" -eq 0 ] || _fail "File size is changed to ($fsize Bytes)"
->  
->  # Truncate the file size back to 0
-> -- 
-> 2.18.0.rc1
 > 
+> Other than that it looks fine to me.
+> 
+> However, on a VM with 8Gb of ram, I can't run the test:
+> 
+> root 11:09:10 /home/fdmanana/git/hub/xfstests (master)> ./check btrfs/194
+> FSTYP         -- btrfs
+> PLATFORM      -- Linux/x86_64 debian5 5.3.0-rc8-btrfs-next-58 #1 SMP
+> Tue Sep 17 18:18:55 WEST 2019
+> MKFS_OPTIONS  -- /dev/sdc
+> MOUNT_OPTIONS -- /dev/sdc /home/fdmanana/btrfs-tests/scratch_1
+> 
+> btrfs/194 [failed, exit status 137]- output mismatch (see
+> /home/fdmanana/git/hub/xfstests/results//btrfs/194.out.bad)
+>     --- tests/btrfs/194.out 2019-10-02 10:51:45.485575789 +0100
+>     +++ /home/fdmanana/git/hub/xfstests/results//btrfs/194.out.bad
+> 2019-10-02 11:12:11.382533722 +0100
+>     @@ -1,2 +1,2 @@
+>      QA output created by 194
+>     -Silence is golden
+>     +./check: line 513:  1324 Killed                  bash -c "test -w
+> ${OOM_SCORE_ADJ} && echo 250 > ${OOM_SCORE_ADJ}; exec ./$seq"
+>     ...
+>     (Run 'diff -u /home/fdmanana/git/hub/xfstests/tests/btrfs/194.out
+> /home/fdmanana/git/hub/xfstests/results//btrfs/194.out.bad'  to see
+> the entire diff)
+> Ran: btrfs/194
+> Failures: btrfs/194
+> Failed 1 of 1 tests
+> 
+> root 11:12:22 /home/fdmanana/git/hub/xfstests (master)> cat
+> /home/fdmanana/git/hub/xfstests/results//btrfs/194.out.bad
+> QA output created by 194
+> ./check: line 513:  1324 Killed                  bash -c "test -w
+> ${OOM_SCORE_ADJ} && echo 250 > ${OOM_SCORE_ADJ}; exec ./$seq"
+> root 11:19:39 /home/fdmanana/git/hub/xfstests (master)>
+> 
+> 
+> 8Gb is a very reasonable amount of ram. This is on a debug kernel
+> (kmemleak, kasan, debug_pagealloc, etc, enabled). Not uncommon among
+> developers at least (even 4Gb of ram is common).
+
+Huh that's weird.  Do you know what step of the test OOM'ed?  Nothing we're
+doing here should be using that much memory.  Thanks,
+
+Josef
