@@ -8,143 +8,166 @@ X-Spam-Status: No, score=-8.3 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 69566C35280
-	for <linux-fstests@archiver.kernel.org>; Wed,  2 Oct 2019 11:00:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9DA16C352AA
+	for <linux-fstests@archiver.kernel.org>; Wed,  2 Oct 2019 11:02:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 39D892086A
-	for <linux-fstests@archiver.kernel.org>; Wed,  2 Oct 2019 11:00:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 71A2720700
+	for <linux-fstests@archiver.kernel.org>; Wed,  2 Oct 2019 11:02:10 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ESJgFTdz"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="itG7mWnb"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726220AbfJBLAG (ORCPT
+        id S1727499AbfJBLCK (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 2 Oct 2019 07:00:06 -0400
-Received: from mail-pg1-f193.google.com ([209.85.215.193]:36902 "EHLO
-        mail-pg1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726157AbfJBLAF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 2 Oct 2019 07:00:05 -0400
-Received: by mail-pg1-f193.google.com with SMTP id c17so11663813pgg.4
-        for <fstests@vger.kernel.org>; Wed, 02 Oct 2019 04:00:05 -0700 (PDT)
+        Wed, 2 Oct 2019 07:02:10 -0400
+Received: from mail-pf1-f194.google.com ([209.85.210.194]:39361 "EHLO
+        mail-pf1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726157AbfJBLCK (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 2 Oct 2019 07:02:10 -0400
+Received: by mail-pf1-f194.google.com with SMTP id v4so10139552pff.6
+        for <fstests@vger.kernel.org>; Wed, 02 Oct 2019 04:02:09 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=date:from:to:cc:subject:message-id:references:mime-version
          :content-disposition:in-reply-to:user-agent;
-        bh=UK3UHjVhJ3ZMTKZOjwjI/XlXGTSgE7uJiyeJAVBdmFs=;
-        b=ESJgFTdzV63JDofuBJMEoGr4SgbobyFCryO8qVvFv4Q9HKZBgQ/Q38kBYy1u80+ezT
-         9Ds9oqzY4q4Ihet2GyjcSbifQ33M/Rr8GDolIBeTam/yFXcwK89tcvk8Dv7e69BLtFIH
-         FrA0sjiKTNY1ioNvwfwUN8KfhHjMntN7CPWNdXtMEf2pBKQ2ox2h5XCDFEyQIEZyFrZu
-         MR9anR/5QjwlsR6/ZTIHXd87P579jL8p5h2M3d1GAZvaS3MRmMqetPjMHz+z7OC/YpSH
-         mOY9RafiDFz8U4+oFxXdyM+6PBUWCLIYK9nQgqRFVWTocwi7ahaqprBXrzS2IG43Llj8
-         ivCQ==
+        bh=j6o4yPi8TFZlClyYCLPHHBwXitDVfUmizCEZ+a1ceTo=;
+        b=itG7mWnbepx82cVwNHzqDoi5psu+n6GHUlPPhkhAmRBGVzTxA6oHSF/KuvHFDdWeK3
+         eu2ydoFAJFozQlWgUNpmC31IRr/N81vvfRuLzoAuKNjbGZbVToGs/e0ynVL8GONTv06u
+         6utHXsnIeg8OfRM+VZNuw786KGkHX2YbjJiQPMcYi8o4g4J4h3xTAqtqQwdFJHMgnleA
+         +IM7IvEdaeZyarI9b/5sowyEJlt1yG+eBQVontAK8hb4vteEVBMLgP/U/d4rWlPD42uF
+         WPBcf4mylQuwtz2LyiR5cOH4v5qBoOS611PN1OpzYbednrngbJWvN3DLxXh/agSzMeGD
+         QxBg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to:user-agent;
-        bh=UK3UHjVhJ3ZMTKZOjwjI/XlXGTSgE7uJiyeJAVBdmFs=;
-        b=ppHWMplprjHFGYFNSZKfmWBxT0LDH8iOlyqRdJtJD7wTURFRc7oy4uB6mQd3o4811A
-         BhEOJ5kIiufVEV8JnYLJvgbuQ4DtXWPRlCUfYC4wiLBGOp+MXs3h9uxSV9jsT6ivHk3y
-         Eljhfkw8WXH8FRmcYIrVcxE0RPG/iHporhFAPP5rQnGvBuNKoBjgk4AV3TJ6NYgkuMpJ
-         kXFxTZ2ZcX940kP19s9wMqqcc1QHOWrFFj3vOoKffzHsLpPnmt3TL9pEv1IhIsXAco5L
-         Uc6AuxtF9E+YsF+hJu+OYimhS9ZmEPWcsF3AzRVmvYgsd2NxK4fR/yWz7wgKx/cUqXMH
-         XdfQ==
-X-Gm-Message-State: APjAAAXtg01Ka4eJkXEkLZRN4wo/wHHKCuSXQVIuvcbCYps3YXKhyJ1z
-        mTqZ/4EV4ztUh/uBj51J6+U=
-X-Google-Smtp-Source: APXvYqxMzXMpvvvlopGLf8ICyvVbJ56L6uHQCD9IJROitX7OIo+ljxSoc8ry3SgnpxKV5JPT+zAlSA==
-X-Received: by 2002:a62:5a85:: with SMTP id o127mr4078154pfb.212.1570014005072;
-        Wed, 02 Oct 2019 04:00:05 -0700 (PDT)
+        bh=j6o4yPi8TFZlClyYCLPHHBwXitDVfUmizCEZ+a1ceTo=;
+        b=FPjbdTC9qVFeeB/asB3TAK7CSOAcxdRaWHZbtx3Nvz6q+G6WCFSzeDod6URolvn9E3
+         sYkJonAC/OTSO6L5bBE+U/TwZzgy5Ug99Ex3dsisKV3v5kVn7FbBu4ZJfHvtB1V24Auc
+         Gnv8gaa0oH6KvqiwGzwOqh7Q6IpQd0gst+d2TuJGF7bFT221IoYeR1rYlxb6bqP0aTnj
+         SIPeMxKc5BkUpF8FrDmppiiynP54LDV3nDomO1c1kCgv2jEJUtTtthVi3XLJ+EluPOnZ
+         SzhVi/DoKtc78MfnLSQcaYzkMojjR5b39P0h9XcUN9LgOKyrzMS02aItHq0lkU+OZ7k9
+         dIAw==
+X-Gm-Message-State: APjAAAVj5awRvoI2/NjzyntScYft7n+PcJlQ2l25JggY1XVumgeFx6gV
+        hnobKxHoGJVm8D9M+EaUh+Q=
+X-Google-Smtp-Source: APXvYqyiNBAGa4Ary9vzGlmDT2vxi02JK7mrDeXly6cLc3pyIaMAybPINpr95R1gM7FQsk+eONZo3Q==
+X-Received: by 2002:a63:1f23:: with SMTP id f35mr2926384pgf.298.1570014129301;
+        Wed, 02 Oct 2019 04:02:09 -0700 (PDT)
 Received: from localhost ([178.128.102.47])
-        by smtp.gmail.com with ESMTPSA id r28sm22102381pfg.62.2019.10.02.04.00.03
+        by smtp.gmail.com with ESMTPSA id l6sm10707315pje.28.2019.10.02.04.02.07
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 02 Oct 2019 04:00:04 -0700 (PDT)
-Date:   Wed, 2 Oct 2019 18:59:59 +0800
+        Wed, 02 Oct 2019 04:02:08 -0700 (PDT)
+Date:   Wed, 2 Oct 2019 19:02:02 +0800
 From:   Eryu Guan <guaneryu@gmail.com>
 To:     Chao Yu <yuchao0@huawei.com>
 Cc:     fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net
-Subject: Re: [PATCH 1/2] common/defrag: support f2fs
-Message-ID: <20191002105956.GZ2622@desktop>
-References: <20190927100627.9086-1-yuchao0@huawei.com>
+Subject: Re: [PATCH] common/rc: generalize _get_filesize()
+Message-ID: <20191002110200.GA2622@desktop>
+References: <20190927100742.9266-1-yuchao0@huawei.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190927100627.9086-1-yuchao0@huawei.com>
+In-Reply-To: <20190927100742.9266-1-yuchao0@huawei.com>
 User-Agent: Mutt/1.12.1 (2019-06-15)
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Sep 27, 2019 at 06:06:26PM +0800, Chao Yu wrote:
-> F2FS supports defragment based on file granularity, adjust test suit
-> to support f2fs.
+On Fri, Sep 27, 2019 at 06:07:42PM +0800, Chao Yu wrote:
+> There are some testcases use below command to get file size, generalize
+> it as global function _get_filesize()
+> 
+> ls -l $1 | $AWK_PROG '{print $5}'
+> 
+> - adjust common/defrag, generic/275 and generic/315 to use it
+> - remove unused _filesize in generic/013
 > 
 > Signed-off-by: Chao Yu <yuchao0@huawei.com>
 > ---
->  common/config |  2 ++
->  common/defrag | 11 ++++++++++-
->  2 files changed, 12 insertions(+), 1 deletion(-)
+>  common/defrag     | 2 +-
+>  common/rc         | 5 +++++
+>  tests/generic/013 | 5 -----
+>  tests/generic/275 | 2 +-
+>  tests/generic/315 | 2 +-
+>  5 files changed, 8 insertions(+), 8 deletions(-)
 > 
-> diff --git a/common/config b/common/config
-> index 4c86a492..c43be339 100644
-> --- a/common/config
-> +++ b/common/config
-> @@ -176,6 +176,7 @@ export XFS_COPY_PROG="$(type -P xfs_copy)"
->  export FSTRIM_PROG="$(type -P fstrim)"
->  export DUMPE2FS_PROG="$(type -P dumpe2fs)"
->  export RESIZE2FS_PROG="$(type -P resize2fs)"
-> +export F2FS_IO_PROG="$(type -P f2fs_io)"
->  export FIO_PROG="$(type -P fio)"
->  export FILEFRAG_PROG="$(type -P filefrag)"
->  export E4DEFRAG_PROG="$(type -P e4defrag)"
-> @@ -240,6 +241,7 @@ case "$HOSTOS" in
->  	export MKFS_BTRFS_PROG=$(set_mkfs_prog_path_with_opts btrfs)
->  	export MKFS_F2FS_PROG=$(set_mkfs_prog_path_with_opts f2fs)
->  	export DUMP_F2FS_PROG=$(type -P dump.f2fs)
-> +	export F2FS_IO_PROG=$(type -P f2fs_io)
->  	export BTRFS_UTIL_PROG=$(type -P btrfs)
->  	export BTRFS_SHOW_SUPER_PROG=$(type -P btrfs-show-super)
->  	export BTRFS_CONVERT_PROG=$(type -P btrfs-convert)
 > diff --git a/common/defrag b/common/defrag
-> index 2bd739c0..9866d3da 100644
+> index 9866d3da..50596f70 100644
 > --- a/common/defrag
 > +++ b/common/defrag
-> @@ -27,6 +27,9 @@ _require_defrag()
->  	rm -f $testfile $donorfile 2>&1 > /dev/null
->  	DEFRAG_PROG="$E4DEFRAG_PROG"
->  	;;
-> +    f2fs)
-> +	DEFRAG_PROG="$F2FS_IO_PROG defrag_file"
-> +	;;
->      btrfs)
->  	DEFRAG_PROG="$BTRFS_UTIL_PROG filesystem defragment"
->  	;;
-> @@ -140,7 +143,13 @@ _defrag()
->  
->  	[ ! -z $csum ] && CSUM_BEFORE=`md5sum $1`
+> @@ -145,7 +145,7 @@ _defrag()
 >  	STAT_BEFORE=`stat -c "a: %x m: %y c: %z" $1`
-> -	$DEFRAG_PROG -v $1 >> $seqres.full 2>&1
-> +
-> +	if [ $FSTYP == "f2fs" ]; then
-> +		_filesize=`ls -l $1 | $AWK_PROG '{print $5}'`
+>  
+>  	if [ $FSTYP == "f2fs" ]; then
+> -		_filesize=`ls -l $1 | $AWK_PROG '{print $5}'`
+> +		_filesize=`_get_filesize $1`
+>  		$DEFRAG_PROG 0 $_filesize $1 >> $seqres.full 2>&1
+>  	else
+>  		$DEFRAG_PROG -v $1 >> $seqres.full 2>&1
+> diff --git a/common/rc b/common/rc
+> index 66c7fd4d..69735ae6 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -165,6 +165,11 @@ if [ ! -z "$REPORT_LIST" ]; then
+>  	_assert_report_list
+>  fi
+>  
+> +_get_filesize()
+> +{
+> +    echo `ls -l $1 | $AWK_PROG '{print $5}'`
 
-Better to declare "filesize" as a local variable here.
-
-		local filesize=`stat -c %s $1`
-
-Otherwise looks fine to me.
-
-But it'd be better to let other f2fs developers review this patchset as
-well.
+Ah, you could update _get_filesize to use "stat -c %s" version then.
 
 Thanks,
 Eryu
 
-> +		$DEFRAG_PROG 0 $_filesize $1 >> $seqres.full 2>&1
-> +	else
-> +		$DEFRAG_PROG -v $1 >> $seqres.full 2>&1
-> +	fi
+> +}
+> +
+>  _mount()
+>  {
+>      $MOUNT_PROG `_mount_ops_filter $*`
+> diff --git a/tests/generic/013 b/tests/generic/013
+> index 9e533ee8..bc596102 100755
+> --- a/tests/generic/013
+> +++ b/tests/generic/013
+> @@ -24,11 +24,6 @@ _cleanup()
+>      rm -rf $TEST_DIR/fsstress.$$.*
+>  }
 >  
->  	_scratch_cycle_mount
->  	STAT_AFTER=`stat -c "a: %x m: %y c: %z" $1`
+> -_filesize()
+> -{
+> -    ls -l $1 | $AWK_PROG '{print "    filesize = " $5}'
+> -}
+> -
+>  # get standard environment, filters and checks
+>  . ./common/rc
+>  . ./common/filter
+> diff --git a/tests/generic/275 b/tests/generic/275
+> index a934c19c..adc82856 100755
+> --- a/tests/generic/275
+> +++ b/tests/generic/275
+> @@ -73,7 +73,7 @@ echo "Bytes written until ENOSPC:" >>$seqres.full
+>  du $SCRATCH_MNT/tmp1 >>$seqres.full
+>  
+>  # And at least some of it should succeed.
+> -_filesize=`ls -l $SCRATCH_MNT/tmp1 | awk '{print $5}'`
+> +_filesize=`_get_filesize $SCRATCH_MNT/tmp1`
+>  [ $_filesize -lt $((128 * 1024)) ] && \
+>  	_fail "Partial write until enospc failed; wrote $_filesize bytes."
+>  
+> diff --git a/tests/generic/315 b/tests/generic/315
+> index fd49b579..808d7d74 100755
+> --- a/tests/generic/315
+> +++ b/tests/generic/315
+> @@ -52,7 +52,7 @@ $XFS_IO_PROG -f -c 'falloc -k 0 $(($avail_begin/2))' \
+>  	$TEST_DIR/testfile.$seq >>$seqres.full 2>&1
+>  
+>  # Verify the file size, it should keep unchanged as 0 in this case
+> -fsize=`ls -l $TEST_DIR/testfile.$seq | awk '{print $5}'`
+> +fsize=`_get_filesize $TEST_DIR/testfile.$seq`
+>  [ "$fsize" -eq 0 ] || _fail "File size is changed to ($fsize Bytes)"
+>  
+>  # Truncate the file size back to 0
 > -- 
 > 2.18.0.rc1
 > 
