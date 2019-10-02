@@ -2,249 +2,98 @@ Return-Path: <SRS0=G1tu=X3=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 887FCC35280
-	for <linux-fstests@archiver.kernel.org>; Wed,  2 Oct 2019 15:59:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C5550C10F14
+	for <linux-fstests@archiver.kernel.org>; Wed,  2 Oct 2019 17:59:26 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 4DC7021D81
-	for <linux-fstests@archiver.kernel.org>; Wed,  2 Oct 2019 15:59:41 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ocyGKDp2"
+	by mail.kernel.org (Postfix) with ESMTP id 9DB9321783
+	for <linux-fstests@archiver.kernel.org>; Wed,  2 Oct 2019 17:59:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726157AbfJBP7l (ORCPT
+        id S1727624AbfJBR70 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 2 Oct 2019 11:59:41 -0400
-Received: from mail-vs1-f68.google.com ([209.85.217.68]:37291 "EHLO
-        mail-vs1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726152AbfJBP7k (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 2 Oct 2019 11:59:40 -0400
-Received: by mail-vs1-f68.google.com with SMTP id p13so12279648vsr.4;
-        Wed, 02 Oct 2019 08:59:40 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:reply-to:from:date:message-id
-         :subject:to:cc:content-transfer-encoding;
-        bh=1qSD1pA0mVDAyNlcObKInkm71TQza8I4LieiYmzqGiI=;
-        b=ocyGKDp2N/CG9LSi5go3mrRyW79l+HlNqFiIaWWYE/xIuhb2z8HIxn0+rlpoW8+Oo2
-         UknilbMPlXw6Au2Dd7Uc+4lWwZCKGFpQGlehf3wnvLo7dgDlGUe9Od7LGZSQnrFUwpsL
-         aQZgKFYbpb4ZgK1GHs9qyvbP/L3kIbqFvGR79unMtxgYJnxxHgKj2pzqN3ncypGcxCcT
-         /QI9ZAmzoXS0PI6clse5PFek/FfuM+7voEXikL4g5xBsnjaSlmil0ZxUIY187l7Dj4RL
-         HIhvCouQ9pi6MA/ONRPhma5VOS3qXyaOzBTtBrYQvstcCFYdt/yo/zyI+EonbVskoQjc
-         deMA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:reply-to
-         :from:date:message-id:subject:to:cc:content-transfer-encoding;
-        bh=1qSD1pA0mVDAyNlcObKInkm71TQza8I4LieiYmzqGiI=;
-        b=SZ277gzj4OvmkIM7LyDUwVVtP0UXtxs3QdcrYYRm3Q0aTg7bYftRDVquD6VHRIyIze
-         UrdZm4eL1jUEhndpitJZaAwpvTyIBfbocJVkph14xQnfWp8e2WEKOzAp4nAK88g+J6UF
-         rqM8edQ24CegKqkH+d8Y0N/AmToDiilQDkQQpy1zWH+3gbaoLKqQBUQjBinr0+lw8cFk
-         jiaD2PzPcNBH3v0yVLcswkDOSFBaBcSGRjLzOJUFGI1eOwrLO9dxzroDpMuKnRoGS8iN
-         9PceY7zIrWeiRuDuHZgaazxDGwb7LTqtfQmRLaiQTKrfEA6vfibWTFZM6v8Y1/xiQFKX
-         E/ZA==
-X-Gm-Message-State: APjAAAV0+EG6IxpbQw9auwIFWoDe+/d8cjYhz74OiABUTenhiCVM/Bqu
-        KwPoY4tAZAnfD9LzuhcZFDzPBlXSb20OztFxNrA=
-X-Google-Smtp-Source: APXvYqxaKxIuFHzvmhJZxwJRWo8SsSLHc5jJ+ecOWfWO+z2lOPEMO4pRU3Lgxa/C7aJLKXzaBL5VBQHxBKMqpt3HsP4=
-X-Received: by 2002:a67:bc15:: with SMTP id t21mr2237237vsn.90.1570031977528;
- Wed, 02 Oct 2019 08:59:37 -0700 (PDT)
+        Wed, 2 Oct 2019 13:59:26 -0400
+Received: from mga06.intel.com ([134.134.136.31]:1877 "EHLO mga06.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726669AbfJBR70 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 2 Oct 2019 13:59:26 -0400
+X-Amp-Result: UNKNOWN
+X-Amp-Original-Verdict: FILE UNKNOWN
+X-Amp-File-Uploaded: False
+Received: from orsmga005.jf.intel.com ([10.7.209.41])
+  by orsmga104.jf.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 02 Oct 2019 10:59:25 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.67,249,1566889200"; 
+   d="scan'208";a="366779725"
+Received: from iweiny-desk2.sc.intel.com ([10.3.52.157])
+  by orsmga005.jf.intel.com with ESMTP; 02 Oct 2019 10:59:24 -0700
+Date:   Wed, 2 Oct 2019 10:59:24 -0700
+From:   Ira Weiny <ira.weiny@intel.com>
+To:     Eryu Guan <eguan@linux.alibaba.com>
+Cc:     fstests@vger.kernel.org, Eryu Guan <guaneryu@gmail.com>,
+        john.hubbard@gmail.com, Dave Chinner <david@fromorbit.com>,
+        Jan Kara <jack@suse.cz>, Jason Gunthorpe <jgg@ziepe.ca>,
+        dan.j.williams@intel.com, Jeff Layton <jlayton@kernel.org>
+Subject: Re: [PATCH V2 00/16] Fix locktest and add lease testing to it
+Message-ID: <20191002175924.GD32696@iweiny-DESK2.sc.intel.com>
+References: <20190923175336.2287-1-ira.weiny@intel.com>
+ <20191001215410.GA8840@iweiny-DESK2.sc.intel.com>
+ <20191002082429.GC67926@e18g06458.et15sqa>
 MIME-Version: 1.0
-References: <20191001200551.1513-1-josef@toxicpanda.com> <CAL3q7H4CD8A+WjQbeT=MZ_k7ibiT9fe_+NvPpQ2m2=+99Mt9FQ@mail.gmail.com>
- <20191002135633.qeurdguga57r4mza@MacBook-Pro-91.local>
-In-Reply-To: <20191002135633.qeurdguga57r4mza@MacBook-Pro-91.local>
-Reply-To: fdmanana@gmail.com
-From:   Filipe Manana <fdmanana@gmail.com>
-Date:   Wed, 2 Oct 2019 16:59:26 +0100
-Message-ID: <CAL3q7H44qTCA5vfWsJKbf9_qhO0Yg-FNq5wqJ6_TXeNXQ3gCjA@mail.gmail.com>
-Subject: Re: [PATCH] btrfs/194: add a test for multi-subvolume fsyncing
-To:     Josef Bacik <josef@toxicpanda.com>
-Cc:     linux-btrfs <linux-btrfs@vger.kernel.org>, kernel-team@fb.com,
-        fstests <fstests@vger.kernel.org>, Josef Bacik <jbacik@fb.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20191002082429.GC67926@e18g06458.et15sqa>
+User-Agent: Mutt/1.11.1 (2018-12-01)
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Oct 2, 2019 at 2:56 PM Josef Bacik <josef@toxicpanda.com> wrote:
->
-> On Wed, Oct 02, 2019 at 11:22:40AM +0100, Filipe Manana wrote:
-> > On Wed, Oct 2, 2019 at 5:29 AM Josef Bacik <josef@toxicpanda.com> wrote=
-:
+On Wed, Oct 02, 2019 at 04:24:29PM +0800, Eryu Guan wrote:
+> On Tue, Oct 01, 2019 at 02:54:10PM -0700, Ira Weiny wrote:
+> > On Mon, Sep 23, 2019 at 10:53:20AM -0700, 'Ira Weiny' wrote:
+> > > From: Ira Weiny <ira.weiny@intel.com>
+> > > 
+> > > Add lease tests[1] to locktest because they share so much code.  Make running
+> > > of lease tests separate as an '-L' option.
+> > > 
+> > > To make things cleaner update the lock test code and test script.  This
+> > > includes fixing a rather serious bug.
+> > > 
+> > > Finally update the error output to help identify any steps which fail during
+> > > testing.
 > > >
-> > > From: Josef Bacik <jbacik@fb.com>
-> > >
-> > > I discovered a problem in btrfs where we'd end up pointing at a block=
- we
-> > > hadn't written out yet.  This is triggered by a race when two differe=
-nt
-> > > files on two different subvolumes fsync.  This test exercises this pa=
-th
-> > > with dm-log-writes, and then replays the log at every FUA to verify t=
-he
-> > > file system is still mountable and the log is replayable.
-> >
-> > Please mention in the changelog, or in the test's description, the
-> > subject of the patch that fixes the problem.
-> > Otherwise people running the test and seeing failures will have a hard
-> > time figuring things out (think of QA teams
-> > for example, or anyone some weeks or months after, where context is
-> > lost and mailing list search is not that great).
-> >
-> > >
-> > > Signed-off-by: Josef Bacik <josef@toxicpanda.com>
-> > > ---
-> > >  tests/btrfs/194     | 102 ++++++++++++++++++++++++++++++++++++++++++=
-++
-> > >  tests/btrfs/194.out |   2 +
-> > >  tests/btrfs/group   |   1 +
-> > >  3 files changed, 105 insertions(+)
-> > >  create mode 100755 tests/btrfs/194
-> > >  create mode 100644 tests/btrfs/194.out
-> > >
-> > > diff --git a/tests/btrfs/194 b/tests/btrfs/194
-> > > new file mode 100755
-> > > index 00000000..d5edb313
-> > > --- /dev/null
-> > > +++ b/tests/btrfs/194
-> > > @@ -0,0 +1,102 @@
-> > > +#! /bin/bash
-> > > +# SPDX-License-Identifier: GPL-2.0
-> > > +# Copyright (c) 2019 Facebook.  All Rights Reserved.
-> > > +#
-> > > +# FS QA Test 194
-> > > +#
-> > > +# Test multi subvolume fsync to test a bug where we'd end up pointin=
-g at a block
-> > > +# we haven't written.
-> > > +#
-> > > +# Will do log replay and check the filesystem.
-> > > +#
-> > > +seq=3D`basename $0`
-> > > +seqres=3D$RESULT_DIR/$seq
-> > > +echo "QA output created by $seq"
-> > > +
-> > > +here=3D`pwd`
-> > > +tmp=3D/tmp/$$
-> > > +fio_config=3D$tmp.fio
-> >
-> > This isn't used anywhere.
-> >
-> > > +status=3D1       # failure is the default!
-> > > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > > +
-> > > +_cleanup()
-> > > +{
-> > > +       cd /
-> > > +       $KILLALL_PROG -KILL -q $FSSTRESS_PROG &> /dev/null
-> >
-> > This line can go away, the test doesn't use fsstress.
-> >
-> > > +       _log_writes_cleanup &> /dev/null
-> > > +       _dmthin_cleanup
-> > > +       rm -f $tmp.*
-> > > +}
-> > > +
-> > > +# get standard environment, filters and checks
-> > > +. ./common/rc
-> > > +. ./common/filter
-> > > +. ./common/dmthin
-> > > +. ./common/dmlogwrites
-> > > +
-> > > +# remove previous $seqres.full before test
-> > > +rm -f $seqres.full
-> > > +
-> > > +# real QA test starts here
-> > > +
-> > > +# Modify as appropriate.
-> > > +_supported_fs generic
-> > > +_supported_os Linux
-> > > +
-> > > +# Use thin device as replay device, which requires $SCRATCH_DEV
-> > > +_require_scratch_nocheck
-> > > +# and we need extra device as log device
-> > > +_require_log_writes
-> > > +_require_dm_target thin-pool
-> > > +
-> > > +_require_fio
-> >
-> > All existing tests I could see, do "_require_fio $fio_config", where
-> > $fio_config is not empty.
-> >
->
-> Yeah you can pass in a config or not, if you don't it just checks to make=
- sure
-> you have fio available.  I originally intended to do a config, but just w=
-ent
-> with the commandline since it's easier to do the individual files and I'm=
- not
-> using any esoteric fio options.
->
-> <snip>
->
-> >
-> > Other than that it looks fine to me.
-> >
-> > However, on a VM with 8Gb of ram, I can't run the test:
-> >
-> > root 11:09:10 /home/fdmanana/git/hub/xfstests (master)> ./check btrfs/1=
-94
-> > FSTYP         -- btrfs
-> > PLATFORM      -- Linux/x86_64 debian5 5.3.0-rc8-btrfs-next-58 #1 SMP
-> > Tue Sep 17 18:18:55 WEST 2019
-> > MKFS_OPTIONS  -- /dev/sdc
-> > MOUNT_OPTIONS -- /dev/sdc /home/fdmanana/btrfs-tests/scratch_1
-> >
-> > btrfs/194 [failed, exit status 137]- output mismatch (see
-> > /home/fdmanana/git/hub/xfstests/results//btrfs/194.out.bad)
-> >     --- tests/btrfs/194.out 2019-10-02 10:51:45.485575789 +0100
-> >     +++ /home/fdmanana/git/hub/xfstests/results//btrfs/194.out.bad
-> > 2019-10-02 11:12:11.382533722 +0100
-> >     @@ -1,2 +1,2 @@
-> >      QA output created by 194
-> >     -Silence is golden
-> >     +./check: line 513:  1324 Killed                  bash -c "test -w
-> > ${OOM_SCORE_ADJ} && echo 250 > ${OOM_SCORE_ADJ}; exec ./$seq"
-> >     ...
-> >     (Run 'diff -u /home/fdmanana/git/hub/xfstests/tests/btrfs/194.out
-> > /home/fdmanana/git/hub/xfstests/results//btrfs/194.out.bad'  to see
-> > the entire diff)
-> > Ran: btrfs/194
-> > Failures: btrfs/194
-> > Failed 1 of 1 tests
-> >
-> > root 11:12:22 /home/fdmanana/git/hub/xfstests (master)> cat
-> > /home/fdmanana/git/hub/xfstests/results//btrfs/194.out.bad
-> > QA output created by 194
-> > ./check: line 513:  1324 Killed                  bash -c "test -w
-> > ${OOM_SCORE_ADJ} && echo 250 > ${OOM_SCORE_ADJ}; exec ./$seq"
-> > root 11:19:39 /home/fdmanana/git/hub/xfstests (master)>
-> >
-> >
-> > 8Gb is a very reasonable amount of ram. This is on a debug kernel
-> > (kmemleak, kasan, debug_pagealloc, etc, enabled). Not uncommon among
-> > developers at least (even 4Gb of ram is common).
->
-> Huh that's weird.  Do you know what step of the test OOM'ed?  Nothing we'=
-re
-> doing here should be using that much memory.  Thanks,
+> > 
+> > Was there any further feedback on this series?  Did it get mangled too bad to
+> > apply?
+> 
+> Sorry, I forget to mention in last update announce that I'm on public
+> holiday this week and have limited internet access. I'll review this v2
+> when I get back.
 
-It OOMs when spawning the fio processes (btw, noticed now, the comment
-mentions 100 process but the loop tries to spawn 50):
+Awesome!  Have a great time!  :-D
 
-https://pastebin.com/hDhhNL60
+> 
+> > 
+> > Ira
+> > 
+> > > 
+> > > Changes from V1:
+> > > 	Create a new option '-L' to run lease testing
+> > > 	Created 568 test script which shared common code with 131
+> > > 	Moved 2 patches earlier in the series
+> > > 		[PATCH V2 09/16] src/locktest: Clean up error output
+> > > 		[PATCH V2 10/16] src/locktest: Audit all debug output
+> > > 	Added 3 patches
+> > > 		[PATCH V2 11/16] src/locktest: Add run() function
+> > > 		[PATCH V2 15/16] common/locktest: Add common locktest functions
+> > > 		[PATCH V2 16/16] generic/568: Add lease testing
+> 
+> Thanks for the revision!
 
->
-> Josef
+NP, I kind of like the way it turned out.
 
+Ira
 
-
---=20
-Filipe David Manana,
-
-=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
- right.=E2=80=9D
