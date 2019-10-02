@@ -2,98 +2,236 @@ Return-Path: <SRS0=G1tu=X3=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C5550C10F14
-	for <linux-fstests@archiver.kernel.org>; Wed,  2 Oct 2019 17:59:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6688CC10F14
+	for <linux-fstests@archiver.kernel.org>; Wed,  2 Oct 2019 18:41:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 9DB9321783
-	for <linux-fstests@archiver.kernel.org>; Wed,  2 Oct 2019 17:59:26 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3911E21783
+	for <linux-fstests@archiver.kernel.org>; Wed,  2 Oct 2019 18:41:38 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="B73xyAt7"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727624AbfJBR70 (ORCPT
+        id S1726708AbfJBSlh (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 2 Oct 2019 13:59:26 -0400
-Received: from mga06.intel.com ([134.134.136.31]:1877 "EHLO mga06.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726669AbfJBR70 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 2 Oct 2019 13:59:26 -0400
-X-Amp-Result: UNKNOWN
-X-Amp-Original-Verdict: FILE UNKNOWN
-X-Amp-File-Uploaded: False
-Received: from orsmga005.jf.intel.com ([10.7.209.41])
-  by orsmga104.jf.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 02 Oct 2019 10:59:25 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.67,249,1566889200"; 
-   d="scan'208";a="366779725"
-Received: from iweiny-desk2.sc.intel.com ([10.3.52.157])
-  by orsmga005.jf.intel.com with ESMTP; 02 Oct 2019 10:59:24 -0700
-Date:   Wed, 2 Oct 2019 10:59:24 -0700
-From:   Ira Weiny <ira.weiny@intel.com>
-To:     Eryu Guan <eguan@linux.alibaba.com>
-Cc:     fstests@vger.kernel.org, Eryu Guan <guaneryu@gmail.com>,
-        john.hubbard@gmail.com, Dave Chinner <david@fromorbit.com>,
-        Jan Kara <jack@suse.cz>, Jason Gunthorpe <jgg@ziepe.ca>,
-        dan.j.williams@intel.com, Jeff Layton <jlayton@kernel.org>
-Subject: Re: [PATCH V2 00/16] Fix locktest and add lease testing to it
-Message-ID: <20191002175924.GD32696@iweiny-DESK2.sc.intel.com>
-References: <20190923175336.2287-1-ira.weiny@intel.com>
- <20191001215410.GA8840@iweiny-DESK2.sc.intel.com>
- <20191002082429.GC67926@e18g06458.et15sqa>
+        Wed, 2 Oct 2019 14:41:37 -0400
+Received: from mail-qk1-f181.google.com ([209.85.222.181]:38012 "EHLO
+        mail-qk1-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726076AbfJBSlh (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 2 Oct 2019 14:41:37 -0400
+Received: by mail-qk1-f181.google.com with SMTP id u186so16085627qkc.5
+        for <fstests@vger.kernel.org>; Wed, 02 Oct 2019 11:41:36 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
+        h=from:to:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=lIVT3jFPw6k+aNp9uTRpNgvLeVg+3uvDlpVSa/R+fEE=;
+        b=B73xyAt7MtyZxC2VKf831r4uBQTyS2qRFV6Q7feHDRlOA2ydnco8WMmbDnGF+cKeYR
+         bQbqJpWZ4iMyr8oG5AsBjJG413kteIbYs4AsJ/MPZ8V5VTTiFLdi2YtpjCX7vnRQUx3B
+         1Eg+EKI3AlGBhl0gT/ftCcuULdKkyrMr/pTolzLwSLj0kHb/iVHXDY9w3KB/aokoWMyU
+         yH5R6WbwHvvcp5OzHh6HaMNDKgTwdpfdSTl9+0I2DAKs9UJQGajaOjJG/DzLqK/XR3Wz
+         UGJvefL/eF/zp+hDbZIAszRII9szDkU47ml7IQwzOSbAqohGpJytlS5szHtRYZXv8nog
+         vgeA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=lIVT3jFPw6k+aNp9uTRpNgvLeVg+3uvDlpVSa/R+fEE=;
+        b=oDRh+thnMC/+hgAOL6o5meajT4Wl22rjkYqQ3ELC+lQ0/E7RDFKmoI8SEsqMR5ARcG
+         iGoULVwPsxj24NyGjlcRB4rr1Enx9D86yE+Em5dAerPIckprXvGnRO4YvY91fVe97tkp
+         MsiwifC3Fd8QeVNMU9uMVpkt5tQi37ldu39c0ME1k6We2xyTyUZEHPgO5lU9GDL4/cuC
+         0RKRdqBGeJGQLsBCbVT4iAzc+/iB93qm54a46GGweTMl65lbLw1y9xR9Oi/eRdPd6VUO
+         zdtxE5dSCKYITX1soAOSnDuqro0nBQaLkvMrUHD3oauC8VUYKkk7hE/7f+7lZg6g4jWf
+         RS0w==
+X-Gm-Message-State: APjAAAVABo97ugBPySCWwrvqDwTGfMHvY3wIzaAM1PhA22xSBt5J59jA
+        /WH6PpCXVUJDCvELSM3HyGeof8JZkKDXcA==
+X-Google-Smtp-Source: APXvYqy/FEDPTl7JBDCsOYEzpNTgwB7ohRu1qopl/ntGoS7dQtjaB/x2vOKNSNYnmRAE/cssF4psZA==
+X-Received: by 2002:a37:6156:: with SMTP id v83mr261565qkb.80.1570041695612;
+        Wed, 02 Oct 2019 11:41:35 -0700 (PDT)
+Received: from localhost ([107.15.81.208])
+        by smtp.gmail.com with ESMTPSA id q64sm16224qkb.32.2019.10.02.11.41.34
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 02 Oct 2019 11:41:34 -0700 (PDT)
+From:   Josef Bacik <josef@toxicpanda.com>
+To:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+        kernel-team@fb.com
+Subject: [PATCH][v2] btrfs/194: add a test for multi-subvolume fsyncing
+Date:   Wed,  2 Oct 2019 14:41:33 -0400
+Message-Id: <20191002184133.21099-1-josef@toxicpanda.com>
+X-Mailer: git-send-email 2.21.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20191002082429.GC67926@e18g06458.et15sqa>
-User-Agent: Mutt/1.11.1 (2018-12-01)
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Oct 02, 2019 at 04:24:29PM +0800, Eryu Guan wrote:
-> On Tue, Oct 01, 2019 at 02:54:10PM -0700, Ira Weiny wrote:
-> > On Mon, Sep 23, 2019 at 10:53:20AM -0700, 'Ira Weiny' wrote:
-> > > From: Ira Weiny <ira.weiny@intel.com>
-> > > 
-> > > Add lease tests[1] to locktest because they share so much code.  Make running
-> > > of lease tests separate as an '-L' option.
-> > > 
-> > > To make things cleaner update the lock test code and test script.  This
-> > > includes fixing a rather serious bug.
-> > > 
-> > > Finally update the error output to help identify any steps which fail during
-> > > testing.
-> > >
-> > 
-> > Was there any further feedback on this series?  Did it get mangled too bad to
-> > apply?
-> 
-> Sorry, I forget to mention in last update announce that I'm on public
-> holiday this week and have limited internet access. I'll review this v2
-> when I get back.
+I discovered a problem in btrfs where we'd end up pointing at a block we
+hadn't written out yet.  This is triggered by a race when two different
+files on two different subvolumes fsync.  This test exercises this path
+with dm-log-writes, and then replays the log at every FUA to verify the
+file system is still mountable and the log is replayable.
 
-Awesome!  Have a great time!  :-D
+This test is to verify the fix
 
-> 
-> > 
-> > Ira
-> > 
-> > > 
-> > > Changes from V1:
-> > > 	Create a new option '-L' to run lease testing
-> > > 	Created 568 test script which shared common code with 131
-> > > 	Moved 2 patches earlier in the series
-> > > 		[PATCH V2 09/16] src/locktest: Clean up error output
-> > > 		[PATCH V2 10/16] src/locktest: Audit all debug output
-> > > 	Added 3 patches
-> > > 		[PATCH V2 11/16] src/locktest: Add run() function
-> > > 		[PATCH V2 15/16] common/locktest: Add common locktest functions
-> > > 		[PATCH V2 16/16] generic/568: Add lease testing
-> 
-> Thanks for the revision!
+btrfs: fix incorrect updating of log root tree
 
-NP, I kind of like the way it turned out.
+actually fixed the problem.
 
-Ira
+Signed-off-by: Josef Bacik <josef@toxicpanda.com>
+---
+v1->v2:
+- added the patchname related to this test in the comments and changelog.
+- running fio makes it use 400mib of shared memory, so running 50 of them is
+  impossible on boxes that don't have hundreds of gib of RAM.  Fixed this to
+  just generate a fio config so we can run 1 fio instance with 50 threads which
+  makes it not OOM boxes with tiny amounts of RAM.
+- fixed some formatting things that Filipe pointed out.
+
+ tests/btrfs/194     | 111 ++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/194.out |   2 +
+ tests/btrfs/group   |   1 +
+ 3 files changed, 114 insertions(+)
+ create mode 100755 tests/btrfs/194
+ create mode 100644 tests/btrfs/194.out
+
+diff --git a/tests/btrfs/194 b/tests/btrfs/194
+new file mode 100755
+index 00000000..b98064e2
+--- /dev/null
++++ b/tests/btrfs/194
+@@ -0,0 +1,111 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2019 Facebook.  All Rights Reserved.
++#
++# FS QA Test 194
++#
++# Test multi subvolume fsync to test a bug where we'd end up pointing at a block
++# we haven't written.  This was fixed by the patch
++#
++# btrfs: fix incorrect updating of log root tree
++#
++# Will do log replay and check the filesystem.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++fio_config=$tmp.fio
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	_log_writes_cleanup &> /dev/null
++	_dmthin_cleanup
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/dmthin
++. ./common/dmlogwrites
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs generic
++_supported_os Linux
++
++# Use thin device as replay device, which requires $SCRATCH_DEV
++_require_scratch_nocheck
++# and we need extra device as log device
++_require_log_writes
++_require_dm_target thin-pool
++
++cat >$fio_config <<EOF
++[global]
++readwrite=write
++fallocate=none
++bs=4k
++fsync=1
++size=128k
++EOF
++
++for i in $(seq 0 49); do
++	echo "[foo$i]" >> $fio_config
++	echo "filename=$SCRATCH_MNT/$i/file" >> $fio_config
++done
++
++_require_fio $fio_config
++
++cat $fio_config >> $seqres.full
++
++# Use a thin device to provide deterministic discard behavior. Discards are used
++# by the log replay tool for fast zeroing to prevent out-of-order replay issues.
++_test_unmount
++_dmthin_init $devsize $devsize $csize $lowspace
++_log_writes_init $DMTHIN_VOL_DEV
++_log_writes_mkfs >> $seqres.full 2>&1
++_log_writes_mark mkfs
++
++_log_writes_mount
++
++# First create all the subvolumes
++for i in $(seq 0 49); do
++	$BTRFS_UTIL_PROG subvolume create "$SCRATCH_MNT/$i" > /dev/null
++done
++
++$FIO_PROG $fio_config > /dev/null 2>&1
++_log_writes_unmount
++
++_log_writes_remove
++prev=$(_log_writes_mark_to_entry_number mkfs)
++[ -z "$prev" ] && _fail "failed to locate entry mark 'mkfs'"
++cur=$(_log_writes_find_next_fua $prev)
++[ -z "$cur" ] && _fail "failed to locate next FUA write"
++
++while [ ! -z "$cur" ]; do
++	_log_writes_replay_log_range $cur $DMTHIN_VOL_DEV >> $seqres.full
++
++	# We need to mount the fs because btrfsck won't bother checking the log.
++	_dmthin_mount
++	_dmthin_check_fs
++
++	prev=$cur
++	cur=$(_log_writes_find_next_fua $(($cur + 1)))
++	[ -z "$cur" ] && break
++done
++
++echo "Silence is golden"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/194.out b/tests/btrfs/194.out
+new file mode 100644
+index 00000000..7bfd50ff
+--- /dev/null
++++ b/tests/btrfs/194.out
+@@ -0,0 +1,2 @@
++QA output created by 194
++Silence is golden
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index b92cb12c..0d0e1bba 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -196,3 +196,4 @@
+ 191 auto quick send dedupe
+ 192 auto replay snapshot stress
+ 193 auto quick qgroup enospc limit
++194 auto metadata log volume
+-- 
+2.21.0
 
