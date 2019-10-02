@@ -1,112 +1,129 @@
-Return-Path: <SRS0=ibZJ=X2=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=G1tu=X3=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.6 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 858EAECE58A
-	for <linux-fstests@archiver.kernel.org>; Tue,  1 Oct 2019 21:54:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8FB46ECE587
+	for <linux-fstests@archiver.kernel.org>; Wed,  2 Oct 2019 00:49:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 640BF21924
-	for <linux-fstests@archiver.kernel.org>; Tue,  1 Oct 2019 21:54:12 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5F3CC20842
+	for <linux-fstests@archiver.kernel.org>; Wed,  2 Oct 2019 00:49:23 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1569977363;
+	bh=wRRq3OMuH+EYhScT4N/jZoemae8Y/42c1CAVXf3riVc=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
+	b=YTZ+JjsAN6ac726aN7i2YmTdDZTNblmpHmHlx9/0HugIz0nhALOwA8T4tVHkA/rAG
+	 6GIJewfePMM/MzAmhqulCJmmgrzfg2p3Hx77sm6bS9Oyd+4A4PmwNawh8g2iV5sG9p
+	 qG4oWrHQMI7c1pqhWFrUTlvhEX3AzdYKLBmLb6Dg=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728352AbfJAVyL (ORCPT
+        id S1726096AbfJBAtW (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 1 Oct 2019 17:54:11 -0400
-Received: from mga09.intel.com ([134.134.136.24]:56720 "EHLO mga09.intel.com"
+        Tue, 1 Oct 2019 20:49:22 -0400
+Received: from mail.kernel.org ([198.145.29.99]:45946 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728237AbfJAVyL (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 1 Oct 2019 17:54:11 -0400
-X-Amp-Result: UNKNOWN
-X-Amp-Original-Verdict: FILE UNKNOWN
-X-Amp-File-Uploaded: False
-Received: from fmsmga004.fm.intel.com ([10.253.24.48])
-  by orsmga102.jf.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 01 Oct 2019 14:54:11 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.64,572,1559545200"; 
-   d="scan'208";a="216225645"
-Received: from iweiny-desk2.sc.intel.com ([10.3.52.157])
-  by fmsmga004.fm.intel.com with ESMTP; 01 Oct 2019 14:54:10 -0700
-Date:   Tue, 1 Oct 2019 14:54:10 -0700
-From:   Ira Weiny <ira.weiny@intel.com>
-To:     fstests@vger.kernel.org, Eryu Guan <guaneryu@gmail.com>
-Cc:     john.hubbard@gmail.com, Dave Chinner <david@fromorbit.com>,
-        Jan Kara <jack@suse.cz>, Jason Gunthorpe <jgg@ziepe.ca>,
-        dan.j.williams@intel.com, Jeff Layton <jlayton@kernel.org>
-Subject: Re: [PATCH V2 00/16] Fix locktest and add lease testing to it
-Message-ID: <20191001215410.GA8840@iweiny-DESK2.sc.intel.com>
-References: <20190923175336.2287-1-ira.weiny@intel.com>
+        id S1726931AbfJBAtW (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 1 Oct 2019 20:49:22 -0400
+Received: from localhost (unknown [148.87.23.13])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id BF70E2070B;
+        Wed,  2 Oct 2019 00:49:21 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1569977361;
+        bh=wRRq3OMuH+EYhScT4N/jZoemae8Y/42c1CAVXf3riVc=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=KeT0GinuOx6MqQrLAHQYMNO/x0Z+20NpdsamrVyGEFmH67eNKlP3AiP1cBN5oiBG5
+         dEG3UU7Bw9rBGzUnrSOv+adwrn0VRK9XjjHd76zqqSjC5RpRS6Z/z0BqKCXUp/mn+1
+         CooZr2XGxTTuJ6xPJOZM05TcU68J19t9lR5FxlW4=
+Date:   Tue, 1 Oct 2019 17:49:18 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Chris Hoy Poy via RT <kernel-helpdesk@rt.linuxfoundation.org>
+Cc:     djwong@kernel.org, fstests@vger.kernel.org
+Subject: Re: [Kernel.org Helpdesk #79165] please add fstests@vger.kernel.org
+ to lore.kernel.org
+Message-ID: <20191002004918.GB13097@magnolia>
+References: <RT-Ticket-79165@linuxfoundation>
+ <20190903231702.GA5339@magnolia>
+ <rt-4.4.0-1780-1569466036-1450.79165-6-0@linuxfoundation>
+ <20190930194315.GA13097@magnolia>
+ <rt-4.4.0-5374-1569872597-133.79165-6-0@linuxfoundation>
+ <rt-4.4.0-12635-1569918200-1370.79165-6-0@linuxfoundation>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190923175336.2287-1-ira.weiny@intel.com>
-User-Agent: Mutt/1.11.1 (2018-12-01)
+In-Reply-To: <rt-4.4.0-12635-1569918200-1370.79165-6-0@linuxfoundation>
+User-Agent: Mutt/1.9.4 (2018-02-28)
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Sep 23, 2019 at 10:53:20AM -0700, 'Ira Weiny' wrote:
-> From: Ira Weiny <ira.weiny@intel.com>
+On Tue, Oct 01, 2019 at 04:23:20AM -0400, Chris Hoy Poy via RT wrote:
+> Hi Darrick,
 > 
-> Add lease tests[1] to locktest because they share so much code.  Make running
-> of lease tests separate as an '-L' option.
+> I've set this up now - 
 > 
-> To make things cleaner update the lock test code and test script.  This
-> includes fixing a rather serious bug.                                                                                                                 
-> 
-> Finally update the error output to help identify any steps which fail during
-> testing.                                                                                                                                            
->
+> https://lore.kernel.org/fstests
 
-Was there any further feedback on this series?  Did it get mangled too bad to
-apply?
+Thank you!
 
-Ira
+--D
 
+> cheers
+> /Chris
 > 
-> Changes from V1:
-> 	Create a new option '-L' to run lease testing
-> 	Created 568 test script which shared common code with 131
-> 	Moved 2 patches earlier in the series
-> 		[PATCH V2 09/16] src/locktest: Clean up error output
-> 		[PATCH V2 10/16] src/locktest: Audit all debug output
-> 	Added 3 patches
-> 		[PATCH V2 11/16] src/locktest: Add run() function
-> 		[PATCH V2 15/16] common/locktest: Add common locktest functions
-> 		[PATCH V2 16/16] generic/568: Add lease testing
+> On Tue Oct 01 03:43:17 2019, djwong@kernel.org wrote:
+> > Hi Chris,
+> > 
+> > On Wed, Sep 25, 2019 at 10:47:16PM -0400, Chris Hoy Poy via RT wrote:
+> > > Hi,
+> > >
+> > > Please feel free to throw some archives my way
+> > >  (choypoy@linuxfoundation.org) and I'll import them and set this up
+> > > :)
+> > 
+> > Ok, here's what I've been able to package so far:
+> > 
+> > https://djwong.org/docs/fstests.tar.xz
+> > 
+> > With sha256sum of:
+> > 
+> > 905192de19298a4a21dafdd3a715183320f12ea02c0b16a96aa0c792eb810262
+> > fstests.tar.xz
+> > 
+> > I think the list history goes further back than May 2014, but that's
+> > all
+> > I've been able to collect.
+> > 
+> > --D
+> > 
+> > > cheers
+> > > /Chris
+> > >
+> > > On Wed Sep 04 07:17:07 2019, djwong@kernel.org wrote:
+> > > > Hi, could you please start archiving the fstests@vger.kernel.org
+> > > > mailing
+> > > > list on lore.kernel.org?
+> > > >
+> > > > (And now that I have actual experience running list-archive-
+> > > > maker.py I
+> > > > can supply archives fairly quickly unlike linux-xfs...)
+> > > >
+> > > > Thank you!
+> > > >
+> > > > --Darrick
+> > >
+> > >
+> > > --
+> > > Chris Hoy Poy
+> > > Collaborative Projects IT
+> > > The Linux Foundation
 > 
-> Ira Weiny (16):
->   src/locktest: Remove unnecessary sleep
->   src/locktest: Remove OPEN macro
->   src/locktest: Change command macro names
->   src/locktest: Add get_cmd_str
->   src/locktest.c: Clean up client command passing
->   src/locktest.c: Fix return code if last test fails
->   generic/131: Clean up pid variables
->   generic/131: Save stderr for debugging
->   src/locktest: Clean up error output
->   src/locktest: Audit all debug output
->   src/locktest: Add run() function
->   src/locktest: Add simple lease testing
->   src/locktest: Add lease testing for basic signal reception
->   src/locktest: Add truncate lease tests
->   common/locktest: Add common locktest functions
->   generic/568: Add lease testing
-> 
->  common/locktest       |  95 ++++
->  src/locktest.c        | 999 +++++++++++++++++++++++++++---------------
->  tests/generic/131     |  54 +--
->  tests/generic/568     |  32 ++
->  tests/generic/568.out |   2 +
->  tests/generic/group   |   1 +
->  6 files changed, 786 insertions(+), 397 deletions(-)
->  create mode 100644 common/locktest
->  create mode 100755 tests/generic/568
->  create mode 100644 tests/generic/568.out
 > 
 > -- 
-> 2.20.1
-> 
+> Chris Hoy Poy
+> Collaborative Projects IT
+> The Linux Foundation
