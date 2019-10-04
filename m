@@ -1,230 +1,112 @@
-Return-Path: <SRS0=kypT=X4=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=01xi=X5=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 138DBC32792
-	for <linux-fstests@archiver.kernel.org>; Thu,  3 Oct 2019 11:24:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 122DBC4360C
+	for <linux-fstests@archiver.kernel.org>; Fri,  4 Oct 2019 04:04:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id DB8C420673
-	for <linux-fstests@archiver.kernel.org>; Thu,  3 Oct 2019 11:24:22 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="KuV6eyak"
+	by mail.kernel.org (Postfix) with ESMTP id D8AFB2133F
+	for <linux-fstests@archiver.kernel.org>; Fri,  4 Oct 2019 04:04:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729642AbfJCLYW (ORCPT
+        id S1727758AbfJDEEW (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 3 Oct 2019 07:24:22 -0400
-Received: from mail-vk1-f194.google.com ([209.85.221.194]:41996 "EHLO
-        mail-vk1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729304AbfJCLYW (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 3 Oct 2019 07:24:22 -0400
-Received: by mail-vk1-f194.google.com with SMTP id f1so525292vkh.9;
-        Thu, 03 Oct 2019 04:24:21 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:reply-to:from:date:message-id
-         :subject:to:cc:content-transfer-encoding;
-        bh=q9rFqSinVXXltMXV3Z5GXcuAqIBK/RVpwpplESCwFis=;
-        b=KuV6eyakgmyxjnbUl92sHJ+AURxaGHr3BJnb4UdyFstRsWwjf0q4qFU5RgXGwPZDyy
-         Wc8plUKgRqdxPYnuWyqukXHjwYSSwt8QiwEW2S3+7TgXJcld4cRRb+IaXAq3cTeQudHr
-         mQL0zi0PF29/MxJIE65ZmODOtq1Z3yvvpVbxZeTzEGvMtXZcRMjE3fK34bns+sRSzl3P
-         SALxrJqRNNh4nQRG3RTsH5auCOc5r7rKGpEoA5x3y7K+PL5yZUXoUlHoqWpKq4dNk7hy
-         XruhqjSM/k9Fj32S9uHiSutXHgwP2ZFnwJRPlgOM2PnhbbXiv06kY/wHcioXWPL5uJnI
-         psrg==
+        Fri, 4 Oct 2019 00:04:22 -0400
+Received: from youngberry.canonical.com ([91.189.89.112]:34883 "EHLO
+        youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726927AbfJDEEW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 4 Oct 2019 00:04:22 -0400
+Received: from mail-pl1-f199.google.com ([209.85.214.199])
+        by youngberry.canonical.com with esmtps (TLS1.2:ECDHE_RSA_AES_128_GCM_SHA256:128)
+        (Exim 4.86_2)
+        (envelope-from <po-hsu.lin@canonical.com>)
+        id 1iGEpI-0006l3-7X
+        for fstests@vger.kernel.org; Fri, 04 Oct 2019 04:04:20 +0000
+Received: by mail-pl1-f199.google.com with SMTP id g11so3101853plm.22
+        for <fstests@vger.kernel.org>; Thu, 03 Oct 2019 21:04:20 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:reply-to
-         :from:date:message-id:subject:to:cc:content-transfer-encoding;
-        bh=q9rFqSinVXXltMXV3Z5GXcuAqIBK/RVpwpplESCwFis=;
-        b=TlK8ClJRGJJbxbbDcdtKCjStMrW+7+VYP2uPQYKaKGqCwJ9NRxPvBXiF69Tfzp8n1q
-         /DHSCmZHEvm3ePc+Hk+A3e+XsUWASzyX4B9gJOgenh5OugQTH5VZbbl+gyew3TcKR4Sj
-         SNjURB8tujfY40xiFMQR9U5vn28Za5vIQgiwYwp4ymiEe9VtHNZn6MVblQJeFvLeFRcx
-         C5KoHf/u1irRabSy3z9h0uoIzmLqL50nRHDHQFmFTkGEsMcS9xU1J/tOis4/EJ6C9PAY
-         AVTW4qTYQ7hB6vfi4iJzceN2lEgQEZS2VCg7DFsbQ7IlK2ZMNBcDaXz6qdyFE9ZYtXPw
-         l3aA==
-X-Gm-Message-State: APjAAAVF7fZILjeO49bEee1VeHHiHKuGozGOY58QXBQhB9BeVepnvjTO
-        +cWPu18HvtTlkOy/DJTfgIkn+Zpau9W5PF5Y6QM=
-X-Google-Smtp-Source: APXvYqzIsz2tqtcMSmp0OGqdVGa1O3gqjFzJy4EJD+ETxTFXHvE/ACdWWr7Ddspj/JMNbNflCkJlUp7vH8Fvwdj1l1k=
-X-Received: by 2002:a1f:6681:: with SMTP id a123mr4704703vkc.81.1570101860692;
- Thu, 03 Oct 2019 04:24:20 -0700 (PDT)
-MIME-Version: 1.0
-References: <20191003075350.36002-1-wqu@suse.com>
-In-Reply-To: <20191003075350.36002-1-wqu@suse.com>
-Reply-To: fdmanana@gmail.com
-From:   Filipe Manana <fdmanana@gmail.com>
-Date:   Thu, 3 Oct 2019 12:24:09 +0100
-Message-ID: <CAL3q7H7Rovqc30gmFW2nXH=T2ffBqn8=WKqGV20XVsx3ngpaAw@mail.gmail.com>
-Subject: Re: [PATCH v2] fstests: btrfs: Add regression test to check if btrfs
- can handle high devid
-To:     Qu Wenruo <wqu@suse.com>
-Cc:     fstests <fstests@vger.kernel.org>,
-        linux-btrfs <linux-btrfs@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+        h=x-gm-message-state:from:to:subject:date:message-id;
+        bh=pQcBC/Gwn7dlZ8/B4EyzioFNbtVn0xu/u6+nRD0C5UM=;
+        b=N37HoACzBr9r/ES8GH5W1SILgDfTzfX0Bs3eTsY1GCTstv2RDUm42QbyedZLMf0R/L
+         XWF2/OE7Wactyf8cvOb04bzWIyoadNq0zol0cGOt5+bJZRNgZ6aC9i5IgrJv5MENlU4j
+         eaajThX7yOa1IVY8skylagQ+ScDCVud1P/8RSbrTUkhZZqFAFAQXkxZDvJ+IZMsMf3Vu
+         MaXQ7/UUAjgjgDZPqJOIrnN0w7/vXoSDyXV4ObGxa0weJ7Nw6qzM6svCcmQiijUmr+yp
+         T75DhZYYoru5db/gABrAhrEhipM3WS/rxx0q8goj9KIuvr2jGo7DACcLhg9sqaOWFdJo
+         rP+w==
+X-Gm-Message-State: APjAAAUMx82TlGoS4eJ/MB/pzsoybAz6sdH+kpvCQbW+JPviWr6Hs8Tm
+        X3whNF+fhf/2gBHg5KF3Ut3muoh8ZTXV5x7rvts5Nf1S/NbyY2vRHeeM30G6HGke1OxGkEeoyIt
+        mkm+iHq8EIYkQN7WdV7/epQ8a5RXl50zIVw==
+X-Received: by 2002:a17:90a:f8f:: with SMTP id 15mr14890657pjz.58.1570161858494;
+        Thu, 03 Oct 2019 21:04:18 -0700 (PDT)
+X-Google-Smtp-Source: APXvYqyFmlPI70bmStDMbZecemnWKWW4gfeqdqiVWdxTxnGacV6tCpm/zQYrzbPNExYeFjPKbiVgYw==
+X-Received: by 2002:a17:90a:f8f:: with SMTP id 15mr14890607pjz.58.1570161857942;
+        Thu, 03 Oct 2019 21:04:17 -0700 (PDT)
+Received: from Leggiero.taipei.internal (61-220-137-37.HINET-IP.hinet.net. [61.220.137.37])
+        by smtp.gmail.com with ESMTPSA id d14sm6307501pfh.36.2019.10.03.21.04.16
+        for <fstests@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 03 Oct 2019 21:04:17 -0700 (PDT)
+From:   Po-Hsu Lin <po-hsu.lin@canonical.com>
+To:     fstests@vger.kernel.org
+Subject: [PATCH] check: convert spaces to tabs in help msg
+Date:   Fri,  4 Oct 2019 12:04:10 +0800
+Message-Id: <20191004040410.18509-1-po-hsu.lin@canonical.com>
+X-Mailer: git-send-email 2.17.1
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Oct 3, 2019 at 8:55 AM Qu Wenruo <wqu@suse.com> wrote:
->
-> Add a regression test to check if btrfs can handle high devid.
->
-> The test will add and remove devices to a btrfs fs, so that the devid
-> will increase to uncommon but still valid values.
->
-> The regression is introduced by kernel commit ab4ba2e13346 ("btrfs:
-> tree-checker: Verify dev item").
-> The fix is titled "btrfs: tree-checker: Fix wrong check on max devid".
->
-> Signed-off-by: Qu Wenruo <wqu@suse.com>
+There are some mix use of spaces and tabs in the help message:
+$ ./check --help
+Usage: ./check [options] [testlist]
 
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
+check options
+    -nfs                test NFS
+    -glusterfs                test GlusterFS
+    -cifs               test CIFS
+    -9p			test 9p
+    -overlay		test overlay
+    -pvfs2          test PVFS2
+    -tmpfs              test TMPFS
+    -ubifs              test ubifs
 
-Thanks! It's looking much better, the comments really help.
+unify them with tabs.
 
-> ---
-> Changelog:
-> v2:
-> - Small comment refinement
-> - Add more comment explaining some details, including:
->   * Why node size affects the runtime
->   * How the triggering threshold is calculated
->   * Why the intermediate number 64 is used as iteration number
-> ---
->  tests/btrfs/194     | 86 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/194.out |  2 ++
->  tests/btrfs/group   |  1 +
->  3 files changed, 89 insertions(+)
->  create mode 100755 tests/btrfs/194
->  create mode 100644 tests/btrfs/194.out
->
-> diff --git a/tests/btrfs/194 b/tests/btrfs/194
-> new file mode 100755
-> index 00000000..b7249f0d
-> --- /dev/null
-> +++ b/tests/btrfs/194
-> @@ -0,0 +1,86 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
-> +#
-> +# FS QA Test 194
-> +#
-> +# Test if btrfs can handle large device ids.
-> +#
-> +# The regression is introduced by kernel commit ab4ba2e13346 ("btrfs:
-> +# tree-checker: Verify dev item").
-> +# The fix is titled: "btrfs: tree-checker: Fix wrong check on max devid"
-> +#
-> +seq=3D`basename $0`
-> +seqres=3D$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=3D`pwd`
-> +tmp=3D/tmp/$$
-> +status=3D1       # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +       cd /
-> +       rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs btrfs
-> +_supported_os Linux
-> +_require_scratch_dev_pool 2
-> +_scratch_dev_pool_get 2
-> +
-> +# Here we use 4k node size to reduce runtime (explained near _scratch_mk=
-fs call)
-> +# To use the minimal node size (4k) we need 4K page size.
-> +if [ $(get_page_size) !=3D 4096 ]; then
-> +       _notrun "This test need 4k page size"
-> +fi
-> +
-> +device_1=3D$(echo $SCRATCH_DEV_POOL | awk '{print $1}')
-> +device_2=3D$(echo $SCRATCH_DEV_POOL | awk '{print $2}')
-> +
-> +echo device_1=3D$device_1 device_2=3D$device_2 >> $seqres.full
-> +
-> +# The wrong check limit is based on the max item size (BTRFS_MAX_DEVS() =
-macro),
-> +# and max item size is based on node size, so smaller node size will res=
-ult
-> +# much shorter runtime. So here we use minimal node size (4K) to reduce =
-runtime.
-> +_scratch_mkfs -n 4k >> $seqres.full
-> +_scratch_mount
-> +
-> +# For 4k nodesize, the wrong limit is calculated by:
-> +# ((4096 - 101 - 25 - 80) / 32) + 1
-> +#    |      |    |    |     |- sizeof(btrfs_stripe)
-> +#    |      |    |    |- sizeof(btrfs_chunk)
-> +#    |      |    |- sizeof(btrfs_item)
-> +#    |      |- sizeof(btrfs_header)
-> +#    |- node size
-> +# Which is 122.
-> +#
-> +# The old limit is wrong because it doesn't take devid holes into consid=
-eration.
-> +# We can have large devid, but still have only 1 device.
-> +#
-> +# Add and remove device in a loop, each iteration will increase devid by=
- 2.
-> +# So by 64 iterations, we will definitely hit that 122 limit.
-> +for (( i =3D 0; i < 64; i++ )); do
-> +       $BTRFS_UTIL_PROG device add -f $device_2 $SCRATCH_MNT
-> +       $BTRFS_UTIL_PROG device del $device_1 $SCRATCH_MNT
-> +       $BTRFS_UTIL_PROG device add -f $device_1 $SCRATCH_MNT
-> +       $BTRFS_UTIL_PROG device del $device_2 $SCRATCH_MNT
-> +done
-> +_scratch_dev_pool_put
-> +
-> +echo "Silence is golden"
-> +
-> +# success, all done
-> +status=3D0
-> +exit
-> diff --git a/tests/btrfs/194.out b/tests/btrfs/194.out
-> new file mode 100644
-> index 00000000..7bfd50ff
-> --- /dev/null
-> +++ b/tests/btrfs/194.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 194
-> +Silence is golden
-> diff --git a/tests/btrfs/group b/tests/btrfs/group
-> index b92cb12c..d8aafe20 100644
-> --- a/tests/btrfs/group
-> +++ b/tests/btrfs/group
-> @@ -196,3 +196,4 @@
->  191 auto quick send dedupe
->  192 auto replay snapshot stress
->  193 auto quick qgroup enospc limit
-> +194 auto volume
-> --
-> 2.22.0
->
+Signed-off-by: Po-Hsu Lin <po-hsu.lin@canonical.com>
+---
+ check | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
 
+diff --git a/check b/check
+index 3d6a64cd..c7f1dc5e 100755
+--- a/check
++++ b/check
+@@ -52,14 +52,14 @@ usage()
+     echo "Usage: $0 [options] [testlist]"'
+ 
+ check options
+-    -nfs                test NFS
+-    -glusterfs                test GlusterFS
+-    -cifs               test CIFS
++    -nfs		test NFS
++    -glusterfs		test GlusterFS
++    -cifs		test CIFS
+     -9p			test 9p
+     -overlay		test overlay
+-    -pvfs2          test PVFS2
+-    -tmpfs              test TMPFS
+-    -ubifs              test ubifs
++    -pvfs2		test PVFS2
++    -tmpfs		test TMPFS
++    -ubifs		test ubifs
+     -l			line mode diff
+     -udiff		show unified diff (default)
+     -n			show me, do not run tests
+-- 
+2.17.1
 
---=20
-Filipe David Manana,
-
-=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
- right.=E2=80=9D
