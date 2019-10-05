@@ -2,350 +2,182 @@ Return-Path: <SRS0=KtmJ=X6=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.3 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+X-Spam-Status: No, score=-8.3 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=ham autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 12A57C4740A
-	for <linux-fstests@archiver.kernel.org>; Sat,  5 Oct 2019 18:35:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 26999C4740A
+	for <linux-fstests@archiver.kernel.org>; Sat,  5 Oct 2019 19:07:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id D2E21222C0
-	for <linux-fstests@archiver.kernel.org>; Sat,  5 Oct 2019 18:35:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E2221222CB
+	for <linux-fstests@archiver.kernel.org>; Sat,  5 Oct 2019 19:07:52 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="bpB09IzR"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="oiCDdDpb"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2387884AbfJESf2 (ORCPT
+        id S1727980AbfJETHw (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 5 Oct 2019 14:35:28 -0400
-Received: from mail-pg1-f194.google.com ([209.85.215.194]:43839 "EHLO
-        mail-pg1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2387477AbfJESf2 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 5 Oct 2019 14:35:28 -0400
-Received: by mail-pg1-f194.google.com with SMTP id v27so5622869pgk.10
-        for <fstests@vger.kernel.org>; Sat, 05 Oct 2019 11:35:27 -0700 (PDT)
+        Sat, 5 Oct 2019 15:07:52 -0400
+Received: from mail-pf1-f193.google.com ([209.85.210.193]:44412 "EHLO
+        mail-pf1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727466AbfJETHw (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 5 Oct 2019 15:07:52 -0400
+Received: by mail-pf1-f193.google.com with SMTP id q21so5898751pfn.11
+        for <fstests@vger.kernel.org>; Sat, 05 Oct 2019 12:07:51 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=date:from:to:cc:subject:message-id:references:mime-version
          :content-disposition:in-reply-to:user-agent;
-        bh=Tnbg8cbdnCoP/gLWy4NbGy+ltT6M9bJ9vhLYsPjZeS4=;
-        b=bpB09IzRudsQGjBLurE7gSMeiYAucGWvoD2lXalBPZNhJinXtmtD0CTt0RypA2ZTcb
-         gxG/1FsQDBCJSU/dDzZMkZMEAquvgR+K5CH1QjY7cNlOVyRiY1eDX8nd/ZPTh/9U7SB2
-         7DT/GU6tDQJTuMMw2OApkZ0b7ayN9SwHAwQOYB9quJTcVs552IvUPerxgOcCeyL6TtGD
-         FIEue7tOT+NHjWUbgfGMuSo+uM6jCinejKWGLcbRThpBQlFMTPM8s+6wJFtNy8cQJO1c
-         EgLKKvTiyvhPzvA0hugGd6IaBZ8DjSDjDA8ZlQVAF5R0MadEKLqQhauJcRYUy0QSo/ch
-         U3vQ==
+        bh=djdMH5GaLBUctsqFiVphAGq64s7l+iDu5SpEiRynbDw=;
+        b=oiCDdDpbtwVPCGtjENL1MsfEjQOvp3U5NZoN5zfti2JxGXZNEzPDEosBHXusH3sHi3
+         M8LYgWsxiM5YOfLdQPvItM6Ur1if0ugEDwoC9FfczGlw8NDtmUComldrE4Es+37H/Iz9
+         7aJgDnYSdVENBYhrPDczCkjSqTNC5feqehoJDEaGMielWUbdzrvwrN1YR9p/TsIFkDiK
+         0zkm+RzkDKQo1Zys2UTnd0W+WZvg+Yd2xaMdjUPklkf5BX8aYi4hM0wYWKD9oWFJgMl+
+         TADSc1h7UsbujJ6DFRCO0zcBTThnLaCrSDyVPm/gmS/MVnlxg4AOEC4hRh0GJvkkUNdG
+         swOQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to:user-agent;
-        bh=Tnbg8cbdnCoP/gLWy4NbGy+ltT6M9bJ9vhLYsPjZeS4=;
-        b=ESQnQddxADDa8ZdUJ/0X9RErKoPGau0TklV8DgH7Rr9xzWlpPx39VuuXJ/YiqHwjoS
-         XdarKror5bumTbmi4TbJYAHuumsdUYTeDxZEe94TatdLwJiSUkJxJ0PpIbI/PCPPOS4f
-         OopTSME+El69Fn3jxLfToxFfnODqrkm38o2m9Hi9kxNc3mqBxS05PKhNAWOTHsmT6VSv
-         LC5jih53VyZcVwGhqzUooxyvEDA27vxeyRsvR4uElLHyhpcOqw8Co7Giotcr+qzDF8qR
-         ilXypR9kun49t7I5zeCE2eVZGfri4QzUfadh6W0Z56O6ICCpPhWHb2+Hhh/mlOLLK9uF
-         wiEA==
-X-Gm-Message-State: APjAAAU/rrKr9ZvmhoTnSXhQDip256zVIchGMyrRdSuolCxZCb3wu/vQ
-        upacjWnQEza4fEb8lxuBpc8=
-X-Google-Smtp-Source: APXvYqzF/m5Yw7i3RKsbPAPV0z3TnGphBIu5W4izOFixYcp10bEcRtt5vz4gR4OoVrQEL6sENn3etw==
-X-Received: by 2002:a62:62c6:: with SMTP id w189mr24202548pfb.235.1570300527207;
-        Sat, 05 Oct 2019 11:35:27 -0700 (PDT)
+        bh=djdMH5GaLBUctsqFiVphAGq64s7l+iDu5SpEiRynbDw=;
+        b=BlGnQTbqHGf4XLhjoM20NtdBLig2gWF0yBJmR67YZAX6LoXd0znkFk55OhMKkHsI7O
+         DnbwBptYqp1/BCEdwanjlbUYEXcAJ6E5hWUXa5EVp/WHEtalhzL99o73Zm5NHz2Faadm
+         LwKgxys2OFmuWL/v5l0sHNYMWFpBp2JHWpMEylretHX6WHT9TsqPMjOffWf58dDqwbGY
+         d/Xdzhx24Fun1mlvV6sZXDGwev1WCo1RYo91QZHknLTY2Gx8QVIasYRIVeFfop48n65e
+         LvJ73WL434PZyxou5Kjb9b/3ilOAyu40zJbsUDe5StG3tfZnSCRu7Zm2b3rwziUDHLJk
+         ofWA==
+X-Gm-Message-State: APjAAAX5GrOjYEirbtfHbPiCXBqGhUjXU6e+VXwbcc8KFXgETpjvfBb9
+        AXpDdbm8yteEItnJkz2YYz8=
+X-Google-Smtp-Source: APXvYqwgUDAwD3Iqz/77j6sPT7GSuqpDFrMQx2aD9fQ96PC1gjotNJ8L+gO/FwDEAU8sN3IKAgrhjQ==
+X-Received: by 2002:a63:c904:: with SMTP id o4mr9786887pgg.388.1570302471366;
+        Sat, 05 Oct 2019 12:07:51 -0700 (PDT)
 Received: from localhost ([178.128.102.47])
-        by smtp.gmail.com with ESMTPSA id x72sm11800150pfc.89.2019.10.05.11.35.24
+        by smtp.gmail.com with ESMTPSA id r28sm11613007pfg.62.2019.10.05.12.07.49
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 05 Oct 2019 11:35:25 -0700 (PDT)
-Date:   Sun, 6 Oct 2019 02:35:19 +0800
+        Sat, 05 Oct 2019 12:07:49 -0700 (PDT)
+Date:   Sun, 6 Oct 2019 03:07:44 +0800
 From:   Eryu Guan <guaneryu@gmail.com>
-To:     Deepa Dinamani <deepa.kernel@gmail.com>
-Cc:     fstests@vger.kernel.org, arnd@arndb.de, y2038@lists.linaro.org
-Subject: Re: [PATCH] generic/402: fix for updated behavior of timestamp limits
-Message-ID: <20191005183517.GE2622@desktop>
-References: <20190719041231.26500-1-deepa.kernel@gmail.com>
+To:     Su Yanjun <suyj.fnst@cn.fujitsu.com>
+Cc:     fstests@vger.kernel.org,
+        "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH v2] fsx: add more check for copy_file_range
+Message-ID: <20191005190741.GF2622@desktop>
+References: <1569549234-13096-1-git-send-email-suyj.fnst@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190719041231.26500-1-deepa.kernel@gmail.com>
+In-Reply-To: <1569549234-13096-1-git-send-email-suyj.fnst@cn.fujitsu.com>
 User-Agent: Mutt/1.12.1 (2019-06-15)
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Jul 18, 2019 at 09:12:31PM -0700, Deepa Dinamani wrote:
-> The mount behavior will not be altered because of the unsupported
-> timestamps on the filesystems.
+On Fri, Sep 27, 2019 at 09:53:54AM +0800, Su Yanjun wrote:
+> On some linux distros(RHEL7, centos 7) copy_file_range uses
+> general implementation (splice interface). splice interace
+> uses pipe_to_file. pipe_to_file only work for different page.
+> The userspace cant's be  aware of such error because copy_file_range
+> returns ok too.
+> So for such case when copy_file_range return we read back data
+> then check it.
 > 
-> Adjust the test accordingly.
-
-Thanks for the heads-up about the merge of the fixes
-
-https://git.kernel.org/torvalds/c/cfb82e1df8b7c76991ea12958855897c2fb4debc
-
+> Also add check for do_clone_range following Eryu's advice.
 > 
-> An updated series to be posted after the merge window is hosted at
-> <https://github.com/deepa-hub/vfs/tree/limits>
-> 
-> Signed-off-by: Deepa Dinamani <deepa.kernel@gmail.com>
->
+> Signed-off-by: Su Yanjun <suyj.fnst@cn.fujitsu.com>
 > ---
->  common/rc             | 36 +++++++++---------
->  tests/generic/402     | 87 ++++++++++++++++---------------------------
->  tests/generic/402.out |  2 +-
->  3 files changed, 53 insertions(+), 72 deletions(-)
-> 
-> diff --git a/common/rc b/common/rc
-> index 25203bb4..39a2deb0 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -1959,16 +1959,9 @@ _run_aiodio()
->      return $status
->  }
->  
-> -# this test requires y2038 sysfs switch and filesystem
-> -# timestamp ranges support.
-> -_require_y2038()
-> +_require_timestamp_range()
->  {
->  	local device=${1:-$TEST_DEV}
-> -	local sysfsdir=/proc/sys/fs/fs-timestamp-check-on
-> -
-> -	if [ ! -e $sysfsdir ]; then
-> -		_notrun "no kernel support for y2038 sysfs switch"
-> -	fi
->  
->  	local tsmin tsmax
->  	read tsmin tsmax <<<$(_filesystem_timestamp_range $device)
-> @@ -1980,23 +1973,32 @@ _require_y2038()
->  _filesystem_timestamp_range()
->  {
->  	local device=${1:-$TEST_DEV}
-> +	u32max=$(((1<<32)-1))
-> +	s32min=-$((1<<31))
-> +	s32max=$(((1<<31)-1))
-> +	s64max=$(((1<<63)-1))
-> +	s64min=$((1<<63))
-> +
->  	case $FSTYP in
-> -	ext4)
-> +	ext2)
-> +		echo "$s32min $s32max"
-> +		;;
-> +	ext3|ext4)
->  		if [ $(dumpe2fs -h $device 2>/dev/null | grep "Inode size:" | cut -d: -f2) -gt 128 ]; then
-> -			echo "-2147483648 15032385535"
-> +			printf "%d %d\n" $s32min 0x37fffffff
->  		else
-> -			echo "-2147483648 2147483647"
-> +			echo "$s32min $s32max"
->  		fi
->  		;;
->  
-> -	xfs)
-> -		echo "-2147483648 2147483647"
-> -		;;
->  	jfs)
-> -		echo "0 4294967295"
-> +		echo "0 $u32max"
->  		;;
-> -	f2fs)
-> -		echo "-2147483648 2147483647"
-> +	xfs)
-> +		echo "$s32min $s32max"
-> +		;;
-> +	btrfs)
-> +		echo "$s64min $s64max"
->  		;;
->  	*)
->  		echo "-1 -1"
-> diff --git a/tests/generic/402 b/tests/generic/402
-> index f742fedd..dd136ec2 100755
-> --- a/tests/generic/402
-> +++ b/tests/generic/402
-> @@ -4,15 +4,10 @@
->  #
->  # FS QA Test 402
->  #
-> -# Tests to verify policy for filesystem timestamps for
-> -# supported ranges:
-> -# 1. Verify filesystem rw mount according to sysctl
-> -# timestamp_supported.
-> -# 2. Verify timestamp clamping for timestamps beyond max
-> -# timestamp supported.
-> +# Test to verify filesystem timestamps for supported ranges.
->  #
-> -# Exit status 1: either or both tests above fail.
-> -# Exit status 0: both the above tests pass.
-> +# Exit status 1: test failed.
-> +# Exit status 0: test passed.
+> v2:
+> - Use check_buffers instead memcmp code
+> - Add check for do_clone_range
+> - Fix return unique error number for the check code
 
-These exit status checks are not needed, please see below.
+I just noticed that fsx already has an option (-X) to control check file
+content or not after each test, which calls check_buffers().
 
->  #
->  seq=`basename $0`
->  seqres=$RESULT_DIR/$seq
-> @@ -49,47 +44,59 @@ check_stat()
->  	prev_timestamp="$timestamp;$timestamp"
->  	if [ $prev_timestamp != $stat_timestamp ]; then
->  		echo "$prev_timestamp != $stat_timestamp" | tee -a $seqres.full
-> +		return 1
+Would you please check if adding '-X' option to fsx could reproduce the
+copy_file_range bug on RHEL7? If so, perhaps we should add a new test
+which is similar to generic/522 but does content check. Or just add '-X'
+to generic/52[12]?
 
-We already print error message on test failure, which will break the
-golden image, so there's no need to return 0 or 1. All similar checks
-and returns are not needed in other functions.
+/me copies Darrick and hopes he could share his thoughts.
 
 Thanks,
 Eryu
 
->  	fi
-> +	return 0
->  }
->  
->  run_test_individual()
+> ---
+>  ltp/fsx.c | 35 +++++++++++++++++++++++++++++++++++
+>  1 file changed, 35 insertions(+)
+> 
+> diff --git a/ltp/fsx.c b/ltp/fsx.c
+> index 06d08e4..714bebc 100644
+> --- a/ltp/fsx.c
+> +++ b/ltp/fsx.c
+> @@ -1378,6 +1378,7 @@ test_clone_range(void)
+>  void
+>  do_clone_range(unsigned offset, unsigned length, unsigned dest)
 >  {
-> +	fail=0
->  	file=$1
->  	timestamp=$2
->  	update_time=$3
->  
->  	# check if the time needs update
->  	if [ $update_time -eq 1 ]; then
-> -		echo "Updating file: $file to timestamp `date -d @$timestamp`"  >> $seqres.full
-> +		echo "Updating file: $file to timestamp $timestamp"  >> $seqres.full
->  		$XFS_IO_PROG -f -c "utimes $timestamp 0 $timestamp 0" $file
->  		if [ $? -ne 0 ]; then
->  			echo "Failed to update times on $file" | tee -a $seqres.full
-> +			fail=1
->  		fi
->  	fi
->  
-> -	tsclamp=$(($timestamp>$tsmax?$tsmax:$timestamp))
-> -	echo "Checking file: $file Updated timestamp is `date -d @$tsclamp`"  >> $seqres.full
-> -	check_stat $file $tsclamp
-> +	tsclamp=$((timestamp<tsmin?tsmin:timestamp>tsmax?tsmax:timestamp))
-> +	echo "Checking file: $file Updated timestamp is $tsclamp"  >> $seqres.full
-> +	if ! check_stat $file $tsclamp; then
-> +		fail=1
-> +	fi
-> +	return $fail
->  }
->  
->  run_test()
->  {
-> +	fail=0
->  	update_time=$1
->  
->  	n=1
->  
->  	for TIME in "${TIMESTAMPS[@]}"; do
-> -		run_test_individual ${SCRATCH_MNT}/test_$n $TIME $update_time
-> +		if ! run_test_individual ${SCRATCH_MNT}/test_$n $TIME $update_time; then
-> +			fail=1
-> +		fi
->  		((n++))
->  	done
+> +	int ret = 0;
+>  	struct file_clone_range	fcr = {
+>  		.src_fd = fd,
+>  		.src_offset = offset,
+> @@ -1429,6 +1430,23 @@ do_clone_range(unsigned offset, unsigned length, unsigned dest)
+>  		memset(good_buf + file_size, '\0', dest - file_size);
+>  	if (dest + length > file_size)
+>  		file_size = dest + length;
 > +
-> +	return $fail
+> +	ret = lseek(fd, (off_t)dest, SEEK_SET);
+> +	if (ret == (off_t)-1) {
+> +		prterr("do_clone_range: lseek");
+> +		report_failure(162);
+> +	}
+> +	ret = fsxread(fd, temp_buf, length, dest);
+> +	if (ret != length) {
+> +		if (ret == -1)
+> +			prterr("do_clone_range: read");
+> +		else
+> +			prt("short read: 0x%x bytes instead of 0x%x\n",
+> +				ret, length);
+> +		report_failure(163);
+> +	}
+> +	check_buffers(temp_buf, dest, length);
+> +
 >  }
 >  
->  _scratch_mkfs &>> $seqres.full 2>&1 || _fail "mkfs failed"
-> -_require_y2038 $SCRATCH_DEV
-> +_require_timestamp_range $SCRATCH_DEV
+>  #else
+> @@ -1602,6 +1620,7 @@ do_copy_range(unsigned offset, unsigned length, unsigned dest)
+>  	size_t olen;
+>  	ssize_t nr;
+>  	int tries = 0;
+> +	int ret = 0;
 >  
->  read tsmin tsmax <<<$(_filesystem_timestamp_range $SCRATCH_DEV)
-> -echo min supported timestamp $tsmin $(date --date=@$tsmin) >> $seqres.full
-> -echo max supported timestamp $tsmax $(date --date=@$tsmax) >> $seqres.full
-> +echo min supported timestamp $tsmin >> $seqres.full
-> +echo max supported timestamp $tsmax >> $seqres.full
+>  	if (length == 0) {
+>  		if (!quiet && testcalls > simulatedopcount)
+> @@ -1665,6 +1684,22 @@ do_copy_range(unsigned offset, unsigned length, unsigned dest)
+>  		memset(good_buf + file_size, '\0', dest - file_size);
+>  	if (dest + length > file_size)
+>  		file_size = dest + length;
+> +
+> +	ret = lseek(fd, (off_t)dest, SEEK_SET);
+> +	if (ret == (off_t)-1) {
+> +		prterr("do_copy_range: lseek");
+> +		report_failure(162);
+> +	}
+> +	ret = fsxread(fd, temp_buf, length, dest);
+> +	if (ret != length) {
+> +		if (ret == -1)
+> +			prterr("do_copy_range: read");
+> +		else
+> +			prt("short read: 0x%x bytes instead of 0x%x\n",
+> +				ret, length);
+> +		report_failure(163);
+> +	}
+> +	check_buffers(temp_buf, dest, length);
+>  }
 >  
->  # Test timestamps array
->  
-> @@ -97,45 +104,14 @@ declare -a TIMESTAMPS=(
->  	$tsmin
->  	0
->  	$tsmax
-> +	$((tsmax/2))
->  	$((tsmax+1))
-> -	4294967295
-> -	8589934591
-> -	34359738367
->  )
->  
-> -# Max timestamp is hardcoded to Mon Jan 18 19:14:07 PST 2038
-> -sys_tsmax=2147483647
-> -echo "max timestamp that needs to be supported by fs for rw mount is" \
-> -	"$((sys_tsmax+1)) $(date --date=@$((sys_tsmax+1)))" >> $seqres.full
-> -
-> -read ts_check <<<$(cat /proc/sys/fs/fs-timestamp-check-on)
-> -
->  _scratch_mount
->  result=$?
->  
-> -if [ $ts_check -ne 0 ]; then
-> -	echo "sysctl filesystem timestamp check is on" >> $seqres.full
-> -	# check for mount failure if the minimum requirement for max timestamp
-> -	# supported is not met.
-> -	if [ $sys_tsmax -ge $tsmax ]; then
-> -		if [ $result -eq 0 ]; then
-> -			echo "mount test failed"  | tee -a $seqres.full
-> -			exit
-> -		fi
-> -	else
-> -		if [ $result -ne 0 ]; then
-> -			echo "failed to mount $SCRATCH_DEV"  | tee -a $seqres.full
-> -			exit
-> -		fi
-> -	fi
-> -else
-> -	# if sysctl switch is off then mount should succeed always.
-> -	echo "sysctl filesystem timestamp check is off" >> $seqres.full
-> -	if [ $result -ne 0 ]; then
-> -		echo "failed to mount $SCRATCH_DEV and timestamp check is off"  >> $seqres.full
-> -		exit
-> -	fi
-> -fi
-> +status=0
->  
->  # Begin test case 1
->  echo "In memory timestamps update test start" >> $seqres.full
-> @@ -143,7 +119,9 @@ echo "In memory timestamps update test start" >> $seqres.full
->  # update time on the file
->  update_time=1
->  
-> -run_test $update_time
-> +if ! run_test $update_time; then
-> +	status=1
-> +fi
->  
->  echo "In memory timestamps update complete" >> $seqres.full
->  
-> @@ -162,12 +140,13 @@ update_time=0
->  echo "On disk timestamps update test start" >> $seqres.full
->  
->  # Re-run test
-> -run_test $update_time
-> +if ! run_test $update_time; then
-> +	status=1
-> +fi
->  
->  echo "On disk timestamps update test complete" >> $seqres.full
->  
-> -echo "y2038 inode timestamp tests completed successfully"
-> +echo "inode timestamp tests completed status $status"
->  
->  # success, all done
-> -status=0
-> -exit
-> +exit $status
-> diff --git a/tests/generic/402.out b/tests/generic/402.out
-> index 6c5b9308..4500e6c7 100644
-> --- a/tests/generic/402.out
-> +++ b/tests/generic/402.out
-> @@ -1,2 +1,2 @@
->  QA output created by 402
-> -y2038 inode timestamp tests completed successfully
-> +inode timestamp tests completed status 0
+>  #else
 > -- 
-> 2.17.1
+> 2.7.4
+> 
+> 
 > 
