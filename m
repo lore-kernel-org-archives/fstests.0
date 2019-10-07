@@ -2,127 +2,234 @@ Return-Path: <SRS0=x6C3=YA=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0FAFEECE58C
-	for <linux-fstests@archiver.kernel.org>; Mon,  7 Oct 2019 15:13:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D4E99ECE58E
+	for <linux-fstests@archiver.kernel.org>; Mon,  7 Oct 2019 19:33:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id D6C8B2070B
-	for <linux-fstests@archiver.kernel.org>; Mon,  7 Oct 2019 15:13:30 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A49F92133F
+	for <linux-fstests@archiver.kernel.org>; Mon,  7 Oct 2019 19:33:45 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="HdYuG0zW"
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="b9D9yic2"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728059AbfJGPNa (ORCPT
+        id S1728330AbfJGTdp (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 7 Oct 2019 11:13:30 -0400
-Received: from aserp2120.oracle.com ([141.146.126.78]:42926 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727753AbfJGPNY (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 7 Oct 2019 11:13:24 -0400
-Received: from pps.filterd (aserp2120.oracle.com [127.0.0.1])
-        by aserp2120.oracle.com (8.16.0.27/8.16.0.27) with SMTP id x97F4HnS103371;
-        Mon, 7 Oct 2019 15:13:11 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
- : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=corp-2019-08-05;
- bh=65lGLVGFxEtMnoDqCV3m+1RTSqR/RQHh6OFEIdNh42c=;
- b=HdYuG0zWcPcy5HyNzShUFrdM/If1Rj/TF/zxLNGeC/C/W/uBAlFsTWumhU4hwOOZx3E+
- rGO15aZubTgmZrU7kXjeIcEapbqmXdhJ/Dv9JTOYjm/dkiRre9pPwzXRqfjm3rRJ1W2j
- S0uhE71AFil4G61v1NUT4I3qbovQpIMYswQqE2BdYAXbBsf6+vuFHT0zHQ97LEUBu7bx
- F7jIDIcE7d1pzQsUh7Nsjq6EH89g/aD975edBQUoWwjRPxXffZlXVt4FgZr1Tt1BIIxd
- CKQhW1oUecGJVQ+Dd0PDXfYuC52NQNPH4rm8K/dIm/L6+YiWJ/3HPKAVb12Moh1prWk5 pA== 
-Received: from aserp3030.oracle.com (aserp3030.oracle.com [141.146.126.71])
-        by aserp2120.oracle.com with ESMTP id 2vek4q7d1j-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Mon, 07 Oct 2019 15:13:11 +0000
-Received: from pps.filterd (aserp3030.oracle.com [127.0.0.1])
-        by aserp3030.oracle.com (8.16.0.27/8.16.0.27) with SMTP id x97FD4m1141829;
-        Mon, 7 Oct 2019 15:13:11 GMT
-Received: from aserv0121.oracle.com (aserv0121.oracle.com [141.146.126.235])
-        by aserp3030.oracle.com with ESMTP id 2vg1yu2khb-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Mon, 07 Oct 2019 15:13:08 +0000
-Received: from abhmp0011.oracle.com (abhmp0011.oracle.com [141.146.116.17])
-        by aserv0121.oracle.com (8.14.4/8.13.8) with ESMTP id x97FCgkS012198;
-        Mon, 7 Oct 2019 15:12:43 GMT
-Received: from localhost (/67.169.218.210)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Mon, 07 Oct 2019 08:12:42 -0700
-Date:   Mon, 7 Oct 2019 08:12:44 -0700
-From:   "Darrick J. Wong" <darrick.wong@oracle.com>
-To:     Yang Xu <xuyang2018.jy@cn.fujitsu.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] xfs/097: Remove wrong broken assignment operation
-Message-ID: <20191007151244.GC13097@magnolia>
-References: <1570432515-13184-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
+        Mon, 7 Oct 2019 15:33:45 -0400
+Received: from mail-qt1-f174.google.com ([209.85.160.174]:42973 "EHLO
+        mail-qt1-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728654AbfJGTdp (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 7 Oct 2019 15:33:45 -0400
+Received: by mail-qt1-f174.google.com with SMTP id w14so20897711qto.9
+        for <fstests@vger.kernel.org>; Mon, 07 Oct 2019 12:33:42 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=QCrDiFIy/8kr0/sCxfCpQIxG631Ehcjx2HxXxScXlWU=;
+        b=b9D9yic2tFPsBjbAf8JOzRSyrxZTS3D7NLHiJDdSbYwLT/sB0gWtR84u6A4iDDkSdK
+         wOEYfIipuM7FxgQatWTOm2ylxzsi0S158CnW8u/dTXF2s2XVEilrJ2nyDkEu5jORxwGC
+         bT7+U20ApMPNeJZvoP0Ws0/6/9aBUnxnWLwWyiwRllSkERVFaHBPIubquWxZd0UxBtC6
+         YNFHjwtRPn4UkCjvEXOPWrjN4faoZqsWVvCwuLjcfNzXETcME4B58gh+9B8enS7bMmaL
+         e+6AX23i7YepxcAAPHSy0ZWUd0GwEyPs8wR8a5Wb+HVL29ZuRbhh65VadGSZA78t01xj
+         +Siw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=QCrDiFIy/8kr0/sCxfCpQIxG631Ehcjx2HxXxScXlWU=;
+        b=LUNYxzyomCLyWCxJ4dsPA9XPcUPUYeTdIbcv99KHxEUI3ZY2WNPi0RcGSknR5TjDeP
+         w+/27mNCPEtUzF+2Pj1Ls6ZRPbJfyIn6tjx+IuE4gMB/lJk9y4SUJKT855B3cvRTSf+6
+         NHySX2qkFdNUUreKbH02mKduTlPH2MHUjnXmDULgtP8qqUEtcM3kBOl7HXz1Spcooybz
+         sB/l8Kgjr7q2llIEmi+Ux/Yo4Z2Ipaw4Pg67P0X2YVrZoRoZopYNWqm0wQUGNfCO/3Ev
+         094hdgFi69D39O06XAo9RjfPPPVs3X6EfTNZRbssm2zbnXV8WuEQwvDMc18bz57ZGNfY
+         i2TQ==
+X-Gm-Message-State: APjAAAWirfbbzXQ7y4zP6ha+wlNrYqymAJlZca7u+vU0Qt0TVkeSco0s
+        PWBssmL+V/6is3UEIu5s2PtZZdBZ31bVkA==
+X-Google-Smtp-Source: APXvYqwZo6hUSHEeXFjo+073gFzhEZnVwlB9bqXpTaP8t+36L1ukTQLwmaCb35qgGLz3oOy9zVI+JQ==
+X-Received: by 2002:aed:3576:: with SMTP id b51mr32357621qte.378.1570476821413;
+        Mon, 07 Oct 2019 12:33:41 -0700 (PDT)
+Received: from localhost ([107.15.81.208])
+        by smtp.gmail.com with ESMTPSA id y26sm10056673qtk.22.2019.10.07.12.33.40
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 07 Oct 2019 12:33:40 -0700 (PDT)
+From:   Josef Bacik <josef@toxicpanda.com>
+To:     fstests@vger.kernel.org, kernel-team@fb.com,
+        linux-btrfs@vger.kernel.org
+Cc:     Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH][v3] btrfs/194: add a test for multi-subvolume fsyncing
+Date:   Mon,  7 Oct 2019 15:33:39 -0400
+Message-Id: <20191007193339.4054-1-josef@toxicpanda.com>
+X-Mailer: git-send-email 2.21.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1570432515-13184-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
-User-Agent: Mutt/1.9.4 (2018-02-28)
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9403 signatures=668684
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=0 malwarescore=0
- phishscore=0 bulkscore=0 spamscore=0 mlxscore=0 mlxlogscore=999
- adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.0.1-1908290000 definitions=main-1910070151
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9403 signatures=668684
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 priorityscore=1501 malwarescore=0
- suspectscore=0 phishscore=0 bulkscore=0 spamscore=0 clxscore=1015
- lowpriorityscore=0 mlxscore=0 impostorscore=0 mlxlogscore=999 adultscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.0.1-1908290000
- definitions=main-1910070151
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Oct 07, 2019 at 03:15:15PM +0800, Yang Xu wrote:
-> On old kernel, since commit ded188b8609 ("xfs: Fix the situation that mount 
-> operation rejects corrupted XFS") running this case got the mismatched output,
-> as below:
+I discovered a problem in btrfs where we'd end up pointing at a block we
+hadn't written out yet.  This is triggered by a race when two different
+files on two different subvolumes fsync.  This test exercises this path
+with dm-log-writes, and then replays the log at every FUA to verify the
+file system is still mountable and the log is replayable.
 
-But why did the output mismatch?  Did the fs heal itself?  Did
-allocating 5 more files somehow avoid touching the finobt?  Is the
-assignment logic in the loop broken?
+This test is to verify the fix
 
---D
+btrfs: fix incorrect updating of log root tree
 
-> -----------------------------------
->  + check fs
->  + corrupt image
->  + mount image && modify files
-> -broken: 1
-> +broken: 0
->  + repair fs
->  + mount image (2)
-> ------------------------------------
-> 
-> It fails because the broken is always equal to 0 when _try_scratch_mount
-> succeed. So remove this wrong assignment operation.
-> 
-> Signed-off-by: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
-> ---
->  tests/xfs/097 | 2 --
->  1 file changed, 2 deletions(-)
-> 
-> diff --git a/tests/xfs/097 b/tests/xfs/097
-> index 1cb7d69c..20791738 100755
-> --- a/tests/xfs/097
-> +++ b/tests/xfs/097
-> @@ -81,8 +81,6 @@ done
->  echo "+ mount image && modify files"
->  broken=1
->  if _try_scratch_mount >> $seqres.full 2>&1; then
-> -
-> -	broken=0
->  	for x in `seq 65 70`; do
->  		touch "${TESTFILE}.${x}" 2> /dev/null && broken=0
->  	done
-> -- 
-> 2.18.1
-> 
-> 
-> 
+actually fixed the problem.
+
+Reviewed-by: Filipe Manana <fdmanana@suse.com>
+Signed-off-by: Josef Bacik <josef@toxicpanda.com>
+---
+v2->v3:
+- cleaned up various bits that were leftover from the original test I copied
+  from.
+- added Filipe's reviewed-by.
+
+ tests/btrfs/194     | 110 ++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/194.out |   2 +
+ tests/btrfs/group   |   1 +
+ 3 files changed, 113 insertions(+)
+ create mode 100755 tests/btrfs/194
+ create mode 100644 tests/btrfs/194.out
+
+diff --git a/tests/btrfs/194 b/tests/btrfs/194
+new file mode 100755
+index 00000000..b7ab3a66
+--- /dev/null
++++ b/tests/btrfs/194
+@@ -0,0 +1,110 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2019 Facebook.  All Rights Reserved.
++#
++# FS QA Test 194
++#
++# Test multi subvolume fsync to test a bug where we'd end up pointing at a block
++# we haven't written.  This was fixed by the patch
++#
++# btrfs: fix incorrect updating of log root tree
++#
++# Will do log replay and check the filesystem.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++fio_config=$tmp.fio
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	_log_writes_cleanup &> /dev/null
++	_dmthin_cleanup
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/dmthin
++. ./common/dmlogwrites
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs btrfs
++_supported_os Linux
++
++# Use thin device as replay device, which requires $SCRATCH_DEV
++_require_scratch_nocheck
++# and we need extra device as log device
++_require_log_writes
++_require_dm_target thin-pool
++
++cat >$fio_config <<EOF
++[global]
++readwrite=write
++fallocate=none
++bs=4k
++fsync=1
++size=128k
++EOF
++
++for i in $(seq 0 49); do
++	echo "[foo$i]" >> $fio_config
++	echo "filename=$SCRATCH_MNT/$i/file" >> $fio_config
++done
++
++_require_fio $fio_config
++
++cat $fio_config >> $seqres.full
++
++# Use a thin device to provide deterministic discard behavior. Discards are used
++# by the log replay tool for fast zeroing to prevent out-of-order replay issues.
++_dmthin_init
++_log_writes_init $DMTHIN_VOL_DEV
++_log_writes_mkfs >> $seqres.full 2>&1
++_log_writes_mark mkfs
++
++_log_writes_mount
++
++# First create all the subvolumes
++for i in $(seq 0 49); do
++	$BTRFS_UTIL_PROG subvolume create "$SCRATCH_MNT/$i" > /dev/null
++done
++
++$FIO_PROG $fio_config > /dev/null 2>&1
++_log_writes_unmount
++
++_log_writes_remove
++prev=$(_log_writes_mark_to_entry_number mkfs)
++[ -z "$prev" ] && _fail "failed to locate entry mark 'mkfs'"
++cur=$(_log_writes_find_next_fua $prev)
++[ -z "$cur" ] && _fail "failed to locate next FUA write"
++
++while [ ! -z "$cur" ]; do
++	_log_writes_replay_log_range $cur $DMTHIN_VOL_DEV >> $seqres.full
++
++	# We need to mount the fs because btrfsck won't bother checking the log.
++	_dmthin_mount
++	_dmthin_check_fs
++
++	prev=$cur
++	cur=$(_log_writes_find_next_fua $(($cur + 1)))
++	[ -z "$cur" ] && break
++done
++
++echo "Silence is golden"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/194.out b/tests/btrfs/194.out
+new file mode 100644
+index 00000000..7bfd50ff
+--- /dev/null
++++ b/tests/btrfs/194.out
+@@ -0,0 +1,2 @@
++QA output created by 194
++Silence is golden
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index b92cb12c..0d0e1bba 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -196,3 +196,4 @@
+ 191 auto quick send dedupe
+ 192 auto replay snapshot stress
+ 193 auto quick qgroup enospc limit
++194 auto metadata log volume
+-- 
+2.21.0
+
