@@ -1,68 +1,100 @@
-Return-Path: <SRS0=d8y6=YB=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=es+p=YC=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.0 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8A487C10F14
-	for <linux-fstests@archiver.kernel.org>; Tue,  8 Oct 2019 07:02:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B7741C47404
+	for <linux-fstests@archiver.kernel.org>; Wed,  9 Oct 2019 05:35:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 544A82067B
-	for <linux-fstests@archiver.kernel.org>; Tue,  8 Oct 2019 07:02:20 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7D16C21835
+	for <linux-fstests@archiver.kernel.org>; Wed,  9 Oct 2019 05:35:35 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="LXGyKfKI"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="autUznIk"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730057AbfJHHCU (ORCPT
+        id S1730557AbfJIFff (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 8 Oct 2019 03:02:20 -0400
-Received: from bombadil.infradead.org ([198.137.202.133]:50236 "EHLO
-        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729740AbfJHHCT (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 8 Oct 2019 03:02:19 -0400
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=bombadil.20170209; h=In-Reply-To:Content-Type:MIME-Version
-        :References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description:Resent-Date:
-        Resent-From:Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:List-Id:
-        List-Help:List-Unsubscribe:List-Subscribe:List-Post:List-Owner:List-Archive;
-         bh=R36TZzBOPEDid2T0Y470W6LEYzb9MwiOcpjHirWUoGE=; b=LXGyKfKIi+CbSMwwTJ4UpvyzS
-        nsi0DKw9JqlIkoZZXHYKXBd4KRkb7ECnQIdEFs0fFNYXTJ6MOJGVDjTWw0YxxHRstf2lT7lMgsNjh
-        edH2OybciqGCu4FSdEaY/1w6P5vUd3Gm2fBSuSV3AkIYc4verp0qQTWYwfwPtHD2+V2DwCOdBdk4E
-        cUQx/2ftQrkWtqaBRS3+UCei2RNh4t+p3SC7VA7fumWZ10GiHdeFoIjASqmSo9hkFKTwdhx8WtPMS
-        M9QuWZNK7//9IkACMe9vTQYuCENgPlIw+a7wD1EBknFA7Tpu8gWdmYPkGuoSLt9o8ivtK6LaGkzcg
-        fYr4lNkqA==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.92.2 #3 (Red Hat Linux))
-        id 1iHjVj-000777-AG; Tue, 08 Oct 2019 07:02:19 +0000
-Date:   Tue, 8 Oct 2019 00:02:19 -0700
-From:   Christoph Hellwig <hch@infradead.org>
-To:     "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org
-Subject: Re: [PATCH 3/4] xfs/263: use _scratch_mkfs_xfs instead of open-coded
- mkfs call
-Message-ID: <20191008070219.GF21805@infradead.org>
-References: <157049658503.2397321.13914737091290093511.stgit@magnolia>
- <157049660366.2397321.3207595496710777905.stgit@magnolia>
+        Wed, 9 Oct 2019 01:35:35 -0400
+Received: from mail-pg1-f175.google.com ([209.85.215.175]:36789 "EHLO
+        mail-pg1-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1730451AbfJIFfe (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 9 Oct 2019 01:35:34 -0400
+Received: by mail-pg1-f175.google.com with SMTP id 23so672299pgk.3
+        for <fstests@vger.kernel.org>; Tue, 08 Oct 2019 22:35:34 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=481Ci0kx/vFxIsZ1Yi67RVoTaC52PrgSXnO15ggmUXs=;
+        b=autUznIkkMsToM2sQ+8QKDZoLsEwWMXJPhcFfYdockc1NW07kaFAuKh5i5R4ZmGby2
+         ikEULuOYRQ732lARGG5lWhkpI3GwVn2ZURXRooALBOtH+D0t2z3SzDvhLZFdyuHS0PSY
+         OHmdsS4vpVJAr/AaN3Xh7g+Uyh8pV4mcKer//zF3VD+Y5R3M4JV508SGaisRoou/VoR2
+         Qap3lJxwacWsRXMWwutFcSocrQ3XpXf/ds3pR7u4USBmMF7bPDK13VXVMlKEs+wk9/LH
+         T7sjpaVXnqiawWdAdu35MLi6oQY90PAY2wQdrDVovR164vPaYR2yADNZxRdlvdeHmmmc
+         eJkQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=481Ci0kx/vFxIsZ1Yi67RVoTaC52PrgSXnO15ggmUXs=;
+        b=OxHmg/OpOcVtwX6n4SIEixoeyiRwJXGyovY++BRmKSCGMUTXhrDaNecbFBFv6OotFH
+         0O90Z3mNIoOjbAIxmhHbXjAXAkyrBzySluOyJuQ/WNz4SXSJBNQtTLOpNoOSHT/U2FQv
+         XP4gYCn8vbGfAFz+R54CzNUKSvxWaNUNHXHom5OKk4FratnC9MUPBPs/ZVgko3S8hpV4
+         2IFc+G0Qm+h5BTjjAjfQzexw5NqVUD50Lq+0jrajMusyd8cDyIPDt/QF2M9WTGLNkJJK
+         KiED3HXTwGYVNVKqzXRQpD2+wWMhLKPWNCCK0Ys8kNrGJnfPGx5L5Q3OhuGcmx2qva1u
+         jBTQ==
+X-Gm-Message-State: APjAAAUdRD4i5Zz4VJXluReKjNGRLehXreKf1bWN+CWXfAOyqlJPiWD0
+        sHXntLs5pc7omdKBuk1s+8+Pxqtz/2U=
+X-Google-Smtp-Source: APXvYqxgBMWTw5dnppsnMGy0oUqRgjHUhioScSbPOYnBlqs0S7MRW1Wss8IWOdypO3EIHhu2t836Qw==
+X-Received: by 2002:a17:90a:f001:: with SMTP id bt1mr2028387pjb.2.1570599334001;
+        Tue, 08 Oct 2019 22:35:34 -0700 (PDT)
+Received: from xzhoux.usersys.redhat.com ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id s14sm892249pfe.52.2019.10.08.22.35.32
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 08 Oct 2019 22:35:33 -0700 (PDT)
+From:   Murphy Zhou <jencce.kernel@gmail.com>
+To:     fstests@vger.kernel.org
+Cc:     Murphy Zhou <jencce.kernel@gmail.com>
+Subject: [PATCH] generic/001: remove unnecessary backslash
+Date:   Wed,  9 Oct 2019 13:34:34 +0800
+Message-Id: <20191009053434.19369-1-jencce.kernel@gmail.com>
+X-Mailer: git-send-email 2.20.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <157049660366.2397321.3207595496710777905.stgit@magnolia>
-User-Agent: Mutt/1.12.1 (2019-06-15)
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Oct 07, 2019 at 06:03:23PM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <darrick.wong@oracle.com>
-> 
-> Fix this test to use _scratch_mkfs_xfs instead of the open-coded mkfs
-> call.  This is needed to make the test succeed when XFS DAX is enabled
-> and mkfs enables reflink by default.
+Awk 5.0.1 is complaining about this backslash and causing false alarm
+like this:
+    warning: regexp escape sequence '\#' is not a known regexp operator
 
-Looks good,
+This fix works fine with Awk 3.1.7 , 4.0.2 , 4.2.1 and 5.0.1. This
+backslash is not necessary.
 
-Reviewed-by: Christoph Hellwig <hch@lst.de>
+Signed-off-by: Murphy Zhou <jencce.kernel@gmail.com>
+---
+ tests/generic/001 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tests/generic/001 b/tests/generic/001
+index 046e54e3..3a047754 100755
+--- a/tests/generic/001
++++ b/tests/generic/001
+@@ -177,7 +177,7 @@ _chain()
+ {
+     $AWK_PROG -v full_file=$seqres.full -v verify=$verify <$tmp.config '
+ BEGIN	{ nfile = 0 }
+-/^\#/	{ next }
++/^#/	{ next }
+ 	{ file[nfile] = $1
+ 	  size[nfile] = $2
+ 	  link[nfile] = 0
+-- 
+2.20.1
+
