@@ -1,75 +1,104 @@
-Return-Path: <SRS0=mik5=YD=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=yvB5=YE=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.0 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-8.3 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4F2E0C4360C
-	for <linux-fstests@archiver.kernel.org>; Thu, 10 Oct 2019 06:49:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D4141C47404
+	for <linux-fstests@archiver.kernel.org>; Fri, 11 Oct 2019 07:03:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 2617221920
-	for <linux-fstests@archiver.kernel.org>; Thu, 10 Oct 2019 06:49:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9F0832084C
+	for <linux-fstests@archiver.kernel.org>; Fri, 11 Oct 2019 07:03:30 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="JiG/Li5b"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="s/OF2m/I"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727296AbfJJGtg (ORCPT
+        id S1726714AbfJKHDa (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 10 Oct 2019 02:49:36 -0400
-Received: from bombadil.infradead.org ([198.137.202.133]:46234 "EHLO
-        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727207AbfJJGtg (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 10 Oct 2019 02:49:36 -0400
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=bombadil.20170209; h=In-Reply-To:Content-Type:MIME-Version
-        :References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description:Resent-Date:
-        Resent-From:Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:List-Id:
-        List-Help:List-Unsubscribe:List-Subscribe:List-Post:List-Owner:List-Archive;
-         bh=xKWuIym4JxqmokYQU5+3M41thCo8iJpJuuKy/e5KtI8=; b=JiG/Li5bQE1C7qwZbS2uxb5W4
-        adT4DJQ4WtEv8nRM/KHCpnDfM1WsA//UoQjxD8w72pwmtFQLqYbULHt4Pqp1T5QI69gqard2EzVHg
-        u8oE+m2iHBtlztMenfF9oqBuVN/ofsNhGZCdGIz3QwSKz75WHYfJbePv5YfvHOm3gCIwqnLdJqgFc
-        tYHQ04P3hiRInMThSoFDyLKVE2lXanloZ0ZKlxH/AWcd8NBIz49E9pBEqCD5w4i9G+VcxOmkcMsyZ
-        6uQ2GPA0TtubdTro8edr5Xe8Hzf7MX2p5G/xJgTu8LMO3FeZyQ5DL0mnZokr9IfMByRYQkCzXINHy
-        MQtsZosxg==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.92.2 #3 (Red Hat Linux))
-        id 1iISGV-0007xq-Tt; Thu, 10 Oct 2019 06:49:35 +0000
-Date:   Wed, 9 Oct 2019 23:49:35 -0700
-From:   Christoph Hellwig <hch@infradead.org>
-To:     "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc:     Eryu Guan <guaneryu@gmail.com>,
-        Christoph Hellwig <hch@infradead.org>,
-        fstests <fstests@vger.kernel.org>
-Subject: Re: [PATCH] generic: check reflink multiple mmap write
-Message-ID: <20191010064935.GA28292@infradead.org>
-References: <20191010041440.GH13097@magnolia>
+        Fri, 11 Oct 2019 03:03:30 -0400
+Received: from mail-pf1-f194.google.com ([209.85.210.194]:35791 "EHLO
+        mail-pf1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726679AbfJKHDa (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 11 Oct 2019 03:03:30 -0400
+Received: by mail-pf1-f194.google.com with SMTP id 205so5522236pfw.2;
+        Fri, 11 Oct 2019 00:03:29 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=to:cc:from:subject:message-id:date:user-agent:mime-version
+         :content-language:content-transfer-encoding;
+        bh=H/6iiROPMKo0TlgNSl+l8IPOTIC7KwQPg0RdMpmm4+E=;
+        b=s/OF2m/IWfUirr+JOKnWUvbGSrWyeRBwUx9H75uKHXZRO3NwN4J7wGHADKTr6uhKlD
+         qOszXumDcCEhvY2gr6AoUjeXHsHnxBAUA6rDw/kH74iwOEA4LMGPyp6pJr+dL6ItF6qI
+         /G5YCmu/shX31DO/WxQ6JThvcape91n+tvJ0OCetrVtvBaUe0Wj8hi50DjrvR9sgBrBI
+         xrIF0114KIr7kIr2dFSj7XIctAS8yY6GuZwwwNoWBEdArb5zvdRo4XNJH62JHKGoKbxH
+         Tid5A0RMr9f0IIBceLKwrpoF4X2bTfTEMZfwrQZdBIx7DB+TrhI3uzGryuYg4ISGWaxl
+         hQPQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:to:cc:from:subject:message-id:date:user-agent
+         :mime-version:content-language:content-transfer-encoding;
+        bh=H/6iiROPMKo0TlgNSl+l8IPOTIC7KwQPg0RdMpmm4+E=;
+        b=qYg692QgR4Gupe7QjrkG8ZVoBPy5ws0FpOqGA0Xh1VeS5kMWqPo4iVj6FX0VrvJT0r
+         pgVr7OCBdXWbL+mQbbbUIu6pNN/JovDhD8SBeL3ZmeoTq+eX5MGkZscSq3E5SYDTNxsP
+         MFHWemvogD+GWlQQjWgviPmWb7VikHMeWICAs6Cz8qwocZT8N/XO+da4cQaPAJO1ZSjH
+         cJYpTXM0VCWA16ZYZeCklPUkPkTxHNQaSsbrhmBYbo1NWTYYN80fTH4fsV1e4w3mEKFL
+         pvainxeuDGnEOCuEcQHQe3HJnyxhZ4Lqg604lfotz9MIoxVuXpie+a/DDiwkxMd88zMg
+         siYQ==
+X-Gm-Message-State: APjAAAUVTE40WKQm41eZGlSXizo2ZtOeWJ3TN7YDNvGyTH7SGwLqWfyz
+        //qzUwbPlRiiVtlOU4amHUuKL8U=
+X-Google-Smtp-Source: APXvYqzoxoGv4cvnD6T2JXXkeV0hzNUq7qGX1844tO/wil/Sp0fIi3td7kuS4vzm3sSLxYkTVHWSoQ==
+X-Received: by 2002:aa7:93c3:: with SMTP id y3mr15126067pff.2.1570777409630;
+        Fri, 11 Oct 2019 00:03:29 -0700 (PDT)
+Received: from [10.76.90.34] ([203.205.141.123])
+        by smtp.gmail.com with ESMTPSA id 7sm6752627pgx.26.2019.10.11.00.03.26
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Fri, 11 Oct 2019 00:03:29 -0700 (PDT)
+To:     fstests@vger.kernel.org
+Cc:     linux-xfs@vger.kernel.org, Eryu Guan <guaneryu@gmail.com>,
+        newtongao@tencent.com, jasperwang@tencent.com
+From:   kaixuxia <xiakaixu1987@gmail.com>
+Subject: [PATCH] fstests: remove duplicated renameat2 system call number for
+ i386
+Message-ID: <6d0c1a12-b4b2-cb35-1150-001ffa83a5db@gmail.com>
+Date:   Fri, 11 Oct 2019 15:03:24 +0800
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:60.0) Gecko/20100101
+ Thunderbird/60.9.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20191010041440.GH13097@magnolia>
-User-Agent: Mutt/1.12.1 (2019-06-15)
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Oct 09, 2019 at 09:14:40PM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <darrick.wong@oracle.com>
-> 
-> Add a test to make sure that we can handle multiple memory mappings to a
-> physical storage extent shared by multiple files, and that we can handle
-> the copy on write operation without error.
-> 
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+Remove duplicated renameat2 system call number for i386.
 
-Thanks, this looks good:
+Signed-off-by: kaixuxia <kaixuxia@tencent.com>
+---
+ src/renameat2.c | 4 ----
+ 1 file changed, 4 deletions(-)
 
-Reviewed-by: Christoph Hellwig <hch@lst.de>
+diff --git a/src/renameat2.c b/src/renameat2.c
+index c59ce65..8f712a4 100644
+--- a/src/renameat2.c
++++ b/src/renameat2.c
+@@ -18,10 +18,6 @@
+ #define SYS_renameat2 353
+ #endif
+ 
+-#if !defined(SYS_renameat2) && defined(__i386__)
+-#define SYS_renameat2 353
+-#endif
+-
+ static int renameat2(int dfd1, const char *path1,
+ 		     int dfd2, const char *path2,
+ 		     unsigned int flags)
+-- 
+1.8.3.1
 
-To further try fund DAX corner cases we should also try different
-offsets for the different files, or different offsets in the same
-file referring to the same blocks.  I can take a stab at that once
-I find some time.
+-- 
+kaixuxia
