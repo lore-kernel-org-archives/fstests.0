@@ -2,213 +2,211 @@ Return-Path: <SRS0=0vMW=YG=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5CDCDC4360C
-	for <linux-fstests@archiver.kernel.org>; Sun, 13 Oct 2019 13:06:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3D8DBC4CECE
+	for <linux-fstests@archiver.kernel.org>; Sun, 13 Oct 2019 16:24:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 2346C206B7
-	for <linux-fstests@archiver.kernel.org>; Sun, 13 Oct 2019 13:06:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 06E7C20659
+	for <linux-fstests@archiver.kernel.org>; Sun, 13 Oct 2019 16:24:10 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="B+cQlEa/"
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="cuFrfqAS"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728789AbfJMNGE (ORCPT
+        id S1728239AbfJMQYJ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 13 Oct 2019 09:06:04 -0400
-Received: from mail-pf1-f194.google.com ([209.85.210.194]:42375 "EHLO
-        mail-pf1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728478AbfJMNGE (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 13 Oct 2019 09:06:04 -0400
-Received: by mail-pf1-f194.google.com with SMTP id q12so8825091pff.9
-        for <fstests@vger.kernel.org>; Sun, 13 Oct 2019 06:06:04 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=message-id:date:from:to:subject:mime-version:content-disposition;
-        bh=geLMbLwO+aKMqiBNSI89NueFmtNAEbmYIipquz1t3Ew=;
-        b=B+cQlEa/H1Jw69eTeGfhqs9Jm+ZlSVvEO3w7OrRAxX7vIucCu5XkKZItNu+Ojatvln
-         vYrLgulTJvib8N5Enx0SVoGQuTmCKjeRRu8H0Use45tFB0k86WBnbpopXRfQQC28FsU9
-         rIAjsK3XpicQJkZxm+w9vYx0/Tf5crdx786NQ9EzRRvskkl1pTWZDtQCEGXYO5yViSOs
-         PuqwbPkFewQIERfZfpbXnSkstymCYJrkpAMGWYEyQorXdqxhZa5koPYeB1FFbjL7EI+r
-         tlsbEFpKI1O8hypgqpY0TfXvh+CE631vMZr1a1gmH4aQzDJRnNA1FRN/8an5WfBVS4kj
-         51iA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:message-id:date:from:to:subject:mime-version
-         :content-disposition;
-        bh=geLMbLwO+aKMqiBNSI89NueFmtNAEbmYIipquz1t3Ew=;
-        b=aujArgvBKbuD0Lq6e73Zuf5stRUCF/KvzoEM3lN/fZmkc/xlIvQwCqSSmo6xcidl43
-         b6eYNvQXy8auVz++yg4YC+i3u+HJJR8soRXlXV7uPLAuYiq45/1H6Q2AZTrtEX4wLPtC
-         YOJQkfhxQWPIVfVFNkeYCcK22AjfwbYYYok8P5MtOLJXUXEPtED+IIAdDN9yPnMvgDLc
-         SfpC55hhWh2U+hC9/G8WpNBv+MPeHfZ6mDUswLq0ETnSaf1ztukgW2oOalvXwruz5KcA
-         zNko1mZv0hCrR92HUrpe98aS4DN1ctZ4GCfgOIPihv3ZYAGvvq9/l/Zf9fci9zcC+sc5
-         ODOA==
-X-Gm-Message-State: APjAAAW/PrIpJR1wENOQzirZTy838TraKzRX5y+rC/eR2js6Wo4S0lR0
-        crLm1AenOkt1XX8pmFiaId5hd+Wl
-X-Google-Smtp-Source: APXvYqyJpGfR2Jy41kVIjIW7Q+7huaMtWZhnnWA3p+rns9K8oC0oNnnXJNgo4hzgpx529golMAaHZw==
-X-Received: by 2002:a62:e807:: with SMTP id c7mr27210894pfi.18.1570971963500;
-        Sun, 13 Oct 2019 06:06:03 -0700 (PDT)
-Received: from localhost ([178.128.102.47])
-        by smtp.gmail.com with ESMTPSA id v43sm19987491pjb.1.2019.10.13.06.06.01
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 13 Oct 2019 06:06:02 -0700 (PDT)
-Message-ID: <5da3213a.1c69fb81.a290c.4dca@mx.google.com>
-Date:   Sun, 13 Oct 2019 21:05:56 +0800
-From:   Eryu Guan <guaneryu@gmail.com>
-To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: master branch updated to 22b06b010cc6
+        Sun, 13 Oct 2019 12:24:09 -0400
+Received: from userp2120.oracle.com ([156.151.31.85]:42622 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726085AbfJMQYJ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 13 Oct 2019 12:24:09 -0400
+Received: from pps.filterd (userp2120.oracle.com [127.0.0.1])
+        by userp2120.oracle.com (8.16.0.27/8.16.0.27) with SMTP id x9DGIdYX026861;
+        Sun, 13 Oct 2019 16:23:55 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
+ : subject : message-id : references : mime-version : content-type :
+ in-reply-to; s=corp-2019-08-05;
+ bh=kg6UKe/dgX+UkTWqUGk3ZAYM4FldfZJuou3+vcFVd74=;
+ b=cuFrfqASJsOLYeBtjhnUwtTDRNXfWgidB4U1ePpdlwLfdF8Tto2GdW91zAT6Y62DD+Du
+ OX55oK2bT5NCGc8jIl1nmlmvlTiQhNApfDtExEfo6DWsu16Dm7Bb+WKgsjbt9MGsi8Xy
+ zegu7vf0Q4qa7I7dH8tUmUxfmpRhNr1cb6t/EtbODr07PphA9bcrPPIqWaCNCN1fHHsB
+ Ifevr6p+u4jQ/vmOvPQmuCY0VjqbxeDsr/u83XkorXvWgwgYFIGvjKigqoRPBMHlNj1S
+ C8gim/e/9aCZN9lrdPxukgIEznjAELu/f+DPDG0I8zBZo7oyuWGVjba0NWNbIxJjlpwU NA== 
+Received: from userp3020.oracle.com (userp3020.oracle.com [156.151.31.79])
+        by userp2120.oracle.com with ESMTP id 2vk7fqv9wf-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Sun, 13 Oct 2019 16:23:54 +0000
+Received: from pps.filterd (userp3020.oracle.com [127.0.0.1])
+        by userp3020.oracle.com (8.16.0.27/8.16.0.27) with SMTP id x9DGNSfR068866;
+        Sun, 13 Oct 2019 16:23:54 GMT
+Received: from userv0122.oracle.com (userv0122.oracle.com [156.151.31.75])
+        by userp3020.oracle.com with ESMTP id 2vkry45pvr-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Sun, 13 Oct 2019 16:23:54 +0000
+Received: from abhmp0014.oracle.com (abhmp0014.oracle.com [141.146.116.20])
+        by userv0122.oracle.com (8.14.4/8.14.4) with ESMTP id x9DGNkr5002446;
+        Sun, 13 Oct 2019 16:23:46 GMT
+Received: from localhost (/67.169.218.210)
+        by default (Oracle Beehive Gateway v4.0)
+        with ESMTP ; Sun, 13 Oct 2019 09:23:46 -0700
+Date:   Sun, 13 Oct 2019 09:23:45 -0700
+From:   "Darrick J. Wong" <darrick.wong@oracle.com>
+To:     Eryu Guan <guaneryu@gmail.com>
+Cc:     Christoph Hellwig <hch@infradead.org>,
+        fstests <fstests@vger.kernel.org>
+Subject: Re: [PATCH v2] generic: check reflink multiple mmap write
+Message-ID: <20191013162345.GJ13097@magnolia>
+References: <20191010041440.GH13097@magnolia>
+ <20191011214120.GI13097@magnolia>
+ <20191013121134.GG2622@desktop>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="qSF4pCqhOSwt"
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <20191013121134.GG2622@desktop>
+User-Agent: Mutt/1.9.4 (2018-02-28)
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9409 signatures=668684
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=0 malwarescore=0
+ phishscore=0 bulkscore=0 spamscore=0 mlxscore=0 mlxlogscore=999
+ adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.0.1-1908290000 definitions=main-1910130164
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9409 signatures=668684
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 priorityscore=1501 malwarescore=0
+ suspectscore=0 phishscore=0 bulkscore=0 spamscore=0 clxscore=1015
+ lowpriorityscore=0 mlxscore=0 impostorscore=0 mlxlogscore=999 adultscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.0.1-1908290000
+ definitions=main-1910130163
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+On Sun, Oct 13, 2019 at 08:11:37PM +0800, Eryu Guan wrote:
+> On Fri, Oct 11, 2019 at 02:41:20PM -0700, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <darrick.wong@oracle.com>
+> > 
+> > Add a test to make sure that we can handle multiple memory mappings to a
+> > physical storage extent shared by multiple files, and that we can handle
+> > the copy on write operation without error.  Make sure we can also handle
+> > mappings at different offsets in the page cache.
+> > 
+> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > ---
+> > v2: test at different offsets
+> > ---
+> >  src/Makefile                |    2 -
+> >  src/mmap-write-concurrent.c |  155 +++++++++++++++++++++++++++++++++++++++++++
+> 
+> I added an entry in .gitignore file.
 
---qSF4pCqhOSwt
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Thanks!
 
-Hi all,
+<snip>
+> > +
+> > +# real QA test starts here
+> > +_supported_os Linux
+> > +_supported_fs generic
+> > +_require_command "$FILEFRAG_PROG" filefrag
+> 
+> Also added
+> 
+> _require_test_program "mmap-write-concurrent"
+> 
 
-The master branch of the xfstests repository at:
+> > +echo "mwrite all copies" | tee -a $seqres.full
+> > +off=$(( (filesz / 2) - 168 ))
+> > +len=337
+> > +./src/mmap-write-concurrent $len \
+> 
+> And used "$here/src/mmap-write-concurrent .." here.
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+Old habits die hard, I guess. :(  Thanks for fixing those up on
+commit...
 
-have just been updated. This is probably the biggest update I've ever made.
-Notably, I pulled in the leasetest patchset from Ira Weiny, the fs-verity
-patchset from Eric Biggers. The locktest changes only affect generic/131 and
-the new generic/571 leasetest case, and the fs-verity tests will only run if
-you have fs-verity support, other than that the two patchsets should not have
-other side effect.
+--D
 
-Some other new tests and random fixes are also merged, but I don't expect to
-see any new failures. If you hit bugs please drop bug report and/or fixes to
-the list.
-
-Many thanks to Jeff Layton, Filipe Manana and Christoph Hellwig for reviewing
-patches!
-
-Thanks,
-Eryu
-
-The new head of the master branch is commit:
-
-22b06b010cc6 generic: check reflink multiple mmap write
-
-New commits:
-
-Darrick J. Wong (5):
-      [5b2232dde59d] xfs/196: check for delalloc blocks after pwrite
-      [d48645e8a120] xfs/{088, 089, 091}: redirect stderr when writing to corrupt fs
-      [7c1c3fa59331] xfs/263: use _scratch_mkfs_xfs instead of open-coded mkfs call
-      [96b5068aa2b9] populate: punch files after writing to fragment free space properly
-      [22b06b010cc6] generic: check reflink multiple mmap write
-
-Eric Biggers (8):
-      [12629d54e2fa] common/filter: add _filter_xfs_io_fiemap()
-      [0467d90019dd] common/verity: add common functions for testing fs-verity
-      [16f52cac08a6] generic: test general behavior of verity files
-      [59c53985cbe6] generic: test access controls on the fs-verity ioctls
-      [98abd9a8d47b] generic: test corrupting verity files
-      [cb20d83e824c] generic: test that fs-verity is using the correct measurement values
-      [5f8fccd0a087] generic: test using fs-verity and fscrypt simultaneously
-      [78fa1fb8163d] generic: test the fs-verity built-in signature verification support
-
-Ira Weiny (16):
-      [0beb74fb70e6] src/locktest: Remove unnecessary sleep
-      [6cb474bc17e7] src/locktest: Remove OPEN macro
-      [4d5f16cf639b] src/locktest: Change command macro names
-      [a5f4ca19e656] src/locktest: Add get_cmd_str
-      [214cc10503cd] src/locktest.c: Clean up client command passing
-      [8deddd16f4d3] src/locktest.c: Fix return code if last test fails
-      [f10a6b4a4e26] generic/131: Clean up pid variables
-      [450873c962a1] generic/131: Save stderr for debugging
-      [170771f3c838] src/locktest: Clean up error output
-      [4d0f2152e5ba] src/locktest: Audit all debug output
-      [a4940119d16a] src/locktest: Add run() function
-      [82ae25c4dfaa] src/locktest: Add simple lease testing
-      [6d3cbc48a581] src/locktest: Add lease testing for basic signal reception
-      [a7bfbe8b2e19] src/locktest: Add truncate lease tests
-      [f91931a1a68e] common/locktest: Add common locktest functions
-      [ac92390251f3] generic: Add lease testing
-
-Josef Bacik (1):
-      [17c22e556f8f] btrfs: add a test for multi-subvolume fsyncing
-
-Murphy Zhou (1):
-      [95a2510bb1f2] generic/001: remove unnecessary backslash
-
-kaixuxia (1):
-      [fe64c0e70d9a] src/renameat2: remove duplicated renameat2 system call number for i386
-
-
-Code Diffstat:
-
- .gitignore                  |   1 +
- common/config               |   2 +
- common/filter               |  24 ++
- common/locktest             |  95 +++++
- common/populate             |  54 ++-
- common/verity               | 215 ++++++++++
- src/Makefile                |   2 +-
- src/locktest.c              | 999 +++++++++++++++++++++++++++++---------------
- src/mmap-write-concurrent.c | 155 +++++++
- src/renameat2.c             |   4 -
- tests/btrfs/196             | 110 +++++
- tests/btrfs/196.out         |   2 +
- tests/btrfs/group           |   1 +
- tests/generic/001           |   2 +-
- tests/generic/131           |  54 +--
- tests/generic/571           |  32 ++
- tests/generic/571.out       |   2 +
- tests/generic/572           | 199 +++++++++
- tests/generic/572.out       |  74 ++++
- tests/generic/573           |  73 ++++
- tests/generic/573.out       |  14 +
- tests/generic/574           | 154 +++++++
- tests/generic/574.out       |  91 ++++
- tests/generic/575           | 112 +++++
- tests/generic/575.out       |   5 +
- tests/generic/576           |  80 ++++
- tests/generic/576.out       |  12 +
- tests/generic/577           | 150 +++++++
- tests/generic/577.out       |  42 ++
- tests/generic/578           | 105 +++++
- tests/generic/578.out       |  31 ++
- tests/generic/group         |   8 +
- tests/xfs/088               |   2 +-
- tests/xfs/089               |   2 +-
- tests/xfs/091               |   2 +-
- tests/xfs/196               |   2 +
- tests/xfs/263               |   4 +-
- 37 files changed, 2493 insertions(+), 423 deletions(-)
---
-Eryu Guan
-guaneryu@gmail.com
-
---qSF4pCqhOSwt
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAl2jIM8ACgkQJlKqKVyP
-52NK7Q//Y4e8C4wXJN0Yz53Lnb1WmeXxly18rYafr69HTwhkBESkY/oM118XqvvD
-i8S3c9yvyaOijqRg+OfmUDxnZdL10Xoa4Thv8ZPsHk1PBDN5xe6iqbSBhiE+YkCJ
-QfVHUyYFdaxGi2iseZoRRPOStsE7MXPLl2KgaddijIbGHP0PCJpc/lr3uBVvt2UM
-J35J+Oe8qn1RlaHNNYV3agChA3wE3Rbr3xGexxIgGbG3a4d8yd/d3OH5BD+LVb+w
-yfQvwl3+OZXxRIWnvbZWod/+B6+gucES/+96z1AtuW9xP7fqkCABb6WtaqhYwp7H
-Hq2JUdh7AfFlPTRNlygy23fpjONyoDpXyAh/cvxdPRvXcQ16hMY6rM7w+e39RHwB
-CES8Xc/04k0PXn1Xeo9SQo8BcYOKj2Gh29IfzSebs0PFzAs0JV3DbrkogzQcmN2x
-yUf3KziROeRkulnpPXb00VMAamxrSJOBUBAsXH1oPcKZwZsI9jOKCNSLOn0ZmFcR
-YltCRbFqrwHmZyAXu5Z8E2caSn7KtdLq9bZ12ZBnEbj87B8+8uIfmzJ61o3eZlaL
-ileiPl8173G8fZKKoudJ0HSiZHQZ5ocU42HtX7YGK4g+KwZNiyCJBghjw4rWuQRv
-Rb0UrjP45sJsWPbqEr+mc5MGI0OmYncAI2Tu8eK1fyDC8yJP6dI=
-=QU4J
------END PGP SIGNATURE-----
-
---qSF4pCqhOSwt--
+> Thanks,
+> Eryu
+> 
+> > +		$off $testdir/file1 \
+> > +		$off $testdir/file2 \
+> > +		$off $testdir/file3 \
+> > +		$off $testdir/file4 \
+> > +		$((off + blksz)) $testdir/file5 \
+> > +		$((off + (blksz * 2))) $testdir/file6 \
+> > +		$((off + (blksz * 3))) $testdir/file7 \
+> > +		$((off + (blksz * 4))) $testdir/file8 \
+> > +		168 $testdir/file1 \
+> > +		$((blksz - 168)) $testdir/file2 \
+> > +		$((filesz - 777)) $testdir/file3 \
+> > +		$(((blksz * 3) - 168)) $testdir/file4 \
+> > +
+> > +
+> > +echo "Compare files before remount" | tee -a $seqres.full
+> > +compare
+> > +_test_cycle_mount
+> > +
+> > +echo "Compare files after remount" | tee -a $seqres.full
+> > +compare
+> > +
+> > +echo "Check for non-shared extents" | tee -a $seqres.full
+> > +$FILEFRAG_PROG -v $testdir/file1 $testdir/file2 $testdir/file3 $testdir/file4 \
+> > +		  $testdir/file5 $testdir/file6 $testdir/file7 $testdir/file8 \
+> > +		  | grep '^[[:space:]]*[0-9]*:' > $testdir/fiemap
+> > +cat $testdir/fiemap >> $seqres.full
+> > +grep -q 'shared' $testdir/fiemap || \
+> > +		echo "Expected to find shared extents"
+> > +
+> > +grep -q -v 'shared' $testdir/fiemap || \
+> > +		echo "Expected to find non-shared extents"
+> > +
+> > +# success, all done
+> > +status=0
+> > +exit
+> > diff --git a/tests/generic/945.out b/tests/generic/945.out
+> > new file mode 100644
+> > index 00000000..ad1e21ff
+> > --- /dev/null
+> > +++ b/tests/generic/945.out
+> > @@ -0,0 +1,31 @@
+> > +QA output created by 945
+> > +Create the original files
+> > +Compare files before cow
+> > +c946b71bb69c07daf25470742c967e7c  TEST_DIR/test-945/file1
+> > +c946b71bb69c07daf25470742c967e7c  TEST_DIR/test-945/file2
+> > +c946b71bb69c07daf25470742c967e7c  TEST_DIR/test-945/file3
+> > +c946b71bb69c07daf25470742c967e7c  TEST_DIR/test-945/file4
+> > +74e6b9b1a03fdf09293c089b002800f8  TEST_DIR/test-945/file5
+> > +c14f20b97155e3fc11a17532d02ad9df  TEST_DIR/test-945/file6
+> > +22eb46e0f4a3742c8d86346845b7bc80  TEST_DIR/test-945/file7
+> > +4d292f06cec9d3f1bece4822cd5ef532  TEST_DIR/test-945/file8
+> > +mwrite all copies
+> > +Compare files before remount
+> > +c1b46135a2620ae6da21bbfd4cbb3cba  TEST_DIR/test-945/file1
+> > +16f0bc0f97c42d2ad903c519095b8126  TEST_DIR/test-945/file2
+> > +eb71e3135ca2abf33bb9081e2b49a876  TEST_DIR/test-945/file3
+> > +2678dfcb77bed4dc29e19836bef82e5b  TEST_DIR/test-945/file4
+> > +2802d75dbee4f29d62124aa7b473edca  TEST_DIR/test-945/file5
+> > +acd58cf3d33ef905e26800a0e049223c  TEST_DIR/test-945/file6
+> > +1b68d203e5a1c1b45a9510bedcd1e126  TEST_DIR/test-945/file7
+> > +9479709b697ced2e3a57c17bc1b97373  TEST_DIR/test-945/file8
+> > +Compare files after remount
+> > +c1b46135a2620ae6da21bbfd4cbb3cba  TEST_DIR/test-945/file1
+> > +16f0bc0f97c42d2ad903c519095b8126  TEST_DIR/test-945/file2
+> > +eb71e3135ca2abf33bb9081e2b49a876  TEST_DIR/test-945/file3
+> > +2678dfcb77bed4dc29e19836bef82e5b  TEST_DIR/test-945/file4
+> > +2802d75dbee4f29d62124aa7b473edca  TEST_DIR/test-945/file5
+> > +acd58cf3d33ef905e26800a0e049223c  TEST_DIR/test-945/file6
+> > +1b68d203e5a1c1b45a9510bedcd1e126  TEST_DIR/test-945/file7
+> > +9479709b697ced2e3a57c17bc1b97373  TEST_DIR/test-945/file8
+> > +Check for non-shared extents
+> > diff --git a/tests/generic/group b/tests/generic/group
+> > index 4584667f..f77c5b21 100644
+> > --- a/tests/generic/group
+> > +++ b/tests/generic/group
+> > @@ -576,3 +576,4 @@
+> >  715 dangerous_norepair
+> >  716 dangerous_norepair
+> >  720 dangerous_norepair
+> > +945 auto quick rw clone
