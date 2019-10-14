@@ -2,160 +2,215 @@ Return-Path: <SRS0=eAkR=YH=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	UNPARSEABLE_RELAY,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
+X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 41AC0ECE587
-	for <linux-fstests@archiver.kernel.org>; Mon, 14 Oct 2019 16:41:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 87549C4CECE
+	for <linux-fstests@archiver.kernel.org>; Mon, 14 Oct 2019 22:06:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 1B71320663
-	for <linux-fstests@archiver.kernel.org>; Mon, 14 Oct 2019 16:41:13 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="o5ZNDeV2"
+	by mail.kernel.org (Postfix) with ESMTP id 5780721882
+	for <linux-fstests@archiver.kernel.org>; Mon, 14 Oct 2019 22:06:42 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1571090802;
+	bh=6ZSRWDRTAQJMgAGTx2YsjUObOmwBsJD3GxlEsVboQGk=;
+	h=From:To:Cc:Subject:Date:List-ID:From;
+	b=N6lNC5GM0HB1WnZS6e7qS080ghYfhz+4m4Q+oVAuGMv7IKYhEqd0s1lDQ4m2C1SsC
+	 Jk+zABxKaZPHxjerSEJaOScYl7Y6wSf7fZCV56Z5Vb+cjBesGTnc7p17Zi0yG2vYCA
+	 b2DG1fDCG6fOdUfXjidlk3ThA3sCoOiaPLEXKXFM=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730497AbfJNQlM (ORCPT
+        id S1730997AbfJNWGm (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 14 Oct 2019 12:41:12 -0400
-Received: from aserp2120.oracle.com ([141.146.126.78]:38442 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727038AbfJNQlM (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 14 Oct 2019 12:41:12 -0400
-Received: from pps.filterd (aserp2120.oracle.com [127.0.0.1])
-        by aserp2120.oracle.com (8.16.0.27/8.16.0.27) with SMTP id x9EGOhkt185212;
-        Mon, 14 Oct 2019 16:41:08 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
- : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=corp-2019-08-05;
- bh=x4h2TXk0qaY84wiLThxLg2G4gdCdL0LYozyi9D4RkwQ=;
- b=o5ZNDeV2YnsjqmaoudYfjq99Zmu0Ns95GgobDEjkDviDbETWZaZi5kyqXwIcVlXQyVt+
- wmk8pdls8CKOVxpvznNSEm6TPH/RuNckxRP+6R9BsTxiUSlAUF+b02mOxGbAvDH9fDRp
- hnu8yJONxxkcrpai2fG7ERqieVnwaak+H+Ilxgl2tj3ubKDWbxu+vKiIxSfK7QZQdvSq
- u9zPz2/m5sVT3eIIUxJ/h4sslyYgJyc1Bvn8h9m8JVuymhXd92aFL53NpOWAFxid352r
- 5//FSj/WZlxOiXwbJrns51dwgd4QRBOhMq+xf+Az7yRWleNOZF/hUsnz9Fhb90M7906c iQ== 
-Received: from aserp3020.oracle.com (aserp3020.oracle.com [141.146.126.70])
-        by aserp2120.oracle.com with ESMTP id 2vk6sqa5c1-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Mon, 14 Oct 2019 16:41:08 +0000
-Received: from pps.filterd (aserp3020.oracle.com [127.0.0.1])
-        by aserp3020.oracle.com (8.16.0.27/8.16.0.27) with SMTP id x9EGNZn4151017;
-        Mon, 14 Oct 2019 16:39:07 GMT
-Received: from userv0121.oracle.com (userv0121.oracle.com [156.151.31.72])
-        by aserp3020.oracle.com with ESMTP id 2vkrbk6baj-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Mon, 14 Oct 2019 16:39:07 +0000
-Received: from abhmp0012.oracle.com (abhmp0012.oracle.com [141.146.116.18])
-        by userv0121.oracle.com (8.14.4/8.13.8) with ESMTP id x9EGd6a0012344;
-        Mon, 14 Oct 2019 16:39:06 GMT
-Received: from localhost (/67.169.218.210)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Mon, 14 Oct 2019 16:39:05 +0000
-Date:   Mon, 14 Oct 2019 09:39:04 -0700
-From:   "Darrick J. Wong" <darrick.wong@oracle.com>
-To:     Yang Xu <xuyang2018.jy@cn.fujitsu.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] xfs/097: Remove wrong broken assignment operation
-Message-ID: <20191014163904.GF26541@magnolia>
-References: <1570432515-13184-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
- <20191007151244.GC13097@magnolia>
- <56deacb8-1d4a-193c-f41c-469c78d97315@cn.fujitsu.com>
+        Mon, 14 Oct 2019 18:06:42 -0400
+Received: from mail.kernel.org ([198.145.29.99]:38458 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1730859AbfJNWGl (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 14 Oct 2019 18:06:41 -0400
+Received: from ebiggers-linuxstation.mtv.corp.google.com (unknown [104.132.1.77])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 8289D21721;
+        Mon, 14 Oct 2019 22:06:40 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1571090800;
+        bh=6ZSRWDRTAQJMgAGTx2YsjUObOmwBsJD3GxlEsVboQGk=;
+        h=From:To:Cc:Subject:Date:From;
+        b=cM22FCSLONOFGHpWRDyFP/nsKcFW1Qv4UwBbCYqINEVl4r/QI3MQsvfUOj9y8CUdB
+         zZKKSra2v+HbYyUWJEx7QZcBXvdveCmt4jMALlrEFjXygjzofwszbCS7i6WFU24jwq
+         n9pCV9c9GIoAn1nihQLGH6ChzmYTyt1kLOhD9/w4=
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     fstests@vger.kernel.org
+Cc:     linux-fscrypt@vger.kernel.org, Theodore Ts'o <tytso@mit.edu>,
+        Jaegeuk Kim <jaegeuk@kernel.org>,
+        Victor Hsieh <victorhsieh@google.com>
+Subject: [PATCH] generic: add an fs-verity stress test
+Date:   Mon, 14 Oct 2019 15:05:21 -0700
+Message-Id: <20191014220521.15458-1-ebiggers@kernel.org>
+X-Mailer: git-send-email 2.23.0.700.g56cf767bdb-goog
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <56deacb8-1d4a-193c-f41c-469c78d97315@cn.fujitsu.com>
-User-Agent: Mutt/1.9.4 (2018-02-28)
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9410 signatures=668684
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=0 malwarescore=0
- phishscore=0 bulkscore=0 spamscore=0 mlxscore=0 mlxlogscore=999
- adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.0.1-1908290000 definitions=main-1910140142
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9410 signatures=668684
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 priorityscore=1501 malwarescore=0
- suspectscore=0 phishscore=0 bulkscore=0 spamscore=0 clxscore=1015
- lowpriorityscore=0 mlxscore=0 impostorscore=0 mlxlogscore=999 adultscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.0.1-1908290000
- definitions=main-1910140142
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Oct 08, 2019 at 10:39:59AM +0800, Yang Xu wrote:
-> 
-> 
-> on 2019/10/07 23:12, Darrick J. Wong wrote:
-> > On Mon, Oct 07, 2019 at 03:15:15PM +0800, Yang Xu wrote:
-> > > On old kernel, since commit ded188b8609 ("xfs: Fix the situation that mount
-> > > operation rejects corrupted XFS") running this case got the mismatched output,
-> > > as below:
-> > 
-> > But why did the output mismatch?  Did the fs heal itself?  Did
-> > allocating 5 more files somehow avoid touching the finobt?  Is the
-> > assignment logic in the loop broken?
-> 
-> The output mismatch because on old kernel, we can mount the corrupted xfs
-> and touch action will be refused. so broken is equal to 0.
-> The fs doesn't heal ifself.
-> allocating 5 more file will touch the finobt.
-> 
-> You can see this url
-> https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/commit/?id=ded188b86096e2845e59dedae6050c7f254a96b
-> 
-> eg xfs/087, they all delete "broken=0" before allocationg 5 more file.
-> commit ded188b86 compatibled old kernel(permit mount and refuse touch) and
-> new kernel(refuse mount) behavior on corrupted xfs.  Or, I misunderstand
-> this case?
+From: Eric Biggers <ebiggers@google.com>
 
-How old is the kernel?  At some point (4.10, I think?) we added a patch
-to reserve metadata blocks for future free inode btree expansion.  That
-required us to count the blocks in the finobt, at which point xfs/097's
-behavior changed such that the fs doesn't mount after the test corrupts
-the finobt.
+Add a stress test for fs-verity.  This tests enabling fs-verity on
+multiple files concurrently with concurrent readers on those files (with
+reads occurring before, during, and after the fs-verity enablement),
+while fsstress is also running on the same filesystem.
 
---D
+I haven't seen any failures from running this on ext4 and f2fs.
 
-> > 
-> > --D
-> > 
-> > > -----------------------------------
-> > >   + check fs
-> > >   + corrupt image
-> > >   + mount image && modify files
-> > > -broken: 1
-> > > +broken: 0
-> > >   + repair fs
-> > >   + mount image (2)
-> > > ------------------------------------
-> > > 
-> > > It fails because the broken is always equal to 0 when _try_scratch_mount
-> > > succeed. So remove this wrong assignment operation.
-> > > 
-> > > Signed-off-by: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
-> > > ---
-> > >   tests/xfs/097 | 2 --
-> > >   1 file changed, 2 deletions(-)
-> > > 
-> > > diff --git a/tests/xfs/097 b/tests/xfs/097
-> > > index 1cb7d69c..20791738 100755
-> > > --- a/tests/xfs/097
-> > > +++ b/tests/xfs/097
-> > > @@ -81,8 +81,6 @@ done
-> > >   echo "+ mount image && modify files"
-> > >   broken=1
-> > >   if _try_scratch_mount >> $seqres.full 2>&1; then
-> > > -
-> > > -	broken=0
-> > >   	for x in `seq 65 70`; do
-> > >   		touch "${TESTFILE}.${x}" 2> /dev/null && broken=0
-> > >   	done
-> > > -- 
-> > > 2.18.1
-> > > 
-> > > 
-> > > 
-> > 
-> > 
-> 
-> 
+Signed-off-by: Eric Biggers <ebiggers@google.com>
+---
+ tests/generic/906     | 115 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/906.out |   2 +
+ tests/generic/group   |   1 +
+ 3 files changed, 118 insertions(+)
+ create mode 100755 tests/generic/906
+ create mode 100644 tests/generic/906.out
+
+diff --git a/tests/generic/906 b/tests/generic/906
+new file mode 100755
+index 00000000..78796487
+--- /dev/null
++++ b/tests/generic/906
+@@ -0,0 +1,115 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright 2019 Google LLC
++#
++# FS QA Test generic/906
++#
++# Stress test for fs-verity.  This tests enabling fs-verity on multiple files
++# concurrently with concurrent readers on those files (with reads occurring
++# before, during, and after the fs-verity enablement), while fsstress is also
++# running on the same filesystem.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	# Stop all subprocesses.
++	$KILLALL_PROG -q $FSSTRESS_PROG
++	touch $tmp.done
++	wait
++
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/verity
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_scratch_verity
++_require_command "$KILLALL_PROG" killall
++
++_scratch_mkfs_verity &>> $seqres.full
++_scratch_mount
++
++fsv_file_size=10000000
++nproc_enabler=$((4 * LOAD_FACTOR))
++nproc_reader=$((6 * LOAD_FACTOR))
++nproc_stress=$((3 * LOAD_FACTOR))
++runtime=$((20 * TIME_FACTOR))
++
++# Create the test files and start the fs-verity enabler processes.
++for ((proc = 0; proc < nproc_enabler; proc++)); do
++	orig_file=$SCRATCH_MNT/orig$proc
++	fsv_file=$SCRATCH_MNT/fsv$proc
++	head -c $fsv_file_size /dev/urandom > $orig_file
++	(
++		while [ ! -e $tmp.done ]; do
++			rm -f $fsv_file
++			cp $orig_file $fsv_file
++			_fsv_enable $fsv_file
++			# Give the readers some time to read from the file.
++			sleep 0.$((RANDOM % 100))
++		done
++	) &
++done
++
++# Start the reader processes.
++for ((proc = 0; proc < nproc_reader; proc++)); do
++	(
++		while [ ! -e $tmp.done ]; do
++			# Choose a random file for each iteration, so that
++			# sometimes multiple processes read from the same file.
++			i=$((RANDOM % nproc_enabler))
++			orig_file=$SCRATCH_MNT/orig$i
++			fsv_file=$SCRATCH_MNT/fsv$i
++
++			# After the copy from $orig_file to $fsv_file has
++			# completed, the contents of these two files should
++			# match, regardless of whether verity has been enabled
++			# or not yet (or is currently being enabled).
++			cmp $orig_file $fsv_file |& _filter_scratch | \
++				grep -v "SCRATCH_MNT/fsv$i: No such file or directory" | \
++				grep -v "EOF on SCRATCH_MNT/fsv$i"
++
++			_fsv_measure $fsv_file 2>&1 >/dev/null | \
++				grep -v "No such file or directory" | \
++				grep -v "No data available"
++		done
++	) &
++done
++
++# Start a process that occasionally runs 'sync && drop_caches'.  This makes more
++# reads go through fs-verity for real, rather than just returning pagecache.
++(
++	while [ ! -e $tmp.done ]; do
++		sleep 2.$((RANDOM % 100))
++		sync && echo 3 > /proc/sys/vm/drop_caches
++	done
++) &
++
++# Start the fsstress processes.
++$FSSTRESS_PROG $FSSTRESS_AVOID -p $nproc_stress -l 0 -d $SCRATCH_MNT/stressdir \
++	>> $seqres.full 2>&1 &
++
++# Run for a while.
++sleep $runtime
++
++echo "Silence is golden"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/906.out b/tests/generic/906.out
+new file mode 100644
+index 00000000..94ee4185
+--- /dev/null
++++ b/tests/generic/906.out
+@@ -0,0 +1,2 @@
++QA output created by 906
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index 6f9c4e12..d55d0eea 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -581,3 +581,4 @@
+ 576 auto quick verity encrypt
+ 577 auto quick verity
+ 578 auto quick rw clone
++906 auto stress verity
+-- 
+2.23.0.700.g56cf767bdb-goog
+
