@@ -7,44 +7,44 @@ X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 095A4ECE588
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 59607C10F14
 	for <linux-fstests@archiver.kernel.org>; Tue, 15 Oct 2019 18:25:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id D5C9020854
-	for <linux-fstests@archiver.kernel.org>; Tue, 15 Oct 2019 18:25:56 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 35C2C2084B
+	for <linux-fstests@archiver.kernel.org>; Tue, 15 Oct 2019 18:25:57 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1571163956;
-	bh=/hpTM+O+Z8VWmjP8yz15AC0xcLB2kV1VFiz+xCRpXPo=;
+	s=default; t=1571163957;
+	bh=ZPCr5yAug8CbLSs+7CjUY/YdR3nLwh5sWzDXxrkNqno=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=ircLUpx55Bthz+TL5SnJ68ohWQ/2643iKgRTRXphbHtuygsXu1qyjx6zBmI81HgUe
-	 NRFm2z7345Ygixc97XWWVRsGDxSl6uRLaZEwm3dYeyNQjWqc7QAqv2kxMD8iKERxgv
-	 kpADxLjuQ27xbqP0LvuOoFZuMEsP/+9RZFcdG2vc=
+	b=o0va75fCvJ9WuWEokIcAqgB7rhV3QiF+bJclAgxEhTeS+DntF2lBiYuxAmtOhMbaR
+	 V4/KfC/NWr2/0/HSHBAdZeUqWV0hFHOyVuLyTC95cm2+CQPyynNmRifc4GhZdwmw2P
+	 1HaFA4DwHX2CJrf03vXhc/W5WAN1/aBg5sM/30CA=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2389010AbfJOSZ4 (ORCPT
+        id S2389036AbfJOSZ4 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
         Tue, 15 Oct 2019 14:25:56 -0400
-Received: from mail.kernel.org ([198.145.29.99]:44080 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.99]:44082 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726144AbfJOSZ4 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        id S1730002AbfJOSZ4 (ORCPT <rfc822;fstests@vger.kernel.org>);
         Tue, 15 Oct 2019 14:25:56 -0400
 Received: from ebiggers-linuxstation.mtv.corp.google.com (unknown [104.132.1.77])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 1AA95222D0;
-        Tue, 15 Oct 2019 18:17:24 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 2C37A222C6;
+        Tue, 15 Oct 2019 18:17:23 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1571163444;
-        bh=/hpTM+O+Z8VWmjP8yz15AC0xcLB2kV1VFiz+xCRpXPo=;
+        s=default; t=1571163443;
+        bh=ZPCr5yAug8CbLSs+7CjUY/YdR3nLwh5sWzDXxrkNqno=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=FKtEYthJ/koUQIvoK5+629MmU9J+Zq3u13QdkUoQjJbkaVYzvE0wtEzSgX4hDPebv
-         PqNkshdEnZMq0ZU30/5t7uQK/J8J8rTRA9QQpqDu57D2uThZhFgej4HmbNw8312tKd
-         2+YnuyVnTjhY0K+zFoSeXBE6ZknykRcUiiC+5d18=
+        b=hRgAzMkE7IQVu4Sk7ibY+n82MvRm2L+odbY0k5O38x/T889JyQbJLL1ZBvVwCNDpR
+         uXnUST/ReDmZma2hNA/JFVBSU0oQBogYU1/IrTP5GeSNrANghh1HpDhVmhzLKzFJSb
+         j24IfIYr2M/Wdc0M7FQjjQagP9f4jZKXgvGzsKpg=
 From:   Eric Biggers <ebiggers@kernel.org>
 To:     fstests@vger.kernel.org
 Cc:     linux-fscrypt@vger.kernel.org
-Subject: [PATCH v3 7/9] generic: verify ciphertext of v2 encryption policies with AES-256
-Date:   Tue, 15 Oct 2019 11:16:41 -0700
-Message-Id: <20191015181643.6519-8-ebiggers@kernel.org>
+Subject: [PATCH v3 3/9] common/encrypt: support checking for v2 encryption policy support
+Date:   Tue, 15 Oct 2019 11:16:37 -0700
+Message-Id: <20191015181643.6519-4-ebiggers@kernel.org>
 X-Mailer: git-send-email 2.23.0.700.g56cf767bdb-goog
 In-Reply-To: <20191015181643.6519-1-ebiggers@kernel.org>
 References: <20191015181643.6519-1-ebiggers@kernel.org>
@@ -57,88 +57,99 @@ X-Mailing-List: fstests@vger.kernel.org
 
 From: Eric Biggers <ebiggers@google.com>
 
-Verify ciphertext for v2 encryption policies that use AES-256-XTS to
-encrypt file contents and AES-256-CTS-CBC to encrypt file names.
+Allow passing '-v 2' to _require_scratch_encryption() to check for v2
+encryption policy support on the scratch device, and for xfs_io support
+for setting and getting v2 encryption policies.
 
 Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- tests/generic/802     | 43 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/802.out |  6 ++++++
- tests/generic/group   |  1 +
- 3 files changed, 50 insertions(+)
- create mode 100755 tests/generic/802
- create mode 100644 tests/generic/802.out
+ common/encrypt | 42 +++++++++++++++++++++++++++++++++---------
+ 1 file changed, 33 insertions(+), 9 deletions(-)
 
-diff --git a/tests/generic/802 b/tests/generic/802
-new file mode 100755
-index 00000000..457260b2
---- /dev/null
-+++ b/tests/generic/802
-@@ -0,0 +1,43 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright 2019 Google LLC
-+#
-+# FS QA Test generic/802
-+#
-+# Verify ciphertext for v2 encryption policies that use AES-256-XTS to encrypt
-+# file contents and AES-256-CTS-CBC to encrypt file names.
-+#
-+# This is the same as generic/548, except using v2 policies.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/encrypt
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+
-+_verify_ciphertext_for_encryption_policy AES-256-XTS AES-256-CTS-CBC v2
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/802.out b/tests/generic/802.out
-new file mode 100644
-index 00000000..c0930809
---- /dev/null
-+++ b/tests/generic/802.out
-@@ -0,0 +1,6 @@
-+QA output created by 802
-+
-+Verifying ciphertext with parameters:
-+	contents_encryption_mode: AES-256-XTS
-+	filenames_encryption_mode: AES-256-CTS-CBC
-+	options: v2
-diff --git a/tests/generic/group b/tests/generic/group
-index 6d1ecf5a..6b6002e1 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -583,3 +583,4 @@
- 578 auto quick rw clone
- 800 auto quick encrypt
- 801 auto quick encrypt
-+802 auto quick encrypt
+diff --git a/common/encrypt b/common/encrypt
+index a086e80f..eec585a0 100644
+--- a/common/encrypt
++++ b/common/encrypt
+@@ -6,12 +6,13 @@
+ 
+ #
+ # _require_scratch_encryption [-c CONTENTS_MODE] [-n FILENAMES_MODE]
++#			      [-v POLICY_VERSION]
+ #
+ # Require encryption support on the scratch device.
+ #
+-# This checks for support for the default type of encryption policy (AES-256-XTS
+-# and AES-256-CTS).  Options can be specified to also require support for a
+-# different type of encryption policy.
++# This checks for support for the default type of encryption policy (v1 with
++# AES-256-XTS and AES-256-CTS).  Options can be specified to also require
++# support for a different type of encryption policy.
+ #
+ _require_scratch_encryption()
+ {
+@@ -68,14 +69,19 @@ _require_encryption_policy_support()
+ 	local mnt=$1
+ 	local dir=$mnt/tmpdir
+ 	local set_encpolicy_args=""
++	local policy_version=1
+ 	local c
+ 
+ 	OPTIND=2
+-	while getopts "c:n:" c; do
++	while getopts "c:n:v:" c; do
+ 		case $c in
+ 		c|n)
+ 			set_encpolicy_args+=" -$c $OPTARG"
+ 			;;
++		v)
++			set_encpolicy_args+=" -$c $OPTARG"
++			policy_version=$OPTARG
++			;;
+ 		*)
+ 			_fail "Unrecognized option '$c'"
+ 			;;
+@@ -87,10 +93,26 @@ _require_encryption_policy_support()
+ 		>> $seqres.full
+ 
+ 	mkdir $dir
+-	_require_command "$KEYCTL_PROG" keyctl
+-	_new_session_keyring
+-	local keydesc=$(_generate_session_encryption_key)
+-	if _set_encpolicy $dir $keydesc $set_encpolicy_args \
++	if (( policy_version > 1 )); then
++		_require_xfs_io_command "get_encpolicy" "-t"
++		local output=$(_get_encpolicy $dir -t)
++		if [ "$output" != "supported" ]; then
++			if [ "$output" = "unsupported" ]; then
++				_notrun "kernel does not support $FSTYP encryption v2 API"
++			fi
++			_fail "Unexpected output from 'get_encpolicy -t': $output"
++		fi
++		# Both the kernel and xfs_io support v2 encryption policies, and
++		# therefore also filesystem-level keys -- since that's the only
++		# way to provide keys for v2 policies.
++		local raw_key=$(_generate_raw_encryption_key)
++		local keyspec=$(_add_enckey $mnt "$raw_key" | awk '{print $NF}')
++	else
++		_require_command "$KEYCTL_PROG" keyctl
++		_new_session_keyring
++		local keyspec=$(_generate_session_encryption_key)
++	fi
++	if _set_encpolicy $dir $keyspec $set_encpolicy_args \
+ 		2>&1 >>$seqres.full | egrep -q 'Invalid argument'; then
+ 		_notrun "kernel does not support encryption policy: '$set_encpolicy_args'"
+ 	fi
+@@ -103,7 +125,9 @@ _require_encryption_policy_support()
+ 	if ! echo foo > $dir/file; then
+ 		_notrun "encryption policy '$set_encpolicy_args' is unusable; probably missing kernel crypto API support"
+ 	fi
+-	$KEYCTL_PROG clear @s
++	if (( policy_version <= 1 )); then
++		$KEYCTL_PROG clear @s
++	fi
+ 	rm -r $dir
+ }
+ 
 -- 
 2.23.0.700.g56cf767bdb-goog
 
