@@ -4,111 +4,279 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 936FDECE588
-	for <linux-fstests@archiver.kernel.org>; Tue, 15 Oct 2019 10:16:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 47AD6C10F14
+	for <linux-fstests@archiver.kernel.org>; Tue, 15 Oct 2019 10:51:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 6D9CF217F9
-	for <linux-fstests@archiver.kernel.org>; Tue, 15 Oct 2019 10:16:04 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 192AB2089C
+	for <linux-fstests@archiver.kernel.org>; Tue, 15 Oct 2019 10:51:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725820AbfJOKQE (ORCPT
+        id S1727304AbfJOKvw (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 15 Oct 2019 06:16:04 -0400
-Received: from szxga04-in.huawei.com ([45.249.212.190]:3720 "EHLO huawei.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1725769AbfJOKQD (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 15 Oct 2019 06:16:03 -0400
-Received: from DGGEMS411-HUB.china.huawei.com (unknown [172.30.72.58])
-        by Forcepoint Email with ESMTP id 91664438C1179D91CE27;
-        Tue, 15 Oct 2019 18:16:02 +0800 (CST)
-Received: from [10.134.22.195] (10.134.22.195) by smtp.huawei.com
- (10.3.19.211) with Microsoft SMTP Server (TLS) id 14.3.439.0; Tue, 15 Oct
- 2019 18:15:58 +0800
-Subject: Re: [PATCH v2 1/2] common/defrag: support f2fs
-CC:     <guaneryu@gmail.com>, <fstests@vger.kernel.org>,
-        <linux-f2fs-devel@lists.sourceforge.net>
-References: <20191015100938.123519-1-yuchao0@huawei.com>
-To:     Jaegeuk Kim <jaegeuk@kernel.org>
-From:   Chao Yu <yuchao0@huawei.com>
-Message-ID: <22384b38-7334-ec2c-0bfc-5af14436b374@huawei.com>
-Date:   Tue, 15 Oct 2019 18:15:59 +0800
-User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:52.0) Gecko/20100101
- Thunderbird/52.9.1
+        Tue, 15 Oct 2019 06:51:52 -0400
+Received: from mx1.redhat.com ([209.132.183.28]:33138 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726906AbfJOKvw (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 15 Oct 2019 06:51:52 -0400
+Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 860AAC055673;
+        Tue, 15 Oct 2019 10:51:51 +0000 (UTC)
+Received: from bfoster (dhcp-41-2.bos.redhat.com [10.18.41.2])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id 90BD5605A6;
+        Tue, 15 Oct 2019 10:51:50 +0000 (UTC)
+Date:   Tue, 15 Oct 2019 06:51:48 -0400
+From:   Brian Foster <bfoster@redhat.com>
+To:     kaixuxia <xiakaixu1987@gmail.com>
+Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
+        Eryu Guan <guaneryu@gmail.com>, newtongao@tencent.com,
+        jasperwang@tencent.com
+Subject: Re: [PATCH] fsstress: add renameat2 support
+Message-ID: <20191015105148.GA18607@bfoster>
+References: <09bd0206-7460-a18f-990b-391fd1d2b361@gmail.com>
+ <9b36578b-00da-2621-8fae-2359fe751a67@gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <20191015100938.123519-1-yuchao0@huawei.com>
-Content-Type: text/plain; charset="windows-1252"
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.134.22.195]
-X-CFilter-Loop: Reflected
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <9b36578b-00da-2621-8fae-2359fe751a67@gmail.com>
+User-Agent: Mutt/1.12.1 (2019-06-15)
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.11
+X-Greylist: Sender IP whitelisted, not delayed by milter-greylist-4.5.16 (mx1.redhat.com [10.5.110.32]); Tue, 15 Oct 2019 10:51:51 +0000 (UTC)
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Jaegeuk, do you have time to check these two patches which are trying to adjust
-defrag/casefold testcase for f2fs?
+On Tue, Oct 15, 2019 at 10:34:31AM +0800, kaixuxia wrote:
+> According to the comments, after adding this fsstress renameat2 support,
+> the deadlock between the AGI and AGF with RENAME_WHITEOUT can be reproduced
+> by using customized parameters(limited to rename_whiteout and creates). If
+> this patch is okay, I will send the fsstress test patch. 
+> So, Eryu, Brian, comments? 
+> 
 
-On 2019/10/15 18:09, Chao Yu wrote:
-> F2FS supports defragment based on file granularity, adjust test suit
-> to support f2fs.
+I still need to take a closer look at the patch, but are you saying you
+have reproduced the deadlock using fsstress with this patch? Does
+it reproduce reliably and within a reasonable amount of time? If so, I
+think it's probably a good idea to post a test along with this patch so
+we can test it..
+
+Brian
+
+> On 2019/10/11 15:56, kaixuxia wrote:
+> > Support the renameat2 syscall in fsstress.
+> > 
+> > Signed-off-by: kaixuxia <kaixuxia@tencent.com>
+> > ---
+> >  ltp/fsstress.c | 90 +++++++++++++++++++++++++++++++++++++++++++++++++++-------
+> >  1 file changed, 79 insertions(+), 11 deletions(-)
+> > 
+> > diff --git a/ltp/fsstress.c b/ltp/fsstress.c
+> > index 51976f5..21529a2 100644
+> > --- a/ltp/fsstress.c
+> > +++ b/ltp/fsstress.c
+> > @@ -44,6 +44,16 @@ io_context_t	io_ctx;
+> >  #define IOV_MAX 1024
+> >  #endif
+> >  
+> > +#ifndef RENAME_NOREPLACE
+> > +#define RENAME_NOREPLACE	(1 << 0)	/* Don't overwrite target */
+> > +#endif
+> > +#ifndef RENAME_EXCHANGE
+> > +#define RENAME_EXCHANGE		(1 << 1)	/* Exchange source and dest */
+> > +#endif
+> > +#ifndef RENAME_WHITEOUT
+> > +#define RENAME_WHITEOUT		(1 << 2)	/* Whiteout source */
+> > +#endif
+> > +
+> >  #define FILELEN_MAX		(32*4096)
+> >  
+> >  typedef enum {
+> > @@ -85,6 +95,9 @@ typedef enum {
+> >  	OP_READV,
+> >  	OP_REMOVEFATTR,
+> >  	OP_RENAME,
+> > +	OP_RNOREPLACE,
+> > +	OP_REXCHANGE,
+> > +	OP_RWHITEOUT,
+> >  	OP_RESVSP,
+> >  	OP_RMDIR,
+> >  	OP_SETATTR,
+> > @@ -203,6 +216,9 @@ void	readlink_f(int, long);
+> >  void	readv_f(int, long);
+> >  void	removefattr_f(int, long);
+> >  void	rename_f(int, long);
+> > +void    rnoreplace_f(int, long);
+> > +void    rexchange_f(int, long);
+> > +void    rwhiteout_f(int, long);
+> >  void	resvsp_f(int, long);
+> >  void	rmdir_f(int, long);
+> >  void	setattr_f(int, long);
+> > @@ -262,6 +278,9 @@ opdesc_t	ops[] = {
+> >  	/* remove (delete) extended attribute */
+> >  	{ OP_REMOVEFATTR, "removefattr", removefattr_f, 1, 1 },
+> >  	{ OP_RENAME, "rename", rename_f, 2, 1 },
+> > +	{ OP_RNOREPLACE, "rnoreplace", rnoreplace_f, 2, 1 },
+> > +	{ OP_REXCHANGE, "rexchange", rexchange_f, 2, 1 },
+> > +	{ OP_RWHITEOUT, "rwhiteout", rwhiteout_f, 2, 1 },
+> >  	{ OP_RESVSP, "resvsp", resvsp_f, 1, 1 },
+> >  	{ OP_RMDIR, "rmdir", rmdir_f, 1, 1 },
+> >  	/* set attribute flag (FS_IOC_SETFLAGS ioctl) */
+> > @@ -354,7 +373,7 @@ int	open_path(pathname_t *, int);
+> >  DIR	*opendir_path(pathname_t *);
+> >  void	process_freq(char *);
+> >  int	readlink_path(pathname_t *, char *, size_t);
+> > -int	rename_path(pathname_t *, pathname_t *);
+> > +int	rename_path(pathname_t *, pathname_t *, int);
+> >  int	rmdir_path(pathname_t *);
+> >  void	separate_pathname(pathname_t *, char *, pathname_t *);
+> >  void	show_ops(int, char *);
+> > @@ -1519,7 +1538,7 @@ readlink_path(pathname_t *name, char *lbuf, size_t lbufsiz)
+> >  }
+> >  
+> >  int
+> > -rename_path(pathname_t *name1, pathname_t *name2)
+> > +rename_path(pathname_t *name1, pathname_t *name2, int mode)
+> >  {
+> >  	char		buf1[NAME_MAX + 1];
+> >  	char		buf2[NAME_MAX + 1];
+> > @@ -1528,14 +1547,14 @@ rename_path(pathname_t *name1, pathname_t *name2)
+> >  	pathname_t	newname2;
+> >  	int		rval;
+> >  
+> > -	rval = rename(name1->path, name2->path);
+> > +	rval = syscall(__NR_renameat2, AT_FDCWD, name1->path, AT_FDCWD, name2->path, mode);
+> >  	if (rval >= 0 || errno != ENAMETOOLONG)
+> >  		return rval;
+> >  	separate_pathname(name1, buf1, &newname1);
+> >  	separate_pathname(name2, buf2, &newname2);
+> >  	if (strcmp(buf1, buf2) == 0) {
+> >  		if (chdir(buf1) == 0) {
+> > -			rval = rename_path(&newname1, &newname2);
+> > +			rval = rename_path(&newname1, &newname2, mode);
+> >  			assert(chdir("..") == 0);
+> >  		}
+> >  	} else {
+> > @@ -1555,7 +1574,7 @@ rename_path(pathname_t *name1, pathname_t *name2)
+> >  			append_pathname(&newname2, "../");
+> >  			append_pathname(&newname2, name2->path);
+> >  			if (chdir(buf1) == 0) {
+> > -				rval = rename_path(&newname1, &newname2);
+> > +				rval = rename_path(&newname1, &newname2, mode);
+> >  				assert(chdir("..") == 0);
+> >  			}
+> >  		} else {
+> > @@ -1563,7 +1582,7 @@ rename_path(pathname_t *name1, pathname_t *name2)
+> >  			append_pathname(&newname1, "../");
+> >  			append_pathname(&newname1, name1->path);
+> >  			if (chdir(buf2) == 0) {
+> > -				rval = rename_path(&newname1, &newname2);
+> > +				rval = rename_path(&newname1, &newname2, mode);
+> >  				assert(chdir("..") == 0);
+> >  			}
+> >  		}
+> > @@ -4215,8 +4234,18 @@ out:
+> >  	free_pathname(&f);
+> >  }
+> >  
+> > +struct print_flags renameat2_flags [] = {
+> > +	{ RENAME_NOREPLACE, "NOREPLACE"},
+> > +	{ RENAME_EXCHANGE, "EXCHANGE"},
+> > +	{ RENAME_WHITEOUT, "WHITEOUT"},
+> > +	{ -1, NULL}
+> > +};
+> > +
+> > +#define translate_renameat2_flags(mode)	\
+> > +	({translate_flags(mode, "|", renameat2_flags);})
+> > +
+> >  void
+> > -rename_f(int opno, long r)
+> > +do_renameat2(int opno, long r, int mode)
+> >  {
+> >  	fent_t		*dfep;
+> >  	int		e;
+> > @@ -4229,6 +4258,7 @@ rename_f(int opno, long r)
+> >  	int		parid;
+> >  	int		v;
+> >  	int		v1;
+> > +	int		fd;
+> >  
+> >  	/* get an existing path for the source of the rename */
+> >  	init_pathname(&f);
+> > @@ -4260,7 +4290,21 @@ rename_f(int opno, long r)
+> >  		free_pathname(&f);
+> >  		return;
+> >  	}
+> > -	e = rename_path(&f, &newf) < 0 ? errno : 0;
+> > +	/* Both pathnames must exist for the RENAME_EXCHANGE */
+> > +	if (mode == RENAME_EXCHANGE) {
+> > +		fd = creat_path(&newf, 0666);
+> > +		e = fd < 0 ? errno : 0;
+> > +		check_cwd();
+> > +		if (fd < 0) {
+> > +			if (v)
+> > +				printf("%d/%d: renameat2 - creat %s failed %d\n",
+> > +					procid, opno, newf.path, e);
+> > +			free_pathname(&newf);
+> > +			free_pathname(&f);
+> > +			return;
+> > +		}
+> > +	}
+> > +	e = rename_path(&f, &newf, mode) < 0 ? errno : 0;
+> >  	check_cwd();
+> >  	if (e == 0) {
+> >  		int xattr_counter = fep->xattr_counter;
+> > @@ -4273,12 +4317,13 @@ rename_f(int opno, long r)
+> >  		add_to_flist(flp - flist, id, parid, xattr_counter);
+> >  	}
+> >  	if (v) {
+> > -		printf("%d/%d: rename %s to %s %d\n", procid, opno, f.path,
+> > +		printf("%d/%d: rename(%s) %s to %s %d\n", procid,
+> > +			opno, translate_renameat2_flags(mode), f.path,
+> >  			newf.path, e);
+> >  		if (e == 0) {
+> > -			printf("%d/%d: rename del entry: id=%d,parent=%d\n",
+> > +			printf("%d/%d: rename source entry: id=%d,parent=%d\n",
+> >  				procid, opno, fep->id, fep->parent);
+> > -			printf("%d/%d: rename add entry: id=%d,parent=%d\n",
+> > +			printf("%d/%d: rename target entry: id=%d,parent=%d\n",
+> >  				procid, opno, id, parid);
+> >  		}
+> >  	}
+> > @@ -4287,6 +4332,29 @@ rename_f(int opno, long r)
+> >  }
+> >  
+> >  void
+> > +rename_f(int opno, long r)
+> > +{
+> > +	do_renameat2(opno, r, 0);
+> > +}
+> > +void
+> > +rnoreplace_f(int opno, long r)
+> > +{
+> > +	do_renameat2(opno, r, RENAME_NOREPLACE);
+> > +}
+> > +
+> > +void
+> > +rexchange_f(int opno, long r)
+> > +{
+> > +	do_renameat2(opno, r, RENAME_EXCHANGE);
+> > +}
+> > +
+> > +void
+> > +rwhiteout_f(int opno, long r)
+> > +{
+> > +	do_renameat2(opno, r, RENAME_WHITEOUT);
+> > +}
+> > +
+> > +void
+> >  resvsp_f(int opno, long r)
+> >  {
+> >  	int		e;
+> > 
 > 
-> Signed-off-by: Chao Yu <yuchao0@huawei.com>
-> ---
-> v2:
-> - use local variable in function
->  common/config |  2 ++
->  common/defrag | 11 ++++++++++-
->  2 files changed, 12 insertions(+), 1 deletion(-)
-> 
-> diff --git a/common/config b/common/config
-> index a0d58bde..22592cec 100644
-> --- a/common/config
-> +++ b/common/config
-> @@ -176,6 +176,7 @@ export XFS_COPY_PROG="$(type -P xfs_copy)"
->  export FSTRIM_PROG="$(type -P fstrim)"
->  export DUMPE2FS_PROG="$(type -P dumpe2fs)"
->  export RESIZE2FS_PROG="$(type -P resize2fs)"
-> +export F2FS_IO_PROG="$(type -P f2fs_io)"
->  export FIO_PROG="$(type -P fio)"
->  export FILEFRAG_PROG="$(type -P filefrag)"
->  export E4DEFRAG_PROG="$(type -P e4defrag)"
-> @@ -242,6 +243,7 @@ case "$HOSTOS" in
->  	export MKFS_BTRFS_PROG=$(set_mkfs_prog_path_with_opts btrfs)
->  	export MKFS_F2FS_PROG=$(set_mkfs_prog_path_with_opts f2fs)
->  	export DUMP_F2FS_PROG=$(type -P dump.f2fs)
-> +	export F2FS_IO_PROG=$(type -P f2fs_io)
->  	export BTRFS_UTIL_PROG=$(type -P btrfs)
->  	export BTRFS_SHOW_SUPER_PROG=$(type -P btrfs-show-super)
->  	export BTRFS_CONVERT_PROG=$(type -P btrfs-convert)
-> diff --git a/common/defrag b/common/defrag
-> index 2bd739c0..1381a4dd 100644
-> --- a/common/defrag
-> +++ b/common/defrag
-> @@ -27,6 +27,9 @@ _require_defrag()
->  	rm -f $testfile $donorfile 2>&1 > /dev/null
->  	DEFRAG_PROG="$E4DEFRAG_PROG"
->  	;;
-> +    f2fs)
-> +	DEFRAG_PROG="$F2FS_IO_PROG defrag_file"
-> +	;;
->      btrfs)
->  	DEFRAG_PROG="$BTRFS_UTIL_PROG filesystem defragment"
->  	;;
-> @@ -140,7 +143,13 @@ _defrag()
->  
->  	[ ! -z $csum ] && CSUM_BEFORE=`md5sum $1`
->  	STAT_BEFORE=`stat -c "a: %x m: %y c: %z" $1`
-> -	$DEFRAG_PROG -v $1 >> $seqres.full 2>&1
-> +
-> +	if [ $FSTYP == "f2fs" ]; then
-> +		local filesize=`ls -l $1 | $AWK_PROG '{print $5}'`
-> +		$DEFRAG_PROG 0 $filesize $1 >> $seqres.full 2>&1
-> +	else
-> +		$DEFRAG_PROG -v $1 >> $seqres.full 2>&1
-> +	fi
->  
->  	_scratch_cycle_mount
->  	STAT_AFTER=`stat -c "a: %x m: %y c: %z" $1`
-> 
+> -- 
+> kaixuxia
