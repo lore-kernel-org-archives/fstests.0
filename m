@@ -2,189 +2,136 @@ Return-Path: <SRS0=6y5p=YI=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F02ECC10F14
-	for <linux-fstests@archiver.kernel.org>; Tue, 15 Oct 2019 08:44:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C63DCECE58E
+	for <linux-fstests@archiver.kernel.org>; Tue, 15 Oct 2019 09:55:16 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id CB6192064B
-	for <linux-fstests@archiver.kernel.org>; Tue, 15 Oct 2019 08:44:02 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A31A220659
+	for <linux-fstests@archiver.kernel.org>; Tue, 15 Oct 2019 09:55:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726959AbfJOIoC (ORCPT
+        id S1727181AbfJOJzQ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 15 Oct 2019 04:44:02 -0400
-Received: from mgwym02.jp.fujitsu.com ([211.128.242.41]:32900 "EHLO
-        mgwym02.jp.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726430AbfJOIoC (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 15 Oct 2019 04:44:02 -0400
-X-Greylist: delayed 673 seconds by postgrey-1.27 at vger.kernel.org; Tue, 15 Oct 2019 04:44:00 EDT
-Received: from yt-mxoi1.gw.nic.fujitsu.com (unknown [192.168.229.67]) by mgwym02.jp.fujitsu.com with smtp
-         id 56ad_202a_8db402eb_8b7a_4d39_98d7_47b333069961;
-        Tue, 15 Oct 2019 17:32:41 +0900
-Received: from m3050.s.css.fujitsu.com (msm.b.css.fujitsu.com [10.134.21.208])
-        by yt-mxoi1.gw.nic.fujitsu.com (Postfix) with ESMTP id 4716DAC00F8
-        for <fstests@vger.kernel.org>; Tue, 15 Oct 2019 17:32:41 +0900 (JST)
-Received: from qi-tx200s7.8.8.8.8 (unknown [10.19.3.106])
-        by m3050.s.css.fujitsu.com (Postfix) with ESMTP id 2315AF1;
-        Tue, 15 Oct 2019 17:32:41 +0900 (JST)
-From:   QI Fuli <qi.fuli@fujitsu.com>
-To:     fstests@vger.kernel.org, virtio-fs@redhat.com
-Cc:     QI Fuli <qi.fuli@fujitsu.com>,
-        "Dr . David Alan Gilbert" <dgilbert@redhat.com>,
-        Misono Tomohiro <misono.tomohiro@fujitsu.com>
-Subject: [PATCH] fstests: Add virtio-fs shared file system support
-Date:   Tue, 15 Oct 2019 17:32:28 +0900
-Message-Id: <20191015083228.13475-1-qi.fuli@fujitsu.com>
-X-Mailer: git-send-email 2.20.1
+        Tue, 15 Oct 2019 05:55:16 -0400
+Received: from szxga04-in.huawei.com ([45.249.212.190]:3718 "EHLO huawei.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1725890AbfJOJzQ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 15 Oct 2019 05:55:16 -0400
+Received: from DGGEMS407-HUB.china.huawei.com (unknown [172.30.72.60])
+        by Forcepoint Email with ESMTP id 4562C3B1048D65315235;
+        Tue, 15 Oct 2019 17:55:14 +0800 (CST)
+Received: from [10.134.22.195] (10.134.22.195) by smtp.huawei.com
+ (10.3.19.207) with Microsoft SMTP Server (TLS) id 14.3.439.0; Tue, 15 Oct
+ 2019 17:55:08 +0800
+Subject: Re: [PATCH 1/2] common/defrag: support f2fs
+To:     Eryu Guan <guaneryu@gmail.com>
+CC:     <fstests@vger.kernel.org>, <linux-f2fs-devel@lists.sourceforge.net>
+References: <20190927100627.9086-1-yuchao0@huawei.com>
+ <20191002105956.GZ2622@desktop>
+From:   Chao Yu <yuchao0@huawei.com>
+Message-ID: <c4a64d7b-de6a-1bb7-102c-4a6ea1a627d6@huawei.com>
+Date:   Tue, 15 Oct 2019 17:55:08 +0800
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:52.0) Gecko/20100101
+ Thunderbird/52.9.1
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-TM-AS-GCONF: 00
+In-Reply-To: <20191002105956.GZ2622@desktop>
+Content-Type: text/plain; charset="windows-1252"
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.134.22.195]
+X-CFilter-Loop: Reflected
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This patch adds support for virtio-fs shared file system that lets
-virtual machines access a directory tree on the host.
+On 2019/10/2 18:59, Eryu Guan wrote:
+> On Fri, Sep 27, 2019 at 06:06:26PM +0800, Chao Yu wrote:
+>> F2FS supports defragment based on file granularity, adjust test suit
+>> to support f2fs.
+>>
+>> Signed-off-by: Chao Yu <yuchao0@huawei.com>
+>> ---
+>>  common/config |  2 ++
+>>  common/defrag | 11 ++++++++++-
+>>  2 files changed, 12 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/common/config b/common/config
+>> index 4c86a492..c43be339 100644
+>> --- a/common/config
+>> +++ b/common/config
+>> @@ -176,6 +176,7 @@ export XFS_COPY_PROG="$(type -P xfs_copy)"
+>>  export FSTRIM_PROG="$(type -P fstrim)"
+>>  export DUMPE2FS_PROG="$(type -P dumpe2fs)"
+>>  export RESIZE2FS_PROG="$(type -P resize2fs)"
+>> +export F2FS_IO_PROG="$(type -P f2fs_io)"
+>>  export FIO_PROG="$(type -P fio)"
+>>  export FILEFRAG_PROG="$(type -P filefrag)"
+>>  export E4DEFRAG_PROG="$(type -P e4defrag)"
+>> @@ -240,6 +241,7 @@ case "$HOSTOS" in
+>>  	export MKFS_BTRFS_PROG=$(set_mkfs_prog_path_with_opts btrfs)
+>>  	export MKFS_F2FS_PROG=$(set_mkfs_prog_path_with_opts f2fs)
+>>  	export DUMP_F2FS_PROG=$(type -P dump.f2fs)
+>> +	export F2FS_IO_PROG=$(type -P f2fs_io)
+>>  	export BTRFS_UTIL_PROG=$(type -P btrfs)
+>>  	export BTRFS_SHOW_SUPER_PROG=$(type -P btrfs-show-super)
+>>  	export BTRFS_CONVERT_PROG=$(type -P btrfs-convert)
+>> diff --git a/common/defrag b/common/defrag
+>> index 2bd739c0..9866d3da 100644
+>> --- a/common/defrag
+>> +++ b/common/defrag
+>> @@ -27,6 +27,9 @@ _require_defrag()
+>>  	rm -f $testfile $donorfile 2>&1 > /dev/null
+>>  	DEFRAG_PROG="$E4DEFRAG_PROG"
+>>  	;;
+>> +    f2fs)
+>> +	DEFRAG_PROG="$F2FS_IO_PROG defrag_file"
+>> +	;;
+>>      btrfs)
+>>  	DEFRAG_PROG="$BTRFS_UTIL_PROG filesystem defragment"
+>>  	;;
+>> @@ -140,7 +143,13 @@ _defrag()
+>>  
+>>  	[ ! -z $csum ] && CSUM_BEFORE=`md5sum $1`
+>>  	STAT_BEFORE=`stat -c "a: %x m: %y c: %z" $1`
+>> -	$DEFRAG_PROG -v $1 >> $seqres.full 2>&1
+>> +
+>> +	if [ $FSTYP == "f2fs" ]; then
+>> +		_filesize=`ls -l $1 | $AWK_PROG '{print $5}'`
 
-To run xfstests on it, first, start virtiofsd daemon in host:
- ./virtiofsd -o vhost_user_socket=/tmp/vhostqemu0 -o source=$DIR0 -o cache=always
- ./virtiofsd -o vhost_user_socket=/tmp/vhostqemu1 -o source=$DIR1 -o cache=always
+Sorry for later reply.
 
-second, launch QEMU with:
- -chardev socket,id=char0,path=/tmp/vhostqemu0
- -device vhost-user-fs-pci,queue-size=1024,chardev=char0,tag=myfs0
- -chardev socket,id=char1,path=/tmp/vhostqemu1
- -device vhost-user-fs-pci,queue-size=1024,chardev=char1,tag=myfs1
- -m 8G
- -object memory-backend-file,id=mem,size=8G,mem-path=/dev/shm,share=on
- -numa node,memdev=mem
+> 
+> Better to declare "filesize" as a local variable here.
+> 
+> 		local filesize=`stat -c %s $1`
 
-then, inside the VM run xfstests with:
- export TEST_DEV=myfs0
- export TEST_DIR=$TESTDIR
- export SCRATCH_DEV=myfs1
- export SCRATCH_MNT=$SCRATCHMNT
- export MOUNT_OPTIONS=""
- export TEST_FS_MOUNT_OPTS=""
+Will update to use below code here:
 
-Cc: Dr. David Alan Gilbert <dgilbert@redhat.com>
-Signed-off-by: Misono Tomohiro <misono.tomohiro@fujitsu.com>
-Signed-off-by: QI Fuli <qi.fuli@fujitsu.com>
----
- check         |  2 ++
- common/config |  4 ++--
- common/rc     | 18 +++++++++++++++---
- 3 files changed, 19 insertions(+), 5 deletions(-)
+local filesize=`ls -l $1 | $AWK_PROG '{print $5}'`
 
-diff --git a/check b/check
-index c7f1dc5e..2e148e57 100755
---- a/check
-+++ b/check
-@@ -56,6 +56,7 @@ check options
-     -glusterfs		test GlusterFS
-     -cifs		test CIFS
-     -9p			test 9p
-+    -virtiofs		test virtiofs
-     -overlay		test overlay
-     -pvfs2		test PVFS2
-     -tmpfs		test TMPFS
-@@ -268,6 +269,7 @@ while [ $# -gt 0 ]; do
- 	-glusterfs)	FSTYP=glusterfs ;;
- 	-cifs)		FSTYP=cifs ;;
- 	-9p)		FSTYP=9p ;;
-+	-virtiofs)	FSTYP=virtiofs ;;
- 	-overlay)	FSTYP=overlay; export OVERLAY=true ;;
- 	-pvfs2)		FSTYP=pvfs2 ;;
- 	-tmpfs)		FSTYP=tmpfs ;;
-diff --git a/common/config b/common/config
-index a0d58bde..2cb0202a 100644
---- a/common/config
-+++ b/common/config
-@@ -480,8 +480,8 @@ _check_device()
- 	fi
- 
- 	case "$FSTYP" in
--	9p|tmpfs)
--		# 9p mount tags are just plain strings, so anything is allowed
-+	9p|tmpfs|virtiofs)
-+		# 9p and virtiofs mount tags are just plain strings, so anything is allowed
- 		# tmpfs doesn't use mount source, ignore
- 		;;
- 	overlay)
-diff --git a/common/rc b/common/rc
-index cfaabf10..3d5c8b23 100644
---- a/common/rc
-+++ b/common/rc
-@@ -603,6 +603,9 @@ _test_mkfs()
-     9p)
- 	# do nothing for 9p
- 	;;
-+    virtiofs)
-+	# do nothing for virtiofs
-+	;;
-     ceph)
- 	# do nothing for ceph
- 	;;
-@@ -640,6 +643,9 @@ _mkfs_dev()
-     9p)
- 	# do nothing for 9p
- 	;;
-+    virtiofs)
-+	# do nothing for virtiofs
-+	;;
-     overlay)
- 	# do nothing for overlay
- 	;;
-@@ -704,7 +710,7 @@ _scratch_mkfs()
- 	local mkfs_status
- 
- 	case $FSTYP in
--	nfs*|cifs|ceph|overlay|glusterfs|pvfs2|9p)
-+	nfs*|cifs|ceph|overlay|glusterfs|pvfs2|9p|virtiofs)
- 		# unable to re-create this fstyp, just remove all files in
- 		# $SCRATCH_MNT to avoid EEXIST caused by the leftover files
- 		# created in previous runs
-@@ -1467,7 +1473,7 @@ _require_scratch_nocheck()
- 			_notrun "this test requires a valid \$SCRATCH_MNT"
- 		fi
- 		;;
--	9p)
-+	9p|virtiofs)
- 		if [ -z "$SCRATCH_DEV" ]; then
- 			_notrun "this test requires a valid \$SCRATCH_DEV"
- 		fi
-@@ -1591,7 +1597,7 @@ _require_test()
- 			_notrun "this test requires a valid \$TEST_DIR"
- 		fi
- 		;;
--	9p)
-+	9p|virtiofs)
- 		if [ -z "$TEST_DEV" ]; then
- 			_notrun "this test requires a valid \$TEST_DEV"
- 		fi
-@@ -2686,6 +2692,9 @@ _check_test_fs()
-     9p)
- 	# no way to check consistency for 9p
- 	;;
-+    virtiofs)
-+	# no way to check consistency for virtiofs
-+	;;
-     ceph)
- 	# no way to check consistency for CephFS
- 	;;
-@@ -2744,6 +2753,9 @@ _check_scratch_fs()
-     9p)
- 	# no way to check consistency for 9p
- 	;;
-+    virtiofs)
-+	# no way to check consistency for virtiofs
-+	;;
-     ceph)
- 	# no way to check consistency for CephFS
- 	;;
--- 
-2.20.1
+Thanks,
 
+> 
+> Otherwise looks fine to me.
+> 
+> But it'd be better to let other f2fs developers review this patchset as
+> well.
+> 
+> Thanks,
+> Eryu
+> 
+>> +		$DEFRAG_PROG 0 $_filesize $1 >> $seqres.full 2>&1
+>> +	else
+>> +		$DEFRAG_PROG -v $1 >> $seqres.full 2>&1
+>> +	fi
+>>  
+>>  	_scratch_cycle_mount
+>>  	STAT_AFTER=`stat -c "a: %x m: %y c: %z" $1`
+>> -- 
+>> 2.18.0.rc1
+>>
+> .
+> 
