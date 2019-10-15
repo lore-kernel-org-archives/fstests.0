@@ -1,216 +1,300 @@
-Return-Path: <SRS0=eAkR=YH=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=6y5p=YI=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-8.3 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 87549C4CECE
-	for <linux-fstests@archiver.kernel.org>; Mon, 14 Oct 2019 22:06:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3A383C4CECE
+	for <linux-fstests@archiver.kernel.org>; Tue, 15 Oct 2019 02:34:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 5780721882
-	for <linux-fstests@archiver.kernel.org>; Mon, 14 Oct 2019 22:06:42 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1571090802;
-	bh=6ZSRWDRTAQJMgAGTx2YsjUObOmwBsJD3GxlEsVboQGk=;
-	h=From:To:Cc:Subject:Date:List-ID:From;
-	b=N6lNC5GM0HB1WnZS6e7qS080ghYfhz+4m4Q+oVAuGMv7IKYhEqd0s1lDQ4m2C1SsC
-	 Jk+zABxKaZPHxjerSEJaOScYl7Y6wSf7fZCV56Z5Vb+cjBesGTnc7p17Zi0yG2vYCA
-	 b2DG1fDCG6fOdUfXjidlk3ThA3sCoOiaPLEXKXFM=
+	by mail.kernel.org (Postfix) with ESMTP id 06B3121848
+	for <linux-fstests@archiver.kernel.org>; Tue, 15 Oct 2019 02:34:40 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="X4QiKRtX"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730997AbfJNWGm (ORCPT
+        id S1727119AbfJOCek (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 14 Oct 2019 18:06:42 -0400
-Received: from mail.kernel.org ([198.145.29.99]:38458 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1730859AbfJNWGl (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 14 Oct 2019 18:06:41 -0400
-Received: from ebiggers-linuxstation.mtv.corp.google.com (unknown [104.132.1.77])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 8289D21721;
-        Mon, 14 Oct 2019 22:06:40 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1571090800;
-        bh=6ZSRWDRTAQJMgAGTx2YsjUObOmwBsJD3GxlEsVboQGk=;
-        h=From:To:Cc:Subject:Date:From;
-        b=cM22FCSLONOFGHpWRDyFP/nsKcFW1Qv4UwBbCYqINEVl4r/QI3MQsvfUOj9y8CUdB
-         zZKKSra2v+HbYyUWJEx7QZcBXvdveCmt4jMALlrEFjXygjzofwszbCS7i6WFU24jwq
-         n9pCV9c9GIoAn1nihQLGH6ChzmYTyt1kLOhD9/w4=
-From:   Eric Biggers <ebiggers@kernel.org>
+        Mon, 14 Oct 2019 22:34:40 -0400
+Received: from mail-pg1-f195.google.com ([209.85.215.195]:40374 "EHLO
+        mail-pg1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726974AbfJOCek (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 14 Oct 2019 22:34:40 -0400
+Received: by mail-pg1-f195.google.com with SMTP id e13so2957053pga.7;
+        Mon, 14 Oct 2019 19:34:39 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=subject:from:to:cc:references:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=1HKZebU/Ck4Q7oIjSVNBzRbNK/k8QE7I0KIkMGdabe4=;
+        b=X4QiKRtXenQlDnmlVM1iZ2Xd5YF9ycLF1Axi20FlzVmyMn9ihkdr0/gwrMGewEUbi0
+         kUmv7oFJa5PcgYt+pQL4O6R1wEV+N6bnLkewvBPhp/7oKINEg4FSNgNdNp+R7IIVApKr
+         5OtrbO6kIU1uecNZL7D7N9usP+XFVp6bUkt5RuLqvdVG513vE8AldFhs2LXhjMbZEof/
+         x8kSXKO25Z7eon/zEtihPSCJcXLV2fQzeA4oJ6OiYEU0VQPXSTLuIpQav2jG+Jdu0Uc8
+         cfBVOW5y/hGhuHqxYV8oGzDtJbs9+6lMEoNrc9ZdNUr7ybs8Dw5LsUJUrTIbM6uT99DW
+         q7SA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:subject:from:to:cc:references:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=1HKZebU/Ck4Q7oIjSVNBzRbNK/k8QE7I0KIkMGdabe4=;
+        b=HaLgojxsSWjhtXXlgH+I179Q4l35/ub4RsaWaukizb2ASkbO8fPZsgEavVDiQ2jWSd
+         kWHOcb78UdUSTT8dXbb+RJYocWDgEO2I3gGqjwHkTp0p27m811DCSOUkUoVtfk3adw+y
+         WJ+mE7iJvxJEb9yHtMSKzJ7EksLDEkxMfeYjVVdH3xAA8Wfi1GPjfLmL724ktz3+ZK+V
+         AgLg9Yq1zAGWtsSu/q9NsNew/HCjtlL76kGwoMdbAzS76U/NTQ/b6GBgNghhOGAXKjOA
+         NkHYHQAm9qpmeYMechnZjer366iyZQ6ogggPoi/ke1lqCXlmzWFVvOxzqLOzjEEj6alg
+         9Ozw==
+X-Gm-Message-State: APjAAAWZWmU7cGgGvUG8iuVbQyMLAyth2YCWUciNsOOzAaBTySVPzwy6
+        kB2X0bslmoVPZVzY1x47aQ==
+X-Google-Smtp-Source: APXvYqx3XQUtZM0eaJ4JFqeEOvLCPvdXq6gK6ZlJMKLWqG9G+8t6dGNI+ApVMmIEabsZCDX/g8miLg==
+X-Received: by 2002:a17:90a:17ad:: with SMTP id q42mr40507560pja.100.1571106878646;
+        Mon, 14 Oct 2019 19:34:38 -0700 (PDT)
+Received: from [10.76.90.34] ([203.205.141.123])
+        by smtp.gmail.com with ESMTPSA id k23sm20993779pgi.49.2019.10.14.19.34.35
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Mon, 14 Oct 2019 19:34:38 -0700 (PDT)
+Subject: Re: [PATCH] fsstress: add renameat2 support
+From:   kaixuxia <xiakaixu1987@gmail.com>
 To:     fstests@vger.kernel.org
-Cc:     linux-fscrypt@vger.kernel.org, Theodore Ts'o <tytso@mit.edu>,
-        Jaegeuk Kim <jaegeuk@kernel.org>,
-        Victor Hsieh <victorhsieh@google.com>
-Subject: [PATCH] generic: add an fs-verity stress test
-Date:   Mon, 14 Oct 2019 15:05:21 -0700
-Message-Id: <20191014220521.15458-1-ebiggers@kernel.org>
-X-Mailer: git-send-email 2.23.0.700.g56cf767bdb-goog
+Cc:     linux-xfs@vger.kernel.org, Eryu Guan <guaneryu@gmail.com>,
+        Brian Foster <bfoster@redhat.com>, newtongao@tencent.com,
+        jasperwang@tencent.com
+References: <09bd0206-7460-a18f-990b-391fd1d2b361@gmail.com>
+Message-ID: <9b36578b-00da-2621-8fae-2359fe751a67@gmail.com>
+Date:   Tue, 15 Oct 2019 10:34:31 +0800
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:60.0) Gecko/20100101
+ Thunderbird/60.9.0
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+In-Reply-To: <09bd0206-7460-a18f-990b-391fd1d2b361@gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Eric Biggers <ebiggers@google.com>
+According to the comments, after adding this fsstress renameat2 support,
+the deadlock between the AGI and AGF with RENAME_WHITEOUT can be reproduced
+by using customized parameters(limited to rename_whiteout and creates). If
+this patch is okay, I will send the fsstress test patch. 
+So, Eryu, Brian, comments? 
 
-Add a stress test for fs-verity.  This tests enabling fs-verity on
-multiple files concurrently with concurrent readers on those files (with
-reads occurring before, during, and after the fs-verity enablement),
-while fsstress is also running on the same filesystem.
+On 2019/10/11 15:56, kaixuxia wrote:
+> Support the renameat2 syscall in fsstress.
+> 
+> Signed-off-by: kaixuxia <kaixuxia@tencent.com>
+> ---
+>  ltp/fsstress.c | 90 +++++++++++++++++++++++++++++++++++++++++++++++++++-------
+>  1 file changed, 79 insertions(+), 11 deletions(-)
+> 
+> diff --git a/ltp/fsstress.c b/ltp/fsstress.c
+> index 51976f5..21529a2 100644
+> --- a/ltp/fsstress.c
+> +++ b/ltp/fsstress.c
+> @@ -44,6 +44,16 @@ io_context_t	io_ctx;
+>  #define IOV_MAX 1024
+>  #endif
+>  
+> +#ifndef RENAME_NOREPLACE
+> +#define RENAME_NOREPLACE	(1 << 0)	/* Don't overwrite target */
+> +#endif
+> +#ifndef RENAME_EXCHANGE
+> +#define RENAME_EXCHANGE		(1 << 1)	/* Exchange source and dest */
+> +#endif
+> +#ifndef RENAME_WHITEOUT
+> +#define RENAME_WHITEOUT		(1 << 2)	/* Whiteout source */
+> +#endif
+> +
+>  #define FILELEN_MAX		(32*4096)
+>  
+>  typedef enum {
+> @@ -85,6 +95,9 @@ typedef enum {
+>  	OP_READV,
+>  	OP_REMOVEFATTR,
+>  	OP_RENAME,
+> +	OP_RNOREPLACE,
+> +	OP_REXCHANGE,
+> +	OP_RWHITEOUT,
+>  	OP_RESVSP,
+>  	OP_RMDIR,
+>  	OP_SETATTR,
+> @@ -203,6 +216,9 @@ void	readlink_f(int, long);
+>  void	readv_f(int, long);
+>  void	removefattr_f(int, long);
+>  void	rename_f(int, long);
+> +void    rnoreplace_f(int, long);
+> +void    rexchange_f(int, long);
+> +void    rwhiteout_f(int, long);
+>  void	resvsp_f(int, long);
+>  void	rmdir_f(int, long);
+>  void	setattr_f(int, long);
+> @@ -262,6 +278,9 @@ opdesc_t	ops[] = {
+>  	/* remove (delete) extended attribute */
+>  	{ OP_REMOVEFATTR, "removefattr", removefattr_f, 1, 1 },
+>  	{ OP_RENAME, "rename", rename_f, 2, 1 },
+> +	{ OP_RNOREPLACE, "rnoreplace", rnoreplace_f, 2, 1 },
+> +	{ OP_REXCHANGE, "rexchange", rexchange_f, 2, 1 },
+> +	{ OP_RWHITEOUT, "rwhiteout", rwhiteout_f, 2, 1 },
+>  	{ OP_RESVSP, "resvsp", resvsp_f, 1, 1 },
+>  	{ OP_RMDIR, "rmdir", rmdir_f, 1, 1 },
+>  	/* set attribute flag (FS_IOC_SETFLAGS ioctl) */
+> @@ -354,7 +373,7 @@ int	open_path(pathname_t *, int);
+>  DIR	*opendir_path(pathname_t *);
+>  void	process_freq(char *);
+>  int	readlink_path(pathname_t *, char *, size_t);
+> -int	rename_path(pathname_t *, pathname_t *);
+> +int	rename_path(pathname_t *, pathname_t *, int);
+>  int	rmdir_path(pathname_t *);
+>  void	separate_pathname(pathname_t *, char *, pathname_t *);
+>  void	show_ops(int, char *);
+> @@ -1519,7 +1538,7 @@ readlink_path(pathname_t *name, char *lbuf, size_t lbufsiz)
+>  }
+>  
+>  int
+> -rename_path(pathname_t *name1, pathname_t *name2)
+> +rename_path(pathname_t *name1, pathname_t *name2, int mode)
+>  {
+>  	char		buf1[NAME_MAX + 1];
+>  	char		buf2[NAME_MAX + 1];
+> @@ -1528,14 +1547,14 @@ rename_path(pathname_t *name1, pathname_t *name2)
+>  	pathname_t	newname2;
+>  	int		rval;
+>  
+> -	rval = rename(name1->path, name2->path);
+> +	rval = syscall(__NR_renameat2, AT_FDCWD, name1->path, AT_FDCWD, name2->path, mode);
+>  	if (rval >= 0 || errno != ENAMETOOLONG)
+>  		return rval;
+>  	separate_pathname(name1, buf1, &newname1);
+>  	separate_pathname(name2, buf2, &newname2);
+>  	if (strcmp(buf1, buf2) == 0) {
+>  		if (chdir(buf1) == 0) {
+> -			rval = rename_path(&newname1, &newname2);
+> +			rval = rename_path(&newname1, &newname2, mode);
+>  			assert(chdir("..") == 0);
+>  		}
+>  	} else {
+> @@ -1555,7 +1574,7 @@ rename_path(pathname_t *name1, pathname_t *name2)
+>  			append_pathname(&newname2, "../");
+>  			append_pathname(&newname2, name2->path);
+>  			if (chdir(buf1) == 0) {
+> -				rval = rename_path(&newname1, &newname2);
+> +				rval = rename_path(&newname1, &newname2, mode);
+>  				assert(chdir("..") == 0);
+>  			}
+>  		} else {
+> @@ -1563,7 +1582,7 @@ rename_path(pathname_t *name1, pathname_t *name2)
+>  			append_pathname(&newname1, "../");
+>  			append_pathname(&newname1, name1->path);
+>  			if (chdir(buf2) == 0) {
+> -				rval = rename_path(&newname1, &newname2);
+> +				rval = rename_path(&newname1, &newname2, mode);
+>  				assert(chdir("..") == 0);
+>  			}
+>  		}
+> @@ -4215,8 +4234,18 @@ out:
+>  	free_pathname(&f);
+>  }
+>  
+> +struct print_flags renameat2_flags [] = {
+> +	{ RENAME_NOREPLACE, "NOREPLACE"},
+> +	{ RENAME_EXCHANGE, "EXCHANGE"},
+> +	{ RENAME_WHITEOUT, "WHITEOUT"},
+> +	{ -1, NULL}
+> +};
+> +
+> +#define translate_renameat2_flags(mode)	\
+> +	({translate_flags(mode, "|", renameat2_flags);})
+> +
+>  void
+> -rename_f(int opno, long r)
+> +do_renameat2(int opno, long r, int mode)
+>  {
+>  	fent_t		*dfep;
+>  	int		e;
+> @@ -4229,6 +4258,7 @@ rename_f(int opno, long r)
+>  	int		parid;
+>  	int		v;
+>  	int		v1;
+> +	int		fd;
+>  
+>  	/* get an existing path for the source of the rename */
+>  	init_pathname(&f);
+> @@ -4260,7 +4290,21 @@ rename_f(int opno, long r)
+>  		free_pathname(&f);
+>  		return;
+>  	}
+> -	e = rename_path(&f, &newf) < 0 ? errno : 0;
+> +	/* Both pathnames must exist for the RENAME_EXCHANGE */
+> +	if (mode == RENAME_EXCHANGE) {
+> +		fd = creat_path(&newf, 0666);
+> +		e = fd < 0 ? errno : 0;
+> +		check_cwd();
+> +		if (fd < 0) {
+> +			if (v)
+> +				printf("%d/%d: renameat2 - creat %s failed %d\n",
+> +					procid, opno, newf.path, e);
+> +			free_pathname(&newf);
+> +			free_pathname(&f);
+> +			return;
+> +		}
+> +	}
+> +	e = rename_path(&f, &newf, mode) < 0 ? errno : 0;
+>  	check_cwd();
+>  	if (e == 0) {
+>  		int xattr_counter = fep->xattr_counter;
+> @@ -4273,12 +4317,13 @@ rename_f(int opno, long r)
+>  		add_to_flist(flp - flist, id, parid, xattr_counter);
+>  	}
+>  	if (v) {
+> -		printf("%d/%d: rename %s to %s %d\n", procid, opno, f.path,
+> +		printf("%d/%d: rename(%s) %s to %s %d\n", procid,
+> +			opno, translate_renameat2_flags(mode), f.path,
+>  			newf.path, e);
+>  		if (e == 0) {
+> -			printf("%d/%d: rename del entry: id=%d,parent=%d\n",
+> +			printf("%d/%d: rename source entry: id=%d,parent=%d\n",
+>  				procid, opno, fep->id, fep->parent);
+> -			printf("%d/%d: rename add entry: id=%d,parent=%d\n",
+> +			printf("%d/%d: rename target entry: id=%d,parent=%d\n",
+>  				procid, opno, id, parid);
+>  		}
+>  	}
+> @@ -4287,6 +4332,29 @@ rename_f(int opno, long r)
+>  }
+>  
+>  void
+> +rename_f(int opno, long r)
+> +{
+> +	do_renameat2(opno, r, 0);
+> +}
+> +void
+> +rnoreplace_f(int opno, long r)
+> +{
+> +	do_renameat2(opno, r, RENAME_NOREPLACE);
+> +}
+> +
+> +void
+> +rexchange_f(int opno, long r)
+> +{
+> +	do_renameat2(opno, r, RENAME_EXCHANGE);
+> +}
+> +
+> +void
+> +rwhiteout_f(int opno, long r)
+> +{
+> +	do_renameat2(opno, r, RENAME_WHITEOUT);
+> +}
+> +
+> +void
+>  resvsp_f(int opno, long r)
+>  {
+>  	int		e;
+> 
 
-I haven't seen any failures from running this on ext4 and f2fs.
-
-Signed-off-by: Eric Biggers <ebiggers@google.com>
----
- tests/generic/906     | 115 ++++++++++++++++++++++++++++++++++++++++++
- tests/generic/906.out |   2 +
- tests/generic/group   |   1 +
- 3 files changed, 118 insertions(+)
- create mode 100755 tests/generic/906
- create mode 100644 tests/generic/906.out
-
-diff --git a/tests/generic/906 b/tests/generic/906
-new file mode 100755
-index 00000000..78796487
---- /dev/null
-+++ b/tests/generic/906
-@@ -0,0 +1,115 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright 2019 Google LLC
-+#
-+# FS QA Test generic/906
-+#
-+# Stress test for fs-verity.  This tests enabling fs-verity on multiple files
-+# concurrently with concurrent readers on those files (with reads occurring
-+# before, during, and after the fs-verity enablement), while fsstress is also
-+# running on the same filesystem.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	# Stop all subprocesses.
-+	$KILLALL_PROG -q $FSSTRESS_PROG
-+	touch $tmp.done
-+	wait
-+
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/verity
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch_verity
-+_require_command "$KILLALL_PROG" killall
-+
-+_scratch_mkfs_verity &>> $seqres.full
-+_scratch_mount
-+
-+fsv_file_size=10000000
-+nproc_enabler=$((4 * LOAD_FACTOR))
-+nproc_reader=$((6 * LOAD_FACTOR))
-+nproc_stress=$((3 * LOAD_FACTOR))
-+runtime=$((20 * TIME_FACTOR))
-+
-+# Create the test files and start the fs-verity enabler processes.
-+for ((proc = 0; proc < nproc_enabler; proc++)); do
-+	orig_file=$SCRATCH_MNT/orig$proc
-+	fsv_file=$SCRATCH_MNT/fsv$proc
-+	head -c $fsv_file_size /dev/urandom > $orig_file
-+	(
-+		while [ ! -e $tmp.done ]; do
-+			rm -f $fsv_file
-+			cp $orig_file $fsv_file
-+			_fsv_enable $fsv_file
-+			# Give the readers some time to read from the file.
-+			sleep 0.$((RANDOM % 100))
-+		done
-+	) &
-+done
-+
-+# Start the reader processes.
-+for ((proc = 0; proc < nproc_reader; proc++)); do
-+	(
-+		while [ ! -e $tmp.done ]; do
-+			# Choose a random file for each iteration, so that
-+			# sometimes multiple processes read from the same file.
-+			i=$((RANDOM % nproc_enabler))
-+			orig_file=$SCRATCH_MNT/orig$i
-+			fsv_file=$SCRATCH_MNT/fsv$i
-+
-+			# After the copy from $orig_file to $fsv_file has
-+			# completed, the contents of these two files should
-+			# match, regardless of whether verity has been enabled
-+			# or not yet (or is currently being enabled).
-+			cmp $orig_file $fsv_file |& _filter_scratch | \
-+				grep -v "SCRATCH_MNT/fsv$i: No such file or directory" | \
-+				grep -v "EOF on SCRATCH_MNT/fsv$i"
-+
-+			_fsv_measure $fsv_file 2>&1 >/dev/null | \
-+				grep -v "No such file or directory" | \
-+				grep -v "No data available"
-+		done
-+	) &
-+done
-+
-+# Start a process that occasionally runs 'sync && drop_caches'.  This makes more
-+# reads go through fs-verity for real, rather than just returning pagecache.
-+(
-+	while [ ! -e $tmp.done ]; do
-+		sleep 2.$((RANDOM % 100))
-+		sync && echo 3 > /proc/sys/vm/drop_caches
-+	done
-+) &
-+
-+# Start the fsstress processes.
-+$FSSTRESS_PROG $FSSTRESS_AVOID -p $nproc_stress -l 0 -d $SCRATCH_MNT/stressdir \
-+	>> $seqres.full 2>&1 &
-+
-+# Run for a while.
-+sleep $runtime
-+
-+echo "Silence is golden"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/906.out b/tests/generic/906.out
-new file mode 100644
-index 00000000..94ee4185
---- /dev/null
-+++ b/tests/generic/906.out
-@@ -0,0 +1,2 @@
-+QA output created by 906
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index 6f9c4e12..d55d0eea 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -581,3 +581,4 @@
- 576 auto quick verity encrypt
- 577 auto quick verity
- 578 auto quick rw clone
-+906 auto stress verity
 -- 
-2.23.0.700.g56cf767bdb-goog
-
+kaixuxia
