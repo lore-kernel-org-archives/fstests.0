@@ -2,189 +2,143 @@ Return-Path: <SRS0=6y5p=YI=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.3 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
-	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 06E1AC10F14
-	for <linux-fstests@archiver.kernel.org>; Tue, 15 Oct 2019 18:19:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 095A4ECE588
+	for <linux-fstests@archiver.kernel.org>; Tue, 15 Oct 2019 18:25:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id CC57620663
-	for <linux-fstests@archiver.kernel.org>; Tue, 15 Oct 2019 18:19:31 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="QKSxp1W1"
+	by mail.kernel.org (Postfix) with ESMTP id D5C9020854
+	for <linux-fstests@archiver.kernel.org>; Tue, 15 Oct 2019 18:25:56 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1571163956;
+	bh=/hpTM+O+Z8VWmjP8yz15AC0xcLB2kV1VFiz+xCRpXPo=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
+	b=ircLUpx55Bthz+TL5SnJ68ohWQ/2643iKgRTRXphbHtuygsXu1qyjx6zBmI81HgUe
+	 NRFm2z7345Ygixc97XWWVRsGDxSl6uRLaZEwm3dYeyNQjWqc7QAqv2kxMD8iKERxgv
+	 kpADxLjuQ27xbqP0LvuOoFZuMEsP/+9RZFcdG2vc=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727709AbfJOSTb (ORCPT
+        id S2389010AbfJOSZ4 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 15 Oct 2019 14:19:31 -0400
-Received: from aserp2120.oracle.com ([141.146.126.78]:41932 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726358AbfJOSTb (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 15 Oct 2019 14:19:31 -0400
-Received: from pps.filterd (aserp2120.oracle.com [127.0.0.1])
-        by aserp2120.oracle.com (8.16.0.27/8.16.0.27) with SMTP id x9FIJE6I105171;
-        Tue, 15 Oct 2019 18:19:14 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
- : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=corp-2019-08-05;
- bh=I0qZeod/yPxxOXr7KUmvzCbrF/zMxFtkwEBsC4flSq4=;
- b=QKSxp1W1H/h9/RtrQiy8VUClv+4U7S1o88zk/7unfMnKGnLb9VkTk7io5RgZkbsgsg+w
- dTp9ILO4ccAbhUFJy66jH2VKTBgZEk/BiwuMg5/kYQEIrGY1wqzWemzd17zoYp5bezhF
- qPDD3d3zazg6P8xzQs6xDwV5ksmpjCHeSrxsJDQh5DaaG+fZh+luy4pjgEeOGT363E8r
- Q2Atzy6CZFYHFn/MNpORHrEFeS5z3f7bXYGHVRmVEPWlSHKCqm8SWZX/hoM5N52fb3Ae
- vLkFzCEdLnydHnsUz/+e/9QDp3hVlWo/VpG3QQK6/p49tB87OKJgF+SdRVQmM74XJrsU bg== 
-Received: from aserp3030.oracle.com (aserp3030.oracle.com [141.146.126.71])
-        by aserp2120.oracle.com with ESMTP id 2vk6sqhy4d-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Tue, 15 Oct 2019 18:19:14 +0000
-Received: from pps.filterd (aserp3030.oracle.com [127.0.0.1])
-        by aserp3030.oracle.com (8.16.0.27/8.16.0.27) with SMTP id x9FIIrFf155135;
-        Tue, 15 Oct 2019 18:19:14 GMT
-Received: from userv0121.oracle.com (userv0121.oracle.com [156.151.31.72])
-        by aserp3030.oracle.com with ESMTP id 2vnf7rpjcm-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Tue, 15 Oct 2019 18:19:11 +0000
-Received: from abhmp0008.oracle.com (abhmp0008.oracle.com [141.146.116.14])
-        by userv0121.oracle.com (8.14.4/8.13.8) with ESMTP id x9FIHpiU021215;
-        Tue, 15 Oct 2019 18:17:51 GMT
-Received: from localhost (/67.169.218.210)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Tue, 15 Oct 2019 18:17:51 +0000
-Date:   Tue, 15 Oct 2019 11:17:50 -0700
-From:   "Darrick J. Wong" <darrick.wong@oracle.com>
-To:     Chao Yu <yuchao0@huawei.com>
-Cc:     guaneryu@gmail.com, fstests@vger.kernel.org,
-        linux-f2fs-devel@lists.sourceforge.net
-Subject: Re: [PATCH v2] common/rc: generalize _get_filesize()
-Message-ID: <20191015181750.GK13097@magnolia>
-References: <20191015101149.127599-1-yuchao0@huawei.com>
+        Tue, 15 Oct 2019 14:25:56 -0400
+Received: from mail.kernel.org ([198.145.29.99]:44080 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726144AbfJOSZ4 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 15 Oct 2019 14:25:56 -0400
+Received: from ebiggers-linuxstation.mtv.corp.google.com (unknown [104.132.1.77])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 1AA95222D0;
+        Tue, 15 Oct 2019 18:17:24 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1571163444;
+        bh=/hpTM+O+Z8VWmjP8yz15AC0xcLB2kV1VFiz+xCRpXPo=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=FKtEYthJ/koUQIvoK5+629MmU9J+Zq3u13QdkUoQjJbkaVYzvE0wtEzSgX4hDPebv
+         PqNkshdEnZMq0ZU30/5t7uQK/J8J8rTRA9QQpqDu57D2uThZhFgej4HmbNw8312tKd
+         2+YnuyVnTjhY0K+zFoSeXBE6ZknykRcUiiC+5d18=
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     fstests@vger.kernel.org
+Cc:     linux-fscrypt@vger.kernel.org
+Subject: [PATCH v3 7/9] generic: verify ciphertext of v2 encryption policies with AES-256
+Date:   Tue, 15 Oct 2019 11:16:41 -0700
+Message-Id: <20191015181643.6519-8-ebiggers@kernel.org>
+X-Mailer: git-send-email 2.23.0.700.g56cf767bdb-goog
+In-Reply-To: <20191015181643.6519-1-ebiggers@kernel.org>
+References: <20191015181643.6519-1-ebiggers@kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20191015101149.127599-1-yuchao0@huawei.com>
-User-Agent: Mutt/1.9.4 (2018-02-28)
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9411 signatures=668684
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=0 malwarescore=0
- phishscore=0 bulkscore=0 spamscore=0 mlxscore=0 mlxlogscore=952
- adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.0.1-1908290000 definitions=main-1910150155
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9411 signatures=668684
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 priorityscore=1501 malwarescore=0
- suspectscore=0 phishscore=0 bulkscore=0 spamscore=0 clxscore=1015
- lowpriorityscore=0 mlxscore=0 impostorscore=0 mlxlogscore=999 adultscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.0.1-1908290000
- definitions=main-1910150155
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Oct 15, 2019 at 06:11:49PM +0800, Chao Yu wrote:
-> There are some testcases use below command to get file size, generalize
-> it as global function _get_filesize()
-> 
-> ls -l $1 | $AWK_PROG '{print $5}'
-> 
-> And in addition, using more simple command "stat -c %s" instead.
-> 
-> - adjust common/defrag, generic/275 and generic/315 to use it
-> - remove unused _filesize in generic/013
-> 
-> Signed-off-by: Chao Yu <yuchao0@huawei.com>
-> ---
-> v2:
-> - As suggested by Eryu, let's use "stat -c %s" instead of original
-> complicated one.
-> 
->  common/defrag     | 2 +-
->  common/rc         | 5 +++++
->  tests/generic/013 | 5 -----
->  tests/generic/275 | 2 +-
->  tests/generic/315 | 2 +-
->  5 files changed, 8 insertions(+), 8 deletions(-)
-> 
-> diff --git a/common/defrag b/common/defrag
-> index 1381a4dd..1769013b 100644
-> --- a/common/defrag
-> +++ b/common/defrag
-> @@ -145,7 +145,7 @@ _defrag()
->  	STAT_BEFORE=`stat -c "a: %x m: %y c: %z" $1`
->  
->  	if [ $FSTYP == "f2fs" ]; then
-> -		local filesize=`ls -l $1 | $AWK_PROG '{print $5}'`
-> +		local filesize=`_get_filesize $1`
->  		$DEFRAG_PROG 0 $filesize $1 >> $seqres.full 2>&1
->  	else
->  		$DEFRAG_PROG -v $1 >> $seqres.full 2>&1
-> diff --git a/common/rc b/common/rc
-> index cfaabf10..bd388a4c 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -165,6 +165,11 @@ if [ ! -z "$REPORT_LIST" ]; then
->  	_assert_report_list
->  fi
->  
-> +_get_filesize()
-> +{
-> +    echo `stat -c %s $1`
+From: Eric Biggers <ebiggers@google.com>
 
-Why bother enclosing this in backticks?  Wouldn't this also work?
+Verify ciphertext for v2 encryption policies that use AES-256-XTS to
+encrypt file contents and AES-256-CTS-CBC to encrypt file names.
 
-_get_filesize()
-{
-	stat -c %s "$1"
-}
+Signed-off-by: Eric Biggers <ebiggers@google.com>
+---
+ tests/generic/802     | 43 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/802.out |  6 ++++++
+ tests/generic/group   |  1 +
+ 3 files changed, 50 insertions(+)
+ create mode 100755 tests/generic/802
+ create mode 100644 tests/generic/802.out
 
---D
+diff --git a/tests/generic/802 b/tests/generic/802
+new file mode 100755
+index 00000000..457260b2
+--- /dev/null
++++ b/tests/generic/802
+@@ -0,0 +1,43 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright 2019 Google LLC
++#
++# FS QA Test generic/802
++#
++# Verify ciphertext for v2 encryption policies that use AES-256-XTS to encrypt
++# file contents and AES-256-CTS-CBC to encrypt file names.
++#
++# This is the same as generic/548, except using v2 policies.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/encrypt
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++
++_verify_ciphertext_for_encryption_policy AES-256-XTS AES-256-CTS-CBC v2
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/802.out b/tests/generic/802.out
+new file mode 100644
+index 00000000..c0930809
+--- /dev/null
++++ b/tests/generic/802.out
+@@ -0,0 +1,6 @@
++QA output created by 802
++
++Verifying ciphertext with parameters:
++	contents_encryption_mode: AES-256-XTS
++	filenames_encryption_mode: AES-256-CTS-CBC
++	options: v2
+diff --git a/tests/generic/group b/tests/generic/group
+index 6d1ecf5a..6b6002e1 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -583,3 +583,4 @@
+ 578 auto quick rw clone
+ 800 auto quick encrypt
+ 801 auto quick encrypt
++802 auto quick encrypt
+-- 
+2.23.0.700.g56cf767bdb-goog
 
-> +}
-> +
->  _mount()
->  {
->      $MOUNT_PROG `_mount_ops_filter $*`
-> diff --git a/tests/generic/013 b/tests/generic/013
-> index 9e533ee8..bc596102 100755
-> --- a/tests/generic/013
-> +++ b/tests/generic/013
-> @@ -24,11 +24,6 @@ _cleanup()
->      rm -rf $TEST_DIR/fsstress.$$.*
->  }
->  
-> -_filesize()
-> -{
-> -    ls -l $1 | $AWK_PROG '{print "    filesize = " $5}'
-> -}
-> -
->  # get standard environment, filters and checks
->  . ./common/rc
->  . ./common/filter
-> diff --git a/tests/generic/275 b/tests/generic/275
-> index a934c19c..adc82856 100755
-> --- a/tests/generic/275
-> +++ b/tests/generic/275
-> @@ -73,7 +73,7 @@ echo "Bytes written until ENOSPC:" >>$seqres.full
->  du $SCRATCH_MNT/tmp1 >>$seqres.full
->  
->  # And at least some of it should succeed.
-> -_filesize=`ls -l $SCRATCH_MNT/tmp1 | awk '{print $5}'`
-> +_filesize=`_get_filesize $SCRATCH_MNT/tmp1`
->  [ $_filesize -lt $((128 * 1024)) ] && \
->  	_fail "Partial write until enospc failed; wrote $_filesize bytes."
->  
-> diff --git a/tests/generic/315 b/tests/generic/315
-> index fd49b579..808d7d74 100755
-> --- a/tests/generic/315
-> +++ b/tests/generic/315
-> @@ -52,7 +52,7 @@ $XFS_IO_PROG -f -c 'falloc -k 0 $(($avail_begin/2))' \
->  	$TEST_DIR/testfile.$seq >>$seqres.full 2>&1
->  
->  # Verify the file size, it should keep unchanged as 0 in this case
-> -fsize=`ls -l $TEST_DIR/testfile.$seq | awk '{print $5}'`
-> +fsize=`_get_filesize $TEST_DIR/testfile.$seq`
->  [ "$fsize" -eq 0 ] || _fail "File size is changed to ($fsize Bytes)"
->  
->  # Truncate the file size back to 0
-> -- 
-> 2.18.0.rc1
-> 
