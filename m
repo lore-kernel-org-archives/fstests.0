@@ -7,44 +7,44 @@ X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E144CC10F14
-	for <linux-fstests@archiver.kernel.org>; Tue, 15 Oct 2019 18:25:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 460F2ECE58F
+	for <linux-fstests@archiver.kernel.org>; Tue, 15 Oct 2019 18:26:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id B37282086A
-	for <linux-fstests@archiver.kernel.org>; Tue, 15 Oct 2019 18:25:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2229620854
+	for <linux-fstests@archiver.kernel.org>; Tue, 15 Oct 2019 18:26:01 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1571163959;
-	bh=eYdj6nW1X42BTHaVsqRt5KCIEizR+MebdyD1sNPoDrE=;
+	s=default; t=1571163961;
+	bh=RHiTGwKIyhw68XNamvogA0hnIzZsk8r+AmjBH0AhhTM=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=sScenOQdrCTXKTWjgi9nGFq9VntEbymJ/tdUqMh7WZN/a69Cw1AbvZhTT1ZP6uEJK
-	 0leJeWglLJGIfx+brcy36zizOzHyWNLOPnLPPxIm979tuLo9RGDLqR5fVCO7c52oUC
-	 5sIbsyEbpj3+CiW1vn8iOmfEXE+F9/wLR6V6KJxM=
+	b=e1ydl18qK4Mgg9Jux3qIuVIo3kkURWmzZm3n9bBMrdzEZhYnk901wYTbqfaRy8Sl/
+	 Xuh8a708z8EAiG7I8WIQLbUglSxTvAjBv6Kejyb3WqUslyg87saZKRoffqraL9QevI
+	 O150YLF5SYrGgsTjGTcMmBmm/qsOn3DqFLWLNIzM=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2389091AbfJOSZ6 (ORCPT
+        id S2389076AbfJOSZ5 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 15 Oct 2019 14:25:58 -0400
-Received: from mail.kernel.org ([198.145.29.99]:44090 "EHLO mail.kernel.org"
+        Tue, 15 Oct 2019 14:25:57 -0400
+Received: from mail.kernel.org ([198.145.29.99]:44092 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726144AbfJOSZ5 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        id S2389025AbfJOSZ5 (ORCPT <rfc822;fstests@vger.kernel.org>);
         Tue, 15 Oct 2019 14:25:57 -0400
 Received: from ebiggers-linuxstation.mtv.corp.google.com (unknown [104.132.1.77])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 56F5E222D1;
+        by mail.kernel.org (Postfix) with ESMTPSA id 8F490222D3;
         Tue, 15 Oct 2019 18:17:24 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
         s=default; t=1571163444;
-        bh=eYdj6nW1X42BTHaVsqRt5KCIEizR+MebdyD1sNPoDrE=;
+        bh=RHiTGwKIyhw68XNamvogA0hnIzZsk8r+AmjBH0AhhTM=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=Jq0ZY5Xi+1OmWL8Pe2Y8E3PRQM9JZcvsWyl7WFTaJgce7PlaUSIFfuP/em30Eg+Js
-         bEND92SItzXyKPvF5ugVjNuYYbwYYPpTWdlCIcqA3LbR7PCRpMbOOJ98hM7BMXdlFc
-         9XZ5CBK8egeNckmmke6bvOn+naMs1O5a/o390P0c=
+        b=Us4GG7U9j8xrkEs4hidLFmIjtKOhN+Df+AlsTO0E2ZvtaOdnsUj/bj8r4mAuEeT0J
+         excI884r6Jsk9kjqrSHYsT7goJ5nGLlbp/8qVYnHKlINtTuxWik/q8PfBrdcL3GNK0
+         S/9iHQ9YQbzV8hEYBeJR+yB0T1Jq3ZIChU5xm2es=
 From:   Eric Biggers <ebiggers@kernel.org>
 To:     fstests@vger.kernel.org
 Cc:     linux-fscrypt@vger.kernel.org
-Subject: [PATCH v3 8/9] generic: verify ciphertext of v2 encryption policies with AES-128
-Date:   Tue, 15 Oct 2019 11:16:42 -0700
-Message-Id: <20191015181643.6519-9-ebiggers@kernel.org>
+Subject: [PATCH v3 9/9] generic: verify ciphertext of v2 encryption policies with Adiantum
+Date:   Tue, 15 Oct 2019 11:16:43 -0700
+Message-Id: <20191015181643.6519-10-ebiggers@kernel.org>
 X-Mailer: git-send-email 2.23.0.700.g56cf767bdb-goog
 In-Reply-To: <20191015181643.6519-1-ebiggers@kernel.org>
 References: <20191015181643.6519-1-ebiggers@kernel.org>
@@ -57,34 +57,34 @@ X-Mailing-List: fstests@vger.kernel.org
 
 From: Eric Biggers <ebiggers@google.com>
 
-Verify ciphertext for v2 encryption policies that use AES-128-CBC-ESSIV
-to encrypt file contents and AES-128-CTS-CBC to encrypt file names.
+Verify ciphertext for v2 encryption policies that use Adiantum to
+encrypt file contents and file names.
 
 Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- tests/generic/803     | 43 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/803.out |  6 ++++++
+ tests/generic/804     | 45 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/804.out | 11 +++++++++++
  tests/generic/group   |  1 +
- 3 files changed, 50 insertions(+)
- create mode 100755 tests/generic/803
- create mode 100644 tests/generic/803.out
+ 3 files changed, 57 insertions(+)
+ create mode 100755 tests/generic/804
+ create mode 100644 tests/generic/804.out
 
-diff --git a/tests/generic/803 b/tests/generic/803
+diff --git a/tests/generic/804 b/tests/generic/804
 new file mode 100755
-index 00000000..c12daeff
+index 00000000..72e7b025
 --- /dev/null
-+++ b/tests/generic/803
-@@ -0,0 +1,43 @@
++++ b/tests/generic/804
+@@ -0,0 +1,45 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
 +# Copyright 2019 Google LLC
 +#
-+# FS QA Test generic/803
++# FS QA Test generic/804
 +#
-+# Verify ciphertext for v2 encryption policies that use AES-128-CBC-ESSIV to
-+# encrypt file contents and AES-128-CTS-CBC to encrypt file names.
++# Verify ciphertext for v2 encryption policies that use Adiantum to encrypt file
++# contents and file names.
 +#
-+# This is the same as generic/549, except using v2 policies.
++# This is the same as generic/550, except using v2 policies.
 +#
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
@@ -113,32 +113,39 @@ index 00000000..c12daeff
 +_supported_fs generic
 +_supported_os Linux
 +
-+_verify_ciphertext_for_encryption_policy AES-128-CBC-ESSIV AES-128-CTS-CBC v2
++# Test both with and without the DIRECT_KEY flag.
++_verify_ciphertext_for_encryption_policy Adiantum Adiantum v2
++_verify_ciphertext_for_encryption_policy Adiantum Adiantum v2 direct
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/generic/803.out b/tests/generic/803.out
+diff --git a/tests/generic/804.out b/tests/generic/804.out
 new file mode 100644
-index 00000000..f4051d27
+index 00000000..726376b2
 --- /dev/null
-+++ b/tests/generic/803.out
-@@ -0,0 +1,6 @@
-+QA output created by 803
++++ b/tests/generic/804.out
+@@ -0,0 +1,11 @@
++QA output created by 804
 +
 +Verifying ciphertext with parameters:
-+	contents_encryption_mode: AES-128-CBC-ESSIV
-+	filenames_encryption_mode: AES-128-CTS-CBC
++	contents_encryption_mode: Adiantum
++	filenames_encryption_mode: Adiantum
 +	options: v2
++
++Verifying ciphertext with parameters:
++	contents_encryption_mode: Adiantum
++	filenames_encryption_mode: Adiantum
++	options: v2 direct
 diff --git a/tests/generic/group b/tests/generic/group
-index 6b6002e1..6f5c15b2 100644
+index 6f5c15b2..3373980d 100644
 --- a/tests/generic/group
 +++ b/tests/generic/group
-@@ -584,3 +584,4 @@
- 800 auto quick encrypt
+@@ -585,3 +585,4 @@
  801 auto quick encrypt
  802 auto quick encrypt
-+803 auto quick encrypt
+ 803 auto quick encrypt
++804 auto quick encrypt
 -- 
 2.23.0.700.g56cf767bdb-goog
 
