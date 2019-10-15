@@ -7,44 +7,44 @@ X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A19D4ECE588
-	for <linux-fstests@archiver.kernel.org>; Tue, 15 Oct 2019 18:26:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 78EE2ECE596
+	for <linux-fstests@archiver.kernel.org>; Tue, 15 Oct 2019 18:26:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 6F8972084B
-	for <linux-fstests@archiver.kernel.org>; Tue, 15 Oct 2019 18:26:02 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4AC8020854
+	for <linux-fstests@archiver.kernel.org>; Tue, 15 Oct 2019 18:26:03 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1571163962;
-	bh=pQRF+ZXOzBk/Odo8CcH9Vd+Da+HwrNlFUC4vKvs4HfM=;
+	s=default; t=1571163963;
+	bh=zfg9s4arwp3SzLhVrrpIiqBm8Yyz0+GJ8OCcgKoXGec=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=NN/Xbd3sYSQ04Zq3e56mc57V92dcL0APtQEljQ8Qgsy3+h6e0wm+41ORb6XWU/QRz
-	 ktUlBZLcIKjvXlazfhM2IftUlnZFUIqzUZninYs5mB6Ygt41Jn3o5powmt1BMLWJAF
-	 VbzoXRza0x0bbYY/HxM8S/GKVtIM9HKvYzYuZlF8=
+	b=iagwrol5KtrDEEIx/bWnOjPMEi3SDJSiga8OsdMRUfQLENf9IHkm8Gu8tQgV6x2ci
+	 urMLazM+7H/ldTtQp9hA19Gk4rrCnmAUVdeDhHNk8HfHNA2SwgtxFQqxqzTT/XlGp1
+	 79PeEjf1qsq8YbCHQmKP2Zxs8G/AIOdrwQHu93Q8=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730140AbfJOS0B (ORCPT
+        id S1726408AbfJOS0C (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 15 Oct 2019 14:26:01 -0400
-Received: from mail.kernel.org ([198.145.29.99]:44094 "EHLO mail.kernel.org"
+        Tue, 15 Oct 2019 14:26:02 -0400
+Received: from mail.kernel.org ([198.145.29.99]:44096 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726408AbfJOSZ5 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        id S2389038AbfJOSZ5 (ORCPT <rfc822;fstests@vger.kernel.org>);
         Tue, 15 Oct 2019 14:25:57 -0400
 Received: from ebiggers-linuxstation.mtv.corp.google.com (unknown [104.132.1.77])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id A181A222CB;
-        Tue, 15 Oct 2019 18:17:23 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id AC2DA222C3;
+        Tue, 15 Oct 2019 18:17:22 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1571163443;
-        bh=pQRF+ZXOzBk/Odo8CcH9Vd+Da+HwrNlFUC4vKvs4HfM=;
+        s=default; t=1571163442;
+        bh=zfg9s4arwp3SzLhVrrpIiqBm8Yyz0+GJ8OCcgKoXGec=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=c50A2VKq75soeAV35ffPkfTAu4f6E6zXHQR6VDVZ72KO6/G5ckNXZ6KJfkny56oIC
-         98MBovrTdihVz40/me6606zo1LB7TvgNyb36+YRwnKU7ymYOapIFb1WNbjL5pf2vjv
-         Nqmd1XeQNmaLqF6oVQpANLKQXL9S7MWc787Q6es0=
+        b=nQETF6VwoRNidBEJQfO25eTEUHnsTu7GcQLz21BLMW8Rz7IbPmtQgXzCcpluL+B4O
+         5/J9zUF98BdKh5fuN1NrngcKdW/5ckhl3+ugzMVB2pXh+DjoecK+6/MuEkS+eVMPP0
+         5B19bDy6seG2NfUxIg/u5OBERQYZCrrK5bxziloE=
 From:   Eric Biggers <ebiggers@kernel.org>
 To:     fstests@vger.kernel.org
 Cc:     linux-fscrypt@vger.kernel.org
-Subject: [PATCH v3 5/9] generic: add basic test for fscrypt API additions
-Date:   Tue, 15 Oct 2019 11:16:39 -0700
-Message-Id: <20191015181643.6519-6-ebiggers@kernel.org>
+Subject: [PATCH v3 1/9] common/encrypt: disambiguate session encryption keys
+Date:   Tue, 15 Oct 2019 11:16:35 -0700
+Message-Id: <20191015181643.6519-2-ebiggers@kernel.org>
 X-Mailer: git-send-email 2.23.0.700.g56cf767bdb-goog
 In-Reply-To: <20191015181643.6519-1-ebiggers@kernel.org>
 References: <20191015181643.6519-1-ebiggers@kernel.org>
@@ -57,257 +57,343 @@ X-Mailing-List: fstests@vger.kernel.org
 
 From: Eric Biggers <ebiggers@google.com>
 
-Add a basic test of the fscrypt filesystem-level encryption keyring and
-v2 encryption policies.
+Rename the helper functions that add/remove keys from the session
+keyring, in order to distinguish them from the helper functions I'll be
+adding to add/remove keys from the new filesystem-level keyring.
 
 Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- tests/generic/800     | 127 ++++++++++++++++++++++++++++++++++++++++++
- tests/generic/800.out |  91 ++++++++++++++++++++++++++++++
- tests/generic/group   |   1 +
- 3 files changed, 219 insertions(+)
- create mode 100755 tests/generic/800
- create mode 100644 tests/generic/800.out
+ common/encrypt    | 20 ++++++++++----------
+ tests/ext4/024    |  2 +-
+ tests/generic/397 |  4 ++--
+ tests/generic/398 |  8 ++++----
+ tests/generic/399 |  4 ++--
+ tests/generic/419 |  4 ++--
+ tests/generic/421 |  4 ++--
+ tests/generic/429 |  8 ++++----
+ tests/generic/435 |  4 ++--
+ tests/generic/440 |  8 ++++----
+ tests/generic/576 |  2 +-
+ 11 files changed, 34 insertions(+), 34 deletions(-)
 
-diff --git a/tests/generic/800 b/tests/generic/800
-new file mode 100755
-index 00000000..79a101f6
---- /dev/null
-+++ b/tests/generic/800
-@@ -0,0 +1,127 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright 2019 Google LLC
-+#
-+# FS QA Test generic/800
-+#
-+# Basic test of the fscrypt filesystem-level encryption keyring
-+# and v2 encryption policies.
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+echo
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/encrypt
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch_encryption -v 2
-+
-+_scratch_mkfs_encrypted &>> $seqres.full
-+_scratch_mount
-+
-+test_with_policy_version()
-+{
-+	local vers=$1
-+	local raw_key=""
-+	local i
-+
-+	for i in {1..64}; do
-+		raw_key+="\\x$(printf "%02x" $i)"
-+	done
-+
-+	if (( vers == 1 )); then
-+		# Key descriptor: arbitrary value
-+		local keyspec="0000111122223333"
-+		local add_enckey_args="-d $keyspec"
-+	else
-+		# Key identifier:
-+		# HKDF-SHA512(key=raw_key, salt="", info="fscrypt\0\x01")
-+		local keyspec="69b2f6edeee720cce0577937eb8a6751"
-+		local add_enckey_args=""
-+	fi
-+
-+	mkdir $dir
-+	echo "# Setting v$vers encryption policy"
-+	_set_encpolicy $dir $keyspec
-+	echo "# Getting v$vers encryption policy"
-+	_get_encpolicy $dir | _filter_scratch
-+	if (( vers == 1 )); then
-+		echo "# Getting v1 encryption policy using old ioctl"
-+		_get_encpolicy $dir -1 | _filter_scratch
-+	fi
-+	echo "# Trying to create file without key added yet"
-+	$XFS_IO_PROG -f $dir/file |& _filter_scratch
-+	echo "# Getting encryption key status"
-+	_enckey_status $SCRATCH_MNT $keyspec
-+	echo "# Adding encryption key"
-+	_add_enckey $SCRATCH_MNT "$raw_key" $add_enckey_args
-+	echo "# Creating encrypted file"
-+	echo contents > $dir/file
-+	echo "# Getting encryption key status"
-+	_enckey_status $SCRATCH_MNT $keyspec
-+	echo "# Removing encryption key"
-+	_rm_enckey $SCRATCH_MNT $keyspec
-+	echo "# Getting encryption key status"
-+	_enckey_status $SCRATCH_MNT $keyspec
-+	echo "# Verifying that the encrypted directory was \"locked\""
-+	cat $dir/file |& _filter_scratch
-+	cat "$(find $dir -type f)" |& _filter_scratch | cut -d ' ' -f3-
-+
-+	# Test removing key with a file open.
-+	echo "# Re-adding encryption key"
-+	_add_enckey $SCRATCH_MNT "$raw_key" $add_enckey_args
-+	echo "# Creating another encrypted file"
-+	echo foo > $dir/file2
-+	echo "# Removing key while an encrypted file is open"
-+	exec 3< $dir/file
-+	_rm_enckey $SCRATCH_MNT $keyspec
-+	echo "# Non-open file should have been evicted"
-+	cat $dir/file2 |& _filter_scratch
-+	echo "# Open file shouldn't have been evicted"
-+	cat $dir/file
-+	echo "# Key should be in \"incompletely removed\" state"
-+	_enckey_status $SCRATCH_MNT $keyspec
-+	echo "# Closing file and removing key for real now"
-+	exec 3<&-
-+	_rm_enckey $SCRATCH_MNT $keyspec
-+	cat $dir/file |& _filter_scratch
-+
-+	echo "# Cleaning up"
-+	rm -r $dir
-+	_scratch_cycle_mount	# Clear all keys
-+	echo
-+}
-+
-+dir=$SCRATCH_MNT/dir
-+
-+test_with_policy_version 1
-+
-+test_with_policy_version 2
-+
-+echo "# Trying to remove absent key"
-+_rm_enckey $SCRATCH_MNT abcdabcdabcdabcd
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/800.out b/tests/generic/800.out
-new file mode 100644
-index 00000000..a4027e2a
---- /dev/null
-+++ b/tests/generic/800.out
-@@ -0,0 +1,91 @@
-+QA output created by 800
-+
-+# Setting v1 encryption policy
-+# Getting v1 encryption policy
-+Encryption policy for SCRATCH_MNT/dir:
-+	Policy version: 0
-+	Master key descriptor: 0000111122223333
-+	Contents encryption mode: 1 (AES-256-XTS)
-+	Filenames encryption mode: 4 (AES-256-CTS)
-+	Flags: 0x02
-+# Getting v1 encryption policy using old ioctl
-+Encryption policy for SCRATCH_MNT/dir:
-+	Policy version: 0
-+	Master key descriptor: 0000111122223333
-+	Contents encryption mode: 1 (AES-256-XTS)
-+	Filenames encryption mode: 4 (AES-256-CTS)
-+	Flags: 0x02
-+# Trying to create file without key added yet
-+SCRATCH_MNT/dir/file: Required key not available
-+# Getting encryption key status
-+Absent
-+# Adding encryption key
-+Added encryption key with descriptor 0000111122223333
-+# Creating encrypted file
-+# Getting encryption key status
-+Present
-+# Removing encryption key
-+Removed encryption key with descriptor 0000111122223333
-+# Getting encryption key status
-+Absent
-+# Verifying that the encrypted directory was "locked"
-+cat: SCRATCH_MNT/dir/file: No such file or directory
-+Required key not available
-+# Re-adding encryption key
-+Added encryption key with descriptor 0000111122223333
-+# Creating another encrypted file
-+# Removing key while an encrypted file is open
-+Removed encryption key with descriptor 0000111122223333, but files still busy
-+# Non-open file should have been evicted
-+cat: SCRATCH_MNT/dir/file2: Required key not available
-+# Open file shouldn't have been evicted
-+contents
-+# Key should be in "incompletely removed" state
-+Incompletely removed
-+# Closing file and removing key for real now
-+Removed encryption key with descriptor 0000111122223333
-+cat: SCRATCH_MNT/dir/file: No such file or directory
-+# Cleaning up
-+
-+# Setting v2 encryption policy
-+# Getting v2 encryption policy
-+Encryption policy for SCRATCH_MNT/dir:
-+	Policy version: 2
-+	Master key identifier: 69b2f6edeee720cce0577937eb8a6751
-+	Contents encryption mode: 1 (AES-256-XTS)
-+	Filenames encryption mode: 4 (AES-256-CTS)
-+	Flags: 0x02
-+# Trying to create file without key added yet
-+SCRATCH_MNT/dir/file: Required key not available
-+# Getting encryption key status
-+Absent
-+# Adding encryption key
-+Added encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
-+# Creating encrypted file
-+# Getting encryption key status
-+Present (user_count=1, added_by_self)
-+# Removing encryption key
-+Removed encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
-+# Getting encryption key status
-+Absent
-+# Verifying that the encrypted directory was "locked"
-+cat: SCRATCH_MNT/dir/file: No such file or directory
-+Required key not available
-+# Re-adding encryption key
-+Added encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
-+# Creating another encrypted file
-+# Removing key while an encrypted file is open
-+Removed encryption key with identifier 69b2f6edeee720cce0577937eb8a6751, but files still busy
-+# Non-open file should have been evicted
-+cat: SCRATCH_MNT/dir/file2: Required key not available
-+# Open file shouldn't have been evicted
-+contents
-+# Key should be in "incompletely removed" state
-+Incompletely removed
-+# Closing file and removing key for real now
-+Removed encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
-+cat: SCRATCH_MNT/dir/file: No such file or directory
-+# Cleaning up
-+
-+# Trying to remove absent key
-+Error removing encryption key: Required key not available
-diff --git a/tests/generic/group b/tests/generic/group
-index 6f9c4e12..cf2240ec 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -581,3 +581,4 @@
- 576 auto quick verity encrypt
- 577 auto quick verity
- 578 auto quick rw clone
-+800 auto quick encrypt
+diff --git a/common/encrypt b/common/encrypt
+index 06a56ed9..7bbe1936 100644
+--- a/common/encrypt
++++ b/common/encrypt
+@@ -89,7 +89,7 @@ _require_encryption_policy_support()
+ 	mkdir $dir
+ 	_require_command "$KEYCTL_PROG" keyctl
+ 	_new_session_keyring
+-	local keydesc=$(_generate_encryption_key)
++	local keydesc=$(_generate_session_encryption_key)
+ 	if _set_encpolicy $dir $keydesc $set_encpolicy_args \
+ 		2>&1 >>$seqres.full | egrep -q 'Invalid argument'; then
+ 		_notrun "kernel does not support encryption policy: '$set_encpolicy_args'"
+@@ -153,7 +153,7 @@ _generate_key_descriptor()
+ 	echo $keydesc
+ }
+ 
+-# Generate a raw encryption key, but don't add it to the keyring yet.
++# Generate a raw encryption key, but don't add it to any keyring yet.
+ _generate_raw_encryption_key()
+ {
+ 	local raw=""
+@@ -166,7 +166,7 @@ _generate_raw_encryption_key()
+ 
+ # Add the specified raw encryption key to the session keyring, using the
+ # specified key descriptor.
+-_add_encryption_key()
++_add_session_encryption_key()
+ {
+ 	local keydesc=$1
+ 	local raw=$2
+@@ -209,26 +209,26 @@ _add_encryption_key()
+ # keyctl program.  It's assumed the caller has already set up a test-scoped
+ # session keyring using _new_session_keyring.
+ #
+-_generate_encryption_key()
++_generate_session_encryption_key()
+ {
+ 	local keydesc=$(_generate_key_descriptor)
+ 	local raw=$(_generate_raw_encryption_key)
+ 
+-	_add_encryption_key $keydesc $raw
++	_add_session_encryption_key $keydesc $raw
+ 
+ 	echo $keydesc
+ }
+ 
+ # Unlink an encryption key from the session keyring, given its key descriptor.
+-_unlink_encryption_key()
++_unlink_session_encryption_key()
+ {
+ 	local keydesc=$1
+ 	local keyid=$($KEYCTL_PROG search @s logon $FSTYP:$keydesc)
+ 	$KEYCTL_PROG unlink $keyid >>$seqres.full
+ }
+ 
+-# Revoke an encryption key from the keyring, given its key descriptor.
+-_revoke_encryption_key()
++# Revoke an encryption key from the session keyring, given its key descriptor.
++_revoke_session_encryption_key()
+ {
+ 	local keydesc=$1
+ 	local keyid=$($KEYCTL_PROG search @s logon $FSTYP:$keydesc)
+@@ -412,7 +412,7 @@ _require_get_ciphertext_filename_support()
+ 		_scratch_mount
+ 		_new_session_keyring
+ 
+-		local keydesc=$(_generate_encryption_key)
++		local keydesc=$(_generate_session_encryption_key)
+ 		local dir=$SCRATCH_MNT/test.${FUNCNAME[0]}
+ 		local file=$dir/$(perl -e 'print "A" x 255')
+ 		mkdir $dir
+@@ -634,7 +634,7 @@ _verify_ciphertext_for_encryption_policy()
+ 	local raw_key=$(_generate_raw_encryption_key)
+ 	local keydesc=$(_generate_key_descriptor)
+ 	_new_session_keyring
+-	_add_encryption_key $keydesc $raw_key
++	_add_session_encryption_key $keydesc $raw_key
+ 	local raw_key_hex=$(echo "$raw_key" | tr -d '\\x')
+ 
+ 	echo
+diff --git a/tests/ext4/024 b/tests/ext4/024
+index a86cc417..95243b70 100755
+--- a/tests/ext4/024
++++ b/tests/ext4/024
+@@ -53,7 +53,7 @@ _new_session_keyring
+ _scratch_mkfs_encrypted &>>$seqres.full
+ _scratch_mount
+ mkdir $SCRATCH_MNT/edir
+-keydesc=$(_generate_encryption_key)
++keydesc=$(_generate_session_encryption_key)
+ _set_encpolicy $SCRATCH_MNT/edir $keydesc
+ echo foo > $SCRATCH_MNT/edir/file
+ inum=$(stat -c '%i' $SCRATCH_MNT/edir/file)
+diff --git a/tests/generic/397 b/tests/generic/397
+index a97e866b..f2e22950 100755
+--- a/tests/generic/397
++++ b/tests/generic/397
+@@ -45,7 +45,7 @@ _scratch_mkfs_encrypted &>> $seqres.full
+ _scratch_mount
+ 
+ mkdir $SCRATCH_MNT/edir $SCRATCH_MNT/ref_dir
+-keydesc=$(_generate_encryption_key)
++keydesc=$(_generate_session_encryption_key)
+ _set_encpolicy $SCRATCH_MNT/edir $keydesc
+ for dir in $SCRATCH_MNT/edir $SCRATCH_MNT/ref_dir; do
+ 	touch $dir/empty > /dev/null
+@@ -92,7 +92,7 @@ filter_create_errors()
+ 	    -e 's/Operation not permitted/Required key not available/'
+ }
+ 
+-_unlink_encryption_key $keydesc
++_unlink_session_encryption_key $keydesc
+ _scratch_cycle_mount
+ 
+ # Check that unencrypted names aren't there
+diff --git a/tests/generic/398 b/tests/generic/398
+index d224e021..9727b2de 100755
+--- a/tests/generic/398
++++ b/tests/generic/398
+@@ -68,8 +68,8 @@ edir1=$SCRATCH_MNT/edir1
+ edir2=$SCRATCH_MNT/edir2
+ udir=$SCRATCH_MNT/udir
+ mkdir $edir1 $edir2 $udir
+-keydesc1=$(_generate_encryption_key)
+-keydesc2=$(_generate_encryption_key)
++keydesc1=$(_generate_session_encryption_key)
++keydesc2=$(_generate_session_encryption_key)
+ _set_encpolicy $edir1 $keydesc1
+ _set_encpolicy $edir2 $keydesc2
+ touch $edir1/efile1
+@@ -141,8 +141,8 @@ rm $edir1/fifo $edir2/fifo $udir/fifo
+ # Now test that *without* access to the encrypted key, we cannot use an exchange
+ # (cross rename) operation to move a forbidden file into an encrypted directory.
+ 
+-_unlink_encryption_key $keydesc1
+-_unlink_encryption_key $keydesc2
++_unlink_session_encryption_key $keydesc1
++_unlink_session_encryption_key $keydesc2
+ _scratch_cycle_mount
+ efile1=$(find $edir1 -type f)
+ efile2=$(find $edir2 -type f)
+diff --git a/tests/generic/399 b/tests/generic/399
+index dfd8d3c2..b2aaac13 100755
+--- a/tests/generic/399
++++ b/tests/generic/399
+@@ -61,7 +61,7 @@ dd if=/dev/zero of=$SCRATCH_DEV bs=$((1024 * 1024)) \
+ _scratch_mkfs_sized_encrypted $fs_size &>> $seqres.full
+ _scratch_mount
+ 
+-keydesc=$(_generate_encryption_key)
++keydesc=$(_generate_session_encryption_key)
+ mkdir $SCRATCH_MNT/encrypted_dir
+ _set_encpolicy $SCRATCH_MNT/encrypted_dir $keydesc
+ 
+@@ -127,7 +127,7 @@ done
+ # memory than the '-9' preset.  The memory needed with our settings will be
+ # 64 * 6.5 = 416 MB; see xz(1).
+ #
+-_unlink_encryption_key $keydesc
++_unlink_session_encryption_key $keydesc
+ _scratch_unmount
+ fs_compressed_size=$(head -c $fs_size $SCRATCH_DEV | \
+ 	xz --lzma2=dict=64M,mf=hc4,mode=fast,nice=16 | \
+diff --git a/tests/generic/419 b/tests/generic/419
+index 0abbac90..d07aec05 100755
+--- a/tests/generic/419
++++ b/tests/generic/419
+@@ -47,11 +47,11 @@ _scratch_mkfs_encrypted &>> $seqres.full
+ _scratch_mount
+ 
+ mkdir $SCRATCH_MNT/edir
+-keydesc=$(_generate_encryption_key)
++keydesc=$(_generate_session_encryption_key)
+ _set_encpolicy $SCRATCH_MNT/edir $keydesc
+ echo a > $SCRATCH_MNT/edir/a
+ echo b > $SCRATCH_MNT/edir/b
+-_unlink_encryption_key $keydesc
++_unlink_session_encryption_key $keydesc
+ _scratch_cycle_mount
+ 
+ # Note that because encrypted filenames are unpredictable, this needs to be
+diff --git a/tests/generic/421 b/tests/generic/421
+index c8cc2dcc..f634a431 100755
+--- a/tests/generic/421
++++ b/tests/generic/421
+@@ -51,7 +51,7 @@ slice=2
+ # Create an encrypted file and sync its data to disk.
+ rm -rf $dir
+ mkdir $dir
+-keydesc=$(_generate_encryption_key)
++keydesc=$(_generate_session_encryption_key)
+ _set_encpolicy $dir $keydesc
+ $XFS_IO_PROG -f $file -c "pwrite 0 $((nproc*slice))M" -c "fsync" > /dev/null
+ 
+@@ -71,7 +71,7 @@ done
+ sleep 1
+ 
+ # Revoke the encryption key.
+-keyid=$(_revoke_encryption_key $keydesc)
++keyid=$(_revoke_session_encryption_key $keydesc)
+ 
+ # Now try to open the file again.  In buggy kernels this caused concurrent
+ # readers to crash with a NULL pointer dereference during decryption.
+diff --git a/tests/generic/429 b/tests/generic/429
+index 472fdbd9..6c18c543 100755
+--- a/tests/generic/429
++++ b/tests/generic/429
+@@ -56,7 +56,7 @@ _new_session_keyring
+ keydesc=$(_generate_key_descriptor)
+ raw_key=$(_generate_raw_encryption_key)
+ mkdir $SCRATCH_MNT/edir
+-_add_encryption_key $keydesc $raw_key
++_add_session_encryption_key $keydesc $raw_key
+ _set_encpolicy $SCRATCH_MNT/edir $keydesc
+ 
+ # Create two files in the directory: one whose name is valid in the base64
+@@ -96,7 +96,7 @@ show_directory_with_key()
+ # the correct number of them are listed by readdir, and save them for later.
+ echo
+ echo "***** Without encryption key *****"
+-_unlink_encryption_key $keydesc
++_unlink_session_encryption_key $keydesc
+ _scratch_cycle_mount
+ echo "--- Directory listing:"
+ ciphertext_names=( $(find $SCRATCH_MNT/edir -mindepth 1 | sort) )
+@@ -109,7 +109,7 @@ show_file_contents
+ # stale dentries.
+ echo
+ echo "***** With encryption key *****"
+-_add_encryption_key $keydesc $raw_key
++_add_session_encryption_key $keydesc $raw_key
+ show_directory_with_key
+ 
+ # Test for ->d_revalidate() race conditions.
+@@ -127,7 +127,7 @@ echo "***** After key revocation *****"
+ 	exec 3<$SCRATCH_MNT/edir
+ 	exec 4<$SCRATCH_MNT/edir/@@@
+ 	exec 5<$SCRATCH_MNT/edir/abcd
+-	_revoke_encryption_key $keydesc
++	_revoke_session_encryption_key $keydesc
+ 	show_directory_with_key
+ )
+ 
+diff --git a/tests/generic/435 b/tests/generic/435
+index 073596f3..f12d2be8 100755
+--- a/tests/generic/435
++++ b/tests/generic/435
+@@ -50,7 +50,7 @@ _new_session_keyring
+ _scratch_mkfs_encrypted &>> $seqres.full
+ _scratch_mount
+ mkdir $SCRATCH_MNT/edir
+-keydesc=$(_generate_encryption_key)
++keydesc=$(_generate_session_encryption_key)
+ # -f 0x2: zero-pad to 16-byte boundary (i.e. encryption block boundary)
+ _set_encpolicy $SCRATCH_MNT/edir $keydesc -f 0x2
+ 
+@@ -66,7 +66,7 @@ _set_encpolicy $SCRATCH_MNT/edir $keydesc -f 0x2
+ seq -f "$SCRATCH_MNT/edir/abcdefghijklmnopqrstuvwxyz012345%.0f" 100000 | xargs touch
+ find $SCRATCH_MNT/edir/ -type f | xargs stat -c %i | sort | uniq | wc -l
+ 
+-_unlink_encryption_key $keydesc
++_unlink_session_encryption_key $keydesc
+ _scratch_cycle_mount
+ 
+ # Verify that every file has a unique inode number and can be removed without
+diff --git a/tests/generic/440 b/tests/generic/440
+index 434286f4..1ec1ed48 100755
+--- a/tests/generic/440
++++ b/tests/generic/440
+@@ -46,7 +46,7 @@ _scratch_mkfs_encrypted &>> $seqres.full
+ _scratch_mount
+ keydesc=$(_generate_key_descriptor)
+ raw_key=$(_generate_raw_encryption_key)
+-_add_encryption_key $keydesc $raw_key
++_add_session_encryption_key $keydesc $raw_key
+ 
+ # Set up an encrypted directory containing a regular file, a subdirectory, and a
+ # symlink.
+@@ -65,7 +65,7 @@ echo
+ echo "***** Parent has key, but child doesn't *****"
+ exec 3< $SCRATCH_MNT/edir # pin inode with cached key in memory
+ ls $SCRATCH_MNT/edir | sort
+-_unlink_encryption_key $keydesc
++_unlink_session_encryption_key $keydesc
+ cat $SCRATCH_MNT/edir/file |& _filter_scratch
+ ls $SCRATCH_MNT/edir/subdir
+ cat $SCRATCH_MNT/edir/symlink |& _filter_scratch
+@@ -79,14 +79,14 @@ exec 3>&-
+ # plaintext contents, even though its filename is shown in ciphertext!
+ echo
+ echo "***** Child has key, but parent doesn't *****"
+-_add_encryption_key $keydesc $raw_key
++_add_session_encryption_key $keydesc $raw_key
+ mkdir $SCRATCH_MNT/edir2
+ _set_encpolicy $SCRATCH_MNT/edir2 $keydesc
+ ln $SCRATCH_MNT/edir/file $SCRATCH_MNT/edir2/link
+ _scratch_cycle_mount
+ cat $SCRATCH_MNT/edir2/link
+ exec 3< $SCRATCH_MNT/edir2/link # pin inode with cached key in memory
+-_unlink_encryption_key $keydesc
++_unlink_session_encryption_key $keydesc
+ stat $SCRATCH_MNT/edir/file |& _filter_scratch
+ cat "$(find $SCRATCH_MNT/edir/ -type f)"
+ exec 3>&-
+diff --git a/tests/generic/576 b/tests/generic/576
+index 254199ca..58525295 100755
+--- a/tests/generic/576
++++ b/tests/generic/576
+@@ -47,7 +47,7 @@ fsv_file=$edir/file.fsv
+ 
+ # Set up an encrypted directory.
+ _new_session_keyring
+-keydesc=$(_generate_encryption_key)
++keydesc=$(_generate_session_encryption_key)
+ mkdir $edir
+ _set_encpolicy $edir $keydesc
+ 
 -- 
 2.23.0.700.g56cf767bdb-goog
 
