@@ -1,70 +1,70 @@
-Return-Path: <SRS0=dVie=YJ=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=KSdQ=YK=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
 X-Spam-Status: No, score=-8.3 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A8048FA3728
-	for <linux-fstests@archiver.kernel.org>; Wed, 16 Oct 2019 12:28:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5100AECE599
+	for <linux-fstests@archiver.kernel.org>; Thu, 17 Oct 2019 01:47:25 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 75C86218DE
-	for <linux-fstests@archiver.kernel.org>; Wed, 16 Oct 2019 12:28:50 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1178921925
+	for <linux-fstests@archiver.kernel.org>; Thu, 17 Oct 2019 01:47:25 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="HhjqyHs3"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="YjYfjemR"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727268AbfJPM2u (ORCPT
+        id S2388322AbfJQBrY (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 16 Oct 2019 08:28:50 -0400
-Received: from mail-pl1-f193.google.com ([209.85.214.193]:39112 "EHLO
-        mail-pl1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726354AbfJPM2u (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 16 Oct 2019 08:28:50 -0400
-Received: by mail-pl1-f193.google.com with SMTP id s17so11205618plp.6;
-        Wed, 16 Oct 2019 05:28:47 -0700 (PDT)
+        Wed, 16 Oct 2019 21:47:24 -0400
+Received: from mail-pg1-f195.google.com ([209.85.215.195]:33585 "EHLO
+        mail-pg1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727387AbfJQBrY (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 16 Oct 2019 21:47:24 -0400
+Received: by mail-pg1-f195.google.com with SMTP id i76so346039pgc.0;
+        Wed, 16 Oct 2019 18:47:23 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=to:cc:from:subject:message-id:date:user-agent:mime-version
          :content-language:content-transfer-encoding;
-        bh=1wCk9XUoI3BdIB/CiMTBuCvX8NBvPhCPWNLOU20CrRg=;
-        b=HhjqyHs3z2VsozG6RJWoXbJIlgyoR+kSwzcpiVPiSlKmT7NOOaNJk1TZckqmnmexde
-         u4UClrZPVopyppK5zK5IfPGCr9ccYQUiefT0YOl80XGIPVam2TOvTSw1yHndxKG1yyL/
-         GuFL4IJ4wudnVKu3XylSx0oUDE+bVymtL1V/N+UftgId/DqfqW0Cmwbv/H9E7PbeLepq
-         F2Cm+5gO0LRcjv6hmkQnyTc6jy6onPeKvaDlwaN7Thr6HnHpSQ78/PI3TRQ/E1p6OMX+
-         IaI9hgfrJwFDmAgNFEEXX6dJFG467P2qdQPZWaro7ygZVVax1gkHBxBZzZvx8CIpPY+H
-         5UWg==
+        bh=rVJD5UxloovhiCkJ29H51QyBZ8G1eVF8rpQyrdGv45Y=;
+        b=YjYfjemRDi68dsiqcdUeHa6/KWu0yE1H/rCSVxoaCZVXoc1g+owfUtUtnTvlMdHXZZ
+         fH3WZhhuXdkItIML8WqeFwCeNWx/Ik08E0ViQ9xImQBtC5vX4DoHDIWW3/uIOmncDG1Q
+         LZfeh384p2yX6dn0nDhMXWyOLGcnobxGC5nxu0qYk5FIcb/scGfIIT5V2u+bBeJaiiHR
+         J3vN8Z1f6C7eCc2KNjRBfe12deWIIJHKwQjEN2JxfZX0jFHTI7hZZ/939DJyAI28OY6U
+         gP0trJoZpEAVXwQbGeATV1Hl16ecvUa4o/E6KZiWDoiQaSpdpQChSVOpXUCdsnqorFX3
+         VBwQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:to:cc:from:subject:message-id:date:user-agent
          :mime-version:content-language:content-transfer-encoding;
-        bh=1wCk9XUoI3BdIB/CiMTBuCvX8NBvPhCPWNLOU20CrRg=;
-        b=BxP75N6XMUa1ssmqtE45h0aGfKGWhKQGiGqPTWtIx7gQJ1xbsJgIPZ+G8otZRLwOQt
-         xRvh98qGNtzpmkRTJp5B45Ro0SW4yU1Yux+7MPkKNHqBJxHaDejgFK6ZN1H5pVht0uYL
-         DjXN9eDhIPc+Uqs2wj0Zhwo070bhT4YyTz35GcJazOnDJLhNWrFDreZKo7MuuoIXqX/M
-         LbWtKqLS3TrPy1p9bive3nFs1wnxGvpKs7fvbEKMbbm0xhOwtRLg0FUXHqakrbgMJM8x
-         qLFvVLB579KA5vQ6uq3Fr7DDOhEvFAxCobr84vInH53UaOzR1EOdScT3G1Rfuw0WMOze
-         B4kg==
-X-Gm-Message-State: APjAAAXGZM3y3GrGGLakJkrr8Wm0Ta1u7OVE9Jq/Ky9fCIQYMBcTR0lH
-        CzqBufPHbBfZ/m3diGkILw==
-X-Google-Smtp-Source: APXvYqw3DrOYAe4/UrqN9uJ7+xRl4oo/pycoytmv2pggKl6blKlzbJmQpwveteOdxfhCSUESzphcmw==
-X-Received: by 2002:a17:902:b94b:: with SMTP id h11mr40770719pls.21.1571228927462;
-        Wed, 16 Oct 2019 05:28:47 -0700 (PDT)
+        bh=rVJD5UxloovhiCkJ29H51QyBZ8G1eVF8rpQyrdGv45Y=;
+        b=iZnm3awXR49/8+6LqUrz6pB6WoDEN6F2O3rjcw4fZb2vu3KT6p41oJfHJf+NJjlhAv
+         FD7OPt5PHk5dx/8SqMlgsVzMM+KnOGw4HAmxupwViy1Z5reai9UAhHCFTt/eVwTnaJ7e
+         KASKyIGSCenIRXsVXR3EfxJc7Fw8ZLwiGvYMDwQTAe1mB/lmZhT0evc/0c7b4KoM/0cQ
+         3OrIw3HoLz+CLPB873wgPL1ZCbqnkSq0c2mACMJoNBsRm3TcYir3N/FsqtQ1kOY0anx8
+         tlwz7HucRrNR9fEqCsvfESB/zy1OPAY5z2Ft8yRirQ2CtPKDo7nyopGJhmrUqI60WzTq
+         Vj5g==
+X-Gm-Message-State: APjAAAU1qTKMhjLtBCr8c+kNo/lDi+v0B9fNbXS2MYgfZKk9Als4WUu3
+        EJN3HK2XyhrDY4H5cNzkRg==
+X-Google-Smtp-Source: APXvYqzNssgfm25MwzuMb2puUAFl6SNOGAMfTO9N5Nen1eJtspRr9SETqlvNY2McM5lfFoPbPzKAWw==
+X-Received: by 2002:a63:f646:: with SMTP id u6mr1241261pgj.71.1571276843432;
+        Wed, 16 Oct 2019 18:47:23 -0700 (PDT)
 Received: from [10.76.90.34] ([203.205.141.123])
-        by smtp.gmail.com with ESMTPSA id r18sm33094774pfc.3.2019.10.16.05.28.45
+        by smtp.gmail.com with ESMTPSA id l24sm358320pff.151.2019.10.16.18.47.20
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 16 Oct 2019 05:28:47 -0700 (PDT)
+        Wed, 16 Oct 2019 18:47:22 -0700 (PDT)
 To:     fstests@vger.kernel.org
 Cc:     linux-xfs@vger.kernel.org, Eryu Guan <guaneryu@gmail.com>,
-        Brian Foster <bfoster@redhat.com>,
-        "Darrick J. Wong" <darrick.wong@oracle.com>, newtongao@tencent.com,
+        "Darrick J. Wong" <darrick.wong@oracle.com>,
+        Brian Foster <bfoster@redhat.com>, newtongao@tencent.com,
         jasperwang@tencent.com
 From:   kaixuxia <xiakaixu1987@gmail.com>
-Subject: [PATCH v2] fsstress: add renameat2 support
-Message-ID: <92911289-a58a-8f16-e003-d6a1cea3720b@gmail.com>
-Date:   Wed, 16 Oct 2019 20:28:44 +0800
+Subject: [PATCH v3] fsstress: add renameat2 support
+Message-ID: <b6fa2a70-a603-7ebc-f913-593a3731a4fc@gmail.com>
+Date:   Thu, 17 Oct 2019 09:47:19 +0800
 User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:60.0) Gecko/20100101
  Thunderbird/60.9.0
 MIME-Version: 1.0
@@ -80,11 +80,14 @@ Support the renameat2 syscall in fsstress.
 
 Signed-off-by: kaixuxia <kaixuxia@tencent.com>
 ---
- ltp/fsstress.c | 155 +++++++++++++++++++++++++++++++++++++++++++++------------
- 1 file changed, 122 insertions(+), 33 deletions(-)
+Changes in v3:
+ - Fix the rename(..., 0) case, avoide to cripple fsstress.
+
+ ltp/fsstress.c | 158 +++++++++++++++++++++++++++++++++++++++++++++------------
+ 1 file changed, 125 insertions(+), 33 deletions(-)
 
 diff --git a/ltp/fsstress.c b/ltp/fsstress.c
-index 51976f5..5d39695 100644
+index 51976f5..1a20358 100644
 --- a/ltp/fsstress.c
 +++ b/ltp/fsstress.c
 @@ -44,6 +44,38 @@ io_context_t	io_ctx;
@@ -174,12 +177,15 @@ index 51976f5..5d39695 100644
  {
  	char		buf1[NAME_MAX + 1];
  	char		buf2[NAME_MAX + 1];
-@@ -1528,14 +1569,14 @@ rename_path(pathname_t *name1, pathname_t *name2)
+@@ -1528,14 +1569,17 @@ rename_path(pathname_t *name1, pathname_t *name2)
  	pathname_t	newname2;
  	int		rval;
  
 -	rval = rename(name1->path, name2->path);
-+	rval = renameat2(AT_FDCWD, name1->path, AT_FDCWD, name2->path, mode);
++	if (mode == 0)
++		rval = rename(name1->path, name2->path);
++	else
++		rval = renameat2(AT_FDCWD, name1->path, AT_FDCWD, name2->path, mode);
  	if (rval >= 0 || errno != ENAMETOOLONG)
  		return rval;
  	separate_pathname(name1, buf1, &newname1);
@@ -191,7 +197,7 @@ index 51976f5..5d39695 100644
  			assert(chdir("..") == 0);
  		}
  	} else {
-@@ -1555,7 +1596,7 @@ rename_path(pathname_t *name1, pathname_t *name2)
+@@ -1555,7 +1599,7 @@ rename_path(pathname_t *name1, pathname_t *name2)
  			append_pathname(&newname2, "../");
  			append_pathname(&newname2, name2->path);
  			if (chdir(buf1) == 0) {
@@ -200,7 +206,7 @@ index 51976f5..5d39695 100644
  				assert(chdir("..") == 0);
  			}
  		} else {
-@@ -1563,7 +1604,7 @@ rename_path(pathname_t *name1, pathname_t *name2)
+@@ -1563,7 +1607,7 @@ rename_path(pathname_t *name1, pathname_t *name2)
  			append_pathname(&newname1, "../");
  			append_pathname(&newname1, name1->path);
  			if (chdir(buf2) == 0) {
@@ -209,7 +215,7 @@ index 51976f5..5d39695 100644
  				assert(chdir("..") == 0);
  			}
  		}
-@@ -4215,8 +4256,18 @@ out:
+@@ -4215,8 +4259,18 @@ out:
  	free_pathname(&f);
  }
  
@@ -229,7 +235,7 @@ index 51976f5..5d39695 100644
  {
  	fent_t		*dfep;
  	int		e;
-@@ -4234,35 +4285,49 @@ rename_f(int opno, long r)
+@@ -4234,35 +4288,49 @@ rename_f(int opno, long r)
  	init_pathname(&f);
  	if (!get_fname(FT_ANYm, r, &f, &flp, &fep, &v1)) {
  		if (v1)
@@ -302,7 +308,7 @@ index 51976f5..5d39695 100644
  		int xattr_counter = fep->xattr_counter;
  
  		if (flp - flist == FT_DIR) {
-@@ -4273,12 +4338,13 @@ rename_f(int opno, long r)
+@@ -4273,12 +4341,13 @@ rename_f(int opno, long r)
  		add_to_flist(flp - flist, id, parid, xattr_counter);
  	}
  	if (v) {
@@ -319,7 +325,7 @@ index 51976f5..5d39695 100644
  				procid, opno, id, parid);
  		}
  	}
-@@ -4287,6 +4353,29 @@ rename_f(int opno, long r)
+@@ -4287,6 +4356,29 @@ rename_f(int opno, long r)
  }
  
  void
