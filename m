@@ -5,129 +5,172 @@ X-Spam-Level:
 X-Spam-Status: No, score=-8.2 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A56E7ECE58E
-	for <linux-fstests@archiver.kernel.org>; Thu, 17 Oct 2019 09:19:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0715CECE58E
+	for <linux-fstests@archiver.kernel.org>; Thu, 17 Oct 2019 09:41:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 6E51520869
-	for <linux-fstests@archiver.kernel.org>; Thu, 17 Oct 2019 09:19:12 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C72AC21A4C
+	for <linux-fstests@archiver.kernel.org>; Thu, 17 Oct 2019 09:41:04 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="dV7wvvEk"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="QiT17T8E"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729612AbfJQJTM (ORCPT
+        id S2439520AbfJQJlB (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 17 Oct 2019 05:19:12 -0400
-Received: from mail-pf1-f193.google.com ([209.85.210.193]:43937 "EHLO
-        mail-pf1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728987AbfJQJTM (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 17 Oct 2019 05:19:12 -0400
-Received: by mail-pf1-f193.google.com with SMTP id a2so1239107pfo.10
-        for <fstests@vger.kernel.org>; Thu, 17 Oct 2019 02:19:11 -0700 (PDT)
+        Thu, 17 Oct 2019 05:41:01 -0400
+Received: from mail-pl1-f194.google.com ([209.85.214.194]:44716 "EHLO
+        mail-pl1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2439516AbfJQJk7 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 17 Oct 2019 05:40:59 -0400
+Received: by mail-pl1-f194.google.com with SMTP id q15so846418pll.11;
+        Thu, 17 Oct 2019 02:40:57 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to:user-agent;
-        bh=6yq3YcFgWVA75Nk82/UG5GxdaowbwFyqDOV0+1rMbCQ=;
-        b=dV7wvvEksGlN3tiw03sf8V2H5lx01sSxA89Zt4t0W7UAp1a7WPh/RADuDnZGZdMBut
-         6oshuubNitxNT8hAkbl31PUrxNkqzycrqf5npnKe/sbi+xvvP2bwgIis16wCnL29NQly
-         QZK3Axzz3BEmHl3D4RSOmXYr+yR5dMuvzZBnvMZltgpUZK6igVB95l9smmd9rzO7OlxL
-         O5ggh7l8d31rY0Btg+XJOTMtRTv0VoqEl8Hndr2pxOfBwJ18OQK3vjmnz69cFn4p4G5H
-         QJpBTBCrhK4hFNz9sLiG1kGx4LltBrkHQRa7xq5fRXBWob4z5hiZcwzbE3dX0fdpaEVz
-         NBiQ==
+        h=to:cc:from:subject:message-id:date:user-agent:mime-version
+         :content-language:content-transfer-encoding;
+        bh=IFU/J9klOPXpeK+FUQd7ZcRQH26PWNssyQpLrq+S1gY=;
+        b=QiT17T8EblTRQ1ZF9Yppbw/JKsPQwI6fyqiKIbUpXQwKGqFfdtJkaJyZDoxuCW8xPg
+         chn8bYmzHRx65TW/2Gswu/10UoAvXzrnP/uyOlWPu+5HB5PnZErfdfAKa/3VJGZey14p
+         6gz4Gr9gr817GhbgrhRJB7dJNFv7QWyhdvRSVr7+0QSHiK/FYtF2al0/HhEEjuGjGldK
+         KPJM9RCubBBCS2Re9yYwGec24yVxd3kyqj6bfuPxdjFsXnf70x/8wk1bcxQm4c+b4V7N
+         QAdAlkN39Wwr1Y0shWDH0CaeyeKPQYioP0p43lLapM6mEMfPL8b27CcCy9GtjkeDeBrX
+         qTNw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to:user-agent;
-        bh=6yq3YcFgWVA75Nk82/UG5GxdaowbwFyqDOV0+1rMbCQ=;
-        b=dG3FNd3E8wSkGK5L7i7o4t0yCyIuhbq3RujNZc+GuaMAqtmsmtsmm7SznXkEyldmST
-         25EOxZT9LyWQuEUR+hES4W+KSa4HiLObDVLktBBsT+hOtWHMFEQazH5R6Hre6rOa1YKx
-         +ZiWsBgfZXMt/McOvSTqFpEGa1LUQKGIXTqop0Hjse65SMgbo0crp/H4A7MkgRyGfkrl
-         QOGyVPga7QPGYz4p7o18f82IL25W88ebGma3d7BBfqcthTgrKJPlECDDvCNWYw+VFYEq
-         GVB7ij67TnH0QZloH8FSIsZnXaZF4WdYyIh0cdMLtM6tnCSCPH9mgCZSFnkxcplSCCCo
-         5whQ==
-X-Gm-Message-State: APjAAAWedS+CccnqrLnVqOivBkcwbZa+hrNk545BQIAJQ31s+8dl+Qp6
-        hrULvQIqUoiSwmpatYmMFcs=
-X-Google-Smtp-Source: APXvYqyRajZ39mmFYuOcfy9Dt2T9IX7pTmyMU814Z8bEoG5IjO746JzisRZDIq91MfUVTPlqbxLrXw==
-X-Received: by 2002:a63:e055:: with SMTP id n21mr2944737pgj.411.1571303951294;
-        Thu, 17 Oct 2019 02:19:11 -0700 (PDT)
-Received: from localhost ([178.128.102.47])
-        by smtp.gmail.com with ESMTPSA id k124sm1666639pga.83.2019.10.17.02.19.09
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 17 Oct 2019 02:19:10 -0700 (PDT)
-Date:   Thu, 17 Oct 2019 17:19:03 +0800
-From:   Eryu Guan <guaneryu@gmail.com>
-To:     Zhihao Cheng <chengzhihao1@huawei.com>
-Cc:     darrick.wong@oracle.com, ebiggers@google.com, yi.zhang@huawei.com,
-        fstests@vger.kernel.org
-Subject: Re: [PATCH xfstests v2] common/rc: Add path $here before
- src/t_dir_type
-Message-ID: <20191017091856.GI2622@desktop>
-References: <1571188500-82985-1-git-send-email-chengzhihao1@huawei.com>
+        h=x-gm-message-state:to:cc:from:subject:message-id:date:user-agent
+         :mime-version:content-language:content-transfer-encoding;
+        bh=IFU/J9klOPXpeK+FUQd7ZcRQH26PWNssyQpLrq+S1gY=;
+        b=b/4yzqMoGW9wbpoO59heAb/B/DKD9Z6f6igRIJ49aRCkw3s0p17WvVsosmuoksUCba
+         pJHbvBRng+q7USNcnXQKoH8suGVVCEq65XKS3V6RZ/EFTy8gZrhrDlTl4PHIi9nWT4f+
+         k5b5zexaNMTXPIh32i3zdQkM0tIz1WyjcvbIvpogxeN5Mzbu8N1GweoyXKlEZHzLD2dE
+         rSDfqriQ5UBvZ9gaLwXAJwXqCPaC4o20xcWSOYRqTOor3iaw12McAeh2b1OQNLExyklv
+         9oEvnPYoQ3Us7j7cYyGaPuKDESU9IzoxpkawYGkEGQQXIeAzXb9RIKDaCfIlUcsNuCUB
+         +K0g==
+X-Gm-Message-State: APjAAAVgRSnLBa0gOxMZt6zdi3ffeiRF7zn8N0eogofidrTmFdrv2+cA
+        gQWFfrwrYzIZjTHi9OYj7A==
+X-Google-Smtp-Source: APXvYqzcUxD9mpqCSqkvLuTalAyLgguCff3yuJWptdLSN68g0N1RyFUxHlTDhAihx1lmQn9U4zQONg==
+X-Received: by 2002:a17:902:2e:: with SMTP id 43mr3115502pla.55.1571305256705;
+        Thu, 17 Oct 2019 02:40:56 -0700 (PDT)
+Received: from [10.76.90.34] ([203.205.141.123])
+        by smtp.gmail.com with ESMTPSA id q76sm3748063pfc.86.2019.10.17.02.40.54
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 17 Oct 2019 02:40:56 -0700 (PDT)
+To:     fstests@vger.kernel.org
+Cc:     linux-xfs@vger.kernel.org, Eryu Guan <guaneryu@gmail.com>,
+        "Darrick J. Wong" <darrick.wong@oracle.com>,
+        Brian Foster <bfoster@redhat.com>, newtongao@tencent.com,
+        jasperwang@tencent.com
+From:   kaixuxia <xiakaixu1987@gmail.com>
+Subject: [PATCH RFC] xfs: test the deadlock between the AGI and AGF with
+ RENAME_WHITEOUT
+Message-ID: <a1a28793-6fc3-fb53-2ec3-646f1a758443@gmail.com>
+Date:   Thu, 17 Oct 2019 17:40:51 +0800
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:60.0) Gecko/20100101
+ Thunderbird/60.9.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1571188500-82985-1-git-send-email-chengzhihao1@huawei.com>
-User-Agent: Mutt/1.12.1 (2019-06-15)
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Oct 16, 2019 at 09:15:00AM +0800, Zhihao Cheng wrote:
-> Running generic/192 with overlayfs(Let ubifs as base fs) yields the
-> following output:
-> 
->   generic/192 - output mismatch
->      QA output created by 192
->      sleep for 5 seconds
->      test
->     +./common/rc: line 316: src/t_dir_type: No such file or directory
->      delta1 is in range
->      delta2 is in range
->     ...
-> 
-> When the use case fails, the call stack in generic/192 is:
-> 
->   local unknowns=$(src/t_dir_type $dir u | wc -l)	common/rc:316
->   _supports_filetype					common/rc:299
->   _overlay_mount					common/overlay:52
->   _overlay_test_mount					common/overlay:93
->   _test_mount						common/rc:407
->   _test_cycle_mount					generic/192:50
-> 
-> Before _test_cycle_mount() being invoked, generic/192 executed 'cd /'
-> to change work dir from 'xfstests-dev' to '/', so src/t_dir_type was not
-> found.
-> 
-> Signed-off-by: Zhihao Cheng <chengzhihao1@huawei.com>
+There is ABBA deadlock bug between the AGI and AGF when performing
+rename() with RENAME_WHITEOUT flag, and add this testcase to make
+sure the rename() call works well.
 
-Thanks for the patch! But I think it's better to fix all similar issues
-in the whole fstests tree, I can see there're a lot more tests use
-src/<file> without the $here prefix.
+Signed-off-by: kaixuxia <kaixuxia@tencent.com>
+---
+ tests/generic/579     | 56 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/579.out |  2 ++
+ tests/generic/group   |  1 +
+ 3 files changed, 59 insertions(+)
+ create mode 100755 tests/generic/579
+ create mode 100644 tests/generic/579.out
 
-Thanks!
+diff --git a/tests/generic/579 b/tests/generic/579
+new file mode 100755
+index 0000000..d6b0042
+--- /dev/null
++++ b/tests/generic/579
+@@ -0,0 +1,56 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2019 Tencent.  All Rights Reserved.
++#
++# FS QA Test No. 579
++#
++# Regression test for:
++#    bc56ad8c74b8: ("xfs: Fix deadlock between AGI and AGF with RENAME_WHITEOUT")
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1        # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++        cd /
++        rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/renameat2
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_os Linux
++_supported_fs generic
++_require_scratch
++_require_renameat2 whiteout
++
++_scratch_mkfs > $seqres.full 2>&1 || _fail "mkfs failed"
++_scratch_mount >> $seqres.full 2>&1
++
++# start a create and rename(rename_whiteout) workload. These processes
++# occur simultaneously may cause the deadlock between AGI and AGF with
++# RENAME_WHITEOUT.
++$FSSTRESS_PROG -z -n 100 -p 100 \
++		-f creat=5 \
++		-f rwhiteout=5 \
++		-d $SCRATCH_MNT/fsstress >> $seqres.full 2>&1
++
++echo Silence is golden
++
++# Failure comes in the form of a deadlock.
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/579.out b/tests/generic/579.out
+new file mode 100644
+index 0000000..06f4633
+--- /dev/null
++++ b/tests/generic/579.out
+@@ -0,0 +1,2 @@
++QA output created by 579
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index 6f9c4e1..21870d2 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -581,3 +581,4 @@
+ 576 auto quick verity encrypt
+ 577 auto quick verity
+ 578 auto quick rw clone
++579 auto rename
+-- 
+1.8.3.1
 
-Eryu
-
-> ---
->  common/rc | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/common/rc b/common/rc
-> index cfaabf10..28c27975 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -313,7 +313,7 @@ _supports_filetype()
->  		local testfile=$dir/$$.ftype
->  		touch $testfile
->  		# look for DT_UNKNOWN files
-> -		local unknowns=$(src/t_dir_type $dir u | wc -l)
-> +		local unknowns=$($here/src/t_dir_type $dir u | wc -l)
->  		rm $testfile
->  		# 0 unknowns is success
->  		return $unknowns
-> -- 
-> 2.13.6
-> 
+-- 
+kaixuxia
