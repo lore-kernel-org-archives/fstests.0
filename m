@@ -8,222 +8,378 @@ X-Spam-Status: No, score=-8.3 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E0AA0CA9EA0
-	for <linux-fstests@archiver.kernel.org>; Fri, 18 Oct 2019 09:15:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BF9F6CA9EA0
+	for <linux-fstests@archiver.kernel.org>; Fri, 18 Oct 2019 09:58:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id BA6B5222C3
-	for <linux-fstests@archiver.kernel.org>; Fri, 18 Oct 2019 09:15:49 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7EC47222BD
+	for <linux-fstests@archiver.kernel.org>; Fri, 18 Oct 2019 09:58:02 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="vBYTmxPn"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="JL92D3z0"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2391167AbfJRJPt (ORCPT
+        id S2392164AbfJRJ6C (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 18 Oct 2019 05:15:49 -0400
-Received: from mail-pf1-f193.google.com ([209.85.210.193]:44284 "EHLO
-        mail-pf1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1731444AbfJRJPs (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 18 Oct 2019 05:15:48 -0400
-Received: by mail-pf1-f193.google.com with SMTP id q21so3473427pfn.11
-        for <fstests@vger.kernel.org>; Fri, 18 Oct 2019 02:15:46 -0700 (PDT)
+        Fri, 18 Oct 2019 05:58:02 -0400
+Received: from mail-pf1-f196.google.com ([209.85.210.196]:38734 "EHLO
+        mail-pf1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2389081AbfJRJ6C (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 18 Oct 2019 05:58:02 -0400
+Received: by mail-pf1-f196.google.com with SMTP id h195so3557785pfe.5;
+        Fri, 18 Oct 2019 02:58:01 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to:user-agent;
-        bh=WST3IHmB4Yaq0s+j7mfZWbA/H08o+3ozNzjBE/vWdQg=;
-        b=vBYTmxPnm1QbaJzCVBCm2zqLKKQMj4NzOSQN617kxPffI4E9ovSG6fNsMm9XIhrnQg
-         1+44mCRhEG76+Lc/oljHqo/XDQd7DQoW+Tl45M4Bno0jOE85OiQqH6Z0ljJ9hySvAt9O
-         zZEXEB3VzRWNH4KUZxGB3YyXQuFHWVb58OhVH4HumnsH0LWsLFanBqeuJEX6oRRsH4po
-         9YHsyRZGatl5+TGIALi8CAIdOV48/azJVwvmxpVD/9Mi/ywHX6R9WyX9NyFYxuzfMtYB
-         Qa8XkmSw9Z00CeAKlw365+WWFcaDXNRdySH6Pwb/HYg3QiFkH3QT03/Gbrzpmn2PlRvT
-         rs8A==
+        h=to:cc:from:subject:message-id:date:user-agent:mime-version
+         :content-language:content-transfer-encoding;
+        bh=pL8ykawI17LOx8kqE9qCutKPqKIeU/yxymH4rv3Qa/4=;
+        b=JL92D3z02/UimOm+n4rHH5bmQ2yRVbO/tthJGonmxKAlLfFO4Tzo2lp7osf9Kmn9qC
+         Vvnu+oUKjI1RTOAi8956VLJJWwZ+H8/3uN3kMrU3bUH6p+SUClo7AKWzTWLqirv78hYk
+         1blAKAT+lVj/r7x67O1MhexHYIDsTv8i4RSfMQ8UuFvCmqOGyi7TxIhOLZC+HWKSMNrv
+         xEYlC++byu5M8nN17z2//P2PPjgZt92Iky7Wru+DKNvbAsZm3SPjqWsDkHuYOkAXGMYd
+         oQFGHh7aDTD1tw7qVAYd96PXXsnLfifH/aF7N1xF+t+0C94Kmzpp6p2eW2vd8kDMWzQC
+         3cxg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to:user-agent;
-        bh=WST3IHmB4Yaq0s+j7mfZWbA/H08o+3ozNzjBE/vWdQg=;
-        b=WZN2tcqJi9qZKCgKugI4v+WmzfeU/esne34fj02NZL27ySobFNkGfrLPchg7cem1qs
-         NDRlvaW/1LUWsef8Kmdcv9itjzH8j8fSzz7m8SdpPdcrat5u1VxEdviU5WnsSAddGTm2
-         4+8Qfh8RYYaIytzcwckyAK01mxTlvsflpw9jBIhvnbySfY7B6R5+K7pPAIujA2EkGusx
-         VGi7Y6xYYqYAxogHn0tL95/5eZcJFxTl9RezcpiM54XDhDnk9IeG0jXAknqMRf/LNyPg
-         9O4tav9rOkOZnzcW/4igIqZPa+3ihYYuka8AHO9eDGEi8Mrh3Bfy68oNEKLpI10v1jeC
-         qO/A==
-X-Gm-Message-State: APjAAAWUES0ipPMIeEyo9PlPaclnWMw9DaH2L4Qn/r121CwboEfSZkPc
-        Mw0LMAFjxloYY4HCIa4fCcU=
-X-Google-Smtp-Source: APXvYqxqOr0nstkbI/aEAXqa5KaeTluLOPohRLJOpCxo90mBDSx8DAj5nn9X1Zv9v8E4A4Ol0ypfVw==
-X-Received: by 2002:a17:90a:c24a:: with SMTP id d10mr9858349pjx.124.1571390146162;
-        Fri, 18 Oct 2019 02:15:46 -0700 (PDT)
-Received: from localhost ([178.128.102.47])
-        by smtp.gmail.com with ESMTPSA id a8sm5147006pff.5.2019.10.18.02.15.44
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 18 Oct 2019 02:15:45 -0700 (PDT)
-Date:   Fri, 18 Oct 2019 17:15:38 +0800
-From:   Eryu Guan <guaneryu@gmail.com>
-To:     QI Fuli <qi.fuli@fujitsu.com>
-Cc:     fstests@vger.kernel.org, virtio-fs@redhat.com,
-        Misono Tomohiro <misono.tomohiro@fujitsu.com>
-Subject: Re: [Virtio-fs] [PATCH] fstests: Add virtio-fs shared file system
- support
-Message-ID: <20191018091533.GM2622@desktop>
-References: <20191015083228.13475-1-qi.fuli@fujitsu.com>
+        h=x-gm-message-state:to:cc:from:subject:message-id:date:user-agent
+         :mime-version:content-language:content-transfer-encoding;
+        bh=pL8ykawI17LOx8kqE9qCutKPqKIeU/yxymH4rv3Qa/4=;
+        b=KrHycN0ouxzhGA91HDqheqOJgHvmf+W968dWfKniaNJ+2CtoaVcaE5k74wKW5XeUee
+         m//7hqgJk0IWRrtMA00JDDZz9w0V+vW18SAIV0YudKWT8kfPOa3PwT4AHszcd2BV1bTh
+         THwbmNKT3zthZNsw2x4G7fnORiXlnlqi5fBANK9xaxtPfMgnZ7JicBEwJXB2evtn4TT0
+         YkdKXjou4SPi8TT63pjYx+JmULzmXsEhDg31mjGHoiTGRCckVBWVfDxLbRzxxH0t0Ap9
+         78BhR1gMlo9hfc5nNQw9yQMmpnRHB2It5ybU5+7oXhMDiVIoJbyeloUr53n9kWm9WmDc
+         XR7g==
+X-Gm-Message-State: APjAAAXpIyD3Bo5egdiJe8wG4mDL3krnRa/YYjqdqgjKHhz+275Szl5a
+        0ksP5wfLYHZ866dA51VgpA==
+X-Google-Smtp-Source: APXvYqypgj0latnjQn6uJNRm9DH4PH3/o3lx8CfhXokSWXU4EZLUt/ClojEZFII9H0GZMjyFUjRmUg==
+X-Received: by 2002:aa7:838f:: with SMTP id u15mr5506672pfm.13.1571392680956;
+        Fri, 18 Oct 2019 02:58:00 -0700 (PDT)
+Received: from [10.76.90.34] ([203.205.141.123])
+        by smtp.gmail.com with ESMTPSA id p11sm5435221pgs.51.2019.10.18.02.57.58
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Fri, 18 Oct 2019 02:58:00 -0700 (PDT)
+To:     fstests@vger.kernel.org
+Cc:     linux-xfs@vger.kernel.org, Eryu Guan <guaneryu@gmail.com>,
+        "Darrick J. Wong" <darrick.wong@oracle.com>,
+        Brian Foster <bfoster@redhat.com>, newtongao@tencent.com,
+        jasperwang@tencent.com
+From:   kaixuxia <xiakaixu1987@gmail.com>
+Subject: [PATCH v4] fsstress: add renameat2 support
+Message-ID: <5df7cc7b-31b4-69e2-f623-83a2c90bfca7@gmail.com>
+Date:   Fri, 18 Oct 2019 17:57:55 +0800
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:60.0) Gecko/20100101
+ Thunderbird/60.9.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20191015083228.13475-1-qi.fuli@fujitsu.com>
-User-Agent: Mutt/1.12.1 (2019-06-15)
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Oct 15, 2019 at 05:32:28PM +0900, QI Fuli wrote:
-> This patch adds support for virtio-fs shared file system that lets
-> virtual machines access a directory tree on the host.
-> 
-> To run xfstests on it, first, start virtiofsd daemon in host:
->  ./virtiofsd -o vhost_user_socket=/tmp/vhostqemu0 -o source=$DIR0 -o cache=always
->  ./virtiofsd -o vhost_user_socket=/tmp/vhostqemu1 -o source=$DIR1 -o cache=always
-> 
-> second, launch QEMU with:
->  -chardev socket,id=char0,path=/tmp/vhostqemu0
->  -device vhost-user-fs-pci,queue-size=1024,chardev=char0,tag=myfs0
->  -chardev socket,id=char1,path=/tmp/vhostqemu1
->  -device vhost-user-fs-pci,queue-size=1024,chardev=char1,tag=myfs1
->  -m 8G
->  -object memory-backend-file,id=mem,size=8G,mem-path=/dev/shm,share=on
->  -numa node,memdev=mem
-> 
-> then, inside the VM run xfstests with:
->  export TEST_DEV=myfs0
->  export TEST_DIR=$TESTDIR
->  export SCRATCH_DEV=myfs1
->  export SCRATCH_MNT=$SCRATCHMNT
->  export MOUNT_OPTIONS=""
->  export TEST_FS_MOUNT_OPTS=""
-> 
-> Cc: Dr. David Alan Gilbert <dgilbert@redhat.com>
-> Signed-off-by: Misono Tomohiro <misono.tomohiro@fujitsu.com>
-> Signed-off-by: QI Fuli <qi.fuli@fujitsu.com>
+Support the renameat2 syscall in fsstress.
 
-Looks good to me, thanks for the patch!
+Signed-off-by: kaixuxia <kaixuxia@tencent.com>
+---
+Changes in v4:
+ -Fix long line((> 80 characters) problem.
+ -Fix the RENAME_WHITEOUT RENAME_EXCHANGE file flist problem.
 
-Eryu
+ ltp/fsstress.c | 174 +++++++++++++++++++++++++++++++++++++++++++++++----------
+ 1 file changed, 143 insertions(+), 31 deletions(-)
 
-> ---
->  check         |  2 ++
->  common/config |  4 ++--
->  common/rc     | 18 +++++++++++++++---
->  3 files changed, 19 insertions(+), 5 deletions(-)
-> 
-> diff --git a/check b/check
-> index c7f1dc5e..2e148e57 100755
-> --- a/check
-> +++ b/check
-> @@ -56,6 +56,7 @@ check options
->      -glusterfs		test GlusterFS
->      -cifs		test CIFS
->      -9p			test 9p
-> +    -virtiofs		test virtiofs
->      -overlay		test overlay
->      -pvfs2		test PVFS2
->      -tmpfs		test TMPFS
-> @@ -268,6 +269,7 @@ while [ $# -gt 0 ]; do
->  	-glusterfs)	FSTYP=glusterfs ;;
->  	-cifs)		FSTYP=cifs ;;
->  	-9p)		FSTYP=9p ;;
-> +	-virtiofs)	FSTYP=virtiofs ;;
->  	-overlay)	FSTYP=overlay; export OVERLAY=true ;;
->  	-pvfs2)		FSTYP=pvfs2 ;;
->  	-tmpfs)		FSTYP=tmpfs ;;
-> diff --git a/common/config b/common/config
-> index a0d58bde..2cb0202a 100644
-> --- a/common/config
-> +++ b/common/config
-> @@ -480,8 +480,8 @@ _check_device()
->  	fi
->  
->  	case "$FSTYP" in
-> -	9p|tmpfs)
-> -		# 9p mount tags are just plain strings, so anything is allowed
-> +	9p|tmpfs|virtiofs)
-> +		# 9p and virtiofs mount tags are just plain strings, so anything is allowed
->  		# tmpfs doesn't use mount source, ignore
->  		;;
->  	overlay)
-> diff --git a/common/rc b/common/rc
-> index cfaabf10..3d5c8b23 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -603,6 +603,9 @@ _test_mkfs()
->      9p)
->  	# do nothing for 9p
->  	;;
-> +    virtiofs)
-> +	# do nothing for virtiofs
-> +	;;
->      ceph)
->  	# do nothing for ceph
->  	;;
-> @@ -640,6 +643,9 @@ _mkfs_dev()
->      9p)
->  	# do nothing for 9p
->  	;;
-> +    virtiofs)
-> +	# do nothing for virtiofs
-> +	;;
->      overlay)
->  	# do nothing for overlay
->  	;;
-> @@ -704,7 +710,7 @@ _scratch_mkfs()
->  	local mkfs_status
->  
->  	case $FSTYP in
-> -	nfs*|cifs|ceph|overlay|glusterfs|pvfs2|9p)
-> +	nfs*|cifs|ceph|overlay|glusterfs|pvfs2|9p|virtiofs)
->  		# unable to re-create this fstyp, just remove all files in
->  		# $SCRATCH_MNT to avoid EEXIST caused by the leftover files
->  		# created in previous runs
-> @@ -1467,7 +1473,7 @@ _require_scratch_nocheck()
->  			_notrun "this test requires a valid \$SCRATCH_MNT"
->  		fi
->  		;;
-> -	9p)
-> +	9p|virtiofs)
->  		if [ -z "$SCRATCH_DEV" ]; then
->  			_notrun "this test requires a valid \$SCRATCH_DEV"
->  		fi
-> @@ -1591,7 +1597,7 @@ _require_test()
->  			_notrun "this test requires a valid \$TEST_DIR"
->  		fi
->  		;;
-> -	9p)
-> +	9p|virtiofs)
->  		if [ -z "$TEST_DEV" ]; then
->  			_notrun "this test requires a valid \$TEST_DEV"
->  		fi
-> @@ -2686,6 +2692,9 @@ _check_test_fs()
->      9p)
->  	# no way to check consistency for 9p
->  	;;
-> +    virtiofs)
-> +	# no way to check consistency for virtiofs
-> +	;;
->      ceph)
->  	# no way to check consistency for CephFS
->  	;;
-> @@ -2744,6 +2753,9 @@ _check_scratch_fs()
->      9p)
->  	# no way to check consistency for 9p
->  	;;
-> +    virtiofs)
-> +	# no way to check consistency for virtiofs
-> +	;;
->      ceph)
->  	# no way to check consistency for CephFS
->  	;;
-> -- 
-> 2.20.1
-> 
-> _______________________________________________
-> Virtio-fs mailing list
-> Virtio-fs@redhat.com
-> https://www.redhat.com/mailman/listinfo/virtio-fs
+diff --git a/ltp/fsstress.c b/ltp/fsstress.c
+index 51976f5..f268a5a 100644
+--- a/ltp/fsstress.c
++++ b/ltp/fsstress.c
+@@ -44,6 +44,38 @@ io_context_t	io_ctx;
+ #define IOV_MAX 1024
+ #endif
+ 
++#ifndef HAVE_RENAMEAT2
++#if !defined(SYS_renameat2) && defined(__x86_64__)
++#define SYS_renameat2 316
++#endif
++
++#if !defined(SYS_renameat2) && defined(__i386__)
++#define SYS_renameat2 353
++#endif
++
++static int renameat2(int dfd1, const char *path1,
++		     int dfd2, const char *path2,
++		     unsigned int flags)
++{
++#ifdef SYS_renameat2
++	return syscall(SYS_renameat2, dfd1, path1, dfd2, path2, flags);
++#else
++	errno = ENOSYS;
++	return -1;
++#endif
++}
++#endif
++
++#ifndef RENAME_NOREPLACE
++#define RENAME_NOREPLACE	(1 << 0)	/* Don't overwrite target */
++#endif
++#ifndef RENAME_EXCHANGE
++#define RENAME_EXCHANGE		(1 << 1)	/* Exchange source and dest */
++#endif
++#ifndef RENAME_WHITEOUT
++#define RENAME_WHITEOUT		(1 << 2)	/* Whiteout source */
++#endif
++
+ #define FILELEN_MAX		(32*4096)
+ 
+ typedef enum {
+@@ -85,6 +117,9 @@ typedef enum {
+ 	OP_READV,
+ 	OP_REMOVEFATTR,
+ 	OP_RENAME,
++	OP_RNOREPLACE,
++	OP_REXCHANGE,
++	OP_RWHITEOUT,
+ 	OP_RESVSP,
+ 	OP_RMDIR,
+ 	OP_SETATTR,
+@@ -203,6 +238,9 @@ void	readlink_f(int, long);
+ void	readv_f(int, long);
+ void	removefattr_f(int, long);
+ void	rename_f(int, long);
++void    rnoreplace_f(int, long);
++void    rexchange_f(int, long);
++void    rwhiteout_f(int, long);
+ void	resvsp_f(int, long);
+ void	rmdir_f(int, long);
+ void	setattr_f(int, long);
+@@ -262,6 +300,9 @@ opdesc_t	ops[] = {
+ 	/* remove (delete) extended attribute */
+ 	{ OP_REMOVEFATTR, "removefattr", removefattr_f, 1, 1 },
+ 	{ OP_RENAME, "rename", rename_f, 2, 1 },
++	{ OP_RNOREPLACE, "rnoreplace", rnoreplace_f, 2, 1 },
++	{ OP_REXCHANGE, "rexchange", rexchange_f, 2, 1 },
++	{ OP_RWHITEOUT, "rwhiteout", rwhiteout_f, 2, 1 },
+ 	{ OP_RESVSP, "resvsp", resvsp_f, 1, 1 },
+ 	{ OP_RMDIR, "rmdir", rmdir_f, 1, 1 },
+ 	/* set attribute flag (FS_IOC_SETFLAGS ioctl) */
+@@ -354,7 +395,7 @@ int	open_path(pathname_t *, int);
+ DIR	*opendir_path(pathname_t *);
+ void	process_freq(char *);
+ int	readlink_path(pathname_t *, char *, size_t);
+-int	rename_path(pathname_t *, pathname_t *);
++int	rename_path(pathname_t *, pathname_t *, int);
+ int	rmdir_path(pathname_t *);
+ void	separate_pathname(pathname_t *, char *, pathname_t *);
+ void	show_ops(int, char *);
+@@ -1519,7 +1560,7 @@ readlink_path(pathname_t *name, char *lbuf, size_t lbufsiz)
+ }
+ 
+ int
+-rename_path(pathname_t *name1, pathname_t *name2)
++rename_path(pathname_t *name1, pathname_t *name2, int mode)
+ {
+ 	char		buf1[NAME_MAX + 1];
+ 	char		buf2[NAME_MAX + 1];
+@@ -1528,14 +1569,18 @@ rename_path(pathname_t *name1, pathname_t *name2)
+ 	pathname_t	newname2;
+ 	int		rval;
+ 
+-	rval = rename(name1->path, name2->path);
++	if (mode == 0)
++		rval = rename(name1->path, name2->path);
++	else
++		rval = renameat2(AT_FDCWD, name1->path,
++				 AT_FDCWD, name2->path, mode);
+ 	if (rval >= 0 || errno != ENAMETOOLONG)
+ 		return rval;
+ 	separate_pathname(name1, buf1, &newname1);
+ 	separate_pathname(name2, buf2, &newname2);
+ 	if (strcmp(buf1, buf2) == 0) {
+ 		if (chdir(buf1) == 0) {
+-			rval = rename_path(&newname1, &newname2);
++			rval = rename_path(&newname1, &newname2, mode);
+ 			assert(chdir("..") == 0);
+ 		}
+ 	} else {
+@@ -1555,7 +1600,7 @@ rename_path(pathname_t *name1, pathname_t *name2)
+ 			append_pathname(&newname2, "../");
+ 			append_pathname(&newname2, name2->path);
+ 			if (chdir(buf1) == 0) {
+-				rval = rename_path(&newname1, &newname2);
++				rval = rename_path(&newname1, &newname2, mode);
+ 				assert(chdir("..") == 0);
+ 			}
+ 		} else {
+@@ -1563,7 +1608,7 @@ rename_path(pathname_t *name1, pathname_t *name2)
+ 			append_pathname(&newname1, "../");
+ 			append_pathname(&newname1, name1->path);
+ 			if (chdir(buf2) == 0) {
+-				rval = rename_path(&newname1, &newname2);
++				rval = rename_path(&newname1, &newname2, mode);
+ 				assert(chdir("..") == 0);
+ 			}
+ 		}
+@@ -4215,10 +4260,21 @@ out:
+ 	free_pathname(&f);
+ }
+ 
++struct print_flags renameat2_flags [] = {
++	{ RENAME_NOREPLACE, "NOREPLACE"},
++	{ RENAME_EXCHANGE, "EXCHANGE"},
++	{ RENAME_WHITEOUT, "WHITEOUT"},
++	{ -1, NULL}
++};
++
++#define translate_renameat2_flags(mode)	\
++	({translate_flags(mode, "|", renameat2_flags);})
++
+ void
+-rename_f(int opno, long r)
++do_renameat2(int opno, long r, int mode)
+ {
+ 	fent_t		*dfep;
++	flist_t		*dflp;
+ 	int		e;
+ 	pathname_t	f;
+ 	fent_t		*fep;
+@@ -4234,33 +4290,56 @@ rename_f(int opno, long r)
+ 	init_pathname(&f);
+ 	if (!get_fname(FT_ANYm, r, &f, &flp, &fep, &v1)) {
+ 		if (v1)
+-			printf("%d/%d: rename - no filename\n", procid, opno);
++			printf("%d/%d: rename - no source filename\n",
++				procid, opno);
+ 		free_pathname(&f);
+ 		return;
+ 	}
++	/* Both pathnames must exist for the RENAME_EXCHANGE */
++	if (mode == RENAME_EXCHANGE) {
++		init_pathname(&newf);
++		if (!get_fname(FT_ANYm, random(), &newf, &dflp, &dfep, &v)) {
++			if (v)
++				printf("%d/%d: rename - no target filename\n",
++					procid, opno);
++			free_pathname(&newf);
++			free_pathname(&f);
++			return;
++		}
++		v |= v1;
++		id = dfep->id;
++		parid = dfep->parent;
++	} else {
++		/*
++		 * get an existing directory for the destination parent
++		 * directory name.
++		 */
++		if (!get_fname(FT_DIRm, random(), NULL, NULL, &dfep, &v))
++			parid = -1;
++		else
++			parid = dfep->id;
++		v |= v1;
+ 
+-	/* get an existing directory for the destination parent directory name */
+-	if (!get_fname(FT_DIRm, random(), NULL, NULL, &dfep, &v))
+-		parid = -1;
+-	else
+-		parid = dfep->id;
+-	v |= v1;
+-
+-	/* generate a new path using an existing parent directory in name */
+-	init_pathname(&newf);
+-	e = generate_fname(dfep, flp - flist, &newf, &id, &v1);
+-	v |= v1;
+-	if (!e) {
+-		if (v) {
+-			(void)fent_to_name(&f, &flist[FT_DIR], dfep);
+-			printf("%d/%d: rename - no filename from %s\n",
+-				procid, opno, f.path);
++		/*
++		 * generate a new path using an existing parent directory
++		 * in name.
++		 */
++		init_pathname(&newf);
++		e = generate_fname(dfep, flp - flist, &newf, &id, &v1);
++		v |= v1;
++		if (!e) {
++			if (v) {
++				(void)fent_to_name(&f, &flist[FT_DIR], dfep);
++				printf("%d/%d: rename - no filename from %s\n",
++					procid, opno, f.path);
++			}
++			free_pathname(&newf);
++			free_pathname(&f);
++			return;
+ 		}
+-		free_pathname(&newf);
+-		free_pathname(&f);
+-		return;
+ 	}
+-	e = rename_path(&f, &newf) < 0 ? errno : 0;
++
++	e = rename_path(&f, &newf, mode) < 0 ? errno : 0;
+ 	check_cwd();
+ 	if (e == 0) {
+ 		int xattr_counter = fep->xattr_counter;
+@@ -4269,16 +4348,26 @@ rename_f(int opno, long r)
+ 			oldid = fep->id;
+ 			fix_parent(oldid, id);
+ 		}
++
++		if (mode == RENAME_WHITEOUT)
++			add_to_flist(FT_DEV, fep->id, fep->parent, 0);
++		else if (mode == RENAME_EXCHANGE) {
++			del_from_flist(dflp - flist, dfep - dflp->fents);
++			add_to_flist(dflp - flist, fep->id, fep->parent,
++				     dfep->xattr_counter);
++		}
++
+ 		del_from_flist(flp - flist, fep - flp->fents);
+ 		add_to_flist(flp - flist, id, parid, xattr_counter);
+ 	}
+ 	if (v) {
+-		printf("%d/%d: rename %s to %s %d\n", procid, opno, f.path,
++		printf("%d/%d: rename(%s) %s to %s %d\n", procid,
++			opno, translate_renameat2_flags(mode), f.path,
+ 			newf.path, e);
+ 		if (e == 0) {
+-			printf("%d/%d: rename del entry: id=%d,parent=%d\n",
++			printf("%d/%d: rename source entry: id=%d,parent=%d\n",
+ 				procid, opno, fep->id, fep->parent);
+-			printf("%d/%d: rename add entry: id=%d,parent=%d\n",
++			printf("%d/%d: rename target entry: id=%d,parent=%d\n",
+ 				procid, opno, id, parid);
+ 		}
+ 	}
+@@ -4287,6 +4376,29 @@ rename_f(int opno, long r)
+ }
+ 
+ void
++rename_f(int opno, long r)
++{
++	do_renameat2(opno, r, 0);
++}
++void
++rnoreplace_f(int opno, long r)
++{
++	do_renameat2(opno, r, RENAME_NOREPLACE);
++}
++
++void
++rexchange_f(int opno, long r)
++{
++	do_renameat2(opno, r, RENAME_EXCHANGE);
++}
++
++void
++rwhiteout_f(int opno, long r)
++{
++	do_renameat2(opno, r, RENAME_WHITEOUT);
++}
++
++void
+ resvsp_f(int opno, long r)
+ {
+ 	int		e;
+-- 
+1.8.3.1
+
+-- 
+kaixuxia
