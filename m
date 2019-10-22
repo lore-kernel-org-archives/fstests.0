@@ -2,98 +2,219 @@ Return-Path: <SRS0=glCd=YP=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.7 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	UNPARSEABLE_RELAY,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
+X-Spam-Status: No, score=-9.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EC60BCA9EA0
-	for <linux-fstests@archiver.kernel.org>; Tue, 22 Oct 2019 12:31:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 29E75CA9EA0
+	for <linux-fstests@archiver.kernel.org>; Tue, 22 Oct 2019 12:42:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id CB82621872
-	for <linux-fstests@archiver.kernel.org>; Tue, 22 Oct 2019 12:31:43 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2404E218AE
+	for <linux-fstests@archiver.kernel.org>; Tue, 22 Oct 2019 12:42:34 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=mykernel.net header.i=cgxu519@mykernel.net header.b="ezXA8/Pv"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2388388AbfJVMbn (ORCPT
+        id S1729994AbfJVMmd (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 22 Oct 2019 08:31:43 -0400
-Received: from out4436.biz.mail.alibaba.com ([47.88.44.36]:19068 "EHLO
-        out4436.biz.mail.alibaba.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S2388066AbfJVMbn (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 22 Oct 2019 08:31:43 -0400
-X-Alimail-AntiSpam: AC=PASS;BC=-1|-1;BR=01201311R211e4;CH=green;DM=||false|;FP=0|-1|-1|-1|0|-1|-1|-1;HT=e01f04391;MF=eguan@linux.alibaba.com;NM=1;PH=DS;RN=3;SR=0;TI=SMTPD_---0Tfv6Apt_1571747490;
-Received: from localhost(mailfrom:eguan@linux.alibaba.com fp:SMTPD_---0Tfv6Apt_1571747490)
-          by smtp.aliyun-inc.com(127.0.0.1);
-          Tue, 22 Oct 2019 20:31:30 +0800
-From:   Eryu Guan <eguan@linux.alibaba.com>
-To:     fstests@vger.kernel.org
-Cc:     Misono Tomohiro <misono.tomohiro@jp.fujitsu.com>,
-        Eryu Guan <eguan@linux.alibaba.com>
-Subject: [PATCH] ltp/fsx: hornor keep_size_calls when replaying operations
-Date:   Tue, 22 Oct 2019 20:31:15 +0800
-Message-Id: <20191022123115.12250-1-eguan@linux.alibaba.com>
-X-Mailer: git-send-email 2.14.4.44.g2045bb6
+        Tue, 22 Oct 2019 08:42:33 -0400
+Received: from sender2-of-o52.zoho.com.cn ([163.53.93.247]:21144 "EHLO
+        sender2-of-o52.zoho.com.cn" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726978AbfJVMmd (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 22 Oct 2019 08:42:33 -0400
+X-Greylist: delayed 909 seconds by postgrey-1.27 at vger.kernel.org; Tue, 22 Oct 2019 08:42:30 EDT
+ARC-Seal: i=1; a=rsa-sha256; t=1571747199; cv=none; 
+        d=zoho.com.cn; s=zohoarc; 
+        b=ZQya63fb0erza0FoiZtJfdTBxn8t2ipKOIjNTlFDAMmQ9sqODvG71W9ZWMIDKRXf1jpP9SfsqXu4GQGIe2LINpcdOD1a9AUI4Wz0HlpL6Bx6yze2yUXRlegJFNI09Ec2jO8wCnCye3FUMw8qcdOp9fDt1VQah46rQ9CGLPp6jT8=
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zoho.com.cn; s=zohoarc; 
+        t=1571747199; h=Content-Type:Content-Transfer-Encoding:Cc:Date:From:MIME-Version:Message-ID:Subject:To:ARC-Authentication-Results; 
+        bh=tSQFdaFIC/Vx+c0BcqNbbCkD9v1+arnQd/AIzDppyTg=; 
+        b=Yu1m0UrsrASHo92SqaFNaDU11YKJ67QJh7mFv/+J7o78BSJ/0FguOkjoa6SJ6hrLffFkW4ykCoW9wjfCUnbr6+DzbeKDwWmC7ILpnGtkfVowN6YYZ0zCetp5hFDt2bkZBIX9TzoCo923hYdDCeoSSb2l+z6WEWYy2MVbjY7qAds=
+ARC-Authentication-Results: i=1; mx.zoho.com.cn;
+        dkim=pass  header.i=mykernel.net;
+        spf=pass  smtp.mailfrom=cgxu519@mykernel.net;
+        dmarc=pass header.from=<cgxu519@mykernel.net> header.from=<cgxu519@mykernel.net>
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1571747199;
+        s=zohomail; d=mykernel.net; i=cgxu519@mykernel.net;
+        h=From:To:Cc:Message-ID:Subject:Date:MIME-Version:Content-Transfer-Encoding:Content-Type;
+        l=4294; bh=tSQFdaFIC/Vx+c0BcqNbbCkD9v1+arnQd/AIzDppyTg=;
+        b=ezXA8/PvNtzR59Es1hifZimesTC7AbDOCqiO5N6xxruY/TsKrJsfwjxorBw84ohQ
+        VLdJAYP51LwiMGf20XLceQJP7p7teFz32g6hwSV2iemrZywjal0Se0Wq2wtjPYLbqFp
+        OSiWcz71/gmZpkEgGCmEguT9cF5xSBjQnZPr6t/k=
+Received: from localhost.localdomain (218.18.229.179 [218.18.229.179]) by mx.zoho.com.cn
+        with SMTPS id 1571747197281762.2415362494289; Tue, 22 Oct 2019 20:26:37 +0800 (CST)
+From:   Chengguang Xu <cgxu519@mykernel.net>
+To:     fstests@vger.kernel.org, linux-unionfs@vger.kernel.org
+Cc:     guaneryu@gmail.com, amir73il@gmail.com, miklos@szeredi.hu,
+        Chengguang Xu <cgxu519@mykernel.net>
+Message-ID: <20191022122621.27374-1-cgxu519@mykernel.net>
+Subject: [PATCH] overlay/066: copy-up test for variant sparse files
+Date:   Tue, 22 Oct 2019 20:26:21 +0800
+X-Mailer: git-send-email 2.20.1
+MIME-Version: 1.0
+Content-Transfer-Encoding: quoted-printable
+X-ZohoCNMailClient: External
+Content-Type: text/plain; charset=utf8
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-When replaying fsx operations with "--replay-ops opsfile" option, the
-ops described by opsfile may contain 'keep_size' directive for fallocate
-and/or zero_range operations, but it's possible that the underlying
-filesystem doesn't support KEEP_SIZE flag and causes fsx reports false
-failure, despite the 'keep_size_calls' switch is set to false.
+This is intensive copy-up test for sparse files,
+these cases are mainly used for regression test
+of copy-up improvement for sparse files.
 
-For example, running generic/469 on NFSv4, which supports fallocate(2)
-but not the KEEP_SIZE flag, we see:
-
-main: filesystem does not support fallocate mode FALLOC_FL_KEEP_SIZE, disabling!
-main: filesystem does not support fallocate mode FALLOC_FL_PUNCH_HOLE | FALLOC_FL_KEEP_SIZE, disabling!
-main: filesystem does not support fallocate mode FALLOC_FL_ZERO_RANGE, disabling!
-main: filesystem does not support fallocate mode FALLOC_FL_COLLAPSE_RANGE, disabling!
-main: filesystem does not support fallocate mode FALLOC_FL_INSERT_RANGE, disabling!
-main: filesystem does not support clone range, disabling!
-main: filesystem does not support dedupe range, disabling!
-fallocate: 0x0 to 0x1000
-do_preallocate: fallocate: Operation not supported
-LOG DUMP (1 total operations):
-1(  1 mod 256): FALLOC   0x0 thru 0x1000        (0x1000 bytes) PAST_EOF
-Log of operations saved to "/test1/469.fsx.fsxops"; replay with --replay-ops
-Correct content saved for comparison
-(maybe hexdump "/test1/469.fsx" vs "/test1/469.fsx.fsxgood")
-
-Fix it by making sure 'keep_size_calls' is true when 'keep_size' is
-set, otherwise just skip the operation.
-
-Reviewed-by: Misono Tomohiro <misono.tomohiro@jp.fujitsu.com>
-Signed-off-by: Eryu Guan <eguan@linux.alibaba.com>
+Signed-off-by: Chengguang Xu <cgxu519@mykernel.net>
 ---
- ltp/fsx.c | 6 ++++++
- 1 file changed, 6 insertions(+)
+ tests/overlay/066     | 108 ++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/066.out |   2 +
+ tests/overlay/group   |   1 +
+ 3 files changed, 111 insertions(+)
+ create mode 100755 tests/overlay/066
+ create mode 100644 tests/overlay/066.out
 
-diff --git a/ltp/fsx.c b/ltp/fsx.c
-index 06d08e4e93f3..ae89bf665db4 100644
---- a/ltp/fsx.c
-+++ b/ltp/fsx.c
-@@ -2044,6 +2044,9 @@ have_op:
- 		if (!fallocate_calls) {
- 			log4(OP_FALLOCATE, offset, size, FL_SKIPPED);
- 			goto out;
-+		} else if (keep_size && !keep_size_calls) {
-+			log4(OP_FALLOCATE, offset, size, FL_SKIPPED | FL_KEEP_SIZE);
-+			goto out;
- 		}
- 		break;
- 	case OP_PUNCH_HOLE:
-@@ -2056,6 +2059,9 @@ have_op:
- 		if (!zero_range_calls) {
- 			log4(OP_ZERO_RANGE, offset, size, FL_SKIPPED);
- 			goto out;
-+		} else if (keep_size && !keep_size_calls) {
-+			log4(OP_ZERO_RANGE, offset, size, FL_SKIPPED | FL_KEEP_SIZE);
-+			goto out;
- 		}
- 		break;
- 	case OP_COLLAPSE_RANGE:
--- 
-2.14.4.44.g2045bb6
+diff --git a/tests/overlay/066 b/tests/overlay/066
+new file mode 100755
+index 00000000..0394b14e
+--- /dev/null
++++ b/tests/overlay/066
+@@ -0,0 +1,108 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2019 Chengguang Xu <cgxu519@mykernel.net>. All Rights Rese=
+rved.
++#
++# FS QA Test 066
++#
++# Test overlayfs copy-up function for variant sparse files.
++#
++seq=3D`basename $0`
++seqres=3D$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=3D`pwd`
++tmp=3D/tmp/$$
++status=3D1=09# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++=09cd /
++=09rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs generic
++_supported_os Linux
++_require_test
++_require_scratch
++
++# Remove all files from previous tests
++_scratch_mkfs
++_require_fs_space $OVL_BASE_SCRATCH_MNT $((10*1024*13 + 100*1024))
++
++lowerdir=3D$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
++upperdir=3D$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
++testfile=3D"copyup_sparse_test"
++mkdir -p $lowerdir
++
++# Create a completely empty hole file.
++$XFS_IO_PROG -fc "truncate 10M" "${lowerdir}/${testfile}_empty_holefile" >=
+>$seqres.full
++
++iosize=3D`stat -c %o "${lowerdir}/${testfile}_empty_holefile"`
++if [ $iosize -le 1024 ]; then
++=09ioszie=3D1
++else
++=09iosize=3D`expr $iosize / 1024`
++fi
++
++# Create test files with different hole size patterns.
++while [ $iosize -le 2048 ]; do
++=09pos=3D$iosize
++=09$XFS_IO_PROG -fc "truncate 10M" "${lowerdir}/${testfile}_iosize${iosize=
+}K_holefile" >>$seqres.full
++=09while [ $pos -lt 8192 ]; do
++=09=09$XFS_IO_PROG -fc "pwrite ${pos}K ${iosize}K" "${lowerdir}/${testfile=
+}_iosize${iosize}K_holefile" >>$seqres.full
++=09=09pos=3D`expr $pos + $iosize + $iosize`
++=09done
++=09iosize=3D`expr $iosize + $iosize`
++done
++
++# Create test file with many random holes(1M~2M).
++$XFS_IO_PROG -fc "truncate 100M" "${lowerdir}/${testfile}_random_holefile"=
+ >>$seqres.full
++pos=3D2048
++while [ $pos -le 81920 ]; do
++=09iosize=3D`expr $RANDOM % 2048`
++=09if [ $iosize -lt 1024 ]; then
++=09=09iosize=3D`expr $iosize + 1024`
++=09fi
++=09$XFS_IO_PROG -fc "pwrite ${pos}K ${iosize}K" "${lowerdir}/${testfile}_r=
+andom_holefile" >>$seqres.full
++=09pos=3D`expr $pos + $iosize + $iosize`
++done
++
++_scratch_mount
++
++# Open the files should succeed, no errors are expected.
++for f in $SCRATCH_MNT/*; do
++=09$XFS_IO_PROG -c "open" $f >>$seqres.full
++done
++
++echo "Silence is golden"
++
++# Check all copy-up files in upper layer.
++iosize=3D`stat -c %o "${lowerdir}/${testfile}_empty_holefile"`
++if [ $iosize -le 1024 ]; then
++=09ioszie=3D1
++else
++=09iosize=3D`expr $iosize / 1024`
++fi
++
++while [ $iosize -le 2048 ]; do
++=09diff "${lowerdir}/${testfile}_iosize${iosize}K_holefile" "${upperdir}/$=
+{testfile}_iosize${iosize}K_holefile" >>$seqres.full
++=09iosize=3D`expr $iosize + $iosize`
++done
++
++diff "${lowerdir}/${testfile}_empty_holefile"  "${upperdir}/${testfile}_em=
+pty_holefile"  >>$seqres.full
++diff "${lowerdir}/${testfile}_random_holefile" "${upperdir}/${testfile}_ra=
+ndom_holefile" >>$seqres.full
++
++# success, all done
++status=3D0
++exit
+diff --git a/tests/overlay/066.out b/tests/overlay/066.out
+new file mode 100644
+index 00000000..b60cc24c
+--- /dev/null
++++ b/tests/overlay/066.out
+@@ -0,0 +1,2 @@
++QA output created by 066
++Silence is golden
+diff --git a/tests/overlay/group b/tests/overlay/group
+index ef8517a1..1dec7db9 100644
+--- a/tests/overlay/group
++++ b/tests/overlay/group
+@@ -68,3 +68,4 @@
+ 063 auto quick whiteout
+ 064 auto quick copyup
+ 065 auto quick mount
++066 auto quick copyup
+--=20
+2.20.1
+
+
 
