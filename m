@@ -2,230 +2,71 @@ Return-Path: <SRS0=glCd=YP=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.2 required=3.0
-	tests=HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 91605CA9EAF
-	for <linux-fstests@archiver.kernel.org>; Tue, 22 Oct 2019 02:06:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BDE9DCA9EA0
+	for <linux-fstests@archiver.kernel.org>; Tue, 22 Oct 2019 07:58:15 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 69F9920663
-	for <linux-fstests@archiver.kernel.org>; Tue, 22 Oct 2019 02:06:12 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9E6B920B7C
+	for <linux-fstests@archiver.kernel.org>; Tue, 22 Oct 2019 07:58:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730314AbfJVCGM (ORCPT
+        id S2388018AbfJVH6P (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 21 Oct 2019 22:06:12 -0400
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:10923 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1730084AbfJVCGM (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 21 Oct 2019 22:06:12 -0400
-X-IronPort-AV: E=Sophos;i="5.67,325,1566835200"; 
-   d="scan'208";a="77298030"
-Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
-  by heian.cn.fujitsu.com with ESMTP; 22 Oct 2019 10:06:09 +0800
-Received: from G08CNEXCHPEKD02.g08.fujitsu.local (unknown [10.167.33.83])
-        by cn.fujitsu.com (Postfix) with ESMTP id 923024B6EC92;
-        Tue, 22 Oct 2019 09:58:13 +0800 (CST)
-Received: from [10.167.220.84] (10.167.220.84) by
- G08CNEXCHPEKD02.g08.fujitsu.local (10.167.33.89) with Microsoft SMTP Server
- id 14.3.439.0; Tue, 22 Oct 2019 10:06:05 +0800
-Subject: Re: [PATCH] xfs/097: Remove wrong broken assignment operation
-To:     "Darrick J. Wong" <darrick.wong@oracle.com>
-CC:     <guaneryu@gmail.com>, <fstests@vger.kernel.org>
-References: <1570432515-13184-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
- <20191007151244.GC13097@magnolia>
- <56deacb8-1d4a-193c-f41c-469c78d97315@cn.fujitsu.com>
- <20191014163904.GF26541@magnolia>
- <0925e033-0d0d-6eb4-8b1b-ca980ee5cd20@cn.fujitsu.com>
- <74874fd4-6034-d5c0-4f9d-5f0de5ef9703@cn.fujitsu.com>
- <20191021155039.GB6726@magnolia>
- <f9f2f492-d59d-c45d-8d48-232adefebe85@cn.fujitsu.com>
- <20191022015528.GD6726@magnolia>
-From:   Yang Xu <xuyang2018.jy@cn.fujitsu.com>
-Message-ID: <c0cc5052-793e-3227-132e-f91e4b080e55@cn.fujitsu.com>
-Date:   Tue, 22 Oct 2019 10:06:05 +0800
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101
- Thunderbird/68.0
+        Tue, 22 Oct 2019 03:58:15 -0400
+Received: from mx2.suse.de ([195.135.220.15]:48332 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S2387999AbfJVH6P (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 22 Oct 2019 03:58:15 -0400
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+Received: from relay2.suse.de (unknown [195.135.220.254])
+        by mx1.suse.de (Postfix) with ESMTP id D9C58B86B;
+        Tue, 22 Oct 2019 07:58:11 +0000 (UTC)
+From:   Qu Wenruo <wqu@suse.com>
+To:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Subject: [PATCH 0/2] btrfs: dm-log-writes test for fstrim with fsstress
+Date:   Tue, 22 Oct 2019 15:58:04 +0800
+Message-Id: <20191022075806.16616-1-wqu@suse.com>
+X-Mailer: git-send-email 2.23.0
 MIME-Version: 1.0
-In-Reply-To: <20191022015528.GD6726@magnolia>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
 Content-Transfer-Encoding: 8bit
-X-Originating-IP: [10.167.220.84]
-X-yoursite-MailScanner-ID: 923024B6EC92.AD73B
-X-yoursite-MailScanner: Found to be clean
-X-yoursite-MailScanner-From: xuyang2018.jy@cn.fujitsu.com
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+Just to make sure the fstrim is not trimming anything vital (like tree
+blocks still in use) on btrfs.
 
+The first patch is to enhance log-writes to check each DISCARD
+operation.
+The feature is not used in test cases, as it's too time consuming.
+But should be a pretty handy feature for small logwrites.
 
-on 2019/10/22 9:55, Darrick J. Wong wrote:
-> On Tue, Oct 22, 2019 at 09:49:48AM +0800, Yang Xu wrote:
->>
->>
->> on 2019/10/21 23:50, Darrick J. Wong wrote:
->>> On Mon, Oct 21, 2019 at 08:09:39PM +0800, Yang Xu wrote:
->>>>
->>>>
->>>>    on 2019/10/15 14:27, Yang Xu wrote:
->>>>>
->>>>>
->>>>> on 2019/10/15 0:39, Darrick J. Wong wrote:
->>>>>> On Tue, Oct 08, 2019 at 10:39:59AM +0800, Yang Xu wrote:
->>>>>>>
->>>>>>>
->>>>>>> on 2019/10/07 23:12, Darrick J. Wong wrote:
->>>>>>>> On Mon, Oct 07, 2019 at 03:15:15PM +0800, Yang Xu wrote:
->>>>>>>>> On old kernel, since commit ded188b8609 ("xfs: Fix the
->>>>>>>>> situation that mount
->>>>>>>>> operation rejects corrupted XFS") running this case got
->>>>>>>>> the mismatched output,
->>>>>>>>> as below:
->>>>>>>>
->>>>>>>> But why did the output mismatch?  Did the fs heal itself?  Did
->>>>>>>> allocating 5 more files somehow avoid touching the finobt?  Is the
->>>>>>>> assignment logic in the loop broken?
->>>>>>>
->>>>>>> The output mismatch because on old kernel, we can mount the
->>>>>>> corrupted xfs
->>>>>>> and touch action will be refused. so broken is equal to 0.
->>>>>>> The fs doesn't heal ifself.
->>>>>>> allocating 5 more file will touch the finobt.
->>>>>>>
->>>>>>> You can see this url
->>>>>>> https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/commit/?id=ded188b86096e2845e59dedae6050c7f254a96b
->>>>>>>
->>>>>>>
->>>>>>> eg xfs/087, they all delete "broken=0" before allocationg 5 more file.
->>>>>>> commit ded188b86 compatibled old kernel(permit mount and refuse
->>>>>>> touch) and
->>>>>>> new kernel(refuse mount) behavior on corrupted xfs.  Or, I misunderstand
->>>>>>> this case?
->>>>>>
->>>>>> How old is the kernel?  At some point (4.10, I think?) we added a patch
->>>>>> to reserve metadata blocks for future free inode btree expansion.  That
->>>>>> required us to count the blocks in the finobt, at which point xfs/097's
->>>>>> behavior changed such that the fs doesn't mount after the test corrupts
->>>>>> the finobt.
->>>>> I test this case on kernel-3.10.0-1062.el7.x86_64.
->>>>> I find the patch you said to reserve metadata blocks for future free
->>>>> inode btree expansion. This kernel doesn't backport this commit 76d771b4
->>>>> ("xfs: use per-AG reservations for the finobt"), so it permmits to
->>>>> mount.
->>>>>
->>>>> I can understand your meaning. But from xfstests commit ded188b86, it
->>>>> looks like refuse touch or refuse mount is acceptable for xfstests.
->>>>>
->>>>> Also, xfs/087 is a similar case but it sets broken=1 instead of broken
->>>>> =0.  Before this kernel commit 76d771b4, xfs/087(xfs/097) permits mount
->>>>> and refuse touch, after this commit, xfs/087(xfs/097) refuses mount.
->>>>> I think we should keep xfs/097 consistent with xfs/087. What do you
->>>>> think about it?
->>>>>
->>>>> ps:my patch is intend to fix the inconsistent of broken assignment
->>>>> operation that xfstests commit ded188b86 introduced.
->>>> Hi Darrick
->>>>     Do you have some questions on this patch?
->>>
->>> Does it still pass on upstreeam 5.4?
->>
->> Of course. It still can pass on upstream 5.4.
->>
->> --------------------------------------
->> echo "+ mount image && modify files"
->> broken=1
->> //on kernel with commit d771b4 ("xfs: use per-AG reservations for the
->> //finobt", it will not run into this if judgement, so broken=1.
->> //on kernel without this kernel commit, it will run into this if //judgement
->> and touch will be refused, so broken is still equal to 1.
->> if _try_scratch_mount >> $seqres.full 2>&1; then
->>          for x in `seq 65 70`; do
->>                  touch "${TESTFILE}.${x}" 2> /dev/null && broken=0
->>          done
->>          umount "${SCRATCH_MNT}"
->> fi
->> --------------------------------------
-> 
-> Ah, ok.  Looks good to me then.  Sorry I was a little slow on the
-> uptake. :/
-It doesn't matter. Thanks for your review.
-> 
-> Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
-> 
-> --D
-> 
->>
->>>
->>> --D
->>>
->>>> Hi Eryu
->>>>      What do you think about this patch(I only want to keep xfs/097 consistent
->>>> with xfs/087).
->>>>>
->>>>> Thanks
->>>>> Yang Xu
->>>>>
->>>>>>
->>>>>> --D
->>>>>>
->>>>>>>>
->>>>>>>> --D
->>>>>>>>
->>>>>>>>> -----------------------------------
->>>>>>>>>      + check fs
->>>>>>>>>      + corrupt image
->>>>>>>>>      + mount image && modify files
->>>>>>>>> -broken: 1
->>>>>>>>> +broken: 0
->>>>>>>>>      + repair fs
->>>>>>>>>      + mount image (2)
->>>>>>>>> ------------------------------------
->>>>>>>>>
->>>>>>>>> It fails because the broken is always equal to 0 when
->>>>>>>>> _try_scratch_mount
->>>>>>>>> succeed. So remove this wrong assignment operation.
->>>>>>>>>
->>>>>>>>> Signed-off-by: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
->>>>>>>>> ---
->>>>>>>>>      tests/xfs/097 | 2 --
->>>>>>>>>      1 file changed, 2 deletions(-)
->>>>>>>>>
->>>>>>>>> diff --git a/tests/xfs/097 b/tests/xfs/097
->>>>>>>>> index 1cb7d69c..20791738 100755
->>>>>>>>> --- a/tests/xfs/097
->>>>>>>>> +++ b/tests/xfs/097
->>>>>>>>> @@ -81,8 +81,6 @@ done
->>>>>>>>>      echo "+ mount image && modify files"
->>>>>>>>>      broken=1
->>>>>>>>>      if _try_scratch_mount >> $seqres.full 2>&1; then
->>>>>>>>> -
->>>>>>>>> -    broken=0
->>>>>>>>>          for x in `seq 65 70`; do
->>>>>>>>>              touch "${TESTFILE}.${x}" 2> /dev/null && broken=0
->>>>>>>>>          done
->>>>>>>>> -- 
->>>>>>>>> 2.18.1
->>>>>>>>>
->>>>>>>>>
->>>>>>>>>
->>>>>>>>
->>>>>>>>
->>>>>>>
->>>>>>>
->>>>>>
->>>>>>
->>>>>
->>>>>
->>>>
->>>>
->>>
->>>
->>
->>
-> 
-> 
+The second patch is the test case.
+Which triggers fsstress and a loop of fstrim, all recorded by
+dm-log-writes.
+Then check each FLUSH after the 'prepare' mark.
 
+The test case in theory can go generic, but I'm using various btrfs
+specific hack to speed up the test and has a workaround to avoid false
+alert.
+
+So far I haven't triggered a bug.
+
+Qu Wenruo (2):
+  fstests: log-writes: Add new discard check point
+  fstests: btrfs: dm-logwrites test for fstrim and fsstress workload
+
+ src/log-writes/replay-log.c |  10 ++-
+ tests/btrfs/197             | 131 ++++++++++++++++++++++++++++++++++++
+ tests/btrfs/197.out         |   2 +
+ tests/btrfs/group           |   1 +
+ 4 files changed, 142 insertions(+), 2 deletions(-)
+ create mode 100755 tests/btrfs/197
+ create mode 100644 tests/btrfs/197.out
+
+-- 
+2.23.0
 
