@@ -2,426 +2,422 @@ Return-Path: <SRS0=glCd=YP=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-8.1 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 28123CA9EB7
-	for <linux-fstests@archiver.kernel.org>; Tue, 22 Oct 2019 10:02:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9B652CA9EA0
+	for <linux-fstests@archiver.kernel.org>; Tue, 22 Oct 2019 12:19:43 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id E0580214B2
-	for <linux-fstests@archiver.kernel.org>; Tue, 22 Oct 2019 10:02:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 556D72184C
+	for <linux-fstests@archiver.kernel.org>; Tue, 22 Oct 2019 12:19:43 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="K1siEuN2"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="rbbi6vSh"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731594AbfJVKCT (ORCPT
+        id S2388392AbfJVMTn (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 22 Oct 2019 06:02:19 -0400
-Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:22491 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1731610AbfJVKCT (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 22 Oct 2019 06:02:19 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1571738537;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=jjtBo56OgxWzpT6Z3+cb5q6/gMLu2fCqwUGua76BJnE=;
-        b=K1siEuN25vN1flHP3SwdZnyjicAB2iFUi59yKjCNDqyyvD7asmB5RMndAe7trVe9fcprSj
-        q2fM1DNLVGkHq2CSkix/5bplc5Usdbm0hblzlLe9UiPPdEKnUpX5rN/JHx8S+wG2SEUCiZ
-        eWgS2x9x+uxzxeZZgLj+7rRNsQZ1b80=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-368-eHaudmUZPfq6TQFIMutuGw-1; Tue, 22 Oct 2019 06:02:14 -0400
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id B216A1800DD0;
-        Tue, 22 Oct 2019 10:02:13 +0000 (UTC)
-Received: from dhcp-12-171.nay.redhat.com (dhcp-12-171.nay.redhat.com [10.66.12.171])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 5D01B5D6A5;
-        Tue, 22 Oct 2019 10:02:12 +0000 (UTC)
-From:   Zorro Lang <zlang@redhat.com>
+        Tue, 22 Oct 2019 08:19:43 -0400
+Received: from mail-pg1-f193.google.com ([209.85.215.193]:35868 "EHLO
+        mail-pg1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2387675AbfJVMTm (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 22 Oct 2019 08:19:42 -0400
+Received: by mail-pg1-f193.google.com with SMTP id 23so9850420pgk.3;
+        Tue, 22 Oct 2019 05:19:42 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=to:cc:from:subject:message-id:date:user-agent:mime-version
+         :content-language:content-transfer-encoding;
+        bh=5TWIVz7dgKnzZqk1U/p/q+JiLakN6F7Bx/i+wT50caM=;
+        b=rbbi6vShoSRaGNU2h3v+gwDu4PmD2V+k69qbZhziaRkK6bYJ1G5o9W14eWdCcejk3U
+         uJSgZ44ZKuEv44s9WCEghU8f5wF/7UyPGzW3Bz2/U964EKAbhA53qj2CUgj/WjLPhfaJ
+         Q7GTTKrpCyRTBOXyfTQouAIlSvqDaG1ZVuEUEf+kceAlR421Q44CepAn91VkiWx69CPb
+         u15ehIFaZadwsl/VqqlBeblNGWRoKiVv3JfCPwTqyfZrGq/1m01yZ7ftKM5OofK/8T4w
+         QqGXW1inGsSpxfLE9bKq4GGbJ2IJBTtpJCoAmQ9T/ADbaGev4gcCYUNgm87D7VnVY9fO
+         adKg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:to:cc:from:subject:message-id:date:user-agent
+         :mime-version:content-language:content-transfer-encoding;
+        bh=5TWIVz7dgKnzZqk1U/p/q+JiLakN6F7Bx/i+wT50caM=;
+        b=cf/N/PD0v9iNdpT7RAQJsQwFQ9WygSDiamGcwNAy7De6LuZejBUk1R6dF7ac8com9T
+         /IHw/PKiHJxhN+mRaXojbDt0eLb90uiBhaHfkEcrb3U9mpwyRx/lTrNLpljIaYXuHQOa
+         KSXwwyl00LdwOlW3t3ZblSh9HGGThOUCb9STzy41b1nkBMnY5B0kK+MLrTITnJCz6wxF
+         TW4Do1AQWeaCWqKUHpuyu1Nvov4xDVmZQIYQpPH23hliQRPsIVAYcGWzeAMEBYbDg46g
+         H4t5A6APvNBHNIpHSfTjDlGKkOsVwGJxkhF6t9sZE0RL5zB7cwhBRLwGqYh7q+TOz35m
+         lwag==
+X-Gm-Message-State: APjAAAVn18ufoxUdD+UeCh0hLePHvY3xdWyKicCYkAJb6r5OAYe54MAQ
+        I9aYK8rgmvC16gthXDkAXQ==
+X-Google-Smtp-Source: APXvYqxG0twRUtGj2kmngxbid8m7ForXO/IP5qnpsggjyEHXH5+yEu+aHBGkVerCbZSPLGocW72r1g==
+X-Received: by 2002:aa7:87d9:: with SMTP id i25mr4074261pfo.244.1571746781641;
+        Tue, 22 Oct 2019 05:19:41 -0700 (PDT)
+Received: from [10.76.90.34] ([203.205.141.123])
+        by smtp.gmail.com with ESMTPSA id x11sm33728446pja.3.2019.10.22.05.19.39
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Tue, 22 Oct 2019 05:19:41 -0700 (PDT)
 To:     fstests@vger.kernel.org
-Cc:     linux-xfs@vger.kernel.org, ikent@redhat.com
-Subject: [PATCH] xfstests: xfs mount option sanity test
-Date:   Tue, 22 Oct 2019 18:01:18 +0800
-Message-Id: <20191022100118.18506-1-zlang@redhat.com>
+Cc:     linux-xfs@vger.kernel.org, Eryu Guan <guaneryu@gmail.com>,
+        Brian Foster <bfoster@redhat.com>, newtongao@tencent.com,
+        jasperwang@tencent.com
+From:   kaixuxia <xiakaixu1987@gmail.com>
+Subject: [PATCH v5] fsstress: add renameat2 support
+Message-ID: <a602433c-ec36-a607-e1bc-6e532e3ebaca@gmail.com>
+Date:   Tue, 22 Oct 2019 20:19:37 +0800
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:60.0) Gecko/20100101
+ Thunderbird/60.9.0
 MIME-Version: 1.0
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.15
-X-MC-Unique: eHaudmUZPfq6TQFIMutuGw-1
-X-Mimecast-Spam-Score: 0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-XFS is changing to suit the new mount API, so add this case to make
-sure the changing won't bring in regression issue on xfs mount option
-parse phase, and won't change some default behaviors either.
+Support the renameat2 syscall in fsstress.
 
-Signed-off-by: Zorro Lang <zlang@redhat.com>
+Signed-off-by: kaixuxia <kaixuxia@tencent.com>
 ---
- tests/xfs/148     | 315 ++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/148.out |   6 +
- tests/xfs/group   |   1 +
- 3 files changed, 322 insertions(+)
- create mode 100755 tests/xfs/148
- create mode 100644 tests/xfs/148.out
+Changes in v5:
+ - Fix the RENAME_EXCHANGE flist fents swap problem.
 
-diff --git a/tests/xfs/148 b/tests/xfs/148
-new file mode 100755
-index 00000000..5c268f18
---- /dev/null
-+++ b/tests/xfs/148
-@@ -0,0 +1,315 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2019 Red Hat, Inc. All Rights Reserved.
-+#
-+# FS QA Test 148
-+#
-+# XFS mount options sanity check, refer to 'man 5 xfs'.
-+#
-+seq=3D`basename $0`
-+seqres=3D$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=3D`pwd`
-+tmp=3D/tmp/$$
-+status=3D1=09# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+=09cd /
-+=09rm -f $tmp.*
-+=09$UMOUNT_PROG $LOOP_MNT 2>/dev/null
-+=09if [ -n "$LOOP_DEV" ];then
-+=09=09_destroy_loop_device $LOOP_DEV 2>/dev/null
-+=09fi
-+=09if [ -n "$LOOP_SPARE_DEV" ];then
-+=09=09_destroy_loop_device $LOOP_SPARE_DEV 2>/dev/null
-+=09fi
-+=09rm -f $LOOP_IMG
-+=09rm -f $LOOP_SPARE_IMG
-+=09rmdir $LOOP_MNT
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs xfs
-+_supported_os Linux
-+_require_test
-+_require_loop
-+_require_xfs_io_command "falloc"
-+
-+LOOP_IMG=3D$TEST_DIR/$seq.dev
-+LOOP_SPARE_IMG=3D$TEST_DIR/$seq.logdev
-+LOOP_MNT=3D$TEST_DIR/$seq.mnt
-+
-+echo "** create loop device"
-+$XFS_IO_PROG -f -c "falloc 0 1g" $LOOP_IMG
-+LOOP_DEV=3D`_create_loop_device $LOOP_IMG`
-+
-+echo "** create loop log device"
-+$XFS_IO_PROG -f -c "falloc 0 512m" $LOOP_SPARE_IMG
-+LOOP_SPARE_DEV=3D`_create_loop_device $LOOP_SPARE_IMG`
-+
-+echo "** create loop mount point"
-+rmdir $LOOP_MNT 2>/dev/null
-+mkdir -p $LOOP_MNT || _fail "cannot create loopback mount point"
-+
-+# avoid the effection from MKFS_OPTIONS
-+MKFS_OPTIONS=3D""
-+do_mkfs()
-+{
-+=09$MKFS_XFS_PROG -f $* $LOOP_DEV | _filter_mkfs >$seqres.full 2>$tmp.mkfs
-+=09if [ "${PIPESTATUS[0]}" -ne 0 ]; then
-+=09=09_fail "Fails on _mkfs_dev $* $LOOP_DEV"
-+=09fi
-+=09. $tmp.mkfs
-+}
-+
-+is_dev_mounted()
-+{
-+=09findmnt --source $LOOP_DEV >/dev/null
-+=09return $?
-+}
-+
-+get_mount_info()
-+{
-+=09findmnt --source $LOOP_DEV -o OPTIONS -n
-+}
-+
-+force_unmount()
-+{
-+=09$UMOUNT_PROG $LOOP_MNT >/dev/null 2>&1
-+}
-+
-+# _do_test <mount options> <should be mounted?> [<key string> <key should =
-be found?>]
-+_do_test()
-+{
-+=09local opts=3D"$1"
-+=09local mounted=3D"$2"=09# pass or fail
-+=09local key=3D"$3"
-+=09local found=3D"$4"=09# true or false
-+=09local rc
-+=09local info
-+
-+=09# mount test
-+=09_mount $LOOP_DEV $LOOP_MNT $opts 2>/dev/null
-+=09rc=3D$?
-+=09if [ $rc -eq 0 ];then
-+=09=09if [ "${mounted}" =3D "fail" ];then
-+=09=09=09echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-+=09=09=09echo "ERROR: expect ${mounted}, but pass"
-+=09=09=09return 1
-+=09=09fi
-+=09=09is_dev_mounted
-+=09=09if [ $? -ne 0 ];then
-+=09=09=09echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-+=09=09=09echo "ERROR: fs not mounted even mount return 0"
-+=09=09=09return 1
-+=09=09fi
-+=09else
-+=09=09if [ "${mount_ret}" =3D "pass" ];then
-+=09=09=09echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-+=09=09=09echo "ERROR: expect ${mounted}, but fail"
-+=09=09=09return 1
-+=09=09fi
-+=09=09is_dev_mounted
-+=09=09if [ $? -eq 0 ];then
-+=09=09=09echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-+=09=09=09echo "ERROR: fs is mounted even mount return non-zero"
-+=09=09=09return 1
-+=09=09fi
-+=09fi
-+
-+=09# Skip below checking if "$key" argument isn't specified
-+=09if [ -z "$key" ];then
-+=09=09return 0
-+=09fi
-+=09# Check the mount options after fs mounted.
-+=09info=3D`get_mount_info`
-+=09echo $info | grep -q "${key}"
-+=09rc=3D$?
-+=09if [ $rc -eq 0 ];then
-+=09=09if [ "$found" !=3D "true" ];then
-+=09=09=09echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-+=09=09=09echo "ERROR: expect there's $key in $info, but not found"
-+=09=09=09return 1
-+=09=09fi
-+=09else
-+=09=09if [ "$found" !=3D "false" ];then
-+=09=09=09echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-+=09=09=09echo "ERROR: expect there's not $key in $info, but found"
-+=09=09=09return 1
-+=09=09fi
-+=09fi
-+
-+=09return 0
-+}
-+
-+do_test()
-+{
-+=09# force unmount before testing
-+=09force_unmount
-+=09_do_test "$@"
-+=09# force unmount after testing
-+=09force_unmount
-+}
-+
-+echo "** start xfs mount testing ..."
-+# Test allocsize=3Dsize
-+# Valid values for this option are page size (typically 4KiB) through to 1=
-GiB
-+do_mkfs
-+if [ $dbsize -ge 1024 ];then
-+=09blsize=3D"$((dbsize / 1024))k"
-+fi
-+do_test "" pass "allocsize" "false"
-+do_test "-o allocsize=3D$blsize" pass "allocsize=3D$blsize" "true"
-+do_test "-o allocsize=3D1048576k" pass "allocsize=3D1048576k" "true"
-+do_test "-o allocsize=3D$((dbsize / 2))" fail
-+do_test "-o allocsize=3D2g" fail
-+
-+# Test attr2
-+do_mkfs -m crc=3D1
-+do_test "" pass "attr2" "true"
-+do_test "-o attr2" pass "attr2" "true"
-+do_test "-o noattr2" fail
-+do_mkfs -m crc=3D0
-+do_test "" pass "attr2" "true"
-+do_test "-o attr2" pass "attr2" "true"
-+do_test "-o noattr2" pass "attr2" "false"
-+
-+# Test discard
-+do_mkfs
-+do_test "" pass "discard" "false"
-+do_test "-o discard" pass "discard" "true"
-+do_test "-o nodiscard" pass "discard" "false"
-+
-+# Test grpid|bsdgroups|nogrpid|sysvgroups
-+do_test "" pass "grpid" "false"
-+do_test "-o grpid" pass "grpid" "true"
-+do_test "-o bsdgroups" pass "grpid" "true"
-+do_test "-o nogrpid" pass "grpid" "false"
-+do_test "-o sysvgroups" pass "grpid" "false"
-+
-+# Test filestreams
-+do_test "" pass "filestreams" "false"
-+do_test "-o filestreams" pass "filestreams" "true"
-+
-+# Test ikeep
-+do_test "" pass "ikeep" "false"
-+do_test "-o ikeep" pass "ikeep" "true"
-+do_test "-o noikeep" pass "ikeep" "false"
-+
-+# Test inode32|inode64
-+do_test "" pass "inode64" "true"
-+do_test "-o inode32" pass "inode32" "true"
-+do_test "-o inode64" pass "inode64" "true"
-+
-+# Test largeio
-+do_test "" pass "largeio" "false"
-+do_test "-o largeio" pass "largeio" "true"
-+do_test "-o nolargeio" pass "largeio" "false"
-+
-+# Test logbufs=3Dvalue. Valid numbers range from 2=E2=80=938 inclusive.
-+do_test "" pass "logbufs" "false"
-+do_test "-o logbufs=3D8" pass "logbufs=3D8" "true"
-+do_test "-o logbufs=3D2" pass "logbufs=3D2" "true"
-+do_test "-o logbufs=3D1" fail
-+###### but it gets logbufs=3D8 now, why? bug? #######
-+# do_test "-o logbufs=3D0" fail
-+do_test "-o logbufs=3D9" fail
-+do_test "-o logbufs=3D99999999999999" fail
-+
-+# Test logbsize=3Dvalue.
-+do_mkfs -m crc=3D1 -l version=3D2
-+do_test "" pass "logbsize" "false"
-+do_test "-o logbsize=3D16384" pass "logbsize=3D16k" "true"
-+do_test "-o logbsize=3D16k" pass "logbsize=3D16k" "true"
-+do_test "-o logbsize=3D32k" pass "logbsize=3D32k" "true"
-+do_test "-o logbsize=3D64k" pass "logbsize=3D64k" "true"
-+do_test "-o logbsize=3D128k" pass "logbsize=3D128k" "true"
-+do_test "-o logbsize=3D256k" pass "logbsize=3D256k" "true"
-+do_test "-o logbsize=3D8k" fail
-+do_test "-o logbsize=3D512k" fail
-+####### it's invalid, but it set to default size 32k
-+# do_test "-o logbsize=3D0" false
-+do_mkfs -m crc=3D0 -l version=3D1
-+do_test "" pass "logbsize" "false"
-+do_test "-o logbsize=3D16384" pass "logbsize=3D16k" "true"
-+do_test "-o logbsize=3D16k" pass "logbsize=3D16k" "true"
-+do_test "-o logbsize=3D32k" pass "logbsize=3D32k" "true"
-+do_test "-o logbsize=3D64k" fail
-+
-+# Test logdev
-+do_mkfs
-+do_test "" pass "logdev" "false"
-+do_test "-o logdev=3D$LOOP_SPARE_DEV" fail
-+do_mkfs -l logdev=3D$LOOP_SPARE_DEV
-+do_test "-o logdev=3D$LOOP_SPARE_DEV" pass "logdev=3D$LOOP_SPARE_DEV" "tru=
-e"
-+do_test "" fail
-+
-+# Test noalign
-+do_mkfs
-+do_test "" pass "noalign" "false"
-+do_test "-o noalign" pass "noalign" "true"
-+
-+# Test norecovery
-+do_test "" pass "norecovery" "false"
-+do_test "-o norecovery,ro" pass "norecovery" "true"
-+do_test "-o norecovery" fail
-+
-+# Test nouuid
-+do_test "" pass "nouuid" "false"
-+do_test "-o nouuid" pass "nouuid" "true"
-+
-+# Test noquota
-+do_test "" pass "noquota" "true"
-+do_test "-o noquota" pass "noquota" "true"
-+
-+# Test uquota/usrquota/quota/uqnoenforce/qnoenforce
-+do_test "" pass "usrquota" "false"
-+do_test "-o uquota" pass "usrquota" "true"
-+do_test "-o usrquota" pass "usrquota" "true"
-+do_test "-o quota" pass "usrquota" "true"
-+do_test "-o uqnoenforce" pass "usrquota" "true"
-+do_test "-o qnoenforce" pass "usrquota" "true"
-+
-+# Test gquota/grpquota/gqnoenforce
-+do_test "" pass "grpquota" "false"
-+do_test "-o gquota" pass "grpquota" "true"
-+do_test "-o grpquota" pass "grpquota" "true"
-+do_test "-o gqnoenforce" pass "gqnoenforce" "true"
-+
-+# Test pquota/prjquota/pqnoenforce
-+do_test "" pass "prjquota" "false"
-+do_test "-o pquota" pass "prjquota" "true"
-+do_test "-o prjquota" pass "prjquota" "true"
-+do_test "-o pqnoenforce" pass "pqnoenforce" "true"
-+
-+# Test sunit=3Dvalue and swidth=3Dvalue
-+do_mkfs -d sunit=3D128,swidth=3D128
-+do_test "-o sunit=3D8,swidth=3D8" pass "sunit=3D8,swidth=3D8" "true"
-+do_test "-o sunit=3D8,swidth=3D64" pass "sunit=3D8,swidth=3D64" "true"
-+do_test "-o sunit=3D128,swidth=3D128" pass "sunit=3D128,swidth=3D128" "tru=
-e"
-+do_test "-o sunit=3D256,swidth=3D256" pass "sunit=3D256,swidth=3D256" "tru=
-e"
-+do_test "-o sunit=3D2,swidth=3D2" fail
-+
-+# Test swalloc
-+do_mkfs
-+do_test "" pass "swalloc" "false"
-+do_test "-o swalloc" pass "swalloc" "true"
-+
-+# Test wsync
-+do_test "" pass "wsync" "false"
-+do_test "-o wsync" pass "wsync" "true"
-+
-+echo "** end of testing"
-+# success, all done
-+status=3D0
-+exit
-diff --git a/tests/xfs/148.out b/tests/xfs/148.out
-new file mode 100644
-index 00000000..a71d9231
---- /dev/null
-+++ b/tests/xfs/148.out
-@@ -0,0 +1,6 @@
-+QA output created by 148
-+** create loop device
-+** create loop log device
-+** create loop mount point
-+** start xfs mount testing ...
-+** end of testing
-diff --git a/tests/xfs/group b/tests/xfs/group
-index f4ebcd8c..019aebad 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -145,6 +145,7 @@
- 145 dmapi
- 146 dmapi
- 147 dmapi
-+148 auto quick mount
- 150 dmapi
- 151 dmapi
- 152 dmapi
---=20
-2.20.1
+ ltp/fsstress.c | 202 +++++++++++++++++++++++++++++++++++++++++++++++----------
+ 1 file changed, 169 insertions(+), 33 deletions(-)
 
+diff --git a/ltp/fsstress.c b/ltp/fsstress.c
+index 51976f5..7c59f2d 100644
+--- a/ltp/fsstress.c
++++ b/ltp/fsstress.c
+@@ -44,6 +44,38 @@ io_context_t	io_ctx;
+ #define IOV_MAX 1024
+ #endif
+ 
++#ifndef HAVE_RENAMEAT2
++#if !defined(SYS_renameat2) && defined(__x86_64__)
++#define SYS_renameat2 316
++#endif
++
++#if !defined(SYS_renameat2) && defined(__i386__)
++#define SYS_renameat2 353
++#endif
++
++static int renameat2(int dfd1, const char *path1,
++		     int dfd2, const char *path2,
++		     unsigned int flags)
++{
++#ifdef SYS_renameat2
++	return syscall(SYS_renameat2, dfd1, path1, dfd2, path2, flags);
++#else
++	errno = ENOSYS;
++	return -1;
++#endif
++}
++#endif
++
++#ifndef RENAME_NOREPLACE
++#define RENAME_NOREPLACE	(1 << 0)	/* Don't overwrite target */
++#endif
++#ifndef RENAME_EXCHANGE
++#define RENAME_EXCHANGE		(1 << 1)	/* Exchange source and dest */
++#endif
++#ifndef RENAME_WHITEOUT
++#define RENAME_WHITEOUT		(1 << 2)	/* Whiteout source */
++#endif
++
+ #define FILELEN_MAX		(32*4096)
+ 
+ typedef enum {
+@@ -85,6 +117,9 @@ typedef enum {
+ 	OP_READV,
+ 	OP_REMOVEFATTR,
+ 	OP_RENAME,
++	OP_RNOREPLACE,
++	OP_REXCHANGE,
++	OP_RWHITEOUT,
+ 	OP_RESVSP,
+ 	OP_RMDIR,
+ 	OP_SETATTR,
+@@ -203,6 +238,9 @@ void	readlink_f(int, long);
+ void	readv_f(int, long);
+ void	removefattr_f(int, long);
+ void	rename_f(int, long);
++void    rnoreplace_f(int, long);
++void    rexchange_f(int, long);
++void    rwhiteout_f(int, long);
+ void	resvsp_f(int, long);
+ void	rmdir_f(int, long);
+ void	setattr_f(int, long);
+@@ -262,6 +300,9 @@ opdesc_t	ops[] = {
+ 	/* remove (delete) extended attribute */
+ 	{ OP_REMOVEFATTR, "removefattr", removefattr_f, 1, 1 },
+ 	{ OP_RENAME, "rename", rename_f, 2, 1 },
++	{ OP_RNOREPLACE, "rnoreplace", rnoreplace_f, 2, 1 },
++	{ OP_REXCHANGE, "rexchange", rexchange_f, 2, 1 },
++	{ OP_RWHITEOUT, "rwhiteout", rwhiteout_f, 2, 1 },
+ 	{ OP_RESVSP, "resvsp", resvsp_f, 1, 1 },
+ 	{ OP_RMDIR, "rmdir", rmdir_f, 1, 1 },
+ 	/* set attribute flag (FS_IOC_SETFLAGS ioctl) */
+@@ -321,6 +362,7 @@ int		execute_freq = 1;
+ struct print_string	flag_str = {0};
+ 
+ void	add_to_flist(int, int, int, int);
++void	swap_flist_fents(int, int, int, int);
+ void	append_pathname(pathname_t *, char *);
+ int	attr_list_path(pathname_t *, char *, const int, int, attrlist_cursor_t *);
+ int	attr_remove_path(pathname_t *, const char *, int);
+@@ -354,7 +396,7 @@ int	open_path(pathname_t *, int);
+ DIR	*opendir_path(pathname_t *);
+ void	process_freq(char *);
+ int	readlink_path(pathname_t *, char *, size_t);
+-int	rename_path(pathname_t *, pathname_t *);
++int	rename_path(pathname_t *, pathname_t *, int);
+ int	rmdir_path(pathname_t *);
+ void	separate_pathname(pathname_t *, char *, pathname_t *);
+ void	show_ops(int, char *);
+@@ -758,6 +800,24 @@ add_to_flist(int ft, int id, int parent, int xattr_counter)
+ }
+ 
+ void
++swap_flist_fents(int ft, int slot, int dft, int dslot)
++{
++	flist_t *ftp;
++	flist_t *dftp;
++	fent_t	tmpfent;
++
++	ftp = &flist[ft];
++	dftp = &flist[dft];
++	if (ft == FT_DIR)
++		dcache_purge(ftp->fents[slot].id);
++	if (dft == FT_DIR)
++		dcache_purge(dftp->fents[dslot].id);
++	tmpfent = ftp->fents[slot];
++	ftp->fents[slot] = dftp->fents[dslot];
++	dftp->fents[dslot] = tmpfent;
++}
++
++void
+ append_pathname(pathname_t *name, char *str)
+ {
+ 	int	len;
+@@ -1519,7 +1579,7 @@ readlink_path(pathname_t *name, char *lbuf, size_t lbufsiz)
+ }
+ 
+ int
+-rename_path(pathname_t *name1, pathname_t *name2)
++rename_path(pathname_t *name1, pathname_t *name2, int mode)
+ {
+ 	char		buf1[NAME_MAX + 1];
+ 	char		buf2[NAME_MAX + 1];
+@@ -1528,14 +1588,18 @@ rename_path(pathname_t *name1, pathname_t *name2)
+ 	pathname_t	newname2;
+ 	int		rval;
+ 
+-	rval = rename(name1->path, name2->path);
++	if (mode == 0)
++		rval = rename(name1->path, name2->path);
++	else
++		rval = renameat2(AT_FDCWD, name1->path,
++				 AT_FDCWD, name2->path, mode);
+ 	if (rval >= 0 || errno != ENAMETOOLONG)
+ 		return rval;
+ 	separate_pathname(name1, buf1, &newname1);
+ 	separate_pathname(name2, buf2, &newname2);
+ 	if (strcmp(buf1, buf2) == 0) {
+ 		if (chdir(buf1) == 0) {
+-			rval = rename_path(&newname1, &newname2);
++			rval = rename_path(&newname1, &newname2, mode);
+ 			assert(chdir("..") == 0);
+ 		}
+ 	} else {
+@@ -1555,7 +1619,7 @@ rename_path(pathname_t *name1, pathname_t *name2)
+ 			append_pathname(&newname2, "../");
+ 			append_pathname(&newname2, name2->path);
+ 			if (chdir(buf1) == 0) {
+-				rval = rename_path(&newname1, &newname2);
++				rval = rename_path(&newname1, &newname2, mode);
+ 				assert(chdir("..") == 0);
+ 			}
+ 		} else {
+@@ -1563,7 +1627,7 @@ rename_path(pathname_t *name1, pathname_t *name2)
+ 			append_pathname(&newname1, "../");
+ 			append_pathname(&newname1, name1->path);
+ 			if (chdir(buf2) == 0) {
+-				rval = rename_path(&newname1, &newname2);
++				rval = rename_path(&newname1, &newname2, mode);
+ 				assert(chdir("..") == 0);
+ 			}
+ 		}
+@@ -4215,10 +4279,21 @@ out:
+ 	free_pathname(&f);
+ }
+ 
++struct print_flags renameat2_flags [] = {
++	{ RENAME_NOREPLACE, "NOREPLACE"},
++	{ RENAME_EXCHANGE, "EXCHANGE"},
++	{ RENAME_WHITEOUT, "WHITEOUT"},
++	{ -1, NULL}
++};
++
++#define translate_renameat2_flags(mode)	\
++	({translate_flags(mode, "|", renameat2_flags);})
++
+ void
+-rename_f(int opno, long r)
++do_renameat2(int opno, long r, int mode)
+ {
+ 	fent_t		*dfep;
++	flist_t		*dflp;
+ 	int		e;
+ 	pathname_t	f;
+ 	fent_t		*fep;
+@@ -4234,33 +4309,56 @@ rename_f(int opno, long r)
+ 	init_pathname(&f);
+ 	if (!get_fname(FT_ANYm, r, &f, &flp, &fep, &v1)) {
+ 		if (v1)
+-			printf("%d/%d: rename - no filename\n", procid, opno);
++			printf("%d/%d: rename - no source filename\n",
++				procid, opno);
+ 		free_pathname(&f);
+ 		return;
+ 	}
++	/* Both pathnames must exist for the RENAME_EXCHANGE */
++	if (mode == RENAME_EXCHANGE) {
++		init_pathname(&newf);
++		if (!get_fname(FT_ANYm, random(), &newf, &dflp, &dfep, &v)) {
++			if (v)
++				printf("%d/%d: rename - no target filename\n",
++					procid, opno);
++			free_pathname(&newf);
++			free_pathname(&f);
++			return;
++		}
++		v |= v1;
++		id = dfep->id;
++		parid = dfep->parent;
++	} else {
++		/*
++		 * get an existing directory for the destination parent
++		 * directory name.
++		 */
++		if (!get_fname(FT_DIRm, random(), NULL, NULL, &dfep, &v))
++			parid = -1;
++		else
++			parid = dfep->id;
++		v |= v1;
+ 
+-	/* get an existing directory for the destination parent directory name */
+-	if (!get_fname(FT_DIRm, random(), NULL, NULL, &dfep, &v))
+-		parid = -1;
+-	else
+-		parid = dfep->id;
+-	v |= v1;
+-
+-	/* generate a new path using an existing parent directory in name */
+-	init_pathname(&newf);
+-	e = generate_fname(dfep, flp - flist, &newf, &id, &v1);
+-	v |= v1;
+-	if (!e) {
+-		if (v) {
+-			(void)fent_to_name(&f, &flist[FT_DIR], dfep);
+-			printf("%d/%d: rename - no filename from %s\n",
+-				procid, opno, f.path);
++		/*
++		 * generate a new path using an existing parent directory
++		 * in name.
++		 */
++		init_pathname(&newf);
++		e = generate_fname(dfep, flp - flist, &newf, &id, &v1);
++		v |= v1;
++		if (!e) {
++			if (v) {
++				(void)fent_to_name(&f, &flist[FT_DIR], dfep);
++				printf("%d/%d: rename - no filename from %s\n",
++					procid, opno, f.path);
++			}
++			free_pathname(&newf);
++			free_pathname(&f);
++			return;
+ 		}
+-		free_pathname(&newf);
+-		free_pathname(&f);
+-		return;
+ 	}
+-	e = rename_path(&f, &newf) < 0 ? errno : 0;
++
++	e = rename_path(&f, &newf, mode) < 0 ? errno : 0;
+ 	check_cwd();
+ 	if (e == 0) {
+ 		int xattr_counter = fep->xattr_counter;
+@@ -4269,16 +4367,31 @@ rename_f(int opno, long r)
+ 			oldid = fep->id;
+ 			fix_parent(oldid, id);
+ 		}
+-		del_from_flist(flp - flist, fep - flp->fents);
+-		add_to_flist(flp - flist, id, parid, xattr_counter);
++
++		if (mode == RENAME_WHITEOUT) {
++			add_to_flist(FT_DEV, fep->id, fep->parent, 0);
++			del_from_flist(flp - flist, fep - flp->fents);
++			add_to_flist(flp - flist, id, parid, xattr_counter);
++		} else if (mode == RENAME_EXCHANGE) {
++			if (dflp - flist == FT_DIR) {
++				oldid = dfep->id;
++				fix_parent(oldid, fep->id);
++			}
++			swap_flist_fents(flp - flist, fep - flp->fents,
++					 dflp - flist, dfep - dflp->fents);
++		} else {
++			del_from_flist(flp - flist, fep - flp->fents);
++			add_to_flist(flp - flist, id, parid, xattr_counter);
++		}
+ 	}
+ 	if (v) {
+-		printf("%d/%d: rename %s to %s %d\n", procid, opno, f.path,
++		printf("%d/%d: rename(%s) %s to %s %d\n", procid,
++			opno, translate_renameat2_flags(mode), f.path,
+ 			newf.path, e);
+ 		if (e == 0) {
+-			printf("%d/%d: rename del entry: id=%d,parent=%d\n",
++			printf("%d/%d: rename source entry: id=%d,parent=%d\n",
+ 				procid, opno, fep->id, fep->parent);
+-			printf("%d/%d: rename add entry: id=%d,parent=%d\n",
++			printf("%d/%d: rename target entry: id=%d,parent=%d\n",
+ 				procid, opno, id, parid);
+ 		}
+ 	}
+@@ -4287,6 +4400,29 @@ rename_f(int opno, long r)
+ }
+ 
+ void
++rename_f(int opno, long r)
++{
++	do_renameat2(opno, r, 0);
++}
++void
++rnoreplace_f(int opno, long r)
++{
++	do_renameat2(opno, r, RENAME_NOREPLACE);
++}
++
++void
++rexchange_f(int opno, long r)
++{
++	do_renameat2(opno, r, RENAME_EXCHANGE);
++}
++
++void
++rwhiteout_f(int opno, long r)
++{
++	do_renameat2(opno, r, RENAME_WHITEOUT);
++}
++
++void
+ resvsp_f(int opno, long r)
+ {
+ 	int		e;
+-- 
+1.8.3.1
+
+-- 
+kaixuxia
