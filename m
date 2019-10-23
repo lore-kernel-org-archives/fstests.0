@@ -2,294 +2,455 @@ Return-Path: <SRS0=nbej=YQ=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
-	autolearn_force=no version=3.4.0
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7BAFCCA9EA0
-	for <linux-fstests@archiver.kernel.org>; Wed, 23 Oct 2019 02:36:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A6BDDCA9EAE
+	for <linux-fstests@archiver.kernel.org>; Wed, 23 Oct 2019 03:38:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 11F6E2053B
-	for <linux-fstests@archiver.kernel.org>; Wed, 23 Oct 2019 02:36:09 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 66AFE2173B
+	for <linux-fstests@archiver.kernel.org>; Wed, 23 Oct 2019 03:38:35 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=mykernel.net header.i=cgxu519@mykernel.net header.b="UniVkE+W"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="EkdSs7cd"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1732261AbfJWCgI (ORCPT
+        id S1732395AbfJWDif (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 22 Oct 2019 22:36:08 -0400
-Received: from sender3-pp-o92.zoho.com.cn ([124.251.121.251]:25725 "EHLO
-        sender3-pp-o92.zoho.com.cn" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S2388969AbfJWCgI (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 22 Oct 2019 22:36:08 -0400
-ARC-Seal: i=1; a=rsa-sha256; t=1571798146; cv=none; 
-        d=zoho.com.cn; s=zohoarc; 
-        b=SRDUfn1F5ISOg9WQ090kCGSc7qjRonw7/18d9kQcrtKrjJuA3+P9wH26T4JtTHe7rP3f2zKVA8IlSAHUDgXwtaIa0ZrWHTrVrkBX+I4umc2jinEZ0WHe3r+tnyMZW22SV8lzT8fDwK8ugAD+A+eKAO+nqAzMmQVo41FA+vA93pc=
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zoho.com.cn; s=zohoarc; 
-        t=1571798146; h=Content-Type:Content-Transfer-Encoding:Cc:Date:From:In-Reply-To:MIME-Version:Message-ID:Reply-To:References:Subject:To:ARC-Authentication-Results; 
-        bh=i9Gm5YNnthNWQFsTAvgpartk6iJmywHmbyaQYAzVrWM=; 
-        b=g+8FvJ1qK3e5g8P8dmdybMpF1Xwiq6s9kr4eNSUZEiDSVrvCEz681etU9eALTCH5y4NTb2zVw4ME0JazbIn3JzOeGjIIGkT4yYLG10oBy+cpYk2v4d2eCqcusDFdA4uyJi3Df5gNS4QNqudaqaDEsnaZTzyTU8SS2W2TjctWVvI=
-ARC-Authentication-Results: i=1; mx.zoho.com.cn;
-        dkim=pass  header.i=mykernel.net;
-        spf=pass  smtp.mailfrom=cgxu519@mykernel.net;
-        dmarc=pass header.from=<cgxu519@mykernel.net> header.from=<cgxu519@mykernel.net>
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1571798146;
-        s=zohomail; d=mykernel.net; i=cgxu519@mykernel.net;
-        h=Date:From:Reply-To:To:Cc:Message-ID:In-Reply-To:References:Subject:MIME-Version:Content-Type:Content-Transfer-Encoding;
-        l=6815; bh=i9Gm5YNnthNWQFsTAvgpartk6iJmywHmbyaQYAzVrWM=;
-        b=UniVkE+WteLeLQa2oPVf07zkkSB258VWsYe9AGiQJUfeTaUi+MvHoPenWL+64maU
-        fVL/lUtVjP8Arg2l9feJrcb4eFskPqVrw1zrguE6hBNyFy6ymZsuxTBYx4qNZir9qIk
-        TqcUwjZYNTy4JxaGyBPLcIjYZdEpc7YXVbdGTU18=
-Received: from mail.baihui.com by mx.zoho.com.cn
-        with SMTP id 1571798143907963.5163989350823; Wed, 23 Oct 2019 10:35:43 +0800 (CST)
-Date:   Wed, 23 Oct 2019 10:35:43 +0800
-From:   Chengguang Xu <cgxu519@mykernel.net>
-Reply-To: cgxu519@mykernel.net
-To:     "Amir Goldstein" <amir73il@gmail.com>
-Cc:     "fstests" <fstests@vger.kernel.org>,
-        "overlayfs" <linux-unionfs@vger.kernel.org>,
-        "Eryu Guan" <guaneryu@gmail.com>,
-        "Miklos Szeredi" <miklos@szeredi.hu>
-Message-ID: <16df67853a0.cbb0025c28387.6494870826455764764@mykernel.net>
-In-Reply-To: <CAOQ4uxiXwJp4dh_yENsxskbSvuGew2ZqRFyKccdFUMLGWUaz3Q@mail.gmail.com>
-References: <20191022122621.27374-1-cgxu519@mykernel.net> <CAOQ4uxiXwJp4dh_yENsxskbSvuGew2ZqRFyKccdFUMLGWUaz3Q@mail.gmail.com>
-Subject: Re: [PATCH] overlay/066: copy-up test for variant sparse files
+        Tue, 22 Oct 2019 23:38:35 -0400
+Received: from us-smtp-2.mimecast.com ([205.139.110.61]:20759 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1727582AbfJWDie (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 22 Oct 2019 23:38:34 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1571801912;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=ra4ByP+FHXXG9TZZlWJD7D0vUesrofo4ctFNlNjuhuk=;
+        b=EkdSs7cdxfOHD6RIIZmKsfabuXHPtomqvmFw6fA16qZ8jf0sriFOttEEov+hxQxMBGRJ5L
+        aU6a/tzHBS6+HCaDpTofSOSpBTmGQEah8B4u1VfIAxM9vxzC/Q/iv8hX6XsSR46TcExWHa
+        H9hP4WBfpInTkudGOeJjjpC+7TfiSuQ=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-202-LKIKRu8BO2OkL9CBFS5Vgw-1; Tue, 22 Oct 2019 23:38:30 -0400
+Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id DEDE71800D6B;
+        Wed, 23 Oct 2019 03:38:29 +0000 (UTC)
+Received: from donald.localdomain (vpn2-54-85.bne.redhat.com [10.64.54.85])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id 59F8B60C4E;
+        Wed, 23 Oct 2019 03:38:29 +0000 (UTC)
+Received: from localhost (localhost [IPv6:::1])
+        by donald.localdomain (Postfix) with ESMTP id AAA28280110;
+        Wed, 23 Oct 2019 11:38:26 +0800 (AWST)
+Message-ID: <7e96f69cd6067e202aac59c70616c643ad63c27d.camel@redhat.com>
+Subject: Re: [PATCH] xfstests: xfs mount option sanity test
+From:   Ian Kent <ikent@redhat.com>
+To:     Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org
+Cc:     linux-xfs@vger.kernel.org
+Date:   Wed, 23 Oct 2019 11:38:26 +0800
+In-Reply-To: <20191022100118.18506-1-zlang@redhat.com>
+References: <20191022100118.18506-1-zlang@redhat.com>
+User-Agent: Evolution 3.32.4 (3.32.4-1.fc30)
 MIME-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.12
+X-MC-Unique: LKIKRu8BO2OkL9CBFS5Vgw-1
+X-Mimecast-Spam-Score: 0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: quoted-printable
-X-Priority: Medium
-User-Agent: ZohoCN Mail
-X-Mailer: ZohoCN Mail
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
- ---- =E5=9C=A8 =E6=98=9F=E6=9C=9F=E4=BA=8C, 2019-10-22 21:31:32 Amir Golds=
-tein <amir73il@gmail.com> =E6=92=B0=E5=86=99 ----
- > On Tue, Oct 22, 2019 at 3:26 PM Chengguang Xu <cgxu519@mykernel.net> wro=
-te:
- > >
- > > This is intensive copy-up test for sparse files,
- > > these cases are mainly used for regression test
- > > of copy-up improvement for sparse files.
- > >
- > > Signed-off-by: Chengguang Xu <cgxu519@mykernel.net>
- > > ---
- > >  tests/overlay/066     | 108 +++++++++++++++++++++++++++++++++++++++++=
-+
- > >  tests/overlay/066.out |   2 +
- > >  tests/overlay/group   |   1 +
- > >  3 files changed, 111 insertions(+)
- > >  create mode 100755 tests/overlay/066
- > >  create mode 100644 tests/overlay/066.out
- > >
- > > diff --git a/tests/overlay/066 b/tests/overlay/066
- > > new file mode 100755
- > > index 00000000..0394b14e
- > > --- /dev/null
- > > +++ b/tests/overlay/066
- > > @@ -0,0 +1,108 @@
- > > +#! /bin/bash
- > > +# SPDX-License-Identifier: GPL-2.0
- > > +# Copyright (c) 2019 Chengguang Xu <cgxu519@mykernel.net>. All Rights=
- Reserved.
- > > +#
- > > +# FS QA Test 066
- > > +#
- > > +# Test overlayfs copy-up function for variant sparse files.
- > > +#
- > > +seq=3D`basename $0`
- > > +seqres=3D$RESULT_DIR/$seq
- > > +echo "QA output created by $seq"
- > > +
- > > +here=3D`pwd`
- > > +tmp=3D/tmp/$
- > > +status=3D1       # failure is the default!
- > > +trap "_cleanup; exit \$status" 0 1 2 3 15
- > > +
- > > +_cleanup()
- > > +{
- > > +       cd /
- > > +       rm -f $tmp.*
- > > +}
- > > +
- > > +# get standard environment, filters and checks
- > > +. ./common/rc
- > > +. ./common/filter
- > > +
- > > +# remove previous $seqres.full before test
- > > +rm -f $seqres.full
- > > +
- > > +# real QA test starts here
- > > +
- > > +# Modify as appropriate.
- > > +_supported_fs generic
- > > +_supported_os Linux
- > > +_require_test
- > > +_require_scratch
- > > +
- > > +# Remove all files from previous tests
- > > +_scratch_mkfs
- > > +_require_fs_space $OVL_BASE_SCRATCH_MNT $((10*1024*13 + 100*1024))
- >=20
- > Please add a comment about how the above is calculated.
- > Should it depend on fs reported iosize or blocksize?
+On Tue, 2019-10-22 at 18:01 +0800, Zorro Lang wrote:
+> XFS is changing to suit the new mount API, so add this case to make
+> sure the changing won't bring in regression issue on xfs mount option
+> parse phase, and won't change some default behaviors either.
 
-The calculation based on file size * file num, in other word,
-we have 13 10M files and one 100M file. I'll add explanation
-for it.
+This looks great, it looks quite comprehensive.
 
- >=20
- > > +
- > > +lowerdir=3D$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
- > > +upperdir=3D$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
- > > +testfile=3D"copyup_sparse_test"
- > > +mkdir -p $lowerdir
- > > +
- > > +# Create a completely empty hole file.
- > > +$XFS_IO_PROG -fc "truncate 10M" "${lowerdir}/${testfile}_empty_holefi=
-le" >>$seqres.full
- > > +
- > > +iosize=3D`stat -c %o "${lowerdir}/${testfile}_empty_holefile"`
- >=20
- > I am not sure why fs reported iosize is interesting for this test case.
- > If anything you need _get_file_block_size
+I'll give it a try once I've done the recently requested changes
+to my mount api series and let you know how it goes.
 
-If hole size is smaller than fs block size, then the block will still be al=
-located,
-let me check _get_file_block_size.
+Presumably the test passes when using the current master branch of
+the xfs-linux tree, correct?
 
+Ian
 
- >=20
- > > +if [ $iosize -le 1024 ]; then
- > > +       ioszie=3D1
- >=20
- > typo: ioszie
-
-I'll fix in v2.
-
- >=20
- > > +else
- > > +       iosize=3D`expr $iosize / 1024`
- > > +fi
- > > +
- > > +# Create test files with different hole size patterns.
- > > +while [ $iosize -le 2048 ]; do
- > > +       pos=3D$iosize
- > > +       $XFS_IO_PROG -fc "truncate 10M" "${lowerdir}/${testfile}_iosiz=
-e${iosize}K_holefile" >>$seqres.full
- > > +       while [ $pos -lt 8192 ]; do
- > > +               $XFS_IO_PROG -fc "pwrite ${pos}K ${iosize}K" "${lowerd=
-ir}/${testfile}_iosize${iosize}K_holefile" >>$seqres.full
- > > +               pos=3D`expr $pos + $iosize + $iosize`
- > > +       done
- > > +       iosize=3D`expr $iosize + $iosize`
- > > +done
- > > +
- > > +# Create test file with many random holes(1M~2M).
- > > +$XFS_IO_PROG -fc "truncate 100M" "${lowerdir}/${testfile}_random_hole=
-file" >>$seqres.full
- > > +pos=3D2048
- > > +while [ $pos -le 81920 ]; do
- > > +       iosize=3D`expr $RANDOM % 2048`
- > > +       if [ $iosize -lt 1024 ]; then
- > > +               iosize=3D`expr $iosize + 1024`
- > > +       fi
- >=20
- > IOW: iosize=3D`expr $RANDOM % 1024 + 1024`
-
-Yeah, good suggestion but maybe 1M~2M hole size is not sufficient,
-I plan to extend to 5M(max) in next version.
-
- >=20
- > > +       $XFS_IO_PROG -fc "pwrite ${pos}K ${iosize}K" "${lowerdir}/${te=
-stfile}_random_holefile" >>$seqres.full
- > > +       pos=3D`expr $pos + $iosize + $iosize`
- > > +done
- > > +
- > > +_scratch_mount
- > > +
- > > +# Open the files should succeed, no errors are expected.
- > > +for f in $SCRATCH_MNT/*; do
- > > +       $XFS_IO_PROG -c "open" $f >>$seqres.full
- > > +done
- > > +
- > > +echo "Silence is golden"
- > > +
- > > +# Check all copy-up files in upper layer.
- > > +iosize=3D`stat -c %o "${lowerdir}/${testfile}_empty_holefile"`
- > > +if [ $iosize -le 1024 ]; then
- > > +       ioszie=3D1
- >=20
- > typo: ioszie
-
-I'll fix in v2.
-
- >=20
- > > +else
- > > +       iosize=3D`expr $iosize / 1024`
- > > +fi
- > > +
- > > +while [ $iosize -le 2048 ]; do
- > > +       diff "${lowerdir}/${testfile}_iosize${iosize}K_holefile" "${up=
-perdir}/${testfile}_iosize${iosize}K_holefile" >>$seqres.full
- > > +       iosize=3D`expr $iosize + $iosize`
- > > +done
- > > +
- > > +diff "${lowerdir}/${testfile}_empty_holefile"  "${upperdir}/${testfil=
-e}_empty_holefile"  >>$seqres.full
- > > +diff "${lowerdir}/${testfile}_random_holefile" "${upperdir}/${testfil=
-e}_random_holefile" >>$seqres.full
- >=20
- > This expression does not fail the test if file differ?
- > Did you mean:
- >=20
- > diff "${lowerdir}/${testfile}_empty_holefile"
- > "${upperdir}/${testfile}_empty_holefile"  >>$seqres.full || \
- >     echo ${testfile}_empty_holefile" copy up failed
-
-Yeah, it's more useful for investigating problem.
-
-
- >=20
- > > +
- > > +# success, all done
- > > +status=3D0
- > > +exit
- > > diff --git a/tests/overlay/066.out b/tests/overlay/066.out
- > > new file mode 100644
- > > index 00000000..b60cc24c
- > > --- /dev/null
- > > +++ b/tests/overlay/066.out
- > > @@ -0,0 +1,2 @@
- > > +QA output created by 066
- > > +Silence is golden
- > > diff --git a/tests/overlay/group b/tests/overlay/group
- > > index ef8517a1..1dec7db9 100644
- > > --- a/tests/overlay/group
- > > +++ b/tests/overlay/group
- > > @@ -68,3 +68,4 @@
- > >  063 auto quick whiteout
- > >  064 auto quick copyup
- > >  065 auto quick mount
- > > +066 auto quick copyup
- >=20
- > I'm curious, how long does the test run with and without copy up hole
- > optimization patch?
-
-I'm using NVMe SSD disk so the performance(bw & iops) is quite good,
-below figure from the result of xfstest  for test case overlay/066.
-
-xfs: 7s(before) =3D> 6s(after)
-ext4: 7s(before) =3D> 6s(after)
-
-Maybe there will be remarkable difference on bigger sparse file,=20
-if anyone interested on this I can add more test files(big) but it will als=
-o
-increase  test time significantly.
-
-Thanks,
-Chengguang
-
+>=20
+> Signed-off-by: Zorro Lang <zlang@redhat.com>
+> ---
+>  tests/xfs/148     | 315
+> ++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/148.out |   6 +
+>  tests/xfs/group   |   1 +
+>  3 files changed, 322 insertions(+)
+>  create mode 100755 tests/xfs/148
+>  create mode 100644 tests/xfs/148.out
+>=20
+> diff --git a/tests/xfs/148 b/tests/xfs/148
+> new file mode 100755
+> index 00000000..5c268f18
+> --- /dev/null
+> +++ b/tests/xfs/148
+> @@ -0,0 +1,315 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2019 Red Hat, Inc. All Rights Reserved.
+> +#
+> +# FS QA Test 148
+> +#
+> +# XFS mount options sanity check, refer to 'man 5 xfs'.
+> +#
+> +seq=3D`basename $0`
+> +seqres=3D$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=3D`pwd`
+> +tmp=3D/tmp/$$
+> +status=3D1=09# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +=09cd /
+> +=09rm -f $tmp.*
+> +=09$UMOUNT_PROG $LOOP_MNT 2>/dev/null
+> +=09if [ -n "$LOOP_DEV" ];then
+> +=09=09_destroy_loop_device $LOOP_DEV 2>/dev/null
+> +=09fi
+> +=09if [ -n "$LOOP_SPARE_DEV" ];then
+> +=09=09_destroy_loop_device $LOOP_SPARE_DEV 2>/dev/null
+> +=09fi
+> +=09rm -f $LOOP_IMG
+> +=09rm -f $LOOP_SPARE_IMG
+> +=09rmdir $LOOP_MNT
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +_supported_fs xfs
+> +_supported_os Linux
+> +_require_test
+> +_require_loop
+> +_require_xfs_io_command "falloc"
+> +
+> +LOOP_IMG=3D$TEST_DIR/$seq.dev
+> +LOOP_SPARE_IMG=3D$TEST_DIR/$seq.logdev
+> +LOOP_MNT=3D$TEST_DIR/$seq.mnt
+> +
+> +echo "** create loop device"
+> +$XFS_IO_PROG -f -c "falloc 0 1g" $LOOP_IMG
+> +LOOP_DEV=3D`_create_loop_device $LOOP_IMG`
+> +
+> +echo "** create loop log device"
+> +$XFS_IO_PROG -f -c "falloc 0 512m" $LOOP_SPARE_IMG
+> +LOOP_SPARE_DEV=3D`_create_loop_device $LOOP_SPARE_IMG`
+> +
+> +echo "** create loop mount point"
+> +rmdir $LOOP_MNT 2>/dev/null
+> +mkdir -p $LOOP_MNT || _fail "cannot create loopback mount point"
+> +
+> +# avoid the effection from MKFS_OPTIONS
+> +MKFS_OPTIONS=3D""
+> +do_mkfs()
+> +{
+> +=09$MKFS_XFS_PROG -f $* $LOOP_DEV | _filter_mkfs >$seqres.full
+> 2>$tmp.mkfs
+> +=09if [ "${PIPESTATUS[0]}" -ne 0 ]; then
+> +=09=09_fail "Fails on _mkfs_dev $* $LOOP_DEV"
+> +=09fi
+> +=09. $tmp.mkfs
+> +}
+> +
+> +is_dev_mounted()
+> +{
+> +=09findmnt --source $LOOP_DEV >/dev/null
+> +=09return $?
+> +}
+> +
+> +get_mount_info()
+> +{
+> +=09findmnt --source $LOOP_DEV -o OPTIONS -n
+> +}
+> +
+> +force_unmount()
+> +{
+> +=09$UMOUNT_PROG $LOOP_MNT >/dev/null 2>&1
+> +}
+> +
+> +# _do_test <mount options> <should be mounted?> [<key string> <key
+> should be found?>]
+> +_do_test()
+> +{
+> +=09local opts=3D"$1"
+> +=09local mounted=3D"$2"=09# pass or fail
+> +=09local key=3D"$3"
+> +=09local found=3D"$4"=09# true or false
+> +=09local rc
+> +=09local info
+> +
+> +=09# mount test
+> +=09_mount $LOOP_DEV $LOOP_MNT $opts 2>/dev/null
+> +=09rc=3D$?
+> +=09if [ $rc -eq 0 ];then
+> +=09=09if [ "${mounted}" =3D "fail" ];then
+> +=09=09=09echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT
+> $opts"
+> +=09=09=09echo "ERROR: expect ${mounted}, but pass"
+> +=09=09=09return 1
+> +=09=09fi
+> +=09=09is_dev_mounted
+> +=09=09if [ $? -ne 0 ];then
+> +=09=09=09echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT
+> $opts"
+> +=09=09=09echo "ERROR: fs not mounted even mount return
+> 0"
+> +=09=09=09return 1
+> +=09=09fi
+> +=09else
+> +=09=09if [ "${mount_ret}" =3D "pass" ];then
+> +=09=09=09echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT
+> $opts"
+> +=09=09=09echo "ERROR: expect ${mounted}, but fail"
+> +=09=09=09return 1
+> +=09=09fi
+> +=09=09is_dev_mounted
+> +=09=09if [ $? -eq 0 ];then
+> +=09=09=09echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT
+> $opts"
+> +=09=09=09echo "ERROR: fs is mounted even mount return
+> non-zero"
+> +=09=09=09return 1
+> +=09=09fi
+> +=09fi
+> +
+> +=09# Skip below checking if "$key" argument isn't specified
+> +=09if [ -z "$key" ];then
+> +=09=09return 0
+> +=09fi
+> +=09# Check the mount options after fs mounted.
+> +=09info=3D`get_mount_info`
+> +=09echo $info | grep -q "${key}"
+> +=09rc=3D$?
+> +=09if [ $rc -eq 0 ];then
+> +=09=09if [ "$found" !=3D "true" ];then
+> +=09=09=09echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT
+> $opts"
+> +=09=09=09echo "ERROR: expect there's $key in $info, but
+> not found"
+> +=09=09=09return 1
+> +=09=09fi
+> +=09else
+> +=09=09if [ "$found" !=3D "false" ];then
+> +=09=09=09echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT
+> $opts"
+> +=09=09=09echo "ERROR: expect there's not $key in $info,
+> but found"
+> +=09=09=09return 1
+> +=09=09fi
+> +=09fi
+> +
+> +=09return 0
+> +}
+> +
+> +do_test()
+> +{
+> +=09# force unmount before testing
+> +=09force_unmount
+> +=09_do_test "$@"
+> +=09# force unmount after testing
+> +=09force_unmount
+> +}
+> +
+> +echo "** start xfs mount testing ..."
+> +# Test allocsize=3Dsize
+> +# Valid values for this option are page size (typically 4KiB)
+> through to 1GiB
+> +do_mkfs
+> +if [ $dbsize -ge 1024 ];then
+> +=09blsize=3D"$((dbsize / 1024))k"
+> +fi
+> +do_test "" pass "allocsize" "false"
+> +do_test "-o allocsize=3D$blsize" pass "allocsize=3D$blsize" "true"
+> +do_test "-o allocsize=3D1048576k" pass "allocsize=3D1048576k" "true"
+> +do_test "-o allocsize=3D$((dbsize / 2))" fail
+> +do_test "-o allocsize=3D2g" fail
+> +
+> +# Test attr2
+> +do_mkfs -m crc=3D1
+> +do_test "" pass "attr2" "true"
+> +do_test "-o attr2" pass "attr2" "true"
+> +do_test "-o noattr2" fail
+> +do_mkfs -m crc=3D0
+> +do_test "" pass "attr2" "true"
+> +do_test "-o attr2" pass "attr2" "true"
+> +do_test "-o noattr2" pass "attr2" "false"
+> +
+> +# Test discard
+> +do_mkfs
+> +do_test "" pass "discard" "false"
+> +do_test "-o discard" pass "discard" "true"
+> +do_test "-o nodiscard" pass "discard" "false"
+> +
+> +# Test grpid|bsdgroups|nogrpid|sysvgroups
+> +do_test "" pass "grpid" "false"
+> +do_test "-o grpid" pass "grpid" "true"
+> +do_test "-o bsdgroups" pass "grpid" "true"
+> +do_test "-o nogrpid" pass "grpid" "false"
+> +do_test "-o sysvgroups" pass "grpid" "false"
+> +
+> +# Test filestreams
+> +do_test "" pass "filestreams" "false"
+> +do_test "-o filestreams" pass "filestreams" "true"
+> +
+> +# Test ikeep
+> +do_test "" pass "ikeep" "false"
+> +do_test "-o ikeep" pass "ikeep" "true"
+> +do_test "-o noikeep" pass "ikeep" "false"
+> +
+> +# Test inode32|inode64
+> +do_test "" pass "inode64" "true"
+> +do_test "-o inode32" pass "inode32" "true"
+> +do_test "-o inode64" pass "inode64" "true"
+> +
+> +# Test largeio
+> +do_test "" pass "largeio" "false"
+> +do_test "-o largeio" pass "largeio" "true"
+> +do_test "-o nolargeio" pass "largeio" "false"
+> +
+> +# Test logbufs=3Dvalue. Valid numbers range from 2=E2=80=938 inclusive.
+> +do_test "" pass "logbufs" "false"
+> +do_test "-o logbufs=3D8" pass "logbufs=3D8" "true"
+> +do_test "-o logbufs=3D2" pass "logbufs=3D2" "true"
+> +do_test "-o logbufs=3D1" fail
+> +###### but it gets logbufs=3D8 now, why? bug? #######
+> +# do_test "-o logbufs=3D0" fail
+> +do_test "-o logbufs=3D9" fail
+> +do_test "-o logbufs=3D99999999999999" fail
+> +
+> +# Test logbsize=3Dvalue.
+> +do_mkfs -m crc=3D1 -l version=3D2
+> +do_test "" pass "logbsize" "false"
+> +do_test "-o logbsize=3D16384" pass "logbsize=3D16k" "true"
+> +do_test "-o logbsize=3D16k" pass "logbsize=3D16k" "true"
+> +do_test "-o logbsize=3D32k" pass "logbsize=3D32k" "true"
+> +do_test "-o logbsize=3D64k" pass "logbsize=3D64k" "true"
+> +do_test "-o logbsize=3D128k" pass "logbsize=3D128k" "true"
+> +do_test "-o logbsize=3D256k" pass "logbsize=3D256k" "true"
+> +do_test "-o logbsize=3D8k" fail
+> +do_test "-o logbsize=3D512k" fail
+> +####### it's invalid, but it set to default size 32k
+> +# do_test "-o logbsize=3D0" false
+> +do_mkfs -m crc=3D0 -l version=3D1
+> +do_test "" pass "logbsize" "false"
+> +do_test "-o logbsize=3D16384" pass "logbsize=3D16k" "true"
+> +do_test "-o logbsize=3D16k" pass "logbsize=3D16k" "true"
+> +do_test "-o logbsize=3D32k" pass "logbsize=3D32k" "true"
+> +do_test "-o logbsize=3D64k" fail
+> +
+> +# Test logdev
+> +do_mkfs
+> +do_test "" pass "logdev" "false"
+> +do_test "-o logdev=3D$LOOP_SPARE_DEV" fail
+> +do_mkfs -l logdev=3D$LOOP_SPARE_DEV
+> +do_test "-o logdev=3D$LOOP_SPARE_DEV" pass "logdev=3D$LOOP_SPARE_DEV"
+> "true"
+> +do_test "" fail
+> +
+> +# Test noalign
+> +do_mkfs
+> +do_test "" pass "noalign" "false"
+> +do_test "-o noalign" pass "noalign" "true"
+> +
+> +# Test norecovery
+> +do_test "" pass "norecovery" "false"
+> +do_test "-o norecovery,ro" pass "norecovery" "true"
+> +do_test "-o norecovery" fail
+> +
+> +# Test nouuid
+> +do_test "" pass "nouuid" "false"
+> +do_test "-o nouuid" pass "nouuid" "true"
+> +
+> +# Test noquota
+> +do_test "" pass "noquota" "true"
+> +do_test "-o noquota" pass "noquota" "true"
+> +
+> +# Test uquota/usrquota/quota/uqnoenforce/qnoenforce
+> +do_test "" pass "usrquota" "false"
+> +do_test "-o uquota" pass "usrquota" "true"
+> +do_test "-o usrquota" pass "usrquota" "true"
+> +do_test "-o quota" pass "usrquota" "true"
+> +do_test "-o uqnoenforce" pass "usrquota" "true"
+> +do_test "-o qnoenforce" pass "usrquota" "true"
+> +
+> +# Test gquota/grpquota/gqnoenforce
+> +do_test "" pass "grpquota" "false"
+> +do_test "-o gquota" pass "grpquota" "true"
+> +do_test "-o grpquota" pass "grpquota" "true"
+> +do_test "-o gqnoenforce" pass "gqnoenforce" "true"
+> +
+> +# Test pquota/prjquota/pqnoenforce
+> +do_test "" pass "prjquota" "false"
+> +do_test "-o pquota" pass "prjquota" "true"
+> +do_test "-o prjquota" pass "prjquota" "true"
+> +do_test "-o pqnoenforce" pass "pqnoenforce" "true"
+> +
+> +# Test sunit=3Dvalue and swidth=3Dvalue
+> +do_mkfs -d sunit=3D128,swidth=3D128
+> +do_test "-o sunit=3D8,swidth=3D8" pass "sunit=3D8,swidth=3D8" "true"
+> +do_test "-o sunit=3D8,swidth=3D64" pass "sunit=3D8,swidth=3D64" "true"
+> +do_test "-o sunit=3D128,swidth=3D128" pass "sunit=3D128,swidth=3D128" "t=
+rue"
+> +do_test "-o sunit=3D256,swidth=3D256" pass "sunit=3D256,swidth=3D256" "t=
+rue"
+> +do_test "-o sunit=3D2,swidth=3D2" fail
+> +
+> +# Test swalloc
+> +do_mkfs
+> +do_test "" pass "swalloc" "false"
+> +do_test "-o swalloc" pass "swalloc" "true"
+> +
+> +# Test wsync
+> +do_test "" pass "wsync" "false"
+> +do_test "-o wsync" pass "wsync" "true"
+> +
+> +echo "** end of testing"
+> +# success, all done
+> +status=3D0
+> +exit
+> diff --git a/tests/xfs/148.out b/tests/xfs/148.out
+> new file mode 100644
+> index 00000000..a71d9231
+> --- /dev/null
+> +++ b/tests/xfs/148.out
+> @@ -0,0 +1,6 @@
+> +QA output created by 148
+> +** create loop device
+> +** create loop log device
+> +** create loop mount point
+> +** start xfs mount testing ...
+> +** end of testing
+> diff --git a/tests/xfs/group b/tests/xfs/group
+> index f4ebcd8c..019aebad 100644
+> --- a/tests/xfs/group
+> +++ b/tests/xfs/group
+> @@ -145,6 +145,7 @@
+>  145 dmapi
+>  146 dmapi
+>  147 dmapi
+> +148 auto quick mount
+>  150 dmapi
+>  151 dmapi
+>  152 dmapi
 
