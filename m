@@ -2,244 +2,257 @@ Return-Path: <SRS0=fGqU=YR=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 97209CA9EAF
-	for <linux-fstests@archiver.kernel.org>; Thu, 24 Oct 2019 10:16:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9B141CA9EAF
+	for <linux-fstests@archiver.kernel.org>; Thu, 24 Oct 2019 12:30:26 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 6D12220684
-	for <linux-fstests@archiver.kernel.org>; Thu, 24 Oct 2019 10:16:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 32C2D20650
+	for <linux-fstests@archiver.kernel.org>; Thu, 24 Oct 2019 12:30:24 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=mykernel.net header.i=cgxu519@mykernel.net header.b="R6N5vPgR"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2391863AbfJXKQj (ORCPT
+        id S1726434AbfJXMaX (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 24 Oct 2019 06:16:39 -0400
-Received: from mx2.suse.de ([195.135.220.15]:33664 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S2388677AbfJXKQj (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 24 Oct 2019 06:16:39 -0400
-X-Virus-Scanned: by amavisd-new at test-mx.suse.de
-Received: from relay2.suse.de (unknown [195.135.220.254])
-        by mx1.suse.de (Postfix) with ESMTP id 7ED22AC3F;
-        Thu, 24 Oct 2019 10:16:35 +0000 (UTC)
-From:   Qu Wenruo <wqu@suse.com>
-To:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Subject: [PATCH] fstests: btrfs: Test if btrfs can trim adjacent extents across adjacent block groups boundary
-Date:   Thu, 24 Oct 2019 18:16:29 +0800
-Message-Id: <20191024101629.33807-1-wqu@suse.com>
-X-Mailer: git-send-email 2.23.0
+        Thu, 24 Oct 2019 08:30:23 -0400
+Received: from sender2-of-o52.zoho.com.cn ([163.53.93.247]:21295 "EHLO
+        sender2-of-o52.zoho.com.cn" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726360AbfJXMaX (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 24 Oct 2019 08:30:23 -0400
+ARC-Seal: i=1; a=rsa-sha256; t=1571920181; cv=none; 
+        d=zoho.com.cn; s=zohoarc; 
+        b=Iybl7YVdrYE32+MaD1LV/11KschiFj/bqk/2hZrOicYxku6102DCCT7CRQBe8e1RDCpsDbN6i/jnJyDvti+r/TD+qO+toig42SkR0lny72lofnnyTNO8Zu9PwaYJXGv/V433SrkE6psO+yfVKjLHV5uaM9Gc2625vprSP7LUNQw=
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zoho.com.cn; s=zohoarc; 
+        t=1571920181; h=Content-Type:Content-Transfer-Encoding:Cc:Date:From:MIME-Version:Message-ID:Subject:To:ARC-Authentication-Results; 
+        bh=0aIQoXsauAlc8inagNut1GIPyl1KH20Js5P8Lz4Xn4w=; 
+        b=abad88HK8IvkJ+XLUwgTUw1NYPTymzS1QMSRrwBwNisf6RZth4fJPwXpTy8RtRIr6Edh4Kav84mskBsUftNMXDjayoJNdw6khYrtb5L1zD4dXBjc5w7Jvq9iBekI/pwREuOuQaQ8nZY8iuM7KGtrydMVC+PDblc1gDme2E+IbuA=
+ARC-Authentication-Results: i=1; mx.zoho.com.cn;
+        dkim=pass  header.i=mykernel.net;
+        spf=pass  smtp.mailfrom=cgxu519@mykernel.net;
+        dmarc=pass header.from=<cgxu519@mykernel.net> header.from=<cgxu519@mykernel.net>
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1571920181;
+        s=zohomail; d=mykernel.net; i=cgxu519@mykernel.net;
+        h=From:To:Cc:Message-ID:Subject:Date:MIME-Version:Content-Transfer-Encoding:Content-Type;
+        l=5574; bh=0aIQoXsauAlc8inagNut1GIPyl1KH20Js5P8Lz4Xn4w=;
+        b=R6N5vPgRIV8LWsqvxpbVD3FU6dhPE4MGqeh979eIj+HXZpY4dkHIrHgS8D/s8LUO
+        4kQRMO6LljEihofRPVk+6HO6h5dHf1xpu9QGIDCm/Sdhmok+q6OWOtr29na4P0b9JNJ
+        2JhhHQMcHDR5ZSiU60a8XuUCodUlJ6B9YZ5kuTGg=
+Received: from localhost.localdomain (218.18.229.179 [218.18.229.179]) by mx.zoho.com.cn
+        with SMTPS id 157192017851456.31123617052731; Thu, 24 Oct 2019 20:29:38 +0800 (CST)
+From:   Chengguang Xu <cgxu519@mykernel.net>
+To:     fstests@vger.kernel.org, linux-unionfs@vger.kernel.org
+Cc:     guaneryu@gmail.com, amir73il@gmail.com, miklos@szeredi.hu,
+        Chengguang Xu <cgxu519@mykernel.net>
+Message-ID: <20191024122923.24689-1-cgxu519@mykernel.net>
+Subject: [PATCH v3] overlay/066: copy-up test for variant sparse files
+Date:   Thu, 24 Oct 2019 20:29:23 +0800
+X-Mailer: git-send-email 2.20.1
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: quoted-printable
+X-ZohoCNMailClient: External
+Content-Type: text/plain; charset=utf8
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-The test case checks if btrfs can trim adjacent extents across adjacent
-block groups boundary correctly.
+This is intensive copy-up test for sparse files,
+these cases will be mainly used for regression test
+of copy-up improvement for sparse files.
 
-The test case craft the following extents layout:
+Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+Signed-off-by: Chengguang Xu <cgxu519@mykernel.net>
 
-         |  BG1 |      BG2        |       BG3            |
- Bytenr: X-8M   X      X+512M     X+1G  X+1G+128M
-         |//////|//////|          |     |//|
-
-There is a long existing bug that, when btrfs is trying to trim the
-range at [X+512M, X+1G+128M), it will only trim [X+512M, X+1G).
-
-This test case is the regression test for this long existing bug.
-
-It will verify the trimmed bytes by using loopback device backed up by a
-file, and checking the bytes used by the file to determine how many
-bytes are trimmed.
-
-Signed-off-by: Qu Wenruo <wqu@suse.com>
 ---
- tests/btrfs/198     | 154 ++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/198.out |   2 +
- tests/btrfs/group   |   1 +
- 3 files changed, 157 insertions(+)
- create mode 100755 tests/btrfs/198
- create mode 100644 tests/btrfs/198.out
+v1->v2:
+- Call _get_block_size to get fs block size.
+- Add comment for test space requirement.
+- Print meaningful error message when copy-up fail.
+- Adjust random hole range to 1M~5M.
+- Fix typo.
 
-diff --git a/tests/btrfs/198 b/tests/btrfs/198
+v2->v3:
+- Fix space requiremnt for test.
+- Add more descriptions for test files and hole patterns.
+- Define well named variables to replace unexplained numbers.
+- Fix random hole algorithm to what Amir suggested.
+- Adjust iosize to start from 1K.
+- Remove from quick test group.
+
+ tests/overlay/066     | 130 ++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/066.out |   2 +
+ tests/overlay/group   |   1 +
+ 3 files changed, 133 insertions(+)
+ create mode 100755 tests/overlay/066
+ create mode 100644 tests/overlay/066.out
+
+diff --git a/tests/overlay/066 b/tests/overlay/066
 new file mode 100755
-index 00000000..851e44c1
+index 00000000..285a5aff
 --- /dev/null
-+++ b/tests/btrfs/198
-@@ -0,0 +1,154 @@
++++ b/tests/overlay/066
+@@ -0,0 +1,130 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
++# Copyright (c) 2019 Chengguang Xu <cgxu519@mykernel.net>
++# All Rights Reserved.
 +#
-+# FS QA Test 198
++# FS QA Test 066
 +#
-+# Test if btrfs discard mount option is trimming adjacent extents across
-+# block groups boundary.
-+# The test case uses loopback device and file used space to detect trimmed
-+# bytes.
++# Test overlayfs copy-up function for variant sparse files.
 +#
-+# There is a long existing bug that btrfs doesn't discard all space for
-+# above mentioned case.
-+#
-+# The fix is: "btrfs: extent-tree: Ensure we trim ranges across block group
-+# boundary"
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
++seq=3D`basename $0`
++seqres=3D$RESULT_DIR/$seq
 +echo "QA output created by $seq"
 +
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
++here=3D`pwd`
++tmp=3D/tmp/$$
++status=3D1=09# failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
 +
 +_cleanup()
 +{
-+	cd /
-+	umount $loop_mnt &> /dev/null
-+	_destroy_loop_device $loop_dev &> /dev/null
-+	rm -rf $tmp.*
++=09cd /
++=09rm -f $tmp.*
 +}
 +
-+# get standard environment, filters and checks
++# get standard environment, filters and checks.
 +. ./common/rc
 +. ./common/filter
 +
-+# remove previous $seqres.full before test
++# remove previous $seqres.full before test.
 +rm -f $seqres.full
 +
-+# real QA test starts here
++# real QA test starts here.
 +
 +# Modify as appropriate.
-+_supported_fs btrfs
++_supported_fs generic
 +_supported_os Linux
-+_require_fstrim
-+_require_loop
-+_require_xfs_io_command "fiemap"
++_require_test
++_require_scratch
 +
-+# We need less than 2G data write, consider it 2G and double it just in case
-+_require_scratch_size	$((4 * 1024 * 1024))
++# Remove all files from previous tests
++_scratch_mkfs
 +
-+loop_file="$SCRATCH_MNT/image"
-+
-+# The margin when checking trimmed size.
++# We have totally 14 test files in this test.
++# The detail as below:
++# 1 empty file(10M) + 2^0(K)..2^11(K) hole size files(each 10M) + 1 random=
+ hole size file(100M).
 +#
-+# The margin is for tree blocks, calculated by
-+# 3 * max_tree_block_size
-+# |   |- 64K
-+# |- 3 trees get modified (root tree, extent tree, fs tree)
-+#
-+# In reality, there should be no margin at all due to the mount options.
-+# But who knows what will happen in later kernels.
-+margin_kb=$(( 3 * 64 ))
-+trimmed_kb=$(( 768 * 1024 )) # 768M
++# Considering both upper and lower fs will fill zero when copy-up
++# hole area in the file, this test at least requires double disk
++# space of the sum of above test files' size.
 +
-+_scratch_mkfs >> $seqres.full
++_require_fs_space $OVL_BASE_SCRATCH_MNT $(((10*1024*13 + 100*1024*1) * 2))
++
++lowerdir=3D$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
++upperdir=3D$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
++testfile=3D"copyup_sparse_test"
++
++# Create a completely empty hole file(10M).
++file_size=3D10240
++$XFS_IO_PROG -fc "truncate ${file_size}K" "${lowerdir}/${testfile}_empty_h=
+olefile" \
++=09=09 >>$seqres.full
++
++# Create 2^0(K)..2^11(K) hole size test files(each 10M).
++#
++# The pattern is like below, both hole and data are equal to
++# iosize except last hole.
++#
++# |-- hole --|-- data --| ... |-- data --|-- hole --|
++
++iosize=3D1
++max_iosize=3D2048
++file_size=3D10240
++max_pos=3D`expr $file_size - $max_iosize`
++
++while [ $iosize -le $max_iosize ]; do
++=09pos=3D$iosize
++=09$XFS_IO_PROG -fc "truncate ${file_size}K" \
++=09=09"${lowerdir}/${testfile}_iosize${iosize}K_holefile" >>$seqres.full
++=09while [ $pos -lt $max_pos ]; do
++=09=09$XFS_IO_PROG -fc "pwrite ${pos}K ${iosize}K" \
++=09=09"${lowerdir}/${testfile}_iosize${iosize}K_holefile" >>$seqres.full
++=09=09pos=3D`expr $pos + $iosize + $iosize`
++=09done
++=09iosize=3D`expr $iosize + $iosize`
++done
++
++# Create test file with many random holes(hole size is between 1M and 5M),
++# total file size is 100M.
++
++pos=3D2048
++max_pos=3D81920
++file_size=3D102400
++min_hole=3D1024
++max_hole=3D5120
++
++$XFS_IO_PROG -fc "truncate ${file_size}K" "${lowerdir}/${testfile}_random_=
+holefile" \
++=09=09>>$seqres.full
++
++while [ $pos -le $max_pos ]; do
++=09iosize=3D$(($RANDOM % ($max_hole - $min_hole) + $min_hole))
++=09$XFS_IO_PROG -fc "pwrite ${pos}K ${iosize}K" \
++=09=09"${lowerdir}/${testfile}_random_holefile" >>$seqres.full
++=09pos=3D`expr $pos + $iosize + $iosize`
++done
++
 +_scratch_mount
 +
-+# Create a sparse file as the loopback target.
-+# 10G size makes sure we have 1G chunk size.
-+truncate -s 10G "$loop_file"
-+
-+_mkfs_dev -d SINGLE "$loop_file"
-+
-+loop_dev=$(_create_loop_device "$loop_file")
-+loop_mnt=$tmp/loop_mnt
-+
-+mkdir -p $loop_mnt
-+# - nospace_cache
-+#   Since v1 cache using DATA space, it can break data extent bytenr
-+#   continuousness.
-+# - nodatasum
-+#   As there will be 1.5G data write, generating 1.5M csum.
-+#   Disabling datasum could reduce the margin caused by metadata to minimal
-+# - discard
-+#   What we're testing
-+_mount -o nospace_cache,nodatasum,discard $loop_dev $loop_mnt
-+
-+# Craft the following extent layout:
-+#         |  BG1 |      BG2        |       BG3            |
-+# Bytenr: X-8M   X      X+512M     X+1G  X+1G+128M 
-+#         |//////|//////|                |//|
-+#            V      V           V          V
-+#            |      |           |          |- file 'tail_padding'
-+#            |      |           |- file 'cross_boundary'
-+#            |      |- file 'lead_padding2'
-+#            |- file 'lead_padding1'
-+# So that all extents of file 'cross_boundary' are all adjacent and crosses the
-+# boundary of BG1 and BG2
-+# File 'lead_padding1' and 'lead_padding2' are all paddings to fill the
-+# leading gap.
-+# File 'tail_padding' is to ensure after deleting file 'cross_boundary' we still
-+# have used extent in BG3, to prevent trimming the whole BG3.
-+# And since BG1 needs exactly 8M to fill, we need to sync write to ensure
-+# the write sequence.
-+_pwrite_byte 0xcd 0 8M $loop_mnt/lead_padding1 > /dev/null
-+sync
-+
-+_pwrite_byte 0xcd 0 512M $loop_mnt/lead_padding2 > /dev/null
-+sync
-+_pwrite_byte 0xcd 0 $(($trimmed_kb * 1024)) $loop_mnt/cross_boundary \
-+	> /dev/null
-+sync
-+
-+_pwrite_byte 0xcd 0 1M $loop_mnt/tail_padding > /dev/null
-+sync
-+
-+
-+$XFS_IO_PROG -c "fiemap" $loop_mnt/cross_boundary >> $seqres.full
-+# Ensure all extent are continuous
-+# Btrfs fiemap will merge continuous results, so the output should be only
-+# 2 lines, 1 line for filename, 1 line for a large merged fiemap result.
-+if [ $($XFS_IO_PROG -c "fiemap" $loop_mnt/cross_boundary | wc -l) -ne 2 ]; then
-+	_notrun "Non-continuous extent bytenr detected"
-+fi
-+
-+size1_kb=$(du $loop_file| cut -f1)
-+
-+# Delete the file 'cross_boundary'.
-+# This will delete $trimmed_kb data extents across the chunk boundary.
-+rm -f $loop_mnt/cross_boundary
-+
-+# sync so btrfs will commit transaction and trim the freed extents
-+sync
-+
-+size2_kb=$(du $loop_file | cut -f1)
-+
-+echo "loopback file size before discard: $size1_kb KiB" >> $seqres.full
-+echo "loopback file size after discard:  $size2_kb KiB" >> $seqres.full
-+echo "Expect trimmed size:               $trimmed_kb KiB" >> $seqres.full
-+echo "Have trimmed size:                 $(($size1_kb - $size2_kb)) KiB" >> $seqres.full
-+
-+if [ $(($size2_kb+ $trimmed_kb)) -gt $(($size1_kb + $margin_kb)) -o \
-+     $(($size2_kb+ $trimmed_kb)) -lt $(($size1_kb - $margin_kb)) ]; then
-+	_fail "Btrfs doesn't trim the range correctly"
-+fi
++# Open the test files, no errors are expected.
++for f in $SCRATCH_MNT/*; do
++=09$XFS_IO_PROG -c "open" $f >>$seqres.full
++done
 +
 +echo "Silence is golden"
 +
++# Check all copy-up files in upper layer.
++iosize=3D1
++while [ $iosize -le 2048 ]; do
++=09diff "${lowerdir}/${testfile}_iosize${iosize}K_holefile" \
++=09=09"${upperdir}/${testfile}_iosize${iosize}K_holefile" >>$seqres.full |=
+|\
++=09=09echo "${upperdir}/${testfile}_iosize${iosize}K_holefile" copy up fai=
+led!
++=09iosize=3D`expr $iosize + $iosize`
++done
++
++diff "${lowerdir}/${testfile}_empty_holefile"  "${upperdir}/${testfile}_em=
+pty_holefile"  \
++=09>>$seqres.full || echo "${upperdir}/${testfile}_empty_holefile" copy up=
+ failed!
++diff "${lowerdir}/${testfile}_random_holefile" "${upperdir}/${testfile}_ra=
+ndom_holefile" \
++=09>>$seqres.full || echo "${upperdir}/${testfile}_random_holefile" copy u=
+p failed!
++
 +# success, all done
-+status=0
++status=3D0
 +exit
-diff --git a/tests/btrfs/198.out b/tests/btrfs/198.out
+diff --git a/tests/overlay/066.out b/tests/overlay/066.out
 new file mode 100644
-index 00000000..cb4c7854
+index 00000000..b60cc24c
 --- /dev/null
-+++ b/tests/btrfs/198.out
++++ b/tests/overlay/066.out
 @@ -0,0 +1,2 @@
-+QA output created by 198
++QA output created by 066
 +Silence is golden
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index ee35fa59..1b1cbbde 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -200,3 +200,4 @@
- 195 auto volume
- 196 auto metadata log volume
- 197 auto replay trim
-+198 auto trim quick
--- 
-2.23.0
+diff --git a/tests/overlay/group b/tests/overlay/group
+index ef8517a1..e22134df 100644
+--- a/tests/overlay/group
++++ b/tests/overlay/group
+@@ -68,3 +68,4 @@
+ 063 auto quick whiteout
+ 064 auto quick copyup
+ 065 auto quick mount
++066 auto copyup
+--=20
+2.20.1
+
+
 
