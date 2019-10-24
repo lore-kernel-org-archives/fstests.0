@@ -2,221 +2,244 @@ Return-Path: <SRS0=fGqU=YR=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ABC99CA9EAF
-	for <linux-fstests@archiver.kernel.org>; Thu, 24 Oct 2019 06:29:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 97209CA9EAF
+	for <linux-fstests@archiver.kernel.org>; Thu, 24 Oct 2019 10:16:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 7156C2166E
-	for <linux-fstests@archiver.kernel.org>; Thu, 24 Oct 2019 06:29:42 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="aaMfC4vd"
+	by mail.kernel.org (Postfix) with ESMTP id 6D12220684
+	for <linux-fstests@archiver.kernel.org>; Thu, 24 Oct 2019 10:16:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2404448AbfJXG3m (ORCPT
+        id S2391863AbfJXKQj (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 24 Oct 2019 02:29:42 -0400
-Received: from mail-yw1-f67.google.com ([209.85.161.67]:37411 "EHLO
-        mail-yw1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727750AbfJXG3l (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 24 Oct 2019 02:29:41 -0400
-Received: by mail-yw1-f67.google.com with SMTP id c185so2302928ywb.4;
-        Wed, 23 Oct 2019 23:29:39 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=NpwmhwXAKQDQClc+SOoYbeJdGjhrVWqn+uo8W1MmdRE=;
-        b=aaMfC4vdKvuo0ffqE5qT8wnInLAw5/BoEFCB8tI+fItV8bN3bo7/V63eZYGcedkT+z
-         LO5h44E8lf3XAbLJhonlMw6CP3XOAq1hAmcs3fOsBhXVv0YMZjXcmspZ5mQj7w4WEjut
-         8SMnTFrmZ+VhKbc4CA1rIik9n2BCDodQc7hoiKyNO1SHE8zeAAxNHQ4ZilA+5f31+LFi
-         TpNCLbqle0J0m95zr+03ZPaHIOZ0TOKETN5aPJZ4NpgD4ha8DRtl1lqklMJ6NOJnVOjf
-         PAymVjyGsG35TLzOG/TK3nWJMeMlx5ZzmDVjfWOlI7ATXELPDk+IrmBklmuILqg0bYe8
-         xYZQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=NpwmhwXAKQDQClc+SOoYbeJdGjhrVWqn+uo8W1MmdRE=;
-        b=HbJ0Lt2GBQUaLcnOjXn9MM3ODHsPscNSUsw9Nwi5zPJk4y1DySO8JnBTTswr5OR6BU
-         keznv2kzyO8bv5wSpRTQVGjjplDGABULSLNW2QdQ/YAYnMHlIU2IYZaJGNZZeSPpn2Ja
-         yerNsCHfMehCcv5DjekAKNd5mbdO4XUHiEtD0830zI0VSwgZDahYrX9EDUokdz3sAsm5
-         id7fIeIFcs0+LTtGYl6zG2IK2QGIUcbEMAmCghnYhzVAt/a2FvZnkOI/3nAnWZyo8ba8
-         T8w7s151CgZv6UcY6aoJZEm8CAgORfm3zarqtGpmA+jJ7R1K80t6t1ye163a0qFrDC/+
-         6JZQ==
-X-Gm-Message-State: APjAAAX7gZq73bGNfoKuxw/G/Wb7snXKudyMoAxr4bL4c6sJKcgrZ4OH
-        DEU4C2YZgoe71tkLMjT9fKgQ8c2+P+tB5Hqd7YE=
-X-Google-Smtp-Source: APXvYqysQ6+rUqT+Ev9d3ryao3+ILYSQJ9KySCKWsG0e4Y97fY76ikQU0woGc9CBHFK9iHXq0j6+L9tZatHIi/TxMpY=
-X-Received: by 2002:a0d:e347:: with SMTP id m68mr5439557ywe.181.1571898578623;
- Wed, 23 Oct 2019 23:29:38 -0700 (PDT)
+        Thu, 24 Oct 2019 06:16:39 -0400
+Received: from mx2.suse.de ([195.135.220.15]:33664 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S2388677AbfJXKQj (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 24 Oct 2019 06:16:39 -0400
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+Received: from relay2.suse.de (unknown [195.135.220.254])
+        by mx1.suse.de (Postfix) with ESMTP id 7ED22AC3F;
+        Thu, 24 Oct 2019 10:16:35 +0000 (UTC)
+From:   Qu Wenruo <wqu@suse.com>
+To:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Subject: [PATCH] fstests: btrfs: Test if btrfs can trim adjacent extents across adjacent block groups boundary
+Date:   Thu, 24 Oct 2019 18:16:29 +0800
+Message-Id: <20191024101629.33807-1-wqu@suse.com>
+X-Mailer: git-send-email 2.23.0
 MIME-Version: 1.0
-References: <20191024055435.6059-1-cgxu519@mykernel.net>
-In-Reply-To: <20191024055435.6059-1-cgxu519@mykernel.net>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Thu, 24 Oct 2019 09:29:27 +0300
-Message-ID: <CAOQ4uxixTyXxoTPsuz91+1rB+GupWR256QCAoi7sEbDiRxksyA@mail.gmail.com>
-Subject: Re: [PATCH v2] overlay/066: copy-up test for variant sparse files
-To:     Chengguang Xu <cgxu519@mykernel.net>
-Cc:     fstests <fstests@vger.kernel.org>,
-        overlayfs <linux-unionfs@vger.kernel.org>,
-        Eryu Guan <guaneryu@gmail.com>,
-        Miklos Szeredi <miklos@szeredi.hu>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Oct 24, 2019 at 8:54 AM Chengguang Xu <cgxu519@mykernel.net> wrote:
->
-> This is intensive copy-up test for sparse files,
-> these cases will be mainly used for regression test
-> of copy-up improvement for sparse files.
->
-> Signed-off-by: Chengguang Xu <cgxu519@mykernel.net>
+The test case checks if btrfs can trim adjacent extents across adjacent
+block groups boundary correctly.
 
-You can add:
-Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+The test case craft the following extents layout:
 
-after fixing nits below...
+         |  BG1 |      BG2        |       BG3            |
+ Bytenr: X-8M   X      X+512M     X+1G  X+1G+128M
+         |//////|//////|          |     |//|
 
-> ---
-> v1->v2:
-> - Call _get_block_size to get fs block size.
-> - Add comment for test space requirement.
-> - Print meaningful error message when copy-up fail.
-> - Adjust random hole range to 1M~5M.
-> - Fix typo.
->
->  tests/overlay/066     | 120 ++++++++++++++++++++++++++++++++++++++++++
->  tests/overlay/066.out |   2 +
->  tests/overlay/group   |   1 +
->  3 files changed, 123 insertions(+)
->  create mode 100755 tests/overlay/066
->  create mode 100644 tests/overlay/066.out
->
-> diff --git a/tests/overlay/066 b/tests/overlay/066
-> new file mode 100755
-> index 00000000..b01fc2a4
-> --- /dev/null
-> +++ b/tests/overlay/066
-> @@ -0,0 +1,120 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2019 Chengguang Xu <cgxu519@mykernel.net>
-> +# All Rights Reserved.
-> +#
-> +# FS QA Test 066
-> +#
-> +# Test overlayfs copy-up function for variant sparse files.
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1       # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +       cd /
-> +       rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs generic
-> +_supported_os Linux
-> +_require_test
-> +_require_scratch
-> +
-> +# Remove all files from previous tests
-> +_scratch_mkfs
-> +# We have totally 14 test files in this test,
-> +# one file for 100M and 13 files for 10M.
+There is a long existing bug that, when btrfs is trying to trim the
+range at [X+512M, X+1G+128M), it will only trim [X+512M, X+1G).
 
-So we need double that amount of space if both upper and lower
-do not support holes.
+This test case is the regression test for this long existing bug.
 
-Also it is not obvious to the reader how the number 13 came to
-be. It is better to explicitly say 1 empty file + 2^0 .. 2^11 hole size
-file, so if ever the test pattern changes, it will be easier to adapt this
-formula.
+It will verify the trimmed bytes by using loopback device backed up by a
+file, and checking the bytes used by the file to determine how many
+bytes are trimmed.
 
-> +_require_fs_space $OVL_BASE_SCRATCH_MNT $((10*1024*13 + 100*1024*1))
-> +
-> +lowerdir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
-> +upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
-> +testfile="copyup_sparse_test"
-> +mkdir -p $lowerdir
-> +
-> +# Create a completely empty hole file.
-> +$XFS_IO_PROG -fc "truncate 10M" "${lowerdir}/${testfile}_empty_holefile" \
-> +                >>$seqres.full
-> +
-> +iosize=$(_get_block_size "${lowerdir}")
-> +if [ $iosize -le 1024 ]; then
-> +       iosize=1
-> +else
-> +       iosize=`expr $iosize / 1024`
-> +fi
-> +
-> +# Create test files with different hole size patterns.
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+---
+ tests/btrfs/198     | 154 ++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/198.out |   2 +
+ tests/btrfs/group   |   1 +
+ 3 files changed, 157 insertions(+)
+ create mode 100755 tests/btrfs/198
+ create mode 100644 tests/btrfs/198.out
 
-Better be more verbose in the comment about the pattern of
-the files, so reader won't need to follow code to understand.
-Also better to have constants to make the algorithm clearer:
+diff --git a/tests/btrfs/198 b/tests/btrfs/198
+new file mode 100755
+index 00000000..851e44c1
+--- /dev/null
++++ b/tests/btrfs/198
+@@ -0,0 +1,154 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test 198
++#
++# Test if btrfs discard mount option is trimming adjacent extents across
++# block groups boundary.
++# The test case uses loopback device and file used space to detect trimmed
++# bytes.
++#
++# There is a long existing bug that btrfs doesn't discard all space for
++# above mentioned case.
++#
++# The fix is: "btrfs: extent-tree: Ensure we trim ranges across block group
++# boundary"
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	umount $loop_mnt &> /dev/null
++	_destroy_loop_device $loop_dev &> /dev/null
++	rm -rf $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs btrfs
++_supported_os Linux
++_require_fstrim
++_require_loop
++_require_xfs_io_command "fiemap"
++
++# We need less than 2G data write, consider it 2G and double it just in case
++_require_scratch_size	$((4 * 1024 * 1024))
++
++loop_file="$SCRATCH_MNT/image"
++
++# The margin when checking trimmed size.
++#
++# The margin is for tree blocks, calculated by
++# 3 * max_tree_block_size
++# |   |- 64K
++# |- 3 trees get modified (root tree, extent tree, fs tree)
++#
++# In reality, there should be no margin at all due to the mount options.
++# But who knows what will happen in later kernels.
++margin_kb=$(( 3 * 64 ))
++trimmed_kb=$(( 768 * 1024 )) # 768M
++
++_scratch_mkfs >> $seqres.full
++_scratch_mount
++
++# Create a sparse file as the loopback target.
++# 10G size makes sure we have 1G chunk size.
++truncate -s 10G "$loop_file"
++
++_mkfs_dev -d SINGLE "$loop_file"
++
++loop_dev=$(_create_loop_device "$loop_file")
++loop_mnt=$tmp/loop_mnt
++
++mkdir -p $loop_mnt
++# - nospace_cache
++#   Since v1 cache using DATA space, it can break data extent bytenr
++#   continuousness.
++# - nodatasum
++#   As there will be 1.5G data write, generating 1.5M csum.
++#   Disabling datasum could reduce the margin caused by metadata to minimal
++# - discard
++#   What we're testing
++_mount -o nospace_cache,nodatasum,discard $loop_dev $loop_mnt
++
++# Craft the following extent layout:
++#         |  BG1 |      BG2        |       BG3            |
++# Bytenr: X-8M   X      X+512M     X+1G  X+1G+128M 
++#         |//////|//////|                |//|
++#            V      V           V          V
++#            |      |           |          |- file 'tail_padding'
++#            |      |           |- file 'cross_boundary'
++#            |      |- file 'lead_padding2'
++#            |- file 'lead_padding1'
++# So that all extents of file 'cross_boundary' are all adjacent and crosses the
++# boundary of BG1 and BG2
++# File 'lead_padding1' and 'lead_padding2' are all paddings to fill the
++# leading gap.
++# File 'tail_padding' is to ensure after deleting file 'cross_boundary' we still
++# have used extent in BG3, to prevent trimming the whole BG3.
++# And since BG1 needs exactly 8M to fill, we need to sync write to ensure
++# the write sequence.
++_pwrite_byte 0xcd 0 8M $loop_mnt/lead_padding1 > /dev/null
++sync
++
++_pwrite_byte 0xcd 0 512M $loop_mnt/lead_padding2 > /dev/null
++sync
++_pwrite_byte 0xcd 0 $(($trimmed_kb * 1024)) $loop_mnt/cross_boundary \
++	> /dev/null
++sync
++
++_pwrite_byte 0xcd 0 1M $loop_mnt/tail_padding > /dev/null
++sync
++
++
++$XFS_IO_PROG -c "fiemap" $loop_mnt/cross_boundary >> $seqres.full
++# Ensure all extent are continuous
++# Btrfs fiemap will merge continuous results, so the output should be only
++# 2 lines, 1 line for filename, 1 line for a large merged fiemap result.
++if [ $($XFS_IO_PROG -c "fiemap" $loop_mnt/cross_boundary | wc -l) -ne 2 ]; then
++	_notrun "Non-continuous extent bytenr detected"
++fi
++
++size1_kb=$(du $loop_file| cut -f1)
++
++# Delete the file 'cross_boundary'.
++# This will delete $trimmed_kb data extents across the chunk boundary.
++rm -f $loop_mnt/cross_boundary
++
++# sync so btrfs will commit transaction and trim the freed extents
++sync
++
++size2_kb=$(du $loop_file | cut -f1)
++
++echo "loopback file size before discard: $size1_kb KiB" >> $seqres.full
++echo "loopback file size after discard:  $size2_kb KiB" >> $seqres.full
++echo "Expect trimmed size:               $trimmed_kb KiB" >> $seqres.full
++echo "Have trimmed size:                 $(($size1_kb - $size2_kb)) KiB" >> $seqres.full
++
++if [ $(($size2_kb+ $trimmed_kb)) -gt $(($size1_kb + $margin_kb)) -o \
++     $(($size2_kb+ $trimmed_kb)) -lt $(($size1_kb - $margin_kb)) ]; then
++	_fail "Btrfs doesn't trim the range correctly"
++fi
++
++echo "Silence is golden"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/198.out b/tests/btrfs/198.out
+new file mode 100644
+index 00000000..cb4c7854
+--- /dev/null
++++ b/tests/btrfs/198.out
+@@ -0,0 +1,2 @@
++QA output created by 198
++Silence is golden
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index ee35fa59..1b1cbbde 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -200,3 +200,4 @@
+ 195 auto volume
+ 196 auto metadata log volume
+ 197 auto replay trim
++198 auto trim quick
+-- 
+2.23.0
 
-max_iosize=2048
-file_size=10240
-max_pos=`expr $file_size - $max_iosize`
-
-> +while [ $iosize -le 2048 ]; do
-> +       pos=$iosize
-> +       $XFS_IO_PROG -fc "truncate 10M" \
-> +               "${lowerdir}/${testfile}_iosize${iosize}K_holefile" >>$seqres.full
-> +       while [ $pos -lt 8192 ]; do
-> +               $XFS_IO_PROG -fc "pwrite ${pos}K ${iosize}K" \
-> +               "${lowerdir}/${testfile}_iosize${iosize}K_holefile" >>$seqres.full
-> +               pos=`expr $pos + $iosize + $iosize`
-> +       done
-> +       iosize=`expr $iosize + $iosize`
-> +done
-> +
-> +# Create test file with many random holes(1M~5M).
-> +$XFS_IO_PROG -fc "truncate 100M" "${lowerdir}/${testfile}_random_holefile" \
-> +               >>$seqres.full
-
-Same comment about using constants instead of unexplained numbers,
-including:
-min_hole=1024
-max_hole=5120
-
-> +pos=2048
-> +while [ $pos -le 81920 ]; do
-> +       iosize=`expr $RANDOM % 5120`
-> +       if [ $iosize -lt 1024 ]; then
-> +               iosize=`expr $iosize + 1024`
-> +       fi
-
-So that is a weird way to express random 1MB~5MB
-it results in 2 times higher probability for holes in the range
-1MB~2MB and I don't think that was intentional. Better use:
-
-   iosize=$(($RANDOM % ($max_hole - $min_hole) + $min_hole))
-
-Thanks,
-Amir.
