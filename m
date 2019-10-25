@@ -2,288 +2,121 @@ Return-Path: <SRS0=ouML=YS=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	UNPARSEABLE_RELAY,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.3 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F1FADCA9EA0
-	for <linux-fstests@archiver.kernel.org>; Fri, 25 Oct 2019 10:37:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BA5B5CA9EBD
+	for <linux-fstests@archiver.kernel.org>; Fri, 25 Oct 2019 16:00:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id C4E9D2070B
-	for <linux-fstests@archiver.kernel.org>; Fri, 25 Oct 2019 10:37:49 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9097221E6F
+	for <linux-fstests@archiver.kernel.org>; Fri, 25 Oct 2019 16:00:20 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="KgG82CEx"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730165AbfJYKht (ORCPT
+        id S2503674AbfJYQAU (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 25 Oct 2019 06:37:49 -0400
-Received: from out30-57.freemail.mail.aliyun.com ([115.124.30.57]:47660 "EHLO
-        out30-57.freemail.mail.aliyun.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1730471AbfJYKht (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 25 Oct 2019 06:37:49 -0400
-X-Alimail-AntiSpam: AC=PASS;BC=-1|-1;BR=01201311R161e4;CH=green;DM=||false|;FP=0|-1|-1|-1|0|-1|-1|-1;HT=e01e07417;MF=eguan@linux.alibaba.com;NM=1;PH=DS;RN=5;SR=0;TI=SMTPD_---0Tg9T3he_1571999863;
-Received: from localhost(mailfrom:eguan@linux.alibaba.com fp:SMTPD_---0Tg9T3he_1571999863)
-          by smtp.aliyun-inc.com(127.0.0.1);
-          Fri, 25 Oct 2019 18:37:43 +0800
-Date:   Fri, 25 Oct 2019 18:37:43 +0800
-From:   Eryu Guan <eguan@linux.alibaba.com>
-To:     Filipe Manana <fdmanana@gmail.com>
-Cc:     Qu Wenruo <wqu@suse.com>, fstests <fstests@vger.kernel.org>,
-        linux-btrfs <linux-btrfs@vger.kernel.org>
-Subject: Re: [PATCH] fstests: btrfs: Test if btrfs can trim adjacent extents
- across adjacent block groups boundary
-Message-ID: <20191025103743.GH67926@e18g06458.et15sqa>
-References: <20191024101629.33807-1-wqu@suse.com>
- <CAL3q7H4HkuhY-pKcJzCXLRK08gJec=ZT_NqFFRTXagbZ5xmdYA@mail.gmail.com>
+        Fri, 25 Oct 2019 12:00:20 -0400
+Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:57637 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S2503539AbfJYQAU (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 25 Oct 2019 12:00:20 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1572019219;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=rMYccXhObpzn/LtQ2xyPLpIygsBKHSm5xujI07DicIg=;
+        b=KgG82CExPkfJ+KHcED+ga/eNhD4IDnWUq1sW2yI/iXkFxae92KhRr/NT7GYqKTCQRAsH6e
+        S5yRyAZdabttQgOyaniuqczZzTvy+OCFAg0/+tUmT1fagtKM5WvCEhqqel7Km5tUPQr9X2
+        E/ACNFOGoMkv+BnMFRivLYh/jYvrO/U=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-135-xL2rYtyDOQyOUPVGQGfZLg-1; Fri, 25 Oct 2019 12:00:15 -0400
+Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 98748800D4E;
+        Fri, 25 Oct 2019 16:00:14 +0000 (UTC)
+Received: from bfoster (dhcp-41-2.bos.redhat.com [10.18.41.2])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id 930F6600D1;
+        Fri, 25 Oct 2019 16:00:13 +0000 (UTC)
+Date:   Fri, 25 Oct 2019 12:00:11 -0400
+From:   Brian Foster <bfoster@redhat.com>
+To:     kaixuxia <xiakaixu1987@gmail.com>
+Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
+        guaneryu@gmail.com, newtongao@tencent.com, jasperwang@tencent.com
+Subject: Re: [PATCH 1/4] fsstress: show the real file id and parid in
+ rename_f()
+Message-ID: <20191025160011.GD11837@bfoster>
+References: <cover.1571926790.git.kaixuxia@tencent.com>
+ <d68b2f32b3dbe57427e6bacaeb6e4a32d8576b0c.1571926790.git.kaixuxia@tencent.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+In-Reply-To: <d68b2f32b3dbe57427e6bacaeb6e4a32d8576b0c.1571926790.git.kaixuxia@tencent.com>
+User-Agent: Mutt/1.12.1 (2019-06-15)
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.11
+X-MC-Unique: xL2rYtyDOQyOUPVGQGfZLg-1
+X-Mimecast-Spam-Score: 0
+Content-Type: text/plain; charset=WINDOWS-1252
+Content-Transfer-Encoding: quoted-printable
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <CAL3q7H4HkuhY-pKcJzCXLRK08gJec=ZT_NqFFRTXagbZ5xmdYA@mail.gmail.com>
-User-Agent: Mutt/1.5.21 (2010-09-15)
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Oct 25, 2019 at 11:11:37AM +0100, Filipe Manana wrote:
-> On Fri, Oct 25, 2019 at 7:59 AM Qu Wenruo <wqu@suse.com> wrote:
-> >
-> > The test case checks if btrfs can trim adjacent extents across adjacent
-> > block groups boundary correctly.
-> >
-> > The test case craft the following extents layout:
-> >
-> >          |  BG1 |      BG2        |       BG3            |
-> >  Bytenr: X-8M   X      X+512M     X+1G  X+1G+128M
-> >          |//////|//////|          |     |//|
-> >
-> > There is a long existing bug that, when btrfs is trying to trim the
-> > range at [X+512M, X+1G+128M), it will only trim [X+512M, X+1G).
-> >
-> > This test case is the regression test for this long existing bug.
-> >
-> > It will verify the trimmed bytes by using loopback device backed up by a
-> > file, and checking the bytes used by the file to determine how many
-> > bytes are trimmed.
-> >
-> > Signed-off-by: Qu Wenruo <wqu@suse.com>
-> > ---
-> >  tests/btrfs/198     | 154 ++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/btrfs/198.out |   2 +
-> >  tests/btrfs/group   |   1 +
-> >  3 files changed, 157 insertions(+)
-> >  create mode 100755 tests/btrfs/198
-> >  create mode 100644 tests/btrfs/198.out
-> >
-> > diff --git a/tests/btrfs/198 b/tests/btrfs/198
-> > new file mode 100755
-> > index 00000000..851e44c1
-> > --- /dev/null
-> > +++ b/tests/btrfs/198
-> > @@ -0,0 +1,154 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
-> > +#
-> > +# FS QA Test 198
-> > +#
-> > +# Test if btrfs discard mount option is trimming adjacent extents across
-> > +# block groups boundary.
-> > +# The test case uses loopback device and file used space to detect trimmed
-> > +# bytes.
-> > +#
-> > +# There is a long existing bug that btrfs doesn't discard all space for
-> > +# above mentioned case.
-> > +#
-> > +# The fix is: "btrfs: extent-tree: Ensure we trim ranges across block group
-> > +# boundary"
-> > +#
-> > +seq=`basename $0`
-> > +seqres=$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +
-> > +here=`pwd`
-> > +tmp=/tmp/$$
-> > +status=1       # failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +_cleanup()
-> > +{
-> > +       cd /
-> > +       umount $loop_mnt &> /dev/null
-> > +       _destroy_loop_device $loop_dev &> /dev/null
-> > +       rm -rf $tmp.*
-> > +}
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +. ./common/filter
-> > +
-> > +# remove previous $seqres.full before test
-> > +rm -f $seqres.full
-> > +
-> > +# real QA test starts here
-> > +
-> > +# Modify as appropriate.
-> > +_supported_fs btrfs
-> > +_supported_os Linux
-> > +_require_fstrim
-> 
-> This is not needed, as it only tests if the fstrim program is available.
-> And this doesn't use it, only requires the fs to supported "-o
-> discard" option, which btrfs does for a very long time.
-> 
-> > +_require_loop
-> > +_require_xfs_io_command "fiemap"
-> > +
-> > +# We need less than 2G data write, consider it 2G and double it just in case
-> > +_require_scratch_size  $((4 * 1024 * 1024))
-> > +
-> > +loop_file="$SCRATCH_MNT/image"
-> > +
-> > +# The margin when checking trimmed size.
-> > +#
-> > +# The margin is for tree blocks, calculated by
-> > +# 3 * max_tree_block_size
-> > +# |   |- 64K
-> > +# |- 3 trees get modified (root tree, extent tree, fs tree)
-> > +#
-> > +# In reality, there should be no margin at all due to the mount options.
-> > +# But who knows what will happen in later kernels.
-> > +margin_kb=$(( 3 * 64 ))
-> > +trimmed_kb=$(( 768 * 1024 )) # 768M
-> > +
-> > +_scratch_mkfs >> $seqres.full
-> > +_scratch_mount
-> > +
-> > +# Create a sparse file as the loopback target.
-> > +# 10G size makes sure we have 1G chunk size.
-> > +truncate -s 10G "$loop_file"
-> > +
-> > +_mkfs_dev -d SINGLE "$loop_file"
-> > +
-> > +loop_dev=$(_create_loop_device "$loop_file")
-> > +loop_mnt=$tmp/loop_mnt
-> > +
-> > +mkdir -p $loop_mnt
-> > +# - nospace_cache
-> > +#   Since v1 cache using DATA space, it can break data extent bytenr
-> > +#   continuousness.
-> > +# - nodatasum
-> > +#   As there will be 1.5G data write, generating 1.5M csum.
-> > +#   Disabling datasum could reduce the margin caused by metadata to minimal
-> > +# - discard
-> > +#   What we're testing
-> > +_mount -o nospace_cache,nodatasum,discard $loop_dev $loop_mnt
-> > +
-> > +# Craft the following extent layout:
-> > +#         |  BG1 |      BG2        |       BG3            |
-> > +# Bytenr: X-8M   X      X+512M     X+1G  X+1G+128M
-> > +#         |//////|//////|                |//|
-> > +#            V      V           V          V
-> > +#            |      |           |          |- file 'tail_padding'
-> > +#            |      |           |- file 'cross_boundary'
-> > +#            |      |- file 'lead_padding2'
-> > +#            |- file 'lead_padding1'
-> > +# So that all extents of file 'cross_boundary' are all adjacent and crosses the
-> > +# boundary of BG1 and BG2
-> > +# File 'lead_padding1' and 'lead_padding2' are all paddings to fill the
-> > +# leading gap.
-> > +# File 'tail_padding' is to ensure after deleting file 'cross_boundary' we still
-> > +# have used extent in BG3, to prevent trimming the whole BG3.
-> > +# And since BG1 needs exactly 8M to fill, we need to sync write to ensure
-> > +# the write sequence.
-> > +_pwrite_byte 0xcd 0 8M $loop_mnt/lead_padding1 > /dev/null
-> > +sync
-> > +
-> > +_pwrite_byte 0xcd 0 512M $loop_mnt/lead_padding2 > /dev/null
-> > +sync
-> > +_pwrite_byte 0xcd 0 $(($trimmed_kb * 1024)) $loop_mnt/cross_boundary \
-> > +       > /dev/null
-> > +sync
-> > +
-> > +_pwrite_byte 0xcd 0 1M $loop_mnt/tail_padding > /dev/null
-> > +sync
-> > +
-> > +
-> > +$XFS_IO_PROG -c "fiemap" $loop_mnt/cross_boundary >> $seqres.full
-> > +# Ensure all extent are continuous
-> > +# Btrfs fiemap will merge continuous results, so the output should be only
-> > +# 2 lines, 1 line for filename, 1 line for a large merged fiemap result.
-> > +if [ $($XFS_IO_PROG -c "fiemap" $loop_mnt/cross_boundary | wc -l) -ne 2 ]; then
-> > +       _notrun "Non-continuous extent bytenr detected"
-> > +fi
-> > +
-> > +size1_kb=$(du $loop_file| cut -f1)
-> > +
-> > +# Delete the file 'cross_boundary'.
-> > +# This will delete $trimmed_kb data extents across the chunk boundary.
-> > +rm -f $loop_mnt/cross_boundary
-> > +
-> > +# sync so btrfs will commit transaction and trim the freed extents
-> > +sync
-> > +
-> > +size2_kb=$(du $loop_file | cut -f1)
-> > +
-> > +echo "loopback file size before discard: $size1_kb KiB" >> $seqres.full
-> > +echo "loopback file size after discard:  $size2_kb KiB" >> $seqres.full
-> > +echo "Expect trimmed size:               $trimmed_kb KiB" >> $seqres.full
-> > +echo "Have trimmed size:                 $(($size1_kb - $size2_kb)) KiB" >> $seqres.full
-> > +
-> > +if [ $(($size2_kb+ $trimmed_kb)) -gt $(($size1_kb + $margin_kb)) -o \
-> > +     $(($size2_kb+ $trimmed_kb)) -lt $(($size1_kb - $margin_kb)) ]; then
-> > +       _fail "Btrfs doesn't trim the range correctly"
-> 
-> Use of _fail is discouraged and only for very special cases.
-> A simple 'echo ...' is enough here to make the test fail.
-> 
-> Perhaps these are things that Eryu can fixup when he picks the patch,
-> as they are trivial.
+On Thu, Oct 24, 2019 at 10:20:48PM +0800, kaixuxia wrote:
+> The source file id and parentid are overwritten by del_from_flist()
+> call, and should show the actually values.
+>=20
+> Signed-off-by: kaixuxia <kaixuxia@tencent.com>
+> ---
 
-Sure, I can do that :)
+Reviewed-by: Brian Foster <bfoster@redhat.com>
 
-> 
-> With that,
-> 
-> Reviewed-by: Filipe Manana <fdmanana@suse.com>
+>  ltp/fsstress.c | 11 +++++++----
+>  1 file changed, 7 insertions(+), 4 deletions(-)
+>=20
+> diff --git a/ltp/fsstress.c b/ltp/fsstress.c
+> index 51976f5..95285f1 100644
+> --- a/ltp/fsstress.c
+> +++ b/ltp/fsstress.c
+> @@ -4227,6 +4227,7 @@ rename_f(int opno, long r)
+>  =09pathname_t=09newf;
+>  =09int=09=09oldid;
+>  =09int=09=09parid;
+> +=09int=09=09oldparid;
+>  =09int=09=09v;
+>  =09int=09=09v1;
+> =20
+> @@ -4265,10 +4266,12 @@ rename_f(int opno, long r)
+>  =09if (e =3D=3D 0) {
+>  =09=09int xattr_counter =3D fep->xattr_counter;
+> =20
+> -=09=09if (flp - flist =3D=3D FT_DIR) {
+> -=09=09=09oldid =3D fep->id;
+> +=09=09oldid =3D fep->id;
+> +=09=09oldparid =3D fep->parent;
+> +
+> +=09=09if (flp - flist =3D=3D FT_DIR)
+>  =09=09=09fix_parent(oldid, id);
+> -=09=09}
+> +
+>  =09=09del_from_flist(flp - flist, fep - flp->fents);
+>  =09=09add_to_flist(flp - flist, id, parid, xattr_counter);
+>  =09}
+> @@ -4277,7 +4280,7 @@ rename_f(int opno, long r)
+>  =09=09=09newf.path, e);
+>  =09=09if (e =3D=3D 0) {
+>  =09=09=09printf("%d/%d: rename del entry: id=3D%d,parent=3D%d\n",
+> -=09=09=09=09procid, opno, fep->id, fep->parent);
+> +=09=09=09=09procid, opno, oldid, oldparid);
+>  =09=09=09printf("%d/%d: rename add entry: id=3D%d,parent=3D%d\n",
+>  =09=09=09=09procid, opno, id, parid);
+>  =09=09}
+> --=20
+> 1.8.3.1
+>=20
 
-Thanks a lot for the review!
-
-Eryu
-
-> 
-> Thanks.
-> 
-> > +fi
-> > +
-> > +echo "Silence is golden"
-> > +
-> > +# success, all done
-> > +status=0
-> > +exit
-> > diff --git a/tests/btrfs/198.out b/tests/btrfs/198.out
-> > new file mode 100644
-> > index 00000000..cb4c7854
-> > --- /dev/null
-> > +++ b/tests/btrfs/198.out
-> > @@ -0,0 +1,2 @@
-> > +QA output created by 198
-> > +Silence is golden
-> > diff --git a/tests/btrfs/group b/tests/btrfs/group
-> > index ee35fa59..1b1cbbde 100644
-> > --- a/tests/btrfs/group
-> > +++ b/tests/btrfs/group
-> > @@ -200,3 +200,4 @@
-> >  195 auto volume
-> >  196 auto metadata log volume
-> >  197 auto replay trim
-> > +198 auto trim quick
-> > --
-> > 2.23.0
-> >
-> 
-> 
-> -- 
-> Filipe David Manana,
-> 
-> “Whether you think you can, or you think you can't — you're right.”
