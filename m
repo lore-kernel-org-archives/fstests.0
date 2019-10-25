@@ -2,706 +2,317 @@ Return-Path: <SRS0=ouML=YS=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 35ED3CA9EA0
-	for <linux-fstests@archiver.kernel.org>; Fri, 25 Oct 2019 09:58:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AA6FFCA9EA0
+	for <linux-fstests@archiver.kernel.org>; Fri, 25 Oct 2019 10:11:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id EAC7021929
-	for <linux-fstests@archiver.kernel.org>; Fri, 25 Oct 2019 09:58:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 71BCD20663
+	for <linux-fstests@archiver.kernel.org>; Fri, 25 Oct 2019 10:11:50 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="dcvUMpEC"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="lWQbfHDf"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2408444AbfJYJ6f (ORCPT
+        id S2409031AbfJYKLu (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 25 Oct 2019 05:58:35 -0400
-Received: from us-smtp-2.mimecast.com ([207.211.31.81]:50762 "EHLO
-        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S2408162AbfJYJ6f (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 25 Oct 2019 05:58:35 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1571997512;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=Aiyq0UpTPRgSEbPj1wM5dme+LZ+eitTP4jIBakugw4w=;
-        b=dcvUMpECb8wfatjKRLC/WzFo2j3ipknU62W94x+TONrCwfJVmrRCYT6a/K9hFLpWgcCnp5
-        5Fr5MIJPQGHAMUykIW4N0cPd1LTLz9QGD8wniRkairHy1ZXFmAyKPqEDI00jnToO+Kwsoi
-        w/VC1hO/gjLGQoiXfLFPpGDrdTotXkg=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-35-jRyMvg0JP-ugqyofK_qZMA-1; Fri, 25 Oct 2019 05:58:28 -0400
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 09DAC80183D;
-        Fri, 25 Oct 2019 09:58:28 +0000 (UTC)
-Received: from donald.localdomain (vpn2-54-104.bne.redhat.com [10.64.54.104])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id 3A8385D70E;
-        Fri, 25 Oct 2019 09:58:27 +0000 (UTC)
-Received: from localhost (localhost [IPv6:::1])
-        by donald.localdomain (Postfix) with ESMTP id AF24A2801C4;
-        Fri, 25 Oct 2019 17:58:24 +0800 (AWST)
-Message-ID: <747ce652cb48807cc8125320b5c2f2c079a85350.camel@redhat.com>
-Subject: Re: [PATCH] xfstests: xfs mount option sanity test
-From:   Ian Kent <ikent@redhat.com>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org,
-        linux-xfs@vger.kernel.org
-Date:   Fri, 25 Oct 2019 17:58:24 +0800
-In-Reply-To: <0451e6b3dbceea0f799ce09fd64f0cb1dc688536.camel@redhat.com>
-References: <20191022100118.18506-1-zlang@redhat.com>
-         <b2056efe3bd3cb17811442ca4a8720b9d51e087d.camel@redhat.com>
-         <20191025080530.GA3802@dhcp-12-102.nay.redhat.com>
-         <c037e9c5af10e66857589cb3c00337f18ac660f2.camel@redhat.com>
-         <943de2c8954e0781bacf437c67bbb1104d734c1d.camel@redhat.com>
-         <d086542e379f9025796cdffab3a37a7f2934033d.camel@redhat.com>
-         <20191025094227.GB3802@dhcp-12-102.nay.redhat.com>
-         <0451e6b3dbceea0f799ce09fd64f0cb1dc688536.camel@redhat.com>
-User-Agent: Evolution 3.32.4 (3.32.4-1.fc30)
+        Fri, 25 Oct 2019 06:11:50 -0400
+Received: from mail-vk1-f193.google.com ([209.85.221.193]:45804 "EHLO
+        mail-vk1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2408997AbfJYKLu (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 25 Oct 2019 06:11:50 -0400
+Received: by mail-vk1-f193.google.com with SMTP id q25so328050vkn.12;
+        Fri, 25 Oct 2019 03:11:48 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:reply-to:from:date:message-id
+         :subject:to:cc:content-transfer-encoding;
+        bh=P6xlUPFrC3o7OeDMrc6utKRmHyfp+szRLZPKCEsSc7s=;
+        b=lWQbfHDfI2ZByYl7TPCCWXxvH4i6KG+Ax1PpG5vVUpLYSFIjZEfZopGFRQfhdXqJD+
+         vKpwlUSyeTnZ7r3xL5UNqaiqNstNJdBKIsVczSIY4LbrZzk1UIjMGMuHg7Xb3NgXSIKi
+         8avrpuBlwg2oNnrSn5gd4h6NKMfhunhVdkl+9RsBYhPIPTtSmCghvSvXYGVnMPtP5I+R
+         461EnE/3xKR46uPJqSZJQmjQyDepWEdGD1dhqLABXCoLGkas2Lm7dBdHdIUiDB9fIVwX
+         pEqGF9gPSiy6q4L2UxguP/cPKpE/cS1Fh4RIgRm2u5cbsp3mRI6O1zKGmChymzGp7sbk
+         9zMQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:reply-to
+         :from:date:message-id:subject:to:cc:content-transfer-encoding;
+        bh=P6xlUPFrC3o7OeDMrc6utKRmHyfp+szRLZPKCEsSc7s=;
+        b=lVQhDJh4Pt7mFc1MQDkZnTefo95d0/tDJHF5/BnMf+FJiDXzrAuKAei0ZQbdZ8JOBt
+         QrksDLGnKwIIMrue7l4W36a32WxR1fT/EdI1a9xid+IX6ASUgzpMFk2RhhKBvh/gBIC/
+         +MlG56sqHRKEjUJkGqIer2QU4G9Wea3l8Itx94x57KVkUBPeEulerIY5oJcemvYRS9XQ
+         o7dZI9qjJmTjfhBzgaQ3QALcaEc+pxtTL8emnQDoVpkbY1pMGY5wjq5grK4vcP30d+YT
+         c1yXYU3NxmRdPNlVWI2PnCDTmvzCY+HMM+cZwLU5bedMnzhl7/VevOJmtR/W9mv0hFZQ
+         yTMQ==
+X-Gm-Message-State: APjAAAXFRVhsoGP0ChebSrMntckqVWDeOsDE1X8N9+HSgfIG2JOf3pjX
+        7wOFshTuujXVQ+QP0iwljRfRqkJ9yzoVonbNN8lXnA==
+X-Google-Smtp-Source: APXvYqwCzk4KRfHT+sA7HV0v7n4BVpsXWlO3sG+D0LffvHQhlsdkcYm3wgycrm78stgFrNMa7x6lnAoYKYmBznJn79o=
+X-Received: by 2002:a05:6122:328:: with SMTP id d8mr1625336vko.14.1571998308111;
+ Fri, 25 Oct 2019 03:11:48 -0700 (PDT)
 MIME-Version: 1.0
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.15
-X-MC-Unique: jRyMvg0JP-ugqyofK_qZMA-1
-X-Mimecast-Spam-Score: 0
-Content-Type: text/plain; charset=UTF-8
+References: <20191024101629.33807-1-wqu@suse.com>
+In-Reply-To: <20191024101629.33807-1-wqu@suse.com>
+Reply-To: fdmanana@gmail.com
+From:   Filipe Manana <fdmanana@gmail.com>
+Date:   Fri, 25 Oct 2019 11:11:37 +0100
+Message-ID: <CAL3q7H4HkuhY-pKcJzCXLRK08gJec=ZT_NqFFRTXagbZ5xmdYA@mail.gmail.com>
+Subject: Re: [PATCH] fstests: btrfs: Test if btrfs can trim adjacent extents
+ across adjacent block groups boundary
+To:     Qu Wenruo <wqu@suse.com>
+Cc:     fstests <fstests@vger.kernel.org>,
+        linux-btrfs <linux-btrfs@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, 2019-10-25 at 17:49 +0800, Ian Kent wrote:
-> On Fri, 2019-10-25 at 17:42 +0800, Zorro Lang wrote:
-> > On Fri, Oct 25, 2019 at 05:09:10PM +0800, Ian Kent wrote:
-> > > On Fri, 2019-10-25 at 16:48 +0800, Ian Kent wrote:
-> > > > On Fri, 2019-10-25 at 16:20 +0800, Ian Kent wrote:
-> > > > > On Fri, 2019-10-25 at 16:05 +0800, Zorro Lang wrote:
-> > > > > > On Thu, Oct 24, 2019 at 12:47:17PM +0800, Ian Kent wrote:
-> > > > > > > On Tue, 2019-10-22 at 18:01 +0800, Zorro Lang wrote:
-> > > > > > > > XFS is changing to suit the new mount API, so add this
-> > > > > > > > case
-> > > > > > > > to
-> > > > > > > > make
-> > > > > > > > sure the changing won't bring in regression issue on
-> > > > > > > > xfs
-> > > > > > > > mount
-> > > > > > > > option
-> > > > > > > > parse phase, and won't change some default behaviors
-> > > > > > > > either.
-> > > > > > >=20
-> > > > > > > I think this isn't quite right:
-> > > > > > >=20
-> > > > > > > [root@f30 xfstests-dev]# diff -u /home/raven/xfstests-
-> > > > > > > dev/tests/xfs/148.out /home/raven/xfstests-
-> > > > > > > dev/results//xfs/148.out.bad
-> > > > > > > --- /home/raven/xfstests-dev/tests/xfs/148.out=092019-
-> > > > > > > 10-24
-> > > > > > > 09:27:27.304929313 +0800
-> > > > > > > +++ /home/raven/xfstests-dev/results//xfs/148.out.bad=09
-> > > > > > > 2019-
-> > > > > > > 10-24 10:42:40.739436223 +0800
-> > > > > > > @@ -3,4 +3,10 @@
-> > > > > > >  ** create loop log device
-> > > > > > >  ** create loop mount point
-> > > > > > >  ** start xfs mount testing ...
-> > > > > > > +[FAILED]: mount /dev/loop0 /mnt/test/148.mnt=20
-> > > > > > > +ERROR: expect there's logbufs in
-> > > > > > > rw,relatime,seclabel,attr2,inode64,logbufs=3D8,logbsize=3D32k
-> > > > > > > ,n
-> > > > > > > oquo
-> > > > > > > ta
-> > > > > > > ,
-> > > > > > > but not found
-> > > > > > > +[FAILED]: mount /dev/loop0 /mnt/test/148.mnt=20
-> > > > > > > +ERROR: expect there's logbsize in
-> > > > > > > rw,relatime,seclabel,attr2,inode64,logbufs=3D8,logbsize=3D32k
-> > > > > > > ,n
-> > > > > > > oquo
-> > > > > > > ta
-> > > > > > > ,
-> > > > > > > but not found
-> > > > > > > +[FAILED]: mount /dev/loop0 /mnt/test/148.mnt=20
-> > > > > > > +ERROR: expect there's logbsize in
-> > > > > > > rw,relatime,seclabel,attr2,inode64,logbufs=3D8,logbsize=3D32k
-> > > > > > > ,n
-> > > > > > > oquo
-> > > > > > > ta
-> > > > > > > ,
-> > > > > > > but not found
-> > > > > > >  ** end of testing
-> > > > > > >=20
-> > > > > > > Above logbufs and logbsize are present in the options
-> > > > > > > string
-> > > > > > > but
-> > > > > > > an error is reported.
-> > > > > >=20
-> > > > > > Oh, There're two reasons to cause this failure:
-> > > > > > 1) I made a mistake at here:
-> > > > > >         if [ $rc -eq 0 ];then
-> > > > > >                 if [ "$found" !=3D "true" ];then
-> > > > > >                         echo "[FAILED]: mount $LOOP_DEV
-> > > > > > $LOOP_MNT
-> > > > > > $opts"
-> > > > > >                         echo "ERROR: expect there's $key in
-> > > > > > $info,
-> > > > > > but not found"
-> > > > > >                         return 1
-> > > > > >                 fi
-> > > > > >         else
-> > > > > >                 if [ "$found" !=3D "false" ];then
-> > > > > >                         echo "[FAILED]: mount $LOOP_DEV
-> > > > > > $LOOP_MNT
-> > > > > > $opts"
-> > > > > >                         echo "ERROR: expect there's not
-> > > > > > $key
-> > > > > > in
-> > > > > > $info, but found"
-> > > > > >                         return 1
-> > > > > >                 fi
-> > > > > >         fi
-> > > > > >=20
-> > > > > > I should exchange the "there's" line with "there's not"
-> > > > > > line.
-> > > > > >=20
-> > > > > > 2) The case expect there's not "logbufs=3DN" or "logbsize=3DN"
-> > > > > > output
-> > > > > > as
-> > > > > > default.
-> > > > > > But your system has these two options in /proc/mounts if
-> > > > > > mount
-> > > > > > without any
-> > > > > > options.
-> > > > > >=20
-> > > > > > Hmm... strange, I've tested this case on rhel8 and rhel7,
-> > > > > > all
-> > > > > > passed.
-> > > > > > Where
-> > > > > > can I reproduce this error?
-> > > > >=20
-> > > > > There's every chance this has changed along the way but the
-> > > > > current
-> > > > > upstream source sets these two fields to default values at
-> > > > > some
-> > > > > point (looks like via xfs_mountfs() from xfs_fs_fill_super()
-> > > > > to
-> > > > > me).
-> > > > >=20
-> > > > > So the super block op ->show_options() sees them as > 0 and
-> > > > > prints
-> > > > > the option in the proc output.
-> > > > >=20
-> > > > > But I'm not so familiar with xfs so the subtleties of these
-> > > > > options
-> > > > > eludes me.
-> > > >=20
-> > > > Oh, I see what's going on.
-> > > >=20
-> > > > In, for example, RHEL-8 xlog_get_iclog_buffer_size() on entry
-> > > > we
-> > > > have:
-> > > >=20
-> > > >         if (mp->m_logbufs <=3D 0)
-> > > >                 log->l_iclog_bufs =3D XLOG_MAX_ICLOGS;
-> > > >         else
-> > > >                 log->l_iclog_bufs =3D mp->m_logbufs;
-> > > >=20
-> > > > which sets a struct xlog field but leaves the struct xfs_mount
-> > > > alone.
-> > > >=20
-> > > > But upstream on entry we have:
-> > > >=20
-> > > >        if (mp->m_logbufs <=3D 0)
-> > > >                 mp->m_logbufs =3D XLOG_MAX_ICLOGS;
-> > > >        if (mp->m_logbsize <=3D 0)
-> > > >                 mp->m_logbsize =3D XLOG_BIG_RECORD_BSIZE;
-> > > >=20
-> > > > which sets the struct xfs_mount fields before continuing.
-> > > >=20
-> > > > There's a lot more going on in xlog_get_iclog_buffer_size() so
-> > > > this
-> > > > is a very simple minded comparison on my part but the point is
-> > > > RHEL-8 (and I'm assuming RHEL-7 too) is different to the
-> > > > current
-> > > > xfs upstream.
-> > > >=20
-> > > > > Dave, can you help out please wrt. current RHEL xfs or what
-> > > > > I'm
-> > > > > missing here?
-> > > >=20
-> > > > So I'd still like more info around this difference please Dave.
-> > > > Apologies for the post beer-clock intrusion, ;)
-> > >=20
-> > > Ok, more info., first see commit 1cb51258758d7:
-> > >=20
-> > > Author: Eric Sandeen <sandeen@sandeen.net>
-> > > Date:   Thu Aug 16 16:24:43 2007 +1000
-> > >=20
-> > >     [XFS] choose single default logbuf count & size
-> > >=20
-> > > and then commit 4f62282a36964:
-> > >=20
-> > > Author: Christoph Hellwig <hch@lst.de>
-> > > Date:   Fri Jun 28 19:27:20 2019 -0700
-> > >=20
-> > >     xfs: cleanup xlog_get_iclog_buffer_size
-> > >=20
-> > > which is where the change occurred.
-> > >=20
-> > > I think this last change is what's causing the difference in
-> > > behaviour.
-> >=20
-> > Hmm... so the 'default behavior' is changed, should I tend to the
-> > lastest
-> > upstream behavior, then cause old kernel testing fail (report a bug
-> > to merge
-> > the upstream change)? Or skip this test, make it as an 'undifined'
-> > behavior?
->=20
-> I'm not certain but I think the file system behaviour is the
-> much same but current upstream is simplified.
->=20
-> I think that a pass should be either option not present or
-> option is present and set to default (for example logbufs=3D8)
-> when the option is not given.
->=20
-> Not sure that's simple to do but would probably be the best
-> way to deal with it.
->=20
-> I expect Dave knows what the implications of upstream changes are
-> and sets back port priorities accordingly so I'm not sure a bug
-> against RHEL xfs is the right way to go. And older RHEL releases
-> are less likely change (assuming this change doesn't have serious
-> implications) but we still need to perform QA testing on them.
+On Fri, Oct 25, 2019 at 7:59 AM Qu Wenruo <wqu@suse.com> wrote:
+>
+> The test case checks if btrfs can trim adjacent extents across adjacent
+> block groups boundary correctly.
+>
+> The test case craft the following extents layout:
+>
+>          |  BG1 |      BG2        |       BG3            |
+>  Bytenr: X-8M   X      X+512M     X+1G  X+1G+128M
+>          |//////|//////|          |     |//|
+>
+> There is a long existing bug that, when btrfs is trying to trim the
+> range at [X+512M, X+1G+128M), it will only trim [X+512M, X+1G).
+>
+> This test case is the regression test for this long existing bug.
+>
+> It will verify the trimmed bytes by using loopback device backed up by a
+> file, and checking the bytes used by the file to determine how many
+> bytes are trimmed.
+>
+> Signed-off-by: Qu Wenruo <wqu@suse.com>
+> ---
+>  tests/btrfs/198     | 154 ++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/198.out |   2 +
+>  tests/btrfs/group   |   1 +
+>  3 files changed, 157 insertions(+)
+>  create mode 100755 tests/btrfs/198
+>  create mode 100644 tests/btrfs/198.out
+>
+> diff --git a/tests/btrfs/198 b/tests/btrfs/198
+> new file mode 100755
+> index 00000000..851e44c1
+> --- /dev/null
+> +++ b/tests/btrfs/198
+> @@ -0,0 +1,154 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
+> +#
+> +# FS QA Test 198
+> +#
+> +# Test if btrfs discard mount option is trimming adjacent extents across
+> +# block groups boundary.
+> +# The test case uses loopback device and file used space to detect trimm=
+ed
+> +# bytes.
+> +#
+> +# There is a long existing bug that btrfs doesn't discard all space for
+> +# above mentioned case.
+> +#
+> +# The fix is: "btrfs: extent-tree: Ensure we trim ranges across block gr=
+oup
+> +# boundary"
+> +#
+> +seq=3D`basename $0`
+> +seqres=3D$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=3D`pwd`
+> +tmp=3D/tmp/$$
+> +status=3D1       # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +       cd /
+> +       umount $loop_mnt &> /dev/null
+> +       _destroy_loop_device $loop_dev &> /dev/null
+> +       rm -rf $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs btrfs
+> +_supported_os Linux
+> +_require_fstrim
 
-There's also the fact that we don't know what xfs code base people
-will use when running xfstests so this applies equally to upstream
-xfstests too.
+This is not needed, as it only tests if the fstrim program is available.
+And this doesn't use it, only requires the fs to supported "-o
+discard" option, which btrfs does for a very long time.
 
->=20
-> > Thanks,
-> > Zorro
-> >=20
-> > > > > > Thanks,
-> > > > > > Zorro
-> > > > > >=20
-> > > > > > > Ian
-> > > > > > >=20
-> > > > > > > > Signed-off-by: Zorro Lang <zlang@redhat.com>
-> > > > > > > > ---
-> > > > > > > >  tests/xfs/148     | 315
-> > > > > > > > ++++++++++++++++++++++++++++++++++++++++++++++
-> > > > > > > >  tests/xfs/148.out |   6 +
-> > > > > > > >  tests/xfs/group   |   1 +
-> > > > > > > >  3 files changed, 322 insertions(+)
-> > > > > > > >  create mode 100755 tests/xfs/148
-> > > > > > > >  create mode 100644 tests/xfs/148.out
-> > > > > > > >=20
-> > > > > > > > diff --git a/tests/xfs/148 b/tests/xfs/148
-> > > > > > > > new file mode 100755
-> > > > > > > > index 00000000..5c268f18
-> > > > > > > > --- /dev/null
-> > > > > > > > +++ b/tests/xfs/148
-> > > > > > > > @@ -0,0 +1,315 @@
-> > > > > > > > +#! /bin/bash
-> > > > > > > > +# SPDX-License-Identifier: GPL-2.0
-> > > > > > > > +# Copyright (c) 2019 Red Hat, Inc. All Rights
-> > > > > > > > Reserved.
-> > > > > > > > +#
-> > > > > > > > +# FS QA Test 148
-> > > > > > > > +#
-> > > > > > > > +# XFS mount options sanity check, refer to 'man 5
-> > > > > > > > xfs'.
-> > > > > > > > +#
-> > > > > > > > +seq=3D`basename $0`
-> > > > > > > > +seqres=3D$RESULT_DIR/$seq
-> > > > > > > > +echo "QA output created by $seq"
-> > > > > > > > +
-> > > > > > > > +here=3D`pwd`
-> > > > > > > > +tmp=3D/tmp/$$
-> > > > > > > > +status=3D1=09# failure is the default!
-> > > > > > > > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > > > > > > > +
-> > > > > > > > +_cleanup()
-> > > > > > > > +{
-> > > > > > > > +=09cd /
-> > > > > > > > +=09rm -f $tmp.*
-> > > > > > > > +=09$UMOUNT_PROG $LOOP_MNT 2>/dev/null
-> > > > > > > > +=09if [ -n "$LOOP_DEV" ];then
-> > > > > > > > +=09=09_destroy_loop_device $LOOP_DEV
-> > > > > > > > 2>/dev/null
-> > > > > > > > +=09fi
-> > > > > > > > +=09if [ -n "$LOOP_SPARE_DEV" ];then
-> > > > > > > > +=09=09_destroy_loop_device $LOOP_SPARE_DEV
-> > > > > > > > 2>/dev/null
-> > > > > > > > +=09fi
-> > > > > > > > +=09rm -f $LOOP_IMG
-> > > > > > > > +=09rm -f $LOOP_SPARE_IMG
-> > > > > > > > +=09rmdir $LOOP_MNT
-> > > > > > > > +}
-> > > > > > > > +
-> > > > > > > > +# get standard environment, filters and checks
-> > > > > > > > +. ./common/rc
-> > > > > > > > +. ./common/filter
-> > > > > > > > +
-> > > > > > > > +# remove previous $seqres.full before test
-> > > > > > > > +rm -f $seqres.full
-> > > > > > > > +
-> > > > > > > > +# real QA test starts here
-> > > > > > > > +_supported_fs xfs
-> > > > > > > > +_supported_os Linux
-> > > > > > > > +_require_test
-> > > > > > > > +_require_loop
-> > > > > > > > +_require_xfs_io_command "falloc"
-> > > > > > > > +
-> > > > > > > > +LOOP_IMG=3D$TEST_DIR/$seq.dev
-> > > > > > > > +LOOP_SPARE_IMG=3D$TEST_DIR/$seq.logdev
-> > > > > > > > +LOOP_MNT=3D$TEST_DIR/$seq.mnt
-> > > > > > > > +
-> > > > > > > > +echo "** create loop device"
-> > > > > > > > +$XFS_IO_PROG -f -c "falloc 0 1g" $LOOP_IMG
-> > > > > > > > +LOOP_DEV=3D`_create_loop_device $LOOP_IMG`
-> > > > > > > > +
-> > > > > > > > +echo "** create loop log device"
-> > > > > > > > +$XFS_IO_PROG -f -c "falloc 0 512m" $LOOP_SPARE_IMG
-> > > > > > > > +LOOP_SPARE_DEV=3D`_create_loop_device $LOOP_SPARE_IMG`
-> > > > > > > > +
-> > > > > > > > +echo "** create loop mount point"
-> > > > > > > > +rmdir $LOOP_MNT 2>/dev/null
-> > > > > > > > +mkdir -p $LOOP_MNT || _fail "cannot create loopback
-> > > > > > > > mount
-> > > > > > > > point"
-> > > > > > > > +
-> > > > > > > > +# avoid the effection from MKFS_OPTIONS
-> > > > > > > > +MKFS_OPTIONS=3D""
-> > > > > > > > +do_mkfs()
-> > > > > > > > +{
-> > > > > > > > +=09$MKFS_XFS_PROG -f $* $LOOP_DEV | _filter_mkfs
-> > > > > > > > > $seqres.full
-> > > > > > > > 2>$tmp.mkfs
-> > > > > > > > +=09if [ "${PIPESTATUS[0]}" -ne 0 ]; then
-> > > > > > > > +=09=09_fail "Fails on _mkfs_dev $* $LOOP_DEV"
-> > > > > > > > +=09fi
-> > > > > > > > +=09. $tmp.mkfs
-> > > > > > > > +}
-> > > > > > > > +
-> > > > > > > > +is_dev_mounted()
-> > > > > > > > +{
-> > > > > > > > +=09findmnt --source $LOOP_DEV >/dev/null
-> > > > > > > > +=09return $?
-> > > > > > > > +}
-> > > > > > > > +
-> > > > > > > > +get_mount_info()
-> > > > > > > > +{
-> > > > > > > > +=09findmnt --source $LOOP_DEV -o OPTIONS -n
-> > > > > > > > +}
-> > > > > > > > +
-> > > > > > > > +force_unmount()
-> > > > > > > > +{
-> > > > > > > > +=09$UMOUNT_PROG $LOOP_MNT >/dev/null 2>&1
-> > > > > > > > +}
-> > > > > > > > +
-> > > > > > > > +# _do_test <mount options> <should be mounted?> [<key
-> > > > > > > > string>
-> > > > > > > > <key
-> > > > > > > > should be found?>]
-> > > > > > > > +_do_test()
-> > > > > > > > +{
-> > > > > > > > +=09local opts=3D"$1"
-> > > > > > > > +=09local mounted=3D"$2"=09# pass or fail
-> > > > > > > > +=09local key=3D"$3"
-> > > > > > > > +=09local found=3D"$4"=09# true or false
-> > > > > > > > +=09local rc
-> > > > > > > > +=09local info
-> > > > > > > > +
-> > > > > > > > +=09# mount test
-> > > > > > > > +=09_mount $LOOP_DEV $LOOP_MNT $opts 2>/dev/null
-> > > > > > > > +=09rc=3D$?
-> > > > > > > > +=09if [ $rc -eq 0 ];then
-> > > > > > > > +=09=09if [ "${mounted}" =3D "fail" ];then
-> > > > > > > > +=09=09=09echo "[FAILED]: mount $LOOP_DEV
-> > > > > > > > $LOOP_MNT
-> > > > > > > > $opts"
-> > > > > > > > +=09=09=09echo "ERROR: expect ${mounted},
-> > > > > > > > but
-> > > > > > > > pass"
-> > > > > > > > +=09=09=09return 1
-> > > > > > > > +=09=09fi
-> > > > > > > > +=09=09is_dev_mounted
-> > > > > > > > +=09=09if [ $? -ne 0 ];then
-> > > > > > > > +=09=09=09echo "[FAILED]: mount $LOOP_DEV
-> > > > > > > > $LOOP_MNT
-> > > > > > > > $opts"
-> > > > > > > > +=09=09=09echo "ERROR: fs not mounted
-> > > > > > > > even mount
-> > > > > > > > return
-> > > > > > > > 0"
-> > > > > > > > +=09=09=09return 1
-> > > > > > > > +=09=09fi
-> > > > > > > > +=09else
-> > > > > > > > +=09=09if [ "${mount_ret}" =3D "pass" ];then
-> > > > > > > > +=09=09=09echo "[FAILED]: mount $LOOP_DEV
-> > > > > > > > $LOOP_MNT
-> > > > > > > > $opts"
-> > > > > > > > +=09=09=09echo "ERROR: expect ${mounted},
-> > > > > > > > but
-> > > > > > > > fail"
-> > > > > > > > +=09=09=09return 1
-> > > > > > > > +=09=09fi
-> > > > > > > > +=09=09is_dev_mounted
-> > > > > > > > +=09=09if [ $? -eq 0 ];then
-> > > > > > > > +=09=09=09echo "[FAILED]: mount $LOOP_DEV
-> > > > > > > > $LOOP_MNT
-> > > > > > > > $opts"
-> > > > > > > > +=09=09=09echo "ERROR: fs is mounted even
-> > > > > > > > mount
-> > > > > > > > return
-> > > > > > > > non-zero"
-> > > > > > > > +=09=09=09return 1
-> > > > > > > > +=09=09fi
-> > > > > > > > +=09fi
-> > > > > > > > +
-> > > > > > > > +=09# Skip below checking if "$key" argument isn't
-> > > > > > > > specified
-> > > > > > > > +=09if [ -z "$key" ];then
-> > > > > > > > +=09=09return 0
-> > > > > > > > +=09fi
-> > > > > > > > +=09# Check the mount options after fs mounted.
-> > > > > > > > +=09info=3D`get_mount_info`
-> > > > > > > > +=09echo $info | grep -q "${key}"
-> > > > > > > > +=09rc=3D$?
-> > > > > > > > +=09if [ $rc -eq 0 ];then
-> > > > > > > > +=09=09if [ "$found" !=3D "true" ];then
-> > > > > > > > +=09=09=09echo "[FAILED]: mount $LOOP_DEV
-> > > > > > > > $LOOP_MNT
-> > > > > > > > $opts"
-> > > > > > > > +=09=09=09echo "ERROR: expect there's
-> > > > > > > > $key in
-> > > > > > > > $info, but
-> > > > > > > > not found"
-> > > > > > > > +=09=09=09return 1
-> > > > > > > > +=09=09fi
-> > > > > > > > +=09else
-> > > > > > > > +=09=09if [ "$found" !=3D "false" ];then
-> > > > > > > > +=09=09=09echo "[FAILED]: mount $LOOP_DEV
-> > > > > > > > $LOOP_MNT
-> > > > > > > > $opts"
-> > > > > > > > +=09=09=09echo "ERROR: expect there's not
-> > > > > > > > $key in
-> > > > > > > > $info,
-> > > > > > > > but found"
-> > > > > > > > +=09=09=09return 1
-> > > > > > > > +=09=09fi
-> > > > > > > > +=09fi
-> > > > > > > > +
-> > > > > > > > +=09return 0
-> > > > > > > > +}
-> > > > > > > > +
-> > > > > > > > +do_test()
-> > > > > > > > +{
-> > > > > > > > +=09# force unmount before testing
-> > > > > > > > +=09force_unmount
-> > > > > > > > +=09_do_test "$@"
-> > > > > > > > +=09# force unmount after testing
-> > > > > > > > +=09force_unmount
-> > > > > > > > +}
-> > > > > > > > +
-> > > > > > > > +echo "** start xfs mount testing ..."
-> > > > > > > > +# Test allocsize=3Dsize
-> > > > > > > > +# Valid values for this option are page size
-> > > > > > > > (typically
-> > > > > > > > 4KiB)
-> > > > > > > > through to 1GiB
-> > > > > > > > +do_mkfs
-> > > > > > > > +if [ $dbsize -ge 1024 ];then
-> > > > > > > > +=09blsize=3D"$((dbsize / 1024))k"
-> > > > > > > > +fi
-> > > > > > > > +do_test "" pass "allocsize" "false"
-> > > > > > > > +do_test "-o allocsize=3D$blsize" pass
-> > > > > > > > "allocsize=3D$blsize"
-> > > > > > > > "true"
-> > > > > > > > +do_test "-o allocsize=3D1048576k" pass
-> > > > > > > > "allocsize=3D1048576k"
-> > > > > > > > "true"
-> > > > > > > > +do_test "-o allocsize=3D$((dbsize / 2))" fail
-> > > > > > > > +do_test "-o allocsize=3D2g" fail
-> > > > > > > > +
-> > > > > > > > +# Test attr2
-> > > > > > > > +do_mkfs -m crc=3D1
-> > > > > > > > +do_test "" pass "attr2" "true"
-> > > > > > > > +do_test "-o attr2" pass "attr2" "true"
-> > > > > > > > +do_test "-o noattr2" fail
-> > > > > > > > +do_mkfs -m crc=3D0
-> > > > > > > > +do_test "" pass "attr2" "true"
-> > > > > > > > +do_test "-o attr2" pass "attr2" "true"
-> > > > > > > > +do_test "-o noattr2" pass "attr2" "false"
-> > > > > > > > +
-> > > > > > > > +# Test discard
-> > > > > > > > +do_mkfs
-> > > > > > > > +do_test "" pass "discard" "false"
-> > > > > > > > +do_test "-o discard" pass "discard" "true"
-> > > > > > > > +do_test "-o nodiscard" pass "discard" "false"
-> > > > > > > > +
-> > > > > > > > +# Test grpid|bsdgroups|nogrpid|sysvgroups
-> > > > > > > > +do_test "" pass "grpid" "false"
-> > > > > > > > +do_test "-o grpid" pass "grpid" "true"
-> > > > > > > > +do_test "-o bsdgroups" pass "grpid" "true"
-> > > > > > > > +do_test "-o nogrpid" pass "grpid" "false"
-> > > > > > > > +do_test "-o sysvgroups" pass "grpid" "false"
-> > > > > > > > +
-> > > > > > > > +# Test filestreams
-> > > > > > > > +do_test "" pass "filestreams" "false"
-> > > > > > > > +do_test "-o filestreams" pass "filestreams" "true"
-> > > > > > > > +
-> > > > > > > > +# Test ikeep
-> > > > > > > > +do_test "" pass "ikeep" "false"
-> > > > > > > > +do_test "-o ikeep" pass "ikeep" "true"
-> > > > > > > > +do_test "-o noikeep" pass "ikeep" "false"
-> > > > > > > > +
-> > > > > > > > +# Test inode32|inode64
-> > > > > > > > +do_test "" pass "inode64" "true"
-> > > > > > > > +do_test "-o inode32" pass "inode32" "true"
-> > > > > > > > +do_test "-o inode64" pass "inode64" "true"
-> > > > > > > > +
-> > > > > > > > +# Test largeio
-> > > > > > > > +do_test "" pass "largeio" "false"
-> > > > > > > > +do_test "-o largeio" pass "largeio" "true"
-> > > > > > > > +do_test "-o nolargeio" pass "largeio" "false"
-> > > > > > > > +
-> > > > > > > > +# Test logbufs=3Dvalue. Valid numbers range from 2=E2=80=
-=938
-> > > > > > > > inclusive.
-> > > > > > > > +do_test "" pass "logbufs" "false"
-> > > > > > > > +do_test "-o logbufs=3D8" pass "logbufs=3D8" "true"
-> > > > > > > > +do_test "-o logbufs=3D2" pass "logbufs=3D2" "true"
-> > > > > > > > +do_test "-o logbufs=3D1" fail
-> > > > > > > > +###### but it gets logbufs=3D8 now, why? bug? #######
-> > > > > > > > +# do_test "-o logbufs=3D0" fail
-> > > > > > > > +do_test "-o logbufs=3D9" fail
-> > > > > > > > +do_test "-o logbufs=3D99999999999999" fail
-> > > > > > > > +
-> > > > > > > > +# Test logbsize=3Dvalue.
-> > > > > > > > +do_mkfs -m crc=3D1 -l version=3D2
-> > > > > > > > +do_test "" pass "logbsize" "false"
-> > > > > > > > +do_test "-o logbsize=3D16384" pass "logbsize=3D16k" "true"
-> > > > > > > > +do_test "-o logbsize=3D16k" pass "logbsize=3D16k" "true"
-> > > > > > > > +do_test "-o logbsize=3D32k" pass "logbsize=3D32k" "true"
-> > > > > > > > +do_test "-o logbsize=3D64k" pass "logbsize=3D64k" "true"
-> > > > > > > > +do_test "-o logbsize=3D128k" pass "logbsize=3D128k" "true"
-> > > > > > > > +do_test "-o logbsize=3D256k" pass "logbsize=3D256k" "true"
-> > > > > > > > +do_test "-o logbsize=3D8k" fail
-> > > > > > > > +do_test "-o logbsize=3D512k" fail
-> > > > > > > > +####### it's invalid, but it set to default size 32k
-> > > > > > > > +# do_test "-o logbsize=3D0" false
-> > > > > > > > +do_mkfs -m crc=3D0 -l version=3D1
-> > > > > > > > +do_test "" pass "logbsize" "false"
-> > > > > > > > +do_test "-o logbsize=3D16384" pass "logbsize=3D16k" "true"
-> > > > > > > > +do_test "-o logbsize=3D16k" pass "logbsize=3D16k" "true"
-> > > > > > > > +do_test "-o logbsize=3D32k" pass "logbsize=3D32k" "true"
-> > > > > > > > +do_test "-o logbsize=3D64k" fail
-> > > > > > > > +
-> > > > > > > > +# Test logdev
-> > > > > > > > +do_mkfs
-> > > > > > > > +do_test "" pass "logdev" "false"
-> > > > > > > > +do_test "-o logdev=3D$LOOP_SPARE_DEV" fail
-> > > > > > > > +do_mkfs -l logdev=3D$LOOP_SPARE_DEV
-> > > > > > > > +do_test "-o logdev=3D$LOOP_SPARE_DEV" pass
-> > > > > > > > "logdev=3D$LOOP_SPARE_DEV"
-> > > > > > > > "true"
-> > > > > > > > +do_test "" fail
-> > > > > > > > +
-> > > > > > > > +# Test noalign
-> > > > > > > > +do_mkfs
-> > > > > > > > +do_test "" pass "noalign" "false"
-> > > > > > > > +do_test "-o noalign" pass "noalign" "true"
-> > > > > > > > +
-> > > > > > > > +# Test norecovery
-> > > > > > > > +do_test "" pass "norecovery" "false"
-> > > > > > > > +do_test "-o norecovery,ro" pass "norecovery" "true"
-> > > > > > > > +do_test "-o norecovery" fail
-> > > > > > > > +
-> > > > > > > > +# Test nouuid
-> > > > > > > > +do_test "" pass "nouuid" "false"
-> > > > > > > > +do_test "-o nouuid" pass "nouuid" "true"
-> > > > > > > > +
-> > > > > > > > +# Test noquota
-> > > > > > > > +do_test "" pass "noquota" "true"
-> > > > > > > > +do_test "-o noquota" pass "noquota" "true"
-> > > > > > > > +
-> > > > > > > > +# Test uquota/usrquota/quota/uqnoenforce/qnoenforce
-> > > > > > > > +do_test "" pass "usrquota" "false"
-> > > > > > > > +do_test "-o uquota" pass "usrquota" "true"
-> > > > > > > > +do_test "-o usrquota" pass "usrquota" "true"
-> > > > > > > > +do_test "-o quota" pass "usrquota" "true"
-> > > > > > > > +do_test "-o uqnoenforce" pass "usrquota" "true"
-> > > > > > > > +do_test "-o qnoenforce" pass "usrquota" "true"
-> > > > > > > > +
-> > > > > > > > +# Test gquota/grpquota/gqnoenforce
-> > > > > > > > +do_test "" pass "grpquota" "false"
-> > > > > > > > +do_test "-o gquota" pass "grpquota" "true"
-> > > > > > > > +do_test "-o grpquota" pass "grpquota" "true"
-> > > > > > > > +do_test "-o gqnoenforce" pass "gqnoenforce" "true"
-> > > > > > > > +
-> > > > > > > > +# Test pquota/prjquota/pqnoenforce
-> > > > > > > > +do_test "" pass "prjquota" "false"
-> > > > > > > > +do_test "-o pquota" pass "prjquota" "true"
-> > > > > > > > +do_test "-o prjquota" pass "prjquota" "true"
-> > > > > > > > +do_test "-o pqnoenforce" pass "pqnoenforce" "true"
-> > > > > > > > +
-> > > > > > > > +# Test sunit=3Dvalue and swidth=3Dvalue
-> > > > > > > > +do_mkfs -d sunit=3D128,swidth=3D128
-> > > > > > > > +do_test "-o sunit=3D8,swidth=3D8" pass "sunit=3D8,swidth=
-=3D8"
-> > > > > > > > "true"
-> > > > > > > > +do_test "-o sunit=3D8,swidth=3D64" pass
-> > > > > > > > "sunit=3D8,swidth=3D64"
-> > > > > > > > "true"
-> > > > > > > > +do_test "-o sunit=3D128,swidth=3D128" pass
-> > > > > > > > "sunit=3D128,swidth=3D128"
-> > > > > > > > "true"
-> > > > > > > > +do_test "-o sunit=3D256,swidth=3D256" pass
-> > > > > > > > "sunit=3D256,swidth=3D256"
-> > > > > > > > "true"
-> > > > > > > > +do_test "-o sunit=3D2,swidth=3D2" fail
-> > > > > > > > +
-> > > > > > > > +# Test swalloc
-> > > > > > > > +do_mkfs
-> > > > > > > > +do_test "" pass "swalloc" "false"
-> > > > > > > > +do_test "-o swalloc" pass "swalloc" "true"
-> > > > > > > > +
-> > > > > > > > +# Test wsync
-> > > > > > > > +do_test "" pass "wsync" "false"
-> > > > > > > > +do_test "-o wsync" pass "wsync" "true"
-> > > > > > > > +
-> > > > > > > > +echo "** end of testing"
-> > > > > > > > +# success, all done
-> > > > > > > > +status=3D0
-> > > > > > > > +exit
-> > > > > > > > diff --git a/tests/xfs/148.out b/tests/xfs/148.out
-> > > > > > > > new file mode 100644
-> > > > > > > > index 00000000..a71d9231
-> > > > > > > > --- /dev/null
-> > > > > > > > +++ b/tests/xfs/148.out
-> > > > > > > > @@ -0,0 +1,6 @@
-> > > > > > > > +QA output created by 148
-> > > > > > > > +** create loop device
-> > > > > > > > +** create loop log device
-> > > > > > > > +** create loop mount point
-> > > > > > > > +** start xfs mount testing ...
-> > > > > > > > +** end of testing
-> > > > > > > > diff --git a/tests/xfs/group b/tests/xfs/group
-> > > > > > > > index f4ebcd8c..019aebad 100644
-> > > > > > > > --- a/tests/xfs/group
-> > > > > > > > +++ b/tests/xfs/group
-> > > > > > > > @@ -145,6 +145,7 @@
-> > > > > > > >  145 dmapi
-> > > > > > > >  146 dmapi
-> > > > > > > >  147 dmapi
-> > > > > > > > +148 auto quick mount
-> > > > > > > >  150 dmapi
-> > > > > > > >  151 dmapi
-> > > > > > > >  152 dmapi
+> +_require_loop
+> +_require_xfs_io_command "fiemap"
+> +
+> +# We need less than 2G data write, consider it 2G and double it just in =
+case
+> +_require_scratch_size  $((4 * 1024 * 1024))
+> +
+> +loop_file=3D"$SCRATCH_MNT/image"
+> +
+> +# The margin when checking trimmed size.
+> +#
+> +# The margin is for tree blocks, calculated by
+> +# 3 * max_tree_block_size
+> +# |   |- 64K
+> +# |- 3 trees get modified (root tree, extent tree, fs tree)
+> +#
+> +# In reality, there should be no margin at all due to the mount options.
+> +# But who knows what will happen in later kernels.
+> +margin_kb=3D$(( 3 * 64 ))
+> +trimmed_kb=3D$(( 768 * 1024 )) # 768M
+> +
+> +_scratch_mkfs >> $seqres.full
+> +_scratch_mount
+> +
+> +# Create a sparse file as the loopback target.
+> +# 10G size makes sure we have 1G chunk size.
+> +truncate -s 10G "$loop_file"
+> +
+> +_mkfs_dev -d SINGLE "$loop_file"
+> +
+> +loop_dev=3D$(_create_loop_device "$loop_file")
+> +loop_mnt=3D$tmp/loop_mnt
+> +
+> +mkdir -p $loop_mnt
+> +# - nospace_cache
+> +#   Since v1 cache using DATA space, it can break data extent bytenr
+> +#   continuousness.
+> +# - nodatasum
+> +#   As there will be 1.5G data write, generating 1.5M csum.
+> +#   Disabling datasum could reduce the margin caused by metadata to mini=
+mal
+> +# - discard
+> +#   What we're testing
+> +_mount -o nospace_cache,nodatasum,discard $loop_dev $loop_mnt
+> +
+> +# Craft the following extent layout:
+> +#         |  BG1 |      BG2        |       BG3            |
+> +# Bytenr: X-8M   X      X+512M     X+1G  X+1G+128M
+> +#         |//////|//////|                |//|
+> +#            V      V           V          V
+> +#            |      |           |          |- file 'tail_padding'
+> +#            |      |           |- file 'cross_boundary'
+> +#            |      |- file 'lead_padding2'
+> +#            |- file 'lead_padding1'
+> +# So that all extents of file 'cross_boundary' are all adjacent and cros=
+ses the
+> +# boundary of BG1 and BG2
+> +# File 'lead_padding1' and 'lead_padding2' are all paddings to fill the
+> +# leading gap.
+> +# File 'tail_padding' is to ensure after deleting file 'cross_boundary' =
+we still
+> +# have used extent in BG3, to prevent trimming the whole BG3.
+> +# And since BG1 needs exactly 8M to fill, we need to sync write to ensur=
+e
+> +# the write sequence.
+> +_pwrite_byte 0xcd 0 8M $loop_mnt/lead_padding1 > /dev/null
+> +sync
+> +
+> +_pwrite_byte 0xcd 0 512M $loop_mnt/lead_padding2 > /dev/null
+> +sync
+> +_pwrite_byte 0xcd 0 $(($trimmed_kb * 1024)) $loop_mnt/cross_boundary \
+> +       > /dev/null
+> +sync
+> +
+> +_pwrite_byte 0xcd 0 1M $loop_mnt/tail_padding > /dev/null
+> +sync
+> +
+> +
+> +$XFS_IO_PROG -c "fiemap" $loop_mnt/cross_boundary >> $seqres.full
+> +# Ensure all extent are continuous
+> +# Btrfs fiemap will merge continuous results, so the output should be on=
+ly
+> +# 2 lines, 1 line for filename, 1 line for a large merged fiemap result.
+> +if [ $($XFS_IO_PROG -c "fiemap" $loop_mnt/cross_boundary | wc -l) -ne 2 =
+]; then
+> +       _notrun "Non-continuous extent bytenr detected"
+> +fi
+> +
+> +size1_kb=3D$(du $loop_file| cut -f1)
+> +
+> +# Delete the file 'cross_boundary'.
+> +# This will delete $trimmed_kb data extents across the chunk boundary.
+> +rm -f $loop_mnt/cross_boundary
+> +
+> +# sync so btrfs will commit transaction and trim the freed extents
+> +sync
+> +
+> +size2_kb=3D$(du $loop_file | cut -f1)
+> +
+> +echo "loopback file size before discard: $size1_kb KiB" >> $seqres.full
+> +echo "loopback file size after discard:  $size2_kb KiB" >> $seqres.full
+> +echo "Expect trimmed size:               $trimmed_kb KiB" >> $seqres.ful=
+l
+> +echo "Have trimmed size:                 $(($size1_kb - $size2_kb)) KiB"=
+ >> $seqres.full
+> +
+> +if [ $(($size2_kb+ $trimmed_kb)) -gt $(($size1_kb + $margin_kb)) -o \
+> +     $(($size2_kb+ $trimmed_kb)) -lt $(($size1_kb - $margin_kb)) ]; then
+> +       _fail "Btrfs doesn't trim the range correctly"
 
+Use of _fail is discouraged and only for very special cases.
+A simple 'echo ...' is enough here to make the test fail.
+
+Perhaps these are things that Eryu can fixup when he picks the patch,
+as they are trivial.
+
+With that,
+
+Reviewed-by: Filipe Manana <fdmanana@suse.com>
+
+Thanks.
+
+> +fi
+> +
+> +echo "Silence is golden"
+> +
+> +# success, all done
+> +status=3D0
+> +exit
+> diff --git a/tests/btrfs/198.out b/tests/btrfs/198.out
+> new file mode 100644
+> index 00000000..cb4c7854
+> --- /dev/null
+> +++ b/tests/btrfs/198.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 198
+> +Silence is golden
+> diff --git a/tests/btrfs/group b/tests/btrfs/group
+> index ee35fa59..1b1cbbde 100644
+> --- a/tests/btrfs/group
+> +++ b/tests/btrfs/group
+> @@ -200,3 +200,4 @@
+>  195 auto volume
+>  196 auto metadata log volume
+>  197 auto replay trim
+> +198 auto trim quick
+> --
+> 2.23.0
+>
+
+
+--=20
+Filipe David Manana,
+
+=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
+ right.=E2=80=9D
