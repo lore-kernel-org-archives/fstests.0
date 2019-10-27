@@ -2,305 +2,182 @@ Return-Path: <SRS0=HuhN=YU=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+X-Spam-Status: No, score=-3.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0EBECCA9EAF
-	for <linux-fstests@archiver.kernel.org>; Sun, 27 Oct 2019 11:08:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7BCF8CA9EAF
+	for <linux-fstests@archiver.kernel.org>; Sun, 27 Oct 2019 13:59:51 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id B572A20717
-	for <linux-fstests@archiver.kernel.org>; Sun, 27 Oct 2019 11:08:17 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3499F21726
+	for <linux-fstests@archiver.kernel.org>; Sun, 27 Oct 2019 13:59:51 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="qR7ReG5J"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Ec+8laEe"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726678AbfJ0LIR (ORCPT
+        id S1726541AbfJ0N7u (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 27 Oct 2019 07:08:17 -0400
-Received: from mail-pl1-f193.google.com ([209.85.214.193]:39576 "EHLO
-        mail-pl1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726661AbfJ0LIR (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 27 Oct 2019 07:08:17 -0400
-Received: by mail-pl1-f193.google.com with SMTP id s17so3888937plp.6
-        for <fstests@vger.kernel.org>; Sun, 27 Oct 2019 04:08:16 -0700 (PDT)
+        Sun, 27 Oct 2019 09:59:50 -0400
+Received: from mail-yw1-f66.google.com ([209.85.161.66]:42394 "EHLO
+        mail-yw1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725807AbfJ0N7u (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 27 Oct 2019 09:59:50 -0400
+Received: by mail-yw1-f66.google.com with SMTP id d5so2889700ywk.9;
+        Sun, 27 Oct 2019 06:59:48 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=message-id:date:from:to:subject:mime-version:content-disposition;
-        bh=/BMx1QrZVzuR8i6v4wzpywmWFTTB2ZsRZQXG/1QabvE=;
-        b=qR7ReG5Jpa91ykmBjfGTir/6hbw3WhwC8zEWh81hjtL2mjtu1Q63diZb77zDvaG/hH
-         nJ4bbsZY2nVDSA1wjsP+VJEJ1EAUhjOOtPvlorwR22u+ospkrzFTq+ko1i28+iV1lDFl
-         bMwCsLWOlgdZwqe12hHKxTdSK12MSddR23HKutCZ9ECNzoBS/bN9/BGGzNrmYOoCqiav
-         Nlrx1uVd5yzoKhUKqkx0dYrQXO0Yhwwm2DzUWp563+ORCwdZbuqmvlaRUps8sHprUHrI
-         6UHC3AaOu43wZxb3FiriTUs6nMiytzHKGYuQ5gWvWRWW2Wsu5gbpD+U4DLb1HtRaQN1w
-         tCWw==
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc:content-transfer-encoding;
+        bh=poDWleOxwscAi1b6vGHml3VbL/qBFRh3NZaGbX0t3BU=;
+        b=Ec+8laEeYmf/x6OI5mvnPVNY2TL9yLXNLWoGnvMrB6E5hbpnlHGLvnvd41qYTZQhfQ
+         ypPg+E9fAtwZhMkkX4VPnOIeU6R5NxCvr2pbkr7X+du6QctthjNbLzUs/gBG++FAiFni
+         PIgRffMAHAYfnEsoCqRAYb7crAxzjif/OporEWTHJiSWxh5wrwJNJoHEL7GtnAbJFi3O
+         EAt+MUPlZXKO6loTZOCeCK4ajyDuulR/Hoib2jmmpB6PggfBrDG9TSdvWHagEjkiFvjX
+         oVhimrJDz1Lug77JukA20xT7HbtJzbRlOWHVGC9pDwuMfnyr1WU39HgLmlrZ4p8zQu9o
+         s3+Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:message-id:date:from:to:subject:mime-version
-         :content-disposition;
-        bh=/BMx1QrZVzuR8i6v4wzpywmWFTTB2ZsRZQXG/1QabvE=;
-        b=MzLh+/zr1hsvgsFMnEDSzD3GEDWMXiK318lLuxWFYli6xMQBwhLTuycY1DE5ZMFDA5
-         BPx+3yQyvInDo3o9AuXLB16e3kOYLfir6HqMvBZobmUknu0crUPwm8NIw3rSesvugcOL
-         hodxVjqR7KjdFSvUlzBZ3AYwiQ81tATbqqCPutnIMHWHVvXogpl8B8Vb5iinVUj6TXTZ
-         Q+JchAM1iL7dSwn8bA/AkfjjbRNxs6f1k31IiBkk0g7FO+4hJK/crbHlUwkGh6llNeDU
-         44TWOlb6zp546xH+Htp1q2AUZKULZuHFhUZfOhIc2g8yaDBbEuwdkD983nbaA3Ff8+6M
-         ZCkA==
-X-Gm-Message-State: APjAAAUGSRskl2ft3ak0DN5zjPryBUg013IzabPAwF/r2XkwefQIC27A
-        m3TM7AQwRaGj1q9LcaNBXIqO0nWp
-X-Google-Smtp-Source: APXvYqxhGZQ9ivy66p/pupIW3MphKIsiFKZcZZLoHAuh72dAti4j+bXVjrE6siF+23TZWKdKonx/fA==
-X-Received: by 2002:a17:902:a503:: with SMTP id s3mr13355332plq.203.1572174495900;
-        Sun, 27 Oct 2019 04:08:15 -0700 (PDT)
-Received: from localhost ([178.128.102.47])
-        by smtp.gmail.com with ESMTPSA id i126sm8463515pfc.29.2019.10.27.04.08.13
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 27 Oct 2019 04:08:14 -0700 (PDT)
-Message-ID: <5db57a9e.1c69fb81.e6b74.994d@mx.google.com>
-Date:   Sun, 27 Oct 2019 19:08:09 +0800
-From:   Eryu Guan <guaneryu@gmail.com>
-To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: master branch updated to b2b1f60e0b7c
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=poDWleOxwscAi1b6vGHml3VbL/qBFRh3NZaGbX0t3BU=;
+        b=Upn9Yprya3jaDnuHU38gvEjevz7Ue3c3l0JJVDHjCWe4dC386Yij6OF/u/L6Cj2HTO
+         9dY1o6FLl7D1qBl10juRDwhEs9+Kp4KMBGzTDfpnzCJe/LeJAblPrTsaIydqSQsgWov4
+         /iry5goas3lv2cLKfFNtvNPaVI/u3B2zfknSCF9QwEQd+tUjFa3ulVOKU25qcRcYcnCd
+         ygeYNR/QaKJxX4P5YiMddefPIOb7L98Gt3KB0KUA3jxQ2YKm3xjCCU8aKzdtZpBEVbbj
+         6PcRuJU6AnUUkxE18hYgXn5n8nsqarNyDgt9jzr8qWCxaJ713QjUdPwWtygFteDef1QZ
+         MN7w==
+X-Gm-Message-State: APjAAAXm5fXM0R97ce2W/Uslmhfyhi0DziGEiImVvrGzAqlasuuoJCbD
+        aV0MNhh1EBAzf6LlWP8OP1yoWlwNWTgJaSUa8CM=
+X-Google-Smtp-Source: APXvYqwULU4gXYRQRpmhVMr8NS0vNeSJGPNOU540Qf7LxS98LrRNTA+WPV9S2l+YL4wZX0EujbTQjXhht6L9/2isbkY=
+X-Received: by 2002:a81:3187:: with SMTP id x129mr10054062ywx.294.1572184787702;
+ Sun, 27 Oct 2019 06:59:47 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="7AsQ8RJwLizQ"
-Content-Disposition: inline
+References: <20191024122923.24689-1-cgxu519@mykernel.net> <CAOQ4uxidZ=g29hGmKxinRA4Gp6CiWbOB9RqLWPPFXwtCB4DWog@mail.gmail.com>
+ <16e007f78f9.12a9e815231850.7849365151361114799@mykernel.net>
+In-Reply-To: <16e007f78f9.12a9e815231850.7849365151361114799@mykernel.net>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Sun, 27 Oct 2019 15:59:36 +0200
+Message-ID: <CAOQ4uxgZDKnMGB3pbCJpyH_RxWzbEHLQMB2Mpc10PK=7=xYLOg@mail.gmail.com>
+Subject: Re: [PATCH v3] overlay/066: copy-up test for variant sparse files
+To:     Chengguang Xu <cgxu519@mykernel.net>
+Cc:     fstests <fstests@vger.kernel.org>,
+        overlayfs <linux-unionfs@vger.kernel.org>,
+        Eryu Guan <guaneryu@gmail.com>,
+        Miklos Szeredi <miklos@szeredi.hu>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+On Fri, Oct 25, 2019 at 4:19 AM Chengguang Xu <cgxu519@mykernel.net> wrote:
+>
+>  ---- =E5=9C=A8 =E6=98=9F=E6=9C=9F=E4=BA=94, 2019-10-25 05:02:07 Amir Gol=
+dstein <amir73il@gmail.com> =E6=92=B0=E5=86=99 ----
+>  > On Thu, Oct 24, 2019 at 3:29 PM Chengguang Xu <cgxu519@mykernel.net> w=
+rote:
+>  > >
+>  > > This is intensive copy-up test for sparse files,
+>  > > these cases will be mainly used for regression test
+>  > > of copy-up improvement for sparse files.
+>  > >
+>  > > Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+>  > > Signed-off-by: Chengguang Xu <cgxu519@mykernel.net>
+>  > >
+>  > > ---
+>  > > v1->v2:
+>  > > - Call _get_block_size to get fs block size.
+>  > > - Add comment for test space requirement.
+>  > > - Print meaningful error message when copy-up fail.
+>  > > - Adjust random hole range to 1M~5M.
+>  > > - Fix typo.
+>  > >
+>  > > v2->v3:
+>  > > - Fix space requiremnt for test.
+>  > > - Add more descriptions for test files and hole patterns.
+>  > > - Define well named variables to replace unexplained numbers.
+>  > > - Fix random hole algorithm to what Amir suggested.
+>  > > - Adjust iosize to start from 1K.
 
---7AsQ8RJwLizQ
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Chengguang,
 
-Hi all,
+Sorry, I did't notice that you did that. Why?
+As you can see below, this change has a very bad impact on test run time.
+Any reason not to use _get_block_size?
 
-The master branch of the xfstests repository at:
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+>  > > - Remove from quick test group.
+>  >
+>  > Why? you said it takes 7s without the kernel patch.
+>  > The test overlay/001 is in quick group and it copies up 2*4GB
+>  > sparse files.
+>
+> I noticed that after changed to start from 1K iosize the test took about =
+23s.
+> I'm afraid maybe it will take more time on low performance VM env.
+>
+> The test overlay/001 took 8s/1s with/without kernel patch, so mainly test=
+ time
+> wasted on creating test files on test overlay/066.
 
-have just been updated. This is another huge update, notably that I pulled in
-more fsverity and encrypt tests from Eric Biggers. Also there're three new
-btrfs tests and one new overlayfs test.
+You are correct about the time spent on creating the files, but...
 
-Note that the three btrfs all fail with current v5.4-rc4 kernel.
+On my low perf VM, the test runs 95s with overlay over xfs+reflink
 
-The patchset that adds renameat2 support to fsstress and adds new test
-exercising deadlock in rename path in XFS is in a good shape now, and will
-probably be merged in next update.
+But if I set start iosize=3D4 (which what my fs block size is) the test
+runs only 30s.
+
+IOW, most of the test time is spent on creating the files with small iosize
+below fs block size, which doesn't test copy up of holes at all.
+
+If I further change file size to be a multiply of iosize (x10),
+test run time drops to 6s!
+I don't think we loose too much test coverage if we do that?
+If anything we gain testing different file sizes.
+
+The disk space requirement formula for ${iosize}K_holefiles becomes:
+10*(2^0 + 2^11)K*12/2 =3D~ 10 * 1024 * 12
+same as before, just needs explaining.
+(the formula assumes the worst case of min_iosize=3D1)
+
+-------------
+ #
+ # |-- hole --|-- data --| ... |-- data --|-- hole --|
+
+-iosize=3D1
++min_iosize=3D$(($(_get_block_size "${lowerdir}") / 1024 ))
++iosize=3D$min_iosize
+ max_iosize=3D2048
+-file_size=3D10240
+-max_pos=3D`expr $file_size - $max_iosize`
+
+ while [ $iosize -le $max_iosize ]; do
++       file_size=3D$((10*$iosize))
++       max_pos=3D`expr $file_size - $iosize`
++       date >>$seqres.full
++       echo "Creating ${testfile}_iosize${iosize}K_holefile..." >>$seqres.=
+full
+        pos=3D$iosize
+        $XFS_IO_PROG -fc "truncate ${file_size}K" \
+                "${lowerdir}/${testfile}_iosize${iosize}K_holefile"
+>>$seqres.full
+-----------
+
+
+>
+>  >
+>  > Tests that are not in quick group are far less likely to be run
+>  > regularly by developers.
+>
+> hmm...well, lets add 'quick' group again and remove it  if anyone complai=
+ns later.
+>
+
+I am now complaining ;-), but after fixes above, test is really quick
+
+Please send a fix patch (to already merged test) to fir test runtime
+and possibly use _get_block_size.
 
 Thanks,
-Eryu
-
-The new head of the master branch is commit:
-
-b2b1f60e0b7c generic: verify ciphertext of v2 encryption policies with Adiantum
-
-New commits:
-
-Anand Jain (2):
-      [43602315cad9] btrfs: test for alien btrfs-devices
-      [6344f142bcd4] btrfs: test for alien devices
-
-Chao Yu (2):
-      [3d5ce2a6f129] common/defrag: support f2fs
-      [1767b2fc6fe4] common/casefold: support f2fs
-
-Chengguang Xu (1):
-      [e036a11f813d] overlay: copy-up test for variant sparse files
-
-Darrick J. Wong (1):
-      [85357715c8e5] xfs/435: disable dmesg checks
-
-Deepa Dinamani (1):
-      [03d3f75cb45c] generic/402: fix for updated behavior of timestamp limits
-
-Eric Biggers (11):
-      [f198f0647dc8] common/rc: skip encrypted direct I/O tests on f2fs
-      [85bb7969ade1] generic: add an fs-verity stress test
-      [4e3ef46d2980] common/encrypt: disambiguate session encryption keys
-      [ca4ef3f7b981] common/encrypt: add helper functions that wrap new xfs_io commands
-      [72af926020a7] common/encrypt: support checking for v2 encryption policy support
-      [f78b6daf26f6] common/encrypt: support verifying ciphertext of v2 encryption policies
-      [ba4414c1d4b6] generic: add basic test for fscrypt API additions
-      [9866a83c5124] generic: add test for non-root use of fscrypt API additions
-      [15409503aae7] generic: verify ciphertext of v2 encryption policies with AES-256
-      [e764a4aba039] generic: verify ciphertext of v2 encryption policies with AES-128
-      [b2b1f60e0b7c] generic: verify ciphertext of v2 encryption policies with Adiantum
-
-Qu Wenruo (2):
-      [9b56b948e90a] src/log-writes: Add new discard check point
-      [24f2c46da114] btrfs: trim adjacent extents across adjacent block groups boundary
-
-Yang Xu (2):
-      [74dfaaaacd91] xfs/097: Remove wrong broken assignment operation
-      [4bd44aa86be6] generic/{569,570}: use _filter_xfs_io_error to filter pwrite64
-
-Zhihao Cheng (1):
-      [b7cecbea22ba] fstests: Add path $here before src/<file>
-
-
-Code Diffstat:
-
- common/casefold             |   9 ++
- common/config               |   2 +
- common/defrag               |  11 +-
- common/encrypt              | 183 +++++++++++++++++++++-----
- common/locktest             |   4 +-
- common/populate             |   2 +-
- common/quota                |   4 +-
- common/rc                   |  73 ++++++-----
- common/renameat2            |   6 +-
- common/repair               |   2 +-
- src/fscrypt-crypt-util.c    | 304 +++++++++++++++++++++++++++++++++++++++-----
- src/log-writes/replay-log.c |  10 +-
- tests/btrfs/197             |  88 +++++++++++++
- tests/btrfs/197.out         |  25 ++++
- tests/btrfs/198             |  77 +++++++++++
- tests/btrfs/198.out         |  25 ++++
- tests/btrfs/199             | 153 ++++++++++++++++++++++
- tests/btrfs/199.out         |   2 +
- tests/btrfs/group           |   3 +
- tests/ext4/024              |   2 +-
- tests/generic/002           |   8 +-
- tests/generic/014           |   2 +-
- tests/generic/035           |   4 +-
- tests/generic/042           |   2 +-
- tests/generic/068           |   2 +-
- tests/generic/084           |   2 +-
- tests/generic/088           |   2 +-
- tests/generic/093           |   3 +
- tests/generic/120           |  12 +-
- tests/generic/124           |   4 +-
- tests/generic/125           |   4 +-
- tests/generic/129           |   8 +-
- tests/generic/223           |   8 +-
- tests/generic/252           |   2 +-
- tests/generic/257           |   2 +-
- tests/generic/310           |   5 +-
- tests/generic/317           |   6 +-
- tests/generic/331           |   2 +-
- tests/generic/332           |   2 +-
- tests/generic/340           |   6 +-
- tests/generic/344           |  10 +-
- tests/generic/345           |  10 +-
- tests/generic/346           |   8 +-
- tests/generic/354           |   8 +-
- tests/generic/379           |  12 +-
- tests/generic/385           |   2 +-
- tests/generic/397           |   4 +-
- tests/generic/398           |  34 ++---
- tests/generic/399           |   4 +-
- tests/generic/401           |   2 +-
- tests/generic/402           |  66 ++--------
- tests/generic/402.out       |   2 +-
- tests/generic/413           |  18 +--
- tests/generic/417           |   2 +-
- tests/generic/418           |   2 +-
- tests/generic/419           |   6 +-
- tests/generic/421           |   4 +-
- tests/generic/426           |   4 +-
- tests/generic/428           |   2 +-
- tests/generic/429           |   8 +-
- tests/generic/435           |   4 +-
- tests/generic/437           |   2 +-
- tests/generic/438           |   2 +-
- tests/generic/440           |   8 +-
- tests/generic/462           |   4 +
- tests/generic/486           |   3 +-
- tests/generic/524           |   2 +-
- tests/generic/569           |   4 +-
- tests/generic/570           |   4 +-
- tests/generic/576           |   2 +-
- tests/generic/579           | 115 +++++++++++++++++
- tests/generic/579.out       |   2 +
- tests/generic/580           | 127 ++++++++++++++++++
- tests/generic/580.out       |  91 +++++++++++++
- tests/generic/581           | 144 +++++++++++++++++++++
- tests/generic/581.out       |  62 +++++++++
- tests/generic/582           |  43 +++++++
- tests/generic/582.out       |   6 +
- tests/generic/583           |  43 +++++++
- tests/generic/583.out       |   6 +
- tests/generic/584           |  45 +++++++
- tests/generic/584.out       |  11 ++
- tests/generic/group         |   6 +
- tests/overlay/066           | 130 +++++++++++++++++++
- tests/overlay/066.out       |   2 +
- tests/overlay/group         |   1 +
- tests/shared/032            |   2 +-
- tests/xfs/009               |  22 ++--
- tests/xfs/024               |   4 +-
- tests/xfs/030               |   8 +-
- tests/xfs/032               |   2 +-
- tests/xfs/033               |   6 +-
- tests/xfs/034               |   2 +-
- tests/xfs/041               |   4 +-
- tests/xfs/042               |   2 +-
- tests/xfs/048               |   2 +-
- tests/xfs/052               |   6 +-
- tests/xfs/061               |   2 +-
- tests/xfs/062               |   2 +-
- tests/xfs/066               |   2 +-
- tests/xfs/071               |   2 +-
- tests/xfs/081               |   2 +-
- tests/xfs/097               |   2 -
- tests/xfs/111               |   4 +-
- tests/xfs/114               |   2 +-
- tests/xfs/121               |   2 +-
- tests/xfs/136               |   2 +-
- tests/xfs/181               |   2 +-
- tests/xfs/197               |   4 +-
- tests/xfs/206               |   2 +-
- tests/xfs/238               |   2 +-
- tests/xfs/240               |   2 +-
- tests/xfs/241               |   2 +-
- tests/xfs/260               |  18 +--
- tests/xfs/269               |   2 +-
- tests/xfs/272               |   2 +-
- tests/xfs/274               |   2 +-
- tests/xfs/276               |   2 +-
- tests/xfs/282               |   4 +-
- tests/xfs/283               |   4 +-
- tests/xfs/285               |   2 +-
- tests/xfs/286               |   2 +-
- tests/xfs/294               |   2 +-
- tests/xfs/331               |   4 +-
- tests/xfs/335               |   4 +-
- tests/xfs/336               |   4 +-
- tests/xfs/337               |   4 +-
- tests/xfs/341               |   4 +-
- tests/xfs/342               |   4 +-
- tests/xfs/422               |   2 +-
- tests/xfs/423               |   2 +-
- tests/xfs/435               |   1 +
- tests/xfs/443               |   4 +-
- tests/xfs/444               |   2 +-
- tests/xfs/509               |   2 +-
- tests/xfs/510               |   2 +-
- 136 files changed, 1948 insertions(+), 375 deletions(-)
---
-Eryu Guan
-guaneryu@gmail.com
-
---7AsQ8RJwLizQ
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAl21ejIACgkQJlKqKVyP
-52OSeg/7BRSQAZKxSvIUUDE4M7vy8FP78Hnxl14R3y3VQkX1NaPG1QfHJ/L2nzZo
-M+LbzjxRICXUbT6hMLb4H8KdxiGUbpSxyG5In3yYYaYs9B5RnZ5dSgMkWrGsFW56
-/ZmtxzQgzcsUq7Auz7p3dGciraMAJHyToR2MTVmFHxNrG2b4qBsd74yq7bUhoh5L
-Ws1Q+eMgwy03KaGLxiN4NfeMT/nw8ZX+4EQIl1+dNDm8H8/rfyD3naClWOpIXEvg
-Kq/oKxdWsF8egHKYZfrIIVIm4yujms/GG5eqrunWmS5O7xIMib1llyxTM/OADjuy
-Vb24bLU6OsFRnkPenwjxppXKbwFOJJu2sqR2OaT+K2BdQMy33M0agSGap+oGCxjh
-Ac4rt5HRs7K+Fy10Ajh44CxHn2hzdUvwXYYdqzmlFK8HpPSik1sKhox5XR6JZOhO
-6MfUgsVYzxGSHvdv9VmjGbcIFe1AwzgK6UDOQM25bH1nzGzCRsK+r7hgLp6BbKmf
-WpAJ2X2Y79wtCwQ7GI/web33KvHM7TQ3brysDBOKqtFIAj9l6TvwA+9KRyL6V8zu
-EiK3BGuqXcg6XWbsFgpEuDNzAhEWXg0Jc+qMpw04Uep/OD2FlLSF9ZOl75jdRrx1
-8WiefRl/Sk4/Fvsl9FsIls64m2HtzUo82xPZCk8J+RDZGG9+quY=
-=ay+a
------END PGP SIGNATURE-----
-
---7AsQ8RJwLizQ--
+Amir.
