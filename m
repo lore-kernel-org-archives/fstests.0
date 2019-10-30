@@ -2,450 +2,246 @@ Return-Path: <SRS0=KRl+=YX=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0AD5CCA9EC5
-	for <linux-fstests@archiver.kernel.org>; Wed, 30 Oct 2019 10:34:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 61B20CA9EC5
+	for <linux-fstests@archiver.kernel.org>; Wed, 30 Oct 2019 12:27:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id B261220862
-	for <linux-fstests@archiver.kernel.org>; Wed, 30 Oct 2019 10:34:22 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="JAPX1d57"
+	by mail.kernel.org (Postfix) with ESMTP id 2D7862087E
+	for <linux-fstests@archiver.kernel.org>; Wed, 30 Oct 2019 12:27:48 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1572438468;
+	bh=LGYymFw/vzF9sG+kdCptpAuirGBlDkje4M7W+tWseJM=;
+	h=From:To:Cc:Subject:Date:List-ID:From;
+	b=1OZgf2oK1IXg4GaX4Nk2HenBnKiSpILdysCShTCMTeELq+RZLRWfaYQReDF5Qd3+4
+	 3Tvh4w7NezkNBMUyuO5PKt2rMwvz+VDUnRcRbEzc3T7vyuNUfVkXmRS4O1P+ITw8rA
+	 DrRBujS07Fl44UXW4BkMqyP1DLB7xyHd+YIICFhU=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726069AbfJ3KeW (ORCPT
+        id S1726371AbfJ3M1r (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 30 Oct 2019 06:34:22 -0400
-Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:25931 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726046AbfJ3KeW (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 30 Oct 2019 06:34:22 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1572431660;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=xVermggFmUZX5KgDLcs8Tz6XDFrKSCHfytqJ4Sb09vk=;
-        b=JAPX1d57aKpLZeUsNy19psi9ow/fglsWJkB0fJaxSFpxYXhhZ5Cc4K6QFqrwaN2WVMYYj6
-        +DKqe1qpusUe3fpkyDUVqmjbHnrvSw6OwOlMwM3BVF3sovOqeoHLmcdC7hvoNjKfF5QOpH
-        J1paaR7ZLl8U92THInN57lRufk28XzI=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-203-_Yo5RX8POHqtrsh_7X6c8A-1; Wed, 30 Oct 2019 06:34:18 -0400
-Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        Wed, 30 Oct 2019 08:27:47 -0400
+Received: from mail.kernel.org ([198.145.29.99]:54268 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726088AbfJ3M1r (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 30 Oct 2019 08:27:47 -0400
+Received: from localhost.localdomain (bl8-197-74.dsl.telepac.pt [85.241.197.74])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 51817800C61;
-        Wed, 30 Oct 2019 10:34:17 +0000 (UTC)
-Received: from localhost.localdomain.com (ovpn-12-92.pek2.redhat.com [10.72.12.92])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 81CFF19C78;
-        Wed, 30 Oct 2019 10:34:15 +0000 (UTC)
-From:   Zorro Lang <zlang@redhat.com>
+        by mail.kernel.org (Postfix) with ESMTPSA id 4C73420656;
+        Wed, 30 Oct 2019 12:27:45 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1572438466;
+        bh=LGYymFw/vzF9sG+kdCptpAuirGBlDkje4M7W+tWseJM=;
+        h=From:To:Cc:Subject:Date:From;
+        b=hf12p+EJr/NKhCUWtweiFOIS0FpYzOAXbxmWpoOoEh13vzOjSoKGVlMleL4uDPqvo
+         oQ8lmWRP3ZWCMdyAL7y/Jt21CKe4J0oHgpdBIlmuXkIQHCAblgxOhj24rP4s8um1rH
+         fr4CkUzWfUVWpMbHb1hv+2NUpA31oYGxZqr1JCT4=
+From:   fdmanana@kernel.org
 To:     fstests@vger.kernel.org
-Cc:     linux-xfs@vger.kernel.org
-Subject: [PATCH v2] xfstests: xfs mount option sanity test
-Date:   Wed, 30 Oct 2019 18:34:10 +0800
-Message-Id: <20191030103410.2239-1-zlang@redhat.com>
-MIME-Version: 1.0
-X-Scanned-By: MIMEDefang 2.84 on 10.5.11.23
-X-MC-Unique: _Yo5RX8POHqtrsh_7X6c8A-1
-X-Mimecast-Spam-Score: 0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] btrfs: test that send can issue clone operations within the same file
+Date:   Wed, 30 Oct 2019 12:27:41 +0000
+Message-Id: <20191030122741.11073-1-fdmanana@kernel.org>
+X-Mailer: git-send-email 2.11.0
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-XFS is changing to suit the new mount API, so add this case to make
-sure the changing won't bring in regression issue on xfs mount option
-parse phase, and won't change some default behaviors either.
+From: Filipe Manana <fdmanana@suse.com>
 
-Signed-off-by: Zorro Lang <zlang@redhat.com>
+Verify that both full and incremental send operations can issue clone
+operations when a file has extents that are shared with itself (at
+different offsets of course).
+
+This currently fails on btrfs but is addressed by a patch for the
+kernel titled:
+
+  "Btrfs: send, allow clone operations within the same file"
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
 ---
+ tests/btrfs/200     | 133 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/200.out |  17 +++++++
+ tests/btrfs/group   |   1 +
+ 3 files changed, 151 insertions(+)
+ create mode 100755 tests/btrfs/200
+ create mode 100644 tests/btrfs/200.out
 
-Hi,
-
-V2 did below changes:
-1) Fix wrong output messages in _do_test function
-2) Remove logbufs=3DN and logbsize=3DN default display test. Lastest upstre=
-am
-   kernel displays these options in /proc/mounts by default, but old kernel
-   doesn't show them except user indicate these options when mount xfs.
-   Refer to https://marc.info/?l=3Dfstests&m=3D157199699615477&w=3D2
-
-Thanks,
-Zorro
-
- tests/xfs/148     | 320 ++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/148.out |   6 +
- tests/xfs/group   |   1 +
- 3 files changed, 327 insertions(+)
- create mode 100755 tests/xfs/148
- create mode 100644 tests/xfs/148.out
-
-diff --git a/tests/xfs/148 b/tests/xfs/148
+diff --git a/tests/btrfs/200 b/tests/btrfs/200
 new file mode 100755
-index 00000000..a662f6f7
+index 00000000..e7853c4b
 --- /dev/null
-+++ b/tests/xfs/148
-@@ -0,0 +1,320 @@
++++ b/tests/btrfs/200
+@@ -0,0 +1,133 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2019 Red Hat, Inc. All Rights Reserved.
++# Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
 +#
-+# FS QA Test 148
++# FS QA Test No. 200
 +#
-+# XFS mount options sanity check, refer to 'man 5 xfs'.
++# Check that send operations (full and incremental) are able to issue clone
++# operations for extents that are shared between the same file.
 +#
-+seq=3D`basename $0`
-+seqres=3D$RESULT_DIR/$seq
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
 +echo "QA output created by $seq"
-+
-+here=3D`pwd`
-+tmp=3D/tmp/$$
-+status=3D1=09# failure is the default!
++tmp=/tmp/$$
++status=1	# failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
 +
 +_cleanup()
 +{
-+=09cd /
-+=09rm -f $tmp.*
-+=09$UMOUNT_PROG $LOOP_MNT 2>/dev/null
-+=09if [ -n "$LOOP_DEV" ];then
-+=09=09_destroy_loop_device $LOOP_DEV 2>/dev/null
-+=09fi
-+=09if [ -n "$LOOP_SPARE_DEV" ];then
-+=09=09_destroy_loop_device $LOOP_SPARE_DEV 2>/dev/null
-+=09fi
-+=09rm -f $LOOP_IMG
-+=09rm -f $LOOP_SPARE_IMG
-+=09rmdir $LOOP_MNT
++	cd /
++	rm -f $tmp.*
++	rm -fr $send_files_dir
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
++. ./common/reflink
++. ./common/punch
 +
 +# real QA test starts here
-+_supported_fs xfs
++_supported_fs btrfs
 +_supported_os Linux
++_require_fssum
 +_require_test
-+_require_loop
-+_require_xfs_io_command "falloc"
++_require_scratch_reflink
++_require_xfs_io_command "fiemap"
 +
-+LOOP_IMG=3D$TEST_DIR/$seq.dev
-+LOOP_SPARE_IMG=3D$TEST_DIR/$seq.logdev
-+LOOP_MNT=3D$TEST_DIR/$seq.mnt
-+
-+echo "** create loop device"
-+$XFS_IO_PROG -f -c "falloc 0 1g" $LOOP_IMG
-+LOOP_DEV=3D`_create_loop_device $LOOP_IMG`
-+
-+echo "** create loop log device"
-+$XFS_IO_PROG -f -c "falloc 0 512m" $LOOP_SPARE_IMG
-+LOOP_SPARE_DEV=3D`_create_loop_device $LOOP_SPARE_IMG`
-+
-+echo "** create loop mount point"
-+rmdir $LOOP_MNT 2>/dev/null
-+mkdir -p $LOOP_MNT || _fail "cannot create loopback mount point"
-+
-+# avoid the effection from MKFS_OPTIONS
-+MKFS_OPTIONS=3D""
-+do_mkfs()
++count_extents()
 +{
-+=09$MKFS_XFS_PROG -f $* $LOOP_DEV | _filter_mkfs >$seqres.full 2>$tmp.mkfs
-+=09if [ "${PIPESTATUS[0]}" -ne 0 ]; then
-+=09=09_fail "Fails on _mkfs_dev $* $LOOP_DEV"
-+=09fi
-+=09. $tmp.mkfs
++	$XFS_IO_PROG -r -c "fiemap" $1 | tail -n +2 | wc -l
 +}
 +
-+is_dev_mounted()
++count_exclusive_extents()
 +{
-+=09findmnt --source $LOOP_DEV >/dev/null
-+=09return $?
++	$XFS_IO_PROG -r -c "fiemap" $1 | tail -n +2 | cut -d ' ' -f 3 \
++		| sort | uniq | wc -l
 +}
 +
-+get_mount_info()
-+{
-+=09findmnt --source $LOOP_DEV -o OPTIONS -n
-+}
++send_files_dir=$TEST_DIR/btrfs-test-$seq
 +
-+force_unmount()
-+{
-+=09$UMOUNT_PROG $LOOP_MNT >/dev/null 2>&1
-+}
++rm -f $seqres.full
++rm -fr $send_files_dir
++mkdir $send_files_dir
 +
-+# _do_test <mount options> <should be mounted?> [<key string> <key should =
-be found?>]
-+_do_test()
-+{
-+=09local opts=3D"$1"
-+=09local mounted=3D"$2"=09# pass or fail
-+=09local key=3D"$3"
-+=09local found=3D"$4"=09# true or false
-+=09local rc
-+=09local info
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
 +
-+=09# mount test
-+=09_mount $LOOP_DEV $LOOP_MNT $opts 2>/dev/null
-+=09rc=3D$?
-+=09if [ $rc -eq 0 ];then
-+=09=09if [ "${mounted}" =3D "fail" ];then
-+=09=09=09echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-+=09=09=09echo "ERROR: expect ${mounted}, but pass"
-+=09=09=09return 1
-+=09=09fi
-+=09=09is_dev_mounted
-+=09=09if [ $? -ne 0 ];then
-+=09=09=09echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-+=09=09=09echo "ERROR: fs not mounted even mount return 0"
-+=09=09=09return 1
-+=09=09fi
-+=09else
-+=09=09if [ "${mount_ret}" =3D "pass" ];then
-+=09=09=09echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-+=09=09=09echo "ERROR: expect ${mounted}, but fail"
-+=09=09=09return 1
-+=09=09fi
-+=09=09is_dev_mounted
-+=09=09if [ $? -eq 0 ];then
-+=09=09=09echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-+=09=09=09echo "ERROR: fs is mounted even mount return non-zero"
-+=09=09=09return 1
-+=09=09fi
-+=09fi
++# Create our first test file, which has an extent that is shared only with
++# itself and no other files. We want to verify a full send operation will
++# clone the extent.
++$XFS_IO_PROG -f -c "pwrite -S 0xb1 -b 64K 0 64K" $SCRATCH_MNT/foo \
++	| _filter_xfs_io
++$XFS_IO_PROG -c "reflink $SCRATCH_MNT/foo 0 64K 64K" $SCRATCH_MNT/foo \
++	| _filter_xfs_io
 +
-+=09# Skip below checking if "$key" argument isn't specified
-+=09if [ -z "$key" ];then
-+=09=09return 0
-+=09fi
-+=09# Check the mount options after fs mounted.
-+=09info=3D`get_mount_info`
-+=09echo $info | grep -q "${key}"
-+=09rc=3D$?
-+=09if [ $rc -eq 0 ];then
-+=09=09if [ "$found" !=3D "true" ];then
-+=09=09=09echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-+=09=09=09echo "ERROR: expect there's not $key in $info, but not found"
-+=09=09=09return 1
-+=09=09fi
-+=09else
-+=09=09if [ "$found" !=3D "false" ];then
-+=09=09=09echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-+=09=09=09echo "ERROR: expect there's $key in $info, but found"
-+=09=09=09return 1
-+=09=09fi
-+=09fi
++# Create out second test file which initially, for the first send operation,
++# only has a single extent that is not shared.
++$XFS_IO_PROG -f -c "pwrite -S 0xc7 -b 64K 0 64K" $SCRATCH_MNT/bar \
++	| _filter_xfs_io
 +
-+=09return 0
-+}
++$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/base 2>&1 \
++	| _filter_scratch
 +
-+do_test()
-+{
-+=09# force unmount before testing
-+=09force_unmount
-+=09_do_test "$@"
-+=09# force unmount after testing
-+=09force_unmount
-+}
++$BTRFS_UTIL_PROG send -f $send_files_dir/1.snap $SCRATCH_MNT/base 2>&1 \
++	| _filter_scratch
 +
-+echo "** start xfs mount testing ..."
-+# Test allocsize=3Dsize
-+# Valid values for this option are page size (typically 4KiB) through to 1=
-GiB
-+do_mkfs
-+if [ $dbsize -ge 1024 ];then
-+=09blsize=3D"$((dbsize / 1024))k"
++# Now clone the existing extent in file bar to itself at a different offset.
++# We want to verify the incremental send operation below will issue a clone
++# operation instead of a write operation.
++$XFS_IO_PROG -c "reflink $SCRATCH_MNT/bar 0 64K 64K" $SCRATCH_MNT/bar \
++	| _filter_xfs_io
++
++$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/incr 2>&1 \
++	| _filter_scratch
++
++$BTRFS_UTIL_PROG send -p $SCRATCH_MNT/base -f $send_files_dir/2.snap \
++	$SCRATCH_MNT/incr 2>&1 | _filter_scratch
++
++# Compute digests of the snapshot trees so that later we can compare against
++# digests of the trees in the new filesystem, to see if they match (no data or
++# metadata corruption happened).
++$FSSUM_PROG -A -f -w $send_files_dir/base.fssum $SCRATCH_MNT/base
++$FSSUM_PROG -A -f -w $send_files_dir/incr.fssum \
++	-x $SCRATCH_MNT/incr/base $SCRATCH_MNT/incr
++
++# Now recreate the filesystem by receiving both send streams and verify we get
++# the same file contents that the original filesystem had and that files foo
++# and bar have shared extents.
++_scratch_unmount
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++
++$BTRFS_UTIL_PROG receive -f $send_files_dir/1.snap $SCRATCH_MNT
++$BTRFS_UTIL_PROG receive -f $send_files_dir/2.snap $SCRATCH_MNT
++
++# Compute digests of the snapshot trees in the new filesystem and compare them
++# to the ones in the original filesystem, they must match.
++$FSSUM_PROG -r $send_files_dir/base.fssum $SCRATCH_MNT/base
++$FSSUM_PROG -r $send_files_dir/incr.fssum $SCRATCH_MNT/incr
++
++num_extents=$(count_extents $SCRATCH_MNT/base/foo)
++num_exclusive_extents=$(count_exclusive_extents $SCRATCH_MNT/base/foo)
++if [ $num_extents -ne 2 ] || [ $num_exclusive_extents -ne 1 ]; then
++	echo "File foo does not have 2 shared extents in the base snapshot"
++	$XFS_IO_PROG -r -c "fiemap" $SCRATCH_MNT/base/foo
 +fi
-+do_test "" pass "allocsize" "false"
-+do_test "-o allocsize=3D$blsize" pass "allocsize=3D$blsize" "true"
-+do_test "-o allocsize=3D1048576k" pass "allocsize=3D1048576k" "true"
-+do_test "-o allocsize=3D$((dbsize / 2))" fail
-+do_test "-o allocsize=3D2g" fail
 +
-+# Test attr2
-+do_mkfs -m crc=3D1
-+do_test "" pass "attr2" "true"
-+do_test "-o attr2" pass "attr2" "true"
-+do_test "-o noattr2" fail
-+do_mkfs -m crc=3D0
-+do_test "" pass "attr2" "true"
-+do_test "-o attr2" pass "attr2" "true"
-+do_test "-o noattr2" pass "attr2" "false"
++num_extents=$(count_extents $SCRATCH_MNT/incr/foo)
++num_exclusive_extents=$(count_exclusive_extents $SCRATCH_MNT/incr/foo)
++if [ $num_extents -ne 2 ] || [ $num_exclusive_extents -ne 1 ]; then
++	echo "File foo does not have 2 shared extents in the incr snapshot"
++	$XFS_IO_PROG -r -c "fiemap" $SCRATCH_MNT/incr/foo
++fi
 +
-+# Test discard
-+do_mkfs
-+do_test "" pass "discard" "false"
-+do_test "-o discard" pass "discard" "true"
-+do_test "-o nodiscard" pass "discard" "false"
++num_extents=$(count_extents $SCRATCH_MNT/incr/bar)
++num_exclusive_extents=$(count_exclusive_extents $SCRATCH_MNT/incr/bar)
++if [ $num_extents -ne 2 ] || [ $num_exclusive_extents -ne 1 ]; then
++	echo "File bar does not have 2 shared extents in the incr snapshot"
++	$XFS_IO_PROG -r -c "fiemap" $SCRATCH_MNT/incr/bar
++fi
 +
-+# Test grpid|bsdgroups|nogrpid|sysvgroups
-+do_test "" pass "grpid" "false"
-+do_test "-o grpid" pass "grpid" "true"
-+do_test "-o bsdgroups" pass "grpid" "true"
-+do_test "-o nogrpid" pass "grpid" "false"
-+do_test "-o sysvgroups" pass "grpid" "false"
-+
-+# Test filestreams
-+do_test "" pass "filestreams" "false"
-+do_test "-o filestreams" pass "filestreams" "true"
-+
-+# Test ikeep
-+do_test "" pass "ikeep" "false"
-+do_test "-o ikeep" pass "ikeep" "true"
-+do_test "-o noikeep" pass "ikeep" "false"
-+
-+# Test inode32|inode64
-+do_test "" pass "inode64" "true"
-+do_test "-o inode32" pass "inode32" "true"
-+do_test "-o inode64" pass "inode64" "true"
-+
-+# Test largeio
-+do_test "" pass "largeio" "false"
-+do_test "-o largeio" pass "largeio" "true"
-+do_test "-o nolargeio" pass "largeio" "false"
-+
-+# Test logbufs=3Dvalue. Valid numbers range from 2=E2=80=938 inclusive.
-+# New kernel (refer to 4f62282a3696 xfs: cleanup xlog_get_iclog_buffer_siz=
-e)
-+# prints "logbufs=3DN" in /proc/mounts, but old kernel not. So the default
-+# 'display' about logbufs can't be expected, disable this test.
-+#do_test "" pass "logbufs" "false"
-+do_test "-o logbufs=3D8" pass "logbufs=3D8" "true"
-+do_test "-o logbufs=3D2" pass "logbufs=3D2" "true"
-+do_test "-o logbufs=3D1" fail
-+do_test "-o logbufs=3D9" fail
-+do_test "-o logbufs=3D99999999999999" fail
-+
-+# Test logbsize=3Dvalue.
-+do_mkfs -m crc=3D1 -l version=3D2
-+# New kernel (refer to 4f62282a3696 xfs: cleanup xlog_get_iclog_buffer_siz=
-e)
-+# prints "logbsize=3DN" in /proc/mounts, but old kernel not. So the defaul=
-t
-+# 'display' about logbsize can't be expected, disable this test.
-+#do_test "" pass "logbsize" "false"
-+do_test "-o logbsize=3D16384" pass "logbsize=3D16k" "true"
-+do_test "-o logbsize=3D16k" pass "logbsize=3D16k" "true"
-+do_test "-o logbsize=3D32k" pass "logbsize=3D32k" "true"
-+do_test "-o logbsize=3D64k" pass "logbsize=3D64k" "true"
-+do_test "-o logbsize=3D128k" pass "logbsize=3D128k" "true"
-+do_test "-o logbsize=3D256k" pass "logbsize=3D256k" "true"
-+do_test "-o logbsize=3D8k" fail
-+do_test "-o logbsize=3D512k" fail
-+do_mkfs -m crc=3D0 -l version=3D1
-+# New kernel (refer to 4f62282a3696 xfs: cleanup xlog_get_iclog_buffer_siz=
-e)
-+# prints "logbsize=3DN" in /proc/mounts, but old kernel not. So the defaul=
-t
-+# 'display' about logbsize can't be expected, disable this test.
-+#do_test "" pass "logbsize" "false"
-+do_test "-o logbsize=3D16384" pass "logbsize=3D16k" "true"
-+do_test "-o logbsize=3D16k" pass "logbsize=3D16k" "true"
-+do_test "-o logbsize=3D32k" pass "logbsize=3D32k" "true"
-+do_test "-o logbsize=3D64k" fail
-+
-+# Test logdev
-+do_mkfs
-+do_test "" pass "logdev" "false"
-+do_test "-o logdev=3D$LOOP_SPARE_DEV" fail
-+do_mkfs -l logdev=3D$LOOP_SPARE_DEV
-+do_test "-o logdev=3D$LOOP_SPARE_DEV" pass "logdev=3D$LOOP_SPARE_DEV" "tru=
-e"
-+do_test "" fail
-+
-+# Test noalign
-+do_mkfs
-+do_test "" pass "noalign" "false"
-+do_test "-o noalign" pass "noalign" "true"
-+
-+# Test norecovery
-+do_test "" pass "norecovery" "false"
-+do_test "-o norecovery,ro" pass "norecovery" "true"
-+do_test "-o norecovery" fail
-+
-+# Test nouuid
-+do_test "" pass "nouuid" "false"
-+do_test "-o nouuid" pass "nouuid" "true"
-+
-+# Test noquota
-+do_test "" pass "noquota" "true"
-+do_test "-o noquota" pass "noquota" "true"
-+
-+# Test uquota/usrquota/quota/uqnoenforce/qnoenforce
-+do_test "" pass "usrquota" "false"
-+do_test "-o uquota" pass "usrquota" "true"
-+do_test "-o usrquota" pass "usrquota" "true"
-+do_test "-o quota" pass "usrquota" "true"
-+do_test "-o uqnoenforce" pass "usrquota" "true"
-+do_test "-o qnoenforce" pass "usrquota" "true"
-+
-+# Test gquota/grpquota/gqnoenforce
-+do_test "" pass "grpquota" "false"
-+do_test "-o gquota" pass "grpquota" "true"
-+do_test "-o grpquota" pass "grpquota" "true"
-+do_test "-o gqnoenforce" pass "gqnoenforce" "true"
-+
-+# Test pquota/prjquota/pqnoenforce
-+do_test "" pass "prjquota" "false"
-+do_test "-o pquota" pass "prjquota" "true"
-+do_test "-o prjquota" pass "prjquota" "true"
-+do_test "-o pqnoenforce" pass "pqnoenforce" "true"
-+
-+# Test sunit=3Dvalue and swidth=3Dvalue
-+do_mkfs -d sunit=3D128,swidth=3D128
-+do_test "-o sunit=3D8,swidth=3D8" pass "sunit=3D8,swidth=3D8" "true"
-+do_test "-o sunit=3D8,swidth=3D64" pass "sunit=3D8,swidth=3D64" "true"
-+do_test "-o sunit=3D128,swidth=3D128" pass "sunit=3D128,swidth=3D128" "tru=
-e"
-+do_test "-o sunit=3D256,swidth=3D256" pass "sunit=3D256,swidth=3D256" "tru=
-e"
-+do_test "-o sunit=3D2,swidth=3D2" fail
-+
-+# Test swalloc
-+do_mkfs
-+do_test "" pass "swalloc" "false"
-+do_test "-o swalloc" pass "swalloc" "true"
-+
-+# Test wsync
-+do_test "" pass "wsync" "false"
-+do_test "-o wsync" pass "wsync" "true"
-+
-+echo "** end of testing"
-+# success, all done
-+status=3D0
++status=0
 +exit
-diff --git a/tests/xfs/148.out b/tests/xfs/148.out
+diff --git a/tests/btrfs/200.out b/tests/btrfs/200.out
 new file mode 100644
-index 00000000..a71d9231
+index 00000000..3eec567e
 --- /dev/null
-+++ b/tests/xfs/148.out
-@@ -0,0 +1,6 @@
-+QA output created by 148
-+** create loop device
-+** create loop log device
-+** create loop mount point
-+** start xfs mount testing ...
-+** end of testing
-diff --git a/tests/xfs/group b/tests/xfs/group
-index f4ebcd8c..019aebad 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -145,6 +145,7 @@
- 145 dmapi
- 146 dmapi
- 147 dmapi
-+148 auto quick mount
- 150 dmapi
- 151 dmapi
- 152 dmapi
---=20
-2.20.1
++++ b/tests/btrfs/200.out
+@@ -0,0 +1,17 @@
++QA output created by 200
++wrote 65536/65536 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++linked 65536/65536 bytes at offset 65536
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 65536/65536 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/base'
++At subvol SCRATCH_MNT/base
++linked 65536/65536 bytes at offset 65536
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/incr'
++At subvol SCRATCH_MNT/incr
++At subvol base
++At snapshot incr
++OK
++OK
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index c7ab129e..d56dcafa 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -202,3 +202,4 @@
+ 197 auto quick volume
+ 198 auto quick volume
+ 199 auto quick trim
++200 auto quick send clone
+-- 
+2.11.0
 
