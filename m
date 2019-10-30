@@ -2,368 +2,478 @@ Return-Path: <SRS0=KRl+=YX=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AD1C2CA9EC5
-	for <linux-fstests@archiver.kernel.org>; Wed, 30 Oct 2019 12:41:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 86F45CA9EC5
+	for <linux-fstests@archiver.kernel.org>; Wed, 30 Oct 2019 16:39:32 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 7722320862
-	for <linux-fstests@archiver.kernel.org>; Wed, 30 Oct 2019 12:41:13 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4725D208E3
+	for <linux-fstests@archiver.kernel.org>; Wed, 30 Oct 2019 16:39:32 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="CB+DjU4F"
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="hkvVy46w"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726269AbfJ3MlN (ORCPT
+        id S1726905AbfJ3Qjc (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 30 Oct 2019 08:41:13 -0400
-Received: from us-smtp-1.mimecast.com ([205.139.110.61]:35132 "EHLO
-        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726119AbfJ3MlN (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 30 Oct 2019 08:41:13 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1572439271;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=jwJwdFsFfVCCCGhjx2903N6K6Srwmlu76TC9RUydWTM=;
-        b=CB+DjU4FDTJbO0grweKPocixzt5tsXmSzoIZA9ShA48efMuXFzq3SoF6oHe8xKkgqAH7hT
-        8nhovefW1MbzRwlcdnOXcvuurGdC2HhPH3OH33rS8pXHhbL4SgjS2WRttZ2FWF/RMwofJh
-        Bj5AmEyMRceUi8w83A8Zpes9JlxNs58=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-318-mmPIXzg_MmeNS4Q44mHykw-1; Wed, 30 Oct 2019 08:40:52 -0400
-Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 33CD51005500;
-        Wed, 30 Oct 2019 12:40:51 +0000 (UTC)
-Received: from bfoster (dhcp-41-2.bos.redhat.com [10.18.41.2])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id 262D760BE0;
-        Wed, 30 Oct 2019 12:40:49 +0000 (UTC)
-Date:   Wed, 30 Oct 2019 08:40:47 -0400
-From:   Brian Foster <bfoster@redhat.com>
-To:     kaixuxia <xiakaixu1987@gmail.com>
-Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
-        guaneryu@gmail.com, newtongao@tencent.com, jasperwang@tencent.com
-Subject: Re: [PATCH v2 3/4] fsstress: add EXCHANGE renameat2 support
-Message-ID: <20191030124047.GA46856@bfoster>
-References: <cover.1572057903.git.kaixuxia@tencent.com>
- <8e8cf5e50bc3c26c90d2677d3194d36346ef0c24.1572057903.git.kaixuxia@tencent.com>
- <20191029134010.GF41131@bfoster>
- <8b5f167b-2d7c-a387-c440-80cfe6f95c42@gmail.com>
+        Wed, 30 Oct 2019 12:39:32 -0400
+Received: from userp2120.oracle.com ([156.151.31.85]:48524 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726552AbfJ3Qjb (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 30 Oct 2019 12:39:31 -0400
+Received: from pps.filterd (userp2120.oracle.com [127.0.0.1])
+        by userp2120.oracle.com (8.16.0.27/8.16.0.27) with SMTP id x9UGYirA080003;
+        Wed, 30 Oct 2019 16:39:25 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
+ : subject : message-id : references : mime-version : content-type :
+ content-transfer-encoding : in-reply-to; s=corp-2019-08-05;
+ bh=iTX6zoZXDiNc4Ucpj7HWZ6AA9vaVK/qKych+TryghRE=;
+ b=hkvVy46wE10zQxXvFGBj/GAws65gVz5fv1i9zpdhI6T/BEZ+qzOI5yLvEOwCUKhkwV7d
+ l1qkkNQF7p1vRauI7n6yBD+3+dqoXJ1BB1jbztVO93xNykW5LIe/q1NapvRigZkiN46q
+ fDeRuL6/SwT2FGpdlsR/W4TYmN9JSPfSTpX+5NXrlmZNiSOoNmIXf63H0bd+pHCmIkaN
+ rM6N4+4MwMTCobsgW4THgRyGSXJvA0nH2nk9Ats8gmpKxmKGfnLruAbdFmbF1dm4ySSR
+ eb+EKlvKkzE7ufRuUtngyGYhYNQagtFV2yTnnPQCYA1eYyhbgmv6pqLflz7HV8kGNEcS Rg== 
+Received: from userp3020.oracle.com (userp3020.oracle.com [156.151.31.79])
+        by userp2120.oracle.com with ESMTP id 2vxwhfnjkp-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Wed, 30 Oct 2019 16:39:24 +0000
+Received: from pps.filterd (userp3020.oracle.com [127.0.0.1])
+        by userp3020.oracle.com (8.16.0.27/8.16.0.27) with SMTP id x9UGYOZF082014;
+        Wed, 30 Oct 2019 16:39:24 GMT
+Received: from userv0122.oracle.com (userv0122.oracle.com [156.151.31.75])
+        by userp3020.oracle.com with ESMTP id 2vxwj9mc9y-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Wed, 30 Oct 2019 16:39:24 +0000
+Received: from abhmp0011.oracle.com (abhmp0011.oracle.com [141.146.116.17])
+        by userv0122.oracle.com (8.14.4/8.14.4) with ESMTP id x9UGdN1c012599;
+        Wed, 30 Oct 2019 16:39:23 GMT
+Received: from localhost (/67.169.218.210)
+        by default (Oracle Beehive Gateway v4.0)
+        with ESMTP ; Wed, 30 Oct 2019 09:39:23 -0700
+Date:   Wed, 30 Oct 2019 09:39:22 -0700
+From:   "Darrick J. Wong" <darrick.wong@oracle.com>
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH v2] xfstests: xfs mount option sanity test
+Message-ID: <20191030163922.GB15224@magnolia>
+References: <20191030103410.2239-1-zlang@redhat.com>
 MIME-Version: 1.0
-In-Reply-To: <8b5f167b-2d7c-a387-c440-80cfe6f95c42@gmail.com>
-User-Agent: Mutt/1.12.1 (2019-06-15)
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.12
-X-MC-Unique: mmPIXzg_MmeNS4Q44mHykw-1
-X-Mimecast-Spam-Score: 0
-Content-Type: text/plain; charset=WINDOWS-1252
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20191030103410.2239-1-zlang@redhat.com>
+User-Agent: Mutt/1.9.4 (2018-02-28)
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9426 signatures=668685
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=0 malwarescore=0
+ phishscore=0 bulkscore=0 spamscore=0 mlxscore=0 mlxlogscore=999
+ adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.0.1-1908290000 definitions=main-1910300150
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9426 signatures=668685
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 priorityscore=1501 malwarescore=0
+ suspectscore=0 phishscore=0 bulkscore=0 spamscore=0 clxscore=1011
+ lowpriorityscore=0 mlxscore=0 impostorscore=0 mlxlogscore=999 adultscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.0.1-1908290000
+ definitions=main-1910300150
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Oct 30, 2019 at 11:17:04AM +0800, kaixuxia wrote:
-> On 2019/10/29 21:40, Brian Foster wrote:
-> > On Sat, Oct 26, 2019 at 07:18:37PM +0800, kaixuxia wrote:
-> >> Support the EXCHANGE renameat2 syscall in fsstress.
-> >>
-> >> In order to maintain filelist/filename integrity, we restrict
-> >> rexchange to files of the same type.
-> >>
-> >> Signed-off-by: kaixuxia <kaixuxia@tencent.com>
-> >> ---
-> >=20
-> > While this looks pretty good to me at this point, I do notice instances
-> > of the following in a quick test:
-> >=20
-> > 0/29: rename(EXCHANGE) d3/d9/dc/dd to d3/d9/dc/dd/df 22
-> > ...
-> > 0/43: rename(EXCHANGE) d3 to d3/d9/dc/d18 22
-> > ...
-> >=20
-> > It looks like we're getting an EINVAL error on rexchange of directories=
-.
-> > That same operation seems to work fine via the ./src/renameat2 tool. An=
-y
-> > idea what's going on there?
->=20
-> Hmm.. I am not sure if I understand what your mean. Seems like
-> this is because the special source and target parameters setting.
-> There are parameters check for RENAME_EXCHANGE in renameat2() call,
->=20
->  static int do_renameat2(int olddfd, const char __user *oldname, int newd=
-fd,
->                          const char __user *newname, unsigned int flags)
->  {
->   ...
->          /* source should not be ancestor of target */
->          error =3D -EINVAL;
->          if (old_dentry =3D=3D trap)
->                  goto exit5;
->          /* target should not be an ancestor of source */
->          if (!(flags & RENAME_EXCHANGE))
->                  error =3D -ENOTEMPTY;
->          if (new_dentry =3D=3D trap)
->                  goto exit5;
->  ...
->  }=20
->=20
-> so we get the EINVAL error on rexchange of directories. I also tested it
-> via the ./src/renameat2 tool, and the strace result as below,
->=20
+On Wed, Oct 30, 2019 at 06:34:10PM +0800, Zorro Lang wrote:
+> XFS is changing to suit the new mount API, so add this case to make
+> sure the changing won't bring in regression issue on xfs mount option
+> parse phase, and won't change some default behaviors either.
+> 
+> Signed-off-by: Zorro Lang <zlang@redhat.com>
+> ---
+> 
+> Hi,
+> 
+> V2 did below changes:
+> 1) Fix wrong output messages in _do_test function
 
-Ah, I see. I wasn't aware of the restriction and didn't catch that quirk
-of these particular requests, so I thought it was failing arbitrary
-directory swaps (which is what I tested with renameat2). This makes
-sense, thanks for the explanation.
+Hmm, I still see this on 5.4-rc4:
 
->  # src/renameat2 -x /xfs-bufdeadlock/d3 /xfs-bufdeadlock/d3/d9/dc/d18
->   Invalid argument
->=20
->  syscall_316(0xffffff9c, 0x7ffe38930813, 0xffffff9c, 0x7ffe38930827, 0x2,=
- 0) =3D -1 (errno 22)
-> =20
-> Exchange looks a bit more tricky here.. Maybe we have two choices,
-> one is just leave the EINVAL there since the fsstress is stress
-> test and the EINVAL possibility is low. The other one is we should
-> do parameters check before invoking the renameat2() call, if the
-> source and target file fents are not suitable we will try more
-> until get the right file fents...
->=20
++[FAILED]: mount /dev/loop0 /mnt/148.mnt -o logbsize=16384
++ERROR: expect there's logbsize=16k in , but found
++[FAILED]: mount /dev/loop0 /mnt/148.mnt -o logbsize=16k
++ERROR: expect there's logbsize=16k in , but found
 
-Hmm.. I think it might be fine to ignore from a functional standpoint if
-the complexity is too involved to detect and skip. That said, I'm
-wondering if the filelist helps us enough here to implement similar
-checks as in the kernel VFS. On a quick look, it appears we walk up the
-dentry chain looking to see if one dentry is a parent of the other. See
-d_ancestor() (called via do_renameat2() -> lock_rename()) for example:
+Oh, right, you're stripping out MKFS_OPTIONS and formatting a loop
+device, which on my system means you get rmapbt=1 by default and
+whatnot.
 
-/*
- * ...
- * Returns the ancestor dentry of p2 which is a child of p1, if p1 is
- * an ancestor of p2, else NULL.
- */
-struct dentry *d_ancestor(struct dentry *p1, struct dentry *p2)
-{
-        struct dentry *p;
+I think the larger problem here might be that now we have to figure out
+the special-casing of some of these options.
 
-        for (p =3D p2; !IS_ROOT(p); p =3D p->d_parent) {
-                if (p->d_parent =3D=3D p1)
-                        return p;
-        }
-        return NULL;
-}
+--D
 
-Any reason we couldn't do a couple similar checks on rexchange of two
-dirs and skip the rename if necessary?
-
-Brian
-
-> >=20
-> > Brian
-> >=20
-> >>  ltp/fsstress.c | 92 ++++++++++++++++++++++++++++++++++++++++++++-----=
----------
-> >>  1 file changed, 71 insertions(+), 21 deletions(-)
-> >>
-> >> diff --git a/ltp/fsstress.c b/ltp/fsstress.c
-> >> index ecc1adc..83d6337 100644
-> >> --- a/ltp/fsstress.c
-> >> +++ b/ltp/fsstress.c
-> >> @@ -69,6 +69,9 @@ static int renameat2(int dfd1, const char *path1,
-> >>  #ifndef RENAME_NOREPLACE
-> >>  #define RENAME_NOREPLACE=09(1 << 0)=09/* Don't overwrite target */
-> >>  #endif
-> >> +#ifndef RENAME_EXCHANGE
-> >> +#define RENAME_EXCHANGE=09=09(1 << 1)=09/* Exchange source and dest *=
-/
-> >> +#endif
-> >>  #ifndef RENAME_WHITEOUT
-> >>  #define RENAME_WHITEOUT=09=09(1 << 2)=09/* Whiteout source */
-> >>  #endif
-> >> @@ -115,6 +118,7 @@ typedef enum {
-> >>  =09OP_REMOVEFATTR,
-> >>  =09OP_RENAME,
-> >>  =09OP_RNOREPLACE,
-> >> +=09OP_REXCHANGE,
-> >>  =09OP_RWHITEOUT,
-> >>  =09OP_RESVSP,
-> >>  =09OP_RMDIR,
-> >> @@ -235,6 +239,7 @@ void=09readv_f(int, long);
-> >>  void=09removefattr_f(int, long);
-> >>  void=09rename_f(int, long);
-> >>  void=09rnoreplace_f(int, long);
-> >> +void=09rexchange_f(int, long);
-> >>  void=09rwhiteout_f(int, long);
-> >>  void=09resvsp_f(int, long);
-> >>  void=09rmdir_f(int, long);
-> >> @@ -296,6 +301,7 @@ opdesc_t=09ops[] =3D {
-> >>  =09{ OP_REMOVEFATTR, "removefattr", removefattr_f, 1, 1 },
-> >>  =09{ OP_RENAME, "rename", rename_f, 2, 1 },
-> >>  =09{ OP_RNOREPLACE, "rnoreplace", rnoreplace_f, 2, 1 },
-> >> +=09{ OP_REXCHANGE, "rexchange", rexchange_f, 2, 1 },
-> >>  =09{ OP_RWHITEOUT, "rwhiteout", rwhiteout_f, 2, 1 },
-> >>  =09{ OP_RESVSP, "resvsp", resvsp_f, 1, 1 },
-> >>  =09{ OP_RMDIR, "rmdir", rmdir_f, 1, 1 },
-> >> @@ -371,7 +377,7 @@ void=09del_from_flist(int, int);
-> >>  int=09dirid_to_name(char *, int);
-> >>  void=09doproc(void);
-> >>  int=09fent_to_name(pathname_t *, flist_t *, fent_t *);
-> >> -void=09fix_parent(int, int);
-> >> +void=09fix_parent(int, int, bool);
-> >>  void=09free_pathname(pathname_t *);
-> >>  int=09generate_fname(fent_t *, int, pathname_t *, int *, int *);
-> >>  int=09generate_xattr_name(int, char *, int);
-> >> @@ -1118,7 +1124,7 @@ fent_to_name(pathname_t *name, flist_t *flp, fen=
-t_t *fep)
-> >>  }
-> >> =20
-> >>  void
-> >> -fix_parent(int oldid, int newid)
-> >> +fix_parent(int oldid, int newid, bool swap)
-> >>  {
-> >>  =09fent_t=09*fep;
-> >>  =09flist_t=09*flp;
-> >> @@ -1129,6 +1135,8 @@ fix_parent(int oldid, int newid)
-> >>  =09=09for (j =3D 0, fep =3D flp->fents; j < flp->nfiles; j++, fep++) =
-{
-> >>  =09=09=09if (fep->parent =3D=3D oldid)
-> >>  =09=09=09=09fep->parent =3D newid;
-> >> +=09=09=09else if (swap && fep->parent =3D=3D newid)
-> >> +=09=09=09=09fep->parent =3D oldid;
-> >>  =09=09}
-> >>  =09}
-> >>  }
-> >> @@ -4256,6 +4264,7 @@ out:
-> >> =20
-> >>  struct print_flags renameat2_flags [] =3D {
-> >>  =09{ RENAME_NOREPLACE, "NOREPLACE"},
-> >> +=09{ RENAME_EXCHANGE, "EXCHANGE"},
-> >>  =09{ RENAME_WHITEOUT, "WHITEOUT"},
-> >>  =09{ -1, NULL}
-> >>  };
-> >> @@ -4291,41 +4300,76 @@ do_renameat2(int opno, long r, int mode)
-> >>  =09=09return;
-> >>  =09}
-> >> =20
-> >> -=09/* get an existing directory for the destination parent directory =
-name */
-> >> -=09if (!get_fname(FT_DIRm, random(), NULL, NULL, &dfep, &v))
-> >> -=09=09parid =3D -1;
-> >> -=09else
-> >> -=09=09parid =3D dfep->id;
-> >> -=09v |=3D v1;
-> >> +=09/*
-> >> +=09 * Both pathnames must exist for the RENAME_EXCHANGE, and in
-> >> +=09 * order to maintain filelist/filename integrity, we should
-> >> +=09 * restrict exchange operation to files of the same type.
-> >> +=09 */
-> >> +=09if (mode =3D=3D RENAME_EXCHANGE) {
-> >> +=09=09which =3D 1 << (flp - flist);
-> >> +=09=09init_pathname(&newf);
-> >> +=09=09if (!get_fname(which, random(), &newf, NULL, &dfep, &v)) {
-> >> +=09=09=09if (v)
-> >> +=09=09=09=09printf("%d/%d: rename - no target filename\n",
-> >> +=09=09=09=09=09procid, opno);
-> >> +=09=09=09free_pathname(&newf);
-> >> +=09=09=09free_pathname(&f);
-> >> +=09=09=09return;
-> >> +=09=09}
-> >> +=09=09v |=3D v1;
-> >> +=09=09id =3D dfep->id;
-> >> +=09=09parid =3D dfep->parent;
-> >> +=09} else {
-> >> +=09=09/*
-> >> +=09=09 * Get an existing directory for the destination parent
-> >> +=09=09 * directory name.
-> >> +=09=09 */
-> >> +=09=09if (!get_fname(FT_DIRm, random(), NULL, NULL, &dfep, &v))
-> >> +=09=09=09parid =3D -1;
-> >> +=09=09else
-> >> +=09=09=09parid =3D dfep->id;
-> >> +=09=09v |=3D v1;
-> >> =20
-> >> -=09/* generate a new path using an existing parent directory in name =
-*/
-> >> -=09init_pathname(&newf);
-> >> -=09e =3D generate_fname(dfep, flp - flist, &newf, &id, &v1);
-> >> -=09v |=3D v1;
-> >> -=09if (!e) {
-> >> -=09=09if (v) {
-> >> -=09=09=09(void)fent_to_name(&f, &flist[FT_DIR], dfep);
-> >> -=09=09=09printf("%d/%d: rename - no filename from %s\n",
-> >> -=09=09=09=09procid, opno, f.path);
-> >> +=09=09/*
-> >> +=09=09 * Generate a new path using an existing parent directory
-> >> +=09=09 * in name.
-> >> +=09=09 */
-> >> +=09=09init_pathname(&newf);
-> >> +=09=09e =3D generate_fname(dfep, flp - flist, &newf, &id, &v1);
-> >> +=09=09v |=3D v1;
-> >> +=09=09if (!e) {
-> >> +=09=09=09if (v) {
-> >> +=09=09=09=09(void)fent_to_name(&f, &flist[FT_DIR], dfep);
-> >> +=09=09=09=09printf("%d/%d: rename - no filename from %s\n",
-> >> +=09=09=09=09=09procid, opno, f.path);
-> >> +=09=09=09}
-> >> +=09=09=09free_pathname(&newf);
-> >> +=09=09=09free_pathname(&f);
-> >> +=09=09=09return;
-> >>  =09=09}
-> >> -=09=09free_pathname(&newf);
-> >> -=09=09free_pathname(&f);
-> >> -=09=09return;
-> >>  =09}
-> >>  =09e =3D rename_path(&f, &newf, mode) < 0 ? errno : 0;
-> >>  =09check_cwd();
-> >>  =09if (e =3D=3D 0) {
-> >>  =09=09int xattr_counter =3D fep->xattr_counter;
-> >> +=09=09bool swap =3D (mode =3D=3D RENAME_EXCHANGE) ? true : false;
-> >> =20
-> >>  =09=09oldid =3D fep->id;
-> >>  =09=09oldparid =3D fep->parent;
-> >> =20
-> >> +=09=09/*
-> >> +=09=09 * Swap the parent ids for RENAME_EXCHANGE, and replace the
-> >> +=09=09 * old parent id for the others.
-> >> +=09=09 */
-> >>  =09=09if (flp - flist =3D=3D FT_DIR)
-> >> -=09=09=09fix_parent(oldid, id);
-> >> +=09=09=09fix_parent(oldid, id, swap);
-> >> =20
-> >>  =09=09if (mode =3D=3D RENAME_WHITEOUT) {
-> >>  =09=09=09fep->xattr_counter =3D 0;
-> >>  =09=09=09add_to_flist(flp - flist, id, parid, xattr_counter);
-> >> +=09=09} else if (mode =3D=3D RENAME_EXCHANGE) {
-> >> +=09=09=09fep->xattr_counter =3D dfep->xattr_counter;
-> >> +=09=09=09dfep->xattr_counter =3D xattr_counter;
-> >>  =09=09} else {
-> >>  =09=09=09del_from_flist(flp - flist, fep - flp->fents);
-> >>  =09=09=09add_to_flist(flp - flist, id, parid, xattr_counter);
-> >> @@ -4359,6 +4403,12 @@ rnoreplace_f(int opno, long r)
-> >>  }
-> >> =20
-> >>  void
-> >> +rexchange_f(int opno, long r)
-> >> +{
-> >> +=09do_renameat2(opno, r, RENAME_EXCHANGE);
-> >> +}
-> >> +
-> >> +void
-> >>  rwhiteout_f(int opno, long r)
-> >>  {
-> >>  =09do_renameat2(opno, r, RENAME_WHITEOUT);
-> >> --=20
-> >> 1.8.3.1
-> >>
-> >=20
->=20
-> --=20
-> kaixuxia
-
+> 2) Remove logbufs=N and logbsize=N default display test. Lastest upstream
+>    kernel displays these options in /proc/mounts by default, but old kernel
+>    doesn't show them except user indicate these options when mount xfs.
+>    Refer to https://marc.info/?l=fstests&m=157199699615477&w=2
+> 
+> Thanks,
+> Zorro
+> 
+>  tests/xfs/148     | 320 ++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/148.out |   6 +
+>  tests/xfs/group   |   1 +
+>  3 files changed, 327 insertions(+)
+>  create mode 100755 tests/xfs/148
+>  create mode 100644 tests/xfs/148.out
+> 
+> diff --git a/tests/xfs/148 b/tests/xfs/148
+> new file mode 100755
+> index 00000000..a662f6f7
+> --- /dev/null
+> +++ b/tests/xfs/148
+> @@ -0,0 +1,320 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2019 Red Hat, Inc. All Rights Reserved.
+> +#
+> +# FS QA Test 148
+> +#
+> +# XFS mount options sanity check, refer to 'man 5 xfs'.
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +	$UMOUNT_PROG $LOOP_MNT 2>/dev/null
+> +	if [ -n "$LOOP_DEV" ];then
+> +		_destroy_loop_device $LOOP_DEV 2>/dev/null
+> +	fi
+> +	if [ -n "$LOOP_SPARE_DEV" ];then
+> +		_destroy_loop_device $LOOP_SPARE_DEV 2>/dev/null
+> +	fi
+> +	rm -f $LOOP_IMG
+> +	rm -f $LOOP_SPARE_IMG
+> +	rmdir $LOOP_MNT
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +_supported_fs xfs
+> +_supported_os Linux
+> +_require_test
+> +_require_loop
+> +_require_xfs_io_command "falloc"
+> +
+> +LOOP_IMG=$TEST_DIR/$seq.dev
+> +LOOP_SPARE_IMG=$TEST_DIR/$seq.logdev
+> +LOOP_MNT=$TEST_DIR/$seq.mnt
+> +
+> +echo "** create loop device"
+> +$XFS_IO_PROG -f -c "falloc 0 1g" $LOOP_IMG
+> +LOOP_DEV=`_create_loop_device $LOOP_IMG`
+> +
+> +echo "** create loop log device"
+> +$XFS_IO_PROG -f -c "falloc 0 512m" $LOOP_SPARE_IMG
+> +LOOP_SPARE_DEV=`_create_loop_device $LOOP_SPARE_IMG`
+> +
+> +echo "** create loop mount point"
+> +rmdir $LOOP_MNT 2>/dev/null
+> +mkdir -p $LOOP_MNT || _fail "cannot create loopback mount point"
+> +
+> +# avoid the effection from MKFS_OPTIONS
+> +MKFS_OPTIONS=""
+> +do_mkfs()
+> +{
+> +	$MKFS_XFS_PROG -f $* $LOOP_DEV | _filter_mkfs >$seqres.full 2>$tmp.mkfs
+> +	if [ "${PIPESTATUS[0]}" -ne 0 ]; then
+> +		_fail "Fails on _mkfs_dev $* $LOOP_DEV"
+> +	fi
+> +	. $tmp.mkfs
+> +}
+> +
+> +is_dev_mounted()
+> +{
+> +	findmnt --source $LOOP_DEV >/dev/null
+> +	return $?
+> +}
+> +
+> +get_mount_info()
+> +{
+> +	findmnt --source $LOOP_DEV -o OPTIONS -n
+> +}
+> +
+> +force_unmount()
+> +{
+> +	$UMOUNT_PROG $LOOP_MNT >/dev/null 2>&1
+> +}
+> +
+> +# _do_test <mount options> <should be mounted?> [<key string> <key should be found?>]
+> +_do_test()
+> +{
+> +	local opts="$1"
+> +	local mounted="$2"	# pass or fail
+> +	local key="$3"
+> +	local found="$4"	# true or false
+> +	local rc
+> +	local info
+> +
+> +	# mount test
+> +	_mount $LOOP_DEV $LOOP_MNT $opts 2>/dev/null
+> +	rc=$?
+> +	if [ $rc -eq 0 ];then
+> +		if [ "${mounted}" = "fail" ];then
+> +			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
+> +			echo "ERROR: expect ${mounted}, but pass"
+> +			return 1
+> +		fi
+> +		is_dev_mounted
+> +		if [ $? -ne 0 ];then
+> +			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
+> +			echo "ERROR: fs not mounted even mount return 0"
+> +			return 1
+> +		fi
+> +	else
+> +		if [ "${mount_ret}" = "pass" ];then
+> +			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
+> +			echo "ERROR: expect ${mounted}, but fail"
+> +			return 1
+> +		fi
+> +		is_dev_mounted
+> +		if [ $? -eq 0 ];then
+> +			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
+> +			echo "ERROR: fs is mounted even mount return non-zero"
+> +			return 1
+> +		fi
+> +	fi
+> +
+> +	# Skip below checking if "$key" argument isn't specified
+> +	if [ -z "$key" ];then
+> +		return 0
+> +	fi
+> +	# Check the mount options after fs mounted.
+> +	info=`get_mount_info`
+> +	echo $info | grep -q "${key}"
+> +	rc=$?
+> +	if [ $rc -eq 0 ];then
+> +		if [ "$found" != "true" ];then
+> +			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
+> +			echo "ERROR: expect there's not $key in $info, but not found"
+> +			return 1
+> +		fi
+> +	else
+> +		if [ "$found" != "false" ];then
+> +			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
+> +			echo "ERROR: expect there's $key in $info, but found"
+> +			return 1
+> +		fi
+> +	fi
+> +
+> +	return 0
+> +}
+> +
+> +do_test()
+> +{
+> +	# force unmount before testing
+> +	force_unmount
+> +	_do_test "$@"
+> +	# force unmount after testing
+> +	force_unmount
+> +}
+> +
+> +echo "** start xfs mount testing ..."
+> +# Test allocsize=size
+> +# Valid values for this option are page size (typically 4KiB) through to 1GiB
+> +do_mkfs
+> +if [ $dbsize -ge 1024 ];then
+> +	blsize="$((dbsize / 1024))k"
+> +fi
+> +do_test "" pass "allocsize" "false"
+> +do_test "-o allocsize=$blsize" pass "allocsize=$blsize" "true"
+> +do_test "-o allocsize=1048576k" pass "allocsize=1048576k" "true"
+> +do_test "-o allocsize=$((dbsize / 2))" fail
+> +do_test "-o allocsize=2g" fail
+> +
+> +# Test attr2
+> +do_mkfs -m crc=1
+> +do_test "" pass "attr2" "true"
+> +do_test "-o attr2" pass "attr2" "true"
+> +do_test "-o noattr2" fail
+> +do_mkfs -m crc=0
+> +do_test "" pass "attr2" "true"
+> +do_test "-o attr2" pass "attr2" "true"
+> +do_test "-o noattr2" pass "attr2" "false"
+> +
+> +# Test discard
+> +do_mkfs
+> +do_test "" pass "discard" "false"
+> +do_test "-o discard" pass "discard" "true"
+> +do_test "-o nodiscard" pass "discard" "false"
+> +
+> +# Test grpid|bsdgroups|nogrpid|sysvgroups
+> +do_test "" pass "grpid" "false"
+> +do_test "-o grpid" pass "grpid" "true"
+> +do_test "-o bsdgroups" pass "grpid" "true"
+> +do_test "-o nogrpid" pass "grpid" "false"
+> +do_test "-o sysvgroups" pass "grpid" "false"
+> +
+> +# Test filestreams
+> +do_test "" pass "filestreams" "false"
+> +do_test "-o filestreams" pass "filestreams" "true"
+> +
+> +# Test ikeep
+> +do_test "" pass "ikeep" "false"
+> +do_test "-o ikeep" pass "ikeep" "true"
+> +do_test "-o noikeep" pass "ikeep" "false"
+> +
+> +# Test inode32|inode64
+> +do_test "" pass "inode64" "true"
+> +do_test "-o inode32" pass "inode32" "true"
+> +do_test "-o inode64" pass "inode64" "true"
+> +
+> +# Test largeio
+> +do_test "" pass "largeio" "false"
+> +do_test "-o largeio" pass "largeio" "true"
+> +do_test "-o nolargeio" pass "largeio" "false"
+> +
+> +# Test logbufs=value. Valid numbers range from 2–8 inclusive.
+> +# New kernel (refer to 4f62282a3696 xfs: cleanup xlog_get_iclog_buffer_size)
+> +# prints "logbufs=N" in /proc/mounts, but old kernel not. So the default
+> +# 'display' about logbufs can't be expected, disable this test.
+> +#do_test "" pass "logbufs" "false"
+> +do_test "-o logbufs=8" pass "logbufs=8" "true"
+> +do_test "-o logbufs=2" pass "logbufs=2" "true"
+> +do_test "-o logbufs=1" fail
+> +do_test "-o logbufs=9" fail
+> +do_test "-o logbufs=99999999999999" fail
+> +
+> +# Test logbsize=value.
+> +do_mkfs -m crc=1 -l version=2
+> +# New kernel (refer to 4f62282a3696 xfs: cleanup xlog_get_iclog_buffer_size)
+> +# prints "logbsize=N" in /proc/mounts, but old kernel not. So the default
+> +# 'display' about logbsize can't be expected, disable this test.
+> +#do_test "" pass "logbsize" "false"
+> +do_test "-o logbsize=16384" pass "logbsize=16k" "true"
+> +do_test "-o logbsize=16k" pass "logbsize=16k" "true"
+> +do_test "-o logbsize=32k" pass "logbsize=32k" "true"
+> +do_test "-o logbsize=64k" pass "logbsize=64k" "true"
+> +do_test "-o logbsize=128k" pass "logbsize=128k" "true"
+> +do_test "-o logbsize=256k" pass "logbsize=256k" "true"
+> +do_test "-o logbsize=8k" fail
+> +do_test "-o logbsize=512k" fail
+> +do_mkfs -m crc=0 -l version=1
+> +# New kernel (refer to 4f62282a3696 xfs: cleanup xlog_get_iclog_buffer_size)
+> +# prints "logbsize=N" in /proc/mounts, but old kernel not. So the default
+> +# 'display' about logbsize can't be expected, disable this test.
+> +#do_test "" pass "logbsize" "false"
+> +do_test "-o logbsize=16384" pass "logbsize=16k" "true"
+> +do_test "-o logbsize=16k" pass "logbsize=16k" "true"
+> +do_test "-o logbsize=32k" pass "logbsize=32k" "true"
+> +do_test "-o logbsize=64k" fail
+> +
+> +# Test logdev
+> +do_mkfs
+> +do_test "" pass "logdev" "false"
+> +do_test "-o logdev=$LOOP_SPARE_DEV" fail
+> +do_mkfs -l logdev=$LOOP_SPARE_DEV
+> +do_test "-o logdev=$LOOP_SPARE_DEV" pass "logdev=$LOOP_SPARE_DEV" "true"
+> +do_test "" fail
+> +
+> +# Test noalign
+> +do_mkfs
+> +do_test "" pass "noalign" "false"
+> +do_test "-o noalign" pass "noalign" "true"
+> +
+> +# Test norecovery
+> +do_test "" pass "norecovery" "false"
+> +do_test "-o norecovery,ro" pass "norecovery" "true"
+> +do_test "-o norecovery" fail
+> +
+> +# Test nouuid
+> +do_test "" pass "nouuid" "false"
+> +do_test "-o nouuid" pass "nouuid" "true"
+> +
+> +# Test noquota
+> +do_test "" pass "noquota" "true"
+> +do_test "-o noquota" pass "noquota" "true"
+> +
+> +# Test uquota/usrquota/quota/uqnoenforce/qnoenforce
+> +do_test "" pass "usrquota" "false"
+> +do_test "-o uquota" pass "usrquota" "true"
+> +do_test "-o usrquota" pass "usrquota" "true"
+> +do_test "-o quota" pass "usrquota" "true"
+> +do_test "-o uqnoenforce" pass "usrquota" "true"
+> +do_test "-o qnoenforce" pass "usrquota" "true"
+> +
+> +# Test gquota/grpquota/gqnoenforce
+> +do_test "" pass "grpquota" "false"
+> +do_test "-o gquota" pass "grpquota" "true"
+> +do_test "-o grpquota" pass "grpquota" "true"
+> +do_test "-o gqnoenforce" pass "gqnoenforce" "true"
+> +
+> +# Test pquota/prjquota/pqnoenforce
+> +do_test "" pass "prjquota" "false"
+> +do_test "-o pquota" pass "prjquota" "true"
+> +do_test "-o prjquota" pass "prjquota" "true"
+> +do_test "-o pqnoenforce" pass "pqnoenforce" "true"
+> +
+> +# Test sunit=value and swidth=value
+> +do_mkfs -d sunit=128,swidth=128
+> +do_test "-o sunit=8,swidth=8" pass "sunit=8,swidth=8" "true"
+> +do_test "-o sunit=8,swidth=64" pass "sunit=8,swidth=64" "true"
+> +do_test "-o sunit=128,swidth=128" pass "sunit=128,swidth=128" "true"
+> +do_test "-o sunit=256,swidth=256" pass "sunit=256,swidth=256" "true"
+> +do_test "-o sunit=2,swidth=2" fail
+> +
+> +# Test swalloc
+> +do_mkfs
+> +do_test "" pass "swalloc" "false"
+> +do_test "-o swalloc" pass "swalloc" "true"
+> +
+> +# Test wsync
+> +do_test "" pass "wsync" "false"
+> +do_test "-o wsync" pass "wsync" "true"
+> +
+> +echo "** end of testing"
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/148.out b/tests/xfs/148.out
+> new file mode 100644
+> index 00000000..a71d9231
+> --- /dev/null
+> +++ b/tests/xfs/148.out
+> @@ -0,0 +1,6 @@
+> +QA output created by 148
+> +** create loop device
+> +** create loop log device
+> +** create loop mount point
+> +** start xfs mount testing ...
+> +** end of testing
+> diff --git a/tests/xfs/group b/tests/xfs/group
+> index f4ebcd8c..019aebad 100644
+> --- a/tests/xfs/group
+> +++ b/tests/xfs/group
+> @@ -145,6 +145,7 @@
+>  145 dmapi
+>  146 dmapi
+>  147 dmapi
+> +148 auto quick mount
+>  150 dmapi
+>  151 dmapi
+>  152 dmapi
+> -- 
+> 2.20.1
+> 
