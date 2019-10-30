@@ -2,161 +2,450 @@ Return-Path: <SRS0=KRl+=YX=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C5836CA9EAF
-	for <linux-fstests@archiver.kernel.org>; Wed, 30 Oct 2019 05:34:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0AD5CCA9EC5
+	for <linux-fstests@archiver.kernel.org>; Wed, 30 Oct 2019 10:34:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 843292087E
-	for <linux-fstests@archiver.kernel.org>; Wed, 30 Oct 2019 05:34:12 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B261220862
+	for <linux-fstests@archiver.kernel.org>; Wed, 30 Oct 2019 10:34:22 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="YJW8JEzo"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="JAPX1d57"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727258AbfJ3FeM (ORCPT
+        id S1726069AbfJ3KeW (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 30 Oct 2019 01:34:12 -0400
-Received: from mail-yw1-f65.google.com ([209.85.161.65]:37146 "EHLO
-        mail-yw1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725855AbfJ3FeL (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 30 Oct 2019 01:34:11 -0400
-Received: by mail-yw1-f65.google.com with SMTP id v84so463794ywc.4;
-        Tue, 29 Oct 2019 22:34:11 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=awvmcllvoQxkws+t9hh1Rf782NhS4hoTdPuyYWHl1Qw=;
-        b=YJW8JEzo/gUWhW+GX6FjSrlkJx48NldVHVf3eECe63wV3efUovH7oz/X1ewVMfPAv3
-         rPy9BbZQFpaal7jfS72jf9l9KeGJBSeLstBGJfampKTlz9z4Y9/Sz9LGDIBadWHRoRvM
-         ZtmPri8egMeI0GTiWuPuton/WcAleFRL23OuuZpqCoeyhH69wIRuyDRz6QsPiKZCdzXq
-         7cOJnucaTDRfhowumzJN8aY64yYOP7zKpaerbn94KvscKW1thsJSKylBJCGrcng+oYwL
-         kUsKndoh8yawzMwnHls0UuRDM/bYxkADJFfI9f4P1zC8W9WG3/MYbwJ4BKtg04rVTqyh
-         7EOg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=awvmcllvoQxkws+t9hh1Rf782NhS4hoTdPuyYWHl1Qw=;
-        b=AlQdb3XF0c6JFqCMBjMyth+6SXTrM/1gpX60DX+NnHDp+VqQ50Xogv4xjyv/aCfQPv
-         K/rDAAH+Fc7jCuqoajPz0eLF4/rQazmKdgg/dAcoYbiQ9XLsKH07Qt6M3KU8JMO/aUMp
-         5wiLivbb8nrRbhR1nXcl2TQRYo6W9oCx8iab8mCbBG/hmrDA7StsECdln7eSJfXRQf1M
-         p+dXjZrQFKnjVVQp3O+5V2bgswq/xAxqsxDumOCCrRv36FHedffL6q8/MLD2eKcKtiz9
-         gAs9ze7YKL1czv4MAvCVZikg/YbrxKlAUb+erzoj2raLNxZSwLt7WEXtRZT4N5oD8/Mx
-         PKtA==
-X-Gm-Message-State: APjAAAXLxsU6QTDT0SZQApZ7yGIlp7rwMJjJubLNl/ZwtbzLnQZZ3oGG
-        ZC5Js4idmiegmtp/Z3+/Bi6YWiz3YcZ5bEXob3o=
-X-Google-Smtp-Source: APXvYqzkhjwPX8DFKvX76CmDH5rDPGkFrl2rnqidDe/UX+00dduLxm9kM05f0UwNy2G0TUeUxHvbXk336DX1tSNb184=
-X-Received: by 2002:a81:4a02:: with SMTP id x2mr20329875ywa.31.1572413650729;
- Tue, 29 Oct 2019 22:34:10 -0700 (PDT)
+        Wed, 30 Oct 2019 06:34:22 -0400
+Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:25931 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726046AbfJ3KeW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 30 Oct 2019 06:34:22 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1572431660;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=xVermggFmUZX5KgDLcs8Tz6XDFrKSCHfytqJ4Sb09vk=;
+        b=JAPX1d57aKpLZeUsNy19psi9ow/fglsWJkB0fJaxSFpxYXhhZ5Cc4K6QFqrwaN2WVMYYj6
+        +DKqe1qpusUe3fpkyDUVqmjbHnrvSw6OwOlMwM3BVF3sovOqeoHLmcdC7hvoNjKfF5QOpH
+        J1paaR7ZLl8U92THInN57lRufk28XzI=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-203-_Yo5RX8POHqtrsh_7X6c8A-1; Wed, 30 Oct 2019 06:34:18 -0400
+Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.phx2.redhat.com [10.5.11.23])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 51817800C61;
+        Wed, 30 Oct 2019 10:34:17 +0000 (UTC)
+Received: from localhost.localdomain.com (ovpn-12-92.pek2.redhat.com [10.72.12.92])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 81CFF19C78;
+        Wed, 30 Oct 2019 10:34:15 +0000 (UTC)
+From:   Zorro Lang <zlang@redhat.com>
+To:     fstests@vger.kernel.org
+Cc:     linux-xfs@vger.kernel.org
+Subject: [PATCH v2] xfstests: xfs mount option sanity test
+Date:   Wed, 30 Oct 2019 18:34:10 +0800
+Message-Id: <20191030103410.2239-1-zlang@redhat.com>
 MIME-Version: 1.0
-References: <20191029055713.28191-1-cgxu519@mykernel.net> <CAOQ4uxgzZHXOv7K++BArYmaTEHbYr5oCkgXw8WVUsQgh0uyqhg@mail.gmail.com>
- <16e173c434a.11f8ced8d40796.3954073574203284331@mykernel.net>
- <CAOQ4uxjddbot29=cYqLMLyqT=w=pWmLOPqVzvi-5mcXQ3AB3EQ@mail.gmail.com>
- <CAOQ4uxiZgmA6Z8Lq=ac7O9f1+CMnSmyLoAA7TDu6Hyt=-pUctw@mail.gmail.com> <16e1afc4097.118c98c8b43000.1263688409904269456@mykernel.net>
-In-Reply-To: <16e1afc4097.118c98c8b43000.1263688409904269456@mykernel.net>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Wed, 30 Oct 2019 07:33:59 +0200
-Message-ID: <CAOQ4uxjqMTFc-Fmpg3oGChy01X2JzQoG_jqxk5iEz+bR4yoQjg@mail.gmail.com>
-Subject: Re: [PATCH] overlay/066: adjust test file size && add more test patterns
-To:     Chengguang Xu <cgxu519@mykernel.net>
-Cc:     fstests <fstests@vger.kernel.org>,
-        overlayfs <linux-unionfs@vger.kernel.org>,
-        Eryu Guan <guaneryu@gmail.com>,
-        Miklos Szeredi <miklos@szeredi.hu>
-Content-Type: text/plain; charset="UTF-8"
+X-Scanned-By: MIMEDefang 2.84 on 10.5.11.23
+X-MC-Unique: _Yo5RX8POHqtrsh_7X6c8A-1
+X-Mimecast-Spam-Score: 0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: quoted-printable
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Oct 30, 2019 at 6:46 AM Chengguang Xu <cgxu519@mykernel.net> wrote:
->
->  ---- =E5=9C=A8 =E6=98=9F=E6=9C=9F=E4=BA=8C, 2019-10-29 20:32:43 Amir Gol=
-dstein <amir73il@gmail.com> =E6=92=B0=E5=86=99 ----
->  > On Tue, Oct 29, 2019 at 1:58 PM Amir Goldstein <amir73il@gmail.com> wr=
-ote:
->  > >
->  > > On Tue, Oct 29, 2019 at 1:17 PM Chengguang Xu <cgxu519@mykernel.net>=
- wrote:
->  > > >
->  > > >  ---- =E5=9C=A8 =E6=98=9F=E6=9C=9F=E4=BA=8C, 2019-10-29 16:32:32 A=
-mir Goldstein <amir73il@gmail.com> =E6=92=B0=E5=86=99 ----
->  > > >  > On Tue, Oct 29, 2019 at 7:57 AM Chengguang Xu <cgxu519@mykernel=
-.net> wrote:
->  > > >  > >
->  > > >  >
->  > > >  > Can you please send the patch as plain/text.
->  > > >  > Your mailer has sent it with quoted printable encoding and git =
+XFS is changing to suit the new mount API, so add this case to make
+sure the changing won't bring in regression issue on xfs mount option
+parse phase, and won't change some default behaviors either.
+
+Signed-off-by: Zorro Lang <zlang@redhat.com>
+---
+
+Hi,
+
+V2 did below changes:
+1) Fix wrong output messages in _do_test function
+2) Remove logbufs=3DN and logbsize=3DN default display test. Lastest upstre=
 am
->  > > >  > fails to apply the patch:
->  > > >  > https://lore.kernel.org/fstests/20191029055713.28191-1-cgxu519@=
-mykernel.net/raw
->  > > >  >
->  > > >
->  > > > Sorry for that,  I'm not clear for the reason, so I send you the p=
-atch in attachment first.
->  > > >
->  > >
->  >
->  > OK, I can verify that test runs quick (5s) on my VM.
->  >
->  > But there is one more issue that I think needs to be addressed, either
->  > in this fix patch or in a follow up patch.
->  >
->  > If the test ever fails on some run with a specific random holes sequen=
-ce,
->  > it is going to be quite hard for reporter to report this sequence or f=
-or
->  > developers to reproduce the same random sequence.
->
-> IMO, it's not so hard as you thought,  I prefer to use filefrag to check =
-it.
->
-> I think below tidy info is very clear and easy to understand what had hap=
-pened.
->
-> [root@hades ovl-lower]# filefrag -k -e copyup_sparse_test_random_small_ho=
-lefile
-> Filesystem type is: 58465342
-> File size of copyup_sparse_test_random_small_holefile is 10485760 (10240 =
-blocks of 1024 bytes)
->  ext:     logical_offset:        physical_offset: length:   expected: fla=
-gs:
->    0:        4..     411:    2625148..   2625555:    408:          4:
->    1:      816..    1259:    2626172..   2626615:    444:    2625960:
->    2:     1696..    1783:    2627196..   2627283:     88:    2627052:
->    3:     1872..    2207:    2627372..   2627707:    336:
->    4:     2544..    3019:    2629244..   2629719:    476:    2628044:
->    5:     3496..    3599:    2629720..   2629823:    104:
->    6:     3704..    3819:    2629928..   2630043:    116:
->    7:     3936..    3959:    2630044..   2630067:     24:
->    8:     3980..    4487:    2631292..   2631799:    508:    2630088:
->    9:     4992..    5235:    2631800..   2632043:    244:
->   10:     5472..    5715:    2632044..   2632287:    244:
->   11:     5956..    6355:    2633340..   2633739:    400:    2632528:
->   12:     6752..    6787:    2633740..   2633775:     36:
->   13:     6820..    6907:    2633808..   2633895:     88:
->   14:     6996..    7447:    2633896..   2634347:    452:
->   15:     7900..    8211:    2637436..   2637747:    312:    2634800:
->   16:     8516..    8867:    2638052..   2638403:    352:
->   17:     9216..    9703:    2638752..   2639239:    488:             las=
-t
-> copyup_sparse_test_random_small_holefile: 7 extents found
->
-
-There is a difference between understanding what happened and
-reproducing, but there is no reason to choose one method over
-the other.
-
-As a developer, when I get a bug report I would rather have both
-an easy reproducer and all the postmortem  information available.
-Therefore, please echo xfs_io commands, at least for creation of
-random files to full log AND filefrag info, at least for the random
-files to full log.
+   kernel displays these options in /proc/mounts by default, but old kernel
+   doesn't show them except user indicate these options when mount xfs.
+   Refer to https://marc.info/?l=3Dfstests&m=3D157199699615477&w=3D2
 
 Thanks,
-Amir.
+Zorro
+
+ tests/xfs/148     | 320 ++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/148.out |   6 +
+ tests/xfs/group   |   1 +
+ 3 files changed, 327 insertions(+)
+ create mode 100755 tests/xfs/148
+ create mode 100644 tests/xfs/148.out
+
+diff --git a/tests/xfs/148 b/tests/xfs/148
+new file mode 100755
+index 00000000..a662f6f7
+--- /dev/null
++++ b/tests/xfs/148
+@@ -0,0 +1,320 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2019 Red Hat, Inc. All Rights Reserved.
++#
++# FS QA Test 148
++#
++# XFS mount options sanity check, refer to 'man 5 xfs'.
++#
++seq=3D`basename $0`
++seqres=3D$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=3D`pwd`
++tmp=3D/tmp/$$
++status=3D1=09# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++=09cd /
++=09rm -f $tmp.*
++=09$UMOUNT_PROG $LOOP_MNT 2>/dev/null
++=09if [ -n "$LOOP_DEV" ];then
++=09=09_destroy_loop_device $LOOP_DEV 2>/dev/null
++=09fi
++=09if [ -n "$LOOP_SPARE_DEV" ];then
++=09=09_destroy_loop_device $LOOP_SPARE_DEV 2>/dev/null
++=09fi
++=09rm -f $LOOP_IMG
++=09rm -f $LOOP_SPARE_IMG
++=09rmdir $LOOP_MNT
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs xfs
++_supported_os Linux
++_require_test
++_require_loop
++_require_xfs_io_command "falloc"
++
++LOOP_IMG=3D$TEST_DIR/$seq.dev
++LOOP_SPARE_IMG=3D$TEST_DIR/$seq.logdev
++LOOP_MNT=3D$TEST_DIR/$seq.mnt
++
++echo "** create loop device"
++$XFS_IO_PROG -f -c "falloc 0 1g" $LOOP_IMG
++LOOP_DEV=3D`_create_loop_device $LOOP_IMG`
++
++echo "** create loop log device"
++$XFS_IO_PROG -f -c "falloc 0 512m" $LOOP_SPARE_IMG
++LOOP_SPARE_DEV=3D`_create_loop_device $LOOP_SPARE_IMG`
++
++echo "** create loop mount point"
++rmdir $LOOP_MNT 2>/dev/null
++mkdir -p $LOOP_MNT || _fail "cannot create loopback mount point"
++
++# avoid the effection from MKFS_OPTIONS
++MKFS_OPTIONS=3D""
++do_mkfs()
++{
++=09$MKFS_XFS_PROG -f $* $LOOP_DEV | _filter_mkfs >$seqres.full 2>$tmp.mkfs
++=09if [ "${PIPESTATUS[0]}" -ne 0 ]; then
++=09=09_fail "Fails on _mkfs_dev $* $LOOP_DEV"
++=09fi
++=09. $tmp.mkfs
++}
++
++is_dev_mounted()
++{
++=09findmnt --source $LOOP_DEV >/dev/null
++=09return $?
++}
++
++get_mount_info()
++{
++=09findmnt --source $LOOP_DEV -o OPTIONS -n
++}
++
++force_unmount()
++{
++=09$UMOUNT_PROG $LOOP_MNT >/dev/null 2>&1
++}
++
++# _do_test <mount options> <should be mounted?> [<key string> <key should =
+be found?>]
++_do_test()
++{
++=09local opts=3D"$1"
++=09local mounted=3D"$2"=09# pass or fail
++=09local key=3D"$3"
++=09local found=3D"$4"=09# true or false
++=09local rc
++=09local info
++
++=09# mount test
++=09_mount $LOOP_DEV $LOOP_MNT $opts 2>/dev/null
++=09rc=3D$?
++=09if [ $rc -eq 0 ];then
++=09=09if [ "${mounted}" =3D "fail" ];then
++=09=09=09echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
++=09=09=09echo "ERROR: expect ${mounted}, but pass"
++=09=09=09return 1
++=09=09fi
++=09=09is_dev_mounted
++=09=09if [ $? -ne 0 ];then
++=09=09=09echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
++=09=09=09echo "ERROR: fs not mounted even mount return 0"
++=09=09=09return 1
++=09=09fi
++=09else
++=09=09if [ "${mount_ret}" =3D "pass" ];then
++=09=09=09echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
++=09=09=09echo "ERROR: expect ${mounted}, but fail"
++=09=09=09return 1
++=09=09fi
++=09=09is_dev_mounted
++=09=09if [ $? -eq 0 ];then
++=09=09=09echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
++=09=09=09echo "ERROR: fs is mounted even mount return non-zero"
++=09=09=09return 1
++=09=09fi
++=09fi
++
++=09# Skip below checking if "$key" argument isn't specified
++=09if [ -z "$key" ];then
++=09=09return 0
++=09fi
++=09# Check the mount options after fs mounted.
++=09info=3D`get_mount_info`
++=09echo $info | grep -q "${key}"
++=09rc=3D$?
++=09if [ $rc -eq 0 ];then
++=09=09if [ "$found" !=3D "true" ];then
++=09=09=09echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
++=09=09=09echo "ERROR: expect there's not $key in $info, but not found"
++=09=09=09return 1
++=09=09fi
++=09else
++=09=09if [ "$found" !=3D "false" ];then
++=09=09=09echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
++=09=09=09echo "ERROR: expect there's $key in $info, but found"
++=09=09=09return 1
++=09=09fi
++=09fi
++
++=09return 0
++}
++
++do_test()
++{
++=09# force unmount before testing
++=09force_unmount
++=09_do_test "$@"
++=09# force unmount after testing
++=09force_unmount
++}
++
++echo "** start xfs mount testing ..."
++# Test allocsize=3Dsize
++# Valid values for this option are page size (typically 4KiB) through to 1=
+GiB
++do_mkfs
++if [ $dbsize -ge 1024 ];then
++=09blsize=3D"$((dbsize / 1024))k"
++fi
++do_test "" pass "allocsize" "false"
++do_test "-o allocsize=3D$blsize" pass "allocsize=3D$blsize" "true"
++do_test "-o allocsize=3D1048576k" pass "allocsize=3D1048576k" "true"
++do_test "-o allocsize=3D$((dbsize / 2))" fail
++do_test "-o allocsize=3D2g" fail
++
++# Test attr2
++do_mkfs -m crc=3D1
++do_test "" pass "attr2" "true"
++do_test "-o attr2" pass "attr2" "true"
++do_test "-o noattr2" fail
++do_mkfs -m crc=3D0
++do_test "" pass "attr2" "true"
++do_test "-o attr2" pass "attr2" "true"
++do_test "-o noattr2" pass "attr2" "false"
++
++# Test discard
++do_mkfs
++do_test "" pass "discard" "false"
++do_test "-o discard" pass "discard" "true"
++do_test "-o nodiscard" pass "discard" "false"
++
++# Test grpid|bsdgroups|nogrpid|sysvgroups
++do_test "" pass "grpid" "false"
++do_test "-o grpid" pass "grpid" "true"
++do_test "-o bsdgroups" pass "grpid" "true"
++do_test "-o nogrpid" pass "grpid" "false"
++do_test "-o sysvgroups" pass "grpid" "false"
++
++# Test filestreams
++do_test "" pass "filestreams" "false"
++do_test "-o filestreams" pass "filestreams" "true"
++
++# Test ikeep
++do_test "" pass "ikeep" "false"
++do_test "-o ikeep" pass "ikeep" "true"
++do_test "-o noikeep" pass "ikeep" "false"
++
++# Test inode32|inode64
++do_test "" pass "inode64" "true"
++do_test "-o inode32" pass "inode32" "true"
++do_test "-o inode64" pass "inode64" "true"
++
++# Test largeio
++do_test "" pass "largeio" "false"
++do_test "-o largeio" pass "largeio" "true"
++do_test "-o nolargeio" pass "largeio" "false"
++
++# Test logbufs=3Dvalue. Valid numbers range from 2=E2=80=938 inclusive.
++# New kernel (refer to 4f62282a3696 xfs: cleanup xlog_get_iclog_buffer_siz=
+e)
++# prints "logbufs=3DN" in /proc/mounts, but old kernel not. So the default
++# 'display' about logbufs can't be expected, disable this test.
++#do_test "" pass "logbufs" "false"
++do_test "-o logbufs=3D8" pass "logbufs=3D8" "true"
++do_test "-o logbufs=3D2" pass "logbufs=3D2" "true"
++do_test "-o logbufs=3D1" fail
++do_test "-o logbufs=3D9" fail
++do_test "-o logbufs=3D99999999999999" fail
++
++# Test logbsize=3Dvalue.
++do_mkfs -m crc=3D1 -l version=3D2
++# New kernel (refer to 4f62282a3696 xfs: cleanup xlog_get_iclog_buffer_siz=
+e)
++# prints "logbsize=3DN" in /proc/mounts, but old kernel not. So the defaul=
+t
++# 'display' about logbsize can't be expected, disable this test.
++#do_test "" pass "logbsize" "false"
++do_test "-o logbsize=3D16384" pass "logbsize=3D16k" "true"
++do_test "-o logbsize=3D16k" pass "logbsize=3D16k" "true"
++do_test "-o logbsize=3D32k" pass "logbsize=3D32k" "true"
++do_test "-o logbsize=3D64k" pass "logbsize=3D64k" "true"
++do_test "-o logbsize=3D128k" pass "logbsize=3D128k" "true"
++do_test "-o logbsize=3D256k" pass "logbsize=3D256k" "true"
++do_test "-o logbsize=3D8k" fail
++do_test "-o logbsize=3D512k" fail
++do_mkfs -m crc=3D0 -l version=3D1
++# New kernel (refer to 4f62282a3696 xfs: cleanup xlog_get_iclog_buffer_siz=
+e)
++# prints "logbsize=3DN" in /proc/mounts, but old kernel not. So the defaul=
+t
++# 'display' about logbsize can't be expected, disable this test.
++#do_test "" pass "logbsize" "false"
++do_test "-o logbsize=3D16384" pass "logbsize=3D16k" "true"
++do_test "-o logbsize=3D16k" pass "logbsize=3D16k" "true"
++do_test "-o logbsize=3D32k" pass "logbsize=3D32k" "true"
++do_test "-o logbsize=3D64k" fail
++
++# Test logdev
++do_mkfs
++do_test "" pass "logdev" "false"
++do_test "-o logdev=3D$LOOP_SPARE_DEV" fail
++do_mkfs -l logdev=3D$LOOP_SPARE_DEV
++do_test "-o logdev=3D$LOOP_SPARE_DEV" pass "logdev=3D$LOOP_SPARE_DEV" "tru=
+e"
++do_test "" fail
++
++# Test noalign
++do_mkfs
++do_test "" pass "noalign" "false"
++do_test "-o noalign" pass "noalign" "true"
++
++# Test norecovery
++do_test "" pass "norecovery" "false"
++do_test "-o norecovery,ro" pass "norecovery" "true"
++do_test "-o norecovery" fail
++
++# Test nouuid
++do_test "" pass "nouuid" "false"
++do_test "-o nouuid" pass "nouuid" "true"
++
++# Test noquota
++do_test "" pass "noquota" "true"
++do_test "-o noquota" pass "noquota" "true"
++
++# Test uquota/usrquota/quota/uqnoenforce/qnoenforce
++do_test "" pass "usrquota" "false"
++do_test "-o uquota" pass "usrquota" "true"
++do_test "-o usrquota" pass "usrquota" "true"
++do_test "-o quota" pass "usrquota" "true"
++do_test "-o uqnoenforce" pass "usrquota" "true"
++do_test "-o qnoenforce" pass "usrquota" "true"
++
++# Test gquota/grpquota/gqnoenforce
++do_test "" pass "grpquota" "false"
++do_test "-o gquota" pass "grpquota" "true"
++do_test "-o grpquota" pass "grpquota" "true"
++do_test "-o gqnoenforce" pass "gqnoenforce" "true"
++
++# Test pquota/prjquota/pqnoenforce
++do_test "" pass "prjquota" "false"
++do_test "-o pquota" pass "prjquota" "true"
++do_test "-o prjquota" pass "prjquota" "true"
++do_test "-o pqnoenforce" pass "pqnoenforce" "true"
++
++# Test sunit=3Dvalue and swidth=3Dvalue
++do_mkfs -d sunit=3D128,swidth=3D128
++do_test "-o sunit=3D8,swidth=3D8" pass "sunit=3D8,swidth=3D8" "true"
++do_test "-o sunit=3D8,swidth=3D64" pass "sunit=3D8,swidth=3D64" "true"
++do_test "-o sunit=3D128,swidth=3D128" pass "sunit=3D128,swidth=3D128" "tru=
+e"
++do_test "-o sunit=3D256,swidth=3D256" pass "sunit=3D256,swidth=3D256" "tru=
+e"
++do_test "-o sunit=3D2,swidth=3D2" fail
++
++# Test swalloc
++do_mkfs
++do_test "" pass "swalloc" "false"
++do_test "-o swalloc" pass "swalloc" "true"
++
++# Test wsync
++do_test "" pass "wsync" "false"
++do_test "-o wsync" pass "wsync" "true"
++
++echo "** end of testing"
++# success, all done
++status=3D0
++exit
+diff --git a/tests/xfs/148.out b/tests/xfs/148.out
+new file mode 100644
+index 00000000..a71d9231
+--- /dev/null
++++ b/tests/xfs/148.out
+@@ -0,0 +1,6 @@
++QA output created by 148
++** create loop device
++** create loop log device
++** create loop mount point
++** start xfs mount testing ...
++** end of testing
+diff --git a/tests/xfs/group b/tests/xfs/group
+index f4ebcd8c..019aebad 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -145,6 +145,7 @@
+ 145 dmapi
+ 146 dmapi
+ 147 dmapi
++148 auto quick mount
+ 150 dmapi
+ 151 dmapi
+ 152 dmapi
+--=20
+2.20.1
+
