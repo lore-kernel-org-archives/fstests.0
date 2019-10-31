@@ -2,171 +2,85 @@ Return-Path: <SRS0=ptrv=YY=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 36D77CA9EC3
-	for <linux-fstests@archiver.kernel.org>; Thu, 31 Oct 2019 06:42:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 13400CA9EC3
+	for <linux-fstests@archiver.kernel.org>; Thu, 31 Oct 2019 09:12:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 06A842083E
-	for <linux-fstests@archiver.kernel.org>; Thu, 31 Oct 2019 06:42:01 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="rxP96bRo"
+	by mail.kernel.org (Postfix) with ESMTP id D68302080F
+	for <linux-fstests@archiver.kernel.org>; Thu, 31 Oct 2019 09:12:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726908AbfJaGmA (ORCPT
+        id S1726867AbfJaJMH (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 31 Oct 2019 02:42:00 -0400
-Received: from mail-pf1-f194.google.com ([209.85.210.194]:39028 "EHLO
-        mail-pf1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726832AbfJaGmA (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 31 Oct 2019 02:42:00 -0400
-Received: by mail-pf1-f194.google.com with SMTP id x28so375225pfo.6;
-        Wed, 30 Oct 2019 23:41:59 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :in-reply-to:references;
-        bh=w9zY2lPZZtHSlyRMoIj997ehNCeQwDNAoaR1Qgpivbc=;
-        b=rxP96bRovTLcUi/WBG9tALOoV44zSUNH27OCwwtWYF48OIuGsEeQEQurVXtLlqP94Q
-         ggPewAmqTaWwK1q0iaoZ/DPwEcmdG8EzAxB6sYvh2gesQeGrp/tGS12xmpO/u6YPDdJR
-         aCGZvGfLzFMVfPE0mx3ZvZ1/pm3LdagIB1ud9FVpwQEmQ2mRsr37PJdu9POfop3vMzA/
-         MwjnzXNjoiVefv3I2t3tFWuxcuJthbrEYUE9SaSdksVWaZ4cpoVWpc5mUcdm6p02WlxL
-         FwnPMxZ0q51Jky8LOlccU2bgW0s/Q9qzm8GkC+kKh+VtUukZKHgcxz8p1BvsrMyMM4AB
-         wFGg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:in-reply-to:references;
-        bh=w9zY2lPZZtHSlyRMoIj997ehNCeQwDNAoaR1Qgpivbc=;
-        b=KY7VjTLNjeeanLF0e8eW2z0PX/f7B8BaCbJ8FvKsziGOZlWtVYW/00pONtpDvpbJv0
-         Qk2FLipRBs0bMWeBXwwVU2EBT/V55eZZCvpO+3Q2MdbPQlSpYU1qFOJ77myGim6sZ8Vu
-         HIa6ryytC62uzBqda/i3c6ZFQhdWznP0zZNuhdKYHGqq+t1BF0Vmqseo0/Js78IiAwOC
-         qGxl90M/mn5pziG8L2eqvgIU6QQAZp9mkA3tuUKoQFA+yAtlQtVeGZ2zxWgBk6UqptNt
-         Uj6ZaCW5DKEspfD/eQgaQ6dlYNpGufr6dNdKFAceHoqQrxBfIx9uhQtocFb7TpCpdQ16
-         ukew==
-X-Gm-Message-State: APjAAAWHjoue1eeM1UoVBFsGIUlD0MheQi7BPO9ms2k34h/c50/yOA79
-        qbEKUtWbkuM4xE54UtCVmB1JW5kXMg==
-X-Google-Smtp-Source: APXvYqzA3aCTadtABMcx8INZBxn2eA6XHYxHK2Eb5uB9KbqhEftA4I7JaG0csI0iflbAop8D4zqFsg==
-X-Received: by 2002:a63:6782:: with SMTP id b124mr4687201pgc.220.1572504118399;
-        Wed, 30 Oct 2019 23:41:58 -0700 (PDT)
-Received: from he-cluster.localdomain (67.216.221.250.16clouds.com. [67.216.221.250])
-        by smtp.gmail.com with ESMTPSA id x7sm2218815pff.0.2019.10.30.23.41.57
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 30 Oct 2019 23:41:57 -0700 (PDT)
-From:   kaixuxia <xiakaixu1987@gmail.com>
-X-Google-Original-From: kaixuxia <kaixuxia@tencent.com>
-To:     fstests@vger.kernel.org
-Cc:     linux-xfs@vger.kernel.org, guaneryu@gmail.com, bfoster@redhat.com,
-        newtongao@tencent.com, jasperwang@tencent.com
-Subject: [PATCH v3 4/4] xfs: test the deadlock between the AGI and AGF with RENAME_WHITEOUT
-Date:   Thu, 31 Oct 2019 14:41:49 +0800
-Message-Id: <d967ddb55c0a241cd001a5a7b2daee6d38d2ec33.1572503039.git.kaixuxia@tencent.com>
-X-Mailer: git-send-email 1.8.3.1
-In-Reply-To: <cover.1572503039.git.kaixuxia@tencent.com>
-References: <cover.1572503039.git.kaixuxia@tencent.com>
-In-Reply-To: <cover.1572503039.git.kaixuxia@tencent.com>
-References: <cover.1572503039.git.kaixuxia@tencent.com>
+        Thu, 31 Oct 2019 05:12:07 -0400
+Received: from szxga07-in.huawei.com ([45.249.212.35]:57202 "EHLO huawei.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726776AbfJaJMH (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 31 Oct 2019 05:12:07 -0400
+Received: from DGGEMS410-HUB.china.huawei.com (unknown [172.30.72.58])
+        by Forcepoint Email with ESMTP id AA405144E3B8C18F361E;
+        Thu, 31 Oct 2019 17:12:05 +0800 (CST)
+Received: from huawei.com (10.90.53.225) by DGGEMS410-HUB.china.huawei.com
+ (10.3.19.210) with Microsoft SMTP Server id 14.3.439.0; Thu, 31 Oct 2019
+ 17:11:56 +0800
+From:   Zhihao Cheng <chengzhihao1@huawei.com>
+To:     <guaneryu@gmail.com>, <darrick.wong@oracle.com>,
+        <ebiggers@google.com>, <yi.zhang@huawei.com>
+CC:     <fstests@vger.kernel.org>
+Subject: [PATCH xfstests] generic/317: Use relative paths to avoid traversal permission problems
+Date:   Thu, 31 Oct 2019 17:19:17 +0800
+Message-ID: <1572513557-112797-1-git-send-email-chengzhihao1@huawei.com>
+X-Mailer: git-send-email 2.7.4
+MIME-Version: 1.0
+Content-Type: text/plain
+X-Originating-IP: [10.90.53.225]
+X-CFilter-Loop: Reflected
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-There is ABBA deadlock bug between the AGI and AGF when performing
-rename() with RENAME_WHITEOUT flag, and add this testcase to make
-sure the rename() call works well.
+generic/317 will fail because execvp(cmd) is executed without permission,
+where cmd is '$here/src/lstat64 $file', which is called by
+  $here/src/nsexec -s -U -M "0 $qa_user_id 1000" -G "0 $qa_user_id 1000"\
+  $here/src/lstat64 $file
 
-Signed-off-by: kaixuxia <kaixuxia@tencent.com>
-Reviewed-by: Brian Foster <bfoster@redhat.com>
+So, you will see following output:
+  From user_ns
+  ...
+  +execvp: Permission denied
+
+nsexec runs the instruction '$here/src/lstat64 $file' as a regular user,
+the regular user may not have permission to access path in '$here'.
+
+Actually, it has been fixed in 4818302fbf ("xfstests: generic/317 use
+relative paths..."), which then been modified by b7cecbea22 ("fstests:
+Add path $here before src/<file>").
+
+Fixes: b7cecbea22 ("fstests: Add path $here before src/<file>")
+Signed-off-by: Zhihao Cheng <chengzhihao1@huawei.com>
 ---
- tests/generic/585     | 56 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/585.out |  2 ++
- tests/generic/group   |  1 +
- 3 files changed, 59 insertions(+)
- create mode 100755 tests/generic/585
- create mode 100644 tests/generic/585.out
+ tests/generic/317 | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
 
-diff --git a/tests/generic/585 b/tests/generic/585
-new file mode 100755
-index 0000000..f815da5
---- /dev/null
-+++ b/tests/generic/585
-@@ -0,0 +1,56 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2019 Tencent.  All Rights Reserved.
-+#
-+# FS QA Test No. 585
-+#
-+# Regression test for:
-+#    bc56ad8c74b8: ("xfs: Fix deadlock between AGI and AGF with RENAME_WHITEOUT")
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1        # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+        cd /
-+        rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/renameat2
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_os Linux
-+_supported_fs generic
-+_require_scratch
-+_require_renameat2 whiteout
-+
-+_scratch_mkfs > $seqres.full 2>&1 || _fail "mkfs failed"
-+_scratch_mount >> $seqres.full 2>&1
-+
-+# start a create and rename(rename_whiteout) workload. These processes
-+# occur simultaneously may cause the deadlock between AGI and AGF with
-+# RENAME_WHITEOUT.
-+$FSSTRESS_PROG -z -n 150 -p 100 \
-+		-f mknod=5 \
-+		-f rwhiteout=5 \
-+		-d $SCRATCH_MNT/fsstress >> $seqres.full 2>&1
-+
-+echo Silence is golden
-+
-+# Failure comes in the form of a deadlock.
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/585.out b/tests/generic/585.out
-new file mode 100644
-index 0000000..e4dd43b
---- /dev/null
-+++ b/tests/generic/585.out
-@@ -0,0 +1,2 @@
-+QA output created by 585
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index 42ca2b9..e5d0c1d 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -587,3 +587,4 @@
- 582 auto quick encrypt
- 583 auto quick encrypt
- 584 auto quick encrypt
-+585 auto rename
+diff --git a/tests/generic/317 b/tests/generic/317
+index 509887d..8ea9d81 100755
+--- a/tests/generic/317
++++ b/tests/generic/317
+@@ -61,7 +61,10 @@ _print_numeric_uid()
+     $here/src/lstat64 $file |head -3 |_filter_output
+ 
+     echo "From user_ns"
+-    $here/src/nsexec -s -U -M "0 $qa_user_id 1000" -G "0 $qa_user_id 1000" $here/src/lstat64 $file |head -3 |_filter_output
++    # don't use $here/src/lstat64, as we're running cmd(src/lstat64) in
++    # nsexec as a regular user, and $here may contain path component that
++    # a regular user doesn't have search permission
++    $here/src/nsexec -s -U -M "0 $qa_user_id 1000" -G "0 $qa_user_id 1000" src/lstat64 $file |head -3 |_filter_output
+ }
+ 
+ _scratch_unmount >/dev/null 2>&1
 -- 
-1.8.3.1
+2.7.4
 
