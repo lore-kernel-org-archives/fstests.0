@@ -2,825 +2,373 @@ Return-Path: <SRS0=OCqJ=YZ=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CC899CA9ECF
-	for <linux-fstests@archiver.kernel.org>; Fri,  1 Nov 2019 10:24:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B4FD5CA9ECF
+	for <linux-fstests@archiver.kernel.org>; Fri,  1 Nov 2019 10:28:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 88A8D217D9
-	for <linux-fstests@archiver.kernel.org>; Fri,  1 Nov 2019 10:24:26 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="QmyEKtfc"
+	by mail.kernel.org (Postfix) with ESMTP id 80A9321835
+	for <linux-fstests@archiver.kernel.org>; Fri,  1 Nov 2019 10:28:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729682AbfKAKY0 (ORCPT
+        id S1729074AbfKAK2f (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 1 Nov 2019 06:24:26 -0400
-Received: from mail-lj1-f181.google.com ([209.85.208.181]:35711 "EHLO
-        mail-lj1-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729557AbfKAKY0 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 1 Nov 2019 06:24:26 -0400
-Received: by mail-lj1-f181.google.com with SMTP id r7so1049831ljg.2
-        for <fstests@vger.kernel.org>; Fri, 01 Nov 2019 03:24:23 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:from:date:message-id:subject:to;
-        bh=lS9XAT9Ib7jlO4uyTJyPqzac7jGVFCKIh7g+EEQ0g90=;
-        b=QmyEKtfcA2JCQbeS124h3iurQZJbixhkcf/jRXhMb1tpSRIZh2GXfpPesIik7+badM
-         h+wggrE+RfazG/p+fzCtGW9MD4M6Mmzg5ey/AiOPfibqMFj3j4atx79Io4a15wBNY2jZ
-         O2fiG4lcySImmAsvJsa89yCUKWA87Msd32bGkBkSgGnfLBJDAIhR/YrVdZGpjoYqkAgp
-         c4A5WmocHPMQQ7Vs4fJoF/2zkS3tts4tRt4Tii1WYO6CROcKcn19yz+JL/V+jyntxU3u
-         VDT1CxWK3INIS5jIdaH+TUzwkC8p1f8BP667wa6tSNjIeCNwXPblychODaHA/bFz3bgq
-         n/CA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:from:date:message-id:subject:to;
-        bh=lS9XAT9Ib7jlO4uyTJyPqzac7jGVFCKIh7g+EEQ0g90=;
-        b=jgkLTk+tHMqIG83bcGNQSCoLtRCd6shiHRahnQvNJiIv309R3IkxOuVZ9S6tejXa4Y
-         MtgTrIp1870uPD4HHzAW/1YoIZWDmc1P6qi3H9evDXCL2VST1SBI8/rIZunz+refeSp6
-         0LCWL3qgTm+Bi/6TY/QE8LRO3OQwLifuysCZGqCPZhyC+6X+0v3jGrjZIxXHMCocR3U2
-         8Y075c3GwYmXD90ZBat72BGj/dyCHheX+digRABSQypUxuOq9XowAlcZ/gxECSNL3bCN
-         XeaKGRjXIact2aVLJ/to7aW6nhKVLqTPGvDcbAsaGc4IesS/eIg64MMbM543Jvi5XsOK
-         r7bA==
-X-Gm-Message-State: APjAAAWXmef7gGw2BMwFXHnGdJ03vf0XuTXa5F4gb4mjH1CaFQGCBQdp
-        Ri4MEhDgeBz3sIWoHnxzDE4cuc6Nx9MsBr6n9CpjwSd+
-X-Google-Smtp-Source: APXvYqyEWMnip/eVhniXOVxTfxapKcvifHMz2inCVR5FtewCB8tKzSbr0NiFOVhymyt68T+KBM2oczsgpZwmqxzGfUk=
-X-Received: by 2002:a2e:2e02:: with SMTP id u2mr3929821lju.97.1572603862434;
- Fri, 01 Nov 2019 03:24:22 -0700 (PDT)
+        Fri, 1 Nov 2019 06:28:35 -0400
+Received: from szxga06-in.huawei.com ([45.249.212.32]:48708 "EHLO huawei.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1728711AbfKAK2e (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 1 Nov 2019 06:28:34 -0400
+Received: from DGGEMS403-HUB.china.huawei.com (unknown [172.30.72.58])
+        by Forcepoint Email with ESMTP id 5200D4C1C67F53296CFA;
+        Fri,  1 Nov 2019 18:28:32 +0800 (CST)
+Received: from szvp000203569.huawei.com (10.120.216.130) by
+ DGGEMS403-HUB.china.huawei.com (10.3.19.203) with Microsoft SMTP Server id
+ 14.3.439.0; Fri, 1 Nov 2019 18:28:23 +0800
+From:   Chao Yu <yuchao0@huawei.com>
+To:     <guaneryu@gmail.com>
+CC:     <fstests@vger.kernel.org>,
+        <linux-f2fs-devel@lists.sourceforge.net>,
+        "Chao Yu" <yuchao0@huawei.com>
+Subject: [PATCH v4] common/rc: generalize _get_filesize()
+Date:   Fri, 1 Nov 2019 18:28:21 +0800
+Message-ID: <20191101102821.14315-1-yuchao0@huawei.com>
+X-Mailer: git-send-email 2.18.0.rc1
 MIME-Version: 1.0
-From:   Sun Yong <sunyong0511@gmail.com>
-Date:   Fri, 1 Nov 2019 18:24:10 +0800
-Message-ID: <CAAPJbvoLOXAMcxp9SBDNRjeegWEUJ-+P1MECekSLyZJStuJCEQ@mail.gmail.com>
-Subject: [PATCH] fstests: transport two ext4 tests from LTP
-To:     fstests@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain
+X-Originating-IP: [10.120.216.130]
+X-CFilter-Loop: Reflected
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Recently LTP upstream removed some ext4 tests[1]. And two of them is
-still valid to keep. So I transport those two tests here.
+There are some testcases use below two kind of commands to get file
+size, generalize the second way as global function _get_filesize()
+to simply codes.
 
-ext4-nsec-timestamps, which is used to test nanosec timestamps of
-ext4, rewrite into ext4/043 and 044.
-ext4-subdir-limit, which is used to test subdirectory limit of ext4,
-rewrite into ext4/045.
+1. ls -l $1 | $AWK_PROG '{print $5}'
+2. stat -c %s $1
 
-[1] https://marc.info/?l=linux-fsdevel&m=157190623919681&w=2
-
-Signed-off-by: Sun Yong <yosun@suse.com>
+Signed-off-by: Chao Yu <yuchao0@huawei.com>
 ---
+v4:
+- let _get_filesize() to cover more codes.
+ common/populate   | 2 +-
+ common/rc         | 5 +++++
+ common/verity     | 4 ++--
+ tests/btrfs/086   | 2 +-
+ tests/generic/013 | 5 -----
+ tests/generic/275 | 2 +-
+ tests/generic/286 | 8 ++++----
+ tests/generic/297 | 2 +-
+ tests/generic/298 | 2 +-
+ tests/generic/315 | 2 +-
+ tests/generic/399 | 2 +-
+ tests/generic/497 | 8 ++++----
+ tests/generic/514 | 2 +-
+ tests/generic/572 | 4 ++--
+ tests/overlay/060 | 2 +-
+ tests/xfs/014     | 2 +-
+ tests/xfs/076     | 2 +-
+ tests/xfs/306     | 2 +-
+ 18 files changed, 29 insertions(+), 29 deletions(-)
 
-diff --git a/src/Makefile b/src/Makefile
-index ce6d8610..387293d1 100644
---- a/src/Makefile
-+++ b/src/Makefile
-@@ -16,7 +16,8 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
-     holetest t_truncate_self t_mmap_dio af_unix t_mmap_stale_pmd \
-     t_mmap_cow_race t_mmap_fallocate fsync-err t_mmap_write_ro \
-     t_ext4_dax_journal_corruption t_ext4_dax_inline_corruption \
--    t_ofd_locks t_locks_execve t_mmap_collision mmap-write-concurrent
-+    t_ofd_locks t_locks_execve t_mmap_collision mmap-write-concurrent \
-+    t_ext4_file_time t_create_short_dirs t_create_long_dirs
+diff --git a/common/populate b/common/populate
+index eeac66d7..0b036051 100644
+--- a/common/populate
++++ b/common/populate
+@@ -777,7 +777,7 @@ _fill_fs()
+ 		fi
+ 
+ 		if [ -f $dir/$file_count ]; then
+-			bytes_written=$(stat -c '%s' $dir/$file_count)
++			bytes_written=$(_get_filesize $dir/$file_count)
+ 		fi
+ 
+ 		# If there was no room to make the file, then divide it in
+diff --git a/common/rc b/common/rc
+index a2a28f32..06611e0c 100644
+--- a/common/rc
++++ b/common/rc
+@@ -165,6 +165,11 @@ if [ ! -z "$REPORT_LIST" ]; then
+ 	_assert_report_list
+ fi
+ 
++_get_filesize()
++{
++    stat -c %s "$1"
++}
++
+ _mount()
+ {
+     $MOUNT_PROG `_mount_ops_filter $*`
+diff --git a/common/verity b/common/verity
+index bcb5670d..1261dfb4 100644
+--- a/common/verity
++++ b/common/verity
+@@ -154,7 +154,7 @@ _fsv_scratch_corrupt_bytes()
+ 	sync	# Sync to avoid unwritten extents
+ 
+ 	cat > $tmp.bytes
+-	local end=$(( offset + $(stat -c %s $tmp.bytes ) ))
++	local end=$(( offset + $(_get_filesize $tmp.bytes ) ))
+ 
+ 	# For each extent that intersects the requested range in order, add a
+ 	# command that writes the next part of the data to that extent.
+@@ -205,7 +205,7 @@ _fsv_scratch_corrupt_merkle_tree()
+ 	ext4|f2fs)
+ 		# ext4 and f2fs store the Merkle tree after the file contents
+ 		# itself, starting at the next 65536-byte aligned boundary.
+-		(( offset += ($(stat -c %s $file) + 65535) & ~65535 ))
++		(( offset += ($(_get_filesize $file) + 65535) & ~65535 ))
+ 		_fsv_scratch_corrupt_bytes $file $offset
+ 		;;
+ 	*)
+diff --git a/tests/btrfs/086 b/tests/btrfs/086
+index 750b54de..f80134a3 100755
+--- a/tests/btrfs/086
++++ b/tests/btrfs/086
+@@ -54,7 +54,7 @@ touch $SCRATCH_MNT/bar
+ # supposed to happen and for example it made inode eviction enter an infinite
+ # loop that dumped a warning trace on each iteration.
+ $CLONER_PROG -s 0 -d 65536 -l 0 $SCRATCH_MNT/foo $SCRATCH_MNT/bar
+-echo "bar file size after clone operation: $(stat -c %s $SCRATCH_MNT/bar)"
++echo "bar file size after clone operation: `_get_filesize $SCRATCH_MNT/bar`"
+ 
+ status=0
+ exit
+diff --git a/tests/generic/013 b/tests/generic/013
+index 9e533ee8..bc596102 100755
+--- a/tests/generic/013
++++ b/tests/generic/013
+@@ -24,11 +24,6 @@ _cleanup()
+     rm -rf $TEST_DIR/fsstress.$$.*
+ }
+ 
+-_filesize()
+-{
+-    ls -l $1 | $AWK_PROG '{print "    filesize = " $5}'
+-}
+-
+ # get standard environment, filters and checks
+ . ./common/rc
+ . ./common/filter
+diff --git a/tests/generic/275 b/tests/generic/275
+index a934c19c..adc82856 100755
+--- a/tests/generic/275
++++ b/tests/generic/275
+@@ -73,7 +73,7 @@ echo "Bytes written until ENOSPC:" >>$seqres.full
+ du $SCRATCH_MNT/tmp1 >>$seqres.full
+ 
+ # And at least some of it should succeed.
+-_filesize=`ls -l $SCRATCH_MNT/tmp1 | awk '{print $5}'`
++_filesize=`_get_filesize $SCRATCH_MNT/tmp1`
+ [ $_filesize -lt $((128 * 1024)) ] && \
+ 	_fail "Partial write until enospc failed; wrote $_filesize bytes."
+ 
+diff --git a/tests/generic/286 b/tests/generic/286
+index 0d980e79..00cb87b7 100755
+--- a/tests/generic/286
++++ b/tests/generic/286
+@@ -57,7 +57,7 @@ test01()
+ 
+ 	$here/src/seek_copy_test $src $dest
+ 	
+-	test $(stat -c "%s" $src) = $(stat -c "%s" $dest) ||
++	test $(_get_filesize $src) = $(_get_filesize $dest) ||
+ 		_fail "TEST01: file size check failed"
+ 
+ 	cmp $src $dest || _fail "TEST01: file bytes check failed"
+@@ -85,7 +85,7 @@ test02()
+ 
+ 	$here/src/seek_copy_test $src $dest
+ 
+-	test $(stat -c "%s" $src) = $(stat -c "%s" $dest) ||
++	test $(_get_filesize $src) = $(_get_filesize $dest) ||
+ 		_fail "TEST02: file size check failed"
+ 
+ 	cmp $src $dest || _fail "TEST02: file bytes check failed"
+@@ -127,7 +127,7 @@ test03()
+ 	echo >>$seqres.full
+ 	$here/src/seek_copy_test $src $dest
+ 
+-	test $(stat -c "%s" $src) = $(stat -c "%s" $dest) ||
++	test $(_get_filesize $src) = $(_get_filesize $dest) ||
+ 		_fail "TEST03: file size check failed"
+ 
+ 	cmp $src $dest || _fail "TEST03: file bytes check failed"
+@@ -169,7 +169,7 @@ test04()
+ 	echo >>$seqres.full
+ 	$here/src/seek_copy_test $src $dest
+ 
+-	test $(stat -c "%s" $src) = $(stat -c "%s" $dest) ||
++	test $(_get_filesize $src) = $(_get_filesize $dest) ||
+ 		_fail "TEST04: file size check failed"
+ 
+ 	cmp $src $dest || _fail "TEST04: file bytes check failed"
+diff --git a/tests/generic/297 b/tests/generic/297
+index 5950a8da..eb08a9e3 100755
+--- a/tests/generic/297
++++ b/tests/generic/297
+@@ -66,7 +66,7 @@ done
+ 
+ echo "Try to kill reflink after a shorter period of time"
+ kill_after=2	# give us a shorter time to die
+-n=$(stat -c '%s' $testdir/file1)
++n=$(_get_filesize $testdir/file1)
+ echo "performing kill test on $n bytes..." >> $seqres.full
+ touch $TEST_DIR/before
+ $TIMEOUT_PROG -s INT ${kill_after}s $XFS_IO_PROG -f -c "reflink $testdir/file1 0 $n $n" $testdir/file1 >> $seqres.full 2>&1
+diff --git a/tests/generic/298 b/tests/generic/298
+index b87012dd..8b9cb7d6 100755
+--- a/tests/generic/298
++++ b/tests/generic/298
+@@ -66,7 +66,7 @@ done
+ 
+ echo "Try to kill reflink after a shorter period of time"
+ kill_after=2	# give us a shorter time to die
+-n=$(stat -c '%s' $testdir/file1)
++n=$(_get_filesize $testdir/file1)
+ echo "performing kill test on $n bytes..." >> $seqres.full
+ touch $TEST_DIR/before
+ urk=$($TIMEOUT_PROG -s KILL ${kill_after}s $XFS_IO_PROG -f -c "reflink $testdir/file1 0 $n $n" $testdir/file1 >> $seqres.full 2>&1)
+diff --git a/tests/generic/315 b/tests/generic/315
+index fd49b579..808d7d74 100755
+--- a/tests/generic/315
++++ b/tests/generic/315
+@@ -52,7 +52,7 @@ $XFS_IO_PROG -f -c 'falloc -k 0 $(($avail_begin/2))' \
+ 	$TEST_DIR/testfile.$seq >>$seqres.full 2>&1
+ 
+ # Verify the file size, it should keep unchanged as 0 in this case
+-fsize=`ls -l $TEST_DIR/testfile.$seq | awk '{print $5}'`
++fsize=`_get_filesize $TEST_DIR/testfile.$seq`
+ [ "$fsize" -eq 0 ] || _fail "File size is changed to ($fsize Bytes)"
+ 
+ # Truncate the file size back to 0
+diff --git a/tests/generic/399 b/tests/generic/399
+index b2aaac13..a9b3997a 100755
+--- a/tests/generic/399
++++ b/tests/generic/399
+@@ -89,7 +89,7 @@ while true; do
+ 
+ 	file_size=0
+ 	if [ -e $file ]; then
+-		file_size=$(stat -c %s $file)
++		file_size=$(_get_filesize $file)
+ 	fi
+ 
+ 	# We shouldn't have been able to write more data than we had space for.
+diff --git a/tests/generic/497 b/tests/generic/497
+index 3d5502ef..faeaa142 100755
+--- a/tests/generic/497
++++ b/tests/generic/497
+@@ -60,9 +60,9 @@ swapfile_cycle() {
+ # Create a swap file with a large discontiguous range(?)
+ echo "large discontig swap" | tee -a $seqres.full
+ _pwrite_byte 0x58 0 $((len * 2)) $swapfile >> $seqres.full
+-old_sz="$(stat -c '%s' $swapfile)"
++old_sz="$(_get_filesize $swapfile)"
+ $XFS_IO_PROG -c "fcollapse $((len / 2)) $len" $swapfile >> $seqres.full 2>&1
+-new_sz="$(stat -c '%s' $swapfile)"
++new_sz="$(_get_filesize $swapfile)"
+ if [ $old_sz -gt $new_sz ]; then
+ 	swapfile_cycle $swapfile
+ fi
+@@ -71,9 +71,9 @@ rm -f $swapfile
+ # Create a swap file with a small discontiguous range(?)
+ echo "small discontig swap" | tee -a $seqres.full
+ _pwrite_byte 0x58 0 $((len + 1024)) $swapfile >> $seqres.full
+-old_sz="$(stat -c '%s' $swapfile)"
++old_sz="$(_get_filesize $swapfile)"
+ $XFS_IO_PROG -c "fcollapse 66560 1024" $swapfile >> $seqres.full 2>&1
+-new_sz="$(stat -c '%s' $swapfile)"
++new_sz="$(_get_filesize $swapfile)"
+ if [ $old_sz -gt $new_sz ]; then
+ 	swapfile_cycle $swapfile
+ fi
+diff --git a/tests/generic/514 b/tests/generic/514
+index 0a71e382..550a6475 100755
+--- a/tests/generic/514
++++ b/tests/generic/514
+@@ -39,7 +39,7 @@ chmod a+rwx $SCRATCH_MNT
+ $XFS_IO_PROG -f -c "pwrite -S 0x18 0 1m" $SCRATCH_MNT/foo >>$seqres.full
+ su -s/bin/bash - $qa_user -c "ulimit -f 64 ; $XFS_IO_PROG -f -c \"reflink $SCRATCH_MNT/foo\" $SCRATCH_MNT/bar" >> $seqres.full 2>&1
+ 
+-sz="$(stat -c '%s' $SCRATCH_MNT/bar)"
++sz="$(_get_filesize $SCRATCH_MNT/bar)"
+ if [ "$sz" -ne 0 ] && [ "$sz" -ne 65536 ]; then
+ 	echo "Oddball file size $sz??"
+ fi
+diff --git a/tests/generic/572 b/tests/generic/572
+index 382c4947..2e88302f 100755
+--- a/tests/generic/572
++++ b/tests/generic/572
+@@ -161,10 +161,10 @@ head -c 100000 /dev/urandom > $fsv_orig_file
+ cp $fsv_orig_file $fsv_file
+ _fsv_enable $fsv_file >> $seqres.full
+ cmp $fsv_file $fsv_orig_file
+-stat -c %s $fsv_file
++_get_filesize $fsv_file
+ _scratch_cycle_mount
+ cmp $fsv_file $fsv_orig_file
+-stat -c %s $fsv_file
++_get_filesize $fsv_file
+ 
+ _fsv_scratch_begin_subtest "Trying to measure non-verity file fails with ENODATA"
+ echo foo > $fsv_file
+diff --git a/tests/overlay/060 b/tests/overlay/060
+index 77ff0148..34140e12 100755
+--- a/tests/overlay/060
++++ b/tests/overlay/060
+@@ -99,7 +99,7 @@ check_file_size()
+ {
+ 	local target=$1 expected_size=$2 actual_size
+ 
+-	actual_size=$(stat -c "%s" $target)
++	actual_size=$(_get_filesize $target)
+ 
+ 	[ "$actual_size" == "$expected_size" ] || echo "Expected file size $expected_size but actual size is $actual_size"
+ }
+diff --git a/tests/xfs/014 b/tests/xfs/014
+index 84e4e71a..be470a2d 100755
+--- a/tests/xfs/014
++++ b/tests/xfs/014
+@@ -53,7 +53,7 @@ _spec_prealloc_file()
+ 	# write a 4k aligned amount of data to keep the calculations simple
+ 	$XFS_IO_PROG -c "pwrite 0 128m" $file >> $seqres.full
+ 
+-	size=`stat -c "%s" $file`
++	size=`_get_filesize $file`
+ 	blocks=`stat -c "%b" $file`
+ 	blocksize=`stat -c "%B" $file`
+ 
+diff --git a/tests/xfs/076 b/tests/xfs/076
+index e8b191c4..2dcdd30c 100755
+--- a/tests/xfs/076
++++ b/tests/xfs/076
+@@ -93,7 +93,7 @@ _consume_freesp $SCRATCH_MNT/spc
+ # space. Note that we start at the end of the file and work backwards as a
+ # reverse allocation pattern increases the chances of both left and right sparse
+ # record merges.
+-offset=`stat -c "%s" $SCRATCH_MNT/spc`
++offset=`_get_filesize $SCRATCH_MNT/spc`
+ offset=$((offset - $CHUNK_SIZE * 2))
+ while [ $offset -ge 0 ]; do
+ 	$XFS_IO_PROG -c "fpunch $offset $CHUNK_SIZE" $SCRATCH_MNT/spc \
+diff --git a/tests/xfs/306 b/tests/xfs/306
+index b56b18f2..edbb6076 100755
+--- a/tests/xfs/306
++++ b/tests/xfs/306
+@@ -61,7 +61,7 @@ done
+ $XFS_IO_PROG -xc "resblks 16" $SCRATCH_MNT >> $seqres.full 2>&1
+ dd if=/dev/zero of=$SCRATCH_MNT/file bs=4k >> $seqres.full 2>&1
+ $XFS_IO_PROG -c "fsync" $SCRATCH_MNT/file >> $seqres.full 2>&1
+-size=`stat -c %s $SCRATCH_MNT/file`
++size=`_get_filesize $SCRATCH_MNT/file`
+ for i in $(seq 0 8192 $size); do
+ 	$XFS_IO_PROG -c "fpunch $i 4k" $SCRATCH_MNT/file >> $seqres.full 2>&1
+ done
+-- 
+2.18.0.rc1
 
- LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
-     preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
-diff --git a/src/t_create_long_dirs.c b/src/t_create_long_dirs.c
-new file mode 100644
-index 00000000..72a0689a
---- /dev/null
-+++ b/src/t_create_long_dirs.c
-@@ -0,0 +1,136 @@
-+// SPDX-License-Identifier: GPL-2.0
-+// Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
-+
-+#define _POSIX_C_SOURCE 200809L
-+#include <unistd.h>
-+#include <stdlib.h>
-+#include <stdio.h>
-+#include <stdlib.h>
-+#include <time.h>
-+#include <fcntl.h>
-+#include <sys/types.h>
-+#include <sys/stat.h>
-+#include "config.h"
-+
-+#define NAME_LEN    255
-+#define NCHARS        62
-+#define MAX_LEN1    62
-+#define MAX_LEN2    (62 * 62)
-+#define MAX_LEN3    (62 * 62 * 62)
-+
-+/* valid characters for the directory name */
-+char chars[NCHARS + 1] =
-+    "0123456789qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM";
-+
-+/* to store the generated directory name */
-+char name[NAME_LEN + 1];
-+int names;
-+int parent_fd;
-+
-+/*
-+ * init_name - initialize the directory name
-+ *
-+ * Generate a randomized directory name, and then we generate more
-+ * directory names based on it.
-+ */
-+void init_name(void)
-+{
-+    int i;
-+
-+    srand(time(NULL));
-+
-+    for (i = 0; i < NAME_LEN; i++)
-+        name[i] = chars[rand() % 62];
-+}
-+
-+void create_dir(void)
-+{
-+    if (mkdirat(parent_fd, name, S_IRWXU)) {
-+        perror("mkdir");
-+        exit(1);
-+    }
-+}
-+
-+/*
-+ * create_dirs - create @names directory names
-+ * @n: how many names to be created
-+ *
-+ * if n <= 62,       we need to modify 1 char of the name
-+ * if n <= 62*62,    we need to modify 2 chars
-+ * if n <= 62*62*62, we need to modify 3 chars
-+ */
-+void create_dirs(int n)
-+{
-+    int i, j, k;
-+    int depth;
-+
-+    if (n <= MAX_LEN1)
-+        depth = 1;
-+    else if (n <= MAX_LEN2)
-+        depth = 2;
-+    else
-+        depth = 3;
-+
-+    for (i = 0; i < NCHARS; i++) {
-+        name[0] = chars[i];
-+        if (depth == 1) {
-+            create_dir();
-+            if (--n == 0)
-+                return;
-+            continue;
-+        }
-+
-+        for (j = 0; j < NCHARS; j++) {
-+            name[1] = chars[j];
-+            if (depth == 2) {
-+                create_dir();
-+                if (--n == 0)
-+                    return;
-+                continue;
-+            }
-+
-+            for (k = 0; k < NCHARS; k++) {
-+                name[2] = chars[k];
-+                create_dir();
-+                if (--n == 0)
-+                    return;
-+            }
-+        }
-+    }
-+}
-+
-+void usage()
-+{
-+    fprintf(stderr, "Usage: create_long_dirs nr_dirs parent_dir\n");
-+}
-+
-+/*
-+ * Create long-name directories
-+ * @argv[1]: directory number
-+ * @argv[2]: parent directory
-+ */
-+int main(int argc, char *argv[])
-+{
-+    if (argc != 3) {
-+        usage();
-+        return 1;
-+    }
-+
-+    names = atoi(argv[1]);
-+    if (names > MAX_LEN3 || names <= 0) {
-+        usage();
-+        return 1;
-+    }
-+
-+    parent_fd = open(argv[2], O_RDONLY);
-+    if (parent_fd == -1) {
-+        perror("open parent dir failed");
-+        return 1;
-+    }
-+
-+    init_name();
-+
-+    create_dirs(names);
-+
-+    return 0;
-+}
-diff --git a/src/t_create_short_dirs.c b/src/t_create_short_dirs.c
-new file mode 100644
-index 00000000..2725a1f0
---- /dev/null
-+++ b/src/t_create_short_dirs.c
-@@ -0,0 +1,139 @@
-+// SPDX-License-Identifier: GPL-2.0
-+// Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
-+
-+#define _POSIX_C_SOURCE 200809L
-+#include <unistd.h>
-+#include <stdlib.h>
-+#include <stdio.h>
-+#include <errno.h>
-+#include <fcntl.h>
-+#include <sys/stat.h>
-+#include <sys/types.h>
-+#include "config.h"
-+
-+/* valid characters for a directory name */
-+char chars[] =
-"0123456789qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM";
-+
-+/* to store the generated directory name */
-+char name[10];
-+int names;
-+int parent_fd;
-+
-+/* NCHARS = 10 + 26 + 26 = 62 */
-+#define NCHARS        62
-+#define MAX_LEN1    62
-+#define MAX_LEN2    (62 * 62)
-+#define MAX_LEN3    (62 * 62 * 62)
-+#define MAX_NAMES    (MAX_LEN1 + MAX_LEN2 + MAX_LEN3)
-+
-+void create_dir(void)
-+{
-+    if (mkdirat(parent_fd, name, S_IRWXU)) {
-+        perror("mkdir");
-+        exit(1);
-+    }
-+}
-+
-+/*
-+ * create_1 - create length-1 directory names
-+ * @n: how name names to be created
-+ */
-+void create_1(int n)
-+{
-+    int i;
-+
-+    name[1] = '\0';
-+    for (i = 0; i < NCHARS; i++) {
-+        name[0] = chars[i];
-+        create_dir();
-+        if (--n == 0)
-+            return;
-+    }
-+}
-+
-+/*
-+ * create_2 - generate length-2 directory names
-+ * @n: how many names to be created
-+ */
-+void create_2(int n)
-+{
-+    int i, j;
-+
-+    name[2] = '\0';
-+    for (i = 0; i < NCHARS; i++) {
-+        name[0] = chars[i];
-+        for (j = 0; j < NCHARS; j++) {
-+            name[1] = chars[j];
-+            create_dir();
-+            if (--n == 0)
-+                return;
-+        }
-+    }
-+}
-+
-+/*
-+ * create_3 - generate length-3 directory names
-+ * @n: how many names to be created
-+ */
-+void create_3(int n)
-+{
-+    int i, j, k;
-+
-+    name[3] = '\0';
-+    for (i = 0; i < NCHARS; i++) {
-+        name[0] = chars[i];
-+        for (j = 0; j < NCHARS; j++) {
-+            name[1] = chars[j];
-+            for (k = 0; k < NCHARS; k++) {
-+                name[2] = chars[k];
-+                create_dir();
-+                if (--n == 0)
-+                    return;
-+            }
-+        }
-+    }
-+}
-+
-+void usage()
-+{
-+    fprintf(stderr, "Usage: create_short_dirs nr_dirs parent_dir\n");
-+}
-+
-+/*
-+ * Create short-name directoriess
-+ * @argv[1]: director number
-+ * @argv[2]: the parent directory
-+ */
-+int main(int argc, char *argv[])
-+{
-+    if (argc != 3) {
-+        usage();
-+        return 1;
-+    }
-+
-+    names = atoi(argv[1]);
-+    if (names > MAX_NAMES || names <= 0) {
-+        usage();
-+        return 1;
-+    }
-+
-+    parent_fd = open(argv[2], O_RDONLY);
-+    if (parent_fd == -1) {
-+        perror("open parent dir");
-+        return 1;
-+    }
-+
-+    create_1(names);
-+    if (names <= MAX_LEN1)
-+        return 0;
-+
-+    names -= MAX_LEN1;
-+    create_2(names);
-+    if (names <= MAX_LEN2)
-+        return 0;
-+
-+    names -= MAX_LEN2;
-+    create_3(names);
-+
-+    return 0;
-+}
-diff --git a/src/t_ext4_file_time.c b/src/t_ext4_file_time.c
-new file mode 100644
-index 00000000..eac55c75
---- /dev/null
-+++ b/src/t_ext4_file_time.c
-@@ -0,0 +1,50 @@
-+// SPDX-License-Identifier: GPL-2.0
-+// Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
-+
-+#include <sys/types.h>
-+#include <sys/stat.h>
-+#include <unistd.h>
-+#include <stdio.h>
-+#include <string.h>
-+
-+/*
-+ * Usage: file_time <filename> <atime|mtime|ctime> <sec|nsec>
-+ */
-+int main(int argc, char *argv[])
-+{
-+    time_t t;
-+    struct stat st;
-+
-+    if (argc != 4) {
-+        fprintf(stderr, "Wrong argument num!\n");
-+        return 1;
-+    }
-+
-+    if (stat(argv[1], &st) != 0) {
-+        perror("stat failed");
-+        return 1;
-+    }
-+
-+    if (strcmp(argv[3], "sec") == 0) {
-+        if (strcmp(argv[2], "atime") == 0)
-+            t = st.st_atime;
-+        else if (strcmp(argv[2], "mtime") == 0)
-+            t = st.st_mtime;
-+        else
-+            t = st.st_ctime;
-+    } else if (strcmp(argv[3], "nsec") == 0) {
-+        if (strcmp(argv[2], "atime") == 0)
-+            t = st.st_atim.tv_nsec;
-+        else if (strcmp(argv[2], "mtime") == 0)
-+            t = st.st_mtim.tv_nsec;
-+        else
-+            t = st.st_ctim.tv_nsec;
-+    } else {
-+        fprintf(stderr, "Wrong argument: %s\n", argv[3]);
-+        return 1;
-+    }
-+
-+    printf("%lu\n", t);
-+
-+    return 0;
-+}
-diff --git a/tests/ext4/043 b/tests/ext4/043
-new file mode 100755
-index 00000000..b6e5df9f
---- /dev/null
-+++ b/tests/ext4/043
-@@ -0,0 +1,64 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2019 SUSE Linux Products GmbH.  All Rights Reserved.
-+#
-+# FS QA Test No. 043
-+#
-+# Transfer from ltp/testcases/kernel/fs/ext4-new-features/ext4_nsec_timestamps
-+# Test file timestamps is second with 128 inode size
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+    cd /
-+    rm -f $tmp.*
-+    _scratch_cleanup_files
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs ext3 ext4
-+_supported_os Linux
-+
-+_require_scratch
-+_require_test_program "t_ext4_file_time"
-+_require_command "$TUNE2FS_PROG" tune2fs
-+
-+echo "Silence is golden"
-+
-+echo "Start test timestamps with 128 inode size one device
-$SCRATCH_DEV" >$seqres.full
-+_scratch_mkfs_ext4 -I 128 >> $seqres.full 2>&1
-+tune2fs -O extents $SCRATCH_DEV >>$seqres.full 2>&1
-+_scratch_mount
-+
-+touch "${SCRATCH_MNT}/tmp_file"
-+
-+atime=`$here/src/t_ext4_file_time $SCRATCH_MNT/tmp_file atime nsec`
-+mtime=`$here/src/t_ext4_file_time $SCRATCH_MNT/tmp_file mtime nsec`
-+ctime=`$here/src/t_ext4_file_time $SCRATCH_MNT/tmp_file ctime nsec`
-+
-+if [ $atime -ne 0 -o $mtime -ne 0 -o $ctime -ne 0 ]; then
-+        echo "Timestamp is not second(atime: $atime, mtime: $mtime,
-ctime: $ctime)" >> $seqres.full
-+        _scratch_unmount >> $seqres.full 2>&1
-+        exit
-+fi
-+echo "Ext4 nanosecond timestamps test with 128 inode size pass" >> $seqres.full
-+_scratch_unmount >> $seqres.full 2>&1
-+
-+# no BUG_ON, all done
-+status=0
-+exit
-diff --git a/tests/ext4/043.out b/tests/ext4/043.out
-new file mode 100644
-index 00000000..f90f0a57
---- /dev/null
-+++ b/tests/ext4/043.out
-@@ -0,0 +1,2 @@
-+QA output created by 043
-+Silence is golden
-diff --git a/tests/ext4/044 b/tests/ext4/044
-new file mode 100755
-index 00000000..3e899f5a
---- /dev/null
-+++ b/tests/ext4/044
-@@ -0,0 +1,112 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2019 SUSE Linux Products GmbH.  All Rights Reserved.
-+#
-+# FS QA Test No. 044
-+#
-+# Transfer from ltp/testcases/kernel/fs/ext4-new-features/ext4_nsec_timestamps
-+# Test file timestamps is nanosecond with 256 inode size
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+    cd /
-+    rm -f $tmp.*
-+    _scratch_cleanup_files
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs ext3 ext4
-+_supported_os Linux
-+_require_scratch
-+_require_test_program "t_ext4_file_time"
-+
-+echo "Silence is golden"
-+
-+echo "Test timestamps with 256 inode size one device $SCRATCH_DEV"
->$seqres.full
-+_scratch_mkfs_ext4 -t ext3 -I 256 >> $seqres.full 2>&1
-+_scratch_mount
-+
-+# Create file
-+touch "${SCRATCH_MNT}/tmp_file"
-+sleep 1
-+
-+# Change atime, ctime and mtime of the file
-+touch "${SCRATCH_MNT}/tmp_file"
-+
-+cur_time=`date '+%s %N'`
-+sec=`echo $cur_time | awk {'print $1'}`
-+nsec=`echo $cur_time | awk {'print $2'}`
-+
-+sec_atime=`$here/src/t_ext4_file_time $SCRATCH_MNT/tmp_file atime sec`
-+sec_mtime=`$here/src/t_ext4_file_time $SCRATCH_MNT/tmp_file mtime sec`
-+sec_ctime=`$here/src/t_ext4_file_time $SCRATCH_MNT/tmp_file ctime sec`
-+nsec_atime=`$here/src/t_ext4_file_time $SCRATCH_MNT/tmp_file atime nsec`
-+nsec_mtime=`$here/src/t_ext4_file_time $SCRATCH_MNT/tmp_file mtime nsec`
-+nsec_ctime=`$here/src/t_ext4_file_time $SCRATCH_MNT/tmp_file ctime nsec`
-+
-+# Test nanosecond
-+if [ $nsec_atime -eq 0 -a $nsec_mtime -eq 0 -a $nsec_ctime -eq 0 ]; then
-+        echo "The timestamp is not nanosecond(nsec_atime: $nsec_atime, \
-+              nsec_mtime: $nsec_mtime, nsec_ctime: $nsec_ctime)" >>
-$seqres.full
-+        _scratch_unmount >> $seqres.full 2>&1
-+        exit
-+fi
-+
-+diff1=$(( $sec_atime - $sec ))
-+diff2=$(( $sec_mtime - $sec ))
-+diff3=$(( $sec_ctime - $sec ))
-+
-+# Test difference between file time and current time
-+if [ $diff1 -gt 1 -o $diff2 -gt 1 -o $diff2 -gt 1 ]; then
-+        echo "The timestamp is wrong, it must be earlier than the
-current time we got. \
-+             (sec_atime: $sec_atime, sec_mtime: $sec_mtime,
-sec_ctime: $sec_ctime, \
-+             cur_time[s]: $sec)" >> $seqres.full
-+        _scratch_unmount >> $seqres.full 2>&1
-+        exit
-+fi
-+_scratch_unmount >> $seqres.full 2>&1
-+
-+# Test mount to ext3 and then mount back to ext4
-+mount -t ext3 $SCRATCH_DEV $SCRATCH_MNT
-+if [ $? -ne 0 ]; then
-+        echo "$SCRATCH_DEV fail in mounting to ext3" >> $seqres.full
-+        _scratch_unmount >> $seqres.full 2>&1
-+        exit
-+fi
-+_scratch_unmount >> $seqres.full 2>&1
-+_scratch_mount
-+
-+nsec_atime2=`$here/src/t_ext4_file_time $SCRATCH_MNT/tmp_file atime nsec`
-+nsec_mtime2=`$here/src/t_ext4_file_time $SCRATCH_MNT/tmp_file mtime nsec`
-+nsec_ctime2=`$here/src/t_ext4_file_time $SCRATCH_MNT/tmp_file ctime nsec`
-+
-+if [ $nsec_atime -ne $nsec_atime2 -o $nsec_ctime -ne $nsec_ctime2 -o \
-+     $nsec_mtime -ne $nsec_mtime2 ]; then
-+        echo "File nanosecond timestamp has changed \
-+                        unexpected. Before[atime mtime ctime]: $nsec_atime \
-+                        nsec_mtime $nsec_ctime, After[atime mtime ctime]: \
-+                        $nsec_atime2 $nsec_mtime2 $nsec_ctime2)" >>
-$seqres.full
-+        _scratch_unmount >> $seqres.full 2>&1
-+        exit
-+fi
-+_scratch_unmount >> $seqres.full 2>&1
-+
-+# no BUG_ON, all done
-+status=0
-+exit
-diff --git a/tests/ext4/044.out b/tests/ext4/044.out
-new file mode 100644
-index 00000000..12a61dc4
---- /dev/null
-+++ b/tests/ext4/044.out
-@@ -0,0 +1,2 @@
-+QA output created by 044
-+Silence is golden
-diff --git a/tests/ext4/045 b/tests/ext4/045
-new file mode 100755
-index 00000000..c70baa97
---- /dev/null
-+++ b/tests/ext4/045
-@@ -0,0 +1,148 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2019 SUSE Linux Products GmbH.  All Rights Reserved.
-+#
-+# FS QA Test No. 045
-+#
-+# Transfer from
-ltp/testcases/kernel/fs/ext4-new-features/ext4_subdir_limit_test
-+#
-+# Test subdirectory limit of ext4.
-+# We create more than 32000 subdirectorys on the ext4 filesystem.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+SHORT_DIR=1
-+LONG_DIR=2
-+FAIL=1
-+PASS=0
-+prev_block_size=0
-+prev_result=$FAIL
-+
-+_cleanup()
-+{
-+    cd /
-+    rm -f $tmp.*
-+    _scratch_cleanup_files
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs ext4
-+_supported_os Linux
-+
-+_require_scratch
-+_require_test_program "t_create_short_dirs"
-+_require_test_program "t_create_long_dirs"
-+_require_command "$TUNE2FS_PROG" tune2fs
-+_require_command "$E2FSCK_PROG" e2fsck
-+_require_dumpe2fs
-+
-+echo "Silence is golden"
-+
-+# Run a test case
-+# $1: Number of directories to create
-+# $2: create short dir or long dir
-+# $3: parent directory
-+# $4: filesystem block size
-+_workout()
-+{
-+    local dir_name_len=
-+    if [ $2 -eq $SHORT_DIR ]; then
-+        dir_name_len="short name"
-+    else
-+        dir_name_len="long name"
-+    fi
-+
-+    echo "Num of dirs to create: $1, Dir name len: $dir_name_len, " \
-+          "Parent dir: $3, Block size: $4" >> $seqres.full 2>&1
-+
-+    # Only mkfs if block size has been changed, or previous case failed
-+    if [ $prev_result -ne $PASS -o $4 -ne $prev_block_size ]; then
-+        $MKFS_EXT4_PROG -F -b $4 -I 256 $SCRATCH_DEV >> $seqres.full 2>&1
-+        prev_block_size=$4
-+        tune2fs -O extents $SCRATCH_DEV >> $seqres.full 2>&1
-+    fi
-+    prev_result=$FAIL
-+
-+    _scratch_mount
-+
-+    # create directories
-+    mkdir -p $3 2> /dev/null
-+
-+    if [ $2 -eq $SHORT_DIR ]; then
-+        $here/src/t_create_short_dirs $1 $3
-+    else
-+        $here/src/t_create_long_dirs $1 $3
-+    fi
-+
-+    if [ $? -ne 0 ]; then
-+        nr_dirs=`ls $3 | wc -l`
-+        echo "Failed to create directories - $nr_dirs"
-+        _scratch_unmount
-+        return
-+    fi
-+
-+    # delete directories
-+    cd $3
-+    ls | xargs rmdir
-+    if [ $? -ne 0 ]; then
-+        echo "Failed to remove directories in $3"
-+        cd - > /dev/null
-+        _scratch_unmount
-+        return
-+    fi
-+    cd - > /dev/null
-+    _scratch_unmount
-+
-+    # check dir_nlink is set
-+    dumpe2fs $SCRATCH_DEV 2> /dev/null | grep '^Filesystem features'
-| grep -q dir_nlink
-+    if [ $? -ne 0 ]; then
-+        echo "Feature dir_nlink is not set, please check $seqres.full
-for detail"
-+        return
-+    fi
-+
-+    # run fsck to make sure the filesystem has no errors
-+    $E2FSCK_PROG -fy $SCRATCH_DEV >> $seqres.full 2>&1
-+    if [ $? -ne 0 ]; then
-+        echo "fsck: the filesystem has errors, please check
-$seqres.full for detail"
-+        return
-+    fi
-+
-+    prev_result=$PASS
-+}
-+
-+# main
-+DIR_LEN=( $SHORT_DIR $LONG_DIR )
-+PARENT_DIR=( "$SCRATCH_MNT" "$SCRATCH_MNT/sub" )
-+BLOCK_SIZE=( 1024 2048 4096 )
-+
-+for ((i = 0; i < 3; i++)); do
-+    for ((j = 0; j < 2; j++)); do
-+        for ((k = 0; k < 2; k++)); do
-+            if [ ${DIR_LEN[$k]} -eq $LONG_DIR -a \
-+                    ${BLOCK_SIZE[$i]} -eq 1024 ]; then
-+                continue
-+            fi
-+            _workout 65537 ${DIR_LEN[$k]} ${PARENT_DIR[$j]} ${BLOCK_SIZE[$i]}
-+        done
-+    done
-+done
-+
-+_scratch_unmount >> $seqres.full 2>&1
-+
-+# no BUG_ON, all done
-+status=0
-+exit
-diff --git a/tests/ext4/045.out b/tests/ext4/045.out
-new file mode 100644
-index 00000000..66276cfa
---- /dev/null
-+++ b/tests/ext4/045.out
-@@ -0,0 +1,2 @@
-+QA output created by 045
-+Silence is golden
-diff --git a/tests/ext4/group b/tests/ext4/group
-index 9dfc0d35..8419cdea 100644
---- a/tests/ext4/group
-+++ b/tests/ext4/group
-@@ -45,6 +45,9 @@
- 040 dangerous_fuzzers
- 041 dangerous_fuzzers
- 042 auto quick
-+043 auto quick
-+044 auto quick
-+045 auto
- 271 auto rw quick
- 301 aio auto ioctl rw stress defrag
- 302 aio auto ioctl rw stress defrag
