@@ -6,31 +6,31 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A7A02C47E49
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D171ECA9ED1
 	for <linux-fstests@archiver.kernel.org>; Fri,  1 Nov 2019 11:00:55 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 7D63A217D9
+	by mail.kernel.org (Postfix) with ESMTP id A9AA621897
 	for <linux-fstests@archiver.kernel.org>; Fri,  1 Nov 2019 11:00:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726622AbfKALAz (ORCPT
+        id S1727325AbfKALAz (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
         Fri, 1 Nov 2019 07:00:55 -0400
-Received: from mx2.suse.de ([195.135.220.15]:57684 "EHLO mx1.suse.de"
+Received: from mx2.suse.de ([195.135.220.15]:57682 "EHLO mx1.suse.de"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1727325AbfKALAz (ORCPT <rfc822;fstests@vger.kernel.org>);
+        id S1726711AbfKALAz (ORCPT <rfc822;fstests@vger.kernel.org>);
         Fri, 1 Nov 2019 07:00:55 -0400
 X-Virus-Scanned: by amavisd-new at test-mx.suse.de
 Received: from relay2.suse.de (unknown [195.135.220.254])
-        by mx1.suse.de (Postfix) with ESMTP id 87E10B344
+        by mx1.suse.de (Postfix) with ESMTP id 82014B31A
         for <fstests@vger.kernel.org>; Fri,  1 Nov 2019 11:00:53 +0000 (UTC)
 Received: by quack2.suse.cz (Postfix, from userid 1000)
-        id 436121E4849; Fri,  1 Nov 2019 12:00:53 +0100 (CET)
+        id 412BE1E47DD; Fri,  1 Nov 2019 12:00:53 +0100 (CET)
 From:   Jan Kara <jack@suse.cz>
 To:     fstests@vger.kernel.org
 Cc:     Jan Kara <jack@suse.cz>
-Subject: [PATCH 2/2] generic/235: Fix false failure on ext2
-Date:   Fri,  1 Nov 2019 12:00:46 +0100
-Message-Id: <20191101110046.24994-3-jack@suse.cz>
+Subject: [PATCH 1/2] generic/382: Make test independent of fs allocation
+Date:   Fri,  1 Nov 2019 12:00:45 +0100
+Message-Id: <20191101110046.24994-2-jack@suse.cz>
 X-Mailer: git-send-email 2.16.4
 In-Reply-To: <20191101110046.24994-1-jack@suse.cz>
 References: <20191101110046.24994-1-jack@suse.cz>
@@ -39,51 +39,74 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-The test gives false failure on ext2 filesystem as 64k file already has
-indirect block and so space usage does not exactly match expectation.
-The test really needs to verify only whether quota accounting got
-reenabled so just test using creating another empty file which is not
-prone to these problems.
+Test generic/382 depends on filesystem allocating exactly 30M of blocks
+when writing 30M file. This is not true for some filesystems - e.g. for
+ext2 due to indirect blocks - while leads to false positive failures.
+In this case, the test is not actually interested in comparing exact
+usage, rather in verifying the ability to write 30M worth of data. So
+instead of comparing 'xfs_quota report' output, just depend on detecting
+error when writing files.
 
 Signed-off-by: Jan Kara <jack@suse.cz>
 ---
- tests/generic/235     | 5 +++--
- tests/generic/235.out | 4 ++--
- 2 files changed, 5 insertions(+), 4 deletions(-)
+ tests/generic/382     |  9 ++-------
+ tests/generic/382.out | 12 ------------
+ 2 files changed, 2 insertions(+), 19 deletions(-)
 
-diff --git a/tests/generic/235 b/tests/generic/235
-index 6adc803c04b7..01db4711a0ec 100755
---- a/tests/generic/235
-+++ b/tests/generic/235
-@@ -55,8 +55,9 @@ _try_scratch_mount "-o remount,ro" 2>&1 | tee -a $seqres.full | _filter_scratch
- touch $SCRATCH_MNT/failed 2>&1 | tee -a $seqres.full | _filter_scratch
- _try_scratch_mount "-o remount,rw" 2>&1 | tee -a $seqres.full | _filter_scratch
+diff --git a/tests/generic/382 b/tests/generic/382
+index 50816f69a915..5ae229052bdc 100755
+--- a/tests/generic/382
++++ b/tests/generic/382
+@@ -67,21 +67,16 @@ do_test()
+ 	$XFS_QUOTA_PROG -x -c "report $type -N -bi" $SCRATCH_MNT | grep -v ^root | _filter_spaces
  
--$XFS_IO_PROG -c 'pwrite 0 64k' -c 'fsync' \
--			$SCRATCH_MNT/testfile >>$seqres.full 2>&1
-+touch $SCRATCH_MNT/testfile2
-+chown $qa_user:$qa_user $SCRATCH_MNT/testfile2
-+
- do_repquota
+ 	## blocks default quota test ##
+-	_user_do "$XFS_IO_PROG -f -c \"pwrite 0 30M\" -c \"fsync\" $SCRATCH_MNT/data" | _filter_xfs_io
+-	echo "$qname blocks quota after write 30M data"
+-	$XFS_QUOTA_PROG -x -c "report $type -N -b" $SCRATCH_MNT | grep -v ^root | _filter_spaces
++	_user_do "$XFS_IO_PROG -f -c \"pwrite 0 30M\" -c \"fsync\" $SCRATCH_MNT/data" 2>&1 | _filter_xfs_io
  
- _scratch_unmount 2>/dev/null
-diff --git a/tests/generic/235.out b/tests/generic/235.out
-index abcb47a69d06..87b16e0acf6d 100644
---- a/tests/generic/235.out
-+++ b/tests/generic/235.out
-@@ -17,10 +17,10 @@ Block grace time: 7days; Inode grace time: 7days
-                         Block limits                File limits
- User            used    soft    hard  grace    used  soft  hard  grace
- ----------------------------------------------------------------------
--fsgqa     --      64       0       0              1     0     0       
-+fsgqa     --       0       0       0              2     0     0       
- *** Report for group quotas on device SCRATCH_DEV
- Block grace time: 7days; Inode grace time: 7days
-                         Block limits                File limits
- Group           used    soft    hard  grace    used  soft  hard  grace
- ----------------------------------------------------------------------
--fsgqa     --      64       0       0              1     0     0       
-+fsgqa     --       0       0       0              2     0     0       
+ 	rm -f ${SCRATCH_MNT}/* >/dev/null 2>&1
+ 
+ 	## inode default quota test ##
+ 	for ((i=0; i<30; i++));do
+-		_user_do "echo -n > ${SCRATCH_MNT}/file${i}"
++		_user_do "echo -n > ${SCRATCH_MNT}/file${i}" 2>&1
+ 	done
+ 	sync
+ 
+-	echo "$qname inode quota after creating 30 inodes"
+-	$XFS_QUOTA_PROG -x -c "report $type -N -i" $SCRATCH_MNT | grep -v ^root | _filter_spaces
+-
+ 	rm -f ${SCRATCH_MNT}/* >/dev/null 2>&1
+ }
+ 
+diff --git a/tests/generic/382.out b/tests/generic/382.out
+index ad32ccd334bd..a538ca67368c 100644
+--- a/tests/generic/382.out
++++ b/tests/generic/382.out
+@@ -5,21 +5,9 @@ fsgqa 0 40960 40960 00 [--------] 0 40 40 00 [--------]
+ 
+ wrote 31457280/31457280 bytes at offset 0
+ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-user blocks quota after write 30M data
+-fsgqa 30720 40960 40960 00 [--------]
+-
+-user inode quota after creating 30 inodes
+-fsgqa 30 40 40 00 [--------]
+-
+ === group quota test ===
+ group blocks and inode limit
+ fsgqa 0 40960 40960 00 [--------] 0 40 40 00 [--------]
+ 
+ wrote 31457280/31457280 bytes at offset 0
+ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-group blocks quota after write 30M data
+-fsgqa 30720 40960 40960 00 [--------]
+-
+-group inode quota after creating 30 inodes
+-fsgqa 30 40 40 00 [--------]
+-
 -- 
 2.16.4
 
