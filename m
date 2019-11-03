@@ -1,285 +1,258 @@
-Return-Path: <SRS0=jkS+=Y2=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=SJPO=Y3=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
 X-Spam-Status: No, score=-8.3 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham
-	autolearn_force=no version=3.4.0
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 93BECCA9EC7
-	for <linux-fstests@archiver.kernel.org>; Sat,  2 Nov 2019 06:26:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 23DC1CA9EB0
+	for <linux-fstests@archiver.kernel.org>; Sun,  3 Nov 2019 15:25:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 55B262085B
-	for <linux-fstests@archiver.kernel.org>; Sat,  2 Nov 2019 06:26:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D36BE2084D
+	for <linux-fstests@archiver.kernel.org>; Sun,  3 Nov 2019 15:25:02 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="lbyMkmOy"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="iFXBL0eO"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725956AbfKBG0d (ORCPT
+        id S1727682AbfKCPZC (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 2 Nov 2019 02:26:33 -0400
-Received: from mail-pg1-f193.google.com ([209.85.215.193]:34668 "EHLO
-        mail-pg1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725842AbfKBG0c (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 2 Nov 2019 02:26:32 -0400
-Received: by mail-pg1-f193.google.com with SMTP id e4so7811973pgs.1;
-        Fri, 01 Nov 2019 23:26:32 -0700 (PDT)
+        Sun, 3 Nov 2019 10:25:02 -0500
+Received: from mail-pf1-f194.google.com ([209.85.210.194]:38661 "EHLO
+        mail-pf1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727541AbfKCPZC (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 3 Nov 2019 10:25:02 -0500
+Received: by mail-pf1-f194.google.com with SMTP id c13so10436633pfp.5;
+        Sun, 03 Nov 2019 07:25:01 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=date:from:to:cc:subject:message-id:references:mime-version
          :content-disposition:in-reply-to:user-agent;
-        bh=Ffar5Bpso3EE7eRyIlkDnabkFXSapyh8sFlP5SxpdWk=;
-        b=lbyMkmOyCAjgvk0tUyE/oAA92HIAL93mfjn74WtQW6WNclv1qvIq/neQk93bkZIBXA
-         JepMKkEo+gtuOrilmyw7wx7d1S+ttgQzc8Gtn5En1J20JnmgeuodGCXFP3vXAxlqg3ad
-         Dxr2GBPWMztTTU8MX4xom16RkAmjk4n2PXxs9ya47B5troDOzSEpaLURHrwMEFqhg7f3
-         brCW3WqeluDjqwmQh0fAsiHzQ0Q4fvXqSdUjmh4VAhKenBcZ4Tz1+y7jGmdXRO+M5LQN
-         LFgEBbtiuoa4+tQhu0jbdB+ws7n6yl3oPhHmNP+LX9WDgbByPcMenXKfNEaHi22kkAIy
-         79aQ==
+        bh=/l+CmnzZ7MsHxS7xlXF5o6727ZXCJYAbNgznqg2CIJE=;
+        b=iFXBL0eOxRgRwl9B/glOlzBG/fDb6rn7pGRsMzPpNXQGzIrJp0qkkql5FJbGFroisb
+         Rz05HzVOW4VR9ylcxENjgcZatlmf3zrgwSetfMaoO5if7oJIQYK2GLV3KWMbV6dEwuMj
+         KOEra7D5H+NfAsZXPhhq3ArXW9CQao6exFekX4YEg3TG5h2H49hFQxmdsgv6z10hzrV7
+         IbALARoaQmYXZm/hHduPUnt0hj7CFO4XLfGupYAZki5CL95i8bMfOJAMUM3rFQKMuGnS
+         JUXm3HY82SgdJm9CbIeskY4//i8U/wSQVvqIc6vZbgB/P5Bm7X27Tmwb9FM8Xppv/kyd
+         Yczw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to:user-agent;
-        bh=Ffar5Bpso3EE7eRyIlkDnabkFXSapyh8sFlP5SxpdWk=;
-        b=ZKud+QwPH+a7j4aDH1ol3dQ74P8KZBVoVtOEPPEaovGYEiuei/xTRBDdfPsyXr7S8n
-         ypnWV481U9+P9DVAeqs3mwL8qWvVvvzP2z1kgwOtYQjR/gSZaUKVXaA1eXoY51ziw3fI
-         ZAc9v5R4ssH6P+XGFoMUmrzCE0X2Hcmi4l4GfB4fzzasSy4NIO7Z4EGyWdzc/YOjmV/k
-         NP4bwf648laOXpkrQ1aIWbqxml6owdKmB6qB1KdPevGg9AvpRYAxCR/SvYziiZVwkV10
-         gebzsdJRY6NzuwbXPKq5IqndMufNmW0suTS9MR+nQsGqInugJAD/e3IDZ3zMaUhedZyC
-         OWIg==
-X-Gm-Message-State: APjAAAVA2wMmnwxMFv0RDFFwFTx90ApINKzVRkwZd1j0B/B7euwTZ+3r
-        +osPpAFLaXh2fmQ/txeDcSM=
-X-Google-Smtp-Source: APXvYqxQx9SaR4TLi5IFspQNz14x8S3GBx8s8cEF6sNSOjDrtyc1qwErlt36hIySEKeV7wOVyCf2ng==
-X-Received: by 2002:a63:1242:: with SMTP id 2mr17853894pgs.288.1572675991748;
-        Fri, 01 Nov 2019 23:26:31 -0700 (PDT)
+        bh=/l+CmnzZ7MsHxS7xlXF5o6727ZXCJYAbNgznqg2CIJE=;
+        b=UhS9KsPlAyqvA0wEEL+2lKdUrGVgYaIk2+OMk8+WIPCMvTEmEiLMj29RO5xcGIm54+
+         SN0QJhg1yXr5RM+yb2dK/G0WzDb3V48hi8BPtyv5ohBfI4rpHxBMUq3taEbq/tw7nxzh
+         NO9hvvZHJSDxemI2A5jKZMAMH1jSkF1eXfcvhwYHIRHJo0SdDXIciT4u8/7BGB/SVNeE
+         ZNGHy7DBDvEz61V58b89X5iRmt1Y/gY4mztTOD69PtuC2vT4aiIJqgGvR7ULRvCHJQ8L
+         T22SODHgrZU7YE8NlR0Hmx1+W+Rfy0Bad37hYd/6+G6LkTfGwx7iHKZED8LceKc9lNaC
+         0lwQ==
+X-Gm-Message-State: APjAAAWyHdk6F8z4u6IL6jOKtsRoGrJ4jipwXMJyKAxrzLFuulRjzDiX
+        sNPEvaH5nwTm+ML4SGkPpiJ94si5
+X-Google-Smtp-Source: APXvYqw8Bf66lTUUB2B3IYHqwKNe8TrE3u4k3wXLNvvTHWLaDbMIGxst4GTBtsdvI5HCdOK4OZ7/4A==
+X-Received: by 2002:aa7:82d7:: with SMTP id f23mr26645903pfn.141.1572794701118;
+        Sun, 03 Nov 2019 07:25:01 -0800 (PST)
 Received: from localhost ([178.128.102.47])
-        by smtp.gmail.com with ESMTPSA id w6sm8627035pfw.84.2019.11.01.23.26.29
+        by smtp.gmail.com with ESMTPSA id 70sm14217901pfw.160.2019.11.03.07.24.58
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 01 Nov 2019 23:26:30 -0700 (PDT)
-Date:   Sat, 2 Nov 2019 14:26:25 +0800
+        Sun, 03 Nov 2019 07:24:59 -0800 (PST)
+Date:   Sun, 3 Nov 2019 23:24:51 +0800
 From:   Eryu Guan <guaneryu@gmail.com>
-To:     fdmanana@kernel.org
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-        Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH] btrfs: test that send can issue clone operations within
- the same file
-Message-ID: <20191102062625.GG2543@desktop>
-References: <20191030122741.11073-1-fdmanana@kernel.org>
+To:     Eric Sandeen <sandeen@redhat.com>
+Cc:     fstests <fstests@vger.kernel.org>,
+        linux-xfs <linux-xfs@vger.kernel.org>
+Subject: Re: [PATCH] fstests: verify that xfs_growfs can operate on mounted
+ device node
+Message-ID: <20191103152446.GA8664@desktop>
+References: <1253fd24-a0ef-26ca-6ff9-b3b7a451e78a@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20191030122741.11073-1-fdmanana@kernel.org>
+In-Reply-To: <1253fd24-a0ef-26ca-6ff9-b3b7a451e78a@redhat.com>
 User-Agent: Mutt/1.12.1 (2019-06-15)
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Oct 30, 2019 at 12:27:41PM +0000, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
+On Tue, Oct 29, 2019 at 12:53:48PM -0500, Eric Sandeen wrote:
+> The ability to use a mounted device node as the primary argument
+> to xfs_growfs will be added back in, because it was an undocumented
+> behavior that some userspace depended on.  This test exercises that
+> functionality.
 > 
-> Verify that both full and incremental send operations can issue clone
-> operations when a file has extents that are shared with itself (at
-> different offsets of course).
-> 
-> This currently fails on btrfs but is addressed by a patch for the
-> kernel titled:
-> 
->   "Btrfs: send, allow clone operations within the same file"
-> 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
 > ---
->  tests/btrfs/200     | 133 ++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/200.out |  17 +++++++
->  tests/btrfs/group   |   1 +
->  3 files changed, 151 insertions(+)
->  create mode 100755 tests/btrfs/200
->  create mode 100644 tests/btrfs/200.out
 > 
-> diff --git a/tests/btrfs/200 b/tests/btrfs/200
+> diff --git a/tests/xfs/148 b/tests/xfs/148
 > new file mode 100755
-> index 00000000..e7853c4b
+> index 00000000..357ae01c
 > --- /dev/null
-> +++ b/tests/btrfs/200
-> @@ -0,0 +1,133 @@
+> +++ b/tests/xfs/148
+> @@ -0,0 +1,100 @@
 > +#! /bin/bash
 > +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
+> +# Copyright (c) 2019 Red Hat, Inc.  All Rights Reserved.
 > +#
-> +# FS QA Test No. 200
+> +# FS QA Test 148
 > +#
-> +# Check that send operations (full and incremental) are able to issue clone
-> +# operations for extents that are shared between the same file.
+> +# Test to ensure xfs_growfs command accepts device nodes if & only
+> +# if they are mounted.
+> +# This functionality, though undocumented, worked until xfsprogs v4.12
+> +# It was added back and documented after xfsprogs v5.2
+
+I'm testing with xfsprogs from for-next branch, which is v5.3.0-rc1
+based xfs_growfs, but I still see failures like
+
+     === xfs_growfs - check device node ===
+    +xfs_growfs: /dev/loop0 is not a mounted XFS filesystem
+     === xfs_growfs - check device symlink ===
+    +xfs_growfs: /mnt/test/loop_symlink.21781 is not a mounted XFS filesystem
+     === unmount ===
+
+If it's already fixed, would you please list the related commits in
+commit log as well?
+
+> +#
+> +# Based on xfs/289
 > +#
 > +seq=`basename $0`
 > +seqres=$RESULT_DIR/$seq
 > +echo "QA output created by $seq"
+> +
+> +here=`pwd`
 > +tmp=/tmp/$$
 > +status=1	# failure is the default!
 > +trap "_cleanup; exit \$status" 0 1 2 3 15
 > +
 > +_cleanup()
 > +{
-> +	cd /
-> +	rm -f $tmp.*
-> +	rm -fr $send_files_dir
+> +    $UMOUNT_PROG $mntdir
+> +    _destroy_loop_device $loop_dev
+> +    rmdir $mntdir
+> +    rm -f $loop_symlink
+> +    rm -f $loopfile
 > +}
+
+'mntdir', 'loop_symlink' and 'loopfile' should be defined before
+_cleanup, otherwise if we exit early, e.g. due to unmet requirement,
+we'll see false failures.
+
+And should check if 'loop_dev' is defined before destroy it.
+
 > +
 > +# get standard environment, filters and checks
 > +. ./common/rc
 > +. ./common/filter
-> +. ./common/reflink
-> +. ./common/punch
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
 > +
 > +# real QA test starts here
-> +_supported_fs btrfs
+> +
+> +# Modify as appropriate.
+> +_supported_fs xfs
 > +_supported_os Linux
-> +_require_fssum
 > +_require_test
-> +_require_scratch_reflink
-> +_require_xfs_io_command "fiemap"
+> +_require_loop
 > +
-> +count_extents()
-> +{
-> +	$XFS_IO_PROG -r -c "fiemap" $1 | tail -n +2 | wc -l
-> +}
+> +loopfile=$TEST_DIR/fsfile
+> +mntdir=$TEST_DIR/mntdir
+> +loop_symlink=$TEST_DIR/loop_symlink.$$
+> +
+> +mkdir -p $mntdir || _fail "!!! failed to create temp mount dir"
+> +
+> +echo "=== mkfs.xfs ==="
+> +$MKFS_XFS_PROG -d file,name=$loopfile,size=16m -f >/dev/null 2>&1
+> +
+> +echo "=== truncate ==="
+> +$XFS_IO_PROG -fc "truncate 256m" $loopfile
+> +
+> +echo "=== create loop device ==="
+> +loop_dev=$(_create_loop_device $loopfile)
+> +
+> +echo "=== create loop device symlink ==="
+> +ln -s $loop_dev $loop_symlink
+> +
+> +echo "loop device is $loop_dev"
 
-There's a similar in common/rc called _count_extents(), but it opens
-file with rw permission. Perhaps you could just update the existing
-helper? (And add '-r' to _count_holes() and _count_attr_extents()?)
+This should be redirected to $seqres.full, as $loop_dev could be any
+loop device.
 
 > +
-> +count_exclusive_extents()
-> +{
-> +	$XFS_IO_PROG -r -c "fiemap" $1 | tail -n +2 | cut -d ' ' -f 3 \
-> +		| sort | uniq | wc -l
-> +}
+> +# These unmounted operations should fail
+> +
+> +echo "=== xfs_growfs - unmounted device, command should be rejected ==="
+> +$XFS_GROWFS_PROG $loop_dev 2>&1 | sed -e s:$loop_dev:LOOPDEV:
+> +
+> +echo "=== xfs_growfs - check symlinked dev, unmounted ==="
+> +$XFS_GROWFS_PROG $loop_symlink 2>&1 | sed -e s:$loop_symlink:LOOPSYMLINK:
+> +
+> +# These mounted operations should pass
+> +
+> +echo "=== mount ==="
+> +$MOUNT_PROG $loop_dev $mntdir || _fail "!!! failed to loopback mount"
+> +
+> +echo "=== xfs_growfs - check device node ==="
+> +$XFS_GROWFS_PROG -D 8192 $loop_dev > /dev/null
+> +
+> +echo "=== xfs_growfs - check device symlink ==="
+> +$XFS_GROWFS_PROG -D 12288 $loop_symlink > /dev/null
+> +
+> +echo "=== unmount ==="
+> +$UMOUNT_PROG $mntdir || _fail "!!! failed to unmount"
+> +
+> +echo "=== mount device symlink ==="
+> +$MOUNT_PROG $loop_symlink $mntdir || _fail "!!! failed to loopback mount"
+> +
+> +echo "=== xfs_growfs - check device symlink ==="
+> +$XFS_GROWFS_PROG -D 16384 $loop_symlink > /dev/null
+> +
+> +echo "=== xfs_growfs - check device node ==="
+> +$XFS_GROWFS_PROG -D 20480 $loop_dev > /dev/null
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/148.out b/tests/xfs/148.out
+> new file mode 100644
+> index 00000000..d8e6f02d
+> --- /dev/null
+> +++ b/tests/xfs/148.out
+> @@ -0,0 +1,17 @@
+> +QA output created by 148
+> +=== mkfs.xfs ===
+> +=== truncate ===
+> +=== create loop device ===
+> +=== create loop device symlink ===
+> +loop device is /dev/loop0
 
-And maybe add this one to common helper too.
-
-Otherwise looks good to me.
+So this line should be removed as well.
 
 Thanks,
 Eryu
 
-> +
-> +send_files_dir=$TEST_DIR/btrfs-test-$seq
-> +
-> +rm -f $seqres.full
-> +rm -fr $send_files_dir
-> +mkdir $send_files_dir
-> +
-> +_scratch_mkfs >>$seqres.full 2>&1
-> +_scratch_mount
-> +
-> +# Create our first test file, which has an extent that is shared only with
-> +# itself and no other files. We want to verify a full send operation will
-> +# clone the extent.
-> +$XFS_IO_PROG -f -c "pwrite -S 0xb1 -b 64K 0 64K" $SCRATCH_MNT/foo \
-> +	| _filter_xfs_io
-> +$XFS_IO_PROG -c "reflink $SCRATCH_MNT/foo 0 64K 64K" $SCRATCH_MNT/foo \
-> +	| _filter_xfs_io
-> +
-> +# Create out second test file which initially, for the first send operation,
-> +# only has a single extent that is not shared.
-> +$XFS_IO_PROG -f -c "pwrite -S 0xc7 -b 64K 0 64K" $SCRATCH_MNT/bar \
-> +	| _filter_xfs_io
-> +
-> +$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/base 2>&1 \
-> +	| _filter_scratch
-> +
-> +$BTRFS_UTIL_PROG send -f $send_files_dir/1.snap $SCRATCH_MNT/base 2>&1 \
-> +	| _filter_scratch
-> +
-> +# Now clone the existing extent in file bar to itself at a different offset.
-> +# We want to verify the incremental send operation below will issue a clone
-> +# operation instead of a write operation.
-> +$XFS_IO_PROG -c "reflink $SCRATCH_MNT/bar 0 64K 64K" $SCRATCH_MNT/bar \
-> +	| _filter_xfs_io
-> +
-> +$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/incr 2>&1 \
-> +	| _filter_scratch
-> +
-> +$BTRFS_UTIL_PROG send -p $SCRATCH_MNT/base -f $send_files_dir/2.snap \
-> +	$SCRATCH_MNT/incr 2>&1 | _filter_scratch
-> +
-> +# Compute digests of the snapshot trees so that later we can compare against
-> +# digests of the trees in the new filesystem, to see if they match (no data or
-> +# metadata corruption happened).
-> +$FSSUM_PROG -A -f -w $send_files_dir/base.fssum $SCRATCH_MNT/base
-> +$FSSUM_PROG -A -f -w $send_files_dir/incr.fssum \
-> +	-x $SCRATCH_MNT/incr/base $SCRATCH_MNT/incr
-> +
-> +# Now recreate the filesystem by receiving both send streams and verify we get
-> +# the same file contents that the original filesystem had and that files foo
-> +# and bar have shared extents.
-> +_scratch_unmount
-> +_scratch_mkfs >>$seqres.full 2>&1
-> +_scratch_mount
-> +
-> +$BTRFS_UTIL_PROG receive -f $send_files_dir/1.snap $SCRATCH_MNT
-> +$BTRFS_UTIL_PROG receive -f $send_files_dir/2.snap $SCRATCH_MNT
-> +
-> +# Compute digests of the snapshot trees in the new filesystem and compare them
-> +# to the ones in the original filesystem, they must match.
-> +$FSSUM_PROG -r $send_files_dir/base.fssum $SCRATCH_MNT/base
-> +$FSSUM_PROG -r $send_files_dir/incr.fssum $SCRATCH_MNT/incr
-> +
-> +num_extents=$(count_extents $SCRATCH_MNT/base/foo)
-> +num_exclusive_extents=$(count_exclusive_extents $SCRATCH_MNT/base/foo)
-> +if [ $num_extents -ne 2 ] || [ $num_exclusive_extents -ne 1 ]; then
-> +	echo "File foo does not have 2 shared extents in the base snapshot"
-> +	$XFS_IO_PROG -r -c "fiemap" $SCRATCH_MNT/base/foo
-> +fi
-> +
-> +num_extents=$(count_extents $SCRATCH_MNT/incr/foo)
-> +num_exclusive_extents=$(count_exclusive_extents $SCRATCH_MNT/incr/foo)
-> +if [ $num_extents -ne 2 ] || [ $num_exclusive_extents -ne 1 ]; then
-> +	echo "File foo does not have 2 shared extents in the incr snapshot"
-> +	$XFS_IO_PROG -r -c "fiemap" $SCRATCH_MNT/incr/foo
-> +fi
-> +
-> +num_extents=$(count_extents $SCRATCH_MNT/incr/bar)
-> +num_exclusive_extents=$(count_exclusive_extents $SCRATCH_MNT/incr/bar)
-> +if [ $num_extents -ne 2 ] || [ $num_exclusive_extents -ne 1 ]; then
-> +	echo "File bar does not have 2 shared extents in the incr snapshot"
-> +	$XFS_IO_PROG -r -c "fiemap" $SCRATCH_MNT/incr/bar
-> +fi
-> +
-> +status=0
-> +exit
-> diff --git a/tests/btrfs/200.out b/tests/btrfs/200.out
-> new file mode 100644
-> index 00000000..3eec567e
-> --- /dev/null
-> +++ b/tests/btrfs/200.out
-> @@ -0,0 +1,17 @@
-> +QA output created by 200
-> +wrote 65536/65536 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +linked 65536/65536 bytes at offset 65536
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +wrote 65536/65536 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/base'
-> +At subvol SCRATCH_MNT/base
-> +linked 65536/65536 bytes at offset 65536
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/incr'
-> +At subvol SCRATCH_MNT/incr
-> +At subvol base
-> +At snapshot incr
-> +OK
-> +OK
-> diff --git a/tests/btrfs/group b/tests/btrfs/group
-> index c7ab129e..d56dcafa 100644
-> --- a/tests/btrfs/group
-> +++ b/tests/btrfs/group
-> @@ -202,3 +202,4 @@
->  197 auto quick volume
->  198 auto quick volume
->  199 auto quick trim
-> +200 auto quick send clone
-> -- 
-> 2.11.0
+> +=== xfs_growfs - unmounted device, command should be rejected ===
+> +xfs_growfs: LOOPDEV is not a mounted XFS filesystem
+> +=== xfs_growfs - check symlinked dev, unmounted ===
+> +xfs_growfs: LOOPSYMLINK is not a mounted XFS filesystem
+> +=== mount ===
+> +=== xfs_growfs - check device node ===
+> +=== xfs_growfs - check device symlink ===
+> +=== unmount ===
+> +=== mount device symlink ===
+> +=== xfs_growfs - check device symlink ===
+> +=== xfs_growfs - check device node ===
+> diff --git a/tests/xfs/group b/tests/xfs/group
+> index f4ebcd8c..40a61b55 100644
+> --- a/tests/xfs/group
+> +++ b/tests/xfs/group
+> @@ -145,6 +145,7 @@
+>  145 dmapi
+>  146 dmapi
+>  147 dmapi
+> +148 quick auto growfs
+>  150 dmapi
+>  151 dmapi
+>  152 dmapi
 > 
