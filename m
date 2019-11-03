@@ -2,319 +2,173 @@ Return-Path: <SRS0=SJPO=Y3=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.3 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+X-Spam-Status: No, score=-5.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
-	version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 65BE1CA9EB0
-	for <linux-fstests@archiver.kernel.org>; Sun,  3 Nov 2019 16:16:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C0E05CA9EB0
+	for <linux-fstests@archiver.kernel.org>; Sun,  3 Nov 2019 16:26:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 280682084D
-	for <linux-fstests@archiver.kernel.org>; Sun,  3 Nov 2019 16:16:20 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9218920659
+	for <linux-fstests@archiver.kernel.org>; Sun,  3 Nov 2019 16:26:56 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="UHmEzzUD"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="gA6vKNjw"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727710AbfKCQQT (ORCPT
+        id S1727769AbfKCQ04 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 3 Nov 2019 11:16:19 -0500
-Received: from mail-pf1-f194.google.com ([209.85.210.194]:36727 "EHLO
-        mail-pf1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727541AbfKCQQT (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 3 Nov 2019 11:16:19 -0500
-Received: by mail-pf1-f194.google.com with SMTP id v19so10495573pfm.3
-        for <fstests@vger.kernel.org>; Sun, 03 Nov 2019 08:16:17 -0800 (PST)
+        Sun, 3 Nov 2019 11:26:56 -0500
+Received: from mail-pg1-f194.google.com ([209.85.215.194]:34663 "EHLO
+        mail-pg1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727710AbfKCQ04 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 3 Nov 2019 11:26:56 -0500
+Received: by mail-pg1-f194.google.com with SMTP id e4so9692117pgs.1
+        for <fstests@vger.kernel.org>; Sun, 03 Nov 2019 08:26:55 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to:user-agent;
-        bh=IjKIgcRgc5LcALCEdk1n9f5I6er72gAmQ5VLEwbGeZ0=;
-        b=UHmEzzUDg02ymOgrcrC5UDDR8pgu2QdbHpvlrc5O4cdLgK/8bwffAkSMSwjC8PdJSG
-         7M402eEMn7VbPPrCqLWlHl11gog7NID/F+MeaPRm7Gd6JMmlrFvDZL5owrRRy8S5Bs0a
-         rjznwFzCCqEi0Ib3YmqPtJWQ1t48jwDLAnXdpAyR+B7CiC/SWiqCHhfiK8tGCOvXHCb5
-         GrLXdhdK6iD++sKeqrGw61A/CI379C21ImDBZAMT68GEnbcTor7e7R8T1loZW5DNEcnx
-         /ctKA6oWYRq3SaWtaSi7JyaUwl+J4oL5T9gv2ogVov6i0RSw2kL5jT7D+eCbAcylDrNg
-         q/7Q==
+        h=message-id:date:from:to:subject:mime-version:content-disposition;
+        bh=xx53ECyaRFLGxIvH/HkIdGa/cfBYAdGsD4YJn4h8Hy8=;
+        b=gA6vKNjwLxuM4qYZgAh71oS6irOTrWrlyyewdNKXzMwPHfKBthjzJvd6ayxk+lKyfD
+         8R2vncmh/xZaSAm+UnHy9c350QWuSnI/PUleLAL5PXxcdniQOJ/TVZPGQd/7xqby6DZR
+         ON1qwO/QDNEaJgsmIxdStVJQVKzDWdvcunD4hnA7h7th/LP7ktW8E2aw+wBSwt1w/Ct1
+         sR9D+ISJhWJ41+rHZqj/TBocs7IMmJ3jAsMlcrMVpfTzJqwy53RSzEm1kRHWvcYMtwK2
+         DflRyryiS92bLWVl9Hpc3gg0ZIrEkhvGrVKJ6wHU6hqoH+sO2GXIcl7J34H9DPBbI09Z
+         MneQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to:user-agent;
-        bh=IjKIgcRgc5LcALCEdk1n9f5I6er72gAmQ5VLEwbGeZ0=;
-        b=jLrl35qt7CBc13XHpLxS1s0Mm7HfctLXtKEGdCO/58EfoeLUwuJ7kRYek/T3EYqlqZ
-         LFMprw/Jmj5OdB4/fM2Dm2jnqVD/fC0amTP5pxxHK22pCB6rlvEUA8vrBO0dH6ubkYld
-         qA0ULeHLS/zxNuhC8dzZ26eWVrKBLlpX+sOHPkbgOeYHR/bFu9ftcgFOns8qmzXXXx0a
-         LvPzevRHxY6bUfq74hg9f8psOHe/0+HI0Ju1U6/1aQVz+Fw/r5qgCfQ9rf3ONuOqKJhf
-         ubxdOjZOt7wgpqdEg5836xeJxT9jwwSHyWm/kNp1aPiKEsrh73DJpbHQZ5Wc8Ud5AI2S
-         Yt0A==
-X-Gm-Message-State: APjAAAU4wUDcNnF60bf0I2FjxdTS285elZYupvfKwqz33/6vry9k2Wqn
-        uJc7wv3sHFHvktW0r2BPTTU=
-X-Google-Smtp-Source: APXvYqy2UD4yPjnSd7UYEltDgjiBMpzOEF8XwWnQMbIEmt76e6IOY4qdOaLu3KevC+U/ehQVDWDudA==
-X-Received: by 2002:a63:6506:: with SMTP id z6mr12686445pgb.65.1572797776909;
-        Sun, 03 Nov 2019 08:16:16 -0800 (PST)
+        h=x-gm-message-state:message-id:date:from:to:subject:mime-version
+         :content-disposition;
+        bh=xx53ECyaRFLGxIvH/HkIdGa/cfBYAdGsD4YJn4h8Hy8=;
+        b=ttCJm+qzdQCqjsOwjSuAckttGBfhHWW5ssUBBPx3VCBsXRa9E0QGGOyO7QfuZfXMhC
+         E1lGK/2sL+h3Xsi//xiwzxCdIvq4Y5t/TZun6qQUWZAC1lUOMJ5Pbd3Z/r6Kj6ym0iMF
+         5sPvSZOojWhKW9R8eC4QA4V0VzytvDT6ZVKXZo824sNS0cT8Ik9go6fokA3yLHgHDpNS
+         LCaa47moV0add+Elto5g8CHa8ZLEukhw+64NQOCn2oemGP2RXaYHy2Ta73S+moRc9Uel
+         F9oVZ9AW0m6wvw+QLH6pjQxPIOA4dknZZJazwgNgdJh85ClnevNmCvjnnDeKqHVuLhhY
+         UicQ==
+X-Gm-Message-State: APjAAAWH5KTZ2RraNSeMO+UpqJa0nKeZmLI3wXfLJsSCkIkHDUfiAT4l
+        56YBY5mhsLPJ6zZV7ckJB3174z72
+X-Google-Smtp-Source: APXvYqy1r45ysCV6NKXideOa6kcxwrsrLOg+O1XAUYbDYKtFM7yqR6u5mftGssI4s+FgyZrtTySyyA==
+X-Received: by 2002:a62:4e96:: with SMTP id c144mr26171788pfb.45.1572798414875;
+        Sun, 03 Nov 2019 08:26:54 -0800 (PST)
 Received: from localhost ([178.128.102.47])
-        by smtp.gmail.com with ESMTPSA id z7sm6444770pgk.10.2019.11.03.08.16.06
+        by smtp.gmail.com with ESMTPSA id y144sm12739394pfb.188.2019.11.03.08.26.53
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 03 Nov 2019 08:16:15 -0800 (PST)
-Date:   Mon, 4 Nov 2019 00:15:59 +0800
+        Sun, 03 Nov 2019 08:26:53 -0800 (PST)
+Message-ID: <5dbeffcd.1c69fb81.d08e.49ba@mx.google.com>
+Date:   Mon, 04 Nov 2019 00:26:48 +0800
 From:   Eryu Guan <guaneryu@gmail.com>
-To:     "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] xfs: make sure the kernel and repair tools catch bad
- names
-Message-ID: <20191103161540.GB8664@desktop>
-References: <20191029222948.GA15224@magnolia>
+To:     fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: master branch updated to 220b7e35fe34
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="TDUCammdkLmT"
 Content-Disposition: inline
-In-Reply-To: <20191029222948.GA15224@magnolia>
-User-Agent: Mutt/1.12.1 (2019-06-15)
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Oct 29, 2019 at 03:29:48PM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <darrick.wong@oracle.com>
-> 
-> Make sure we actually catch bad names in the kernel.
-> 
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> ---
->  tests/xfs/749     |  137 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/749.out |   50 +++++++++++++++++++
->  tests/xfs/group   |    1 
->  3 files changed, 188 insertions(+)
->  create mode 100755 tests/xfs/749
->  create mode 100644 tests/xfs/749.out
-> 
-> diff --git a/tests/xfs/749 b/tests/xfs/749
-> new file mode 100755
-> index 00000000..a8353cc2
-> --- /dev/null
-> +++ b/tests/xfs/749
-> @@ -0,0 +1,137 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0-or-newer
-> +# Copyright (c) 2019, Oracle and/or its affiliates.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 749
-> +#
-> +# See if we catch corrupt directory names or attr names with nulls or slashes
-> +# in them.
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1    # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	$UMOUNT_PROG $mntpt > /dev/null 2>&1
-> +	test -n "$loopdev" && _destroy_loop_device $loopdev > /dev/null 2>&1
-> +	rm -r -f $imgfile $mntpt $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/attr
-> +
-> +# real QA test starts here
-> +_supported_fs xfs
-> +_supported_os Linux
-> +_require_test
-> +_require_attrs
-> +_require_xfs_mkfs_crc
-> +_disable_dmesg_check
-> +
-> +rm -f $seqres.full
-> +
-> +imgfile=$TEST_DIR/img-$seq
-> +mntpt=$TEST_DIR/mount-$seq
-> +testdir=$mntpt/testdir
-> +testfile=$mntpt/testfile
-> +nullstr="too_many_beans"
-> +slashstr="are_bad_for_you"
-> +test_names=("something" "$nullstr" "$slashstr" "another")
-> +
-> +# Format image file w/o crcs so we can sed the image file
-> +$XFS_IO_PROG -f -c 'truncate 40m' $imgfile
-> +loopdev=$(_create_loop_device $imgfile)
-> +MKFS_OPTIONS="-m crc=0" _mkfs_dev $loopdev >> $seqres.full
 
-I see the following failures after forcing it crc=0 with v5.4-rc4
-kernel, just want to make sure if that's all expected?
+--TDUCammdkLmT
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
- attr_get: No data available
- Could not get "a_are_bad/for_you" for TEST_DIR/mount-148/testfile
- ++ ACCESSING BAD METADATA
--ls: reading directory 'TEST_DIR/mount-148/testdir': Structure needs cleaning
-+ls: reading directory 'TEST_DIR/mount-148/testdir': Input/output error
- f_something
--attr_list: Structure needs cleaning
-+f_too_many
-+Attribute "a_something" has a 3 byte value for TEST_DIR/mount-148/testfile
-+Attribute "a_are_bad/for_you" has a 3 byte value for TEST_DIR/mount-148/testfile
-+Attribute "a_another" has a 3 byte value for TEST_DIR/mount-148/testfile
- TEST_DIR/mount-148/testdir/f_something
- Attribute "a_something" had a 3 byte value for TEST_DIR/mount-148/testfile:
- heh
+Hi all,
+
+The master branch of the xfstests repository at:
+
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+have just been updated. Thanks to kaixuxia, fsstress is now having renameat2
+support, and there's a new test that takes use of this new functionality! Also
+many thanks to Brian Foster reviewing the renameat2 support patchsets.
+
+The other commits are fixing random bugs, so there should be no new failures
+after this update.
 
 Thanks,
 Eryu
 
-> +
-> +# Mount image file
-> +mkdir -p $mntpt
-> +_mount $loopdev $mntpt
-> +
-> +echo "creating entries" >> $seqres.full
-> +
-> +# Create directory entries
-> +mkdir -p $testdir
-> +for name in "${test_names[@]}"; do
-> +	touch "$testdir/f_$name"
-> +done
-> +
-> +# Create attrs
-> +touch $testfile
-> +for name in "${test_names[@]}"; do
-> +	$ATTR_PROG -s "a_$name" -V heh $testfile >> $seqres.full
-> +done
-> +
-> +# Now put in the first part of the garbage names to make sure we can't
-> +# access those directly
-> +test_names+=("too_many" "are_bad/for_you")
-> +
-> +access_stuff() {
-> +	ls $testdir
-> +	$ATTR_PROG -l $testfile
-> +
-> +	for name in "${test_names[@]}"; do
-> +		ls "$testdir/f_$name"
-> +		$ATTR_PROG -g "a_$name" $testfile
-> +	done
-> +}
-> +
-> +# Does it work?
-> +echo "++ ACCESSING GOOD METADATA" | tee -a $seqres.full
-> +access_stuff > $tmp.log 2>&1
-> +cat $tmp.log >> $seqres.full
-> +cat $tmp.log | _filter_test_dir
-> +
-> +# Corrupt the entries
-> +$UMOUNT_PROG $mntpt
-> +_destroy_loop_device $loopdev
-> +cp $imgfile $imgfile.old
-> +sed -b \
-> +	-e "s/$nullstr/too_many\x00beans/g" \
-> +	-e "s/$slashstr/are_bad\/for_you/g" \
-> +	-i $imgfile
-> +test "$(md5sum < $imgfile)" != "$(md5sum < $imgfile.old)" ||
-> +	_fail "sed failed to change the image file?"
-> +rm -f $imgfile.old
-> +loopdev=$(_create_loop_device $imgfile)
-> +_mount $loopdev $mntpt
-> +
-> +# Try to access the corrupt metadata
-> +echo "++ ACCESSING BAD METADATA" | tee -a $seqres.full
-> +access_stuff > $tmp.log 2>&1
-> +cat $tmp.log >> $seqres.full
-> +cat $tmp.log | _filter_test_dir | sed -e '/Could not list/d'
-> +
-> +echo "does scrub complain?" >> $seqres.full
-> +
-> +# Does scrub complain about this?
-> +if _supports_xfs_scrub $mntpt $loopdev; then
-> +	$XFS_SCRUB_PROG -n $mntpt >> $seqres.full 2>&1
-> +	res=$?
-> +	test $((res & 1)) -eq 0 && \
-> +		echo "scrub failed to report corruption ($res)"
-> +fi
-> +
-> +echo "does repair complain?" >> $seqres.full
-> +
-> +# Does repair complain about this?
-> +$UMOUNT_PROG $mntpt
-> +$XFS_REPAIR_PROG -n $loopdev >> $seqres.full 2>&1
-> +res=$?
-> +test $res -eq 1 || \
-> +	echo "repair failed to report corruption ($res)"
-> +
-> +_destroy_loop_device $loopdev
-> +loopdev=
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/749.out b/tests/xfs/749.out
-> new file mode 100644
-> index 00000000..ab7b7dc6
-> --- /dev/null
-> +++ b/tests/xfs/749.out
-> @@ -0,0 +1,50 @@
-> +QA output created by 749
-> +++ ACCESSING GOOD METADATA
-> +f_another
-> +f_are_bad_for_you
-> +f_something
-> +f_too_many_beans
-> +Attribute "a_something" has a 3 byte value for TEST_DIR/mount-749/testfile
-> +Attribute "a_too_many_beans" has a 3 byte value for TEST_DIR/mount-749/testfile
-> +Attribute "a_are_bad_for_you" has a 3 byte value for TEST_DIR/mount-749/testfile
-> +Attribute "a_another" has a 3 byte value for TEST_DIR/mount-749/testfile
-> +TEST_DIR/mount-749/testdir/f_something
-> +Attribute "a_something" had a 3 byte value for TEST_DIR/mount-749/testfile:
-> +heh
-> +TEST_DIR/mount-749/testdir/f_too_many_beans
-> +Attribute "a_too_many_beans" had a 3 byte value for TEST_DIR/mount-749/testfile:
-> +heh
-> +TEST_DIR/mount-749/testdir/f_are_bad_for_you
-> +Attribute "a_are_bad_for_you" had a 3 byte value for TEST_DIR/mount-749/testfile:
-> +heh
-> +TEST_DIR/mount-749/testdir/f_another
-> +Attribute "a_another" had a 3 byte value for TEST_DIR/mount-749/testfile:
-> +heh
-> +ls: cannot access 'TEST_DIR/mount-749/testdir/f_too_many': No such file or directory
-> +attr_get: No data available
-> +Could not get "a_too_many" for TEST_DIR/mount-749/testfile
-> +ls: cannot access 'TEST_DIR/mount-749/testdir/f_are_bad/for_you': No such file or directory
-> +attr_get: No data available
-> +Could not get "a_are_bad/for_you" for TEST_DIR/mount-749/testfile
-> +++ ACCESSING BAD METADATA
-> +ls: reading directory 'TEST_DIR/mount-749/testdir': Structure needs cleaning
-> +f_something
-> +attr_list: Structure needs cleaning
-> +TEST_DIR/mount-749/testdir/f_something
-> +Attribute "a_something" had a 3 byte value for TEST_DIR/mount-749/testfile:
-> +heh
-> +ls: cannot access 'TEST_DIR/mount-749/testdir/f_too_many_beans': No such file or directory
-> +attr_get: No data available
-> +Could not get "a_too_many_beans" for TEST_DIR/mount-749/testfile
-> +ls: cannot access 'TEST_DIR/mount-749/testdir/f_are_bad_for_you': No such file or directory
-> +attr_get: No data available
-> +Could not get "a_are_bad_for_you" for TEST_DIR/mount-749/testfile
-> +TEST_DIR/mount-749/testdir/f_another
-> +Attribute "a_another" had a 3 byte value for TEST_DIR/mount-749/testfile:
-> +heh
-> +ls: cannot access 'TEST_DIR/mount-749/testdir/f_too_many': No such file or directory
-> +attr_get: No data available
-> +Could not get "a_too_many" for TEST_DIR/mount-749/testfile
-> +ls: cannot access 'TEST_DIR/mount-749/testdir/f_are_bad/for_you': No such file or directory
-> +Attribute "a_are_bad/for_you" had a 3 byte value for TEST_DIR/mount-749/testfile:
-> +heh
-> diff --git a/tests/xfs/group b/tests/xfs/group
-> index f4ebcd8c..9600cb4e 100644
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
-> @@ -507,3 +507,4 @@
->  509 auto ioctl
->  510 auto ioctl quick
->  511 auto quick quota
-> +749 auto quick fuzzers
+The new head of the master branch is commit:
+
+220b7e35fe34 generic/317: Use relative paths to avoid traversal permission problems
+
+New commits:
+
+Baihua Lu (1):
+      [c062fdb6705e] common/rc: fix _require_xfs_io_command utimes check
+
+Chao Yu (1):
+      [11d3da6a7fe1] common/rc: generalize _get_filesize()
+
+Eric Biggers (1):
+      [eff343fb5d5f] generic: handle fs.verity.require_signatures being enabled
+
+Zhihao Cheng (1):
+      [220b7e35fe34] generic/317: Use relative paths to avoid traversal permission problems
+
+kaixuxia (4):
+      [266e3c91d649] fsstress: show the real file id and parid in rename_f()
+      [7f41cf24140c] fsstress: add NOREPLACE and WHITEOUT renameat2 support
+      [65dfd40a97b6] fsstress: add EXCHANGE renameat2 support
+      [0f211f5bca40] generic: test the deadlock between the AGI and AGF with RENAME_WHITEOUT
+
+
+Code Diffstat:
+
+ common/populate       |   2 +-
+ common/rc             |   7 +-
+ common/verity         |  41 +++++++--
+ ltp/fsstress.c        | 231 +++++++++++++++++++++++++++++++++++++++++---------
+ tests/btrfs/086       |   2 +-
+ tests/generic/013     |   5 --
+ tests/generic/275     |   2 +-
+ tests/generic/286     |   8 +-
+ tests/generic/297     |   2 +-
+ tests/generic/298     |   2 +-
+ tests/generic/315     |   2 +-
+ tests/generic/317     |   5 +-
+ tests/generic/399     |   2 +-
+ tests/generic/497     |   8 +-
+ tests/generic/514     |   2 +-
+ tests/generic/572     |   6 +-
+ tests/generic/573     |   2 +
+ tests/generic/574     |   2 +
+ tests/generic/575     |   2 +
+ tests/generic/576     |   2 +
+ tests/generic/577     |   8 +-
+ tests/generic/577.out |   1 -
+ tests/generic/579     |   2 +
+ tests/generic/585     |  56 ++++++++++++
+ tests/generic/585.out |   2 +
+ tests/generic/group   |   1 +
+ tests/overlay/060     |   2 +-
+ tests/xfs/014         |   2 +-
+ tests/xfs/076         |   2 +-
+ tests/xfs/306         |   2 +-
+ 30 files changed, 334 insertions(+), 79 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
+
+--TDUCammdkLmT
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAl2+/3QACgkQJlKqKVyP
+52Nm1w/9FYpeMscCv1IUrLQzjp5oO9AlHmIKrLw3RFCyZBEV4Xn3sm0xBUV7756M
+hzivR1nfr1s17DPa7gfb4vfu7GS3d/Xy1ziR+YPkxaVwCqsQynsdfBXDoe96hKWk
+8oX+lC+WuLiL4tEbqnS7725+BKb/zL5OvG6xxXR/NsHzrkwNUtQbzj87HlEWuKGv
+gac+ZglPPwQXmVSFhxjtTa3oKgypo/2d96yfFwoblzX4kCgxHxFSPdG4t9kt3krQ
+1F+jAIPVFlo7uKfCX+CUaSYxgyTs2L7SqCJiHuOko4YEyIPe7Ejtuhj3S3OmP0FY
+uxncTLhU0GWocX6x8rGpgSGfQOuJsx0EowlccvonQu1tXDksxqDmutvmcyVRqfut
+mGQa/WcGYoDHnHyBTElErn3nBdb+1uBUGMQ5BajXWtQkP7OiSI7jNpSaYUg9z7oL
+RgsAP+NvhSMMYYQ+Ayi9g7iRIOMC47buQOx/bw9P1kIl41I8CJaexhma9xDL02px
+P8BXj7OEjIJlIApapiM7iReUZPAUHu9uGejxDY3bvlivTVfib2Lwj5l0bbWy/aNC
+azPKfo7d4vjI3fwv+tcNo8kkJ95UYnL5Qc2JF725Aimc8LFUETnJZzbw/jCTh3re
+BfGNY3q6EKIrcX1O0LqeH+Mlkiirxv0AS17Q/M7MZG7UJtjsXhE=
+=aAHy
+-----END PGP SIGNATURE-----
+
+--TDUCammdkLmT--
