@@ -1,334 +1,114 @@
-Return-Path: <SRS0=SJPO=Y3=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=Pc5s=Y4=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.3 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.3 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F176DCA9EB0
-	for <linux-fstests@archiver.kernel.org>; Sun,  3 Nov 2019 18:52:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 06A5ACA9EBB
+	for <linux-fstests@archiver.kernel.org>; Mon,  4 Nov 2019 01:49:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id B1D0A2190F
-	for <linux-fstests@archiver.kernel.org>; Sun,  3 Nov 2019 18:52:38 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CB0B221D7C
+	for <linux-fstests@archiver.kernel.org>; Mon,  4 Nov 2019 01:49:46 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="TDPFBycT"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="XZffH1wn"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727717AbfKCSwi (ORCPT
+        id S1728869AbfKDBtq (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 3 Nov 2019 13:52:38 -0500
-Received: from userp2130.oracle.com ([156.151.31.86]:33920 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727322AbfKCSwi (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 3 Nov 2019 13:52:38 -0500
-Received: from pps.filterd (userp2130.oracle.com [127.0.0.1])
-        by userp2130.oracle.com (8.16.0.27/8.16.0.27) with SMTP id xA3Io7LD160833;
-        Sun, 3 Nov 2019 18:52:35 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
- : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=corp-2019-08-05;
- bh=Wg2xC6nGhHan5g1fJOY24T1ppCyEziZqhZUnHuSRDzE=;
- b=TDPFBycTFIDHX9aR7CsPZIYxRGs4D8yPG1BgzUsqDklKWt5BT2Df32nxONt7a0V+lMN9
- EPaglIhsueRWSGUaRpGx3DVQ/PEcaw1qJlfr0/pPOYYedME3WhF/4WZzgqIwFdOTrvwJ
- nLnwZlHu3wj+1IR5u7bWKXEKeer9joR0+BAb5RMkdztgWtwh3NSbhaLo9vKGCvRM1y5c
- pa1B+dn+kggYnSpclVFU/bPBfOaDt8uSBJldpLL+AT1XtOcvqzktEJF2xLmpTk+EMas9
- F7BsFs+aV8zIK+YI1JplAalcP+PNXkK1HgoKNWIW7t/KpSVsyf0Y58kHNmHwn8EO2ZF+ ag== 
-Received: from aserp3020.oracle.com (aserp3020.oracle.com [141.146.126.70])
-        by userp2130.oracle.com with ESMTP id 2w117tkxtj-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Sun, 03 Nov 2019 18:52:35 +0000
-Received: from pps.filterd (aserp3020.oracle.com [127.0.0.1])
-        by aserp3020.oracle.com (8.16.0.27/8.16.0.27) with SMTP id xA3Ihodp014641;
-        Sun, 3 Nov 2019 18:52:34 GMT
-Received: from userv0121.oracle.com (userv0121.oracle.com [156.151.31.72])
-        by aserp3020.oracle.com with ESMTP id 2w1ka7xj60-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Sun, 03 Nov 2019 18:52:34 +0000
-Received: from abhmp0010.oracle.com (abhmp0010.oracle.com [141.146.116.16])
-        by userv0121.oracle.com (8.14.4/8.13.8) with ESMTP id xA3IqW10001920;
-        Sun, 3 Nov 2019 18:52:33 GMT
-Received: from localhost (/67.169.218.210)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Sun, 03 Nov 2019 10:52:32 -0800
-Date:   Sun, 3 Nov 2019 10:52:31 -0800
-From:   "Darrick J. Wong" <darrick.wong@oracle.com>
+        Sun, 3 Nov 2019 20:49:46 -0500
+Received: from us-smtp-2.mimecast.com ([205.139.110.61]:51136 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1728812AbfKDBtq (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 3 Nov 2019 20:49:46 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1572832185;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=LKwjEx3F+8yVd3sbD3qWcd2xtXeFJuRdOn/qJPJ+bX4=;
+        b=XZffH1wnPiaN2BrSJSl94nqp3roeOH8pbI2pG6VP1m1dNKVLylR6e4LJyg2EOAFw4ATrRb
+        SC9mHw3KR6uqiGOjxctX8zOT9Yt0jyxVFZOP2UFb5dMOKb69f6ZN+ofz6FYpcIq9jAholE
+        SQP+3v3VmoZ7vFfjmLnKeOq+9Hhj8iQ=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-172-FmzZZY6bPxesMNrF4hQ6Bg-1; Sun, 03 Nov 2019 20:49:41 -0500
+Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 9D7F5800A1A;
+        Mon,  4 Nov 2019 01:49:40 +0000 (UTC)
+Received: from Liberator-6.local (ovpn04.gateway.prod.ext.phx2.redhat.com [10.5.9.4])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id 52D901001B23;
+        Mon,  4 Nov 2019 01:49:40 +0000 (UTC)
+Subject: Re: [PATCH] fstests: verify that xfs_growfs can operate on mounted
+ device node
 To:     Eryu Guan <guaneryu@gmail.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] xfs: make sure the kernel and repair tools catch bad
- names
-Message-ID: <20191103185231.GD15224@magnolia>
-References: <20191029222948.GA15224@magnolia>
- <20191103161540.GB8664@desktop>
+Cc:     fstests <fstests@vger.kernel.org>,
+        linux-xfs <linux-xfs@vger.kernel.org>
+References: <1253fd24-a0ef-26ca-6ff9-b3b7a451e78a@redhat.com>
+ <20191103152446.GA8664@desktop>
+From:   Eric Sandeen <sandeen@redhat.com>
+Message-ID: <fc635655-1feb-6a31-197b-cea9d0daf855@redhat.com>
+Date:   Sun, 3 Nov 2019 19:49:39 -0600
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:68.0)
+ Gecko/20100101 Thunderbird/68.2.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20191103161540.GB8664@desktop>
-User-Agent: Mutt/1.9.4 (2018-02-28)
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9430 signatures=668685
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=0 malwarescore=0
- phishscore=0 bulkscore=0 spamscore=0 mlxscore=0 mlxlogscore=999
- adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.0.1-1908290000 definitions=main-1911030196
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9430 signatures=668685
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 priorityscore=1501 malwarescore=0
- suspectscore=0 phishscore=0 bulkscore=0 spamscore=0 clxscore=1015
- lowpriorityscore=0 mlxscore=0 impostorscore=0 mlxlogscore=999 adultscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.0.1-1908290000
- definitions=main-1911030197
+In-Reply-To: <20191103152446.GA8664@desktop>
+Content-Language: en-US
+X-Scanned-By: MIMEDefang 2.84 on 10.5.11.22
+X-MC-Unique: FmzZZY6bPxesMNrF4hQ6Bg-1
+X-Mimecast-Spam-Score: 0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Nov 04, 2019 at 12:15:59AM +0800, Eryu Guan wrote:
-> On Tue, Oct 29, 2019 at 03:29:48PM -0700, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <darrick.wong@oracle.com>
-> > 
-> > Make sure we actually catch bad names in the kernel.
-> > 
-> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> > ---
-> >  tests/xfs/749     |  137 +++++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/xfs/749.out |   50 +++++++++++++++++++
-> >  tests/xfs/group   |    1 
-> >  3 files changed, 188 insertions(+)
-> >  create mode 100755 tests/xfs/749
-> >  create mode 100644 tests/xfs/749.out
-> > 
-> > diff --git a/tests/xfs/749 b/tests/xfs/749
-> > new file mode 100755
-> > index 00000000..a8353cc2
-> > --- /dev/null
-> > +++ b/tests/xfs/749
-> > @@ -0,0 +1,137 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0-or-newer
-> > +# Copyright (c) 2019, Oracle and/or its affiliates.  All Rights Reserved.
-> > +#
-> > +# FS QA Test No. 749
-> > +#
-> > +# See if we catch corrupt directory names or attr names with nulls or slashes
-> > +# in them.
-> > +
-> > +seq=`basename $0`
-> > +seqres=$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +
-> > +here=`pwd`
-> > +tmp=/tmp/$$
-> > +status=1    # failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +_cleanup()
-> > +{
-> > +	cd /
-> > +	$UMOUNT_PROG $mntpt > /dev/null 2>&1
-> > +	test -n "$loopdev" && _destroy_loop_device $loopdev > /dev/null 2>&1
-> > +	rm -r -f $imgfile $mntpt $tmp.*
-> > +}
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +. ./common/filter
-> > +. ./common/attr
-> > +
-> > +# real QA test starts here
-> > +_supported_fs xfs
-> > +_supported_os Linux
-> > +_require_test
-> > +_require_attrs
-> > +_require_xfs_mkfs_crc
-> > +_disable_dmesg_check
-> > +
-> > +rm -f $seqres.full
-> > +
-> > +imgfile=$TEST_DIR/img-$seq
-> > +mntpt=$TEST_DIR/mount-$seq
-> > +testdir=$mntpt/testdir
-> > +testfile=$mntpt/testfile
-> > +nullstr="too_many_beans"
-> > +slashstr="are_bad_for_you"
-> > +test_names=("something" "$nullstr" "$slashstr" "another")
-> > +
-> > +# Format image file w/o crcs so we can sed the image file
-> > +$XFS_IO_PROG -f -c 'truncate 40m' $imgfile
-> > +loopdev=$(_create_loop_device $imgfile)
-> > +MKFS_OPTIONS="-m crc=0" _mkfs_dev $loopdev >> $seqres.full
-> 
-> I see the following failures after forcing it crc=0 with v5.4-rc4
-> kernel, just want to make sure if that's all expected?
+On 11/3/19 9:24 AM, Eryu Guan wrote:
+> On Tue, Oct 29, 2019 at 12:53:48PM -0500, Eric Sandeen wrote:
+>> The ability to use a mounted device node as the primary argument
+>> to xfs_growfs will be added back in, because it was an undocumented
+>> behavior that some userspace depended on.  This test exercises that
+>> functionality.
+>>
+>> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+>> ---
+>>
+>> diff --git a/tests/xfs/148 b/tests/xfs/148
+>> new file mode 100755
+>> index 00000000..357ae01c
+>> --- /dev/null
+>> +++ b/tests/xfs/148
+>> @@ -0,0 +1,100 @@
+>> +#! /bin/bash
+>> +# SPDX-License-Identifier: GPL-2.0
+>> +# Copyright (c) 2019 Red Hat, Inc.  All Rights Reserved.
+>> +#
+>> +# FS QA Test 148
+>> +#
+>> +# Test to ensure xfs_growfs command accepts device nodes if & only
+>> +# if they are mounted.
+>> +# This functionality, though undocumented, worked until xfsprogs v4.12
+>> +# It was added back and documented after xfsprogs v5.2
+>=20
+> I'm testing with xfsprogs from for-next branch, which is v5.3.0-rc1
+> based xfs_growfs, but I still see failures like
+>=20
+>      =3D=3D=3D xfs_growfs - check device node =3D=3D=3D
+>     +xfs_growfs: /dev/loop0 is not a mounted XFS filesystem
+>      =3D=3D=3D xfs_growfs - check device symlink =3D=3D=3D
+>     +xfs_growfs: /mnt/test/loop_symlink.21781 is not a mounted XFS filesy=
+stem
+>      =3D=3D=3D unmount =3D=3D=3D
+>=20
+> If it's already fixed, would you please list the related commits in
+> commit log as well?
 
-That's the expected output for 5.4; the test should pass on xfs
-for-next (i.e. 5.5) since it will contain tighter checks on what's a
-valid name.
+I haven't merged the fix yet.
 
---D
+If you like I can resend the test when it's merged.
 
->  attr_get: No data available
->  Could not get "a_are_bad/for_you" for TEST_DIR/mount-148/testfile
->  ++ ACCESSING BAD METADATA
-> -ls: reading directory 'TEST_DIR/mount-148/testdir': Structure needs cleaning
-> +ls: reading directory 'TEST_DIR/mount-148/testdir': Input/output error
->  f_something
-> -attr_list: Structure needs cleaning
-> +f_too_many
-> +Attribute "a_something" has a 3 byte value for TEST_DIR/mount-148/testfile
-> +Attribute "a_are_bad/for_you" has a 3 byte value for TEST_DIR/mount-148/testfile
-> +Attribute "a_another" has a 3 byte value for TEST_DIR/mount-148/testfile
->  TEST_DIR/mount-148/testdir/f_something
->  Attribute "a_something" had a 3 byte value for TEST_DIR/mount-148/testfile:
->  heh
-> 
-> Thanks,
-> Eryu
-> 
-> > +
-> > +# Mount image file
-> > +mkdir -p $mntpt
-> > +_mount $loopdev $mntpt
-> > +
-> > +echo "creating entries" >> $seqres.full
-> > +
-> > +# Create directory entries
-> > +mkdir -p $testdir
-> > +for name in "${test_names[@]}"; do
-> > +	touch "$testdir/f_$name"
-> > +done
-> > +
-> > +# Create attrs
-> > +touch $testfile
-> > +for name in "${test_names[@]}"; do
-> > +	$ATTR_PROG -s "a_$name" -V heh $testfile >> $seqres.full
-> > +done
-> > +
-> > +# Now put in the first part of the garbage names to make sure we can't
-> > +# access those directly
-> > +test_names+=("too_many" "are_bad/for_you")
-> > +
-> > +access_stuff() {
-> > +	ls $testdir
-> > +	$ATTR_PROG -l $testfile
-> > +
-> > +	for name in "${test_names[@]}"; do
-> > +		ls "$testdir/f_$name"
-> > +		$ATTR_PROG -g "a_$name" $testfile
-> > +	done
-> > +}
-> > +
-> > +# Does it work?
-> > +echo "++ ACCESSING GOOD METADATA" | tee -a $seqres.full
-> > +access_stuff > $tmp.log 2>&1
-> > +cat $tmp.log >> $seqres.full
-> > +cat $tmp.log | _filter_test_dir
-> > +
-> > +# Corrupt the entries
-> > +$UMOUNT_PROG $mntpt
-> > +_destroy_loop_device $loopdev
-> > +cp $imgfile $imgfile.old
-> > +sed -b \
-> > +	-e "s/$nullstr/too_many\x00beans/g" \
-> > +	-e "s/$slashstr/are_bad\/for_you/g" \
-> > +	-i $imgfile
-> > +test "$(md5sum < $imgfile)" != "$(md5sum < $imgfile.old)" ||
-> > +	_fail "sed failed to change the image file?"
-> > +rm -f $imgfile.old
-> > +loopdev=$(_create_loop_device $imgfile)
-> > +_mount $loopdev $mntpt
-> > +
-> > +# Try to access the corrupt metadata
-> > +echo "++ ACCESSING BAD METADATA" | tee -a $seqres.full
-> > +access_stuff > $tmp.log 2>&1
-> > +cat $tmp.log >> $seqres.full
-> > +cat $tmp.log | _filter_test_dir | sed -e '/Could not list/d'
-> > +
-> > +echo "does scrub complain?" >> $seqres.full
-> > +
-> > +# Does scrub complain about this?
-> > +if _supports_xfs_scrub $mntpt $loopdev; then
-> > +	$XFS_SCRUB_PROG -n $mntpt >> $seqres.full 2>&1
-> > +	res=$?
-> > +	test $((res & 1)) -eq 0 && \
-> > +		echo "scrub failed to report corruption ($res)"
-> > +fi
-> > +
-> > +echo "does repair complain?" >> $seqres.full
-> > +
-> > +# Does repair complain about this?
-> > +$UMOUNT_PROG $mntpt
-> > +$XFS_REPAIR_PROG -n $loopdev >> $seqres.full 2>&1
-> > +res=$?
-> > +test $res -eq 1 || \
-> > +	echo "repair failed to report corruption ($res)"
-> > +
-> > +_destroy_loop_device $loopdev
-> > +loopdev=
-> > +
-> > +# success, all done
-> > +status=0
-> > +exit
-> > diff --git a/tests/xfs/749.out b/tests/xfs/749.out
-> > new file mode 100644
-> > index 00000000..ab7b7dc6
-> > --- /dev/null
-> > +++ b/tests/xfs/749.out
-> > @@ -0,0 +1,50 @@
-> > +QA output created by 749
-> > +++ ACCESSING GOOD METADATA
-> > +f_another
-> > +f_are_bad_for_you
-> > +f_something
-> > +f_too_many_beans
-> > +Attribute "a_something" has a 3 byte value for TEST_DIR/mount-749/testfile
-> > +Attribute "a_too_many_beans" has a 3 byte value for TEST_DIR/mount-749/testfile
-> > +Attribute "a_are_bad_for_you" has a 3 byte value for TEST_DIR/mount-749/testfile
-> > +Attribute "a_another" has a 3 byte value for TEST_DIR/mount-749/testfile
-> > +TEST_DIR/mount-749/testdir/f_something
-> > +Attribute "a_something" had a 3 byte value for TEST_DIR/mount-749/testfile:
-> > +heh
-> > +TEST_DIR/mount-749/testdir/f_too_many_beans
-> > +Attribute "a_too_many_beans" had a 3 byte value for TEST_DIR/mount-749/testfile:
-> > +heh
-> > +TEST_DIR/mount-749/testdir/f_are_bad_for_you
-> > +Attribute "a_are_bad_for_you" had a 3 byte value for TEST_DIR/mount-749/testfile:
-> > +heh
-> > +TEST_DIR/mount-749/testdir/f_another
-> > +Attribute "a_another" had a 3 byte value for TEST_DIR/mount-749/testfile:
-> > +heh
-> > +ls: cannot access 'TEST_DIR/mount-749/testdir/f_too_many': No such file or directory
-> > +attr_get: No data available
-> > +Could not get "a_too_many" for TEST_DIR/mount-749/testfile
-> > +ls: cannot access 'TEST_DIR/mount-749/testdir/f_are_bad/for_you': No such file or directory
-> > +attr_get: No data available
-> > +Could not get "a_are_bad/for_you" for TEST_DIR/mount-749/testfile
-> > +++ ACCESSING BAD METADATA
-> > +ls: reading directory 'TEST_DIR/mount-749/testdir': Structure needs cleaning
-> > +f_something
-> > +attr_list: Structure needs cleaning
-> > +TEST_DIR/mount-749/testdir/f_something
-> > +Attribute "a_something" had a 3 byte value for TEST_DIR/mount-749/testfile:
-> > +heh
-> > +ls: cannot access 'TEST_DIR/mount-749/testdir/f_too_many_beans': No such file or directory
-> > +attr_get: No data available
-> > +Could not get "a_too_many_beans" for TEST_DIR/mount-749/testfile
-> > +ls: cannot access 'TEST_DIR/mount-749/testdir/f_are_bad_for_you': No such file or directory
-> > +attr_get: No data available
-> > +Could not get "a_are_bad_for_you" for TEST_DIR/mount-749/testfile
-> > +TEST_DIR/mount-749/testdir/f_another
-> > +Attribute "a_another" had a 3 byte value for TEST_DIR/mount-749/testfile:
-> > +heh
-> > +ls: cannot access 'TEST_DIR/mount-749/testdir/f_too_many': No such file or directory
-> > +attr_get: No data available
-> > +Could not get "a_too_many" for TEST_DIR/mount-749/testfile
-> > +ls: cannot access 'TEST_DIR/mount-749/testdir/f_are_bad/for_you': No such file or directory
-> > +Attribute "a_are_bad/for_you" had a 3 byte value for TEST_DIR/mount-749/testfile:
-> > +heh
-> > diff --git a/tests/xfs/group b/tests/xfs/group
-> > index f4ebcd8c..9600cb4e 100644
-> > --- a/tests/xfs/group
-> > +++ b/tests/xfs/group
-> > @@ -507,3 +507,4 @@
-> >  509 auto ioctl
-> >  510 auto ioctl quick
-> >  511 auto quick quota
-> > +749 auto quick fuzzers
