@@ -2,235 +2,78 @@ Return-Path: <SRS0=5Vws=Y5=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BCDA8C17498
-	for <linux-fstests@archiver.kernel.org>; Tue,  5 Nov 2019 14:57:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 63F82C5DF60
+	for <linux-fstests@archiver.kernel.org>; Tue,  5 Nov 2019 15:31:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 8FB4521A4A
-	for <linux-fstests@archiver.kernel.org>; Tue,  5 Nov 2019 14:57:06 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1572965826;
-	bh=XUeUBwRSU90NHuQYOTLWZCHE0RTyqgxJTHCTijCAmaI=;
-	h=From:To:Cc:Subject:Date:List-ID:From;
-	b=o710w3Mtr9KvFVn8CIbzgHDZ309eU0B7JlvEJNckDYhfMkROdWkUilUut4Dc7gM50
-	 9rmbYvwV6Oi4jP5cPEBnZM28haBL8jbLkcGan93PGO7kx0jZY199gsNlqUn59QFgDQ
-	 xSP2F+j6xheeyW5xZJTumWeobbEOWEvpDeHH8Zwo=
+	by mail.kernel.org (Postfix) with ESMTP id 400E321D71
+	for <linux-fstests@archiver.kernel.org>; Tue,  5 Nov 2019 15:31:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2389616AbfKEO5G (ORCPT
+        id S1727889AbfKEPbB (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 5 Nov 2019 09:57:06 -0500
-Received: from mail.kernel.org ([198.145.29.99]:58744 "EHLO mail.kernel.org"
+        Tue, 5 Nov 2019 10:31:01 -0500
+Received: from mail.kernel.org ([198.145.29.99]:44956 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2389183AbfKEO5G (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 5 Nov 2019 09:57:06 -0500
-Received: from localhost.localdomain (bl8-197-74.dsl.telepac.pt [85.241.197.74])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        id S1727830AbfKEPbB (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 5 Nov 2019 10:31:01 -0500
+Received: from arrakis.emea.arm.com (unknown [46.69.195.45])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id EB690217F5;
-        Tue,  5 Nov 2019 14:57:03 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1572965824;
-        bh=XUeUBwRSU90NHuQYOTLWZCHE0RTyqgxJTHCTijCAmaI=;
-        h=From:To:Cc:Subject:Date:From;
-        b=DeTCHwh5N5HO0JFPHo/rn0Dgm0B1PJOE4IWSHkT4wdkEJSTS7eLhAP15l3eXTs4ym
-         26dJgiPxe5R6KtGl1d9nnz4iWGyw5lUy3YHh6KaIcgoNcX7wX2IG8jzpdBLSsR8rjh
-         aO5fZK/9OeixRPzbZRZlmZZuyprjGlotiMKMaYmM=
-From:   fdmanana@kernel.org
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH 3/3] btrfs: test that send can issue clone operations within the same file
-Date:   Tue,  5 Nov 2019 14:57:00 +0000
-Message-Id: <20191105145700.11281-1-fdmanana@kernel.org>
-X-Mailer: git-send-email 2.11.0
+        by mail.kernel.org (Postfix) with ESMTPSA id 4F879217F5;
+        Tue,  5 Nov 2019 15:30:59 +0000 (UTC)
+Date:   Tue, 5 Nov 2019 15:30:56 +0000
+From:   Catalin Marinas <catalin.marinas@arm.com>
+To:     Amir Goldstein <amir73il@gmail.com>
+Cc:     Theodore Tso <tytso@mit.edu>, fstests <fstests@vger.kernel.org>,
+        Matthew Wilcox <willy@infradead.org>,
+        Michal Hocko <mhocko@kernel.org>, Qian Cai <cai@lca.pw>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        Linus Torvalds <torvalds@linux-foundation.org>,
+        Linux MM <linux-mm@kvack.org>,
+        linux-kernel <linux-kernel@vger.kernel.org>
+Subject: Re: 5.4-rc1 boot regression with kmemleak enabled
+Message-ID: <20191105153055.GC22987@arrakis.emea.arm.com>
+References: <CAOQ4uxgy6THDG2NsNSQ+=FP+iSZKeCkNEM9PbxQSB5p5nHvoCA@mail.gmail.com>
+ <20191105115431.GD26580@mbp>
+ <CAOQ4uxjm=tWsQpfLkY9O_3qWK86X=kCD19P8zJAQjs5ms_RfZw@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAOQ4uxjm=tWsQpfLkY9O_3qWK86X=kCD19P8zJAQjs5ms_RfZw@mail.gmail.com>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Filipe Manana <fdmanana@suse.com>
+On Tue, Nov 05, 2019 at 02:33:48PM +0200, Amir Goldstein wrote:
+> On Tue, Nov 5, 2019 at 1:54 PM Catalin Marinas <catalin.marinas@arm.com> wrote:
+> > (sorry if you got this message twice; our SMTP server went bust)
+> >
+> > On Tue, Nov 05, 2019 at 09:14:06AM +0200, Amir Goldstein wrote:
+> > > My kvm-xfstests [1] VM doesn't boot with kmemleak enabled since commit
+> > > c5665868183f ("mm: kmemleak: use the memory pool for early allocations").
+> > >
+> > > There is no console output when running:
+> > >
+> > > $ kvm -boot order=c -net none -machine type=pc,accel=kvm:tcg -cpu host \
+> > >     -drive file=$ROOTFS,if=virtio,snapshot=on -vga none -nographic \
+> > >     -smp 2 -m 2048 -serial mon:stdio --kernel $KERNEL \
+> > >     --append 'root=/dev/vda console=ttyS0,115200'
+> >
+> > This was fixed in 5.4-rc4, see commit 2abd839aa7e6 ("kmemleak: Do not
+> > corrupt the object_list during clean-up").
+> 
+> Did not fix my issue.
+> Still not booting with 5.4-rc6.
+> Any other suggestions?
 
-Verify that both full and incremental send operations can issue clone
-operations when a file has extents that are shared with itself (at
-different offsets of course).
+Can you pass an earlyprintk=ttyS0,115200 (if that's the correct x86
+syntax) on the kernel command line? It may print some early messages
+that would help with debugging.
 
-This currently fails on btrfs but is addressed by a patch for the
-kernel titled:
-
-  "Btrfs: send, allow clone operations within the same file"
-
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
- tests/btrfs/200     | 122 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/200.out |  17 ++++++++
- tests/btrfs/group   |   1 +
- 3 files changed, 140 insertions(+)
- create mode 100755 tests/btrfs/200
- create mode 100644 tests/btrfs/200.out
-
-diff --git a/tests/btrfs/200 b/tests/btrfs/200
-new file mode 100755
-index 00000000..8661f446
---- /dev/null
-+++ b/tests/btrfs/200
-@@ -0,0 +1,122 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
-+#
-+# FS QA Test No. 200
-+#
-+# Check that send operations (full and incremental) are able to issue clone
-+# operations for extents that are shared between the same file.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+	rm -fr $send_files_dir
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/reflink
-+. ./common/punch
-+
-+# real QA test starts here
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_fssum
-+_require_test
-+_require_scratch_reflink
-+_require_xfs_io_command "fiemap"
-+
-+send_files_dir=$TEST_DIR/btrfs-test-$seq
-+
-+rm -f $seqres.full
-+rm -fr $send_files_dir
-+mkdir $send_files_dir
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+
-+# Create our first test file, which has an extent that is shared only with
-+# itself and no other files. We want to verify a full send operation will
-+# clone the extent.
-+$XFS_IO_PROG -f -c "pwrite -S 0xb1 -b 64K 0 64K" $SCRATCH_MNT/foo \
-+	| _filter_xfs_io
-+$XFS_IO_PROG -c "reflink $SCRATCH_MNT/foo 0 64K 64K" $SCRATCH_MNT/foo \
-+	| _filter_xfs_io
-+
-+# Create out second test file which initially, for the first send operation,
-+# only has a single extent that is not shared.
-+$XFS_IO_PROG -f -c "pwrite -S 0xc7 -b 64K 0 64K" $SCRATCH_MNT/bar \
-+	| _filter_xfs_io
-+
-+$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/base 2>&1 \
-+	| _filter_scratch
-+
-+$BTRFS_UTIL_PROG send -f $send_files_dir/1.snap $SCRATCH_MNT/base 2>&1 \
-+	| _filter_scratch
-+
-+# Now clone the existing extent in file bar to itself at a different offset.
-+# We want to verify the incremental send operation below will issue a clone
-+# operation instead of a write operation.
-+$XFS_IO_PROG -c "reflink $SCRATCH_MNT/bar 0 64K 64K" $SCRATCH_MNT/bar \
-+	| _filter_xfs_io
-+
-+$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/incr 2>&1 \
-+	| _filter_scratch
-+
-+$BTRFS_UTIL_PROG send -p $SCRATCH_MNT/base -f $send_files_dir/2.snap \
-+	$SCRATCH_MNT/incr 2>&1 | _filter_scratch
-+
-+# Compute digests of the snapshot trees so that later we can compare against
-+# digests of the trees in the new filesystem, to see if they match (no data or
-+# metadata corruption happened).
-+$FSSUM_PROG -A -f -w $send_files_dir/base.fssum $SCRATCH_MNT/base
-+$FSSUM_PROG -A -f -w $send_files_dir/incr.fssum \
-+	-x $SCRATCH_MNT/incr/base $SCRATCH_MNT/incr
-+
-+# Now recreate the filesystem by receiving both send streams and verify we get
-+# the same file contents that the original filesystem had and that files foo
-+# and bar have shared extents.
-+_scratch_unmount
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+
-+$BTRFS_UTIL_PROG receive -f $send_files_dir/1.snap $SCRATCH_MNT
-+$BTRFS_UTIL_PROG receive -f $send_files_dir/2.snap $SCRATCH_MNT
-+
-+# Compute digests of the snapshot trees in the new filesystem and compare them
-+# to the ones in the original filesystem, they must match.
-+$FSSUM_PROG -r $send_files_dir/base.fssum $SCRATCH_MNT/base
-+$FSSUM_PROG -r $send_files_dir/incr.fssum $SCRATCH_MNT/incr
-+
-+num_extents=$(_count_extents $SCRATCH_MNT/base/foo)
-+num_exclusive_extents=$(_count_exclusive_extents $SCRATCH_MNT/base/foo)
-+if [ $num_extents -ne 2 ] || [ $num_exclusive_extents -ne 1 ]; then
-+	echo "File foo does not have 2 shared extents in the base snapshot"
-+	$XFS_IO_PROG -r -c "fiemap" $SCRATCH_MNT/base/foo
-+fi
-+
-+num_extents=$(_count_extents $SCRATCH_MNT/incr/foo)
-+num_exclusive_extents=$(_count_exclusive_extents $SCRATCH_MNT/incr/foo)
-+if [ $num_extents -ne 2 ] || [ $num_exclusive_extents -ne 1 ]; then
-+	echo "File foo does not have 2 shared extents in the incr snapshot"
-+	$XFS_IO_PROG -r -c "fiemap" $SCRATCH_MNT/incr/foo
-+fi
-+
-+num_extents=$(_count_extents $SCRATCH_MNT/incr/bar)
-+num_exclusive_extents=$(_count_exclusive_extents $SCRATCH_MNT/incr/bar)
-+if [ $num_extents -ne 2 ] || [ $num_exclusive_extents -ne 1 ]; then
-+	echo "File bar does not have 2 shared extents in the incr snapshot"
-+	$XFS_IO_PROG -r -c "fiemap" $SCRATCH_MNT/incr/bar
-+fi
-+
-+status=0
-+exit
-diff --git a/tests/btrfs/200.out b/tests/btrfs/200.out
-new file mode 100644
-index 00000000..3eec567e
---- /dev/null
-+++ b/tests/btrfs/200.out
-@@ -0,0 +1,17 @@
-+QA output created by 200
-+wrote 65536/65536 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+linked 65536/65536 bytes at offset 65536
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 65536/65536 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/base'
-+At subvol SCRATCH_MNT/base
-+linked 65536/65536 bytes at offset 65536
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/incr'
-+At subvol SCRATCH_MNT/incr
-+At subvol base
-+At snapshot incr
-+OK
-+OK
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index c7ab129e..d56dcafa 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -202,3 +202,4 @@
- 197 auto quick volume
- 198 auto quick volume
- 199 auto quick trim
-+200 auto quick send clone
 -- 
-2.11.0
-
+Catalin
