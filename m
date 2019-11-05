@@ -2,243 +2,259 @@ Return-Path: <SRS0=5Vws=Y5=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 53361CA9EDA
-	for <linux-fstests@archiver.kernel.org>; Tue,  5 Nov 2019 07:14:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D9275CA9ED9
+	for <linux-fstests@archiver.kernel.org>; Tue,  5 Nov 2019 07:29:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 106E320663
-	for <linux-fstests@archiver.kernel.org>; Tue,  5 Nov 2019 07:14:20 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9EB40206B8
+	for <linux-fstests@archiver.kernel.org>; Tue,  5 Nov 2019 07:29:59 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="BXL6mpoa"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="s7VYOY2A"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2387639AbfKEHOT (ORCPT
+        id S2387656AbfKEH37 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 5 Nov 2019 02:14:19 -0500
-Received: from mail-yb1-f196.google.com ([209.85.219.196]:46865 "EHLO
-        mail-yb1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2387442AbfKEHOT (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 5 Nov 2019 02:14:19 -0500
-Received: by mail-yb1-f196.google.com with SMTP id h202so8972409ybg.13;
-        Mon, 04 Nov 2019 23:14:18 -0800 (PST)
+        Tue, 5 Nov 2019 02:29:59 -0500
+Received: from mail-yw1-f67.google.com ([209.85.161.67]:40974 "EHLO
+        mail-yw1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2387600AbfKEH37 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 5 Nov 2019 02:29:59 -0500
+Received: by mail-yw1-f67.google.com with SMTP id j190so2201393ywf.8;
+        Mon, 04 Nov 2019 23:29:58 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=mime-version:from:date:message-id:subject:to:cc;
-        bh=yO7XkjwWZ+6rGu3b+EVCbVS058nDrAyEXQjVMuzyu+s=;
-        b=BXL6mpoa8kMoOs7f1e7psmYFX/jXEvIhfJ/F6zoV3k3zZKHOAC7yp+Sb7WJz3Lgf40
-         I4Ps5+wxLRH2TpnR/8JhSTsSBkmuf2pfm1/pVAKEf6u1kCYwJrlAU0fUJJ7+85OgqmcJ
-         DNDrkFjCFhKIElTr0Spbxr0QAXE8W+uZ/jbiPTVS3Rrw+ZWR7X9wdsNVD+6E3INxuVWk
-         EMUqJ2bp7Fbh/pP7bkZ8MwFRqdHgnG7+zpPQwd4hKL/iTjw2eL+0OyhDzbqqijxsRjH8
-         YQOucg/ay+4kD/FyD7ID6MtDAOrXoz3Iq3GrTQgnOJJKUowoguKK0rnx7Rhi56x+SLua
-         CWMg==
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=j0cfF0FK/fzQm7gGMsm3n4wrJJcRFrT7Rij3/U3pzI8=;
+        b=s7VYOY2AEUspkgvDCTtfLPDLPKzDOPRliXoii4LCY5lKPgGlcHlEdq3IRsYvQ5Helr
+         F9PbmQl+Wz32qbdpfKluBNj3dZkHOeOUAo6EoSEr2FSuTjJyZHj/dx58h4Hrzls8YYj0
+         5yIGj192am5MDql8LAeu5SGgK8hf3fyl0MD9PG/QtY33DYibDV9M2aCg9dCmwXOazWp7
+         QWtKOcPtiDaFlgstoc9fBhGtoYLnpMvekS4Wg8U5Cy8zNfPsOfH8WHoGo/toNAtpoKL6
+         pr3NEznAopl+IZg3FLQKfD8TE2ZwoeUkd/9oCP+jbxuS09NfZ86eSOIkXduOqFckgKru
+         qN9w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:from:date:message-id:subject:to:cc;
-        bh=yO7XkjwWZ+6rGu3b+EVCbVS058nDrAyEXQjVMuzyu+s=;
-        b=lpVgf73MgiJME/vGHqxPN9pDBnMSgzvL3N09Q6gsdR3OwyquiGDlXM58gxpiZUv0IQ
-         ITcZP5eO+dYOSHNRozEnDlYVYQkie9y0DL1bUXhcGNL9Dycqp2C8nYPg0C2bAsMysnnI
-         c1QdLLBGQ0otxG5cB5M+8rC2KZVCaH9mo7aQhMhlxVEISkjOmON1yk6ez7fEtkeWzbTh
-         pqSl9sBeY9GGKOiL68gFCWOYRk4lNhiNKwH0pagu+Yq+hRRr+RDTkBeAzVqvu1tpmybW
-         GT8krPs+ZoUYupZ2PNPijHUNrWzZV+uugoXMaVXrcDRlJOKDyTCBctxUvE99eT3gDiH2
-         NfwQ==
-X-Gm-Message-State: APjAAAXIv1JAkoLbnJ1IHYU2GLdBaysw1d2YchPrC1V/K8hFrGb5XFQ5
-        QEB2ktb/ha1htxIcDQeSrV4dZ1isUNCj7vg8Cns=
-X-Google-Smtp-Source: APXvYqyit+EoPzBumJ0cPcnF638Uws20EgL51fw6kEe5dPrwmHL6s2MYJHQOj1/qo7vkU9iMlrOYOmuG36jrOlAEnK0=
-X-Received: by 2002:a25:e909:: with SMTP id n9mr26304193ybd.428.1572938058047;
- Mon, 04 Nov 2019 23:14:18 -0800 (PST)
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=j0cfF0FK/fzQm7gGMsm3n4wrJJcRFrT7Rij3/U3pzI8=;
+        b=rh71ma1//UJRoa9daPbU8l4mLZnBGlTrpMrHLio3TP0rGDb3IonXr3hy6Au/zz0WZf
+         7XJm+G0uJBGofy0syc5UcvtIwwwGtL+hkMLl6v2rK0F9BD5ITBHBbplhbNBh57REfMHL
+         9yVWWE1+YUhibAT3M1OfEslM7ApsxHRgUCMd2+S1FHhwLJPPbRNbtgewOJsBSRRXaYPe
+         EfBvx1P46ybSZJQFrgbO6shQ6gUQNa8Udc7zr0Cuzn2HmnwaXQRdOW9vbAqKEVCXD4w9
+         haf5AsPlQgBcOgfOsCWtf31/EMQnY57wejtbv+DOTWmcJsYCKS1704FV4aFH4E3429Bw
+         lnzg==
+X-Gm-Message-State: APjAAAUd+4JcSPjjk7sEkGTdQfKLASWpK/SyWWYVMFBF46K+s/Jt1cEE
+        n1hLQqOM04NEaIcQOZe4h1F6WOtYS2vSMX956+I=
+X-Google-Smtp-Source: APXvYqxAbHqRuu4C/cYGfoFeuX7UQwk9jV4g6GO15MGPtOWIrN4nHEmbtt4RzQdEYu3SXrW/9z//UL5DExpr1kvlZ2o=
+X-Received: by 2002:a81:6c58:: with SMTP id h85mr22137798ywc.88.1572938997553;
+ Mon, 04 Nov 2019 23:29:57 -0800 (PST)
 MIME-Version: 1.0
+References: <20191105053510.13849-1-cgxu519@mykernel.net>
+In-Reply-To: <20191105053510.13849-1-cgxu519@mykernel.net>
 From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Tue, 5 Nov 2019 09:14:06 +0200
-Message-ID: <CAOQ4uxgy6THDG2NsNSQ+=FP+iSZKeCkNEM9PbxQSB5p5nHvoCA@mail.gmail.com>
-Subject: 5.4-rc1 boot regression with kmemleak enabled
-To:     Catalin Marinas <catalin.marinas@arm.com>
-Cc:     Theodore Tso <tytso@mit.edu>, fstests <fstests@vger.kernel.org>,
-        Matthew Wilcox <willy@infradead.org>,
-        Michal Hocko <mhocko@kernel.org>, Qian Cai <cai@lca.pw>,
-        Andrew Morton <akpm@linux-foundation.org>,
-        Linus Torvalds <torvalds@linux-foundation.org>,
-        Linux MM <linux-mm@kvack.org>,
-        linux-kernel <linux-kernel@vger.kernel.org>
-Content-Type: multipart/mixed; boundary="0000000000003445c50596942e76"
+Date:   Tue, 5 Nov 2019 09:29:46 +0200
+Message-ID: <CAOQ4uxg9BpH+V50novSRz6vqEP08USFgdgYagQyyK7v6q_kzDg@mail.gmail.com>
+Subject: Re: [PATCH v2] overlay/066: adjust test file size && add more test patterns
+To:     Chengguang Xu <cgxu519@mykernel.net>
+Cc:     fstests <fstests@vger.kernel.org>,
+        overlayfs <linux-unionfs@vger.kernel.org>,
+        Eryu Guan <guaneryu@gmail.com>,
+        Miklos Szeredi <miklos@szeredi.hu>
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
---0000000000003445c50596942e76
-Content-Type: text/plain; charset="UTF-8"
+On Tue, Nov 5, 2019 at 7:35 AM Chengguang Xu <cgxu519@mykernel.net> wrote:
+>
+> Making many small holes in 10M test file seems not very
+> helpful for test coverage and it takes too much time on
+> creating test files. In order to improve test speed we
+> adjust test file size to (10 * iosize) for iosize aligned
+> hole files and meanwhile add more test patterns for small
+> random holes and small empty file.
+>
+> Signed-off-by: Chengguang Xu <cgxu519@mykernel.net>
+> ---
+> v1->v2:
+> - Check result in one diff command.
+> - Print more information(file layout) to full log when test failed.
+> - Truncate test file name.
+>
+>  tests/overlay/066 | 97 +++++++++++++++++++++++++++++++++--------------
+>  1 file changed, 69 insertions(+), 28 deletions(-)
+>
+> diff --git a/tests/overlay/066 b/tests/overlay/066
+> index 285a5aff..c353bdc7 100755
+> --- a/tests/overlay/066
+> +++ b/tests/overlay/066
+> @@ -40,48 +40,85 @@ _require_scratch
+>  # Remove all files from previous tests
+>  _scratch_mkfs
+>
+> -# We have totally 14 test files in this test.
+> +# We have totally 16 test files in this test.
+>  # The detail as below:
+> -# 1 empty file(10M) + 2^0(K)..2^11(K) hole size files(each 10M) + 1 random hole size file(100M).
+> +# 1 small empty file 4K
+> +# 1 big empty file 4M
+> +# 1 small random hole file 10M
+> +# 1 big random hole file 100M
+> +#
+> +# 12 files with variant iosize aligned holes.
+> +# 2^0(K)..2^11(K) hole size files(file size = 10 * iosize)
+>  #
+>  # Considering both upper and lower fs will fill zero when copy-up
+>  # hole area in the file, this test at least requires double disk
+>  # space of the sum of above test files' size.
+>
+> -_require_fs_space $OVL_BASE_SCRATCH_MNT $(((10*1024*13 + 100*1024*1) * 2))
+> +_require_fs_space $OVL_BASE_SCRATCH_MNT $((((4) + (4096) + (10 * 1024) \
+> +                + (100 * 1024) + (10 * (1 + 2048) * 12 / 2)) * 2))
+>
+>  lowerdir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
+>  upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
+>  testfile="copyup_sparse_test"
+>
+> -# Create a completely empty hole file(10M).
+> -file_size=10240
+> -$XFS_IO_PROG -fc "truncate ${file_size}K" "${lowerdir}/${testfile}_empty_holefile" \
+> +# Create a small completely empty hole file(4K).
+> +file_size=4
+> +$XFS_IO_PROG -fc "truncate ${file_size}K" "${lowerdir}/${testfile}_empty_small" \
+>                  >>$seqres.full
+>
+> -# Create 2^0(K)..2^11(K) hole size test files(each 10M).
+> +# Create a big completely empty hole file(4M).
+> +file_size=4096
+> +$XFS_IO_PROG -fc "truncate ${file_size}K" "${lowerdir}/${testfile}_empty_big" \
+> +                >>$seqres.full
+> +
+> +# Create 2^0(K)..2^11(K) hole size test files(file size = 10 * iosize).
+>  #
+>  # The pattern is like below, both hole and data are equal to
+>  # iosize except last hole.
+>  #
+>  # |-- hole --|-- data --| ... |-- data --|-- hole --|
+>
+> -iosize=1
+> +min_iosize=1
+>  max_iosize=2048
+> -file_size=10240
+> -max_pos=`expr $file_size - $max_iosize`
+> +iosize=$min_iosize
+>
+>  while [ $iosize -le $max_iosize ]; do
+> +       file_size=$(($iosize * 10))
+> +       max_pos=$(($file_size - $iosize))
+>         pos=$iosize
+>         $XFS_IO_PROG -fc "truncate ${file_size}K" \
+> -               "${lowerdir}/${testfile}_iosize${iosize}K_holefile" >>$seqres.full
+> +               "${lowerdir}/${testfile}_iosize${iosize}K" >>$seqres.full
+> +       echo -e "\niosize=${iosize}K hole test write scenarios ---\n" >>$seqres.full
+>         while [ $pos -lt $max_pos ]; do
+>                 $XFS_IO_PROG -fc "pwrite ${pos}K ${iosize}K" \
+> -               "${lowerdir}/${testfile}_iosize${iosize}K_holefile" >>$seqres.full
+> -               pos=`expr $pos + $iosize + $iosize`
+> +               "${lowerdir}/${testfile}_iosize${iosize}K" >>$seqres.full
+> +               pos=$(($pos + $iosize * 2))
+>         done
+> -       iosize=`expr $iosize + $iosize`
+> +       iosize=$(($iosize * 2))
+>  done
+> +echo >>$seqres.full
+> +
+> +# Create test file with many random small holes(hole size is between 4K and 512K),
+> +# total file size is 10M.
+> +
+> +pos=4
+> +max_pos=9216
 
-Hi Catalin,
+2 above are commutable values, please do not set them manually
+pos=$min_hole
+max_pos=$(($file_size - 2*$max_hole))
 
-My kvm-xfstests [1] VM doesn't boot with kmemleak enabled since commit
-c5665868183f ("mm: kmemleak: use the memory pool for early allocations").
+Right?
 
-There is no console output when running:
+Please use calculation also for random big file.
 
-$ kvm -boot order=c -net none -machine type=pc,accel=kvm:tcg -cpu host \
-    -drive file=$ROOTFS,if=virtio,snapshot=on -vga none -nographic \
-    -smp 2 -m 2048 -serial mon:stdio --kernel $KERNEL \
-    --append 'root=/dev/vda console=ttyS0,115200'
+> +file_size=10240
+> +min_hole=4
+> +max_hole=512
+> +
+> +$XFS_IO_PROG -fc "truncate ${file_size}K" "${lowerdir}/${testfile}_random_small" \
+> +               >>$seqres.full
+> +
+> +echo -e "\nSmall random hole test write scenarios ---\n" >>$seqres.full
+> +while [ $pos -le $max_pos ]; do
+> +       iosize=$(($RANDOM % ($max_hole - $min_hole) + $min_hole))
+> +       $XFS_IO_PROG -fc "pwrite ${pos}K ${iosize}K" \
+> +               "${lowerdir}/${testfile}_random_small" >>$seqres.full
 
-$ kvm --version
-QEMU emulator version 2.11.1(Debian 1:2.11+dfsg-1ubuntu7.19)
-Copyright (c) 2003-2017 Fabrice Bellard and the QEMU Project developers
+I still prefer that you use a helper
+do_io "pwrite ${pos}K ${iosize}K" "${lowerdir}/${testfile}_random_small"
 
-Attached defconfig saved by 'make savedefconfig'.
+which also records the xfs_io command in full log.
 
-I tried increasing DEBUG_KMEMLEAK_MEM_POOL_SIZE, which did not help.
-I also tried moving kmemleak_init() back to its old location, since this
-changes seemed unrelated to the commit. Didn't help either.
+> +       pos=$(($pos + $iosize * 2))
+> +done
+> +echo >>$seqres.full
+> +
+>
+>  # Create test file with many random holes(hole size is between 1M and 5M),
+>  # total file size is 100M.
+> @@ -92,19 +129,22 @@ file_size=102400
+>  min_hole=1024
+>  max_hole=5120
+>
+> -$XFS_IO_PROG -fc "truncate ${file_size}K" "${lowerdir}/${testfile}_random_holefile" \
+> +$XFS_IO_PROG -fc "truncate ${file_size}K" "${lowerdir}/${testfile}_random_big" \
+>                 >>$seqres.full
+>
+> +echo -e "\nBig random hole test write scenarios ---\n" >>$seqres.full
+>  while [ $pos -le $max_pos ]; do
+>         iosize=$(($RANDOM % ($max_hole - $min_hole) + $min_hole))
+>         $XFS_IO_PROG -fc "pwrite ${pos}K ${iosize}K" \
+> -               "${lowerdir}/${testfile}_random_holefile" >>$seqres.full
+> -       pos=`expr $pos + $iosize + $iosize`
+> +               "${lowerdir}/${testfile}_random_big" >>$seqres.full
+> +       pos=$(($pos + $iosize * 2))
+>  done
+> +echo >>$seqres.full
+>
+>  _scratch_mount
+>
+>  # Open the test files, no errors are expected.
+> +echo -e "\nDoing copy-up...\n" >>$seqres.full
+>  for f in $SCRATCH_MNT/*; do
+>         $XFS_IO_PROG -c "open" $f >>$seqres.full
+>  done
+> @@ -112,18 +152,19 @@ done
+>  echo "Silence is golden"
+>
+>  # Check all copy-up files in upper layer.
+> -iosize=1
+> -while [ $iosize -le 2048 ]; do
+> -       diff "${lowerdir}/${testfile}_iosize${iosize}K_holefile" \
+> -               "${upperdir}/${testfile}_iosize${iosize}K_holefile" >>$seqres.full ||\
+> -               echo "${upperdir}/${testfile}_iosize${iosize}K_holefile" copy up failed!
+> -       iosize=`expr $iosize + $iosize`
+> -done
+>
+> -diff "${lowerdir}/${testfile}_empty_holefile"  "${upperdir}/${testfile}_empty_holefile"  \
+> -       >>$seqres.full || echo "${upperdir}/${testfile}_empty_holefile" copy up failed!
+> -diff "${lowerdir}/${testfile}_random_holefile" "${upperdir}/${testfile}_random_holefile" \
+> -       >>$seqres.full || echo "${upperdir}/${testfile}_random_holefile" copy up failed!
+> +diff -qr ${upperdir} ${lowerdir} >>$seqres.full
 
-Let me know if you have any suggestion how to debug this.
+The output of diff is exactly the interesting output to golden output that
+will fail the test if it is not empty.
+If you want it also in full log please use | tee -a $seqres.full
 
 Thanks,
 Amir.
-
-
-[1] https://github.com/tytso/xfstests-bld/blob/master/Documentation/kvm-xfstests.md
-
---0000000000003445c50596942e76
-Content-Type: application/octet-stream; name=defconfig
-Content-Disposition: attachment; filename=defconfig
-Content-Transfer-Encoding: base64
-Content-ID: <f_k2lin2zj0>
-X-Attachment-Id: f_k2lin2zj0
-
-Q09ORklHX0xPQ0FMVkVSU0lPTj0iLXhmc3Rlc3RzIgpDT05GSUdfU1lTVklQQz15CkNPTkZJR19Q
-T1NJWF9NUVVFVUU9eQpDT05GSUdfQVVESVQ9eQpDT05GSUdfTk9fSFo9eQpDT05GSUdfSElHSF9S
-RVNfVElNRVJTPXkKQ09ORklHX0JTRF9QUk9DRVNTX0FDQ1Q9eQpDT05GSUdfVEFTS1NUQVRTPXkK
-Q09ORklHX1RBU0tfREVMQVlfQUNDVD15CkNPTkZJR19UQVNLX1hBQ0NUPXkKQ09ORklHX1RBU0tf
-SU9fQUNDT1VOVElORz15CiMgQ09ORklHX0NQVV9JU09MQVRJT04gaXMgbm90IHNldApDT05GSUdf
-SUtDT05GSUc9eQpDT05GSUdfSUtDT05GSUdfUFJPQz15CkNPTkZJR19DR1JPVVBTPXkKQ09ORklH
-X0NHUk9VUF9TQ0hFRD15CkNPTkZJR19VU0VSX05TPXkKQ09ORklHX1NZU0ZTX0RFUFJFQ0FURUQ9
-eQpDT05GSUdfQkxLX0RFVl9JTklUUkQ9eQpDT05GSUdfQ0NfT1BUSU1JWkVfRk9SX1NJWkU9eQpD
-T05GSUdfQlBGX1NZU0NBTEw9eQpDT05GSUdfVVNFUkZBVUxURkQ9eQojIENPTkZJR19DT01QQVRf
-QlJLIGlzIG5vdCBzZXQKQ09ORklHX1NMQUI9eQpDT05GSUdfUFJPRklMSU5HPXkKQ09ORklHX1NN
-UD15CkNPTkZJR19YODZfWDJBUElDPXkKIyBDT05GSUdfWDg2X0VYVEVOREVEX1BMQVRGT1JNIGlz
-IG5vdCBzZXQKQ09ORklHX0hZUEVSVklTT1JfR1VFU1Q9eQpDT05GSUdfUEFSQVZJUlQ9eQpDT05G
-SUdfUEFSQVZJUlRfU1BJTkxPQ0tTPXkKQ09ORklHX1BBUkFWSVJUX1RJTUVfQUNDT1VOVElORz15
-CkNPTkZJR19NQ09SRTI9eQpDT05GSUdfTlJfQ1BVUz00OAojIENPTkZJR19YODZfTUNFX0FNRCBp
-cyBub3Qgc2V0CiMgQ09ORklHX01JQ1JPQ09ERSBpcyBub3Qgc2V0CkNPTkZJR19YODZfTVNSPXkK
-Q09ORklHX1g4Nl9DUFVJRD15CkNPTkZJR19OVU1BPXkKIyBDT05GSUdfQU1EX05VTUEgaXMgbm90
-IHNldApDT05GSUdfWDg2X1BNRU1fTEVHQUNZPXkKQ09ORklHX1g4Nl9DSEVDS19CSU9TX0NPUlJV
-UFRJT049eQpDT05GSUdfSFpfMzAwPXkKQ09ORklHX0tFWEVDPXkKQ09ORklHX0tFWEVDX0ZJTEU9
-eQpDT05GSUdfQ1JBU0hfRFVNUD15CiMgQ09ORklHX1JBTkRPTUlaRV9CQVNFIGlzIG5vdCBzZXQK
-Q09ORklHX1BIWVNJQ0FMX0FMSUdOPTB4MTAwMDAwMApDT05GSUdfTEVHQUNZX1ZTWVNDQUxMX0VN
-VUxBVEU9eQojIENPTkZJR19TVVNQRU5EIGlzIG5vdCBzZXQKIyBDT05GSUdfQUNQSV9SRVZfT1ZF
-UlJJREVfUE9TU0lCTEUgaXMgbm90IHNldApDT05GSUdfQ1BVX0ZSRVFfREVGQVVMVF9HT1ZfVVNF
-UlNQQUNFPXkKQ09ORklHX0NQVV9GUkVRX0dPVl9QRVJGT1JNQU5DRT15CkNPTkZJR19DUFVfRlJF
-UV9HT1ZfT05ERU1BTkQ9eQpDT05GSUdfQ1BVX0lETEVfR09WX0xBRERFUj15CiMgQ09ORklHX1BD
-SV9NTUNPTkZJRyBpcyBub3Qgc2V0CkNPTkZJR19JQTMyX0VNVUxBVElPTj15CkNPTkZJR19ETUlf
-U1lTRlM9eQpDT05GSUdfSlVNUF9MQUJFTD15CkNPTkZJR19CTEtfREVWX0lOVEVHUklUWT15CkNP
-TkZJR19QQVJUSVRJT05fQURWQU5DRUQ9eQpDT05GSUdfQlNEX0RJU0tMQUJFTD15CiMgQ09ORklH
-X01RX0lPU0NIRURfREVBRExJTkUgaXMgbm90IHNldApDT05GSUdfQklORk1UX01JU0M9eQpDT05G
-SUdfTkVUPXkKQ09ORklHX1BBQ0tFVD15CkNPTkZJR19QQUNLRVRfRElBRz15CkNPTkZJR19VTklY
-PXkKQ09ORklHX1VOSVhfRElBRz15CkNPTkZJR19YRlJNX1VTRVI9eQpDT05GSUdfTkVUX0tFWT15
-CkNPTkZJR19JTkVUPXkKQ09ORklHX0lQX01VTFRJQ0FTVD15CkNPTkZJR19JUF9BRFZBTkNFRF9S
-T1VURVI9eQpDT05GSUdfSVBfRklCX1RSSUVfU1RBVFM9eQpDT05GSUdfSVBfTVVMVElQTEVfVEFC
-TEVTPXkKQ09ORklHX0lQX1JPVVRFX01VTFRJUEFUSD15CkNPTkZJR19JUF9ST1VURV9WRVJCT1NF
-PXkKQ09ORklHX05FVF9JUElQPXkKQ09ORklHX05FVF9JUEdSRV9ERU1VWD15CkNPTkZJR19ORVRf
-SVBHUkU9eQpDT05GSUdfTkVUX0lQR1JFX0JST0FEQ0FTVD15CkNPTkZJR19TWU5fQ09PS0lFUz15
-CkNPTkZJR19ORVRfRk9VPXkKQ09ORklHX0lORVRfSVBDT01QPXkKQ09ORklHX0lORVRfVURQX0RJ
-QUc9eQpDT05GSUdfSVBWNl9ST1VURVJfUFJFRj15CkNPTkZJR19JUFY2X1RVTk5FTD15CkNPTkZJ
-R19JUFY2X01VTFRJUExFX1RBQkxFUz15CkNPTkZJR19JUFY2X1NVQlRSRUVTPXkKQ09ORklHX05F
-VFdPUktfU0VDTUFSSz15CkNPTkZJR19WTEFOXzgwMjFRPXkKQ09ORklHX0ROU19SRVNPTFZFUj15
-CkNPTkZJR19ORVRMSU5LX0RJQUc9eQpDT05GSUdfQ0dST1VQX05FVF9QUklPPXkKQ09ORklHX0NH
-Uk9VUF9ORVRfQ0xBU1NJRD15CiMgQ09ORklHX1dJUkVMRVNTIGlzIG5vdCBzZXQKQ09ORklHX05F
-VF85UD15CkNPTkZJR19ORVRfOVBfVklSVElPPXkKQ09ORklHX0NFUEhfTElCPXkKQ09ORklHX1BD
-ST15CkNPTkZJR19QQ0lfTVNJPXkKQ09ORklHX1VFVkVOVF9IRUxQRVI9eQpDT05GSUdfVUVWRU5U
-X0hFTFBFUl9QQVRIPSIvc2Jpbi9ob3RwbHVnIgpDT05GSUdfREVWVE1QRlM9eQpDT05GSUdfRldf
-TE9BREVSX1VTRVJfSEVMUEVSPXkKQ09ORklHX0ZXX0xPQURFUl9VU0VSX0hFTFBFUl9GQUxMQkFD
-Sz15CkNPTkZJR19DT05ORUNUT1I9eQpDT05GSUdfQkxLX0RFVl9MT09QPXkKQ09ORklHX0JMS19E
-RVZfUkFNPXkKQ09ORklHX0JMS19ERVZfUkFNX1NJWkU9NjU1MzYKQ09ORklHX1ZJUlRJT19CTEs9
-eQojIENPTkZJR19TQ1NJX1BST0NfRlMgaXMgbm90IHNldApDT05GSUdfQkxLX0RFVl9TRD15CkNP
-TkZJR19TQ1NJX1ZJUlRJTz15CkNPTkZJR19BVEE9eQojIENPTkZJR19TQVRBX1BNUCBpcyBub3Qg
-c2V0CiMgQ09ORklHX0FUQV9TRkYgaXMgbm90IHNldApDT05GSUdfTUQ9eQpDT05GSUdfTURfTElO
-RUFSPXkKQ09ORklHX01EX01VTFRJUEFUSD15CkNPTkZJR19NRF9GQVVMVFk9eQpDT05GSUdfQkxL
-X0RFVl9ETT15CkNPTkZJR19ETV9DUllQVD15CkNPTkZJR19ETV9TTkFQU0hPVD15CkNPTkZJR19E
-TV9USElOX1BST1ZJU0lPTklORz15CkNPTkZJR19ETV9NSVJST1I9eQpDT05GSUdfRE1fUkFJRD15
-CkNPTkZJR19ETV9aRVJPPXkKQ09ORklHX0RNX0RFTEFZPXkKQ09ORklHX0RNX0ZMQUtFWT15CkNP
-TkZJR19ETV9MT0dfV1JJVEVTPXkKQ09ORklHX05FVERFVklDRVM9eQpDT05GSUdfRFVNTVk9eQpD
-T05GSUdfTkVUQ09OU09MRT15CkNPTkZJR19ORVRDT05TT0xFX0RZTkFNSUM9eQpDT05GSUdfVFVO
-PXkKQ09ORklHX1ZFVEg9eQpDT05GSUdfVklSVElPX05FVD15CiMgQ09ORklHX0VUSEVSTkVUIGlz
-IG5vdCBzZXQKIyBDT05GSUdfV0xBTiBpcyBub3Qgc2V0CiMgQ09ORklHX0lOUFVUX01PVVNFIGlz
-IG5vdCBzZXQKIyBDT05GSUdfU0VSSU9fU0VSUE9SVCBpcyBub3Qgc2V0CkNPTkZJR19WVF9IV19D
-T05TT0xFX0JJTkRJTkc9eQojIENPTkZJR19MRUdBQ1lfUFRZUyBpcyBub3Qgc2V0CkNPTkZJR19E
-RVZLTUVNPXkKQ09ORklHX1NFUklBTF84MjUwPXkKIyBDT05GSUdfU0VSSUFMXzgyNTBfREVQUkVD
-QVRFRF9PUFRJT05TIGlzIG5vdCBzZXQKQ09ORklHX1NFUklBTF84MjUwX0NPTlNPTEU9eQojIENP
-TkZJR19TRVJJQUxfODI1MF9FWEFSIGlzIG5vdCBzZXQKQ09ORklHX1NFUklBTF84MjUwX05SX1VB
-UlRTPTMyCkNPTkZJR19TRVJJQUxfODI1MF9SVU5USU1FX1VBUlRTPTMyCkNPTkZJR19WSVJUSU9f
-Q09OU09MRT15CiMgQ09ORklHX0hXX1JBTkRPTV9JTlRFTCBpcyBub3Qgc2V0CiMgQ09ORklHX0hX
-X1JBTkRPTV9BTUQgaXMgbm90IHNldAojIENPTkZJR19IV19SQU5ET01fVklBIGlzIG5vdCBzZXQK
-Q09ORklHX0hXX1JBTkRPTV9WSVJUSU89eQojIENPTkZJR19IV01PTiBpcyBub3Qgc2V0CiMgQ09O
-RklHX1g4Nl9QS0dfVEVNUF9USEVSTUFMIGlzIG5vdCBzZXQKQ09ORklHX1JDX0NPUkU9eQpDT05G
-SUdfUkNfREVDT0RFUlM9eQpDT05GSUdfSVJfTkVDX0RFQ09ERVI9eQpDT05GSUdfSVJfUkM1X0RF
-Q09ERVI9eQpDT05GSUdfSVJfUkM2X0RFQ09ERVI9eQpDT05GSUdfSVJfSlZDX0RFQ09ERVI9eQpD
-T05GSUdfSVJfU09OWV9ERUNPREVSPXkKQ09ORklHX0lSX1NBTllPX0RFQ09ERVI9eQpDT05GSUdf
-SVJfU0hBUlBfREVDT0RFUj15CkNPTkZJR19JUl9NQ0VfS0JEX0RFQ09ERVI9eQpDT05GSUdfSVJf
-WE1QX0RFQ09ERVI9eQpDT05GSUdfSElEX0JBVFRFUllfU1RSRU5HVEg9eQpDT05GSUdfSElEUkFX
-PXkKQ09ORklHX1VISUQ9eQojIENPTkZJR19ISURfQTRURUNIIGlzIG5vdCBzZXQKIyBDT05GSUdf
-SElEX0FQUExFIGlzIG5vdCBzZXQKIyBDT05GSUdfSElEX0JFTEtJTiBpcyBub3Qgc2V0CiMgQ09O
-RklHX0hJRF9DSEVSUlkgaXMgbm90IHNldAojIENPTkZJR19ISURfQ0hJQ09OWSBpcyBub3Qgc2V0
-CiMgQ09ORklHX0hJRF9DWVBSRVNTIGlzIG5vdCBzZXQKIyBDT05GSUdfSElEX0VaS0VZIGlzIG5v
-dCBzZXQKIyBDT05GSUdfSElEX0lURSBpcyBub3Qgc2V0CiMgQ09ORklHX0hJRF9LRU5TSU5HVE9O
-IGlzIG5vdCBzZXQKIyBDT05GSUdfSElEX0xPR0lURUNIIGlzIG5vdCBzZXQKIyBDT05GSUdfSElE
-X01JQ1JPU09GVCBpcyBub3Qgc2V0CiMgQ09ORklHX0hJRF9NT05URVJFWSBpcyBub3Qgc2V0CiMg
-Q09ORklHX1VTQl9TVVBQT1JUIGlzIG5vdCBzZXQKQ09ORklHX1JUQ19DTEFTUz15CiMgQ09ORklH
-X1JUQ19EUlZfQ01PUyBpcyBub3Qgc2V0CkNPTkZJR19WSVJUX0RSSVZFUlM9eQpDT05GSUdfVklS
-VElPX1BDST15CkNPTkZJR19WSVJUSU9fQkFMTE9PTj15CiMgQ09ORklHX1g4Nl9QTEFURk9STV9E
-RVZJQ0VTIGlzIG5vdCBzZXQKIyBDT05GSUdfSU9NTVVfU1VQUE9SVCBpcyBub3Qgc2V0CkNPTkZJ
-R19WQUxJREFURV9GU19QQVJTRVI9eQpDT05GSUdfRVhUMl9GUz15CkNPTkZJR19FWFQyX0ZTX1hB
-VFRSPXkKQ09ORklHX0VYVDJfRlNfUE9TSVhfQUNMPXkKQ09ORklHX0VYVDJfRlNfU0VDVVJJVFk9
-eQpDT05GSUdfRVhUNF9GUz15CkNPTkZJR19FWFQ0X0ZTX1BPU0lYX0FDTD15CkNPTkZJR19FWFQ0
-X0ZTX1NFQ1VSSVRZPXkKQ09ORklHX0VYVDRfREVCVUc9eQpDT05GSUdfSkJEMl9ERUJVRz15CkNP
-TkZJR19YRlNfRlM9eQpDT05GSUdfWEZTX1FVT1RBPXkKQ09ORklHX1hGU19QT1NJWF9BQ0w9eQpD
-T05GSUdfWEZTX1JUPXkKQ09ORklHX1hGU19ERUJVRz15CiMgQ09ORklHX1hGU19BU1NFUlRfRkFU
-QUwgaXMgbm90IHNldApDT05GSUdfT0NGUzJfRlM9eQojIENPTkZJR19PQ0ZTMl9ERUJVR19NQVNL
-TE9HIGlzIG5vdCBzZXQKQ09ORklHX0JUUkZTX0ZTPXkKQ09ORklHX0JUUkZTX0ZTX1BPU0lYX0FD
-TD15CkNPTkZJR19CVFJGU19ERUJVRz15CkNPTkZJR19CVFJGU19BU1NFUlQ9eQpDT05GSUdfRjJG
-U19GUz15CkNPTkZJR19GMkZTX0ZTX1NFQ1VSSVRZPXkKQ09ORklHX0YyRlNfQ0hFQ0tfRlM9eQpD
-T05GSUdfRlNfREFYPXkKQ09ORklHX0ZTX0VOQ1JZUFRJT049eQpDT05GSUdfRkFOT1RJRlk9eQpD
-T05GSUdfRkFOT1RJRllfQUNDRVNTX1BFUk1JU1NJT05TPXkKQ09ORklHX1FVT1RBX05FVExJTktf
-SU5URVJGQUNFPXkKIyBDT05GSUdfUFJJTlRfUVVPVEFfV0FSTklORyBpcyBub3Qgc2V0CkNPTkZJ
-R19RRk1UX1YyPXkKQ09ORklHX0FVVE9GUzRfRlM9eQpDT05GSUdfRlVTRV9GUz15CkNPTkZJR19D
-VVNFPXkKQ09ORklHX09WRVJMQVlfRlM9eQpDT05GSUdfRlNDQUNIRT15CkNPTkZJR19GU0NBQ0hF
-X1NUQVRTPXkKQ09ORklHX0NBQ0hFRklMRVM9eQpDT05GSUdfVkZBVF9GUz15CkNPTkZJR19QUk9D
-X0tDT1JFPXkKQ09ORklHX1BST0NfQ0hJTERSRU49eQpDT05GSUdfVE1QRlM9eQpDT05GSUdfVE1Q
-RlNfUE9TSVhfQUNMPXkKQ09ORklHX0NPTkZJR0ZTX0ZTPXkKQ09ORklHX0VDUllQVF9GUz15CkNP
-TkZJR19FQ1JZUFRfRlNfTUVTU0FHSU5HPXkKQ09ORklHX0hGU1BMVVNfRlM9eQpDT05GSUdfQ1JB
-TUZTPXkKQ09ORklHX1NRVUFTSEZTPXkKQ09ORklHX1NRVUFTSEZTX1hBVFRSPXkKQ09ORklHX1NR
-VUFTSEZTX0xaTz15CkNPTkZJR19TUVVBU0hGU19YWj15CkNPTkZJR19ST01GU19GUz15CkNPTkZJ
-R19VRlNfRlM9eQpDT05GSUdfTkZTX0ZTPXkKQ09ORklHX05GU0Q9eQojIENPTkZJR19SUENTRUNf
-R1NTX0tSQjUgaXMgbm90IHNldApDT05GSUdfQ0lGUz15CiMgQ09ORklHX0NJRlNfREVCVUcgaXMg
-bm90IHNldApDT05GSUdfQ09EQV9GUz15CkNPTkZJR185UF9GUz15CkNPTkZJR19OTFNfREVGQVVM
-VD0idXRmOCIKQ09ORklHX05MU19DT0RFUEFHRV80Mzc9eQpDT05GSUdfTkxTX0NPREVQQUdFXzg1
-MD15CkNPTkZJR19OTFNfQVNDSUk9eQpDT05GSUdfTkxTX0lTTzg4NTlfMT15CkNPTkZJR19ETE09
-eQpDT05GSUdfU0VDVVJJVFk9eQojIENPTkZJR19JTlRFR1JJVFkgaXMgbm90IHNldApDT05GSUdf
-TFNNPSJ5YW1hLGxvYWRwaW4sc2FmZXNldGlkLGludGVncml0eSxzZWxpbnV4LHNtYWNrLHRvbW95
-byxhcHBhcm1vciIKIyBDT05GSUdfQ1JZUFRPX01BTkFHRVJfRElTQUJMRV9URVNUUyBpcyBub3Qg
-c2V0CkNPTkZJR19DUllQVE9fRUNIQUlOSVY9eQpDT05GSUdfQ1JZUFRPX0NSQzMyQ19JTlRFTD15
-CkNPTkZJR19DUllQVE9fQ1JDMzJfUENMTVVMPXkKQ09ORklHX0NSWVBUT19BRVNfTklfSU5URUw9
-eQpDT05GSUdfQ1JZUFRPX0FSQzQ9eQpDT05GSUdfQ1JZUFRPX0RFUz15CiMgQ09ORklHX0NSWVBU
-T19IVyBpcyBub3Qgc2V0CkNPTkZJR19QUklOVEtfVElNRT15CkNPTkZJR19NRVNTQUdFX0xPR0xF
-VkVMX0RFRkFVTFQ9NwpDT05GSUdfRFlOQU1JQ19ERUJVRz15CkNPTkZJR19ERUJVR19JTkZPPXkK
-Q09ORklHX0RFQlVHX0lORk9fUkVEVUNFRD15CiMgQ09ORklHX0VOQUJMRV9NVVNUX0NIRUNLIGlz
-IG5vdCBzZXQKQ09ORklHX0RFQlVHX1NFQ1RJT05fTUlTTUFUQ0g9eQpDT05GSUdfTUFHSUNfU1lT
-UlE9eQpDT05GSUdfREVCVUdfS0VSTkVMPXkKQ09ORklHX1BBR0VfRVhURU5TSU9OPXkKQ09ORklH
-X0RFQlVHX1BBR0VBTExPQz15CkNPTkZJR19ERUJVR19PQkpFQ1RTPXkKQ09ORklHX0RFQlVHX1NM
-QUI9eQpDT05GSUdfREVCVUdfS01FTUxFQUs9eQpDT05GSUdfSEFSRExPQ0tVUF9ERVRFQ1RPUj15
-CkNPTkZJR19CT09UUEFSQU1fSFVOR19UQVNLX1BBTklDPXkKQ09ORklHX1dRX1dBVENIRE9HPXkK
-Q09ORklHX1BBTklDX1RJTUVPVVQ9NQpDT05GSUdfU0NIRURTVEFUUz15CkNPTkZJR19TQ0hFRF9T
-VEFDS19FTkRfQ0hFQ0s9eQpDT05GSUdfUFJPVkVfTE9DS0lORz15CkNPTkZJR19MT0NLX1NUQVQ9
-eQpDT05GSUdfREVCVUdfQVRPTUlDX1NMRUVQPXkKQ09ORklHX0RFQlVHX0xJU1Q9eQpDT05GSUdf
-UkNVX0NQVV9TVEFMTF9USU1FT1VUPTYwCiMgQ09ORklHX1JDVV9UUkFDRSBpcyBub3Qgc2V0CkNP
-TkZJR19SQ1VfRVFTX0RFQlVHPXkKQ09ORklHX0ZBVUxUX0lOSkVDVElPTj15CkNPTkZJR19GQUlM
-X01BS0VfUkVRVUVTVD15CkNPTkZJR19GQVVMVF9JTkpFQ1RJT05fREVCVUdfRlM9eQpDT05GSUdf
-RlRSQUNFX1NZU0NBTExTPXkKQ09ORklHX1RSQUNFUl9TTkFQU0hPVD15CkNPTkZJR19TVEFDS19U
-UkFDRVI9eQpDT05GSUdfQkxLX0RFVl9JT19UUkFDRT15CkNPTkZJR19GVU5DVElPTl9QUk9GSUxF
-Uj15CkNPTkZJR19ERUJVR19XWD15CiMgQ09ORklHX1g4Nl9ERUJVR19GUFUgaXMgbm90IHNldAo=
---0000000000003445c50596942e76--
