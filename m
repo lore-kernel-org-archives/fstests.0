@@ -8,953 +8,216 @@ X-Spam-Status: No, score=-8.3 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F30F2C17444
-	for <linux-fstests@archiver.kernel.org>; Sun, 10 Nov 2019 13:17:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 574D4C43331
+	for <linux-fstests@archiver.kernel.org>; Sun, 10 Nov 2019 14:11:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id B8AF620B7C
-	for <linux-fstests@archiver.kernel.org>; Sun, 10 Nov 2019 13:17:24 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0D29820842
+	for <linux-fstests@archiver.kernel.org>; Sun, 10 Nov 2019 14:11:04 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="XsJPVZpB"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="c07y5DWz"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726301AbfKJNRY (ORCPT
+        id S1726467AbfKJOLD (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 10 Nov 2019 08:17:24 -0500
-Received: from mail-pf1-f194.google.com ([209.85.210.194]:37776 "EHLO
-        mail-pf1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726390AbfKJNRX (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 10 Nov 2019 08:17:23 -0500
-Received: by mail-pf1-f194.google.com with SMTP id p24so8503242pfn.4
-        for <fstests@vger.kernel.org>; Sun, 10 Nov 2019 05:17:23 -0800 (PST)
+        Sun, 10 Nov 2019 09:11:03 -0500
+Received: from mail-pf1-f193.google.com ([209.85.210.193]:35763 "EHLO
+        mail-pf1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726436AbfKJOLD (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 10 Nov 2019 09:11:03 -0500
+Received: by mail-pf1-f193.google.com with SMTP id d13so8584543pfq.2
+        for <fstests@vger.kernel.org>; Sun, 10 Nov 2019 06:11:01 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=date:from:to:cc:subject:message-id:references:mime-version
          :content-disposition:in-reply-to:user-agent;
-        bh=AtRZCkR4XnIKayiBBiWKx/zorxHFHug31B6vUpjEZDU=;
-        b=XsJPVZpBZaAkGt6ifkuwIzzW3Ccd7b+2WVrTBtZjnvN+hSDJ9v8VbZ2IeboKiWLV9r
-         q68CzYDuxYf49SFS1kh/a9F6HgYgsWE7Jx4L1SqZiv1t6s4sjqMZz4QjwoVwJrg8YwPu
-         N/kAR/0zuxxY4B6YIuDLDZTm94qfgA8Dt7yF1GEeIvLoKiZfy87/+ayTnr1NSXi+xph8
-         iZBCRxOmMjxuEqIA+Ku+x4/LxE7zKl7Bj+EkXs8ZL7jyw5/WxtkVL6Wqh9eJPck3AQ5y
-         DckqirS5zdpLVDGGRgU3E4xgPzNEV4WKVz5o42gEhakuy+jUVfsTJtuNjZx9Umo18kLl
-         9WOg==
+        bh=5mpFVceqE4AZpEDI2JwKcBlnF1E2paoSk/mNauoYhlc=;
+        b=c07y5DWzsnq2gJxUOEsXgvb09RsxAGerg1cmPif/WhTEDhn+EZYBAHJ+Lb1+wi+PQQ
+         4hOq/KY4uzXOrNAsEO/wwcA5D+60JwJ+9pr7P30qJvN/e24QpyjNgqSRPdYFLXn3F/Zq
+         reSb4a5kpfiLCfI6zKFQ/Xk3Wg2fukKSq0mDvLTzxEu753W+jSgRnWYQaQgQWtEDaXmm
+         kh8NeVYEHn2dlXwFuQ3bs96FWwrf3j5B9ZAGyC6UeLiY+cs60WTjAyQGufEKZbp+yry8
+         ILvH7wCob0D1mRXNeAH5IuMX0plLjEAUc8eQksDVTMY+Fmf6MYY+pcC7rhIhP3VJ2yBU
+         EAVA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to:user-agent;
-        bh=AtRZCkR4XnIKayiBBiWKx/zorxHFHug31B6vUpjEZDU=;
-        b=MBHfBfNqv7iyaHYPPTvgAcPwtjccuJNy+KB5PARLCECbutpPn8X8nuAhdAPvGeJwvu
-         wPYlN8LGTacqgFRBJD+LvYg2aZyuZBX1zaSS59DS3pqvrcnNGwW7YVOjkx0Zlou+/Tem
-         s6qmpX1o6qshbaTF4QoKnPn5wAZgkq4Q/xtanCpSxR76zS/5/hQpdUhFBts2k9UcItxW
-         /DL9X7VtgB5srE+mTVcRbJ1RLyFqfZG0gzg/6Mh10Hgyj3TSmX8CHrYmxbjPekT2yTAW
-         WVu3AZ2cHJDSgB2ao2tU835hTIb+vZffYwtAgUtn8sUZdIKG65tMVRuUy5y5YHtL0eh8
-         2p9w==
-X-Gm-Message-State: APjAAAXp8Rvupe5CM2cGPP8238w4lIiX2Y+tHalN4tQo2lVKt7ABHZ3h
-        iba3gGI2aRvdR+hlOlffkEyJSldu
-X-Google-Smtp-Source: APXvYqyyUuvK/TjdGRaiV/Cn2qhfDq9zR2DJfndQNq+rp583WYTv13Jf9YhGge+ogXvLwIJJOm6ZMA==
-X-Received: by 2002:a63:1311:: with SMTP id i17mr23337969pgl.343.1573391842339;
-        Sun, 10 Nov 2019 05:17:22 -0800 (PST)
+        bh=5mpFVceqE4AZpEDI2JwKcBlnF1E2paoSk/mNauoYhlc=;
+        b=mxaVXn2s6XmfyxxMB2Sh7zZITXsRzSVBqsZa3rnapMt/CdW7Q/mxp+wa8e7a4HMoBY
+         RLrSMQtWj2B7Pwl2CRBxRSQ/8lTz9P/nEY5Q5Qfp87lon4YsBR7x/fkyNVjm4+Xjrhyl
+         QS+SURYJNVFHxJfE2uP86JyaFVpP1g8HrB0Le7spRnCOZkzLAIWdBZ7vkgOFCdOPlIg/
+         4qhWL1ci8GqZjwv9uhNEqkXqb7r+gW2c4RmY9nBh3MwMvOyWQKusWSAL9S1FLngsDjkD
+         HMEJf7zdQb3pwrNPBpkpM9x7cvDTyNqwc06VmK09igXCYlJEnryzJraMaM7nNtB2gQE2
+         uRnw==
+X-Gm-Message-State: APjAAAVKuqrxKqOUZojy9kQ4+IxO94KqB34FuoHln84s0KYRnWw5oSHa
+        +ZsmpDjObmGDFhzqLUimD8I=
+X-Google-Smtp-Source: APXvYqwuZvJM44cF1SfUIIPQOXfXkIY/rKa+ldtJlz0zkAHfiPkvrVGR3awjHLwTDr2wdIeQCyCKRg==
+X-Received: by 2002:aa7:9ad0:: with SMTP id x16mr10790852pfp.51.1573395060899;
+        Sun, 10 Nov 2019 06:11:00 -0800 (PST)
 Received: from localhost ([178.128.102.47])
-        by smtp.gmail.com with ESMTPSA id v15sm9369316pfe.44.2019.11.10.05.17.17
+        by smtp.gmail.com with ESMTPSA id u7sm12293327pfh.84.2019.11.10.06.10.59
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 10 Nov 2019 05:17:21 -0800 (PST)
-Date:   Sun, 10 Nov 2019 21:17:12 +0800
+        Sun, 10 Nov 2019 06:10:59 -0800 (PST)
+Date:   Sun, 10 Nov 2019 22:10:54 +0800
 From:   Eryu Guan <guaneryu@gmail.com>
-To:     Sun Yong <sunyong0511@gmail.com>
-Cc:     fstests@vger.kernel.org, yosun@suse.com
-Subject: Re: [PATCH v2] fstests: transport two ext4 tests from LTP
-Message-ID: <20191110131710.GD8664@desktop>
-References: <CAAPJbvqksutxzznPO1T5Z_pQA-=SuKHLuzp_TOyJu7s3W2tL=Q@mail.gmail.com>
+To:     Jan Kara <jack@suse.cz>
+Cc:     fstests@vger.kernel.org,
+        "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH 2/2] generic/050: Handle xfs quota special case with
+ different output
+Message-ID: <20191110141052.GE8664@desktop>
+References: <20191105131922.24848-1-jack@suse.cz>
+ <20191105131922.24848-3-jack@suse.cz>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAAPJbvqksutxzznPO1T5Z_pQA-=SuKHLuzp_TOyJu7s3W2tL=Q@mail.gmail.com>
+In-Reply-To: <20191105131922.24848-3-jack@suse.cz>
 User-Agent: Mutt/1.12.1 (2019-06-15)
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Nov 04, 2019 at 03:30:55PM +0800, Sun Yong wrote:
-> Recently LTP upstream removed some ext4 tests[1]. And two of them is
-> still valid to keep. So I transport those two tests here.
-> 
-> ext4-nsec-timestamps, which is used to test nanosec timestamps of
-> ext4, rewrite into ext4/043 and 044.
-> ext4-subdir-limit, which is used to test subdirectory limit of ext4,
-> rewrite into ext4/045.
-> 
-> [1] https://marc.info/?l=linux-fsdevel&m=157190623919681&w=2
-> 
-> Signed-off-by: Sun Yong <yosun@suse.com>
-> ---
-> v2: Correct copyright information
-> ---
-> diff --git a/src/Makefile b/src/Makefile
-> index ce6d8610..387293d1 100644
-> --- a/src/Makefile
-> +++ b/src/Makefile
-> @@ -16,7 +16,8 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
->      holetest t_truncate_self t_mmap_dio af_unix t_mmap_stale_pmd \
->      t_mmap_cow_race t_mmap_fallocate fsync-err t_mmap_write_ro \
->      t_ext4_dax_journal_corruption t_ext4_dax_inline_corruption \
-> -    t_ofd_locks t_locks_execve t_mmap_collision mmap-write-concurrent
-> +    t_ofd_locks t_locks_execve t_mmap_collision mmap-write-concurrent \
-> +    t_ext4_file_time t_create_short_dirs t_create_long_dirs
-> 
->  LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
->      preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
-> diff --git a/src/t_create_long_dirs.c b/src/t_create_long_dirs.c
-> new file mode 100644
-> index 00000000..76a886aa
-> --- /dev/null
-> +++ b/src/t_create_long_dirs.c
-> @@ -0,0 +1,155 @@
-> +/******************************************************************************/
-> +/*
->         */
-> +/* Copyright (c) 2009 FUJITSU LIMITED
->         */
-> +/*
->         */
+[cc'ed Darrick for his inputs, if there's any]
 
-Seems your patch got white-space damaged somehow, would you please check
-and re-send?
+On Tue, Nov 05, 2019 at 02:19:22PM +0100, Jan Kara wrote:
+> Instead of faking output for the case of XFS with quotas, just use a
+> different output file with appropriate output.
+> 
+> Signed-off-by: Jan Kara <jack@suse.cz>
+> ---
+>  tests/generic/050              | 29 ++++++-----------------------
+>  tests/generic/050.cfg          |  1 +
+>  tests/generic/050.out.xfsquota | 22 ++++++++++++++++++++++
+>  3 files changed, 29 insertions(+), 23 deletions(-)
+>  create mode 100644 tests/generic/050.out.xfsquota
+> 
+> diff --git a/tests/generic/050 b/tests/generic/050
+> index a8d648e5eede..c5375805fd7a 100755
+> --- a/tests/generic/050
+> +++ b/tests/generic/050
+> @@ -39,27 +39,15 @@ _require_norecovery
+>  features=""
+>  if ! _has_metadata_journaling $SCRATCH_DEV >/dev/null; then
+>  	features="nojournal"
+> +elif [ "$FSTYP" = "xfs" ] && echo "$MOUNT_OPTIONS" | grep -q quota ; then
+> +	# Mounting with quota on XFS requires a writable fs, which means
+> +	# we expect to fail the ro blockdev test with with EPERM.
+> +	features="xfsquota"
+
+Given that we already have a non-default output for "nojournal" feature,
+this looks fine to me.
+
+>  fi
+>  _link_out_file "$features"
+>  
+>  _scratch_mkfs >/dev/null 2>&1
+>  
+> -filter_ro_mount() {
+> -	local arg=""
+> -
+> -	if [ -n "$expect_mount_failure" ]; then
+> -		arg="s|mount: $SCRATCH_MNT: permission denied|mount: device write-protected, mounting read-only|g"
+> -	fi
+> -	sed -e "$arg" | _filter_ro_mount
+> -}
+> -
+> -# Mounting with quota on XFS requires a writable fs, which means
+> -# we expect to fail the ro blockdev test with with EPERM.
+> -expect_mount_failure=
+> -if [ "$FSTYP" = "xfs" ] && echo "$MOUNT_OPTIONS" | grep -q quota ; then
+> -	expect_mount_failure=1
+> -fi
+> -
+>  #
+>  # Mark the device read-only
+>  #
+> @@ -70,7 +58,7 @@ blockdev --setro $SCRATCH_DEV
+>  # Mount it, and make sure we can't write to it, and we can unmount it again
+>  #
+>  echo "mounting read-only block device:"
+> -_try_scratch_mount 2>&1 | filter_ro_mount
+> +_try_scratch_mount 2>&1 | _filter_ro_mount
+>  if [ "${PIPESTATUS[0]}" -eq 0 ]; then
+
+But I think we could remove above check as a whole, just do
+
+_try_scratch_mount 2>&1 | _filter_ro_mount
+echo "touching file on read-only filesystem (should fail)"
+touch $SCRATCH_MNT/foo 2>&1 | _filter_scratch
+echo "unmounting read-only filesystem"
+_scratch_unmount 2>&1 | _filter_scratch
+
+as what we did prior to commit b0415daaa968 ("generic/050: fix ro
+blockdev mount of xfs with quota").
+
+>  	echo "touching file on read-only filesystem (should fail)"
+>  	touch $SCRATCH_MNT/foo 2>&1 | _filter_scratch
+> @@ -81,11 +69,6 @@ if [ "${PIPESTATUS[0]}" -eq 0 ]; then
+>  	#
+>  	echo "unmounting read-only filesystem"
+>  	_scratch_unmount 2>&1 | _filter_scratch
+> -elif [ -n "${expect_mount_failure}" ]; then
+> -	# Mount failed, so simulate EROFS instead of scribbling on root fs
+> -	echo "touching file on read-only filesystem (should fail)"
+> -	echo "touch: cannot touch 'SCRATCH_MNT/foo': Read-only file system"
+> -	echo "unmounting read-only filesystem"
+>  else
+>  	echo "Mount failed, though it wasn't supposed to!"
+>  fi
+
+So this message could be removed too, which is confusing in xfsquota
+case, and _scratch_unmount error message would break golden image in
+non-xfsquota case.
+
+> @@ -124,7 +107,7 @@ _scratch_unmount 2>&1 | _filter_scratch | _filter_ending_dot
+>  # data recovery hack.
+>  #
+>  echo "mounting filesystem with -o norecovery on a read-only device:"
+> -_try_scratch_mount -o norecovery 2>&1 | filter_ro_mount
+> +_try_scratch_mount -o norecovery 2>&1 | _filter_ro_mount
+>  if [ "${PIPESTATUS[0]}" -eq 0 ]; then
+>  	echo "unmounting read-only filesystem"
+>  	_scratch_unmount 2>&1 | _filter_scratch
+> diff --git a/tests/generic/050.cfg b/tests/generic/050.cfg
+> index c76bd473873b..1d9d60bc69a0 100644
+> --- a/tests/generic/050.cfg
+> +++ b/tests/generic/050.cfg
+> @@ -1 +1,2 @@
+>  nojournal: nojournal
+> +xfsquota: xfsquota
+> diff --git a/tests/generic/050.out.xfsquota b/tests/generic/050.out.xfsquota
+> new file mode 100644
+> index 000000000000..1a90d525c40a
+> --- /dev/null
+> +++ b/tests/generic/050.out.xfsquota
+> @@ -0,0 +1,22 @@
+> +QA output created by 050
+> +setting device read-only
+> +mounting read-only block device:
+> +mount: /mnt-scratch: permission denied
+> +Mount failed, though it wasn't supposed to!
+
+This is confusing, we expect a mount failure in xfsquota case.
 
 Thanks,
 Eryu
 
-> +/* This program is free software;  you can redistribute it and/or
-> modify      */
-> +/* it under the terms of the GNU General Public License as published
-> by       */
-> +/* the Free Software Foundation; either version 2 of the License, or
->         */
-> +/* (at your option) any later version.
->         */
-> +/*
->         */
-> +/* This program is distributed in the hope that it will be useful,
->         */
-> +/* but WITHOUT ANY WARRANTY;  without even the implied warranty of
->         */
-> +/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See
->         */
-> +/* the GNU General Public License for more details.
->         */
-> +/*
->         */
-> +/* You should have received a copy of the GNU General Public License
->         */
-> +/* along with this program;  if not, write to the Free Software
->         */
-> +/* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-> 02110-1301 USA    */
-> +/*
->         */
-> +/* Author: Li Zefan <lizf@cn.fujitsu.com>
->         */
-> +/*
->         */
-> +/******************************************************************************/
-> +
-> +#define _POSIX_C_SOURCE 200809L
-> +#include <unistd.h>
-> +#include <stdlib.h>
-> +#include <stdio.h>
-> +#include <stdlib.h>
-> +#include <time.h>
-> +#include <fcntl.h>
-> +#include <sys/types.h>
-> +#include <sys/stat.h>
-> +#include "config.h"
-> +
-> +#define NAME_LEN    255
-> +#define NCHARS        62
-> +#define MAX_LEN1    62
-> +#define MAX_LEN2    (62 * 62)
-> +#define MAX_LEN3    (62 * 62 * 62)
-> +
-> +/* valid characters for the directory name */
-> +char chars[NCHARS + 1] =
-> +    "0123456789qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM";
-> +
-> +/* to store the generated directory name */
-> +char name[NAME_LEN + 1];
-> +int names;
-> +int parent_fd;
-> +
-> +/*
-> + * init_name - initialize the directory name
-> + *
-> + * Generate a randomized directory name, and then we generate more
-> + * directory names based on it.
-> + */
-> +void init_name(void)
-> +{
-> +    int i;
-> +
-> +    srand(time(NULL));
-> +
-> +    for (i = 0; i < NAME_LEN; i++)
-> +        name[i] = chars[rand() % 62];
-> +}
-> +
-> +void create_dir(void)
-> +{
-> +    if (mkdirat(parent_fd, name, S_IRWXU)) {
-> +        perror("mkdir");
-> +        exit(1);
-> +    }
-> +}
-> +
-> +/*
-> + * create_dirs - create @names directory names
-> + * @n: how many names to be created
-> + *
-> + * if n <= 62,       we need to modify 1 char of the name
-> + * if n <= 62*62,    we need to modify 2 chars
-> + * if n <= 62*62*62, we need to modify 3 chars
-> + */
-> +void create_dirs(int n)
-> +{
-> +    int i, j, k;
-> +    int depth;
-> +
-> +    if (n <= MAX_LEN1)
-> +        depth = 1;
-> +    else if (n <= MAX_LEN2)
-> +        depth = 2;
-> +    else
-> +        depth = 3;
-> +
-> +    for (i = 0; i < NCHARS; i++) {
-> +        name[0] = chars[i];
-> +        if (depth == 1) {
-> +            create_dir();
-> +            if (--n == 0)
-> +                return;
-> +            continue;
-> +        }
-> +
-> +        for (j = 0; j < NCHARS; j++) {
-> +            name[1] = chars[j];
-> +            if (depth == 2) {
-> +                create_dir();
-> +                if (--n == 0)
-> +                    return;
-> +                continue;
-> +            }
-> +
-> +            for (k = 0; k < NCHARS; k++) {
-> +                name[2] = chars[k];
-> +                create_dir();
-> +                if (--n == 0)
-> +                    return;
-> +            }
-> +        }
-> +    }
-> +}
-> +
-> +void usage()
-> +{
-> +    fprintf(stderr, "Usage: create_long_dirs nr_dirs parent_dir\n");
-> +}
-> +
-> +/*
-> + * Create long-name directories
-> + * @argv[1]: directory number
-> + * @argv[2]: parent directory
-> + */
-> +int main(int argc, char *argv[])
-> +{
-> +    if (argc != 3) {
-> +        usage();
-> +        return 1;
-> +    }
-> +
-> +    names = atoi(argv[1]);
-> +    if (names > MAX_LEN3 || names <= 0) {
-> +        usage();
-> +        return 1;
-> +    }
-> +
-> +    parent_fd = open(argv[2], O_RDONLY);
-> +    if (parent_fd == -1) {
-> +        perror("open parent dir failed");
-> +        return 1;
-> +    }
-> +
-> +    init_name();
-> +
-> +    create_dirs(names);
-> +
-> +    return 0;
-> +}
-> diff --git a/src/t_create_short_dirs.c b/src/t_create_short_dirs.c
-> new file mode 100644
-> index 00000000..c5733b9d
-> --- /dev/null
-> +++ b/src/t_create_short_dirs.c
-> @@ -0,0 +1,158 @@
-> +/******************************************************************************/
-> +/*
->         */
-> +/* Copyright (c) 2009 FUJITSU LIMITED
->         */
-> +/*
->         */
-> +/* This program is free software;  you can redistribute it and/or
-> modify      */
-> +/* it under the terms of the GNU General Public License as published
-> by       */
-> +/* the Free Software Foundation; either version 2 of the License, or
->         */
-> +/* (at your option) any later version.
->         */
-> +/*
->         */
-> +/* This program is distributed in the hope that it will be useful,
->         */
-> +/* but WITHOUT ANY WARRANTY;  without even the implied warranty of
->         */
-> +/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See
->         */
-> +/* the GNU General Public License for more details.
->         */
-> +/*
->         */
-> +/* You should have received a copy of the GNU General Public License
->         */
-> +/* along with this program;  if not, write to the Free Software
->         */
-> +/* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-> 02110-1301 USA    */
-> +/*
->         */
-> +/* Author: Li Zefan <lizf@cn.fujitsu.com>
->         */
-> +/*
->         */
-> +/******************************************************************************/
-> +
-> +#define _POSIX_C_SOURCE 200809L
-> +#include <unistd.h>
-> +#include <stdlib.h>
-> +#include <stdio.h>
-> +#include <errno.h>
-> +#include <fcntl.h>
-> +#include <sys/stat.h>
-> +#include <sys/types.h>
-> +#include "config.h"
-> +
-> +/* valid characters for a directory name */
-> +char chars[] =
-> "0123456789qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM";
-> +
-> +/* to store the generated directory name */
-> +char name[10];
-> +int names;
-> +int parent_fd;
-> +
-> +/* NCHARS = 10 + 26 + 26 = 62 */
-> +#define NCHARS        62
-> +#define MAX_LEN1    62
-> +#define MAX_LEN2    (62 * 62)
-> +#define MAX_LEN3    (62 * 62 * 62)
-> +#define MAX_NAMES    (MAX_LEN1 + MAX_LEN2 + MAX_LEN3)
-> +
-> +void create_dir(void)
-> +{
-> +    if (mkdirat(parent_fd, name, S_IRWXU)) {
-> +        perror("mkdir");
-> +        exit(1);
-> +    }
-> +}
-> +
-> +/*
-> + * create_1 - create length-1 directory names
-> + * @n: how name names to be created
-> + */
-> +void create_1(int n)
-> +{
-> +    int i;
-> +
-> +    name[1] = '\0';
-> +    for (i = 0; i < NCHARS; i++) {
-> +        name[0] = chars[i];
-> +        create_dir();
-> +        if (--n == 0)
-> +            return;
-> +    }
-> +}
-> +
-> +/*
-> + * create_2 - generate length-2 directory names
-> + * @n: how many names to be created
-> + */
-> +void create_2(int n)
-> +{
-> +    int i, j;
-> +
-> +    name[2] = '\0';
-> +    for (i = 0; i < NCHARS; i++) {
-> +        name[0] = chars[i];
-> +        for (j = 0; j < NCHARS; j++) {
-> +            name[1] = chars[j];
-> +            create_dir();
-> +            if (--n == 0)
-> +                return;
-> +        }
-> +    }
-> +}
-> +
-> +/*
-> + * create_3 - generate length-3 directory names
-> + * @n: how many names to be created
-> + */
-> +void create_3(int n)
-> +{
-> +    int i, j, k;
-> +
-> +    name[3] = '\0';
-> +    for (i = 0; i < NCHARS; i++) {
-> +        name[0] = chars[i];
-> +        for (j = 0; j < NCHARS; j++) {
-> +            name[1] = chars[j];
-> +            for (k = 0; k < NCHARS; k++) {
-> +                name[2] = chars[k];
-> +                create_dir();
-> +                if (--n == 0)
-> +                    return;
-> +            }
-> +        }
-> +    }
-> +}
-> +
-> +void usage()
-> +{
-> +    fprintf(stderr, "Usage: create_short_dirs nr_dirs parent_dir\n");
-> +}
-> +
-> +/*
-> + * Create short-name directoriess
-> + * @argv[1]: director number
-> + * @argv[2]: the parent directory
-> + */
-> +int main(int argc, char *argv[])
-> +{
-> +    if (argc != 3) {
-> +        usage();
-> +        return 1;
-> +    }
-> +
-> +    names = atoi(argv[1]);
-> +    if (names > MAX_NAMES || names <= 0) {
-> +        usage();
-> +        return 1;
-> +    }
-> +
-> +    parent_fd = open(argv[2], O_RDONLY);
-> +    if (parent_fd == -1) {
-> +        perror("open parent dir");
-> +        return 1;
-> +    }
-> +
-> +    create_1(names);
-> +    if (names <= MAX_LEN1)
-> +        return 0;
-> +
-> +    names -= MAX_LEN1;
-> +    create_2(names);
-> +    if (names <= MAX_LEN2)
-> +        return 0;
-> +
-> +    names -= MAX_LEN2;
-> +    create_3(names);
-> +
-> +    return 0;
-> +}
-> diff --git a/src/t_ext4_file_time.c b/src/t_ext4_file_time.c
-> new file mode 100644
-> index 00000000..a10adb3d
-> --- /dev/null
-> +++ b/src/t_ext4_file_time.c
-> @@ -0,0 +1,69 @@
-> +/******************************************************************************/
-> +/*
->         */
-> +/* Copyright (c) 2009 FUJITSU LIMITED
->         */
-> +/*
->         */
-> +/* This program is free software;  you can redistribute it and/or
-> modify      */
-> +/* it under the terms of the GNU General Public License as published
-> by       */
-> +/* the Free Software Foundation; either version 2 of the License, or
->         */
-> +/* (at your option) any later version.
->         */
-> +/*
->         */
-> +/* This program is distributed in the hope that it will be useful,
->         */
-> +/* but WITHOUT ANY WARRANTY;  without even the implied warranty of
->         */
-> +/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See
->         */
-> +/* the GNU General Public License for more details.
->         */
-> +/*
->         */
-> +/* You should have received a copy of the GNU General Public License
->         */
-> +/* along with this program;  if not, write to the Free Software
->         */
-> +/* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-> 02110-1301 USA    */
-> +/*
->         */
-> +/* Author: Li Zefan <lizf@cn.fujitsu.com>
->         */
-> +/*
->         */
-> +/******************************************************************************/
-> +
-> +#include <sys/types.h>
-> +#include <sys/stat.h>
-> +#include <unistd.h>
-> +#include <stdio.h>
-> +#include <string.h>
-> +
-> +/*
-> + * Usage: file_time <filename> <atime|mtime|ctime> <sec|nsec>
-> + */
-> +int main(int argc, char *argv[])
-> +{
-> +    time_t t;
-> +    struct stat st;
-> +
-> +    if (argc != 4) {
-> +        fprintf(stderr, "Wrong argument num!\n");
-> +        return 1;
-> +    }
-> +
-> +    if (stat(argv[1], &st) != 0) {
-> +        perror("stat failed");
-> +        return 1;
-> +    }
-> +
-> +    if (strcmp(argv[3], "sec") == 0) {
-> +        if (strcmp(argv[2], "atime") == 0)
-> +            t = st.st_atime;
-> +        else if (strcmp(argv[2], "mtime") == 0)
-> +            t = st.st_mtime;
-> +        else
-> +            t = st.st_ctime;
-> +    } else if (strcmp(argv[3], "nsec") == 0) {
-> +        if (strcmp(argv[2], "atime") == 0)
-> +            t = st.st_atim.tv_nsec;
-> +        else if (strcmp(argv[2], "mtime") == 0)
-> +            t = st.st_mtim.tv_nsec;
-> +        else
-> +            t = st.st_ctim.tv_nsec;
-> +    } else {
-> +        fprintf(stderr, "Wrong argument: %s\n", argv[3]);
-> +        return 1;
-> +    }
-> +
-> +    printf("%lu\n", t);
-> +
-> +    return 0;
-> +}
-> diff --git a/tests/ext4/043 b/tests/ext4/043
-> new file mode 100755
-> index 00000000..b6e5df9f
-> --- /dev/null
-> +++ b/tests/ext4/043
-> @@ -0,0 +1,64 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2019 SUSE Linux Products GmbH.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 043
-> +#
-> +# Transfer from ltp/testcases/kernel/fs/ext4-new-features/ext4_nsec_timestamps
-> +# Test file timestamps is second with 128 inode size
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1    # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +    cd /
-> +    rm -f $tmp.*
-> +    _scratch_cleanup_files
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +_supported_fs ext3 ext4
-> +_supported_os Linux
-> +
-> +_require_scratch
-> +_require_test_program "t_ext4_file_time"
-> +_require_command "$TUNE2FS_PROG" tune2fs
-> +
-> +echo "Silence is golden"
-> +
-> +echo "Start test timestamps with 128 inode size one device
-> $SCRATCH_DEV" >$seqres.full
-> +_scratch_mkfs_ext4 -I 128 >> $seqres.full 2>&1
-> +tune2fs -O extents $SCRATCH_DEV >>$seqres.full 2>&1
-> +_scratch_mount
-> +
-> +touch "${SCRATCH_MNT}/tmp_file"
-> +
-> +atime=`$here/src/t_ext4_file_time $SCRATCH_MNT/tmp_file atime nsec`
-> +mtime=`$here/src/t_ext4_file_time $SCRATCH_MNT/tmp_file mtime nsec`
-> +ctime=`$here/src/t_ext4_file_time $SCRATCH_MNT/tmp_file ctime nsec`
-> +
-> +if [ $atime -ne 0 -o $mtime -ne 0 -o $ctime -ne 0 ]; then
-> +        echo "Timestamp is not second(atime: $atime, mtime: $mtime,
-> ctime: $ctime)" >> $seqres.full
-> +        _scratch_unmount >> $seqres.full 2>&1
-> +        exit
-> +fi
-> +echo "Ext4 nanosecond timestamps test with 128 inode size pass" >> $seqres.full
-> +_scratch_unmount >> $seqres.full 2>&1
-> +
-> +# no BUG_ON, all done
-> +status=0
-> +exit
-> diff --git a/tests/ext4/043.out b/tests/ext4/043.out
-> new file mode 100644
-> index 00000000..f90f0a57
-> --- /dev/null
-> +++ b/tests/ext4/043.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 043
-> +Silence is golden
-> diff --git a/tests/ext4/044 b/tests/ext4/044
-> new file mode 100755
-> index 00000000..3e899f5a
-> --- /dev/null
-> +++ b/tests/ext4/044
-> @@ -0,0 +1,112 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2019 SUSE Linux Products GmbH.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 044
-> +#
-> +# Transfer from ltp/testcases/kernel/fs/ext4-new-features/ext4_nsec_timestamps
-> +# Test file timestamps is nanosecond with 256 inode size
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1    # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +    cd /
-> +    rm -f $tmp.*
-> +    _scratch_cleanup_files
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +_supported_fs ext3 ext4
-> +_supported_os Linux
-> +_require_scratch
-> +_require_test_program "t_ext4_file_time"
-> +
-> +echo "Silence is golden"
-> +
-> +echo "Test timestamps with 256 inode size one device $SCRATCH_DEV"
-> >$seqres.full
-> +_scratch_mkfs_ext4 -t ext3 -I 256 >> $seqres.full 2>&1
-> +_scratch_mount
-> +
-> +# Create file
-> +touch "${SCRATCH_MNT}/tmp_file"
-> +sleep 1
-> +
-> +# Change atime, ctime and mtime of the file
-> +touch "${SCRATCH_MNT}/tmp_file"
-> +
-> +cur_time=`date '+%s %N'`
-> +sec=`echo $cur_time | awk {'print $1'}`
-> +nsec=`echo $cur_time | awk {'print $2'}`
-> +
-> +sec_atime=`$here/src/t_ext4_file_time $SCRATCH_MNT/tmp_file atime sec`
-> +sec_mtime=`$here/src/t_ext4_file_time $SCRATCH_MNT/tmp_file mtime sec`
-> +sec_ctime=`$here/src/t_ext4_file_time $SCRATCH_MNT/tmp_file ctime sec`
-> +nsec_atime=`$here/src/t_ext4_file_time $SCRATCH_MNT/tmp_file atime nsec`
-> +nsec_mtime=`$here/src/t_ext4_file_time $SCRATCH_MNT/tmp_file mtime nsec`
-> +nsec_ctime=`$here/src/t_ext4_file_time $SCRATCH_MNT/tmp_file ctime nsec`
-> +
-> +# Test nanosecond
-> +if [ $nsec_atime -eq 0 -a $nsec_mtime -eq 0 -a $nsec_ctime -eq 0 ]; then
-> +        echo "The timestamp is not nanosecond(nsec_atime: $nsec_atime, \
-> +              nsec_mtime: $nsec_mtime, nsec_ctime: $nsec_ctime)" >>
-> $seqres.full
-> +        _scratch_unmount >> $seqres.full 2>&1
-> +        exit
-> +fi
-> +
-> +diff1=$(( $sec_atime - $sec ))
-> +diff2=$(( $sec_mtime - $sec ))
-> +diff3=$(( $sec_ctime - $sec ))
-> +
-> +# Test difference between file time and current time
-> +if [ $diff1 -gt 1 -o $diff2 -gt 1 -o $diff2 -gt 1 ]; then
-> +        echo "The timestamp is wrong, it must be earlier than the
-> current time we got. \
-> +             (sec_atime: $sec_atime, sec_mtime: $sec_mtime,
-> sec_ctime: $sec_ctime, \
-> +             cur_time[s]: $sec)" >> $seqres.full
-> +        _scratch_unmount >> $seqres.full 2>&1
-> +        exit
-> +fi
-> +_scratch_unmount >> $seqres.full 2>&1
-> +
-> +# Test mount to ext3 and then mount back to ext4
-> +mount -t ext3 $SCRATCH_DEV $SCRATCH_MNT
-> +if [ $? -ne 0 ]; then
-> +        echo "$SCRATCH_DEV fail in mounting to ext3" >> $seqres.full
-> +        _scratch_unmount >> $seqres.full 2>&1
-> +        exit
-> +fi
-> +_scratch_unmount >> $seqres.full 2>&1
-> +_scratch_mount
-> +
-> +nsec_atime2=`$here/src/t_ext4_file_time $SCRATCH_MNT/tmp_file atime nsec`
-> +nsec_mtime2=`$here/src/t_ext4_file_time $SCRATCH_MNT/tmp_file mtime nsec`
-> +nsec_ctime2=`$here/src/t_ext4_file_time $SCRATCH_MNT/tmp_file ctime nsec`
-> +
-> +if [ $nsec_atime -ne $nsec_atime2 -o $nsec_ctime -ne $nsec_ctime2 -o \
-> +     $nsec_mtime -ne $nsec_mtime2 ]; then
-> +        echo "File nanosecond timestamp has changed \
-> +                        unexpected. Before[atime mtime ctime]: $nsec_atime \
-> +                        nsec_mtime $nsec_ctime, After[atime mtime ctime]: \
-> +                        $nsec_atime2 $nsec_mtime2 $nsec_ctime2)" >>
-> $seqres.full
-> +        _scratch_unmount >> $seqres.full 2>&1
-> +        exit
-> +fi
-> +_scratch_unmount >> $seqres.full 2>&1
-> +
-> +# no BUG_ON, all done
-> +status=0
-> +exit
-> diff --git a/tests/ext4/044.out b/tests/ext4/044.out
-> new file mode 100644
-> index 00000000..12a61dc4
-> --- /dev/null
-> +++ b/tests/ext4/044.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 044
-> +Silence is golden
-> diff --git a/tests/ext4/045 b/tests/ext4/045
-> new file mode 100755
-> index 00000000..c70baa97
-> --- /dev/null
-> +++ b/tests/ext4/045
-> @@ -0,0 +1,148 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2019 SUSE Linux Products GmbH.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 045
-> +#
-> +# Transfer from
-> ltp/testcases/kernel/fs/ext4-new-features/ext4_subdir_limit_test
-> +#
-> +# Test subdirectory limit of ext4.
-> +# We create more than 32000 subdirectorys on the ext4 filesystem.
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1    # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +SHORT_DIR=1
-> +LONG_DIR=2
-> +FAIL=1
-> +PASS=0
-> +prev_block_size=0
-> +prev_result=$FAIL
-> +
-> +_cleanup()
-> +{
-> +    cd /
-> +    rm -f $tmp.*
-> +    _scratch_cleanup_files
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +_supported_fs ext4
-> +_supported_os Linux
-> +
-> +_require_scratch
-> +_require_test_program "t_create_short_dirs"
-> +_require_test_program "t_create_long_dirs"
-> +_require_command "$TUNE2FS_PROG" tune2fs
-> +_require_command "$E2FSCK_PROG" e2fsck
-> +_require_dumpe2fs
-> +
-> +echo "Silence is golden"
-> +
-> +# Run a test case
-> +# $1: Number of directories to create
-> +# $2: create short dir or long dir
-> +# $3: parent directory
-> +# $4: filesystem block size
-> +_workout()
-> +{
-> +    local dir_name_len=
-> +    if [ $2 -eq $SHORT_DIR ]; then
-> +        dir_name_len="short name"
-> +    else
-> +        dir_name_len="long name"
-> +    fi
-> +
-> +    echo "Num of dirs to create: $1, Dir name len: $dir_name_len, " \
-> +          "Parent dir: $3, Block size: $4" >> $seqres.full 2>&1
-> +
-> +    # Only mkfs if block size has been changed, or previous case failed
-> +    if [ $prev_result -ne $PASS -o $4 -ne $prev_block_size ]; then
-> +        $MKFS_EXT4_PROG -F -b $4 -I 256 $SCRATCH_DEV >> $seqres.full 2>&1
-> +        prev_block_size=$4
-> +        tune2fs -O extents $SCRATCH_DEV >> $seqres.full 2>&1
-> +    fi
-> +    prev_result=$FAIL
-> +
-> +    _scratch_mount
-> +
-> +    # create directories
-> +    mkdir -p $3 2> /dev/null
-> +
-> +    if [ $2 -eq $SHORT_DIR ]; then
-> +        $here/src/t_create_short_dirs $1 $3
-> +    else
-> +        $here/src/t_create_long_dirs $1 $3
-> +    fi
-> +
-> +    if [ $? -ne 0 ]; then
-> +        nr_dirs=`ls $3 | wc -l`
-> +        echo "Failed to create directories - $nr_dirs"
-> +        _scratch_unmount
-> +        return
-> +    fi
-> +
-> +    # delete directories
-> +    cd $3
-> +    ls | xargs rmdir
-> +    if [ $? -ne 0 ]; then
-> +        echo "Failed to remove directories in $3"
-> +        cd - > /dev/null
-> +        _scratch_unmount
-> +        return
-> +    fi
-> +    cd - > /dev/null
-> +    _scratch_unmount
-> +
-> +    # check dir_nlink is set
-> +    dumpe2fs $SCRATCH_DEV 2> /dev/null | grep '^Filesystem features'
-> | grep -q dir_nlink
-> +    if [ $? -ne 0 ]; then
-> +        echo "Feature dir_nlink is not set, please check $seqres.full
-> for detail"
-> +        return
-> +    fi
-> +
-> +    # run fsck to make sure the filesystem has no errors
-> +    $E2FSCK_PROG -fy $SCRATCH_DEV >> $seqres.full 2>&1
-> +    if [ $? -ne 0 ]; then
-> +        echo "fsck: the filesystem has errors, please check
-> $seqres.full for detail"
-> +        return
-> +    fi
-> +
-> +    prev_result=$PASS
-> +}
-> +
-> +# main
-> +DIR_LEN=( $SHORT_DIR $LONG_DIR )
-> +PARENT_DIR=( "$SCRATCH_MNT" "$SCRATCH_MNT/sub" )
-> +BLOCK_SIZE=( 1024 2048 4096 )
-> +
-> +for ((i = 0; i < 3; i++)); do
-> +    for ((j = 0; j < 2; j++)); do
-> +        for ((k = 0; k < 2; k++)); do
-> +            if [ ${DIR_LEN[$k]} -eq $LONG_DIR -a \
-> +                    ${BLOCK_SIZE[$i]} -eq 1024 ]; then
-> +                continue
-> +            fi
-> +            _workout 65537 ${DIR_LEN[$k]} ${PARENT_DIR[$j]} ${BLOCK_SIZE[$i]}
-> +        done
-> +    done
-> +done
-> +
-> +_scratch_unmount >> $seqres.full 2>&1
-> +
-> +# no BUG_ON, all done
-> +status=0
-> +exit
-> diff --git a/tests/ext4/045.out b/tests/ext4/045.out
-> new file mode 100644
-> index 00000000..66276cfa
-> --- /dev/null
-> +++ b/tests/ext4/045.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 045
-> +Silence is golden
-> diff --git a/tests/ext4/group b/tests/ext4/group
-> index 9dfc0d35..8419cdea 100644
-> --- a/tests/ext4/group
-> +++ b/tests/ext4/group
-> @@ -45,6 +45,9 @@
->  040 dangerous_fuzzers
->  041 dangerous_fuzzers
->  042 auto quick
-> +043 auto quick
-> +044 auto quick
-> +045 auto
->  271 auto rw quick
->  301 aio auto ioctl rw stress defrag
->  302 aio auto ioctl rw stress defrag
+> +setting device read-write
+> +mounting read-write block device:
+> +touch files
+> +going down:
+> +unmounting shutdown filesystem:
+> +setting device read-only
+> +mounting filesystem that needs recovery on a read-only device:
+> +mount: device write-protected, mounting read-only
+> +mount: cannot mount device read-only
+> +unmounting read-only filesystem
+> +umount: SCRATCH_DEV: not mounted
+> +mounting filesystem with -o norecovery on a read-only device:
+> +mount: /mnt-scratch: permission denied
+> +Mount failed, though it wasn't supposed to!
+> +setting device read-write
+> +mounting filesystem that needs recovery with -o ro:
+> +*** done
+> -- 
+> 2.16.4
+> 
