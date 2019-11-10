@@ -2,393 +2,168 @@ Return-Path: <SRS0=7tTV=ZC=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.3 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+X-Spam-Status: No, score=-5.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham
-	autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A9D00C43331
-	for <linux-fstests@archiver.kernel.org>; Sun, 10 Nov 2019 16:33:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DE8E8C43331
+	for <linux-fstests@archiver.kernel.org>; Sun, 10 Nov 2019 16:51:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 76643214E0
-	for <linux-fstests@archiver.kernel.org>; Sun, 10 Nov 2019 16:33:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A8C16206BB
+	for <linux-fstests@archiver.kernel.org>; Sun, 10 Nov 2019 16:51:54 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="gsUFEzbE"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="VJ5DHYVb"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726983AbfKJQdp (ORCPT
+        id S1726953AbfKJQvy (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 10 Nov 2019 11:33:45 -0500
-Received: from mail-pl1-f194.google.com ([209.85.214.194]:34066 "EHLO
-        mail-pl1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727151AbfKJQdp (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 10 Nov 2019 11:33:45 -0500
-Received: by mail-pl1-f194.google.com with SMTP id h13so1250753plr.1
-        for <fstests@vger.kernel.org>; Sun, 10 Nov 2019 08:33:42 -0800 (PST)
+        Sun, 10 Nov 2019 11:51:54 -0500
+Received: from mail-pg1-f194.google.com ([209.85.215.194]:45989 "EHLO
+        mail-pg1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726859AbfKJQvy (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 10 Nov 2019 11:51:54 -0500
+Received: by mail-pg1-f194.google.com with SMTP id w11so7617045pga.12
+        for <fstests@vger.kernel.org>; Sun, 10 Nov 2019 08:51:53 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to:user-agent;
-        bh=hYv/uD84l5Ocg/3YaFDS/nvfdN/chJK6PpLrkQbFlhk=;
-        b=gsUFEzbEzeGPRxeKlPA4gqIW9KAcSkcVJEyXx0Dar2fFYiKFHLpaO8a46bPChEKxM7
-         DELoA2nfzA75mSzlPAnLmBMwu6ySPUBMybH+1jiKkjehP993aAkvuPeqlD0WBflSbAVc
-         KllV/aTNq9rLzra9YkmMtebnRT3jDMdrJZnp/g011KGFUfRumm4y6L/89MQYMgJNbKa8
-         G/MXRl2FxcIC15XyMMc/iFWbJg96ZW32NuXU027gfaZhVzlqe8m0sEYkRlrb4RWoODrN
-         pgFUZEUPoYxpiL7t4aEiFVCqN35QwsxHQ8NBM2lrPIif4oIdeHyi+OMdXe7a+sEXxR6O
-         2CyQ==
+        h=message-id:date:from:to:subject:mime-version:content-disposition;
+        bh=1RoOs8XQFgdHOnEtT79h0OYDv6e2ANC7/kx67v9q5QA=;
+        b=VJ5DHYVb8yIPFc8XSeQubjhVRfqz9StjEGr3svTxkXLPmdgA/uMn2nCPLwTnSrjoi2
+         +GRM6ticq20Lw20kf5Eq94kdEXqsKstbiEOMPu+aLQ5h8iS++0fRrL6NOR1mzntsK5Qm
+         gY3mUsZwCOEUawMx5JgHtEcFzLKvQiapbKvr5BvR0TR3YxBwOAiuQfJIO1nIDK5nRh4A
+         eiLrWmxkIJyOUW6R9anieMx+zCgXf2PKf+ro2LKMc0BqbKW7cvkM81SFpkltggKFYQ8W
+         I5D3quppl5XR3EDHSgbKngpmWoydV1pmUlzYC3iNs7iIlZ0pU6u/S/6EC3tPEfU38Vyl
+         vVig==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to:user-agent;
-        bh=hYv/uD84l5Ocg/3YaFDS/nvfdN/chJK6PpLrkQbFlhk=;
-        b=dZgTZlHEa9CNbqaeZ53Yt84xbsqbESII31xoe/O9ySvhOvtAxRwL/lWn04KKeT15uA
-         rKf1WxqyH6NF9i3CtcEQ1L2ivOqBvjZ8UtlVGZh4+MT9vp/FzGuD6fOD+RHK5hmLYNne
-         U8E0YGfcaYMEVWdL8Wd1b7db5gse4CM5t2NNbw8fkszsgXt6IHv3N7GtIKYLMR62/jQN
-         JAXqBaA9MF1DKRwVsa5GhOnj7mOIYIcOw4EH8bJOiG8iKTYZAmJSs0GNgyhCDbxrS5PP
-         le7wLtPIuDeQsVcn75mPpgBAW7fUj8HaLXkesNn4ouQGy0yUAPC7MBEow2zKfscvG1NJ
-         5bZA==
-X-Gm-Message-State: APjAAAW/CmGQUtIKVD9ZTjYZiM8EZqBXEu30uY7AcCqNBjF68H0f32vC
-        yg+HwjG6VYQyh+0OysQFITPR1nIz
-X-Google-Smtp-Source: APXvYqwqvCBy5D8DY/P6RnOEyvmwA+SMAi1P9/EDKA5w5RXC3aqQ+DVqnMXFR9DZTTOuEfMOmXW7xA==
-X-Received: by 2002:a17:902:8bcb:: with SMTP id r11mr11035035plo.11.1573403622315;
-        Sun, 10 Nov 2019 08:33:42 -0800 (PST)
+        h=x-gm-message-state:message-id:date:from:to:subject:mime-version
+         :content-disposition;
+        bh=1RoOs8XQFgdHOnEtT79h0OYDv6e2ANC7/kx67v9q5QA=;
+        b=UxZzFyMtA9Hri8d00j4RDxoKn/SL5DKuMfryOcBWNw5FgbJbwieWWfLIerHEE8+SQM
+         5sPCm8EiZWaeqeNOpQw7w2UqtsO8tEAfybSNmk4ej36MmFYIUA436ckvqxApjSkBFeJF
+         1wMJ3VxzT72TPYB2Ra3YbJ1hCTXYc7seE9L67kEiwdziINjKUkGX2Ftk+VYWfnnDiWaN
+         lVNvZoJuEiO5utqiRBuF18yM+KnOWFxX1OGfeph1w8GM1jt8o+Be69xDOWBEkl/YKPA8
+         tNVRyxOTrNWk1/2GW0WQMOpsc9fSFqBlhXHPzwIliVt9aINfEuVK0oM/QnQG4dyGHady
+         ulyw==
+X-Gm-Message-State: APjAAAUY4qZpU9ymYoAQiqszozg9TWh8XktWC8mWYbu8q0oQTJDpp3DQ
+        h6Nvz2FNDhSniXJCAACKqwjfNlxP
+X-Google-Smtp-Source: APXvYqwaZXTiy8Dp61bJFaV6TYVHsBec6qVku6Sda6l1cXt3LIgTM5aysq76KI28cwoFr8ylGMlV1A==
+X-Received: by 2002:aa7:8d93:: with SMTP id i19mr23844459pfr.26.1573404713178;
+        Sun, 10 Nov 2019 08:51:53 -0800 (PST)
 Received: from localhost ([178.128.102.47])
-        by smtp.gmail.com with ESMTPSA id r22sm15664754pfg.54.2019.11.10.08.33.39
+        by smtp.gmail.com with ESMTPSA id c184sm15227524pfc.159.2019.11.10.08.51.51
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 10 Nov 2019 08:33:40 -0800 (PST)
-Date:   Mon, 11 Nov 2019 00:33:35 +0800
+        Sun, 10 Nov 2019 08:51:52 -0800 (PST)
+Message-ID: <5dc84028.1c69fb81.65ad3.94b5@mx.google.com>
+Date:   Mon, 11 Nov 2019 00:51:46 +0800
 From:   Eryu Guan <guaneryu@gmail.com>
-To:     Dmitry Monakhov <dmonakhov@openvz.org>
-Cc:     fstests@vger.kernel.org, jack@suse.cz,
-        Dmitry Monakhov <dmtrmonakhov@yandex-team.ru>
-Subject: Re: [PATCH 1/2] add generic/585
-Message-ID: <20191110163332.GF8664@desktop>
-References: <20191031103639.3786-1-dmonakhov@openvz.org>
+To:     fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: master branch updated to e07c7b16a4f9
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="lh9AU4QTzgON"
 Content-Disposition: inline
-In-Reply-To: <20191031103639.3786-1-dmonakhov@openvz.org>
-User-Agent: Mutt/1.12.1 (2019-06-15)
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Oct 31, 2019 at 10:36:38AM +0000, Dmitry Monakhov wrote:
-> From: Dmitry Monakhov <dmtrmonakhov@yandex-team.ru>
-> 
-> Quotasync may livelock if others tasks generate enough dirty dquots in parallel
-> This test case pefrorm fchown to produce dirty quotas
-> 
-> This test known to detect livelock non-journaled quota for kernels prior to v5.4
-> 
-> Signed-off-by: Dmitry Monakhov <dmtrmonakhov@yandex-team.ru>
-> ---
->  src/Makefile          |   2 +-
->  src/chowner.c         | 107 ++++++++++++++++++++++++++++++++++++++++++++++++++
 
-Missing an entry in .gitingore
+--lh9AU4QTzgON
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
->  tests/generic/585     |  94 ++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/585.out |   2 +
->  tests/generic/group   |   1 +
->  5 files changed, 205 insertions(+), 1 deletion(-)
->  create mode 100644 src/chowner.c
->  create mode 100755 tests/generic/585
->  create mode 100644 tests/generic/585.out
-> 
-> diff --git a/src/Makefile b/src/Makefile
-> index ce6d861..b3ab7b4 100644
-> --- a/src/Makefile
-> +++ b/src/Makefile
-> @@ -28,7 +28,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
->  	attr-list-by-handle-cursor-test listxattr dio-interleaved t_dir_type \
->  	dio-invalidate-cache stat_test t_encrypted_d_revalidate \
->  	attr_replace_test swapon mkswap t_attr_corruption t_open_tmpfiles \
-> -	fscrypt-crypt-util bulkstat_null_ocount
-> +	fscrypt-crypt-util bulkstat_null_ocount chowner
->  
->  SUBDIRS = log-writes perf
->  
-> diff --git a/src/chowner.c b/src/chowner.c
-> new file mode 100644
-> index 0000000..043cd06
-> --- /dev/null
-> +++ b/src/chowner.c
-> @@ -0,0 +1,107 @@
-> +// SPDX-License-Identifier: GPL-2.0
-> +//
-> +// Copyright (c) 2019 YANDEX LLC.  All Rights Reserved.
-> +// Author: Dmitry Monakhov <dmtrmonakhov@yandex-team.ru>
-> +
-> +#include <unistd.h>
-> +#include <stdio.h>
-> +#include <stdlib.h>
-> +#include <time.h>
-> +#include <sys/time.h>
-> +#include <fcntl.h>
-> +#include <limits.h>
-> +
-> +char *progname;
-> +
-> +void usage(void)
-> +{
-> +	printf("Usage %s: [-b uid] [-e uid] [-g] [-P] [-t timeout] FNAME\n", progname);
-> +	printf("\t\t -b: begin of uid range\n");
-> +	printf("\t\t -e: length of uid range\n");
-                         ^^^^^^ should be end of uid range?
+Hi all,
 
-> +	printf("\t\t -g: change group uid\n");
-> +	printf("\t\t -t: loop timeout\n");
-> +	printf("\t\t -P: Do not run chowner loop, only prepare files\n");
-> +	exit(1);
-> +}
-> +int main(int argc, char *const *argv)
-> +{
-> +	char *filename;
-> +	int fd;
-> +	int c;
-> +	uid_t begin = 2000;
-> +	uid_t end = 12000;
-> +	unsigned int timeout = 10;
-> +	struct timeval start, now, delta = { 0, 0 };
-> +	uid_t uid;
-> +	gid_t gid = getegid();
-> +	int do_group = 0;
-> +	int do_prepare = 0;
-> +
-> +	progname = argv[0];
-> +	while ((c = getopt(argc, argv, "b:e:gPt:")) != -1) {
-> +		switch (c) {
-> +		case 'b':
-> +			begin = atoi(optarg);
-> +			break;
-> +		case 'e':
-> +			end = atoi(optarg);
-> +			break;
-> +		case 'g':
-> +			do_group = 1;
-> +			break;
-> +		case 'P':
-> +			do_prepare = 1;
-> +			break;
-> +		case 't':
-> +			timeout = atoi(optarg);
-> +			break;
-> +		default:
-> +			usage();
-> +		}
-> +	}
-> +	if (optind == argc-1)
-> +		filename = argv[optind];
-> +	else
-> +		usage();
-> +	if (do_prepare) {
-> +		char path[PATH_MAX];
-> +		for (uid = begin; uid < end;uid++) {
-> +			sprintf(path, "%s.%d", filename, uid);
+The master branch of the xfstests repository at:
 
-So in do_prepare case, expect filename to be a filename prefix? Or a
-directory? From the test code, it seems to be a dir, but this c code
-treats as an filename prefix.
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-# Preparation step: Create all files with uid in range
-# to cache quota in kernel memory
-mkdir -p $SCRATCH_MNT/q
-$here/src/chowner $SCRATCH_MNT/q -b $begin -e $end -P
+have just been updated. There're new tests added for xfs and btrfs, and some
+quota tests are fixed to work well with ext2 and ext4 (nojournal mode).
 
-> +			fd = open(path, O_RDWR|O_CREAT, 0666);
-> +			if (fd < 0) {
-> +				perror("open");
-> +				exit(1);
-> +			}
-> +			if (do_group)
-> +				gid = uid;
-> +			if (fchown(fd, uid, gid)) {
-> +				perror("chown");
-> +				exit(1);
-> +			}
-> +			close(fd);
-> +		}
-> +		return 0;
-> +	}
-> +	fd = open(filename, O_RDWR|O_CREAT, 0666);
-> +	if (fd < 0) {
-> +		perror("open");
-> +		exit(1);
-> +	}
-> +	gettimeofday(&start, NULL);
-> +
-> +	while (1) {
-> +		for (uid = begin; uid < end;uid++) {
-> +			if (do_group)
-> +				gid = uid;
-> +			if (fchown(fd, uid, gid)) {
-> +				perror("chown");
-> +				exit(1);
-> +			}
-> +		}
-> +		gettimeofday(&now, NULL);
-> +		timersub(&now, &start, &delta);
-> +		if (delta.tv_sec >= timeout)
-> +			break;
-> +	}
-> +	return 0;
-> +}
-> diff --git a/tests/generic/585 b/tests/generic/585
-> new file mode 100755
-> index 0000000..d37522a
-> --- /dev/null
-> +++ b/tests/generic/585
-> @@ -0,0 +1,94 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2019 YANDEX LLC.  All Rights Reserved.
-> +#
-> +# FS QA Test 585
-> +#
-> +# Check livelock during quota-sync  while other tasks dirty quotas in parallel.
-> +# Run fchown(2) in a loop is the fastest way to produce dirty quotas
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/quota
-> +
-> +
-> +begin=2000
-> +end=10000
-> +nr_proc=$((16 * LOAD_FACTOR))
-> +deadline=$((100 * TIME_FACTOR))
-
-So this test has two "_workout"s, and one takes around 120s, so whole
-test takes around 4 minutes, which seems a bit long for a generic test.
-
-What's the reproducibility if you lower the runtime? I'd be good to find
-a good banalce between reproducibility and test run time. e.g. 20s for
-60% reproducibility is better than 240s for 90%.
-
-> +
-> +_workout()
-
-Local functions doesn't need "_" prefix.
-
-> +{
-> +    for ((i=0; i < nr_proc; i++))
-> +    do
-
-Use tab for indention. And the indentions are not consistent, some lines
-use tab and some lines use spaces.
-
-> +	# Spread files to isolated dirs to minimize locking contention
-> +	mkdir -p $SCRATCH_MNT/chowner/$i
-> +	$here/src/chowner $SCRATCH_MNT/chowner/$i/test -b $begin -e $end \
-> +			  -t $((deadline + 10)) &
-> +	pids="$pids $!"
-> +    done
-> +    # Let chowners warm up ...
-> +    sleep 5
-> +    start=$(date +%s)
-> +    for ((i=0;i<3;i++))
-> +    do
-> +	s=$(date +%s)
-> +	# In normal situation command should finish in ~1sec,
-> +	# but in case of livelock it will spin until chowners exits
-> +	$*
-> +	e=$(date +%s)
-> +	echo "loop $i: $* runtime: $((e-s))" >> $seqres.full
-> +	sleep 2
-> +    done
-> +    end=$(date +%s)
-> +    runtime=$((end-start))
-> +    echo "DONE: $* total runtime: $runtime"  >> $seqres.full
-> +    kill -TERM $pids 2> /dev/null
-> +    wait $pids
-> +
-> +    [ $runtime -le $deadline ] || \
-> +	_fail "Live lock detected, $* runtime: $runtime, deadline: $deadline"
-> +}
-> +
-> +# real QA test starts here
-> +_supported_fs generic
-> +_supported_os Linux
-> +_require_quota
-> +#_require_user
-
-Could be removed.
-
-> +_require_scratch
-> +_require_command "$KILLALL_PROG" killall
-
-killall is not used, can be removed.
-
-And we need
-
-_require_test_program "chowner"
-
-> +
-> +rm -f $seqres.full
-> +_scratch_mkfs_sized $((512 * 1024 * 1024)) >> $seqres.full 2>&1
-
-Any reason to use sized mkfs?
-
-> +_scratch_mount "-o quota,user"
-> +chmod 777 $SCRATCH_MNT
-> +quotacheck -u $SCRATCH_MNT 2>/dev/null
-> +quotaon -v -u $SCRATCH_MNT >> $seqres.full 2>&1
-
-Above steps could be replaced by:
-
-_qmount_option "usrquota"
-_qmount
+The new failures introduced are btrfs/200 and xfs/148, they both fail with
+v5.4-rc6 kernel currently.
 
 Thanks,
 Eryu
 
-> +
-> +# Preparation step: Create all files with uid in range
-> +# to cache quota in kernel memory
-> +mkdir -p $SCRATCH_MNT/q
-> +$here/src/chowner $SCRATCH_MNT/q -b $begin -e $end -P
-> +
-> +_workout quotasync $SCRATCH_MNT
-> +_workout sync
-> +
-> +echo "Silence is golden"
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/585.out b/tests/generic/585.out
-> new file mode 100644
-> index 0000000..e4dd43b
-> --- /dev/null
-> +++ b/tests/generic/585.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 585
-> +Silence is golden
-> diff --git a/tests/generic/group b/tests/generic/group
-> index 42ca2b9..703a1b4 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -587,3 +587,4 @@
->  582 auto quick encrypt
->  583 auto quick encrypt
->  584 auto quick encrypt
-> +585 auto quota rw stress
-> -- 
-> 2.7.4
-> 
+The new head of the master branch is commit:
+
+e07c7b16a4f9 generic/235: Fix false failure on ext2
+
+New commits:
+
+Chengguang Xu (1):
+      [8947e7cacf2e] overlay/066: adjust test file size && add more test patterns
+
+Darrick J. Wong (1):
+      [fcfa7d242f3d] xfs: make sure the kernel and repair tools catch bad names
+
+Eric Sandeen (1):
+      [edeef98d4f42] xfs/207: explicitly test for xflag character
+
+Filipe Manana (3):
+      [e1670cce6af9] common: open files in ro mode for extent and hole count helpers
+      [6fb111ab6089] common: add helper to count number of exclusive extents in a file
+      [cb836732356c] btrfs: test that send can issue clone operations within the same file
+
+Jan Kara (4):
+      [6ad9168b0ad6] common/quota: Fix _qmount_options
+      [2814810ed1a0] generic/050: Fix test failure for filesystems without journal
+      [777e98ec577c] generic/382: Make test independent of fs allocation
+      [e07c7b16a4f9] generic/235: Fix false failure on ext2
+
+kaixuxia (1):
+      [8d8b993f7925] fsstress: show the real file id and parid in rmdir() and unlink()
+
+
+Code Diffstat:
+
+ .gitignore                                 |   1 +
+ common/quota                               |   4 +-
+ common/rc                                  |  47 ++++++++--
+ ltp/fsstress.c                             |  18 +++-
+ tests/btrfs/200                            | 122 +++++++++++++++++++++++++
+ tests/btrfs/200.out                        |  17 ++++
+ tests/btrfs/group                          |   1 +
+ tests/generic/050                          |   8 ++
+ tests/generic/050.cfg                      |   1 +
+ tests/generic/{050.out => 050.out.default} |   0
+ tests/generic/050.out.nojournal            |  22 +++++
+ tests/generic/235                          |   5 +-
+ tests/generic/235.out                      |   4 +-
+ tests/generic/382                          |   5 --
+ tests/generic/382.out                      |  12 ---
+ tests/overlay/066                          | 120 +++++++++++++++++--------
+ tests/xfs/148                              | 137 +++++++++++++++++++++++++++++
+ tests/xfs/148.out                          |  50 +++++++++++
+ tests/xfs/207                              |  13 ++-
+ tests/xfs/207.out                          |   4 +-
+ tests/xfs/group                            |   1 +
+ 21 files changed, 515 insertions(+), 77 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
+
+--lh9AU4QTzgON
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAl3IP80ACgkQJlKqKVyP
+52PMqhAAlzR5/PzB9cvquw2TQ+4bH60O755TbGzdq29Ncu+EWDwmjuiiPM5hNdNh
+uqCrHyVpILJuWS2oCKPZDapRz7BWJqJYKaILb6xV1/r1e5vauRyIyf2UqAoCtuMl
+jDCaL3Ik0UplTfW3JOmkEa560OvFJCiBJYDkotB8VMI76C9LcTh8r0chGomWcHVc
+27oA9M0ZCsHtnEB3j7tpg0CsUwOqc6F9Wi68DwrS3ZMBJfFNGcm9l6r2yMUXjCAQ
+d5JIAgpx23U7LJYWtDR1rZ5Zl6FYCLWIwl9VuOtDE7o7YrmnHteW7yS1NPZR/hs9
+6lX5kIqO0kesdEwy5VquCvGmxi+tq+AhkM8YR1Rp3znizOQqjvu2FL+EYP5wTdIp
+BIqblNG6ClvdeqnNtdC06ul195lzY/gYqck+f7l9N34QFeSQgqiXUE1oxEUPNoqa
+BaUE+/ly53TyrjO2dsQcoED7CCqV/vbxtrrFn5404YAr+YHbpHw0eg1/2BEJUoot
+KEGSlThC9BCIisxl2NnEHYrtCiQOYYbcHmg1PN+AT9+yRTH9rmiwcSmdwREhfcuV
+XMa3Yp8llkZXzGws/b+YEr3zLD/5RTmCGSLYGc2UeQehDyoRm7g711Rms74y1ty7
+b+/ut1uMAnwGfF7xHCznhi1isHAlILYEjlxliROd7x2LSVysWiU=
+=0+SE
+-----END PGP SIGNATURE-----
+
+--lh9AU4QTzgON--
