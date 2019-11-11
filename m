@@ -2,125 +2,100 @@ Return-Path: <SRS0=0kg8=ZD=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.7 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-2.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 20EF9C43331
-	for <linux-fstests@archiver.kernel.org>; Mon, 11 Nov 2019 07:40:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 707A2C43331
+	for <linux-fstests@archiver.kernel.org>; Mon, 11 Nov 2019 14:29:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id E60232075C
-	for <linux-fstests@archiver.kernel.org>; Mon, 11 Nov 2019 07:40:20 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="DAHA4kG+"
+	by mail.kernel.org (Postfix) with ESMTP id 42E5021783
+	for <linux-fstests@archiver.kernel.org>; Mon, 11 Nov 2019 14:29:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726770AbfKKHkU (ORCPT
+        id S1726871AbfKKO33 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 11 Nov 2019 02:40:20 -0500
-Received: from mail-wr1-f68.google.com ([209.85.221.68]:44656 "EHLO
-        mail-wr1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726360AbfKKHkU (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 11 Nov 2019 02:40:20 -0500
-Received: by mail-wr1-f68.google.com with SMTP id f2so13382956wrs.11;
-        Sun, 10 Nov 2019 23:40:18 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id;
-        bh=MoAGf49PP11xkmCo2JW1cZjvmPda4h92cn+3cutaohs=;
-        b=DAHA4kG+5pFgJmDpNVdg0UL3r+mBvcxiQvSyDdR0PtUsta6XaZbCBKJSOH+5uxBWfA
-         Wy6Mz+yqOihfdQqk711MaMtzxm2HYa6YNh7sux7NXk+J+yBui5Yq0VksF75uAXsDbcPv
-         wYmxZrcO3YYhjGJQFWgq71m0gEBXvjH6143XdTAR/eLq0qPcW0AmHdph3c9C2A/bf4Y8
-         6dfKY/f1/I6Qpl/ybFYvg+9KFyhiJolkgGirieZi5VQKCLGTo1z6ANpia7oJb5a/hpmA
-         7H8PAGytYvqNl8hyXMD/u1PvOT9934K0dLKAnKQk5y5Dtc+hn/wLgaBYji7wT8r+4OO0
-         M5VQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id;
-        bh=MoAGf49PP11xkmCo2JW1cZjvmPda4h92cn+3cutaohs=;
-        b=jAbLvaWfyQXg8S/4v8+wCXF5KpWLzmzkj5zn7ovRbpg23TYSd6BahkgwHxjVfNhePi
-         sKnaViZbwiFsjTK9gKZRwm/Kyy1J+iTs8ejKfLfRvDCoGbKp1txoqHcSAe8nbZ9F6G1W
-         LVLQ8A/WkhU6ahXY//p/6tHJEqUAWzjSkJ6DE6WSbPh2Q6Kzt3jxat6LyOyTHoC2jUUt
-         VfOPLO8b3QogO5DFMhi0frrdJr+48YYhk3Jn4CnZHP6SOtBH0zQroqm6pG2RE6Taec7o
-         Wx/ls6wzy98MI42AQm0gl8U378OIXbEtSIcwFIYTob0SgNhgQLHEIJ9FfzHwRkip30Sw
-         KpUA==
-X-Gm-Message-State: APjAAAV4mW823LahLU44IdDcfo//kue31oNN5XoD431nDmiaVwyECCsM
-        XOWEciCjaFS6ZeOxrum5s54=
-X-Google-Smtp-Source: APXvYqyC4oQEaSD10Jq+fJZB91XYzHQHB/wMKJbN4v+7h72FCf4QnSmHUdMVMdTb6t2rsObMgLWu0w==
-X-Received: by 2002:adf:ed48:: with SMTP id u8mr18448337wro.28.1573458018006;
-        Sun, 10 Nov 2019 23:40:18 -0800 (PST)
-Received: from localhost.localdomain ([94.230.83.228])
-        by smtp.gmail.com with ESMTPSA id j63sm20557270wmj.46.2019.11.10.23.40.16
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 10 Nov 2019 23:40:17 -0800 (PST)
-From:   Amir Goldstein <amir73il@gmail.com>
+        Mon, 11 Nov 2019 09:29:29 -0500
+Received: from mx2.suse.de ([195.135.220.15]:40792 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726811AbfKKO32 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 11 Nov 2019 09:29:28 -0500
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+Received: from relay2.suse.de (unknown [195.135.220.254])
+        by mx1.suse.de (Postfix) with ESMTP id 399B6AC9A;
+        Mon, 11 Nov 2019 14:29:27 +0000 (UTC)
+Received: by quack2.suse.cz (Postfix, from userid 1000)
+        id 870001E47E5; Mon, 11 Nov 2019 15:29:26 +0100 (CET)
+Date:   Mon, 11 Nov 2019 15:29:26 +0100
+From:   Jan Kara <jack@suse.cz>
 To:     Eryu Guan <guaneryu@gmail.com>
-Cc:     Miklos Szeredi <miklos@szeredi.hu>,
-        Deepa Dinamani <deepa.kernel@gmail.com>,
-        linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: [PATCH] overlay: support timestamp range check
-Date:   Mon, 11 Nov 2019 09:40:10 +0200
-Message-Id: <20191111074010.3738-1-amir73il@gmail.com>
-X-Mailer: git-send-email 2.17.1
+Cc:     Jan Kara <jack@suse.cz>, fstests@vger.kernel.org,
+        "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH 2/2] generic/050: Handle xfs quota special case with
+ different output
+Message-ID: <20191111142926.GD13307@quack2.suse.cz>
+References: <20191105131922.24848-1-jack@suse.cz>
+ <20191105131922.24848-3-jack@suse.cz>
+ <20191110141052.GE8664@desktop>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20191110141052.GE8664@desktop>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Overlayfs timestamp range is the same as base fs timestamp range
+On Sun 10-11-19 22:10:54, Eryu Guan wrote:
+> [cc'ed Darrick for his inputs, if there's any]
+> >  fi
+> >  _link_out_file "$features"
+> >  
+> >  _scratch_mkfs >/dev/null 2>&1
+> >  
+> > -filter_ro_mount() {
+> > -	local arg=""
+> > -
+> > -	if [ -n "$expect_mount_failure" ]; then
+> > -		arg="s|mount: $SCRATCH_MNT: permission denied|mount: device write-protected, mounting read-only|g"
+> > -	fi
+> > -	sed -e "$arg" | _filter_ro_mount
+> > -}
+> > -
+> > -# Mounting with quota on XFS requires a writable fs, which means
+> > -# we expect to fail the ro blockdev test with with EPERM.
+> > -expect_mount_failure=
+> > -if [ "$FSTYP" = "xfs" ] && echo "$MOUNT_OPTIONS" | grep -q quota ; then
+> > -	expect_mount_failure=1
+> > -fi
+> > -
+> >  #
+> >  # Mark the device read-only
+> >  #
+> > @@ -70,7 +58,7 @@ blockdev --setro $SCRATCH_DEV
+> >  # Mount it, and make sure we can't write to it, and we can unmount it again
+> >  #
+> >  echo "mounting read-only block device:"
+> > -_try_scratch_mount 2>&1 | filter_ro_mount
+> > +_try_scratch_mount 2>&1 | _filter_ro_mount
+> >  if [ "${PIPESTATUS[0]}" -eq 0 ]; then
+> 
+> But I think we could remove above check as a whole, just do
+> 
+> _try_scratch_mount 2>&1 | _filter_ro_mount
+> echo "touching file on read-only filesystem (should fail)"
+> touch $SCRATCH_MNT/foo 2>&1 | _filter_scratch
+> echo "unmounting read-only filesystem"
+> _scratch_unmount 2>&1 | _filter_scratch
+> 
+> as what we did prior to commit b0415daaa968 ("generic/050: fix ro
+> blockdev mount of xfs with quota").
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
+Your suggestion looks good to me. I'll update the patch, test, and resend.
 
-Eryu,
+								Honza
 
-This change will cause the test to start running and failing on upstream
-kernel with overlayfs over some fs (e.g. xfs/ext4).
 
-The kernel fix is posted:
-https://lore.kernel.org/linux-fsdevel/20191111073000.2957-1-amir73il@gmail.com/T/#u
-
-Thanks,
-Amir.
-
- common/rc | 10 +++++++++-
- 1 file changed, 9 insertions(+), 1 deletion(-)
-
-diff --git a/common/rc b/common/rc
-index b988e912..e5535279 100644
---- a/common/rc
-+++ b/common/rc
-@@ -1978,13 +1978,14 @@ _require_timestamp_range()
- _filesystem_timestamp_range()
- {
- 	local device=${1:-$TEST_DEV}
-+	local fstyp=${2:-$FSTYP}
- 	u32max=$(((1<<32)-1))
- 	s32min=-$((1<<31))
- 	s32max=$(((1<<31)-1))
- 	s64max=$(((1<<63)-1))
- 	s64min=$((1<<63))
- 
--	case $FSTYP in
-+	case $fstyp in
- 	ext2)
- 		echo "$s32min $s32max"
- 		;;
-@@ -2005,6 +2006,13 @@ _filesystem_timestamp_range()
- 	btrfs)
- 		echo "$s64min $s64max"
- 		;;
-+	overlay)
-+		if [ ! -z $OVL_BASE_FSTYP -a $OVL_BASE_FSTYP != "overlay" ]; then
-+			_filesystem_timestamp_range $OVL_BASE_TEST_DEV $OVL_BASE_FSTYP
-+		else
-+			echo "-1 -1"
-+		fi
-+		;;
- 	*)
- 		echo "-1 -1"
- 		;;
 -- 
-2.17.1
-
+Jan Kara <jack@suse.com>
+SUSE Labs, CR
