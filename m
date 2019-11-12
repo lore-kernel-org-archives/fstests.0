@@ -1,86 +1,202 @@
-Return-Path: <SRS0=0kg8=ZD=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=UPHr=ZE=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.7 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6746EC17447
-	for <linux-fstests@archiver.kernel.org>; Mon, 11 Nov 2019 22:32:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3EC78C43331
+	for <linux-fstests@archiver.kernel.org>; Tue, 12 Nov 2019 15:13:46 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 2C3862184C
-	for <linux-fstests@archiver.kernel.org>; Mon, 11 Nov 2019 22:32:40 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="eSBUSLdH"
+	by mail.kernel.org (Postfix) with ESMTP id 17DDA21A49
+	for <linux-fstests@archiver.kernel.org>; Tue, 12 Nov 2019 15:13:46 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1573571626;
+	bh=kKklsAScypZ0Cmqv8ZxvfGiMcXlsxZsytkVhcht98Hg=;
+	h=From:To:Cc:Subject:Date:List-ID:From;
+	b=kbiNzj9/z1DMGFsLzBD6B6vyFUIsey3yhqm/Wb3BXgjLN/s6uF1xCktN4/XHZ2p3a
+	 W9t5JFGLdECJJhx+ys3ZCt+bAE+QcdsZiftBZoT4pUBD0+xzY/mvLH2OBJNzzPAb1b
+	 K9B0v6QIxNDBlAiRF6XETgWOzlDjY6xoyGkleHiE=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726939AbfKKWck (ORCPT
+        id S1727162AbfKLPNp (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 11 Nov 2019 17:32:40 -0500
-Received: from mail-io1-f67.google.com ([209.85.166.67]:40378 "EHLO
-        mail-io1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726845AbfKKWcj (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 11 Nov 2019 17:32:39 -0500
-Received: by mail-io1-f67.google.com with SMTP id p6so16395071iod.7;
-        Mon, 11 Nov 2019 14:32:39 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=OzLR9tv4i3WF8MkXry3d9TxP8TpxcQKmqeN/RPf6iq4=;
-        b=eSBUSLdHo8P3Ygobhlt4Xmco16afJOm2jYijrD6uLEs9DYuAycWqmGN6tYvtxq4ddv
-         hqtPKFuYFWKsWmwHo6jnSIIZbNBBrX5TOyMyGOIQtBfrWhAVGBIzkVIblXw6hqT6+iSc
-         xU/pl+Pz2E+LtoS5oHZCj0zXLUR9XgU1sJdet4MAQ/nzDUmzi0xgetdrZi49zw+EVpzN
-         DpPmpxBz7nrJmhb/nkwqiRkGVJDjSxM6FWEKgk9s+RSevlGt8+EWu3T1Kd1E1JEQ5fsu
-         gilhw86mW9I5k0sAz38PzAVCnKq1Pu4gGBC9s+bYIE+cMGJzskY06k/BKu2yZJg+ojVA
-         UMEg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=OzLR9tv4i3WF8MkXry3d9TxP8TpxcQKmqeN/RPf6iq4=;
-        b=J/je1b68VskbCwg9mn3cTszaW7XX4CstEcrw2U9F7nfEH26ojR2aqsb/d33E3svBNl
-         KiL3MvJvVMcItFe4Q2oVTWsJmI4PDhap00i79yd3Pn2zczZL3iKkWxnpBMW9RztWWOFQ
-         DWpSq7kR8UWFrZMrQBJPcYfeLwwn5VXj95wdlCWavzAF3Xg885iqwfWJRe1nYAZUWOpP
-         M/smtcIB7BssdIVZGNV0eJ3wfn2QFsm9naPJRcGi7YMF/ZfZAWA9G0VFg7wGb6Nsk1Ts
-         9OaiZncVhmbAsl/amYfaXsUR5h4b2fQn9ab99UY/ZpL/zkVJXVbxnjL7Pl1puDnlpJ3X
-         HDQA==
-X-Gm-Message-State: APjAAAXI7HnNCasgxvrHmnajKRYzyt6sFczJ/jf8fhUIqLpX4bZQe2Xi
-        MOQTg7J4h2DGISSm2OU33vy4lmMBDibg0xUXItVjzg==
-X-Google-Smtp-Source: APXvYqxO0suayAMv4ao/CR8q25jhS3dgwMJF4+BoRk/uKEZGgK1tzMeQ/sOKJHdi5tYOyPSPIiJA9pcD6CWN2ZG9kr0=
-X-Received: by 2002:a02:a402:: with SMTP id c2mr13791407jal.5.1573511558430;
- Mon, 11 Nov 2019 14:32:38 -0800 (PST)
-MIME-Version: 1.0
-References: <20191111074010.3738-1-amir73il@gmail.com>
-In-Reply-To: <20191111074010.3738-1-amir73il@gmail.com>
-From:   Deepa Dinamani <deepa.kernel@gmail.com>
-Date:   Mon, 11 Nov 2019 14:32:26 -0800
-Message-ID: <CABeXuvo8SADSgtQYbJHE-afU5EYzCFZp17BoVLpeiYvqJ6RiCw@mail.gmail.com>
-Subject: Re: [PATCH] overlay: support timestamp range check
-To:     Amir Goldstein <amir73il@gmail.com>
-Cc:     Eryu Guan <guaneryu@gmail.com>, Miklos Szeredi <miklos@szeredi.hu>,
-        linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+        Tue, 12 Nov 2019 10:13:45 -0500
+Received: from mail.kernel.org ([198.145.29.99]:34632 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726896AbfKLPNp (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 12 Nov 2019 10:13:45 -0500
+Received: from localhost.localdomain (bl8-197-74.dsl.telepac.pt [85.241.197.74])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id CB0A92067B;
+        Tue, 12 Nov 2019 15:13:43 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1573571624;
+        bh=kKklsAScypZ0Cmqv8ZxvfGiMcXlsxZsytkVhcht98Hg=;
+        h=From:To:Cc:Subject:Date:From;
+        b=FN4orMJKDBkN5DUCFdpLyeCluIXM4WV4IOv5GlDk5fphwpyzV0BPVKvSUIW6iO5VA
+         K1tgzjXnb72z3R2b40fOkEBYEVRZVvDvwDn+0oSDT1Ci6HDO/n4ORHDJ13vLYDjzw+
+         0OTkAVoPiKd0rJepKzrdvaGsUaVPAge7F2g/SMRo=
+From:   fdmanana@kernel.org
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] btrfs: test fsync after hole punching when using the no-holes feature
+Date:   Tue, 12 Nov 2019 15:13:40 +0000
+Message-Id: <20191112151340.3688-1-fdmanana@kernel.org>
+X-Mailer: git-send-email 2.11.0
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Nov 10, 2019 at 11:40 PM Amir Goldstein <amir73il@gmail.com> wrote:
->
-> Overlayfs timestamp range is the same as base fs timestamp range
->
-> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> ---
->
-> Eryu,
->
-> This change will cause the test to start running and failing on upstream
-> kernel with overlayfs over some fs (e.g. xfs/ext4).
->
-> The kernel fix is posted:
-> https://lore.kernel.org/linux-fsdevel/20191111073000.2957-1-amir73il@gmail.com/T/#u
+From: Filipe Manana <fdmanana@suse.com>
 
-The patch seems ok to me.
-Acked-by: Deepa Dinamani <deepa.kernel@gmail.com>
+Test that when we have the no-holes feature enabled and a specific metadata
+layout, if we punch a hole that starts at file offset 0 and fsync the file,
+after replaying the log the hole exists.
+
+This currently fails on btrfs but is fixed by a patch for the linux kernel
+with the following subject:
+
+ "Btrfs: fix missing hole after hole punching and fsync when using NO_HOLES"
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/btrfs/201     | 100 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/201.out |   5 +++
+ tests/btrfs/group   |   1 +
+ 3 files changed, 106 insertions(+)
+ create mode 100755 tests/btrfs/201
+ create mode 100644 tests/btrfs/201.out
+
+diff --git a/tests/btrfs/201 b/tests/btrfs/201
+new file mode 100755
+index 00000000..592ae23d
+--- /dev/null
++++ b/tests/btrfs/201
+@@ -0,0 +1,100 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FSQA Test No. 201
++#
++# Test that when we have the no-holes feature enabled and a specific metadata
++# layout, if we punch a hole that starts at file offset 0 and fsync the file,
++# after replaying the log the hole exists.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	_cleanup_flakey
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/attr
++. ./common/filter
++. ./common/dmflakey
++
++# real QA test starts here
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch
++_require_dm_target flakey
++_require_attrs
++_require_xfs_io_command "fpunch"
++_require_btrfs_fs_feature "no_holes"
++_require_btrfs_mkfs_feature "no-holes"
++_require_odirect
++
++rm -f $seqres.full
++
++# We create the filesystem with a node size of 64Kb because we need to create a
++# specific metadata layout in order to trigger the bug we are testing. At the
++# moment the node size can not be smaller then the system's page size, so given
++# that the largest possible page size is 64Kb and by default the node size is
++# set to the system's page size value, we explicitly create a filesystem with a
++# 64Kb node size, so that the test can run reliably independently of the system's
++# page size.
++_scratch_mkfs -O no-holes -n $((64 * 1024)) >>$seqres.full 2>&1
++_require_metadata_journaling $SCRATCH_DEV
++_init_flakey
++_mount_flakey
++
++# Create our first file, which is used just to fill space in a leaf. Its items
++# ocuppy most of the first leaf. We use a large xattr since it's an easy and
++# fast way to fill a lot of leaf space.
++touch $SCRATCH_MNT/foo
++$SETFATTR_PROG -n 'user.x1' -v $(printf '%0.sX' $(seq 1 63617)) $SCRATCH_MNT/foo
++
++# Create our second file, which we will use to test if fsync persists a hole
++# punch operation against it. Create several extent items for the file, all with
++# a size of 64Kb. The first extent item of this file is located within the first
++# leaf of the fs tree, as its last item, and all the remaining extent items in
++# another leaf.
++offset=0
++for ((i = 0; i <= 10; i++)); do
++	$XFS_IO_PROG -f -d -c "pwrite -S 0xab -b 64K $offset 64K" \
++		$SCRATCH_MNT/bar >/dev/null
++	offset=$(($offset + 64 * 1024))
++done
++
++# Make sure everything done so far is durably persisted. We also want to start a
++# new transaction and bump the filesystem generation. We don't fsync because we
++# want to keep the 'full sync' flag in the inode of file 'bar', so that the
++# fsync after the hole punch operation uses the slow path, which is necessary to
++# trigger the bug we are testing.
++sync
++
++# Now punch a hole that covers only the first extent item of file bar. That is
++# the only extent item in the first leaf of the first tree, so the hole punch
++# operation will drop it and will not touch the second leaf which contains the
++# remaining extent items. These conditions are necessary to trigger the bug we
++# are testing.
++$XFS_IO_PROG -c "fpunch 0 64K" -c "fsync" $SCRATCH_MNT/bar
++
++echo "File digest before power failure:"
++md5sum $SCRATCH_MNT/bar | _filter_scratch
++# Simulate a power failure and mount the filesystem to check that replaying the
++# log tree succeeds and our file bar has the expected content.
++_flakey_drop_and_remount
++echo "File digest after power failure and log replay:"
++md5sum $SCRATCH_MNT/bar | _filter_scratch
++
++_unmount_flakey
++_cleanup_flakey
++
++status=0
++exit
+diff --git a/tests/btrfs/201.out b/tests/btrfs/201.out
+new file mode 100644
+index 00000000..66631658
+--- /dev/null
++++ b/tests/btrfs/201.out
+@@ -0,0 +1,5 @@
++QA output created by 201
++File digest before power failure:
++e1e40ea5ab31cc36fb74830a6293eb2b  SCRATCH_MNT/bar
++File digest after power failure and log replay:
++e1e40ea5ab31cc36fb74830a6293eb2b  SCRATCH_MNT/bar
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index d56dcafa..d7eeb45d 100755
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -203,3 +203,4 @@
+ 198 auto quick volume
+ 199 auto quick trim
+ 200 auto quick send clone
++201 auto quick punch log
+-- 
+2.11.0
+
