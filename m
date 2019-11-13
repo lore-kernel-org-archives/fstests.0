@@ -8,61 +8,61 @@ X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 46082C43331
-	for <linux-fstests@archiver.kernel.org>; Wed, 13 Nov 2019 08:51:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AF05FC43331
+	for <linux-fstests@archiver.kernel.org>; Wed, 13 Nov 2019 09:23:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id E59CC22459
-	for <linux-fstests@archiver.kernel.org>; Wed, 13 Nov 2019 08:51:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6322B2067B
+	for <linux-fstests@archiver.kernel.org>; Wed, 13 Nov 2019 09:23:35 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="JFRHGwHE"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="cuDU1KQm"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725993AbfKMIvD (ORCPT
+        id S1726910AbfKMJXf (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 13 Nov 2019 03:51:03 -0500
-Received: from mail-pg1-f172.google.com ([209.85.215.172]:34123 "EHLO
-        mail-pg1-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725966AbfKMIvD (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 13 Nov 2019 03:51:03 -0500
-Received: by mail-pg1-f172.google.com with SMTP id z188so970894pgb.1
-        for <fstests@vger.kernel.org>; Wed, 13 Nov 2019 00:51:02 -0800 (PST)
+        Wed, 13 Nov 2019 04:23:35 -0500
+Received: from mail-pf1-f179.google.com ([209.85.210.179]:39890 "EHLO
+        mail-pf1-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726422AbfKMJXe (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 13 Nov 2019 04:23:34 -0500
+Received: by mail-pf1-f179.google.com with SMTP id x28so1248238pfo.6
+        for <fstests@vger.kernel.org>; Wed, 13 Nov 2019 01:23:34 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=R/9F1V8GTuP6xAdqe84KcI9H9Y/g2B9Nnsa98oihbl8=;
-        b=JFRHGwHEaPDMlK+imsLtf27AoZpp1A0zZ3dch7y1ZAYsAkB1m3c4aZ9T061+M9lABJ
-         ruEPmyX1i5Vnkq9JCtgq53ufLbQh9UOFwI92XZAPmCnYV19FPi1JGH0Uz2WAQEInFath
-         1+X+zTi16DqsDVWN5fijpX7lK4sE5EUqxqb6sRi9Wc39fa+dSgV3ay+3GvCF2Fhjg77h
-         vqdXLkyYdsR0hkz4/sfT47nlFJsLzxlljMM47zlAeFYUBti2C0X+2nnlGNfTlnY/06Tp
-         YD1yMsfzcew7msA/kkjexjlicNQPcOi+3+6cpfHL6lhMcBJZ9x2jZ1wfnIJ6lvBSkwjd
-         R2LA==
+        bh=HzbVrkHoef70mS/lBWPb5LfwslOo1mi6H8EO0n3C7QU=;
+        b=cuDU1KQm9jdkx0s5JyhT/QpwKgtVBkP1qhuKCf8LIBXtMF/m9FROAcBnBcxrJIWs79
+         mjK9T+ESflCR7k5LqMgygfXI+c3d0jN4yf7cwMZU71feDpF+5e3De00g6LuL4az+NdKp
+         YKC0AFa9JrZ1zHRlX7uRbYd1BXDHBvOrCcUFbI7L1SPsYQ0nMSGYh1Ak0VQ6pdcC21/E
+         JSiWfjfAJxnYuEohjuBS/MTiBqejIplB6qJ2XCas4R200IBbxXcPAJMHncOqf759WNAg
+         ZrCxO+iFrXBBRu6L73njg6GwRMGbDmYOO5aaD7YkTKvPSA5N8rM9G1hvcsHa6dyClNBf
+         FUJw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=R/9F1V8GTuP6xAdqe84KcI9H9Y/g2B9Nnsa98oihbl8=;
-        b=Xz5L7JKBwU0bnUpcPZtEGHy4jwUVl+Pqy+INPxOJorZxEq2NuGx8tKXB3Mdfg6hh5N
-         RSn/51E6XvELeSJETBoYOdJMSTPKnoGOWlUoiLv1s9wM+WJKZZ85MmehrCASSsbSN/eD
-         RA4IwZLuMfnXhisO4YtjQC5/OTuiOwP/tAyh2fplGhm+vPM524T1IKlbXfD50tdk7GSK
-         t9B7CFxfJNjN1fBmJMrKm/Tb23Xmx5xRlr8Hn0ckRABhQHRpz6UGn4yqTkBSWEfhsJpv
-         OMUM9vcf/2NTf8EtcAVeFtOjK/9SfNIbA2MigGX84qaq++CBtgNThWKBrV+3ujgLGvhP
-         jpHA==
-X-Gm-Message-State: APjAAAXptJfCCTXZZFyU1qbLgHfBDNnFSfjJ4QdvACq+l16+IXin2ogk
-        0An7nRu3SW4cVqghUZJbQ5S91Cmx
-X-Google-Smtp-Source: APXvYqwylkNaJ8iMl7tqxjU2RMVUeAyfHFGU9JMF6L2dZj+d7eOvu/F0D/ElwuBX+QrUVXD4uIL7/w==
-X-Received: by 2002:a17:90a:9dca:: with SMTP id x10mr3215774pjv.139.1573635061249;
-        Wed, 13 Nov 2019 00:51:01 -0800 (PST)
+        bh=HzbVrkHoef70mS/lBWPb5LfwslOo1mi6H8EO0n3C7QU=;
+        b=A4lkaR0vR++8zUWMK5umewT0cMfW9JRX6UDsEr26GaAfcjTzn/POD9evVtYwivRWCD
+         LugUI/cBqeQx1bE93Lk6QBQq0XlbbkrN2uwb/wdQlgozmbO+xIH6NH/1LXuKFeoNPmAU
+         XzTM15udmnY5hAuBIYtzbrRgDdQ11Jr/PaItb/gFayfMFIton18S05W4YEzYABGIsK4V
+         FaE1JUx8qy2n0HfnGEy8amNpuOGy9BWza4L8O1iS4Rr9aS5MOTJFfsbZuWYqfRGOLesC
+         WOAGMrjB1isTEMdsoyBvHhF5296zLbf/g5EdB8DNfE59HuKNiyyXIbQCt7uklBNlTS3E
+         wxHw==
+X-Gm-Message-State: APjAAAWuB7tM+ZCuGsreIkB9ux5r4DrIHz6wqlqZOZP5yoExOd7MXMsd
+        lJBldsR54doMM+SC0RfPzCa/dGq+
+X-Google-Smtp-Source: APXvYqwwoYf3Gni/jtF7qS3dFi8XmVW1ZBpzmYELeWDrhz1ObHW8j5phTrpKlcgQE4XyrjRMRAzauw==
+X-Received: by 2002:a17:90a:989:: with SMTP id 9mr3511658pjo.35.1573637012701;
+        Wed, 13 Nov 2019 01:23:32 -0800 (PST)
 Received: from linux-3f6g.apac.novell.com ([45.122.156.254])
-        by smtp.gmail.com with ESMTPSA id q185sm2404213pfc.153.2019.11.13.00.50.58
+        by smtp.gmail.com with ESMTPSA id b24sm1666485pgk.93.2019.11.13.01.23.30
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 13 Nov 2019 00:51:00 -0800 (PST)
+        Wed, 13 Nov 2019 01:23:31 -0800 (PST)
 From:   Yong Sun <sunyong0511@gmail.com>
 X-Google-Original-From: Yong Sun <yosun@suse.com>
 To:     fstests@vger.kernel.org
 Cc:     Yong Sun <yosun@suse.com>
-Subject: [PATCH v3] fstests: transport two ext4 tests from LTP
-Date:   Wed, 13 Nov 2019 16:50:03 +0800
-Message-Id: <20191113085003.17141-1-yosun@suse.com>
+Subject: [PATCH v4] fstests: transport two ext4 tests from LTP
+Date:   Wed, 13 Nov 2019 17:22:08 +0800
+Message-Id: <20191113092208.20169-1-yosun@suse.com>
 X-Mailer: git-send-email 2.21.0
 In-Reply-To: <CAAPJbvoLOXAMcxp9SBDNRjeegWEUJ-+P1MECekSLyZJStuJCEQ@mail.gmail.com>
 References: <CAAPJbvoLOXAMcxp9SBDNRjeegWEUJ-+P1MECekSLyZJStuJCEQ@mail.gmail.com>
@@ -84,10 +84,12 @@ Signed-off-by: Sun Yong <yosun@suse.com>
 ---
 v2: Correct copyright information
 v3: Correct white-space damage
+v4: Add a missing file
 ---
  src/Makefile              |   3 +-
  src/t_create_long_dirs.c  | 155 +++++++++++++++++++++++++++++++++++++
  src/t_create_short_dirs.c | 158 ++++++++++++++++++++++++++++++++++++++
+ src/t_ext4_file_time.c    |  69 +++++++++++++++++
  tests/ext4/043            |  64 +++++++++++++++
  tests/ext4/043.out        |   2 +
  tests/ext4/044            | 112 +++++++++++++++++++++++++++
@@ -95,9 +97,10 @@ v3: Correct white-space damage
  tests/ext4/045            | 148 +++++++++++++++++++++++++++++++++++
  tests/ext4/045.out        |   2 +
  tests/ext4/group          |   3 +
- 10 files changed, 648 insertions(+), 1 deletion(-)
+ 11 files changed, 717 insertions(+), 1 deletion(-)
  create mode 100644 src/t_create_long_dirs.c
  create mode 100644 src/t_create_short_dirs.c
+ create mode 100644 src/t_ext4_file_time.c
  create mode 100755 tests/ext4/043
  create mode 100644 tests/ext4/043.out
  create mode 100755 tests/ext4/044
@@ -441,6 +444,81 @@ index 00000000..c5733b9d
 +
 +	names -= MAX_LEN2;
 +	create_3(names);
++
++	return 0;
++}
+diff --git a/src/t_ext4_file_time.c b/src/t_ext4_file_time.c
+new file mode 100644
+index 00000000..a10adb3d
+--- /dev/null
++++ b/src/t_ext4_file_time.c
+@@ -0,0 +1,69 @@
++/******************************************************************************/
++/*                                                                            */
++/* Copyright (c) 2009 FUJITSU LIMITED                                         */
++/*                                                                            */
++/* This program is free software;  you can redistribute it and/or modify      */
++/* it under the terms of the GNU General Public License as published by       */
++/* the Free Software Foundation; either version 2 of the License, or          */
++/* (at your option) any later version.                                        */
++/*                                                                            */
++/* This program is distributed in the hope that it will be useful,            */
++/* but WITHOUT ANY WARRANTY;  without even the implied warranty of            */
++/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See                  */
++/* the GNU General Public License for more details.                           */
++/*                                                                            */
++/* You should have received a copy of the GNU General Public License          */
++/* along with this program;  if not, write to the Free Software               */
++/* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA    */
++/*                                                                            */
++/* Author: Li Zefan <lizf@cn.fujitsu.com>                                     */
++/*                                                                            */
++/******************************************************************************/
++
++#include <sys/types.h>
++#include <sys/stat.h>
++#include <unistd.h>
++#include <stdio.h>
++#include <string.h>
++
++/*
++ * Usage: file_time <filename> <atime|mtime|ctime> <sec|nsec>
++ */
++int main(int argc, char *argv[])
++{
++	time_t t;
++	struct stat st;
++
++	if (argc != 4) {
++		fprintf(stderr, "Wrong argument num!\n");
++		return 1;
++	}
++
++	if (stat(argv[1], &st) != 0) {
++		perror("stat failed");
++		return 1;
++	}
++
++	if (strcmp(argv[3], "sec") == 0) {
++		if (strcmp(argv[2], "atime") == 0)
++			t = st.st_atime;
++		else if (strcmp(argv[2], "mtime") == 0)
++			t = st.st_mtime;
++		else
++			t = st.st_ctime;
++	} else if (strcmp(argv[3], "nsec") == 0) {
++		if (strcmp(argv[2], "atime") == 0)
++			t = st.st_atim.tv_nsec;
++		else if (strcmp(argv[2], "mtime") == 0)
++			t = st.st_mtim.tv_nsec;
++		else
++			t = st.st_ctim.tv_nsec;
++	} else {
++		fprintf(stderr, "Wrong argument: %s\n", argv[3]);
++		return 1;
++	}
++
++	printf("%lu\n", t);
 +
 +	return 0;
 +}
