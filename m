@@ -1,202 +1,383 @@
-Return-Path: <SRS0=UPHr=ZE=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=mLUL=ZF=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3EC78C43331
-	for <linux-fstests@archiver.kernel.org>; Tue, 12 Nov 2019 15:13:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B1042C43331
+	for <linux-fstests@archiver.kernel.org>; Wed, 13 Nov 2019 02:44:25 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 17DDA21A49
-	for <linux-fstests@archiver.kernel.org>; Tue, 12 Nov 2019 15:13:46 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1573571626;
-	bh=kKklsAScypZ0Cmqv8ZxvfGiMcXlsxZsytkVhcht98Hg=;
-	h=From:To:Cc:Subject:Date:List-ID:From;
-	b=kbiNzj9/z1DMGFsLzBD6B6vyFUIsey3yhqm/Wb3BXgjLN/s6uF1xCktN4/XHZ2p3a
-	 W9t5JFGLdECJJhx+ys3ZCt+bAE+QcdsZiftBZoT4pUBD0+xzY/mvLH2OBJNzzPAb1b
-	 K9B0v6QIxNDBlAiRF6XETgWOzlDjY6xoyGkleHiE=
+	by mail.kernel.org (Postfix) with ESMTP id 798CC21A49
+	for <linux-fstests@archiver.kernel.org>; Wed, 13 Nov 2019 02:44:25 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="HifHJwlT"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727162AbfKLPNp (ORCPT
+        id S1727476AbfKMCoZ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 12 Nov 2019 10:13:45 -0500
-Received: from mail.kernel.org ([198.145.29.99]:34632 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726896AbfKLPNp (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 12 Nov 2019 10:13:45 -0500
-Received: from localhost.localdomain (bl8-197-74.dsl.telepac.pt [85.241.197.74])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id CB0A92067B;
-        Tue, 12 Nov 2019 15:13:43 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1573571624;
-        bh=kKklsAScypZ0Cmqv8ZxvfGiMcXlsxZsytkVhcht98Hg=;
-        h=From:To:Cc:Subject:Date:From;
-        b=FN4orMJKDBkN5DUCFdpLyeCluIXM4WV4IOv5GlDk5fphwpyzV0BPVKvSUIW6iO5VA
-         K1tgzjXnb72z3R2b40fOkEBYEVRZVvDvwDn+0oSDT1Ci6HDO/n4ORHDJ13vLYDjzw+
-         0OTkAVoPiKd0rJepKzrdvaGsUaVPAge7F2g/SMRo=
-From:   fdmanana@kernel.org
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH] btrfs: test fsync after hole punching when using the no-holes feature
-Date:   Tue, 12 Nov 2019 15:13:40 +0000
-Message-Id: <20191112151340.3688-1-fdmanana@kernel.org>
-X-Mailer: git-send-email 2.11.0
+        Tue, 12 Nov 2019 21:44:25 -0500
+Received: from userp2130.oracle.com ([156.151.31.86]:59492 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727226AbfKMCoY (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 12 Nov 2019 21:44:24 -0500
+Received: from pps.filterd (userp2130.oracle.com [127.0.0.1])
+        by userp2130.oracle.com (8.16.0.27/8.16.0.27) with SMTP id xAD2i5uL085693;
+        Wed, 13 Nov 2019 02:44:22 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
+ : subject : message-id : mime-version : content-type; s=corp-2019-08-05;
+ bh=851r/TCU/AjERCxdibaSzjacfnZWSuO1uGff4br/Ekk=;
+ b=HifHJwlTpvKMEvoUAc0B5K2o0/AEu6kkUFKS1CyEYKR4DpcbzY0LmN5fusVg6KeekzvG
+ BW/nzO5EaWIBAIGiL50PCajnpP16t9ng6RRsAenJiE9RuxnuVtXui4eRHA5r38Bch82S
+ s94pbZFFmt1f35VBB/vDm3pfy4MCwxPoc2F0dFPZHRKeUFSQQoI2I1NgJhhkQrv9ZXqW
+ UPrYOkxwmKR5P15JxtXSTSE2JjUz0YzSP3NmUrbm/I1hQiH0/I2WIBVZsRv4f2L8hxjx
+ /o/DnjWXXL+ggZktRYDj4HDM9A8Ko9DGSxT5atLSacyhR+vZNOP+XQbVbkmm7d25ifU2 sQ== 
+Received: from aserp3020.oracle.com (aserp3020.oracle.com [141.146.126.70])
+        by userp2130.oracle.com with ESMTP id 2w5mvts3we-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Wed, 13 Nov 2019 02:44:22 +0000
+Received: from pps.filterd (aserp3020.oracle.com [127.0.0.1])
+        by aserp3020.oracle.com (8.16.0.27/8.16.0.27) with SMTP id xAD2i7XV015077;
+        Wed, 13 Nov 2019 02:44:21 GMT
+Received: from userv0122.oracle.com (userv0122.oracle.com [156.151.31.75])
+        by aserp3020.oracle.com with ESMTP id 2w7j04ea52-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Wed, 13 Nov 2019 02:44:21 +0000
+Received: from abhmp0022.oracle.com (abhmp0022.oracle.com [141.146.116.28])
+        by userv0122.oracle.com (8.14.4/8.14.4) with ESMTP id xAD2iIVb003097;
+        Wed, 13 Nov 2019 02:44:18 GMT
+Received: from localhost (/67.169.218.210)
+        by default (Oracle Beehive Gateway v4.0)
+        with ESMTP ; Tue, 12 Nov 2019 18:44:17 -0800
+Date:   Tue, 12 Nov 2019 18:44:16 -0800
+From:   "Darrick J. Wong" <darrick.wong@oracle.com>
+To:     Eryu Guan <guaneryu@gmail.com>
+Cc:     fstests@vger.kernel.org, xfs <linux-xfs@vger.kernel.org>
+Subject: [PATCH] generic: test race between appending AIO DIO and fallocate
+Message-ID: <20191113024416.GH6235@magnolia>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+User-Agent: Mutt/1.9.4 (2018-02-28)
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9439 signatures=668685
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=0 malwarescore=0
+ phishscore=0 bulkscore=0 spamscore=0 mlxscore=0 mlxlogscore=999
+ adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.0.1-1910280000 definitions=main-1911130022
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9439 signatures=668685
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 priorityscore=1501 malwarescore=0
+ suspectscore=0 phishscore=0 bulkscore=0 spamscore=0 clxscore=1015
+ lowpriorityscore=0 mlxscore=0 impostorscore=0 mlxlogscore=999 adultscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.0.1-1910280000
+ definitions=main-1911130022
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Filipe Manana <fdmanana@suse.com>
+From: Darrick J. Wong <darrick.wong@oracle.com>
 
-Test that when we have the no-holes feature enabled and a specific metadata
-layout, if we punch a hole that starts at file offset 0 and fsync the file,
-after replaying the log the hole exists.
+Dave Chinner reports[1] that an appending AIO DIO write to the second
+block of a zero-length file and an fallocate request to the first block
+of the same file can race to set isize, with the user-visible end result
+that the file size is set incorrectly to one block long.  Write a small
+test to reproduce the results.
 
-This currently fails on btrfs but is fixed by a patch for the linux kernel
-with the following subject:
+[1] https://lore.kernel.org/linux-xfs/20191029100342.GA41131@bfoster/T/
 
- "Btrfs: fix missing hole after hole punching and fsync when using NO_HOLES"
-
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- tests/btrfs/201     | 100 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/201.out |   5 +++
- tests/btrfs/group   |   1 +
- 3 files changed, 106 insertions(+)
- create mode 100755 tests/btrfs/201
- create mode 100644 tests/btrfs/201.out
+ .../aio-dio-append-write-fallocate-race.c          |  212 ++++++++++++++++++++
+ tests/generic/722                                  |   43 ++++
+ tests/generic/722.out                              |    2 
+ tests/generic/group                                |    1 
+ 4 files changed, 258 insertions(+)
+ create mode 100644 src/aio-dio-regress/aio-dio-append-write-fallocate-race.c
+ create mode 100755 tests/generic/722
+ create mode 100644 tests/generic/722.out
 
-diff --git a/tests/btrfs/201 b/tests/btrfs/201
-new file mode 100755
-index 00000000..592ae23d
+diff --git a/src/aio-dio-regress/aio-dio-append-write-fallocate-race.c b/src/aio-dio-regress/aio-dio-append-write-fallocate-race.c
+new file mode 100644
+index 00000000..091b047d
 --- /dev/null
-+++ b/tests/btrfs/201
-@@ -0,0 +1,100 @@
++++ b/src/aio-dio-regress/aio-dio-append-write-fallocate-race.c
+@@ -0,0 +1,212 @@
++// SPDX-License-Identifier: GPL-2.0-or-newer
++/*
++ * Copyright (c) 2019 Oracle.
++ * All Rights Reserved.
++ *
++ * Race appending aio dio and fallocate to make sure we get the correct file
++ * size afterwards.
++ */
++#include <stdio.h>
++#include <pthread.h>
++#include <sys/types.h>
++#include <sys/stat.h>
++#include <fcntl.h>
++#include <unistd.h>
++#include <string.h>
++#include <errno.h>
++#include <libaio.h>
++#include <stdlib.h>
++#include <stdbool.h>
++#include <limits.h>
++
++static int fd;
++static int blocksize;
++
++static void *
++falloc_thread(
++	void		*p)
++{
++	int		ret;
++
++	ret = fallocate(fd, 0, 0, blocksize);
++	if (ret)
++		perror("falloc");
++
++	return NULL;
++}
++
++static int
++test(
++	const char	*fname,
++	unsigned int	iteration,
++	unsigned int	*passed)
++{
++	struct stat	sbuf;
++	pthread_t	thread;
++	io_context_t	ioctx = 0;
++	struct iocb	iocb;
++	struct iocb	*iocbp = &iocb;
++	struct io_event	event;
++	char		*buf;
++	bool		wait_thread = false;
++	int		ret;
++
++	/* Truncate file, allocate resources for doing IO. */
++	fd = open(fname, O_DIRECT | O_RDWR | O_TRUNC | O_CREAT, 0644);
++	if (fd < 0) {
++		perror(fname);
++		return -1;
++	}
++
++	ret = fstat(fd, &sbuf);
++	if (ret) {
++		perror(fname);
++		goto out;
++	}
++	blocksize = sbuf.st_blksize;
++
++	ret = posix_memalign((void **)&buf, blocksize, blocksize);
++	if (ret) {
++		errno = ret;
++		perror("buffer");
++		goto out;
++	}
++	memset(buf, 'X', blocksize);
++	memset(&event, 0, sizeof(event));
++
++	ret = io_queue_init(1, &ioctx);
++	if (ret) {
++		errno = -ret;
++		perror("io_queue_init");
++		goto out_buf;
++	}
++
++	/*
++	 * Set ourselves up to race fallocate(0..blocksize) with aio dio
++	 * pwrite(blocksize..blocksize * 2).  This /should/ give us a file
++	 * with length (2 * blocksize).
++	 */
++	io_prep_pwrite(&iocb, fd, buf, blocksize, blocksize);
++
++	ret = pthread_create(&thread, NULL, falloc_thread, NULL);
++	if (ret) {
++		errno = ret;
++		perror("pthread");
++		goto out_io;
++	}
++	wait_thread = true;
++
++	ret = io_submit(ioctx, 1, &iocbp);
++	if (ret != 1) {
++		errno = -ret;
++		perror("io_submit");
++		goto out_join;
++	}
++
++	ret = io_getevents(ioctx, 1, 1, &event, NULL);
++	if (ret != 1) {
++		errno = -ret;
++		perror("io_getevents");
++		goto out_join;
++	}
++
++	if (event.res < 0) {
++		errno = -event.res;
++		perror("io_event.res");
++		goto out_join;
++	}
++
++	if (event.res2 < 0) {
++		errno = -event.res2;
++		perror("io_event.res2");
++		goto out_join;
++	}
++
++	wait_thread = false;
++	ret = pthread_join(thread, NULL);
++	if (ret) {
++		errno = ret;
++		perror("join");
++		goto out_io;
++	}
++
++	/* Make sure we actually got a file of size (2 * blocksize). */
++	ret = fstat(fd, &sbuf);
++	if (ret) {
++		perror(fname);
++		goto out_buf;
++	}
++
++	if (sbuf.st_size != 2 * blocksize) {
++		fprintf(stderr, "[%u]: sbuf.st_size=%llu, expected %llu.\n",
++				iteration,
++				(unsigned long long)sbuf.st_size,
++				(unsigned long long)2 * blocksize);
++	} else {
++		printf("[%u]: passed.\n", iteration);
++		(*passed)++;
++	}
++
++out_join:
++	if (wait_thread) {
++		ret = pthread_join(thread, NULL);
++		if (ret) {
++			errno = ret;
++			perror("join");
++			goto out_io;
++		}
++	}
++out_io:
++	ret = io_queue_release(ioctx);
++	if (ret) {
++		errno = -ret;
++		perror("io_queue_release");
++	}
++
++out_buf:
++	free(buf);
++out:
++	ret = close(fd);
++	fd = -1;
++	if (ret) {
++		perror("close");
++		return -1;
++	}
++
++	return 0;
++}
++
++int main(int argc, char *argv[])
++{
++	int		ret;
++	long		l;
++	unsigned int	i;
++	unsigned int	passed = 0;
++
++	if (argc != 3) {
++		printf("Usage: %s filename iterations\n", argv[0]);
++		return 1;
++	}
++
++	errno = 0;
++	l = strtol(argv[2], NULL, 0);
++	if (errno) {
++		perror(argv[2]);
++		return 1;
++	}
++	if (l < 1 || l > UINT_MAX) {
++		fprintf(stderr, "%ld: must be between 1 and %u.\n",
++				l, UINT_MAX);
++		return 1;
++	}
++
++	for (i = 0; i < l; i++) {
++		ret = test(argv[1], i, &passed);
++		if (ret)
++			return 1;
++	}
++
++	printf("pass rate: %u/%u (%.2f%%)\n", passed, i, 100.0 * passed / i);
++
++	return 0;
++}
+diff --git a/tests/generic/722 b/tests/generic/722
+new file mode 100755
+index 00000000..937abf36
+--- /dev/null
++++ b/tests/generic/722
+@@ -0,0 +1,43 @@
 +#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
++# SPDX-License-Identifier: GPL-2.0-or-later
++# Copyright (c) 2019, Oracle and/or its affiliates.  All Rights Reserved.
 +#
-+# FSQA Test No. 201
++# FS QA Test No. 722
 +#
-+# Test that when we have the no-holes feature enabled and a specific metadata
-+# layout, if we punch a hole that starts at file offset 0 and fsync the file,
-+# after replaying the log the hole exists.
-+#
++# Race an appending aio dio write to the second block of a file while
++# simultaneously fallocating to the first block.  Make sure that we end up
++# with a two-block file.
++
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
 +echo "QA output created by $seq"
++
++here=`pwd`
 +tmp=/tmp/$$
-+status=1	# failure is the default!
++status=1    # failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
 +
 +_cleanup()
 +{
-+	_cleanup_flakey
 +	cd /
-+	rm -f $tmp.*
++	rm -f $tmp.* $testfile
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
-+. ./common/attr
-+. ./common/filter
-+. ./common/dmflakey
 +
 +# real QA test starts here
-+_supported_fs btrfs
 +_supported_os Linux
-+_require_scratch
-+_require_dm_target flakey
-+_require_attrs
-+_require_xfs_io_command "fpunch"
-+_require_btrfs_fs_feature "no_holes"
-+_require_btrfs_mkfs_feature "no-holes"
-+_require_odirect
++_supported_fs generic
++_require_aiodio "aio-dio-append-write-fallocate-race"
++_require_test
 +
 +rm -f $seqres.full
 +
-+# We create the filesystem with a node size of 64Kb because we need to create a
-+# specific metadata layout in order to trigger the bug we are testing. At the
-+# moment the node size can not be smaller then the system's page size, so given
-+# that the largest possible page size is 64Kb and by default the node size is
-+# set to the system's page size value, we explicitly create a filesystem with a
-+# 64Kb node size, so that the test can run reliably independently of the system's
-+# page size.
-+_scratch_mkfs -O no-holes -n $((64 * 1024)) >>$seqres.full 2>&1
-+_require_metadata_journaling $SCRATCH_DEV
-+_init_flakey
-+_mount_flakey
++testfile=$TEST_DIR/test-$seq
++$AIO_TEST $testfile 100 >> $seqres.full
 +
-+# Create our first file, which is used just to fill space in a leaf. Its items
-+# ocuppy most of the first leaf. We use a large xattr since it's an easy and
-+# fast way to fill a lot of leaf space.
-+touch $SCRATCH_MNT/foo
-+$SETFATTR_PROG -n 'user.x1' -v $(printf '%0.sX' $(seq 1 63617)) $SCRATCH_MNT/foo
-+
-+# Create our second file, which we will use to test if fsync persists a hole
-+# punch operation against it. Create several extent items for the file, all with
-+# a size of 64Kb. The first extent item of this file is located within the first
-+# leaf of the fs tree, as its last item, and all the remaining extent items in
-+# another leaf.
-+offset=0
-+for ((i = 0; i <= 10; i++)); do
-+	$XFS_IO_PROG -f -d -c "pwrite -S 0xab -b 64K $offset 64K" \
-+		$SCRATCH_MNT/bar >/dev/null
-+	offset=$(($offset + 64 * 1024))
-+done
-+
-+# Make sure everything done so far is durably persisted. We also want to start a
-+# new transaction and bump the filesystem generation. We don't fsync because we
-+# want to keep the 'full sync' flag in the inode of file 'bar', so that the
-+# fsync after the hole punch operation uses the slow path, which is necessary to
-+# trigger the bug we are testing.
-+sync
-+
-+# Now punch a hole that covers only the first extent item of file bar. That is
-+# the only extent item in the first leaf of the first tree, so the hole punch
-+# operation will drop it and will not touch the second leaf which contains the
-+# remaining extent items. These conditions are necessary to trigger the bug we
-+# are testing.
-+$XFS_IO_PROG -c "fpunch 0 64K" -c "fsync" $SCRATCH_MNT/bar
-+
-+echo "File digest before power failure:"
-+md5sum $SCRATCH_MNT/bar | _filter_scratch
-+# Simulate a power failure and mount the filesystem to check that replaying the
-+# log tree succeeds and our file bar has the expected content.
-+_flakey_drop_and_remount
-+echo "File digest after power failure and log replay:"
-+md5sum $SCRATCH_MNT/bar | _filter_scratch
-+
-+_unmount_flakey
-+_cleanup_flakey
-+
++echo Silence is golden.
++# success, all done
 +status=0
 +exit
-diff --git a/tests/btrfs/201.out b/tests/btrfs/201.out
+diff --git a/tests/generic/722.out b/tests/generic/722.out
 new file mode 100644
-index 00000000..66631658
+index 00000000..8621a87d
 --- /dev/null
-+++ b/tests/btrfs/201.out
-@@ -0,0 +1,5 @@
-+QA output created by 201
-+File digest before power failure:
-+e1e40ea5ab31cc36fb74830a6293eb2b  SCRATCH_MNT/bar
-+File digest after power failure and log replay:
-+e1e40ea5ab31cc36fb74830a6293eb2b  SCRATCH_MNT/bar
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index d56dcafa..d7eeb45d 100755
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -203,3 +203,4 @@
- 198 auto quick volume
- 199 auto quick trim
- 200 auto quick send clone
-+201 auto quick punch log
--- 
-2.11.0
-
++++ b/tests/generic/722.out
+@@ -0,0 +1,2 @@
++QA output created by 722
++Silence is golden.
+diff --git a/tests/generic/group b/tests/generic/group
+index e5d0c1da..308f86f2 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -588,3 +588,4 @@
+ 583 auto quick encrypt
+ 584 auto quick encrypt
+ 585 auto rename
++722 auto quick rw falloc
