@@ -2,80 +2,82 @@ Return-Path: <SRS0=chfm=ZG=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BEA9EC432C3
-	for <linux-fstests@archiver.kernel.org>; Thu, 14 Nov 2019 14:01:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7F705C43141
+	for <linux-fstests@archiver.kernel.org>; Thu, 14 Nov 2019 15:58:43 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 961D620718
-	for <linux-fstests@archiver.kernel.org>; Thu, 14 Nov 2019 14:01:50 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5060E2072C
+	for <linux-fstests@archiver.kernel.org>; Thu, 14 Nov 2019 15:58:43 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="BMXflQd3"
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="pqLM/VG4"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727002AbfKNOBu (ORCPT
+        id S1726516AbfKNP6m (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 14 Nov 2019 09:01:50 -0500
-Received: from us-smtp-1.mimecast.com ([205.139.110.61]:59005 "EHLO
-        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726374AbfKNOBu (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 14 Nov 2019 09:01:50 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1573740108;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=LXzBSabGasL5wWWG90ENPDVy8Gflx7Hh7nvY//+h5W8=;
-        b=BMXflQd309Ki0yS46mfXoN7Jo/Bugr3DuUulwTu4eEyWfC5l7359MYn46feM5d0N4xUp3b
-        qP0cSkJBYu6WqL2/+weS/ylsaPmKOA8SMh5ZGqTHO8yTPdoHqUTab9ua3FkpbzKmNsDofi
-        LRr/57yQNpTzOKzlOTq5P3fA+Q8Wro8=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-28-hxQlZ5BtPCi8Ow03OjbUlw-1; Thu, 14 Nov 2019 09:01:47 -0500
-Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 4E354800C77
-        for <fstests@vger.kernel.org>; Thu, 14 Nov 2019 14:01:46 +0000 (UTC)
-Received: from localhost.localdomain.com (ovpn-12-86.pek2.redhat.com [10.72.12.86])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 107181081172
-        for <fstests@vger.kernel.org>; Thu, 14 Nov 2019 14:01:44 +0000 (UTC)
-From:   Zorro Lang <zlang@redhat.com>
-To:     fstests@vger.kernel.org
-Subject: [PATCH] generic/563.out: fix the wrong case number in golden image
-Date:   Thu, 14 Nov 2019 22:01:38 +0800
-Message-Id: <20191114140138.9299-1-zlang@redhat.com>
+        Thu, 14 Nov 2019 10:58:42 -0500
+Received: from mail-qk1-f176.google.com ([209.85.222.176]:34834 "EHLO
+        mail-qk1-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726276AbfKNP6m (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 14 Nov 2019 10:58:42 -0500
+Received: by mail-qk1-f176.google.com with SMTP id i19so5411249qki.2
+        for <fstests@vger.kernel.org>; Thu, 14 Nov 2019 07:58:40 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
+        h=from:to:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=szHo+P2PSiz+xMNI9xO5k2lAHGTQwAPwywh7skxacKs=;
+        b=pqLM/VG4r0hbIb49jc0yxf+9VLq2ZGr0dC1byrmvmNIlB1JfJL4+luHiH0qI6lQTlY
+         Aa0+4TWbUO10LOltRbPvZI/aqdfHfxbgrHrrEIAta+CV/PVJpllmkwQoXpX+6F+dCM4E
+         rs4H6NqziKxPL75PCQHx2DsI1e9r3OvlazPv7HtsELoNMdKCVdUrIIFSYzBa3GA038yC
+         9YYgy8kJUkcyEd1RsegRGb2WuNS4B5Dg+Nv2uTu+5HXi8eZnUnOjN+c1Nq7s3gBSStGw
+         2/56sgMnEpAwJulumEsmr4OwUsZa+UiUJdVQHzQGCofChOt9X5HQtU4JVIY+GMsGOQcg
+         e2Kw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=szHo+P2PSiz+xMNI9xO5k2lAHGTQwAPwywh7skxacKs=;
+        b=d27l3Mn39DNfSzgOLzXg4gXQxiHKxxPf3Dy8s0aMLr5t1f3AUAP8JjOuoh+3QyvkF1
+         5sghpKT53ztl7JaUWuliA3x6SPukU0f4ZVGKbI+Z0uqR+iHAD/JudodVImLUznKbofPJ
+         A3asWpK3L9wxtcklsijtEEmYpxl0EjdJGqZprilpn669AEkiIky4f+PD6fg6SpcvnGAN
+         iOUsgfCLn/yaCDLbhH1oVHzhhYasI8/QxMKWl3o7BQw0k7q8tLutf2yhmxm+FadmAE3l
+         +bVMVTlg8JZxfF9XYf6YhtVPUAFwWJ0GubE4vkaGBsGU8jp1KrTRoCYn+Gq5uylSUdG/
+         924A==
+X-Gm-Message-State: APjAAAVshgoLAOsLlQqtvMLsy2GKpXm/34NRH1PKPD7et1RmGR5hZaEX
+        83Jgw0iXjrFUqxLwnNolCyq4mGAubkAe+Q==
+X-Google-Smtp-Source: APXvYqyKnFRan4srSlpE1AZ7le1Vd9FwkPf6fXLl0tHlNV5ilewXQ6gtDC0tCzMmf090rro4v06Apw==
+X-Received: by 2002:a37:9e05:: with SMTP id h5mr7656911qke.76.1573747119185;
+        Thu, 14 Nov 2019 07:58:39 -0800 (PST)
+Received: from localhost ([107.15.81.208])
+        by smtp.gmail.com with ESMTPSA id 7sm2888051qkf.67.2019.11.14.07.58.38
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 14 Nov 2019 07:58:38 -0800 (PST)
+From:   Josef Bacik <josef@toxicpanda.com>
+To:     fstests@vger.kernel.org, kernel-team@fb.com,
+        linux-btrfs@vger.kernel.org
+Subject: [PATCH 0/3] fsstress: add support for btrfs subvol and snapshot ops
+Date:   Thu, 14 Nov 2019 10:58:33 -0500
+Message-Id: <20191114155836.3528-1-josef@toxicpanda.com>
+X-Mailer: git-send-email 2.21.0
 MIME-Version: 1.0
-X-Scanned-By: MIMEDefang 2.84 on 10.5.11.22
-X-MC-Unique: hxQlZ5BtPCi8Ow03OjbUlw-1
-X-Mimecast-Spam-Score: 0
-Content-Type: text/plain; charset=WINDOWS-1252
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-The first line of generic/563.out is wrong, the number should be 563,
-not 011. This mismatch will always cause testing fail.
+For btrfs it would be nice to exercise our subvol and snapshot operations with
+fsstress as well.  The set of patches adds this ability.  I've added a new file
+type for subvolumes, and they behave just like directories for all intents and
+purposes.  The bulk of the supporting code needed for this went into the first
+patch, as well as the code to add the ability to link in libbtrfsutil.  The
+second patch is more straightforward as it just adds the snapshot operation, and
+the final patch goes through and makes everybody pick either a directory or
+subvolume for their target file.  I've done a bunch of testing with this on
+btrfs to make sure everything works as expected.  I then did a follow up run on
+xfs to verify I didn't break the non-btrfs case.  Thanks,
 
-Signed-off-by: Zorro Lang <zlang@redhat.com>
----
- tests/generic/563.out | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/tests/generic/563.out b/tests/generic/563.out
-index 277f4bcb..29bfbf53 100644
---- a/tests/generic/563.out
-+++ b/tests/generic/563.out
-@@ -1,4 +1,4 @@
--QA output created by 011
-+QA output created by 563
- read/write
- read is in range
- write is in range
---=20
-2.20.1
+Josef
 
