@@ -2,65 +2,68 @@ Return-Path: <SRS0=chfm=ZG=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.7 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7F705C43141
-	for <linux-fstests@archiver.kernel.org>; Thu, 14 Nov 2019 15:58:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 84420C33C9A
+	for <linux-fstests@archiver.kernel.org>; Thu, 14 Nov 2019 15:58:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 5060E2072C
-	for <linux-fstests@archiver.kernel.org>; Thu, 14 Nov 2019 15:58:43 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 54BC920718
+	for <linux-fstests@archiver.kernel.org>; Thu, 14 Nov 2019 15:58:45 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="pqLM/VG4"
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="FkA1RHwS"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726516AbfKNP6m (ORCPT
+        id S1726755AbfKNP6p (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 14 Nov 2019 10:58:42 -0500
-Received: from mail-qk1-f176.google.com ([209.85.222.176]:34834 "EHLO
-        mail-qk1-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726276AbfKNP6m (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 14 Nov 2019 10:58:42 -0500
-Received: by mail-qk1-f176.google.com with SMTP id i19so5411249qki.2
-        for <fstests@vger.kernel.org>; Thu, 14 Nov 2019 07:58:40 -0800 (PST)
+        Thu, 14 Nov 2019 10:58:45 -0500
+Received: from mail-qv1-f65.google.com ([209.85.219.65]:45080 "EHLO
+        mail-qv1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726567AbfKNP6o (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 14 Nov 2019 10:58:44 -0500
+Received: by mail-qv1-f65.google.com with SMTP id g12so2520379qvy.12
+        for <fstests@vger.kernel.org>; Thu, 14 Nov 2019 07:58:44 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
-        h=from:to:subject:date:message-id:mime-version
+        h=from:to:subject:date:message-id:in-reply-to:references:mime-version
          :content-transfer-encoding;
-        bh=szHo+P2PSiz+xMNI9xO5k2lAHGTQwAPwywh7skxacKs=;
-        b=pqLM/VG4r0hbIb49jc0yxf+9VLq2ZGr0dC1byrmvmNIlB1JfJL4+luHiH0qI6lQTlY
-         Aa0+4TWbUO10LOltRbPvZI/aqdfHfxbgrHrrEIAta+CV/PVJpllmkwQoXpX+6F+dCM4E
-         rs4H6NqziKxPL75PCQHx2DsI1e9r3OvlazPv7HtsELoNMdKCVdUrIIFSYzBa3GA038yC
-         9YYgy8kJUkcyEd1RsegRGb2WuNS4B5Dg+Nv2uTu+5HXi8eZnUnOjN+c1Nq7s3gBSStGw
-         2/56sgMnEpAwJulumEsmr4OwUsZa+UiUJdVQHzQGCofChOt9X5HQtU4JVIY+GMsGOQcg
-         e2Kw==
+        bh=g4Cq4oSZATopiVHWVuyHeblX9FKGAXQkB3bQW5IcCaE=;
+        b=FkA1RHwSsEVhm+x5dz/3kKs3ygEJMicBgQ53LO5NW7BDgQufdH9otjwIZOIjahcqjc
+         XoFAd+fT3dxigzSF6gthEyB1RN8B8VIIlO2G8Kd3vaYvH7XqBj2YcyZn4JNtcc2aE2Q2
+         vLyZ7abpBFGnLbMBXCzAjNu3h756/Vca3+qUl5LCQqszLQVt9GF1BgADFg3XbSsypM/i
+         p26fmcfThPHnhViUFYg7oETRsbIYm38X8tq61TyxbZwegpXM8KtdhBaPrptm+r04zZcI
+         lF/lntT3R0Zkji1dDcuNYFGWkJ7d4BF4M5JATJHKVufb9kR8rT4FOXJB+puMgLCvWLil
+         DNhw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=szHo+P2PSiz+xMNI9xO5k2lAHGTQwAPwywh7skxacKs=;
-        b=d27l3Mn39DNfSzgOLzXg4gXQxiHKxxPf3Dy8s0aMLr5t1f3AUAP8JjOuoh+3QyvkF1
-         5sghpKT53ztl7JaUWuliA3x6SPukU0f4ZVGKbI+Z0uqR+iHAD/JudodVImLUznKbofPJ
-         A3asWpK3L9wxtcklsijtEEmYpxl0EjdJGqZprilpn669AEkiIky4f+PD6fg6SpcvnGAN
-         iOUsgfCLn/yaCDLbhH1oVHzhhYasI8/QxMKWl3o7BQw0k7q8tLutf2yhmxm+FadmAE3l
-         +bVMVTlg8JZxfF9XYf6YhtVPUAFwWJ0GubE4vkaGBsGU8jp1KrTRoCYn+Gq5uylSUdG/
-         924A==
-X-Gm-Message-State: APjAAAVshgoLAOsLlQqtvMLsy2GKpXm/34NRH1PKPD7et1RmGR5hZaEX
-        83Jgw0iXjrFUqxLwnNolCyq4mGAubkAe+Q==
-X-Google-Smtp-Source: APXvYqyKnFRan4srSlpE1AZ7le1Vd9FwkPf6fXLl0tHlNV5ilewXQ6gtDC0tCzMmf090rro4v06Apw==
-X-Received: by 2002:a37:9e05:: with SMTP id h5mr7656911qke.76.1573747119185;
-        Thu, 14 Nov 2019 07:58:39 -0800 (PST)
+        h=x-gm-message-state:from:to:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=g4Cq4oSZATopiVHWVuyHeblX9FKGAXQkB3bQW5IcCaE=;
+        b=qMTQoof3FSC0bfPgM/VPSSd929ArAjOtLUHQL3nlRlgkT+3BE9akQZaIYbYcntYzcz
+         vLuLesFn/dvsjrPwHQ8F7x4Ny3Jf1Z5H6CDPyNHgVLXOo9buIzb4CsOmqF13Mut+d+vB
+         0MWXTO9QLRIvBy0MBIPHQDWcVdUpEIuSEZ76EAcjq4gv2C62sARfhqSZAwzdGgYEQnAV
+         1sgQSG+PvNciWFj5cpbKJPZtVoVpMMRw6/X1EOnMvdGlkYS8Yz9ylPcbcXspPtquAtq+
+         MHhxI89P+GJBTWED/gdln62jBBOVejvhXs6Yyu/GAjp45A9p5kcBVYyKbGE3PLIWB5UM
+         SNAA==
+X-Gm-Message-State: APjAAAXTRSwbFREDjG1h8peAsRGX+Mq4s3/6HvmRyORGW/v0SxAKKib0
+        9d3LZ+yIU4uMNNXEO7Yb7QcUDJLpUINA+w==
+X-Google-Smtp-Source: APXvYqyALWLG2uRrukq54qZP0rq83mmA1JIq8/TCLDu3wP16nA01HCyou7KMGeca/Sdy6lYSRty8Ww==
+X-Received: by 2002:ad4:55cc:: with SMTP id bt12mr8385893qvb.58.1573747123415;
+        Thu, 14 Nov 2019 07:58:43 -0800 (PST)
 Received: from localhost ([107.15.81.208])
-        by smtp.gmail.com with ESMTPSA id 7sm2888051qkf.67.2019.11.14.07.58.38
+        by smtp.gmail.com with ESMTPSA id u7sm2787280qkm.127.2019.11.14.07.58.42
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 14 Nov 2019 07:58:38 -0800 (PST)
+        Thu, 14 Nov 2019 07:58:42 -0800 (PST)
 From:   Josef Bacik <josef@toxicpanda.com>
 To:     fstests@vger.kernel.org, kernel-team@fb.com,
         linux-btrfs@vger.kernel.org
-Subject: [PATCH 0/3] fsstress: add support for btrfs subvol and snapshot ops
-Date:   Thu, 14 Nov 2019 10:58:33 -0500
-Message-Id: <20191114155836.3528-1-josef@toxicpanda.com>
+Subject: [PATCH 2/3] fsstress: add the ability to create snapshots
+Date:   Thu, 14 Nov 2019 10:58:35 -0500
+Message-Id: <20191114155836.3528-3-josef@toxicpanda.com>
 X-Mailer: git-send-email 2.21.0
+In-Reply-To: <20191114155836.3528-1-josef@toxicpanda.com>
+References: <20191114155836.3528-1-josef@toxicpanda.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
@@ -68,16 +71,106 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-For btrfs it would be nice to exercise our subvol and snapshot operations with
-fsstress as well.  The set of patches adds this ability.  I've added a new file
-type for subvolumes, and they behave just like directories for all intents and
-purposes.  The bulk of the supporting code needed for this went into the first
-patch, as well as the code to add the ability to link in libbtrfsutil.  The
-second patch is more straightforward as it just adds the snapshot operation, and
-the final patch goes through and makes everybody pick either a directory or
-subvolume for their target file.  I've done a bunch of testing with this on
-btrfs to make sure everything works as expected.  I then did a follow up run on
-xfs to verify I didn't break the non-btrfs case.  Thanks,
+Snapshots are just fancy subvolumes, add this ability so we can stress
+snapshot creation.  We get the deletion with SUBVOL_DELETE.
 
-Josef
+Signed-off-by: Josef Bacik <josef@toxicpanda.com>
+---
+ ltp/fsstress.c | 53 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 53 insertions(+)
+
+diff --git a/ltp/fsstress.c b/ltp/fsstress.c
+index e0636a12..f7f5f1dc 100644
+--- a/ltp/fsstress.c
++++ b/ltp/fsstress.c
+@@ -129,6 +129,7 @@ typedef enum {
+ 	OP_SETATTR,
+ 	OP_SETFATTR,
+ 	OP_SETXATTR,
++	OP_SNAPSHOT,
+ 	OP_SPLICE,
+ 	OP_STAT,
+ 	OP_SUBVOL_CREATE,
+@@ -255,6 +256,7 @@ void	rmdir_f(int, long);
+ void	setattr_f(int, long);
+ void	setfattr_f(int, long);
+ void	setxattr_f(int, long);
++void	snapshot_f(int, long);
+ void	splice_f(int, long);
+ void	stat_f(int, long);
+ void	subvol_create_f(int, long);
+@@ -322,6 +324,7 @@ opdesc_t	ops[] = {
+ 	{ OP_SETFATTR, "setfattr", setfattr_f, 2, 1 },
+ 	/* set project id (XFS_IOC_FSSETXATTR ioctl) */
+ 	{ OP_SETXATTR, "setxattr", setxattr_f, 1, 1 },
++	{ OP_SNAPSHOT, "snapshot", snapshot_f, 1, 1 },
+ 	{ OP_SPLICE, "splice", splice_f, 1, 1 },
+ 	{ OP_STAT, "stat", stat_f, 1, 0 },
+ 	{ OP_SUBVOL_CREATE, "subvol_create", subvol_create_f, 1, 1},
+@@ -1903,6 +1906,7 @@ zero_freq(void)
+ #define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
+ 
+ opty_t btrfs_ops[] = {
++	OP_SNAPSHOT,
+ 	OP_SUBVOL_CREATE,
+ 	OP_SUBVOL_DELETE,
+ };
+@@ -4703,6 +4707,55 @@ out:
+ 	free_pathname(&f);
+ }
+ 
++void
++snapshot_f(int opno, long r)
++{
++#ifdef HAVE_BTRFSUTIL_H
++	enum btrfs_util_error	e;
++	pathname_t		f;
++	pathname_t		newf;
++	fent_t			*fep;
++	int			id;
++	int			parid;
++	int			v;
++	int			v1;
++	int			err;
++
++	init_pathname(&f);
++	if (!get_fname(FT_SUBVOLm, r, &f, NULL, &fep, &v)) {
++		if (v)
++			printf("%d/%d: snapshot - no subvolume\n", procid,
++			       opno);
++		free_pathname(&f);
++		return;
++	}
++	init_pathname(&newf);
++	parid = fep->id;
++	err = generate_fname(fep, FT_SUBVOL, &newf, &id, &v1);
++	v |= v1;
++	if (!err) {
++		if (v) {
++			(void)fent_to_name(&f, fep);
++			printf("%d/%d: snapshot - no filename from %s\n",
++			       procid, opno, f.path);
++		}
++		free_pathname(&f);
++		return;
++	}
++	e = btrfs_util_create_snapshot(f.path, newf.path, 0, NULL, NULL);
++	if (e == BTRFS_UTIL_OK)
++		add_to_flist(FT_SUBVOL, id, parid, 0);
++	if (v) {
++		printf("%d/%d: snapshot %s->%s %d(%s)\n", procid, opno,
++		       f.path, newf.path, e, btrfs_util_strerror(e));
++		printf("%d/%d: snapshot add id=%d,parent=%d\n", procid, opno,
++		       id, parid);
++	}
++	free_pathname(&newf);
++	free_pathname(&f);
++#endif
++}
++
+ void
+ stat_f(int opno, long r)
+ {
+-- 
+2.21.0
 
