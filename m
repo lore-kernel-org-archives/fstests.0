@@ -1,115 +1,136 @@
-Return-Path: <SRS0=Or0g=ZJ=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=YaBu=ZK=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.3 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-9.7 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C51EDC432C0
-	for <linux-fstests@archiver.kernel.org>; Sun, 17 Nov 2019 17:53:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 090B2C432C0
+	for <linux-fstests@archiver.kernel.org>; Mon, 18 Nov 2019 17:41:26 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 8E6DD2084C
-	for <linux-fstests@archiver.kernel.org>; Sun, 17 Nov 2019 17:53:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CA3BC2186D
+	for <linux-fstests@archiver.kernel.org>; Mon, 18 Nov 2019 17:41:25 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Hjl755FV"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="UPIO81FO"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726032AbfKQRxc (ORCPT
+        id S1726635AbfKRRlZ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 17 Nov 2019 12:53:32 -0500
-Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:33634 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726047AbfKQRxc (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 17 Nov 2019 12:53:32 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1574013211;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=z3jThtnFHn+u2Zbntihdur7DaqZTHatfWOLXJf5lMaI=;
-        b=Hjl755FV3YPhozJVPCoT9QSY2iqbyeZWzfi2wsCI46A4UYNMRvV+DhIZOu+JnO2k9nv+YE
-        6v/3UGgrAEtHEdvEAuEatQXLkrlxNajKqpJskMwn+CoOxkBUlVbrvIPYh6v1c7JxdXkA5Y
-        ZdvGkR20fDM27sCszdZzBZjv3g2FxEs=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-173-fKrGSsigMlm1CY9tzT5iOA-1; Sun, 17 Nov 2019 12:53:28 -0500
-Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 615281800D4F;
-        Sun, 17 Nov 2019 17:53:27 +0000 (UTC)
-Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id CBE6D60900;
-        Sun, 17 Nov 2019 17:53:26 +0000 (UTC)
-Date:   Mon, 18 Nov 2019 02:01:15 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     linux-block@vger.kernel.org
-Cc:     bfoster@redhat.com, cgroups@vger.kernel.org,
-        fstests@vger.kernel.org
-Subject: Qestion about block cgroup for disk partition
-Message-ID: <20191117180114.GQ3802@dhcp-12-102.nay.redhat.com>
-MIME-Version: 1.0
-User-Agent: Mutt/1.10.1 (2018-07-13)
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
-X-MC-Unique: fKrGSsigMlm1CY9tzT5iOA-1
-X-Mimecast-Spam-Score: 0
-Content-Type: text/plain; charset=WINDOWS-1252
-Content-Transfer-Encoding: quoted-printable
-Content-Disposition: inline
+        Mon, 18 Nov 2019 12:41:25 -0500
+Received: from mail-qv1-f66.google.com ([209.85.219.66]:34995 "EHLO
+        mail-qv1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726475AbfKRRlZ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 18 Nov 2019 12:41:25 -0500
+Received: by mail-qv1-f66.google.com with SMTP id y18so6901382qve.2
+        for <fstests@vger.kernel.org>; Mon, 18 Nov 2019 09:41:24 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id;
+        bh=9kihoHmI1QsTVMJS2aIPNdr4NDjbxH9mKnkcDL0U+7U=;
+        b=UPIO81FO8wJkMcjbt6lVkJ/rSyAoCRM5og8crlDNRB6kVvVcb/r1JtFxJ8BGnxhq6f
+         Ohdv4AFcrdeAHi5GjOUx+9/naKHXblntcr2H5Ne2Mf1I1eHVOd4NnVHr/kiFHNJ8jj+C
+         iYALoN8WZ1tF926MQzKvMjK0nv5e4NrLN96w1U+iWt1FvRKOx+/01XDJr1MA95iCOe1T
+         GC5l4RSXa2dsdhxVVJkKiPyP3s6fsGCMujdDobeOelOuvcEcjHEqrD/9WE/qjOF8wrky
+         mj1gqJwJOxXjfonILdu/2PKuUg67Gx74y07UDbKdBdYsFebmXEh+1rkRO7IJUW9Unxjd
+         yrDg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id;
+        bh=9kihoHmI1QsTVMJS2aIPNdr4NDjbxH9mKnkcDL0U+7U=;
+        b=jLuyI4tDUlQt6g14EJF2GL0jJRNQRHahsTGVvovIRxQaauedKJgMzDPnDWOZw56592
+         DJeOTXF3FFMvbcE99udFkQKlnhOzJn0fcPqQoOvQ30uuL34IBcTQL5cdMr2nvwoR7x4D
+         BKnx5Ba1dlaG/WUATQcK9/DJD005c79fhnllCWLDnimd2h8hwcHPWxnCJrO+dWIU+gTQ
+         TeFQeeRzQOzqaM8EWyPEGdsjCSRSS9mA26UfY/+Jdrb7h0yc0k6CAfSiD3abnrTtYW5b
+         plPV4F3bFQuZ4BxyLr4PhrQatT9E0eP7xhSKxZo+FscDKGPlla0GRzoEiePhAbuQufm0
+         fpKg==
+X-Gm-Message-State: APjAAAWJEY8xr4LcvnpUKe+KQklm49bYlw53a55V4y0La0rq8lnzjgjP
+        5dI5aRqYYZ29VsTICnsKh6dy7ao=
+X-Google-Smtp-Source: APXvYqwUSBzGNzrJ5IOu8XfjsGSn2mYtny/lKxKCE9EV4zhIJ2inrhZVIRisgiBBSV8tO0fuYct4Lg==
+X-Received: by 2002:a05:6214:852:: with SMTP id dg18mr6489265qvb.8.1574098883970;
+        Mon, 18 Nov 2019 09:41:23 -0800 (PST)
+Received: from gabell.bos.redhat.com (nat-pool-bos-t.redhat.com. [66.187.233.206])
+        by smtp.gmail.com with ESMTPSA id q8sm11051438qta.31.2019.11.18.09.41.22
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 18 Nov 2019 09:41:23 -0800 (PST)
+From:   Masayoshi Mizuma <msys.mizuma@gmail.com>
+To:     fstests@vger.kernel.org
+Cc:     Masayoshi Mizuma <msys.mizuma@gmail.com>,
+        Masayoshi Mizuma <m.mizuma@jp.fujitsu.com>
+Subject: [PATCH] generic/551: Adjust the size argument for aio-dio-write-verify
+Date:   Mon, 18 Nov 2019 12:40:37 -0500
+Message-Id: <20191118174037.363-1-msys.mizuma@gmail.com>
+X-Mailer: git-send-email 2.17.1
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Hi,
+From: Masayoshi Mizuma <m.mizuma@jp.fujitsu.com>
 
-Recently we found a weird failure by running xfstests generic/563 on xfs or
-ext4, when the test device is a general disk partition. If you don't want t=
-o
-try xfstests, you can see below script[1].
+generic/551 sometimes fails because it's killed by OOM killer.
+That is because aio-dio-write-verify, which is called by
+generic/551, tries to allocate memory even though the total
+allocation size exceeds the available memory.
 
-If we test on a disk partition (e.g. /dev/sdb1 or /dev/nvme0n1p1), the cgro=
-up's
-io.stat always can't output the correct minor device number of the disk
-partition. LVM or loop devices don't have this issue.
+aio-dio-write-verify allocates memory according to the 'size'
+argument, and generic/551 passes the argument.
 
-Is there any 'blk-cgroup' expert would like to help to answer this question=
-?
-Is this expected or it's a bug will be fixed later? It can be reproduced on
-latest upstream kernel.
+Stop adding the argument when the total size is exceeds
+the available memory.
 
-Thanks,
-Zorro
+Signed-off-by: Masayoshi Mizuma <m.mizuma@jp.fujitsu.com>
+---
+ common/rc         | 11 +++++++++++
+ tests/generic/551 |  6 ++++++
+ 2 files changed, 17 insertions(+)
 
-
-[1]
-# cat blkcgroup-test.sh=20
-#/bin/bash
-
-umount /dev/nvme0n1p1 2>/dev/null
-mkfs.xfs -f /dev/nvme0n1p1 >/dev/null 2>&1
-mount /dev/nvme0n1p1 /mnt/scratch
-major=3D$((0x`stat -L -c "%t" /dev/nvme0n1p1`))
-minor=3D$((0x`stat -L -c "%T" /dev/nvme0n1p1`))
-echo "$major:$minor"
-echo "+io" > /sys/fs/cgroup/cgroup.subtree_control
-echo $$ > /sys/fs/cgroup/cgroup.procs
-rmdir /sys/fs/cgroup/mytest-cg
-xfs_io -fc "pwrite 0 8m" /mnt/scratch/file >/dev/null 2>&1
-umount /dev/nvme0n1p1 && mount /dev/nvme0n1p1 /mnt/scratch
-stat /mnt/scratch/file >/dev/null
-mkdir /sys/fs/cgroup/mytest-cg
-echo $$ > /sys/fs/cgroup/mytest-cg/cgroup.procs
-xfs_io -c "pread 0 8m" -c "pwrite 0 8m" -c fsync /mnt/scratch/file >/dev/nu=
-ll 2>&1
-mkdir -p /sys/fs/cgroup
-echo $$ > /sys/fs/cgroup/cgroup.procs
-xfs_io -c fsync /mnt/scratch/file
-cat /sys/fs/cgroup/mytest-cg/io.stat
-
-[2]
-259:1
-259:0 rbytes=3D8388608 wbytes=3D8389632 rios=3D67 wios=3D12 dbytes=3D0 dios=
-=3D0
+diff --git a/common/rc b/common/rc
+index b988e912..3494426e 100644
+--- a/common/rc
++++ b/common/rc
+@@ -910,6 +910,17 @@ _free_memory_bytes()
+     free -b | grep ^Mem | awk '{print $4}'
+ }
+ 
++_available_memory_bytes()
++{
++    nf=`free -b | grep ^Mem | awk '{print NF}'`
++    if [[ nf -lt 7 ]]; then
++        # Doesn't have available field. Fallback.
++        _free_memory_bytes
++    else
++        free -b | grep ^Mem | awk '{print $7}'
++    fi
++}
++
+ # Create fs of certain size on scratch device
+ # _scratch_mkfs_sized <size in bytes> [optional blocksize]
+ _scratch_mkfs_sized()
+diff --git a/tests/generic/551 b/tests/generic/551
+index a2a5b51d..a0dc9cd7 100755
+--- a/tests/generic/551
++++ b/tests/generic/551
+@@ -55,12 +55,18 @@ do_test()
+ 	local size
+ 	local off
+ 	local truncsize
++	local total_size=0
++	local avail_mem=`_available_memory_bytes`
+ 
+ 	# the number of AIO write operation
+ 	num_oper=$((RANDOM % 64 + 1))
+ 
+ 	for ((i=0; i<num_oper; i++)); do
+ 		size=$(((RANDOM % max_io_size_b + 1) * diosize))
++		total_size=$((total_size + size*2))
++		if [[ $total_size -ge $avail_mem ]]; then
++			break
++		fi
+ 		off=$((RANDOM % max_io_size_b * diosize))
+ 		oper_list="$oper_list -a size=$size,off=$off"
+ 	done
+-- 
+2.18.1
 
