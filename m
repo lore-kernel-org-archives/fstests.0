@@ -1,53 +1,71 @@
-Return-Path: <SRS0=o/cj=ZL=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=ndeD=ZM=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 400D6C432C3
-	for <linux-fstests@archiver.kernel.org>; Tue, 19 Nov 2019 22:35:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7D747C432C3
+	for <linux-fstests@archiver.kernel.org>; Wed, 20 Nov 2019 06:47:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 18B642245B
-	for <linux-fstests@archiver.kernel.org>; Tue, 19 Nov 2019 22:35:45 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1574202945;
-	bh=LlKJsgsUeADvLLy81A2dvgQYKFYUOtvPPmXnIL6rDRs=;
-	h=From:To:Cc:Subject:Date:List-ID:From;
-	b=Bt7aqkwe4KIyohQYnqYWUg5UH2abQXvJTuEfCnz9AluFwNc3T3IKfSyh+21Wiw5+n
-	 VQiWIuH3AXHrK2OziFLf4zDAmRRaYJePU/WDEOFowRTW2YT0Zab/v3jPCvBZV7ZJk7
-	 2D3AmJMsX+EJAH6lIJNpYm/znxv733SSnS8XPRK4=
+	by mail.kernel.org (Postfix) with ESMTP id 50E7920731
+	for <linux-fstests@archiver.kernel.org>; Wed, 20 Nov 2019 06:47:10 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="Z/GJNzPS"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726539AbfKSWfo (ORCPT
+        id S1726163AbfKTGrK (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 19 Nov 2019 17:35:44 -0500
-Received: from mail.kernel.org ([198.145.29.99]:43524 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726025AbfKSWfo (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 19 Nov 2019 17:35:44 -0500
-Received: from ebiggers-linuxstation.mtv.corp.google.com (unknown [104.132.1.77])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 9F98122449;
-        Tue, 19 Nov 2019 22:35:42 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1574202942;
-        bh=LlKJsgsUeADvLLy81A2dvgQYKFYUOtvPPmXnIL6rDRs=;
-        h=From:To:Cc:Subject:Date:From;
-        b=gzOhm2d/vblWOzB4huynAQAmCVKXsM3NUR61KCuFYxuAnowA6PJXlorCcTgu29fHL
-         epVTCFDnwKRoq+5FlFU0L61rrVXTDTet1oAy+oocF2u7GQqXd+2og48vBv1w4BZCNf
-         1Nr71zTbfK/OXQxDBUWhq+lYLbyuwK2g3NfM5b+I=
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     linux-xfs@vger.kernel.org
-Cc:     fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org,
-        keyrings@vger.kernel.org,
-        Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>
-Subject: [xfsprogs RFC PATCH] xfs_io/encrypt: support passing a keyring key to add_enckey
-Date:   Tue, 19 Nov 2019 14:34:56 -0800
-Message-Id: <20191119223456.230696-1-ebiggers@kernel.org>
-X-Mailer: git-send-email 2.24.0.432.g9d3f5f5b63-goog
+        Wed, 20 Nov 2019 01:47:10 -0500
+Received: from esa4.hgst.iphmx.com ([216.71.154.42]:49569 "EHLO
+        esa4.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725268AbfKTGrJ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 20 Nov 2019 01:47:09 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1574232429; x=1605768429;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=x3C0QWKGnbHiXf89Z95VPNtK6A6B5YQ6CboCRZJg454=;
+  b=Z/GJNzPSUgO9D42wIQ+qowzmXGSjgA8gctVA6h9aAc77LbBwChDRHT+1
+   1qaVzeMtqfbEYGmIDECaDcuhWRh3K7lERi41AmqDXSghlr1Y1HMXTJVI0
+   GtqCfIfgfSxWwgfZUzdsycFNvJjUTQN+sqORd0q26JpCmh212UbtMy7TW
+   lfj3K3m8MAsyWTTBdoPj8GHfWVQD7G23LXDDLzKLk2jz5qC6aRt+2ZmUm
+   LfVQAxcW6SuxdVBUn9Q08ZTms6t3sybIe6epOFgMJl+6f8hzO+j5fzwoy
+   oDuthES75yNrvX+Z4Ltp3ASGIgRROKVLTjmC8wu7TEm1QpWCXpCTzmFAR
+   Q==;
+IronPort-SDR: E/5pzDZMCngS7JwoQGSCnVljk9VeTSwrB/Bj6QtsYb3yZ8r0JPzn4tfmgO+QR3W/t8GWdTwoSv
+ uvoSIIPFxjsZJ4i8lX8Mj0UUSKSEhBjfALrKH7H6vIyBoTcto3+sPFebUTz/5f8FvQ068MSmgn
+ HAfDO5n2/XjFfVSsJfNumchyP/povTZdkOO3RRT5UCEhL2N+GKQvn0lzsnborkLQn7/9ZseVH7
+ NdFhODNJpbYH/ZWk6KRQnuuYSnXK5doOggjzDEUfTnmtZDmul8AXn5NWlSOV2naIaN/LkDWp/c
+ U9s=
+X-IronPort-AV: E=Sophos;i="5.69,220,1571673600"; 
+   d="scan'208";a="123506626"
+Received: from uls-op-cesaip01.wdc.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
+  by ob1.hgst.iphmx.com with ESMTP; 20 Nov 2019 14:47:09 +0800
+IronPort-SDR: XqyC7hvd8VD76gLqFrrq+yL12wkiym9QYNV5fTPYgUwTiq9q417JbfTQo50c6yNvtvY4iPoe4J
+ huO/RqsvPFzGe5cYzV9JbxGKEyJE2GByb9QuYTwI70PuQRk+V8f9SL1yx9hbI8K+ij0SW5O6DE
+ FPF0l/cvYlJSrcxSMZdMmLYtQkoRBstcyxRdCRqRo9oSgYGdCUKH7Zcfnzin8I9LEibUd+PBj9
+ yhoKw/i1uwRMlTfYlfQ8mwYlu3bMY8w+Pr34Tq1A+d3ckIWEeS1NTm9JZEUN2C8G0Lkc0P8dIp
+ Z/pBCUxwaJ2LvnprL0Vj83Xi
+Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
+  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Nov 2019 22:42:20 -0800
+IronPort-SDR: I4q08cXQk4g/llEotZS96WckPyC/OAcjAO2icxGiuReWHHnqhI5nEa02IpBJvbcaGiUGhMOk0s
+ i3XcvZp/tsJTIrAJiWbBZIkC+7IGh+rRMYZNKtXYc/1YGSAmrJWpXH0qPcivyydAyUh/6AnBZj
+ y5Tuk932y+Ls5HTtwHswZaupPEBfav3K/Gw6jAX9a0BCUhN8hvlQOyGzWlyJNfdbLM9zNvEAAJ
+ aFBcj/MYc9aN8sEqxQGE1LnTEClAAmS4uAKGuLs0ZI9C/9g5AWz8NUjWFLBVHAGpvOjlRv8Ruw
+ cxE=
+WDCIronportException: Internal
+Received: from naota.dhcp.fujisawa.hgst.com (HELO naota.fujisawa.hgst.com) ([10.149.53.115])
+  by uls-op-cesaip01.wdc.com with ESMTP; 19 Nov 2019 22:47:09 -0800
+From:   Naohiro Aota <naohiro.aota@wdc.com>
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, Naohiro Aota <naohiro.aota@wdc.com>
+Subject: [PATCH] fstests, btrfs: check flakey device instead of backend device
+Date:   Wed, 20 Nov 2019 15:44:06 +0900
+Message-Id: <20191120064406.3467779-1-naohiro.aota@wdc.com>
+X-Mailer: git-send-email 2.24.0
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
@@ -55,280 +73,30 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Eric Biggers <ebiggers@google.com>
+btrfs/085 mount and works on $FLAKEY_DEV, but it's inspecting the
+underlying $SCRATCH_DEV. Since writing to dm-flakey does not invalidate
+page cache of $SCRATCH_DEV, the btrfs command can read a stalled data
+from page cache. We should check the flakey device to avoid such cache
+inconsistency.
 
-Add a '-k' option to the 'add_enckey' xfs_io command to allow exercising
-the key_id field that is being added to struct fscrypt_add_key_arg.
-
-This is needed for the corresponding test in xfstests.
-
-For more details, see the corresponding xfstests and kernel patches.
-
-Signed-off-by: Eric Biggers <ebiggers@google.com>
+Signed-off-by: Naohiro Aota <naohiro.aota@wdc.com>
 ---
+ tests/btrfs/085 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-I'm sending this out for comment now, but it shouldn't be merged until
-the corresponding kernel patch has reached mainline.
-
- configure.ac          |  1 +
- include/builddefs.in  |  4 ++
- io/encrypt.c          | 90 +++++++++++++++++++++++++++++++------------
- m4/package_libcdev.m4 | 21 ++++++++++
- man/man8/xfs_io.8     | 10 +++--
- 5 files changed, 98 insertions(+), 28 deletions(-)
-
-diff --git a/configure.ac b/configure.ac
-index 30b1213b..3323181c 100644
---- a/configure.ac
-+++ b/configure.ac
-@@ -176,6 +176,7 @@ AC_HAVE_READDIR
- AC_HAVE_FSETXATTR
- AC_HAVE_MREMAP
- AC_NEED_INTERNAL_FSXATTR
-+AC_NEED_INTERNAL_FSCRYPT_ADD_KEY_ARG
- AC_HAVE_GETFSMAP
- AC_HAVE_STATFS_FLAGS
- AC_HAVE_MAP_SYNC
-diff --git a/include/builddefs.in b/include/builddefs.in
-index 4700b527..3b6b1c1b 100644
---- a/include/builddefs.in
-+++ b/include/builddefs.in
-@@ -102,6 +102,7 @@ HAVE_FLS = @have_fls@
- HAVE_FSETXATTR = @have_fsetxattr@
- HAVE_MREMAP = @have_mremap@
- NEED_INTERNAL_FSXATTR = @need_internal_fsxattr@
-+NEED_INTERNAL_FSCRYPT_ADD_KEY_ARG = @need_internal_fscrypt_add_key_arg@
- HAVE_GETFSMAP = @have_getfsmap@
- HAVE_STATFS_FLAGS = @have_statfs_flags@
- HAVE_MAP_SYNC = @have_map_sync@
-@@ -141,6 +142,9 @@ endif
- ifeq ($(NEED_INTERNAL_FSXATTR),yes)
- PCFLAGS+= -DOVERRIDE_SYSTEM_FSXATTR
- endif
-+ifeq ($(NEED_INTERNAL_FSCRYPT_ADD_KEY_ARG),yes)
-+PCFLAGS+= -DOVERRIDE_SYSTEM_FSCRYPT_ADD_KEY_ARG
-+endif
- ifeq ($(HAVE_GETFSMAP),yes)
- PCFLAGS+= -DHAVE_GETFSMAP
- endif
-diff --git a/io/encrypt.c b/io/encrypt.c
-index de48c50c..01b7e0df 100644
---- a/io/encrypt.c
-+++ b/io/encrypt.c
-@@ -4,6 +4,9 @@
-  * Author: Eric Biggers <ebiggers@google.com>
-  */
- 
-+#ifdef OVERRIDE_SYSTEM_FSCRYPT_ADD_KEY_ARG
-+#  define fscrypt_add_key_arg sys_fscrypt_add_key_arg
-+#endif
- #include "platform_defs.h"
- #include "command.h"
- #include "init.h"
-@@ -99,13 +102,7 @@ struct fscrypt_key_specifier {
- 	} u;
- };
- 
--#define FS_IOC_ADD_ENCRYPTION_KEY		_IOWR('f', 23, struct fscrypt_add_key_arg)
--struct fscrypt_add_key_arg {
--	struct fscrypt_key_specifier key_spec;
--	__u32 raw_size;
--	__u32 __reserved[9];
--	__u8 raw[];
--};
-+/* FS_IOC_ADD_ENCRYPTION_KEY is defined later */
- 
- #define FS_IOC_REMOVE_ENCRYPTION_KEY		_IOWR('f', 24, struct fscrypt_remove_key_arg)
- #define FS_IOC_REMOVE_ENCRYPTION_KEY_ALL_USERS	_IOWR('f', 25, struct fscrypt_remove_key_arg)
-@@ -136,6 +133,26 @@ struct fscrypt_get_key_status_arg {
- 
- #endif /* !FS_IOC_GET_ENCRYPTION_POLICY_EX */
- 
-+/*
-+ * Since the key_id field was added later than struct fscrypt_add_key_arg
-+ * itself, we may need to override the system definition to get that field.
-+ */
-+#if !defined(FS_IOC_ADD_ENCRYPTION_KEY) || \
-+	defined(OVERRIDE_SYSTEM_FSCRYPT_ADD_KEY_ARG)
-+#undef fscrypt_add_key_arg
-+struct fscrypt_add_key_arg {
-+	struct fscrypt_key_specifier key_spec;
-+	__u32 raw_size;
-+	__u32 key_id;
-+	__u32 __reserved[8];
-+	__u8 raw[];
-+};
-+#endif
-+
-+#ifndef FS_IOC_ADD_ENCRYPTION_KEY
-+#  define FS_IOC_ADD_ENCRYPTION_KEY		_IOWR('f', 23, struct fscrypt_add_key_arg)
-+#endif
-+
- static const struct {
- 	__u8 mode;
- 	const char *name;
-@@ -217,8 +234,9 @@ add_enckey_help(void)
- " 'add_enckey' - add key for v2 policies\n"
- " 'add_enckey -d 0000111122223333' - add key for v1 policies w/ given descriptor\n"
- "\n"
--"The key in binary is read from standard input.\n"
-+"Unless -k is given, the key in binary is read from standard input.\n"
- " -d DESCRIPTOR -- master_key_descriptor\n"
-+" -k KEY_ID -- ID of fscrypt-provisioning key containing the raw key\n"
- "\n"));
- }
- 
-@@ -431,6 +449,21 @@ str2keyspec(const char *str, int policy_version,
- 	return policy_version;
- }
- 
-+static int
-+parse_key_id(const char *arg)
-+{
-+	long value;
-+	char *tmp;
-+
-+	value = strtol(arg, &tmp, 0);
-+	if (value <= 0 || value > INT_MAX || tmp == arg || *tmp != '\0') {
-+		fprintf(stderr, _("invalid key ID: %s\n"), arg);
-+		/* 0 is never a valid Linux key ID. */
-+		return 0;
-+	}
-+	return value;
-+}
-+
- static void
- test_for_v2_policy_support(void)
+diff --git a/tests/btrfs/085 b/tests/btrfs/085
+index 4773ed8041fd..2a31eefd2013 100755
+--- a/tests/btrfs/085
++++ b/tests/btrfs/085
+@@ -46,7 +46,7 @@ rm -f $seqres.full
+ has_orphan_item()
  {
-@@ -689,13 +722,18 @@ add_enckey_f(int argc, char **argv)
- 
- 	arg->key_spec.type = FSCRYPT_KEY_SPEC_TYPE_IDENTIFIER;
- 
--	while ((c = getopt(argc, argv, "d:")) != EOF) {
-+	while ((c = getopt(argc, argv, "d:k:")) != EOF) {
- 		switch (c) {
- 		case 'd':
- 			arg->key_spec.type = FSCRYPT_KEY_SPEC_TYPE_DESCRIPTOR;
- 			if (!str2keydesc(optarg, arg->key_spec.u.descriptor))
- 				goto out;
- 			break;
-+		case 'k':
-+			arg->key_id = parse_key_id(optarg);
-+			if (arg->key_id == 0)
-+				goto out;
-+			break;
- 		default:
- 			retval = command_usage(&add_enckey_cmd);
- 			goto out;
-@@ -709,21 +747,23 @@ add_enckey_f(int argc, char **argv)
- 		goto out;
- 	}
- 
--	raw_size = read_until_limit_or_eof(STDIN_FILENO, arg->raw,
--					   FSCRYPT_MAX_KEY_SIZE + 1);
--	if (raw_size < 0) {
--		fprintf(stderr, _("Error reading key from stdin: %s\n"),
--			strerror(errno));
--		exitcode = 1;
--		goto out;
--	}
--	if (raw_size > FSCRYPT_MAX_KEY_SIZE) {
--		fprintf(stderr,
--			_("Invalid key; got > FSCRYPT_MAX_KEY_SIZE (%d) bytes on stdin!\n"),
--			FSCRYPT_MAX_KEY_SIZE);
--		goto out;
--	}
--	arg->raw_size = raw_size;
-+	if (arg->key_id == 0) {
-+		raw_size = read_until_limit_or_eof(STDIN_FILENO, arg->raw,
-+						   FSCRYPT_MAX_KEY_SIZE + 1);
-+		if (raw_size < 0) {
-+			fprintf(stderr, _("Error reading key from stdin: %s\n"),
-+				strerror(errno));
-+			exitcode = 1;
-+			goto out;
-+		}
-+		if (raw_size > FSCRYPT_MAX_KEY_SIZE) {
-+			fprintf(stderr,
-+				_("Invalid key; got > FSCRYPT_MAX_KEY_SIZE (%d) bytes on stdin!\n"),
-+				FSCRYPT_MAX_KEY_SIZE);
-+			goto out;
-+		}
-+		arg->raw_size = raw_size;
-+	} /* else, raw key is given via key with ID 'key_id' */
- 
- 	if (ioctl(file->fd, FS_IOC_ADD_ENCRYPTION_KEY, arg) != 0) {
- 		fprintf(stderr, _("Error adding encryption key: %s\n"),
-@@ -859,7 +899,7 @@ encrypt_init(void)
- 
- 	add_enckey_cmd.name = "add_enckey";
- 	add_enckey_cmd.cfunc = add_enckey_f;
--	add_enckey_cmd.args = _("[-d descriptor]");
-+	add_enckey_cmd.args = _("[-d descriptor] [-k key_id]");
- 	add_enckey_cmd.argmin = 0;
- 	add_enckey_cmd.argmax = -1;
- 	add_enckey_cmd.flags = CMD_NOMAP_OK | CMD_FOREIGN_OK;
-diff --git a/m4/package_libcdev.m4 b/m4/package_libcdev.m4
-index 2c0c72ce..adab9bb9 100644
---- a/m4/package_libcdev.m4
-+++ b/m4/package_libcdev.m4
-@@ -278,6 +278,27 @@ AC_DEFUN([AC_NEED_INTERNAL_FSXATTR],
-     AC_SUBST(need_internal_fsxattr)
-   ])
- 
-+#
-+# Check if we need to override the system struct fscrypt_add_key_arg
-+# with the internal definition.  This /only/ happens if the system
-+# actually defines struct fscrypt_add_key_arg /and/ the system
-+# definition is missing certain fields.
-+#
-+AC_DEFUN([AC_NEED_INTERNAL_FSCRYPT_ADD_KEY_ARG],
-+  [
-+    AC_CHECK_TYPE(struct fscrypt_add_key_arg,
-+      [
-+        AC_CHECK_MEMBER(struct fscrypt_add_key_arg.key_id,
-+          ,
-+          need_internal_fscrypt_add_key_arg=yes,
-+          [#include <linux/fs.h>]
-+        )
-+      ],,
-+      [#include <linux/fs.h>]
-+    )
-+    AC_SUBST(need_internal_fscrypt_add_key_arg)
-+  ])
-+
- #
- # Check if we have a FS_IOC_GETFSMAP ioctl (Linux)
- #
-diff --git a/man/man8/xfs_io.8 b/man/man8/xfs_io.8
-index c69b295d..0afe3e7f 100644
---- a/man/man8/xfs_io.8
-+++ b/man/man8/xfs_io.8
-@@ -749,10 +749,10 @@ Test whether v2 encryption policies are supported.  Prints "supported",
- .RE
- .PD
- .TP
--.BI "add_enckey [ \-d " descriptor " ]"
-+.BI "add_enckey [ \-d " descriptor " ] [ \-k " key_id " ]"
- On filesystems that support encryption, add an encryption key to the filesystem
--containing the currently open file.  The key in binary (typically 64 bytes long)
--is read from standard input.
-+containing the currently open file.  By default, the raw key in binary
-+(typically 64 bytes long) is read from standard input.
- .RS 1.0i
- .PD 0
- .TP 0.4i
-@@ -761,6 +761,10 @@ key descriptor, as a 16-character hex string (8 bytes).  If given, the key will
- be available for use by v1 encryption policies that use this descriptor.
- Otherwise, the key is added as a v2 policy key, and on success the resulting
- "key identifier" will be printed.
-+.TP
-+.BI \-k " key_id"
-+ID of kernel keyring key of type "fscrypt-provisioning".  If given, the raw key
-+will be taken from here rather than from standard input.
- .RE
- .PD
- .TP
+ 	INO=$1
+-	if $BTRFS_UTIL_PROG inspect-internal dump-tree $SCRATCH_DEV | \
++	if $BTRFS_UTIL_PROG inspect-internal dump-tree $FLAKEY_DEV | \
+ 		grep -q "key (ORPHAN ORPHAN_ITEM $INO)"; then
+ 		return 0
+ 	fi
 -- 
-2.24.0.432.g9d3f5f5b63-goog
+2.24.0
 
