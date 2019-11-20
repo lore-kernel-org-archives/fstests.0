@@ -2,101 +2,94 @@ Return-Path: <SRS0=ndeD=ZM=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7D747C432C3
-	for <linux-fstests@archiver.kernel.org>; Wed, 20 Nov 2019 06:47:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 72F31C432C0
+	for <linux-fstests@archiver.kernel.org>; Wed, 20 Nov 2019 08:17:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 50E7920731
-	for <linux-fstests@archiver.kernel.org>; Wed, 20 Nov 2019 06:47:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3A248223B0
+	for <linux-fstests@archiver.kernel.org>; Wed, 20 Nov 2019 08:17:31 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="Z/GJNzPS"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="SggGLWeu"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726163AbfKTGrK (ORCPT
+        id S1727530AbfKTIRa (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 20 Nov 2019 01:47:10 -0500
-Received: from esa4.hgst.iphmx.com ([216.71.154.42]:49569 "EHLO
-        esa4.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725268AbfKTGrJ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 20 Nov 2019 01:47:09 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1574232429; x=1605768429;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=x3C0QWKGnbHiXf89Z95VPNtK6A6B5YQ6CboCRZJg454=;
-  b=Z/GJNzPSUgO9D42wIQ+qowzmXGSjgA8gctVA6h9aAc77LbBwChDRHT+1
-   1qaVzeMtqfbEYGmIDECaDcuhWRh3K7lERi41AmqDXSghlr1Y1HMXTJVI0
-   GtqCfIfgfSxWwgfZUzdsycFNvJjUTQN+sqORd0q26JpCmh212UbtMy7TW
-   lfj3K3m8MAsyWTTBdoPj8GHfWVQD7G23LXDDLzKLk2jz5qC6aRt+2ZmUm
-   LfVQAxcW6SuxdVBUn9Q08ZTms6t3sybIe6epOFgMJl+6f8hzO+j5fzwoy
-   oDuthES75yNrvX+Z4Ltp3ASGIgRROKVLTjmC8wu7TEm1QpWCXpCTzmFAR
-   Q==;
-IronPort-SDR: E/5pzDZMCngS7JwoQGSCnVljk9VeTSwrB/Bj6QtsYb3yZ8r0JPzn4tfmgO+QR3W/t8GWdTwoSv
- uvoSIIPFxjsZJ4i8lX8Mj0UUSKSEhBjfALrKH7H6vIyBoTcto3+sPFebUTz/5f8FvQ068MSmgn
- HAfDO5n2/XjFfVSsJfNumchyP/povTZdkOO3RRT5UCEhL2N+GKQvn0lzsnborkLQn7/9ZseVH7
- NdFhODNJpbYH/ZWk6KRQnuuYSnXK5doOggjzDEUfTnmtZDmul8AXn5NWlSOV2naIaN/LkDWp/c
- U9s=
-X-IronPort-AV: E=Sophos;i="5.69,220,1571673600"; 
-   d="scan'208";a="123506626"
-Received: from uls-op-cesaip01.wdc.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
-  by ob1.hgst.iphmx.com with ESMTP; 20 Nov 2019 14:47:09 +0800
-IronPort-SDR: XqyC7hvd8VD76gLqFrrq+yL12wkiym9QYNV5fTPYgUwTiq9q417JbfTQo50c6yNvtvY4iPoe4J
- huO/RqsvPFzGe5cYzV9JbxGKEyJE2GByb9QuYTwI70PuQRk+V8f9SL1yx9hbI8K+ij0SW5O6DE
- FPF0l/cvYlJSrcxSMZdMmLYtQkoRBstcyxRdCRqRo9oSgYGdCUKH7Zcfnzin8I9LEibUd+PBj9
- yhoKw/i1uwRMlTfYlfQ8mwYlu3bMY8w+Pr34Tq1A+d3ckIWEeS1NTm9JZEUN2C8G0Lkc0P8dIp
- Z/pBCUxwaJ2LvnprL0Vj83Xi
-Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
-  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Nov 2019 22:42:20 -0800
-IronPort-SDR: I4q08cXQk4g/llEotZS96WckPyC/OAcjAO2icxGiuReWHHnqhI5nEa02IpBJvbcaGiUGhMOk0s
- i3XcvZp/tsJTIrAJiWbBZIkC+7IGh+rRMYZNKtXYc/1YGSAmrJWpXH0qPcivyydAyUh/6AnBZj
- y5Tuk932y+Ls5HTtwHswZaupPEBfav3K/Gw6jAX9a0BCUhN8hvlQOyGzWlyJNfdbLM9zNvEAAJ
- aFBcj/MYc9aN8sEqxQGE1LnTEClAAmS4uAKGuLs0ZI9C/9g5AWz8NUjWFLBVHAGpvOjlRv8Ruw
- cxE=
-WDCIronportException: Internal
-Received: from naota.dhcp.fujisawa.hgst.com (HELO naota.fujisawa.hgst.com) ([10.149.53.115])
-  by uls-op-cesaip01.wdc.com with ESMTP; 19 Nov 2019 22:47:09 -0800
-From:   Naohiro Aota <naohiro.aota@wdc.com>
+        Wed, 20 Nov 2019 03:17:30 -0500
+Received: from mail-pg1-f194.google.com ([209.85.215.194]:37371 "EHLO
+        mail-pg1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726038AbfKTIRa (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 20 Nov 2019 03:17:30 -0500
+Received: by mail-pg1-f194.google.com with SMTP id b10so4434311pgd.4
+        for <fstests@vger.kernel.org>; Wed, 20 Nov 2019 00:17:30 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id;
+        bh=HvA7JmwUwHZwFW3EHjprtW+bx/bsb0bTSHktS7NyTKo=;
+        b=SggGLWeu1zPtyG1TQToElqkfDkZ3yPWgD1uSz4H06F2zjKxdhJR6VC6bwvy0M4UGUg
+         KZrAiMX6WETHDUpWpyagUsVv7dAeQqA+mRRpWTwk9njJvX8n3fA82ywGHcVpn23H4z/G
+         cVPFqBFffoEqwqetwsBlOJFAMRyR+BG0leudlfyF3mTJXHXDo/gZLBefDdMPEZRQIWAY
+         iubq4VIzsNSUjiquVo+yvXX66FKZJ3+svYlIjMemDbgUqwwdqiJJZeEeSJVXlQjyQEI5
+         1V7a7YbhF3DXhZzEefwvqnKrdpR2yi9X5z7NA+UvBCo5eCnfh/s6O79f8LTNjWrxGSz0
+         XXsw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id;
+        bh=HvA7JmwUwHZwFW3EHjprtW+bx/bsb0bTSHktS7NyTKo=;
+        b=W1pZnR12AZxX/hYX5SClmOcB+vPxZfzGFl8WMNV5saTDQm299EcNryzp2J1OiQEsYy
+         ydlxgO5PUvXLNybOtYl7101/G3iGjmd4SjB6wlrUEG/E40OKxkvF/0RzLIlXNb6U85fw
+         qmMVMAQrFO701eo7L9yaYyval0Bb+S0uUCwCpUtRa34xf3xa0TfVOJJySiVNsVW7nEx9
+         p+6OHS4tQOl0qRsEsl6q50jzW532MqYygsrBssn6oJoal2MO47GyIoiBXB8s5XQSgwQX
+         9sZ9U6PtIPscZR/A3WihRZ0ihB2Gm5cFDm6NptFPqJlZy7Bp/WsPfhCPJVxMSFJJz/vC
+         eLeQ==
+X-Gm-Message-State: APjAAAVwGnFwoOli/KKe3ilJBvaFz+ShBdCuGkwiAXwSoytynNGYzaVg
+        QBYr8jXcKgV0v7ZwWY39zU01gj2MF0k=
+X-Google-Smtp-Source: APXvYqztuz2qoHnMK74oTpIB3NRlJK8M0WWIsqSeXmX122Lu5T2q9/bRCTPZ0iqd/qtM6pFL/vylsA==
+X-Received: by 2002:a63:da13:: with SMTP id c19mr1732074pgh.435.1574237849410;
+        Wed, 20 Nov 2019 00:17:29 -0800 (PST)
+Received: from lbh-vm.xmfducmkfhgejfckffvf135llh.hx.internal.cloudapp.net ([52.175.53.118])
+        by smtp.gmail.com with ESMTPSA id i2sm27254270pgt.34.2019.11.20.00.17.27
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 20 Nov 2019 00:17:28 -0800 (PST)
+From:   Baihua Lu <lubaihua0331@gmail.com>
 To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Naohiro Aota <naohiro.aota@wdc.com>
-Subject: [PATCH] fstests, btrfs: check flakey device instead of backend device
-Date:   Wed, 20 Nov 2019 15:44:06 +0900
-Message-Id: <20191120064406.3467779-1-naohiro.aota@wdc.com>
-X-Mailer: git-send-email 2.24.0
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Cc:     balu@microsoft.com, Lili.Deng@microsoft.com,
+        Baihua Lu <lubaihua0331@gmail.com>
+Subject: [PATCH] xfs/191-input-validation:Fix issue that the test takes too long
+Date:   Wed, 20 Nov 2019 08:17:24 +0000
+Message-Id: <20191120081724.113792-1-lubaihua0331@gmail.com>
+X-Mailer: git-send-email 2.17.1
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-btrfs/085 mount and works on $FLAKEY_DEV, but it's inspecting the
-underlying $SCRATCH_DEV. Since writing to dm-flakey does not invalidate
-page cache of $SCRATCH_DEV, the btrfs command can read a stalled data
-from page cache. We should check the flakey device to avoid such cache
-inconsistency.
+When test is passed, _check_filesystems will execute. If there is no
+mkfs a new XFS filesystem $SCRATCH_DEV in this test, in the check
+filesystems stage, xfs_logprint will be failed for having dirty log and
+xfs_repaire will take a long time.
 
-Signed-off-by: Naohiro Aota <naohiro.aota@wdc.com>
+Signed-off-by: Baihua Lu <lubaihua0331@gmail.com>
 ---
- tests/btrfs/085 | 2 +-
+ tests/xfs/191-input-validation | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/tests/btrfs/085 b/tests/btrfs/085
-index 4773ed8041fd..2a31eefd2013 100755
---- a/tests/btrfs/085
-+++ b/tests/btrfs/085
-@@ -46,7 +46,7 @@ rm -f $seqres.full
- has_orphan_item()
- {
- 	INO=$1
--	if $BTRFS_UTIL_PROG inspect-internal dump-tree $SCRATCH_DEV | \
-+	if $BTRFS_UTIL_PROG inspect-internal dump-tree $FLAKEY_DEV | \
- 		grep -q "key (ORPHAN ORPHAN_ITEM $INO)"; then
- 		return 0
- 	fi
+diff --git a/tests/xfs/191-input-validation b/tests/xfs/191-input-validation
+index b6658015..fd239dbb 100755
+--- a/tests/xfs/191-input-validation
++++ b/tests/xfs/191-input-validation
+@@ -34,7 +34,7 @@ _supported_os Linux
+ _require_scratch
+ _require_xfs_mkfs_validation
+ 
+-
++_scratch_mkfs >/dev/null 2>&1
+ 
+ rm -f $seqres.full
+ echo silence is golden
 -- 
-2.24.0
+2.17.1
 
