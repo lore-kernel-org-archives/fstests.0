@@ -2,94 +2,99 @@ Return-Path: <SRS0=ndeD=ZM=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-5.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 72F31C432C0
-	for <linux-fstests@archiver.kernel.org>; Wed, 20 Nov 2019 08:17:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4EAC9C432C0
+	for <linux-fstests@archiver.kernel.org>; Wed, 20 Nov 2019 13:15:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 3A248223B0
-	for <linux-fstests@archiver.kernel.org>; Wed, 20 Nov 2019 08:17:31 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="SggGLWeu"
+	by mail.kernel.org (Postfix) with ESMTP id 2A95822519
+	for <linux-fstests@archiver.kernel.org>; Wed, 20 Nov 2019 13:15:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727530AbfKTIRa (ORCPT
+        id S1729091AbfKTNPH (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 20 Nov 2019 03:17:30 -0500
-Received: from mail-pg1-f194.google.com ([209.85.215.194]:37371 "EHLO
-        mail-pg1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726038AbfKTIRa (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 20 Nov 2019 03:17:30 -0500
-Received: by mail-pg1-f194.google.com with SMTP id b10so4434311pgd.4
-        for <fstests@vger.kernel.org>; Wed, 20 Nov 2019 00:17:30 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id;
-        bh=HvA7JmwUwHZwFW3EHjprtW+bx/bsb0bTSHktS7NyTKo=;
-        b=SggGLWeu1zPtyG1TQToElqkfDkZ3yPWgD1uSz4H06F2zjKxdhJR6VC6bwvy0M4UGUg
-         KZrAiMX6WETHDUpWpyagUsVv7dAeQqA+mRRpWTwk9njJvX8n3fA82ywGHcVpn23H4z/G
-         cVPFqBFffoEqwqetwsBlOJFAMRyR+BG0leudlfyF3mTJXHXDo/gZLBefDdMPEZRQIWAY
-         iubq4VIzsNSUjiquVo+yvXX66FKZJ3+svYlIjMemDbgUqwwdqiJJZeEeSJVXlQjyQEI5
-         1V7a7YbhF3DXhZzEefwvqnKrdpR2yi9X5z7NA+UvBCo5eCnfh/s6O79f8LTNjWrxGSz0
-         XXsw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id;
-        bh=HvA7JmwUwHZwFW3EHjprtW+bx/bsb0bTSHktS7NyTKo=;
-        b=W1pZnR12AZxX/hYX5SClmOcB+vPxZfzGFl8WMNV5saTDQm299EcNryzp2J1OiQEsYy
-         ydlxgO5PUvXLNybOtYl7101/G3iGjmd4SjB6wlrUEG/E40OKxkvF/0RzLIlXNb6U85fw
-         qmMVMAQrFO701eo7L9yaYyval0Bb+S0uUCwCpUtRa34xf3xa0TfVOJJySiVNsVW7nEx9
-         p+6OHS4tQOl0qRsEsl6q50jzW532MqYygsrBssn6oJoal2MO47GyIoiBXB8s5XQSgwQX
-         9sZ9U6PtIPscZR/A3WihRZ0ihB2Gm5cFDm6NptFPqJlZy7Bp/WsPfhCPJVxMSFJJz/vC
-         eLeQ==
-X-Gm-Message-State: APjAAAVwGnFwoOli/KKe3ilJBvaFz+ShBdCuGkwiAXwSoytynNGYzaVg
-        QBYr8jXcKgV0v7ZwWY39zU01gj2MF0k=
-X-Google-Smtp-Source: APXvYqztuz2qoHnMK74oTpIB3NRlJK8M0WWIsqSeXmX122Lu5T2q9/bRCTPZ0iqd/qtM6pFL/vylsA==
-X-Received: by 2002:a63:da13:: with SMTP id c19mr1732074pgh.435.1574237849410;
-        Wed, 20 Nov 2019 00:17:29 -0800 (PST)
-Received: from lbh-vm.xmfducmkfhgejfckffvf135llh.hx.internal.cloudapp.net ([52.175.53.118])
-        by smtp.gmail.com with ESMTPSA id i2sm27254270pgt.34.2019.11.20.00.17.27
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 20 Nov 2019 00:17:28 -0800 (PST)
-From:   Baihua Lu <lubaihua0331@gmail.com>
-To:     fstests@vger.kernel.org
-Cc:     balu@microsoft.com, Lili.Deng@microsoft.com,
-        Baihua Lu <lubaihua0331@gmail.com>
-Subject: [PATCH] xfs/191-input-validation:Fix issue that the test takes too long
-Date:   Wed, 20 Nov 2019 08:17:24 +0000
-Message-Id: <20191120081724.113792-1-lubaihua0331@gmail.com>
-X-Mailer: git-send-email 2.17.1
+        Wed, 20 Nov 2019 08:15:07 -0500
+Received: from mx2.suse.de ([195.135.220.15]:53356 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1727958AbfKTNPH (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 20 Nov 2019 08:15:07 -0500
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+Received: from relay2.suse.de (unknown [195.135.220.254])
+        by mx1.suse.de (Postfix) with ESMTP id 2EC326A504;
+        Wed, 20 Nov 2019 13:15:05 +0000 (UTC)
+Subject: Re: [PATCH] fstests, btrfs: check flakey device instead of backend
+ device
+To:     Naohiro Aota <naohiro.aota@wdc.com>, fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org
+References: <20191120064406.3467779-1-naohiro.aota@wdc.com>
+From:   Nikolay Borisov <nborisov@suse.com>
+Openpgp: preference=signencrypt
+Autocrypt: addr=nborisov@suse.com; prefer-encrypt=mutual; keydata=
+ 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
+Message-ID: <feaf6d1d-d56f-6643-f2da-7e6435384580@suse.com>
+Date:   Wed, 20 Nov 2019 15:15:02 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101
+ Thunderbird/60.9.0
+MIME-Version: 1.0
+In-Reply-To: <20191120064406.3467779-1-naohiro.aota@wdc.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-When test is passed, _check_filesystems will execute. If there is no
-mkfs a new XFS filesystem $SCRATCH_DEV in this test, in the check
-filesystems stage, xfs_logprint will be failed for having dirty log and
-xfs_repaire will take a long time.
 
-Signed-off-by: Baihua Lu <lubaihua0331@gmail.com>
----
- tests/xfs/191-input-validation | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/tests/xfs/191-input-validation b/tests/xfs/191-input-validation
-index b6658015..fd239dbb 100755
---- a/tests/xfs/191-input-validation
-+++ b/tests/xfs/191-input-validation
-@@ -34,7 +34,7 @@ _supported_os Linux
- _require_scratch
- _require_xfs_mkfs_validation
- 
--
-+_scratch_mkfs >/dev/null 2>&1
- 
- rm -f $seqres.full
- echo silence is golden
--- 
-2.17.1
+On 20.11.19 г. 8:44 ч., Naohiro Aota wrote:
+> btrfs/085 mount and works on $FLAKEY_DEV, but it's inspecting the
+> underlying $SCRATCH_DEV. Since writing to dm-flakey does not invalidate
+> page cache of $SCRATCH_DEV, the btrfs command can read a stalled data
+> from page cache. We should check the flakey device to avoid such cache
+> inconsistency.
+> 
+> Signed-off-by: Naohiro Aota <naohiro.aota@wdc.com>
 
+Reviewed-by: Nikolay Borisov <nborisov@suse.com
