@@ -1,415 +1,222 @@
-Return-Path: <SRS0=o+xb=ZO=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=YV7M=ZQ=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+X-Spam-Status: No, score=-9.7 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3ADF0C432C0
-	for <linux-fstests@archiver.kernel.org>; Fri, 22 Nov 2019 01:28:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 77DDEC432C0
+	for <linux-fstests@archiver.kernel.org>; Sun, 24 Nov 2019 14:30:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id EF2F4206C2
-	for <linux-fstests@archiver.kernel.org>; Fri, 22 Nov 2019 01:27:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4233E2071A
+	for <linux-fstests@archiver.kernel.org>; Sun, 24 Nov 2019 14:30:10 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ASlw3CCa"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ET8DHAuH"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726705AbfKVB17 (ORCPT
+        id S1726836AbfKXOaJ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 21 Nov 2019 20:27:59 -0500
-Received: from mail-il1-f194.google.com ([209.85.166.194]:36923 "EHLO
-        mail-il1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726343AbfKVB17 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 21 Nov 2019 20:27:59 -0500
-Received: by mail-il1-f194.google.com with SMTP id s5so5291576iln.4;
-        Thu, 21 Nov 2019 17:27:58 -0800 (PST)
+        Sun, 24 Nov 2019 09:30:09 -0500
+Received: from mail-wm1-f51.google.com ([209.85.128.51]:54907 "EHLO
+        mail-wm1-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726798AbfKXOaJ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 24 Nov 2019 09:30:09 -0500
+Received: by mail-wm1-f51.google.com with SMTP id b11so2990921wmj.4;
+        Sun, 24 Nov 2019 06:30:07 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=rPCJO7GnHksxBlMw8PoFikzTQVlqGerblR7VxrP8op8=;
-        b=ASlw3CCaFyR7q32GfxFccLOWoxnvXOTa6ScK3/dkhxFAmkjvMTsDw/oYeroX/UONIN
-         1dg5+8/eS6TvDRHxqLr9dWmYSpNN3jTahRkvZvtS1HaTgqcze5cSO4io7cfCfaaUTCCU
-         Cqxwt00jbCZia2fmxB8EiJt3rQUz6nWain09sdY0XnT6q34tSY3npp17ts8KADzFGAvN
-         KbNE1t+EjaSnPYjKPW4n/Tqa6NhY5wFBCIEKgqRIL6dtpuOVrS8m0HblUwIa0QebSk2D
-         PORn+VK9gepAf5J4/n/pYIBS1+cn2fzbwUJrerpGGiquQr328/JRqY/7GR0vrvyskOmS
-         kaVg==
+        h=from:to:cc:subject:date:message-id;
+        bh=w6XPxMD1xfZU9M95aFkTQnmgJPOQe+sMuAbHFjGOuEc=;
+        b=ET8DHAuHFdAGLreIksZK8jtOMPvnfTkgcurg5PWSeYG4doL13vikHzsr0w38fBnERm
+         ASRTT+JIHeCbhdBjEXalI4QIcjjcWj5i+F0UJZz0Yroz1VbDu5Xf5m0VroZJsKHCeJOl
+         KVm5CaprMwLgcgh+0F6DPinjq9+YxMac8wN74hEkYg9LAr9SX1K+w6ZcYx/Cgvy9MoiQ
+         LTgQGz0vrZtxURVjQbMZtExAS9XXxxgpe1K+EZh9W8QZa+qmkUjEZVwLEjj1RzybmoHb
+         fEiMFZGnq8O/n1on5/jI8WMb2Kprm6QttTroBrr9TO2/YLysPNYBZwIFn3LDFvPNMfW5
+         eW6Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=rPCJO7GnHksxBlMw8PoFikzTQVlqGerblR7VxrP8op8=;
-        b=CBME4DUJqMcJPy2HBB7gsDZHouKATVr6ygpsAJQ2aAdbvIVt+RraztHBpUfD4L2TJj
-         r/5i64r11THsHbYi1ahioxBPngkdUrYMiMYh2ctNlafE0AuthteUss1rXXo/jcyIoQBj
-         JShoYL99LIEooXM6XSycrFXqws0+Sh5moXpWhG8GvkgnSTI37gYiQlKwP3kcQWoqlblM
-         Kx2e8FQhg+PEevzwA/W7oCP5YoY27NEY1Zlue78JMzC5sWUoygkpsa2LaOSYZ0VvfeM3
-         ALsNiuCIve8G8pCK30r3/EDrVYcBcJgzO5ji2gjjGldeAy68AD0iAzF3ypeOBZ970L9P
-         29qg==
-X-Gm-Message-State: APjAAAV1Dle3tNu3UNdKGUP0go9Xc/rKnAMPtTBYrju/PCrNZZ7oRpmU
-        /Gttzc4tcUyKsLAGUKn5m0hUEbB72H9sO0Gixew=
-X-Google-Smtp-Source: APXvYqx85lCERWslzGv41CtcOyxqAyw6OMEf34F51kHE4PdFepqxGk1J7gmJsjOA+WHZErki5D7vpMXvmmXglZ/6t+0=
-X-Received: by 2002:a92:2451:: with SMTP id k78mr14095595ilk.300.1574386077542;
- Thu, 21 Nov 2019 17:27:57 -0800 (PST)
-MIME-Version: 1.0
-References: <20190829161155.GA5360@magnolia> <20190830004407.GA5340@magnolia>
- <20191121170107.GM6211@magnolia> <CAHpGcMJYRVeNNjhMP8GEVD9Wr5g-7_sXkR=qxQTCqrwyskuDBw@mail.gmail.com>
- <20191121191453.GN6211@magnolia>
-In-Reply-To: <20191121191453.GN6211@magnolia>
-From:   =?UTF-8?Q?Andreas_Gr=C3=BCnbacher?= <andreas.gruenbacher@gmail.com>
-Date:   Fri, 22 Nov 2019 02:27:46 +0100
-Message-ID: <CAHpGcMK_pJA1KU0fbX28e41a8X9Fa7Kw12k8=P955LUW8yYEkw@mail.gmail.com>
-Subject: Re: [RFC PATCH] generic: test splice() with pipes
-To:     "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc:     xfs <linux-xfs@vger.kernel.org>, Al Viro <viro@zeniv.linux.org.uk>,
-        linux-fsdevel <linux-fsdevel@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+        h=x-gm-message-state:from:to:cc:subject:date:message-id;
+        bh=w6XPxMD1xfZU9M95aFkTQnmgJPOQe+sMuAbHFjGOuEc=;
+        b=XybcRteyqH26OonB8Z5SQT01BWYiBEnTkD2gtqb1nMIhfChNDeTVk7y31O6yxB79bu
+         K4DLpyZ21hIThEgBq246gKg75TVB7f4YzlXJb59MVB+Btk14XO1byd4tlAbmCblT6wBi
+         jRUWKt+lH6ZWnfoAgMPdIueOF5iQxWYqCEDqnQ3LF5D05OYMhSU2DKA69WPhkIhLSCM4
+         GXxFXv9JiukJ4O0V3zTru1vOp8dtOBhEl8rK37+S46ZyK/e81M3lQolja8qmnGB+VZcv
+         baWYgNK2CqhZy2dKMGdWIkAFVxYlEB7wB7HPY3IORMGMt9I1H6jH8T7pvLrsV8ItTqkY
+         VwDg==
+X-Gm-Message-State: APjAAAV8/OulcTy/JWCerMDu1CwZu5tVJWGEP5LFAui3JnlarlMtNqNn
+        0oOLn1TsMBlEbbZGKS6P7hc=
+X-Google-Smtp-Source: APXvYqzHrlFz7e0caKTCkN3ex7SGOzwZRI/WVF9yU9RXBG3WhB5pVN6sRp8O7h79HF4f/z6cOPEkqg==
+X-Received: by 2002:a1c:9804:: with SMTP id a4mr24324872wme.57.1574605806286;
+        Sun, 24 Nov 2019 06:30:06 -0800 (PST)
+Received: from amir-ThinkPad-T480.ctera.local (bzq-166-168-31-246.red.bezeqint.net. [31.168.166.246])
+        by smtp.gmail.com with ESMTPSA id d202sm5131518wmd.47.2019.11.24.06.30.04
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 24 Nov 2019 06:30:05 -0800 (PST)
+From:   Amir Goldstein <amir73il@gmail.com>
+To:     Eryu Guan <guaneryu@gmail.com>
+Cc:     Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: [PATCH] overlay: Test unique st_dev;st_ino on non-samefs setup
+Date:   Sun, 24 Nov 2019 16:29:57 +0200
+Message-Id: <20191124142957.20873-1-amir73il@gmail.com>
+X-Mailer: git-send-email 2.17.1
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Am Do., 21. Nov. 2019 um 20:14 Uhr schrieb Darrick J. Wong
-<darrick.wong@oracle.com>:
-> On Thu, Nov 21, 2019 at 07:48:54PM +0100, Andreas Gr=C3=BCnbacher wrote:
-> > Am Do., 21. Nov. 2019 um 18:01 Uhr schrieb Darrick J. Wong
-> > <darrick.wong@oracle.com>:
-> > > On Thu, Aug 29, 2019 at 05:44:07PM -0700, Darrick J. Wong wrote:
-> > > > From: Darrick J. Wong <darrick.wong@oracle.com>
-> > > >
-> > > > Andreas Gr=C3=BCnbacher reports that on the two filesystems that su=
-pport
-> > > > iomap directio, it's possible for splice() to return -EAGAIN (inste=
-ad of
-> > > > a short splice) if the pipe being written to has less space availab=
-le in
-> > > > its pipe buffers than the length supplied by the calling process.
-> > > >
-> > > > This is a regression test to check for correct operation.
-> > > >
-> > > > XXX Andreas: Since you wrote the C reproducer, can you send me the
-> > > > proper copyright and author attribution statement for the C program=
-?
-> > >
-> > > Ping?  Andreas, can I get the above info so I can get this moving aga=
-in?
-> >
-> > Oops, sure, this is:
-> >
-> > Copyright (c) 2019 RedHat Inc.  All Rights Reserved.
-> > Author: Andreas Gruenbacher <agruenba@redhat.com>
->
-> Ok thanks.  It's appropriate to tag it as GPL v2 licensed, correct?
+Check that files from middle layer on same fs as upper layer
+are not allowed to export the real inode st_dev;st_ino.
 
-My prevous reply didn't quite make it, so again, yes, that's correct.
+This is a regression test for kernel commit:
+  ovl: fix corner case of non-unique st_dev;st_ino
+
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+
+Eryu,
+
+This is a test for kernel v4.17 regression I noticed during discussion
+on an unrelated change.
+
+The fix for this regression has been posted [1] last week, but did not
+get any feedback yet. So maybe wait with merging the test until Miklos
+ackloledges the bug, or until the fix commit has a final description.
+
+As the test demonstrates in a simple user scenario, the problem is real,
+although I have no idea how common this setup is in the wild.
 
 Thanks,
-Andreas
+Amir.
 
-> --D
->
-> > > --D
-> > >
-> > > > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> > > > ---
-> > > >  .gitignore            |    1
-> > > >  src/Makefile          |    2 -
-> > > >  src/splice-test.c     |  173 +++++++++++++++++++++++++++++++++++++=
-++++++++++++
-> > > >  tests/generic/720     |   41 ++++++++++++
-> > > >  tests/generic/720.out |    7 ++
-> > > >  tests/generic/group   |    1
-> > > >  6 files changed, 224 insertions(+), 1 deletion(-)
-> > > >  create mode 100644 src/splice-test.c
-> > > >  create mode 100755 tests/generic/720
-> > > >  create mode 100644 tests/generic/720.out
-> > > >
-> > > > diff --git a/.gitignore b/.gitignore
-> > > > index c8c815f9..26d4da11 100644
-> > > > --- a/.gitignore
-> > > > +++ b/.gitignore
-> > > > @@ -112,6 +112,7 @@
-> > > >  /src/runas
-> > > >  /src/seek_copy_test
-> > > >  /src/seek_sanity_test
-> > > > +/src/splice-test
-> > > >  /src/stale_handle
-> > > >  /src/stat_test
-> > > >  /src/swapon
-> > > > diff --git a/src/Makefile b/src/Makefile
-> > > > index c4fcf370..2920dfb1 100644
-> > > > --- a/src/Makefile
-> > > > +++ b/src/Makefile
-> > > > @@ -28,7 +28,7 @@ LINUX_TARGETS =3D xfsctl bstat t_mtab getdevicesi=
-ze preallo_rw_pattern_reader \
-> > > >       attr-list-by-handle-cursor-test listxattr dio-interleaved t_d=
-ir_type \
-> > > >       dio-invalidate-cache stat_test t_encrypted_d_revalidate \
-> > > >       attr_replace_test swapon mkswap t_attr_corruption t_open_tmpf=
-iles \
-> > > > -     fscrypt-crypt-util bulkstat_null_ocount
-> > > > +     fscrypt-crypt-util bulkstat_null_ocount splice-test
-> > > >
-> > > >  SUBDIRS =3D log-writes perf
-> > > >
-> > > > diff --git a/src/splice-test.c b/src/splice-test.c
-> > > > new file mode 100644
-> > > > index 00000000..d3c12075
-> > > > --- /dev/null
-> > > > +++ b/src/splice-test.c
-> > > > @@ -0,0 +1,173 @@
-> > > > +// SPDX-License-Identifier: GPL-2.0-or-later
-> > > > +/*
-> > > > + * Copyright (C) 2019 ????????????????????????????
-> > > > + * Author:
-> > > > + *
-> > > > + * Make sure that reading and writing to a pipe via splice.
-> > > > + */
-> > > > +#include <sys/types.h>
-> > > > +#include <sys/stat.h>
-> > > > +#include <sys/wait.h>
-> > > > +#include <unistd.h>
-> > > > +#include <fcntl.h>
-> > > > +#include <err.h>
-> > > > +
-> > > > +#include <stdlib.h>
-> > > > +#include <stdio.h>
-> > > > +#include <stdbool.h>
-> > > > +#include <string.h>
-> > > > +#include <errno.h>
-> > > > +
-> > > > +#define SECTOR_SIZE 512
-> > > > +#define BUFFER_SIZE (150 * SECTOR_SIZE)
-> > > > +
-> > > > +void read_from_pipe(int fd, const char *filename, size_t size)
-> > > > +{
-> > > > +     char buffer[SECTOR_SIZE];
-> > > > +     size_t sz;
-> > > > +     ssize_t ret;
-> > > > +
-> > > > +     while (size) {
-> > > > +             sz =3D size;
-> > > > +             if (sz > sizeof buffer)
-> > > > +                     sz =3D sizeof buffer;
-> > > > +             ret =3D read(fd, buffer, sz);
-> > > > +             if (ret < 0)
-> > > > +                     err(1, "read: %s", filename);
-> > > > +             if (ret =3D=3D 0) {
-> > > > +                     fprintf(stderr, "read: %s: unexpected EOF\n",=
- filename);
-> > > > +                     exit(1);
-> > > > +             }
-> > > > +             size -=3D sz;
-> > > > +     }
-> > > > +}
-> > > > +
-> > > > +void do_splice1(int fd, const char *filename, size_t size)
-> > > > +{
-> > > > +     bool retried =3D false;
-> > > > +     int pipefd[2];
-> > > > +
-> > > > +     if (pipe(pipefd) =3D=3D -1)
-> > > > +             err(1, "pipe");
-> > > > +     while (size) {
-> > > > +             ssize_t spliced;
-> > > > +
-> > > > +             spliced =3D splice(fd, NULL, pipefd[1], NULL, size, S=
-PLICE_F_MOVE);
-> > > > +             if (spliced =3D=3D -1) {
-> > > > +                     if (errno =3D=3D EAGAIN && !retried) {
-> > > > +                             retried =3D true;
-> > > > +                             fprintf(stderr, "retrying splice\n");
-> > > > +                             sleep(1);
-> > > > +                             continue;
-> > > > +                     }
-> > > > +                     err(1, "splice");
-> > > > +             }
-> > > > +             read_from_pipe(pipefd[0], filename, spliced);
-> > > > +             size -=3D spliced;
-> > > > +     }
-> > > > +     close(pipefd[0]);
-> > > > +     close(pipefd[1]);
-> > > > +}
-> > > > +
-> > > > +void do_splice2(int fd, const char *filename, size_t size)
-> > > > +{
-> > > > +     bool retried =3D false;
-> > > > +     int pipefd[2];
-> > > > +     int pid;
-> > > > +
-> > > > +     if (pipe(pipefd) =3D=3D -1)
-> > > > +             err(1, "pipe");
-> > > > +
-> > > > +     pid =3D fork();
-> > > > +     if (pid =3D=3D 0) {
-> > > > +             close(pipefd[1]);
-> > > > +             read_from_pipe(pipefd[0], filename, size);
-> > > > +             exit(0);
-> > > > +     } else {
-> > > > +             close(pipefd[0]);
-> > > > +             while (size) {
-> > > > +                     ssize_t spliced;
-> > > > +
-> > > > +                     spliced =3D splice(fd, NULL, pipefd[1], NULL,=
- size, SPLICE_F_MOVE);
-> > > > +                     if (spliced =3D=3D -1) {
-> > > > +                             if (errno =3D=3D EAGAIN && !retried) =
-{
-> > > > +                                     retried =3D true;
-> > > > +                                     fprintf(stderr, "retrying spl=
-ice\n");
-> > > > +                                     sleep(1);
-> > > > +                                     continue;
-> > > > +                             }
-> > > > +                             err(1, "splice");
-> > > > +                     }
-> > > > +                     size -=3D spliced;
-> > > > +             }
-> > > > +             close(pipefd[1]);
-> > > > +             waitpid(pid, NULL, 0);
-> > > > +     }
-> > > > +}
-> > > > +
-> > > > +void usage(const char *argv0)
-> > > > +{
-> > > > +     fprintf(stderr, "USAGE: %s [-rd] {filename}\n", basename(argv=
-0));
-> > > > +     exit(2);
-> > > > +}
-> > > > +
-> > > > +int main(int argc, char *argv[])
-> > > > +{
-> > > > +     void (*do_splice)(int fd, const char *filename, size_t size);
-> > > > +     const char *filename;
-> > > > +     char *buffer;
-> > > > +     int opt, open_flags, fd;
-> > > > +     ssize_t ret;
-> > > > +
-> > > > +     do_splice =3D do_splice1;
-> > > > +     open_flags =3D O_CREAT | O_TRUNC | O_RDWR | O_DIRECT;
-> > > > +
-> > > > +     while ((opt =3D getopt(argc, argv, "rd")) !=3D -1) {
-> > > > +             switch(opt) {
-> > > > +             case 'r':
-> > > > +                     do_splice =3D do_splice2;
-> > > > +                     break;
-> > > > +             case 'd':
-> > > > +                     open_flags &=3D ~O_DIRECT;
-> > > > +                     break;
-> > > > +             default:  /* '?' */
-> > > > +                     usage(argv[0]);
-> > > > +             }
-> > > > +     }
-> > > > +
-> > > > +     if (optind >=3D argc)
-> > > > +             usage(argv[0]);
-> > > > +     filename =3D argv[optind];
-> > > > +
-> > > > +     printf("%s reader %s O_DIRECT\n",
-> > > > +                do_splice =3D=3D do_splice1 ? "sequential" : "conc=
-urrent",
-> > > > +                (open_flags & O_DIRECT) ? "with" : "without");
-> > > > +
-> > > > +     buffer =3D aligned_alloc(SECTOR_SIZE, BUFFER_SIZE);
-> > > > +     if (buffer =3D=3D NULL)
-> > > > +             err(1, "aligned_alloc");
-> > > > +
-> > > > +     fd =3D open(filename, open_flags, 0666);
-> > > > +     if (fd =3D=3D -1)
-> > > > +             err(1, "open: %s", filename);
-> > > > +
-> > > > +     memset(buffer, 'x', BUFFER_SIZE);
-> > > > +     ret =3D write(fd, buffer, BUFFER_SIZE);
-> > > > +     if (ret < 0)
-> > > > +             err(1, "write: %s", filename);
-> > > > +     if (ret !=3D BUFFER_SIZE) {
-> > > > +             fprintf(stderr, "%s: short write\n", filename);
-> > > > +             exit(1);
-> > > > +     }
-> > > > +
-> > > > +     ret =3D lseek(fd, 0, SEEK_SET);
-> > > > +     if (ret !=3D 0)
-> > > > +             err(1, "lseek: %s", filename);
-> > > > +
-> > > > +     do_splice(fd, filename, BUFFER_SIZE);
-> > > > +
-> > > > +     if (unlink(filename) =3D=3D -1)
-> > > > +             err(1, "unlink: %s", filename);
-> > > > +
-> > > > +     return 0;
-> > > > +}
-> > > > diff --git a/tests/generic/720 b/tests/generic/720
-> > > > new file mode 100755
-> > > > index 00000000..b7f09c40
-> > > > --- /dev/null
-> > > > +++ b/tests/generic/720
-> > > > @@ -0,0 +1,41 @@
-> > > > +#! /bin/bash
-> > > > +# SPDX-License-Identifier: GPL-2.0-or-later
-> > > > +# Copyright (c) 2019, Oracle and/or its affiliates.  All Rights Re=
-served.
-> > > > +#
-> > > > +# FS QA Test No. 720
-> > > > +#
-> > > > +# Test using splice() to read from pipes.
-> > > > +
-> > > > +seq=3D`basename $0`
-> > > > +seqres=3D$RESULT_DIR/$seq
-> > > > +echo "QA output created by $seq"
-> > > > +
-> > > > +here=3D`pwd`
-> > > > +tmp=3D/tmp/$$
-> > > > +status=3D1    # failure is the default!
-> > > > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > > > +
-> > > > +_cleanup()
-> > > > +{
-> > > > +     cd /
-> > > > +     rm -f $TEST_DIR/a
-> > > > +}
-> > > > +
-> > > > +# get standard environment, filters and checks
-> > > > +. ./common/rc
-> > > > +
-> > > > +# real QA test starts here
-> > > > +_supported_os Linux
-> > > > +_supported_fs generic
-> > > > +_require_test
-> > > > +
-> > > > +rm -f $seqres.full
-> > > > +
-> > > > +src/splice-test -r $TEST_DIR/a
-> > > > +src/splice-test -rd $TEST_DIR/a
-> > > > +src/splice-test $TEST_DIR/a
-> > > > +src/splice-test -d $TEST_DIR/a
-> > > > +
-> > > > +# success, all done
-> > > > +status=3D0
-> > > > +exit
-> > > > diff --git a/tests/generic/720.out b/tests/generic/720.out
-> > > > new file mode 100644
-> > > > index 00000000..b0fc9935
-> > > > --- /dev/null
-> > > > +++ b/tests/generic/720.out
-> > > > @@ -0,0 +1,7 @@
-> > > > +QA output created by 720
-> > > > +concurrent reader with O_DIRECT
-> > > > +concurrent reader with O_DIRECT
-> > > > +concurrent reader without O_DIRECT
-> > > > +concurrent reader without O_DIRECT
-> > > > +sequential reader with O_DIRECT
-> > > > +sequential reader without O_DIRECT
-> > > > diff --git a/tests/generic/group b/tests/generic/group
-> > > > index cd418106..f75d4e60 100644
-> > > > --- a/tests/generic/group
-> > > > +++ b/tests/generic/group
-> > > > @@ -569,3 +569,4 @@
-> > > >  564 auto quick copy_range
-> > > >  565 auto quick copy_range
-> > > >  719 auto quick quota metadata
-> > > > +720 auto quick rw pipe splice
-> >
-> > Thanks,
-> > Andreas
+[1] https://marc.info/?l=linux-unionfs&m=157400544201252&w=2
+
+ tests/overlay/067     | 94 +++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/067.out |  2 +
+ tests/overlay/group   |  1 +
+ 3 files changed, 97 insertions(+)
+ create mode 100755 tests/overlay/067
+ create mode 100644 tests/overlay/067.out
+
+diff --git a/tests/overlay/067 b/tests/overlay/067
+new file mode 100755
+index 00000000..88bcd399
+--- /dev/null
++++ b/tests/overlay/067
+@@ -0,0 +1,94 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2019 CTERA Networks. All Rights Reserved.
++#
++# FSQA Test No. 067
++#
++# Test unique st_dev;st_ino on non-samefs setup.
++#
++# Check that files from middle layer on same fs as upper layer
++# are not allowed to export the real inode st_dev;st_ino.
++#
++# This is a regression test for kernel commit:
++#   ovl: fix corner case of non-unique st_dev;st_ino
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs overlay
++_supported_os Linux
++# Use non-default scratch underlying overlay dirs, we need to check
++# them explicity after test.
++_require_scratch_nocheck
++_require_test
++
++# Lower is on test partition
++lower=$OVL_BASE_TEST_DIR/$OVL_LOWER-$seq
++# Upper/work are on scratch partition
++middle=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
++upper=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
++work=$OVL_BASE_SCRATCH_MNT/$OVL_WORK
++
++rm -rf $lower
++mkdir $lower
++
++_scratch_mkfs >>$seqres.full 2>&1
++
++realfile=$middle/file
++testfile=$SCRATCH_MNT/file
++
++# Create a file on middle layer on same fs as upper layer
++echo wrong > $realfile
++
++# Mount an overlay on $SCRATCH_MNT with lower layer on test partition
++# and middle and upper layer on scratch partition.
++# Disable xino, so not all overlay inodes are on the same st_dev.
++_overlay_scratch_mount_dirs $middle:$lower $upper $work -o xino=off || \
++	_notrun "cannot mount overlay with xino=off option"
++
++stat $realfile >>$seqres.full
++stat $testfile >>$seqres.full
++
++# Diverge the content of the overlay file from its origin
++echo right > $testfile
++
++stat $testfile >>$seqres.full
++
++# Expect the overlay file to differ from the original lower file
++diff -q $realfile $testfile >>$seqres.full &&
++	echo "diff with middle layer file doesn't know right from wrong! (warm cache)"
++
++echo 3 > /proc/sys/vm/drop_caches
++
++stat $testfile >>$seqres.full
++
++# Expect the overlay file to differ from the original lower file
++diff -q $realfile $testfile >>$seqres.full &&
++	echo "diff with middle layer file doesn't know right from wrong! (cold cache)"
++
++$UMOUNT_PROG $SCRATCH_MNT
++# check overlayfs
++_overlay_check_scratch_dirs $middle:$lower $upper $work -o xino=off
++
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/overlay/067.out b/tests/overlay/067.out
+new file mode 100644
+index 00000000..daa15453
+--- /dev/null
++++ b/tests/overlay/067.out
+@@ -0,0 +1,2 @@
++QA output created by 067
++Silence is golden
+diff --git a/tests/overlay/group b/tests/overlay/group
+index 1dec7db9..b7cd7774 100644
+--- a/tests/overlay/group
++++ b/tests/overlay/group
+@@ -69,3 +69,4 @@
+ 064 auto quick copyup
+ 065 auto quick mount
+ 066 auto quick copyup
++067 auto quick copyup nonsamefs
+-- 
+2.17.1
+
