@@ -1,127 +1,94 @@
-Return-Path: <SRS0=3VcH=ZR=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=JLeR=ZS=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.7 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	UNPARSEABLE_RELAY,URIBL_BLOCKED autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BDCF0C432C0
-	for <linux-fstests@archiver.kernel.org>; Mon, 25 Nov 2019 05:00:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 65358C432C0
+	for <linux-fstests@archiver.kernel.org>; Tue, 26 Nov 2019 05:23:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 8EA292071A
-	for <linux-fstests@archiver.kernel.org>; Mon, 25 Nov 2019 05:00:30 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3052D20637
+	for <linux-fstests@archiver.kernel.org>; Tue, 26 Nov 2019 05:23:47 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="GxkPFqgN"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725468AbfKYFAa (ORCPT
+        id S1725911AbfKZFXq (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 25 Nov 2019 00:00:30 -0500
-Received: from m4a0040g.houston.softwaregrp.com ([15.124.2.86]:56565 "EHLO
-        m4a0040g.houston.softwaregrp.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1725385AbfKYFA3 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 25 Nov 2019 00:00:29 -0500
-Received: FROM m4a0040g.houston.softwaregrp.com (15.120.17.147) BY m4a0040g.houston.softwaregrp.com WITH ESMTP;
- Mon, 25 Nov 2019 04:58:34 +0000
-Received: from M4W0335.microfocus.com (2002:f78:1193::f78:1193) by
- M4W0335.microfocus.com (2002:f78:1193::f78:1193) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id
- 15.1.1591.10; Mon, 25 Nov 2019 04:59:59 +0000
-Received: from NAM01-BN3-obe.outbound.protection.outlook.com (15.124.8.11) by
- M4W0335.microfocus.com (15.120.17.147) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id
- 15.1.1591.10 via Frontend Transport; Mon, 25 Nov 2019 04:59:59 +0000
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=d7NrhYXCcyEsK0fg6fXRSolaEiImaFzRe5kRQNQ9s9OfIbROz/6l+Zyy8wab7O7vnwXnA3sQ5R2206jggHO3SjGwsb4H7EuwFGYslUG1ehUEVgeMbr5FSTcIUh9g7BwLsEmqUilsKqNN0aYsfRCRGZJ1QIbZb2RvbQJuocT47PVtuzdTzDql5o1qSBJH4wLywrYafUhLAWv2dgMJ6njO3tx5Q/df2d9zTLiKQ+JdmKA94Yl94nrz9GA0Nh2Yn7CopwQ17NbBOlARxd6ti+1qhgcFuH9fey3RiDGuWFRKuArm86d9WGz0hQdu3UYmro3B1Q1ml+pD7zWGG1famtQgdQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=pF9EBx/+7nSRRidiHxuH6L9g9gT0YsSA1uLm0+i/USI=;
- b=b5+8ZZUMl13kwaaAkzHVemLTRLOy+esaP3+bnM6x5Zwsf/7HrP8DPs0JlQBo+Z/9QwuGIJYf3vIaPJqpJQCjLXG1xZrkUBV3FPJAXoobsEnX+eQt2RBxnrh9e2ra0tMGlxBhnSNhhPQpZw611zT8lbRvyf/Q1Dmq5pD1csBjyHJ+qE2DM7JnO41A4ZXcZ1wMA6VNv9wG0ZRDtT7l05gFRZpwB64bmfqLMLekFV3qmlvkw5/e2BgygpX33dQnsFS0vLTWRs2PevZNfb2Vpmi9Wqxrn+y+h03CoO0tleb2o1yRlZK26O1YOMYhm7fXZky5nZLdvESmcGaCzoJa8MAOhA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=suse.com; dmarc=pass action=none header.from=suse.com;
- dkim=pass header.d=suse.com; arc=none
-Received: from BY5PR18MB3266.namprd18.prod.outlook.com (10.255.163.207) by
- BY5PR18MB3409.namprd18.prod.outlook.com (10.255.139.29) with Microsoft SMTP
- Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.2474.17; Mon, 25 Nov 2019 04:59:58 +0000
-Received: from BY5PR18MB3266.namprd18.prod.outlook.com
- ([fe80::1842:7869:d7de:a07b]) by BY5PR18MB3266.namprd18.prod.outlook.com
- ([fe80::1842:7869:d7de:a07b%3]) with mapi id 15.20.2474.023; Mon, 25 Nov 2019
- 04:59:58 +0000
-From:   Qu WenRuo <wqu@suse.com>
-To:     Eryu Guan <guaneryu@gmail.com>
-CC:     "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-        "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
-Subject: Re: [PATCH] fstests: common: Keep $seqres.dmesg in $RESULT_DIR
-Thread-Topic: [PATCH] fstests: common: Keep $seqres.dmesg in $RESULT_DIR
-Thread-Index: AQHVouKhQTA9YnQYlkiwVHpFnR38LqebVJQA
-Date:   Mon, 25 Nov 2019 04:59:58 +0000
-Message-ID: <b9a5bca6-5aaa-81c7-1e87-91646c55f955@suse.com>
-References: <20191113065938.34720-1-wqu@suse.com>
- <20191124161538.GG8664@desktop>
-In-Reply-To: <20191124161538.GG8664@desktop>
-Accept-Language: zh-CN, en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-clientproxiedby: BYAPR01CA0041.prod.exchangelabs.com (2603:10b6:a03:94::18)
- To BY5PR18MB3266.namprd18.prod.outlook.com (2603:10b6:a03:1a1::15)
-authentication-results: spf=none (sender IP is ) smtp.mailfrom=wqu@suse.com; 
-x-ms-exchange-messagesentrepresentingtype: 1
-x-originating-ip: [149.28.201.231]
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-correlation-id: 5daa42f3-6b07-44b6-b666-08d7716451c4
-x-ms-traffictypediagnostic: BY5PR18MB3409:
-x-microsoft-antispam-prvs: <BY5PR18MB34094A972A6561C9FD7D7421D64A0@BY5PR18MB3409.namprd18.prod.outlook.com>
-x-ms-oob-tlc-oobclassifiers: OLM:8882;
-x-forefront-prvs: 0232B30BBC
-x-forefront-antispam-report: SFV:NSPM;SFS:(10019020)(4636009)(39860400002)(136003)(396003)(376002)(366004)(346002)(199004)(189003)(81166006)(8676002)(81156014)(8936002)(5660300002)(2906002)(66446008)(64756008)(66556008)(66476007)(66946007)(7736002)(305945005)(99286004)(1411001)(66066001)(316002)(6116002)(3846002)(446003)(256004)(14444005)(102836004)(76176011)(386003)(52116002)(6246003)(71190400001)(71200400001)(6512007)(11346002)(54906003)(6916009)(6436002)(229853002)(2616005)(6486002)(31686004)(31696002)(86362001)(14454004)(186003)(26005)(6506007)(4326008)(478600001)(36756003)(25786009);DIR:OUT;SFP:1102;SCL:1;SRVR:BY5PR18MB3409;H:BY5PR18MB3266.namprd18.prod.outlook.com;FPR:;SPF:None;LANG:en;PTR:InfoNoRecords;A:1;MX:1;
-received-spf: None (protection.outlook.com: suse.com does not designate
- permitted sender hosts)
-x-ms-exchange-senderadcheck: 1
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: B1LnGRiomlHNoOxvC4wyEQhz4MqhuFs5EQk5zReXMNP0QEolwNaxOxkTnBw/i9tw5blL3627HtSOwXcDR+0OfpE9hE87y3mOMpHuA75Y30R4JtHBOtjMbehbBDsrS8/yON7rCWwdh+pRGlfMZSfXrGuQLRkSXXMKtLUpIXSoiYIeoks503HRA+BqKNLwFjnhkNqWkWREJOe91lFVz5mcUhvaaForLtjod0dAPBywkbOBcbUAd0D+TkWe9SL1/0Mya1s/kr26S2eOT8GDRhgFHmISCFv2CLtSN06bPk+HHyWoRSZgW6OwydlbXUvQX+FcKoV5FzYDqPfMFE7o2U40vmAFbe8SNMpYY/ZfV0yg534nAFZd1ZIWEX4ymEmo2z50iXzzyczJplGCgiqzToFF9O4xKGxT+g5lGcXq5CSqD9QMY2zXv6jkb7mwZhtU+XtI
-x-ms-exchange-transport-forked: True
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <4C9F59AB25AABC48BA58F2E22AF533E6@namprd18.prod.outlook.com>
-Content-Transfer-Encoding: base64
-MIME-Version: 1.0
-X-MS-Exchange-CrossTenant-Network-Message-Id: 5daa42f3-6b07-44b6-b666-08d7716451c4
-X-MS-Exchange-CrossTenant-originalarrivaltime: 25 Nov 2019 04:59:58.2926
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 856b813c-16e5-49a5-85ec-6f081e13b527
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: d27W5WzcpeEjOEZVOoaJMamEF4NIuEue+G6cCpE4ehYsxthpWGVF0FPhuH0KrHVt
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BY5PR18MB3409
-X-OriginatorOrg: suse.com
+        Tue, 26 Nov 2019 00:23:46 -0500
+Received: from mail-pj1-f67.google.com ([209.85.216.67]:39706 "EHLO
+        mail-pj1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725372AbfKZFXq (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 26 Nov 2019 00:23:46 -0500
+Received: by mail-pj1-f67.google.com with SMTP id v93so4439357pjb.6
+        for <fstests@vger.kernel.org>; Mon, 25 Nov 2019 21:23:46 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id;
+        bh=P1OgTgw0b1XsDHjP8RicW+OXJNvDDICc0wExNfSd6ek=;
+        b=GxkPFqgN2nAgdphBZaduSkMwSSbeMz0WbIDJIUgAAt/NiePTG++dzoShCHmtjsJ1UR
+         bApSR6dx+kisQvI1x/UdRHD8ioUyO1ZJm69B9oWamrD4cjDruSHLA2fZKJR5cbch+iUA
+         TwywJ86vI8ZmerZc2Aupd8pdLGldVxvAOFGUBIyfbvsh9rLvZQZmhOrELwHp5pOEinoT
+         E9sZt/OctyzfdotXOozffuPbyjDTz9iDUQvAkBXEpXo7TR6idIt8OPTOzRrhB9AO/Hsl
+         4p3Q/GBi30fpgw8RogXcbYAJUfW7lswjtepsENrt0Sz6HILTgd50RnlnjTGeyZg+m/6V
+         YTZQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id;
+        bh=P1OgTgw0b1XsDHjP8RicW+OXJNvDDICc0wExNfSd6ek=;
+        b=g9/XVV8+p7lsU3FdZq2/4wpMJdPmTbGSqUkANNuPPKc3PqwpWJTNsPaliPFgb2x7WN
+         1uuin+oZeVNdH/MxX3lXF9ZdfseOKWHb/nRjtngM42elu8fnplr+EkRHktPgmscg6k3J
+         rZyRB/5xZzT2AoFDcQNRtHK81r4U5pCJh7wdINvnLcMwfSd6eYGm0cOo+xSRaYLvOfe+
+         DuSrfuzaV/o2OmzcCmPL8t2y6/VQZkY/4/lRP7jXbJwUFxXONo9U9OCpUi9ZSRAzq80B
+         IxCxzR442CS0GXyxYoJ0rAprBSOk1dlBqhhtdJ6VBBA9foIpwJIzMQpFVWnYWSKomSWK
+         ew5A==
+X-Gm-Message-State: APjAAAXrTR0XZCNkL+N17ou8qdK33iSVKtJhXO+jcfzKl/8x+pliY+Y5
+        ehEm6+MpQftcujy+r4MieU0PuIjB
+X-Google-Smtp-Source: APXvYqxIDLoUNzaM8yX4ot7TcnHvgZBQ8rXAZDsPnuRYV3/SWm8i5t+HoEhlCrWu5w3bHvUS2gD0Fg==
+X-Received: by 2002:a17:90a:fb53:: with SMTP id iq19mr4102498pjb.138.1574745825554;
+        Mon, 25 Nov 2019 21:23:45 -0800 (PST)
+Received: from lbh-vm.xmfducmkfhgejfckffvf135llh.hx.internal.cloudapp.net ([52.175.53.118])
+        by smtp.gmail.com with ESMTPSA id q26sm10254192pff.143.2019.11.25.21.23.43
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 25 Nov 2019 21:23:44 -0800 (PST)
+From:   Baihua Lu <lubaihua0331@gmail.com>
+To:     fstests@vger.kernel.org, guaneryu@gmail.com
+Cc:     balu@microsoft.com, Lili.Deng@microsoft.com,
+        Baihua Lu <lubaihua0331@gmail.com>
+Subject: [PATCH] xfs/191-input-validation:Fix issue that the test takes too long
+Date:   Tue, 26 Nov 2019 05:23:36 +0000
+Message-Id: <20191126052336.98489-1-lubaihua0331@gmail.com>
+X-Mailer: git-send-email 2.17.1
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-DQoNCk9uIDIwMTkvMTEvMjUg5LiK5Y2IMTI6MTUsIEVyeXUgR3VhbiB3cm90ZToNCj4gT24gV2Vk
-LCBOb3YgMTMsIDIwMTkgYXQgMDI6NTk6MzhQTSArMDgwMCwgUXUgV2VucnVvIHdyb3RlOg0KPj4g
-Q3VycmVudGx5IGZzdGVzdHMgd2lsbCByZW1vdmUgJHNlcXJlcy5kbWVzZyBpZiBub3RoaW5nIHdy
-b25nIGhhcHBlbmVkLg0KPj4gSXQgc2F2ZXMgc29tZSBzcGFjZSwgYnV0IHNvbWV0aW1lcyBpdCBt
-YXkgbm90IHByb3ZpZGUgZ29vZCBlbm91Z2gNCj4+IGhpc3RvcnkgZm9yIGRldmVsb3BlcnMgdG8g
-Y2hlY2suDQo+PiBFLmcuIHNvbWUgdW5leHBlY3RlZCBkbWVzZyBmcm9tIGZzLCBidXQgbm90IHNl
-cmlvdXMgZW5vdWdoIHRvIGJlIGNhdWdodA0KPj4gYnkgY3VycmVudCBmaWx0ZXIuDQo+Pg0KPj4g
-U28gaW5zdGVhZCBvZiBkZWxldGluZyB0aGUgb3JkaW5hcnkgJHNlcXJlcy5kbWVzZywganVzdCBr
-ZWVwIHRoZW0sIHNvDQo+PiB3ZSBjYW4gYXJjaGl2ZSB0aGVtIGZvciBsYXRlciByZXZpZXcuDQo+
-Pg0KPj4gU2lnbmVkLW9mZi1ieTogUXUgV2VucnVvIDx3cXVAc3VzZS5jb20+DQo+IA0KPiBUaGlz
-IGxvb2tzIGZpbmUgdG8gbWUsIGJ1dCBpdCBjYXVzZXMgbW9yZSBkaXNrIHNwYWNlIGNvbnN1bXB0
-aW9uIGFuZCBtYXkNCj4gZWF0IGFsbCByb290ZnMgc3BhY2UgcXVpY2tseSBhbmQgdW5leHBlY3Rl
-ZGx5Lg0KPiANCj4gSSBzdWdnZXN0IHdlIGFkZCBhbiBvcHRpb24gdG8gY29udHJvbCB0aGUgYmVo
-YXZpb3IsIGFuZCBkZWZhdWx0IGJlaGF2aW9yDQo+IGlzIHRvIGRlbGV0ZSB0aGUgZG1lc2cgZmls
-ZS4NCg0KU3VyZSwgSSdsbCBhZGQgYW4gb3B0aW9uIHRvIGNoYW5nZSB0aGUgYmVoYXZpb3IgaW4g
-bmV4dCB2ZXJzaW9uLg0KDQpUaGFua3MsDQpRdQ0KDQo+IA0KPiBUaGFua3MsDQo+IEVyeXUNCj4g
-DQo+PiAtLS0NCj4+ICBjb21tb24vcmMgfCA0ICstLS0NCj4+ICAxIGZpbGUgY2hhbmdlZCwgMSBp
-bnNlcnRpb24oKyksIDMgZGVsZXRpb25zKC0pDQo+Pg0KPj4gZGlmZiAtLWdpdCBhL2NvbW1vbi9y
-YyBiL2NvbW1vbi9yYw0KPj4gaW5kZXggYjk4OGU5MTIuLjU5YTMzOWE2IDEwMDY0NA0KPj4gLS0t
-IGEvY29tbW9uL3JjDQo+PiArKysgYi9jb21tb24vcmMNCj4+IEBAIC0zNjI1LDEwICszNjI1LDgg
-QEAgX2NoZWNrX2RtZXNnKCkNCj4+ICAJaWYgWyAkPyAtZXEgMCBdOyB0aGVuDQo+PiAgCQlfZHVt
-cF9lcnIgIl9jaGVja19kbWVzZzogc29tZXRoaW5nIGZvdW5kIGluIGRtZXNnIChzZWUgJHNlcXJl
-cy5kbWVzZykiDQo+PiAgCQlyZXR1cm4gMQ0KPj4gLQllbHNlDQo+PiAtCQlybSAtZiAkc2VxcmVz
-LmRtZXNnDQo+PiAtCQlyZXR1cm4gMA0KPj4gIAlmaQ0KPj4gKwlyZXR1cm4gMA0KPj4gIH0NCj4+
-ICANCj4+ICAjIGNhcHR1cmUgdGhlIGttZW1sZWFrIHJlcG9ydA0KPj4gLS0gDQo+PiAyLjIzLjAN
-Cj4+DQo=
+In this test, we don't need to check filesystem on the scratch device for there is not
+really creating the file system. If _check_filesystems executes, xfs_logprint will be
+failed for having dirty log and xfs_repaire will take a long time.
+
+Signed-off-by: Baihua Lu <lubaihua0331@gmail.com>
+---
+ tests/xfs/191-input-validation | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tests/xfs/191-input-validation b/tests/xfs/191-input-validation
+index b6658015..db427349 100755
+--- a/tests/xfs/191-input-validation
++++ b/tests/xfs/191-input-validation
+@@ -31,7 +31,7 @@ _cleanup()
+ # Modify as appropriate.
+ _supported_fs xfs
+ _supported_os Linux
+-_require_scratch
++_require_scratch_nocheck
+ _require_xfs_mkfs_validation
+ 
+ 
+-- 
+2.17.1
+
