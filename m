@@ -1,165 +1,121 @@
-Return-Path: <SRS0=I7qB=ZT=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=SzeB=ZU=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.6 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.7 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CD3D9C43215
-	for <linux-fstests@archiver.kernel.org>; Wed, 27 Nov 2019 22:58:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 76FADC432C0
+	for <linux-fstests@archiver.kernel.org>; Thu, 28 Nov 2019 07:10:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id A15D22168B
-	for <linux-fstests@archiver.kernel.org>; Wed, 27 Nov 2019 22:58:03 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1574895483;
-	bh=t3udkCyJ2+MbQy+Z9Qp0o57cXv0Q9HyyU13vVE5dUQc=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=QdEa7V8haVGxS9RqHUlRV9NomqRTSFNaPXz0o1VQfYDJMTtSbv3EFuq+vz+tnA9XB
-	 5FPSIdSzLVRqCZaAxcLB9K8+THaLooKVZunB7d4FRx3vL+p1HG6RnvJN7qe7TN9M0L
-	 7hJhB0gv6WJNkTmaM4fvPn40k0m7essQ6lMisbCA=
+	by mail.kernel.org (Postfix) with ESMTP id 534C9215E5
+	for <linux-fstests@archiver.kernel.org>; Thu, 28 Nov 2019 07:10:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727618AbfK0W6C (ORCPT
+        id S1726448AbfK1HKw (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 27 Nov 2019 17:58:02 -0500
-Received: from mail.kernel.org ([198.145.29.99]:52892 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727614AbfK0W6C (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 27 Nov 2019 17:58:02 -0500
-Received: from sol.localdomain (c-24-5-143-220.hsd1.ca.comcast.net [24.5.143.220])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 4CFF02158A;
-        Wed, 27 Nov 2019 22:58:01 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1574895481;
-        bh=t3udkCyJ2+MbQy+Z9Qp0o57cXv0Q9HyyU13vVE5dUQc=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=Deo/NFja3Ec/iEpHsMVqKdwZVOB5gZqTJi2hjqlmoJsTFDWmlOLbvzV3X7LPyDphP
-         Ms8zbsvj56T1mZ6OnHtT+QRnj9cJ4EFpVyogpcxAZIhdHecHMkTEFlIa4JBQRSHK3i
-         SzMH3cM0I2ptzWcMNEyqaxez08YhmzctQ8rnC2Eg=
-Date:   Wed, 27 Nov 2019 14:57:59 -0800
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>
-Cc:     fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org,
-        keyrings@vger.kernel.org
-Subject: Re: [RFC PATCH 0/3] xfstests: test adding filesystem-level fscrypt
- key via key_id
-Message-ID: <20191127225759.GA303989@sol.localdomain>
-References: <20191119223130.228341-1-ebiggers@kernel.org>
- <20191127204536.GA12520@linux.intel.com>
+        Thu, 28 Nov 2019 02:10:52 -0500
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:38422 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726438AbfK1HKv (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 28 Nov 2019 02:10:51 -0500
+X-IronPort-AV: E=Sophos;i="5.69,252,1571673600"; 
+   d="scan'208";a="79208203"
+Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
+  by heian.cn.fujitsu.com with ESMTP; 28 Nov 2019 15:10:29 +0800
+Received: from G08CNEXCHPEKD02.g08.fujitsu.local (unknown [10.167.33.83])
+        by cn.fujitsu.com (Postfix) with ESMTP id 388494CE1C01;
+        Thu, 28 Nov 2019 15:02:02 +0800 (CST)
+Received: from localhost.localdomain (10.167.220.84) by
+ G08CNEXCHPEKD02.g08.fujitsu.local (10.167.33.89) with Microsoft SMTP Server
+ (TLS) id 14.3.439.0; Thu, 28 Nov 2019 15:10:28 +0800
+From:   Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+To:     <fstests@vger.kernel.org>
+CC:     Yang Xu <xuyang2018.jy@cn.fujitsu.com>,
+        "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: [PATCH] xfs/148: sort and filter attribute list output
+Date:   Thu, 28 Nov 2019 15:10:45 +0800
+Message-ID: <1574925045-7334-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
+X-Mailer: git-send-email 1.8.3.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20191127204536.GA12520@linux.intel.com>
-User-Agent: Mutt/1.12.2 (2019-09-21)
+Content-Type: text/plain
+X-Originating-IP: [10.167.220.84]
+X-yoursite-MailScanner-ID: 388494CE1C01.AB2FF
+X-yoursite-MailScanner: Found to be clean
+X-yoursite-MailScanner-From: xuyang2018.jy@cn.fujitsu.com
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Nov 27, 2019 at 10:45:36PM +0200, Jarkko Sakkinen wrote:
-> On Tue, Nov 19, 2019 at 02:31:27PM -0800, Eric Biggers wrote:
-> > This series adds a test which tests adding a key to a filesystem's
-> > fscrypt keyring via an "fscrypt-provisioning" keyring key.  This is an
-> > alternative to the normal method where the raw key is given directly.
-> > 
-> > I'm sending this out for comment, but it shouldn't be merged until the
-> > corresponding kernel patch has reached mainline.  For more details, see
-> > the kernel patch:
-> > https://lkml.kernel.org/linux-fscrypt/20191119222447.226853-1-ebiggers@kernel.org/T/#u
-> > 
-> > This test depends on an xfs_io patch which adds the '-k' option to the
-> > 'add_enckey' command, e.g.:
-> > 
-> > 	xfs_io -c "add_enckey -k KEY_ID" MOUNTPOINT
-> > 
-> > This test is skipped if the needed kernel or xfs_io support is absent.
-> > 
-> > This has been tested on ext4, f2fs, and ubifs.
-> > 
-> > To apply cleanly, my other xfstests patch series
-> > "[RFC PATCH 0/5] xfstests: verify ciphertext of IV_INO_LBLK_64 encryption policies"
-> > must be applied first.
-> > 
-> > This series can also be retrieved from
-> > https://git.kernel.org/pub/scm/linux/kernel/git/ebiggers/xfstests-dev.git
-> > tag "fscrypt-provisioning_2019-11-19".
-> > 
-> > Eric Biggers (3):
-> >   common/rc: handle option with argument in _require_xfs_io_command()
-> >   common/encrypt: move constant test key to common code
-> >   generic: test adding filesystem-level fscrypt key via key_id
-> > 
-> >  common/encrypt        |  95 +++++++++++++++++++++----
-> >  common/rc             |   2 +-
-> >  tests/generic/580     |  17 ++---
-> >  tests/generic/806     | 156 ++++++++++++++++++++++++++++++++++++++++++
-> >  tests/generic/806.out |  73 ++++++++++++++++++++
-> >  tests/generic/group   |   1 +
-> >  6 files changed, 316 insertions(+), 28 deletions(-)
-> >  create mode 100644 tests/generic/806
-> >  create mode 100644 tests/generic/806.out
-> > 
-> > -- 
-> > 2.24.0.432.g9d3f5f5b63-goog
-> > 
-> 
-> I'm newbie with fscrypt so I started by encrypting a directory without
-> the new feature
-> 
-> sudo tune2fs -O encrypt /dev/sda2
-> sudo fscrypt setup /
-> fscrypt encrypt foo
-> 
-> Worked.
-> 
-> Generally speaking I'd appreciate a usage example like here to the
-> commit message:
-> 
-> https://lwn.net/Articles/692514/
-> 
-> Is this doable?
-> 
-> I might consider trying out the XFS test suite some day but right now it
-> would be first nice to smoke test the feature quickly.
-> 
-> I think for this patch that would actually be mostly sufficient testing.
-> 
+When I backport fixed patches from Darrick tighten-verifiers tree, this case 
+also fails. As below:
+-----------------------------------------------------------
+"diff test/xfs/148.out result/xfs/148.out.bad
+7,8d6
+< Attribute "a_something" has a 3 byte value for TEST_DIR/mount-148/testfile
+< Attribute "a_too_many_beans" has a 3 byte value for TEST_DIR/mount-148/testfile
+9a8
+> Attribute "a_too_many_beans" has a 3 byte value for TEST_DIR/mount-148/testfile
+10a10,11
+> Attribute "a_something" has a 3 byte value for TEST_DIR/mount-148/testfile
+> Attribute "selinux" has a 37 byte value for TEST_DIR/mount-148/testfile
+49,50c50,51
+< Attribute "a_are_bad/for_you" had a 3 byte value for TEST_DIR/mount-148/testfile:
+< heh
+> attr_get: No data available
+> Could not get "a_are_bad/for_you" for TEST_DIR/mount-148/testfile"
+-------------------------------------------------------------
+We should sort attribute list output and filter selinux. Also "a_are_bad/for_you"
+doesn't exist, we should correct it in output.
 
-You could manually do what the xfstest does, which is more or less the following
-(requires xfs_io patched with https://patchwork.kernel.org/patch/11252795/):
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+Signed-off-by: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+---
+ tests/xfs/148     | 2 +-
+ tests/xfs/148.out | 8 ++++----
+ 2 files changed, 5 insertions(+), 5 deletions(-)
 
-	mkfs.ext4 -O encrypt /dev/vdc
-	mount /dev/vdc /vdc
-	keyctl new_session
-	payload='\x02\x00\x00\x00\x00\x00\x00\x00'
-	for i in {1..64}; do
-		payload+="\\x$(printf "%02x" $i)"
-	done
-	keyid=$(echo -ne "$payload" | keyctl padd fscrypt-provisioning desc @s)
-	keyspec=$(xfs_io -c "add_enckey -k $keyid" /vdc | awk '{print $NF}')
-	mkdir /vdc/edir
-	xfs_io -c "set_encpolicy $keyspec" /vdc/edir
-	echo contents > /vdc/edir/file
+diff --git a/tests/xfs/148 b/tests/xfs/148
+index 42cfdab0..06862faa 100755
+--- a/tests/xfs/148
++++ b/tests/xfs/148
+@@ -76,7 +76,7 @@ test_names+=("too_many" "are_bad/for_you")
+ 
+ access_stuff() {
+ 	ls $testdir
+-	$ATTR_PROG -l $testfile
++	$ATTR_PROG -l $testfile | grep "a_" | sort
+ 
+ 	for name in "${test_names[@]}"; do
+ 		ls "$testdir/f_$name"
+diff --git a/tests/xfs/148.out b/tests/xfs/148.out
+index c301ecb6..ab3fc25b 100644
+--- a/tests/xfs/148.out
++++ b/tests/xfs/148.out
+@@ -4,10 +4,10 @@ f_another
+ f_are_bad_for_you
+ f_something
+ f_too_many_beans
++Attribute "a_another" has a 3 byte value for TEST_DIR/mount-148/testfile
++Attribute "a_are_bad_for_you" has a 3 byte value for TEST_DIR/mount-148/testfile
+ Attribute "a_something" has a 3 byte value for TEST_DIR/mount-148/testfile
+ Attribute "a_too_many_beans" has a 3 byte value for TEST_DIR/mount-148/testfile
+-Attribute "a_are_bad_for_you" has a 3 byte value for TEST_DIR/mount-148/testfile
+-Attribute "a_another" has a 3 byte value for TEST_DIR/mount-148/testfile
+ TEST_DIR/mount-148/testdir/f_something
+ Attribute "a_something" had a 3 byte value for TEST_DIR/mount-148/testfile:
+ heh
+@@ -46,5 +46,5 @@ ls: cannot access 'TEST_DIR/mount-148/testdir/f_too_many': No such file or direc
+ attr_get: No data available
+ Could not get "a_too_many" for TEST_DIR/mount-148/testfile
+ ls: cannot access 'TEST_DIR/mount-148/testdir/f_are_bad/for_you': No such file or directory
+-Attribute "a_are_bad/for_you" had a 3 byte value for TEST_DIR/mount-148/testfile:
+-heh
++attr_get: No data available
++Could not get "a_are_bad/for_you" for TEST_DIR/mount-148/testfile
+-- 
+2.18.0
 
-I'm not yet planning to use this feature in the 'fscrypt' userspace tool
-https://github.com/google/fscrypt.  The user who actually wants this feature
-(Android) isn't using the 'fscrypt' tool, but rather is using custom code.
 
-Also, the 'fscrypt' tool isn't meant for testing or exposing every corner of the
-fscrypt kernel API.  Rather, it's meant to be a user-friendly tool for creating
-encrypted directories on "regular" Linux distros, supporting lots of higher
-level userspace features like passphrase hashing with Argon2, multiple
-protectors, and auto-unlocking directories with PAM.
 
-So for now, the important thing is to have an xfstest that fully tests this new
-API.  For that, like the other fscrypt tests, I'm using keyctl and xfs_io to
-access the kernel API directly.
-
-Later, if people really need the 'fscrypt' tool to do something that requires
-this feature, we can add it.  This would likely take the form of a user-friendly
-option to 'fscrypt unlock' rather than a direct translation of the kernel API.
-
-- Eric
