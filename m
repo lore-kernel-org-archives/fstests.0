@@ -2,95 +2,90 @@ Return-Path: <SRS0=++Hp=ZV=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ECC8EC432C0
-	for <linux-fstests@archiver.kernel.org>; Fri, 29 Nov 2019 04:57:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 60A7DC432C0
+	for <linux-fstests@archiver.kernel.org>; Fri, 29 Nov 2019 07:27:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id C9542217AB
-	for <linux-fstests@archiver.kernel.org>; Fri, 29 Nov 2019 04:57:50 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3593E2086A
+	for <linux-fstests@archiver.kernel.org>; Fri, 29 Nov 2019 07:27:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726985AbfK2E5u (ORCPT
+        id S1726653AbfK2H1v (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 28 Nov 2019 23:57:50 -0500
-Received: from mx2.suse.de ([195.135.220.15]:54372 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726800AbfK2E5u (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 28 Nov 2019 23:57:50 -0500
-X-Virus-Scanned: by amavisd-new at test-mx.suse.de
-Received: from relay2.suse.de (unknown [195.135.220.254])
-        by mx1.suse.de (Postfix) with ESMTP id 4EDB7AC1A;
-        Fri, 29 Nov 2019 04:57:48 +0000 (UTC)
-From:   Qu Wenruo <wqu@suse.com>
-To:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Subject: [PATCH] fstests: common: Allow user to keep $seqres.dmesg for all tests
-Date:   Fri, 29 Nov 2019 12:57:43 +0800
-Message-Id: <20191129045743.47105-1-wqu@suse.com>
-X-Mailer: git-send-email 2.24.0
+        Fri, 29 Nov 2019 02:27:51 -0500
+Received: from snd00002.auone-net.jp ([111.86.247.2]:65062 "EHLO
+        dmta0005-f.auone-net.jp" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726215AbfK2H1v (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 29 Nov 2019 02:27:51 -0500
+X-Greylist: delayed 401 seconds by postgrey-1.27 at vger.kernel.org; Fri, 29 Nov 2019 02:27:51 EST
+Received: from ppp.dion.ne.jp by dmta0003.auone-net.jp with ESMTP
+          id <20191129072108857.YEGH.25002.ppp.dion.ne.jp@dmta0003.auone-net.jp>
+          for <fstests@vger.kernel.org>; Fri, 29 Nov 2019 16:21:08 +0900
+Date:   Fri, 29 Nov 2019 16:21:08 +0900
+From:   Kusanagi Kouichi <slash@ac.auone-net.jp>
+To:     fstests@vger.kernel.org
+Subject: [PATCH] common/filter: Don't use strtonum
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+User-Agent: Mutt/1.12.2 (2019-09-21)
+Message-Id: <20191129072108857.YEGH.25002.ppp.dion.ne.jp@dmta0003.auone-net.jp>
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Currently fstests will remove $seqres.dmesg if nothing wrong happened.
-It saves some space, but sometimes it may not provide good enough
-history for developers to check.
-E.g. some unexpected dmesg from fs, but not serious enough to be caught
-by current filter.
+It's a gawk extension and not needed. Make tests pass with non-gawk.
 
-So instead of deleting the ordinary $seqres.dmesg, provide a new config:
-KEEP_DMESG, to allow user to choose whether to keep the dmesg.
-
-The default value for it is 0, which keeps the existing behavior by
-deleting ordinary dmesg.
-
-Signed-off-by: Qu Wenruo <wqu@suse.com>
+Signed-off-by: Kusanagi Kouichi <slash@ac.auone-net.jp>
 ---
- common/config | 4 ++++
- common/rc     | 4 +++-
- 2 files changed, 7 insertions(+), 1 deletion(-)
+ common/filter | 23 +++++++++++++----------
+ 1 file changed, 13 insertions(+), 10 deletions(-)
 
-diff --git a/common/config b/common/config
-index 1b75777f..b409f32c 100644
---- a/common/config
-+++ b/common/config
-@@ -22,6 +22,9 @@
- # RMT_IRIXTAPE_DEV- the IRIX remote tape device for the xfsdump tests
- # RMT_TAPE_USER -   remote user for tape device
- # SELINUX_MOUNT_OPTIONS - Options to use when SELinux is enabled.
-+# KEEP_DMESG -      whether to keep all dmesg for each test case.
-+#                   1: keep all dmesg
-+#                   0: only keep dmesg with error/warning (default)
- #
- # - These can be added to $HOST_CONFIG_DIR (witch default to ./config)
- #   below or a separate local configuration file can be used (using
-@@ -757,6 +760,7 @@ if [ -z "$CONFIG_INCLUDED" ]; then
- 	[ -z "$TEST_FS_MOUNT_OPTS" ] && _test_mount_opts
- 	[ -z "$MKFS_OPTIONS" ] && _mkfs_opts
- 	[ -z "$FSCK_OPTIONS" ] && _fsck_opts
-+	[ -z "$KEEP_DMESG" ] && export KEEP_DMESG=0
- else
- 	# We get here for the non multi section case, on every test that sources
- 	# common/rc after re-sourcing the HOST_OPTIONS config file.
-diff --git a/common/rc b/common/rc
-index e5535279..a1386f61 100644
---- a/common/rc
-+++ b/common/rc
-@@ -3634,7 +3634,9 @@ _check_dmesg()
- 		_dump_err "_check_dmesg: something found in dmesg (see $seqres.dmesg)"
- 		return 1
- 	else
--		rm -f $seqres.dmesg
-+		if [ "$KEEP_DMESG" != 1 ]; then
-+			rm -f $seqres.dmesg
+diff --git a/common/filter b/common/filter
+index 2477f386..e02cc0b9 100644
+--- a/common/filter
++++ b/common/filter
+@@ -241,9 +241,9 @@ _filter_xfs_io_units_modified()
+ 		/wrote/ {
+ 			split($2, bytes, "/")
+ 
+-			bytes_written = strtonum(bytes[1])
++			bytes_written = bytes[1]
+ 
+-			offset = strtonum($NF)
++			offset = $NF
+ 
+ 			unit_start = offset / unit_size
+ 			unit_start = int(unit_start)
+@@ -487,14 +487,17 @@ _filter_busy_mount()
+ _filter_od()
+ {
+ 	BLOCK_SIZE=$(_get_block_size $SCRATCH_MNT)
+-	$AWK_PROG -v block_size=$BLOCK_SIZE '
+-		/^[0-9]+/ {
+-			offset = strtonum("0"$1);
+-			$1 = sprintf("%o", offset / block_size);
+-			print $0;
+-		}
+-		/\*/
+-	'
++	while read line
++	do
++		if test "$line" = '*'
++		then
++			printf '*\n'
++			continue
 +		fi
- 		return 0
- 	fi
++
++		offset="${line%% *}"
++		printf '%o%s\n' $((offset / BLOCK_SIZE)) "${line#$offset}"
++	done
  }
+ 
+ # Remove quotes from failed mknod calls. Starting with Coreutils v8.25,
 -- 
-2.23.0
+2.24.0
 
