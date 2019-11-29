@@ -2,139 +2,187 @@ Return-Path: <SRS0=++Hp=ZV=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E8CEFC432C0
-	for <linux-fstests@archiver.kernel.org>; Fri, 29 Nov 2019 09:48:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 11E96C432C0
+	for <linux-fstests@archiver.kernel.org>; Fri, 29 Nov 2019 15:15:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id C503B215F1
-	for <linux-fstests@archiver.kernel.org>; Fri, 29 Nov 2019 09:48:43 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D769421781
+	for <linux-fstests@archiver.kernel.org>; Fri, 29 Nov 2019 15:15:16 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1575040516;
+	bh=DzmFP1g/C4Zu48AgFSs5fvDJ1vZjROCqu/ogxFaXGAg=;
+	h=From:To:Cc:Subject:Date:List-ID:From;
+	b=uuoMsxIfmzMc8dIsigQ217fuuZJLmvKVLue01CSixPy9iYNO4NY0pUzbWjR2Fz+qz
+	 VtUEvnJKKZowrgVe8DnKyOp+BeUXFNPWaSXg1WKF5M11TNsp4lAZeRl53ZIiJnr1Xr
+	 343X32hlefATFgkIteFD/sZ2+F1nIgu0Fb3rNTj8=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726360AbfK2Jsn (ORCPT
+        id S1726808AbfK2PPQ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 29 Nov 2019 04:48:43 -0500
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:55345 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1725892AbfK2Jsn (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 29 Nov 2019 04:48:43 -0500
-X-IronPort-AV: E=Sophos;i="5.69,257,1571673600"; 
-   d="scan'208";a="79274362"
-Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
-  by heian.cn.fujitsu.com with ESMTP; 29 Nov 2019 17:48:41 +0800
-Received: from G08CNEXMBPEKD04.g08.fujitsu.local (unknown [10.167.33.201])
-        by cn.fujitsu.com (Postfix) with ESMTP id 723304CE1C09;
-        Fri, 29 Nov 2019 17:40:13 +0800 (CST)
-Received: from [10.167.220.84] (10.167.220.84) by
- G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201) with Microsoft SMTP Server
- (TLS) id 15.0.1395.4; Fri, 29 Nov 2019 17:48:39 +0800
-Subject: Re: [PATCH] xfs/148: sort and filter attribute list output
-To:     <fstests@vger.kernel.org>
-CC:     "Darrick J. Wong" <darrick.wong@oracle.com>
-References: <1574925045-7334-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
-From:   Yang Xu <xuyang2018.jy@cn.fujitsu.com>
-Message-ID: <830da627-d5ab-6e76-297c-8425506420d7@cn.fujitsu.com>
-Date:   Fri, 29 Nov 2019 17:48:36 +0800
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101
- Thunderbird/68.0
-MIME-Version: 1.0
-In-Reply-To: <1574925045-7334-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
-Content-Type: text/plain; charset="gbk"; format=flowed
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.167.220.84]
-X-ClientProxiedBy: G08CNEXCHPEKD06.g08.fujitsu.local (10.167.33.205) To
- G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201)
-X-yoursite-MailScanner-ID: 723304CE1C09.AA7C7
-X-yoursite-MailScanner: Found to be clean
-X-yoursite-MailScanner-From: xuyang2018.jy@cn.fujitsu.com
+        Fri, 29 Nov 2019 10:15:16 -0500
+Received: from mail.kernel.org ([198.145.29.99]:36946 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726608AbfK2PPQ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 29 Nov 2019 10:15:16 -0500
+Received: from debian6.Home (bl8-197-74.dsl.telepac.pt [85.241.197.74])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 22C88216F4;
+        Fri, 29 Nov 2019 15:15:13 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1575040514;
+        bh=DzmFP1g/C4Zu48AgFSs5fvDJ1vZjROCqu/ogxFaXGAg=;
+        h=From:To:Cc:Subject:Date:From;
+        b=0wBxqjP8nNTG/9ISEV9/ietE31FkFgMQUZrX2U0zWoB6lVbx+r1waQT3MwINmFgFU
+         +yEGqZJUnXdaeEjmFoPpmYC45yyfE/bAxwwEXglPN6AvwuBEPF7oLOLtyk5D5MDho5
+         qf0lopVpnv+4tj8ZJan1YIwTbVLiPw8bJFhlbdxA=
+From:   fdmanana@kernel.org
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] generic: test journal/log replay when a file with cloned extents was fsync'ed
+Date:   Fri, 29 Nov 2019 15:15:09 +0000
+Message-Id: <20191129151509.1871-1-fdmanana@kernel.org>
+X-Mailer: git-send-email 2.11.0
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+From: Filipe Manana <fdmanana@suse.com>
 
+Test that if we clone part of an extent from a file to itself at a
+different offset, fsync it, rewrite (COW) part of the extent from the
+former offset, fsync it again, power fail and then mount the filesystem,
+we are able to read the whole file and it has the correct data.
 
-on 2019/11/28 15:10, Yang Xu wrote:
-> When I backport fixed patches from Darrick tighten-verifiers tree, this case
-> also fails. As below:
-> -----------------------------------------------------------
-> "diff test/xfs/148.out result/xfs/148.out.bad
-> 7,8d6
-> < Attribute "a_something" has a 3 byte value for TEST_DIR/mount-148/testfile
-> < Attribute "a_too_many_beans" has a 3 byte value for TEST_DIR/mount-148/testfile
-> 9a8
->> Attribute "a_too_many_beans" has a 3 byte value for TEST_DIR/mount-148/testfile
-> 10a10,11
->> Attribute "a_something" has a 3 byte value for TEST_DIR/mount-148/testfile
->> Attribute "selinux" has a 37 byte value for TEST_DIR/mount-148/testfile
-> 49,50c50,51
-> < Attribute "a_are_bad/for_you" had a 3 byte value for TEST_DIR/mount-148/testfile:
-> < heh
->> attr_get: No data available
->> Could not get "a_are_bad/for_you" for TEST_DIR/mount-148/testfile"
-> -------------------------------------------------------------
-> We should sort attribute list output and filter selinux. Also "a_are_bad/for_you"
-> doesn't exist, we should correct it in output.
-> 
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> Signed-off-by: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
-> ---
->   tests/xfs/148     | 2 +-
->   tests/xfs/148.out | 8 ++++----
->   2 files changed, 5 insertions(+), 5 deletions(-)
-> 
-> diff --git a/tests/xfs/148 b/tests/xfs/148
-> index 42cfdab0..06862faa 100755
-> --- a/tests/xfs/148
-> +++ b/tests/xfs/148
-> @@ -76,7 +76,7 @@ test_names+=("too_many" "are_bad/for_you")
->   
->   access_stuff() {
->   	ls $testdir
-> -	$ATTR_PROG -l $testfile
-> +	$ATTR_PROG -l $testfile | grep "a_" | sort
->   
->   	for name in "${test_names[@]}"; do
->   		ls "$testdir/f_$name"
-on  3.10.0-1101.el7.x86_64 kernel,
-#ls -l TEST_DIR/mount-148/testfile
-#ls: cannot access TEST_DIR/mount-148/testfile: No such file or directory
+This is motivated by a bug found in btrfs which is fixed by a kernel patch
+that has the following subject:
 
-on 4.18.0-147.el8.x86_64
-# ls -l TEST_DIR/mount-148/testfile
-#ls: cannot access 'TEST_DIR/mount-148/testfile': No such file or directory
-[root@localhost ltp]#
+  "Btrfs: fix missing data checksums after replaying a log tree"
 
-I think we should filter "'" by sed and change 148.out. I will send v2 
-patch.
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/generic/586     | 77 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/586.out | 13 +++++++++
+ tests/generic/group   |  1 +
+ 3 files changed, 91 insertions(+)
+ create mode 100755 tests/generic/586
+ create mode 100644 tests/generic/586.out
 
-
-> diff --git a/tests/xfs/148.out b/tests/xfs/148.out
-> index c301ecb6..ab3fc25b 100644
-> --- a/tests/xfs/148.out
-> +++ b/tests/xfs/148.out
-> @@ -4,10 +4,10 @@ f_another
->   f_are_bad_for_you
->   f_something
->   f_too_many_beans
-> +Attribute "a_another" has a 3 byte value for TEST_DIR/mount-148/testfile
-> +Attribute "a_are_bad_for_you" has a 3 byte value for TEST_DIR/mount-148/testfile
->   Attribute "a_something" has a 3 byte value for TEST_DIR/mount-148/testfile
->   Attribute "a_too_many_beans" has a 3 byte value for TEST_DIR/mount-148/testfile
-> -Attribute "a_are_bad_for_you" has a 3 byte value for TEST_DIR/mount-148/testfile
-> -Attribute "a_another" has a 3 byte value for TEST_DIR/mount-148/testfile
->   TEST_DIR/mount-148/testdir/f_something
->   Attribute "a_something" had a 3 byte value for TEST_DIR/mount-148/testfile:
->   heh
-> @@ -46,5 +46,5 @@ ls: cannot access 'TEST_DIR/mount-148/testdir/f_too_many': No such file or direc
->   attr_get: No data available
->   Could not get "a_too_many" for TEST_DIR/mount-148/testfile
->   ls: cannot access 'TEST_DIR/mount-148/testdir/f_are_bad/for_you': No such file or directory
-> -Attribute "a_are_bad/for_you" had a 3 byte value for TEST_DIR/mount-148/testfile:
-> -heh
-> +attr_get: No data available
-> +Could not get "a_are_bad/for_you" for TEST_DIR/mount-148/testfile
-> 
-
+diff --git a/tests/generic/586 b/tests/generic/586
+new file mode 100755
+index 00000000..b889a0d0
+--- /dev/null
++++ b/tests/generic/586
+@@ -0,0 +1,77 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FSQA Test No. 586
++#
++# Test that if we clone part of an extent from a file to itself at different
++# offset, fsync it, rewrite (COW) part of the extent from the former offset,
++# fsync it again, power fail and then mount the filesystem, we are able to
++# read the whole file and it has the correct data.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	_cleanup_flakey
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/reflink
++. ./common/dmflakey
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_scratch_reflink
++_require_dm_target flakey
++
++rm -f $seqres.full
++
++_scratch_mkfs >>$seqres.full 2>&1
++_require_metadata_journaling $SCRATCH_DEV
++_init_flakey
++_mount_flakey
++
++# Create our test file with two 256Kb extents, one at file offset 0 and the
++# other at file offset 256Kb.
++$XFS_IO_PROG -f -c "pwrite -S 0xa3 0 256K" \
++	     -c "fsync" \
++	     -c "pwrite -S 0xc7 256K 256K" \
++	     $SCRATCH_MNT/foobar | _filter_xfs_io
++
++# Now clone the second 64Kb of data from the second extent into file offset 0.
++# After this we get that extent partially shared. Also fsync the file.
++$XFS_IO_PROG -c "reflink $SCRATCH_MNT/foobar 320K 0K 64K" \
++	     -c "fsync" \
++	     $SCRATCH_MNT/foobar | _filter_xfs_io
++
++# Now COW the first 64Kb of data for that second extent. After this we no longer
++# have the extent fully referenced - its second 64Kb of data are referenced at
++# file offset 0 and its last 192Kb of data are referenced at file offset 320Kb.
++# Fsync the file to make sure everything is durably persisted.
++$XFS_IO_PROG -c "pwrite -S 0xe5 256K 64K" \
++	     -c "fsync" \
++	     $SCRATCH_MNT/foobar | _filter_xfs_io
++
++echo "File digest before power failure:"
++_md5_checksum $SCRATCH_MNT/foobar
++
++# Simulate a power failure and then check no data loss or corruption happened.
++_flakey_drop_and_remount
++
++echo "File digest after mount:"
++_md5_checksum $SCRATCH_MNT/foobar
++
++_unmount_flakey
++status=0
++exit
+diff --git a/tests/generic/586.out b/tests/generic/586.out
+new file mode 100644
+index 00000000..7bb4cdce
+--- /dev/null
++++ b/tests/generic/586.out
+@@ -0,0 +1,13 @@
++QA output created by 586
++wrote 262144/262144 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 262144/262144 bytes at offset 262144
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++linked 65536/65536 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 65536/65536 bytes at offset 262144
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++File digest before power failure:
++b92c7b6e89d6f466cffba1f6e6193e5d
++File digest after mount:
++b92c7b6e89d6f466cffba1f6e6193e5d
+diff --git a/tests/generic/group b/tests/generic/group
+index e5d0c1da..d264cfcf 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -588,3 +588,4 @@
+ 583 auto quick encrypt
+ 584 auto quick encrypt
+ 585 auto rename
++586 auto quick log clone
+-- 
+2.11.0
 
