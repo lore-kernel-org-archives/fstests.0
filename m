@@ -1,732 +1,158 @@
-Return-Path: <SRS0=8nse=ZW=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=1u3g=ZX=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.1 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D2C44C432C0
-	for <linux-fstests@archiver.kernel.org>; Sat, 30 Nov 2019 06:53:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 48A3AC432C3
+	for <linux-fstests@archiver.kernel.org>; Sun,  1 Dec 2019 03:35:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 947C920725
-	for <linux-fstests@archiver.kernel.org>; Sat, 30 Nov 2019 06:53:41 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 068312084E
+	for <linux-fstests@archiver.kernel.org>; Sun,  1 Dec 2019 03:35:07 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="CHS8N07D"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Isa4VLXK"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725881AbfK3Gxl (ORCPT
+        id S1727179AbfLADfH (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 30 Nov 2019 01:53:41 -0500
-Received: from us-smtp-2.mimecast.com ([205.139.110.61]:36402 "EHLO
-        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1725783AbfK3Gxl (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 30 Nov 2019 01:53:41 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1575096818;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=abmEBm+MuAPMV/Lt2KXXX2QVNefdEbVkI4GqG5WtJkY=;
-        b=CHS8N07Dxx0HuzecDli1XceAsX82tCHZpE3Yl0NehjT727+eV40Avk/20yjUShjsbMbINB
-        dEmy5BTaX2hLxkMqmpdYfcTEUZppP8AWDq1hc6EcJbsFwDjsdeu+6ZehI8EsjzC8hlAy8Q
-        oEor/ndoyngPrpB2n9oybdIQ8ruGOec=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-190-BjOq5tLrP2iEauWIDjsanA-1; Sat, 30 Nov 2019 01:53:35 -0500
-Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 92F3BDB20;
-        Sat, 30 Nov 2019 06:53:34 +0000 (UTC)
-Received: from localhost.localdomain.com (ovpn-12-80.pek2.redhat.com [10.72.12.80])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 7F9FE60BF4;
-        Sat, 30 Nov 2019 06:53:32 +0000 (UTC)
-From:   Zorro Lang <zlang@redhat.com>
-To:     fstests@vger.kernel.org
-Cc:     linux-fsdevel@vger.kernel.org
-Subject: [PATCH] generic: test mount move semantics
-Date:   Sat, 30 Nov 2019 14:53:24 +0800
-Message-Id: <20191130065324.17608-1-zlang@redhat.com>
+        Sat, 30 Nov 2019 22:35:07 -0500
+Received: from mail-pf1-f194.google.com ([209.85.210.194]:38646 "EHLO
+        mail-pf1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727095AbfLADfH (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 30 Nov 2019 22:35:07 -0500
+Received: by mail-pf1-f194.google.com with SMTP id x185so3950734pfc.5;
+        Sat, 30 Nov 2019 19:35:06 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to:user-agent;
+        bh=t8fp6/hStw8m2jDmz0614Xn1uqL/H8ze3iIp5Qj4Q+E=;
+        b=Isa4VLXKCvQEzCKrXC6stjs1GdixJKpGrDtIDBDJmYJjjSarIzV0Heom5N+JKwSwds
+         g6+xUVaShxQc0sGn8WHVeFtL6hEcrH0FYLMghJwzB6n1rqjde6XSzSa7hyFYISewm5dD
+         XcPUyA7XIBl37tt4e+0/d2IT+Hv1slsE+8pnZyXue6Sv7Hibo83WPZD6n0jWHjxFIlcU
+         2yCNIfJxYy+jMTy7+5xd47C4FIU0zCI0i7L+J7RuRa04A8z5A3ri0Zcett7/kus8ngNt
+         srJKPohHzcgTieuE83tlWanf/ABYWTkPmHZQE9ar93j3uBs+rQwy7i6WXs25/cGMQbTq
+         GVWQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to:user-agent;
+        bh=t8fp6/hStw8m2jDmz0614Xn1uqL/H8ze3iIp5Qj4Q+E=;
+        b=nXHQN6eilbQ1Y/XVoTF18twk9MPsGMNplMMXp0SIxpBDaI+yD6nyhtPcB4BSdsbRVB
+         XYxj8RvkneehqXhgAZAWHrJfuzm9AWfgZ1xkEBk/VQyF4H3+sofOtIDLfJuML8KssJ4F
+         zFPnBC1Z2HP3hvnHQO/Nbxy1mvel65CkxEedx0UUZfJz8NYcG49TSnl9c0h7uPu4IBYw
+         sudTUucplhBSPK+VJH8Fx/CwfXnHQha2tQY3eujbZgYIHH2Dp97vGnhy7mfwZUrF2g1c
+         7Kb+oGz5uEeIH6pLUcPP23Qz00F+FpZ7p7DTBN+lA0B8KN9CVB4VMc2eesB8J3m4wn1H
+         /qEg==
+X-Gm-Message-State: APjAAAUyILtc3y9jpT77kPM50B6DqoQb7evKlrRSMutfGhyQhmDXYstH
+        BPlbOX529KLYw2bI41Hl5tU=
+X-Google-Smtp-Source: APXvYqyjF6aEvb4y6lxi+Oz0pbhO+ApPDcD/uSwEAMaujCIAxhhTWc4ZOXFAmX9MNxS5UR3d52dD+Q==
+X-Received: by 2002:a63:4246:: with SMTP id p67mr24282923pga.243.1575171306443;
+        Sat, 30 Nov 2019 19:35:06 -0800 (PST)
+Received: from localhost ([178.128.102.47])
+        by smtp.gmail.com with ESMTPSA id d23sm6939680pfo.176.2019.11.30.19.35.04
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 30 Nov 2019 19:35:05 -0800 (PST)
+Date:   Sun, 1 Dec 2019 11:35:00 +0800
+From:   Eryu Guan <guaneryu@gmail.com>
+To:     "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc:     fstests <fstests@vger.kernel.org>, xfs <linux-xfs@vger.kernel.org>,
+        Jan Kara <jack@suse.cz>
+Subject: Re: [PATCH v2] generic/050: fix xfsquota configuration failures
+Message-ID: <20191201033458.GH8664@desktop>
+References: <20191127163457.GL6212@magnolia>
 MIME-Version: 1.0
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.12
-X-MC-Unique: BjOq5tLrP2iEauWIDjsanA-1
-X-Mimecast-Spam-Score: 0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20191127163457.GL6212@magnolia>
+User-Agent: Mutt/1.12.1 (2019-06-15)
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This's a functional test case for mount --move operation, it verifies
-below semantics:
+On Wed, Nov 27, 2019 at 08:34:57AM -0800, Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
+> 
+> The new 'xfsquota' configuration for generic/050 doesn't filter out
+> SCRATCH_MNT properly and seems to be missing an error message in the
+> golden output.  Fix both of these problems.
+> 
+> Fixes: e088479871 ("generic/050: Handle xfs quota special case with different output")
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 
-  -------------------------------------------------------------------------=
---
-  |         MOVE MOUNT OPERATION                                           =
- |
-  |************************************************************************=
-**
-  |source(A)->| shared       |       private  |       slave    | unbindable=
- |
-  | dest(B)  |               |                |                |           =
- |
-  |   |      |               |                |                |           =
- |
-  |   v      |               |                |                |           =
- |
-  |************************************************************************=
-**
-  |  shared  | shared        |     shared     | shared & slave |  invalid  =
- |
-  |          |               |                |                |           =
- |
-  |non-shared| shared        |      private   |      slave     | unbindable=
- |
-  *************************************************************************=
-**
-  NOTE: moving a mount residing under a shared mount is invalid.
+Thanks for the fix! And sorry for not noticing such test failure. I did
+test xfs/050 but apparently I forget to enable xfsquota..
 
-This case uses fsstress to produce a little random load, to make
-sure basic operations won't break the the moved mountpoints.
-
-Signed-off-by: Zorro Lang <zlang@redhat.com>
----
-
-Hi,
-
-It's been long time (maybe 2 years) since I finished this test case. Those
-cases before this one have been merged:
-
-  8a02ca3b generic: test two vfsmount no peers
-  101cb277 generic: test mount shared subtrees state transition
-  71691c26 generic: test bind mount operations
-  74a84259 common/rc: new functions for multi-level mount/umount operations
-
-I thought this 'mount --move' test wasn't so necessary, so I left it in my
-local repo long time. But now upstream fsdevel is developing new mount API,
-I think this case will be helpful for that (if mount util supports new moun=
-t
-API later). So I change it a little then send out again.
-
-Thanks,
-Zorro
-
- common/rc             |   6 +
- tests/generic/586     | 182 ++++++++++++++++++++
- tests/generic/586.out | 374 ++++++++++++++++++++++++++++++++++++++++++
- tests/generic/group   |   1 +
- 4 files changed, 563 insertions(+)
- create mode 100755 tests/generic/586
- create mode 100644 tests/generic/586.out
-
-diff --git a/common/rc b/common/rc
-index b988e912..936cc5c5 100644
---- a/common/rc
-+++ b/common/rc
-@@ -189,6 +189,12 @@ _get_mount()
-=20
- =09_mount $scratch_opts $*
- =09if [ $? -eq 0 ]; then
-+=09=09# mount --move operation updates the mountpoint, so remove
-+=09=09# the old one and insert the new one
-+=09=09if [[ "$*" =3D~ --move|-M ]]; then
-+=09=09=09MOUNTED_POINT_STACK=3D`echo $MOUNTED_POINT_STACK | \
-+=09=09=09=09=09=09cut -d\  -f2-`
-+=09=09fi
- =09=09MOUNTED_POINT_STACK=3D"$mnt_point $MOUNTED_POINT_STACK"
- =09else
- =09=09return 1
-diff --git a/tests/generic/586 b/tests/generic/586
-new file mode 100755
-index 00000000..170e57bc
---- /dev/null
-+++ b/tests/generic/586
-@@ -0,0 +1,182 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2019 Red Hat Inc.  All Rights Reserved.
-+#
-+# FS QA Test 586
-+#
-+# Test mount shared subtrees, verify the move semantics:
-+#
-+# ------------------------------------------------------------------------=
----
-+# |         MOVE MOUNT OPERATION                                          =
-  |
-+# |***********************************************************************=
-***
-+# |source(A)->| shared       |       private  |       slave    | unbindabl=
-e |
-+# | dest(B)  |               |                |                |          =
-  |
-+# |   |      |               |                |                |          =
-  |
-+# |   v      |               |                |                |          =
-  |
-+# |***********************************************************************=
-***
-+# |  shared  | shared        |     shared     | shared & slave |  invalid =
-  |
-+# |          |               |                |                |          =
-  |
-+# |non-shared| shared        |      private   |      slave     | unbindabl=
-e |
-+# ************************************************************************=
-***
-+#   NOTE: moving a mount residing under a shared mount is invalid.
-+#
-+#-----------------------------------------------------------------------
-+#
-+seq=3D`basename $0`
-+seqres=3D$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=3D`pwd`
-+tmp=3D/tmp/$$
-+status=3D1=09# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+=09cd /
-+=09rm -f $tmp.*
-+=09_clear_mount_stack
-+=09# make sure there's no bug cause dentry isn't be freed
-+=09rm -rf $MNTHEAD
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_test
-+_require_scratch
-+_require_local_device $SCRATCH_DEV
-+
-+fs_stress()
-+{
-+=09local target=3D$1
-+
-+=09$FSSTRESS_PROG -n 50 -p 3 -d $target >/dev/null
-+=09sync
-+}
-+
-+# prepare some mountpoint dir
-+SRCHEAD=3D$TEST_DIR/$seq-src
-+DSTHEAD=3D$TEST_DIR/$seq-dst
-+rm -rf $SRCHEAD $DSTHEAD
-+mkdir $SRCHEAD $DSTHEAD 2>>$seqres.full
-+mpA=3D$SRCHEAD/"$$"_mpA
-+mpB=3D$SRCHEAD/"$$"_mpB
-+mpC=3D$DSTHEAD/"$$"_mpC
-+mpD=3D$DSTHEAD/"$$"_mpD
-+
-+find_mnt()
-+{
-+=09echo "------"
-+=09findmnt -n -o TARGET,SOURCE $SCRATCH_DEV | \
-+=09=09sed -e "s;$mpA;mpA;g" \
-+=09=09    -e "s;$mpB;mpB;g" \
-+=09=09    -e "s;$mpC;mpC;g" \
-+=09=09    -e "s;$mpD;mpD;g" | \
-+=09=09_filter_spaces | _filter_testdir_and_scratch | sort
-+=09echo "=3D=3D=3D=3D=3D=3D"
-+}
-+
-+start_test()
-+{
-+=09local type=3D$1
-+
-+=09_scratch_mkfs >$seqres.full 2>&1
-+
-+=09_get_mount -t $FSTYP $SCRATCH_DEV $SRCHEAD
-+=09# make sure $SRCHEAD is private
-+=09$MOUNT_PROG --make-private $SRCHEAD
-+
-+=09_get_mount -t $FSTYP $SCRATCH_DEV $DSTHEAD
-+=09# test start with a bind, then make-shared $DSTHEAD
-+=09_get_mount --bind $DSTHEAD $DSTHEAD
-+=09$MOUNT_PROG --make-"${type}" $DSTHEAD
-+=09mkdir $mpA $mpB $mpC $mpD
-+}
-+
-+end_test()
-+{
-+=09_clear_mount_stack
-+=09rm -rf $mpA $mpB $mpC $mpD
-+}
-+
-+move_run()
-+{
-+=09local source=3D$1
-+=09local dest=3D$2
-+
-+=09start_test $dest
-+
-+=09echo "move $source to $dest"
-+=09_get_mount -t $FSTYP $SCRATCH_DEV $mpA
-+=09mkdir -p $mpA/dir 2>/dev/null
-+=09$MOUNT_PROG --make-shared $mpA
-+=09# need a peer for slave later
-+=09_get_mount --bind $mpA $mpB
-+=09$MOUNT_PROG --make-"$source" $mpB
-+=09# maybe unbindable at here
-+=09_get_mount --move $mpB $mpC 2>/dev/null
-+=09if [ $? -ne 0 ]; then
-+=09=09find_mnt
-+=09=09end_test
-+=09=09return 0
-+=09fi
-+
-+=09# check mpC after move B to C
-+=09for m in $mpA $mpC; do
-+=09=09_get_mount -t $FSTYP $SCRATCH_DEV $m/dir
-+=09=09fs_stress $m/dir
-+=09=09find_mnt
-+=09=09_put_mount
-+=09done
-+
-+=09# mpC will be in different parent mount, test moving from different
-+=09# parent mount, and moving a mount residing under a shared mount is
-+=09# invalid
-+=09_get_mount --move $mpC $mpD 2>/dev/null
-+=09if [ $? -ne 0 ]; then
-+=09=09find_mnt
-+=09=09end_test
-+=09=09return 0
-+=09fi
-+=09for m in $mpA $mpD; do
-+=09=09_get_mount -t $FSTYP $SCRATCH_DEV $m/dir
-+=09=09fs_stress $m/dir
-+=09=09find_mnt
-+=09=09_put_mount
-+=09done
-+
-+=09end_test
-+}
-+
-+move_test()
-+{
-+=09#        source     dest
-+=09move_run shared     shared
-+=09move_run slave      shared
-+=09move_run private    shared
-+=09move_run unbindable shared
-+
-+=09move_run shared     slave
-+=09move_run slave      slave
-+=09move_run private    slave
-+=09move_run unbindable slave
-+
-+=09move_run shared     private
-+=09move_run slave      private
-+=09move_run private    private
-+=09move_run unbindable private
-+}
-+
-+move_test
-+
-+# success, all done
-+status=3D0
-+exit
-diff --git a/tests/generic/586.out b/tests/generic/586.out
-new file mode 100644
-index 00000000..efa99942
---- /dev/null
-+++ b/tests/generic/586.out
-@@ -0,0 +1,374 @@
-+QA output created by 586
-+move shared to shared
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-+move slave to shared
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-+move private to shared
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-+move unbindable to shared
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-+move shared to slave
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpD SCRATCH_DEV
-+mpD/dir SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpD SCRATCH_DEV
-+mpD/dir SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-+move slave to slave
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpD SCRATCH_DEV
-+mpD/dir SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpD SCRATCH_DEV
-+mpD/dir SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-+move private to slave
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpD SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpD SCRATCH_DEV
-+mpD/dir SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-+move unbindable to slave
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpD SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpD SCRATCH_DEV
-+mpD/dir SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-+move shared to private
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpD SCRATCH_DEV
-+mpD/dir SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpD SCRATCH_DEV
-+mpD/dir SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-+move slave to private
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpD SCRATCH_DEV
-+mpD/dir SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpD SCRATCH_DEV
-+mpD/dir SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-+move private to private
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpD SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpD SCRATCH_DEV
-+mpD/dir SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-+move unbindable to private
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpD SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-+------
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-dst SCRATCH_DEV
-+TEST_DIR/586-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpD SCRATCH_DEV
-+mpD/dir SCRATCH_DEV
-+=3D=3D=3D=3D=3D=3D
-diff --git a/tests/generic/group b/tests/generic/group
-index e5d0c1da..7ceddfcd 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -588,3 +588,4 @@
- 583 auto quick encrypt
- 584 auto quick encrypt
- 585 auto rename
-+586 auto quick mount
---=20
-2.20.1
-
+Thanks!
+Eryu
+> ---
+> v2: don't try the touch if the mount fails
+> ---
+>  tests/generic/050              |   12 +++++++-----
+>  tests/generic/050.out.xfsquota |    5 ++---
+>  2 files changed, 9 insertions(+), 8 deletions(-)
+> 
+> diff --git a/tests/generic/050 b/tests/generic/050
+> index cf2b9381..7eabc7a7 100755
+> --- a/tests/generic/050
+> +++ b/tests/generic/050
+> @@ -58,9 +58,11 @@ blockdev --setro $SCRATCH_DEV
+>  # Mount it, and make sure we can't write to it, and we can unmount it again
+>  #
+>  echo "mounting read-only block device:"
+> -_try_scratch_mount 2>&1 | _filter_ro_mount
+> -echo "touching file on read-only filesystem (should fail)"
+> -touch $SCRATCH_MNT/foo 2>&1 | _filter_scratch
+> +_try_scratch_mount 2>&1 | _filter_ro_mount | _filter_scratch
+> +if [ "${PIPESTATUS[0]}" -eq 0 ]; then
+> +	echo "touching file on read-only filesystem (should fail)"
+> +	touch $SCRATCH_MNT/foo 2>&1 | _filter_scratch
+> +fi
+>  
+>  #
+>  # Apparently this used to be broken at some point:
+> @@ -92,7 +94,7 @@ blockdev --setro $SCRATCH_DEV
+>  # -o norecovery is used.
+>  #
+>  echo "mounting filesystem that needs recovery on a read-only device:"
+> -_try_scratch_mount 2>&1 | _filter_ro_mount
+> +_try_scratch_mount 2>&1 | _filter_ro_mount | _filter_scratch
+>  
+>  echo "unmounting read-only filesystem"
+>  _scratch_unmount 2>&1 | _filter_scratch | _filter_ending_dot
+> @@ -103,7 +105,7 @@ _scratch_unmount 2>&1 | _filter_scratch | _filter_ending_dot
+>  # data recovery hack.
+>  #
+>  echo "mounting filesystem with -o norecovery on a read-only device:"
+> -_try_scratch_mount -o norecovery 2>&1 | _filter_ro_mount
+> +_try_scratch_mount -o norecovery 2>&1 | _filter_ro_mount | _filter_scratch
+>  echo "unmounting read-only filesystem"
+>  _scratch_unmount 2>&1 | _filter_scratch | _filter_ending_dot
+>  
+> diff --git a/tests/generic/050.out.xfsquota b/tests/generic/050.out.xfsquota
+> index f204bd2f..35d7bd68 100644
+> --- a/tests/generic/050.out.xfsquota
+> +++ b/tests/generic/050.out.xfsquota
+> @@ -1,8 +1,7 @@
+>  QA output created by 050
+>  setting device read-only
+>  mounting read-only block device:
+> -mount: /mnt-scratch: permission denied
+> -touching file on read-only filesystem (should fail)
+> +mount: SCRATCH_MNT: permission denied
+>  unmounting read-only filesystem
+>  umount: SCRATCH_DEV: not mounted
+>  setting device read-write
+> @@ -17,7 +16,7 @@ mount: cannot mount device read-only
+>  unmounting read-only filesystem
+>  umount: SCRATCH_DEV: not mounted
+>  mounting filesystem with -o norecovery on a read-only device:
+> -mount: /mnt-scratch: permission denied
+> +mount: SCRATCH_MNT: permission denied
+>  unmounting read-only filesystem
+>  umount: SCRATCH_DEV: not mounted
+>  setting device read-write
