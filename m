@@ -5,389 +5,132 @@ X-Spam-Level:
 X-Spam-Status: No, score=-8.1 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
-	autolearn_force=no version=3.4.0
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5894BC33C8C
-	for <linux-fstests@archiver.kernel.org>; Sun,  1 Dec 2019 14:28:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 492DBC432C0
+	for <linux-fstests@archiver.kernel.org>; Sun,  1 Dec 2019 15:47:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 2EB8C20867
-	for <linux-fstests@archiver.kernel.org>; Sun,  1 Dec 2019 14:28:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1630320725
+	for <linux-fstests@archiver.kernel.org>; Sun,  1 Dec 2019 15:47:54 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Kt3Osl4o"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ejkJ/VH2"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727040AbfLAO2r (ORCPT
+        id S1727139AbfLAPrx (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 1 Dec 2019 09:28:47 -0500
-Received: from mail-pl1-f194.google.com ([209.85.214.194]:33919 "EHLO
-        mail-pl1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726489AbfLAO2q (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 1 Dec 2019 09:28:46 -0500
-Received: by mail-pl1-f194.google.com with SMTP id h13so15095403plr.1;
-        Sun, 01 Dec 2019 06:28:46 -0800 (PST)
+        Sun, 1 Dec 2019 10:47:53 -0500
+Received: from mail-pl1-f195.google.com ([209.85.214.195]:36341 "EHLO
+        mail-pl1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726393AbfLAPrx (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 1 Dec 2019 10:47:53 -0500
+Received: by mail-pl1-f195.google.com with SMTP id k20so2689848pls.3
+        for <fstests@vger.kernel.org>; Sun, 01 Dec 2019 07:47:53 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=date:from:to:cc:subject:message-id:references:mime-version
          :content-disposition:in-reply-to:user-agent;
-        bh=DMj83np5g2+v6kgUgDxubAg3d0vlBwqpjy1VMyVGu7A=;
-        b=Kt3Osl4o0wIyskQZ9a7hBTeSc/xYqxa76T90kLT8oj/lLOh02qdvzs4SqyZolE8ZDL
-         A9uAk8dRKPVQZDKxwnnvWN5fU6+9JJRL+/+rAEt76jycG+FPIMrmUeA1OgKcldeXcaVY
-         zgujFtV3Kj+3gnEtyo/gAj/xpZ/actfj6N4dg7keRYw7P63DzkrwmbbjRhgFvwiH5WHq
-         ih31GPYvxkxplyWZ7E/ThRoSF6CKUmWsVrlwCp/7Lcej0m3rpfCG0SxNCUqHxauAu+5s
-         x7unfXtYZ32Ejk7A0+hNS+nuuEDvMcvMifN6qjllMCrAKJDyJlsN++Y91mnKuu6J3N6g
-         IS9Q==
+        bh=OK62MqlnHq1gL+sAFHs3fO+8OWyNi2arv0skKKa25Bg=;
+        b=ejkJ/VH2TYLYBh2ixn7rbFWvWunh/y559yaO6/aphkGDljnyt8sYhdZLyuAVnoJO5f
+         qjqcOdOzJuPjKthtshl/IfMEjNFIG1u1Qfyhzapkeu1RnEL/D2DTVWY7r97lBUde+PBA
+         qpehPCVR+NdXc2y/+qWlKN4l6gqXJABUQxyA9f6//xaTzwXyMQPkdlZzS33omzOk5kGm
+         nIfPCHxgNyAHjJidciwhbPJsutVB4cGtrp2OJye+YBFY2OnlFtg/GSDeoB85BcuafoFB
+         DI6DLx2wQYrG20dco6ZmQz+4VhAYO2mJPd8dEPl2RnHamcELeOnYK39QZd8Xp7dAIMZh
+         eGjw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to:user-agent;
-        bh=DMj83np5g2+v6kgUgDxubAg3d0vlBwqpjy1VMyVGu7A=;
-        b=f3eCpAz8/KxDv8VCyqECvZgpWIsaYe19mnsezuTqPVBk1EncLhRvbXIgVY/EOnLWV+
-         S7Nzz4Vf17sYce/dk7nH2XbB9aHpGM02HOiYIg60r2Jvq+VH/qdYSCC3b+4/bQjiqtST
-         JKa2svTsqu6wj4qEiRyF8Dk1aeD1O9KASfJyYgbK1+swSUPc1zsyMTyJSoQO3GzJ3xRQ
-         m8C5BlSpqkuqjA7vH/4ghh+rLDB7uvh4mpZN2epfhx373bPJXZ6HaGndYl8Kxlgn0uHv
-         UO1j9PQ0BSi/cvmLPaIYEWCuixn59Hga4Xyj//aaAHnmZNfjbKIBKOICEvyT6QZmDV5h
-         fkpA==
-X-Gm-Message-State: APjAAAW6zN2N8TlFERPtDSkunza/J0d2nwr7FsfkDhnTXtHinHZNECN+
-        Eqw8cN/7Tau/d1hc4JrThtgBL+uz
-X-Google-Smtp-Source: APXvYqyKJ5AhlBkjVMLQrTzsbFJ+EZ5KUVeGDWQ8zrE4g3flZ68iKbcShms6KvJmPMPrVpKsrKQfuw==
-X-Received: by 2002:a17:90a:23a9:: with SMTP id g38mr30637473pje.128.1575210525852;
-        Sun, 01 Dec 2019 06:28:45 -0800 (PST)
+        bh=OK62MqlnHq1gL+sAFHs3fO+8OWyNi2arv0skKKa25Bg=;
+        b=GNzLLbPX5yvaFWKW4Tf9il3Ks9L5eseyiA0ruJVqeg7gkVb5phdqTE72P87W3KuPdk
+         DR0QCN1MXdN4/SmAizNy+GdTPqvretpf5gMTIeskPQ7nmi+/W/Ob2XBdq0Snuy/J6o7W
+         jgpLZa5UsdkYhq8dyvupylqOy/sjzLzVW+hgWCmf/BpprMsa8KM07VyQpjqaRvLxrlTN
+         tt16n/x+QYDrqO1WfzJA3ZzNgTeFbJ5ICPvw/T5Ofq+kGlx5jnpk3TkRTZDE1jQlVK7/
+         VbrSMftX3HR1/hrXeIhQveYQnnw8/Kx0pFLvmz1NrIcPh+OYuEOLFjUTI342frCtiqqj
+         5L/A==
+X-Gm-Message-State: APjAAAUwQvKpNpylMvsTD+A3fsTO58N+uypAOZWWRXdg3IJUtA4r6UWf
+        wj1dQLOahhoiA6a3QOxs8ZQ=
+X-Google-Smtp-Source: APXvYqwyhO2B9jBiaL5Tcu57/0kxihDs+xQ5vzDneleyxPgQt55429X/0rxUZQfvVnpTQg65JEcYrA==
+X-Received: by 2002:a17:902:a60c:: with SMTP id u12mr22578648plq.113.1575215272751;
+        Sun, 01 Dec 2019 07:47:52 -0800 (PST)
 Received: from localhost ([178.128.102.47])
-        by smtp.gmail.com with ESMTPSA id r10sm28681493pgn.68.2019.12.01.06.28.43
+        by smtp.gmail.com with ESMTPSA id a26sm7600254pfo.5.2019.12.01.07.47.51
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 01 Dec 2019 06:28:44 -0800 (PST)
-Date:   Sun, 1 Dec 2019 22:28:39 +0800
+        Sun, 01 Dec 2019 07:47:52 -0800 (PST)
+Date:   Sun, 1 Dec 2019 23:47:47 +0800
 From:   Eryu Guan <guaneryu@gmail.com>
-To:     "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc:     fstests@vger.kernel.org, xfs <linux-xfs@vger.kernel.org>
-Subject: Re: [PATCH] generic: test race between appending AIO DIO and
- fallocate
-Message-ID: <20191201142824.GI8664@desktop>
-References: <20191113024416.GH6235@magnolia>
+To:     Kusanagi Kouichi <slash@ac.auone-net.jp>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH] common/filter: Don't use strtonum
+Message-ID: <20191201154747.GJ8664@desktop>
+References: <20191129072108857.YEGH.25002.ppp.dion.ne.jp@dmta0003.auone-net.jp>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20191113024416.GH6235@magnolia>
+In-Reply-To: <20191129072108857.YEGH.25002.ppp.dion.ne.jp@dmta0003.auone-net.jp>
 User-Agent: Mutt/1.12.1 (2019-06-15)
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Nov 12, 2019 at 06:44:16PM -0800, Darrick J. Wong wrote:
-> From: Darrick J. Wong <darrick.wong@oracle.com>
+On Fri, Nov 29, 2019 at 04:21:08PM +0900, Kusanagi Kouichi wrote:
+> It's a gawk extension and not needed. Make tests pass with non-gawk.
 > 
-> Dave Chinner reports[1] that an appending AIO DIO write to the second
-> block of a zero-length file and an fallocate request to the first block
-> of the same file can race to set isize, with the user-visible end result
-> that the file size is set incorrectly to one block long.  Write a small
-> test to reproduce the results.
-> 
-> [1] https://lore.kernel.org/linux-xfs/20191029100342.GA41131@bfoster/T/
-> 
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> ---
->  .../aio-dio-append-write-fallocate-race.c          |  212 ++++++++++++++++++++
+> Signed-off-by: Kusanagi Kouichi <slash@ac.auone-net.jp>
 
-I added an entry in .gitignore for it.
-
->  tests/generic/722                                  |   43 ++++
->  tests/generic/722.out                              |    2 
->  tests/generic/group                                |    1 
->  4 files changed, 258 insertions(+)
->  create mode 100644 src/aio-dio-regress/aio-dio-append-write-fallocate-race.c
->  create mode 100755 tests/generic/722
->  create mode 100644 tests/generic/722.out
-> 
-> diff --git a/src/aio-dio-regress/aio-dio-append-write-fallocate-race.c b/src/aio-dio-regress/aio-dio-append-write-fallocate-race.c
-> new file mode 100644
-> index 00000000..091b047d
-> --- /dev/null
-> +++ b/src/aio-dio-regress/aio-dio-append-write-fallocate-race.c
-> @@ -0,0 +1,212 @@
-> +// SPDX-License-Identifier: GPL-2.0-or-newer
-> +/*
-> + * Copyright (c) 2019 Oracle.
-> + * All Rights Reserved.
-> + *
-> + * Race appending aio dio and fallocate to make sure we get the correct file
-> + * size afterwards.
-> + */
-> +#include <stdio.h>
-> +#include <pthread.h>
-> +#include <sys/types.h>
-> +#include <sys/stat.h>
-> +#include <fcntl.h>
-> +#include <unistd.h>
-> +#include <string.h>
-> +#include <errno.h>
-> +#include <libaio.h>
-> +#include <stdlib.h>
-> +#include <stdbool.h>
-> +#include <limits.h>
-> +
-> +static int fd;
-> +static int blocksize;
-> +
-> +static void *
-> +falloc_thread(
-> +	void		*p)
-> +{
-> +	int		ret;
-> +
-> +	ret = fallocate(fd, 0, 0, blocksize);
-> +	if (ret)
-> +		perror("falloc");
-> +
-> +	return NULL;
-> +}
-> +
-> +static int
-> +test(
-> +	const char	*fname,
-> +	unsigned int	iteration,
-> +	unsigned int	*passed)
-> +{
-> +	struct stat	sbuf;
-> +	pthread_t	thread;
-> +	io_context_t	ioctx = 0;
-> +	struct iocb	iocb;
-> +	struct iocb	*iocbp = &iocb;
-> +	struct io_event	event;
-> +	char		*buf;
-> +	bool		wait_thread = false;
-> +	int		ret;
-> +
-> +	/* Truncate file, allocate resources for doing IO. */
-> +	fd = open(fname, O_DIRECT | O_RDWR | O_TRUNC | O_CREAT, 0644);
-> +	if (fd < 0) {
-> +		perror(fname);
-> +		return -1;
-> +	}
-> +
-> +	ret = fstat(fd, &sbuf);
-> +	if (ret) {
-> +		perror(fname);
-> +		goto out;
-> +	}
-> +	blocksize = sbuf.st_blksize;
-> +
-> +	ret = posix_memalign((void **)&buf, blocksize, blocksize);
-> +	if (ret) {
-> +		errno = ret;
-> +		perror("buffer");
-> +		goto out;
-> +	}
-> +	memset(buf, 'X', blocksize);
-> +	memset(&event, 0, sizeof(event));
-> +
-> +	ret = io_queue_init(1, &ioctx);
-> +	if (ret) {
-> +		errno = -ret;
-> +		perror("io_queue_init");
-> +		goto out_buf;
-> +	}
-> +
-> +	/*
-> +	 * Set ourselves up to race fallocate(0..blocksize) with aio dio
-> +	 * pwrite(blocksize..blocksize * 2).  This /should/ give us a file
-> +	 * with length (2 * blocksize).
-> +	 */
-> +	io_prep_pwrite(&iocb, fd, buf, blocksize, blocksize);
-> +
-> +	ret = pthread_create(&thread, NULL, falloc_thread, NULL);
-> +	if (ret) {
-> +		errno = ret;
-> +		perror("pthread");
-> +		goto out_io;
-> +	}
-> +	wait_thread = true;
-> +
-> +	ret = io_submit(ioctx, 1, &iocbp);
-> +	if (ret != 1) {
-> +		errno = -ret;
-> +		perror("io_submit");
-> +		goto out_join;
-> +	}
-> +
-> +	ret = io_getevents(ioctx, 1, 1, &event, NULL);
-> +	if (ret != 1) {
-> +		errno = -ret;
-> +		perror("io_getevents");
-> +		goto out_join;
-> +	}
-> +
-> +	if (event.res < 0) {
-> +		errno = -event.res;
-> +		perror("io_event.res");
-> +		goto out_join;
-> +	}
-> +
-> +	if (event.res2 < 0) {
-> +		errno = -event.res2;
-> +		perror("io_event.res2");
-> +		goto out_join;
-> +	}
-> +
-> +	wait_thread = false;
-> +	ret = pthread_join(thread, NULL);
-> +	if (ret) {
-> +		errno = ret;
-> +		perror("join");
-> +		goto out_io;
-> +	}
-> +
-> +	/* Make sure we actually got a file of size (2 * blocksize). */
-> +	ret = fstat(fd, &sbuf);
-> +	if (ret) {
-> +		perror(fname);
-> +		goto out_buf;
-> +	}
-> +
-> +	if (sbuf.st_size != 2 * blocksize) {
-> +		fprintf(stderr, "[%u]: sbuf.st_size=%llu, expected %llu.\n",
-> +				iteration,
-> +				(unsigned long long)sbuf.st_size,
-> +				(unsigned long long)2 * blocksize);
-> +	} else {
-> +		printf("[%u]: passed.\n", iteration);
-> +		(*passed)++;
-> +	}
-> +
-> +out_join:
-> +	if (wait_thread) {
-> +		ret = pthread_join(thread, NULL);
-> +		if (ret) {
-> +			errno = ret;
-> +			perror("join");
-> +			goto out_io;
-> +		}
-> +	}
-> +out_io:
-> +	ret = io_queue_release(ioctx);
-> +	if (ret) {
-> +		errno = -ret;
-> +		perror("io_queue_release");
-> +	}
-> +
-> +out_buf:
-> +	free(buf);
-> +out:
-> +	ret = close(fd);
-> +	fd = -1;
-> +	if (ret) {
-> +		perror("close");
-> +		return -1;
-> +	}
-> +
-> +	return 0;
-> +}
-> +
-> +int main(int argc, char *argv[])
-> +{
-> +	int		ret;
-> +	long		l;
-> +	unsigned int	i;
-> +	unsigned int	passed = 0;
-> +
-> +	if (argc != 3) {
-> +		printf("Usage: %s filename iterations\n", argv[0]);
-> +		return 1;
-> +	}
-> +
-> +	errno = 0;
-> +	l = strtol(argv[2], NULL, 0);
-> +	if (errno) {
-> +		perror(argv[2]);
-> +		return 1;
-> +	}
-> +	if (l < 1 || l > UINT_MAX) {
-> +		fprintf(stderr, "%ld: must be between 1 and %u.\n",
-> +				l, UINT_MAX);
-> +		return 1;
-> +	}
-> +
-> +	for (i = 0; i < l; i++) {
-> +		ret = test(argv[1], i, &passed);
-> +		if (ret)
-> +			return 1;
-> +	}
-> +
-> +	printf("pass rate: %u/%u (%.2f%%)\n", passed, i, 100.0 * passed / i);
-> +
-> +	return 0;
-> +}
-> diff --git a/tests/generic/722 b/tests/generic/722
-> new file mode 100755
-> index 00000000..937abf36
-> --- /dev/null
-> +++ b/tests/generic/722
-> @@ -0,0 +1,43 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0-or-later
-> +# Copyright (c) 2019, Oracle and/or its affiliates.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 722
-> +#
-> +# Race an appending aio dio write to the second block of a file while
-> +# simultaneously fallocating to the first block.  Make sure that we end up
-> +# with a two-block file.
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1    # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.* $testfile
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +
-> +# real QA test starts here
-> +_supported_os Linux
-> +_supported_fs generic
-> +_require_aiodio "aio-dio-append-write-fallocate-race"
-> +_require_test
-
-Also added
-
-_require_xfs_io_command "falloc"
+I noticed that you sent another two patches that fix similar issue in
+another test. I think we could fold them into one patch that fixes all
+the strtonum problem.
 
 Thanks,
 Eryu
 
+> ---
+>  common/filter | 23 +++++++++++++----------
+>  1 file changed, 13 insertions(+), 10 deletions(-)
+> 
+> diff --git a/common/filter b/common/filter
+> index 2477f386..e02cc0b9 100644
+> --- a/common/filter
+> +++ b/common/filter
+> @@ -241,9 +241,9 @@ _filter_xfs_io_units_modified()
+>  		/wrote/ {
+>  			split($2, bytes, "/")
+>  
+> -			bytes_written = strtonum(bytes[1])
+> +			bytes_written = bytes[1]
+>  
+> -			offset = strtonum($NF)
+> +			offset = $NF
+>  
+>  			unit_start = offset / unit_size
+>  			unit_start = int(unit_start)
+> @@ -487,14 +487,17 @@ _filter_busy_mount()
+>  _filter_od()
+>  {
+>  	BLOCK_SIZE=$(_get_block_size $SCRATCH_MNT)
+> -	$AWK_PROG -v block_size=$BLOCK_SIZE '
+> -		/^[0-9]+/ {
+> -			offset = strtonum("0"$1);
+> -			$1 = sprintf("%o", offset / block_size);
+> -			print $0;
+> -		}
+> -		/\*/
+> -	'
+> +	while read line
+> +	do
+> +		if test "$line" = '*'
+> +		then
+> +			printf '*\n'
+> +			continue
+> +		fi
 > +
-> +rm -f $seqres.full
-> +
-> +testfile=$TEST_DIR/test-$seq
-> +$AIO_TEST $testfile 100 >> $seqres.full
-> +
-> +echo Silence is golden.
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/722.out b/tests/generic/722.out
-> new file mode 100644
-> index 00000000..8621a87d
-> --- /dev/null
-> +++ b/tests/generic/722.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 722
-> +Silence is golden.
-> diff --git a/tests/generic/group b/tests/generic/group
-> index e5d0c1da..308f86f2 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -588,3 +588,4 @@
->  583 auto quick encrypt
->  584 auto quick encrypt
->  585 auto rename
-> +722 auto quick rw falloc
+> +		offset="${line%% *}"
+> +		printf '%o%s\n' $((offset / BLOCK_SIZE)) "${line#$offset}"
+> +	done
+>  }
+>  
+>  # Remove quotes from failed mknod calls. Starting with Coreutils v8.25,
+> -- 
+> 2.24.0
+> 
