@@ -2,455 +2,168 @@ Return-Path: <SRS0=WWQL=ZY=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.3 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 78343C432C0
-	for <linux-fstests@archiver.kernel.org>; Mon,  2 Dec 2019 23:02:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 281E0C432C0
+	for <linux-fstests@archiver.kernel.org>; Mon,  2 Dec 2019 23:21:32 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 3CCAD20718
-	for <linux-fstests@archiver.kernel.org>; Mon,  2 Dec 2019 23:02:35 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1575327755;
-	bh=wNdoKVgoQv7bgfb5cPcZUhuM99zL7NWhekH6Fv6wKDw=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=SZvTZ5HmwlwLguCLvsl9lh2liGnxMoo5sNOv1NUSYZZhhPKJar4ZnuDwDurttUJqF
-	 N5qF5s7vE4xZ7Jq5hqOsg2mGSCr6b1ruYQnRO+zMMs2Jn8u+XyAv+Mjt+ukbrdwQG3
-	 4rjVXhRdSSxD1ikxeERJnh48k0vUF4EAPj+xA3q8=
+	by mail.kernel.org (Postfix) with ESMTP id EC94020718
+	for <linux-fstests@archiver.kernel.org>; Mon,  2 Dec 2019 23:21:31 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="anbDr0yj"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725903AbfLBXCe (ORCPT
+        id S1726707AbfLBXVb (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 2 Dec 2019 18:02:34 -0500
-Received: from mail.kernel.org ([198.145.29.99]:59512 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725853AbfLBXCe (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 2 Dec 2019 18:02:34 -0500
-Received: from ebiggers-linuxstation.mtv.corp.google.com (unknown [104.132.1.77])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id A90FF207DD;
-        Mon,  2 Dec 2019 23:02:32 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1575327752;
-        bh=wNdoKVgoQv7bgfb5cPcZUhuM99zL7NWhekH6Fv6wKDw=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=sA/XVrjBISF+N2VfFw6dYO84s2MH2D4l1kwZuZSIFpbNHCF/NcnNz/bTBRlZD7MGQ
-         vHxHlnSdVuAepipkF3ZKmixFNqkaNipNHrUWJGyGxVZWDS1lVAuVZz09610XwuIRAo
-         vpGDJlgMGs7vRmkeEtwoD0sEipSIQYm2TQbNmpug=
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     fstests@vger.kernel.org
-Cc:     linux-fscrypt@vger.kernel.org, Satya Tangirala <satyat@google.com>
-Subject: [PATCH v2 4/5] common/encrypt: support verifying ciphertext of IV_INO_LBLK_64 policies
-Date:   Mon,  2 Dec 2019 15:01:54 -0800
-Message-Id: <20191202230155.99071-5-ebiggers@kernel.org>
-X-Mailer: git-send-email 2.24.0.393.g34dc348eaf-goog
-In-Reply-To: <20191202230155.99071-1-ebiggers@kernel.org>
-References: <20191202230155.99071-1-ebiggers@kernel.org>
+        Mon, 2 Dec 2019 18:21:31 -0500
+Received: from userp2120.oracle.com ([156.151.31.85]:36266 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726799AbfLBXVb (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 2 Dec 2019 18:21:31 -0500
+Received: from pps.filterd (userp2120.oracle.com [127.0.0.1])
+        by userp2120.oracle.com (8.16.0.27/8.16.0.27) with SMTP id xB2NEBGR121973;
+        Mon, 2 Dec 2019 23:21:25 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
+ : subject : message-id : references : mime-version : content-type :
+ in-reply-to; s=corp-2019-08-05;
+ bh=DyjY//NAfAFR0a7JlJJAo0+G6f42HFX31NW9PDdA5+w=;
+ b=anbDr0yj8PXm9TjJ0bdJZxmNxpnSuCavGhKgxksqEBMkjqBE35ty5sVavTEHRes+PwNj
+ OesgmCNYoaXILnqAPDwBhJH31BUHWDa/1YHje7XGHneSJ8if2D4IBhiQqQwezkpzg/im
+ ZJQburHA7um4WbhiLA6yHjUEK8K3OnQKYgTDwArmJPgRmp5ObHcg+nQkJXDey+9aZ/9r
+ t0Pn/7bMAz1iYqmITlhYMU1FrTL+m8DV8RL3/cuKHGMVO8FWWFAygCNBMzGZmampPIw4
+ vJ3mhqkM0yvQnOiICLpiTTwqNZ/SDje/FXtSwbO2KXckuYvUUfqX56o95Sv5TMekhZz2 Ug== 
+Received: from aserp3030.oracle.com (aserp3030.oracle.com [141.146.126.71])
+        by userp2120.oracle.com with ESMTP id 2wkh2r3cjy-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Mon, 02 Dec 2019 23:21:24 +0000
+Received: from pps.filterd (aserp3030.oracle.com [127.0.0.1])
+        by aserp3030.oracle.com (8.16.0.27/8.16.0.27) with SMTP id xB2NE8YK131850;
+        Mon, 2 Dec 2019 23:21:24 GMT
+Received: from aserv0121.oracle.com (aserv0121.oracle.com [141.146.126.235])
+        by aserp3030.oracle.com with ESMTP id 2wn8k1acaq-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Mon, 02 Dec 2019 23:21:23 +0000
+Received: from abhmp0006.oracle.com (abhmp0006.oracle.com [141.146.116.12])
+        by aserv0121.oracle.com (8.14.4/8.13.8) with ESMTP id xB2NLNQD002552;
+        Mon, 2 Dec 2019 23:21:23 GMT
+Received: from localhost (/10.159.148.223)
+        by default (Oracle Beehive Gateway v4.0)
+        with ESMTP ; Mon, 02 Dec 2019 15:21:22 -0800
+Date:   Mon, 2 Dec 2019 15:21:21 -0800
+From:   "Darrick J. Wong" <darrick.wong@oracle.com>
+To:     Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH] xfs/148: sort and filter attribute list output
+Message-ID: <20191202232121.GD7339@magnolia>
+References: <1574925045-7334-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1574925045-7334-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
+User-Agent: Mutt/1.9.4 (2018-02-28)
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9459 signatures=668685
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=0 malwarescore=0
+ phishscore=0 bulkscore=0 spamscore=0 mlxscore=0 mlxlogscore=999
+ adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.0.1-1911140001 definitions=main-1912020199
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9459 signatures=668685
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 priorityscore=1501 malwarescore=0
+ suspectscore=0 phishscore=0 bulkscore=0 spamscore=0 clxscore=1015
+ lowpriorityscore=0 mlxscore=0 impostorscore=0 mlxlogscore=999 adultscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.0.1-1911140001
+ definitions=main-1912020199
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Eric Biggers <ebiggers@google.com>
+On Thu, Nov 28, 2019 at 03:10:45PM +0800, Yang Xu wrote:
+> When I backport fixed patches from Darrick tighten-verifiers tree, this case 
 
-Update _verify_ciphertext_for_encryption_policy() to support encryption
-policies with the IV_INO_LBLK_64 flag set.
+NAK, why are you backporting out of my development tree and not upstream?
+What are you even backporting, seeing as the patches for this are in 5.5
+and Linus hasn't even pulled that yet??
 
-This flag modifies the encryption to include the inode number in the IVs
-and to use a key derived from the tuple [master_key, fs_uuid, mode_num].
-Since the file nonce is *not* included in this key derivation, multiple
-files can use the same key.
+Also, why are you sending a patch to fstests that is (a) barely a week
+old, (b) doesn't actually list me as the author, and (c) I myself
+haven't even sent to fstests yet?
 
-This flag is supported by v2 encryption policies only -- not by v1.
+> also fails. As below:
+> -----------------------------------------------------------
+> "diff test/xfs/148.out result/xfs/148.out.bad
+> 7,8d6
+> < Attribute "a_something" has a 3 byte value for TEST_DIR/mount-148/testfile
+> < Attribute "a_too_many_beans" has a 3 byte value for TEST_DIR/mount-148/testfile
+> 9a8
+> > Attribute "a_too_many_beans" has a 3 byte value for TEST_DIR/mount-148/testfile
+> 10a10,11
+> > Attribute "a_something" has a 3 byte value for TEST_DIR/mount-148/testfile
+> > Attribute "selinux" has a 37 byte value for TEST_DIR/mount-148/testfile
+> 49,50c50,51
+> < Attribute "a_are_bad/for_you" had a 3 byte value for TEST_DIR/mount-148/testfile:
+> < heh
+> > attr_get: No data available
+> > Could not get "a_are_bad/for_you" for TEST_DIR/mount-148/testfile"
+> -------------------------------------------------------------
+> We should sort attribute list output and filter selinux. Also "a_are_bad/for_you"
+> doesn't exist, we should correct it in output.
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> Signed-off-by: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+> ---
+>  tests/xfs/148     | 2 +-
+>  tests/xfs/148.out | 8 ++++----
+>  2 files changed, 5 insertions(+), 5 deletions(-)
+> 
+> diff --git a/tests/xfs/148 b/tests/xfs/148
+> index 42cfdab0..06862faa 100755
+> --- a/tests/xfs/148
+> +++ b/tests/xfs/148
+> @@ -76,7 +76,7 @@ test_names+=("too_many" "are_bad/for_you")
+>  
+>  access_stuff() {
+>  	ls $testdir
+> -	$ATTR_PROG -l $testfile
+> +	$ATTR_PROG -l $testfile | grep "a_" | sort
+>  
+>  	for name in "${test_names[@]}"; do
+>  		ls "$testdir/f_$name"
+> diff --git a/tests/xfs/148.out b/tests/xfs/148.out
+> index c301ecb6..ab3fc25b 100644
+> --- a/tests/xfs/148.out
+> +++ b/tests/xfs/148.out
+> @@ -4,10 +4,10 @@ f_another
+>  f_are_bad_for_you
+>  f_something
+>  f_too_many_beans
+> +Attribute "a_another" has a 3 byte value for TEST_DIR/mount-148/testfile
+> +Attribute "a_are_bad_for_you" has a 3 byte value for TEST_DIR/mount-148/testfile
+>  Attribute "a_something" has a 3 byte value for TEST_DIR/mount-148/testfile
+>  Attribute "a_too_many_beans" has a 3 byte value for TEST_DIR/mount-148/testfile
+> -Attribute "a_are_bad_for_you" has a 3 byte value for TEST_DIR/mount-148/testfile
+> -Attribute "a_another" has a 3 byte value for TEST_DIR/mount-148/testfile
+>  TEST_DIR/mount-148/testdir/f_something
+>  Attribute "a_something" had a 3 byte value for TEST_DIR/mount-148/testfile:
+>  heh
+> @@ -46,5 +46,5 @@ ls: cannot access 'TEST_DIR/mount-148/testdir/f_too_many': No such file or direc
+>  attr_get: No data available
+>  Could not get "a_too_many" for TEST_DIR/mount-148/testfile
+>  ls: cannot access 'TEST_DIR/mount-148/testdir/f_are_bad/for_you': No such file or directory
+> -Attribute "a_are_bad/for_you" had a 3 byte value for TEST_DIR/mount-148/testfile:
+> -heh
+> +attr_get: No data available
+> +Could not get "a_are_bad/for_you" for TEST_DIR/mount-148/testfile
 
-Signed-off-by: Eric Biggers <ebiggers@google.com>
----
- common/encrypt           | 100 +++++++++++++++++++++++++++++++--------
- src/fscrypt-crypt-util.c |  67 ++++++++++++++++++++++++--
- 2 files changed, 144 insertions(+), 23 deletions(-)
+Huh?  Why???
 
-diff --git a/common/encrypt b/common/encrypt
-index b967c65a..2e9908ad 100644
---- a/common/encrypt
-+++ b/common/encrypt
-@@ -6,7 +6,7 @@
- 
- #
- # _require_scratch_encryption [-c CONTENTS_MODE] [-n FILENAMES_MODE]
--#			      [-v POLICY_VERSION]
-+#			      [-f POLICY_FLAGS] [-v POLICY_VERSION]
- #
- # Require encryption support on the scratch device.
- #
-@@ -69,15 +69,20 @@ _require_encryption_policy_support()
- 	local mnt=$1
- 	local dir=$mnt/tmpdir
- 	local set_encpolicy_args=""
-+	local policy_flags=0
- 	local policy_version=1
- 	local c
- 
- 	OPTIND=2
--	while getopts "c:n:v:" c; do
-+	while getopts "c:n:f:v:" c; do
- 		case $c in
- 		c|n)
- 			set_encpolicy_args+=" -$c $OPTARG"
- 			;;
-+		f)
-+			set_encpolicy_args+=" -$c $OPTARG"
-+			policy_flags=$OPTARG
-+			;;
- 		v)
- 			set_encpolicy_args+=" -$c $OPTARG"
- 			policy_version=$OPTARG
-@@ -92,6 +97,12 @@ _require_encryption_policy_support()
- 	echo "Checking whether kernel supports encryption policy: $set_encpolicy_args" \
- 		>> $seqres.full
- 
-+	if (( policy_flags & FSCRYPT_POLICY_FLAG_IV_INO_LBLK_64 )); then
-+		_scratch_unmount
-+		_scratch_mkfs_stable_inodes_encrypted &>> $seqres.full
-+		_scratch_mount
-+	fi
-+
- 	mkdir $dir
- 	if (( policy_version > 1 )); then
- 		_require_xfs_io_command "get_encpolicy" "-t"
-@@ -159,6 +170,23 @@ _scratch_mkfs_sized_encrypted()
- 	esac
- }
- 
-+# Like _scratch_mkfs_encrypted(), but add -O stable_inodes if applicable for the
-+# filesystem type.  This is necessary for using encryption policies that include
-+# the inode number in the IVs, e.g. policies with the IV_INO_LBLK_64 flag set.
-+_scratch_mkfs_stable_inodes_encrypted()
-+{
-+	case $FSTYP in
-+	ext4)
-+		if ! _scratch_mkfs -O encrypt -O stable_inodes; then
-+			_notrun "-O stable_inodes is not supported"
-+		fi
-+		;;
-+	*)
-+		_scratch_mkfs_encrypted
-+		;;
-+	esac
-+}
-+
- # Give the invoking shell a new session keyring.  This makes any keys we add to
- # the session keyring scoped to the lifetime of the test script.
- _new_session_keyring()
-@@ -568,7 +596,8 @@ _do_verify_ciphertext_for_encryption_policy()
- 	local set_encpolicy_args=$4
- 	local keyspec=$5
- 	local raw_key_hex=$6
--	local crypt_cmd="$here/src/fscrypt-crypt-util $7"
-+	local crypt_contents_cmd="$here/src/fscrypt-crypt-util $7"
-+	local crypt_filename_cmd="$here/src/fscrypt-crypt-util $8"
- 
- 	local blocksize=$(_get_block_size $SCRATCH_MNT)
- 	local test_contents_files=()
-@@ -626,14 +655,15 @@ _do_verify_ciphertext_for_encryption_policy()
- 		read -r src inode blocklist <<< "$f"
- 		nonce=$(_get_encryption_nonce $SCRATCH_DEV $inode)
- 		_dump_ciphertext_blocks $SCRATCH_DEV $blocklist > $tmp.actual_contents
--		$crypt_cmd $contents_encryption_mode $raw_key_hex \
-+		$crypt_contents_cmd $contents_encryption_mode $raw_key_hex \
- 			--file-nonce=$nonce --block-size=$blocksize \
--			< $src > $tmp.expected_contents
-+			--inode-number=$inode < $src > $tmp.expected_contents
- 		if ! cmp $tmp.expected_contents $tmp.actual_contents; then
- 			_fail "Expected encrypted contents != actual encrypted contents.  File: $f"
- 		fi
--		$crypt_cmd $contents_encryption_mode $raw_key_hex --decrypt \
--			--file-nonce=$nonce --block-size=$blocksize \
-+		$crypt_contents_cmd $contents_encryption_mode $raw_key_hex \
-+			--decrypt --file-nonce=$nonce --block-size=$blocksize \
-+			--inode-number=$inode \
- 			< $tmp.actual_contents > $tmp.decrypted_contents
- 		if ! cmp $src $tmp.decrypted_contents; then
- 			_fail "Contents decryption sanity check failed.  File: $f"
-@@ -647,16 +677,17 @@ _do_verify_ciphertext_for_encryption_policy()
- 		_get_ciphertext_filename $SCRATCH_DEV $inode $dir_inode \
- 			> $tmp.actual_name
- 		echo -n "$name" | \
--			$crypt_cmd $filenames_encryption_mode $raw_key_hex \
--			--file-nonce=$nonce --padding=$padding \
--			--block-size=255 > $tmp.expected_name
-+			$crypt_filename_cmd $filenames_encryption_mode \
-+			$raw_key_hex --file-nonce=$nonce --padding=$padding \
-+			--block-size=255 --inode-number=$dir_inode \
-+			> $tmp.expected_name
- 		if ! cmp $tmp.expected_name $tmp.actual_name; then
- 			_fail "Expected encrypted filename != actual encrypted filename.  File: $f"
- 		fi
--		$crypt_cmd $filenames_encryption_mode $raw_key_hex --decrypt \
--			--file-nonce=$nonce --padding=$padding \
--			--block-size=255 < $tmp.actual_name \
--			> $tmp.decrypted_name
-+		$crypt_filename_cmd $filenames_encryption_mode $raw_key_hex \
-+			--decrypt --file-nonce=$nonce --padding=$padding \
-+			--block-size=255 --inode-number=$dir_inode \
-+			< $tmp.actual_name > $tmp.decrypted_name
- 		decrypted_name=$(tr -d '\0' < $tmp.decrypted_name)
- 		if [ "$name" != "$decrypted_name" ]; then
- 			_fail "Filename decryption sanity check failed ($name != $decrypted_name).  File: $f"
-@@ -673,6 +704,7 @@ FSCRYPT_MODE_AES_128_CTS=6
- FSCRYPT_MODE_ADIANTUM=9
- 
- FSCRYPT_POLICY_FLAG_DIRECT_KEY=0x04
-+FSCRYPT_POLICY_FLAG_IV_INO_LBLK_64=0x08
- 
- _fscrypt_mode_name_to_num()
- {
-@@ -692,8 +724,13 @@ _fscrypt_mode_name_to_num()
- # policy of the specified type is used.
- #
- # The first two parameters are the contents and filenames encryption modes to
--# test.  Optionally, also specify 'direct' to test the DIRECT_KEY flag, and/or
--# 'v2' to test v2 policies.
-+# test.  The following optional parameters are also accepted to further modify
-+# the type of encryption policy that is tested:
-+#
-+#	'v2':			test a v2 encryption policy
-+#	'direct':		test the DIRECT_KEY policy flag
-+#	'iv_ino_lblk_64':	test the IV_INO_LBLK_64 policy flag
-+#
- _verify_ciphertext_for_encryption_policy()
- {
- 	local contents_encryption_mode=$1
-@@ -703,6 +740,8 @@ _verify_ciphertext_for_encryption_policy()
- 	local policy_flags=0
- 	local set_encpolicy_args=""
- 	local crypt_util_args=""
-+	local crypt_util_contents_args=""
-+	local crypt_util_filename_args=""
- 
- 	shift 2
- 	for opt; do
-@@ -717,6 +756,9 @@ _verify_ciphertext_for_encryption_policy()
- 			fi
- 			(( policy_flags |= FSCRYPT_POLICY_FLAG_DIRECT_KEY ))
- 			;;
-+		iv_ino_lblk_64)
-+			(( policy_flags |= FSCRYPT_POLICY_FLAG_IV_INO_LBLK_64 ))
-+			;;
- 		*)
- 			_fail "Unknown option '$opt' passed to ${FUNCNAME[0]}"
- 			;;
-@@ -732,9 +774,19 @@ _verify_ciphertext_for_encryption_policy()
- 		set_encpolicy_args+=" -v 2"
- 		crypt_util_args+=" --kdf=HKDF-SHA512"
- 		if (( policy_flags & FSCRYPT_POLICY_FLAG_DIRECT_KEY )); then
-+			if (( policy_flags & FSCRYPT_POLICY_FLAG_IV_INO_LBLK_64 )); then
-+				_fail "'direct' and 'iv_ino_lblk_64' options are mutually exclusive"
-+			fi
- 			crypt_util_args+=" --mode-num=$contents_mode_num"
-+		elif (( policy_flags & FSCRYPT_POLICY_FLAG_IV_INO_LBLK_64 )); then
-+			crypt_util_args+=" --iv-ino-lblk-64"
-+			crypt_util_contents_args+=" --mode-num=$contents_mode_num"
-+			crypt_util_filename_args+=" --mode-num=$filenames_mode_num"
- 		fi
- 	else
-+		if (( policy_flags & ~FSCRYPT_POLICY_FLAG_DIRECT_KEY )); then
-+			_fail "unsupported flags for v1 policy: $policy_flags"
-+		fi
- 		if (( policy_flags & FSCRYPT_POLICY_FLAG_DIRECT_KEY )); then
- 			crypt_util_args+=" --kdf=none"
- 		else
-@@ -743,7 +795,7 @@ _verify_ciphertext_for_encryption_policy()
- 	fi
- 	set_encpolicy_args=${set_encpolicy_args# }
- 
--	_require_scratch_encryption $set_encpolicy_args
-+	_require_scratch_encryption $set_encpolicy_args -f $policy_flags
- 	_require_test_program "fscrypt-crypt-util"
- 	_require_xfs_io_command "fiemap"
- 	_require_get_encryption_nonce_support
-@@ -753,9 +805,18 @@ _verify_ciphertext_for_encryption_policy()
- 	fi
- 
- 	echo "Creating encryption-capable filesystem" >> $seqres.full
--	_scratch_mkfs_encrypted &>> $seqres.full
-+	if (( policy_flags & FSCRYPT_POLICY_FLAG_IV_INO_LBLK_64 )); then
-+		_scratch_mkfs_stable_inodes_encrypted &>> $seqres.full
-+	else
-+		_scratch_mkfs_encrypted &>> $seqres.full
-+	fi
- 	_scratch_mount
- 
-+	crypt_util_args+=" --fs-uuid=$(blkid -s UUID -o value $SCRATCH_DEV | tr -d -)"
-+
-+	crypt_util_contents_args+="$crypt_util_args"
-+	crypt_util_filename_args+="$crypt_util_args"
-+
- 	echo "Generating encryption key" >> $seqres.full
- 	local raw_key=$(_generate_raw_encryption_key)
- 	if (( policy_version > 1 )); then
-@@ -781,5 +842,6 @@ _verify_ciphertext_for_encryption_policy()
- 		"$set_encpolicy_args" \
- 		"$keyspec" \
- 		"$raw_key_hex" \
--		"$crypt_util_args"
-+		"$crypt_util_contents_args" \
-+		"$crypt_util_filename_args"
- }
-diff --git a/src/fscrypt-crypt-util.c b/src/fscrypt-crypt-util.c
-index 30f5e585..1bf8f95c 100644
---- a/src/fscrypt-crypt-util.c
-+++ b/src/fscrypt-crypt-util.c
-@@ -62,7 +62,15 @@ static void usage(FILE *fp)
- "                                Default: 4096 bytes\n"
- "  --decrypt                   Decrypt instead of encrypt\n"
- "  --file-nonce=NONCE          File's nonce as a 32-character hex string\n"
-+"  --fs-uuid=UUID              The filesystem UUID as a 32-character hex string.\n"
-+"                                Only required for --iv-ino-lblk-64.\n"
- "  --help                      Show this help\n"
-+"  --inode-number=INUM         The file's inode number.  Only required for\n"
-+"                                --iv-ino-lblk-64.\n"
-+"  --iv-ino-lblk-64            Use the format where the IVs include the inode\n"
-+"                                number and the same key is shared across files.\n"
-+"                                Requires --kdf=HKDF-SHA512, --fs-uuid,\n"
-+"                                --inode-number, and --mode-num.\n"
- "  --kdf=KDF                   Key derivation function to use: AES-128-ECB,\n"
- "                                HKDF-SHA512, or none.  Default: none\n"
- "  --mode-num=NUM              Derive per-mode key using mode number NUM\n"
-@@ -1576,6 +1584,7 @@ static void test_adiantum(void)
-  *----------------------------------------------------------------------------*/
- 
- #define FILE_NONCE_SIZE		16
-+#define UUID_SIZE		16
- #define MAX_KEY_SIZE		64
- 
- static const struct fscrypt_cipher {
-@@ -1694,6 +1703,18 @@ static u8 parse_mode_number(const char *arg)
- 	return num;
- }
- 
-+static u32 parse_inode_number(const char *arg)
-+{
-+	char *tmp;
-+	unsigned long long num = strtoull(arg, &tmp, 10);
-+
-+	if (num <= 0 || *tmp)
-+		die("Invalid inode number: %s", arg);
-+	if ((u32)num != num)
-+		die("Inode number %s is too large; must be 32-bit", arg);
-+	return num;
-+}
-+
- struct key_and_iv_params {
- 	u8 master_key[MAX_KEY_SIZE];
- 	int master_key_size;
-@@ -1701,11 +1722,16 @@ struct key_and_iv_params {
- 	u8 mode_num;
- 	u8 file_nonce[FILE_NONCE_SIZE];
- 	bool file_nonce_specified;
-+	bool iv_ino_lblk_64;
-+	u32 inode_number;
-+	u8 fs_uuid[UUID_SIZE];
-+	bool fs_uuid_specified;
- };
- 
- #define HKDF_CONTEXT_KEY_IDENTIFIER	1
- #define HKDF_CONTEXT_PER_FILE_KEY	2
--#define HKDF_CONTEXT_PER_MODE_KEY	3
-+#define HKDF_CONTEXT_DIRECT_KEY		3
-+#define HKDF_CONTEXT_IV_INO_LBLK_64_KEY	4
- 
- /*
-  * Get the key and starting IV with which the encryption will actually be done.
-@@ -1718,7 +1744,7 @@ static void get_key_and_iv(const struct key_and_iv_params *params,
- {
- 	bool file_nonce_in_iv = false;
- 	struct aes_key aes_key;
--	u8 info[8 + 1 + FILE_NONCE_SIZE] = "fscrypt";
-+	u8 info[8 + 1 + 1 + UUID_SIZE] = "fscrypt";
- 	size_t infolen = 8;
- 	size_t i;
- 
-@@ -1726,6 +1752,9 @@ static void get_key_and_iv(const struct key_and_iv_params *params,
- 
- 	memset(iv, 0, sizeof(*iv));
- 
-+	if (params->iv_ino_lblk_64 && params->kdf != KDF_HKDF_SHA512)
-+		die("--iv-ino-lblk-64 requires --kdf=HKDF-SHA512");
-+
- 	switch (params->kdf) {
- 	case KDF_NONE:
- 		if (params->mode_num != 0)
-@@ -1746,8 +1775,20 @@ static void get_key_and_iv(const struct key_and_iv_params *params,
- 				    &real_key[i]);
- 		break;
- 	case KDF_HKDF_SHA512:
--		if (params->mode_num != 0) {
--			info[infolen++] = HKDF_CONTEXT_PER_MODE_KEY;
-+		if (params->iv_ino_lblk_64) {
-+			if (!params->fs_uuid_specified)
-+				die("--iv-ino-lblk-64 requires --fs-uuid");
-+			if (params->inode_number == 0)
-+				die("--iv-ino-lblk-64 requires --inode-number");
-+			if (params->mode_num == 0)
-+				die("--iv-ino-lblk-64 requires --mode-num");
-+			info[infolen++] = HKDF_CONTEXT_IV_INO_LBLK_64_KEY;
-+			info[infolen++] = params->mode_num;
-+			memcpy(&info[infolen], params->fs_uuid, UUID_SIZE);
-+			infolen += UUID_SIZE;
-+			put_unaligned_le32(params->inode_number, &iv->bytes[4]);
-+		} else if (params->mode_num != 0) {
-+			info[infolen++] = HKDF_CONTEXT_DIRECT_KEY;
- 			info[infolen++] = params->mode_num;
- 			file_nonce_in_iv = true;
- 		} else if (params->file_nonce_specified) {
-@@ -1773,7 +1814,10 @@ enum {
- 	OPT_BLOCK_SIZE,
- 	OPT_DECRYPT,
- 	OPT_FILE_NONCE,
-+	OPT_FS_UUID,
- 	OPT_HELP,
-+	OPT_INODE_NUMBER,
-+	OPT_IV_INO_LBLK_64,
- 	OPT_KDF,
- 	OPT_MODE_NUM,
- 	OPT_PADDING,
-@@ -1783,7 +1827,10 @@ static const struct option longopts[] = {
- 	{ "block-size",      required_argument, NULL, OPT_BLOCK_SIZE },
- 	{ "decrypt",         no_argument,       NULL, OPT_DECRYPT },
- 	{ "file-nonce",      required_argument, NULL, OPT_FILE_NONCE },
-+	{ "fs-uuid",         required_argument, NULL, OPT_FS_UUID },
- 	{ "help",            no_argument,       NULL, OPT_HELP },
-+	{ "inode-number",    required_argument, NULL, OPT_INODE_NUMBER },
-+	{ "iv-ino-lblk-64",  no_argument,       NULL, OPT_IV_INO_LBLK_64 },
- 	{ "kdf",             required_argument, NULL, OPT_KDF },
- 	{ "mode-num",        required_argument, NULL, OPT_MODE_NUM },
- 	{ "padding",         required_argument, NULL, OPT_PADDING },
-@@ -1831,9 +1878,21 @@ int main(int argc, char *argv[])
- 				die("Invalid file nonce: %s", optarg);
- 			params.file_nonce_specified = true;
- 			break;
-+		case OPT_FS_UUID:
-+			if (hex2bin(optarg, params.fs_uuid, UUID_SIZE)
-+			    != UUID_SIZE)
-+				die("Invalid filesystem UUID: %s", optarg);
-+			params.fs_uuid_specified = true;
-+			break;
- 		case OPT_HELP:
- 			usage(stdout);
- 			return 0;
-+		case OPT_INODE_NUMBER:
-+			params.inode_number = parse_inode_number(optarg);
-+			break;
-+		case OPT_IV_INO_LBLK_64:
-+			params.iv_ino_lblk_64 = true;
-+			break;
- 		case OPT_KDF:
- 			params.kdf = parse_kdf_algorithm(optarg);
- 			break;
--- 
-2.24.0.393.g34dc348eaf-goog
+NAK NAK NAK
 
+--D
+
+> -- 
+> 2.18.0
+> 
+> 
+> 
