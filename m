@@ -2,404 +2,207 @@ Return-Path: <SRS0=WWQL=ZY=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.3 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.2 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 90D8FC432C0
-	for <linux-fstests@archiver.kernel.org>; Mon,  2 Dec 2019 16:28:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EB92BC432C0
+	for <linux-fstests@archiver.kernel.org>; Mon,  2 Dec 2019 19:24:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 58B9420748
-	for <linux-fstests@archiver.kernel.org>; Mon,  2 Dec 2019 16:28:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B7B8F20833
+	for <linux-fstests@archiver.kernel.org>; Mon,  2 Dec 2019 19:24:27 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="An3DRfqW"
+	dkim=pass (2048-bit key) header.d=osandov-com.20150623.gappssmtp.com header.i=@osandov-com.20150623.gappssmtp.com header.b="Oaa2Ww02"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727490AbfLBQ2z (ORCPT
+        id S1728002AbfLBTY1 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 2 Dec 2019 11:28:55 -0500
-Received: from userp2120.oracle.com ([156.151.31.85]:35798 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727431AbfLBQ2y (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 2 Dec 2019 11:28:54 -0500
-Received: from pps.filterd (userp2120.oracle.com [127.0.0.1])
-        by userp2120.oracle.com (8.16.0.27/8.16.0.27) with SMTP id xB2GJZW4162797;
-        Mon, 2 Dec 2019 16:28:52 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
- : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=corp-2019-08-05;
- bh=4kQqpR9zCdGlnp8oXL5mTlyg+DDZaH3Xv89tyZCWovY=;
- b=An3DRfqWN8dVpAvfEFzP9i8QaxX8PlS+OvOeZvxig2vigl8BEcrB5gNmU8mA/1vY8o1/
- sZ8vnM18iQiQxNj/upqPqUWlR8FsJCmUlUr6JxkOWv8LsAEH2WAjSYvlG6WiKrN8BRyW
- 1/rHlrdmRwgiigJ49YluBVgOA/krNwc4IPduvUAqABG2VbYrvTG5vWlZzRVKDGHFaHIp
- zy937mMaK0TdanVKv3J4EdDSX2fWfuzlLQlnFzlifE4sT6GF/NGvEEKBMD41omEyvIgl
- wqTFJCPDzmbXP0zfoeUhd+PlvvS5iGYEuwdN9JobbNDSO55UtMU1zlOU1dO+z0zfymEx xQ== 
-Received: from userp3030.oracle.com (userp3030.oracle.com [156.151.31.80])
-        by userp2120.oracle.com with ESMTP id 2wkh2r13hn-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Mon, 02 Dec 2019 16:28:52 +0000
-Received: from pps.filterd (userp3030.oracle.com [127.0.0.1])
-        by userp3030.oracle.com (8.16.0.27/8.16.0.27) with SMTP id xB2GIoEf059854;
-        Mon, 2 Dec 2019 16:28:51 GMT
-Received: from aserv0122.oracle.com (aserv0122.oracle.com [141.146.126.236])
-        by userp3030.oracle.com with ESMTP id 2wm1w2v05d-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Mon, 02 Dec 2019 16:28:51 +0000
-Received: from abhmp0016.oracle.com (abhmp0016.oracle.com [141.146.116.22])
-        by aserv0122.oracle.com (8.14.4/8.14.4) with ESMTP id xB2GSn6w027778;
-        Mon, 2 Dec 2019 16:28:49 GMT
-Received: from localhost (/67.169.218.210)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Mon, 02 Dec 2019 08:28:49 -0800
-Date:   Mon, 2 Dec 2019 08:28:48 -0800
-From:   "Darrick J. Wong" <darrick.wong@oracle.com>
-To:     Eryu Guan <guaneryu@gmail.com>
-Cc:     fstests@vger.kernel.org, xfs <linux-xfs@vger.kernel.org>
-Subject: Re: [PATCH] generic: test race between appending AIO DIO and
- fallocate
-Message-ID: <20191202162848.GB7335@magnolia>
-References: <20191113024416.GH6235@magnolia>
- <20191201142824.GI8664@desktop>
+        Mon, 2 Dec 2019 14:24:27 -0500
+Received: from mail-pj1-f66.google.com ([209.85.216.66]:42006 "EHLO
+        mail-pj1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727976AbfLBTY1 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 2 Dec 2019 14:24:27 -0500
+Received: by mail-pj1-f66.google.com with SMTP id o11so157015pjp.9
+        for <fstests@vger.kernel.org>; Mon, 02 Dec 2019 11:24:26 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=osandov-com.20150623.gappssmtp.com; s=20150623;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to:user-agent;
+        bh=jQBHOyBQMALu1xUt5LSXgCIP2vbABLa0pScxXLK5aTI=;
+        b=Oaa2Ww02j2IrEITVFCeYRWXdRMHrdU3wp76+mk6BjbnHfsdPQ3G/nG7MYq//2R1OSO
+         TM8WLrlf2hJcxKNfZ1BPFxQcT/GFDjxs7/zNUm/YzYIYPcv6avf5zYdWugoxPed1rNIP
+         EcKU1bzAiS+6FRAVe7m9WIMNUmKSsUBNb9KQsr11uNUq57s7lv09+5F45ha4dVKWWKrJ
+         X+9ydptC4o04SoP6DkKQCi9OiAqKa3KyiVuSvi+gQtMPJoK8AJDZu7Bc2W2j+V9SX+tD
+         uJRY2JCtBQ7MnF9Wpnkyvqmk4Ku1bxrqmTb0SVK5rkJatmIzSLkduJXlzpQ4tRY8cptt
+         SVww==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to:user-agent;
+        bh=jQBHOyBQMALu1xUt5LSXgCIP2vbABLa0pScxXLK5aTI=;
+        b=lqawqwblE+kQF2ZnJ4fqmboZ2rQ2vTwVFX2xufaTR4ygKMUS2VzytJjpdxGGrx4NYF
+         i5oaictECw7NqMyoqPVc/r4SrhM8neXNVk6o+8AwUZJrxcq4cdOtlaDIamfu0vPsreEb
+         L+OYd5QI+UMINisTDFXt/OUugBji4xpoeZlAOW1kzOvjpCDkrzUhOO9wDrHTmi96b3qw
+         R8dCzyamPIPYJVSFpbs7QeWuXNONsKya33gs6MfT8Gh1NdESjui+1p4ZKj1UC3kN6Tpw
+         G+SYuB8icWwKAGS/4hV0MTt+vUFuly5kTCUNQlhAJnJeIeCIbyJyY2ymOpfL9SRzb8m5
+         IQXA==
+X-Gm-Message-State: APjAAAW9QRq6oYO4LWD3XXIEwfe+CX0XVqhX0jVDrm8Ip+IO0ljDUdfl
+        OkFGsn/yht+ln4CmrprmahcJVuiNMrF+MA==
+X-Google-Smtp-Source: APXvYqzxXTNGyNm+MZjXrXFxtViFo9lfEpI37r7d+Rgj9cb+/GKVRzY/5FGTE7jyFXim3KK70p1BIA==
+X-Received: by 2002:a17:90a:7781:: with SMTP id v1mr737022pjk.93.1575314666009;
+        Mon, 02 Dec 2019 11:24:26 -0800 (PST)
+Received: from vader ([2620:10d:c090:200::3:4fcf])
+        by smtp.gmail.com with ESMTPSA id u4sm125506pjb.31.2019.12.02.11.24.25
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 02 Dec 2019 11:24:25 -0800 (PST)
+Date:   Mon, 2 Dec 2019 11:24:24 -0800
+From:   Omar Sandoval <osandov@osandov.com>
+To:     "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc:     fstests@vger.kernel.org, kernel-team@fb.com,
+        linux-xfs@vger.kernel.org
+Subject: Re: [PATCH] generic: test truncating mixed written/unwritten XFS
+ realtime extent
+Message-ID: <20191202192424.GA809204@vader>
+References: <2512a38027e5286eae01d4aa36726f49a94e523d.1574799173.git.osandov@fb.com>
+ <20191127012646.GR6219@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20191201142824.GI8664@desktop>
-User-Agent: Mutt/1.9.4 (2018-02-28)
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9459 signatures=668685
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=0 malwarescore=0
- phishscore=0 bulkscore=0 spamscore=0 mlxscore=0 mlxlogscore=999
- adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.0.1-1911140001 definitions=main-1912020142
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9459 signatures=668685
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 priorityscore=1501 malwarescore=0
- suspectscore=0 phishscore=0 bulkscore=0 spamscore=0 clxscore=1015
- lowpriorityscore=0 mlxscore=0 impostorscore=0 mlxlogscore=999 adultscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.0.1-1911140001
- definitions=main-1912020142
+In-Reply-To: <20191127012646.GR6219@magnolia>
+User-Agent: Mutt/1.12.2 (2019-09-21)
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Dec 01, 2019 at 10:28:39PM +0800, Eryu Guan wrote:
-> On Tue, Nov 12, 2019 at 06:44:16PM -0800, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <darrick.wong@oracle.com>
+On Tue, Nov 26, 2019 at 05:26:46PM -0800, Darrick J. Wong wrote:
+> On Tue, Nov 26, 2019 at 12:13:56PM -0800, Omar Sandoval wrote:
+> > From: Omar Sandoval <osandov@fb.com>
 > > 
-> > Dave Chinner reports[1] that an appending AIO DIO write to the second
-> > block of a zero-length file and an fallocate request to the first block
-> > of the same file can race to set isize, with the user-visible end result
-> > that the file size is set incorrectly to one block long.  Write a small
-> > test to reproduce the results.
+> > The only XFS-specific part of this test is the setup, so we can make the
+> > rest a generic test. It's slow, though, as it needs to write 8GB to
+> > convert a big unwritten extent to written.
 > > 
-> > [1] https://lore.kernel.org/linux-xfs/20191029100342.GA41131@bfoster/T/
-> > 
-> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > Signed-off-by: Omar Sandoval <osandov@fb.com>
 > > ---
-> >  .../aio-dio-append-write-fallocate-race.c          |  212 ++++++++++++++++++++
-> 
-> I added an entry in .gitignore for it.
-> 
-> >  tests/generic/722                                  |   43 ++++
-> >  tests/generic/722.out                              |    2 
-> >  tests/generic/group                                |    1 
-> >  4 files changed, 258 insertions(+)
-> >  create mode 100644 src/aio-dio-regress/aio-dio-append-write-fallocate-race.c
-> >  create mode 100755 tests/generic/722
-> >  create mode 100644 tests/generic/722.out
+> >  tests/generic/586     | 59 +++++++++++++++++++++++++++++++++++++++++++
+> >  tests/generic/586.out |  2 ++
+> >  tests/generic/group   |  1 +
+> >  3 files changed, 62 insertions(+)
+> >  create mode 100755 tests/generic/586
+> >  create mode 100644 tests/generic/586.out
 > > 
-> > diff --git a/src/aio-dio-regress/aio-dio-append-write-fallocate-race.c b/src/aio-dio-regress/aio-dio-append-write-fallocate-race.c
-> > new file mode 100644
-> > index 00000000..091b047d
-> > --- /dev/null
-> > +++ b/src/aio-dio-regress/aio-dio-append-write-fallocate-race.c
-> > @@ -0,0 +1,212 @@
-> > +// SPDX-License-Identifier: GPL-2.0-or-newer
-> > +/*
-> > + * Copyright (c) 2019 Oracle.
-> > + * All Rights Reserved.
-> > + *
-> > + * Race appending aio dio and fallocate to make sure we get the correct file
-> > + * size afterwards.
-> > + */
-> > +#include <stdio.h>
-> > +#include <pthread.h>
-> > +#include <sys/types.h>
-> > +#include <sys/stat.h>
-> > +#include <fcntl.h>
-> > +#include <unistd.h>
-> > +#include <string.h>
-> > +#include <errno.h>
-> > +#include <libaio.h>
-> > +#include <stdlib.h>
-> > +#include <stdbool.h>
-> > +#include <limits.h>
-> > +
-> > +static int fd;
-> > +static int blocksize;
-> > +
-> > +static void *
-> > +falloc_thread(
-> > +	void		*p)
-> > +{
-> > +	int		ret;
-> > +
-> > +	ret = fallocate(fd, 0, 0, blocksize);
-> > +	if (ret)
-> > +		perror("falloc");
-> > +
-> > +	return NULL;
-> > +}
-> > +
-> > +static int
-> > +test(
-> > +	const char	*fname,
-> > +	unsigned int	iteration,
-> > +	unsigned int	*passed)
-> > +{
-> > +	struct stat	sbuf;
-> > +	pthread_t	thread;
-> > +	io_context_t	ioctx = 0;
-> > +	struct iocb	iocb;
-> > +	struct iocb	*iocbp = &iocb;
-> > +	struct io_event	event;
-> > +	char		*buf;
-> > +	bool		wait_thread = false;
-> > +	int		ret;
-> > +
-> > +	/* Truncate file, allocate resources for doing IO. */
-> > +	fd = open(fname, O_DIRECT | O_RDWR | O_TRUNC | O_CREAT, 0644);
-> > +	if (fd < 0) {
-> > +		perror(fname);
-> > +		return -1;
-> > +	}
-> > +
-> > +	ret = fstat(fd, &sbuf);
-> > +	if (ret) {
-> > +		perror(fname);
-> > +		goto out;
-> > +	}
-> > +	blocksize = sbuf.st_blksize;
-> > +
-> > +	ret = posix_memalign((void **)&buf, blocksize, blocksize);
-> > +	if (ret) {
-> > +		errno = ret;
-> > +		perror("buffer");
-> > +		goto out;
-> > +	}
-> > +	memset(buf, 'X', blocksize);
-> > +	memset(&event, 0, sizeof(event));
-> > +
-> > +	ret = io_queue_init(1, &ioctx);
-> > +	if (ret) {
-> > +		errno = -ret;
-> > +		perror("io_queue_init");
-> > +		goto out_buf;
-> > +	}
-> > +
-> > +	/*
-> > +	 * Set ourselves up to race fallocate(0..blocksize) with aio dio
-> > +	 * pwrite(blocksize..blocksize * 2).  This /should/ give us a file
-> > +	 * with length (2 * blocksize).
-> > +	 */
-> > +	io_prep_pwrite(&iocb, fd, buf, blocksize, blocksize);
-> > +
-> > +	ret = pthread_create(&thread, NULL, falloc_thread, NULL);
-> > +	if (ret) {
-> > +		errno = ret;
-> > +		perror("pthread");
-> > +		goto out_io;
-> > +	}
-> > +	wait_thread = true;
-> > +
-> > +	ret = io_submit(ioctx, 1, &iocbp);
-> > +	if (ret != 1) {
-> > +		errno = -ret;
-> > +		perror("io_submit");
-> > +		goto out_join;
-> > +	}
-> > +
-> > +	ret = io_getevents(ioctx, 1, 1, &event, NULL);
-> > +	if (ret != 1) {
-> > +		errno = -ret;
-> > +		perror("io_getevents");
-> > +		goto out_join;
-> > +	}
-> > +
-> > +	if (event.res < 0) {
-> > +		errno = -event.res;
-> > +		perror("io_event.res");
-> > +		goto out_join;
-> > +	}
-> > +
-> > +	if (event.res2 < 0) {
-> > +		errno = -event.res2;
-> > +		perror("io_event.res2");
-> > +		goto out_join;
-> > +	}
-> > +
-> > +	wait_thread = false;
-> > +	ret = pthread_join(thread, NULL);
-> > +	if (ret) {
-> > +		errno = ret;
-> > +		perror("join");
-> > +		goto out_io;
-> > +	}
-> > +
-> > +	/* Make sure we actually got a file of size (2 * blocksize). */
-> > +	ret = fstat(fd, &sbuf);
-> > +	if (ret) {
-> > +		perror(fname);
-> > +		goto out_buf;
-> > +	}
-> > +
-> > +	if (sbuf.st_size != 2 * blocksize) {
-> > +		fprintf(stderr, "[%u]: sbuf.st_size=%llu, expected %llu.\n",
-> > +				iteration,
-> > +				(unsigned long long)sbuf.st_size,
-> > +				(unsigned long long)2 * blocksize);
-> > +	} else {
-> > +		printf("[%u]: passed.\n", iteration);
-> > +		(*passed)++;
-> > +	}
-> > +
-> > +out_join:
-> > +	if (wait_thread) {
-> > +		ret = pthread_join(thread, NULL);
-> > +		if (ret) {
-> > +			errno = ret;
-> > +			perror("join");
-> > +			goto out_io;
-> > +		}
-> > +	}
-> > +out_io:
-> > +	ret = io_queue_release(ioctx);
-> > +	if (ret) {
-> > +		errno = -ret;
-> > +		perror("io_queue_release");
-> > +	}
-> > +
-> > +out_buf:
-> > +	free(buf);
-> > +out:
-> > +	ret = close(fd);
-> > +	fd = -1;
-> > +	if (ret) {
-> > +		perror("close");
-> > +		return -1;
-> > +	}
-> > +
-> > +	return 0;
-> > +}
-> > +
-> > +int main(int argc, char *argv[])
-> > +{
-> > +	int		ret;
-> > +	long		l;
-> > +	unsigned int	i;
-> > +	unsigned int	passed = 0;
-> > +
-> > +	if (argc != 3) {
-> > +		printf("Usage: %s filename iterations\n", argv[0]);
-> > +		return 1;
-> > +	}
-> > +
-> > +	errno = 0;
-> > +	l = strtol(argv[2], NULL, 0);
-> > +	if (errno) {
-> > +		perror(argv[2]);
-> > +		return 1;
-> > +	}
-> > +	if (l < 1 || l > UINT_MAX) {
-> > +		fprintf(stderr, "%ld: must be between 1 and %u.\n",
-> > +				l, UINT_MAX);
-> > +		return 1;
-> > +	}
-> > +
-> > +	for (i = 0; i < l; i++) {
-> > +		ret = test(argv[1], i, &passed);
-> > +		if (ret)
-> > +			return 1;
-> > +	}
-> > +
-> > +	printf("pass rate: %u/%u (%.2f%%)\n", passed, i, 100.0 * passed / i);
-> > +
-> > +	return 0;
-> > +}
-> > diff --git a/tests/generic/722 b/tests/generic/722
+> > diff --git a/tests/generic/586 b/tests/generic/586
 > > new file mode 100755
-> > index 00000000..937abf36
+> > index 00000000..5bcad68b
 > > --- /dev/null
-> > +++ b/tests/generic/722
-> > @@ -0,0 +1,43 @@
+> > +++ b/tests/generic/586
+> > @@ -0,0 +1,59 @@
 > > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0-or-later
-> > +# Copyright (c) 2019, Oracle and/or its affiliates.  All Rights Reserved.
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (c) 2019 Facebook.  All Rights Reserved.
 > > +#
-> > +# FS QA Test No. 722
+> > +# FS QA Test 586
 > > +#
-> > +# Race an appending aio dio write to the second block of a file while
-> > +# simultaneously fallocating to the first block.  Make sure that we end up
-> > +# with a two-block file.
-> > +
+> > +# Test "xfs: fix realtime file data space leak" and "xfs: don't check for AG
+> > +# deadlock for realtime files in bunmapi". On XFS without the fix, rm will hang
+> > +# forever. On other filesystems, this just tests writing into big fallocates.
+> > +#
 > > +seq=`basename $0`
 > > +seqres=$RESULT_DIR/$seq
 > > +echo "QA output created by $seq"
 > > +
 > > +here=`pwd`
 > > +tmp=/tmp/$$
-> > +status=1    # failure is the default!
+> > +status=1	# failure is the default!
 > > +trap "_cleanup; exit \$status" 0 1 2 3 15
 > > +
 > > +_cleanup()
 > > +{
 > > +	cd /
-> > +	rm -f $tmp.* $testfile
+> > +	rm -f $tmp.*
 > > +}
 > > +
-> > +# get standard environment, filters and checks
 > > +. ./common/rc
-> > +
-> > +# real QA test starts here
-> > +_supported_os Linux
-> > +_supported_fs generic
-> > +_require_aiodio "aio-dio-append-write-fallocate-race"
-> > +_require_test
-> 
-> Also added
-> 
-> _require_xfs_io_command "falloc"
-
-Thanks for fixing these. :)
-
---D
-
-> Thanks,
-> Eryu
-> 
+> > +. ./common/filter
 > > +
 > > +rm -f $seqres.full
 > > +
-> > +testfile=$TEST_DIR/test-$seq
-> > +$AIO_TEST $testfile 100 >> $seqres.full
+> > +_supported_fs generic
+> > +_supported_os Linux
+> > +_require_scratch
 > > +
-> > +echo Silence is golden.
-> > +# success, all done
-> > +status=0
-> > +exit
-> > diff --git a/tests/generic/722.out b/tests/generic/722.out
-> > new file mode 100644
-> > index 00000000..8621a87d
-> > --- /dev/null
-> > +++ b/tests/generic/722.out
-> > @@ -0,0 +1,2 @@
-> > +QA output created by 722
-> > +Silence is golden.
-> > diff --git a/tests/generic/group b/tests/generic/group
-> > index e5d0c1da..308f86f2 100644
-> > --- a/tests/generic/group
-> > +++ b/tests/generic/group
-> > @@ -588,3 +588,4 @@
-> >  583 auto quick encrypt
-> >  584 auto quick encrypt
-> >  585 auto rename
-> > +722 auto quick rw falloc
+> > +maxextlen=$((0x1fffff))
+> 
+> /me wonders if we ought to move this to common/xfs and hoist the other
+> place (xfs/507) where we define this.
+> 
+> > +bs=4096
+> > +rextsize=4
+> > +
+> > +extra_options=""
+> > +if [[ $FSTYP = xfs && $USE_EXTERNAL = yes && -n $SCRATCH_RTDEV ]]; then
+> > +	extra_options="$extra_options -bsize=$bs"
+> 
+> Hm.  Could you rework this to _require_realtime, and if the caller
+> didn't set SCRATCH_RTDEV, create a file on the test device so that we
+> can always do the realtime test if the kernel supports it?  That will
+> ensure that this gets more testing that it does now...
+
+Sorry, I don't follow. _require_realtime checks that SCRATCH_RTDEV was
+set. Did you mean something like this?
+
+if [[ $USE_EXTERNAL = yes && -n $SCRATCH_RTDEV ]]; then
+	use the configured rtdev
+else
+	_require_test
+	_require_scratch
+	set up a loop device on the test filesystem as the rtdev
+fi
+
+> > +	extra_options="$extra_options -r extsize=$((bs * rextsize))"
+> > +	extra_options="$extra_options -d agsize=$(((maxextlen + 1) * bs / 2)),rtinherit=1"
+> 
+> ...particularly because I don't think very many people actually run
+> fstests with rt enabled /and/ rtinherit set to stress the realtime
+> allocator.
+> 
+> (I did a year ago and out came a torrent of bugs such that someone could
+> probably write themselves a nice year end bonus just fixing all that,
+> software is terrible :()
+> 
+> > +fi
+> > +_scratch_mkfs $extra_options >>$seqres.full 2>&1
+> > +_scratch_mount
+> > +_require_fs_space "$SCRATCH_MNT" "$(((maxextlen + 1) * bs / 1024))"
+> > +
+> > +fallocate -l $(((maxextlen + 1 - rextsize) * bs)) "$SCRATCH_MNT/file"
+> > +sync
+> 
+> $XFS_IO_PROG -c "falloc 0 <math expression>" -c fsync $SCRATCH_MNT/file
+
+Will fix.
+
+> (Hm ok, fallocate the first 2097148 blocks of the file...)
+
+Oops, I'll add some explanations for all of this stuff.
+
+Thanks for taking a look!
+
+> > +fallocate -o $(((maxextlen + 1 - rextsize) * bs)) -l $((rextsize * bs)) "$SCRATCH_MNT/file"
+> > +sync
+> 
+> $XFS_IO_PROG -c "falloc <the -o expression> <the -l expression>" -c fsync $SCRATCH_MNT/file
+> 
+> (now fallocate blocks 2097148 to 2097152)
+> 
+> (Not sure why you do the last rtext separately...)
+> 
+> > +dd if=/dev/zero of="$SCRATCH_MNT/file" bs=$bs count=$((maxextlen + 2 - rextsize)) conv=notrunc status=none
+> > +sync
+> 
+> $XFS_IO_PROG -c "pwrite <count= expression> $bs" -c fsync $SCRATCH_MNT/file
+> 
+> (and finally write to block 2097149?)
+> 
+> --D
