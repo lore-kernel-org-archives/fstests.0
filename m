@@ -2,140 +2,102 @@ Return-Path: <SRS0=sDCH=Z4=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5728FC43603
-	for <linux-fstests@archiver.kernel.org>; Fri,  6 Dec 2019 07:08:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C07DDC43603
+	for <linux-fstests@archiver.kernel.org>; Fri,  6 Dec 2019 15:32:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 2589820707
-	for <linux-fstests@archiver.kernel.org>; Fri,  6 Dec 2019 07:08:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9375B2466E
+	for <linux-fstests@archiver.kernel.org>; Fri,  6 Dec 2019 15:32:35 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Ih6zlvc7"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726272AbfLFHIc (ORCPT
+        id S1726250AbfLFPcf (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 6 Dec 2019 02:08:32 -0500
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:3946 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726214AbfLFHIc (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 6 Dec 2019 02:08:32 -0500
-X-IronPort-AV: E=Sophos;i="5.69,283,1571673600"; 
-   d="scan'208";a="79707266"
-Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
-  by heian.cn.fujitsu.com with ESMTP; 06 Dec 2019 15:08:25 +0800
-Received: from G08CNEXMBPEKD04.g08.fujitsu.local (unknown [10.167.33.201])
-        by cn.fujitsu.com (Postfix) with ESMTP id 4C5114CE1BED;
-        Fri,  6 Dec 2019 14:59:56 +0800 (CST)
-Received: from [10.167.220.84] (10.167.220.84) by
- G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201) with Microsoft SMTP Server
- (TLS) id 15.0.1395.4; Fri, 6 Dec 2019 15:08:27 +0800
-Subject: Re: [PATCH] xfs/148: sort attribute list output
-To:     Xiaoli Feng <xifeng@redhat.com>
-CC:     "Darrick J. Wong" <darrick.wong@oracle.com>,
-        Eryu Guan <guaneryu@gmail.com>,
-        Yang Xu <xuyang2018.jy@cn.fujitsu.com>,
-        fstests <fstests@vger.kernel.org>,
-        xfs <linux-xfs@vger.kernel.org>
-References: <20191204023642.GD7328@magnolia>
- <443856653.20019671.1575615076055.JavaMail.zimbra@redhat.com>
-From:   Yang Xu <xuyang2018.jy@cn.fujitsu.com>
-Message-ID: <1c4f93ac-96b7-f347-250a-1e678fb14693@cn.fujitsu.com>
-Date:   Fri, 6 Dec 2019 15:08:25 +0800
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101
- Thunderbird/68.0
+        Fri, 6 Dec 2019 10:32:35 -0500
+Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:37456 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726313AbfLFPce (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 6 Dec 2019 10:32:34 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1575646354;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=vrRHGPYmjcTM0XZC8UNoHhF8C8DOYU45Fu5tYyP/hQA=;
+        b=Ih6zlvc7f2XuEfm7LvhNaWeFF/01tbB5hXzs9SDdV/7F49ElkRmKy97GpIaWf6iulaEih/
+        p6Zj9O42j5hGsdGPV1X6a4bIUI2awb08LgZkaarGgc67CR0h26cndFvdUcg/rOBpw5EtwU
+        v7Z+ZVUmHUE0O/EdFSjZbhjc4T/0R0k=
+Received: from mail-oi1-f197.google.com (mail-oi1-f197.google.com
+ [209.85.167.197]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-265-iGEZid56N_C4h5xAYhJoQQ-1; Fri, 06 Dec 2019 10:32:32 -0500
+Received: by mail-oi1-f197.google.com with SMTP id 23so67791oii.4
+        for <fstests@vger.kernel.org>; Fri, 06 Dec 2019 07:32:32 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:from:date:message-id:subject:to:cc;
+        bh=kSj30NZ4slRVLhG11NpWfTALn0mUTBYqBl4220+YO5g=;
+        b=Nky4SAoEg8Eb9QHFaDlbsos7NkyT+oSG5UEfZqrhgrwgbZ1fQ1RtT2FPDLHRohHKIQ
+         lKNkpEjKua2EBUNFlX9lY5eDTkCBA5AhLp7oFm4RuIsWwNTLrYWPA3gM1AmvFDD8ibj7
+         JEcNHKgkodKz0X/U8w6bPedM1f9w2KwZXiNAe4av0Tz3i9OTEDO+RTk7T9drDD2XKtkU
+         43386HYN8l+/QT7rkIxw/jIslGOEyIToD7xIdxL77NFPjR7gRFksC+DIq+1NmAmgqFiH
+         2eKk5onOcfzZGcHfKzkZBHRX8E9wH1Ib7i3IW6RbQPYtfmtDPB1EN/rFgQ650DOdtkUe
+         mVlQ==
+X-Gm-Message-State: APjAAAWN04aCnsa/nL0IjVya+jt2D+7/MIAP4uKR7wzP+6UGltCJpCDb
+        pvUmTLw1haaXT6GkUJLp75ilW5YK4Qwq1P3f9FwKMbiKG8QsFKWx9It7Q8MbyYutfpFn6dGRmzC
+        fSWSrLwTtlPU4Si9qlMDorFmIsjKUjZv7IQ==
+X-Received: by 2002:aca:4e90:: with SMTP id c138mr12821903oib.147.1575646351370;
+        Fri, 06 Dec 2019 07:32:31 -0800 (PST)
+X-Google-Smtp-Source: APXvYqzdJNsSuHajakas0kMY45NJw8UyyPFxBH1fDI/Kgwr43XMxlZXh4LAlIW3tukCj6X/thZ80bUvvvudgJoc2C1I=
+X-Received: by 2002:aca:4e90:: with SMTP id c138mr12821868oib.147.1575646351091;
+ Fri, 06 Dec 2019 07:32:31 -0800 (PST)
 MIME-Version: 1.0
-In-Reply-To: <443856653.20019671.1575615076055.JavaMail.zimbra@redhat.com>
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.167.220.84]
-X-ClientProxiedBy: G08CNEXCHPEKD06.g08.fujitsu.local (10.167.33.205) To
- G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201)
-X-yoursite-MailScanner-ID: 4C5114CE1BED.AEE5A
-X-yoursite-MailScanner: Found to be clean
-X-yoursite-MailScanner-From: xuyang2018.jy@cn.fujitsu.com
+From:   Andreas Gruenbacher <agruenba@redhat.com>
+Date:   Fri, 6 Dec 2019 16:32:20 +0100
+Message-ID: <CAHc6FU6ZbWL_LhZ_p1c=gAiD9VAjkPCMT01pqkcTSO0V9s9OgQ@mail.gmail.com>
+Subject: Fwd: fio verify and short writes (resend)
+To:     fstests <fstests@vger.kernel.org>
+Cc:     fio@vger.kernel.org
+X-MC-Unique: iGEZid56N_C4h5xAYhJoQQ-1
+X-Mimecast-Spam-Score: 0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+Hi,
 
+[This basically is a resend of https://www.spinics.net/lists/fio/msg08165.h=
+tml.]
 
-on 2019/12/06 14:51, Xiaoli Feng wrote:
-> Hi,
-> 
-> ----- Original Message -----
->> From: "Darrick J. Wong" <darrick.wong@oracle.com>
->> To: "Eryu Guan" <guaneryu@gmail.com>
->> Cc: "Yang Xu" <xuyang2018.ky@cn.fujitsu.com>, "fstests" <fstests@vger.kernel.org>, "xfs" <linux-xfs@vger.kernel.org>
->> Sent: Wednesday, December 4, 2019 10:36:42 AM
->> Subject: [PATCH] xfs/148: sort attribute list output
->>
->> From: Darrick J. Wong <darrick.wong@oracle.com>
->>
->> Yang Xu reported a test failure in xfs/148 that I think comes from
->> extended attributes being returned in a different order than they were
->> set.  Since order isn't important in this test, sort the output to make
->> it consistent.
->>
->> Reported-by: Yang Xu <xuyang2018.ky@cn.fujitsu.com>
->> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
->> ---
->>   tests/xfs/148     |    2 +-
->>   tests/xfs/148.out |    4 ++--
->>   2 files changed, 3 insertions(+), 3 deletions(-)
->>
->> diff --git a/tests/xfs/148 b/tests/xfs/148
->> index 42cfdab0..ec1d0ece 100755
->> --- a/tests/xfs/148
->> +++ b/tests/xfs/148
->> @@ -76,7 +76,7 @@ test_names+=("too_many" "are_bad/for_you")
->>   
->>   access_stuff() {
->>   	ls $testdir
->> -	$ATTR_PROG -l $testfile
->> +	$ATTR_PROG -l $testfile | grep 'a_' | sort
->>   
->>   	for name in "${test_names[@]}"; do
->>   		ls "$testdir/f_$name"
->> diff --git a/tests/xfs/148.out b/tests/xfs/148.out
->> index c301ecb6..f95b55b7 100644
->> --- a/tests/xfs/148.out
->> +++ b/tests/xfs/148.out
->> @@ -4,10 +4,10 @@ f_another
->>   f_are_bad_for_you
->>   f_something
->>   f_too_many_beans
->> +Attribute "a_another" has a 3 byte value for TEST_DIR/mount-148/testfile
->> +Attribute "a_are_bad_for_you" has a 3 byte value for
-> 
->  From my test on RHEL8&RHEL7, when touch a file, there is a default attribute:
-> Attribute "selinux" has a 37 byte value for TEST_DIR/mount-148/testfile
-> Could you share the OS you test?
-Hi Xiao
-    IMHO, the aim of this test is to check kernel whether catch corrupt 
-directory name or attr names. selinux is not check target. Also, if you 
-disable selinux, it doesn't generate selinux in 148.out.  So Darrick 
-filters selinux.
+I've run into a verify issue with fio in xfstest generic/300 [*]:
 
-Thanks
-Yang Xu
-> 
-> Thanks.
-> 
->> TEST_DIR/mount-148/testfile
->>   Attribute "a_something" has a 3 byte value for TEST_DIR/mount-148/testfile
->>   Attribute "a_too_many_beans" has a 3 byte value for
->>   TEST_DIR/mount-148/testfile
->> -Attribute "a_are_bad_for_you" has a 3 byte value for
->> TEST_DIR/mount-148/testfile
->> -Attribute "a_another" has a 3 byte value for TEST_DIR/mount-148/testfile
->>   TEST_DIR/mount-148/testdir/f_something
->>   Attribute "a_something" had a 3 byte value for TEST_DIR/mount-148/testfile:
->>   heh
->>
->>
-> 
-> 
-> 
+The filesystem I'm running this on has a block size of 1k, on a
+current mainline kernel and with current fio.
 
+The aio-dio-verifier thread in that test case writes 4k buffers and
+then reads them back in.
+
+The test case is designed to run the filesystem out of space. When
+that happens, some writes can end up short. That doesn't seem to
+happen on ext4 or xfs filesystems with a block size of 1k, possibly
+just because the test always runs on a scratch filesystem, but it
+does happen on gfs2.
+
+When the aio-dio-verifier thread reads the buffer of such a short write
+back in, part of the buffer will lie in a hole and be zero-filled, so
+verification will fail.
+
+Any thoughts?
+
+Thanks,
+Andreas
+
+[*] https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/tree/tests/gener=
+ic/300
 
