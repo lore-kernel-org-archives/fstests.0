@@ -1,102 +1,101 @@
-Return-Path: <SRS0=jPGN=Z7=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=DfEV=2A=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.6 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 51CC3C3F68F
-	for <linux-fstests@archiver.kernel.org>; Mon,  9 Dec 2019 18:18:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 267C1C43603
+	for <linux-fstests@archiver.kernel.org>; Tue, 10 Dec 2019 18:42:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 1E86B24654
-	for <linux-fstests@archiver.kernel.org>; Mon,  9 Dec 2019 18:18:30 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1575915510;
-	bh=5Xae/bF3FMRbrd9T7PqTMB/ISEVVGLMSLvUQwEtLh78=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=Se3LkLiWGMjFqxUBjEhhisnFcU1Rvq7WzbLDzt1zhF77c69VqkW2DEVWhvaz9QehY
-	 sOVIa835BBX7QCM8IvIET7NOW8hRb2zCDRqbNGdfaMRfriV/LoEVIGdyHsNE5Sstin
-	 u4MHUXaW/a4ZB1h6isjl2EtiNdhNOM592yU3E9VE=
+	by mail.kernel.org (Postfix) with ESMTP id EF61120838
+	for <linux-fstests@archiver.kernel.org>; Tue, 10 Dec 2019 18:42:13 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=osandov-com.20150623.gappssmtp.com header.i=@osandov-com.20150623.gappssmtp.com header.b="BKjQt4LP"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726495AbfLISS3 (ORCPT
+        id S1727634AbfLJSmN (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 9 Dec 2019 13:18:29 -0500
-Received: from mail.kernel.org ([198.145.29.99]:60350 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726408AbfLISS3 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 9 Dec 2019 13:18:29 -0500
-Received: from gmail.com (unknown [104.132.1.77])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id DA2EC2080D;
-        Mon,  9 Dec 2019 18:18:28 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1575915509;
-        bh=5Xae/bF3FMRbrd9T7PqTMB/ISEVVGLMSLvUQwEtLh78=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=ZyAaQ+7tkf5YkdNKPoWULUcKbTOQ6MNzpod+eRF5ANgETIcAqU27SJvhN/ULyWPyW
-         tv9m4ZCxiwEeLlnJ11aQg6Tnbsk8dO0q1Ji2/tEfx2J6srY/RzoaHSCq9DPl9wMeRY
-         0NY63Odff5e3afGa6f25xA7Aj3Nd8RIEkVD7jnnQ=
-Date:   Mon, 9 Dec 2019 10:18:27 -0800
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     fstests@vger.kernel.org, Satya Tangirala <satyat@google.com>
-Cc:     linux-fscrypt@vger.kernel.org
-Subject: Re: [PATCH v2 0/5] xfstests: verify ciphertext of IV_INO_LBLK_64
- encryption policies
-Message-ID: <20191209181826.GC149190@gmail.com>
-References: <20191202230155.99071-1-ebiggers@kernel.org>
+        Tue, 10 Dec 2019 13:42:13 -0500
+Received: from mail-pl1-f193.google.com ([209.85.214.193]:33635 "EHLO
+        mail-pl1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727558AbfLJSmN (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 10 Dec 2019 13:42:13 -0500
+Received: by mail-pl1-f193.google.com with SMTP id c13so221575pls.0
+        for <fstests@vger.kernel.org>; Tue, 10 Dec 2019 10:42:13 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=osandov-com.20150623.gappssmtp.com; s=20150623;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=hYonU0ZBVzIZogNNtFncp9JVEITK1ibbwogpkkXsdR8=;
+        b=BKjQt4LP9UOG9uHqefSOMOSwr9jQOQo9E2XHU7F+BWyye+OdngJAcLKR/6PUffnnMH
+         cFxIKADwTzMvcVeNR+xCTp+5G4X+3T4J3QJEg18bnypP3iQwVesMdFNSqA9JcZO/a0W6
+         tBj3Y+QG587eiI8ebfFd2iHmkdfw43JFblCRXMnaLXqvGLPyYbqhPDWHWgC0BkJqagkf
+         FSyjA2E75oJzB/9HksXLz7ShxWV8MyLvjdzMw1A3jhz57qDIswSbBUdYZm56FDzW52dS
+         zyFqd6Ha2bygLPiMZjbw689t+VOEHuo0qJIyXwGyNxdMg4fzbUylV0/QWvdNGbARCkb7
+         32rA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=hYonU0ZBVzIZogNNtFncp9JVEITK1ibbwogpkkXsdR8=;
+        b=HtXVkr7UTh2+U7j1IE8LdTQNbozLRPWSvjYqp/HASeHzvbBbqaWO1/qmNcSTbcjrlw
+         DR/EqH5i3GAkD757HlmzE26GEaK7hCj/uPoztVoPJcb/dVq6SrH3sCbRmEN3jybetQ9U
+         TfewSt3UyekVbhwtVRIHtPLl8rJHfu61K8tKUcgK03qBPj8ifGR7OjR7Rf6LkLfH3iub
+         tZ4W2JtsVMZV0NwbOy8T+vUFIiyax7tqe5gLz5FOD0G8CRhV3uNigVg2xmHJzjZg4K31
+         VjAxUyLFbmLu6sBsn/B1ByUnkUZk3nQygkBgjy0TF3LKIJHyaeDq4Y5SvLE/nfKI2j2u
+         mOjA==
+X-Gm-Message-State: APjAAAWufRAquMJjFplbTrH3Zi0jlhk4HVNhPSXr23W1E8FGCbGfjKrD
+        0HPKU1l+eVjkhOQ+vqUd8o3N8w==
+X-Google-Smtp-Source: APXvYqx7Om20lYby2/Ttd5FRX48tLQN6nyQvqZ6CQV6ZD4ZjPZwylMcD7ew+sIsT9TfQaS2+K+wtsg==
+X-Received: by 2002:a17:90a:cb8c:: with SMTP id a12mr7136435pju.71.1576003332570;
+        Tue, 10 Dec 2019 10:42:12 -0800 (PST)
+Received: from vader ([2620:10d:c090:200::1:c519])
+        by smtp.gmail.com with ESMTPSA id a13sm4381474pfc.40.2019.12.10.10.42.11
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 10 Dec 2019 10:42:11 -0800 (PST)
+Date:   Tue, 10 Dec 2019 10:42:10 -0800
+From:   Omar Sandoval <osandov@osandov.com>
+To:     Luis Henriques <lhenriques@suse.com>
+Cc:     Eryu Guan <guaneryu@gmail.com>, fstests@vger.kernel.org
+Subject: Re: [PATCH] generic/590: add _require_xfs_io_command "falloc"
+Message-ID: <20191210184210.GC204474@vader>
+References: <20191209171452.16170-1-lhenriques@suse.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20191202230155.99071-1-ebiggers@kernel.org>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+In-Reply-To: <20191209171452.16170-1-lhenriques@suse.com>
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Dec 02, 2019 at 03:01:50PM -0800, Eric Biggers wrote:
-> Hello,
+On Mon, Dec 09, 2019 at 05:14:52PM +0000, Luis Henriques wrote:
+> Without this check the test will fail with message:
 > 
-> This series adds an xfstest which tests that the encryption for
-> IV_INO_LBLK_64 encryption policies is being done correctly.
+>   fallocate: Operation not supported
 > 
-> IV_INO_LBLK_64 is a new fscrypt policy flag which modifies the
-> encryption to be optimized for inline encryption hardware compliant with
-> the UFS v2.1 standard or the upcoming version of the eMMC standard.  For
-> more information, see the kernel patchset:
-> https://lore.kernel.org/linux-fscrypt/20191024215438.138489-1-ebiggers@kernel.org/T/#u
-> 
-> The kernel patches have been merged into mainline and will be in v5.5.
-> 
-> In addition to the latest kernel, to run on ext4 this test also needs a
-> version of e2fsprogs built from the master branch, in order to get
-> support for formatting the filesystem with '-O stable_inodes'.
-> 
-> As usual, the test will skip itself if the prerequisites aren't met.
-> 
-> No real changes since v1; just rebased onto the latest xfstests master
-> branch and updated the cover letter.
-> 
-> Eric Biggers (5):
->   fscrypt-crypt-util: create key_and_iv_params structure
->   fscrypt-crypt-util: add HKDF context constants
->   common/encrypt: create named variables for UAPI constants
->   common/encrypt: support verifying ciphertext of IV_INO_LBLK_64
->     policies
->   generic: verify ciphertext of IV_INO_LBLK_64 encryption policies
-> 
->  common/encrypt           | 126 +++++++++++++++++++++++++-------
->  src/fscrypt-crypt-util.c | 151 ++++++++++++++++++++++++++++-----------
->  tests/generic/805        |  43 +++++++++++
->  tests/generic/805.out    |   6 ++
->  tests/generic/group      |   1 +
->  5 files changed, 259 insertions(+), 68 deletions(-)
->  create mode 100644 tests/generic/805
->  create mode 100644 tests/generic/805.out
-> 
+> Instead, with this _require_xfs_io_command, the test will be skipped
+> instead if falloc isn't supported.
 
-Ping.  Does anyone want to take a look at this?  Satya?
+Thanks, I missed this.
 
-- Eric
+Reviewed-by: Omar Sandoval <osandov@fb.com>
+
+> Signed-off-by: Luis Henriques <lhenriques@suse.com>
+> ---
+>  tests/generic/590 | 1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/tests/generic/590 b/tests/generic/590
+> index 80a665c6b001..2670fe99d21f 100755
+> --- a/tests/generic/590
+> +++ b/tests/generic/590
+> @@ -34,6 +34,7 @@ rm -f $seqres.full
+>  _supported_fs generic
+>  _supported_os Linux
+>  _require_scratch_nocheck
+> +_require_xfs_io_command "falloc"
+>  
+>  maxextlen=$((0x1fffff))
+>  bs=4096
