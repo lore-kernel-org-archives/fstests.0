@@ -2,255 +2,570 @@ Return-Path: <SRS0=288U=2B=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.0 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 39EF7C3F68F
-	for <linux-fstests@archiver.kernel.org>; Wed, 11 Dec 2019 07:35:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DE330C43603
+	for <linux-fstests@archiver.kernel.org>; Wed, 11 Dec 2019 08:33:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 0F32A214D8
-	for <linux-fstests@archiver.kernel.org>; Wed, 11 Dec 2019 07:35:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8256A20836
+	for <linux-fstests@archiver.kernel.org>; Wed, 11 Dec 2019 08:33:29 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=gmx.net header.i=@gmx.net header.b="ZwsTAL4g"
+	dkim=pass (2048-bit key) header.d=themaw.net header.i=@themaw.net header.b="neKHizwY";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="MP8rcdvY"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726988AbfLKHfo (ORCPT
+        id S1727851AbfLKId3 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 11 Dec 2019 02:35:44 -0500
-Received: from mout.gmx.net ([212.227.17.20]:57905 "EHLO mout.gmx.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725800AbfLKHfn (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 11 Dec 2019 02:35:43 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net;
-        s=badeba3b8450; t=1576049732;
-        bh=qQkXi9zYiISCx/Mu0jLKrkzG6c32juHBWDS+JDrcRK0=;
-        h=X-UI-Sender-Class:Subject:To:Cc:References:From:Date:In-Reply-To;
-        b=ZwsTAL4gl7LcZCZT2NpxBbx8KXod3lzWO7dSTZaj33SVvhKub436foX1qVpBoTser
-         rsxc2zHnH1iVTByX9rcU8SEhkTYC9HB3IVSsqC/lRyLyRM/EHEWsRM0QYaHJKSCHSU
-         aAMUQ7/nDWXBJ/VWNvKHvBLMHQYFGB0xvXvkgWEI=
-X-UI-Sender-Class: 01bb95c1-4bf8-414a-932a-4f6e2808ef9c
-Received: from [0.0.0.0] ([13.231.109.76]) by mail.gmx.com (mrgmx104
- [212.227.17.174]) with ESMTPSA (Nemesis) id 1M7b6b-1ie5ao419B-007yW7; Wed, 11
- Dec 2019 08:35:32 +0100
-Subject: Re: [PATCHi RFC] fstest: btrfs/158 fix miss-aligned stripe and device
-To:     Anand Jain <anand.jain@oracle.com>, fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, wqu@suse.com
-References: <010f5b0e-939a-b2be-70a2-d8670d1696ab@suse.com>
- <1576044519-28313-1-git-send-email-anand.jain@oracle.com>
- <b89463c5-9f0d-b262-0198-2750e0b2aabc@gmx.com>
- <6025418e-25ce-19f9-3c53-6b094609098c@oracle.com>
-From:   Qu Wenruo <quwenruo.btrfs@gmx.com>
-Autocrypt: addr=quwenruo.btrfs@gmx.com; prefer-encrypt=mutual; keydata=
- mQENBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
- 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
- 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
- 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
- gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
- AAG0IlF1IFdlbnJ1byA8cXV3ZW5ydW8uYnRyZnNAZ214LmNvbT6JAU4EEwEIADgCGwMFCwkI
- BwIGFQgJCgsCBBYCAwECHgECF4AWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCXZw1oQAKCRDC
- PZHzoSX+qCY6CACd+mWu3okGwRKXju6bou+7VkqCaHTdyXwWFTsr+/0ly5nUdDtT3yEVggPJ
- 3VP70wjlrxUjNjFb6iIvGYxiPOrop1NGwGYvQktgRhaIhALG6rPoSSAhGNjwGVRw0km0PlIN
- D29BTj/lYEk+jVM1YL0QLgAE1AI3krihg/lp/fQT53wLhR8YZIF8ETXbClQG1vJ0cllPuEEv
- efKxRyiTSjB+PsozSvYWhXsPeJ+KKjFen7ebE5reQTPFzSHctCdPnoR/4jSPlnTlnEvLeqcD
- ZTuKfQe1gWrPeevQzgCtgBF/WjIOeJs41klnYzC3DymuQlmFubss0jShLOW8eSOOWhLRuQEN
- BFnVga8BCACqU+th4Esy/c8BnvliFAjAfpzhI1wH76FD1MJPmAhA3DnX5JDORcgaCbPEwhLj
- 1xlwTgpeT+QfDmGJ5B5BlrrQFZVE1fChEjiJvyiSAO4yQPkrPVYTI7Xj34FnscPj/IrRUUka
- 68MlHxPtFnAHr25VIuOS41lmYKYNwPNLRz9Ik6DmeTG3WJO2BQRNvXA0pXrJH1fNGSsRb+pK
- EKHKtL1803x71zQxCwLh+zLP1iXHVM5j8gX9zqupigQR/Cel2XPS44zWcDW8r7B0q1eW4Jrv
- 0x19p4P923voqn+joIAostyNTUjCeSrUdKth9jcdlam9X2DziA/DHDFfS5eq4fEvABEBAAGJ
- ATwEGAEIACYCGwwWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCXZw1rgUJCWpOfwAKCRDCPZHz
- oSX+qFcEB/95cs8cM1OQdE/GgOfCGxwgckMeWyzOR7bkAWW0lDVp2hpgJuxBW/gyfmtBnUai
- fnggx3EE3ev8HTysZU9q0h+TJwwJKGv6sUc8qcTGFDtavnnl+r6xDUY7A6GvXEsSoCEEynby
- 72byGeSovfq/4AWGNPBG1L61Exl+gbqfvbECP3ziXnob009+z9I4qXodHSYINfAkZkA523JG
- ap12LndJeLk3gfWNZfXEWyGnuciRGbqESkhIRav8ootsCIops/SqXm0/k+Kcl4gGUO/iD/T5
- oagaDh0QtOd8RWSMwLxwn8uIhpH84Q4X1LadJ5NCgGa6xPP5qqRuiC+9gZqbq4Nj
-Message-ID: <1c01a538-2eb8-9e73-9145-93c9fd7c714a@gmx.com>
-Date:   Wed, 11 Dec 2019 15:35:26 +0800
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.2.2
+        Wed, 11 Dec 2019 03:33:29 -0500
+Received: from wout5-smtp.messagingengine.com ([64.147.123.21]:46851 "EHLO
+        wout5-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726845AbfLKId3 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 11 Dec 2019 03:33:29 -0500
+Received: from compute1.internal (compute1.nyi.internal [10.202.2.41])
+        by mailout.west.internal (Postfix) with ESMTP id 0E46DA44;
+        Wed, 11 Dec 2019 03:33:26 -0500 (EST)
+Received: from mailfrontend1 ([10.202.2.162])
+  by compute1.internal (MEProxy); Wed, 11 Dec 2019 03:33:27 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=themaw.net; h=
+        message-id:subject:from:to:cc:date:in-reply-to:references
+        :content-type:mime-version:content-transfer-encoding; s=fm1; bh=
+        d+aMhoCMHKwhU0Yog5Q637eo5HrGtRJqcgFIkPYzgqQ=; b=neKHizwYjxmlz+Ej
+        4yLXokYFF4rb8nSk1h9vI4NWyI+81ogxw5kq4byW3wZ4ov5uFX+bRVQ04u/26fqx
+        zNldCspr7AevYKCzjH2nw0TNixBpcKgoepPC9yAizGX9pT2Cdxr0lw4yFgZEUNwG
+        vDKKkptxQUWtERaY0OrmZOMf8sa4Q+VA1OzWaWr9Fb+usSr7NQ0ARTUq8+ZMQdHg
+        HSJS6v26VKomMm0HONKONN2OwGp0X3KHn3dLsKoEmvoY1Pdx7FsToH+Zk4DPaBtv
+        dYGBiRTy3Qs5Yo7AwFVMPpsMRfnO2dxi9CHR/x12sJkpRCoCSoq0/A1NAmbvoq3b
+        bZNzQg==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=cc:content-transfer-encoding:content-type
+        :date:from:in-reply-to:message-id:mime-version:references
+        :subject:to:x-me-proxy:x-me-proxy:x-me-sender:x-me-sender
+        :x-sasl-enc; s=fm1; bh=d+aMhoCMHKwhU0Yog5Q637eo5HrGtRJqcgFIkPYzg
+        qQ=; b=MP8rcdvYG1t42BUngM7qspBfCyPXmsQ+YYd7LIbf9XzbxAZCgF8tt7Qrs
+        3gqARH/wfMz9sQnM8wvmupy6ypFNy4zU0ex0RjhaxlwuvmRsm6RdpvidLGmLBjU6
+        8/2RC/hOcQLMk3zitUMFpgtlng4482+33GWHm2641r5vfZ+e/SZhTgZepF/y7Eww
+        73ZjYkh0/qsg5n9IaR1pdrrd9uWQFkD82DB9q82Y9zSr27GSxDa6izMiHv2FGKpT
+        wb5opqQgRI6pTKnRFTVbC1sKK6zmCjL4WMg+cZZQTipUZan3Ovzp0MPvJoKH0pFl
+        BjWnJKxQN1bx2pFnQX/xTjtg002aA==
+X-ME-Sender: <xms:1qnwXfjrJS8ipxlDqUmZlZrzuoUIQZac9uWcHXzpMYHlS0YOQ7Elpw>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedufedrudelgedguddugecutefuodetggdotefrod
+    ftvfcurfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfgh
+    necuuegrihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmd
+    enucfjughrpefkuffhvfffjghftggfggfgsehtkeertddtreejnecuhfhrohhmpefkrghn
+    ucfmvghnthcuoehrrghvvghnsehthhgvmhgrfidrnhgvtheqnecuffhomhgrihhnpehmrg
+    hrtgdrihhnfhhonecukfhppeduudekrddvtdelrddukeelrdduleeknecurfgrrhgrmhep
+    mhgrihhlfhhrohhmpehrrghvvghnsehthhgvmhgrfidrnhgvthenucevlhhushhtvghruf
+    hiiigvpedt
+X-ME-Proxy: <xmx:1qnwXerRn5EVXH4lnZKD1F2HvhuybjvyELwP_GUletCpwuYL-YxVWQ>
+    <xmx:1qnwXTVumIm8RUImAdSQPWFk6IEl1ybbNvs6Mr8JHSz89ADjZYn6nw>
+    <xmx:1qnwXXrfdPlAabfXOqmNW9KDJU4FsSyxgqgGEIQBiaFT-IESCtiJFQ>
+    <xmx:1qnwXV148GN6RiVWv2qfkzjHjYW33jv0f476WczpmVlgWNSTMACeLg>
+Received: from mickey.themaw.net (unknown [118.209.189.198])
+        by mail.messagingengine.com (Postfix) with ESMTPA id 7251F80060;
+        Wed, 11 Dec 2019 03:33:24 -0500 (EST)
+Message-ID: <381504a191f867dc53702454103b138eae94d61f.camel@themaw.net>
+Subject: Re: [PATCH v2] xfstests: xfs mount option sanity test
+From:   Ian Kent <raven@themaw.net>
+To:     Zorro Lang <zlang@redhat.com>,
+        "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Date:   Wed, 11 Dec 2019 16:33:20 +0800
+In-Reply-To: <20191211064216.GA14328@dhcp-12-102.nay.redhat.com>
+References: <20191030103410.2239-1-zlang@redhat.com>
+         <20191030163922.GB15224@magnolia>
+         <20191030232453.GD3802@dhcp-12-102.nay.redhat.com>
+         <20191211064216.GA14328@dhcp-12-102.nay.redhat.com>
+Content-Type: text/plain; charset="UTF-8"
+User-Agent: Evolution 3.32.5 (3.32.5-1.fc30) 
 MIME-Version: 1.0
-In-Reply-To: <6025418e-25ce-19f9-3c53-6b094609098c@oracle.com>
-Content-Type: multipart/signed; micalg=pgp-sha256;
- protocol="application/pgp-signature";
- boundary="u6AY7VeH0E4D3bfdHfNRDrYlmQMWQMa30"
-X-Provags-ID: V03:K1:7D53C+AzQYRp8M0i83/GQzKY/mwsdaSvs1drUbkGZgopN6ZicHB
- ZkQkQV1DbZlbiHnp6WoXBh3oOw+yCeRlthcM7+NQT3w7xwrXzRPTguTsdhFeFYwrSAi3qL8
- /PkP4EFHFqUC1QXohPkiACzMR79kfNX+A8MpsNUOpKNIlUE1asqfeLRAU8OZ1j8FJatNpJS
- 7aroCuCsTnXEo8353g0Dg==
-X-UI-Out-Filterresults: notjunk:1;V03:K0:MHILUlY8IPs=:vbKb9fFAiMfpy2OutBTYZ6
- gQr7BQpRc8tN9IzI5dKYbj1Ny1Sd2HZ8hhPqaW5q58iXHU4/Fda4Hc1uwmF95Geb264w+U7Zt
- V421e4rKBRlqBU0+5bolUuttrZI0J0gbkCUOaTmAZoTLA845Ibk6QrlY2zJo+um6L+g/hUfLx
- iE+JCgwAG9323WhheRZn/gCCpDhi6KzUFmXmRtW32SSdvGKP/k68pqRUDBgZQMTiFgAFoDV/i
- /oyUoQc9amj/VDC5SviOdPfQVlsyzzyMNLgjmaJ35sRu5UxRPYtv7DqHyyR3j11xHrOAMMdJO
- 3vtQOSQyiA/7lXcSqwqt8sESs94J5WJsa7VZi9svcOks7+lmSiqISfHoaT0jbMNzQykq3kh4B
- QTXvRiiB5pY01j+A911yTSgnwEeiNpHrVcHr/UUX1D+m+Ax/GNQc6+LEvq1hmb+ka7Rl1F9Fp
- BBoRsnxXVp2RsoWpFvjJbSD0ymPaFjxAEdJZ+YMRhRo0U5AmC2IGCiH3GLcrBL7ju6I2J4Ds4
- GnB4bg74LcyFwIspk2xvQ6ahz+EXZwAbz4QFaSCl4bYaBp/Oh1vbdhewZjMn+vg9LsGj7uEdN
- qjaprQFKgj3jugg6jCef9bR3hSWtXyyjWJ1OpSb6jdbYmHREjx5dwadO9R/LD6NVI3qMYJ2BD
- 24ak3+gNZ148O4S7bfRc58YgHarctKfZnoM5ZyUkinctlMQ3oO9HhCQvuD22OoXPQ4v1D+rxN
- gk5jU+E8y2zeVKC4NIUh9ptXPEbxSild4PCdM+D3b9JW2TlwXQYCGD1Yo1ta2RxcAw7Rx1Z41
- M8EuowETnqhIFkp6HZQzNqMgr3UeK23LfO/4senvtLQ/60IKmX1xR/AafYDiBfn/EtYfcU/VT
- tYSF5+KBkpry2LXM1qdVttv46BBxstbMsvODA1DvMqw1Td1FOzx/Av4YS6zJuvIDmUEOJnQy7
- MJX4DJU4ABKIUBAtJbFujS2irG0RFahSRmQr/7QyDlqTiWQjgIj2caWfnaL3KP11Bs3bVFL54
- IHrczh61omTz8Tcbm7hLU1cQBImPnXGVy6++q/QRMex7zwvDa5HNe9j/DSmpXDdBAoSok6QyB
- 8IyGHAPX20qGmgpWGOw6q4CitpGxdl+eLif3oUz81+iJiwHypxvGhtGA8e4+8My8j+W5J70be
- 37qWdRpI//1bOjQg8ySsbZ1G7IE60pZHYaaAF6AXJKIqgMAgvhxlwI6BIaEhfC5teShXABnsN
- aSHkEjWflNzDkpYCuKZGlYlc996q+YL9S8l1RonymlSc7wAj983xhXZEjAac=
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---u6AY7VeH0E4D3bfdHfNRDrYlmQMWQMa30
-Content-Type: multipart/mixed; boundary="ZAMLx6I0kUu60UYdHlf46pPArZLHfCA6s"
+On Wed, 2019-12-11 at 14:42 +0800, Zorro Lang wrote:
+> On Thu, Oct 31, 2019 at 07:24:53AM +0800, Zorro Lang wrote:
+> > On Wed, Oct 30, 2019 at 09:39:22AM -0700, Darrick J. Wong wrote:
+> > > On Wed, Oct 30, 2019 at 06:34:10PM +0800, Zorro Lang wrote:
+> > > > XFS is changing to suit the new mount API, so add this case to
+> > > > make
+> > > > sure the changing won't bring in regression issue on xfs mount
+> > > > option
+> > > > parse phase, and won't change some default behaviors either.
+> > > > 
+> > > > Signed-off-by: Zorro Lang <zlang@redhat.com>
+> > > > ---
+> > > > 
+> > > > Hi,
+> > > > 
+> > > > V2 did below changes:
+> > > > 1) Fix wrong output messages in _do_test function
+> > > 
+> > > Hmm, I still see this on 5.4-rc4:
+> > > 
+> > > +[FAILED]: mount /dev/loop0 /mnt/148.mnt -o logbsize=16384
+> > > +ERROR: expect there's logbsize=16k in , but found
+> >                                              ^^^
+> >                                              not
+> > 
+> > > +[FAILED]: mount /dev/loop0 /mnt/148.mnt -o logbsize=16k
+> > > +ERROR: expect there's logbsize=16k in , but found
+> >                                              ^^^
+> >                                              not
+> > 
+> > Sorry for this typo, I'll fix it.
+> > 
+> > > Oh, right, you're stripping out MKFS_OPTIONS and formatting a
+> > > loop
+> > > device, which on my system means you get rmapbt=1 by default and
+> > > whatnot.
+> > 
+> > Hmm...  why rmapbt=1 cause logbsize=16k can't be displayed in
+> > /proc/mounts?
+> > 
+> > Actually set MKFS_OPTIONS="" is not helpful for this case, due to I
+> > run
+> > "$MKFS_XFS_PROG -f $* $LOOP_DEV" directly. I strip out
+> > MKFS_OPTIONS,
+> > because I use SCRACH_DEV at first :)
+> > 
+> > > I think the larger problem here might be that now we have to
+> > > figure out
+> > > the special-casing of some of these options.
+> > 
+> > Maybe we should avoid the testing about those behaviors can't be
+> > sure, if we
+> > can't make it have a fixed output.
+> 
+> It's been long time passed. I still don't have a proper way to
+> reproduce and
+> avoid this failure you hit. Does anyone has a better idea for this
+> case?
 
---ZAMLx6I0kUu60UYdHlf46pPArZLHfCA6s
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: quoted-printable
+I think I understand the problem but correct me if I'm wrong.
 
+Couldn't you cover both cases, pass an additional parameter that
+says what the default is if it isn't specified as an option and
+don't fail if it is present in the options.
 
+You could check kernel versions to decide whether to pass the
+third parameter and so decide if you need to allow for a default
+option to account for the differing behaviour.
 
-On 2019/12/11 =E4=B8=8B=E5=8D=883:23, Anand Jain wrote:
->=20
->=20
-> On 12/11/19 3:08 PM, Qu Wenruo wrote:
->>
->>
->> On 2019/12/11 =E4=B8=8B=E5=8D=882:08, Anand Jain wrote:
->>> We changed the order of the allocation on the devices, and
->>> so the test cases which are hard coded to find specific stripe
->>> on the specific device gets failed. So fix it with the new layout.
->>>
->>> Signed-off-by: Anand Jain <anand.jain@oracle.com>
->>> ---
->>> Qu, Right we need to fix the dev in the test case as well.
->>> =C2=A0=C2=A0=C2=A0=C2=A0 I saw your patches bit late. Here is what I =
-had.. you may
->>> =C2=A0=C2=A0=C2=A0=C2=A0 use it. So I am marking this patch as RFC.
->>
->> I am crafting a better solution, to handle both behavior (and even
->> future behavior), by getting both devid and physical offset.
->=20
-> =C2=A0Yep helper function using either,
-> =C2=A0=C2=A0 devid and btrfs fi show
-> =C2=A0=C2=A0 or
-> =C2=A0=C2=A0 uuid=C2=A0 and blkid
->=20
-> =C2=A0would dynamically find the right device.
+Ian
+> 
+> Thanks,
+> Zorro
+> 
+> > Thanks,
+> > Zorro
+> > 
+> > > --D
+> > > 
+> > > > 2) Remove logbufs=N and logbsize=N default display test.
+> > > > Lastest upstream
+> > > >    kernel displays these options in /proc/mounts by default,
+> > > > but old kernel
+> > > >    doesn't show them except user indicate these options when
+> > > > mount xfs.
+> > > >    Refer to https://marc.info/?l=fstests&m=157199699615477&w=2
+> > > > 
+> > > > Thanks,
+> > > > Zorro
+> > > > 
+> > > >  tests/xfs/148     | 320
+> > > > ++++++++++++++++++++++++++++++++++++++++++++++
+> > > >  tests/xfs/148.out |   6 +
+> > > >  tests/xfs/group   |   1 +
+> > > >  3 files changed, 327 insertions(+)
+> > > >  create mode 100755 tests/xfs/148
+> > > >  create mode 100644 tests/xfs/148.out
+> > > > 
+> > > > diff --git a/tests/xfs/148 b/tests/xfs/148
+> > > > new file mode 100755
+> > > > index 00000000..a662f6f7
+> > > > --- /dev/null
+> > > > +++ b/tests/xfs/148
+> > > > @@ -0,0 +1,320 @@
+> > > > +#! /bin/bash
+> > > > +# SPDX-License-Identifier: GPL-2.0
+> > > > +# Copyright (c) 2019 Red Hat, Inc. All Rights Reserved.
+> > > > +#
+> > > > +# FS QA Test 148
+> > > > +#
+> > > > +# XFS mount options sanity check, refer to 'man 5 xfs'.
+> > > > +#
+> > > > +seq=`basename $0`
+> > > > +seqres=$RESULT_DIR/$seq
+> > > > +echo "QA output created by $seq"
+> > > > +
+> > > > +here=`pwd`
+> > > > +tmp=/tmp/$$
+> > > > +status=1	# failure is the default!
+> > > > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > > > +
+> > > > +_cleanup()
+> > > > +{
+> > > > +	cd /
+> > > > +	rm -f $tmp.*
+> > > > +	$UMOUNT_PROG $LOOP_MNT 2>/dev/null
+> > > > +	if [ -n "$LOOP_DEV" ];then
+> > > > +		_destroy_loop_device $LOOP_DEV 2>/dev/null
+> > > > +	fi
+> > > > +	if [ -n "$LOOP_SPARE_DEV" ];then
+> > > > +		_destroy_loop_device $LOOP_SPARE_DEV
+> > > > 2>/dev/null
+> > > > +	fi
+> > > > +	rm -f $LOOP_IMG
+> > > > +	rm -f $LOOP_SPARE_IMG
+> > > > +	rmdir $LOOP_MNT
+> > > > +}
+> > > > +
+> > > > +# get standard environment, filters and checks
+> > > > +. ./common/rc
+> > > > +. ./common/filter
+> > > > +
+> > > > +# remove previous $seqres.full before test
+> > > > +rm -f $seqres.full
+> > > > +
+> > > > +# real QA test starts here
+> > > > +_supported_fs xfs
+> > > > +_supported_os Linux
+> > > > +_require_test
+> > > > +_require_loop
+> > > > +_require_xfs_io_command "falloc"
+> > > > +
+> > > > +LOOP_IMG=$TEST_DIR/$seq.dev
+> > > > +LOOP_SPARE_IMG=$TEST_DIR/$seq.logdev
+> > > > +LOOP_MNT=$TEST_DIR/$seq.mnt
+> > > > +
+> > > > +echo "** create loop device"
+> > > > +$XFS_IO_PROG -f -c "falloc 0 1g" $LOOP_IMG
+> > > > +LOOP_DEV=`_create_loop_device $LOOP_IMG`
+> > > > +
+> > > > +echo "** create loop log device"
+> > > > +$XFS_IO_PROG -f -c "falloc 0 512m" $LOOP_SPARE_IMG
+> > > > +LOOP_SPARE_DEV=`_create_loop_device $LOOP_SPARE_IMG`
+> > > > +
+> > > > +echo "** create loop mount point"
+> > > > +rmdir $LOOP_MNT 2>/dev/null
+> > > > +mkdir -p $LOOP_MNT || _fail "cannot create loopback mount
+> > > > point"
+> > > > +
+> > > > +# avoid the effection from MKFS_OPTIONS
+> > > > +MKFS_OPTIONS=""
+> > > > +do_mkfs()
+> > > > +{
+> > > > +	$MKFS_XFS_PROG -f $* $LOOP_DEV | _filter_mkfs
+> > > > >$seqres.full 2>$tmp.mkfs
+> > > > +	if [ "${PIPESTATUS[0]}" -ne 0 ]; then
+> > > > +		_fail "Fails on _mkfs_dev $* $LOOP_DEV"
+> > > > +	fi
+> > > > +	. $tmp.mkfs
+> > > > +}
+> > > > +
+> > > > +is_dev_mounted()
+> > > > +{
+> > > > +	findmnt --source $LOOP_DEV >/dev/null
+> > > > +	return $?
+> > > > +}
+> > > > +
+> > > > +get_mount_info()
+> > > > +{
+> > > > +	findmnt --source $LOOP_DEV -o OPTIONS -n
+> > > > +}
+> > > > +
+> > > > +force_unmount()
+> > > > +{
+> > > > +	$UMOUNT_PROG $LOOP_MNT >/dev/null 2>&1
+> > > > +}
+> > > > +
+> > > > +# _do_test <mount options> <should be mounted?> [<key string>
+> > > > <key should be found?>]
+> > > > +_do_test()
+> > > > +{
+> > > > +	local opts="$1"
+> > > > +	local mounted="$2"	# pass or fail
+> > > > +	local key="$3"
+> > > > +	local found="$4"	# true or false
+> > > > +	local rc
+> > > > +	local info
+> > > > +
+> > > > +	# mount test
+> > > > +	_mount $LOOP_DEV $LOOP_MNT $opts 2>/dev/null
+> > > > +	rc=$?
+> > > > +	if [ $rc -eq 0 ];then
+> > > > +		if [ "${mounted}" = "fail" ];then
+> > > > +			echo "[FAILED]: mount $LOOP_DEV
+> > > > $LOOP_MNT $opts"
+> > > > +			echo "ERROR: expect ${mounted}, but
+> > > > pass"
+> > > > +			return 1
+> > > > +		fi
+> > > > +		is_dev_mounted
+> > > > +		if [ $? -ne 0 ];then
+> > > > +			echo "[FAILED]: mount $LOOP_DEV
+> > > > $LOOP_MNT $opts"
+> > > > +			echo "ERROR: fs not mounted even mount
+> > > > return 0"
+> > > > +			return 1
+> > > > +		fi
+> > > > +	else
+> > > > +		if [ "${mount_ret}" = "pass" ];then
+> > > > +			echo "[FAILED]: mount $LOOP_DEV
+> > > > $LOOP_MNT $opts"
+> > > > +			echo "ERROR: expect ${mounted}, but
+> > > > fail"
+> > > > +			return 1
+> > > > +		fi
+> > > > +		is_dev_mounted
+> > > > +		if [ $? -eq 0 ];then
+> > > > +			echo "[FAILED]: mount $LOOP_DEV
+> > > > $LOOP_MNT $opts"
+> > > > +			echo "ERROR: fs is mounted even mount
+> > > > return non-zero"
+> > > > +			return 1
+> > > > +		fi
+> > > > +	fi
+> > > > +
+> > > > +	# Skip below checking if "$key" argument isn't
+> > > > specified
+> > > > +	if [ -z "$key" ];then
+> > > > +		return 0
+> > > > +	fi
+> > > > +	# Check the mount options after fs mounted.
+> > > > +	info=`get_mount_info`
+> > > > +	echo $info | grep -q "${key}"
+> > > > +	rc=$?
+> > > > +	if [ $rc -eq 0 ];then
+> > > > +		if [ "$found" != "true" ];then
+> > > > +			echo "[FAILED]: mount $LOOP_DEV
+> > > > $LOOP_MNT $opts"
+> > > > +			echo "ERROR: expect there's not $key in
+> > > > $info, but not found"
+> > > > +			return 1
+> > > > +		fi
+> > > > +	else
+> > > > +		if [ "$found" != "false" ];then
+> > > > +			echo "[FAILED]: mount $LOOP_DEV
+> > > > $LOOP_MNT $opts"
+> > > > +			echo "ERROR: expect there's $key in
+> > > > $info, but found"
+> > > > +			return 1
+> > > > +		fi
+> > > > +	fi
+> > > > +
+> > > > +	return 0
+> > > > +}
+> > > > +
+> > > > +do_test()
+> > > > +{
+> > > > +	# force unmount before testing
+> > > > +	force_unmount
+> > > > +	_do_test "$@"
+> > > > +	# force unmount after testing
+> > > > +	force_unmount
+> > > > +}
+> > > > +
+> > > > +echo "** start xfs mount testing ..."
+> > > > +# Test allocsize=size
+> > > > +# Valid values for this option are page size (typically 4KiB)
+> > > > through to 1GiB
+> > > > +do_mkfs
+> > > > +if [ $dbsize -ge 1024 ];then
+> > > > +	blsize="$((dbsize / 1024))k"
+> > > > +fi
+> > > > +do_test "" pass "allocsize" "false"
+> > > > +do_test "-o allocsize=$blsize" pass "allocsize=$blsize" "true"
+> > > > +do_test "-o allocsize=1048576k" pass "allocsize=1048576k"
+> > > > "true"
+> > > > +do_test "-o allocsize=$((dbsize / 2))" fail
+> > > > +do_test "-o allocsize=2g" fail
+> > > > +
+> > > > +# Test attr2
+> > > > +do_mkfs -m crc=1
+> > > > +do_test "" pass "attr2" "true"
+> > > > +do_test "-o attr2" pass "attr2" "true"
+> > > > +do_test "-o noattr2" fail
+> > > > +do_mkfs -m crc=0
+> > > > +do_test "" pass "attr2" "true"
+> > > > +do_test "-o attr2" pass "attr2" "true"
+> > > > +do_test "-o noattr2" pass "attr2" "false"
+> > > > +
+> > > > +# Test discard
+> > > > +do_mkfs
+> > > > +do_test "" pass "discard" "false"
+> > > > +do_test "-o discard" pass "discard" "true"
+> > > > +do_test "-o nodiscard" pass "discard" "false"
+> > > > +
+> > > > +# Test grpid|bsdgroups|nogrpid|sysvgroups
+> > > > +do_test "" pass "grpid" "false"
+> > > > +do_test "-o grpid" pass "grpid" "true"
+> > > > +do_test "-o bsdgroups" pass "grpid" "true"
+> > > > +do_test "-o nogrpid" pass "grpid" "false"
+> > > > +do_test "-o sysvgroups" pass "grpid" "false"
+> > > > +
+> > > > +# Test filestreams
+> > > > +do_test "" pass "filestreams" "false"
+> > > > +do_test "-o filestreams" pass "filestreams" "true"
+> > > > +
+> > > > +# Test ikeep
+> > > > +do_test "" pass "ikeep" "false"
+> > > > +do_test "-o ikeep" pass "ikeep" "true"
+> > > > +do_test "-o noikeep" pass "ikeep" "false"
+> > > > +
+> > > > +# Test inode32|inode64
+> > > > +do_test "" pass "inode64" "true"
+> > > > +do_test "-o inode32" pass "inode32" "true"
+> > > > +do_test "-o inode64" pass "inode64" "true"
+> > > > +
+> > > > +# Test largeio
+> > > > +do_test "" pass "largeio" "false"
+> > > > +do_test "-o largeio" pass "largeio" "true"
+> > > > +do_test "-o nolargeio" pass "largeio" "false"
+> > > > +
+> > > > +# Test logbufs=value. Valid numbers range from 2–8 inclusive.
+> > > > +# New kernel (refer to 4f62282a3696 xfs: cleanup
+> > > > xlog_get_iclog_buffer_size)
+> > > > +# prints "logbufs=N" in /proc/mounts, but old kernel not. So
+> > > > the default
+> > > > +# 'display' about logbufs can't be expected, disable this
+> > > > test.
+> > > > +#do_test "" pass "logbufs" "false"
+> > > > +do_test "-o logbufs=8" pass "logbufs=8" "true"
+> > > > +do_test "-o logbufs=2" pass "logbufs=2" "true"
+> > > > +do_test "-o logbufs=1" fail
+> > > > +do_test "-o logbufs=9" fail
+> > > > +do_test "-o logbufs=99999999999999" fail
+> > > > +
+> > > > +# Test logbsize=value.
+> > > > +do_mkfs -m crc=1 -l version=2
+> > > > +# New kernel (refer to 4f62282a3696 xfs: cleanup
+> > > > xlog_get_iclog_buffer_size)
+> > > > +# prints "logbsize=N" in /proc/mounts, but old kernel not. So
+> > > > the default
+> > > > +# 'display' about logbsize can't be expected, disable this
+> > > > test.
+> > > > +#do_test "" pass "logbsize" "false"
+> > > > +do_test "-o logbsize=16384" pass "logbsize=16k" "true"
+> > > > +do_test "-o logbsize=16k" pass "logbsize=16k" "true"
+> > > > +do_test "-o logbsize=32k" pass "logbsize=32k" "true"
+> > > > +do_test "-o logbsize=64k" pass "logbsize=64k" "true"
+> > > > +do_test "-o logbsize=128k" pass "logbsize=128k" "true"
+> > > > +do_test "-o logbsize=256k" pass "logbsize=256k" "true"
+> > > > +do_test "-o logbsize=8k" fail
+> > > > +do_test "-o logbsize=512k" fail
+> > > > +do_mkfs -m crc=0 -l version=1
+> > > > +# New kernel (refer to 4f62282a3696 xfs: cleanup
+> > > > xlog_get_iclog_buffer_size)
+> > > > +# prints "logbsize=N" in /proc/mounts, but old kernel not. So
+> > > > the default
+> > > > +# 'display' about logbsize can't be expected, disable this
+> > > > test.
+> > > > +#do_test "" pass "logbsize" "false"
+> > > > +do_test "-o logbsize=16384" pass "logbsize=16k" "true"
+> > > > +do_test "-o logbsize=16k" pass "logbsize=16k" "true"
+> > > > +do_test "-o logbsize=32k" pass "logbsize=32k" "true"
+> > > > +do_test "-o logbsize=64k" fail
+> > > > +
+> > > > +# Test logdev
+> > > > +do_mkfs
+> > > > +do_test "" pass "logdev" "false"
+> > > > +do_test "-o logdev=$LOOP_SPARE_DEV" fail
+> > > > +do_mkfs -l logdev=$LOOP_SPARE_DEV
+> > > > +do_test "-o logdev=$LOOP_SPARE_DEV" pass
+> > > > "logdev=$LOOP_SPARE_DEV" "true"
+> > > > +do_test "" fail
+> > > > +
+> > > > +# Test noalign
+> > > > +do_mkfs
+> > > > +do_test "" pass "noalign" "false"
+> > > > +do_test "-o noalign" pass "noalign" "true"
+> > > > +
+> > > > +# Test norecovery
+> > > > +do_test "" pass "norecovery" "false"
+> > > > +do_test "-o norecovery,ro" pass "norecovery" "true"
+> > > > +do_test "-o norecovery" fail
+> > > > +
+> > > > +# Test nouuid
+> > > > +do_test "" pass "nouuid" "false"
+> > > > +do_test "-o nouuid" pass "nouuid" "true"
+> > > > +
+> > > > +# Test noquota
+> > > > +do_test "" pass "noquota" "true"
+> > > > +do_test "-o noquota" pass "noquota" "true"
+> > > > +
+> > > > +# Test uquota/usrquota/quota/uqnoenforce/qnoenforce
+> > > > +do_test "" pass "usrquota" "false"
+> > > > +do_test "-o uquota" pass "usrquota" "true"
+> > > > +do_test "-o usrquota" pass "usrquota" "true"
+> > > > +do_test "-o quota" pass "usrquota" "true"
+> > > > +do_test "-o uqnoenforce" pass "usrquota" "true"
+> > > > +do_test "-o qnoenforce" pass "usrquota" "true"
+> > > > +
+> > > > +# Test gquota/grpquota/gqnoenforce
+> > > > +do_test "" pass "grpquota" "false"
+> > > > +do_test "-o gquota" pass "grpquota" "true"
+> > > > +do_test "-o grpquota" pass "grpquota" "true"
+> > > > +do_test "-o gqnoenforce" pass "gqnoenforce" "true"
+> > > > +
+> > > > +# Test pquota/prjquota/pqnoenforce
+> > > > +do_test "" pass "prjquota" "false"
+> > > > +do_test "-o pquota" pass "prjquota" "true"
+> > > > +do_test "-o prjquota" pass "prjquota" "true"
+> > > > +do_test "-o pqnoenforce" pass "pqnoenforce" "true"
+> > > > +
+> > > > +# Test sunit=value and swidth=value
+> > > > +do_mkfs -d sunit=128,swidth=128
+> > > > +do_test "-o sunit=8,swidth=8" pass "sunit=8,swidth=8" "true"
+> > > > +do_test "-o sunit=8,swidth=64" pass "sunit=8,swidth=64" "true"
+> > > > +do_test "-o sunit=128,swidth=128" pass "sunit=128,swidth=128"
+> > > > "true"
+> > > > +do_test "-o sunit=256,swidth=256" pass "sunit=256,swidth=256"
+> > > > "true"
+> > > > +do_test "-o sunit=2,swidth=2" fail
+> > > > +
+> > > > +# Test swalloc
+> > > > +do_mkfs
+> > > > +do_test "" pass "swalloc" "false"
+> > > > +do_test "-o swalloc" pass "swalloc" "true"
+> > > > +
+> > > > +# Test wsync
+> > > > +do_test "" pass "wsync" "false"
+> > > > +do_test "-o wsync" pass "wsync" "true"
+> > > > +
+> > > > +echo "** end of testing"
+> > > > +# success, all done
+> > > > +status=0
+> > > > +exit
+> > > > diff --git a/tests/xfs/148.out b/tests/xfs/148.out
+> > > > new file mode 100644
+> > > > index 00000000..a71d9231
+> > > > --- /dev/null
+> > > > +++ b/tests/xfs/148.out
+> > > > @@ -0,0 +1,6 @@
+> > > > +QA output created by 148
+> > > > +** create loop device
+> > > > +** create loop log device
+> > > > +** create loop mount point
+> > > > +** start xfs mount testing ...
+> > > > +** end of testing
+> > > > diff --git a/tests/xfs/group b/tests/xfs/group
+> > > > index f4ebcd8c..019aebad 100644
+> > > > --- a/tests/xfs/group
+> > > > +++ b/tests/xfs/group
+> > > > @@ -145,6 +145,7 @@
+> > > >  145 dmapi
+> > > >  146 dmapi
+> > > >  147 dmapi
+> > > > +148 auto quick mount
+> > > >  150 dmapi
+> > > >  151 dmapi
+> > > >  152 dmapi
+> > > > -- 
+> > > > 2.20.1
+> > > > 
 
-My current helper is going to rely on the fact that all mkfs.btrfs
-assigned devid sequentially.
-Which means "mkfs.btrfs -f $dev1 $dev2" will always assigned devid 1 to
-$dev1, and devid 2 to $dev2.
-
-As long as we don't touch that part, we should be OK.
-(And I really hope we won't touch that part).
-
->=20
-> =C2=A0I am ok with either.
->=20
->> And I tend to remove the fail_make_request requirement from some tests=
-,
->> and direct read with multiple try should be enough to trigger repair f=
-or
->> test btrfs/142 and btrfs/143.
->>
->=20
->> In fact, I don't believe your current fix is good enough to handle bot=
-h
->> old and new mkfs.btrfs.
->=20
-> =C2=A0It was designed to handle only forward compatible.
-
-Then both Oracle and SUSE QA people will hate such tests...
-
-Thanks,
-Qu
-
->=20
-> Thanks, Anand
->=20
->> So we need to investigate more for raid repair test cases to make them=
-
->> future proof.
->>
->> Thanks,
->> Qu
->>> Thanks.
->>>
->>> =C2=A0 tests/btrfs/158=C2=A0=C2=A0=C2=A0=C2=A0 | 10 +++++-----
->>> =C2=A0 tests/btrfs/158.out |=C2=A0 4 ++--
->>> =C2=A0 2 files changed, 7 insertions(+), 7 deletions(-)
->>>
->>> diff --git a/tests/btrfs/158 b/tests/btrfs/158
->>> index 603e8bea9b7e..7f2066384f55 100755
->>> --- a/tests/btrfs/158
->>> +++ b/tests/btrfs/158
->>> @@ -76,14 +76,14 @@ _scratch_unmount
->>> =C2=A0 =C2=A0 stripe_0=3D`get_physical_stripe0`
->>> =C2=A0 stripe_1=3D`get_physical_stripe1`
->>> -dev4=3D`echo $SCRATCH_DEV_POOL | awk '{print $4}'`
->>> -dev3=3D`echo $SCRATCH_DEV_POOL | awk '{print $3}'`
->>> +dev1=3D`echo $SCRATCH_DEV_POOL | awk '{print $1}'`
->>> +dev2=3D`echo $SCRATCH_DEV_POOL | awk '{print $2}'`
->>> =C2=A0 =C2=A0 # step 2: corrupt the 1st and 2nd stripe (stripe 0 and =
-1)
->>> -echo "step 2......simulate bitrot at offset $stripe_0 of
->>> device_4($dev4) and offset $stripe_1 of device_3($dev3)" >>$seqres.fu=
-ll
->>> +echo "step 2......simulate bitrot at offset $stripe_0 of
->>> device_1($dev1) and offset $stripe_1 of device_2($dev2)" >>$seqres.fu=
-ll
->>> =C2=A0 -$XFS_IO_PROG -f -d -c "pwrite -S 0xbb $stripe_0 64K" $dev4 |
->>> _filter_xfs_io
->>> -$XFS_IO_PROG -f -d -c "pwrite -S 0xbb $stripe_1 64K" $dev3 |
->>> _filter_xfs_io
->>> +$XFS_IO_PROG -f -d -c "pwrite -S 0xbb $stripe_0 64K" $dev1 |
->>> _filter_xfs_io
->>> +$XFS_IO_PROG -f -d -c "pwrite -S 0xbb $stripe_1 64K" $dev2 |
->>> _filter_xfs_io
->>> =C2=A0 =C2=A0 # step 3: scrub filesystem to repair the bitrot
->>> =C2=A0 echo "step 3......repair the bitrot" >> $seqres.full
->>> diff --git a/tests/btrfs/158.out b/tests/btrfs/158.out
->>> index 1f5ad3f76917..5cdaeb238c62 100644
->>> --- a/tests/btrfs/158.out
->>> +++ b/tests/btrfs/158.out
->>> @@ -1,9 +1,9 @@
->>> =C2=A0 QA output created by 158
->>> =C2=A0 wrote 131072/131072 bytes at offset 0
->>> =C2=A0 XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
->>> -wrote 65536/65536 bytes at offset 9437184
->>> +wrote 65536/65536 bytes at offset 22020096
->>> =C2=A0 XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
->>> -wrote 65536/65536 bytes at offset 9437184
->>> +wrote 65536/65536 bytes at offset 1048576
->>> =C2=A0 XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
->>> =C2=A0 0000000 aaaa aaaa aaaa aaaa aaaa aaaa aaaa aaaa
->>> =C2=A0 *
->>>
->>
-
-
---ZAMLx6I0kUu60UYdHlf46pPArZLHfCA6s--
-
---u6AY7VeH0E4D3bfdHfNRDrYlmQMWQMa30
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAEBCAAdFiEELd9y5aWlW6idqkLhwj2R86El/qgFAl3wnD4ACgkQwj2R86El
-/qhi4QgApvHOy1tHXKDg4U/7JQCpkiFWSr/OkuVI4h/Txb3E8Pu0xLVwPwyQpBgE
-nre5eb8VJhoGOMo6xjEu3SHrej2pRJ1ghrMikXMMrerhrLsJDQiMpF1H4iRMKFtq
-N4GuMEAwmYiFq5ur+oQW/AkHVei3VTG+fVS+Unu4yNxOV8oT8tWjneuY4jMDo21C
-uhj+XFOgdQACToDHugq4f9YT3sQn3DXiSuk0iQw85lTZ89/C2MaLlhQKV8pSHD8b
-VctqmgMQzLwKWem2HPMYypPH2fhlJiyQ7M73tFoJIWX4vvNfT1YbcVMuao7KQsdk
-G3FCGF+lqs3QizBjFCQLAohEJrUK0w==
-=onVz
------END PGP SIGNATURE-----
-
---u6AY7VeH0E4D3bfdHfNRDrYlmQMWQMa30--
