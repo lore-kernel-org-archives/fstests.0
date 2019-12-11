@@ -2,67 +2,72 @@ Return-Path: <SRS0=288U=2B=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
+X-Spam-Status: No, score=-3.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=no
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0445CC2D0C6
-	for <linux-fstests@archiver.kernel.org>; Wed, 11 Dec 2019 09:50:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 41188C43603
+	for <linux-fstests@archiver.kernel.org>; Wed, 11 Dec 2019 10:40:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id D496A214D8
-	for <linux-fstests@archiver.kernel.org>; Wed, 11 Dec 2019 09:50:22 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0A2B421D7D
+	for <linux-fstests@archiver.kernel.org>; Wed, 11 Dec 2019 10:40:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728550AbfLKJuW (ORCPT
+        id S1728888AbfLKKki (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 11 Dec 2019 04:50:22 -0500
-Received: from mga12.intel.com ([192.55.52.136]:42696 "EHLO mga12.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727493AbfLKJuW (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 11 Dec 2019 04:50:22 -0500
-X-Amp-Result: UNSCANNABLE
-X-Amp-File-Uploaded: False
-Received: from orsmga004.jf.intel.com ([10.7.209.38])
-  by fmsmga106.fm.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 11 Dec 2019 01:50:21 -0800
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.69,301,1571727600"; 
-   d="scan'208";a="363545358"
-Received: from unknown (HELO localhost) ([10.237.50.137])
-  by orsmga004.jf.intel.com with ESMTP; 11 Dec 2019 01:50:19 -0800
-Date:   Wed, 11 Dec 2019 11:50:19 +0200
-From:   Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>
-To:     Eric Biggers <ebiggers@kernel.org>, dhowells@redhat.com
-Cc:     fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org,
-        keyrings@vger.kernel.org
-Subject: Re: [RFC PATCH 0/3] xfstests: test adding filesystem-level fscrypt
- key via key_id
-Message-ID: <20191211095019.GA7077@linux.intel.com>
-References: <20191119223130.228341-1-ebiggers@kernel.org>
- <20191127204536.GA12520@linux.intel.com>
- <20191127225759.GA303989@sol.localdomain>
+        Wed, 11 Dec 2019 05:40:38 -0500
+Received: from mx2.suse.de ([195.135.220.15]:58578 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1728030AbfLKKki (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 11 Dec 2019 05:40:38 -0500
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+Received: from relay2.suse.de (unknown [195.135.220.254])
+        by mx1.suse.de (Postfix) with ESMTP id 8A6A2AD55;
+        Wed, 11 Dec 2019 10:40:36 +0000 (UTC)
+From:   Qu Wenruo <wqu@suse.com>
+To:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Subject: [PATCH 0/3] fstests: btrfs/15[78] btrfs/14[23]: Use more accurate devid/phsyical for corruption
+Date:   Wed, 11 Dec 2019 18:40:26 +0800
+Message-Id: <20191211104029.25541-1-wqu@suse.com>
+X-Mailer: git-send-email 2.24.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20191127225759.GA303989@sol.localdomain>
-Organization: Intel Finland Oy - BIC 0357606-4 - Westendinkatu 7, 02160 Espoo
-User-Agent: Mutt/1.10.1 (2018-07-13)
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Nov 27, 2019 at 02:57:59PM -0800, Eric Biggers wrote:
-> You could manually do what the xfstest does, which is more or less the following
-> (requires xfs_io patched with https://patchwork.kernel.org/patch/11252795/):
+Btrfs-progs commit c501c9e3b816 ("btrfs-progs: mkfs: match devid order
+to the stripe index") changed the chunk layout, making it more human
+friendly for manually offset calculation.
 
-I postpone testing/reviewing this patch up until its depedencies are in
-the mainline.
+However btrfs/14[23] btrfs/15[78] are using hard-coded devid sequence
+for corruption, thus they can't stand such change and fail.
 
-I'll add these to my tree as soon as we have addressed a critical bug
-in tpm_tis:
+This patchset will handle such problems in patch 2 and 3, to use more
+accurate helper to replace the hard-coded one.
 
-1. KEYS: remove CONFIG_KEYS_COMPAT
-2. KEYS: asymmetric: return ENOMEM if akcipher_request_alloc() fails
+And the first patch will address a bad _notrun messages, which is mostly
+related to btrfs/14[23].
 
-Just mentioning that I haven't forgotten them.
+Qu Wenruo (3):
+  fstests: common: Use more accurate kernel config for
+    _require_fail_make_request
+  fstests: btrfs/14[23]: Use proper help to get both devid and physical
+    offset for corruption.
+  fstests: btrfs/15[78]: Use proper helper to get both devid and
+    physical offset for corruption
 
-/Jarkko
+ common/rc           |  2 +-
+ tests/btrfs/142     | 50 +++++++++++++++++++++++++++++-------------
+ tests/btrfs/142.out |  2 --
+ tests/btrfs/143     | 48 +++++++++++++++++++++++++++++-----------
+ tests/btrfs/143.out |  2 --
+ tests/btrfs/157     | 53 +++++++++++++++++++++++++++++----------------
+ tests/btrfs/157.out |  4 ----
+ tests/btrfs/158     | 48 +++++++++++++++++++++++++---------------
+ tests/btrfs/158.out |  4 ----
+ 9 files changed, 136 insertions(+), 77 deletions(-)
+
+-- 
+2.23.0
+
