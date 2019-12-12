@@ -2,89 +2,110 @@ Return-Path: <SRS0=/sVf=2C=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.2 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EF948C43603
-	for <linux-fstests@archiver.kernel.org>; Thu, 12 Dec 2019 20:16:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4DA4FC43603
+	for <linux-fstests@archiver.kernel.org>; Thu, 12 Dec 2019 21:55:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id A941521556
-	for <linux-fstests@archiver.kernel.org>; Thu, 12 Dec 2019 20:16:20 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1C9FC2253D
+	for <linux-fstests@archiver.kernel.org>; Thu, 12 Dec 2019 21:55:28 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="makzMCAq"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="FRBAbE33"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730634AbfLLUQU (ORCPT
+        id S1731187AbfLLVz1 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 12 Dec 2019 15:16:20 -0500
-Received: from mail-qk1-f195.google.com ([209.85.222.195]:44718 "EHLO
-        mail-qk1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726814AbfLLUQT (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 12 Dec 2019 15:16:19 -0500
-Received: by mail-qk1-f195.google.com with SMTP id w127so2677143qkb.11
-        for <fstests@vger.kernel.org>; Thu, 12 Dec 2019 12:16:19 -0800 (PST)
+        Thu, 12 Dec 2019 16:55:27 -0500
+Received: from mail-io1-f67.google.com ([209.85.166.67]:33094 "EHLO
+        mail-io1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1730784AbfLLVz1 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 12 Dec 2019 16:55:27 -0500
+Received: by mail-io1-f67.google.com with SMTP id s25so295487iob.0
+        for <fstests@vger.kernel.org>; Thu, 12 Dec 2019 13:55:27 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=PwOtkCQ0EU+X8nv+fgjaYQ3XAmjgThjZRgqTHikICJk=;
-        b=makzMCAq5DMjIwu7WPNgaIR3phMa0wYDdZza1XRxLpwgDVJWDH5uvBLOV3cNNEQlO7
-         r4gDXaiwCg1TcQY0uoN7aQzVkGdyG+aI+9JFES4ddkvWbQG7goGp0U9jgfrPPQZVuks9
-         puP/OLbI+z+4EGFwJzj2rRApjxfxNuvTm0FscoXAuduQWe7fIW5LxfK3mWR8MBifDLkx
-         9LoAvORnXAemyLDEFauVlDhKiF/3qhy3Uw4Fn4auYN93UzGwytG+71McWQQtKCnwvL+/
-         8Yk20eDhAJ3fCTKDfJ9a+BCGTSVqpHRsdC0Kj8kF8QIQo72L8sPnse/YwMCwB1ER3z/B
-         R9pQ==
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=1DSdSRi2qXGSpbBPqJwoIrcfYipBfThdv3SdpHmdfe0=;
+        b=FRBAbE33ERrggzr3cxWD5VT2KpNbtuT118eOf1AK+Htv7iBvbg9TPvHcRToQyn0oNI
+         5Eap6OBirgCSGM0JomTw0LeI5EGQuO0NOhyQD14nMQ3Ok2DCywk2GaLOAdqmtM7GvBGj
+         JujpygaqB9/K9MHJVihQo2t/Lo0o1JXRZlsouAS0x2QvEeGWSLHjvGn4X9SfbkARXJye
+         Vq4kMP1NAsMfgu+C5RgMk/zLKifayOF/zrFRZrl2FSHUCcOnjo/Rvf+F90MaBNTf/cQK
+         XZXVtk9aNDU09qU96mEP6cG5F7SByuDh0yBhCU8ZCUkzH4HrH0973Unjr4yAHZhohCaf
+         xP3w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=PwOtkCQ0EU+X8nv+fgjaYQ3XAmjgThjZRgqTHikICJk=;
-        b=qfUZwFZFcErbgA5NOfQdUPJZlr5Il5PmFt+DgWQ0tDjANU1o/f+9+z055vd3kCz+JN
-         wZrvFnyiB7A8+/VKxrrV3HxhPO+faNPopS9WzYStqqziOJP1E14B5wxEcu8o8y6bf0Ae
-         d6SSHVbpDKgXc0B8UgwK8XODLZQiMU7yUpWyIohfVdlXAE3EYOA30wrnTroTfzkeWgez
-         6sIDLdP2Gy53B/kCGIHHM28mGAR59O4NvXYG7f3mSvymrT0BvgQC+6SxNVlDOANeJSur
-         HmMH06JOa3k1eUUFn5W7+y9TIjpxyd8yIqbnFT90PbDdSe9peChnzdx/08whgCLF8BRD
-         dxpw==
-X-Gm-Message-State: APjAAAXpXYJesSeTfZk8/TZXe19//fSsxEV86awODXpjwKI4IVkZF8Vn
-        x8uQGta1norgW6t+T/sM8w4TMQ==
-X-Google-Smtp-Source: APXvYqy92fBkJeMSKaY8exs4q7XhJXGuHLRQbW+wTe6xtiMNnL7lJNIArDhswluisERiFMt2d9yAng==
-X-Received: by 2002:a37:b2c7:: with SMTP id b190mr10347307qkf.329.1576181778535;
-        Thu, 12 Dec 2019 12:16:18 -0800 (PST)
-Received: from ?IPv6:2620:10d:c0a8:1102:ce0:3629:8daa:1271? ([2620:10d:c091:480::7783])
-        by smtp.gmail.com with ESMTPSA id b3sm2517504qtr.86.2019.12.12.12.16.15
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 12 Dec 2019 12:16:17 -0800 (PST)
-Subject: Re: [PATCH fstests] btrfs/187: require 8GB scratch dev
-To:     Johannes Thumshirn <jthumshirn@suse.de>, fstests@vger.kernel.org
-Cc:     Linux BTRFS Mailinglist <linux-btrfs@vger.kernel.org>,
-        jth@kernel.org, Filipe Manana <fdmanana@suse.com>
-References: <20191212074543.30628-1-jthumshirn@suse.de>
-From:   Josef Bacik <josef@toxicpanda.com>
-Message-ID: <0cc6f157-0416-bce2-296b-d01a813199fd@toxicpanda.com>
-Date:   Thu, 12 Dec 2019 15:16:14 -0500
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:68.0)
- Gecko/20100101 Thunderbird/68.3.0
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=1DSdSRi2qXGSpbBPqJwoIrcfYipBfThdv3SdpHmdfe0=;
+        b=VIvKtGToFa1gX1IU2u/0OHUmbOYy3yKMIgTi43CQxILd0xdl/Y0ln3Yv9V6F67S0Iq
+         J4MD0VNqRx+HFoRrey9Ovo6tbnFX2Nb92zb2Sbi6MfJ0zDMSPZEAAfAyIMjMIdwq6rhl
+         XX8nTbkDpX7yT3VYHk0ng0oeH5ripns3gkr9FOyKQVUrDsPANPtaLwstRblrFP37G47D
+         1GEfVJGuXPLWH0s8R6uGIpHHFjfoH7h12S0lCfPIgTSVQtWhx4mBWoOa6IRTEJUhcykX
+         73+6I+WlewDd5Yw6LqQeCrduAnmQCawxv4mD7IwnsLqoYr52Kd7i4SVxcpsjMK/OlECX
+         ldtg==
+X-Gm-Message-State: APjAAAWlcFyxsAse9/mEheANFMrp2kcGgfw/wHbP3SHah1UYA/c+9Dc2
+        bfF1PJ7n00GolJ7cE/UNbXOW4+F5GIxoR3JtoWlO/Q==
+X-Google-Smtp-Source: APXvYqw0LWL2gmoLFzEb2aG7Bbr2KbTa9axNMuz5D8p2xiTAp/ArbEKA5/Vf4DRvWpi+nrDmIv8K9FgJ9j/BjA9yGRY=
+X-Received: by 2002:a6b:8b15:: with SMTP id n21mr4980821iod.110.1576187726557;
+ Thu, 12 Dec 2019 13:55:26 -0800 (PST)
 MIME-Version: 1.0
-In-Reply-To: <20191212074543.30628-1-jthumshirn@suse.de>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+References: <20190719041231.26500-1-deepa.kernel@gmail.com> <CAOQ4uxhxVKhUh_P_NffLbGScpiL0wOrCTLwWJWeSbRRNbHzPrg@mail.gmail.com>
+In-Reply-To: <CAOQ4uxhxVKhUh_P_NffLbGScpiL0wOrCTLwWJWeSbRRNbHzPrg@mail.gmail.com>
+From:   Deepa Dinamani <deepa.kernel@gmail.com>
+Date:   Thu, 12 Dec 2019 13:55:15 -0800
+Message-ID: <CABeXuvoHw8W02JsmZjafnQkOs1=0dodSpBFyJ_Gq+1vs+hFkQQ@mail.gmail.com>
+Subject: Re: [PATCH] generic/402: fix for updated behavior of timestamp limits
+To:     Amir Goldstein <amir73il@gmail.com>
+Cc:     fstests <fstests@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>,
+        y2038 Mailman List <y2038@lists.linaro.org>,
+        Sasha Levin <sashal@kernel.org>,
+        Greg KH <gregkh@linuxfoundation.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 12/12/19 2:45 AM, Johannes Thumshirn wrote:
-> In my testing on 1GB zram devices btrfs/187 usually fails with ENOSPC.
-> 
-> Add a requirement for 8GB scratch devices (empirically measured).
-> 
-> Cc: Filipe Manana <fdmanana@suse.com>
-> Signed-off-by: Johannes Thumshirn <jthumshirn@suse.de>
+> >  {
+> >         local device=${1:-$TEST_DEV}
+> > -       local sysfsdir=/proc/sys/fs/fs-timestamp-check-on
+> > -
+> > -       if [ ! -e $sysfsdir ]; then
+> > -               _notrun "no kernel support for y2038 sysfs switch"
+> > -       fi
+> >
+>
+> Deepa,
+>
+> This change, which is already merged removed the test for kernel support
+> and replaced it with test only for filesystem support.
+>
+> This impacts people validating stable kernel releases with xfstest, because
+> this test now always fails on stable kernels and I don't think that timestamp
+> clamping behavior is going to stable kernels.
+>
+> Of course stable kernel testers can exclude this test, but this will remove test
+> coverage and may result in silent breakage of > y2038 timetamps in stable
+> kernels.
+>
+> I think test should identify if kernel had clamping behavior and change the
+> expected timestamp values accordingly, similar to how the test was before
+> adjusting it to new behavior.
+>
+> Do you agree? Can you make these changes?
 
-Reviewed-by: Josef Bacik <josef@toxicpanda.com>
+Initially, we were going to allow rw mounts for filesystems which
+could not update timestamps. And, this was a big change in behavior.
+That is why we had the behavior exposed from the kernel.
+I wasn't aware that the failing fstests would cause such a nuisence.
+Since everybody seems to just rely on all the fstests passing, yes I
+agree that bringing this back would be the easiest to not fail on
+stable kernels.
+I will post the kernel and the xfstest patch.
 
-Thanks,
+Thanks for helping me catch it.
 
-Josef
+-Deepa
