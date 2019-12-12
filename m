@@ -2,69 +2,33 @@ Return-Path: <SRS0=/sVf=2C=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AEC00C43603
-	for <linux-fstests@archiver.kernel.org>; Thu, 12 Dec 2019 03:12:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6EECAC43603
+	for <linux-fstests@archiver.kernel.org>; Thu, 12 Dec 2019 05:30:43 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 79378214D8
-	for <linux-fstests@archiver.kernel.org>; Thu, 12 Dec 2019 03:12:01 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="AQ2RtXfX"
+	by mail.kernel.org (Postfix) with ESMTP id 3F05E21655
+	for <linux-fstests@archiver.kernel.org>; Thu, 12 Dec 2019 05:30:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726714AbfLLDMB (ORCPT
+        id S1726820AbfLLFan (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 11 Dec 2019 22:12:01 -0500
-Received: from esa2.hgst.iphmx.com ([68.232.143.124]:23982 "EHLO
-        esa2.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726717AbfLLDMA (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 11 Dec 2019 22:12:00 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1576120327; x=1607656327;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=Jjp/yZ1MTAPxxCDvrDk1glK+sVxgdkwnsNldO5LMQAA=;
-  b=AQ2RtXfXaWqMQFHVPjpwWKKokIWL7VACFbR6RVwU83AX9dGsqbkih33W
-   BVNhBP7RpZcEBpzGa2iqXJOuYj1WpiqUdOdrOvYcVh4bdqWJWWFHTKuNn
-   uCB8i7fefCXqvZ/9rCM28PBpzOoXB6uWEgj4x0fSXU9DZtsRljrNGkBbZ
-   gouFj+uqeXY/ETxoZgMFTZaPkyUr5APiGgjl9aXhBa70ViiAq9So7061P
-   yJyYlHA9ByqYYKrG89/mah7Mmfm+yAjaCKHEYwulL7LopgYwtUkkqLdMq
-   VU4rJ38laL3QdzzvlWOLT1cdIWcRkagL4egUm/VAHI/UlZkBqOocVk8Eq
-   A==;
-IronPort-SDR: cxMD6NkaJKRc7RZWmvUzjINCgiMbUVdwnmBHOvh6NL5p00gLk5ZrJP8LMiZpVgP1z/XP9sS18q
- XMNL0I+EdAITIywnHPZ/qBvOeHOLrnPXsGxCMvZ4pqZSeP2ii87Yr6WRUisrRhrY8zEwHq28ad
- u7KjSQSqEK5ex1aqAprb+Wak8dph9POeUH1UhziJy6liWD9LxdVO5V+3lBweBxlIrLnMEoJJ9K
- dqrD2wv2jyKkoiqe/6nLEz5PT2YPL+qV9CTpFHmRsGvJBdWykhpNTh3vjYe4Cx0j6Sb1g87Oy9
- cqQ=
-X-IronPort-AV: E=Sophos;i="5.69,304,1571673600"; 
-   d="scan'208";a="226668830"
-Received: from uls-op-cesaip01.wdc.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
-  by ob1.hgst.iphmx.com with ESMTP; 12 Dec 2019 11:12:06 +0800
-IronPort-SDR: LWvDwbJJtf+ZPZukqF/aco/riK00CDp4b4uXu2twEuZhqwPpNkeoAiilO+ZOTRpvEtVPVbsqo8
- 7HGhBQ5XGtSijOGVnnxJOVTCJkCfGkIcX9JpVwoFHoqrr85zpTCbCRbDCze2U5lsG8HCH46gF2
- iQzODbojaiUPads8EmqwOTnWdNkdexJyUnldUyIqqesqjX7hrp+hxKQpgKv/Fif2ERR5XT62Mb
- vVITluIxPYSzDDyltZyvAyroUU1K412A9jL04Q4tFlaMNPr6iwlQE96dDfphx+ZgXdA61aEhDr
- kSsC3b95zVS4jrFGGLvSsuMc
-Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
-  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Dec 2019 19:06:33 -0800
-IronPort-SDR: IqNbjB019MfQwHnDpbKz7gdvkjGtU8Ig2TVTyj5xVa95f6uNCVP9iJEJQlyZgI3/0wkC9fFFmM
- sQXwPzxgarb89wOyZBp01Jm5fWSHNT+twrbDSABZZWI3miZWXfgWFFAZNdtlrJlLCKvmyLUx/L
- yUzNDoQbRkbbF9uV47iHhYG/bkV/gHITzfdbFJ+RvcrPePkijR8RjhzjRVju4dCynBxFg0EwKL
- CnbEsRxynPnllP7t4L+VyUNNIgIYYAivgtoyNpY+jlqNxdSnNsjz5Uy9ntbnSIMj3zufNwjQyx
- z5I=
-WDCIronportException: Internal
-Received: from naota.dhcp.fujisawa.hgst.com (HELO naota.fujisawa.hgst.com) ([10.149.53.115])
-  by uls-op-cesaip01.wdc.com with ESMTP; 11 Dec 2019 19:12:00 -0800
-From:   Naohiro Aota <naohiro.aota@wdc.com>
-To:     fstests@vger.kernel.org
-Cc:     Naohiro Aota <naohiro.aota@wdc.com>
-Subject: [PATCH] common/filter: prepend 0 to treat offset as octal
-Date:   Thu, 12 Dec 2019 12:11:52 +0900
-Message-Id: <20191212031152.1906287-1-naohiro.aota@wdc.com>
+        Thu, 12 Dec 2019 00:30:43 -0500
+Received: from mx2.suse.de ([195.135.220.15]:53416 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1725980AbfLLFam (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 12 Dec 2019 00:30:42 -0500
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+Received: from relay2.suse.de (unknown [195.135.220.254])
+        by mx1.suse.de (Postfix) with ESMTP id D517DAE17;
+        Thu, 12 Dec 2019 05:30:39 +0000 (UTC)
+From:   Qu Wenruo <wqu@suse.com>
+To:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Cc:     Nikolay Borisov <nborisov@suse.com>
+Subject: [PATCH] fstests: btrfs/09[58]: Use hash to replace unreliable od output
+Date:   Thu, 12 Dec 2019 13:30:34 +0800
+Message-Id: <20191212053034.21995-1-wqu@suse.com>
 X-Mailer: git-send-email 2.24.0
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -73,28 +37,199 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-The offsets printed by "od" are octal numbers. So, we need to add "0" at
-the head of the $offset to parse it as an octal number.
+[BUG]
+With latest master, btrfs/09[58] fails like:
 
-Fixes: 37520a314bd4 ("fstests: Don't use gawk's strtonum")
-Signed-off-by: Naohiro Aota <naohiro.aota@wdc.com>
+  btrfs/095 2s ... - output mismatch (see xfstests-dev/results//btrfs/095.out.bad)
+      --- tests/btrfs/095.out     2019-12-12 13:23:24.266697540 +0800
+      +++ xfstests-dev/results//btrfs/095.out.bad      2019-12-12 13:23:29.340030879 +0800
+      @@ -4,32 +4,32 @@
+       File contents before power failure:
+       0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+       *
+      -207 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
+      +771 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
+       *
+      -226 bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb
+      ...
+      (Run 'diff -u xfstests-dev/tests/btrfs/095.out xfstests-dev/results//btrfs/095.out.bad'  to see the entire diff)
+  btrfs/098 2s ... - output mismatch (see xfstests-dev/results//btrfs/098.out.bad)
+      --- tests/btrfs/098.out     2019-12-12 13:23:24.266697540 +0800
+      +++ xfstests-dev/results//btrfs/098.out.bad      2019-12-12 13:23:31.306697545 +0800
+      @@ -3,20 +3,20 @@
+       File contents before power failure:
+       0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+       *
+      -144 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
+      +537 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
+       *
+      -151 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+      ...
+      (Run 'diff -u xfstests-dev/tests/btrfs/098.out xfstests-dev/results//btrfs/098.out.bad'  to see the entire diff)
+  Ran: btrfs/095 btrfs/098
+  Failures: btrfs/095 btrfs/098
+  Failed 2 of 2 tests
+
+[CAUSE]
+It looks like commit 37520a314bd4 ("fstests: Don't use gawk's strtonum")
+is making _filter_od doing stupid filtering.
+
+[FIX]
+Personally speaking, I don't really care about whatever _filter_od is
+doing at all.
+And since these two test cases only care about the content, let's use
+hash to replace unreliable _filter_od output.
+While move the filtered (and meaningless) od output to $seqres.full.
+
+Reported-by: Nikolay Borisov <nborisov@suse.com>
+Signed-off-by: Qu Wenruo <wqu@suse.com>
 ---
- common/filter | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ tests/btrfs/095     | 13 +++++++++----
+ tests/btrfs/095.out | 36 ++++--------------------------------
+ tests/btrfs/098     | 14 ++++++++++----
+ tests/btrfs/098.out | 24 ++++--------------------
+ 4 files changed, 27 insertions(+), 60 deletions(-)
 
-diff --git a/common/filter b/common/filter
-index 6140e58368d7..88fcb6ef68ee 100644
---- a/common/filter
-+++ b/common/filter
-@@ -495,7 +495,7 @@ _filter_od()
- 		fi
+diff --git a/tests/btrfs/095 b/tests/btrfs/095
+index 4c810a5d..4b381a9e 100755
+--- a/tests/btrfs/095
++++ b/tests/btrfs/095
+@@ -122,8 +122,10 @@ $CLONER_PROG -s $((768 * $BLOCK_SIZE)) -d $((150 * $BLOCK_SIZE)) -l $((25 * $BLO
+ # fsync and before the next transaction commit.
+ $XFS_IO_PROG -c "fsync" $SCRATCH_MNT/foo
  
- 		offset="${line%% *}"
--		printf '%o%s\n' $((offset / BLOCK_SIZE)) "${line#$offset}"
-+		printf '%o%s\n' $(("0$offset" / BLOCK_SIZE)) "${line#$offset}"
- 	done
- }
+-echo "File contents before power failure:"
+-od -t x1 $SCRATCH_MNT/foo | _filter_od
++echo "File hash before power failure:"
++_md5_checksum $SCRATCH_MNT/foo
++echo "File contens before power failure:" >> $seqres.full
++od -t x1 $SCRATCH_MNT/foo | _filter_od >> $seqres.full
  
+ # During log replay, the btrfs delayed references implementation used to run the
+ # deletion of back references before the addition of new back references, which
+@@ -135,8 +137,11 @@ od -t x1 $SCRATCH_MNT/foo | _filter_od
+ # failure of the insertion that ended up turning the fs into read-only mode.
+ _flakey_drop_and_remount
+ 
+-echo "File contents after log replay:"
+-od -t x1 $SCRATCH_MNT/foo | _filter_od
++echo "File hash after log replay:"
++_md5_checksum $SCRATCH_MNT/foo
++
++echo "File contents after log replay:" >> $seqres.full
++od -t x1 $SCRATCH_MNT/foo | _filter_od >> $seqres.full
+ 
+ _unmount_flakey
+ 
+diff --git a/tests/btrfs/095.out b/tests/btrfs/095.out
+index e73b24d5..5c3ec951 100644
+--- a/tests/btrfs/095.out
++++ b/tests/btrfs/095.out
+@@ -1,35 +1,7 @@
+ QA output created by 095
+ Blocks modified: [135 - 164]
+ Blocks modified: [768 - 792]
+-File contents before power failure:
+-0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+-*
+-207 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
+-*
+-226 bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb
+-*
+-257 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+-*
+-1137 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
+-*
+-1175 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+-*
+-1400 bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb
+-*
+-1431
+-File contents after log replay:
+-0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+-*
+-207 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
+-*
+-226 bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb
+-*
+-257 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+-*
+-1137 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
+-*
+-1175 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+-*
+-1400 bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb
+-*
+-1431
++File hash before power failure:
++beaf47c36659ac29bb9363fb8ffa10a1
++File hash after log replay:
++beaf47c36659ac29bb9363fb8ffa10a1
+diff --git a/tests/btrfs/098 b/tests/btrfs/098
+index 0e0b5123..e42e3146 100755
+--- a/tests/btrfs/098
++++ b/tests/btrfs/098
+@@ -69,8 +69,11 @@ $CLONER_PROG -s $(((200 * $BLOCK_SIZE) + (5 * $BLOCK_SIZE))) \
+ # first fsync we did before.
+ $XFS_IO_PROG -c "fsync" $SCRATCH_MNT/foo
+ 
+-echo "File contents before power failure:"
+-od -t x1 $SCRATCH_MNT/foo | _filter_od
++
++echo "File hash before power failure:"
++_md5_checksum $SCRATCH_MNT/foo
++echo "File contents before power failure:" >> $seqres.full
++od -t x1 $SCRATCH_MNT/foo | _filter_od >> $seqres.full
+ 
+ # The fsync log replay first processes the file extent item corresponding to the
+ # file offset mapped by 100th block (the one which refers to the [5, 10[ block
+@@ -95,10 +98,13 @@ od -t x1 $SCRATCH_MNT/foo | _filter_od
+ #
+ _flakey_drop_and_remount
+ 
+-echo "File contents after log replay:"
+ # Must match the file contents we had after cloning the extent and before
+ # the power failure happened.
+-od -t x1 $SCRATCH_MNT/foo | _filter_od
++echo "File hash after log replay:"
++_md5_checksum $SCRATCH_MNT/foo
++
++echo "File contents after log replay:" >> $seqres.full
++od -t x1 $SCRATCH_MNT/foo | _filter_od >> $seqres.full
+ 
+ _unmount_flakey
+ 
+diff --git a/tests/btrfs/098.out b/tests/btrfs/098.out
+index 98a96dec..e3db64a0 100644
+--- a/tests/btrfs/098.out
++++ b/tests/btrfs/098.out
+@@ -1,22 +1,6 @@
+ QA output created by 098
+ Blocks modified: [200 - 224]
+-File contents before power failure:
+-0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+-*
+-144 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
+-*
+-151 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+-*
+-310 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
+-*
+-341
+-File contents after log replay:
+-0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+-*
+-144 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
+-*
+-151 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+-*
+-310 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
+-*
+-341
++File hash before power failure:
++39b386375971248740ed8651d5a2ed9f
++File hash after log replay:
++39b386375971248740ed8651d5a2ed9f
 -- 
-2.24.0
+2.23.0
 
