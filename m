@@ -2,121 +2,144 @@ Return-Path: <SRS0=/sVf=2C=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.3 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 62BA8C43603
-	for <linux-fstests@archiver.kernel.org>; Thu, 12 Dec 2019 06:10:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6A763C43603
+	for <linux-fstests@archiver.kernel.org>; Thu, 12 Dec 2019 07:12:16 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 32AA62073D
-	for <linux-fstests@archiver.kernel.org>; Thu, 12 Dec 2019 06:10:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3B97422B48
+	for <linux-fstests@archiver.kernel.org>; Thu, 12 Dec 2019 07:12:16 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="IbG/9RKi"
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="J7v3XRpD"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726833AbfLLGKa (ORCPT
+        id S1727994AbfLLHMP (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 12 Dec 2019 01:10:30 -0500
-Received: from userp2120.oracle.com ([156.151.31.85]:59850 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726784AbfLLGKa (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 12 Dec 2019 01:10:30 -0500
-Received: from pps.filterd (userp2120.oracle.com [127.0.0.1])
-        by userp2120.oracle.com (8.16.0.27/8.16.0.27) with SMTP id xBC69LAS015764;
-        Thu, 12 Dec 2019 06:10:29 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
- : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=corp-2019-08-05;
- bh=OJj0XFnYkHwBoNr+feZDXx3vo6ccNsCu/58ji43lh7g=;
- b=IbG/9RKi33c0Tv9ZzEbwLJXGQzPLHsKE8WxZUiPZEAt7M0QJ0Z9TLvngwLGTMNafsznx
- D2srfnRX3cVyY+KPqKjBzALRNk/hzuckuJSoDth2ZRqx0WauCe9utEHZWe4Z/DYLG1CE
- EOLtE/XO4pwrVHnRscgi1mk+zoLvGV7Lo+nschrD4uVq1IGSdaizW8/Lia6y6pKTJTjh
- SNPGwB7blsnILKaCcKC/rbg9TH7JZd2G4fw0ZlRHlh0bRLbEpaa30+23vFKMwIk+p+zr
- 1zZjWBxuxAkOP8Mw6/Q7Tm2KvORH0vHfPCppD7nNrImJQoMyZezqjBZE8YGhC3TAjBc9 pg== 
-Received: from aserp3020.oracle.com (aserp3020.oracle.com [141.146.126.70])
-        by userp2120.oracle.com with ESMTP id 2wr4qrrtjg-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Thu, 12 Dec 2019 06:10:28 +0000
-Received: from pps.filterd (aserp3020.oracle.com [127.0.0.1])
-        by aserp3020.oracle.com (8.16.0.27/8.16.0.27) with SMTP id xBC68sqk108049;
-        Thu, 12 Dec 2019 06:10:28 GMT
-Received: from aserv0121.oracle.com (aserv0121.oracle.com [141.146.126.235])
-        by aserp3020.oracle.com with ESMTP id 2wubmdhj71-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Thu, 12 Dec 2019 06:10:27 +0000
-Received: from abhmp0006.oracle.com (abhmp0006.oracle.com [141.146.116.12])
-        by aserv0121.oracle.com (8.14.4/8.13.8) with ESMTP id xBC6ARuT011931;
-        Thu, 12 Dec 2019 06:10:27 GMT
-Received: from localhost (/10.159.154.109)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Wed, 11 Dec 2019 22:10:27 -0800
-Date:   Wed, 11 Dec 2019 22:10:26 -0800
-From:   "Darrick J. Wong" <darrick.wong@oracle.com>
-To:     Naohiro Aota <naohiro.aota@wdc.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] common/filter: prepend 0 to treat offset as octal
-Message-ID: <20191212061026.GB99869@magnolia>
-References: <20191212031152.1906287-1-naohiro.aota@wdc.com>
- <20191212060437.GA99869@magnolia>
+        Thu, 12 Dec 2019 02:12:15 -0500
+Received: from esa6.hgst.iphmx.com ([216.71.154.45]:41510 "EHLO
+        esa6.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727970AbfLLHMP (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 12 Dec 2019 02:12:15 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1576134735; x=1607670735;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:content-transfer-encoding:in-reply-to;
+  bh=leUUbHAm4yYX2Qfh1/6M9FqY2HWNEzTi7SfEf1o3LyA=;
+  b=J7v3XRpDgwNYB/cEwgWNCPn7MWajIdRy3yYDEvRLC8T85Qx3+CyTCbTc
+   Ru3BcE15afWpOlVILU3JydTPqTEvKehYgtj55EdeD7BmdtuKtWAhtDBjf
+   OT6xIjnwi2JDtvk1N4u1kkPkcz+jvl+dda17kGoNvjb+pM2PCEodiU5DX
+   QVD+9JP8Tv7LVvSSUZkrwDcmH188Vlhbhe8tqlRvjFGTnuGXHSKLxagtq
+   hOOLpOY1aaGPIHNU2D72RF5rCshp0gJ7qw+adjM26MEDb4S38KWitaOj/
+   n8iOW8agJzJDYoC/3GKuzbGz0wp5accn8/7hGAtFmfXK92hueo/0IlaRp
+   w==;
+IronPort-SDR: ey7nWG9TVq8DCL0bWwHD2RYj+tjH1DUFr2rzpsgLWKxOIOQxydJyrGYPYy9g4n10wQIY0C1n1a
+ MtJ8aVCuGLPIAp8fYbTRCdCiniuNjtqkVc6nFLtkqXT1H1GR2zF7xRC6VgfN8vi+iDS0vcuyGM
+ EMoGXmEEkIrELhuf+0w99FgetAnuYR2Otx+eH8KGk62PDeMnsZykfjVcHFae7FAT/5KfJ+afLa
+ aLWbYe38hd3PZYdkSevWVinPFl2vLdkKuGAUO+irGIoWenjkHVs2MljkbSSY1H07fFkhtcoRIE
+ j8g=
+X-IronPort-AV: E=Sophos;i="5.69,305,1571673600"; 
+   d="scan'208";a="126783051"
+Received: from h199-255-45-14.hgst.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
+  by ob1.hgst.iphmx.com with ESMTP; 12 Dec 2019 15:12:15 +0800
+IronPort-SDR: 1r4ugks7lkN1Cqo6LvOg3aZdMw2z8NCHNxi2H8KGcSpugeExQ0KNaDrNbU9pluTy8PdYhdRHBh
+ 4XWgiwWXqna3M7djmoFamXRWcKEGLes1A9Pt1Q/WO0xqtqT+0B3DsQh6H3ZbSTWHQVhIa97+8v
+ 1M9vzWrF6ozXxK9UzSo4CEIYTKADMDwLZ9Qmjqg2k82bNsaKr+9LzLae7qWIq5oznapYEUORIk
+ Xc8X7XXvF91oLRgyrhDWeMg3hSrp1Edca+AofPSan9qUa+ulw5vNt+2t3Ov53fTTTrBmtuOpvc
+ yEBN0ecmhj/gHkKKLIc4yRT3
+Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
+  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Dec 2019 23:06:48 -0800
+IronPort-SDR: OF1r0dehefcq21NzMspAjSpraevvTli+po/qJX+Os+2168ZN53SNh5S6bB51eaY1azo4e14s8N
+ 8JIa0MoEPO7YAD1FsPlkATVeO31nHLlmOiuUT9Dnc+/I1honpqKCAFIR1irR1J3Ki1WP7t9yLu
+ IjF/Asiu1mSrmWIg3kak9MA6D+/HRuU6wo5nMuCTsuEC7exSbkeZFEQ3rxqQ+RP9orJzNffRJl
+ y4Fat7McRzYXg9upyHUnev7TgrRPBFJflDyrwYKV/aL3EBDULJyiKnFlkfUCI0hDhCfSPXJmnS
+ Qf8=
+WDCIronportException: Internal
+Received: from naota.dhcp.fujisawa.hgst.com ([10.149.53.115])
+  by uls-op-cesaip01.wdc.com with SMTP; 11 Dec 2019 23:12:14 -0800
+Received: (nullmailer pid 2149980 invoked by uid 1000);
+        Thu, 12 Dec 2019 07:12:12 -0000
+Date:   Thu, 12 Dec 2019 16:12:12 +0900
+From:   Naohiro Aota <naohiro.aota@wdc.com>
+To:     Qu Wenruo <quwenruo.btrfs@gmx.com>
+Cc:     Qu Wenruo <wqu@suse.com>, fstests@vger.kernel.org,
+        linux-btrfs@vger.kernel.org, Nikolay Borisov <nborisov@suse.com>
+Subject: Re: [PATCH] fstests: btrfs/09[58]: Use hash to replace unreliable od
+ output
+Message-ID: <20191212071212.x2yypehczdkok5vr@naota.dhcp.fujisawa.hgst.com>
+References: <20191212053034.21995-1-wqu@suse.com>
+ <20191212053750.vxikimln5pjbaaot@naota.dhcp.fujisawa.hgst.com>
+ <8a96e22e-fe5e-6432-0b5c-cab4ecf915c8@gmx.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Disposition: inline
-In-Reply-To: <20191212060437.GA99869@magnolia>
-User-Agent: Mutt/1.9.4 (2018-02-28)
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9468 signatures=668685
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=0 malwarescore=0
- phishscore=0 bulkscore=0 spamscore=0 mlxscore=0 mlxlogscore=999
- adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.0.1-1911140001 definitions=main-1912120040
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9468 signatures=668685
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 priorityscore=1501 malwarescore=0
- suspectscore=0 phishscore=0 bulkscore=0 spamscore=0 clxscore=1015
- lowpriorityscore=0 mlxscore=0 impostorscore=0 mlxlogscore=999 adultscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.0.1-1911140001
- definitions=main-1912120040
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <8a96e22e-fe5e-6432-0b5c-cab4ecf915c8@gmx.com>
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Dec 11, 2019 at 10:04:37PM -0800, Darrick J. Wong wrote:
-> On Thu, Dec 12, 2019 at 12:11:52PM +0900, Naohiro Aota wrote:
-> > The offsets printed by "od" are octal numbers. So, we need to add "0" at
-> > the head of the $offset to parse it as an octal number.
-> > 
-> > Fixes: 37520a314bd4 ("fstests: Don't use gawk's strtonum")
-> > Signed-off-by: Naohiro Aota <naohiro.aota@wdc.com>
-> 
-> <grumble> Did the original patch author run all the tests that use
-> _filter_od to make sure there weren't any regressions.  This fixes
-> xfs/139 for me, so...
-> 
-> Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+On Thu, Dec 12, 2019 at 01:54:43PM +0800, Qu Wenruo wrote:
+>
+>
+>On 2019/12/12 下午1:37, Naohiro Aota wrote:
+>> On Thu, Dec 12, 2019 at 01:30:34PM +0800, Qu Wenruo wrote:
+>>> [BUG]
+>>> With latest master, btrfs/09[58] fails like:
+>>>
+>>>  btrfs/095 2s ... - output mismatch (see
+>>> xfstests-dev/results//btrfs/095.out.bad)
+>>>      --- tests/btrfs/095.out     2019-12-12 13:23:24.266697540 +0800
+>>>      +++ xfstests-dev/results//btrfs/095.out.bad      2019-12-12
+>>> 13:23:29.340030879 +0800
+>>>      @@ -4,32 +4,32 @@
+>>>       File contents before power failure:
+>>>       0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+>>>       *
+>>>      -207 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
+>>>      +771 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
+>>>       *
+>>>      -226 bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb
+>>>      ...
+>>>      (Run 'diff -u xfstests-dev/tests/btrfs/095.out
+>>> xfstests-dev/results//btrfs/095.out.bad'  to see the entire diff)
+>>>  btrfs/098 2s ... - output mismatch (see
+>>> xfstests-dev/results//btrfs/098.out.bad)
+>>>      --- tests/btrfs/098.out     2019-12-12 13:23:24.266697540 +0800
+>>>      +++ xfstests-dev/results//btrfs/098.out.bad      2019-12-12
+>>> 13:23:31.306697545 +0800
+>>>      @@ -3,20 +3,20 @@
+>>>       File contents before power failure:
+>>>       0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+>>>       *
+>>>      -144 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
+>>>      +537 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
+>>>       *
+>>>      -151 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+>>>      ...
+>>>      (Run 'diff -u xfstests-dev/tests/btrfs/098.out
+>>> xfstests-dev/results//btrfs/098.out.bad'  to see the entire diff)
+>>>  Ran: btrfs/095 btrfs/098
+>>>  Failures: btrfs/095 btrfs/098
+>>>  Failed 2 of 2 tests
+>>>
+>>> [CAUSE]
+>>> It looks like commit 37520a314bd4 ("fstests: Don't use gawk's strtonum")
+>>> is making _filter_od doing stupid filtering.
+>>
+>> I sent a fix to the list. That commit is parsing od's offsets as decimal
+>> which actually is octal.
+>>
+>> https://lore.kernel.org/fstests/20191212031152.1906287-1-naohiro.aota@wdc.com/T/#u
+>
+>Oh, that's much better.
+>
+>Although that _filter_od still seems can't handle hex.
 
-...also, thank you for fixing this problem. :)
+I agree with you that ocatal makes no sense these days. I'm considering to
+extend _filter_od to take an argument to specify "oct|dec|hex" so that
+callers can use "od -A x" and see outputs in hex (or decimal).
 
---D
-
-> --D
-> 
-> > ---
-> >  common/filter | 2 +-
-> >  1 file changed, 1 insertion(+), 1 deletion(-)
-> > 
-> > diff --git a/common/filter b/common/filter
-> > index 6140e58368d7..88fcb6ef68ee 100644
-> > --- a/common/filter
-> > +++ b/common/filter
-> > @@ -495,7 +495,7 @@ _filter_od()
-> >  		fi
-> >  
-> >  		offset="${line%% *}"
-> > -		printf '%o%s\n' $((offset / BLOCK_SIZE)) "${line#$offset}"
-> > +		printf '%o%s\n' $(("0$offset" / BLOCK_SIZE)) "${line#$offset}"
-> >  	done
-> >  }
-> >  
-> > -- 
-> > 2.24.0
-> > 
+Thanks,
