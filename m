@@ -1,131 +1,116 @@
-Return-Path: <SRS0=uevG=2D=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=+iS3=2F=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.3 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
-	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F2888C2D0CD
-	for <linux-fstests@archiver.kernel.org>; Fri, 13 Dec 2019 20:42:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C1ED0C43603
+	for <linux-fstests@archiver.kernel.org>; Sun, 15 Dec 2019 16:08:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 2DADC24705
-	for <linux-fstests@archiver.kernel.org>; Fri, 13 Dec 2019 20:42:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 911DA206D3
+	for <linux-fstests@archiver.kernel.org>; Sun, 15 Dec 2019 16:08:02 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="U65hTQwP"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="t4dfDQZa"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726427AbfLMUmv (ORCPT
+        id S1726232AbfLOQIC (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 13 Dec 2019 15:42:51 -0500
-Received: from userp2120.oracle.com ([156.151.31.85]:32922 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725799AbfLMUmv (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 13 Dec 2019 15:42:51 -0500
-Received: from pps.filterd (userp2120.oracle.com [127.0.0.1])
-        by userp2120.oracle.com (8.16.0.27/8.16.0.27) with SMTP id xBDKe8c4078658;
-        Fri, 13 Dec 2019 20:42:45 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
- : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=corp-2019-08-05;
- bh=q+gzoiNwIV+aK93ORZthOuxZdasqPbgsDvNdzGyhtmc=;
- b=U65hTQwP2qvGIOExZJcgEqyqYVaFCv9RBp4NWRVywvVrzWteh/8oLeDLa/mrdOrAJK/9
- QYD6jxJVGmFi7OhvQwHzmXOIZRvB/9Yv1VuVIH6+Hqy3Kzl9mjI45JKYPCm3TECe6Wig
- vCRSl1DCFClXJzrXe15JXbxcX7XkxEczyX4djs2/S3TSGy9fB2n+O1xBSwuMt2Omt4Vv
- 4GGu1G24RY7xqxs4PcW1kMFLVWWMesqj6vp1Y66jcCRzl/7Mg76Kh3g+V0sg+yvfVNRT
- oFh6SFmQnpQM1WgUtf4ypBtueDctsP+YRvDl0/auDIvmLGS5SV5wDBsfVow9PA2Z32w+ SA== 
-Received: from userp3020.oracle.com (userp3020.oracle.com [156.151.31.79])
-        by userp2120.oracle.com with ESMTP id 2wr4qs35xv-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Fri, 13 Dec 2019 20:42:45 +0000
-Received: from pps.filterd (userp3020.oracle.com [127.0.0.1])
-        by userp3020.oracle.com (8.16.0.27/8.16.0.27) with SMTP id xBDKYRAl002412;
-        Fri, 13 Dec 2019 20:42:45 GMT
-Received: from userv0121.oracle.com (userv0121.oracle.com [156.151.31.72])
-        by userp3020.oracle.com with ESMTP id 2wvd1h336q-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Fri, 13 Dec 2019 20:42:44 +0000
-Received: from abhmp0009.oracle.com (abhmp0009.oracle.com [141.146.116.15])
-        by userv0121.oracle.com (8.14.4/8.13.8) with ESMTP id xBDKghxf022401;
-        Fri, 13 Dec 2019 20:42:43 GMT
-Received: from localhost (/10.145.178.64)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Fri, 13 Dec 2019 12:42:42 -0800
-Date:   Fri, 13 Dec 2019 12:42:41 -0800
-From:   "Darrick J. Wong" <darrick.wong@oracle.com>
-To:     Yang Xu <xuyang2018.jy@cn.fujitsu.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] generic/520: use fsync instead of sync during clean_dir
-Message-ID: <20191213204241.GC99869@magnolia>
-References: <1576215941-19208-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
+        Sun, 15 Dec 2019 11:08:02 -0500
+Received: from mail-pf1-f194.google.com ([209.85.210.194]:40689 "EHLO
+        mail-pf1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726135AbfLOQIC (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 15 Dec 2019 11:08:02 -0500
+Received: by mail-pf1-f194.google.com with SMTP id q8so4252004pfh.7
+        for <fstests@vger.kernel.org>; Sun, 15 Dec 2019 08:08:01 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=7oXr4VRNJ4sChNeblK7rGgX4eaFz9JPmUv1N+yoGVa4=;
+        b=t4dfDQZaGkni4kmeboqJeCW+YA3khHoTfCSimUPD/+P/iJoNZ+w+g5g7m/qcrlsqzG
+         V+mMZz8bqZpwbD/vtQ+wmDbeJVxZlmEplSWzM2uP9jOKI6fOetxhPvnJRjFpgYRr4vno
+         KGfGSQtXZw/NgUsDIbq23KMxXLwgVChCXaSafdpNJYt9TmeoQQXukbtop2D8+asPksAr
+         HXdvG7VvbF362VjUSHxr7RU6U8MNjN3DHOi22Z/etaxKT7cmlj/7QHSUAOmCIGcUsNI/
+         7Q06yhAedOGWgoHDGkUS6E1k7PtuqQhTALJtoO5rVxku0/WwwE2EtGAaAkhDIuC1FMEv
+         XD5w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=7oXr4VRNJ4sChNeblK7rGgX4eaFz9JPmUv1N+yoGVa4=;
+        b=KOuie+0UbYfnlDpq2eZwe2qPYdP56qz/FgWKmYMKn/oFDM9tnnVnDC8EKFGRsmGBwp
+         OjPxbUM8qIgPWU9Wkbtr9JJIxLaCYH0ZBWWXGzGbC5mNKbCa5G7/wmc80wFK+KdqsxPf
+         jeQhDrj+8ke3OJKA8meeXmzp+49nXw2rWXofXWRenyXmCPkDoU7s2kX4hd6+CZp3BPEG
+         tsFG2EDQ4qvKM1qW0Fcp+cxvnBd6nL4j+yO0G1PGDJy7o7UDe1l2Rvs0hMlQwnRhcJ+c
+         ljtcVpOqMNe0ZFZv/BOsTCmCQUM0ZcMkWIle7JkXwEVpD8GCP8Cup8Bzoplbqk91MNbO
+         8aCA==
+X-Gm-Message-State: APjAAAUsbn5W4ILPQpgvMHBazPmDWhDzXnoZdzAwAmWrSaE+UtZHBV8u
+        Wm4DV7vBDqpKYlWeu6rNy6U=
+X-Google-Smtp-Source: APXvYqyj9r6Fs1ZRck3jUO6rRdboxhwSOGS12bka+W4GztcC0qnf03rhW1c84iiL2BvLLZlwlhDe9A==
+X-Received: by 2002:a63:de4a:: with SMTP id y10mr12831445pgi.367.1576426081447;
+        Sun, 15 Dec 2019 08:08:01 -0800 (PST)
+Received: from localhost ([178.128.102.47])
+        by smtp.gmail.com with ESMTPSA id c8sm18508224pfj.106.2019.12.15.08.07.59
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 15 Dec 2019 08:08:00 -0800 (PST)
+Date:   Mon, 16 Dec 2019 00:07:55 +0800
+From:   Eryu Guan <guaneryu@gmail.com>
+To:     "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc:     Naohiro Aota <naohiro.aota@wdc.com>, fstests@vger.kernel.org
+Subject: Re: [PATCH] common/filter: prepend 0 to treat offset as octal
+Message-ID: <20191215160751.GA1776323@desktop>
+References: <20191212031152.1906287-1-naohiro.aota@wdc.com>
+ <20191212060437.GA99869@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1576215941-19208-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
-User-Agent: Mutt/1.9.4 (2018-02-28)
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9470 signatures=668685
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=0 malwarescore=0
- phishscore=0 bulkscore=0 spamscore=0 mlxscore=0 mlxlogscore=999
- adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.0.1-1911140001 definitions=main-1912130151
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9470 signatures=668685
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 priorityscore=1501 malwarescore=0
- suspectscore=0 phishscore=0 bulkscore=0 spamscore=0 clxscore=1015
- lowpriorityscore=0 mlxscore=0 impostorscore=0 mlxlogscore=999 adultscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.0.1-1911140001
- definitions=main-1912130152
+In-Reply-To: <20191212060437.GA99869@magnolia>
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Dec 13, 2019 at 01:45:41PM +0800, Yang Xu wrote:
-> When I test this case on xfs, it may fail as below:
-> --------------------------------------------
->  === link SCRATCH_MNT/A/foo SCRATCH_MNT/bar  with fsync SCRATCH_MNT/A ===
-> +umount: /mnt/xfstests/scratch: target is busy.
-> +        (In some cases useful info about processes that use
-> +         the device is found by lsof(8) or fuser(1))
-> ---------------------------------------------
+On Wed, Dec 11, 2019 at 10:04:37PM -0800, Darrick J. Wong wrote:
+> On Thu, Dec 12, 2019 at 12:11:52PM +0900, Naohiro Aota wrote:
+> > The offsets printed by "od" are octal numbers. So, we need to add "0" at
+> > the head of the $offset to parse it as an octal number.
+> > 
+> > Fixes: 37520a314bd4 ("fstests: Don't use gawk's strtonum")
+> > Signed-off-by: Naohiro Aota <naohiro.aota@wdc.com>
 > 
-> I think we don't need to sync all fs and fsync SCRATCH_MNT is enough.
+> <grumble> Did the original patch author run all the tests that use
+> _filter_od to make sure there weren't any regressions.  This fixes
+> xfs/139 for me, so...
+
+My apologies, I did test tests that use _filter_od, but clearly not
+include xfs/139..
+
+Eryu
+
 > 
-> Signed-off-by: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
-> ---
->  tests/generic/520 | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+> Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
 > 
-> diff --git a/tests/generic/520 b/tests/generic/520
-> index 167d7077..a16467ca 100755
-> --- a/tests/generic/520
-> +++ b/tests/generic/520
-> @@ -58,7 +58,7 @@ clean_dir()
->  {
->  	_mount_flakey
->  	rm -rf $(find $SCRATCH_MNT/* | grep -v "lost+found")
-> -	sync
-> +	$XFS_IO_PROG -c "fsync" $SCRATCH_MNT
-
-But that only has to force the scratch mount directory to disk.
-
-Assuming the test authors really meant "write all of the scratch fs'
-dirty data/metadata to disk", I think you want:
-
- $XFS_IO_PROG -c syncfs $SCRATCH_MNT
-
-here?
-
-Also, why did umount spit out 'target is busy' here?  clean_dir() erases
-the scratch fs between tests, there shouldn't be anything flakey about
-that.
-
---D
-
->  	_unmount_flakey
->  }
->  
-> -- 
-> 2.18.0
+> --D
 > 
-> 
-> 
+> > ---
+> >  common/filter | 2 +-
+> >  1 file changed, 1 insertion(+), 1 deletion(-)
+> > 
+> > diff --git a/common/filter b/common/filter
+> > index 6140e58368d7..88fcb6ef68ee 100644
+> > --- a/common/filter
+> > +++ b/common/filter
+> > @@ -495,7 +495,7 @@ _filter_od()
+> >  		fi
+> >  
+> >  		offset="${line%% *}"
+> > -		printf '%o%s\n' $((offset / BLOCK_SIZE)) "${line#$offset}"
+> > +		printf '%o%s\n' $(("0$offset" / BLOCK_SIZE)) "${line#$offset}"
+> >  	done
+> >  }
+> >  
+> > -- 
+> > 2.24.0
+> > 
