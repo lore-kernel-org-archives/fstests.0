@@ -2,301 +2,238 @@ Return-Path: <SRS0=EflN=2H=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7DC6AC43603
-	for <linux-fstests@archiver.kernel.org>; Tue, 17 Dec 2019 17:44:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E6E4AC2D0CD
+	for <linux-fstests@archiver.kernel.org>; Tue, 17 Dec 2019 22:34:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 4439F206D8
-	for <linux-fstests@archiver.kernel.org>; Tue, 17 Dec 2019 17:44:03 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="UoyuVd1+"
+	by mail.kernel.org (Postfix) with ESMTP id B8C0A218AC
+	for <linux-fstests@archiver.kernel.org>; Tue, 17 Dec 2019 22:34:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727388AbfLQRoD (ORCPT
+        id S1726512AbfLQWeJ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 17 Dec 2019 12:44:03 -0500
-Received: from mail-ua1-f66.google.com ([209.85.222.66]:46234 "EHLO
-        mail-ua1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726764AbfLQRoC (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 17 Dec 2019 12:44:02 -0500
-Received: by mail-ua1-f66.google.com with SMTP id l6so3263942uap.13;
-        Tue, 17 Dec 2019 09:44:01 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:reply-to:from:date:message-id
-         :subject:to:cc:content-transfer-encoding;
-        bh=PE+y+kGa7gfD/I7FoyZ8FdVWsS2hnoq61wngQANzDL0=;
-        b=UoyuVd1+nYhfliJQLNJ81MYsXavYAMVcOQJ2VXscWIArtsshzHcVVV4NzfDGGMG/9u
-         pQ1ugV3byeAeCRGLColWvwjoTRlPJZliTW8kS9lnDWx9VyP0yq0TtBsyG3PuNGqR4Vpa
-         NikaPeh83Aw6S5DLVZXYbPavFlKi/laAAb309ChxRoIju6Bn1berzMG7c/qAxZBsim2+
-         eorqGBnN0US8GWA0AVDG/uQI47Gwhkc8apEVRxwlUV7MY5ZahEiRnCyNFNL0SbKfz3Ur
-         LxZ0/TRlCa4jVIotchTCirn10mGzkbncEGdWMEaUmMHy+Cb3doE2A1ip2tFF9fGn71aq
-         U90Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:reply-to
-         :from:date:message-id:subject:to:cc:content-transfer-encoding;
-        bh=PE+y+kGa7gfD/I7FoyZ8FdVWsS2hnoq61wngQANzDL0=;
-        b=mZ94xL56lz4dA/NmbXWOJYdSyqCYmJl7yoSOoIVfcQE6BrvWbOJk68+qZwngzoWK0G
-         Q31Bd0Ed9hONnifiiHcKwyWYJOztpnq/4nydpu1IQ0GlVlFEB2ynmP0lDC0qUgzj/sPF
-         wZA4GWkY3U9bYaXdR5cY95njcqMd5u2ybLh8ce0RXtWUMNpbA/4plS2JDYX4J12+rCNc
-         6c1cbaJi4R/uKIz4DGJJWe7SUk2VXuhrhjW0q/bwaY7vx2A2VVXawkTFB8bSscKLoaSc
-         5i3u0ECbqLjEis9Z9Hw2AtHkqyq0zOg5S8gsD1ym6pp9X4ID7L+GCpuXra2vXGkc04t5
-         I45w==
-X-Gm-Message-State: APjAAAUNbF5A98mGr1SIL+l52RPvY6+MKRK4zNSVu8zecNkkBTf/PnBK
-        7rLmkJrk0il1XqWgZofnW+nGcL9DYpT+1sNZoG4=
-X-Google-Smtp-Source: APXvYqwPjCCmUugcvMCFUBF1tWdoPw7pebki/8M9ZwnD55ZvgoY37hUoSTFb4T5lodjtZkF4q1ypaI7f1rLuOCPyXbM=
-X-Received: by 2002:a9f:368f:: with SMTP id p15mr4123251uap.123.1576604641289;
- Tue, 17 Dec 2019 09:44:01 -0800 (PST)
+        Tue, 17 Dec 2019 17:34:09 -0500
+Received: from sandeen.net ([63.231.237.45]:36632 "EHLO sandeen.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725886AbfLQWeI (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 17 Dec 2019 17:34:08 -0500
+Received: from [10.0.0.4] (liberator [10.0.0.4])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by sandeen.net (Postfix) with ESMTPSA id D3D80F8AF6;
+        Tue, 17 Dec 2019 16:33:54 -0600 (CST)
+To:     linux-xfs <linux-xfs@vger.kernel.org>,
+        fstests <fstests@vger.kernel.org>
+Cc:     Zorro Lang <zlang@redhat.com>
+From:   Eric Sandeen <sandeen@sandeen.net>
+Subject: [PATCH V2] fstests: verify that xfs_growfs can operate on mounted
+ device node
+Autocrypt: addr=sandeen@sandeen.net; prefer-encrypt=mutual; keydata=
+ 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 pA==
+Message-ID: <4cdefab7-02f0-7703-a3d2-8c2b3ce655b7@sandeen.net>
+Date:   Tue, 17 Dec 2019 16:34:07 -0600
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:68.0)
+ Gecko/20100101 Thunderbird/68.3.0
 MIME-Version: 1.0
-References: <20191212083123.25888-1-wqu@suse.com>
-In-Reply-To: <20191212083123.25888-1-wqu@suse.com>
-Reply-To: fdmanana@gmail.com
-From:   Filipe Manana <fdmanana@gmail.com>
-Date:   Tue, 17 Dec 2019 17:43:50 +0000
-Message-ID: <CAL3q7H5C+R3nPs-hW8k5pdFy9qDEVvD1UY+jNngZcmaDhcyr7w@mail.gmail.com>
-Subject: Re: [PATCH] fstests: btrfs/14[01]: Use proper helper to get both
- devid and physical for corruption
-To:     Qu Wenruo <wqu@suse.com>
-Cc:     fstests <fstests@vger.kernel.org>,
-        linux-btrfs <linux-btrfs@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Dec 12, 2019 at 8:31 AM Qu Wenruo <wqu@suse.com> wrote:
->
-> [BUG]
-> With btrfs-progs v5.4, btrfs/140 and btrfs/141 will fail.
+From: Eric Sandeen <sandeen@redhat.com>
 
-Oddly, it doesn't fail for me. Only 142, 143, 157 and 158.
+The ability to use a mounted device node as the primary argument
+to xfs_growfs was added back in with:
+  7e8275f8 xfs_growfs: allow mounted device node as argument
+because it was an undocumented behavior that some userspace depended on.
+This test exercises that functionality.
 
-However this seems correct.
+Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+---
 
->
-> [CAUSE]
-> Both tests are testing re-silvering of RAID1, thus they need to corrupt
-> on-disk data.
->
-> This requires to do manual logical -> physical bytes mapping in the test
-> case.
-> However the test case itself uses too many hard coded helper to grab
-> physical offset, which will change with mkfs.btrfs.
->
-> [FIX]
-> Use more flex helper, to get both devid and physical for such
+V2: Address Eryu's review concerns
 
-more flex -> more flexible
+diff --git a/tests/xfs/999 b/tests/xfs/999
+new file mode 100755
+index 00000000..186a29eb
+--- /dev/null
++++ b/tests/xfs/999
+@@ -0,0 +1,101 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2019 Red Hat, Inc.  All Rights Reserved.
++#
++# FS QA Test 999
++#
++# Test to ensure xfs_growfs command accepts device nodes if & only
++# if they are mounted.
++# This functionality, though undocumented, worked until xfsprogs v4.12
++# It was added back and documented after xfsprogs v5.2 via
++#   7e8275f8 xfs_growfs: allow mounted device node as argument
++#
++# Based on xfs/289
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++loopfile=$TEST_DIR/fsfile
++mntdir=$TEST_DIR/mntdir
++loop_symlink=$TEST_DIR/loop_symlink.$$
++
++_cleanup()
++{
++    $UMOUNT_PROG $mntdir
++    [ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
++    rmdir $mntdir
++    rm -f $loop_symlink
++    rm -f $loopfile
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs xfs
++_supported_os Linux
++_require_test
++_require_loop
++
++mkdir -p $mntdir || _fail "!!! failed to create temp mount dir"
++
++echo "=== mkfs.xfs ==="
++$MKFS_XFS_PROG -d file,name=$loopfile,size=16m -f >/dev/null 2>&1
++
++echo "=== truncate ==="
++$XFS_IO_PROG -fc "truncate 256m" $loopfile
++
++echo "=== create loop device ==="
++loop_dev=$(_create_loop_device $loopfile)
++
++echo "=== create loop device symlink ==="
++ln -s $loop_dev $loop_symlink
++
++echo "loop device is $loop_dev" >> $seqres.full
++
++# These unmounted operations should fail
++
++echo "=== xfs_growfs - unmounted device, command should be rejected ==="
++$XFS_GROWFS_PROG $loop_dev 2>&1 | sed -e s:$loop_dev:LOOPDEV:
++
++echo "=== xfs_growfs - check symlinked dev, unmounted ==="
++$XFS_GROWFS_PROG $loop_symlink 2>&1 | sed -e s:$loop_symlink:LOOPSYMLINK:
++
++# These mounted operations should pass
++
++echo "=== mount ==="
++$MOUNT_PROG $loop_dev $mntdir || _fail "!!! failed to loopback mount"
++
++echo "=== xfs_growfs - check device node ==="
++$XFS_GROWFS_PROG -D 8192 $loop_dev > /dev/null
++
++echo "=== xfs_growfs - check device symlink ==="
++$XFS_GROWFS_PROG -D 12288 $loop_symlink > /dev/null
++
++echo "=== unmount ==="
++$UMOUNT_PROG $mntdir || _fail "!!! failed to unmount"
++
++echo "=== mount device symlink ==="
++$MOUNT_PROG $loop_symlink $mntdir || _fail "!!! failed to loopback mount"
++
++echo "=== xfs_growfs - check device symlink ==="
++$XFS_GROWFS_PROG -D 16384 $loop_symlink > /dev/null
++
++echo "=== xfs_growfs - check device node ==="
++$XFS_GROWFS_PROG -D 20480 $loop_dev > /dev/null
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/999.out b/tests/xfs/999.out
+new file mode 100644
+index 00000000..ababb892
+--- /dev/null
++++ b/tests/xfs/999.out
+@@ -0,0 +1,16 @@
++QA output created by 999
++=== mkfs.xfs ===
++=== truncate ===
++=== create loop device ===
++=== create loop device symlink ===
++=== xfs_growfs - unmounted device, command should be rejected ===
++xfs_growfs: LOOPDEV is not a mounted XFS filesystem
++=== xfs_growfs - check symlinked dev, unmounted ===
++xfs_growfs: LOOPSYMLINK is not a mounted XFS filesystem
++=== mount ===
++=== xfs_growfs - check device node ===
++=== xfs_growfs - check device symlink ===
++=== unmount ===
++=== mount device symlink ===
++=== xfs_growfs - check device symlink ===
++=== xfs_growfs - check device node ===
+diff --git a/tests/xfs/group b/tests/xfs/group
+index 4373d082..ff251002 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -508,3 +508,4 @@
+ 509 auto ioctl
+ 510 auto ioctl quick
+ 511 auto quick quota
++999 quick auto growfs
 
-> corruption.
->
-> Signed-off-by: Qu Wenruo <wqu@suse.com>
-> ---
->  tests/btrfs/140     | 36 ++++++++++++++++++++++++++++--------
->  tests/btrfs/140.out |  2 --
->  tests/btrfs/141     | 33 ++++++++++++++++++++++++++-------
->  tests/btrfs/141.out |  2 --
->  4 files changed, 54 insertions(+), 19 deletions(-)
->
-> diff --git a/tests/btrfs/140 b/tests/btrfs/140
-> index 1c5aa679..5c6de733 100755
-> --- a/tests/btrfs/140
-> +++ b/tests/btrfs/140
-> @@ -46,10 +46,26 @@ _require_odirect
->
->  get_physical()
->  {
-> -       # $1 is logical address
-> -       # print chunk tree and find devid 2 which is $SCRATCH_DEV
-> -       $BTRFS_UTIL_PROG inspect-internal dump-tree -t 3 $SCRATCH_DEV | \
-> -       grep $1 -A 6 | awk '($1 ~ /stripe/ && $3 ~ /devid/ && $4 ~ /1/) {=
- print $6 }'
-> +       local logical=3D$1
-> +       local stripe=3D$2
-> +        $BTRFS_UTIL_PROG inspect-internal dump-tree -t 3 $SCRATCH_DEV | =
-\
-> +               grep $logical -A 6 | \
-> +               awk "(\$1 ~ /stripe/ && \$3 ~ /devid/ && \$2 ~ /$stripe/)=
- { print \$6 }"
-> +}
-
-Same as before, $AWK_PROG.
-
-These helpers seems the same as in 142 and 143 (and 141, updated later
-in this patch).
-I know this patch isn't introducing them, but we should move them into
-helpers at common/btrfs one day.
-
-Thanks.
-
-> +
-> +get_devid()
-> +{
-> +       local logical=3D$1
-> +       local stripe=3D$2
-> +        $BTRFS_UTIL_PROG inspect-internal dump-tree -t 3 $SCRATCH_DEV | =
-\
-> +               grep $logical -A 6 | \
-> +               awk "(\$1 ~ /stripe/ && \$3 ~ /devid/ && \$2 ~ /$stripe/)=
- { print \$4 }"
-> +}
-> +
-> +get_device_path()
-> +{
-> +       local devid=3D$1
-> +       echo "$SCRATCH_DEV_POOL" | awk "{print \$$devid}"
->  }
->
->  _scratch_dev_pool_get 2
-> @@ -72,11 +88,15 @@ echo "step 2......corrupt file extent" >>$seqres.full
->
->  ${FILEFRAG_PROG} -v $SCRATCH_MNT/foobar >> $seqres.full
->  logical_in_btrfs=3D`${FILEFRAG_PROG} -v $SCRATCH_MNT/foobar | _filter_fi=
-lefrag | cut -d '#' -f 1`
-> -physical_on_scratch=3D`get_physical ${logical_in_btrfs}`
-> +physical=3D$(get_physical ${logical_in_btrfs} 1)
-> +devid=3D$(get_devid ${logical_in_btrfs} 1)
-> +devpath=3D$(get_device_path ${devid})
->
->  _scratch_unmount
-> -$XFS_IO_PROG -d -c "pwrite -S 0xbb -b 64K $physical_on_scratch 64K" $SCR=
-ATCH_DEV |\
-> -       _filter_xfs_io_offset
-> +
-> +echo " corrupt stripe #1, devid $devid devpath $devpath physical $physic=
-al" \
-> +       >> $seqres.full
-> +$XFS_IO_PROG -d -c "pwrite -S 0xbb -b 64K $physical 64K" $devpath > /dev=
-/null
->
->  _scratch_mount
->
-> @@ -96,7 +116,7 @@ done
->  _scratch_unmount
->
->  # check if the repair works
-> -$XFS_IO_PROG -d -c "pread -v -b 512 $physical_on_scratch 512" $SCRATCH_D=
-EV |\
-> +$XFS_IO_PROG -d -c "pread -v -b 512 $physical 512" $devpath |\
->         _filter_xfs_io_offset
->
->  _scratch_dev_pool_put
-> diff --git a/tests/btrfs/140.out b/tests/btrfs/140.out
-> index f3fdf174..fb5aa108 100644
-> --- a/tests/btrfs/140.out
-> +++ b/tests/btrfs/140.out
-> @@ -1,8 +1,6 @@
->  QA output created by 140
->  wrote 131072/131072 bytes
->  XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> -wrote 65536/65536 bytes
-> -XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
->  XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
-....
->  XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
-....
->  XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
-....
-> diff --git a/tests/btrfs/141 b/tests/btrfs/141
-> index 186d18c8..2f5ad1a2 100755
-> --- a/tests/btrfs/141
-> +++ b/tests/btrfs/141
-> @@ -46,10 +46,26 @@ _require_command "$FILEFRAG_PROG" filefrag
->
->  get_physical()
->  {
-> -        # $1 is logical address
-> -        # print chunk tree and find devid 2 which is $SCRATCH_DEV
-> +       local logical=3D$1
-> +       local stripe=3D$2
->          $BTRFS_UTIL_PROG inspect-internal dump-tree -t 3 $SCRATCH_DEV | =
-\
-> -       grep $1 -A 6 | awk '($1 ~ /stripe/ && $3 ~ /devid/ && $4 ~ /1/) {=
- print $6 }'
-> +               grep $logical -A 6 | \
-> +               awk "(\$1 ~ /stripe/ && \$3 ~ /devid/ && \$2 ~ /$stripe/)=
- { print \$6 }"
-> +}
-> +
-> +get_devid()
-> +{
-> +       local logical=3D$1
-> +       local stripe=3D$2
-> +        $BTRFS_UTIL_PROG inspect-internal dump-tree -t 3 $SCRATCH_DEV | =
-\
-> +               grep $logical -A 6 | \
-> +               awk "(\$1 ~ /stripe/ && \$3 ~ /devid/ && \$2 ~ /$stripe/)=
- { print \$4 }"
-> +}
-> +
-> +get_device_path()
-> +{
-> +       local devid=3D$1
-> +       echo "$SCRATCH_DEV_POOL" | awk "{print \$$devid}"
->  }
->
->  _scratch_dev_pool_get 2
-> @@ -72,11 +88,14 @@ echo "step 2......corrupt file extent" >>$seqres.full
->
->  ${FILEFRAG_PROG} -v $SCRATCH_MNT/foobar >> $seqres.full
->  logical_in_btrfs=3D`${FILEFRAG_PROG} -v $SCRATCH_MNT/foobar | _filter_fi=
-lefrag | cut -d '#' -f 1`
-> -physical_on_scratch=3D`get_physical ${logical_in_btrfs}`
-> +physical=3D$(get_physical ${logical_in_btrfs} 1)
-> +devid=3D$(get_devid ${logical_in_btrfs} 1)
-> +devpath=3D$(get_device_path ${devid})
->
->  _scratch_unmount
-> -$XFS_IO_PROG -d -c "pwrite -S 0xbb -b 64K $physical_on_scratch 64K" $SCR=
-ATCH_DEV |\
-> -       _filter_xfs_io_offset
-> +echo " corrupt stripe #1, devid $devid devpath $devpath physical $physic=
-al" \
-> +       >> $seqres.full
-> +$XFS_IO_PROG -d -c "pwrite -S 0xbb -b 64K $physical 64K" $devpath > /dev=
-/null
->
->  _scratch_mount
->
-> @@ -97,7 +116,7 @@ done
->  _scratch_unmount
->
->  # check if the repair works
-> -$XFS_IO_PROG -c "pread -v -b 512 $physical_on_scratch 512" $SCRATCH_DEV =
-|\
-> +$XFS_IO_PROG -c "pread -v -b 512 $physical 512" $devpath |\
->         _filter_xfs_io_offset
->
->  _scratch_dev_pool_put
-> diff --git a/tests/btrfs/141.out b/tests/btrfs/141.out
-> index 116f98a2..4b8be189 100644
-> --- a/tests/btrfs/141.out
-> +++ b/tests/btrfs/141.out
-> @@ -1,8 +1,6 @@
->  QA output created by 141
->  wrote 131072/131072 bytes
->  XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> -wrote 65536/65536 bytes
-> -XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
->  XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
-....
->  XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
-....
->  XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
-....
-> --
-> 2.23.0
->
-
-
---=20
-Filipe David Manana,
-
-=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
- right.=E2=80=9D
