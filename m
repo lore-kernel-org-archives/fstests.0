@@ -7,61 +7,61 @@ X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
 	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DA885C3F68F
-	for <linux-fstests@archiver.kernel.org>; Tue, 17 Dec 2019 16:19:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 90D74C43603
+	for <linux-fstests@archiver.kernel.org>; Tue, 17 Dec 2019 17:25:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id AF59821835
-	for <linux-fstests@archiver.kernel.org>; Tue, 17 Dec 2019 16:19:18 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 650362465E
+	for <linux-fstests@archiver.kernel.org>; Tue, 17 Dec 2019 17:25:03 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="TwdYYL69"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="G+rxd+Ou"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728772AbfLQQTR (ORCPT
+        id S1727231AbfLQRZD (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 17 Dec 2019 11:19:17 -0500
-Received: from mail-vs1-f68.google.com ([209.85.217.68]:44447 "EHLO
-        mail-vs1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728707AbfLQQTQ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 17 Dec 2019 11:19:16 -0500
-Received: by mail-vs1-f68.google.com with SMTP id p6so6808797vsj.11;
-        Tue, 17 Dec 2019 08:19:16 -0800 (PST)
+        Tue, 17 Dec 2019 12:25:03 -0500
+Received: from mail-vs1-f65.google.com ([209.85.217.65]:36821 "EHLO
+        mail-vs1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726887AbfLQRZC (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 17 Dec 2019 12:25:02 -0500
+Received: by mail-vs1-f65.google.com with SMTP id u14so2997355vsu.3;
+        Tue, 17 Dec 2019 09:25:01 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=mime-version:references:in-reply-to:reply-to:from:date:message-id
          :subject:to:cc:content-transfer-encoding;
-        bh=qGj6aWj6B80dTZYAaTQw1v6GOu57Aa9K90ugOVMTzHo=;
-        b=TwdYYL69dCi91jEgQHaTqONGNhe7qdCnHuwYXnWGCP7dIj9aJzUKE2k2ptB+3jd22H
-         NSEEpf3xea1yF1PrrcaWASsaE4gvZrDQlR1jQBK00lUfTIwNZ4bjINXA8ONvVroHVIEw
-         IlkQVt7s5sknR4k5m9Fy7ywv8xIxZfTymUcmoIDXTEGHNaRg6PE/YyjIE3d7DU+0CfCu
-         Dh0WHG/dG/CaNDvPMFuq7Dr+tKfI5TgRog1GIomOnDJovtd9sQaOoNc5va/0vnZKXUfw
-         pw6SD7Zs9TjKSJtXG/WHxVDEzacEqGcvAnQk+kBE0VfazAzdH3hb0nKr17K/e4PdrywP
-         b0eg==
+        bh=YR0TrjMy/QDn2raZ9wU9QOuPVU0wjj7bHsjH10hwvFA=;
+        b=G+rxd+Ou9B5L7sBCpsHc3jNvMIpiQsarlYED2oa0lGmVt3A77yNzFYF/e7B36Iz17L
+         N0qK1xuZr5bReIA24FCsmfHEnK15/t29+cyJwjiTXgFGBgib7zyyWhlzJzc329c9wtgS
+         yGPvtA0CwpG2tGG7nsJ5RF/sEgj1sGVr78QSWJ6iPE4W4qkzFfgx+Wo6OTfyKjP73wjr
+         BSl4/gU02SYwzEownAQx++Y7ip+6sehQtR3kT9q+gsqhrqRJEAOyY6X20NbPSvOldcMd
+         rUU98S0dOS8bmi5RVPLtRdtw/FXnqGePQSw052yl9ZEt8nWQ1qH/EYUSp+ivxecT6iKa
+         8gLA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:reply-to
          :from:date:message-id:subject:to:cc:content-transfer-encoding;
-        bh=qGj6aWj6B80dTZYAaTQw1v6GOu57Aa9K90ugOVMTzHo=;
-        b=ssQcz1YgXipJTEkfo5jtP5rV3uNDfo4GOAnqXhAEGXxwyqleeTHi86OuHOF8QcE5x+
-         T87zzpO/bsLwt9Nzg7eEibKFjRxDXKYiIYrFe3hyMoWIgIZBHCnOSgujVIEE+VjzRhsr
-         KZT63nrC4ZlVvuJwPmQJw/octZAMUg41LeVHf9ErbHfGxD0R/h3j3v6bFc+yJ7xIDAK1
-         oBSQyxNX6vSO/RlfNd4I8kWkZd4bmCGW2WATtyf7i/jCAUttvythZn0G30hRHrzY9z+o
-         7hZTZ6s9tWwNQ6OszcH6U47SnTudvafU8fjx/UDvxPoB08wts1kGDnTjp27sjauOzxy+
-         bkwQ==
-X-Gm-Message-State: APjAAAWJG0/ZOmWEZDkIx/ikWW18b4VpsacLVzh9SLS0FkGTozz/3xzB
-        tLF9J4dqxL+Qx01/gx/4m48uULb//3sTou3XD7w=
-X-Google-Smtp-Source: APXvYqw/MVv/AXXK6inrPgfHfwTDZI/nMSmpwmRKPzD3/LOiiNWarN57iIvrvzFewohhEfiGn0D0Jw/VK/FqbLrnm/M=
-X-Received: by 2002:a05:6102:18f:: with SMTP id r15mr3375981vsq.206.1576599555724;
- Tue, 17 Dec 2019 08:19:15 -0800 (PST)
+        bh=YR0TrjMy/QDn2raZ9wU9QOuPVU0wjj7bHsjH10hwvFA=;
+        b=hKz388F6wHqXw7NN4Oo5IBe5WOoVikmgblaj9eGW3O+jD7YTykE+HKnLefptZzIHit
+         LV6NaKxw007adWdtgHiPV2kw3BeeKn5R+G3DO7KvXPgHMG+qFRyhhqeL9g6PqR0R+u98
+         NEOIdq9PuWeYv1HzTPhErDO3lIcWqUCFoM2wlrxhMpQi4qgVs0LyDM8V+sgN39WyBCRb
+         xVVyLSCe9SfENPVVhRP27EoNctYmOFmYzIyjMxQubX5pEfaPPNKz53lsNe6AvMvXh6tk
+         zUqWyqzp8o/EMRLs1O0OPR8mviL3LlhfWyuwJsBBOC1pyuCaiA9Z8gd8gqLuLjAVKnqj
+         guVQ==
+X-Gm-Message-State: APjAAAUvGITRGCf1P64+ETIWg7bCM6FWPWOEHKc7/vplzB0pi4TFpWCb
+        4o7gt90zPQvSaN1RJROY04R9U75llL4OMI2KqK7FFA==
+X-Google-Smtp-Source: APXvYqxlqqprqefLgnhBkSdRxbyYQhfXvNOH2KdF0C6EZUbxXUPoBY6KnYawDflSGTiQdc76Z8mrBHLOKlaVmdWSg4o=
+X-Received: by 2002:a67:8010:: with SMTP id b16mr3590765vsd.90.1576603500997;
+ Tue, 17 Dec 2019 09:25:00 -0800 (PST)
 MIME-Version: 1.0
-References: <20191217152505.44650-1-josef@toxicpanda.com>
-In-Reply-To: <20191217152505.44650-1-josef@toxicpanda.com>
+References: <20191211104029.25541-1-wqu@suse.com> <20191211104029.25541-2-wqu@suse.com>
+In-Reply-To: <20191211104029.25541-2-wqu@suse.com>
 Reply-To: fdmanana@gmail.com
 From:   Filipe Manana <fdmanana@gmail.com>
-Date:   Tue, 17 Dec 2019 16:19:04 +0000
-Message-ID: <CAL3q7H6pyj1gMz_xQZOG842B0KmxM80Su7kSABV7_qrAvokchw@mail.gmail.com>
-Subject: Re: [PATCH] src/fssum: skip subvolumes when building a sum
-To:     Josef Bacik <josef@toxicpanda.com>
+Date:   Tue, 17 Dec 2019 17:24:50 +0000
+Message-ID: <CAL3q7H50wBGvT1dVFh0MSZ7V=690Eek86pYq_ct2CN2aViGFHg@mail.gmail.com>
+Subject: Re: [PATCH 1/3] fstests: common: Use more accurate kernel config for _require_fail_make_request
+To:     Qu Wenruo <wqu@suse.com>
 Cc:     fstests <fstests@vger.kernel.org>,
-        linux-btrfs <linux-btrfs@vger.kernel.org>, kernel-team@fb.com
+        linux-btrfs <linux-btrfs@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 Sender: fstests-owner@vger.kernel.org
@@ -69,57 +69,38 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Dec 17, 2019 at 3:25 PM Josef Bacik <josef@toxicpanda.com> wrote:
+On Wed, Dec 11, 2019 at 10:40 AM Qu Wenruo <wqu@suse.com> wrote:
 >
-> With the snapshot/subvolume support added to fsstress I've been seeing
-> random failures with our send/receive related tests.  This is because
-> fssum is summing the path with the subvolumes for our test fs'es that
-> are generated by fsstress.  But with send/receive it skips subvolumes,
-> which makes the sums mismatch.  Fix this by skipping directories that do
-> not match our st_dev, which is how we differentiate subvolumes in btrfs.
+> Just enabling CONFIG_FAIL_MAKE_REQUEST will not fulfill
+> _require_fail_make_request.
 >
-> Signed-off-by: Josef Bacik <josef@toxicpanda.com>
-
-Looks good, thanks.
+> It's CONFIG_FAULT_INJECTION_DEBUG_FS.
+>
+> Signed-off-by: Qu Wenruo <wqu@suse.com>
 
 Reviewed-by: Filipe Manana <fdmanana@suse.com>
 
+Thanks.
+
 > ---
->  src/fssum.c | 11 +++++++++++
->  1 file changed, 11 insertions(+)
+>  common/rc | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> diff --git a/src/fssum.c b/src/fssum.c
-> index 6ba0a95c..a243839a 100644
-> --- a/src/fssum.c
-> +++ b/src/fssum.c
-> @@ -517,6 +517,12 @@ sum(int dirfd, int level, sum_t *dircs, char *path_p=
-refix, char *path_in)
->         int excl;
->         sum_file_data_t sum_file_data =3D flags[FLAG_STRUCTURE] ?
->                         sum_file_data_strict : sum_file_data_permissive;
-> +       struct stat64 dir_st;
-> +
-> +       if (fstat64(dirfd, &dir_st)) {
-> +               perror("fstat");
-> +               exit(-1);
-> +       }
+> diff --git a/common/rc b/common/rc
+> index 5cdd829b..2d72f158 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -2357,7 +2357,7 @@ _require_fail_make_request()
+>  {
+>      [ -f "$DEBUGFS_MNT/fail_make_request/probability" ] \
+>         || _notrun "$DEBUGFS_MNT/fail_make_request \
+> - not found. Seems that CONFIG_FAIL_MAKE_REQUEST kernel config option not=
+ enabled"
+> + not found. Seems that CONFIG_FAULT_INJECTION_DEBUG_FS kernel config opt=
+ion not enabled"
+>  }
 >
->         d =3D fdopendir(dirfd);
->         if (!d) {
-> @@ -570,6 +576,11 @@ sum(int dirfd, int level, sum_t *dircs, char *path_p=
-refix, char *path_in)
->                                 path_prefix, path, strerror(errno));
->                         exit(-1);
->                 }
-> +
-> +               /* We are crossing into a different subvol, skip this sub=
-tree. */
-> +               if (st.st_dev !=3D dir_st.st_dev)
-> +                       goto next;
-> +
->                 sum_add_u64(&meta, level);
->                 sum_add(&meta, namelist[i], strlen(namelist[i]));
->                 if (!S_ISDIR(st.st_mode))
+>  # Disable extent zeroing for ext4 on the given device
 > --
 > 2.23.0
 >
