@@ -2,159 +2,71 @@ Return-Path: <SRS0=0bps=2J=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.2 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A4B5CC2D0D3
-	for <linux-fstests@archiver.kernel.org>; Thu, 19 Dec 2019 21:16:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D95F2C43603
+	for <linux-fstests@archiver.kernel.org>; Thu, 19 Dec 2019 22:33:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 7972324683
-	for <linux-fstests@archiver.kernel.org>; Thu, 19 Dec 2019 21:16:52 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="NjUHbewP"
+	by mail.kernel.org (Postfix) with ESMTP id B0F092465E
+	for <linux-fstests@archiver.kernel.org>; Thu, 19 Dec 2019 22:33:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727462AbfLSVQu (ORCPT
+        id S1726866AbfLSWdh (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 19 Dec 2019 16:16:50 -0500
-Received: from mail-qt1-f196.google.com ([209.85.160.196]:37196 "EHLO
-        mail-qt1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727454AbfLSVQs (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 19 Dec 2019 16:16:48 -0500
-Received: by mail-qt1-f196.google.com with SMTP id w47so6289399qtk.4
-        for <fstests@vger.kernel.org>; Thu, 19 Dec 2019 13:16:48 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
-        h=subject:to:references:from:message-id:date:user-agent:mime-version
-         :in-reply-to:content-language:content-transfer-encoding;
-        bh=cyz2FofkvAs+tYZsZmZnIcVc3z+B4FGuGfZg6Bel1Ds=;
-        b=NjUHbewPFrlhBO7+xxcKjhKJTR57MkG0slnnY0EVFuKKez2T9vF+AbtWZrHfNfDlI2
-         fwBekA6md/0BAml86ma0as40QVkgoPm8dUFalCFqq8Avf1pZ9ZJkqYgvMd5Jag4rQQz2
-         d9avyaqAH4ryNHvQK+uIVCT+nKJLx8UloYhznr2456d3SR0OgWsQ5EnM30tqTvP8Gdzl
-         99HD3rJ2m7Ipd+BcmqidAVNM/9N8XI24HqelYWjmOci3Q6uqdxbRNyLCWeAevhsFwlpE
-         DQmwJ+E8N/x5j3pzpDY775C0tvKJQ03bkNPWycYjRsSpjWTSvfxIUQRt0fTro6q/5eFt
-         1cLw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=cyz2FofkvAs+tYZsZmZnIcVc3z+B4FGuGfZg6Bel1Ds=;
-        b=HWWG+mMtqts1DxBdPouhWk/ZW0JpFhMs0KpJZfZni3TZrYQsqSVDL8mP452UlIa5Eh
-         O2RyFloFBAepX8ZO9nJ3dKzP2KnaBvWYCDY2WQxLWefTLbX7LUnObBgbIHekwCJFTGRi
-         9mrHwVTq+H2mHh5XyGtJQo2fxgghXnsPueDDU62Uvo9J5Z4p+lRXK6K3uhvI4FcNHc/G
-         8kmS+okT5SZv81c1yA3D5bseINAS0cSsBp1u0bM4koXhnHguKndLMlBbU0gR6v+ClnA2
-         Md05CnHV6Ta1QV1kxzbFRI+bjUPX3Qh8qq3NvTo67PGYC4G1aYw/orEB3avWZ2DdQheT
-         lxJw==
-X-Gm-Message-State: APjAAAWGUYIu74UPMShHq45gibyMsERwl4brioVrxlzeu0e0rB7SzGmX
-        hczOXlhcoN+VGd90dl2BBAw0Qg==
-X-Google-Smtp-Source: APXvYqx3kFF5c1xH9dyWHhxf9uybwO0ZlAwS6BO77nWN7DnDVuH6/ballj88tWPLWcZvNUVB9HJEsA==
-X-Received: by 2002:ac8:614d:: with SMTP id d13mr8271090qtm.212.1576790207660;
-        Thu, 19 Dec 2019 13:16:47 -0800 (PST)
-Received: from ?IPv6:2620:10d:c0a8:1102:ce0:3629:8daa:1271? ([2620:10d:c091:480::d837])
-        by smtp.gmail.com with ESMTPSA id l35sm650498qtl.12.2019.12.19.13.16.46
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 19 Dec 2019 13:16:46 -0800 (PST)
-Subject: Re: [PATCH] btrfs: regression test for subvol deletion after rename
-To:     Nikolay Borisov <nborisov@suse.com>, linux-btrfs@vger.kernel.org,
-        fstests@vger.kernel.org, kernel-team@fb.com
-References: <20191219142835.50371-1-josef@toxicpanda.com>
- <db0849cb-66d9-4815-d111-b225cb27a3c5@suse.com>
-From:   Josef Bacik <josef@toxicpanda.com>
-Message-ID: <5ea1f28a-16bc-f97c-9c4a-ce47f94b1b43@toxicpanda.com>
-Date:   Thu, 19 Dec 2019 16:16:45 -0500
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:68.0)
- Gecko/20100101 Thunderbird/68.3.1
+        Thu, 19 Dec 2019 17:33:37 -0500
+Received: from fieldses.org ([173.255.197.46]:38774 "EHLO fieldses.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726818AbfLSWdh (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 19 Dec 2019 17:33:37 -0500
+Received: by fieldses.org (Postfix, from userid 2815)
+        id EA22247F; Thu, 19 Dec 2019 17:33:36 -0500 (EST)
+Date:   Thu, 19 Dec 2019 17:33:36 -0500
+To:     fstests@vger.kernel.org
+Cc:     linux-nfs@vger.kernel.org
+Subject: [PATCH] generic/529: use an ACL that doesn't confuse NFS
+Message-ID: <20191219223336.GC12026@fieldses.org>
 MIME-Version: 1.0
-In-Reply-To: <db0849cb-66d9-4815-d111-b225cb27a3c5@suse.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+User-Agent: Mutt/1.5.21 (2010-09-15)
+From:   bfields@fieldses.org (J. Bruce Fields)
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 12/19/19 11:12 AM, Nikolay Borisov wrote:
-> 
-> 
-> On 19.12.19 г. 16:28 ч., Josef Bacik wrote:
->> Test removal of a subvolume via rmdir after it has been renamed into a
->> snapshot of the volume that originally contained the subvolume
->> reference.
->>
->> This currently fails on btrfs but is fixed by the patch with the title
->>
->>    "btrfs: fix invalid removal of root ref"
->>
->> Signed-off-by: Josef Bacik <josef@toxicpanda.com>
->> ---
->>   tests/btrfs/202     | 54 +++++++++++++++++++++++++++++++++++++++++++++
->>   tests/btrfs/202.out |  4 ++++
->>   tests/btrfs/group   |  1 +
->>   3 files changed, 59 insertions(+)
->>   create mode 100755 tests/btrfs/202
->>   create mode 100644 tests/btrfs/202.out
->>
->> diff --git a/tests/btrfs/202 b/tests/btrfs/202
->> new file mode 100755
->> index 00000000..b02ee446
->> --- /dev/null
->> +++ b/tests/btrfs/202
->> @@ -0,0 +1,54 @@
->> +#! /bin/bash
->> +# SPDX-License-Identifier: GPL-2.0
->> +#
->> +# FS QA Test 201
->> +#
->> +# Regression test for fix "btrfs: fix invalid removal of root ref"
->> +#
->> +seq=`basename $0`
->> +seqres=$RESULT_DIR/$seq
->> +echo "QA output created by $seq"
->> +
->> +here=`pwd`
->> +tmp=/tmp/$$
->> +status=1	# failure is the default!
->> +trap "_cleanup; exit \$status" 0 1 2 3 15
->> +
->> +_cleanup()
->> +{
->> +	cd /
->> +	rm -f $tmp.*
->> +}
->> +
->> +. ./common/rc
->> +. ./common/filter
->> +
->> +rm -f $seqres.full
->> +
->> +_supported_fs btrfs
->> +_supported_os Linux
->> +
->> +_scratch_mkfs >> $seqres.full 2>&1
->> +_scratch_mount
->> +
->> +# Create a subvol b under a and then snapshot a into c.  This create's a stub
->> +# entry in c for b because c doesn't have a reference for b.
->> +#
->> +# But when we rename b c/foo it creates a ref for b in c.  However if we go to
->> +# remove c/b btrfs used to depend on not finding the root ref to handle the
->> +# unlink properly, but we now have a ref for that root.  We also had a bug that
->> +# would allow us to remove mis-matched refs if the keys matched, so we'd end up
->> +# removing too many entries which would cause a transaction abort.
->> +
->> +$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/a | _filter_scratch
->> +$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/a/b | _filter_scratch
->> +$BTRFS_UTIL_PROG subvolume snapshot $SCRATCH_MNT/a $SCRATCH_MNT/c \
->> +	| _filter_scratch
->> +ls $SCRATCH_MNT/c/b
-> 
-> Isn't this ls redundant?
-> 
+From: "J. Bruce Fields" <bfields@redhat.com>
 
-No we need the dummy entry in cache before we add the root ref during the 
-rename.  Thanks,
+For historical reasons having to do with Solaris ACL behavior, the Linux
+client treats an ACL like the one used as an example here as equivalent
+to a mode, causing listxattr to report that no ACL is set on the file.
 
-Josef
+(See the comment at the top of fs/nfs_common/nfsacl.c in the kernel
+source for details, and the "bogus ACL_MASK entry" comment in the same
+source file.)  This causes a spurious generic/529 failure on NFS.
+
+As far as I can tell any ACL should trigger the original XFS problem.
+So, modify it so as not to hit this odd NFS corner case.
+
+Signed-off-by: J. Bruce Fields <bfields@redhat.com>
+---
+ src/t_attr_corruption.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/t_attr_corruption.c b/src/t_attr_corruption.c
+index e7d435b1791f..b5513d44a288 100644
+--- a/src/t_attr_corruption.c
++++ b/src/t_attr_corruption.c
+@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
+ 		.e = {
+ 			{htole16(1), 0, 0},
+ 			{htole16(4), 0, 0},
+-			{htole16(0x10), 0, 0},
++			{htole16(0x10), htole16(4), 0},
+ 			{htole16(0x20), 0, 0},
+ 		},
+ 	};
+-- 
+2.24.1
+
