@@ -2,169 +2,80 @@ Return-Path: <SRS0=0bps=2J=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+X-Spam-Status: No, score=-0.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0D3F8C43603
-	for <linux-fstests@archiver.kernel.org>; Thu, 19 Dec 2019 14:28:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 771B6C43603
+	for <linux-fstests@archiver.kernel.org>; Thu, 19 Dec 2019 15:48:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id D54762467F
-	for <linux-fstests@archiver.kernel.org>; Thu, 19 Dec 2019 14:28:38 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="sPzbSWgM"
+	by mail.kernel.org (Postfix) with ESMTP id 5375B2146E
+	for <linux-fstests@archiver.kernel.org>; Thu, 19 Dec 2019 15:48:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726873AbfLSO2i (ORCPT
+        id S1726779AbfLSPse (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 19 Dec 2019 09:28:38 -0500
-Received: from mail-qk1-f193.google.com ([209.85.222.193]:41016 "EHLO
-        mail-qk1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726744AbfLSO2i (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 19 Dec 2019 09:28:38 -0500
-Received: by mail-qk1-f193.google.com with SMTP id x129so4750431qke.8
-        for <fstests@vger.kernel.org>; Thu, 19 Dec 2019 06:28:38 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
-        h=from:to:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=EvqY5TvLs2EG4Ubsh3PQ2JzrxSkMhMPV6qsK0WJpGKw=;
-        b=sPzbSWgMnZcCv3QxfuwTEh8TQ0G0wtRC7QspVh3RgKDukoy+ILoAunU8r2lKSsESoX
-         JQWDUs/wIFL3hOLb0thCbGEJCWt67nq04wNi3LipsC7DcVXnj2tahqkcwMxtsrSHYTpv
-         tjyzvVQBuyBjT9c2WGAIzer5Nx3snHdA8LMWDeha6HP+4ymp69ByT86iGc9S0gySdhu9
-         t08urhD7JsMUwnXNZbFV0w7aOOB/BToODPnWKqfaMYgYa85JqOghpRtvbIeidnYN4Tu0
-         TDxE6TkVjF8BMoJq7puMh1+kpoBWeHDdDDu/CsSjI8REtfnbuIxIvzFQTSn0LxpwR+wH
-         B1QQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=EvqY5TvLs2EG4Ubsh3PQ2JzrxSkMhMPV6qsK0WJpGKw=;
-        b=nsiRkxnZ+QCTCNA9MtnjJnTS7vO7HBlDpK9j6TBefx9gnrJv4Ui6eGCSJRc/nQHN8r
-         GH2a0jeabpwAfTacUn2w22xRzl+cufBg5upLCq7bTdezC1UtDwQWC+cTX4SZLot+webI
-         OlMOTUkX/hFsGRgs4iDdNcD+RNQsLrMHvU7FCJaj6/Dc4WjhNUstztPtDgl69l0TL5cU
-         vXY84J3ga1mRyVcq2btw3JFZ50Ru9LpUblvlEjkr2nPT6HB23LvkYUq8xmJrD6dGbuLg
-         AMfeREdkzn/3n8gfbBk2cm+tZJZob0LMLdFhjxa62WBMl8M3NcSGd36rsDlG3v5OSSY+
-         z14Q==
-X-Gm-Message-State: APjAAAVBjssKZsdAVUkdQRX0n0/bZde9lVgUf0grpgnVIWKHvkEI9LuO
-        vYfiQw6E+YBQmNjFAZgYiwDzeQ==
-X-Google-Smtp-Source: APXvYqz1jDbORjr+hxhQaQ9oa2hWthuxh6OPG3MhHEHOlu6PCBIdzBqsfsFe9ZOvj/EUY54beGULUQ==
-X-Received: by 2002:ae9:e30b:: with SMTP id v11mr8551777qkf.434.1576765717461;
-        Thu, 19 Dec 2019 06:28:37 -0800 (PST)
-Received: from localhost ([107.15.81.208])
-        by smtp.gmail.com with ESMTPSA id q73sm1750009qka.56.2019.12.19.06.28.36
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 19 Dec 2019 06:28:36 -0800 (PST)
-From:   Josef Bacik <josef@toxicpanda.com>
-To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org,
-        kernel-team@fb.com
-Subject: [PATCH] btrfs: regression test for subvol deletion after rename
-Date:   Thu, 19 Dec 2019 09:28:35 -0500
-Message-Id: <20191219142835.50371-1-josef@toxicpanda.com>
-X-Mailer: git-send-email 2.23.0
+        Thu, 19 Dec 2019 10:48:34 -0500
+Received: from imap2.colo.codethink.co.uk ([78.40.148.184]:54098 "EHLO
+        imap2.colo.codethink.co.uk" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726760AbfLSPse (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 19 Dec 2019 10:48:34 -0500
+Received: from [167.98.27.226] (helo=xylophone)
+        by imap2.colo.codethink.co.uk with esmtpsa  (Exim 4.92 #3 (Debian))
+        id 1ihy2O-00084g-ID; Thu, 19 Dec 2019 15:48:28 +0000
+Message-ID: <f913d1f409dd4b2a22bcb71a3ddaeb2b87a00671.camel@codethink.co.uk>
+Subject: Re: [Y2038] [PATCH] generic/402: fix for updated behavior of
+ timestamp limits
+From:   Ben Hutchings <ben.hutchings@codethink.co.uk>
+To:     Arnd Bergmann <arnd@arndb.de>, Greg KH <gregkh@linuxfoundation.org>
+Cc:     Amir Goldstein <amir73il@gmail.com>,
+        Deepa Dinamani <deepa.kernel@gmail.com>,
+        Sasha Levin <sashal@kernel.org>,
+        y2038 Mailman List <y2038@lists.linaro.org>,
+        fstests <fstests@vger.kernel.org>,
+        Eryu Guan <guaneryu@gmail.com>,
+        "cip-dev@lists.cip-project.org" <cip-dev@lists.cip-project.org>
+Date:   Thu, 19 Dec 2019 15:48:28 +0000
+In-Reply-To: <CAK8P3a1HiPLbajjoYQf0N4RBw9eUK6uyC+mOq7LaRmNpgiOgLA@mail.gmail.com>
+References: <20190719041231.26500-1-deepa.kernel@gmail.com>
+         <CAOQ4uxhxVKhUh_P_NffLbGScpiL0wOrCTLwWJWeSbRRNbHzPrg@mail.gmail.com>
+         <CABeXuvoHw8W02JsmZjafnQkOs1=0dodSpBFyJ_Gq+1vs+hFkQQ@mail.gmail.com>
+         <CABeXuvqO=04BJw2bWa6d2fv1FTe-B_JsNhVdYTwT=fY=ncOCkw@mail.gmail.com>
+         <CAOQ4uxjaFBZZUKyu6YS08ta8pdW_FSjRYA4J7S8+_=Gfi-kO2Q@mail.gmail.com>
+         <CAK8P3a1fYPq6DCqhT6ziJaxETLHt8uUgbHWryHiD4kQWwKLp2Q@mail.gmail.com>
+         <20191219084046.GA1026636@kroah.com>
+         <CAK8P3a1HiPLbajjoYQf0N4RBw9eUK6uyC+mOq7LaRmNpgiOgLA@mail.gmail.com>
+Organization: Codethink Ltd.
+Content-Type: text/plain; charset="UTF-8"
+User-Agent: Evolution 3.30.5-1.1 
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Test removal of a subvolume via rmdir after it has been renamed into a
-snapshot of the volume that originally contained the subvolume
-reference.
+[+cc cip-dev]
 
-This currently fails on btrfs but is fixed by the patch with the title
+On Thu, 2019-12-19 at 12:29 +0100, Arnd Bergmann wrote:
+[...]
+> - Users of CIP SLTS kernels with extreme service life that may involve
+>   not upgrading until after y2038 (this is obviously not recommended if
+>   you connect to a public network, but I'm sure some people do this anyway).
+>   For running user space, this requires either a 32-bit kernel with the
+>   linux-5.1 syscall changes or a 64-bit kernel. If you run a 64-bit linux-4.9
+>   kernel in a deeply embedded non-networked machine, it still makes
+>   sense to have working inode timestamps and be able to test that.
+[...]
 
-  "btrfs: fix invalid removal of root ref"
+CIP is currently aiming for a 10 year support lifetime, so both of its
+currently existing branches (4.4, 4.19) should be long out of support
+in 2038.  Still, it's possible that some people hope to extend that
+later.
 
-Signed-off-by: Josef Bacik <josef@toxicpanda.com>
----
- tests/btrfs/202     | 54 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/202.out |  4 ++++
- tests/btrfs/group   |  1 +
- 3 files changed, 59 insertions(+)
- create mode 100755 tests/btrfs/202
- create mode 100644 tests/btrfs/202.out
+Ben.
 
-diff --git a/tests/btrfs/202 b/tests/btrfs/202
-new file mode 100755
-index 00000000..b02ee446
---- /dev/null
-+++ b/tests/btrfs/202
-@@ -0,0 +1,54 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+#
-+# FS QA Test 201
-+#
-+# Regression test for fix "btrfs: fix invalid removal of root ref"
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+. ./common/rc
-+. ./common/filter
-+
-+rm -f $seqres.full
-+
-+_supported_fs btrfs
-+_supported_os Linux
-+
-+_scratch_mkfs >> $seqres.full 2>&1
-+_scratch_mount
-+
-+# Create a subvol b under a and then snapshot a into c.  This create's a stub
-+# entry in c for b because c doesn't have a reference for b.
-+#
-+# But when we rename b c/foo it creates a ref for b in c.  However if we go to
-+# remove c/b btrfs used to depend on not finding the root ref to handle the
-+# unlink properly, but we now have a ref for that root.  We also had a bug that
-+# would allow us to remove mis-matched refs if the keys matched, so we'd end up
-+# removing too many entries which would cause a transaction abort.
-+
-+$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/a | _filter_scratch
-+$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/a/b | _filter_scratch
-+$BTRFS_UTIL_PROG subvolume snapshot $SCRATCH_MNT/a $SCRATCH_MNT/c \
-+	| _filter_scratch
-+ls $SCRATCH_MNT/c/b
-+mkdir $SCRATCH_MNT/c/foo
-+mv $SCRATCH_MNT/a/b $SCRATCH_MNT/c/foo
-+rm -rf $SCRATCH_MNT/*
-+touch $SCRATCH_MNT/blah
-+
-+status=0
-+exit
-diff --git a/tests/btrfs/202.out b/tests/btrfs/202.out
-new file mode 100644
-index 00000000..938870cf
---- /dev/null
-+++ b/tests/btrfs/202.out
-@@ -0,0 +1,4 @@
-+QA output created by 201
-+Create subvolume 'SCRATCH_MNT/a'
-+Create subvolume 'SCRATCH_MNT/a/b'
-+Create a snapshot of 'SCRATCH_MNT/a' in 'SCRATCH_MNT/c'
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index d7eeb45d..7abc5f07 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -204,3 +204,4 @@
- 199 auto quick trim
- 200 auto quick send clone
- 201 auto quick punch log
-+202 auto quick volume
 -- 
-2.23.0
+Ben Hutchings, Software Developer                         Codethink Ltd
+https://www.codethink.co.uk/                 Dale House, 35 Dale Street
+                                     Manchester, M1 2HF, United Kingdom
 
