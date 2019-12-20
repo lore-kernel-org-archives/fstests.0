@@ -6,171 +6,134 @@ X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DD88BC43603
-	for <linux-fstests@archiver.kernel.org>; Fri, 20 Dec 2019 02:48:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 901D6C43603
+	for <linux-fstests@archiver.kernel.org>; Fri, 20 Dec 2019 09:53:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id BC1CD2465E
-	for <linux-fstests@archiver.kernel.org>; Fri, 20 Dec 2019 02:48:46 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6CEB62465E
+	for <linux-fstests@archiver.kernel.org>; Fri, 20 Dec 2019 09:53:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727129AbfLTCsq (ORCPT
+        id S1727262AbfLTJxr (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 19 Dec 2019 21:48:46 -0500
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:33073 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1727006AbfLTCsq (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 19 Dec 2019 21:48:46 -0500
-X-IronPort-AV: E=Sophos;i="5.69,334,1571673600"; 
-   d="scan'208";a="80552143"
-Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
-  by heian.cn.fujitsu.com with ESMTP; 20 Dec 2019 10:48:39 +0800
-Received: from G08CNEXMBPEKD04.g08.fujitsu.local (unknown [10.167.33.201])
-        by cn.fujitsu.com (Postfix) with ESMTP id 5DBA84CE1C86;
-        Fri, 20 Dec 2019 10:39:53 +0800 (CST)
-Received: from [10.167.220.84] (10.167.220.84) by
- G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201) with Microsoft SMTP Server
- (TLS) id 15.0.1395.4; Fri, 20 Dec 2019 10:48:35 +0800
-Subject: Re: [PATCH] generic/520: use fsync instead of sync during clean_dir
-To:     "Darrick J. Wong" <darrick.wong@oracle.com>
-CC:     <fstests@vger.kernel.org>
-References: <1576215941-19208-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
- <20191213204241.GC99869@magnolia>
- <8899c91c-1f92-4f49-c994-f04c9a6eb5fd@cn.fujitsu.com>
- <20191217223619.GI12766@magnolia>
- <3dffc06e-fceb-e7a5-b739-afd15f6b4093@cn.fujitsu.com>
- <20191219170859.GE7497@magnolia>
-From:   Yang Xu <xuyang2018.jy@cn.fujitsu.com>
-Message-ID: <750e04e4-86f7-127f-c759-d67157c929f1@cn.fujitsu.com>
-Date:   Fri, 20 Dec 2019 10:48:32 +0800
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101
- Thunderbird/68.0
+        Fri, 20 Dec 2019 04:53:47 -0500
+Received: from mx2.suse.de ([195.135.220.15]:60584 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1727261AbfLTJxr (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 20 Dec 2019 04:53:47 -0500
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+Received: from relay2.suse.de (unknown [195.135.220.254])
+        by mx2.suse.de (Postfix) with ESMTP id 25315ACFE;
+        Fri, 20 Dec 2019 09:53:45 +0000 (UTC)
+Subject: Re: [PATCH] btrfs: regression test for subvol deletion after rename
+To:     Josef Bacik <josef@toxicpanda.com>, linux-btrfs@vger.kernel.org,
+        fstests@vger.kernel.org, kernel-team@fb.com
+References: <20191219142835.50371-1-josef@toxicpanda.com>
+ <db0849cb-66d9-4815-d111-b225cb27a3c5@suse.com>
+ <5ea1f28a-16bc-f97c-9c4a-ce47f94b1b43@toxicpanda.com>
+From:   Nikolay Borisov <nborisov@suse.com>
+Message-ID: <0f3fe438-acc5-31b4-a366-3210b31e5b17@suse.com>
+Date:   Fri, 20 Dec 2019 11:53:43 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.2.2
 MIME-Version: 1.0
-In-Reply-To: <20191219170859.GE7497@magnolia>
-Content-Type: text/plain; charset="gbk"; format=flowed
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.167.220.84]
-X-ClientProxiedBy: G08CNEXCHPEKD05.g08.fujitsu.local (10.167.33.203) To
- G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201)
-X-yoursite-MailScanner-ID: 5DBA84CE1C86.A1FD8
-X-yoursite-MailScanner: Found to be clean
-X-yoursite-MailScanner-From: xuyang2018.jy@cn.fujitsu.com
+In-Reply-To: <5ea1f28a-16bc-f97c-9c4a-ce47f94b1b43@toxicpanda.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-on 2019/12/20 1:08, Darrick J. Wong wrote:
-> On Wed, Dec 18, 2019 at 10:37:51AM +0800, Yang Xu wrote:
->>
->>
->> on 2019/12/18 6:36, Darrick J. Wong wrote:
->>> On Mon, Dec 16, 2019 at 02:24:56PM +0800, Yang Xu wrote:
->>>>
->>>>
->>>> on 2019/12/14 4:42, Darrick J. Wong wrote:
->>>>> On Fri, Dec 13, 2019 at 01:45:41PM +0800, Yang Xu wrote:
->>>>>> When I test this case on xfs, it may fail as below:
->>>>>> --------------------------------------------
->>>>>>     === link SCRATCH_MNT/A/foo SCRATCH_MNT/bar  with fsync SCRATCH_MNT/A ===
->>>>>> +umount: /mnt/xfstests/scratch: target is busy.
->>>>>> +        (In some cases useful info about processes that use
->>>>>> +         the device is found by lsof(8) or fuser(1))
->>>>>> ---------------------------------------------
->>>>>>
->>>>>> I think we don't need to sync all fs and fsync SCRATCH_MNT is enough.
->>>>>>
->>>>>> Signed-off-by: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
->>>>>> ---
->>>>>>     tests/generic/520 | 2 +-
->>>>>>     1 file changed, 1 insertion(+), 1 deletion(-)
->>>>>>
->>>>>> diff --git a/tests/generic/520 b/tests/generic/520
->>>>>> index 167d7077..a16467ca 100755
->>>>>> --- a/tests/generic/520
->>>>>> +++ b/tests/generic/520
->>>>>> @@ -58,7 +58,7 @@ clean_dir()
->>>>>>     {
->>>>>>     	_mount_flakey
->>>>>>     	rm -rf $(find $SCRATCH_MNT/* | grep -v "lost+found")
->>>>>> -	sync
->>>>>> +	$XFS_IO_PROG -c "fsync" $SCRATCH_MNT
->>>>>
->>>>> But that only has to force the scratch mount directory to disk.
->>>>>
->>>>> Assuming the test authors really meant "write all of the scratch fs'
->>>>> dirty data/metadata to disk", I think you want:
->>>>>
->>>>>     $XFS_IO_PROG -c syncfs $SCRATCH_MNT
->>>>>
->>>>> here?
->>>> My xfsprogs version doesn't support syncfs command. Or, we can use fsync to
->>>> make four files(foo bar A/foo A/bar) write to disk?
->>>
->>> Hmm, 'sync -f $SCRATCH_MNT' then?
->> Both syncfs and sync -f are all useful when I test on 4.18.0-147.el8.x86_64.
->> But on old system (3.10.0-1101.el7.x86_64
->> ), sync command doesn't support -f option.  Or, I think we should use a
->> generic way to avoid busy error. IMHO, it has two ways(mkfs and fsync), but
->> mkfs will add more test time. What do you think about it?
-> 
-> Ahh, ok.  I guess fsyncing the four things is fine then....
-> 
->>>>> Also, why did umount spit out 'target is busy' here?  clean_dir() erases
->>>>> the scratch fs between tests, there shouldn't be anything flakey about
->>>>> that.
->>>> I try to find the cause of this but fail. I debug it but no useful
->>>> output(using  _unmount_flakey  || fuser -uvm $SCRATCH_MNT ), failed as
->>>> below:
->>>> umount: /mnt/xfstests/scratch: target is busy.
->>>>           (In some cases useful info about processes that use
->>>>            the device is found by lsof(8) or fuser(1))
->>>>                        USER        PID ACCESS COMMAND
->>>> /mnt/xfstests/scratch:
->>>>                        root     kernel mount (root)/mnt/xfstests/scratch
->>>>
->>>> ps: My test machine only excutes this cases and doesn't do other  things.
->>>
->>> Does a second umount attempt succeed after the fuser fails to find
->>> anything sitting on the mount?
->> Yes, second umount succeed.
-> 
-> Also, which kernel behaves like this?  Does it happen with upstream?
-> AFAICT when running this in a loop on 5.5-rc2 it doesn't exhibit this
-> failure, but maybe another kernel does?
-3.10.0-1101.el7.x86_64 and 4.18.0-147.el8.x86_64 all have the problem.
-
-Yes. I use upstream kernel 5.4+(commit head 76bb8b05960c3d16) on my 
-vm(4G memory, 4Gswap, 20G test/scratch dev,2 cpu) and test it in a 100 
-loop. It fails 6 times . I think it fails because sync may make other 
-things(such as system log or message) write to disk but maybe doesn't 
-have enough time to  make our rm options file to disk.
-
-ps: my colleague has a smiliar bug for generic/442 when we remove dm 
-device. If you can review it, I will be very grateful.
-https://patchwork.kernel.org/patch/11160197/
-> 
-> --D
-> 
->>> --D
->>>
->>>>>
->>>>> --D
->>>>>
->>>>>>     	_unmount_flakey
->>>>>>     }
->>>>>> -- 
->>>>>> 2.18.0
->>>>>>
->>>>>>
->>>>>>
->>>>>
->>>>>
->>>>
->>>>
->>>
->>>
->>
->>
-> 
-> 
 
 
+On 19.12.19 г. 23:16 ч., Josef Bacik wrote:
+> On 12/19/19 11:12 AM, Nikolay Borisov wrote:
+>>
+>>
+>> On 19.12.19 г. 16:28 ч., Josef Bacik wrote:
+>>> Test removal of a subvolume via rmdir after it has been renamed into a
+>>> snapshot of the volume that originally contained the subvolume
+>>> reference.
+>>>
+>>> This currently fails on btrfs but is fixed by the patch with the title
+>>>
+>>>    "btrfs: fix invalid removal of root ref"
+>>>
+>>> Signed-off-by: Josef Bacik <josef@toxicpanda.com>
+>>> ---
+>>>   tests/btrfs/202     | 54 +++++++++++++++++++++++++++++++++++++++++++++
+>>>   tests/btrfs/202.out |  4 ++++
+>>>   tests/btrfs/group   |  1 +
+>>>   3 files changed, 59 insertions(+)
+>>>   create mode 100755 tests/btrfs/202
+>>>   create mode 100644 tests/btrfs/202.out
+>>>
+>>> diff --git a/tests/btrfs/202 b/tests/btrfs/202
+>>> new file mode 100755
+>>> index 00000000..b02ee446
+>>> --- /dev/null
+>>> +++ b/tests/btrfs/202
+>>> @@ -0,0 +1,54 @@
+>>> +#! /bin/bash
+>>> +# SPDX-License-Identifier: GPL-2.0
+>>> +#
+>>> +# FS QA Test 201
+>>> +#
+>>> +# Regression test for fix "btrfs: fix invalid removal of root ref"
+>>> +#
+>>> +seq=`basename $0`
+>>> +seqres=$RESULT_DIR/$seq
+>>> +echo "QA output created by $seq"
+>>> +
+>>> +here=`pwd`
+>>> +tmp=/tmp/$$
+>>> +status=1    # failure is the default!
+>>> +trap "_cleanup; exit \$status" 0 1 2 3 15
+>>> +
+>>> +_cleanup()
+>>> +{
+>>> +    cd /
+>>> +    rm -f $tmp.*
+>>> +}
+>>> +
+>>> +. ./common/rc
+>>> +. ./common/filter
+>>> +
+>>> +rm -f $seqres.full
+>>> +
+>>> +_supported_fs btrfs
+>>> +_supported_os Linux
+>>> +
+>>> +_scratch_mkfs >> $seqres.full 2>&1
+>>> +_scratch_mount
+>>> +
+>>> +# Create a subvol b under a and then snapshot a into c.  This 
+>>> create's a stub
+>>> +# entry in c for b because c doesn't have a reference for b.
+>>> +#
+>>> +# But when we rename b c/foo it creates a ref for b in c.  However 
+>>> if we go to
+>>> +# remove c/b btrfs used to depend on not finding the root ref to 
+>>> handle the
+>>> +# unlink properly, but we now have a ref for that root.  We also had 
+>>> a bug that
+>>> +# would allow us to remove mis-matched refs if the keys matched, so 
+>>> we'd end up
+>>> +# removing too many entries which would cause a transaction abort.
+>>> +
+>>> +$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/a | _filter_scratch
+>>> +$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/a/b | _filter_scratch
+>>> +$BTRFS_UTIL_PROG subvolume snapshot $SCRATCH_MNT/a $SCRATCH_MNT/c \
+>>> +    | _filter_scratch
+>>> +ls $SCRATCH_MNT/c/b
+>>
+>> Isn't this ls redundant?
+>>
+> 
+> No we need the dummy entry in cache before we add the root ref during 
+> the rename.  Thanks,
+
+A comment stating this would be good.
+
+> 
+> Josef
