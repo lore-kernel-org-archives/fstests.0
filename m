@@ -2,175 +2,94 @@ Return-Path: <SRS0=LJOt=2K=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6D172C2D0C0
-	for <linux-fstests@archiver.kernel.org>; Fri, 20 Dec 2019 14:40:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 54FDEC43603
+	for <linux-fstests@archiver.kernel.org>; Fri, 20 Dec 2019 22:45:16 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 42B0E2064B
-	for <linux-fstests@archiver.kernel.org>; Fri, 20 Dec 2019 14:40:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 298D02146E
+	for <linux-fstests@archiver.kernel.org>; Fri, 20 Dec 2019 22:45:16 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="LR3ODt6f"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="sVx275mT"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727704AbfLTOk1 (ORCPT
+        id S1726705AbfLTWpP (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 20 Dec 2019 09:40:27 -0500
-Received: from mail-qk1-f171.google.com ([209.85.222.171]:33109 "EHLO
-        mail-qk1-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727576AbfLTOk1 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 20 Dec 2019 09:40:27 -0500
-Received: by mail-qk1-f171.google.com with SMTP id d71so8152819qkc.0
-        for <fstests@vger.kernel.org>; Fri, 20 Dec 2019 06:40:27 -0800 (PST)
+        Fri, 20 Dec 2019 17:45:15 -0500
+Received: from mail-il1-f196.google.com ([209.85.166.196]:36194 "EHLO
+        mail-il1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726030AbfLTWpO (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 20 Dec 2019 17:45:14 -0500
+Received: by mail-il1-f196.google.com with SMTP id b15so9289164iln.3
+        for <fstests@vger.kernel.org>; Fri, 20 Dec 2019 14:45:13 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
-        h=from:to:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=sQAjOBAg4UwpUQLN0OhUhNXuuC0VTNTUVuT+oKCzaiY=;
-        b=LR3ODt6fGhfn9vm8FTOqXlXP2MBovYdOk7OSVHsMA1S7p9MFxl7NYQViLG55Ypa6Us
-         8Y9rAr7I4csh2StdVlsZZW4ZedcMZeOUBbm0sGL2jOWH5U2UaGYY83QG3UG7jFRokHL0
-         FUG9naYHy806uMKmumCLZLGrcEg9m+Pu5ikqiZK5aWvoaQIO6bqNWdvZq3Fhz5tkKNfP
-         W8RzlwI7Du3Lb4Xp9Dosg8v4/PIUCM+h5ipUHioX8dDS/87RRkOQ1vDAt7e1DSwpRFa4
-         ngcF5fhiIF+0vgwtRmI9Iu0EinLTvDu3dlvVn92rEbU6297EsjZHFTqY6hImitAg5Bp1
-         G31A==
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=HUHvY2ovNDkEoq/r8w4grFsNYqTttbEgQgH77yG6HHo=;
+        b=sVx275mT78+3IA19apCSbwF1E88yd3bM63dvgNaqHr4weNKvsFxDFm2qhtuLC7G9zf
+         gjMlzLGwDXXfkuPtjD5R1wmP+9bYTVTk5hzUAXRjv5FCnAfFHMLkX/VIl3v9Vw2izx0m
+         gqYqZQfHc5h+U/j4ovmQU+KBCdQ9Ltb7xXUIEIRoPC82OsFbw0sItJqoLrVn3A7wHx79
+         wvL/ZT/GIlUE9NUHf0din2xaHKRcdGH41n54Q9DWQ0sMlwQcMABoZ0goR08vbc2lP9Tw
+         EKmSJOEkabNGp/feI0MVUF+6JQ6BZRiCme4M8yRCDqi992Vzv4Gei0Rmzt6UYy3+lZsn
+         xAag==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=sQAjOBAg4UwpUQLN0OhUhNXuuC0VTNTUVuT+oKCzaiY=;
-        b=N5H0Vlu1FjUm1H7LXC0c05MDCEnJ5vkrkBwk5HW52UlzZ0iSIUWFYwOjJnOvqdLScR
-         6ygnH4XSwsDZM1MpZAWUWyj4xpTOC361Gw9kEKbM2IZMw9MBRpo8ZgQSm3W1+hcwrMVX
-         rR7lAjnW442cjcGP1C4LBAPnepay9DFhbE1kqtK+TietnTs10keoMHNt41s1OlUSVWXD
-         O19S/dZb96Q05DZ1xto7dBD38CnIZJU7ieYcl/pDJKQn9pF4+75L24mZ/8HjOuesvYNn
-         DtmYPoGIGNggAE983vucKP39hxbetyoAOoKka1iXqX1gJPxPET3DIrjN0b2g2KSPqBJJ
-         jwzQ==
-X-Gm-Message-State: APjAAAV9SmJ/8NdOKDbVvCLQYlHU0AiztVu3FZXiPwfHXSKFGaq/Rlh9
-        xsz3RZkjlkJ79heLY1r2m8S1lQ==
-X-Google-Smtp-Source: APXvYqwRmS4Vrn4SKVlkHb72d2mmi4AIc43L7vCVPSxVEEMfll0z8PSM0BMMWprIEegLiJ0VQVwvHg==
-X-Received: by 2002:a37:68a:: with SMTP id 132mr4426935qkg.139.1576852826499;
-        Fri, 20 Dec 2019 06:40:26 -0800 (PST)
-Received: from localhost ([107.15.81.208])
-        by smtp.gmail.com with ESMTPSA id k4sm2859745qki.35.2019.12.20.06.40.25
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 20 Dec 2019 06:40:25 -0800 (PST)
-From:   Josef Bacik <josef@toxicpanda.com>
-To:     kernel-team@fb.com, linux-btrfs@vger.kernel.org,
-        fstests@vger.kernel.org
-Subject: [PATCH][v2] btrfs: regression test for subvol deletion after rename
-Date:   Fri, 20 Dec 2019 09:40:24 -0500
-Message-Id: <20191220144024.52271-1-josef@toxicpanda.com>
-X-Mailer: git-send-email 2.23.0
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=HUHvY2ovNDkEoq/r8w4grFsNYqTttbEgQgH77yG6HHo=;
+        b=tRv6fx9LKH0/vYMrN6QXNsfSzxk9pNLnjhgjORaxAC/AtYeHqQstVJ5g5CKrVED14t
+         5elp929XGyFoIYyWC4Naa26yNwUnazWzUwzSPKD3Kydt8YAlk+nYmVF5IL5PzVgp5FF6
+         liuMxRRZMNAg4IlOeN2ijZ5tuIbaFrkbjI3D1UbwFxCkoqHKR5/lqxrdvA8qG/ZUXerF
+         8bsLfe6zYDknggtdKCVLlmHw/8kTXKiFIhML8cQAW6eD836KernllIWMfxgdtSfePfHk
+         EsENqPgjZGcKm8OfsTr71SiCXG9HGvXomnQqYKddWS3BJgbGm62u1ay035up9aBF18zv
+         hc9g==
+X-Gm-Message-State: APjAAAXZN3ETOXc7Nkf+hQ1xeby9SBNNQv0FzW93YN8bDXvKGT+BZhZV
+        1s/E25lw/0WjHN1t38ppjVadP0ThA5Y1RSS6dzE=
+X-Google-Smtp-Source: APXvYqyazoOC9/MOLaT9EckeD8fePsWe44YvftlHRynvQ4n1ZrD16UhBDZJxQ4Jlm8C+BHzPNVxEVnIziorbI/z5hNs=
+X-Received: by 2002:a92:1906:: with SMTP id 6mr15126137ilz.130.1576881913470;
+ Fri, 20 Dec 2019 14:45:13 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20190719041231.26500-1-deepa.kernel@gmail.com>
+ <CAOQ4uxhxVKhUh_P_NffLbGScpiL0wOrCTLwWJWeSbRRNbHzPrg@mail.gmail.com>
+ <CABeXuvoHw8W02JsmZjafnQkOs1=0dodSpBFyJ_Gq+1vs+hFkQQ@mail.gmail.com>
+ <CABeXuvqO=04BJw2bWa6d2fv1FTe-B_JsNhVdYTwT=fY=ncOCkw@mail.gmail.com>
+ <CAOQ4uxjaFBZZUKyu6YS08ta8pdW_FSjRYA4J7S8+_=Gfi-kO2Q@mail.gmail.com>
+ <CAK8P3a1fYPq6DCqhT6ziJaxETLHt8uUgbHWryHiD4kQWwKLp2Q@mail.gmail.com> <CAOQ4uxjaqV=d9SPYPPODOT0MNpSARQNQW0=4qb8N4u7ni-hupg@mail.gmail.com>
+In-Reply-To: <CAOQ4uxjaqV=d9SPYPPODOT0MNpSARQNQW0=4qb8N4u7ni-hupg@mail.gmail.com>
+From:   Deepa Dinamani <deepa.kernel@gmail.com>
+Date:   Fri, 20 Dec 2019 14:45:00 -0800
+Message-ID: <CABeXuvq+37-WO8KH5en-1LaSGOLbw9zziC4eAqGvpJwe85kudQ@mail.gmail.com>
+Subject: Re: [Y2038] [PATCH] generic/402: fix for updated behavior of
+ timestamp limits
+To:     Amir Goldstein <amir73il@gmail.com>
+Cc:     Arnd Bergmann <arnd@arndb.de>, Sasha Levin <sashal@kernel.org>,
+        y2038 Mailman List <y2038@lists.linaro.org>,
+        Greg KH <gregkh@linuxfoundation.org>,
+        fstests <fstests@vger.kernel.org>, Eryu Guan <guaneryu@gmail.com>
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Test removal of a subvolume via rmdir after it has been renamed into a
-snapshot of the volume that originally contained the subvolume
-reference.
+> Deepa,
+>
+> You added this warning:
+> pr_warn("Mounted %s file system at %s supports timestamps until ...
+> along with timestamp clamping
+>
+> I suggest that you implement kernel support check based on grepping
+> for this warning after loop mounting an ext2 test image.
+> A bit over the top and ugly, but the test should be reliable and
+> mkfs.ext2 is probably available in all xfstest deployments.
+>
+> xfs/049 makes use of an ext2 loop mount, so your test won't be the
+> first one to use ext2 for testing other fs.
 
-This currently fails on btrfs but is fixed by the patch with the title
+Ok, this can work. Let me give this a try.
 
-  "btrfs: fix invalid removal of root ref"
-
-Signed-off-by: Josef Bacik <josef@toxicpanda.com>
----
-v1->v2:
-- add a comment for ls'ing the dummy subvol
-
- tests/btrfs/202     | 57 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/202.out |  4 ++++
- tests/btrfs/group   |  1 +
- 3 files changed, 62 insertions(+)
- create mode 100755 tests/btrfs/202
- create mode 100644 tests/btrfs/202.out
-
-diff --git a/tests/btrfs/202 b/tests/btrfs/202
-new file mode 100755
-index 00000000..5d56a2a2
---- /dev/null
-+++ b/tests/btrfs/202
-@@ -0,0 +1,57 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+#
-+# FS QA Test 201
-+#
-+# Regression test for fix "btrfs: fix invalid removal of root ref"
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+. ./common/rc
-+. ./common/filter
-+
-+rm -f $seqres.full
-+
-+_supported_fs btrfs
-+_supported_os Linux
-+
-+_scratch_mkfs >> $seqres.full 2>&1
-+_scratch_mount
-+
-+# Create a subvol b under a and then snapshot a into c.  This create's a stub
-+# entry in c for b because c doesn't have a reference for b.
-+#
-+# But when we rename b c/foo it creates a ref for b in c.  However if we go to
-+# remove c/b btrfs used to depend on not finding the root ref to handle the
-+# unlink properly, but we now have a ref for that root.  We also had a bug that
-+# would allow us to remove mis-matched refs if the keys matched, so we'd end up
-+# removing too many entries which would cause a transaction abort.
-+
-+$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/a | _filter_scratch
-+$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/a/b | _filter_scratch
-+$BTRFS_UTIL_PROG subvolume snapshot $SCRATCH_MNT/a $SCRATCH_MNT/c \
-+	| _filter_scratch
-+
-+# Need the dummy entry created so that we get the invalid removal when we rmdir
-+ls $SCRATCH_MNT/c/b
-+
-+mkdir $SCRATCH_MNT/c/foo
-+mv $SCRATCH_MNT/a/b $SCRATCH_MNT/c/foo
-+rm -rf $SCRATCH_MNT/*
-+touch $SCRATCH_MNT/blah
-+
-+status=0
-+exit
-diff --git a/tests/btrfs/202.out b/tests/btrfs/202.out
-new file mode 100644
-index 00000000..938870cf
---- /dev/null
-+++ b/tests/btrfs/202.out
-@@ -0,0 +1,4 @@
-+QA output created by 201
-+Create subvolume 'SCRATCH_MNT/a'
-+Create subvolume 'SCRATCH_MNT/a/b'
-+Create a snapshot of 'SCRATCH_MNT/a' in 'SCRATCH_MNT/c'
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index d7eeb45d..7abc5f07 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -204,3 +204,4 @@
- 199 auto quick trim
- 200 auto quick send clone
- 201 auto quick punch log
-+202 auto quick volume
--- 
-2.23.0
-
+Thanks,
+Deepa
