@@ -1,95 +1,127 @@
-Return-Path: <SRS0=LJOt=2K=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=dxnf=2L=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 54FDEC43603
-	for <linux-fstests@archiver.kernel.org>; Fri, 20 Dec 2019 22:45:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DB44FC2D0C0
+	for <linux-fstests@archiver.kernel.org>; Sat, 21 Dec 2019 08:55:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 298D02146E
-	for <linux-fstests@archiver.kernel.org>; Fri, 20 Dec 2019 22:45:16 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="sVx275mT"
+	by mail.kernel.org (Postfix) with ESMTP id B7F8D2072B
+	for <linux-fstests@archiver.kernel.org>; Sat, 21 Dec 2019 08:55:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726705AbfLTWpP (ORCPT
+        id S1726024AbfLUIzU (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 20 Dec 2019 17:45:15 -0500
-Received: from mail-il1-f196.google.com ([209.85.166.196]:36194 "EHLO
-        mail-il1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726030AbfLTWpO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 20 Dec 2019 17:45:14 -0500
-Received: by mail-il1-f196.google.com with SMTP id b15so9289164iln.3
-        for <fstests@vger.kernel.org>; Fri, 20 Dec 2019 14:45:13 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=HUHvY2ovNDkEoq/r8w4grFsNYqTttbEgQgH77yG6HHo=;
-        b=sVx275mT78+3IA19apCSbwF1E88yd3bM63dvgNaqHr4weNKvsFxDFm2qhtuLC7G9zf
-         gjMlzLGwDXXfkuPtjD5R1wmP+9bYTVTk5hzUAXRjv5FCnAfFHMLkX/VIl3v9Vw2izx0m
-         gqYqZQfHc5h+U/j4ovmQU+KBCdQ9Ltb7xXUIEIRoPC82OsFbw0sItJqoLrVn3A7wHx79
-         wvL/ZT/GIlUE9NUHf0din2xaHKRcdGH41n54Q9DWQ0sMlwQcMABoZ0goR08vbc2lP9Tw
-         EKmSJOEkabNGp/feI0MVUF+6JQ6BZRiCme4M8yRCDqi992Vzv4Gei0Rmzt6UYy3+lZsn
-         xAag==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=HUHvY2ovNDkEoq/r8w4grFsNYqTttbEgQgH77yG6HHo=;
-        b=tRv6fx9LKH0/vYMrN6QXNsfSzxk9pNLnjhgjORaxAC/AtYeHqQstVJ5g5CKrVED14t
-         5elp929XGyFoIYyWC4Naa26yNwUnazWzUwzSPKD3Kydt8YAlk+nYmVF5IL5PzVgp5FF6
-         liuMxRRZMNAg4IlOeN2ijZ5tuIbaFrkbjI3D1UbwFxCkoqHKR5/lqxrdvA8qG/ZUXerF
-         8bsLfe6zYDknggtdKCVLlmHw/8kTXKiFIhML8cQAW6eD836KernllIWMfxgdtSfePfHk
-         EsENqPgjZGcKm8OfsTr71SiCXG9HGvXomnQqYKddWS3BJgbGm62u1ay035up9aBF18zv
-         hc9g==
-X-Gm-Message-State: APjAAAXZN3ETOXc7Nkf+hQ1xeby9SBNNQv0FzW93YN8bDXvKGT+BZhZV
-        1s/E25lw/0WjHN1t38ppjVadP0ThA5Y1RSS6dzE=
-X-Google-Smtp-Source: APXvYqyazoOC9/MOLaT9EckeD8fePsWe44YvftlHRynvQ4n1ZrD16UhBDZJxQ4Jlm8C+BHzPNVxEVnIziorbI/z5hNs=
-X-Received: by 2002:a92:1906:: with SMTP id 6mr15126137ilz.130.1576881913470;
- Fri, 20 Dec 2019 14:45:13 -0800 (PST)
+        Sat, 21 Dec 2019 03:55:20 -0500
+Received: from snd00011.auone-net.jp ([111.86.247.11]:38881 "EHLO
+        dmta0008.auone-net.jp" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1725954AbfLUIzU (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 21 Dec 2019 03:55:20 -0500
+Received: from ppp.dion.ne.jp by dmta0008.auone-net.jp with ESMTP
+          id <20191221085518708.CZTM.12086.ppp.dion.ne.jp@dmta0008.auone-net.jp>
+          for <fstests@vger.kernel.org>; Sat, 21 Dec 2019 17:55:18 +0900
+Date:   Sat, 21 Dec 2019 17:55:18 +0900
+From:   Kusanagi Kouichi <slash@ac.auone-net.jp>
+To:     fstests@vger.kernel.org
+Subject: [PATCH] generic/{003,120,192}: Set atime options precisely
 MIME-Version: 1.0
-References: <20190719041231.26500-1-deepa.kernel@gmail.com>
- <CAOQ4uxhxVKhUh_P_NffLbGScpiL0wOrCTLwWJWeSbRRNbHzPrg@mail.gmail.com>
- <CABeXuvoHw8W02JsmZjafnQkOs1=0dodSpBFyJ_Gq+1vs+hFkQQ@mail.gmail.com>
- <CABeXuvqO=04BJw2bWa6d2fv1FTe-B_JsNhVdYTwT=fY=ncOCkw@mail.gmail.com>
- <CAOQ4uxjaFBZZUKyu6YS08ta8pdW_FSjRYA4J7S8+_=Gfi-kO2Q@mail.gmail.com>
- <CAK8P3a1fYPq6DCqhT6ziJaxETLHt8uUgbHWryHiD4kQWwKLp2Q@mail.gmail.com> <CAOQ4uxjaqV=d9SPYPPODOT0MNpSARQNQW0=4qb8N4u7ni-hupg@mail.gmail.com>
-In-Reply-To: <CAOQ4uxjaqV=d9SPYPPODOT0MNpSARQNQW0=4qb8N4u7ni-hupg@mail.gmail.com>
-From:   Deepa Dinamani <deepa.kernel@gmail.com>
-Date:   Fri, 20 Dec 2019 14:45:00 -0800
-Message-ID: <CABeXuvq+37-WO8KH5en-1LaSGOLbw9zziC4eAqGvpJwe85kudQ@mail.gmail.com>
-Subject: Re: [Y2038] [PATCH] generic/402: fix for updated behavior of
- timestamp limits
-To:     Amir Goldstein <amir73il@gmail.com>
-Cc:     Arnd Bergmann <arnd@arndb.de>, Sasha Levin <sashal@kernel.org>,
-        y2038 Mailman List <y2038@lists.linaro.org>,
-        Greg KH <gregkh@linuxfoundation.org>,
-        fstests <fstests@vger.kernel.org>, Eryu Guan <guaneryu@gmail.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Message-Id: <20191221085518708.CZTM.12086.ppp.dion.ne.jp@dmta0008.auone-net.jp>
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-> Deepa,
->
-> You added this warning:
-> pr_warn("Mounted %s file system at %s supports timestamps until ...
-> along with timestamp clamping
->
-> I suggest that you implement kernel support check based on grepping
-> for this warning after loop mounting an ext2 test image.
-> A bit over the top and ugly, but the test should be reliable and
-> mkfs.ext2 is probably available in all xfstest deployments.
->
-> xfs/049 makes use of an ext2 loop mount, so your test won't be the
-> first one to use ext2 for testing other fs.
+Make tests pass regardless of options set by MOUNT_OPTIONS.
 
-Ok, this can work. Let me give this a try.
+Signed-off-by: Kusanagi Kouichi <slash@ac.auone-net.jp>
+---
+ common/rc         | 3 +--
+ tests/generic/003 | 6 +++---
+ tests/generic/120 | 2 +-
+ tests/generic/192 | 1 +
+ 4 files changed, 6 insertions(+), 6 deletions(-)
 
-Thanks,
-Deepa
+diff --git a/common/rc b/common/rc
+index 5cdd829b..e2f081c0 100644
+--- a/common/rc
++++ b/common/rc
+@@ -440,7 +440,7 @@ _test_cycle_mount()
+ 	return
+     fi
+     _test_unmount
+-    _test_mount
++    _test_mount "$@"
+ }
+ 
+ _scratch_mkfs_options()
+@@ -3392,7 +3392,6 @@ _exclude_scratch_mount_option()
+ 
+ _require_atime()
+ {
+-	_exclude_scratch_mount_option "noatime"
+ 	case $FSTYP in
+ 	nfs|cifs)
+ 		_notrun "atime related mount options have no effect on $FSTYP"
+diff --git a/tests/generic/003 b/tests/generic/003
+index 767d7059..a634b1a4 100755
+--- a/tests/generic/003
++++ b/tests/generic/003
+@@ -66,7 +66,7 @@ _compare_stat_times() {
+ }
+ 
+ _scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
+-_scratch_mount "-o relatime"
++_scratch_mount "-o atime,nostrictatime,relatime"
+ 
+ if [ "$FSTYP" = "btrfs" ]; then
+ 	TPATH=$SCRATCH_MNT/sub1
+@@ -94,7 +94,7 @@ _compare_stat_times NNN "$file1_stat_after_first_access" \
+ 	"$file1_stat_after_second_access" "after accessing file1 second time"
+ 
+ # Mounting with nodiratime option
+-_scratch_cycle_mount "nodiratime"
++_scratch_cycle_mount "atime,nodiratime"
+ file1_stat_after_remount=`_stat $TPATH/dir1/file1`
+ _compare_stat_times NNN "$file1_stat_after_second_access" \
+ 	"$file1_stat_after_remount" "for file1 after remount"
+@@ -120,7 +120,7 @@ _compare_stat_times NNN "$dir2_stat_after_file_creation" \
+ 	"$dir2_stat_after_file_access" "for dir2 after file access"
+ 
+ # Mounting with noatime option, creating a file and accessing it
+-_scratch_cycle_mount "noatime"
++_scratch_cycle_mount "noatime,nostrictatime"
+ echo "ccc" > $TPATH/dir2/file3
+ file3_stat_before_first_access=`_stat $TPATH/dir2/file3`
+ sleep 1
+diff --git a/tests/generic/120 b/tests/generic/120
+index 48ca9508..2f86d9fc 100755
+--- a/tests/generic/120
++++ b/tests/generic/120
+@@ -44,7 +44,7 @@ _compare_access_times()
+ 
+ }
+ 
+-if ! _try_scratch_mount "-o noatime" >$tmp.out 2>&1
++if ! _try_scratch_mount "-o noatime,nostrictatime" >$tmp.out 2>&1
+ then
+     cat $tmp.out
+     echo "!!! mount failed"
+diff --git a/tests/generic/192 b/tests/generic/192
+index 50b3d6fd..37197979 100755
+--- a/tests/generic/192
++++ b/tests/generic/192
+@@ -38,6 +38,7 @@ testfile=$TEST_DIR/testfile
+ rm -f $testfile
+ rm -f $seqres.full
+ 
++_test_cycle_mount -o atime
+ echo test >$testfile
+ time1=`_access_time $testfile | tee -a $seqres.full`
+ 
+-- 
+2.24.1
+
