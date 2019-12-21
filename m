@@ -2,117 +2,102 @@ Return-Path: <SRS0=dxnf=2L=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B28E1C2D0C3
-	for <linux-fstests@archiver.kernel.org>; Sat, 21 Dec 2019 18:51:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 67DA3C2D0D3
+	for <linux-fstests@archiver.kernel.org>; Sat, 21 Dec 2019 18:52:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 814AE20665
-	for <linux-fstests@archiver.kernel.org>; Sat, 21 Dec 2019 18:51:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 33D78206D8
+	for <linux-fstests@archiver.kernel.org>; Sat, 21 Dec 2019 18:52:00 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="u7No9L/d"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="sBqi/2Xf"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726995AbfLUSv7 (ORCPT
+        id S1726107AbfLUSwA (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 21 Dec 2019 13:51:59 -0500
-Received: from mail-wr1-f67.google.com ([209.85.221.67]:40968 "EHLO
-        mail-wr1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726107AbfLUSv6 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 21 Dec 2019 13:51:58 -0500
-Received: by mail-wr1-f67.google.com with SMTP id c9so12555939wrw.8;
-        Sat, 21 Dec 2019 10:51:57 -0800 (PST)
+        Sat, 21 Dec 2019 13:52:00 -0500
+Received: from mail-wr1-f50.google.com ([209.85.221.50]:35497 "EHLO
+        mail-wr1-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726648AbfLUSv7 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 21 Dec 2019 13:51:59 -0500
+Received: by mail-wr1-f50.google.com with SMTP id g17so12555363wro.2;
+        Sat, 21 Dec 2019 10:51:58 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id;
-        bh=7xNQF6la3SVSsFUP+4NMm0w2clLT5YbEKiF44Xw2akE=;
-        b=u7No9L/dhYX00DzfSWbNDwBuCLGcgVCW2+FlmPRBYK+QM+DXjjj5UOValLH9ZbDKZw
-         75xxJvfLkNOBenD/0lpUMeflCjE9OnUemUaut8ycdM1g0U+kT5TLMCDeAJGZq9ZYR5cQ
-         P0V3Lh6Y8L49WQDqnHWNqRFBfNUwYal/W5XmUkqoe2qkhYn1S4Bfjfe3Xc1e7Z9m8hD3
-         Q4h5HMFgDvDcxSfsudm1sQfx2pOeO28IvL/6vK1QjWDBBN/YKOJocojUACoZZDZg195K
-         frHttLcfawPAxuqhrhDu1djZUwI6EA708oVe/5Ik39+mVyF+RerA36dE2yHwD69rInYg
-         BkCQ==
+        h=from:to:cc:subject:date:message-id:in-reply-to:references;
+        bh=5BRhvobtNdmKk3i7GYogWznJM8/6rPQQF6haJk7WNLI=;
+        b=sBqi/2XfoiHBVyY6OTVJxsq9+FaiFoR31Hs7vO85HhOTLTplR7NETQzPwCpfTuh1A8
+         NW8HUt98jFhGDDL92NCRUktljQUEKHRmhAFIJgmj/gMqjoYe5A0NfCENzcdkGAuzXSaF
+         uJLG6COemtF+IX0IW1oklwHmHs/bgy1pINh2owgjyVcu1e29ho35aEn9H4HGFg6ZOCxo
+         ATW8ldqhrcVZW4QumHaZ0/0H2Gli02si23TY6SkOE2y2+iUNmCTOMmvVR7YqGKlNs/wA
+         oE1L1JvQi80fPhlwYarq7d+mGCNaftDgVtrv/w6tA9d4OnLusZy25suBgw+ySe1CVr/J
+         V0yA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id;
-        bh=7xNQF6la3SVSsFUP+4NMm0w2clLT5YbEKiF44Xw2akE=;
-        b=OXZuHhcqB1qfJRX20Wkek8ipqSJ8Jvz9UcSAqDjASoZjPAcpYHgf7Vxc7TED5Ibp98
-         m1oJd4qV7zc28qvK4+UiCYxIBgvpFsKgUJBMyHGAnL7gDwD+jNv9zj6p93f6opuydJj8
-         vw+kzDDZibnPbePnCOONQf1ZBYhAR5Na9YDpB9AS2oRqiFxXk70pYJe75eZVrXIuIAWl
-         8I+jm7vvTEQIYR955ueInesuGy9x2Ocj/vHsHC0CK9NDj8jvKLHigVhJqD88jifVz71g
-         zX8rbkErgHpl5PoV4NfkdlsCHGr8iMSMCvIN1znhXZxg0CglmEw7xP+2jr6GlLD8kbgP
-         EpGA==
-X-Gm-Message-State: APjAAAW+yX/M+7rwhpce08G/SHfxJJjr7TpAO5nuaqTTTV3mVv1wMQ19
-        rPdhNWU4SjlN+yVVoj7THl4=
-X-Google-Smtp-Source: APXvYqxkJCCSXbgxroeGL6Tdgyn8lXvDMNZtG1QD9i+65t+7jNJXBW2D5PJodTNtP2zT8JKd2Nn4uQ==
-X-Received: by 2002:adf:dfc2:: with SMTP id q2mr20966336wrn.251.1576954316530;
-        Sat, 21 Dec 2019 10:51:56 -0800 (PST)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references;
+        bh=5BRhvobtNdmKk3i7GYogWznJM8/6rPQQF6haJk7WNLI=;
+        b=CWr8VRsVhPubIPcvgHxNBwnevUvMgrW80Hx6JBCfluNXD4ETAM77Ye/K6sAzBO0T8l
+         QL61iihvjPRBRLH8oKQLoVMxHexQpaW2I+Vpsk5OGLTIX+yLZYkRQOlrHBzwIZM/8Vk6
+         f5QGxuWIjfK7qfEW+nlWE4kBfoUXF3lMdLeBBKYkCrAHFrE1a4ouJekNmL4RTxz3XYmY
+         jPDWu+gOzcyA4BzmAzdzCmmDaRidStj5WWuHJrclzeimHp5G77ufYPlHRidMyKZbwclv
+         VLtR+tK3G9p9sol1hm0sc4GTjDvm08G9OuTwVRRkyH8+xnPyRoIjRDZw4Iu40tS3HOP3
+         etgA==
+X-Gm-Message-State: APjAAAWNnNb1LIaJ/6HJ/2RO5eRl3B7Z+CLUHx0k50dhyB0r5vbn/NqG
+        42Fa7/o6qesLhtadDs4raMM=
+X-Google-Smtp-Source: APXvYqwit37sQ5eCTWi58huyDmVZN8iZaFcodNXwADrFPVShHgKC+ofwYYn8nIY1huSP5Zm+/R0XOw==
+X-Received: by 2002:adf:edd0:: with SMTP id v16mr21638887wro.310.1576954317867;
+        Sat, 21 Dec 2019 10:51:57 -0800 (PST)
 Received: from localhost.localdomain ([141.226.162.223])
-        by smtp.gmail.com with ESMTPSA id o4sm13729832wrx.25.2019.12.21.10.51.55
+        by smtp.gmail.com with ESMTPSA id o4sm13729832wrx.25.2019.12.21.10.51.56
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 21 Dec 2019 10:51:55 -0800 (PST)
+        Sat, 21 Dec 2019 10:51:57 -0800 (PST)
 From:   Amir Goldstein <amir73il@gmail.com>
 To:     Eryu Guan <guaneryu@gmail.com>
 Cc:     Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org,
         fstests@vger.kernel.org
-Subject: [PATCH 0/3] Nested overlay exportfs tests
-Date:   Sat, 21 Dec 2019 20:51:46 +0200
-Message-Id: <20191221185149.17509-1-amir73il@gmail.com>
+Subject: [PATCH 1/3] overlay: create the overlay/nested test group
+Date:   Sat, 21 Dec 2019 20:51:47 +0200
+Message-Id: <20191221185149.17509-2-amir73il@gmail.com>
 X-Mailer: git-send-email 2.17.1
+In-Reply-To: <20191221185149.17509-1-amir73il@gmail.com>
+References: <20191221185149.17509-1-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Eryu,
+For tests that mount an overlayfs over overlayfs.
 
-There is a somewhat convoluted story behind those tests...
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+ tests/overlay/group | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-At the time when overlay NFS export support was merged (v4.16),
-nested overlay NFS export was not supported, because of the requirement
-that all layers must have non null s_uuid. I had private patches to add
-support for nested overlay NFS export, which I tested with these tests.
-
-In kernel v4.20, commit 9df085f3c9a2 ("ovl: relax requirement for non
-null uuid ...") was merged to enable NFS export of overlayfs with lower
-squashfs. As a by-product from this change, nested overlay NFS export
-is since supported.
-
-v5.5-rc2 includes a fix to the v4.20 commit above ("ovl: fix lookup
-failure on multi lower squashfs"). I used these tests to verify that
-the change did not break the single lower layer with no uuid case.
-
-v5.5-rc2 also includes a fix to how overlayfs encodes file handles in
-memory ("ovl: make sure that real fid is 32bit aligned in memory").
-I also use those test to verify this change and they flushed out several
-bugs in my initial implementation that the existing overlay/exportfs
-test did not catch.
-
-Since those test have proven to be useful in catching bugs not directly
-related to the less interesting case of nested overlay NFS export, I
-decided it is now prime time for me to post them.
-
-Thanks,
-Amir.
-
-Amir Goldstein (3):
-  overlay: create the overlay/nested test group
-  overlay: test file handles with nested overlay on the same fs
-  overlay: test file handles with nested overlay on another fs
-
- tests/overlay/068     | 304 +++++++++++++++++++++++++++++++++++++++++
- tests/overlay/068.out |  50 +++++++
- tests/overlay/069     | 306 ++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/069.out |  50 +++++++
- tests/overlay/group   |   6 +-
- 5 files changed, 714 insertions(+), 2 deletions(-)
- create mode 100755 tests/overlay/068
- create mode 100644 tests/overlay/068.out
- create mode 100755 tests/overlay/069
- create mode 100644 tests/overlay/069.out
-
+diff --git a/tests/overlay/group b/tests/overlay/group
+index b7cd7774..e809f7f2 100644
+--- a/tests/overlay/group
++++ b/tests/overlay/group
+@@ -24,14 +24,14 @@
+ 019 auto stress
+ 020 auto quick copyup perms
+ 021 auto quick copyup
+-022 auto quick mount
++022 auto quick mount nested
+ 023 auto quick attr
+ 024 auto quick mount
+ 025 auto quick attr
+ 026 auto attr quick
+ 027 auto quick perms
+ 028 auto copyup quick
+-029 auto quick
++029 auto quick nested
+ 030 auto quick perms
+ 031 auto quick whiteout
+ 032 auto quick copyup hardlink
 -- 
 2.17.1
 
