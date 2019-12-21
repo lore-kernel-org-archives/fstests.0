@@ -2,126 +2,214 @@ Return-Path: <SRS0=dxnf=2L=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DB44FC2D0C0
-	for <linux-fstests@archiver.kernel.org>; Sat, 21 Dec 2019 08:55:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2B89FC2D0C3
+	for <linux-fstests@archiver.kernel.org>; Sat, 21 Dec 2019 17:04:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id B7F8D2072B
-	for <linux-fstests@archiver.kernel.org>; Sat, 21 Dec 2019 08:55:20 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E4522206EF
+	for <linux-fstests@archiver.kernel.org>; Sat, 21 Dec 2019 17:04:56 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="dGhFAqqP"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726024AbfLUIzU (ORCPT
+        id S1726567AbfLURE4 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 21 Dec 2019 03:55:20 -0500
-Received: from snd00011.auone-net.jp ([111.86.247.11]:38881 "EHLO
-        dmta0008.auone-net.jp" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1725954AbfLUIzU (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 21 Dec 2019 03:55:20 -0500
-Received: from ppp.dion.ne.jp by dmta0008.auone-net.jp with ESMTP
-          id <20191221085518708.CZTM.12086.ppp.dion.ne.jp@dmta0008.auone-net.jp>
-          for <fstests@vger.kernel.org>; Sat, 21 Dec 2019 17:55:18 +0900
-Date:   Sat, 21 Dec 2019 17:55:18 +0900
-From:   Kusanagi Kouichi <slash@ac.auone-net.jp>
-To:     fstests@vger.kernel.org
-Subject: [PATCH] generic/{003,120,192}: Set atime options precisely
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Message-Id: <20191221085518708.CZTM.12086.ppp.dion.ne.jp@dmta0008.auone-net.jp>
+        Sat, 21 Dec 2019 12:04:56 -0500
+Received: from mail-wm1-f42.google.com ([209.85.128.42]:51647 "EHLO
+        mail-wm1-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726179AbfLURE4 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 21 Dec 2019 12:04:56 -0500
+Received: by mail-wm1-f42.google.com with SMTP id d73so11928689wmd.1;
+        Sat, 21 Dec 2019 09:04:55 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id;
+        bh=XYYsNOwA4P2JUXVBuryUxvONRaOD/VDfSk7veS8CbIM=;
+        b=dGhFAqqPwTBxAMWD/HugWz7FObPdySk16bUJuH4QsQnpZ/xCHowx7MKUCcfijRC7AR
+         gBxvcw7shrr1VV9gwP466WzzM4+FNEElXiGAdMkmyqeltpmZIrpMgJLTm/McWECBIBsw
+         QAzNKa+jVoqatuR+2lvBLYs5qE5MmnXVOaNrx8o+b6dAedZshID8YHPzgkSHjY5wNd24
+         lDviz97wVaoqVjotxSqRu5PRPqLAg8R6iWx+V1Iv+HwtLZewji9qIZidX5y95WRKx+vu
+         /M06wAO2AG2gXW0u/rZ9Dz47RFrxs8hEH3pvm+i5pE4wthsndljvp9dA20Hd8z1oAP40
+         vzRg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id;
+        bh=XYYsNOwA4P2JUXVBuryUxvONRaOD/VDfSk7veS8CbIM=;
+        b=TczjM1DgfSFaeDfVFI+aYo47bxhaVDDpCC9atBLLdwt8sHiV5ake7oMjO98Jg03z2D
+         VmeurlJrYt9Zcw8jw5NPASeWR+4qBEut0O8ZFXSw4dE56QfT4beyRqWfEL85wUJUNTu/
+         WTza3dh/rlCVNZTk2RUF6mzQmGLO9v4G3pEKFO9luFjFUJnKaLGBsKCv3UwhD8rqQdj8
+         SWZazY+xz53Okgeh5owE2lutnU/GYCbPrVFseBjCVjqVIBhcWZMemYTTqr76obZr3nGy
+         zYhdPCx35cJ1inVILRJw5ojZLpqaJH/9yGMcJXvhYaS5g2KwMlRy8OFCkyhsOjqc7nZI
+         9x8Q==
+X-Gm-Message-State: APjAAAXYgzSosxi2Qzjw2BrR3p5uVZcUKRe+T2Y29nPPIzR56gqNWSTB
+        y7reJUGY+6uVbfNfUxqnt2U=
+X-Google-Smtp-Source: APXvYqw7nwfXBg96IY5BgyoKJmEnSTKPtBCdwt7CaejicuFPN8RtRE0M8bmZ4Nb2R2bTDv2m7/MYng==
+X-Received: by 2002:a1c:1f51:: with SMTP id f78mr21751351wmf.60.1576947894498;
+        Sat, 21 Dec 2019 09:04:54 -0800 (PST)
+Received: from localhost.localdomain ([141.226.162.223])
+        by smtp.gmail.com with ESMTPSA id q68sm16193448wme.14.2019.12.21.09.04.53
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 21 Dec 2019 09:04:53 -0800 (PST)
+From:   Amir Goldstein <amir73il@gmail.com>
+To:     Eryu Guan <guaneryu@gmail.com>
+Cc:     Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: [PATCH v2] overlay: Test unique st_dev;st_ino on non-samefs setup
+Date:   Sat, 21 Dec 2019 19:04:47 +0200
+Message-Id: <20191221170447.13586-1-amir73il@gmail.com>
+X-Mailer: git-send-email 2.17.1
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Make tests pass regardless of options set by MOUNT_OPTIONS.
+Check that files from middle layer on same fs as upper layer
+are not allowed to export the real inode st_dev;st_ino.
 
-Signed-off-by: Kusanagi Kouichi <slash@ac.auone-net.jp>
+This is a regression test for kernel commit:
+  9c6d8f13e9da ("ovl: fix corner case of non-unique st_dev;st_ino")
+
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 ---
- common/rc         | 3 +--
- tests/generic/003 | 6 +++---
- tests/generic/120 | 2 +-
- tests/generic/192 | 1 +
- 4 files changed, 6 insertions(+), 6 deletions(-)
 
-diff --git a/common/rc b/common/rc
-index 5cdd829b..e2f081c0 100644
---- a/common/rc
-+++ b/common/rc
-@@ -440,7 +440,7 @@ _test_cycle_mount()
- 	return
-     fi
-     _test_unmount
--    _test_mount
-+    _test_mount "$@"
- }
- 
- _scratch_mkfs_options()
-@@ -3392,7 +3392,6 @@ _exclude_scratch_mount_option()
- 
- _require_atime()
- {
--	_exclude_scratch_mount_option "noatime"
- 	case $FSTYP in
- 	nfs|cifs)
- 		_notrun "atime related mount options have no effect on $FSTYP"
-diff --git a/tests/generic/003 b/tests/generic/003
-index 767d7059..a634b1a4 100755
---- a/tests/generic/003
-+++ b/tests/generic/003
-@@ -66,7 +66,7 @@ _compare_stat_times() {
- }
- 
- _scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
--_scratch_mount "-o relatime"
-+_scratch_mount "-o atime,nostrictatime,relatime"
- 
- if [ "$FSTYP" = "btrfs" ]; then
- 	TPATH=$SCRATCH_MNT/sub1
-@@ -94,7 +94,7 @@ _compare_stat_times NNN "$file1_stat_after_first_access" \
- 	"$file1_stat_after_second_access" "after accessing file1 second time"
- 
- # Mounting with nodiratime option
--_scratch_cycle_mount "nodiratime"
-+_scratch_cycle_mount "atime,nodiratime"
- file1_stat_after_remount=`_stat $TPATH/dir1/file1`
- _compare_stat_times NNN "$file1_stat_after_second_access" \
- 	"$file1_stat_after_remount" "for file1 after remount"
-@@ -120,7 +120,7 @@ _compare_stat_times NNN "$dir2_stat_after_file_creation" \
- 	"$dir2_stat_after_file_access" "for dir2 after file access"
- 
- # Mounting with noatime option, creating a file and accessing it
--_scratch_cycle_mount "noatime"
-+_scratch_cycle_mount "noatime,nostrictatime"
- echo "ccc" > $TPATH/dir2/file3
- file3_stat_before_first_access=`_stat $TPATH/dir2/file3`
- sleep 1
-diff --git a/tests/generic/120 b/tests/generic/120
-index 48ca9508..2f86d9fc 100755
---- a/tests/generic/120
-+++ b/tests/generic/120
-@@ -44,7 +44,7 @@ _compare_access_times()
- 
- }
- 
--if ! _try_scratch_mount "-o noatime" >$tmp.out 2>&1
-+if ! _try_scratch_mount "-o noatime,nostrictatime" >$tmp.out 2>&1
- then
-     cat $tmp.out
-     echo "!!! mount failed"
-diff --git a/tests/generic/192 b/tests/generic/192
-index 50b3d6fd..37197979 100755
---- a/tests/generic/192
-+++ b/tests/generic/192
-@@ -38,6 +38,7 @@ testfile=$TEST_DIR/testfile
- rm -f $testfile
- rm -f $seqres.full
- 
-+_test_cycle_mount -o atime
- echo test >$testfile
- time1=`_access_time $testfile | tee -a $seqres.full`
- 
+Eryu,
+
+The kernel fix commit is now upstream.
+
+Thanks,
+Amir.
+
+Changes since v1:
+- Document upstream commit id
+
+ tests/overlay/067     | 94 +++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/067.out |  2 +
+ tests/overlay/group   |  1 +
+ 3 files changed, 97 insertions(+)
+ create mode 100755 tests/overlay/067
+ create mode 100644 tests/overlay/067.out
+
+diff --git a/tests/overlay/067 b/tests/overlay/067
+new file mode 100755
+index 00000000..d0a59a0b
+--- /dev/null
++++ b/tests/overlay/067
+@@ -0,0 +1,94 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2019 CTERA Networks. All Rights Reserved.
++#
++# FSQA Test No. 067
++#
++# Test unique st_dev;st_ino on non-samefs setup.
++#
++# Check that files from middle layer on same fs as upper layer
++# are not allowed to export the real inode st_dev;st_ino.
++#
++# This is a regression test for kernel commit:
++#   9c6d8f13e9da ovl: fix corner case of non-unique st_dev;st_ino
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs overlay
++_supported_os Linux
++# Use non-default scratch underlying overlay dirs, we need to check
++# them explicity after test.
++_require_scratch_nocheck
++_require_test
++
++# Lower is on test partition
++lower=$OVL_BASE_TEST_DIR/$OVL_LOWER-$seq
++# Upper/work are on scratch partition
++middle=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
++upper=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
++work=$OVL_BASE_SCRATCH_MNT/$OVL_WORK
++
++rm -rf $lower
++mkdir $lower
++
++_scratch_mkfs >>$seqres.full 2>&1
++
++realfile=$middle/file
++testfile=$SCRATCH_MNT/file
++
++# Create a file on middle layer on same fs as upper layer
++echo wrong > $realfile
++
++# Mount an overlay on $SCRATCH_MNT with lower layer on test partition
++# and middle and upper layer on scratch partition.
++# Disable xino, so not all overlay inodes are on the same st_dev.
++_overlay_scratch_mount_dirs $middle:$lower $upper $work -o xino=off || \
++	_notrun "cannot mount overlay with xino=off option"
++
++stat $realfile >>$seqres.full
++stat $testfile >>$seqres.full
++
++# Diverge the content of the overlay file from its origin
++echo right > $testfile
++
++stat $testfile >>$seqres.full
++
++# Expect the overlay file to differ from the original lower file
++diff -q $realfile $testfile >>$seqres.full &&
++	echo "diff with middle layer file doesn't know right from wrong! (warm cache)"
++
++echo 3 > /proc/sys/vm/drop_caches
++
++stat $testfile >>$seqres.full
++
++# Expect the overlay file to differ from the original lower file
++diff -q $realfile $testfile >>$seqres.full &&
++	echo "diff with middle layer file doesn't know right from wrong! (cold cache)"
++
++$UMOUNT_PROG $SCRATCH_MNT
++# check overlayfs
++_overlay_check_scratch_dirs $middle:$lower $upper $work -o xino=off
++
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/overlay/067.out b/tests/overlay/067.out
+new file mode 100644
+index 00000000..daa15453
+--- /dev/null
++++ b/tests/overlay/067.out
+@@ -0,0 +1,2 @@
++QA output created by 067
++Silence is golden
+diff --git a/tests/overlay/group b/tests/overlay/group
+index 1dec7db9..b7cd7774 100644
+--- a/tests/overlay/group
++++ b/tests/overlay/group
+@@ -69,3 +69,4 @@
+ 064 auto quick copyup
+ 065 auto quick mount
+ 066 auto quick copyup
++067 auto quick copyup nonsamefs
 -- 
-2.24.1
+2.17.1
 
