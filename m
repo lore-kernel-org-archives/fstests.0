@@ -2,225 +2,129 @@ Return-Path: <SRS0=A77W=2N=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CA13FC2D0C0
-	for <linux-fstests@archiver.kernel.org>; Mon, 23 Dec 2019 05:12:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F21FCC2D0C0
+	for <linux-fstests@archiver.kernel.org>; Mon, 23 Dec 2019 05:16:32 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 7C9CF206D3
-	for <linux-fstests@archiver.kernel.org>; Mon, 23 Dec 2019 05:12:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B51F32073A
+	for <linux-fstests@archiver.kernel.org>; Mon, 23 Dec 2019 05:16:32 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="GdPEqWfh"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="de2zFEDW"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725795AbfLWFMh (ORCPT
+        id S1725822AbfLWFQc (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 23 Dec 2019 00:12:37 -0500
-Received: from us-smtp-2.mimecast.com ([207.211.31.81]:32559 "EHLO
-        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1725283AbfLWFMg (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 23 Dec 2019 00:12:36 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1577077955;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=Tu+L/bX41eXdE9A7LS1wNU6m422wpVLpuU+ZKOq5hxo=;
-        b=GdPEqWfhbrABkdfFTTwP/RPO7ewHEi+GP/hAOEdOCZjq5yEO5ux0V7cpokDDnciW1opFMg
-        /rKLab18Vz5pqebQBkrXsyfCX6Ove6hiR0+ttgsCt+7WujTE5S7OIVmkw6iiWsbG0FSCh6
-        siVUVu/TPBodrVq3yL5BtiaW1E0XS1E=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-409-tqn0yxCZNHWr2fsb-VOdng-1; Mon, 23 Dec 2019 00:12:32 -0500
-X-MC-Unique: tqn0yxCZNHWr2fsb-VOdng-1
-Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id AEE1A477;
-        Mon, 23 Dec 2019 05:12:31 +0000 (UTC)
-Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 2D39F67E4C;
-        Mon, 23 Dec 2019 05:12:30 +0000 (UTC)
-Date:   Mon, 23 Dec 2019 13:21:06 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     fstests <fstests@vger.kernel.org>
-Cc:     linux-xfs <linux-xfs@vger.kernel.org>
-Subject: Re: [PATCH V2] fstests: verify that xfs_growfs can operate on
- mounted device node
-Message-ID: <20191223052106.GG14328@dhcp-12-102.nay.redhat.com>
-Mail-Followup-To: fstests <fstests@vger.kernel.org>,
-        linux-xfs <linux-xfs@vger.kernel.org>
-References: <4cdefab7-02f0-7703-a3d2-8c2b3ce655b7@sandeen.net>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <4cdefab7-02f0-7703-a3d2-8c2b3ce655b7@sandeen.net>
-User-Agent: Mutt/1.10.1 (2018-07-13)
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
+        Mon, 23 Dec 2019 00:16:32 -0500
+Received: from mail-pg1-f195.google.com ([209.85.215.195]:32942 "EHLO
+        mail-pg1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725283AbfLWFQc (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 23 Dec 2019 00:16:32 -0500
+Received: by mail-pg1-f195.google.com with SMTP id 6so8229492pgk.0
+        for <fstests@vger.kernel.org>; Sun, 22 Dec 2019 21:16:31 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id:in-reply-to:references;
+        bh=LBWkJ7isWZaPTfyfHLf3fdbxARBYL15UFlaJzmle34U=;
+        b=de2zFEDWizFEnIV7hMR/eXtPAC2goymrOpilforLtrq/AVQw3Shva31Fydb58DEQHs
+         or2wBaeQetFW+xSJHiQzOtalQKUIvbJAcGoQXxAiWxMgzJ3XukHIIcLEBV17ZVPBfomf
+         eRYGuW5B/cMh3hYRpPAO6JT99wV8p2MbhC4RWGZ4nmw91NL2WVnszfIXC8EsVGSTVMzc
+         jrbgKT2S7O6XuSvS47NKspzwOX5pyKFdm8BkZ6kwt0YtNGDCzaMD/IK1b6RCQRkhNGAI
+         nmEdkxlg6PBeokL7+mDu2YAplmKXzi9PKOnCCtwZw0S4qwPGySEOfRYUOzS7EzbS7c7S
+         TztA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references;
+        bh=LBWkJ7isWZaPTfyfHLf3fdbxARBYL15UFlaJzmle34U=;
+        b=tQ610G7+gdU6L7manmZJqOy+ccLwc/6EQqMvyzRh0X9Jq1ZZW4B2WNkT1L6+rGZchf
+         Ml/APOYQfq7KZp2xRKHUbaBQ65UnTBnu9VxdrVIasqOoSMoR1e9yVgUXhPyfjM4l9szt
+         6lUvWFNoDAfbHRfG+3t8IZ/o98/XGqM8ek6D2ewH1gUIfMM4GPF9h+0JFUFRMeopvv24
+         WWlydIFvt90E8euwA8bqG47DNn6UhQhmwKSShypL2xei+6wPrNTpzNVNz0i+T9FguzLs
+         e8GjH97F5Ghw3uyDzw7LA8FVMPw3PSI3Rv7yQ2rpP69VZQx92j0wKUaIJIvSKK6u8pEq
+         XBRA==
+X-Gm-Message-State: APjAAAW/IUylCxVAuhdK+MVqDA/eDJEf3tE3s6bYsqibFtBR4cDEvje0
+        WkyWYmibIO43hvXDR8YRpmSs7FgT
+X-Google-Smtp-Source: APXvYqzgxgZbY1/TLXuS22u7FkAfoSHSqVz6Uv/r5HWiFkIvivqt9vD38iZRZE+KmhG+DtSjNtu6Pw==
+X-Received: by 2002:a63:1f5c:: with SMTP id q28mr27365938pgm.404.1577078191167;
+        Sun, 22 Dec 2019 21:16:31 -0800 (PST)
+Received: from deepa-ubuntu.lan (c-98-234-52-230.hsd1.ca.comcast.net. [98.234.52.230])
+        by smtp.gmail.com with ESMTPSA id fa5sm18664961pjb.2.2019.12.22.21.16.29
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 22 Dec 2019 21:16:30 -0800 (PST)
+From:   Deepa Dinamani <deepa.kernel@gmail.com>
+To:     fstests@vger.kernel.org
+Cc:     amir73il@gmail.com, arnd@arndb.de, gregkh@linuxfoundation.org,
+        guaneryu@gmail.com, sashal@kernel.org, y2038@lists.linaro.org
+Subject: [PATCH] generic/402: Make timestamp range check conditional
+Date:   Sun, 22 Dec 2019 21:16:22 -0800
+Message-Id: <20191223051622.7975-1-deepa.kernel@gmail.com>
+X-Mailer: git-send-email 2.17.1
+In-Reply-To: <CABeXuvq+37-WO8KH5en-1LaSGOLbw9zziC4eAqGvpJwe85kudQ@mail.gmail.com>
+References: <CABeXuvq+37-WO8KH5en-1LaSGOLbw9zziC4eAqGvpJwe85kudQ@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Dec 17, 2019 at 04:34:07PM -0600, Eric Sandeen wrote:
-> From: Eric Sandeen <sandeen@redhat.com>
-> 
-> The ability to use a mounted device node as the primary argument
-> to xfs_growfs was added back in with:
->   7e8275f8 xfs_growfs: allow mounted device node as argument
-> because it was an undocumented behavior that some userspace depended on.
-> This test exercises that functionality.
-> 
-> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
-> ---
+Addition of fs-specific timestamp range checking was added
+in 188d20bcd1eb ("vfs: Add file timestamp range support").
 
-Looks good to me, and this case fails on old xfsprogs as expected, and test
-passed after merge "7e8275f8 xfs_growfs: allow mounted device node as argument".
+Add a check for whether the kernel supports the limits check
+before running the associated test.
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+Signed-off-by: Deepa Dinamani <deepa.kernel@gmail.com>
+---
+ common/rc         | 11 +++++++++++
+ tests/generic/402 |  3 +++
+ 2 files changed, 14 insertions(+)
 
-> 
-> V2: Address Eryu's review concerns
-> 
-> diff --git a/tests/xfs/999 b/tests/xfs/999
-> new file mode 100755
-> index 00000000..186a29eb
-> --- /dev/null
-> +++ b/tests/xfs/999
-> @@ -0,0 +1,101 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2019 Red Hat, Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test 999
-> +#
-> +# Test to ensure xfs_growfs command accepts device nodes if & only
-> +# if they are mounted.
-> +# This functionality, though undocumented, worked until xfsprogs v4.12
-> +# It was added back and documented after xfsprogs v5.2 via
-> +#   7e8275f8 xfs_growfs: allow mounted device node as argument
-> +#
-> +# Based on xfs/289
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +loopfile=$TEST_DIR/fsfile
-> +mntdir=$TEST_DIR/mntdir
-> +loop_symlink=$TEST_DIR/loop_symlink.$$
-> +
-> +_cleanup()
-> +{
-> +    $UMOUNT_PROG $mntdir
-> +    [ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
-> +    rmdir $mntdir
-> +    rm -f $loop_symlink
-> +    rm -f $loopfile
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs xfs
-> +_supported_os Linux
-> +_require_test
-> +_require_loop
-> +
-> +mkdir -p $mntdir || _fail "!!! failed to create temp mount dir"
-> +
-> +echo "=== mkfs.xfs ==="
-> +$MKFS_XFS_PROG -d file,name=$loopfile,size=16m -f >/dev/null 2>&1
-> +
-> +echo "=== truncate ==="
-> +$XFS_IO_PROG -fc "truncate 256m" $loopfile
-> +
-> +echo "=== create loop device ==="
-> +loop_dev=$(_create_loop_device $loopfile)
-> +
-> +echo "=== create loop device symlink ==="
-> +ln -s $loop_dev $loop_symlink
-> +
-> +echo "loop device is $loop_dev" >> $seqres.full
-> +
-> +# These unmounted operations should fail
-> +
-> +echo "=== xfs_growfs - unmounted device, command should be rejected ==="
-> +$XFS_GROWFS_PROG $loop_dev 2>&1 | sed -e s:$loop_dev:LOOPDEV:
-> +
-> +echo "=== xfs_growfs - check symlinked dev, unmounted ==="
-> +$XFS_GROWFS_PROG $loop_symlink 2>&1 | sed -e s:$loop_symlink:LOOPSYMLINK:
-> +
-> +# These mounted operations should pass
-> +
-> +echo "=== mount ==="
-> +$MOUNT_PROG $loop_dev $mntdir || _fail "!!! failed to loopback mount"
-> +
-> +echo "=== xfs_growfs - check device node ==="
-> +$XFS_GROWFS_PROG -D 8192 $loop_dev > /dev/null
-> +
-> +echo "=== xfs_growfs - check device symlink ==="
-> +$XFS_GROWFS_PROG -D 12288 $loop_symlink > /dev/null
-> +
-> +echo "=== unmount ==="
-> +$UMOUNT_PROG $mntdir || _fail "!!! failed to unmount"
-> +
-> +echo "=== mount device symlink ==="
-> +$MOUNT_PROG $loop_symlink $mntdir || _fail "!!! failed to loopback mount"
-> +
-> +echo "=== xfs_growfs - check device symlink ==="
-> +$XFS_GROWFS_PROG -D 16384 $loop_symlink > /dev/null
-> +
-> +echo "=== xfs_growfs - check device node ==="
-> +$XFS_GROWFS_PROG -D 20480 $loop_dev > /dev/null
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/999.out b/tests/xfs/999.out
-> new file mode 100644
-> index 00000000..ababb892
-> --- /dev/null
-> +++ b/tests/xfs/999.out
-> @@ -0,0 +1,16 @@
-> +QA output created by 999
-> +=== mkfs.xfs ===
-> +=== truncate ===
-> +=== create loop device ===
-> +=== create loop device symlink ===
-> +=== xfs_growfs - unmounted device, command should be rejected ===
-> +xfs_growfs: LOOPDEV is not a mounted XFS filesystem
-> +=== xfs_growfs - check symlinked dev, unmounted ===
-> +xfs_growfs: LOOPSYMLINK is not a mounted XFS filesystem
-> +=== mount ===
-> +=== xfs_growfs - check device node ===
-> +=== xfs_growfs - check device symlink ===
-> +=== unmount ===
-> +=== mount device symlink ===
-> +=== xfs_growfs - check device symlink ===
-> +=== xfs_growfs - check device node ===
-> diff --git a/tests/xfs/group b/tests/xfs/group
-> index 4373d082..ff251002 100644
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
-> @@ -508,3 +508,4 @@
->  509 auto ioctl
->  510 auto ioctl quick
->  511 auto quick quota
-> +999 quick auto growfs
-> 
+diff --git a/common/rc b/common/rc
+index 816588d6..472db995 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1981,6 +1981,17 @@ _run_aiodio()
+     return $status
+ }
+ 
++_require_kernel_timestamp_range()
++{
++	# 128-byte inodes do not have room for extended timestamp
++	MKFS_OPTIONS=-I128 _scratch_mkfs_ext4 &>> $seqres.full 2>&1 || _fail "ext4 mkfs failed"
++
++	mount -t ext4 ${SCRATCH_DEV} ${SCRATCH_MNT}
++	_check_dmesg_for "ext4 filesystem being mounted at ${SCRATCH_MNT} supports timestamps until 2038" || \
++		_notrun "Kernel does not support timestamp limits"
++	umount ${SCRATCH_MNT}
++}
++
+ _require_timestamp_range()
+ {
+ 	local device=${1:-$TEST_DEV}
+diff --git a/tests/generic/402 b/tests/generic/402
+index 0392c258..2be94c54 100755
+--- a/tests/generic/402
++++ b/tests/generic/402
+@@ -30,6 +30,7 @@ rm -f $seqres.full
+ _supported_fs generic
+ _supported_os Linux
+ _require_scratch
++_require_check_dmesg
+ _require_xfs_io_command utimes
+ 
+ # Compare file timestamps obtained from stat
+@@ -79,6 +80,8 @@ run_test()
+ 	done
+ }
+ 
++_require_kernel_timestamp_range
++
+ _scratch_mkfs &>> $seqres.full 2>&1 || _fail "mkfs failed"
+ _require_timestamp_range $SCRATCH_DEV
+ 
+-- 
+2.17.1
 
