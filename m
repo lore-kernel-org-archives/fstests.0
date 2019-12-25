@@ -1,153 +1,151 @@
-Return-Path: <SRS0=Sr/I=2O=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=EIQn=2P=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+X-Spam-Status: No, score=-6.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EBAFCC2D0C3
-	for <linux-fstests@archiver.kernel.org>; Tue, 24 Dec 2019 18:02:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C9E18C2D0DA
+	for <linux-fstests@archiver.kernel.org>; Wed, 25 Dec 2019 08:35:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id BFFE420731
-	for <linux-fstests@archiver.kernel.org>; Tue, 24 Dec 2019 18:02:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A68CC20730
+	for <linux-fstests@archiver.kernel.org>; Wed, 25 Dec 2019 08:35:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726183AbfLXSCh (ORCPT
+        id S1726289AbfLYIfs (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 24 Dec 2019 13:02:37 -0500
-Received: from sandeen.net ([63.231.237.45]:41586 "EHLO sandeen.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726171AbfLXSCh (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 24 Dec 2019 13:02:37 -0500
-Received: from Liberator-6.local (unknown [50.34.188.200])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by sandeen.net (Postfix) with ESMTPSA id 1D4D733FD;
-        Tue, 24 Dec 2019 12:02:04 -0600 (CST)
-Subject: Re: [PATCH] generic/386: check the correct field from df output
-To:     "Theodore Y. Ts'o" <tytso@mit.edu>, fstests@vger.kernel.org
-References: <20191222212730.378358-1-tytso@mit.edu>
- <20191222213032.GC108990@mit.edu>
-From:   Eric Sandeen <sandeen@sandeen.net>
-Autocrypt: addr=sandeen@sandeen.net; prefer-encrypt=mutual; keydata=
- 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 pA==
-Message-ID: <3f863ffd-cbee-222c-a353-9108107daf9e@sandeen.net>
-Date:   Tue, 24 Dec 2019 10:02:16 -0800
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:68.0)
- Gecko/20100101 Thunderbird/68.3.1
+        Wed, 25 Dec 2019 03:35:48 -0500
+Received: from snd00003.auone-net.jp ([111.86.247.3]:14689 "EHLO
+        dmta0006.auone-net.jp" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726196AbfLYIfs (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 25 Dec 2019 03:35:48 -0500
+Received: from ppp.dion.ne.jp by dmta0006.auone-net.jp with ESMTP
+          id <20191225083545507.IVEA.121610.ppp.dion.ne.jp@dmta0006.auone-net.jp>;
+          Wed, 25 Dec 2019 17:35:45 +0900
+Date:   Wed, 25 Dec 2019 17:35:45 +0900
+From:   Kusanagi Kouichi <slash@ac.auone-net.jp>
+To:     Naohiro Aota <naohiro.aota@wdc.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH] generic/{003,120,192}: Set atime options precisely
+References: <20191221085518708.CZTM.12086.ppp.dion.ne.jp@dmta0008.auone-net.jp>
+ <20191223083608.4fytirftalw5arga@naota.dhcp.fujisawa.hgst.com>
 MIME-Version: 1.0
-In-Reply-To: <20191222213032.GC108990@mit.edu>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20191223083608.4fytirftalw5arga@naota.dhcp.fujisawa.hgst.com>
+Message-Id: <20191225083545507.IVEA.121610.ppp.dion.ne.jp@dmta0006.auone-net.jp>
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 12/22/19 3:30 PM, Theodore Y. Ts'o wrote:
-> On Sun, Dec 22, 2019 at 04:27:30PM -0500, Theodore Ts'o wrote:
->> ...  However, looking at xfsprogs's quota command, I
->> see no evidence that there is any line breaking logic.
+On 2019-12-23 17:36:08 +0900, Naohiro Aota wrote:
+> On Sat, Dec 21, 2019 at 05:55:18PM +0900, Kusanagi Kouichi wrote:
+> > Make tests pass regardless of options set by MOUNT_OPTIONS.
+> > 
+> > Signed-off-by: Kusanagi Kouichi <slash@ac.auone-net.jp>
+> > ---
+> > common/rc         | 3 +--
+> > tests/generic/003 | 6 +++---
+> > tests/generic/120 | 2 +-
+> > tests/generic/192 | 1 +
+> > 4 files changed, 6 insertions(+), 6 deletions(-)
+> > 
+> > diff --git a/common/rc b/common/rc
+> > index 5cdd829b..e2f081c0 100644
+> > --- a/common/rc
+> > +++ b/common/rc
+> > @@ -440,7 +440,7 @@ _test_cycle_mount()
+> > 	return
+> >     fi
+> >     _test_unmount
+> > -    _test_mount
+> > +    _test_mount "$@"
+> > }
+> > 
+> > _scratch_mkfs_options()
 > 
-> Eric, since you're the xfsprogs maintainer --- am I missing something?
-> Was there a line breaking feature in the past?
+> It would be less confusing to have the same interface as
+> _scratch_cycle_mount().
 > 
->     	    	 	  	     - Ted
+> > @@ -3392,7 +3392,6 @@ _exclude_scratch_mount_option()
+> > 
+> > _require_atime()
+> > {
+> > -	_exclude_scratch_mount_option "noatime"
+> > 	case $FSTYP in
+> > 	nfs|cifs)
+> > 		_notrun "atime related mount options have no effect on $FSTYP"
+> > diff --git a/tests/generic/003 b/tests/generic/003
+> > index 767d7059..a634b1a4 100755
+> > --- a/tests/generic/003
+> > +++ b/tests/generic/003
+> > @@ -66,7 +66,7 @@ _compare_stat_times() {
+> > }
+> > 
+> > _scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
+> > -_scratch_mount "-o relatime"
+> > +_scratch_mount "-o atime,nostrictatime,relatime"
+> > 
+> > if [ "$FSTYP" = "btrfs" ]; then
+> > 	TPATH=$SCRATCH_MNT/sub1
+> > @@ -94,7 +94,7 @@ _compare_stat_times NNN "$file1_stat_after_first_access" \
+> > 	"$file1_stat_after_second_access" "after accessing file1 second time"
+> > 
+> > # Mounting with nodiratime option
+> > -_scratch_cycle_mount "nodiratime"
+> > +_scratch_cycle_mount "atime,nodiratime"
+> > file1_stat_after_remount=`_stat $TPATH/dir1/file1`
+> > _compare_stat_times NNN "$file1_stat_after_second_access" \
+> > 	"$file1_stat_after_remount" "for file1 after remount"
+> > @@ -120,7 +120,7 @@ _compare_stat_times NNN "$dir2_stat_after_file_creation" \
+> > 	"$dir2_stat_after_file_access" "for dir2 after file access"
+> > 
+> > # Mounting with noatime option, creating a file and accessing it
+> > -_scratch_cycle_mount "noatime"
+> > +_scratch_cycle_mount "noatime,nostrictatime"
+> > echo "ccc" > $TPATH/dir2/file3
+> > file3_stat_before_first_access=`_stat $TPATH/dir2/file3`
+> > sleep 1
+> > diff --git a/tests/generic/120 b/tests/generic/120
+> > index 48ca9508..2f86d9fc 100755
+> > --- a/tests/generic/120
+> > +++ b/tests/generic/120
+> > @@ -44,7 +44,7 @@ _compare_access_times()
+> > 
+> > }
+> > 
+> > -if ! _try_scratch_mount "-o noatime" >$tmp.out 2>&1
+> > +if ! _try_scratch_mount "-o noatime,nostrictatime" >$tmp.out 2>&1
+> > then
+> >     cat $tmp.out
+> >     echo "!!! mount failed"
+> 
+> I'm not sure about these parts, but personally I think it's OK to just
+> skip atime related tests when you explicitly specify
+> MOUNT_OPTIONS=noatime. So, you state you want to test FS behavior with
+> noatime by specifying the MOUNT_OPTIONS, then it would be no use to
+> run those atime related tests anyway.
+> 
+> Or, we need to add _exclude_scratch_mount_option "strictatime" also?
 > 
 
-The logic is in the free_space() function.
+OK. Please drop this patch. Instead, let's skip generic/003 and generic/120
+if strictatime is set.
 
-        if (flags & HUMAN_FLAG) {
-                count = fprintf(fp, "%-12s", path->fs_name);
-                if (count > 13)
-                        fprintf(fp, "\n%12s", " ");
-        } else {
-                count = fprintf(fp, "%-19s", path->fs_name);
-                if (count > 20)
-                        fprintf(fp, "\n%19s", " ");
-        }
-
-eguan made this change to xfstests to handle it:
-
-commit 50f2346560487303b381d11bbe52b93cd0a887bd
-Author: Eryu Guan <eguan@redhat.com>
-Date:   Tue Oct 14 22:59:38 2014 +1100
-
-    xfs/262: update filter to deal with long device name correctly
-    
-    If the device name is too long, the output of xfs_quota -c "df" will be
-    broke into two lines as
-    
-    Filesystem           1K-blocks       Used  Available  Use% Pathname
-    /dev/mapper/rhel_hp--dl388eg8--01-testlv2
-                          15718400      32932   15685468    0% /mnt/testarea/scratch
-    /dev/mapper/rhel_hp--dl388eg8--01-testlv2
-                            512000          0     512000    0% /mnt/testarea/scratch/test
-    
-    and _filter_quota_rpt() couldn't catch the correct available number and
-    test will fail as
-    
-        [root@hp-dl388g8-01 xfstests]# diff -u tests/xfs/262.out /root/xfstests/results//xfs/262.out.bad
-        --- tests/xfs/262.out   2014-10-08 20:16:19.000000000 +0800
-        +++ /root/xfstests/results//xfs/262.out.bad  2014-10-09 14:29:38.795813323 +0800
-        @@ -1,2 +1,4 @@
-         QA output created by 262
-         Silence is golden.
-        +hard limit 0 bytes, expected 524288000
-        +hard limit 0 bytes, expected 524288000
-    
-    Update the filter so it could catch the correct value.
-    
-    Signed-off-by: Eryu Guan <eguan@redhat.com>
-    Reviewed-by: Dave Chinner <dchinner@redhat.com>
-    Signed-off-by: Dave Chinner <david@fromorbit.com>
-
-
-Does:
-
--			bsize = byte_size($(NF-2));
-+			bsize = byte_size($(NF-4));
-
-fix it properly on ext4?
-
+> > diff --git a/tests/generic/192 b/tests/generic/192
+> > index 50b3d6fd..37197979 100755
+> > --- a/tests/generic/192
+> > +++ b/tests/generic/192
+> > @@ -38,6 +38,7 @@ testfile=$TEST_DIR/testfile
+> > rm -f $testfile
+> > rm -f $seqres.full
+> > 
+> > +_test_cycle_mount -o atime
+> > echo test >$testfile
+> > time1=`_access_time $testfile | tee -a $seqres.full`
+> > 
+> > -- 
+> > 2.24.1
+> > 
+> 
