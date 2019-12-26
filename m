@@ -1,151 +1,93 @@
-Return-Path: <SRS0=EIQn=2P=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=zKMi=2Q=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C9E18C2D0DA
-	for <linux-fstests@archiver.kernel.org>; Wed, 25 Dec 2019 08:35:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0296AC2D0DB
+	for <linux-fstests@archiver.kernel.org>; Thu, 26 Dec 2019 06:47:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id A68CC20730
-	for <linux-fstests@archiver.kernel.org>; Wed, 25 Dec 2019 08:35:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D65AE2071E
+	for <linux-fstests@archiver.kernel.org>; Thu, 26 Dec 2019 06:47:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726289AbfLYIfs (ORCPT
+        id S1726023AbfLZGrz (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 25 Dec 2019 03:35:48 -0500
-Received: from snd00003.auone-net.jp ([111.86.247.3]:14689 "EHLO
-        dmta0006.auone-net.jp" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726196AbfLYIfs (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 25 Dec 2019 03:35:48 -0500
-Received: from ppp.dion.ne.jp by dmta0006.auone-net.jp with ESMTP
-          id <20191225083545507.IVEA.121610.ppp.dion.ne.jp@dmta0006.auone-net.jp>;
-          Wed, 25 Dec 2019 17:35:45 +0900
-Date:   Wed, 25 Dec 2019 17:35:45 +0900
-From:   Kusanagi Kouichi <slash@ac.auone-net.jp>
-To:     Naohiro Aota <naohiro.aota@wdc.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] generic/{003,120,192}: Set atime options precisely
-References: <20191221085518708.CZTM.12086.ppp.dion.ne.jp@dmta0008.auone-net.jp>
- <20191223083608.4fytirftalw5arga@naota.dhcp.fujisawa.hgst.com>
+        Thu, 26 Dec 2019 01:47:55 -0500
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:53697 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726127AbfLZGrz (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 26 Dec 2019 01:47:55 -0500
+X-IronPort-AV: E=Sophos;i="5.69,357,1571673600"; 
+   d="scan'208";a="80802199"
+Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
+  by heian.cn.fujitsu.com with ESMTP; 26 Dec 2019 14:47:52 +0800
+Received: from G08CNEXMBPEKD05.g08.fujitsu.local (unknown [10.167.33.204])
+        by cn.fujitsu.com (Postfix) with ESMTP id D9C0C4CE1BE8
+        for <fstests@vger.kernel.org>; Thu, 26 Dec 2019 14:39:01 +0800 (CST)
+Received: from G08CNEXCHPEKD02.g08.fujitsu.local (10.167.33.83) by
+ G08CNEXMBPEKD05.g08.fujitsu.local (10.167.33.204) with Microsoft SMTP Server
+ (TLS) id 15.0.1395.4; Thu, 26 Dec 2019 14:47:49 +0800
+Received: from localhost.localdomain (10.167.220.84) by
+ G08CNEXCHPEKD02.g08.fujitsu.local (10.167.33.89) with Microsoft SMTP Server
+ (TLS) id 14.3.439.0; Thu, 26 Dec 2019 14:47:50 +0800
+From:   Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+To:     <fstests@vger.kernel.org>
+CC:     Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+Subject: [PATCH] generic/590: skip test if kernel doesn't support realtime
+Date:   Thu, 26 Dec 2019 14:48:36 +0800
+Message-ID: <1577342916-14289-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
+X-Mailer: git-send-email 1.8.3.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20191223083608.4fytirftalw5arga@naota.dhcp.fujisawa.hgst.com>
-Message-Id: <20191225083545507.IVEA.121610.ppp.dion.ne.jp@dmta0006.auone-net.jp>
+Content-Type: text/plain
+X-Originating-IP: [10.167.220.84]
+X-yoursite-MailScanner-ID: D9C0C4CE1BE8.AFF02
+X-yoursite-MailScanner: Found to be clean
+X-yoursite-MailScanner-From: xuyang2018.jy@cn.fujitsu.com
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 2019-12-23 17:36:08 +0900, Naohiro Aota wrote:
-> On Sat, Dec 21, 2019 at 05:55:18PM +0900, Kusanagi Kouichi wrote:
-> > Make tests pass regardless of options set by MOUNT_OPTIONS.
-> > 
-> > Signed-off-by: Kusanagi Kouichi <slash@ac.auone-net.jp>
-> > ---
-> > common/rc         | 3 +--
-> > tests/generic/003 | 6 +++---
-> > tests/generic/120 | 2 +-
-> > tests/generic/192 | 1 +
-> > 4 files changed, 6 insertions(+), 6 deletions(-)
-> > 
-> > diff --git a/common/rc b/common/rc
-> > index 5cdd829b..e2f081c0 100644
-> > --- a/common/rc
-> > +++ b/common/rc
-> > @@ -440,7 +440,7 @@ _test_cycle_mount()
-> > 	return
-> >     fi
-> >     _test_unmount
-> > -    _test_mount
-> > +    _test_mount "$@"
-> > }
-> > 
-> > _scratch_mkfs_options()
-> 
-> It would be less confusing to have the same interface as
-> _scratch_cycle_mount().
-> 
-> > @@ -3392,7 +3392,6 @@ _exclude_scratch_mount_option()
-> > 
-> > _require_atime()
-> > {
-> > -	_exclude_scratch_mount_option "noatime"
-> > 	case $FSTYP in
-> > 	nfs|cifs)
-> > 		_notrun "atime related mount options have no effect on $FSTYP"
-> > diff --git a/tests/generic/003 b/tests/generic/003
-> > index 767d7059..a634b1a4 100755
-> > --- a/tests/generic/003
-> > +++ b/tests/generic/003
-> > @@ -66,7 +66,7 @@ _compare_stat_times() {
-> > }
-> > 
-> > _scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
-> > -_scratch_mount "-o relatime"
-> > +_scratch_mount "-o atime,nostrictatime,relatime"
-> > 
-> > if [ "$FSTYP" = "btrfs" ]; then
-> > 	TPATH=$SCRATCH_MNT/sub1
-> > @@ -94,7 +94,7 @@ _compare_stat_times NNN "$file1_stat_after_first_access" \
-> > 	"$file1_stat_after_second_access" "after accessing file1 second time"
-> > 
-> > # Mounting with nodiratime option
-> > -_scratch_cycle_mount "nodiratime"
-> > +_scratch_cycle_mount "atime,nodiratime"
-> > file1_stat_after_remount=`_stat $TPATH/dir1/file1`
-> > _compare_stat_times NNN "$file1_stat_after_second_access" \
-> > 	"$file1_stat_after_remount" "for file1 after remount"
-> > @@ -120,7 +120,7 @@ _compare_stat_times NNN "$dir2_stat_after_file_creation" \
-> > 	"$dir2_stat_after_file_access" "for dir2 after file access"
-> > 
-> > # Mounting with noatime option, creating a file and accessing it
-> > -_scratch_cycle_mount "noatime"
-> > +_scratch_cycle_mount "noatime,nostrictatime"
-> > echo "ccc" > $TPATH/dir2/file3
-> > file3_stat_before_first_access=`_stat $TPATH/dir2/file3`
-> > sleep 1
-> > diff --git a/tests/generic/120 b/tests/generic/120
-> > index 48ca9508..2f86d9fc 100755
-> > --- a/tests/generic/120
-> > +++ b/tests/generic/120
-> > @@ -44,7 +44,7 @@ _compare_access_times()
-> > 
-> > }
-> > 
-> > -if ! _try_scratch_mount "-o noatime" >$tmp.out 2>&1
-> > +if ! _try_scratch_mount "-o noatime,nostrictatime" >$tmp.out 2>&1
-> > then
-> >     cat $tmp.out
-> >     echo "!!! mount failed"
-> 
-> I'm not sure about these parts, but personally I think it's OK to just
-> skip atime related tests when you explicitly specify
-> MOUNT_OPTIONS=noatime. So, you state you want to test FS behavior with
-> noatime by specifying the MOUNT_OPTIONS, then it would be no use to
-> run those atime related tests anyway.
-> 
-> Or, we need to add _exclude_scratch_mount_option "strictatime" also?
-> 
+IMHO, if kernel doesn't supprt realtime, we should skip test.
+So add it. Also, when we use _scratch_mkfs on xfs, we will get
+the following error:
+mkfs failed with extra mkfs options added to "-bsize=4096" by test 590 **
 
-OK. Please drop this patch. Instead, let's skip generic/003 and generic/120
-if strictatime is set.
+This failure occurs because we have used "export XFS_MKFS_OPTIONS=
+${XFS_MKFS_OPTIONS:=-bsize=4096}" in common/config, we don't need to
+set it again in extra_options, so remove it.
 
-> > diff --git a/tests/generic/192 b/tests/generic/192
-> > index 50b3d6fd..37197979 100755
-> > --- a/tests/generic/192
-> > +++ b/tests/generic/192
-> > @@ -38,6 +38,7 @@ testfile=$TEST_DIR/testfile
-> > rm -f $testfile
-> > rm -f $seqres.full
-> > 
-> > +_test_cycle_mount -o atime
-> > echo test >$testfile
-> > time1=`_access_time $testfile | tee -a $seqres.full`
-> > 
-> > -- 
-> > 2.24.1
-> > 
-> 
+Signed-off-by: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+---
+ tests/generic/590 | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/tests/generic/590 b/tests/generic/590
+index 2670fe99..d2673748 100755
+--- a/tests/generic/590
++++ b/tests/generic/590
+@@ -55,7 +55,6 @@ if [[ $FSTYP = xfs ]]; then
+ 		USE_EXTERNAL=yes
+ 		SCRATCH_RTDEV="$loop"
+ 	fi
+-	extra_options="$extra_options -bsize=$bs"
+ 	extra_options="$extra_options -r extsize=$((bs * rextsize))"
+ 	extra_options="$extra_options -d agsize=$(((maxextlen + 1) * bs / 2)),rtinherit=1"
+ 	# disable reflink as reflink not supported with realtime devices
+@@ -64,7 +63,8 @@ if [[ $FSTYP = xfs ]]; then
+ 	fi
+ fi
+ _scratch_mkfs $extra_options >>$seqres.full 2>&1
+-_scratch_mount
++try_scratch_mount >>$seqres.full 2>&1 || \
++	_notrun "mount failed or kernel doesn't support realtime"
+ _require_fs_space "$SCRATCH_MNT" $((filesz / 1024))
+ 
+ # Allocate maxextlen + 1 blocks. As long as the allocator does something sane,
+-- 
+2.18.0
+
+
+
