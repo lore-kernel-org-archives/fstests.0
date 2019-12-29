@@ -2,147 +2,157 @@ Return-Path: <SRS0=MkaF=2T=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.7 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+X-Spam-Status: No, score=-5.7 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
 	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 930A1C2D0CE
-	for <linux-fstests@archiver.kernel.org>; Sun, 29 Dec 2019 16:05:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EE3D9C2D0DA
+	for <linux-fstests@archiver.kernel.org>; Sun, 29 Dec 2019 18:28:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 63D4C2071E
-	for <linux-fstests@archiver.kernel.org>; Sun, 29 Dec 2019 16:05:44 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C77F020748
+	for <linux-fstests@archiver.kernel.org>; Sun, 29 Dec 2019 18:28:50 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="kKDpYQ9v"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="RvMP2h5e"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726626AbfL2QFo (ORCPT
+        id S1726278AbfL2S2u (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 29 Dec 2019 11:05:44 -0500
-Received: from mail-pf1-f195.google.com ([209.85.210.195]:32846 "EHLO
-        mail-pf1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726455AbfL2QFo (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 29 Dec 2019 11:05:44 -0500
-Received: by mail-pf1-f195.google.com with SMTP id z16so17180725pfk.0
-        for <fstests@vger.kernel.org>; Sun, 29 Dec 2019 08:05:43 -0800 (PST)
+        Sun, 29 Dec 2019 13:28:50 -0500
+Received: from mail-pj1-f65.google.com ([209.85.216.65]:35088 "EHLO
+        mail-pj1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726490AbfL2S2u (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 29 Dec 2019 13:28:50 -0500
+Received: by mail-pj1-f65.google.com with SMTP id s7so7212867pjc.0
+        for <fstests@vger.kernel.org>; Sun, 29 Dec 2019 10:28:49 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=nTJtiiPEyL9SoOo4XX1YbLGZHGq/is7pIRdsc9IxP3c=;
-        b=kKDpYQ9vmpwYKv0JV3Ny07IteLFF8XlpmX72T4LBwJtjUKd/opudDh7SBPDuTzyKTt
-         D1V5CwkRFnTQeAJs6xOhCtzOKE1atfSfK2fsDn+YMaBDqxSWosiwJe06fMSLzrdIrwZi
-         G/4Hm1seP+ADttgC48fpEjkTuNPnFMrzBgCj1mgWqX7p9yueHbsDkwed/jjv+q1dEc+z
-         vtv3AsltX2Ow4JCtA9gYdPAcc0vzwpgmNewj4HV3pw2AzOjr8guPr3IhnP8Ni2kS2VT6
-         bF2UUM3MAwr4qMTLOQ6exIykNoxRH3eYYaJgWCGLT/AGOtlA7M7PGIGhRNhkoMe1XBvm
-         FJjw==
+        h=message-id:date:from:to:subject:mime-version:content-disposition;
+        bh=1+uICSkUryEkqfXX+1IzEy8JxcEuXl8R1wvBP75Tbjw=;
+        b=RvMP2h5e41aHZJVxOLB2CD/enHndVGW8RX86Fsfga5Pbjh9q2Z0N2/tgnprS3i33Vu
+         syQMn34uktDx57moWBXBm0A98tZLsRTkgy+HfB5uSi03+9eFhCWAlkBdEOnUBoRz9nhp
+         W6VteaLysKEVFXWQp9K32HDDlmzVaPi/CXGhf7BrVuXMpMQMHVHqnn/r+uKIZtXOiiy2
+         7XVmtv7v2csRc5SK6M2yVngtvLvGueBiSQY+00v1MUk2XsUbsNZdIOKymocmuHRgbUlg
+         VWJBWDHQ7VjMXjWWaEKV8N8hhrg36MAXce6VJys9YiDWyRVVc8F+wk8k3JSrshBCFOjy
+         MIYw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=nTJtiiPEyL9SoOo4XX1YbLGZHGq/is7pIRdsc9IxP3c=;
-        b=CL6dae5i3tCRjmeqUPlzyMKLXCii40XW7wLJugAF5ZenFQhCqDsAaFV1P8nJfpYWTu
-         f5YwdBPYXwSboCBFY5KX9qWcAG+6xznNu8vQb23aV0BcBZCZBrwuWS7Dp8XNTG0DyBQS
-         +2WQeDdi7srOEGp/fY5QJgKZweZT96Zivy08X2qIY+JTO7AK9wQTlbhjbCdxlbZZ1Nqd
-         6jPEYvlgnb3DY2l/0ak/nv8SQ9jvKKe4282okpboX8O08Wvhwiu4NP8BhuBaRVxzSe8Y
-         7ef0DoP70+M37d2ub4vSxWfYJaBjSZbT29UV/fteCSbANpmNZyY27Tm4GIHvR1BjRjI2
-         C88Q==
-X-Gm-Message-State: APjAAAWAFaYY6izarx3bTETd/mjJ+k84+Wobhga7BAGSULiJHR/bfrtY
-        zCpaK6SsN3NIzpg1Ry52uaM=
-X-Google-Smtp-Source: APXvYqyRLRhYzuynIku1XDtExhbCzntOIkf55V0ulvw906FiHD7J2kkWFAriLJG7MsBW9ZsGHQXzRw==
-X-Received: by 2002:a62:8f0d:: with SMTP id n13mr54678863pfd.38.1577635543312;
-        Sun, 29 Dec 2019 08:05:43 -0800 (PST)
+        h=x-gm-message-state:message-id:date:from:to:subject:mime-version
+         :content-disposition;
+        bh=1+uICSkUryEkqfXX+1IzEy8JxcEuXl8R1wvBP75Tbjw=;
+        b=ge+OKnYToDSZqhGhboHV/HbpawlgzlHEln4VXOZb4eX4WpUkJJyCIy7bWwkweEsrIR
+         cQJv5gaAJU1AGrs8s6ZPXfisFb3/xAe+KhFyVtGA0O64LvxRdGEWQEgOglCgQL5lC+Zb
+         GCxWDsQiUSIDD8WgFiBOf8NjdBWeUWKzY8Y0w0nB231cXe3SoyGJeAJr9YmVUVx8cc/N
+         EImCk+4X+Wr9MT2fIi7A44QxEus2N/VA5rvoyqGbP+4zBQbioQaEUo+bw50VVI6QpL8Z
+         qk+EB084W4G3GcLOXuMXEcSazH2uUWBT1OT815cJb2uQs2Ldaf6n7lWngo94V3OylMKP
+         fdkA==
+X-Gm-Message-State: APjAAAV1sri1Hh0Bw5Yp9UbVl2Tto5lLgDkztbD+DC7k1U158dIkN0WL
+        PY0aRiO2bY0jOMRhpYWSpCyzi2jA
+X-Google-Smtp-Source: APXvYqz4sZvhJURAO6aPToaY9SRro3w0+ehRAXbwCcDg8JJRfNnDWbbFHXT5I+zj0AWMShtLhtXPtw==
+X-Received: by 2002:a17:90a:e657:: with SMTP id ep23mr40346670pjb.105.1577644129313;
+        Sun, 29 Dec 2019 10:28:49 -0800 (PST)
 Received: from localhost ([178.128.102.47])
-        by smtp.gmail.com with ESMTPSA id e12sm20979640pjs.3.2019.12.29.08.05.41
+        by smtp.gmail.com with ESMTPSA id w187sm30894109pfw.62.2019.12.29.10.28.47
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 29 Dec 2019 08:05:42 -0800 (PST)
-Date:   Mon, 30 Dec 2019 00:05:37 +0800
+        Sun, 29 Dec 2019 10:28:48 -0800 (PST)
+Message-ID: <5e08f060.1c69fb81.4707a.c444@mx.google.com>
+Date:   Mon, 30 Dec 2019 02:28:43 +0800
 From:   Eryu Guan <guaneryu@gmail.com>
-To:     Yang Xu <xuyang2018.jy@cn.fujitsu.com>
-Cc:     Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org,
-        sandeen@sandeen.net
-Subject: Re: [PATCH] generic/386: check the correct field from df output
-Message-ID: <20191229160534.GA893866@desktop>
-References: <20191222212730.378358-1-tytso@mit.edu>
- <ae961477-f14a-60b3-9784-909470bc2bc8@cn.fujitsu.com>
+To:     fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: master branch updated to a0b0287cb747
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="LqJATDIYsNGG"
 Content-Disposition: inline
-In-Reply-To: <ae961477-f14a-60b3-9784-909470bc2bc8@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Dec 23, 2019 at 09:24:56AM +0800, Yang Xu wrote:
-> 
-> 
-> on 2019/12/23 5:27, Theodore Ts'o wrote:
-> > The generic/386 test was checking the "Available" field when it should
-> > have been checking the "1k-blocks" field, which represents the project
-> > quota's hard limit.  On xfs, an empty directory takes no space, so it
-> > doesn't matter.  But for ext4, an empty directory still takes 4k (or
-> > whatever the file system's block size happens to be):
-> > 
-> > Filesystem           1K-blocks       Used  Available  Use% Pathname
-> > /dev/vdc                512000          4     511996    0% /vdc/test
-> > 
-> > This causes generic/386 to falsely fail.  There was a confusing
-> > comment claiming that for a very long device name, the df output would
-> > have a line break, and for that reason, the test would extract the
-> > field using $(NF-2).  However, looking at xfsprogs's quota command, I
-> > see no evidence that there is any line breaking logic.  Since we now
-> > want to use the second field, even if there was some line breaking
-> > going on, using $2 should be a better choice.
-> > 
-> > This fix is needed to fix generic/386 from failing on ext4:
-> Hi Theodore
-> 
-> I have a same fix but I use $(NF-4) field of df command. Also I wrongly
-> think project quota uses a block size.
-> url:
-> https://patchwork.kernel.org/patch/11296657/
 
-Yes, $(NF-4) works, as Eric suggested as well. I applied Ted's patch
-(with $2->$(NF-4) fix), as the commit log is explaining well what's the
-problem and why taking "1k blocks" is correct. And thank you for the fix
-all the same!
+--LqJATDIYsNGG
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+
+Hi all,
+
+The master branch of the xfstests repository at:
+
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+have just been updated. This update mainly pulls in btrfs tests and fixes.
+Notably, fsstress is able to do btrfs subvolume tests, and you may hit new
+failures when testing btrfs. Also, a regression introduced in last update in
+generic/386 has been fixed, the test passes on ext4 now.
+
+Many thanks to Filipe Manana, who helped review most of the btrfs updates!
+
+And this is the last update in 2019, happy new year!
 
 Thanks,
 Eryu
 
-> 
-> Best Regards
-> Yang Xu
-> > 
-> >      hard limit 524283904 bytes, expected 524288000
-> > 
-> > Signed-off-by: Theodore Ts'o <tytso@mit.edu>
-> > ---
-> >   tests/generic/386 | 4 +---
-> >   1 file changed, 1 insertion(+), 3 deletions(-)
-> > 
-> > diff --git a/tests/generic/386 b/tests/generic/386
-> > index 0c44c80e..37e9b943 100755
-> > --- a/tests/generic/386
-> > +++ b/tests/generic/386
-> > @@ -62,8 +62,6 @@ _require_scratch
-> >   # both the "df" and the "report" output.  For "report", the line we're
-> >   # interested in contains our project name in the first field.  For "df"
-> >   # it contains our project directory in the last field.
-> > -# But if the device name is too long, the "df" output is broke into two
-> > -# lines, the fourth field is not correct, so take $(NF-2) of "df"
-> >   _filter_quota_rpt() {
-> >   	awk '
-> >   	BEGIN {
-> > @@ -89,7 +87,7 @@ _filter_quota_rpt() {
-> >   			bsize = byte_size($4);
-> >   		} else if ($NF ~ proj_dir) {
-> >   			# this is the "df" output
-> > -			bsize = byte_size($(NF-2));
-> > +			bsize = byte_size($2));
-> >   		} else {
-> >   			next;
-> >   		}
-> > 
-> 
-> 
+The new head of the master branch is commit:
+
+a0b0287cb747 btrfs/15[78]: Use proper helper to get both devid and physical offset for corruption
+
+New commits:
+
+Josef Bacik (4):
+      [fb769938dcc5] fsstress: add the ability to create/delete subvolumes
+      [fd0830929573] fsstress: add the ability to create snapshots
+      [f2e567ab172c] fsstress: allow operations to use either a directory or subvol
+      [805c6262d5f7] src/fssum: skip subvolumes when building a sum
+
+Qu Wenruo (3):
+      [ab76e971702d] common: Use more accurate kernel config for _require_fail_make_request
+      [1a27bf14ef8b] btrfs/14[23]: Use proper help to get both devid and physical offset for corruption.
+      [a0b0287cb747] btrfs/15[78]: Use proper helper to get both devid and physical offset for corruption
+
+Theodore Ts'o (1):
+      [ea726c4a55c9] generic/386: check the correct field from df output
+
+
+Code Diffstat:
+
+ common/rc              |   2 +-
+ configure.ac           |   1 +
+ include/builddefs.in   |   1 +
+ ltp/Makefile           |   4 +
+ ltp/fsstress.c         | 299 +++++++++++++++++++++++++++++++++++++++++--------
+ m4/package_libbtrfs.m4 |   5 +
+ src/fssum.c            |  11 ++
+ tests/btrfs/142        |  52 ++++++---
+ tests/btrfs/142.out    |   2 -
+ tests/btrfs/143        |  50 ++++++---
+ tests/btrfs/143.out    |   2 -
+ tests/btrfs/157        |  49 +++++---
+ tests/btrfs/157.out    |   4 -
+ tests/btrfs/158        |  44 +++++---
+ tests/btrfs/158.out    |   4 -
+ tests/generic/386      |   6 +-
+ 16 files changed, 414 insertions(+), 122 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
+
+--LqJATDIYsNGG
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAl4I7+EACgkQJlKqKVyP
+52MuIw//S7Vh7JVhwHrns3R6+/G8cH0U9xOHJVxi+IVWEl5z7Vt9fjb7nenrKQq8
+V7knOWc2xtIU8yoLbb0piNNNdqvjPr2twq51Jh4Jv2E8cflVkKWLmAcU1bMMfUgf
+9jWaMDJrF/S9lPd0HVTTZSzkCabMz0HXWcD0gF+kBiHqSEgT8T19Kqcw3lNt3ePN
+l6GKl8tj7t3Gcq2F4ProdJuAs0RnitB158opyd1gNaMstsc2pla1Ls128X9chDLh
+1u83RQ7fILbtUkqukAR29f2ub00RyNTw7LMN63W2h3ew5jwWdG48aEe8yVfq/RK2
++JEwuTSXwX1aTI44oPMp8iRo5icBrXVLxKNS636Ve93sR58bYFd/IlMdUzaNDwvA
+rwObZAr1qijYxQLgze1CBySKj/KtgW4/mwZ7kq7BoXa6SuGTKFbT5OQoKxVnn1q0
+NuMscf8RP1dKr82NqoheL811RnAG2tzyHjXYjuaMx/2u7oiy9xLkGNAaaVH4LLd+
+zlu9413DX1e0F4pjIUZ8MUdqsaXAAGZ0nGmEXzjii4hUe1GPga8K9dEGnoSlRoTD
+0+JfL85WVWzHKGeaG1Qglz2CnPBZ6AvWZ2jrNDAZYRh275j56+oK2VrKKRX37OG4
+s2xCII/PZ7qCb8w9zBaa60Z3TyNDOqksJADOeh0QgfnVJ2KGOdA=
+=WM7r
+-----END PGP SIGNATURE-----
+
+--LqJATDIYsNGG--
