@@ -1,154 +1,148 @@
-Return-Path: <SRS0=bQ1U=2S=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=MkaF=2T=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+X-Spam-Status: No, score=-6.7 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 63078C2D0C8
-	for <linux-fstests@archiver.kernel.org>; Sat, 28 Dec 2019 22:13:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 930A1C2D0CE
+	for <linux-fstests@archiver.kernel.org>; Sun, 29 Dec 2019 16:05:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 2BCD4207E0
-	for <linux-fstests@archiver.kernel.org>; Sat, 28 Dec 2019 22:13:26 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 63D4C2071E
+	for <linux-fstests@archiver.kernel.org>; Sun, 29 Dec 2019 16:05:44 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="MDL7QdyL"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="kKDpYQ9v"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726100AbfL1WNZ (ORCPT
+        id S1726626AbfL2QFo (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 28 Dec 2019 17:13:25 -0500
-Received: from mail-pl1-f193.google.com ([209.85.214.193]:37858 "EHLO
-        mail-pl1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726080AbfL1WNZ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 28 Dec 2019 17:13:25 -0500
-Received: by mail-pl1-f193.google.com with SMTP id c23so13168527plz.4
-        for <fstests@vger.kernel.org>; Sat, 28 Dec 2019 14:13:25 -0800 (PST)
+        Sun, 29 Dec 2019 11:05:44 -0500
+Received: from mail-pf1-f195.google.com ([209.85.210.195]:32846 "EHLO
+        mail-pf1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726455AbfL2QFo (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 29 Dec 2019 11:05:44 -0500
+Received: by mail-pf1-f195.google.com with SMTP id z16so17180725pfk.0
+        for <fstests@vger.kernel.org>; Sun, 29 Dec 2019 08:05:43 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references;
-        bh=oZ8h5OpCKXQC2vCJzChYsTM5Ww/i/WXow7LH9SIfHbc=;
-        b=MDL7QdyLx6tYv/cFx6K1ikEyEcg12By5spdMbLdq+o6sm2iidrvgwu5jHAT72HhbY8
-         tB6VazhhYl6QKdYAg7LldEQxa2lADFBfjM3skte9NElovnfO1CAFcJ2Lx2zi6dyb7pju
-         bVnIdI60p7VfcspBeM3j3oVr2v94LuwZLLgA0XCrM5xLnlb8gI++v/ZyetIgexf7jxqE
-         +E4hapr1VtGOxNBFHEnRQLyZlPQgnrpShjd2t4/mgqL8P9zjimE8jH+sHoCUe954iRRf
-         v0/ifdFRP6WpMMwFJ/LkI8G5Y4/VX2hhOD75+nR4N+kv+fjkNMmWGRkrvJKhMOMAfQcG
-         L4RQ==
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=nTJtiiPEyL9SoOo4XX1YbLGZHGq/is7pIRdsc9IxP3c=;
+        b=kKDpYQ9vmpwYKv0JV3Ny07IteLFF8XlpmX72T4LBwJtjUKd/opudDh7SBPDuTzyKTt
+         D1V5CwkRFnTQeAJs6xOhCtzOKE1atfSfK2fsDn+YMaBDqxSWosiwJe06fMSLzrdIrwZi
+         G/4Hm1seP+ADttgC48fpEjkTuNPnFMrzBgCj1mgWqX7p9yueHbsDkwed/jjv+q1dEc+z
+         vtv3AsltX2Ow4JCtA9gYdPAcc0vzwpgmNewj4HV3pw2AzOjr8guPr3IhnP8Ni2kS2VT6
+         bF2UUM3MAwr4qMTLOQ6exIykNoxRH3eYYaJgWCGLT/AGOtlA7M7PGIGhRNhkoMe1XBvm
+         FJjw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references;
-        bh=oZ8h5OpCKXQC2vCJzChYsTM5Ww/i/WXow7LH9SIfHbc=;
-        b=n3fp4EwpKM8+Y6UZx5ydadKZUa9U8Sbm5SW78BoKHzTigzfn0oZUKSZvq+w0UYL6fE
-         0JVA++OHAvIOryHKxWKmlr8J7wjyfS6Y+nIjaL6fhTHfJ0OJi2Ch76kYF8moBYRHl7yE
-         g3aIcy71untoUPkq2BHQIed630f+9Dhq4s6fj8v86JMV1/EPVwznNcYYp0Kzq98fPoPF
-         dNO4wjKRUZSQQEvzcgqabP0luKpNy5heNOeFb3eMPonJS6vY0XG44o0GVlu27yaN+MEF
-         oHKVBXTlyevm5V/dEHLZwOGCDemTu7RS/9Q0yhwBm10ouVQ4SAgCGPchS4r2Ies40939
-         DjEw==
-X-Gm-Message-State: APjAAAX0liOZgyIzpo0l3YUiF5BvxcLFijqznycXdzfx5DSTPZ/i9VW+
-        mrBT+9B0hpU0h8YSm5ORrSCgxt4C
-X-Google-Smtp-Source: APXvYqzvIXtC05TUEQd8BDQDZHC36WX/Mg0m3W9BTVWVPHtDgilltOfAjI4CYUW1OmFv+/o9fevMVg==
-X-Received: by 2002:a17:90a:9f84:: with SMTP id o4mr36021285pjp.88.1577571204421;
-        Sat, 28 Dec 2019 14:13:24 -0800 (PST)
-Received: from deepa-ubuntu.lan (c-98-234-52-230.hsd1.ca.comcast.net. [98.234.52.230])
-        by smtp.gmail.com with ESMTPSA id i127sm47041522pfe.54.2019.12.28.14.13.23
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=nTJtiiPEyL9SoOo4XX1YbLGZHGq/is7pIRdsc9IxP3c=;
+        b=CL6dae5i3tCRjmeqUPlzyMKLXCii40XW7wLJugAF5ZenFQhCqDsAaFV1P8nJfpYWTu
+         f5YwdBPYXwSboCBFY5KX9qWcAG+6xznNu8vQb23aV0BcBZCZBrwuWS7Dp8XNTG0DyBQS
+         +2WQeDdi7srOEGp/fY5QJgKZweZT96Zivy08X2qIY+JTO7AK9wQTlbhjbCdxlbZZ1Nqd
+         6jPEYvlgnb3DY2l/0ak/nv8SQ9jvKKe4282okpboX8O08Wvhwiu4NP8BhuBaRVxzSe8Y
+         7ef0DoP70+M37d2ub4vSxWfYJaBjSZbT29UV/fteCSbANpmNZyY27Tm4GIHvR1BjRjI2
+         C88Q==
+X-Gm-Message-State: APjAAAWAFaYY6izarx3bTETd/mjJ+k84+Wobhga7BAGSULiJHR/bfrtY
+        zCpaK6SsN3NIzpg1Ry52uaM=
+X-Google-Smtp-Source: APXvYqyRLRhYzuynIku1XDtExhbCzntOIkf55V0ulvw906FiHD7J2kkWFAriLJG7MsBW9ZsGHQXzRw==
+X-Received: by 2002:a62:8f0d:: with SMTP id n13mr54678863pfd.38.1577635543312;
+        Sun, 29 Dec 2019 08:05:43 -0800 (PST)
+Received: from localhost ([178.128.102.47])
+        by smtp.gmail.com with ESMTPSA id e12sm20979640pjs.3.2019.12.29.08.05.41
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 28 Dec 2019 14:13:23 -0800 (PST)
-From:   Deepa Dinamani <deepa.kernel@gmail.com>
-To:     fstests@vger.kernel.org
-Cc:     amir73il@gmail.com, arnd@arndb.de, gregkh@linuxfoundation.org,
-        guaneryu@gmail.com, sashal@kernel.org, y2038@lists.linaro.org
-Subject: [PATCH v2] generic/402: Make timestamp range check conditional
-Date:   Sat, 28 Dec 2019 14:13:17 -0800
-Message-Id: <20191228221317.16654-1-deepa.kernel@gmail.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <CABeXuvr74C0DS-K4_us4CdPPFxp=7RHmCHAZQQmJrh=PZfux-w@mail.gmail.com>
-References: <CABeXuvr74C0DS-K4_us4CdPPFxp=7RHmCHAZQQmJrh=PZfux-w@mail.gmail.com>
+        Sun, 29 Dec 2019 08:05:42 -0800 (PST)
+Date:   Mon, 30 Dec 2019 00:05:37 +0800
+From:   Eryu Guan <guaneryu@gmail.com>
+To:     Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+Cc:     Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org,
+        sandeen@sandeen.net
+Subject: Re: [PATCH] generic/386: check the correct field from df output
+Message-ID: <20191229160534.GA893866@desktop>
+References: <20191222212730.378358-1-tytso@mit.edu>
+ <ae961477-f14a-60b3-9784-909470bc2bc8@cn.fujitsu.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <ae961477-f14a-60b3-9784-909470bc2bc8@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Addition of fs-specific timestamp range checking was added
-in 188d20bcd1eb ("vfs: Add file timestamp range support").
+On Mon, Dec 23, 2019 at 09:24:56AM +0800, Yang Xu wrote:
+> 
+> 
+> on 2019/12/23 5:27, Theodore Ts'o wrote:
+> > The generic/386 test was checking the "Available" field when it should
+> > have been checking the "1k-blocks" field, which represents the project
+> > quota's hard limit.  On xfs, an empty directory takes no space, so it
+> > doesn't matter.  But for ext4, an empty directory still takes 4k (or
+> > whatever the file system's block size happens to be):
+> > 
+> > Filesystem           1K-blocks       Used  Available  Use% Pathname
+> > /dev/vdc                512000          4     511996    0% /vdc/test
+> > 
+> > This causes generic/386 to falsely fail.  There was a confusing
+> > comment claiming that for a very long device name, the df output would
+> > have a line break, and for that reason, the test would extract the
+> > field using $(NF-2).  However, looking at xfsprogs's quota command, I
+> > see no evidence that there is any line breaking logic.  Since we now
+> > want to use the second field, even if there was some line breaking
+> > going on, using $2 should be a better choice.
+> > 
+> > This fix is needed to fix generic/386 from failing on ext4:
+> Hi Theodore
+> 
+> I have a same fix but I use $(NF-4) field of df command. Also I wrongly
+> think project quota uses a block size.
+> url:
+> https://patchwork.kernel.org/patch/11296657/
 
-Add a check for whether the kernel supports the limits check
-before running the associated test.
+Yes, $(NF-4) works, as Eric suggested as well. I applied Ted's patch
+(with $2->$(NF-4) fix), as the commit log is explaining well what's the
+problem and why taking "1k blocks" is correct. And thank you for the fix
+all the same!
 
-ext4 has been chosen to test for the presence of kernel support
-for this feature. If there is a concern that ext4 could be built
-out of the kernel, I can include a _require_ext4() along the
-lines of _require_ext2().
+Thanks,
+Eryu
 
-Suggested-by: Amir Goldstein <amir73il@gmail.com>
-Signed-off-by: Deepa Dinamani <deepa.kernel@gmail.com>
----
-* Changes since v1:
-  used loopback device instead of mkfs scratch dev
-
- common/rc         | 26 ++++++++++++++++++++++++++
- tests/generic/402 |  3 +++
- 2 files changed, 29 insertions(+)
-
-diff --git a/common/rc b/common/rc
-index 816588d6..6248adf7 100644
---- a/common/rc
-+++ b/common/rc
-@@ -1981,6 +1981,32 @@ _run_aiodio()
-     return $status
- }
- 
-+_require_kernel_timestamp_range()
-+{
-+	LOOP_FILE=$SCRATCH_MNT/loop_file
-+	LOOP_MNT=$SCRATCH_MNT/loop_mnt
-+
-+	dd if=/dev/zero of=$LOOP_FILE bs=1M count=2 2>&1 | _filter_dd || _fail "loopback prep failed"
-+
-+	# Use ext4 with 128-byte inodes, which do not have room for extended timestamp
-+	FSTYP=ext4 MKFS_OPTIONS=-I128 \
-+	_mkfs_dev $LOOP_FILE >> $seqres.full 2>&1 || _fail "ext4 mkfs failed"
-+
-+	LOOP_DEV=$(_create_loop_device $LOOP_FILE)
-+	mkdir -p $LOOP_MNT >> $seqres.full 2>&1 || _fail "failed to create $LOOP_MNT"
-+	mount -t ext4 ${LOOP_DEV} ${LOOP_MNT} >> $seqres.full 2>&1 || _fail "ext4 mount failed"
-+	notrun=false
-+	_check_dmesg_for "ext4 filesystem being mounted at ${LOOP_MNT} supports timestamps until 2038" || \
-+		notrun=true
-+
-+	umount ${LOOP_MNT} >> $seqres.full 2>&1 ||_fail "failed to umount $LOOP_MNT"
-+	_destroy_loop_device ${LOOP_DEV} >> $seqres.full 2>&1
-+
-+	if $notrun; then
-+		_notrun "Kernel does not support timestamp limits"
-+	fi
-+}
-+
- _require_timestamp_range()
- {
- 	local device=${1:-$TEST_DEV}
-diff --git a/tests/generic/402 b/tests/generic/402
-index 0392c258..2be94c54 100755
---- a/tests/generic/402
-+++ b/tests/generic/402
-@@ -30,6 +30,7 @@ rm -f $seqres.full
- _supported_fs generic
- _supported_os Linux
- _require_scratch
-+_require_check_dmesg
- _require_xfs_io_command utimes
- 
- # Compare file timestamps obtained from stat
-@@ -79,6 +80,8 @@ run_test()
- 	done
- }
- 
-+_require_kernel_timestamp_range
-+
- _scratch_mkfs &>> $seqres.full 2>&1 || _fail "mkfs failed"
- _require_timestamp_range $SCRATCH_DEV
- 
--- 
-2.17.1
-
+> 
+> Best Regards
+> Yang Xu
+> > 
+> >      hard limit 524283904 bytes, expected 524288000
+> > 
+> > Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+> > ---
+> >   tests/generic/386 | 4 +---
+> >   1 file changed, 1 insertion(+), 3 deletions(-)
+> > 
+> > diff --git a/tests/generic/386 b/tests/generic/386
+> > index 0c44c80e..37e9b943 100755
+> > --- a/tests/generic/386
+> > +++ b/tests/generic/386
+> > @@ -62,8 +62,6 @@ _require_scratch
+> >   # both the "df" and the "report" output.  For "report", the line we're
+> >   # interested in contains our project name in the first field.  For "df"
+> >   # it contains our project directory in the last field.
+> > -# But if the device name is too long, the "df" output is broke into two
+> > -# lines, the fourth field is not correct, so take $(NF-2) of "df"
+> >   _filter_quota_rpt() {
+> >   	awk '
+> >   	BEGIN {
+> > @@ -89,7 +87,7 @@ _filter_quota_rpt() {
+> >   			bsize = byte_size($4);
+> >   		} else if ($NF ~ proj_dir) {
+> >   			# this is the "df" output
+> > -			bsize = byte_size($(NF-2));
+> > +			bsize = byte_size($2));
+> >   		} else {
+> >   			next;
+> >   		}
+> > 
+> 
+> 
