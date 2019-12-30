@@ -8,61 +8,61 @@ X-Spam-Status: No, score=-9.7 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9E93FC2D0CE
-	for <linux-fstests@archiver.kernel.org>; Mon, 30 Dec 2019 14:14:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A45A8C2D0D4
+	for <linux-fstests@archiver.kernel.org>; Mon, 30 Dec 2019 14:14:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 6449A20718
-	for <linux-fstests@archiver.kernel.org>; Mon, 30 Dec 2019 14:14:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6F55220718
+	for <linux-fstests@archiver.kernel.org>; Mon, 30 Dec 2019 14:14:38 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="FBAbtc9Y"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="BfAThjcN"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727506AbfL3OOh (ORCPT
+        id S1727513AbfL3OOi (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 30 Dec 2019 09:14:37 -0500
-Received: from mail-wr1-f68.google.com ([209.85.221.68]:41833 "EHLO
-        mail-wr1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727465AbfL3OOg (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 30 Dec 2019 09:14:36 -0500
-Received: by mail-wr1-f68.google.com with SMTP id c9so32765435wrw.8;
-        Mon, 30 Dec 2019 06:14:34 -0800 (PST)
+        Mon, 30 Dec 2019 09:14:38 -0500
+Received: from mail-wr1-f49.google.com ([209.85.221.49]:46265 "EHLO
+        mail-wr1-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727497AbfL3OOi (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 30 Dec 2019 09:14:38 -0500
+Received: by mail-wr1-f49.google.com with SMTP id z7so32705907wrl.13;
+        Mon, 30 Dec 2019 06:14:36 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references;
-        bh=ag1k92Wg4HpiBfmVHzU+oFGAkwW7DK60cK1JYtlVPas=;
-        b=FBAbtc9Yige6enB8wjZYefZVZ8orfyBktOJp6ccVdjyVqlctvYU3L+v3ornDW7d7an
-         M7gUDKx2/rA+JqtxVvLuxem3DhpOe0GV2YtbNBbbsqkLWpSbN/O7nGctGFNVLvay1ZlR
-         4fiETnjboDDg/38QquaSXnntV3orlZO1yPRwh7LiTPhjwQRfkvrrP/ZahBJNdIAfDHF2
-         HbsRSZ/MaBNH8eywnvVxyakQf5mVNjD9XCLT1sYCOJ5E0elmAVZ8oJqGxgnVlkUhbi9m
-         3CsaEC8hd/E9VRugwrXnxxNgTJVw6EmDaQ9UsDpRYbjI1RLgZ5ZYC+OqSABuiMTPhu6l
-         Ln6Q==
+        bh=X8dZLBuAucF5ya3OTGUV6A7fndOSrsVdVooUwjcD874=;
+        b=BfAThjcNfJVLaxpMz/2vRd9M1FU0wMrSpo/pDctcs6xEhW2RBWbKER/i/YL3Stl6dX
+         luuyuQoa3LGZ3GwYKwVYWRxmX0No1SNymcdnbOoYTRAy4XJFrUvEvqW20/BnfP6Uik+D
+         j14ip8LTJIF9v/6R41P1lD55gFPGuWRBM5T7ryp7FUQxLTfghBnC1bfVKAC/S6yRrGJC
+         fN0/aGFTKci7dMvY7yIOk91a4HoSsxZo7RJPjr56jVJ6jqZjWUROz9xL9XD7fMxNhIlg
+         eeomt6kSg/NKNfDySX0JLiMEgtLy7HJeY1DzCHPwkm3DwJi15q7TS8zhswKYyZj5ydPu
+         pOaw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references;
-        bh=ag1k92Wg4HpiBfmVHzU+oFGAkwW7DK60cK1JYtlVPas=;
-        b=CiCZeVtLuMmKe7qB0cNMX/n1l7s2tjeZg5I9Z/xZzBR9gKFgTZh9GbDjxt43ToIW68
-         EGRJVc9q2JDRH9PEOH2skdSK2Iy9+pPIgjshn0FLgEXs9NXU864DijZPADtMKUFjjIEj
-         cDbRjc/4pBk3eCb+xwwEQ7Tt9mBK/yF28J4xlZOSVTqI2e5eFSkQufvRwRfeuYYSWxn2
-         xgKG6Q2/TDKpGMZB/G3SKlYIX1cTaD0DS0pxiUaW1v6V8D9tJPNidm2xmbCyEG3cd1XD
-         9EmKDuDGOWG0TR6hQ8lfgKqaswpkcAr3juhVYCzHFa4mlBLf5Da7q3irbIKdMyTvZeEI
-         nQXg==
-X-Gm-Message-State: APjAAAV23kfqqrN2LxzM8sZeuPHr4uROhQaBdSe9/GQB5crxC7QALqWd
-        i8Lzmw3gbSSRcY0gCPlNAW8=
-X-Google-Smtp-Source: APXvYqya32rLjyF/58QijNOEPxnI+3evpSgpz6l0B8KvLyVke9iW4g3q90f/BBj4AxLjwZ82rtwyTA==
-X-Received: by 2002:adf:e78a:: with SMTP id n10mr70044689wrm.62.1577715274075;
-        Mon, 30 Dec 2019 06:14:34 -0800 (PST)
+        bh=X8dZLBuAucF5ya3OTGUV6A7fndOSrsVdVooUwjcD874=;
+        b=Q6ivFPYBDzZaM5xdLCOK6epgXjF/wpuBTubo7n4XHfsP6lwHGuU09AC2SSSxgGHG0S
+         MrTpxTj1SenpTBtW+jKFQK7kRHjSJICQI0wrhLqZZxmqvSMYKoD/obwmDnJFtEHNXMbD
+         5iMMhbPuk2m2UBpCruIAsdNEZqNAL4pt7pPrbLBNSm6RMErwdYa9hLJrOKKdyO0Jc6mg
+         vwG0vW74yiVnw+Jby2vLsVjfg/i3qD04+hJoxOZAZ5/oMDH6w+robmrfNNO/IcSxTUp+
+         yVlaMN9JQ4bPBM1qIO8HjBGpS8pMIH075R3k2LXjxflfaNk6DUONX91ffqz41h7IYICn
+         5TYw==
+X-Gm-Message-State: APjAAAUiygCyHC/uY5syiRVIVJCWcMx5m4oETCp+S8nFczGjuWiIFCKE
+        UuotN58Cj7tBwQpVVLiIlQXj5w4j
+X-Google-Smtp-Source: APXvYqwRyhYTPFEaxTORP1BBDvKxEKF6dP+s50Hlr13vP8rY3yMALbVETx/BMUYN7xP5P3/R4QNtHw==
+X-Received: by 2002:adf:f3d1:: with SMTP id g17mr68845231wrp.378.1577715275319;
+        Mon, 30 Dec 2019 06:14:35 -0800 (PST)
 Received: from amir-ThinkPad-T480.ctera.local (bzq-166-168-31-246.red.bezeqint.net. [31.168.166.246])
-        by smtp.gmail.com with ESMTPSA id t8sm44532651wrp.69.2019.12.30.06.14.32
+        by smtp.gmail.com with ESMTPSA id t8sm44532651wrp.69.2019.12.30.06.14.34
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 30 Dec 2019 06:14:33 -0800 (PST)
+        Mon, 30 Dec 2019 06:14:34 -0800 (PST)
 From:   Amir Goldstein <amir73il@gmail.com>
 To:     Eryu Guan <guaneryu@gmail.com>
 Cc:     Miklos Szeredi <miklos@szeredi.hu>,
         Jeff Layton <jlayton@poochiereds.net>,
         linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: [PATCH v2 3/5] overlay: test file handles with nested overlay over non-samefs lower
-Date:   Mon, 30 Dec 2019 16:14:21 +0200
-Message-Id: <20191230141423.31695-4-amir73il@gmail.com>
+Subject: [PATCH v2 4/5] overlay: test constant ino with nested overlay over samefs lower
+Date:   Mon, 30 Dec 2019 16:14:22 +0200
+Message-Id: <20191230141423.31695-5-amir73il@gmail.com>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20191230141423.31695-1-amir73il@gmail.com>
 References: <20191230141423.31695-1-amir73il@gmail.com>
@@ -71,44 +71,43 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This is a variant of overlay file handles test for an overlayfs that
-is nested over another lower overlayfs on non-samefs.
+Also test that d_ino of readdir entries and i_ino from /proc/locks are
+consistent with st_ino and that inode numbers persist after rename to
+new parent, drop caches and mount cycle.
 
 Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 ---
- tests/overlay/069     | 313 ++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/069.out |  50 +++++++
+ tests/overlay/070     | 222 ++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/070.out |   2 +
  tests/overlay/group   |   1 +
- 3 files changed, 364 insertions(+)
- create mode 100755 tests/overlay/069
- create mode 100644 tests/overlay/069.out
+ 3 files changed, 225 insertions(+)
+ create mode 100755 tests/overlay/070
+ create mode 100644 tests/overlay/070.out
 
-diff --git a/tests/overlay/069 b/tests/overlay/069
+diff --git a/tests/overlay/070 b/tests/overlay/070
 new file mode 100755
-index 00000000..efa95f38
+index 00000000..5782ecdd
 --- /dev/null
-+++ b/tests/overlay/069
-@@ -0,0 +1,313 @@
++++ b/tests/overlay/070
+@@ -0,0 +1,222 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
 +# Copyright (C) 2019 CTERA Networks. All Rights Reserved.
 +#
-+# FS QA Test No. 069
++# FSQA Test No. 070
 +#
-+# Test encode/decode of nested overlay file handles
++# This is a variant of overlay/017 to test constant st_ino numbers for
++# nested overlay setup, where all layers of both overlays are on the
++# same fs.
 +#
-+# This is a variant of overlay file handles test for an overlayfs that is
-+# nested over another lower overlayfs on non-samefs.
++# This simple test demonstrates a known issue with overlayfs:
++# - stat file A shows inode number X
++# - modify A to trigger copy up
++# - stat file A shows inode number Y != X
 +#
-+# - Check encode/write/decode/read content of lower/upper file handles
-+# - Check encode/decode/write/read content of lower/upper file handles
-+# - Check decode/read of unlinked lower/upper files and directories
-+# - Check decode/read of lower file handles after copy up, link and unlink
-+# - Check decode/read of lower file handles after rename of parent and self
-+#
-+# This test does not cover connectable file handles of non-directories,
-+# because name_to_handle_at() syscall does not support requesting connectable
-+# file handles.
++# Also test that d_ino of readdir entries and i_ino from /proc/locks are
++# consistent with st_ino and that inode numbers persist after rename to
++# new parent, drop caches and mount cycle.
 +#
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
@@ -132,77 +131,54 @@ index 00000000..efa95f38
 +. ./common/filter
 +
 +# real QA test starts here
-+
 +_supported_fs overlay
 +_supported_os Linux
-+_require_test
 +_require_scratch_nocheck
-+# _require_exportfs already requires open_by_handle, but let's not count on it
-+_require_test_program "open_by_handle"
++_require_test_program "af_unix"
++_require_test_program "t_dir_type"
 +# We need to require all features together, because nfs_export cannot
 +# be enabled when index is disabled
 +_require_scratch_overlay_features index nfs_export redirect_dir
 +
-+# Lower overlay lower layer is on test fs, upper is on scratch fs
-+lower=$OVL_BASE_TEST_MNT/$OVL_LOWER-$seq
++lower=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
 +upper=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
 +work=$OVL_BASE_SCRATCH_MNT/$OVL_WORK
-+
 +# Lower dir of nested overlay is the scratch overlay mount at SCRATCH_MNT
-+upper2=$OVL_BASE_TEST_DIR/$OVL_UPPER.2
-+work2=$OVL_BASE_TEST_DIR/$OVL_WORK.2
-+mnt2=$OVL_BASE_TEST_DIR/$OVL_MNT.2
++upper2=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER.2
++work2=$OVL_BASE_SCRATCH_MNT/$OVL_WORK.2
++mnt2=$OVL_BASE_SCRATCH_MNT/$OVL_MNT.2
 +
 +lowerdir=$lower/lowertestdir
 +upperdir=$upper/uppertestdir
 +lowertestdir=$mnt2/lowertestdir
 +uppertestdir=$mnt2/uppertestdir
-+NUMFILES=1
 +
-+# Create test dir and empty test files
-+create_test_files()
-+{
-+	local dir=$1
-+	local opt=$2
-+
-+	src/open_by_handle -cp $opt $dir $NUMFILES
-+}
-+
-+# Test encode/decode file handles on overlay mount
-+test_file_handles()
-+{
-+	local dir=$1
-+	shift
-+
-+	echo test_file_handles $dir $* | _filter_test_dir | _filter_ovl_dirs | \
-+				sed -e "s,$tmp\.,,g"
-+	$here/src/open_by_handle $* $dir $NUMFILES
-+}
-+
-+# Re-create lower/upper/work dirs
 +create_dirs()
 +{
 +	# Create the underlying overlay dirs
 +	_scratch_mkfs
 +
-+	# Re-create the nested overlay upper dirs
-+	rm -rf $lower $upper2 $work2 $mnt2
-+	mkdir $lower $upper2 $work2 $mnt2
++	# Create the nested overlay upper dirs
++	mkdir -p $upper2 $work2 $mnt2
 +}
 +
 +# Mount a nested overlay with $SCRATCH_MNT as lower layer
 +mount_dirs()
 +{
-+	# Mount the underlying non-samefs overlay
-+	_overlay_mount_dirs $lower $upper $work overlay1 $SCRATCH_MNT \
-+		-o "index=on,nfs_export=on,redirect_dir=on"
++	# Mount the underlying overlay with file handle support
++	_scratch_mount -o "index=on,nfs_export=on"
 +
 +	# Mount the nested overlay
++	# Enable redirect_dir for renaming a merge directory.
++	# Enabling xino in this test requires that base filesystem inode numbers will
++	# not use bit 63 in inode number of the test files, because bit 63 is used by
++	# overlayfs to indicate the layer. Let's just assume that this is true for all
++	# tested filesystems and if we are wrong, the test may fail.
 +	_overlay_mount_dirs $SCRATCH_MNT $upper2 $work2 overlay2 $mnt2 \
-+		-o "index=on,nfs_export=on,redirect_dir=on" 2>/dev/null ||
-+		_notrun "cannot mount nested overlay with nfs_export=on option"
-+	_fs_options overlay2 | grep -q "nfs_export=on" || \
-+		_notrun "cannot enable nfs_export feature on nested overlay"
++		-o "redirect_dir=on,index=on,xino=on" || \
++		_notrun "cannot mount nested overlay with xino=on option"
++	_fs_options overlay2 | grep -q "xino=on" || \
++		_notrun "cannot enable xino feature on nested overlay"
 +}
 +
 +# Unmount the nested overlay mount and check underlying overlay layers
@@ -211,262 +187,148 @@ index 00000000..efa95f38
 +	# unmount & check nested overlay
 +	$UMOUNT_PROG $mnt2
 +	_overlay_check_dirs $SCRATCH_MNT $upper2 $work2 \
-+		-o "index=on,nfs_export=on,redirect_dir=on"
++		-o "redirect_dir=on,index=on,xino=on"
 +
 +	# unmount & check underlying overlay
 +	$UMOUNT_PROG $SCRATCH_MNT
-+	_overlay_check_dirs $lower $upper $work \
-+		-o "index=on,nfs_export=on,redirect_dir=on"
++	_overlay_check_scratch_dirs $lower $upper $work \
++		-o "index=on,nfs_export=on"
 +}
 +
-+# Check non-stale file handles of lower/upper files and verify
-+# that handle decoded before copy up is encoded to upper after
-+# copy up. Verify reading data from file open by file handle
-+# and verify access_at() with dirfd open by file handle.
++FILES="dir file symlink link chrdev blkdev fifo socket"
++
++create_test_files()
++{
++	local dir=$1
++
++	# Create our test files.
++	mkdir -p $dir/dir
++	touch $dir/file
++	ln -s $dir/file $dir/symlink
++	touch $dir/link
++	ln $dir/link $dir/link2
++	mknod $dir/chrdev c 1 1
++	mknod $dir/blkdev b 1 1
++	mknod $dir/fifo p
++	$here/src/af_unix $dir/socket
++}
++
++# Record inode numbers in format <ino> <basename>
++record_inode_numbers()
++{
++	local dir=$1
++	local outfile=$2
++
++	echo "record_inode_numbers $outfile" >> $seqres.full
++
++	for n in $FILES; do
++		ls -id $dir/$n
++	done | \
++	while read ino file; do
++		f=`basename $file`
++		echo $ino $f | tee -a $seqres.full >> $outfile
++		# /proc/locks exposes i_ino - compare it to st_ino. flock -n
++		# doesn't follow symlink, blocks on fifo and fails on socket
++		[[ $f =~ fifo|socket|symlink ]] || \
++		flock -n $file cat /proc/locks | tee -a $seqres.full | grep -q ":$ino " || \
++			echo "lock for $f not found by ino $ino ($outfile) - see $seqres.full"
++	done
++}
++
++# Check inode numbers match recorder inode numbers
++check_inode_numbers()
++{
++	local dir=$1
++	local before=$2
++	local after=$3
++
++	record_inode_numbers $dir $after
++
++	# Test constant stat(2) st_ino -
++	# Compare before..after - expect silence
++	# We use diff -u so out.bad will tell us which stage failed
++	diff -u $before $after
++
++	# Test constant readdir(3)/getdents(2) d_ino -
++	# Expect to find file by inode number
++	cat $before | while read ino f; do
++		$here/src/t_dir_type $dir $ino | tee -a $seqres.full | grep -q $f || \
++			echo "$f not found by ino $ino (from $before) - see $seqres.full"
++	done
++}
++
++rm -f $seqres.full
++
 +create_dirs
-+create_test_files $upperdir
++
 +create_test_files $lowerdir
-+mount_dirs
-+# Check encode/decode of upper regular file handles
-+test_file_handles $uppertestdir
-+# Check encode/decode of upper dir file handle
-+test_file_handles $uppertestdir -p
-+# Check encode/write/decode/read/write of upper file handles
-+test_file_handles $uppertestdir -wrap
-+# Check encode/decode of lower regular file handles before copy up
-+test_file_handles $lowertestdir
-+# Check encode/decode of lower dir file handles before copy up
-+test_file_handles $lowertestdir -p
-+# Check encode/write/decode/read/write of lower file handles across copy up
-+test_file_handles $lowertestdir -wrap
-+unmount_dirs
-+
-+# Check copy up after encode/decode of lower/upper files
-+# (copy up of disconnected dentry to index dir)
-+create_dirs
 +create_test_files $upperdir
-+create_test_files $lowerdir
++
 +mount_dirs
-+# Check encode/decode/write/read of upper regular file handles
-+test_file_handles $uppertestdir -a
-+test_file_handles $uppertestdir -r
-+# Check encode/decode/write/read of lower regular file handles
-+test_file_handles $lowertestdir -a
-+test_file_handles $lowertestdir -r
++
++# Record inode numbers in the lower overlay
++record_inode_numbers $SCRATCH_MNT/lowertestdir $tmp.lower.lo
++record_inode_numbers $SCRATCH_MNT/uppertestdir $tmp.lower.up
++
++# Record inode numbers before copy up
++record_inode_numbers $lowertestdir $tmp.before.lo
++record_inode_numbers $uppertestdir $tmp.before.up
++
++# Copy up all files
++for f in $FILES; do
++	# chown -h modifies all those file types
++	chown -h 100 $lowertestdir/$f
++	chown -h 100 $uppertestdir/$f
++done
++
++# Compare inode numbers before/after copy up
++check_inode_numbers $lowertestdir $tmp.before.lo $tmp.after_copyup.lo
++check_inode_numbers $uppertestdir $tmp.before.up $tmp.after_copyup.up
++
++# Move all files to another dir
++mkdir $lowertestdir.2 $uppertestdir.2
++
++for f in $FILES; do
++	mv $lowertestdir/$f $lowertestdir.2/
++	mv $uppertestdir/$f $uppertestdir.2/
++done
++
++echo 3 > /proc/sys/vm/drop_caches
++
++# Compare inode numbers before/after rename and drop caches
++check_inode_numbers $lowertestdir.2 $tmp.after_copyup.lo $tmp.after_move.lo
++check_inode_numbers $uppertestdir.2 $tmp.after_copyup.up $tmp.after_move.up
++
++# Verify that the inode numbers survive a mount cycle
++unmount_dirs
++mount_dirs
++
++# Compare inode numbers before/after mount cycle
++check_inode_numbers $lowertestdir.2 $tmp.after_move.lo $tmp.after_cycle.lo
++check_inode_numbers $uppertestdir.2 $tmp.after_move.up $tmp.after_cycle.up
++
 +unmount_dirs
 +
-+# Check non-stale handles to unlinked but open lower/upper files
-+create_dirs
-+create_test_files $upperdir
-+create_test_files $upperdir.rw
-+create_test_files $lowerdir
-+create_test_files $lowerdir.rw
-+mount_dirs
-+test_file_handles $uppertestdir -dk
-+# Check encode/write/unlink/decode/read of upper regular file handles
-+test_file_handles $uppertestdir.rw -rwdk
-+test_file_handles $lowertestdir -dk
-+# Check encode/write/unlink/decode/read of lower file handles across copy up
-+test_file_handles $lowertestdir.rw -rwdk
-+unmount_dirs
-+
-+# Check stale handles of unlinked lower/upper files (nlink = 1,0)
-+create_dirs
-+create_test_files $upperdir
-+create_test_files $lowerdir
-+mount_dirs
-+# Check decode of upper file handles after unlink/rmdir (nlink == 0)
-+test_file_handles $uppertestdir -dp
-+# Check decode of lower file handles after unlink/rmdir (nlink == 0)
-+test_file_handles $lowertestdir -dp
-+unmount_dirs
-+
-+# Check non-stale file handles of linked lower/upper files (nlink = 1,2,1)
-+create_dirs
-+create_test_files $upperdir
-+create_test_files $lowerdir
-+mount_dirs
-+# Check encode/decode of upper file handles (nlink == 1)
-+test_file_handles $uppertestdir
-+# Check decode/read of upper file handles after link (nlink == 2)
-+test_file_handles $uppertestdir -wlr
-+# Check decode/read of upper file handles after link + unlink (nlink == 1)
-+test_file_handles $uppertestdir -ur
-+# Check encode/decode of lower file handles before copy up (nlink == 1)
-+test_file_handles $lowertestdir
-+# Check decode/read of lower file handles after copy up + link (nlink == 2)
-+test_file_handles $lowertestdir -wlr
-+# Check decode/read of lower file handles after copy up + link + unlink (nlink == 1)
-+test_file_handles $lowertestdir -ur
-+unmount_dirs
-+
-+# Check non-stale file handles of linked lower/upper hardlinks (nlink = 2,1)
-+create_dirs
-+create_test_files $upperdir
-+create_test_files $lowerdir
-+# Create lower/upper hardlinks
-+test_file_handles $lowerdir -l >/dev/null
-+test_file_handles $upperdir -l >/dev/null
-+mount_dirs
-+# Check encode/decode of upper hardlink file handles (nlink == 2)
-+test_file_handles $uppertestdir
-+# Check decode/read of upper hardlink file handles after unlink (nlink == 1)
-+test_file_handles $uppertestdir -wur
-+# Check encode/decode of lower hardlink file handles before copy up (nlink == 2)
-+test_file_handles $lowertestdir
-+# Check decode/read of lower hardlink file handles after copy up + unlink (nlink == 1)
-+test_file_handles $lowertestdir -wur
-+unmount_dirs
-+
-+# Check stale file handles of unlinked lower/upper hardlinks (nlink = 2,0)
-+create_dirs
-+create_test_files $upperdir
-+create_test_files $lowerdir
-+# Create lower/upper hardlinks
-+test_file_handles $lowerdir -l >/dev/null
-+test_file_handles $upperdir -l >/dev/null
-+mount_dirs
-+# Check encode/decode of upper hardlink file handles (nlink == 2)
-+test_file_handles $uppertestdir
-+# Check decode of upper hardlink file handles after 2*unlink (nlink == 0)
-+test_file_handles $uppertestdir -d
-+# Check encode/decode of lower hardlink file handles before copy up (nlink == 2)
-+test_file_handles $lowertestdir
-+# Check decode of lower hardlink file handles after copy up + 2*unlink (nlink == 0)
-+test_file_handles $lowertestdir -d
-+unmount_dirs
-+
-+# Check non-stale file handles of lower/upper renamed files
-+create_dirs
-+create_test_files $upperdir
-+create_test_files $lowerdir
-+mount_dirs
-+# Check decode/read of upper file handles after rename in same upper parent
-+test_file_handles $uppertestdir -wmr
-+# Check decode/read of lower file handles after copy up + rename in same merge parent
-+test_file_handles $lowertestdir -wmr
-+unmount_dirs
-+
-+# Check non-stale file handles of lower/upper moved files
-+create_dirs
-+create_test_files $upperdir -w
-+create_test_files $lowerdir -w
-+mkdir -p $lowerdir.lo $lowerdir.up $upperdir.lo $upperdir.up
-+mount_dirs
-+# Check encode/decode/read of lower/upper file handles after move to new upper testdir
-+test_file_handles $uppertestdir -o $tmp.upper_file_handles
-+test_file_handles $lowertestdir -o $tmp.lower_file_handles
-+mv $uppertestdir/* $uppertestdir.up/
-+mv $lowertestdir/* $uppertestdir.lo/
-+# Check open and read from stored file handles
-+test_file_handles $mnt2 -r -i $tmp.upper_file_handles
-+test_file_handles $mnt2 -r -i $tmp.lower_file_handles
-+# Check encode/decode/read of lower/upper file handles after move to new merge testdir
-+test_file_handles $uppertestdir.up -o $tmp.upper_file_handles
-+test_file_handles $uppertestdir.lo -o $tmp.lower_file_handles
-+mv $uppertestdir.up/* $lowertestdir.up/
-+mv $uppertestdir.lo/* $lowertestdir.lo/
-+# Check open and read from stored file handles
-+test_file_handles $mnt2 -r -i $tmp.upper_file_handles
-+test_file_handles $mnt2 -r -i $tmp.lower_file_handles
-+unmount_dirs
-+
-+# Check non-stale file handles of lower/upper renamed dirs
-+create_dirs
-+create_test_files $upperdir -w
-+create_test_files $lowerdir -w
-+create_test_files $upperdir/subdir -w
-+create_test_files $lowerdir/subdir -w
-+mount_dirs
-+# Check encode/decode/read of lower/upper file handles after rename of testdir
-+test_file_handles $uppertestdir -p -o $tmp.upper_file_handles
-+test_file_handles $lowertestdir -p -o $tmp.lower_file_handles
-+# Check encode/decode/read of lower/upper file handles after rename of testdir's parent
-+test_file_handles $uppertestdir/subdir -p -o $tmp.upper_subdir_file_handles
-+test_file_handles $lowertestdir/subdir -p -o $tmp.lower_subdir_file_handles
-+# Rename pure upper dir
-+mv $uppertestdir $uppertestdir.new/
-+# Copy up lower dir, index and rename
-+mv $lowertestdir $lowertestdir.new/
-+# Check open, read and readdir from stored file handles
-+# (testdir argument is the mount point and NOT the dir
-+#  we are trying to open by stored file handle)
-+test_file_handles $mnt2 -rp -i $tmp.upper_file_handles
-+test_file_handles $mnt2 -rp -i $tmp.lower_file_handles
-+test_file_handles $mnt2 -rp -i $tmp.upper_subdir_file_handles
-+test_file_handles $mnt2 -rp -i $tmp.lower_subdir_file_handles
-+# Retry decoding lower subdir file handle when indexed testdir is in dcache
-+# (providing renamed testdir argument pins the indexed testdir to dcache)
-+test_file_handles $lowertestdir.new -rp -i $tmp.lower_subdir_file_handles
-+unmount_dirs
-+
++echo "Silence is golden"
 +status=0
 +exit
-diff --git a/tests/overlay/069.out b/tests/overlay/069.out
+diff --git a/tests/overlay/070.out b/tests/overlay/070.out
 new file mode 100644
-index 00000000..583588c0
+index 00000000..8940c5da
 --- /dev/null
-+++ b/tests/overlay/069.out
-@@ -0,0 +1,50 @@
-+QA output created by 069
-+test_file_handles TEST_DIR.2/uppertestdir
-+test_file_handles TEST_DIR.2/uppertestdir -p
-+test_file_handles TEST_DIR.2/uppertestdir -wrap
-+test_file_handles TEST_DIR.2/lowertestdir
-+test_file_handles TEST_DIR.2/lowertestdir -p
-+test_file_handles TEST_DIR.2/lowertestdir -wrap
-+test_file_handles TEST_DIR.2/uppertestdir -a
-+test_file_handles TEST_DIR.2/uppertestdir -r
-+test_file_handles TEST_DIR.2/lowertestdir -a
-+test_file_handles TEST_DIR.2/lowertestdir -r
-+test_file_handles TEST_DIR.2/uppertestdir -dk
-+test_file_handles TEST_DIR.2/uppertestdir.rw -rwdk
-+test_file_handles TEST_DIR.2/lowertestdir -dk
-+test_file_handles TEST_DIR.2/lowertestdir.rw -rwdk
-+test_file_handles TEST_DIR.2/uppertestdir -dp
-+test_file_handles TEST_DIR.2/lowertestdir -dp
-+test_file_handles TEST_DIR.2/uppertestdir
-+test_file_handles TEST_DIR.2/uppertestdir -wlr
-+test_file_handles TEST_DIR.2/uppertestdir -ur
-+test_file_handles TEST_DIR.2/lowertestdir
-+test_file_handles TEST_DIR.2/lowertestdir -wlr
-+test_file_handles TEST_DIR.2/lowertestdir -ur
-+test_file_handles TEST_DIR.2/uppertestdir
-+test_file_handles TEST_DIR.2/uppertestdir -wur
-+test_file_handles TEST_DIR.2/lowertestdir
-+test_file_handles TEST_DIR.2/lowertestdir -wur
-+test_file_handles TEST_DIR.2/uppertestdir
-+test_file_handles TEST_DIR.2/uppertestdir -d
-+test_file_handles TEST_DIR.2/lowertestdir
-+test_file_handles TEST_DIR.2/lowertestdir -d
-+test_file_handles TEST_DIR.2/uppertestdir -wmr
-+test_file_handles TEST_DIR.2/lowertestdir -wmr
-+test_file_handles TEST_DIR.2/uppertestdir -o upper_file_handles
-+test_file_handles TEST_DIR.2/lowertestdir -o lower_file_handles
-+test_file_handles TEST_DIR.2 -r -i upper_file_handles
-+test_file_handles TEST_DIR.2 -r -i lower_file_handles
-+test_file_handles TEST_DIR.2/uppertestdir.up -o upper_file_handles
-+test_file_handles TEST_DIR.2/uppertestdir.lo -o lower_file_handles
-+test_file_handles TEST_DIR.2 -r -i upper_file_handles
-+test_file_handles TEST_DIR.2 -r -i lower_file_handles
-+test_file_handles TEST_DIR.2/uppertestdir -p -o upper_file_handles
-+test_file_handles TEST_DIR.2/lowertestdir -p -o lower_file_handles
-+test_file_handles TEST_DIR.2/uppertestdir/subdir -p -o upper_subdir_file_handles
-+test_file_handles TEST_DIR.2/lowertestdir/subdir -p -o lower_subdir_file_handles
-+test_file_handles TEST_DIR.2 -rp -i upper_file_handles
-+test_file_handles TEST_DIR.2 -rp -i lower_file_handles
-+test_file_handles TEST_DIR.2 -rp -i upper_subdir_file_handles
-+test_file_handles TEST_DIR.2 -rp -i lower_subdir_file_handles
-+test_file_handles TEST_DIR.2/lowertestdir.new -rp -i lower_subdir_file_handles
++++ b/tests/overlay/070.out
+@@ -0,0 +1,2 @@
++QA output created by 070
++Silence is golden
 diff --git a/tests/overlay/group b/tests/overlay/group
-index be628dd1..9290ce99 100644
+index 9290ce99..45f6885b 100644
 --- a/tests/overlay/group
 +++ b/tests/overlay/group
-@@ -71,3 +71,4 @@
- 066 auto quick copyup
+@@ -72,3 +72,4 @@
  067 auto quick copyup nonsamefs
  068 auto quick copyup hardlink exportfs nested
-+069 auto quick copyup hardlink exportfs nested nonsamefs
+ 069 auto quick copyup hardlink exportfs nested nonsamefs
++070 auto quick copyup redirect nested
 -- 
 2.17.1
 
