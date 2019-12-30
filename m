@@ -8,61 +8,61 @@ X-Spam-Status: No, score=-9.7 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0000AC2D0C2
-	for <linux-fstests@archiver.kernel.org>; Mon, 30 Dec 2019 14:14:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9E93FC2D0CE
+	for <linux-fstests@archiver.kernel.org>; Mon, 30 Dec 2019 14:14:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id B8B5720718
-	for <linux-fstests@archiver.kernel.org>; Mon, 30 Dec 2019 14:14:36 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6449A20718
+	for <linux-fstests@archiver.kernel.org>; Mon, 30 Dec 2019 14:14:37 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="IHmozsdB"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="FBAbtc9Y"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727499AbfL3OOg (ORCPT
+        id S1727506AbfL3OOh (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 30 Dec 2019 09:14:36 -0500
-Received: from mail-wm1-f65.google.com ([209.85.128.65]:36638 "EHLO
-        mail-wm1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727445AbfL3OOg (ORCPT
+        Mon, 30 Dec 2019 09:14:37 -0500
+Received: from mail-wr1-f68.google.com ([209.85.221.68]:41833 "EHLO
+        mail-wr1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727465AbfL3OOg (ORCPT
         <rfc822;fstests@vger.kernel.org>); Mon, 30 Dec 2019 09:14:36 -0500
-Received: by mail-wm1-f65.google.com with SMTP id p17so14263843wma.1;
-        Mon, 30 Dec 2019 06:14:33 -0800 (PST)
+Received: by mail-wr1-f68.google.com with SMTP id c9so32765435wrw.8;
+        Mon, 30 Dec 2019 06:14:34 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references;
-        bh=GEb0yxKoNJZGLX/qXtAVpxhdRJoeLzeoz2pO/c3+lto=;
-        b=IHmozsdBvmY6t9AuxlUX9Rvfr544ZDOrPRoZ9nFCIertYq0xZMr6luS6SpC11gAlUY
-         CnFHXFNYqZmd9mskQUkM+fpawiteuIyQ0IIoBKvQvoe4rgMAjykLVMalPdbeYhotsefP
-         CQR+Bp8lUUZdJHZSskEFmA/q0e/QONMW3rlMiisDL7/fT8H/2v+z6N83xvcuzncxE//N
-         lj64P77rRKPnZp8Wx99ccCX6x2QzDTWMWkO6VXQfoSoKOHW8Gw6zCG5xmn+rVGu8E3t7
-         18BHyuFRvgAX0iT0QHHUH+B/KBgNFdbmun94XHV4Hh54PKQN6GrDHluDX+9pLFIRnFUZ
-         4NyQ==
+        bh=ag1k92Wg4HpiBfmVHzU+oFGAkwW7DK60cK1JYtlVPas=;
+        b=FBAbtc9Yige6enB8wjZYefZVZ8orfyBktOJp6ccVdjyVqlctvYU3L+v3ornDW7d7an
+         M7gUDKx2/rA+JqtxVvLuxem3DhpOe0GV2YtbNBbbsqkLWpSbN/O7nGctGFNVLvay1ZlR
+         4fiETnjboDDg/38QquaSXnntV3orlZO1yPRwh7LiTPhjwQRfkvrrP/ZahBJNdIAfDHF2
+         HbsRSZ/MaBNH8eywnvVxyakQf5mVNjD9XCLT1sYCOJ5E0elmAVZ8oJqGxgnVlkUhbi9m
+         3CsaEC8hd/E9VRugwrXnxxNgTJVw6EmDaQ9UsDpRYbjI1RLgZ5ZYC+OqSABuiMTPhu6l
+         Ln6Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references;
-        bh=GEb0yxKoNJZGLX/qXtAVpxhdRJoeLzeoz2pO/c3+lto=;
-        b=G66JUi2I16IvaDXajJ1Y5l0rkdUHlwAaLglpMolDEC6tqSt14Io44RFtvSVpAe+jmT
-         2pRimsHiM/uIwSMTmSS2LWTePaiGjy3hsN4pixpWEyGiHpsVV8UA6X6GNIcZybNselBT
-         F4L+GOD2ykbXDZelPyx1qlikB7wRgFM1ueRXJop8EDOJshYL0icue9dzBJu76jqmyZsU
-         NKWT+q2ZHLiaeFnAhS8fyXsLYLFQifB3/KU1RETHy6AkFbYQCeXo2u3+2/zNHmenGowm
-         YrbWzGFRnyMPs0kxZOPS0xexCDsUWBzTA2QOJmZBQs+FidOh5Mz1osJkJO+kduUwMC7H
-         XqbQ==
-X-Gm-Message-State: APjAAAUg38OMvomFYbuzGCl0r773eVoCJ8MqMkPAtF/lE9549HoXCK/2
-        TC9Ng0lu0o20FbEeZty+AF4=
-X-Google-Smtp-Source: APXvYqz+c76rQrZmf6aTIkrqAJ3b4JnKipbmYBp3ZIETc8FwOzEX2kEbZ56GVFWvxY8EIMQ4XF4+ww==
-X-Received: by 2002:a1c:7715:: with SMTP id t21mr34325448wmi.149.1577715272790;
-        Mon, 30 Dec 2019 06:14:32 -0800 (PST)
+        bh=ag1k92Wg4HpiBfmVHzU+oFGAkwW7DK60cK1JYtlVPas=;
+        b=CiCZeVtLuMmKe7qB0cNMX/n1l7s2tjeZg5I9Z/xZzBR9gKFgTZh9GbDjxt43ToIW68
+         EGRJVc9q2JDRH9PEOH2skdSK2Iy9+pPIgjshn0FLgEXs9NXU864DijZPADtMKUFjjIEj
+         cDbRjc/4pBk3eCb+xwwEQ7Tt9mBK/yF28J4xlZOSVTqI2e5eFSkQufvRwRfeuYYSWxn2
+         xgKG6Q2/TDKpGMZB/G3SKlYIX1cTaD0DS0pxiUaW1v6V8D9tJPNidm2xmbCyEG3cd1XD
+         9EmKDuDGOWG0TR6hQ8lfgKqaswpkcAr3juhVYCzHFa4mlBLf5Da7q3irbIKdMyTvZeEI
+         nQXg==
+X-Gm-Message-State: APjAAAV23kfqqrN2LxzM8sZeuPHr4uROhQaBdSe9/GQB5crxC7QALqWd
+        i8Lzmw3gbSSRcY0gCPlNAW8=
+X-Google-Smtp-Source: APXvYqya32rLjyF/58QijNOEPxnI+3evpSgpz6l0B8KvLyVke9iW4g3q90f/BBj4AxLjwZ82rtwyTA==
+X-Received: by 2002:adf:e78a:: with SMTP id n10mr70044689wrm.62.1577715274075;
+        Mon, 30 Dec 2019 06:14:34 -0800 (PST)
 Received: from amir-ThinkPad-T480.ctera.local (bzq-166-168-31-246.red.bezeqint.net. [31.168.166.246])
-        by smtp.gmail.com with ESMTPSA id t8sm44532651wrp.69.2019.12.30.06.14.31
+        by smtp.gmail.com with ESMTPSA id t8sm44532651wrp.69.2019.12.30.06.14.32
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 30 Dec 2019 06:14:32 -0800 (PST)
+        Mon, 30 Dec 2019 06:14:33 -0800 (PST)
 From:   Amir Goldstein <amir73il@gmail.com>
 To:     Eryu Guan <guaneryu@gmail.com>
 Cc:     Miklos Szeredi <miklos@szeredi.hu>,
         Jeff Layton <jlayton@poochiereds.net>,
         linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: [PATCH v2 2/5] overlay: test file handles with nested overlay over samefs lower
-Date:   Mon, 30 Dec 2019 16:14:20 +0200
-Message-Id: <20191230141423.31695-3-amir73il@gmail.com>
+Subject: [PATCH v2 3/5] overlay: test file handles with nested overlay over non-samefs lower
+Date:   Mon, 30 Dec 2019 16:14:21 +0200
+Message-Id: <20191230141423.31695-4-amir73il@gmail.com>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20191230141423.31695-1-amir73il@gmail.com>
 References: <20191230141423.31695-1-amir73il@gmail.com>
@@ -72,33 +72,33 @@ List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
 This is a variant of overlay file handles test for an overlayfs that
-is nested over another lower overlayfs on the same fs.
+is nested over another lower overlayfs on non-samefs.
 
 Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 ---
- tests/overlay/068     | 304 ++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/068.out |  50 +++++++
+ tests/overlay/069     | 313 ++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/069.out |  50 +++++++
  tests/overlay/group   |   1 +
- 3 files changed, 355 insertions(+)
- create mode 100755 tests/overlay/068
- create mode 100644 tests/overlay/068.out
+ 3 files changed, 364 insertions(+)
+ create mode 100755 tests/overlay/069
+ create mode 100644 tests/overlay/069.out
 
-diff --git a/tests/overlay/068 b/tests/overlay/068
+diff --git a/tests/overlay/069 b/tests/overlay/069
 new file mode 100755
-index 00000000..2b533f22
+index 00000000..efa95f38
 --- /dev/null
-+++ b/tests/overlay/068
-@@ -0,0 +1,304 @@
++++ b/tests/overlay/069
+@@ -0,0 +1,313 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
 +# Copyright (C) 2019 CTERA Networks. All Rights Reserved.
 +#
-+# FS QA Test No. 068
++# FS QA Test No. 069
 +#
 +# Test encode/decode of nested overlay file handles
 +#
 +# This is a variant of overlay file handles test for an overlayfs that is
-+# nested over another lower overlayfs on the same fs.
++# nested over another lower overlayfs on non-samefs.
 +#
 +# - Check encode/write/decode/read content of lower/upper file handles
 +# - Check encode/decode/write/read content of lower/upper file handles
@@ -135,20 +135,26 @@ index 00000000..2b533f22
 +
 +_supported_fs overlay
 +_supported_os Linux
-+_require_scratch
++_require_test
++_require_scratch_nocheck
 +# _require_exportfs already requires open_by_handle, but let's not count on it
 +_require_test_program "open_by_handle"
 +# We need to require all features together, because nfs_export cannot
 +# be enabled when index is disabled
 +_require_scratch_overlay_features index nfs_export redirect_dir
 +
-+# Lower dir of nested overlay is the scratch overlay mount at SCRATCH_MNT
-+upper2=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER.2
-+work2=$OVL_BASE_SCRATCH_MNT/$OVL_WORK.2
-+mnt2=$OVL_BASE_SCRATCH_MNT/$OVL_MNT.2
++# Lower overlay lower layer is on test fs, upper is on scratch fs
++lower=$OVL_BASE_TEST_MNT/$OVL_LOWER-$seq
++upper=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
++work=$OVL_BASE_SCRATCH_MNT/$OVL_WORK
 +
-+lowerdir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER/lowertestdir
-+upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER/uppertestdir
++# Lower dir of nested overlay is the scratch overlay mount at SCRATCH_MNT
++upper2=$OVL_BASE_TEST_DIR/$OVL_UPPER.2
++work2=$OVL_BASE_TEST_DIR/$OVL_WORK.2
++mnt2=$OVL_BASE_TEST_DIR/$OVL_MNT.2
++
++lowerdir=$lower/lowertestdir
++upperdir=$upper/uppertestdir
 +lowertestdir=$mnt2/lowertestdir
 +uppertestdir=$mnt2/uppertestdir
 +NUMFILES=1
@@ -168,7 +174,7 @@ index 00000000..2b533f22
 +	local dir=$1
 +	shift
 +
-+	echo test_file_handles $dir $* | _filter_scratch | _filter_ovl_dirs | \
++	echo test_file_handles $dir $* | _filter_test_dir | _filter_ovl_dirs | \
 +				sed -e "s,$tmp\.,,g"
 +	$here/src/open_by_handle $* $dir $NUMFILES
 +}
@@ -179,15 +185,17 @@ index 00000000..2b533f22
 +	# Create the underlying overlay dirs
 +	_scratch_mkfs
 +
-+	# Create the nested overlay upper dirs
-+	mkdir -p $upper2 $work2 $mnt2
++	# Re-create the nested overlay upper dirs
++	rm -rf $lower $upper2 $work2 $mnt2
++	mkdir $lower $upper2 $work2 $mnt2
 +}
 +
 +# Mount a nested overlay with $SCRATCH_MNT as lower layer
 +mount_dirs()
 +{
-+	# Mount the underlying overlay
-+	_scratch_mount -o "index=on,nfs_export=on,redirect_dir=on"
++	# Mount the underlying non-samefs overlay
++	_overlay_mount_dirs $lower $upper $work overlay1 $SCRATCH_MNT \
++		-o "index=on,nfs_export=on,redirect_dir=on"
 +
 +	# Mount the nested overlay
 +	_overlay_mount_dirs $SCRATCH_MNT $upper2 $work2 overlay2 $mnt2 \
@@ -206,8 +214,9 @@ index 00000000..2b533f22
 +		-o "index=on,nfs_export=on,redirect_dir=on"
 +
 +	# unmount & check underlying overlay
-+	_scratch_unmount
-+	_check_scratch_fs
++	$UMOUNT_PROG $SCRATCH_MNT
++	_overlay_check_dirs $lower $upper $work \
++		-o "index=on,nfs_export=on,redirect_dir=on"
 +}
 +
 +# Check non-stale file handles of lower/upper files and verify
@@ -393,71 +402,71 @@ index 00000000..2b533f22
 +
 +status=0
 +exit
-diff --git a/tests/overlay/068.out b/tests/overlay/068.out
+diff --git a/tests/overlay/069.out b/tests/overlay/069.out
 new file mode 100644
-index 00000000..9fd75c7f
+index 00000000..583588c0
 --- /dev/null
-+++ b/tests/overlay/068.out
++++ b/tests/overlay/069.out
 @@ -0,0 +1,50 @@
-+QA output created by 068
-+test_file_handles SCRATCH_MNT.2/uppertestdir
-+test_file_handles SCRATCH_MNT.2/uppertestdir -p
-+test_file_handles SCRATCH_MNT.2/uppertestdir -wrap
-+test_file_handles SCRATCH_MNT.2/lowertestdir
-+test_file_handles SCRATCH_MNT.2/lowertestdir -p
-+test_file_handles SCRATCH_MNT.2/lowertestdir -wrap
-+test_file_handles SCRATCH_MNT.2/uppertestdir -a
-+test_file_handles SCRATCH_MNT.2/uppertestdir -r
-+test_file_handles SCRATCH_MNT.2/lowertestdir -a
-+test_file_handles SCRATCH_MNT.2/lowertestdir -r
-+test_file_handles SCRATCH_MNT.2/uppertestdir -dk
-+test_file_handles SCRATCH_MNT.2/uppertestdir.rw -rwdk
-+test_file_handles SCRATCH_MNT.2/lowertestdir -dk
-+test_file_handles SCRATCH_MNT.2/lowertestdir.rw -rwdk
-+test_file_handles SCRATCH_MNT.2/uppertestdir -dp
-+test_file_handles SCRATCH_MNT.2/lowertestdir -dp
-+test_file_handles SCRATCH_MNT.2/uppertestdir
-+test_file_handles SCRATCH_MNT.2/uppertestdir -wlr
-+test_file_handles SCRATCH_MNT.2/uppertestdir -ur
-+test_file_handles SCRATCH_MNT.2/lowertestdir
-+test_file_handles SCRATCH_MNT.2/lowertestdir -wlr
-+test_file_handles SCRATCH_MNT.2/lowertestdir -ur
-+test_file_handles SCRATCH_MNT.2/uppertestdir
-+test_file_handles SCRATCH_MNT.2/uppertestdir -wur
-+test_file_handles SCRATCH_MNT.2/lowertestdir
-+test_file_handles SCRATCH_MNT.2/lowertestdir -wur
-+test_file_handles SCRATCH_MNT.2/uppertestdir
-+test_file_handles SCRATCH_MNT.2/uppertestdir -d
-+test_file_handles SCRATCH_MNT.2/lowertestdir
-+test_file_handles SCRATCH_MNT.2/lowertestdir -d
-+test_file_handles SCRATCH_MNT.2/uppertestdir -wmr
-+test_file_handles SCRATCH_MNT.2/lowertestdir -wmr
-+test_file_handles SCRATCH_MNT.2/uppertestdir -o upper_file_handles
-+test_file_handles SCRATCH_MNT.2/lowertestdir -o lower_file_handles
-+test_file_handles SCRATCH_MNT.2 -r -i upper_file_handles
-+test_file_handles SCRATCH_MNT.2 -r -i lower_file_handles
-+test_file_handles SCRATCH_MNT.2/uppertestdir.up -o upper_file_handles
-+test_file_handles SCRATCH_MNT.2/uppertestdir.lo -o lower_file_handles
-+test_file_handles SCRATCH_MNT.2 -r -i upper_file_handles
-+test_file_handles SCRATCH_MNT.2 -r -i lower_file_handles
-+test_file_handles SCRATCH_MNT.2/uppertestdir -p -o upper_file_handles
-+test_file_handles SCRATCH_MNT.2/lowertestdir -p -o lower_file_handles
-+test_file_handles SCRATCH_MNT.2/uppertestdir/subdir -p -o upper_subdir_file_handles
-+test_file_handles SCRATCH_MNT.2/lowertestdir/subdir -p -o lower_subdir_file_handles
-+test_file_handles SCRATCH_MNT.2 -rp -i upper_file_handles
-+test_file_handles SCRATCH_MNT.2 -rp -i lower_file_handles
-+test_file_handles SCRATCH_MNT.2 -rp -i upper_subdir_file_handles
-+test_file_handles SCRATCH_MNT.2 -rp -i lower_subdir_file_handles
-+test_file_handles SCRATCH_MNT.2/lowertestdir.new -rp -i lower_subdir_file_handles
++QA output created by 069
++test_file_handles TEST_DIR.2/uppertestdir
++test_file_handles TEST_DIR.2/uppertestdir -p
++test_file_handles TEST_DIR.2/uppertestdir -wrap
++test_file_handles TEST_DIR.2/lowertestdir
++test_file_handles TEST_DIR.2/lowertestdir -p
++test_file_handles TEST_DIR.2/lowertestdir -wrap
++test_file_handles TEST_DIR.2/uppertestdir -a
++test_file_handles TEST_DIR.2/uppertestdir -r
++test_file_handles TEST_DIR.2/lowertestdir -a
++test_file_handles TEST_DIR.2/lowertestdir -r
++test_file_handles TEST_DIR.2/uppertestdir -dk
++test_file_handles TEST_DIR.2/uppertestdir.rw -rwdk
++test_file_handles TEST_DIR.2/lowertestdir -dk
++test_file_handles TEST_DIR.2/lowertestdir.rw -rwdk
++test_file_handles TEST_DIR.2/uppertestdir -dp
++test_file_handles TEST_DIR.2/lowertestdir -dp
++test_file_handles TEST_DIR.2/uppertestdir
++test_file_handles TEST_DIR.2/uppertestdir -wlr
++test_file_handles TEST_DIR.2/uppertestdir -ur
++test_file_handles TEST_DIR.2/lowertestdir
++test_file_handles TEST_DIR.2/lowertestdir -wlr
++test_file_handles TEST_DIR.2/lowertestdir -ur
++test_file_handles TEST_DIR.2/uppertestdir
++test_file_handles TEST_DIR.2/uppertestdir -wur
++test_file_handles TEST_DIR.2/lowertestdir
++test_file_handles TEST_DIR.2/lowertestdir -wur
++test_file_handles TEST_DIR.2/uppertestdir
++test_file_handles TEST_DIR.2/uppertestdir -d
++test_file_handles TEST_DIR.2/lowertestdir
++test_file_handles TEST_DIR.2/lowertestdir -d
++test_file_handles TEST_DIR.2/uppertestdir -wmr
++test_file_handles TEST_DIR.2/lowertestdir -wmr
++test_file_handles TEST_DIR.2/uppertestdir -o upper_file_handles
++test_file_handles TEST_DIR.2/lowertestdir -o lower_file_handles
++test_file_handles TEST_DIR.2 -r -i upper_file_handles
++test_file_handles TEST_DIR.2 -r -i lower_file_handles
++test_file_handles TEST_DIR.2/uppertestdir.up -o upper_file_handles
++test_file_handles TEST_DIR.2/uppertestdir.lo -o lower_file_handles
++test_file_handles TEST_DIR.2 -r -i upper_file_handles
++test_file_handles TEST_DIR.2 -r -i lower_file_handles
++test_file_handles TEST_DIR.2/uppertestdir -p -o upper_file_handles
++test_file_handles TEST_DIR.2/lowertestdir -p -o lower_file_handles
++test_file_handles TEST_DIR.2/uppertestdir/subdir -p -o upper_subdir_file_handles
++test_file_handles TEST_DIR.2/lowertestdir/subdir -p -o lower_subdir_file_handles
++test_file_handles TEST_DIR.2 -rp -i upper_file_handles
++test_file_handles TEST_DIR.2 -rp -i lower_file_handles
++test_file_handles TEST_DIR.2 -rp -i upper_subdir_file_handles
++test_file_handles TEST_DIR.2 -rp -i lower_subdir_file_handles
++test_file_handles TEST_DIR.2/lowertestdir.new -rp -i lower_subdir_file_handles
 diff --git a/tests/overlay/group b/tests/overlay/group
-index e809f7f2..be628dd1 100644
+index be628dd1..9290ce99 100644
 --- a/tests/overlay/group
 +++ b/tests/overlay/group
-@@ -70,3 +70,4 @@
- 065 auto quick mount
+@@ -71,3 +71,4 @@
  066 auto quick copyup
  067 auto quick copyup nonsamefs
-+068 auto quick copyup hardlink exportfs nested
+ 068 auto quick copyup hardlink exportfs nested
++069 auto quick copyup hardlink exportfs nested nonsamefs
 -- 
 2.17.1
 
