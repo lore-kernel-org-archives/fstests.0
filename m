@@ -2,89 +2,109 @@ Return-Path: <SRS0=PjwK=2Y=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.2 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FSL_HELO_FAKE,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BCDB9C2D0C2
-	for <linux-fstests@archiver.kernel.org>; Fri,  3 Jan 2020 15:42:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 87DECC32767
+	for <linux-fstests@archiver.kernel.org>; Fri,  3 Jan 2020 16:46:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 8566421734
-	for <linux-fstests@archiver.kernel.org>; Fri,  3 Jan 2020 15:42:57 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="jLsd5nk2"
+	by mail.kernel.org (Postfix) with ESMTP id 5E323217F4
+	for <linux-fstests@archiver.kernel.org>; Fri,  3 Jan 2020 16:46:29 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1578069989;
+	bh=ZOD+GqzkVuTHOS6C3Rl28U7LUU9+JZEftu8qXbGZ5po=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
+	b=N6i7Bd1HzLA4obq4foj9FtE7TmkpFGr7fGJ/2+rcqjgpbwNt40KcXymFFNBBBFION
+	 CjqBdxsP+Dwd/iYUk+AgMSZVMEAYKvpCBzqW4+D3HWy/lZ6EHoqkAcgQDXAFd6LjOO
+	 YZzJZya6H17L3rQ1yo1CsYp5zGe6+AjsiFTYvOkg=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727803AbgACPm5 (ORCPT
+        id S1727966AbgACQq2 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 3 Jan 2020 10:42:57 -0500
-Received: from mail-qk1-f194.google.com ([209.85.222.194]:46065 "EHLO
-        mail-qk1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727539AbgACPm5 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 3 Jan 2020 10:42:57 -0500
-Received: by mail-qk1-f194.google.com with SMTP id x1so34020012qkl.12
-        for <fstests@vger.kernel.org>; Fri, 03 Jan 2020 07:42:56 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=H4V2LxuI5nQJ8kOrebZjX/q6tWJkui78v7y3X/s2ymE=;
-        b=jLsd5nk2uXM2OtSHSQA+fx12gAu6+ohw+XaQX7jb2CytEeKSx4Vl5sr3MOQETU+3ov
-         sTsy0cT3/7iIlVuPqKmcWdn/I+/gDQQEVP1zkzmxJmeaJ0HNzHsJC6LR1Gg7DaSpYPIf
-         hOWKWIVF1JBQAUck1E3JyyII+sUeDLkd1Uok8m1gZwHixuarpLnrIO6luknwudjfNxaO
-         5UdlrAVp8HajMXi6Dw6oSst/ZiOVqNqXPHf6xuOQTKoreqvAbRm1H7KlpObK5xO3jVYN
-         fO1or03bPhRGEm+PwW5OPRuis1UU8mr/ErTkVLIE5g5RxZJTVlekY/TxIaNfeVCcqVHh
-         pvfw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=H4V2LxuI5nQJ8kOrebZjX/q6tWJkui78v7y3X/s2ymE=;
-        b=pTWPsm7ecJWhFqdBKDfDvseFL0nwzkwLcitxQzdffwMU9/UlawJ2aUuU4PYksVsjZ0
-         bEFlOkIcQKSIAnjUcvxmmhzuUY4bO1Vhgf9+7/OLfTcLdes/3cdpugH6WFKBOrlJhgYa
-         JOUjIhEqzRnzD+/Vm280ZlxWeMLUbd7dAK2aoQfdlfCTsjKOroR6bVbJt1/ygLSK8WB8
-         lFmNrjziSeSx1viwg67ILxYXVRzM1Nn9MuXgXX2nblYqrR8yeEACuyZ8hb3kf7soWaPI
-         b6sFrTH5RrUZmYWwfI0MwR5dnnnd9ns9HofJFGhhpD4VHnmp1jCwspXMaY+z6DuOUMCN
-         2COw==
-X-Gm-Message-State: APjAAAUNLXCS0ro0HrG/Qv+aUdsQeAE5y66IJuu2FetQZwslDdZjoCy6
-        /EFR1O2Lmt+Exsz3UAnFkSRf8g==
-X-Google-Smtp-Source: APXvYqyPr44EMw8tW9t5JZ0aRxoyI/XhpXe47WJuWHvjsiy9ZgwmTavoahNXRyBJRAHY5IuwoV4VGw==
-X-Received: by 2002:ae9:e103:: with SMTP id g3mr66147304qkm.353.1578066176041;
-        Fri, 03 Jan 2020 07:42:56 -0800 (PST)
-Received: from [192.168.1.106] ([107.15.81.208])
-        by smtp.gmail.com with ESMTPSA id n32sm18537939qtk.66.2020.01.03.07.42.55
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 03 Jan 2020 07:42:55 -0800 (PST)
-Subject: Re: [PATCH] btrfs/139: require 2GB scratch dev
-To:     Johannes Thumshirn <jth@kernel.org>, Eryu Guan <guaneryu@gmail.com>
-Cc:     Qu Wenruo <wqu@suse.com>, linux-btrfs@vger.kernel.org,
-        fstests@vger.kernel.org, Damien Le Moal <Damien.LeMoal@wdc.com>
-References: <20200103112905.1078-1-jth@kernel.org>
-From:   Josef Bacik <josef@toxicpanda.com>
-Message-ID: <e204cc04-b270-c5cc-6ab9-3d46183765aa@toxicpanda.com>
-Date:   Fri, 3 Jan 2020 10:42:54 -0500
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:68.0)
- Gecko/20100101 Thunderbird/68.3.1
+        Fri, 3 Jan 2020 11:46:28 -0500
+Received: from mail.kernel.org ([198.145.29.99]:60022 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1727912AbgACQq2 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 3 Jan 2020 11:46:28 -0500
+Received: from gmail.com (unknown [104.132.1.77])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id ECDE3206E6;
+        Fri,  3 Jan 2020 16:46:27 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1578069988;
+        bh=ZOD+GqzkVuTHOS6C3Rl28U7LUU9+JZEftu8qXbGZ5po=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=G8PqknC0mihmVKoPyedRSgw6LJL5DY8cB3kO7POi4DQYUY+6nzDPmn21Ig7BiOKUe
+         0LWTpUhR9GKCzXiD/mXOx+tX2edMh8MArwNMbvFE3uvHtQEOUvDB+ko5yiYdhf5AqL
+         WZKXN7JTX7vGKC/I1TYGRNKIXd60rRv3Fy12RYe4=
+Date:   Fri, 3 Jan 2020 08:46:26 -0800
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     fstests@vger.kernel.org, Eryu Guan <guaneryu@gmail.com>
+Cc:     linux-fscrypt@vger.kernel.org, Satya Tangirala <satyat@google.com>
+Subject: Re: [PATCH v2 0/5] xfstests: verify ciphertext of IV_INO_LBLK_64
+ encryption policies
+Message-ID: <20200103164626.GA19521@gmail.com>
+References: <20191202230155.99071-1-ebiggers@kernel.org>
+ <20191209181826.GC149190@gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <20200103112905.1078-1-jth@kernel.org>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20191209181826.GC149190@gmail.com>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 1/3/20 6:29 AM, Johannes Thumshirn wrote:
-> In my testing on 1GB zram devices btrfs/139 usually fails with
-> ENOSPC.
+On Mon, Dec 09, 2019 at 10:18:27AM -0800, Eric Biggers wrote:
+> On Mon, Dec 02, 2019 at 03:01:50PM -0800, Eric Biggers wrote:
+> > Hello,
+> > 
+> > This series adds an xfstest which tests that the encryption for
+> > IV_INO_LBLK_64 encryption policies is being done correctly.
+> > 
+> > IV_INO_LBLK_64 is a new fscrypt policy flag which modifies the
+> > encryption to be optimized for inline encryption hardware compliant with
+> > the UFS v2.1 standard or the upcoming version of the eMMC standard.  For
+> > more information, see the kernel patchset:
+> > https://lore.kernel.org/linux-fscrypt/20191024215438.138489-1-ebiggers@kernel.org/T/#u
+> > 
+> > The kernel patches have been merged into mainline and will be in v5.5.
+> > 
+> > In addition to the latest kernel, to run on ext4 this test also needs a
+> > version of e2fsprogs built from the master branch, in order to get
+> > support for formatting the filesystem with '-O stable_inodes'.
+> > 
+> > As usual, the test will skip itself if the prerequisites aren't met.
+> > 
+> > No real changes since v1; just rebased onto the latest xfstests master
+> > branch and updated the cover letter.
+> > 
+> > Eric Biggers (5):
+> >   fscrypt-crypt-util: create key_and_iv_params structure
+> >   fscrypt-crypt-util: add HKDF context constants
+> >   common/encrypt: create named variables for UAPI constants
+> >   common/encrypt: support verifying ciphertext of IV_INO_LBLK_64
+> >     policies
+> >   generic: verify ciphertext of IV_INO_LBLK_64 encryption policies
+> > 
+> >  common/encrypt           | 126 +++++++++++++++++++++++++-------
+> >  src/fscrypt-crypt-util.c | 151 ++++++++++++++++++++++++++++-----------
+> >  tests/generic/805        |  43 +++++++++++
+> >  tests/generic/805.out    |   6 ++
+> >  tests/generic/group      |   1 +
+> >  5 files changed, 259 insertions(+), 68 deletions(-)
+> >  create mode 100644 tests/generic/805
+> >  create mode 100644 tests/generic/805.out
+> > 
 > 
-> Add a requirement for 2GB scratch devices (empirically measured).
+> Ping.  Does anyone want to take a look at this?  Satya?
 > 
-> Signed-off-by: Johannes Thumshirn <jth@kernel.org>
 
-Reviewed-by: Josef Bacik <josef@toxicpanda.com>
+Eryu, can you review and consider applying this series?  It doesn't look like
+anyone else is going to formally review it.
 
 Thanks,
 
-Josef
+- Eric
