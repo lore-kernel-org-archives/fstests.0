@@ -1,352 +1,257 @@
-Return-Path: <SRS0=M3Lt=2U=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=PjwK=2Y=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.7 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+X-Spam-Status: No, score=-6.7 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 92759C2D0C2
-	for <linux-fstests@archiver.kernel.org>; Mon, 30 Dec 2019 14:14:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D9432C2D0CE
+	for <linux-fstests@archiver.kernel.org>; Fri,  3 Jan 2020 06:46:15 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 6032220722
-	for <linux-fstests@archiver.kernel.org>; Mon, 30 Dec 2019 14:14:40 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A2B6822314
+	for <linux-fstests@archiver.kernel.org>; Fri,  3 Jan 2020 06:46:15 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="E00skeqi"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="vMWhtZ5I"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727497AbfL3OOk (ORCPT
+        id S1725972AbgACGqP (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 30 Dec 2019 09:14:40 -0500
-Received: from mail-wr1-f66.google.com ([209.85.221.66]:37754 "EHLO
-        mail-wr1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727465AbfL3OOj (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 30 Dec 2019 09:14:39 -0500
-Received: by mail-wr1-f66.google.com with SMTP id w15so20149046wru.4;
-        Mon, 30 Dec 2019 06:14:37 -0800 (PST)
+        Fri, 3 Jan 2020 01:46:15 -0500
+Received: from mail-il1-f194.google.com ([209.85.166.194]:45734 "EHLO
+        mail-il1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725890AbgACGqP (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 3 Jan 2020 01:46:15 -0500
+Received: by mail-il1-f194.google.com with SMTP id p8so35885769iln.12
+        for <fstests@vger.kernel.org>; Thu, 02 Jan 2020 22:46:14 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references;
-        bh=RfEAK9j6briFBgWqZdICOtsHbkomqUsPHt1aeYW+a1U=;
-        b=E00skeqiFvrH2vERLvP/G6LhUqo0kBNuEUATTUfRuTSWrJ89cjTQyghdBkNDiLJb+z
-         7HwcntDDI4Q8aVFtaGqKDS2pqEwwUSZmIGBNP/bZfLkyBOQot3ebsZq30HOLOUEuWeJN
-         tnd8SjlyHnS3xuZOzcfVfyd79KeKyFycoJj7KDReVi8Pr1LBnAG6KjIF8Z4WpFTmlQiE
-         UejXHwAY9dgxG6AErCReQwBZ0F2D8z1NC4JYh431MfCRx3HzyQFusEzoP+vpf1nHJ9TU
-         XKu8/SkW2AsH0pY0cpf4JrWnGs/xStPjSv21vUZNjPqGTmoIQkCmEphFWg1CosxqD7xN
-         NPvA==
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=rmHzKxQbfQMHeQW1KOO0WIzMJKmOVVylgButWsDXvdI=;
+        b=vMWhtZ5IvPMoTDAKMcK3sBb5Ao5WDkZwAVW/rIwVz4veSwphEVfxpr8YvdJjcI/QcM
+         h7FMDSdnenX5fT/fR9HGSkIbuhvdWIt5t3jTzyQ4rbVAi3uyjaUPrep+iCfmfCFCc6wA
+         l2FUxmUu9Dp8v6f3QS+7Cx4KIEY9ILvkHd78DE4HLsO/f/K/l7p0dqYdtsV9aXY789Ae
+         1ENLhuWw88fUu2P0JRhWQpENHwG+dtm5BEvQT4gkCLfP3lh8+mibgIqBj6r0NRsOqgfD
+         oBo+mQ7GpppTKB0Y2FizqgwkL5XfnzOs+6vS9Gd7lSbxb+GqYJH2gA+zOiqgHZJnNzam
+         rhrw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references;
-        bh=RfEAK9j6briFBgWqZdICOtsHbkomqUsPHt1aeYW+a1U=;
-        b=Co192KdHS0krqUPwa2D+WO6PJg4YDy8UaJFEHMDWswLzB2tY9tn83LVSmzpt4B2pKW
-         Q8geGnqeakXnTuZwWpw8wGyI723TWSHVp788ppNbFiBt0uZV4ttTNZCzwBQSIELTWm2u
-         Xqq6WX6oDhChShvj8vHWGlbDDeApU/27hCGIwAHocZ3VNsaYc/qFPgsW1rmpJaABu1x5
-         v+gpriJD7c/4UVjgzjRkETz/xl5SDXWVOb5fdFo8i5bMfyOlVW0NR2ezOgbw4D7DXg+u
-         qRvfpVQTqT1b1hAJ/SR4BWOVUKDEElEZRBbjSDgqXPI4GVraa4OG3dKd/FOEXOQnHHXA
-         78Cg==
-X-Gm-Message-State: APjAAAU5P92Vygtu19rRCmUVF/iZdroGoUYPEzMKh21XRiyjtHnQN6tS
-        QSYhKZXDEV0vylt0PTzLaxX+LtlB
-X-Google-Smtp-Source: APXvYqyZs7nxsa0AHKQkiUYYXTaV33ONh2EYhHAC0izU+tih9klczs8+/myZMm1J1DxSkCPf0pQhWA==
-X-Received: by 2002:adf:e550:: with SMTP id z16mr67514422wrm.315.1577715276641;
-        Mon, 30 Dec 2019 06:14:36 -0800 (PST)
-Received: from amir-ThinkPad-T480.ctera.local (bzq-166-168-31-246.red.bezeqint.net. [31.168.166.246])
-        by smtp.gmail.com with ESMTPSA id t8sm44532651wrp.69.2019.12.30.06.14.35
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 30 Dec 2019 06:14:36 -0800 (PST)
-From:   Amir Goldstein <amir73il@gmail.com>
-To:     Eryu Guan <guaneryu@gmail.com>
-Cc:     Miklos Szeredi <miklos@szeredi.hu>,
-        Jeff Layton <jlayton@poochiereds.net>,
-        linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: [PATCH v2 5/5] overlay: test constant ino with nested overlay over non-samefs lower
-Date:   Mon, 30 Dec 2019 16:14:23 +0200
-Message-Id: <20191230141423.31695-6-amir73il@gmail.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20191230141423.31695-1-amir73il@gmail.com>
-References: <20191230141423.31695-1-amir73il@gmail.com>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=rmHzKxQbfQMHeQW1KOO0WIzMJKmOVVylgButWsDXvdI=;
+        b=OtVfonI5Orli5HnET622Rdj2wfyFos/fIRC5Xq2Y73HGzwE4YWsEcbFr8rsd7+ekGk
+         Fx6RPw+VNOezCY9bPylvIY0JdT0ihjMDdsffF20moSzMuo9MBgK0P4KDuSq6GV6FeolU
+         a0CRsP6jsgrZsMuZlCI7kFe3Ttj7Zuml7kF1VKo3lEP8QMoz9fNpjZqXAQ16Qinmx/qk
+         2h3nSrkTcjzTKnK2MGh2EB+8lJq+6F+tFgKMWD92FpFBRXNYqUjCuzamVnpZ7OERIt11
+         q0tcoiYVYP7YurA+2tyYoGsgtxC83VDi0CydrsOND+z6EaFL/22g5C0mNwx/Mds5PBhC
+         F4dw==
+X-Gm-Message-State: APjAAAVxg78bKG0rMrz2jtGR7kfLOVXncYVUaPpdRPtLChNvIzf7IEeq
+        DEnJpsfL62Se/2Q0J4q0cXOSXrxnLA/6q6tprz4=
+X-Google-Smtp-Source: APXvYqwxHvqBe0Jopx2XAIE9XpPKGQn7vZfF25oPH9m7vMzNV3/ayHPb7aRY0AjQ6bAceZSyr2IGJlT4I/RGpLUuZKk=
+X-Received: by 2002:a92:1642:: with SMTP id r63mr77987393ill.81.1578033974261;
+ Thu, 02 Jan 2020 22:46:14 -0800 (PST)
+MIME-Version: 1.0
+References: <CABeXuvr74C0DS-K4_us4CdPPFxp=7RHmCHAZQQmJrh=PZfux-w@mail.gmail.com>
+ <20191228221317.16654-1-deepa.kernel@gmail.com> <CAOQ4uxifpjjirTyUsCm03TFx8LOvkt0xX+RNyFZU5sHNU+bfqA@mail.gmail.com>
+In-Reply-To: <CAOQ4uxifpjjirTyUsCm03TFx8LOvkt0xX+RNyFZU5sHNU+bfqA@mail.gmail.com>
+From:   Deepa Dinamani <deepa.kernel@gmail.com>
+Date:   Thu, 2 Jan 2020 22:46:02 -0800
+Message-ID: <CABeXuvqxLnfUMcq9+ip8vkMU43gAphr9MvveD1bw+5QeWo+3zA@mail.gmail.com>
+Subject: Re: [PATCH v2] generic/402: Make timestamp range check conditional
+To:     Amir Goldstein <amir73il@gmail.com>
+Cc:     fstests <fstests@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>,
+        Greg KH <gregkh@linuxfoundation.org>,
+        Eryu Guan <guaneryu@gmail.com>,
+        Sasha Levin <sashal@kernel.org>,
+        y2038 Mailman List <y2038@lists.linaro.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Also test that d_ino of readdir entries and i_ino from /proc/locks are
-consistent with st_ino and that inode numbers persist after rename to
-new parent, drop caches and mount cycle.
+> As a generic helper, this function has a few problems:
+> 1. It assumes scratch dev is mounted (and you're not even calling it
+> after _scratch_mount)
 
-With nested xino configuration, directory st_ino is not persistent and
-its st_ino/d_ino/i_ino values are not consistent, so test only non-dir
-in this test.
+Ok, this was an oversight. I was using rootfs as scratch and didn't
+catch this in my tests.
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> 2. The cleanup() hook won't clean loop mnt/dev if interrupted
+
+Agreed. I can add these in.
+
+There are some existing functions in common/rc that do not clean up.
+For example _require_scratch_swapfile might leave partial state if interrupted.
+
+> 3. test doesn't have _require_loop (nor require ext4 as you mentioned)
+
+Some generic functions assume many preconditions.
+But, if it is preferred to be more self contained, I can model this
+after something like _require_scratch_swapfile()
+
+> All this leads me to think that perhaps it would be better off, at least until
+> kernel has fsinfo, to keep this entire helper inside generic/402,
+> while addressing
+> the issues above in the test itself.
+
+> A more generic solution would be harder and IMO and overkill at this point.
+
+With fsinfo as proposed, it would not be possible to tell if fs ranges
+are supported without doing the same kind of workaround.
+A capability bit could be added to advertise that feature of VFS, or
+it might be reasonable to assume it from the mere existence of fsinfo
+syscall.
+
+> What do you think?
+
+The following proposed patch uses a local _cleanup handler that can handle this.
+I am okay with either approach. I'm not sure which one is preferable
+to xfstests maintainers.
+Let me know and I can post it as a V3.
+
+-Deepa
+
+From f539005511f3ad83563cabc6d185b2c76ae37dea Mon Sep 17 00:00:00 2001
+From: Deepa Dinamani <deepa.kernel@gmail.com>
+Date: Sun, 22 Dec 2019 19:18:14 -0800
+Subject: [PATCH v3 1/1] generic/402: Make timestamp range check conditional
+
+Addition of fs-specific timestamp range checking was added
+in 188d20bcd1eb ("vfs: Add file timestamp range support").
+
+Add a check for whether the kernel supports the limits check
+before running the associated test.
+
+ext4 has been chosen to test for the presence of kernel support
+for this feature.
+
+Suggested-by: Amir Goldstein <amir73il@gmail.com>
+Signed-off-by: Deepa Dinamani <deepa.kernel@gmail.com>
 ---
- tests/overlay/071     | 236 ++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/071.out |   2 +
- tests/overlay/group   |   1 +
- 3 files changed, 239 insertions(+)
- create mode 100755 tests/overlay/071
- create mode 100644 tests/overlay/071.out
+ common/rc         | 50 +++++++++++++++++++++++++++++++++++++++++++----
+ tests/generic/402 | 12 +++++++++++-
+ 2 files changed, 57 insertions(+), 5 deletions(-)
 
-diff --git a/tests/overlay/071 b/tests/overlay/071
-new file mode 100755
-index 00000000..31a9d54e
---- /dev/null
-+++ b/tests/overlay/071
-@@ -0,0 +1,236 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2019 CTERA Networks. All Rights Reserved.
-+#
-+# FSQA Test No. 071
-+#
-+# This is a variant of overlay/017 to test constant st_ino numbers for
-+# nested overlay setup, where lower overlay layers are not on the same fs.
-+#
-+# This simple test demonstrates a known issue with overlayfs:
-+# - stat file A shows inode number X
-+# - modify A to trigger copy up
-+# - stat file A shows inode number Y != X
-+#
-+# Also test that d_ino of readdir entries and i_ino from /proc/locks are
-+# consistent with st_ino and that inode numbers persist after rename to
-+# new parent, drop caches and mount cycle.
-+#
-+# With nested xino configuration, directory st_ino is not persistent and
-+# its st_ino/d_ino/i_ino values are not consistent, so test only non-dir
-+# in this test.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
+diff --git a/common/rc b/common/rc
+index eeac1355..796052e6 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1751,17 +1751,18 @@ _require_loop()
+ #
+ _require_ext2()
+ {
++    fs=${1:-ext2}
+     if [ "$HOSTOS" != "Linux" ]
+     then
+-    _notrun "This test requires linux for ext2 filesystem support"
++    _notrun "This test requires linux for $fs filesystem support"
+     fi
+
+-    modprobe ext2 >/dev/null 2>&1
+-    if grep ext2 /proc/filesystems >/dev/null 2>&1
++    modprobe $fs >/dev/null 2>&1
++    if grep $fs /proc/filesystems >/dev/null 2>&1
+     then
+     :
+     else
+-    _notrun "This test requires ext2 filesystem support"
++    _notrun "This test requires $fs filesystem support"
+     fi
+ }
+
+@@ -1981,6 +1982,47 @@ _run_aiodio()
+     return $status
+ }
+
++_require_kernel_timestamp_range()
++{
 +
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
++    _require_scratch
++    _require_loop
++    _require_ext2 ext4
++
++    # Use a subshell to clean up the nested loop mount
++    _cleanup='( umount $LOOP_MNT ; _destroy_loop_device $LOOP_DEV ;
+rm -f $LOOP_FILE ; _scratch_unmount )'
++
++    _scratch_mkfs >/dev/null
++    _scratch_mount
++
++    LOOP_FILE=$SCRATCH_MNT/loop_file
++    LOOP_MNT=$SCRATCH_MNT/loop_mnt
++
++    dd if=/dev/zero of=$LOOP_FILE bs=1M count=2 2>&1 | _filter_dd ||
+_fail "loopback prep failed"
++
++    # Use ext4 with 128-byte inodes, which do not have room for
+extended timestamp
++    FSTYP=ext4 MKFS_OPTIONS=-I128 \
++    _mkfs_dev $LOOP_FILE >> $seqres.full 2>&1 || _fail "ext4 mkfs failed"
++
++    LOOP_DEV=$(_create_loop_device $LOOP_FILE)
++    mkdir -p $LOOP_MNT >> $seqres.full 2>&1 || _fail "failed to
+create $LOOP_MNT"
++    mount -t ext4 ${LOOP_DEV} ${LOOP_MNT} >> $seqres.full 2>&1 ||
+_fail "ext4 mount failed"
++    notrun=false
++    _check_dmesg_for "ext4 filesystem being mounted at ${LOOP_MNT}
+supports timestamps until 2038" || \
++        notrun=true
++
++    umount ${LOOP_MNT} >> $seqres.full 2>&1 || _fail "failed to
+umount $LOOP_MNT"
++    _destroy_loop_device ${LOOP_DEV} >> $seqres.full 2>&1
++
++    _scratch_unmount
++
++    _cleanup=:
++
++    if $notrun; then
++        _notrun "Kernel does not support timestamp limits"
++    fi
++}
++
+ _require_timestamp_range()
+ {
+     local device=${1:-$TEST_DEV}
+diff --git a/tests/generic/402 b/tests/generic/402
+index 0392c258..4288168a 100755
+--- a/tests/generic/402
++++ b/tests/generic/402
+@@ -16,7 +16,14 @@ echo "QA output created by $seq"
+ here=`pwd`
+ tmp=/tmp/$$
+ status=1    # failure is the default!
+-trap "exit \$status" 0 1 2 3 15
++_cleanup=:
++trap "eval \$_cleanup; _cleanup; exit \$status" 0 1 2 3 15
 +
 +_cleanup()
 +{
-+	cd /
-+	rm -f $tmp.*
-+	# Unmount the nested overlay mount
-+	$UMOUNT_PROG $mnt2 2>/dev/null
++    cd /
++    rm -f $tmp.*
 +}
+
+ # Get standard environment, filters and checks.
+ . ./common/rc
+@@ -30,6 +37,7 @@ rm -f $seqres.full
+ _supported_fs generic
+ _supported_os Linux
+ _require_scratch
++_require_check_dmesg
+ _require_xfs_io_command utimes
+
+ # Compare file timestamps obtained from stat
+@@ -79,6 +87,8 @@ run_test()
+     done
+ }
+
++_require_kernel_timestamp_range
 +
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs overlay
-+_supported_os Linux
-+_require_test
-+_require_scratch_nocheck
-+_require_test_program "af_unix"
-+_require_test_program "t_dir_type"
-+# We need to require all features together, because nfs_export cannot
-+# be enabled when index is disabled
-+_require_scratch_overlay_features index nfs_export redirect_dir
-+
-+# Lower overlay lower layer is on test fs, upper is on scratch fs
-+lower=$OVL_BASE_TEST_MNT/$OVL_LOWER-$seq
-+upper=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
-+work=$OVL_BASE_SCRATCH_MNT/$OVL_WORK
-+# Lower dir of nested overlay is the scratch overlay mount at SCRATCH_MNT
-+upper2=$OVL_BASE_SCRATCH_DIR/$OVL_UPPER.2
-+work2=$OVL_BASE_SCRATCH_DIR/$OVL_WORK.2
-+mnt2=$OVL_BASE_SCRATCH_DIR/$OVL_MNT.2
-+
-+lowerdir=$lower/lowertestdir
-+upperdir=$upper/uppertestdir
-+lowertestdir=$mnt2/lowertestdir
-+uppertestdir=$mnt2/uppertestdir
-+
-+create_dirs()
-+{
-+	# Create the underlying overlay dirs
-+	_scratch_mkfs
-+
-+	# Re-create the nested overlay upper dirs
-+	rm -rf $lower $upper2 $work2 $mnt2
-+	mkdir $lower $upper2 $work2 $mnt2
-+}
-+
-+# Mount a nested overlay with $SCRATCH_MNT as lower layer
-+mount_dirs()
-+{
-+	# Mount the underlying overlay with file handle support
-+	_overlay_mount_dirs $lower $upper $work overlay1 $SCRATCH_MNT \
-+		-o "index=on,nfs_export=on,xino=on" || \
-+                _notrun "cannot mount overlay with xino=on option"
-+	_fs_options overlay1 | grep -q "xino=on" || \
-+		_notrun "cannot enable xino feature on overlay"
-+
-+	# Mount the nested overlay
-+	# Enable redirect_dir for renaming a merge directory.
-+	# Enabling xino in this test requires that base filesystem inode numbers will
-+	# not use bit 63 in inode number of the test files, because bit 63 is used by
-+	# overlayfs to indicate the layer. Let's just assume that this is true for all
-+	# tested filesystems and if we are wrong, the test may fail.
-+	_overlay_mount_dirs $SCRATCH_MNT $upper2 $work2 overlay2 $mnt2 \
-+		-o "redirect_dir=on,index=on,xino=on" || \
-+		_notrun "cannot mount nested overlay with xino=on option"
-+	_fs_options overlay2 | grep -q "xino=on" || \
-+		_notrun "cannot enable xino feature on nested overlay"
-+}
-+
-+# Unmount the nested overlay mount and check underlying overlay layers
-+unmount_dirs()
-+{
-+	# unmount & check nested overlay
-+	$UMOUNT_PROG $mnt2
-+	_overlay_check_dirs $SCRATCH_MNT $upper2 $work2 \
-+		-o "redirect_dir=on,index=on,xino=on"
-+
-+	# unmount & check underlying overlay
-+	$UMOUNT_PROG $SCRATCH_MNT
-+	_overlay_check_dirs $lower $upper $work \
-+		-o "index=on,nfs_export=on"
-+}
-+
-+FILES="file symlink link chrdev blkdev fifo socket"
-+
-+create_test_files()
-+{
-+	local dir=$1
-+
-+	# Create our test files.
-+	mkdir -p $dir
-+	touch $dir/file
-+	ln -s $dir/file $dir/symlink
-+	touch $dir/link
-+	ln $dir/link $dir/link2
-+	mknod $dir/chrdev c 1 1
-+	mknod $dir/blkdev b 1 1
-+	mknod $dir/fifo p
-+	$here/src/af_unix $dir/socket
-+}
-+
-+# Record inode numbers in format <ino> <basename>
-+record_inode_numbers()
-+{
-+	local dir=$1
-+	local outfile=$2
-+
-+	echo "record_inode_numbers $outfile" >> $seqres.full
-+
-+	for n in $FILES; do
-+		ls -id $dir/$n
-+	done | \
-+	while read ino file; do
-+		f=`basename $file`
-+		echo $ino $f | tee -a $seqres.full >> $outfile
-+		# /proc/locks exposes i_ino - compare it to st_ino. flock -n
-+		# doesn't follow symlink, blocks on fifo and fails on socket
-+		[[ $f =~ fifo|socket|symlink ]] || \
-+		flock -n $file cat /proc/locks | tee -a $seqres.full | grep -q ":$ino " || \
-+			echo "lock for $f not found by ino $ino ($outfile) - see $seqres.full"
-+	done
-+}
-+
-+# Check inode numbers match recorder inode numbers
-+check_inode_numbers()
-+{
-+	local dir=$1
-+	local before=$2
-+	local after=$3
-+
-+	record_inode_numbers $dir $after
-+
-+	# Test constant stat(2) st_ino -
-+	# Compare before..after - expect silence
-+	# We use diff -u so out.bad will tell us which stage failed
-+	diff -u $before $after
-+
-+	# Test constant readdir(3)/getdents(2) d_ino -
-+	# Expect to find file by inode number
-+	cat $before | while read ino f; do
-+		$here/src/t_dir_type $dir $ino | tee -a $seqres.full | grep -q $f || \
-+			echo "$f not found by ino $ino (from $before) - see $seqres.full"
-+	done
-+}
-+
-+rm -f $seqres.full
-+
-+create_dirs
-+
-+create_test_files $lowerdir
-+create_test_files $upperdir
-+
-+mount_dirs
-+
-+# Record inode numbers in the lower overlay
-+record_inode_numbers $SCRATCH_MNT/lowertestdir $tmp.lower.lo
-+record_inode_numbers $SCRATCH_MNT/uppertestdir $tmp.lower.up
-+
-+# Compare inode numbers in lower overlay vs. nested overlay
-+# With nested xino lower/lower, all inode numbers overflow xino bits and
-+# d_ino/i_ino in nested overlay are the same as in lower overlay.
-+check_inode_numbers $lowertestdir $tmp.lower.lo $tmp.before.lo
-+
-+# Record inode numbers before copy up from nested upper
-+record_inode_numbers $uppertestdir $tmp.before.up
-+
-+# Copy up all files
-+for f in $FILES; do
-+	# chown -h modifies all those file types
-+	chown -h 100 $lowertestdir/$f
-+	chown -h 100 $uppertestdir/$f
-+done
-+
-+# Compare inode numbers before/after copy up
-+check_inode_numbers $lowertestdir $tmp.before.lo $tmp.after_copyup.lo
-+check_inode_numbers $uppertestdir $tmp.before.up $tmp.after_copyup.up
-+
-+# Move all files to another dir
-+mkdir $lowertestdir.2 $uppertestdir.2
-+
-+for f in $FILES; do
-+	mv $lowertestdir/$f $lowertestdir.2/
-+	mv $uppertestdir/$f $uppertestdir.2/
-+done
-+
-+echo 3 > /proc/sys/vm/drop_caches
-+
-+# Compare inode numbers before/after rename and drop caches
-+check_inode_numbers $lowertestdir.2 $tmp.after_copyup.lo $tmp.after_move.lo
-+check_inode_numbers $uppertestdir.2 $tmp.after_copyup.up $tmp.after_move.up
-+
-+# Verify that the inode numbers survive a mount cycle
-+unmount_dirs
-+mount_dirs
-+
-+# Compare inode numbers before/after mount cycle
-+check_inode_numbers $lowertestdir.2 $tmp.after_move.lo $tmp.after_cycle.lo
-+check_inode_numbers $uppertestdir.2 $tmp.after_move.up $tmp.after_cycle.up
-+
-+unmount_dirs
-+
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/overlay/071.out b/tests/overlay/071.out
-new file mode 100644
-index 00000000..9a9ef40a
---- /dev/null
-+++ b/tests/overlay/071.out
-@@ -0,0 +1,2 @@
-+QA output created by 071
-+Silence is golden
-diff --git a/tests/overlay/group b/tests/overlay/group
-index 45f6885b..2a45ae5f 100644
---- a/tests/overlay/group
-+++ b/tests/overlay/group
-@@ -73,3 +73,4 @@
- 068 auto quick copyup hardlink exportfs nested
- 069 auto quick copyup hardlink exportfs nested nonsamefs
- 070 auto quick copyup redirect nested
-+071 auto quick copyup redirect nested nonsamefs
+ _scratch_mkfs &>> $seqres.full 2>&1 || _fail "mkfs failed"
+ _require_timestamp_range $SCRATCH_DEV
+
 -- 
 2.17.1
-
