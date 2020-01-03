@@ -2,90 +2,89 @@ Return-Path: <SRS0=PjwK=2Y=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-5.2 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 32720C2D0C2
-	for <linux-fstests@archiver.kernel.org>; Fri,  3 Jan 2020 11:29:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ADD2DC2D0C2
+	for <linux-fstests@archiver.kernel.org>; Fri,  3 Jan 2020 15:42:36 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 05E282253D
-	for <linux-fstests@archiver.kernel.org>; Fri,  3 Jan 2020 11:29:29 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1578050970;
-	bh=vhgGI92K+epc2rR/vPkC/04Ks/KT3J7Yx+rKMuCr7vg=;
-	h=From:To:Cc:Subject:Date:List-ID:From;
-	b=kYMqJDPGvsFcSTqiAAgFtI12wN1hHPXHiRotLWBtrddo1NKLEL0tUDoyMX0pKOhlL
-	 YwyIMRgfj7ox5Csuvc8wXA3A5WUOdbBAWqPmp06/c8pCcZywdk8jZfhU3RiV/5dVEg
-	 m8H/FdNmVYmBaGL14IAfbxmZXCF3DpOYlqpGquIE=
+	by mail.kernel.org (Postfix) with ESMTP id 7F6BC222C4
+	for <linux-fstests@archiver.kernel.org>; Fri,  3 Jan 2020 15:42:36 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="jKyOXThf"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727456AbgACL33 (ORCPT
+        id S1727793AbgACPmg (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 3 Jan 2020 06:29:29 -0500
-Received: from mail-wm1-f67.google.com ([209.85.128.67]:55446 "EHLO
-        mail-wm1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727453AbgACL33 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 3 Jan 2020 06:29:29 -0500
-Received: by mail-wm1-f67.google.com with SMTP id q9so8096196wmj.5;
-        Fri, 03 Jan 2020 03:29:28 -0800 (PST)
+        Fri, 3 Jan 2020 10:42:36 -0500
+Received: from mail-qk1-f193.google.com ([209.85.222.193]:40913 "EHLO
+        mail-qk1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727646AbgACPmf (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 3 Jan 2020 10:42:35 -0500
+Received: by mail-qk1-f193.google.com with SMTP id c17so34055360qkg.7
+        for <fstests@vger.kernel.org>; Fri, 03 Jan 2020 07:42:35 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=Z5OBrN6ZmrGNnuSXVYsD43O/DtdpuRo4xbPRml+vZT0=;
+        b=jKyOXThfe+Ch1DuzYRLw/yxan2VquOl1RVxkdv2eGFmLvvugRPhWFLuMNvdS6cS81h
+         /rpbk5dtc601rsTIx4HW80Djz4AxxhjhhoXqAUwn6xrbD/YNtOivP4jZ685dLV7o4KXk
+         JKr7fY7mFed0PUC9AxtG9wCCVwtOZfAWrKees6Nzmb84TCJTE9PCg4x8fVDre3+oKeQf
+         QlxKsdDyQzndMoii93fjsSvhdJCLs5DUOhR77PfJa4Fxl0OnUVwlfIVQ52ZjUmUt8xFv
+         TpLa0jT+L6rX04ZbcmfKIXWhLyvH9T9Hy6D4k/qxVBgNV/doeAIVgbkoTdV1Bp85+pvs
+         n+nA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id;
-        bh=tmqzLslb6L779oXexaa6bDxetpW67XU58Vd325R8/dk=;
-        b=LHnVFm8NiRrEB2zpdkbRGe4AsjO4E6sIqesbjzl+6gLdezkowW/mnGB7CYrsTRdkOp
-         0UU/hyCg4UQ5KuOC0qJ1o5o3i/8ew+WZt3VxkRyqWigbTfwDMZxhXo9jaU5dSYle/XK/
-         rd5Q+FSWVaLYF67rLzxbLbBfNQpELmlM0ls/x/X18Sihtx83ywXEc0JBwrVtRbQyvlqu
-         sPzQnUBnZWtIN1PtdPsfhp5p+U41HTNwr/Mv/vaUJhDxu5si/Ca6x6cM4yLFN1NMLO1S
-         9e6mD8vGn5pKu0GMDRhpm0J4TvDAPYH594szy1RzpAt/AJIF+V/X72xQQCJ5MqweDXXM
-         TI1g==
-X-Gm-Message-State: APjAAAXg+OKhspzTDDlwfzqNDpd5bW1oVYtLCt0fcTxd1Uejz2ofkR4v
-        lQ9PAKwpJioVJ68szsJalN0=
-X-Google-Smtp-Source: APXvYqzcGd1O5Tej9V2s6gSu8GzGlgNve6nRrPepp23GH+eQAXzrxt0QaMXC6EhEjPVHYF2JUxZE5g==
-X-Received: by 2002:a05:600c:220e:: with SMTP id z14mr19212200wml.114.1578050967602;
-        Fri, 03 Jan 2020 03:29:27 -0800 (PST)
-Received: from linux-t19r.fritz.box (ppp-46-244-218-95.dynamic.mnet-online.de. [46.244.218.95])
-        by smtp.gmail.com with ESMTPSA id w22sm11308657wmk.34.2020.01.03.03.29.26
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 03 Jan 2020 03:29:27 -0800 (PST)
-From:   Johannes Thumshirn <jth@kernel.org>
-To:     Eryu Guan <guaneryu@gmail.com>
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=Z5OBrN6ZmrGNnuSXVYsD43O/DtdpuRo4xbPRml+vZT0=;
+        b=qiuCCf0US8JPmkvnEmxUumLdsXl4wMlBYwj62x8EOcQr4WoS6kqDeqeIWAq53IxXcp
+         SBSWp2zh4UbFww893sUsBB8Q/xiiCGmqc/+J6CCLKAx17PVhfkJCz/I5FmNhLhiyr6RS
+         KudIJeJVZuyxpGTvQy7I8UP9k3xucFHOoMq0g3FU1UvW766LAgoRvZ4dTarEOmxbaaqx
+         cGXr7TqFFc3qjR7eTLY7brFHm6sKoRnVgCk8iToKKwx7qp1fLqpabgnCK6JYCbERC7Kk
+         mTTehfppqNeKG4Vq9Ljr77o0mPysXIBn3HB8B3Dx/S1r1DD3gM1HiJTRQiU7DxWN989k
+         Jsqw==
+X-Gm-Message-State: APjAAAUSQijrotjXCQZeSsiY/KW0buyIrTClDs1Y6Qg2WZpIQja5igCw
+        S2pCxSEunNwB6x4ZmF0yEpYLVw==
+X-Google-Smtp-Source: APXvYqzISCPUj324y+DKnjnOwsXNduRzWhK1Dbc9qwI+ySs4g59VHyJg2GRWAK+/lTTZ0RsTdwONkg==
+X-Received: by 2002:ae9:f106:: with SMTP id k6mr73953628qkg.189.1578066154739;
+        Fri, 03 Jan 2020 07:42:34 -0800 (PST)
+Received: from [192.168.1.106] ([107.15.81.208])
+        by smtp.gmail.com with ESMTPSA id q35sm18737004qta.19.2020.01.03.07.42.33
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 03 Jan 2020 07:42:34 -0800 (PST)
+Subject: Re: [PATCH] btrfs/140: use proper helpers to get devid and physical
+ offset for corruption
+To:     Johannes Thumshirn <jth@kernel.org>, Eryu Guan <guaneryu@gmail.com>
 Cc:     Qu Wenruo <wqu@suse.com>, linux-btrfs@vger.kernel.org,
-        fstests@vger.kernel.org, Damien Le Moal <Damien.LeMoal@wdc.com>,
-        Johannes Thumshirn <jth@kernel.org>
-Subject: [PATCH] btrfs/139: require 2GB scratch dev
-Date:   Fri,  3 Jan 2020 12:29:05 +0100
-Message-Id: <20200103112905.1078-1-jth@kernel.org>
-X-Mailer: git-send-email 2.16.4
+        fstests@vger.kernel.org, Damien Le Moal <Damien.LeMoal@wdc.com>
+References: <20200103111810.658-1-jth@kernel.org>
+From:   Josef Bacik <josef@toxicpanda.com>
+Message-ID: <2970a67b-c10b-0038-ef2e-29b42dda107d@toxicpanda.com>
+Date:   Fri, 3 Jan 2020 10:42:33 -0500
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:68.0)
+ Gecko/20100101 Thunderbird/68.3.1
+MIME-Version: 1.0
+In-Reply-To: <20200103111810.658-1-jth@kernel.org>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-In my testing on 1GB zram devices btrfs/139 usually fails with
-ENOSPC.
+On 1/3/20 6:18 AM, Johannes Thumshirn wrote:
+> Similar to fstests commit 1a27bf14ef8b "btrfs/14[23]: Use proper help to
+> get both devid and physical offset for corruption." btrfs/140 needs the
+> same treatment to pass with updated btrfs-progs.
+> 
+> Signed-off-by: Johannes Thumshirn <jth@kernel.org>
 
-Add a requirement for 2GB scratch devices (empirically measured).
+Reviewed-by: Josef Bacik <josef@toxicpanda.com>
 
-Signed-off-by: Johannes Thumshirn <jth@kernel.org>
----
- tests/btrfs/139 | 3 +++
- 1 file changed, 3 insertions(+)
+Thanks,
 
-diff --git a/tests/btrfs/139 b/tests/btrfs/139
-index 5664617c..2f84c811 100755
---- a/tests/btrfs/139
-+++ b/tests/btrfs/139
-@@ -31,6 +31,9 @@ _cleanup()
- # remove previous $seqres.full before test
- rm -f $seqres.full
- 
-+# We at least need 2GB of free space on $SCRATCH_DEV
-+_require_scratch_size $((2 * 1024 * 1024))
-+
- _supported_fs btrfs
- _supported_os Linux
- _require_scratch
--- 
-2.16.4
-
+Josef
