@@ -2,99 +2,96 @@ Return-Path: <SRS0=Klg3=23=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,USER_AGENT_SANE_1
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5B61BC3F68F
-	for <linux-fstests@archiver.kernel.org>; Mon,  6 Jan 2020 02:55:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6085AC32771
+	for <linux-fstests@archiver.kernel.org>; Mon,  6 Jan 2020 06:56:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 3D24C217F4
-	for <linux-fstests@archiver.kernel.org>; Mon,  6 Jan 2020 02:55:13 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2D0A221775
+	for <linux-fstests@archiver.kernel.org>; Mon,  6 Jan 2020 06:56:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727323AbgAFCzM (ORCPT
+        id S1726338AbgAFG46 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 5 Jan 2020 21:55:12 -0500
-Received: from out30-56.freemail.mail.aliyun.com ([115.124.30.56]:59582 "EHLO
-        out30-56.freemail.mail.aliyun.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1727307AbgAFCzM (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 5 Jan 2020 21:55:12 -0500
-X-Alimail-AntiSpam: AC=PASS;BC=-1|-1;BR=01201311R621e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=e01e04395;MF=eguan@linux.alibaba.com;NM=1;PH=DS;RN=6;SR=0;TI=SMTPD_---0Tmv.V2J_1578279309;
-Received: from localhost(mailfrom:eguan@linux.alibaba.com fp:SMTPD_---0Tmv.V2J_1578279309)
-          by smtp.aliyun-inc.com(127.0.0.1);
-          Mon, 06 Jan 2020 10:55:09 +0800
-Date:   Mon, 6 Jan 2020 10:55:09 +0800
-From:   Eryu Guan <eguan@linux.alibaba.com>
-To:     Eric Biggers <ebiggers@kernel.org>
-Cc:     fstests@vger.kernel.org, Eryu Guan <guaneryu@gmail.com>,
-        linux-fscrypt@vger.kernel.org, Satya Tangirala <satyat@google.com>
-Subject: Re: [PATCH v2 0/5] xfstests: verify ciphertext of IV_INO_LBLK_64
- encryption policies
-Message-ID: <20200106025509.GF41863@e18g06458.et15sqa>
-References: <20191202230155.99071-1-ebiggers@kernel.org>
- <20191209181826.GC149190@gmail.com>
- <20200103164626.GA19521@gmail.com>
+        Mon, 6 Jan 2020 01:56:58 -0500
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:55510 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726294AbgAFG46 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 6 Jan 2020 01:56:58 -0500
+X-IronPort-AV: E=Sophos;i="5.69,401,1571673600"; 
+   d="scan'208";a="81351642"
+Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
+  by heian.cn.fujitsu.com with ESMTP; 06 Jan 2020 14:56:56 +0800
+Received: from G08CNEXMBPEKD04.g08.fujitsu.local (unknown [10.167.33.201])
+        by cn.fujitsu.com (Postfix) with ESMTP id 97F8E49E932A;
+        Mon,  6 Jan 2020 14:47:58 +0800 (CST)
+Received: from G08CNEXCHPEKD03.g08.fujitsu.local (10.167.33.85) by
+ G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201) with Microsoft SMTP Server
+ (TLS) id 15.0.1395.4; Mon, 6 Jan 2020 14:56:55 +0800
+Received: from Fedora-30.g08.fujitsu.local (10.167.220.106) by
+ G08CNEXCHPEKD03.g08.fujitsu.local (10.167.33.89) with Microsoft SMTP Server
+ id 14.3.439.0; Mon, 6 Jan 2020 14:57:07 +0800
+From:   Xiao Yang <yangx.jy@cn.fujitsu.com>
+To:     <eguan@linux.alibaba.com>
+CC:     <fstests@vger.kernel.org>, Xiao Yang <yangx.jy@cn.fujitsu.com>
+Subject: [PATCH 1/2] ltp/fsx.c: Add FALLOC_FL_KEEP_SIZE flag and '-K' option
+Date:   Mon, 6 Jan 2020 14:52:37 +0800
+Message-ID: <20200106065238.12884-1-yangx.jy@cn.fujitsu.com>
+X-Mailer: git-send-email 2.21.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200103164626.GA19521@gmail.com>
-User-Agent: Mutt/1.5.21 (2010-09-15)
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-yoursite-MailScanner-ID: 97F8E49E932A.ABE83
+X-yoursite-MailScanner: Found to be clean
+X-yoursite-MailScanner-From: yangx.jy@cn.fujitsu.com
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Jan 03, 2020 at 08:46:26AM -0800, Eric Biggers wrote:
-> On Mon, Dec 09, 2019 at 10:18:27AM -0800, Eric Biggers wrote:
-> > On Mon, Dec 02, 2019 at 03:01:50PM -0800, Eric Biggers wrote:
-> > > Hello,
-> > > 
-> > > This series adds an xfstest which tests that the encryption for
-> > > IV_INO_LBLK_64 encryption policies is being done correctly.
-> > > 
-> > > IV_INO_LBLK_64 is a new fscrypt policy flag which modifies the
-> > > encryption to be optimized for inline encryption hardware compliant with
-> > > the UFS v2.1 standard or the upcoming version of the eMMC standard.  For
-> > > more information, see the kernel patchset:
-> > > https://lore.kernel.org/linux-fscrypt/20191024215438.138489-1-ebiggers@kernel.org/T/#u
-> > > 
-> > > The kernel patches have been merged into mainline and will be in v5.5.
-> > > 
-> > > In addition to the latest kernel, to run on ext4 this test also needs a
-> > > version of e2fsprogs built from the master branch, in order to get
-> > > support for formatting the filesystem with '-O stable_inodes'.
-> > > 
-> > > As usual, the test will skip itself if the prerequisites aren't met.
-> > > 
-> > > No real changes since v1; just rebased onto the latest xfstests master
-> > > branch and updated the cover letter.
-> > > 
-> > > Eric Biggers (5):
-> > >   fscrypt-crypt-util: create key_and_iv_params structure
-> > >   fscrypt-crypt-util: add HKDF context constants
-> > >   common/encrypt: create named variables for UAPI constants
-> > >   common/encrypt: support verifying ciphertext of IV_INO_LBLK_64
-> > >     policies
-> > >   generic: verify ciphertext of IV_INO_LBLK_64 encryption policies
-> > > 
-> > >  common/encrypt           | 126 +++++++++++++++++++++++++-------
-> > >  src/fscrypt-crypt-util.c | 151 ++++++++++++++++++++++++++++-----------
-> > >  tests/generic/805        |  43 +++++++++++
-> > >  tests/generic/805.out    |   6 ++
-> > >  tests/generic/group      |   1 +
-> > >  5 files changed, 259 insertions(+), 68 deletions(-)
-> > >  create mode 100644 tests/generic/805
-> > >  create mode 100644 tests/generic/805.out
-> > > 
-> > 
-> > Ping.  Does anyone want to take a look at this?  Satya?
-> > 
-> 
-> Eryu, can you review and consider applying this series?  It doesn't look like
-> anyone else is going to formally review it.
+1) Add FALLOC_FL_KEEP_SIZE flag for do_zero_range().
+2) Add '-K' option to the usage of fsx.
 
-I've reviewed & applied this patchset in my local tree, will push them
-out soon. So sorry for the delay!
+Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+---
+ ltp/fsx.c | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
 
-Thanks,
-Eryu
+diff --git a/ltp/fsx.c b/ltp/fsx.c
+index 06d08e4e..11465e62 100644
+--- a/ltp/fsx.c
++++ b/ltp/fsx.c
+@@ -1197,7 +1197,7 @@ void
+ do_zero_range(unsigned offset, unsigned length, int keep_size)
+ {
+ 	unsigned end_offset;
+-	int mode = FALLOC_FL_ZERO_RANGE;
++	int mode = keep_size ? FALLOC_FL_ZERO_RANGE | FALLOC_FL_KEEP_SIZE : FALLOC_FL_ZERO_RANGE;
+ 
+ 	if (length == 0) {
+ 		if (!quiet && testcalls > simulatedopcount)
+@@ -2215,7 +2215,7 @@ void
+ usage(void)
+ {
+ 	fprintf(stdout, "usage: %s",
+-		"fsx [-dknqxABEFJLOWZ] [-b opnum] [-c Prob] [-g filldata] [-i logdev] [-j logid] [-l flen] [-m start:end] [-o oplen] [-p progressinterval] [-r readbdy] [-s style] [-t truncbdy] [-w writebdy] [-D startingop] [-N numops] [-P dirpath] [-S seed] fname\n\
++		"fsx [-dknqxABEFJKLOWZ] [-b opnum] [-c Prob] [-g filldata] [-i logdev] [-j logid] [-l flen] [-m start:end] [-o oplen] [-p progressinterval] [-r readbdy] [-s style] [-t truncbdy] [-w writebdy] [-D startingop] [-N numops] [-P dirpath] [-S seed] fname\n\
+ 	-b opnum: beginning operation number (default 1)\n\
+ 	-c P: 1 in P chance of file close+open at each op (default infinity)\n\
+ 	-d: debug output for all operations\n\
+@@ -2265,6 +2265,9 @@ usage(void)
+ #ifdef HAVE_COPY_FILE_RANGE
+ "	-E: Do not use copy range calls\n"
+ #endif
++#ifdef FALLOC_FL_KEEP_SIZE
++"	-K: Do not use keep size calls\n"
++#endif
+ "	-L: fsxLite - no file creations & no file size changes\n\
+ 	-N numops: total # operations to do (default infinity)\n\
+ 	-O: use oplen (see -o flag) for every op (default random)\n\
+-- 
+2.21.0
+
+
+
