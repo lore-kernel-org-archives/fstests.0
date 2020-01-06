@@ -2,137 +2,179 @@ Return-Path: <SRS0=Klg3=23=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.0 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 489E9C32771
-	for <linux-fstests@archiver.kernel.org>; Mon,  6 Jan 2020 08:56:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A9B34C2D0D1
+	for <linux-fstests@archiver.kernel.org>; Mon,  6 Jan 2020 10:24:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 1A8E920848
-	for <linux-fstests@archiver.kernel.org>; Mon,  6 Jan 2020 08:56:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7AFA6207FD
+	for <linux-fstests@archiver.kernel.org>; Mon,  6 Jan 2020 10:24:53 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=gmx.net header.i=@gmx.net header.b="V9WaTkcP"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="TvxMWqK8"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725908AbgAFI41 (ORCPT
+        id S1726080AbgAFKYx (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 6 Jan 2020 03:56:27 -0500
-Received: from mout.gmx.net ([212.227.15.18]:53725 "EHLO mout.gmx.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726307AbgAFI41 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 6 Jan 2020 03:56:27 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net;
-        s=badeba3b8450; t=1578300975;
-        bh=EevMvVqS8Asv+063Cb4z/6k+5ufQS41WpjP6ja7rmrY=;
-        h=X-UI-Sender-Class:Subject:To:Cc:References:From:Date:In-Reply-To;
-        b=V9WaTkcPd/221sly84odxAUyZoUZ4ml46LTz5i7rMrubcAwPXPplv5/yNxR3nAGDr
-         rhh/KYbjPVnvIxaLrkz+NG2fq1TY11DO92vV1pjNkC3ZJ+uZdAcKFK52UxdA797LrS
-         CqNXUXrPsb2Ei26TgLdyDBAaujeXt4YvuzOOgrAQ=
-X-UI-Sender-Class: 01bb95c1-4bf8-414a-932a-4f6e2808ef9c
-Received: from [0.0.0.0] ([149.28.201.231]) by mail.gmx.com (mrgmx004
- [212.227.17.184]) with ESMTPSA (Nemesis) id 1MAwbz-1izde33qUj-00BLyj; Mon, 06
- Jan 2020 09:56:15 +0100
-Subject: Re: [PATCH] btrfs/140: use proper helpers to get devid and physical
- offset for corruption
-To:     Eryu Guan <guaneryu@gmail.com>, Johannes Thumshirn <jth@kernel.org>
-Cc:     Qu Wenruo <wqu@suse.com>, linux-btrfs@vger.kernel.org,
-        fstests@vger.kernel.org, Damien Le Moal <Damien.LeMoal@wdc.com>
-References: <20200103111810.658-1-jth@kernel.org>
- <20200106081647.GE893866@desktop>
-From:   Qu Wenruo <quwenruo.btrfs@gmx.com>
-Message-ID: <1c1dd1ae-e484-ee02-a7d8-077f95f7d4cf@gmx.com>
-Date:   Mon, 6 Jan 2020 16:56:10 +0800
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.3.1
+        Mon, 6 Jan 2020 05:24:53 -0500
+Received: from mail-pj1-f66.google.com ([209.85.216.66]:35582 "EHLO
+        mail-pj1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725446AbgAFKYw (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 6 Jan 2020 05:24:52 -0500
+Received: by mail-pj1-f66.google.com with SMTP id s7so7621546pjc.0
+        for <fstests@vger.kernel.org>; Mon, 06 Jan 2020 02:24:52 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=message-id:date:from:to:subject:mime-version:content-disposition;
+        bh=JNaokyiNpzLUs4EiWBifI1bPhWCIKOPNu9ojUcWsQpE=;
+        b=TvxMWqK8SC8vEfjWD4a0PPzOfSvUsOCTjf4WnMZZjic1Q/85+J88dpoB4ixA3/DL1R
+         0YVolWyW54DpYZJcthb8AxL6mk8+ZOgQKg/Zj/j+QdT4vADhGOyYzb0tlMfnFrJEXY40
+         udb6g5f4ZNSfmOLdozlhVgcm7hc1W0gbND8mwSL8jc+FUczlhsf4TyIRVZWqXRO1TWTk
+         5DpSozc2eMPqc0vVWGkwOx85H1r6HwopWfD1jrb0RkgPThk0lxyyA2KmRqJ/VvLFCQip
+         7E8eQ9hkagBo3hGN93EGxEINc+ICCImmLd67hb1VKLJCD/GjyC2E1iQZbnde4zBwoIJD
+         g7UQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:message-id:date:from:to:subject:mime-version
+         :content-disposition;
+        bh=JNaokyiNpzLUs4EiWBifI1bPhWCIKOPNu9ojUcWsQpE=;
+        b=MDRttXTNjQHCSh7rjbUjmL5J2idkvysyzpOHkvBIAmnrXiO7UPwaPlUqbM8I5wJEbH
+         MJce/eikAgsHHbCjacEKna2hVSSQmRyqO7DKX2ndpH1wnIHnSamlCEFA90uax2GVBdqc
+         VOnq84jfjRxqYMaeF/jv6rpUWDeXUNUPjdobB3rFBcQrUOKDvwK1c0u04p2rTbCWcjsp
+         qFMKoxBanlo8wxqG+yU6mQfEVYNVUSjgCPJMjwzatXPY/xrsK6oVjlzrXxfHsudFVxjr
+         i1+0FK2XvgothDp388nUCsHkowsuFac/jwDSjEQzUuRHOSv9n1ke+GhXSzZZ1O6/cfkU
+         0iIA==
+X-Gm-Message-State: APjAAAUioqPf68a+nND02P/lmnnc2YmWTCj+k2FAucnNX/4oiJY9nGWO
+        bIPrgwFvygWGvTCjZZcKmE2BLHIsEHE=
+X-Google-Smtp-Source: APXvYqxguAqDMdtBeVr/tZkVnoaQ/Wf5qDmTr2HOZxKuyaAAQp2r/wv1bfXKR/wQQFNOjJ5xUKyt8Q==
+X-Received: by 2002:a17:902:8484:: with SMTP id c4mr91183382plo.339.1578306291816;
+        Mon, 06 Jan 2020 02:24:51 -0800 (PST)
+Received: from localhost ([178.128.102.47])
+        by smtp.gmail.com with ESMTPSA id t9sm23463037pjq.11.2020.01.06.02.24.50
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 06 Jan 2020 02:24:51 -0800 (PST)
+Message-ID: <5e130af3.1c69fb81.85cfc.0d28@mx.google.com>
+Date:   Mon, 06 Jan 2020 18:24:46 +0800
+From:   Eryu Guan <guaneryu@gmail.com>
+To:     fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: master branch updated to 6458922bb5dc
 MIME-Version: 1.0
-In-Reply-To: <20200106081647.GE893866@desktop>
-Content-Type: multipart/signed; micalg=pgp-sha256;
- protocol="application/pgp-signature";
- boundary="mAsfxpBkW8TiT1wuLBXB0vftMz52Favf8"
-X-Provags-ID: V03:K1:AFnykzjQJQJOQhO/2AZRXpMIxXgBYjHz8Fx67s6ece82FUvd1Q8
- W8c+4FKgYTjDN14QBSu1daZXVnEcRmAEAweG1iWcj1dhzOgDUFzcvGqHx1QKPNCzJ2F4/iy
- tZYGB5VH/97qI5VbDygeIrnMMmo0bWPbHVnUcnnnQOyuMbvQo06cvLlNYeV/7nHkx8OsYAI
- Q2vXWLCpasBMVQgomYMyA==
-X-UI-Out-Filterresults: notjunk:1;V03:K0:qX4rA4lklPA=:idrTa7PcBiLGmzA7uKswhc
- y/adt9VOk6wOTWOxG8lWTX/VaTNVrLooBW0o8RoBOfPjtdddcg5Ku5tbaQrIEWhvY2rB40Lil
- tkcmwra0eWYzpQZcQA/iypx9fV1B7x1NDvZ0pa0cSuQpe22rnuFPzkjJndHe1hnTDyjwlLi5/
- /JUkPIWEECW3jysl32YoQw8b2zFLwewY1GbOv2sq3lCzCGgCBH9y0rCjllR/cfw8XLx65Zf6b
- t6rtBNCr/lbj3iOQ0lnK9yQ3tpzCuUWJe7BmKeX5tRRSqUrGhQYCmExx54K5ijYnzVn2aEdtm
- QYK67M/KZdaMkiF6G90zqOYU7BdaYhrUITphpAligquNFn1hY8ABjp+Epw0rcYJsgqowhbsWI
- dJ22phLUJyWFk8JblzPjcXdyAwmRTOcoKtGuXkOJB02BFMvIss7IclubfuMi971cPP77CHa6C
- GSDYavxcpsHcBbTu1Hu7smR4DInh5nCEIVoiWghUr/+wjJ2DAG2o2fEZkB1+8mW/DYg0ncgfF
- Qace01zrj92u9FN7ZRD25SzX9YaTDPKqGR7mE2Pqfs6aVkMKov6G7DjgSWHLNz73IAQU9U/dt
- AF6cl6hn9XtK4a/kqLB+1XUTxh0TxrFUyKL8+eyUO2O0UIsPRAICNBJiP5mp/q0Q4w+IL2ai5
- BNyetyXPEFcUQ7JfMOmVMl/lqtH706c5aPtCL5rCZYuj92QkSUGc6DAqTlXfmwS1y1xpKM7YI
- gANppq/GL+SnIgRO06lVpVZVVINr22vzKI3prCXCg2QlmOor5cilWiqflNa0dscgQMhATY9Gy
- GEDihyBQT9TlwuWAsvQ0nA/YR+1YK5dI9OR+rzGP3EAS26stKvBHPbY8Km7yUmnNsf5gYG94R
- uRDKm4SZqsVPlhiKisZvUEBuBafyTn3FeD+IYUVl5QboYke/FpEqagbNS5wo2bzY1PnQRktLN
- sYwopP0TWDlenpEWZLoq0dFwd0eyAI/176+Kr3d73l6qg/u7OU1Vmgbl43VmZmvGX4C3eN2z/
- 1lgnAHBtOmW96FG70radP+31hkQSZM027G+kCFJqeEoPGdnVJNTu+HyV6bhDf2V9sFeh5Kqql
- nRl2OwJ9LHpP9AEXb/vE+MTHEy1ULmzlPgMXVNwW6hSJgkH/Egzb4Ej7ddqkcwPZYWIUCj9l0
- 6wGuSipcRpUaxLu3j+g/KwHGtUzdbvXWzx4dMjjQ0sKQ1yaNdyPVumXI2jtPXoI3PEybNJMHE
- yy/c+nu75MUWFk3oV7mycxZB+/6IIv/qXgynj/MV1hIUG1DcsEHin/npYnpA=
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="0ZzggZ6LV7K1"
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---mAsfxpBkW8TiT1wuLBXB0vftMz52Favf8
-Content-Type: multipart/mixed; boundary="0UXar6WGGfw181H4z1HFHG2Y5hAqAHtGn"
 
---0UXar6WGGfw181H4z1HFHG2Y5hAqAHtGn
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: quoted-printable
+--0ZzggZ6LV7K1
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
+Hi all,
 
+The master branch of the xfstests repository at:
 
-On 2020/1/6 =E4=B8=8B=E5=8D=884:16, Eryu Guan wrote:
-> On Fri, Jan 03, 2020 at 12:18:10PM +0100, Johannes Thumshirn wrote:
->> Similar to fstests commit 1a27bf14ef8b "btrfs/14[23]: Use proper help =
-to
->> get both devid and physical offset for corruption." btrfs/140 needs th=
-e
->> same treatment to pass with updated btrfs-progs.
->>
->> Signed-off-by: Johannes Thumshirn <jth@kernel.org>
->> ---
->=20
-> Qu Wenruo has posted "fstests: btrfs/14[01]: Use proper helper to get
-> both devid and physical for corruption" earlier, and I'll apply his
-> patch instead.
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-Thanks.
+have just been updated. This update mainly pulls in the fscrypt improvements
+and new tests from Eric Biggers. There're also some new tests for btrfs & xfs,
+and some random bug fixes.
 
-The timing is great since I was just going to ping that patch.
+The new btrfs test (btrfs/202) currently fails with v5.5-rc5 kernel, the fix is
+not upstreamed yet.
+
+There're still some review backlogs in my to-review list, my apology for the
+delay!
 
 Thanks,
-Qu
->=20
-> Thanks,
-> Eryu
->=20
+Eryu
+
+The new head of the master branch is commit:
+
+6458922bb5dc btrfs: regression test for subvol deletion after rename
+
+New commits:
+
+Darrick J. Wong (2):
+      [29e2be05501f] common/dmerror: always try to resume device
+      [c4802d4a53a9] fsx: fix range overlap check
+
+Eric Biggers (5):
+      [80bc5f9d790b] fscrypt-crypt-util: create key_and_iv_params structure
+      [faf3abfe3f16] fscrypt-crypt-util: add HKDF context constants
+      [799d6b506df7] common/encrypt: create named variables for UAPI constants
+      [a5d24c8bdf94] common/encrypt: support verifying ciphertext of IV_INO_LBLK_64 policies
+      [0335928b8c93] generic: verify ciphertext of IV_INO_LBLK_64 encryption policies
+
+Eric Sandeen (1):
+      [7b3ddeec674e] fstests: verify that xfs_growfs can operate on mounted device node
+
+J. Bruce Fields (1):
+      [dda94e8088a7] generic/529: use an ACL that doesn't confuse NFS
+
+Johannes Thumshirn (1):
+      [6a31c46b1a44] btrfs/139: require 2GB scratch dev
+
+Josef Bacik (1):
+      [6458922bb5dc] btrfs: regression test for subvol deletion after rename
+
+Qu Wenruo (1):
+      [996e2632443d] btrfs/14[01]: Use proper helper to get both devid and physical for corruption
+
+Yang Xu (2):
+      [c09db96d31f2] generic/386: fill missing brackets in awk
+      [64954c0ead68] generic/590: skip test if kernel doesn't support realtime
 
 
---0UXar6WGGfw181H4z1HFHG2Y5hAqAHtGn--
+Code Diffstat:
 
---mAsfxpBkW8TiT1wuLBXB0vftMz52Favf8
+ common/dmerror           |  21 +++++--
+ common/encrypt           | 126 ++++++++++++++++++++++++++++++---------
+ ltp/fsx.c                |  14 ++++-
+ src/fscrypt-crypt-util.c | 151 ++++++++++++++++++++++++++++++++++-------------
+ src/t_attr_corruption.c  |   2 +-
+ tests/btrfs/139          |   3 +-
+ tests/btrfs/140          |  34 ++++++++---
+ tests/btrfs/140.out      |   2 -
+ tests/btrfs/141          |  35 ++++++++---
+ tests/btrfs/141.out      |   2 -
+ tests/btrfs/202          |  57 ++++++++++++++++++
+ tests/btrfs/202.out      |   4 ++
+ tests/btrfs/group        |   1 +
+ tests/generic/386        |   2 +-
+ tests/generic/590        |   8 ++-
+ tests/generic/592        |  43 ++++++++++++++
+ tests/generic/592.out    |   6 ++
+ tests/generic/group      |   1 +
+ tests/xfs/149            | 101 +++++++++++++++++++++++++++++++
+ tests/xfs/149.out        |  16 +++++
+ tests/xfs/group          |   1 +
+ 21 files changed, 531 insertions(+), 99 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
+
+--0ZzggZ6LV7K1
 Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQFLBAEBCAA1FiEELd9y5aWlW6idqkLhwj2R86El/qgFAl4S9ioXHHF1d2VucnVv
-LmJ0cmZzQGdteC5jb20ACgkQwj2R86El/qi0nQf/ScPmHwFKzsz1FTIHQ68SpvN6
-io/r0YV8m9Hgt6VMUmOdpIhXEays8dR8awfux2cbPcz+EcbMEDSN1flmXb/IVitX
-IyWT7ofmtahjzuC0BJy8G8ieB2xXro3sY0b6a/h1IrL6bK1sFIrOS4kdIGhEvYrR
-L+yE6vKVmZV9XBckMGpILVJT3UNkqy05NSu0wsgu171+klyCZoU1HzD3rBJdBKIK
-/SWduKF5F3XpGAFkn0Rd+zRGAIynQiHSNWGAQuqmioToPLFWNtJ7V5YMqGLGRF6m
-itqQ+3MsdfEyloxBmgGvmdHWawDlDU61bsvZB/9yIam2QhAmEVllzuhO2fxaeg==
-=cioM
+iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAl4TCnAACgkQJlKqKVyP
+52Px1Q//ZhMHEh/9tmc013lMcVIAVBOrEojKd9ApEVaJqtEHEKwqnopnk0XTtBmV
+4K3pr3sns9bF3bhtLjeFYXCLd2aZWBsoowfw1sVLxnBoqsip2OhQhrKiBzcbp8ey
+OxBxD6VsSEhxH6i/E9DMkdLs905gXMCWS0itMyZvqw3CW8Nj4mJkEsRKpDix/WTP
+ItQ+r64zae0UCgwpToyMVswVZLucwibNAe6xlPlGJFOqp7TRDte7MMt8EG5h9CLl
+SDVzKo8kduiqDtsgT+Ia18/r+AX0vqyeN0sEUkd93JuTOcpWBq28TTHV3ivZIt7k
+zEOwdwo+IHvI06j62ucTbFghlomeyMolGIOjB7xRvJK9LEhf3DTXXtjm5EnTqDGe
+sBPmwLXfoLbhVEKLLO3GDbw5nMwpejs9qLUjLGGj936atH+eXquYJYVllbxmZeK8
+fiMfMq8ZHWbte2/HjUYtSvFIKe3IjUFZSXxe+9xnpF+tWfc3d3I9N2d8OAhOo9UF
+98ZOh2qEdjIYZYfGDoqPyxmRPW/mnzD0sfvHQvMXvjI/1Ot9eS0issCsSbBtl0uD
+wrWFTRdb2ABG3y7eGFpqYFGyHNNvTsGoMOt6dJsFcJ5kfh1HZ+7m+lBo69J7BiNH
+0LzvCh+4SMugQxJQjjsWuzZLoHM+rG7NSSB+wJ1HgCQxdicRM8Y=
+=W9Sn
 -----END PGP SIGNATURE-----
 
---mAsfxpBkW8TiT1wuLBXB0vftMz52Favf8--
+--0ZzggZ6LV7K1--
