@@ -2,88 +2,78 @@ Return-Path: <SRS0=Klg3=23=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 62B55C32771
-	for <linux-fstests@archiver.kernel.org>; Mon,  6 Jan 2020 08:16:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 010EEC32771
+	for <linux-fstests@archiver.kernel.org>; Mon,  6 Jan 2020 08:30:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 30D8C21775
-	for <linux-fstests@archiver.kernel.org>; Mon,  6 Jan 2020 08:16:56 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="VI340YGo"
+	by mail.kernel.org (Postfix) with ESMTP id C666C215A4
+	for <linux-fstests@archiver.kernel.org>; Mon,  6 Jan 2020 08:30:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725821AbgAFIQz (ORCPT
+        id S1725887AbgAFIaG (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 6 Jan 2020 03:16:55 -0500
-Received: from mail-pj1-f67.google.com ([209.85.216.67]:38206 "EHLO
-        mail-pj1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725446AbgAFIQz (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 6 Jan 2020 03:16:55 -0500
-Received: by mail-pj1-f67.google.com with SMTP id l35so7469934pje.3;
-        Mon, 06 Jan 2020 00:16:55 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=o2l9/alDuzrPmIULbxtnmIOI1g1WS53LksYUGyc887E=;
-        b=VI340YGoNYtAb1hiVuK+ItSmzcAga1ko2IL9CKZBfZbKYKwrhyhRyHDhC0U3HvzCj1
-         oqj/CZDixz7Zgugpze5yg51DzcjilSV2AYLERUIJPWDkFuSCtWypYn+YQYU7LTTtgno1
-         xvv5gvsPE0Vj6VI/tK5lJWMesoCfMmmYYolVLRoDsZmWAridr5mkaI1xeQaNVKgSj2em
-         inlLch2yYFDb4q4+sQKrAnV1nWDkwPaDH7KNr7zQ0XmIIyqJyV+yI7k4XIlJlUYQPybz
-         AJ6P6eSfnucM2cfOV+LFzbCOCRROTO79E2rnLvm3o1MoRpzagl6ngpXF0FMUTBiUdtjm
-         R0oA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=o2l9/alDuzrPmIULbxtnmIOI1g1WS53LksYUGyc887E=;
-        b=igrpK3nDl38bYWcUG2DgI+159Sa6MSZXoYZQuQf4PHr84m1RgwAPKW8v0tRbXiuZpu
-         yZ7SuZz6WnwaLFYAsKxIwPzk9SngUOGwnTM9i3htJxXROsXkgv9tKDb11P3zqOVlPJGU
-         Wa+4AR2Tlun2Av6cO/LwKMAwTxkCfy2VZewPHt4OltSOeyw7Mqi5msscp9wqk7pE3A0r
-         bplOe1VT0SkTENU2tvWzX6G5w7a5RXqc91rDDC7N5CXqV3LJFBAKSOJOu/eQnw7lmk6L
-         g9TTJRTik1ES0pbPq0JhN5HkhzAZz9cNHBKVdQfp14Qj4pgXL+xotjz2fHe7IJdBxiSr
-         IFVA==
-X-Gm-Message-State: APjAAAVQQ6/LEUoUuzV5RkVdRvv3XjXBWk/NpP51n+sVTsZ8kJARcJRw
-        EMHX0Na3N2HPCUDunxtO5tkgPLuxEbY=
-X-Google-Smtp-Source: APXvYqz8FaeT6349rpiq4FZHymuOujTmAJpMLxnxq0ksNLA1SLGwEbi0NRsc5W7LvzyKlPySiNYb1g==
-X-Received: by 2002:a17:90a:8545:: with SMTP id a5mr41780748pjw.43.1578298614934;
-        Mon, 06 Jan 2020 00:16:54 -0800 (PST)
-Received: from localhost ([178.128.102.47])
-        by smtp.gmail.com with ESMTPSA id b98sm23560362pjc.16.2020.01.06.00.16.53
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 06 Jan 2020 00:16:54 -0800 (PST)
-Date:   Mon, 6 Jan 2020 16:16:49 +0800
-From:   Eryu Guan <guaneryu@gmail.com>
-To:     Johannes Thumshirn <jth@kernel.org>
-Cc:     Qu Wenruo <wqu@suse.com>, linux-btrfs@vger.kernel.org,
-        fstests@vger.kernel.org, Damien Le Moal <Damien.LeMoal@wdc.com>
-Subject: Re: [PATCH] btrfs/140: use proper helpers to get devid and physical
- offset for corruption
-Message-ID: <20200106081647.GE893866@desktop>
-References: <20200103111810.658-1-jth@kernel.org>
+        Mon, 6 Jan 2020 03:30:06 -0500
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:9576 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1725446AbgAFIaG (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 6 Jan 2020 03:30:06 -0500
+X-IronPort-AV: E=Sophos;i="5.69,401,1571673600"; 
+   d="scan'208";a="81368270"
+Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
+  by heian.cn.fujitsu.com with ESMTP; 06 Jan 2020 16:30:03 +0800
+Received: from G08CNEXMBPEKD06.g08.fujitsu.local (unknown [10.167.33.206])
+        by cn.fujitsu.com (Postfix) with ESMTP id CD00149E9326;
+        Mon,  6 Jan 2020 16:21:01 +0800 (CST)
+Received: from [10.167.220.69] (10.167.220.69) by
+ G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206) with Microsoft SMTP Server
+ (TLS) id 15.0.1395.4; Mon, 6 Jan 2020 16:29:52 +0800
+Message-ID: <5E12EFFE.8060906@cn.fujitsu.com>
+Date:   Mon, 6 Jan 2020 16:29:50 +0800
+From:   Xiao Yang <yangx.jy@cn.fujitsu.com>
+User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.2; zh-CN; rv:1.9.2.18) Gecko/20110616 Thunderbird/3.1.11
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200103111810.658-1-jth@kernel.org>
+To:     Eryu Guan <eguan@linux.alibaba.com>
+CC:     <fstests@vger.kernel.org>, <guaneryu@gmail.com>
+Subject: Re: [PATCH] ltp/fsx.c: Ignore unsupported keep_size flag even if
+ it's specified by --replay-ops
+References: <20200103075451.12354-1-yangx.jy@cn.fujitsu.com> <20200103082642.GE41863@e18g06458.et15sqa>
+In-Reply-To: <20200103082642.GE41863@e18g06458.et15sqa>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.167.220.69]
+X-ClientProxiedBy: G08CNEXCHPEKD04.g08.fujitsu.local (10.167.33.200) To
+ G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206)
+X-yoursite-MailScanner-ID: CD00149E9326.A9B0F
+X-yoursite-MailScanner: Found to be clean
+X-yoursite-MailScanner-From: yangx.jy@cn.fujitsu.com
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Jan 03, 2020 at 12:18:10PM +0100, Johannes Thumshirn wrote:
-> Similar to fstests commit 1a27bf14ef8b "btrfs/14[23]: Use proper help to
-> get both devid and physical offset for corruption." btrfs/140 needs the
-> same treatment to pass with updated btrfs-progs.
-> 
-> Signed-off-by: Johannes Thumshirn <jth@kernel.org>
-> ---
+On 2020/1/3 16:26, Eryu Guan wrote:
+> I proposed a similar fix back in 2017[1], but Amir didn't like it
+> because my patch (and your patch) ignored keep_size silently (newly
+> generated ops list was different than the one fed to --replay-ops).
+>
+> I proposed a new version in last Oct[2], which will record such ops as
+> skipped in the generated ops list, and Brian suggested to add a switch
+> to control the behavior if we want to fail fsx on unsupported ops. But I
+> didn't have time to work on it since then..
+>
+> Would you like to help implement the switch Brian suggested based on my
+> second patch? Then I can apply my v2 patch&  your switch patch.
+Hi Eryu,
 
-Qu Wenruo has posted "fstests: btrfs/14[01]: Use proper helper to get
-both devid and physical for corruption" earlier, and I'll apply his
-patch instead.
+After reading current fsx code, it will skip all unsupported ops(e.g. 
+punch_hole, zero_range,
+collapse_range) automatically even if they are specified by --replay-ops.
+
+Why do we need to add a switch for keep size?
 
 Thanks,
-Eryu
+Xiao Yang
+
+
