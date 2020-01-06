@@ -2,91 +2,137 @@ Return-Path: <SRS0=Klg3=23=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.0 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 22A7FC32771
-	for <linux-fstests@archiver.kernel.org>; Mon,  6 Jan 2020 08:39:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 489E9C32771
+	for <linux-fstests@archiver.kernel.org>; Mon,  6 Jan 2020 08:56:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id F181B21734
-	for <linux-fstests@archiver.kernel.org>; Mon,  6 Jan 2020 08:39:08 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1A8E920848
+	for <linux-fstests@archiver.kernel.org>; Mon,  6 Jan 2020 08:56:27 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=gmx.net header.i=@gmx.net header.b="V9WaTkcP"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725887AbgAFIjI (ORCPT
+        id S1725908AbgAFI41 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 6 Jan 2020 03:39:08 -0500
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:17858 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1725821AbgAFIjI (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 6 Jan 2020 03:39:08 -0500
-X-IronPort-AV: E=Sophos;i="5.69,401,1571673600"; 
-   d="scan'208";a="81369100"
-Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
-  by heian.cn.fujitsu.com with ESMTP; 06 Jan 2020 16:39:05 +0800
-Received: from G08CNEXMBPEKD06.g08.fujitsu.local (unknown [10.167.33.206])
-        by cn.fujitsu.com (Postfix) with ESMTP id 9AD6649E9329;
-        Mon,  6 Jan 2020 16:30:03 +0800 (CST)
-Received: from [10.167.220.69] (10.167.220.69) by
- G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206) with Microsoft SMTP Server
- (TLS) id 15.0.1395.4; Mon, 6 Jan 2020 16:39:00 +0800
-Message-ID: <5E12F222.7090104@cn.fujitsu.com>
-Date:   Mon, 6 Jan 2020 16:38:58 +0800
-From:   Xiao Yang <yangx.jy@cn.fujitsu.com>
-User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.2; zh-CN; rv:1.9.2.18) Gecko/20110616 Thunderbird/3.1.11
+        Mon, 6 Jan 2020 03:56:27 -0500
+Received: from mout.gmx.net ([212.227.15.18]:53725 "EHLO mout.gmx.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726307AbgAFI41 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 6 Jan 2020 03:56:27 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net;
+        s=badeba3b8450; t=1578300975;
+        bh=EevMvVqS8Asv+063Cb4z/6k+5ufQS41WpjP6ja7rmrY=;
+        h=X-UI-Sender-Class:Subject:To:Cc:References:From:Date:In-Reply-To;
+        b=V9WaTkcPd/221sly84odxAUyZoUZ4ml46LTz5i7rMrubcAwPXPplv5/yNxR3nAGDr
+         rhh/KYbjPVnvIxaLrkz+NG2fq1TY11DO92vV1pjNkC3ZJ+uZdAcKFK52UxdA797LrS
+         CqNXUXrPsb2Ei26TgLdyDBAaujeXt4YvuzOOgrAQ=
+X-UI-Sender-Class: 01bb95c1-4bf8-414a-932a-4f6e2808ef9c
+Received: from [0.0.0.0] ([149.28.201.231]) by mail.gmx.com (mrgmx004
+ [212.227.17.184]) with ESMTPSA (Nemesis) id 1MAwbz-1izde33qUj-00BLyj; Mon, 06
+ Jan 2020 09:56:15 +0100
+Subject: Re: [PATCH] btrfs/140: use proper helpers to get devid and physical
+ offset for corruption
+To:     Eryu Guan <guaneryu@gmail.com>, Johannes Thumshirn <jth@kernel.org>
+Cc:     Qu Wenruo <wqu@suse.com>, linux-btrfs@vger.kernel.org,
+        fstests@vger.kernel.org, Damien Le Moal <Damien.LeMoal@wdc.com>
+References: <20200103111810.658-1-jth@kernel.org>
+ <20200106081647.GE893866@desktop>
+From:   Qu Wenruo <quwenruo.btrfs@gmx.com>
+Message-ID: <1c1dd1ae-e484-ee02-a7d8-077f95f7d4cf@gmx.com>
+Date:   Mon, 6 Jan 2020 16:56:10 +0800
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.3.1
 MIME-Version: 1.0
-To:     Eryu Guan <eguan@linux.alibaba.com>
-CC:     <fstests@vger.kernel.org>, <guaneryu@gmail.com>
-Subject: Re: [PATCH] ltp/fsx.c: Ignore unsupported keep_size flag even if
- it's specified by --replay-ops
-References: <20200103075451.12354-1-yangx.jy@cn.fujitsu.com> <20200103082642.GE41863@e18g06458.et15sqa> <5E12EFFE.8060906@cn.fujitsu.com>
-In-Reply-To: <5E12EFFE.8060906@cn.fujitsu.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.167.220.69]
-X-ClientProxiedBy: G08CNEXCHPEKD04.g08.fujitsu.local (10.167.33.200) To
- G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206)
-X-yoursite-MailScanner-ID: 9AD6649E9329.AAB54
-X-yoursite-MailScanner: Found to be clean
-X-yoursite-MailScanner-From: yangx.jy@cn.fujitsu.com
+In-Reply-To: <20200106081647.GE893866@desktop>
+Content-Type: multipart/signed; micalg=pgp-sha256;
+ protocol="application/pgp-signature";
+ boundary="mAsfxpBkW8TiT1wuLBXB0vftMz52Favf8"
+X-Provags-ID: V03:K1:AFnykzjQJQJOQhO/2AZRXpMIxXgBYjHz8Fx67s6ece82FUvd1Q8
+ W8c+4FKgYTjDN14QBSu1daZXVnEcRmAEAweG1iWcj1dhzOgDUFzcvGqHx1QKPNCzJ2F4/iy
+ tZYGB5VH/97qI5VbDygeIrnMMmo0bWPbHVnUcnnnQOyuMbvQo06cvLlNYeV/7nHkx8OsYAI
+ Q2vXWLCpasBMVQgomYMyA==
+X-UI-Out-Filterresults: notjunk:1;V03:K0:qX4rA4lklPA=:idrTa7PcBiLGmzA7uKswhc
+ y/adt9VOk6wOTWOxG8lWTX/VaTNVrLooBW0o8RoBOfPjtdddcg5Ku5tbaQrIEWhvY2rB40Lil
+ tkcmwra0eWYzpQZcQA/iypx9fV1B7x1NDvZ0pa0cSuQpe22rnuFPzkjJndHe1hnTDyjwlLi5/
+ /JUkPIWEECW3jysl32YoQw8b2zFLwewY1GbOv2sq3lCzCGgCBH9y0rCjllR/cfw8XLx65Zf6b
+ t6rtBNCr/lbj3iOQ0lnK9yQ3tpzCuUWJe7BmKeX5tRRSqUrGhQYCmExx54K5ijYnzVn2aEdtm
+ QYK67M/KZdaMkiF6G90zqOYU7BdaYhrUITphpAligquNFn1hY8ABjp+Epw0rcYJsgqowhbsWI
+ dJ22phLUJyWFk8JblzPjcXdyAwmRTOcoKtGuXkOJB02BFMvIss7IclubfuMi971cPP77CHa6C
+ GSDYavxcpsHcBbTu1Hu7smR4DInh5nCEIVoiWghUr/+wjJ2DAG2o2fEZkB1+8mW/DYg0ncgfF
+ Qace01zrj92u9FN7ZRD25SzX9YaTDPKqGR7mE2Pqfs6aVkMKov6G7DjgSWHLNz73IAQU9U/dt
+ AF6cl6hn9XtK4a/kqLB+1XUTxh0TxrFUyKL8+eyUO2O0UIsPRAICNBJiP5mp/q0Q4w+IL2ai5
+ BNyetyXPEFcUQ7JfMOmVMl/lqtH706c5aPtCL5rCZYuj92QkSUGc6DAqTlXfmwS1y1xpKM7YI
+ gANppq/GL+SnIgRO06lVpVZVVINr22vzKI3prCXCg2QlmOor5cilWiqflNa0dscgQMhATY9Gy
+ GEDihyBQT9TlwuWAsvQ0nA/YR+1YK5dI9OR+rzGP3EAS26stKvBHPbY8Km7yUmnNsf5gYG94R
+ uRDKm4SZqsVPlhiKisZvUEBuBafyTn3FeD+IYUVl5QboYke/FpEqagbNS5wo2bzY1PnQRktLN
+ sYwopP0TWDlenpEWZLoq0dFwd0eyAI/176+Kr3d73l6qg/u7OU1Vmgbl43VmZmvGX4C3eN2z/
+ 1lgnAHBtOmW96FG70radP+31hkQSZM027G+kCFJqeEoPGdnVJNTu+HyV6bhDf2V9sFeh5Kqql
+ nRl2OwJ9LHpP9AEXb/vE+MTHEy1ULmzlPgMXVNwW6hSJgkH/Egzb4Ej7ddqkcwPZYWIUCj9l0
+ 6wGuSipcRpUaxLu3j+g/KwHGtUzdbvXWzx4dMjjQ0sKQ1yaNdyPVumXI2jtPXoI3PEybNJMHE
+ yy/c+nu75MUWFk3oV7mycxZB+/6IIv/qXgynj/MV1hIUG1DcsEHin/npYnpA=
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 2020/1/6 16:29, Xiao Yang wrote:
-> On 2020/1/3 16:26, Eryu Guan wrote:
->> I proposed a similar fix back in 2017[1], but Amir didn't like it
->> because my patch (and your patch) ignored keep_size silently (newly
->> generated ops list was different than the one fed to --replay-ops).
->>
->> I proposed a new version in last Oct[2], which will record such ops as
->> skipped in the generated ops list, and Brian suggested to add a switch
->> to control the behavior if we want to fail fsx on unsupported ops. But I
->> didn't have time to work on it since then..
->>
->> Would you like to help implement the switch Brian suggested based on my
->> second patch? Then I can apply my v2 patch&  your switch patch.
-> Hi Eryu,
->
-> After reading current fsx code, it will skip all unsupported ops(e.g. 
-> punch_hole, zero_range,
-> collapse_range) automatically even if they are specified by --replay-ops.
->
-> Why do we need to add a switch for keep size?
-Hi Eryu,
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--mAsfxpBkW8TiT1wuLBXB0vftMz52Favf8
+Content-Type: multipart/mixed; boundary="0UXar6WGGfw181H4z1HFHG2Y5hAqAHtGn"
 
-Do you mean that we should add a switch for all unsupported 
-ops(punch_hole, zero_range, keep_size and so on)?
+--0UXar6WGGfw181H4z1HFHG2Y5hAqAHtGn
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: quoted-printable
+
+
+
+On 2020/1/6 =E4=B8=8B=E5=8D=884:16, Eryu Guan wrote:
+> On Fri, Jan 03, 2020 at 12:18:10PM +0100, Johannes Thumshirn wrote:
+>> Similar to fstests commit 1a27bf14ef8b "btrfs/14[23]: Use proper help =
+to
+>> get both devid and physical offset for corruption." btrfs/140 needs th=
+e
+>> same treatment to pass with updated btrfs-progs.
+>>
+>> Signed-off-by: Johannes Thumshirn <jth@kernel.org>
+>> ---
+>=20
+> Qu Wenruo has posted "fstests: btrfs/14[01]: Use proper helper to get
+> both devid and physical for corruption" earlier, and I'll apply his
+> patch instead.
+
+Thanks.
+
+The timing is great since I was just going to ping that patch.
 
 Thanks,
-Xiao Yang
->
+Qu
+>=20
 > Thanks,
-> Xiao Yang
->
->
-> .
->
+> Eryu
+>=20
 
 
+--0UXar6WGGfw181H4z1HFHG2Y5hAqAHtGn--
 
+--mAsfxpBkW8TiT1wuLBXB0vftMz52Favf8
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQFLBAEBCAA1FiEELd9y5aWlW6idqkLhwj2R86El/qgFAl4S9ioXHHF1d2VucnVv
+LmJ0cmZzQGdteC5jb20ACgkQwj2R86El/qi0nQf/ScPmHwFKzsz1FTIHQ68SpvN6
+io/r0YV8m9Hgt6VMUmOdpIhXEays8dR8awfux2cbPcz+EcbMEDSN1flmXb/IVitX
+IyWT7ofmtahjzuC0BJy8G8ieB2xXro3sY0b6a/h1IrL6bK1sFIrOS4kdIGhEvYrR
+L+yE6vKVmZV9XBckMGpILVJT3UNkqy05NSu0wsgu171+klyCZoU1HzD3rBJdBKIK
+/SWduKF5F3XpGAFkn0Rd+zRGAIynQiHSNWGAQuqmioToPLFWNtJ7V5YMqGLGRF6m
+itqQ+3MsdfEyloxBmgGvmdHWawDlDU61bsvZB/9yIam2QhAmEVllzuhO2fxaeg==
+=cioM
+-----END PGP SIGNATURE-----
+
+--mAsfxpBkW8TiT1wuLBXB0vftMz52Favf8--
