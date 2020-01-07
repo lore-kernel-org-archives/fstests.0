@@ -2,154 +2,80 @@ Return-Path: <SRS0=VTFL=24=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 68E65C33C8C
-	for <linux-fstests@archiver.kernel.org>; Tue,  7 Jan 2020 16:52:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 16078C33C9E
+	for <linux-fstests@archiver.kernel.org>; Tue,  7 Jan 2020 16:55:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 3FF0B208C4
-	for <linux-fstests@archiver.kernel.org>; Tue,  7 Jan 2020 16:52:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D80B92080A
+	for <linux-fstests@archiver.kernel.org>; Tue,  7 Jan 2020 16:55:52 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="nReyFPFO"
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="OcqkYiU1"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728405AbgAGQw6 (ORCPT
+        id S1728523AbgAGQzw (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 7 Jan 2020 11:52:58 -0500
-Received: from bombadil.infradead.org ([198.137.202.133]:51446 "EHLO
-        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728215AbgAGQw6 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 7 Jan 2020 11:52:58 -0500
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=bombadil.20170209; h=Content-Transfer-Encoding:
-        MIME-Version:Message-Id:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:
-        Content-ID:Content-Description:Resent-Date:Resent-From:Resent-Sender:
-        Resent-To:Resent-Cc:Resent-Message-ID:In-Reply-To:References:List-Id:
-        List-Help:List-Unsubscribe:List-Subscribe:List-Post:List-Owner:List-Archive;
-         bh=uX1cNfoUjlP7M1M+NyKWUF0XVUS6WmFcz58xFnZiu+o=; b=nReyFPFO+7l9lq7HCOa9MYg8F
-        33QXE6lEJbd/nG/7YgY3uf/cLcFTDuXIhY1b9Zypsk+5s4zmtM4qW0590htEUmvu7jswaJt+6U3Vm
-        xWbCVvmdHztZrbp2BBeYzr/Ix5+tslCbpE9PbSs3M/C9tinRwsmKSYuAgQS3GtpCCe2rX95ua+3dH
-        iao8W30ZcF6JJHnAfOTNK9VsR9k5wbIYhWPW9vwW/UqGRli8Qm18BM3STBcscKyad8sDzfKfJJmPw
-        tKLGEjpGRzt+9Fymf/+hh0OhKtyqt2984PBmZeXX8UM6PPDrb1X/1VqhSIB5f03lOma7nWKDASp3q
-        JnfLZlPIQ==;
-Received: from clnet-p19-102.ikbnet.co.at ([83.175.77.102] helo=localhost)
-        by bombadil.infradead.org with esmtpsa (Exim 4.92.3 #3 (Red Hat Linux))
-        id 1ios6E-00028K-2c; Tue, 07 Jan 2020 16:52:58 +0000
-From:   Christoph Hellwig <hch@lst.de>
-To:     fstests@vger.kernel.org
-Cc:     linux-xfs@vger.kernel.org
-Subject: [PATCH] xfs: add a new test for removing ACLs through the attr interface
-Date:   Tue,  7 Jan 2020 17:52:55 +0100
-Message-Id: <20200107165255.261877-1-hch@lst.de>
-X-Mailer: git-send-email 2.24.1
+        Tue, 7 Jan 2020 11:55:52 -0500
+Received: from mail-qt1-f169.google.com ([209.85.160.169]:36783 "EHLO
+        mail-qt1-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728454AbgAGQzv (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 7 Jan 2020 11:55:51 -0500
+Received: by mail-qt1-f169.google.com with SMTP id q20so340113qtp.3
+        for <fstests@vger.kernel.org>; Tue, 07 Jan 2020 08:55:50 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
+        h=from:to:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=bpXnwPXyr8tXDiy7kEFIiafSbEdLAqdCUWAx8vDbwjk=;
+        b=OcqkYiU1R3O5YYUg7nlD6aoxU+N/bjzocElv++2M/NfqO3D2e6tDD3SgR7RQEO8yeR
+         bgmiKSD0duAgsCtjTOcSiHAOprl2xFbfzdW2+/fhztBVQP/YvM0go+VlaOeKLBnfmPuh
+         x//ulTisG6PE3RdPhkirr7fS+FhVEdpuBuSkcix1ywKi1ZBw5akXX7Is3vauvpKULlkA
+         wTkX2y8h3zRwxpcvDGFoftMOpzadir5ljFYczN4vlEArpWmZZcDUR41bM8L8qnlToCcU
+         RefatCQQAw0f34GQPRg+lA2Drb9e9fSSpBoTPwc5zY5P1s1reGc2tFvZ0qK8I5Gehqtz
+         rEcg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=bpXnwPXyr8tXDiy7kEFIiafSbEdLAqdCUWAx8vDbwjk=;
+        b=fdeNhtFvBShvuV+wUZKWg33Kdewrm0oSxEJUclaNkoMTd99JfB96XmOS1yHt2uWEET
+         hH1ZCBmuwMr3EOo2WipgdKplIhDMS58Lt8JiHW1gUWC1cefdy11K16f3JPQTjA325xVD
+         xNTzKTtlOpNfjqORkNFj78+FRmPiQMc2+9hEcGesFobGyfME2/I4NVvsrmcGQ9ljc4Xh
+         zyBkx2Dp7wxYWSL8Cr9OgmR2MptTMpF6FJwpxQgYuvumDw+SeFMd79V5X1QqOC25zsDm
+         a+Xa3MKPxV4EAav7BJ9PqdhkoY4Trt67hN7Kv9p6Mtlj/DU5bi+C9qQtv3UxmMskX07Y
+         xZeQ==
+X-Gm-Message-State: APjAAAWj+pXyCYAusKYYK8uGlt1KNq9pMVpT5HXCk+7mHpohvX1lTF8/
+        NwaKn1WMVMXqFthultSrqdnTDd2kHhxhUw==
+X-Google-Smtp-Source: APXvYqznW1xDrFgzzvGpdCMkFDfCDg48uFe7Li7qGGeh90gTgl6RVDd2Ln7XaUfl8V2avbdpQOwpKQ==
+X-Received: by 2002:aed:256f:: with SMTP id w44mr74397881qtc.331.1578416149856;
+        Tue, 07 Jan 2020 08:55:49 -0800 (PST)
+Received: from localhost ([107.15.81.208])
+        by smtp.gmail.com with ESMTPSA id r6sm124924qtm.63.2020.01.07.08.55.48
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 07 Jan 2020 08:55:49 -0800 (PST)
+From:   Josef Bacik <josef@toxicpanda.com>
+To:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Subject: [PATCH 0/3] Some fsx improvements
+Date:   Tue,  7 Jan 2020 11:55:39 -0500
+Message-Id: <20200107165542.70108-1-josef@toxicpanda.com>
+X-Mailer: git-send-email 2.23.0
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Test that removing the SGI_ACL_FILE attr also removes the cached ACL
-used for access control checking.
+I was fixing a i_size problem in btrfs and I used fsx to reproduce the issue,
+but I needed to make a few changes to actually reproduce the problem.  The
+individual explanations are in the patch changelogs themselves.  One thing that
+may trip people up is that I've done system("echo 3 > /proc/sys/vm/drop_caches")
+for dropping caches, but this is consistent with several other tools we have in
+fstests.  These are all small and straightforward fixes, and don't really affect
+any of the other tests.  The only exception is generic/521 which is a soak test,
+I figure we want that thing to cover as much ground as possible, so enabling the
+close+open operation is desired there.  Thanks,
 
-Signed-off-by: Christoph Hellwig <hch@lst.de>
----
- tests/xfs/666     | 58 +++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/666.out |  7 ++++++
- tests/xfs/group   |  1 +
- 3 files changed, 66 insertions(+)
- create mode 100755 tests/xfs/666
- create mode 100644 tests/xfs/666.out
-
-diff --git a/tests/xfs/666 b/tests/xfs/666
-new file mode 100755
-index 00000000..00d3cbc1
---- /dev/null
-+++ b/tests/xfs/666
-@@ -0,0 +1,58 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2020 Christoph Hellwig
-+#
-+# FS QA Test 666
-+#
-+# Ensure that removing the access ACL through the XFS-specific attr name removes
-+# the cached ACL as well
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $FILE
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/attr
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+
-+_require_test
-+_require_runas
-+_require_acls
-+_require_user
-+
-+FILE=$TEST_DIR/foo
-+
-+echo "This is a test" > ${FILE}
-+chmod g-r $FILE
-+chmod o-r $FILE
-+chmod u-r $FILE
-+
-+echo "No ACL: "
-+_user_do "cat $FILE"
-+
-+echo "With ACL: "
-+setfacl -m u:$qa_user:r $FILE
-+_user_do "cat $FILE"
-+
-+echo "ACL Removed through attr:"
-+setfattr -x trusted.SGI_ACL_FILE ${FILE}
-+_user_do "cat $FILE"
-+
-+status=0
-+exit
-diff --git a/tests/xfs/666.out b/tests/xfs/666.out
-new file mode 100644
-index 00000000..bd45c3ef
---- /dev/null
-+++ b/tests/xfs/666.out
-@@ -0,0 +1,7 @@
-+QA output created by 666
-+No ACL: 
-+Permission denied
-+With ACL: 
-+This is a test
-+ACL Removed through attr:
-+Permission denied
-diff --git a/tests/xfs/group b/tests/xfs/group
-index c7253cf1..6af5171e 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -509,3 +509,4 @@
- 509 auto ioctl
- 510 auto ioctl quick
- 511 auto quick quota
-+666 auto quick acl attr
--- 
-2.24.1
+Josef
 
