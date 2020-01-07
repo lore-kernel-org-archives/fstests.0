@@ -4,152 +4,79 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CD5EBC33C99
-	for <linux-fstests@archiver.kernel.org>; Tue,  7 Jan 2020 06:01:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B959BC33C99
+	for <linux-fstests@archiver.kernel.org>; Tue,  7 Jan 2020 06:31:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id AA178207E0
-	for <linux-fstests@archiver.kernel.org>; Tue,  7 Jan 2020 06:01:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 87673207E0
+	for <linux-fstests@archiver.kernel.org>; Tue,  7 Jan 2020 06:31:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725781AbgAGGBv (ORCPT
+        id S1725781AbgAGGbj (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 7 Jan 2020 01:01:51 -0500
-Received: from mx2.suse.de ([195.135.220.15]:50028 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725267AbgAGGBu (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 7 Jan 2020 01:01:50 -0500
-X-Virus-Scanned: by amavisd-new at test-mx.suse.de
-Received: from relay2.suse.de (unknown [195.135.220.254])
-        by mx2.suse.de (Postfix) with ESMTP id EC191ADBE;
-        Tue,  7 Jan 2020 06:01:48 +0000 (UTC)
-From:   Qu Wenruo <wqu@suse.com>
-To:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Cc:     Anand Jain <anand.jain@oracle.com>,
-        Josef Bacik <josef@toxicpanda.com>
-Subject: [PATCH] fstests: btrfs/172: Remove the dead test which we have no plan to fix
-Date:   Tue,  7 Jan 2020 14:01:43 +0800
-Message-Id: <20200107060143.2613-1-wqu@suse.com>
-X-Mailer: git-send-email 2.24.1
+        Tue, 7 Jan 2020 01:31:39 -0500
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:1323 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1725267AbgAGGbj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 7 Jan 2020 01:31:39 -0500
+X-IronPort-AV: E=Sophos;i="5.69,404,1571673600"; 
+   d="scan'208";a="81423182"
+Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
+  by heian.cn.fujitsu.com with ESMTP; 07 Jan 2020 14:31:36 +0800
+Received: from G08CNEXMBPEKD05.g08.fujitsu.local (unknown [10.167.33.204])
+        by cn.fujitsu.com (Postfix) with ESMTP id 06855406AB15;
+        Tue,  7 Jan 2020 14:22:32 +0800 (CST)
+Received: from G08CNEXCHPEKD02.g08.fujitsu.local (10.167.33.83) by
+ G08CNEXMBPEKD05.g08.fujitsu.local (10.167.33.204) with Microsoft SMTP Server
+ (TLS) id 15.0.1395.4; Tue, 7 Jan 2020 14:31:29 +0800
+Received: from localhost.localdomain (10.167.220.84) by
+ G08CNEXCHPEKD02.g08.fujitsu.local (10.167.33.89) with Microsoft SMTP Server
+ (TLS) id 14.3.439.0; Tue, 7 Jan 2020 14:31:29 +0800
+From:   Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+To:     <yangx.jy@cn.fujitsu.com>, <guaneryu@gmail.com>
+CC:     <fstests@vger.kernel.org>, Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+Subject: [PATCH] fsstress.c: Add header file stdbool.h
+Date:   Tue, 7 Jan 2020 14:31:26 +0800
+Message-ID: <1578378686-22832-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
+X-Mailer: git-send-email 1.8.3.1
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-Originating-IP: [10.167.220.84]
+X-yoursite-MailScanner-ID: 06855406AB15.AB3F5
+X-yoursite-MailScanner: Found to be clean
+X-yoursite-MailScanner-From: xuyang2018.jy@cn.fujitsu.com
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-There is no plan to fix it yet, so remove it.
+Compilation failed on Fedora 20 because stdbool.h is not included
+in xfs/platform_defs-x86_64.h or xfs/linux.h on Fedora 20.
 
-Cc: Anand Jain <anand.jain@oracle.com>
-Signed-off-by: Qu Wenruo <wqu@suse.com>
-Reviewed-by: Josef Bacik <josef@toxicpanda.com>
+Also, yang xiao fixed similar problem(commit 234f51ebbd) for fsx.c in
+2016.2, but after that, fsstress.c started to use bool variable without
+including stdbool.h file. It may fail on old linux distributions, so
+fix it.
+
+Signed-off-by: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
 ---
- tests/btrfs/172     | 73 ---------------------------------------------
- tests/btrfs/172.out |  2 --
- tests/btrfs/group   |  1 -
- 3 files changed, 76 deletions(-)
- delete mode 100755 tests/btrfs/172
- delete mode 100644 tests/btrfs/172.out
+ ltp/fsstress.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/tests/btrfs/172 b/tests/btrfs/172
-deleted file mode 100755
-index 0dffb2dff40b..000000000000
---- a/tests/btrfs/172
-+++ /dev/null
-@@ -1,73 +0,0 @@
--#! /bin/bash
--# SPDX-License-Identifier: GPL-2.0
--# Copyright (c) 2018 Oracle. All Rights Reserved.
--#
--# FS QA Test 172
--#
--# Test if the unaligned (by size and offset) punch hole is successful when FS
--# is at ENOSPC.
--#
--seq=`basename $0`
--seqres=$RESULT_DIR/$seq
--echo "QA output created by $seq"
--
--here=`pwd`
--tmp=/tmp/$$
--status=1	# failure is the default!
--trap "_cleanup; exit \$status" 0 1 2 3 15
--
--_cleanup()
--{
--	cd /
--	rm -f $tmp.*
--}
--
--# get standard environment, filters and checks
--. ./common/rc
--. ./common/filter
--
--# remove previous $seqres.full before test
--rm -f $seqres.full
--
--# real QA test starts here
--
--# Modify as appropriate.
--_supported_fs btrfs
--_supported_os Linux
--_require_scratch
--_require_xfs_io_command "fpunch"
--
--_scratch_mkfs_sized $((256 * 1024 *1024)) >> $seqres.full
--
--# max_inline ensures data is not inlined within metadata extents
--_scratch_mount "-o max_inline=0,nodatacow"
--
--cat /proc/self/mounts | grep $SCRATCH_DEV >> $seqres.full
--$BTRFS_UTIL_PROG filesystem df $SCRATCH_MNT >> $seqres.full
--
--extent_size=$(_scratch_btrfs_sectorsize)
--unalign_by=512
--echo extent_size=$extent_size unalign_by=$unalign_by >> $seqres.full
--
--$XFS_IO_PROG -f -c "pwrite -S 0xab 0 $((extent_size * 10))" \
--					$SCRATCH_MNT/testfile >> $seqres.full
--
--echo "Fill all space available for data and all unallocated space." >> $seqres.full
--dd status=none if=/dev/zero of=$SCRATCH_MNT/filler bs=512 >> $seqres.full 2>&1
--
--hole_offset=0
--hole_len=$unalign_by
--$XFS_IO_PROG -c "fpunch $hole_offset $hole_len" $SCRATCH_MNT/testfile
--
--hole_offset=$(($extent_size + $unalign_by))
--hole_len=$(($extent_size - $unalign_by))
--$XFS_IO_PROG -c "fpunch $hole_offset $hole_len" $SCRATCH_MNT/testfile
--
--hole_offset=$(($extent_size * 2 + $unalign_by))
--hole_len=$(($extent_size * 5))
--$XFS_IO_PROG -c "fpunch $hole_offset $hole_len" $SCRATCH_MNT/testfile
--
--# success, all done
--echo "Silence is golden"
--status=0
--exit
-diff --git a/tests/btrfs/172.out b/tests/btrfs/172.out
-deleted file mode 100644
-index ce2de3f0d107..000000000000
---- a/tests/btrfs/172.out
-+++ /dev/null
-@@ -1,2 +0,0 @@
--QA output created by 172
--Silence is golden
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index d7eeb45d3bc4..ed971bae493c 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -174,7 +174,6 @@
- 169 auto quick send
- 170 auto quick snapshot
- 171 auto quick qgroup
--172 auto quick punch
- 173 auto quick swap
- 174 auto quick swap
- 175 auto quick swap volume
+diff --git a/ltp/fsstress.c b/ltp/fsstress.c
+index c5a59d51..709fdeec 100644
+--- a/ltp/fsstress.c
++++ b/ltp/fsstress.c
+@@ -8,6 +8,7 @@
+ #include <setjmp.h>
+ #include <sys/uio.h>
+ #include <stddef.h>
++#include <stdbool.h>
+ #include "global.h"
+ 
+ #ifdef HAVE_BTRFSUTIL_H
 -- 
-2.24.1
+2.18.0
+
+
 
