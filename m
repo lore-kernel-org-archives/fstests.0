@@ -2,106 +2,86 @@ Return-Path: <SRS0=VTFL=24=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D851FC33C99
-	for <linux-fstests@archiver.kernel.org>; Tue,  7 Jan 2020 08:49:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 18C86C33C9E
+	for <linux-fstests@archiver.kernel.org>; Tue,  7 Jan 2020 08:51:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id AC4D82080A
-	for <linux-fstests@archiver.kernel.org>; Tue,  7 Jan 2020 08:49:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E0F522075A
+	for <linux-fstests@archiver.kernel.org>; Tue,  7 Jan 2020 08:51:41 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ohLNmuBh"
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="h40YQX3R"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726514AbgAGItT (ORCPT
+        id S1726485AbgAGIvk (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 7 Jan 2020 03:49:19 -0500
-Received: from mail-il1-f195.google.com ([209.85.166.195]:36572 "EHLO
-        mail-il1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725801AbgAGItT (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 7 Jan 2020 03:49:19 -0500
-Received: by mail-il1-f195.google.com with SMTP id b15so45101055iln.3
-        for <fstests@vger.kernel.org>; Tue, 07 Jan 2020 00:49:18 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=Mp9LrD5WTx2WpgVFWg50lk3uCtXwyYHuu9bloaKpD9I=;
-        b=ohLNmuBhQ0YRSD22LoDaRazMLLIlU9K4yHYt5JMsvGp5tGjuy47sYBocZJF2XtQhCH
-         rB1BC2lLnPcHpqdtdQ8uD7zcu05LjN+VdRaGkJImbVaPj/mURitEsHZZ/x/uZf0hZl6S
-         O8DTUMYGZ8j8bGfKlrrUcQnwWppY/72yfDGcQ4ulnR7w1Z8DGQhuUzqzTOedzqtG3rU7
-         gWz3eXJNfjhnSlDj57bXM72VOZFsLw62APRa+eGfa5YD4RRRh6dqUWIEJg6ZIGl5Ybqx
-         snJPQhmHzO3A2l26/W1qpuWF9rB9aRzJ24HWPxjQXoe0Hie0jel2DmsZWcYgnnCz31jO
-         1o1w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=Mp9LrD5WTx2WpgVFWg50lk3uCtXwyYHuu9bloaKpD9I=;
-        b=iHCCmafw3aLx7cw7WmKiiQi3N9qU0pw8LkivDclom0dBHEQM7pBqnFdvQ97R89UnfO
-         NBQzV8++rtnGatDW2iOG14Ax/PCeRfxnWWbL5jI9eqloNdtuYBjUELIACQUM+JFyrdFK
-         O0jsXjYyk4dnMFHEj9ioWVfs3fGv2y8vRbZeYMQRSWkOF3RJZs9kcb+dbSljYfjIhWrx
-         Ih2cjF3HPMgDn0bLoYoy0N4AgvIB+czA0vkRqbUrAd69gmvtyunOyB4rifTN1o/hS0Yr
-         a8d0EXywTbCkqp1byjCvcfX0oIOLGnHUvdJ+NawabCx1lRQ98dA0gVXqjaCynzCub1a1
-         zFzg==
-X-Gm-Message-State: APjAAAVo/qi7/mr9zhEHdTSfeNaHPgRuWx9KCeu6NmJwpCIYo6qw4ixh
-        Oyxqb4uk+ssIcOCqPjhYRPGYczoINAdr5h6LingyYeQv
-X-Google-Smtp-Source: APXvYqzEgbYatZTGFlEjC8r98CWHKb7ubs826iVots9QM9LLkjUu9md1/GCY6Zig6LLfGPIlhn+nMrsz5WK6aZ0yJ24=
-X-Received: by 2002:a92:5c8a:: with SMTP id d10mr95003698ilg.137.1578386958621;
- Tue, 07 Jan 2020 00:49:18 -0800 (PST)
+        Tue, 7 Jan 2020 03:51:40 -0500
+Received: from userp2120.oracle.com ([156.151.31.85]:35618 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725801AbgAGIvk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 7 Jan 2020 03:51:40 -0500
+Received: from pps.filterd (userp2120.oracle.com [127.0.0.1])
+        by userp2120.oracle.com (8.16.0.27/8.16.0.27) with SMTP id 0078hTjk074363;
+        Tue, 7 Jan 2020 08:51:35 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=subject : to : cc :
+ references : from : message-id : date : mime-version : in-reply-to :
+ content-type : content-transfer-encoding; s=corp-2019-08-05;
+ bh=zx9/09uxBbTCX6go6UeXdHjxlycz0f4FN6PGw46XXaE=;
+ b=h40YQX3RylgHGnAocV92nD1BKDmdvDjGpQgN0FqN2CXi2TLWh6d0SFUSqeUwcJ7Bu5m3
+ ImhD/wj88vmao258JAPtUCiIOL1Wu4BDY6VTxUnI1GmDxzUbCtXgoESK0YCkYs8PhzGO
+ KqXTlAryQ1TDNxsuzipuaxqgTqXdXCTbraYJqLuE+cHtuE+weEwIP0RGs0af++yimDf7
+ mqvoO07A0PPIFTZnt+BrKP7OllkId5Ip8JntHhHDV4P+mXDROAm54zGHuqlKhpuiNBUd
+ 85nC2BECoseBOJNUGP6gRij9Mp+23zPWWJXIm9OrYsX3aZlsY+pqCckK+UE/ktXVpCLx 5Q== 
+Received: from aserp3030.oracle.com (aserp3030.oracle.com [141.146.126.71])
+        by userp2120.oracle.com with ESMTP id 2xakbqkut2-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Tue, 07 Jan 2020 08:51:35 +0000
+Received: from pps.filterd (aserp3030.oracle.com [127.0.0.1])
+        by aserp3030.oracle.com (8.16.0.27/8.16.0.27) with SMTP id 0078oSjN184002;
+        Tue, 7 Jan 2020 08:51:34 GMT
+Received: from userv0121.oracle.com (userv0121.oracle.com [156.151.31.72])
+        by aserp3030.oracle.com with ESMTP id 2xcpam1ncc-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Tue, 07 Jan 2020 08:51:34 +0000
+Received: from abhmp0020.oracle.com (abhmp0020.oracle.com [141.146.116.26])
+        by userv0121.oracle.com (8.14.4/8.13.8) with ESMTP id 0078pVC1014152;
+        Tue, 7 Jan 2020 08:51:31 GMT
+Received: from [10.186.51.152] (/10.186.51.152)
+        by default (Oracle Beehive Gateway v4.0)
+        with ESMTP ; Tue, 07 Jan 2020 00:51:31 -0800
+Subject: Re: [PATCH] fstests: btrfs/172: Remove the dead test which we have no
+ plan to fix
+To:     Qu Wenruo <wqu@suse.com>, fstests@vger.kernel.org,
+        linux-btrfs@vger.kernel.org
+Cc:     Josef Bacik <josef@toxicpanda.com>
+References: <20200107060143.2613-1-wqu@suse.com>
+From:   Anand Jain <anand.jain@oracle.com>
+Message-ID: <c6fa4cc2-e670-c3ca-7485-b116e6653bbf@oracle.com>
+Date:   Tue, 7 Jan 2020 16:40:06 +0800
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.3.0
 MIME-Version: 1.0
-References: <20200106070654.13249-1-yangx.jy@cn.fujitsu.com>
- <20200106070654.13249-2-yangx.jy@cn.fujitsu.com> <CAOQ4uxh91oRB03UGuqhSgASeY7-OtQD3wMRdOQ-SL0UBgdMPHQ@mail.gmail.com>
- <5E13E895.8020005@cn.fujitsu.com> <CAOQ4uxijoQugy_qqpfmyFmF4GcCOenbL7eX8d2aEEGknfe_UQg@mail.gmail.com>
- <5E1436D1.9030601@cn.fujitsu.com>
-In-Reply-To: <5E1436D1.9030601@cn.fujitsu.com>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Tue, 7 Jan 2020 10:49:07 +0200
-Message-ID: <CAOQ4uxjYmGXsRhGe76KSqfS3k-aMsad=bGdmm-wwMOXyDKFRyA@mail.gmail.com>
-Subject: Re: [PATCH v2 2/2] fsx: Add '-a' option to skip unsupported keep size automatically
-To:     Xiao Yang <yangx.jy@cn.fujitsu.com>
-Cc:     fstests <fstests@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <20200107060143.2613-1-wqu@suse.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9492 signatures=668685
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=0 malwarescore=0
+ phishscore=0 bulkscore=0 spamscore=0 mlxscore=0 mlxlogscore=999
+ adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.0.1-1911140001 definitions=main-2001070071
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9492 signatures=668685
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 priorityscore=1501 malwarescore=0
+ suspectscore=0 phishscore=0 bulkscore=0 spamscore=0 clxscore=1015
+ lowpriorityscore=0 mlxscore=0 impostorscore=0 mlxlogscore=999 adultscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.0.1-1911140001
+ definitions=main-2001070070
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Jan 7, 2020 at 9:45 AM Xiao Yang <yangx.jy@cn.fujitsu.com> wrote:
->
-> On 2020/1/7 14:47, Amir Goldstein wrote:
-> > No it is not wrong, but this is different than skipping keep_size.
-> > My point is that when fsx is run with some parameters and
-> > produces a replay-ops log. If that replay-ops log is replayed with
-> > exact same parameters it should produce the exact same sequence.
-> >
-> > In the case of punch/zero/collapse, if those are skipped when recording
-> > the ops log, then ops log includes the keyword "skip ..." explicitly, but
-> > but for skipped keep_size, keep_size will simply not be in the log.
-> Hi Amir,
->
-> If keep_size is not supported, ops log can also includes the keyword
-> "skip ..." by Eryu's patch:
-> https://lore.kernel.org/fstests/20191022123115.12250-1-eguan@linux.alibaba.com/
->
-> Do you want to add require support for keep_size/punch/zero/collapse and
-> accept Eryu's patch as well?
->
 
-I am perfectly fine with Eryu's patch and I think it is correct to merge it,
-but it is completely independent to fixing the 4 tests.
-
-Eryu's patch is changing the way the ops log is recorded (for the better),
-but it doesn't change (and I think it is wrong to change) the way that ops
-log is replayed.
-
-The hardcoded ops logs in those 4 tests are not going to change because
-you modify fsx.
-
-The hardcoded ops logs in those 4 tests intentionally include the keep_size
-directive, so those tests should not be run on NFS.
-
-Thanks,
-Amir.
+Reviewed-by: Anand Jain <anand.jain@oracle.com>
