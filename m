@@ -2,90 +2,82 @@ Return-Path: <SRS0=VTFL=24=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.6 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 41E4AC33C99
-	for <linux-fstests@archiver.kernel.org>; Tue,  7 Jan 2020 07:15:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 381B2C33C99
+	for <linux-fstests@archiver.kernel.org>; Tue,  7 Jan 2020 07:44:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 0A8EC2077B
-	for <linux-fstests@archiver.kernel.org>; Tue,  7 Jan 2020 07:15:05 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1578381305;
-	bh=3yMHNLG7pwHewdP1frFHQJesrvJGRkiPBj7d5kM3HDs=;
-	h=Subject:To:Cc:References:From:Date:In-Reply-To:List-ID:From;
-	b=0fk7DBFx3RTmhxTbd3mac26pZR6QdNIqqHvsneQEWBGzD1nclIje2P405a2Yr3Tm9
-	 fSLUrCutsFbkcDX1vMZ+AxptQylusyP8s4xo2jr0mymX3roEBoyW2ajbAMWWjwe4mR
-	 +4Hwr9yFXEwBHHaXgQhvD3MqRAjq8mahlXAGFnVs=
+	by mail.kernel.org (Postfix) with ESMTP id 14B392081E
+	for <linux-fstests@archiver.kernel.org>; Tue,  7 Jan 2020 07:44:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725874AbgAGHPE (ORCPT
+        id S1727328AbgAGHoX (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 7 Jan 2020 02:15:04 -0500
-Received: from mail-wr1-f67.google.com ([209.85.221.67]:34235 "EHLO
-        mail-wr1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725781AbgAGHPE (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 7 Jan 2020 02:15:04 -0500
-Received: by mail-wr1-f67.google.com with SMTP id t2so52667141wrr.1;
-        Mon, 06 Jan 2020 23:15:02 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-transfer-encoding;
-        bh=3yMHNLG7pwHewdP1frFHQJesrvJGRkiPBj7d5kM3HDs=;
-        b=RQfN/Wk4R145DE5gm6KSnpVwgc1Y7+OuI9LkfNpDDbdjtZGBEsrv6pMlo9fi0Mav1Z
-         uMmkMaH7V8DNCK7LW+I7sXZvv+k6TFZdZl524Gl5WWi60OUPkSsj1+b835H6sdwJ0XKl
-         bgwg6xNE6UvPqeJByqbbbi9Vlq3LVKSwJG4BfLpaHz5YQtLbLzl74d01o1XTzSoZs8BC
-         Tp8seHdBFi/seCRJ2L53ICz5M4P2UUy7f/uZeF8XOLu3hpgBeklQwKFgQ9nN++C3ta4e
-         xBm8eP6fErveF4UvkeAvM8rmtwxpoAS+fVpUceYdMIkP/69wdh9ZQd522tZkTpnG6P3+
-         9Wqw==
-X-Gm-Message-State: APjAAAUSR6EwfzRFvsvrr3shEgF6zuyrH7w2D+NsBvUDrnO3f/IqMjkk
-        4bOzdMuxcd6v8Y9EsTyYInQ=
-X-Google-Smtp-Source: APXvYqyv+aUalrOIady4hQm7l/sNXHhceysXG7eO1uF7DYQTmiGwP17FZkpdmXk4cxtHzJoGLZUCaQ==
-X-Received: by 2002:a5d:410e:: with SMTP id l14mr104014901wrp.238.1578381302122;
-        Mon, 06 Jan 2020 23:15:02 -0800 (PST)
-Received: from Johanness-MBP.fritz.box (ppp-46-244-208-11.dynamic.mnet-online.de. [46.244.208.11])
-        by smtp.gmail.com with ESMTPSA id n67sm26211505wmf.46.2020.01.06.23.15.00
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 06 Jan 2020 23:15:01 -0800 (PST)
-Subject: Re: [PATCH] btrfs/140: use proper helpers to get devid and physical
- offset for corruption
-To:     Qu Wenruo <quwenruo.btrfs@gmx.com>, Eryu Guan <guaneryu@gmail.com>
-Cc:     Qu Wenruo <wqu@suse.com>, linux-btrfs@vger.kernel.org,
-        fstests@vger.kernel.org, Damien Le Moal <Damien.LeMoal@wdc.com>
-References: <20200103111810.658-1-jth@kernel.org>
- <20200106081647.GE893866@desktop>
- <1c1dd1ae-e484-ee02-a7d8-077f95f7d4cf@gmx.com>
-From:   Johannes Thumshirn <jth@kernel.org>
-Message-ID: <49f4d5ed-93b8-7660-ba67-d82f282eabec@kernel.org>
-Date:   Tue, 7 Jan 2020 08:14:57 +0100
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:68.0)
- Gecko/20100101 Thunderbird/68.3.1
+        Tue, 7 Jan 2020 02:44:23 -0500
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:37503 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1725781AbgAGHoX (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 7 Jan 2020 02:44:23 -0500
+X-IronPort-AV: E=Sophos;i="5.69,404,1571673600"; 
+   d="scan'208";a="81425629"
+Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
+  by heian.cn.fujitsu.com with ESMTP; 07 Jan 2020 15:44:20 +0800
+Received: from G08CNEXMBPEKD06.g08.fujitsu.local (unknown [10.167.33.206])
+        by cn.fujitsu.com (Postfix) with ESMTP id F3E8749E9335;
+        Tue,  7 Jan 2020 15:35:20 +0800 (CST)
+Received: from [10.167.220.69] (10.167.220.69) by
+ G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206) with Microsoft SMTP Server
+ (TLS) id 15.0.1395.4; Tue, 7 Jan 2020 15:44:19 +0800
+Message-ID: <5E1436D1.9030601@cn.fujitsu.com>
+Date:   Tue, 7 Jan 2020 15:44:17 +0800
+From:   Xiao Yang <yangx.jy@cn.fujitsu.com>
+User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.2; zh-CN; rv:1.9.2.18) Gecko/20110616 Thunderbird/3.1.11
 MIME-Version: 1.0
-In-Reply-To: <1c1dd1ae-e484-ee02-a7d8-077f95f7d4cf@gmx.com>
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+To:     Amir Goldstein <amir73il@gmail.com>
+CC:     fstests <fstests@vger.kernel.org>
+Subject: Re: [PATCH v2 2/2] fsx: Add '-a' option to skip unsupported keep
+ size automatically
+References: <20200106070654.13249-1-yangx.jy@cn.fujitsu.com> <20200106070654.13249-2-yangx.jy@cn.fujitsu.com> <CAOQ4uxh91oRB03UGuqhSgASeY7-OtQD3wMRdOQ-SL0UBgdMPHQ@mail.gmail.com> <5E13E895.8020005@cn.fujitsu.com> <CAOQ4uxijoQugy_qqpfmyFmF4GcCOenbL7eX8d2aEEGknfe_UQg@mail.gmail.com>
+In-Reply-To: <CAOQ4uxijoQugy_qqpfmyFmF4GcCOenbL7eX8d2aEEGknfe_UQg@mail.gmail.com>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.167.220.69]
+X-ClientProxiedBy: G08CNEXCHPEKD04.g08.fujitsu.local (10.167.33.200) To
+ G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206)
+X-yoursite-MailScanner-ID: F3E8749E9335.AA590
+X-yoursite-MailScanner: Found to be clean
+X-yoursite-MailScanner-From: yangx.jy@cn.fujitsu.com
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Am 06.01.20 um 09:56 schrieb Qu Wenruo:
+On 2020/1/7 14:47, Amir Goldstein wrote:
+> No it is not wrong, but this is different than skipping keep_size.
+> My point is that when fsx is run with some parameters and
+> produces a replay-ops log. If that replay-ops log is replayed with
+> exact same parameters it should produce the exact same sequence.
 >
-> On 2020/1/6 下午4:16, Eryu Guan wrote:
->> On Fri, Jan 03, 2020 at 12:18:10PM +0100, Johannes Thumshirn wrote:
->>> Similar to fstests commit 1a27bf14ef8b "btrfs/14[23]: Use proper help to
->>> get both devid and physical offset for corruption." btrfs/140 needs the
->>> same treatment to pass with updated btrfs-progs.
->>>
->>> Signed-off-by: Johannes Thumshirn <jth@kernel.org>
->>> ---
->> Qu Wenruo has posted "fstests: btrfs/14[01]: Use proper helper to get
->> both devid and physical for corruption" earlier, and I'll apply his
->> patch instead.
-> Thanks.
->
-> The timing is great since I was just going to ping that patch.
+> In the case of punch/zero/collapse, if those are skipped when recording
+> the ops log, then ops log includes the keyword "skip ..." explicitly, but
+> but for skipped keep_size, keep_size will simply not be in the log.
+Hi Amir,
 
-Thanks as well,
-    Johannes
+If keep_size is not supported, ops log can also includes the keyword 
+"skip ..." by Eryu's patch:
+https://lore.kernel.org/fstests/20191022123115.12250-1-eguan@linux.alibaba.com/
+
+Do you want to add require support for keep_size/punch/zero/collapse and 
+accept Eryu's patch as well?
+
+Thanks,
+Xiao Yang
+>
+> IOW, the fsxops logs that are hardcoded in the 4 tests that you changed
+> have all been created*with*  keep_size support and*with*  punch/zero/collapse
+> support, so should also be replayed the same way, because otherwise the test
+> is simply not doing what it was intended to do.
+
+
+
