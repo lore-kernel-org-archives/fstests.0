@@ -2,147 +2,85 @@ Return-Path: <SRS0=wN5T=25=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.3 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 494C7C47409
-	for <linux-fstests@archiver.kernel.org>; Wed,  8 Jan 2020 16:22:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BB83DC33CA2
+	for <linux-fstests@archiver.kernel.org>; Wed,  8 Jan 2020 17:45:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 1F4E62077B
-	for <linux-fstests@archiver.kernel.org>; Wed,  8 Jan 2020 16:22:48 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="iEDq0qbW"
+	by mail.kernel.org (Postfix) with ESMTP id 8B6D820720
+	for <linux-fstests@archiver.kernel.org>; Wed,  8 Jan 2020 17:45:37 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1578505537;
+	bh=/3AHcDnyzqBvJryLFnkqmX0q+58zLvlJ0N5HH/xT7zo=;
+	h=From:To:Cc:Subject:Date:List-ID:From;
+	b=iy4MjU4hjYHKr6c+lsTP69hz+8BRO/wS9loFNEjRGof/8KMXdWm9DobvktGVMuo2F
+	 F2QR4kjYqioFKQ/GO0INkKfQ7HEXTunotAiU1C32ZYoSO9iC4vtqo1ourBDsL1uaYV
+	 DcHzNEKy6muNddxD68I+K6hqr+yYLLWW884EyZSk=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728273AbgAHQWr (ORCPT
+        id S1727917AbgAHRpg (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 8 Jan 2020 11:22:47 -0500
-Received: from userp2120.oracle.com ([156.151.31.85]:48804 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729468AbgAHQWp (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 8 Jan 2020 11:22:45 -0500
-Received: from pps.filterd (userp2120.oracle.com [127.0.0.1])
-        by userp2120.oracle.com (8.16.0.27/8.16.0.27) with SMTP id 008GDHBK021843;
-        Wed, 8 Jan 2020 16:22:31 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
- : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=corp-2019-08-05;
- bh=ijmVGq8pxhtpSqE8zsb3tDptvDuzMJoa7HOUihySP7g=;
- b=iEDq0qbW/eG08a1WPtCpEGFt3tC83jP73Mp2TN3UKDSJdlMB3pb2ACWAzVbxI3T1ARHe
- z0Ak6wFKYTgleC4uPxdZ/KKt5jSNqDg9W8zzyXcHau9mlPlNxU6mB6ktxkIMkdbm1QUr
- pXPLkkad6bOe0zeU2OWT6oWp2pRrdDAtBm7dAFEFVjmFuFiHXxIyTIY0UIzmIY1FNVyU
- LFT/Z1CD5IwHKqLgYhzdxl9T8rdW8zwn0XZRQZJMKVnWKZ3+Cu/CQPFncCPFSvsi9RTp
- skCVxy0PmeZTTkqVmHq7iSnB3YqxgMW0tU+T6309nenNUGJowR1RjwNFgcseLvQQlOKl FA== 
-Received: from userp3020.oracle.com (userp3020.oracle.com [156.151.31.79])
-        by userp2120.oracle.com with ESMTP id 2xakbqvvv6-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Wed, 08 Jan 2020 16:22:31 +0000
-Received: from pps.filterd (userp3020.oracle.com [127.0.0.1])
-        by userp3020.oracle.com (8.16.0.27/8.16.0.27) with SMTP id 008GEG2J044120;
-        Wed, 8 Jan 2020 16:22:31 GMT
-Received: from userv0121.oracle.com (userv0121.oracle.com [156.151.31.72])
-        by userp3020.oracle.com with ESMTP id 2xcpct0k14-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Wed, 08 Jan 2020 16:22:30 +0000
-Received: from abhmp0009.oracle.com (abhmp0009.oracle.com [141.146.116.15])
-        by userv0121.oracle.com (8.14.4/8.13.8) with ESMTP id 008GMTU7026840;
-        Wed, 8 Jan 2020 16:22:29 GMT
-Received: from localhost (/67.169.218.210)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Wed, 08 Jan 2020 08:22:29 -0800
-Date:   Wed, 8 Jan 2020 08:22:27 -0800
-From:   "Darrick J. Wong" <darrick.wong@oracle.com>
-To:     yu kuai <yukuai3@huawei.com>
-Cc:     guaneryu@gmail.com, jbacik@fusionio.com, fstests@vger.kernel.org,
-        linux-xfs@vger.kernel.org, zhengbin13@huawei.com,
-        yi.zhang@huawei.com
-Subject: Re: [PATCH] xfs/126: fix that corrupt xattr might fail with a small
- probability
-Message-ID: <20200108162227.GD5552@magnolia>
-References: <20200108092758.41363-1-yukuai3@huawei.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200108092758.41363-1-yukuai3@huawei.com>
-User-Agent: Mutt/1.9.4 (2018-02-28)
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9494 signatures=668685
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=0 malwarescore=0
- phishscore=0 bulkscore=0 spamscore=0 mlxscore=0 mlxlogscore=999
- adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.0.1-1911140001 definitions=main-2001080133
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9494 signatures=668685
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 priorityscore=1501 malwarescore=0
- suspectscore=0 phishscore=0 bulkscore=0 spamscore=0 clxscore=1011
- lowpriorityscore=0 mlxscore=0 impostorscore=0 mlxlogscore=999 adultscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.0.1-1911140001
- definitions=main-2001080133
+        Wed, 8 Jan 2020 12:45:36 -0500
+Received: from mail-wr1-f68.google.com ([209.85.221.68]:43845 "EHLO
+        mail-wr1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727145AbgAHRpg (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 8 Jan 2020 12:45:36 -0500
+Received: by mail-wr1-f68.google.com with SMTP id d16so4297583wre.10;
+        Wed, 08 Jan 2020 09:45:35 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id;
+        bh=v5LveUQBQcDfQvLghpre8J/xh4zJ+Dsh9fxrgvihujs=;
+        b=Yw6FbKe3HKrF5ZkySaR3QTmVaX8DxizU68HLPo4ARZ2/vzlmFqys9Ok0sbQEtL8JSB
+         VGOMBNDJPnO+yPLhbh72app1vuhp616Ccnzrs3Bg5lkX8GEEkpVLiEjZPkFrrA6tJpjb
+         1AYJH0wQqj8hiKLsS7nSjYsrGk/YgKKG6FdxK1Ve3QbHZS4ToJzKv3tcTi1nqtgHT8H6
+         8Ba2qUlyzdzgCfOgPrZnj+g6sKnOgw7LNshdapDMACWx6xdqOpkTYxNHKvtUrb7Q8pb2
+         eV2LxMKQpztNNtMDWd30KEJm8h4K/c4bznwUPi2vLKdHYrxZqS6EqHn6PQRBQD0MYwlY
+         G8zQ==
+X-Gm-Message-State: APjAAAXWHH6spqLbn9+cvpqvNBMIYIQzohBlw2kudLcsvgg/ZQzz5ZoL
+        gPwCjt4k1dqWarxvLwIRnUQ=
+X-Google-Smtp-Source: APXvYqwsDyXrAGQi82E1YQJs9eM3wPGGmSzx9R60bM9AcfmtgHCz4KgE+bEDtj6XKLg8WiNlbfi5Kg==
+X-Received: by 2002:adf:fd07:: with SMTP id e7mr5784865wrr.21.1578505534466;
+        Wed, 08 Jan 2020 09:45:34 -0800 (PST)
+Received: from linux-t19r.fritz.box (ppp-46-244-195-226.dynamic.mnet-online.de. [46.244.195.226])
+        by smtp.gmail.com with ESMTPSA id x14sm4392695wmj.42.2020.01.08.09.45.32
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Wed, 08 Jan 2020 09:45:33 -0800 (PST)
+From:   Johannes Thumshirn <jth@kernel.org>
+To:     Eryu Guan <guaneryu@gmail.com>
+Cc:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org,
+        Johannes Thumshirn <johannes.thumshirn@wdc.com>
+Subject: [PATCH] btrfs/202: fix golden output
+Date:   Wed,  8 Jan 2020 18:45:10 +0100
+Message-Id: <20200108174510.6261-1-jth@kernel.org>
+X-Mailer: git-send-email 2.16.4
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Jan 08, 2020 at 05:27:58PM +0800, yu kuai wrote:
-> The cmd used in xfs_db to corrupt xattr is "blocktrash -x 32
-> -y $((blksz * 8)) -n8 -3", which means select random 8 bit from 32 to
-> end of the block, and the changed bits are randomized. However,
-> there is a small chance that corrupting xattr failed because irrelevant
-> bits are chossen or the chooosen bits are not changed, which lead to
-> output missmatch:
-> QA output created by 126                    QA output created by 126
-> + create scratch fs                         + create scratch fs
-> + mount fs image                            + mount fs image
-> + make some files                           + make some files
-> + check fs                                  + check fs
-> + check xattr                               + check xattr
-> + corrupt xattr                             + corrupt xattr
-> + mount image && modify xattr               + mount image && modify xattr
-> + repair fs                                 + repair fs
-> + mount image (2)                           + mount image (2)
-> + chattr -R -i                              + chattr -R -i
-> + modify xattr (2)                          + modify xattr (2)
->                                             > # file: tmp/scratch/attrfile
->                                             > user.x00000000="0000000000000000"
->                                             >
-> + check fs (2)                              + check fs (2)
-> 
-> Fix the problem by adding a seed for random processing to select same
-> bits each time, and inverting the selected bits.
-> 
-> Signed-off-by: yu kuai <yukuai3@huawei.com>
-> ---
->  tests/xfs/126 | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/tests/xfs/126 b/tests/xfs/126
-> index 4f9f8cf9..9b57e58b 100755
-> --- a/tests/xfs/126
-> +++ b/tests/xfs/126
-> @@ -37,7 +37,7 @@ test -n "${FORCE_FUZZ}" || _require_scratch_xfs_crc
->  _require_attrs
->  _require_populate_commands
->  _require_xfs_db_blocktrash_z_command
-> -test -z "${FUZZ_ARGS}" && FUZZ_ARGS="-n 8 -3"
-> +test -z "${FUZZ_ARGS}" && FUZZ_ARGS="-n 8 -2"
+From: Johannes Thumshirn <johannes.thumshirn@wdc.com>
 
-TBH I've wondered if blocktrash -3 and fuzz-random should snapshot the
-buffer before randomizing it and try again if the contents don't change?
-I suspect most of our fuzz tests expect "randomize the ____" to return
-with ____ full of random junk, not the exact same contents as before.
+The golden output of btrfs/202 contains the sequence number 201 instead of
+202, fix this.
 
---D
+Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
+---
+ tests/btrfs/202.out | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
->  rm -f $seqres.full
->  
-> @@ -72,7 +72,7 @@ echo "+ corrupt xattr"
->  loff=1
->  while true; do
->  	_scratch_xfs_db -x -c "inode ${inode}" -c "ablock ${loff}" -c "stack" | grep -q 'file attr block is unmapped' && break
-> -	_scratch_xfs_db -x -c "inode ${inode}" -c "ablock ${loff}" -c "stack" -c "blocktrash -x 32 -y $((blksz * 8)) -z ${FUZZ_ARGS}" >> $seqres.full
-> +	_scratch_xfs_db -x -c "inode ${inode}" -c "ablock ${loff}" -c "stack" -c "blocktrash -s 1024 -x 32 -y $((blksz * 8)) -z ${FUZZ_ARGS}" >> $seqres.full
->  	loff="$((loff + 1))"
->  done
->  
-> -- 
-> 2.17.2
-> 
+diff --git a/tests/btrfs/202.out b/tests/btrfs/202.out
+index 938870cf..7f33d49f 100644
+--- a/tests/btrfs/202.out
++++ b/tests/btrfs/202.out
+@@ -1,4 +1,4 @@
+-QA output created by 201
++QA output created by 202
+ Create subvolume 'SCRATCH_MNT/a'
+ Create subvolume 'SCRATCH_MNT/a/b'
+ Create a snapshot of 'SCRATCH_MNT/a' in 'SCRATCH_MNT/c'
+-- 
+2.16.4
+
