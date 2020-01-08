@@ -2,85 +2,302 @@ Return-Path: <SRS0=wN5T=25=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BB83DC33CA2
-	for <linux-fstests@archiver.kernel.org>; Wed,  8 Jan 2020 17:45:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B4EA7C33CA2
+	for <linux-fstests@archiver.kernel.org>; Wed,  8 Jan 2020 19:25:36 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 8B6D820720
-	for <linux-fstests@archiver.kernel.org>; Wed,  8 Jan 2020 17:45:37 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1578505537;
-	bh=/3AHcDnyzqBvJryLFnkqmX0q+58zLvlJ0N5HH/xT7zo=;
-	h=From:To:Cc:Subject:Date:List-ID:From;
-	b=iy4MjU4hjYHKr6c+lsTP69hz+8BRO/wS9loFNEjRGof/8KMXdWm9DobvktGVMuo2F
-	 F2QR4kjYqioFKQ/GO0INkKfQ7HEXTunotAiU1C32ZYoSO9iC4vtqo1ourBDsL1uaYV
-	 DcHzNEKy6muNddxD68I+K6hqr+yYLLWW884EyZSk=
+	by mail.kernel.org (Postfix) with ESMTP id 84D2B20720
+	for <linux-fstests@archiver.kernel.org>; Wed,  8 Jan 2020 19:25:36 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=fail reason="key not found in DNS" (0-bit key) header.d=szeredi.hu header.i=@szeredi.hu header.b="T9JxaQpo"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727917AbgAHRpg (ORCPT
+        id S1727428AbgAHTZg (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 8 Jan 2020 12:45:36 -0500
-Received: from mail-wr1-f68.google.com ([209.85.221.68]:43845 "EHLO
-        mail-wr1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727145AbgAHRpg (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 8 Jan 2020 12:45:36 -0500
-Received: by mail-wr1-f68.google.com with SMTP id d16so4297583wre.10;
-        Wed, 08 Jan 2020 09:45:35 -0800 (PST)
+        Wed, 8 Jan 2020 14:25:36 -0500
+Received: from mail-wr1-f67.google.com ([209.85.221.67]:44140 "EHLO
+        mail-wr1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727782AbgAHTZf (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 8 Jan 2020 14:25:35 -0500
+Received: by mail-wr1-f67.google.com with SMTP id q10so4614192wrm.11
+        for <fstests@vger.kernel.org>; Wed, 08 Jan 2020 11:25:34 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=szeredi.hu; s=google;
+        h=date:from:to:cc:subject:message-id:mime-version:content-disposition;
+        bh=0sNC8jmXp2Yi+T5aKk0mqVrDOvJHjARtc2RxQpOJLOU=;
+        b=T9JxaQpo6wsWMd6+cS6hhpZO+/whCXJqrRwAHYbI3vdtzydpgHnKsgun0nJzlxr1H7
+         2lyEzBvCCPjcPva7LSBhUxg6VwzenlUkqEJWPxtE6WGUscwI2ye6zG3L2rFfHyua/ROm
+         y6TMF2U7WrF79z9xJJ5mWazLwCzhgVlb+rTns=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id;
-        bh=v5LveUQBQcDfQvLghpre8J/xh4zJ+Dsh9fxrgvihujs=;
-        b=Yw6FbKe3HKrF5ZkySaR3QTmVaX8DxizU68HLPo4ARZ2/vzlmFqys9Ok0sbQEtL8JSB
-         VGOMBNDJPnO+yPLhbh72app1vuhp616Ccnzrs3Bg5lkX8GEEkpVLiEjZPkFrrA6tJpjb
-         1AYJH0wQqj8hiKLsS7nSjYsrGk/YgKKG6FdxK1Ve3QbHZS4ToJzKv3tcTi1nqtgHT8H6
-         8Ba2qUlyzdzgCfOgPrZnj+g6sKnOgw7LNshdapDMACWx6xdqOpkTYxNHKvtUrb7Q8pb2
-         eV2LxMKQpztNNtMDWd30KEJm8h4K/c4bznwUPi2vLKdHYrxZqS6EqHn6PQRBQD0MYwlY
-         G8zQ==
-X-Gm-Message-State: APjAAAXWHH6spqLbn9+cvpqvNBMIYIQzohBlw2kudLcsvgg/ZQzz5ZoL
-        gPwCjt4k1dqWarxvLwIRnUQ=
-X-Google-Smtp-Source: APXvYqwsDyXrAGQi82E1YQJs9eM3wPGGmSzx9R60bM9AcfmtgHCz4KgE+bEDtj6XKLg8WiNlbfi5Kg==
-X-Received: by 2002:adf:fd07:: with SMTP id e7mr5784865wrr.21.1578505534466;
-        Wed, 08 Jan 2020 09:45:34 -0800 (PST)
-Received: from linux-t19r.fritz.box (ppp-46-244-195-226.dynamic.mnet-online.de. [46.244.195.226])
-        by smtp.gmail.com with ESMTPSA id x14sm4392695wmj.42.2020.01.08.09.45.32
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 08 Jan 2020 09:45:33 -0800 (PST)
-From:   Johannes Thumshirn <jth@kernel.org>
-To:     Eryu Guan <guaneryu@gmail.com>
-Cc:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org,
-        Johannes Thumshirn <johannes.thumshirn@wdc.com>
-Subject: [PATCH] btrfs/202: fix golden output
-Date:   Wed,  8 Jan 2020 18:45:10 +0100
-Message-Id: <20200108174510.6261-1-jth@kernel.org>
-X-Mailer: git-send-email 2.16.4
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:mime-version
+         :content-disposition;
+        bh=0sNC8jmXp2Yi+T5aKk0mqVrDOvJHjARtc2RxQpOJLOU=;
+        b=gLPDheVdeH+UU+f0pV2w4eFCZ6HlFD8IrBe6toprqo129oST6i0YoQ1TCkbXW8i0c9
+         Qp9vCIocaLDknvBJAbDvI2JfvH9dSWnABBdbcE/RRD7pp37N0OVATjE3TVt6aQQqOgrW
+         R5vg1bmTEvy/ZH1JaiYDrbx4H2n9+/t+LHtNa8y5YvsCt8BXXNiZslHXgnwgfpUnaLK5
+         Y6s8vOYwfHpdR2LTN1yG0SBJqCy4YuIhqd0aHrdWw1p2kt1sIIhk0ZnPliL3/6jHyh+d
+         0j/qJ+MppuKRFQq6ygISoFo0dhPLqMf8/Z+wmzUFcoKtqQyiIt9qniuGQ43T337sbRD6
+         zwjQ==
+X-Gm-Message-State: APjAAAWKOS8FtPwBQD4Gj+4syDlvDY7Avl/YANQtfoVYET4o+sNEHQEV
+        1QgQIX90AW0MupqujaXTzS1y4XOP0el9vw==
+X-Google-Smtp-Source: APXvYqy0HQKXvGunDbArFkX9VaqJ014nHzIWKb6VNWwl1qML6LqiWZqhVQOCSiUbRB2cR4io/f0Wpg==
+X-Received: by 2002:adf:e812:: with SMTP id o18mr6186746wrm.127.1578511533465;
+        Wed, 08 Jan 2020 11:25:33 -0800 (PST)
+Received: from miu.piliscsaba.redhat.com (catv-212-96-48-140.catv.broadband.hu. [212.96.48.140])
+        by smtp.gmail.com with ESMTPSA id e18sm5363682wrr.95.2020.01.08.11.25.32
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 08 Jan 2020 11:25:32 -0800 (PST)
+Date:   Wed, 8 Jan 2020 20:25:25 +0100
+From:   Miklos Szeredi <miklos@szeredi.hu>
+To:     fstests@vger.kernel.org
+Cc:     Eryu Guan <guaneryu@gmail.com>, linux-fsdevel@vger.kernel.org
+Subject: [PATCH] xfstests: add fuse support
+Message-ID: <20200108192504.GA893@miu.piliscsaba.redhat.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Johannes Thumshirn <johannes.thumshirn@wdc.com>
+This allows using any fuse filesystem that can be mounted with
 
-The golden output of btrfs/202 contains the sequence number 201 instead of
-202, fix this.
+  mount -t fuse.$SUBTYPE ...
 
-Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
+Signed-off-by: Miklos Szeredi <mszeredi@redhat.com>
 ---
- tests/btrfs/202.out | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ README.fuse   |   28 ++++++++++++++++++++++++++++
+ check         |    2 ++
+ common/attr   |    4 ++--
+ common/config |    8 +++++++-
+ common/rc     |   34 ++++++++++++++++++++++++++++------
+ 5 files changed, 67 insertions(+), 9 deletions(-)
 
-diff --git a/tests/btrfs/202.out b/tests/btrfs/202.out
-index 938870cf..7f33d49f 100644
---- a/tests/btrfs/202.out
-+++ b/tests/btrfs/202.out
-@@ -1,4 +1,4 @@
--QA output created by 201
-+QA output created by 202
- Create subvolume 'SCRATCH_MNT/a'
- Create subvolume 'SCRATCH_MNT/a/b'
- Create a snapshot of 'SCRATCH_MNT/a' in 'SCRATCH_MNT/c'
--- 
-2.16.4
+--- a/common/config
++++ b/common/config
+@@ -295,6 +295,9 @@ _mount_opts()
+ 	9p)
+ 		export MOUNT_OPTIONS=$PLAN9_MOUNT_OPTIONS
+ 		;;
++	fuse)
++		export MOUNT_OPTIONS=$FUSE_MOUNT_OPTIONS
++		;;
+ 	xfs)
+ 		export MOUNT_OPTIONS=$XFS_MOUNT_OPTIONS
+ 		;;
+@@ -353,6 +356,9 @@ _test_mount_opts()
+ 	9p)
+ 		export TEST_FS_MOUNT_OPTS=$PLAN9_MOUNT_OPTIONS
+ 		;;
++	fuse)
++		export TEST_FS_MOUNT_OPTS=$FUSE_MOUNT_OPTIONS
++		;;
+ 	cifs)
+ 		export TEST_FS_MOUNT_OPTS=$CIFS_MOUNT_OPTIONS
+ 		;;
+@@ -485,7 +491,7 @@ _check_device()
+ 	fi
+ 
+ 	case "$FSTYP" in
+-	9p|tmpfs|virtiofs)
++	9p|fuse|tmpfs|virtiofs)
+ 		# 9p and virtiofs mount tags are just plain strings, so anything is allowed
+ 		# tmpfs doesn't use mount source, ignore
+ 		;;
+--- a/common/rc
++++ b/common/rc
+@@ -143,6 +143,8 @@ case "$FSTYP" in
+ 	 ;;
+     9p)
+ 	 ;;
++    fuse)
++	 ;;
+     ceph)
+ 	 ;;
+     glusterfs)
+@@ -339,7 +341,7 @@ _try_scratch_mount()
+ 		_overlay_scratch_mount $*
+ 		return $?
+ 	fi
+-	_mount -t $FSTYP `_scratch_mount_options $*`
++	_mount -t $FSTYP$SUBTYP `_scratch_mount_options $*`
+ }
+ 
+ # mount scratch device with given options and _fail if mount fails
+@@ -422,7 +424,7 @@ _test_mount()
+         return $?
+     fi
+     _test_options mount
+-    _mount -t $FSTYP $TEST_OPTIONS $TEST_FS_MOUNT_OPTS $SELINUX_MOUNT_OPTIONS $* $TEST_DEV $TEST_DIR
++    _mount -t $FSTYP$SUBTYP $TEST_OPTIONS $TEST_FS_MOUNT_OPTS $SELINUX_MOUNT_OPTIONS $* $TEST_DEV $TEST_DIR
+ }
+ 
+ _test_unmount()
+@@ -614,6 +616,9 @@ _test_mkfs()
+     9p)
+ 	# do nothing for 9p
+ 	;;
++    fuse)
++	# do nothing for fuse
++	;;
+     virtiofs)
+ 	# do nothing for virtiofs
+ 	;;
+@@ -654,6 +659,9 @@ _mkfs_dev()
+     9p)
+ 	# do nothing for 9p
+ 	;;
++    fuse)
++	# do nothing for fuse
++	;;
+     virtiofs)
+ 	# do nothing for virtiofs
+ 	;;
+@@ -705,6 +713,14 @@ _scratch_cleanup_files()
+ 		_overlay_mkdirs $OVL_BASE_SCRATCH_MNT
+ 		# leave base fs mouted so tests can setup lower/upper dir files
+ 		;;
++	fuse)
++		[ -n "$SCRATCH_MNT" ] || return 1
++		_scratch_mount
++		if [ ! -e $SCRATCH_MNT/bin/sh ]; then
++			rm -rf $SCRATCH_MNT/*
++		fi
++		_scratch_unmount
++		;;
+ 	*)
+ 		[ -n "$SCRATCH_MNT" ] || return 1
+ 		_scratch_mount
+@@ -721,7 +737,7 @@ _scratch_mkfs()
+ 	local mkfs_status
+ 
+ 	case $FSTYP in
+-	nfs*|cifs|ceph|overlay|glusterfs|pvfs2|9p|virtiofs)
++	nfs*|cifs|ceph|overlay|glusterfs|pvfs2|9p|fuse|virtiofs)
+ 		# unable to re-create this fstyp, just remove all files in
+ 		# $SCRATCH_MNT to avoid EEXIST caused by the leftover files
+ 		# created in previous runs
+@@ -1495,7 +1511,7 @@ _require_scratch_nocheck()
+ 			_notrun "this test requires a valid \$SCRATCH_MNT"
+ 		fi
+ 		;;
+-	9p|virtiofs)
++	9p|fuse|virtiofs)
+ 		if [ -z "$SCRATCH_DEV" ]; then
+ 			_notrun "this test requires a valid \$SCRATCH_DEV"
+ 		fi
+@@ -1619,7 +1635,7 @@ _require_test()
+ 			_notrun "this test requires a valid \$TEST_DIR"
+ 		fi
+ 		;;
+-	9p|virtiofs)
++	9p|fuse|virtiofs)
+ 		if [ -z "$TEST_DEV" ]; then
+ 			_notrun "this test requires a valid \$TEST_DEV"
+ 		fi
+@@ -2599,7 +2615,7 @@ _mount_or_remount_rw()
+ 
+ 	if [ $USE_REMOUNT -eq 0 ]; then
+ 		if [ "$FSTYP" != "overlay" ]; then
+-			_mount -t $FSTYP $mount_opts $device $mountpoint
++			_mount -t $FSTYP$SUBTYP $mount_opts $device $mountpoint
+ 		else
+ 			_overlay_mount $device $mountpoint
+ 		fi
+@@ -2727,6 +2743,9 @@ _check_test_fs()
+     9p)
+ 	# no way to check consistency for 9p
+ 	;;
++    fuse)
++	# no way to check consistency for fuse
++	;;
+     virtiofs)
+ 	# no way to check consistency for virtiofs
+ 	;;
+@@ -2788,6 +2807,9 @@ _check_scratch_fs()
+     9p)
+ 	# no way to check consistency for 9p
+ 	;;
++    fuse)
++	# no way to check consistency for fuse
++	;;
+     virtiofs)
+ 	# no way to check consistency for virtiofs
+ 	;;
+--- a/check
++++ b/check
+@@ -56,6 +56,7 @@ check options
+     -glusterfs		test GlusterFS
+     -cifs		test CIFS
+     -9p			test 9p
++    -fuse		test fuse
+     -virtiofs		test virtiofs
+     -overlay		test overlay
+     -pvfs2		test PVFS2
+@@ -269,6 +270,7 @@ while [ $# -gt 0 ]; do
+ 	-glusterfs)	FSTYP=glusterfs ;;
+ 	-cifs)		FSTYP=cifs ;;
+ 	-9p)		FSTYP=9p ;;
++	-fuse)		FSTYP=fuse ;;
+ 	-virtiofs)	FSTYP=virtiofs ;;
+ 	-overlay)	FSTYP=overlay; export OVERLAY=true ;;
+ 	-pvfs2)		FSTYP=pvfs2 ;;
+--- a/common/attr
++++ b/common/attr
+@@ -238,7 +238,7 @@ _getfattr()
+ 
+ # set maximum total attr space based on fs type
+ case "$FSTYP" in
+-xfs|udf|pvfs2|9p|ceph)
++xfs|udf|pvfs2|9p|ceph|fuse)
+ 	MAX_ATTRS=1000
+ 	;;
+ *)
+@@ -258,7 +258,7 @@ xfs|udf|btrfs)
+ pvfs2)
+ 	MAX_ATTRVAL_SIZE=8192
+ 	;;
+-9p|ceph)
++9p|ceph|fuse)
+ 	MAX_ATTRVAL_SIZE=65536
+ 	;;
+ *)
+--- /dev/null
++++ b/README.fuse
+@@ -0,0 +1,28 @@
++Here are instructions for testing fuse using the passthrough_ll example
++filesystem provided in the libfuse source tree:
++
++git clone git://github.com/libfuse/libfuse.git
++cd libfuse
++meson build
++cd build
++ninja
++cp example/passthrough_ll /usr/bin
++cd
++cat << 'EOF' > /sbin/mount.fuse.passthrough_ll
++#!/bin/bash
++ulimit -n 1048576
++exec /usr/bin/passthrough_ll -ofsname="$@"
++EOF
++chmod +x /sbin/mount.fuse.passthrough_ll
++mkdir -p /mnt/test /mnt/scratch /home/test/test /home/test/scratch
++
++Use the following config file:
++
++export TEST_DEV=non1
++export TEST_DIR=/mnt/test
++export SCRATCH_DEV=non2
++export SCRATCH_MNT=/mnt/scratch
++export FSTYP=fuse
++export SUBTYP=.passthrough_ll
++export FUSE_MOUNT_OPTIONS="-osource=/home/test/scratch,allow_other,default_permissions"
++export TEST_FS_MOUNT_OPTS="-osource=/home/test/test,allow_other,default_permissions"
+
+
 
