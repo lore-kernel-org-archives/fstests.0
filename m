@@ -2,84 +2,112 @@ Return-Path: <SRS0=RfwH=3C=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 15045C33CA9
-	for <linux-fstests@archiver.kernel.org>; Mon, 13 Jan 2020 02:07:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3FB58C32771
+	for <linux-fstests@archiver.kernel.org>; Mon, 13 Jan 2020 03:24:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id E31D62187F
-	for <linux-fstests@archiver.kernel.org>; Mon, 13 Jan 2020 02:07:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0EAE2206D6
+	for <linux-fstests@archiver.kernel.org>; Mon, 13 Jan 2020 03:24:40 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="OyMSMS5v"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1732487AbgAMCHF (ORCPT
+        id S1733136AbgAMDYj (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 12 Jan 2020 21:07:05 -0500
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:19563 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1727222AbgAMCHF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 12 Jan 2020 21:07:05 -0500
-X-IronPort-AV: E=Sophos;i="5.69,427,1571673600"; 
-   d="scan'208";a="81708410"
-Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
-  by heian.cn.fujitsu.com with ESMTP; 13 Jan 2020 10:07:01 +0800
-Received: from G08CNEXMBPEKD04.g08.fujitsu.local (unknown [10.167.33.201])
-        by cn.fujitsu.com (Postfix) with ESMTP id C8E774CE1CB3;
-        Mon, 13 Jan 2020 09:57:55 +0800 (CST)
-Received: from [10.167.220.69] (10.167.220.69) by
- G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201) with Microsoft SMTP Server
- (TLS) id 15.0.1395.4; Mon, 13 Jan 2020 10:07:01 +0800
-Message-ID: <5E1BD0C0.4040704@cn.fujitsu.com>
-Date:   Mon, 13 Jan 2020 10:06:56 +0800
-From:   Xiao Yang <yangx.jy@cn.fujitsu.com>
-User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.2; zh-CN; rv:1.9.2.18) Gecko/20110616 Thunderbird/3.1.11
+        Sun, 12 Jan 2020 22:24:39 -0500
+Received: from mail-pf1-f180.google.com ([209.85.210.180]:44748 "EHLO
+        mail-pf1-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1733109AbgAMDYj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 12 Jan 2020 22:24:39 -0500
+Received: by mail-pf1-f180.google.com with SMTP id 195so4156261pfw.11
+        for <fstests@vger.kernel.org>; Sun, 12 Jan 2020 19:24:39 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=G1clkR/hQj4YtE39u7jadVEUDAhZ5NwiMayu0BXE9ZI=;
+        b=OyMSMS5vbciY6hNG9o43MIZe/sJ8tgymKt/oYKONnQQcKroBH3scytgxjo34KtaJQC
+         z3kU41zHV2zJ94cLzJenQ+q5T86kGL8+bHwaA3owH0ZXZbe9SUChrH4Gq2ZKrTvZ5Ngg
+         vwqeY19BKtr64F2BMOvEr4eygGx9txmEkNboeWtmlUwBKiFvRng0L4rJlX0zmhmUaW4G
+         EjqjlAXsJ25HntOyjaOjZnFbTOIIeksCWSVd/tERov4KpjRNCXL9XXjWJVfy+9HPyqRu
+         HL8eG2HK+hTx+71o819+xIIgz1GzM/VOSsF3Zk5SSAo9QvORlFg/rBWzPieZPdQaypSy
+         ff+A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=G1clkR/hQj4YtE39u7jadVEUDAhZ5NwiMayu0BXE9ZI=;
+        b=VtUtA7EXrkYXye8NpHhSc/Q+JHbm5kWW6kFifbCTSXPKw97LdVVcI8KCVvsJLmN0kV
+         B5Y04zEyw0kONd3L6zSD7DRPOJuENe75QpWRph8W5PkArVwfuMwvQ+ALb+RWZWdvCJqD
+         0HgVNAuyPqMX+3wWWg0S9Y/BJdDs+ejH8/3obzUKy9BBZObBqtoukJCISTIGLYA+ZxdU
+         DxZmz8AhnMXQfC+qtdcM11/JzN++KqZ8rdW9Mqcs3G+QSXqZSGm1wiyusCK2vWXx64Tu
+         8YHNvOcmVOYptMgSgedCRUgB3pNs+Ozd2Pjf2cN+i/4vA1wvdvk0wkM8NQcsEN+KraZ2
+         bZSw==
+X-Gm-Message-State: APjAAAWsrbrEUEJGAE0e3MxFlS4NrTLlSwehD2iB7/FcSDXJi4BkEi/j
+        6dwUg19Iuv+jsvYnwuLrojwqA48Y
+X-Google-Smtp-Source: APXvYqy2Grqgd/0apYOWlgtHr59yX3Um4scq95zo4c2zmbgdtDCH7gEyxCbnek1d3XJ/5eJbNCzslQ==
+X-Received: by 2002:aa7:8191:: with SMTP id g17mr17822788pfi.25.1578885878772;
+        Sun, 12 Jan 2020 19:24:38 -0800 (PST)
+Received: from xzhoux.usersys.redhat.com ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id v10sm11181943pgk.24.2020.01.12.19.24.37
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 12 Jan 2020 19:24:38 -0800 (PST)
+From:   Murphy Zhou <jencce.kernel@gmail.com>
+To:     fstests@vger.kernel.org
+Cc:     Murphy Zhou <jencce.kernel@gmail.com>
+Subject: [PATCH] generic/175, generic/176: cleanup testdir before exit
+Date:   Mon, 13 Jan 2020 11:24:09 +0800
+Message-Id: <20200113032409.11501-1-jencce.kernel@gmail.com>
+X-Mailer: git-send-email 2.20.1
 MIME-Version: 1.0
-To:     Eryu Guan <eguan@linux.alibaba.com>
-CC:     fstests <fstests@vger.kernel.org>
-Subject: Re: [PATCH v2 2/2] fsx: Add '-a' option to skip unsupported keep
- size automatically
-References: <20200106070654.13249-1-yangx.jy@cn.fujitsu.com> <20200106070654.13249-2-yangx.jy@cn.fujitsu.com> <CAOQ4uxh91oRB03UGuqhSgASeY7-OtQD3wMRdOQ-SL0UBgdMPHQ@mail.gmail.com> <5E13E895.8020005@cn.fujitsu.com> <CAOQ4uxijoQugy_qqpfmyFmF4GcCOenbL7eX8d2aEEGknfe_UQg@mail.gmail.com> <5E1436D1.9030601@cn.fujitsu.com> <CAOQ4uxjYmGXsRhGe76KSqfS3k-aMsad=bGdmm-wwMOXyDKFRyA@mail.gmail.com>
-In-Reply-To: <CAOQ4uxjYmGXsRhGe76KSqfS3k-aMsad=bGdmm-wwMOXyDKFRyA@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.167.220.69]
-X-ClientProxiedBy: G08CNEXCHPEKD04.g08.fujitsu.local (10.167.33.200) To
- G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201)
-X-yoursite-MailScanner-ID: C8E774CE1CB3.ADBB1
-X-yoursite-MailScanner: Found to be clean
-X-yoursite-MailScanner-From: yangx.jy@cn.fujitsu.com
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 2020/1/7 16:49, Amir Goldstein wrote:
->> >  If keep_size is not supported, ops log can also includes the keyword
->> >  "skip ..." by Eryu's patch:
->> >  https://lore.kernel.org/fstests/20191022123115.12250-1-eguan@linux.alibaba.com/
->> >
->> >  Do you want to add require support for keep_size/punch/zero/collapse and
->> >  accept Eryu's patch as well?
->> >
-> I am perfectly fine with Eryu's patch and I think it is correct to merge it,
-> but it is completely independent to fixing the 4 tests.
+Usually the _mkfs helper will cleanup these directories at the
+beginning of testcase. However, when testing on NFS, the cleanup
+could be very slow and it is confusing that: We have already
+started to run generic/176 but we get stuck in _mkfs, cleaning
+up files left by the previous testcase generic/175.
 
-Hi Eryu,
+To be clear, cleanup testdir before exit.
 
-These 4 tests need the exact operations to reproduce some issues by 
---replay-ops so Amir perfer to skip tests rather than one operation
-if a required operation/flag in tests is not supported.
+Signed-off-by: Murphy Zhou <jencce.kernel@gmail.com>
+---
+ tests/generic/175 | 1 +
+ tests/generic/176 | 1 +
+ 2 files changed, 2 insertions(+)
 
-I think it is reasonable to skip these tests in the case so I have sent 
-v3 patch set[1][2]:
-https://www.spinics.net/lists/fstests/msg13290.html
-https://www.spinics.net/lists/fstests/msg13291.html
-
-With my v3 patch set, it seems that these 4 tests have no chance to fall 
-into the condition described by your patch:
-https://lore.kernel.org/fstests/20191022123115.12250-1-eguan@linux.alibaba.com/
-
-Best Regards,
-Xiao Yang
-
+diff --git a/tests/generic/175 b/tests/generic/175
+index 79e5b3d6..bd966a28 100755
+--- a/tests/generic/175
++++ b/tests/generic/175
+@@ -61,6 +61,7 @@ bytes=$((blks * blksz))
+ echo "reflinking $blks blocks, $bytes bytes" >> "$seqres.full"
+ _reflink_range "$testdir/file1" 0 "$testdir/file2" 0 $bytes >> "$seqres.full"
+ 
++rm -rf $testdir
+ # success, all done
+ status=0
+ exit
+diff --git a/tests/generic/176 b/tests/generic/176
+index a084578a..bc83762e 100755
+--- a/tests/generic/176
++++ b/tests/generic/176
+@@ -73,6 +73,7 @@ bytes=$((blocks_needed * blksz))
+ echo "reflinking $((blocks_needed / 2)) blocks, $((bytes / 2)) bytes" >> "$seqres.full"
+ _reflink_range "$testdir/file1" 0 "$testdir/file2" 0 $bytes >> "$seqres.full"
+ 
++rm -rf $testdir
+ # success, all done
+ status=0
+ exit
+-- 
+2.20.1
 
