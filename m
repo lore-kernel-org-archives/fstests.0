@@ -2,161 +2,191 @@ Return-Path: <SRS0=EYS7=3E=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AEB49C32771
-	for <linux-fstests@archiver.kernel.org>; Wed, 15 Jan 2020 17:19:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 81EC1C33CB3
+	for <linux-fstests@archiver.kernel.org>; Wed, 15 Jan 2020 18:08:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 723ED214AF
-	for <linux-fstests@archiver.kernel.org>; Wed, 15 Jan 2020 17:19:29 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5C12524656
+	for <linux-fstests@archiver.kernel.org>; Wed, 15 Jan 2020 18:08:00 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="bJjNBfl0"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="L8G7TR9J"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728792AbgAORT3 (ORCPT
+        id S1729148AbgAOSHz (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 15 Jan 2020 12:19:29 -0500
-Received: from userp2130.oracle.com ([156.151.31.86]:56630 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727016AbgAORT2 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 15 Jan 2020 12:19:28 -0500
-Received: from pps.filterd (userp2130.oracle.com [127.0.0.1])
-        by userp2130.oracle.com (8.16.0.27/8.16.0.27) with SMTP id 00FHDCq7063144;
-        Wed, 15 Jan 2020 17:19:26 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
- : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=corp-2019-08-05;
- bh=1wGGSiMayuixqNNq6md031WKAXBxKouyhxuk5rHesJw=;
- b=bJjNBfl0BllDwux4IhXx18h6ogpehB5BXzZ5yChV9japHOQ+SwGOyW1FYpecVhBFEMMa
- x8bxcusVM2/5x8VfHqd16hEYKs7/8xj/Uzn0FlJr/RcRqFU0kZWyPWEgkyc7OCsfu4Ly
- I1NCVWG5kdWXkL4fgcSaZBuW5C5LR0OgZNkNsdX+QxsPchu6TZcXkpxMWqhj4ncWSNNR
- DixgJoKWHRckKm6orVaDkdAcw4U0ZFbW0PbQbBD2BAMGK+A00c+ozsYZlBbtsypGfHaB
- BABioOlB3XC8evsUN85BvsxbuGyZZzw/i7776Csj0KOVdsrZp9cuG5j6AklTh0T1P7qs tA== 
-Received: from userp3020.oracle.com (userp3020.oracle.com [156.151.31.79])
-        by userp2130.oracle.com with ESMTP id 2xf74sdh87-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Wed, 15 Jan 2020 17:19:26 +0000
-Received: from pps.filterd (userp3020.oracle.com [127.0.0.1])
-        by userp3020.oracle.com (8.16.0.27/8.16.0.27) with SMTP id 00FHEEKt119077;
-        Wed, 15 Jan 2020 17:19:26 GMT
-Received: from aserv0121.oracle.com (aserv0121.oracle.com [141.146.126.235])
-        by userp3020.oracle.com with ESMTP id 2xj1prhemk-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Wed, 15 Jan 2020 17:19:26 +0000
-Received: from abhmp0005.oracle.com (abhmp0005.oracle.com [141.146.116.11])
-        by aserv0121.oracle.com (8.14.4/8.13.8) with ESMTP id 00FHJPrV000504;
-        Wed, 15 Jan 2020 17:19:25 GMT
-Received: from localhost (/67.169.218.210)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Wed, 15 Jan 2020 09:19:24 -0800
-Date:   Wed, 15 Jan 2020 09:19:23 -0800
-From:   "Darrick J. Wong" <darrick.wong@oracle.com>
-To:     Murphy Zhou <jencce.kernel@gmail.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] generic/175, generic/176: cleanup testdir before exit
-Message-ID: <20200115171923.GG8257@magnolia>
-References: <20200113032409.11501-1-jencce.kernel@gmail.com>
- <20200113224203.GA8241@magnolia>
- <20200115042132.xl6ijsavac23x7dx@xzhoux.usersys.redhat.com>
+        Wed, 15 Jan 2020 13:07:55 -0500
+Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:48802 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1729091AbgAOSHy (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 15 Jan 2020 13:07:54 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1579111673;
+        h=from:from:reply-to:reply-to:subject:subject:date:date:
+         message-id:message-id:to:to:cc:cc:mime-version:mime-version:
+         content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
+        bh=rNzJ89c4VnWMK++o1hE6EqIMCPtZMKvoQOCJso4aDP4=;
+        b=L8G7TR9JC7bYwlQM0SoQvTRoGOCRnbxT1dj+hLLtEFj0+1uq0dkXhWWnsLrTp7LfoKn1qF
+        cil/OpK/zDGUXTGINXbqtKGx5cBvUYioXuom8YUjBD7NSVwZj+Cs1kuhhYQsdzPH5Uli9p
+        nA9nlvZcECsQaZ+gOZg51+H0nNmkBlU=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-337-DJ6aiOIzOHyYQfVPhWu5yQ-1; Wed, 15 Jan 2020 13:07:50 -0500
+X-MC-Unique: DJ6aiOIzOHyYQfVPhWu5yQ-1
+Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id BDCE1101FEEF;
+        Wed, 15 Jan 2020 18:07:48 +0000 (UTC)
+Received: from [127.0.0.1] (ovpn04.gateway.prod.ext.phx2.redhat.com [10.5.9.4])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id 4C29910842B9;
+        Wed, 15 Jan 2020 18:07:48 +0000 (UTC)
+Reply-To: sandeen@redhat.com
+Subject: Re: xfs/191 failures?
+To:     "Darrick J. Wong" <darrick.wong@oracle.com>,
+        Christoph Hellwig <hch@infradead.org>
+Cc:     Baihua Lu <lubaihua0331@gmail.com>, fstests@vger.kernel.org,
+        linux-xfs@vger.kernel.org
+References: <20200115150802.GA425@infradead.org>
+ <20200115162126.GY8247@magnolia>
+From:   Eric Sandeen <esandeen@redhat.com>
+Autocrypt: addr=esandeen@redhat.com; prefer-encrypt=mutual; keydata=
+ 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 pA==
+Message-ID: <ae0bc15b-efcb-89e3-4e6e-7c60aab1c3a5@redhat.com>
+Date:   Wed, 15 Jan 2020 12:07:47 -0600
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:68.0)
+ Gecko/20100101 Thunderbird/68.4.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200115042132.xl6ijsavac23x7dx@xzhoux.usersys.redhat.com>
-User-Agent: Mutt/1.9.4 (2018-02-28)
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9501 signatures=668685
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=0 malwarescore=0
- phishscore=0 bulkscore=0 spamscore=0 mlxscore=0 mlxlogscore=999
- adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.0.1-1911140001 definitions=main-2001150131
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9501 signatures=668685
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 priorityscore=1501 malwarescore=0
- suspectscore=0 phishscore=0 bulkscore=0 spamscore=0 clxscore=1015
- lowpriorityscore=0 mlxscore=0 impostorscore=0 mlxlogscore=999 adultscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.0.1-1911140001
- definitions=main-2001150131
+In-Reply-To: <20200115162126.GY8247@magnolia>
+Content-Type: text/plain; charset=windows-1252
+Content-Language: en-US
+X-Scanned-By: MIMEDefang 2.84 on 10.5.11.22
+Content-Transfer-Encoding: quoted-printable
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Jan 15, 2020 at 12:21:32PM +0800, Murphy Zhou wrote:
-> On Mon, Jan 13, 2020 at 02:42:03PM -0800, Darrick J. Wong wrote:
-> > On Mon, Jan 13, 2020 at 11:24:09AM +0800, Murphy Zhou wrote:
-> > > Usually the _mkfs helper will cleanup these directories at the
-> > > beginning of testcase. However, when testing on NFS, the cleanup
-> > > could be very slow and it is confusing that: We have already
-> > > started to run generic/176 but we get stuck in _mkfs, cleaning
-> > > up files left by the previous testcase generic/175.
-> > 
-> > Isn't this a general problem with the way nfs handles "mkfs" on scratch
-> > devices?  So you'd want to fix this once by doing the cleanup between
-> > tests instead of playing whackamole with whatever crazy file tests we
-> > think of next?
-> 
-> Hmm, it's hard to tell. Deleting these files at anywhere makes sense.
-> This patch is hardly a "fix", just trying to make it more clear.
-> 
-> > 
-> > > To be clear, cleanup testdir before exit.
-> > > 
-> > > Signed-off-by: Murphy Zhou <jencce.kernel@gmail.com>
-> > > ---
-> > >  tests/generic/175 | 1 +
-> > >  tests/generic/176 | 1 +
-> > >  2 files changed, 2 insertions(+)
-> > > 
-> > > diff --git a/tests/generic/175 b/tests/generic/175
-> > > index 79e5b3d6..bd966a28 100755
-> > > --- a/tests/generic/175
-> > > +++ b/tests/generic/175
-> > > @@ -61,6 +61,7 @@ bytes=$((blks * blksz))
-> > >  echo "reflinking $blks blocks, $bytes bytes" >> "$seqres.full"
-> > >  _reflink_range "$testdir/file1" 0 "$testdir/file2" 0 $bytes >> "$seqres.full"
-> > >  
-> > > +rm -rf $testdir
-> > 
-> > Or put another way, this probably ought to be in _try_wipe_scratch_devs()
-> 
-> That's for devices I believe..
 
-It exists to zap the scratch devices into enough of a clean state that
-whatever contents a test wrote to the scratch devices cannot easily
-(e.g. mount) leak into the next test.  IOWs, exactly where you'd want
-FSTYP=NFS to delete whatever junk is in the scratch mount.
 
-Plus then you get a clean nfs scratch mount at the start of each test
-without needing to whackamole each test.
+On 1/15/20 10:21 AM, Darrick J. Wong wrote:
+> On Wed, Jan 15, 2020 at 07:08:02AM -0800, Christoph Hellwig wrote:
+>> Hi Jan and Baihua,
+>>
+>> the xfs/191 test case has been failing for me basically since it
+>> was added.  Does it succeed for anyone with an upstream kernel
+>> and xfsprogs?
+>=20
+> It never succeeds here.
 
-> Thanks,
-> Murphy
-> 
-> > 
-> > --D
-> > 
-> > >  # success, all done
-> > >  status=0
-> > >  exit
-> > > diff --git a/tests/generic/176 b/tests/generic/176
-> > > index a084578a..bc83762e 100755
-> > > --- a/tests/generic/176
-> > > +++ b/tests/generic/176
-> > > @@ -73,6 +73,7 @@ bytes=$((blocks_needed * blksz))
-> > >  echo "reflinking $((blocks_needed / 2)) blocks, $((bytes / 2)) bytes" >> "$seqres.full"
-> > >  _reflink_range "$testdir/file1" 0 "$testdir/file2" 0 $bytes >> "$seqres.full"
-> > >  
-> > > +rm -rf $testdir
+<Jan has left Red Hat>
 
-Also this will massively slow down generic/17[56] on btrfs/XFS
-considering that we don't care about deleting the massively reflinked
-file we created.
+yeah I think this has always been a mess, not sure why it took so long to
+highlight it.  Seems like a combination of WTF? and general rot.
 
---D
+> --D
+>=20
+>> Here is my diff between the golden and the actual
+>> output:
+>=20
+>> --- /root/xfstests/tests/xfs/191-input-validation.out	2016-09-21 20:34=
+:14.961574921 +0000
+>> +++ /root/xfstests/results//xfs/191-input-validation.out.bad	2020-01-1=
+5 15:05:25.580935340 +0000
+>> @@ -1,2 +1,13 @@
+>>  QA output created by 191-input-validation
+>>  silence is golden
 
-> > >  # success, all done
-> > >  status=0
-> > >  exit
-> > > -- 
-> > > 2.20.1
-> > > 
+supposedly these should fail, but they pass:
+
+>> +pass -n size=3D2b /dev/vdc
+>> +pass -d agsize=3D8192b /dev/vdc
+>> +pass -d agsize=3D65536s /dev/vdc
+
+I don't know why it wouldn't be valid to use block & sector units for the=
+se
+values.  But this whole mkfs reworking discussion was so long ago :(
+
+>> +pass -d su=3D0,sw=3D64 /dev/vdc
+
+not sure why this passes
+
+>> +pass -d su=3D4096s,sw=3D64 /dev/vdc
+>> +pass -d su=3D4096b,sw=3D64 /dev/vdc
+
+s & b suffixes seem to be ignored here, which seems like a bug.
+
+>> +pass -l su=3D10b /dev/vdc
+
+again this seems to DTRT.
+
+
+according to the test, these should pass, but they fail:
+
+>> +fail -n log=3D15 /dev/vdc
+
+uh, "-n log=3D" isn't even a mkfs option so of course it fails
+
+>> +fail -r rtdev=3D/mnt/test/191-input-validation.img /dev/vdc
+
+this fails because reflink is default now
+
+>> +fail -r size=3D65536,rtdev=3D/mnt/test/191-input-validation.img /dev/=
+vdc
+
+ditto
+
+>> +fail -i log=3D10 /dev/vdc
+
+-i log is not a valid option either so of course it fails.
+
+My first thought was to nuke it all, but I think the test could be salvag=
+ed
+by anyone motivated to do so.
+
+-Eric
+
