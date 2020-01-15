@@ -6,41 +6,41 @@ X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
 	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
 	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 15D69C33CB1
-	for <linux-fstests@archiver.kernel.org>; Wed, 15 Jan 2020 15:01:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C9874C33CB1
+	for <linux-fstests@archiver.kernel.org>; Wed, 15 Jan 2020 15:08:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id DADB7214AF
-	for <linux-fstests@archiver.kernel.org>; Wed, 15 Jan 2020 15:00:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 96A032465A
+	for <linux-fstests@archiver.kernel.org>; Wed, 15 Jan 2020 15:08:05 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="DMVMXqXr"
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="nL2vP1tC"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726132AbgAOPA7 (ORCPT
+        id S1726501AbgAOPIF (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 15 Jan 2020 10:00:59 -0500
-Received: from bombadil.infradead.org ([198.137.202.133]:36468 "EHLO
+        Wed, 15 Jan 2020 10:08:05 -0500
+Received: from bombadil.infradead.org ([198.137.202.133]:38420 "EHLO
         bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726248AbgAOPA7 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 15 Jan 2020 10:00:59 -0500
+        with ESMTP id S1726132AbgAOPIF (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 15 Jan 2020 10:08:05 -0500
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
         d=infradead.org; s=bombadil.20170209; h=Content-Type:MIME-Version:Message-ID:
         Subject:Cc:To:From:Date:Sender:Reply-To:Content-Transfer-Encoding:Content-ID:
         Content-Description:Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc
         :Resent-Message-ID:In-Reply-To:References:List-Id:List-Help:List-Unsubscribe:
         List-Subscribe:List-Post:List-Owner:List-Archive;
-        bh=/fTiloHBAPS8Cs1bg/qh1RWyOiQKme98A3pXMx8rMWo=; b=DMVMXqXrql3jtgswju6Iz92Uz7
-        QN7s0LVi3y5/7tBMo2ApjbtQPx7tLmgq3GVsEJWU9vFP/ssxO2anoiTtYaZOBuE6mEmAXq3WgNL+Z
-        +UGAel68dHIiq9TB1JOvrqxWN8zmmghhjc+5R7xs+9F5gvjGYCJKuwdUKJnzV5bJsHjpDehhYmcNm
-        5NFvi5h/vGM8GOiNsasweYFfLkTeyaAZ5I1UGobxwdS3TKc3xrgYB3wLwbIyqvllzJ+c9gtTnS8hT
-        JsTbpL2i4Y4h6DWX5fQUkTqm1wOrmCj/188N2scjLnWUfZE5l6dRG3OcjH5mIljF7nRYEHC/vzmRM
-        9jHAT5Ag==;
+        bh=796tKAbK6j2ghTsXjLBQJuDUm5b41Shs0TtRfi9nngY=; b=nL2vP1tCUdIM8lzWSFrK6/7sCE
+        LvdNvaTpoDTK4jgnvLJ/qL6J0WKz1EVZXIeh/RW+1YlaxWyKOBJXNdjVbiGs9x1BFR2MwZy6CuHI1
+        wMijvrqzuBpDK6wTMR5WIEnnKJZem5xwY8xw1asRhi8X7CupridhNeUFBFPbCF15NUZ0F2tb7GNJI
+        1lZ0ccEtZ7+ccA2daeUr1SXIO+pcJ7qB2kyPcdtWxxad3kHHELiygk4UEx0mUov/JvltvR3N0uX5s
+        orJ0M+xB+l4ZwATqUzHMpvAbWeS2LWGzZaV4M8mkFW/FpGpTuq82yMXdTmil6LkJMaTJGs6qgg3Ar
+        w0JfdSLw==;
 Received: from hch by bombadil.infradead.org with local (Exim 4.92.3 #3 (Red Hat Linux))
-        id 1irkAF-0006o4-7Q; Wed, 15 Jan 2020 15:00:59 +0000
-Date:   Wed, 15 Jan 2020 07:00:59 -0800
+        id 1irkH4-0000NY-1V; Wed, 15 Jan 2020 15:08:02 +0000
+Date:   Wed, 15 Jan 2020 07:08:02 -0800
 From:   Christoph Hellwig <hch@infradead.org>
-To:     jlayton@kernel.org
-Cc:     fstests@vger.kernel.org
-Subject: xfstests generic/484
-Message-ID: <20200115150059.GA21201@infradead.org>
+To:     Jan Tulak <jtulak@redhat.com>, Baihua Lu <lubaihua0331@gmail.com>
+Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: xfs/191 failures?
+Message-ID: <20200115150802.GA425@infradead.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
@@ -50,10 +50,26 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Hi Jeff,
+Hi Jan and Baihua,
 
-do you remember the story behind xfstests generic/484?  That test has
-been failing for me ever since it was added and on every file system
-(which is not surprising given that the functionality isn't file system
-specific).  Are we expected to fix the issue in the lock ode?  Or did we
-give up on it?
+the xfs/191 test case has been failing for me basically since it
+was added.  Does it succeed for anyone with an upstream kernel
+and xfsprogs?  Here is my diff between the golden and the actual
+output:
+
+--- /root/xfstests/tests/xfs/191-input-validation.out	2016-09-21 20:34:14.961574921 +0000
++++ /root/xfstests/results//xfs/191-input-validation.out.bad	2020-01-15 15:05:25.580935340 +0000
+@@ -1,2 +1,13 @@
+ QA output created by 191-input-validation
+ silence is golden
++pass -n size=2b /dev/vdc
++pass -d agsize=8192b /dev/vdc
++pass -d agsize=65536s /dev/vdc
++pass -d su=0,sw=64 /dev/vdc
++pass -d su=4096s,sw=64 /dev/vdc
++pass -d su=4096b,sw=64 /dev/vdc
++pass -l su=10b /dev/vdc
++fail -n log=15 /dev/vdc
++fail -r rtdev=/mnt/test/191-input-validation.img /dev/vdc
++fail -r size=65536,rtdev=/mnt/test/191-input-validation.img /dev/vdc
++fail -i log=10 /dev/vdc
