@@ -2,169 +2,64 @@ Return-Path: <SRS0=clGf=3F=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4126EC33CB3
-	for <linux-fstests@archiver.kernel.org>; Thu, 16 Jan 2020 07:45:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B3C29C33CB1
+	for <linux-fstests@archiver.kernel.org>; Thu, 16 Jan 2020 09:23:43 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 142662075B
-	for <linux-fstests@archiver.kernel.org>; Thu, 16 Jan 2020 07:45:20 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 86EF42073A
+	for <linux-fstests@archiver.kernel.org>; Thu, 16 Jan 2020 09:23:43 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="fC5DW9H1"
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="J6ZbtR06"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729442AbgAPHpT (ORCPT
+        id S1729619AbgAPJXn (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 16 Jan 2020 02:45:19 -0500
-Received: from mail-pl1-f193.google.com ([209.85.214.193]:36227 "EHLO
-        mail-pl1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726653AbgAPHpS (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 16 Jan 2020 02:45:18 -0500
-Received: by mail-pl1-f193.google.com with SMTP id a6so7999407plm.3
-        for <fstests@vger.kernel.org>; Wed, 15 Jan 2020 23:45:18 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=EEe/GkaZ2LgKg5zgCN5U285mZs10pnF/q75Olv8HuzQ=;
-        b=fC5DW9H1mxNKKWsqFjmEzoj6p/bMT0ObNG4tsUc+npYxqWhXX4DywNzMK0DIY4HT69
-         Jq/WbRE8XqBbS0t6oALZuMVlogeHUxKjb9ZzkaAOl58MuQ8VtHfmwcwi2PkCe9Ovmy7V
-         hPxnGJ7Kd/pfZN5igUXnRE9tfLzu9DhWn8FXvhfNlFcS302a4H1pSdUtjEcmrrN02jmR
-         TiswgHbm1IEont9FCMDl11cpmlURA8ojIMM3F1EcrwCzGUOgKCUW9/65qho5PojfSkKa
-         HZS3h1tLpLBrHzbAnIK3GdGopCxxBRRxDH/mOUbX1ws7vTGc94Ad5ZTCPjxzqrnbLs/Q
-         /kCQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=EEe/GkaZ2LgKg5zgCN5U285mZs10pnF/q75Olv8HuzQ=;
-        b=I6cV6SsGPOTphmMruENWSzXE77A/tag1eavuwpruBojG+EjRmabevBKcJxa/58kiX1
-         Q8bySWyqH+P/PzEBN+agPSlRDdSZYl2iTPCC23q74YvA4rLkDjri6bsXKlGoc+T0JQ7l
-         QfNIwjBY4K4LaNC7Iydt5Qq5lw+RD1GR4L17cCiuoLBltivmq/xL0pKF1snJPTLy5JGC
-         maHooPBG4bOkJ54ZGxMymBYqXbSuz8YhBSF+0/livz5bF8Md6/9MSgyGsvxKJWCiZJOF
-         6XSsvH536xe0VIOnC5kR7LdcyjVldsYht/Cr/SETlRaN3/s9IYch+yobGMStmDDux1WX
-         UkVQ==
-X-Gm-Message-State: APjAAAXijXK1rTyRi9XIYO/DFA+IG7DDz98BI83YVxXlk0MBDmxrh4wB
-        gkVobxLqk52lU3hU2QfPgSU=
-X-Google-Smtp-Source: APXvYqy5pBfyf1uyn7B/mAJTX60RGitASUHYB66RiSrTBXJxg++L0jxmSHtJUC5t93OFW0j8K5T1xA==
-X-Received: by 2002:a17:90b:46c4:: with SMTP id jx4mr5242561pjb.32.1579160717678;
-        Wed, 15 Jan 2020 23:45:17 -0800 (PST)
-Received: from localhost ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id 3sm2275659pjg.27.2020.01.15.23.45.16
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 15 Jan 2020 23:45:16 -0800 (PST)
-Date:   Thu, 16 Jan 2020 15:45:09 +0800
-From:   Murphy Zhou <jencce.kernel@gmail.com>
+        Thu, 16 Jan 2020 04:23:43 -0500
+Received: from bombadil.infradead.org ([198.137.202.133]:40748 "EHLO
+        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726684AbgAPJXm (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 16 Jan 2020 04:23:42 -0500
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20170209; h=In-Reply-To:Content-Type:MIME-Version
+        :References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description:Resent-Date:
+        Resent-From:Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:List-Id:
+        List-Help:List-Unsubscribe:List-Subscribe:List-Post:List-Owner:List-Archive;
+         bh=fwuDtVEmEKWOErQd97npYduoZrTA0IvJkG3MLQ3D6IU=; b=J6ZbtR06bm5ZOmIYJO5ro3w8Y
+        cgZcXhxjZhlvJlnfq2w0Vm3HHozXbAe3qqmlfsBFlvse5D/L7JojD754mRokJQWBCVI+3ITd9fFew
+        ODfjmP2079MOoALoVDqwxPTL7EVOdUq4V02REllvWW9XWgvth/NH8nVO/0gwREiasX/NrptRA9crp
+        NyEtmvFLibaXzCBt2sHHxqrYJQk5puq+eqA3SGWiKvZqF0hHkU2O+io6fXdGtZF7bPF+ZjQhnZhLz
+        P4RSi5VUKjexBKN4ujZ8bdU8irUGZanzHg2hRAgu6LRnxBvz5phWi9QvuGqySc4WHyHsrn9Mwkm9X
+        qSLg26TKw==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.92.3 #3 (Red Hat Linux))
+        id 1is1NK-00063U-R0; Thu, 16 Jan 2020 09:23:38 +0000
+Date:   Thu, 16 Jan 2020 01:23:38 -0800
+From:   Christoph Hellwig <hch@infradead.org>
 To:     "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc:     Murphy Zhou <jencce.kernel@gmail.com>, fstests@vger.kernel.org
-Subject: Re: [PATCH] generic/175, generic/176: cleanup testdir before exit
-Message-ID: <20200116074509.gnfkvvpy2jhahv3n@xzhoux.usersys.redhat.com>
-References: <20200113032409.11501-1-jencce.kernel@gmail.com>
- <20200113224203.GA8241@magnolia>
- <20200115042132.xl6ijsavac23x7dx@xzhoux.usersys.redhat.com>
- <20200115171923.GG8257@magnolia>
+Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: Re: [PATCH 1/7] xfs/449: filter out "Discarding..." from output
+Message-ID: <20200116092338.GA21601@infradead.org>
+References: <157915143549.2374854.7759901526137960493.stgit@magnolia>
+ <157915144176.2374854.14349580805612117354.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20200115171923.GG8257@magnolia>
+In-Reply-To: <157915144176.2374854.14349580805612117354.stgit@magnolia>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Jan 15, 2020 at 09:19:23AM -0800, Darrick J. Wong wrote:
-> On Wed, Jan 15, 2020 at 12:21:32PM +0800, Murphy Zhou wrote:
-> > On Mon, Jan 13, 2020 at 02:42:03PM -0800, Darrick J. Wong wrote:
-> > > On Mon, Jan 13, 2020 at 11:24:09AM +0800, Murphy Zhou wrote:
-> > > > Usually the _mkfs helper will cleanup these directories at the
-> > > > beginning of testcase. However, when testing on NFS, the cleanup
-> > > > could be very slow and it is confusing that: We have already
-> > > > started to run generic/176 but we get stuck in _mkfs, cleaning
-> > > > up files left by the previous testcase generic/175.
-> > > 
-> > > Isn't this a general problem with the way nfs handles "mkfs" on scratch
-> > > devices?  So you'd want to fix this once by doing the cleanup between
-> > > tests instead of playing whackamole with whatever crazy file tests we
-> > > think of next?
-> > 
-> > Hmm, it's hard to tell. Deleting these files at anywhere makes sense.
-> > This patch is hardly a "fix", just trying to make it more clear.
-> > 
-> > > 
-> > > > To be clear, cleanup testdir before exit.
-> > > > 
-> > > > Signed-off-by: Murphy Zhou <jencce.kernel@gmail.com>
-> > > > ---
-> > > >  tests/generic/175 | 1 +
-> > > >  tests/generic/176 | 1 +
-> > > >  2 files changed, 2 insertions(+)
-> > > > 
-> > > > diff --git a/tests/generic/175 b/tests/generic/175
-> > > > index 79e5b3d6..bd966a28 100755
-> > > > --- a/tests/generic/175
-> > > > +++ b/tests/generic/175
-> > > > @@ -61,6 +61,7 @@ bytes=$((blks * blksz))
-> > > >  echo "reflinking $blks blocks, $bytes bytes" >> "$seqres.full"
-> > > >  _reflink_range "$testdir/file1" 0 "$testdir/file2" 0 $bytes >> "$seqres.full"
-> > > >  
-> > > > +rm -rf $testdir
-> > > 
-> > > Or put another way, this probably ought to be in _try_wipe_scratch_devs()
-> > 
-> > That's for devices I believe..
+On Wed, Jan 15, 2020 at 09:10:41PM -0800, Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
 > 
-> It exists to zap the scratch devices into enough of a clean state that
-> whatever contents a test wrote to the scratch devices cannot easily
-> (e.g. mount) leak into the next test.  IOWs, exactly where you'd want
-> FSTYP=NFS to delete whatever junk is in the scratch mount.
-> 
-> Plus then you get a clean nfs scratch mount at the start of each test
-> without needing to whackamole each test.
-> 
-> > Thanks,
-> > Murphy
-> > 
-> > > 
-> > > --D
-> > > 
-> > > >  # success, all done
-> > > >  status=0
-> > > >  exit
-> > > > diff --git a/tests/generic/176 b/tests/generic/176
-> > > > index a084578a..bc83762e 100755
-> > > > --- a/tests/generic/176
-> > > > +++ b/tests/generic/176
-> > > > @@ -73,6 +73,7 @@ bytes=$((blocks_needed * blksz))
-> > > >  echo "reflinking $((blocks_needed / 2)) blocks, $((bytes / 2)) bytes" >> "$seqres.full"
-> > > >  _reflink_range "$testdir/file1" 0 "$testdir/file2" 0 $bytes >> "$seqres.full"
-> > > >  
-> > > > +rm -rf $testdir
-> 
-> Also this will massively slow down generic/17[56] on btrfs/XFS
-> considering that we don't care about deleting the massively reflinked
-> file we created.
+> xfsprogs 5.4 prints "Discarding..." if the disk supports the trim
+> command.  Filter this out of the output because xfs_info and friends
+> won't print that out.
 
-Deleting them would be a good testcase to me. After all the tests,
-deleting them should not cause any problem, or spending to much
-time. Leaving them behind and letting them get formatted by mkfs,
-definitely will be faster, but may make potential problems not
-discovered.
-
-
-If you think the deleting will be extremely slow, maybe it's time
-to optimize how xfs deleting reflinked files.
-
-Thanks,
-Murphy
-
-> 
-> --D
-> 
-> > > >  # success, all done
-> > > >  status=0
-> > > >  exit
-> > > > -- 
-> > > > 2.20.1
-> > > > 
+We really should drop that message as it is breaking way too many
+things and isn't actually useful.
