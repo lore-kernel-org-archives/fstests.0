@@ -2,262 +2,169 @@ Return-Path: <SRS0=clGf=3F=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 482B5C33CB1
-	for <linux-fstests@archiver.kernel.org>; Thu, 16 Jan 2020 05:13:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4126EC33CB3
+	for <linux-fstests@archiver.kernel.org>; Thu, 16 Jan 2020 07:45:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 1979F2075B
-	for <linux-fstests@archiver.kernel.org>; Thu, 16 Jan 2020 05:13:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 142662075B
+	for <linux-fstests@archiver.kernel.org>; Thu, 16 Jan 2020 07:45:20 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="Gs/KMN7Y"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="fC5DW9H1"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727002AbgAPFNr (ORCPT
+        id S1729442AbgAPHpT (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 16 Jan 2020 00:13:47 -0500
-Received: from userp2120.oracle.com ([156.151.31.85]:49414 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726984AbgAPFNr (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 16 Jan 2020 00:13:47 -0500
-Received: from pps.filterd (userp2120.oracle.com [127.0.0.1])
-        by userp2120.oracle.com (8.16.0.27/8.16.0.27) with SMTP id 00G5DAV1173172;
-        Thu, 16 Jan 2020 05:13:45 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=subject : from : to :
- cc : date : message-id : in-reply-to : references : mime-version :
- content-type : content-transfer-encoding; s=corp-2019-08-05;
- bh=sBxCc7zlXvHTS4R6nVhRZR8sYDfaNlzvU6VqknYBivw=;
- b=Gs/KMN7YbMWCnTXdegCx+NNzE/8IPsM0gKDfGk4hEt3plscsYUUSV3JosEqN/Bj9LjLA
- 70MRtWsF5fAk/O99m0/lytHmOkkiyIj3Lq4+vrpqizZqdzWiGWuaiopA+DLOeNeFc4Ro
- dP4AB2jJ6ZAW16w6KfUKER4iw/qOPY8V2kCOf7aot5I1pOuxPnQlrgfEjd/Icrihw+HT
- KyPvNtB41zBxjteaGlIJJzy8hhV0e5IwK9OD+javFrCbhb5VTuOcOiG5Az1md4rz0Ai7
- xxz6DsuPIerWyGAGqqI40Tn4/FH5TCEefwi6/HvA6yqcPJruU6lVudCrk2eTBoQRgDWy tw== 
-Received: from userp3020.oracle.com (userp3020.oracle.com [156.151.31.79])
-        by userp2120.oracle.com with ESMTP id 2xf73yr7fx-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Thu, 16 Jan 2020 05:13:45 +0000
-Received: from pps.filterd (userp3020.oracle.com [127.0.0.1])
-        by userp3020.oracle.com (8.16.0.27/8.16.0.27) with SMTP id 00G59DQg085357;
-        Thu, 16 Jan 2020 05:11:44 GMT
-Received: from userv0121.oracle.com (userv0121.oracle.com [156.151.31.72])
-        by userp3020.oracle.com with ESMTP id 2xj1psd1mv-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Thu, 16 Jan 2020 05:11:44 +0000
-Received: from abhmp0003.oracle.com (abhmp0003.oracle.com [141.146.116.9])
-        by userv0121.oracle.com (8.14.4/8.13.8) with ESMTP id 00G5Bisl024449;
-        Thu, 16 Jan 2020 05:11:44 GMT
-Received: from localhost (/67.169.218.210)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Wed, 15 Jan 2020 21:11:43 -0800
-Subject: [PATCH 2/2] xfs: test setting labels with xfs_admin
-From:   "Darrick J. Wong" <darrick.wong@oracle.com>
-To:     guaneryu@gmail.com, darrick.wong@oracle.com
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Date:   Wed, 15 Jan 2020 21:11:42 -0800
-Message-ID: <157915150275.2375135.12157351351400702116.stgit@magnolia>
-In-Reply-To: <157915149017.2375135.14166864164575311878.stgit@magnolia>
-References: <157915149017.2375135.14166864164575311878.stgit@magnolia>
-User-Agent: StGit/0.17.1-dirty
+        Thu, 16 Jan 2020 02:45:19 -0500
+Received: from mail-pl1-f193.google.com ([209.85.214.193]:36227 "EHLO
+        mail-pl1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726653AbgAPHpS (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 16 Jan 2020 02:45:18 -0500
+Received: by mail-pl1-f193.google.com with SMTP id a6so7999407plm.3
+        for <fstests@vger.kernel.org>; Wed, 15 Jan 2020 23:45:18 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=EEe/GkaZ2LgKg5zgCN5U285mZs10pnF/q75Olv8HuzQ=;
+        b=fC5DW9H1mxNKKWsqFjmEzoj6p/bMT0ObNG4tsUc+npYxqWhXX4DywNzMK0DIY4HT69
+         Jq/WbRE8XqBbS0t6oALZuMVlogeHUxKjb9ZzkaAOl58MuQ8VtHfmwcwi2PkCe9Ovmy7V
+         hPxnGJ7Kd/pfZN5igUXnRE9tfLzu9DhWn8FXvhfNlFcS302a4H1pSdUtjEcmrrN02jmR
+         TiswgHbm1IEont9FCMDl11cpmlURA8ojIMM3F1EcrwCzGUOgKCUW9/65qho5PojfSkKa
+         HZS3h1tLpLBrHzbAnIK3GdGopCxxBRRxDH/mOUbX1ws7vTGc94Ad5ZTCPjxzqrnbLs/Q
+         /kCQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=EEe/GkaZ2LgKg5zgCN5U285mZs10pnF/q75Olv8HuzQ=;
+        b=I6cV6SsGPOTphmMruENWSzXE77A/tag1eavuwpruBojG+EjRmabevBKcJxa/58kiX1
+         Q8bySWyqH+P/PzEBN+agPSlRDdSZYl2iTPCC23q74YvA4rLkDjri6bsXKlGoc+T0JQ7l
+         QfNIwjBY4K4LaNC7Iydt5Qq5lw+RD1GR4L17cCiuoLBltivmq/xL0pKF1snJPTLy5JGC
+         maHooPBG4bOkJ54ZGxMymBYqXbSuz8YhBSF+0/livz5bF8Md6/9MSgyGsvxKJWCiZJOF
+         6XSsvH536xe0VIOnC5kR7LdcyjVldsYht/Cr/SETlRaN3/s9IYch+yobGMStmDDux1WX
+         UkVQ==
+X-Gm-Message-State: APjAAAXijXK1rTyRi9XIYO/DFA+IG7DDz98BI83YVxXlk0MBDmxrh4wB
+        gkVobxLqk52lU3hU2QfPgSU=
+X-Google-Smtp-Source: APXvYqy5pBfyf1uyn7B/mAJTX60RGitASUHYB66RiSrTBXJxg++L0jxmSHtJUC5t93OFW0j8K5T1xA==
+X-Received: by 2002:a17:90b:46c4:: with SMTP id jx4mr5242561pjb.32.1579160717678;
+        Wed, 15 Jan 2020 23:45:17 -0800 (PST)
+Received: from localhost ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id 3sm2275659pjg.27.2020.01.15.23.45.16
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 15 Jan 2020 23:45:16 -0800 (PST)
+Date:   Thu, 16 Jan 2020 15:45:09 +0800
+From:   Murphy Zhou <jencce.kernel@gmail.com>
+To:     "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc:     Murphy Zhou <jencce.kernel@gmail.com>, fstests@vger.kernel.org
+Subject: Re: [PATCH] generic/175, generic/176: cleanup testdir before exit
+Message-ID: <20200116074509.gnfkvvpy2jhahv3n@xzhoux.usersys.redhat.com>
+References: <20200113032409.11501-1-jencce.kernel@gmail.com>
+ <20200113224203.GA8241@magnolia>
+ <20200115042132.xl6ijsavac23x7dx@xzhoux.usersys.redhat.com>
+ <20200115171923.GG8257@magnolia>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9501 signatures=668685
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=0 malwarescore=0
- phishscore=0 bulkscore=0 spamscore=0 mlxscore=0 mlxlogscore=999
- adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.0.1-1911140001 definitions=main-2001160042
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9501 signatures=668685
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 priorityscore=1501 malwarescore=0
- suspectscore=0 phishscore=0 bulkscore=0 spamscore=0 clxscore=1015
- lowpriorityscore=0 mlxscore=0 impostorscore=0 mlxlogscore=999 adultscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.0.1-1911140001
- definitions=main-2001160043
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20200115171923.GG8257@magnolia>
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Darrick J. Wong <darrick.wong@oracle.com>
+On Wed, Jan 15, 2020 at 09:19:23AM -0800, Darrick J. Wong wrote:
+> On Wed, Jan 15, 2020 at 12:21:32PM +0800, Murphy Zhou wrote:
+> > On Mon, Jan 13, 2020 at 02:42:03PM -0800, Darrick J. Wong wrote:
+> > > On Mon, Jan 13, 2020 at 11:24:09AM +0800, Murphy Zhou wrote:
+> > > > Usually the _mkfs helper will cleanup these directories at the
+> > > > beginning of testcase. However, when testing on NFS, the cleanup
+> > > > could be very slow and it is confusing that: We have already
+> > > > started to run generic/176 but we get stuck in _mkfs, cleaning
+> > > > up files left by the previous testcase generic/175.
+> > > 
+> > > Isn't this a general problem with the way nfs handles "mkfs" on scratch
+> > > devices?  So you'd want to fix this once by doing the cleanup between
+> > > tests instead of playing whackamole with whatever crazy file tests we
+> > > think of next?
+> > 
+> > Hmm, it's hard to tell. Deleting these files at anywhere makes sense.
+> > This patch is hardly a "fix", just trying to make it more clear.
+> > 
+> > > 
+> > > > To be clear, cleanup testdir before exit.
+> > > > 
+> > > > Signed-off-by: Murphy Zhou <jencce.kernel@gmail.com>
+> > > > ---
+> > > >  tests/generic/175 | 1 +
+> > > >  tests/generic/176 | 1 +
+> > > >  2 files changed, 2 insertions(+)
+> > > > 
+> > > > diff --git a/tests/generic/175 b/tests/generic/175
+> > > > index 79e5b3d6..bd966a28 100755
+> > > > --- a/tests/generic/175
+> > > > +++ b/tests/generic/175
+> > > > @@ -61,6 +61,7 @@ bytes=$((blks * blksz))
+> > > >  echo "reflinking $blks blocks, $bytes bytes" >> "$seqres.full"
+> > > >  _reflink_range "$testdir/file1" 0 "$testdir/file2" 0 $bytes >> "$seqres.full"
+> > > >  
+> > > > +rm -rf $testdir
+> > > 
+> > > Or put another way, this probably ought to be in _try_wipe_scratch_devs()
+> > 
+> > That's for devices I believe..
+> 
+> It exists to zap the scratch devices into enough of a clean state that
+> whatever contents a test wrote to the scratch devices cannot easily
+> (e.g. mount) leak into the next test.  IOWs, exactly where you'd want
+> FSTYP=NFS to delete whatever junk is in the scratch mount.
+> 
+> Plus then you get a clean nfs scratch mount at the start of each test
+> without needing to whackamole each test.
+> 
+> > Thanks,
+> > Murphy
+> > 
+> > > 
+> > > --D
+> > > 
+> > > >  # success, all done
+> > > >  status=0
+> > > >  exit
+> > > > diff --git a/tests/generic/176 b/tests/generic/176
+> > > > index a084578a..bc83762e 100755
+> > > > --- a/tests/generic/176
+> > > > +++ b/tests/generic/176
+> > > > @@ -73,6 +73,7 @@ bytes=$((blocks_needed * blksz))
+> > > >  echo "reflinking $((blocks_needed / 2)) blocks, $((bytes / 2)) bytes" >> "$seqres.full"
+> > > >  _reflink_range "$testdir/file1" 0 "$testdir/file2" 0 $bytes >> "$seqres.full"
+> > > >  
+> > > > +rm -rf $testdir
+> 
+> Also this will massively slow down generic/17[56] on btrfs/XFS
+> considering that we don't care about deleting the massively reflinked
+> file we created.
 
-Test setting filesystem labels with xfs_admin.
-
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
----
- tests/xfs/912     |  103 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/912.out |   43 ++++++++++++++++++++++
- tests/xfs/group   |    1 +
- 3 files changed, 147 insertions(+)
- create mode 100755 tests/xfs/912
- create mode 100644 tests/xfs/912.out
+Deleting them would be a good testcase to me. After all the tests,
+deleting them should not cause any problem, or spending to much
+time. Leaving them behind and letting them get formatted by mkfs,
+definitely will be faster, but may make potential problems not
+discovered.
 
 
-diff --git a/tests/xfs/912 b/tests/xfs/912
-new file mode 100755
-index 00000000..1eef36cd
---- /dev/null
-+++ b/tests/xfs/912
-@@ -0,0 +1,103 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0-or-later
-+# Copyright (c) 2020, Oracle and/or its affiliates.  All Rights Reserved.
-+#
-+# FS QA Test No. 912
-+#
-+# Check that xfs_admin can set and clear filesystem labels offline and online.
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+
-+# real QA test starts here
-+_supported_fs xfs
-+_supported_os Linux
-+_require_scratch
-+_require_xfs_db_command label
-+_require_xfs_io_command label
-+grep -q "xfs_io" "$(which xfs_admin)" || \
-+	_notrun "xfs_admin does not support online label setting of any kind"
-+
-+rm -f $seqres.full
-+
-+echo
-+echo "Format with label"
-+_scratch_mkfs -L "label0" > $seqres.full
-+
-+echo "Read label offline"
-+_scratch_xfs_admin -l
-+
-+echo "Read label online"
-+_scratch_mount
-+_scratch_xfs_admin -l
-+
-+echo
-+echo "Set label offline"
-+_scratch_unmount
-+_scratch_xfs_admin -L "label1"
-+
-+echo "Read label offline"
-+_scratch_xfs_admin -l
-+
-+echo "Read label online"
-+_scratch_mount
-+_scratch_xfs_admin -l
-+
-+echo
-+echo "Set label online"
-+_scratch_xfs_admin -L "label2"
-+
-+echo "Read label online"
-+_scratch_xfs_admin -l
-+
-+echo "Read label offline"
-+_scratch_unmount
-+_scratch_xfs_admin -l
-+
-+echo
-+echo "Clear label online"
-+_scratch_mount
-+_scratch_xfs_admin -L "--"
-+
-+echo "Read label online"
-+_scratch_xfs_admin -l
-+
-+echo "Read label offline"
-+_scratch_unmount
-+_scratch_xfs_admin -l
-+
-+echo
-+echo "Set label offline"
-+_scratch_xfs_admin -L "label3"
-+
-+echo "Read label offline"
-+_scratch_xfs_admin -l
-+
-+echo
-+echo "Clear label offline"
-+_scratch_xfs_admin -L "--"
-+
-+echo "Read label offline"
-+_scratch_xfs_admin -l
-+
-+echo "Read label online"
-+_scratch_mount
-+_scratch_xfs_admin -l
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/912.out b/tests/xfs/912.out
-new file mode 100644
-index 00000000..186d827f
---- /dev/null
-+++ b/tests/xfs/912.out
-@@ -0,0 +1,43 @@
-+QA output created by 912
-+
-+Format with label
-+Read label offline
-+label = "label0"
-+Read label online
-+label = "label0"
-+
-+Set label offline
-+writing all SBs
-+new label = "label1"
-+Read label offline
-+label = "label1"
-+Read label online
-+label = "label1"
-+
-+Set label online
-+label = "label2"
-+Read label online
-+label = "label2"
-+Read label offline
-+label = "label2"
-+
-+Clear label online
-+label = ""
-+Read label online
-+label = ""
-+Read label offline
-+label = ""
-+
-+Set label offline
-+writing all SBs
-+new label = "label3"
-+Read label offline
-+label = "label3"
-+
-+Clear label offline
-+writing all SBs
-+new label = ""
-+Read label offline
-+label = ""
-+Read label online
-+label = ""
-diff --git a/tests/xfs/group b/tests/xfs/group
-index a6c9ef08..cc1d122a 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -511,3 +511,4 @@
- 511 auto quick quota
- 747 auto quick scrub
- 748 auto quick scrub
-+912 auto quick label
+If you think the deleting will be extremely slow, maybe it's time
+to optimize how xfs deleting reflinked files.
 
+Thanks,
+Murphy
+
+> 
+> --D
+> 
+> > > >  # success, all done
+> > > >  status=0
+> > > >  exit
+> > > > -- 
+> > > > 2.20.1
+> > > > 
