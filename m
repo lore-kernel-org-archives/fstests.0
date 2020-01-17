@@ -1,98 +1,69 @@
-Return-Path: <SRS0=clGf=3F=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=Jsw6=3G=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 57AFBC33CB1
-	for <linux-fstests@archiver.kernel.org>; Thu, 16 Jan 2020 16:16:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3491EC33CAF
+	for <linux-fstests@archiver.kernel.org>; Fri, 17 Jan 2020 02:20:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 23BE4206D5
-	for <linux-fstests@archiver.kernel.org>; Thu, 16 Jan 2020 16:16:59 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1579191419;
-	bh=UQGRvJy+7JZ//PovsjBJ7LchKK481IsY6KERgIx38Go=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
-	b=jL+Ldb7hOehpNx3mxvmnf9reTASbtZ0ujmr0uSR9mGOosRaI69Ob8lLnIEL+pYTHN
-	 IY0CkFGl4xGnFfJEQGCrPQVKPdeee9cMArvkfbIHQKiw4DiwGCITeh6O2DZrszkQ31
-	 5wgvlnpmaPSuBs6z3/2tELp+QEgsrizZcPxTvlOE=
+	by mail.kernel.org (Postfix) with ESMTP id 0D0B22075B
+	for <linux-fstests@archiver.kernel.org>; Fri, 17 Jan 2020 02:20:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726406AbgAPQQ6 (ORCPT
+        id S1729693AbgAQCUi (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 16 Jan 2020 11:16:58 -0500
-Received: from mail.kernel.org ([198.145.29.99]:35012 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726371AbgAPQQ6 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 16 Jan 2020 11:16:58 -0500
-Received: from mail-ua1-f47.google.com (mail-ua1-f47.google.com [209.85.222.47])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 16675206D5;
-        Thu, 16 Jan 2020 16:16:58 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1579191418;
-        bh=UQGRvJy+7JZ//PovsjBJ7LchKK481IsY6KERgIx38Go=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=ub2YTkHtJ799YCE3Qe5m0WvntUBngVIdIfxkgwMPo1Zbq2Zbpc8iW/utjIk0fT9yn
-         pZI0TI0Ad6INL/hvUT7WRC/ubSeMyOLolZL+yQBOrr7qaOWVUUex3O527tHZC0+zKU
-         oOOCj0kH6QRgH9d/lOg0eQqrzF9TKGWxgCPhpNHs=
-Received: by mail-ua1-f47.google.com with SMTP id a12so7860750uan.0;
-        Thu, 16 Jan 2020 08:16:58 -0800 (PST)
-X-Gm-Message-State: APjAAAUlNIx2xDMKVfAY9q1Fuh3XfHxqj5lRuADfEzpbiDRrsrLzGLic
-        kwVi7vOV5LYUnOJX1RjIDj8/v/8f4PwLvWCDhnA=
-X-Google-Smtp-Source: APXvYqyAySVnFrpLaRw+8Ipg5AjPM1RJW84peCGV54THCl2JbN6WSggYTTlsUhrdupiJ1BpVoTkvfUnynIuSJ/E/e+8=
-X-Received: by 2002:ab0:2a93:: with SMTP id h19mr18028050uar.27.1579191417027;
- Thu, 16 Jan 2020 08:16:57 -0800 (PST)
+        Thu, 16 Jan 2020 21:20:38 -0500
+Received: from szxga07-in.huawei.com ([45.249.212.35]:48054 "EHLO huawei.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1729113AbgAQCUi (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 16 Jan 2020 21:20:38 -0500
+Received: from DGGEMS413-HUB.china.huawei.com (unknown [172.30.72.59])
+        by Forcepoint Email with ESMTP id 3C40C41464A385DAC902;
+        Fri, 17 Jan 2020 10:20:36 +0800 (CST)
+Received: from [127.0.0.1] (10.173.220.96) by DGGEMS413-HUB.china.huawei.com
+ (10.3.19.213) with Microsoft SMTP Server id 14.3.439.0; Fri, 17 Jan 2020
+ 10:20:27 +0800
+Subject: Re: [PATCH] xfs/126: fix that corrupt xattr might fail with a small
+ probability
+To:     "Darrick J. Wong" <darrick.wong@oracle.com>
+CC:     <guaneryu@gmail.com>, <jbacik@fusionio.com>,
+        <fstests@vger.kernel.org>, <linux-xfs@vger.kernel.org>,
+        <zhengbin13@huawei.com>, <yi.zhang@huawei.com>
+References: <20200108092758.41363-1-yukuai3@huawei.com>
+ <20200108162227.GD5552@magnolia>
+ <3c7e9497-e0ed-23e4-ff9c-4b1c1a77c9fa@huawei.com>
+ <20200109164615.GA8247@magnolia>
+ <51e99fd5-617f-6558-7a04-c4a198139cdd@huawei.com>
+ <20200116160323.GC2149943@magnolia>
+From:   "yukuai (C)" <yukuai3@huawei.com>
+Message-ID: <bc9afd0d-91e5-ef0a-94cb-599b8a57b136@huawei.com>
+Date:   Fri, 17 Jan 2020 10:20:26 +0800
+User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:60.0) Gecko/20100101
+ Thunderbird/60.8.0
 MIME-Version: 1.0
-References: <20200115132216.24041-1-fdmanana@kernel.org> <785ebd3c-89cb-0079-782c-9fd1e07116fa@toxicpanda.com>
-In-Reply-To: <785ebd3c-89cb-0079-782c-9fd1e07116fa@toxicpanda.com>
-From:   Filipe Manana <fdmanana@kernel.org>
-Date:   Thu, 16 Jan 2020 16:16:45 +0000
-X-Gmail-Original-Message-ID: <CAL3q7H655byvBYD8-wvHwDWJaWZumvyyj3bvYTOjuVZtFLjJ-w@mail.gmail.com>
-Message-ID: <CAL3q7H655byvBYD8-wvHwDWJaWZumvyyj3bvYTOjuVZtFLjJ-w@mail.gmail.com>
-Subject: Re: [PATCH] generic/527: add additional test including a file with a hardlink
-To:     Josef Bacik <josef@toxicpanda.com>
-Cc:     fstests <fstests@vger.kernel.org>,
-        linux-btrfs <linux-btrfs@vger.kernel.org>,
-        Filipe Manana <fdmanana@suse.com>
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <20200116160323.GC2149943@magnolia>
+Content-Type: text/plain; charset="gbk"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.173.220.96]
+X-CFilter-Loop: Reflected
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Jan 16, 2020 at 4:05 PM Josef Bacik <josef@toxicpanda.com> wrote:
->
-> On 1/15/20 8:22 AM, fdmanana@kernel.org wrote:
-> > From: Filipe Manana <fdmanana@suse.com>
-> >
-> > Add a similar test to the existing one but with a file that has a
-> > hardlink as well. This is motivated by a bug found in btrfs where
-> > a fsync on a file that has the old name of another file results
-> > in the logging code to hit an infinite loop. The patch that fixes
-> > the bug in btrfs has the following subject:
-> >
-> >    "Btrfs: fix infinite loop during fsync after rename operations"
-> >
-> > Signed-off-by: Filipe Manana <fdmanana@suse.com>
->
-> What's our policy on adding a new variant to an existing test?  I thought we
-> preferred to create a new test for these sort of things?  If not then you can add
 
-Usually yes, but since over time there started to be too many fsync
-related tests, we had a discussion with Dave (Chinner)
-and others about considering consolidating more tests into the same
-files. It's not just the number of test files, but more time to run
-(even if each one adds only 1 or 2 seconds).
 
-That's why I opted here to update generic/527 instead of adding a new test file.
-Thanks.
+On 2020/1/17 0:03, Darrick J. Wong wrote:
+> Does adding "-o 4" to the blocktrash command make it work reliably?
+> That should be close enough to the start of the attrleaf block that
+> we'll reliably corrupt*some*  amount of stuff in the header.
 
->
-> Reviewed-by: Josef Bacik <josef@toxicpanda.com>
->
-> I have no strong opinions either way, I just know it's come up in the past.  Thanks,
->
-> Josef
+Seems like a good idea!
+After adding "-o 4", I tested over 200 times, and blocktrash never 
+failed to corrupt xattr anymore.
+
+Thanks!
+Yu Kuai
+
