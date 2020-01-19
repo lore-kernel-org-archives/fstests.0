@@ -2,100 +2,67 @@ Return-Path: <SRS0=QNn/=3I=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-1.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
 	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 08731C33CB7
-	for <linux-fstests@archiver.kernel.org>; Sun, 19 Jan 2020 18:25:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D7AD7C3F68F
+	for <linux-fstests@archiver.kernel.org>; Sun, 19 Jan 2020 22:02:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id CBF482072B
-	for <linux-fstests@archiver.kernel.org>; Sun, 19 Jan 2020 18:25:45 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1579458345;
-	bh=zQZdqDeuWbNbPpCdXf5Ch3zYDAXZ97H8bl/7Br8CJNw=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=EKGWRpIwaWhClwPrLBKvcBAVNR0XemS7ImRpOuecKuIj1UNNm+B6vN6HMWsqneYGa
-	 BPVFZj3DUDrJTe/7yI3khzJkxHELs3H4fVhoqU4VoNUuy/YQLD1AWIs0+x9PGc5K/y
-	 zrXDaClfulsbdq1QPu13P4jCA6FKgXLsWupJTH+A=
+	by mail.kernel.org (Postfix) with ESMTP id A9F5C206B7
+	for <linux-fstests@archiver.kernel.org>; Sun, 19 Jan 2020 22:02:54 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="QupRRIgk"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727138AbgASSZp (ORCPT
+        id S1729027AbgASWCx (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 19 Jan 2020 13:25:45 -0500
-Received: from mail.kernel.org ([198.145.29.99]:41692 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727111AbgASSZp (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 19 Jan 2020 13:25:45 -0500
-Received: from sol.localdomain (c-107-3-166-239.hsd1.ca.comcast.net [107.3.166.239])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 5441620674;
-        Sun, 19 Jan 2020 18:25:44 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1579458344;
-        bh=zQZdqDeuWbNbPpCdXf5Ch3zYDAXZ97H8bl/7Br8CJNw=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=j1FTRC554mfLcYQFv5j7GMePr9aDGp/PS9E2kfaOxBqotGo4Fdvzqh9Lz2PUC3McU
-         zZ1waBYbm8TH+G6I6OjLsZqWVa1QxNQGIItk0gCKbJpPlpsjq2ZEej/xLh6mmWck7t
-         4ZOSBaXuNfxkQB2At09Di5kDbvjoUT3olIAniXrI=
-Date:   Sun, 19 Jan 2020 10:25:42 -0800
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     Murphy Zhou <xzhou@redhat.com>
-Cc:     fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org
-Subject: Re: [PATCH v3 6/9] generic: add test for non-root use of fscrypt API
- additions
-Message-ID: <20200119182542.GA913@sol.localdomain>
-References: <20191015181643.6519-1-ebiggers@kernel.org>
- <20191015181643.6519-7-ebiggers@kernel.org>
- <20200119054515.3mxrpky7fiegnj5s@xzhoux.usersys.redhat.com>
+        Sun, 19 Jan 2020 17:02:53 -0500
+Received: from bombadil.infradead.org ([198.137.202.133]:41550 "EHLO
+        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727556AbgASWCx (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 19 Jan 2020 17:02:53 -0500
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20170209; h=In-Reply-To:Content-Type:MIME-Version
+        :References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description:Resent-Date:
+        Resent-From:Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:List-Id:
+        List-Help:List-Unsubscribe:List-Subscribe:List-Post:List-Owner:List-Archive;
+         bh=cWLMtNDd/EcuhVk+Yppg2fToCZ06Peh0aHjqkxNjPC0=; b=QupRRIgkYv272HmoFudagDwJ7
+        fRLhfEyJt7w0lneQgFYOUqohNzRDT6aOUIoH63KRhUIwbxfXZxMcm0BzLl5zMXX5yG3JXGYptBVTi
+        +Bu+OSK/2EoQK81v8u9Ry8o0Fita2tJvtedPA5JpZOfKJD3ddbpaUyQsg8KOfuGRJghOR4tYSnhCx
+        3s6RT356hc+jki/kpESV+1Ft/XPDsgDMeDEAqj8Q7ZmBgFD2Ltd3/6CW1xffypwEb5Ij7WrrMIjb7
+        YWy1B0i3kA5zeoSTDi85bWUocV36KoMQsDmZzox0TkbT8VtCehjuQBxcRXRKY6K5f4Oac57w3+urx
+        5Z4v7oujw==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.92.3 #3 (Red Hat Linux))
+        id 1itIei-0002cG-24; Sun, 19 Jan 2020 22:02:52 +0000
+Date:   Sun, 19 Jan 2020 14:02:52 -0800
+From:   Christoph Hellwig <hch@infradead.org>
+To:     Murphy Zhou <jencce.kernel@gmail.com>
+Cc:     "Darrick J. Wong" <darrick.wong@oracle.com>,
+        Christoph Hellwig <hch@infradead.org>, fstests@vger.kernel.org
+Subject: Re: [PATCH] generic: require fibmap for testcases using filefrag
+Message-ID: <20200119220252.GA9313@infradead.org>
+References: <20200117083824.32450-1-jencce.kernel@gmail.com>
+ <20200117084517.GA24082@infradead.org>
+ <20200117100230.gcvnheoh3rzddhg2@xzhoux.usersys.redhat.com>
+ <20200118004700.GD2149943@magnolia>
+ <20200118093851.s3qynwkyi4ay2vqc@xzhoux.usersys.redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20200119054515.3mxrpky7fiegnj5s@xzhoux.usersys.redhat.com>
+In-Reply-To: <20200118093851.s3qynwkyi4ay2vqc@xzhoux.usersys.redhat.com>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Jan 19, 2020 at 01:45:15PM +0800, Murphy Zhou wrote:
-> Hi Eric,
+On Sat, Jan 18, 2020 at 05:38:51PM +0800, Murphy Zhou wrote:
+> > But do those tests require filefrag -B??
 > 
-> On Tue, Oct 15, 2019 at 11:16:40AM -0700, Eric Biggers wrote:
-> > From: Eric Biggers <ebiggers@google.com>
-> > 
-> > Test non-root use of the fscrypt filesystem-level encryption keyring and
-> > v2 encryption policies.
-> 
-> This testcase now fails on latest Linus tree with latest e2fsprogs
-> on ext4:
-> 
-> FSTYP         -- ext4
-> PLATFORM      -- Linux/x86_64 dell-pesc430-01 5.4.0+ #1 SMP Mon Nov 25 16:40:55 EST 2019
-> MKFS_OPTIONS  -- /dev/sda3
-> MOUNT_OPTIONS -- -o acl,user_xattr -o context=system_u:object_r:nfs_t:s0 /dev/sda3 /mnt/xfstests/mnt2
-> generic/581	- output mismatch (see /var/lib/xfstests/results//generic/581.out.bad)
->     --- tests/generic/581.out	2019-11-25 20:30:04.536051638 -0500
->     +++ /var/lib/xfstests/results//generic/581.out.bad	2019-11-26 01:04:17.318332220 -0500
->     @@ -33,7 +33,7 @@
->      Added encryption key
->      Added encryption key
->      Added encryption key
->     -Error adding encryption key: Disk quota exceeded
->     +Added encryption key
->      
->      # Adding key as root
-> ...
-> 
-> A rough looking back shows that this probably started since your fscrypt
-> update for 5.5, added support for IV_INO_LBLK_64 encryption policies.
-> 
-> I guess you are aware of this :-)
-> 
+> Not really. But filefrag will fall back to use fibmap.
 
-Nope, this has been passing for me.  I don't see how this can have anything to
-do with the fscrypt update for 5.5.  I'm guessing this is a race condition in
-the test caused by the kernel's keyrings subsystem reclaiming the keys quota
-asynchronously.  I'll see if I can find a way to reproduce it and make the test
-more reliable.
-
-- Eric
+But that means it requires either FIEMAP or FIBMAP, and your patch
+will cause regressions for file systems only implementing FIEMAP.
+So the fix isn't to ask for FIBMAP, but to implement FIEMAP in
+any file system missing that support.
