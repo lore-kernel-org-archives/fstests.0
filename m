@@ -2,113 +2,70 @@ Return-Path: <SRS0=dTCq=3J=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1711AC33CB6
-	for <linux-fstests@archiver.kernel.org>; Mon, 20 Jan 2020 02:21:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 309B1C33CA1
+	for <linux-fstests@archiver.kernel.org>; Mon, 20 Jan 2020 07:09:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id DEFF4206D7
-	for <linux-fstests@archiver.kernel.org>; Mon, 20 Jan 2020 02:21:05 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="fntJYMDp"
+	by mail.kernel.org (Postfix) with ESMTP id 103B22077C
+	for <linux-fstests@archiver.kernel.org>; Mon, 20 Jan 2020 07:09:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728934AbgATCVF (ORCPT
+        id S1725872AbgATHJo (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 19 Jan 2020 21:21:05 -0500
-Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:37960 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1728874AbgATCVF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 19 Jan 2020 21:21:05 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1579486864;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=qVu9q986LuNyNKwrEDimdMNGWStikF2Ba4yVaUees/8=;
-        b=fntJYMDpOHtqGHiCKNcS/9F5Okw6j4t4UBidxDniMafv2srltgHtXs+zIr/CeieGvAaIqg
-        M3LRCnfllBs4YZkVmEDvaEZErEc8BQkVTfvC2F5Vcvp1qFxG/uAcb1IxrD9ui/8Y0sYSgB
-        LxmgKlDY1kc4bKEd5mTTI6YEoVaNHhQ=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-392-McSD059pORCmIFLezXmLLg-1; Sun, 19 Jan 2020 21:21:00 -0500
-X-MC-Unique: McSD059pORCmIFLezXmLLg-1
-Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id C81E3185432C;
-        Mon, 20 Jan 2020 02:20:59 +0000 (UTC)
-Received: from localhost (dhcp-12-196.nay.redhat.com [10.66.12.196])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 4599D1A7E4;
-        Mon, 20 Jan 2020 02:20:59 +0000 (UTC)
-Date:   Mon, 20 Jan 2020 10:20:57 +0800
-From:   Murphy Zhou <xzhou@redhat.com>
-To:     Eric Biggers <ebiggers@kernel.org>
-Cc:     Murphy Zhou <xzhou@redhat.com>, fstests@vger.kernel.org,
-        linux-fscrypt@vger.kernel.org
-Subject: Re: [PATCH v3 6/9] generic: add test for non-root use of fscrypt API
- additions
-Message-ID: <20200120022057.6bgrpd5iu34455ty@xzhoux.usersys.redhat.com>
-References: <20191015181643.6519-1-ebiggers@kernel.org>
- <20191015181643.6519-7-ebiggers@kernel.org>
- <20200119054515.3mxrpky7fiegnj5s@xzhoux.usersys.redhat.com>
- <20200119182542.GA913@sol.localdomain>
+        Mon, 20 Jan 2020 02:09:44 -0500
+Received: from mx2.suse.de ([195.135.220.15]:34642 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725851AbgATHJo (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 20 Jan 2020 02:09:44 -0500
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+Received: from relay2.suse.de (unknown [195.135.220.254])
+        by mx2.suse.de (Postfix) with ESMTP id B51C6AF84;
+        Mon, 20 Jan 2020 07:09:42 +0000 (UTC)
+From:   Qu Wenruo <wqu@suse.com>
+To:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Subject: [PATCH 1/2] fstests: Always dump dmesg for failed test cases
+Date:   Mon, 20 Jan 2020 15:09:37 +0800
+Message-Id: <20200120070938.30247-1-wqu@suse.com>
+X-Mailer: git-send-email 2.24.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200119182542.GA913@sol.localdomain>
-X-Scanned-By: MIMEDefang 2.84 on 10.5.11.23
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Jan 19, 2020 at 10:25:42AM -0800, Eric Biggers wrote:
-> On Sun, Jan 19, 2020 at 01:45:15PM +0800, Murphy Zhou wrote:
-> > Hi Eric,
-> > 
-> > On Tue, Oct 15, 2019 at 11:16:40AM -0700, Eric Biggers wrote:
-> > > From: Eric Biggers <ebiggers@google.com>
-> > > 
-> > > Test non-root use of the fscrypt filesystem-level encryption keyring and
-> > > v2 encryption policies.
-> > 
-> > This testcase now fails on latest Linus tree with latest e2fsprogs
-> > on ext4:
-> > 
-> > FSTYP         -- ext4
-> > PLATFORM      -- Linux/x86_64 dell-pesc430-01 5.4.0+ #1 SMP Mon Nov 25 16:40:55 EST 2019
-> > MKFS_OPTIONS  -- /dev/sda3
-> > MOUNT_OPTIONS -- -o acl,user_xattr -o context=system_u:object_r:nfs_t:s0 /dev/sda3 /mnt/xfstests/mnt2
-> > generic/581	- output mismatch (see /var/lib/xfstests/results//generic/581.out.bad)
-> >     --- tests/generic/581.out	2019-11-25 20:30:04.536051638 -0500
-> >     +++ /var/lib/xfstests/results//generic/581.out.bad	2019-11-26 01:04:17.318332220 -0500
-> >     @@ -33,7 +33,7 @@
-> >      Added encryption key
-> >      Added encryption key
-> >      Added encryption key
-> >     -Error adding encryption key: Disk quota exceeded
-> >     +Added encryption key
-> >      
-> >      # Adding key as root
-> > ...
-> > 
-> > A rough looking back shows that this probably started since your fscrypt
-> > update for 5.5, added support for IV_INO_LBLK_64 encryption policies.
-> > 
-> > I guess you are aware of this :-)
-> > 
-> 
-> Nope, this has been passing for me.  I don't see how this can have anything to
-> do with the fscrypt update for 5.5.  I'm guessing this is a race condition in
-> the test caused by the kernel's keyrings subsystem reclaiming the keys quota
-> asynchronously.  I'll see if I can find a way to reproduce it and make the test
-> more reliable.
+When hard-to-hit bugs happened, we really want every piece of info to
+help us debugging.
 
-OK, Thanks for the info. I'll try to bisect.
+Although we already have KEEP_DMESG config, not everyone is utilizing
+it, thus when hard-to-hit bugs happened, one could only set it and retry
+until next hit.
 
-> 
-> - Eric
-> 
+This patch will change the behavior by always dumping the dmesg for
+failed tests, so that developers can always get extra info from any
+failure.
+
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+---
+ check | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/check b/check
+index 2e148e5776e5..e580b2249f06 100755
+--- a/check
++++ b/check
+@@ -840,6 +840,9 @@ for section in $HOST_OPTIONS_SECTIONS; do
+ 
+ 	# make sure we record the status of the last test we ran.
+ 	if $err ; then
++		if [ ! -f $seqres.dmesg ]; then
++			_dmesg_since_test_start >$seqres.dmesg
++		fi
+ 		bad="$bad $seqnum"
+ 		n_bad=`expr $n_bad + 1`
+ 		tc_status="fail"
+-- 
+2.24.1
 
