@@ -2,35 +2,68 @@ Return-Path: <SRS0=dTCq=3J=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EF810C33CA1
-	for <linux-fstests@archiver.kernel.org>; Mon, 20 Jan 2020 07:09:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5311FC2D0DB
+	for <linux-fstests@archiver.kernel.org>; Mon, 20 Jan 2020 10:35:19 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id D045D2073A
-	for <linux-fstests@archiver.kernel.org>; Mon, 20 Jan 2020 07:09:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1249A207E0
+	for <linux-fstests@archiver.kernel.org>; Mon, 20 Jan 2020 10:35:19 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="TYbt61KJ"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726148AbgATHJr (ORCPT
+        id S1726125AbgATKfS (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 20 Jan 2020 02:09:47 -0500
-Received: from mx2.suse.de ([195.135.220.15]:34666 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725851AbgATHJr (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 20 Jan 2020 02:09:47 -0500
-X-Virus-Scanned: by amavisd-new at test-mx.suse.de
-Received: from relay2.suse.de (unknown [195.135.220.254])
-        by mx2.suse.de (Postfix) with ESMTP id 20889AED5;
-        Mon, 20 Jan 2020 07:09:45 +0000 (UTC)
-From:   Qu Wenruo <wqu@suse.com>
-To:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Subject: [PATCH 2/2] fstests: btrfs: Fix a bug where test case can't grab the 2nd device when glob is used
-Date:   Mon, 20 Jan 2020 15:09:38 +0800
-Message-Id: <20200120070938.30247-2-wqu@suse.com>
+        Mon, 20 Jan 2020 05:35:18 -0500
+Received: from mail-pg1-f172.google.com ([209.85.215.172]:33608 "EHLO
+        mail-pg1-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726130AbgATKfS (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 20 Jan 2020 05:35:18 -0500
+Received: by mail-pg1-f172.google.com with SMTP id 6so15359113pgk.0
+        for <fstests@vger.kernel.org>; Mon, 20 Jan 2020 02:35:18 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=GFVhHnWt4lYGIfxJ9PGJU5vTsFabRPBO6EzrLDaUrmU=;
+        b=TYbt61KJaXogWuy2no8btBqQ90bRcAH5H64jV1bZICfcdsY5q7AljbBJXXBfkdAt2D
+         JVrmh2s3zzcAtzfh/CjC85JrzxVMAWAKoBwe+KKP+EQeCxZAxKGG870lUz9JpA4DM9nx
+         WlLozUJBXAvGrjyu7Y48DJ1ueKzOofmQSfnxJGuwpQLnSkV2eh4CXPjXu6MyMosGUdIN
+         kzGhZt2JaMSb7OTADK+k7yXsYfN262jLQuEr1hQ4pf8HPcAsLs05j+MNC4KlYGzs8Yvt
+         TBCrYGprxwhqJTJrzVws3cuSRff9ttMR6A6il+dZ0afkET0kyr/TvitCmFWJW2erji5u
+         fF6A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=GFVhHnWt4lYGIfxJ9PGJU5vTsFabRPBO6EzrLDaUrmU=;
+        b=q4c6BjyxWBPctxBZ8fqSwxNuiRei4RG/nLYuX0rdOitD30P8HnIjERUfrgc6yU+Bv0
+         wUSRpnGCf9eI0aoovZrzJQzegwCL3CglBiXITnZ10GuYRA2/NzOABybCqaOWxSwqX3EF
+         D+GsRAQA/e0ln2ahbDOTjiSX4TjKithJv56BvJRzm8P3rDcIj74xsF+tK47Wo5BlFucN
+         nq89mqMjrFoypkcw+W772w1m8f8gOCtuL8pmXheYdCi3fy69WfMloAaksSDpGgEHgS3q
+         6c60fd/UKsdJjcJxvMGV3iEHSJUxEErCyWaF4/3KOUf3V7XwbfoD6+JSwMNJEGItMBXf
+         E+xg==
+X-Gm-Message-State: APjAAAVwHRfkOzbM4RsKT7s99UqU9N/oFDzREPMNYRTSoRMgeMjnSqwl
+        zhjxL/TWFKPXucTulf561P6VF1cBw6h2+piw
+X-Google-Smtp-Source: APXvYqwknwqDPyx8EJwi0ivxJBhR9bYeX7HA6JaLo27ke7hp2P0nnNNk+P74uJWQZtN/tgOGl3Z+WQ==
+X-Received: by 2002:a63:e513:: with SMTP id r19mr60455275pgh.326.1579516517000;
+        Mon, 20 Jan 2020 02:35:17 -0800 (PST)
+Received: from linux-3f6g.apac.novell.com ([45.122.156.254])
+        by smtp.gmail.com with ESMTPSA id a2sm37056685pgv.64.2020.01.20.02.35.13
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 20 Jan 2020 02:35:16 -0800 (PST)
+From:   sunyong0511@gmail.com
+To:     fstests@vger.kernel.org
+Cc:     darrick.wong@oracle.com, guaneryu@gmail.com,
+        Yong Sun <sunyong0511@gmail.com>, Sun Yong <yosun@suse.com>
+Subject: [PATCH v6] fstests: transport two ext4 tests from LTP
+Date:   Mon, 20 Jan 2020 18:34:54 +0800
+Message-Id: <20200120103453.3906-1-sunyong0511@gmail.com>
 X-Mailer: git-send-email 2.24.1
-In-Reply-To: <20200120070938.30247-1-wqu@suse.com>
-References: <20200120070938.30247-1-wqu@suse.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
@@ -38,157 +71,744 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-If SCRATCH_DEV_POOL is definted using glob, e.g.
-SCRATCH_DEV_POOL="/dev/mapper/test-scratch[123456]", then btrfs/175 will
-fail like this:
-btrfs/175 15s ... - output mismatch (see results//btrfs/175.out.bad)
-    --- tests/btrfs/175.out     2019-10-22 15:18:14.085632007 +0800
-    +++ results//btrfs/175.out.bad      2020-01-20 14:53:56.518567916 +0800
-    @@ -6,3 +6,4 @@
-     Single on multiple devices
-     swapon: SCRATCH_MNT/swap: swapon failed: Invalid argument
-     Single on one device
-    +ERROR: checking status of : No such file or directory
-    ...
-    (Run 'diff -u tests/btrfs/175.out results//btrfs/175.out.bad'  to see the entire diff)
+From: Yong Sun <sunyong0511@gmail.com>
 
-This is caused by the extra quotation mark (and the complexity nature of
-bash glob).
+Recently LTP upstream removed some ext4 tests[1].
+And two of them is still valid to keep. So I transport those two tests here.
+ext4-nsec-timestamps, which is used to test nanosec timestamps of ext4, rewrite into ext4/043 and 044.
+ext4-subdir-limit, which is used to test subdirectory limit of ext4, rewrite into ext4/045.
 
-  # SCRATCH_DEV_POOL="/dev/mapper/test-scratch[123]"
-  # echo ${SCRATCH_DEV_POOL}
-  /dev/mapper/test-scratch1 /dev/mapper/test-scratch2 /dev/mapper/test-scratch3
-  # echo "${SCRATCH_DEV_POOL}"
-  /dev/mapper/test-scratch[123]
+[1] https://marc.info/?l=linux-fsdevel&m=157190623919681&w=2
 
-To fix the problem, remove the quotation mark out of
-${SCRATCH_DEV_POOL} or $SCRATCH_DEV_POOL for all related test cases.
-
-Signed-off-by: Qu Wenruo <wqu@suse.com>
+Signed-off-by: Sun Yong <yosun@suse.com>
 ---
-The weirdest thing is, only btrfs/17[56], all other related test cases
-pass without any problem.
-
-Maybe it's time to provide a proper wrapper to do such thing?
+v2: Correct copyright information
+v3: Correct white-space damage
+v4: Add a missing file
+v5: Fix several issue reviewed by Darrick
+v6: Fix several issue reviewed by Eryu, and remove block setting in ext4/045
+Refer to ext4/045 fail https://www.spinics.net/lists/linux-ext4/msg69467.html
 ---
- tests/btrfs/140 | 2 +-
- tests/btrfs/141 | 2 +-
- tests/btrfs/142 | 2 +-
- tests/btrfs/143 | 2 +-
- tests/btrfs/157 | 2 +-
- tests/btrfs/158 | 2 +-
- tests/btrfs/175 | 2 +-
- tests/btrfs/176 | 6 +++---
- 8 files changed, 10 insertions(+), 10 deletions(-)
+ .gitignore                |   3 +
+ src/Makefile              |   3 +-
+ src/t_create_long_dirs.c  | 139 +++++++++++++++++++++++++++++++++++++
+ src/t_create_short_dirs.c | 142 ++++++++++++++++++++++++++++++++++++++
+ src/t_get_file_time.c     |  53 ++++++++++++++
+ tests/ext4/043            |  56 +++++++++++++++
+ tests/ext4/043.out        |   2 +
+ tests/ext4/044            |  87 +++++++++++++++++++++++
+ tests/ext4/044.out        |   2 +
+ tests/ext4/045            | 111 +++++++++++++++++++++++++++++
+ tests/ext4/045.out        |   2 +
+ tests/ext4/group          |   3 +
+ 12 files changed, 602 insertions(+), 1 deletion(-)
+ create mode 100644 src/t_create_long_dirs.c
+ create mode 100644 src/t_create_short_dirs.c
+ create mode 100644 src/t_get_file_time.c
+ create mode 100755 tests/ext4/043
+ create mode 100644 tests/ext4/043.out
+ create mode 100755 tests/ext4/044
+ create mode 100644 tests/ext4/044.out
+ create mode 100755 tests/ext4/045
+ create mode 100644 tests/ext4/045.out
 
-diff --git a/tests/btrfs/140 b/tests/btrfs/140
-index f0db8022cb48..0e6c91019854 100755
---- a/tests/btrfs/140
-+++ b/tests/btrfs/140
-@@ -65,7 +65,7 @@ get_devid()
- get_device_path()
- {
- 	local devid=$1
--	echo "$SCRATCH_DEV_POOL" | $AWK_PROG "{print \$$devid}"
-+	echo $SCRATCH_DEV_POOL | $AWK_PROG "{print \$$devid}"
- }
+diff --git a/.gitignore b/.gitignore
+index d83df7d2..919f5e2e 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -118,6 +118,8 @@
+ /src/swapon
+ /src/t_access_root
+ /src/t_attr_corruption
++/src/t_create_long_dirs
++/src/t_create_short_dirs
+ /src/t_dir_offset
+ /src/t_dir_offset2
+ /src/t_dir_type
+@@ -126,6 +128,7 @@
+ /src/t_ext4_dax_journal_corruption
+ /src/t_futimens
+ /src/t_getcwd
++/src/t_get_file_time
+ /src/t_holes
+ /src/t_immutable
+ /src/t_locks_execve
+diff --git a/src/Makefile b/src/Makefile
+index ce6d8610..0ad8e5d4 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -16,7 +16,8 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
+ 	holetest t_truncate_self t_mmap_dio af_unix t_mmap_stale_pmd \
+ 	t_mmap_cow_race t_mmap_fallocate fsync-err t_mmap_write_ro \
+ 	t_ext4_dax_journal_corruption t_ext4_dax_inline_corruption \
+-	t_ofd_locks t_locks_execve t_mmap_collision mmap-write-concurrent
++	t_ofd_locks t_locks_execve t_mmap_collision mmap-write-concurrent \
++	t_get_file_time t_create_short_dirs t_create_long_dirs
  
- _scratch_dev_pool_get 2
-diff --git a/tests/btrfs/141 b/tests/btrfs/141
-index c8c184ba29b0..5678e6513f80 100755
---- a/tests/btrfs/141
-+++ b/tests/btrfs/141
-@@ -65,7 +65,7 @@ get_devid()
- get_device_path()
- {
- 	local devid=$1
--	echo "$SCRATCH_DEV_POOL" | $AWK_PROG "{print \$$devid}"
-+	echo $SCRATCH_DEV_POOL | $AWK_PROG "{print \$$devid}"
- }
- 
- _scratch_dev_pool_get 2
-diff --git a/tests/btrfs/142 b/tests/btrfs/142
-index db0a3377a1ed..ae480352c4d9 100755
---- a/tests/btrfs/142
-+++ b/tests/btrfs/142
-@@ -66,7 +66,7 @@ get_devid()
- get_device_path()
- {
- 	local devid=$1
--	echo "$SCRATCH_DEV_POOL" | $AWK_PROG "{print \$$devid}"
-+	echo $SCRATCH_DEV_POOL | $AWK_PROG "{print \$$devid}"
- }
- 
- start_fail()
-diff --git a/tests/btrfs/143 b/tests/btrfs/143
-index 0388a52899c9..9e1e7ea0874d 100755
---- a/tests/btrfs/143
-+++ b/tests/btrfs/143
-@@ -73,7 +73,7 @@ get_devid()
- get_device_path()
- {
- 	local devid=$1
--	echo "$SCRATCH_DEV_POOL" | $AWK_PROG "{print \$$devid}"
-+	echo $SCRATCH_DEV_POOL | $AWK_PROG "{print \$$devid}"
- }
- 
- SYSFS_BDEV=`_sysfs_dev $SCRATCH_DEV`
-diff --git a/tests/btrfs/157 b/tests/btrfs/157
-index 634370b97ec0..c60d05ce36f3 100755
---- a/tests/btrfs/157
-+++ b/tests/btrfs/157
-@@ -70,7 +70,7 @@ get_devid()
- get_device_path()
- {
- 	local devid=$1
--	echo "$SCRATCH_DEV_POOL" | $AWK_PROG "{print \$$devid}"
-+	echo $SCRATCH_DEV_POOL | $AWK_PROG "{print \$$devid}"
- }
- 
- _scratch_dev_pool_get 4
-diff --git a/tests/btrfs/158 b/tests/btrfs/158
-index d6df9eaa7dea..179c620b223f 100755
---- a/tests/btrfs/158
-+++ b/tests/btrfs/158
-@@ -62,7 +62,7 @@ get_devid()
- get_device_path()
- {
- 	local devid=$1
--	echo "$SCRATCH_DEV_POOL" | $AWK_PROG "{print \$$devid}"
-+	echo $SCRATCH_DEV_POOL | $AWK_PROG "{print \$$devid}"
- }
- 
- _scratch_dev_pool_get 4
-diff --git a/tests/btrfs/175 b/tests/btrfs/175
-index d13be3e95ed4..e1c3c28fe5a4 100755
---- a/tests/btrfs/175
-+++ b/tests/btrfs/175
-@@ -63,7 +63,7 @@ _scratch_mount
- # Create the swap file, then add the device. That way we know it's all on one
- # device.
- _format_swapfile "$SCRATCH_MNT/swap" $(($(get_page_size) * 10))
--scratch_dev2="$(echo "${SCRATCH_DEV_POOL}" | awk '{ print $2 }')"
-+scratch_dev2="$(echo ${SCRATCH_DEV_POOL} | awk '{ print $2 }')"
- $BTRFS_UTIL_PROG device add -f "$scratch_dev2" "$SCRATCH_MNT"
- swapon "$SCRATCH_MNT/swap" 2>&1 | _filter_scratch
- swapoff "$SCRATCH_MNT/swap" > /dev/null 2>&1
-diff --git a/tests/btrfs/176 b/tests/btrfs/176
-index 196ba2b8bdf6..c2d67c6f807a 100755
---- a/tests/btrfs/176
-+++ b/tests/btrfs/176
-@@ -39,9 +39,9 @@ _require_scratch_swapfile
- # We check the filesystem manually because we move devices around.
- rm -f "${RESULT_DIR}/require_scratch"
- 
--scratch_dev1="$(echo "${SCRATCH_DEV_POOL}" | awk '{ print $1 }')"
--scratch_dev2="$(echo "${SCRATCH_DEV_POOL}" | awk '{ print $2 }')"
--scratch_dev3="$(echo "${SCRATCH_DEV_POOL}" | awk '{ print $3 }')"
-+scratch_dev1="$(echo ${SCRATCH_DEV_POOL} | awk '{ print $1 }')"
-+scratch_dev2="$(echo ${SCRATCH_DEV_POOL} | awk '{ print $2 }')"
-+scratch_dev3="$(echo ${SCRATCH_DEV_POOL} | awk '{ print $3 }')"
- 
- echo "Remove device"
- _scratch_mkfs >> $seqres.full 2>&1
+ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+ 	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
+diff --git a/src/t_create_long_dirs.c b/src/t_create_long_dirs.c
+new file mode 100644
+index 00000000..fe5b4b64
+--- /dev/null
++++ b/src/t_create_long_dirs.c
+@@ -0,0 +1,139 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Copyright (c) 2009 FUJITSU LIMITED
++ * Author: Li Zefan <lizf@cn.fujitsu.com>
++ */
++
++#define _POSIX_C_SOURCE 200809L
++#include <unistd.h>
++#include <stdlib.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <time.h>
++#include <fcntl.h>
++#include <sys/types.h>
++#include <sys/stat.h>
++#include "config.h"
++
++/* NCHARS = 10 + 26 + 26 = 62 */
++#define NAME_LEN	255
++#define NCHARS		62
++#define MAX_LEN1	62
++#define MAX_LEN2	(62 * 62)
++#define MAX_LEN3	(62 * 62 * 62)
++
++/* valid characters for the directory name */
++char chars[NCHARS + 1] = "0123456789qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM";
++
++/* to store the generated directory name */
++char name[NAME_LEN + 1];
++int names;
++int parent_fd;
++
++/*
++ * init_name - initialize the directory name
++ *
++ * Generate a randomized directory name, and then we generate more
++ * directory names based on it.
++ */
++void init_name(void)
++{
++	int i;
++
++	srand(time(NULL));
++
++	for (i = 0; i < NAME_LEN; i++)
++		name[i] = chars[rand() % 62];
++}
++
++void create_dir(void)
++{
++	if (mkdirat(parent_fd, name, S_IRWXU)) {
++		perror("mkdir");
++		exit(1);
++	}
++}
++
++/*
++ * create_dirs - create @names directory names
++ * @n: how many names to be created
++ *
++ * if n <= 62,       we need to modify 1 char of the name
++ * if n <= 62*62,    we need to modify 2 chars
++ * if n <= 62*62*62, we need to modify 3 chars
++ */
++void create_dirs(int n)
++{
++	int i, j, k;
++	int depth;
++
++	if (n <= MAX_LEN1)
++		depth = 1;
++	else if (n <= MAX_LEN2)
++		depth = 2;
++	else
++		depth = 3;
++
++	for (i = 0; i < NCHARS; i++) {
++		name[0] = chars[i];
++		if (depth == 1) {
++			create_dir();
++			if (--n == 0)
++				return;
++			continue;
++		}
++
++		for (j = 0; j < NCHARS; j++) {
++			name[1] = chars[j];
++			if (depth == 2) {
++				create_dir();
++				if (--n == 0)
++					return;
++				continue;
++			}
++
++			for (k = 0; k < NCHARS; k++) {
++				name[2] = chars[k];
++				create_dir();
++				if (--n == 0)
++					return;
++			}
++		}
++	}
++}
++
++void usage()
++{
++	fprintf(stderr, "Usage: create_long_dirs nr_dirs parent_dir\n");
++}
++
++/*
++ * Create long-name directories
++ * @argv[1]: directory number
++ * @argv[2]: parent directory
++ */
++int main(int argc, char *argv[])
++{
++	if (argc != 3) {
++		usage();
++		return 1;
++	}
++
++	names = atoi(argv[1]);
++	if (names > MAX_LEN3 || names <= 0) {
++		usage();
++		return 1;
++	}
++
++	parent_fd = open(argv[2], O_RDONLY);
++	if (parent_fd == -1) {
++		perror("open parent dir failed");
++		return 1;
++	}
++
++	init_name();
++
++	create_dirs(names);
++
++	return 0;
++}
+diff --git a/src/t_create_short_dirs.c b/src/t_create_short_dirs.c
+new file mode 100644
+index 00000000..778506e1
+--- /dev/null
++++ b/src/t_create_short_dirs.c
+@@ -0,0 +1,142 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Copyright (c) 2009 FUJITSU LIMITED
++ * Author: Li Zefan <lizf@cn.fujitsu.com>
++ */
++
++#define _POSIX_C_SOURCE 200809L
++#include <unistd.h>
++#include <stdlib.h>
++#include <stdio.h>
++#include <errno.h>
++#include <fcntl.h>
++#include <sys/stat.h>
++#include <sys/types.h>
++#include "config.h"
++
++/* NCHARS = 10 + 26 + 26 = 62 */
++#define NCHARS      62
++#define MAX_LEN1    62
++#define MAX_LEN2    (62 * 62)
++#define MAX_LEN3    (62 * 62 * 62)
++#define MAX_NAMES   (MAX_LEN1 + MAX_LEN2 + MAX_LEN3)
++
++/* valid characters for a directory name */
++char chars[] = "0123456789qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM";
++
++/* to store the generated directory name */
++char name[10];
++int names;
++int parent_fd;
++
++void create_dir(void)
++{
++	if (mkdirat(parent_fd, name, S_IRWXU)) {
++		perror("mkdir");
++		exit(1);
++	}
++}
++
++/*
++ * create_1 - create length-1 directory names
++ * @n: how name names to be created
++ */
++void create_1(int n)
++{
++	int i;
++
++	name[1] = '\0';
++	for (i = 0; i < NCHARS; i++) {
++		name[0] = chars[i];
++		create_dir();
++		if (--n == 0)
++			return;
++	}
++}
++
++/*
++ * create_2 - generate length-2 directory names
++ * @n: how many names to be created
++ */
++void create_2(int n)
++{
++	int i, j;
++
++	name[2] = '\0';
++	for (i = 0; i < NCHARS; i++) {
++		name[0] = chars[i];
++		for (j = 0; j < NCHARS; j++) {
++			name[1] = chars[j];
++			create_dir();
++			if (--n == 0)
++				return;
++		}
++	}
++}
++
++/*
++ * create_3 - generate length-3 directory names
++ * @n: how many names to be created
++ */
++void create_3(int n)
++{
++	int i, j, k;
++
++	name[3] = '\0';
++	for (i = 0; i < NCHARS; i++) {
++		name[0] = chars[i];
++		for (j = 0; j < NCHARS; j++) {
++			name[1] = chars[j];
++			for (k = 0; k < NCHARS; k++) {
++				name[2] = chars[k];
++				create_dir();
++				if (--n == 0)
++					return;
++			}
++		}
++	}
++}
++
++void usage()
++{
++	fprintf(stderr, "Usage: create_short_dirs nr_dirs parent_dir\n");
++}
++
++/*
++ * Create short-name directoriess
++ * @argv[1]: director number
++ * @argv[2]: the parent directory
++ */
++int main(int argc, char *argv[])
++{
++	if (argc != 3) {
++		usage();
++		return 1;
++	}
++
++	names = atoi(argv[1]);
++	if (names > MAX_NAMES || names <= 0) {
++		usage();
++		return 1;
++	}
++
++	parent_fd = open(argv[2], O_RDONLY);
++	if (parent_fd == -1) {
++		perror("open parent dir failed");
++		return 1;
++	}
++
++	create_1(names);
++	if (names <= MAX_LEN1)
++		return 0;
++
++	names -= MAX_LEN1;
++	create_2(names);
++	if (names <= MAX_LEN2)
++		return 0;
++
++	names -= MAX_LEN2;
++	create_3(names);
++
++	return 0;
++}
+diff --git a/src/t_get_file_time.c b/src/t_get_file_time.c
+new file mode 100644
+index 00000000..de478170
+--- /dev/null
++++ b/src/t_get_file_time.c
+@@ -0,0 +1,53 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Copyright (c) 2009 FUJITSU LIMITED
++ * Author: Li Zefan <lizf@cn.fujitsu.com>
++ */
++
++#include <sys/types.h>
++#include <sys/stat.h>
++#include <unistd.h>
++#include <stdio.h>
++#include <string.h>
++
++/*
++ * Usage: t_get_file_time <filename> <atime|mtime|ctime> <sec|nsec>
++ */
++int main(int argc, char *argv[])
++{
++	time_t t;
++	struct stat st;
++
++	if (argc != 4) {
++		fprintf(stderr, "Wrong argument num!\n");
++		return 1;
++	}
++
++	if (stat(argv[1], &st) != 0) {
++		perror("stat failed");
++		return 1;
++	}
++
++	if (strcmp(argv[3], "sec") == 0) {
++		if (strcmp(argv[2], "atime") == 0)
++			t = st.st_atime;
++		else if (strcmp(argv[2], "mtime") == 0)
++			t = st.st_mtime;
++		else
++			t = st.st_ctime;
++	} else if (strcmp(argv[3], "nsec") == 0) {
++		if (strcmp(argv[2], "atime") == 0)
++			t = st.st_atim.tv_nsec;
++		else if (strcmp(argv[2], "mtime") == 0)
++			t = st.st_mtim.tv_nsec;
++		else
++			t = st.st_ctim.tv_nsec;
++	} else {
++		fprintf(stderr, "Wrong argument: %s\n", argv[3]);
++		return 1;
++	}
++
++	printf("%lu\n", t);
++
++	return 0;
++}
+diff --git a/tests/ext4/043 b/tests/ext4/043
+new file mode 100755
+index 00000000..b526af42
+--- /dev/null
++++ b/tests/ext4/043
+@@ -0,0 +1,56 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2020 SUSE Linux Products GmbH.  All Rights Reserved.
++#
++# FS QA Test No. 043
++#
++# Test file timestamps are only precise to seconds with 128-byte inodes."
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs ext3 ext4
++_supported_os Linux
++
++_require_scratch
++_require_test_program "t_get_file_time"
++
++echo "Silence is golden"
++
++echo "Start test timestamps with 128 inode size one device $SCRATCH_DEV" >$seqres.full
++_scratch_mkfs -I 128 >> $seqres.full 2>&1
++_scratch_mount
++
++touch "${SCRATCH_MNT}/tmp_file"
++
++atime=`$here/src/t_get_file_time $SCRATCH_MNT/tmp_file atime nsec`
++mtime=`$here/src/t_get_file_time $SCRATCH_MNT/tmp_file mtime nsec`
++ctime=`$here/src/t_get_file_time $SCRATCH_MNT/tmp_file ctime nsec`
++
++if [ $atime -ne 0 -o $mtime -ne 0 -o $ctime -ne 0 ]; then
++	echo "nsec should be zero when extended timestamps are disabled"
++	echo "atime: $atime, mtime: $mtime, ctime: $ctime"
++fi
++
++status=0
++exit
+diff --git a/tests/ext4/043.out b/tests/ext4/043.out
+new file mode 100644
+index 00000000..f90f0a57
+--- /dev/null
++++ b/tests/ext4/043.out
+@@ -0,0 +1,2 @@
++QA output created by 043
++Silence is golden
+diff --git a/tests/ext4/044 b/tests/ext4/044
+new file mode 100755
+index 00000000..b1f7a531
+--- /dev/null
++++ b/tests/ext4/044
+@@ -0,0 +1,87 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2020 SUSE Linux Products GmbH.  All Rights Reserved.
++#
++# FS QA Test No. 044
++#
++# Test file timestamps are precise to nanoseconds with 256-byte inodes
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs ext4
++_supported_os Linux
++_require_scratch
++_require_test_program "t_get_file_time"
++
++echo "Silence is golden"
++
++echo "Test timestamps with 256 inode size one device $SCRATCH_DEV" >$seqres.full
++_scratch_mkfs -t ext3 -I 256 >> $seqres.full 2>&1
++_scratch_mount
++
++# Create file
++touch "${SCRATCH_MNT}/tmp_file"
++sleep 1
++
++# Change atime, ctime and mtime of the file
++touch "${SCRATCH_MNT}/tmp_file"
++
++cur_time=`date '+%s %N'`
++sec=`echo $cur_time | awk {'print $1'}`
++nsec=`echo $cur_time | awk {'print $2'}`
++
++sec_atime=`$here/src/t_get_file_time $SCRATCH_MNT/tmp_file atime sec`
++sec_mtime=`$here/src/t_get_file_time $SCRATCH_MNT/tmp_file mtime sec`
++sec_ctime=`$here/src/t_get_file_time $SCRATCH_MNT/tmp_file ctime sec`
++nsec_atime=`$here/src/t_get_file_time $SCRATCH_MNT/tmp_file atime nsec`
++nsec_mtime=`$here/src/t_get_file_time $SCRATCH_MNT/tmp_file mtime nsec`
++nsec_ctime=`$here/src/t_get_file_time $SCRATCH_MNT/tmp_file ctime nsec`
++
++# Test nanosecond
++if [ $nsec_atime -eq 0 -a $nsec_mtime -eq 0 -a $nsec_ctime -eq 0 ]; then
++	echo "The timestamp is not nanosecond(nsec_atime: $nsec_atime, \ 
++		nsec_mtime: $nsec_mtime, nsec_ctime: $nsec_ctime, cur_time[ns]: $nsec)"
++fi
++
++# Check difference between file time and current time
++[ $(( $sec_atime - $sec )) -gt 1 ] && echo "The timestamp is wrong, sec_atime: $sec_atime, cur_time[s]: $sec"
++[ $(( $sec_mtime - $sec )) -gt 1 ] && echo "The timestamp is wrong, sec_atime: $sec_atime, cur_time[s]: $sec"
++[ $(( $sec_ctime - $sec )) -gt 1 ] && echo "The timestamp is wrong, sec_atime: $sec_atime, cur_time[s]: $sec"
++
++_scratch_unmount >> $seqres.full 2>&1
++
++# Test mount to ext3 then mount back to ext4 and check timestamp again
++_mount -t ext3 `_scratch_mount_options $*` || _fail "ext3 mount failed"
++_scratch_unmount >> $seqres.full 2>&1
++_scratch_mount
++
++nsec_atime2=`$here/src/t_get_file_time $SCRATCH_MNT/tmp_file atime nsec`
++nsec_mtime2=`$here/src/t_get_file_time $SCRATCH_MNT/tmp_file mtime nsec`
++nsec_ctime2=`$here/src/t_get_file_time $SCRATCH_MNT/tmp_file ctime nsec`
++
++[ $nsec_atime -ne $nsec_atime2 ] && echo "File nanosecond timestamp atime has changed unexpected from $nsec_atime to $nsec_atime2"
++[ $nsec_mtime -ne $nsec_mtime2 ] && echo "File nanosecond timestamp mtime has changed unexpected from $nsec_mtime to $nsec_mtime2"
++[ $nsec_ctime -ne $nsec_ctime2 ] && echo "File nanosecond timestamp ctime has changed unexpected from $nsec_ctime to $nsec_ctime2"
++
++status=0
++exit
+diff --git a/tests/ext4/044.out b/tests/ext4/044.out
+new file mode 100644
+index 00000000..12a61dc4
+--- /dev/null
++++ b/tests/ext4/044.out
+@@ -0,0 +1,2 @@
++QA output created by 044
++Silence is golden
+diff --git a/tests/ext4/045 b/tests/ext4/045
+new file mode 100755
+index 00000000..29524e48
+--- /dev/null
++++ b/tests/ext4/045
+@@ -0,0 +1,111 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2020 SUSE Linux Products GmbH.  All Rights Reserved.
++#
++# FS QA Test No. 045
++#
++# Test subdirectory limit of ext4. 
++# We create more than 65000 subdirectories on the ext4 filesystem.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++SHORT_DIR=1
++LONG_DIR=2
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs ext4
++_supported_os Linux
++
++_require_scratch
++_require_test_program "t_create_short_dirs"
++_require_test_program "t_create_long_dirs"
++_require_dumpe2fs "$DUMPE2FS_PROG" dumpe2fs
++
++echo "Silence is golden"
++
++# Run a test case
++# $1: Number of directories to create
++# $2: create short dir or long dir
++# $3: parent directory
++workout()
++{
++	local dir_name_len=""
++	if [ $2 -eq $SHORT_DIR ]; then
++		dir_name_len="short name"
++	else
++		dir_name_len="long name"
++	fi
++
++	echo "Num of dirs to create: $1, Dir name len: $dir_name_len, " \
++		"Parent dir: $3" >> $seqres.full
++
++	_scratch_mkfs "-O extent,dir_nlink,dir_index -I 256" >> $seqres.full 2>&1
++	_scratch_mount
++
++	# create directories
++	mkdir -p $3 2> /dev/null
++
++	if [ $2 -eq $SHORT_DIR ]; then
++		$here/src/t_create_short_dirs $1 $3
++	else
++		$here/src/t_create_long_dirs $1 $3
++	fi
++
++	if [ $? -ne 0 ]; then
++		nr_dirs=`ls $3 | wc -l`
++		echo "Failed to create directories - $nr_dirs"
++		_scratch_unmount
++		return
++	fi
++
++	# delete directories
++	cd $3
++	ls | xargs rmdir
++	if [ $? -ne 0 ]; then
++		echo "Failed to remove directories in $3"
++		cd - > /dev/null
++		_scratch_unmount
++		return
++	fi
++	cd - > /dev/null
++	_scratch_unmount
++
++	# check dir_nlink is set
++	$DUMPE2FS_PROG -h $SCRATCH_DEV 2>> $seqres.full | grep '^Filesystem features' | grep -q dir_nlink
++	if [ $? -ne 0 ]; then
++		echo "Feature dir_nlink is not set, please check $seqres.full for detail"
++		return
++	fi
++}
++
++# main
++DIR_NUM=65537
++DIR_LEN=( $SHORT_DIR $LONG_DIR )
++PARENT_DIR="$SCRATCH_MNT/subdir"
++
++for ((i = 0; i < 2; i++)); do
++>-------workout $DIR_NUM ${DIR_LEN[$i]} $PARENT_DIR
++done
++
++status=0
++exit
+diff --git a/tests/ext4/045.out b/tests/ext4/045.out
+new file mode 100644
+index 00000000..66276cfa
+--- /dev/null
++++ b/tests/ext4/045.out
+@@ -0,0 +1,2 @@
++QA output created by 045
++Silence is golden
+diff --git a/tests/ext4/group b/tests/ext4/group
+index 9dfc0d35..5f16684a 100644
+--- a/tests/ext4/group
++++ b/tests/ext4/group
+@@ -45,6 +45,9 @@
+ 040 dangerous_fuzzers
+ 041 dangerous_fuzzers
+ 042 auto quick
++043 auto quick
++044 auto quick
++045 auto dir
+ 271 auto rw quick
+ 301 aio auto ioctl rw stress defrag
+ 302 aio auto ioctl rw stress defrag
 -- 
 2.24.1
 
