@@ -2,81 +2,91 @@ Return-Path: <SRS0=IF6L=3L=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-5.2 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B36FBC2D0DB
-	for <linux-fstests@archiver.kernel.org>; Wed, 22 Jan 2020 12:22:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F1ED0C2D0DB
+	for <linux-fstests@archiver.kernel.org>; Wed, 22 Jan 2020 20:23:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 7AB7024685
-	for <linux-fstests@archiver.kernel.org>; Wed, 22 Jan 2020 12:22:42 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1579695762;
-	bh=nQLtEDRbYssgJSvrupPb0Kxq4dvjvnEOmbuGYmIf6Tw=;
-	h=From:To:Cc:Subject:Date:List-ID:From;
-	b=oQukOcpumreKv/kCOE7ndG/BJo/6wnGV8pedgD05th7F3wNVZF1noy8dIjtg326Y1
-	 visZA8r1cmkcYGbK2oCHAeIaQsqUIbqCI4GElpIydmb00L0khAzWn8mRo19vrynavA
-	 V3tKKAsHyXSLw7aWFs8Cd7D+3WzQRvzwipxLbJyc=
+	by mail.kernel.org (Postfix) with ESMTP id C6FDA2465B
+	for <linux-fstests@archiver.kernel.org>; Wed, 22 Jan 2020 20:23:40 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="H8eli337"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728912AbgAVMWm (ORCPT
+        id S1729144AbgAVUXk (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 22 Jan 2020 07:22:42 -0500
-Received: from mail.kernel.org ([198.145.29.99]:35506 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728900AbgAVMWl (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 22 Jan 2020 07:22:41 -0500
-Received: from debian5.Home (bl8-197-74.dsl.telepac.pt [85.241.197.74])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 8045C24655;
-        Wed, 22 Jan 2020 12:22:40 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1579695761;
-        bh=nQLtEDRbYssgJSvrupPb0Kxq4dvjvnEOmbuGYmIf6Tw=;
-        h=From:To:Cc:Subject:Date:From;
-        b=OtP+WUdsujqOWjcRcWqyLvgXvdljurDEXl2EzIjoUiHIrHzaixiCGe5bx5biHYEjB
-         9rG9XyVcOHoBAe3cPtdidO1fQsfRWEGDAO8gFMXsVFc41NIeLsnJe/xQ96FEHpWZKI
-         G/gXkq52xPuW1a17sWsNYraV9mX1dqNHFifuRvE8=
-From:   fdmanana@kernel.org
-To:     fstests@vger.kernel.org
+        Wed, 22 Jan 2020 15:23:40 -0500
+Received: from mail-qt1-f193.google.com ([209.85.160.193]:35633 "EHLO
+        mail-qt1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729140AbgAVUXk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 22 Jan 2020 15:23:40 -0500
+Received: by mail-qt1-f193.google.com with SMTP id e12so670436qto.2
+        for <fstests@vger.kernel.org>; Wed, 22 Jan 2020 12:23:39 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=4/arTa3krJhTfmJlyqVGNTQkFUrwlPiK9/xBaOn72dc=;
+        b=H8eli337d1qGhjE/Y2dPhNQoOsARXgR29WD4I9g8S4FZbKqbBQ5lwIKP/LQaTalgw8
+         CgG93ZASYHjuX/PReEZlGpViYhlzPZQRZ/dWkfthTmhrkWRUd9w14Y147nLE7dy/q/g4
+         LPWoAANb1Ohae0NkRIFa4F6NIRgZYpc2Dlb/xWCBmBW1XkFOO7Z1oz/lArBlm9UhMWVC
+         AKXCZriJ2J+0wxYi5GjJ/UNN/wwIE+b2oEEMFoQ5BrAZpWGHVtCgY3UAfz8R9jCBUIw4
+         rzr3hk79asQeGrULC9Gv5rGvmvUFOEucs8jj6EOAmsyJDgVT1MQ/6RnERtTvzJ+T6Z2A
+         JYTg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=4/arTa3krJhTfmJlyqVGNTQkFUrwlPiK9/xBaOn72dc=;
+        b=YhFG1FrERN15bYFQbNu+q0eGua1FyRBzGnuRvS9rev2cD5RtRe2ieHnyDC6XzlUYoe
+         lZK3t4GCpHRrNp+2py8cB2uLm97/sgIXyZs9z0YpuzYM9zsrIqXiRTQs2WbbDcb4igfn
+         SdVVWdU9M+luXMHqd7i3f4ArBarQ7JJyRwVYqfCdt4pZQUzPR2hHtfkQ1EaNn/g1Olyp
+         0mEZPOO5PRkjikyOqKFm8ZaaXCvT8IhqlrJUDWQK+KeoB4huh4SwSGj+tFMoSBcUfbTv
+         8thuqgw2YhzaKzomF66IA02dDulnKY+7wmU05CwRbTWiPsD7CLTYr11SCm6zOmpV5QH5
+         LohA==
+X-Gm-Message-State: APjAAAW/QKF36hOw2k3xSNLkd7xCdx489AANJZwGN9iKbEiAH/2tCaer
+        rjYcLjNjVp3qCjJRD5u0aThtLA==
+X-Google-Smtp-Source: APXvYqzMqMOewKwRgj1hVbAxeFlLBLnMm80kTE5RB8R64i3QOuXONjsjOiYlEFjGxkye7QZzwKI4qA==
+X-Received: by 2002:ac8:2bb9:: with SMTP id m54mr12699463qtm.150.1579724619221;
+        Wed, 22 Jan 2020 12:23:39 -0800 (PST)
+Received: from ?IPv6:2620:10d:c0a8:1102:ce0:3629:8daa:1271? ([2620:10d:c091:480::7e55])
+        by smtp.gmail.com with ESMTPSA id 184sm19019202qke.73.2020.01.22.12.23.38
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 22 Jan 2020 12:23:38 -0800 (PST)
+Subject: Re: [PATCH] fstests: remove test btrfs/130 from the dangerous group
+To:     fdmanana@kernel.org, fstests@vger.kernel.org
 Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH] fstests: remove test btrfs/130 from the dangerous group
-Date:   Wed, 22 Jan 2020 12:22:33 +0000
-Message-Id: <20200122122233.1931-1-fdmanana@kernel.org>
-X-Mailer: git-send-email 2.11.0
+References: <20200122122233.1931-1-fdmanana@kernel.org>
+From:   Josef Bacik <josef@toxicpanda.com>
+Message-ID: <5631fa5a-ebde-c090-92be-38a8e093d7c7@toxicpanda.com>
+Date:   Wed, 22 Jan 2020 15:23:37 -0500
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:68.0)
+ Gecko/20100101 Thunderbird/68.4.1
+MIME-Version: 1.0
+In-Reply-To: <20200122122233.1931-1-fdmanana@kernel.org>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Filipe Manana <fdmanana@suse.com>
+On 1/22/20 7:22 AM, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
+> 
+> As of the linux kernel commit fd0ddbe2509568 ("Btrfs: send, skip
+> backreference walking for extents with many references"), the test is no
+> longer dangerous and it's fast (takes 1 to 2 seconds on a modest vm with
+> a debug kernel). Therefore remove it from the dangerous group and add it
+> to the auto and quick groups as well.
+> 
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
 
-As of the linux kernel commit fd0ddbe2509568 ("Btrfs: send, skip
-backreference walking for extents with many references"), the test is no
-longer dangerous and it's fast (takes 1 to 2 seconds on a modest vm with
-a debug kernel). Therefore remove it from the dangerous group and add it
-to the auto and quick groups as well.
+Reviewed-by: Josef Bacik <josef@toxicpanda.com>
 
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
- tests/btrfs/group | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Thanks,
 
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index d7eeb45d..8a69f940 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -132,7 +132,7 @@
- 127 auto quick send
- 128 auto quick send
- 129 auto quick send
--130 clone send dangerous
-+130 auto quick clone send
- 131 auto quick
- 132 auto enospc
- 133 auto quick send
--- 
-2.11.0
-
+Josef
