@@ -1,169 +1,147 @@
-Return-Path: <SRS0=5Ls0=3Q=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=SPcx=3S=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.3 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
-	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1F5CAC33CB7
-	for <linux-fstests@archiver.kernel.org>; Mon, 27 Jan 2020 16:57:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5BF7BC33CB3
+	for <linux-fstests@archiver.kernel.org>; Wed, 29 Jan 2020 00:43:55 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id E954B214AF
-	for <linux-fstests@archiver.kernel.org>; Mon, 27 Jan 2020 16:57:40 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="GqkxmQTC"
+	by mail.kernel.org (Postfix) with ESMTP id 2EB7824683
+	for <linux-fstests@archiver.kernel.org>; Wed, 29 Jan 2020 00:43:55 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1580258635;
+	bh=Sz/j53Dlf4MmHfKEkkCGhQTLBEmti0a764YSF89K/1Q=;
+	h=From:To:Cc:Subject:Date:List-ID:From;
+	b=OHCQWQWvGZZTfv7x4ewU+6cA2iGwS/bAOAhjGsniOsCwZgQw96MjsM0Gvb3h/QpPU
+	 F8XJInQqD7ZvYrhMyP/3aL29WDvS7IkdZGxuycppyCcBiPL1CA662fBmBU1Opkc9Vw
+	 HoG8x0W9eer5f4PQK3YvQB9MW0FtBxSL+pvA4fJE=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727441AbgA0Q5f (ORCPT
+        id S1726485AbgA2Any (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 27 Jan 2020 11:57:35 -0500
-Received: from userp2130.oracle.com ([156.151.31.86]:45608 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725975AbgA0Q5f (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 27 Jan 2020 11:57:35 -0500
-Received: from pps.filterd (userp2130.oracle.com [127.0.0.1])
-        by userp2130.oracle.com (8.16.0.27/8.16.0.27) with SMTP id 00RGcJMX086230;
-        Mon, 27 Jan 2020 16:57:31 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to :
- subject : message-id : references : mime-version : content-type :
- in-reply-to; s=corp-2019-08-05;
- bh=o952mxisDkjRjXUnhDFKJxhcCE4N2WfBz2FmntS0G+A=;
- b=GqkxmQTCroc3IyIVOwWJC6B4P/kDxRVoDqIr2ZtXki80P2f/UfUCWRIaM0nYrA0nk5MI
- 2P0YzNyNOzEuBK84945RGDeymIu0lgeDC1JxTZDZ1qxRMIt3LkeGzX0RgAlVH8qtxokj
- KnopGuQ8TvIu0HJFuZNNn6Uso1qNQWwl/COU8baDO5DCd6Z+ZYHx5zNU9jKsk4QLQiGL
- 6uvQfd303Hqx5pD8r7EG+GjPKBs0l0XFucXFwgZqrhnuvqHzNdmKYOoVzv8GUiAECykl
- 58KtjUhZMlZhyb889Sv2VRU5NQSsO/Z1FZKlqBoH/iVhVsyXweq3RAEcr9qsvSDgu9ZY LQ== 
-Received: from userp3020.oracle.com (userp3020.oracle.com [156.151.31.79])
-        by userp2130.oracle.com with ESMTP id 2xrd3u0pq0-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Mon, 27 Jan 2020 16:57:31 +0000
-Received: from pps.filterd (userp3020.oracle.com [127.0.0.1])
-        by userp3020.oracle.com (8.16.0.27/8.16.0.27) with SMTP id 00RGd2lu182921;
-        Mon, 27 Jan 2020 16:57:30 GMT
-Received: from aserv0122.oracle.com (aserv0122.oracle.com [141.146.126.236])
-        by userp3020.oracle.com with ESMTP id 2xrytqddr9-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Mon, 27 Jan 2020 16:57:30 +0000
-Received: from abhmp0007.oracle.com (abhmp0007.oracle.com [141.146.116.13])
-        by aserv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 00RGvTnF009135;
-        Mon, 27 Jan 2020 16:57:29 GMT
-Received: from localhost (/67.169.218.210)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Mon, 27 Jan 2020 08:57:29 -0800
-Date:   Mon, 27 Jan 2020 08:57:28 -0800
-From:   "Darrick J. Wong" <darrick.wong@oracle.com>
-To:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
-        zlang@redhat.com
-Subject: Re: [PATCH v3] xfstests: xfs mount option sanity test
-Message-ID: <20200127165728.GA3448165@magnolia>
-References: <20200115081132.22710-1-zlang@redhat.com>
- <20200118172330.GE2149943@magnolia>
- <20200119072342.GH14282@dhcp-12-102.nay.redhat.com>
+        Tue, 28 Jan 2020 19:43:54 -0500
+Received: from mail.kernel.org ([198.145.29.99]:45820 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726427AbgA2Any (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 28 Jan 2020 19:43:54 -0500
+Received: from ebiggers-linuxstation.mtv.corp.google.com (unknown [104.132.1.77])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 6B6B720663;
+        Wed, 29 Jan 2020 00:43:53 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1580258633;
+        bh=Sz/j53Dlf4MmHfKEkkCGhQTLBEmti0a764YSF89K/1Q=;
+        h=From:To:Cc:Subject:Date:From;
+        b=y23wHW0qmOq8PGEu1lrBgUSk6oKEaoLyUulGN26+Q6zAdCat0F2mM3V5dXWP3Q+KE
+         t0AY5BXS+uB+rznVrnEU7ltxPbUHSfDqUCOYQ+LDw8Sr12HBX17mprB2kXysw4xCCS
+         tPbC7UhAAXsMQXkYa5cI2Q+2nIYSXcBVMe+6xrR4=
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     fstests@vger.kernel.org
+Cc:     linux-fscrypt@vger.kernel.org, keyrings@vger.kernel.org,
+        Murphy Zhou <xzhou@redhat.com>
+Subject: [PATCH] generic/581: try to avoid flakiness in keys quota test
+Date:   Tue, 28 Jan 2020 16:42:51 -0800
+Message-Id: <20200129004251.133747-1-ebiggers@kernel.org>
+X-Mailer: git-send-email 2.25.0.341.g760bfbb309-goog
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200119072342.GH14282@dhcp-12-102.nay.redhat.com>
-User-Agent: Mutt/1.9.4 (2018-02-28)
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9513 signatures=668685
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=0 malwarescore=0
- phishscore=0 bulkscore=0 spamscore=0 mlxscore=0 mlxlogscore=999
- adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.0.1-1911140001 definitions=main-2001270139
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9513 signatures=668685
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 priorityscore=1501 malwarescore=0
- suspectscore=0 phishscore=0 bulkscore=0 spamscore=0 clxscore=1015
- lowpriorityscore=0 mlxscore=0 impostorscore=0 mlxlogscore=999 adultscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.0.1-1911140001
- definitions=main-2001270139
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Jan 19, 2020 at 03:23:42PM +0800, Zorro Lang wrote:
-> On Sat, Jan 18, 2020 at 09:23:30AM -0800, Darrick J. Wong wrote:
-> > On Wed, Jan 15, 2020 at 04:11:32PM +0800, Zorro Lang wrote:
-> > > XFS is changing to suit the new mount API, so add this case to make
-> > > sure the changing won't bring in regression issue on xfs mount option
-> > > parse phase, and won't change some default behaviors either.
-> > > 
-> > > Signed-off-by: Zorro Lang <zlang@redhat.com>
-> > > ---
-> > > 
-> > > Hi,
-> > > 
-> > > Thanks the suggestions from Darrick, v3 did below changes:
-> > > 1) Add more debug info output in do_mkfs and do_test.
-> > > 2) A new function filter_loop.
-> > > 3) Update .out file content
-> > > 
-> > > I've simply run this case on RHEL-7, RHEL-8 and upstream 5.5-rc4 kernel,
-> > > all passed.
-> > 
-> > Something else I noticed -- if for whatever reason the mount fails due
-> > to log size checks, the kernel logs things like:
-> > 
-> > xfs: Bad value for 'logbufs'
-> > XFS (loop0): Mounting V5 Filesystem
-> > XFS (loop0): Log size 3273 blocks too small, minimum size is 3299 blocks
-> > XFS (loop0): AAIEEE! Log failed size checks. Abort!
-> > XFS: Assertion failed: 0, file: fs/xfs/xfs_log.c, line: 706
-> 
-> Thanks Darrick, you always can find exceptions:) BTW, how to reproduce this
-> error?
+From: Eric Biggers <ebiggers@google.com>
 
-It's the same problem as last time -- I run upstream xfsprogs (with the
-patch turning on rmap by default); and when this test runs apparently
-there are logbufs options that increase the kernel's view of the minimum
-log size to the point that we fail the mount time log size checks.
+generic/581 passes for me, but Murphy Zhou reported that it started
+failing for him.  The part that failed is the part that sets the key
+quota to the fsgqa user's current number of keys plus 5, then tries to
+add 6 filesystem encryption keys as the fsgqa user.  Adding the 6th key
+unexpectedly succeeded.
 
-I observed that changing the LOOP_IMG creation code to make a 32G sparse
-file results in an fs with a larger log area:
+What I think is happening is that because the kernel's keys subsystem
+garbage-collects keys asynchronously, the quota may be freed up later
+than expected after removing fscrypt keys.  Thus the test is flaky.
 
-	$XFS_IO_PROG -f -c "truncate 32g" $LOOP_IMG
+It would be nice to fix this in the kernel, but unfortunately there
+doesn't seem to be an easy fix, and the keys subsystem has always worked
+this way.  And it seems unlikely to cause real-world problems, as the
+keys quota really just exists to prevent denial-of-service attacks.
 
-fixes all of these problems.  See diff below.
+So, for now just try to make the test more reliable by:
 
-> Looks like I touched too many things in one case, cause I have a long way to
-> make it "no exception" ;)
-> 
-> > 
-> > Which is then picked up by the dmesg scanner in fstests.  Maybe we need
-> > (a) _check_dmesg between each _do_test iteration, and/or (b) filter that
-> > particular assertion so we don't fail the test?
-> 
-> I can add _check_dmesg between each _do_test iteration, but I have to exit
-> directly if _check_dmesg returns 1, or we need a way to save each failed
-> $seqres.dmesg (maybe just cat $seqres.dmesg ?)
-> 
-> About the dmesg filter, each _do_test can have its own filter if it need.
-> For example, "logbufs" test filter "Assertion failed: 0, file: fs/xfs/xfs_log.c".
-> But might that filter out useful kernel warning?
-> 
-> What do you think?
+(1) Reduce the scope of the modified keys quota to just the part of the
+    test that needs it.
+(2) Before getting the current number of keys for the purpose of setting
+    the quota, wait for any invalidated keys to be garbage-collected.
 
-Eh, now that I've taken a second look at this, I don't think there's a
-good way to filter this particular ASSERT vs. any other that could pop
-up.
+Tested with a kernel that has a 1 second sleep hacked into the beginning
+of key_garbage_collector().  With that, this test fails before this
+patch and passes afterwards.
 
---D
+Reported-by: Murphy Zhou <xzhou@redhat.com>
+Signed-off-by: Eric Biggers <ebiggers@google.com>
+---
+ tests/generic/581 | 29 +++++++++++++++++++++--------
+ 1 file changed, 21 insertions(+), 8 deletions(-)
 
-diff --git a/tests/xfs/997 b/tests/xfs/997
-index 6b7235dd..c5bb0e51 100755
---- a/tests/xfs/997
-+++ b/tests/xfs/997
-@@ -50,11 +50,11 @@ LOOP_SPARE_IMG=$TEST_DIR/$seq.logdev
- LOOP_MNT=$TEST_DIR/$seq.mnt
+diff --git a/tests/generic/581 b/tests/generic/581
+index 89aa03c2..bc49eadc 100755
+--- a/tests/generic/581
++++ b/tests/generic/581
+@@ -45,14 +45,6 @@ _require_scratch_encryption -v 2
+ _scratch_mkfs_encrypted &>> $seqres.full
+ _scratch_mount
  
- echo "** create loop device"
--$XFS_IO_PROG -f -c "falloc 0 1g" $LOOP_IMG
-+$XFS_IO_PROG -f -c "truncate 32g" $LOOP_IMG
- LOOP_DEV=`_create_loop_device $LOOP_IMG`
+-# Set the fsgqa user's key quota to their current number of keys plus 5.
+-orig_keys=$(_user_do "awk '/^[[:space:]]*$(id -u fsgqa):/{print \$4}' /proc/key-users | cut -d/ -f1")
+-: ${orig_keys:=0}
+-echo "orig_keys=$orig_keys" >> $seqres.full
+-orig_maxkeys=$(</proc/sys/kernel/keys/maxkeys)
+-keys_to_add=5
+-echo $((orig_keys + keys_to_add)) > /proc/sys/kernel/keys/maxkeys
+-
+ dir=$SCRATCH_MNT/dir
  
- echo "** create loop log device"
--$XFS_IO_PROG -f -c "falloc 0 512m" $LOOP_SPARE_IMG
-+$XFS_IO_PROG -f -c "truncate 512m" $LOOP_SPARE_IMG
- LOOP_SPARE_DEV=`_create_loop_device $LOOP_SPARE_IMG`
+ raw_key=""
+@@ -98,6 +90,24 @@ _user_do_rm_enckey $SCRATCH_MNT $keyid
  
- echo "** create loop mount point"
+ _scratch_cycle_mount	# Clear all keys
+ 
++# Wait for any invalidated keys to be garbage-collected.
++i=0
++while grep -E -q '^[0-9a-f]+ [^ ]*i[^ ]*' /proc/keys; do
++	if ((++i >= 20)); then
++		echo "Timed out waiting for invalidated keys to be GC'ed" >> $seqres.full
++		break
++	fi
++	sleep 0.5
++done
++
++# Set the user key quota to the fsgqa user's current number of keys plus 5.
++orig_keys=$(_user_do "awk '/^[[:space:]]*$(id -u fsgqa):/{print \$4}' /proc/key-users | cut -d/ -f1")
++: ${orig_keys:=0}
++echo "orig_keys=$orig_keys" >> $seqres.full
++orig_maxkeys=$(</proc/sys/kernel/keys/maxkeys)
++keys_to_add=5
++echo $((orig_keys + keys_to_add)) > /proc/sys/kernel/keys/maxkeys
++
+ echo
+ echo "# Testing user key quota"
+ for i in `seq $((keys_to_add + 1))`; do
+@@ -106,6 +116,9 @@ for i in `seq $((keys_to_add + 1))`; do
+ 	    | sed 's/ with identifier .*$//'
+ done
+ 
++# Restore the original key quota.
++echo "$orig_maxkeys" > /proc/sys/kernel/keys/maxkeys
++
+ rm -rf $dir
+ echo
+ _user_do "mkdir $dir"
+-- 
+2.25.0.341.g760bfbb309-goog
+
