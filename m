@@ -2,113 +2,163 @@ Return-Path: <SRS0=SPcx=3S=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FSL_HELO_FAKE,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 273A7C3F68F
-	for <linux-fstests@archiver.kernel.org>; Wed, 29 Jan 2020 00:45:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 65B43C33CB2
+	for <linux-fstests@archiver.kernel.org>; Wed, 29 Jan 2020 05:13:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id EE55421739
-	for <linux-fstests@archiver.kernel.org>; Wed, 29 Jan 2020 00:45:46 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1580258747;
-	bh=CjLApc0NvFYZVZkSpwTwdDV2rpmlmy+MjXIUnYqAFDs=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=JytK2ARlRMPyzLLuwvVaNKPy/ojH47pKYU/DYJOCASNp3RWaarhaz9DIIZ7bovs2C
-	 +1ecA2YKZegksgj8UWng6v5ZuxiilUQnuwK90B1h38uRO0nU1Jkow4cx0fo80ewklh
-	 KU19SVQ9QpcRdYqBi4idLqUSGIEqKwKySMRllfMM=
+	by mail.kernel.org (Postfix) with ESMTP id 2C052207FD
+	for <linux-fstests@archiver.kernel.org>; Wed, 29 Jan 2020 05:13:41 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="CRwHTcZT"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726721AbgA2Apq (ORCPT
+        id S1725858AbgA2FNk (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 28 Jan 2020 19:45:46 -0500
-Received: from mail.kernel.org ([198.145.29.99]:56204 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726583AbgA2Apq (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 28 Jan 2020 19:45:46 -0500
-Received: from gmail.com (unknown [104.132.1.77])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        Wed, 29 Jan 2020 00:13:40 -0500
+Received: from us-smtp-1.mimecast.com ([205.139.110.61]:24998 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1725208AbgA2FNk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 29 Jan 2020 00:13:40 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1580274818;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=1eoXCykABiQhAP1um5/47/S0PtyaiYlY7/O7HoAVb88=;
+        b=CRwHTcZTA3oKfCalNXAfEiJp2NlIipGM7mBVnc49xztoOqVkh8wchwC9ZiQOziibFY8m3z
+        C2C2aHHoprFdSA5wL3pSrmiQJ6wZPwhLdaLYv5AreFBP+K09BsyILZUJhmrEtFOgX9fU43
+        Vw22A653zq0EY2qC1eSHHuJEmL70MP4=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-228-0ZApfu1lMu6xi8LLggBIAg-1; Wed, 29 Jan 2020 00:13:35 -0500
+X-MC-Unique: 0ZApfu1lMu6xi8LLggBIAg-1
+Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 926DF20663;
-        Wed, 29 Jan 2020 00:45:45 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1580258745;
-        bh=CjLApc0NvFYZVZkSpwTwdDV2rpmlmy+MjXIUnYqAFDs=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=jOwETRWmOMUtfzMhYA0lgB95xE4/0MZhQ20ZDCh5gR/Uiz2JlrW8cl0pXI2KcKljB
-         +w2DtrZd3GF1ik+lsKQcSOs+fXAEpgatQddiKVDvv+sEaiCWhsHcmvX0qWuzsCsJ+B
-         xeMHWTc66mZjCgK7YU5Hpq1U3E/Z4xkUb2KaEUx0=
-Date:   Tue, 28 Jan 2020 16:45:44 -0800
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     Murphy Zhou <xzhou@redhat.com>
-Cc:     fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org
-Subject: Re: [PATCH v3 6/9] generic: add test for non-root use of fscrypt API
- additions
-Message-ID: <20200129004543.GB224488@gmail.com>
-References: <20191015181643.6519-1-ebiggers@kernel.org>
- <20191015181643.6519-7-ebiggers@kernel.org>
- <20200119054515.3mxrpky7fiegnj5s@xzhoux.usersys.redhat.com>
- <20200119182542.GA913@sol.localdomain>
- <20200120022057.6bgrpd5iu34455ty@xzhoux.usersys.redhat.com>
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 530DE107ACC5;
+        Wed, 29 Jan 2020 05:13:34 +0000 (UTC)
+Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id BBEC860BE0;
+        Wed, 29 Jan 2020 05:13:33 +0000 (UTC)
+Date:   Wed, 29 Jan 2020 13:23:10 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH v3] xfstests: xfs mount option sanity test
+Message-ID: <20200129052310.GJ14282@dhcp-12-102.nay.redhat.com>
+Mail-Followup-To: "Darrick J. Wong" <darrick.wong@oracle.com>,
+        fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+References: <20200115081132.22710-1-zlang@redhat.com>
+ <20200118172330.GE2149943@magnolia>
+ <20200119072342.GH14282@dhcp-12-102.nay.redhat.com>
+ <20200127165728.GA3448165@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20200120022057.6bgrpd5iu34455ty@xzhoux.usersys.redhat.com>
+In-Reply-To: <20200127165728.GA3448165@magnolia>
 User-Agent: Mutt/1.10.1 (2018-07-13)
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.12
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Jan 20, 2020 at 10:20:57AM +0800, Murphy Zhou wrote:
-> On Sun, Jan 19, 2020 at 10:25:42AM -0800, Eric Biggers wrote:
-> > On Sun, Jan 19, 2020 at 01:45:15PM +0800, Murphy Zhou wrote:
-> > > Hi Eric,
-> > > 
-> > > On Tue, Oct 15, 2019 at 11:16:40AM -0700, Eric Biggers wrote:
-> > > > From: Eric Biggers <ebiggers@google.com>
+On Mon, Jan 27, 2020 at 08:57:28AM -0800, Darrick J. Wong wrote:
+> On Sun, Jan 19, 2020 at 03:23:42PM +0800, Zorro Lang wrote:
+> > On Sat, Jan 18, 2020 at 09:23:30AM -0800, Darrick J. Wong wrote:
+> > > On Wed, Jan 15, 2020 at 04:11:32PM +0800, Zorro Lang wrote:
+> > > > XFS is changing to suit the new mount API, so add this case to make
+> > > > sure the changing won't bring in regression issue on xfs mount option
+> > > > parse phase, and won't change some default behaviors either.
 > > > > 
-> > > > Test non-root use of the fscrypt filesystem-level encryption keyring and
-> > > > v2 encryption policies.
+> > > > Signed-off-by: Zorro Lang <zlang@redhat.com>
+> > > > ---
+> > > > 
+> > > > Hi,
+> > > > 
+> > > > Thanks the suggestions from Darrick, v3 did below changes:
+> > > > 1) Add more debug info output in do_mkfs and do_test.
+> > > > 2) A new function filter_loop.
+> > > > 3) Update .out file content
+> > > > 
+> > > > I've simply run this case on RHEL-7, RHEL-8 and upstream 5.5-rc4 kernel,
+> > > > all passed.
 > > > 
-> > > This testcase now fails on latest Linus tree with latest e2fsprogs
-> > > on ext4:
+> > > Something else I noticed -- if for whatever reason the mount fails due
+> > > to log size checks, the kernel logs things like:
 > > > 
-> > > FSTYP         -- ext4
-> > > PLATFORM      -- Linux/x86_64 dell-pesc430-01 5.4.0+ #1 SMP Mon Nov 25 16:40:55 EST 2019
-> > > MKFS_OPTIONS  -- /dev/sda3
-> > > MOUNT_OPTIONS -- -o acl,user_xattr -o context=system_u:object_r:nfs_t:s0 /dev/sda3 /mnt/xfstests/mnt2
-> > > generic/581	- output mismatch (see /var/lib/xfstests/results//generic/581.out.bad)
-> > >     --- tests/generic/581.out	2019-11-25 20:30:04.536051638 -0500
-> > >     +++ /var/lib/xfstests/results//generic/581.out.bad	2019-11-26 01:04:17.318332220 -0500
-> > >     @@ -33,7 +33,7 @@
-> > >      Added encryption key
-> > >      Added encryption key
-> > >      Added encryption key
-> > >     -Error adding encryption key: Disk quota exceeded
-> > >     +Added encryption key
-> > >      
-> > >      # Adding key as root
-> > > ...
-> > > 
-> > > A rough looking back shows that this probably started since your fscrypt
-> > > update for 5.5, added support for IV_INO_LBLK_64 encryption policies.
-> > > 
-> > > I guess you are aware of this :-)
-> > > 
+> > > xfs: Bad value for 'logbufs'
+> > > XFS (loop0): Mounting V5 Filesystem
+> > > XFS (loop0): Log size 3273 blocks too small, minimum size is 3299 blocks
+> > > XFS (loop0): AAIEEE! Log failed size checks. Abort!
+> > > XFS: Assertion failed: 0, file: fs/xfs/xfs_log.c, line: 706
 > > 
-> > Nope, this has been passing for me.  I don't see how this can have anything to
-> > do with the fscrypt update for 5.5.  I'm guessing this is a race condition in
-> > the test caused by the kernel's keyrings subsystem reclaiming the keys quota
-> > asynchronously.  I'll see if I can find a way to reproduce it and make the test
-> > more reliable.
+> > Thanks Darrick, you always can find exceptions:) BTW, how to reproduce this
+> > error?
 > 
-> OK, Thanks for the info. I'll try to bisect.
+> It's the same problem as last time -- I run upstream xfsprogs (with the
+> patch turning on rmap by default); and when this test runs apparently
+> there are logbufs options that increase the kernel's view of the minimum
+> log size to the point that we fail the mount time log size checks.
+> 
+> I observed that changing the LOOP_IMG creation code to make a 32G sparse
+> file results in an fs with a larger log area:
+
+Thanks, that's a good idea, sparse file helps to get larger log space!
+
+> 
+> 	$XFS_IO_PROG -f -c "truncate 32g" $LOOP_IMG
+> 
+> fixes all of these problems.  See diff below.
+> 
+> > Looks like I touched too many things in one case, cause I have a long way to
+> > make it "no exception" ;)
+> > 
+> > > 
+> > > Which is then picked up by the dmesg scanner in fstests.  Maybe we need
+> > > (a) _check_dmesg between each _do_test iteration, and/or (b) filter that
+> > > particular assertion so we don't fail the test?
+> > 
+> > I can add _check_dmesg between each _do_test iteration, but I have to exit
+> > directly if _check_dmesg returns 1, or we need a way to save each failed
+> > $seqres.dmesg (maybe just cat $seqres.dmesg ?)
+> > 
+> > About the dmesg filter, each _do_test can have its own filter if it need.
+> > For example, "logbufs" test filter "Assertion failed: 0, file: fs/xfs/xfs_log.c".
+> > But might that filter out useful kernel warning?
+> > 
+> > What do you think?
+> 
+> Eh, now that I've taken a second look at this, I don't think there's a
+> good way to filter this particular ASSERT vs. any other that could pop
+> up.
+
+Sure, I'm afraid to filter more real bugs, if there's not a good way to
+filter it.
+
+> 
+> --D
+> 
+> diff --git a/tests/xfs/997 b/tests/xfs/997
+> index 6b7235dd..c5bb0e51 100755
+> --- a/tests/xfs/997
+> +++ b/tests/xfs/997
+> @@ -50,11 +50,11 @@ LOOP_SPARE_IMG=$TEST_DIR/$seq.logdev
+>  LOOP_MNT=$TEST_DIR/$seq.mnt
+>  
+>  echo "** create loop device"
+> -$XFS_IO_PROG -f -c "falloc 0 1g" $LOOP_IMG
+> +$XFS_IO_PROG -f -c "truncate 32g" $LOOP_IMG
+>  LOOP_DEV=`_create_loop_device $LOOP_IMG`
+>  
+>  echo "** create loop log device"
+> -$XFS_IO_PROG -f -c "falloc 0 512m" $LOOP_SPARE_IMG
+> +$XFS_IO_PROG -f -c "truncate 512m" $LOOP_SPARE_IMG
+>  LOOP_SPARE_DEV=`_create_loop_device $LOOP_SPARE_IMG`
+>  
+>  echo "** create loop mount point"
 > 
 
-Can you check whether the test passes reliably for you if you apply
-https://lkml.kernel.org/fstests/20200129004251.133747-1-ebiggers@kernel.org/?
-
-Thanks,
-
-- Eric
