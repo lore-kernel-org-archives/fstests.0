@@ -6,31 +6,30 @@ X-Spam-Status: No, score=-5.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
 	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 93E7BC2D0DB
-	for <linux-fstests@archiver.kernel.org>; Fri, 31 Jan 2020 21:04:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 46DD8C2D0DB
+	for <linux-fstests@archiver.kernel.org>; Fri, 31 Jan 2020 21:22:51 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 7255A20707
-	for <linux-fstests@archiver.kernel.org>; Fri, 31 Jan 2020 21:04:18 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 22102214D8
+	for <linux-fstests@archiver.kernel.org>; Fri, 31 Jan 2020 21:22:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726213AbgAaVES (ORCPT
+        id S1726109AbgAaVWu (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 31 Jan 2020 16:04:18 -0500
-Received: from trent.utfs.org ([94.185.90.103]:43452 "EHLO trent.utfs.org"
+        Fri, 31 Jan 2020 16:22:50 -0500
+Received: from trent.utfs.org ([94.185.90.103]:45012 "EHLO trent.utfs.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726102AbgAaVER (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 31 Jan 2020 16:04:17 -0500
-X-Greylist: delayed 509 seconds by postgrey-1.27 at vger.kernel.org; Fri, 31 Jan 2020 16:04:17 EST
+        id S1726102AbgAaVWu (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 31 Jan 2020 16:22:50 -0500
 Received: from localhost (localhost [IPv6:::1])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
         (No client certificate requested)
-        by trent.utfs.org (Postfix) with ESMTPS id 40D695FCBC
-        for <fstests@vger.kernel.org>; Fri, 31 Jan 2020 21:55:47 +0100 (CET)
-Date:   Fri, 31 Jan 2020 12:55:47 -0800 (PST)
+        by trent.utfs.org (Postfix) with ESMTPS id 242A55F9CA
+        for <fstests@vger.kernel.org>; Fri, 31 Jan 2020 22:22:49 +0100 (CET)
+Date:   Fri, 31 Jan 2020 13:22:49 -0800 (PST)
 From:   Christian Kujau <lists@nerdbynature.de>
 To:     fstests@vger.kernel.org
-Subject: shared/032: add options for reiser4
-Message-ID: <alpine.DEB.2.22.395.2001311244100.2831@trent.utfs.org>
+Subject: README: fsgqa needs a home directory too
+Message-ID: <alpine.DEB.2.22.395.2001311318390.2831@trent.utfs.org>
 User-Agent: Alpine 2.22 (DEB 395 2020-01-19)
 MIME-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
@@ -39,45 +38,38 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Last night I had xfstests running and after a while it hung at shared/032 
-because I had reiser4progs installed and it was waiting for input:
+generic/128 whould fail with:
 
------------------------------------------------------------------
-mkfs -t reiser4 /dev/ram0
-mkfs.reiser4 1.2.1
-Format release: 4.0.2
-Copyright (C) 2001-2005 by Hans Reiser, licensing governed by 
-reiser4progs/COPYING. 
+     QA output created by 128
+    +su: warning: cannot change directory to /home/fsgqa: No such file or directory
 
-Block size 4096 will be used.                                                                                                                                                                         
-Linux 5.5.0-rc5-amd64 is detected.                                                                                                                                                                    
-Uuid 2006a590-832a-49f5-9317-cf91bf866dd7 will be used.                                                                                                                                               
-Reiser4 is going to be created on /dev/ram0.                                                                                                                                                          
-(Yes/No): 
------------------------------------------------------------------
-
-The patch below adds an option (cf. reiserfs the line above) so that the 
-test continues.
-
-Curiously enough the test still "succeeds" for reiser{fs,4} (and jfs too) 
-because the userspace tools don't appear to have a routine to check for 
-"contains an existing filesystem", but that could be addressed in a 
-different patch.
+Adjust README to create a home directory too. And (totally unrelated), 
+fix the 404 for the udf_test tool.
 
 Signed-off-by: Christian Kujau <lists@nerdbynature.de>
 
---- tests/shared/032.orig	2020-01-12 08:43:34.000000000 -0800
-+++ tests/shared/032	2020-01-31 12:30:27.158763104 -0800
-@@ -49,6 +49,7 @@
- 	[ $fs = gfs ] && preop="echo y |" && preargs="-p lock_nolock -j 1"
- 	[ $fs = gfs2 ] && preop="echo y |" && preargs="-p lock_nolock -j 1"
- 	[ $fs = reiserfs ] && preop="echo y |" && preargs="-f"
-+	[ $fs = reiser4 ] && preop="echo y |" && preargs="-f"
- 	# cramfs mkfs requires a directory argument
- 	[ $fs = cramfs ] && preargs=/proc/fs
- 	[ $fs = ext2 ] && preargs="-F"
+--- README.orig	2020-01-12 08:43:34.000000000 -0800
++++ README	2020-01-31 13:18:12.494026480 -0800
+@@ -19,7 +19,7 @@
+ 	(Note that for RHEL and CentOS, you may need the EPEL repo.)
+ - run make
+ - run make install
+-- create fsgqa test user ("sudo useradd fsgqa")
++- create fsgqa test user ("sudo useradd -m fsgqa")
+ - create fsgqa group ("sudo groupadd fsgqa")
+ - create 123456-fsgqa test user ("sudo useradd 123456-fsgqa")
+ 
+@@ -33,7 +33,7 @@
+     - install administrative tools specific to the filesystem you wish to test
+     - If you wish to run the udf components of the suite install
+       mkudffs. Also download and build the Philips UDF Verification Software
+-      from http://www.extra.research.philips.com/udf/, then copy the udf_test
++      from https://www.lscdweb.com/registered/udf_verifier.html, then copy the udf_test
+       binary to xfstests/src/. If you wish to disable UDF verification test
+       set the environment variable DISABLE_UDF_TEST to 1.
+ 
 
 -- 
-BOFH excuse #164:
+BOFH excuse #220:
 
-root rot
+Someone thought The Big Red Button was a light switch.
