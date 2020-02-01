@@ -1,75 +1,119 @@
-Return-Path: <SRS0=v13d=3U=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=RvYx=3V=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 46DD8C2D0DB
-	for <linux-fstests@archiver.kernel.org>; Fri, 31 Jan 2020 21:22:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 71718C33C9E
+	for <linux-fstests@archiver.kernel.org>; Sat,  1 Feb 2020 07:36:58 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 22102214D8
-	for <linux-fstests@archiver.kernel.org>; Fri, 31 Jan 2020 21:22:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 37334206D3
+	for <linux-fstests@archiver.kernel.org>; Sat,  1 Feb 2020 07:36:58 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Idwfpzjj"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726109AbgAaVWu (ORCPT
+        id S1726156AbgBAHg5 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 31 Jan 2020 16:22:50 -0500
-Received: from trent.utfs.org ([94.185.90.103]:45012 "EHLO trent.utfs.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726102AbgAaVWu (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 31 Jan 2020 16:22:50 -0500
-Received: from localhost (localhost [IPv6:::1])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-        (No client certificate requested)
-        by trent.utfs.org (Postfix) with ESMTPS id 242A55F9CA
-        for <fstests@vger.kernel.org>; Fri, 31 Jan 2020 22:22:49 +0100 (CET)
-Date:   Fri, 31 Jan 2020 13:22:49 -0800 (PST)
-From:   Christian Kujau <lists@nerdbynature.de>
-To:     fstests@vger.kernel.org
-Subject: README: fsgqa needs a home directory too
-Message-ID: <alpine.DEB.2.22.395.2001311318390.2831@trent.utfs.org>
-User-Agent: Alpine 2.22 (DEB 395 2020-01-19)
+        Sat, 1 Feb 2020 02:36:57 -0500
+Received: from mail-pf1-f195.google.com ([209.85.210.195]:45649 "EHLO
+        mail-pf1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726115AbgBAHg5 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 1 Feb 2020 02:36:57 -0500
+Received: by mail-pf1-f195.google.com with SMTP id 2so4633456pfg.12;
+        Fri, 31 Jan 2020 23:36:57 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=I+jRZq2XIwvW7oIRq1PIrb+5cf/HFrnPVa/ZNKQ7FnM=;
+        b=IdwfpzjjXg4u72pCz/u53g809RdGXsEue3Njlu4pmiUgIdSLqcNPjCI1O3LG2uy/Vk
+         4obs4V2Z7DSfPcJfY/MHL22mNhOPTmvF/VsfHFGHszO1pmRvVzYrQTW9NRbuFf6y1piy
+         63A9GaxchzSOu/yO7Qvdg855im39WscWf94bl7v8ox4SQa6xsg3uYpXEbaFzA5z2xfzf
+         xX5X+Mv20n+rZ7uAV0tiZF/QIVxBuO4WzV/73w6wKdBsXuoUkA6RkPAN/Pw3ZxNw14c4
+         NwEDngrusme9Kb7r18wm/gRrflTXWiRtp+pMopG4A+5cUB19g+53fY9BOxiErLNxHHHE
+         U6ZA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=I+jRZq2XIwvW7oIRq1PIrb+5cf/HFrnPVa/ZNKQ7FnM=;
+        b=tXdo4Nhk2OUHfkQw+cA66S9BXc9LqHTkgc8wNqeBbGRw4z4kO8Gk98ZxVQva2HTZGR
+         ifwzi6LXNPSSEynzNtSfTar5ON6bP4AwdZRag+OyIAg6SXkRaSgKSyMrJ/7i0Dmutv0p
+         klQhcbS8sFsgdRJks+58+5XFnfJSegK45bt6e1HVQQo/rrUHugGsxeutrX2ycuxVjfQ4
+         90X11dFx/HGgjfYBH3nI8Sgi/ijIiBZDb3SfccLgIhzpDjniA0KZScLIKBZv7Rp0KaXK
+         +cUlufMQ4x5FslfC9sRzQ8ei3solbMUEYGubLLcc4hnfJG/ct5wjiQ0pcvZwbIZ5BMOr
+         OA8g==
+X-Gm-Message-State: APjAAAXpCs4fKrNG04Hd7x2r7C2tcKkf2PPtym2j+WZNRaX+owBzAPZa
+        Nf9teK1CwDnjropAa0LNt8M=
+X-Google-Smtp-Source: APXvYqyu+igt0+W1CIhy68Has71RnjbyboRXfSRcVadRamIIaXEZybiEh8s79z5ajjCZjvn0fr5oAQ==
+X-Received: by 2002:aa7:91c1:: with SMTP id z1mr15188554pfa.182.1580542616651;
+        Fri, 31 Jan 2020 23:36:56 -0800 (PST)
+Received: from localhost ([178.128.102.47])
+        by smtp.gmail.com with ESMTPSA id s124sm13343485pfc.57.2020.01.31.23.36.54
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 31 Jan 2020 23:36:55 -0800 (PST)
+Date:   Sat, 1 Feb 2020 15:36:49 +0800
+From:   Eryu Guan <guaneryu@gmail.com>
+To:     Qu Wenruo <wqu@suse.com>
+Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Subject: Re: [PATCH] fstests: btrfs/153: Remove it from auto group
+Message-ID: <20200201073649.GA2697@desktop>
+References: <20200114125044.21594-1-wqu@suse.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20200114125044.21594-1-wqu@suse.com>
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-generic/128 whould fail with:
+On Tue, Jan 14, 2020 at 08:50:44PM +0800, Qu Wenruo wrote:
+> This test case always fail after commit c6887cd11149 ("Btrfs: don't do
+> nocow check unless we have to").
+> As btrfs no longer checks nodatacow at buffered write time.
+> 
+> That commits brings in a big performance enhancement, as that check is
+> not cheap, but breaks qgroup, as write into preallocated space now needs
+> extra space.
+> 
+> There isn't yet a good solution (reverting that patch is not possible,
+> and only check nodatacow for quota enabled case is very bug prune due to
+> quite a lot code change).
+> 
+> We may solve it using the new ticketed space reservation facility, but
+> that won't come into fruit anytime soon.
+> 
+> So let's just remove that test case from 'auto' group, but still keep
+> the test case to inform we still have a lot of work to do.
+> 
+> Signed-off-by: Qu Wenruo <wqu@suse.com>
 
-     QA output created by 128
-    +su: warning: cannot change directory to /home/fsgqa: No such file or directory
+I'd like to see an ACK from btrfs folks. Thanks!
 
-Adjust README to create a home directory too. And (totally unrelated), 
-fix the 404 for the udf_test tool.
+Eryu
 
-Signed-off-by: Christian Kujau <lists@nerdbynature.de>
-
---- README.orig	2020-01-12 08:43:34.000000000 -0800
-+++ README	2020-01-31 13:18:12.494026480 -0800
-@@ -19,7 +19,7 @@
- 	(Note that for RHEL and CentOS, you may need the EPEL repo.)
- - run make
- - run make install
--- create fsgqa test user ("sudo useradd fsgqa")
-+- create fsgqa test user ("sudo useradd -m fsgqa")
- - create fsgqa group ("sudo groupadd fsgqa")
- - create 123456-fsgqa test user ("sudo useradd 123456-fsgqa")
- 
-@@ -33,7 +33,7 @@
-     - install administrative tools specific to the filesystem you wish to test
-     - If you wish to run the udf components of the suite install
-       mkudffs. Also download and build the Philips UDF Verification Software
--      from http://www.extra.research.philips.com/udf/, then copy the udf_test
-+      from https://www.lscdweb.com/registered/udf_verifier.html, then copy the udf_test
-       binary to xfstests/src/. If you wish to disable UDF verification test
-       set the environment variable DISABLE_UDF_TEST to 1.
- 
-
--- 
-BOFH excuse #220:
-
-Someone thought The Big Red Button was a light switch.
+> ---
+>  tests/btrfs/group | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/tests/btrfs/group b/tests/btrfs/group
+> index 697b6a38ea00..3c554a194742 100644
+> --- a/tests/btrfs/group
+> +++ b/tests/btrfs/group
+> @@ -155,7 +155,7 @@
+>  150 auto quick dangerous
+>  151 auto quick volume
+>  152 auto quick metadata qgroup send
+> -153 auto quick qgroup limit
+> +153 quick qgroup limit
+>  154 auto quick volume
+>  155 auto quick send
+>  156 auto quick trim
+> -- 
+> 2.24.1
+> 
