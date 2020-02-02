@@ -1,161 +1,189 @@
-Return-Path: <SRS0=RvYx=3V=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=b8ZK=3W=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+X-Spam-Status: No, score=-5.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable autolearn_force=no
-	version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5DFBFC33C9E
-	for <linux-fstests@archiver.kernel.org>; Sat,  1 Feb 2020 13:07:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 16651C3524A
+	for <linux-fstests@archiver.kernel.org>; Sun,  2 Feb 2020 13:30:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 143AF2070C
-	for <linux-fstests@archiver.kernel.org>; Sat,  1 Feb 2020 13:07:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DBFF920643
+	for <linux-fstests@archiver.kernel.org>; Sun,  2 Feb 2020 13:30:09 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="SXEBA+tP"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="HJZNxlGX"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726480AbgBANH2 (ORCPT
+        id S1726836AbgBBNaJ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 1 Feb 2020 08:07:28 -0500
-Received: from mail-il1-f195.google.com ([209.85.166.195]:44485 "EHLO
-        mail-il1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726297AbgBANH2 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 1 Feb 2020 08:07:28 -0500
-Received: by mail-il1-f195.google.com with SMTP id s85so5251039ill.11;
-        Sat, 01 Feb 2020 05:07:28 -0800 (PST)
+        Sun, 2 Feb 2020 08:30:09 -0500
+Received: from mail-pf1-f193.google.com ([209.85.210.193]:45070 "EHLO
+        mail-pf1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726541AbgBBNaJ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 2 Feb 2020 08:30:09 -0500
+Received: by mail-pf1-f193.google.com with SMTP id 2so6070304pfg.12
+        for <fstests@vger.kernel.org>; Sun, 02 Feb 2020 05:30:08 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=oNKC7fDBF5bypMMsY3mRJy+utUKLGrjciGC3lDrgQ1s=;
-        b=SXEBA+tPeh6jGa9IdMJaUREtXKGtqqX9CLtkw/+Xfre+LMAJrwxyLt33mpm1ZiqgJQ
-         QM5UdOvS3oNu9u8VujN0ZOazlwi0a4+qw2FwnlnHWFc3t7WSz+m92hBjqzF68ourdDWY
-         tnPb0gYe5m1FNoGAGcVN2zzl3P2egB8CtZkkQNJeVgXYO3aoFjRnyPbOwG6CjE8GNyqL
-         0ZwRECThXoQA+HMzVEpSk8VMGZVMGbZgAc9ZleddcJLq1lUFivHPloyDoLqBx/hWcREE
-         +g2sR8K8y2U/Hi7TZhkp+9kARkpjMilghf7Fqq7vS6yNEGPF8YV73koJ+7L/5iQRnRVR
-         Jqug==
+        h=message-id:date:from:to:subject:mime-version:content-disposition;
+        bh=07K/DEanPkoyc9yuDLq8Ug9VEOR7xpjr5dIgJEHQ8CA=;
+        b=HJZNxlGXRVX0ddFQLRpcuLp7S07ZfRFFXDfb7CzGxvA9Aoe4n90YJ88t0DgYbnYN+k
+         5RAoP9ROntKJbS3eRF6RMOd5PnPOA/HDOBwSH9cagMA9QwbgGlkEFUdVnhXlR89MasUO
+         B69jWUAlZBeolaEN44Ioe3PU6adG5rUFGrK8X/j/I5GR4ABWl+EnGTfu4XZY8jJQulIH
+         CJJMg9xgMd37zji6Nv22drzzNkD6ivs/afJFyR1i4EolZSdbUQXGBIwWct3wm5BkvjZc
+         DGDOGgAYmeM/AV//mwLUFX7mW+bcpKpTPe6oTb+bV/IV5AECpsBAmzbGXzcqhUvUIzix
+         BPfw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=oNKC7fDBF5bypMMsY3mRJy+utUKLGrjciGC3lDrgQ1s=;
-        b=uG/M9N6BNY+p6vg7A01t3M26Drqoxl+b+QOvI51K789mhK86yjZ3CqVgT0/8YiPVR1
-         hUs0Foe38PqP5xhghyllYIjqggCk1Be+QywVKGbXJMV2m91vgeVBDOsu6vsbOkImJgJG
-         7Q66LXJE1bYdfYpibQG6cxL3cUnbn9C0E1E8lwO4JKaSnDmq5nT4G2enLat4zvygseDL
-         jAZO5sG0JPJiqjw4rXYbbjRHMjrD0DmLJcmc/QviPQOXjPv/+xWN3eYPojPdKzh7rY55
-         mOdX3PHyWVjrOLo1/xlqB0o2uVbDzj6no9xSKtAu8+fEugk0j0UM+jspXhvMdgJ77nqg
-         tnSw==
-X-Gm-Message-State: APjAAAXw4jZsSkzBo1+Q+erL1FHRi3Z7fIjmUHfndscIhpRYmPu1If3L
-        KOTzVVpUpZXwZfNRjbrv1FELbD3Btiqzz/spf3s=
-X-Google-Smtp-Source: APXvYqx3+Gx+gIejbyuzt6sWJ6pulqhDnZM9iFTZSZMn3Nl3GqjRKOQC3qXXSpmALrzdMnhA1342lzXegvRL7mBJe2o=
-X-Received: by 2002:a92:d5c3:: with SMTP id d3mr7139367ilq.250.1580562447510;
- Sat, 01 Feb 2020 05:07:27 -0800 (PST)
+        h=x-gm-message-state:message-id:date:from:to:subject:mime-version
+         :content-disposition;
+        bh=07K/DEanPkoyc9yuDLq8Ug9VEOR7xpjr5dIgJEHQ8CA=;
+        b=We93F9shSVGcIcqbNjCvskJ4Kx2qlImr/x8QtbF0LJN0Dm2QPZ7Htw5iSqpB9gBULL
+         8TKKrvqfwfIKP5LKwLqgB+gngSVB1aH9kz9dtUzFuSci3Hhe69ZqiXCpbSKGlLkg2yzl
+         mL6OD9zPamhBsuYSlOT5fxWRJyX6kRYTsW1fZkNwLfij7y8WLPA+yb7meEn6iv2fDLEO
+         VSYVBi7Yny4naW2YK4U05/e5Dn4sNcEkDwsr7YaGRJYBUkVbfwx8aDwEUw28pU5cutc5
+         5bv/QiRtlf7c2WRd2dxX2gw8CzNWdsEHDJRUK3o84lKOzDKTiNzWL3lqiKXbdcwhyMPh
+         gMDw==
+X-Gm-Message-State: APjAAAXb1lH7gcM7A38m1xUd1wTrbGfyohBmdohbP+V55AeQCR7rF2Iz
+        WyPWeoUnhY8zOUlSQBWEQdDdNjuH
+X-Google-Smtp-Source: APXvYqxh0XqGOPBVYyyYhNWRRPEZ0qzyEsXH0tMrk3zEzoU4kuocT9z9Y7e5QvGLot+/a6Qr7ESZDw==
+X-Received: by 2002:a63:1f5b:: with SMTP id q27mr6565050pgm.434.1580650208229;
+        Sun, 02 Feb 2020 05:30:08 -0800 (PST)
+Received: from localhost ([178.128.102.47])
+        by smtp.gmail.com with ESMTPSA id hg11sm16988196pjb.14.2020.02.02.05.30.06
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 02 Feb 2020 05:30:07 -0800 (PST)
+Message-ID: <5e36cedf.1c69fb81.eb779.dabd@mx.google.com>
+Date:   Sun, 02 Feb 2020 21:30:01 +0800
+From:   Eryu Guan <guaneryu@gmail.com>
+To:     fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: master branch updated to 61c6d0c30574
 MIME-Version: 1.0
-References: <20200114125044.21594-1-wqu@suse.com> <20200201073649.GA2697@desktop>
- <CAOQ4uxj_MFHrWthckSVUaHp3us2eNFeZRc_wuD90CxcUveYUTA@mail.gmail.com> <c3310387-da7b-3184-147f-67f00eed1aae@suse.com>
-In-Reply-To: <c3310387-da7b-3184-147f-67f00eed1aae@suse.com>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Sat, 1 Feb 2020 15:07:16 +0200
-Message-ID: <CAOQ4uxiu6T-cHr5TZ93K1U5fGnu8bG4RSpkZqMvvDEw_wDCuPg@mail.gmail.com>
-Subject: Re: [PATCH] fstests: btrfs/153: Remove it from auto group
-To:     Qu Wenruo <wqu@suse.com>
-Cc:     Eryu Guan <guaneryu@gmail.com>, fstests <fstests@vger.kernel.org>,
-        Linux Btrfs <linux-btrfs@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="odNBw9FULBo3"
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sat, Feb 1, 2020 at 2:39 PM Qu Wenruo <wqu@suse.com> wrote:
->
->
->
-> On 2020/2/1 =E4=B8=8B=E5=8D=887:10, Amir Goldstein wrote:
-> > On Sat, Feb 1, 2020 at 9:41 AM Eryu Guan <guaneryu@gmail.com> wrote:
-> >>
-> >> On Tue, Jan 14, 2020 at 08:50:44PM +0800, Qu Wenruo wrote:
-> >>> This test case always fail after commit c6887cd11149 ("Btrfs: don't d=
-o
-> >>> nocow check unless we have to").
-> >>> As btrfs no longer checks nodatacow at buffered write time.
-> >>>
-> >>> That commits brings in a big performance enhancement, as that check i=
-s
-> >>> not cheap, but breaks qgroup, as write into preallocated space now ne=
-eds
-> >>> extra space.
-> >>>
-> >>> There isn't yet a good solution (reverting that patch is not possible=
-,
-> >>> and only check nodatacow for quota enabled case is very bug prune due=
- to
-> >>> quite a lot code change).
-> >>>
-> >>> We may solve it using the new ticketed space reservation facility, bu=
-t
-> >>> that won't come into fruit anytime soon.
-> >>>
-> >>> So let's just remove that test case from 'auto' group, but still keep
-> >>> the test case to inform we still have a lot of work to do.
-> >>>
-> >>> Signed-off-by: Qu Wenruo <wqu@suse.com>
-> >>
-> >> I'd like to see an ACK from btrfs folks. Thanks!
-> >>
-> >> Eryu
-> >>
-> >>> ---
-> >>>  tests/btrfs/group | 2 +-
-> >>>  1 file changed, 1 insertion(+), 1 deletion(-)
-> >>>
-> >>> diff --git a/tests/btrfs/group b/tests/btrfs/group
-> >>> index 697b6a38ea00..3c554a194742 100644
-> >>> --- a/tests/btrfs/group
-> >>> +++ b/tests/btrfs/group
-> >>> @@ -155,7 +155,7 @@
-> >>>  150 auto quick dangerous
-> >>>  151 auto quick volume
-> >>>  152 auto quick metadata qgroup send
-> >>> -153 auto quick qgroup limit
-> >>> +153 quick qgroup limit
-> >
-> > Hmm, if removing from auto it might make sense to also remove it
-> > from quick, because people often use quick as a sanity regression group=
-.
->
-> That's also one of my concern.
->
-> However recently I tend to run more same VMs on different ranges of
-> fstests to speed up the testing progress other than using 'quick' group.
->
-> Anyway this depends on the end users (QA and developers).
->
-> >
-> > The issue at hand is a recurring pattern.
-> > It is also been discussed recently about generic/484:
-> > https://lore.kernel.org/fstests/20200131164619.GA13005@infradead.org/
-> >
-> > I also handled something like this with:
-> > fdb69864 overlay/061: remove from auto and quick groups
-> >
-> > I suggest adding a group 'broken' to mark known/wontfix issues
-> > then a default regression test could run -g auto -x broken
-> > or -g quick -x broken for a quick regression sanity.
->
-> That's much better.
->
-> Just one question, if a test is in both quick and broken group, will -g
-> quick -x broken still exclude it?
->
 
-Yes.
-That is the main use case for -x. Often used with -x dangerous.
+--odNBw9FULBo3
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-What we don't have, AFAIK, is the ability to request 'auto && quick'.
+Hi all,
+
+The master branch of the xfstests repository at:
+
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+have just been updated. This update mainly pulls in the new overlay tests from
+Amir Goldstein and a new xfs test, along with other various fixes. The new
+overlay tests should not fail on v5.5 kernel, but the new xfs/512 test
+currently fails on latest kernel.
+
+The review process was slowed down due to Chinese New Year holiday and Wuhan
+coronavirus, so there're still some pending patches to review. But if you have
+patches that have been pending for more than 1 month, please resend, they
+probably fall out of my radar.
 
 Thanks,
-Amir.
+Eryu
+
+The new head of the master branch is commit:
+
+61c6d0c30574 btrfs/130: remove the dangerous group
+
+New commits:
+
+Amir Goldstein (5):
+      [88a966b1b9cc] overlay: create the overlay/nested test group
+      [7d50029d5863] overlay: test file handles with nested overlay over samefs lower
+      [c499faebbf8b] overlay: test file handles with nested overlay over non-samefs lower
+      [0482218a3dc3] overlay: test constant ino with nested overlay over samefs lower
+      [e288b4bade12] overlay: test constant ino with nested overlay over non-samefs lower
+
+Christoph Hellwig (1):
+      [3fde92b2a36b] xfs: add a new test for removing ACLs through the attr interface
+
+Darrick J. Wong (6):
+      [fe815742e286] xfs/122: add disk dquot structure to the list
+      [6478e3343829] xfs/507: skip if we can't create a large sparse file for testing
+      [e002de2e5b54] xfs/279: skip test if we can't allocate scsi_debug device
+      [cfa9327172d4] common/rc: fix _get_max_lfs_filesize on 32-bit platforms
+      [7d05ebe51ba4] generic/108: skip test if we can't initialize scsi_debug
+      [699ebfad5db5] xfs/020: call _notrun if we can't create a 60t sparse image
+
+Deepa Dinamani (1):
+      [4bfaca4ef87e] generic/402: Make timestamp range check conditional
+
+Filipe Manana (1):
+      [61c6d0c30574] btrfs/130: remove the dangerous group
+
+Josef Bacik (2):
+      [27e2a2bd2f44] ltp/fsx: do size check after closeopen operation
+      [fb72f6f547d7] ltp/fsx: drop caches if we're doing closeopen
+
+Xiao Yang (1):
+      [af37fc423f8e] generic: Add check for required keep_size/punch_hole/zero_range/collapse_range
+
+Yang Xu (1):
+      [b536de2a0424] generic/520: Remove sync in clean_dir
+
+
+Code Diffstat:
+
+ common/rc             |  11 +-
+ ltp/fsx.c             |  10 +-
+ tests/btrfs/group     |   2 +-
+ tests/generic/108     |   4 +-
+ tests/generic/402     |  13 ++-
+ tests/generic/456     |   3 +
+ tests/generic/469     |   3 +
+ tests/generic/499     |   1 +
+ tests/generic/511     |   1 +
+ tests/generic/520     |   1 -
+ tests/overlay/068     | 304 ++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/068.out |  50 ++++++++
+ tests/overlay/069     | 313 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/069.out |  50 ++++++++
+ tests/overlay/070     | 223 +++++++++++++++++++++++++++++++++++
+ tests/overlay/070.out |   2 +
+ tests/overlay/071     | 237 ++++++++++++++++++++++++++++++++++++++
+ tests/overlay/071.out |   2 +
+ tests/overlay/group   |   8 +-
+ tests/xfs/020         |   2 +
+ tests/xfs/122.out     |   1 +
+ tests/xfs/279         |   3 +
+ tests/xfs/507         |   1 +
+ tests/xfs/512         |  59 ++++++++++
+ tests/xfs/512.out     |   7 ++
+ tests/xfs/group       |   1 +
+ 26 files changed, 1298 insertions(+), 14 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
+
+--odNBw9FULBo3
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAl42zm0ACgkQJlKqKVyP
+52NyEA//d6qqacn2bJ2nbGxUWvtZuT5k8JPrklv4O6IFivMj/yWS7VYYGAY7DaUu
+EcpiGMc5UktvPfNIecVkVMey3em2hc4k43TbLaLJ1yVVALL8gJ07Jal31RNoSGLO
+WGXKztWbmvizWZYgKB0fEKcpCuxilpD9YwyqY5DfXliV8L3K4rB4B203MmKuWdDt
+Gxmm6YhuZQhuPj0KQyiMNDJkxxlga6wqRBafUslIiNgS6yMoFsMqS0OIUdeq493O
+iPjpypQuIxttC3tw6kqxQ67AH98TOAJbFOksC/6iGH03knHWfLKCxqki+zpm5ozY
+u3Tze1wVOXiLnoCjRJin+qW1ZjdGtSnsVDqOyxTT46PANys3WbHa+IKwV/4L+xvs
+v6Vy8Jz3NBLcEVpvZDsyX5vCGzI5lZEv+WJ5i+kTWbXO2gVurxXzj2LXRpvqDutL
+Vhq4ktBS3Mx79r6+u8N33wO+NjpDfWonn2TtLQ/GWcJDiMsPX1e7An2nqfIb9m8i
+tgPi3P6kRuAjQbPXU+UFUK5baNYYuNo/v4TvrQdQ52OgeUo8uiH5D7znPOapB2RD
+A+bCEcu7vlzXxP05dFIHiOkoPJQqurUIVnOxoywiJcGkeAasdpkGBpHMdJOk6xbE
+QkjiZQWpAPqe8s9Pvp+FUtUiwzZ/6PB+jtzayXoqODruDziTEvs=
+=jyXI
+-----END PGP SIGNATURE-----
+
+--odNBw9FULBo3--
