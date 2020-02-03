@@ -1,118 +1,229 @@
-Return-Path: <SRS0=b8ZK=3W=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=5TGV=3X=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.3 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
-	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 94ED0C35249
-	for <linux-fstests@archiver.kernel.org>; Sun,  2 Feb 2020 19:54:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7D370C35247
+	for <linux-fstests@archiver.kernel.org>; Mon,  3 Feb 2020 16:19:26 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 45A762067C
-	for <linux-fstests@archiver.kernel.org>; Sun,  2 Feb 2020 19:54:23 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="DjdJlW7a"
+	by mail.kernel.org (Postfix) with ESMTP id 469E92086A
+	for <linux-fstests@archiver.kernel.org>; Mon,  3 Feb 2020 16:19:26 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1580746766;
+	bh=5N5JVK/0JL17sLlmZfSwWbFhse7eTdwThfXLT2jWAUw=;
+	h=From:To:Cc:Subject:Date:List-ID:From;
+	b=RraERriKxgwU2QL5ef7LG63xpQqkR1Yz6YutaYUF9ayJRlq72STaS42wqejvp0+d4
+	 ikIMifviYjtUdIRRD+69WZ7ZEQO6+89nnBVzgq9yNXAzyCm1HRGvyh/Mr/WQ4UAree
+	 wTI8q1QPcCgy5PRKoNO1O7gtJMBFxWpfXw36kMbU=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726921AbgBBTyX (ORCPT
+        id S1727588AbgBCQTZ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 2 Feb 2020 14:54:23 -0500
-Received: from userp2120.oracle.com ([156.151.31.85]:51444 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726290AbgBBTyW (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 2 Feb 2020 14:54:22 -0500
-Received: from pps.filterd (userp2120.oracle.com [127.0.0.1])
-        by userp2120.oracle.com (8.16.0.27/8.16.0.27) with SMTP id 012JrEH4169747;
-        Sun, 2 Feb 2020 19:54:20 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
- : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=corp-2019-08-05;
- bh=xCvVKNyTbCLiVMZlZ/qKKWNLLwXtm0FuE7phomgC3wA=;
- b=DjdJlW7aOVCieSjOFRQO2Ds8Jti6qBT8E8M+beTt4Ezk14rh5VGUh+vrt88pQcPh4YRt
- rj7FXGT7SGQajQGvxaTevnXO7WHqSOiEX2MMDfhVWlOnC5QDva37HczHvXnqOML16mzu
- X6ZjgpA+uCdFeKcPBnxRR5Nh/1SmKBopesGOTMsDoX1sqLw7X4PVwaq66g0NBywryv6X
- 9fdo/htvUc6/4U813bBZ7WWuhKRRKBgFV1Hgi2JUWNY+vIsF7I4xE2sNCsexZ5PV/9NU
- xmiJCDN0Lj2ovYgufL1ndVHUyv11FrQovwnE/g+C6EfIUd5+J28uZXYFh/x7PW6CDnlj mw== 
-Received: from userp3030.oracle.com (userp3030.oracle.com [156.151.31.80])
-        by userp2120.oracle.com with ESMTP id 2xwyg98k1j-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Sun, 02 Feb 2020 19:54:20 +0000
-Received: from pps.filterd (userp3030.oracle.com [127.0.0.1])
-        by userp3030.oracle.com (8.16.0.27/8.16.0.27) with SMTP id 012JjYdW047838;
-        Sun, 2 Feb 2020 19:54:19 GMT
-Received: from aserv0122.oracle.com (aserv0122.oracle.com [141.146.126.236])
-        by userp3030.oracle.com with ESMTP id 2xwjt1ttyv-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Sun, 02 Feb 2020 19:54:19 +0000
-Received: from abhmp0008.oracle.com (abhmp0008.oracle.com [141.146.116.14])
-        by aserv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 012JsIa2011662;
-        Sun, 2 Feb 2020 19:54:18 GMT
-Received: from localhost (/67.169.218.210)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Sun, 02 Feb 2020 11:54:18 -0800
-Date:   Sun, 2 Feb 2020 11:54:18 -0800
-From:   "Darrick J. Wong" <darrick.wong@oracle.com>
-To:     guaneryu@gmail.com
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 7/7] xfs/020: call _notrun if we can't create a 60t
- sparse image
-Message-ID: <20200202195418.GD6869@magnolia>
-References: <157915143549.2374854.7759901526137960493.stgit@magnolia>
- <157915147960.2374854.2067220014390694914.stgit@magnolia>
+        Mon, 3 Feb 2020 11:19:25 -0500
+Received: from mail.kernel.org ([198.145.29.99]:59334 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1727253AbgBCQTZ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 3 Feb 2020 11:19:25 -0500
+Received: from debian5.Home (bl8-197-74.dsl.telepac.pt [85.241.197.74])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 35D9F20838;
+        Mon,  3 Feb 2020 16:19:23 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1580746764;
+        bh=5N5JVK/0JL17sLlmZfSwWbFhse7eTdwThfXLT2jWAUw=;
+        h=From:To:Cc:Subject:Date:From;
+        b=xJe63ZR+brRhGpaxkRAA8ke9sKKgx6FWyz7/M07/k88SlGRtuLbrkGAyqFNbEsfMd
+         +2yN+5klPn8GJGwrcFLzrhSceakexeqzUq9zU7zPSPmV60f96Es+5p4RzAMyND2+06
+         ndxIkASS+0+bJsuQPlpg4pjVnaNu656WviGbv3bk=
+From:   fdmanana@kernel.org
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>,
+        Josef Bacik <josef@toxicpanda.com>
+Subject: [PATCH resend] btrfs: add test for incremental send for file with shared extents
+Date:   Mon,  3 Feb 2020 16:19:19 +0000
+Message-Id: <20200203161919.1385-1-fdmanana@kernel.org>
+X-Mailer: git-send-email 2.25.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <157915147960.2374854.2067220014390694914.stgit@magnolia>
-User-Agent: Mutt/1.9.4 (2018-02-28)
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9519 signatures=668685
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=1 malwarescore=0
- phishscore=0 bulkscore=0 spamscore=0 mlxscore=0 mlxlogscore=999
- adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.0.1-1911140001 definitions=main-2002020158
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9519 signatures=668685
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 priorityscore=1501 malwarescore=0
- suspectscore=1 phishscore=0 bulkscore=0 spamscore=0 clxscore=1015
- lowpriorityscore=0 mlxscore=0 impostorscore=0 mlxlogscore=999 adultscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.0.1-1911140001
- definitions=main-2002020159
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Jan 15, 2020 at 09:11:19PM -0800, Darrick J. Wong wrote:
-> From: Darrick J. Wong <darrick.wong@oracle.com>
-> 
-> If we can't create the 60T sparse image for testing repair on a large fs
-> (such as when running on 32-bit), don't bother running the rest of the
-> test.
-> 
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> ---
->  tests/xfs/020 |    2 ++
->  1 file changed, 2 insertions(+)
-> 
-> 
-> diff --git a/tests/xfs/020 b/tests/xfs/020
-> index 61da4101..e39c3482 100755
-> --- a/tests/xfs/020
-> +++ b/tests/xfs/020
-> @@ -42,6 +42,8 @@ echo "Silence is golden"
->  
->  fsfile=$TEST_DIR/fsfile.$seq
->  rm -f $fsfile
-> +truncate -s 60t $fsfile || _notrun "Cannot create 60T sparse file for test."
+From: Filipe Manana <fdmanana@suse.com>
 
-Um, this got committed with "xfs_io -x -c 'truncate 60t' and not as
-written, which means that this test does not work on i386 because xfs_io
-doesn't return nonzero when the truncate syscall fails.  Will send
-patch.
+Test that an incremental send operation works correctly when a file has
+shared extents with itself in the send snapshot, with a hole between them,
+and the file size has increased in the send snapshot.
 
---D
+This currently fails in 5.5-rc kernels (regression) but is fixed by a
+patch that has the following subject:
 
-> +rm -f $fsfile
->  
->  $MKFS_PROG -t xfs -d size=60t,file,name=$fsfile >/dev/null
->  $XFS_REPAIR_PROG -f -o ag_stride=32 -t 1 $fsfile >/dev/null 2>&1
-> 
+  Btrfs: send, fix emission of invalid clone operations within the same file
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+Reviewed-by: Josef Bacik <josef@toxicpanda.com>
+---
+
+Resend, since last update missed this patch.
+
+ tests/btrfs/203     | 100 ++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/203.out |  25 +++++++++++
+ tests/btrfs/group   |   1 +
+ 3 files changed, 126 insertions(+)
+ create mode 100755 tests/btrfs/203
+ create mode 100644 tests/btrfs/203.out
+
+diff --git a/tests/btrfs/203 b/tests/btrfs/203
+new file mode 100755
+index 00000000..2ba5463c
+--- /dev/null
++++ b/tests/btrfs/203
+@@ -0,0 +1,100 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2020 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test No. 203
++#
++# Test that an incremental send operation works correctly when a file has shared
++# extents with itself in the send snapshot, with a hole between them, and the
++# file size has increased in the send snapshot.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++	rm -fr $send_files_dir
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/reflink
++
++# real QA test starts here
++_supported_fs btrfs
++_supported_os Linux
++_require_test
++_require_scratch_reflink
++
++send_files_dir=$TEST_DIR/btrfs-test-$seq
++
++rm -f $seqres.full
++rm -fr $send_files_dir
++mkdir $send_files_dir
++
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++
++# Create our test file with a size of 64K in the parent snapshot.
++# After the parent snapshot is created, we will increase its size and then clone
++# one of its extents into a different offset and leave a hole between the shared
++# extents. The shared extents will be located at offsets greater then size of the
++# file in the parent snapshot.
++$XFS_IO_PROG -f -c "pwrite -S 0xf1 0 64K" $SCRATCH_MNT/foobar | _filter_xfs_io
++
++$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/base 2>&1 \
++	| _filter_scratch
++
++$BTRFS_UTIL_PROG send -f $send_files_dir/1.snap $SCRATCH_MNT/base 2>&1 \
++	| _filter_scratch
++
++# Create a 320K extent at file offset 512K, with chunks of 64K having different
++# content (to check cloning operations from send refer to the correct ranges).
++# After that clone a range that includes a hole and a part of the extent created
++# before - the clone range starts at an offset (448K) lower then the extent's
++# offset (512K). We want to see the existence of the hole doesn't confuse the
++# kernel's send code to send an invalid clone operation (with a source range
++# going beyond the file's current size). The hole that confused send to issue
++# an invalid clone operation spans the file range from offset 384K to 512K.
++#
++# Use offsets and ranges that are aligned to 64K, so that the test can run on
++# machines with any page size (and therefore block size).
++#
++$XFS_IO_PROG -c "pwrite -S 0xab 512K 64K" \
++	     -c "pwrite -S 0xcd 576K 64K" \
++	     -c "pwrite -S 0xef 640K 64K" \
++	     -c "pwrite -S 0x64 704K 64K" \
++	     -c "pwrite -S 0x73 768K 64K" \
++	     -c "reflink $SCRATCH_MNT/foobar 448K 192K 192K" \
++	     $SCRATCH_MNT/foobar | _filter_xfs_io
++
++$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/incr 2>&1 \
++	| _filter_scratch
++
++$BTRFS_UTIL_PROG send -p $SCRATCH_MNT/base -f $send_files_dir/2.snap \
++		 $SCRATCH_MNT/incr 2>&1 | _filter_scratch
++
++echo "File foobar digest in the original filesystem:"
++_md5_checksum $SCRATCH_MNT/incr/foobar
++
++# Now recreate the filesystem by receiving both send streams and verify we get
++# the same file contents that the original filesystem had.
++_scratch_unmount
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++
++$BTRFS_UTIL_PROG receive -f $send_files_dir/1.snap $SCRATCH_MNT
++$BTRFS_UTIL_PROG receive -f $send_files_dir/2.snap $SCRATCH_MNT
++
++echo "File foobar digest in the new filesystem:"
++_md5_checksum $SCRATCH_MNT/incr/foobar
++
++status=0
++exit
+diff --git a/tests/btrfs/203.out b/tests/btrfs/203.out
+new file mode 100644
+index 00000000..58739a98
+--- /dev/null
++++ b/tests/btrfs/203.out
+@@ -0,0 +1,25 @@
++QA output created by 203
++wrote 65536/65536 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/base'
++At subvol SCRATCH_MNT/base
++wrote 65536/65536 bytes at offset 524288
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 65536/65536 bytes at offset 589824
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 65536/65536 bytes at offset 655360
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 65536/65536 bytes at offset 720896
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 65536/65536 bytes at offset 786432
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++linked 196608/196608 bytes at offset 196608
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/incr'
++At subvol SCRATCH_MNT/incr
++File foobar digest in the original filesystem:
++2b76b23b62fdbbbcae1ee37eec84fd7d
++At subvol base
++At snapshot incr
++File foobar digest in the new filesystem:
++2b76b23b62fdbbbcae1ee37eec84fd7d
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index d21bf438..8533c5e1 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -205,3 +205,4 @@
+ 200 auto quick send clone
+ 201 auto quick punch log
+ 202 auto quick subvol snapshot
++203 auto quick send clone
+-- 
+2.25.0
+
