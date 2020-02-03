@@ -2,138 +2,95 @@ Return-Path: <SRS0=5TGV=3X=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1B9D1C35247
-	for <linux-fstests@archiver.kernel.org>; Mon,  3 Feb 2020 16:19:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 93F4BC35247
+	for <linux-fstests@archiver.kernel.org>; Mon,  3 Feb 2020 18:19:13 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id E46D420CC7
-	for <linux-fstests@archiver.kernel.org>; Mon,  3 Feb 2020 16:19:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 634A82086A
+	for <linux-fstests@archiver.kernel.org>; Mon,  3 Feb 2020 18:19:13 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1580746774;
-	bh=C7pFM5jD9US0E+9iqc90ppmrvri9thW9M7VZTI9xmRo=;
+	s=default; t=1580753953;
+	bh=PRpA5nojw0LgQoNjUD6Ljs3ht9OPRMhDWbwEkI/W0gQ=;
 	h=From:To:Cc:Subject:Date:List-ID:From;
-	b=0dh2sLTjlJtI1r7v2U3K79+GQDtXPkvz4Cpiqgbw1Yjmrb84X3SrHVe4Wu4JwwM4Y
-	 6IZTHkDK9tkHDKsuWkVmyknhJdkLVm2UbBRSWu4yKNnVq1YiaBLqgFZ/2VKq0mha2Q
-	 ieXMA0qJpXwhsQoR31k9RcHV+3NtCv0RV7nTivRA=
+	b=QE3IKdnLDBJujJyrL3PRSNwj/2AH4QAsII90ousxdGlOcRDntwImWsH3VJKQc4J3R
+	 EjWsAAkjX72iCZzxBFeERg8ebieDvYHV7oXLwQZLB6QNcra8aM4dbj88GDtGjSc1Co
+	 CkZOPl4ZeLwNr8vljYdCZOmMHEQ4sisV/M3AIeL0=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727253AbgBCQTd (ORCPT
+        id S1729375AbgBCSTN (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 3 Feb 2020 11:19:33 -0500
-Received: from mail.kernel.org ([198.145.29.99]:59378 "EHLO mail.kernel.org"
+        Mon, 3 Feb 2020 13:19:13 -0500
+Received: from mail.kernel.org ([198.145.29.99]:33396 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728324AbgBCQTd (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 3 Feb 2020 11:19:33 -0500
-Received: from debian6.Home (bl8-197-74.dsl.telepac.pt [85.241.197.74])
+        id S1727936AbgBCSTM (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 3 Feb 2020 13:19:12 -0500
+Received: from ebiggers-linuxstation.mtv.corp.google.com (unknown [104.132.1.77])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 7660320838;
-        Mon,  3 Feb 2020 16:19:31 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 50DED20838;
+        Mon,  3 Feb 2020 18:19:12 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1580746772;
-        bh=C7pFM5jD9US0E+9iqc90ppmrvri9thW9M7VZTI9xmRo=;
+        s=default; t=1580753952;
+        bh=PRpA5nojw0LgQoNjUD6Ljs3ht9OPRMhDWbwEkI/W0gQ=;
         h=From:To:Cc:Subject:Date:From;
-        b=H+2vWa0J8QcgCqHu3ukusYT3/FPg408wsUZ6VWHgIlI9XpuQq8wAKO/bMUlo7iTsN
-         HrejgmRmpaP/2yzTqQ9Y52AVDRDWPhy8ykJpibZy+GVnf2UkYurPvw4dgYA9Wswujf
-         LQ/fPqlguXd2qZAzQOkB3h8xAqpFegHNi2Ssi8Kk=
-From:   fdmanana@kernel.org
+        b=D4pm7jG2h3mfu5kDYwCenB/eTHrFUrthPWKvl8Tw+feXHZ2klVB3k5g4pmg/pTdAh
+         WOKUcMBP1Tu0q8RuoOuynQadz+nc85NvhwoJJx//un1rd6BfRh/BnscyXY2Z8doBJY
+         WioOVC+ajbXcUL0TqlhYWEPdObS/o7UKEOBOF+70=
+From:   Eric Biggers <ebiggers@kernel.org>
 To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH resend] generic/527: add additional test including a file with a hardlink
-Date:   Mon,  3 Feb 2020 16:19:28 +0000
-Message-Id: <20200203161928.14722-1-fdmanana@kernel.org>
-X-Mailer: git-send-email 2.11.0
+Cc:     linux-fscrypt@vger.kernel.org, keyrings@vger.kernel.org
+Subject: [PATCH v2 0/3] xfstests: test adding filesystem-level fscrypt key via key_id
+Date:   Mon,  3 Feb 2020 10:18:52 -0800
+Message-Id: <20200203181855.42987-1-ebiggers@kernel.org>
+X-Mailer: git-send-email 2.25.0.341.g760bfbb309-goog
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Filipe Manana <fdmanana@suse.com>
+This series adds a test which tests adding a key to a filesystem's
+fscrypt keyring via an "fscrypt-provisioning" keyring key.  This is an
+alternative to the normal method where the raw key is given directly.
 
-Add a similar test to the existing one but with a file that has a
-hardlink as well. This is motivated by a bug found in btrfs where
-a fsync on a file that has the old name of another file results
-in the logging code to hit an infinite loop. The patch that fixes
-the bug in btrfs has the following subject:
+The needed kernel support was merged in 5.6, so currently this test
+needs the latest mainline kernel to run.
 
-  "Btrfs: fix infinite loop during fsync after rename operations"
+This test also depends on an xfs_io patch which adds the '-k' option to
+the 'add_enckey' command, e.g.:
 
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
-Reviewed-by: Josef Bacik <josef@toxicpanda.com>
----
+        xfs_io -c "add_enckey -k KEY_ID" MOUNTPOINT
 
-Resend, since last update missed this patch.
+This test is skipped if the needed kernel or xfs_io support is absent.
 
- tests/generic/527     | 26 ++++++++++++++++++++++++++
- tests/generic/527.out |  4 ++++
- 2 files changed, 30 insertions(+)
+This has been tested on ext4, f2fs, and ubifs.
 
-diff --git a/tests/generic/527 b/tests/generic/527
-index aacccd91..61dd4f0b 100755
---- a/tests/generic/527
-+++ b/tests/generic/527
-@@ -45,6 +45,12 @@ mkdir $SCRATCH_MNT/testdir
- echo -n "foo" > $SCRATCH_MNT/testdir/fname1
- echo -n "hello" > $SCRATCH_MNT/testdir/fname2
- 
-+# For a different variant of the same test but when files have hardlinks too.
-+mkdir $SCRATCH_MNT/testdir2
-+echo -n "foo" > $SCRATCH_MNT/testdir2/zz
-+ln $SCRATCH_MNT/testdir2/zz $SCRATCH_MNT/testdir2/zz_link
-+echo -n "hello" > $SCRATCH_MNT/testdir2/a
-+
- # Make sure everything done so far is durably persisted.
- sync
- 
-@@ -57,6 +63,21 @@ ln $SCRATCH_MNT/testdir/fname3 $SCRATCH_MNT/testdir/fname2
- echo -n "bar" > $SCRATCH_MNT/testdir/fname1
- $XFS_IO_PROG -c "fsync" $SCRATCH_MNT/testdir/fname1
- 
-+# A second variant, more complex, that involves files with hardlinks too.
-+
-+# The following 3 renames are equivalent to a rename exchange (zz_link to a), but
-+# without the atomicity which isn't required here.
-+mv $SCRATCH_MNT/testdir2/a $SCRATCH_MNT/testdir2/tmp
-+mv $SCRATCH_MNT/testdir2/zz_link $SCRATCH_MNT/testdir2/a
-+mv $SCRATCH_MNT/testdir2/tmp $SCRATCH_MNT/testdir2/zz_link
-+
-+# The following rename and file creation are equivalent to a rename whiteout.
-+mv $SCRATCH_MNT/testdir2/zz $SCRATCH_MNT/testdir2/a2
-+echo -n "bar" > $SCRATCH_MNT/testdir2/zz
-+
-+# Fsync of zz should work and produce correct results after a power failure.
-+$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/testdir2/zz
-+
- # Simulate a power failure and mount the filesystem to check that all file names
- # exist and correspond to the correct inodes.
- _flakey_drop_and_remount
-@@ -65,6 +86,11 @@ echo "File fname1 data after power failure: $(cat $SCRATCH_MNT/testdir/fname1)"
- echo "File fname2 data after power failure: $(cat $SCRATCH_MNT/testdir/fname2)"
- echo "File fname3 data after power failure: $(cat $SCRATCH_MNT/testdir/fname3)"
- 
-+echo "File a data after power failure: $(cat $SCRATCH_MNT/testdir2/a)"
-+echo "File a2 data after power failure: $(cat $SCRATCH_MNT/testdir2/a2)"
-+echo "File zz data after power failure: $(cat $SCRATCH_MNT/testdir2/zz)"
-+echo "File zz_link data after power failure: $(cat $SCRATCH_MNT/testdir2/zz_link)"
-+
- _unmount_flakey
- 
- status=0
-diff --git a/tests/generic/527.out b/tests/generic/527.out
-index 3c34e1ff..7397fe88 100644
---- a/tests/generic/527.out
-+++ b/tests/generic/527.out
-@@ -2,3 +2,7 @@ QA output created by 527
- File fname1 data after power failure: bar
- File fname2 data after power failure: foo
- File fname3 data after power failure: foo
-+File a data after power failure: foo
-+File a2 data after power failure: foo
-+File zz data after power failure: bar
-+File zz_link data after power failure: hello
+This series can also be retrieved from
+https://git.kernel.org/pub/scm/linux/kernel/git/ebiggers/xfstests-dev.git
+tag "fscrypt-provisioning_2020-02-03".
+
+Changed since v1:
+  - Fixed incorrect detection of kernel support.
+
+Eric Biggers (3):
+  common/rc: handle option with argument in _require_xfs_io_command()
+  common/encrypt: move constant test key to common code
+  generic: test adding filesystem-level fscrypt key via key_id
+
+ common/encrypt        |  95 ++++++++++++++++++++++----
+ common/rc             |   2 +-
+ tests/generic/580     |  17 ++---
+ tests/generic/806     | 155 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/806.out |  73 ++++++++++++++++++++
+ tests/generic/group   |   1 +
+ 6 files changed, 315 insertions(+), 28 deletions(-)
+ create mode 100644 tests/generic/806
+ create mode 100644 tests/generic/806.out
+
 -- 
-2.11.0
+2.25.0.341.g760bfbb309-goog
 
