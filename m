@@ -1,52 +1,67 @@
-Return-Path: <SRS0=5TGV=3X=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=2WCJ=3Y=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
+X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CB18EC3524D
-	for <linux-fstests@archiver.kernel.org>; Mon,  3 Feb 2020 18:20:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 12C4BC3524D
+	for <linux-fstests@archiver.kernel.org>; Tue,  4 Feb 2020 14:38:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id A6D6F20CC7
-	for <linux-fstests@archiver.kernel.org>; Mon,  3 Feb 2020 18:20:33 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1580754033;
-	bh=8NerwRjN3S6Sxxz+XUxY9Y5QuccEf9rDfoNHoKxPLrY=;
-	h=From:To:Cc:Subject:Date:List-ID:From;
-	b=pLJ1icTX4fiKfzzvmbXRJR0eC0QwWGE7Ub8MZQ/4lyRPEcfIS4WuZL0c2HhA+9eWx
-	 fJ1jMLj9UJu4jkEwq2wFljsqi4hrWd3lFroI2c2DsGqTJ9mEPbJ0lW2QMNJcGZS0+f
-	 +foCCoOHgxfLdMkZO6kE1JHx/kQUX5G60mE1tN3w=
+	by mail.kernel.org (Postfix) with ESMTP id DDE662082E
+	for <linux-fstests@archiver.kernel.org>; Tue,  4 Feb 2020 14:38:03 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="MPm4HEgD"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728683AbgBCSUd (ORCPT
+        id S1727304AbgBDOiD (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 3 Feb 2020 13:20:33 -0500
-Received: from mail.kernel.org ([198.145.29.99]:33786 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727309AbgBCSUd (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 3 Feb 2020 13:20:33 -0500
-Received: from ebiggers-linuxstation.mtv.corp.google.com (unknown [104.132.1.77])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id D4EEF20838;
-        Mon,  3 Feb 2020 18:20:31 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1580754032;
-        bh=8NerwRjN3S6Sxxz+XUxY9Y5QuccEf9rDfoNHoKxPLrY=;
-        h=From:To:Cc:Subject:Date:From;
-        b=fNVKUJZQynSYfMzkB6ViMhy5hKpJixtuZMymZRmmWGsGVXa4Grw9lZUvhp/MUrgCd
-         Z4yL4UdDczrotn9ZAzeZ8FBCI2u8wXv2ZUe57e9y40gz3Tv28z3ohmOcHfr4NvCCeh
-         Fs3md7X1HlPKTiS/YpOlFBW9kC7yXSvZGwz8V4Zo=
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     linux-xfs@vger.kernel.org
-Cc:     fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org,
-        keyrings@vger.kernel.org
-Subject: [PATCH v2] xfs_io/encrypt: support passing a keyring key to add_enckey
-Date:   Mon,  3 Feb 2020 10:20:13 -0800
-Message-Id: <20200203182013.43474-1-ebiggers@kernel.org>
-X-Mailer: git-send-email 2.25.0.341.g760bfbb309-goog
+        Tue, 4 Feb 2020 09:38:03 -0500
+Received: from mail-qk1-f195.google.com ([209.85.222.195]:43178 "EHLO
+        mail-qk1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727250AbgBDOiD (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 4 Feb 2020 09:38:03 -0500
+Received: by mail-qk1-f195.google.com with SMTP id j20so18095092qka.10
+        for <fstests@vger.kernel.org>; Tue, 04 Feb 2020 06:38:01 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
+        h=from:to:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=1UCMkonT7Vd3ETCvM77HXTXnAy5YoDZ075AHY2GGCbU=;
+        b=MPm4HEgDDG0lDuhSudsLPDRPxDLcN7nKPwrRcYAJP2NwgwgOeeac+7GQXWYUUS7q+t
+         /alLIqxnVfl3xNL7HFY0wEbA9a/Kjppfr6BeGn7SXXkh8J01/LFd7xQ1xT5p5RmLxAnV
+         1HaEbpLPf5Ouz2zi/UVMcO10GOgNA6FLe0941fvUkF6otQDe2klgUsgTPpFG2Pgn3cq3
+         cIeHfBSymOIqPIdQVMpPuwWv6pa6n7cso6mR40xyrsBmGKqMPGnKphREdm8huBFH6M72
+         mEBmFTYUZWiVmRT2pt1gI9A5/lNmc2GwBVuKrV4uriyHKLwHcnRrkEzxZKnIiejyYu8l
+         lt+w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=1UCMkonT7Vd3ETCvM77HXTXnAy5YoDZ075AHY2GGCbU=;
+        b=hwLJZ3Z2mNKIEnedLVml/53VJ/2IQFPl7c75D4CKe8P/0XmvZrDjY+lBv/peQfwCkn
+         L5Bk0u1r6VDz7yFFLs/WjjfOpa75rRCq1Cp3TH77wWAqvYJcfwoRouaQ9nMNCwx5/Qw6
+         wN2WVdNQgnP+KigpdxokXV/Um0xTh7utu+xxBNGgNRW7iAZ/k0ORi3GNFJcnu99mJoKH
+         s2oVDqKE30/xWMauNowRhIz+v8bQ5GOkWcm3SsGM1F/beRnJWDw7tMCCZvgVc2s3w7hO
+         eyIvp48SFw1kpNmOSG2Sl7k1N+RB2D/Ie1NSJnNcJm1LMlYu6/ybd9v32lMW/NEEW+Cs
+         b84Q==
+X-Gm-Message-State: APjAAAWYxmpZ4b6sqs4MObGGTXIzzcRYhBfcEAqLezB9giuBml5FuDwB
+        xZNBEF/a7rhKeQ2cz1T1qfkLhg==
+X-Google-Smtp-Source: APXvYqz2DyiiExpJC9uJtKJmaw3bS0mMcWpIywZgRrj/7pkXYxbHZqtrwMfTnR8oD/nfch/AMTBexA==
+X-Received: by 2002:a05:620a:999:: with SMTP id x25mr28222350qkx.87.1580827081125;
+        Tue, 04 Feb 2020 06:38:01 -0800 (PST)
+Received: from localhost ([107.15.81.208])
+        by smtp.gmail.com with ESMTPSA id 184sm11027091qkl.81.2020.02.04.06.38.00
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 04 Feb 2020 06:38:00 -0800 (PST)
+From:   Josef Bacik <josef@toxicpanda.com>
+To:     kernel-team@fb.com, linux-btrfs@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: [PATCH][v2] xfstest: add a test for the btrfs file extent gap issue
+Date:   Tue,  4 Feb 2020 09:37:59 -0500
+Message-Id: <20200204143759.697376-1-josef@toxicpanda.com>
+X-Mailer: git-send-email 2.24.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
@@ -54,283 +69,129 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Eric Biggers <ebiggers@google.com>
+This is a test to validate that we're not adjusting up i_size before we
+have the appropriate file extents on disk.  We had a problem where
+i_size would be adjusted up without a contiguous range of file extents,
+which isn't ok without a special option enabled.
 
-Add a '-k' option to the 'add_enckey' xfs_io command to allow exercising
-the key_id field that is being added to struct fscrypt_add_key_arg.
-
-This is needed for the corresponding test in xfstests.
-
-For more details, see the corresponding xfstests patches as well as
-kernel commit 93edd392cad7 ("fscrypt: support passing a keyring key to
-FS_IOC_ADD_ENCRYPTION_KEY").
-
-Signed-off-by: Eric Biggers <ebiggers@google.com>
+Signed-off-by: Josef Bacik <josef@toxicpanda.com>
 ---
+v1->v2:
+- adjusted the commit interval time to make the test shorter
+- adjusted the write range so we didn't get tripped up by btrfs's delalloc
+  behavior
+- integrated all of Filipe's suggestions
 
-No changes since v1.
+ tests/btrfs/172     | 76 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/172.out |  3 ++
+ tests/btrfs/group   |  1 +
+ 3 files changed, 80 insertions(+)
+ create mode 100755 tests/btrfs/172
+ create mode 100644 tests/btrfs/172.out
 
-This applies to the for-next branch of xfsprogs.
-
- configure.ac          |  1 +
- include/builddefs.in  |  4 ++
- io/encrypt.c          | 90 +++++++++++++++++++++++++++++++------------
- m4/package_libcdev.m4 | 21 ++++++++++
- man/man8/xfs_io.8     | 10 +++--
- 5 files changed, 98 insertions(+), 28 deletions(-)
-
-diff --git a/configure.ac b/configure.ac
-index 5eb7c14b..f9348a0c 100644
---- a/configure.ac
-+++ b/configure.ac
-@@ -176,6 +176,7 @@ AC_HAVE_READDIR
- AC_HAVE_FSETXATTR
- AC_HAVE_MREMAP
- AC_NEED_INTERNAL_FSXATTR
-+AC_NEED_INTERNAL_FSCRYPT_ADD_KEY_ARG
- AC_HAVE_GETFSMAP
- AC_HAVE_STATFS_FLAGS
- AC_HAVE_MAP_SYNC
-diff --git a/include/builddefs.in b/include/builddefs.in
-index 4700b527..3b6b1c1b 100644
---- a/include/builddefs.in
-+++ b/include/builddefs.in
-@@ -102,6 +102,7 @@ HAVE_FLS = @have_fls@
- HAVE_FSETXATTR = @have_fsetxattr@
- HAVE_MREMAP = @have_mremap@
- NEED_INTERNAL_FSXATTR = @need_internal_fsxattr@
-+NEED_INTERNAL_FSCRYPT_ADD_KEY_ARG = @need_internal_fscrypt_add_key_arg@
- HAVE_GETFSMAP = @have_getfsmap@
- HAVE_STATFS_FLAGS = @have_statfs_flags@
- HAVE_MAP_SYNC = @have_map_sync@
-@@ -141,6 +142,9 @@ endif
- ifeq ($(NEED_INTERNAL_FSXATTR),yes)
- PCFLAGS+= -DOVERRIDE_SYSTEM_FSXATTR
- endif
-+ifeq ($(NEED_INTERNAL_FSCRYPT_ADD_KEY_ARG),yes)
-+PCFLAGS+= -DOVERRIDE_SYSTEM_FSCRYPT_ADD_KEY_ARG
-+endif
- ifeq ($(HAVE_GETFSMAP),yes)
- PCFLAGS+= -DHAVE_GETFSMAP
- endif
-diff --git a/io/encrypt.c b/io/encrypt.c
-index de48c50c..01b7e0df 100644
---- a/io/encrypt.c
-+++ b/io/encrypt.c
-@@ -4,6 +4,9 @@
-  * Author: Eric Biggers <ebiggers@google.com>
-  */
- 
-+#ifdef OVERRIDE_SYSTEM_FSCRYPT_ADD_KEY_ARG
-+#  define fscrypt_add_key_arg sys_fscrypt_add_key_arg
-+#endif
- #include "platform_defs.h"
- #include "command.h"
- #include "init.h"
-@@ -99,13 +102,7 @@ struct fscrypt_key_specifier {
- 	} u;
- };
- 
--#define FS_IOC_ADD_ENCRYPTION_KEY		_IOWR('f', 23, struct fscrypt_add_key_arg)
--struct fscrypt_add_key_arg {
--	struct fscrypt_key_specifier key_spec;
--	__u32 raw_size;
--	__u32 __reserved[9];
--	__u8 raw[];
--};
-+/* FS_IOC_ADD_ENCRYPTION_KEY is defined later */
- 
- #define FS_IOC_REMOVE_ENCRYPTION_KEY		_IOWR('f', 24, struct fscrypt_remove_key_arg)
- #define FS_IOC_REMOVE_ENCRYPTION_KEY_ALL_USERS	_IOWR('f', 25, struct fscrypt_remove_key_arg)
-@@ -136,6 +133,26 @@ struct fscrypt_get_key_status_arg {
- 
- #endif /* !FS_IOC_GET_ENCRYPTION_POLICY_EX */
- 
-+/*
-+ * Since the key_id field was added later than struct fscrypt_add_key_arg
-+ * itself, we may need to override the system definition to get that field.
-+ */
-+#if !defined(FS_IOC_ADD_ENCRYPTION_KEY) || \
-+	defined(OVERRIDE_SYSTEM_FSCRYPT_ADD_KEY_ARG)
-+#undef fscrypt_add_key_arg
-+struct fscrypt_add_key_arg {
-+	struct fscrypt_key_specifier key_spec;
-+	__u32 raw_size;
-+	__u32 key_id;
-+	__u32 __reserved[8];
-+	__u8 raw[];
-+};
-+#endif
+diff --git a/tests/btrfs/172 b/tests/btrfs/172
+new file mode 100755
+index 00000000..cae5f623
+--- /dev/null
++++ b/tests/btrfs/172
+@@ -0,0 +1,76 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2020 Facebook.  All Rights Reserved.
++#
++# FS QA Test 172
++#
++# Validate that without no-holes we do not get an i_size that is after a gap in
++# the file extents on disk.  This is fixed by the following patches
++#
++#     btrfs: use the file extent tree infrastructure
++#     btrfs: replace all uses of btrfs_ordered_update_i_size
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
 +
-+#ifndef FS_IOC_ADD_ENCRYPTION_KEY
-+#  define FS_IOC_ADD_ENCRYPTION_KEY		_IOWR('f', 23, struct fscrypt_add_key_arg)
-+#endif
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
 +
- static const struct {
- 	__u8 mode;
- 	const char *name;
-@@ -217,8 +234,9 @@ add_enckey_help(void)
- " 'add_enckey' - add key for v2 policies\n"
- " 'add_enckey -d 0000111122223333' - add key for v1 policies w/ given descriptor\n"
- "\n"
--"The key in binary is read from standard input.\n"
-+"Unless -k is given, the key in binary is read from standard input.\n"
- " -d DESCRIPTOR -- master_key_descriptor\n"
-+" -k KEY_ID -- ID of fscrypt-provisioning key containing the raw key\n"
- "\n"));
- }
- 
-@@ -431,6 +449,21 @@ str2keyspec(const char *str, int policy_version,
- 	return policy_version;
- }
- 
-+static int
-+parse_key_id(const char *arg)
++_cleanup()
 +{
-+	long value;
-+	char *tmp;
-+
-+	value = strtol(arg, &tmp, 0);
-+	if (value <= 0 || value > INT_MAX || tmp == arg || *tmp != '\0') {
-+		fprintf(stderr, _("invalid key ID: %s\n"), arg);
-+		/* 0 is never a valid Linux key ID. */
-+		return 0;
-+	}
-+	return value;
++	cd /
++	rm -f $tmp.*
 +}
 +
- static void
- test_for_v2_policy_support(void)
- {
-@@ -689,13 +722,18 @@ add_enckey_f(int argc, char **argv)
- 
- 	arg->key_spec.type = FSCRYPT_KEY_SPEC_TYPE_IDENTIFIER;
- 
--	while ((c = getopt(argc, argv, "d:")) != EOF) {
-+	while ((c = getopt(argc, argv, "d:k:")) != EOF) {
- 		switch (c) {
- 		case 'd':
- 			arg->key_spec.type = FSCRYPT_KEY_SPEC_TYPE_DESCRIPTOR;
- 			if (!str2keydesc(optarg, arg->key_spec.u.descriptor))
- 				goto out;
- 			break;
-+		case 'k':
-+			arg->key_id = parse_key_id(optarg);
-+			if (arg->key_id == 0)
-+				goto out;
-+			break;
- 		default:
- 			retval = command_usage(&add_enckey_cmd);
- 			goto out;
-@@ -709,21 +747,23 @@ add_enckey_f(int argc, char **argv)
- 		goto out;
- 	}
- 
--	raw_size = read_until_limit_or_eof(STDIN_FILENO, arg->raw,
--					   FSCRYPT_MAX_KEY_SIZE + 1);
--	if (raw_size < 0) {
--		fprintf(stderr, _("Error reading key from stdin: %s\n"),
--			strerror(errno));
--		exitcode = 1;
--		goto out;
--	}
--	if (raw_size > FSCRYPT_MAX_KEY_SIZE) {
--		fprintf(stderr,
--			_("Invalid key; got > FSCRYPT_MAX_KEY_SIZE (%d) bytes on stdin!\n"),
--			FSCRYPT_MAX_KEY_SIZE);
--		goto out;
--	}
--	arg->raw_size = raw_size;
-+	if (arg->key_id == 0) {
-+		raw_size = read_until_limit_or_eof(STDIN_FILENO, arg->raw,
-+						   FSCRYPT_MAX_KEY_SIZE + 1);
-+		if (raw_size < 0) {
-+			fprintf(stderr, _("Error reading key from stdin: %s\n"),
-+				strerror(errno));
-+			exitcode = 1;
-+			goto out;
-+		}
-+		if (raw_size > FSCRYPT_MAX_KEY_SIZE) {
-+			fprintf(stderr,
-+				_("Invalid key; got > FSCRYPT_MAX_KEY_SIZE (%d) bytes on stdin!\n"),
-+				FSCRYPT_MAX_KEY_SIZE);
-+			goto out;
-+		}
-+		arg->raw_size = raw_size;
-+	} /* else, raw key is given via key with ID 'key_id' */
- 
- 	if (ioctl(file->fd, FS_IOC_ADD_ENCRYPTION_KEY, arg) != 0) {
- 		fprintf(stderr, _("Error adding encryption key: %s\n"),
-@@ -859,7 +899,7 @@ encrypt_init(void)
- 
- 	add_enckey_cmd.name = "add_enckey";
- 	add_enckey_cmd.cfunc = add_enckey_f;
--	add_enckey_cmd.args = _("[-d descriptor]");
-+	add_enckey_cmd.args = _("[-d descriptor] [-k key_id]");
- 	add_enckey_cmd.argmin = 0;
- 	add_enckey_cmd.argmax = -1;
- 	add_enckey_cmd.flags = CMD_NOMAP_OK | CMD_FOREIGN_OK;
-diff --git a/m4/package_libcdev.m4 b/m4/package_libcdev.m4
-index 2c0c72ce..adab9bb9 100644
---- a/m4/package_libcdev.m4
-+++ b/m4/package_libcdev.m4
-@@ -278,6 +278,27 @@ AC_DEFUN([AC_NEED_INTERNAL_FSXATTR],
-     AC_SUBST(need_internal_fsxattr)
-   ])
- 
-+#
-+# Check if we need to override the system struct fscrypt_add_key_arg
-+# with the internal definition.  This /only/ happens if the system
-+# actually defines struct fscrypt_add_key_arg /and/ the system
-+# definition is missing certain fields.
-+#
-+AC_DEFUN([AC_NEED_INTERNAL_FSCRYPT_ADD_KEY_ARG],
-+  [
-+    AC_CHECK_TYPE(struct fscrypt_add_key_arg,
-+      [
-+        AC_CHECK_MEMBER(struct fscrypt_add_key_arg.key_id,
-+          ,
-+          need_internal_fscrypt_add_key_arg=yes,
-+          [#include <linux/fs.h>]
-+        )
-+      ],,
-+      [#include <linux/fs.h>]
-+    )
-+    AC_SUBST(need_internal_fscrypt_add_key_arg)
-+  ])
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/dmlogwrites
 +
- #
- # Check if we have a FS_IOC_GETFSMAP ioctl (Linux)
- #
-diff --git a/man/man8/xfs_io.8 b/man/man8/xfs_io.8
-index f5431a8c..b9dcc312 100644
---- a/man/man8/xfs_io.8
-+++ b/man/man8/xfs_io.8
-@@ -749,10 +749,10 @@ Test whether v2 encryption policies are supported.  Prints "supported",
- .RE
- .PD
- .TP
--.BI "add_enckey [ \-d " descriptor " ]"
-+.BI "add_enckey [ \-d " descriptor " ] [ \-k " key_id " ]"
- On filesystems that support encryption, add an encryption key to the filesystem
--containing the currently open file.  The key in binary (typically 64 bytes long)
--is read from standard input.
-+containing the currently open file.  By default, the raw key in binary
-+(typically 64 bytes long) is read from standard input.
- .RS 1.0i
- .PD 0
- .TP 0.4i
-@@ -761,6 +761,10 @@ key descriptor, as a 16-character hex string (8 bytes).  If given, the key will
- be available for use by v1 encryption policies that use this descriptor.
- Otherwise, the key is added as a v2 policy key, and on success the resulting
- "key identifier" will be printed.
-+.TP
-+.BI \-k " key_id"
-+ID of kernel keyring key of type "fscrypt-provisioning".  If given, the raw key
-+will be taken from here rather than from standard input.
- .RE
- .PD
- .TP
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch
++_require_log_writes
++_require_xfs_io_command "sync_range"
++
++_log_writes_init $SCRATCH_DEV
++_log_writes_mkfs "-O ^no-holes" >> $seqres.full 2>&1
++
++# There's not a straightforward way to commit the transaction without also
++# flushing dirty pages, so shorten the commit interval to 1 so we're sure to get
++# a commit with our broken file
++_log_writes_mount -o commit=1
++
++$XFS_IO_PROG -f -c "pwrite 0 5m" $SCRATCH_MNT/file | _filter_xfs_io
++$XFS_IO_PROG -f -c "sync_range -abw 4m 1m" $SCRATCH_MNT/file | _filter_xfs_io
++
++# Now wait for a transaction commit to happen, wait 2x just to be super sure
++sleep 2
++
++_log_writes_unmount
++_log_writes_remove
++
++cur=$(_log_writes_find_next_fua 0)
++echo "cur=$cur" >> $seqres.full
++while [ ! -z "$cur" ]; do
++	_log_writes_replay_log_range $cur $SCRATCH_DEV >> $seqres.full
++
++	# We only care about the fs consistency, so just run fsck, we don't have
++	# to mount the fs to validate it
++	_check_scratch_fs
++
++	cur=$(_log_writes_find_next_fua $(($cur + 1)))
++done
++
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/172.out b/tests/btrfs/172.out
+new file mode 100644
+index 00000000..45051739
+--- /dev/null
++++ b/tests/btrfs/172.out
+@@ -0,0 +1,3 @@
++QA output created by 172
++wrote 5242880/5242880 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 4b64bf8b..53cb3451 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -174,6 +174,7 @@
+ 169 auto quick send
+ 170 auto quick snapshot
+ 171 auto quick qgroup
++172 auto quick log replay
+ 173 auto quick swap
+ 174 auto quick swap
+ 175 auto quick swap volume
 -- 
-2.25.0.341.g760bfbb309-goog
+2.24.1
 
