@@ -2,176 +2,108 @@ Return-Path: <SRS0=N66O=3Z=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C1081C35247
-	for <linux-fstests@archiver.kernel.org>; Wed,  5 Feb 2020 16:23:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A6C23C352A1
+	for <linux-fstests@archiver.kernel.org>; Wed,  5 Feb 2020 23:06:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 920C220730
-	for <linux-fstests@archiver.kernel.org>; Wed,  5 Feb 2020 16:23:57 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="xAkIiemF";
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="BWkqe8Gh"
+	by mail.kernel.org (Postfix) with ESMTP id 86C23214AF
+	for <linux-fstests@archiver.kernel.org>; Wed,  5 Feb 2020 23:06:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726413AbgBEQX5 (ORCPT
+        id S1727762AbgBEXGb (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 5 Feb 2020 11:23:57 -0500
-Received: from aserp2120.oracle.com ([141.146.126.78]:58838 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726957AbgBEQX5 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 5 Feb 2020 11:23:57 -0500
-Received: from pps.filterd (aserp2120.oracle.com [127.0.0.1])
-        by aserp2120.oracle.com (8.16.0.27/8.16.0.27) with SMTP id 015GNfG3055101;
-        Wed, 5 Feb 2020 16:23:55 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
- : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=corp-2020-01-29;
- bh=J/fES2Y5R94gR/eUkZh9IEGoNdWhxMpx8GqM1eCQF0Y=;
- b=xAkIiemFF1QfOTIOCk4xpI5jgTzQX0RezgqIJiFATbsNlQJ3mbToFsin1rhQY3/sB2Oj
- DaiigIi6NZvlNfDDfnvT2GUf2pt2803eColsd6vtFvkwPLIimNZrDeAmRejKOADEDBC/
- 6KvBJhvhpYo+Mz2b5bF8twne999qHId0TlaKgvoym3vP/AhkFJ1i6qTQcGIQlu6slGeH
- h0Ky2AiVFpE8inxxrbSbBxlV4jaMFKYWkUn/YOAVBuRCDHvTICtGNhvtPOnTkmgVA6Wl
- xCR3c8OkcnEf3dywpecDqdll3QcGPZR6d3CuqatCjvh32RWnwo/lk64uwynskvM/+pSc 2w== 
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
- : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=corp-2019-08-05;
- bh=J/fES2Y5R94gR/eUkZh9IEGoNdWhxMpx8GqM1eCQF0Y=;
- b=BWkqe8GhhgnJnFWZwBFUzBtC7QCjs9/KPpfVx9HqUhjDqQSMbwkwY28WulDc3B0nbxqR
- 6XMPE1Zj6HqCElj2e6En3NXFKZhtfiAlOFZC5LBMajJpybeRsiVWVlBn+m2Qo4D1CY3q
- rlOc/EnVb9K/VsidgZReq61HQsQzFpW9XUROM7B5jDgC7p/SdcyMIp+IphncDVcfoFTS
- eassApviR0ricniX/qROqv6oc/GfrP46kkdCXw5BGX/zYybouMWOAv9UU7pUubgZG7ot
- gD75uOCC0pGxChETyrVJfUAWhO3wqBcFOp0ej/8Tzt9ns3gpfrqnOCyn0X0RZeYIHVx3 Dg== 
-Received: from userp3030.oracle.com (userp3030.oracle.com [156.151.31.80])
-        by aserp2120.oracle.com with ESMTP id 2xykbp44jn-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Wed, 05 Feb 2020 16:23:55 +0000
-Received: from pps.filterd (userp3030.oracle.com [127.0.0.1])
-        by userp3030.oracle.com (8.16.0.27/8.16.0.27) with SMTP id 015GNlpw058703;
-        Wed, 5 Feb 2020 16:23:54 GMT
-Received: from userv0121.oracle.com (userv0121.oracle.com [156.151.31.72])
-        by userp3030.oracle.com with ESMTP id 2xymut3ngs-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Wed, 05 Feb 2020 16:23:51 +0000
-Received: from abhmp0002.oracle.com (abhmp0002.oracle.com [141.146.116.8])
-        by userv0121.oracle.com (8.14.4/8.13.8) with ESMTP id 015GNF1w032560;
-        Wed, 5 Feb 2020 16:23:15 GMT
-Received: from localhost (/67.169.218.210)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Wed, 05 Feb 2020 08:23:14 -0800
-Date:   Wed, 5 Feb 2020 08:23:13 -0800
-From:   "Darrick J. Wong" <darrick.wong@oracle.com>
-To:     Amir Goldstein <amir73il@gmail.com>
-Cc:     Eryu Guan <guaneryu@gmail.com>,
-        linux-xfs <linux-xfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>
-Subject: Re: [PATCH 1/2] xfs: refactor calls to xfs_admin
-Message-ID: <20200205162313.GE6869@magnolia>
-References: <158086094707.1990521.17646841467136148296.stgit@magnolia>
- <158086095320.1990521.15734406558551927388.stgit@magnolia>
- <CAOQ4uxjYZGAMXy+PVpyCr9+hiWt7BrmruLgsG7s2w7Z-4pfpAg@mail.gmail.com>
+        Wed, 5 Feb 2020 18:06:31 -0500
+Received: from mail104.syd.optusnet.com.au ([211.29.132.246]:48826 "EHLO
+        mail104.syd.optusnet.com.au" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1727237AbgBEXGb (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 5 Feb 2020 18:06:31 -0500
+Received: from dread.disaster.area (pa49-181-161-120.pa.nsw.optusnet.com.au [49.181.161.120])
+        by mail104.syd.optusnet.com.au (Postfix) with ESMTPS id 14B6F8204F1;
+        Thu,  6 Feb 2020 10:06:27 +1100 (AEDT)
+Received: from dave by dread.disaster.area with local (Exim 4.92.3)
+        (envelope-from <david@fromorbit.com>)
+        id 1izTkY-0006PA-46; Thu, 06 Feb 2020 10:06:26 +1100
+Date:   Thu, 6 Feb 2020 10:06:26 +1100
+From:   Dave Chinner <david@fromorbit.com>
+To:     Jeff Moyer <jmoyer@redhat.com>
+Cc:     linux-fsdevel@vger.kernel.org, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: Re: [PATCH 0/3] fstests: fixes for 64k pages and dax
+Message-ID: <20200205230626.GO20628@dread.disaster.area>
+References: <20200205224818.18707-1-jmoyer@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAOQ4uxjYZGAMXy+PVpyCr9+hiWt7BrmruLgsG7s2w7Z-4pfpAg@mail.gmail.com>
-User-Agent: Mutt/1.9.4 (2018-02-28)
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9522 signatures=668685
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=0 malwarescore=0
- phishscore=0 bulkscore=0 spamscore=0 mlxscore=0 mlxlogscore=999
- adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.0.1-1911140001 definitions=main-2002050124
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9522 signatures=668685
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 priorityscore=1501 malwarescore=0
- suspectscore=0 phishscore=0 bulkscore=0 spamscore=0 clxscore=1015
- lowpriorityscore=0 mlxscore=0 impostorscore=0 mlxlogscore=999 adultscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.0.1-1911140001
- definitions=main-2002050124
+In-Reply-To: <20200205224818.18707-1-jmoyer@redhat.com>
+User-Agent: Mutt/1.10.1 (2018-07-13)
+X-Optus-CM-Score: 0
+X-Optus-CM-Analysis: v=2.3 cv=LYdCFQXi c=1 sm=1 tr=0
+        a=SkgQWeG3jiSQFIjTo4+liA==:117 a=SkgQWeG3jiSQFIjTo4+liA==:17
+        a=jpOVt7BSZ2e4Z31A5e1TngXxSK0=:19 a=kj9zAlcOel0A:10 a=l697ptgUJYAA:10
+        a=VwQbUJbxAAAA:8 a=7-415B0cAAAA:8 a=Hdpg4Cy1Pty9vVzyJowA:9
+        a=CjuIK1q_8ugA:10 a=AjGcO6oz07-iQ99wixmX:22 a=biEYGPWJfzWAr4FL6Ov7:22
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Feb 05, 2020 at 08:35:05AM +0200, Amir Goldstein wrote:
-> On Wed, Feb 5, 2020 at 2:02 AM Darrick J. Wong <darrick.wong@oracle.com> wrote:
-> >
-> > From: Darrick J. Wong <darrick.wong@oracle.com>
-> >
-> > Create a helper to run xfs_admin on the scratch device, then refactor
-> > all tests to use it.
+[cc fstests@vger.kernel.org]
+
+On Wed, Feb 05, 2020 at 05:48:15PM -0500, Jeff Moyer wrote:
+> This set of patches fixes a few false positives I encountered when
+> testing DAX on ppc64le (which has a 64k page size).
 > 
-> all tests... heh overstatement :)
-
-"all tests that use xfs_admin"?
-
-> Maybe say something about how logdev is needed as argument and
-> supported only since recent v5.4 xfsprogs.
-> Does older xfsprogs cope well with the extra argument?
-
-Prior to 5.4, xfs_admin will reject the logdev argument and exit; and
-if you try to work around it by constructing the xfs_db command by hand,
-xfs_db will reject the filesystem because the log device isn't
-specified.
-
-IOWs, prior to 5.4 it just plain didn't work at all.
-
---D
-
-> Thanks,
-> Amir.
+> Patch 1 is actually not specific to non-4k page sizes.  Right now we
+> only test for dax incompatibility in the dm flakey target.  This means
+> that tests that use dm-thin or the snapshot target will still try to
+> run.  Moving the check to _require_dm_target fixes that problem.
 > 
-> >
-> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> > ---
-> >  common/config |    1 +
-> >  common/xfs    |    8 ++++++++
-> >  tests/xfs/287 |    2 +-
-> >  3 files changed, 10 insertions(+), 1 deletion(-)
-> >
-> >
-> > diff --git a/common/config b/common/config
-> > index 9a9c7760..1116cb99 100644
-> > --- a/common/config
-> > +++ b/common/config
-> > @@ -154,6 +154,7 @@ MKSWAP_PROG="$MKSWAP_PROG -f"
-> >  export XFS_LOGPRINT_PROG="$(type -P xfs_logprint)"
-> >  export XFS_REPAIR_PROG="$(type -P xfs_repair)"
-> >  export XFS_DB_PROG="$(type -P xfs_db)"
-> > +export XFS_ADMIN_PROG="$(type -P xfs_admin)"
-> >  export XFS_GROWFS_PROG=$(type -P xfs_growfs)
-> >  export XFS_SPACEMAN_PROG="$(type -P xfs_spaceman)"
-> >  export XFS_SCRUB_PROG="$(type -P xfs_scrub)"
-> > diff --git a/common/xfs b/common/xfs
-> > index 706ddf85..d9a9784f 100644
-> > --- a/common/xfs
-> > +++ b/common/xfs
-> > @@ -218,6 +218,14 @@ _scratch_xfs_db()
-> >         $XFS_DB_PROG "$@" $(_scratch_xfs_db_options)
-> >  }
-> >
-> > +_scratch_xfs_admin()
-> > +{
-> > +       local options=("$SCRATCH_DEV")
-> > +       [ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ] && \
-> > +               options+=("$SCRATCH_LOGDEV")
-> > +       $XFS_ADMIN_PROG "$@" "${options[@]}"
-> > +}
-> > +
-> >  _scratch_xfs_logprint()
-> >  {
-> >         SCRATCH_OPTIONS=""
-> > diff --git a/tests/xfs/287 b/tests/xfs/287
-> > index 8dc754a5..f77ed2f1 100755
-> > --- a/tests/xfs/287
-> > +++ b/tests/xfs/287
-> > @@ -70,7 +70,7 @@ $XFS_IO_PROG -r -c "lsproj" $dir/32bit
-> >  _scratch_unmount
-> >
-> >  # Now, enable projid32bit support by xfs_admin
-> > -xfs_admin -p $SCRATCH_DEV >> $seqres.full 2>&1 || _fail "xfs_admin failed"
-> > +_scratch_xfs_admin -p >> $seqres.full 2>&1 || _fail "xfs_admin failed"
-> >
-> >  # Now mount the fs, 32bit project quotas shall be supported, now
-> >  _qmount_option "pquota"
-> >
+> Patches 2 and 3 get rid of hard coded block/page sizes in the tests.
+> They run just fine on 64k pages and 64k block sizes.
+> 
+> Even after these patches, there are many more tests that fail in the
+> following configuration:
+> 
+> MKFS_OPTIONS="-b size=65536 -m reflink=0" MOUNT_OPTIONS="-o dax"
+> 
+> One class of failures is tests that create a really small file system
+> size.  Some of those tests seem to require the very small size, but
+> others seem like they could live with a slightly bigger size that
+> would then fit the log (the typical failure is a mkfs failure due to
+> not enough blocks for the log).  For the former case, I'm tempted to
+> send patches to _notrun those tests, and for the latter, I'd like to
+> bump the file system sizes up.  300MB seems to be large enough to
+> accommodate the log.  Would folks be opposed to those approaches?
+> 
+> Another class of failure is tests that either hard-code a block size
+> to trigger a specific error case, or that test a multitude of block
+> sizes.  I'd like to send a patch to _notrun those tests if there is
+> a user-specified block size.  That will require parsing the MKFS_OPTIONS
+> based on the fs type, of course.  Is that something that seems
+> reasonable?
+> 
+> I will follow up with a series of patches to implement those changes
+> if there is consensus on the approach.  These first three seemed
+> straight-forward to me, so that's where I'm starting.
+> 
+> Thanks!
+> Jeff
+> 
+> [PATCH 1/3] dax/dm: disable testing on devices that don't support dax
+> [PATCH 2/3] t_mmap_collision: fix hard-coded page size
+> [PATCH 3/3] xfs/300: modify test to work on any fs block size
+
+Hi Jeff,
+
+You probably should be sending fstests patches to
+fstests@vger.kernel.org, otherwise they probably won't get noticed
+by the fstests maintainer...
+
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
