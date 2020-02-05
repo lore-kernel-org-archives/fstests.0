@@ -7,61 +7,62 @@ X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
 	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 84FF3C35249
-	for <linux-fstests@archiver.kernel.org>; Wed,  5 Feb 2020 06:40:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 05A74C35249
+	for <linux-fstests@archiver.kernel.org>; Wed,  5 Feb 2020 06:55:19 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 584A52192A
-	for <linux-fstests@archiver.kernel.org>; Wed,  5 Feb 2020 06:40:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CD74221741
+	for <linux-fstests@archiver.kernel.org>; Wed,  5 Feb 2020 06:55:18 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="bIeVYP9Q"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ltjZNNWX"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725875AbgBEGkr (ORCPT
+        id S1726308AbgBEGzS (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 5 Feb 2020 01:40:47 -0500
-Received: from mail-io1-f68.google.com ([209.85.166.68]:45906 "EHLO
-        mail-io1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725793AbgBEGkr (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 5 Feb 2020 01:40:47 -0500
-Received: by mail-io1-f68.google.com with SMTP id i11so859036ioi.12;
-        Tue, 04 Feb 2020 22:40:46 -0800 (PST)
+        Wed, 5 Feb 2020 01:55:18 -0500
+Received: from mail-il1-f193.google.com ([209.85.166.193]:40724 "EHLO
+        mail-il1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726277AbgBEGzS (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 5 Feb 2020 01:55:18 -0500
+Received: by mail-il1-f193.google.com with SMTP id i7so961451ilr.7;
+        Tue, 04 Feb 2020 22:55:18 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=ps49yErJSGLxuDdumQjkw++0jVSap89fdxSUrxe19J0=;
-        b=bIeVYP9QD9+yi6kH8sAPAGGCN6jtIKBznIinQ3ixnS4h+WM0OkVEXCIwTj4Kw4UB2L
-         /xFAJrgmuVlXiSneeUIV+ZZdGcIU+dNlqUYpm5DlQB5snPBRpZQusf30u7xZpsrxwxfV
-         /FPgRBrqquygD/w3mSWMgNGajM/yJfZaGKPVuvEx84qtDD9lPia8jF+p7Xa1Swkk7Z8q
-         RPVsR8JVIOeBS3sQ5VI48aBHYavN+n055eAq/WVV64scmVW3gu2KJ2HFYLNM4T6ppsfr
-         R5JSByK45ONXCPacSIx/AbGIw1ykw6KnuJK2sJemJgvcnJVXk2LvKayYx/viUChjvbPa
-         UM8w==
+        bh=4AA1F5TWGVsxveJtsuc5HZZRZPRGGdeZZ+73WmC7wtE=;
+        b=ltjZNNWX1hRxH/ymxgCm+t8L3LTwkVp3PjnbB+ZcB2uZMsb50k2hw8E2QNbBpmfmiI
+         I0s5ksV2pIOrKcw+vhm1MxrAY2ix+GmbIRUv8JTs7rLeJchhOnAaNIPAFEHeUPoIKiUF
+         12PE879HODkvAlEAmQdvwZXjkjxritUynE2OxdBiO4uohp6BAD4TLJ2r53qRPV72CFaI
+         7SltJce83fpXPdB6I61eyoAFf2R891VVVAfMlXFOb+a4pJLr+tQuOjXA5C5TQwBCsomP
+         cchRWBtV6rmEepwWXOajTUpp7plIDqFNp5djhkn3Bggnwka9g9tu6My0Q47rGZslynKi
+         3suA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=ps49yErJSGLxuDdumQjkw++0jVSap89fdxSUrxe19J0=;
-        b=lSniGW/f24RxYTqb440CxGpfNw+0DjxEdClPDg4ddjpF8jcfQ+tTNdYULvhgxnLYki
-         /FRVsKNZA2PSk70m0NLnXQ95gu5BvnuosBGo0UiQHtcY8SohQ2905FlM8IwFTFBW6LsM
-         X0Y/ASjyV9sYcwnlGzOxCU1pvFzN32fsCol2IY2u94l7y+1ScHdMGqJAEUWwSUtm/Ebi
-         URm/QSCjmndDFQ9PjwDM7M6DF5K65UziLVFuK4/xmbn8JqAlT+MqIojQE570244V0o+2
-         DEr6IP/94c3ueKcoohdUqAjFUAcoKQYfDlLtTi6vFy0UDrC7OIeAGwUBs/GKTcOKo/dn
-         lszA==
-X-Gm-Message-State: APjAAAUC50G8/pv6vvf39pz7dfc68nBJAKfupoUxxIirCEVqjtqfmfTY
-        3VYDrLd4KMilfhljfaJHYlnjC2WCPGr4oWQsXew=
-X-Google-Smtp-Source: APXvYqw5vC2dY/TnotFfjq/Kzx5GD0Y1NwOa31h5QMSNnkDDBPYInflsxJdDRpzuaX5tiGwM1OKp3mRQXRgX+M4w3UY=
-X-Received: by 2002:a02:81cc:: with SMTP id r12mr26599392jag.93.1580884846619;
- Tue, 04 Feb 2020 22:40:46 -0800 (PST)
+        bh=4AA1F5TWGVsxveJtsuc5HZZRZPRGGdeZZ+73WmC7wtE=;
+        b=SPLLp9Mh5iHeLJT2Ur6uBfn5O1ReIQxceWH0uNq03ozivxVy4wVy3/BkWjpzNTOGWG
+         eJXqKOdqnV+QI8sAd2cX3GbfyihTadvP0Z4PrraCdIiYJ49zwW70M6crvPyR+grxlJJj
+         a03d1QYQfk/EAMpkL/DW2BDEOBrF27DKKSAdaB5zdGC8iq+hCDNnzA/ZPbF+1eyDHEaa
+         g1grqZiNqqfMQDJnb7GsB3rINXWjnOfSHBRV3eY45oO43H/eH24BJLouL4hM5PlgM1xq
+         hvcp0bGFXVbDOBTnAKhK0R9nf9vXVSn2Xz9/XacT7WFtf6ta5wi6pnSlIloMJAaAZiN2
+         LH0g==
+X-Gm-Message-State: APjAAAU6IjTQGjmPmQgTTuyl0U2UwChJnDmpDdy5VKE46elbaEppI2eD
+        I11Bfk0LM0F4szs256feZxdfqt8NTAK8831776k=
+X-Google-Smtp-Source: APXvYqzdljwWOahm5VBi7+srRJXHWl5qbAYsb0csgxnSXsDOW4PKtcMcAt8gY/gmxZkWqvvxByOPZLEsEMIlRXI2n0k=
+X-Received: by 2002:a92:8656:: with SMTP id g83mr25504865ild.9.1580885717689;
+ Tue, 04 Feb 2020 22:55:17 -0800 (PST)
 MIME-Version: 1.0
-References: <158086094707.1990521.17646841467136148296.stgit@magnolia> <158086095935.1990521.3334372807118647101.stgit@magnolia>
-In-Reply-To: <158086095935.1990521.3334372807118647101.stgit@magnolia>
+References: <158086090225.1989378.6869317139530865842.stgit@magnolia> <158086092087.1989378.18220785148122680849.stgit@magnolia>
+In-Reply-To: <158086092087.1989378.18220785148122680849.stgit@magnolia>
 From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Wed, 5 Feb 2020 08:40:35 +0200
-Message-ID: <CAOQ4uxi5i-iTZG7+BgybvS7SQqat94k5jQXUK2LW-9iDf2NgnQ@mail.gmail.com>
-Subject: Re: [PATCH 2/2] xfs: test setting labels with xfs_admin
+Date:   Wed, 5 Feb 2020 08:55:06 +0200
+Message-ID: <CAOQ4uxi7eDjzjxOU=2_w=putAErKTCTNUqJA-JKef3X9LLZOvQ@mail.gmail.com>
+Subject: Re: [PATCH 3/5] generic/402: skip test if xfs_io can't parse the date value
 To:     "Darrick J. Wong" <darrick.wong@oracle.com>
 Cc:     Eryu Guan <guaneryu@gmail.com>,
         linux-xfs <linux-xfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>
+        fstests <fstests@vger.kernel.org>,
+        Deepa Dinamani <deepa.kernel@gmail.com>
 Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
@@ -72,192 +73,57 @@ On Wed, Feb 5, 2020 at 2:02 AM Darrick J. Wong <darrick.wong@oracle.com> wrote:
 >
 > From: Darrick J. Wong <darrick.wong@oracle.com>
 >
-> Test setting filesystem labels with xfs_admin.
+> If xfs_io's utimes command cannot interpret the arguments that are given
+> to it, it will print out "Bad value for [am]time".  Detect when this
+> happens and drop the file out of the test entirely.
+>
+> This is particularly noticeable on 32-bit platforms and the largest
+> timestamp seconds supported by the filesystem is INT_MAX.  In this case,
+> the maximum value we can cram into tv_sec is INT_MAX, and there is no
+> way to actually test setting a timestamp of INT_MAX + 1 to test the
+> clamping.
 >
 > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 > ---
->  tests/xfs/912     |  103 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/912.out |   43 ++++++++++++++++++++++
->  tests/xfs/group   |    1 +
->  3 files changed, 147 insertions(+)
->  create mode 100755 tests/xfs/912
->  create mode 100644 tests/xfs/912.out
+>  tests/generic/402 |   11 ++++++++++-
+>  1 file changed, 10 insertions(+), 1 deletion(-)
 >
 >
-> diff --git a/tests/xfs/912 b/tests/xfs/912
-> new file mode 100755
-> index 00000000..1eef36cd
-> --- /dev/null
-> +++ b/tests/xfs/912
-> @@ -0,0 +1,103 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0-or-later
-> +# Copyright (c) 2020, Oracle and/or its affiliates.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 912
-> +#
-> +# Check that xfs_admin can set and clear filesystem labels offline and online.
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1    # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +       cd /
+> diff --git a/tests/generic/402 b/tests/generic/402
+> index 2a34d127..32988866 100755
+> --- a/tests/generic/402
+> +++ b/tests/generic/402
+> @@ -63,10 +63,19 @@ run_test_individual()
+>         # check if the time needs update
+>         if [ $update_time -eq 1 ]; then
+>                 echo "Updating file: $file to timestamp $timestamp"  >> $seqres.full
+> -               $XFS_IO_PROG -f -c "utimes $timestamp 0 $timestamp 0" $file
+> +               $XFS_IO_PROG -f -c "utimes $timestamp 0 $timestamp 0" $file >> $tmp.utimes 2>&1
 
-odd cleanup.
-I think the standard rm tmp files is needed for in-case common
-helpers generate tmp files.
+Maybe use > instead of >> to be safe.
 
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +
-> +# real QA test starts here
-> +_supported_fs xfs
-> +_supported_os Linux
-> +_require_scratch
-> +_require_xfs_db_command label
-> +_require_xfs_io_command label
-> +grep -q "xfs_io" "$(which xfs_admin)" || \
-> +       _notrun "xfs_admin does not support online label setting of any kind"
+Also I would feel more comfortable if we special case the 0 timestamp
+against being skipped, to be safe that we don't have a silent regression
+in xfs_io or something causing all files to be skipped.
 
-odd test. If it cannot be prettier than than perhaps hide this inside
-a _require helper?
+Otherwise:
 
-> +
-> +rm -f $seqres.full
-> +
-> +echo
-> +echo "Format with label"
-> +_scratch_mkfs -L "label0" > $seqres.full
-> +
-> +echo "Read label offline"
-> +_scratch_xfs_admin -l
-> +
-> +echo "Read label online"
-> +_scratch_mount
-> +_scratch_xfs_admin -l
-> +
-> +echo
-> +echo "Set label offline"
-> +_scratch_unmount
-> +_scratch_xfs_admin -L "label1"
-> +
-> +echo "Read label offline"
-> +_scratch_xfs_admin -l
-> +
-> +echo "Read label online"
-> +_scratch_mount
-> +_scratch_xfs_admin -l
-> +
-> +echo
-> +echo "Set label online"
-> +_scratch_xfs_admin -L "label2"
-> +
-> +echo "Read label online"
-> +_scratch_xfs_admin -l
-> +
-> +echo "Read label offline"
-> +_scratch_unmount
-> +_scratch_xfs_admin -l
-> +
-> +echo
-> +echo "Clear label online"
-> +_scratch_mount
-> +_scratch_xfs_admin -L "--"
-> +
-> +echo "Read label online"
-> +_scratch_xfs_admin -l
-> +
-> +echo "Read label offline"
-> +_scratch_unmount
-> +_scratch_xfs_admin -l
-> +
-> +echo
-> +echo "Set label offline"
-> +_scratch_xfs_admin -L "label3"
-> +
-> +echo "Read label offline"
-> +_scratch_xfs_admin -l
-> +
-> +echo
-> +echo "Clear label offline"
-> +_scratch_xfs_admin -L "--"
-> +
-> +echo "Read label offline"
-> +_scratch_xfs_admin -l
-> +
-> +echo "Read label online"
-> +_scratch_mount
-> +_scratch_xfs_admin -l
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/912.out b/tests/xfs/912.out
-> new file mode 100644
-> index 00000000..186d827f
-> --- /dev/null
-> +++ b/tests/xfs/912.out
-> @@ -0,0 +1,43 @@
-> +QA output created by 912
-> +
-> +Format with label
-> +Read label offline
-> +label = "label0"
-> +Read label online
-> +label = "label0"
-> +
-> +Set label offline
-> +writing all SBs
-> +new label = "label1"
-> +Read label offline
-> +label = "label1"
-> +Read label online
-> +label = "label1"
-> +
-> +Set label online
-> +label = "label2"
-> +Read label online
-> +label = "label2"
-> +Read label offline
-> +label = "label2"
-> +
-> +Clear label online
-> +label = ""
-> +Read label online
-> +label = ""
-> +Read label offline
-> +label = ""
-> +
-> +Set label offline
-> +writing all SBs
-> +new label = "label3"
-> +Read label offline
-> +label = "label3"
-> +
-> +Clear label offline
-> +writing all SBs
-> +new label = ""
-> +Read label offline
-> +label = ""
-> +Read label online
-> +label = ""
-> diff --git a/tests/xfs/group b/tests/xfs/group
-> index edffef9a..898bd9e4 100644
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
-> @@ -512,3 +512,4 @@
->  512 auto quick acl attr
->  747 auto quick scrub
->  748 auto quick scrub
-> +912 auto quick label
+Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+
+
+> +               cat $tmp.utimes >> $seqres.full
+> +               if grep -q "Bad value" "$tmp.utimes"; then
+> +                       rm -f $file $tmp.utimes
+> +                       return
+> +               fi
+> +               cat $tmp.utimes
+> +               rm $tmp.utimes
+>                 if [ $? -ne 0 ]; then
+>                         echo "Failed to update times on $file" | tee -a $seqres.full
+>                 fi
+> +       else
+> +               test -f $file || return
+>         fi
+>
+>         tsclamp=$((timestamp<tsmin?tsmin:timestamp>tsmax?tsmax:timestamp))
 >
