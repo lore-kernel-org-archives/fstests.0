@@ -2,93 +2,162 @@ Return-Path: <SRS0=N66O=3Z=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham
+X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 24E48C35247
-	for <linux-fstests@archiver.kernel.org>; Wed,  5 Feb 2020 00:04:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E3A07C35249
+	for <linux-fstests@archiver.kernel.org>; Wed,  5 Feb 2020 04:39:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id EBA632085B
-	for <linux-fstests@archiver.kernel.org>; Wed,  5 Feb 2020 00:04:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A5D06217F4
+	for <linux-fstests@archiver.kernel.org>; Wed,  5 Feb 2020 04:39:14 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="MEBa7R/z"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ATLgBS77"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727537AbgBEAEb (ORCPT
+        id S1727861AbgBEEjO (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 4 Feb 2020 19:04:31 -0500
-Received: from aserp2120.oracle.com ([141.146.126.78]:60254 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727483AbgBEAEb (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 4 Feb 2020 19:04:31 -0500
-Received: from pps.filterd (aserp2120.oracle.com [127.0.0.1])
-        by aserp2120.oracle.com (8.16.0.27/8.16.0.27) with SMTP id 015038Mv079907;
-        Wed, 5 Feb 2020 00:04:29 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=subject : from : to :
- cc : date : message-id : mime-version : content-type :
- content-transfer-encoding; s=corp-2019-08-05;
- bh=nNXUApq8BrcddsbTTSAPRSIfVhIZ7r+xOqXKz+G78o8=;
- b=MEBa7R/zDPzvBW1m0dU5579yBlUNGFIeY++nA15HAlB8wGcIb2dg7HyuVsji1slFB5Hn
- rPMRzDJAgZYaiiu0Wv2DyYkwY4h93fvpoRToLe+dJrXsFWakK8Ik9xdsAeU+aLjcMa8A
- CZuXew7EEw0zJGWDE26nRJo5kTn4FpfgJ7TmLHcngDuq3mjMn6nk09h++1oKgZx48r/2
- bCXuJuulheRV0yNe3OzB+3e73q7rJSCeML4lF5Bi1uApMmdGVHnwcfNr8tTCrasow45g
- /rGAhBKttZzpM2HpNq1zOBXxIscqJ/GTxS8wxS0k3Ga9zXfB8UfnhIZpNm1lJLSayLT6 ag== 
-Received: from userp3020.oracle.com (userp3020.oracle.com [156.151.31.79])
-        by aserp2120.oracle.com with ESMTP id 2xyhkfg8ju-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Wed, 05 Feb 2020 00:04:29 +0000
-Received: from pps.filterd (userp3020.oracle.com [127.0.0.1])
-        by userp3020.oracle.com (8.16.0.27/8.16.0.27) with SMTP id 014NxFgK036601;
-        Wed, 5 Feb 2020 00:02:29 GMT
-Received: from userv0121.oracle.com (userv0121.oracle.com [156.151.31.72])
-        by userp3020.oracle.com with ESMTP id 2xyhmqwbcu-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Wed, 05 Feb 2020 00:02:28 +0000
-Received: from abhmp0004.oracle.com (abhmp0004.oracle.com [141.146.116.10])
-        by userv0121.oracle.com (8.14.4/8.13.8) with ESMTP id 01502S2k022043;
-        Wed, 5 Feb 2020 00:02:28 GMT
-Received: from localhost (/10.159.250.52)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Tue, 04 Feb 2020 16:02:27 -0800
-Subject: [PATCH 0/2] xfs_admin: unify online/offline fs label setting
-From:   "Darrick J. Wong" <darrick.wong@oracle.com>
-To:     guaneryu@gmail.com, darrick.wong@oracle.com
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Date:   Tue, 04 Feb 2020 16:02:27 -0800
-Message-ID: <158086094707.1990521.17646841467136148296.stgit@magnolia>
-User-Agent: StGit/0.17.1-dirty
+        Tue, 4 Feb 2020 23:39:14 -0500
+Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:44277 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1727879AbgBEEjO (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 4 Feb 2020 23:39:14 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1580877552;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=o/FSRn5ZgAGskL5aURpHxUHlcFZjDhPUKviiGyjuhIU=;
+        b=ATLgBS77Xf6hm9Ebjy/YMiLfzhSsG6NPV8sc5FHS1z9uiK6T9lOAE1U7bCS8wwCtemzz0h
+        NW2/zDc0U2jxgWJXHdBUmJSsFTtWcxKTW1HT6pMpx917r4GvS7VEINpgx+eNN4RzP2DXRa
+        wr18JtOScOFPGPLAmSkJLbVpDJwtov4=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-236-8UfdUb0nMQGsWY1CMSCuOQ-1; Tue, 04 Feb 2020 23:39:08 -0500
+X-MC-Unique: 8UfdUb0nMQGsWY1CMSCuOQ-1
+Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.phx2.redhat.com [10.5.11.23])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id BF3BFDB23;
+        Wed,  5 Feb 2020 04:39:07 +0000 (UTC)
+Received: from localhost (dhcp-12-196.nay.redhat.com [10.66.12.196])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 3232C212C;
+        Wed,  5 Feb 2020 04:39:06 +0000 (UTC)
+Date:   Wed, 5 Feb 2020 12:39:05 +0800
+From:   Murphy Zhou <xzhou@redhat.com>
+To:     Eric Biggers <ebiggers@kernel.org>
+Cc:     fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org,
+        keyrings@vger.kernel.org, Murphy Zhou <xzhou@redhat.com>
+Subject: Re: [PATCH] generic/581: try to avoid flakiness in keys quota test
+Message-ID: <20200205043905.xpp5rniupbi4j7qa@xzhoux.usersys.redhat.com>
+References: <20200129004251.133747-1-ebiggers@kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9521 signatures=668685
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=0 malwarescore=0
- phishscore=0 bulkscore=0 spamscore=0 mlxscore=0 mlxlogscore=843
- adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.0.1-2001150001 definitions=main-2002040164
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9521 signatures=668685
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 priorityscore=1501 malwarescore=0
- suspectscore=0 phishscore=0 bulkscore=0 spamscore=0 clxscore=1015
- lowpriorityscore=0 mlxscore=0 impostorscore=0 mlxlogscore=896 adultscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.0.1-2001150001
- definitions=main-2002040165
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20200129004251.133747-1-ebiggers@kernel.org>
+X-Scanned-By: MIMEDefang 2.84 on 10.5.11.23
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Hi all,
+On Tue, Jan 28, 2020 at 04:42:51PM -0800, Eric Biggers wrote:
+> From: Eric Biggers <ebiggers@google.com>
+> 
+> generic/581 passes for me, but Murphy Zhou reported that it started
+> failing for him.  The part that failed is the part that sets the key
+> quota to the fsgqa user's current number of keys plus 5, then tries to
+> add 6 filesystem encryption keys as the fsgqa user.  Adding the 6th key
+> unexpectedly succeeded.
 
-Unify the online and offline label setting code paths in xfs_admin so
-that one program can handle both.
+Ack. This patch fixed generic/581 failure on my side.
 
-If you're going to start using this mess, you probably ought to just
-pull from my git trees, which are linked below.
+Thanks Eric!
 
-This is an extraordinary way to destroy everything.  Enjoy!
-Comments and questions are, as always, welcome.
+Murphy
 
---D
+> 
+> What I think is happening is that because the kernel's keys subsystem
+> garbage-collects keys asynchronously, the quota may be freed up later
+> than expected after removing fscrypt keys.  Thus the test is flaky.
+> 
+> It would be nice to fix this in the kernel, but unfortunately there
+> doesn't seem to be an easy fix, and the keys subsystem has always worked
+> this way.  And it seems unlikely to cause real-world problems, as the
+> keys quota really just exists to prevent denial-of-service attacks.
+> 
+> So, for now just try to make the test more reliable by:
+> 
+> (1) Reduce the scope of the modified keys quota to just the part of the
+>     test that needs it.
+> (2) Before getting the current number of keys for the purpose of setting
+>     the quota, wait for any invalidated keys to be garbage-collected.
+> 
+> Tested with a kernel that has a 1 second sleep hacked into the beginning
+> of key_garbage_collector().  With that, this test fails before this
+> patch and passes afterwards.
+> 
+> Reported-by: Murphy Zhou <xzhou@redhat.com>
+> Signed-off-by: Eric Biggers <ebiggers@google.com>
+> ---
+>  tests/generic/581 | 29 +++++++++++++++++++++--------
+>  1 file changed, 21 insertions(+), 8 deletions(-)
+> 
+> diff --git a/tests/generic/581 b/tests/generic/581
+> index 89aa03c2..bc49eadc 100755
+> --- a/tests/generic/581
+> +++ b/tests/generic/581
+> @@ -45,14 +45,6 @@ _require_scratch_encryption -v 2
+>  _scratch_mkfs_encrypted &>> $seqres.full
+>  _scratch_mount
+>  
+> -# Set the fsgqa user's key quota to their current number of keys plus 5.
+> -orig_keys=$(_user_do "awk '/^[[:space:]]*$(id -u fsgqa):/{print \$4}' /proc/key-users | cut -d/ -f1")
+> -: ${orig_keys:=0}
+> -echo "orig_keys=$orig_keys" >> $seqres.full
+> -orig_maxkeys=$(</proc/sys/kernel/keys/maxkeys)
+> -keys_to_add=5
+> -echo $((orig_keys + keys_to_add)) > /proc/sys/kernel/keys/maxkeys
+> -
+>  dir=$SCRATCH_MNT/dir
+>  
+>  raw_key=""
+> @@ -98,6 +90,24 @@ _user_do_rm_enckey $SCRATCH_MNT $keyid
+>  
+>  _scratch_cycle_mount	# Clear all keys
+>  
+> +# Wait for any invalidated keys to be garbage-collected.
+> +i=0
+> +while grep -E -q '^[0-9a-f]+ [^ ]*i[^ ]*' /proc/keys; do
+> +	if ((++i >= 20)); then
+> +		echo "Timed out waiting for invalidated keys to be GC'ed" >> $seqres.full
+> +		break
+> +	fi
+> +	sleep 0.5
+> +done
+> +
+> +# Set the user key quota to the fsgqa user's current number of keys plus 5.
+> +orig_keys=$(_user_do "awk '/^[[:space:]]*$(id -u fsgqa):/{print \$4}' /proc/key-users | cut -d/ -f1")
+> +: ${orig_keys:=0}
+> +echo "orig_keys=$orig_keys" >> $seqres.full
+> +orig_maxkeys=$(</proc/sys/kernel/keys/maxkeys)
+> +keys_to_add=5
+> +echo $((orig_keys + keys_to_add)) > /proc/sys/kernel/keys/maxkeys
+> +
+>  echo
+>  echo "# Testing user key quota"
+>  for i in `seq $((keys_to_add + 1))`; do
+> @@ -106,6 +116,9 @@ for i in `seq $((keys_to_add + 1))`; do
+>  	    | sed 's/ with identifier .*$//'
+>  done
+>  
+> +# Restore the original key quota.
+> +echo "$orig_maxkeys" > /proc/sys/kernel/keys/maxkeys
+> +
+>  rm -rf $dir
+>  echo
+>  _user_do "mkdir $dir"
+> -- 
+> 2.25.0.341.g760bfbb309-goog
+> 
 
-fstests git tree:
-https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=online-label-setting
