@@ -2,162 +2,139 @@ Return-Path: <SRS0=N66O=3Z=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E3A07C35249
-	for <linux-fstests@archiver.kernel.org>; Wed,  5 Feb 2020 04:39:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BC6A2C35249
+	for <linux-fstests@archiver.kernel.org>; Wed,  5 Feb 2020 06:35:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id A5D06217F4
-	for <linux-fstests@archiver.kernel.org>; Wed,  5 Feb 2020 04:39:14 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8A02D20659
+	for <linux-fstests@archiver.kernel.org>; Wed,  5 Feb 2020 06:35:17 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ATLgBS77"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Cp2Zmdm1"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727861AbgBEEjO (ORCPT
+        id S1725875AbgBEGfR (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 4 Feb 2020 23:39:14 -0500
-Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:44277 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1727879AbgBEEjO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 4 Feb 2020 23:39:14 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1580877552;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=o/FSRn5ZgAGskL5aURpHxUHlcFZjDhPUKviiGyjuhIU=;
-        b=ATLgBS77Xf6hm9Ebjy/YMiLfzhSsG6NPV8sc5FHS1z9uiK6T9lOAE1U7bCS8wwCtemzz0h
-        NW2/zDc0U2jxgWJXHdBUmJSsFTtWcxKTW1HT6pMpx917r4GvS7VEINpgx+eNN4RzP2DXRa
-        wr18JtOScOFPGPLAmSkJLbVpDJwtov4=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-236-8UfdUb0nMQGsWY1CMSCuOQ-1; Tue, 04 Feb 2020 23:39:08 -0500
-X-MC-Unique: 8UfdUb0nMQGsWY1CMSCuOQ-1
-Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id BF3BFDB23;
-        Wed,  5 Feb 2020 04:39:07 +0000 (UTC)
-Received: from localhost (dhcp-12-196.nay.redhat.com [10.66.12.196])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 3232C212C;
-        Wed,  5 Feb 2020 04:39:06 +0000 (UTC)
-Date:   Wed, 5 Feb 2020 12:39:05 +0800
-From:   Murphy Zhou <xzhou@redhat.com>
-To:     Eric Biggers <ebiggers@kernel.org>
-Cc:     fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org,
-        keyrings@vger.kernel.org, Murphy Zhou <xzhou@redhat.com>
-Subject: Re: [PATCH] generic/581: try to avoid flakiness in keys quota test
-Message-ID: <20200205043905.xpp5rniupbi4j7qa@xzhoux.usersys.redhat.com>
-References: <20200129004251.133747-1-ebiggers@kernel.org>
+        Wed, 5 Feb 2020 01:35:17 -0500
+Received: from mail-io1-f67.google.com ([209.85.166.67]:34766 "EHLO
+        mail-io1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725793AbgBEGfQ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 5 Feb 2020 01:35:16 -0500
+Received: by mail-io1-f67.google.com with SMTP id z193so901283iof.1;
+        Tue, 04 Feb 2020 22:35:16 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=2W/TQUS2r3/q1tQU8U4tb9k4OFU4GnATVNsAlJ6eoSo=;
+        b=Cp2Zmdm1LNXBVV6ZQw6XAgoCeYO4F/VL+PZMkzeu0h0clY+JckTyFE22rT6+0Q0fhj
+         SdF5MNIrI7gEMjZyg7IPNxEiqFXTdtMShs49p64gnSYnSvQCOkFgbzhVMwplXeOr1iwd
+         7w48dBajCnM0E7j5QxMlD/gRXwDzWUzu5Tt1y/xGmMfg2XSyLQmMFK02teuf+Dk85i7q
+         sjA7IBIwp6CF4SJICiOuWagYfXcaKjcYNzasowRPTGnGjqqBmVmIuHmksPhBqf6Pn2hr
+         mLVHCRFMWBoGoZTaLea5n2F8Qh4nUP7BGRp1acM/kiwJFukjMaOczfgERVtwBCSKudkN
+         6yYQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=2W/TQUS2r3/q1tQU8U4tb9k4OFU4GnATVNsAlJ6eoSo=;
+        b=TuYN2Y4Ze1VXEBMjcG5VowGFBC2HbHDB/qkXexmHwzyG2RwSc3RlohTOdp40zhVU9L
+         uyav2lv4c3fiOmLVjUrWWoogKUGaGGkI8OuRaTiZIZoRWeWWt/hyAt5ub1A0TEUZyXFM
+         kZAXJO6u09R8hMmdO5MHi0H4mCDveK3E+9FTSFxYDC7eqGOCHD3QARwa/TwJESBzIiNL
+         nNd+EBSkRJwC/flHZzN4GjxA3hot5WPSsGwt4ZdYiXnM08EXVyfqbX40w5nXWSDJH4Rq
+         1rxYWFgxPCkLk5HiZnvvjEMSSl6zdYQH0dp5c4QOQ+APj+eEs9Yj7vQPjHHemhnqFXZ5
+         ou4g==
+X-Gm-Message-State: APjAAAWCNAXVSkBtrfoNzrd0nsSBO+8x1Nm1QATKAHN9JPw3OBUpfbUD
+        4oj+3pbhoWi2ulVTfCOuXHvsZArQ+e3XZxclO0w=
+X-Google-Smtp-Source: APXvYqwhuovg4oyH0u5e/JySsRezJvoRXfkDd2Ro+HQk3YMsephL5vt4JshyXfF8KwxrcKPx36UoWH6u4qeq+myks8c=
+X-Received: by 2002:a6b:f214:: with SMTP id q20mr28089826ioh.137.1580884516151;
+ Tue, 04 Feb 2020 22:35:16 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200129004251.133747-1-ebiggers@kernel.org>
-X-Scanned-By: MIMEDefang 2.84 on 10.5.11.23
+References: <158086094707.1990521.17646841467136148296.stgit@magnolia> <158086095320.1990521.15734406558551927388.stgit@magnolia>
+In-Reply-To: <158086095320.1990521.15734406558551927388.stgit@magnolia>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Wed, 5 Feb 2020 08:35:05 +0200
+Message-ID: <CAOQ4uxjYZGAMXy+PVpyCr9+hiWt7BrmruLgsG7s2w7Z-4pfpAg@mail.gmail.com>
+Subject: Re: [PATCH 1/2] xfs: refactor calls to xfs_admin
+To:     "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc:     Eryu Guan <guaneryu@gmail.com>,
+        linux-xfs <linux-xfs@vger.kernel.org>,
+        fstests <fstests@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Jan 28, 2020 at 04:42:51PM -0800, Eric Biggers wrote:
-> From: Eric Biggers <ebiggers@google.com>
-> 
-> generic/581 passes for me, but Murphy Zhou reported that it started
-> failing for him.  The part that failed is the part that sets the key
-> quota to the fsgqa user's current number of keys plus 5, then tries to
-> add 6 filesystem encryption keys as the fsgqa user.  Adding the 6th key
-> unexpectedly succeeded.
+On Wed, Feb 5, 2020 at 2:02 AM Darrick J. Wong <darrick.wong@oracle.com> wrote:
+>
+> From: Darrick J. Wong <darrick.wong@oracle.com>
+>
+> Create a helper to run xfs_admin on the scratch device, then refactor
+> all tests to use it.
 
-Ack. This patch fixed generic/581 failure on my side.
+all tests... heh overstatement :)
 
-Thanks Eric!
+Maybe say something about how logdev is needed as argument and
+supported only since recent v5.4 xfsprogs.
+Does older xfsprogs cope well with the extra argument?
 
-Murphy
+Thanks,
+Amir.
 
-> 
-> What I think is happening is that because the kernel's keys subsystem
-> garbage-collects keys asynchronously, the quota may be freed up later
-> than expected after removing fscrypt keys.  Thus the test is flaky.
-> 
-> It would be nice to fix this in the kernel, but unfortunately there
-> doesn't seem to be an easy fix, and the keys subsystem has always worked
-> this way.  And it seems unlikely to cause real-world problems, as the
-> keys quota really just exists to prevent denial-of-service attacks.
-> 
-> So, for now just try to make the test more reliable by:
-> 
-> (1) Reduce the scope of the modified keys quota to just the part of the
->     test that needs it.
-> (2) Before getting the current number of keys for the purpose of setting
->     the quota, wait for any invalidated keys to be garbage-collected.
-> 
-> Tested with a kernel that has a 1 second sleep hacked into the beginning
-> of key_garbage_collector().  With that, this test fails before this
-> patch and passes afterwards.
-> 
-> Reported-by: Murphy Zhou <xzhou@redhat.com>
-> Signed-off-by: Eric Biggers <ebiggers@google.com>
+>
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 > ---
->  tests/generic/581 | 29 +++++++++++++++++++++--------
->  1 file changed, 21 insertions(+), 8 deletions(-)
-> 
-> diff --git a/tests/generic/581 b/tests/generic/581
-> index 89aa03c2..bc49eadc 100755
-> --- a/tests/generic/581
-> +++ b/tests/generic/581
-> @@ -45,14 +45,6 @@ _require_scratch_encryption -v 2
->  _scratch_mkfs_encrypted &>> $seqres.full
->  _scratch_mount
->  
-> -# Set the fsgqa user's key quota to their current number of keys plus 5.
-> -orig_keys=$(_user_do "awk '/^[[:space:]]*$(id -u fsgqa):/{print \$4}' /proc/key-users | cut -d/ -f1")
-> -: ${orig_keys:=0}
-> -echo "orig_keys=$orig_keys" >> $seqres.full
-> -orig_maxkeys=$(</proc/sys/kernel/keys/maxkeys)
-> -keys_to_add=5
-> -echo $((orig_keys + keys_to_add)) > /proc/sys/kernel/keys/maxkeys
-> -
->  dir=$SCRATCH_MNT/dir
->  
->  raw_key=""
-> @@ -98,6 +90,24 @@ _user_do_rm_enckey $SCRATCH_MNT $keyid
->  
->  _scratch_cycle_mount	# Clear all keys
->  
-> +# Wait for any invalidated keys to be garbage-collected.
-> +i=0
-> +while grep -E -q '^[0-9a-f]+ [^ ]*i[^ ]*' /proc/keys; do
-> +	if ((++i >= 20)); then
-> +		echo "Timed out waiting for invalidated keys to be GC'ed" >> $seqres.full
-> +		break
-> +	fi
-> +	sleep 0.5
-> +done
+>  common/config |    1 +
+>  common/xfs    |    8 ++++++++
+>  tests/xfs/287 |    2 +-
+>  3 files changed, 10 insertions(+), 1 deletion(-)
+>
+>
+> diff --git a/common/config b/common/config
+> index 9a9c7760..1116cb99 100644
+> --- a/common/config
+> +++ b/common/config
+> @@ -154,6 +154,7 @@ MKSWAP_PROG="$MKSWAP_PROG -f"
+>  export XFS_LOGPRINT_PROG="$(type -P xfs_logprint)"
+>  export XFS_REPAIR_PROG="$(type -P xfs_repair)"
+>  export XFS_DB_PROG="$(type -P xfs_db)"
+> +export XFS_ADMIN_PROG="$(type -P xfs_admin)"
+>  export XFS_GROWFS_PROG=$(type -P xfs_growfs)
+>  export XFS_SPACEMAN_PROG="$(type -P xfs_spaceman)"
+>  export XFS_SCRUB_PROG="$(type -P xfs_scrub)"
+> diff --git a/common/xfs b/common/xfs
+> index 706ddf85..d9a9784f 100644
+> --- a/common/xfs
+> +++ b/common/xfs
+> @@ -218,6 +218,14 @@ _scratch_xfs_db()
+>         $XFS_DB_PROG "$@" $(_scratch_xfs_db_options)
+>  }
+>
+> +_scratch_xfs_admin()
+> +{
+> +       local options=("$SCRATCH_DEV")
+> +       [ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ] && \
+> +               options+=("$SCRATCH_LOGDEV")
+> +       $XFS_ADMIN_PROG "$@" "${options[@]}"
+> +}
 > +
-> +# Set the user key quota to the fsgqa user's current number of keys plus 5.
-> +orig_keys=$(_user_do "awk '/^[[:space:]]*$(id -u fsgqa):/{print \$4}' /proc/key-users | cut -d/ -f1")
-> +: ${orig_keys:=0}
-> +echo "orig_keys=$orig_keys" >> $seqres.full
-> +orig_maxkeys=$(</proc/sys/kernel/keys/maxkeys)
-> +keys_to_add=5
-> +echo $((orig_keys + keys_to_add)) > /proc/sys/kernel/keys/maxkeys
-> +
->  echo
->  echo "# Testing user key quota"
->  for i in `seq $((keys_to_add + 1))`; do
-> @@ -106,6 +116,9 @@ for i in `seq $((keys_to_add + 1))`; do
->  	    | sed 's/ with identifier .*$//'
->  done
->  
-> +# Restore the original key quota.
-> +echo "$orig_maxkeys" > /proc/sys/kernel/keys/maxkeys
-> +
->  rm -rf $dir
->  echo
->  _user_do "mkdir $dir"
-> -- 
-> 2.25.0.341.g760bfbb309-goog
-> 
-
+>  _scratch_xfs_logprint()
+>  {
+>         SCRATCH_OPTIONS=""
+> diff --git a/tests/xfs/287 b/tests/xfs/287
+> index 8dc754a5..f77ed2f1 100755
+> --- a/tests/xfs/287
+> +++ b/tests/xfs/287
+> @@ -70,7 +70,7 @@ $XFS_IO_PROG -r -c "lsproj" $dir/32bit
+>  _scratch_unmount
+>
+>  # Now, enable projid32bit support by xfs_admin
+> -xfs_admin -p $SCRATCH_DEV >> $seqres.full 2>&1 || _fail "xfs_admin failed"
+> +_scratch_xfs_admin -p >> $seqres.full 2>&1 || _fail "xfs_admin failed"
+>
+>  # Now mount the fs, 32bit project quotas shall be supported, now
+>  _qmount_option "pquota"
+>
