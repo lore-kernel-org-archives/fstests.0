@@ -2,108 +2,176 @@ Return-Path: <SRS0=N66O=3Z=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D6490C33CA1
-	for <linux-fstests@archiver.kernel.org>; Wed,  5 Feb 2020 09:13:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C1081C35247
+	for <linux-fstests@archiver.kernel.org>; Wed,  5 Feb 2020 16:23:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id AA44521741
-	for <linux-fstests@archiver.kernel.org>; Wed,  5 Feb 2020 09:13:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 920C220730
+	for <linux-fstests@archiver.kernel.org>; Wed,  5 Feb 2020 16:23:57 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="N+DcHxnW"
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="xAkIiemF";
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="BWkqe8Gh"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727070AbgBEJNy (ORCPT
+        id S1726413AbgBEQX5 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 5 Feb 2020 04:13:54 -0500
-Received: from mail-pg1-f170.google.com ([209.85.215.170]:46662 "EHLO
-        mail-pg1-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727068AbgBEJNx (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 5 Feb 2020 04:13:53 -0500
-Received: by mail-pg1-f170.google.com with SMTP id z124so640278pgb.13;
-        Wed, 05 Feb 2020 01:13:53 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=date:from:to:subject:message-id:mime-version:content-disposition;
-        bh=BfYP/sEy4/fJVwSiC+e7+jkNA60RhSADybG7LX07YSI=;
-        b=N+DcHxnW2BJxY4co+tn82iKDNsynY1J/dWiGjcFnFPHvS4NIPuTLtRkDet0sfoO437
-         02IplSiSBRdqD6MuFtYvOzhc2SCbQLRf49EG9wW0NwGWOAbd8n1gt+RyaM4VZ24c8/xn
-         cWFN7ll+ErY2V3LyfYOk8iLpm/ePc75lNtgfE2E55idxLL6xZZmyx1A21mh03m27kLgd
-         lMHeECqNpCTwuIcQs8QJDDFlYGJ21SY5JM1uVs1dY0TZjqLkCkT4dA2G4xiMYDBN8te8
-         DLM2kMOAly8dE1+vyLHCJxahGwMC/aiS9EvtaJ9KjilWkuYxDYtRaZ0wb8jc78OzLpZE
-         ChjA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:subject:message-id:mime-version
-         :content-disposition;
-        bh=BfYP/sEy4/fJVwSiC+e7+jkNA60RhSADybG7LX07YSI=;
-        b=M1o7J+LQqeSUZ4WIyZhLsxFH1vBY9cU+DTHfNgvP236lb2VBdx3OE7zvgMZsOBw3Uq
-         QcEQvhWci0zQz4TZhG2+5ZX7MvCMIq23YpwURsBuQV+dkmeLiQjAgPtBeTaWcGCzujai
-         irJDg4Terg9bq2pGny9PXEZ0zx/ZalHaXI+FZWYY/f7QOk14jDlaQwEqfvn8GImpybdL
-         UzouD6vsxQR3ickkZHlCS/sz4EPCQvp/Jb/3zROCBOU9RpdBRVaQ5j5/uUTxYg2FPZuJ
-         P+VEXURt8HpxM8A6EGoDluQbr/wfYRFMsmIM+e9j4iRU82la25FcpbCcgquPDHFQsDxM
-         xrQg==
-X-Gm-Message-State: APjAAAWmh+Ii1l2TFciR24iPCpbtaBka9mTQclXjitpD42uZK+wptOdi
-        Ow5xX9jE6X7PTEx8pgEEcLoBcX60
-X-Google-Smtp-Source: APXvYqy8qXK5+bPfJ+6P9Wbjk+87I50cF81xoOfrU5Z7peu0sFm+qA8fPCkimotMO+rk/Dw94m2h9A==
-X-Received: by 2002:a63:f551:: with SMTP id e17mr34932469pgk.162.1580894032684;
-        Wed, 05 Feb 2020 01:13:52 -0800 (PST)
-Received: from localhost ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id x10sm28081925pfi.180.2020.02.05.01.13.51
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 05 Feb 2020 01:13:51 -0800 (PST)
-Date:   Wed, 5 Feb 2020 17:13:44 +0800
-From:   Murphy Zhou <jencce.kernel@gmail.com>
-To:     linux-ext4@vger.kernel.org, fstests@vger.kernel.org
-Subject: ext4 dio RWF_NOWAIT change
-Message-ID: <20200205091344.u5c3nnblezzh5xgb@xzhoux.usersys.redhat.com>
+        Wed, 5 Feb 2020 11:23:57 -0500
+Received: from aserp2120.oracle.com ([141.146.126.78]:58838 "EHLO
+        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726957AbgBEQX5 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 5 Feb 2020 11:23:57 -0500
+Received: from pps.filterd (aserp2120.oracle.com [127.0.0.1])
+        by aserp2120.oracle.com (8.16.0.27/8.16.0.27) with SMTP id 015GNfG3055101;
+        Wed, 5 Feb 2020 16:23:55 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
+ : subject : message-id : references : mime-version : content-type :
+ in-reply-to; s=corp-2020-01-29;
+ bh=J/fES2Y5R94gR/eUkZh9IEGoNdWhxMpx8GqM1eCQF0Y=;
+ b=xAkIiemFF1QfOTIOCk4xpI5jgTzQX0RezgqIJiFATbsNlQJ3mbToFsin1rhQY3/sB2Oj
+ DaiigIi6NZvlNfDDfnvT2GUf2pt2803eColsd6vtFvkwPLIimNZrDeAmRejKOADEDBC/
+ 6KvBJhvhpYo+Mz2b5bF8twne999qHId0TlaKgvoym3vP/AhkFJ1i6qTQcGIQlu6slGeH
+ h0Ky2AiVFpE8inxxrbSbBxlV4jaMFKYWkUn/YOAVBuRCDHvTICtGNhvtPOnTkmgVA6Wl
+ xCR3c8OkcnEf3dywpecDqdll3QcGPZR6d3CuqatCjvh32RWnwo/lk64uwynskvM/+pSc 2w== 
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
+ : subject : message-id : references : mime-version : content-type :
+ in-reply-to; s=corp-2019-08-05;
+ bh=J/fES2Y5R94gR/eUkZh9IEGoNdWhxMpx8GqM1eCQF0Y=;
+ b=BWkqe8GhhgnJnFWZwBFUzBtC7QCjs9/KPpfVx9HqUhjDqQSMbwkwY28WulDc3B0nbxqR
+ 6XMPE1Zj6HqCElj2e6En3NXFKZhtfiAlOFZC5LBMajJpybeRsiVWVlBn+m2Qo4D1CY3q
+ rlOc/EnVb9K/VsidgZReq61HQsQzFpW9XUROM7B5jDgC7p/SdcyMIp+IphncDVcfoFTS
+ eassApviR0ricniX/qROqv6oc/GfrP46kkdCXw5BGX/zYybouMWOAv9UU7pUubgZG7ot
+ gD75uOCC0pGxChETyrVJfUAWhO3wqBcFOp0ej/8Tzt9ns3gpfrqnOCyn0X0RZeYIHVx3 Dg== 
+Received: from userp3030.oracle.com (userp3030.oracle.com [156.151.31.80])
+        by aserp2120.oracle.com with ESMTP id 2xykbp44jn-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Wed, 05 Feb 2020 16:23:55 +0000
+Received: from pps.filterd (userp3030.oracle.com [127.0.0.1])
+        by userp3030.oracle.com (8.16.0.27/8.16.0.27) with SMTP id 015GNlpw058703;
+        Wed, 5 Feb 2020 16:23:54 GMT
+Received: from userv0121.oracle.com (userv0121.oracle.com [156.151.31.72])
+        by userp3030.oracle.com with ESMTP id 2xymut3ngs-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Wed, 05 Feb 2020 16:23:51 +0000
+Received: from abhmp0002.oracle.com (abhmp0002.oracle.com [141.146.116.8])
+        by userv0121.oracle.com (8.14.4/8.13.8) with ESMTP id 015GNF1w032560;
+        Wed, 5 Feb 2020 16:23:15 GMT
+Received: from localhost (/67.169.218.210)
+        by default (Oracle Beehive Gateway v4.0)
+        with ESMTP ; Wed, 05 Feb 2020 08:23:14 -0800
+Date:   Wed, 5 Feb 2020 08:23:13 -0800
+From:   "Darrick J. Wong" <darrick.wong@oracle.com>
+To:     Amir Goldstein <amir73il@gmail.com>
+Cc:     Eryu Guan <guaneryu@gmail.com>,
+        linux-xfs <linux-xfs@vger.kernel.org>,
+        fstests <fstests@vger.kernel.org>
+Subject: Re: [PATCH 1/2] xfs: refactor calls to xfs_admin
+Message-ID: <20200205162313.GE6869@magnolia>
+References: <158086094707.1990521.17646841467136148296.stgit@magnolia>
+ <158086095320.1990521.15734406558551927388.stgit@magnolia>
+ <CAOQ4uxjYZGAMXy+PVpyCr9+hiWt7BrmruLgsG7s2w7Z-4pfpAg@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <CAOQ4uxjYZGAMXy+PVpyCr9+hiWt7BrmruLgsG7s2w7Z-4pfpAg@mail.gmail.com>
+User-Agent: Mutt/1.9.4 (2018-02-28)
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9522 signatures=668685
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=0 malwarescore=0
+ phishscore=0 bulkscore=0 spamscore=0 mlxscore=0 mlxlogscore=999
+ adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.0.1-1911140001 definitions=main-2002050124
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9522 signatures=668685
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 priorityscore=1501 malwarescore=0
+ suspectscore=0 phishscore=0 bulkscore=0 spamscore=0 clxscore=1015
+ lowpriorityscore=0 mlxscore=0 impostorscore=0 mlxlogscore=999 adultscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.0.1-1911140001
+ definitions=main-2002050124
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Hi,
+On Wed, Feb 05, 2020 at 08:35:05AM +0200, Amir Goldstein wrote:
+> On Wed, Feb 5, 2020 at 2:02 AM Darrick J. Wong <darrick.wong@oracle.com> wrote:
+> >
+> > From: Darrick J. Wong <darrick.wong@oracle.com>
+> >
+> > Create a helper to run xfs_admin on the scratch device, then refactor
+> > all tests to use it.
+> 
+> all tests... heh overstatement :)
 
-Kernel commit 378f32bab3714f04c4e0c3aee4129f6703805550
-Author: Matthew Bobrowski <mbobrowski@mbobrowski.org>
-Date:   Tue Nov 5 23:02:39 2019 +1100
+"all tests that use xfs_admin"?
 
-    ext4: introduce direct I/O write using iomap infrastructure
+> Maybe say something about how logdev is needed as argument and
+> supported only since recent v5.4 xfsprogs.
+> Does older xfsprogs cope well with the extra argument?
 
+Prior to 5.4, xfs_admin will reject the logdev argument and exit; and
+if you try to work around it by constructing the xfs_db command by hand,
+xfs_db will reject the filesystem because the log device isn't
+specified.
 
-Changed the logic of dio+RWF_NOWAIT
+IOWs, prior to 5.4 it just plain didn't work at all.
 
-from:
+--D
 
--       if (!inode_trylock(inode)) {
--               if (iocb->ki_flags & IOCB_NOWAIT)
--                       return -EAGAIN;
--               inode_lock(inode);
--       }
-
-
-to:
-
-+       if (iocb->ki_flags & IOCB_NOWAIT) {
-+               if (!inode_trylock(inode))
-+                       return -EAGAIN;
-+       } else {
-+               inode_lock(inode);
-+       }
-
-
-fstests generic/471 expecet EAGAIN on this situation, so it started to
-fail since than.
-
-The current logic is similar with other filesystems, but only ext4 fails
-on geneirc/471.
-
-Any thoughts how to fix this?
-
-Thanks,
-Murphy
+> Thanks,
+> Amir.
+> 
+> >
+> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > ---
+> >  common/config |    1 +
+> >  common/xfs    |    8 ++++++++
+> >  tests/xfs/287 |    2 +-
+> >  3 files changed, 10 insertions(+), 1 deletion(-)
+> >
+> >
+> > diff --git a/common/config b/common/config
+> > index 9a9c7760..1116cb99 100644
+> > --- a/common/config
+> > +++ b/common/config
+> > @@ -154,6 +154,7 @@ MKSWAP_PROG="$MKSWAP_PROG -f"
+> >  export XFS_LOGPRINT_PROG="$(type -P xfs_logprint)"
+> >  export XFS_REPAIR_PROG="$(type -P xfs_repair)"
+> >  export XFS_DB_PROG="$(type -P xfs_db)"
+> > +export XFS_ADMIN_PROG="$(type -P xfs_admin)"
+> >  export XFS_GROWFS_PROG=$(type -P xfs_growfs)
+> >  export XFS_SPACEMAN_PROG="$(type -P xfs_spaceman)"
+> >  export XFS_SCRUB_PROG="$(type -P xfs_scrub)"
+> > diff --git a/common/xfs b/common/xfs
+> > index 706ddf85..d9a9784f 100644
+> > --- a/common/xfs
+> > +++ b/common/xfs
+> > @@ -218,6 +218,14 @@ _scratch_xfs_db()
+> >         $XFS_DB_PROG "$@" $(_scratch_xfs_db_options)
+> >  }
+> >
+> > +_scratch_xfs_admin()
+> > +{
+> > +       local options=("$SCRATCH_DEV")
+> > +       [ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ] && \
+> > +               options+=("$SCRATCH_LOGDEV")
+> > +       $XFS_ADMIN_PROG "$@" "${options[@]}"
+> > +}
+> > +
+> >  _scratch_xfs_logprint()
+> >  {
+> >         SCRATCH_OPTIONS=""
+> > diff --git a/tests/xfs/287 b/tests/xfs/287
+> > index 8dc754a5..f77ed2f1 100755
+> > --- a/tests/xfs/287
+> > +++ b/tests/xfs/287
+> > @@ -70,7 +70,7 @@ $XFS_IO_PROG -r -c "lsproj" $dir/32bit
+> >  _scratch_unmount
+> >
+> >  # Now, enable projid32bit support by xfs_admin
+> > -xfs_admin -p $SCRATCH_DEV >> $seqres.full 2>&1 || _fail "xfs_admin failed"
+> > +_scratch_xfs_admin -p >> $seqres.full 2>&1 || _fail "xfs_admin failed"
+> >
+> >  # Now mount the fs, 32bit project quotas shall be supported, now
+> >  _qmount_option "pquota"
+> >
