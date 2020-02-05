@@ -2,128 +2,108 @@ Return-Path: <SRS0=N66O=3Z=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 05A74C35249
-	for <linux-fstests@archiver.kernel.org>; Wed,  5 Feb 2020 06:55:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D6490C33CA1
+	for <linux-fstests@archiver.kernel.org>; Wed,  5 Feb 2020 09:13:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id CD74221741
-	for <linux-fstests@archiver.kernel.org>; Wed,  5 Feb 2020 06:55:18 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AA44521741
+	for <linux-fstests@archiver.kernel.org>; Wed,  5 Feb 2020 09:13:54 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ltjZNNWX"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="N+DcHxnW"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726308AbgBEGzS (ORCPT
+        id S1727070AbgBEJNy (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 5 Feb 2020 01:55:18 -0500
-Received: from mail-il1-f193.google.com ([209.85.166.193]:40724 "EHLO
-        mail-il1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726277AbgBEGzS (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 5 Feb 2020 01:55:18 -0500
-Received: by mail-il1-f193.google.com with SMTP id i7so961451ilr.7;
-        Tue, 04 Feb 2020 22:55:18 -0800 (PST)
+        Wed, 5 Feb 2020 04:13:54 -0500
+Received: from mail-pg1-f170.google.com ([209.85.215.170]:46662 "EHLO
+        mail-pg1-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727068AbgBEJNx (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 5 Feb 2020 04:13:53 -0500
+Received: by mail-pg1-f170.google.com with SMTP id z124so640278pgb.13;
+        Wed, 05 Feb 2020 01:13:53 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=4AA1F5TWGVsxveJtsuc5HZZRZPRGGdeZZ+73WmC7wtE=;
-        b=ltjZNNWX1hRxH/ymxgCm+t8L3LTwkVp3PjnbB+ZcB2uZMsb50k2hw8E2QNbBpmfmiI
-         I0s5ksV2pIOrKcw+vhm1MxrAY2ix+GmbIRUv8JTs7rLeJchhOnAaNIPAFEHeUPoIKiUF
-         12PE879HODkvAlEAmQdvwZXjkjxritUynE2OxdBiO4uohp6BAD4TLJ2r53qRPV72CFaI
-         7SltJce83fpXPdB6I61eyoAFf2R891VVVAfMlXFOb+a4pJLr+tQuOjXA5C5TQwBCsomP
-         cchRWBtV6rmEepwWXOajTUpp7plIDqFNp5djhkn3Bggnwka9g9tu6My0Q47rGZslynKi
-         3suA==
+        h=date:from:to:subject:message-id:mime-version:content-disposition;
+        bh=BfYP/sEy4/fJVwSiC+e7+jkNA60RhSADybG7LX07YSI=;
+        b=N+DcHxnW2BJxY4co+tn82iKDNsynY1J/dWiGjcFnFPHvS4NIPuTLtRkDet0sfoO437
+         02IplSiSBRdqD6MuFtYvOzhc2SCbQLRf49EG9wW0NwGWOAbd8n1gt+RyaM4VZ24c8/xn
+         cWFN7ll+ErY2V3LyfYOk8iLpm/ePc75lNtgfE2E55idxLL6xZZmyx1A21mh03m27kLgd
+         lMHeECqNpCTwuIcQs8QJDDFlYGJ21SY5JM1uVs1dY0TZjqLkCkT4dA2G4xiMYDBN8te8
+         DLM2kMOAly8dE1+vyLHCJxahGwMC/aiS9EvtaJ9KjilWkuYxDYtRaZ0wb8jc78OzLpZE
+         ChjA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=4AA1F5TWGVsxveJtsuc5HZZRZPRGGdeZZ+73WmC7wtE=;
-        b=SPLLp9Mh5iHeLJT2Ur6uBfn5O1ReIQxceWH0uNq03ozivxVy4wVy3/BkWjpzNTOGWG
-         eJXqKOdqnV+QI8sAd2cX3GbfyihTadvP0Z4PrraCdIiYJ49zwW70M6crvPyR+grxlJJj
-         a03d1QYQfk/EAMpkL/DW2BDEOBrF27DKKSAdaB5zdGC8iq+hCDNnzA/ZPbF+1eyDHEaa
-         g1grqZiNqqfMQDJnb7GsB3rINXWjnOfSHBRV3eY45oO43H/eH24BJLouL4hM5PlgM1xq
-         hvcp0bGFXVbDOBTnAKhK0R9nf9vXVSn2Xz9/XacT7WFtf6ta5wi6pnSlIloMJAaAZiN2
-         LH0g==
-X-Gm-Message-State: APjAAAU6IjTQGjmPmQgTTuyl0U2UwChJnDmpDdy5VKE46elbaEppI2eD
-        I11Bfk0LM0F4szs256feZxdfqt8NTAK8831776k=
-X-Google-Smtp-Source: APXvYqzdljwWOahm5VBi7+srRJXHWl5qbAYsb0csgxnSXsDOW4PKtcMcAt8gY/gmxZkWqvvxByOPZLEsEMIlRXI2n0k=
-X-Received: by 2002:a92:8656:: with SMTP id g83mr25504865ild.9.1580885717689;
- Tue, 04 Feb 2020 22:55:17 -0800 (PST)
+        h=x-gm-message-state:date:from:to:subject:message-id:mime-version
+         :content-disposition;
+        bh=BfYP/sEy4/fJVwSiC+e7+jkNA60RhSADybG7LX07YSI=;
+        b=M1o7J+LQqeSUZ4WIyZhLsxFH1vBY9cU+DTHfNgvP236lb2VBdx3OE7zvgMZsOBw3Uq
+         QcEQvhWci0zQz4TZhG2+5ZX7MvCMIq23YpwURsBuQV+dkmeLiQjAgPtBeTaWcGCzujai
+         irJDg4Terg9bq2pGny9PXEZ0zx/ZalHaXI+FZWYY/f7QOk14jDlaQwEqfvn8GImpybdL
+         UzouD6vsxQR3ickkZHlCS/sz4EPCQvp/Jb/3zROCBOU9RpdBRVaQ5j5/uUTxYg2FPZuJ
+         P+VEXURt8HpxM8A6EGoDluQbr/wfYRFMsmIM+e9j4iRU82la25FcpbCcgquPDHFQsDxM
+         xrQg==
+X-Gm-Message-State: APjAAAWmh+Ii1l2TFciR24iPCpbtaBka9mTQclXjitpD42uZK+wptOdi
+        Ow5xX9jE6X7PTEx8pgEEcLoBcX60
+X-Google-Smtp-Source: APXvYqy8qXK5+bPfJ+6P9Wbjk+87I50cF81xoOfrU5Z7peu0sFm+qA8fPCkimotMO+rk/Dw94m2h9A==
+X-Received: by 2002:a63:f551:: with SMTP id e17mr34932469pgk.162.1580894032684;
+        Wed, 05 Feb 2020 01:13:52 -0800 (PST)
+Received: from localhost ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id x10sm28081925pfi.180.2020.02.05.01.13.51
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 05 Feb 2020 01:13:51 -0800 (PST)
+Date:   Wed, 5 Feb 2020 17:13:44 +0800
+From:   Murphy Zhou <jencce.kernel@gmail.com>
+To:     linux-ext4@vger.kernel.org, fstests@vger.kernel.org
+Subject: ext4 dio RWF_NOWAIT change
+Message-ID: <20200205091344.u5c3nnblezzh5xgb@xzhoux.usersys.redhat.com>
 MIME-Version: 1.0
-References: <158086090225.1989378.6869317139530865842.stgit@magnolia> <158086092087.1989378.18220785148122680849.stgit@magnolia>
-In-Reply-To: <158086092087.1989378.18220785148122680849.stgit@magnolia>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Wed, 5 Feb 2020 08:55:06 +0200
-Message-ID: <CAOQ4uxi7eDjzjxOU=2_w=putAErKTCTNUqJA-JKef3X9LLZOvQ@mail.gmail.com>
-Subject: Re: [PATCH 3/5] generic/402: skip test if xfs_io can't parse the date value
-To:     "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc:     Eryu Guan <guaneryu@gmail.com>,
-        linux-xfs <linux-xfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>,
-        Deepa Dinamani <deepa.kernel@gmail.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Feb 5, 2020 at 2:02 AM Darrick J. Wong <darrick.wong@oracle.com> wrote:
->
-> From: Darrick J. Wong <darrick.wong@oracle.com>
->
-> If xfs_io's utimes command cannot interpret the arguments that are given
-> to it, it will print out "Bad value for [am]time".  Detect when this
-> happens and drop the file out of the test entirely.
->
-> This is particularly noticeable on 32-bit platforms and the largest
-> timestamp seconds supported by the filesystem is INT_MAX.  In this case,
-> the maximum value we can cram into tv_sec is INT_MAX, and there is no
-> way to actually test setting a timestamp of INT_MAX + 1 to test the
-> clamping.
->
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> ---
->  tests/generic/402 |   11 ++++++++++-
->  1 file changed, 10 insertions(+), 1 deletion(-)
->
->
-> diff --git a/tests/generic/402 b/tests/generic/402
-> index 2a34d127..32988866 100755
-> --- a/tests/generic/402
-> +++ b/tests/generic/402
-> @@ -63,10 +63,19 @@ run_test_individual()
->         # check if the time needs update
->         if [ $update_time -eq 1 ]; then
->                 echo "Updating file: $file to timestamp $timestamp"  >> $seqres.full
-> -               $XFS_IO_PROG -f -c "utimes $timestamp 0 $timestamp 0" $file
-> +               $XFS_IO_PROG -f -c "utimes $timestamp 0 $timestamp 0" $file >> $tmp.utimes 2>&1
+Hi,
 
-Maybe use > instead of >> to be safe.
+Kernel commit 378f32bab3714f04c4e0c3aee4129f6703805550
+Author: Matthew Bobrowski <mbobrowski@mbobrowski.org>
+Date:   Tue Nov 5 23:02:39 2019 +1100
 
-Also I would feel more comfortable if we special case the 0 timestamp
-against being skipped, to be safe that we don't have a silent regression
-in xfs_io or something causing all files to be skipped.
-
-Otherwise:
-
-Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+    ext4: introduce direct I/O write using iomap infrastructure
 
 
-> +               cat $tmp.utimes >> $seqres.full
-> +               if grep -q "Bad value" "$tmp.utimes"; then
-> +                       rm -f $file $tmp.utimes
-> +                       return
-> +               fi
-> +               cat $tmp.utimes
-> +               rm $tmp.utimes
->                 if [ $? -ne 0 ]; then
->                         echo "Failed to update times on $file" | tee -a $seqres.full
->                 fi
-> +       else
-> +               test -f $file || return
->         fi
->
->         tsclamp=$((timestamp<tsmin?tsmin:timestamp>tsmax?tsmax:timestamp))
->
+Changed the logic of dio+RWF_NOWAIT
+
+from:
+
+-       if (!inode_trylock(inode)) {
+-               if (iocb->ki_flags & IOCB_NOWAIT)
+-                       return -EAGAIN;
+-               inode_lock(inode);
+-       }
+
+
+to:
+
++       if (iocb->ki_flags & IOCB_NOWAIT) {
++               if (!inode_trylock(inode))
++                       return -EAGAIN;
++       } else {
++               inode_lock(inode);
++       }
+
+
+fstests generic/471 expecet EAGAIN on this situation, so it started to
+fail since than.
+
+The current logic is similar with other filesystems, but only ext4 fails
+on geneirc/471.
+
+Any thoughts how to fix this?
+
+Thanks,
+Murphy
