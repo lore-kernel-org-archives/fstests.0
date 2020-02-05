@@ -1,219 +1,107 @@
-Return-Path: <SRS0=2WCJ=3Y=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=N66O=3Z=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A97F1C3524B
-	for <linux-fstests@archiver.kernel.org>; Tue,  4 Feb 2020 17:00:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8DA69C35247
+	for <linux-fstests@archiver.kernel.org>; Wed,  5 Feb 2020 00:01:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 7D29020674
-	for <linux-fstests@archiver.kernel.org>; Tue,  4 Feb 2020 17:00:42 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5F69F214AF
+	for <linux-fstests@archiver.kernel.org>; Wed,  5 Feb 2020 00:01:53 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="VhrHYpxH"
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="YNchd+7u"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727358AbgBDRAm (ORCPT
+        id S1727664AbgBEABx (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 4 Feb 2020 12:00:42 -0500
-Received: from mail-ua1-f68.google.com ([209.85.222.68]:41185 "EHLO
-        mail-ua1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727310AbgBDRAm (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 4 Feb 2020 12:00:42 -0500
-Received: by mail-ua1-f68.google.com with SMTP id f7so6994202uaa.8;
-        Tue, 04 Feb 2020 09:00:39 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:reply-to:from:date:message-id
-         :subject:to:cc:content-transfer-encoding;
-        bh=Y3Gu57aTqRvDmHSkxeoVWh8nA1QeUVJELfh/b5I4Brg=;
-        b=VhrHYpxH2WFKjfBgWdVGKxFEjk6OCHRY9n3cT3Rq5O0xEG0G05lAe8rAci/M77ptf8
-         io2089x7ljFTQts47RXwKlZZmbpqjHE7Mkxj6fRqp5Q3bwsJZoVzFbRtcgMZusQycgLA
-         APB864QbPSdDThbSxNrYEEslTkwB2ZAIGWD80Avfhm/Je17TKsa/RRPSD9cV7liMiJHW
-         u0h0hFMx+Wy8+ZaJ2mSdUajIX+R1YuKut9YTTI+MykBrDc+zqGV8DS0xbC4k2Eh8zLCM
-         7DiXli3wd6rfpJgjvhfEHnzltVeYdDNoXDgEtrSgCVnbTLKtdfDsSD9IH4V/vsrEvtCh
-         VazA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:reply-to
-         :from:date:message-id:subject:to:cc:content-transfer-encoding;
-        bh=Y3Gu57aTqRvDmHSkxeoVWh8nA1QeUVJELfh/b5I4Brg=;
-        b=dtBscBqzt2wgvHY8Io6hNn4RRC5L8Qme3zgV6jFwTK1ceZxSKaQg54r08cVnE49vX0
-         13PYuLZiWoYsTiUlyGGeOKzx8jQKD6v+YsN2+vI/ygD7GN6bTL9xIbeB2nnZ65HzX62X
-         YSyEY4jhdasCW0sfdLNlIKYuo9nvh8hreYWGVs19oLAzUH5EbmNpDB+EsEz8X/s06SKi
-         UfX0o8DlA/JfaFJbTF9KD1hySbbIIZF+1sH0kra2Wump2CZnyaEW9gNn5e031QkNPLDV
-         yc5rdqN0/JkZFgTxh2B+bKEwNs3Z/Jo0IR7HIr+3GAZ8coea3qnVP3sD31ZE5nI6RTc8
-         SOfQ==
-X-Gm-Message-State: APjAAAWR6nMTZKDY3sw4/u9PNqnU+gf4uzLIiEgikqWU7+wv6QlabSvf
-        HQepMpbkeNicR6Shhv+5Rd7bNx1VI0HWWLgPpLvwK3vw
-X-Google-Smtp-Source: APXvYqwOFufUYy74IerdGdQ9QqO0kPZ07+YmrMrZW27YwVg1saHG+gzil11tGcnM0D/6U0xb8JtrXMIuunQ8sTCrFFk=
-X-Received: by 2002:ab0:724c:: with SMTP id d12mr18469254uap.0.1580835638832;
- Tue, 04 Feb 2020 09:00:38 -0800 (PST)
+        Tue, 4 Feb 2020 19:01:53 -0500
+Received: from userp2120.oracle.com ([156.151.31.85]:42398 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727534AbgBEABw (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 4 Feb 2020 19:01:52 -0500
+Received: from pps.filterd (userp2120.oracle.com [127.0.0.1])
+        by userp2120.oracle.com (8.16.0.27/8.16.0.27) with SMTP id 014NwqQP086013;
+        Wed, 5 Feb 2020 00:01:51 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=subject : from : to :
+ cc : date : message-id : in-reply-to : references : mime-version :
+ content-type : content-transfer-encoding; s=corp-2019-08-05;
+ bh=yoHjzEoLeU4OqrWJ4cCJO0a5dvQ9kLQmXeRaDfXK/vo=;
+ b=YNchd+7ui8SReqXT0AuG+GrzwXkdzfufU5luZy5uCG6scDHrzWQBopEoa3DMylsIeGs/
+ bpLdo2SsZ9dDgjPTpZv+tJuL++P3qMzU5RRg6OXFf9bIQfUSRsMhx1vA6MabwI3cz3ww
+ cTre5PoHeZD5zCtrvG2+NnJi/uzGhYINe/XWRb5ljq1fDQ4/M0LxJFj2jEdxg0aoir+F
+ nMPTWx68eKatRlYbUE21UsAhVxCcYnMAtnMhLNV1AgwOkO1kJmTv6cQNER34h/KyX+k7
+ 60+2FlYEBBu+rX1L0/FxtHowRf1QGbd6a3PTM7IKkaCdtKia1fxM0hv5WneTa08CQ1OR Sw== 
+Received: from userp3030.oracle.com (userp3030.oracle.com [156.151.31.80])
+        by userp2120.oracle.com with ESMTP id 2xyhkf88a1-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Wed, 05 Feb 2020 00:01:50 +0000
+Received: from pps.filterd (userp3030.oracle.com [127.0.0.1])
+        by userp3030.oracle.com (8.16.0.27/8.16.0.27) with SMTP id 014NwrJ1059200;
+        Wed, 5 Feb 2020 00:01:50 GMT
+Received: from aserv0121.oracle.com (aserv0121.oracle.com [141.146.126.235])
+        by userp3030.oracle.com with ESMTP id 2xyhmq3gmu-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Wed, 05 Feb 2020 00:01:50 +0000
+Received: from abhmp0006.oracle.com (abhmp0006.oracle.com [141.146.116.12])
+        by aserv0121.oracle.com (8.14.4/8.13.8) with ESMTP id 01501nwr022436;
+        Wed, 5 Feb 2020 00:01:49 GMT
+Received: from localhost (/10.159.250.52)
+        by default (Oracle Beehive Gateway v4.0)
+        with ESMTP ; Tue, 04 Feb 2020 16:01:49 -0800
+Subject: [PATCH 1/5] xfs/449: filter out "Discarding..." from output
+From:   "Darrick J. Wong" <darrick.wong@oracle.com>
+To:     guaneryu@gmail.com, darrick.wong@oracle.com
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Date:   Tue, 04 Feb 2020 16:01:48 -0800
+Message-ID: <158086090849.1989378.625300470019425718.stgit@magnolia>
+In-Reply-To: <158086090225.1989378.6869317139530865842.stgit@magnolia>
+References: <158086090225.1989378.6869317139530865842.stgit@magnolia>
+User-Agent: StGit/0.17.1-dirty
 MIME-Version: 1.0
-References: <20200204143759.697376-1-josef@toxicpanda.com>
-In-Reply-To: <20200204143759.697376-1-josef@toxicpanda.com>
-Reply-To: fdmanana@gmail.com
-From:   Filipe Manana <fdmanana@gmail.com>
-Date:   Tue, 4 Feb 2020 17:00:25 +0000
-Message-ID: <CAL3q7H7S2amma2OWGVujPM-jdLcor4zb5suXWsa_LHrwL-x8DA@mail.gmail.com>
-Subject: Re: [PATCH][v2] xfstest: add a test for the btrfs file extent gap issue
-To:     Josef Bacik <josef@toxicpanda.com>
-Cc:     kernel-team@fb.com, linux-btrfs <linux-btrfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9521 signatures=668685
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=0 malwarescore=0
+ phishscore=0 bulkscore=0 spamscore=0 mlxscore=0 mlxlogscore=999
+ adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.0.1-2001150001 definitions=main-2002040164
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9521 signatures=668685
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 priorityscore=1501 malwarescore=0
+ suspectscore=0 phishscore=0 bulkscore=0 spamscore=0 clxscore=1015
+ lowpriorityscore=0 mlxscore=0 impostorscore=0 mlxlogscore=999 adultscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.0.1-2001150001
+ definitions=main-2002040164
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Feb 4, 2020 at 2:39 PM Josef Bacik <josef@toxicpanda.com> wrote:
->
-> This is a test to validate that we're not adjusting up i_size before we
-> have the appropriate file extents on disk.  We had a problem where
-> i_size would be adjusted up without a contiguous range of file extents,
-> which isn't ok without a special option enabled.
->
-> Signed-off-by: Josef Bacik <josef@toxicpanda.com>
+From: Darrick J. Wong <darrick.wong@oracle.com>
 
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
+xfsprogs 5.4 prints "Discarding..." if the disk supports the trim
+command.  Filter this out of the output because xfs_info and friends
+won't print that out.
 
-Thanks.
-
-> ---
-> v1->v2:
-> - adjusted the commit interval time to make the test shorter
-> - adjusted the write range so we didn't get tripped up by btrfs's delallo=
-c
->   behavior
-> - integrated all of Filipe's suggestions
->
->  tests/btrfs/172     | 76 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/172.out |  3 ++
->  tests/btrfs/group   |  1 +
->  3 files changed, 80 insertions(+)
->  create mode 100755 tests/btrfs/172
->  create mode 100644 tests/btrfs/172.out
->
-> diff --git a/tests/btrfs/172 b/tests/btrfs/172
-> new file mode 100755
-> index 00000000..cae5f623
-> --- /dev/null
-> +++ b/tests/btrfs/172
-> @@ -0,0 +1,76 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2020 Facebook.  All Rights Reserved.
-> +#
-> +# FS QA Test 172
-> +#
-> +# Validate that without no-holes we do not get an i_size that is after a=
- gap in
-> +# the file extents on disk.  This is fixed by the following patches
-> +#
-> +#     btrfs: use the file extent tree infrastructure
-> +#     btrfs: replace all uses of btrfs_ordered_update_i_size
-> +#
-> +seq=3D`basename $0`
-> +seqres=3D$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=3D`pwd`
-> +tmp=3D/tmp/$$
-> +status=3D1       # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +       cd /
-> +       rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/dmlogwrites
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs btrfs
-> +_supported_os Linux
-> +_require_scratch
-> +_require_log_writes
-> +_require_xfs_io_command "sync_range"
-> +
-> +_log_writes_init $SCRATCH_DEV
-> +_log_writes_mkfs "-O ^no-holes" >> $seqres.full 2>&1
-> +
-> +# There's not a straightforward way to commit the transaction without al=
-so
-> +# flushing dirty pages, so shorten the commit interval to 1 so we're sur=
-e to get
-> +# a commit with our broken file
-> +_log_writes_mount -o commit=3D1
-> +
-> +$XFS_IO_PROG -f -c "pwrite 0 5m" $SCRATCH_MNT/file | _filter_xfs_io
-> +$XFS_IO_PROG -f -c "sync_range -abw 4m 1m" $SCRATCH_MNT/file | _filter_x=
-fs_io
-> +
-> +# Now wait for a transaction commit to happen, wait 2x just to be super =
-sure
-> +sleep 2
-> +
-> +_log_writes_unmount
-> +_log_writes_remove
-> +
-> +cur=3D$(_log_writes_find_next_fua 0)
-> +echo "cur=3D$cur" >> $seqres.full
-> +while [ ! -z "$cur" ]; do
-> +       _log_writes_replay_log_range $cur $SCRATCH_DEV >> $seqres.full
-> +
-> +       # We only care about the fs consistency, so just run fsck, we don=
-'t have
-> +       # to mount the fs to validate it
-> +       _check_scratch_fs
-> +
-> +       cur=3D$(_log_writes_find_next_fua $(($cur + 1)))
-> +done
-> +
-> +# success, all done
-> +status=3D0
-> +exit
-> diff --git a/tests/btrfs/172.out b/tests/btrfs/172.out
-> new file mode 100644
-> index 00000000..45051739
-> --- /dev/null
-> +++ b/tests/btrfs/172.out
-> @@ -0,0 +1,3 @@
-> +QA output created by 172
-> +wrote 5242880/5242880 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> diff --git a/tests/btrfs/group b/tests/btrfs/group
-> index 4b64bf8b..53cb3451 100644
-> --- a/tests/btrfs/group
-> +++ b/tests/btrfs/group
-> @@ -174,6 +174,7 @@
->  169 auto quick send
->  170 auto quick snapshot
->  171 auto quick qgroup
-> +172 auto quick log replay
->  173 auto quick swap
->  174 auto quick swap
->  175 auto quick swap volume
-> --
-> 2.24.1
->
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+---
+ tests/xfs/449 |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 
---=20
-Filipe David Manana,
+diff --git a/tests/xfs/449 b/tests/xfs/449
+index 7aae1545..83c3c493 100755
+--- a/tests/xfs/449
++++ b/tests/xfs/449
+@@ -39,7 +39,7 @@ _require_scratch_nocheck
+ _require_xfs_spaceman_command "info"
+ _require_command "$XFS_GROWFS_PROG" xfs_growfs
+ 
+-_scratch_mkfs > $tmp.mkfs
++_scratch_mkfs | sed -e '/Discarding/d' > $tmp.mkfs
+ echo MKFS >> $seqres.full
+ cat $tmp.mkfs >> $seqres.full
+ 
 
-=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
- right.=E2=80=9D
