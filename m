@@ -1,109 +1,97 @@
-Return-Path: <SRS0=N66O=3Z=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=YiqY=32=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A6C23C352A1
-	for <linux-fstests@archiver.kernel.org>; Wed,  5 Feb 2020 23:06:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AED55C2D0B1
+	for <linux-fstests@archiver.kernel.org>; Thu,  6 Feb 2020 04:34:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 86C23214AF
-	for <linux-fstests@archiver.kernel.org>; Wed,  5 Feb 2020 23:06:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 81C9B214AF
+	for <linux-fstests@archiver.kernel.org>; Thu,  6 Feb 2020 04:34:17 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="F4gNvF/g"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727762AbgBEXGb (ORCPT
+        id S1727731AbgBFEeR (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 5 Feb 2020 18:06:31 -0500
-Received: from mail104.syd.optusnet.com.au ([211.29.132.246]:48826 "EHLO
-        mail104.syd.optusnet.com.au" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1727237AbgBEXGb (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 5 Feb 2020 18:06:31 -0500
-Received: from dread.disaster.area (pa49-181-161-120.pa.nsw.optusnet.com.au [49.181.161.120])
-        by mail104.syd.optusnet.com.au (Postfix) with ESMTPS id 14B6F8204F1;
-        Thu,  6 Feb 2020 10:06:27 +1100 (AEDT)
-Received: from dave by dread.disaster.area with local (Exim 4.92.3)
-        (envelope-from <david@fromorbit.com>)
-        id 1izTkY-0006PA-46; Thu, 06 Feb 2020 10:06:26 +1100
-Date:   Thu, 6 Feb 2020 10:06:26 +1100
-From:   Dave Chinner <david@fromorbit.com>
-To:     Jeff Moyer <jmoyer@redhat.com>
-Cc:     linux-fsdevel@vger.kernel.org, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org
-Subject: Re: [PATCH 0/3] fstests: fixes for 64k pages and dax
-Message-ID: <20200205230626.GO20628@dread.disaster.area>
-References: <20200205224818.18707-1-jmoyer@redhat.com>
+        Wed, 5 Feb 2020 23:34:17 -0500
+Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:44928 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1727415AbgBFEeR (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 5 Feb 2020 23:34:17 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1580963655;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=uT1YEnQpKR24TfgxPzf9UuCZNpuFKqUFfxsZs5GZejg=;
+        b=F4gNvF/gOGa25nonREFB0hWDtTfy+yPTVtcqUJrA9yrM7WPaMvWnmBT2F2JM0WibuW9MIr
+        i2Lh7TmQnCYxl7fZgG22E6kxiSlJkhRkDePUkhq2iJMeQCaYZhulTy42PoN2uUzeqYIeb4
+        fJrERaUqsO+KbA0zOoa8pCYV1lLn5/4=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-171-rhf4SF8gMQ2rNNzsY9z-Ow-1; Wed, 05 Feb 2020 23:34:13 -0500
+X-MC-Unique: rhf4SF8gMQ2rNNzsY9z-Ow-1
+Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id E8BA91413;
+        Thu,  6 Feb 2020 04:34:11 +0000 (UTC)
+Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 5D5D98DC0F;
+        Thu,  6 Feb 2020 04:34:11 +0000 (UTC)
+Date:   Thu, 6 Feb 2020 12:44:05 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH 1/5] xfs/449: filter out "Discarding..." from output
+Message-ID: <20200206044405.GP14282@dhcp-12-102.nay.redhat.com>
+Mail-Followup-To: "Darrick J. Wong" <darrick.wong@oracle.com>,
+        linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+References: <158086090225.1989378.6869317139530865842.stgit@magnolia>
+ <158086090849.1989378.625300470019425718.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20200205224818.18707-1-jmoyer@redhat.com>
+In-Reply-To: <158086090849.1989378.625300470019425718.stgit@magnolia>
 User-Agent: Mutt/1.10.1 (2018-07-13)
-X-Optus-CM-Score: 0
-X-Optus-CM-Analysis: v=2.3 cv=LYdCFQXi c=1 sm=1 tr=0
-        a=SkgQWeG3jiSQFIjTo4+liA==:117 a=SkgQWeG3jiSQFIjTo4+liA==:17
-        a=jpOVt7BSZ2e4Z31A5e1TngXxSK0=:19 a=kj9zAlcOel0A:10 a=l697ptgUJYAA:10
-        a=VwQbUJbxAAAA:8 a=7-415B0cAAAA:8 a=Hdpg4Cy1Pty9vVzyJowA:9
-        a=CjuIK1q_8ugA:10 a=AjGcO6oz07-iQ99wixmX:22 a=biEYGPWJfzWAr4FL6Ov7:22
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-[cc fstests@vger.kernel.org]
+On Tue, Feb 04, 2020 at 04:01:48PM -0800, Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
+> 
+> xfsprogs 5.4 prints "Discarding..." if the disk supports the trim
+> command.  Filter this out of the output because xfs_info and friends
+> won't print that out.
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> ---
+>  tests/xfs/449 |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> 
+> diff --git a/tests/xfs/449 b/tests/xfs/449
+> index 7aae1545..83c3c493 100755
+> --- a/tests/xfs/449
+> +++ b/tests/xfs/449
+> @@ -39,7 +39,7 @@ _require_scratch_nocheck
+>  _require_xfs_spaceman_command "info"
+>  _require_command "$XFS_GROWFS_PROG" xfs_growfs
+>  
+> -_scratch_mkfs > $tmp.mkfs
+> +_scratch_mkfs | sed -e '/Discarding/d' > $tmp.mkfs
 
-On Wed, Feb 05, 2020 at 05:48:15PM -0500, Jeff Moyer wrote:
-> This set of patches fixes a few false positives I encountered when
-> testing DAX on ppc64le (which has a 64k page size).
-> 
-> Patch 1 is actually not specific to non-4k page sizes.  Right now we
-> only test for dax incompatibility in the dm flakey target.  This means
-> that tests that use dm-thin or the snapshot target will still try to
-> run.  Moving the check to _require_dm_target fixes that problem.
-> 
-> Patches 2 and 3 get rid of hard coded block/page sizes in the tests.
-> They run just fine on 64k pages and 64k block sizes.
-> 
-> Even after these patches, there are many more tests that fail in the
-> following configuration:
-> 
-> MKFS_OPTIONS="-b size=65536 -m reflink=0" MOUNT_OPTIONS="-o dax"
-> 
-> One class of failures is tests that create a really small file system
-> size.  Some of those tests seem to require the very small size, but
-> others seem like they could live with a slightly bigger size that
-> would then fit the log (the typical failure is a mkfs failure due to
-> not enough blocks for the log).  For the former case, I'm tempted to
-> send patches to _notrun those tests, and for the latter, I'd like to
-> bump the file system sizes up.  300MB seems to be large enough to
-> accommodate the log.  Would folks be opposed to those approaches?
-> 
-> Another class of failure is tests that either hard-code a block size
-> to trigger a specific error case, or that test a multitude of block
-> sizes.  I'd like to send a patch to _notrun those tests if there is
-> a user-specified block size.  That will require parsing the MKFS_OPTIONS
-> based on the fs type, of course.  Is that something that seems
-> reasonable?
-> 
-> I will follow up with a series of patches to implement those changes
-> if there is consensus on the approach.  These first three seemed
-> straight-forward to me, so that's where I'm starting.
-> 
-> Thanks!
-> Jeff
-> 
-> [PATCH 1/3] dax/dm: disable testing on devices that don't support dax
-> [PATCH 2/3] t_mmap_collision: fix hard-coded page size
-> [PATCH 3/3] xfs/300: modify test to work on any fs block size
+Looks good to me.
 
-Hi Jeff,
+>  echo MKFS >> $seqres.full
+>  cat $tmp.mkfs >> $seqres.full
+>  
+> 
 
-You probably should be sending fstests patches to
-fstests@vger.kernel.org, otherwise they probably won't get noticed
-by the fstests maintainer...
-
-Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
