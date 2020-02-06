@@ -2,124 +2,91 @@ Return-Path: <SRS0=YiqY=32=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+X-Spam-Status: No, score=-5.2 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 78FF9C352A2
-	for <linux-fstests@archiver.kernel.org>; Thu,  6 Feb 2020 14:36:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 553D0C33CAC
+	for <linux-fstests@archiver.kernel.org>; Thu,  6 Feb 2020 15:47:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 4EE402082E
-	for <linux-fstests@archiver.kernel.org>; Thu,  6 Feb 2020 14:36:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2C72C21775
+	for <linux-fstests@archiver.kernel.org>; Thu,  6 Feb 2020 15:47:38 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Qy33kAiW"
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="nNcUOaA4"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727925AbgBFOgv (ORCPT
+        id S1727557AbgBFPrh (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 6 Feb 2020 09:36:51 -0500
-Received: from us-smtp-2.mimecast.com ([205.139.110.61]:57294 "EHLO
-        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726765AbgBFOgu (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 6 Feb 2020 09:36:50 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1580999810;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=M6ywBgEyecB7i6tCl7rBaaIJ1nlHocqQsOpoi6h5WDY=;
-        b=Qy33kAiWd1ijCrnEagSeXtJ4gee8lDF+3VuMiiVbFG0BBtcN2r/9e1tzwfhBw7+YOSD0h8
-        1qwt16sUSEGyb01L892d0qzL6FTz54WFP1vvQBQ0N16xvWgNyUI9x3SVKXU5+QTpTiuutW
-        0sKoCm3zPi/mkBHTsAub3vDwp3FK9Qo=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-90-acILuq70MVCP-rDbn0K-rg-1; Thu, 06 Feb 2020 09:36:46 -0500
-X-MC-Unique: acILuq70MVCP-rDbn0K-rg-1
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id CA275800D54;
-        Thu,  6 Feb 2020 14:36:44 +0000 (UTC)
-Received: from segfault.boston.devel.redhat.com (segfault.boston.devel.redhat.com [10.19.60.26])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id 4302B790EE;
-        Thu,  6 Feb 2020 14:36:44 +0000 (UTC)
-From:   Jeff Moyer <jmoyer@redhat.com>
-To:     Dave Chinner <david@fromorbit.com>
-Cc:     linux-fsdevel@vger.kernel.org, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org
-Subject: Re: [PATCH 0/3] fstests: fixes for 64k pages and dax
-References: <20200205224818.18707-1-jmoyer@redhat.com>
-        <20200205230626.GO20628@dread.disaster.area>
-X-PGP-KeyID: 1F78E1B4
-X-PGP-CertKey: F6FE 280D 8293 F72C 65FD  5A58 1FF8 A7CA 1F78 E1B4
-Date:   Thu, 06 Feb 2020 09:36:43 -0500
-In-Reply-To: <20200205230626.GO20628@dread.disaster.area> (Dave Chinner's
-        message of "Thu, 6 Feb 2020 10:06:26 +1100")
-Message-ID: <x49lfpflr44.fsf@segfault.boston.devel.redhat.com>
-User-Agent: Gnus/5.13 (Gnus v5.13) Emacs/26.1 (gnu/linux)
+        Thu, 6 Feb 2020 10:47:37 -0500
+Received: from mail-qv1-f67.google.com ([209.85.219.67]:45235 "EHLO
+        mail-qv1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727484AbgBFPrh (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 6 Feb 2020 10:47:37 -0500
+Received: by mail-qv1-f67.google.com with SMTP id l14so3029459qvu.12
+        for <fstests@vger.kernel.org>; Thu, 06 Feb 2020 07:47:36 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
+        h=subject:to:references:from:message-id:date:user-agent:mime-version
+         :in-reply-to:content-language:content-transfer-encoding;
+        bh=fUviPoffa4xlnXF8ElkhP3XofIfwyDG+X8bi6P0i8IY=;
+        b=nNcUOaA4xGyRlPaHmICd5gl8of9jh4XrVdi5NFxEFefbCkjxoEpXyiIvdhw2fdXan8
+         61+Ele0ojKO85X4wj6v7jjDlGkbn/FgdBWGZjPJsc+mjtiwgDg5sQ0y6BDimoQicLZiD
+         mkHG5Pqzc2mdGS4e1AQw1OIBW56jZ1OGP8eBhXBkpNj4MiaL0kr/KjUeS47GsTQojmGo
+         VAvUeNbt9R6ysnocs5Lb8shUlqqmWOwkmRG0F8Dn+gpacKWaULmRlSPO9ttr33T9oipl
+         bD+Y4qXL7yygSPNQrZDZsXG4Mn3pp0IUYFnaVF241gmw6wM216hTLKi8eJpWgUa3kq9R
+         5YQw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:subject:to:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=fUviPoffa4xlnXF8ElkhP3XofIfwyDG+X8bi6P0i8IY=;
+        b=cWBa2QbssfdknmntlE5W+/HxrMlYjulGHabOlwDdJ3KDIo/jW09qialfv9n90bCt+T
+         M9hdJHxqII5Ssp6Ux0A0PeHqMf83JUu3GoZ2yl43CQfeh6DhWPPXJq+oMjs5hshElQfz
+         SlmaA+vXaQH9bUmPrptTT+LF40LaA2M9/LfgWmh+Np9L86jxL3AdWrTJFQSfQPML+q56
+         uU3jx2MSLYixfcse+Mj20SrCprm0eitavfywODy4SGqub1Odabyj+Wg8ZOkHS7brR9/J
+         MnWmW4oCU0S0PKn2+q8kcG1aB0BDWuaCuW4cUUwcbCk7hpSyLuOiYRF8WpTRWVLQYkk1
+         Dr0Q==
+X-Gm-Message-State: APjAAAXAK84lbPKGLmFhP2IjGJcTNLQ2YZWEkJ0iTRa85OfN5HX3mx94
+        yvclJXWuZcR6EXMzNfPbMkNHOOIn3BI=
+X-Google-Smtp-Source: APXvYqxnKDR4BFR+JflzReERr3YgbgBrTlj7ZIAcHqIpT/tNLZzk4c29m4n8Qhp+OgCeXBSaLridKg==
+X-Received: by 2002:ad4:4a69:: with SMTP id cn9mr2950839qvb.218.1581004056244;
+        Thu, 06 Feb 2020 07:47:36 -0800 (PST)
+Received: from [192.168.1.106] ([107.15.81.208])
+        by smtp.gmail.com with ESMTPSA id y188sm1564117qkd.10.2020.02.06.07.47.35
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 06 Feb 2020 07:47:35 -0800 (PST)
+Subject: Re: [PATCH] fstests: btrfs/022: Disable snapshot ioctl in fsstress
+To:     Qu Wenruo <wqu@suse.com>, fstests@vger.kernel.org,
+        linux-btrfs@vger.kernel.org
+References: <20200206053226.23624-1-wqu@suse.com>
+From:   Josef Bacik <josef@toxicpanda.com>
+Message-ID: <e3c530b6-af9d-97de-7008-5bc02c77e037@toxicpanda.com>
+Date:   Thu, 6 Feb 2020 10:47:34 -0500
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:68.0)
+ Gecko/20100101 Thunderbird/68.4.2
 MIME-Version: 1.0
-Content-Type: text/plain
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.15
+In-Reply-To: <20200206053226.23624-1-wqu@suse.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Dave Chinner <david@fromorbit.com> writes:
+On 2/6/20 12:32 AM, Qu Wenruo wrote:
+> Since commit fd0830929573 ("fsstress: add the ability to create
+> snapshots") adds the ability for fsstress to create/delete snapshot and
+> subvolume, test case btrfs/022 fails as _btrfs_get_subvolid can't
+> handle multiple subvolumes under the same path.
+> 
+> So manually disable snapshot/subvolume creation and deletion ioctl in this
+> test case. Other qgroup test cases aren't affected.
+> 
+> Signed-off-by: Qu Wenruo <wqu@suse.com>
 
-> [cc fstests@vger.kernel.org]
->
-> On Wed, Feb 05, 2020 at 05:48:15PM -0500, Jeff Moyer wrote:
->> This set of patches fixes a few false positives I encountered when
->> testing DAX on ppc64le (which has a 64k page size).
->> 
->> Patch 1 is actually not specific to non-4k page sizes.  Right now we
->> only test for dax incompatibility in the dm flakey target.  This means
->> that tests that use dm-thin or the snapshot target will still try to
->> run.  Moving the check to _require_dm_target fixes that problem.
->> 
->> Patches 2 and 3 get rid of hard coded block/page sizes in the tests.
->> They run just fine on 64k pages and 64k block sizes.
->> 
->> Even after these patches, there are many more tests that fail in the
->> following configuration:
->> 
->> MKFS_OPTIONS="-b size=65536 -m reflink=0" MOUNT_OPTIONS="-o dax"
->> 
->> One class of failures is tests that create a really small file system
->> size.  Some of those tests seem to require the very small size, but
->> others seem like they could live with a slightly bigger size that
->> would then fit the log (the typical failure is a mkfs failure due to
->> not enough blocks for the log).  For the former case, I'm tempted to
->> send patches to _notrun those tests, and for the latter, I'd like to
->> bump the file system sizes up.  300MB seems to be large enough to
->> accommodate the log.  Would folks be opposed to those approaches?
->> 
->> Another class of failure is tests that either hard-code a block size
->> to trigger a specific error case, or that test a multitude of block
->> sizes.  I'd like to send a patch to _notrun those tests if there is
->> a user-specified block size.  That will require parsing the MKFS_OPTIONS
->> based on the fs type, of course.  Is that something that seems
->> reasonable?
->> 
->> I will follow up with a series of patches to implement those changes
->> if there is consensus on the approach.  These first three seemed
->> straight-forward to me, so that's where I'm starting.
->> 
->> Thanks!
->> Jeff
->> 
->> [PATCH 1/3] dax/dm: disable testing on devices that don't support dax
->> [PATCH 2/3] t_mmap_collision: fix hard-coded page size
->> [PATCH 3/3] xfs/300: modify test to work on any fs block size
->
-> Hi Jeff,
->
-> You probably should be sending fstests patches to
-> fstests@vger.kernel.org, otherwise they probably won't get noticed
-> by the fstests maintainer...
+Why not just fix _btrfs_get_subvolid?  You can use egrep to make sure the name 
+matches exactly.  Thanks,
 
-Hm, somehow I didn't know about that list.  I'll send v2 there, thanks!
-
--Jeff
-
+Josef
