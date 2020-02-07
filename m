@@ -1,299 +1,149 @@
-Return-Path: <SRS0=YiqY=32=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=bDwJ=33=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.3 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,MSGID_FROM_MTA_HEADER,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	UNPARSEABLE_RELAY,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 33227C352A2
-	for <linux-fstests@archiver.kernel.org>; Thu,  6 Feb 2020 17:53:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A426BC35247
+	for <linux-fstests@archiver.kernel.org>; Fri,  7 Feb 2020 00:37:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 051C2214AF
-	for <linux-fstests@archiver.kernel.org>; Thu,  6 Feb 2020 17:53:48 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="mujHN48/";
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="qbw5dV9L"
+	by mail.kernel.org (Postfix) with ESMTP id 7A04C214AF
+	for <linux-fstests@archiver.kernel.org>; Fri,  7 Feb 2020 00:37:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727788AbgBFRxr (ORCPT
+        id S1727003AbgBGAhH convert rfc822-to-8bit (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 6 Feb 2020 12:53:47 -0500
-Received: from aserp2120.oracle.com ([141.146.126.78]:55860 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727607AbgBFRxr (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 6 Feb 2020 12:53:47 -0500
-Received: from pps.filterd (aserp2120.oracle.com [127.0.0.1])
-        by aserp2120.oracle.com (8.16.0.27/8.16.0.27) with SMTP id 016HmDk6092978;
-        Thu, 6 Feb 2020 17:53:45 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
- : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=corp-2020-01-29;
- bh=RcX2uCtVO6aBFoDsNCPIti1l422O9F51ezxnnoTBMoc=;
- b=mujHN48/lL76l5BeMpJS/cLF/SRqeestFmtWJG8yO3cL13VtCwDF3Jo2r++kkl/3+Wjs
- ORVDLNAzBtQAb5YRjMPHeH5vF9tv2Dm2LLQToKsNJGq+OKg0PscRiWqqUsJm2qZDlvDq
- VweE1Fx3mE421L4UFYppouRFcYJ/Yu4WZEmcrw4yRuANA5rTwM20K5MRsCFshOLcCJiC
- SyK8WIUY/pdXAgkxSsy3oEA3R2O/GJBx6o1qrDiOkTe7BKJroAXoUkN4FD+oSnLNwHlW
- oV5ggbP7xdl3qDt1fffEWoWtSioRYql7ZlD67XAma7hUv+Ge5tMleJw4sAhaX7JMDJnl ag== 
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
- : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=corp-2019-08-05;
- bh=RcX2uCtVO6aBFoDsNCPIti1l422O9F51ezxnnoTBMoc=;
- b=qbw5dV9Lnnp5AOEZ2OdHD2dDZRZIxODl31mlVo/LI6UUDBk7heceZinacZFCm3922ZxJ
- g8fgDB80wyS5FtfRx0KXOkIk2K4rfLkN9M33ljvz4Q0KyswrFBSMoSYgRvuj5CKw+KMP
- pSZ8ib8wc9sIppDkRIzdosGtYIszAbxCmwY/O7whqJSEoir2JzuJNC1w8bNuLX/a+NWk
- PjQnVumYUltiHaFt5RXekawwuMjX7k+aMubgnQ/foCIhezbY+JuAXiU+hpnUQn3IxJJv
- OPikBCa1qjDP3J+z02CZOf8dzlllgDMZuHNjiH9yTRKzFlfjhOFLXigfjflCBOgSN3M6 aQ== 
-Received: from aserp3030.oracle.com (aserp3030.oracle.com [141.146.126.71])
-        by aserp2120.oracle.com with ESMTP id 2xykbpbbkj-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Thu, 06 Feb 2020 17:53:45 +0000
-Received: from pps.filterd (aserp3030.oracle.com [127.0.0.1])
-        by aserp3030.oracle.com (8.16.0.27/8.16.0.27) with SMTP id 016Hn6bx140992;
-        Thu, 6 Feb 2020 17:53:45 GMT
-Received: from aserv0121.oracle.com (aserv0121.oracle.com [141.146.126.235])
-        by aserp3030.oracle.com with ESMTP id 2y080dq50x-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Thu, 06 Feb 2020 17:53:44 +0000
-Received: from abhmp0016.oracle.com (abhmp0016.oracle.com [141.146.116.22])
-        by aserv0121.oracle.com (8.14.4/8.13.8) with ESMTP id 016HriYu006379;
-        Thu, 6 Feb 2020 17:53:44 GMT
-Received: from localhost (/10.145.179.117)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Thu, 06 Feb 2020 09:53:44 -0800
-Date:   Thu, 6 Feb 2020 09:53:42 -0800
-From:   "Darrick J. Wong" <darrick.wong@oracle.com>
-To:     Amir Goldstein <amir73il@gmail.com>
-Cc:     Eryu Guan <guaneryu@gmail.com>,
-        linux-xfs <linux-xfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>
-Subject: Re: [PATCH 2/2] xfs: test setting labels with xfs_admin
-Message-ID: <20200206175342.GF6869@magnolia>
-References: <158086094707.1990521.17646841467136148296.stgit@magnolia>
- <158086095935.1990521.3334372807118647101.stgit@magnolia>
- <CAOQ4uxi5i-iTZG7+BgybvS7SQqat94k5jQXUK2LW-9iDf2NgnQ@mail.gmail.com>
+        Thu, 6 Feb 2020 19:37:07 -0500
+Received: from m9a0013g.houston.softwaregrp.com ([15.124.64.91]:34281 "EHLO
+        m9a0013g.houston.softwaregrp.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726509AbgBGAhG (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 6 Feb 2020 19:37:06 -0500
+Received: FROM m9a0013g.houston.softwaregrp.com (15.121.0.190) BY m9a0013g.houston.softwaregrp.com WITH ESMTP;
+ Fri,  7 Feb 2020 00:36:26 +0000
+Received: from M9W0068.microfocus.com (2002:f79:bf::f79:bf) by
+ M9W0067.microfocus.com (2002:f79:be::f79:be) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id
+ 15.1.1591.10; Fri, 7 Feb 2020 00:35:52 +0000
+Received: from NAM04-SN1-obe.outbound.protection.outlook.com (15.124.72.11) by
+ M9W0068.microfocus.com (15.121.0.191) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id
+ 15.1.1591.10 via Frontend Transport; Fri, 7 Feb 2020 00:35:52 +0000
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=TD1J4Cj/l1qRcGckcZf+XXITEFkrAOvWWrONxIvisFiNWwLr6nbSRFGaiQaH1PcGwik2tO9wauf3zbYGHlbbUknilx/X2789NaqH1NBjjjwIVlgTvyV8EyZKmGOAyW0Rtf95+3Llu6OAfxtFEBCXFPd5k8Jp9n7hMC+V0hZdXoh4Ch24SClMlVB36GlbYa83fEoSQx0rxxzVK0mZL9T25Y73dMou5Bv1iVuy2krqd03XIFqlSX2MDhJ9DWcddIugfe5z7oYvhgM9xQoMhT93S/b1Q4DJSfDBxDt2+O4sA3FpEwXilUksoFvzufYXbFsRi4dxiXSSjgeG5mjqS6xFEQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=Z33mJcFKU/xnlZqh/PKgUJEHgluc4mD60AzNUKApo5M=;
+ b=O07WN1B34AnEqzDn7DGnwyHs1gRWrwsbHLWFrBLQaHe++oIYWz2XAUcsfV2wSgW7BHVNEzffUlCKrYH7H6cWgqoKwedMfACAPaMzS96sPVwD6ysZOHac8E+SFOx8wTT6j4OrTGU+dznamN28BHz7rxRz77M0u63RzRMNz7kVrmVfcPX60ONy42tqL43Wxb8M4/54+Pdph6TYvaIFDa261FCAQPLkc3BOfjvhbgaVMiOhDpkPSgoq+IaiGzALrBBxN2vHf/ktPzOoKNM7gvx8DW62wuo/8t8K/EyoRYerbSRt28oIvlUU4Fh9EA1PXFRUMTsY46/7Yo5TCq3IOGXoLA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=suse.com; dmarc=pass action=none header.from=suse.com;
+ dkim=pass header.d=suse.com; arc=none
+Authentication-Results: spf=none (sender IP is ) smtp.mailfrom=wqu@suse.com; 
+Received: from BY5PR18MB3266.namprd18.prod.outlook.com (10.255.163.207) by
+ BY5PR18MB3171.namprd18.prod.outlook.com (10.255.137.24) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.2707.21; Fri, 7 Feb 2020 00:35:50 +0000
+Received: from BY5PR18MB3266.namprd18.prod.outlook.com
+ ([fe80::d948:61b9:971a:facd]) by BY5PR18MB3266.namprd18.prod.outlook.com
+ ([fe80::d948:61b9:971a:facd%7]) with mapi id 15.20.2707.024; Fri, 7 Feb 2020
+ 00:35:50 +0000
+Subject: Re: [PATCH] fstests: btrfs/022: Disable snapshot ioctl in fsstress
+To:     Josef Bacik <josef@toxicpanda.com>, <fstests@vger.kernel.org>,
+        <linux-btrfs@vger.kernel.org>
+References: <20200206053226.23624-1-wqu@suse.com>
+ <e3c530b6-af9d-97de-7008-5bc02c77e037@toxicpanda.com>
+From:   Qu Wenruo <wqu@suse.com>
+Autocrypt: addr=wqu@suse.com; keydata=
+ mQENBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
+ 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
+ 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
+ 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
+ gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
+ AAG0GFF1IFdlbnJ1byA8d3F1QHN1c2UuY29tPokBTQQTAQgAOAIbAwULCQgHAgYVCAkKCwIE
+ FgIDAQIeAQIXgBYhBC3fcuWlpVuonapC4cI9kfOhJf6oBQJdnDWhAAoJEMI9kfOhJf6oZgoH
+ 90uqoGyUh5UWtiT9zjUcvlMTCpd/QSgwagDuY+tEdVPaKlcnTNAvZKWSit8VuocjrOFbTLwb
+ vZ43n5f/l/1QtwMgQei/RMY2XhW+totimzlHVuxVaIDwkF+zc+pUI6lDPnULZHS3mWhbVr9N
+ vZAAYVV7GesyyFpZiNm7GLvLmtEdYbc9OnIAOZb3eKfY3mWEs0eU0MxikcZSOYy3EWY3JES7
+ J9pFgBrCn4hF83tPH2sphh1GUFii+AUGBMY/dC6VgMKbCugg+u/dTZEcBXxD17m+UcbucB/k
+ F2oxqZBEQrb5SogdIq7Y9dZdlf1m3GRRJTX7eWefZw10HhFhs1mwx7kBDQRZ1YGvAQgAqlPr
+ YeBLMv3PAZ75YhQIwH6c4SNcB++hQ9TCT5gIQNw51+SQzkXIGgmzxMIS49cZcE4KXk/kHw5h
+ ieQeQZa60BWVRNXwoRI4ib8okgDuMkD5Kz1WEyO149+BZ7HD4/yK0VFJGuvDJR8T7RZwB69u
+ VSLjkuNZZmCmDcDzS0c/SJOg5nkxt1iTtgUETb1wNKV6yR9XzRkrEW/qShChyrS9fNN8e9c0
+ MQsC4fsyz9Ylx1TOY/IF/c6rqYoEEfwnpdlz0uOM1nA1vK+wdKtXluCa79MdfaeD/dt76Kp/
+ o6CAKLLcjU1Iwnkq1HSrYfY3HZWpvV9g84gPwxwxX0uXquHxLwARAQABiQE8BBgBCAAmAhsM
+ FiEELd9y5aWlW6idqkLhwj2R86El/qgFAl2cNa4FCQlqTn8ACgkQwj2R86El/qhXBAf/eXLP
+ HDNTkHRPxoDnwhscIHJDHlsszke25AFltJQ1adoaYCbsQVv4Mn5rQZ1Gon54IMdxBN3r/B08
+ rGVPatIfkycMCShr+rFHPKnExhQ7Wr555fq+sQ1GOwOhr1xLEqAhBMp28u9m8hnkqL36v+AF
+ hjTwRtS+tRMZfoG6n72xAj984l56G9NPfs/SOKl6HR0mCDXwJGZAOdtyRmqddi53SXi5N4H1
+ jWX1xFshp7nIkRm6hEpISEWr/KKLbAiKKbP0ql5tP5PinJeIBlDv4g/0+aGoGg4dELTnfEVk
+ jMC8cJ/LiIaR/OEOF9S2nSeTQoBmusTz+aqkbogvvYGam6uDYw==
+Message-ID: <8199544d-c5cb-eb1e-ed7c-f9b170324997@suse.com>
+Date:   Fri, 7 Feb 2020 08:35:46 +0800
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.4.2
+In-Reply-To: <e3c530b6-af9d-97de-7008-5bc02c77e037@toxicpanda.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Language: en-US
+Content-Transfer-Encoding: 8BIT
+X-ClientProxiedBy: BYAPR05CA0042.namprd05.prod.outlook.com
+ (2603:10b6:a03:74::19) To BY5PR18MB3266.namprd18.prod.outlook.com
+ (2603:10b6:a03:1a1::15)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAOQ4uxi5i-iTZG7+BgybvS7SQqat94k5jQXUK2LW-9iDf2NgnQ@mail.gmail.com>
-User-Agent: Mutt/1.9.4 (2018-02-28)
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9523 signatures=668685
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=0 malwarescore=0
- phishscore=0 bulkscore=0 spamscore=0 mlxscore=0 mlxlogscore=999
- adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.0.1-1911140001 definitions=main-2002060133
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9523 signatures=668685
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 priorityscore=1501 malwarescore=0
- suspectscore=0 phishscore=0 bulkscore=0 spamscore=0 clxscore=1015
- lowpriorityscore=0 mlxscore=0 impostorscore=0 mlxlogscore=999 adultscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.0.1-1911140001
- definitions=main-2002060133
+Received: from [0.0.0.0] (149.28.201.231) by BYAPR05CA0042.namprd05.prod.outlook.com (2603:10b6:a03:74::19) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.2707.15 via Frontend Transport; Fri, 7 Feb 2020 00:35:49 +0000
+X-Originating-IP: [149.28.201.231]
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: ce72bd0b-1614-42e1-5fa5-08d7ab65ae38
+X-MS-TrafficTypeDiagnostic: BY5PR18MB3171:
+X-Microsoft-Antispam-PRVS: <BY5PR18MB31718943644DEFFAFB9ED26ED61C0@BY5PR18MB3171.namprd18.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:494;
+X-Forefront-PRVS: 0306EE2ED4
+X-Forefront-Antispam-Report: SFV:NSPM;SFS:(10019020)(4636009)(346002)(396003)(39860400002)(376002)(366004)(136003)(199004)(189003)(8676002)(66476007)(316002)(66556008)(6706004)(16576012)(186003)(4744005)(66946007)(26005)(956004)(31696002)(16526019)(81156014)(2616005)(36756003)(81166006)(8936002)(52116002)(478600001)(31686004)(6666004)(5660300002)(86362001)(2906002)(53546011)(6486002)(78286006);DIR:OUT;SFP:1102;SCL:1;SRVR:BY5PR18MB3171;H:BY5PR18MB3266.namprd18.prod.outlook.com;FPR:;SPF:None;LANG:en;PTR:InfoNoRecords;A:1;MX:1;
+Received-SPF: None (protection.outlook.com: suse.com does not designate
+ permitted sender hosts)
+X-MS-Exchange-SenderADCheck: 1
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: bK/dlRnryuHcpZu3ePvPIMhzkDzJU2OPmxYVOOpsWegSsUTLMUOkcyRycSLMa9Lv0h4u+yi3Bn8+nGM1tPGZGA01kpABxnK6j6znuKsEdEjc91hXvQy67TiLhIPuPhA3J40ID2iTkYswLB8d/86tjTJT1wek7OKCS7h/ITjzQs8i0t3jY/5cF4H32Coh3HATfYDyBRm0mSwhPFlXNia5ZOneuSGUhD9NGfK/Z/dPRMwgvGvz5PFKYRSjBdD7gXxKdvuUi/gFUrGunJZZ/N49PTTeLUsUvFpdipDCJ4XwsWdd9g5fCITsVNC1Sff0c99qPCAjdxmZoQT3NhZe9TsS1YbEzeggEyUWAO9M3QCpwIvoXxLHxg4FqkXsrrOEUJNYFQCBYYq+vNiYIWfr4whFWq0apM97HzBSjE5SvVNB5CMKceJ3n/j08JMleT+kKZV3RkWLgxezDsW9fEJM8y98YFVWuRJzxSoiNcNtsplRlOSonhKuU6gxuZ6kQEIcqEDOg72TcgghUtmnkOA/G2hTuf8op5+ly/8h4ph8T9Wlm3M=
+X-MS-Exchange-AntiSpam-MessageData: J8BUHpYqb0wQPKw0BqNHBLHpDS+CbZHjdX6Rsmz4MW19p5RpQr5QwpuUG8rrOdEV3pNlBFjX1CAMgTmndcLWPATFWoig2J//7/Uh4oxSy+bktPGeSvnA+FFt1U4IhpCSAQGbLf6/KRp3y5EGf+eBDA==
+X-MS-Exchange-CrossTenant-Network-Message-Id: ce72bd0b-1614-42e1-5fa5-08d7ab65ae38
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 07 Feb 2020 00:35:50.1709
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 856b813c-16e5-49a5-85ec-6f081e13b527
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: AX8XZTDDF6V3K2N+B4TI1f5sTPYcgfjftb8mNBay958UVgA5MDg6CIvLSYWdaF8G
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BY5PR18MB3171
+X-OriginatorOrg: suse.com
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Feb 05, 2020 at 08:40:35AM +0200, Amir Goldstein wrote:
-> On Wed, Feb 5, 2020 at 2:02 AM Darrick J. Wong <darrick.wong@oracle.com> wrote:
-> >
-> > From: Darrick J. Wong <darrick.wong@oracle.com>
-> >
-> > Test setting filesystem labels with xfs_admin.
-> >
-> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> > ---
-> >  tests/xfs/912     |  103 +++++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/xfs/912.out |   43 ++++++++++++++++++++++
-> >  tests/xfs/group   |    1 +
-> >  3 files changed, 147 insertions(+)
-> >  create mode 100755 tests/xfs/912
-> >  create mode 100644 tests/xfs/912.out
-> >
-> >
-> > diff --git a/tests/xfs/912 b/tests/xfs/912
-> > new file mode 100755
-> > index 00000000..1eef36cd
-> > --- /dev/null
-> > +++ b/tests/xfs/912
-> > @@ -0,0 +1,103 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0-or-later
-> > +# Copyright (c) 2020, Oracle and/or its affiliates.  All Rights Reserved.
-> > +#
-> > +# FS QA Test No. 912
-> > +#
-> > +# Check that xfs_admin can set and clear filesystem labels offline and online.
-> > +
-> > +seq=`basename $0`
-> > +seqres=$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +
-> > +here=`pwd`
-> > +tmp=/tmp/$$
-> > +status=1    # failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +_cleanup()
-> > +{
-> > +       cd /
+
+
+On 2020/2/6 下午11:47, Josef Bacik wrote:
+> On 2/6/20 12:32 AM, Qu Wenruo wrote:
+>> Since commit fd0830929573 ("fsstress: add the ability to create
+>> snapshots") adds the ability for fsstress to create/delete snapshot and
+>> subvolume, test case btrfs/022 fails as _btrfs_get_subvolid can't
+>> handle multiple subvolumes under the same path.
+>>
+>> So manually disable snapshot/subvolume creation and deletion ioctl in
+>> this
+>> test case. Other qgroup test cases aren't affected.
+>>
+>> Signed-off-by: Qu Wenruo <wqu@suse.com>
 > 
-> odd cleanup.
-> I think the standard rm tmp files is needed for in-case common
-> helpers generate tmp files.
+> Why not just fix _btrfs_get_subvolid?  You can use egrep to make sure
+> the name matches exactly.  Thanks,
 
-Heh, ok, will add that.
+Because we have other requirement, like limit tests.
 
-> > +}
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +
-> > +# real QA test starts here
-> > +_supported_fs xfs
-> > +_supported_os Linux
-> > +_require_scratch
-> > +_require_xfs_db_command label
-> > +_require_xfs_io_command label
-> > +grep -q "xfs_io" "$(which xfs_admin)" || \
-> > +       _notrun "xfs_admin does not support online label setting of any kind"
+If we have other snapshots/subvolumes, they don't have the same limit,
+thus unable to test qgroup properly.
+
+Thanks,
+Qu
 > 
-> odd test. If it cannot be prettier than than perhaps hide this inside
-> a _require helper?
-
-There's only one user of it so far, though I guess if I'm going to add
-get/set fs uuid ioctls then maybe this should get refactored...
-
-...assuming Eric doesn't just nuke xfs_admin online updates out of
-existence entirely. :)
-
---D
-
-> > +
-> > +rm -f $seqres.full
-> > +
-> > +echo
-> > +echo "Format with label"
-> > +_scratch_mkfs -L "label0" > $seqres.full
-> > +
-> > +echo "Read label offline"
-> > +_scratch_xfs_admin -l
-> > +
-> > +echo "Read label online"
-> > +_scratch_mount
-> > +_scratch_xfs_admin -l
-> > +
-> > +echo
-> > +echo "Set label offline"
-> > +_scratch_unmount
-> > +_scratch_xfs_admin -L "label1"
-> > +
-> > +echo "Read label offline"
-> > +_scratch_xfs_admin -l
-> > +
-> > +echo "Read label online"
-> > +_scratch_mount
-> > +_scratch_xfs_admin -l
-> > +
-> > +echo
-> > +echo "Set label online"
-> > +_scratch_xfs_admin -L "label2"
-> > +
-> > +echo "Read label online"
-> > +_scratch_xfs_admin -l
-> > +
-> > +echo "Read label offline"
-> > +_scratch_unmount
-> > +_scratch_xfs_admin -l
-> > +
-> > +echo
-> > +echo "Clear label online"
-> > +_scratch_mount
-> > +_scratch_xfs_admin -L "--"
-> > +
-> > +echo "Read label online"
-> > +_scratch_xfs_admin -l
-> > +
-> > +echo "Read label offline"
-> > +_scratch_unmount
-> > +_scratch_xfs_admin -l
-> > +
-> > +echo
-> > +echo "Set label offline"
-> > +_scratch_xfs_admin -L "label3"
-> > +
-> > +echo "Read label offline"
-> > +_scratch_xfs_admin -l
-> > +
-> > +echo
-> > +echo "Clear label offline"
-> > +_scratch_xfs_admin -L "--"
-> > +
-> > +echo "Read label offline"
-> > +_scratch_xfs_admin -l
-> > +
-> > +echo "Read label online"
-> > +_scratch_mount
-> > +_scratch_xfs_admin -l
-> > +
-> > +# success, all done
-> > +status=0
-> > +exit
-> > diff --git a/tests/xfs/912.out b/tests/xfs/912.out
-> > new file mode 100644
-> > index 00000000..186d827f
-> > --- /dev/null
-> > +++ b/tests/xfs/912.out
-> > @@ -0,0 +1,43 @@
-> > +QA output created by 912
-> > +
-> > +Format with label
-> > +Read label offline
-> > +label = "label0"
-> > +Read label online
-> > +label = "label0"
-> > +
-> > +Set label offline
-> > +writing all SBs
-> > +new label = "label1"
-> > +Read label offline
-> > +label = "label1"
-> > +Read label online
-> > +label = "label1"
-> > +
-> > +Set label online
-> > +label = "label2"
-> > +Read label online
-> > +label = "label2"
-> > +Read label offline
-> > +label = "label2"
-> > +
-> > +Clear label online
-> > +label = ""
-> > +Read label online
-> > +label = ""
-> > +Read label offline
-> > +label = ""
-> > +
-> > +Set label offline
-> > +writing all SBs
-> > +new label = "label3"
-> > +Read label offline
-> > +label = "label3"
-> > +
-> > +Clear label offline
-> > +writing all SBs
-> > +new label = ""
-> > +Read label offline
-> > +label = ""
-> > +Read label online
-> > +label = ""
-> > diff --git a/tests/xfs/group b/tests/xfs/group
-> > index edffef9a..898bd9e4 100644
-> > --- a/tests/xfs/group
-> > +++ b/tests/xfs/group
-> > @@ -512,3 +512,4 @@
-> >  512 auto quick acl attr
-> >  747 auto quick scrub
-> >  748 auto quick scrub
-> > +912 auto quick label
-> >
+> Josef
