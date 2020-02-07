@@ -4,70 +4,70 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-5.2 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
-	version=3.4.0
+	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7E574C35247
-	for <linux-fstests@archiver.kernel.org>; Fri,  7 Feb 2020 02:10:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2013AC352A2
+	for <linux-fstests@archiver.kernel.org>; Fri,  7 Feb 2020 02:11:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 5313B21D7D
-	for <linux-fstests@archiver.kernel.org>; Fri,  7 Feb 2020 02:10:14 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E079721D7D
+	for <linux-fstests@archiver.kernel.org>; Fri,  7 Feb 2020 02:11:03 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="BKUv4Vj6"
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="GL7K3S51"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727178AbgBGCKO (ORCPT
+        id S1727505AbgBGCLD (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 6 Feb 2020 21:10:14 -0500
-Received: from mail-qk1-f196.google.com ([209.85.222.196]:44083 "EHLO
-        mail-qk1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727012AbgBGCKN (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 6 Feb 2020 21:10:13 -0500
-Received: by mail-qk1-f196.google.com with SMTP id v195so733256qkb.11
-        for <fstests@vger.kernel.org>; Thu, 06 Feb 2020 18:10:13 -0800 (PST)
+        Thu, 6 Feb 2020 21:11:03 -0500
+Received: from mail-qk1-f194.google.com ([209.85.222.194]:33069 "EHLO
+        mail-qk1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727028AbgBGCLD (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 6 Feb 2020 21:11:03 -0500
+Received: by mail-qk1-f194.google.com with SMTP id h4so803295qkm.0
+        for <fstests@vger.kernel.org>; Thu, 06 Feb 2020 18:11:01 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
         h=subject:to:references:from:message-id:date:user-agent:mime-version
          :in-reply-to:content-language:content-transfer-encoding;
-        bh=Bzp60jIPY0ijpd1Xz7Ps7kvYjlALeehugg4Cz7HfZ+k=;
-        b=BKUv4Vj6j3AG3fvwWanDUdWCn+t21VSZGVGOIwSC6Sr4B5IFL5cDosm+k94m068Iem
-         EJB+a19B5aRDBnR1OpXQdzV/msdsCPsU880aHc7sxc7rkVNnJzY09tHiphAPQPfwJ2hw
-         GkH6m2LXrSk/d80IR5dImMFPtCRGV0n7NzQ66dJzRCxlzNQvuSkic/QAGD2xY6llmXA9
-         +RSmJtM95wZrPx3btBb+2XdSzojGrKV/YHa37cNwkeGuZZxzg/v3h9HjC1b4kd6jmBmY
-         OLvw2BF78uB/BsRqnMAPRp1oOtsABCOiDBQEil9XSNaOeVRM7WCzw5DWHeD4HDanm804
-         2kEg==
+        bh=GohM5j4mI7JcEUmByle4atLeR2+HlAMwdV2lrgFqoU4=;
+        b=GL7K3S51MuifAY+a5v4KEKjb5Mt8ncrz3FW5AR8lJxh4RRI9nnJGtdZW8pMsIy7/W1
+         GwT9zAbtU4v7Ubz1ajfR8FQYIh+TvuDATbj4tyI31NOeFnCu1uY5KOpEX6t/s3/JcJQB
+         yEtUHrdHelAbmFXWgLKSU6DCT7hiGUyRaJ4m0eAMMhytQkSHFAjrOrJ0sZPTAv+vHxnL
+         GRDC/rDuwmZKv6TosGs5fc/wUaRzdUD5CxtneY4KcAmtTayr83E3g0pPW4UC7BWbjQ9o
+         Nu30NIKyZ/Mg7tQevteHeZMXhm+1wPCPW4dUrfCNbR12b0CW+eJPYT46sjV+PsgiU71P
+         Dnjw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:subject:to:references:from:message-id:date
          :user-agent:mime-version:in-reply-to:content-language
          :content-transfer-encoding;
-        bh=Bzp60jIPY0ijpd1Xz7Ps7kvYjlALeehugg4Cz7HfZ+k=;
-        b=HFKx+RzfvkdUUqw+BvDtsCrUpyCjbtil7ZTgCwwSv/3p44af1UHKndjXNs11iEtgZD
-         mjNa3nqKK4IkIIzbXDJmaDACin3U7NFsjidtvoB8b6kifdj4QYi0aySPCOXRj82AuuUI
-         lMQW/jVdH26xJhThnwnecXeiiQWcb/AylPIEypP/Z0DUFeMMUJRBFYTnwS8gF3OT/8DX
-         Wbzj1nTNe/hA93K7yKC6KPw+oy1q17bwnK3jsTta1oi36NDbZYCMbtiuQSdX4FVMC+6c
-         iqtvk4H8W0VrBXrxGbym6AbkGq/UjRYwgqR4xP3N29B3bFQH0FlsKOLp6p63GmKIUjwk
-         SrJw==
-X-Gm-Message-State: APjAAAXM6MKyBdKxGwIQ1Zg4sVOlo73KmGtCn5dc+axol7g5z00zVGFw
-        3YWiTcdEMPj0aetY1Z1YJcwFYunrA+M=
-X-Google-Smtp-Source: APXvYqxl0sis2dUipkaE5wXUOR6R6Wdp1gw954zJ9R/n+WrQ1H6ysCpjvR9jSeBlz+75Yux70uOFYQ==
-X-Received: by 2002:a05:620a:996:: with SMTP id x22mr4251711qkx.127.1581041412704;
-        Thu, 06 Feb 2020 18:10:12 -0800 (PST)
+        bh=GohM5j4mI7JcEUmByle4atLeR2+HlAMwdV2lrgFqoU4=;
+        b=k9k/J09j5F/KWaSCuuXpXd6wEG57HjKIsjc7OxM2+Nlz1MpyDguTrA9ITPTy8WaQ7c
+         D/aNRmlsvxtWQd+EbOoW9+QhNTfpE3vKbU+7QBCSI2jyMPWT5KCD2oLOQsRh8jbBxR83
+         OTGaqQne3zlK7pwRbX232HgUng31GytTCAgxCZZWKbbvGFeUwArSjIVho3rEKiqbqKUa
+         qtjEYTHSK7Li2dYJ0A/vUyht3mUeufbqW7hmaVYULOsyB5q/5IwpC6wYSAsqbhOY/u58
+         Z8+0NJyfzYB61HoaIheTMalGbwM2N6Vz+nvQWt7n7oUf4x/1rmRlvsF0ZK8mznN8D/Sn
+         n7Vg==
+X-Gm-Message-State: APjAAAXhGu8/EWz2JaHQwUaX+OPs9SI7w0Sh9n0uGQmDxJufi2UKnhuX
+        wyBPSVWA6k+kdxsmSZPgW2J27Qd/Vsc=
+X-Google-Smtp-Source: APXvYqxFptk9pQSSnuaAFg60/m6rsUIjV0fHObqrs+cVKW5h2WsKnlKWJSoDXpyAZu+gPGxd6a/a/Q==
+X-Received: by 2002:a37:8ec7:: with SMTP id q190mr5181076qkd.412.1581041460901;
+        Thu, 06 Feb 2020 18:11:00 -0800 (PST)
 Received: from [192.168.1.106] ([107.15.81.208])
-        by smtp.gmail.com with ESMTPSA id b17sm622816qtr.36.2020.02.06.18.10.11
+        by smtp.gmail.com with ESMTPSA id d18sm596126qke.75.2020.02.06.18.10.59
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 06 Feb 2020 18:10:12 -0800 (PST)
-Subject: Re: [PATCH 2/3] fstests: btrfs/022: Match qgroup id more correctly
+        Thu, 06 Feb 2020 18:11:00 -0800 (PST)
+Subject: Re: [PATCH 3/3] fstests: btrfs/022: Add debug output
 To:     Qu Wenruo <wqu@suse.com>, fstests@vger.kernel.org,
         linux-btrfs@vger.kernel.org
 References: <20200207015942.9079-1-wqu@suse.com>
- <20200207015942.9079-3-wqu@suse.com>
+ <20200207015942.9079-4-wqu@suse.com>
 From:   Josef Bacik <josef@toxicpanda.com>
-Message-ID: <99175f4e-00a3-fe9f-7c7f-3c2c87aa31cb@toxicpanda.com>
-Date:   Thu, 6 Feb 2020 21:10:11 -0500
+Message-ID: <e734fda2-04f9-0dc8-ae6c-88ce415a95f1@toxicpanda.com>
+Date:   Thu, 6 Feb 2020 21:10:59 -0500
 User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:68.0)
  Gecko/20100101 Thunderbird/68.4.2
 MIME-Version: 1.0
-In-Reply-To: <20200207015942.9079-3-wqu@suse.com>
+In-Reply-To: <20200207015942.9079-4-wqu@suse.com>
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
@@ -77,35 +77,12 @@ List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
 On 2/6/20 8:59 PM, Qu Wenruo wrote:
-> [BUG]
-> Btrfs/022 sometimes fails with snapshot's reference mismatch with its
-> source.
+> When btrfs/022 fails, its $seqres.full doesn't contain much useful info
+> to debug.
 > 
-> [CAUSE]
-> Since commit fd0830929573 ("fsstress: add the ability to create
-> snapshots") adds the ability for fsstress to create/delete snapshot and
-> subvolumes, fsstress will create new subvolumes under test dir.
+> This patch will add extra debug, including subvolid and full "btrfs
+> qgroup show" output.
 > 
-> For example, we could have the following subvolumes created by fsstress:
-> subvol a id=256
-> subvol b id=306
-> qgroupid         rfer         excl
-> --------         ----         ----
-> 0/5             16384        16384
-> 0/256        13914112        16384
-> ...
-> 0/263         3080192      2306048 		<< 2 *306* 048
-> ...
-> 0/306        13914112        16384 		<< 0/ *306
-> 
-> So when we're greping for subvolid 306, it matches qgroup 0/263 first,
-> which has difference size, and caused false alert.
-> 
-> [FIX]
-> Instead of greping "$subvolid" blindly, now grep "0/$subvolid" to catch
-> qgroupid correctly, without hitting rfer/excl values.
-> 
-> Suggested-by: Josef Bacik <josef@toxicpanda.com>
 > Signed-off-by: Qu Wenruo <wqu@suse.com>
 
 Reviewed-by: Josef Bacik <josef@toxicpanda.com>
