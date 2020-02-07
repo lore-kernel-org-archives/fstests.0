@@ -2,91 +2,132 @@ Return-Path: <SRS0=bDwJ=33=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.2 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2013AC352A2
-	for <linux-fstests@archiver.kernel.org>; Fri,  7 Feb 2020 02:11:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 13906C352A2
+	for <linux-fstests@archiver.kernel.org>; Fri,  7 Feb 2020 09:41:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id E079721D7D
-	for <linux-fstests@archiver.kernel.org>; Fri,  7 Feb 2020 02:11:03 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="GL7K3S51"
+	by mail.kernel.org (Postfix) with ESMTP id E875A24650
+	for <linux-fstests@archiver.kernel.org>; Fri,  7 Feb 2020 09:41:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727505AbgBGCLD (ORCPT
+        id S1726587AbgBGJl3 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 6 Feb 2020 21:11:03 -0500
-Received: from mail-qk1-f194.google.com ([209.85.222.194]:33069 "EHLO
-        mail-qk1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727028AbgBGCLD (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 6 Feb 2020 21:11:03 -0500
-Received: by mail-qk1-f194.google.com with SMTP id h4so803295qkm.0
-        for <fstests@vger.kernel.org>; Thu, 06 Feb 2020 18:11:01 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
-        h=subject:to:references:from:message-id:date:user-agent:mime-version
-         :in-reply-to:content-language:content-transfer-encoding;
-        bh=GohM5j4mI7JcEUmByle4atLeR2+HlAMwdV2lrgFqoU4=;
-        b=GL7K3S51MuifAY+a5v4KEKjb5Mt8ncrz3FW5AR8lJxh4RRI9nnJGtdZW8pMsIy7/W1
-         GwT9zAbtU4v7Ubz1ajfR8FQYIh+TvuDATbj4tyI31NOeFnCu1uY5KOpEX6t/s3/JcJQB
-         yEtUHrdHelAbmFXWgLKSU6DCT7hiGUyRaJ4m0eAMMhytQkSHFAjrOrJ0sZPTAv+vHxnL
-         GRDC/rDuwmZKv6TosGs5fc/wUaRzdUD5CxtneY4KcAmtTayr83E3g0pPW4UC7BWbjQ9o
-         Nu30NIKyZ/Mg7tQevteHeZMXhm+1wPCPW4dUrfCNbR12b0CW+eJPYT46sjV+PsgiU71P
-         Dnjw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=GohM5j4mI7JcEUmByle4atLeR2+HlAMwdV2lrgFqoU4=;
-        b=k9k/J09j5F/KWaSCuuXpXd6wEG57HjKIsjc7OxM2+Nlz1MpyDguTrA9ITPTy8WaQ7c
-         D/aNRmlsvxtWQd+EbOoW9+QhNTfpE3vKbU+7QBCSI2jyMPWT5KCD2oLOQsRh8jbBxR83
-         OTGaqQne3zlK7pwRbX232HgUng31GytTCAgxCZZWKbbvGFeUwArSjIVho3rEKiqbqKUa
-         qtjEYTHSK7Li2dYJ0A/vUyht3mUeufbqW7hmaVYULOsyB5q/5IwpC6wYSAsqbhOY/u58
-         Z8+0NJyfzYB61HoaIheTMalGbwM2N6Vz+nvQWt7n7oUf4x/1rmRlvsF0ZK8mznN8D/Sn
-         n7Vg==
-X-Gm-Message-State: APjAAAXhGu8/EWz2JaHQwUaX+OPs9SI7w0Sh9n0uGQmDxJufi2UKnhuX
-        wyBPSVWA6k+kdxsmSZPgW2J27Qd/Vsc=
-X-Google-Smtp-Source: APXvYqxFptk9pQSSnuaAFg60/m6rsUIjV0fHObqrs+cVKW5h2WsKnlKWJSoDXpyAZu+gPGxd6a/a/Q==
-X-Received: by 2002:a37:8ec7:: with SMTP id q190mr5181076qkd.412.1581041460901;
-        Thu, 06 Feb 2020 18:11:00 -0800 (PST)
-Received: from [192.168.1.106] ([107.15.81.208])
-        by smtp.gmail.com with ESMTPSA id d18sm596126qke.75.2020.02.06.18.10.59
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 06 Feb 2020 18:11:00 -0800 (PST)
-Subject: Re: [PATCH 3/3] fstests: btrfs/022: Add debug output
+        Fri, 7 Feb 2020 04:41:29 -0500
+Received: from mx2.suse.de ([195.135.220.15]:60036 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726451AbgBGJl3 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 7 Feb 2020 04:41:29 -0500
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+Received: from relay2.suse.de (unknown [195.135.220.254])
+        by mx2.suse.de (Postfix) with ESMTP id D2521AFE4;
+        Fri,  7 Feb 2020 09:41:26 +0000 (UTC)
+Subject: Re: [PATCH 1/3] fstests: btrfs: Use word mathcing for
+ _btrfs_get_subvolid()
 To:     Qu Wenruo <wqu@suse.com>, fstests@vger.kernel.org,
         linux-btrfs@vger.kernel.org
+Cc:     Josef Bacik <josef@toxicpanda.com>
 References: <20200207015942.9079-1-wqu@suse.com>
- <20200207015942.9079-4-wqu@suse.com>
-From:   Josef Bacik <josef@toxicpanda.com>
-Message-ID: <e734fda2-04f9-0dc8-ae6c-88ce415a95f1@toxicpanda.com>
-Date:   Thu, 6 Feb 2020 21:10:59 -0500
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:68.0)
- Gecko/20100101 Thunderbird/68.4.2
+ <20200207015942.9079-2-wqu@suse.com>
+From:   Nikolay Borisov <nborisov@suse.com>
+Autocrypt: addr=nborisov@suse.com; prefer-encrypt=mutual; keydata=
+ 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
+Message-ID: <b7a6bacf-0434-9743-1ff0-41f9344421db@suse.com>
+Date:   Fri, 7 Feb 2020 11:41:25 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.4.1
 MIME-Version: 1.0
-In-Reply-To: <20200207015942.9079-4-wqu@suse.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
+In-Reply-To: <20200207015942.9079-2-wqu@suse.com>
+Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 2/6/20 8:59 PM, Qu Wenruo wrote:
-> When btrfs/022 fails, its $seqres.full doesn't contain much useful info
-> to debug.
+
+
+On 7.02.20 г. 3:59 ч., Qu Wenruo wrote:
+> Current _btrfs_get_subvolid() can't handle the following case at all:
+>   # btrfs subvol list $SCRATCH_MNT
+>   ID 256 gen 9 top level 5 path subv1
+>   ID 257 gen 7 top level 256 path subv1/subv2
+>   ID 258 gen 8 top level 256 path subv1/subv3
+>   ID 259 gen 9 top level 256 path subv1/subv4
 > 
-> This patch will add extra debug, including subvolid and full "btrfs
-> qgroup show" output.
+> If we call "_btrfs_get_subvolid $SCRATCH_MNT subv1" we will get a list
+> of all subvolumes, not the subvolid of subv1.
 > 
+> To address this problem, we go egrep to match $name which starts with a
+> space, and at the end of a line.
+> So that all other subvolumes won't hit.
+> 
+> Suggested-by: Josef Bacik <josef@toxicpanda.com>
 > Signed-off-by: Qu Wenruo <wqu@suse.com>
 
-Reviewed-by: Josef Bacik <josef@toxicpanda.com>
+Reviewed-by: Nikolay Borisov <nborisov@suse.com>
 
-Thanks,
+> ---
+>  common/btrfs | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/common/btrfs b/common/btrfs
+> index 19ac7cc4..85b33e4c 100644
+> --- a/common/btrfs
+> +++ b/common/btrfs
+> @@ -7,7 +7,7 @@ _btrfs_get_subvolid()
+>  	mnt=$1
+>  	name=$2
+>  
+> -	$BTRFS_UTIL_PROG sub list $mnt | grep $name | awk '{ print $2 }'
+> +	$BTRFS_UTIL_PROG sub list $mnt | egrep "\s$name$" | awk '{ print $2 }'
 
-Josef
+nit: But you don't even need egrep for this, you could have simply used
+"grep $name$"
+
+>  }
+>  
+>  # _require_btrfs_command <command> [<subcommand>|<option>]
+> 
