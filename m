@@ -2,97 +2,159 @@ Return-Path: <SRS0=bDwJ=33=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.7 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 57FB5C04EB5
-	for <linux-fstests@archiver.kernel.org>; Fri,  7 Feb 2020 15:38:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 40B23C04EB5
+	for <linux-fstests@archiver.kernel.org>; Fri,  7 Feb 2020 15:59:32 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 3535920720
-	for <linux-fstests@archiver.kernel.org>; Fri,  7 Feb 2020 15:38:30 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 14C6F214AF
+	for <linux-fstests@archiver.kernel.org>; Fri,  7 Feb 2020 15:59:32 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="RHnNux/q"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726988AbgBGPi3 (ORCPT
+        id S1726974AbgBGP7b (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 7 Feb 2020 10:38:29 -0500
-Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:59130 "EHLO
-        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726982AbgBGPi3 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 7 Feb 2020 10:38:29 -0500
-Received: from callcc.thunk.org (guestnat-104-133-0-101.corp.google.com [104.133.0.101] (may be forged))
-        (authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 017FcOAI024382
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Fri, 7 Feb 2020 10:38:25 -0500
-Received: by callcc.thunk.org (Postfix, from userid 15806)
-        id 48821420324; Fri,  7 Feb 2020 10:38:24 -0500 (EST)
-Date:   Fri, 7 Feb 2020 10:38:24 -0500
-From:   "Theodore Y. Ts'o" <tytso@mit.edu>
-To:     Murphy Zhou <jencce.kernel@gmail.com>
-Cc:     linux-ext4@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: ext4 dio RWF_NOWAIT change
-Message-ID: <20200207153824.GA122530@mit.edu>
-References: <20200205091344.u5c3nnblezzh5xgb@xzhoux.usersys.redhat.com>
+        Fri, 7 Feb 2020 10:59:31 -0500
+Received: from userp2130.oracle.com ([156.151.31.86]:55998 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726874AbgBGP7b (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 7 Feb 2020 10:59:31 -0500
+Received: from pps.filterd (userp2130.oracle.com [127.0.0.1])
+        by userp2130.oracle.com (8.16.0.27/8.16.0.27) with SMTP id 017FYJqo131277;
+        Fri, 7 Feb 2020 15:59:27 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=subject : to : cc :
+ references : from : message-id : date : mime-version : in-reply-to :
+ content-type : content-transfer-encoding; s=corp-2020-01-29;
+ bh=NJynFQC+J3hZndE3Kejw6DBfNcDNvipxIcBhAOmSFnM=;
+ b=RHnNux/qBG2gO1EHOu/hSGzImG2xzsMHjHxQQS7rXPJJVmGLbZVx79ctLLXndEKGiaG3
+ hcyC5b6WmZRFXTnGPAO+CD3zuSotRC/BBqCGesmeknryLGEbHluPcoGs6OJEZcindWR3
+ NOPUu1JPud11LC7dtiME6wSehrs4rXrxDtnY+7lSGFiwmN9k9u/AnSc7L3VdpzM9fTzd
+ Ic4gLwQTeGb+jiv5eeq/vG3fZz2VIitnH04LkkVcXaTD4jyfJh0zMwv5f0FrtSsNUDEr
+ gR8e4Bd28h2mExgeI6ThAjbQce8Aa3KK+Yj16LDG8om0hbUEMHkFPlm0iBPtwuwhLVS+ 0g== 
+Received: from aserp3030.oracle.com (aserp3030.oracle.com [141.146.126.71])
+        by userp2130.oracle.com with ESMTP id 2xykbpgum4-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Fri, 07 Feb 2020 15:59:27 +0000
+Received: from pps.filterd (aserp3030.oracle.com [127.0.0.1])
+        by aserp3030.oracle.com (8.16.0.27/8.16.0.27) with SMTP id 017FYM5U071049;
+        Fri, 7 Feb 2020 15:59:27 GMT
+Received: from aserv0122.oracle.com (aserv0122.oracle.com [141.146.126.236])
+        by aserp3030.oracle.com with ESMTP id 2y16pqyph4-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Fri, 07 Feb 2020 15:59:26 +0000
+Received: from abhmp0006.oracle.com (abhmp0006.oracle.com [141.146.116.12])
+        by aserv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 017FxQeT032702;
+        Fri, 7 Feb 2020 15:59:26 GMT
+Received: from [192.168.1.119] (/39.109.145.141)
+        by default (Oracle Beehive Gateway v4.0)
+        with ESMTP ; Fri, 07 Feb 2020 07:59:25 -0800
+Subject: Re: [PATCH] fstests: btrfs/179 call quota rescan
+To:     Qu Wenruo <quwenruo.btrfs@gmx.com>, fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org
+References: <1581076895-6688-1-git-send-email-anand.jain@oracle.com>
+ <1fae4e42-e8ce-d16d-8b2f-cada33ee67bf@gmx.com>
+From:   Anand Jain <anand.jain@oracle.com>
+Message-ID: <580c99c8-dcfd-d12b-6ede-7636bf404d32@oracle.com>
+Date:   Fri, 7 Feb 2020 23:59:13 +0800
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:52.0)
+ Gecko/20100101 Thunderbird/52.9.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200205091344.u5c3nnblezzh5xgb@xzhoux.usersys.redhat.com>
+In-Reply-To: <1fae4e42-e8ce-d16d-8b2f-cada33ee67bf@gmx.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9523 signatures=668685
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=0 malwarescore=0
+ phishscore=0 bulkscore=0 spamscore=0 mlxscore=0 mlxlogscore=999
+ adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.0.1-1911140001 definitions=main-2002070119
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9523 signatures=668685
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 priorityscore=1501 malwarescore=0
+ suspectscore=0 phishscore=0 bulkscore=0 spamscore=0 clxscore=1015
+ lowpriorityscore=0 mlxscore=0 impostorscore=0 mlxlogscore=999 adultscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.0.1-1911140001
+ definitions=main-2002070119
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Feb 05, 2020 at 05:13:44PM +0800, Murphy Zhou wrote:
-> Hi,
-> 
-> Kernel commit 378f32bab3714f04c4e0c3aee4129f6703805550
-> Author: Matthew Bobrowski <mbobrowski@mbobrowski.org>
-> Date:   Tue Nov 5 23:02:39 2019 +1100
-> 
->     ext4: introduce direct I/O write using iomap infrastructure
-> 
-> 
-> Changed the logic of dio+RWF_NOWAIT
-> 
-> from:
-> 
-> -       if (!inode_trylock(inode)) {
-> -               if (iocb->ki_flags & IOCB_NOWAIT)
-> -                       return -EAGAIN;
-> -               inode_lock(inode);
-> -       }
-> 
-> 
-> to:
-> 
-> +       if (iocb->ki_flags & IOCB_NOWAIT) {
-> +               if (!inode_trylock(inode))
-> +                       return -EAGAIN;
-> +       } else {
-> +               inode_lock(inode);
-> +       }
-> 
-> 
-> fstests generic/471 expecet EAGAIN on this situation, so it started to
-> fail since than.
 
-I don't understand why this specific change would cause the situation.
-In the generic/471 test, here iocb->ki_flags will have IOCB_NOWAIT
-set, and in that case I don't see how there would be a change in
-behavior with respect to EAGAIN being returned.
 
-In any case, I've been suppressing generic/471 because of concerns
-that the test is bogus so I hadn't noticed.  From
-kvm-xfstests/test-appliance/files/root/fs/global_exclude:
+On 7/2/20 8:15 PM, Qu Wenruo wrote:
+> 
+> 
+> On 2020/2/7 下午8:01, Anand Jain wrote:
+>> On some systems btrfs/179 fails as the check finds that there is
+>> difference in the qgroup counts.
+>>
+>> By the async nature of qgroup tree scan, the latest qgroup counts at the
+>> time of umount might not be upto date,
+> 
+> Yes, so far so good.
+> 
+>> if it isn't then the check will
+>> report the difference in count. The difference in qgroup counts are anyway
+>> updated in the following mount, so it is not a real issue that this test
+>> case is trying to verify.
+> 
+> No problem either.
+> 
+>> So make sure the qgroup counts are updated
+>> before unmount happens and make the check happy.
+> 
+> But the solution doesn't look correct to me.
+> 
+> We should either make btrfs-check to handle such half-dropped case
+> better,
 
-# The test generic/471 tests the RWF_NOWAIT flag; however
-# how it is supposed to work with file systems is disputed,
-# and not all device drivers support it.  As a result
-# it doesn't work if an LVM device driver is in use (as is the
-# case with gce-xfstests).  So let's suppress it for now.  For
-# more details see:
-# https://lore.kernel.org/linux-block/20190723220502.GX7777@dread.disaster.area/
-generic/471
+  Check is ok. The count as check counts matches with the count after 
+the mount. So what is recorded in the qgroup is not upto date.
 
-							- Ted
+> or find a way to wait for all subvolume drop to be finished in
+> test case.
+
+Yes this is one way. Just wait for few seconds will do, test passes. Do 
+you know any better way?
+
+Thanks, Anand
+
+> Papering the test by rescan is not a good idea at all.
+> If one day we really hit some qgroup accounting problem, this papering
+> way could hugely reduce the coverage.
+> 
+
+
+> Thanks,
+> Qu
+> 
+>>
+>> Signed-off-by: Anand Jain <anand.jain@oracle.com>
+>> ---
+>>   tests/btrfs/179 | 8 ++++++++
+>>   1 file changed, 8 insertions(+)
+>>
+>> diff --git a/tests/btrfs/179 b/tests/btrfs/179
+>> index 4a24ea419a7e..74e91841eaa6 100755
+>> --- a/tests/btrfs/179
+>> +++ b/tests/btrfs/179
+>> @@ -109,6 +109,14 @@ wait $snapshot_pid
+>>   kill $delete_pid
+>>   wait $delete_pid
+>>   
+>> +# By the async nature of qgroup tree scan, the latest qgroup counts at the time
+>> +# of umount might not be upto date, if it isn't then the check will report the
+>> +# difference in count. The difference in qgroup counts are anyway updated in the
+>> +# following mount, so it is not a real issue that this test case is trying to
+>> +# verify. So make sure the qgroup counts are updated before unmount happens.
+>> +
+>> +$BTRFS_UTIL_PROG quota rescan -w $SCRATCH_MNT >> $seqres.full
+>> +
+>>   # success, all done
+>>   echo "Silence is golden"
+>>   
+>>
+> 
