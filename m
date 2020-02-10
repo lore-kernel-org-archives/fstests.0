@@ -1,161 +1,194 @@
-Return-Path: <SRS0=beki=35=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=LxO1=36=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.0 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3AEACC35250
-	for <linux-fstests@archiver.kernel.org>; Sun,  9 Feb 2020 16:04:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D9223C2BA83
+	for <linux-fstests@archiver.kernel.org>; Mon, 10 Feb 2020 00:29:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 0E60D20715
-	for <linux-fstests@archiver.kernel.org>; Sun,  9 Feb 2020 16:04:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9CD9C208C4
+	for <linux-fstests@archiver.kernel.org>; Mon, 10 Feb 2020 00:29:17 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="pjIPlWg3"
+	dkim=pass (1024-bit key) header.d=gmx.net header.i=@gmx.net header.b="IUxEJPUv"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727661AbgBIQD7 (ORCPT
+        id S1726207AbgBJA3R (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 9 Feb 2020 11:03:59 -0500
-Received: from mail-pj1-f43.google.com ([209.85.216.43]:36888 "EHLO
-        mail-pj1-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727777AbgBIQD7 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 9 Feb 2020 11:03:59 -0500
-Received: by mail-pj1-f43.google.com with SMTP id m13so3097872pjb.2
-        for <fstests@vger.kernel.org>; Sun, 09 Feb 2020 08:03:59 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=message-id:date:from:to:subject:mime-version:content-disposition;
-        bh=THRGL4klm2DalVWBeaTKivP38KxQ5hGV5H6/KuuFWmI=;
-        b=pjIPlWg3PhMTEsl04lK81TEUMZPOqQ4OafUscNDxz5iy6qvzJEp536fdAIgH7A3NcF
-         6ugLMP6bGvC+D2v2cJaD8fGjiyFLxkbnl+9zDA8dRxbBrpDYsFsEOdn+KBL1Aww39jZO
-         gmJCCWfE0DXJ0gtVcmSr1RBgSiLBz0fwFIQrzQfy8/Df8PFntxdx+EBgMi6bccAEJsLa
-         VR+9hbiSGHulabmiLU9gPH0SFYsxriPAH2yWn2iNyCfnWtegy1/nhCV5og4PqrpN9Rm8
-         U0EdKw4RFWudY4amd2cI200pf1ToFAbG/jpXzVmPc+D0Q1IzL2K581tlPFPZrMpYbJhU
-         9uDw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:message-id:date:from:to:subject:mime-version
-         :content-disposition;
-        bh=THRGL4klm2DalVWBeaTKivP38KxQ5hGV5H6/KuuFWmI=;
-        b=ISZvziUbVk0W6kavBp0KUnJ6ew1a6jP9gLol2lpCVIZ7QXgK0F5F/efATjRcPQoLt/
-         eHCS+HtlcQ6JybuAsndbQdw0apPPahxWAaqTjt4giLQXUwCcKZpStA16rtUjpHhhI+OI
-         MZMl3QF4ZvwYBKA//Q83F8tpCDeLg+jU/HTsRew0jU4ltKUF4i0RbnekTuJaH+LY4DFV
-         kYg3tLp9weufI7TWrfSn/fK4A1tIphHQgwyFWv8NlneUeeJopEKda990d3edsDpP6hSR
-         GCq24eRIoOrX+irrVuhxWhK1EcsFrsSNklP75ttxrlXWTqRIOkXUz2tg6rWSLDtroTZU
-         s87g==
-X-Gm-Message-State: APjAAAUbE12LXlsrjHZmKu6XIcqidTphvsKs/WeySIbBl0ZqcptfEdM1
-        GwwOw9gxeiYF9V/VoCAKLFikulyY
-X-Google-Smtp-Source: APXvYqxMnEvoqDBkjZjSVLHa2mm23Q6NbMwRdqmQIIFBf5a+gbWj/WgMCoJiH5n5h362Rxucj1xuZg==
-X-Received: by 2002:a17:902:9890:: with SMTP id s16mr7983969plp.77.1581264238802;
-        Sun, 09 Feb 2020 08:03:58 -0800 (PST)
-Received: from localhost ([178.128.102.47])
-        by smtp.gmail.com with ESMTPSA id 133sm9537348pfy.14.2020.02.09.08.03.57
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 09 Feb 2020 08:03:58 -0800 (PST)
-Message-ID: <5e402d6e.1c69fb81.a5f7a.9694@mx.google.com>
-Date:   Mon, 10 Feb 2020 00:03:53 +0800
-From:   Eryu Guan <guaneryu@gmail.com>
-To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: master branch updated to 2806589445b8
+        Sun, 9 Feb 2020 19:29:17 -0500
+Received: from mout.gmx.net ([212.227.15.18]:39131 "EHLO mout.gmx.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725970AbgBJA3Q (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 9 Feb 2020 19:29:16 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net;
+        s=badeba3b8450; t=1581294550;
+        bh=cggfV9LbpJQBPUOmcHm3Sufx6z56Ueks81V1fPYbPU8=;
+        h=X-UI-Sender-Class:Subject:To:Cc:References:From:Date:In-Reply-To;
+        b=IUxEJPUvS+7v9VThQYAVHZ2Hnzmy581BNmXIYH1GftqC+bJlSLrsDOCVtBGJYNJRn
+         YTBA/dz4ZZHFdqUqEEuz/CbJSae1RJ1hc+c5zK/9J4+oF1B3dc53NYHl1/VwmPRZjW
+         btwMsygkcGKRvf4vpV8ZTKNGzxLwfLttZVfJLV08=
+X-UI-Sender-Class: 01bb95c1-4bf8-414a-932a-4f6e2808ef9c
+Received: from [0.0.0.0] ([149.28.201.231]) by mail.gmx.com (mrgmx004
+ [212.227.17.184]) with ESMTPSA (Nemesis) id 1MuUj2-1jJ1jL33aM-00rZBB; Mon, 10
+ Feb 2020 01:29:10 +0100
+Subject: Re: [PATCH 1/2] fstests: Always dump dmesg for failed test cases
+To:     Eryu Guan <guaneryu@gmail.com>, Qu Wenruo <wqu@suse.com>
+Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+References: <20200120070938.30247-1-wqu@suse.com>
+ <20200209154840.GF2697@desktop>
+From:   Qu Wenruo <quwenruo.btrfs@gmx.com>
+Autocrypt: addr=quwenruo.btrfs@gmx.com; prefer-encrypt=mutual; keydata=
+ mQENBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
+ 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
+ 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
+ 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
+ gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
+ AAG0IlF1IFdlbnJ1byA8cXV3ZW5ydW8uYnRyZnNAZ214LmNvbT6JAU4EEwEIADgCGwMFCwkI
+ BwIGFQgJCgsCBBYCAwECHgECF4AWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCXZw1oQAKCRDC
+ PZHzoSX+qCY6CACd+mWu3okGwRKXju6bou+7VkqCaHTdyXwWFTsr+/0ly5nUdDtT3yEVggPJ
+ 3VP70wjlrxUjNjFb6iIvGYxiPOrop1NGwGYvQktgRhaIhALG6rPoSSAhGNjwGVRw0km0PlIN
+ D29BTj/lYEk+jVM1YL0QLgAE1AI3krihg/lp/fQT53wLhR8YZIF8ETXbClQG1vJ0cllPuEEv
+ efKxRyiTSjB+PsozSvYWhXsPeJ+KKjFen7ebE5reQTPFzSHctCdPnoR/4jSPlnTlnEvLeqcD
+ ZTuKfQe1gWrPeevQzgCtgBF/WjIOeJs41klnYzC3DymuQlmFubss0jShLOW8eSOOWhLRuQEN
+ BFnVga8BCACqU+th4Esy/c8BnvliFAjAfpzhI1wH76FD1MJPmAhA3DnX5JDORcgaCbPEwhLj
+ 1xlwTgpeT+QfDmGJ5B5BlrrQFZVE1fChEjiJvyiSAO4yQPkrPVYTI7Xj34FnscPj/IrRUUka
+ 68MlHxPtFnAHr25VIuOS41lmYKYNwPNLRz9Ik6DmeTG3WJO2BQRNvXA0pXrJH1fNGSsRb+pK
+ EKHKtL1803x71zQxCwLh+zLP1iXHVM5j8gX9zqupigQR/Cel2XPS44zWcDW8r7B0q1eW4Jrv
+ 0x19p4P923voqn+joIAostyNTUjCeSrUdKth9jcdlam9X2DziA/DHDFfS5eq4fEvABEBAAGJ
+ ATwEGAEIACYCGwwWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCXZw1rgUJCWpOfwAKCRDCPZHz
+ oSX+qFcEB/95cs8cM1OQdE/GgOfCGxwgckMeWyzOR7bkAWW0lDVp2hpgJuxBW/gyfmtBnUai
+ fnggx3EE3ev8HTysZU9q0h+TJwwJKGv6sUc8qcTGFDtavnnl+r6xDUY7A6GvXEsSoCEEynby
+ 72byGeSovfq/4AWGNPBG1L61Exl+gbqfvbECP3ziXnob009+z9I4qXodHSYINfAkZkA523JG
+ ap12LndJeLk3gfWNZfXEWyGnuciRGbqESkhIRav8ootsCIops/SqXm0/k+Kcl4gGUO/iD/T5
+ oagaDh0QtOd8RWSMwLxwn8uIhpH84Q4X1LadJ5NCgGa6xPP5qqRuiC+9gZqbq4Nj
+Message-ID: <f6243f1d-3df5-3eb1-35eb-6e7aeb2a568f@gmx.com>
+Date:   Mon, 10 Feb 2020 08:29:05 +0800
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.4.2
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="pSJeQKFoP6c6"
-Content-Disposition: inline
+In-Reply-To: <20200209154840.GF2697@desktop>
+Content-Type: multipart/signed; micalg=pgp-sha256;
+ protocol="application/pgp-signature";
+ boundary="mSBrKArHbciMTXK5PKKoqb26D5ybtpkM6"
+X-Provags-ID: V03:K1:awnA9H0YnlOHosgJLb7FiJ6wrMwTGhhjjKZX+RtAjXG2fgJ4OqL
+ PKMPqWc0arIpQgsiDmGb/RNmr/TDK+UZjX1OgSmEEFIq5j4yg9J+aNOUeiC7WQOFnvOz7RK
+ uOBjnMQ7/YZQf/IeHOJlxGJsSK5Eg3I/XE8Zvw7i1YpS6Oa1f9lfQb7u2dn7/gRBxBmSHgE
+ hYjzi+Z8ig7jxOW6Z/Fhg==
+X-UI-Out-Filterresults: notjunk:1;V03:K0:mQCGT0GzaZs=:dEO2gLvmI1fhHb7/d8Q2dQ
+ D0gnwC5jlUV+OnBUIodiLVbnYqRnQI+0KmqQPer7yAwxL6hiV7DZKVzGMp1wHLQJHV4ycBbZ/
+ ZQCMc7dSEKndAMhuDoA2ZWcb8+pc2tAGVKKhIBVR6h5F3AlL4GaP2OYwsV5Ov/X01EZEgFvN9
+ twHkhxGRKCca43xRakYzkVLXRENjHbsyPBye3pv/wTKtv1oMs+yao2yg3qW+bgsHlWGu0D46N
+ u32UM4RwIk9mFFi0DUxAcz2uv7KQNc50LTDHQSNWuaLYNI2MYPPU2TnrmGcXe9hgyHuKtlBEg
+ nWCijMcBcHd5DYCOg3kom8Cwb72pvMwsf0zz8yLQ5+fwp5LLikAu6x5X1pi7+x/GWDY41H3jp
+ H3zNNafl49HhrNSaC1HMIiwTrOKUfc/VbhabW3NB4t4DZtrMhyc5dSaE+goI0du+zTfDFfG41
+ rH+P4cQ/iws1E0IiqPHGzTG8+dNXqonQgGgqBnWRKfUJws+AHzgILWkTFTPUELMh9yOOTOTkD
+ kujMvv4cunCH4c9Mp9NROYeTI4YnrJghv2H3DCdNyVSGhVK965k9QBVjhhDI8WtQkaKjUSltU
+ ZWapDyg4ywUavF66CAjpxKkAtc3oTXg137xE/aqqQ+AgXs+D0cXLen9WPoPWDHOuttvyIbXBy
+ qlXLwxTyeryzN4UrY4GnWnByoJBSGgRgmK7+F0k41B74ZOwpWgpsg4A+1XADSJD3FAoJo53Pw
+ GjhF3a9DfFFmbqXeBQYnqNHCIfO8A4csm2sLDgfcL0TnYsItv8EP+1ixxVEeKe7IAHLOTuzAz
+ KmPjjsj+x2o/2nEJtObyqFU6cQwt2PXZjNQ+vRRNbs5xC73IYS2o9O05k6HcN/lTZYoGPkLX1
+ 4cY91DG0YCzdFuoAzDMpoaUYQPImDQcG3hoZ1EePuVRwrKRsZQ6tkycMfzdGBg267D6RVN5CI
+ zzlG/E/gJKbEkSCRcKCi1opGJpgn4mkW/MmPidQX76FC1l7cm/U5eg/58v1iZS/MYux8ZrFDw
+ lMsvgRgJ8IMfxmm8M6S5oTcwTBl2sa+bErRWCI9jKvZW9DSFBZ4QnUPTxYdw020Zu0NyyLIaC
+ 3rBibmffeaSsisgPwhgsEoTnv8wHxrSY7Vm/D9wYt+ZcMcq+9jLksllQlOUodMzoKMfvN0/9b
+ pWfFkGWeyN9B9qASJSDdvBWkK1n4bj60s4I6+C8l4yrgeWUrv0srY8LlYAriA7ZaSNevkQ6ca
+ yFX9dxsaWMuUIA8Ri
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--mSBrKArHbciMTXK5PKKoqb26D5ybtpkM6
+Content-Type: multipart/mixed; boundary="IL0Cnch6ZeCJzmKO1COFp0WImLcl7z4gA"
 
---pSJeQKFoP6c6
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+--IL0Cnch6ZeCJzmKO1COFp0WImLcl7z4gA
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: quoted-printable
 
-Hi all,
 
-The master branch of the xfstests repository at:
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+On 2020/2/9 =E4=B8=8B=E5=8D=8811:48, Eryu Guan wrote:
+> On Mon, Jan 20, 2020 at 03:09:37PM +0800, Qu Wenruo wrote:
+>> When hard-to-hit bugs happened, we really want every piece of info to
+>> help us debugging.
+>>
+>> Although we already have KEEP_DMESG config, not everyone is utilizing
+>> it, thus when hard-to-hit bugs happened, one could only set it and ret=
+ry
+>> until next hit.
+>>
+>> This patch will change the behavior by always dumping the dmesg for
+>> failed tests, so that developers can always get extra info from any
+>> failure.
+>>
+>> Signed-off-by: Qu Wenruo <wqu@suse.com>
+>> ---
+>>  check | 3 +++
+>>  1 file changed, 3 insertions(+)
+>>
+>> diff --git a/check b/check
+>> index 2e148e5776e5..e580b2249f06 100755
+>> --- a/check
+>> +++ b/check
+>> @@ -840,6 +840,9 @@ for section in $HOST_OPTIONS_SECTIONS; do
+>> =20
+>>  	# make sure we record the status of the last test we ran.
+>>  	if $err ; then
+>> +		if [ ! -f $seqres.dmesg ]; then
+>> +			_dmesg_since_test_start >$seqres.dmesg
+>> +		fi
+>=20
+> So this only saves the dmesg of the last test?
+>=20
+> And I don't think this is necessary, even if it saves the dmesgs of all=
 
-have just been updated. This update mainly pulls in the patches that have been
-reviewed by someone, which accelerates the review & merge process a lot, many
-thanks to the contributors as well as the reviewers!
+> failed tests, this behavior change requires some more diskspace and may=
 
-Though there're two new btrfs tests and one new test case in generic/527, but
-there should be no new failures if you're testing with latest Linus tree.
+> fulfill / more easily.
+>=20
+> I think if one knows he/she's debugging a hard-to-hit bug, set
+> KEEP_DMESG. Or again, make "save dmesg of every failed test" a tunable
+> behavior.
+
+Makes sense.
+
+As I just went the same solution.
 
 Thanks,
-Eryu
-
-The new head of the master branch is commit:
-
-2806589445b8 btrfs/022: Add debug output
-
-New commits:
-
-Darrick J. Wong (4):
-      [1d22275b06aa] xfs/449: filter out "Discarding..." from output
-      [13a86fa73d52] xfs/020: fix truncation test
-      [1f3f20c52f0a] xfs/117: fix inode corruption loop
-      [05730e20c354] fsx: support 64-bit operation counts
-
-Eric Biggers (1):
-      [1c5c2aa7f6da] generic/581: try to avoid flakiness in keys quota test
-
-Filipe Manana (2):
-      [c0679253bc14] generic/527: add additional test including a file with a hardlink
-      [8a861b8faf1f] btrfs: add test for incremental send for file with shared extents
-
-Josef Bacik (1):
-      [2d4500367c5e] btrfs: add a test for the btrfs file extent gap issue
-
-Qu Wenruo (3):
-      [f41020d7f026] btrfs: Use word mathcing for _btrfs_get_subvolid()
-      [9e2be2b1330b] btrfs/022: Match qgroup id more correctly
-      [2806589445b8] btrfs/022: Add debug output
+Qu
+>=20
+> Thanks,
+> Eryu
+>=20
+>>  		bad=3D"$bad $seqnum"
+>>  		n_bad=3D`expr $n_bad + 1`
+>>  		tc_status=3D"fail"
+>> --=20
+>> 2.24.1
+>>
 
 
-Code Diffstat:
+--IL0Cnch6ZeCJzmKO1COFp0WImLcl7z4gA--
 
- common/btrfs          |   2 +-
- ltp/fsx.c             |  54 ++++++++++++++-------------
- tests/btrfs/022       |  19 +++++++---
- tests/btrfs/172       |  76 ++++++++++++++++++++++++++++++++++++++
- tests/btrfs/172.out   |   3 ++
- tests/btrfs/203       | 100 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/203.out   |  25 +++++++++++++
- tests/btrfs/group     |   2 +
- tests/generic/527     |  26 +++++++++++++
- tests/generic/527.out |   4 ++
- tests/generic/581     |  29 +++++++++++----
- tests/xfs/020         |   4 +-
- tests/xfs/117         |   2 +-
- tests/xfs/449         |   2 +-
- 14 files changed, 304 insertions(+), 44 deletions(-)
---
-Eryu Guan
-guaneryu@gmail.com
-
---pSJeQKFoP6c6
+--mSBrKArHbciMTXK5PKKoqb26D5ybtpkM6
 Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAl5ALOwACgkQJlKqKVyP
-52P9dRAAsIaOSLgVvvWj6g/M9KmzF/pffu/BHGG1S+y+dYOjPEm9mOxaXF0r3c3E
-pzZeL8GMtF0N0CZwdxWX8AdUxx1Vn0Iwujv8YqtZq+4LUxk7qS3I0+69qcXu5BUH
-c3mDB6PLLmsJAqJGC4JShn63AUvgacDIJjhwdK+mIqhSxvt6cuN8iXPBU90Z7qb7
-G8PlWmclQOZSPGSrcqMkzbQRfxQ6vuTFZj6QfCQDsUYj6Glofsrivnw9jTDkY4jm
-sBZbxH86X5ZymBvA8rt3uUIP72TVlC52k6hSaluvrH+V23JDjU0T5G/yhCGqXL9N
-Eu7mvZ18ewibKi+ydSjTsj9IAhkVVuT73D2JMNf4K5YWwUWiJhVcwIhrBocpltNf
-maAWqNSx8GVSry0iEMmA2evWdvG6Q0WvYICWN05vemuNGB/vRz/RGvb3y4JPq+IQ
-NYf6ZxKj+Wzhgpr2gDLhsFQKiooxDvyPVhELhKQKZXttfPhk4RSzfjm1AMkhK5fL
-XcVYvFStcCyX0zZNRYNwxiGiuQpdlWKdItyJEfK/puUC+1AOPsCwD0F01VYwTJU6
-Z86MI/3FJIGvkDv6l+6Kl78no19TDYRZOCk/4J8GimzMsE7Zj9vuGo4WmxQ2SfzM
-+uKGm/2vgzaA0vR0PTvEF0o0q+YHN7QyEeSsTABR15MjKC85c2s=
-=iksU
+iQEzBAEBCAAdFiEELd9y5aWlW6idqkLhwj2R86El/qgFAl5Ao9EACgkQwj2R86El
+/qj0xgf/Slc2ohAEEpb0XHKhbSDITdzh7jMB3AuhdscaFNa/c6v9O7ZGQprnOLlZ
+MHEc2KuIKH+2udIBGNbc17aCZu7pYLLQeXCxt82C+kXphkBcGOFrt3JMCZm4XcMe
+sIeqxF4y/JMIEDDgAgBwhdymhAua7k5df/IWq0haiiQHdA0CCOz8Q0ELpdzAfiLR
+z8p0T1RxxMIdnu3HpfYMiYRX8WNo/W16VxcobDxrCdaAdxJuGl0aUlQNEiwzZy9z
+s0mtuTmZrFKI9MMU4zgrACsQlk/lz7OaGYKrnqr9qTa//W1LYJhq9+f+puFgIhAc
+Tq39PPJRkkwtsmmuYpWMFbKmKZJMPw==
+=WiLC
 -----END PGP SIGNATURE-----
 
---pSJeQKFoP6c6--
+--mSBrKArHbciMTXK5PKKoqb26D5ybtpkM6--
