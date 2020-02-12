@@ -2,132 +2,106 @@ Return-Path: <SRS0=afT8=4A=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DFED8C2BA83
-	for <linux-fstests@archiver.kernel.org>; Wed, 12 Feb 2020 10:50:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E6E59C2BA83
+	for <linux-fstests@archiver.kernel.org>; Wed, 12 Feb 2020 10:54:36 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id B2B2720873
-	for <linux-fstests@archiver.kernel.org>; Wed, 12 Feb 2020 10:50:28 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="YFhtNSX2"
+	by mail.kernel.org (Postfix) with ESMTP id BA7DC2082F
+	for <linux-fstests@archiver.kernel.org>; Wed, 12 Feb 2020 10:54:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727567AbgBLKu2 (ORCPT
+        id S1727163AbgBLKyg (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 12 Feb 2020 05:50:28 -0500
-Received: from mail-pl1-f195.google.com ([209.85.214.195]:33043 "EHLO
-        mail-pl1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725710AbgBLKu2 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 12 Feb 2020 05:50:28 -0500
-Received: by mail-pl1-f195.google.com with SMTP id ay11so834650plb.0;
-        Wed, 12 Feb 2020 02:50:27 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=KwYUt36/m5Zra9oiWnv5NglJ51Q8JRyxfXbpzb8jNMo=;
-        b=YFhtNSX2HQfROr6X2rfRntcwEYqvfehNLEdmf2lgJ+WO9/+QsLA7DIEoLdYr/cO8Iq
-         xh71UXRcbEzYM6wexqqD9g+Fl7bw5IZiCWqdxHkicngBTraUPWnRvT0IQg+U4NAIj+0v
-         BGAsSXGLiO+EzVZMmhJSVsANUjLQ7ANixOJKoLMvCYczq52oDxqFDxcDJeX1+HU2vvAc
-         UWoEJmIYtt21dCg6v1Z7EOL5ztQC9TaFnlkV5XBgXvaqIL7x65LHmPuuu0YUrjU6yjK+
-         XmZCSupkTQzKuzH0p7bTXT/eelKq+x756T6VunGkVxU82kaEXXixU3WLWQnQ4H3kcUGz
-         LGZQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=KwYUt36/m5Zra9oiWnv5NglJ51Q8JRyxfXbpzb8jNMo=;
-        b=KSLwvcAo47cs95LWXE7MM48NGYFRJLHkJlvXuicomXhtoUnr5KXIqZQ3QcDi0ivWdi
-         2jht31ab5s27ggPEoeLMVmWKyICCgG+6FNrScJBSbVSMg7xo/6xhfbHm7io9GDtjTvYJ
-         cSnYWPC/DV09DaBTETSyBZm43hEPSS4QpVDwVO+py0lUxDk2yhH7IVCGezcbX0AUI2AQ
-         3JHPNMJL1s+x/ptxAKvcmfED2r45nBgpBouZarhAy8Bq/Xjn0Uq3NNsa238jpKFjO+4H
-         yRybhx3c2LNdLbQ8dN2TrBy97amS2pdd1XBMADRfCDghOokCDfu9Mo0QgVX8sRya4qhX
-         qcYQ==
-X-Gm-Message-State: APjAAAVK9Nyou5AJCXse+hHEe2bxqmosS8orKj9E/voQgkkkvNfu5E3P
-        qHp5BzGXM6SxgaPDZNjo0oepDfpz
-X-Google-Smtp-Source: APXvYqx7vb0poKTK4gqwe4IOMPVElxX76jI2v8Y03uSAcMQ6UdVEsm13u5A1ppfdOfTqwu2JRiBD4A==
-X-Received: by 2002:a17:902:b484:: with SMTP id y4mr22203579plr.126.1581504627326;
-        Wed, 12 Feb 2020 02:50:27 -0800 (PST)
-Received: from localhost ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id r62sm389569pfc.89.2020.02.12.02.50.25
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 12 Feb 2020 02:50:26 -0800 (PST)
-Date:   Wed, 12 Feb 2020 18:50:19 +0800
-From:   Murphy Zhou <jencce.kernel@gmail.com>
-To:     "Theodore Y. Ts'o" <tytso@mit.edu>
-Cc:     Murphy Zhou <jencce.kernel@gmail.com>, linux-ext4@vger.kernel.org,
-        fstests@vger.kernel.org
-Subject: Re: ext4 dio RWF_NOWAIT change
-Message-ID: <20200212105019.5zah56u2l47oh3gf@xzhoux.usersys.redhat.com>
-References: <20200205091344.u5c3nnblezzh5xgb@xzhoux.usersys.redhat.com>
- <20200207153824.GA122530@mit.edu>
+        Wed, 12 Feb 2020 05:54:36 -0500
+Received: from mx2.suse.de ([195.135.220.15]:35530 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725945AbgBLKyg (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 12 Feb 2020 05:54:36 -0500
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+Received: from relay2.suse.de (unknown [195.135.220.254])
+        by mx2.suse.de (Postfix) with ESMTP id 72669B326;
+        Wed, 12 Feb 2020 10:54:34 +0000 (UTC)
+Received: by quack2.suse.cz (Postfix, from userid 1000)
+        id B2FF11E0E01; Wed, 12 Feb 2020 11:54:33 +0100 (CET)
+Date:   Wed, 12 Feb 2020 11:54:33 +0100
+From:   Jan Kara <jack@suse.cz>
+To:     Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+Cc:     Jan Kara <jack@suse.cz>, Theodore Ts'o <tytso@mit.edu>,
+        fstests <fstests@vger.kernel.org>
+Subject: Re: generic/269 hangs on lastest upstream kernel
+Message-ID: <20200212105433.GH25573@quack2.suse.cz>
+References: <59a10449-9e0f-f289-2f9f-a2028fb0b3ca@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20200207153824.GA122530@mit.edu>
+In-Reply-To: <59a10449-9e0f-f289-2f9f-a2028fb0b3ca@cn.fujitsu.com>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Feb 07, 2020 at 10:38:24AM -0500, Theodore Y. Ts'o wrote:
-> On Wed, Feb 05, 2020 at 05:13:44PM +0800, Murphy Zhou wrote:
-> > Hi,
-> > 
-> > Kernel commit 378f32bab3714f04c4e0c3aee4129f6703805550
-> > Author: Matthew Bobrowski <mbobrowski@mbobrowski.org>
-> > Date:   Tue Nov 5 23:02:39 2019 +1100
-> > 
-> >     ext4: introduce direct I/O write using iomap infrastructure
-> > 
-> > 
-> > Changed the logic of dio+RWF_NOWAIT
-> > 
-> > from:
-> > 
-> > -       if (!inode_trylock(inode)) {
-> > -               if (iocb->ki_flags & IOCB_NOWAIT)
-> > -                       return -EAGAIN;
-> > -               inode_lock(inode);
-> > -       }
-> > 
-> > 
-> > to:
-> > 
-> > +       if (iocb->ki_flags & IOCB_NOWAIT) {
-> > +               if (!inode_trylock(inode))
-> > +                       return -EAGAIN;
-> > +       } else {
-> > +               inode_lock(inode);
-> > +       }
-> > 
-> > 
-> > fstests generic/471 expecet EAGAIN on this situation, so it started to
-> > fail since than.
-> 
-> I don't understand why this specific change would cause the situation.
-> In the generic/471 test, here iocb->ki_flags will have IOCB_NOWAIT
-> set, and in that case I don't see how there would be a change in
-> behavior with respect to EAGAIN being returned.
-> 
-> In any case, I've been suppressing generic/471 because of concerns
-> that the test is bogus so I hadn't noticed.  From
-> kvm-xfstests/test-appliance/files/root/fs/global_exclude:
-> 
-> # The test generic/471 tests the RWF_NOWAIT flag; however
-> # how it is supposed to work with file systems is disputed,
-> # and not all device drivers support it.  As a result
-> # it doesn't work if an LVM device driver is in use (as is the
-> # case with gce-xfstests).  So let's suppress it for now.  For
-> # more details see:
-> # https://lore.kernel.org/linux-block/20190723220502.GX7777@dread.disaster.area/
-> generic/471
-> 
-> 							- Ted
+Hello!
 
-Thanks for all the details! Ted.
+On Tue 11-02-20 16:14:35, Yang Xu wrote:
+> Since xfstests support rename2, this case(generic/269) reports filesystem
+> inconsistent problem with ext4 on my system(4.18.0-32.el8.x86_64).
 
-Murphy
+I don't remember seeing this in my testing... It might be specific to that
+RHEL kernel.
+
+> When I test generic/269(ext4) on 5.6.0-rc1 kernel, it hangs.
+> ----------------------------------------------
+> dmesg as below:
+>    76.506753] run fstests generic/269 at 2020-02-11 05:53:44
+> [   76.955667] EXT4-fs (sdc): mounted filesystem with ordered data mode.
+> Opts: acl,                           user_xattr
+> [  100.912511] device virbr0-nic left promiscuous mode
+> [  100.912520] virbr0: port 1(virbr0-nic) entered disabled state
+> [  246.801561] INFO: task dd:17284 blocked for more than 122 seconds.
+> [  246.801564]       Not tainted 5.6.0-rc1 #41
+> [  246.801565] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables
+> this mes                           sage.
+> [  246.801566] dd              D    0 17284  16931 0x00000080
+> [  246.801568] Call Trace:
+> [  246.801584]  ? __schedule+0x251/0x690
+> [  246.801586]  schedule+0x40/0xb0
+> [  246.801588]  wb_wait_for_completion+0x52/0x80
+> [  246.801591]  ? finish_wait+0x80/0x80
+> [  246.801592]  __writeback_inodes_sb_nr+0xaa/0xd0
+> [  246.801593]  try_to_writeback_inodes_sb+0x3c/0x50
+
+Interesting. Does the hang resolve eventually or the machine is hung
+permanently? If the hang is permanent, can you do:
+
+echo w >/proc/sysrq-trigger
+
+and send us the stacktraces from dmesg? Thanks!
+
+								Honza
+
+> [  246.801609]  ext4_nonda_switch+0x7b/0x80 [ext4]
+> [  246.801618]  ext4_da_write_begin+0x6f/0x480 [ext4]
+> [  246.801621]  generic_perform_write+0xf4/0x1b0
+> [  246.801628]  ext4_buffered_write_iter+0x8d/0x120 [ext4]
+> [  246.801634]  ext4_file_write_iter+0x6e/0x700 [ext4]
+> [  246.801636]  new_sync_write+0x12d/0x1d0
+> [  246.801638]  vfs_write+0xa5/0x1a0
+> [  246.801640]  ksys_write+0x59/0xd0
+> [  246.801643]  do_syscall_64+0x55/0x1b0
+> [  246.801645]  entry_SYSCALL_64_after_hwframe+0x44/0xa9
+> [  246.801646] RIP: 0033:0x7fe9ec947b28
+> [  246.801650] Code: Bad RIP value.
+> ----------------------------------------------
+> 
+> Does anyone also meet this problem?
+> 
+> Best Regards
+> Yang Xu
+> 
+> 
+-- 
+Jan Kara <jack@suse.com>
+SUSE Labs, CR
