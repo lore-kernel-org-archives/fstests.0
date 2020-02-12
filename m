@@ -2,113 +2,132 @@ Return-Path: <SRS0=afT8=4A=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E83BEC352A4
-	for <linux-fstests@archiver.kernel.org>; Wed, 12 Feb 2020 09:35:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DFED8C2BA83
+	for <linux-fstests@archiver.kernel.org>; Wed, 12 Feb 2020 10:50:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 8FEE52073C
-	for <linux-fstests@archiver.kernel.org>; Wed, 12 Feb 2020 09:35:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B2B2720873
+	for <linux-fstests@archiver.kernel.org>; Wed, 12 Feb 2020 10:50:28 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="l5rDAAoB"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="YFhtNSX2"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728834AbgBLJfV (ORCPT
+        id S1727567AbgBLKu2 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 12 Feb 2020 04:35:21 -0500
-Received: from userp2130.oracle.com ([156.151.31.86]:45216 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728626AbgBLJfU (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 12 Feb 2020 04:35:20 -0500
-Received: from pps.filterd (userp2130.oracle.com [127.0.0.1])
-        by userp2130.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 01C9WenN157848;
-        Wed, 12 Feb 2020 09:35:19 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=from : to : cc :
- subject : date : message-id; s=corp-2020-01-29;
- bh=UZgTeNn3pFfDcQDEzGHX4wvZEumYLpiPqufzcgnzhzM=;
- b=l5rDAAoBXbYSNDm63UQes8gq3pht7ZLMM7TI5meUOEoE56p0rosGjphKpAfWY2WSH5fK
- 80LiJOtNL3rFP3zcdoueJWh6eqW6OMsQ3ziQkp6jd++p42G2CMbx1OxiCPXW2aW4k5Jw
- GK9Q5NusirRKKFBFZlG9qNhUciO8Irxkjw8NWgiuPdk5Y+j8dJ3ORivxA0cKthAHEcyR
- ALvIKFmBWPliwgKWNdhOtsTVLgJUto/1c4+tS1LI7zM3zqx2tb3Uy0Tf3OKFgKgczYB7
- gTELIjWgYE9t3oenvEezBRaPeEgwRiVzfZ9gnKWQ9uXxXU4U6mxZy+9/4LmliHX6KRL4 gw== 
-Received: from aserp3020.oracle.com (aserp3020.oracle.com [141.146.126.70])
-        by userp2130.oracle.com with ESMTP id 2y2k88914p-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Wed, 12 Feb 2020 09:35:19 +0000
-Received: from pps.filterd (aserp3020.oracle.com [127.0.0.1])
-        by aserp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 01C9WVq2068296;
-        Wed, 12 Feb 2020 09:35:18 GMT
-Received: from aserv0122.oracle.com (aserv0122.oracle.com [141.146.126.236])
-        by aserp3020.oracle.com with ESMTP id 2y26svxrd5-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Wed, 12 Feb 2020 09:35:18 +0000
-Received: from abhmp0004.oracle.com (abhmp0004.oracle.com [141.146.116.10])
-        by aserv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 01C9ZIuP015123;
-        Wed, 12 Feb 2020 09:35:18 GMT
-Received: from tp.localdomain (/39.109.145.141)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Wed, 12 Feb 2020 01:35:18 -0800
-From:   Anand Jain <anand.jain@oracle.com>
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org
-Subject: [PATCH v2] fstests: btrfs/179 call sync qgroup counts
-Date:   Wed, 12 Feb 2020 17:35:09 +0800
-Message-Id: <1581500109-22736-1-git-send-email-anand.jain@oracle.com>
-X-Mailer: git-send-email 1.8.3.1
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9528 signatures=668685
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 adultscore=0 phishscore=0 mlxscore=0
- malwarescore=0 bulkscore=0 spamscore=0 suspectscore=13 mlxlogscore=999
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2001150001
- definitions=main-2002120076
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9528 signatures=668685
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 adultscore=0 lowpriorityscore=0
- suspectscore=13 bulkscore=0 phishscore=0 mlxlogscore=999 mlxscore=0
- malwarescore=0 impostorscore=0 clxscore=1015 spamscore=0
- priorityscore=1501 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2001150001 definitions=main-2002120076
+        Wed, 12 Feb 2020 05:50:28 -0500
+Received: from mail-pl1-f195.google.com ([209.85.214.195]:33043 "EHLO
+        mail-pl1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725710AbgBLKu2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 12 Feb 2020 05:50:28 -0500
+Received: by mail-pl1-f195.google.com with SMTP id ay11so834650plb.0;
+        Wed, 12 Feb 2020 02:50:27 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=KwYUt36/m5Zra9oiWnv5NglJ51Q8JRyxfXbpzb8jNMo=;
+        b=YFhtNSX2HQfROr6X2rfRntcwEYqvfehNLEdmf2lgJ+WO9/+QsLA7DIEoLdYr/cO8Iq
+         xh71UXRcbEzYM6wexqqD9g+Fl7bw5IZiCWqdxHkicngBTraUPWnRvT0IQg+U4NAIj+0v
+         BGAsSXGLiO+EzVZMmhJSVsANUjLQ7ANixOJKoLMvCYczq52oDxqFDxcDJeX1+HU2vvAc
+         UWoEJmIYtt21dCg6v1Z7EOL5ztQC9TaFnlkV5XBgXvaqIL7x65LHmPuuu0YUrjU6yjK+
+         XmZCSupkTQzKuzH0p7bTXT/eelKq+x756T6VunGkVxU82kaEXXixU3WLWQnQ4H3kcUGz
+         LGZQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=KwYUt36/m5Zra9oiWnv5NglJ51Q8JRyxfXbpzb8jNMo=;
+        b=KSLwvcAo47cs95LWXE7MM48NGYFRJLHkJlvXuicomXhtoUnr5KXIqZQ3QcDi0ivWdi
+         2jht31ab5s27ggPEoeLMVmWKyICCgG+6FNrScJBSbVSMg7xo/6xhfbHm7io9GDtjTvYJ
+         cSnYWPC/DV09DaBTETSyBZm43hEPSS4QpVDwVO+py0lUxDk2yhH7IVCGezcbX0AUI2AQ
+         3JHPNMJL1s+x/ptxAKvcmfED2r45nBgpBouZarhAy8Bq/Xjn0Uq3NNsa238jpKFjO+4H
+         yRybhx3c2LNdLbQ8dN2TrBy97amS2pdd1XBMADRfCDghOokCDfu9Mo0QgVX8sRya4qhX
+         qcYQ==
+X-Gm-Message-State: APjAAAVK9Nyou5AJCXse+hHEe2bxqmosS8orKj9E/voQgkkkvNfu5E3P
+        qHp5BzGXM6SxgaPDZNjo0oepDfpz
+X-Google-Smtp-Source: APXvYqx7vb0poKTK4gqwe4IOMPVElxX76jI2v8Y03uSAcMQ6UdVEsm13u5A1ppfdOfTqwu2JRiBD4A==
+X-Received: by 2002:a17:902:b484:: with SMTP id y4mr22203579plr.126.1581504627326;
+        Wed, 12 Feb 2020 02:50:27 -0800 (PST)
+Received: from localhost ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id r62sm389569pfc.89.2020.02.12.02.50.25
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 12 Feb 2020 02:50:26 -0800 (PST)
+Date:   Wed, 12 Feb 2020 18:50:19 +0800
+From:   Murphy Zhou <jencce.kernel@gmail.com>
+To:     "Theodore Y. Ts'o" <tytso@mit.edu>
+Cc:     Murphy Zhou <jencce.kernel@gmail.com>, linux-ext4@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: Re: ext4 dio RWF_NOWAIT change
+Message-ID: <20200212105019.5zah56u2l47oh3gf@xzhoux.usersys.redhat.com>
+References: <20200205091344.u5c3nnblezzh5xgb@xzhoux.usersys.redhat.com>
+ <20200207153824.GA122530@mit.edu>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20200207153824.GA122530@mit.edu>
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On some systems btrfs/179 fails because the check finds that there is
-difference in the qgroup counts.
+On Fri, Feb 07, 2020 at 10:38:24AM -0500, Theodore Y. Ts'o wrote:
+> On Wed, Feb 05, 2020 at 05:13:44PM +0800, Murphy Zhou wrote:
+> > Hi,
+> > 
+> > Kernel commit 378f32bab3714f04c4e0c3aee4129f6703805550
+> > Author: Matthew Bobrowski <mbobrowski@mbobrowski.org>
+> > Date:   Tue Nov 5 23:02:39 2019 +1100
+> > 
+> >     ext4: introduce direct I/O write using iomap infrastructure
+> > 
+> > 
+> > Changed the logic of dio+RWF_NOWAIT
+> > 
+> > from:
+> > 
+> > -       if (!inode_trylock(inode)) {
+> > -               if (iocb->ki_flags & IOCB_NOWAIT)
+> > -                       return -EAGAIN;
+> > -               inode_lock(inode);
+> > -       }
+> > 
+> > 
+> > to:
+> > 
+> > +       if (iocb->ki_flags & IOCB_NOWAIT) {
+> > +               if (!inode_trylock(inode))
+> > +                       return -EAGAIN;
+> > +       } else {
+> > +               inode_lock(inode);
+> > +       }
+> > 
+> > 
+> > fstests generic/471 expecet EAGAIN on this situation, so it started to
+> > fail since than.
+> 
+> I don't understand why this specific change would cause the situation.
+> In the generic/471 test, here iocb->ki_flags will have IOCB_NOWAIT
+> set, and in that case I don't see how there would be a change in
+> behavior with respect to EAGAIN being returned.
+> 
+> In any case, I've been suppressing generic/471 because of concerns
+> that the test is bogus so I hadn't noticed.  From
+> kvm-xfstests/test-appliance/files/root/fs/global_exclude:
+> 
+> # The test generic/471 tests the RWF_NOWAIT flag; however
+> # how it is supposed to work with file systems is disputed,
+> # and not all device drivers support it.  As a result
+> # it doesn't work if an LVM device driver is in use (as is the
+> # case with gce-xfstests).  So let's suppress it for now.  For
+> # more details see:
+> # https://lore.kernel.org/linux-block/20190723220502.GX7777@dread.disaster.area/
+> generic/471
+> 
+> 							- Ted
 
-So as the intention of the test case is to test any hang like situation
-during heavy snapshot create/delete operation with quota enabled, so
-make sure the qgroup counts are consistent at the end of the test case,
-so to make the check happy.
+Thanks for all the details! Ted.
 
-Signed-off-by: Anand Jain <anand.jain@oracle.com>
----
-v2: Use subvolume sync at the end of the test case.
-    Patch title changed.
-
- tests/btrfs/179 | 9 +++++++++
- 1 file changed, 9 insertions(+)
-
-diff --git a/tests/btrfs/179 b/tests/btrfs/179
-index 4a24ea419a7e..8795d59c01f8 100755
---- a/tests/btrfs/179
-+++ b/tests/btrfs/179
-@@ -109,6 +109,15 @@ wait $snapshot_pid
- kill $delete_pid
- wait $delete_pid
- 
-+# By the async nature of qgroup tree scan and subvolume delete, the latest
-+# qgroup counts at the time of umount might not be upto date, if it isn't
-+# then the check will report the difference in count. The difference in
-+# qgroup counts are anyway updated in the following mount, so it is not a
-+# real issue that this test case is trying to verify. So make sure the
-+# qgroup counts are in sync before unmount happens.
-+
-+$BTRFS_UTIL_PROG subvolume sync $SCRATCH_MNT >> $seqres.full
-+
- # success, all done
- echo "Silence is golden"
- 
--- 
-1.8.3.1
-
+Murphy
