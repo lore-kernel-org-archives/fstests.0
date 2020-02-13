@@ -1,191 +1,159 @@
-Return-Path: <SRS0=afT8=4A=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=5J60=4B=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.0 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 962AAC2BA83
-	for <linux-fstests@archiver.kernel.org>; Wed, 12 Feb 2020 14:20:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EEB28C352A4
+	for <linux-fstests@archiver.kernel.org>; Thu, 13 Feb 2020 00:04:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 4FBAC20714
-	for <linux-fstests@archiver.kernel.org>; Wed, 12 Feb 2020 14:20:15 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=gmx.net header.i=@gmx.net header.b="ejKlrPRf"
+	by mail.kernel.org (Postfix) with ESMTP id CB66221739
+	for <linux-fstests@archiver.kernel.org>; Thu, 13 Feb 2020 00:04:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727781AbgBLOUP (ORCPT
+        id S1729191AbgBMAEO (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 12 Feb 2020 09:20:15 -0500
-Received: from mout.gmx.net ([212.227.15.19]:54735 "EHLO mout.gmx.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727732AbgBLOUO (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 12 Feb 2020 09:20:14 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net;
-        s=badeba3b8450; t=1581517207;
-        bh=oo6qY20kC04YNhEd8Bj9VWo5iqLnjV4vXtFl73na9BU=;
-        h=X-UI-Sender-Class:Subject:To:Cc:References:From:Date:In-Reply-To;
-        b=ejKlrPRfs7epNWCrQzDYBjCP+J201tfWXOFB3RY0DNZkc6190jv5+Cl2mAs3TyyZu
-         9yf1MtlxV4vbk60h3MszylV+qxFtE+VWS7LeQQ7Ox+wCRSrZnnWPgl1y3zrgtzSX3L
-         dae6jV6Fz3OEPAHRcVf+9da2Gg2QRSvlGW4tdnEo=
-X-UI-Sender-Class: 01bb95c1-4bf8-414a-932a-4f6e2808ef9c
-Received: from [0.0.0.0] ([149.28.201.231]) by mail.gmx.com (mrgmx005
- [212.227.17.184]) with ESMTPSA (Nemesis) id 1MplXz-1jpq5C09ZV-00qFGR; Wed, 12
- Feb 2020 15:20:07 +0100
-Subject: Re: [PATCH v2] fstests: btrfs/179 call sync qgroup counts
-To:     Anand Jain <anand.jain@oracle.com>, fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org
-References: <1581500109-22736-1-git-send-email-anand.jain@oracle.com>
-From:   Qu Wenruo <quwenruo.btrfs@gmx.com>
-Autocrypt: addr=quwenruo.btrfs@gmx.com; prefer-encrypt=mutual; keydata=
- mQENBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
- 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
- 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
- 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
- gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
- AAG0IlF1IFdlbnJ1byA8cXV3ZW5ydW8uYnRyZnNAZ214LmNvbT6JAU4EEwEIADgCGwMFCwkI
- BwIGFQgJCgsCBBYCAwECHgECF4AWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCXZw1oQAKCRDC
- PZHzoSX+qCY6CACd+mWu3okGwRKXju6bou+7VkqCaHTdyXwWFTsr+/0ly5nUdDtT3yEVggPJ
- 3VP70wjlrxUjNjFb6iIvGYxiPOrop1NGwGYvQktgRhaIhALG6rPoSSAhGNjwGVRw0km0PlIN
- D29BTj/lYEk+jVM1YL0QLgAE1AI3krihg/lp/fQT53wLhR8YZIF8ETXbClQG1vJ0cllPuEEv
- efKxRyiTSjB+PsozSvYWhXsPeJ+KKjFen7ebE5reQTPFzSHctCdPnoR/4jSPlnTlnEvLeqcD
- ZTuKfQe1gWrPeevQzgCtgBF/WjIOeJs41klnYzC3DymuQlmFubss0jShLOW8eSOOWhLRuQEN
- BFnVga8BCACqU+th4Esy/c8BnvliFAjAfpzhI1wH76FD1MJPmAhA3DnX5JDORcgaCbPEwhLj
- 1xlwTgpeT+QfDmGJ5B5BlrrQFZVE1fChEjiJvyiSAO4yQPkrPVYTI7Xj34FnscPj/IrRUUka
- 68MlHxPtFnAHr25VIuOS41lmYKYNwPNLRz9Ik6DmeTG3WJO2BQRNvXA0pXrJH1fNGSsRb+pK
- EKHKtL1803x71zQxCwLh+zLP1iXHVM5j8gX9zqupigQR/Cel2XPS44zWcDW8r7B0q1eW4Jrv
- 0x19p4P923voqn+joIAostyNTUjCeSrUdKth9jcdlam9X2DziA/DHDFfS5eq4fEvABEBAAGJ
- ATwEGAEIACYCGwwWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCXZw1rgUJCWpOfwAKCRDCPZHz
- oSX+qFcEB/95cs8cM1OQdE/GgOfCGxwgckMeWyzOR7bkAWW0lDVp2hpgJuxBW/gyfmtBnUai
- fnggx3EE3ev8HTysZU9q0h+TJwwJKGv6sUc8qcTGFDtavnnl+r6xDUY7A6GvXEsSoCEEynby
- 72byGeSovfq/4AWGNPBG1L61Exl+gbqfvbECP3ziXnob009+z9I4qXodHSYINfAkZkA523JG
- ap12LndJeLk3gfWNZfXEWyGnuciRGbqESkhIRav8ootsCIops/SqXm0/k+Kcl4gGUO/iD/T5
- oagaDh0QtOd8RWSMwLxwn8uIhpH84Q4X1LadJ5NCgGa6xPP5qqRuiC+9gZqbq4Nj
-Message-ID: <d6fb1d1b-351c-bdb8-692d-b767840193f1@gmx.com>
-Date:   Wed, 12 Feb 2020 22:20:01 +0800
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.4.2
+        Wed, 12 Feb 2020 19:04:14 -0500
+Received: from youngberry.canonical.com ([91.189.89.112]:44520 "EHLO
+        youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727117AbgBMAEO (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 12 Feb 2020 19:04:14 -0500
+Received: from mail-qt1-f200.google.com ([209.85.160.200])
+        by youngberry.canonical.com with esmtps (TLS1.2:ECDHE_RSA_AES_128_GCM_SHA256:128)
+        (Exim 4.86_2)
+        (envelope-from <mfo@canonical.com>)
+        id 1j21zH-0006jD-Rf
+        for fstests@vger.kernel.org; Thu, 13 Feb 2020 00:04:12 +0000
+Received: by mail-qt1-f200.google.com with SMTP id o24so2454130qtr.17
+        for <fstests@vger.kernel.org>; Wed, 12 Feb 2020 16:04:11 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=9n0Le7Ahi8OQG8OShn7ro2Wc6jMub1TyJe+oSxfncxo=;
+        b=ALDSdPJLLLvlSaSzasAveSi+bHiwwrWJzXGg2xaIn19BF0Z9sesh42VBg9lKfBCAO5
+         Ll3tzfv8F1PV11r1O79PSqrSdV4uBNTUUFLT03mB3vOoBTnbwCulr9I5cEvb6RKHsVEb
+         c6Jkpp7rmNG5t7Wg187Q5QZaITfZn2j5RMOlIujtjgrEknQBGPyKN9BVAiVfq/+xIaJ0
+         s/nVMbVPb2Kle6qAT8GA5WVxNK2O83eGG11UEIWj/4SbbCXARXACfTJoA9BNPMaR6iT0
+         4r45VYRbabZnQF6vaNYtrqhKi2LlF+gTiU2P5ub2k3/9Xy8qSG50XT0yeJJz8i+HAK+x
+         Wc1g==
+X-Gm-Message-State: APjAAAX4bSpouDqR3gDDh6TXiKi9TLqopuEtOPKp9RmSbzeJcfDQicb0
+        K0D2FsuxRNEI/ChsOlosS/kBoTflpJ7tuMuOcun3U+xO3FqsriFiwAnfrpsb0dAf+NrcQNiNf4i
+        QGTjfPnmKseXMN51LimHXJwjWl3hVMmtSB5c=
+X-Received: by 2002:ac8:750e:: with SMTP id u14mr9141036qtq.320.1581552250890;
+        Wed, 12 Feb 2020 16:04:10 -0800 (PST)
+X-Google-Smtp-Source: APXvYqxPvITXZMarPnqfE96u8LylxuOskzaLoO9sLanWYrZ4iHAV2M7htqpASPsjpCbhdWvFYdhKyA==
+X-Received: by 2002:ac8:750e:: with SMTP id u14mr9141016qtq.320.1581552250634;
+        Wed, 12 Feb 2020 16:04:10 -0800 (PST)
+Received: from localhost.localdomain ([2804:14c:4e7:1017:a97b:ff5a:85e:d3eb])
+        by smtp.gmail.com with ESMTPSA id g26sm319225qkk.68.2020.02.12.16.04.09
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 12 Feb 2020 16:04:10 -0800 (PST)
+From:   Mauricio Faria de Oliveira <mfo@canonical.com>
+To:     fstests@vger.kernel.org
+Subject: [PATCH] common/overlay,rc: introduce OVL_ALT_FSTYP for testing aufs
+Date:   Wed, 12 Feb 2020 21:04:06 -0300
+Message-Id: <20200213000406.4966-1-mfo@canonical.com>
+X-Mailer: git-send-email 2.20.1
 MIME-Version: 1.0
-In-Reply-To: <1581500109-22736-1-git-send-email-anand.jain@oracle.com>
-Content-Type: multipart/signed; micalg=pgp-sha256;
- protocol="application/pgp-signature";
- boundary="dYrctnbqnCJeqPwHVrfFBKBSFusBonrjf"
-X-Provags-ID: V03:K1:vJiy3HJK54lgIceZ9FEhkTsJOEl5fD2/BMyHt0qH2ivCiGHwmH5
- emfvPvr5DLzdxoSUjUovUjFJy9wOaJNA7jOmr0OF4OuaOHNTHVA+3TGGD5e3wTuFBMKZpVe
- V0B/jfb+TXvJ+xUm4kppunnE2D0dNYMVFcVHQc2cD8nEyK9hO2LDJmkhemL4mG+QJ07lIKC
- BRZ3DFrIwcFRBzamt9J5w==
-X-UI-Out-Filterresults: notjunk:1;V03:K0:NnImzBsOT4c=:KBQA3+B3taaW/isTyT3W+F
- PM4Nac3f7a1h85Ow5dU/mF1SrKx7zG1+Dqclw06Y20EKDLLgJSIeIO+v99/QQLgy8lhoI57dT
- m5dKTO/7XAORYqGwJGUteaA7Ah8egNqnCD5wdDEGK7QYjZvovxM0NHtjdHSnUBsikuoTgOuOR
- NveZOlmh2drA62i/JI8NeFziB3jNgVDrX5/usEvhfOGkGojQu915Qz+9gLQiVbkhzPkoPWnOI
- vHU9gsf+puaYFsj/3/bA/qr3z2FVXCXFI+9fXvwCI6rrhaGKWkD1LIda+/m75MSl+tmr4ErsI
- MgfUdg9alQWV3pT2L9yFvYCrYQJJMCcEHvvKWhEQS5tGXg0jQJKbu2mA2I6PPsTv9vN8xNXf7
- oLnVuKafYi0eP9fLgJoEjLQkM/uMK1tg95oblE/HbEjDJo6f+qYhEC3kNImIlE2w7hljJhNJY
- 8FVDfWzamzdUAn2CMmMnLdmvk6X1zfGFeMkr0nqko0akkp/zaNbNzZZHm/8mCpiPw9dsBNTx1
- TcU0lk/n4LUD0Auc8pYGXEE85Str5cPJwrizPECFJhARTMRVDGTntkBL+GuR5oDColudXyl14
- nR/P2rjmhn4C3ZIwPfnc0bwrmHiTQ9Iel4aiEFs6plKHBcceiBNMtCLGPvO/bb+3YM1Yrl5Y0
- yIaqlp9O2nPI8Mex0Cy9axCaXbo2Zbl2V5+GpOMWtYZkYar0o8vY1AnUl7OGdFODdHT7O3lcB
- H8iUXvZFIklzA1pCdXbw2LgQM9+7yVTF2OY+y1jPKvy4b05zdYW9phqZSjrWv7T/cmMn00QCq
- HUxIqqHfsRNJow5BIbNYXpUzpWlFSSWeLYMZdxMGPoKdeXxovBanQI9AdDupsYf82RCahXoSc
- We+uP8j7oGYHTX781QwfcEh+ZzZ5l18SnuYaGZ8CzOrzd/xhjWgNg9Ta3oVg1/iS+4Wvob2Ty
- tLNpqr6UKpemCicsSzYDKM0WYzeTUtAjFRFU8AtNeGAqwg32zj7J/ERWmOhgZHqzYA98rsG7c
- 8NVvMTAefW/xtI9IEGef68jfk/ypmek114zMDNPQZUERkiShhvhkE2SX/xY3sai3Qb1qSx2Gp
- lJE8Vl5ZF3yjO2qWSB5J9XI1DBV/mOXBdLHGrEPQwmfn4bAGu04V7H0QPAYP59QWjMceQ1hLv
- C7z5/pB9hFcOvcrdjxQKcoh8g7BOzM77ukxXZ4yipRRd+RqGNCRpbTs03xrSjumh+oISXAIz/
- uLE+wcJn0/LlxJylo
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---dYrctnbqnCJeqPwHVrfFBKBSFusBonrjf
-Content-Type: multipart/mixed; boundary="44FlbcQx4HlCTyrVlwi0mCj4nZXkxAcyJ"
+Recently looking for an aufs test suite. The author clarified that
+'There is no public test suite specific to aufs.' [1] at this time,
+and it looks like 'xfstests/tests/generic' should be enough [1, 2],
+and is clearly an improvement in terms of publicly available tests.
 
---44FlbcQx4HlCTyrVlwi0mCj4nZXkxAcyJ
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: quoted-printable
+Thus, building on top of the existing infrastructure for overlay,
+just introduce OVL_ALT_FSTYP that can be set to "aufs" to use it.
+(using overlay's upperdir as rw-branch and lowerdir as ro-branch).
 
+This is indeed a workaround^W simple change that does the job vs.
+creating a new FSTYP "aufs" and mechanically changing the number
+of places that check for "overlay" to just handle "aufs" as well.
+(so the effort is still small as aufs has no specific tests now.)
 
+Currently, running the generic + overlay (i.e., ./check -overlay)
+tests (and excluding a few [3] which either hang or keep looping)
+the numbers for aufs on loop devices on v5.4-based Ubuntu kernel
+show a relatively good starting base in terms of exercising code:
 
-On 2020/2/12 =E4=B8=8B=E5=8D=885:35, Anand Jain wrote:
-> On some systems btrfs/179 fails because the check finds that there is
-> difference in the qgroup counts.
->=20
-> So as the intention of the test case is to test any hang like situation=
+  - Ran: 645 tests
+  - Not run: 483 tests
+  - Failures: 21 tests
 
-> during heavy snapshot create/delete operation with quota enabled, so
-> make sure the qgroup counts are consistent at the end of the test case,=
+So, hopefully this may be a starting point as an aufs test suite.
 
-> so to make the check happy.
->=20
-> Signed-off-by: Anand Jain <anand.jain@oracle.com>
-> ---
-> v2: Use subvolume sync at the end of the test case.
->     Patch title changed.
->=20
->  tests/btrfs/179 | 9 +++++++++
->  1 file changed, 9 insertions(+)
->=20
-> diff --git a/tests/btrfs/179 b/tests/btrfs/179
-> index 4a24ea419a7e..8795d59c01f8 100755
-> --- a/tests/btrfs/179
-> +++ b/tests/btrfs/179
-> @@ -109,6 +109,15 @@ wait $snapshot_pid
->  kill $delete_pid
->  wait $delete_pid
-> =20
-> +# By the async nature of qgroup tree scan and subvolume delete, the la=
-test
-> +# qgroup counts at the time of umount might not be upto date, if it is=
-n't
-> +# then the check will report the difference in count. The difference i=
-n
-> +# qgroup counts are anyway updated in the following mount, so it is no=
-t a
-> +# real issue that this test case is trying to verify. So make sure the=
+[1] https://sourceforge.net/p/aufs/mailman/message/36918721/
+[2] https://sourceforge.net/p/aufs/mailman/message/36918932/
+[3] Steps:
 
-> +# qgroup counts are in sync before unmount happens.
+  $ export OVL_ALT_FSTYP=aufs
+  $ export FSTYP=ext4
+  $ export TEST_DEV=/dev/loop0
+  $ export TEST_DIR=/mnt/test
+  $ export SCRATCH_DEV=/dev/loop1
+  $ export SCRATCH_MNT=/mnt/scratch
 
-It could be a little easier. Just btrfs-progs has a bug accounting
-qgroups for subvolume being dropped.
-Btrfs-progs tends to account more extents than it should be.
+  $ sudo mkfs.$FSTYP -F $TEST_DEV
+  $ sudo mkfs.$FSTYP -F $SCRATCH_DEV
+  $ sudo mkdir $TEST_DIR $SCRATCH_MNT
 
-The subvolume sync would be a workaround for it.
+  $ cat <<EOF >/tmp/exclude-tests
+  generic/013
+  generic/070
+  generic/075
+  generic/112
+  generic/127
+  generic/461
+  generic/476
+  generic/522
+  generic/530
+  overlay/019
+  EOF
 
-Despite the commment, it looks good to me.
+  $ sudo -E ./check -overlay -E /tmp/exclude-tests
+---
+ common/overlay | 6 ++++++
+ common/rc      | 4 ++++
+ 2 files changed, 10 insertions(+)
 
-Thanks,
-Qu
+diff --git a/common/overlay b/common/overlay
+index 65c639e9c6d8..3b3351ed040e 100644
+--- a/common/overlay
++++ b/common/overlay
+@@ -20,6 +20,12 @@ _overlay_mount_dirs()
+ 	local workdir=$3
+ 	shift 3
+ 
++	if [ -n "$OVL_ALT_FSTYP" -a "$OVL_ALT_FSTYP" = "aufs" ]; then
++		$MOUNT_PROG -t aufs -o br=$upperdir=rw:$lowerdir=ro \
++			`_common_dev_mount_options $*`
++		return $?
++	fi
++
+ 	$MOUNT_PROG -t overlay -o lowerdir=$lowerdir -o upperdir=$upperdir \
+ 		    -o workdir=$workdir `_common_dev_mount_options $*`
+ }
+diff --git a/common/rc b/common/rc
+index b4a77a2187f4..976afb66015d 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1471,6 +1471,10 @@ _check_mounted_on()
+ 		return 2 # 2 = mounted on wrong mnt
+ 	fi
+ 
++	if [ -n "$type" -a "$type" = "overlay" -a -n "$OVL_ALT_FSTYP" ]; then
++		type="$OVL_ALT_FSTYP"
++	fi
++
+ 	if [ -n "$type" -a "`_fs_type $dev`" != "$type" ]; then
+ 		echo "$devname=$dev is mounted but not a type $type filesystem"
+ 		# raw $DF_PROG cannot handle NFS/CIFS/overlay correctly
+-- 
+2.20.1
 
-> +
-> +$BTRFS_UTIL_PROG subvolume sync $SCRATCH_MNT >> $seqres.full
-> +
->  # success, all done
->  echo "Silence is golden"
-> =20
->=20
-
-
---44FlbcQx4HlCTyrVlwi0mCj4nZXkxAcyJ--
-
---dYrctnbqnCJeqPwHVrfFBKBSFusBonrjf
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAEBCAAdFiEELd9y5aWlW6idqkLhwj2R86El/qgFAl5ECZEACgkQwj2R86El
-/qjFYwf/b8irjBQWXSDWD4DsQGZuJBdI1LyOAhlXAoXhqE5WW6NfFEDzl667nP4j
-SIBhDCi+xQnJl2zac3tt8bUdvNhSSlByHgHTQTIedx1EO1ezRWhfCSvfoj3h3xSj
-jokx6q6wAhPN/iXT/j6EIjq2pUNOEcs+wNIrwxnS7yhKgznpA9sZrUmEvaY8GGb/
-YSnREFZrIn9RJ6D/hObRMaL2VtfhpHHfHMuolRn4TdVy09gtvpLU4ZMRrtYMWsVy
-WPJ6MqlIFnekcpmcydXEOIpajZJbJpai6Z1OoewB1KPiwe59ImysA09MTGL1hhuJ
-gnM3n4m0r565TxKUgzF1fooOlt3L7g==
-=KXpE
------END PGP SIGNATURE-----
-
---dYrctnbqnCJeqPwHVrfFBKBSFusBonrjf--
