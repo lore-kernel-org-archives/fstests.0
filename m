@@ -2,171 +2,182 @@ Return-Path: <SRS0=5J60=4B=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
+X-Spam-Status: No, score=-8.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 61A3DC2BA83
-	for <linux-fstests@archiver.kernel.org>; Thu, 13 Feb 2020 08:49:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 502CFC2BA83
+	for <linux-fstests@archiver.kernel.org>; Thu, 13 Feb 2020 09:57:55 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 3EABE2168B
-	for <linux-fstests@archiver.kernel.org>; Thu, 13 Feb 2020 08:49:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 203542073C
+	for <linux-fstests@archiver.kernel.org>; Thu, 13 Feb 2020 09:57:55 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="IButqSES"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729485AbgBMItb (ORCPT
+        id S1729578AbgBMJ5y (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 13 Feb 2020 03:49:31 -0500
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:49430 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1729406AbgBMIta (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 13 Feb 2020 03:49:30 -0500
-X-IronPort-AV: E=Sophos;i="5.70,435,1574092800"; 
-   d="scan'208";a="83246887"
-Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
-  by heian.cn.fujitsu.com with ESMTP; 13 Feb 2020 16:49:25 +0800
-Received: from G08CNEXMBPEKD04.g08.fujitsu.local (unknown [10.167.33.201])
-        by cn.fujitsu.com (Postfix) with ESMTP id 5A1F450A9975;
-        Thu, 13 Feb 2020 16:39:52 +0800 (CST)
-Received: from [10.167.220.84] (10.167.220.84) by
- G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201) with Microsoft SMTP Server
- (TLS) id 15.0.1395.4; Thu, 13 Feb 2020 16:49:23 +0800
-Subject: Re: generic/269 hangs on lastest upstream kernel
-To:     Jan Kara <jack@suse.cz>
-CC:     Theodore Ts'o <tytso@mit.edu>, fstests <fstests@vger.kernel.org>
-References: <59a10449-9e0f-f289-2f9f-a2028fb0b3ca@cn.fujitsu.com>
- <20200212105433.GH25573@quack2.suse.cz>
-From:   Yang Xu <xuyang2018.jy@cn.fujitsu.com>
-Message-ID: <00470e6d-0e1c-6060-225b-4c56dd33c083@cn.fujitsu.com>
-Date:   Thu, 13 Feb 2020 16:49:21 +0800
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101
- Thunderbird/68.0
+        Thu, 13 Feb 2020 04:57:54 -0500
+Received: from mail-il1-f193.google.com ([209.85.166.193]:42475 "EHLO
+        mail-il1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729422AbgBMJ5y (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 13 Feb 2020 04:57:54 -0500
+Received: by mail-il1-f193.google.com with SMTP id x2so4431914ila.9
+        for <fstests@vger.kernel.org>; Thu, 13 Feb 2020 01:57:54 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=hfQq+GyezI/Vi1KpBUdrNwV4jCZuWDxu6fB4iGXg8zk=;
+        b=IButqSESVtF5VGa4wrkQk4LtdhOBlf0yZX4iSf0AaMah52C19wODhT+HmVxzhsbJ/1
+         MPA2PPw+S6+GbXzGK7/giTfzIaBCWYVGfRDmjkPQ/N4Ilx1plrf6JlMQGVofbhTUrg/m
+         VihFJpLrWIBGD6SQ2/vR2gwucfjl9vURT7Z1gr2AQ55QqtGpJAyZfqHt9rgzckoqcS0H
+         /enEmZxW6DFtsn7dHT0As/MEqxh48fxBZx3bYIovKBwDlR0KEO1V42j1suCF8ZdWqlQg
+         Q1i6B5tmVyYQqnzrC2v8gd3YYJr5drdZDvkdttf3x6nl/NC13yMTD4XFKl4u5lSBMvs+
+         ydAw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=hfQq+GyezI/Vi1KpBUdrNwV4jCZuWDxu6fB4iGXg8zk=;
+        b=d6r14RzkHcg9pbFrNc3mKsgHYt4xvz8dLbcz+J23N0QI0bdvahm1dG+HE+Chit0JRb
+         z3BqMESu8bCPiHkYFTYegLDEKu7WsQpQrjhxa2RssanIWX8mw4wDm2aIeDtUwfuCKtzW
+         pa5aWEfYaECj+mUttEV3SNVGeEYa9SArRfcnUd2Xz6xOiY2haDOXuIhXtFh1fF61K+Mr
+         lb1C7CjvcyzEiHDujPSYSaNxxR/6xQ0NLGf9MRYPxFi+0TmL60p60Yw48G6Qk4awW2Ro
+         z3xnf48KSg83uid9m6Bp9h2r/iokmsSjfXwln+oLvDHAb32eHfRG6GGDh2qe5o4fbA6R
+         kkTg==
+X-Gm-Message-State: APjAAAX+OlklZRt3mu58iPLnpNJuLp8VDGJuhG3VmE4mBti/K4IprEXJ
+        qaBWwApAS5tkql2Y7XbO1PUe98W/S/8ryo1JX+U=
+X-Google-Smtp-Source: APXvYqy86czCn9Tcvvx9TZyLkFooBVVG1DP+ATqX81Y0ZSY+oTBHyHDQaXAtjcch8KGx//2KN5kHlSehQqmbTlp8el0=
+X-Received: by 2002:a92:8656:: with SMTP id g83mr15836459ild.9.1581587873983;
+ Thu, 13 Feb 2020 01:57:53 -0800 (PST)
 MIME-Version: 1.0
-In-Reply-To: <20200212105433.GH25573@quack2.suse.cz>
-Content-Type: text/plain; charset="gbk"; format=flowed
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.167.220.84]
-X-ClientProxiedBy: G08CNEXCHPEKD05.g08.fujitsu.local (10.167.33.203) To
- G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201)
-X-yoursite-MailScanner-ID: 5A1F450A9975.ADA3D
-X-yoursite-MailScanner: Found to be clean
-X-yoursite-MailScanner-From: xuyang2018.jy@cn.fujitsu.com
+References: <20200213000406.4966-1-mfo@canonical.com>
+In-Reply-To: <20200213000406.4966-1-mfo@canonical.com>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Thu, 13 Feb 2020 11:57:42 +0200
+Message-ID: <CAOQ4uxjA4n7uJSUTHpRx_228HuBTtt5nNV8H0JmeKmczK_QBMA@mail.gmail.com>
+Subject: Re: [PATCH] common/overlay,rc: introduce OVL_ALT_FSTYP for testing aufs
+To:     Mauricio Faria de Oliveira <mfo@canonical.com>
+Cc:     fstests <fstests@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+On Thu, Feb 13, 2020 at 2:05 AM Mauricio Faria de Oliveira
+<mfo@canonical.com> wrote:
+>
+> Recently looking for an aufs test suite. The author clarified that
+> 'There is no public test suite specific to aufs.' [1] at this time,
+> and it looks like 'xfstests/tests/generic' should be enough [1, 2],
+> and is clearly an improvement in terms of publicly available tests.
+>
+> Thus, building on top of the existing infrastructure for overlay,
+> just introduce OVL_ALT_FSTYP that can be set to "aufs" to use it.
+> (using overlay's upperdir as rw-branch and lowerdir as ro-branch).
+>
+> This is indeed a workaround^W simple change that does the job vs.
+> creating a new FSTYP "aufs" and mechanically changing the number
+> of places that check for "overlay" to just handle "aufs" as well.
+> (so the effort is still small as aufs has no specific tests now.)
 
+Very nice!
+Please update README.overlay.
 
-on 2020/02/12 18:54, Jan Kara wrote:
-> Hello!
-> 
-> On Tue 11-02-20 16:14:35, Yang Xu wrote:
->> Since xfstests support rename2, this case(generic/269) reports filesystem
->> inconsistent problem with ext4 on my system(4.18.0-32.el8.x86_64).
-> 
-> I don't remember seeing this in my testing... It might be specific to that
-> RHEL kernel.
-Agree.
-> 
->> When I test generic/269(ext4) on 5.6.0-rc1 kernel, it hangs.
->> ----------------------------------------------
->> dmesg as below:
->>     76.506753] run fstests generic/269 at 2020-02-11 05:53:44
->> [   76.955667] EXT4-fs (sdc): mounted filesystem with ordered data mode.
->> Opts: acl,                           user_xattr
->> [  100.912511] device virbr0-nic left promiscuous mode
->> [  100.912520] virbr0: port 1(virbr0-nic) entered disabled state
->> [  246.801561] INFO: task dd:17284 blocked for more than 122 seconds.
->> [  246.801564]       Not tainted 5.6.0-rc1 #41
->> [  246.801565] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables
->> this mes                           sage.
->> [  246.801566] dd              D    0 17284  16931 0x00000080
->> [  246.801568] Call Trace:
->> [  246.801584]  ? __schedule+0x251/0x690
->> [  246.801586]  schedule+0x40/0xb0
->> [  246.801588]  wb_wait_for_completion+0x52/0x80
->> [  246.801591]  ? finish_wait+0x80/0x80
->> [  246.801592]  __writeback_inodes_sb_nr+0xaa/0xd0
->> [  246.801593]  try_to_writeback_inodes_sb+0x3c/0x50
-> 
-> Interesting. Does the hang resolve eventually or the machine is hung
-> permanently? If the hang is permanent, can you do:
-> 
-> echo w >/proc/sysrq-trigger
-> 
-> and send us the stacktraces from dmesg? Thanks!
-Yes. the hang is permanent, log as below:
+FYI, I made a similar small change to enable testing of fuse.overlay
+with unionmount-testsuite:
+https://github.com/amir73il/unionmount-testsuite/commit/a72c274e0f5d6d05ad7c563fc7eff42356bffd15
+Therefore:
+1. Your changes could be useful for testing fuse.overlay with xfstests
+2. You can just as easily test aufs with unionmount-testsuite -
+The test coverage is mostly orthogonal to that of xfstests
+(patches are welcome)
 
-[  959.451423] fsstress        D    0 20094  20033 0x00000080
-[  959.451424] Call Trace:
-[  959.451425]  ? __schedule+0x251/0x690
-[  959.451426]  schedule+0x40/0xb0
-[  959.451428]  schedule_preempt_disabled+0xa/0x10
-[  959.451429]  __mutex_lock.isra.8+0x2b5/0x4a0
-[  959.451430]  ? __check_object_size+0x162/0x173
-[  959.451431]  lock_rename+0x28/0xb0
-[  959.451433]  do_renameat2+0x2a9/0x530
-[  959.451434]  __x64_sys_renameat2+0x20/0x30
-[  959.451436]  do_syscall_64+0x55/0x1b0
-[  959.451436]  entry_SYSCALL_64_after_hwframe+0x44/0xa9
+>
+> Currently, running the generic + overlay (i.e., ./check -overlay)
+> tests (and excluding a few [3] which either hang or keep looping)
+> the numbers for aufs on loop devices on v5.4-based Ubuntu kernel
+> show a relatively good starting base in terms of exercising code:
+>
+>   - Ran: 645 tests
+>   - Not run: 483 tests
+>   - Failures: 21 tests
 
+I'd be interested to know the stats for the overlay/* tests.
 
-[  959.453023] dd              D    0 21645  19793 0x00004080
-[  959.453024] Call Trace:
-[  959.453026]  ? __schedule+0x251/0x690
-[  959.453027]  ? __wake_up_common_lock+0x87/0xc0
-[  959.453028]  schedule+0x40/0xb0
-[  959.453030]  jbd2_log_wait_commit+0xac/0x120 [jbd2]
-[  959.453032]  ? finish_wait+0x80/0x80
-[  959.453034]  jbd2_log_do_checkpoint+0x383/0x3f0 [jbd2]
-[  959.453036]  __jbd2_log_wait_for_space+0x66/0x190 [jbd2]
-[  959.453038]  add_transaction_credits+0x27d/0x290 [jbd2]
-[  959.453040]  ? blk_mq_make_request+0x289/0x5d0
-[  959.453042]  start_this_handle+0x10a/0x510 [jbd2]
-[  959.453043]  ? _cond_resched+0x15/0x30
-[  959.453045]  jbd2__journal_start+0xea/0x1f0 [jbd2]
-[  959.453051]  ? ext4_writepages+0x518/0xd90 [ext4]
-[  959.453057]  __ext4_journal_start_sb+0x6e/0x130 [ext4]
-[  959.453063]  ext4_writepages+0x518/0xd90 [ext4]
-[  959.453065]  ? do_writepages+0x41/0xd0
-[  959.453070]  ? ext4_mark_inode_dirty+0x1f0/0x1f0 [ext4]
-[  959.453072]  do_writepages+0x41/0xd0
-[  959.453073]  ? iomap_write_begin+0x4c0/0x4c0
-[  959.453188]  ? xfs_iunlock+0xf3/0x100 [xfs]
-[  959.453189]  __filemap_fdatawrite_range+0xcb/0x100
-[  959.453191]  ? __raw_spin_unlock+0x5/0x10
-[  959.453198]  ext4_release_file+0x6c/0xa0 [ext4]
-[  959.453200]  __fput+0xbe/0x250
-[  959.453201]  task_work_run+0x84/0xa0
-[  959.453203]  exit_to_usermode_loop+0xc8/0xd0
-[  959.453204]  do_syscall_64+0x1a5/0x1b0
-[  959.453205]  entry_SYSCALL_64_after_hwframe+0x44/0xa9
-[  959.453206] RIP: 0033:0x7f368a22f1a8
+>
+> So, hopefully this may be a starting point as an aufs test suite.
+>
+> [1] https://sourceforge.net/p/aufs/mailman/message/36918721/
+> [2] https://sourceforge.net/p/aufs/mailman/message/36918932/
+> [3] Steps:
+>
+>   $ export OVL_ALT_FSTYP=aufs
+>   $ export FSTYP=ext4
+>   $ export TEST_DEV=/dev/loop0
+>   $ export TEST_DIR=/mnt/test
+>   $ export SCRATCH_DEV=/dev/loop1
+>   $ export SCRATCH_MNT=/mnt/scratch
+>
+>   $ sudo mkfs.$FSTYP -F $TEST_DEV
+>   $ sudo mkfs.$FSTYP -F $SCRATCH_DEV
+>   $ sudo mkdir $TEST_DIR $SCRATCH_MNT
+>
+>   $ cat <<EOF >/tmp/exclude-tests
+>   generic/013
+>   generic/070
+>   generic/075
+>   generic/112
+>   generic/127
+>   generic/461
+>   generic/476
+>   generic/522
+>   generic/530
+>   overlay/019
+>   EOF
+>
+>   $ sudo -E ./check -overlay -E /tmp/exclude-tests
+> ---
+>  common/overlay | 6 ++++++
+>  common/rc      | 4 ++++
+>  2 files changed, 10 insertions(+)
+>
+> diff --git a/common/overlay b/common/overlay
+> index 65c639e9c6d8..3b3351ed040e 100644
+> --- a/common/overlay
+> +++ b/common/overlay
+> @@ -20,6 +20,12 @@ _overlay_mount_dirs()
+>         local workdir=$3
+>         shift 3
+>
+> +       if [ -n "$OVL_ALT_FSTYP" -a "$OVL_ALT_FSTYP" = "aufs" ]; then
+> +               $MOUNT_PROG -t aufs -o br=$upperdir=rw:$lowerdir=ro \
+> +                       `_common_dev_mount_options $*`
+> +               return $?
+> +       fi
+> +
+>         $MOUNT_PROG -t overlay -o lowerdir=$lowerdir -o upperdir=$upperdir \
+>                     -o workdir=$workdir `_common_dev_mount_options $*`
 
-Best Regards
-Yang Xu
+I think it would be better to define (in common/config):
 
-> 
-> 								Honza
-> 
->> [  246.801609]  ext4_nonda_switch+0x7b/0x80 [ext4]
->> [  246.801618]  ext4_da_write_begin+0x6f/0x480 [ext4]
->> [  246.801621]  generic_perform_write+0xf4/0x1b0
->> [  246.801628]  ext4_buffered_write_iter+0x8d/0x120 [ext4]
->> [  246.801634]  ext4_file_write_iter+0x6e/0x700 [ext4]
->> [  246.801636]  new_sync_write+0x12d/0x1d0
->> [  246.801638]  vfs_write+0xa5/0x1a0
->> [  246.801640]  ksys_write+0x59/0xd0
->> [  246.801643]  do_syscall_64+0x55/0x1b0
->> [  246.801645]  entry_SYSCALL_64_after_hwframe+0x44/0xa9
->> [  246.801646] RIP: 0033:0x7fe9ec947b28
->> [  246.801650] Code: Bad RIP value.
->> ----------------------------------------------
->>
->> Does anyone also meet this problem?
->>
->> Best Regards
->> Yang Xu
->>
->>
+export OVL_FSTYP=${OVL_FSTYP:="overlay"}
 
+And make sure to always mount -t $OVL_FSTYP
+then you won't need to check if  OVL_ALT_FSTYP is non empty.
+and setting OVL_FSTYP to "fuse.overlay" should mostly work.
 
+I did find 5 overlay tests that do mount -t overlay not via any
+of the common helpers, so you'll need to handle those, possibly
+with another common helper that supports middle layers:
+tests/overlay/011
+tests/overlay/035
+tests/overlay/052
+tests/overlay/053
+tests/overlay/062
+
+Thanks,
+Amir.
