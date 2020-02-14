@@ -2,157 +2,283 @@ Return-Path: <SRS0=rSMp=4C=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A6B88C2BA83
-	for <linux-fstests@archiver.kernel.org>; Fri, 14 Feb 2020 15:19:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 14335C3B1A1
+	for <linux-fstests@archiver.kernel.org>; Fri, 14 Feb 2020 16:43:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 842A32168B
-	for <linux-fstests@archiver.kernel.org>; Fri, 14 Feb 2020 15:19:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D771324691
+	for <linux-fstests@archiver.kernel.org>; Fri, 14 Feb 2020 16:43:06 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="JRyTpzke"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729558AbgBNPTD (ORCPT
+        id S2388998AbgBNQnC (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 14 Feb 2020 10:19:03 -0500
-Received: from youngberry.canonical.com ([91.189.89.112]:54689 "EHLO
-        youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729482AbgBNPTD (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 14 Feb 2020 10:19:03 -0500
-Received: from mail-qt1-f198.google.com ([209.85.160.198])
-        by youngberry.canonical.com with esmtps (TLS1.2:ECDHE_RSA_AES_128_GCM_SHA256:128)
-        (Exim 4.86_2)
-        (envelope-from <mfo@canonical.com>)
-        id 1j2ck9-00023N-BA
-        for fstests@vger.kernel.org; Fri, 14 Feb 2020 15:19:01 +0000
-Received: by mail-qt1-f198.google.com with SMTP id k20so6088890qtm.11
-        for <fstests@vger.kernel.org>; Fri, 14 Feb 2020 07:19:01 -0800 (PST)
+        Fri, 14 Feb 2020 11:43:02 -0500
+Received: from mail-qk1-f196.google.com ([209.85.222.196]:34025 "EHLO
+        mail-qk1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2390639AbgBNQm5 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 14 Feb 2020 11:42:57 -0500
+Received: by mail-qk1-f196.google.com with SMTP id c20so9813167qkm.1;
+        Fri, 14 Feb 2020 08:42:56 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id;
+        bh=YP3vB4FLSiYMsD12Fzk8Kpsrn3n01N+ovOb8Y+f5N7k=;
+        b=JRyTpzkeVJSFy4ZhayN6IxOVMP6ORQNxLhPqdik/ir2YP2NK8PFd/HfkDgiASvLkCR
+         BmIkHpioToy6VkO2gqyfOg7IB/2syJXHlpMvLKHz3KOzDLJ7ciajBUgswF44TQjLPOme
+         +Lp9lQ48zAotu7ebx/NVnS2d9KaSqvt7oQkSAk6OXrSIA1dSz08eRjLg0Q3S918pZX7H
+         9sQCjR9nY93bh2mDm6Zoj6F2FrD/zKz4VDuRMsUTJb1jC4BtiTDOA/jf2i/bChguS5uB
+         SArJf7SW1zwscmpb2fN9ewUNi5yolmGJUi3QE8e8NpWJTbX3ufGuJTA0OpAPOAuqR8rV
+         c2fg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=3GiixWLPt3Xsm/w7r5HRS6kYyZ1TZwQaBGsuqSkCksc=;
-        b=sLqtiFR49VJYllwb15A9nK0iAmpAv0VW03pVI8zclIh0Lb8SxAXOznTtj7DBETDgil
-         rfTC379hvwejOOUpVuU0zUUuzlNUrFl2KdyTCh2Pi5mpWW7xLmXN17egCXCCADmaB5EG
-         nl2klOV9Mq13K6SXUVp0fvjrBIpGNMmJVCeviAm/0U5tOVseA0cKO+wTfVWiAwra0bFi
-         GQDDIlhW0rDA4f3a1KdOrw++kYJzz00I9dEmSuyK9GB+mChewoR8LtOJkzbohKepiBmn
-         1eI7zr+FUTXsZxTUS7+5gdyX3jJtkm/wSErYWcRsMSG2eCblouj4KqjEJlgai52lzfzN
-         SeYQ==
-X-Gm-Message-State: APjAAAXBz4jeeUhOuwV+cAZV5j91ql5ilIw02p4nB+gPcWAk4l8EVIBw
-        xKRlCHw8ycEJiFmB0ZrSsrHR8h9tsEjVB3RMB4ro45S6DWwk+4jyzDuDIY3STQsTSKK3UhR1t71
-        O+/F9s1c9xXAEdEhQAiFb7SpZl51cxhVn3zA=
-X-Received: by 2002:a05:620a:2119:: with SMTP id l25mr3088414qkl.248.1581693540150;
-        Fri, 14 Feb 2020 07:19:00 -0800 (PST)
-X-Google-Smtp-Source: APXvYqzXrSZQbHcIdhkQnJmXTyveNUP2K55D0Dm3Xws0oOOOcoew+XDbhOk/5G8rqYSJdGqL9okHqA==
-X-Received: by 2002:a05:620a:2119:: with SMTP id l25mr3088391qkl.248.1581693539900;
-        Fri, 14 Feb 2020 07:18:59 -0800 (PST)
-Received: from localhost.localdomain ([2804:14c:4e7:1017:a97b:ff5a:85e:d3eb])
-        by smtp.gmail.com with ESMTPSA id s22sm3403933qke.19.2020.02.14.07.18.58
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 14 Feb 2020 07:18:59 -0800 (PST)
-From:   Mauricio Faria de Oliveira <mfo@canonical.com>
+        h=x-gm-message-state:from:to:cc:subject:date:message-id;
+        bh=YP3vB4FLSiYMsD12Fzk8Kpsrn3n01N+ovOb8Y+f5N7k=;
+        b=bWgBFymLaYtabhsWLmt+ndtrrAcwrZOxN8WIjilSgHAW2JuX+wr1KDYVt1n/4DR1Ih
+         T6FsSsXKDk6XaadYH5ejnsoYf/sPvV+AO2Kxq0KGESQv3zrip+GAZiOMwW8FI2AmqPw+
+         TnzRK6rHLs+dqXBbaTupVpMlzN0ydt7+ULiJ1zl9Ec+Qxq6JUI2LLd1RNF20KYYKgFL9
+         yHO6n1MBZaWOUGy/pWjOeZz6zsThxHc8MDbxHD7aODfc2d78YVRJUOGz1LwK8E3XnVBV
+         a+l0/HXFI5E5D31qtooHbdVeHWxJnk54k+ukllUyHefZNjkGDr+Q2iGGJT+U4QTUlz8F
+         pXIg==
+X-Gm-Message-State: APjAAAVNdXh9CnmNKPVn4YLBgZQESEJaj+pHCbcZSL75wrX/NRtzXwTr
+        +xvJ1Ex1qN+Bhdr02sr0cJYK6Xo0
+X-Google-Smtp-Source: APXvYqzON6xyXBDb16rz+jonD/UZ+Y3iAYAaPLL4yhRhF5HseqoPh4wwhw+QzaHnaBpHXq/hxSprtg==
+X-Received: by 2002:a37:887:: with SMTP id 129mr3534994qki.250.1581698575727;
+        Fri, 14 Feb 2020 08:42:55 -0800 (PST)
+Received: from localhost.localdomain (c-73-60-226-25.hsd1.nh.comcast.net. [73.60.226.25])
+        by smtp.gmail.com with ESMTPSA id h8sm3453936qtm.51.2020.02.14.08.42.54
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Fri, 14 Feb 2020 08:42:54 -0800 (PST)
+From:   Eric Whitney <enwlinux@gmail.com>
 To:     fstests@vger.kernel.org
-Cc:     Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v2 5/5] common/overlay: silence some mount messages for fuse-overlayfs
-Date:   Fri, 14 Feb 2020 12:18:48 -0300
-Message-Id: <20200214151848.8328-6-mfo@canonical.com>
-X-Mailer: git-send-email 2.20.1
-In-Reply-To: <20200214151848.8328-1-mfo@canonical.com>
-References: <20200214151848.8328-1-mfo@canonical.com>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Cc:     tytso@mit.edu, linux-ext4@vger.kernel.org,
+        Eric Whitney <enwlinux@gmail.com>
+Subject: [PATCH] ext4/002: remove EXT4_EOFBLOCKS_FL test
+Date:   Fri, 14 Feb 2020 11:42:49 -0500
+Message-Id: <20200214164249.21868-1-enwlinux@gmail.com>
+X-Mailer: git-send-email 2.11.0
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-When mouting fuse-overlayfs there are some messages that make
-the tests report failures due to output mismatch; ignore them:
+This test exercises obsolete ext4-specific functionality that will be
+removed in the kernel's 5.7 release.  Once that happens, ext4/002 will
+always fail, so remove the test to avoid the noise.
 
-  uid=unchanged
-  uid=unchanged
-  upperdir=/mnt/test/ovl-upper
-  workdir=/mnt/test/ovl-work
-  lowerdir=/mnt/test/ovl-lower
-  mountpoint=/mnt/test/ovl-mnt
-
-For other filesystem types (e.g., overlay and aufs) make sure to
-only print non-null output, to avoid blank lines output mismatch.
-
-And return the status of the mount command, not other commands.
-
-Currently, running './check -overlay' tests (excluding generic/062)
-the numbers for fuse-overlayfs on loop devices on v5.4-based Ubuntu
-kernel with the fuse-overlayfs package from Ubuntu Eoan/19.10 are:
-
- - Ran: 530
- - Not run: 395
- - Failures: 29
-
-And hopefully this helps with testing for fuse-overlayfs too.
-
-Steps:
-
-  $ export OVL_FSTYP=fuse.fuse-overlayfs
-  $ export FSTYP=ext4
-  $ export TEST_DEV=/dev/loop0
-  $ export TEST_DIR=/mnt/test
-  $ export SCRATCH_DEV=/dev/loop1
-  $ export SCRATCH_MNT=/mnt/scratch
-
-  $ sudo mkfs.$FSTYP -F $TEST_DEV
-  $ sudo mkfs.$FSTYP -F $SCRATCH_DEV
-  $ sudo mkdir $TEST_DIR $SCRATCH_MNT
-
-  $ cat <<EOF >/tmp/exclude-tests
-  generic/062
-  EOF
-
-  $ sudo -E ./check -overlay -E /tmp/exclude-tests
-
-Signed-off-by: Mauricio Faria de Oliveira <mfo@canonical.com>
+Signed-off-by: Eric Whitney <enwlinux@gmail.com>
 ---
- common/overlay | 20 +++++++++++++++++++-
- 1 file changed, 19 insertions(+), 1 deletion(-)
+ tests/ext4/002     | 168 -----------------------------------------------------
+ tests/ext4/002.out |   7 ---
+ tests/ext4/group   |   1 -
+ 3 files changed, 176 deletions(-)
+ delete mode 100755 tests/ext4/002
+ delete mode 100644 tests/ext4/002.out
 
-diff --git a/common/overlay b/common/overlay
-index a1076926c23f..27f3c08252ee 100644
---- a/common/overlay
-+++ b/common/overlay
-@@ -19,6 +19,8 @@ _overlay_mount_dirs()
- 	local upperdir=$2
- 	local workdir=$3
- 	local options
-+	local output
-+	local rc
- 	shift 3
- 
- 	options="-o lowerdir=$lowerdir -o upperdir=$upperdir -o workdir=$workdir"
-@@ -26,7 +28,23 @@ _overlay_mount_dirs()
- 		options="-o br=$upperdir=rw -o br=$lowerdir=ro"
- 	fi
- 
--	$MOUNT_PROG -t $OVL_FSTYP $options `_common_dev_mount_options $*`
-+	options="$options `_common_dev_mount_options $*`"
-+	output="`$MOUNT_PROG -t $OVL_FSTYP $options 2>&1`"
-+	rc=$?
-+
-+	if [ "$OVL_FSTYP" = "fuse.fuse-overlayfs" ]; then
-+		# Less verbosity to avoid output mismatch.
-+		echo "$output" | grep -v \
-+			-e "^uid=" \
-+			-e "^upperdir=" \
-+			-e "^lowerdir=" \
-+			-e "^workdir=" \
-+			-e "^mountpoint="
-+	elif [ -n "$output" ]; then
-+		echo "$output"
-+	fi
-+
-+	return $rc
- }
- 
- # Mount with same options/mnt/dev of scratch mount, but optionally
+diff --git a/tests/ext4/002 b/tests/ext4/002
+deleted file mode 100755
+index 986834bb..00000000
+--- a/tests/ext4/002
++++ /dev/null
+@@ -1,168 +0,0 @@
+-#! /bin/bash
+-# SPDX-License-Identifier: GPL-2.0
+-# Copyright (c) 2010 Google, Inc.  All Rights Reserved.
+-#
+-# FS QA Test No. ext4/002
+-#
+-# Test to ensure that the EOFBLOCK_FL gets set/unset correctly.
+-#
+-# As found by Theodore Ts'o:
+-# If a 128K file is falloc'ed using the KEEP_SIZE flag, and then
+-# write exactly 128K, the EOFBLOCK_FL doesn't get cleared correctly.
+-# This is bad since it forces e2fsck to complain about that inode.
+-# If you have a large number of inodes that are written with fallocate
+-# using KEEP_SIZE, and then fill them up to their expected size,
+-# e2fsck will potentially complain about a _huge_ number of inodes.
+-# This would also cause a huge increase in the time taken by e2fsck
+-# to complete its check.
+-#
+-# Test scenarios covered:
+-# 1. Fallocating X bytes and writing Y (Y<X) (buffered and direct io)
+-# 2. Fallocating X bytes and writing Y (Y=X) (buffered and direct io)
+-# 3. Fallocating X bytes and writing Y (Y>X) (buffered and direct io)
+-#
+-# These test cases exercise the normal and edge case conditions using
+-# falloc (and KEEP_SIZE).
+-#
+-# Ref: http://thread.gmane.org/gmane.comp.file-systems.ext4/20682
+-#
+-seq=`basename $0`
+-seqres=$RESULT_DIR/$seq
+-echo "QA output created by $seq"
+-
+-here=`pwd`
+-tmp=/tmp/$$
+-status=1        # failure is the default!
+-trap "_cleanup; exit \$status" 0 1 2 3 15
+-
+-# Test specific macros.
+-BIT_NOT_SET=0   # inode flag - 0x400000 bit is not set.
+-BIT_SET=1       # inode flag - 0x400000 bit is set.
+-
+-# Generic test cleanup function.
+-_cleanup()
+-{
+-  cd /
+-  rm -f $tmp.*
+-}
+-
+-# Ext4 uses the EOFBLOCKS_FL bit when fallocating blocks with KEEP_SIZE
+-# enabled. The only time this bit should be set is when extending the allocated
+-# blocks further than what the i_size represents. In the situations wherein the
+-# i_size covers all allocated blocks, this bit should be cleared.
+-
+-# Checks the state of the sample file in the filesystem and returns whether
+-# the inode flag 0x400000 is set or not.
+-_check_ext4_eof_flag()
+-{
+-  # Check whether EOFBLOCK_FL is set.
+-  # For ext4 filesystems: use debugfs to check if EOFBLOCKS_FL is set.
+-  # Other filesystems: do nothing. The default fsck at the end of the test
+-  # should catch any potential errors.
+-  if [ "${FSTYP}" == "ext4" ]; then
+-    bit_set=1
+-
+-    # Unmount the ${SCRATCH_DEV}
+-    _scratch_unmount
+-
+-    # Run debugfs to gather file_parameters - specifically iflags.
+-    file_params=`debugfs ${SCRATCH_DEV} -R "stat ${1}" 2>&1 | grep -e Flags:`
+-    iflags=${file_params#*Flags: }
+-
+-    # Ensure that the iflags value was parsed correctly.
+-    if [ -z ${iflags} ]; then
+-      echo "iFlags value was not parsed successfully." >> $seqres.full
+-      status=1
+-      exit ${status}
+-    fi
+-
+-    # Check if EOFBLOCKS_FL is set.
+-    if ((${iflags} & 0x400000)); then
+-      echo "EOFBLOCK_FL bit is set." >> $seqres.full
+-      bit_set=1
+-    else
+-      echo "EOFBLOCK_FL bit is not set." >> $seqres.full
+-      bit_set=0
+-    fi
+-
+-    # Check current bit state to expected value.
+-    if [ ${bit_set} -ne ${2} ]; then
+-      echo "Error: Current bit state incorrect." >> $seqres.full
+-      status=1
+-      exit ${status}
+-    fi
+-
+-    # Mount the ${SCRATCH_DEV}
+-    _scratch_mount
+-  fi
+-}
+-
+-# Get standard environment, filters and checks.
+-. ./common/rc
+-. ./common/filter
+-
+-# Prerequisites for the test run.
+-_supported_fs ext4
+-_supported_os Linux
+-_require_xfs_io_command "falloc"
+-_require_scratch
+-
+-# Real QA test starts here.
+-rm -f $seqres.full
+-
+-_scratch_mkfs >> $seqres.full 2>&1
+-_scratch_mount
+-
+-BLOCK_SIZE=$(_get_block_size $SCRATCH_MNT)
+-
+-# Begin test cases.
+-echo "Test 1: Fallocate 10 blocks and write 1 block (buffered io)." \
+-    >> $seqres.full
+-${XFS_IO_PROG} -f				\
+-    -c "falloc -k 0 $((10 * $BLOCK_SIZE))"	\
+-    -c "pwrite 0 $BLOCK_SIZE"			\
+-    ${SCRATCH_MNT}/test_1 | _filter_xfs_io_blocks_modified
+-_check_ext4_eof_flag test_1 ${BIT_SET}
+-
+-echo "Test 2: Fallocate 10 blocks and write 1 block (direct io)." \
+-    >> $seqres.full
+-${XFS_IO_PROG} -f -d				\
+-    -c "falloc -k 0 $((10 * $BLOCK_SIZE))"	\
+-    -c "pwrite 0 $BLOCK_SIZE"			\
+-    ${SCRATCH_MNT}/test_2 | _filter_xfs_io_blocks_modified
+-_check_ext4_eof_flag test_2 ${BIT_SET}
+-
+-echo "Test 3: Fallocate 10 blocks and write 10 blocks (buffered io)." \
+-    >> $seqres.full
+-${XFS_IO_PROG} -f				\
+-    -c "falloc -k 0 $((10 * $BLOCK_SIZE))"	\
+-    -c "pwrite 0 $((10 * $BLOCK_SIZE))"		\
+-    ${SCRATCH_MNT}/test_3 | _filter_xfs_io_blocks_modified
+-_check_ext4_eof_flag test_3 ${BIT_NOT_SET}
+-
+-echo "Test 4: Fallocate 10 blocks and write 10 blocks (direct io)." \
+-    >> $seqres.full
+-${XFS_IO_PROG} -f -d				\
+-    -c "falloc -k 0 $((10 * $BLOCK_SIZE))"	\
+-    -c "pwrite 0 $((10 * $BLOCK_SIZE))"		\
+-    ${SCRATCH_MNT}/test_4 | _filter_xfs_io_blocks_modified
+-_check_ext4_eof_flag test_4 ${BIT_NOT_SET}
+-
+-echo "Test 5: Fallocate 32 blocks, seek 64 blocks and write 1 block (buffered io)." \
+-    >> $seqres.full
+-${XFS_IO_PROG} -f					\
+-    -c "falloc -k 0 $((32 * $BLOCK_SIZE))"		\
+-    -c "pwrite $((64 * $BLOCK_SIZE)) $BLOCK_SIZE"	\
+-    ${SCRATCH_MNT}/test_5 | _filter_xfs_io_blocks_modified
+-_check_ext4_eof_flag test_5 ${BIT_NOT_SET}
+-
+-echo "Test 6: Fallocate 32 blocks, seek to 64 blocks and write 1 block (direct io)." \
+-    >> $seqres.full
+-${XFS_IO_PROG} -f -d					\
+-    -c "falloc -k 0 $((32 * $BLOCK_SIZE))"		\
+-    -c "pwrite $((64 * $BLOCK_SIZE)) $BLOCK_SIZE"	\
+-    ${SCRATCH_MNT}/test_6 | _filter_xfs_io_blocks_modified
+-_check_ext4_eof_flag test_6 ${BIT_NOT_SET}
+-
+-status=0
+-exit ${status}
+diff --git a/tests/ext4/002.out b/tests/ext4/002.out
+deleted file mode 100644
+index 1605a115..00000000
+--- a/tests/ext4/002.out
++++ /dev/null
+@@ -1,7 +0,0 @@
+-QA output created by 002
+-Blocks modified: [0 - 0]
+-Blocks modified: [0 - 0]
+-Blocks modified: [0 - 9]
+-Blocks modified: [0 - 9]
+-Blocks modified: [64 - 64]
+-Blocks modified: [64 - 64]
+diff --git a/tests/ext4/group b/tests/ext4/group
+index 9dfc0d35..62483c3f 100644
+--- a/tests/ext4/group
++++ b/tests/ext4/group
+@@ -4,7 +4,6 @@
+ # - comment line before each group is "new" description
+ #
+ 001 auto prealloc quick zero
+-002 auto quick prealloc
+ 003 auto quick
+ 004 auto dump
+ 005 auto quick metadata ioctl rw
 -- 
-2.20.1
+2.11.0
 
