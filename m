@@ -2,144 +2,239 @@ Return-Path: <SRS0=rSMp=4C=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BDEEEC3F68F
-	for <linux-fstests@archiver.kernel.org>; Fri, 14 Feb 2020 20:34:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 19D1BC3F68F
+	for <linux-fstests@archiver.kernel.org>; Fri, 14 Feb 2020 22:06:33 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 8836824654
-	for <linux-fstests@archiver.kernel.org>; Fri, 14 Feb 2020 20:34:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E04192187F
+	for <linux-fstests@archiver.kernel.org>; Fri, 14 Feb 2020 22:06:32 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="2R68OHPh"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="i7mpvqjy"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730005AbgBNUee (ORCPT
+        id S1727529AbgBNWGc (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 14 Feb 2020 15:34:34 -0500
-Received: from mail-qt1-f193.google.com ([209.85.160.193]:46205 "EHLO
-        mail-qt1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1730034AbgBNUee (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 14 Feb 2020 15:34:34 -0500
-Received: by mail-qt1-f193.google.com with SMTP id i14so628493qtv.13
-        for <fstests@vger.kernel.org>; Fri, 14 Feb 2020 12:34:34 -0800 (PST)
+        Fri, 14 Feb 2020 17:06:32 -0500
+Received: from mail-il1-f195.google.com ([209.85.166.195]:41772 "EHLO
+        mail-il1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726101AbgBNWGc (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 14 Feb 2020 17:06:32 -0500
+Received: by mail-il1-f195.google.com with SMTP id f10so9306658ils.8;
+        Fri, 14 Feb 2020 14:06:30 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
-        h=from:to:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=cMd6saOdi3DDi8CRdIOgvhgNU02W4rGFc1+0LI1/+d0=;
-        b=2R68OHPhYM3u7KgG8bg0Q84oJu4niwMadwOI8C2lZzmZOr0zTYIhKSLLgJekCBKJMQ
-         +rEMXC54PABqI/MQ/x8fH/2ppC9ZTgzAh2VSahPAErbc6kd3fW/OhCdRWfXaxbhmWCNQ
-         I14y+wyQOIQuLFYkaOuckpdexiGIK0UzvDGrb5uVzQb5IXcDar8WkK5XJ94CCMygrCd6
-         rj5MGGgWl/sRrxDOifX3KcW6yxEwfELHMKpANcIOCtKU+PCwhBbJhnogjxHH0UPP+pyZ
-         E2Fvp04/8xRbRBq02XlTg8951qe/xQVnR17MvKpnWF1gUb8VowOvFzpuLAV81dmYvbHF
-         b3BQ==
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=lcbJe5atNgncClgN4FOXbcTmuKj4xD8tXw3N8zYwid4=;
+        b=i7mpvqjyvtG+UssI6t/3ZplCCNyX3pxethQEI/nPV7UFtKGHtgaiBAjUg0ek2MXpU0
+         llIQPhjK+sJVRMXC7W2FyyHF/UbGD4hR2oHh7gwwAfifcI1hZ1GapwGDiOsa5oMNkZiW
+         04cGCTRNSRwfTM/oxEn/nuX7ZbI598lEpVFsfVn2Jh2TSPLmJNKGFEqVM8ssep9MY0Qe
+         XqFs0wLoOfjnaG4Off/Uyc3gS9KKhFnN6ZJI3s3zEfSBn58NLe0UD7VwM/m9VnUwrepQ
+         1eBe+EjMjx3lXj4+Q8Q4kDaVHYoiNnIHGJKqjG2GDPOW24mFdPCnozrvSYYSyB0Pvi6U
+         at4w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=cMd6saOdi3DDi8CRdIOgvhgNU02W4rGFc1+0LI1/+d0=;
-        b=IMs3IMM/IAk0iLZUZcDRAP0Ed7PMzOyrt2+owF+c2n4xlFwopMpUUaYJpEiU/Oz48h
-         0FWjUNeT23Oa8RrkTOSZ9Alf9rY+YjeyE2J2PayiHtoJrbZMQHdGUWePolq69CFEc8Zm
-         gJEoDZ9C+zlPu4YsWK9vIGh9DXch/BSYhzfBULbU0ofPdz87Nc6xVaBxUlDmXfym8Lmj
-         CtWJhLA66dmyowxYd/y4T9/COPQ3kY7nLR7mwqv/9Vd0FN8uLWMqsTKS8dnWyxC+2+FJ
-         leImyWU+/6TKsWqaDXaIPCvTDeWkqhQMht/69D9Ym6zROZaRAsvRcVKvg3XXQMS9k84d
-         iBdA==
-X-Gm-Message-State: APjAAAWIr8Rw4ETTAQNNYR3b1Ja1TnBRf313W+dCGOK4Ie3Qra4pa8Zq
-        fXo6WJHBJigYHdEbKhlr9emZ1LTmQvg=
-X-Google-Smtp-Source: APXvYqw9un91A7rs7cHgHwlgL91WG5yFjRh/Ns9R0eZwuuRXy2lXRhl7A/nX/IxTPowMGclaY3Jy5Q==
-X-Received: by 2002:ac8:67d7:: with SMTP id r23mr4070356qtp.20.1581712472948;
-        Fri, 14 Feb 2020 12:34:32 -0800 (PST)
-Received: from localhost ([107.15.81.208])
-        by smtp.gmail.com with ESMTPSA id z5sm4216026qta.7.2020.02.14.12.34.31
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 14 Feb 2020 12:34:32 -0800 (PST)
-From:   Josef Bacik <josef@toxicpanda.com>
-To:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Subject: [PATCH] xfstests: add a CGROUP configuration option
-Date:   Fri, 14 Feb 2020 15:34:31 -0500
-Message-Id: <20200214203431.24506-1-josef@toxicpanda.com>
-X-Mailer: git-send-email 2.24.1
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=lcbJe5atNgncClgN4FOXbcTmuKj4xD8tXw3N8zYwid4=;
+        b=lJxQfT5f9mmWwMu0kPNe4312Z7/HXcETiYHkOIZuiSQKgHEAR6NMxx2b5J1S8WMAB1
+         OmPSiLXOH8HYa3M8u1Ju76xqMnB+yqpPTr38vTNghEgvmh331Xg/nXAlRv2h3aggXVuS
+         XwoFrNgoeDhEMKmbrdP/tu5TYvpE5c1sTCwF6sc7tMG5g9Mqprv3gkOLhGZXSTFThQHg
+         SZgvYlUnMTEbN/fowKn9VAwgCH7VM5hOB5+NJHgMVNnuqO1QUZr1vDJsOC7m7VWhkmW0
+         SF1XX1gAsspW+RjU9Yq6CgDqORV+m7njDcbM0GwNLpjWmXwOWJNIFavezupyRR+nGTlI
+         IGPg==
+X-Gm-Message-State: APjAAAW3wZbz5km02px3mBUfAS9tx+NzeRXrBl6G5iqg1LI8C056cXL+
+        iGbEfRf1XreGSTUcg7PTok7Dsg4BJabBzT468i4=
+X-Google-Smtp-Source: APXvYqwzWV4eFQ9Qwp4OZ6xwfdcUYdcTklgFaXx8XKeUDKXkOpbUrSz8YmWR/u4B2UUwme2ti1qEfeNkOoiz0I9l1IE=
+X-Received: by 2002:a92:5c8a:: with SMTP id d10mr5237068ilg.137.1581717990449;
+ Fri, 14 Feb 2020 14:06:30 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20200214151848.8328-1-mfo@canonical.com> <20200214151848.8328-2-mfo@canonical.com>
+In-Reply-To: <20200214151848.8328-2-mfo@canonical.com>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Sat, 15 Feb 2020 00:06:19 +0200
+Message-ID: <CAOQ4uxj9d6G-RF4i7JQ3EfV6q=YFWLhBCWOK+zf5Xy08KqTGOA@mail.gmail.com>
+Subject: Re: [PATCH v2 1/5] common/overlay,rc,config: introduce OVL_FSTYP
+ variable and aufs
+To:     Mauricio Faria de Oliveira <mfo@canonical.com>
+Cc:     fstests <fstests@vger.kernel.org>,
+        overlayfs <linux-unionfs@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-I want to add some extended statistic gathering for xfstests, but it's
-tricky to isolate xfstests from the rest of the host applications.  The
-most straightforward way to do this is to run every test inside of it's
-own cgroup.  From there we can monitor the activity of tasks in the
-specific cgroup using BPF.
+On Fri, Feb 14, 2020 at 5:18 PM Mauricio Faria de Oliveira
+<mfo@canonical.com> wrote:
+>
+> Recently I was looking for an aufs test suite, and reached out to
+> Okajima, but 'There is no public test suite specific to aufs.' [1],
+> and it looks like 'xfstests/tests/generic' should be enough [1, 2].
+>
+> Thus, building on top existing xfstests support for overlay just
+> introduce the OVL_FSTYP variable, and the default value "overlay"
+> can be changed to "aufs" (uses overlay's upperdir as a rw-branch
+> and lowerdir as a ro-branch; workdir is not used.)
+>
+> This is indeed a workaround^W simple change that does the job vs.
+> creating a new FSTYP "aufs" and mechanically changing the number
+> of places that check for "overlay" to just handle "aufs" as well.
+> (so the effort is still small as aufs has no specific tests now.)
+>
+> This also allows testing fuse-overlayfs with the next patches.
+>
+> The changes are minimal -- just translate overlay mount options
+> and use $OVL_FSTYP as filesystem type for checking/mount/umount;
+> then report it in log headers and document it in README.overlay.
+>
+> Currently, running './check -overlay' tests (excluding a few [3]
+> which either hang or keep looping) the numbers for aufs on loop
+> devices on v5.4-based Ubuntu kernel are:
+>
+>   - Ran: 645 tests
+>   - Not run: 483 tests
+>   - Failures: 22 tests
+>
+> So, hopefully this may help with a starting point for an public
+> test suite for aufs.
+>
+> Thanks to Amir Goldstein for feedback/improvements and pointers
+> to support fuse-overlayfs as well [v2].
+>
+> [1] https://sourceforge.net/p/aufs/mailman/message/36918721/
+> [2] https://sourceforge.net/p/aufs/mailman/message/36918932/
+> [3] Steps:
+>
+>   $ export OVL_FSTYP=aufs
+>   $ export FSTYP=ext4
+>   $ export TEST_DEV=/dev/loop0
+>   $ export TEST_DIR=/mnt/test
+>   $ export SCRATCH_DEV=/dev/loop1
+>   $ export SCRATCH_MNT=/mnt/scratch
+>
+>   $ sudo mkfs.$FSTYP -F $TEST_DEV
+>   $ sudo mkfs.$FSTYP -F $SCRATCH_DEV
+>   $ sudo mkdir $TEST_DIR $SCRATCH_MNT
+>
+>   $ cat <<EOF >/tmp/exclude-tests
+>   generic/013
+>   generic/070
+>   generic/075
+>   generic/112
+>   generic/127
+>   generic/461
+>   generic/476
+>   generic/522
+>   generic/530
+>   overlay/019
+>   EOF
+>
+>   $ sudo -E ./check -overlay -E /tmp/exclude-tests
+>
+> Signed-off-by: Mauricio Faria de Oliveira <mfo@canonical.com>
+> ---
+>  README.overlay |  4 ++++
+>  common/config  |  2 ++
+>  common/overlay | 11 ++++++++---
+>  common/rc      |  6 ++++++
+>  4 files changed, 20 insertions(+), 3 deletions(-)
+>
+> diff --git a/README.overlay b/README.overlay
+> index 30b5ddb2d1c3..08a39b8830c9 100644
+> --- a/README.overlay
+> +++ b/README.overlay
+> @@ -50,3 +50,7 @@ In the example above, MOUNT_OPTIONS will be used to mount the base scratch fs,
+>  TEST_FS_MOUNT_OPTS will be used to mount the base test fs,
+>  OVERLAY_MOUNT_OPTIONS will be used to mount both test and scratch overlay and
+>  OVERLAY_FSCK_OPTIONS will be used to check both test and scratch overlay.
+> +
+> +To test other filesystem types (experimental) configure the OVL_FSTYP variable:
+> +
+> + OVL_FSTYP=aufs
+> diff --git a/common/config b/common/config
+> index 9a9c77602b54..d92a78003295 100644
+> --- a/common/config
+> +++ b/common/config
+> @@ -71,6 +71,8 @@ export OVL_LOWER="ovl-lower"
+>  export OVL_WORK="ovl-work"
+>  # overlay mount point parent must be the base fs root
+>  export OVL_MNT="ovl-mnt"
+> +# overlay mount filesystem type (for testing other fs)
+> +export OVL_FSTYP=${OVL_FSTYP:-overlay}
+>
+>  # From e2fsprogs/e2fsck/e2fsck.h:
+>  # Exit code used by fsck-type programs
+> diff --git a/common/overlay b/common/overlay
+> index 65c639e9c6d8..a1076926c23f 100644
+> --- a/common/overlay
+> +++ b/common/overlay
+> @@ -18,10 +18,15 @@ _overlay_mount_dirs()
+>         local lowerdir=$1
+>         local upperdir=$2
+>         local workdir=$3
+> +       local options
+>         shift 3
+>
+> -       $MOUNT_PROG -t overlay -o lowerdir=$lowerdir -o upperdir=$upperdir \
+> -                   -o workdir=$workdir `_common_dev_mount_options $*`
+> +       options="-o lowerdir=$lowerdir -o upperdir=$upperdir -o workdir=$workdir"
+> +       if [ "$OVL_FSTYP" = "aufs" ]; then
+> +               options="-o br=$upperdir=rw -o br=$lowerdir=ro"
+> +       fi
+> +
+> +       $MOUNT_PROG -t $OVL_FSTYP $options `_common_dev_mount_options $*`
+>  }
+>
+>  # Mount with same options/mnt/dev of scratch mount, but optionally
+> @@ -302,7 +307,7 @@ _overlay_check_fs()
+>                 _overlay_base_mount $*
+>         else
+>                 # Check and umount overlay for dir check
+> -               ovl_mounted=`_is_dir_mountpoint $ovl_mnt`
+> +               ovl_mounted=`_is_dir_mountpoint $ovl_mnt $OVL_FSTYP`
+>                 [ -z "$ovl_mounted" ] || $UMOUNT_PROG $ovl_mnt
+>         fi
+>
+> diff --git a/common/rc b/common/rc
+> index b4a77a2187f4..1feae1a94f9e 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -1471,6 +1471,10 @@ _check_mounted_on()
+>                 return 2 # 2 = mounted on wrong mnt
+>         fi
+>
+> +       if [ -n "$type" -a "$type" = "overlay" ]; then
+> +               type="$OVL_FSTYP"
+> +       fi
+> +
 
-The support for this is pretty simple, allow users to specify
-CGROUP=/path/to/cgroup.  We will create the path if it doesn't already
-exist, and validate we can add things to cgroup.procs.  If we cannot
-it'll be disabled, otherwise we will use this when we do _run_seq by
-echo'ing the bash pid into cgroup.procs, which will cause any children
-to run under that cgroup.
+Hmm. I found 2 other instances of _fs_type in common/rc.
+I think it would be safer to let _fs_type return "overlay" in
+case the mounted fs is of type $OVL_FSTYP.
+This will be simple to do by extending the sed expression -
+no need for special cases and conditions.
 
-Signed-off-by: Josef Bacik <josef@toxicpanda.com>
----
- README |  3 +++
- check  | 17 ++++++++++++++++-
- 2 files changed, 19 insertions(+), 1 deletion(-)
+Other than that, patch looks good.
 
-diff --git a/README b/README
-index 593c1052..722dc170 100644
---- a/README
-+++ b/README
-@@ -102,6 +102,9 @@ Preparing system for tests:
-              - set USE_KMEMLEAK=yes to scan for memory leaks in the kernel
-                after every test, if the kernel supports kmemleak.
-              - set KEEP_DMESG=yes to keep dmesg log after test
-+             - set CGROUP=/path/to/cgroup to create a cgroup to run tests inside
-+               of.  The main check will run outside of the cgroup, only the test
-+               itself and any child processes will run under the cgroup.
- 
-         - or add a case to the switch in common/config assigning
-           these variables based on the hostname of your test
-diff --git a/check b/check
-index 2e148e57..07a0e251 100755
---- a/check
-+++ b/check
-@@ -509,11 +509,23 @@ _expunge_test()
- OOM_SCORE_ADJ="/proc/self/oom_score_adj"
- test -w ${OOM_SCORE_ADJ} && echo -1000 > ${OOM_SCORE_ADJ}
- 
-+# Initialize the cgroup path if it doesn't already exist
-+if [ ! -z "$CGROUP" ]; then
-+	mkdir -p ${CGROUP}
-+
-+	# If we can't write to cgroup.procs then unset cgroup
-+	test -w ${CGROUP}/cgroup.procs || unset CGROUP
-+fi
-+
- # ...and make the tests themselves somewhat more attractive to it, so that if
- # the system runs out of memory it'll be the test that gets killed and not the
- # test framework.
- _run_seq() {
--	bash -c "test -w ${OOM_SCORE_ADJ} && echo 250 > ${OOM_SCORE_ADJ}; exec ./$seq"
-+	_extra="test -w ${OOM_SCORE_ADJ} && echo 250 > ${OOM_SCORE_ADJ};"
-+	if [ ! -z "$CGROUP" ]; then
-+		_extra+="echo $$ > ${CGROUP}/cgroup.procs;"
-+	fi
-+	bash -c "${_extra} exec ./$seq"
- }
- 
- _detect_kmemleak
-@@ -615,6 +627,9 @@ for section in $HOST_OPTIONS_SECTIONS; do
- 	  echo "MKFS_OPTIONS  -- `_scratch_mkfs_options`"
- 	  echo "MOUNT_OPTIONS -- `_scratch_mount_options`"
- 	fi
-+	if [ ! -z "$CGROUP" ]; then
-+	  echo "CGROUP        -- ${CGROUP}"
-+	fi
- 	echo
- 	needwrap=true
- 
--- 
-2.24.1
+Thanks,
+Amir.
 
+>         if [ -n "$type" -a "`_fs_type $dev`" != "$type" ]; then
+>                 echo "$devname=$dev is mounted but not a type $type filesystem"
+>                 # raw $DF_PROG cannot handle NFS/CIFS/overlay correctly
+> @@ -2841,6 +2845,8 @@ _full_fstyp_details()
+>                 FSTYP="$FSTYP (non-debug)"
+>             fi
+>         fi
+> +     elif [ $FSTYP = "overlay" -a "$OVL_FSTYP" != "overlay" ]; then
+> +       FSTYP="$FSTYP ($OVL_FSTYP)"
+>       fi
+>       echo $FSTYP
+>  }
+> --
+> 2.20.1
+>
