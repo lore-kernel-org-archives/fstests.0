@@ -6,56 +6,56 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CDBFAC2BA83
-	for <linux-fstests@archiver.kernel.org>; Fri, 14 Feb 2020 15:18:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 427E1C3B19F
+	for <linux-fstests@archiver.kernel.org>; Fri, 14 Feb 2020 15:19:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id A695C24654
-	for <linux-fstests@archiver.kernel.org>; Fri, 14 Feb 2020 15:18:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 15A9624670
+	for <linux-fstests@archiver.kernel.org>; Fri, 14 Feb 2020 15:19:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729516AbgBNPS7 (ORCPT
+        id S1729546AbgBNPS7 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
         Fri, 14 Feb 2020 10:18:59 -0500
-Received: from youngberry.canonical.com ([91.189.89.112]:54679 "EHLO
+Received: from youngberry.canonical.com ([91.189.89.112]:54682 "EHLO
         youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729546AbgBNPS7 (ORCPT
+        with ESMTP id S1729482AbgBNPS7 (ORCPT
         <rfc822;fstests@vger.kernel.org>); Fri, 14 Feb 2020 10:18:59 -0500
-Received: from mail-qt1-f198.google.com ([209.85.160.198])
+Received: from mail-qk1-f198.google.com ([209.85.222.198])
         by youngberry.canonical.com with esmtps (TLS1.2:ECDHE_RSA_AES_128_GCM_SHA256:128)
         (Exim 4.86_2)
         (envelope-from <mfo@canonical.com>)
-        id 1j2ck4-00022R-GQ
-        for fstests@vger.kernel.org; Fri, 14 Feb 2020 15:18:56 +0000
-Received: by mail-qt1-f198.google.com with SMTP id r30so1827171qtb.10
-        for <fstests@vger.kernel.org>; Fri, 14 Feb 2020 07:18:56 -0800 (PST)
+        id 1j2ck5-00022s-VR
+        for fstests@vger.kernel.org; Fri, 14 Feb 2020 15:18:58 +0000
+Received: by mail-qk1-f198.google.com with SMTP id a132so6375908qkg.5
+        for <fstests@vger.kernel.org>; Fri, 14 Feb 2020 07:18:57 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=ME41u9Tp07L1X77zLOoHPTip6xACtBhTzDmaBFGHOOM=;
-        b=asILEg3g1Tc3eHkG9g71F82IKveestQzCBBKJStrE0e+ox+4EjXr2mgveZDXf+NslX
-         3Yv9PGR85QgeGEhKj7g1EGg/LasnDbTX2nO3ZK4Xpak7bF0l+aJjrL+zYyC3tyG+ZZ8G
-         XSrKeQoaHJ50MSoiL+gdKuB6DsnAK5CIsRsXhPsfu7c3N3QPHz8LbwaEY5MZO2UU9DR4
-         E8MX9VkCcfEY69V4M2rrotRI4WaEnb764wV9EK20MxRKhcwUgud+jaT8qqiKnLFzLfli
-         AtNhmiXcAWtZgbvZePVK1v4FJXT2IhG8MNMy5ZbHHkFw7wDLkCRsSLT0Fwh/p2pWqFZu
-         aIqw==
-X-Gm-Message-State: APjAAAX1+GCxOXM6brR7dTrTp4M3FQZo88D1ftLrV25u5ZVKOSm0TrJA
-        q9WppBo6WFZiYqjvoKyAL+GvTXBWlrNQXaNSEAKff3xnv3sfycuTDECRBS+QgURH21jg2ZLe+ml
-        kXWi6lS8aYxVarhVxL3vMX9OoaJ8e9LzPD/U=
-X-Received: by 2002:a0c:f193:: with SMTP id m19mr2470496qvl.154.1581693535378;
-        Fri, 14 Feb 2020 07:18:55 -0800 (PST)
-X-Google-Smtp-Source: APXvYqzwDqdcbhHypUBGB7UZvecSR25qQwQby/UmpXUfXTNQxuXsUibMBbNf9N6i1Vgi/qa8vnhvDw==
-X-Received: by 2002:a0c:f193:: with SMTP id m19mr2470465qvl.154.1581693535051;
-        Fri, 14 Feb 2020 07:18:55 -0800 (PST)
+        bh=83C2lNWz8o4Om2q4nHCqNIAoV15NBW+uboT5K2kj8rU=;
+        b=WV5Eojzk+KVLonCH9sgdzFUMfpNDCPiu4Gi8CgfLXrO3g31uVl3LCV/seLSS2ZR9ig
+         zEVSKB4wLq84OHIirPhjFkNdYciPCPRvghzRzx92qKoyz1nqC0LMEFgQq+0C70XrUkU7
+         5Gu1PaB22SIvC5pLSSBRQJCSap8APp6SIKJ3Hr6HKHXWqAj8xdIGE02deSI7a1yvtsim
+         PpdJdSJUSGwdBLhOYyUdmMKEg8M+lN+roc7fsUqQpTuB9Hpqbt8gM6cS0/w8P2Y6Tuii
+         54UrOZ9m8mGC+d2ZT9XsRes8IjBmp+QImzHZtQFgVpY84QEEffiFlgAzrbcNa9tF3N6c
+         Jgjw==
+X-Gm-Message-State: APjAAAVh7i3ht9bqCUQtvWaFcuCYZM67VMtm5JpXsirzTIlhLwZYiAGJ
+        gqSfgoytF0tEeR3scn00+T1qqllStFE8fccF0RZyEEqLIEsa0gFGUkfqyqZOoucdzHMJ3/fsc3/
+        lq7j36bY20Q4ZHMND21TlhOQ+1fRO+wJSytc=
+X-Received: by 2002:a37:4e97:: with SMTP id c145mr2976556qkb.253.1581693536956;
+        Fri, 14 Feb 2020 07:18:56 -0800 (PST)
+X-Google-Smtp-Source: APXvYqx98yYRfFgrmnoTK7yOcT8vEYzHYdeLFs9Ej1KFbEv1l6A+9C0pufzZcLHUFobNLA5YXrl16w==
+X-Received: by 2002:a37:4e97:: with SMTP id c145mr2976531qkb.253.1581693536653;
+        Fri, 14 Feb 2020 07:18:56 -0800 (PST)
 Received: from localhost.localdomain ([2804:14c:4e7:1017:a97b:ff5a:85e:d3eb])
-        by smtp.gmail.com with ESMTPSA id s22sm3403933qke.19.2020.02.14.07.18.53
+        by smtp.gmail.com with ESMTPSA id s22sm3403933qke.19.2020.02.14.07.18.55
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 14 Feb 2020 07:18:54 -0800 (PST)
+        Fri, 14 Feb 2020 07:18:56 -0800 (PST)
 From:   Mauricio Faria de Oliveira <mfo@canonical.com>
 To:     fstests@vger.kernel.org
 Cc:     Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v2 2/5] tests/overlay: mount: replace overlay hardcode with OVL_FSTYP variable
-Date:   Fri, 14 Feb 2020 12:18:45 -0300
-Message-Id: <20200214151848.8328-3-mfo@canonical.com>
+Subject: [PATCH v2 3/5] common/rc: introduce new helper function _fs_type_dev_dir()
+Date:   Fri, 14 Feb 2020 12:18:46 -0300
+Message-Id: <20200214151848.8328-4-mfo@canonical.com>
 X-Mailer: git-send-email 2.20.1
 In-Reply-To: <20200214151848.8328-1-mfo@canonical.com>
 References: <20200214151848.8328-1-mfo@canonical.com>
@@ -66,108 +66,81 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This allows other filesystem types to actually be used in these tests.
+In order to determine the fs type on fuse-overlayfs (coming)
+we need to search for the mount point/directory; the device
+is not enough. (details in the next patch.)
 
-Well, aufs does not support the options used in most of them anyway,
-so just let it fail to mount (instead of implementing common helpers
-for middle layers.)
+Thus the _fs_type() function is insufficient to determine
+the filesystem type, as it only searches for mount device.
 
-On fuse-overlayfs (coming) the options should be supported/compatible,
-and thus just work, so no further changes are needed.
+So, introduce the _fs_type_dev_dir() function, which also
+searches for the mountpoint/dir in addition to the device.
 
-Suggested-by: Amir Goldstein <amir73il@gmail.com>
+The fs type fix-up sed script goes into a common function.
+
+P.S.: there might be other sites that need similar changes,
+since the mount device is also checked elsewhere, but just
+with this bit tests can run, so it is good enough for now.)
+
 Signed-off-by: Mauricio Faria de Oliveira <mfo@canonical.com>
 ---
- tests/overlay/011 | 2 +-
- tests/overlay/035 | 2 +-
- tests/overlay/052 | 4 ++--
- tests/overlay/053 | 4 ++--
- tests/overlay/062 | 2 +-
- 5 files changed, 7 insertions(+), 7 deletions(-)
+ common/rc | 36 ++++++++++++++++++++++++++++--------
+ 1 file changed, 28 insertions(+), 8 deletions(-)
 
-diff --git a/tests/overlay/011 b/tests/overlay/011
-index 1d09341b250a..0b39416c9835 100755
---- a/tests/overlay/011
-+++ b/tests/overlay/011
-@@ -53,7 +53,7 @@ $SETFATTR_PROG -n "trusted.overlay.opaque" -v "y" $upperdir/testdir
- # $upperdir overlaid on top of $lowerdir, so that "trusted.overlay.opaque"
- # xattr should be honored and should not be listed
- # mount readonly, because there's no upper and workdir
--$MOUNT_PROG -t overlay -o ro -o lowerdir=$upperdir:$lowerdir $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
-+$MOUNT_PROG -t $OVL_FSTYP -o ro -o lowerdir=$upperdir:$lowerdir $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
+diff --git a/common/rc b/common/rc
+index 1feae1a94f9e..5711eca2a1d2 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1262,6 +1262,19 @@ _used()
+     _df_device $1 | $AWK_PROG '{ sub("%", "") ; print $6 }'
+ }
  
- # Dump trusted.overlay xattr, we should not see the "opaque" xattr
- _getfattr -d -m overlay $SCRATCH_MNT/testdir
-diff --git a/tests/overlay/035 b/tests/overlay/035
-index c0aae935bcf1..bbb158f319cd 100755
---- a/tests/overlay/035
-+++ b/tests/overlay/035
-@@ -52,7 +52,7 @@ mkdir -p $lowerdir1 $lowerdir2 $upperdir $workdir
++# fix filesystem type up
++#
++_fix_fs_type()
++{
++    #
++    # The Linux kernel shows NFSv4 filesystems in df output as
++    # filesystem type nfs4, although we mounted it as nfs earlier.
++    # Fix the filesystem type up here so that the callers don't
++    # have to bother with this quirk.
++    #
++    sed -e 's/nfs4/nfs/' -e 's/fuse.glusterfs/glusterfs/'
++}
++
+ # return the FS type of a mounted device
+ #
+ _fs_type()
+@@ -1272,14 +1285,21 @@ _fs_type()
+ 	exit 1
+     fi
  
- # Mount overlay with lower layers only.
- # Verify that overlay is mounted read-only and that it cannot be remounted rw.
--$MOUNT_PROG -t overlay -o"lowerdir=$lowerdir2:$lowerdir1" \
-+$MOUNT_PROG -t $OVL_FSTYP -o"lowerdir=$lowerdir2:$lowerdir1" \
- 			$OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
- touch $SCRATCH_MNT/foo 2>&1 | _filter_scratch
- $MOUNT_PROG -o remount,rw $SCRATCH_MNT 2>&1 | _filter_ro_mount
-diff --git a/tests/overlay/052 b/tests/overlay/052
-index b1cf0da64bbf..35a7b5f1a903 100755
---- a/tests/overlay/052
-+++ b/tests/overlay/052
-@@ -147,7 +147,7 @@ unmount_dirs
+-    #
+-    # The Linux kernel shows NFSv4 filesystems in df output as
+-    # filesystem type nfs4, although we mounted it as nfs earlier.
+-    # Fix the filesystem type up here so that the callers don't
+-    # have to bother with this quirk.
+-    #
+-    _df_device $1 | $AWK_PROG '{ print $2 }' | \
+-        sed -e 's/nfs4/nfs/' -e 's/fuse.glusterfs/glusterfs/'
++    _df_device $1 | $AWK_PROG '{ print $2 }' | _fix_fs_type
++}
++
++# return the FS type of a mounted device
++# on a mount point directory (check both)
++#
++_fs_type_dev_dir()
++{
++    if [ $# -ne 2 ]
++    then
++	echo "Usage: _fs_type_dev_dir device directory" 1>&2
++	exit 1
++    fi
++
++    _df_dir $2 | $AWK_PROG -v what=$1 '($1==what) { print $2 }' | _fix_fs_type
+ }
  
- # Check encode/decode/read of lower file handles on lower layers only r/o overlay.
- # For non-upper overlay mount, nfs_export requires disabling redirect_dir.
--$MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
-+$MOUNT_PROG -t $OVL_FSTYP $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
- 			-o ro,redirect_dir=nofollow,nfs_export=on,lowerdir=$middle:$lower
- test_file_handles $SCRATCH_MNT/lowertestdir -rp
- test_file_handles $SCRATCH_MNT/lowertestdir/subdir -rp
-@@ -158,7 +158,7 @@ unmount_dirs
- # Overlay lookup cannot follow the redirect from $upper/lowertestdir.new to
- # $lower/lowertestdir. Instead, we mount an overlay subtree rooted at these
- # directories.
--$MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
-+$MOUNT_PROG -t $OVL_FSTYP $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
- 		-o ro,redirect_dir=nofollow,nfs_export=on,lowerdir=$upper/lowertestdir.new:$lower/lowertestdir
- test_file_handles $SCRATCH_MNT -r
- test_file_handles $SCRATCH_MNT/subdir -rp
-diff --git a/tests/overlay/053 b/tests/overlay/053
-index ff95424741ec..5ac19b32c3cb 100755
---- a/tests/overlay/053
-+++ b/tests/overlay/053
-@@ -169,7 +169,7 @@ unmount_dirs
- 
- # Check encode/decode/read of lower file handles on lower layers only r/o overlay.
- # For non-upper overlay mount, nfs_export requires disabling redirect_dir.
--$MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
-+$MOUNT_PROG -t $OVL_FSTYP $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
- 			-o ro,redirect_dir=nofollow,nfs_export=on,lowerdir=$middle:$lower
- test_file_handles $SCRATCH_MNT/lowertestdir -rp
- test_file_handles $SCRATCH_MNT/lowertestdir/subdir -rp
-@@ -180,7 +180,7 @@ unmount_dirs
- # Overlay lookup cannot follow the redirect from $upper/lowertestdir.new to
- # $lower/lowertestdir. Instead, we mount an overlay subtree rooted at these
- # directories.
--$MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
-+$MOUNT_PROG -t $OVL_FSTYP $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
- 		-o ro,redirect_dir=nofollow,nfs_export=on,lowerdir=$upper/lowertestdir.new:$lower/lowertestdir
- test_file_handles $SCRATCH_MNT -r
- test_file_handles $SCRATCH_MNT/subdir -rp
-diff --git a/tests/overlay/062 b/tests/overlay/062
-index 2c86a4b6fd1e..afd3562bfd33 100755
---- a/tests/overlay/062
-+++ b/tests/overlay/062
-@@ -72,7 +72,7 @@ create_test_files $lowertestdir
- $MOUNT_PROG --bind $lowertestdir $lowertestdir
- 
- # For non-upper overlay mount, nfs_export requires disabling redirect_dir.
--$MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
-+$MOUNT_PROG -t $OVL_FSTYP $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
- 	-o ro,redirect_dir=nofollow,nfs_export=on,lowerdir=$lower:$lower2
- 
- # Decode an overlay directory file handle, whose underlying lower dir dentry
+ # return the FS mount options of a mounted device
 -- 
 2.20.1
 
