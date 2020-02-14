@@ -6,56 +6,56 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 96C70C2BA83
-	for <linux-fstests@archiver.kernel.org>; Fri, 14 Feb 2020 15:18:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CDBFAC2BA83
+	for <linux-fstests@archiver.kernel.org>; Fri, 14 Feb 2020 15:18:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 6BF222168B
-	for <linux-fstests@archiver.kernel.org>; Fri, 14 Feb 2020 15:18:57 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A695C24654
+	for <linux-fstests@archiver.kernel.org>; Fri, 14 Feb 2020 15:18:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729555AbgBNPS5 (ORCPT
+        id S1729516AbgBNPS7 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 14 Feb 2020 10:18:57 -0500
-Received: from youngberry.canonical.com ([91.189.89.112]:54676 "EHLO
+        Fri, 14 Feb 2020 10:18:59 -0500
+Received: from youngberry.canonical.com ([91.189.89.112]:54679 "EHLO
         youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729482AbgBNPS5 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 14 Feb 2020 10:18:57 -0500
-Received: from mail-qk1-f200.google.com ([209.85.222.200])
+        with ESMTP id S1729546AbgBNPS7 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 14 Feb 2020 10:18:59 -0500
+Received: from mail-qt1-f198.google.com ([209.85.160.198])
         by youngberry.canonical.com with esmtps (TLS1.2:ECDHE_RSA_AES_128_GCM_SHA256:128)
         (Exim 4.86_2)
         (envelope-from <mfo@canonical.com>)
-        id 1j2ck2-00022A-Q1
-        for fstests@vger.kernel.org; Fri, 14 Feb 2020 15:18:54 +0000
-Received: by mail-qk1-f200.google.com with SMTP id w126so916513qkb.23
-        for <fstests@vger.kernel.org>; Fri, 14 Feb 2020 07:18:54 -0800 (PST)
+        id 1j2ck4-00022R-GQ
+        for fstests@vger.kernel.org; Fri, 14 Feb 2020 15:18:56 +0000
+Received: by mail-qt1-f198.google.com with SMTP id r30so1827171qtb.10
+        for <fstests@vger.kernel.org>; Fri, 14 Feb 2020 07:18:56 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=bpn1DjbE2auZrikA/d7VQIODPI3wrxIMw6GlG2uZhVI=;
-        b=Po2ryi1SNrKYkQpIzB0InT2mrh+S9CC/CIp+oaiQyHxdZdwSsG+ezAbll29V3z1OfG
-         YxBOxmqwOsIea+AdRpK14YasDkwWL1wQmCZRa6KFDZQn7xT2QsjrrlRCgU3Q+BAHYuXP
-         wJWcHFcUyD8bpHknsOaMXPEiELgLvXl7Qn2drmq6yvG/YPF62gxCtUJ2mvvwgfR+8cKx
-         4d1SWclzWwsjAAC2YVD2T80Phv1xH3Bg3BdVR5xrrXQnYgkBoZB/49C5wM/Bo2YGee9g
-         t2ss+9kHVrDqyAeQ2zC7rVg+NCLohq9UFgvOXaoNdlNDSZraqdW4R5uie3IK/3bvMGKF
-         w12Q==
-X-Gm-Message-State: APjAAAXDLjr6thz8PamaYd9EO+ZShoKQhz7GtLspBD+S+fsK5zncYgEg
-        bHgrSb9hR4W4b7dQ2dePqMBNIkmUwQncvCcNQcU/zvOCvFkWuAROdEP0E0IU1wGDghzAlBcoCrA
-        6H4nLVZ2ZWRPrH30D4x1sxM1lVUqSmXcrKLU=
-X-Received: by 2002:ac8:195d:: with SMTP id g29mr2940191qtk.65.1581693533684;
-        Fri, 14 Feb 2020 07:18:53 -0800 (PST)
-X-Google-Smtp-Source: APXvYqwSjpsTgwTbfmXgLXQ6udOZpV8PN8VNKbgXvjshMzyWP6vfINsGpT2YBwSbxGp7zE5faqNHBQ==
-X-Received: by 2002:ac8:195d:: with SMTP id g29mr2940172qtk.65.1581693533352;
-        Fri, 14 Feb 2020 07:18:53 -0800 (PST)
+        bh=ME41u9Tp07L1X77zLOoHPTip6xACtBhTzDmaBFGHOOM=;
+        b=asILEg3g1Tc3eHkG9g71F82IKveestQzCBBKJStrE0e+ox+4EjXr2mgveZDXf+NslX
+         3Yv9PGR85QgeGEhKj7g1EGg/LasnDbTX2nO3ZK4Xpak7bF0l+aJjrL+zYyC3tyG+ZZ8G
+         XSrKeQoaHJ50MSoiL+gdKuB6DsnAK5CIsRsXhPsfu7c3N3QPHz8LbwaEY5MZO2UU9DR4
+         E8MX9VkCcfEY69V4M2rrotRI4WaEnb764wV9EK20MxRKhcwUgud+jaT8qqiKnLFzLfli
+         AtNhmiXcAWtZgbvZePVK1v4FJXT2IhG8MNMy5ZbHHkFw7wDLkCRsSLT0Fwh/p2pWqFZu
+         aIqw==
+X-Gm-Message-State: APjAAAX1+GCxOXM6brR7dTrTp4M3FQZo88D1ftLrV25u5ZVKOSm0TrJA
+        q9WppBo6WFZiYqjvoKyAL+GvTXBWlrNQXaNSEAKff3xnv3sfycuTDECRBS+QgURH21jg2ZLe+ml
+        kXWi6lS8aYxVarhVxL3vMX9OoaJ8e9LzPD/U=
+X-Received: by 2002:a0c:f193:: with SMTP id m19mr2470496qvl.154.1581693535378;
+        Fri, 14 Feb 2020 07:18:55 -0800 (PST)
+X-Google-Smtp-Source: APXvYqzwDqdcbhHypUBGB7UZvecSR25qQwQby/UmpXUfXTNQxuXsUibMBbNf9N6i1Vgi/qa8vnhvDw==
+X-Received: by 2002:a0c:f193:: with SMTP id m19mr2470465qvl.154.1581693535051;
+        Fri, 14 Feb 2020 07:18:55 -0800 (PST)
 Received: from localhost.localdomain ([2804:14c:4e7:1017:a97b:ff5a:85e:d3eb])
-        by smtp.gmail.com with ESMTPSA id s22sm3403933qke.19.2020.02.14.07.18.52
+        by smtp.gmail.com with ESMTPSA id s22sm3403933qke.19.2020.02.14.07.18.53
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 14 Feb 2020 07:18:53 -0800 (PST)
+        Fri, 14 Feb 2020 07:18:54 -0800 (PST)
 From:   Mauricio Faria de Oliveira <mfo@canonical.com>
 To:     fstests@vger.kernel.org
 Cc:     Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v2 1/5] common/overlay,rc,config: introduce OVL_FSTYP variable and aufs
-Date:   Fri, 14 Feb 2020 12:18:44 -0300
-Message-Id: <20200214151848.8328-2-mfo@canonical.com>
+Subject: [PATCH v2 2/5] tests/overlay: mount: replace overlay hardcode with OVL_FSTYP variable
+Date:   Fri, 14 Feb 2020 12:18:45 -0300
+Message-Id: <20200214151848.8328-3-mfo@canonical.com>
 X-Mailer: git-send-email 2.20.1
 In-Reply-To: <20200214151848.8328-1-mfo@canonical.com>
 References: <20200214151848.8328-1-mfo@canonical.com>
@@ -66,158 +66,108 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Recently I was looking for an aufs test suite, and reached out to
-Okajima, but 'There is no public test suite specific to aufs.' [1],
-and it looks like 'xfstests/tests/generic' should be enough [1, 2].
+This allows other filesystem types to actually be used in these tests.
 
-Thus, building on top existing xfstests support for overlay just
-introduce the OVL_FSTYP variable, and the default value "overlay"
-can be changed to "aufs" (uses overlay's upperdir as a rw-branch
-and lowerdir as a ro-branch; workdir is not used.)
+Well, aufs does not support the options used in most of them anyway,
+so just let it fail to mount (instead of implementing common helpers
+for middle layers.)
 
-This is indeed a workaround^W simple change that does the job vs.
-creating a new FSTYP "aufs" and mechanically changing the number
-of places that check for "overlay" to just handle "aufs" as well.
-(so the effort is still small as aufs has no specific tests now.)
+On fuse-overlayfs (coming) the options should be supported/compatible,
+and thus just work, so no further changes are needed.
 
-This also allows testing fuse-overlayfs with the next patches.
-
-The changes are minimal -- just translate overlay mount options
-and use $OVL_FSTYP as filesystem type for checking/mount/umount;
-then report it in log headers and document it in README.overlay.
-
-Currently, running './check -overlay' tests (excluding a few [3]
-which either hang or keep looping) the numbers for aufs on loop
-devices on v5.4-based Ubuntu kernel are:
-
-  - Ran: 645 tests
-  - Not run: 483 tests
-  - Failures: 22 tests
-
-So, hopefully this may help with a starting point for an public
-test suite for aufs.
-
-Thanks to Amir Goldstein for feedback/improvements and pointers
-to support fuse-overlayfs as well [v2].
-
-[1] https://sourceforge.net/p/aufs/mailman/message/36918721/
-[2] https://sourceforge.net/p/aufs/mailman/message/36918932/
-[3] Steps:
-
-  $ export OVL_FSTYP=aufs
-  $ export FSTYP=ext4
-  $ export TEST_DEV=/dev/loop0
-  $ export TEST_DIR=/mnt/test
-  $ export SCRATCH_DEV=/dev/loop1
-  $ export SCRATCH_MNT=/mnt/scratch
-
-  $ sudo mkfs.$FSTYP -F $TEST_DEV
-  $ sudo mkfs.$FSTYP -F $SCRATCH_DEV
-  $ sudo mkdir $TEST_DIR $SCRATCH_MNT
-
-  $ cat <<EOF >/tmp/exclude-tests
-  generic/013
-  generic/070
-  generic/075
-  generic/112
-  generic/127
-  generic/461
-  generic/476
-  generic/522
-  generic/530
-  overlay/019
-  EOF
-
-  $ sudo -E ./check -overlay -E /tmp/exclude-tests
-
+Suggested-by: Amir Goldstein <amir73il@gmail.com>
 Signed-off-by: Mauricio Faria de Oliveira <mfo@canonical.com>
 ---
- README.overlay |  4 ++++
- common/config  |  2 ++
- common/overlay | 11 ++++++++---
- common/rc      |  6 ++++++
- 4 files changed, 20 insertions(+), 3 deletions(-)
+ tests/overlay/011 | 2 +-
+ tests/overlay/035 | 2 +-
+ tests/overlay/052 | 4 ++--
+ tests/overlay/053 | 4 ++--
+ tests/overlay/062 | 2 +-
+ 5 files changed, 7 insertions(+), 7 deletions(-)
 
-diff --git a/README.overlay b/README.overlay
-index 30b5ddb2d1c3..08a39b8830c9 100644
---- a/README.overlay
-+++ b/README.overlay
-@@ -50,3 +50,7 @@ In the example above, MOUNT_OPTIONS will be used to mount the base scratch fs,
- TEST_FS_MOUNT_OPTS will be used to mount the base test fs,
- OVERLAY_MOUNT_OPTIONS will be used to mount both test and scratch overlay and
- OVERLAY_FSCK_OPTIONS will be used to check both test and scratch overlay.
-+
-+To test other filesystem types (experimental) configure the OVL_FSTYP variable:
-+
-+ OVL_FSTYP=aufs
-diff --git a/common/config b/common/config
-index 9a9c77602b54..d92a78003295 100644
---- a/common/config
-+++ b/common/config
-@@ -71,6 +71,8 @@ export OVL_LOWER="ovl-lower"
- export OVL_WORK="ovl-work"
- # overlay mount point parent must be the base fs root
- export OVL_MNT="ovl-mnt"
-+# overlay mount filesystem type (for testing other fs)
-+export OVL_FSTYP=${OVL_FSTYP:-overlay}
+diff --git a/tests/overlay/011 b/tests/overlay/011
+index 1d09341b250a..0b39416c9835 100755
+--- a/tests/overlay/011
++++ b/tests/overlay/011
+@@ -53,7 +53,7 @@ $SETFATTR_PROG -n "trusted.overlay.opaque" -v "y" $upperdir/testdir
+ # $upperdir overlaid on top of $lowerdir, so that "trusted.overlay.opaque"
+ # xattr should be honored and should not be listed
+ # mount readonly, because there's no upper and workdir
+-$MOUNT_PROG -t overlay -o ro -o lowerdir=$upperdir:$lowerdir $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
++$MOUNT_PROG -t $OVL_FSTYP -o ro -o lowerdir=$upperdir:$lowerdir $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
  
- # From e2fsprogs/e2fsck/e2fsck.h:
- # Exit code used by fsck-type programs
-diff --git a/common/overlay b/common/overlay
-index 65c639e9c6d8..a1076926c23f 100644
---- a/common/overlay
-+++ b/common/overlay
-@@ -18,10 +18,15 @@ _overlay_mount_dirs()
- 	local lowerdir=$1
- 	local upperdir=$2
- 	local workdir=$3
-+	local options
- 	shift 3
+ # Dump trusted.overlay xattr, we should not see the "opaque" xattr
+ _getfattr -d -m overlay $SCRATCH_MNT/testdir
+diff --git a/tests/overlay/035 b/tests/overlay/035
+index c0aae935bcf1..bbb158f319cd 100755
+--- a/tests/overlay/035
++++ b/tests/overlay/035
+@@ -52,7 +52,7 @@ mkdir -p $lowerdir1 $lowerdir2 $upperdir $workdir
  
--	$MOUNT_PROG -t overlay -o lowerdir=$lowerdir -o upperdir=$upperdir \
--		    -o workdir=$workdir `_common_dev_mount_options $*`
-+	options="-o lowerdir=$lowerdir -o upperdir=$upperdir -o workdir=$workdir"
-+	if [ "$OVL_FSTYP" = "aufs" ]; then
-+		options="-o br=$upperdir=rw -o br=$lowerdir=ro"
-+	fi
-+
-+	$MOUNT_PROG -t $OVL_FSTYP $options `_common_dev_mount_options $*`
- }
+ # Mount overlay with lower layers only.
+ # Verify that overlay is mounted read-only and that it cannot be remounted rw.
+-$MOUNT_PROG -t overlay -o"lowerdir=$lowerdir2:$lowerdir1" \
++$MOUNT_PROG -t $OVL_FSTYP -o"lowerdir=$lowerdir2:$lowerdir1" \
+ 			$OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
+ touch $SCRATCH_MNT/foo 2>&1 | _filter_scratch
+ $MOUNT_PROG -o remount,rw $SCRATCH_MNT 2>&1 | _filter_ro_mount
+diff --git a/tests/overlay/052 b/tests/overlay/052
+index b1cf0da64bbf..35a7b5f1a903 100755
+--- a/tests/overlay/052
++++ b/tests/overlay/052
+@@ -147,7 +147,7 @@ unmount_dirs
  
- # Mount with same options/mnt/dev of scratch mount, but optionally
-@@ -302,7 +307,7 @@ _overlay_check_fs()
- 		_overlay_base_mount $*
- 	else
- 		# Check and umount overlay for dir check
--		ovl_mounted=`_is_dir_mountpoint $ovl_mnt`
-+		ovl_mounted=`_is_dir_mountpoint $ovl_mnt $OVL_FSTYP`
- 		[ -z "$ovl_mounted" ] || $UMOUNT_PROG $ovl_mnt
- 	fi
+ # Check encode/decode/read of lower file handles on lower layers only r/o overlay.
+ # For non-upper overlay mount, nfs_export requires disabling redirect_dir.
+-$MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
++$MOUNT_PROG -t $OVL_FSTYP $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
+ 			-o ro,redirect_dir=nofollow,nfs_export=on,lowerdir=$middle:$lower
+ test_file_handles $SCRATCH_MNT/lowertestdir -rp
+ test_file_handles $SCRATCH_MNT/lowertestdir/subdir -rp
+@@ -158,7 +158,7 @@ unmount_dirs
+ # Overlay lookup cannot follow the redirect from $upper/lowertestdir.new to
+ # $lower/lowertestdir. Instead, we mount an overlay subtree rooted at these
+ # directories.
+-$MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
++$MOUNT_PROG -t $OVL_FSTYP $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
+ 		-o ro,redirect_dir=nofollow,nfs_export=on,lowerdir=$upper/lowertestdir.new:$lower/lowertestdir
+ test_file_handles $SCRATCH_MNT -r
+ test_file_handles $SCRATCH_MNT/subdir -rp
+diff --git a/tests/overlay/053 b/tests/overlay/053
+index ff95424741ec..5ac19b32c3cb 100755
+--- a/tests/overlay/053
++++ b/tests/overlay/053
+@@ -169,7 +169,7 @@ unmount_dirs
  
-diff --git a/common/rc b/common/rc
-index b4a77a2187f4..1feae1a94f9e 100644
---- a/common/rc
-+++ b/common/rc
-@@ -1471,6 +1471,10 @@ _check_mounted_on()
- 		return 2 # 2 = mounted on wrong mnt
- 	fi
+ # Check encode/decode/read of lower file handles on lower layers only r/o overlay.
+ # For non-upper overlay mount, nfs_export requires disabling redirect_dir.
+-$MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
++$MOUNT_PROG -t $OVL_FSTYP $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
+ 			-o ro,redirect_dir=nofollow,nfs_export=on,lowerdir=$middle:$lower
+ test_file_handles $SCRATCH_MNT/lowertestdir -rp
+ test_file_handles $SCRATCH_MNT/lowertestdir/subdir -rp
+@@ -180,7 +180,7 @@ unmount_dirs
+ # Overlay lookup cannot follow the redirect from $upper/lowertestdir.new to
+ # $lower/lowertestdir. Instead, we mount an overlay subtree rooted at these
+ # directories.
+-$MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
++$MOUNT_PROG -t $OVL_FSTYP $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
+ 		-o ro,redirect_dir=nofollow,nfs_export=on,lowerdir=$upper/lowertestdir.new:$lower/lowertestdir
+ test_file_handles $SCRATCH_MNT -r
+ test_file_handles $SCRATCH_MNT/subdir -rp
+diff --git a/tests/overlay/062 b/tests/overlay/062
+index 2c86a4b6fd1e..afd3562bfd33 100755
+--- a/tests/overlay/062
++++ b/tests/overlay/062
+@@ -72,7 +72,7 @@ create_test_files $lowertestdir
+ $MOUNT_PROG --bind $lowertestdir $lowertestdir
  
-+	if [ -n "$type" -a "$type" = "overlay" ]; then
-+		type="$OVL_FSTYP"
-+	fi
-+
- 	if [ -n "$type" -a "`_fs_type $dev`" != "$type" ]; then
- 		echo "$devname=$dev is mounted but not a type $type filesystem"
- 		# raw $DF_PROG cannot handle NFS/CIFS/overlay correctly
-@@ -2841,6 +2845,8 @@ _full_fstyp_details()
- 		FSTYP="$FSTYP (non-debug)"
- 	    fi
- 	fi
-+     elif [ $FSTYP = "overlay" -a "$OVL_FSTYP" != "overlay" ]; then
-+	FSTYP="$FSTYP ($OVL_FSTYP)"
-      fi
-      echo $FSTYP
- }
+ # For non-upper overlay mount, nfs_export requires disabling redirect_dir.
+-$MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
++$MOUNT_PROG -t $OVL_FSTYP $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
+ 	-o ro,redirect_dir=nofollow,nfs_export=on,lowerdir=$lower:$lower2
+ 
+ # Decode an overlay directory file handle, whose underlying lower dir dentry
 -- 
 2.20.1
 
