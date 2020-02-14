@@ -2,136 +2,112 @@ Return-Path: <SRS0=rSMp=4C=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
+X-Spam-Status: No, score=-3.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=no
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 071BFC2BA83
-	for <linux-fstests@archiver.kernel.org>; Fri, 14 Feb 2020 15:01:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9ADF1C2BA83
+	for <linux-fstests@archiver.kernel.org>; Fri, 14 Feb 2020 15:18:55 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id D84DB24649
-	for <linux-fstests@archiver.kernel.org>; Fri, 14 Feb 2020 15:01:01 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7948D2168B
+	for <linux-fstests@archiver.kernel.org>; Fri, 14 Feb 2020 15:18:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729473AbgBNPBB (ORCPT
+        id S1729487AbgBNPSz (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 14 Feb 2020 10:01:01 -0500
-Received: from mx2.suse.de ([195.135.220.15]:47074 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729345AbgBNPBB (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 14 Feb 2020 10:01:01 -0500
-X-Virus-Scanned: by amavisd-new at test-mx.suse.de
-Received: from relay2.suse.de (unknown [195.135.220.254])
-        by mx2.suse.de (Postfix) with ESMTP id 84AB5ACD6;
-        Fri, 14 Feb 2020 15:00:59 +0000 (UTC)
-Received: by quack2.suse.cz (Postfix, from userid 1000)
-        id 171C91E0B38; Fri, 14 Feb 2020 16:00:59 +0100 (CET)
-Date:   Fri, 14 Feb 2020 16:00:59 +0100
-From:   Jan Kara <jack@suse.cz>
-To:     Yang Xu <xuyang2018.jy@cn.fujitsu.com>
-Cc:     Jan Kara <jack@suse.cz>, Theodore Ts'o <tytso@mit.edu>,
-        fstests <fstests@vger.kernel.org>
-Subject: Re: generic/269 hangs on lastest upstream kernel
-Message-ID: <20200214150059.GA22815@quack2.suse.cz>
-References: <59a10449-9e0f-f289-2f9f-a2028fb0b3ca@cn.fujitsu.com>
- <20200212105433.GH25573@quack2.suse.cz>
- <00470e6d-0e1c-6060-225b-4c56dd33c083@cn.fujitsu.com>
- <20200213211011.GB6600@quack2.suse.cz>
- <062ac52c-3a16-22ef-6396-53334ed94783@cn.fujitsu.com>
+        Fri, 14 Feb 2020 10:18:55 -0500
+Received: from youngberry.canonical.com ([91.189.89.112]:54672 "EHLO
+        youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729482AbgBNPSy (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 14 Feb 2020 10:18:54 -0500
+Received: from mail-qt1-f197.google.com ([209.85.160.197])
+        by youngberry.canonical.com with esmtps (TLS1.2:ECDHE_RSA_AES_128_GCM_SHA256:128)
+        (Exim 4.86_2)
+        (envelope-from <mfo@canonical.com>)
+        id 1j2ck0-00021u-UO
+        for fstests@vger.kernel.org; Fri, 14 Feb 2020 15:18:53 +0000
+Received: by mail-qt1-f197.google.com with SMTP id d9so6093151qtq.13
+        for <fstests@vger.kernel.org>; Fri, 14 Feb 2020 07:18:52 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=/YK+GMLncR0mwK1+Fb3aWlxL3X2QxSVw9dgg5YgGUvc=;
+        b=Y7OMEtflK01AJi0uyGDVsi9TRTNDvc36pQSVJHGrwSH5HElDLye+gkblgEsp2XPEbA
+         1DUOiyN5nYyS7WDFOJKZP0LFVd6EfSu9bI0oKg5Y2fBxYjFWoLLRC7eS+dHX/gKWj/e/
+         oqDmlCDzu1UG/TVwAEo2NvlfpU9VnTcRX5lAuzpPuFDlm1eE5NtJFHLxe8ulYxrgpKsl
+         B5xR7NOu8YWIQAYNdifGqWb7ciQpRCy4m1mKuKt5BHhDLuBUXyqM+GbS0gj8PHmL3uYC
+         5VDdw0nQJ8xNByCipdWlpaF7D8gSi3d6yFgGkzhP0mVgBNOMGeXcAHQQ+Z+DeV5fcybo
+         kWSw==
+X-Gm-Message-State: APjAAAWre5x7eHkM1kGWByMO1XOxQM73sD7OVWKpBLpceUNMnnaZJDj4
+        djtPcSgcv3rk7KxTazI0YWvU+6mIUsYqOZftwzc91KNCaqumAHUhyIy0Rn0TEnxnfvFWaCy1N2M
+        yqM1TxqGA4q+deMpVkzf63009eLbyocC1wMc=
+X-Received: by 2002:ac8:4244:: with SMTP id r4mr2919058qtm.169.1581693531990;
+        Fri, 14 Feb 2020 07:18:51 -0800 (PST)
+X-Google-Smtp-Source: APXvYqxEsKpupKheqWwMFY9W+ixLjAeNrtM52LDkpAEOC7cStI9dcJtU6dRc+DonWi0LcO4y8RXBjQ==
+X-Received: by 2002:ac8:4244:: with SMTP id r4mr2919034qtm.169.1581693531746;
+        Fri, 14 Feb 2020 07:18:51 -0800 (PST)
+Received: from localhost.localdomain ([2804:14c:4e7:1017:a97b:ff5a:85e:d3eb])
+        by smtp.gmail.com with ESMTPSA id s22sm3403933qke.19.2020.02.14.07.18.50
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 14 Feb 2020 07:18:51 -0800 (PST)
+From:   Mauricio Faria de Oliveira <mfo@canonical.com>
+To:     fstests@vger.kernel.org
+Cc:     Amir Goldstein <amir73il@gmail.com>
+Subject: [PATCH v2 0/5] fstests: overlay: initial support for aufs and
+Date:   Fri, 14 Feb 2020 12:18:43 -0300
+Message-Id: <20200214151848.8328-1-mfo@canonical.com>
+X-Mailer: git-send-email 2.20.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <062ac52c-3a16-22ef-6396-53334ed94783@cn.fujitsu.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri 14-02-20 18:24:50, Yang Xu wrote:
-> on 2020/02/14 5:10, Jan Kara wrote:
-> > On Thu 13-02-20 16:49:21, Yang Xu wrote:
-> > > > > When I test generic/269(ext4) on 5.6.0-rc1 kernel, it hangs.
-> > > > > ----------------------------------------------
-> > > > > dmesg as below:
-> > > > >      76.506753] run fstests generic/269 at 2020-02-11 05:53:44
-> > > > > [   76.955667] EXT4-fs (sdc): mounted filesystem with ordered data mode.
-> > > > > Opts: acl,                           user_xattr
-> > > > > [  100.912511] device virbr0-nic left promiscuous mode
-> > > > > [  100.912520] virbr0: port 1(virbr0-nic) entered disabled state
-> > > > > [  246.801561] INFO: task dd:17284 blocked for more than 122 seconds.
-> > > > > [  246.801564]       Not tainted 5.6.0-rc1 #41
-> > > > > [  246.801565] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables
-> > > > > this mes                           sage.
-> > > > > [  246.801566] dd              D    0 17284  16931 0x00000080
-> > > > > [  246.801568] Call Trace:
-> > > > > [  246.801584]  ? __schedule+0x251/0x690
-> > > > > [  246.801586]  schedule+0x40/0xb0
-> > > > > [  246.801588]  wb_wait_for_completion+0x52/0x80
-> > > > > [  246.801591]  ? finish_wait+0x80/0x80
-> > > > > [  246.801592]  __writeback_inodes_sb_nr+0xaa/0xd0
-> > > > > [  246.801593]  try_to_writeback_inodes_sb+0x3c/0x50
-> > > > 
-> > > > Interesting. Does the hang resolve eventually or the machine is hung
-> > > > permanently? If the hang is permanent, can you do:
-> > > > 
-> > > > echo w >/proc/sysrq-trigger
-> > > > 
-> > > > and send us the stacktraces from dmesg? Thanks!
-> > > Yes. the hang is permanent, log as below:
-> full dmesg as attach
-...
+This patchset allows the existing support for overlay to be used with
+aufs and fuse-overlayfs, so the increase the coverage/test tools that
+are available for these filesystems.
 
-Thanks! So the culprit seems to be:
+Initial numbers on v5.4-based Ubuntu kernel on Ubuntu Eoan/19.10
+(fuse-overlay installed from distro package), few tests excluded:
 
-> [  388.087799] kworker/u12:0   D    0    32      2 0x80004000
-> [  388.087803] Workqueue: writeback wb_workfn (flush-8:32)
-> [  388.087805] Call Trace:
-> [  388.087810]  ? __schedule+0x251/0x690
-> [  388.087811]  ? __switch_to_asm+0x34/0x70
-> [  388.087812]  ? __switch_to_asm+0x34/0x70
-> [  388.087814]  schedule+0x40/0xb0
-> [  388.087816]  schedule_timeout+0x20d/0x310
-> [  388.087818]  io_schedule_timeout+0x19/0x40
-> [  388.087819]  wait_for_completion_io+0x113/0x180
-> [  388.087822]  ? wake_up_q+0xa0/0xa0
-> [  388.087824]  submit_bio_wait+0x5b/0x80
-> [  388.087827]  blkdev_issue_flush+0x81/0xb0
-> [  388.087834]  jbd2_cleanup_journal_tail+0x80/0xa0 [jbd2]
-> [  388.087837]  jbd2_log_do_checkpoint+0xf4/0x3f0 [jbd2]
-> [  388.087840]  __jbd2_log_wait_for_space+0x66/0x190 [jbd2]
-> [  388.087843]  ? finish_wait+0x80/0x80
-> [  388.087845]  add_transaction_credits+0x27d/0x290 [jbd2]
-> [  388.087847]  ? blk_mq_make_request+0x289/0x5d0
-> [  388.087849]  start_this_handle+0x10a/0x510 [jbd2]
-> [  388.087851]  ? _cond_resched+0x15/0x30
-> [  388.087853]  jbd2__journal_start+0xea/0x1f0 [jbd2]
-> [  388.087869]  ? ext4_writepages+0x518/0xd90 [ext4]
-> [  388.087875]  __ext4_journal_start_sb+0x6e/0x130 [ext4]
-> [  388.087883]  ext4_writepages+0x518/0xd90 [ext4]
-> [  388.087886]  ? do_writepages+0x41/0xd0
-> [  388.087893]  ? ext4_mark_inode_dirty+0x1f0/0x1f0 [ext4]
-> [  388.087894]  do_writepages+0x41/0xd0
-> [  388.087896]  ? snprintf+0x49/0x60
-> [  388.087898]  __writeback_single_inode+0x3d/0x340
-> [  388.087899]  writeback_sb_inodes+0x1e5/0x480
-> [  388.087901]  wb_writeback+0xfb/0x2f0
-> [  388.087902]  wb_workfn+0xf0/0x430
-> [  388.087903]  ? __switch_to_asm+0x34/0x70
-> [  388.087905]  ? finish_task_switch+0x75/0x250
-> [  388.087907]  process_one_work+0x1a7/0x370
-> [  388.087909]  worker_thread+0x30/0x380
-> [  388.087911]  ? process_one_work+0x370/0x370
-> [  388.087912]  kthread+0x10c/0x130
-> [  388.087913]  ? kthread_park+0x80/0x80
-> [  388.087914]  ret_from_fork+0x35/0x40
+ OVL_FSTYP=aufs
+ - Ran: 645 tests
+ - Not run: 483 tests
+ - Failures: 22 tests
 
-This process is actually waiting for IO to complete while holding
-checkpoint_mutex which holds up everybody else. The question is why the IO
-doesn't complete - that's definitely outside of filesystem. Maybe a bug in
-the block layer, storage driver, or something like that... What does
-'cat /sys/block/<device-with-xfstests>/inflight' show?
+ OVL_FSTYP=fuse.fuse-overlayfs
+ - Ran: 530
+ - Not run: 395
+ - Failures: 29
 
-								Honza
+Thanks to Amir Goldstein for review/improvements/suggestions.
+
+Changes:
+ - v2:
+   - fix tests/overlay that hardcode the overlay fs type
+   - add support to fuse-overlayfs with +3 other patches
+ - v1:
+   - [PATCH] common/overlay,rc: introduce OVL_ALT_FSTYP for testing aufs
+
+Mauricio Faria de Oliveira (5):
+  common/overlay,rc,config: introduce OVL_FSTYP variable and aufs
+  tests/overlay: mount: replace overlay hardcode with OVL_FSTYP variable
+  common/rc: introduce new helper function _fs_type_dev_dir()
+  common/rc: add quirks for fuse-overlayfs device/mount point
+  common/overlay: silence some mount messages for fuse-overlayfs
+
+ README.overlay    |  5 ++++
+ common/config     |  2 ++
+ common/overlay    | 29 +++++++++++++++++++---
+ common/rc         | 61 ++++++++++++++++++++++++++++++++++++++++-------
+ tests/overlay/011 |  2 +-
+ tests/overlay/035 |  2 +-
+ tests/overlay/052 |  4 ++--
+ tests/overlay/053 |  4 ++--
+ tests/overlay/062 |  2 +-
+ 9 files changed, 92 insertions(+), 19 deletions(-)
+
 -- 
-Jan Kara <jack@suse.com>
-SUSE Labs, CR
+2.20.1
+
