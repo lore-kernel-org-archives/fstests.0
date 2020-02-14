@@ -2,127 +2,144 @@ Return-Path: <SRS0=rSMp=4C=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 220DBC3B1BE
-	for <linux-fstests@archiver.kernel.org>; Fri, 14 Feb 2020 18:45:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BDEEEC3F68F
+	for <linux-fstests@archiver.kernel.org>; Fri, 14 Feb 2020 20:34:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id E222F2465D
-	for <linux-fstests@archiver.kernel.org>; Fri, 14 Feb 2020 18:45:25 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8836824654
+	for <linux-fstests@archiver.kernel.org>; Fri, 14 Feb 2020 20:34:35 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="WexSahva"
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="2R68OHPh"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2389734AbgBNSpZ (ORCPT
+        id S1730005AbgBNUee (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 14 Feb 2020 13:45:25 -0500
-Received: from mail-il1-f195.google.com ([209.85.166.195]:34756 "EHLO
-        mail-il1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2389723AbgBNSpZ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 14 Feb 2020 13:45:25 -0500
-Received: by mail-il1-f195.google.com with SMTP id l4so8914422ilj.1;
-        Fri, 14 Feb 2020 10:45:24 -0800 (PST)
+        Fri, 14 Feb 2020 15:34:34 -0500
+Received: from mail-qt1-f193.google.com ([209.85.160.193]:46205 "EHLO
+        mail-qt1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1730034AbgBNUee (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 14 Feb 2020 15:34:34 -0500
+Received: by mail-qt1-f193.google.com with SMTP id i14so628493qtv.13
+        for <fstests@vger.kernel.org>; Fri, 14 Feb 2020 12:34:34 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=ujLZ//Mw6vtAjFLcWjyIUHYK6uJak5XPcS0/tv4WkGY=;
-        b=WexSahva98CfswF0q/JWX+SFIgttENQENTSOqxMFmfVdqh6Zc+mz9Yl9GcC40Z4ywq
-         G9WeUKklsFeFVdbvEJ/XpZWLzrU499V+gVQSyywCigzypa78O2yjRX+cPOzf295sGt2D
-         n1CpfBBLUXrteki1icteEtctyoIFYm53ADmye4pC0wD6vXVs2VWemyxq7XN9BMmxHx0s
-         cjgZB4VFF/lFx66L/33idNyDiIwcg19mQcax9f2VEw8O50uUft/68T3lmfzL7i3zwmln
-         rU+gNWRP+wA3i92E7rhRkBUv3DTxaPRcR6szJaMUFuingUfzFpUNMX4+zK8IOimqmyYB
-         772A==
+        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
+        h=from:to:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=cMd6saOdi3DDi8CRdIOgvhgNU02W4rGFc1+0LI1/+d0=;
+        b=2R68OHPhYM3u7KgG8bg0Q84oJu4niwMadwOI8C2lZzmZOr0zTYIhKSLLgJekCBKJMQ
+         +rEMXC54PABqI/MQ/x8fH/2ppC9ZTgzAh2VSahPAErbc6kd3fW/OhCdRWfXaxbhmWCNQ
+         I14y+wyQOIQuLFYkaOuckpdexiGIK0UzvDGrb5uVzQb5IXcDar8WkK5XJ94CCMygrCd6
+         rj5MGGgWl/sRrxDOifX3KcW6yxEwfELHMKpANcIOCtKU+PCwhBbJhnogjxHH0UPP+pyZ
+         E2Fvp04/8xRbRBq02XlTg8951qe/xQVnR17MvKpnWF1gUb8VowOvFzpuLAV81dmYvbHF
+         b3BQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=ujLZ//Mw6vtAjFLcWjyIUHYK6uJak5XPcS0/tv4WkGY=;
-        b=PJCrRSCQu9l7Utpyzc4lLpD0qtp4/sGGsrFNvZnYJRPpZ1H+QUmmhIxcZ6tlqMtbSx
-         pAWATua5wS7BPei2K+oZ735CnMFilCCKpqaV/FWlgH3iXCC2PJLrKJj4OC0ru1xxiA4F
-         UIsXFbmdJBuCvO1XRdjOlabA/i4qj65GL5Vxv5488pFtt+lvrR8UWFEKkpf1GreuCD2g
-         hbqgxV2+HXZOiRiaOvSc5S0p/xQQs4uJb28LyrNWAH5q5i80R6iecg9Iuqgd1Hzgz2tp
-         h2JE0p9fCRi5pZTq7Zw79U4UWKmcr8714mGSS0jueZ6ROg4Ywq61ScOyqCi40b7xLUxn
-         0RaQ==
-X-Gm-Message-State: APjAAAUTZO8t/fhsKd4g8+82QknpBPaTpDRO5zZusa4a/+EuliFk5E+l
-        +BmReypRyzPRbseVy6cHwU0n0rba+/REJRScIKpvWs8h9nE=
-X-Google-Smtp-Source: APXvYqwZOoj7uz+HGZX4MVZbuAVWhm0csKWg0ZAO7KM5cKu3MpIfR0KEBYBMCocltnOsaXxCP21GNbjY99w+/D97RjQ=
-X-Received: by 2002:a92:5c8a:: with SMTP id d10mr4496735ilg.137.1581705924496;
- Fri, 14 Feb 2020 10:45:24 -0800 (PST)
+        h=x-gm-message-state:from:to:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=cMd6saOdi3DDi8CRdIOgvhgNU02W4rGFc1+0LI1/+d0=;
+        b=IMs3IMM/IAk0iLZUZcDRAP0Ed7PMzOyrt2+owF+c2n4xlFwopMpUUaYJpEiU/Oz48h
+         0FWjUNeT23Oa8RrkTOSZ9Alf9rY+YjeyE2J2PayiHtoJrbZMQHdGUWePolq69CFEc8Zm
+         gJEoDZ9C+zlPu4YsWK9vIGh9DXch/BSYhzfBULbU0ofPdz87Nc6xVaBxUlDmXfym8Lmj
+         CtWJhLA66dmyowxYd/y4T9/COPQ3kY7nLR7mwqv/9Vd0FN8uLWMqsTKS8dnWyxC+2+FJ
+         leImyWU+/6TKsWqaDXaIPCvTDeWkqhQMht/69D9Ym6zROZaRAsvRcVKvg3XXQMS9k84d
+         iBdA==
+X-Gm-Message-State: APjAAAWIr8Rw4ETTAQNNYR3b1Ja1TnBRf313W+dCGOK4Ie3Qra4pa8Zq
+        fXo6WJHBJigYHdEbKhlr9emZ1LTmQvg=
+X-Google-Smtp-Source: APXvYqw9un91A7rs7cHgHwlgL91WG5yFjRh/Ns9R0eZwuuRXy2lXRhl7A/nX/IxTPowMGclaY3Jy5Q==
+X-Received: by 2002:ac8:67d7:: with SMTP id r23mr4070356qtp.20.1581712472948;
+        Fri, 14 Feb 2020 12:34:32 -0800 (PST)
+Received: from localhost ([107.15.81.208])
+        by smtp.gmail.com with ESMTPSA id z5sm4216026qta.7.2020.02.14.12.34.31
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 14 Feb 2020 12:34:32 -0800 (PST)
+From:   Josef Bacik <josef@toxicpanda.com>
+To:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Subject: [PATCH] xfstests: add a CGROUP configuration option
+Date:   Fri, 14 Feb 2020 15:34:31 -0500
+Message-Id: <20200214203431.24506-1-josef@toxicpanda.com>
+X-Mailer: git-send-email 2.24.1
 MIME-Version: 1.0
-References: <20200214151848.8328-1-mfo@canonical.com>
-In-Reply-To: <20200214151848.8328-1-mfo@canonical.com>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Fri, 14 Feb 2020 20:45:13 +0200
-Message-ID: <CAOQ4uxjGdBtzmd=anCbuKo23wMWTu8Ja36-qgGomGy7RSMJ0sg@mail.gmail.com>
-Subject: Re: [PATCH v2 0/5] fstests: overlay: initial support for aufs and
-To:     Mauricio Faria de Oliveira <mfo@canonical.com>
-Cc:     fstests <fstests@vger.kernel.org>,
-        overlayfs <linux-unionfs@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-+CC: <linux-unionfs@vger.kernel.org>
+I want to add some extended statistic gathering for xfstests, but it's
+tricky to isolate xfstests from the rest of the host applications.  The
+most straightforward way to do this is to run every test inside of it's
+own cgroup.  From there we can monitor the activity of tasks in the
+specific cgroup using BPF.
 
-On Fri, Feb 14, 2020 at 5:18 PM Mauricio Faria de Oliveira
-<mfo@canonical.com> wrote:
->
-> This patchset allows the existing support for overlay to be used with
-> aufs and fuse-overlayfs, so the increase the coverage/test tools that
-> are available for these filesystems.
->
-> Initial numbers on v5.4-based Ubuntu kernel on Ubuntu Eoan/19.10
-> (fuse-overlay installed from distro package), few tests excluded:
->
->  OVL_FSTYP=aufs
->  - Ran: 645 tests
->  - Not run: 483 tests
->  - Failures: 22 tests
->
->  OVL_FSTYP=fuse.fuse-overlayfs
->  - Ran: 530
->  - Not run: 395
->  - Failures: 29
->
+The support for this is pretty simple, allow users to specify
+CGROUP=/path/to/cgroup.  We will create the path if it doesn't already
+exist, and validate we can add things to cgroup.procs.  If we cannot
+it'll be disabled, otherwise we will use this when we do _run_seq by
+echo'ing the bash pid into cgroup.procs, which will cause any children
+to run under that cgroup.
 
-It'd be interesting to know the baseline - what are those numbers for
-OVL_FSTYP=overlay with same kernel?
+Signed-off-by: Josef Bacik <josef@toxicpanda.com>
+---
+ README |  3 +++
+ check  | 17 ++++++++++++++++-
+ 2 files changed, 19 insertions(+), 1 deletion(-)
 
-Thanks,
-Amir.
+diff --git a/README b/README
+index 593c1052..722dc170 100644
+--- a/README
++++ b/README
+@@ -102,6 +102,9 @@ Preparing system for tests:
+              - set USE_KMEMLEAK=yes to scan for memory leaks in the kernel
+                after every test, if the kernel supports kmemleak.
+              - set KEEP_DMESG=yes to keep dmesg log after test
++             - set CGROUP=/path/to/cgroup to create a cgroup to run tests inside
++               of.  The main check will run outside of the cgroup, only the test
++               itself and any child processes will run under the cgroup.
+ 
+         - or add a case to the switch in common/config assigning
+           these variables based on the hostname of your test
+diff --git a/check b/check
+index 2e148e57..07a0e251 100755
+--- a/check
++++ b/check
+@@ -509,11 +509,23 @@ _expunge_test()
+ OOM_SCORE_ADJ="/proc/self/oom_score_adj"
+ test -w ${OOM_SCORE_ADJ} && echo -1000 > ${OOM_SCORE_ADJ}
+ 
++# Initialize the cgroup path if it doesn't already exist
++if [ ! -z "$CGROUP" ]; then
++	mkdir -p ${CGROUP}
++
++	# If we can't write to cgroup.procs then unset cgroup
++	test -w ${CGROUP}/cgroup.procs || unset CGROUP
++fi
++
+ # ...and make the tests themselves somewhat more attractive to it, so that if
+ # the system runs out of memory it'll be the test that gets killed and not the
+ # test framework.
+ _run_seq() {
+-	bash -c "test -w ${OOM_SCORE_ADJ} && echo 250 > ${OOM_SCORE_ADJ}; exec ./$seq"
++	_extra="test -w ${OOM_SCORE_ADJ} && echo 250 > ${OOM_SCORE_ADJ};"
++	if [ ! -z "$CGROUP" ]; then
++		_extra+="echo $$ > ${CGROUP}/cgroup.procs;"
++	fi
++	bash -c "${_extra} exec ./$seq"
+ }
+ 
+ _detect_kmemleak
+@@ -615,6 +627,9 @@ for section in $HOST_OPTIONS_SECTIONS; do
+ 	  echo "MKFS_OPTIONS  -- `_scratch_mkfs_options`"
+ 	  echo "MOUNT_OPTIONS -- `_scratch_mount_options`"
+ 	fi
++	if [ ! -z "$CGROUP" ]; then
++	  echo "CGROUP        -- ${CGROUP}"
++	fi
+ 	echo
+ 	needwrap=true
+ 
+-- 
+2.24.1
 
-> Thanks to Amir Goldstein for review/improvements/suggestions.
->
-> Changes:
->  - v2:
->    - fix tests/overlay that hardcode the overlay fs type
->    - add support to fuse-overlayfs with +3 other patches
->  - v1:
->    - [PATCH] common/overlay,rc: introduce OVL_ALT_FSTYP for testing aufs
->
-> Mauricio Faria de Oliveira (5):
->   common/overlay,rc,config: introduce OVL_FSTYP variable and aufs
->   tests/overlay: mount: replace overlay hardcode with OVL_FSTYP variable
->   common/rc: introduce new helper function _fs_type_dev_dir()
->   common/rc: add quirks for fuse-overlayfs device/mount point
->   common/overlay: silence some mount messages for fuse-overlayfs
->
->  README.overlay    |  5 ++++
->  common/config     |  2 ++
->  common/overlay    | 29 +++++++++++++++++++---
->  common/rc         | 61 ++++++++++++++++++++++++++++++++++++++++-------
->  tests/overlay/011 |  2 +-
->  tests/overlay/035 |  2 +-
->  tests/overlay/052 |  4 ++--
->  tests/overlay/053 |  4 ++--
->  tests/overlay/062 |  2 +-
->  9 files changed, 92 insertions(+), 19 deletions(-)
->
-> --
-> 2.20.1
->
