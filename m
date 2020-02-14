@@ -2,90 +2,73 @@ Return-Path: <SRS0=rSMp=4C=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 01324C352A3
-	for <linux-fstests@archiver.kernel.org>; Fri, 14 Feb 2020 01:14:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D0A61C3B194
+	for <linux-fstests@archiver.kernel.org>; Fri, 14 Feb 2020 02:21:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id CFD4720873
-	for <linux-fstests@archiver.kernel.org>; Fri, 14 Feb 2020 01:14:40 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AF9802082F
+	for <linux-fstests@archiver.kernel.org>; Fri, 14 Feb 2020 02:21:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727955AbgBNBOk (ORCPT
+        id S1728216AbgBNCVR (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 13 Feb 2020 20:14:40 -0500
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:18007 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1727604AbgBNBOk (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 13 Feb 2020 20:14:40 -0500
-X-IronPort-AV: E=Sophos;i="5.70,438,1574092800"; 
-   d="scan'208";a="83276023"
-Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
-  by heian.cn.fujitsu.com with ESMTP; 14 Feb 2020 09:14:38 +0800
-Received: from G08CNEXMBPEKD04.g08.fujitsu.local (unknown [10.167.33.201])
-        by cn.fujitsu.com (Postfix) with ESMTP id 76673406AB15;
-        Fri, 14 Feb 2020 09:05:00 +0800 (CST)
-Received: from [10.167.220.84] (10.167.220.84) by
- G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201) with Microsoft SMTP Server
- (TLS) id 15.0.1395.4; Fri, 14 Feb 2020 09:14:33 +0800
-Subject: Re: generic/269 hangs on lastest upstream kernel
-To:     "Theodore Y. Ts'o" <tytso@mit.edu>
-CC:     Jan Kara <jack@suse.cz>, fstests <fstests@vger.kernel.org>
-References: <59a10449-9e0f-f289-2f9f-a2028fb0b3ca@cn.fujitsu.com>
- <20200212105433.GH25573@quack2.suse.cz>
- <00470e6d-0e1c-6060-225b-4c56dd33c083@cn.fujitsu.com>
- <20200213170853.GA311476@mit.edu>
-From:   Yang Xu <xuyang2018.jy@cn.fujitsu.com>
-Message-ID: <1c81c16b-6e31-74cb-0b88-46663fad500d@cn.fujitsu.com>
-Date:   Fri, 14 Feb 2020 09:14:33 +0800
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101
- Thunderbird/68.0
+        Thu, 13 Feb 2020 21:21:17 -0500
+Received: from szxga05-in.huawei.com ([45.249.212.191]:10172 "EHLO huawei.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1728141AbgBNCVR (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 13 Feb 2020 21:21:17 -0500
+Received: from DGGEMS408-HUB.china.huawei.com (unknown [172.30.72.58])
+        by Forcepoint Email with ESMTP id 95AA1FFA0827CC083DCD;
+        Fri, 14 Feb 2020 10:21:14 +0800 (CST)
+Received: from huawei.com (10.175.124.28) by DGGEMS408-HUB.china.huawei.com
+ (10.3.19.208) with Microsoft SMTP Server id 14.3.439.0; Fri, 14 Feb 2020
+ 10:21:06 +0800
+From:   "zhangyi (F)" <yi.zhang@huawei.com>
+To:     <fstests@vger.kernel.org>, <guaneryu@gmail.com>
+CC:     <linux-ext4@vger.kernel.org>, <yi.zhang@huawei.com>
+Subject: [PATCH] ext4/021: make sure the fdatasync subprocess exits
+Date:   Fri, 14 Feb 2020 10:20:01 +0800
+Message-ID: <20200214022001.15563-1-yi.zhang@huawei.com>
+X-Mailer: git-send-email 2.17.2
 MIME-Version: 1.0
-In-Reply-To: <20200213170853.GA311476@mit.edu>
-Content-Type: text/plain; charset="gbk"; format=flowed
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.167.220.84]
-X-ClientProxiedBy: G08CNEXCHPEKD05.g08.fujitsu.local (10.167.33.203) To
- G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201)
-X-yoursite-MailScanner-ID: 76673406AB15.A7913
-X-yoursite-MailScanner: Found to be clean
-X-yoursite-MailScanner-From: xuyang2018.jy@cn.fujitsu.com
+Content-Type: text/plain
+X-Originating-IP: [10.175.124.28]
+X-CFilter-Loop: Reflected
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+Now we just kill fdatasync_work process and wait nothing after the
+test, so a busy unmount failure may appear if the fdatasync syscall
+doesn't return in time.
 
+  umount: /tmp/scratch: target is busy.
+  mount: /tmp/scratch: /dev/sdb already mounted on /tmp/scratch.
+  !!! failed to remount /dev/sdb on /tmp/scratch
 
-on 2020/02/14 1:08, Theodore Y. Ts'o wrote:
-> On Thu, Feb 13, 2020 at 04:49:21PM +0800, Yang Xu wrote:
->>
->>
->> on 2020/02/12 18:54, Jan Kara wrote:
->>> Hello!
->>>
->>> On Tue 11-02-20 16:14:35, Yang Xu wrote:
->>>> Since xfstests support rename2, this case(generic/269) reports filesystem
->>>> inconsistent problem with ext4 on my system(4.18.0-32.el8.x86_64).
->>>
->>> I don't remember seeing this in my testing... It might be specific to that
->>> RHEL kernel.
->>
->> Agree.
-> 
-> So were you able to reproduce this on a 5.6.0-rc1 kernel or not?
-No. I don't reproduce it on 5.6.0-rc1 kernel, but  5.6.0-rc1 kernel hang 
-on my KVM machine when run generic/269.
+This patch kill and wait the xfs_io fdatasync subprocess to make sure
+_check_scratch_fs success.
 
-Best Regards
-Yang Xu
-> 
-> If you are, can you send the .config that you used, in case it's
-> configuration specific?
-> 
-> 					- Ted
-> 
-> 
+Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
+---
+ tests/ext4/021 | 1 +
+ 1 file changed, 1 insertion(+)
 
+diff --git a/tests/ext4/021 b/tests/ext4/021
+index 519737e1..1b4a1ced 100755
+--- a/tests/ext4/021
++++ b/tests/ext4/021
+@@ -18,6 +18,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+ 
+ _cleanup()
+ {
++	$KILLALL_PROG -wq xfs_io
+ 	cd /
+ 	rm -f $tmp.*
+ }
+-- 
+2.23.0.rc2.8.gff66981f45
 
