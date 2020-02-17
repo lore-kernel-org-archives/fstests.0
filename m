@@ -2,167 +2,157 @@ Return-Path: <SRS0=4lTT=4F=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 58A62C761A6
-	for <linux-fstests@archiver.kernel.org>; Mon, 17 Feb 2020 13:26:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B145DC34025
+	for <linux-fstests@archiver.kernel.org>; Mon, 17 Feb 2020 15:44:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 2D7DA2072C
-	for <linux-fstests@archiver.kernel.org>; Mon, 17 Feb 2020 13:26:33 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="YhStM4av"
+	by mail.kernel.org (Postfix) with ESMTP id 9394624649
+	for <linux-fstests@archiver.kernel.org>; Mon, 17 Feb 2020 15:44:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727332AbgBQN0c (ORCPT
+        id S1727553AbgBQPob (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 17 Feb 2020 08:26:32 -0500
-Received: from mail-pg1-f193.google.com ([209.85.215.193]:33662 "EHLO
-        mail-pg1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726866AbgBQN0c (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 17 Feb 2020 08:26:32 -0500
-Received: by mail-pg1-f193.google.com with SMTP id 6so9178648pgk.0
-        for <fstests@vger.kernel.org>; Mon, 17 Feb 2020 05:26:32 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=message-id:date:from:to:subject:mime-version:content-disposition;
-        bh=mHebBYjUlzvQAhath1FpUvaBB0NT4aPLBEdAeuiw4io=;
-        b=YhStM4avYKfnMSp5MLL8oiONGSldOcED2/02HUnBm8taJYePW84qXImFFqsRUHPOrG
-         hIB4bk1fcPZ7owz1QcETi6zU5K8gsl131CWvuYP1xXfnklDdW2x9b3pBL5IUXHrawNC/
-         HlkMDPzdZAuFw0IMl1MP2DFl5OAIs92CmjqLxZoxWucJbbSzLn7CTWoixsJ9yiUG1pN+
-         JkgISKfEiqn790GPRK0rPhIRonckVJhM/r6f078Cg4wPlF7cPYFQ98jKH6cfTf6+ZUmG
-         Gja53iYvdN5uZnM1bwBpqiNVMS5vRimONtSwRPMXir0HsEfafD5NEAMolBB0tJNdtbKW
-         RVBQ==
+        Mon, 17 Feb 2020 10:44:31 -0500
+Received: from youngberry.canonical.com ([91.189.89.112]:47731 "EHLO
+        youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728950AbgBQPob (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 17 Feb 2020 10:44:31 -0500
+Received: from mail-vk1-f197.google.com ([209.85.221.197])
+        by youngberry.canonical.com with esmtps (TLS1.2:ECDHE_RSA_AES_128_GCM_SHA256:128)
+        (Exim 4.86_2)
+        (envelope-from <mauricio.oliveira@canonical.com>)
+        id 1j3iZR-0000d4-Dr
+        for fstests@vger.kernel.org; Mon, 17 Feb 2020 15:44:29 +0000
+Received: by mail-vk1-f197.google.com with SMTP id m25so6943154vko.19
+        for <fstests@vger.kernel.org>; Mon, 17 Feb 2020 07:44:29 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:message-id:date:from:to:subject:mime-version
-         :content-disposition;
-        bh=mHebBYjUlzvQAhath1FpUvaBB0NT4aPLBEdAeuiw4io=;
-        b=XD2EG+DAtxwSCPwGWBD1LN9gThqffZ/J/809F84n50oGR7xAfLmEKojkFgDbpKpmdM
-         xXcoG7LHaWwICY7rLfJy0RlcH7vcgXcqsDVFSUJWWKSnvM+0UAPKFcwVN30QY+FGJOHL
-         hPVJdS3VbWiuNNfgTkwMiLBkg/KKrV2csv+07gVrzXzRSSCiNZY3pVCywGsvAePvFOir
-         v131YSCT6EEJGn8fgom2lE/ILjMnCLMqS/MHx/G7jvN4HJHd14E5wZm0mwfz3/CzJv6S
-         UQ1ilLr9M1Nn97iRmn0i7l541fMzO+ZJveOyVIiBl+kZDVmkmxaSZFpntF1lZOqIxlRK
-         4xcg==
-X-Gm-Message-State: APjAAAXg7U1oB2tYfdRG141dK/ucPnlszvVBr97UR9D7N0LJYpL/qCdV
-        7mFXi6lMoKxvjXI2Pvbvj17Nmprn
-X-Google-Smtp-Source: APXvYqyekL2s+TihmutrToyvJJ9O37aKQq+Af4Wz79GlXHact3c28VWc0/TfWPTB15ckVJEH31OuKA==
-X-Received: by 2002:a63:3c08:: with SMTP id j8mr17787366pga.223.1581945991907;
-        Mon, 17 Feb 2020 05:26:31 -0800 (PST)
-Received: from localhost ([178.128.102.47])
-        by smtp.gmail.com with ESMTPSA id r145sm595758pfr.5.2020.02.17.05.26.30
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 17 Feb 2020 05:26:31 -0800 (PST)
-Message-ID: <5e4a9487.1c69fb81.368a7.1386@mx.google.com>
-Date:   Mon, 17 Feb 2020 21:26:26 +0800
-From:   Eryu Guan <guaneryu@gmail.com>
-To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: master branch updated to 62ec71f6b29e
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=mvNlQZqpY5uOm9Np4VEcXvFnLc3xFEPudEInjapFAlY=;
+        b=dUIAZ43LwfUXXzR+B3mrJtk6D5oQyU20P7eix7zLALC+qD+A6zbwcp/Wgs7KOxbIyr
+         FiPZHwf6Mq+X+rx4qwh3LpnDBoIxkpTYsm0P8rB1M1g6ZbkbSM7v3FLJms8ACR7TJMhE
+         k0HMYrsjeDlhmJNplGFFJtytMY6YJYuv7HiNsH//TLnOLO+AWpO47qN3XUG1jFf7+8Vk
+         +XraiIMCns0obEe5eur1UbkqaHIx7Xv/TnnGAyySXrEzV09IK74h65QdiXNyluvcMrBi
+         VK6gfg5Wf0HVgyvUK5E26Aa71Ham2NG1hmac8UewWVXrtSqwOy4k2COqvz0UOrl11TGB
+         gUPw==
+X-Gm-Message-State: APjAAAVTulVnH4V1ybEGsEdhpJI+ocmGanJT1dlL8vtd87sBUtf1GsGp
+        miBHUP+e9xoEEddTw4KPtUI2VSK+xtY6PbyMkJq4yr12qm/iPmZgbR6LrUQoDT8pqNhr+VrUhyO
+        7abxW9p25fsw+J7jD9K091Gf6FJkfQD0Q7juX+iiDaU8ujOh559A=
+X-Received: by 2002:a05:6102:219:: with SMTP id z25mr8289147vsp.79.1581954267658;
+        Mon, 17 Feb 2020 07:44:27 -0800 (PST)
+X-Google-Smtp-Source: APXvYqz50UZb7AH+OvTNarT/0hI6TofLWcbHshMMfurFolNpZY+QzHbapX0j1xDy8dvwXcSutVLkUeLFPNoDMchbuIg=
+X-Received: by 2002:a05:6102:219:: with SMTP id z25mr8289128vsp.79.1581954267404;
+ Mon, 17 Feb 2020 07:44:27 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="2oSFAYL2oKd4"
-Content-Disposition: inline
+References: <20200214151848.8328-1-mfo@canonical.com> <CAOQ4uxjGdBtzmd=anCbuKo23wMWTu8Ja36-qgGomGy7RSMJ0sg@mail.gmail.com>
+In-Reply-To: <CAOQ4uxjGdBtzmd=anCbuKo23wMWTu8Ja36-qgGomGy7RSMJ0sg@mail.gmail.com>
+From:   Mauricio Faria de Oliveira <mfo@canonical.com>
+Date:   Mon, 17 Feb 2020 12:44:15 -0300
+Message-ID: <CAO9xwp2Z6eF8xnkyh9rsTzCjGJNgZ2ogrLxqzosgjq3YRWeb2w@mail.gmail.com>
+Subject: Re: [PATCH v2 0/5] fstests: overlay: initial support for aufs and
+To:     Amir Goldstein <amir73il@gmail.com>
+Cc:     fstests <fstests@vger.kernel.org>,
+        overlayfs <linux-unionfs@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+On Fri, Feb 14, 2020 at 3:45 PM Amir Goldstein <amir73il@gmail.com> wrote:
+>
+> +CC: <linux-unionfs@vger.kernel.org>
+>
+> On Fri, Feb 14, 2020 at 5:18 PM Mauricio Faria de Oliveira
+> <mfo@canonical.com> wrote:
+> >
+> > This patchset allows the existing support for overlay to be used with
+> > aufs and fuse-overlayfs, so the increase the coverage/test tools that
+> > are available for these filesystems.
+> >
+> > Initial numbers on v5.4-based Ubuntu kernel on Ubuntu Eoan/19.10
+> > (fuse-overlay installed from distro package), few tests excluded:
+> >
+> >  OVL_FSTYP=aufs
+> >  - Ran: 645 tests
+> >  - Not run: 483 tests
+> >  - Failures: 22 tests
+> >
+> >  OVL_FSTYP=fuse.fuse-overlayfs
+> >  - Ran: 530
+> >  - Not run: 395
+> >  - Failures: 29
+> >
+>
+> It'd be interesting to know the baseline - what are those numbers for
+> OVL_FSTYP=overlay with same kernel?
+>
 
---2oSFAYL2oKd4
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Oh, indeed.
+Here's the numbers for the 3 filesystems again (re-runs as I noticed
+some tests skipped in fuse-overlayfs previously.)
 
-Hi all,
+OVL_FSTYP=overlay (unset/default)
+- Ran: 654
+- Not run: 391
+- Failures: 5
 
-The master branch of the xfstests repository at:
+OVL_FSTYP=fuse.fuse-overlayfs
+- Ran: 653
+- Not run: 472
+- Failures: 54
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+OVL_FSTYP=aufs
+- Ran: 645
+- Not run: 483
+- Failures: 22
 
-have just been updated. There're three new tests added, which including one
-re-created test btrfs/204 (was btrfs/172), and one ext4 test deleted. btrfs/204
-still fails with v5.6-rc2 kernel, but the fix is pending in btrfs list. The
-other commits are random fixes.
+BTW, thanks for reviewing/commenting on the individual patches.
 
-There're a few pending patches left in my to-review list, I think I'll catch up
-soon :) And I really appreciate if someone could help review patches!
+I'll review them in more detail, and think I can send out a v3 next week.
 
-Thanks,
-Eryu
-
-The new head of the master branch is commit:
-
-62ec71f6b29e ext4/002: remove EXT4_EOFBLOCKS_FL test
-
-New commits:
-
-Anand Jain (2):
-      [108d8cde1c4e] btrfs: test unaligned punch hole at ENOSPC
-      [26e6cda8aaf8] btrfs/179: call sync qgroup counts
-
-Christian Kujau (2):
-      [e28ee0bdac4c] shared/032: add options for reiser4
-      [e7aab383558a] README: fsgqa needs a home directory too
-
-Eric Biggers (3):
-      [231f24650155] common/rc: handle option with argument in _require_xfs_io_command()
-      [0d9ca511e115] common/encrypt: move constant test key to common code
-      [0ea2b67b095d] generic: test adding filesystem-level fscrypt key via key_id
-
-Eric Whitney (1):
-      [62ec71f6b29e] ext4/002: remove EXT4_EOFBLOCKS_FL test
-
-Marcos Paulo de Souza (1):
-      [2f9b4039253d] common/btrfs: Improve _require_btrfs_command
-
-Zorro Lang (1):
-      [30612dc06ac1] xfs: xfs mount option sanity test
+cheers,
+Mauricio
 
 
-Code Diffstat:
+> Thanks,
+> Amir.
+>
+> > Thanks to Amir Goldstein for review/improvements/suggestions.
+> >
+> > Changes:
+> >  - v2:
+> >    - fix tests/overlay that hardcode the overlay fs type
+> >    - add support to fuse-overlayfs with +3 other patches
+> >  - v1:
+> >    - [PATCH] common/overlay,rc: introduce OVL_ALT_FSTYP for testing aufs
+> >
+> > Mauricio Faria de Oliveira (5):
+> >   common/overlay,rc,config: introduce OVL_FSTYP variable and aufs
+> >   tests/overlay: mount: replace overlay hardcode with OVL_FSTYP variable
+> >   common/rc: introduce new helper function _fs_type_dev_dir()
+> >   common/rc: add quirks for fuse-overlayfs device/mount point
+> >   common/overlay: silence some mount messages for fuse-overlayfs
+> >
+> >  README.overlay    |  5 ++++
+> >  common/config     |  2 ++
+> >  common/overlay    | 29 +++++++++++++++++++---
+> >  common/rc         | 61 ++++++++++++++++++++++++++++++++++++++++-------
+> >  tests/overlay/011 |  2 +-
+> >  tests/overlay/035 |  2 +-
+> >  tests/overlay/052 |  4 ++--
+> >  tests/overlay/053 |  4 ++--
+> >  tests/overlay/062 |  2 +-
+> >  9 files changed, 92 insertions(+), 19 deletions(-)
+> >
+> > --
+> > 2.20.1
+> >
 
- README                |   4 +-
- common/btrfs          |  13 +-
- common/encrypt        |  95 +++++++++++---
- common/rc             |   2 +-
- tests/btrfs/179       |   9 ++
- tests/btrfs/204       |  73 +++++++++++
- tests/btrfs/204.out   |   2 +
- tests/btrfs/group     |   1 +
- tests/ext4/002        | 168 -------------------------
- tests/ext4/002.out    |   7 --
- tests/ext4/group      |   1 -
- tests/generic/580     |  17 +--
- tests/generic/593     | 155 +++++++++++++++++++++++
- tests/generic/593.out |  73 +++++++++++
- tests/generic/group   |   1 +
- tests/shared/032      |   1 +
- tests/xfs/513         | 335 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/513.out     | 100 +++++++++++++++
- tests/xfs/group       |   1 +
- 19 files changed, 850 insertions(+), 208 deletions(-)
+
+
 --
-Eryu Guan
-guaneryu@gmail.com
-
---2oSFAYL2oKd4
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAl5KlDsACgkQJlKqKVyP
-52ONjg/8D6LDUkk9k5IhXutdl6V0JYqvG8NGopGLCBwuSJTZagF3pVUK7ur02Mu0
-FJ1uX3VmKZOS/WgPYNlFpvL1/ZWXpMHGHwrUF8nJYVhSTDBp9+HWfWBQDweBLR1c
-JNiV7vuoiqEgToNjprPw6ptq4WJfchW0uTTdmpgaRTTqXJU4tik8u5rVzgsrrjxk
-NK6hLAxsz4mVSkkWdFNiJvn55FoQtBojowl7My238ceJHXy0cibudkBpUdraZxpl
-brKosMU3Bdz6S0BqDxEl89ka6QI/TrMj4YxVAz4RbyHiCaBUcTCLND2qT+ymkrvI
-U2eTS7NxlN5RXpSdb1a7dH96sU8X9u2iN9Pstx+ZVrva9Lsh57hprN3ESaAEhbMB
-1sXT4SUgNDDHImvOncS4vFXHfOOW2AkxeWii+7zvANLwcJDN1gkML5unm0voF2dN
-KiqTSKx+bRrpjZLdzSRzPiuLyEdzmKLe8qfimjB5t+3FX2DR4MGRlC6fx8WGBSFq
-Dpu3tJXp0sJwbr+v9DPmsNcVPk7WvFnk4QhmIFa5Q70eByFF8Zx9eOVk8+LC3FnK
-EgUeUVvYhwJS9lqPVE7KL1DZ1JmSOEj1dOMekvJY3MASTvQk/oaHTq397U5HSXRZ
-uFoDaTBz+GEvfpduQQY9GAGKezOQHEpjDll3ZWah8XJ4nItlE1Q=
-=WSpM
------END PGP SIGNATURE-----
-
---2oSFAYL2oKd4--
+Mauricio Faria de Oliveira
