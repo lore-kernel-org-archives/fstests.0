@@ -4,150 +4,126 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 15190C34022
-	for <linux-fstests@archiver.kernel.org>; Mon, 17 Feb 2020 16:38:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C89D3C34022
+	for <linux-fstests@archiver.kernel.org>; Mon, 17 Feb 2020 18:06:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id DF5A5215A4
-	for <linux-fstests@archiver.kernel.org>; Mon, 17 Feb 2020 16:38:29 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A639B207FD
+	for <linux-fstests@archiver.kernel.org>; Mon, 17 Feb 2020 18:06:03 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="RI32SMks"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="fZ1AgikY"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728969AbgBQQi3 (ORCPT
+        id S1729345AbgBQSGD (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 17 Feb 2020 11:38:29 -0500
-Received: from us-smtp-1.mimecast.com ([207.211.31.81]:32418 "EHLO
-        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726891AbgBQQi3 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 17 Feb 2020 11:38:29 -0500
+        Mon, 17 Feb 2020 13:06:03 -0500
+Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:35762 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726707AbgBQSGD (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 17 Feb 2020 13:06:03 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1581957508;
+        s=mimecast20190719; t=1581962762;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=Xrwhq1ZkGCeVkJgDZm7aKusobjUIkFeIngZsha42Tis=;
-        b=RI32SMksS/ILz45ayWKb+ZwFz0soyoy5uDAg5wb938UgfQ1LBN6QvQS/p0WovgTGw/tZ1i
-        EJZf0CsoZjHAVv6ViuFHZTn5A+DiZwFW1XA+S6ZC3ZgfQUEKhVoNJJ9zKi4z5hCYIDIOKT
-        ikKG7R1UkW5LU3X+cc0Tb3MIO7AaMMs=
+        bh=WSS4Sxlw5n7hDmXoWjoR2N+JQhCKjC5XqqPU0reRhLo=;
+        b=fZ1AgikYxjybJgomuAgkbWBhmelazlxkE5zpf4TJjB/tifF5ET7miGWhi76iw96q69sSij
+        83yBFaCE9AQz6dqh7zgemi0L8Q1Nth2LW2cmNiSdhjRJfXcblmQzuN+hf6mwH0crs7UH+i
+        xVNFZw9fEEwfY6dKSQ4qiSgw4oy06Pk=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-185-ldWIcyuXNe-cg-HbNDBypQ-1; Mon, 17 Feb 2020 11:38:25 -0500
-X-MC-Unique: ldWIcyuXNe-cg-HbNDBypQ-1
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
+ us-mta-239-RxZkqWmFPOCPP32liA5rVg-1; Mon, 17 Feb 2020 13:06:00 -0500
+X-MC-Unique: RxZkqWmFPOCPP32liA5rVg-1
+Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 7034E800D5A;
-        Mon, 17 Feb 2020 16:38:24 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 6A68D8017CC;
+        Mon, 17 Feb 2020 18:05:59 +0000 (UTC)
 Received: from bfoster (dhcp-41-2.bos.redhat.com [10.18.41.2])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id DA7732CC39;
-        Mon, 17 Feb 2020 16:38:23 +0000 (UTC)
-Date:   Mon, 17 Feb 2020 11:38:21 -0500
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id D8DB95C241;
+        Mon, 17 Feb 2020 18:05:58 +0000 (UTC)
+Date:   Mon, 17 Feb 2020 13:05:57 -0500
 From:   Brian Foster <bfoster@redhat.com>
-To:     Josef Bacik <josef@toxicpanda.com>
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH] xfstests: add a CGROUP configuration option
-Message-ID: <20200217163821.GB6633@bfoster>
-References: <20200214203431.24506-1-josef@toxicpanda.com>
+To:     "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: Re: [PATCH 1/2] xfs: refactor calls to xfs_admin
+Message-ID: <20200217180557.GC6633@bfoster>
+References: <157915149017.2375135.14166864164575311878.stgit@magnolia>
+ <157915149642.2375135.15091840835027007949.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20200214203431.24506-1-josef@toxicpanda.com>
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.15
+In-Reply-To: <157915149642.2375135.15091840835027007949.stgit@magnolia>
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.16
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Feb 14, 2020 at 03:34:31PM -0500, Josef Bacik wrote:
-> I want to add some extended statistic gathering for xfstests, but it's
-> tricky to isolate xfstests from the rest of the host applications.  The
-> most straightforward way to do this is to run every test inside of it's
-> own cgroup.  From there we can monitor the activity of tasks in the
-> specific cgroup using BPF.
+On Wed, Jan 15, 2020 at 09:11:36PM -0800, Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
 > 
-
-I'm curious what kind of info you're looking for from tests..
-
-> The support for this is pretty simple, allow users to specify
-> CGROUP=/path/to/cgroup.  We will create the path if it doesn't already
-> exist, and validate we can add things to cgroup.procs.  If we cannot
-> it'll be disabled, otherwise we will use this when we do _run_seq by
-> echo'ing the bash pid into cgroup.procs, which will cause any children
-> to run under that cgroup.
+> Create a helper to run xfs_admin on the scratch device, then refactor
+> all tests to use it.
 > 
-
-Seems reasonable, but is there any opportunity to combine this with what
-we have in common/cgroup2? It's not clear to me if this cares about
-cgroup v1 or v2, but perhaps the cgroup2 checks could be built on top of
-a generic CGROUP var? I'm also wondering if we'd want to change runtime
-behavior purely based on the existence of the path as opposed to some
-kind of separate knob (in the event some future test requires the path
-for some reason without wanting to enable this mechanism).
-
-Brian
-
-> Signed-off-by: Josef Bacik <josef@toxicpanda.com>
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 > ---
->  README |  3 +++
->  check  | 17 ++++++++++++++++-
->  2 files changed, 19 insertions(+), 1 deletion(-)
+
+Looks Ok:
+
+Reviewed-by: Brian Foster <bfoster@redhat.com>
+
+>  common/config |    1 +
+>  common/xfs    |    8 ++++++++
+>  tests/xfs/287 |    2 +-
+>  3 files changed, 10 insertions(+), 1 deletion(-)
 > 
-> diff --git a/README b/README
-> index 593c1052..722dc170 100644
-> --- a/README
-> +++ b/README
-> @@ -102,6 +102,9 @@ Preparing system for tests:
->               - set USE_KMEMLEAK=yes to scan for memory leaks in the kernel
->                 after every test, if the kernel supports kmemleak.
->               - set KEEP_DMESG=yes to keep dmesg log after test
-> +             - set CGROUP=/path/to/cgroup to create a cgroup to run tests inside
-> +               of.  The main check will run outside of the cgroup, only the test
-> +               itself and any child processes will run under the cgroup.
->  
->          - or add a case to the switch in common/config assigning
->            these variables based on the hostname of your test
-> diff --git a/check b/check
-> index 2e148e57..07a0e251 100755
-> --- a/check
-> +++ b/check
-> @@ -509,11 +509,23 @@ _expunge_test()
->  OOM_SCORE_ADJ="/proc/self/oom_score_adj"
->  test -w ${OOM_SCORE_ADJ} && echo -1000 > ${OOM_SCORE_ADJ}
->  
-> +# Initialize the cgroup path if it doesn't already exist
-> +if [ ! -z "$CGROUP" ]; then
-> +	mkdir -p ${CGROUP}
-> +
-> +	# If we can't write to cgroup.procs then unset cgroup
-> +	test -w ${CGROUP}/cgroup.procs || unset CGROUP
-> +fi
-> +
->  # ...and make the tests themselves somewhat more attractive to it, so that if
->  # the system runs out of memory it'll be the test that gets killed and not the
->  # test framework.
->  _run_seq() {
-> -	bash -c "test -w ${OOM_SCORE_ADJ} && echo 250 > ${OOM_SCORE_ADJ}; exec ./$seq"
-> +	_extra="test -w ${OOM_SCORE_ADJ} && echo 250 > ${OOM_SCORE_ADJ};"
-> +	if [ ! -z "$CGROUP" ]; then
-> +		_extra+="echo $$ > ${CGROUP}/cgroup.procs;"
-> +	fi
-> +	bash -c "${_extra} exec ./$seq"
+> 
+> diff --git a/common/config b/common/config
+> index 9a9c7760..1116cb99 100644
+> --- a/common/config
+> +++ b/common/config
+> @@ -154,6 +154,7 @@ MKSWAP_PROG="$MKSWAP_PROG -f"
+>  export XFS_LOGPRINT_PROG="$(type -P xfs_logprint)"
+>  export XFS_REPAIR_PROG="$(type -P xfs_repair)"
+>  export XFS_DB_PROG="$(type -P xfs_db)"
+> +export XFS_ADMIN_PROG="$(type -P xfs_admin)"
+>  export XFS_GROWFS_PROG=$(type -P xfs_growfs)
+>  export XFS_SPACEMAN_PROG="$(type -P xfs_spaceman)"
+>  export XFS_SCRUB_PROG="$(type -P xfs_scrub)"
+> diff --git a/common/xfs b/common/xfs
+> index 706ddf85..d9a9784f 100644
+> --- a/common/xfs
+> +++ b/common/xfs
+> @@ -218,6 +218,14 @@ _scratch_xfs_db()
+>  	$XFS_DB_PROG "$@" $(_scratch_xfs_db_options)
 >  }
 >  
->  _detect_kmemleak
-> @@ -615,6 +627,9 @@ for section in $HOST_OPTIONS_SECTIONS; do
->  	  echo "MKFS_OPTIONS  -- `_scratch_mkfs_options`"
->  	  echo "MOUNT_OPTIONS -- `_scratch_mount_options`"
->  	fi
-> +	if [ ! -z "$CGROUP" ]; then
-> +	  echo "CGROUP        -- ${CGROUP}"
-> +	fi
->  	echo
->  	needwrap=true
+> +_scratch_xfs_admin()
+> +{
+> +	local options=("$SCRATCH_DEV")
+> +	[ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ] && \
+> +		options+=("$SCRATCH_LOGDEV")
+> +	$XFS_ADMIN_PROG "$@" "${options[@]}"
+> +}
+> +
+>  _scratch_xfs_logprint()
+>  {
+>  	SCRATCH_OPTIONS=""
+> diff --git a/tests/xfs/287 b/tests/xfs/287
+> index 8dc754a5..f77ed2f1 100755
+> --- a/tests/xfs/287
+> +++ b/tests/xfs/287
+> @@ -70,7 +70,7 @@ $XFS_IO_PROG -r -c "lsproj" $dir/32bit
+>  _scratch_unmount
 >  
-> -- 
-> 2.24.1
+>  # Now, enable projid32bit support by xfs_admin
+> -xfs_admin -p $SCRATCH_DEV >> $seqres.full 2>&1 || _fail "xfs_admin failed"
+> +_scratch_xfs_admin -p >> $seqres.full 2>&1 || _fail "xfs_admin failed"
+>  
+>  # Now mount the fs, 32bit project quotas shall be supported, now
+>  _qmount_option "pquota"
 > 
 
