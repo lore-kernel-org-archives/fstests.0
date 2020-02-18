@@ -2,96 +2,107 @@ Return-Path: <SRS0=z/AK=4G=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+X-Spam-Status: No, score=-0.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 33879C34026
-	for <linux-fstests@archiver.kernel.org>; Tue, 18 Feb 2020 14:29:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1895EC3403F
+	for <linux-fstests@archiver.kernel.org>; Tue, 18 Feb 2020 14:35:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id F27A6208C4
-	for <linux-fstests@archiver.kernel.org>; Tue, 18 Feb 2020 14:29:49 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="zObFk4cy"
+	by mail.kernel.org (Postfix) with ESMTP id EFA3C208C4
+	for <linux-fstests@archiver.kernel.org>; Tue, 18 Feb 2020 14:35:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726556AbgBRO3t (ORCPT
+        id S1726963AbgBROfv (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 18 Feb 2020 09:29:49 -0500
-Received: from mail-qk1-f173.google.com ([209.85.222.173]:45447 "EHLO
-        mail-qk1-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726116AbgBRO3t (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 18 Feb 2020 09:29:49 -0500
-Received: by mail-qk1-f173.google.com with SMTP id a2so19584538qko.12
-        for <fstests@vger.kernel.org>; Tue, 18 Feb 2020 06:29:47 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
-        h=from:to:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=R9GgDl7Uv0suH+DqLJarwivXGLHfuBrz191M6D9vpRs=;
-        b=zObFk4cyFJ55d1z0uf7qZPTNZaNqm0DgmV+fQwe8ZfmkVPnKJtX7zHHaR/Dpt3bieI
-         t6KEQgeeOpZcNAZf46lKIvxHBwj7TIZnYw6AMHhywgQnVfey5l+LQvy/AgqE7e8kiN4t
-         +XJNZRYrQuTf52CzYYBkqY7Bi6Jy2q9V0cKOuS76js1XQ7TGNKyAMRMu+WpVTJRsofA5
-         WX/FA2hdP1XS6Dk7owYtmTz8fpbuThpbwXZ+BdrC+uQ5xexqaEX5a7YQ0VOfpUonIgjn
-         0ph0G0fCvauUobmRc5Pfnijft8+w5G16cX1OqXJGxcOOnOOuxtWlmNctIbYfVZRzX1FI
-         Ytgg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=R9GgDl7Uv0suH+DqLJarwivXGLHfuBrz191M6D9vpRs=;
-        b=VSyuSA5Sb8dLDccOAJ8OyDf1YODwApVVK+OOqfAg4q91wLyygX8Qtdh5SVrFggtl9K
-         e+NuLO6FsO/NyvyPAo9vr/oNflX5e739lOg/A4RZNKPCuS9E+pdGe9V9PjlAFhb5lopE
-         ltmlgO3a2NgD0DDK/WRjTnokmv4CtuDSKqEacPUnz6iKy6yjf7ripfNGbiXIiAsKXKu1
-         36rpURxFxKtJRzC7YcDbsZtFyoW1YekL0CfLdMAOQ93+hLgCdABRihBhKalxxL/iCjsW
-         KD/xSoZVH5FPj1OniSKVsXY0aKb7KZrkOEzPM/L9Uo3TeahFNLtzbNCFYWJoIhkV1Y/n
-         opFQ==
-X-Gm-Message-State: APjAAAXuNWXI4MltNZCm8HSKwHKkpqU0Xkq0MoMlfHA1FFUeqh9f64DK
-        bQ9590GP1oWrIpV2h7hMdQQb8A==
-X-Google-Smtp-Source: APXvYqwy+ta/ZN2mjSLOWj5WG+8g5+rx1xV+ipNkM02ksbQBpTPv9dx1tSraXx80E9bJu1LyLBmjlw==
-X-Received: by 2002:a37:a5cc:: with SMTP id o195mr18989387qke.25.1582036187196;
-        Tue, 18 Feb 2020 06:29:47 -0800 (PST)
-Received: from localhost ([107.15.81.208])
-        by smtp.gmail.com with ESMTPSA id l19sm1941460qkl.3.2020.02.18.06.29.46
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 18 Feb 2020 06:29:46 -0800 (PST)
-From:   Josef Bacik <josef@toxicpanda.com>
-To:     kernel-team@fb.com, fstests@vger.kernel.org,
-        linux-btrfs@vger.kernel.org
-Subject: [PATCH] fstests: add perf to the list of test directories
-Date:   Tue, 18 Feb 2020 09:29:45 -0500
-Message-Id: <20200218142945.3719579-1-josef@toxicpanda.com>
-X-Mailer: git-send-email 2.24.1
+        Tue, 18 Feb 2020 09:35:51 -0500
+Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:55043 "EHLO
+        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1727313AbgBROfs (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 18 Feb 2020 09:35:48 -0500
+Received: from callcc.thunk.org ([12.23.74.26])
+        (authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 01IEZY9b014015
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 18 Feb 2020 09:35:35 -0500
+Received: by callcc.thunk.org (Postfix, from userid 15806)
+        id 958DA4211EF; Tue, 18 Feb 2020 09:35:33 -0500 (EST)
+Date:   Tue, 18 Feb 2020 09:35:33 -0500
+From:   "Theodore Y. Ts'o" <tytso@mit.edu>
+To:     Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+Cc:     Jan Kara <jack@suse.cz>, fstests <fstests@vger.kernel.org>
+Subject: Re: generic/269 hangs on lastest upstream kernel
+Message-ID: <20200218143533.GD12604@mit.edu>
+References: <59a10449-9e0f-f289-2f9f-a2028fb0b3ca@cn.fujitsu.com>
+ <20200212105433.GH25573@quack2.suse.cz>
+ <00470e6d-0e1c-6060-225b-4c56dd33c083@cn.fujitsu.com>
+ <20200213170853.GA311476@mit.edu>
+ <1c81c16b-6e31-74cb-0b88-46663fad500d@cn.fujitsu.com>
+ <20200214140541.GA434121@mit.edu>
+ <7adf16bf-d527-1c25-1a24-b4d5e4d757c4@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <7adf16bf-d527-1c25-1a24-b4d5e4d757c4@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-I noticed that despite having PERF_CONFIGNAME set I wasn't getting the
-perf/ tests run when I used -g auto.  This is because it's not included
-in the list of directories to look at.  Fix this so that perf tests get
-run as well.
+On Tue, Feb 18, 2020 at 11:44:24AM +0800, Yang Xu wrote:
+> 
+> 
+> on 2020/02/14 22:05, Theodore Y. Ts'o wrote:
+> > On Fri, Feb 14, 2020 at 09:14:33AM +0800, Yang Xu wrote:
+> > > > 
+> > > > So were you able to reproduce this on a 5.6.0-rc1 kernel or not?
+> > > No. I don't reproduce it on 5.6.0-rc1 kernel, but  5.6.0-rc1 kernel hang on
+> > > my KVM machine when run generic/269.
+> > 
+> > I'm not able to reproduce the 5.6.0-rc1 hang using kvm-xfstests[1].
+> > Neither has any other ext4 developers, which is why it might be useful
+> > to see if there's something unique in your .config for 5.6.0-rc1.
+> > Could you send us the .config you were using?
+> > 
+> Sorry for the late reply.
+> 
+> my 5.6.0-rc1 config as attach.
 
-Signed-off-by: Josef Bacik <josef@toxicpanda.com>
----
- check | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Unfortunately, I just tried using your config with kvm-xfstests, and
+it passed without problems.  Did you say this was a reliable
+reproducer on your system?
 
-diff --git a/check b/check
-index 89f3358a..9e7b6134 100755
---- a/check
-+++ b/check
-@@ -44,7 +44,7 @@ timestamp=${TIMESTAMP:=false}
- 
- rm -f $tmp.list $tmp.tmp $tmp.grep $here/$iam.out $tmp.xlist $tmp.report.*
- 
--SRC_GROUPS="generic shared"
-+SRC_GROUPS="generic shared perf"
- export SRC_DIR="tests"
- 
- usage()
--- 
-2.24.1
+% kvm-xfstests -c 4k generic/269
+KERNEL:    kernel 5.6.0-rc2-xfstests #1492 SMP Mon Feb 17 23:22:40 EST 2020 x86_64
+CPUS:      2
+MEM:       1966.03
 
+ext4/4k: 1 tests, 43 seconds
+  generic/269  Pass     42s
+Totals: 1 tests, 0 skipped, 0 failures, 0 errors, 42s
+
+FSTESTVER: blktests 9e02419 (Thu, 19 Dec 2019 14:45:55 -0800)
+FSTESTVER: e2fsprogs v1.45.4-15-g4b4f7b35 (Wed, 9 Oct 2019 20:25:01 -0400)
+FSTESTVER: fio  fio-3.17 (Mon, 16 Dec 2019 15:48:43 -0700)
+FSTESTVER: fsverity v1.0 (Wed, 6 Nov 2019 10:35:02 -0800)
+FSTESTVER: ima-evm-utils v1.2 (Fri, 26 Jul 2019 07:42:17 -0400)
+FSTESTVER: nvme-cli v1.9-159-g18119bc (Thu, 26 Dec 2019 11:04:01 -0700)
+FSTESTVER: quota  9a001cc (Tue, 5 Nov 2019 16:12:59 +0100)
+FSTESTVER: util-linux v2.35-19-g95afec771 (Fri, 24 Jan 2020 12:25:35 -0500)
+FSTESTVER: xfsprogs v5.4.0 (Fri, 20 Dec 2019 16:47:12 -0500)
+FSTESTVER: xfstests linux-v3.8-2652-g002e349c (Fri, 24 Jan 2020 00:49:40 -0500)
+FSTESTVER: xfstests-bld 6f10355 (Fri, 24 Jan 2020 12:36:30 -0500)
+FSTESTCFG: 4k
+FSTESTSET: generic/269
+FSTESTOPT: aex
+
+This was run on a Debian testing system, with kvm version:
+
+QEMU emulator version 4.2.0 (Debian 1:4.2-3)
+
+What about hardware details of your system?  How many CPU's, memory,
+etc.?  And what sort of storage device are you using for kvm?  (I'm
+using virtio-scsi backed by LVM volumes for the scratch and test
+partitions.)
+
+						- Ted
