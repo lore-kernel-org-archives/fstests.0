@@ -2,178 +2,121 @@ Return-Path: <SRS0=z/AK=4G=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.2 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8190CC34026
-	for <linux-fstests@archiver.kernel.org>; Tue, 18 Feb 2020 11:03:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F3C82C34026
+	for <linux-fstests@archiver.kernel.org>; Tue, 18 Feb 2020 14:17:13 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 552EE207FD
-	for <linux-fstests@archiver.kernel.org>; Tue, 18 Feb 2020 11:03:15 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C61E12176D
+	for <linux-fstests@archiver.kernel.org>; Tue, 18 Feb 2020 14:17:13 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="awt3V+d9"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726327AbgBRLDP (ORCPT
+        id S1726492AbgBRORN (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 18 Feb 2020 06:03:15 -0500
-Received: from mx2.suse.de ([195.135.220.15]:38820 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726298AbgBRLDO (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 18 Feb 2020 06:03:14 -0500
-X-Virus-Scanned: by amavisd-new at test-mx.suse.de
-Received: from relay2.suse.de (unknown [195.135.220.254])
-        by mx2.suse.de (Postfix) with ESMTP id D6010B131;
-        Tue, 18 Feb 2020 11:03:11 +0000 (UTC)
-Received: by quack2.suse.cz (Postfix, from userid 1000)
-        id 0A0EB1E0CF7; Tue, 18 Feb 2020 12:03:11 +0100 (CET)
-Date:   Tue, 18 Feb 2020 12:03:11 +0100
-From:   Jan Kara <jack@suse.cz>
-To:     Yang Xu <xuyang2018.jy@cn.fujitsu.com>
-Cc:     Jan Kara <jack@suse.cz>, Theodore Ts'o <tytso@mit.edu>,
-        fstests <fstests@vger.kernel.org>
-Subject: Re: generic/269 hangs on lastest upstream kernel
-Message-ID: <20200218110311.GI16121@quack2.suse.cz>
-References: <59a10449-9e0f-f289-2f9f-a2028fb0b3ca@cn.fujitsu.com>
- <20200212105433.GH25573@quack2.suse.cz>
- <00470e6d-0e1c-6060-225b-4c56dd33c083@cn.fujitsu.com>
- <20200213211011.GB6600@quack2.suse.cz>
- <062ac52c-3a16-22ef-6396-53334ed94783@cn.fujitsu.com>
- <20200214150059.GA22815@quack2.suse.cz>
- <a0b06474-f447-7943-1012-2a8d20b9e352@cn.fujitsu.com>
- <20200218082436.GF16121@quack2.suse.cz>
- <83cc6208-3fa3-86bb-eb91-77b90b22d98f@cn.fujitsu.com>
+        Tue, 18 Feb 2020 09:17:13 -0500
+Received: from mail-qt1-f195.google.com ([209.85.160.195]:38491 "EHLO
+        mail-qt1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726442AbgBRORN (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 18 Feb 2020 09:17:13 -0500
+Received: by mail-qt1-f195.google.com with SMTP id i23so4412552qtr.5
+        for <fstests@vger.kernel.org>; Tue, 18 Feb 2020 06:17:12 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=+UCgxyYmsy9OBO3kh/zA2QazjAJ14ZIlvINx4SkM/hw=;
+        b=awt3V+d9PrBKzBzdikVmlN5H+FLXC1kyY79D3WFOFDKJbnKpklnI0CZLxSqeLyGOxN
+         aeiMkoweDdCw2xze4pOPs9bJYzKx7cNJ8mBSV/xq5bhuydtbaXUHRYiOlmFkVLwL0Dlp
+         jfLSBv5Xtsxfk0w8j6VSv0OT+rYjeM+KZNUZNK7JbSvkxg3B+aiTUjEPRJ8Wde+dFZA/
+         /BbjI0NQGOHH6YDuKQjNoSGLRmHSla54KaLQU3Po17yG6hHlXMUcHtj+xvOcoXCU28jv
+         p48EjILYwHcMFJxgl+hVZN2bMOgsai4YGNAPjji/ImVDammu613T1/K/5UnBUF9v6U9f
+         i7bQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=+UCgxyYmsy9OBO3kh/zA2QazjAJ14ZIlvINx4SkM/hw=;
+        b=prH8mXJT+k2p9nFLyGokpqQlmqBUjZRAbFSWRxKzGKpom0evSspl+YRR6EgrWkoH+Q
+         edTlGMiq3WqHASRpy4MP0kCS35QTvnLzOIGtrRybCV7+aSbBQj1Gli36/LS6lDUgX0nY
+         sN9qDgHcF+GmF8QWsN4i/TRl2mGi6118sw4v8erJnllhRl2tUMvB/I4olDrDUD/0c5E+
+         EzI2X9+5Dl8YCk5OusmPjlLZGMv8y3thZHf2ZteT0dOGxX1p2JXJdIHw3dcE8PV01T91
+         ior5Sv2NlgclWrs5HYa0rWg12oykM7sgGm/Ctllj3k+OgTF8N7BfUU2ZAXEnAqxZ8+Y2
+         6sMA==
+X-Gm-Message-State: APjAAAU3zAQF/JsjyUTFYbDSfeuuoLP+y0Ni/MWMKAmPtnV4uCAlgSCL
+        7peCkqKGo3r3IzrV1kOGOXfWnUJf6Lc=
+X-Google-Smtp-Source: APXvYqxL+77fmIFQfqT2MiKgUvUTbXZt+kdtNMquU7513VZuZrMc0RX/3sRjLRxKfTknrvV3A4sQBA==
+X-Received: by 2002:ac8:584:: with SMTP id a4mr17644492qth.240.1582035432145;
+        Tue, 18 Feb 2020 06:17:12 -0800 (PST)
+Received: from [192.168.1.106] ([107.15.81.208])
+        by smtp.gmail.com with ESMTPSA id b26sm1918809qkk.5.2020.02.18.06.17.10
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 18 Feb 2020 06:17:11 -0800 (PST)
+Subject: Re: [PATCH] xfstests: add a CGROUP configuration option
+To:     Brian Foster <bfoster@redhat.com>
+Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+References: <20200214203431.24506-1-josef@toxicpanda.com>
+ <20200217163821.GB6633@bfoster>
+From:   Josef Bacik <josef@toxicpanda.com>
+Message-ID: <ad711a8b-f79d-380a-dc11-7e6d1e1e79ba@toxicpanda.com>
+Date:   Tue, 18 Feb 2020 09:17:10 -0500
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:68.0)
+ Gecko/20100101 Thunderbird/68.5.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <83cc6208-3fa3-86bb-eb91-77b90b22d98f@cn.fujitsu.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+In-Reply-To: <20200217163821.GB6633@bfoster>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue 18-02-20 17:46:54, Yang Xu wrote:
+On 2/17/20 11:38 AM, Brian Foster wrote:
+> On Fri, Feb 14, 2020 at 03:34:31PM -0500, Josef Bacik wrote:
+>> I want to add some extended statistic gathering for xfstests, but it's
+>> tricky to isolate xfstests from the rest of the host applications.  The
+>> most straightforward way to do this is to run every test inside of it's
+>> own cgroup.  From there we can monitor the activity of tasks in the
+>> specific cgroup using BPF.
+>>
 > 
-> on 2020/02/18 16:24, Jan Kara wrote:
-> > On Tue 18-02-20 11:25:37, Yang Xu wrote:
-> > > on 2020/02/14 23:00, Jan Kara wrote:
-> > > > On Fri 14-02-20 18:24:50, Yang Xu wrote:
-> > > > > on 2020/02/14 5:10, Jan Kara wrote:
-> > > > > > On Thu 13-02-20 16:49:21, Yang Xu wrote:
-> > > > > > > > > When I test generic/269(ext4) on 5.6.0-rc1 kernel, it hangs.
-> > > > > > > > > ----------------------------------------------
-> > > > > > > > > dmesg as below:
-> > > > > > > > >        76.506753] run fstests generic/269 at 2020-02-11 05:53:44
-> > > > > > > > > [   76.955667] EXT4-fs (sdc): mounted filesystem with ordered data mode.
-> > > > > > > > > Opts: acl,                           user_xattr
-> > > > > > > > > [  100.912511] device virbr0-nic left promiscuous mode
-> > > > > > > > > [  100.912520] virbr0: port 1(virbr0-nic) entered disabled state
-> > > > > > > > > [  246.801561] INFO: task dd:17284 blocked for more than 122 seconds.
-> > > > > > > > > [  246.801564]       Not tainted 5.6.0-rc1 #41
-> > > > > > > > > [  246.801565] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables
-> > > > > > > > > this mes                           sage.
-> > > > > > > > > [  246.801566] dd              D    0 17284  16931 0x00000080
-> > > > > > > > > [  246.801568] Call Trace:
-> > > > > > > > > [  246.801584]  ? __schedule+0x251/0x690
-> > > > > > > > > [  246.801586]  schedule+0x40/0xb0
-> > > > > > > > > [  246.801588]  wb_wait_for_completion+0x52/0x80
-> > > > > > > > > [  246.801591]  ? finish_wait+0x80/0x80
-> > > > > > > > > [  246.801592]  __writeback_inodes_sb_nr+0xaa/0xd0
-> > > > > > > > > [  246.801593]  try_to_writeback_inodes_sb+0x3c/0x50
-> > > > > > > > 
-> > > > > > > > Interesting. Does the hang resolve eventually or the machine is hung
-> > > > > > > > permanently? If the hang is permanent, can you do:
-> > > > > > > > 
-> > > > > > > > echo w >/proc/sysrq-trigger
-> > > > > > > > 
-> > > > > > > > and send us the stacktraces from dmesg? Thanks!
-> > > > > > > Yes. the hang is permanent, log as below:
-> > > > > full dmesg as attach
-> > > > ...
-> > > > 
-> > > > Thanks! So the culprit seems to be:
-> > > > 
-> > > > > [  388.087799] kworker/u12:0   D    0    32      2 0x80004000
-> > > > > [  388.087803] Workqueue: writeback wb_workfn (flush-8:32)
-> > > > > [  388.087805] Call Trace:
-> > > > > [  388.087810]  ? __schedule+0x251/0x690
-> > > > > [  388.087811]  ? __switch_to_asm+0x34/0x70
-> > > > > [  388.087812]  ? __switch_to_asm+0x34/0x70
-> > > > > [  388.087814]  schedule+0x40/0xb0
-> > > > > [  388.087816]  schedule_timeout+0x20d/0x310
-> > > > > [  388.087818]  io_schedule_timeout+0x19/0x40
-> > > > > [  388.087819]  wait_for_completion_io+0x113/0x180
-> > > > > [  388.087822]  ? wake_up_q+0xa0/0xa0
-> > > > > [  388.087824]  submit_bio_wait+0x5b/0x80
-> > > > > [  388.087827]  blkdev_issue_flush+0x81/0xb0
-> > > > > [  388.087834]  jbd2_cleanup_journal_tail+0x80/0xa0 [jbd2]
-> > > > > [  388.087837]  jbd2_log_do_checkpoint+0xf4/0x3f0 [jbd2]
-> > > > > [  388.087840]  __jbd2_log_wait_for_space+0x66/0x190 [jbd2]
-> > > > > [  388.087843]  ? finish_wait+0x80/0x80
-> > > > > [  388.087845]  add_transaction_credits+0x27d/0x290 [jbd2]
-> > > > > [  388.087847]  ? blk_mq_make_request+0x289/0x5d0
-> > > > > [  388.087849]  start_this_handle+0x10a/0x510 [jbd2]
-> > > > > [  388.087851]  ? _cond_resched+0x15/0x30
-> > > > > [  388.087853]  jbd2__journal_start+0xea/0x1f0 [jbd2]
-> > > > > [  388.087869]  ? ext4_writepages+0x518/0xd90 [ext4]
-> > > > > [  388.087875]  __ext4_journal_start_sb+0x6e/0x130 [ext4]
-> > > > > [  388.087883]  ext4_writepages+0x518/0xd90 [ext4]
-> > > > > [  388.087886]  ? do_writepages+0x41/0xd0
-> > > > > [  388.087893]  ? ext4_mark_inode_dirty+0x1f0/0x1f0 [ext4]
-> > > > > [  388.087894]  do_writepages+0x41/0xd0
-> > > > > [  388.087896]  ? snprintf+0x49/0x60
-> > > > > [  388.087898]  __writeback_single_inode+0x3d/0x340
-> > > > > [  388.087899]  writeback_sb_inodes+0x1e5/0x480
-> > > > > [  388.087901]  wb_writeback+0xfb/0x2f0
-> > > > > [  388.087902]  wb_workfn+0xf0/0x430
-> > > > > [  388.087903]  ? __switch_to_asm+0x34/0x70
-> > > > > [  388.087905]  ? finish_task_switch+0x75/0x250
-> > > > > [  388.087907]  process_one_work+0x1a7/0x370
-> > > > > [  388.087909]  worker_thread+0x30/0x380
-> > > > > [  388.087911]  ? process_one_work+0x370/0x370
-> > > > > [  388.087912]  kthread+0x10c/0x130
-> > > > > [  388.087913]  ? kthread_park+0x80/0x80
-> > > > > [  388.087914]  ret_from_fork+0x35/0x40
-> > > > 
-> > > > This process is actually waiting for IO to complete while holding
-> > > > checkpoint_mutex which holds up everybody else. The question is why the IO
-> > > > doesn't complete - that's definitely outside of filesystem. Maybe a bug in
-> > > > the block layer, storage driver, or something like that... What does
-> > > > 'cat /sys/block/<device-with-xfstests>/inflight' show?
-> > > Sorry for the late reply.
-> > > This value is 0, it represent it doesn't have inflight data(but it may be
-> > > counted bug or storage driver bug, is it right?).
-> > > Also, it doesn't hang on my physical machine, but only hang on vm.
-> > 
-> > Hum, curious. Just do make sure, did you check sdc (because that appears to
-> > be the stuck device)?
-> Yes, I check sdc, its value is 0.
-> # cat /sys/block/sdc/inflight
->        0        0
+> I'm curious what kind of info you're looking for from tests..
+> 
 
-OK, thanks!
+Latencies.  We have all of these tests doing all sorts of interesting things, I 
+want to track operation latencies with code we're actually testing so I can see 
+if I've introduced a performance regression somewhere.  Since Facebook's whole 
+fleet is on btrfs I want to make sure I'm only getting information from things 
+being run by xfstests so I can easily go back and hunt down regressions that get 
+introduced.  With BPF I can filter on cgroup membership, so I know I'm only 
+recording stats I care about.
 
-> > > So what should I do in next step(change storge disk format)?
-> > 
-> > I'd try couple of things:
-> > 
-> > 1) If you mount ext4 with barrier=0 mount option, does the problem go away?
-> Yes. Use barrier=0, this case doesn't hang,
+>> The support for this is pretty simple, allow users to specify
+>> CGROUP=/path/to/cgroup.  We will create the path if it doesn't already
+>> exist, and validate we can add things to cgroup.procs.  If we cannot
+>> it'll be disabled, otherwise we will use this when we do _run_seq by
+>> echo'ing the bash pid into cgroup.procs, which will cause any children
+>> to run under that cgroup.
+>>
+> 
+> Seems reasonable, but is there any opportunity to combine this with what
+> we have in common/cgroup2? It's not clear to me if this cares about
+> cgroup v1 or v2, but perhaps the cgroup2 checks could be built on top of
+> a generic CGROUP var? I'm also wondering if we'd want to change runtime
+> behavior purely based on the existence of the path as opposed to some
+> kind of separate knob (in the event some future test requires the path
+> for some reason without wanting to enable this mechanism).
+> 
 
-OK, so there's some problem with how the block layer is handling flush
-bios...
+Oh I probably should have looked around, yeah we can definitely use this.  My 
+initial thought is to just make CGROUP2_PATH exported always, we create 
+/path/to/cgroup2/xfstests and point CGROUP2_PATH at that, and then any tests 
+that use the cgroup2 path for their test will automatically be populated under 
+that global xfstests directory, so I can still capture them with my scripts. 
+Does that sound reasonable?  Thanks,
 
-> > 2) Can you run the test and at the same time run 'blktrace -d /dev/sdc' to
-> > gather traces? Once the machine is stuck, abort blktrace, process the
-> > resulting files with 'blkparse -i sdc' and send here compressed blkparse
-> > output. We should be able to see what was happening with the stuck request
-> > in the trace and maybe that will tell us something.
-> The log size is too big(58M) and our emali limit is 5M.
-
-OK, can you put the log somewhere for download? Alternatively you could
-provide only last say 20s of the trace which should hopefully fit into the
-limit...
-
-								Honza
--- 
-Jan Kara <jack@suse.com>
-SUSE Labs, CR
+Josef
