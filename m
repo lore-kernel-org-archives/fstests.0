@@ -2,107 +2,189 @@ Return-Path: <SRS0=z/AK=4G=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1895EC3403F
-	for <linux-fstests@archiver.kernel.org>; Tue, 18 Feb 2020 14:35:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5EC04C3403F
+	for <linux-fstests@archiver.kernel.org>; Tue, 18 Feb 2020 15:27:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id EFA3C208C4
-	for <linux-fstests@archiver.kernel.org>; Tue, 18 Feb 2020 14:35:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 36B3221D56
+	for <linux-fstests@archiver.kernel.org>; Tue, 18 Feb 2020 15:27:17 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="QNDkuz2G"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726963AbgBROfv (ORCPT
+        id S1726402AbgBRP1Q (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 18 Feb 2020 09:35:51 -0500
-Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:55043 "EHLO
-        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1727313AbgBROfs (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 18 Feb 2020 09:35:48 -0500
-Received: from callcc.thunk.org ([12.23.74.26])
-        (authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 01IEZY9b014015
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Tue, 18 Feb 2020 09:35:35 -0500
-Received: by callcc.thunk.org (Postfix, from userid 15806)
-        id 958DA4211EF; Tue, 18 Feb 2020 09:35:33 -0500 (EST)
-Date:   Tue, 18 Feb 2020 09:35:33 -0500
-From:   "Theodore Y. Ts'o" <tytso@mit.edu>
-To:     Yang Xu <xuyang2018.jy@cn.fujitsu.com>
-Cc:     Jan Kara <jack@suse.cz>, fstests <fstests@vger.kernel.org>
-Subject: Re: generic/269 hangs on lastest upstream kernel
-Message-ID: <20200218143533.GD12604@mit.edu>
-References: <59a10449-9e0f-f289-2f9f-a2028fb0b3ca@cn.fujitsu.com>
- <20200212105433.GH25573@quack2.suse.cz>
- <00470e6d-0e1c-6060-225b-4c56dd33c083@cn.fujitsu.com>
- <20200213170853.GA311476@mit.edu>
- <1c81c16b-6e31-74cb-0b88-46663fad500d@cn.fujitsu.com>
- <20200214140541.GA434121@mit.edu>
- <7adf16bf-d527-1c25-1a24-b4d5e4d757c4@cn.fujitsu.com>
+        Tue, 18 Feb 2020 10:27:16 -0500
+Received: from mail-qv1-f65.google.com ([209.85.219.65]:33356 "EHLO
+        mail-qv1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726312AbgBRP1Q (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 18 Feb 2020 10:27:16 -0500
+Received: by mail-qv1-f65.google.com with SMTP id ek2so222353qvb.0
+        for <fstests@vger.kernel.org>; Tue, 18 Feb 2020 07:27:14 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
+        h=from:to:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=qO1MAHUsz/XGo3/d7jph1BijIhee9edW9+K6IMqVfWE=;
+        b=QNDkuz2GgQkitM0JLDhhJrIxet6qN/ieBu2pDHMBwZqH7MnzChaYC58hl6LuUzN4xj
+         ByB1m3CoZThOkUJhhFmcR1XXXWXzE2afInlBgZJBEgNQZiArCZg6GovU6DoZw7Nt5GTn
+         eYWTfVRhp/6zUMgtayfrlSOh7g4BvV7qrkdMOqvrLqzRmdp0XgkvSs6oeF/foyi7sZ68
+         96bwco29b0mdfgAAtK0J2UVCYxxTdbyKRcrKzkc20W7LldTaYgHKCieKq2+G2WeXOV56
+         JPQ3mp61bGeZQPdV0WVfiaGTmwSbYy+fOdYtdOa95K/OocLjSTvrsIoO7cgeMGa51oz6
+         SNSw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=qO1MAHUsz/XGo3/d7jph1BijIhee9edW9+K6IMqVfWE=;
+        b=WRn7/4dgmcXcmpXGEX77ozOl/o+yljn3QnAohTSpS6tGmSaeL0c1tkXXRbPgXeCOn7
+         hKHnb8AhtroMPKTTL3wBtKZEvXHmLwEP8GvH/o8uxZGAOUhVmb0x3BpRC2bEzVIrdUc7
+         fKVcQKr0/LaIWFQmAC/ryM0buqRM9A0TTlAaS4GL6pKt4p8nWyCURs/O2+0J9PDbaQwb
+         NbpNKCnEjLfATXh0/L/KP0jG8/QQa32EHHVWStZUQaztYkImXHBq2QqjURiGAXW0kNKg
+         rO1O3J0SohrpF1f3mzUAPuI5Rq1Za9FxgUOV9LcVGWE8nBmm7IwEArKa9o+Ral61j6yO
+         FipQ==
+X-Gm-Message-State: APjAAAWSREcm1YjMxYAHl34PAlk9as+MMYUVuAoRP9tVRaGoDrLJ7IaM
+        6hCn14H+qkoyLDbDJMby1BLf1g==
+X-Google-Smtp-Source: APXvYqz1OUTLpisKH8559ZUPrlu2JMpvjFeWahWs7kBmMEh09+bZvV9B9INReAxOIeTunaSaRofsLw==
+X-Received: by 2002:ad4:57c7:: with SMTP id y7mr16449884qvx.174.1582039634114;
+        Tue, 18 Feb 2020 07:27:14 -0800 (PST)
+Received: from localhost ([107.15.81.208])
+        by smtp.gmail.com with ESMTPSA id n4sm1948752qti.55.2020.02.18.07.27.13
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 18 Feb 2020 07:27:13 -0800 (PST)
+From:   Josef Bacik <josef@toxicpanda.com>
+To:     kernel-team@fb.com, fstests@vger.kernel.org,
+        linux-btrfs@vger.kernel.org
+Subject: [PATCH][v2] xfstests: add a option to run xfstests under a cgroup
+Date:   Tue, 18 Feb 2020 10:27:12 -0500
+Message-Id: <20200218152712.3750130-1-josef@toxicpanda.com>
+X-Mailer: git-send-email 2.24.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <7adf16bf-d527-1c25-1a24-b4d5e4d757c4@cn.fujitsu.com>
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Feb 18, 2020 at 11:44:24AM +0800, Yang Xu wrote:
-> 
-> 
-> on 2020/02/14 22:05, Theodore Y. Ts'o wrote:
-> > On Fri, Feb 14, 2020 at 09:14:33AM +0800, Yang Xu wrote:
-> > > > 
-> > > > So were you able to reproduce this on a 5.6.0-rc1 kernel or not?
-> > > No. I don't reproduce it on 5.6.0-rc1 kernel, but  5.6.0-rc1 kernel hang on
-> > > my KVM machine when run generic/269.
-> > 
-> > I'm not able to reproduce the 5.6.0-rc1 hang using kvm-xfstests[1].
-> > Neither has any other ext4 developers, which is why it might be useful
-> > to see if there's something unique in your .config for 5.6.0-rc1.
-> > Could you send us the .config you were using?
-> > 
-> Sorry for the late reply.
-> 
-> my 5.6.0-rc1 config as attach.
+I want to add some extended statistic gathering for xfstests, but it's
+tricky to isolate xfstests from the rest of the host applications.  The
+most straightforward way to do this is to run every test inside of it's
+own cgroup.  From there we can monitor the activity of tasks in the
+specific cgroup using BPF.
 
-Unfortunately, I just tried using your config with kvm-xfstests, and
-it passed without problems.  Did you say this was a reliable
-reproducer on your system?
+The support for this is pretty simple, allow users to pass -C <cgroup
+name>.  We will create the path if it doesn't already exist, and
+validate we can add things to cgroup.procs.  If we cannot it'll be
+disabled, otherwise we will use this when we do _run_seq by echo'ing the
+bash pid into cgroup.procs, which will cause any children to run under
+that cgroup.
 
-% kvm-xfstests -c 4k generic/269
-KERNEL:    kernel 5.6.0-rc2-xfstests #1492 SMP Mon Feb 17 23:22:40 EST 2020 x86_64
-CPUS:      2
-MEM:       1966.03
+Signed-off-by: Josef Bacik <josef@toxicpanda.com>
+---
+v1->v2:
+- Changed it from a local.config option to a command line option.
+- Export CGROUP2_PATH for everything, utilize that path when generating our
+  cgroup for the scripts to run in.
 
-ext4/4k: 1 tests, 43 seconds
-  generic/269  Pass     42s
-Totals: 1 tests, 0 skipped, 0 failures, 0 errors, 42s
+ check          | 24 +++++++++++++++++++++++-
+ common/cgroup2 |  2 --
+ common/config  |  1 +
+ 3 files changed, 24 insertions(+), 3 deletions(-)
 
-FSTESTVER: blktests 9e02419 (Thu, 19 Dec 2019 14:45:55 -0800)
-FSTESTVER: e2fsprogs v1.45.4-15-g4b4f7b35 (Wed, 9 Oct 2019 20:25:01 -0400)
-FSTESTVER: fio  fio-3.17 (Mon, 16 Dec 2019 15:48:43 -0700)
-FSTESTVER: fsverity v1.0 (Wed, 6 Nov 2019 10:35:02 -0800)
-FSTESTVER: ima-evm-utils v1.2 (Fri, 26 Jul 2019 07:42:17 -0400)
-FSTESTVER: nvme-cli v1.9-159-g18119bc (Thu, 26 Dec 2019 11:04:01 -0700)
-FSTESTVER: quota  9a001cc (Tue, 5 Nov 2019 16:12:59 +0100)
-FSTESTVER: util-linux v2.35-19-g95afec771 (Fri, 24 Jan 2020 12:25:35 -0500)
-FSTESTVER: xfsprogs v5.4.0 (Fri, 20 Dec 2019 16:47:12 -0500)
-FSTESTVER: xfstests linux-v3.8-2652-g002e349c (Fri, 24 Jan 2020 00:49:40 -0500)
-FSTESTVER: xfstests-bld 6f10355 (Fri, 24 Jan 2020 12:36:30 -0500)
-FSTESTCFG: 4k
-FSTESTSET: generic/269
-FSTESTOPT: aex
+diff --git a/check b/check
+index 2e148e57..df33628e 100755
+--- a/check
++++ b/check
+@@ -72,6 +72,7 @@ check options
+     --large-fs		optimise scratch device for large filesystems
+     -s section		run only specified section from config file
+     -S section		exclude the specified section from the config file
++    -C cgroup_name	run all the tests in the specified cgroup name
+ 
+ testlist options
+     -g group[,group...]	include tests from these groups
+@@ -101,6 +102,10 @@ excluded from the list of tests to run from that test dir.
+ external_file argument is a path to a single file containing a list of tests
+ to exclude in the form of <test dir>/<test name>.
+ 
++cgroup_name is just a plain name, or a path relative to the root cgroup path.
++If CGROUP2_PATH does not point at where cgroup2 is mounted then adjust it
++accordingly.
++
+ examples:
+  check xfs/001
+  check -g quick
+@@ -307,6 +312,7 @@ while [ $# -gt 0 ]; do
+ 		;;
+ 	--large-fs) export LARGE_SCRATCH_DEV=yes ;;
+ 	--extra-space=*) export SCRATCH_DEV_EMPTY_SPACE=${r#*=} ;;
++	-C)	CGROUP=$2 ; shift ;;
+ 
+ 	-*)	usage ;;
+ 	*)	# not an argument, we've got tests now.
+@@ -509,11 +515,24 @@ _expunge_test()
+ OOM_SCORE_ADJ="/proc/self/oom_score_adj"
+ test -w ${OOM_SCORE_ADJ} && echo -1000 > ${OOM_SCORE_ADJ}
+ 
++# Initialize the cgroup path if it doesn't already exist
++if [ ! -z "$CGROUP" ]; then
++	CGROUP=${CGROUP2_PATH}/${CGROUP}
++	mkdir -p ${CGROUP}
++
++	# If we can't write to cgroup.procs then unset cgroup
++	test -w ${CGROUP}/cgroup.procs || unset CGROUP
++fi
++
+ # ...and make the tests themselves somewhat more attractive to it, so that if
+ # the system runs out of memory it'll be the test that gets killed and not the
+ # test framework.
+ _run_seq() {
+-	bash -c "test -w ${OOM_SCORE_ADJ} && echo 250 > ${OOM_SCORE_ADJ}; exec ./$seq"
++	_extra="test -w ${OOM_SCORE_ADJ} && echo 250 > ${OOM_SCORE_ADJ};"
++	if [ ! -z "$CGROUP" ]; then
++		_extra+="echo $$ > ${CGROUP}/cgroup.procs;"
++	fi
++	bash -c "${_extra} exec ./$seq"
+ }
+ 
+ _detect_kmemleak
+@@ -615,6 +634,9 @@ for section in $HOST_OPTIONS_SECTIONS; do
+ 	  echo "MKFS_OPTIONS  -- `_scratch_mkfs_options`"
+ 	  echo "MOUNT_OPTIONS -- `_scratch_mount_options`"
+ 	fi
++	if [ ! -z "$CGROUP" ]; then
++	  echo "CGROUP        -- ${CGROUP}"
++	fi
+ 	echo
+ 	needwrap=true
+ 
+diff --git a/common/cgroup2 b/common/cgroup2
+index 8833c9c8..554bd238 100644
+--- a/common/cgroup2
++++ b/common/cgroup2
+@@ -1,7 +1,5 @@
+ # cgroup2 specific common functions
+ 
+-export CGROUP2_PATH="${CGROUP2_PATH:-/sys/fs/cgroup}"
+-
+ _require_cgroup2()
+ {
+ 	if [ `findmnt -d backward -n -o FSTYPE -f ${CGROUP2_PATH}` != "cgroup2" ]; then
+diff --git a/common/config b/common/config
+index 9a9c7760..0eaf35c3 100644
+--- a/common/config
++++ b/common/config
+@@ -259,6 +259,7 @@ case "$HOSTOS" in
+ 	export E2FSCK_PROG=$(type -P e2fsck)
+ 	export TUNE2FS_PROG=$(type -P tune2fs)
+ 	export FSCK_OVERLAY_PROG=$(type -P fsck.overlay)
++	export CGROUP2_PATH="${CGROUP2_PATH:-/sys/fs/cgroup}"
+         ;;
+ esac
+ 
+-- 
+2.24.1
 
-This was run on a Debian testing system, with kvm version:
-
-QEMU emulator version 4.2.0 (Debian 1:4.2-3)
-
-What about hardware details of your system?  How many CPU's, memory,
-etc.?  And what sort of storage device are you using for kvm?  (I'm
-using virtio-scsi backed by LVM volumes for the scratch and test
-partitions.)
-
-						- Ted
