@@ -2,121 +2,96 @@ Return-Path: <SRS0=z/AK=4G=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.2 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F3C82C34026
-	for <linux-fstests@archiver.kernel.org>; Tue, 18 Feb 2020 14:17:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 33879C34026
+	for <linux-fstests@archiver.kernel.org>; Tue, 18 Feb 2020 14:29:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id C61E12176D
-	for <linux-fstests@archiver.kernel.org>; Tue, 18 Feb 2020 14:17:13 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id F27A6208C4
+	for <linux-fstests@archiver.kernel.org>; Tue, 18 Feb 2020 14:29:49 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="awt3V+d9"
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="zObFk4cy"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726492AbgBRORN (ORCPT
+        id S1726556AbgBRO3t (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 18 Feb 2020 09:17:13 -0500
-Received: from mail-qt1-f195.google.com ([209.85.160.195]:38491 "EHLO
-        mail-qt1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726442AbgBRORN (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 18 Feb 2020 09:17:13 -0500
-Received: by mail-qt1-f195.google.com with SMTP id i23so4412552qtr.5
-        for <fstests@vger.kernel.org>; Tue, 18 Feb 2020 06:17:12 -0800 (PST)
+        Tue, 18 Feb 2020 09:29:49 -0500
+Received: from mail-qk1-f173.google.com ([209.85.222.173]:45447 "EHLO
+        mail-qk1-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726116AbgBRO3t (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 18 Feb 2020 09:29:49 -0500
+Received: by mail-qk1-f173.google.com with SMTP id a2so19584538qko.12
+        for <fstests@vger.kernel.org>; Tue, 18 Feb 2020 06:29:47 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=+UCgxyYmsy9OBO3kh/zA2QazjAJ14ZIlvINx4SkM/hw=;
-        b=awt3V+d9PrBKzBzdikVmlN5H+FLXC1kyY79D3WFOFDKJbnKpklnI0CZLxSqeLyGOxN
-         aeiMkoweDdCw2xze4pOPs9bJYzKx7cNJ8mBSV/xq5bhuydtbaXUHRYiOlmFkVLwL0Dlp
-         jfLSBv5Xtsxfk0w8j6VSv0OT+rYjeM+KZNUZNK7JbSvkxg3B+aiTUjEPRJ8Wde+dFZA/
-         /BbjI0NQGOHH6YDuKQjNoSGLRmHSla54KaLQU3Po17yG6hHlXMUcHtj+xvOcoXCU28jv
-         p48EjILYwHcMFJxgl+hVZN2bMOgsai4YGNAPjji/ImVDammu613T1/K/5UnBUF9v6U9f
-         i7bQ==
+        h=from:to:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=R9GgDl7Uv0suH+DqLJarwivXGLHfuBrz191M6D9vpRs=;
+        b=zObFk4cyFJ55d1z0uf7qZPTNZaNqm0DgmV+fQwe8ZfmkVPnKJtX7zHHaR/Dpt3bieI
+         t6KEQgeeOpZcNAZf46lKIvxHBwj7TIZnYw6AMHhywgQnVfey5l+LQvy/AgqE7e8kiN4t
+         +XJNZRYrQuTf52CzYYBkqY7Bi6Jy2q9V0cKOuS76js1XQ7TGNKyAMRMu+WpVTJRsofA5
+         WX/FA2hdP1XS6Dk7owYtmTz8fpbuThpbwXZ+BdrC+uQ5xexqaEX5a7YQ0VOfpUonIgjn
+         0ph0G0fCvauUobmRc5Pfnijft8+w5G16cX1OqXJGxcOOnOOuxtWlmNctIbYfVZRzX1FI
+         Ytgg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
+        h=x-gm-message-state:from:to:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=+UCgxyYmsy9OBO3kh/zA2QazjAJ14ZIlvINx4SkM/hw=;
-        b=prH8mXJT+k2p9nFLyGokpqQlmqBUjZRAbFSWRxKzGKpom0evSspl+YRR6EgrWkoH+Q
-         edTlGMiq3WqHASRpy4MP0kCS35QTvnLzOIGtrRybCV7+aSbBQj1Gli36/LS6lDUgX0nY
-         sN9qDgHcF+GmF8QWsN4i/TRl2mGi6118sw4v8erJnllhRl2tUMvB/I4olDrDUD/0c5E+
-         EzI2X9+5Dl8YCk5OusmPjlLZGMv8y3thZHf2ZteT0dOGxX1p2JXJdIHw3dcE8PV01T91
-         ior5Sv2NlgclWrs5HYa0rWg12oykM7sgGm/Ctllj3k+OgTF8N7BfUU2ZAXEnAqxZ8+Y2
-         6sMA==
-X-Gm-Message-State: APjAAAU3zAQF/JsjyUTFYbDSfeuuoLP+y0Ni/MWMKAmPtnV4uCAlgSCL
-        7peCkqKGo3r3IzrV1kOGOXfWnUJf6Lc=
-X-Google-Smtp-Source: APXvYqxL+77fmIFQfqT2MiKgUvUTbXZt+kdtNMquU7513VZuZrMc0RX/3sRjLRxKfTknrvV3A4sQBA==
-X-Received: by 2002:ac8:584:: with SMTP id a4mr17644492qth.240.1582035432145;
-        Tue, 18 Feb 2020 06:17:12 -0800 (PST)
-Received: from [192.168.1.106] ([107.15.81.208])
-        by smtp.gmail.com with ESMTPSA id b26sm1918809qkk.5.2020.02.18.06.17.10
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 18 Feb 2020 06:17:11 -0800 (PST)
-Subject: Re: [PATCH] xfstests: add a CGROUP configuration option
-To:     Brian Foster <bfoster@redhat.com>
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-References: <20200214203431.24506-1-josef@toxicpanda.com>
- <20200217163821.GB6633@bfoster>
+        bh=R9GgDl7Uv0suH+DqLJarwivXGLHfuBrz191M6D9vpRs=;
+        b=VSyuSA5Sb8dLDccOAJ8OyDf1YODwApVVK+OOqfAg4q91wLyygX8Qtdh5SVrFggtl9K
+         e+NuLO6FsO/NyvyPAo9vr/oNflX5e739lOg/A4RZNKPCuS9E+pdGe9V9PjlAFhb5lopE
+         ltmlgO3a2NgD0DDK/WRjTnokmv4CtuDSKqEacPUnz6iKy6yjf7ripfNGbiXIiAsKXKu1
+         36rpURxFxKtJRzC7YcDbsZtFyoW1YekL0CfLdMAOQ93+hLgCdABRihBhKalxxL/iCjsW
+         KD/xSoZVH5FPj1OniSKVsXY0aKb7KZrkOEzPM/L9Uo3TeahFNLtzbNCFYWJoIhkV1Y/n
+         opFQ==
+X-Gm-Message-State: APjAAAXuNWXI4MltNZCm8HSKwHKkpqU0Xkq0MoMlfHA1FFUeqh9f64DK
+        bQ9590GP1oWrIpV2h7hMdQQb8A==
+X-Google-Smtp-Source: APXvYqwy+ta/ZN2mjSLOWj5WG+8g5+rx1xV+ipNkM02ksbQBpTPv9dx1tSraXx80E9bJu1LyLBmjlw==
+X-Received: by 2002:a37:a5cc:: with SMTP id o195mr18989387qke.25.1582036187196;
+        Tue, 18 Feb 2020 06:29:47 -0800 (PST)
+Received: from localhost ([107.15.81.208])
+        by smtp.gmail.com with ESMTPSA id l19sm1941460qkl.3.2020.02.18.06.29.46
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 18 Feb 2020 06:29:46 -0800 (PST)
 From:   Josef Bacik <josef@toxicpanda.com>
-Message-ID: <ad711a8b-f79d-380a-dc11-7e6d1e1e79ba@toxicpanda.com>
-Date:   Tue, 18 Feb 2020 09:17:10 -0500
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:68.0)
- Gecko/20100101 Thunderbird/68.5.0
+To:     kernel-team@fb.com, fstests@vger.kernel.org,
+        linux-btrfs@vger.kernel.org
+Subject: [PATCH] fstests: add perf to the list of test directories
+Date:   Tue, 18 Feb 2020 09:29:45 -0500
+Message-Id: <20200218142945.3719579-1-josef@toxicpanda.com>
+X-Mailer: git-send-email 2.24.1
 MIME-Version: 1.0
-In-Reply-To: <20200217163821.GB6633@bfoster>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 2/17/20 11:38 AM, Brian Foster wrote:
-> On Fri, Feb 14, 2020 at 03:34:31PM -0500, Josef Bacik wrote:
->> I want to add some extended statistic gathering for xfstests, but it's
->> tricky to isolate xfstests from the rest of the host applications.  The
->> most straightforward way to do this is to run every test inside of it's
->> own cgroup.  From there we can monitor the activity of tasks in the
->> specific cgroup using BPF.
->>
-> 
-> I'm curious what kind of info you're looking for from tests..
-> 
+I noticed that despite having PERF_CONFIGNAME set I wasn't getting the
+perf/ tests run when I used -g auto.  This is because it's not included
+in the list of directories to look at.  Fix this so that perf tests get
+run as well.
 
-Latencies.  We have all of these tests doing all sorts of interesting things, I 
-want to track operation latencies with code we're actually testing so I can see 
-if I've introduced a performance regression somewhere.  Since Facebook's whole 
-fleet is on btrfs I want to make sure I'm only getting information from things 
-being run by xfstests so I can easily go back and hunt down regressions that get 
-introduced.  With BPF I can filter on cgroup membership, so I know I'm only 
-recording stats I care about.
+Signed-off-by: Josef Bacik <josef@toxicpanda.com>
+---
+ check | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
->> The support for this is pretty simple, allow users to specify
->> CGROUP=/path/to/cgroup.  We will create the path if it doesn't already
->> exist, and validate we can add things to cgroup.procs.  If we cannot
->> it'll be disabled, otherwise we will use this when we do _run_seq by
->> echo'ing the bash pid into cgroup.procs, which will cause any children
->> to run under that cgroup.
->>
-> 
-> Seems reasonable, but is there any opportunity to combine this with what
-> we have in common/cgroup2? It's not clear to me if this cares about
-> cgroup v1 or v2, but perhaps the cgroup2 checks could be built on top of
-> a generic CGROUP var? I'm also wondering if we'd want to change runtime
-> behavior purely based on the existence of the path as opposed to some
-> kind of separate knob (in the event some future test requires the path
-> for some reason without wanting to enable this mechanism).
-> 
+diff --git a/check b/check
+index 89f3358a..9e7b6134 100755
+--- a/check
++++ b/check
+@@ -44,7 +44,7 @@ timestamp=${TIMESTAMP:=false}
+ 
+ rm -f $tmp.list $tmp.tmp $tmp.grep $here/$iam.out $tmp.xlist $tmp.report.*
+ 
+-SRC_GROUPS="generic shared"
++SRC_GROUPS="generic shared perf"
+ export SRC_DIR="tests"
+ 
+ usage()
+-- 
+2.24.1
 
-Oh I probably should have looked around, yeah we can definitely use this.  My 
-initial thought is to just make CGROUP2_PATH exported always, we create 
-/path/to/cgroup2/xfstests and point CGROUP2_PATH at that, and then any tests 
-that use the cgroup2 path for their test will automatically be populated under 
-that global xfstests directory, so I can still capture them with my scripts. 
-Does that sound reasonable?  Thanks,
-
-Josef
