@@ -2,122 +2,104 @@ Return-Path: <SRS0=z/AK=4G=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 29DFFC34026
-	for <linux-fstests@archiver.kernel.org>; Tue, 18 Feb 2020 15:40:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1DAA6C34026
+	for <linux-fstests@archiver.kernel.org>; Tue, 18 Feb 2020 16:58:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id F300522527
-	for <linux-fstests@archiver.kernel.org>; Tue, 18 Feb 2020 15:40:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DC17C208C4
+	for <linux-fstests@archiver.kernel.org>; Tue, 18 Feb 2020 16:58:33 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="h2Sq5Dn7"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="XC63EWC9"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726442AbgBRPkj (ORCPT
+        id S1726402AbgBRQ6d (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 18 Feb 2020 10:40:39 -0500
-Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:49976 "EHLO
+        Tue, 18 Feb 2020 11:58:33 -0500
+Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:54485 "EHLO
         us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726338AbgBRPkj (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 18 Feb 2020 10:40:39 -0500
+        with ESMTP id S1726360AbgBRQ6d (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 18 Feb 2020 11:58:33 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1582040438;
+        s=mimecast20190719; t=1582045112;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=MPDSJagHBif548aMbDjzaIcvP2AHCn4dh2vIC3MX1QU=;
-        b=h2Sq5Dn750xhL2N4EAre6YOdu+1f+zeOrA7ZG+V9GhLU/bYs/pzlZV2JJng/kKZtht+gNI
-        GsJ0XbRM5ch/d69Rf02nXPfSq8knA0L+SI8sD0WBxe2SPba1RVcJUeWNPHKYW5ZjbS4z4z
-        BC6n+cxbiTrC/HpS7aSbtYTh9opf+14=
+         to:to:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=qv2oO8LNJWg8xfasEQwTLWZoQ+PUUZoL0eNcHzgBby4=;
+        b=XC63EWC9k/yF1h3OOalVR59mHcV4+791+pLBteBrUNTGLSSLlW/ag+hQYy/BmF18YgM4f4
+        53ZzVhxSOi8kOWPykHS2AQf0BVK67/icoekbrt2jSs0m4/LR6CbM6Q9jpCszxaeUriX0X/
+        rcX9azC6n1ooC3Hb/37xGX9mY2UfSTk=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-303-3pyTI1qzOmupi835c6s0Ow-1; Tue, 18 Feb 2020 10:40:36 -0500
-X-MC-Unique: 3pyTI1qzOmupi835c6s0Ow-1
-Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.phx2.redhat.com [10.5.11.23])
+ us-mta-243-LpL_xf_7M0adZSkN_q_7-g-1; Tue, 18 Feb 2020 11:58:29 -0500
+X-MC-Unique: LpL_xf_7M0adZSkN_q_7-g-1
+Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 0A5C7107ACC4;
-        Tue, 18 Feb 2020 15:40:35 +0000 (UTC)
-Received: from bfoster (dhcp-41-2.bos.redhat.com [10.18.41.2])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id 8805C19756;
-        Tue, 18 Feb 2020 15:40:34 +0000 (UTC)
-Date:   Tue, 18 Feb 2020 10:40:32 -0500
-From:   Brian Foster <bfoster@redhat.com>
-To:     Josef Bacik <josef@toxicpanda.com>
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH] xfstests: add a CGROUP configuration option
-Message-ID: <20200218154032.GA14734@bfoster>
-References: <20200214203431.24506-1-josef@toxicpanda.com>
- <20200217163821.GB6633@bfoster>
- <ad711a8b-f79d-380a-dc11-7e6d1e1e79ba@toxicpanda.com>
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 34DEADB20
+        for <fstests@vger.kernel.org>; Tue, 18 Feb 2020 16:58:28 +0000 (UTC)
+Received: from bogon.redhat.com (ovpn-12-51.pek2.redhat.com [10.72.12.51])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 9907160BE1
+        for <fstests@vger.kernel.org>; Tue, 18 Feb 2020 16:58:25 +0000 (UTC)
+From:   Zorro Lang <zlang@redhat.com>
+To:     fstests@vger.kernel.org
+Subject: [PATCH] xfs/513: fix 4k allocsize fails on 64k pagesize
+Date:   Wed, 19 Feb 2020 00:58:18 +0800
+Message-Id: <20200218165818.21066-1-zlang@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <ad711a8b-f79d-380a-dc11-7e6d1e1e79ba@toxicpanda.com>
-X-Scanned-By: MIMEDefang 2.84 on 10.5.11.23
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.12
+Content-Transfer-Encoding: quoted-printable
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Feb 18, 2020 at 09:17:10AM -0500, Josef Bacik wrote:
-> On 2/17/20 11:38 AM, Brian Foster wrote:
-> > On Fri, Feb 14, 2020 at 03:34:31PM -0500, Josef Bacik wrote:
-> > > I want to add some extended statistic gathering for xfstests, but it's
-> > > tricky to isolate xfstests from the rest of the host applications.  The
-> > > most straightforward way to do this is to run every test inside of it's
-> > > own cgroup.  From there we can monitor the activity of tasks in the
-> > > specific cgroup using BPF.
-> > > 
-> > 
-> > I'm curious what kind of info you're looking for from tests..
-> > 
-> 
-> Latencies.  We have all of these tests doing all sorts of interesting
-> things, I want to track operation latencies with code we're actually testing
-> so I can see if I've introduced a performance regression somewhere.  Since
-> Facebook's whole fleet is on btrfs I want to make sure I'm only getting
-> information from things being run by xfstests so I can easily go back and
-> hunt down regressions that get introduced.  With BPF I can filter on cgroup
-> membership, so I know I'm only recording stats I care about.
-> 
+The minimal I/O preallocation size is page size. The allocsize=3D4k
+always fails on 64k pagesize machine. So change the fs blocksize
+allocsize test to allocsize=3D64k.
 
-Interesting, might be useful to document the use case in the commit log.
+Signed-off-by: Zorro Lang <zlang@redhat.com>
+---
+ tests/xfs/513     | 4 ++--
+ tests/xfs/513.out | 2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
 
-> > > The support for this is pretty simple, allow users to specify
-> > > CGROUP=/path/to/cgroup.  We will create the path if it doesn't already
-> > > exist, and validate we can add things to cgroup.procs.  If we cannot
-> > > it'll be disabled, otherwise we will use this when we do _run_seq by
-> > > echo'ing the bash pid into cgroup.procs, which will cause any children
-> > > to run under that cgroup.
-> > > 
-> > 
-> > Seems reasonable, but is there any opportunity to combine this with what
-> > we have in common/cgroup2? It's not clear to me if this cares about
-> > cgroup v1 or v2, but perhaps the cgroup2 checks could be built on top of
-> > a generic CGROUP var? I'm also wondering if we'd want to change runtime
-> > behavior purely based on the existence of the path as opposed to some
-> > kind of separate knob (in the event some future test requires the path
-> > for some reason without wanting to enable this mechanism).
-> > 
-> 
-> Oh I probably should have looked around, yeah we can definitely use this.
-> My initial thought is to just make CGROUP2_PATH exported always, we create
-> /path/to/cgroup2/xfstests and point CGROUP2_PATH at that, and then any tests
-> that use the cgroup2 path for their test will automatically be populated
-> under that global xfstests directory, so I can still capture them with my
-> scripts. Does that sound reasonable?  Thanks,
-> 
-
-Not sure I follow.. are you saying that we'd change CGROUP2_PATH from
-simply pointing at the local cgroup2 root on the local box to some magic
-field that directs creation of a cgroup for the particular test? Or did
-you mean to use a different variable name in the second case? Maybe it's
-just easier to see a patch...
-
-Brian
-
-> Josef
-> 
+diff --git a/tests/xfs/513 b/tests/xfs/513
+index 70bc2f1c..3c3f5163 100755
+--- a/tests/xfs/513
++++ b/tests/xfs/513
+@@ -178,13 +178,13 @@ do_test()
+=20
+ echo "** start xfs mount testing ..."
+ # Test allocsize=3Dsize
+-# Valid values for this option are page size (typically 4KiB) through to=
+ 1GiB
++# Valid values for this option are page size through to 1GiB
+ do_mkfs
+ if [ $dbsize -ge 1024 ];then
+ 	blsize=3D"$((dbsize / 1024))k"
+ fi
+ do_test "" pass "allocsize" "false"
+-do_test "-o allocsize=3D$blsize" pass "allocsize=3D$blsize" "true"
++do_test "-o allocsize=3D64k" pass "allocsize=3D64k" "true"
+ do_test "-o allocsize=3D1048576k" pass "allocsize=3D1048576k" "true"
+ do_test "-o allocsize=3D$((dbsize / 2))" fail
+ do_test "-o allocsize=3D2g" fail
+diff --git a/tests/xfs/513.out b/tests/xfs/513.out
+index 9be18dd8..2d9f8384 100644
+--- a/tests/xfs/513.out
++++ b/tests/xfs/513.out
+@@ -5,7 +5,7 @@ QA output created by 513
+ ** start xfs mount testing ...
+ FORMAT:=20
+ TEST: "" "pass" "allocsize" "false"
+-TEST: "-o allocsize=3D4k" "pass" "allocsize=3D4k" "true"
++TEST: "-o allocsize=3D64k" "pass" "allocsize=3D64k" "true"
+ TEST: "-o allocsize=3D1048576k" "pass" "allocsize=3D1048576k" "true"
+ TEST: "-o allocsize=3D2048" "fail"
+ TEST: "-o allocsize=3D2g" "fail"
+--=20
+2.20.1
 
