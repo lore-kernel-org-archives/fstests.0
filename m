@@ -2,54 +2,59 @@ Return-Path: <SRS0=KIFJ=4H=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A0466C34047
-	for <linux-fstests@archiver.kernel.org>; Wed, 19 Feb 2020 09:49:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8ECA7C34047
+	for <linux-fstests@archiver.kernel.org>; Wed, 19 Feb 2020 10:09:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 802592464E
-	for <linux-fstests@archiver.kernel.org>; Wed, 19 Feb 2020 09:49:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 646C8207FD
+	for <linux-fstests@archiver.kernel.org>; Wed, 19 Feb 2020 10:09:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726469AbgBSJth (ORCPT
+        id S1726450AbgBSKJs (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 19 Feb 2020 04:49:37 -0500
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:44590 "EHLO
+        Wed, 19 Feb 2020 05:09:48 -0500
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:55623 "EHLO
         heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726210AbgBSJth (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 19 Feb 2020 04:49:37 -0500
+        with ESMTP id S1726270AbgBSKJs (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 19 Feb 2020 05:09:48 -0500
 X-IronPort-AV: E=Sophos;i="5.70,459,1574092800"; 
-   d="scan'208";a="83558276"
+   d="scan'208";a="83558859"
 Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
-  by heian.cn.fujitsu.com with ESMTP; 19 Feb 2020 17:49:31 +0800
+  by heian.cn.fujitsu.com with ESMTP; 19 Feb 2020 18:09:41 +0800
 Received: from G08CNEXMBPEKD04.g08.fujitsu.local (unknown [10.167.33.201])
-        by cn.fujitsu.com (Postfix) with ESMTP id D85C7406AB15;
-        Wed, 19 Feb 2020 17:39:53 +0800 (CST)
+        by cn.fujitsu.com (Postfix) with ESMTP id DCEAC50A9971;
+        Wed, 19 Feb 2020 18:00:00 +0800 (CST)
 Received: from [10.167.220.84] (10.167.220.84) by
  G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201) with Microsoft SMTP Server
- (TLS) id 15.0.1395.4; Wed, 19 Feb 2020 17:49:31 +0800
-Subject: Re: [PATCH] xfs/029: filter out "extended-header: cycle: 1" from
- output
-To:     "Darrick J. Wong" <darrick.wong@oracle.com>
-CC:     <fstests@vger.kernel.org>
-References: <1581922940-14074-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
- <20200219003204.GA9511@magnolia>
- <e5c3a5d8-23d2-4760-a9b0-dbe70c53d3bf@cn.fujitsu.com>
- <20200219050729.GC9504@magnolia>
+ (TLS) id 15.0.1395.4; Wed, 19 Feb 2020 18:09:38 +0800
+Subject: Re: generic/269 hangs on lastest upstream kernel
+To:     Jan Kara <jack@suse.cz>
+CC:     Theodore Ts'o <tytso@mit.edu>, fstests <fstests@vger.kernel.org>
+References: <59a10449-9e0f-f289-2f9f-a2028fb0b3ca@cn.fujitsu.com>
+ <20200212105433.GH25573@quack2.suse.cz>
+ <00470e6d-0e1c-6060-225b-4c56dd33c083@cn.fujitsu.com>
+ <20200213211011.GB6600@quack2.suse.cz>
+ <062ac52c-3a16-22ef-6396-53334ed94783@cn.fujitsu.com>
+ <20200214150059.GA22815@quack2.suse.cz>
+ <a0b06474-f447-7943-1012-2a8d20b9e352@cn.fujitsu.com>
+ <20200218082436.GF16121@quack2.suse.cz>
+ <83cc6208-3fa3-86bb-eb91-77b90b22d98f@cn.fujitsu.com>
+ <20200218110311.GI16121@quack2.suse.cz>
 From:   Yang Xu <xuyang2018.jy@cn.fujitsu.com>
-Message-ID: <ec450062-de01-e043-dfb8-c70b14e6a8ee@cn.fujitsu.com>
-Date:   Wed, 19 Feb 2020 17:49:30 +0800
+Message-ID: <b0b82e0c-0e86-af5e-5a61-2fafb2ca85a0@cn.fujitsu.com>
+Date:   Wed, 19 Feb 2020 18:09:37 +0800
 User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101
  Thunderbird/68.0
 MIME-Version: 1.0
-In-Reply-To: <20200219050729.GC9504@magnolia>
+In-Reply-To: <20200218110311.GI16121@quack2.suse.cz>
 Content-Type: text/plain; charset="gbk"; format=flowed
 Content-Transfer-Encoding: 7bit
 X-Originating-IP: [10.167.220.84]
 X-ClientProxiedBy: G08CNEXCHPEKD05.g08.fujitsu.local (10.167.33.203) To
  G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201)
-X-yoursite-MailScanner-ID: D85C7406AB15.ABC9F
+X-yoursite-MailScanner-ID: DCEAC50A9971.AE21C
 X-yoursite-MailScanner: Found to be clean
 X-yoursite-MailScanner-From: xuyang2018.jy@cn.fujitsu.com
 Sender: fstests-owner@vger.kernel.org
@@ -58,85 +63,135 @@ List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
 
-on 2020/02/19 13:07, Darrick J. Wong wrote:
-> On Wed, Feb 19, 2020 at 09:27:29AM +0800, Yang Xu wrote:
->>
->>
->> on 2020/02/19 8:32, Darrick J. Wong wrote:
->>> On Mon, Feb 17, 2020 at 03:02:20PM +0800, Yang Xu wrote:
->>>> When I test this case under GPT disklabel type, this case will fail,
->>>> as below:
->>>> cycle: 1        version: 2              lsn: 1,0        tail_lsn: 1,0
->>>> length of Log Record: 258048    prev offset: -1         num ops: 1
->>>>
->>>> ...
->>>> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
->>>> extended-header: cycle: 1
->>>> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
->>>> ...
->>>>
->>>> my mkfs information as below:
->>>> meta-data=/dev/sda7              isize=512    agcount=16, agsize=327680 blks
->>>>            =                       sectsz=512   attr=2, projid32bit=1
->>>>            =                       crc=1        finobt=1, sparse=1, rmapbt=0
->>>>            =                       reflink=1
->>>> data     =                       bsize=4096   blocks=5242880, imaxpct=25
->>>>            =                       sunit=64     swidth=64 blks
->>>> naming   =version 2              bsize=4096   ascii-ci=0, ftype=1
->>>> log      =internal log           bsize=4096   blocks=5184, version=2
->>>>            =                       sectsz=512   sunit=64 blks, lazy-count=1
->>>> realtime =none                   extsz=4096   blocks=0, rtextents=0
->>>>
->>>> It reports this info because xfs_logprint only read 32k header every time, so it
->>>> needs to read more times. We can filter this useless info.
->>>>
->>>> Signed-off-by: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
->>>> ---
->>>>    tests/xfs/029 | 2 +-
->>>>    1 file changed, 1 insertion(+), 1 deletion(-)
->>>>
->>>> diff --git a/tests/xfs/029 b/tests/xfs/029
->>>> index f532a21b..99742792 100755
->>>> --- a/tests/xfs/029
->>>> +++ b/tests/xfs/029
->>>> @@ -45,7 +45,7 @@ echo
->>>>    _scratch_mkfs_xfs | _filter_mkfs 2>/dev/null
->>>>    echo
->>>> -_scratch_xfs_logprint | _filter_logprint
->>>> +_scratch_xfs_logprint | _filter_logprint | sed -e "/^~~~/d" -e "/extended-header/d"
->>>
->>> Is there a reason not to add that to _filter_logprint?
->> I haven't mastered perl(never used). Can you add that to filter_logprint?
-> 
-> That helper function does not call perl.
-Hi Darrick
-xfs/029 used itself filter_logprint(perl) not used common/log 
-filter_logprint(sed) function. Do we should use common/log and change 
-xfs/029.out? Also, common/log filter_logprint has considered "~~~" and 
-"extended-header: cycle: 1" output.
 
-Best Regards
+on 2020/02/18 19:03, Jan Kara wrote:
+> On Tue 18-02-20 17:46:54, Yang Xu wrote:
+>>
+>> on 2020/02/18 16:24, Jan Kara wrote:
+>>> On Tue 18-02-20 11:25:37, Yang Xu wrote:
+>>>> on 2020/02/14 23:00, Jan Kara wrote:
+>>>>> On Fri 14-02-20 18:24:50, Yang Xu wrote:
+>>>>>> on 2020/02/14 5:10, Jan Kara wrote:
+>>>>>>> On Thu 13-02-20 16:49:21, Yang Xu wrote:
+>>>>>>>>>> When I test generic/269(ext4) on 5.6.0-rc1 kernel, it hangs.
+>>>>>>>>>> ----------------------------------------------
+>>>>>>>>>> dmesg as below:
+>>>>>>>>>>         76.506753] run fstests generic/269 at 2020-02-11 05:53:44
+>>>>>>>>>> [   76.955667] EXT4-fs (sdc): mounted filesystem with ordered data mode.
+>>>>>>>>>> Opts: acl,                           user_xattr
+>>>>>>>>>> [  100.912511] device virbr0-nic left promiscuous mode
+>>>>>>>>>> [  100.912520] virbr0: port 1(virbr0-nic) entered disabled state
+>>>>>>>>>> [  246.801561] INFO: task dd:17284 blocked for more than 122 seconds.
+>>>>>>>>>> [  246.801564]       Not tainted 5.6.0-rc1 #41
+>>>>>>>>>> [  246.801565] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables
+>>>>>>>>>> this mes                           sage.
+>>>>>>>>>> [  246.801566] dd              D    0 17284  16931 0x00000080
+>>>>>>>>>> [  246.801568] Call Trace:
+>>>>>>>>>> [  246.801584]  ? __schedule+0x251/0x690
+>>>>>>>>>> [  246.801586]  schedule+0x40/0xb0
+>>>>>>>>>> [  246.801588]  wb_wait_for_completion+0x52/0x80
+>>>>>>>>>> [  246.801591]  ? finish_wait+0x80/0x80
+>>>>>>>>>> [  246.801592]  __writeback_inodes_sb_nr+0xaa/0xd0
+>>>>>>>>>> [  246.801593]  try_to_writeback_inodes_sb+0x3c/0x50
+>>>>>>>>>
+>>>>>>>>> Interesting. Does the hang resolve eventually or the machine is hung
+>>>>>>>>> permanently? If the hang is permanent, can you do:
+>>>>>>>>>
+>>>>>>>>> echo w >/proc/sysrq-trigger
+>>>>>>>>>
+>>>>>>>>> and send us the stacktraces from dmesg? Thanks!
+>>>>>>>> Yes. the hang is permanent, log as below:
+>>>>>> full dmesg as attach
+>>>>> ...
+>>>>>
+>>>>> Thanks! So the culprit seems to be:
+>>>>>
+>>>>>> [  388.087799] kworker/u12:0   D    0    32      2 0x80004000
+>>>>>> [  388.087803] Workqueue: writeback wb_workfn (flush-8:32)
+>>>>>> [  388.087805] Call Trace:
+>>>>>> [  388.087810]  ? __schedule+0x251/0x690
+>>>>>> [  388.087811]  ? __switch_to_asm+0x34/0x70
+>>>>>> [  388.087812]  ? __switch_to_asm+0x34/0x70
+>>>>>> [  388.087814]  schedule+0x40/0xb0
+>>>>>> [  388.087816]  schedule_timeout+0x20d/0x310
+>>>>>> [  388.087818]  io_schedule_timeout+0x19/0x40
+>>>>>> [  388.087819]  wait_for_completion_io+0x113/0x180
+>>>>>> [  388.087822]  ? wake_up_q+0xa0/0xa0
+>>>>>> [  388.087824]  submit_bio_wait+0x5b/0x80
+>>>>>> [  388.087827]  blkdev_issue_flush+0x81/0xb0
+>>>>>> [  388.087834]  jbd2_cleanup_journal_tail+0x80/0xa0 [jbd2]
+>>>>>> [  388.087837]  jbd2_log_do_checkpoint+0xf4/0x3f0 [jbd2]
+>>>>>> [  388.087840]  __jbd2_log_wait_for_space+0x66/0x190 [jbd2]
+>>>>>> [  388.087843]  ? finish_wait+0x80/0x80
+>>>>>> [  388.087845]  add_transaction_credits+0x27d/0x290 [jbd2]
+>>>>>> [  388.087847]  ? blk_mq_make_request+0x289/0x5d0
+>>>>>> [  388.087849]  start_this_handle+0x10a/0x510 [jbd2]
+>>>>>> [  388.087851]  ? _cond_resched+0x15/0x30
+>>>>>> [  388.087853]  jbd2__journal_start+0xea/0x1f0 [jbd2]
+>>>>>> [  388.087869]  ? ext4_writepages+0x518/0xd90 [ext4]
+>>>>>> [  388.087875]  __ext4_journal_start_sb+0x6e/0x130 [ext4]
+>>>>>> [  388.087883]  ext4_writepages+0x518/0xd90 [ext4]
+>>>>>> [  388.087886]  ? do_writepages+0x41/0xd0
+>>>>>> [  388.087893]  ? ext4_mark_inode_dirty+0x1f0/0x1f0 [ext4]
+>>>>>> [  388.087894]  do_writepages+0x41/0xd0
+>>>>>> [  388.087896]  ? snprintf+0x49/0x60
+>>>>>> [  388.087898]  __writeback_single_inode+0x3d/0x340
+>>>>>> [  388.087899]  writeback_sb_inodes+0x1e5/0x480
+>>>>>> [  388.087901]  wb_writeback+0xfb/0x2f0
+>>>>>> [  388.087902]  wb_workfn+0xf0/0x430
+>>>>>> [  388.087903]  ? __switch_to_asm+0x34/0x70
+>>>>>> [  388.087905]  ? finish_task_switch+0x75/0x250
+>>>>>> [  388.087907]  process_one_work+0x1a7/0x370
+>>>>>> [  388.087909]  worker_thread+0x30/0x380
+>>>>>> [  388.087911]  ? process_one_work+0x370/0x370
+>>>>>> [  388.087912]  kthread+0x10c/0x130
+>>>>>> [  388.087913]  ? kthread_park+0x80/0x80
+>>>>>> [  388.087914]  ret_from_fork+0x35/0x40
+>>>>>
+>>>>> This process is actually waiting for IO to complete while holding
+>>>>> checkpoint_mutex which holds up everybody else. The question is why the IO
+>>>>> doesn't complete - that's definitely outside of filesystem. Maybe a bug in
+>>>>> the block layer, storage driver, or something like that... What does
+>>>>> 'cat /sys/block/<device-with-xfstests>/inflight' show?
+>>>> Sorry for the late reply.
+>>>> This value is 0, it represent it doesn't have inflight data(but it may be
+>>>> counted bug or storage driver bug, is it right?).
+>>>> Also, it doesn't hang on my physical machine, but only hang on vm.
+>>>
+>>> Hum, curious. Just do make sure, did you check sdc (because that appears to
+>>> be the stuck device)?
+>> Yes, I check sdc, its value is 0.
+>> # cat /sys/block/sdc/inflight
+>>         0        0
+> 
+> OK, thanks!
+> 
+>>>> So what should I do in next step(change storge disk format)?
+>>>
+>>> I'd try couple of things:
+>>>
+>>> 1) If you mount ext4 with barrier=0 mount option, does the problem go away?
+>> Yes. Use barrier=0, this case doesn't hang,
+> 
+> OK, so there's some problem with how the block layer is handling flush
+> bios...
+> 
+>>> 2) Can you run the test and at the same time run 'blktrace -d /dev/sdc' to
+>>> gather traces? Once the machine is stuck, abort blktrace, process the
+>>> resulting files with 'blkparse -i sdc' and send here compressed blkparse
+>>> output. We should be able to see what was happening with the stuck request
+>>> in the trace and maybe that will tell us something.
+>> The log size is too big(58M) and our emali limit is 5M.
+> 
+> OK, can you put the log somewhere for download? Alternatively you could
+> provide only last say 20s of the trace which should hopefully fit into the
+> limit...
+Ok. I will use split command and send you in private to avoid much noise.
+
+Best Regard
 Yang Xu
 > 
-> --D
-> 
->> Best Regards
->> Yang Xu
->>>
->>> --D
->>>
->>>>    status=0
->>>>    exit
->>>> -- 
->>>> 2.18.0
->>>>
->>>>
->>>>
->>>
->>>
->>
->>
-> 
+> 								Honza
 > 
 
 
