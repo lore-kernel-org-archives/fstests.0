@@ -2,98 +2,100 @@ Return-Path: <SRS0=KIFJ=4H=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0F6B4C34047
-	for <linux-fstests@archiver.kernel.org>; Wed, 19 Feb 2020 11:42:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5E99FC34047
+	for <linux-fstests@archiver.kernel.org>; Wed, 19 Feb 2020 12:43:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id CDE3C24654
-	for <linux-fstests@archiver.kernel.org>; Wed, 19 Feb 2020 11:42:44 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="E8qrwkCP"
+	by mail.kernel.org (Postfix) with ESMTP id 3266A24656
+	for <linux-fstests@archiver.kernel.org>; Wed, 19 Feb 2020 12:43:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726548AbgBSLmo (ORCPT
+        id S1726771AbgBSMna (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 19 Feb 2020 06:42:44 -0500
-Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:27711 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726497AbgBSLmo (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 19 Feb 2020 06:42:44 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1582112563;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=Bamd9BwqtT0HwP6VQbAkIkPUq9oksnyyeDmVV7A443Q=;
-        b=E8qrwkCPP+h32oi9k1HIovnsU39pE3NPJY9xJ3V/lXO2BYJTdxEshk9BYiH4+zGZ8Jqc1A
-        ENuNSl/ASl0L4CpAea0/T8U2WRwCp8N6lWj8tsxmubTwTWvnuCDuC21G7e9JxE0Y7ngrG5
-        lZBIB6ej0DPaIzLrx4mA8LKAjAkyYKc=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-97-MLhSs_OVOPGvywHmmkFWYA-1; Wed, 19 Feb 2020 06:42:38 -0500
-X-MC-Unique: MLhSs_OVOPGvywHmmkFWYA-1
-Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 4F0B5DB60;
-        Wed, 19 Feb 2020 11:42:37 +0000 (UTC)
-Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id BDADB89F3B;
-        Wed, 19 Feb 2020 11:42:36 +0000 (UTC)
-Date:   Wed, 19 Feb 2020 19:52:57 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Josef Bacik <josef@toxicpanda.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] fstests: add perf to the list of test directories
-Message-ID: <20200219115257.GC14282@dhcp-12-102.nay.redhat.com>
-Mail-Followup-To: Josef Bacik <josef@toxicpanda.com>,
-        fstests@vger.kernel.org
-References: <20200218142945.3719579-1-josef@toxicpanda.com>
+        Wed, 19 Feb 2020 07:43:30 -0500
+Received: from mx2.suse.de ([195.135.220.15]:55306 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726530AbgBSMna (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 19 Feb 2020 07:43:30 -0500
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+Received: from relay2.suse.de (unknown [195.135.220.254])
+        by mx2.suse.de (Postfix) with ESMTP id F1E47C20A;
+        Wed, 19 Feb 2020 12:43:28 +0000 (UTC)
+Received: by quack2.suse.cz (Postfix, from userid 1000)
+        id 78F1A1E0EB5; Wed, 19 Feb 2020 13:43:24 +0100 (CET)
+Date:   Wed, 19 Feb 2020 13:43:24 +0100
+From:   Jan Kara <jack@suse.cz>
+To:     Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+Cc:     Jan Kara <jack@suse.cz>, Theodore Ts'o <tytso@mit.edu>,
+        fstests <fstests@vger.kernel.org>
+Subject: Re: generic/269 hangs on lastest upstream kernel
+Message-ID: <20200219124324.GO16121@quack2.suse.cz>
+References: <00470e6d-0e1c-6060-225b-4c56dd33c083@cn.fujitsu.com>
+ <20200213211011.GB6600@quack2.suse.cz>
+ <062ac52c-3a16-22ef-6396-53334ed94783@cn.fujitsu.com>
+ <20200214150059.GA22815@quack2.suse.cz>
+ <a0b06474-f447-7943-1012-2a8d20b9e352@cn.fujitsu.com>
+ <20200218082436.GF16121@quack2.suse.cz>
+ <83cc6208-3fa3-86bb-eb91-77b90b22d98f@cn.fujitsu.com>
+ <20200218110311.GI16121@quack2.suse.cz>
+ <b0b82e0c-0e86-af5e-5a61-2fafb2ca85a0@cn.fujitsu.com>
+ <73af3d5c-ca64-3ad3-aee2-1e78ee4fae4a@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20200218142945.3719579-1-josef@toxicpanda.com>
+In-Reply-To: <73af3d5c-ca64-3ad3-aee2-1e78ee4fae4a@cn.fujitsu.com>
 User-Agent: Mutt/1.10.1 (2018-07-13)
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.11
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Feb 18, 2020 at 09:29:45AM -0500, Josef Bacik wrote:
-> I noticed that despite having PERF_CONFIGNAME set I wasn't getting the
-> perf/ tests run when I used -g auto.  This is because it's not included
-> in the list of directories to look at.  Fix this so that perf tests get
-> run as well.
-> 
-> Signed-off-by: Josef Bacik <josef@toxicpanda.com>
-> ---
->  check | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/check b/check
-> index 89f3358a..9e7b6134 100755
-> --- a/check
-> +++ b/check
-> @@ -44,7 +44,7 @@ timestamp=${TIMESTAMP:=false}
->  
->  rm -f $tmp.list $tmp.tmp $tmp.grep $here/$iam.out $tmp.xlist $tmp.report.*
->  
-> -SRC_GROUPS="generic shared"
-> +SRC_GROUPS="generic shared perf"
+On Wed 19-02-20 18:42:36, Yang Xu wrote:
+> on 2020/02/19 18:09, Yang Xu wrote:
+> > > > > 1) If you mount ext4 with barrier=0 mount option, does the
+> > > > > problem go away?
+> > > > Yes. Use barrier=0, this case doesn't hang,
+> > > 
+> > > OK, so there's some problem with how the block layer is handling flush
+> > > bios...
+> > > 
+> > > > > 2) Can you run the test and at the same time run 'blktrace
+> > > > > -d /dev/sdc' to
+> > > > > gather traces? Once the machine is stuck, abort blktrace, process the
+> > > > > resulting files with 'blkparse -i sdc' and send here
+> > > > > compressed blkparse
+> > > > > output. We should be able to see what was happening with the
+> > > > > stuck request
+> > > > > in the trace and maybe that will tell us something.
+> > > > The log size is too big(58M) and our emali limit is 5M.
+> > > 
+> > > OK, can you put the log somewhere for download? Alternatively you could
+> > > provide only last say 20s of the trace which should hopefully fit
+> > > into the
+> > > limit...
+> > Ok. I will use split command and send you in private to avoid much noise.
+> log as attach.
 
-Looks good to me, if the maintainer won't prefer moving perf/001 to generic/ :)
+Thanks for the log. So the reason for the hang is clearly visible at the
+end of the log:
 
-Thanks,
-Zorro
+  8,32   2   104324   164.814457402   995  Q FWS [fsstress]
+  8,32   2   104325   164.814458088   995  G FWS [fsstress]
+  8,32   2   104326   164.814460957   739  D  FN [kworker/2:1H]
 
->  export SRC_DIR="tests"
->  
->  usage()
-> -- 
-> 2.24.1
-> 
+This means, fsstress command has queued cache flush request (from
+blkdev_issue_flush()), this has been dispatched to the driver ('D' event)
+but it has never been completed by the driver and so blkdev_issue_flush()
+never returns.
 
+To debug this further, you probably need to start looking into what happens
+with the request inside QEMU. There's not much I can help you with at this
+point since I'm not an expert there. Do you use image file as a backing store
+or a raw partition?
+
+								Honza
+-- 
+Jan Kara <jack@suse.com>
+SUSE Labs, CR
