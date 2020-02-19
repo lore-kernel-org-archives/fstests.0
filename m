@@ -2,100 +2,234 @@ Return-Path: <SRS0=KIFJ=4H=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5E99FC34047
-	for <linux-fstests@archiver.kernel.org>; Wed, 19 Feb 2020 12:43:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 02E9BC34047
+	for <linux-fstests@archiver.kernel.org>; Wed, 19 Feb 2020 14:06:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 3266A24656
-	for <linux-fstests@archiver.kernel.org>; Wed, 19 Feb 2020 12:43:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C2CA520801
+	for <linux-fstests@archiver.kernel.org>; Wed, 19 Feb 2020 14:06:34 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1582121194;
+	bh=XARpIrS6yltExNqzaLJ4ZG7/Iep+jv1FVoBu4F/X70Q=;
+	h=From:To:Cc:Subject:Date:List-ID:From;
+	b=eVjGMusOlgv13di4G06wqO1ZhlzFcUsWHDSeLqV730qAqcYsWyhLVrGzB7yO6ZN7d
+	 f6BlqM2XgNJX75e63EPPljpp03z0yudjU2GQEKGBk4R+mW3fIb1Et4/dTOLoQ525Ta
+	 02xPj0SMKa5O3LGe4/w6ofczQueV3wR+WWc0ZPJI=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726771AbgBSMna (ORCPT
+        id S1726736AbgBSOGe (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 19 Feb 2020 07:43:30 -0500
-Received: from mx2.suse.de ([195.135.220.15]:55306 "EHLO mx2.suse.de"
+        Wed, 19 Feb 2020 09:06:34 -0500
+Received: from mail.kernel.org ([198.145.29.99]:46498 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726530AbgBSMna (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 19 Feb 2020 07:43:30 -0500
-X-Virus-Scanned: by amavisd-new at test-mx.suse.de
-Received: from relay2.suse.de (unknown [195.135.220.254])
-        by mx2.suse.de (Postfix) with ESMTP id F1E47C20A;
-        Wed, 19 Feb 2020 12:43:28 +0000 (UTC)
-Received: by quack2.suse.cz (Postfix, from userid 1000)
-        id 78F1A1E0EB5; Wed, 19 Feb 2020 13:43:24 +0100 (CET)
-Date:   Wed, 19 Feb 2020 13:43:24 +0100
-From:   Jan Kara <jack@suse.cz>
-To:     Yang Xu <xuyang2018.jy@cn.fujitsu.com>
-Cc:     Jan Kara <jack@suse.cz>, Theodore Ts'o <tytso@mit.edu>,
-        fstests <fstests@vger.kernel.org>
-Subject: Re: generic/269 hangs on lastest upstream kernel
-Message-ID: <20200219124324.GO16121@quack2.suse.cz>
-References: <00470e6d-0e1c-6060-225b-4c56dd33c083@cn.fujitsu.com>
- <20200213211011.GB6600@quack2.suse.cz>
- <062ac52c-3a16-22ef-6396-53334ed94783@cn.fujitsu.com>
- <20200214150059.GA22815@quack2.suse.cz>
- <a0b06474-f447-7943-1012-2a8d20b9e352@cn.fujitsu.com>
- <20200218082436.GF16121@quack2.suse.cz>
- <83cc6208-3fa3-86bb-eb91-77b90b22d98f@cn.fujitsu.com>
- <20200218110311.GI16121@quack2.suse.cz>
- <b0b82e0c-0e86-af5e-5a61-2fafb2ca85a0@cn.fujitsu.com>
- <73af3d5c-ca64-3ad3-aee2-1e78ee4fae4a@cn.fujitsu.com>
+        id S1727597AbgBSOGe (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 19 Feb 2020 09:06:34 -0500
+Received: from debian5.Home (bl8-197-74.dsl.telepac.pt [85.241.197.74])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 4A4D524656;
+        Wed, 19 Feb 2020 14:06:32 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1582121193;
+        bh=XARpIrS6yltExNqzaLJ4ZG7/Iep+jv1FVoBu4F/X70Q=;
+        h=From:To:Cc:Subject:Date:From;
+        b=1EPMnYBNQr60LA9NItAnb48BUGjK6BK/mP7Y553r54nDuZ1KNQLHvr4+ZbmsXSwgL
+         WA+nEcdZPXJxYJTrBcATTNz/NDdGdM+sXmoFg/81aGO+mwt/L8YXV4/0GJuRL/DVO0
+         vOHxruBm6Zqt3KnN4Z3Hk9cIpx1uXtXB0xC/I4ww=
+From:   fdmanana@kernel.org
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH 1/2] btrfs/112: remove some tests for cloning inline extents
+Date:   Wed, 19 Feb 2020 14:06:27 +0000
+Message-Id: <20200219140627.1641733-1-fdmanana@kernel.org>
+X-Mailer: git-send-email 2.25.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <73af3d5c-ca64-3ad3-aee2-1e78ee4fae4a@cn.fujitsu.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed 19-02-20 18:42:36, Yang Xu wrote:
-> on 2020/02/19 18:09, Yang Xu wrote:
-> > > > > 1) If you mount ext4 with barrier=0 mount option, does the
-> > > > > problem go away?
-> > > > Yes. Use barrier=0, this case doesn't hang,
-> > > 
-> > > OK, so there's some problem with how the block layer is handling flush
-> > > bios...
-> > > 
-> > > > > 2) Can you run the test and at the same time run 'blktrace
-> > > > > -d /dev/sdc' to
-> > > > > gather traces? Once the machine is stuck, abort blktrace, process the
-> > > > > resulting files with 'blkparse -i sdc' and send here
-> > > > > compressed blkparse
-> > > > > output. We should be able to see what was happening with the
-> > > > > stuck request
-> > > > > in the trace and maybe that will tell us something.
-> > > > The log size is too big(58M) and our emali limit is 5M.
-> > > 
-> > > OK, can you put the log somewhere for download? Alternatively you could
-> > > provide only last say 20s of the trace which should hopefully fit
-> > > into the
-> > > limit...
-> > Ok. I will use split command and send you in private to avoid much noise.
-> log as attach.
+From: Filipe Manana <fdmanana@suse.com>
 
-Thanks for the log. So the reason for the hang is clearly visible at the
-end of the log:
+This test case, btrfs/112, tests that some clone operations that have a
+range covering inline extents fail with either -EOPNOTSUPP or -EINVAL.
+These cases were unsupported on btrfs because they used to lead to file
+corruptions and were not trivial to implement.
 
-  8,32   2   104324   164.814457402   995  Q FWS [fsstress]
-  8,32   2   104325   164.814458088   995  G FWS [fsstress]
-  8,32   2   104326   164.814460957   739  D  FN [kworker/2:1H]
+But there's now a patchset that adds support for them, and the relevant
+patch of that patchset has the following subject:
 
-This means, fsstress command has queued cache flush request (from
-blkdev_issue_flush()), this has been dispatched to the driver ('D' event)
-but it has never been completed by the driver and so blkdev_issue_flush()
-never returns.
+  "Btrfs: implement full reflink support for inline extents"
 
-To debug this further, you probably need to start looking into what happens
-with the request inside QEMU. There's not much I can help you with at this
-point since I'm not an expert there. Do you use image file as a backing store
-or a raw partition?
+So just remove these tests from test case btrfs/112, since this test
+case is about testing only the unsupported reflink operations. A new
+test case that verifies that these cases now work, as long as some other
+new cases, will follow in another patch.
 
-								Honza
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/btrfs/112     | 31 -----------------------------
+ tests/btrfs/112.out | 48 ---------------------------------------------
+ 2 files changed, 79 deletions(-)
+
+diff --git a/tests/btrfs/112 b/tests/btrfs/112
+index e4e9d322..13c19863 100755
+--- a/tests/btrfs/112
++++ b/tests/btrfs/112
+@@ -83,22 +83,6 @@ test_cloning_inline_extents()
+ 	od -t x1 $SCRATCH_MNT/foo2
+ 	$XFS_IO_PROG -c "pwrite -S 0xee 0 90" $SCRATCH_MNT/foo2 | _filter_xfs_io
+ 
+-	# Test cloning the inline extent against a file which has a size of zero
+-	# but has a prealloc extent. It should not be possible as well to clone
+-	# the inline extent from file bar into this file.
+-	$XFS_IO_PROG -f -c "falloc -k 0 1M" $SCRATCH_MNT/foo3 | _filter_xfs_io
+-	$CLONER_PROG -s 0 -d 0 -l 0 $SCRATCH_MNT/bar $SCRATCH_MNT/foo3 \
+-		| _filter_btrfs_cloner_error
+-
+-	# Doing IO against any range in the first 4K of the file should work.
+-	# Due to a past clone ioctl bug which allowed cloning the inline extent,
+-	# these operations resulted in EIO errors.
+-	echo "First 50 bytes of foo3 after clone operation:"
+-	# Should not be able to read any bytes, file has 0 bytes i_size (the
+-	# clone operation failed and did not modify our file).
+-	od -t x1 $SCRATCH_MNT/foo3
+-	$XFS_IO_PROG -c "pwrite -S 0xff 0 90" $SCRATCH_MNT/foo3 | _filter_xfs_io
+-
+ 	# Test cloning the inline extent against a file which consists of a
+ 	# single inline extent that has a size not greater than the size of
+ 	# bar's inline extent (40 < 50).
+@@ -157,21 +141,6 @@ test_cloning_inline_extents()
+ 	# Must have a size of 50 bytes, with all bytes having a value of 0xbb.
+ 	od -t x1 $SCRATCH_MNT/foo7
+ 
+-	# Test cloning the inline extent against a file which has a size not
+-	# greater than the size of bar's inline extent (20 < 50) but has
+-	# a prealloc extent that goes beyond the file's size. It should not be
+-	# possible to clone the inline extent from bar into this file.
+-	$XFS_IO_PROG -f -c "falloc -k 0 1M" \
+-			-c "pwrite -S 0x88 0 20" \
+-			$SCRATCH_MNT/foo8 | _filter_xfs_io
+-	$CLONER_PROG -s 0 -d 0 -l 0 $SCRATCH_MNT/bar $SCRATCH_MNT/foo8 \
+-		| _filter_btrfs_cloner_error
+-
+-	echo "File foo8 data after clone operation:"
+-	# Must have a size of 20 bytes, with all bytes having a value of 0x88
+-	# (the clone operation did not modify our file).
+-	od -t x1 $SCRATCH_MNT/foo8
+-
+ 	_scratch_unmount
+ }
+ 
+diff --git a/tests/btrfs/112.out b/tests/btrfs/112.out
+index 3a95e14d..8c26d758 100644
+--- a/tests/btrfs/112.out
++++ b/tests/btrfs/112.out
+@@ -24,11 +24,6 @@ File foo2 data after clone operation:
+ 0040000
+ wrote 90/90 bytes at offset 0
+ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-clone failed: Invalid argument
+-First 50 bytes of foo3 after clone operation:
+-0000000
+-wrote 90/90 bytes at offset 0
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+ wrote 40/40 bytes at offset 0
+ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+ File foo4 data after clone operation:
+@@ -56,13 +51,6 @@ File foo7 data after clone operation:
+ *
+ 0000060 bb bb
+ 0000062
+-wrote 20/20 bytes at offset 0
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-clone failed: Invalid argument
+-File foo8 data after clone operation:
+-0000000 88 88 88 88 88 88 88 88 88 88 88 88 88 88 88 88
+-0000020 88 88 88 88
+-0000024
+ 
+ Testing with compression and without the no-holes feature...
+ 
+@@ -88,11 +76,6 @@ File foo2 data after clone operation:
+ 0040000
+ wrote 90/90 bytes at offset 0
+ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-clone failed: Invalid argument
+-First 50 bytes of foo3 after clone operation:
+-0000000
+-wrote 90/90 bytes at offset 0
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+ wrote 40/40 bytes at offset 0
+ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+ File foo4 data after clone operation:
+@@ -120,13 +103,6 @@ File foo7 data after clone operation:
+ *
+ 0000060 bb bb
+ 0000062
+-wrote 20/20 bytes at offset 0
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-clone failed: Invalid argument
+-File foo8 data after clone operation:
+-0000000 88 88 88 88 88 88 88 88 88 88 88 88 88 88 88 88
+-0000020 88 88 88 88
+-0000024
+ 
+ Testing without compression and with the no-holes feature...
+ 
+@@ -152,11 +128,6 @@ File foo2 data after clone operation:
+ 0040000
+ wrote 90/90 bytes at offset 0
+ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-clone failed: Invalid argument
+-First 50 bytes of foo3 after clone operation:
+-0000000
+-wrote 90/90 bytes at offset 0
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+ wrote 40/40 bytes at offset 0
+ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+ File foo4 data after clone operation:
+@@ -184,13 +155,6 @@ File foo7 data after clone operation:
+ *
+ 0000060 bb bb
+ 0000062
+-wrote 20/20 bytes at offset 0
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-clone failed: Invalid argument
+-File foo8 data after clone operation:
+-0000000 88 88 88 88 88 88 88 88 88 88 88 88 88 88 88 88
+-0000020 88 88 88 88
+-0000024
+ 
+ Testing with compression and with the no-holes feature...
+ 
+@@ -216,11 +180,6 @@ File foo2 data after clone operation:
+ 0040000
+ wrote 90/90 bytes at offset 0
+ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-clone failed: Invalid argument
+-First 50 bytes of foo3 after clone operation:
+-0000000
+-wrote 90/90 bytes at offset 0
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+ wrote 40/40 bytes at offset 0
+ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+ File foo4 data after clone operation:
+@@ -248,10 +207,3 @@ File foo7 data after clone operation:
+ *
+ 0000060 bb bb
+ 0000062
+-wrote 20/20 bytes at offset 0
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-clone failed: Invalid argument
+-File foo8 data after clone operation:
+-0000000 88 88 88 88 88 88 88 88 88 88 88 88 88 88 88 88
+-0000020 88 88 88 88
+-0000024
 -- 
-Jan Kara <jack@suse.com>
-SUSE Labs, CR
+2.25.0
+
