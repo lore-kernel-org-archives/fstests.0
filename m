@@ -2,200 +2,122 @@ Return-Path: <SRS0=KIFJ=4H=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.3 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
-	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 27F81C34031
-	for <linux-fstests@archiver.kernel.org>; Wed, 19 Feb 2020 00:34:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 99FA7C34031
+	for <linux-fstests@archiver.kernel.org>; Wed, 19 Feb 2020 01:27:36 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id E05A3208E4
-	for <linux-fstests@archiver.kernel.org>; Wed, 19 Feb 2020 00:34:32 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="g72jKpYg"
+	by mail.kernel.org (Postfix) with ESMTP id 66131207FD
+	for <linux-fstests@archiver.kernel.org>; Wed, 19 Feb 2020 01:27:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726723AbgBSAec (ORCPT
+        id S1726799AbgBSB1g (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 18 Feb 2020 19:34:32 -0500
-Received: from aserp2120.oracle.com ([141.146.126.78]:52854 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726488AbgBSAec (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 18 Feb 2020 19:34:32 -0500
-Received: from pps.filterd (aserp2120.oracle.com [127.0.0.1])
-        by aserp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 01J0VMcL019821;
-        Wed, 19 Feb 2020 00:34:27 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
- : subject : message-id : mime-version : content-type; s=corp-2020-01-29;
- bh=UgN5NWw7nXSW1+2on8Flx5ZlSsQ6h7bcx2XTzNvgCv0=;
- b=g72jKpYgBXCXi6mh8s0PUlpRkUikqEX24dPE1Nb4sDvsOiMuXhfuwidK7t+7djvMVJJ2
- omoQ1mXvUlUUmjPE6DoYSckXX5hQJJqEE968Mzz/9fEKXUMsLKrYpAXySRpH191W+U5y
- PHAbyXRAgLtvupJYSrfuL8zvrcF9xDS+83d/VAlVxfg7U1NLYc1RLg2LmPXWsd+vYAyo
- /KYtfPkxcocR3w3KKjPxOXuSJ3k4p67kERKjQRLwZHKR1fxYeoJlFXhZAdlZIOQjwpX/
- z7E6fBvNnW3/HsF7hiiDjDiqlm+oLbak0e78Fo8VdCNDC5HLsiv9oQbPta5SSspt0RXV 7Q== 
-Received: from userp3030.oracle.com (userp3030.oracle.com [156.151.31.80])
-        by aserp2120.oracle.com with ESMTP id 2y8e1hn7dt-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Wed, 19 Feb 2020 00:34:26 +0000
-Received: from pps.filterd (userp3030.oracle.com [127.0.0.1])
-        by userp3030.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 01J0SkBC121501;
-        Wed, 19 Feb 2020 00:34:26 GMT
-Received: from aserv0121.oracle.com (aserv0121.oracle.com [141.146.126.235])
-        by userp3030.oracle.com with ESMTP id 2y6t4kc750-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Wed, 19 Feb 2020 00:34:26 +0000
-Received: from abhmp0020.oracle.com (abhmp0020.oracle.com [141.146.116.26])
-        by aserv0121.oracle.com (8.14.4/8.13.8) with ESMTP id 01J0YP01019478;
-        Wed, 19 Feb 2020 00:34:25 GMT
-Received: from localhost (/67.169.218.210)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Tue, 18 Feb 2020 16:34:25 -0800
-Date:   Tue, 18 Feb 2020 16:34:23 -0800
-From:   "Darrick J. Wong" <darrick.wong@oracle.com>
-To:     Eric Sandeen <sandeen@redhat.com>, Eryu Guan <guaneryu@gmail.com>
-Cc:     xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
-Subject: [RFC PATCH] xfs: make sure our default quota warning limits and
- grace periods survive quotacheck
-Message-ID: <20200219003423.GB9511@magnolia>
+        Tue, 18 Feb 2020 20:27:36 -0500
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:55474 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726749AbgBSB1g (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 18 Feb 2020 20:27:36 -0500
+X-IronPort-AV: E=Sophos;i="5.70,458,1574092800"; 
+   d="scan'208";a="83531142"
+Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
+  by heian.cn.fujitsu.com with ESMTP; 19 Feb 2020 09:27:32 +0800
+Received: from G08CNEXMBPEKD04.g08.fujitsu.local (unknown [10.167.33.201])
+        by cn.fujitsu.com (Postfix) with ESMTP id 4DF9F50A997D;
+        Wed, 19 Feb 2020 09:17:53 +0800 (CST)
+Received: from [10.167.220.84] (10.167.220.84) by
+ G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201) with Microsoft SMTP Server
+ (TLS) id 15.0.1395.4; Wed, 19 Feb 2020 09:27:30 +0800
+Subject: Re: [PATCH] xfs/029: filter out "extended-header: cycle: 1" from
+ output
+To:     "Darrick J. Wong" <darrick.wong@oracle.com>
+CC:     <fstests@vger.kernel.org>
+References: <1581922940-14074-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
+ <20200219003204.GA9511@magnolia>
+From:   Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+Message-ID: <e5c3a5d8-23d2-4760-a9b0-dbe70c53d3bf@cn.fujitsu.com>
+Date:   Wed, 19 Feb 2020 09:27:29 +0800
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101
+ Thunderbird/68.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-User-Agent: Mutt/1.9.4 (2018-02-28)
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9535 signatures=668685
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 adultscore=0 bulkscore=0
- mlxlogscore=999 phishscore=0 mlxscore=0 malwarescore=0 suspectscore=0
- spamscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2001150001 definitions=main-2002190000
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9535 signatures=668685
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=0 phishscore=0
- mlxlogscore=999 mlxscore=0 malwarescore=0 clxscore=1015 adultscore=0
- lowpriorityscore=0 spamscore=0 bulkscore=0 priorityscore=1501
- impostorscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2001150001 definitions=main-2002190000
+In-Reply-To: <20200219003204.GA9511@magnolia>
+Content-Type: text/plain; charset="gbk"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.167.220.84]
+X-ClientProxiedBy: G08CNEXCHPEKD05.g08.fujitsu.local (10.167.33.203) To
+ G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201)
+X-yoursite-MailScanner-ID: 4DF9F50A997D.AF150
+X-yoursite-MailScanner: Found to be clean
+X-yoursite-MailScanner-From: xuyang2018.jy@cn.fujitsu.com
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Darrick J. Wong <darrick.wong@oracle.com>
 
-Make sure that the default quota grace period and maximum warning limits
-set by the administrator survive quotacheck.
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
----
-This is the testcase to go with 'xfs: preserve default grace interval
-during quotacheck', though Eric and I haven't figured out how we're
-going to land that one...
----
- tests/xfs/913     |   69 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/913.out |   13 ++++++++++
- tests/xfs/group   |    1 +
- 3 files changed, 83 insertions(+)
- create mode 100755 tests/xfs/913
- create mode 100644 tests/xfs/913.out
+on 2020/02/19 8:32, Darrick J. Wong wrote:
+> On Mon, Feb 17, 2020 at 03:02:20PM +0800, Yang Xu wrote:
+>> When I test this case under GPT disklabel type, this case will fail,
+>> as below:
+>> cycle: 1        version: 2              lsn: 1,0        tail_lsn: 1,0
+>> length of Log Record: 258048    prev offset: -1         num ops: 1
+>>
+>> ...
+>> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+>> extended-header: cycle: 1
+>> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+>> ...
+>>
+>> my mkfs information as below:
+>> meta-data=/dev/sda7              isize=512    agcount=16, agsize=327680 blks
+>>           =                       sectsz=512   attr=2, projid32bit=1
+>>           =                       crc=1        finobt=1, sparse=1, rmapbt=0
+>>           =                       reflink=1
+>> data     =                       bsize=4096   blocks=5242880, imaxpct=25
+>>           =                       sunit=64     swidth=64 blks
+>> naming   =version 2              bsize=4096   ascii-ci=0, ftype=1
+>> log      =internal log           bsize=4096   blocks=5184, version=2
+>>           =                       sectsz=512   sunit=64 blks, lazy-count=1
+>> realtime =none                   extsz=4096   blocks=0, rtextents=0
+>>
+>> It reports this info because xfs_logprint only read 32k header every time, so it
+>> needs to read more times. We can filter this useless info.
+>>
+>> Signed-off-by: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+>> ---
+>>   tests/xfs/029 | 2 +-
+>>   1 file changed, 1 insertion(+), 1 deletion(-)
+>>
+>> diff --git a/tests/xfs/029 b/tests/xfs/029
+>> index f532a21b..99742792 100755
+>> --- a/tests/xfs/029
+>> +++ b/tests/xfs/029
+>> @@ -45,7 +45,7 @@ echo
+>>   _scratch_mkfs_xfs | _filter_mkfs 2>/dev/null
+>>   
+>>   echo
+>> -_scratch_xfs_logprint | _filter_logprint
+>> +_scratch_xfs_logprint | _filter_logprint | sed -e "/^~~~/d" -e "/extended-header/d"
+> 
+> Is there a reason not to add that to _filter_logprint?
+I haven't mastered perl(never used). Can you add that to filter_logprint?
 
-diff --git a/tests/xfs/913 b/tests/xfs/913
-new file mode 100755
-index 00000000..94681b02
---- /dev/null
-+++ b/tests/xfs/913
-@@ -0,0 +1,69 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0-or-later
-+# Copyright (c) 2020, Oracle and/or its affiliates.  All Rights Reserved.
-+#
-+# FS QA Test No. 913
-+#
-+# Make sure that the quota default grace period and maximum warning limits
-+# survive quotacheck.
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/quota
-+
-+# real QA test starts here
-+_supported_fs xfs
-+_supported_os Linux
-+_require_quota
-+
-+rm -f $seqres.full
-+
-+# Format filesystem and set up quota limits
-+_scratch_mkfs > $seqres.full
-+_qmount_option "usrquota"
-+_scratch_mount >> $seqres.full
-+
-+$XFS_QUOTA_PROG -x -c 'timer -u 300m' $SCRATCH_MNT
-+$XFS_QUOTA_PROG -x -c 'state' $SCRATCH_MNT | grep 'grace time'
-+_scratch_unmount
-+
-+# Remount and check the limits
-+_scratch_mount >> $seqres.full
-+$XFS_QUOTA_PROG -x -c 'state' $SCRATCH_MNT | grep 'grace time'
-+_scratch_unmount
-+
-+# Run repair to force quota check
-+_scratch_xfs_repair >> $seqres.full 2>&1
-+
-+# Remount (this time to run quotacheck) and check the limits.  There's a bug
-+# in quotacheck where we would reset the ondisk default grace period to zero
-+# while the incore copy stays at whatever was read in prior to quotacheck.
-+# This will show up after the /next/ remount.
-+_scratch_mount >> $seqres.full
-+$XFS_QUOTA_PROG -x -c 'state' $SCRATCH_MNT | grep 'grace time'
-+_scratch_unmount
-+
-+# Remount and check the limits
-+_scratch_mount >> $seqres.full
-+$XFS_QUOTA_PROG -x -c 'state' $SCRATCH_MNT | grep 'grace time'
-+_scratch_unmount
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/913.out b/tests/xfs/913.out
-new file mode 100644
-index 00000000..ee989388
---- /dev/null
-+++ b/tests/xfs/913.out
-@@ -0,0 +1,13 @@
-+QA output created by 913
-+Blocks grace time: [0 days 05:00:00]
-+Inodes grace time: [0 days 05:00:00]
-+Realtime Blocks grace time: [0 days 05:00:00]
-+Blocks grace time: [0 days 05:00:00]
-+Inodes grace time: [0 days 05:00:00]
-+Realtime Blocks grace time: [0 days 05:00:00]
-+Blocks grace time: [0 days 05:00:00]
-+Inodes grace time: [0 days 05:00:00]
-+Realtime Blocks grace time: [0 days 05:00:00]
-+Blocks grace time: [0 days 05:00:00]
-+Inodes grace time: [0 days 05:00:00]
-+Realtime Blocks grace time: [0 days 05:00:00]
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 056072fb..87b3c75d 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -539,4 +539,5 @@
- 910 auto quick inobtcount
- 911 auto quick bigtime
- 912 auto quick label
-+913 auto quick quota
- 997 auto quick mount
+Best Regards
+Yang Xu
+> 
+> --D
+> 
+>>   
+>>   status=0
+>>   exit
+>> -- 
+>> 2.18.0
+>>
+>>
+>>
+> 
+> 
+
+
