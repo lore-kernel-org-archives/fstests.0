@@ -2,101 +2,201 @@ Return-Path: <SRS0=97QR=4I=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 34846C761A1
-	for <linux-fstests@archiver.kernel.org>; Thu, 20 Feb 2020 02:58:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A9F9EC5ACC4
+	for <linux-fstests@archiver.kernel.org>; Thu, 20 Feb 2020 03:11:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 15E9C24658
-	for <linux-fstests@archiver.kernel.org>; Thu, 20 Feb 2020 02:58:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 89FA324656
+	for <linux-fstests@archiver.kernel.org>; Thu, 20 Feb 2020 03:11:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727601AbgBTC57 (ORCPT
+        id S1727515AbgBTDLF (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 19 Feb 2020 21:57:59 -0500
-Received: from sandeen.net ([63.231.237.45]:40902 "EHLO sandeen.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727208AbgBTC57 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 19 Feb 2020 21:57:59 -0500
-Received: from [10.0.0.4] (liberator [10.0.0.4])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by sandeen.net (Postfix) with ESMTPSA id E3A4F2A76;
-        Wed, 19 Feb 2020 20:57:42 -0600 (CST)
-Subject: Re: [PATCH 1/2] generic: per-type quota timers set/get test
-To:     Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org
-Cc:     linux-xfs@vger.kernel.org
-References: <20200216181631.22560-1-zlang@redhat.com>
-From:   Eric Sandeen <sandeen@sandeen.net>
-Autocrypt: addr=sandeen@sandeen.net; prefer-encrypt=mutual; keydata=
- mQINBE6x99QBEADMR+yNFBc1Y5avoUhzI/sdR9ANwznsNpiCtZlaO4pIWvqQJCjBzp96cpCs
- nQZV32nqJBYnDpBDITBqTa/EF+IrHx8gKq8TaSBLHUq2ju2gJJLfBoL7V3807PQcI18YzkF+
- WL05ODFQ2cemDhx5uLghHEeOxuGj+1AI+kh/FCzMedHc6k87Yu2ZuaWF+Gh1W2ix6hikRJmQ
- vj5BEeAx7xKkyBhzdbNIbbjV/iGi9b26B/dNcyd5w2My2gxMtxaiP7q5b6GM2rsQklHP8FtW
- ZiYO7jsg/qIppR1C6Zr5jK1GQlMUIclYFeBbKggJ9mSwXJH7MIftilGQ8KDvNuV5AbkronGC
- sEEHj2khs7GfVv4pmUUHf1MRIvV0x3WJkpmhuZaYg8AdJlyGKgp+TQ7B+wCjNTdVqMI1vDk2
- BS6Rg851ay7AypbCPx2w4d8jIkQEgNjACHVDU89PNKAjScK1aTnW+HNUqg9BliCvuX5g4z2j
- gJBs57loTWAGe2Ve3cMy3VoQ40Wt3yKK0Eno8jfgzgb48wyycINZgnseMRhxc2c8hd51tftK
- LKhPj4c7uqjnBjrgOVaVBupGUmvLiePlnW56zJZ51BR5igWnILeOJ1ZIcf7KsaHyE6B1mG+X
- dmYtjDhjf3NAcoBWJuj8euxMB6TcQN2MrSXy5wSKaw40evooGwARAQABtCVFcmljIFIuIFNh
- bmRlZW4gPHNhbmRlZW5Ac2FuZGVlbi5uZXQ+iQI7BBMBAgAlAhsDBgsJCAcDAgYVCAIJCgsE
- FgIDAQIeAQIXgAUCUzMzbAIZAQAKCRAgrhaS4T3e4Fr7D/wO+fenqVvHjq21SCjDCrt8HdVj
- aJ28B1SqSU2toxyg5I160GllAxEHpLFGdbFAhQfBtnmlY9eMjwmJb0sCIrkrB6XNPSPA/B2B
- UPISh0z2odJv35/euJF71qIFgWzp2czJHkHWwVZaZpMWWNvsLIroXoR+uA9c2V1hQFVAJZyk
- EE4xzfm1+oVtjIC12B9tTCuS00pY3AUy21yzNowT6SSk7HAzmtG/PJ/uSB5wEkwldB6jVs2A
- sjOg1wMwVvh/JHilsQg4HSmDfObmZj1d0RWlMWcUE7csRnCE0ZWBMp/ttTn+oosioGa09HAS
- 9jAnauznmYg43oQ5Akd8iQRxz5I58F/+JsdKvWiyrPDfYZtFS+UIgWD7x+mHBZ53Qjazszox
- gjwO9ehZpwUQxBm4I0lPDAKw3HJA+GwwiubTSlq5PS3P7QoCjaV8llH1bNFZMz2o8wPANiDx
- 5FHgpRVgwLHakoCU1Gc+LXHXBzDXt7Cj02WYHdFzMm2hXaslRdhNGowLo1SXZFXa41KGTlNe
- 4di53y9CK5ynV0z+YUa+5LR6RdHrHtgywdKnjeWdqhoVpsWIeORtwWGX8evNOiKJ7j0RsHha
- WrePTubr5nuYTDsQqgc2r4aBIOpeSRR2brlT/UE3wGgy9LY78L4EwPR0MzzecfE1Ws60iSqw
- Pu3vhb7h3bkCDQROsffUARAA0DrUifTrXQzqxO8aiQOC5p9Tz25Np/Tfpv1rofOwL8VPBMvJ
- X4P5l1V2yd70MZRUVgjmCydEyxLJ6G2YyHO2IZTEajUY0Up+b3ErOpLpZwhvgWatjifpj6bB
- SKuDXeThqFdkphF5kAmgfVAIkan5SxWK3+S0V2F/oxstIViBhMhDwI6XsRlnVBoLLYcEilxA
- 2FlRUS7MOZGmRJkRtdGD5koVZSM6xVZQSmfEBaYQ/WJBGJQdPy94nnlAVn3lH3+N7pXvNUuC
- GV+t4YUt3tLcRuIpYBCOWlc7bpgeCps5Xa0dIZgJ8Louu6OBJ5vVXjPxTlkFdT0S0/uerCG5
- 1u8p6sGRLnUeAUGkQfIUqGUjW2rHaXgWNvzOV6i3tf9YaiXKl3avFaNW1kKBs0T5M1cnlWZU
- Utl6k04lz5OjoNY9J/bGyV3DSlkblXRMK87iLYQSrcV6cFz9PRl4vW1LGff3xRQHngeN5fPx
- ze8X5NE3hb+SSwyMSEqJxhVTXJVfQWWW0dQxP7HNwqmOWYF/6m+1gK/Y2gY3jAQnsWTru4RV
- TZGnKwEPmOCpSUvsTRXsVHgsWJ70qd0yOSjWuiv4b8vmD3+QFgyvCBxPMdP3xsxN5etheLMO
- gRwWpLn6yNFq/xtgs+ECgG+gR78yXQyA7iCs5tFs2OrMqV5juSMGmn0kxJUAEQEAAYkCHwQY
- AQIACQUCTrH31AIbDAAKCRAgrhaS4T3e4BKwD/0ZOOmUNOZCSOLAMjZx3mtYtjYgfUNKi0ki
- YPveGoRWTqbis8UitPtNrG4XxgzLOijSdOEzQwkdOIp/QnZhGNssMejCnsluK0GQd+RkFVWN
- mcQT78hBeGcnEMAXZKq7bkIKzvc06GFmkMbX/gAl6DiNGv0UNAX+5FYh+ucCJZSyAp3sA+9/
- LKjxnTedX0aygXA6rkpX0Y0FvN/9dfm47+LGq7WAqBOyYTU3E6/+Z72bZoG/cG7ANLxcPool
- LOrU43oqFnD8QwcN56y4VfFj3/jDF2MX3xu4v2OjglVjMEYHTCxP3mpxesGHuqOit/FR+mF0
- MP9JGfj6x+bj/9JMBtCW1bY/aPeMdPGTJvXjGtOVYblGZrSjXRn5++Uuy36CvkcrjuziSDG+
- JEexGxczWwN4mrOQWhMT5Jyb+18CO+CWxJfHaYXiLEW7dI1AynL4jjn4W0MSiXpWDUw+fsBO
- Pk6ah10C4+R1Jc7dyUsKksMfvvhRX1hTIXhth85H16706bneTayZBhlZ/hK18uqTX+s0onG/
- m1F3vYvdlE4p2ts1mmixMF7KajN9/E5RQtiSArvKTbfsB6Two4MthIuLuf+M0mI4gPl9SPlf
- fWCYVPhaU9o83y1KFbD/+lh1pjP7bEu/YudBvz7F2Myjh4/9GUAijrCTNeDTDAgvIJDjXuLX pA==
-Message-ID: <e54ae15f-6363-4486-0546-030e45ed50bb@sandeen.net>
-Date:   Wed, 19 Feb 2020 20:57:58 -0600
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:68.0)
- Gecko/20100101 Thunderbird/68.5.0
+        Wed, 19 Feb 2020 22:11:05 -0500
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:43367 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1727476AbgBTDLF (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 19 Feb 2020 22:11:05 -0500
+X-IronPort-AV: E=Sophos;i="5.70,462,1574092800"; 
+   d="scan'208";a="83596246"
+Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
+  by heian.cn.fujitsu.com with ESMTP; 20 Feb 2020 11:10:47 +0800
+Received: from G08CNEXMBPEKD04.g08.fujitsu.local (unknown [10.167.33.201])
+        by cn.fujitsu.com (Postfix) with ESMTP id B13A950A9962;
+        Thu, 20 Feb 2020 11:01:06 +0800 (CST)
+Received: from [10.167.220.84] (10.167.220.84) by
+ G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201) with Microsoft SMTP Server
+ (TLS) id 15.0.1395.4; Thu, 20 Feb 2020 11:10:41 +0800
+Subject: Re: [PATCH v1 1/2] generic/054,055: add _require_v2log
+To:     "Darrick J. Wong" <darrick.wong@oracle.com>
+CC:     <guaneryu@gmail.com>, <fstests@vger.kernel.org>
+References: <1582010652-1124-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
+ <20200219050622.GB9504@magnolia>
+ <b42c4b51-84b5-15aa-0a9d-a3375e08d66b@cn.fujitsu.com>
+ <20200219221128.GE9511@magnolia>
+ <8b833401-4ffa-e8b5-48e2-2ce63a2690ba@cn.fujitsu.com>
+ <20200220021709.GF9504@magnolia>
+From:   Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+Message-ID: <916c76e2-9d80-86b4-6e00-6c18976ed61d@cn.fujitsu.com>
+Date:   Thu, 20 Feb 2020 11:10:41 +0800
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101
+ Thunderbird/68.0
 MIME-Version: 1.0
-In-Reply-To: <20200216181631.22560-1-zlang@redhat.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
+In-Reply-To: <20200220021709.GF9504@magnolia>
+Content-Type: text/plain; charset="gbk"; format=flowed
 Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.167.220.84]
+X-ClientProxiedBy: G08CNEXCHPEKD05.g08.fujitsu.local (10.167.33.203) To
+ G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201)
+X-yoursite-MailScanner-ID: B13A950A9962.AC68D
+X-yoursite-MailScanner: Found to be clean
+X-yoursite-MailScanner-From: xuyang2018.jy@cn.fujitsu.com
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 2/16/20 12:16 PM, Zorro Lang wrote:
-> --- /dev/null
-> +++ b/tests/generic/593.out
-> @@ -0,0 +1,32 @@
-> +QA output created by 593
-> +1. set project quota timer
-> +*** Report for user quotas on device SCRATCH_DEV
-> +Block grace time: 7days; Inode grace time: 7days
-> +*** Report for group quotas on device SCRATCH_DEV
-> +Block grace time: 7days; Inode grace time: 7days
-> +*** Report for project quotas on device SCRATCH_DEV
-> +Block grace time: 00:10; Inode grace time: 00:20
 
-One other thing that might be an issue here, I'm not sure every
-filesystem will default to 7 days if no other grace period is set ...?
+
+on 2020/02/20 10:17, Darrick J. Wong wrote:
+> On Thu, Feb 20, 2020 at 10:01:30AM +0800, Yang Xu wrote:
+>>
+>>
+>> on 2020/02/20 6:11, Darrick J. Wong wrote:
+>>> On Wed, Feb 19, 2020 at 04:48:07PM +0800, Yang Xu wrote:
+>>>>
+>>>>
+>>>> on 2020/02/19 13:06, Darrick J. Wong wrote:
+>>>>> On Tue, Feb 18, 2020 at 03:24:10PM +0800, Yang Xu wrote:
+>>>>>> This two case fail on my server machine with GPT disklabe type,
+>>>>>> info as below:
+>>>>>> mount failed: -o logbsize=32k
+>>>>>> dmesg info as below:
+>>>>>> [92633.871954] XFS (sda7): logbuf size must be greater than or equal to log stripe size
+>>>>>>
+>>>>>> The min logbuf size is 256k on my server machine. It needs to use _require_v2log to check.
+>>>>>
+>>>>> Works fine here.  What is sda7's storage and raid alignment
+>>>>> configuration?
+>>>> /dev/sda is a SAS disk, raid aligment is 256k.  When I mkfs.xfs -f
+>>>> /dev/sda7(20G), its lsunit value is 64blks(block size is 4k).
+>>>
+>>> _require_v2log probably ought to be smarter about that.
+>> maybe _require_v2log to specify logbszie for mount options?
+>>>
+>>> But, uh, seeing as generic/05[45] don't currently call _require_v2log,
+>>> how did logbsize=32k end up in the mount options to fail those two
+>>> tests?
+>>>
+>> But generic/05[45] call _get_log_configs. It will use _xfs_log_config
+>> and _xfs_log_config calls logbszie=32k/64k/128k/256k for mount options.
+>> So xfs/xfs_super.c xfs_finish_flag will report EINVAL error if logbsize <
+>> logsunit.  So on my machine this case failed without calling _require_v2log.
+> 
+> logbsize=32k is a perfectly valid option on a fs with a v2 log, provided
+> the log sunit isn't larger than 32k.  _require_v2log conveniently
+> _notruns the test when mounting with logbsize=32k fails, but
+> maybe the problem here is that generic/05[45] need to format the fs with
+> -l su=0 so that we can exercise full control over the mount options?
+Good point, this way is more wise.  -l su=0 will report EINVAL error.
+
+I change xfs_test_config by specifying lsu to meet mount options as below:
+diff --git a/common/log b/common/log
+index c7921f50..9b5a2f6d 100644
+--- a/common/log
++++ b/common/log
+@@ -546,15 +546,15 @@ _xfs_log_config()
+  {
+      echo "# mkfs-opt             mount-opt"
+      echo "# ------------------------------"
+-    echo "  version=2            logbsize=32k"
++    echo "  version=2,su=4096    logbsize=16k"
++    echo "  version=2,su=16k     logbsize=16k"
+      echo "  version=2,su=4096    logbsize=32k"
+-    echo "  version=2,su=32768   logbsize=32k"
+-    echo "  version=2,su=32768   logbsize=64k"
+-    echo "  version=2            logbsize=64k"
++    echo "  version=2,su=32k     logbsize=32k"
++    echo "  version=2,su=4096    logbsize=64k"
+      echo "  version=2,su=64k     logbsize=64k"
+-    echo "  version=2            logbsize=128k"
++    echo "  version=2,su=4096    logbsize=128k"
+      echo "  version=2,su=128k    logbsize=128k"
+-    echo "  version=2            logbsize=256k"
++    echo "  version=2,su=4096    logbsize=256k"
+      echo "  version=2,su=256k    logbsize=256k"
+  }
+
+Best Regards
+Yang Xu
+
+> 
+> --D
+> 
+>> Best Regards
+>> Yang Xu
+>>> --D
+>>>
+>>>> Best Regards
+>>>> Yang Xu
+>>>>>
+>>>>> --D
+>>>>>
+>>>>>> Signed-off-by: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+>>>>>> ---
+>>>>>>     common/log        | 1 +
+>>>>>>     tests/generic/054 | 1 +
+>>>>>>     tests/generic/055 | 1 +
+>>>>>>     3 files changed, 3 insertions(+)
+>>>>>>
+>>>>>> diff --git a/common/log b/common/log
+>>>>>> index c7921f50..f82919a6 100644
+>>>>>> --- a/common/log
+>>>>>> +++ b/common/log
+>>>>>> @@ -494,6 +494,7 @@ _log_version()
+>>>>>>     _require_v2log()
+>>>>>>     {
+>>>>>> +    [ "$FSTYP" != xfs ] && return 0
+>>>>>>         # test out mkfs to see if it supports "-l version=2"
+>>>>>>         export MKFS_OPTIONS="-l version=2"
+>>>>>>         if ! _scratch_mkfs_xfs >>$seqres.full 2>&1; then
+>>>>>> diff --git a/tests/generic/054 b/tests/generic/054
+>>>>>> index 95d40c3c..b4b74615 100755
+>>>>>> --- a/tests/generic/054
+>>>>>> +++ b/tests/generic/054
+>>>>>> @@ -30,6 +30,7 @@ rm -f $seqres.full $tmp.*
+>>>>>>     _require_scratch
+>>>>>>     _require_scratch_shutdown
+>>>>>>     _require_logstate
+>>>>>> +_require_v2log
+>>>>>>     echo "*** init FS"
+>>>>>>     _scratch_unmount >/dev/null 2>&1
+>>>>>> diff --git a/tests/generic/055 b/tests/generic/055
+>>>>>> index 9715f27b..071c4eaf 100755
+>>>>>> --- a/tests/generic/055
+>>>>>> +++ b/tests/generic/055
+>>>>>> @@ -57,6 +57,7 @@ rm -f $seqres.full $tmp.*
+>>>>>>     _require_scratch
+>>>>>>     _require_scratch_shutdown
+>>>>>>     _require_logstate
+>>>>>> +_require_v2log
+>>>>>>     QUOTA_OPTION=`_get_quota_option`
+>>>>>> -- 
+>>>>>> 2.18.0
+>>>>>>
+>>>>>>
+>>>>>>
+>>>>>
+>>>>>
+>>>>
+>>>>
+>>>
+>>>
+>>
+>>
+> 
+> 
+
+
