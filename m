@@ -6,67 +6,67 @@ X-Spam-Status: No, score=-5.3 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
 	SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 21C2FC11D05
-	for <linux-fstests@archiver.kernel.org>; Thu, 20 Feb 2020 15:31:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 26C8AC11D0B
+	for <linux-fstests@archiver.kernel.org>; Thu, 20 Feb 2020 15:34:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id E7F85208CD
-	for <linux-fstests@archiver.kernel.org>; Thu, 20 Feb 2020 15:31:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E7A32207FD
+	for <linux-fstests@archiver.kernel.org>; Thu, 20 Feb 2020 15:34:16 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="CPRsSGPA"
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="YS4QJhMZ"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727709AbgBTPbG (ORCPT
+        id S1728475AbgBTPeQ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 20 Feb 2020 10:31:06 -0500
-Received: from mail-qt1-f196.google.com ([209.85.160.196]:37104 "EHLO
-        mail-qt1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728351AbgBTPbG (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 20 Feb 2020 10:31:06 -0500
-Received: by mail-qt1-f196.google.com with SMTP id w47so3133103qtk.4
-        for <fstests@vger.kernel.org>; Thu, 20 Feb 2020 07:31:05 -0800 (PST)
+        Thu, 20 Feb 2020 10:34:16 -0500
+Received: from mail-qv1-f66.google.com ([209.85.219.66]:44692 "EHLO
+        mail-qv1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728305AbgBTPeQ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 20 Feb 2020 10:34:16 -0500
+Received: by mail-qv1-f66.google.com with SMTP id n8so2042923qvg.11
+        for <fstests@vger.kernel.org>; Thu, 20 Feb 2020 07:34:14 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
         h=subject:to:cc:references:from:message-id:date:user-agent
          :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=Nnmw0tGtYQqxRyjy+xxbIOE5S8uiG8p2Limc9Tq4QsI=;
-        b=CPRsSGPAUtbgnqySLr+rnI6453uc+mKj/Y72WpIhnqviShoLl74TEgdEWva17WTUL1
-         gx0KtCfDVg/kfFoM3aU3xh3KP0fSCMQ/Yf7qwIxlytQCTN87TmNCnghQ03pb4NxrF/H1
-         an3mecKHDPJ/O0gL+mhjdUou6GMmmaQBVePgCVACNqTryifaMQ3PhrqLyvRKCDTOxnaQ
-         ZGJ1XyxE1llR/zubPBkT1o5Fk0sux+5TyvrfUgk03GhwfBnZbWA+toQNWypigI/nbuSU
-         +LptlP0cP6jRGcP4ShBb+I6Mh47lZB917UW/HDvb7umFis47wruZ8FxIM4QUEhbmkks3
-         /5sg==
+        bh=3RbokB1Yu4/JZVnh2IStG+htBxqkiA2Y/kOGW82Wa10=;
+        b=YS4QJhMZ/mIFZDASgmdIaMlW0/77lP792teWAYqLNd4zlyqaBjZtpv5pCdZ9lRvCba
+         FLacUAqjxvK2HDc+1g5LDtwTQldLSKMUw/TcBZHFNmdjfLhfDm3B/zXguONSY/T1ldhi
+         /ki6l7P7ir69aRV2uLDGe0VfRhpP8kecF9dylaeSp7kxgyBoP3Jpl543hAOsu9dk08ek
+         msMPBSg0Zux+6axI2Buu1t3eQWzmhNxgBCMoCO5BTWOwJ9Q8VwbwmcDtyCwSDNTemfKU
+         XRA935MCW9FAmrceHr5uhfFBMUXI7XA7dhS26LFvL6St83tt88NOJXE/8VJTsk6+5T7N
+         UV+A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:subject:to:cc:references:from:message-id:date
          :user-agent:mime-version:in-reply-to:content-language
          :content-transfer-encoding;
-        bh=Nnmw0tGtYQqxRyjy+xxbIOE5S8uiG8p2Limc9Tq4QsI=;
-        b=AE1tvgr7WOZem/jCxUUHo34VvsrXL84m3ED2thPh2iN/7TrEgWwv5h7q1bbQus4BWa
-         Z27M87qZq+nECrSWFzL9tbPX2gMb0y43afDjiZZPk5ElDhPBHk2MeLfDhBZY4NCu+Zk5
-         ff/n+CEb4NZmHUcOc/C0i/7oowtEAZcoQDbihPzrZXTBJToaJ/GGEG2fMEWVQ2ID4wRB
-         pRenZC/+NL77H65ucoRuNmEmZZOU/K+aCfkgMfWp8Syu6hNIxa4AWgzo8s3DEjiTRKVg
-         Y3j5nWsYmLadif9g+nDe8GBNt9HM+pie5w2/9Exoqww7B0qfwqho/V+AgfYY4Kuo31z6
-         kPeA==
-X-Gm-Message-State: APjAAAWHp2RGxwLsLFZHtEgbjnU18au0jhrqfr6vLwNlv46JZu08QeZZ
-        NAbo7z4hvQNf0TwZOjLrYxTyqg==
-X-Google-Smtp-Source: APXvYqwot6aiZI2yUoirkt9rkstu/U9fw/CLvK0IGidiOXHvJhUR39rSBZBR+KJ+NWm93pH5vsVrug==
-X-Received: by 2002:ac8:4085:: with SMTP id p5mr26974541qtl.132.1582212665210;
-        Thu, 20 Feb 2020 07:31:05 -0800 (PST)
+        bh=3RbokB1Yu4/JZVnh2IStG+htBxqkiA2Y/kOGW82Wa10=;
+        b=OklBYHuViVaOqOU/hsDftmhC/xXT/cxM8+r7nZznsnRHGu/tjLfxhv1TsHLXdiqjSs
+         5LxKpmlefVlMXMsyhI7Io1MuE6JOnqHBHbMidFlqzgz5RfdMAAxNa0klED0ZEdclt73e
+         KY9QR/GnfebFzuiW9R2Ne1DquSh9o5i8lxETY1P45mC4YroQe5jcWw1fxemA6FUYPt9e
+         vHTxYi6fB/jdCHdUT1SEzjHXNH2iWVFPeynHdkORO51RNyfuQlc6P6+Ir7lnmVEPw0W/
+         VHuCl+pPStQjQddfuDpj4deTdrLDnqPCOQ4ky5WN0kO88nfrP+CU3FJMjyeW0MeTl7zP
+         mFlA==
+X-Gm-Message-State: APjAAAUCg9ACojvAH5/MasoiK+4ZvPstHOhmSVxWFGhf03fj8yRs+Y1b
+        xFNCseoPV5Ln9k5HFE/XE+o2dNFcb1Q=
+X-Google-Smtp-Source: APXvYqxMmDv7PDvr3WCGrSqJmK3y6q77tWb3e2nPVZnpVmuAe87UEtDDW06vWHNgM+2WGpum6HSguA==
+X-Received: by 2002:a0c:f685:: with SMTP id p5mr26463361qvn.44.1582212854095;
+        Thu, 20 Feb 2020 07:34:14 -0800 (PST)
 Received: from [192.168.1.106] ([107.15.81.208])
-        by smtp.gmail.com with ESMTPSA id u13sm1901487qtg.64.2020.02.20.07.31.03
+        by smtp.gmail.com with ESMTPSA id f7sm1879566qtj.92.2020.02.20.07.34.13
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 20 Feb 2020 07:31:04 -0800 (PST)
-Subject: Re: [PATCH 1/2] btrfs/112: remove some tests for cloning inline
- extents
+        Thu, 20 Feb 2020 07:34:13 -0800 (PST)
+Subject: Re: [PATCH 2/2] btrfs: add test case for newly supported cases of
+ cloning inline extents
 To:     fdmanana@kernel.org, fstests@vger.kernel.org
 Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-References: <20200219140627.1641733-1-fdmanana@kernel.org>
+References: <20200219140641.1642570-1-fdmanana@kernel.org>
 From:   Josef Bacik <josef@toxicpanda.com>
-Message-ID: <1e900857-d2f5-b02f-07c7-1d81062523ca@toxicpanda.com>
-Date:   Thu, 20 Feb 2020 10:31:03 -0500
+Message-ID: <c426284e-64c5-6020-e8c7-eedf2dde9ca1@toxicpanda.com>
+Date:   Thu, 20 Feb 2020 10:34:12 -0500
 User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:68.0)
  Gecko/20100101 Thunderbird/68.5.0
 MIME-Version: 1.0
-In-Reply-To: <20200219140627.1641733-1-fdmanana@kernel.org>
+In-Reply-To: <20200219140641.1642570-1-fdmanana@kernel.org>
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
@@ -78,20 +78,15 @@ X-Mailing-List: fstests@vger.kernel.org
 On 2/19/20 9:06 AM, fdmanana@kernel.org wrote:
 > From: Filipe Manana <fdmanana@suse.com>
 > 
-> This test case, btrfs/112, tests that some clone operations that have a
-> range covering inline extents fail with either -EOPNOTSUPP or -EINVAL.
-> These cases were unsupported on btrfs because they used to lead to file
-> corruptions and were not trivial to implement.
+> Test several scenarios of cloning operations where the source range includes
+> inline extents. They used to not be supported on btrfs because their
+> implementation was not straightforward, and therefore these operations used
+> to fail with errno EOPNOTSUPP on older kernels.
 > 
-> But there's now a patchset that adds support for them, and the relevant
-> patch of that patchset has the following subject:
+> This currently fails on any released kernel. It passes only when the patch
+> with the following subject is applied:
 > 
 >    "Btrfs: implement full reflink support for inline extents"
-> 
-> So just remove these tests from test case btrfs/112, since this test
-> case is about testing only the unsupported reflink operations. A new
-> test case that verifies that these cases now work, as long as some other
-> new cases, will follow in another patch.
 > 
 > Signed-off-by: Filipe Manana <fdmanana@suse.com>
 
