@@ -2,109 +2,103 @@ Return-Path: <SRS0=97QR=4I=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 35D35C3404C
-	for <linux-fstests@archiver.kernel.org>; Thu, 20 Feb 2020 04:55:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 079C9C34031
+	for <linux-fstests@archiver.kernel.org>; Thu, 20 Feb 2020 05:37:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 0B3EE24656
-	for <linux-fstests@archiver.kernel.org>; Thu, 20 Feb 2020 04:55:46 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="bTZ1QZ6Q"
+	by mail.kernel.org (Postfix) with ESMTP id D979B24656
+	for <linux-fstests@archiver.kernel.org>; Thu, 20 Feb 2020 05:37:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727875AbgBTEzp (ORCPT
+        id S1726044AbgBTFhn (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 19 Feb 2020 23:55:45 -0500
-Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:36359 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1727806AbgBTEzp (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 19 Feb 2020 23:55:45 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1582174544;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=C+TC8LymXeVcDTwPt8PlE9k8EzpEuPGxT2dYTaHDh+Y=;
-        b=bTZ1QZ6QQ3DUbbdEOU/aKocwtNh+4edYTyuejArH5FulpaqanG4E5F2fH2RHsoJCY8tYs+
-        hdnw8bAiBczYr3CqWnZKO5+1SEPHGu6m8i2Clv6c5KvzJf5baGkL+G4SwHXfKba0Y5GHhW
-        87tXqqXH6d3mbOd615v9ZGoW44mF1Mc=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-186-SYaqTUDeNTKONnMu8Y73PQ-1; Wed, 19 Feb 2020 23:55:40 -0500
-X-MC-Unique: SYaqTUDeNTKONnMu8Y73PQ-1
-Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 02DDF107ACC4;
-        Thu, 20 Feb 2020 04:55:39 +0000 (UTC)
-Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 73B435C28E;
-        Thu, 20 Feb 2020 04:55:38 +0000 (UTC)
-Date:   Thu, 20 Feb 2020 13:05:59 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Eric Sandeen <sandeen@sandeen.net>
-Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 1/2] generic: per-type quota timers set/get test
-Message-ID: <20200220050559.GG14282@dhcp-12-102.nay.redhat.com>
-Mail-Followup-To: Eric Sandeen <sandeen@sandeen.net>,
-        fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-References: <20200216181631.22560-1-zlang@redhat.com>
- <e54ae15f-6363-4486-0546-030e45ed50bb@sandeen.net>
- <20200220041539.GD14282@dhcp-12-102.nay.redhat.com>
- <605d6c45-9f52-ec84-df01-d5b7665d16dc@sandeen.net>
+        Thu, 20 Feb 2020 00:37:43 -0500
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:57586 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726032AbgBTFhn (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 20 Feb 2020 00:37:43 -0500
+X-IronPort-AV: E=Sophos;i="5.70,462,1574092800"; 
+   d="scan'208";a="83604649"
+Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
+  by heian.cn.fujitsu.com with ESMTP; 20 Feb 2020 13:37:35 +0800
+Received: from G08CNEXMBPEKD05.g08.fujitsu.local (unknown [10.167.33.204])
+        by cn.fujitsu.com (Postfix) with ESMTP id 504CE50A9962;
+        Thu, 20 Feb 2020 13:27:52 +0800 (CST)
+Received: from G08CNEXCHPEKD02.g08.fujitsu.local (10.167.33.83) by
+ G08CNEXMBPEKD05.g08.fujitsu.local (10.167.33.204) with Microsoft SMTP Server
+ (TLS) id 15.0.1395.4; Thu, 20 Feb 2020 13:37:30 +0800
+Received: from localhost.localdomain (10.167.220.84) by
+ G08CNEXCHPEKD02.g08.fujitsu.local (10.167.33.89) with Microsoft SMTP Server
+ (TLS) id 14.3.439.0; Thu, 20 Feb 2020 13:37:28 +0800
+From:   Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+To:     <darrick.wong@oracle.com>, <guaneryu@gmail.com>
+CC:     <fstests@vger.kernel.org>, Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+Subject: [PATCH v2] common/log: add -l su option in _xfs_log_config
+Date:   Thu, 20 Feb 2020 13:38:01 +0800
+Message-ID: <1582177081-6235-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
+X-Mailer: git-send-email 1.8.3.1
+In-Reply-To: <20200220021709.GF9504@magnolia>
+References: <20200220021709.GF9504@magnolia>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <605d6c45-9f52-ec84-df01-d5b7665d16dc@sandeen.net>
-User-Agent: Mutt/1.10.1 (2018-07-13)
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.16
+Content-Type: text/plain
+X-Originating-IP: [10.167.220.84]
+X-yoursite-MailScanner-ID: 504CE50A9962.AC3B6
+X-yoursite-MailScanner: Found to be clean
+X-yoursite-MailScanner-From: xuyang2018.jy@cn.fujitsu.com
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Feb 19, 2020 at 10:23:29PM -0600, Eric Sandeen wrote:
-> 
-> 
-> On 2/19/20 10:15 PM, Zorro Lang wrote:
-> > On Wed, Feb 19, 2020 at 08:57:58PM -0600, Eric Sandeen wrote:
-> >> On 2/16/20 12:16 PM, Zorro Lang wrote:
-> >>> --- /dev/null
-> >>> +++ b/tests/generic/593.out
-> >>> @@ -0,0 +1,32 @@
-> >>> +QA output created by 593
-> >>> +1. set project quota timer
-> >>> +*** Report for user quotas on device SCRATCH_DEV
-> >>> +Block grace time: 7days; Inode grace time: 7days
-> >>> +*** Report for group quotas on device SCRATCH_DEV
-> >>> +Block grace time: 7days; Inode grace time: 7days
-> >>> +*** Report for project quotas on device SCRATCH_DEV
-> >>> +Block grace time: 00:10; Inode grace time: 00:20
-> >>
-> >> One other thing that might be an issue here, I'm not sure every
-> >> filesystem will default to 7 days if no other grace period is set ...?
-> > 
-> > Make sense:) I just hope to test the default grace time by pass.
-> > How about:
-> > 1) Get the default quota timer $string.
-> > 2) Filter above default timer "$string" to "default".
-> > to avoid defferent default timer breaks the golden output.
-> 
-> Makes sense to me, at least after I fix the other xfs bugs ;)
+Currently, if we don't specify -l sunit or -l su option, mkfs.xfs
+will get the stripe size from underlying device.
 
-Yeah, I just reviewed your patch:
-  [PATCH] xfs: test that default grace periods init on first mount
+It works file on most situations. But on some machine, the size of
+underlying device greater than logbsize of mount options, it will
+report error like "logbuf size must be greater than or equal to log
+stripe size". We can specify -l su=4096 to meet this requirement and
+case can still run normally.
 
-I think my case hard to cover this situation, I have to filter the default
-value, but if the default value is bad from beginning, it can't help :)
+Also, from xfs manpage, version 2 also supports 16k log buf size for
+mount option and case passed(only generic/054,055 used this api) on
+my machine. So delete 32k and 64k with different sunit to be consistented
+with ext4 test num(10) and we can test all logbuf size.
 
-Thanks,
-Zorro
+Signed-off-by: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+---
+ common/log | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
 
-> 
-> -Eric
-> 
+diff --git a/common/log b/common/log
+index c7921f50..9b5a2f6d 100644
+--- a/common/log
++++ b/common/log
+@@ -546,15 +546,15 @@ _xfs_log_config()
+ {
+     echo "# mkfs-opt             mount-opt"
+     echo "# ------------------------------"
+-    echo "  version=2            logbsize=32k"
++    echo "  version=2,su=4096    logbsize=16k"
++    echo "  version=2,su=16k     logbsize=16k"
+     echo "  version=2,su=4096    logbsize=32k"
+-    echo "  version=2,su=32768   logbsize=32k"
+-    echo "  version=2,su=32768   logbsize=64k"
+-    echo "  version=2            logbsize=64k"
++    echo "  version=2,su=32k     logbsize=32k"
++    echo "  version=2,su=4096    logbsize=64k"
+     echo "  version=2,su=64k     logbsize=64k"
+-    echo "  version=2            logbsize=128k"
++    echo "  version=2,su=4096    logbsize=128k"
+     echo "  version=2,su=128k    logbsize=128k"
+-    echo "  version=2            logbsize=256k"
++    echo "  version=2,su=4096    logbsize=256k"
+     echo "  version=2,su=256k    logbsize=256k"
+ }
+ 
+-- 
+2.18.0
+
+
 
