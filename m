@@ -2,164 +2,107 @@ Return-Path: <SRS0=97QR=4I=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 90918C5ACC4
-	for <linux-fstests@archiver.kernel.org>; Thu, 20 Feb 2020 02:11:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 00255C7619D
+	for <linux-fstests@archiver.kernel.org>; Thu, 20 Feb 2020 02:16:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 6F70E2465D
-	for <linux-fstests@archiver.kernel.org>; Thu, 20 Feb 2020 02:11:24 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BE74B2465D
+	for <linux-fstests@archiver.kernel.org>; Thu, 20 Feb 2020 02:16:28 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="CUaB86ue"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727125AbgBTCLY (ORCPT
+        id S1727906AbgBTCQ2 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 19 Feb 2020 21:11:24 -0500
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:33716 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1727280AbgBTCLX (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 19 Feb 2020 21:11:23 -0500
-X-IronPort-AV: E=Sophos;i="5.70,462,1574092800"; 
-   d="scan'208";a="83593124"
-Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
-  by heian.cn.fujitsu.com with ESMTP; 20 Feb 2020 10:11:19 +0800
-Received: from G08CNEXMBPEKD04.g08.fujitsu.local (unknown [10.167.33.201])
-        by cn.fujitsu.com (Postfix) with ESMTP id 10E8950A996A;
-        Thu, 20 Feb 2020 10:01:40 +0800 (CST)
-Received: from [10.167.220.84] (10.167.220.84) by
- G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201) with Microsoft SMTP Server
- (TLS) id 15.0.1395.4; Thu, 20 Feb 2020 10:11:18 +0800
-Subject: Re: [PATCH] xfs/029: filter out "extended-header: cycle: 1" from
- output
-To:     "Darrick J. Wong" <darrick.wong@oracle.com>
-CC:     <fstests@vger.kernel.org>
-References: <1581922940-14074-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
- <20200219003204.GA9511@magnolia>
- <e5c3a5d8-23d2-4760-a9b0-dbe70c53d3bf@cn.fujitsu.com>
- <20200219050729.GC9504@magnolia>
- <ec450062-de01-e043-dfb8-c70b14e6a8ee@cn.fujitsu.com>
- <20200219220935.GD9511@magnolia>
-From:   Yang Xu <xuyang2018.jy@cn.fujitsu.com>
-Message-ID: <6fe881eb-5e0e-1e74-5399-4e8204d5b30f@cn.fujitsu.com>
-Date:   Thu, 20 Feb 2020 10:11:16 +0800
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101
- Thunderbird/68.0
+        Wed, 19 Feb 2020 21:16:28 -0500
+Received: from us-smtp-2.mimecast.com ([205.139.110.61]:54860 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1727476AbgBTCQ2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 19 Feb 2020 21:16:28 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1582164987;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=/Wx1kre2anoJleINDVKTvTHOkkPOyvlMGQa1E/boV0I=;
+        b=CUaB86uewyDkXMqyGjs+e8KIG6so01tRlvhR8fofYMC9QR4zBIfetJgwcX1wd+OB1FRFz5
+        UqAmKv9qYBj2/xDToObf6G/d8arE+26odr1fmXdtnqy19m05c4bJlHBjVjQuhAQSvL21Be
+        NeLxIHuBJlmF9WxIj0GfgMzmcTlkVK8=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-330-2IwNvp4xPvu2RE-3Pp9hBA-1; Wed, 19 Feb 2020 21:16:25 -0500
+X-MC-Unique: 2IwNvp4xPvu2RE-3Pp9hBA-1
+Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 63B59100550E;
+        Thu, 20 Feb 2020 02:16:24 +0000 (UTC)
+Received: from [IPv6:::1] (ovpn04.gateway.prod.ext.phx2.redhat.com [10.5.9.4])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id 0C544863A5;
+        Thu, 20 Feb 2020 02:16:23 +0000 (UTC)
+To:     fstests <fstests@vger.kernel.org>,
+        linux-xfs <linux-xfs@vger.kernel.org>
+Cc:     "Luis R. Rodriguez" <mcgrof@kernel.org>
+From:   Eric Sandeen <sandeen@redhat.com>
+Subject: [PATCH] xfs/030: fix test for external log device
+Message-ID: <d3b3a65e-3575-f153-98ca-4a34e170ab78@redhat.com>
+Date:   Wed, 19 Feb 2020 20:16:23 -0600
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:68.0)
+ Gecko/20100101 Thunderbird/68.5.0
 MIME-Version: 1.0
-In-Reply-To: <20200219220935.GD9511@magnolia>
-Content-Type: text/plain; charset="gbk"; format=flowed
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
 Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.167.220.84]
-X-ClientProxiedBy: G08CNEXCHPEKD05.g08.fujitsu.local (10.167.33.203) To
- G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201)
-X-yoursite-MailScanner-ID: 10E8950A996A.AF1A4
-X-yoursite-MailScanner: Found to be clean
-X-yoursite-MailScanner-From: xuyang2018.jy@cn.fujitsu.com
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.11
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+Several tests fail if an external log device is used; in this case
+the xfs_db invocation fails with a clear indication of why, so fix
+that as other tests do by testing for and using the external log
+option if present.
 
+Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+---
 
-on 2020/02/20 6:09, Darrick J. Wong wrote:
-> On Wed, Feb 19, 2020 at 05:49:30PM +0800, Yang Xu wrote:
->>
->> on 2020/02/19 13:07, Darrick J. Wong wrote:
->>> On Wed, Feb 19, 2020 at 09:27:29AM +0800, Yang Xu wrote:
->>>>
->>>>
->>>> on 2020/02/19 8:32, Darrick J. Wong wrote:
->>>>> On Mon, Feb 17, 2020 at 03:02:20PM +0800, Yang Xu wrote:
->>>>>> When I test this case under GPT disklabel type, this case will fail,
->>>>>> as below:
->>>>>> cycle: 1        version: 2              lsn: 1,0        tail_lsn: 1,0
->>>>>> length of Log Record: 258048    prev offset: -1         num ops: 1
->>>>>>
->>>>>> ...
->>>>>> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
->>>>>> extended-header: cycle: 1
->>>>>> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
->>>>>> ...
->>>>>>
->>>>>> my mkfs information as below:
->>>>>> meta-data=/dev/sda7              isize=512    agcount=16, agsize=327680 blks
->>>>>>             =                       sectsz=512   attr=2, projid32bit=1
->>>>>>             =                       crc=1        finobt=1, sparse=1, rmapbt=0
->>>>>>             =                       reflink=1
->>>>>> data     =                       bsize=4096   blocks=5242880, imaxpct=25
->>>>>>             =                       sunit=64     swidth=64 blks
->>>>>> naming   =version 2              bsize=4096   ascii-ci=0, ftype=1
->>>>>> log      =internal log           bsize=4096   blocks=5184, version=2
->>>>>>             =                       sectsz=512   sunit=64 blks, lazy-count=1
->>>>>> realtime =none                   extsz=4096   blocks=0, rtextents=0
->>>>>>
->>>>>> It reports this info because xfs_logprint only read 32k header every time, so it
->>>>>> needs to read more times. We can filter this useless info.
->>>>>>
->>>>>> Signed-off-by: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
->>>>>> ---
->>>>>>     tests/xfs/029 | 2 +-
->>>>>>     1 file changed, 1 insertion(+), 1 deletion(-)
->>>>>>
->>>>>> diff --git a/tests/xfs/029 b/tests/xfs/029
->>>>>> index f532a21b..99742792 100755
->>>>>> --- a/tests/xfs/029
->>>>>> +++ b/tests/xfs/029
->>>>>> @@ -45,7 +45,7 @@ echo
->>>>>>     _scratch_mkfs_xfs | _filter_mkfs 2>/dev/null
->>>>>>     echo
->>>>>> -_scratch_xfs_logprint | _filter_logprint
->>>>>> +_scratch_xfs_logprint | _filter_logprint | sed -e "/^~~~/d" -e "/extended-header/d"
->>>>>
->>>>> Is there a reason not to add that to _filter_logprint?
->>>> I haven't mastered perl(never used). Can you add that to filter_logprint?
->>>
->>> That helper function does not call perl.
->> Hi Darrick
->> xfs/029 used itself filter_logprint(perl) not used common/log
->> filter_logprint(sed) function.
-> 
-> <grumble> Ok, that function in xfs/029 shouldn't be prefixed with "_".
-also for xfs/044. I will fix that.
-> 
->> Do we should use common/log and change
->> xfs/029.out? Also, common/log filter_logprint has considered "~~~" and
->> "extended-header: cycle: 1" output.
-> 
-> <shrug> I'm not much of a perl hacker either.
-OK. I will think about this. Thanks
-
-Best Regards
-Yang Xu
-> 
-> --D
-> 
->> Best Regards
->> Yang Xu
->>>
->>> --D
->>>
->>>> Best Regards
->>>> Yang Xu
->>>>>
->>>>> --D
->>>>>
->>>>>>     status=0
->>>>>>     exit
->>>>>> -- 
->>>>>> 2.18.0
->>>>>>
->>>>>>
->>>>>>
->>>>>
->>>>>
->>>>
->>>>
->>>
->>>
->>
->>
-> 
-> 
+diff --git a/common/repair b/common/repair
+index 5a9097f4..cf69dde9 100644
+--- a/common/repair
++++ b/common/repair
+@@ -9,8 +9,12 @@ _zero_position()
+ 	value=$1
+ 	struct="$2"
+ 
++	SCRATCH_OPTIONS=""
++	[ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ] && \
++		SCRATCH_OPTIONS="-l$SCRATCH_LOGDEV"
++
+ 	# set values for off/len variables provided by db
+-	eval `xfs_db -r -c "$struct" -c stack $SCRATCH_DEV | perl -ne '
++	eval `xfs_db -r -c "$struct" -c stack $SCRATCH_OPTIONS $SCRATCH_DEV | perl -ne '
+ 		if (/byte offset (\d+), length (\d+)/) {
+ 			print "offset=$1\nlength=$2\n"; exit
+ 		}'`
+diff --git a/tests/xfs/030 b/tests/xfs/030
+index efdb6a18..e1cc32ef 100755
+--- a/tests/xfs/030
++++ b/tests/xfs/030
+@@ -77,7 +77,10 @@ else
+ 	_scratch_unmount
+ fi
+ clear=""
+-eval `xfs_db -r -c "sb 1" -c stack $SCRATCH_DEV | perl -ne '
++SCRATCH_OPTIONS=""
++[ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ] && \
++	SCRATCH_OPTIONS="-l$SCRATCH_LOGDEV"
++eval `xfs_db -r -c "sb 1" -c stack $SCRATCH_OPTIONS $SCRATCH_DEV | perl -ne '
+ 	if (/byte offset (\d+), length (\d+)/) {
+ 		print "clear=", $1 / 512, "\n"; exit
+ 	}'`
 
 
