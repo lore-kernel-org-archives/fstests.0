@@ -2,90 +2,199 @@ Return-Path: <SRS0=97QR=4I=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.6 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no
+X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D33BCC11D07
-	for <linux-fstests@archiver.kernel.org>; Thu, 20 Feb 2020 13:42:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3A3ECC11D05
+	for <linux-fstests@archiver.kernel.org>; Thu, 20 Feb 2020 14:38:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id A0433208C4
-	for <linux-fstests@archiver.kernel.org>; Thu, 20 Feb 2020 13:42:34 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1582206154;
-	bh=kLhP1URrWaxjLC2OSHW5CTjnSxV9t3hQTHhtufmcwD0=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=yoV4FcrIF7rEdvYWUrRCz4GgcqNrXp9RAmgev+Ib2gVun17RoDtxVVmTnI5sKaiyF
-	 zd5MGs+fb2dxPkTtww7T85vLyiJh74McrdCM9S5dIk4safxTqk2RywFpq5WgbCX24/
-	 D9zwNUlgkkv7Rn0Xiz3QpNzJxJ/zqXmayZp2C/Uo=
+	by mail.kernel.org (Postfix) with ESMTP id 0EFC020656
+	for <linux-fstests@archiver.kernel.org>; Thu, 20 Feb 2020 14:38:58 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="T7YwBLXV"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728132AbgBTNme (ORCPT
+        id S1728056AbgBTOi6 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 20 Feb 2020 08:42:34 -0500
-Received: from mail-pj1-f67.google.com ([209.85.216.67]:39448 "EHLO
-        mail-pj1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727298AbgBTNme (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 20 Feb 2020 08:42:34 -0500
-Received: by mail-pj1-f67.google.com with SMTP id e9so911114pjr.4;
-        Thu, 20 Feb 2020 05:42:33 -0800 (PST)
+        Thu, 20 Feb 2020 09:38:58 -0500
+Received: from mail-qt1-f196.google.com ([209.85.160.196]:37778 "EHLO
+        mail-qt1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727915AbgBTOi6 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 20 Feb 2020 09:38:58 -0500
+Received: by mail-qt1-f196.google.com with SMTP id w47so3000904qtk.4
+        for <fstests@vger.kernel.org>; Thu, 20 Feb 2020 06:38:57 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
+        h=from:to:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=zeIdljRcyO+Pp7sjG8+tc44S5ZrtukhgpPowXc4pdhI=;
+        b=T7YwBLXVQulyQS+kf24HW5UiSlVQQhYzo5Xrh1NZ4GI7Mxuzv1vfbWd7ROW968S6vy
+         GVT/R8sts9CZ3WG/ONHuSJAzzcfBlmSK00Ci43/N+Q+joocmCHLNgviFYz5rAdxTXhnO
+         XGyTXxoOp37dCBmM+c5iBRxr81LeE9KEHgiy/ZlJeHau2rKhxcBr7ErZ7quuyF71CV4l
+         KIADH3tAg1rGug3W/JlnS802dI6PgwhfkQwgO1uCEGc8g0zAvUNZq9nCKNEpTPUMu9Oo
+         mhj5ZgPSxJpGbVekwDmI9kbyJN1tu7IlazR6nBdlHAmz0w+gdkvXjvfjdkaj9ACOeeUI
+         5U7w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to:user-agent;
-        bh=A8nR8c1bnJTy/2DwNb9tSR6XMbpEcSCUAourdL5AT9k=;
-        b=Ggmt/H8/LIr6wcK6s//BKEEB8/kF3k9/JE0SK6WJxaw18wjAfTslkO2hMKyxkjUo1a
-         199w8cpuzCOZB1OXWJeMmSNaE66pqtQiVyxFDqSG8O50yAbFenpINzLa7cEYcdQ8zbrT
-         ImOPagwzYptzSA4htWaE9U1iCSG4XjlcEGFJIPsLE4fzHq0dF43A9r5lbeF8Zn11AVJK
-         +2B6OWEJdh9hRjXQvk8L7EX/fTzQC2jyOSShsDOPTcm+1cxdZYroULG6uDL1pRAVuy3o
-         pA/wR/iUY+LSdhdkTV0YDUIKEU4O6n+HlT45BLvuhH9UlKEJLWUBOUhDhATkFAbehmbK
-         bhkQ==
-X-Gm-Message-State: APjAAAW9glcqTHXgh1SaePIP1zym9863bwqWq3MhO9vr83TuKbi946L7
-        jGY0vU2uIj3FxiRFe+v+Iv3RPQ+QqwY=
-X-Google-Smtp-Source: APXvYqwnnKeBhiA28TqOxapiOXOU+5ubbxne7yT4+V3/2Ymh8GM5lkVQljeZSJIqEtP0+f0V9e0hsw==
-X-Received: by 2002:a17:902:8bc7:: with SMTP id r7mr31314171plo.12.1582206153245;
-        Thu, 20 Feb 2020 05:42:33 -0800 (PST)
-Received: from 42.do-not-panic.com (42.do-not-panic.com. [157.230.128.187])
-        by smtp.gmail.com with ESMTPSA id d3sm3695887pjx.10.2020.02.20.05.42.32
+        h=x-gm-message-state:from:to:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=zeIdljRcyO+Pp7sjG8+tc44S5ZrtukhgpPowXc4pdhI=;
+        b=Mmf5b75PC44QRaUpiTmXeCEkGn8mOLvUm3f/EK0aN65P4ycAQ2AaRaX92FXP8MhZJa
+         ZhXFq/HR3rGdkP7YPYuBeXXJf+2oI8nJKs1myy/hNv/NxWau7Mkow+ozQAY0BVX5lY6y
+         o7x7BEHRcHcO4n5mYFBdBxlLlKHNpDBxh+y9LA8LWB1+hKB53g8/d9GrTyWpDkDTn8xb
+         WAabkQxnoBmcwVHEBklMdqY5KqaijTEnYuLE4mUbcVaKoJARGuldn5lJGvvlpMWMDl3s
+         WxlFvmUSZEQijhFprE5LYrqIteVpYc8zGqEsUd15CyV1rWUKUcBAEtK+A10562aHvPA9
+         Nt8A==
+X-Gm-Message-State: APjAAAVOeWDR6+nQNlPPhCmRalC82b7NnrRa5+5x7HrQUtKZNdSJ8SjI
+        tTaFTnYExsAtmyytEjHX0/2bcw==
+X-Google-Smtp-Source: APXvYqzT5Z0dY6cia6yOUJQ7qHcbDI6kuCwN2KtkvDuZd0GSeTCegPI13CnF9yjhGp/6nsE/W489Cg==
+X-Received: by 2002:aed:3e6d:: with SMTP id m42mr7411730qtf.187.1582209537187;
+        Thu, 20 Feb 2020 06:38:57 -0800 (PST)
+Received: from localhost ([107.15.81.208])
+        by smtp.gmail.com with ESMTPSA id y26sm1909303qtc.94.2020.02.20.06.38.55
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 20 Feb 2020 05:42:32 -0800 (PST)
-Received: by 42.do-not-panic.com (Postfix, from userid 1000)
-        id 759EE402D7; Thu, 20 Feb 2020 13:42:31 +0000 (UTC)
-Date:   Thu, 20 Feb 2020 13:42:31 +0000
-From:   Luis Chamberlain <mcgrof@kernel.org>
-To:     Eric Sandeen <sandeen@redhat.com>
-Cc:     fstests <fstests@vger.kernel.org>,
-        linux-xfs <linux-xfs@vger.kernel.org>
-Subject: Re: [PATCH] xfs/030: fix test for external log device
-Message-ID: <20200220134231.GV11244@42.do-not-panic.com>
-References: <d3b3a65e-3575-f153-98ca-4a34e170ab78@redhat.com>
- <e1ce0ddb-a043-03bc-167c-c36476f0a9ee@redhat.com>
+        Thu, 20 Feb 2020 06:38:56 -0800 (PST)
+From:   Josef Bacik <josef@toxicpanda.com>
+To:     linux-btrfs@vger.kernel.org, kernel-team@fb.com,
+        fstests@vger.kernel.org
+Subject: [PATCH] fstests: add a another gap extent testcase for btrfs
+Date:   Thu, 20 Feb 2020 09:38:55 -0500
+Message-Id: <20200220143855.3883650-1-josef@toxicpanda.com>
+X-Mailer: git-send-email 2.24.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <e1ce0ddb-a043-03bc-167c-c36476f0a9ee@redhat.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Feb 19, 2020 at 08:20:14PM -0600, Eric Sandeen wrote:
-> On 2/19/20 8:16 PM, Eric Sandeen wrote:
-> > Several tests fail if an external log device is used; in this case
-> > the xfs_db invocation fails with a clear indication of why, so fix
-> > that as other tests do by testing for and using the external log
-> > option if present.
-> > 
-> > Signed-off-by: Eric Sandeen <sandeen@redhat.com>
-> 
-> hm self-NAK I didn't realize we had _scratch_xfs_db, better to go
-> through and fix all of these sorts of things at once.
-> 
-> Luis, seems like you have an itch to scratch, no?
+This is a testcase for a corner that I missed when trying to fix gap
+extents for btrfs.  We would end up with gaps if we hole punched past
+isize and then extended past the gap in a specific way.  This is a
+simple reproducer to show the problem, and has been properly fixed by my
+patches now.
 
-I didn't know it was so easy, sure! Since I test rt and logdev
-on stable kernels, will give this a crack once I have my new
-stable test rig running. Thanks for the proactive approach.
+Signed-off-by: Josef Bacik <josef@toxicpanda.com>
+---
+ tests/btrfs/204     | 85 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/204.out |  5 +++
+ tests/btrfs/group   |  1 +
+ 3 files changed, 91 insertions(+)
+ create mode 100755 tests/btrfs/204
+ create mode 100644 tests/btrfs/204.out
 
-  Luis
+diff --git a/tests/btrfs/204 b/tests/btrfs/204
+new file mode 100755
+index 00000000..0d5c4bed
+--- /dev/null
++++ b/tests/btrfs/204
+@@ -0,0 +1,85 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2020 Facebook.  All Rights Reserved.
++#
++# FS QA Test 204
++#
++# Validate that without no-holes we do not get a i_size that is after a gap in
++# the file extents on disk when punching a hole past i_size.  This is fixed by
++# the following patches
++#
++#	btrfs: use the file extent tree infrastructure
++#	btrfs: replace all uses of btrfs_ordered_update_i_size
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/dmlogwrites
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs generic
++_supported_os Linux
++_require_test
++_require_scratch
++_require_log_writes
++
++_log_writes_init $SCRATCH_DEV
++_log_writes_mkfs "-O ^no-holes" >> $seqres.full 2>&1
++
++# There's not a straightforward way to commit the transaction without also
++# flushing dirty pages, so shorten the commit interval to 1 so we're sure to get
++# a commit with our broken file
++_log_writes_mount -o commit=1
++
++# This creates a gap extent because fpunch doesn't insert hole extents past
++# i_size
++xfs_io -f -c "falloc -k 4k 8k" $SCRATCH_MNT/file
++xfs_io -f -c "fpunch 4k 4k" $SCRATCH_MNT/file
++
++# The pwrite extends the i_size to cover the gap extent, and then the truncate
++# sets the disk_i_size to 12k because it assumes everything was a-ok.
++xfs_io -f -c "pwrite 0 4k" $SCRATCH_MNT/file | _filter_xfs_io
++xfs_io -f -c "pwrite 0 8k" $SCRATCH_MNT/file | _filter_xfs_io
++xfs_io -f -c "truncate 12k" $SCRATCH_MNT/file
++
++# Wait for a transaction commit
++sleep 2
++
++_log_writes_unmount
++_log_writes_remove
++
++cur=$(_log_writes_find_next_fua 0)
++echo "cur=$cur" >> $seqres.full
++while [ ! -z "$cur" ]; do
++	_log_writes_replay_log_range $cur $SCRATCH_DEV >> $seqres.full
++
++	# We only care about the fs consistency, so just run fsck, we don't have
++	# to mount the fs to validate it
++	_check_scratch_fs
++
++	cur=$(_log_writes_find_next_fua $(($cur + 1)))
++done
++
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/204.out b/tests/btrfs/204.out
+new file mode 100644
+index 00000000..44c7c8ae
+--- /dev/null
++++ b/tests/btrfs/204.out
+@@ -0,0 +1,5 @@
++QA output created by 204
++wrote 4096/4096 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 8192/8192 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 6acc6426..7a840177 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -206,3 +206,4 @@
+ 201 auto quick punch log
+ 202 auto quick subvol snapshot
+ 203 auto quick send clone
++204 auto quick log replay
+-- 
+2.24.1
+
