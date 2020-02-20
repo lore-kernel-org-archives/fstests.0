@@ -2,123 +2,105 @@ Return-Path: <SRS0=97QR=4I=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+X-Spam-Status: No, score=-0.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,USER_AGENT_SANE_1
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 004A4C11D0C
-	for <linux-fstests@archiver.kernel.org>; Thu, 20 Feb 2020 18:42:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9843DC11D0C
+	for <linux-fstests@archiver.kernel.org>; Thu, 20 Feb 2020 20:06:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id CFBBB2467A
-	for <linux-fstests@archiver.kernel.org>; Thu, 20 Feb 2020 18:42:14 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6D37020722
+	for <linux-fstests@archiver.kernel.org>; Thu, 20 Feb 2020 20:06:40 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="kUYMZYzx"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="fraFvHw4"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728882AbgBTSmO (ORCPT
+        id S1728770AbgBTUGk (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 20 Feb 2020 13:42:14 -0500
-Received: from aserp2120.oracle.com ([141.146.126.78]:48828 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728237AbgBTSmO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 20 Feb 2020 13:42:14 -0500
-Received: from pps.filterd (aserp2120.oracle.com [127.0.0.1])
-        by aserp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 01KIVT1Y039035;
-        Thu, 20 Feb 2020 18:42:11 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
- : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=corp-2020-01-29;
- bh=a1asEzhbilF9Kwo+cqEtCdusoeP8zcYAj6pxvuwmcUI=;
- b=kUYMZYzxi3/nMDS06nkmblwmx591ZLNWe/yUrgxvcZfhgC2i+H2FV4CZ5+w3cF6qiurn
- DsZVpGnNj8D+qUj7WJnt0xwbFcCyBjmBpLXxXcNppVr+7jerevR4Sq2Zk5XwNlAUJk0R
- i4/ES1QXe1OF9lzHAD1ChIv4OzouL9Cs79BTq2mNhWhjfzvJ1j8hzSDcM0wcNrX1sgSE
- o+EH8r465/Mi32SpXh4dhK9OALdcc0BjIU6U6eno1LJZhUSMzF2gqWucuqO1mop/pGdE
- yGS9SByzwY92mSTWiopJYffAWpCqIxAW9ekn5YPjdgn/H4H4ytTBxKaZjLCS5SuWxN9m 0A== 
-Received: from aserp3030.oracle.com (aserp3030.oracle.com [141.146.126.71])
-        by aserp2120.oracle.com with ESMTP id 2y8udkkqpd-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Thu, 20 Feb 2020 18:42:11 +0000
-Received: from pps.filterd (aserp3030.oracle.com [127.0.0.1])
-        by aserp3030.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 01KISPSj061497;
-        Thu, 20 Feb 2020 18:42:11 GMT
-Received: from aserv0122.oracle.com (aserv0122.oracle.com [141.146.126.236])
-        by aserp3030.oracle.com with ESMTP id 2y8uddc5x9-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Thu, 20 Feb 2020 18:42:11 +0000
-Received: from abhmp0019.oracle.com (abhmp0019.oracle.com [141.146.116.25])
-        by aserv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 01KIg8BC007772;
-        Thu, 20 Feb 2020 18:42:10 GMT
-Received: from localhost (/67.169.218.210)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Thu, 20 Feb 2020 10:42:07 -0800
-Date:   Thu, 20 Feb 2020 10:42:06 -0800
-From:   "Darrick J. Wong" <darrick.wong@oracle.com>
-To:     Eric Biggers <ebiggers@kernel.org>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org,
-        linux-fscrypt@vger.kernel.org, keyrings@vger.kernel.org
-Subject: Re: [PATCH v2] xfs_io/encrypt: support passing a keyring key to
- add_enckey
-Message-ID: <20200220184206.GB9506@magnolia>
-References: <20200203182013.43474-1-ebiggers@kernel.org>
- <20200218214856.GA147283@gmail.com>
+        Thu, 20 Feb 2020 15:06:40 -0500
+Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:28102 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1728927AbgBTUGk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 20 Feb 2020 15:06:40 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1582229198;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=aLcbxLIEN6WxbwBtj6Q9wHAChnBoKRB6in28M9dpO/0=;
+        b=fraFvHw4rqZZKiqmYI2EIZl5gWTEz9V+GKTeq1M24w8qzNNKo0nwAh5BiiLUfpabS2Bixm
+        wmmj0Qqq7J8BpVOvRil1pQt0bCRN7AaawHr/NAe16SC2qd3qo74ebCCVHNM8iWUkTphoOD
+        2GI9962oj/i/XKOEcffF8vwko8cljos=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-150-7lJAB-32OMWUw5RRWVw9qw-1; Thu, 20 Feb 2020 15:06:36 -0500
+X-MC-Unique: 7lJAB-32OMWUw5RRWVw9qw-1
+Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id DE385100550E;
+        Thu, 20 Feb 2020 20:06:35 +0000 (UTC)
+Received: from segfault.boston.devel.redhat.com (segfault.boston.devel.redhat.com [10.19.60.26])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id BA5175DA76;
+        Thu, 20 Feb 2020 20:06:35 +0000 (UTC)
+Received: by segfault.boston.devel.redhat.com (Postfix, from userid 3734)
+        id 92E352015B1B; Thu, 20 Feb 2020 15:06:34 -0500 (EST)
+From:   Jeff Moyer <jmoyer@redhat.com>
+To:     fstests@vger.kernel.org
+Cc:     linux-fsdevel@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: [PATCH V2 0/3] fstests: fixes for 64k pages and dax
+Date:   Thu, 20 Feb 2020 15:06:29 -0500
+Message-Id: <20200220200632.14075-1-jmoyer@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200218214856.GA147283@gmail.com>
-User-Agent: Mutt/1.9.4 (2018-02-28)
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9537 signatures=668685
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 spamscore=0 mlxscore=0 adultscore=0
- mlxlogscore=999 malwarescore=0 bulkscore=0 suspectscore=9 phishscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2001150001
- definitions=main-2002200136
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9537 signatures=668685
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 lowpriorityscore=0 suspectscore=9
- spamscore=0 priorityscore=1501 adultscore=0 mlxscore=0 clxscore=1011
- malwarescore=0 mlxlogscore=999 phishscore=0 impostorscore=0 bulkscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2001150001
- definitions=main-2002200136
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
+Content-Transfer-Encoding: quoted-printable
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Feb 18, 2020 at 01:48:57PM -0800, Eric Biggers wrote:
-> On Mon, Feb 03, 2020 at 10:20:13AM -0800, Eric Biggers wrote:
-> > From: Eric Biggers <ebiggers@google.com>
-> > 
-> > Add a '-k' option to the 'add_enckey' xfs_io command to allow exercising
-> > the key_id field that is being added to struct fscrypt_add_key_arg.
-> > 
-> > This is needed for the corresponding test in xfstests.
-> > 
-> > For more details, see the corresponding xfstests patches as well as
-> > kernel commit 93edd392cad7 ("fscrypt: support passing a keyring key to
-> > FS_IOC_ADD_ENCRYPTION_KEY").
-> > 
-> > Signed-off-by: Eric Biggers <ebiggers@google.com>
-> > ---
-> > 
-> > No changes since v1.
-> > 
-> > This applies to the for-next branch of xfsprogs.
-> > 
-> >  configure.ac          |  1 +
-> >  include/builddefs.in  |  4 ++
-> >  io/encrypt.c          | 90 +++++++++++++++++++++++++++++++------------
-> >  m4/package_libcdev.m4 | 21 ++++++++++
-> >  man/man8/xfs_io.8     | 10 +++--
-> >  5 files changed, 98 insertions(+), 28 deletions(-)
-> > 
-> 
-> Any comments on this patch?  The corresponding xfstests patches were merged.
+This set of patches fixes a few false positives I encountered when
+testing DAX on ppc64le (which has a 64k page size).
 
-I didn't see any obvious bugs, though fwiw I'm not that familiar with
-fscrypt.  This looks like a pretty straightforward addition of a new
-field to a kernel call structure and some other plumbing to fill out the
-new field with CLI arguments / stdin.
+Patch 1 is actually not specific to non-4k page sizes.  Currently,
+each individual dm rc file checks for the presence of the DAX mount
+option, and _notruns the test as part of the initializtion.  This
+doesn't work for the snapshot target.  Moving the check into the
+_require_dm_target fixes the problem, and keeps from the cut-n-paste
+of boilerplate.
 
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+Patches 2 and 3 get rid of hard coded block/page sizes in the tests.
+They run just fine on 64k pages and 64k block sizes.
 
---D
+Even after these patches, there are many more tests that fail in the
+following configuration:
 
-> - Eric
+MKFS_OPTIONS=3D"-b size=3D65536 -m reflink=3D0" MOUNT_OPTIONS=3D"-o dax"
+
+One class of failures is tests that create a really small file system
+size.  Some of those tests seem to require the very small size, but
+others seem like they could live with a slightly bigger size that
+would then fit the log (the typical failure is a mkfs failure due to
+not enough blocks for the log).  For the former case, I'm tempted to
+send patches to _notrun those tests, and for the latter, I'd like to
+bump the file system sizes up.  300MB seems to be large enough to
+accommodate the log.  Would folks be opposed to those approaches?
+
+Another class of failure is tests that either hard-code a block size
+to trigger a specific error case, or that test a multitude of block
+sizes.  I'd like to send a patch to _notrun those tests if there is
+a user-specified block size.  That will require parsing the MKFS_OPTIONS
+based on the fs type, of course.  Is that something that seems
+reasonable?
+
+I will follow up with a series of patches to implement those changes
+if there is consensus on the approach.  These first three seemed
+straight-forward to me, so that's where I'm starting.
+
+Changes in v2:
+- patch 2: remove the boilerplate from all dm rc files (Zorro Lang)
+- cc fstests (thanks, Dave)
+
+[PATCH V2 1/3] dax/dm: disable testing on devices that don't support
+[PATCH V2 2/3] t_mmap_collision: fix hard-coded page size
+[PATCH V2 3/3] xfs/300: modify test to work on any fs block size
+
