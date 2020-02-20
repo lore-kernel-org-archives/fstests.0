@@ -2,201 +2,150 @@ Return-Path: <SRS0=97QR=4I=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A9F9EC5ACC4
-	for <linux-fstests@archiver.kernel.org>; Thu, 20 Feb 2020 03:11:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 680F4C761A1
+	for <linux-fstests@archiver.kernel.org>; Thu, 20 Feb 2020 03:26:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 89FA324656
-	for <linux-fstests@archiver.kernel.org>; Thu, 20 Feb 2020 03:11:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4198C21D56
+	for <linux-fstests@archiver.kernel.org>; Thu, 20 Feb 2020 03:26:41 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Pw8v9CIs"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727515AbgBTDLF (ORCPT
+        id S1727946AbgBTD0l (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 19 Feb 2020 22:11:05 -0500
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:43367 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1727476AbgBTDLF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 19 Feb 2020 22:11:05 -0500
-X-IronPort-AV: E=Sophos;i="5.70,462,1574092800"; 
-   d="scan'208";a="83596246"
-Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
-  by heian.cn.fujitsu.com with ESMTP; 20 Feb 2020 11:10:47 +0800
-Received: from G08CNEXMBPEKD04.g08.fujitsu.local (unknown [10.167.33.201])
-        by cn.fujitsu.com (Postfix) with ESMTP id B13A950A9962;
-        Thu, 20 Feb 2020 11:01:06 +0800 (CST)
-Received: from [10.167.220.84] (10.167.220.84) by
- G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201) with Microsoft SMTP Server
- (TLS) id 15.0.1395.4; Thu, 20 Feb 2020 11:10:41 +0800
-Subject: Re: [PATCH v1 1/2] generic/054,055: add _require_v2log
-To:     "Darrick J. Wong" <darrick.wong@oracle.com>
-CC:     <guaneryu@gmail.com>, <fstests@vger.kernel.org>
-References: <1582010652-1124-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
- <20200219050622.GB9504@magnolia>
- <b42c4b51-84b5-15aa-0a9d-a3375e08d66b@cn.fujitsu.com>
- <20200219221128.GE9511@magnolia>
- <8b833401-4ffa-e8b5-48e2-2ce63a2690ba@cn.fujitsu.com>
- <20200220021709.GF9504@magnolia>
-From:   Yang Xu <xuyang2018.jy@cn.fujitsu.com>
-Message-ID: <916c76e2-9d80-86b4-6e00-6c18976ed61d@cn.fujitsu.com>
-Date:   Thu, 20 Feb 2020 11:10:41 +0800
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101
- Thunderbird/68.0
+        Wed, 19 Feb 2020 22:26:41 -0500
+Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:45571 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1727208AbgBTD0k (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 19 Feb 2020 22:26:40 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1582169200;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=rVvfopNaIeKssHtje9fuGElfnCY5XVisxcjC1/+PV54=;
+        b=Pw8v9CIsatnPqIakOnxTboRJS39TMQRy6q3rd17erV3I+/mtCONn2Ke+iV+gKX7yQQicUa
+        4+t0yhmoTe3kCR1/FS4AZP5C+ssaG2zzxorey20LbTfOzVt9TP8vUhxs5Tu40KbD6PFobs
+        GxZlFVKEi6D44rS45IjXpAa/BRwttZk=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-132-KZT_qsbTN4mbGLBNLCtGwQ-1; Wed, 19 Feb 2020 22:26:30 -0500
+X-MC-Unique: KZT_qsbTN4mbGLBNLCtGwQ-1
+Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id EA2DB13E2;
+        Thu, 20 Feb 2020 03:26:29 +0000 (UTC)
+Received: from [IPv6:::1] (ovpn04.gateway.prod.ext.phx2.redhat.com [10.5.9.4])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id ABBA91001B0B;
+        Thu, 20 Feb 2020 03:26:29 +0000 (UTC)
+To:     fstests <fstests@vger.kernel.org>,
+        linux-xfs <linux-xfs@vger.kernel.org>
+From:   Eric Sandeen <sandeen@redhat.com>
+Subject: [PATCH] xfs: test that default grace periods init on first mount
+Message-ID: <7c6b4646-d7c5-cc03-9c90-c17daa22071d@redhat.com>
+Date:   Wed, 19 Feb 2020 21:26:29 -0600
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:68.0)
+ Gecko/20100101 Thunderbird/68.5.0
 MIME-Version: 1.0
-In-Reply-To: <20200220021709.GF9504@magnolia>
-Content-Type: text/plain; charset="gbk"; format=flowed
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
 Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.167.220.84]
-X-ClientProxiedBy: G08CNEXCHPEKD05.g08.fujitsu.local (10.167.33.203) To
- G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201)
-X-yoursite-MailScanner-ID: B13A950A9962.AC68D
-X-yoursite-MailScanner: Found to be clean
-X-yoursite-MailScanner-From: xuyang2018.jy@cn.fujitsu.com
+X-Scanned-By: MIMEDefang 2.84 on 10.5.11.22
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+There's currently a bug in how default grace periods get set up
+before the very first quotacheck runs; we try to read the quota
+inodes before they are populated, and so the grace periods remain
+empty.  The /next/ mount fills them in.  This is a regression test
+for that bug.
 
+Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+---
 
-on 2020/02/20 10:17, Darrick J. Wong wrote:
-> On Thu, Feb 20, 2020 at 10:01:30AM +0800, Yang Xu wrote:
->>
->>
->> on 2020/02/20 6:11, Darrick J. Wong wrote:
->>> On Wed, Feb 19, 2020 at 04:48:07PM +0800, Yang Xu wrote:
->>>>
->>>>
->>>> on 2020/02/19 13:06, Darrick J. Wong wrote:
->>>>> On Tue, Feb 18, 2020 at 03:24:10PM +0800, Yang Xu wrote:
->>>>>> This two case fail on my server machine with GPT disklabe type,
->>>>>> info as below:
->>>>>> mount failed: -o logbsize=32k
->>>>>> dmesg info as below:
->>>>>> [92633.871954] XFS (sda7): logbuf size must be greater than or equal to log stripe size
->>>>>>
->>>>>> The min logbuf size is 256k on my server machine. It needs to use _require_v2log to check.
->>>>>
->>>>> Works fine here.  What is sda7's storage and raid alignment
->>>>> configuration?
->>>> /dev/sda is a SAS disk, raid aligment is 256k.  When I mkfs.xfs -f
->>>> /dev/sda7(20G), its lsunit value is 64blks(block size is 4k).
->>>
->>> _require_v2log probably ought to be smarter about that.
->> maybe _require_v2log to specify logbszie for mount options?
->>>
->>> But, uh, seeing as generic/05[45] don't currently call _require_v2log,
->>> how did logbsize=32k end up in the mount options to fail those two
->>> tests?
->>>
->> But generic/05[45] call _get_log_configs. It will use _xfs_log_config
->> and _xfs_log_config calls logbszie=32k/64k/128k/256k for mount options.
->> So xfs/xfs_super.c xfs_finish_flag will report EINVAL error if logbsize <
->> logsunit.  So on my machine this case failed without calling _require_v2log.
-> 
-> logbsize=32k is a perfectly valid option on a fs with a v2 log, provided
-> the log sunit isn't larger than 32k.  _require_v2log conveniently
-> _notruns the test when mounting with logbsize=32k fails, but
-> maybe the problem here is that generic/05[45] need to format the fs with
-> -l su=0 so that we can exercise full control over the mount options?
-Good point, this way is more wise.  -l su=0 will report EINVAL error.
-
-I change xfs_test_config by specifying lsu to meet mount options as below:
-diff --git a/common/log b/common/log
-index c7921f50..9b5a2f6d 100644
---- a/common/log
-+++ b/common/log
-@@ -546,15 +546,15 @@ _xfs_log_config()
-  {
-      echo "# mkfs-opt             mount-opt"
-      echo "# ------------------------------"
--    echo "  version=2            logbsize=32k"
-+    echo "  version=2,su=4096    logbsize=16k"
-+    echo "  version=2,su=16k     logbsize=16k"
-      echo "  version=2,su=4096    logbsize=32k"
--    echo "  version=2,su=32768   logbsize=32k"
--    echo "  version=2,su=32768   logbsize=64k"
--    echo "  version=2            logbsize=64k"
-+    echo "  version=2,su=32k     logbsize=32k"
-+    echo "  version=2,su=4096    logbsize=64k"
-      echo "  version=2,su=64k     logbsize=64k"
--    echo "  version=2            logbsize=128k"
-+    echo "  version=2,su=4096    logbsize=128k"
-      echo "  version=2,su=128k    logbsize=128k"
--    echo "  version=2            logbsize=256k"
-+    echo "  version=2,su=4096    logbsize=256k"
-      echo "  version=2,su=256k    logbsize=256k"
-  }
-
-Best Regards
-Yang Xu
-
-> 
-> --D
-> 
->> Best Regards
->> Yang Xu
->>> --D
->>>
->>>> Best Regards
->>>> Yang Xu
->>>>>
->>>>> --D
->>>>>
->>>>>> Signed-off-by: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
->>>>>> ---
->>>>>>     common/log        | 1 +
->>>>>>     tests/generic/054 | 1 +
->>>>>>     tests/generic/055 | 1 +
->>>>>>     3 files changed, 3 insertions(+)
->>>>>>
->>>>>> diff --git a/common/log b/common/log
->>>>>> index c7921f50..f82919a6 100644
->>>>>> --- a/common/log
->>>>>> +++ b/common/log
->>>>>> @@ -494,6 +494,7 @@ _log_version()
->>>>>>     _require_v2log()
->>>>>>     {
->>>>>> +    [ "$FSTYP" != xfs ] && return 0
->>>>>>         # test out mkfs to see if it supports "-l version=2"
->>>>>>         export MKFS_OPTIONS="-l version=2"
->>>>>>         if ! _scratch_mkfs_xfs >>$seqres.full 2>&1; then
->>>>>> diff --git a/tests/generic/054 b/tests/generic/054
->>>>>> index 95d40c3c..b4b74615 100755
->>>>>> --- a/tests/generic/054
->>>>>> +++ b/tests/generic/054
->>>>>> @@ -30,6 +30,7 @@ rm -f $seqres.full $tmp.*
->>>>>>     _require_scratch
->>>>>>     _require_scratch_shutdown
->>>>>>     _require_logstate
->>>>>> +_require_v2log
->>>>>>     echo "*** init FS"
->>>>>>     _scratch_unmount >/dev/null 2>&1
->>>>>> diff --git a/tests/generic/055 b/tests/generic/055
->>>>>> index 9715f27b..071c4eaf 100755
->>>>>> --- a/tests/generic/055
->>>>>> +++ b/tests/generic/055
->>>>>> @@ -57,6 +57,7 @@ rm -f $seqres.full $tmp.*
->>>>>>     _require_scratch
->>>>>>     _require_scratch_shutdown
->>>>>>     _require_logstate
->>>>>> +_require_v2log
->>>>>>     QUOTA_OPTION=`_get_quota_option`
->>>>>> -- 
->>>>>> 2.18.0
->>>>>>
->>>>>>
->>>>>>
->>>>>
->>>>>
->>>>
->>>>
->>>
->>>
->>
->>
-> 
-> 
-
+diff --git a/tests/xfs/995 b/tests/xfs/995
+new file mode 100755
+index 00000000..477855b8
+--- /dev/null
++++ b/tests/xfs/995
+@@ -0,0 +1,50 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2020 Red Hat, Inc.  All Rights Reserved.
++#
++# FS QA Test 995
++#
++# Regression test xfs flaw which did not report proper quota default
++# grace periods until the 2nd mount of a new filesystem with quota.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/quota
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++_require_quota
++
++_scratch_mkfs >$seqres.full 2>&1
++_qmount_option "usrquota"
++_qmount
++
++xfs_quota -x -c "state -u" $SCRATCH_MNT | grep "grace time"
++_scratch_unmount
++_qmount
++xfs_quota -x -c "state -u" $SCRATCH_MNT | grep "grace time"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/995.out b/tests/xfs/995.out
+new file mode 100644
+index 00000000..d10017d1
+--- /dev/null
++++ b/tests/xfs/995.out
+@@ -0,0 +1,7 @@
++QA output created by 995
++Blocks grace time: [7 days]
++Inodes grace time: [7 days]
++Realtime Blocks grace time: [7 days]
++Blocks grace time: [7 days]
++Inodes grace time: [7 days]
++Realtime Blocks grace time: [7 days]
+diff --git a/tests/xfs/group b/tests/xfs/group
+index 0cbd0647..235a2715 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -511,3 +511,4 @@
+ 511 auto quick quota
+ 512 auto quick acl attr
+ 513 auto mount
++995 auto quota quick
 
