@@ -2,150 +2,93 @@ Return-Path: <SRS0=97QR=4I=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 680F4C761A1
-	for <linux-fstests@archiver.kernel.org>; Thu, 20 Feb 2020 03:26:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 57080C3404C
+	for <linux-fstests@archiver.kernel.org>; Thu, 20 Feb 2020 04:05:22 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 4198C21D56
-	for <linux-fstests@archiver.kernel.org>; Thu, 20 Feb 2020 03:26:41 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 217092465D
+	for <linux-fstests@archiver.kernel.org>; Thu, 20 Feb 2020 04:05:22 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Pw8v9CIs"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="jV6iRLOq"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727946AbgBTD0l (ORCPT
+        id S1727875AbgBTEFV (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 19 Feb 2020 22:26:41 -0500
-Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:45571 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1727208AbgBTD0k (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 19 Feb 2020 22:26:40 -0500
+        Wed, 19 Feb 2020 23:05:21 -0500
+Received: from us-smtp-2.mimecast.com ([207.211.31.81]:34047 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1727756AbgBTEFV (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 19 Feb 2020 23:05:21 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1582169200;
+        s=mimecast20190719; t=1582171520;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=rVvfopNaIeKssHtje9fuGElfnCY5XVisxcjC1/+PV54=;
-        b=Pw8v9CIsatnPqIakOnxTboRJS39TMQRy6q3rd17erV3I+/mtCONn2Ke+iV+gKX7yQQicUa
-        4+t0yhmoTe3kCR1/FS4AZP5C+ssaG2zzxorey20LbTfOzVt9TP8vUhxs5Tu40KbD6PFobs
-        GxZlFVKEi6D44rS45IjXpAa/BRwttZk=
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=YhkVa7qtSHIWT/rrXPInexA2kKheunisZ4SZ1pmov+M=;
+        b=jV6iRLOqSjfOvC2fwjpuPHoH7glgMwujxrlfKslfBrS5xN/h/QMbdc+xnzFp/DmDtJLb6B
+        1364hucmvM3zHxWLnYLsCVXVyXsomUjTPAvyqnfeP1rwpvku9uORJGN10yW+g2Q89F+TXe
+        HDh5M64suyjTGN2NQ/BmZ4VCXD9lEXY=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-132-KZT_qsbTN4mbGLBNLCtGwQ-1; Wed, 19 Feb 2020 22:26:30 -0500
-X-MC-Unique: KZT_qsbTN4mbGLBNLCtGwQ-1
-Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+ us-mta-199-S52qvNFEOQmYSbDxKrtCRA-1; Wed, 19 Feb 2020 23:05:18 -0500
+X-MC-Unique: S52qvNFEOQmYSbDxKrtCRA-1
+Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id EA2DB13E2;
-        Thu, 20 Feb 2020 03:26:29 +0000 (UTC)
-Received: from [IPv6:::1] (ovpn04.gateway.prod.ext.phx2.redhat.com [10.5.9.4])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id ABBA91001B0B;
-        Thu, 20 Feb 2020 03:26:29 +0000 (UTC)
-To:     fstests <fstests@vger.kernel.org>,
-        linux-xfs <linux-xfs@vger.kernel.org>
-From:   Eric Sandeen <sandeen@redhat.com>
-Subject: [PATCH] xfs: test that default grace periods init on first mount
-Message-ID: <7c6b4646-d7c5-cc03-9c90-c17daa22071d@redhat.com>
-Date:   Wed, 19 Feb 2020 21:26:29 -0600
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:68.0)
- Gecko/20100101 Thunderbird/68.5.0
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 4CDB6DB62;
+        Thu, 20 Feb 2020 04:05:17 +0000 (UTC)
+Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id BAD835C578;
+        Thu, 20 Feb 2020 04:05:16 +0000 (UTC)
+Date:   Thu, 20 Feb 2020 12:15:39 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Eric Sandeen <sandeen@sandeen.net>
+Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 1/2] generic: per-type quota timers set/get test
+Message-ID: <20200220041539.GD14282@dhcp-12-102.nay.redhat.com>
+Mail-Followup-To: Eric Sandeen <sandeen@sandeen.net>,
+        fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+References: <20200216181631.22560-1-zlang@redhat.com>
+ <e54ae15f-6363-4486-0546-030e45ed50bb@sandeen.net>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-X-Scanned-By: MIMEDefang 2.84 on 10.5.11.22
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <e54ae15f-6363-4486-0546-030e45ed50bb@sandeen.net>
+User-Agent: Mutt/1.10.1 (2018-07-13)
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.16
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-There's currently a bug in how default grace periods get set up
-before the very first quotacheck runs; we try to read the quota
-inodes before they are populated, and so the grace periods remain
-empty.  The /next/ mount fills them in.  This is a regression test
-for that bug.
+On Wed, Feb 19, 2020 at 08:57:58PM -0600, Eric Sandeen wrote:
+> On 2/16/20 12:16 PM, Zorro Lang wrote:
+> > --- /dev/null
+> > +++ b/tests/generic/593.out
+> > @@ -0,0 +1,32 @@
+> > +QA output created by 593
+> > +1. set project quota timer
+> > +*** Report for user quotas on device SCRATCH_DEV
+> > +Block grace time: 7days; Inode grace time: 7days
+> > +*** Report for group quotas on device SCRATCH_DEV
+> > +Block grace time: 7days; Inode grace time: 7days
+> > +*** Report for project quotas on device SCRATCH_DEV
+> > +Block grace time: 00:10; Inode grace time: 00:20
+> 
+> One other thing that might be an issue here, I'm not sure every
+> filesystem will default to 7 days if no other grace period is set ...?
 
-Signed-off-by: Eric Sandeen <sandeen@redhat.com>
----
+Make sense:) I just hope to test the default grace time by pass.
+How about:
+1) Get the default quota timer $string.
+2) Filter above default timer "$string" to "default".
+to avoid defferent default timer breaks the golden output.
 
-diff --git a/tests/xfs/995 b/tests/xfs/995
-new file mode 100755
-index 00000000..477855b8
---- /dev/null
-+++ b/tests/xfs/995
-@@ -0,0 +1,50 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2020 Red Hat, Inc.  All Rights Reserved.
-+#
-+# FS QA Test 995
-+#
-+# Regression test xfs flaw which did not report proper quota default
-+# grace periods until the 2nd mount of a new filesystem with quota.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/quota
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch
-+_require_quota
-+
-+_scratch_mkfs >$seqres.full 2>&1
-+_qmount_option "usrquota"
-+_qmount
-+
-+xfs_quota -x -c "state -u" $SCRATCH_MNT | grep "grace time"
-+_scratch_unmount
-+_qmount
-+xfs_quota -x -c "state -u" $SCRATCH_MNT | grep "grace time"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/995.out b/tests/xfs/995.out
-new file mode 100644
-index 00000000..d10017d1
---- /dev/null
-+++ b/tests/xfs/995.out
-@@ -0,0 +1,7 @@
-+QA output created by 995
-+Blocks grace time: [7 days]
-+Inodes grace time: [7 days]
-+Realtime Blocks grace time: [7 days]
-+Blocks grace time: [7 days]
-+Inodes grace time: [7 days]
-+Realtime Blocks grace time: [7 days]
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 0cbd0647..235a2715 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -511,3 +511,4 @@
- 511 auto quick quota
- 512 auto quick acl attr
- 513 auto mount
-+995 auto quota quick
+Thanks,
+Zorro
+
+> 
 
