@@ -2,248 +2,226 @@ Return-Path: <SRS0=WAnD=4J=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.6 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	UNWANTED_LANGUAGE_BODY,USER_AGENT_SANE_1 autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 12D0CC35646
-	for <linux-fstests@archiver.kernel.org>; Fri, 21 Feb 2020 13:43:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 84A55C3565B
+	for <linux-fstests@archiver.kernel.org>; Fri, 21 Feb 2020 18:43:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id CC7A2222C4
-	for <linux-fstests@archiver.kernel.org>; Fri, 21 Feb 2020 13:43:14 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="YN3/b0q6"
+	by mail.kernel.org (Postfix) with ESMTP id 62319208E4
+	for <linux-fstests@archiver.kernel.org>; Fri, 21 Feb 2020 18:43:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727781AbgBUNnO (ORCPT
+        id S1729288AbgBUSnR (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 21 Feb 2020 08:43:14 -0500
-Received: from us-smtp-1.mimecast.com ([207.211.31.81]:40566 "EHLO
-        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1727213AbgBUNnO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 21 Feb 2020 08:43:14 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1582292593;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=Y9BNANhEy4c+1esbB9J/yf/xmLZ2jQzY8NSIFrPEJSc=;
-        b=YN3/b0q6V+NBe7nk92V6PqCujTjZkAH0a4l4grvxDW5k6AY4hvI3OtlG+HF29i5ZtyopUd
-        y/XdfeNN5sr7LF1ZmqkNPlK7B/T+rQGyfqQ8AeVjmuQOkF4g0KwZtnoc9a8akHBFtdJ45I
-        QObuekie3I1Casc6n3XrX/nyeU5uLng=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-97-Xm1LPeLcO8WD4ldhzrpbpQ-1; Fri, 21 Feb 2020 08:43:09 -0500
-X-MC-Unique: Xm1LPeLcO8WD4ldhzrpbpQ-1
-Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 6903A13E5;
-        Fri, 21 Feb 2020 13:43:08 +0000 (UTC)
-Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id D24485D9C5;
-        Fri, 21 Feb 2020 13:43:07 +0000 (UTC)
-Date:   Fri, 21 Feb 2020 21:53:32 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Jeff Moyer <jmoyer@redhat.com>
-Cc:     fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org,
-        linux-xfs@vger.kernel.org
-Subject: Re: [PATCH V2 2/3] t_mmap_collision: fix hard-coded page size
-Message-ID: <20200221135332.GK14282@dhcp-12-102.nay.redhat.com>
-Mail-Followup-To: Jeff Moyer <jmoyer@redhat.com>, fstests@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org, linux-xfs@vger.kernel.org
-References: <20200220200632.14075-1-jmoyer@redhat.com>
- <20200220200632.14075-3-jmoyer@redhat.com>
+        Fri, 21 Feb 2020 13:43:17 -0500
+Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:50635 "EHLO
+        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726150AbgBUSnQ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 21 Feb 2020 13:43:16 -0500
+Received: from callcc.thunk.org (guestnat-104-133-8-109.corp.google.com [104.133.8.109] (may be forged))
+        (authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 01LIhCu9009362
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Fri, 21 Feb 2020 13:43:13 -0500
+Received: by callcc.thunk.org (Postfix, from userid 15806)
+        id 253224211EF; Fri, 21 Feb 2020 13:43:12 -0500 (EST)
+From:   "Theodore Ts'o" <tytso@mit.edu>
+To:     fstests@vger.kernel.org
+Cc:     "Theodore Ts'o" <tytso@mit.edu>
+Subject: [PATCH] fstests: add an eio group
+Date:   Fri, 21 Feb 2020 13:43:09 -0500
+Message-Id: <20200221184309.776863-1-tytso@mit.edu>
+X-Mailer: git-send-email 2.24.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200220200632.14075-3-jmoyer@redhat.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Feb 20, 2020 at 03:06:31PM -0500, Jeff Moyer wrote:
-> Fix the test to run on non-4k page size systems.
-> 
-> Signed-off-by: Jeff Moyer <jmoyer@redhat.com>
-> ---
+This allows us to run all those tests which simulate disk failures
+using dmerror.
 
-This patch looks good to me, and it's really helpful.
+Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+---
+ tests/btrfs/group   |  8 ++++----
+ tests/generic/group | 42 +++++++++++++++++++++---------------------
+ tests/xfs/group     |  8 ++++----
+ 3 files changed, 29 insertions(+), 29 deletions(-)
 
-Thanks,
-Zorro
-
-Before patched:
-
-FSTYP         -- xfs (non-debug)
-PLATFORM      -- Linux/aarch64
-MKFS_OPTIONS  -- -f -b size=65536 -m crc=1,finobt=1,reflink=1,rmapbt=1 -i sparse=1 /dev/sda5
-MOUNT_OPTIONS -- -o context=system_u:object_r:nfs_t:s0 /dev/sda5 /mnt/xfstests/mnt2
-
-generic/503 14s ... - output mismatch (see /root/xfstests-dev/results//generic/503.out.bad)
-    --- tests/generic/503.out   2020-02-21 05:41:37.992675071 -0500
-    +++ /root/xfstests-dev/results//generic/503.out.bad 2020-02-21 08:20:19.736550319 -0500
-    @@ -1,2 +1,4 @@
-     QA output created by 503
-    +collapse_range_fn fallocate 2: Invalid argument
-    +collapse_range_fn fallocate 2: Invalid argument
-...
-
-After patched:
-
-FSTYP         -- xfs (non-debug)
-PLATFORM      -- Linux/aarch64
-MKFS_OPTIONS  -- -f -b size=65536 -m crc=1,finobt=1,reflink=1,rmapbt=1 -i sparse=1 /dev/sda5
-MOUNT_OPTIONS -- -o context=system_u:object_r:nfs_t:s0 /dev/sda5 /mnt/xfstests/mnt2
-
-generic/503 16s ...  16s
-Ran: generic/503
-Passed all 1 tests
-
->  src/t_mmap_collision.c | 40 +++++++++++++++++++++-------------------
->  1 file changed, 21 insertions(+), 19 deletions(-)
-> 
-> diff --git a/src/t_mmap_collision.c b/src/t_mmap_collision.c
-> index d547bc05..c872f4e2 100644
-> --- a/src/t_mmap_collision.c
-> +++ b/src/t_mmap_collision.c
-> @@ -25,13 +25,12 @@
->  #include <sys/types.h>
->  #include <unistd.h>
->  
-> -#define PAGE(a) ((a)*0x1000)
-> -#define FILE_SIZE PAGE(4)
-> -
->  void *dax_data;
->  int nodax_fd;
->  int dax_fd;
->  bool done;
-> +static int pagesize;
-> +static int file_size;
->  
->  #define err_exit(op)                                                          \
->  {                                                                             \
-> @@ -49,18 +48,18 @@ void punch_hole_fn(void *ptr)
->  		read = 0;
->  
->  		do {
-> -			rc = pread(nodax_fd, dax_data + read, FILE_SIZE - read,
-> +			rc = pread(nodax_fd, dax_data + read, file_size - read,
->  					read);
->  			if (rc > 0)
->  				read += rc;
->  		} while (rc > 0);
->  
-> -		if (read != FILE_SIZE || rc != 0)
-> +		if (read != file_size || rc != 0)
->  			err_exit("pread");
->  
->  		rc = fallocate(dax_fd,
->  				FALLOC_FL_PUNCH_HOLE | FALLOC_FL_KEEP_SIZE,
-> -				0, FILE_SIZE);
-> +				0, file_size);
->  		if (rc < 0)
->  			err_exit("fallocate");
->  
-> @@ -81,18 +80,18 @@ void zero_range_fn(void *ptr)
->  		read = 0;
->  
->  		do {
-> -			rc = pread(nodax_fd, dax_data + read, FILE_SIZE - read,
-> +			rc = pread(nodax_fd, dax_data + read, file_size - read,
->  					read);
->  			if (rc > 0)
->  				read += rc;
->  		} while (rc > 0);
->  
-> -		if (read != FILE_SIZE || rc != 0)
-> +		if (read != file_size || rc != 0)
->  			err_exit("pread");
->  
->  		rc = fallocate(dax_fd,
->  				FALLOC_FL_ZERO_RANGE | FALLOC_FL_KEEP_SIZE,
-> -				0, FILE_SIZE);
-> +				0, file_size);
->  		if (rc < 0)
->  			err_exit("fallocate");
->  
-> @@ -113,11 +112,11 @@ void truncate_down_fn(void *ptr)
->  
->  		if (ftruncate(dax_fd, 0) < 0)
->  			err_exit("ftruncate");
-> -		if (fallocate(dax_fd, 0, 0, FILE_SIZE) < 0)
-> +		if (fallocate(dax_fd, 0, 0, file_size) < 0)
->  			err_exit("fallocate");
->  
->  		do {
-> -			rc = pread(nodax_fd, dax_data + read, FILE_SIZE - read,
-> +			rc = pread(nodax_fd, dax_data + read, file_size - read,
->  					read);
->  			if (rc > 0)
->  				read += rc;
-> @@ -142,15 +141,15 @@ void collapse_range_fn(void *ptr)
->  	while (!done) {
->  		read = 0;
->  
-> -		if (fallocate(dax_fd, 0, 0, FILE_SIZE) < 0)
-> +		if (fallocate(dax_fd, 0, 0, file_size) < 0)
->  			err_exit("fallocate 1");
-> -		if (fallocate(dax_fd, FALLOC_FL_COLLAPSE_RANGE, 0, PAGE(1)) < 0)
-> +		if (fallocate(dax_fd, FALLOC_FL_COLLAPSE_RANGE, 0, pagesize) < 0)
->  			err_exit("fallocate 2");
-> -		if (fallocate(dax_fd, 0, 0, FILE_SIZE) < 0)
-> +		if (fallocate(dax_fd, 0, 0, file_size) < 0)
->  			err_exit("fallocate 3");
->  
->  		do {
-> -			rc = pread(nodax_fd, dax_data + read, FILE_SIZE - read,
-> +			rc = pread(nodax_fd, dax_data + read, file_size - read,
->  					read);
->  			if (rc > 0)
->  				read += rc;
-> @@ -192,6 +191,9 @@ int main(int argc, char *argv[])
->  		exit(0);
->  	}
->  
-> +	pagesize = getpagesize();
-> +	file_size = 4 * pagesize;
-> +
->  	dax_fd = open(argv[1], O_RDWR|O_CREAT, S_IRUSR|S_IWUSR);
->  	if (dax_fd < 0)
->  		err_exit("dax_fd open");
-> @@ -202,15 +204,15 @@ int main(int argc, char *argv[])
->  
->  	if (ftruncate(dax_fd, 0) < 0)
->  		err_exit("dax_fd ftruncate");
-> -	if (fallocate(dax_fd, 0, 0, FILE_SIZE) < 0)
-> +	if (fallocate(dax_fd, 0, 0, file_size) < 0)
->  		err_exit("dax_fd fallocate");
->  
->  	if (ftruncate(nodax_fd, 0) < 0)
->  		err_exit("nodax_fd ftruncate");
-> -	if (fallocate(nodax_fd, 0, 0, FILE_SIZE) < 0)
-> +	if (fallocate(nodax_fd, 0, 0, file_size) < 0)
->  		err_exit("nodax_fd fallocate");
->  
-> -	dax_data = mmap(NULL, FILE_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED,
-> +	dax_data = mmap(NULL, file_size, PROT_READ|PROT_WRITE, MAP_SHARED,
->  			dax_fd, 0);
->  	if (dax_data == MAP_FAILED)
->  		err_exit("mmap");
-> @@ -220,7 +222,7 @@ int main(int argc, char *argv[])
->  	run_test(&truncate_down_fn);
->  	run_test(&collapse_range_fn);
->  
-> -	if (munmap(dax_data, FILE_SIZE) != 0)
-> +	if (munmap(dax_data, file_size) != 0)
->  		err_exit("munmap");
->  
->  	err = close(dax_fd);
-> -- 
-> 2.19.1
-> 
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 1947f0d7..16b784d6 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -102,8 +102,8 @@
+ 097 auto quick send clone
+ 098 auto quick metadata clone log
+ 099 auto quick qgroup limit
+-100 auto replace volume
+-101 auto replace volume
++100 auto replace volume eio
++101 auto replace volume eio
+ 102 auto quick metadata enospc
+ 103 auto quick clone compress
+ 104 auto qgroup
+@@ -148,7 +148,7 @@
+ 143 auto quick
+ 144 auto quick send
+ 145 auto quick send
+-146 auto quick
++146 auto quick eio
+ 147 auto quick send
+ 148 auto quick rw
+ 149 auto quick send compress
+@@ -162,7 +162,7 @@
+ 157 auto quick raid
+ 158 auto quick raid scrub
+ 159 auto quick punch log
+-160 auto quick
++160 auto quick eio
+ 161 auto quick volume seed
+ 162 auto quick volume seed
+ 163 auto quick volume seed
+diff --git a/tests/generic/group b/tests/generic/group
+index a1bf6aca..f93a6430 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -252,9 +252,9 @@
+ 247 auto quick rw
+ 248 auto quick rw
+ 249 auto quick rw
+-250 auto quick prealloc rw
++250 auto quick prealloc rw eio
+ 251 ioctl trim
+-252 auto quick prealloc rw
++252 auto quick prealloc rw eio
+ 253 auto quick clone
+ 254 auto quick clone punch
+ 255 auto quick prealloc punch
+@@ -267,25 +267,25 @@
+ 262 auto quick clone insert
+ 263 rw auto quick
+ 264 auto quick clone
+-265 auto quick clone
+-266 auto quick clone
+-267 auto quick clone
+-268 auto quick clone
++265 auto quick clone eio
++266 auto quick clone eio
++267 auto quick clone eio
++268 auto quick clone eio
+ 269 auto rw prealloc ioctl enospc stress
+ 270 auto quota rw prealloc ioctl enospc stress
+-271 auto quick clone
+-272 auto quick clone
++271 auto quick clone eio
++272 auto quick clone eio
+ 273 auto rw
+ 274 auto rw prealloc enospc
+ 275 auto rw enospc
+-276 auto quick clone
++276 auto quick clone eio
+ 277 auto ioctl quick metadata
+-278 auto quick clone
+-279 auto quick clone
++278 auto quick clone eio
++279 auto quick clone eio
+ 280 auto quota freeze
+-281 auto quick clone
+-282 auto quick clone
+-283 auto quick clone
++281 auto quick clone eio
++282 auto quick clone eio
++283 auto quick clone eio
+ 284 auto quick clone
+ 285 auto rw seek
+ 286 auto quick other seek
+@@ -331,16 +331,16 @@
+ 326 auto quick clone
+ 327 auto quick clone
+ 328 auto quick clone
+-329 auto quick clone
++329 auto quick clone eio
+ 330 auto quick clone
+-331 auto quick clone
++331 auto quick clone eio
+ 332 auto quick clone
+ 333 auto clone
+ 334 auto clone
+ 335 auto quick metadata log
+ 336 auto quick metadata log
+ 337 auto quick metadata
+-338 auto quick rw
++338 auto quick rw eio
+ 339 auto dir
+ 340 auto
+ 341 auto quick metadata log
+@@ -443,8 +443,8 @@
+ 438 auto
+ 439 auto quick punch
+ 440 auto quick encrypt
+-441 auto quick
+-442 blockdev
++441 auto quick eio
++442 blockdev eio
+ 443 auto quick rw
+ 444 auto quick acl
+ 445 auto quick rw seek prealloc
+@@ -477,7 +477,7 @@
+ 472 auto quick swap
+ 473 broken
+ 474 auto quick shutdown metadata
+-475 shutdown auto log metadata
++475 shutdown auto log metadata eio
+ 476 auto rw
+ 477 auto quick exportfs
+ 478 auto quick
+@@ -489,7 +489,7 @@
+ 484 auto quick
+ 485 auto quick insert
+ 486 auto quick attr
+-487 auto quick
++487 auto quick eio
+ 488 auto quick
+ 489 auto quick attr log
+ 490 auto quick rw seek
+diff --git a/tests/xfs/group b/tests/xfs/group
+index 0cbd0647..522d4bc4 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -3,7 +3,7 @@
+ 003 db auto quick
+ 004 db auto quick
+ 005 auto quick
+-006 auto quick mount
++006 auto quick mount eio
+ 007 auto quota quick
+ 008 rw ioctl auto quick
+ 009 rw ioctl auto prealloc quick
+@@ -234,10 +234,10 @@
+ 234 auto quick rmap punch
+ 235 fuzzers rmap
+ 236 auto rmap punch
+-237 auto quick clone
++237 auto quick clone eio
+ 238 auto quick metadata ioctl
+ 239 auto quick clone
+-240 auto quick clone
++240 auto quick clone eio
+ 241 auto quick clone
+ 242 auto quick prealloc zero
+ 243 auto quick clone punch
+@@ -261,7 +261,7 @@
+ 261 auto quick quota
+ 262 dangerous_fuzzers dangerous_scrub dangerous_online_repair
+ 263 auto quick quota
+-264 auto quick mount
++264 auto quick mount eio
+ 265 auto clone
+ 266 dump ioctl auto quick
+ 267 dump ioctl tape
+-- 
+2.24.1
 
