@@ -5,115 +5,131 @@ X-Spam-Level:
 X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
-	version=3.4.0
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2056DC35671
-	for <linux-fstests@archiver.kernel.org>; Sun, 23 Feb 2020 12:34:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B9E99C35671
+	for <linux-fstests@archiver.kernel.org>; Sun, 23 Feb 2020 12:46:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id E7F2C20675
-	for <linux-fstests@archiver.kernel.org>; Sun, 23 Feb 2020 12:34:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8DCAF20675
+	for <linux-fstests@archiver.kernel.org>; Sun, 23 Feb 2020 12:46:04 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="GcrycDug"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="is2Ov72S"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727261AbgBWMe1 (ORCPT
+        id S1726592AbgBWMqE (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 23 Feb 2020 07:34:27 -0500
-Received: from mail-pf1-f193.google.com ([209.85.210.193]:40335 "EHLO
-        mail-pf1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726023AbgBWMe1 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 23 Feb 2020 07:34:27 -0500
-Received: by mail-pf1-f193.google.com with SMTP id b185so3814683pfb.7;
-        Sun, 23 Feb 2020 04:34:27 -0800 (PST)
+        Sun, 23 Feb 2020 07:46:04 -0500
+Received: from mail-pf1-f194.google.com ([209.85.210.194]:43098 "EHLO
+        mail-pf1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726023AbgBWMqD (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 23 Feb 2020 07:46:03 -0500
+Received: by mail-pf1-f194.google.com with SMTP id s1so3815888pfh.10
+        for <fstests@vger.kernel.org>; Sun, 23 Feb 2020 04:46:03 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=date:from:to:cc:subject:message-id:references:mime-version
          :content-disposition:in-reply-to;
-        bh=nRX8NVb8sA2C3VRrxdRuHyU9n580bY1jnLZ5ycnXc1g=;
-        b=GcrycDugcVqdCUcmBIoMWS8XlU6eP2VHnXtRb5ljzZB/lNgxgOfLukkm0iiJC3SCBH
-         71tzTgUmdvE5lNwovktiv+CaTM190E0cXvQzNGHA/lJBFx8E1OHDKjd0Od6bdFaQK+1R
-         WOtS30ts4scszykZ8dYj2LIh+yB1uGWPjjclxl88I+TL5OrOTAVoaGMhW/2p0M/8+qhj
-         Q7JjVqrFF/RSnEwpGF6TK+Wy51zBSVK70IKuvjXccOdzpH2yeNUOSU+eISLBzChS0GDw
-         MEghTyPcT2vRu96ePei9GREzpi4ecBhfiBPy5QGGK1z6MtUC5dVzR+68EfP+09mRtEAt
-         JTJQ==
+        bh=82G3IR4oJUzASc7KXOMWASAJ8K2wlTzxM+YrM7Soe8k=;
+        b=is2Ov72S7Hk6ZLX59Q/mAcPP613oPw5YCF54lKd61tlz51vG1TtWoLQafKut/vdtMV
+         x/vDboeQ8w4g6MBLS+alzsCWrL2miGAtVNfWkz2breK9l0QraJHeMHJje3c6TGUS7qWT
+         y+oknVrp9jBM/LlXhz099O0H3HvsHFBnESISHAY/U9IBwvYwP1VtGApZnwYi9CX0r3hh
+         C0pdplHfHYnsR9JBZG94BLaUeG3g1DkCbEm3rOPhVsyu1YpB8RDhTbvVnDTcwEaNRDFH
+         yTRQ8E5Jr9uxIjnxGsc4VCxDRYGwB9FjD7q9kjIn5fyQYnYa8TBdNoDrpjHOvv6mQVhq
+         UNEg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to;
-        bh=nRX8NVb8sA2C3VRrxdRuHyU9n580bY1jnLZ5ycnXc1g=;
-        b=kXx2QLqRhuM6MMVjpnCEysgsOktToA7k+rr/umtb3z8FqygdrCAm4/vmH0gmcUiAIP
-         V/ts0X54kdBVxhQiTNwakccHJW/LYEpj0c1yry6ZTc4H/R4r2IgNsJZ8MXTsk/dvGQX3
-         BwtG0nbszOlTM3Jb/XBJE2hKUYBAjkoOv7xMJt5muFOzyDi4VSN0Gol+x9q5M7uI+M8L
-         z6j+wq7swDpOLi440/pD6Z6bMImTj0TNgHOpcGSsMxS9XeTijUbQJSulCFo+ikTjGIcM
-         VLUI7OzPn7PVMEf7a2zg+b8fdRKum687CMiu+X6vBdysrUfPUGB8NyPvP+vSJlpFS8fB
-         41iw==
-X-Gm-Message-State: APjAAAXG9MD9E4oQ/8DGGKSs3DXASib+t+Zq3ZjAvxWMctXWUsRAqNqK
-        f9D4Q5a6g/4+bCkg+TEEAfY=
-X-Google-Smtp-Source: APXvYqzdFqMm7kSXzVhPv5GT1bNmEy9NJ6q57kDe57Z1Vilv805KDBkDJnYKKrowLfCm2X9IDCDjcg==
-X-Received: by 2002:a62:788a:: with SMTP id t132mr47299622pfc.134.1582461266702;
-        Sun, 23 Feb 2020 04:34:26 -0800 (PST)
+        bh=82G3IR4oJUzASc7KXOMWASAJ8K2wlTzxM+YrM7Soe8k=;
+        b=X4EBQenGQAf11afL50G3Bq9SsIKFiIFTulBJ2MkAccEyI3mtUnXlNXuNRps76Q9JCV
+         1VOInQyAEseLNGg+mts8Odjj5siqvdmjqjGdpS4KfYV5HGGuvXzlJdFrHvL4OBhYLWJe
+         PaaUytOcS81h35GGcR9wUEbILydAsYcirmay8Wp8FqQk3/vvc+GCbdQUl0rEqulbl6bv
+         QmAnVbBwKk7EdS0F34AFu/YckOjbypEBRPn4j8qre/5FTVvRthON+73MT4DeZ+7AN/b0
+         PiR7pNg8gmvQko3hgb7ne9w0GwVCaaSEx5NzKmyiHs6J4EGsIg4jUw2+hDGJLyqxWvmA
+         cdNw==
+X-Gm-Message-State: APjAAAVUJxNnnvb83bzroj7WPMzOJlkzpqETE24OpI4Q6uzFM0BrpWx7
+        M+NGzdf5WhELe9wpmxKTT2c=
+X-Google-Smtp-Source: APXvYqzG4JSSWgISAjGU8j9zAZPVpZfftkUlCdPmCZTWaoPX5GC6nfI+2f9eoXK/Y021RU5Lmc4u1g==
+X-Received: by 2002:aa7:8101:: with SMTP id b1mr47720087pfi.105.1582461963212;
+        Sun, 23 Feb 2020 04:46:03 -0800 (PST)
 Received: from localhost ([178.128.102.47])
-        by smtp.gmail.com with ESMTPSA id r8sm8679385pjo.22.2020.02.23.04.34.25
+        by smtp.gmail.com with ESMTPSA id g19sm9089377pfh.134.2020.02.23.04.45.59
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 23 Feb 2020 04:34:25 -0800 (PST)
-Date:   Sun, 23 Feb 2020 20:34:15 +0800
+        Sun, 23 Feb 2020 04:46:02 -0800 (PST)
+Date:   Sun, 23 Feb 2020 20:45:48 +0800
 From:   Eryu Guan <guaneryu@gmail.com>
-To:     "zhangyi (F)" <yi.zhang@huawei.com>
-Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org
-Subject: Re: [PATCH] ext4/021: make sure the fdatasync subprocess exits
-Message-ID: <20200223123411.GA3840@desktop>
-References: <20200214022001.15563-1-yi.zhang@huawei.com>
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH] xfs/513: fix 4k allocsize fails on 64k pagesize
+Message-ID: <20200223124545.GB3840@desktop>
+References: <20200218165818.21066-1-zlang@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20200214022001.15563-1-yi.zhang@huawei.com>
+In-Reply-To: <20200218165818.21066-1-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Feb 14, 2020 at 10:20:01AM +0800, zhangyi (F) wrote:
-> Now we just kill fdatasync_work process and wait nothing after the
-> test, so a busy unmount failure may appear if the fdatasync syscall
-> doesn't return in time.
+On Wed, Feb 19, 2020 at 12:58:18AM +0800, Zorro Lang wrote:
+> The minimal I/O preallocation size is page size. The allocsize=4k
+> always fails on 64k pagesize machine. So change the fs blocksize
+> allocsize test to allocsize=64k.
 > 
->   umount: /tmp/scratch: target is busy.
->   mount: /tmp/scratch: /dev/sdb already mounted on /tmp/scratch.
->   !!! failed to remount /dev/sdb on /tmp/scratch
+> Signed-off-by: Zorro Lang <zlang@redhat.com>
+
+I think it's better to make the page size auto-detected, and filter out
+the actual size to something like "PAGESIZE" in .out file.
+
+> ---
+>  tests/xfs/513     | 4 ++--
+>  tests/xfs/513.out | 2 +-
+>  2 files changed, 3 insertions(+), 3 deletions(-)
 > 
-> This patch kill and wait the xfs_io fdatasync subprocess to make sure
-> _check_scratch_fs success.
+> diff --git a/tests/xfs/513 b/tests/xfs/513
+> index 70bc2f1c..3c3f5163 100755
+> --- a/tests/xfs/513
+> +++ b/tests/xfs/513
+> @@ -178,13 +178,13 @@ do_test()
+>  
+>  echo "** start xfs mount testing ..."
+>  # Test allocsize=size
+> -# Valid values for this option are page size (typically 4KiB) through to 1GiB
+> +# Valid values for this option are page size through to 1GiB
+>  do_mkfs
+>  if [ $dbsize -ge 1024 ];then
+>  	blsize="$((dbsize / 1024))k"
+>  fi
+>  do_test "" pass "allocsize" "false"
+> -do_test "-o allocsize=$blsize" pass "allocsize=$blsize" "true"
+> +do_test "-o allocsize=64k" pass "allocsize=64k" "true"
 
-Yeah, that's a problem.
+do_test "-o allocsize=PAGESIZE" pass "allocsize=PAGESIZE" "true"
 
-I think you could add another "trap" in fdatasync_work, as what
-btrfs/036 does:
+And do_test converts the "PAGESIZE" to actual page size.
 
-	trap "wait; exit" SIGTERM
+>  do_test "-o allocsize=1048576k" pass "allocsize=1048576k" "true"
+>  do_test "-o allocsize=$((dbsize / 2))" fail
+>  do_test "-o allocsize=2g" fail
+> diff --git a/tests/xfs/513.out b/tests/xfs/513.out
+> index 9be18dd8..2d9f8384 100644
+> --- a/tests/xfs/513.out
+> +++ b/tests/xfs/513.out
+> @@ -5,7 +5,7 @@ QA output created by 513
+>  ** start xfs mount testing ...
+>  FORMAT: 
+>  TEST: "" "pass" "allocsize" "false"
+> -TEST: "-o allocsize=4k" "pass" "allocsize=4k" "true"
+> +TEST: "-o allocsize=64k" "pass" "allocsize=64k" "true"
 
-So xfs_io will be waited by fdatasync_work before exiting.
+So .out prints "... allocsize=PAGESIZE" ...
 
 Thanks,
 Eryu
 
-> 
-> Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
-> ---
->  tests/ext4/021 | 1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/tests/ext4/021 b/tests/ext4/021
-> index 519737e1..1b4a1ced 100755
-> --- a/tests/ext4/021
-> +++ b/tests/ext4/021
-> @@ -18,6 +18,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
->  
->  _cleanup()
->  {
-> +	$KILLALL_PROG -wq xfs_io
->  	cd /
->  	rm -f $tmp.*
->  }
+>  TEST: "-o allocsize=1048576k" "pass" "allocsize=1048576k" "true"
+>  TEST: "-o allocsize=2048" "fail"
+>  TEST: "-o allocsize=2g" "fail"
 > -- 
-> 2.23.0.rc2.8.gff66981f45
+> 2.20.1
 > 
