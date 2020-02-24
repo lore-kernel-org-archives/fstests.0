@@ -2,165 +2,168 @@ Return-Path: <SRS0=n5xI=4M=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4C9C7C35670
-	for <linux-fstests@archiver.kernel.org>; Mon, 24 Feb 2020 01:35:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 589BCC35673
+	for <linux-fstests@archiver.kernel.org>; Mon, 24 Feb 2020 01:51:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 13E122071C
-	for <linux-fstests@archiver.kernel.org>; Mon, 24 Feb 2020 01:35:15 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="KJd7fb62"
+	by mail.kernel.org (Postfix) with ESMTP id 37D1D20675
+	for <linux-fstests@archiver.kernel.org>; Mon, 24 Feb 2020 01:51:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727166AbgBXBfP (ORCPT
+        id S1727183AbgBXBv3 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 23 Feb 2020 20:35:15 -0500
-Received: from mail-pg1-f196.google.com ([209.85.215.196]:34445 "EHLO
-        mail-pg1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727158AbgBXBfP (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 23 Feb 2020 20:35:15 -0500
-Received: by mail-pg1-f196.google.com with SMTP id j4so4280391pgi.1
-        for <fstests@vger.kernel.org>; Sun, 23 Feb 2020 17:35:13 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=HypwtMwzm3OMiU18WgtmMvsLetNuUnfXzhmDDXSXZIM=;
-        b=KJd7fb62CkJOYjZrG9esgQxIdpdcqux92qk22qRWBwjick1FJq3+Rc46m6bWPMR3/l
-         Y0Z+LDlRfAk9dz8poIX3iYqAIJWv9ey8cfAfRbC+sV+uDd8QYdDjdvhEjKF9OzN68cLM
-         BFb/TmeCHYX0/djleHCjNkeJ+yFeYyh47NuWWuB5uKH4ECD1xRNG1f9BejLJbONVGnQw
-         I4ww6EBl16zNo24kj0En9D3bFyVDrCNEx5eaw06bEZewS24QsXGezCHSXQVaWvkZsAQy
-         xq9oLskbYDnDiJ2NU+sqkQ++YxwFrCiojdXL92BZlPgjpdXjf2vA+StJMICGfAkU1Obc
-         097Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=HypwtMwzm3OMiU18WgtmMvsLetNuUnfXzhmDDXSXZIM=;
-        b=VAgazI+N4T4VIQFmdBQfwQsUvmxgAdjEFyhYl6Qn5Qx9mx1RhoIujgARetBZfpRPRC
-         gtoDTYFv5ZoKXqKmj+S2r0O0OqXGTsLN4jj+g/QlZrOfv7Oj7gf0dtf7mynQLyT/4K0l
-         obYoQJ53SJgBwNS/wLc/4UJO2uuCapPekub/7GhP+FoGCnAM0Sp+W2Xtjav8De5Fn99u
-         bXXnC56csM/Y5/0etueo10fzaFaB6oXAsHMVoM8x8rQnzuHoM3i/CuQfefkPhShFGCAL
-         uGaD5pQjPttoCXQ5DjehjRSscWHE377V+Vte9jaA2Q6s/jPKobKYGYgiGbdt6ZAR4Q2f
-         1+Kw==
-X-Gm-Message-State: APjAAAWjfFKQgaRTVA+J3LL0mx2dwEWBnZRyBsq+MifC+lqjJgSrY0Bw
-        yjOnYsmrQVe1SWoGdXFbwQx9DQK9JI3mKg==
-X-Google-Smtp-Source: APXvYqz52R5lEGyP1oNa1Vm3C8z7ZJoXrD8hFObBXVXEgLG2M4lvT5g4HQx1wQY+b+2wDOJY+c00DQ==
-X-Received: by 2002:a63:d90c:: with SMTP id r12mr53505689pgg.106.1582508113213;
-        Sun, 23 Feb 2020 17:35:13 -0800 (PST)
-Received: from localhost ([178.128.102.47])
-        by smtp.gmail.com with ESMTPSA id o29sm10395895pfp.124.2020.02.23.17.35.12
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 23 Feb 2020 17:35:12 -0800 (PST)
-Date:   Mon, 24 Feb 2020 09:35:05 +0800
-From:   Eryu Guan <guaneryu@gmail.com>
-To:     zlang@redhat.com
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] xfs/513: fix 4k allocsize fails on 64k pagesize
-Message-ID: <20200224013502.GH3840@desktop>
-References: <20200218165818.21066-1-zlang@redhat.com>
- <20200223124545.GB3840@desktop>
- <20200223161818.GN14282@dhcp-12-102.nay.redhat.com>
+        Sun, 23 Feb 2020 20:51:29 -0500
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:62367 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1727151AbgBXBv2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 23 Feb 2020 20:51:28 -0500
+X-IronPort-AV: E=Sophos;i="5.70,478,1574092800"; 
+   d="scan'208";a="83807249"
+Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
+  by heian.cn.fujitsu.com with ESMTP; 24 Feb 2020 09:51:24 +0800
+Received: from G08CNEXMBPEKD04.g08.fujitsu.local (unknown [10.167.33.201])
+        by cn.fujitsu.com (Postfix) with ESMTP id 5BD03406AB15;
+        Mon, 24 Feb 2020 09:41:38 +0800 (CST)
+Received: from [10.167.220.84] (10.167.220.84) by
+ G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201) with Microsoft SMTP Server
+ (TLS) id 15.0.1395.4; Mon, 24 Feb 2020 09:51:23 +0800
+Subject: Re: [PATCH v2] common/log: add -l su option in _xfs_log_config
+To:     "Darrick J. Wong" <darrick.wong@oracle.com>,
+        Eryu Guan <guaneryu@gmail.com>
+CC:     <fstests@vger.kernel.org>
+References: <20200220021709.GF9504@magnolia>
+ <1582177081-6235-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
+ <20200223142208.GD3840@desktop> <20200223163710.GL9504@magnolia>
+From:   Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+Message-ID: <a801d86e-80ab-b2fb-ba72-721365a8133e@cn.fujitsu.com>
+Date:   Mon, 24 Feb 2020 09:51:20 +0800
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101
+ Thunderbird/68.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200223161818.GN14282@dhcp-12-102.nay.redhat.com>
+In-Reply-To: <20200223163710.GL9504@magnolia>
+Content-Type: text/plain; charset="gbk"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.167.220.84]
+X-ClientProxiedBy: G08CNEXCHPEKD05.g08.fujitsu.local (10.167.33.203) To
+ G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201)
+X-yoursite-MailScanner-ID: 5BD03406AB15.AD08A
+X-yoursite-MailScanner: Found to be clean
+X-yoursite-MailScanner-From: xuyang2018.jy@cn.fujitsu.com
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Feb 24, 2020 at 12:18:19AM +0800, Zorro Lang wrote:
-> On Sun, Feb 23, 2020 at 08:45:48PM +0800, Eryu Guan wrote:
-> > On Wed, Feb 19, 2020 at 12:58:18AM +0800, Zorro Lang wrote:
-> > > The minimal I/O preallocation size is page size. The allocsize=4k
-> > > always fails on 64k pagesize machine. So change the fs blocksize
-> > > allocsize test to allocsize=64k.
-> > > 
-> > > Signed-off-by: Zorro Lang <zlang@redhat.com>
-> > 
-> > I think it's better to make the page size auto-detected, and filter out
-> > the actual size to something like "PAGESIZE" in .out file.
-> > 
-> > > ---
-> > >  tests/xfs/513     | 4 ++--
-> > >  tests/xfs/513.out | 2 +-
-> > >  2 files changed, 3 insertions(+), 3 deletions(-)
-> > > 
-> > > diff --git a/tests/xfs/513 b/tests/xfs/513
-> > > index 70bc2f1c..3c3f5163 100755
-> > > --- a/tests/xfs/513
-> > > +++ b/tests/xfs/513
-> > > @@ -178,13 +178,13 @@ do_test()
-> > >  
-> > >  echo "** start xfs mount testing ..."
-> > >  # Test allocsize=size
-> > > -# Valid values for this option are page size (typically 4KiB) through to 1GiB
-> > > +# Valid values for this option are page size through to 1GiB
 
-From this test description, it seems we're not only testing the
-arg-parsing part, but also testing if kernel could mount the ending fs.
-So I thought changing 4k to 64k would lose some test coverage, the
-normal 4k pagesize case is lost.
 
-> > >  do_mkfs
-> > >  if [ $dbsize -ge 1024 ];then
-> > >  	blsize="$((dbsize / 1024))k"
-> > >  fi
-> > >  do_test "" pass "allocsize" "false"
-> > > -do_test "-o allocsize=$blsize" pass "allocsize=$blsize" "true"
-> > > +do_test "-o allocsize=64k" pass "allocsize=64k" "true"
-> > 
-> > do_test "-o allocsize=PAGESIZE" pass "allocsize=PAGESIZE" "true"
-> > 
-> > And do_test converts the "PAGESIZE" to actual page size.
+on 2020/02/24 0:37, Darrick J. Wong wrote:
+> On Sun, Feb 23, 2020 at 10:22:10PM +0800, Eryu Guan wrote:
+>> Hi Darrick,
+>>
+>> On Thu, Feb 20, 2020 at 01:38:01PM +0800, Yang Xu wrote:
+>>> Currently, if we don't specify -l sunit or -l su option, mkfs.xfs
+>>> will get the stripe size from underlying device.
+>>>
+>>> It works file on most situations. But on some machine, the size of
+>>> underlying device greater than logbsize of mount options, it will
+>>> report error like "logbuf size must be greater than or equal to log
+>>> stripe size". We can specify -l su=4096 to meet this requirement and
+>>> case can still run normally.
+>>>
+>>> Also, from xfs manpage, version 2 also supports 16k log buf size for
+>>> mount option and case passed(only generic/054,055 used this api) on
+>>> my machine. So delete 32k and 64k with different sunit to be consistented
 > 
-> I thought about that too, but due to this case only uses PAGESIZE once
-> at here. So I don't know if it's worth changing much code for that.
-> And I don't think the PAGESIZE is necessary for this test, 4k and 64k
-> are all fine for me. The case just trys to make sure 4k/64k can be parsed by
-> fs_parse().
+> I don't understand why there's a need to be consistent, which means I
+> don't understand why we'd "delete 32k and 64k with different sunit".
+> ext4 tests should not be invoking _xfs_log_config()
 
-If it only wants to make sure fs_parse() could parse the arg, then I'm
-fine with the fix.
+Sorry for the confused message.
+_get_log_configs{
+xfs)
+         _xfs_log_config
+         ;;
+     f2fs)
+         _f2fs_log_config
+         ;;
+     ext4)
+         _ext4_log_config
 
-Thanks,
-Eryu
+}
+xfs ,f2fs, and ext4 all have test1~test10.
+So for a generic case, it should be consistent.
+And only generic/054 055 uses _get_log_configs api and no test case
+used _xfs_log_config api. I think we should keep this(test1~test10, 
+054.out only 10 times mkfs and mount output)
+> 
+>>> with ext4 test num(10) and we can test all logbuf size.
+> 
+> Hm?  ext4/010 is an inode bitmap fuzz test.
+>
+No. I mean _ext4_log_config has test1~test10.
 
+Best Regards
+Yang Xu
+>>>
+>>> Signed-off-by: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+>>
+>> Would you like to review this v2 patch again? I feel more confident if
+>> xfs maintainer could ack it :)
+>>
+>> Thanks,
+>> Eryu
+>>
+>>> ---
+>>>   common/log | 12 ++++++------
+>>>   1 file changed, 6 insertions(+), 6 deletions(-)
+>>>
+>>> diff --git a/common/log b/common/log
+>>> index c7921f50..9b5a2f6d 100644
+>>> --- a/common/log
+>>> +++ b/common/log
+>>> @@ -546,15 +546,15 @@ _xfs_log_config()
+>>>   {
+>>>       echo "# mkfs-opt             mount-opt"
+>>>       echo "# ------------------------------"
+>>> -    echo "  version=2            logbsize=32k"
+>>> +    echo "  version=2,su=4096    logbsize=16k"
 > 
-> What do you think?
+> The straight substitutions look fine to me, but then...
 > 
-> Thanks,
-> Zorro
+>>> +    echo "  version=2,su=16k     logbsize=16k"
 > 
-> > 
-> > >  do_test "-o allocsize=1048576k" pass "allocsize=1048576k" "true"
-> > >  do_test "-o allocsize=$((dbsize / 2))" fail
-> > >  do_test "-o allocsize=2g" fail
-> > > diff --git a/tests/xfs/513.out b/tests/xfs/513.out
-> > > index 9be18dd8..2d9f8384 100644
-> > > --- a/tests/xfs/513.out
-> > > +++ b/tests/xfs/513.out
-> > > @@ -5,7 +5,7 @@ QA output created by 513
-> > >  ** start xfs mount testing ...
-> > >  FORMAT: 
-> > >  TEST: "" "pass" "allocsize" "false"
-> > > -TEST: "-o allocsize=4k" "pass" "allocsize=4k" "true"
-> > > +TEST: "-o allocsize=64k" "pass" "allocsize=64k" "true"
-> > 
-> > So .out prints "... allocsize=PAGESIZE" ...
-> > 
-> > Thanks,
-> > Eryu
-> > 
-> > >  TEST: "-o allocsize=1048576k" "pass" "allocsize=1048576k" "true"
-> > >  TEST: "-o allocsize=2048" "fail"
-> > >  TEST: "-o allocsize=2g" "fail"
-> > > -- 
-> > > 2.20.1
-> > > 
-> > 
+> ...I can't tell why we're adding this extra case here, or why this
+> has to be here and not in a separate patch justifying the addition?
 > 
+>>>       echo "  version=2,su=4096    logbsize=32k"
+>>> -    echo "  version=2,su=32768   logbsize=32k"
+>>> -    echo "  version=2,su=32768   logbsize=64k"
+> 
+> ...I also don't think it's a good idea to reduce test coverage, and
+> definitely not buried in something that sounds like a fix patch.
+> 
+> --D
+> 
+>>> -    echo "  version=2            logbsize=64k"
+>>> +    echo "  version=2,su=32k     logbsize=32k"
+>>> +    echo "  version=2,su=4096    logbsize=64k"
+>>>       echo "  version=2,su=64k     logbsize=64k"
+>>> -    echo "  version=2            logbsize=128k"
+>>> +    echo "  version=2,su=4096    logbsize=128k"
+>>>       echo "  version=2,su=128k    logbsize=128k"
+>>> -    echo "  version=2            logbsize=256k"
+>>> +    echo "  version=2,su=4096    logbsize=256k"
+>>>       echo "  version=2,su=256k    logbsize=256k"
+>>>   }
+>>>   
+>>> -- 
+>>> 2.18.0
+>>>
+>>>
+>>>
+> 
+> 
+
+
