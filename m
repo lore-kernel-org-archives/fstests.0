@@ -2,78 +2,102 @@ Return-Path: <SRS0=n5xI=4M=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
+X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 534D3C35671
-	for <linux-fstests@archiver.kernel.org>; Mon, 24 Feb 2020 11:49:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B7422C35671
+	for <linux-fstests@archiver.kernel.org>; Mon, 24 Feb 2020 13:46:46 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 2FCF02072D
-	for <linux-fstests@archiver.kernel.org>; Mon, 24 Feb 2020 11:49:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8BA362080D
+	for <linux-fstests@archiver.kernel.org>; Mon, 24 Feb 2020 13:46:46 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="hP7XI2+5"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727295AbgBXLta (ORCPT
+        id S1726597AbgBXNqq (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 24 Feb 2020 06:49:30 -0500
-Received: from szxga07-in.huawei.com ([45.249.212.35]:58798 "EHLO huawei.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1727282AbgBXLta (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 24 Feb 2020 06:49:30 -0500
-Received: from DGGEMS408-HUB.china.huawei.com (unknown [172.30.72.59])
-        by Forcepoint Email with ESMTP id A64588F09A17B4D6FF50;
-        Mon, 24 Feb 2020 19:31:12 +0800 (CST)
-Received: from [127.0.0.1] (10.173.220.179) by DGGEMS408-HUB.china.huawei.com
- (10.3.19.208) with Microsoft SMTP Server id 14.3.439.0; Mon, 24 Feb 2020
- 19:31:07 +0800
-Subject: Re: [PATCH] ext4/021: make sure the fdatasync subprocess exits
-To:     Eryu Guan <guaneryu@gmail.com>
-CC:     <fstests@vger.kernel.org>, <linux-ext4@vger.kernel.org>
-References: <20200214022001.15563-1-yi.zhang@huawei.com>
- <20200223123411.GA3840@desktop>
-From:   "zhangyi (F)" <yi.zhang@huawei.com>
-Message-ID: <2c2b8a1b-64a3-8fd7-948f-ea7a777e2cf0@huawei.com>
-Date:   Mon, 24 Feb 2020 19:31:06 +0800
-User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:68.0) Gecko/20100101
- Thunderbird/68.3.0
+        Mon, 24 Feb 2020 08:46:46 -0500
+Received: from us-smtp-1.mimecast.com ([207.211.31.81]:24791 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1725535AbgBXNqq (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 24 Feb 2020 08:46:46 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1582552004;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=Y8ecsNHdnLw04uWOJgR7gWMO6EOFZjTJ6zejnqJyQQ0=;
+        b=hP7XI2+5wqqkObsXfOF0w1evaOwGc4PCcM9/cEfbDKMWkxYwjQU2GgHuQvvSCHKK7FH1BN
+        WGewowVVrxJqX66tfBkvKPn+MJ5wu2KbIxFYfdyjb/y/L1bvLbKIQCDxl1EYz6GxnFqFez
+        UYGn3oYcCKISSy1gy91kqFMd4uamouU=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-339-z4yOuXrrOMORUtfbeHlWeA-1; Mon, 24 Feb 2020 08:46:42 -0500
+X-MC-Unique: z4yOuXrrOMORUtfbeHlWeA-1
+Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id CFF5E18A6EC1;
+        Mon, 24 Feb 2020 13:46:41 +0000 (UTC)
+Received: from segfault.boston.devel.redhat.com (segfault.boston.devel.redhat.com [10.19.60.26])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id 5C47191833;
+        Mon, 24 Feb 2020 13:46:41 +0000 (UTC)
+From:   Jeff Moyer <jmoyer@redhat.com>
+To:     fstests@vger.kernel.org
+Cc:     linux-fsdevel@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH V2 3/3] xfs/300: modify test to work on any fs block size
+References: <20200220200632.14075-1-jmoyer@redhat.com>
+        <20200220200632.14075-4-jmoyer@redhat.com>
+        <20200222053152.GM14282@dhcp-12-102.nay.redhat.com>
+X-PGP-KeyID: 1F78E1B4
+X-PGP-CertKey: F6FE 280D 8293 F72C 65FD  5A58 1FF8 A7CA 1F78 E1B4
+Date:   Mon, 24 Feb 2020 08:46:40 -0500
+In-Reply-To: <20200222053152.GM14282@dhcp-12-102.nay.redhat.com> (Zorro Lang's
+        message of "Sat, 22 Feb 2020 13:31:53 +0800")
+Message-ID: <x49ftf0p073.fsf@segfault.boston.devel.redhat.com>
+User-Agent: Gnus/5.13 (Gnus v5.13) Emacs/26.1 (gnu/linux)
 MIME-Version: 1.0
-In-Reply-To: <20200223123411.GA3840@desktop>
-Content-Type: text/plain; charset="utf-8"
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.173.220.179]
-X-CFilter-Loop: Reflected
+Content-Type: text/plain
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.15
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Hi,
+Zorro Lang <zlang@redhat.com> writes:
 
-On 2020/2/23 20:34, Eryu Guan wrote:
-> On Fri, Feb 14, 2020 at 10:20:01AM +0800, zhangyi (F) wrote:
->> Now we just kill fdatasync_work process and wait nothing after the
->> test, so a busy unmount failure may appear if the fdatasync syscall
->> doesn't return in time.
->>
->>   umount: /tmp/scratch: target is busy.
->>   mount: /tmp/scratch: /dev/sdb already mounted on /tmp/scratch.
->>   !!! failed to remount /dev/sdb on /tmp/scratch
->>
->> This patch kill and wait the xfs_io fdatasync subprocess to make sure
->> _check_scratch_fs success.
-> 
-> Yeah, that's a problem.
-> 
-> I think you could add another "trap" in fdatasync_work, as what
-> btrfs/036 does:
-> 
-> 	trap "wait; exit" SIGTERM
-> 
-> So xfs_io will be waited by fdatasync_work before exiting.
-> 
+> On Thu, Feb 20, 2020 at 03:06:32PM -0500, Jeff Moyer wrote:
+>> The test currently assumes a file system block size of 4k.  It will
+>> work just fine on any user-specified block size, though.
+>> 
+>> Signed-off-by: Jeff Moyer <jmoyer@redhat.com>
+>> ---
+>>  tests/xfs/300 | 3 ++-
+>>  1 file changed, 2 insertions(+), 1 deletion(-)
+>> 
+>> diff --git a/tests/xfs/300 b/tests/xfs/300
+>> index 28608b81..4f1c927a 100755
+>> --- a/tests/xfs/300
+>> +++ b/tests/xfs/300
+>> @@ -50,8 +50,9 @@ $XFS_IO_PROG -f -c "pwrite -S 0x63 0 4096" $SCRATCH_MNT/attrvals >> $seqres.full
+>>  cat $SCRATCH_MNT/attrvals | attr -s name $SCRATCH_MNT/$seq.test >> $seqres.full 2>&1
+>>  
+>>  # Fragment the file by writing backwards
+>> +bs=$(_get_file_block_size $SCRATCH_MNT)
+>>  for I in `seq 6 -1 0`; do
+>> -	dd if=/dev/zero of=$SCRATCH_MNT/$seq.test seek=$I bs=4k \
+>> +	dd if=/dev/zero of=$SCRATCH_MNT/$seq.test seek=$I bs=${bs} \
+>
+> Although the original case won't fail on 64k test. But this change makes
+> more sense.
 
-Thanks for your suggestion, I will do that.
+It will fail for the case mentioned in the cover letter.  That is:
+
+MKFS_OPTIONS="-m reflink=0 -b size=65536" MOUNT_OPTIONS="-o dax"
+
+on a system with >4k page size (xfs, in this case).
 
 Thanks,
-Yi.
+Jeff
 
