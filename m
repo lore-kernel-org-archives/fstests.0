@@ -7,101 +7,160 @@ X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 06683C4BA0A
-	for <linux-fstests@archiver.kernel.org>; Wed, 26 Feb 2020 07:32:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 23EB3C4BA0B
+	for <linux-fstests@archiver.kernel.org>; Wed, 26 Feb 2020 07:39:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id CE45024650
-	for <linux-fstests@archiver.kernel.org>; Wed, 26 Feb 2020 07:32:15 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EAC2C21D7E
+	for <linux-fstests@archiver.kernel.org>; Wed, 26 Feb 2020 07:39:39 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="KmOub0YV"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Eu+p5AND"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727035AbgBZHcP (ORCPT
+        id S1727012AbgBZHjj (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 26 Feb 2020 02:32:15 -0500
-Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:37298 "EHLO
+        Wed, 26 Feb 2020 02:39:39 -0500
+Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:47241 "EHLO
         us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726903AbgBZHcP (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 26 Feb 2020 02:32:15 -0500
+        with ESMTP id S1726903AbgBZHjj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 26 Feb 2020 02:39:39 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1582702334;
+        s=mimecast20190719; t=1582702778;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:mime-version:mime-version:content-type:content-type:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=KV5o+9PEGjiymDArFRgmcU3pMgNLdV19iuscLLAmRow=;
-        b=KmOub0YVGbdj1Oyta/NUTgOCZ6XrWygiDusuJxwS/OVSzCWHh7384qM/w73nwXhCzqVV5n
-        BWfgqo2iu4iCm7pHj8Q7Harxbr5TtRvXRI9aMZGqfOJt8GikLQRawQx5VTtqhRpH42rZVY
-        xfNBXMz03tN6K07gY5sdxheyDBqrFxw=
+        bh=wRhA0nrd483E18v5kQg94BNESCEGqV9c1eIWV3FQHu4=;
+        b=Eu+p5AND2BRbcg5g27KIQWb0o9PtANbcKXPHXUJ5i0NQOhstcHrXu2QOUypvHHyG5v8nrn
+        CQnm5mQeRuAnsyQMi6npk3UH9woBZ+FBKtaTDmH/HICsmjSbQbSGXhVQX/VWUw3COU/KWI
+        OpBs2go4frYXervv++c0Red4uu3VsTs=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-320-tt25OrrJOD6B_pMwDBVuww-1; Wed, 26 Feb 2020 02:32:12 -0500
-X-MC-Unique: tt25OrrJOD6B_pMwDBVuww-1
-Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+ us-mta-83-NDrZfCpfPi6nzwJDsbEByw-1; Wed, 26 Feb 2020 02:39:36 -0500
+X-MC-Unique: NDrZfCpfPi6nzwJDsbEByw-1
+Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 7B48F800D53
-        for <fstests@vger.kernel.org>; Wed, 26 Feb 2020 07:32:11 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 81F91800EBB;
+        Wed, 26 Feb 2020 07:39:35 +0000 (UTC)
 Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id E90F9100164D
-        for <fstests@vger.kernel.org>; Wed, 26 Feb 2020 07:32:10 +0000 (UTC)
-Date:   Wed, 26 Feb 2020 15:42:46 +0800
+        by smtp.corp.redhat.com (Postfix) with ESMTP id EB77C909E9;
+        Wed, 26 Feb 2020 07:39:34 +0000 (UTC)
+Date:   Wed, 26 Feb 2020 15:50:09 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     fstests@vger.kernel.org
-Subject: Re: [PATCH V2 3/3] xfs/300: modify test to work on any fs block size
-Message-ID: <20200226074245.GS14282@dhcp-12-102.nay.redhat.com>
-Mail-Followup-To: fstests@vger.kernel.org
-References: <20200220200632.14075-1-jmoyer@redhat.com>
- <20200220200632.14075-4-jmoyer@redhat.com>
- <20200222053152.GM14282@dhcp-12-102.nay.redhat.com>
- <x49ftf0p073.fsf@segfault.boston.devel.redhat.com>
+To:     xzhou@redhat.com
+Cc:     fstests@vger.kernel.org, jlayton@kernel.org,
+        hristoph Hellwig <hch@lst.de>
+Subject: Re: [PATCH] xfstests: remove generic/484
+Message-ID: <20200226075009.GT14282@dhcp-12-102.nay.redhat.com>
+Mail-Followup-To: xzhou@redhat.com, fstests@vger.kernel.org,
+        jlayton@kernel.org, hristoph Hellwig <hch@lst.de>
+References: <20200224222926.694991-1-hch@lst.de>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <x49ftf0p073.fsf@segfault.boston.devel.redhat.com>
+In-Reply-To: <20200224222926.694991-1-hch@lst.de>
 User-Agent: Mutt/1.10.1 (2018-07-13)
-X-Scanned-By: MIMEDefang 2.84 on 10.5.11.22
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Feb 24, 2020 at 08:46:40AM -0500, Jeff Moyer wrote:
-> Zorro Lang <zlang@redhat.com> writes:
+On Mon, Feb 24, 2020 at 02:29:26PM -0800, Christoph Hellwig wrote:
+> Generic/484 tests functionality that isn't really related to file
+> systems, and has failed every since it was added.  Remove it as it
+> serves no puropse in xfstests.
 > 
-> > On Thu, Feb 20, 2020 at 03:06:32PM -0500, Jeff Moyer wrote:
-> >> The test currently assumes a file system block size of 4k.  It will
-> >> work just fine on any user-specified block size, though.
-> >> 
-> >> Signed-off-by: Jeff Moyer <jmoyer@redhat.com>
-> >> ---
-> >>  tests/xfs/300 | 3 ++-
-> >>  1 file changed, 2 insertions(+), 1 deletion(-)
-> >> 
-> >> diff --git a/tests/xfs/300 b/tests/xfs/300
-> >> index 28608b81..4f1c927a 100755
-> >> --- a/tests/xfs/300
-> >> +++ b/tests/xfs/300
-> >> @@ -50,8 +50,9 @@ $XFS_IO_PROG -f -c "pwrite -S 0x63 0 4096" $SCRATCH_MNT/attrvals >> $seqres.full
-> >>  cat $SCRATCH_MNT/attrvals | attr -s name $SCRATCH_MNT/$seq.test >> $seqres.full 2>&1
-> >>  
-> >>  # Fragment the file by writing backwards
-> >> +bs=$(_get_file_block_size $SCRATCH_MNT)
-> >>  for I in `seq 6 -1 0`; do
-> >> -	dd if=/dev/zero of=$SCRATCH_MNT/$seq.test seek=$I bs=4k \
-> >> +	dd if=/dev/zero of=$SCRATCH_MNT/$seq.test seek=$I bs=${bs} \
-> >
-> > Although the original case won't fail on 64k test. But this change makes
-> > more sense.
-> 
-> It will fail for the case mentioned in the cover letter.  That is:
-> 
-> MKFS_OPTIONS="-m reflink=0 -b size=65536" MOUNT_OPTIONS="-o dax"
-> 
-> on a system with >4k page size (xfs, in this case).
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> ---
 
-Thanks, good to know that :)
+CC the original author of this case. To make sure if he has more
+opinions about this change, and if he'd like to shift it to LTP
+if xfstests decides to remove this case at last.
 
+>  tests/generic/484     | 51 -------------------------------------------
+>  tests/generic/484.out |  2 --
+>  tests/generic/group   |  1 -
+>  3 files changed, 54 deletions(-)
+>  delete mode 100755 tests/generic/484
+>  delete mode 100644 tests/generic/484.out
 > 
-> Thanks,
-> Jeff
+> diff --git a/tests/generic/484 b/tests/generic/484
+> deleted file mode 100755
+> index d83380ac..00000000
+> --- a/tests/generic/484
+> +++ /dev/null
+> @@ -1,51 +0,0 @@
+> -#! /bin/bash
+> -# SPDX-License-Identifier: GPL-2.0
+> -# Copyright (c) 2018 Red Hat Inc.  All Rights Reserved.
+> -#
+> -# FS QA Test 484
+> -#
+> -# POSIX requires that record locks are preserved across an execve(2). But
+> -# there's bug that record locks are released if process is multithreaded at the
+> -# time that execve is called.
+> -#
+> -# Fixed by patch from Jeff Layton:
+> -# locks: change POSIX lock ownership on execve when files_struct is displaced
+> -#
+> -seq=`basename $0`
+> -seqres=$RESULT_DIR/$seq
+> -echo "QA output created by $seq"
+> -
+> -here=`pwd`
+> -tmp=/tmp/$$
+> -status=1	# failure is the default!
+> -trap "_cleanup; exit \$status" 0 1 2 3 15
+> -
+> -_cleanup()
+> -{
+> -	cd /
+> -	rm -f $tmp.*
+> -}
+> -
+> -# get standard environment, filters and checks
+> -. ./common/rc
+> -. ./common/filter
+> -
+> -# remove previous $seqres.full before test
+> -rm -f $seqres.full
+> -
+> -# real QA test starts here
+> -_supported_fs generic
+> -_supported_os Linux
+> -_require_test
+> -_require_test_program "t_locks_execve"
+> -
+> -# prepare a 4k testfile in TEST_DIR
+> -$XFS_IO_PROG -f -c "pwrite -S 0xFF 0 4096" \
+> -	$TEST_DIR/t_lock_execve_file >> $seqres.full 2>&1
+> -
+> -$here/src/t_locks_execve $TEST_DIR/t_lock_execve_file
+> -
+> -# success, all done
+> -echo "Silence is golden"
+> -status=0
+> -exit
+> diff --git a/tests/generic/484.out b/tests/generic/484.out
+> deleted file mode 100644
+> index 94f2f0bd..00000000
+> --- a/tests/generic/484.out
+> +++ /dev/null
+> @@ -1,2 +0,0 @@
+> -QA output created by 484
+> -Silence is golden
+> diff --git a/tests/generic/group b/tests/generic/group
+> index ff79a597..dc95b77b 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -486,7 +486,6 @@
+>  481 auto quick log metadata
+>  482 auto metadata replay
+>  483 auto quick log metadata
+> -484 auto quick
+>  485 auto quick insert
+>  486 auto quick attr
+>  487 auto quick eio
+> -- 
+> 2.24.1
 > 
 
