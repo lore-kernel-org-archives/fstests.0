@@ -2,218 +2,84 @@ Return-Path: <SRS0=Ppg5=4S=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+X-Spam-Status: No, score=-3.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A1DD5C3F2D1
-	for <linux-fstests@archiver.kernel.org>; Sun,  1 Mar 2020 13:54:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EAAB6C3F2CD
+	for <linux-fstests@archiver.kernel.org>; Sun,  1 Mar 2020 14:32:36 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 48CE120880
-	for <linux-fstests@archiver.kernel.org>; Sun,  1 Mar 2020 13:54:13 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AAEA8214DB
+	for <linux-fstests@archiver.kernel.org>; Sun,  1 Mar 2020 14:32:36 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="l6dqjfpf"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="qgkiT4Ke"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726204AbgCANyM (ORCPT
+        id S1725945AbgCAOcg (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 1 Mar 2020 08:54:12 -0500
-Received: from mail-pg1-f180.google.com ([209.85.215.180]:35551 "EHLO
-        mail-pg1-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725874AbgCANyM (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 1 Mar 2020 08:54:12 -0500
-Received: by mail-pg1-f180.google.com with SMTP id 7so4053419pgr.2;
-        Sun, 01 Mar 2020 05:54:10 -0800 (PST)
+        Sun, 1 Mar 2020 09:32:36 -0500
+Received: from mail-pl1-f194.google.com ([209.85.214.194]:40924 "EHLO
+        mail-pl1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725887AbgCAOcg (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 1 Mar 2020 09:32:36 -0500
+Received: by mail-pl1-f194.google.com with SMTP id y1so3134873plp.7
+        for <fstests@vger.kernel.org>; Sun, 01 Mar 2020 06:32:35 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=date:from:to:cc:subject:message-id:references:mime-version
          :content-disposition:in-reply-to;
-        bh=zJRNmhyHVjdCuisfZqrBWEUt9slyZyZshlGJyr+GzDs=;
-        b=l6dqjfpfZdLgwxrsFQuJlfVdKbFzm/7coAVdZt97JU6q5bh02U8eJ/3J1s7fVEelBZ
-         uggeJ5JIALTK22BcvpkX0Ebcg6rbZ6AtAuVN6jN1IU/0PXFt8WOyUqQs/5XCqpY4Jy4E
-         fWwCqSunmEdosH9HttSBDpiNxUFSJhgZC2uD3u+kcRpujj2rlLgsmV+Vtnc+vOUwkgOX
-         g6xlY3Ukoc4QO2Jj1FdWgqJ2CqPwkKr5ZrlZkamw/3tflpWDBXTkfuUQZSjKru3QSnHm
-         pDWK/KuoUbY+i6IYl88bORb/2+qtAxMbv03aANcclizzOZCc1r5kRo1C49SPwVoj3TG3
-         3guA==
+        bh=7TdYTQRsr0Sh0r1qmrmkLs4I3Br1sZPGBdDUy6DUkO0=;
+        b=qgkiT4KeauoHWKrTw7vxAf4wtuakCyyhTEjesr39LmRAcyRmXCY7JIrqbIlJAjp4GG
+         2ILOVpFo/7935QLCZB/6CeKKuQtQHzQduPOiph9V0JJs5Ns2YNKbUjLZpB/A4kt+Cjb0
+         gJ4w+6//tSKl3dNlRIf5yG0LAWIwp4MITh99NWpmavifnOFj0jTvi5diwNUvVIZpd1K7
+         G4eQ61naGXDC+caj7+2cpDrN2mgNRnOc4pnEgSBNdu8fPHNgdkMqcbwW+pdMtE9FR5Px
+         qbpF2jO2hMSPSBXEMqQkytU5v2sAfTdlwqzngca3YYmpfbr7TzYYVwAo5tcMAhbXCxaj
+         cXTA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to;
-        bh=zJRNmhyHVjdCuisfZqrBWEUt9slyZyZshlGJyr+GzDs=;
-        b=CTwLQUAiLLASK0/39i+lKdxgBlqhn5QC6WwA/sr7xBozMn6ux0OF8cN5vcMmBquveO
-         LXgYL3p1M4JQi3Si8nyCAwZ2kkeVcl+y+dlB1JjOeM8kBGPRK11qiYyJy5dw+MhvQUu9
-         tz852wg446NDSY5t/eMwlVXy3SbYqBc6iCdJUM/ge5YEo08q3Qlfz5G07StmWjI78rU3
-         2UcK+KG2mNk7C/Ix6Rp4hGlpdGPxjr4Z/FIpbCNWQaFKcpPvF4O3lW1Ccm5bz0dbtTMH
-         dXbavJ1E44E+wH65Ia+0YcN0fp2MGmqvWLsl9TqT1AOpoqUuSgovQDkitHNbbxpnUezC
-         nYFw==
-X-Gm-Message-State: APjAAAXpjjoY9ZuKx/bbfaRyB5EWFj9/aQklw2FlY+az+s44JNx137hz
-        hSiJjg91l3HX7ide5zav8qg=
-X-Google-Smtp-Source: APXvYqzhAzHQ1HsXvoauqP4Mz8ym5oWKepcg7ODWLBH7Msyrzi7SguBOCENsm5mUSjlKDmo02CmX4Q==
-X-Received: by 2002:a63:f20a:: with SMTP id v10mr14283889pgh.420.1583070849686;
-        Sun, 01 Mar 2020 05:54:09 -0800 (PST)
+        bh=7TdYTQRsr0Sh0r1qmrmkLs4I3Br1sZPGBdDUy6DUkO0=;
+        b=PiFSUNNMx199W2ElCowWaFZWL+IbjRHqYPTR1+s10Ix8R766T4prgBHFOTe/eWnLS2
+         d29KospTt0utfyByFYZsqSYMAvEfC5cP4KJehoe/Mwna/2MyPm81FSnbJ3Jo72wyHyp7
+         cBF406q8svT9UK5/XqgYj6+zmcueJf0wXZWGtBWubTtDP9K5bmY9M7LWnoz5chsnmsgP
+         KOK/QwFS5KcOKi24NjFlNVASqw1ueRG9QEZv+G3MPAEcdLNRTyEfaBRnMtSDYmzCyno/
+         rB7y3AmaFPXBFYlnZEtMBfaqcXJe4dzh4MSS5ykI0o/rR+NxXINCt/7zxrV0Ktsa5sOV
+         A3zA==
+X-Gm-Message-State: APjAAAVviEGyYvIPIjeZwo30pLKJg0r3kEM5ZOGBBCM06EfSZcAVIRlF
+        aDrAngChvFCfyfGdEpdRwQ4=
+X-Google-Smtp-Source: APXvYqws/hr5ZVOnIVrJ5HE6gWO53ezbU8ZuivlHgD6cF8XWphETaLzXcNVrPiYP//z/8Zm1yOI3eA==
+X-Received: by 2002:a17:902:9342:: with SMTP id g2mr13030239plp.339.1583073155087;
+        Sun, 01 Mar 2020 06:32:35 -0800 (PST)
 Received: from localhost ([178.128.102.47])
-        by smtp.gmail.com with ESMTPSA id q12sm17456135pfh.158.2020.03.01.05.54.07
+        by smtp.gmail.com with ESMTPSA id r9sm17864209pfl.136.2020.03.01.06.32.31
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 01 Mar 2020 05:54:08 -0800 (PST)
-Date:   Sun, 1 Mar 2020 21:54:06 +0800
+        Sun, 01 Mar 2020 06:32:34 -0800 (PST)
+Date:   Sun, 1 Mar 2020 22:32:26 +0800
 From:   Eryu Guan <guaneryu@gmail.com>
-To:     Marcos Paulo de Souza <marcos@mpdesouza.com>
-Cc:     dsterba@suse.com, nborisov@suse.com, linux-btrfs@vger.kernel.org,
-        fstests@vger.kernel.org, Marcos Paulo de Souza <mpdesouza@suse.com>
-Subject: Re: [ fstests PATCHv3 2/2] btrfs: Test subvolume delete --subvolid
- feature
-Message-ID: <20200301134026.GK3840@desktop>
-References: <20200224031341.27740-1-marcos@mpdesouza.com>
- <20200224031341.27740-3-marcos@mpdesouza.com>
+To:     Christoph Hellwig <hch@lst.de>
+Cc:     fstests@vger.kernel.org, jlayton@kernel.org
+Subject: Re: [PATCH] xfstests: remove generic/484
+Message-ID: <20200301143222.GL3840@desktop>
+References: <20200224222926.694991-1-hch@lst.de>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20200224031341.27740-3-marcos@mpdesouza.com>
+In-Reply-To: <20200224222926.694991-1-hch@lst.de>
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Feb 24, 2020 at 12:13:41AM -0300, Marcos Paulo de Souza wrote:
-> From: Marcos Paulo de Souza <mpdesouza@suse.com>
+On Mon, Feb 24, 2020 at 02:29:26PM -0800, Christoph Hellwig wrote:
+> Generic/484 tests functionality that isn't really related to file
+> systems, and has failed every since it was added.  Remove it as it
+> serves no puropse in xfstests.
 > 
-> Signed-off-by: Marcos Paulo de Souza <mpdesouza@suse.com>
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
 
-Looks fine to me overall, but it'd be better to have commit message to
-describe the test.
-
-Also, it'd be great if btrfs folks could help review it.
+I also removed src/t_locks_execve.c which is used only by this test, and
+its entries in src/Makefile & .gitignore file.
 
 Thanks,
 Eryu
-
-> ---
-> Changes from v2:
-> * Added 'Created subvolume...' into 203.out to match the subvolume creating command
-> * Changed awk to $AWK_PROG, suggested by Eryu
-> * Changed _run_btrfs_util_prog to $BTRFS_UTIL_PROG, suggested by Eryu
-> * Use _scratch_unmount instead of executing umount by hand, sugested by Eryu
-> * Created a local function to delete and list subvolumes, suggested by Eryu
-> 
-> Changes from v1:
-> * Added some prints printing what is being tested
-> * The test now uses the _btrfs_get_subvolid to get subvolumeids instead of using
->   plain integers
-> 
-> 
->  tests/btrfs/203     | 68 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/203.out | 17 ++++++++++++
->  tests/btrfs/group   |  1 +
->  3 files changed, 86 insertions(+)
->  create mode 100755 tests/btrfs/203
->  create mode 100644 tests/btrfs/203.out
-> 
-> diff --git a/tests/btrfs/203 b/tests/btrfs/203
-> new file mode 100755
-> index 00000000..0f662db1
-> --- /dev/null
-> +++ b/tests/btrfs/203
-> @@ -0,0 +1,68 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (C) 2020 SUSE Linux Products GmbH. All Rights Reserved.
-> +#
-> +# FSQA Test No. 203
-> +#
-> +# Test subvolume deletion using the subvolume id, even when the subvolume in
-> +# question is in a different mount space.
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/filter.btrfs
-> +
-> +# real QA test starts here
-> +_supported_fs btrfs
-> +_supported_os Linux
-> +_require_scratch
-> +_require_btrfs_command subvolume delete --subvolid
-> +
-> +_scratch_mkfs > /dev/null 2>&1
-> +_scratch_mount
-> +
-> +_delete_and_list()
-> +{
-> +	local subvol_name="$1"
-> +	local msg="$2"
-> +
-> +	SUBVOLID=$(_btrfs_get_subvolid $SCRATCH_MNT "$subvol_name")
-> +	$BTRFS_UTIL_PROG subvolume delete --subvolid $SUBVOLID $SCRATCH_MNT | _filter_scratch
-> +
-> +	echo "$msg"
-> +	$BTRFS_UTIL_PROG subvolume list $SCRATCH_MNT | $AWK_PROG '{ print $NF }'
-> +}
-> +
-> +# Test creating a normal subvolumes
-> +$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subvol1 | _filter_scratch
-> +$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subvol2 | _filter_scratch
-> +$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subvol3 | _filter_scratch
-> +
-> +echo "Current subvolume ids:"
-> +$BTRFS_UTIL_PROG subvolume list $SCRATCH_MNT | $AWK_PROG '{ print $NF }'
-> +
-> +# Delete the subvolume subvol1, and list the remaining two subvolumes
-> +_delete_and_list subvol1 "After deleting one subvolume:"
-> +_scratch_unmount
-> +
-> +# Now we mount the subvol2, which makes subvol3 not accessible for this mount
-> +# point, but we should be able to delete it using it's subvolume id
-> +$MOUNT_PROG -o subvol=subvol2 $SCRATCH_DEV $SCRATCH_MNT
-> +_delete_and_list subvol3 "Last remaining subvolume:"
-> +_scratch_unmount
-> +
-> +# now mount the rootfs
-> +_scratch_mount
-> +# Delete the subvol2
-> +_delete_and_list subvol2 "All subvolumes removed."
-> +_scratch_unmount
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/btrfs/203.out b/tests/btrfs/203.out
-> new file mode 100644
-> index 00000000..3301852b
-> --- /dev/null
-> +++ b/tests/btrfs/203.out
-> @@ -0,0 +1,17 @@
-> +QA output created by 203
-> +Create subvolume 'SCRATCH_MNT/subvol1'
-> +Create subvolume 'SCRATCH_MNT/subvol2'
-> +Create subvolume 'SCRATCH_MNT/subvol3'
-> +Current subvolume ids:
-> +subvol1
-> +subvol2
-> +subvol3
-> +Delete subvolume (no-commit): 'SCRATCH_MNT/subvol1'
-> +After deleting one subvolume:
-> +subvol2
-> +subvol3
-> +Delete subvolume (no-commit): 'SCRATCH_MNT/subvol3'
-> +Last remaining subvolume:
-> +subvol2
-> +Delete subvolume (no-commit): 'SCRATCH_MNT/subvol2'
-> +All subvolumes removed.
-> diff --git a/tests/btrfs/group b/tests/btrfs/group
-> index 79f85e97..e7744217 100644
-> --- a/tests/btrfs/group
-> +++ b/tests/btrfs/group
-> @@ -204,3 +204,4 @@
->  200 auto quick send clone
->  201 auto quick punch log
->  202 auto quick subvol snapshot
-> +203 auto quick subvol
-> -- 
-> 2.25.0
-> 
