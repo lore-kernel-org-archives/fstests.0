@@ -1,400 +1,172 @@
-Return-Path: <SRS0=Ppg5=4S=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=frcn=4T=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 57076C3F2CD
-	for <linux-fstests@archiver.kernel.org>; Sun,  1 Mar 2020 17:24:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6CFCCC3F2D1
+	for <linux-fstests@archiver.kernel.org>; Mon,  2 Mar 2020 22:08:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 143252468D
-	for <linux-fstests@archiver.kernel.org>; Sun,  1 Mar 2020 17:24:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 40D3324677
+	for <linux-fstests@archiver.kernel.org>; Mon,  2 Mar 2020 22:08:53 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=mpdesouza.com header.i=@mpdesouza.com header.b="nvSGtWx+"
+	dkim=pass (2048-bit key) header.d=osandov-com.20150623.gappssmtp.com header.i=@osandov-com.20150623.gappssmtp.com header.b="UAg7epZs"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726204AbgCARYE (ORCPT
+        id S1725781AbgCBWIw (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 1 Mar 2020 12:24:04 -0500
-Received: from gateway32.websitewelcome.com ([192.185.145.182]:22343 "EHLO
-        gateway32.websitewelcome.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726146AbgCARYE (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 1 Mar 2020 12:24:04 -0500
-X-Greylist: delayed 1208 seconds by postgrey-1.27 at vger.kernel.org; Sun, 01 Mar 2020 12:24:02 EST
-Received: from cm11.websitewelcome.com (cm11.websitewelcome.com [100.42.49.5])
-        by gateway32.websitewelcome.com (Postfix) with ESMTP id 49B4018DF5
-        for <fstests@vger.kernel.org>; Sun,  1 Mar 2020 11:03:54 -0600 (CST)
-Received: from br540.hostgator.com.br ([108.179.252.180])
-        by cmsmtp with SMTP
-        id 8S0Qjl27QSl8q8S0QjOUOU; Sun, 01 Mar 2020 11:03:54 -0600
-X-Authority-Reason: nr=8
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=mpdesouza.com; s=default; h=In-Reply-To:Content-Type:MIME-Version:
-        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description:Resent-Date:
-        Resent-From:Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:List-Id:
-        List-Help:List-Unsubscribe:List-Subscribe:List-Post:List-Owner:List-Archive;
-         bh=CeQ4emmRWKRyDiHKUi5f7YZ129rCdlC6S417Qcy6fpQ=; b=nvSGtWx+JUibQx7oNm4ycrpIf
-        QLgWCbB1E8Flf3aWraVM6W0FNnbYr/g94lQ4yJ1NNA2L5APScxUsluOZRO6/l8Ch0cVnqxI/85IkY
-        YYMh2r0Vj/MfYIge3plCVX1fpS12cIJa4S17gW4mo3NbNjM/NpIsgZd1AnnYcBe0KktmTYxN9GAOt
-        cKbMlreBYZQMt6rfrO6T6bHavmVzoepbe4DuIWXH/kkT2FokZlU5w6nT/Li9fAsWO6GCqET7p7q+V
-        KjkbhJbr+kMJUrTpz3CC6XQAFVVODe7AllsG9SxH4jjfM44wIhBtRaPHRpGlY//Zmc9JgGV10B71J
-        D+2wIkPog==;
-Received: from 189.26.179.234.dynamic.adsl.gvt.net.br ([189.26.179.234]:42306 helo=hephaestus)
-        by br540.hostgator.com.br with esmtpsa (TLSv1.2:ECDHE-RSA-AES256-GCM-SHA384:256)
-        (Exim 4.92)
-        (envelope-from <marcos@mpdesouza.com>)
-        id 1j8S0P-000H9I-Kl; Sun, 01 Mar 2020 14:03:54 -0300
-Date:   Sun, 1 Mar 2020 14:06:54 -0300
-From:   Marcos Paulo de Souza <marcos@mpdesouza.com>
-To:     Eryu Guan <guaneryu@gmail.com>
-Cc:     dsterba@suse.com, nborisov@suse.com, linux-btrfs@vger.kernel.org,
-        fstests@vger.kernel.org, Marcos Paulo de Souza <mpdesouza@suse.com>
-Subject: Re: [ fstests PATCHv3 2/2] btrfs: Test subvolume delete --subvolid
- feature
-Message-ID: <20200301170654.GA12013@hephaestus>
-References: <20200224031341.27740-1-marcos@mpdesouza.com>
- <20200224031341.27740-3-marcos@mpdesouza.com>
- <20200301134026.GK3840@desktop>
+        Mon, 2 Mar 2020 17:08:52 -0500
+Received: from mail-pj1-f68.google.com ([209.85.216.68]:34085 "EHLO
+        mail-pj1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726744AbgCBWIw (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 2 Mar 2020 17:08:52 -0500
+Received: by mail-pj1-f68.google.com with SMTP id f2so351063pjq.1
+        for <fstests@vger.kernel.org>; Mon, 02 Mar 2020 14:08:51 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=osandov-com.20150623.gappssmtp.com; s=20150623;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=6eilX2BTsDDxBviroTez5tkOrUqYg+t+Zvzkt65hfjQ=;
+        b=UAg7epZshV0DfHgJu9gwHnswSsUAfC3j6CNxB9p/i20kT7tNIkBqPQnTnXzKO5i5M7
+         tmNH5upyOPee3FOdjGcUrkalpRT+l5ejW3SPYh6a6aB6ETblTBIB38VVSpIWSak3rCzv
+         DerCVOUg1MUSZFrT3k4Yk9/AYSkQsUfO1HddvJF89v2OkFzj0zCn6gbqBukOtZWKn9mu
+         y4fzIIUwAD5ZoXi0X68SaspceJC5pEZ0r2l+aVWSCZztnJULsqJqTUnISyTci6TtVDmI
+         xb75cy7BUb9IjIFvjnFMXQRUbRmbPKVVuSPeCvIF0hPMcbRtehNT/4ASN1fk8B38tg5Z
+         mA4Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=6eilX2BTsDDxBviroTez5tkOrUqYg+t+Zvzkt65hfjQ=;
+        b=dIsiYo3w+Qejme1GIt6ew0Bccf9fbnEm5Jncubtv9frdAY7bHL0jHUu1ow4KD24/vZ
+         NJi0o931brPADEHrwL4n5JGWQqsAczr9fHngpsZKmxI67k6wQIRSWMjpqJQLW4fAvSvH
+         sw9hBFlMb1/EJ7lQgkA0CLPym/BGJ4XEhZcoX57r5FaNeb52nix35XQedHo7EEvvLg3/
+         rKePI9xz8Rn0IfdThZF46OnamjO0pOlfiwKFhetBnj/0n8FBYlZl6X6E6dYVJQ8pb1eY
+         Fb9IrWCg7XMNu2h1cg0vQc/MRbCKZBuoD3nqXxcR8WTLCqFAt3wn90MjCXJHeFBlfdBv
+         hhJw==
+X-Gm-Message-State: ANhLgQ3eClu6BG5xQnyAcwZeUjOBne6ZaZCgoCRrwIPmsFQvyk8rWsVw
+        tYZIqB+wGNI/by+JCHp669Pt13skm/U=
+X-Google-Smtp-Source: ADFU+vtIqksBZgzw9SLpezCTNWRaTcNPFHKO8RpZ6EGMuP98CiggT0WBaxBQ0n+zQEYBN80HZvyyiw==
+X-Received: by 2002:a17:90a:102:: with SMTP id b2mr630005pjb.64.1583186930599;
+        Mon, 02 Mar 2020 14:08:50 -0800 (PST)
+Received: from vader.thefacebook.com ([2620:10d:c090:500::5:755a])
+        by smtp.gmail.com with ESMTPSA id iq22sm207648pjb.9.2020.03.02.14.08.49
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 02 Mar 2020 14:08:50 -0800 (PST)
+From:   Omar Sandoval <osandov@osandov.com>
+To:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Cc:     kernel-team@fb.com
+Subject: [PATCH fstests] btrfs: add test for large direct I/O reads w/ RAID
+Date:   Mon,  2 Mar 2020 14:08:45 -0800
+Message-Id: <f9a293a382e81ba55e2a321634cb1548d7f69627.1583186857.git.osandov@fb.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-Content-Type: multipart/mixed; boundary="wRRV7LY7NUeQGEoC"
-Content-Disposition: inline
-In-Reply-To: <20200301134026.GK3840@desktop>
-X-AntiAbuse: This header was added to track abuse, please include it with any abuse report
-X-AntiAbuse: Primary Hostname - br540.hostgator.com.br
-X-AntiAbuse: Original Domain - vger.kernel.org
-X-AntiAbuse: Originator/Caller UID/GID - [47 12] / [47 12]
-X-AntiAbuse: Sender Address Domain - mpdesouza.com
-X-BWhitelist: no
-X-Source-IP: 189.26.179.234
-X-Source-L: No
-X-Exim-ID: 1j8S0P-000H9I-Kl
-X-Source: 
-X-Source-Args: 
-X-Source-Dir: 
-X-Source-Sender: 189.26.179.234.dynamic.adsl.gvt.net.br (hephaestus) [189.26.179.234]:42306
-X-Source-Auth: marcos@mpdesouza.com
-X-Email-Count: 2
-X-Source-Cap: bXBkZXNvNTM7bXBkZXNvNTM7YnI1NDAuaG9zdGdhdG9yLmNvbS5icg==
-X-Local-Domain: yes
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+From: Omar Sandoval <osandov@fb.com>
 
---wRRV7LY7NUeQGEoC
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-
-On Sun, Mar 01, 2020 at 09:54:06PM +0800, Eryu Guan wrote:
-> On Mon, Feb 24, 2020 at 12:13:41AM -0300, Marcos Paulo de Souza wrote:
-> > From: Marcos Paulo de Souza <mpdesouza@suse.com>
-> > 
-> > Signed-off-by: Marcos Paulo de Souza <mpdesouza@suse.com>
-> 
-> Looks fine to me overall, but it'd be better to have commit message to
-> describe the test.
-> 
-> Also, it'd be great if btrfs folks could help review it.
-
-Indeed, a commit message makes things better. I'm attaching here a new version
-of the patch containing a commit message. This new version also bumps the test
-number from 203 -> 207, since other messages were merged after I sent my patch.
-
-While adding the commit message I found in Josef's commit that he added a new
-btrfs test 206, but groups contained test 204[1]. Is it a typo?
-
-[1]: https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/commit/?id=1d6d14db1165db1ffc87fbddcf97eb70fdf84607
-
-> 
-> Thanks,
-> Eryu
-> 
-> > ---
-> > Changes from v2:
-> > * Added 'Created subvolume...' into 203.out to match the subvolume creating command
-> > * Changed awk to $AWK_PROG, suggested by Eryu
-> > * Changed _run_btrfs_util_prog to $BTRFS_UTIL_PROG, suggested by Eryu
-> > * Use _scratch_unmount instead of executing umount by hand, sugested by Eryu
-> > * Created a local function to delete and list subvolumes, suggested by Eryu
-> > 
-> > Changes from v1:
-> > * Added some prints printing what is being tested
-> > * The test now uses the _btrfs_get_subvolid to get subvolumeids instead of using
-> >   plain integers
-> > 
-> > 
-> >  tests/btrfs/203     | 68 +++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/btrfs/203.out | 17 ++++++++++++
-> >  tests/btrfs/group   |  1 +
-> >  3 files changed, 86 insertions(+)
-> >  create mode 100755 tests/btrfs/203
-> >  create mode 100644 tests/btrfs/203.out
-> > 
-> > diff --git a/tests/btrfs/203 b/tests/btrfs/203
-> > new file mode 100755
-> > index 00000000..0f662db1
-> > --- /dev/null
-> > +++ b/tests/btrfs/203
-> > @@ -0,0 +1,68 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (C) 2020 SUSE Linux Products GmbH. All Rights Reserved.
-> > +#
-> > +# FSQA Test No. 203
-> > +#
-> > +# Test subvolume deletion using the subvolume id, even when the subvolume in
-> > +# question is in a different mount space.
-> > +#
-> > +seq=`basename $0`
-> > +seqres=$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +tmp=/tmp/$$
-> > +status=1	# failure is the default!
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +. ./common/filter
-> > +. ./common/filter.btrfs
-> > +
-> > +# real QA test starts here
-> > +_supported_fs btrfs
-> > +_supported_os Linux
-> > +_require_scratch
-> > +_require_btrfs_command subvolume delete --subvolid
-> > +
-> > +_scratch_mkfs > /dev/null 2>&1
-> > +_scratch_mount
-> > +
-> > +_delete_and_list()
-> > +{
-> > +	local subvol_name="$1"
-> > +	local msg="$2"
-> > +
-> > +	SUBVOLID=$(_btrfs_get_subvolid $SCRATCH_MNT "$subvol_name")
-> > +	$BTRFS_UTIL_PROG subvolume delete --subvolid $SUBVOLID $SCRATCH_MNT | _filter_scratch
-> > +
-> > +	echo "$msg"
-> > +	$BTRFS_UTIL_PROG subvolume list $SCRATCH_MNT | $AWK_PROG '{ print $NF }'
-> > +}
-> > +
-> > +# Test creating a normal subvolumes
-> > +$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subvol1 | _filter_scratch
-> > +$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subvol2 | _filter_scratch
-> > +$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subvol3 | _filter_scratch
-> > +
-> > +echo "Current subvolume ids:"
-> > +$BTRFS_UTIL_PROG subvolume list $SCRATCH_MNT | $AWK_PROG '{ print $NF }'
-> > +
-> > +# Delete the subvolume subvol1, and list the remaining two subvolumes
-> > +_delete_and_list subvol1 "After deleting one subvolume:"
-> > +_scratch_unmount
-> > +
-> > +# Now we mount the subvol2, which makes subvol3 not accessible for this mount
-> > +# point, but we should be able to delete it using it's subvolume id
-> > +$MOUNT_PROG -o subvol=subvol2 $SCRATCH_DEV $SCRATCH_MNT
-> > +_delete_and_list subvol3 "Last remaining subvolume:"
-> > +_scratch_unmount
-> > +
-> > +# now mount the rootfs
-> > +_scratch_mount
-> > +# Delete the subvol2
-> > +_delete_and_list subvol2 "All subvolumes removed."
-> > +_scratch_unmount
-> > +
-> > +# success, all done
-> > +status=0
-> > +exit
-> > diff --git a/tests/btrfs/203.out b/tests/btrfs/203.out
-> > new file mode 100644
-> > index 00000000..3301852b
-> > --- /dev/null
-> > +++ b/tests/btrfs/203.out
-> > @@ -0,0 +1,17 @@
-> > +QA output created by 203
-> > +Create subvolume 'SCRATCH_MNT/subvol1'
-> > +Create subvolume 'SCRATCH_MNT/subvol2'
-> > +Create subvolume 'SCRATCH_MNT/subvol3'
-> > +Current subvolume ids:
-> > +subvol1
-> > +subvol2
-> > +subvol3
-> > +Delete subvolume (no-commit): 'SCRATCH_MNT/subvol1'
-> > +After deleting one subvolume:
-> > +subvol2
-> > +subvol3
-> > +Delete subvolume (no-commit): 'SCRATCH_MNT/subvol3'
-> > +Last remaining subvolume:
-> > +subvol2
-> > +Delete subvolume (no-commit): 'SCRATCH_MNT/subvol2'
-> > +All subvolumes removed.
-> > diff --git a/tests/btrfs/group b/tests/btrfs/group
-> > index 79f85e97..e7744217 100644
-> > --- a/tests/btrfs/group
-> > +++ b/tests/btrfs/group
-> > @@ -204,3 +204,4 @@
-> >  200 auto quick send clone
-> >  201 auto quick punch log
-> >  202 auto quick subvol snapshot
-> > +203 auto quick subvol
-> > -- 
-> > 2.25.0
-> > 
-
---wRRV7LY7NUeQGEoC
-Content-Type: text/x-patch; charset=us-ascii
-Content-Disposition: attachment;
-	filename="0001-btrfs-Test-subvolume-delete-subvolid-feature.patch"
-
-From 2541e8ef08d45030f97073ef1e5bc9196ef22e4d Mon Sep 17 00:00:00 2001
-From: Marcos Paulo de Souza <mpdesouza@suse.com>
-Date: Sun, 26 Jan 2020 23:44:22 -0300
-Subject: [PATCHv4] btrfs: Test subvolume delete --subvolid feature
-
-Now btrfs can delete subvolumes based in ther subvolume id. This makes
-easy for the user willing to delete a subvolume that cannot be accessed
-by the mount point, since btrfs allows to mount a specific subvolume and
-hiding the other from the mount point.
-
-Signed-off-by: Marcos Paulo de Souza <mpdesouza@suse.com>
+Apparently we don't have any tests which exercise the code path in Btrfs
+that has to split up direct I/Os for RAID stripes. Add one to catch the
+bug fixed by "btrfs: fix RAID direct I/O reads with alternate csums".
 ---
-Changes from v3:
-* Changes test 203 -> 207, since other tests were merged
-* The first patch was merged, so remove it from sending again
-  [https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/commit/?id=2f9b4039253d3a6f91cb2a22639a243b5a27e110]
+I also had to fix up the tests/btrfs/group file, which had a renumbering
+issue that was preventing me from adding a new test.
 
-Changes from v2:
-* Added Reviewed-by from Nikolay to patch 0001
-* Changed awk to $AWK_PROG, suggested by Eryu
-* Changed _run_btrfs_util_prog to $BTRFS_UTIL_PROG, suggested by Eryu
-* Use _scratch_unmount instead of executing umount by hand, sugested by Eryu
-* Created a local function to delete and list subvolumes, suggested by Eryu
-
-Changes from v1:
-* Added some prints printing what is being tested
-* The test now uses the _btrfs_get_subvolid to get subvolumeids instead of using
-  plain integers
-* New patch expanding the funtionality of _require_btrfs_command, which now
-  check for argument of subcommands
-
- tests/btrfs/207     | 68 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/207.out | 17 ++++++++++++
- tests/btrfs/group   |  1 +
- 3 files changed, 86 insertions(+)
+ tests/btrfs/207     | 58 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/207.out |  2 ++
+ tests/btrfs/group   |  3 ++-
+ 3 files changed, 62 insertions(+), 1 deletion(-)
  create mode 100755 tests/btrfs/207
  create mode 100644 tests/btrfs/207.out
 
 diff --git a/tests/btrfs/207 b/tests/btrfs/207
 new file mode 100755
-index 00000000..bec5baea
+index 00000000..99e57cb8
 --- /dev/null
 +++ b/tests/btrfs/207
-@@ -0,0 +1,68 @@
+@@ -0,0 +1,58 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2020 SUSE Linux Products GmbH. All Rights Reserved.
++# Copyright (c) 2020 Facebook.  All Rights Reserved.
 +#
-+# FSQA Test No. 207
++# FS QA Test 207
 +#
-+# Test subvolume deletion using the subvolume id, even when the subvolume in
-+# question is in a different mount space.
++# Test large DIO reads with various profiles. Regression test for patch "btrfs:
++# fix RAID direct I/O reads with alternate csums".
 +#
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
 +echo "QA output created by $seq"
++
++here=`pwd`
 +tmp=/tmp/$$
 +status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+. ./common/filter.btrfs
 +
-+# real QA test starts here
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
 +_supported_fs btrfs
 +_supported_os Linux
-+_require_scratch
-+_require_btrfs_command subvolume delete --subvolid
++# we check scratch dev after each loop
++_require_scratch_nocheck
++_require_scratch_dev_pool 4
++_btrfs_get_profile_configs
 +
-+_scratch_mkfs > /dev/null 2>&1
-+_scratch_mount
++for mkfs_opts in "${_btrfs_profile_configs[@]}"; do
++	echo "Test $mkfs_opts" >>$seqres.full
++	_scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1
++	_scratch_mount >>$seqres.full 2>&1
 +
-+_delete_and_list()
-+{
-+	local subvol_name="$1"
-+	local msg="$2"
++	dd if=/dev/urandom of="$SCRATCH_MNT/$seq" \
++		bs=1M count=64 conv=fsync status=none
++	dd if="$SCRATCH_MNT/$seq" of="$SCRATCH_MNT/$seq.copy" \
++		bs=1M iflag=direct status=none
++	diff -q "$SCRATCH_MNT/$seq" "$SCRATCH_MNT/$seq.copy" |
++		tee -a $seqres.full
 +
-+	SUBVOLID=$(_btrfs_get_subvolid $SCRATCH_MNT "$subvol_name")
-+	$BTRFS_UTIL_PROG subvolume delete --subvolid $SUBVOLID $SCRATCH_MNT | _filter_scratch
++	_scratch_unmount
++	_check_scratch_fs
++done
 +
-+	echo "$msg"
-+	$BTRFS_UTIL_PROG subvolume list $SCRATCH_MNT | $AWK_PROG '{ print $NF }'
-+}
++echo "Silence is golden"
 +
-+# Test creating a normal subvolumes
-+$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subvol1 | _filter_scratch
-+$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subvol2 | _filter_scratch
-+$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subvol3 | _filter_scratch
-+
-+echo "Current subvolume ids:"
-+$BTRFS_UTIL_PROG subvolume list $SCRATCH_MNT | $AWK_PROG '{ print $NF }'
-+
-+# Delete the subvolume subvol1, and list the remaining two subvolumes
-+_delete_and_list subvol1 "After deleting one subvolume:"
-+_scratch_unmount
-+
-+# Now we mount the subvol2, which makes subvol3 not accessible for this mount
-+# point, but we should be able to delete it using it's subvolume id
-+$MOUNT_PROG -o subvol=subvol2 $SCRATCH_DEV $SCRATCH_MNT
-+_delete_and_list subvol3 "Last remaining subvolume:"
-+_scratch_unmount
-+
-+# now mount the rootfs
-+_scratch_mount
-+# Delete the subvol2
-+_delete_and_list subvol2 "All subvolumes removed."
-+_scratch_unmount
-+
-+# success, all done
 +status=0
 +exit
 diff --git a/tests/btrfs/207.out b/tests/btrfs/207.out
 new file mode 100644
-index 00000000..e3f7daa4
+index 00000000..cb8e0e2b
 --- /dev/null
 +++ b/tests/btrfs/207.out
-@@ -0,0 +1,17 @@
+@@ -0,0 +1,2 @@
 +QA output created by 207
-+Create subvolume 'SCRATCH_MNT/subvol1'
-+Create subvolume 'SCRATCH_MNT/subvol2'
-+Create subvolume 'SCRATCH_MNT/subvol3'
-+Current subvolume ids:
-+subvol1
-+subvol2
-+subvol3
-+Delete subvolume (no-commit): 'SCRATCH_MNT/subvol1'
-+After deleting one subvolume:
-+subvol2
-+subvol3
-+Delete subvolume (no-commit): 'SCRATCH_MNT/subvol3'
-+Last remaining subvolume:
-+subvol2
-+Delete subvolume (no-commit): 'SCRATCH_MNT/subvol2'
-+All subvolumes removed.
++Silence is golden
 diff --git a/tests/btrfs/group b/tests/btrfs/group
-index e3ad347b..1acf6af7 100644
+index e3ad347b..c87a042e 100644
 --- a/tests/btrfs/group
 +++ b/tests/btrfs/group
-@@ -209,3 +209,4 @@
+@@ -208,4 +208,5 @@
+ 203 auto quick send clone
  204 auto quick punch
  205 auto quick clone compress
- 204 auto quick log replay
-+207 auto quick subvol
+-204 auto quick log replay
++206 auto quick log replay
++207 auto quick rw raid
 -- 
-2.25.0
+2.25.1
 
-
---wRRV7LY7NUeQGEoC--
