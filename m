@@ -1,130 +1,230 @@
-Return-Path: <SRS0=J9/m=4V=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=eLbG=4W=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
+X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0E987C3F2CE
-	for <linux-fstests@archiver.kernel.org>; Wed,  4 Mar 2020 18:28:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 31B23C3F2D7
+	for <linux-fstests@archiver.kernel.org>; Thu,  5 Mar 2020 08:46:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id D41CD21775
-	for <linux-fstests@archiver.kernel.org>; Wed,  4 Mar 2020 18:28:52 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="aUSV2Bbp"
+	by mail.kernel.org (Postfix) with ESMTP id 084FA21556
+	for <linux-fstests@archiver.kernel.org>; Thu,  5 Mar 2020 08:46:48 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1583398008;
+	bh=TDVkawuh32GQN4TFLHkkDeskDdM2MRcctGCjf9iIfv8=;
+	h=From:To:Cc:Subject:Date:List-ID:From;
+	b=N4Mu2ayeNsrSlNKB4197IYaIbwlaxvV8QM/zYv1CHuSiNni4fUfkLdpPRSpXuGwS8
+	 0dpG1s0d9XAk+bTljnJNshC8E8SYqXLURkItCbeVTpHmVUeHjspBnYVdTwukafDgNz
+	 CPryfnkDvEEZlqTOBD3egZLHbO6Y82uOvR7YXi0Y=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729703AbgCDS2w (ORCPT
+        id S1725946AbgCEIqr (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 4 Mar 2020 13:28:52 -0500
-Received: from mail-io1-f68.google.com ([209.85.166.68]:45964 "EHLO
-        mail-io1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725795AbgCDS2w (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 4 Mar 2020 13:28:52 -0500
-Received: by mail-io1-f68.google.com with SMTP id w9so3467222iob.12
-        for <fstests@vger.kernel.org>; Wed, 04 Mar 2020 10:28:51 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=qVzTWAz/Qc2Pq8HVjSAe4GTrCzoJVPlAvgsjRpn7uyA=;
-        b=aUSV2BbpreNBt7qodDeR0n/F/4KyRJZ4cvBfQuBLC1HIrC43dBNckVdUkq1dmMxDbj
-         lq4ZLoo/VCGYExl8VytKLIU6rZngO85zyxBtlw7EFEQyv/LXnIYShB5K1625bfgEtY2L
-         NL/hjlMtJGQyqw2IUYjyukSDFbjnQ6zF5ogIQxVwkEc3rLHvcb0yPemESJt5PI3c/Bun
-         ff0WvM8DhDiAEKOvSfPM6mfNCc8DFDGEhbN/QVzyStJlc1q0j5C4ti0bvWDw2ZBWCD7l
-         nB844iYIOCX4v/jFQ7fcBZoS0zO8lBPAlw7GLvUkcRYk2GypG6gMLvCDueEi/6IeoLhM
-         uL3w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=qVzTWAz/Qc2Pq8HVjSAe4GTrCzoJVPlAvgsjRpn7uyA=;
-        b=gQsu5dw3bKkhGZ4fdwqoVcLN9lBKv9zXlLsiFpGTsGTnwYPdynyI8uYh9oZzatkUG8
-         NNd2fEtJBsZpgw9kmrXiveZJdR+Q3XvcXzd0VC5Hl06TXzJT6bM4hc2SbHIBwUN8ZZLi
-         kfLpdXdSGAuESJi56pidQDteFesaej4pXGtO34PiTtwt4j6eVaMipQZyLifhQ8C0vjrs
-         lYVufd9X3QNR20jtuoKx0AyjMDBjcCsmQ/JtEUMFT4AU7mSW9o5P8nZaSpKZ+bEDfXd8
-         YcwUHbs7Lgo6GBF281g5Q3Sb5k0uZP7FecqPzcH4OMzk66/1D2cn1Yx7btVF42TBjYdX
-         hEOQ==
-X-Gm-Message-State: ANhLgQ0ZlPTBBubuuSHFT8Nyn7L7IJJ14+ZPBe6JP1jE3EX+ZSPr8zRd
-        5Ixoq91jXh5WD6bHUM31XmbuGLZ053dCIzZavuM=
-X-Google-Smtp-Source: ADFU+vvkhcDIj5lvnCzrSESh86+VyA3dYCwjkJGaNqN3x/vbMIUgCjK1qZi/LuaPQqKx/RIsA9RGJ2oDJYGXZXept/I=
-X-Received: by 2002:a5d:8f06:: with SMTP id f6mr3379314iof.137.1583346531492;
- Wed, 04 Mar 2020 10:28:51 -0800 (PST)
+        Thu, 5 Mar 2020 03:46:47 -0500
+Received: from mail.kernel.org ([198.145.29.99]:41946 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725866AbgCEIqr (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 5 Mar 2020 03:46:47 -0500
+Received: from sol.hsd1.ca.comcast.net (c-107-3-166-239.hsd1.ca.comcast.net [107.3.166.239])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id DD1DA2146E;
+        Thu,  5 Mar 2020 08:46:45 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1583398006;
+        bh=TDVkawuh32GQN4TFLHkkDeskDdM2MRcctGCjf9iIfv8=;
+        h=From:To:Cc:Subject:Date:From;
+        b=auApwJf2pBIHD13Xuj0tGO60HYJNT3zwlLDcswE8Ht0fuySMtZNAHqmV2JXs6Xlo+
+         lfY2eiyxlYx7yYNwq8nNdrhR5ozN88KOm765yyDhjlUoXrZy/u0pi2Z+/JBbTXwvTE
+         4TcJ6frndx/LvyCaidi5rwcTUGVpyRXZpGWl3H1k=
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     fstests@vger.kernel.org
+Cc:     linux-fscrypt@vger.kernel.org
+Subject: [xfstests RFC PATCH] generic: test fscrypt key eviction racing with inode dirtying
+Date:   Thu,  5 Mar 2020 00:46:06 -0800
+Message-Id: <20200305084606.653902-1-ebiggers@kernel.org>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-References: <20200304161120.25764-1-lhenriques@suse.com>
-In-Reply-To: <20200304161120.25764-1-lhenriques@suse.com>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Wed, 4 Mar 2020 20:28:40 +0200
-Message-ID: <CAOQ4uxjZTV6oZ426WSemigcaT=avF8V19bJU45L9=CHH8ZsFzQ@mail.gmail.com>
-Subject: Re: [PATCH] generic/258: check filesystem support for negative timestamps
-To:     Luis Henriques <lhenriques@suse.com>
-Cc:     fstests <fstests@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Mar 4, 2020 at 6:11 PM Luis Henriques <lhenriques@suse.com> wrote:
->
-> Some filesystems do not support negative c/m/atime timestamps.  And for
-> these filesystems, generic/258 will fail.  Since there's currently no way
-> to check sb->s_time_min from userspace, this patch adds a new common/rc
-> function _require_negative_timestamps() that will _notrun depending on the
-> $FSTYP variable.
->
-> Signed-off-by: Luis Henriques <lhenriques@suse.com>
+From: Eric Biggers <ebiggers@google.com>
 
-Looks fine,
+Add a regression test for a bug in the FS_IOC_REMOVE_ENCRYPTION_KEY
+ioctl fixed by commit XXXXXXXXXXXX ("fscrypt: don't evict dirty inodes
+after removing key").
 
-Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+This ioctl is also tested by generic/580 and generic/581, but they
+didn't cover the case where this bug occurs.
 
-> ---
-> Hi!
->
-> I'm only adding 'ceph' to the _require_negative_timestamps() case because
-> that was the only filesystem with s_time_min = 0 that I was able to test.
-> However, a simple grep indicates there are a few other filesystems that
-> would also be required there (e.g. nfs version < 4).
->
-> Cheers,
-> --
-> Luis
->
->  common/rc         | 8 ++++++++
->  tests/generic/258 | 1 +
->  2 files changed, 9 insertions(+)
->
-> diff --git a/common/rc b/common/rc
-> index 0306e93cb1ca..067f30cecde7 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -4157,6 +4157,14 @@ _check_xfs_scrub_does_unicode() {
->         return 0
->  }
->
-> +_require_negative_timestamps() {
-> +       case "$FSTYP" in
-> +       ceph)
-> +               _notrun "$FSTYP does not support negative timestamps"
-> +               ;;
-> +       esac
-> +}
-> +
->  init_rc
->
->  ################################################################################
-> diff --git a/tests/generic/258 b/tests/generic/258
-> index 68b8155d4a9f..dab1a476ed20 100755
-> --- a/tests/generic/258
-> +++ b/tests/generic/258
-> @@ -30,6 +30,7 @@ trap "_cleanup ; exit \$status" 0 1 2 3 15
->  _supported_fs generic
->  _supported_os Linux
->  _require_test
-> +_require_negative_timestamps
->
->  TESTFILE=$TEST_DIR/timestamp-test.txt
->
+This test detects the bug on ext4, f2fs, and ubifs.  The multi-threaded
+part of the test actually still fails on ubifs even with the fix, due to
+another kernel bug which I'm working on fixing.
+
+Signed-off-by: Eric Biggers <ebiggers@google.com>
+---
+
+Not for merging yet.  Sending this out for comment alongside the kernel
+patch https://lkml.kernel.org/r/20200305084138.653498-1-ebiggers@kernel.org
+
+ tests/generic/900     | 115 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/900.out |  10 ++++
+ tests/generic/group   |   1 +
+ 3 files changed, 126 insertions(+)
+ create mode 100755 tests/generic/900
+ create mode 100644 tests/generic/900.out
+
+diff --git a/tests/generic/900 b/tests/generic/900
+new file mode 100755
+index 000000000..737bb7ec1
+--- /dev/null
++++ b/tests/generic/900
+@@ -0,0 +1,115 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright 2020 Google LLC
++#
++# FS QA Test No. 900
++#
++# Regression test for a bug in the FS_IOC_REMOVE_ENCRYPTION_KEY ioctl fixed by
++# commit XXXXXXXXXXXX ("fscrypt: don't evict dirty inodes after removing key").
++# This bug could cause writes to encrypted files to be lost if they raced with
++# the corresponding fscrypt master key being removed.  With f2fs, this bug could
++# also crash the kernel.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	# Stop all subprocesses.
++	touch $tmp.done
++	wait
++
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/encrypt
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_scratch_encryption -v 2
++_require_command "$KEYCTL_PROG" keyctl
++
++_scratch_mkfs_encrypted &>> $seqres.full
++_scratch_mount
++
++dir=$SCRATCH_MNT/dir
++runtime=$((4 * TIME_FACTOR))
++
++# Create an encrypted directory.
++mkdir $dir
++_set_encpolicy $dir $TEST_KEY_IDENTIFIER
++_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY"
++
++# Start with a single-threaded reproducer:
++echo -e "\n# Single-threaded reproducer"
++# Keep a fd open to a file past its fscrypt master key being removed.
++exec 3>$dir/file
++_rm_enckey $SCRATCH_MNT $TEST_KEY_IDENTIFIER
++# Write to and close the open fd.
++echo contents >&3
++exec 3>&-
++# Drop any dentries which might be pinning the inode for "file".
++echo 2 > /proc/sys/vm/drop_caches
++# In buggy kernels, the inode for "file" was evicted despite the dirty data,
++# causing the dirty data to be lost.  Check whether the write made it through.
++_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY"
++cat $dir/file
++rm -f $dir/file
++
++# Also run a multi-threaded reproducer.  This is included for good measure, as
++# this type of thing tends to be good for finding other bugs too.
++echo -e "\n# Multi-threaded reproducer"
++touch $dir/file
++
++# One process add/removes the encryption key repeatedly.
++(
++	while [ ! -e $tmp.done ]; do
++		_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY" &> /dev/null
++		_rm_enckey $SCRATCH_MNT $TEST_KEY_IDENTIFIER &> /dev/null
++	done
++) &
++
++# Another process repeatedly tries to append to the encrypted file.  The file is
++# re-opened each time, so that there are chances for the inode to be evicted.
++# Failures to open the file due to the key being removed are ignored.
++(
++	touch $tmp.expected
++	while [ ! -e $tmp.done ]; do
++		if sh -c "echo -n X >> $dir/file" 2>/dev/null; then
++			# Keep track of the expected file contents.
++			echo -n X >> $tmp.expected
++		fi
++	done
++) &
++
++# Run for a while.
++sleep $runtime
++
++# Stop all subprocesses.
++touch $tmp.done
++wait
++
++# Make sure no writes were lost.
++_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY" &> /dev/null
++stat $tmp.expected >> $seqres.full
++stat $dir/file >> $seqres.full
++cmp $tmp.expected $dir/file
++
++echo "Multi-threaded reproducer done"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/900.out b/tests/generic/900.out
+new file mode 100644
+index 000000000..14fde4c83
+--- /dev/null
++++ b/tests/generic/900.out
+@@ -0,0 +1,10 @@
++QA output created by 900
++Added encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
++
++# Single-threaded reproducer
++Removed encryption key with identifier 69b2f6edeee720cce0577937eb8a6751, but files still busy
++Added encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
++contents
++
++# Multi-threaded reproducer
++Multi-threaded reproducer done
+diff --git a/tests/generic/group b/tests/generic/group
+index ff79a5970..f94c15361 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -596,3 +596,4 @@
+ 591 auto quick rw pipe splice
+ 592 auto quick encrypt
+ 593 auto quick encrypt
++900 auto quick encrypt
+-- 
+2.25.1
+
