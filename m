@@ -1,50 +1,66 @@
-Return-Path: <SRS0=eLbG=4W=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=xM/5=4X=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 31B23C3F2D7
-	for <linux-fstests@archiver.kernel.org>; Thu,  5 Mar 2020 08:46:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9E15FC3F2D1
+	for <linux-fstests@archiver.kernel.org>; Fri,  6 Mar 2020 01:03:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 084FA21556
-	for <linux-fstests@archiver.kernel.org>; Thu,  5 Mar 2020 08:46:48 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1583398008;
-	bh=TDVkawuh32GQN4TFLHkkDeskDdM2MRcctGCjf9iIfv8=;
-	h=From:To:Cc:Subject:Date:List-ID:From;
-	b=N4Mu2ayeNsrSlNKB4197IYaIbwlaxvV8QM/zYv1CHuSiNni4fUfkLdpPRSpXuGwS8
-	 0dpG1s0d9XAk+bTljnJNshC8E8SYqXLURkItCbeVTpHmVUeHjspBnYVdTwukafDgNz
-	 CPryfnkDvEEZlqTOBD3egZLHbO6Y82uOvR7YXi0Y=
+	by mail.kernel.org (Postfix) with ESMTP id 731E82073B
+	for <linux-fstests@archiver.kernel.org>; Fri,  6 Mar 2020 01:03:29 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=osandov-com.20150623.gappssmtp.com header.i=@osandov-com.20150623.gappssmtp.com header.b="C7Gww0GO"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725946AbgCEIqr (ORCPT
+        id S1726173AbgCFBD3 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 5 Mar 2020 03:46:47 -0500
-Received: from mail.kernel.org ([198.145.29.99]:41946 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725866AbgCEIqr (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 5 Mar 2020 03:46:47 -0500
-Received: from sol.hsd1.ca.comcast.net (c-107-3-166-239.hsd1.ca.comcast.net [107.3.166.239])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id DD1DA2146E;
-        Thu,  5 Mar 2020 08:46:45 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1583398006;
-        bh=TDVkawuh32GQN4TFLHkkDeskDdM2MRcctGCjf9iIfv8=;
-        h=From:To:Cc:Subject:Date:From;
-        b=auApwJf2pBIHD13Xuj0tGO60HYJNT3zwlLDcswE8Ht0fuySMtZNAHqmV2JXs6Xlo+
-         lfY2eiyxlYx7yYNwq8nNdrhR5ozN88KOm765yyDhjlUoXrZy/u0pi2Z+/JBbTXwvTE
-         4TcJ6frndx/LvyCaidi5rwcTUGVpyRXZpGWl3H1k=
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     fstests@vger.kernel.org
-Cc:     linux-fscrypt@vger.kernel.org
-Subject: [xfstests RFC PATCH] generic: test fscrypt key eviction racing with inode dirtying
-Date:   Thu,  5 Mar 2020 00:46:06 -0800
-Message-Id: <20200305084606.653902-1-ebiggers@kernel.org>
+        Thu, 5 Mar 2020 20:03:29 -0500
+Received: from mail-pj1-f68.google.com ([209.85.216.68]:37861 "EHLO
+        mail-pj1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726243AbgCFBD2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 5 Mar 2020 20:03:28 -0500
+Received: by mail-pj1-f68.google.com with SMTP id o2so341083pjp.2
+        for <fstests@vger.kernel.org>; Thu, 05 Mar 2020 17:03:28 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=osandov-com.20150623.gappssmtp.com; s=20150623;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=vA+SpwUYxV6vRuQ+sUl9N1NLNNbuEQF9yqQFgqr7THM=;
+        b=C7Gww0GOzSj3xOmSTOh4izW4a5HkhOpgQuiZ8CtGAxGQ+b2XXL36MPgP5JJD1NixKA
+         dVS4G4qBR6iKc1paTcLWSaqCQd/rkcR+zS9+DfrKL3MZ9LtHWYCXGOB3pB55zd9Yfsfy
+         olgykuLveoAftsMWh8Nd56J4TSFteRKdEAqsx4miXh3vXRRa9Ss2lO5x5/hsTd3et9g1
+         vXpgwJ4F62xDFU+uY9LEh4bWN2G947VeGzCI84ocypo05Gm0cYV96Z6g40AXE9ybj2vO
+         s97zc1RUmjJxwvO/Urfk9l2SKEHp6/rTO3RNiGRnKavMVyDu7p/fCEpxeSIaCwXyFONZ
+         fEwQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=vA+SpwUYxV6vRuQ+sUl9N1NLNNbuEQF9yqQFgqr7THM=;
+        b=hupMHlApqDUE9I/GZ/LfdDLxeX6AkngYMr3PEybPcWSQvsybOTATSoxOF3sPZpqff0
+         D3Wbrrv25IjSPVRr+4E/CL1PxZBFmJnylK8phDu49X37Xfkhx8zr68fC04uEX9MrlpZg
+         i7vR/23Up3Ihu3LeEowcnDZ95J2629LTwROz695GCalvq695Sxim6hpI3necqwCrAMOc
+         pxXiXgeyQJmkRvR1b/eBgQEXezAMe+0rk8zg8YNTTPmEmAx5bVu3HMuWcCBTXuNYY+OV
+         sOtMi0ZsdGqQaqyPXyYpuesaquzuTy03d1NiprjD41RLsM7ejWvBmVjh9fp/VH+Syjsx
+         raiQ==
+X-Gm-Message-State: ANhLgQ0nktnfsQYvGYCTy5dK5MhDwjXJq/WOM1NrMibw2tiG+ldc5ZAB
+        F3BNTx3zctGdBKyKCeW9FQh10vD74NM=
+X-Google-Smtp-Source: ADFU+vsBZQWMQ8luyVx3nmTxCXxm1em3yc2F3s+TbbOziCV3EawqwE/wh7Tq9aWaRIcYA7c++mfhqg==
+X-Received: by 2002:a17:902:8509:: with SMTP id bj9mr513698plb.123.1583456607128;
+        Thu, 05 Mar 2020 17:03:27 -0800 (PST)
+Received: from vader.tfbnw.net ([2620:10d:c090:400::5:7c97])
+        by smtp.gmail.com with ESMTPSA id b64sm14863153pfa.94.2020.03.05.17.03.26
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 05 Mar 2020 17:03:26 -0800 (PST)
+From:   Omar Sandoval <osandov@osandov.com>
+To:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Cc:     kernel-team@fb.com, Josef Bacik <josef@toxicpanda.com>
+Subject: [PATCH v2] btrfs: add test for large direct I/O w/ RAID
+Date:   Thu,  5 Mar 2020 17:03:12 -0800
+Message-Id: <e55e1550e89c36dec53b487d7e0a73d6ece900e6.1583456541.git.osandov@fb.com>
 X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -53,49 +69,41 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Eric Biggers <ebiggers@google.com>
+From: Omar Sandoval <osandov@fb.com>
 
-Add a regression test for a bug in the FS_IOC_REMOVE_ENCRYPTION_KEY
-ioctl fixed by commit XXXXXXXXXXXX ("fscrypt: don't evict dirty inodes
-after removing key").
+Apparently we don't have any tests which exercise the code path in Btrfs
+that has to split up direct I/Os for RAID stripes. Add one to catch the
+bug fixed by "btrfs: fix RAID direct I/O reads with alternate csums".
 
-This ioctl is also tested by generic/580 and generic/581, but they
-didn't cover the case where this bug occurs.
-
-This test detects the bug on ext4, f2fs, and ubifs.  The multi-threaded
-part of the test actually still fails on ubifs even with the fix, due to
-another kernel bug which I'm working on fixing.
-
-Signed-off-by: Eric Biggers <ebiggers@google.com>
+Reviewed-by: Josef Bacik <josef@toxicpanda.com>
+Signed-off-by: Omar Sandoval <osandov@fb.com>
 ---
+Changes from v1 -> v2:
 
-Not for merging yet.  Sending this out for comment alongside the kernel
-patch https://lkml.kernel.org/r/20200305084138.653498-1-ebiggers@kernel.org
+- Also test direct I/O writes.
+- Add Josef's reviewed-by
 
- tests/generic/900     | 115 ++++++++++++++++++++++++++++++++++++++++++
- tests/generic/900.out |  10 ++++
- tests/generic/group   |   1 +
- 3 files changed, 126 insertions(+)
- create mode 100755 tests/generic/900
- create mode 100644 tests/generic/900.out
+ tests/btrfs/207     | 62 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/207.out |  2 ++
+ tests/btrfs/group   |  3 ++-
+ 3 files changed, 66 insertions(+), 1 deletion(-)
+ create mode 100755 tests/btrfs/207
+ create mode 100644 tests/btrfs/207.out
 
-diff --git a/tests/generic/900 b/tests/generic/900
+diff --git a/tests/btrfs/207 b/tests/btrfs/207
 new file mode 100755
-index 000000000..737bb7ec1
+index 00000000..d4467401
 --- /dev/null
-+++ b/tests/generic/900
-@@ -0,0 +1,115 @@
++++ b/tests/btrfs/207
+@@ -0,0 +1,62 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
-+# Copyright 2020 Google LLC
++# Copyright (c) 2020 Facebook.  All Rights Reserved.
 +#
-+# FS QA Test No. 900
++# FS QA Test 207
 +#
-+# Regression test for a bug in the FS_IOC_REMOVE_ENCRYPTION_KEY ioctl fixed by
-+# commit XXXXXXXXXXXX ("fscrypt: don't evict dirty inodes after removing key").
-+# This bug could cause writes to encrypted files to be lost if they raced with
-+# the corresponding fscrypt master key being removed.  With f2fs, this bug could
-+# also crash the kernel.
++# Test large DIO reads and writes with various profiles. Regression test for
++# patch "btrfs: fix RAID direct I/O reads with alternate csums".
 +#
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
@@ -108,123 +116,67 @@ index 000000000..737bb7ec1
 +
 +_cleanup()
 +{
-+	# Stop all subprocesses.
-+	touch $tmp.done
-+	wait
-+
++	cd /
 +	rm -f $tmp.*
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+. ./common/encrypt
 +
 +# remove previous $seqres.full before test
 +rm -f $seqres.full
 +
-+# real QA test starts here
-+_supported_fs generic
++_supported_fs btrfs
 +_supported_os Linux
-+_require_scratch_encryption -v 2
-+_require_command "$KEYCTL_PROG" keyctl
++# we check scratch dev after each loop
++_require_scratch_nocheck
++_require_scratch_dev_pool 4
++_btrfs_get_profile_configs
 +
-+_scratch_mkfs_encrypted &>> $seqres.full
-+_scratch_mount
++for mkfs_opts in "${_btrfs_profile_configs[@]}"; do
++	echo "Test $mkfs_opts" >>$seqres.full
++	_scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1
++	_scratch_mount >>$seqres.full 2>&1
 +
-+dir=$SCRATCH_MNT/dir
-+runtime=$((4 * TIME_FACTOR))
++	dd if=/dev/urandom of="$SCRATCH_MNT/$seq" \
++		bs=1M count=64 conv=fsync status=none
++	dd if="$SCRATCH_MNT/$seq" of="$SCRATCH_MNT/$seq.dioread" \
++		bs=1M iflag=direct status=none
++	dd if="$SCRATCH_MNT/$seq" of="$SCRATCH_MNT/$seq.diowrite" \
++		bs=1M oflag=direct status=none
++	diff -q "$SCRATCH_MNT/$seq" "$SCRATCH_MNT/$seq.dioread" |
++		tee -a $seqres.full
++	diff -q "$SCRATCH_MNT/$seq" "$SCRATCH_MNT/$seq.diowrite" |
++		tee -a $seqres.full
 +
-+# Create an encrypted directory.
-+mkdir $dir
-+_set_encpolicy $dir $TEST_KEY_IDENTIFIER
-+_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY"
++	_scratch_unmount
++	_check_scratch_fs
++done
 +
-+# Start with a single-threaded reproducer:
-+echo -e "\n# Single-threaded reproducer"
-+# Keep a fd open to a file past its fscrypt master key being removed.
-+exec 3>$dir/file
-+_rm_enckey $SCRATCH_MNT $TEST_KEY_IDENTIFIER
-+# Write to and close the open fd.
-+echo contents >&3
-+exec 3>&-
-+# Drop any dentries which might be pinning the inode for "file".
-+echo 2 > /proc/sys/vm/drop_caches
-+# In buggy kernels, the inode for "file" was evicted despite the dirty data,
-+# causing the dirty data to be lost.  Check whether the write made it through.
-+_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY"
-+cat $dir/file
-+rm -f $dir/file
++echo "Silence is golden"
 +
-+# Also run a multi-threaded reproducer.  This is included for good measure, as
-+# this type of thing tends to be good for finding other bugs too.
-+echo -e "\n# Multi-threaded reproducer"
-+touch $dir/file
-+
-+# One process add/removes the encryption key repeatedly.
-+(
-+	while [ ! -e $tmp.done ]; do
-+		_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY" &> /dev/null
-+		_rm_enckey $SCRATCH_MNT $TEST_KEY_IDENTIFIER &> /dev/null
-+	done
-+) &
-+
-+# Another process repeatedly tries to append to the encrypted file.  The file is
-+# re-opened each time, so that there are chances for the inode to be evicted.
-+# Failures to open the file due to the key being removed are ignored.
-+(
-+	touch $tmp.expected
-+	while [ ! -e $tmp.done ]; do
-+		if sh -c "echo -n X >> $dir/file" 2>/dev/null; then
-+			# Keep track of the expected file contents.
-+			echo -n X >> $tmp.expected
-+		fi
-+	done
-+) &
-+
-+# Run for a while.
-+sleep $runtime
-+
-+# Stop all subprocesses.
-+touch $tmp.done
-+wait
-+
-+# Make sure no writes were lost.
-+_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY" &> /dev/null
-+stat $tmp.expected >> $seqres.full
-+stat $dir/file >> $seqres.full
-+cmp $tmp.expected $dir/file
-+
-+echo "Multi-threaded reproducer done"
-+
-+# success, all done
 +status=0
 +exit
-diff --git a/tests/generic/900.out b/tests/generic/900.out
+diff --git a/tests/btrfs/207.out b/tests/btrfs/207.out
 new file mode 100644
-index 000000000..14fde4c83
+index 00000000..cb8e0e2b
 --- /dev/null
-+++ b/tests/generic/900.out
-@@ -0,0 +1,10 @@
-+QA output created by 900
-+Added encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
-+
-+# Single-threaded reproducer
-+Removed encryption key with identifier 69b2f6edeee720cce0577937eb8a6751, but files still busy
-+Added encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
-+contents
-+
-+# Multi-threaded reproducer
-+Multi-threaded reproducer done
-diff --git a/tests/generic/group b/tests/generic/group
-index ff79a5970..f94c15361 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -596,3 +596,4 @@
- 591 auto quick rw pipe splice
- 592 auto quick encrypt
- 593 auto quick encrypt
-+900 auto quick encrypt
++++ b/tests/btrfs/207.out
+@@ -0,0 +1,2 @@
++QA output created by 207
++Silence is golden
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index e3ad347b..c87a042e 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -208,4 +208,5 @@
+ 203 auto quick send clone
+ 204 auto quick punch
+ 205 auto quick clone compress
+-204 auto quick log replay
++206 auto quick log replay
++207 auto quick rw raid
 -- 
 2.25.1
 
