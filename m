@@ -2,284 +2,194 @@ Return-Path: <SRS0=xM/5=4X=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F14F9C10DCE
-	for <linux-fstests@archiver.kernel.org>; Fri,  6 Mar 2020 15:41:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4E44FC10DCE
+	for <linux-fstests@archiver.kernel.org>; Fri,  6 Mar 2020 17:51:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id BFA7A2073D
-	for <linux-fstests@archiver.kernel.org>; Fri,  6 Mar 2020 15:41:40 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="HMT83YCo"
+	by mail.kernel.org (Postfix) with ESMTP id 25BDA2072A
+	for <linux-fstests@archiver.kernel.org>; Fri,  6 Mar 2020 17:51:07 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1583517067;
+	bh=/WmzF9haJT3ZbXBRBIlyda+oaAofNEqZgYMOyBTf7GY=;
+	h=From:To:Cc:Subject:Date:List-ID:From;
+	b=RITc1X5QWz84RQP/qinDdYU0HppdGmPN31fMoMBu9OCd5oVf99hQ0TK/h8csU4AD0
+	 4MiGE78UI4QmpdJeRacAmvzicuHeAck+RsaOxFXb9Hr9Wh5LeKvSjK9dKCPL+TMNJg
+	 v0iOzql/cBAcX1po5u+WfLCs0yuQsxLaHWMLiXGw=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726498AbgCFPlk (ORCPT
+        id S1726359AbgCFRvG (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 6 Mar 2020 10:41:40 -0500
-Received: from aserp2120.oracle.com ([141.146.126.78]:35368 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726237AbgCFPlk (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 6 Mar 2020 10:41:40 -0500
-Received: from pps.filterd (aserp2120.oracle.com [127.0.0.1])
-        by aserp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 026Fcekd060882;
-        Fri, 6 Mar 2020 15:41:38 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to :
- subject : message-id : references : mime-version : content-type :
- in-reply-to; s=corp-2020-01-29;
- bh=Auw50HVJRWHELW6YqQftAAMiW8KTK2yjt9xrqdvtO+U=;
- b=HMT83YCopdKWf7B3CIg/+njrtbW6trYUwj2/hy6hWX4RzFQKZ+OpSncGxJDklVUeorvV
- uiMzxtTTFDANVkI9xXQvrmmbgwQc/zQUDjxn+vc/QvYP9/9KwGL4uq8ZmpxNg/0SSAMs
- Qjwd83nIDDHNXyYI/d8i+uWuFAwMnvfsuh+b8keSAhSYHwQ+BzSYSJ+6BU5SULA6Qoaw
- ywmiGlXI0JfLWgvVx/IWCqm8QphY/zra5LkYr/XTyt45bh//blXpS06Gude+Iyoozt8R
- YmoXdghGQ872HpO2rrVFR1LDRunZ76KCC4O9lpAIBmWJme/rz9fQ4Iy/JmzT6JNdIUWW fg== 
-Received: from userp3020.oracle.com (userp3020.oracle.com [156.151.31.79])
-        by aserp2120.oracle.com with ESMTP id 2yffwrbxpr-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Fri, 06 Mar 2020 15:41:38 +0000
-Received: from pps.filterd (userp3020.oracle.com [127.0.0.1])
-        by userp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 026FbbWd050346;
-        Fri, 6 Mar 2020 15:41:37 GMT
-Received: from aserv0122.oracle.com (aserv0122.oracle.com [141.146.126.236])
-        by userp3020.oracle.com with ESMTP id 2yg1pdkyag-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Fri, 06 Mar 2020 15:41:37 +0000
-Received: from abhmp0002.oracle.com (abhmp0002.oracle.com [141.146.116.8])
-        by aserv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 026Ffab6012318;
-        Fri, 6 Mar 2020 15:41:36 GMT
-Received: from localhost (/67.169.218.210)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Fri, 06 Mar 2020 07:41:36 -0800
-Date:   Fri, 6 Mar 2020 07:41:34 -0800
-From:   "Darrick J. Wong" <darrick.wong@oracle.com>
-To:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 3/3] xfs: make sure xfs_db/xfs_quota commands are
- documented
-Message-ID: <20200306154134.GW8045@magnolia>
-References: <158328998787.2374922.4223951558305234252.stgit@magnolia>
- <158329000698.2374922.9344618703224232004.stgit@magnolia>
- <20200306100655.GZ14282@dhcp-12-102.nay.redhat.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200306100655.GZ14282@dhcp-12-102.nay.redhat.com>
-User-Agent: Mutt/1.9.4 (2018-02-28)
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9552 signatures=668685
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 phishscore=0 malwarescore=0
- mlxlogscore=999 mlxscore=0 spamscore=0 adultscore=0 bulkscore=0
- suspectscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2001150001 definitions=main-2003060109
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9552 signatures=668685
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 lowpriorityscore=0 spamscore=0
- impostorscore=0 malwarescore=0 mlxlogscore=999 mlxscore=0 suspectscore=0
- phishscore=0 clxscore=1015 bulkscore=0 adultscore=0 priorityscore=1501
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2001150001
- definitions=main-2003060109
+        Fri, 6 Mar 2020 12:51:06 -0500
+Received: from mail.kernel.org ([198.145.29.99]:44332 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726083AbgCFRvG (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 6 Mar 2020 12:51:06 -0500
+Received: from debian6.Home (bl8-197-74.dsl.telepac.pt [85.241.197.74])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id CF1C4206D7;
+        Fri,  6 Mar 2020 17:51:04 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1583517065;
+        bh=/WmzF9haJT3ZbXBRBIlyda+oaAofNEqZgYMOyBTf7GY=;
+        h=From:To:Cc:Subject:Date:From;
+        b=jlPqwOCtRijcSTwsfUk4fHwnqZnMBF0KBS85S3FURvfFW4Ayh4jgd1QPOD77UB5R1
+         mOOx4MT1vSdfyXxTMT+AJiMrNI6qpKqkbFuRvP9UF1sfeC3rhZGRJGc+5WtPu39u0z
+         YbIsQqMGg6aLfNkmtwlhhEUZQh0zdLS8P8ZwLas8=
+From:   fdmanana@kernel.org
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, josef@toxicpanda.com,
+        Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] btrfs: test power fail after a ranged fsync when not using the no-holes feature
+Date:   Fri,  6 Mar 2020 17:51:02 +0000
+Message-Id: <20200306175102.5539-1-fdmanana@kernel.org>
+X-Mailer: git-send-email 2.11.0
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Mar 06, 2020 at 06:06:55PM +0800, Zorro Lang wrote:
-> On Tue, Mar 03, 2020 at 06:46:47PM -0800, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <darrick.wong@oracle.com>
-> > 
-> > Make sure all the xfs_db/xfs_quota commands are documented.
-> > 
-> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> > ---
-> 
-> The test cases make sense, and looks good to me, although it fails
-> on most of xfsprogs versions currently. I think someone is fixing
-> these missed docs, right :)
+From: Filipe Manana <fdmanana@suse.com>
 
-Yes, the missing command documentation should be in 5.5.
+Test a scenario were we fsync a range of a file and have a power failure.
+We want to check that after a power failure and mounting the filesystem,
+we do not end up with a missing file extent representing a hole. This
+applies only when not using the NO_HOLES feature.
 
-> One thing I noticed that:
->   $CAT "$MANPAGE" | egrep -q "^\.B.*$COMMAND"
-> 
-> The "^\.B.*$COMMAND" can match ".B report", but can't match something
-> likes:
-> "
-> .B
-> limit
-> "
-> 
-> If we don't recommend this format, we'd be better to change and avoid it in
-> manual pages.
+This currently fails on btrfs but it is fixed by a patch for the kernel
+that has the following subject:
 
-I also fixed that.
+  "Btrfs: fix missing file extent item for hole after ranged fsync"
 
-> Reviewd-by: Zorro Lang <zlang@redhat.com>
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/btrfs/207     | 87 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/207.out |  7 +++++
+ tests/btrfs/group   |  3 +-
+ 3 files changed, 96 insertions(+), 1 deletion(-)
+ create mode 100755 tests/btrfs/207
+ create mode 100644 tests/btrfs/207.out
 
-        ^ need an 'e' here...
+diff --git a/tests/btrfs/207 b/tests/btrfs/207
+new file mode 100755
+index 00000000..4a7cbb87
+--- /dev/null
++++ b/tests/btrfs/207
+@@ -0,0 +1,87 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2020 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FSQA Test No. 207
++#
++# Test a scenario were we fsync a range of a file and have a power failure.
++# We want to check that after a power failure and mounting the filesystem, we
++# do not end up with a missing file extent representing a hole. This applies
++# only when not using the NO_HOLES feature.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	_cleanup_flakey
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/attr
++. ./common/filter
++. ./common/dmflakey
++
++# real QA test starts here
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch
++_require_dm_target flakey
++_require_btrfs_fs_feature "no_holes"
++_require_btrfs_mkfs_feature "no-holes"
++_require_xfs_io_command "sync_range"
++
++rm -f $seqres.full
++
++_scratch_mkfs -O ^no-holes >>$seqres.full 2>&1
++_require_metadata_journaling $SCRATCH_DEV
++_init_flakey
++_mount_flakey
++
++# Create a 256K file with a single extent and fsync it to clear the full sync
++# bit from the inode - we want the msync below to trigger a fast fsync.
++$XFS_IO_PROG -f \
++	     -c "pwrite -S 0xab 0 256K" \
++	     -c "fsync" \
++	     $SCRATCH_MNT/foo | _filter_xfs_io
++
++# Force a transaction commit and wipe out the log tree.
++sync
++
++# Dirty 768K of data, increasing the file size to 1Mb, and flush only the range
++# from 256K to 512K without updating the log tree (sync_file_range() does not
++# trigger fsync, it only starts writeback and waits for it to finish).
++$XFS_IO_PROG -c "pwrite -S 0xcd 256K 768K" \
++	     -c "sync_range -abw 256K 256K" \
++	     $SCRATCH_MNT/foo | _filter_xfs_io
++
++# Now dirty the range from 768K to 1M again and sync that range.
++$XFS_IO_PROG \
++    -c "mmap -w 768K 256K"        \
++    -c "mwrite -S 0xef 768K 256K" \
++    -c "msync -s 768K 256K"       \
++    -c "munmap"                   \
++    $SCRATCH_MNT/foo | _filter_xfs_io
++
++echo "File digest before power failure: $(_md5_checksum $SCRATCH_MNT/foo)"
++
++# Simulate a power failure and mount again the filesystem.
++_flakey_drop_and_remount
++
++# Should match what we got before the power failure.
++echo "File digest after power failure: $(_md5_checksum $SCRATCH_MNT/foo)"
++
++# We also want to check that fsck doesn't fail due to an error of a missing
++# file extent item that represents a hole for the range 256K to 512K. The
++# fstests framework does the fsck once the test exits.
++_unmount_flakey
++
++status=0
++exit
+diff --git a/tests/btrfs/207.out b/tests/btrfs/207.out
+new file mode 100644
+index 00000000..d49a6f24
+--- /dev/null
++++ b/tests/btrfs/207.out
+@@ -0,0 +1,7 @@
++QA output created by 207
++wrote 262144/262144 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 786432/786432 bytes at offset 262144
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++File digest before power failure: c0bf141ef2500fcc894f754ead04f02d
++File digest after power failure: c0bf141ef2500fcc894f754ead04f02d
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index fd1943e3..0b1a06d9 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -208,4 +208,5 @@
+ 203 auto quick send clone
+ 204 auto quick punch
+ 205 auto quick clone compress
+-204 auto quick log replay
++206 auto quick log replay
++207 auto quick log
+-- 
+2.11.0
 
---D
-
-> 
-> Thanks,
-> Zorro
-> 
-> >  tests/xfs/754     |   57 +++++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/xfs/754.out |    2 ++
-> >  tests/xfs/755     |   53 +++++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/xfs/755.out |    2 ++
-> >  tests/xfs/group   |    2 ++
-> >  5 files changed, 116 insertions(+)
-> >  create mode 100755 tests/xfs/754
-> >  create mode 100644 tests/xfs/754.out
-> >  create mode 100755 tests/xfs/755
-> >  create mode 100644 tests/xfs/755.out
-> > 
-> > 
-> > diff --git a/tests/xfs/754 b/tests/xfs/754
-> > new file mode 100755
-> > index 00000000..ba0885be
-> > --- /dev/null
-> > +++ b/tests/xfs/754
-> > @@ -0,0 +1,57 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0-or-newer
-> > +# Copyright (c) 2020, Oracle and/or its affiliates.  All Rights Reserved.
-> > +#
-> > +# FS QA Test No. 754
-> > +#
-> > +# Ensure all xfs_db commands are documented.
-> > +
-> > +seq=`basename $0`
-> > +seqres=$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +
-> > +here=`pwd`
-> > +tmp=/tmp/$$
-> > +status=1    # failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +_cleanup()
-> > +{
-> > +	cd /
-> > +	rm -f $tmp.* $file
-> > +}
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +
-> > +# real QA test starts here
-> > +_supported_fs xfs
-> > +_supported_os Linux
-> > +_require_command "$XFS_DB_PROG" "xfs_db"
-> > +_require_command "$MAN_PROG" man
-> > +_require_test
-> > +
-> > +echo "Silence is golden"
-> > +
-> > +MANPAGE=$($MAN_PROG --path xfs_db)
-> > +
-> > +case "$MANPAGE" in
-> > +*.gz|*.z\|*.Z)	CAT=zcat;;
-> > +*.bz2)		CAT=bzcat;;
-> > +*.xz)		CAT=xzcat;;
-> > +*)		CAT=cat;;
-> > +esac
-> > +_require_command `which $CAT` $CAT
-> > +
-> > +file=$TEST_DIR/xx.$seq
-> > +truncate -s 128m $file
-> > +$MKFS_XFS_PROG $file >> /dev/null
-> > +
-> > +for COMMAND in `$XFS_DB_PROG -x -c help $file | awk '{print $1}' | grep -v "^Use"`; do
-> > +  $CAT "$MANPAGE" | egrep -q "^\.B.*$COMMAND" || \
-> > +	echo "$COMMAND not documented in the xfs_db manpage"
-> > +done
-> > +
-> > +# success, all done
-> > +status=0
-> > +exit
-> > diff --git a/tests/xfs/754.out b/tests/xfs/754.out
-> > new file mode 100644
-> > index 00000000..9e7cda82
-> > --- /dev/null
-> > +++ b/tests/xfs/754.out
-> > @@ -0,0 +1,2 @@
-> > +QA output created by 754
-> > +Silence is golden
-> > diff --git a/tests/xfs/755 b/tests/xfs/755
-> > new file mode 100755
-> > index 00000000..0e5d85ab
-> > --- /dev/null
-> > +++ b/tests/xfs/755
-> > @@ -0,0 +1,53 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0-or-newer
-> > +# Copyright (c) 2020, Oracle and/or its affiliates.  All Rights Reserved.
-> > +#
-> > +# FS QA Test No. 755
-> > +#
-> > +# Ensure all xfs_quota commands are documented.
-> > +
-> > +seq=`basename $0`
-> > +seqres=$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +
-> > +here=`pwd`
-> > +tmp=/tmp/$$
-> > +status=1    # failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +_cleanup()
-> > +{
-> > +	cd /
-> > +	rm -f $tmp.* $file
-> > +}
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +
-> > +# real QA test starts here
-> > +_supported_fs xfs
-> > +_supported_os Linux
-> > +_require_command "$XFS_QUOTA_PROG" "xfs_quota"
-> > +_require_command "$MAN_PROG" man
-> > +_require_test
-> > +
-> > +echo "Silence is golden"
-> > +
-> > +MANPAGE=$($MAN_PROG --path xfs_quota)
-> > +
-> > +case "$MANPAGE" in
-> > +*.gz|*.z\|*.Z)	CAT=zcat;;
-> > +*.bz2)		CAT=bzcat;;
-> > +*.xz)		CAT=xzcat;;
-> > +*)		CAT=cat;;
-> > +esac
-> > +_require_command `which $CAT` $CAT
-> > +
-> > +for COMMAND in `$XFS_QUOTA_PROG -x -c help $file | awk '{print $1}' | grep -v "^Use"`; do
-> > +  $CAT "$MANPAGE" | egrep -q "^\.B.*$COMMAND" || \
-> > +	echo "$COMMAND not documented in the xfs_quota manpage"
-> > +done
-> > +
-> > +# success, all done
-> > +status=0
-> > +exit
-> > diff --git a/tests/xfs/755.out b/tests/xfs/755.out
-> > new file mode 100644
-> > index 00000000..7c9ea51c
-> > --- /dev/null
-> > +++ b/tests/xfs/755.out
-> > @@ -0,0 +1,2 @@
-> > +QA output created by 755
-> > +Silence is golden
-> > diff --git a/tests/xfs/group b/tests/xfs/group
-> > index 522d4bc4..aadbb971 100644
-> > --- a/tests/xfs/group
-> > +++ b/tests/xfs/group
-> > @@ -511,3 +511,5 @@
-> >  511 auto quick quota
-> >  512 auto quick acl attr
-> >  513 auto mount
-> > +754 auto quick db
-> > +755 auto quick quota
-> > 
-> 
