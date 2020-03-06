@@ -2,99 +2,123 @@ Return-Path: <SRS0=xM/5=4X=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
 	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0D144C10DCE
-	for <linux-fstests@archiver.kernel.org>; Fri,  6 Mar 2020 08:32:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B85EEC10DCE
+	for <linux-fstests@archiver.kernel.org>; Fri,  6 Mar 2020 09:22:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id DED4D20848
-	for <linux-fstests@archiver.kernel.org>; Fri,  6 Mar 2020 08:32:34 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8BCF720848
+	for <linux-fstests@archiver.kernel.org>; Fri,  6 Mar 2020 09:22:40 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="TOBCFJLP"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725901AbgCFIce (ORCPT
+        id S1726166AbgCFJWk (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 6 Mar 2020 03:32:34 -0500
-Received: from mx2.suse.de ([195.135.220.15]:46888 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725855AbgCFIce (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 6 Mar 2020 03:32:34 -0500
-X-Virus-Scanned: by amavisd-new at test-mx.suse.de
-Received: from relay2.suse.de (unknown [195.135.220.254])
-        by mx2.suse.de (Postfix) with ESMTP id C8BB5B314;
-        Fri,  6 Mar 2020 08:32:31 +0000 (UTC)
-Subject: Re: [PATCH v2] btrfs: add test for large direct I/O w/ RAID
-To:     Omar Sandoval <osandov@osandov.com>, fstests@vger.kernel.org,
-        linux-btrfs@vger.kernel.org
-Cc:     kernel-team@fb.com, Josef Bacik <josef@toxicpanda.com>
-References: <e55e1550e89c36dec53b487d7e0a73d6ece900e6.1583456541.git.osandov@fb.com>
-From:   Nikolay Borisov <nborisov@suse.com>
-Autocrypt: addr=nborisov@suse.com; prefer-encrypt=mutual; keydata=
- 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
-Message-ID: <ba6c0e22-1556-9268-425a-786b592514cb@suse.com>
-Date:   Fri, 6 Mar 2020 10:32:31 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.4.1
+        Fri, 6 Mar 2020 04:22:40 -0500
+Received: from us-smtp-2.mimecast.com ([207.211.31.81]:35310 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1725855AbgCFJWk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 6 Mar 2020 04:22:40 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1583486559;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=GqDzJrEnUL3t6EcmzutSGSoXkRGW9+zbh09QQ+zpyUk=;
+        b=TOBCFJLPipRKjxIoJjQvWUJTMRq2QWGugP5ruJXsgqukMfD9ULLQ9ZC2S1zo/qDZCnCep1
+        VU2ZrAJjIqgIXen/yFPnxPetWcu7HNZoEoC4pjPNO5eltjirHvQjPQRN9ABj943IuxvIPp
+        1ODwXSJIVz/uRD3tKp/t3a4VUtvP4eY=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-269-PkOUhdKrOs-EhClK4fNZbQ-1; Fri, 06 Mar 2020 04:22:35 -0500
+X-MC-Unique: PkOUhdKrOs-EhClK4fNZbQ-1
+Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id B00238017CC;
+        Fri,  6 Mar 2020 09:22:34 +0000 (UTC)
+Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 25BB348;
+        Fri,  6 Mar 2020 09:22:33 +0000 (UTC)
+Date:   Fri, 6 Mar 2020 17:33:22 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     fstests@vger.kernel.org
+Cc:     linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 1/3] generic/402: skip test if xfs_io can't parse the
+ date value
+Message-ID: <20200306093322.GX14282@dhcp-12-102.nay.redhat.com>
+Mail-Followup-To: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+References: <158328998787.2374922.4223951558305234252.stgit@magnolia>
+ <158328999421.2374922.12052887381904972734.stgit@magnolia>
 MIME-Version: 1.0
-In-Reply-To: <e55e1550e89c36dec53b487d7e0a73d6ece900e6.1583456541.git.osandov@fb.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <158328999421.2374922.12052887381904972734.stgit@magnolia>
+User-Agent: Mutt/1.10.1 (2018-07-13)
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-
-
-On 6.03.20 г. 3:03 ч., Omar Sandoval wrote:
-> From: Omar Sandoval <osandov@fb.com>
+On Tue, Mar 03, 2020 at 06:46:34PM -0800, Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
 > 
-> Apparently we don't have any tests which exercise the code path in Btrfs
-> that has to split up direct I/Os for RAID stripes. Add one to catch the
-> bug fixed by "btrfs: fix RAID direct I/O reads with alternate csums".
+> If xfs_io's utimes command cannot interpret the arguments that are given
+> to it, it will print out "Bad value for [am]time".  Detect when this
+> happens and drop the file out of the test entirely.
 > 
-> Reviewed-by: Josef Bacik <josef@toxicpanda.com>
-> Signed-off-by: Omar Sandoval <osandov@fb.com>
+> This is particularly noticeable on 32-bit platforms and the largest
+> timestamp seconds supported by the filesystem is INT_MAX.  In this case,
+> the maximum value we can cram into tv_sec is INT_MAX, and there is no
+> way to actually test setting a timestamp of INT_MAX + 1 to test the
+> clamping.
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+> ---
 
-Reviewed-by: Nikolay Borisov <nborisov@suse.com>
+Looks good to me.
+
+>  tests/generic/402 |   20 ++++++++++++++++++--
+>  1 file changed, 18 insertions(+), 2 deletions(-)
+> 
+> 
+> diff --git a/tests/generic/402 b/tests/generic/402
+> index 2a34d127..2481a5d2 100755
+> --- a/tests/generic/402
+> +++ b/tests/generic/402
+> @@ -63,10 +63,26 @@ run_test_individual()
+>  	# check if the time needs update
+>  	if [ $update_time -eq 1 ]; then
+>  		echo "Updating file: $file to timestamp $timestamp"  >> $seqres.full
+> -		$XFS_IO_PROG -f -c "utimes $timestamp 0 $timestamp 0" $file
+> -		if [ $? -ne 0 ]; then
+> +		rm -f $tmp.utimes
+> +		$XFS_IO_PROG -f -c "utimes $timestamp 0 $timestamp 0" $file > $tmp.utimes 2>&1
+> +		local res=$?
+> +
+> +		cat $tmp.utimes >> $seqres.full
+> +		if [ "$timestamp" -ne 0 ] && grep -q "Bad value" "$tmp.utimes"; then
+> +			echo "xfs_io could not interpret time value \"$timestamp\", skipping \"$file\" test." >> $seqres.full
+> +			rm -f $file $tmp.utimes
+> +			return
+> +		fi
+> +		cat $tmp.utimes
+> +		rm -f $tmp.utimes
+> +		if [ $res -ne 0 ]; then
+>  			echo "Failed to update times on $file" | tee -a $seqres.full
+>  		fi
+> +	else
+> +		if [ ! -f "$file" ]; then
+> +			echo "xfs_io did not create file for time value \"$timestamp\", skipping test." >> $seqres.full
+> +			return
+> +		fi
+>  	fi
+>  
+>  	tsclamp=$((timestamp<tsmin?tsmin:timestamp>tsmax?tsmax:timestamp))
+> 
+
