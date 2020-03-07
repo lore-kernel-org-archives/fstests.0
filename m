@@ -1,195 +1,106 @@
-Return-Path: <SRS0=xM/5=4X=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=YIgP=4Y=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4E44FC10DCE
-	for <linux-fstests@archiver.kernel.org>; Fri,  6 Mar 2020 17:51:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CD7EEC10DCE
+	for <linux-fstests@archiver.kernel.org>; Sat,  7 Mar 2020 00:45:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 25BDA2072A
-	for <linux-fstests@archiver.kernel.org>; Fri,  6 Mar 2020 17:51:07 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1583517067;
-	bh=/WmzF9haJT3ZbXBRBIlyda+oaAofNEqZgYMOyBTf7GY=;
-	h=From:To:Cc:Subject:Date:List-ID:From;
-	b=RITc1X5QWz84RQP/qinDdYU0HppdGmPN31fMoMBu9OCd5oVf99hQ0TK/h8csU4AD0
-	 4MiGE78UI4QmpdJeRacAmvzicuHeAck+RsaOxFXb9Hr9Wh5LeKvSjK9dKCPL+TMNJg
-	 v0iOzql/cBAcX1po5u+WfLCs0yuQsxLaHWMLiXGw=
+	by mail.kernel.org (Postfix) with ESMTP id AB5C2206E6
+	for <linux-fstests@archiver.kernel.org>; Sat,  7 Mar 2020 00:45:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726359AbgCFRvG (ORCPT
+        id S1726259AbgCGApr (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 6 Mar 2020 12:51:06 -0500
-Received: from mail.kernel.org ([198.145.29.99]:44332 "EHLO mail.kernel.org"
+        Fri, 6 Mar 2020 19:45:47 -0500
+Received: from mx2.suse.de ([195.135.220.15]:49148 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726083AbgCFRvG (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 6 Mar 2020 12:51:06 -0500
-Received: from debian6.Home (bl8-197-74.dsl.telepac.pt [85.241.197.74])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id CF1C4206D7;
-        Fri,  6 Mar 2020 17:51:04 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1583517065;
-        bh=/WmzF9haJT3ZbXBRBIlyda+oaAofNEqZgYMOyBTf7GY=;
-        h=From:To:Cc:Subject:Date:From;
-        b=jlPqwOCtRijcSTwsfUk4fHwnqZnMBF0KBS85S3FURvfFW4Ayh4jgd1QPOD77UB5R1
-         mOOx4MT1vSdfyXxTMT+AJiMrNI6qpKqkbFuRvP9UF1sfeC3rhZGRJGc+5WtPu39u0z
-         YbIsQqMGg6aLfNkmtwlhhEUZQh0zdLS8P8ZwLas8=
-From:   fdmanana@kernel.org
+        id S1726231AbgCGApr (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 6 Mar 2020 19:45:47 -0500
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+Received: from relay2.suse.de (unknown [195.135.220.254])
+        by mx2.suse.de (Postfix) with ESMTP id 2BED5AC8F;
+        Sat,  7 Mar 2020 00:45:45 +0000 (UTC)
+From:   Anthony Iliopoulos <ailiopoulos@suse.com>
 To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, josef@toxicpanda.com,
-        Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH] btrfs: test power fail after a ranged fsync when not using the no-holes feature
-Date:   Fri,  6 Mar 2020 17:51:02 +0000
-Message-Id: <20200306175102.5539-1-fdmanana@kernel.org>
-X-Mailer: git-send-email 2.11.0
+Cc:     Anthony Iliopoulos <ailiopoulos@suse.com>
+Subject: [PATCH] xfs/513: fix allocsize on archs with pagesize larger than blocksize
+Date:   Sat,  7 Mar 2020 01:44:07 +0100
+Message-Id: <20200307004407.17116-1-ailiopoulos@suse.com>
+X-Mailer: git-send-email 2.16.4
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Filipe Manana <fdmanana@suse.com>
+The minimum accepted allocsize mount option value is page size, which
+causes the particular test to fail in architectures where page size >
+block size. Fix it by basing the value on the platform page size rather
+than the block size as obtained from mkfs. In addition add a filter so
+that different values can be used without breaking the golden output.
 
-Test a scenario were we fsync a range of a file and have a power failure.
-We want to check that after a power failure and mounting the filesystem,
-we do not end up with a missing file extent representing a hole. This
-applies only when not using the NO_HOLES feature.
-
-This currently fails on btrfs but it is fixed by a patch for the kernel
-that has the following subject:
-
-  "Btrfs: fix missing file extent item for hole after ranged fsync"
-
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
+Signed-off-by: Anthony Iliopoulos <ailiopoulos@suse.com>
 ---
- tests/btrfs/207     | 87 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/207.out |  7 +++++
- tests/btrfs/group   |  3 +-
- 3 files changed, 96 insertions(+), 1 deletion(-)
- create mode 100755 tests/btrfs/207
- create mode 100644 tests/btrfs/207.out
+ tests/xfs/513     | 14 ++++++++++----
+ tests/xfs/513.out |  2 +-
+ 2 files changed, 11 insertions(+), 5 deletions(-)
 
-diff --git a/tests/btrfs/207 b/tests/btrfs/207
-new file mode 100755
-index 00000000..4a7cbb87
---- /dev/null
-+++ b/tests/btrfs/207
-@@ -0,0 +1,87 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2020 SUSE Linux Products GmbH. All Rights Reserved.
-+#
-+# FSQA Test No. 207
-+#
-+# Test a scenario were we fsync a range of a file and have a power failure.
-+# We want to check that after a power failure and mounting the filesystem, we
-+# do not end up with a missing file extent representing a hole. This applies
-+# only when not using the NO_HOLES feature.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
+diff --git a/tests/xfs/513 b/tests/xfs/513
+index 70bc2f1c..2c2c0404 100755
+--- a/tests/xfs/513
++++ b/tests/xfs/513
+@@ -68,6 +68,11 @@ filter_loop()
+ 	    -e "s,\B$LOOP_SPARE_DEV,LOOP_SPARE_DEV,g"
+ }
+ 
++filter_pagesz()
 +{
-+	_cleanup_flakey
-+	cd /
-+	rm -f $tmp.*
++	sed -e "s,allocsize=$pagesz,allocsize=PAGE_SIZE,g"
 +}
 +
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/attr
-+. ./common/filter
-+. ./common/dmflakey
-+
-+# real QA test starts here
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch
-+_require_dm_target flakey
-+_require_btrfs_fs_feature "no_holes"
-+_require_btrfs_mkfs_feature "no-holes"
-+_require_xfs_io_command "sync_range"
-+
-+rm -f $seqres.full
-+
-+_scratch_mkfs -O ^no-holes >>$seqres.full 2>&1
-+_require_metadata_journaling $SCRATCH_DEV
-+_init_flakey
-+_mount_flakey
-+
-+# Create a 256K file with a single extent and fsync it to clear the full sync
-+# bit from the inode - we want the msync below to trigger a fast fsync.
-+$XFS_IO_PROG -f \
-+	     -c "pwrite -S 0xab 0 256K" \
-+	     -c "fsync" \
-+	     $SCRATCH_MNT/foo | _filter_xfs_io
-+
-+# Force a transaction commit and wipe out the log tree.
-+sync
-+
-+# Dirty 768K of data, increasing the file size to 1Mb, and flush only the range
-+# from 256K to 512K without updating the log tree (sync_file_range() does not
-+# trigger fsync, it only starts writeback and waits for it to finish).
-+$XFS_IO_PROG -c "pwrite -S 0xcd 256K 768K" \
-+	     -c "sync_range -abw 256K 256K" \
-+	     $SCRATCH_MNT/foo | _filter_xfs_io
-+
-+# Now dirty the range from 768K to 1M again and sync that range.
-+$XFS_IO_PROG \
-+    -c "mmap -w 768K 256K"        \
-+    -c "mwrite -S 0xef 768K 256K" \
-+    -c "msync -s 768K 256K"       \
-+    -c "munmap"                   \
-+    $SCRATCH_MNT/foo | _filter_xfs_io
-+
-+echo "File digest before power failure: $(_md5_checksum $SCRATCH_MNT/foo)"
-+
-+# Simulate a power failure and mount again the filesystem.
-+_flakey_drop_and_remount
-+
-+# Should match what we got before the power failure.
-+echo "File digest after power failure: $(_md5_checksum $SCRATCH_MNT/foo)"
-+
-+# We also want to check that fsck doesn't fail due to an error of a missing
-+# file extent item that represents a hole for the range 256K to 512K. The
-+# fstests framework does the fsck once the test exits.
-+_unmount_flakey
-+
-+status=0
-+exit
-diff --git a/tests/btrfs/207.out b/tests/btrfs/207.out
-new file mode 100644
-index 00000000..d49a6f24
---- /dev/null
-+++ b/tests/btrfs/207.out
-@@ -0,0 +1,7 @@
-+QA output created by 207
-+wrote 262144/262144 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 786432/786432 bytes at offset 262144
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+File digest before power failure: c0bf141ef2500fcc894f754ead04f02d
-+File digest after power failure: c0bf141ef2500fcc894f754ead04f02d
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index fd1943e3..0b1a06d9 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -208,4 +208,5 @@
- 203 auto quick send clone
- 204 auto quick punch
- 205 auto quick clone compress
--204 auto quick log replay
-+206 auto quick log replay
-+207 auto quick log
+ # avoid the effection from MKFS_OPTIONS
+ MKFS_OPTIONS=""
+ do_mkfs()
+@@ -165,7 +170,7 @@ do_test()
+ 	# Print each argument, include nil ones
+ 	echo -n "TEST:" | tee -a $seqres.full
+ 	for i in "$@";do
+-		echo -n " \"$i\"" | filter_loop | tee -a $seqres.full
++		echo -n " \"$i\"" | filter_loop | filter_pagesz | tee -a $seqres.full
+ 	done
+ 	echo | tee -a $seqres.full
+ 
+@@ -180,11 +185,12 @@ echo "** start xfs mount testing ..."
+ # Test allocsize=size
+ # Valid values for this option are page size (typically 4KiB) through to 1GiB
+ do_mkfs
+-if [ $dbsize -ge 1024 ];then
+-	blsize="$((dbsize / 1024))k"
++pagesz=$(get_page_size)
++if [ $pagesz -ge 1024 ];then
++	pagesz="$((pagesz / 1024))k"
+ fi
+ do_test "" pass "allocsize" "false"
+-do_test "-o allocsize=$blsize" pass "allocsize=$blsize" "true"
++do_test "-o allocsize=$pagesz" pass "allocsize=$pagesz" "true"
+ do_test "-o allocsize=1048576k" pass "allocsize=1048576k" "true"
+ do_test "-o allocsize=$((dbsize / 2))" fail
+ do_test "-o allocsize=2g" fail
+diff --git a/tests/xfs/513.out b/tests/xfs/513.out
+index 9be18dd8..f676a289 100644
+--- a/tests/xfs/513.out
++++ b/tests/xfs/513.out
+@@ -5,7 +5,7 @@ QA output created by 513
+ ** start xfs mount testing ...
+ FORMAT: 
+ TEST: "" "pass" "allocsize" "false"
+-TEST: "-o allocsize=4k" "pass" "allocsize=4k" "true"
++TEST: "-o allocsize=PAGE_SIZE" "pass" "allocsize=PAGE_SIZE" "true"
+ TEST: "-o allocsize=1048576k" "pass" "allocsize=1048576k" "true"
+ TEST: "-o allocsize=2048" "fail"
+ TEST: "-o allocsize=2g" "fail"
 -- 
-2.11.0
+2.16.4
 
