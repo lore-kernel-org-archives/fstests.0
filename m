@@ -1,121 +1,107 @@
-Return-Path: <SRS0=BV5T=42=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=IEHS=43=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C05AFC10F27
-	for <linux-fstests@archiver.kernel.org>; Mon,  9 Mar 2020 11:51:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C3F82C10F27
+	for <linux-fstests@archiver.kernel.org>; Tue, 10 Mar 2020 04:22:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 9F03720848
-	for <linux-fstests@archiver.kernel.org>; Mon,  9 Mar 2020 11:51:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9F24924649
+	for <linux-fstests@archiver.kernel.org>; Tue, 10 Mar 2020 04:22:29 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="xBAv9dSU"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726451AbgCILv7 (ORCPT
+        id S1725988AbgCJEW3 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 9 Mar 2020 07:51:59 -0400
-Received: from mx2.suse.de ([195.135.220.15]:36526 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726248AbgCILv7 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 9 Mar 2020 07:51:59 -0400
-X-Virus-Scanned: by amavisd-new at test-mx.suse.de
-Received: from relay2.suse.de (unknown [195.135.220.254])
-        by mx2.suse.de (Postfix) with ESMTP id 339EDAF2F;
-        Mon,  9 Mar 2020 11:51:57 +0000 (UTC)
-Subject: Re: [PATCH 1/2] fstests: btrfs/177 check for minsize of the scratch
- device
-To:     Anand Jain <anand.jain@oracle.com>, fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org
-References: <20200309114036.5266-1-anand.jain@oracle.com>
- <20200309114036.5266-2-anand.jain@oracle.com>
-From:   Nikolay Borisov <nborisov@suse.com>
-Autocrypt: addr=nborisov@suse.com; prefer-encrypt=mutual; keydata=
- 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
-Message-ID: <6e673a84-3505-3e4a-cb42-6a2f9be115f6@suse.com>
-Date:   Mon, 9 Mar 2020 13:51:56 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.4.1
+        Tue, 10 Mar 2020 00:22:29 -0400
+Received: from aserp2120.oracle.com ([141.146.126.78]:48810 "EHLO
+        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725800AbgCJEW3 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 10 Mar 2020 00:22:29 -0400
+Received: from pps.filterd (aserp2120.oracle.com [127.0.0.1])
+        by aserp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 02A4MRbu183377;
+        Tue, 10 Mar 2020 04:22:27 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=mime-version :
+ message-id : date : from : to : cc : subject : references : in-reply-to :
+ content-type : content-transfer-encoding; s=corp-2020-01-29;
+ bh=17pPcwbPO5mI7aM13d8yqxLx9Q4s1zy1qqA/BXrB8Jg=;
+ b=xBAv9dSUW/Knh9uh0C2afo7ZviI+H/JEym+kF4lLl+9oi9kGB4sH07gWRF/Qo7N5LGY5
+ Aq6jCBJOfgCyHJamLCnAmw3UGY/hkiW7GZpn2bwLFUOXnqitlXf0YD2zciTylrWXu+uW
+ 4Rg9vsskuwSzzwypwjPGo20b1egyCnFTANilq0mE4Z34B8mmcYqh3QJiLw0idvDUEKJt
+ Fj9l/KWAuSzlpOb1mt1I2vJN7JhDEU2ny4PVJ3Lgbxf8h1uoLr+t/UCjkJjb1ODACmTN
+ D88a1dBpnv23zTks1q3H+9QK2AJilYwZcLVhQtpCY7Z23q1qofEvf2W4k+NM44WPzcDm qQ== 
+Received: from aserp3020.oracle.com (aserp3020.oracle.com [141.146.126.70])
+        by aserp2120.oracle.com with ESMTP id 2ym3jqjs3u-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Tue, 10 Mar 2020 04:22:27 +0000
+Received: from pps.filterd (aserp3020.oracle.com [127.0.0.1])
+        by aserp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 02A4HTAv156741;
+        Tue, 10 Mar 2020 04:20:21 GMT
+Received: from aserv0122.oracle.com (aserv0122.oracle.com [141.146.126.236])
+        by aserp3020.oracle.com with ESMTP id 2ymndh5r6k-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Tue, 10 Mar 2020 04:20:21 +0000
+Received: from abhmp0006.oracle.com (abhmp0006.oracle.com [141.146.116.12])
+        by aserv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 02A4KKnO032201;
+        Tue, 10 Mar 2020 04:20:21 GMT
+Received: from tp.localdomain (/39.109.145.141) by default (Oracle Beehive
+ Gateway v4.0) with ESMTP ; Mon, 09 Mar 2020 21:20:12 -0700
 MIME-Version: 1.0
+Message-ID: <1583814004-15489-1-git-send-email-anand.jain@oracle.com>
+Date:   Mon, 9 Mar 2020 21:20:04 -0700 (PDT)
+From:   Anand Jain <anand.jain@oracle.com>
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org
+Subject: [PATCH v2 1/2] fstests: btrfs/177 check for minsize of the scratch
+ device
+References: <20200309114036.5266-2-anand.jain@oracle.com>
 In-Reply-To: <20200309114036.5266-2-anand.jain@oracle.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+X-Mailer: git-send-email 1.8.3.1
+Content-Type: text/plain; charset=ascii
+Content-Transfer-Encoding: 7bit
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9555 signatures=668685
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 adultscore=0 spamscore=0 bulkscore=0
+ mlxscore=0 suspectscore=13 mlxlogscore=999 phishscore=0 malwarescore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2001150001
+ definitions=main-2003100028
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9555 signatures=668685
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 malwarescore=0 clxscore=1015
+ priorityscore=1501 mlxscore=0 phishscore=0 mlxlogscore=999 impostorscore=0
+ bulkscore=0 spamscore=0 suspectscore=13 lowpriorityscore=0 adultscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2001150001
+ definitions=main-2003100028
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+This test case needs at least 3g scratch device space, check for it
+before starting the test case.
 
+Signed-off-by: Anand Jain <anand.jain@oracle.com>
+---
+v2: Makes use of the helper _require_scratch_size() (Thanks Nikolay).
 
-On 9.03.20 г. 13:40 ч., Anand Jain wrote:
-> This test case needs at least 3g scratch device space, check for it
-> before starting the test case.
-> 
-> Signed-off-by: Anand Jain <anand.jain@oracle.com>
-> ---
->  tests/btrfs/177 | 5 +++++
->  1 file changed, 5 insertions(+)
-> 
-> diff --git a/tests/btrfs/177 b/tests/btrfs/177
-> index 2b2c2fcc2198..a627c2ab1666 100755
-> --- a/tests/btrfs/177
-> +++ b/tests/btrfs/177
-> @@ -34,6 +34,11 @@ _require_scratch_swapfile
->  
->  swapfile="$SCRATCH_MNT/swap"
->  
-> +minsize=$((3 * 1024 * 1024 * 1024))
-> +devsize=$(blockdev --getsize64 $SCRATCH_DEV)
-> +[ "$devsize" -lt "$minsize" ] && \
-> +	_notrun "Scratch device $SCRATCH_DEV $devsize must be at least $minsize"
+ tests/btrfs/177 | 2 ++
+ 1 file changed, 2 insertions(+)
 
-Simply use :
+diff --git a/tests/btrfs/177 b/tests/btrfs/177
+index 2b2c2fcc2198..f7c2436ee7e4 100755
+--- a/tests/btrfs/177
++++ b/tests/btrfs/177
+@@ -34,6 +34,8 @@ _require_scratch_swapfile
+ 
+ swapfile="$SCRATCH_MNT/swap"
+ 
++_require_scratch_size $((3 * 1024 * 1024)) #kB
++
+ # First, create a 1GB filesystem and fill it up.
+ _scratch_mkfs_sized $((1024 * 1024 * 1024)) >> $seqres.full 2>&1
+ _scratch_mount
+-- 
+1.8.3.1
 
-_require_scratch_size $((3 * 1024*1024))
-
-> +
->  # First, create a 1GB filesystem and fill it up.
->  _scratch_mkfs_sized $((1024 * 1024 * 1024)) >> $seqres.full 2>&1
->  _scratch_mount
-> 
