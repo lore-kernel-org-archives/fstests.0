@@ -2,93 +2,231 @@ Return-Path: <SRS0=0tij=44=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.2 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable
+X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8EDB2C0044D
-	for <linux-fstests@archiver.kernel.org>; Wed, 11 Mar 2020 17:47:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9A729C2BB1D
+	for <linux-fstests@archiver.kernel.org>; Wed, 11 Mar 2020 21:35:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 19B8B20734
-	for <linux-fstests@archiver.kernel.org>; Wed, 11 Mar 2020 17:47:09 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="AqDvoP/Q"
+	by mail.kernel.org (Postfix) with ESMTP id 418882074E
+	for <linux-fstests@archiver.kernel.org>; Wed, 11 Mar 2020 21:35:42 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1583962542;
+	bh=Xra8VPbIBIEvxvLBaQYJ03gPqE0cmtBpu/Xkd9UujSI=;
+	h=From:To:Cc:Subject:Date:List-ID:From;
+	b=1LSSQ8JyWr0qtu51uFqLnD97FJdOO/dZ9Av/8f4rZ2EIOA/rjjV0VPmR6Tsjr02y8
+	 2MFvoe2sMmMrw1F+aXp/NKarYYdFKx3FvL0/AZIi+tAI2NO69E2CikDX4fiIx95OiY
+	 B61+52gxcnScxEKC0t56qELPoMLV5bp6iJUh2N6Y=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730603AbgCKRrI (ORCPT
+        id S1729402AbgCKVfl (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 11 Mar 2020 13:47:08 -0400
-Received: from mail-qk1-f174.google.com ([209.85.222.174]:45366 "EHLO
-        mail-qk1-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1730550AbgCKRrH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 11 Mar 2020 13:47:07 -0400
-Received: by mail-qk1-f174.google.com with SMTP id c145so2904259qke.12
-        for <fstests@vger.kernel.org>; Wed, 11 Mar 2020 10:47:07 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=FcqiswfdjqetanoyQsWUUD+OLgI+FTzG1aCM5ZGvWYg=;
-        b=AqDvoP/QEi9hL3qxS+Q6NQqdLHK6wx/DwZwjykjXX+QU/8IU6Clrq4p8TaG/id0TTZ
-         VyomtFSnvyv/lAeh4Lsmg1f4X9VzpmX3U1PaPKcRtJiGrkWBwBILhR86B/fET7z8uWhm
-         BAi2SKbsN6tMiMKt4tPNtR/V6vSjINs8/XjW74rxGbk9rKjYdeBJupFELQUiWSGmAiv4
-         0wLmKEwZMoQEICqwWHevYHJZPaGZSVlbwg4CdFk5TNioLZaanqizjQ5o5cIDYM326uA5
-         a6ysIE2aKpW+C1jrh+QPJ1DAG78NmMHU26oe/+Ijy2NNf4NuptR4pzpJO7ql4iRttY9n
-         wrMQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=FcqiswfdjqetanoyQsWUUD+OLgI+FTzG1aCM5ZGvWYg=;
-        b=uOPRfLHQcWRTzjCQIvVebSs3hD88LPmSpgxb4FW1gpaG9YvTVpshUKx8hFizaRYJZ+
-         ugGV9TUPd694hzHmrNIAaAqLKWOecLQY/4o7b3VdaMfjZnUMhG+H23evxSIn7ZpAYHim
-         0evX4xaKilMWVVyffyUZt6S0If00twRrhNhejIxBpjYteidB8t0+agjPKCWQSGf+PNbK
-         NxUpm0ErcOYUH1UyZK8VTq4XleGMKXczT3OXxPZ41mLkJy3drpVAAev7oNyYNE8s76hQ
-         BvmWu7SEVGIH45pBpTzjTuqFCu1vBuI+NjCVeU04kP6lQY7T+/8gfqGbN+RBwqdf+G/2
-         EkRw==
-X-Gm-Message-State: ANhLgQ37upbXN2CTQvrnQ7AuxHee7AwF7Q3uowz/DQKPN74to+6uDsdD
-        D0TQymjam3j0O1AA/lU93b8H+g==
-X-Google-Smtp-Source: ADFU+vtCpeU37ks6JXcL0kuNFs5hanjYoDYD6WeSows5XS5HyohbXIunN3LiNqne3mdWrFZ6Ea8t9Q==
-X-Received: by 2002:a05:620a:6d9:: with SMTP id 25mr3842870qky.457.1583948826431;
-        Wed, 11 Mar 2020 10:47:06 -0700 (PDT)
-Received: from [192.168.1.106] ([107.15.81.208])
-        by smtp.gmail.com with ESMTPSA id f13sm12113841qte.53.2020.03.11.10.47.05
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 11 Mar 2020 10:47:05 -0700 (PDT)
-Subject: Re: [PATCHv4 fstests] btrfs: Test subvolume delete --subvolid feature
-To:     Marcos Paulo de Souza <marcos@mpdesouza.com>,
-        linux-btrfs@vger.kernel.org, guaneryu@gmail.com,
-        fstests@vger.kernel.org
-Cc:     Marcos Paulo de Souza <mpdesouza@suse.com>
-References: <20200309103956.1697-1-marcos@mpdesouza.com>
-From:   Josef Bacik <josef@toxicpanda.com>
-Message-ID: <085200d5-451b-e58c-0a3b-634d12e0002f@toxicpanda.com>
-Date:   Wed, 11 Mar 2020 13:47:04 -0400
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:68.0)
- Gecko/20100101 Thunderbird/68.5.0
+        Wed, 11 Mar 2020 17:35:41 -0400
+Received: from mail.kernel.org ([198.145.29.99]:47744 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726684AbgCKVfk (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 11 Mar 2020 17:35:40 -0400
+Received: from ebiggers-linuxstation.mtv.corp.google.com (unknown [104.132.1.77])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 0601220749;
+        Wed, 11 Mar 2020 21:35:39 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1583962540;
+        bh=Xra8VPbIBIEvxvLBaQYJ03gPqE0cmtBpu/Xkd9UujSI=;
+        h=From:To:Cc:Subject:Date:From;
+        b=I7iDG+VAKx4/wbfky7u3Jf2rVtgfm3KY3z9QIMttGZf1cEnuiPDJOv2a6MMxvN46a
+         faqLhyO3aMFkMLDVaCMt2cfFfOcYij6WX4IBWt+ssVPutNjEmAN+b0AAkNbs1ClPJS
+         gKeo+AjMbur0L1+INm+EQiFFEZ3WrHxiDE3PRkyY=
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     fstests@vger.kernel.org
+Cc:     linux-fscrypt@vger.kernel.org
+Subject: [xfstests PATCH v2] generic: test fscrypt key eviction racing with inode dirtying
+Date:   Wed, 11 Mar 2020 14:34:53 -0700
+Message-Id: <20200311213453.218975-1-ebiggers@kernel.org>
+X-Mailer: git-send-email 2.25.1.481.gfbce0eb801-goog
 MIME-Version: 1.0
-In-Reply-To: <20200309103956.1697-1-marcos@mpdesouza.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 3/9/20 6:39 AM, Marcos Paulo de Souza wrote:
-> From: Marcos Paulo de Souza <mpdesouza@suse.com>
-> 
-> Now btrfs can delete subvolumes based in ther subvolume id. This makes
-> easy for the user willing to delete a subvolume that cannot be accessed
-> by the mount point, since btrfs allows to mount a specific subvolume and
-> hiding the other from the mount point.
-> 
-> Signed-off-by: Marcos Paulo de Souza <mpdesouza@suse.com>
+From: Eric Biggers <ebiggers@google.com>
 
-Reviewed-by: Josef Bacik <josef@toxicpanda.com>
+Add a regression test for a bug in the FS_IOC_REMOVE_ENCRYPTION_KEY
+ioctl fixed by commit 2b4eae95c736 ("fscrypt: don't evict dirty inodes
+after removing key").
 
-Thanks,
+This ioctl is also tested by generic/580 and generic/581, but they
+didn't cover the case where this bug occurs.
 
-Josef
+This test detects the bug on ext4, f2fs, and ubifs.  The multi-threaded
+part of the test actually still fails on ubifs even with the fix, due to
+another kernel bug which I'm working on fixing.
+
+Signed-off-by: Eric Biggers <ebiggers@google.com>
+---
+
+Changed v1 => v2:
+  - Added upstream commit ID.
+  - Removed RFC tag.
+  - Removed some unnecessary output suppressions.
+
+ tests/generic/900     | 115 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/900.out |  10 ++++
+ tests/generic/group   |   1 +
+ 3 files changed, 126 insertions(+)
+ create mode 100755 tests/generic/900
+ create mode 100644 tests/generic/900.out
+
+diff --git a/tests/generic/900 b/tests/generic/900
+new file mode 100755
+index 00000000..8c8671ea
+--- /dev/null
++++ b/tests/generic/900
+@@ -0,0 +1,115 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright 2020 Google LLC
++#
++# FS QA Test No. 900
++#
++# Regression test for a bug in the FS_IOC_REMOVE_ENCRYPTION_KEY ioctl fixed by
++# commit 2b4eae95c736 ("fscrypt: don't evict dirty inodes after removing key").
++# This bug could cause writes to encrypted files to be lost if they raced with
++# the corresponding fscrypt master key being removed.  With f2fs, this bug could
++# also crash the kernel.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	# Stop all subprocesses.
++	touch $tmp.done
++	wait
++
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/encrypt
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_scratch_encryption -v 2
++_require_command "$KEYCTL_PROG" keyctl
++
++_scratch_mkfs_encrypted &>> $seqres.full
++_scratch_mount
++
++dir=$SCRATCH_MNT/dir
++runtime=$((4 * TIME_FACTOR))
++
++# Create an encrypted directory.
++mkdir $dir
++_set_encpolicy $dir $TEST_KEY_IDENTIFIER
++_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY"
++
++# Start with a single-threaded reproducer:
++echo -e "\n# Single-threaded reproducer"
++# Keep a fd open to a file past its fscrypt master key being removed.
++exec 3>$dir/file
++_rm_enckey $SCRATCH_MNT $TEST_KEY_IDENTIFIER
++# Write to and close the open fd.
++echo contents >&3
++exec 3>&-
++# Drop any dentries which might be pinning the inode for "file".
++echo 2 > /proc/sys/vm/drop_caches
++# In buggy kernels, the inode for "file" was evicted despite the dirty data,
++# causing the dirty data to be lost.  Check whether the write made it through.
++_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY"
++cat $dir/file
++rm -f $dir/file
++
++# Also run a multi-threaded reproducer.  This is included for good measure, as
++# this type of thing tends to be good for finding other bugs too.
++echo -e "\n# Multi-threaded reproducer"
++touch $dir/file
++
++# One process add/removes the encryption key repeatedly.
++(
++	while [ ! -e $tmp.done ]; do
++		_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY" > /dev/null
++		_rm_enckey $SCRATCH_MNT $TEST_KEY_IDENTIFIER &> /dev/null
++	done
++) &
++
++# Another process repeatedly tries to append to the encrypted file.  The file is
++# re-opened each time, so that there are chances for the inode to be evicted.
++# Failures to open the file due to the key being removed are ignored.
++(
++	touch $tmp.expected
++	while [ ! -e $tmp.done ]; do
++		if sh -c "echo -n X >> $dir/file" 2>/dev/null; then
++			# Keep track of the expected file contents.
++			echo -n X >> $tmp.expected
++		fi
++	done
++) &
++
++# Run for a while.
++sleep $runtime
++
++# Stop all subprocesses.
++touch $tmp.done
++wait
++
++# Make sure no writes were lost.
++_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY" > /dev/null
++stat $tmp.expected >> $seqres.full
++stat $dir/file >> $seqres.full
++cmp $tmp.expected $dir/file
++
++echo "Multi-threaded reproducer done"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/900.out b/tests/generic/900.out
+new file mode 100644
+index 00000000..14fde4c8
+--- /dev/null
++++ b/tests/generic/900.out
+@@ -0,0 +1,10 @@
++QA output created by 900
++Added encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
++
++# Single-threaded reproducer
++Removed encryption key with identifier 69b2f6edeee720cce0577937eb8a6751, but files still busy
++Added encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
++contents
++
++# Multi-threaded reproducer
++Multi-threaded reproducer done
+diff --git a/tests/generic/group b/tests/generic/group
+index dc95b77b..0852fc31 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -595,3 +595,4 @@
+ 591 auto quick rw pipe splice
+ 592 auto quick encrypt
+ 593 auto quick encrypt
++900 auto quick encrypt
+-- 
+2.25.1.481.gfbce0eb801-goog
+
