@@ -1,170 +1,98 @@
-Return-Path: <SRS0=IEHS=43=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=0tij=44=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.2 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9BC97C10DCE
-	for <linux-fstests@archiver.kernel.org>; Tue, 10 Mar 2020 04:22:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 23FC3C0044D
+	for <linux-fstests@archiver.kernel.org>; Wed, 11 Mar 2020 17:46:13 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 6B2C52467D
-	for <linux-fstests@archiver.kernel.org>; Tue, 10 Mar 2020 04:22:43 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A408C2073E
+	for <linux-fstests@archiver.kernel.org>; Wed, 11 Mar 2020 17:46:13 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="TrtPnXJM"
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="X95kAo5J"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726156AbgCJEWn (ORCPT
+        id S1730502AbgCKRqM (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 10 Mar 2020 00:22:43 -0400
-Received: from userp2130.oracle.com ([156.151.31.86]:57176 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725865AbgCJEWm (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 10 Mar 2020 00:22:42 -0400
-Received: from pps.filterd (userp2130.oracle.com [127.0.0.1])
-        by userp2130.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 02A4MfQM010484;
-        Tue, 10 Mar 2020 04:22:41 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=from : to : cc :
- subject : date : message-id : in-reply-to : references; s=corp-2020-01-29;
- bh=x5H/FiFzNPu50ioZuu49isBRRkJTQ0/Ea+N4oqG3+xw=;
- b=TrtPnXJM8QOgBv4XHI6QUiP6nMBnoTMB6FRDHDbEyxIHxzxU71L53aKC0Pe/Xsbxfo0r
- cj1jyq4tjqlZuJt4M3J5nztnKVUMvT2GDtpHuh5y4T38Jh8csl79PprCoAYK4T6fd9WA
- sp+4Vh7NCO7QDeNEtqzl3QDc4KVGV2IxTuyjzpTpcEVBKMXoDSA10LBCOXgNO2/aY0sq
- m8vedk+BCZnUESS/uEXbcGHlB/wknyAxy9Cl4mdlvPrqligZ/6PLHjOgRhBUp7DYs5hQ
- +Lma4/RPTIe2vSlm5sFG//BSDG2sXqiCbtW2GNUmTafjPniEghmHC1k0i7am6Zj2jzvi Gg== 
-Received: from userp3020.oracle.com (userp3020.oracle.com [156.151.31.79])
-        by userp2130.oracle.com with ESMTP id 2ym31uat0j-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Tue, 10 Mar 2020 04:22:41 +0000
-Received: from pps.filterd (userp3020.oracle.com [127.0.0.1])
-        by userp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 02A4GtQw008912;
-        Tue, 10 Mar 2020 04:22:41 GMT
-Received: from userv0122.oracle.com (userv0122.oracle.com [156.151.31.75])
-        by userp3020.oracle.com with ESMTP id 2ymnb2gcju-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Tue, 10 Mar 2020 04:22:41 +0000
-Received: from abhmp0002.oracle.com (abhmp0002.oracle.com [141.146.116.8])
-        by userv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 02A4MeB6025279;
-        Tue, 10 Mar 2020 04:22:40 GMT
-Received: from tp.localdomain (/39.109.145.141)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Mon, 09 Mar 2020 21:22:40 -0700
-From:   Anand Jain <anand.jain@oracle.com>
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org
-Subject: [PATCH 2/2] fstests: btrfs/177 fix for nodesize 64K and type single
-Date:   Tue, 10 Mar 2020 12:22:32 +0800
-Message-Id: <1583814152-15603-1-git-send-email-anand.jain@oracle.com>
-X-Mailer: git-send-email 1.8.3.1
-In-Reply-To: <20200309114036.5266-3-anand.jain@oracle.com>
-References: <20200309114036.5266-3-anand.jain@oracle.com>
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9555 signatures=668685
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 phishscore=0 mlxscore=0 mlxlogscore=999
- spamscore=0 suspectscore=38 adultscore=0 malwarescore=0 bulkscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2001150001
- definitions=main-2003100028
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9555 signatures=668685
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 adultscore=0 lowpriorityscore=0
- spamscore=0 priorityscore=1501 impostorscore=0 bulkscore=0 suspectscore=38
- phishscore=0 mlxlogscore=999 mlxscore=0 malwarescore=0 clxscore=1015
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2001150001
- definitions=main-2003100029
+        Wed, 11 Mar 2020 13:46:12 -0400
+Received: from mail-qt1-f194.google.com ([209.85.160.194]:42751 "EHLO
+        mail-qt1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1730440AbgCKRqM (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 11 Mar 2020 13:46:12 -0400
+Received: by mail-qt1-f194.google.com with SMTP id g16so2201999qtp.9
+        for <fstests@vger.kernel.org>; Wed, 11 Mar 2020 10:46:12 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=T4d4jIRQBOQaWObZCt2XjqNaQ6fQF1xGmgQsytBUoZg=;
+        b=X95kAo5JyRfoILvSRPRsUASfN3BJdd0AuKURGreNUJsP/Cq0K+BPoHTXjPleEFEABn
+         BZZFI8yuqfil2SY+td21/aH/ORAL57wpcnN32Nf3cnWrnLUXmaxH/7aWToDpF5xqvqdx
+         4h9x7fv2v39TDAML11C9LbAbF7ZUUeh6eYS04QfHoM908tNbWZMjy6+3DiSpcHmn7Swr
+         zTPQUYdP6nhTeUFKdfJrLFxampnSEuJHstwHfLBDyTx4SW73rPiVB6X5PTKjWSWINOSd
+         avgVch8vJT5xZOv+G+JzxCZefeFaW2V8Kh3fB1gX27hAaR9V7li0jA060/egvJB7ltBP
+         23eA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=T4d4jIRQBOQaWObZCt2XjqNaQ6fQF1xGmgQsytBUoZg=;
+        b=NyAFx3EbjMKSJmzeFnoBH/rcaVQtb0Ni+S/KQrDAm+yUa7oIpZG3rS6dvVzh7IvstD
+         9hOkvWayVRu4O5ZM7x3WFG9durUXwAIxULGxSbLpnNI6fVSXASA2v1nSLepWtEWWZgVn
+         ZlyoLCpgfr4aNPaneLhB+XC6F26Q7RvtFdVbxPeFM7XOfjf9xhA8AbDJQjbAjos6ygus
+         n1q2swEajwdEyRi3UF2WvaMOWTKXXC6Y4bsqpdS+c+hAVJslUesRX9Wy4/rl4eBmbrj0
+         6tMqo2l6okGYyoRVX2hgkLZt9AuE+SOty5ixNYNher2tg/C71iFEguhpTelf58NJXC+G
+         gi6g==
+X-Gm-Message-State: ANhLgQ148pJYO2s4lamcep6F1XbyW4pSBcnSfQpdyPpInDtl6gkWTVmU
+        2jYwJxvyrHDw1MVtUe/NHrMDyw==
+X-Google-Smtp-Source: ADFU+vv9hDNzH8Q/2UjJc+sW4AF5hXNKDEBA6uPtI5UF8ZfQthR3CO/OBgX4jhu7ioYGX15g2YpwPg==
+X-Received: by 2002:ac8:4906:: with SMTP id e6mr3767017qtq.178.1583948771602;
+        Wed, 11 Mar 2020 10:46:11 -0700 (PDT)
+Received: from [192.168.1.106] ([107.15.81.208])
+        by smtp.gmail.com with ESMTPSA id u13sm25382323qtg.64.2020.03.11.10.46.10
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 11 Mar 2020 10:46:10 -0700 (PDT)
+Subject: Re: [PATCH] btrfs: test power fail after a ranged fsync when not
+ using the no-holes feature
+To:     fdmanana@kernel.org, fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+References: <20200306175102.5539-1-fdmanana@kernel.org>
+From:   Josef Bacik <josef@toxicpanda.com>
+Message-ID: <e3a0230f-1232-043a-f095-e3e0e9c1d0b5@toxicpanda.com>
+Date:   Wed, 11 Mar 2020 13:46:10 -0400
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:68.0)
+ Gecko/20100101 Thunderbird/68.5.0
+MIME-Version: 1.0
+In-Reply-To: <20200306175102.5539-1-fdmanana@kernel.org>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-In the blockgroup type single with nodesize 64K, the relocation of the bg
-containing the swapfile is not being attempted during the resize. So due
-to this the resize is successful and does not generate the required
-'Text file busy' error message as in the golden output and so the testcase
-fails.
+On 3/6/20 12:51 PM, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
+> 
+> Test a scenario were we fsync a range of a file and have a power failure.
+> We want to check that after a power failure and mounting the filesystem,
+> we do not end up with a missing file extent representing a hole. This
+> applies only when not using the NO_HOLES feature.
+> 
+> This currently fails on btrfs but it is fixed by a patch for the kernel
+> that has the following subject:
+> 
+>    "Btrfs: fix missing file extent item for hole after ranged fsync"
+> 
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
 
-Fix this by replacing the mkfs created chunk with the bigger kernel created
-chunk using balance, and then fill it up to the full. Upsize to 3x of fssize
-once instead of first to 2G and then to 3G. Also drop the unnecessary downsize
-to 2G step.
+Reviewed-by: Josef Bacik <josef@toxicpanda.com>
 
-Signed-off-by: Anand Jain <anand.jain@oracle.com>
----
-no change, just fix conflict with the v2 1/2 patch changes
+Thanks,
 
- tests/btrfs/177     | 34 +++++++++++++++++++++++-----------
- tests/btrfs/177.out |  6 ++----
- 2 files changed, 25 insertions(+), 15 deletions(-)
-
-diff --git a/tests/btrfs/177 b/tests/btrfs/177
-index f7c2436ee7e4..69b9a539500a 100755
---- a/tests/btrfs/177
-+++ b/tests/btrfs/177
-@@ -36,30 +36,42 @@ swapfile="$SCRATCH_MNT/swap"
- 
- _require_scratch_size $((3 * 1024 * 1024)) #kB
- 
--# First, create a 1GB filesystem and fill it up.
--_scratch_mkfs_sized $((1024 * 1024 * 1024)) >> $seqres.full 2>&1
-+# First, create a 1GB filesystem.
-+fssize=$((1024 * 1024 * 1024))
-+_scratch_mkfs_sized $fssize >> $seqres.full 2>&1
- _scratch_mount
--dd if=/dev/zero of="$SCRATCH_MNT/fill" bs=1024k >> $seqres.full 2>&1
--# Now add more space and create a swap file. We know that the first 1GB of the
--# filesystem was used, so the swap file must be in the new part of the
-+
-+# Create a small file and run balance so we shall deal with the chunk
-+# size as allocated by the kernel, mkfs allocated chunks are smaller.
-+dd if=/dev/zero of="$SCRATCH_MNT/fill" bs=4096 count=1 >> $seqres.full 2>&1
-+_run_btrfs_balance_start "$SCRATCH_MNT"
-+
-+# Now fill it up.
-+dd if=/dev/zero of="$SCRATCH_MNT/refill" bs=4096 >> $seqres.full 2>&1
-+
-+# Now add more space and create a swap file. We know that the first $fssize
-+# of the filesystem was used, so the swap file must be in the new part of the
- # filesystem.
--$BTRFS_UTIL_PROG filesystem resize 2G "$SCRATCH_MNT" | _filter_scratch
-+$BTRFS_UTIL_PROG filesystem resize $((3 * fssize)) "$SCRATCH_MNT" | \
-+							_filter_scratch
- _format_swapfile "$swapfile" $((32 * 1024 * 1024))
- swapon "$swapfile"
--# Add even more space which we know is unused.
--$BTRFS_UTIL_PROG filesystem resize 3G "$SCRATCH_MNT" | _filter_scratch
-+
- # Free up the first 1GB of the filesystem.
- rm -f "$SCRATCH_MNT/fill"
-+rm -f "$SCRATCH_MNT/refill"
-+
- # Get rid of empty block groups and also make sure that balance skips block
- # groups containing active swap files.
- _run_btrfs_balance_start "$SCRATCH_MNT"
--# Shrink away the unused space.
--$BTRFS_UTIL_PROG filesystem resize 2G "$SCRATCH_MNT" | _filter_scratch
-+
- # Try to shrink away the area occupied by the swap file, which should fail.
- $BTRFS_UTIL_PROG filesystem resize 1G "$SCRATCH_MNT" 2>&1 | grep -o "Text file busy"
-+
- swapoff "$swapfile"
-+
- # It should work again after swapoff.
--$BTRFS_UTIL_PROG filesystem resize 1G "$SCRATCH_MNT" | _filter_scratch
-+$BTRFS_UTIL_PROG filesystem resize $fssize "$SCRATCH_MNT" | _filter_scratch
- 
- status=0
- exit
-diff --git a/tests/btrfs/177.out b/tests/btrfs/177.out
-index 6ced01da9f61..63aca0e5362d 100644
---- a/tests/btrfs/177.out
-+++ b/tests/btrfs/177.out
-@@ -1,6 +1,4 @@
- QA output created by 177
--Resize 'SCRATCH_MNT' of '2G'
--Resize 'SCRATCH_MNT' of '3G'
--Resize 'SCRATCH_MNT' of '2G'
-+Resize 'SCRATCH_MNT' of '3221225472'
- Text file busy
--Resize 'SCRATCH_MNT' of '1G'
-+Resize 'SCRATCH_MNT' of '1073741824'
--- 
-1.8.3.1
-
+Josef
