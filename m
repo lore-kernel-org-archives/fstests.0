@@ -1,51 +1,51 @@
-Return-Path: <SRS0=0tij=44=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=qJ0B=45=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
 X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9A729C2BB1D
-	for <linux-fstests@archiver.kernel.org>; Wed, 11 Mar 2020 21:35:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AEDB9C10DCE
+	for <linux-fstests@archiver.kernel.org>; Thu, 12 Mar 2020 22:16:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 418882074E
-	for <linux-fstests@archiver.kernel.org>; Wed, 11 Mar 2020 21:35:42 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 84EDE20637
+	for <linux-fstests@archiver.kernel.org>; Thu, 12 Mar 2020 22:16:42 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1583962542;
-	bh=Xra8VPbIBIEvxvLBaQYJ03gPqE0cmtBpu/Xkd9UujSI=;
+	s=default; t=1584051402;
+	bh=AyQkSMP0ichYhKQ2vucgo1PRYtr8vAHB5qXbFqpC64A=;
 	h=From:To:Cc:Subject:Date:List-ID:From;
-	b=1LSSQ8JyWr0qtu51uFqLnD97FJdOO/dZ9Av/8f4rZ2EIOA/rjjV0VPmR6Tsjr02y8
-	 2MFvoe2sMmMrw1F+aXp/NKarYYdFKx3FvL0/AZIi+tAI2NO69E2CikDX4fiIx95OiY
-	 B61+52gxcnScxEKC0t56qELPoMLV5bp6iJUh2N6Y=
+	b=VPxrhoBpib0QKpxnbkehy1/xgxRuMxn0GU2HcJ58dqxhyfRc2L9nuWBn7SFlxnQMZ
+	 IF2arMwiwHVvBTO3FOkLAdyL+tVfLjizwKGkedXAGtG851qw2kK44vqDv+e7kd2YDa
+	 PLyvrMMCTw/9YGkcID6nPHcufH1hzAaLnXydo6/0=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729402AbgCKVfl (ORCPT
+        id S1726623AbgCLWQm (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 11 Mar 2020 17:35:41 -0400
-Received: from mail.kernel.org ([198.145.29.99]:47744 "EHLO mail.kernel.org"
+        Thu, 12 Mar 2020 18:16:42 -0400
+Received: from mail.kernel.org ([198.145.29.99]:46690 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726684AbgCKVfk (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 11 Mar 2020 17:35:40 -0400
-Received: from ebiggers-linuxstation.mtv.corp.google.com (unknown [104.132.1.77])
+        id S1726620AbgCLWQl (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 12 Mar 2020 18:16:41 -0400
+Received: from sol.hsd1.ca.comcast.net (c-107-3-166-239.hsd1.ca.comcast.net [107.3.166.239])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 0601220749;
-        Wed, 11 Mar 2020 21:35:39 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id F191B20637;
+        Thu, 12 Mar 2020 22:16:40 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1583962540;
-        bh=Xra8VPbIBIEvxvLBaQYJ03gPqE0cmtBpu/Xkd9UujSI=;
+        s=default; t=1584051401;
+        bh=AyQkSMP0ichYhKQ2vucgo1PRYtr8vAHB5qXbFqpC64A=;
         h=From:To:Cc:Subject:Date:From;
-        b=I7iDG+VAKx4/wbfky7u3Jf2rVtgfm3KY3z9QIMttGZf1cEnuiPDJOv2a6MMxvN46a
-         faqLhyO3aMFkMLDVaCMt2cfFfOcYij6WX4IBWt+ssVPutNjEmAN+b0AAkNbs1ClPJS
-         gKeo+AjMbur0L1+INm+EQiFFEZ3WrHxiDE3PRkyY=
+        b=FuuK7clcXSM9AnO5e9/mLk3A1Tgwi78PFKzWc/aLAQCqHv5IfoGxzEuiU+sSGfuQd
+         YZ1YwksJEAdmuMuiVUptRZmB8wc/vLKSCcT69Sz+PrDkC9/HXzwDb41aW8I1XC8Ixc
+         woNUU7VLN4uxDY7K8FL3eCikALyYchGsibyhFpCo=
 From:   Eric Biggers <ebiggers@kernel.org>
 To:     fstests@vger.kernel.org
-Cc:     linux-fscrypt@vger.kernel.org
-Subject: [xfstests PATCH v2] generic: test fscrypt key eviction racing with inode dirtying
-Date:   Wed, 11 Mar 2020 14:34:53 -0700
-Message-Id: <20200311213453.218975-1-ebiggers@kernel.org>
-X-Mailer: git-send-email 2.25.1.481.gfbce0eb801-goog
+Cc:     linux-xfs@vger.kernel.org
+Subject: [RFC PATCH] generic: test PF_MEMALLOC interfering with accounting file write
+Date:   Thu, 12 Mar 2020 15:14:37 -0700
+Message-Id: <20200312221437.141484-1-ebiggers@kernel.org>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
@@ -55,49 +55,73 @@ X-Mailing-List: fstests@vger.kernel.org
 
 From: Eric Biggers <ebiggers@google.com>
 
-Add a regression test for a bug in the FS_IOC_REMOVE_ENCRYPTION_KEY
-ioctl fixed by commit 2b4eae95c736 ("fscrypt: don't evict dirty inodes
-after removing key").
-
-This ioctl is also tested by generic/580 and generic/581, but they
-didn't cover the case where this bug occurs.
-
-This test detects the bug on ext4, f2fs, and ubifs.  The multi-threaded
-part of the test actually still fails on ubifs even with the fix, due to
-another kernel bug which I'm working on fixing.
+Add a regression test for the bug fixed by commit 10a98cb16d80 ("xfs:
+clear PF_MEMALLOC before exiting xfsaild thread").
 
 Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
 
-Changed v1 => v2:
-  - Added upstream commit ID.
-  - Removed RFC tag.
-  - Removed some unnecessary output suppressions.
+RFC for now since the commit is in xfs/for-next only, and I'm not sure
+the commit ID is stable.
 
- tests/generic/900     | 115 ++++++++++++++++++++++++++++++++++++++++++
- tests/generic/900.out |  10 ++++
- tests/generic/group   |   1 +
- 3 files changed, 126 insertions(+)
- create mode 100755 tests/generic/900
- create mode 100644 tests/generic/900.out
+ common/config         |  1 +
+ common/rc             | 11 ++++++++
+ tests/generic/901     | 60 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/901.out |  2 ++
+ tests/generic/group   |  1 +
+ 5 files changed, 75 insertions(+)
+ create mode 100644 tests/generic/901
+ create mode 100644 tests/generic/901.out
 
-diff --git a/tests/generic/900 b/tests/generic/900
-new file mode 100755
-index 00000000..8c8671ea
+diff --git a/common/config b/common/config
+index 1116cb995..8023273da 100644
+--- a/common/config
++++ b/common/config
+@@ -220,6 +220,7 @@ export DUPEREMOVE_PROG="$(type -P duperemove)"
+ export CC_PROG="$(type -P cc)"
+ export FSVERITY_PROG="$(type -P fsverity)"
+ export OPENSSL_PROG="$(type -P openssl)"
++export ACCTON_PROG="$(type -P accton)"
+ 
+ # use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
+ # newer systems have udevadm command but older systems like RHEL5 don't.
+diff --git a/common/rc b/common/rc
+index 454f5ccf5..0bc4b14f2 100644
+--- a/common/rc
++++ b/common/rc
+@@ -4168,6 +4168,17 @@ _check_xfs_scrub_does_unicode() {
+ 	return 0
+ }
+ 
++# Require the 'accton' userspace tool and CONFIG_BSD_PROCESS_ACCT=y.
++_require_bsd_process_accounting()
++{
++	_require_command "$ACCTON_PROG" accton
++	$ACCTON_PROG on &> $tmp.test_accton
++	cat $tmp.test_accton >> $seqres.full
++	if grep 'Function not implemented' $tmp.test_accton; then
++		_notrun "BSD process accounting support unavailable"
++	fi
++}
++
+ init_rc
+ 
+ ################################################################################
+diff --git a/tests/generic/901 b/tests/generic/901
+new file mode 100644
+index 000000000..c59300f1b
 --- /dev/null
-+++ b/tests/generic/900
-@@ -0,0 +1,115 @@
++++ b/tests/generic/901
+@@ -0,0 +1,60 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
 +# Copyright 2020 Google LLC
 +#
-+# FS QA Test No. 900
++# FS QA Test No. 901
 +#
-+# Regression test for a bug in the FS_IOC_REMOVE_ENCRYPTION_KEY ioctl fixed by
-+# commit 2b4eae95c736 ("fscrypt: don't evict dirty inodes after removing key").
-+# This bug could cause writes to encrypted files to be lost if they raced with
-+# the corresponding fscrypt master key being removed.  With f2fs, this bug could
-+# also crash the kernel.
++# Regression test for the bug fixed by commit 10a98cb16d80 ("xfs: clear
++# PF_MEMALLOC before exiting xfsaild thread").  If the bug exists, a kernel
++# WARNING should be triggered.  See the commit message for details.
 +#
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
@@ -110,17 +134,13 @@ index 00000000..8c8671ea
 +
 +_cleanup()
 +{
-+	# Stop all subprocesses.
-+	touch $tmp.done
-+	wait
-+
++	$ACCTON_PROG off >> $seqres.full
 +	rm -f $tmp.*
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+. ./common/encrypt
 +
 +# remove previous $seqres.full before test
 +rm -f $seqres.full
@@ -128,105 +148,48 @@ index 00000000..8c8671ea
 +# real QA test starts here
 +_supported_fs generic
 +_supported_os Linux
-+_require_scratch_encryption -v 2
-+_require_command "$KEYCTL_PROG" keyctl
++_require_bsd_process_accounting
++_require_chattr S
++_require_test
++_require_scratch
 +
-+_scratch_mkfs_encrypted &>> $seqres.full
++# To trigger the bug we must unmount a filesystem while BSD process accounting
++# is enabled.  The accounting file must also be located on a different
++# filesystem and have the sync flag set.
++
++accounting_file=$TEST_DIR/$seq
++
++rm -f $accounting_file
++touch $accounting_file
++$CHATTR_PROG +S $accounting_file
++
++_scratch_mkfs &>> $seqres.full
++$ACCTON_PROG $accounting_file >> $seqres.full
 +_scratch_mount
++_scratch_unmount
++$ACCTON_PROG off >> $seqres.full
 +
-+dir=$SCRATCH_MNT/dir
-+runtime=$((4 * TIME_FACTOR))
++echo "Silence is golden"
 +
-+# Create an encrypted directory.
-+mkdir $dir
-+_set_encpolicy $dir $TEST_KEY_IDENTIFIER
-+_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY"
-+
-+# Start with a single-threaded reproducer:
-+echo -e "\n# Single-threaded reproducer"
-+# Keep a fd open to a file past its fscrypt master key being removed.
-+exec 3>$dir/file
-+_rm_enckey $SCRATCH_MNT $TEST_KEY_IDENTIFIER
-+# Write to and close the open fd.
-+echo contents >&3
-+exec 3>&-
-+# Drop any dentries which might be pinning the inode for "file".
-+echo 2 > /proc/sys/vm/drop_caches
-+# In buggy kernels, the inode for "file" was evicted despite the dirty data,
-+# causing the dirty data to be lost.  Check whether the write made it through.
-+_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY"
-+cat $dir/file
-+rm -f $dir/file
-+
-+# Also run a multi-threaded reproducer.  This is included for good measure, as
-+# this type of thing tends to be good for finding other bugs too.
-+echo -e "\n# Multi-threaded reproducer"
-+touch $dir/file
-+
-+# One process add/removes the encryption key repeatedly.
-+(
-+	while [ ! -e $tmp.done ]; do
-+		_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY" > /dev/null
-+		_rm_enckey $SCRATCH_MNT $TEST_KEY_IDENTIFIER &> /dev/null
-+	done
-+) &
-+
-+# Another process repeatedly tries to append to the encrypted file.  The file is
-+# re-opened each time, so that there are chances for the inode to be evicted.
-+# Failures to open the file due to the key being removed are ignored.
-+(
-+	touch $tmp.expected
-+	while [ ! -e $tmp.done ]; do
-+		if sh -c "echo -n X >> $dir/file" 2>/dev/null; then
-+			# Keep track of the expected file contents.
-+			echo -n X >> $tmp.expected
-+		fi
-+	done
-+) &
-+
-+# Run for a while.
-+sleep $runtime
-+
-+# Stop all subprocesses.
-+touch $tmp.done
-+wait
-+
-+# Make sure no writes were lost.
-+_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY" > /dev/null
-+stat $tmp.expected >> $seqres.full
-+stat $dir/file >> $seqres.full
-+cmp $tmp.expected $dir/file
-+
-+echo "Multi-threaded reproducer done"
-+
-+# success, all done
 +status=0
 +exit
-diff --git a/tests/generic/900.out b/tests/generic/900.out
+diff --git a/tests/generic/901.out b/tests/generic/901.out
 new file mode 100644
-index 00000000..14fde4c8
+index 000000000..b206bc11d
 --- /dev/null
-+++ b/tests/generic/900.out
-@@ -0,0 +1,10 @@
-+QA output created by 900
-+Added encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
-+
-+# Single-threaded reproducer
-+Removed encryption key with identifier 69b2f6edeee720cce0577937eb8a6751, but files still busy
-+Added encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
-+contents
-+
-+# Multi-threaded reproducer
-+Multi-threaded reproducer done
++++ b/tests/generic/901.out
+@@ -0,0 +1,2 @@
++QA output created by 901
++Silence is golden
 diff --git a/tests/generic/group b/tests/generic/group
-index dc95b77b..0852fc31 100644
+index dc95b77b3..61a679793 100644
 --- a/tests/generic/group
 +++ b/tests/generic/group
 @@ -595,3 +595,4 @@
  591 auto quick rw pipe splice
  592 auto quick encrypt
  593 auto quick encrypt
-+900 auto quick encrypt
++901 auto quick
 -- 
-2.25.1.481.gfbce0eb801-goog
+2.25.1
 
