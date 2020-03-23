@@ -2,266 +2,231 @@ Return-Path: <SRS0=1ern=5I=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 33E2FC4332B
-	for <linux-fstests@archiver.kernel.org>; Mon, 23 Mar 2020 14:27:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 83353C54FCE
+	for <linux-fstests@archiver.kernel.org>; Mon, 23 Mar 2020 16:41:43 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id F2D29206F8
-	for <linux-fstests@archiver.kernel.org>; Mon, 23 Mar 2020 14:27:41 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=fail reason="key not found in DNS" (0-bit key) header.d=szeredi.hu header.i=@szeredi.hu header.b="jGLi0jqS"
+	by mail.kernel.org (Postfix) with ESMTP id 5B46620735
+	for <linux-fstests@archiver.kernel.org>; Mon, 23 Mar 2020 16:41:43 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1584981703;
+	bh=fZ6Ca65pVsgLkGVDZcmEe0ZSxR5Sa5VHy4Sjlcpm9g0=;
+	h=From:To:Cc:Subject:Date:List-ID:From;
+	b=mzJKyDY7tzR5Y+DCpgqgm0g5QTM5J7LBCqU/tkb1JCdVn1FzvGxQyfoZ9TCNuxD2U
+	 8a5vGiG2Q9Zl3nLHfQsDND2oa4w3EEm9Tdt0E/viTuzlKLjFGOQ+negkvtII2sBFLr
+	 pfdmX2HKLMSbuhTxFCBh7ZRCZJdPzJfBN1YLUr6g=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726991AbgCWO1l (ORCPT
+        id S1727494AbgCWQlm (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 23 Mar 2020 10:27:41 -0400
-Received: from mail-io1-f67.google.com ([209.85.166.67]:41620 "EHLO
-        mail-io1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726128AbgCWO1l (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 23 Mar 2020 10:27:41 -0400
-Received: by mail-io1-f67.google.com with SMTP id y24so14277232ioa.8
-        for <fstests@vger.kernel.org>; Mon, 23 Mar 2020 07:27:41 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=szeredi.hu; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=QhgQiTH66sWx/eNlI7jfsfzmYrUfE8m0OL8LWkYA0o8=;
-        b=jGLi0jqSjtfGB4CmBuGTr6X57Q6hFGieJqNpSHj/dYVkOKRZd6ZEHmzW+lG+7oVzr8
-         ixWVNZ7nj/b8jLiz7NJ2SRVBOUfp8Pa83jmpTdZTUIxDnmqI78H+BxQO71HYDaczTv7p
-         SzVsnogF4zQgT7qeHRQjJ1EvfTu6SJC5HMIwU=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=QhgQiTH66sWx/eNlI7jfsfzmYrUfE8m0OL8LWkYA0o8=;
-        b=cxMlWkyBcBZNRgdj/8oLteWuu14plQ1hZyKVUQjPsYHi3dV7MIaEp9Ieihg9jb1eKA
-         hzrJkGWDEAxS2bDMkfL27RewiiXC8RgkdPCO+iN0YgLZ/i3qXKFIbERXGan96Fr2AMG6
-         m/E3ROjm8cyJufXOI7EJAJ3eDXhLmrLp3lWeJlCQ427q33qdqSOemJkFdEh6welbxh6H
-         WJi6FitPjX85rk1HTvDR0xWmr8FeT7IZJaQ5/lyF9pBFWzGodCLkQYEDDDg42GkCC11R
-         Ar7oDsFJ4cvyLheNFvzfrgRlX3P4/IYTUJ7AmfuzkMVg3oHTRfBs36YT7boVRfcIqGeo
-         0mBA==
-X-Gm-Message-State: ANhLgQ1hWm2Q8+NpxfNEbsOiPFkNynYAfcSuSUKAcl0DROxa5MfuL1CK
-        y8DMK5U7geRRWqRZSH2H92mvgV+xy4uAb5GEka+mUM6R
-X-Google-Smtp-Source: ADFU+vunR/JPufI6AZnAKKzqib155zroYqCHYa6f/D3LjJ6XrxLtm1p1eWqTgYR1Uwioz+rt/JvKKSRxTbEpDXO6mqo=
-X-Received: by 2002:a5d:85d4:: with SMTP id e20mr20108704ios.140.1584973660391;
- Mon, 23 Mar 2020 07:27:40 -0700 (PDT)
+        Mon, 23 Mar 2020 12:41:42 -0400
+Received: from mail.kernel.org ([198.145.29.99]:34358 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1727312AbgCWQlm (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 23 Mar 2020 12:41:42 -0400
+Received: from ebiggers-linuxstation.mtv.corp.google.com (unknown [104.132.1.76])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id B982520722;
+        Mon, 23 Mar 2020 16:41:41 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1584981701;
+        bh=fZ6Ca65pVsgLkGVDZcmEe0ZSxR5Sa5VHy4Sjlcpm9g0=;
+        h=From:To:Cc:Subject:Date:From;
+        b=dRthrSVy7+m3MDexkgWQuT3Vs3I9ClbdWQaMvnvKfQW1RJygLNWH9bwRJDt7NKJqd
+         Ir18b+twpQnOosQ0XBySzncADTWO4VgY7S97llhKN+COmJsLF73bN29INeQHKvVJQw
+         eR5G7LFNauopk9xf1zXfkUIvnSvvC5LpqZ+Gl5gU=
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     fstests@vger.kernel.org
+Cc:     linux-fscrypt@vger.kernel.org
+Subject: [PATCH RESEND v2] generic: test fscrypt key eviction racing with inode dirtying
+Date:   Mon, 23 Mar 2020 09:40:34 -0700
+Message-Id: <20200323164034.69031-1-ebiggers@kernel.org>
+X-Mailer: git-send-email 2.25.1.696.g5e7596f4ac-goog
 MIME-Version: 1.0
-References: <CAFkON1U3cXdXFQYdkoQ3OQU+14GX7C88U6qre58vyfhrrFgKXw@mail.gmail.com>
-In-Reply-To: <CAFkON1U3cXdXFQYdkoQ3OQU+14GX7C88U6qre58vyfhrrFgKXw@mail.gmail.com>
-From:   Miklos Szeredi <miklos@szeredi.hu>
-Date:   Mon, 23 Mar 2020 15:27:29 +0100
-Message-ID: <CAJfpeguxq+f2XPKFzCq-e+Br9nOfegDb6NrMg9_LQ6P3qqw5SQ@mail.gmail.com>
-Subject: Re: Kernel warnings in fs/inode.c:302 drop_nlink+0x28/0x40
-To:     fstests <fstests@vger.kernel.org>
-Cc:     overlayfs <linux-unionfs@vger.kernel.org>,
-        Phasip <phasip@gmail.com>, Amir Goldstein <amir73il@gmail.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-[forwarding test case to fstests@vger]
+From: Eric Biggers <ebiggers@google.com>
 
-On Mon, Mar 23, 2020 at 9:50 AM Phasip <phasip@gmail.com> wrote:
->
-> Hello!
->
-> I have stumbled upon two ways of producing kernel warnings when using the=
- overlayfs, both seem to be results of the same issue.
->
-> The issue seems to be related to handling of hard links that are created =
-directly in the upperdir.
-> Below is my system details and then two samples with a list of commands t=
-o reproduce and the corresponding kernel warning
->
-> System details
-> -------------------
-> My kernel version: Linux ubuntu 5.6.0-050600rc5-generic #202003082130 SMP=
- Mon Mar 9 01:33:48 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux
->
-> # modinfo overlay
-> filename:       /lib/modules/5.6.0-050600rc5-generic/kernel/fs/overlayfs/=
-overlay.ko
-> alias:          fs-overlay
-> license:        GPL
-> description:    Overlay filesystem
-> author:         Miklos Szeredi <miklos@szeredi.hu>
-> srcversion:     DF053786AE7737625051D8F
-> depends:
-> retpoline:      Y
-> intree:         Y
-> name:           overlay
-> vermagic:       5.6.0-050600rc5-generic SMP mod_unload
-> parm:           check_copy_up:Obsolete; does nothing
-> parm:           redirect_max:Maximum length of absolute redirect xattr va=
-lue (ushort)
-> parm:           redirect_dir:Default to on or off for the redirect_dir fe=
-ature (bool)
-> parm:           redirect_always_follow:Follow redirects even if redirect_=
-dir feature is turned off (bool)
-> parm:           index:Default to on or off for the inodes index feature (=
-bool)
-> parm:           nfs_export:Default to on or off for the NFS export featur=
-e (bool)
-> parm:           xino_auto:Auto enable xino feature (bool)
-> parm:           metacopy:Default to on or off for the metadata only copy =
-up feature (bool)
->
->
-> Sample 1
-> -------------
-> mkdir work lower upper final
-> sudo mount -t overlay -o workdir=3Dwork,lowerdir=3Dlower,upperdir=3Dupper=
-,metacopy=3Don overlay final
-> touch final/h
-> ln upper/h upper/k
-> rm -rf final/k
-> rm -rf final/h
-> dmesg
->
-> [ 5771.305217] ------------[ cut here ]------------
-> [ 5771.305227] WARNING: CPU: 1 PID: 116244 at fs/inode.c:302 drop_nlink+0=
-x28/0x40
-> [ 5771.305228] Modules linked in: overlay intel_rapl_msr intel_rapl_commo=
-n crct10dif_pclmul crc32_pclmul ghash_clmulni_intel vmw_balloon aesni_intel=
- crypto_simd cryptd glue_helper intel_rapl_perf joydev input_leds serio_raw=
- i2c_piix4 mac_hid vsock_loopback vmw_vsock_virtio_transport_common vmw_vso=
-ck_vmci_transport vsock vmw_vmci parport_pc ppdev lp parport autofs4 vmw_pv=
-scsi vmxnet3 hid_generic vmwgfx psmouse usbhid hid ttm drm_kms_helper ahci =
-libahci e1000 mptspi syscopyarea mptscsih sysfillrect sysimgblt mptbase fb_=
-sys_fops cec rc_core scsi_transport_spi drm pata_acpi [last unloaded: overl=
-ay]
-> [ 5771.305255] CPU: 1 PID: 116244 Comm: rm Tainted: G        W         5.=
-6.0-050600rc5-generic #202003082130
-> [ 5771.305256] Hardware name: VMware, Inc. VMware Virtual Platform/440BX =
-Desktop Reference Platform, BIOS 6.00 07/29/2019
-> [ 5771.305258] RIP: 0010:drop_nlink+0x28/0x40
-> [ 5771.305260] Code: 66 90 0f 1f 44 00 00 55 8b 47 48 48 89 e5 85 c0 74 1=
-8 8d 50 ff 89 57 48 85 d2 75 0c 48 8b 47 28 f0 48 ff 80 98 04 00 00 5d c3 <=
-0f> 0b c7 47 48 ff ff ff ff 5d c3 66 66 2e 0f 1f 84 00 00 00 00 00
-> [ 5771.305261] RSP: 0018:ffffb7c042bdbdd8 EFLAGS: 00010246
-> [ 5771.305262] RAX: 0000000000000000 RBX: 0000000000000000 RCX: 000000020=
-0000000
-> [ 5771.305263] RDX: ffffa0ec6f512f80 RSI: 0000000100000000 RDI: ffffa0ec7=
-26a22a8
-> [ 5771.305263] RBP: ffffb7c042bdbdd8 R08: 0000000000000002 R09: 000000000=
-0000064
-> [ 5771.305264] R10: ffffa0ec7271b300 R11: ffffa0eaf2158668 R12: ffffa0eaf=
-400a480
-> [ 5771.305264] R13: ffffb7c042bdbe08 R14: 0000000000000000 R15: 000000000=
-0000000
-> [ 5771.305266] FS:  00007f81856ac700(0000) GS:ffffa0ec75e40000(0000) knlG=
-S:0000000000000000
-> [ 5771.305266] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-> [ 5771.305267] CR2: 0000000001a2e000 CR3: 000000003466c004 CR4: 000000000=
-03606e0
-> [ 5771.305273] Call Trace:
-> [ 5771.305283]  ovl_do_remove+0x348/0x4c0 [overlay]
-> [ 5771.305287]  ovl_unlink+0x13/0x20 [overlay]
-> [ 5771.305289]  vfs_unlink+0x114/0x200
-> [ 5771.305290]  do_unlinkat+0x19a/0x2d0
-> [ 5771.305292]  __x64_sys_unlinkat+0x38/0x60
-> [ 5771.305318]  do_syscall_64+0x57/0x1b0
-> [ 5771.305322]  entry_SYSCALL_64_after_hwframe+0x44/0xa9
-> [ 5771.305323] RIP: 0033:0x7f81851cfac7
-> [ 5771.305325] Code: 73 01 c3 48 8b 0d d1 b3 2c 00 f7 d8 64 89 01 48 83 c=
-8 ff c3 66 2e 0f 1f 84 00 00 00 00 00 0f 1f 44 00 00 b8 07 01 00 00 0f 05 <=
-48> 3d 01 f0 ff ff 73 01 c3 48 8b 0d a1 b3 2c 00 f7 d8 64 89 01 48
-> [ 5771.305325] RSP: 002b:00007ffdfc056c58 EFLAGS: 00000202 ORIG_RAX: 0000=
-000000000107
-> [ 5771.305327] RAX: ffffffffffffffda RBX: 0000000001a2f230 RCX: 00007f818=
-51cfac7
-> [ 5771.305327] RDX: 0000000000000000 RSI: 0000000001a2e000 RDI: 00000000f=
-fffff9c
-> [ 5771.305328] RBP: 0000000000000000 R08: 0000000000000003 R09: 000000000=
-0000000
-> [ 5771.305328] R10: 000000000000015e R11: 0000000000000202 R12: 000000000=
-1a2df70
-> [ 5771.305329] R13: 00007ffdfc056d80 R14: 0000000000000000 R15: 000000000=
-0000000
-> [ 5771.305331] ---[ end trace 67e413528020d510 ]---
->
->
-> Sample 2
-> -------------
-> mkdir work lower upper final
-> sudo mount -t overlay -o workdir=3Dwork,lowerdir=3Dlower,upperdir=3Dupper=
-,metacopy=3Don overlay final
-> touch final/h
-> ln upper/h upper/k
-> rm -rf final/k
-> touch final/z
-> mv final/z final/h
-> dmesg
->
-> [ 6633.944688] ------------[ cut here ]------------
-> [ 6633.944700] WARNING: CPU: 0 PID: 47279 at fs/inode.c:302 drop_nlink+0x=
-28/0x40
-> [ 6633.944701] Modules linked in: overlay intel_rapl_msr intel_rapl_commo=
-n crct10dif_pclmul crc32_pclmul ghash_clmulni_intel vmw_balloon aesni_intel=
- crypto_simd cryptd glue_helper intel_rapl_perf joydev input_leds serio_raw=
- i2c_piix4 mac_hid vsock_loopback vmw_vsock_virtio_transport_common vmw_vso=
-ck_vmci_transport vsock vmw_vmci parport_pc ppdev lp parport autofs4 vmw_pv=
-scsi vmxnet3 hid_generic vmwgfx psmouse usbhid hid ttm drm_kms_helper ahci =
-libahci e1000 mptspi syscopyarea mptscsih sysfillrect sysimgblt mptbase fb_=
-sys_fops cec rc_core scsi_transport_spi drm pata_acpi [last unloaded: overl=
-ay]
-> [ 6633.944732] CPU: 0 PID: 47279 Comm: mv Tainted: G        W         5.6=
-.0-050600rc5-generic #202003082130
-> [ 6633.944733] Hardware name: VMware, Inc. VMware Virtual Platform/440BX =
-Desktop Reference Platform, BIOS 6.00 07/29/2019
-> [ 6633.944735] RIP: 0010:drop_nlink+0x28/0x40
-> [ 6633.944736] Code: 66 90 0f 1f 44 00 00 55 8b 47 48 48 89 e5 85 c0 74 1=
-8 8d 50 ff 89 57 48 85 d2 75 0c 48 8b 47 28 f0 48 ff 80 98 04 00 00 5d c3 <=
-0f> 0b c7 47 48 ff ff ff ff 5d c3 66 66 2e 0f 1f 84 00 00 00 00 00
-> [ 6633.944737] RSP: 0018:ffffb7c045163cc8 EFLAGS: 00010246
-> [ 6633.944738] RAX: 0000000000000000 RBX: 0000000000000000 RCX: 000000000=
-0000002
-> [ 6633.944739] RDX: 0000000000000000 RSI: 0000000000000800 RDI: ffffa0ec7=
-26a0020
-> [ 6633.944739] RBP: ffffb7c045163cc8 R08: 0000000000000000 R09: 000000000=
-0000000
-> [ 6633.944740] R10: ffffa0eaf22cb500 R11: ffffa0eb93e20540 R12: ffffa0eaf=
-22cb080
-> [ 6633.944740] R13: ffffa0eb93e21440 R14: ffffb7c045163d40 R15: 000000000=
-0000000
-> [ 6633.944741] FS:  00007f866894e800(0000) GS:ffffa0ec75e00000(0000) knlG=
-S:0000000000000000
-> [ 6633.944742] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-> [ 6633.944743] CR2: 0000000001ba9808 CR3: 00000000af75c005 CR4: 000000000=
-03606f0
-> [ 6633.944753] Call Trace:
-> [ 6633.944767]  ovl_rename+0x92f/0x940 [overlay]
-> [ 6633.944770]  vfs_rename+0x3df/0x9b0
-> [ 6633.944775]  ? _cond_resched+0x19/0x30
-> [ 6633.944779]  ? security_path_rename+0x88/0xb0
-> [ 6633.944780]  do_renameat2+0x507/0x570
-> [ 6633.944782]  __x64_sys_rename+0x23/0x30
-> [ 6633.944786]  do_syscall_64+0x57/0x1b0
-> [ 6633.944787]  entry_SYSCALL_64_after_hwframe+0x44/0xa9
-> [ 6633.944789] RIP: 0033:0x7f8667db9367
-> [ 6633.944790] Code: 75 12 48 89 df e8 a9 d7 08 00 85 c0 0f 95 c0 0f b6 c=
-0 f7 d8 5b c3 66 2e 0f 1f 84 00 00 00 00 00 0f 1f 00 b8 52 00 00 00 0f 05 <=
-48> 3d 01 f0 ff ff 73 01 c3 48 8b 0d 01 8b 35 00 f7 d8 64 89 01 48
-> [ 6633.944790] RSP: 002b:00007ffc331da4a8 EFLAGS: 00000202 ORIG_RAX: 0000=
-000000000052
-> [ 6633.944792] RAX: ffffffffffffffda RBX: 0000000000008000 RCX: 00007f866=
-7db9367
-> [ 6633.944792] RDX: 0000000000000000 RSI: 00007ffc331dc517 RDI: 00007ffc3=
-31dc50f
-> [ 6633.944793] RBP: 00007ffc331da870 R08: 0000000000000000 R09: 000000000=
-0000000
-> [ 6633.944793] R10: 0000000000000640 R11: 0000000000000202 R12: 00007ffc3=
-31da601
-> [ 6633.944794] R13: 00007ffc331da960 R14: 00007ffc331dc50f R15: 000000000=
-0000000
-> [ 6633.944795] ---[ end trace 67e413528020d64a ]---
->
->
-> Best Wishes
-> Pasi Saarinen
->
+Add a regression test for a bug in the FS_IOC_REMOVE_ENCRYPTION_KEY
+ioctl fixed by commit 2b4eae95c736 ("fscrypt: don't evict dirty inodes
+after removing key").
+
+This ioctl is also tested by generic/580 and generic/581, but they
+didn't cover the case where this bug occurs.
+
+This test detects the bug on ext4, f2fs, and ubifs.  The multi-threaded
+part of the test actually still fails on ubifs even with the fix, due to
+another kernel bug which I'm working on fixing.
+
+Signed-off-by: Eric Biggers <ebiggers@google.com>
+---
+
+Changed v1 => v2:
+  - Added upstream commit ID.
+  - Removed RFC tag.
+  - Removed some unnecessary output suppressions.
+
+ tests/generic/900     | 115 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/900.out |  10 ++++
+ tests/generic/group   |   1 +
+ 3 files changed, 126 insertions(+)
+ create mode 100755 tests/generic/900
+ create mode 100644 tests/generic/900.out
+
+diff --git a/tests/generic/900 b/tests/generic/900
+new file mode 100755
+index 00000000..8c8671ea
+--- /dev/null
++++ b/tests/generic/900
+@@ -0,0 +1,115 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright 2020 Google LLC
++#
++# FS QA Test No. 900
++#
++# Regression test for a bug in the FS_IOC_REMOVE_ENCRYPTION_KEY ioctl fixed by
++# commit 2b4eae95c736 ("fscrypt: don't evict dirty inodes after removing key").
++# This bug could cause writes to encrypted files to be lost if they raced with
++# the corresponding fscrypt master key being removed.  With f2fs, this bug could
++# also crash the kernel.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	# Stop all subprocesses.
++	touch $tmp.done
++	wait
++
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/encrypt
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_scratch_encryption -v 2
++_require_command "$KEYCTL_PROG" keyctl
++
++_scratch_mkfs_encrypted &>> $seqres.full
++_scratch_mount
++
++dir=$SCRATCH_MNT/dir
++runtime=$((4 * TIME_FACTOR))
++
++# Create an encrypted directory.
++mkdir $dir
++_set_encpolicy $dir $TEST_KEY_IDENTIFIER
++_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY"
++
++# Start with a single-threaded reproducer:
++echo -e "\n# Single-threaded reproducer"
++# Keep a fd open to a file past its fscrypt master key being removed.
++exec 3>$dir/file
++_rm_enckey $SCRATCH_MNT $TEST_KEY_IDENTIFIER
++# Write to and close the open fd.
++echo contents >&3
++exec 3>&-
++# Drop any dentries which might be pinning the inode for "file".
++echo 2 > /proc/sys/vm/drop_caches
++# In buggy kernels, the inode for "file" was evicted despite the dirty data,
++# causing the dirty data to be lost.  Check whether the write made it through.
++_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY"
++cat $dir/file
++rm -f $dir/file
++
++# Also run a multi-threaded reproducer.  This is included for good measure, as
++# this type of thing tends to be good for finding other bugs too.
++echo -e "\n# Multi-threaded reproducer"
++touch $dir/file
++
++# One process add/removes the encryption key repeatedly.
++(
++	while [ ! -e $tmp.done ]; do
++		_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY" > /dev/null
++		_rm_enckey $SCRATCH_MNT $TEST_KEY_IDENTIFIER &> /dev/null
++	done
++) &
++
++# Another process repeatedly tries to append to the encrypted file.  The file is
++# re-opened each time, so that there are chances for the inode to be evicted.
++# Failures to open the file due to the key being removed are ignored.
++(
++	touch $tmp.expected
++	while [ ! -e $tmp.done ]; do
++		if sh -c "echo -n X >> $dir/file" 2>/dev/null; then
++			# Keep track of the expected file contents.
++			echo -n X >> $tmp.expected
++		fi
++	done
++) &
++
++# Run for a while.
++sleep $runtime
++
++# Stop all subprocesses.
++touch $tmp.done
++wait
++
++# Make sure no writes were lost.
++_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY" > /dev/null
++stat $tmp.expected >> $seqres.full
++stat $dir/file >> $seqres.full
++cmp $tmp.expected $dir/file
++
++echo "Multi-threaded reproducer done"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/900.out b/tests/generic/900.out
+new file mode 100644
+index 00000000..14fde4c8
+--- /dev/null
++++ b/tests/generic/900.out
+@@ -0,0 +1,10 @@
++QA output created by 900
++Added encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
++
++# Single-threaded reproducer
++Removed encryption key with identifier 69b2f6edeee720cce0577937eb8a6751, but files still busy
++Added encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
++contents
++
++# Multi-threaded reproducer
++Multi-threaded reproducer done
+diff --git a/tests/generic/group b/tests/generic/group
+index dc95b77b..0852fc31 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -595,3 +595,4 @@
+ 591 auto quick rw pipe splice
+ 592 auto quick encrypt
+ 593 auto quick encrypt
++900 auto quick encrypt
+-- 
+2.25.1.696.g5e7596f4ac-goog
+
