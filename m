@@ -1,232 +1,133 @@
-Return-Path: <SRS0=1ern=5I=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=iJkU=5J=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.7 required=3.0 tests=DKIM_ADSP_CUSTOM_MED,
+	FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 83353C54FCE
-	for <linux-fstests@archiver.kernel.org>; Mon, 23 Mar 2020 16:41:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E7A5DC10DCE
+	for <linux-fstests@archiver.kernel.org>; Tue, 24 Mar 2020 03:44:36 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 5B46620735
-	for <linux-fstests@archiver.kernel.org>; Mon, 23 Mar 2020 16:41:43 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1584981703;
-	bh=fZ6Ca65pVsgLkGVDZcmEe0ZSxR5Sa5VHy4Sjlcpm9g0=;
-	h=From:To:Cc:Subject:Date:List-ID:From;
-	b=mzJKyDY7tzR5Y+DCpgqgm0g5QTM5J7LBCqU/tkb1JCdVn1FzvGxQyfoZ9TCNuxD2U
-	 8a5vGiG2Q9Zl3nLHfQsDND2oa4w3EEm9Tdt0E/viTuzlKLjFGOQ+negkvtII2sBFLr
-	 pfdmX2HKLMSbuhTxFCBh7ZRCZJdPzJfBN1YLUr6g=
+	by mail.kernel.org (Postfix) with ESMTP id 9E0F8206F8
+	for <linux-fstests@archiver.kernel.org>; Tue, 24 Mar 2020 03:44:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727494AbgCWQlm (ORCPT
+        id S1727064AbgCXDog (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 23 Mar 2020 12:41:42 -0400
-Received: from mail.kernel.org ([198.145.29.99]:34358 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727312AbgCWQlm (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 23 Mar 2020 12:41:42 -0400
-Received: from ebiggers-linuxstation.mtv.corp.google.com (unknown [104.132.1.76])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id B982520722;
-        Mon, 23 Mar 2020 16:41:41 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1584981701;
-        bh=fZ6Ca65pVsgLkGVDZcmEe0ZSxR5Sa5VHy4Sjlcpm9g0=;
-        h=From:To:Cc:Subject:Date:From;
-        b=dRthrSVy7+m3MDexkgWQuT3Vs3I9ClbdWQaMvnvKfQW1RJygLNWH9bwRJDt7NKJqd
-         Ir18b+twpQnOosQ0XBySzncADTWO4VgY7S97llhKN+COmJsLF73bN29INeQHKvVJQw
-         eR5G7LFNauopk9xf1zXfkUIvnSvvC5LpqZ+Gl5gU=
-From:   Eric Biggers <ebiggers@kernel.org>
+        Mon, 23 Mar 2020 23:44:36 -0400
+Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:51500 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1727060AbgCXDog (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 23 Mar 2020 23:44:36 -0400
+Received: from pps.filterd (m0098417.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.0.42/8.16.0.42) with SMTP id 02O3XUTJ010480;
+        Mon, 23 Mar 2020 23:44:34 -0400
+Received: from pps.reinject (localhost [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 2ywet335g6-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 23 Mar 2020 23:44:34 -0400
+Received: from m0098417.ppops.net (m0098417.ppops.net [127.0.0.1])
+        by pps.reinject (8.16.0.36/8.16.0.36) with SMTP id 02O3XxQk011598;
+        Mon, 23 Mar 2020 23:44:34 -0400
+Received: from ppma05wdc.us.ibm.com (1b.90.2fa9.ip4.static.sl-reverse.com [169.47.144.27])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 2ywet335g1-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 23 Mar 2020 23:44:34 -0400
+Received: from pps.filterd (ppma05wdc.us.ibm.com [127.0.0.1])
+        by ppma05wdc.us.ibm.com (8.16.0.27/8.16.0.27) with SMTP id 02O3aDIq030543;
+        Tue, 24 Mar 2020 03:44:33 GMT
+Received: from b01cxnp22034.gho.pok.ibm.com (b01cxnp22034.gho.pok.ibm.com [9.57.198.24])
+        by ppma05wdc.us.ibm.com with ESMTP id 2ywawf5fsf-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 24 Mar 2020 03:44:33 +0000
+Received: from b01ledav003.gho.pok.ibm.com (b01ledav003.gho.pok.ibm.com [9.57.199.108])
+        by b01cxnp22034.gho.pok.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 02O3iXtS45285810
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Tue, 24 Mar 2020 03:44:33 GMT
+Received: from b01ledav003.gho.pok.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id 1A61CB2064;
+        Tue, 24 Mar 2020 03:44:33 +0000 (GMT)
+Received: from b01ledav003.gho.pok.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id 8ECC2B205F;
+        Tue, 24 Mar 2020 03:44:31 +0000 (GMT)
+Received: from localhost.localdomain.com (unknown [9.199.45.156])
+        by b01ledav003.gho.pok.ibm.com (Postfix) with ESMTP;
+        Tue, 24 Mar 2020 03:44:31 +0000 (GMT)
+From:   Chandan Rajendra <chandanrlinux@gmail.com>
 To:     fstests@vger.kernel.org
-Cc:     linux-fscrypt@vger.kernel.org
-Subject: [PATCH RESEND v2] generic: test fscrypt key eviction racing with inode dirtying
-Date:   Mon, 23 Mar 2020 09:40:34 -0700
-Message-Id: <20200323164034.69031-1-ebiggers@kernel.org>
-X-Mailer: git-send-email 2.25.1.696.g5e7596f4ac-goog
+Cc:     Chandan Rajendra <chandanrlinux@gmail.com>,
+        linux-xfs@vger.kernel.org, chandan@linux.ibm.com
+Subject: [PATCH] common/xfs: Execute _xfs_check only for block size <= 4k
+Date:   Tue, 24 Mar 2020 09:17:29 +0530
+Message-Id: <20200324034729.32678-1-chandanrlinux@gmail.com>
+X-Mailer: git-send-email 2.19.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+X-TM-AS-GCONF: 00
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.138,18.0.645
+ definitions=2020-03-23_10:2020-03-23,2020-03-23 signatures=0
+X-Proofpoint-Spam-Details: rule=outbound_spam_definite policy=outbound score=100 impostorscore=0
+ bulkscore=0 mlxlogscore=271 adultscore=0 spamscore=0 clxscore=1034
+ phishscore=0 malwarescore=0 lowpriorityscore=0 mlxscore=0 suspectscore=0
+ priorityscore=1501 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2003020000 definitions=main-2003240016
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Eric Biggers <ebiggers@google.com>
+fsstress when executed as part of some of the tests (e.g. generic/270)
+invokes chown() syscall many times by passing random integers as value
+for the uid argument. For each such syscall invocation for which there
+is no on-disk quota block, xfs invokes xfs_dquot_disk_alloc() which
+allocates a new block and instantiates all the quota structures mapped
+by the newly allocated block. For a single 64k block, the number of
+on-disk quota structures thus created will be 16 times more than that
+for a 4k block.
 
-Add a regression test for a bug in the FS_IOC_REMOVE_ENCRYPTION_KEY
-ioctl fixed by commit 2b4eae95c736 ("fscrypt: don't evict dirty inodes
-after removing key").
+xfs_db's check command (executed after test script finishes execution)
+will read in all of the on-disk quota structures into memory. This
+causes the OOM event to be triggered when reading from filesystems with
+64k block size. For machines with sufficiently large amount of system
+memory, this causes the test to execute for a very long time.
 
-This ioctl is also tested by generic/580 and generic/581, but they
-didn't cover the case where this bug occurs.
+Due to the above stated reasons, this commit disables execution of
+xfs_db's check command when working on 64k blocksized filesystem.
 
-This test detects the bug on ext4, f2fs, and ubifs.  The multi-threaded
-part of the test actually still fails on ubifs even with the fix, due to
-another kernel bug which I'm working on fixing.
-
-Signed-off-by: Eric Biggers <ebiggers@google.com>
+Signed-off-by: Chandan Rajendra <chandanrlinux@gmail.com>
 ---
+ common/xfs | 17 +++++++++++++----
+ 1 file changed, 13 insertions(+), 4 deletions(-)
 
-Changed v1 => v2:
-  - Added upstream commit ID.
-  - Removed RFC tag.
-  - Removed some unnecessary output suppressions.
-
- tests/generic/900     | 115 ++++++++++++++++++++++++++++++++++++++++++
- tests/generic/900.out |  10 ++++
- tests/generic/group   |   1 +
- 3 files changed, 126 insertions(+)
- create mode 100755 tests/generic/900
- create mode 100644 tests/generic/900.out
-
-diff --git a/tests/generic/900 b/tests/generic/900
-new file mode 100755
-index 00000000..8c8671ea
---- /dev/null
-+++ b/tests/generic/900
-@@ -0,0 +1,115 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright 2020 Google LLC
-+#
-+# FS QA Test No. 900
-+#
-+# Regression test for a bug in the FS_IOC_REMOVE_ENCRYPTION_KEY ioctl fixed by
-+# commit 2b4eae95c736 ("fscrypt: don't evict dirty inodes after removing key").
-+# This bug could cause writes to encrypted files to be lost if they raced with
-+# the corresponding fscrypt master key being removed.  With f2fs, this bug could
-+# also crash the kernel.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
+diff --git a/common/xfs b/common/xfs
+index d9a9784f..d65c38d8 100644
+--- a/common/xfs
++++ b/common/xfs
+@@ -455,10 +455,19 @@ _check_xfs_filesystem()
+ 		ok=0
+ 	fi
+ 
+-	# xfs_check runs out of memory on large files, so even providing the test
+-	# option (-t) to avoid indexing the free space trees doesn't make it pass on
+-	# large filesystems. Avoid it.
+-	if [ "$LARGE_SCRATCH_DEV" != yes ]; then
++	dbsize="$($XFS_INFO_PROG "${device}" | grep data.*bsize | sed -e 's/^.*bsize=//g' -e 's/\([0-9]*\).*$/\1/g')"
 +
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	# Stop all subprocesses.
-+	touch $tmp.done
-+	wait
-+
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/encrypt
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch_encryption -v 2
-+_require_command "$KEYCTL_PROG" keyctl
-+
-+_scratch_mkfs_encrypted &>> $seqres.full
-+_scratch_mount
-+
-+dir=$SCRATCH_MNT/dir
-+runtime=$((4 * TIME_FACTOR))
-+
-+# Create an encrypted directory.
-+mkdir $dir
-+_set_encpolicy $dir $TEST_KEY_IDENTIFIER
-+_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY"
-+
-+# Start with a single-threaded reproducer:
-+echo -e "\n# Single-threaded reproducer"
-+# Keep a fd open to a file past its fscrypt master key being removed.
-+exec 3>$dir/file
-+_rm_enckey $SCRATCH_MNT $TEST_KEY_IDENTIFIER
-+# Write to and close the open fd.
-+echo contents >&3
-+exec 3>&-
-+# Drop any dentries which might be pinning the inode for "file".
-+echo 2 > /proc/sys/vm/drop_caches
-+# In buggy kernels, the inode for "file" was evicted despite the dirty data,
-+# causing the dirty data to be lost.  Check whether the write made it through.
-+_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY"
-+cat $dir/file
-+rm -f $dir/file
-+
-+# Also run a multi-threaded reproducer.  This is included for good measure, as
-+# this type of thing tends to be good for finding other bugs too.
-+echo -e "\n# Multi-threaded reproducer"
-+touch $dir/file
-+
-+# One process add/removes the encryption key repeatedly.
-+(
-+	while [ ! -e $tmp.done ]; do
-+		_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY" > /dev/null
-+		_rm_enckey $SCRATCH_MNT $TEST_KEY_IDENTIFIER &> /dev/null
-+	done
-+) &
-+
-+# Another process repeatedly tries to append to the encrypted file.  The file is
-+# re-opened each time, so that there are chances for the inode to be evicted.
-+# Failures to open the file due to the key being removed are ignored.
-+(
-+	touch $tmp.expected
-+	while [ ! -e $tmp.done ]; do
-+		if sh -c "echo -n X >> $dir/file" 2>/dev/null; then
-+			# Keep track of the expected file contents.
-+			echo -n X >> $tmp.expected
-+		fi
-+	done
-+) &
-+
-+# Run for a while.
-+sleep $runtime
-+
-+# Stop all subprocesses.
-+touch $tmp.done
-+wait
-+
-+# Make sure no writes were lost.
-+_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY" > /dev/null
-+stat $tmp.expected >> $seqres.full
-+stat $dir/file >> $seqres.full
-+cmp $tmp.expected $dir/file
-+
-+echo "Multi-threaded reproducer done"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/900.out b/tests/generic/900.out
-new file mode 100644
-index 00000000..14fde4c8
---- /dev/null
-+++ b/tests/generic/900.out
-@@ -0,0 +1,10 @@
-+QA output created by 900
-+Added encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
-+
-+# Single-threaded reproducer
-+Removed encryption key with identifier 69b2f6edeee720cce0577937eb8a6751, but files still busy
-+Added encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
-+contents
-+
-+# Multi-threaded reproducer
-+Multi-threaded reproducer done
-diff --git a/tests/generic/group b/tests/generic/group
-index dc95b77b..0852fc31 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -595,3 +595,4 @@
- 591 auto quick rw pipe splice
- 592 auto quick encrypt
- 593 auto quick encrypt
-+900 auto quick encrypt
++	# xfs_check runs out of memory,
++	# 1. On large files. So even providing the test option (-t) to
++	# avoid indexing the free space trees doesn't make it pass on
++	# large filesystems.
++	# 2. When checking filesystems with large number of quota
++	# structures. This case happens consistently with 64k blocksize when
++	# creating large number of on-disk quota structures whose quota ids
++	# are spread across a large integer range.
++	#
++	# Hence avoid it in these two cases.
++	if [ $dbsize -le 4096 -a "$LARGE_SCRATCH_DEV" != yes ]; then
+ 		_xfs_check $extra_log_options $device 2>&1 > $tmp.fs_check
+ 	fi
+ 	if [ -s $tmp.fs_check ]; then
 -- 
-2.25.1.696.g5e7596f4ac-goog
+2.19.1
 
