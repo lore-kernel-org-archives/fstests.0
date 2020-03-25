@@ -1,77 +1,68 @@
-Return-Path: <SRS0=iJkU=5J=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=/Xor=5K=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4D45CC4332B
-	for <linux-fstests@archiver.kernel.org>; Tue, 24 Mar 2020 09:43:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A9E2CC43331
+	for <linux-fstests@archiver.kernel.org>; Wed, 25 Mar 2020 12:37:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 2262220870
-	for <linux-fstests@archiver.kernel.org>; Tue, 24 Mar 2020 09:43:52 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 775AA2077D
+	for <linux-fstests@archiver.kernel.org>; Wed, 25 Mar 2020 12:37:47 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="R0EwlVhv"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726565AbgCXJnv (ORCPT
+        id S1727417AbgCYMhr (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 24 Mar 2020 05:43:51 -0400
-Received: from out30-132.freemail.mail.aliyun.com ([115.124.30.132]:36088 "EHLO
-        out30-132.freemail.mail.aliyun.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726962AbgCXJnv (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 24 Mar 2020 05:43:51 -0400
-X-Alimail-AntiSpam: AC=PASS;BC=-1|-1;BR=01201311R171e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=e01e04394;MF=eguan@linux.alibaba.com;NM=1;PH=DS;RN=7;SR=0;TI=SMTPD_---0TtVSrO8_1585043022;
-Received: from localhost(mailfrom:eguan@linux.alibaba.com fp:SMTPD_---0TtVSrO8_1585043022)
-          by smtp.aliyun-inc.com(127.0.0.1);
-          Tue, 24 Mar 2020 17:43:43 +0800
-Date:   Tue, 24 Mar 2020 17:43:42 +0800
-From:   Eryu Guan <eguan@linux.alibaba.com>
-To:     Christoph Hellwig <hch@lst.de>
-Cc:     guaneryu@gmail.com, jtulak@redhat.com, fstests@vger.kernel.org,
-        linux-xfs@vger.kernel.org, Yang Xu <xuyang2018.jy@cn.fujitsu.com>
-Subject: Re: [PATCH] xfstests: remove xfs/191-input-validation
-Message-ID: <20200324094342.GI47669@e18g06458.et15sqa>
-References: <20200318172115.1120964-1-hch@lst.de>
- <20200319043306.GK14282@dhcp-12-102.nay.redhat.com>
- <20200324084304.GA25318@lst.de>
+        Wed, 25 Mar 2020 08:37:47 -0400
+Received: from bombadil.infradead.org ([198.137.202.133]:47402 "EHLO
+        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727286AbgCYMhr (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 25 Mar 2020 08:37:47 -0400
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20170209; h=In-Reply-To:Content-Type:MIME-Version
+        :References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=n3U/kV/DpZgkZ7UH8RG/nWXkNtXyHMNX/sn4NxxQjOI=; b=R0EwlVhvkU7SAYzyuLxR6yoyIp
+        LSxmqXX8qhaThqugHpAqfrMsn5tVD4hdbNhqSO4fLfMN50ySQKAtXFTc1GnvCpICGK+iMH+9RWfEn
+        J54zT4+/EygJkQEXueOcIKe8kdBdkFIrN46BtH1JyRdrjtpgZJOX9RUHTSILCWAXD7KBmOiHaldwB
+        JXKsIABKah2IrdLW4pbK5bqItNvWtvX7NOpHmSvNAgt2j/8llEThlQIPg3TUpK2oPXTsnmJDUEEcc
+        4KTtSeXEdjZu3WtAh4cznZM5FnXa5SlnnRSL1vpC+HT0uUvKnoGqsk5ftnrxZ7eCPISLTJTIMMjHC
+        /+peGBAw==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.92.3 #3 (Red Hat Linux))
+        id 1jH5I0-0001qF-Fx; Wed, 25 Mar 2020 12:37:44 +0000
+Date:   Wed, 25 Mar 2020 05:37:44 -0700
+From:   Christoph Hellwig <hch@infradead.org>
+To:     Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+Cc:     guaneryu@gmail.com, darrick.wong@oracle.com,
+        fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH v3] xfs/191: update mkfs.xfs input results
+Message-ID: <20200325123744.GA6574@infradead.org>
+References: <20190616143956.GC15846@desktop>
+ <1560929963-2372-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20200324084304.GA25318@lst.de>
-User-Agent: Mutt/1.5.21 (2010-09-15)
+In-Reply-To: <1560929963-2372-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Mar 24, 2020 at 09:43:04AM +0100, Christoph Hellwig wrote:
-> On Thu, Mar 19, 2020 at 12:33:06PM +0800, Zorro Lang wrote:
-> > On Wed, Mar 18, 2020 at 06:21:15PM +0100, Christoph Hellwig wrote:
-> > > This test has constantly failed since it was added, and the promised
-> > > input validation never materialized.
-> > > 
-> > > Signed-off-by: Christoph Hellwig <hch@lst.de>
-> > > ---
-> > 
-> > Hmm... that's truth this case always fails. But a mkfs.xfs sanity test is
-> > good.
-> > 
-> > We have a RHEL internal mkfs.xfs sanity test case, but it takes long time to
-> > run, can't port to xfstests directly.
-> > I don't know if Jan would like to improve this case, might make it simple,
-> > remove those unstable test lines, rewrite the case to avoid unstable test
-> > results? Or we remove this case, then write a new one?
-> > I can do that too, if the xfs-devel thinks it worth.
-> 
-> Fine with me, but we really need to get rid of tests failing for no
-> good reason.  And given that there hasn't been any action for years
-> just removing this test seems like the by far best option.
+On Wed, Jun 19, 2019 at 03:39:23PM +0800, Yang Xu wrote:
+> Currently, on 5.2.0-rc4+ kernel, when I run xfs/191 with upstream
+> xfsprogs, I get the following errors because mkfs.xfs binary has
+> changed a lot.
 
-Yang Xu had sent patch[1] to fix xfs/191 last June, but it needed ack
-from XFS developers back then, and fell out off radar eventually.
+Looks good:
 
-Do we want to pick & review it again?
+Reviewed-by: Christoph Hellwig <hch@lst.de>
 
-Thanks,
-Eryu
+although this will need a rebase on top of:
 
-[1] https://lore.kernel.org/fstests/1560929963-2372-1-git-send-email-xuyang2018.jy@cn.fujitsu.com/
+xfs/191-input-validation:Fix issue that the test takes too long
+
+which includes a hunk that is also present in this patch.
