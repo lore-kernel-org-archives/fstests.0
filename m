@@ -2,297 +2,148 @@ Return-Path: <SRS0=BsEi=5P=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.5 required=3.0 tests=DKIM_ADSP_CUSTOM_MED,
+	FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7268DC43331
-	for <linux-fstests@archiver.kernel.org>; Mon, 30 Mar 2020 04:33:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E7C1EC2D0E9
+	for <linux-fstests@archiver.kernel.org>; Mon, 30 Mar 2020 10:09:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 271532078B
-	for <linux-fstests@archiver.kernel.org>; Mon, 30 Mar 2020 04:33:31 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Hl7Gs+X1"
+	by mail.kernel.org (Postfix) with ESMTP id C611620732
+	for <linux-fstests@archiver.kernel.org>; Mon, 30 Mar 2020 10:09:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727817AbgC3Eda (ORCPT
+        id S1728722AbgC3KJU (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 30 Mar 2020 00:33:30 -0400
-Received: from us-smtp-delivery-74.mimecast.com ([63.128.21.74]:22032 "EHLO
-        us-smtp-delivery-74.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726085AbgC3Eda (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 30 Mar 2020 00:33:30 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1585542808;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=0cy1nPkwYDHp/WjsUzInfMrrbpVJsnbCuXYcK2oomhs=;
-        b=Hl7Gs+X1L/tSLM8BeqvTmabePza6u/24085ZL+U+/yHmlnsjCmzNuGXHkBWIGIK3b2jRqm
-        qiZ7RHAS5lE5qHOsszrztt732C+8KVOw2qTavCogZ27CmDeVwy1t0AnXGAv4DuJ2FLQWo4
-        +s9JrIT1dMFGxW45ObpMMAV3ZPMGINo=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-414-9IAEo9ZpM9uld2Ca6To5Dg-1; Mon, 30 Mar 2020 00:33:26 -0400
-X-MC-Unique: 9IAEo9ZpM9uld2Ca6To5Dg-1
-Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id EC9D3107ACC4;
-        Mon, 30 Mar 2020 04:33:24 +0000 (UTC)
-Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 615CB100EBAD;
-        Mon, 30 Mar 2020 04:33:24 +0000 (UTC)
-Date:   Mon, 30 Mar 2020 12:45:07 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Yang Xu <xuyang2018.jy@cn.fujitsu.com>, guaneryu@gmail.com
-Cc:     hch@lst.de, fstests@vger.kernel.org
-Subject: Re: [PATCH v4] xfs/191: update mkfs.xfs input results
-Message-ID: <20200330043659.GR14282@dhcp-12-102.nay.redhat.com>
-Mail-Followup-To: Yang Xu <xuyang2018.jy@cn.fujitsu.com>,
-        guaneryu@gmail.com, hch@lst.de, fstests@vger.kernel.org
-References: <1585304270-8790-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
+        Mon, 30 Mar 2020 06:09:20 -0400
+Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:60166 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1728257AbgC3KJT (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 30 Mar 2020 06:09:19 -0400
+Received: from pps.filterd (m0098409.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.0.42/8.16.0.42) with SMTP id 02UA2xT0085379;
+        Mon, 30 Mar 2020 06:09:10 -0400
+Received: from pps.reinject (localhost [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 3021vte0ck-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 30 Mar 2020 06:09:10 -0400
+Received: from m0098409.ppops.net (m0098409.ppops.net [127.0.0.1])
+        by pps.reinject (8.16.0.36/8.16.0.36) with SMTP id 02UA3DfI086977;
+        Mon, 30 Mar 2020 06:09:09 -0400
+Received: from ppma04dal.us.ibm.com (7a.29.35a9.ip4.static.sl-reverse.com [169.53.41.122])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 3021vte0c1-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 30 Mar 2020 06:09:09 -0400
+Received: from pps.filterd (ppma04dal.us.ibm.com [127.0.0.1])
+        by ppma04dal.us.ibm.com (8.16.0.27/8.16.0.27) with SMTP id 02UA5N6l031184;
+        Mon, 30 Mar 2020 10:09:09 GMT
+Received: from b03cxnp08026.gho.boulder.ibm.com (b03cxnp08026.gho.boulder.ibm.com [9.17.130.18])
+        by ppma04dal.us.ibm.com with ESMTP id 301x763sg1-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 30 Mar 2020 10:09:08 +0000
+Received: from b03ledav001.gho.boulder.ibm.com (b03ledav001.gho.boulder.ibm.com [9.17.130.232])
+        by b03cxnp08026.gho.boulder.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 02UA97Je60555604
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Mon, 30 Mar 2020 10:09:07 GMT
+Received: from b03ledav001.gho.boulder.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id B5AB76E04C;
+        Mon, 30 Mar 2020 10:09:07 +0000 (GMT)
+Received: from b03ledav001.gho.boulder.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id EA2226E050;
+        Mon, 30 Mar 2020 10:09:04 +0000 (GMT)
+Received: from localhost.localdomain.com (unknown [9.199.44.125])
+        by b03ledav001.gho.boulder.ibm.com (Postfix) with ESMTP;
+        Mon, 30 Mar 2020 10:09:04 +0000 (GMT)
+From:   Chandan Rajendra <chandanrlinux@gmail.com>
+To:     fstests@vger.kernel.org
+Cc:     Chandan Rajendra <chandanrlinux@gmail.com>, chandan@linux.ibm.com,
+        hch@infradead.org, linux-xfs@vger.kernel.org
+Subject: [PATCH] common/xfs: Execute _xfs_check only when explicitly asked
+Date:   Mon, 30 Mar 2020 15:42:03 +0530
+Message-Id: <20200330101203.12049-1-chandanrlinux@gmail.com>
+X-Mailer: git-send-email 2.19.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1585304270-8790-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
-X-Scanned-By: MIMEDefang 2.84 on 10.5.11.22
+Content-Transfer-Encoding: 8bit
+X-TM-AS-GCONF: 00
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.138,18.0.645
+ definitions=2020-03-30_01:2020-03-27,2020-03-30 signatures=0
+X-Proofpoint-Spam-Details: rule=outbound_spam_definite policy=outbound score=100 lowpriorityscore=0
+ priorityscore=1501 mlxlogscore=253 mlxscore=0 suspectscore=0 spamscore=0
+ malwarescore=0 adultscore=0 clxscore=1034 impostorscore=0 bulkscore=0
+ phishscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2003020000 definitions=main-2003300091
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Mar 27, 2020 at 06:17:50PM +0800, Yang Xu wrote:
-> When I run xfs/191 with upstream xfsprogs, I get the following
-> errors because mkfs.xfs binary has changed a lot(use loop device
-> to avoid stripe alignment affect).
-> 
-> -------------------------
-> pass -n size=2b /dev/loop0
-> pass -d agsize=8192b /dev/loop0
-> pass -d agsize=65536s /dev/loop0
-> pass -d su=0,sw=64 /dev/loop0
-> pass -d su=4096s,sw=64 /dev/loop0
-> pass -d su=4096b,sw=64 /dev/loop0
-> pass -l su=10b /dev/loop0
-> fail -n log=15 /dev/loop0
-> fail -r rtdev=/mnt/xfstests/test/191-input-validation.img /dev/loop0
-> fail -r size=65536,rtdev=/mnt/xfstests/test/191-input-validation.img /dev/loop0
-> fail -i log=10 /dev/loop
-> --------------------------
-> 
-> "pass -d su=0,sw=64 /dev/loop0", expect fail, this behavior has been
-> fixed by commit 16adcb88(mkfs: more sunit/swidth sanity checking).
-> 
-> "fail -n log=15 /dev/sda11" "fail -i log=10 /dev/sda11", expect pass,
-> this option has been removed since commit 2cf637c(mkfs: remove
-> logarithm based CLI option).
-> 
-> "fail -r size=65536,rtdev=$fsimg /dev/sda11" "fail -r rtdev=$fsimg
-> /dev/sda11" works well if we disable reflink, fail if we enable
-> reflink. It fails because reflink was not supported in realtime
-> devices since commit bfa66ec(mkfs: don't create realtime filesystems
-> with reflink enabled).
-> 
-> Since xfsprogs v4.15.0-rc1(commit 68344ba0f mkfs: introduce default
-> configuration structure), we have deault sectorsize and blocksize.
-> So some cases without 's' or 'b' suffix trun into pass.
-> 
-> Signed-off-by: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
-> ---
->  tests/xfs/191-input-validation | 46 ++++++++++++++++++++++------------
->  1 file changed, 30 insertions(+), 16 deletions(-)
-> 
-> diff --git a/tests/xfs/191-input-validation b/tests/xfs/191-input-validation
-> index db427349..93a0b7e9 100755
-> --- a/tests/xfs/191-input-validation
-> +++ b/tests/xfs/191-input-validation
-> @@ -20,6 +20,7 @@ _cleanup()
->  {
->  	cd /
->  	rm -f $tmp.*
-> +	[ -n "$loopdev" ] && _destroy_loop_device $loopdev
->  }
->  
->  # get standard environment, filters and checks
-> @@ -31,11 +32,9 @@ _cleanup()
->  # Modify as appropriate.
->  _supported_fs xfs
->  _supported_os Linux
-> -_require_scratch_nocheck
-> +_require_loop
->  _require_xfs_mkfs_validation
->  
-> -
-> -
->  rm -f $seqres.full
->  echo silence is golden
->  
-> @@ -53,6 +52,12 @@ fssize=$((4 * 1024 * 1024 * 1024))
->  logsize=$((4 * 1024 * 1024 * 100))
->  fsimg=$TEST_DIR/$seq.img
->  
-> +#create a loop device to test
-> +loopimg=$TEST_DIR/$seq.loopimg
-> +$XFS_IO_PROG -f -c "truncate $fssize" $loopimg
-> +loopdev=$(_create_loop_device $loopimg)
-> +SCRATCH_DEV=$loopdev
+fsstress when executed as part of some of the tests (e.g. generic/270)
+invokes chown() syscall many times by passing random integers as value
+for the uid argument. For each such syscall invocation for which there
+is no on-disk quota block, xfs invokes xfs_dquot_disk_alloc() which
+allocates a new block and instantiates all the quota structures mapped
+by the newly allocated block. For filesystems with 64k block size, the
+number of on-disk quota structures created will be 16 times more than
+that for a filesystem with 4k block size.
 
-Hi,
+xfs_db's check command (executed after test script finishes execution)
+will try to read in all of the on-disk quota structures into
+memory. This causes the OOM event to be triggered when reading from
+filesystems with 64k block size. For filesystems with sufficiently large
+amount of system memory, this causes the test to execute for a very long
+time.
 
-I don't want to be picky, I think a "_require_test" would be better
-if we use $TEST_DIR, although we always have a mounted TEST_DIR generally :)
-If Eryu would like to add it, you can save one patch :)
+Due to the above stated reasons, this commit disables execution of
+xfs_db's check command unless explictly asked by the user by setting
+$EXECUTE_XFS_DB_CHECK variable.
 
-Others looks good to me, test passed.
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+Signed-off-by: Chandan Rajendra <chandanrlinux@gmail.com>
+---
+ README     |  2 ++
+ common/xfs | 17 +++++++++++++----
+ 2 files changed, 15 insertions(+), 4 deletions(-)
 
-Thanks for this fix,
-Zorro
-
-> +
->  do_mkfs_pass()
->  {
->  	echo >> $seqres.full
-> @@ -111,11 +116,12 @@ do_mkfs_fail -b size=2s $SCRATCH_DEV
->  do_mkfs_fail -b size=2b $SCRATCH_DEV
->  do_mkfs_fail -b size=nfi $SCRATCH_DEV
->  do_mkfs_fail -b size=4096nfi $SCRATCH_DEV
-> -do_mkfs_fail -n size=2s $SCRATCH_DEV
-> -do_mkfs_fail -n size=2b $SCRATCH_DEV
->  do_mkfs_fail -n size=nfi $SCRATCH_DEV
->  do_mkfs_fail -n size=4096nfi $SCRATCH_DEV
->  
-> +do_mkfs_pass -n size=2b $SCRATCH_DEV
-> +do_mkfs_pass -n size=2b $SCRATCH_DEV
-> +
->  # bad label length
->  do_mkfs_fail -L thisiswaytoolong $SCRATCH_DEV
->  
-> @@ -129,6 +135,8 @@ do_mkfs_pass -d agsize=32M $SCRATCH_DEV
->  do_mkfs_pass -d agsize=1g $SCRATCH_DEV
->  do_mkfs_pass -d agsize=$((32 * 1024 * 1024)) $SCRATCH_DEV
->  do_mkfs_pass -b size=4096 -d agsize=8192b $SCRATCH_DEV
-> +do_mkfs_pass -d agsize=8192b $SCRATCH_DEV
-> +do_mkfs_pass -d agsize=65536s $SCRATCH_DEV
->  do_mkfs_pass -d sectsize=512,agsize=65536s $SCRATCH_DEV
->  do_mkfs_pass -s size=512 -d agsize=65536s $SCRATCH_DEV
->  do_mkfs_pass -d noalign $SCRATCH_DEV
-> @@ -136,7 +144,10 @@ do_mkfs_pass -d sunit=0,swidth=0 $SCRATCH_DEV
->  do_mkfs_pass -d sunit=8,swidth=8 $SCRATCH_DEV
->  do_mkfs_pass -d sunit=8,swidth=64 $SCRATCH_DEV
->  do_mkfs_pass -d su=0,sw=0 $SCRATCH_DEV
-> +do_mkfs_pass -d su=0,sw=64 $SCRATCH_DEV
->  do_mkfs_pass -d su=4096,sw=1 $SCRATCH_DEV
-> +do_mkfs_pass -d su=4096s,sw=64 $SCRATCH_DEV
-> +do_mkfs_pass -d su=4096b,sw=64 $SCRATCH_DEV
->  do_mkfs_pass -d su=4k,sw=1 $SCRATCH_DEV
->  do_mkfs_pass -d su=4K,sw=8 $SCRATCH_DEV
->  do_mkfs_pass -b size=4096 -d su=1b,sw=8 $SCRATCH_DEV
-> @@ -147,8 +158,6 @@ do_mkfs_pass -s size=512 -d su=8s,sw=8 $SCRATCH_DEV
->  do_mkfs_fail -d size=${fssize}b $SCRATCH_DEV
->  do_mkfs_fail -d size=${fssize}s $SCRATCH_DEV
->  do_mkfs_fail -d size=${fssize}yerk $SCRATCH_DEV
-> -do_mkfs_fail -d agsize=8192b $SCRATCH_DEV
-> -do_mkfs_fail -d agsize=65536s $SCRATCH_DEV
->  do_mkfs_fail -d agsize=32Mbsdfsdo $SCRATCH_DEV
->  do_mkfs_fail -d agsize=1GB $SCRATCH_DEV
->  do_mkfs_fail -d agcount=1k $SCRATCH_DEV
-> @@ -159,13 +168,10 @@ do_mkfs_fail -d sunit=64,swidth=0 $SCRATCH_DEV
->  do_mkfs_fail -d sunit=64,swidth=64,noalign $SCRATCH_DEV
->  do_mkfs_fail -d sunit=64k,swidth=64 $SCRATCH_DEV
->  do_mkfs_fail -d sunit=64,swidth=64m $SCRATCH_DEV
-> -do_mkfs_fail -d su=0,sw=64 $SCRATCH_DEV
->  do_mkfs_fail -d su=4096,sw=0 $SCRATCH_DEV
->  do_mkfs_fail -d su=4097,sw=1 $SCRATCH_DEV
->  do_mkfs_fail -d su=4096,sw=64,noalign $SCRATCH_DEV
->  do_mkfs_fail -d su=4096,sw=64s $SCRATCH_DEV
-> -do_mkfs_fail -d su=4096s,sw=64 $SCRATCH_DEV
-> -do_mkfs_fail -d su=4096b,sw=64 $SCRATCH_DEV
->  do_mkfs_fail -d su=4096garabge,sw=64 $SCRATCH_DEV
->  do_mkfs_fail -d su=4096,sw=64,sunit=64,swidth=64 $SCRATCH_DEV
->  do_mkfs_fail -d sectsize=10,agsize=65536s $SCRATCH_DEV
-> @@ -206,6 +212,7 @@ do_mkfs_pass -l sunit=64 $SCRATCH_DEV
->  do_mkfs_pass -l sunit=64 -d sunit=8,swidth=8 $SCRATCH_DEV
->  do_mkfs_pass -l sunit=8 $SCRATCH_DEV
->  do_mkfs_pass -l su=$((4096*10)) $SCRATCH_DEV
-> +do_mkfs_pass -l su=10b $SCRATCH_DEV
->  do_mkfs_pass -b size=4096 -l su=10b $SCRATCH_DEV
->  do_mkfs_pass -l sectsize=512,su=$((4096*10)) $SCRATCH_DEV
->  do_mkfs_pass -l internal $SCRATCH_DEV
-> @@ -228,7 +235,6 @@ do_mkfs_fail -l agnum=32 $SCRATCH_DEV
->  do_mkfs_fail -l sunit=0  $SCRATCH_DEV
->  do_mkfs_fail -l sunit=63 $SCRATCH_DEV
->  do_mkfs_fail -l su=1 $SCRATCH_DEV
-> -do_mkfs_fail -l su=10b $SCRATCH_DEV
->  do_mkfs_fail -l su=10s $SCRATCH_DEV
->  do_mkfs_fail -l su=$((4096*10+1)) $SCRATCH_DEV
->  do_mkfs_fail -l sectsize=10,agsize=65536s $SCRATCH_DEV
-> @@ -246,7 +252,6 @@ do_mkfs_fail -l version=0  $SCRATCH_DEV
->  
->  # naming section, should pass
->  do_mkfs_pass -n size=65536 $SCRATCH_DEV
-> -do_mkfs_pass -n log=15 $SCRATCH_DEV
->  do_mkfs_pass -n version=2 $SCRATCH_DEV
->  do_mkfs_pass -n version=ci $SCRATCH_DEV
->  do_mkfs_pass -n ftype=0 -m crc=0 $SCRATCH_DEV
-> @@ -257,6 +262,7 @@ do_mkfs_fail -n version=1 $SCRATCH_DEV
->  do_mkfs_fail -n version=cid $SCRATCH_DEV
->  do_mkfs_fail -n ftype=4 $SCRATCH_DEV
->  do_mkfs_fail -n ftype=0 $SCRATCH_DEV
-> +do_mkfs_fail -n log=15 $SCRATCH_DE
->  
->  reset_fsimg
->  
-> @@ -272,12 +278,21 @@ do_mkfs_pass -m crc=0 -n ftype=0 $SCRATCH_DEV
->  do_mkfs_fail -m crc=0,finobt=1 $SCRATCH_DEV
->  do_mkfs_fail -m crc=1 -n ftype=0 $SCRATCH_DEV
->  
-> +# realtime section, results depend on reflink
-> +_scratch_mkfs_xfs_supported -m reflink=0 >/dev/null 2>&1
-> +if [ $? -eq 0 ]; then
-> +	do_mkfs_pass -m reflink=0 -r rtdev=$fsimg $SCRATCH_DEV
-> +	do_mkfs_pass -m reflink=0 -r size=65536,rtdev=$fsimg $SCRATCH_DEV
-> +	do_mkfs_fail -m reflink=1 -r rtdev=$fsimg $SCRATCH_DEV
-> +	do_mkfs_fail -m reflink=1 -r size=65536,rtdev=$fsimg $SCRATCH_DEV
-> +else
-> +	do_mkfs_pass -r rtdev=$fsimg $SCRATCH_DEV
-> +	do_mkfs_pass -r size=65536,rtdev=$fsimg $SCRATCH_DEV
-> +fi
->  
->  # realtime section, should pass
-> -do_mkfs_pass -r rtdev=$fsimg $SCRATCH_DEV
->  do_mkfs_pass -r extsize=4k $SCRATCH_DEV
->  do_mkfs_pass -r extsize=1G $SCRATCH_DEV
-> -do_mkfs_pass -r size=65536,rtdev=$fsimg $SCRATCH_DEV
->  do_mkfs_pass -r noalign $SCRATCH_DEV
->  
->  
-> @@ -288,12 +303,10 @@ do_mkfs_fail -r extsize=2G $SCRATCH_DEV
->  do_mkfs_fail -r size=65536 $SCRATCH_DEV
->  
->  
-> -
->  # inode section, should pass
->  do_mkfs_pass -i size=256 -m crc=0 $SCRATCH_DEV
->  do_mkfs_pass -i size=512 $SCRATCH_DEV
->  do_mkfs_pass -i size=2048 $SCRATCH_DEV
-> -do_mkfs_pass -i log=10 $SCRATCH_DEV
->  do_mkfs_pass -i perblock=2 $SCRATCH_DEV
->  do_mkfs_pass -i maxpct=10 $SCRATCH_DEV
->  do_mkfs_pass -i maxpct=100 $SCRATCH_DEV
-> @@ -317,6 +330,7 @@ do_mkfs_fail -i align=2 $SCRATCH_DEV
->  do_mkfs_fail -i sparse -m crc=0 $SCRATCH_DEV
->  do_mkfs_fail -i align=0 -m crc=1 $SCRATCH_DEV
->  do_mkfs_fail -i attr=1 -m crc=1 $SCRATCH_DEV
-> +do_mkfs_fail -i log=10 $SCRATCH_DEV
->  
->  status=0
->  exit
-> -- 
-> 2.23.0
-> 
-> 
-> 
+diff --git a/README b/README
+index 094a7742..c47569cd 100644
+--- a/README
++++ b/README
+@@ -88,6 +88,8 @@ Preparing system for tests:
+                run xfs_repair -n to check the filesystem; xfs_repair to rebuild
+                metadata indexes; and xfs_repair -n (a third time) to check the
+                results of the rebuilding.
++	     - set EXECUTE_XFS_DB_CHECK=1 to have _check_xfs_filesystem
++               run xfs_db's check command on the filesystem.
+              - xfs_scrub, if present, will always check the test and scratch
+                filesystems if they are still online at the end of the test.
+                It is no longer necessary to set TEST_XFS_SCRUB.
+diff --git a/common/xfs b/common/xfs
+index d9a9784f..93ebab75 100644
+--- a/common/xfs
++++ b/common/xfs
+@@ -455,10 +455,19 @@ _check_xfs_filesystem()
+ 		ok=0
+ 	fi
+ 
+-	# xfs_check runs out of memory on large files, so even providing the test
+-	# option (-t) to avoid indexing the free space trees doesn't make it pass on
+-	# large filesystems. Avoid it.
+-	if [ "$LARGE_SCRATCH_DEV" != yes ]; then
++	dbsize="$($XFS_INFO_PROG "${device}" | grep data.*bsize | sed -e 's/^.*bsize=//g' -e 's/\([0-9]*\).*$/\1/g')"
++
++	# xfs_check runs out of memory,
++	# 1. On large files. So even providing the test option (-t) to
++	# avoid indexing the free space trees doesn't make it pass on
++	# large filesystems.
++	# 2. When checking filesystems with large number of quota
++	# structures. This case happens consistently with 64k blocksize when
++	# creating large number of on-disk quota structures whose quota ids
++	# are spread across a large integer range.
++	#
++	# Hence avoid executing it unless explicitly asked by user.
++	if [ -n "$EXECUTE_XFS_DB_CHECK" -a "$LARGE_SCRATCH_DEV" != yes ]; then
+ 		_xfs_check $extra_log_options $device 2>&1 > $tmp.fs_check
+ 	fi
+ 	if [ -s $tmp.fs_check ]; then
+-- 
+2.19.1
 
