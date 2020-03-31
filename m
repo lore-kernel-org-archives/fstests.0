@@ -2,86 +2,117 @@ Return-Path: <SRS0=39K/=5Q=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.7 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	UNPARSEABLE_RELAY,URIBL_BLOCKED autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B4A5DC43331
-	for <linux-fstests@archiver.kernel.org>; Tue, 31 Mar 2020 07:59:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0E922C2D0EE
+	for <linux-fstests@archiver.kernel.org>; Tue, 31 Mar 2020 09:20:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 83D1C20A8B
-	for <linux-fstests@archiver.kernel.org>; Tue, 31 Mar 2020 07:59:52 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D93F020658
+	for <linux-fstests@archiver.kernel.org>; Tue, 31 Mar 2020 09:20:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729950AbgCaH7w (ORCPT
+        id S1730857AbgCaJU0 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 31 Mar 2020 03:59:52 -0400
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:7452 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726397AbgCaH7w (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 31 Mar 2020 03:59:52 -0400
-X-IronPort-AV: E=Sophos;i="5.72,327,1580745600"; 
-   d="scan'208";a="88272453"
-Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
-  by heian.cn.fujitsu.com with ESMTP; 31 Mar 2020 15:59:49 +0800
-Received: from G08CNEXMBPEKD04.g08.fujitsu.local (unknown [10.167.33.201])
-        by cn.fujitsu.com (Postfix) with ESMTP id CD4BF50A996E;
-        Tue, 31 Mar 2020 15:49:29 +0800 (CST)
-Received: from [10.167.220.84] (10.167.220.84) by
- G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201) with Microsoft SMTP Server
- (TLS) id 15.0.1497.2; Tue, 31 Mar 2020 15:59:44 +0800
-Subject: Re: [PATCH v4] xfs/191: update mkfs.xfs input results
-To:     Christoph Hellwig <hch@lst.de>, <guaneryu@gmail.com>,
-        <fstests@vger.kernel.org>, Zorro Lang <zlang@redhat.com>
-References: <1585304270-8790-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
- <20200330043659.GR14282@dhcp-12-102.nay.redhat.com>
- <20200331074940.GB24372@lst.de>
-From:   Yang Xu <xuyang2018.jy@cn.fujitsu.com>
-Message-ID: <64ff8e6d-6b17-cc25-5597-31794ae5f151@cn.fujitsu.com>
-Date:   Tue, 31 Mar 2020 15:59:44 +0800
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101
- Thunderbird/68.0
+        Tue, 31 Mar 2020 05:20:26 -0400
+Received: from mx2.suse.de ([195.135.220.15]:34928 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1731846AbgCaJOh (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 31 Mar 2020 05:14:37 -0400
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+Received: from relay2.suse.de (unknown [195.135.220.254])
+        by mx2.suse.de (Postfix) with ESMTP id 9CF5CABAE;
+        Tue, 31 Mar 2020 09:14:36 +0000 (UTC)
+Received: from localhost (webern.olymp [local])
+        by webern.olymp (OpenSMTPD) with ESMTPA id e70b585e;
+        Tue, 31 Mar 2020 10:14:35 +0100 (WEST)
+Date:   Tue, 31 Mar 2020 10:14:35 +0100
+From:   Luis Henriques <lhenriques@suse.com>
+To:     Eryu Guan <guaneryu@gmail.com>
+Cc:     Goldstein <amir73il@gmail.com>, fstests <fstests@vger.kernel.org>
+Subject: Re: [PATCH] generic/258: check filesystem support for negative
+ timestamps
+Message-ID: <20200331091435.GA90121@suse.com>
+References: <20200304161120.25764-1-lhenriques@suse.com>
+ <CAOQ4uxjZTV6oZ426WSemigcaT=avF8V19bJU45L9=CHH8ZsFzQ@mail.gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <20200331074940.GB24372@lst.de>
-Content-Type: text/plain; charset="gbk"; format=flowed
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.167.220.84]
-X-ClientProxiedBy: G08CNEXCHPEKD04.g08.fujitsu.local (10.167.33.200) To
- G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201)
-X-yoursite-MailScanner-ID: CD4BF50A996E.AF59F
-X-yoursite-MailScanner: Found to be clean
-X-yoursite-MailScanner-From: xuyang2018.jy@cn.fujitsu.com
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAOQ4uxjZTV6oZ426WSemigcaT=avF8V19bJU45L9=CHH8ZsFzQ@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-
-
-on 2020/03/31 15:49, Christoph Hellwig wrote:
-> On Mon, Mar 30, 2020 at 12:45:07PM +0800, Zorro Lang wrote:
->>> +loopimg=$TEST_DIR/$seq.loopimg
->>> +$XFS_IO_PROG -f -c "truncate $fssize" $loopimg
->>> +loopdev=$(_create_loop_device $loopimg)
->>> +SCRATCH_DEV=$loopdev
->>
->> Hi,
->>
->> I don't want to be picky, I think a "_require_test" would be better
->> if we use $TEST_DIR, although we always have a mounted TEST_DIR generally :)
->> If Eryu would like to add it, you can save one patch :)
->>
->> Others looks good to me, test passed.
->> Reviewed-by: Zorro Lang <zlang@redhat.com>
+On Wed, Mar 04, 2020 at 08:28:40PM +0200, Amir Goldstein wrote:
+> On Wed, Mar 4, 2020 at 6:11 PM Luis Henriques <lhenriques@suse.com> wrote:
+> >
+> > Some filesystems do not support negative c/m/atime timestamps.  And for
+> > these filesystems, generic/258 will fail.  Since there's currently no way
+> > to check sb->s_time_min from userspace, this patch adds a new common/rc
+> > function _require_negative_timestamps() that will _notrun depending on the
+> > $FSTYP variable.
+> >
+> > Signed-off-by: Luis Henriques <lhenriques@suse.com>
 > 
-> Same here, modulo a _require_test this looks good:
-Thanks for your and zorro's review. I think Eryu can help me add 
-_require_test when merge this patch into master.
-
-Best Regards
-Yang Xu
+> Looks fine,
 > 
-> Reviewed-by: Christoph Hellwig <hch@lst.de>
-> 
-> 
+> Reviewed-by: Amir Goldstein <amir73il@gmail.com>
 
+Hi Eryu,
 
+I forgot Cc'ing you in the initial email.  Has this patch fell between the
+cracks, or is it not really acceptable?
+
+Cheers,
+--
+Luis
+
+> 
+> > ---
+> > Hi!
+> >
+> > I'm only adding 'ceph' to the _require_negative_timestamps() case because
+> > that was the only filesystem with s_time_min = 0 that I was able to test.
+> > However, a simple grep indicates there are a few other filesystems that
+> > would also be required there (e.g. nfs version < 4).
+> >
+> > Cheers,
+> > --
+> > Luis
+> >
+> >  common/rc         | 8 ++++++++
+> >  tests/generic/258 | 1 +
+> >  2 files changed, 9 insertions(+)
+> >
+> > diff --git a/common/rc b/common/rc
+> > index 0306e93cb1ca..067f30cecde7 100644
+> > --- a/common/rc
+> > +++ b/common/rc
+> > @@ -4157,6 +4157,14 @@ _check_xfs_scrub_does_unicode() {
+> >         return 0
+> >  }
+> >
+> > +_require_negative_timestamps() {
+> > +       case "$FSTYP" in
+> > +       ceph)
+> > +               _notrun "$FSTYP does not support negative timestamps"
+> > +               ;;
+> > +       esac
+> > +}
+> > +
+> >  init_rc
+> >
+> >  ################################################################################
+> > diff --git a/tests/generic/258 b/tests/generic/258
+> > index 68b8155d4a9f..dab1a476ed20 100755
+> > --- a/tests/generic/258
+> > +++ b/tests/generic/258
+> > @@ -30,6 +30,7 @@ trap "_cleanup ; exit \$status" 0 1 2 3 15
+> >  _supported_fs generic
+> >  _supported_os Linux
+> >  _require_test
+> > +_require_negative_timestamps
+> >
+> >  TESTFILE=$TEST_DIR/timestamp-test.txt
+> >
