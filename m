@@ -1,110 +1,195 @@
-Return-Path: <SRS0=lZLm=5T=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=hj9c=5W=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,USER_AGENT_SANE_1 autolearn=no
+X-Spam-Status: No, score=-10.3 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C3CDCC43331
-	for <linux-fstests@archiver.kernel.org>; Fri,  3 Apr 2020 04:32:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EE1A4C2BA19
+	for <linux-fstests@archiver.kernel.org>; Mon,  6 Apr 2020 10:51:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 607B92063A
-	for <linux-fstests@archiver.kernel.org>; Fri,  3 Apr 2020 04:32:58 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="bnwBx4RM"
+	by mail.kernel.org (Postfix) with ESMTP id BEA382072A
+	for <linux-fstests@archiver.kernel.org>; Mon,  6 Apr 2020 10:51:40 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1586170300;
+	bh=Ca5AY7KsqNITjQOHY21bYkfRx1xXHnlK/a6mqp/qpPc=;
+	h=From:To:Cc:Subject:Date:List-ID:From;
+	b=09jl5zMnQVr0+j5S5SOpjYInqKlNN4q2DTVIwn8AOQ+B//iuL8+9r3jWRoh5QSpIN
+	 INtvUMStPdZhhY6KzuU4DioPZcHDhEWdcCA8X8GL2vvMnuFi2VYSPGhmKX+GuxSeeV
+	 FUj6T9Y3TLFJCSw62S0q4nVAcf/yJcVitEcJKGMc=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729087AbgDCEc6 (ORCPT
+        id S1727072AbgDFKvk (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 3 Apr 2020 00:32:58 -0400
-Received: from userp2130.oracle.com ([156.151.31.86]:51524 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729030AbgDCEc5 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 3 Apr 2020 00:32:57 -0400
-Received: from pps.filterd (userp2130.oracle.com [127.0.0.1])
-        by userp2130.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 0334SPj4163721;
-        Fri, 3 Apr 2020 04:32:55 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
- : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=corp-2020-01-29;
- bh=HLaVFg8Hy9yzvqItHeLrxrbBwqJCEIBm8KqbHZJkrpE=;
- b=bnwBx4RMS7T46u94CHJNtJJCxdRcYveQ+pNHN3665TlQdgQwnRFfJzkFu/qPzZJOOV/0
- WCcRM17O65cwq7oTR+6XEu79THJufWfXUz2d9iFOzO5BXDz6UUNaSYmZvRL8PDPIBwPO
- +ngEFhYcn9RB5xhzqLaI9IcIMQbwgWdeKgejDA4Plp8gLOQcvyljFZImVoILeQ3HFiwz
- 251FIhBpDvql9FyQezVxZRL4jOYKIm61NMfj4k2AXHbrdmkzC0NaBeJiSkcgAlw531Q4
- 6eWM7JVLtur2uVes3E3CcdncoB3/EOEsY3kN5pALc8NjRjsb5zrCPA56P92PlrIyg/jT NA== 
-Received: from userp3020.oracle.com (userp3020.oracle.com [156.151.31.79])
-        by userp2130.oracle.com with ESMTP id 303cevexee-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Fri, 03 Apr 2020 04:32:55 +0000
-Received: from pps.filterd (userp3020.oracle.com [127.0.0.1])
-        by userp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 0334WBFr158384;
-        Fri, 3 Apr 2020 04:32:55 GMT
-Received: from aserv0121.oracle.com (aserv0121.oracle.com [141.146.126.235])
-        by userp3020.oracle.com with ESMTP id 302ga3r7mc-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Fri, 03 Apr 2020 04:32:55 +0000
-Received: from abhmp0003.oracle.com (abhmp0003.oracle.com [141.146.116.9])
-        by aserv0121.oracle.com (8.14.4/8.13.8) with ESMTP id 0334Ws58005542;
-        Fri, 3 Apr 2020 04:32:54 GMT
-Received: from localhost (/10.159.130.227)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Thu, 02 Apr 2020 21:32:54 -0700
-Date:   Thu, 2 Apr 2020 21:32:52 -0700
-From:   "Darrick J. Wong" <darrick.wong@oracle.com>
-To:     Eric Biggers <ebiggers@kernel.org>
-Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH v2] generic: test PF_MEMALLOC interfering with accounting
- file write
-Message-ID: <20200403043252.GL80283@magnolia>
-References: <20200403033355.140984-1-ebiggers@kernel.org>
- <20200403035657.GK80283@magnolia>
- <20200403040215.GA11203@sol.localdomain>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200403040215.GA11203@sol.localdomain>
-User-Agent: Mutt/1.9.4 (2018-02-28)
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9579 signatures=668685
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=0 malwarescore=0
- mlxlogscore=999 bulkscore=0 mlxscore=0 spamscore=0 adultscore=0
- phishscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2003020000 definitions=main-2004030036
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9579 signatures=668685
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 priorityscore=1501 adultscore=0
- clxscore=1011 phishscore=0 lowpriorityscore=0 spamscore=0 malwarescore=0
- suspectscore=0 mlxscore=0 impostorscore=0 mlxlogscore=999 bulkscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2003020000
- definitions=main-2004030035
+        Mon, 6 Apr 2020 06:51:40 -0400
+Received: from mail.kernel.org ([198.145.29.99]:36356 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726841AbgDFKvk (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 6 Apr 2020 06:51:40 -0400
+Received: from debian6.Home (bl8-197-74.dsl.telepac.pt [85.241.197.74])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 305D620678;
+        Mon,  6 Apr 2020 10:51:38 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1586170298;
+        bh=Ca5AY7KsqNITjQOHY21bYkfRx1xXHnlK/a6mqp/qpPc=;
+        h=From:To:Cc:Subject:Date:From;
+        b=Geg0e20D/JSBdo5V153kYXLMr87UvS44iarqoy/JFYyz3KXc0+0YB0vPMowS1fcsk
+         pfu6vDdgb3DeBcu+zuq8008+IQvkfJO62Zso7ZIi6HWlrCBtq7lZgfEc/otF048GyH
+         q9ca+ppsgrP4bRwMgzCA/8agx6Mmr56JF/LjqD8g=
+From:   fdmanana@kernel.org
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] btrfs: check that cloning an inline extent does not lead to data loss
+Date:   Mon,  6 Apr 2020 11:51:34 +0100
+Message-Id: <20200406105134.2233-1-fdmanana@kernel.org>
+X-Mailer: git-send-email 2.11.0
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Apr 02, 2020 at 09:02:15PM -0700, Eric Biggers wrote:
-> On Thu, Apr 02, 2020 at 08:56:57PM -0700, Darrick J. Wong wrote:
-> > > +_scratch_mount
-> > > +_scratch_unmount
-> > 
-> > _scratch_cycle_mount
-> > 
-> > With that fixed,
-> > Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
-> > 
-> 
-> That doesn't work because _scratch_cycle_mount does unmount, then mount.
-> This test wants mount, then unmount.
+From: Filipe Manana <fdmanana@suse.com>
 
-LOL, and I even stumbled over the same thing last time.  :(
+We have a bug in the current kernel merge window (for 5.7) that results
+in data loss when cloning an inline extent into a new file (or an empty
+file. This change adds a test for such case into the existing test case
+btrfs/205, because it's the test case that tests all the supported
+scenarios for cloning inline extents in btrfs.
 
-Test looks fine as it is, and you can still add my RVB.
+The btrfs patch for the linux kernel that fixes the regression has the
+following sibject:
 
-Ok, time to go do something else.
+  "Btrfs: fix lost i_size update after cloning inline extent"
 
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/btrfs/205     | 13 +++++++++++++
+ tests/btrfs/205.out | 32 ++++++++++++++++++++++++++++++++
+ 2 files changed, 45 insertions(+)
 
---D
+diff --git a/tests/btrfs/205 b/tests/btrfs/205
+index 9bec2bfa..66355678 100755
+--- a/tests/btrfs/205
++++ b/tests/btrfs/205
+@@ -128,6 +128,18 @@ run_tests()
+ 
+     echo "File bar6 digest = $(_md5_checksum $SCRATCH_MNT/bar6)"
+ 
++    # File foo3 a single inline extent of 500 bytes.
++    echo "Creating file foo3"
++    $XFS_IO_PROG -f -c "pwrite -S 0xbf 0 500" $SCRATCH_MNT/foo3 | _filter_xfs_io
++
++    # File bar7 is an empty file, has no extents.
++    touch $SCRATCH_MNT/bar7
++
++    echo "Cloning foo3 into bar7"
++    $XFS_IO_PROG -c "reflink $SCRATCH_MNT/foo3" $SCRATCH_MNT/bar7 | _filter_xfs_io
++
++    echo "File bar7 digest = $(_md5_checksum $SCRATCH_MNT/bar7)"
++
+     # Unmount and mount again the filesystem. We want to verify the reflink
+     # operations were durably persisted.
+     _scratch_cycle_mount
+@@ -139,6 +151,7 @@ run_tests()
+     echo "File bar4 digest = $(_md5_checksum $SCRATCH_MNT/bar4)"
+     echo "File bar5 digest = $(_md5_checksum $SCRATCH_MNT/bar5)"
+     echo "File bar6 digest = $(_md5_checksum $SCRATCH_MNT/bar6)"
++    echo "File bar7 digest = $(_md5_checksum $SCRATCH_MNT/bar7)"
+ }
+ 
+ _scratch_mkfs "-O ^no-holes" >>$seqres.full 2>&1
+diff --git a/tests/btrfs/205.out b/tests/btrfs/205.out
+index 948e0634..d9932fc0 100644
+--- a/tests/btrfs/205.out
++++ b/tests/btrfs/205.out
+@@ -52,6 +52,13 @@ Cloning foo1 into bar6
+ linked 131072/131072 bytes at offset 0
+ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+ File bar6 digest = 4b48829714d20a4e73a0cf1565270076
++Creating file foo3
++wrote 500/500 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++Cloning foo3 into bar7
++linked 0/0 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++File bar7 digest = 67679afda6f846539ca7138452de0171
+ File digests after mounting again the filesystem:
+ File bar1 digest = e9d03fb5fff30baf3c709f2384dfde67
+ File bar2 digest = 85678cf32ed48f92ca42ad06d0b63f2a
+@@ -59,6 +66,7 @@ File bar3 digest = 85678cf32ed48f92ca42ad06d0b63f2a
+ File bar4 digest = 4b48829714d20a4e73a0cf1565270076
+ File bar5 digest = 4b48829714d20a4e73a0cf1565270076
+ File bar6 digest = 4b48829714d20a4e73a0cf1565270076
++File bar7 digest = 67679afda6f846539ca7138452de0171
+ 
+ Testing with -o compress
+ 
+@@ -112,6 +120,13 @@ Cloning foo1 into bar6
+ linked 131072/131072 bytes at offset 0
+ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+ File bar6 digest = 4b48829714d20a4e73a0cf1565270076
++Creating file foo3
++wrote 500/500 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++Cloning foo3 into bar7
++linked 0/0 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++File bar7 digest = 67679afda6f846539ca7138452de0171
+ File digests after mounting again the filesystem:
+ File bar1 digest = e9d03fb5fff30baf3c709f2384dfde67
+ File bar2 digest = 85678cf32ed48f92ca42ad06d0b63f2a
+@@ -119,6 +134,7 @@ File bar3 digest = 85678cf32ed48f92ca42ad06d0b63f2a
+ File bar4 digest = 4b48829714d20a4e73a0cf1565270076
+ File bar5 digest = 4b48829714d20a4e73a0cf1565270076
+ File bar6 digest = 4b48829714d20a4e73a0cf1565270076
++File bar7 digest = 67679afda6f846539ca7138452de0171
+ 
+ Testing with -o nodatacow
+ 
+@@ -172,6 +188,13 @@ Cloning foo1 into bar6
+ linked 131072/131072 bytes at offset 0
+ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+ File bar6 digest = 4b48829714d20a4e73a0cf1565270076
++Creating file foo3
++wrote 500/500 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++Cloning foo3 into bar7
++linked 0/0 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++File bar7 digest = 67679afda6f846539ca7138452de0171
+ File digests after mounting again the filesystem:
+ File bar1 digest = e9d03fb5fff30baf3c709f2384dfde67
+ File bar2 digest = 85678cf32ed48f92ca42ad06d0b63f2a
+@@ -179,6 +202,7 @@ File bar3 digest = 85678cf32ed48f92ca42ad06d0b63f2a
+ File bar4 digest = 4b48829714d20a4e73a0cf1565270076
+ File bar5 digest = 4b48829714d20a4e73a0cf1565270076
+ File bar6 digest = 4b48829714d20a4e73a0cf1565270076
++File bar7 digest = 67679afda6f846539ca7138452de0171
+ 
+ Testing with -O no-holes
+ 
+@@ -232,6 +256,13 @@ Cloning foo1 into bar6
+ linked 131072/131072 bytes at offset 0
+ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+ File bar6 digest = 4b48829714d20a4e73a0cf1565270076
++Creating file foo3
++wrote 500/500 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++Cloning foo3 into bar7
++linked 0/0 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++File bar7 digest = 67679afda6f846539ca7138452de0171
+ File digests after mounting again the filesystem:
+ File bar1 digest = e9d03fb5fff30baf3c709f2384dfde67
+ File bar2 digest = 85678cf32ed48f92ca42ad06d0b63f2a
+@@ -239,3 +270,4 @@ File bar3 digest = 85678cf32ed48f92ca42ad06d0b63f2a
+ File bar4 digest = 4b48829714d20a4e73a0cf1565270076
+ File bar5 digest = 4b48829714d20a4e73a0cf1565270076
+ File bar6 digest = 4b48829714d20a4e73a0cf1565270076
++File bar7 digest = 67679afda6f846539ca7138452de0171
+-- 
+2.11.0
 
---D
-
-> - Eric
