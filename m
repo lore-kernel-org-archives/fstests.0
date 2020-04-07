@@ -2,127 +2,151 @@ Return-Path: <SRS0=nsk0=5X=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.5 required=3.0 tests=FREEMAIL_FORGED_FROMDOMAIN,
-	FREEMAIL_FROM,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+X-Spam-Status: No, score=-5.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 270F6C2BA16
-	for <linux-fstests@archiver.kernel.org>; Tue,  7 Apr 2020 08:41:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 26A12C2BB55
+	for <linux-fstests@archiver.kernel.org>; Tue,  7 Apr 2020 10:28:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 02D8020748
-	for <linux-fstests@archiver.kernel.org>; Tue,  7 Apr 2020 08:41:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id F217F2074F
+	for <linux-fstests@archiver.kernel.org>; Tue,  7 Apr 2020 10:28:20 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Li4oV6AV"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726393AbgDGIle convert rfc822-to-8bit (ORCPT
+        id S1728973AbgDGKZe (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 7 Apr 2020 04:41:34 -0400
-Received: from us-smtp-1.mimecast.com ([205.139.110.61]:37626 "EHLO
-        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1725883AbgDGIle (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 7 Apr 2020 04:41:34 -0400
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-172-JW5fQY7yOJK9RqZeDVlDIA-1; Tue, 07 Apr 2020 04:41:31 -0400
-X-MC-Unique: JW5fQY7yOJK9RqZeDVlDIA-1
-Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 3485A800D5C;
-        Tue,  7 Apr 2020 08:41:30 +0000 (UTC)
-Received: from dhcp-12-170.nay.redhat.com (dhcp-12-170.nay.redhat.com [10.66.12.170])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id CEA035DA7B;
-        Tue,  7 Apr 2020 08:41:28 +0000 (UTC)
-From:   "Jianhong.Yin" <yin-jianhong@163.com>
-To:     fstests@vger.kernel.org
-Cc:     jiyin@redhat.com, "Jianhong.Yin" <yin-jianhong@163.com>
-Subject: [PATCH v2] generic/432 copy_file_range: add overwrite copy to cover known issue
-Date:   Tue,  7 Apr 2020 16:41:21 +0800
-Message-Id: <20200407084121.92364-1-yin-jianhong@163.com>
+        Tue, 7 Apr 2020 06:25:34 -0400
+Received: from mail-ua1-f42.google.com ([209.85.222.42]:38273 "EHLO
+        mail-ua1-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728950AbgDGKZe (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 7 Apr 2020 06:25:34 -0400
+Received: by mail-ua1-f42.google.com with SMTP id g10so1082441uae.5;
+        Tue, 07 Apr 2020 03:25:33 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:reply-to:from:date:message-id
+         :subject:to:cc:content-transfer-encoding;
+        bh=yKK3YVn/8zz0KqCfbJQl64c90q4g0xNTq14ul3lnAo8=;
+        b=Li4oV6AVipwC0gP0HIjbgvoaJ5Y6TNpZnE38jmmq8TwPPu65XuWLau3kOrt38mH/JV
+         iYvn7ut6EcEbFp4jRYi45DGecGKUzvqcOfw0DNN8Sq/uO9hMZecf9RS02Z8PuUMREu45
+         BFMlejGB5U1x0LNqI+nzyj2MqcDQoB+rTLrxE6JhIJBt19bGbWRAQPM0Te3/iJ1jx78l
+         m2+3FIq1adiwQfS0gW+qsI1IZgFku8H2XwOPNUlyfhYWZluVrStMWysr01IiyT2ExurW
+         lqDK0TWECaqdeFrAiyZbFdw/hQ414R/AVwII5i7KyaA6Ozqx9SmFGLzzEOzhQ4uYcEWM
+         4nUQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:reply-to
+         :from:date:message-id:subject:to:cc:content-transfer-encoding;
+        bh=yKK3YVn/8zz0KqCfbJQl64c90q4g0xNTq14ul3lnAo8=;
+        b=etKOMQ5WIUVrageBoQFXHlTGRkPDLK+4xfZ6EnliIBKzHVlt13vI906OdXoR4+gSVx
+         dJLu9pNq8f4e0fbLY2TZP28JTVetspR/LQxSn5+zWhSAbHNV4+t0t5zEk26VEW7FX8Qt
+         WhbKH3B4ntvrZSJmJ9QaXq02O20YTRoiquETlm+Z65WGJUpCLpnvwnaV7WeYXiS9KFRu
+         yOsEmd8MY38SyrbFfEdFMnPPvZaures9DlqHOxS8JSzVZqTK9jj0yCOcDmk1oVIlcMHB
+         kFjD4lDq1qg91etb8orOdLxf/ZnAyXlOqX6Z1KkC4BpPSsQNHMIoEpu2XabRwQiRi7lt
+         ngeg==
+X-Gm-Message-State: AGi0PuZPamMNCjLrJhaMwlnPqcuV6K4Toc2bF5O7pPfxEER8r6L1xhKo
+        5MkKe4N8I3ISDX878IfYa9/Pb9xZTihjd6rkJzk=
+X-Google-Smtp-Source: APiQypKTTAK0LBSsIxSdtxgw02gTm+TqcEP/9sBn14rl8UN/CIBiuck4F/pC+Ol0kAk+3tn+pCrgJWBXWbYNx5HykPg=
+X-Received: by 2002:ab0:5bcc:: with SMTP id z12mr1105063uae.135.1586255133114;
+ Tue, 07 Apr 2020 03:25:33 -0700 (PDT)
 MIME-Version: 1.0
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
-X-Mimecast-Spam-Score: 0
-X-Mimecast-Originator: 163.com
-Content-Type: text/plain; charset=WINDOWS-1252
-Content-Transfer-Encoding: 8BIT
+References: <CAM2wg3Sqw_a3dwjh6nQn8h-SsyM3v=43Oqce7Eq0U-Jcb7EaaA@mail.gmail.com>
+In-Reply-To: <CAM2wg3Sqw_a3dwjh6nQn8h-SsyM3v=43Oqce7Eq0U-Jcb7EaaA@mail.gmail.com>
+Reply-To: fdmanana@gmail.com
+From:   Filipe Manana <fdmanana@gmail.com>
+Date:   Tue, 7 Apr 2020 11:25:22 +0100
+Message-ID: <CAL3q7H5uq-ucGC5zMBkmtCBToHeiaJsqM=Nz0R_U5dTGjSnpkg@mail.gmail.com>
+Subject: Re: Strange sync/fsync behavior in btrfs
+To:     Arvind Raghavan <raghavan.arvind@gmail.com>
+Cc:     linux-btrfs <linux-btrfs@vger.kernel.org>,
+        fstests <fstests@vger.kernel.org>,
+        Vijay Chidambaram <vijay@cs.utexas.edu>,
+        Jayashree Mohan <jayashree2912@gmail.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-found that follow nfs issue has not been covered by xfstests
- https://bugzilla.redhat.com/show_bug.cgi?id=1803162
- https://bugzilla.redhat.com/show_bug.cgi?id=1803162#c6
+On Mon, Apr 6, 2020 at 8:47 PM Arvind Raghavan
+<raghavan.arvind@gmail.com> wrote:
+>
+> Hi!
+>
+> I am Arvind Raghavan, an undergraduate student at the Unversity
+> of Texas at Austin, working with Prof. Vijay Chidambaram. I've
+> been working on the Crashmonkey [1] project, which is a test
+> harness for file system crash consistency checks. Specifically,
+> we've been working on making a fuzzer to find new bugs, and we
+> discovered some weird behavior. Given the following workload:
+>
+> mkdir A
+> mkdir B
+> mkdir A/C
+> creat B/foo
+> sync (1)
+> link B/foo A/C/foo
+> fsync A (2)
+> <crash>
+>
+> Running on Linux 5.5.2, upon recovering the filesystem, the hard
+> linked file A/C/foo is not present.
 
-add new test to cover it.
+Expected on btrfs at least. Nothing changed in directory A after the
+'sync', so the fsync is a noop. Only directory C and the inode of file
+B/foo had changes.
+We don't go recursively checking if any sub-directories changed. That
+would be very expensive, plus I don't think anyone expects that in
+real use cases.
+If you want A/C/foo persisted then fsync A/C or fsync AC/foo or fsync
+B/foo (at least on btrfs this should work).
 
-test log:
-'''
-[root@hp-dl360g9-02 xfstests]# DIFF_LENGTH=-0 ./check generic/432
-FSTYP         -- nfs
-PLATFORM      -- Linux/x86_64 nfsserver 4.18.0-147.el8.x86_64 ...
-MKFS_OPTIONS  -- nfsserver:/home/exportdir-xfstests-mh ...
-MOUNT_OPTIONS -- -overs=4.2 ...
+> However, if we replace (1)
+> with "fsync B/foo", then upon recovery the link persists. This
 
-generic/432 1s ... - output mismatch (see /var/lib/xfstests/results//generic/432.out.bad)
-    --- tests/generic/432.out   2020-03-05 03:58:35.946872285 -0500
-    +++ /var/lib/xfstests/results//generic/432.out.bad  2020-03-05 03:58:39.519861450 -0500
-    @@ -16,6 +16,7 @@
-     e11fbace556cba26bf0076e74cab90a3  TEST_DIR/test-432/file
-     e5fbacd993eaa5e80ebc2b14b969887d  TEST_DIR/test-432/copy
-     Copy overwrite existed copy file
-    +cmp: EOF on /mnt/nfsmp-xfstests-mh/test-432/file after byte 5000, in line 1
-     md5sums after copying overwrite:
-     e11fbace556cba26bf0076e74cab90a3  TEST_DIR/test-432/file
-    -e11fbace556cba26bf0076e74cab90a3  TEST_DIR/test-432/copy
-    +98ed789264b5b11498bd3f4a70a12916  TEST_DIR/test-432/copy
-Ran: generic/432
-Failures: generic/432
-Failed 1 of 1 tests
-'''
+Replacing the 'sync' with 'fsync B/foo' is different.
+When that fsync is done the inode is logged in btrfs, and then the
+"link B/foo A/C/foo" causes the log to be updated with the new dentry
+because the inode was logged before.
+It's the link creation that persist the new dentry, not the "fsync A".
 
-BTW: xfs_io copy_range need this commit:
-'''
- 64e366d9f81785b015b85395060a492d6ae85019
- xfs_io: copy_range don't truncate dst_file, and add smart length
-'''
+> behavior seems strange, as intuitively it seems that sync should
+> have at least as strong effect as fsync. In addition, it seems
+> that Chris Mason's definition of fsync guarantees here [2] might
+> require this workload to pass.
+>
+> It is important to note that even if we skip the final fsync (2),
+> the result is the same. Thus, the behavior is coming only from
+> the syncing operation at line (1). However, we were also curious
+> to know whether an fsync of the directory A here (2) should
+> persist the file A/C/foo. Chris mentions [2] that an fsync
+> of a directory means that "all the files/subdirs will exist".
 
-Signed-off-by: Jianhong Yin <yin-jianhong@163.com>
----
+I don't think his definition includes recursion... nor that people
+usually expect that.
+I think he meant the sub-directory C and all other dentries of A will
+exist, not that dentries of C or any other descendants will be
+persisted.
 
- tests/generic/432     | 7 +++++++
- tests/generic/432.out | 4 ++++
- 2 files changed, 11 insertions(+)
+Thanks.
 
-diff --git a/tests/generic/432 b/tests/generic/432
-index 6200af86..762eccae 100755
---- a/tests/generic/432
-+++ b/tests/generic/432
-@@ -80,6 +80,13 @@ cmp -n 4000 $testdir/file $testdir/copy 1000 3000
- echo "md5sums after copying tail:"
- md5sum $testdir/{file,copy} | _filter_test_dir
- 
-+echo "Copy overwrite existed copy file"
-+$XFS_IO_PROG -t -f -c 'pwrite -S 0x66 0    5000' $testdir/copy >> $seqres.full 2>&1
-+$XFS_IO_PROG -f -c "copy_range $testdir/file" "$testdir/copy"
-+cmp $testdir/file $testdir/copy
-+echo "md5sums after copying overwrite:"
-+md5sum $testdir/{file,copy} | _filter_test_dir
-+
- #success, all done
- status=0
- exit
-diff --git a/tests/generic/432.out b/tests/generic/432.out
-index c49d7808..27364728 100644
---- a/tests/generic/432.out
-+++ b/tests/generic/432.out
-@@ -15,3 +15,7 @@ Copy tail of original file onto copy
- md5sums after copying tail:
- e11fbace556cba26bf0076e74cab90a3  TEST_DIR/test-432/file
- e5fbacd993eaa5e80ebc2b14b969887d  TEST_DIR/test-432/copy
-+Copy overwrite existed copy file
-+md5sums after copying overwrite:
-+e11fbace556cba26bf0076e74cab90a3  TEST_DIR/test-432/file
-+e11fbace556cba26bf0076e74cab90a3  TEST_DIR/test-432/copy
--- 
-2.18.1
+> Should this apply to files created in subdirectories?
+>
+>
+> Thanks!
+> Arvind
+>
+> [1] https://www.github.com/utsaslab/crashmonkey
+> [2] https://www.spinics.net/lists/linux-btrfs/msg77330.html
 
+
+
+--=20
+Filipe David Manana,
+
+=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
+ right.=E2=80=9D
