@@ -2,151 +2,370 @@ Return-Path: <SRS0=nsk0=5X=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-9.7 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 26A12C2BB55
-	for <linux-fstests@archiver.kernel.org>; Tue,  7 Apr 2020 10:28:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D7A94C2BB55
+	for <linux-fstests@archiver.kernel.org>; Tue,  7 Apr 2020 18:31:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id F217F2074F
-	for <linux-fstests@archiver.kernel.org>; Tue,  7 Apr 2020 10:28:20 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Li4oV6AV"
+	by mail.kernel.org (Postfix) with ESMTP id 9C9862076E
+	for <linux-fstests@archiver.kernel.org>; Tue,  7 Apr 2020 18:31:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728973AbgDGKZe (ORCPT
+        id S1726628AbgDGSbS (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 7 Apr 2020 06:25:34 -0400
-Received: from mail-ua1-f42.google.com ([209.85.222.42]:38273 "EHLO
-        mail-ua1-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728950AbgDGKZe (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 7 Apr 2020 06:25:34 -0400
-Received: by mail-ua1-f42.google.com with SMTP id g10so1082441uae.5;
-        Tue, 07 Apr 2020 03:25:33 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:reply-to:from:date:message-id
-         :subject:to:cc:content-transfer-encoding;
-        bh=yKK3YVn/8zz0KqCfbJQl64c90q4g0xNTq14ul3lnAo8=;
-        b=Li4oV6AVipwC0gP0HIjbgvoaJ5Y6TNpZnE38jmmq8TwPPu65XuWLau3kOrt38mH/JV
-         iYvn7ut6EcEbFp4jRYi45DGecGKUzvqcOfw0DNN8Sq/uO9hMZecf9RS02Z8PuUMREu45
-         BFMlejGB5U1x0LNqI+nzyj2MqcDQoB+rTLrxE6JhIJBt19bGbWRAQPM0Te3/iJ1jx78l
-         m2+3FIq1adiwQfS0gW+qsI1IZgFku8H2XwOPNUlyfhYWZluVrStMWysr01IiyT2ExurW
-         lqDK0TWECaqdeFrAiyZbFdw/hQ414R/AVwII5i7KyaA6Ozqx9SmFGLzzEOzhQ4uYcEWM
-         4nUQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:reply-to
-         :from:date:message-id:subject:to:cc:content-transfer-encoding;
-        bh=yKK3YVn/8zz0KqCfbJQl64c90q4g0xNTq14ul3lnAo8=;
-        b=etKOMQ5WIUVrageBoQFXHlTGRkPDLK+4xfZ6EnliIBKzHVlt13vI906OdXoR4+gSVx
-         dJLu9pNq8f4e0fbLY2TZP28JTVetspR/LQxSn5+zWhSAbHNV4+t0t5zEk26VEW7FX8Qt
-         WhbKH3B4ntvrZSJmJ9QaXq02O20YTRoiquETlm+Z65WGJUpCLpnvwnaV7WeYXiS9KFRu
-         yOsEmd8MY38SyrbFfEdFMnPPvZaures9DlqHOxS8JSzVZqTK9jj0yCOcDmk1oVIlcMHB
-         kFjD4lDq1qg91etb8orOdLxf/ZnAyXlOqX6Z1KkC4BpPSsQNHMIoEpu2XabRwQiRi7lt
-         ngeg==
-X-Gm-Message-State: AGi0PuZPamMNCjLrJhaMwlnPqcuV6K4Toc2bF5O7pPfxEER8r6L1xhKo
-        5MkKe4N8I3ISDX878IfYa9/Pb9xZTihjd6rkJzk=
-X-Google-Smtp-Source: APiQypKTTAK0LBSsIxSdtxgw02gTm+TqcEP/9sBn14rl8UN/CIBiuck4F/pC+Ol0kAk+3tn+pCrgJWBXWbYNx5HykPg=
-X-Received: by 2002:ab0:5bcc:: with SMTP id z12mr1105063uae.135.1586255133114;
- Tue, 07 Apr 2020 03:25:33 -0700 (PDT)
+        Tue, 7 Apr 2020 14:31:18 -0400
+Received: from mga12.intel.com ([192.55.52.136]:47795 "EHLO mga12.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726436AbgDGSbS (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 7 Apr 2020 14:31:18 -0400
+IronPort-SDR: AHb7KEouitRVp0Iu9+KB8C4Z8lauJCdDRCXGimB8F1MNmXrjmwHiNjVb4ncGIafKpovXssnPzG
+ AQRnq9XPGVNw==
+X-Amp-Result: SKIPPED(no attachment in message)
+X-Amp-File-Uploaded: False
+Received: from fmsmga007.fm.intel.com ([10.253.24.52])
+  by fmsmga106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Apr 2020 11:31:09 -0700
+IronPort-SDR: mZWWrPhcUfWsZoVHmBmgdX9nFhfkAqYok3LKO+y4wHl7uWIAqD6Q22EhNRXwlGyz/S8vorCoYb
+ /zIHD6Y3Iw1A==
+X-IronPort-AV: E=Sophos;i="5.72,356,1580803200"; 
+   d="scan'208";a="242147137"
+Received: from iweiny-desk2.sc.intel.com (HELO localhost) ([10.3.52.147])
+  by fmsmga007-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Apr 2020 11:31:07 -0700
+From:   ira.weiny@intel.com
+To:     fstests@vger.kernel.org
+Cc:     Ira Weiny <ira.weiny@intel.com>, linux-kernel@vger.kernel.org,
+        "Darrick J. Wong" <darrick.wong@oracle.com>,
+        Dan Williams <dan.j.williams@intel.com>,
+        Dave Chinner <david@fromorbit.com>,
+        Christoph Hellwig <hch@lst.de>,
+        "Theodore Y. Ts'o" <tytso@mit.edu>, Jan Kara <jack@suse.cz>,
+        Jeff Moyer <jmoyer@redhat.com>, linux-ext4@vger.kernel.org,
+        linux-xfs@vger.kernel.org, linux-fsdevel@vger.kernel.org
+Subject: [PATCH] xfs/XXX: Add xfs/XXX
+Date:   Tue,  7 Apr 2020 11:30:59 -0700
+Message-Id: <20200407183059.568653-1-ira.weiny@intel.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-References: <CAM2wg3Sqw_a3dwjh6nQn8h-SsyM3v=43Oqce7Eq0U-Jcb7EaaA@mail.gmail.com>
-In-Reply-To: <CAM2wg3Sqw_a3dwjh6nQn8h-SsyM3v=43Oqce7Eq0U-Jcb7EaaA@mail.gmail.com>
-Reply-To: fdmanana@gmail.com
-From:   Filipe Manana <fdmanana@gmail.com>
-Date:   Tue, 7 Apr 2020 11:25:22 +0100
-Message-ID: <CAL3q7H5uq-ucGC5zMBkmtCBToHeiaJsqM=Nz0R_U5dTGjSnpkg@mail.gmail.com>
-Subject: Re: Strange sync/fsync behavior in btrfs
-To:     Arvind Raghavan <raghavan.arvind@gmail.com>
-Cc:     linux-btrfs <linux-btrfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>,
-        Vijay Chidambaram <vijay@cs.utexas.edu>,
-        Jayashree Mohan <jayashree2912@gmail.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Apr 6, 2020 at 8:47 PM Arvind Raghavan
-<raghavan.arvind@gmail.com> wrote:
->
-> Hi!
->
-> I am Arvind Raghavan, an undergraduate student at the Unversity
-> of Texas at Austin, working with Prof. Vijay Chidambaram. I've
-> been working on the Crashmonkey [1] project, which is a test
-> harness for file system crash consistency checks. Specifically,
-> we've been working on making a fuzzer to find new bugs, and we
-> discovered some weird behavior. Given the following workload:
->
-> mkdir A
-> mkdir B
-> mkdir A/C
-> creat B/foo
-> sync (1)
-> link B/foo A/C/foo
-> fsync A (2)
-> <crash>
->
-> Running on Linux 5.5.2, upon recovering the filesystem, the hard
-> linked file A/C/foo is not present.
+From: Ira Weiny <ira.weiny@intel.com>
 
-Expected on btrfs at least. Nothing changed in directory A after the
-'sync', so the fsync is a noop. Only directory C and the inode of file
-B/foo had changes.
-We don't go recursively checking if any sub-directories changed. That
-would be very expensive, plus I don't think anyone expects that in
-real use cases.
-If you want A/C/foo persisted then fsync A/C or fsync AC/foo or fsync
-B/foo (at least on btrfs this should work).
+Add XXX to test per file DAX operations.
 
-> However, if we replace (1)
-> with "fsync B/foo", then upon recovery the link persists. This
+The following is tested[*]
 
-Replacing the 'sync' with 'fsync B/foo' is different.
-When that fsync is done the inode is logged in btrfs, and then the
-"link B/foo A/C/foo" causes the log to be updated with the new dentry
-because the inode was logged before.
-It's the link creation that persist the new dentry, not the "fsync A".
+ - Applications must call statx to discover the current S_DAX state.
 
-> behavior seems strange, as intuitively it seems that sync should
-> have at least as strong effect as fsync. In addition, it seems
-> that Chris Mason's definition of fsync guarantees here [2] might
-> require this workload to pass.
->
-> It is important to note that even if we skip the final fsync (2),
-> the result is the same. Thus, the behavior is coming only from
-> the syncing operation at line (1). However, we were also curious
-> to know whether an fsync of the directory A here (2) should
-> persist the file A/C/foo. Chris mentions [2] that an fsync
-> of a directory means that "all the files/subdirs will exist".
+ - There exists an advisory file inode flag FS_XFLAG_DAX that is set based on
+   the parent directory FS_XFLAG_DAX inode flag.  (There is no way to change
+   this flag after file creation.)
 
-I don't think his definition includes recursion... nor that people
-usually expect that.
-I think he meant the sub-directory C and all other dentries of A will
-exist, not that dentries of C or any other descendants will be
-persisted.
+   If FS_XFLAG_DAX is set and the fs is on pmem then it will enable S_DAX at
+   inode load time; if FS_XFLAG_DAX is not set, it will not enable S_DAX.
+   Unless overridden...
 
-Thanks.
+ - There exists a dax= mount option.
 
-> Should this apply to files created in subdirectories?
->
->
-> Thanks!
-> Arvind
->
-> [1] https://www.github.com/utsaslab/crashmonkey
-> [2] https://www.spinics.net/lists/linux-btrfs/msg77330.html
+   "-o dax=never" means "never set S_DAX, ignore FS_XFLAG_DAX"
+   "-o dax=always" means "always set S_DAX (at least on pmem), ignore FS_XFLAG_DAX"
+	"-o dax" (old option) by itself means "dax=always"
+   "-o dax=iflag" means "follow FS_XFLAG_DAX" and is the default
 
+ - There exists an advisory directory inode flag FS_XFLAG_DAX that can be
+   changed at any time.  The flag state is copied into any files or
+   subdirectories when they are created within that directory.  If programs
+   require file access runs in S_DAX mode, they must create those files
+   inside a directory with FS_XFLAG_DAX set, or mount the fs with an
+   appropriate dax mount option.
 
+[*] https://lore.kernel.org/lkml/20200405061945.GA94792@iweiny-DESK2.sc.intel.com/
 
---=20
-Filipe David Manana,
+Signed-off-by: Ira Weiny <ira.weiny@intel.com>
+---
+ tests/xfs/999     | 231 ++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/999.out |  21 +++++
+ tests/xfs/group   |   1 +
+ 3 files changed, 253 insertions(+)
+ create mode 100755 tests/xfs/999
+ create mode 100644 tests/xfs/999.out
 
-=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
- right.=E2=80=9D
+diff --git a/tests/xfs/999 b/tests/xfs/999
+new file mode 100755
+index 000000000000..4d3048616715
+--- /dev/null
++++ b/tests/xfs/999
+@@ -0,0 +1,231 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2019 Intel, Corp.  All Rights Reserved.
++#
++# FSQA Test No. 999 (temporary)
++#
++# Test setting of DAX flag
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++status=1	# failure is the default!
++
++dax_dir=$TEST_DIR/dax-dir
++dax_sub_dir=$TEST_DIR/dax-dir/dax-sub-dir
++dax_inh_file=$dax_dir/dax-inh-file
++dax_non_inh_file=$dax_dir/dax-non-inh-file
++non_dax=$TEST_DIR/non-dax
++dax_file=$TEST_DIR/dax-dir/dax-file
++dax_file_copy=$TEST_DIR/dax-file-copy
++dax_file_move=$TEST_DIR/dax-file-move
++data_file=$TEST_DIR/data-file
++
++_cleanup() {
++	rm -rf $TEST_DIR/*
++}
++
++trap "_cleanup ; exit \$status" 0 1 2 3 15
++
++# get standard environment, filters and checks
++. ./common/rc
++
++# real QA test starts here
++_supported_os Linux
++_require_xfs_io_command "lsattr"
++_require_xfs_io_command "statx"
++_require_test
++
++#
++# mnt_opt's we expect
++# ''
++# '-o dax=off'
++# '-o dax=iflag'
++# '-o dax'
++# '-o dax=always'
++function remount_w_option {
++	mnt_opt=$1
++	export MOUNT_OPTIONS=""
++	export TEST_FS_MOUNT_OPTS=""
++	_test_unmount
++	_test_mount $mnt_opt
++}
++
++function check_dax_mount_option {
++	mnt_opt=$1
++	_fs_options $TEST_DEV | grep -qw '$mnt_opt'
++	if [ "$?" == "0" ]; then
++		echo "FAILED: to mount FS with option '$mnt_opt'"
++		status=1; exit
++	fi
++}
++
++function check_xflag_dax {
++	xfs_io -c 'lsattr' $1 | awk -e '{ print $1 }' | grep 'x' &> /dev/null
++	if [ "$?" != "0" ]; then
++		echo "FAILED: Did NOT find FS_XFLAG_DAX on $1"
++		status=1; exit
++	fi
++}
++
++function check_s_dax {
++	attr=`xfs_io -c 'statx -r' $1 | grep 'stat.attributes' | awk -e '{ print $3 }'`
++	masked=$(( $attr & 0x2000 ))
++	if [ "$masked" != "8192" ]; then
++		echo "FAILED: Did NOT find S_DAX flag on $1"
++		status=1; exit
++	fi
++}
++
++function check_no_xflag_dax {
++	xfs_io -c 'lsattr' $1 | awk -e '{ print $1 }' | grep 'x' &> /dev/null
++	if [ "$?" == "0" ]; then
++		echo "FAILED: Found FS_XFLAG_DAX on $1"
++		status=1; exit
++	fi
++}
++
++function check_no_s_dax {
++	attr=`xfs_io -c 'statx -r' $1 | grep 'stat.attributes' | awk -e '{ print $3 }'`
++	masked=$(( $attr & 0x2000 ))
++	if [ "$masked" == "8192" ]; then
++		echo "FAILED: Found S_DAX flag on $1"
++		status=1; exit
++	fi
++}
++
++echo "running tests..."
++
++remount_w_option ""
++check_dax_mount_option "dax=iflag"
++
++echo "   *** mark dax-dir as dax enabled"
++mkdir $dax_dir
++xfs_io -c 'chattr +x' $dax_dir
++check_xflag_dax $dax_dir
++
++echo "   *** check file inheritance"
++touch $dax_inh_file
++check_xflag_dax $dax_inh_file
++check_s_dax $dax_inh_file
++
++echo "   *** check directory inheritance"
++mkdir $dax_sub_dir
++check_xflag_dax $dax_sub_dir
++
++echo "   *** check changing directory"
++xfs_io -c 'chattr -x' $dax_dir
++check_no_xflag_dax $dax_dir
++check_no_s_dax $dax_dir
++
++echo "   *** check non file inheritance"
++touch $dax_non_inh_file
++check_no_xflag_dax $dax_non_inh_file
++check_no_s_dax $dax_non_inh_file
++
++echo "   *** check that previous file stays enabled"
++check_xflag_dax $dax_inh_file
++check_s_dax $dax_inh_file
++
++echo "   *** Reset the directory"
++xfs_io -c 'chattr +x' $dax_dir
++check_xflag_dax $dax_dir
++
++# Set up for next test
++touch $dax_file
++touch $non_dax
++
++#
++#                      inode flag
++# ./
++#   + dax-dir/             X
++#     + dax-sub-dir/       X
++#     + dax-inh-file       X
++#     + dax-non-inh-file
++#     + dax-file           X
++#   + non-dax
++#
++
++# check mount overrides
++# =====================
++
++echo "   *** Check '-o dax'"
++remount_w_option "-o dax"
++check_dax_mount_option "dax=always"
++
++echo "   *** non-dax inode but overrides to be effective"
++check_no_xflag_dax $non_dax
++check_s_dax $non_dax
++
++echo "   *** Check for non-dax inode to be dax with mount option"
++check_no_xflag_dax $dax_non_inh_file
++check_s_dax $dax_non_inh_file
++
++
++echo "   *** Check '-o dax=never'"
++remount_w_option "-o dax=never"
++check_dax_mount_option "dax=never"
++
++check_xflag_dax $dax_dir
++check_xflag_dax $dax_sub_dir
++check_xflag_dax $dax_inh_file
++check_no_s_dax $dax_inh_file
++check_no_xflag_dax $dax_non_inh_file
++check_no_s_dax $dax_non_inh_file
++check_no_xflag_dax $non_dax
++check_no_s_dax $non_dax
++check_xflag_dax $dax_file
++check_no_s_dax $dax_file
++
++
++echo "   *** Check '-o dax=iflag'"
++remount_w_option "-o dax=iflag"
++check_dax_mount_option "dax=iflag"
++
++check_xflag_dax $dax_dir
++check_xflag_dax $dax_sub_dir
++check_xflag_dax $dax_inh_file
++check_s_dax $dax_inh_file
++check_no_xflag_dax $dax_non_inh_file
++check_no_s_dax $dax_non_inh_file
++check_no_xflag_dax $non_dax
++check_no_s_dax $non_dax
++check_xflag_dax $dax_file
++check_s_dax $dax_file
++
++
++# Check non-zero file operations
++# ==============================
++
++echo "   *** Verify setting FS_XFLAG_DAX flag fails"
++$XFS_IO_PROG -f -c "pwrite 0 10000" $data_file > /dev/null
++xfs_io -c 'chattr +x' $data_file
++check_no_xflag_dax $data_file
++check_no_s_dax $data_file
++
++
++# Check inheritance on cp, mv
++# ===========================
++
++echo "   *** check making 'data' dax with cp"
++cp $non_dax $dax_dir/conv-dax
++check_xflag_dax $dax_dir/conv-dax
++check_s_dax $dax_dir/conv-dax
++
++echo "   *** check making 'data' non-dax with cp"
++rm -f $data_file
++cp $dax_dir/conv-dax $data_file
++check_no_xflag_dax $data_file
++check_no_s_dax $data_file
++
++echo "   *** Moved files 'don't inherit'"
++mv $non_dax $dax_dir/move-dax
++check_no_xflag_dax $dax_dir/move-dax
++check_no_s_dax $dax_dir/move-dax
++
++echo "   *** Check '-o dax=garbage'"
++remount_w_option "-o dax=garbage"
++
++status=0 ; exit
+diff --git a/tests/xfs/999.out b/tests/xfs/999.out
+new file mode 100644
+index 000000000000..3b204d4643a5
+--- /dev/null
++++ b/tests/xfs/999.out
+@@ -0,0 +1,21 @@
++QA output created by 999
++running tests...
++   *** mark dax-dir as dax enabled
++   *** check file inheritance
++   *** check directory inheritance
++   *** check changing directory
++   *** check non file inheritance
++   *** check that previous file stays enabled
++   *** Reset the directory
++   *** Check '-o dax'
++   *** non-dax inode but overrides to be effective
++   *** Check for non-dax inode to be dax with mount option
++   *** Check '-o dax=never'
++   *** Check '-o dax=iflag'
++   *** Verify setting FS_XFLAG_DAX flag fails
++xfs_io: cannot set flags on /mnt/xfstests_test/data-file: Invalid argument
++   *** check making 'data' dax with cp
++   *** check making 'data' non-dax with cp
++   *** Moved files 'don't inherit'
++   *** Check '-o dax=garbage'
++mount: /mnt/xfstests_test: wrong fs type, bad option, bad superblock on /dev/pmem0p1, missing codepage or helper program, or other error.
+diff --git a/tests/xfs/group b/tests/xfs/group
+index 522d4bc44d1f..816883a268bf 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -511,3 +511,4 @@
+ 511 auto quick quota
+ 512 auto quick acl attr
+ 513 auto mount
++999 auto
+-- 
+2.25.1
+
