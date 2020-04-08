@@ -2,177 +2,72 @@ Return-Path: <SRS0=Dt1E=5Y=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 34B37C2D0EA
-	for <linux-fstests@archiver.kernel.org>; Wed,  8 Apr 2020 10:36:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3C3D7C2D0EA
+	for <linux-fstests@archiver.kernel.org>; Wed,  8 Apr 2020 14:14:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 0431620771
-	for <linux-fstests@archiver.kernel.org>; Wed,  8 Apr 2020 10:36:32 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1586342192;
-	bh=kJQLcrgzAwge5U1k+lUnVNgNoNltpoecal7YgmW1t+M=;
-	h=From:To:Cc:Subject:Date:List-ID:From;
-	b=G5n1Ard+LRU4DpWAxSHItMHHdcYBGDR4emQfJpuRbKCRWjTJ+ioSzAB9g7bpsSesO
-	 9y3gb02i835wub6ob0LZRe/nPLo1Pa1p37eFyh4kWW8FbQ1TdVKqZ6mMHX/R2qdn7s
-	 eGEkWo9Jftd6QboDDdXvZBXA/S+n3MIc6mYUhC+I=
+	by mail.kernel.org (Postfix) with ESMTP id EBEA9206F5
+	for <linux-fstests@archiver.kernel.org>; Wed,  8 Apr 2020 14:14:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728215AbgDHKgb (ORCPT
+        id S1727028AbgDHOO6 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 8 Apr 2020 06:36:31 -0400
-Received: from mail.kernel.org ([198.145.29.99]:40630 "EHLO mail.kernel.org"
+        Wed, 8 Apr 2020 10:14:58 -0400
+Received: from mgw-02.mpynet.fi ([82.197.21.91]:36692 "EHLO mgw-02.mpynet.fi"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728209AbgDHKgb (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 8 Apr 2020 06:36:31 -0400
-Received: from debian6.Home (bl8-197-74.dsl.telepac.pt [85.241.197.74])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 1C19A20753;
-        Wed,  8 Apr 2020 10:36:29 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1586342190;
-        bh=kJQLcrgzAwge5U1k+lUnVNgNoNltpoecal7YgmW1t+M=;
-        h=From:To:Cc:Subject:Date:From;
-        b=Qr2GoGw1WcBdtGsrgGMCc7ru5Vl/Ss43LZftEw/3ruVEDoQIeN1KSF2tqelyi05lc
-         SKJJrR6HQgSlg9BifvZYgePNDPo9ug5dCfHQKBMgPYqIaqtPsrVIDOzWlRYkvi+CTg
-         GRpajTjTCs+obRkiH8ebrE5v7RPxbd+HFCRVgfK0=
-From:   fdmanana@kernel.org
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH 4/4] fsx: move range generation logic into a common helper
-Date:   Wed,  8 Apr 2020 11:36:27 +0100
-Message-Id: <20200408103627.11514-1-fdmanana@kernel.org>
-X-Mailer: git-send-email 2.11.0
+        id S1726550AbgDHOO5 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 8 Apr 2020 10:14:57 -0400
+X-Greylist: delayed 1080 seconds by postgrey-1.27 at vger.kernel.org; Wed, 08 Apr 2020 10:14:57 EDT
+Received: from pps.filterd (mgw-02.mpynet.fi [127.0.0.1])
+        by mgw-02.mpynet.fi (8.16.0.42/8.16.0.42) with SMTP id 038Drw7Q124068;
+        Wed, 8 Apr 2020 16:56:56 +0300
+Received: from ex13.tuxera.com (ex13.tuxera.com [178.16.184.72])
+        by mgw-02.mpynet.fi with ESMTP id 3091pn1418-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-SHA384 bits=256 verify=NOT);
+        Wed, 08 Apr 2020 16:56:55 +0300
+Received: from localhost (194.100.106.190) by tuxera-exch.ad.tuxera.com
+ (10.20.48.11) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Wed, 8 Apr
+ 2020 16:56:55 +0300
+From:   Vladimir Zapolskiy <vladimir@tuxera.com>
+To:     Eryu Guan <guaneryu@gmail.com>
+CC:     <fstests@vger.kernel.org>
+Subject: [PATCH 0/4] Assign a few generic tests to additional groups
+Date:   Wed, 8 Apr 2020 16:56:44 +0300
+Message-ID: <20200408135648.5824-1-vladimir@tuxera.com>
+X-Mailer: git-send-email 2.25.1
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-Originating-IP: [194.100.106.190]
+X-ClientProxiedBy: tuxera-exch.ad.tuxera.com (10.20.48.11) To
+ tuxera-exch.ad.tuxera.com (10.20.48.11)
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.138,18.0.676
+ definitions=2020-04-07_10:2020-04-07,2020-04-07 signatures=0
+X-Proofpoint-Spam-Details: rule=mpy_notspam policy=mpy score=0 malwarescore=0 bulkscore=0 spamscore=0
+ phishscore=0 mlxscore=0 suspectscore=0 mlxlogscore=787 adultscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2003020000
+ definitions=main-2004080116
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Filipe Manana <fdmanana@suse.com>
+The rationale behind the proposed changes is to correct and improve
+granularity of some generic tests, so it becomes possible to control
+lists of run tests better, if there is given additional information
+about a test environment and tested filesystems.
 
-We have very similar code that generates the destination range for clone,
-dedupe and copy_file_range operations, so avoid duplicating the code three
-times and move it into a helper function.
+Vladimir Zapolskiy (4):
+  Add generic/459 test to freeze group of tests
+  Add generic/482 test to thin group of tests
+  Add generic/529 test to acl group of tests
+  Add generic/530 test to shutdown group of tests
 
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
- ltp/fsx.c | 91 +++++++++++++++++++++++++--------------------------------------
- 1 file changed, 36 insertions(+), 55 deletions(-)
+ tests/generic/group | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
-diff --git a/ltp/fsx.c b/ltp/fsx.c
-index 89a5f60e..8873cd01 100644
---- a/ltp/fsx.c
-+++ b/ltp/fsx.c
-@@ -1930,6 +1930,36 @@ range_overlaps(
- 	return llabs((unsigned long long)off1 - off0) < size;
- }
- 
-+static void generate_dest_range(unsigned long op,
-+				unsigned long max_range_end,
-+				unsigned long *src_offset,
-+				unsigned long *size,
-+				unsigned long *dst_offset)
-+{
-+	int tries = 0;
-+
-+	TRIM_OFF_LEN(*src_offset, *size, file_size);
-+	if (op == OP_COPY_RANGE) {
-+		*src_offset -= *src_offset % readbdy;
-+		if (o_direct)
-+			*size -= *size % readbdy;
-+	} else {
-+		*src_offset = *src_offset & ~(block_size - 1);
-+		*size = *size & ~(block_size - 1);
-+	}
-+
-+	do {
-+		if (tries++ >= 30) {
-+			*size = 0;
-+			break;
-+		}
-+		*dst_offset = random();
-+		TRIM_OFF(*dst_offset, max_range_end);
-+		*dst_offset = *dst_offset & ~(block_size - 1);
-+	} while (range_overlaps(*src_offset, *dst_offset, *size) ||
-+		 *dst_offset + *size > max_range_end);
-+}
-+
- int
- test(void)
- {
-@@ -2004,63 +2034,14 @@ test(void)
- 			keep_size = random() % 2;
- 		break;
- 	case OP_CLONE_RANGE:
--		{
--			int tries = 0;
--
--			TRIM_OFF_LEN(offset, size, file_size);
--			offset = offset & ~(block_size - 1);
--			size = size & ~(block_size - 1);
--			do {
--				if (tries++ >= 30) {
--					size = 0;
--					break;
--				}
--				offset2 = random();
--				TRIM_OFF(offset2, maxfilelen);
--				offset2 = offset2 & ~(block_size - 1);
--			} while (range_overlaps(offset, offset2, size) ||
--				 offset2 + size > maxfilelen);
--			break;
--		}
-+		generate_dest_range(op, maxfilelen, &offset, &size, &offset2);
-+		break;
- 	case OP_DEDUPE_RANGE:
--		{
--			int tries = 0;
--
--			TRIM_OFF_LEN(offset, size, file_size);
--			offset = offset & ~(block_size - 1);
--			size = size & ~(block_size - 1);
--			do {
--				if (tries++ >= 30) {
--					size = 0;
--					break;
--				}
--				offset2 = random();
--				TRIM_OFF(offset2, file_size);
--				offset2 = offset2 & ~(block_size - 1);
--			} while (range_overlaps(offset, offset2, size) ||
--				 offset2 + size > file_size);
--			break;
--		}
-+		generate_dest_range(op, file_size, &offset, &size, &offset2);
-+		break;
- 	case OP_COPY_RANGE:
--		{
--			int tries = 0;
--
--			TRIM_OFF_LEN(offset, size, file_size);
--			offset -= offset % readbdy;
--			if (o_direct)
--				size -= size % readbdy;
--			do {
--				if (tries++ >= 30) {
--					size = 0;
--					break;
--				}
--				offset2 = random();
--				TRIM_OFF(offset2, maxfilelen);
--				offset2 -= offset2 % writebdy;
--			} while (range_overlaps(offset, offset2, size) ||
--				 offset2 + size > maxfilelen);
--			break;
--		}
-+		generate_dest_range(op, maxfilelen, &offset, &size, &offset2);
-+		break;
- 	}
- 
- have_op:
 -- 
-2.11.0
+2.25.1
 
