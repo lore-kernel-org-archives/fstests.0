@@ -6,24 +6,24 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9FA17C2D0EA
-	for <linux-fstests@archiver.kernel.org>; Wed,  8 Apr 2020 14:16:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 730E1C2BA2B
+	for <linux-fstests@archiver.kernel.org>; Wed,  8 Apr 2020 14:17:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 7C87120780
-	for <linux-fstests@archiver.kernel.org>; Wed,  8 Apr 2020 14:16:58 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 48C66206F5
+	for <linux-fstests@archiver.kernel.org>; Wed,  8 Apr 2020 14:17:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728129AbgDHOQ6 (ORCPT
+        id S1728369AbgDHORA (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 8 Apr 2020 10:16:58 -0400
+        Wed, 8 Apr 2020 10:17:00 -0400
 Received: from mgw-02.mpynet.fi ([82.197.21.91]:36910 "EHLO mgw-02.mpynet.fi"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728096AbgDHOQ5 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 8 Apr 2020 10:16:57 -0400
+        id S1728096AbgDHOQ7 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 8 Apr 2020 10:16:59 -0400
 Received: from pps.filterd (mgw-02.mpynet.fi [127.0.0.1])
-        by mgw-02.mpynet.fi (8.16.0.42/8.16.0.42) with SMTP id 038Drw7T124068;
+        by mgw-02.mpynet.fi (8.16.0.42/8.16.0.42) with SMTP id 038Drw7R124068;
         Wed, 8 Apr 2020 16:56:56 +0300
 Received: from ex13.tuxera.com (ex13.tuxera.com [178.16.184.72])
-        by mgw-02.mpynet.fi with ESMTP id 3091pn1418-4
+        by mgw-02.mpynet.fi with ESMTP id 3091pn1418-2
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-SHA384 bits=256 verify=NOT);
         Wed, 08 Apr 2020 16:56:56 +0300
 Received: from localhost (194.100.106.190) by tuxera-exch.ad.tuxera.com
@@ -32,9 +32,9 @@ Received: from localhost (194.100.106.190) by tuxera-exch.ad.tuxera.com
 From:   Vladimir Zapolskiy <vladimir@tuxera.com>
 To:     Eryu Guan <guaneryu@gmail.com>
 CC:     <fstests@vger.kernel.org>
-Subject: [PATCH 3/4] Add generic/529 test to acl group of tests
-Date:   Wed, 8 Apr 2020 16:56:47 +0300
-Message-ID: <20200408135648.5824-4-vladimir@tuxera.com>
+Subject: [PATCH 1/4] Add generic/459 test to freeze group of tests
+Date:   Wed, 8 Apr 2020 16:56:45 +0300
+Message-ID: <20200408135648.5824-2-vladimir@tuxera.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20200408135648.5824-1-vladimir@tuxera.com>
 References: <20200408135648.5824-1-vladimir@tuxera.com>
@@ -47,7 +47,7 @@ X-ClientProxiedBy: tuxera-exch.ad.tuxera.com (10.20.48.11) To
 X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.138,18.0.676
  definitions=2020-04-07_10:2020-04-07,2020-04-07 signatures=0
 X-Proofpoint-Spam-Details: rule=mpy_notspam policy=mpy score=0 malwarescore=0 bulkscore=0 spamscore=0
- phishscore=0 mlxscore=0 suspectscore=0 mlxlogscore=999 adultscore=0
+ phishscore=0 mlxscore=0 suspectscore=0 mlxlogscore=946 adultscore=0
  classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2003020000
  definitions=main-2004080116
 Sender: fstests-owner@vger.kernel.org
@@ -55,9 +55,8 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-If a filesystem does not support ACLs, the generic/529 test
-execution is not run due to a `_require_acls' check executed
-in runtime.
+If a filesystem does not support freeze feature, the generic/459 test
+execution is not run due to a `_require_freeze' check in runtime.
 
 Signed-off-by: Vladimir Zapolskiy <vladimir@tuxera.com>
 ---
@@ -65,18 +64,18 @@ Signed-off-by: Vladimir Zapolskiy <vladimir@tuxera.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/tests/generic/group b/tests/generic/group
-index 15f4bb085493..cad08e045001 100644
+index 99d06c9ad945..8f02f02551cc 100644
 --- a/tests/generic/group
 +++ b/tests/generic/group
-@@ -530,7 +530,7 @@
- 526 auto quick log
- 527 auto quick log
- 528 auto quick
--529 auto quick attr
-+529 auto quick acl attr
- 530 auto quick unlink
- 531 auto quick unlink
- 532 auto quick
+@@ -461,7 +461,7 @@
+ 456 auto quick metadata collapse zero prealloc
+ 457 auto log replay clone
+ 458 auto quick clone collapse zero
+-459 auto thin
++459 auto freeze thin
+ 460 auto quick rw
+ 461 auto shutdown stress
+ 462 auto quick dax
 -- 
 2.25.1
 
