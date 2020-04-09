@@ -2,158 +2,115 @@ Return-Path: <SRS0=x5Yn=5Z=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-2.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,USER_AGENT_SANE_1 autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E5C02C2BA2B
-	for <linux-fstests@archiver.kernel.org>; Thu,  9 Apr 2020 14:09:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0A5A3C2BA2B
+	for <linux-fstests@archiver.kernel.org>; Thu,  9 Apr 2020 14:52:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id B98A320692
-	for <linux-fstests@archiver.kernel.org>; Thu,  9 Apr 2020 14:09:42 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CBDC8206E9
+	for <linux-fstests@archiver.kernel.org>; Thu,  9 Apr 2020 14:52:47 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="fCDgySZV"
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="vKEddehW"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727244AbgDIOJl (ORCPT
+        id S1727716AbgDIOwq (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 9 Apr 2020 10:09:41 -0400
-Received: from mail-wm1-f65.google.com ([209.85.128.65]:39744 "EHLO
-        mail-wm1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726552AbgDIOJl (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 9 Apr 2020 10:09:41 -0400
-Received: by mail-wm1-f65.google.com with SMTP id y24so4349003wma.4;
-        Thu, 09 Apr 2020 07:09:41 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id;
-        bh=zeSK1KRlEdYxWBmerzbs63KhbV4wQtQnzLXsPRrY5jQ=;
-        b=fCDgySZVgHkng2ygM7baGfzvsAnwHk2hNr8rWn7BUUSwT5jdFjbPXUvbauBrVPUBkZ
-         fqTZy0voDpVu9+V7cOhrgKDmMCUb3kuOpiG7Tex4SCDLZLJ/EC+KtJmW4AZ2xCzIPW0m
-         GmI/JvBqIs/XqxoatH/o7SiA1NyZIHksIAUyfG3n/+21sW7sshXUlxC1YRNHs1BOgefj
-         o625oWjV3nZraxxW6CIBp8R+vPWWk8gCIwf3hM65T0HYa4kofRSHZnMZ9jdQygqloAAw
-         +zZvFdBW1WQteXxDUfBuOxQ1LbLpaeG8J2FAaU8+uUOGBzyMJxEM0TC2+GfI5IYiqQLB
-         CuxQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id;
-        bh=zeSK1KRlEdYxWBmerzbs63KhbV4wQtQnzLXsPRrY5jQ=;
-        b=J/jFQqEY8RNkIoU5al3GhA0PBqn0LVPRF0kGz2+kwHii3vgqSV+s9mREqqHMg1SdZ9
-         MrBVIjcLrviXSvx7MmtwZWPXPDUxfWDYT7iVa3LmATuodTi8fGnazzXJY6Wz5lnJoogd
-         35KbFgoz+0QcmpQ0dH/FmICYxaqRMQDAGZIx8zR4wiuTTu9zRHNzCpEECPd8VGczAlIi
-         TAg4sq8PIFOIKs7HmNwu7MaCBAWiBgQR7MxpISCAIeVqNf37yEgydJVyiC25LXE0wqe/
-         9tpzpNRQgQ7tURIlai5rtkFgOtycwerTJ0joVMVkUUhbpjEDlYTaWDhjg7wpc9JOSZR6
-         wAmA==
-X-Gm-Message-State: AGi0PuZlkNavRxl0pRSq1s3y2XvNmWc69OC0DCWSa4GYstgM2IaK0lZL
-        IyHt1/vJIOUrk6N4dgarSpY3SMnU
-X-Google-Smtp-Source: APiQypI2Bi7G+Tb5+xHsJLnBtOMEOJK3rIlhrHvM9F7kKJgZLUoS7ImACRmMgISxot57KunZh4rOsw==
-X-Received: by 2002:a7b:c3c5:: with SMTP id t5mr88998wmj.80.1586441380442;
-        Thu, 09 Apr 2020 07:09:40 -0700 (PDT)
-Received: from localhost.localdomain ([141.226.12.123])
-        by smtp.gmail.com with ESMTPSA id e23sm30370450wra.43.2020.04.09.07.09.38
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 09 Apr 2020 07:09:39 -0700 (PDT)
-From:   Amir Goldstein <amir73il@gmail.com>
-To:     Eryu Guan <guaneryu@gmail.com>
-Cc:     Chengguang Xu <cgxu519@mykernel.net>,
-        Miklos Szeredi <miklos@szeredi.hu>,
-        linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: [PATCH] overlay/06[89]: fix test run with nfs_export feature enabled by default
-Date:   Thu,  9 Apr 2020 17:09:21 +0300
-Message-Id: <20200409140921.31690-1-amir73il@gmail.com>
-X-Mailer: git-send-email 2.17.1
+        Thu, 9 Apr 2020 10:52:46 -0400
+Received: from userp2130.oracle.com ([156.151.31.86]:59994 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726940AbgDIOwq (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 9 Apr 2020 10:52:46 -0400
+Received: from pps.filterd (userp2130.oracle.com [127.0.0.1])
+        by userp2130.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 039EmFYd067940;
+        Thu, 9 Apr 2020 14:52:15 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
+ : subject : message-id : references : mime-version : content-type :
+ in-reply-to; s=corp-2020-01-29;
+ bh=3GTBSMSI3uCfyion1WPUOtblA5LVBEmYJDDdIqdRXs0=;
+ b=vKEddehWrYDfQaSaBHO8m2S8hLKsQJjSzPrCHZlQqIip+282XW4jW1xgRQ2gztoji5zp
+ n04/PYAtRYGUZopcpcEnKTpnShjr2QGNLmrcALw0iLqh3xaWib8MijdLiYiIuQCGLIut
+ 1ZZy3mOJDW9XjesTKh4dGg2WDjv5CBPyf5RBjavkcvPUSvwdgChTS1OhuxGIy2YrvvOY
+ XMfXEdcB0FZYOYcC/lGdOgXGkthTBrMi0RtH5XAzvzrufxgxlcZ274foqSYfnH+V65Ci
+ LjGnKkpr9CZHNBnCUXxTifahW0Mvy1EpVx+NDJiurDyp7/LGOzUDfP4lfIsXHJ+4viKr +g== 
+Received: from userp3030.oracle.com (userp3030.oracle.com [156.151.31.80])
+        by userp2130.oracle.com with ESMTP id 3091m3hyh2-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Thu, 09 Apr 2020 14:52:15 +0000
+Received: from pps.filterd (userp3030.oracle.com [127.0.0.1])
+        by userp3030.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 039ElQLl046158;
+        Thu, 9 Apr 2020 14:52:14 GMT
+Received: from aserv0121.oracle.com (aserv0121.oracle.com [141.146.126.235])
+        by userp3030.oracle.com with ESMTP id 3091m49m4f-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Thu, 09 Apr 2020 14:52:14 +0000
+Received: from abhmp0006.oracle.com (abhmp0006.oracle.com [141.146.116.12])
+        by aserv0121.oracle.com (8.14.4/8.13.8) with ESMTP id 039Eq8Df028795;
+        Thu, 9 Apr 2020 14:52:08 GMT
+Received: from localhost (/67.169.218.210)
+        by default (Oracle Beehive Gateway v4.0)
+        with ESMTP ; Thu, 09 Apr 2020 07:52:08 -0700
+Date:   Thu, 9 Apr 2020 07:52:07 -0700
+From:   "Darrick J. Wong" <darrick.wong@oracle.com>
+To:     Christoph Hellwig <hch@infradead.org>
+Cc:     Chandan Rajendra <chandan@linux.ibm.com>,
+        linux-xfs@vger.kernel.org, Eryu Guan <guaneryu@gmail.com>,
+        Chandan Rajendra <chandanrlinux@gmail.com>,
+        fstests@vger.kernel.org
+Subject: Re: xfs_check vs. xfs_repair vs. the world^W^Wfstests
+Message-ID: <20200409145207.GL6742@magnolia>
+References: <20200408030031.GB6740@magnolia>
+ <2574725.68tNun6CyS@localhost.localdomain>
+ <20200409074028.GB21033@infradead.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20200409074028.GB21033@infradead.org>
+User-Agent: Mutt/1.9.4 (2018-02-28)
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9586 signatures=668685
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 bulkscore=0 malwarescore=0
+ mlxlogscore=999 phishscore=0 spamscore=0 adultscore=0 suspectscore=0
+ mlxscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2003020000 definitions=main-2004090116
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9586 signatures=668685
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 spamscore=0 adultscore=0
+ impostorscore=0 malwarescore=0 lowpriorityscore=0 mlxlogscore=999
+ priorityscore=1501 clxscore=1015 bulkscore=0 phishscore=0 mlxscore=0
+ suspectscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2003020000 definitions=main-2004090116
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-The tests were checking that nfs_export feature was successfully enabled
-by greping for nfs_export=on option in /proc/mounts.
+On Thu, Apr 09, 2020 at 12:40:28AM -0700, Christoph Hellwig wrote:
+> On Wed, Apr 08, 2020 at 10:23:21AM +0530, Chandan Rajendra wrote:
+> > > Not sure what to do about quota in repair -- we could build in the
+> > > ability to do quota counts since we scan the whole inode table and
+> > > directory tree anyway.  From there it's not so hard to rebuild the quota
+> > > inodes too.
+> > >
+> > 
+> > I will take up this work and get it completed.
+> > 
+> > Since I have other higher priority tasks at work place, I will have this as my
+> > secondary focus. Meanwhile, until it gets done, can we disable running these
+> > tests on block size > 4k i.e. https://patchwork.kernel.org/patch/11454399/.
+> 
+> I still think even with the above outstanding issues we should not
+> run check by default.  We can still opt into it, but check extends
+> the run time of xfstests for not very good reasons.
 
-This check was incorrect if the module default was nfs_export enabled
-and caused test to not run with the message:
-    cannot enable nfs_export feature on nested overlay
+So do I, and when I proposed it back in 2018[1], Dave indicated that we
+ought to get to the point where we don't need to xfs_check as a
+cross-check for xfs_repair.  I'm working on fixing up the smaller things
+that repair doesn't catch, so once that series lands maybe we can just
+drop xfs_check?
 
-Use a helper that checks this condition correctly.
+(Since the only big discrepancy at that point will be the lack of quota
+checking...)
 
-Reported-by: Chengguang Xu <cgxu519@mykernel.net>
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
- common/overlay    | 14 ++++++++------
- tests/overlay/068 |  3 +--
- tests/overlay/069 |  3 +--
- 3 files changed, 10 insertions(+), 10 deletions(-)
+--D
 
-diff --git a/common/overlay b/common/overlay
-index 65c639e9..f8e1e27f 100644
---- a/common/overlay
-+++ b/common/overlay
-@@ -137,9 +137,11 @@ _overlay_scratch_unmount()
- }
- 
- # Check that a specific overlayfs feature is supported
--__check_scratch_overlay_feature()
-+_check_overlay_feature()
- {
- 	local feature=$1
-+	local dev=$2
-+	local mnt=$3
- 
- 	# overalyfs features (e.g. redirect_dir, index) are
- 	# configurable from Kconfig (the build default), by module
-@@ -153,10 +155,10 @@ __check_scratch_overlay_feature()
- 	# index=off if underlying fs does not support file handles.
- 	# Overlayfs only displays mount option if it differs from the default.
- 	# Overlayfs may enable the feature, but fallback to read-only mount.
--	((( [ "$default" = N ] && _fs_options $SCRATCH_DEV | grep -q "${feature}=on" ) || \
--	  ( [ "$default" = Y ] && ! _fs_options $SCRATCH_DEV | grep -q "${feature}=off" )) && \
--	    touch $SCRATCH_MNT/foo 2>/dev/null ) || \
--	        _notrun "${FSTYP} feature '${feature}' cannot be enabled on ${SCRATCH_DEV}"
-+	((( [ "$default" = N ] && _fs_options $dev | grep -q "${feature}=on" ) || \
-+	  ( [ "$default" = Y ] && ! _fs_options $dev | grep -q "${feature}=off" )) && \
-+	    touch $mnt/foo 2>/dev/null ) || \
-+	        _notrun "${FSTYP} feature '${feature}' cannot be enabled on ${dev}"
- }
- 
- # Require a set of overlayfs features
-@@ -178,7 +180,7 @@ _require_scratch_overlay_features()
- 	        _notrun "overlay features '${features[*]}' cannot be enabled on ${SCRATCH_DEV}"
- 
- 	for feature in ${features[*]}; do
--		__check_scratch_overlay_feature ${feature}
-+		_check_overlay_feature ${feature} $SCRATCH_DEV $SCRATCH_MNT
- 	done
- 
- 	_scratch_unmount
-diff --git a/tests/overlay/068 b/tests/overlay/068
-index 933768ba..7dfd6a73 100755
---- a/tests/overlay/068
-+++ b/tests/overlay/068
-@@ -102,8 +102,7 @@ mount_dirs()
- 	_overlay_mount_dirs $SCRATCH_MNT $upper2 $work2 overlay2 $mnt2 \
- 		-o "index=on,nfs_export=on,redirect_dir=on" 2>/dev/null ||
- 		_notrun "cannot mount nested overlay with nfs_export=on option"
--	_fs_options overlay2 | grep -q "nfs_export=on" || \
--		_notrun "cannot enable nfs_export feature on nested overlay"
-+	_check_overlay_feature nfs_export overlay2 $mnt2
- }
- 
- # Unmount the nested overlay mount and check underlying overlay layers
-diff --git a/tests/overlay/069 b/tests/overlay/069
-index de7aa0d7..77dfce63 100755
---- a/tests/overlay/069
-+++ b/tests/overlay/069
-@@ -110,8 +110,7 @@ mount_dirs()
- 	_overlay_mount_dirs $SCRATCH_MNT $upper2 $work2 overlay2 $mnt2 \
- 		-o "index=on,nfs_export=on,redirect_dir=on" 2>/dev/null ||
- 		_notrun "cannot mount nested overlay with nfs_export=on option"
--	_fs_options overlay2 | grep -q "nfs_export=on" || \
--		_notrun "cannot enable nfs_export feature on nested overlay"
-+	_check_overlay_feature nfs_export overlay2 $mnt2
- }
- 
- # Unmount the nested overlay mount and check underlying overlay layers
--- 
-2.17.1
-
+[1] https://lore.kernel.org/fstests/20180214212228.GG7000@dastard/
