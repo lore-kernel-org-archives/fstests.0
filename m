@@ -1,183 +1,72 @@
-Return-Path: <SRS0=Dt1E=5Y=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=x5Yn=5Z=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8B9F9C2BA1A
-	for <linux-fstests@archiver.kernel.org>; Wed,  8 Apr 2020 18:12:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0D9ACC2D0EA
+	for <linux-fstests@archiver.kernel.org>; Thu,  9 Apr 2020 07:41:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 6758D20771
-	for <linux-fstests@archiver.kernel.org>; Wed,  8 Apr 2020 18:12:14 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1586369534;
-	bh=TcPNRCJme7IaXE/FYkUUYDMDLIwcirmTHJy/ltbojaY=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=IHIN3qa5BuhVtWGHH0KF3vfDFjo+teUkokc4RF+HBMvpC5UJ8zQM/9Tw0SRXa1uMS
-	 iwIzfuR6mmvsPrcfQ0Qzzx5Zzjq8VDYASbL5weHHtHLRrn8gr6mjeCpedxbI4VfhyI
-	 409oeO+ALvdSukpbIfzPaXNnZIMtl77jdlAIyNhE=
+	by mail.kernel.org (Postfix) with ESMTP id C43F82075E
+	for <linux-fstests@archiver.kernel.org>; Thu,  9 Apr 2020 07:41:01 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="PYIz0OYR"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729075AbgDHSMO (ORCPT
+        id S1726521AbgDIHlA (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 8 Apr 2020 14:12:14 -0400
-Received: from mail.kernel.org ([198.145.29.99]:60172 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726780AbgDHSMO (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 8 Apr 2020 14:12:14 -0400
-Received: from debian6.Home (bl8-197-74.dsl.telepac.pt [85.241.197.74])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 2A7212075E;
-        Wed,  8 Apr 2020 18:12:12 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1586369532;
-        bh=TcPNRCJme7IaXE/FYkUUYDMDLIwcirmTHJy/ltbojaY=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=PtWXekea1N4XhLirg90o5mmmvMI3DMXeDpfQSb3+LyceemEjP1gHnNqGJwOaMMQ3r
-         eA4/kFvoKz8pQNG+06bPhxnZXWfQRzj1Z8dW4x93wZcoXfzCISgJ+ndnZU2xRmMwFb
-         LlKNzCMlSPIdTJLnZaKjker9LnO/890nUCkDwffc=
-From:   fdmanana@kernel.org
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH v2 4/4] fsx: move range generation logic into a common helper
-Date:   Wed,  8 Apr 2020 19:12:08 +0100
-Message-Id: <20200408181208.12054-1-fdmanana@kernel.org>
-X-Mailer: git-send-email 2.11.0
-In-Reply-To: <20200408103627.11514-1-fdmanana@kernel.org>
-References: <20200408103627.11514-1-fdmanana@kernel.org>
+        Thu, 9 Apr 2020 03:41:00 -0400
+Received: from bombadil.infradead.org ([198.137.202.133]:51584 "EHLO
+        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725997AbgDIHlA (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 9 Apr 2020 03:41:00 -0400
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20170209; h=In-Reply-To:Content-Type:MIME-Version
+        :References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=8EYTxCZM4fYVaCIaZqPSTP+6v/NL7nVFlepypkokg3s=; b=PYIz0OYRPF5tRGO571woedCq/9
+        G2xHxBqVdV+sMrrJJDpcqxdIuz/OIE/mbIMR7WFv2CVOQaCbIcgjhiC3NAQTqa62O+TiNzQcyj9LB
+        bLyMkOuX7ZvAbWGwMwAjreIKRSoMVB2oNCmBzK+seIkugYNK15Y7WCRRNOp8X+2+GsN0hcV6fHGqg
+        x3KkW37+hwNBu22T2+qBx55V5VqdwVR5VqxpxcdtonqIUiGkDfK+D2m/Aff9jyQqnMVvOyK6No1Kr
+        Sq9Xwpx84/49fYx194VR20/rKt/NRJoAPIqs+qJXWwSca3gyEUqdWlz5LcWiMVid3g32U8Hi9+zWE
+        M9Wmbgug==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.92.3 #3 (Red Hat Linux))
+        id 1jMRnY-0008A3-QO; Thu, 09 Apr 2020 07:40:28 +0000
+Date:   Thu, 9 Apr 2020 00:40:28 -0700
+From:   Christoph Hellwig <hch@infradead.org>
+To:     Chandan Rajendra <chandan@linux.ibm.com>
+Cc:     "Darrick J. Wong" <darrick.wong@oracle.com>,
+        linux-xfs@vger.kernel.org, Eryu Guan <guaneryu@gmail.com>,
+        Chandan Rajendra <chandanrlinux@gmail.com>,
+        fstests@vger.kernel.org, hch@infradead.org
+Subject: Re: xfs_check vs. xfs_repair vs. the world^W^Wfstests
+Message-ID: <20200409074028.GB21033@infradead.org>
+References: <20200408030031.GB6740@magnolia>
+ <2574725.68tNun6CyS@localhost.localdomain>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <2574725.68tNun6CyS@localhost.localdomain>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Filipe Manana <fdmanana@suse.com>
+On Wed, Apr 08, 2020 at 10:23:21AM +0530, Chandan Rajendra wrote:
+> > Not sure what to do about quota in repair -- we could build in the
+> > ability to do quota counts since we scan the whole inode table and
+> > directory tree anyway.  From there it's not so hard to rebuild the quota
+> > inodes too.
+> >
+> 
+> I will take up this work and get it completed.
+> 
+> Since I have other higher priority tasks at work place, I will have this as my
+> secondary focus. Meanwhile, until it gets done, can we disable running these
+> tests on block size > 4k i.e. https://patchwork.kernel.org/patch/11454399/.
 
-We have very similar code that generates the destination range for clone,
-dedupe and copy_file_range operations, so avoid duplicating the code three
-times and move it into a helper function.
-
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
-
-V2: Turned the first parameter of the helper into a boolean as Darrick suggested.
-
- ltp/fsx.c | 91 +++++++++++++++++++++++++--------------------------------------
- 1 file changed, 36 insertions(+), 55 deletions(-)
-
-diff --git a/ltp/fsx.c b/ltp/fsx.c
-index 89a5f60e..9bfc98e0 100644
---- a/ltp/fsx.c
-+++ b/ltp/fsx.c
-@@ -1930,6 +1930,36 @@ range_overlaps(
- 	return llabs((unsigned long long)off1 - off0) < size;
- }
- 
-+static void generate_dest_range(bool readbdy_align,
-+				unsigned long max_range_end,
-+				unsigned long *src_offset,
-+				unsigned long *size,
-+				unsigned long *dst_offset)
-+{
-+	int tries = 0;
-+
-+	TRIM_OFF_LEN(*src_offset, *size, file_size);
-+	if (readbdy_align) {
-+		*src_offset -= *src_offset % readbdy;
-+		if (o_direct)
-+			*size -= *size % readbdy;
-+	} else {
-+		*src_offset = *src_offset & ~(block_size - 1);
-+		*size = *size & ~(block_size - 1);
-+	}
-+
-+	do {
-+		if (tries++ >= 30) {
-+			*size = 0;
-+			break;
-+		}
-+		*dst_offset = random();
-+		TRIM_OFF(*dst_offset, max_range_end);
-+		*dst_offset = *dst_offset & ~(block_size - 1);
-+	} while (range_overlaps(*src_offset, *dst_offset, *size) ||
-+		 *dst_offset + *size > max_range_end);
-+}
-+
- int
- test(void)
- {
-@@ -2004,63 +2034,14 @@ test(void)
- 			keep_size = random() % 2;
- 		break;
- 	case OP_CLONE_RANGE:
--		{
--			int tries = 0;
--
--			TRIM_OFF_LEN(offset, size, file_size);
--			offset = offset & ~(block_size - 1);
--			size = size & ~(block_size - 1);
--			do {
--				if (tries++ >= 30) {
--					size = 0;
--					break;
--				}
--				offset2 = random();
--				TRIM_OFF(offset2, maxfilelen);
--				offset2 = offset2 & ~(block_size - 1);
--			} while (range_overlaps(offset, offset2, size) ||
--				 offset2 + size > maxfilelen);
--			break;
--		}
-+		generate_dest_range(false, maxfilelen, &offset, &size, &offset2);
-+		break;
- 	case OP_DEDUPE_RANGE:
--		{
--			int tries = 0;
--
--			TRIM_OFF_LEN(offset, size, file_size);
--			offset = offset & ~(block_size - 1);
--			size = size & ~(block_size - 1);
--			do {
--				if (tries++ >= 30) {
--					size = 0;
--					break;
--				}
--				offset2 = random();
--				TRIM_OFF(offset2, file_size);
--				offset2 = offset2 & ~(block_size - 1);
--			} while (range_overlaps(offset, offset2, size) ||
--				 offset2 + size > file_size);
--			break;
--		}
-+		generate_dest_range(false, file_size, &offset, &size, &offset2);
-+		break;
- 	case OP_COPY_RANGE:
--		{
--			int tries = 0;
--
--			TRIM_OFF_LEN(offset, size, file_size);
--			offset -= offset % readbdy;
--			if (o_direct)
--				size -= size % readbdy;
--			do {
--				if (tries++ >= 30) {
--					size = 0;
--					break;
--				}
--				offset2 = random();
--				TRIM_OFF(offset2, maxfilelen);
--				offset2 -= offset2 % writebdy;
--			} while (range_overlaps(offset, offset2, size) ||
--				 offset2 + size > maxfilelen);
--			break;
--		}
-+		generate_dest_range(true, maxfilelen, &offset, &size, &offset2);
-+		break;
- 	}
- 
- have_op:
--- 
-2.11.0
-
+I still think even with the above outstanding issues we should not
+run check by default.  We can still opt into it, but check extends
+the run time of xfstests for not very good reasons.
