@@ -2,259 +2,274 @@ Return-Path: <SRS0=5a++=52=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 233F5C2BB85
-	for <linux-fstests@archiver.kernel.org>; Fri, 10 Apr 2020 01:37:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4BC8CC2BB85
+	for <linux-fstests@archiver.kernel.org>; Fri, 10 Apr 2020 07:22:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id E11B120936
-	for <linux-fstests@archiver.kernel.org>; Fri, 10 Apr 2020 01:37:12 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 252A32087E
+	for <linux-fstests@archiver.kernel.org>; Fri, 10 Apr 2020 07:22:07 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=mykernel.net header.i=cgxu519@mykernel.net header.b="axZyRF1y"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="VG4bFYig"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726477AbgDJBhM (ORCPT
+        id S1725880AbgDJHWG (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 9 Apr 2020 21:37:12 -0400
-Received: from sender2-of-o52.zoho.com.cn ([163.53.93.247]:21186 "EHLO
-        sender2-of-o52.zoho.com.cn" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1725987AbgDJBhL (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 9 Apr 2020 21:37:11 -0400
-X-Greylist: delayed 908 seconds by postgrey-1.27 at vger.kernel.org; Thu, 09 Apr 2020 21:37:10 EDT
-ARC-Seal: i=1; a=rsa-sha256; t=1586481708; cv=none; 
-        d=zoho.com.cn; s=zohoarc; 
-        b=dGAfQxIlFykBXH2oL4JzxDbym4JQTvUQycqeNJaKGO3g7x5GejR+tr1L59OINct+WwoqeqLe10UXEZ3Y4Lk84VNwpjvNoyVap2JqpByPVMQ0Ry8uoF8RQZHAVSbmCkDU+gaJ1s5Ljc/uS++cPyI5mLXSgzYqXZBbpEwS8L3D8Aw=
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zoho.com.cn; s=zohoarc; 
-        t=1586481708; h=Content-Type:Content-Transfer-Encoding:Cc:Date:From:In-Reply-To:MIME-Version:Message-ID:References:Subject:To; 
-        bh=JTACoukFeV8GJSGPxB3UNCum4AgaukuTvb8ICxNxzGw=; 
-        b=CgF/7DM2kgCaRGa57N7LtRLIvpN/J7YzeRcGJrKIEHFsM34zWSBDwyRrnscZNpHPfOtI9r8Hx0Re/wd/YbGO3MAgNpwNO2y3O/vfXS05EIUDc9jhUS93G55mIl+bFri69cA5SUZVQWd8bHuTfDWi2LanfG0NY0wkT806o0byNeI=
-ARC-Authentication-Results: i=1; mx.zoho.com.cn;
-        dkim=pass  header.i=mykernel.net;
-        spf=pass  smtp.mailfrom=cgxu519@mykernel.net;
-        dmarc=pass header.from=<cgxu519@mykernel.net> header.from=<cgxu519@mykernel.net>
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1586481708;
-        s=zohomail; d=mykernel.net; i=cgxu519@mykernel.net;
-        h=From:To:Cc:Message-ID:Subject:Date:In-Reply-To:References:MIME-Version:Content-Transfer-Encoding:Content-Type;
-        bh=JTACoukFeV8GJSGPxB3UNCum4AgaukuTvb8ICxNxzGw=;
-        b=axZyRF1yJCFmif3Q089m7WiXcNaRDzOPe0a5p7J3XBNiO9NY0pI/FVjtXrZJjavZ
-        kbLNbaMn41+iVkap8HB0/fMpUMRNV8twNxZymp3Uy0Xk8fsXyGtGlEKdTMC8Ytx6O5j
-        OH58P567y/Rexa16JR2GWYjg2UY+WaGFPoMbRZos=
-Received: from localhost.localdomain (218.18.229.179 [218.18.229.179]) by mx.zoho.com.cn
-        with SMTPS id 1586481706402339.1360331165083; Fri, 10 Apr 2020 09:21:46 +0800 (CST)
-From:   Chengguang Xu <cgxu519@mykernel.net>
-To:     guaneryu@gmail.com
-Cc:     fstests@vger.kernel.org, linux-unionfs@vger.kernel.org,
-        miklos@szeredi.hu, amir73il@gmail.com,
-        Chengguang Xu <cgxu519@mykernel.net>
-Message-ID: <20200410012059.27210-2-cgxu519@mykernel.net>
-Subject: [PATCH 2/2] overlay/072: test for sharing inode with whiteout files
-Date:   Fri, 10 Apr 2020 09:20:59 +0800
-X-Mailer: git-send-email 2.20.1
-In-Reply-To: <20200410012059.27210-1-cgxu519@mykernel.net>
-References: <20200410012059.27210-1-cgxu519@mykernel.net>
+        Fri, 10 Apr 2020 03:22:06 -0400
+Received: from mail-il1-f194.google.com ([209.85.166.194]:42114 "EHLO
+        mail-il1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725858AbgDJHWF (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 10 Apr 2020 03:22:05 -0400
+Received: by mail-il1-f194.google.com with SMTP id f16so1072188ilj.9;
+        Fri, 10 Apr 2020 00:22:03 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=C/oMPzsCQWwgMfCTZmxGAT/S3EySbUtr9PeCOExfuuA=;
+        b=VG4bFYigJng4xwD9hqGfRuKMBsEZfOd+Au47xy5xbYWcLA+/d1gkedupT6d6BcxnBZ
+         nEYXcXZvcsAUAKm8CgMYZKYDDxZSJOBkWJe9OzWHKBiH/5LnA72aLBktFmCWMy5ILmFq
+         q4bRMcvMPBRCFYM1MTLTB3SUTxk3CYB0HOwD7o+7k6HQ+FDb0kOP8105skNrPO7RuDMY
+         gOpppKg5q485dbe+4uAClok+41b4FNPQn2wHNCXjbGP1adjNoGVLThy1g63jwTWKhplr
+         SM37U6A4R+6ZFwBplGyRfUOlfrWfq/eojz5ANEuh++Ws9RL5klpe4LJIW4M4v8xFuHuX
+         cvRQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=C/oMPzsCQWwgMfCTZmxGAT/S3EySbUtr9PeCOExfuuA=;
+        b=ZzC9qo0bA9cw7zzBFzX9gjSErovi1Yi9d9tft2DENxqJyG4AlZ12HrkVBEebFkq3rG
+         mXBPO7eJhvx4OqWspEqbJZ/4cp4mzxFc9jRtZZ+j/f7YEKaQmWdozap0D0GneH192pZU
+         zBdZzn7tKbzSlzMiLg+QA3wyEi59wVSr9n6Wc4ae/NgyrL8Y4JxWW0pWiYlVOwn3ooTO
+         t1q8Rn7s/bqqhltw1OoDfD8WxD5pWT10LEZ47LQSrRUIuhHf9A05MDfSPaH0mpraIMk5
+         nnyn4CkCgYfgTBbyu+g88zERO4c7aEv5RdJeIyKvSBmciVmf69tAicoquA1o3tvWmdOk
+         Y+sw==
+X-Gm-Message-State: AGi0PuY9HZHrsw8JN/DpOsKa9PdnANnr8aWRUUI0ZgQxs9YMKSL9KCSm
+        T9SV/3Ka5Vhh/fxfuqWgH0Xw5txOYr9Un3ny8OpMShUl
+X-Google-Smtp-Source: APiQypJ8fnG1pvyII5Yq+xR25fauTic9XLUD1XCtvnELPCRrGuCs6A6P2Vu+7Z+zsUCeZsiLM3sdSVbcT7CBIqpDaBk=
+X-Received: by 2002:a05:6e02:68a:: with SMTP id o10mr4022246ils.72.1586503323234;
+ Fri, 10 Apr 2020 00:22:03 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
-X-ZohoCNMailClient: External
-Content-Type: text/plain; charset=utf8
+References: <20200410012059.27210-1-cgxu519@mykernel.net> <20200410012059.27210-2-cgxu519@mykernel.net>
+In-Reply-To: <20200410012059.27210-2-cgxu519@mykernel.net>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Fri, 10 Apr 2020 10:21:51 +0300
+Message-ID: <CAOQ4uxghdvj9QVJ3DQ3g1p0hbvz5mfMoxgoEAKyQAf4v78p2YA@mail.gmail.com>
+Subject: Re: [PATCH 2/2] overlay/072: test for sharing inode with whiteout files
+To:     Chengguang Xu <cgxu519@mykernel.net>
+Cc:     Eryu Guan <guaneryu@gmail.com>, fstests <fstests@vger.kernel.org>,
+        overlayfs <linux-unionfs@vger.kernel.org>,
+        Miklos Szeredi <miklos@szeredi.hu>
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This is a test for whiteout inode sharing feature.
+On Fri, Apr 10, 2020 at 4:21 AM Chengguang Xu <cgxu519@mykernel.net> wrote:
+>
+> This is a test for whiteout inode sharing feature.
+>
+> Signed-off-by: Chengguang Xu <cgxu519@mykernel.net>
+> ---
+> Hi Eryu,
+>
+> Kernel patch of this feature is still in review but I hope to merge
+> test case first, so that we can check the correctness in a convenient
+> way. The test case will carefully check new module param and skip the
+> test if the param does not exist.
+>
+>
+>  tests/overlay/072     | 148 ++++++++++++++++++++++++++++++++++++++++++
+>  tests/overlay/072.out |   2 +
+>  tests/overlay/group   |   1 +
+>  3 files changed, 151 insertions(+)
+>  create mode 100755 tests/overlay/072
+>  create mode 100644 tests/overlay/072.out
+>
+> diff --git a/tests/overlay/072 b/tests/overlay/072
+> new file mode 100755
+> index 00000000..1cff386d
+> --- /dev/null
+> +++ b/tests/overlay/072
+> @@ -0,0 +1,148 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2020 Chengguang Xu <cgxu519@mykernel.net>.
+> +# All Rights Reserved.
+> +#
+> +# FS QA Test 072
+> +#
+> +# This is a test for inode sharing with whiteout files.
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1       # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +       cd /
+> +       rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +_supported_fs overlay
+> +_supported_os Linux
+> +_require_test
+> +_require_scratch
+> +
+> +param_name="whiteout_link_max"
+> +check_whiteout_link_max()
+> +{
+> +       local param_value=`_get_fs_module_param ${param_name}`
 
-Signed-off-by: Chengguang Xu <cgxu519@mykernel.net>
----
-Hi Eryu,
+Keep this value and set it back on _cleanup()
 
-Kernel patch of this feature is still in review but I hope to merge
-test case first, so that we can check the correctness in a convenient
-way. The test case will carefully check new module param and skip the
-test if the param does not exist.
+> +       if [ -z ${param_value} ]; then
+> +               _notrun "${FSTYP} module param ${param_name} does not exist"
 
+This message will be more helpful:
+"overlayfs does not support whiteout inode sharing"
 
- tests/overlay/072     | 148 ++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/072.out |   2 +
- tests/overlay/group   |   1 +
- 3 files changed, 151 insertions(+)
- create mode 100755 tests/overlay/072
- create mode 100644 tests/overlay/072.out
+> +       fi
+> +}
+> +
+> +lowerdir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
+> +upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
+> +merged=$OVL_BASE_SCRATCH_MNT/$OVL_MNT
 
-diff --git a/tests/overlay/072 b/tests/overlay/072
-new file mode 100755
-index 00000000..1cff386d
---- /dev/null
-+++ b/tests/overlay/072
-@@ -0,0 +1,148 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2020 Chengguang Xu <cgxu519@mykernel.net>.
-+# All Rights Reserved.
-+#
-+# FS QA Test 072
-+#
-+# This is a test for inode sharing with whiteout files.
-+#
-+seq=3D`basename $0`
-+seqres=3D$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=3D`pwd`
-+tmp=3D/tmp/$$
-+status=3D1=09# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+=09cd /
-+=09rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs overlay
-+_supported_os Linux
-+_require_test
-+_require_scratch
-+
-+param_name=3D"whiteout_link_max"
-+check_whiteout_link_max()
-+{
-+=09local param_value=3D`_get_fs_module_param ${param_name}`
-+=09if [ -z ${param_value} ]; then
-+=09=09_notrun "${FSTYP} module param ${param_name} does not exist"
-+=09fi
-+}
-+
-+lowerdir=3D$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
-+upperdir=3D$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
-+merged=3D$OVL_BASE_SCRATCH_MNT/$OVL_MNT
-+
-+#Make some files in lowerdir.
-+make_lower_files()
-+{
-+=09seq 1 $file_count | while read line; do
-+=09=09`touch $lowerdir/test${line} 1>&2 2>/dev/null`
-+=09done
-+}
-+
-+#Delete all copy-uped files in upperdir.
-+make_whiteout_files()
-+{
-+=09rm -f $merged/* 1>&2 2>/dev/null
-+}
-+
-+#Check link count of whiteout files.
-+check_whiteout_files()
-+{
-+=09seq 1 $file_count | while read line; do
-+=09=09local real_count=3D`stat -c %h $upperdir/test${line} 2>/dev/null`
-+=09=09if [[ $link_count !=3D $real_count ]]; then
-+=09=09=09echo "Expected whiteout link count is $link_count but real count =
-is $real_count"
-+=09=09fi
-+=09done
-+}
-+
-+check_whiteout_link_max
-+
-+# Case1:
-+# Setting whiteout_link_max=3D0 will not share inode
-+# with whiteout files, it means each whiteout file
-+# will has it's own inode.
-+
-+file_count=3D10
-+link_max=3D0
-+link_count=3D1
-+_scratch_mkfs
-+_set_fs_module_param $param_name $link_max
-+make_lower_files
-+_scratch_mount
-+make_whiteout_files
-+check_whiteout_files
-+$UMOUNT_PROG $OVL_BASE_SCRATCH_MNT/$OVL_MNT
-+
-+# Case2:
-+# Setting whiteout_link_max=3D1 will not share inode
-+# with whiteout files, it means each whiteout file
-+# will has it's own inode.
-+
-+file_count=3D10
-+link_max=3D1
-+link_count=3D1
-+_scratch_mkfs
-+_set_fs_module_param $param_name $link_max
-+make_lower_files
-+_scratch_mount
-+make_whiteout_files
-+check_whiteout_files $link_count
-+$UMOUNT_PROG $OVL_BASE_SCRATCH_MNT/$OVL_MNT
-+
-+# Case3:
-+# Setting whiteout_link_max=3D2 will not share inode
-+# with whiteout files, it means each whiteout file
-+# will has it's own inode. However, the inode will
-+# be shared with tmpfile(in workdir) which is used
-+# for creating whiteout file.
-+
-+file_count=3D10
-+link_max=3D2
-+link_count=3D2
-+_scratch_mkfs
-+_set_fs_module_param $param_name $link_max
-+make_lower_files
-+_scratch_mount
-+make_whiteout_files
-+check_whiteout_files
-+$UMOUNT_PROG $OVL_BASE_SCRATCH_MNT/$OVL_MNT
-+
-+# Case4:
-+# Setting whiteout_link_max=3D10 will share inode
-+# with 9 whiteout files and meanwhile the inode
-+# will also share with tmpfile(in workdir) which
-+# is used for creating whiteout file.
-+
-+file_count=3D18
-+link_max=3D10
-+link_count=3D10
-+_scratch_mkfs
-+_set_fs_module_param $param_name $link_max
-+make_lower_files
-+_scratch_mount
-+make_whiteout_files
-+check_whiteout_files
-+$UMOUNT_PROG $OVL_BASE_SCRATCH_MNT/$OVL_MNT
-+
-+# success, all done
-+echo "Silence is golden"
-+status=3D0
-+exit
-diff --git a/tests/overlay/072.out b/tests/overlay/072.out
-new file mode 100644
-index 00000000..590bbc6c
---- /dev/null
-+++ b/tests/overlay/072.out
-@@ -0,0 +1,2 @@
-+QA output created by 072
-+Silence is golden
-diff --git a/tests/overlay/group b/tests/overlay/group
-index 43ad8a52..8b2276f1 100644
---- a/tests/overlay/group
-+++ b/tests/overlay/group
-@@ -74,3 +74,4 @@
- 069 auto quick copyup hardlink exportfs nested nonsamefs
- 070 auto quick copyup redirect nested
- 071 auto quick copyup redirect nested nonsamefs
-+072 auto quick whiteout
---=20
-2.20.1
+Best if you use $SCRATCH_MNT instead of $merged
 
+> +
+> +#Make some files in lowerdir.
+> +make_lower_files()
+> +{
+> +       seq 1 $file_count | while read line; do
 
+I think that a for statement would be more readable here.
+
+> +               `touch $lowerdir/test${line} 1>&2 2>/dev/null`
+> +       done
+> +}
+> +
+> +#Delete all copy-uped files in upperdir.
+> +make_whiteout_files()
+> +{
+> +       rm -f $merged/* 1>&2 2>/dev/null
+> +}
+> +
+> +#Check link count of whiteout files.
+> +check_whiteout_files()
+> +{
+> +       seq 1 $file_count | while read line; do
+> +               local real_count=`stat -c %h $upperdir/test${line} 2>/dev/null`
+> +               if [[ $link_count != $real_count ]]; then
+> +                       echo "Expected whiteout link count is $link_count but real count is $real_count"
+> +               fi
+> +       done
+> +}
+> +
+> +check_whiteout_link_max
+> +
+> +# Case1:
+> +# Setting whiteout_link_max=0 will not share inode
+> +# with whiteout files, it means each whiteout file
+> +# will has it's own inode.
+> +
+> +file_count=10
+> +link_max=0
+> +link_count=1
+
+Would be nicer to put all the below in a run_test_case() function
+with above as arguments.
+
+> +_scratch_mkfs
+> +_set_fs_module_param $param_name $link_max
+> +make_lower_files
+> +_scratch_mount
+> +make_whiteout_files
+> +check_whiteout_files
+> +$UMOUNT_PROG $OVL_BASE_SCRATCH_MNT/$OVL_MNT
+
+Better:
+$UMOUNT_PROG $SCRATCH_MNT
+
+Even better:
+_scratch_umount
+
+The difference is that if the test case has reference leaks on inode or
+dentry, _overlay_base_unmount() will detect them.
+
+> +
+> +# Case2:
+> +# Setting whiteout_link_max=1 will not share inode
+> +# with whiteout files, it means each whiteout file
+> +# will has it's own inode.
+> +
+> +file_count=10
+> +link_max=1
+> +link_count=1
+> +_scratch_mkfs
+> +_set_fs_module_param $param_name $link_max
+> +make_lower_files
+> +_scratch_mount
+> +make_whiteout_files
+> +check_whiteout_files $link_count
+> +$UMOUNT_PROG $OVL_BASE_SCRATCH_MNT/$OVL_MNT
+> +
+> +# Case3:
+> +# Setting whiteout_link_max=2 will not share inode
+> +# with whiteout files, it means each whiteout file
+> +# will has it's own inode. However, the inode will
+> +# be shared with tmpfile(in workdir) which is used
+> +# for creating whiteout file.
+
+First, that is  strange outcome of whiteout_link_max=2
+I would not expect it.
+Second, how can every whiteout be shared with tmpfile?
+There should be at most one tmpfile at all times, so the
+whiteouts that already reached whiteout_link_max should
+not be linked to any tmpfile.
+
+Please add to test_case() verification that work dir contains
+at most one tmpfile.
+But please make sure that the test is clever enough to check
+both work and index dirs for tmpfiles (names beginning with #).
+
+> +
+> +file_count=10
+> +link_max=2
+> +link_count=2
+> +_scratch_mkfs
+> +_set_fs_module_param $param_name $link_max
+> +make_lower_files
+> +_scratch_mount
+> +make_whiteout_files
+> +check_whiteout_files
+> +$UMOUNT_PROG $OVL_BASE_SCRATCH_MNT/$OVL_MNT
+> +
+> +# Case4:
+> +# Setting whiteout_link_max=10 will share inode
+> +# with 9 whiteout files and meanwhile the inode
+> +# will also share with tmpfile(in workdir) which
+> +# is used for creating whiteout file.
+> +
+
+Same here. nlink 10 is what I would expect, not 9.
+
+Thanks,
+Amir.
