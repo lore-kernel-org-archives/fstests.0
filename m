@@ -1,99 +1,85 @@
-Return-Path: <SRS0=5a++=52=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=6UmA=54=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.2 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-2.4 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7DC4BC2BB85
-	for <linux-fstests@archiver.kernel.org>; Fri, 10 Apr 2020 19:22:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C4A65C2BA2B
+	for <linux-fstests@archiver.kernel.org>; Sun, 12 Apr 2020 06:26:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 5D1022084D
-	for <linux-fstests@archiver.kernel.org>; Fri, 10 Apr 2020 19:22:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8EB10206C3
+	for <linux-fstests@archiver.kernel.org>; Sun, 12 Apr 2020 06:26:11 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="bImjK3L5"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="NZB3c7YR"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726177AbgDJTWu (ORCPT
+        id S1725873AbgDLG0K (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 10 Apr 2020 15:22:50 -0400
-Received: from mail-qk1-f196.google.com ([209.85.222.196]:42020 "EHLO
-        mail-qk1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726203AbgDJTWu (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 10 Apr 2020 15:22:50 -0400
-Received: by mail-qk1-f196.google.com with SMTP id x66so3187762qkd.9
-        for <fstests@vger.kernel.org>; Fri, 10 Apr 2020 12:22:49 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=hQTyhDUGNWY+2vY832LY8m2QdJZh5HwVSeRffKOPmc8=;
-        b=bImjK3L51xIjlqbeYH+mT6Irt1470WDoVRoMZcoOkbAra5bbdqiVJI3OCJZVoHsRGt
-         hvtwKcgOC0Qc9prFLIzYhI4/24qEL930DmEtFsIgtfbBbqzgM/NV2OnKBaWWRTs7SY88
-         +9jT65MJJCCwnqN6bzQMGxlO865UtKp+chu8sMEUCunx6X+St91TiI+hMShygR5eXwP4
-         ZrgbBKauRpge6/gofOCazZlR3v1QI0jxeEJJHJ4L0H9bRYmK52f97hsOLuXBp5pURnwk
-         0h7zr2yK8wnSKyKubdwu/JFAqDNx7NGos6ja/mGk9oEOV9qOtPDXPX8uIhkHH+gQVhD4
-         2RKQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=hQTyhDUGNWY+2vY832LY8m2QdJZh5HwVSeRffKOPmc8=;
-        b=tAH6aulHfnW2W1imAvMlEReVfYI7NpRkoQbk3l7Jcnri/eHO33x9c+w3bvXds0qxxJ
-         g7f2zjA7L86nrsIub3BhMThMVGUrgt5SxU+iDF4tmhcPdqSTRHgL2biwhwIcyBIND2B5
-         rLVOZssRE2FE7meOxJs9J0n4k23B1u9UkmudbPjdoV92o4LRF2+C4HgNdciFeJlObJJi
-         hfWqTQcQ+iPF7zVpfsf1b5p5ASBTua9WVcw+rB4YWbdinyz4I2Dgi31v7Vilngs2iMOd
-         SmjdcjcBrD4lJPKwl1DVVhX1gb8hk3Uqz1b+2kUBxxrLPgx/XJQT/ZLngzGokW8XnzOc
-         cHvA==
-X-Gm-Message-State: AGi0PubuvpLf+FGaB9kDhPtepmvinqjvyZk5pzX0kjZGCldHimMyJikK
-        WQgDTeuSDY7/zz7u3J/qg5PnLA==
-X-Google-Smtp-Source: APiQypL9H8PFloon/jvIQxeYt7ZlVMvxdRczru6MXWOyVmZEFcn2fKQqcGFPfp7SAY9O1lvZVIHCZA==
-X-Received: by 2002:a37:8603:: with SMTP id i3mr5220048qkd.303.1586546568851;
-        Fri, 10 Apr 2020 12:22:48 -0700 (PDT)
-Received: from [192.168.1.106] ([107.15.81.208])
-        by smtp.gmail.com with ESMTPSA id y21sm2203519qka.37.2020.04.10.12.22.47
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 10 Apr 2020 12:22:48 -0700 (PDT)
-Subject: Re: [PATCH] btrfs: check that cloning an inline extent does not lead
- to data loss
-To:     fdmanana@kernel.org, fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-References: <20200406105134.2233-1-fdmanana@kernel.org>
-From:   Josef Bacik <josef@toxicpanda.com>
-Message-ID: <0287777d-39b1-c11d-82bb-d68cdef54df9@toxicpanda.com>
-Date:   Fri, 10 Apr 2020 15:22:47 -0400
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:68.0)
- Gecko/20100101 Thunderbird/68.6.0
+        Sun, 12 Apr 2020 02:26:10 -0400
+Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:49449 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1725832AbgDLG0K (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 12 Apr 2020 02:26:10 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1586672770;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=KlSAFMTFBmHmZDJTQWvEfgX6j80URK3qDJmmjsL2HeM=;
+        b=NZB3c7YRsk61tJZACeSrOwATd+JtOKOs+pjIXR2eY/jG/rKOGNT0qxYziAU4Rjul6ymM6W
+        gy4pZNAoDjvZH6coBgNtn6pUgQ69v8fvR2zh8JXrtkbbdWQxSMnNrybMq8JTpkRMsU7Kqm
+        ux8vwUyQDBCOiX2CtEMTmn/G1fT1Aag=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-459-eEUzC-uWPmm6JNiYdSfAtA-1; Sun, 12 Apr 2020 02:26:06 -0400
+X-MC-Unique: eEUzC-uWPmm6JNiYdSfAtA-1
+Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 7C7EE107ACCA
+        for <fstests@vger.kernel.org>; Sun, 12 Apr 2020 06:26:05 +0000 (UTC)
+Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id E426B11A260
+        for <fstests@vger.kernel.org>; Sun, 12 Apr 2020 06:26:04 +0000 (UTC)
+Date:   Sun, 12 Apr 2020 14:38:14 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     fstests@vger.kernel.org
+Subject: Re: [PATCH 0/4] Assign a few generic tests to additional groups
+Message-ID: <20200412063814.GW14282@dhcp-12-102.nay.redhat.com>
+Mail-Followup-To: fstests@vger.kernel.org
+References: <20200408135648.5824-1-vladimir@tuxera.com>
 MIME-Version: 1.0
-In-Reply-To: <20200406105134.2233-1-fdmanana@kernel.org>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20200408135648.5824-1-vladimir@tuxera.com>
+User-Agent: Mutt/1.10.1 (2018-07-13)
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.11
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 4/6/20 6:51 AM, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
+On Wed, Apr 08, 2020 at 04:56:44PM +0300, Vladimir Zapolskiy wrote:
+> The rationale behind the proposed changes is to correct and improve
+> granularity of some generic tests, so it becomes possible to control
+> lists of run tests better, if there is given additional information
+> about a test environment and tested filesystems.
 > 
-> We have a bug in the current kernel merge window (for 5.7) that results
-> in data loss when cloning an inline extent into a new file (or an empty
-> file. This change adds a test for such case into the existing test case
-> btrfs/205, because it's the test case that tests all the supported
-> scenarios for cloning inline extents in btrfs.
-> 
-> The btrfs patch for the linux kernel that fixes the regression has the
-> following sibject:
-> 
->    "Btrfs: fix lost i_size update after cloning inline extent"
-> 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> Vladimir Zapolskiy (4):
+>   Add generic/459 test to freeze group of tests
+>   Add generic/482 test to thin group of tests
+>   Add generic/529 test to acl group of tests
+>   Add generic/530 test to shutdown group of tests
 
-Reviewed-by: Josef Bacik <josef@toxicpanda.com>
+That's fine for me, to set more sub-cases in proper groups. Due to generally
+when someone writes a case, we don't take care of its group list so much.
 
-Thanks,
+> 
+>  tests/generic/group | 8 ++++----
+>  1 file changed, 4 insertions(+), 4 deletions(-)
+> 
+> -- 
+> 2.25.1
+> 
 
-Josef
