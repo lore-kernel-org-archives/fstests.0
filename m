@@ -2,181 +2,298 @@ Return-Path: <SRS0=mI6p=55=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B1947C2BA2B
-	for <linux-fstests@archiver.kernel.org>; Mon, 13 Apr 2020 07:54:53 +0000 (UTC)
-Received: from vger.kernel.org (unknown [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 80DA020775
-	for <linux-fstests@archiver.kernel.org>; Mon, 13 Apr 2020 07:54:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 75082C2BBC7
+	for <linux-fstests@archiver.kernel.org>; Mon, 13 Apr 2020 10:15:37 +0000 (UTC)
+Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
+	by mail.kernel.org (Postfix) with ESMTP id 502D720732
+	for <linux-fstests@archiver.kernel.org>; Mon, 13 Apr 2020 10:15:37 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="LdKv4Bhm"
-DMARC-Filter: OpenDMARC Filter v1.3.2 mail.kernel.org 80DA020775
-Authentication-Results: mail.kernel.org; dmarc=fail (p=none dis=none) header.from=gmail.com
-Authentication-Results: mail.kernel.org; spf=none smtp.mailfrom=fstests-owner@vger.kernel.org
+	dkim=pass (1024-bit key) header.d=mykernel.net header.i=cgxu519@mykernel.net header.b="Rhc/Mbqg"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729521AbgDMHyt (ORCPT
+        id S1728255AbgDMKPg (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 13 Apr 2020 03:54:49 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.18]:37460 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727480AbgDMHys (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 13 Apr 2020 03:54:48 -0400
-Received: from mail-io1-xd43.google.com (mail-io1-xd43.google.com [IPv6:2607:f8b0:4864:20::d43])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4A9AEC008651;
-        Mon, 13 Apr 2020 00:54:48 -0700 (PDT)
-Received: by mail-io1-xd43.google.com with SMTP id n10so8549276iom.3;
-        Mon, 13 Apr 2020 00:54:48 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=Fxdds2vPGS3N/102R6ExV/SBHS+w/11kI+QRFuDnruo=;
-        b=LdKv4BhmbHJcCbUnqYd7/INd7IRPACwNoGsA+AW7nLT9uuV9rGvs/8favMyv1eZwZZ
-         Wyw02zFL0pMC6j02qV9kT8QSNqmPtZ10h7PFXbT5HN15zveOABgeIRuO25KBGTEdiAT1
-         x+fL0JFJrzeYbeZskSJBRrxUz3qFqTNh86hPJVMHDz5cFc/H0OUTRTSN1i00o0YbK5wg
-         XpCljmKRIw2wEprR1kjab0mzXG0jJFavEUlRlUG4TUbxOD+R8DiHgf30ZT34el3EHw2k
-         WezgSHoiZfzKq6GQ3QX2pLsJDeZo5ptLjwoLtpAqUVAQyp/ljQwCsFR9EJAXAOz02qpj
-         AEvQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=Fxdds2vPGS3N/102R6ExV/SBHS+w/11kI+QRFuDnruo=;
-        b=mbber3RmO5vEhbxW1IBgM9Jl5yljeevnkMJFINzNL2XETtYiF3Ta9oUBu70I1whvAy
-         OstmP4E7+LWiJ4Z6o2bgOqhoiCii26I+PxjLZ0o/2gDIPWSL8xesTxmZxPTFTerAt5ws
-         qUzeY9mahyXCWod6UblpXXLKQhl24oL+QYEqVlKRW58hNIonbVkFI9KQ2cn0N4B/q8um
-         mbV9lONA8PksUgPR0sB4rU2C+Ff2jzsfYyJbJGEdihSGGBoGV1w331+Klz64l3AuhvvJ
-         3kaT4JTp2FNtwv7Pno+ya1FlbntLgo2/Z/58uC5KeM77+5gZIE3yPYwYKxeq7WJGxXEc
-         qH+g==
-X-Gm-Message-State: AGi0PuaGv8VKBDV3LNBHF9VSVWIEorJu6QTCGH9stP8Oxdz+iYm1/qz4
-        H9JPPRniiWrCUb9wBLcaYuQBzbrJeEO5wk+pPt8=
-X-Google-Smtp-Source: APiQypL5Eljk4TK/mwa+XDxgwgpIUGCujDIQ8sy3Yf0VdZARHKdYNLMpnF8pB675OD/IHE0afd4q+knrLM59ckuUgB0=
-X-Received: by 2002:a05:6602:1302:: with SMTP id h2mr15261121iov.186.1586764487632;
- Mon, 13 Apr 2020 00:54:47 -0700 (PDT)
+        Mon, 13 Apr 2020 06:15:36 -0400
+Received: from sender2-pp-o92.zoho.com.cn ([163.53.93.251]:25333 "EHLO
+        sender2-pp-o92.zoho.com.cn" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1728253AbgDMKPf (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 13 Apr 2020 06:15:35 -0400
+ARC-Seal: i=1; a=rsa-sha256; t=1586772920; cv=none; 
+        d=zoho.com.cn; s=zohoarc; 
+        b=aEsJGRmAaPWqL1vVGYzxX1KQKvgeF983xVoacZ9Kx1XeQO4dNXIg+t6vhC4JRPHyymjABizKfvzogRSZhIzEQsaqCqQi7MJ60CogNLJjXHfwfi5YcWxW1UfQYRSTAC0Av53k7MRF7udw2FepYiPaU7LtH6cSL6Am5UgRr9ARo7c=
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zoho.com.cn; s=zohoarc; 
+        t=1586772920; h=Content-Type:Content-Transfer-Encoding:Cc:Date:From:In-Reply-To:MIME-Version:Message-ID:Reply-To:References:Subject:To; 
+        bh=logQSLvUXZCKpovGGrsarUVaFoEHbxZyi3Pn/Ejj3qg=; 
+        b=aHwGmqEW1/1WPp0VUgF8YCC48EPIaji2ztEHPsKyKERLPjnPrRXWwX0/bKShAp6xyNvg3rQBBHlPfF4TnncOlP8Bpxjxb9NFOzZyP36pObbQ36BSlQvTGd5GnSFHdQ5YUGNsWgx5ul3qar6TZ1B62Sw7O7R3FmkSWPTUYOMpfhE=
+ARC-Authentication-Results: i=1; mx.zoho.com.cn;
+        dkim=pass  header.i=mykernel.net;
+        spf=pass  smtp.mailfrom=cgxu519@mykernel.net;
+        dmarc=pass header.from=<cgxu519@mykernel.net> header.from=<cgxu519@mykernel.net>
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1586772920;
+        s=zohomail; d=mykernel.net; i=cgxu519@mykernel.net;
+        h=Date:From:Reply-To:To:Cc:Message-ID:In-Reply-To:References:Subject:MIME-Version:Content-Type:Content-Transfer-Encoding;
+        bh=logQSLvUXZCKpovGGrsarUVaFoEHbxZyi3Pn/Ejj3qg=;
+        b=Rhc/MbqgZkU6rphDt2Mv2tqb/1iirCZubgmgDeVEpZXsxqKIzoT1u9Eey8zH0sFO
+        Uz2fgzIigTBYGE2N7z7bow4JZO2TOro6JZXyWS2b7MxNJk1rB+j+kpy18L2e5TAY4JJ
+        cZ49GtZ7AopKVkBvcqJ16qNqemDRC/6DurKn0+Y0=
+Received: from mail.baihui.com by mx.zoho.com.cn
+        with SMTP id 1586772917751384.2737611692895; Mon, 13 Apr 2020 18:15:17 +0800 (CST)
+Date:   Mon, 13 Apr 2020 18:15:17 +0800
+From:   Chengguang Xu <cgxu519@mykernel.net>
+Reply-To: cgxu519@mykernel.net
+To:     "Amir Goldstein" <amir73il@gmail.com>
+Cc:     "Eryu Guan" <guaneryu@gmail.com>,
+        "fstests" <fstests@vger.kernel.org>,
+        "overlayfs" <linux-unionfs@vger.kernel.org>,
+        "Miklos Szeredi" <miklos@szeredi.hu>
+Message-ID: <17173093df3.f6003c6d6224.1796766948671904062@mykernel.net>
+In-Reply-To: <CAOQ4uxghdvj9QVJ3DQ3g1p0hbvz5mfMoxgoEAKyQAf4v78p2YA@mail.gmail.com>
+References: <20200410012059.27210-1-cgxu519@mykernel.net> <20200410012059.27210-2-cgxu519@mykernel.net> <CAOQ4uxghdvj9QVJ3DQ3g1p0hbvz5mfMoxgoEAKyQAf4v78p2YA@mail.gmail.com>
+Subject: Re: [PATCH 2/2] overlay/072: test for sharing inode with whiteout
+ files
 MIME-Version: 1.0
-References: <20200413054419.1560503-1-ira.weiny@intel.com>
-In-Reply-To: <20200413054419.1560503-1-ira.weiny@intel.com>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Mon, 13 Apr 2020 10:54:36 +0300
-Message-ID: <CAOQ4uxguVRysAuVEtQmPj+x=RDtDnGCtNeGvbvXNuvppwagwDg@mail.gmail.com>
-Subject: Re: [PATCH] xfs/XXX: Add xfs/XXX
-To:     ira.weiny@intel.com
-Cc:     fstests <fstests@vger.kernel.org>,
-        linux-kernel <linux-kernel@vger.kernel.org>,
-        "Darrick J. Wong" <darrick.wong@oracle.com>,
-        Dan Williams <dan.j.williams@intel.com>,
-        Dave Chinner <david@fromorbit.com>,
-        Christoph Hellwig <hch@lst.de>,
-        "Theodore Y. Ts'o" <tytso@mit.edu>, Jan Kara <jack@suse.cz>,
-        Jeff Moyer <jmoyer@redhat.com>,
-        Ext4 <linux-ext4@vger.kernel.org>,
-        linux-xfs <linux-xfs@vger.kernel.org>,
-        linux-fsdevel <linux-fsdevel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+Importance: Medium
+User-Agent: ZohoCN Mail
+X-Mailer: ZohoCN Mail
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Apr 13, 2020 at 9:06 AM <ira.weiny@intel.com> wrote:
->
-> From: Ira Weiny <ira.weiny@intel.com>
->
-> Add XXX to test per file DAX operations.
+ ---- =E5=9C=A8 =E6=98=9F=E6=9C=9F=E4=BA=94, 2020-04-10 15:21:51 Amir Golds=
+tein <amir73il@gmail.com> =E6=92=B0=E5=86=99 ----
+ > On Fri, Apr 10, 2020 at 4:21 AM Chengguang Xu <cgxu519@mykernel.net> wro=
+te:
+ > >
+ > > This is a test for whiteout inode sharing feature.
+ > >
+ > > Signed-off-by: Chengguang Xu <cgxu519@mykernel.net>
+ > > ---
+ > > Hi Eryu,
+ > >
+ > > Kernel patch of this feature is still in review but I hope to merge
+ > > test case first, so that we can check the correctness in a convenient
+ > > way. The test case will carefully check new module param and skip the
+ > > test if the param does not exist.
+ > >
+ > >
+ > >  tests/overlay/072     | 148 +++++++++++++++++++++++++++++++++++++++++=
++
+ > >  tests/overlay/072.out |   2 +
+ > >  tests/overlay/group   |   1 +
+ > >  3 files changed, 151 insertions(+)
+ > >  create mode 100755 tests/overlay/072
+ > >  create mode 100644 tests/overlay/072.out
+ > >
+ > > diff --git a/tests/overlay/072 b/tests/overlay/072
+ > > new file mode 100755
+ > > index 00000000..1cff386d
+ > > --- /dev/null
+ > > +++ b/tests/overlay/072
+ > > @@ -0,0 +1,148 @@
+ > > +#! /bin/bash
+ > > +# SPDX-License-Identifier: GPL-2.0
+ > > +# Copyright (c) 2020 Chengguang Xu <cgxu519@mykernel.net>.
+ > > +# All Rights Reserved.
+ > > +#
+ > > +# FS QA Test 072
+ > > +#
+ > > +# This is a test for inode sharing with whiteout files.
+ > > +#
+ > > +seq=3D`basename $0`
+ > > +seqres=3D$RESULT_DIR/$seq
+ > > +echo "QA output created by $seq"
+ > > +
+ > > +here=3D`pwd`
+ > > +tmp=3D/tmp/$
+ > > +status=3D1       # failure is the default!
+ > > +trap "_cleanup; exit \$status" 0 1 2 3 15
+ > > +
+ > > +_cleanup()
+ > > +{
+ > > +       cd /
+ > > +       rm -f $tmp.*
+ > > +}
+ > > +
+ > > +# get standard environment, filters and checks
+ > > +. ./common/rc
+ > > +. ./common/filter
+ > > +
+ > > +# remove previous $seqres.full before test
+ > > +rm -f $seqres.full
+ > > +
+ > > +# real QA test starts here
+ > > +_supported_fs overlay
+ > > +_supported_os Linux
+ > > +_require_test
+ > > +_require_scratch
+ > > +
+ > > +param_name=3D"whiteout_link_max"
+ > > +check_whiteout_link_max()
+ > > +{
+ > > +       local param_value=3D`_get_fs_module_param ${param_name}`
+ >=20
+ > Keep this value and set it back on _cleanup()
+ >=20
+ > > +       if [ -z ${param_value} ]; then
+ > > +               _notrun "${FSTYP} module param ${param_name} does not =
+exist"
+ >=20
+ > This message will be more helpful:
+ > "overlayfs does not support whiteout inode sharing"
+ >=20
+ > > +       fi
+ > > +}
+ > > +
+ > > +lowerdir=3D$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
+ > > +upperdir=3D$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
+ > > +merged=3D$OVL_BASE_SCRATCH_MNT/$OVL_MNT
+ >=20
+ > Best if you use $SCRATCH_MNT instead of $merged
+ >=20
+ > > +
+ > > +#Make some files in lowerdir.
+ > > +make_lower_files()
+ > > +{
+ > > +       seq 1 $file_count | while read line; do
+ >=20
+ > I think that a for statement would be more readable here.
+ >=20
+ > > +               `touch $lowerdir/test${line} 1>&2 2>/dev/null`
+ > > +       done
+ > > +}
+ > > +
+ > > +#Delete all copy-uped files in upperdir.
+ > > +make_whiteout_files()
+ > > +{
+ > > +       rm -f $merged/* 1>&2 2>/dev/null
+ > > +}
+ > > +
+ > > +#Check link count of whiteout files.
+ > > +check_whiteout_files()
+ > > +{
+ > > +       seq 1 $file_count | while read line; do
+ > > +               local real_count=3D`stat -c %h $upperdir/test${line} 2=
+>/dev/null`
+ > > +               if [[ $link_count !=3D $real_count ]]; then
+ > > +                       echo "Expected whiteout link count is $link_co=
+unt but real count is $real_count"
+ > > +               fi
+ > > +       done
+ > > +}
+ > > +
+ > > +check_whiteout_link_max
+ > > +
+ > > +# Case1:
+ > > +# Setting whiteout_link_max=3D0 will not share inode
+ > > +# with whiteout files, it means each whiteout file
+ > > +# will has it's own inode.
+ > > +
+ > > +file_count=3D10
+ > > +link_max=3D0
+ > > +link_count=3D1
+ >=20
+ > Would be nicer to put all the below in a run_test_case() function
+ > with above as arguments.
+ >=20
 
-Please change commit title to "xfs: Add test for per file DAX operations"
-The title Add xfs/XXX is not useful even if XXX where a number.
+Something like below?
+---------
+# Arguments:
+# $1: Maximum link count
+# $2: Testing file number
+# $3: Expected link count
+run_test_case()
+{
+        _scratch_mkfs
+        _set_fs_module_param $param_name ${1}
+        make_lower_files ${2}
+        _scratch_mount
+        make_whiteout_files
+        check_whiteout_files ${2} ${3}
+        $UMOUNT_PROG $SCRATCH_MNT
+}
 
-But the kernel patch suggests that there is an intention to make
-this behavior also applicable to ext4??
-If that is the case I would recommend making this a generic tests
-which requires filesystem support for -o dax=XXX
+link_max=3D1
+file_count=3D10
+link_count=3D1
+run_test_case $link_max $file_count $link_count
+---------
 
->
-> The following is tested[*]
->
->  1. There exists an in-kernel access mode flag S_DAX that is set when
->     file accesses go directly to persistent memory, bypassing the page
->     cache.  Applications must call statx to discover the current S_DAX
->     state (STATX_ATTR_DAX).
->
->  2. There exists an advisory file inode flag FS_XFLAG_DAX that is
->     inherited from the parent directory FS_XFLAG_DAX inode flag at file
->     creation time.  This advisory flag can be set or cleared at any
->     time, but doing so does not immediately affect the S_DAX state.
->
->     Unless overridden by mount options (see (3)), if FS_XFLAG_DAX is set
->     and the fs is on pmem then it will enable S_DAX at inode load time;
->     if FS_XFLAG_DAX is not set, it will not enable S_DAX.
->
->  3. There exists a dax= mount option.
->
->     "-o dax=never"  means "never set S_DAX, ignore FS_XFLAG_DAX."
->
->     "-o dax=always" means "always set S_DAX (at least on pmem),
->                     and ignore FS_XFLAG_DAX."
->
->     "-o dax"        is an alias for "dax=always".
->
->     "-o dax=inode"  means "follow FS_XFLAG_DAX" and is the default.
->
->  4. There exists an advisory directory inode flag FS_XFLAG_DAX that can
->     be set or cleared at any time.  The flag state is copied into any
->     files or subdirectories when they are created within that directory.
->
->  5. Programs that require a specific file access mode (DAX or not DAX)
->     can do one of the following:
->
->     (a) Create files in directories that the FS_XFLAG_DAX flag set as
->         needed; or
->
->     (b) Have the administrator set an override via mount option; or
->
->     (c) Set or clear the file's FS_XFLAG_DAX flag as needed.  Programs
->         must then cause the kernel to evict the inode from memory.  This
->         can be done by:
->
->         i>  Closing the file and re-opening the file and using statx to
->             see if the fs has changed the S_DAX flag; and
->
->         ii> If the file still does not have the desired S_DAX access
->             mode, either unmount and remount the filesystem, or close
->             the file and use drop_caches.
->
->  6. It's not unreasonable that users who want to squeeze every last bit
->     of performance out of the particular rough and tumble bits of their
->     storage also be exposed to the difficulties of what happens when the
->     operating system can't totally virtualize those hardware
->     capabilities.  Your high performance sports car is not a Toyota
->     minivan, as it were.
->
-> [*] https://lore.kernel.org/lkml/20200409165927.GD6741@magnolia/
->
-> Signed-off-by: Ira Weiny <ira.weiny@intel.com>
->
-> ---
-> Changes from v6 (kernel patch set):
->         Start versions tracking the kernel patch set.
->         Update for new requirements
->
-> Changes from V1 (xfstests patch):
->         Add test to ensure moved files preserve their flag
->         Check chattr of non-dax flags (check bug found by Darrick)
-> ---
-...
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
-> @@ -511,3 +511,4 @@
->  511 auto quick quota
->  512 auto quick acl attr
->  513 auto mount
-> +999 auto
+ > > +_scratch_mkfs
+ > > +_set_fs_module_param $param_name $link_max
+ > > +make_lower_files
+ > > +_scratch_mount
+ > > +make_whiteout_files
+ > > +check_whiteout_files
+ > > +$UMOUNT_PROG $OVL_BASE_SCRATCH_MNT/$OVL_MNT
+ >=20
+ > Better:
+ > $UMOUNT_PROG $SCRATCH_MNT
+ >=20
+ > Even better:
+ > _scratch_umount
 
-The test looks also 'quick'
+I haven't found the definition of _scratch_umount,
+have we implemented it?
+
+
+ >=20
+ > The difference is that if the test case has reference leaks on inode or
+ > dentry, _overlay_base_unmount() will detect them.
+ >=20
+ > > +
+ > > +# Case2:
+ > > +# Setting whiteout_link_max=3D1 will not share inode
+ > > +# with whiteout files, it means each whiteout file
+ > > +# will has it's own inode.
+ > > +
+ > > +file_count=3D10
+ > > +link_max=3D1
+ > > +link_count=3D1
+ > > +_scratch_mkfs
+ > > +_set_fs_module_param $param_name $link_max
+ > > +make_lower_files
+ > > +_scratch_mount
+ > > +make_whiteout_files
+ > > +check_whiteout_files $link_count
+ > > +$UMOUNT_PROG $OVL_BASE_SCRATCH_MNT/$OVL_MNT
+ > > +
+ > > +# Case3:
+ > > +# Setting whiteout_link_max=3D2 will not share inode
+ > > +# with whiteout files, it means each whiteout file
+ > > +# will has it's own inode. However, the inode will
+ > > +# be shared with tmpfile(in workdir) which is used
+ > > +# for creating whiteout file.
+ >=20
+ > First, that is  strange outcome of whiteout_link_max=3D2
+ > I would not expect it.
+ > Second, how can every whiteout be shared with tmpfile?
+ > There should be at most one tmpfile at all times, so the
+ > whiteouts that already reached whiteout_link_max should
+ > not be linked to any tmpfile.
+
+I think I misunderstood your comment in my kernel patch, so I changed
+the logic to keep all tmpfiles in workdir and cleanup them during next moun=
+t.
+I'll fix it in V3 kernel patch.
+
+ >=20
+ > Please add to test_case() verification that work dir contains
+ > at most one tmpfile.
+ > But please make sure that the test is clever enough to check
+ > both work and index dirs for tmpfiles (names beginning with #).
+ >=20
+
+So should I check module params of index and nfs_export for checking
+tmpfile in index dir?
 
 Thanks,
-Amir.
+cgxu
+
