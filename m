@@ -2,114 +2,181 @@ Return-Path: <SRS0=mI6p=55=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 99302C2BBC7
-	for <linux-fstests@archiver.kernel.org>; Mon, 13 Apr 2020 07:25:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B1947C2BA2B
+	for <linux-fstests@archiver.kernel.org>; Mon, 13 Apr 2020 07:54:53 +0000 (UTC)
 Received: from vger.kernel.org (unknown [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 6BC9C2076A
-	for <linux-fstests@archiver.kernel.org>; Mon, 13 Apr 2020 07:25:09 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.3.2 mail.kernel.org 6BC9C2076A
-Authentication-Results: mail.kernel.org; dmarc=none (p=none dis=none) header.from=tuxera.com
+	by mail.kernel.org (Postfix) with ESMTP id 80DA020775
+	for <linux-fstests@archiver.kernel.org>; Mon, 13 Apr 2020 07:54:53 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="LdKv4Bhm"
+DMARC-Filter: OpenDMARC Filter v1.3.2 mail.kernel.org 80DA020775
+Authentication-Results: mail.kernel.org; dmarc=fail (p=none dis=none) header.from=gmail.com
 Authentication-Results: mail.kernel.org; spf=none smtp.mailfrom=fstests-owner@vger.kernel.org
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727840AbgDMHZI (ORCPT
+        id S1729521AbgDMHyt (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 13 Apr 2020 03:25:08 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.18]:60068 "EHLO
+        Mon, 13 Apr 2020 03:54:49 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.18]:37460 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727612AbgDMHZI (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 13 Apr 2020 03:25:08 -0400
-Received: from mgw-02.mpynet.fi (mgw-02.mpynet.fi [82.197.21.91])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3D623C008651
-        for <fstests@vger.kernel.org>; Mon, 13 Apr 2020 00:25:08 -0700 (PDT)
-Received: from pps.filterd (mgw-02.mpynet.fi [127.0.0.1])
-        by mgw-02.mpynet.fi (8.16.0.42/8.16.0.42) with SMTP id 03D7OtGs090672;
-        Mon, 13 Apr 2020 10:25:00 +0300
-Received: from ex13.tuxera.com (ex13.tuxera.com [178.16.184.72])
-        by mgw-02.mpynet.fi with ESMTP id 30b1k1j3gc-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-SHA384 bits=256 verify=NOT);
-        Mon, 13 Apr 2020 10:25:00 +0300
-Received: from localhost (194.100.106.190) by tuxera-exch.ad.tuxera.com
- (10.20.48.11) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Mon, 13 Apr
- 2020 10:24:59 +0300
-From:   Vladimir Zapolskiy <vladimir@tuxera.com>
-To:     Eryu Guan <guaneryu@gmail.com>, Zorro Lang <zlang@redhat.com>
-CC:     <fstests@vger.kernel.org>
-Subject: [PATCH v2] generic: assign a few tests to additional groups
-Date:   Mon, 13 Apr 2020 10:24:49 +0300
-Message-ID: <20200413072449.14268-1-vladimir@tuxera.com>
-X-Mailer: git-send-email 2.25.1
+        with ESMTP id S1727480AbgDMHys (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 13 Apr 2020 03:54:48 -0400
+Received: from mail-io1-xd43.google.com (mail-io1-xd43.google.com [IPv6:2607:f8b0:4864:20::d43])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4A9AEC008651;
+        Mon, 13 Apr 2020 00:54:48 -0700 (PDT)
+Received: by mail-io1-xd43.google.com with SMTP id n10so8549276iom.3;
+        Mon, 13 Apr 2020 00:54:48 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=Fxdds2vPGS3N/102R6ExV/SBHS+w/11kI+QRFuDnruo=;
+        b=LdKv4BhmbHJcCbUnqYd7/INd7IRPACwNoGsA+AW7nLT9uuV9rGvs/8favMyv1eZwZZ
+         Wyw02zFL0pMC6j02qV9kT8QSNqmPtZ10h7PFXbT5HN15zveOABgeIRuO25KBGTEdiAT1
+         x+fL0JFJrzeYbeZskSJBRrxUz3qFqTNh86hPJVMHDz5cFc/H0OUTRTSN1i00o0YbK5wg
+         XpCljmKRIw2wEprR1kjab0mzXG0jJFavEUlRlUG4TUbxOD+R8DiHgf30ZT34el3EHw2k
+         WezgSHoiZfzKq6GQ3QX2pLsJDeZo5ptLjwoLtpAqUVAQyp/ljQwCsFR9EJAXAOz02qpj
+         AEvQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=Fxdds2vPGS3N/102R6ExV/SBHS+w/11kI+QRFuDnruo=;
+        b=mbber3RmO5vEhbxW1IBgM9Jl5yljeevnkMJFINzNL2XETtYiF3Ta9oUBu70I1whvAy
+         OstmP4E7+LWiJ4Z6o2bgOqhoiCii26I+PxjLZ0o/2gDIPWSL8xesTxmZxPTFTerAt5ws
+         qUzeY9mahyXCWod6UblpXXLKQhl24oL+QYEqVlKRW58hNIonbVkFI9KQ2cn0N4B/q8um
+         mbV9lONA8PksUgPR0sB4rU2C+Ff2jzsfYyJbJGEdihSGGBoGV1w331+Klz64l3AuhvvJ
+         3kaT4JTp2FNtwv7Pno+ya1FlbntLgo2/Z/58uC5KeM77+5gZIE3yPYwYKxeq7WJGxXEc
+         qH+g==
+X-Gm-Message-State: AGi0PuaGv8VKBDV3LNBHF9VSVWIEorJu6QTCGH9stP8Oxdz+iYm1/qz4
+        H9JPPRniiWrCUb9wBLcaYuQBzbrJeEO5wk+pPt8=
+X-Google-Smtp-Source: APiQypL5Eljk4TK/mwa+XDxgwgpIUGCujDIQ8sy3Yf0VdZARHKdYNLMpnF8pB675OD/IHE0afd4q+knrLM59ckuUgB0=
+X-Received: by 2002:a05:6602:1302:: with SMTP id h2mr15261121iov.186.1586764487632;
+ Mon, 13 Apr 2020 00:54:47 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7BIT
-Content-Type:   text/plain; charset=US-ASCII
-X-Originating-IP: [194.100.106.190]
-X-ClientProxiedBy: tuxera-exch.ad.tuxera.com (10.20.48.11) To
- tuxera-exch.ad.tuxera.com (10.20.48.11)
-X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.138,18.0.676
- definitions=2020-04-13_02:2020-04-12,2020-04-13 signatures=0
-X-Proofpoint-Spam-Details: rule=mpy_notspam policy=mpy score=0 malwarescore=0 mlxscore=0 adultscore=0
- spamscore=0 phishscore=0 mlxlogscore=999 suspectscore=0 bulkscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2003020000
- definitions=main-2004130065
+References: <20200413054419.1560503-1-ira.weiny@intel.com>
+In-Reply-To: <20200413054419.1560503-1-ira.weiny@intel.com>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Mon, 13 Apr 2020 10:54:36 +0300
+Message-ID: <CAOQ4uxguVRysAuVEtQmPj+x=RDtDnGCtNeGvbvXNuvppwagwDg@mail.gmail.com>
+Subject: Re: [PATCH] xfs/XXX: Add xfs/XXX
+To:     ira.weiny@intel.com
+Cc:     fstests <fstests@vger.kernel.org>,
+        linux-kernel <linux-kernel@vger.kernel.org>,
+        "Darrick J. Wong" <darrick.wong@oracle.com>,
+        Dan Williams <dan.j.williams@intel.com>,
+        Dave Chinner <david@fromorbit.com>,
+        Christoph Hellwig <hch@lst.de>,
+        "Theodore Y. Ts'o" <tytso@mit.edu>, Jan Kara <jack@suse.cz>,
+        Jeff Moyer <jmoyer@redhat.com>,
+        Ext4 <linux-ext4@vger.kernel.org>,
+        linux-xfs <linux-xfs@vger.kernel.org>,
+        linux-fsdevel <linux-fsdevel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-The rationale behind the proposed changes is to correct and improve
-granularity of some generic tests, so it becomes possible to control
-lists of run tests better, if there is given additional information
-about a test environment and tested filesystems.
+On Mon, Apr 13, 2020 at 9:06 AM <ira.weiny@intel.com> wrote:
+>
+> From: Ira Weiny <ira.weiny@intel.com>
+>
+> Add XXX to test per file DAX operations.
 
-* generic/459 test is added to freeze group
-* generic/482 test is added to thin group
-* generic/529 test is added to acl group
-* generic/530 test is added to shutdown group
+Please change commit title to "xfs: Add test for per file DAX operations"
+The title Add xfs/XXX is not useful even if XXX where a number.
 
-Signed-off-by: Vladimir Zapolskiy <vladimir@tuxera.com>
----
-Changes from v1 to v2:
-* squashed the changes into one as asked by Eryu Guan
+But the kernel patch suggests that there is an intention to make
+this behavior also applicable to ext4??
+If that is the case I would recommend making this a generic tests
+which requires filesystem support for -o dax=XXX
 
-tests/generic/group | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+>
+> The following is tested[*]
+>
+>  1. There exists an in-kernel access mode flag S_DAX that is set when
+>     file accesses go directly to persistent memory, bypassing the page
+>     cache.  Applications must call statx to discover the current S_DAX
+>     state (STATX_ATTR_DAX).
+>
+>  2. There exists an advisory file inode flag FS_XFLAG_DAX that is
+>     inherited from the parent directory FS_XFLAG_DAX inode flag at file
+>     creation time.  This advisory flag can be set or cleared at any
+>     time, but doing so does not immediately affect the S_DAX state.
+>
+>     Unless overridden by mount options (see (3)), if FS_XFLAG_DAX is set
+>     and the fs is on pmem then it will enable S_DAX at inode load time;
+>     if FS_XFLAG_DAX is not set, it will not enable S_DAX.
+>
+>  3. There exists a dax= mount option.
+>
+>     "-o dax=never"  means "never set S_DAX, ignore FS_XFLAG_DAX."
+>
+>     "-o dax=always" means "always set S_DAX (at least on pmem),
+>                     and ignore FS_XFLAG_DAX."
+>
+>     "-o dax"        is an alias for "dax=always".
+>
+>     "-o dax=inode"  means "follow FS_XFLAG_DAX" and is the default.
+>
+>  4. There exists an advisory directory inode flag FS_XFLAG_DAX that can
+>     be set or cleared at any time.  The flag state is copied into any
+>     files or subdirectories when they are created within that directory.
+>
+>  5. Programs that require a specific file access mode (DAX or not DAX)
+>     can do one of the following:
+>
+>     (a) Create files in directories that the FS_XFLAG_DAX flag set as
+>         needed; or
+>
+>     (b) Have the administrator set an override via mount option; or
+>
+>     (c) Set or clear the file's FS_XFLAG_DAX flag as needed.  Programs
+>         must then cause the kernel to evict the inode from memory.  This
+>         can be done by:
+>
+>         i>  Closing the file and re-opening the file and using statx to
+>             see if the fs has changed the S_DAX flag; and
+>
+>         ii> If the file still does not have the desired S_DAX access
+>             mode, either unmount and remount the filesystem, or close
+>             the file and use drop_caches.
+>
+>  6. It's not unreasonable that users who want to squeeze every last bit
+>     of performance out of the particular rough and tumble bits of their
+>     storage also be exposed to the difficulties of what happens when the
+>     operating system can't totally virtualize those hardware
+>     capabilities.  Your high performance sports car is not a Toyota
+>     minivan, as it were.
+>
+> [*] https://lore.kernel.org/lkml/20200409165927.GD6741@magnolia/
+>
+> Signed-off-by: Ira Weiny <ira.weiny@intel.com>
+>
+> ---
+> Changes from v6 (kernel patch set):
+>         Start versions tracking the kernel patch set.
+>         Update for new requirements
+>
+> Changes from V1 (xfstests patch):
+>         Add test to ensure moved files preserve their flag
+>         Check chattr of non-dax flags (check bug found by Darrick)
+> ---
+...
+> --- a/tests/xfs/group
+> +++ b/tests/xfs/group
+> @@ -511,3 +511,4 @@
+>  511 auto quick quota
+>  512 auto quick acl attr
+>  513 auto mount
+> +999 auto
 
-diff --git a/tests/generic/group b/tests/generic/group
-index 99d06c9ad945..718575baeef9 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -461,7 +461,7 @@
- 456 auto quick metadata collapse zero prealloc
- 457 auto log replay clone
- 458 auto quick clone collapse zero
--459 auto thin
-+459 auto freeze thin
- 460 auto quick rw
- 461 auto shutdown stress
- 462 auto quick dax
-@@ -484,7 +484,7 @@
- 479 auto quick metadata log
- 480 auto quick metadata log
- 481 auto quick log metadata
--482 auto metadata replay
-+482 auto metadata replay thin
- 483 auto quick log metadata
- 485 auto quick insert
- 486 auto quick attr
-@@ -530,8 +530,8 @@
- 526 auto quick log
- 527 auto quick log
- 528 auto quick
--529 auto quick attr
--530 auto quick unlink
-+529 auto quick acl attr
-+530 auto quick shutdown unlink
- 531 auto quick unlink
- 532 auto quick
- 533 auto quick attr
--- 
-2.25.1
+The test looks also 'quick'
 
+Thanks,
+Amir.
