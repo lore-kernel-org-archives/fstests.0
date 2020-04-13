@@ -2,39 +2,67 @@ Return-Path: <SRS0=mI6p=55=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CD55EC352BE
-	for <linux-fstests@archiver.kernel.org>; Mon, 13 Apr 2020 15:53:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8668BC2BA19
+	for <linux-fstests@archiver.kernel.org>; Mon, 13 Apr 2020 16:12:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B533B20732
-	for <linux-fstests@archiver.kernel.org>; Mon, 13 Apr 2020 15:53:40 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 603812063A
+	for <linux-fstests@archiver.kernel.org>; Mon, 13 Apr 2020 16:12:00 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="KbdBetJc"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731129AbgDMPxd (ORCPT
+        id S1731299AbgDMQL7 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 13 Apr 2020 11:53:33 -0400
-Received: from mga05.intel.com ([192.55.52.43]:23003 "EHLO mga05.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1730923AbgDMPxb (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 13 Apr 2020 11:53:31 -0400
-IronPort-SDR: +3V5bGy9diZ/WUc47UtQVOPLdy3RvpUz8enl4F/x1qmMJA439Pl2fytohnLi2YWq+vqDzO+48q
- 6WHZz4r/Q6mg==
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from orsmga003.jf.intel.com ([10.7.209.27])
-  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 13 Apr 2020 08:53:27 -0700
-IronPort-SDR: OdZguRshJhPs+cTxV/tPWG8TIeOnFVJ2u5n/nZNKVJpmOpxpT7j2PQ/KiSZolC9qxXx2g+nh/z
- CfE7wE398vOg==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.72,378,1580803200"; 
-   d="scan'208";a="252910113"
-Received: from iweiny-desk2.sc.intel.com ([10.3.52.147])
-  by orsmga003.jf.intel.com with ESMTP; 13 Apr 2020 08:53:26 -0700
-Date:   Mon, 13 Apr 2020 08:53:26 -0700
-From:   Ira Weiny <ira.weiny@intel.com>
-To:     Amir Goldstein <amir73il@gmail.com>
+        Mon, 13 Apr 2020 12:11:59 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37544 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1731261AbgDMQL7 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 13 Apr 2020 12:11:59 -0400
+Received: from mail-il1-x144.google.com (mail-il1-x144.google.com [IPv6:2607:f8b0:4864:20::144])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 034F8C0A3BDC;
+        Mon, 13 Apr 2020 09:11:59 -0700 (PDT)
+Received: by mail-il1-x144.google.com with SMTP id b18so391252ilf.2;
+        Mon, 13 Apr 2020 09:11:58 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=OA301vNntdDyfA2VhstFhgzhyLC/fDUHW7Zm+pd6ULM=;
+        b=KbdBetJcEP+yZMe7JYDdQTE4d4aFxqf+TLML9GkOW5xiffnh+ymW7VpySyBF1SrQja
+         sdAz3Es1hxPJg4A6cn2lstL8uSevJVNswERMAHZcfbtcdvB92r6y4GHLaR0goX3BVaOA
+         U1V+al8x0jG5X7DurQ7TUANzIeUajduoh3uEdJKguYGouWC1SZY6XzuUUu9xRSmjk4JA
+         qPsBgrdbNGdMzkq9660Ok/WhB39mMI5Rokf/iIThJzywMA7nhGingJLS36JOgktuIbGR
+         FjHnc5+TV7Hg3jANxXw5aYY+WOON1sorEkSZJtFJFlC5lLXJShFzZ0BpXv9gsPOA0uK7
+         HniA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=OA301vNntdDyfA2VhstFhgzhyLC/fDUHW7Zm+pd6ULM=;
+        b=nc2NUMtjt2u6EK9ZxP1ktmBuQSN53RJqIo6op78TLt0dPSULEtMFp65Mhehrf1GKmS
+         bh2sBi8v6HO0rRx1GqKzLTSnozkZOE8Tu1Qu8hjnYk32zw/XqQRRYc+ei9FlXMdD0T1l
+         GnwTQMVt8sYAATgyAV2yAiA5oz8s2W/2dL66TvmnvbnQz07ujBEXuOJdkfcpJQmYHxjW
+         l12vZr7ZdNO8Tp+wCwTyvWKgAYY1p40iR4FUv+daJrpLYHYYPZ9EeEMZkzBxDBtl3Eir
+         7U8A51oAV1ub6jWoBc4wWOkywHewtTFfqIQaHC38fiL5ReYDHDac/vNBq7BXIzdMs21t
+         Bcmw==
+X-Gm-Message-State: AGi0PuaygwsBI6sfxMZwpLBY6qANIixjrVDz2RAezW14W+1pT9h6zz7u
+        XL2vhYlD4pMGSUybEVHWCnpJaVh2VYs/hCyxdJ8=
+X-Google-Smtp-Source: APiQypIQi+IE4/jJu+QpuTIrt9Z4n5ruPHVB6/qEDJLkUgTws/lRTlQKBfOmXhCaFoUrPisWqwZ7efO+G+2i8KrMcTM=
+X-Received: by 2002:a05:6e02:6c1:: with SMTP id p1mr18324420ils.137.1586794318407;
+ Mon, 13 Apr 2020 09:11:58 -0700 (PDT)
+MIME-Version: 1.0
+References: <20200413054419.1560503-1-ira.weiny@intel.com> <CAOQ4uxguVRysAuVEtQmPj+x=RDtDnGCtNeGvbvXNuvppwagwDg@mail.gmail.com>
+ <20200413155325.GA1560218@iweiny-DESK2.sc.intel.com>
+In-Reply-To: <20200413155325.GA1560218@iweiny-DESK2.sc.intel.com>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Mon, 13 Apr 2020 19:11:46 +0300
+Message-ID: <CAOQ4uxg4Cr-vqA35TbhD5q7Jd1OgLUiL48nO_XNhkpMsCDW_UQ@mail.gmail.com>
+Subject: Re: [PATCH] xfs/XXX: Add xfs/XXX
+To:     Ira Weiny <ira.weiny@intel.com>
 Cc:     fstests <fstests@vger.kernel.org>,
         linux-kernel <linux-kernel@vger.kernel.org>,
         "Darrick J. Wong" <darrick.wong@oracle.com>,
@@ -46,143 +74,41 @@ Cc:     fstests <fstests@vger.kernel.org>,
         Ext4 <linux-ext4@vger.kernel.org>,
         linux-xfs <linux-xfs@vger.kernel.org>,
         linux-fsdevel <linux-fsdevel@vger.kernel.org>
-Subject: Re: [PATCH] xfs/XXX: Add xfs/XXX
-Message-ID: <20200413155325.GA1560218@iweiny-DESK2.sc.intel.com>
-References: <20200413054419.1560503-1-ira.weiny@intel.com>
- <CAOQ4uxguVRysAuVEtQmPj+x=RDtDnGCtNeGvbvXNuvppwagwDg@mail.gmail.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAOQ4uxguVRysAuVEtQmPj+x=RDtDnGCtNeGvbvXNuvppwagwDg@mail.gmail.com>
-User-Agent: Mutt/1.11.1 (2018-12-01)
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Apr 13, 2020 at 10:54:36AM +0300, Amir Goldstein wrote:
-> On Mon, Apr 13, 2020 at 9:06 AM <ira.weiny@intel.com> wrote:
 > >
-> > From: Ira Weiny <ira.weiny@intel.com>
-> >
-> > Add XXX to test per file DAX operations.
-> 
-> Please change commit title to "xfs: Add test for per file DAX operations"
-> The title Add xfs/XXX is not useful even if XXX where a number.
+> > But the kernel patch suggests that there is an intention to make
+> > this behavior also applicable to ext4??
+> > If that is the case I would recommend making this a generic tests
+> > which requires filesystem support for -o dax=XXX
+>
+> I have a patch set for ext4 which is not quite passing this.  I'm not sure what
+> is going on yet.
+>
+> Once that is working I was going to move this to generic.  (The documentation
+> in the kernel patch set also reflects ext4 being different from xfs for the
+> time being.)
 
-Thanks and...  yes this really should have been marked RFC as the requirements
-have been in flux and I never meant for this to be merged until the kernel
-patches are merged.  Hence keeping the number XXX.
+IMO, if ext4 maintainer is on board with the plan to make this behavior of
+ext4 then it is best to add this test as generic from the start.
+Any other filesystems that may tag along later?
 
-RFC would have been better.
+>
+> This is mainly because I'm not sure if ext4 will make 5.8 or not.  Would you
+> prefer making this generic now?  I assume there is some way to mark generic
+> tests for a subset of FS's?  I have not figured that out yet.
+>
 
-I've update v8.  thanks!
+There is a way, _supported_fs, see the tests/shared/*,
+but the idea it to get rid of those in favor of feature tests such as
+_require_scratch_dax
 
-> 
-> But the kernel patch suggests that there is an intention to make
-> this behavior also applicable to ext4??
-> If that is the case I would recommend making this a generic tests
-> which requires filesystem support for -o dax=XXX
+I believe it should be trivial to implement
+_require_scratch_dax_never
 
-I have a patch set for ext4 which is not quite passing this.  I'm not sure what
-is going on yet.
-
-Once that is working I was going to move this to generic.  (The documentation
-in the kernel patch set also reflects ext4 being different from xfs for the
-time being.)
-
-This is mainly because I'm not sure if ext4 will make 5.8 or not.  Would you
-prefer making this generic now?  I assume there is some way to mark generic
-tests for a subset of FS's?  I have not figured that out yet.
-
-> 
-> >
-> > The following is tested[*]
-> >
-> >  1. There exists an in-kernel access mode flag S_DAX that is set when
-> >     file accesses go directly to persistent memory, bypassing the page
-> >     cache.  Applications must call statx to discover the current S_DAX
-> >     state (STATX_ATTR_DAX).
-> >
-> >  2. There exists an advisory file inode flag FS_XFLAG_DAX that is
-> >     inherited from the parent directory FS_XFLAG_DAX inode flag at file
-> >     creation time.  This advisory flag can be set or cleared at any
-> >     time, but doing so does not immediately affect the S_DAX state.
-> >
-> >     Unless overridden by mount options (see (3)), if FS_XFLAG_DAX is set
-> >     and the fs is on pmem then it will enable S_DAX at inode load time;
-> >     if FS_XFLAG_DAX is not set, it will not enable S_DAX.
-> >
-> >  3. There exists a dax= mount option.
-> >
-> >     "-o dax=never"  means "never set S_DAX, ignore FS_XFLAG_DAX."
-> >
-> >     "-o dax=always" means "always set S_DAX (at least on pmem),
-> >                     and ignore FS_XFLAG_DAX."
-> >
-> >     "-o dax"        is an alias for "dax=always".
-> >
-> >     "-o dax=inode"  means "follow FS_XFLAG_DAX" and is the default.
-> >
-> >  4. There exists an advisory directory inode flag FS_XFLAG_DAX that can
-> >     be set or cleared at any time.  The flag state is copied into any
-> >     files or subdirectories when they are created within that directory.
-> >
-> >  5. Programs that require a specific file access mode (DAX or not DAX)
-> >     can do one of the following:
-> >
-> >     (a) Create files in directories that the FS_XFLAG_DAX flag set as
-> >         needed; or
-> >
-> >     (b) Have the administrator set an override via mount option; or
-> >
-> >     (c) Set or clear the file's FS_XFLAG_DAX flag as needed.  Programs
-> >         must then cause the kernel to evict the inode from memory.  This
-> >         can be done by:
-> >
-> >         i>  Closing the file and re-opening the file and using statx to
-> >             see if the fs has changed the S_DAX flag; and
-> >
-> >         ii> If the file still does not have the desired S_DAX access
-> >             mode, either unmount and remount the filesystem, or close
-> >             the file and use drop_caches.
-> >
-> >  6. It's not unreasonable that users who want to squeeze every last bit
-> >     of performance out of the particular rough and tumble bits of their
-> >     storage also be exposed to the difficulties of what happens when the
-> >     operating system can't totally virtualize those hardware
-> >     capabilities.  Your high performance sports car is not a Toyota
-> >     minivan, as it were.
-> >
-> > [*] https://lore.kernel.org/lkml/20200409165927.GD6741@magnolia/
-> >
-> > Signed-off-by: Ira Weiny <ira.weiny@intel.com>
-> >
-> > ---
-> > Changes from v6 (kernel patch set):
-> >         Start versions tracking the kernel patch set.
-> >         Update for new requirements
-> >
-> > Changes from V1 (xfstests patch):
-> >         Add test to ensure moved files preserve their flag
-> >         Check chattr of non-dax flags (check bug found by Darrick)
-> > ---
-> ...
-> > --- a/tests/xfs/group
-> > +++ b/tests/xfs/group
-> > @@ -511,3 +511,4 @@
-> >  511 auto quick quota
-> >  512 auto quick acl attr
-> >  513 auto mount
-> > +999 auto
-> 
-> The test looks also 'quick'
-
-Sure! Updated in v8
-
-Thanks for the review!
-Ira
-
-> 
-> Thanks,
-> Amir.
+Thanks,
+Amir.
