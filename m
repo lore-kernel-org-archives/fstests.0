@@ -2,70 +2,60 @@ Return-Path: <SRS0=mI6p=55=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,USER_AGENT_SANE_1 autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8668BC2BA19
-	for <linux-fstests@archiver.kernel.org>; Mon, 13 Apr 2020 16:12:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 910DBC2BA2B
+	for <linux-fstests@archiver.kernel.org>; Mon, 13 Apr 2020 16:22:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 603812063A
-	for <linux-fstests@archiver.kernel.org>; Mon, 13 Apr 2020 16:12:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 694D420678
+	for <linux-fstests@archiver.kernel.org>; Mon, 13 Apr 2020 16:22:50 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="KbdBetJc"
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="J94TMoHe"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731299AbgDMQL7 (ORCPT
+        id S1731487AbgDMQWq (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 13 Apr 2020 12:11:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37544 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1731261AbgDMQL7 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 13 Apr 2020 12:11:59 -0400
-Received: from mail-il1-x144.google.com (mail-il1-x144.google.com [IPv6:2607:f8b0:4864:20::144])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 034F8C0A3BDC;
-        Mon, 13 Apr 2020 09:11:59 -0700 (PDT)
-Received: by mail-il1-x144.google.com with SMTP id b18so391252ilf.2;
-        Mon, 13 Apr 2020 09:11:58 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=OA301vNntdDyfA2VhstFhgzhyLC/fDUHW7Zm+pd6ULM=;
-        b=KbdBetJcEP+yZMe7JYDdQTE4d4aFxqf+TLML9GkOW5xiffnh+ymW7VpySyBF1SrQja
-         sdAz3Es1hxPJg4A6cn2lstL8uSevJVNswERMAHZcfbtcdvB92r6y4GHLaR0goX3BVaOA
-         U1V+al8x0jG5X7DurQ7TUANzIeUajduoh3uEdJKguYGouWC1SZY6XzuUUu9xRSmjk4JA
-         qPsBgrdbNGdMzkq9660Ok/WhB39mMI5Rokf/iIThJzywMA7nhGingJLS36JOgktuIbGR
-         FjHnc5+TV7Hg3jANxXw5aYY+WOON1sorEkSZJtFJFlC5lLXJShFzZ0BpXv9gsPOA0uK7
-         HniA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=OA301vNntdDyfA2VhstFhgzhyLC/fDUHW7Zm+pd6ULM=;
-        b=nc2NUMtjt2u6EK9ZxP1ktmBuQSN53RJqIo6op78TLt0dPSULEtMFp65Mhehrf1GKmS
-         bh2sBi8v6HO0rRx1GqKzLTSnozkZOE8Tu1Qu8hjnYk32zw/XqQRRYc+ei9FlXMdD0T1l
-         GnwTQMVt8sYAATgyAV2yAiA5oz8s2W/2dL66TvmnvbnQz07ujBEXuOJdkfcpJQmYHxjW
-         l12vZr7ZdNO8Tp+wCwTyvWKgAYY1p40iR4FUv+daJrpLYHYYPZ9EeEMZkzBxDBtl3Eir
-         7U8A51oAV1ub6jWoBc4wWOkywHewtTFfqIQaHC38fiL5ReYDHDac/vNBq7BXIzdMs21t
-         Bcmw==
-X-Gm-Message-State: AGi0PuaygwsBI6sfxMZwpLBY6qANIixjrVDz2RAezW14W+1pT9h6zz7u
-        XL2vhYlD4pMGSUybEVHWCnpJaVh2VYs/hCyxdJ8=
-X-Google-Smtp-Source: APiQypIQi+IE4/jJu+QpuTIrt9Z4n5ruPHVB6/qEDJLkUgTws/lRTlQKBfOmXhCaFoUrPisWqwZ7efO+G+2i8KrMcTM=
-X-Received: by 2002:a05:6e02:6c1:: with SMTP id p1mr18324420ils.137.1586794318407;
- Mon, 13 Apr 2020 09:11:58 -0700 (PDT)
-MIME-Version: 1.0
-References: <20200413054419.1560503-1-ira.weiny@intel.com> <CAOQ4uxguVRysAuVEtQmPj+x=RDtDnGCtNeGvbvXNuvppwagwDg@mail.gmail.com>
- <20200413155325.GA1560218@iweiny-DESK2.sc.intel.com>
-In-Reply-To: <20200413155325.GA1560218@iweiny-DESK2.sc.intel.com>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Mon, 13 Apr 2020 19:11:46 +0300
-Message-ID: <CAOQ4uxg4Cr-vqA35TbhD5q7Jd1OgLUiL48nO_XNhkpMsCDW_UQ@mail.gmail.com>
-Subject: Re: [PATCH] xfs/XXX: Add xfs/XXX
-To:     Ira Weiny <ira.weiny@intel.com>
-Cc:     fstests <fstests@vger.kernel.org>,
+        Mon, 13 Apr 2020 12:22:46 -0400
+Received: from userp2120.oracle.com ([156.151.31.85]:52292 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1731410AbgDMQWp (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 13 Apr 2020 12:22:45 -0400
+Received: from pps.filterd (userp2120.oracle.com [127.0.0.1])
+        by userp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 03DGJHgp083266;
+        Mon, 13 Apr 2020 16:22:32 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
+ : subject : message-id : references : mime-version : content-type :
+ in-reply-to; s=corp-2020-01-29;
+ bh=5T9mPw8GB/r8H50I90kuMynWhnQTRHYwlj+Ng3RQM1Q=;
+ b=J94TMoHe8uwQkg2/RnnzUFI2jtizrn97gsFY3wcgYDDDMvQNwPq3PnwEcnDPHEXPil7K
+ hTlow0INHcy8Fx3YTBMg32CP3n6N0eMm3Td194KtH/wpuzAQ+SC9tJc2yh+roWLuZB4+
+ HUBsBXClwI2oZwk/yl35K7/o9H59PdVq8uNWqZwyzZXJx01vMJj0HO204VF72i7b3fJ9
+ 9xd39ZMSu1wxN8TeOSsww4PldUCiP0QabcpgG0ThqVnxI3URsuKUlnzVOWgIf05XTJis
+ Pcs4HclZRdBzgX/c7lcSVqzTQffyFigimlYROHP0NX8VWrmuk+zc0XDN6u1lNzIO/Ns8 sg== 
+Received: from userp3030.oracle.com (userp3030.oracle.com [156.151.31.80])
+        by userp2120.oracle.com with ESMTP id 30b6hpff0d-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Mon, 13 Apr 2020 16:22:32 +0000
+Received: from pps.filterd (userp3030.oracle.com [127.0.0.1])
+        by userp3030.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 03DGHf4S083132;
+        Mon, 13 Apr 2020 16:22:32 GMT
+Received: from userv0121.oracle.com (userv0121.oracle.com [156.151.31.72])
+        by userp3030.oracle.com with ESMTP id 30bqcehv4y-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Mon, 13 Apr 2020 16:22:32 +0000
+Received: from abhmp0016.oracle.com (abhmp0016.oracle.com [141.146.116.22])
+        by userv0121.oracle.com (8.14.4/8.13.8) with ESMTP id 03DGMUat008221;
+        Mon, 13 Apr 2020 16:22:30 GMT
+Received: from localhost (/67.169.218.210)
+        by default (Oracle Beehive Gateway v4.0)
+        with ESMTP ; Mon, 13 Apr 2020 09:22:30 -0700
+Date:   Mon, 13 Apr 2020 09:22:28 -0700
+From:   "Darrick J. Wong" <darrick.wong@oracle.com>
+To:     Amir Goldstein <amir73il@gmail.com>
+Cc:     Ira Weiny <ira.weiny@intel.com>, fstests <fstests@vger.kernel.org>,
         linux-kernel <linux-kernel@vger.kernel.org>,
-        "Darrick J. Wong" <darrick.wong@oracle.com>,
         Dan Williams <dan.j.williams@intel.com>,
         Dave Chinner <david@fromorbit.com>,
         Christoph Hellwig <hch@lst.de>,
@@ -74,41 +64,72 @@ Cc:     fstests <fstests@vger.kernel.org>,
         Ext4 <linux-ext4@vger.kernel.org>,
         linux-xfs <linux-xfs@vger.kernel.org>,
         linux-fsdevel <linux-fsdevel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Subject: Re: [PATCH] xfs/XXX: Add xfs/XXX
+Message-ID: <20200413162228.GA6742@magnolia>
+References: <20200413054419.1560503-1-ira.weiny@intel.com>
+ <CAOQ4uxguVRysAuVEtQmPj+x=RDtDnGCtNeGvbvXNuvppwagwDg@mail.gmail.com>
+ <20200413155325.GA1560218@iweiny-DESK2.sc.intel.com>
+ <CAOQ4uxg4Cr-vqA35TbhD5q7Jd1OgLUiL48nO_XNhkpMsCDW_UQ@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAOQ4uxg4Cr-vqA35TbhD5q7Jd1OgLUiL48nO_XNhkpMsCDW_UQ@mail.gmail.com>
+User-Agent: Mutt/1.9.4 (2018-02-28)
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9590 signatures=668686
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=0 mlxlogscore=999
+ bulkscore=0 malwarescore=0 phishscore=0 mlxscore=0 spamscore=0
+ adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2003020000 definitions=main-2004130124
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9590 signatures=668686
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 spamscore=0 adultscore=0
+ mlxlogscore=999 clxscore=1015 mlxscore=0 phishscore=0 suspectscore=0
+ lowpriorityscore=0 bulkscore=0 malwarescore=0 priorityscore=1501
+ impostorscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2003020000 definitions=main-2004130124
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+On Mon, Apr 13, 2020 at 07:11:46PM +0300, Amir Goldstein wrote:
+> > >
+> > > But the kernel patch suggests that there is an intention to make
+> > > this behavior also applicable to ext4??
+> > > If that is the case I would recommend making this a generic tests
+> > > which requires filesystem support for -o dax=XXX
 > >
-> > But the kernel patch suggests that there is an intention to make
-> > this behavior also applicable to ext4??
-> > If that is the case I would recommend making this a generic tests
-> > which requires filesystem support for -o dax=XXX
->
-> I have a patch set for ext4 which is not quite passing this.  I'm not sure what
-> is going on yet.
->
-> Once that is working I was going to move this to generic.  (The documentation
-> in the kernel patch set also reflects ext4 being different from xfs for the
-> time being.)
+> > I have a patch set for ext4 which is not quite passing this.  I'm not sure what
+> > is going on yet.
+> >
+> > Once that is working I was going to move this to generic.  (The documentation
+> > in the kernel patch set also reflects ext4 being different from xfs for the
+> > time being.)
+> 
+> IMO, if ext4 maintainer is on board with the plan to make this behavior of
+> ext4 then it is best to add this test as generic from the start.
+> Any other filesystems that may tag along later?
 
-IMO, if ext4 maintainer is on board with the plan to make this behavior of
-ext4 then it is best to add this test as generic from the start.
-Any other filesystems that may tag along later?
+I was under the impression that any test can go in generic/ so long as
+it isn't using fs-specific interfaces (e.g. xfs error injection), even
+if not all filesystems actually support the functionality being examined
+by the test.
 
->
-> This is mainly because I'm not sure if ext4 will make 5.8 or not.  Would you
-> prefer making this generic now?  I assume there is some way to mark generic
-> tests for a subset of FS's?  I have not figured that out yet.
->
+> >
+> > This is mainly because I'm not sure if ext4 will make 5.8 or not.  Would you
+> > prefer making this generic now?  I assume there is some way to mark generic
+> > tests for a subset of FS's?  I have not figured that out yet.
+> >
+> 
+> There is a way, _supported_fs, see the tests/shared/*,
+> but the idea it to get rid of those in favor of feature tests such as
+> _require_scratch_dax
+> 
+> I believe it should be trivial to implement
+> _require_scratch_dax_never
 
-There is a way, _supported_fs, see the tests/shared/*,
-but the idea it to get rid of those in favor of feature tests such as
-_require_scratch_dax
+Agreed, though I would name the helper to make it clear that it's
+checking the dax mount options (e.g. "_require_scratch_dax_mountopt")
+because "never" is a little subtle here.
 
-I believe it should be trivial to implement
-_require_scratch_dax_never
-
-Thanks,
-Amir.
+> Thanks,
+> Amir.
