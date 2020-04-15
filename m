@@ -2,33 +2,33 @@ Return-Path: <SRS0=LRpr=57=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,PDS_TONAME_EQ_TOLOCAL_SHORT,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 91B85C2BA19
-	for <linux-fstests@archiver.kernel.org>; Wed, 15 Apr 2020 20:16:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9FA44C2BA19
+	for <linux-fstests@archiver.kernel.org>; Wed, 15 Apr 2020 20:17:49 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 73B202076D
-	for <linux-fstests@archiver.kernel.org>; Wed, 15 Apr 2020 20:16:50 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 76FFC2076D
+	for <linux-fstests@archiver.kernel.org>; Wed, 15 Apr 2020 20:17:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2437829AbgDOUQu (ORCPT
+        id S2437870AbgDOURs (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 15 Apr 2020 16:16:50 -0400
-Received: from sandeen.net ([63.231.237.45]:59476 "EHLO sandeen.net"
+        Wed, 15 Apr 2020 16:17:48 -0400
+Received: from sandeen.net ([63.231.237.45]:59562 "EHLO sandeen.net"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2437811AbgDOUQt (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 15 Apr 2020 16:16:49 -0400
+        id S2437811AbgDOURr (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 15 Apr 2020 16:17:47 -0400
 Received: from [10.0.0.4] (liberator [10.0.0.4])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by sandeen.net (Postfix) with ESMTPSA id 601E6F8C2B;
-        Wed, 15 Apr 2020 15:16:28 -0500 (CDT)
+        by sandeen.net (Postfix) with ESMTPSA id 0E81DF8C2B;
+        Wed, 15 Apr 2020 15:17:27 -0500 (CDT)
+Subject: [PATCH 1/4] fstests: rename _require_test_symlinks
+From:   Eric Sandeen <sandeen@sandeen.net>
 To:     fstests <fstests@vger.kernel.org>,
         Namjae Jeon <namjae.jeon@samsung.com>
-From:   Eric Sandeen <sandeen@sandeen.net>
-Subject: [PATCH 0/4 V2] fstests: fix test requirements for exfat testing
- support
+References: <9798d553-0bdd-2b8b-ce3b-3c8d2c37936e@sandeen.net>
 Autocrypt: addr=sandeen@sandeen.net; prefer-encrypt=mutual; keydata=
  mQINBE6x99QBEADMR+yNFBc1Y5avoUhzI/sdR9ANwznsNpiCtZlaO4pIWvqQJCjBzp96cpCs
  nQZV32nqJBYnDpBDITBqTa/EF+IrHx8gKq8TaSBLHUq2ju2gJJLfBoL7V3807PQcI18YzkF+
@@ -71,21 +71,117 @@ Autocrypt: addr=sandeen@sandeen.net; prefer-encrypt=mutual; keydata=
  Pk6ah10C4+R1Jc7dyUsKksMfvvhRX1hTIXhth85H16706bneTayZBhlZ/hK18uqTX+s0onG/
  m1F3vYvdlE4p2ts1mmixMF7KajN9/E5RQtiSArvKTbfsB6Two4MthIuLuf+M0mI4gPl9SPlf
  fWCYVPhaU9o83y1KFbD/+lh1pjP7bEu/YudBvz7F2Myjh4/9GUAijrCTNeDTDAgvIJDjXuLX pA==
-Message-ID: <9798d553-0bdd-2b8b-ce3b-3c8d2c37936e@sandeen.net>
-Date:   Wed, 15 Apr 2020 15:16:47 -0500
+Message-ID: <d95e51a8-7f80-c39f-b9a5-b526ba4bd09e@sandeen.net>
+Date:   Wed, 15 Apr 2020 15:17:46 -0500
 User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:68.0)
  Gecko/20100101 Thunderbird/68.7.0
 MIME-Version: 1.0
+In-Reply-To: <9798d553-0bdd-2b8b-ce3b-3c8d2c37936e@sandeen.net>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Running xfstests over exfat reveals a lot of tests don't properly check
-for filesystem capabilities before running, which leads to incorrect
-failures.  This series fixes up several of those.
+Generally these tests are not restricted to one device or the other;
+testing the test device will suffice to determine the capability
+but it doesn't need to be named that way.
 
--Eric
+Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+---
+
+diff --git a/common/rc b/common/rc
+index 24a8f145..31361d0e 100644
+--- a/common/rc
++++ b/common/rc
+@@ -3481,7 +3481,7 @@ run_check()
+ 	"$@" >> $seqres.full 2>&1 || _fail "failed: '$@'"
+ }
+ 
+-_require_test_symlinks()
++_require_symlinks()
+ {
+ 	local target=`mktemp -p $TEST_DIR`
+ 	local link=`mktemp -p $TEST_DIR -u`
+diff --git a/tests/generic/005 b/tests/generic/005
+index 118fca20..c49109e9 100755
+--- a/tests/generic/005
++++ b/tests/generic/005
+@@ -48,7 +48,7 @@ _touch()
+ # real QA test starts here
+ _supported_fs generic
+ _require_test
+-_require_test_symlinks
++_require_symlinks
+ 
+ _supported_os Linux
+ 
+diff --git a/tests/generic/023 b/tests/generic/023
+index ea40f3d2..1cfa25cd 100755
+--- a/tests/generic/023
++++ b/tests/generic/023
+@@ -30,7 +30,7 @@ _supported_os Linux
+ 
+ _require_test
+ _require_renameat2
+-_require_test_symlinks
++_require_symlinks
+ 
+ # real QA test starts here
+ 
+diff --git a/tests/generic/024 b/tests/generic/024
+index 531a515f..b6ac4182 100755
+--- a/tests/generic/024
++++ b/tests/generic/024
+@@ -30,7 +30,7 @@ _supported_os Linux
+ 
+ _require_test
+ _require_renameat2 noreplace
+-_require_test_symlinks
++_require_symlinks
+ 
+ # real QA test starts here
+ 
+diff --git a/tests/generic/025 b/tests/generic/025
+index e69d655f..2eb3e5e8 100755
+--- a/tests/generic/025
++++ b/tests/generic/025
+@@ -30,7 +30,7 @@ _supported_os Linux
+ 
+ _require_test
+ _require_renameat2 exchange
+-_require_test_symlinks
++_require_symlinks
+ 
+ # real QA test starts here
+ 
+diff --git a/tests/generic/067 b/tests/generic/067
+index bd72dc85..d4c710d2 100755
+--- a/tests/generic/067
++++ b/tests/generic/067
+@@ -37,7 +37,7 @@ _cleanup()
+ # Modify as appropriate.
+ _supported_fs generic
+ _supported_os Linux
+-_require_test_symlinks
++_require_symlinks
+ _require_test
+ _require_scratch
+ _require_loop
+diff --git a/tests/generic/078 b/tests/generic/078
+index a421a8ab..ce0201c9 100755
+--- a/tests/generic/078
++++ b/tests/generic/078
+@@ -30,7 +30,7 @@ _supported_os Linux
+ 
+ _require_test
+ _require_renameat2 whiteout
+-_require_test_symlinks
++_require_symlinks
+ 
+ # real QA test starts here
+ 
+
+
