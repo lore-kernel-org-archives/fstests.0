@@ -6,25 +6,25 @@ X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 465C1C2BA19
-	for <linux-fstests@archiver.kernel.org>; Wed, 15 Apr 2020 20:18:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 46DD2C2BA19
+	for <linux-fstests@archiver.kernel.org>; Wed, 15 Apr 2020 20:20:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 26C4F20784
-	for <linux-fstests@archiver.kernel.org>; Wed, 15 Apr 2020 20:18:34 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1F8DF20784
+	for <linux-fstests@archiver.kernel.org>; Wed, 15 Apr 2020 20:20:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2437881AbgDOUSd (ORCPT
+        id S2437939AbgDOUUh (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 15 Apr 2020 16:18:33 -0400
-Received: from sandeen.net ([63.231.237.45]:59584 "EHLO sandeen.net"
+        Wed, 15 Apr 2020 16:20:37 -0400
+Received: from sandeen.net ([63.231.237.45]:59718 "EHLO sandeen.net"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2437923AbgDOUS3 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 15 Apr 2020 16:18:29 -0400
+        id S2437924AbgDOUUf (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 15 Apr 2020 16:20:35 -0400
 Received: from [10.0.0.4] (liberator [10.0.0.4])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by sandeen.net (Postfix) with ESMTPSA id D2C23170B41;
-        Wed, 15 Apr 2020 15:18:08 -0500 (CDT)
-Subject: [PATCH 2/4] fstests: use _require_symlinks on all necessary tests
+        by sandeen.net (Postfix) with ESMTPSA id 2A355F8C2B;
+        Wed, 15 Apr 2020 15:20:15 -0500 (CDT)
+Subject: [PATCH 3/4] fstests: add _require_hardlinks for all necessary tests
 From:   Eric Sandeen <sandeen@sandeen.net>
 To:     fstests <fstests@vger.kernel.org>,
         Namjae Jeon <namjae.jeon@samsung.com>
@@ -71,182 +71,304 @@ Autocrypt: addr=sandeen@sandeen.net; prefer-encrypt=mutual; keydata=
  Pk6ah10C4+R1Jc7dyUsKksMfvvhRX1hTIXhth85H16706bneTayZBhlZ/hK18uqTX+s0onG/
  m1F3vYvdlE4p2ts1mmixMF7KajN9/E5RQtiSArvKTbfsB6Two4MthIuLuf+M0mI4gPl9SPlf
  fWCYVPhaU9o83y1KFbD/+lh1pjP7bEu/YudBvz7F2Myjh4/9GUAijrCTNeDTDAgvIJDjXuLX pA==
-Message-ID: <b76c7013-0d00-23fc-fbe3-2f56da54baaf@sandeen.net>
-Date:   Wed, 15 Apr 2020 15:18:27 -0500
+Message-ID: <215d9e5c-2b76-907b-d881-a6177a150260@sandeen.net>
+Date:   Wed, 15 Apr 2020 15:20:33 -0500
 User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:68.0)
  Gecko/20100101 Thunderbird/68.7.0
 MIME-Version: 1.0
 In-Reply-To: <9798d553-0bdd-2b8b-ce3b-3c8d2c37936e@sandeen.net>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Consistently use _require_symlinks on all generic tests which
-create a symlink when they run.
+Add a new _require function for hardlinks, to test hardlink support
+in all tests which need it.
 
 Signed-off-by: Eric Sandeen <sandeen@redhat.com>
 ---
 
-diff --git a/tests/generic/062 b/tests/generic/062
-index 3fef02e8..ba744885 100755
---- a/tests/generic/062
-+++ b/tests/generic/062
-@@ -59,6 +59,7 @@ _supported_os Linux
+V2: Use full pathname for ln target
+
+diff --git a/common/rc b/common/rc
+index 31361d0e..742b99de 100644
+--- a/common/rc
++++ b/common/rc
+@@ -3493,6 +3493,18 @@ _require_symlinks()
+ 	rm -f $target $link
+ }
  
- _require_scratch
- _require_attrs
-+_require_symlinks
- 
- rm -f $tmp.backup1 $tmp.backup2 $seqres.full
- 
-diff --git a/tests/generic/109 b/tests/generic/109
-index 8be70c23..549a95b1 100755
---- a/tests/generic/109
-+++ b/tests/generic/109
-@@ -29,6 +29,7 @@ _cleanup()
++_require_hardlinks()
++{
++	local target=`mktemp -p $TEST_DIR`
++	local link=`mktemp -p $TEST_DIR -u`
++	ln $target $link
++	if [ "$?" -ne 0 ]; then
++		rm -f $target
++		_notrun "No hardlink support"
++	fi
++	rm -f $target $link
++}
++
+ _require_test_fcntl_advisory_locks()
+ {
+ 	[ "$FSTYP" != "cifs" ] && return 0
+diff --git a/tests/generic/002 b/tests/generic/002
+index 575ac42b..480b77bc 100755
+--- a/tests/generic/002
++++ b/tests/generic/002
+@@ -28,6 +28,7 @@ _cleanup()
  _supported_fs generic
  _supported_os Linux
- _require_scratch
-+_require_symlinks
- 
- rm -f $seqres.full
- 
-diff --git a/tests/generic/294 b/tests/generic/294
-index b74579ac..32c89b03 100755
---- a/tests/generic/294
-+++ b/tests/generic/294
-@@ -32,6 +32,7 @@ _cleanup()
- _supported_fs generic
- _supported_os Linux
- _require_scratch
-+_require_symlinks
- 
- rm -f $seqres.full
- _scratch_mkfs > $seqres.full 2>&1 || _fail "Could not mkfs scratch device"
-diff --git a/tests/generic/306 b/tests/generic/306
-index 081d1a89..046f4516 100755
---- a/tests/generic/306
-+++ b/tests/generic/306
-@@ -33,6 +33,7 @@ _supported_fs generic
- _supported_os Linux
- _require_scratch
  _require_test
-+_require_symlinks
++_require_hardlinks
  
- DEVNULL=$SCRATCH_MNT/devnull
- DEVZERO=$SCRATCH_MNT/devzero
-diff --git a/tests/generic/348 b/tests/generic/348
-index 630ff160..e0139d9a 100755
---- a/tests/generic/348
-+++ b/tests/generic/348
-@@ -32,6 +32,7 @@ _cleanup()
+ rm -f $seqres.full
+ 
+diff --git a/tests/generic/039 b/tests/generic/039
+index daa2e353..27cd6bf5 100755
+--- a/tests/generic/039
++++ b/tests/generic/039
+@@ -39,6 +39,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
  _supported_fs generic
  _supported_os Linux
  _require_scratch
-+_require_symlinks
++_require_hardlinks
  _require_dm_target flakey
  
  rm -f $seqres.full
-diff --git a/tests/generic/360 b/tests/generic/360
-index a9a4f2f9..f15548e2 100755
---- a/tests/generic/360
-+++ b/tests/generic/360
-@@ -31,6 +31,7 @@ rm -f $seqres.full
+diff --git a/tests/generic/040 b/tests/generic/040
+index 712ae595..b69d8127 100755
+--- a/tests/generic/040
++++ b/tests/generic/040
+@@ -44,6 +44,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+ _supported_fs generic
+ _supported_os Linux
+ _require_scratch
++_require_hardlinks
+ _require_dm_target flakey
+ 
+ rm -f $seqres.full
+diff --git a/tests/generic/041 b/tests/generic/041
+index 8001e8ce..1674d544 100755
+--- a/tests/generic/041
++++ b/tests/generic/041
+@@ -48,6 +48,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+ _supported_fs generic
+ _supported_os Linux
+ _require_scratch
++_require_hardlinks
+ _require_dm_target flakey
+ 
+ rm -f $seqres.full
+diff --git a/tests/generic/056 b/tests/generic/056
+index 9caf1166..28920d36 100755
+--- a/tests/generic/056
++++ b/tests/generic/056
+@@ -37,6 +37,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+ _supported_fs generic
+ _supported_os Linux
+ _require_scratch
++_require_hardlinks
+ _require_dm_target flakey
+ 
+ rm -f $seqres.full
+diff --git a/tests/generic/057 b/tests/generic/057
+index ba51dbb9..91e1d98e 100755
+--- a/tests/generic/057
++++ b/tests/generic/057
+@@ -37,6 +37,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+ _supported_fs generic
+ _supported_os Linux
+ _require_scratch
++_require_hardlinks
+ _require_dm_target flakey
+ 
+ rm -f $seqres.full
+diff --git a/tests/generic/065 b/tests/generic/065
+index d6a1670b..30f3c32e 100755
+--- a/tests/generic/065
++++ b/tests/generic/065
+@@ -38,6 +38,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+ _supported_fs generic
+ _supported_os Linux
+ _require_scratch
++_require_hardlinks
+ _require_dm_target flakey
+ 
+ rm -f $seqres.full
+diff --git a/tests/generic/089 b/tests/generic/089
+index 3d608269..52649596 100755
+--- a/tests/generic/089
++++ b/tests/generic/089
+@@ -36,6 +36,7 @@ addentries()
  _supported_fs generic
  _supported_os Linux
  _require_test
-+_require_symlinks
++_require_hardlinks
  
- linkfile=$TEST_DIR/$seq.symlink
- rm -f $linkfile
-diff --git a/tests/generic/397 b/tests/generic/397
-index f2e22950..c2245bd5 100755
---- a/tests/generic/397
-+++ b/tests/generic/397
-@@ -36,6 +36,7 @@ rm -f $seqres.full
+ rm -f $seqres.full
+ [ "X$TEST_DIR" = "X" ] && exit 1
+diff --git a/tests/generic/090 b/tests/generic/090
+index bf38d1c8..db1aeef3 100755
+--- a/tests/generic/090
++++ b/tests/generic/090
+@@ -36,6 +36,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+ _supported_fs generic
+ _supported_os Linux
+ _require_scratch
++_require_hardlinks
+ _require_dm_target flakey
+ 
+ rm -f $seqres.full
+diff --git a/tests/generic/104 b/tests/generic/104
+index d78689f4..4b6256db 100755
+--- a/tests/generic/104
++++ b/tests/generic/104
+@@ -31,6 +31,7 @@ _cleanup()
+ _supported_fs generic
+ _supported_os Linux
+ _require_scratch
++_require_hardlinks
+ _require_dm_target flakey
+ 
+ rm -f $seqres.full
+diff --git a/tests/generic/106 b/tests/generic/106
+index 74d5dc30..e1c859e5 100755
+--- a/tests/generic/106
++++ b/tests/generic/106
+@@ -30,6 +30,7 @@ _cleanup()
+ _supported_fs generic
+ _supported_os Linux
+ _require_scratch
++_require_hardlinks
+ _require_dm_target flakey
+ 
+ rm -f $seqres.full
+diff --git a/tests/generic/107 b/tests/generic/107
+index 5c6bbfca..214f3389 100755
+--- a/tests/generic/107
++++ b/tests/generic/107
+@@ -33,6 +33,7 @@ _cleanup()
+ _supported_fs generic
+ _supported_os Linux
+ _require_scratch
++_require_hardlinks
+ _require_dm_target flakey
+ 
+ rm -f $seqres.full
+diff --git a/tests/generic/236 b/tests/generic/236
+index f207165f..2110b053 100755
+--- a/tests/generic/236
++++ b/tests/generic/236
+@@ -25,8 +25,8 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+ 
  # real QA test starts here
  _supported_fs generic
+-# only Linux supports fallocate
  _supported_os Linux
-+_require_symlinks
- _require_scratch_encryption
- _require_command "$KEYCTL_PROG" keyctl
++_require_hardlinks
+ _require_test
  
-diff --git a/tests/generic/399 b/tests/generic/399
-index a9b3997a..a4013720 100755
---- a/tests/generic/399
-+++ b/tests/generic/399
-@@ -43,6 +43,7 @@ rm -f $seqres.full
- _supported_fs generic
- _supported_os Linux
- _require_scratch_encryption
-+_require_symlinks
- _require_command "$XZ_PROG" xz
- _require_command "$KEYCTL_PROG" keyctl
- 
-diff --git a/tests/generic/401 b/tests/generic/401
-index 9d45fbcd..00e9bbe0 100755
---- a/tests/generic/401
-+++ b/tests/generic/401
-@@ -37,6 +37,7 @@ _cleanup()
- _supported_fs generic
- _supported_os Linux
- _require_scratch
-+_require_symlinks
- _require_test_program "t_dir_type"
- 
- rm -f $seqres.full
-diff --git a/tests/generic/423 b/tests/generic/423
-index b61d5de0..6db55fd6 100755
---- a/tests/generic/423
-+++ b/tests/generic/423
-@@ -38,6 +38,7 @@ _require_test
- _require_test_program "stat_test"
- _require_test_program "af_unix"
- _require_statx
-+_require_symlinks
- 
- function check_stat () {
- 	$here/src/stat_test $* || echo stat_test failed
-diff --git a/tests/generic/440 b/tests/generic/440
-index 1ec1ed48..3446c147 100755
---- a/tests/generic/440
-+++ b/tests/generic/440
-@@ -38,6 +38,7 @@ rm -f $seqres.full
- _supported_fs generic
- _supported_os Linux
- _require_scratch_encryption
-+_require_symlinks
- _require_command "$KEYCTL_PROG" keyctl
- 
- # Set up an encryption-capable filesystem and an encryption key.
-diff --git a/tests/generic/479 b/tests/generic/479
-index ad20aaee..aaf864a4 100755
---- a/tests/generic/479
-+++ b/tests/generic/479
+ rm -f $TEST_DIR/ouch*
+diff --git a/tests/generic/336 b/tests/generic/336
+index e007552c..6832ccde 100755
+--- a/tests/generic/336
++++ b/tests/generic/336
 @@ -32,6 +32,7 @@ _cleanup()
  _supported_fs generic
  _supported_os Linux
  _require_scratch
-+_require_symlinks
++_require_hardlinks
  _require_dm_target flakey
  
  rm -f $seqres.full
-diff --git a/tests/generic/556 b/tests/generic/556
-index b7239e34..4899b403 100755
---- a/tests/generic/556
-+++ b/tests/generic/556
-@@ -19,6 +19,7 @@ _supported_os Linux
+diff --git a/tests/generic/343 b/tests/generic/343
+index e35488dd..2034197e 100755
+--- a/tests/generic/343
++++ b/tests/generic/343
+@@ -32,6 +32,7 @@ _cleanup()
  _supported_fs generic
- _require_scratch_nocheck
- _require_scratch_casefold
-+_require_symlinks
- _require_check_dmesg
- _require_attrs
+ _supported_os Linux
+ _require_scratch
++_require_hardlinks
+ _require_dm_target flakey
  
-
+ rm -f $seqres.full
+diff --git a/tests/generic/378 b/tests/generic/378
+index 393d1ce7..ea776949 100755
+--- a/tests/generic/378
++++ b/tests/generic/378
+@@ -39,6 +39,7 @@ _supported_fs generic
+ _supported_os Linux
+ _require_test
+ _require_user
++_require_hardlinks
+ 
+ # Setup testfile and its hardlink
+ testfile=$TEST_DIR/testfile.$seq
+diff --git a/tests/generic/480 b/tests/generic/480
+index ba2c34ad..63a87519 100755
+--- a/tests/generic/480
++++ b/tests/generic/480
+@@ -32,6 +32,7 @@ _cleanup()
+ _supported_fs generic
+ _supported_os Linux
+ _require_scratch
++_require_hardlinks
+ _require_dm_target flakey
+ 
+ rm -f $seqres.full
+diff --git a/tests/generic/498 b/tests/generic/498
+index 71f5091c..7adf0b32 100755
+--- a/tests/generic/498
++++ b/tests/generic/498
+@@ -31,6 +31,7 @@ _cleanup()
+ _supported_fs generic
+ _supported_os Linux
+ _require_scratch
++_require_hardlinks
+ _require_dm_target flakey
+ 
+ rm -f $seqres.full
+diff --git a/tests/generic/502 b/tests/generic/502
+index a60ac9a7..a49ee0b3 100755
+--- a/tests/generic/502
++++ b/tests/generic/502
+@@ -34,6 +34,7 @@ _cleanup()
+ _supported_fs generic
+ _supported_os Linux
+ _require_scratch
++_require_hardlinks
+ _require_dm_target flakey
+ 
+ rm -f $seqres.full
+diff --git a/tests/generic/526 b/tests/generic/526
+index d0b51f87..934d263f 100755
+--- a/tests/generic/526
++++ b/tests/generic/526
+@@ -32,6 +32,7 @@ _cleanup()
+ _supported_fs generic
+ _supported_os Linux
+ _require_scratch
++_require_hardlinks
+ _require_dm_target flakey
+ 
+ rm -f $seqres.full
+diff --git a/tests/generic/527 b/tests/generic/527
+index 61dd4f0b..4b664da9 100755
+--- a/tests/generic/527
++++ b/tests/generic/527
+@@ -32,6 +32,7 @@ _cleanup()
+ _supported_fs generic
+ _supported_os Linux
+ _require_scratch
++_require_hardlinks
+ _require_dm_target flakey
+ 
+ rm -f $seqres.full
 
 
