@@ -2,29 +2,31 @@ Return-Path: <SRS0=LRpr=57=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,PDS_TONAME_EQ_TOLOCAL_SHORT,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 92E9EC2BA19
-	for <linux-fstests@archiver.kernel.org>; Wed, 15 Apr 2020 20:21:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1D5EBC2BA19
+	for <linux-fstests@archiver.kernel.org>; Wed, 15 Apr 2020 20:23:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 72C8B2076D
-	for <linux-fstests@archiver.kernel.org>; Wed, 15 Apr 2020 20:21:58 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 009662076D
+	for <linux-fstests@archiver.kernel.org>; Wed, 15 Apr 2020 20:23:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2441998AbgDOUV6 (ORCPT
+        id S2442002AbgDOUXD (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 15 Apr 2020 16:21:58 -0400
-Received: from sandeen.net ([63.231.237.45]:59792 "EHLO sandeen.net"
+        Wed, 15 Apr 2020 16:23:03 -0400
+Received: from sandeen.net ([63.231.237.45]:59830 "EHLO sandeen.net"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2441997AbgDOUV5 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 15 Apr 2020 16:21:57 -0400
+        id S2441997AbgDOUWu (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 15 Apr 2020 16:22:50 -0400
 Received: from [10.0.0.4] (liberator [10.0.0.4])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by sandeen.net (Postfix) with ESMTPSA id A157448C682;
-        Wed, 15 Apr 2020 15:21:36 -0500 (CDT)
-Subject: [PATCH 4/4] fstests: test for fallocate capability in more tests
+        by sandeen.net (Postfix) with ESMTPSA id 4BF78F8C2B;
+        Wed, 15 Apr 2020 15:22:30 -0500 (CDT)
+Subject: [PATCH 5/4] fstests: exclude exfat from tests which require metadata
+ journaling
 From:   Eric Sandeen <sandeen@sandeen.net>
 To:     fstests <fstests@vger.kernel.org>,
         Namjae Jeon <namjae.jeon@samsung.com>
@@ -71,8 +73,8 @@ Autocrypt: addr=sandeen@sandeen.net; prefer-encrypt=mutual; keydata=
  Pk6ah10C4+R1Jc7dyUsKksMfvvhRX1hTIXhth85H16706bneTayZBhlZ/hK18uqTX+s0onG/
  m1F3vYvdlE4p2ts1mmixMF7KajN9/E5RQtiSArvKTbfsB6Two4MthIuLuf+M0mI4gPl9SPlf
  fWCYVPhaU9o83y1KFbD/+lh1pjP7bEu/YudBvz7F2Myjh4/9GUAijrCTNeDTDAgvIJDjXuLX pA==
-Message-ID: <1058c9b7-61e7-f8f9-b5d3-2e94a78d17de@sandeen.net>
-Date:   Wed, 15 Apr 2020 15:21:55 -0500
+Message-ID: <767dab7b-df62-a2c4-015d-159db6689569@sandeen.net>
+Date:   Wed, 15 Apr 2020 15:22:49 -0500
 User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:68.0)
  Gecko/20100101 Thunderbird/68.7.0
 MIME-Version: 1.0
@@ -85,48 +87,21 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-These 3 tests explicitly call xfs_io's fallocate command, test whether
-it works before running the test.
-
 Signed-off-by: Eric Sandeen <sandeen@redhat.com>
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
 
-diff --git a/tests/generic/286 b/tests/generic/286
-index 00cb87b7..8be4fbc9 100755
---- a/tests/generic/286
-+++ b/tests/generic/286
-@@ -23,6 +23,7 @@ _supported_fs generic
- _supported_os Linux
+diff --git a/common/rc b/common/rc
+index 476d3d07..ec17c99a 100644
+--- a/common/rc
++++ b/common/rc
+@@ -3211,7 +3211,7 @@ _has_metadata_journaling()
+ 	fi
  
- _require_test
-+_require_xfs_io_command "falloc"
- _require_seek_data_hole
- 
- src=$TEST_DIR/seek_copy_testfile
-diff --git a/tests/generic/404 b/tests/generic/404
-index 14decdb7..69d7e71e 100755
---- a/tests/generic/404
-+++ b/tests/generic/404
-@@ -76,6 +76,7 @@ rm -f $seqres.full
- _supported_fs generic
- _supported_os Linux
- _require_test
-+_require_xfs_io_command "falloc"
- _require_xfs_io_command "finsert"
- 
- blksize=`_get_block_size $TEST_DIR`
-diff --git a/tests/generic/569 b/tests/generic/569
-index 4573be5a..385fa59f 100755
---- a/tests/generic/569
-+++ b/tests/generic/569
-@@ -29,6 +29,7 @@ _cleanup()
- # real QA test starts here
- _supported_os Linux
- _supported_fs generic
-+_require_xfs_io_command "falloc"
- _require_test_program swapon
- _require_scratch_swapfile
- 
+ 	case "$FSTYP" in
+-	ext2|vfat|msdos|udf)
++	ext2|vfat|msdos|udf|exfat)
+ 		echo "$FSTYP does not support metadata journaling"
+ 		return 1
+ 		;;
 
 
