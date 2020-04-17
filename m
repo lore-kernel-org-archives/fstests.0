@@ -2,186 +2,154 @@ Return-Path: <SRS0=26Jc=6B=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 651FCC2D0EF
-	for <linux-fstests@archiver.kernel.org>; Fri, 17 Apr 2020 17:32:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 44526C2D0EF
+	for <linux-fstests@archiver.kernel.org>; Fri, 17 Apr 2020 17:48:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4358522209
-	for <linux-fstests@archiver.kernel.org>; Fri, 17 Apr 2020 17:32:27 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1587144747;
-	bh=ecBgLw1w9yQe1RySCuIf65DJjqZM3K8JlNSrvoGnj9c=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=YaHlx+Jy1rDJZ3c22SIRsUMExdD1q+TEO5DGXmynY86GEK7mi2cuNBi+fxogCf7v+
-	 HJslGG1e7gcKflMte+s72bAIKL3WMc2/uflaxRwZSpAjq7e8d2onnuF9aOs7thMmUm
-	 y72z2r4NAbSvnhBZNcwn3ODJnVG4fFw7WKjmYa+8=
+	by mail.kernel.org (Postfix) with ESMTP id 166552076D
+	for <linux-fstests@archiver.kernel.org>; Fri, 17 Apr 2020 17:48:02 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="L6wCx8nK"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729445AbgDQRc1 (ORCPT
+        id S1729756AbgDQRsB (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 17 Apr 2020 13:32:27 -0400
-Received: from mail.kernel.org ([198.145.29.99]:41458 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728602AbgDQRc0 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 17 Apr 2020 13:32:26 -0400
-Received: from debian7.Home (bl8-197-74.dsl.telepac.pt [85.241.197.74])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        Fri, 17 Apr 2020 13:48:01 -0400
+Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:57140 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1729736AbgDQRsB (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 17 Apr 2020 13:48:01 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1587145679;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=Izss2Wk8c6NbM+6CCqaR7BeWdE4zePhdLqBUnnGLKCY=;
+        b=L6wCx8nKRYuR0Ny3XtaSbKmwIdZdLGh89zi/mUepul9jtw4qQr1DsjE1L+C+Qbwnhv6A8p
+        mxGVxzmZQkcubL3xxy30qcHMNx9qZKsJjW3qR954hmZWXyIcZsGAy1aFbiOT5wasoShBOd
+        OIvL8W49enwAHcx9o5z4VBDCeHHecBY=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-345-u7aSPfCZPlutmdMKi_swWQ-1; Fri, 17 Apr 2020 13:47:56 -0400
+X-MC-Unique: u7aSPfCZPlutmdMKi_swWQ-1
+Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 5DF24208E4;
-        Fri, 17 Apr 2020 17:32:25 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1587144746;
-        bh=ecBgLw1w9yQe1RySCuIf65DJjqZM3K8JlNSrvoGnj9c=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=O1J4Y0Qif23PdrZj6FDE66dwLSZHqRhuHxaQG7/zeGUs3GOTyM53yFZlaFTOeQMDi
-         j/1rIDfVYhnxy9TpgGlFFqIO5cv453md7501fMAXEyTv/+i+kP/wTXbq1EDjpaZBT2
-         4baGL1objbAolgSxdyDIkm6dtVdjkjj5dDTj6dtA=
-From:   fdmanana@kernel.org
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH 4/4] fsx: move range generation logic into a common helper
-Date:   Fri, 17 Apr 2020 18:32:21 +0100
-Message-Id: <20200417173221.6380-1-fdmanana@kernel.org>
-X-Mailer: git-send-email 2.11.0
-In-Reply-To: <20200408103627.11514-1-fdmanana@kernel.org>
-References: <20200408103627.11514-1-fdmanana@kernel.org>
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 751EC107ACC7;
+        Fri, 17 Apr 2020 17:47:55 +0000 (UTC)
+Received: from bfoster (dhcp-41-2.bos.redhat.com [10.18.41.2])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id C16F060BE0;
+        Fri, 17 Apr 2020 17:47:54 +0000 (UTC)
+Date:   Fri, 17 Apr 2020 13:47:52 -0400
+From:   Brian Foster <bfoster@redhat.com>
+To:     Filipe Manana <fdmanana@kernel.org>
+Cc:     fstests <fstests@vger.kernel.org>,
+        linux-btrfs <linux-btrfs@vger.kernel.org>,
+        Filipe Manana <fdmanana@suse.com>
+Subject: Re: [PATCH 1/4] fsx: add missing file size update on zero range
+ operations
+Message-ID: <20200417174752.GG13463@bfoster>
+References: <20200408103552.11339-1-fdmanana@kernel.org>
+ <20200417171020.GB13463@bfoster>
+ <CAL3q7H5nxP5tt8i=i0uQoG7VBs94O=ZkcAz8khS-DGCTTQG1=g@mail.gmail.com>
+ <20200417172606.GF13463@bfoster>
+ <CAL3q7H5YSrV6Z+aB=ncSQiUfbACWgMArVRB9xu0Dhx0mTp3bZA@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAL3q7H5YSrV6Z+aB=ncSQiUfbACWgMArVRB9xu0Dhx0mTp3bZA@mail.gmail.com>
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.12
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Filipe Manana <fdmanana@suse.com>
+On Fri, Apr 17, 2020 at 06:32:03PM +0100, Filipe Manana wrote:
+> On Fri, Apr 17, 2020 at 6:26 PM Brian Foster <bfoster@redhat.com> wrote:
+> >
+> > On Fri, Apr 17, 2020 at 06:20:24PM +0100, Filipe Manana wrote:
+> > > On Fri, Apr 17, 2020 at 6:10 PM Brian Foster <bfoster@redhat.com> wrote:
+> > > >
+> > > > On Wed, Apr 08, 2020 at 11:35:52AM +0100, fdmanana@kernel.org wrote:
+> > > > > From: Filipe Manana <fdmanana@suse.com>
+> > > > >
+> > > > > When a zero range operation increases the size of the test file we were
+> > > > > not updating the global variable 'file_size' which tracks the current
+> > > > > size of the test file. This variable is used to for example compute the
+> > > > > offset for a source range of clone, dedupe and copy file range operations.
+> > > > >
+> > > > > So just fix it by updating the 'file_size' global variable whenever a zero
+> > > > > range operation does not use the keep size flag and its range goes beyond
+> > > > > the current file size.
+> > > > >
+> > > > > Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> > > > > ---
+> > > > >  ltp/fsx.c | 2 ++
+> > > > >  1 file changed, 2 insertions(+)
+> > > > >
+> > > > > diff --git a/ltp/fsx.c b/ltp/fsx.c
+> > > > > index 9d598a4f..fa383c94 100644
+> > > > > --- a/ltp/fsx.c
+> > > > > +++ b/ltp/fsx.c
+> > > > > @@ -1212,6 +1212,8 @@ do_zero_range(unsigned offset, unsigned length, int keep_size)
+> > > > >       }
+> > > > >
+> > > > >       end_offset = keep_size ? 0 : offset + length;
+> > > > > +     if (!keep_size && end_offset > file_size)
+> > > > > +             file_size = end_offset;
+> > > >
+> > > > Should this ever happen if the caller uses TRIM_OFF_LEN() on the
+> > > > offset and length?
+> > >
+> > > TRIM_OFF_LEN only trims the range, not the file_size.
+> > > Or did I miss something?
+> > >
+> >
+> > Right, but TRIM_LEN() does:
+> >
+> >         if ((off) + (len) > (size))             \
+> >                 (len) = (size) - (off);         \
+> >
+> > ... where size is file_size. Hm?
+> 
+> That only updates the range's length, not the file_size.
+> 
 
-We have very similar code that generates the destination range for clone,
-dedupe and copy_file_range operations, so avoid duplicating the code three
-times and move it into a helper function.
+Yes, but it caps the range to within file_size.
 
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
+> Also, if you check the global style, you'll see that in the function
+> for every operation that can change file size we do update file_size
+> explicitly (e.g. do_preallocate(), and we call TRIM_OFF_LEN before
+> calling it as well).
+> 
 
-V2: Turned the first parameter of the helper into a boolean as Darrick suggested.
-V3: Added destination offset align by writebdy when bdy_align is true.
+do_preallocate() (fallocate) passes maxfilelen instead of file_size, as
+does write and mapwrite. Insert range uses TRIM_LEN() directly but also
+passes maxfilelen.
 
- ltp/fsx.c | 94 ++++++++++++++++++++++++++-------------------------------------
- 1 file changed, 39 insertions(+), 55 deletions(-)
+Brian
 
-diff --git a/ltp/fsx.c b/ltp/fsx.c
-index 89a5f60e..2e51169b 100644
---- a/ltp/fsx.c
-+++ b/ltp/fsx.c
-@@ -1930,6 +1930,39 @@ range_overlaps(
- 	return llabs((unsigned long long)off1 - off0) < size;
- }
- 
-+static void generate_dest_range(bool bdy_align,
-+				unsigned long max_range_end,
-+				unsigned long *src_offset,
-+				unsigned long *size,
-+				unsigned long *dst_offset)
-+{
-+	int tries = 0;
-+
-+	TRIM_OFF_LEN(*src_offset, *size, file_size);
-+	if (bdy_align) {
-+		*src_offset -= *src_offset % readbdy;
-+		if (o_direct)
-+			*size -= *size % readbdy;
-+	} else {
-+		*src_offset = *src_offset & ~(block_size - 1);
-+		*size = *size & ~(block_size - 1);
-+	}
-+
-+	do {
-+		if (tries++ >= 30) {
-+			*size = 0;
-+			break;
-+		}
-+		*dst_offset = random();
-+		TRIM_OFF(*dst_offset, max_range_end);
-+		if (bdy_align)
-+			*dst_offset = *dst_offset & writebdy;
-+		else
-+			*dst_offset = *dst_offset & ~(block_size - 1);
-+	} while (range_overlaps(*src_offset, *dst_offset, *size) ||
-+		 *dst_offset + *size > max_range_end);
-+}
-+
- int
- test(void)
- {
-@@ -2004,63 +2037,14 @@ test(void)
- 			keep_size = random() % 2;
- 		break;
- 	case OP_CLONE_RANGE:
--		{
--			int tries = 0;
--
--			TRIM_OFF_LEN(offset, size, file_size);
--			offset = offset & ~(block_size - 1);
--			size = size & ~(block_size - 1);
--			do {
--				if (tries++ >= 30) {
--					size = 0;
--					break;
--				}
--				offset2 = random();
--				TRIM_OFF(offset2, maxfilelen);
--				offset2 = offset2 & ~(block_size - 1);
--			} while (range_overlaps(offset, offset2, size) ||
--				 offset2 + size > maxfilelen);
--			break;
--		}
-+		generate_dest_range(false, maxfilelen, &offset, &size, &offset2);
-+		break;
- 	case OP_DEDUPE_RANGE:
--		{
--			int tries = 0;
--
--			TRIM_OFF_LEN(offset, size, file_size);
--			offset = offset & ~(block_size - 1);
--			size = size & ~(block_size - 1);
--			do {
--				if (tries++ >= 30) {
--					size = 0;
--					break;
--				}
--				offset2 = random();
--				TRIM_OFF(offset2, file_size);
--				offset2 = offset2 & ~(block_size - 1);
--			} while (range_overlaps(offset, offset2, size) ||
--				 offset2 + size > file_size);
--			break;
--		}
-+		generate_dest_range(false, file_size, &offset, &size, &offset2);
-+		break;
- 	case OP_COPY_RANGE:
--		{
--			int tries = 0;
--
--			TRIM_OFF_LEN(offset, size, file_size);
--			offset -= offset % readbdy;
--			if (o_direct)
--				size -= size % readbdy;
--			do {
--				if (tries++ >= 30) {
--					size = 0;
--					break;
--				}
--				offset2 = random();
--				TRIM_OFF(offset2, maxfilelen);
--				offset2 -= offset2 % writebdy;
--			} while (range_overlaps(offset, offset2, size) ||
--				 offset2 + size > maxfilelen);
--			break;
--		}
-+		generate_dest_range(true, maxfilelen, &offset, &size, &offset2);
-+		break;
- 	}
- 
- have_op:
--- 
-2.11.0
+> Thanks.
+> 
+> >
+> > Brian
+> >
+> > > Thanks.
+> > >
+> > > >
+> > > > Brian
+> > > >
+> > > > >
+> > > > >       if (end_offset > biggest) {
+> > > > >               biggest = end_offset;
+> > > > > --
+> > > > > 2.11.0
+> > > > >
+> > > >
+> > >
+> >
+> 
 
