@@ -2,101 +2,85 @@ Return-Path: <SRS0=TcRL=6D=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.7 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	UNPARSEABLE_RELAY autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F18C0C38A30
-	for <linux-fstests@archiver.kernel.org>; Sun, 19 Apr 2020 10:49:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BC442C38A30
+	for <linux-fstests@archiver.kernel.org>; Sun, 19 Apr 2020 14:54:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CE95F21974
-	for <linux-fstests@archiver.kernel.org>; Sun, 19 Apr 2020 10:49:46 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="BkZecsED"
+	by mail.kernel.org (Postfix) with ESMTP id 8DB8B21841
+	for <linux-fstests@archiver.kernel.org>; Sun, 19 Apr 2020 14:54:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725939AbgDSKtq (ORCPT
+        id S1726208AbgDSOye (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 19 Apr 2020 06:49:46 -0400
-Received: from us-smtp-1.mimecast.com ([205.139.110.61]:51292 "EHLO
-        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1725845AbgDSKtq (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 19 Apr 2020 06:49:46 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1587293385;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=O7gAonBU3evhymFwQer16GSnsrGRuvcDgRvPDZH/Hc4=;
-        b=BkZecsEDS0ao8x8IFHSAoXoaOCDAvrW8ARg9EvWaMYH5oue3lFmGgBR4x1jn/u23qflpMA
-        WOtTveCMrPrE5YgI2JqIJG74iyq4UtVBblbJ45SyndTi8f2hbD10fCIiTqQTy8UUDYgyJr
-        y89bZgval/7fIiitLRBGM2JD3iUKrM4=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-180-QLjKK4cjOEC-J27WNjDjRw-1; Sun, 19 Apr 2020 06:49:43 -0400
-X-MC-Unique: QLjKK4cjOEC-J27WNjDjRw-1
-Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 283FD8017F5
-        for <fstests@vger.kernel.org>; Sun, 19 Apr 2020 10:49:42 +0000 (UTC)
-Received: from bogon.redhat.com (ovpn-12-89.pek2.redhat.com [10.72.12.89])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 9EACC12974A
-        for <fstests@vger.kernel.org>; Sun, 19 Apr 2020 10:49:40 +0000 (UTC)
-From:   Zorro Lang <zlang@redhat.com>
-To:     fstests@vger.kernel.org
-Subject: [PATCH] generic/594: require setquota tool supports project quota
-Date:   Sun, 19 Apr 2020 18:49:36 +0800
-Message-Id: <20200419104936.30095-1-zlang@redhat.com>
+        Sun, 19 Apr 2020 10:54:34 -0400
+Received: from out20-26.mail.aliyun.com ([115.124.20.26]:48388 "EHLO
+        out20-26.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725994AbgDSOye (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 19 Apr 2020 10:54:34 -0400
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.0801112|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_regular_dialog|0.137629-0.00138172-0.860989;FP=0|0|0|0|0|-1|-1|-1;HT=e01a16370;MF=guan@eryu.me;NM=1;PH=DS;RN=4;RT=4;SR=0;TI=SMTPD_---.HJr3Pll_1587308070;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.HJr3Pll_1587308070)
+          by smtp.aliyun-inc.com(10.147.42.135);
+          Sun, 19 Apr 2020 22:54:30 +0800
+Date:   Sun, 19 Apr 2020 22:55:37 +0800
+From:   Eryu Guan <guan@eryu.me>
+To:     fdmanana@kernel.org
+Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+        Filipe Manana <fdmanana@suse.com>
+Subject: Re: [PATCH 1/4] fsx: add missing file size update on zero range
+ operations
+Message-ID: <20200419145537.GE388005@desktop>
+References: <20200408103552.11339-1-fdmanana@kernel.org>
 MIME-Version: 1.0
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.11
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20200408103552.11339-1-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-The old setquota tool doesn't support project quota, it doesn't has
-"-P, --project" option. So _notrun the test to avoid a failure.
+On Wed, Apr 08, 2020 at 11:35:52AM +0100, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
+> 
+> When a zero range operation increases the size of the test file we were
+> not updating the global variable 'file_size' which tracks the current
+> size of the test file. This variable is used to for example compute the
+> offset for a source range of clone, dedupe and copy file range operations.
+> 
+> So just fix it by updating the 'file_size' global variable whenever a zero
+> range operation does not use the keep size flag and its range goes beyond
+> the current file size.
+> 
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> ---
+>  ltp/fsx.c | 2 ++
+>  1 file changed, 2 insertions(+)
+> 
+> diff --git a/ltp/fsx.c b/ltp/fsx.c
+> index 9d598a4f..fa383c94 100644
+> --- a/ltp/fsx.c
+> +++ b/ltp/fsx.c
+> @@ -1212,6 +1212,8 @@ do_zero_range(unsigned offset, unsigned length, int keep_size)
+>  	}
+>  
+>  	end_offset = keep_size ? 0 : offset + length;
+> +	if (!keep_size && end_offset > file_size)
+> +		file_size = end_offset;
 
-Signed-off-by: Zorro Lang <zlang@redhat.com>
----
- common/quota      | 9 +++++++++
- tests/generic/594 | 1 +
- 2 files changed, 10 insertions(+)
+I think this should be done after we really excute fallocate(2),
+otherwise we may return early below:
 
-diff --git a/common/quota b/common/quota
-index 4e07fef1..240e0bbc 100644
---- a/common/quota
-+++ b/common/quota
-@@ -124,6 +124,15 @@ _scratch_enable_pquota()
- 	esac
- }
-=20
-+_require_setquota_project()
-+{
-+	setquota --help 2>&1 | \
-+		grep -q "\-P, \-\-project[[:space:]]*set limits for project"
-+	if [ "$?" -ne 0 ];then
-+		_notrun "setquota doesn't support project quota (-P)"
-+	fi
-+}
-+
- #
- # checks for user nobody in /etc/passwd and /etc/group.
- #
-diff --git a/tests/generic/594 b/tests/generic/594
-index e501d54c..2665e5b4 100755
---- a/tests/generic/594
-+++ b/tests/generic/594
-@@ -34,6 +34,7 @@ rm -f $seqres.full
- _supported_fs generic
- _supported_os Linux
- _require_scratch
-+_require_setquota_project
- # V4 XFS doesn't support to mount project and group quota together
- if [ "$FSTYP" =3D "xfs" ];then
- 	_require_scratch_xfs_crc
---=20
-2.20.1
+        if (testcalls <= simulatedopcount)                                                                                                                                                                                                     
+	                return;
 
+Thanks,
+Eryu
+
+>  
+>  	if (end_offset > biggest) {
+>  		biggest = end_offset;
+> -- 
+> 2.11.0
+> 
