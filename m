@@ -2,205 +2,183 @@ Return-Path: <SRS0=ARln=6E=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9D169C3A5A0
-	for <linux-fstests@archiver.kernel.org>; Mon, 20 Apr 2020 10:35:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B9602C3815B
+	for <linux-fstests@archiver.kernel.org>; Mon, 20 Apr 2020 11:33:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7B6B32082E
-	for <linux-fstests@archiver.kernel.org>; Mon, 20 Apr 2020 10:35:03 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="nG/zNytA"
+	by mail.kernel.org (Postfix) with ESMTP id 949E520738
+	for <linux-fstests@archiver.kernel.org>; Mon, 20 Apr 2020 11:33:30 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1587382410;
+	bh=a4JxLNVo8P5vCvCI7Om1mehKcLGZ7e7TRLza9xWNdoE=;
+	h=Subject:From:To:Cc:Date:In-Reply-To:References:List-ID:From;
+	b=ZLufcd33rG76rB2M3PZDvVCPGCRSEE7X7008Dg1TdXJBPPA4WZb+G3Vm85E++Xj77
+	 hPrkddUaYi1bCsZZ2MM0bM/uWuyuXPV3yMcueJdWYU3eDMeUsKKEkGKH7KzhqBiIW3
+	 Qihd0p8KD9iaMmJcd4oAMBNnHZY+k8hUl7l2B/Kk=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726117AbgDTKfC (ORCPT
+        id S1726020AbgDTLda (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 20 Apr 2020 06:35:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41364 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1725773AbgDTKfB (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 20 Apr 2020 06:35:01 -0400
-Received: from mail-wr1-x443.google.com (mail-wr1-x443.google.com [IPv6:2a00:1450:4864:20::443])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0F6F2C061A0C;
-        Mon, 20 Apr 2020 03:35:01 -0700 (PDT)
-Received: by mail-wr1-x443.google.com with SMTP id i10so11441958wrv.10;
-        Mon, 20 Apr 2020 03:35:00 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id;
-        bh=71jSQBVB1hEmUSXCpD1ZsizcB1aIAhtY2Vb35LS/asc=;
-        b=nG/zNytAujL9D7iHHMb6Y+xHm0Wr7s/3D5cZcNq9/2xqLTpwjoElXA/EujGWKbgO5l
-         KxHk4Px37HyP46ekQpcIqqlnhWeJzG5f6mZt63FUTlE9lLIuzyAN9J7mvlg0BhU40d0L
-         i5wPV5Ya5ndHuTW209EvP3+C/eu1jKFFxYeKxQmW34DR4R9FhZwV/iWpN6+TzgToPTKE
-         Jf/ypy4qNgTStUB6EgsHlh0Ao/DNuJ2xKKd7w3N3eO3xUttP0oRJty2tKV7Bk316Syj+
-         gJE3dkn7QMppkc7aIz/cPZMh4/XwlRLMRps3XzA+s2QaEwZ1OsxOt5tVpUX+GqMHTVy5
-         n3Yw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id;
-        bh=71jSQBVB1hEmUSXCpD1ZsizcB1aIAhtY2Vb35LS/asc=;
-        b=ZanFhi6yesOL2Ymo/u58RAYs3a0+6S1M21yocLyLekpcNLFbVYpPeBE/ITANO9SV5k
-         w03tiv/KtTkt6s2VkIyjNwUb4nE1BVTpC2r2lIm6nG1ZtAXHc3TxSvSF+6r+Kel5s7ed
-         d4u5Z66A7z7FEUhkLHUXIafUntwNlQYrJ3VwQ6vzJ6UxiqHXgrz80//X7gyv5FH6+fES
-         Wn488OmzQyJGstFJCih9bV1xjzdFFOlFgea3VRD1gFPzbGS9nPmINRpeR9NoSb98WE7r
-         NukofRLGrjLiXRmC7lFJ9VNzJtNsQSx42Ju9rxyZzyzbvz1lAShx6zaw//EA+GuUlHc8
-         A7Uw==
-X-Gm-Message-State: AGi0PuahT15WofgLJGkj7OXOWABYiqOy5tQshTf2UkZZCaVI6LVVEG9F
-        o/2RfFFeuK4B/i2d0xefFuBHVnaU
-X-Google-Smtp-Source: APiQypKQr6uPv5dEl6/bSvi0pATXzNDEC/dXT0ZLFSByTgk0qlYkD35ywaR3/TR/RQSax2i+2e9PEQ==
-X-Received: by 2002:adf:aad4:: with SMTP id i20mr14625163wrc.47.1587378899749;
-        Mon, 20 Apr 2020 03:34:59 -0700 (PDT)
-Received: from localhost.localdomain ([141.226.12.123])
-        by smtp.gmail.com with ESMTPSA id 1sm833435wmz.13.2020.04.20.03.34.58
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 20 Apr 2020 03:34:59 -0700 (PDT)
-From:   Amir Goldstein <amir73il@gmail.com>
-To:     Eryu Guan <guaneryu@gmail.com>
-Cc:     Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org,
-        fstests@vger.kernel.org
-Subject: [PATCH v2] overlay: another test for dropping nlink below zero
-Date:   Mon, 20 Apr 2020 13:34:53 +0300
-Message-Id: <20200420103453.26425-1-amir73il@gmail.com>
-X-Mailer: git-send-email 2.17.1
+        Mon, 20 Apr 2020 07:33:30 -0400
+Received: from mail.kernel.org ([198.145.29.99]:49700 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725550AbgDTLda (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 20 Apr 2020 07:33:30 -0400
+Received: from tleilax.poochiereds.net (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 1D10C206D4;
+        Mon, 20 Apr 2020 11:33:29 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1587382409;
+        bh=a4JxLNVo8P5vCvCI7Om1mehKcLGZ7e7TRLza9xWNdoE=;
+        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
+        b=pGhBdYubKbyovlT2nxysTjsdDCwQpXt+BVqmZw52jimOFTYmuqVef4g80auy1TM/E
+         z/6lTqUE5WNttvW3iysSWugSBmh6kV9LzG9cZ6LtAKO2TEq03792ch3J55+w9JwsL0
+         qAD9je7PfKy1u5WwDy0CpjvBXklx3AMC3und6GCU=
+Message-ID: <d80c659f7755dadf218ba03f23da277811840475.camel@kernel.org>
+Subject: Re: [RFC PATCH xfstests] generic: test reporting of wb errors via
+ syncfs
+From:   Jeff Layton <jlayton@kernel.org>
+To:     Brian Foster <bfoster@redhat.com>
+Cc:     guaneryu@gmail.com, fstests@vger.kernel.org,
+        linux-fsdevel@vger.kernel.org
+Date:   Mon, 20 Apr 2020 07:33:27 -0400
+In-Reply-To: <20200417153620.GA13463@bfoster>
+References: <20200414120740.293998-1-jlayton@kernel.org>
+         <20200417153620.GA13463@bfoster>
+Content-Type: text/plain; charset="UTF-8"
+User-Agent: Evolution 3.34.4 (3.34.4-1.fc31) 
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This is a variant on test overlay/034.
+On Fri, 2020-04-17 at 11:36 -0400, Brian Foster wrote:
+> On Tue, Apr 14, 2020 at 08:07:40AM -0400, Jeff Layton wrote:
+> > From: Jeff Layton <jlayton@redhat.com>
+> > 
+> > Add a test for new syncfs error reporting behavior. When an inode fails
+> > to be written back, ensure that a subsequent call to syncfs() will also
+> > report an error.
+> > 
+> > Signed-off-by: Jeff Layton <jlayton@kernel.org>
+> > ---
+> >  tests/generic/999     | 98 +++++++++++++++++++++++++++++++++++++++++++
+> >  tests/generic/999.out |  8 ++++
+> >  tests/generic/group   |  1 +
+> >  3 files changed, 107 insertions(+)
+> >  create mode 100755 tests/generic/999
+> >  create mode 100644 tests/generic/999.out
+> > 
+> > diff --git a/tests/generic/999 b/tests/generic/999
+> > new file mode 100755
+> > index 000000000000..7383ce24c8fd
+> > --- /dev/null
+> > +++ b/tests/generic/999
+> > @@ -0,0 +1,98 @@
+> > +#! /bin/bash
+> > +# FS QA Test No. 999
+> > +#
+> > +# Open a file and write to it and fsync. Then, flip the data device to throw
+> > +# errors, write to it again and do an fdatasync. Then open an O_RDONLY fd on
+> > +# the same file and call syncfs against it and ensure that an error is reported.
+> > +# Then call syncfs again and ensure that no error is reported. Finally, repeat
+> > +# the open and syncfs and ensure that there is no error reported.
+> > +#
+> > +#-----------------------------------------------------------------------
+> > +# Copyright (c) 2020, Jeff Layton <jlayton@kernel.org>
+> > +#
+> > +# This program is free software; you can redistribute it and/or
+> > +# modify it under the terms of the GNU General Public License as
+> > +# published by the Free Software Foundation.
+> > +#
+> > +# This program is distributed in the hope that it would be useful,
+> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> > +# GNU General Public License for more details.
+> > +#
+> > +# You should have received a copy of the GNU General Public License
+> > +# along with this program; if not, write the Free Software Foundation,
+> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> > +#-----------------------------------------------------------------------
+> 
+> I think the big copyright hunk has been replaced with the
+> SPDX-License-Identifier thing (see other tests for reference).
+> 
 
-This variant is mangling upper hardlinks instead of lower hardlinks
-and does not require the inodes index feature.
+Thanks. Will fix.
 
-This is a regression test for kernel commit 83552eacdfc0
-("ovl: fix WARN_ON nlink drop to zero")
+> > +
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +
+> > +here=`pwd`
+> > +tmp=/tmp/$$
+> > +status=1    # failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	rm -f $tmp.*
+> > +	_dmerror_cleanup
+> > +}
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/filter
+> > +. ./common/dmerror
+> > +
+> > +# real QA test starts here
+> > +_supported_os Linux
+> > +_require_scratch_nocheck
+> > +# This test uses "dm" without taking into account the data could be on
+> > +# realtime subvolume, thus the test will fail with rtinherit=1
+> > +_require_no_rtinherit
+> > +_require_dm_target error
+> > +
+> > +rm -f $seqres.full
+> > +
+> > +echo "Format and mount"
+> > +_scratch_mkfs > $seqres.full 2>&1
+> > +_dmerror_init
+> > +_dmerror_mount
+> > +
+> > +datalen=65536
+> > +_require_fs_space $SCRATCH_MNT $datalen
+> 
+> That seems unnecessary for such a small value. BTW, any reason this
+> needs to write more than a page?
+> 
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+No reason for that size. I think I just copied that from generic/487
+since I started with that one as a template. I'll cut it down to a page.
 
-V2:
-- Fix stale comments about lower hardlinks
-- Replace 'touch' with 'stat' of overlay inode
+Should I not bother calling _require_fs_space here since it's so small?
+I wasn't sure how strict that was...
 
----
- tests/overlay/072     | 85 +++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/072.out |  3 ++
- tests/overlay/group   |  1 +
- 3 files changed, 89 insertions(+)
- create mode 100755 tests/overlay/072
- create mode 100644 tests/overlay/072.out
+> > +
+> > +# use fd 5 to hold file open
+> > +testfile=$SCRATCH_MNT/syncfs-reports-errors
+> > +exec 5>$testfile
+> > +
+> 
+> Also what's the reason for holding an fd on the test file like this?
+> Does this affect error reporting behavior in some way? Otherwise the
+> rest looks reasonable to me.
+> 
 
-diff --git a/tests/overlay/072 b/tests/overlay/072
-new file mode 100755
-index 00000000..d2cb93b9
---- /dev/null
-+++ b/tests/overlay/072
-@@ -0,0 +1,85 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2020 CTERA Networks. All Rights Reserved.
-+#
-+# FS QA Test 072
-+#
-+# Test overlay nlink when adding upper hardlinks.
-+#
-+# nlink of overlay inode could be dropped indefinitely by adding
-+# unaccounted upper hardlinks underneath a mounted overlay and
-+# trying to remove them.
-+#
-+# This is a variant of test overlay/034 with mangling of upper instead
-+# of lower hardlinks. Unlike overlay/034, this test does not require the
-+# inode index feature and will pass whether is it enabled or disabled
-+# by default.
-+#
-+# This is a regression test for kernel commit 83552eacdfc0
-+# ("ovl: fix WARN_ON nlink drop to zero").
-+# Without the fix, the test triggers
-+# WARN_ON(inode->i_nlink == 0) in drop_link().
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs overlay
-+_supported_os Linux
-+_require_scratch
-+
-+upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
-+
-+# Remove all files from previous tests
-+_scratch_mkfs
-+
-+# Create upper hardlink
-+mkdir -p $upperdir
-+touch $upperdir/0
-+ln $upperdir/0 $upperdir/1
-+
-+_scratch_mount
-+
-+# Verify overlay inode nlink 2 same as upper inode
-+stat -c '%h' $SCRATCH_MNT/0
-+
-+# Add upper hardlinks while overlay is mounted - overlay inode nlink
-+# is not being updated
-+ln $upperdir/0 $upperdir/2
-+ln $upperdir/0 $upperdir/3
-+
-+# Unlink the 2 un-accounted upper hardlinks - overlay inode nlinks
-+# drops 2 and may reach 0 if the situation is not detected
-+rm $SCRATCH_MNT/2
-+rm $SCRATCH_MNT/3
-+
-+# Check if getting ENOENT when trying to link !I_LINKABLE with nlink 0
-+ln $SCRATCH_MNT/0 $SCRATCH_MNT/4
-+
-+# Unlink all hardlinks - if overlay inode nlink is 0, this will trigger
-+# WARN_ON() in drop_nlink()
-+rm $SCRATCH_MNT/0
-+rm $SCRATCH_MNT/1
-+rm $SCRATCH_MNT/4
-+
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/overlay/072.out b/tests/overlay/072.out
-new file mode 100644
-index 00000000..28eeb940
---- /dev/null
-+++ b/tests/overlay/072.out
-@@ -0,0 +1,3 @@
-+QA output created by 072
-+2
-+Silence is golden
-diff --git a/tests/overlay/group b/tests/overlay/group
-index 43ad8a52..82876d09 100644
---- a/tests/overlay/group
-+++ b/tests/overlay/group
-@@ -74,3 +74,4 @@
- 069 auto quick copyup hardlink exportfs nested nonsamefs
- 070 auto quick copyup redirect nested
- 071 auto quick copyup redirect nested nonsamefs
-+072 auto quick copyup hardlink
+Again, copied from 487. It's not necessary for this test. I'll switch
+that to just "touch testfile" at the start and get rid of the follow-on
+close.
+
+Thanks for the review!
 -- 
-2.17.1
+Jeff Layton <jlayton@kernel.org>
 
