@@ -4,47 +4,47 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 94D40C3815B
-	for <linux-fstests@archiver.kernel.org>; Mon, 20 Apr 2020 17:09:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 73DF3C3A5A0
+	for <linux-fstests@archiver.kernel.org>; Mon, 20 Apr 2020 17:09:22 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6799F208E4
-	for <linux-fstests@archiver.kernel.org>; Mon, 20 Apr 2020 17:09:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4981D22244
+	for <linux-fstests@archiver.kernel.org>; Mon, 20 Apr 2020 17:09:22 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1587402550;
-	bh=/09lFz86nyjgOxhAxgGqNyvCbXjNDXalZtzZZTnqodE=;
+	s=default; t=1587402562;
+	bh=1NURecO0mrbzqRJJhqwcnUklSVWjq4mXylGXv77qwzU=;
 	h=From:To:Cc:Subject:Date:List-ID:From;
-	b=ZJu+GynUQfXyHADW5clEz758Dr94i5mK2BzPpAL1NQEBSYNsMWVMmz8CY4c/sE0Om
-	 EzfJDYFrALYktC4MObzYIF+MxxRI4l5NYWJZfB6SDWTE2EEDZ1XKtVAGa8+8fe5MjY
-	 ejPBbtemGGdWT7fGGhNdHDsz/47MVabqLrprmsWk=
+	b=msLPkbLZEz32le21K91oM5yxT3wy1163HeMEOdaTBRFkubGLx5/3E3h+MqANJ4Cit
+	 nfxaAQumYblVWaa49wqtB1TMn9lCppfgGn99uhRnN66+ZuF60sTbSIf+heqAXodXtg
+	 uATxjA/7q4CCm+KJivKQgXhYDk1nmPK08/nEy4vk=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726100AbgDTRJK (ORCPT
+        id S1726522AbgDTRJW (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 20 Apr 2020 13:09:10 -0400
-Received: from mail.kernel.org ([198.145.29.99]:42710 "EHLO mail.kernel.org"
+        Mon, 20 Apr 2020 13:09:22 -0400
+Received: from mail.kernel.org ([198.145.29.99]:42760 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725784AbgDTRJK (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 20 Apr 2020 13:09:10 -0400
+        id S1726296AbgDTRJV (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 20 Apr 2020 13:09:21 -0400
 Received: from debian7.Home (bl8-197-74.dsl.telepac.pt [85.241.197.74])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id BBBF4206D9;
-        Mon, 20 Apr 2020 17:09:08 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id C0D49206D9;
+        Mon, 20 Apr 2020 17:09:20 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1587402549;
-        bh=/09lFz86nyjgOxhAxgGqNyvCbXjNDXalZtzZZTnqodE=;
+        s=default; t=1587402561;
+        bh=1NURecO0mrbzqRJJhqwcnUklSVWjq4mXylGXv77qwzU=;
         h=From:To:Cc:Subject:Date:From;
-        b=oIvhkGvh8dNq1KRn0wMOb5dpf7Heg+flEnRxEb+xiCTGqgBib7EsCIdC/D7hY14WW
-         FB0tIf5KtSYrlkU6eK6r2EumZ6YwynScbH+SkU9GThHXcaqlEliDKqNpZCTzRnT0KC
-         uusGL6hlPGtrMCjLEZGygRZwJORLaMIR0gqK8mwI=
+        b=peRQsf5jD8aed7u1ZY4wNJK+QO4AgM4RRvq4VZgOP6ZyOV+jbl1zygQBSGAAqmxQ2
+         fuSl2M9t7MkNFHsUIW7tQYhU5oInyVJA26MDEHAf07q7W//7rjzCFUgfbyO4Ar4wtf
+         xV5RRCht31X+atU411k4d7RV4cglJfDMA7nQLGMA=
 From:   fdmanana@kernel.org
 To:     fstests@vger.kernel.org
 Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH 2/4] fsx: fix infinite/too long loops when generating ranges for clone operations
-Date:   Mon, 20 Apr 2020 18:09:05 +0100
-Message-Id: <20200420170905.9944-1-fdmanana@kernel.org>
+Subject: [PATCH 3/4] fsx: fix infinite/too long loops when generating ranges for copy_file_range
+Date:   Mon, 20 Apr 2020 18:09:17 +0100
+Message-Id: <20200420170917.9994-1-fdmanana@kernel.org>
 X-Mailer: git-send-email 2.11.0
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
@@ -53,12 +53,13 @@ X-Mailing-List: fstests@vger.kernel.org
 
 From: Filipe Manana <fdmanana@suse.com>
 
-While running generic/457 I've had fsx taking a lot of CPU time and not
-making any progress for over an hour. Attaching gdb to the fsx process
-revealed that fsx was in the loop that generates the ranges for a clone
-operation, in particular the loop seemed to never end because the range
-defined by 'offset2' kept overlapping with the range defined by 'offset'.
-So far this happened two times in one of my test VMs with generic/457.
+While running generic/521 I've had fsx taking a lot of CPU time and not
+making any progress for several hours. Attaching gdb to the fsx process
+revealed that fsx was in the loop that generates the ranges for a
+copy_file_range operation, in particular the loop seemed to never end
+because the range defined by 'offset2' kept overlapping with the range
+defined by 'offset'.
+So far this happened one time only in one of my test VMs with generic/521.
 
 Fix this by breaking out of the loop after trying 30 times, like we
 currently do for dedupe operations, which results in logging the operation
@@ -67,24 +68,25 @@ as skipped.
 Signed-off-by: Filipe Manana <fdmanana@suse.com>
 Reviewed-by: Brian Foster <bfoster@redhat.com>
 ---
- ltp/fsx.c | 28 ++++++++++++++++++----------
- 1 file changed, 18 insertions(+), 10 deletions(-)
+ ltp/fsx.c | 30 +++++++++++++++++++-----------
+ 1 file changed, 19 insertions(+), 11 deletions(-)
 
 diff --git a/ltp/fsx.c b/ltp/fsx.c
-index 56479eda..ab64b50a 100644
+index ab64b50a..40cbd401 100644
 --- a/ltp/fsx.c
 +++ b/ltp/fsx.c
-@@ -2013,16 +2013,24 @@ test(void)
- 			keep_size = random() % 2;
- 		break;
- 	case OP_CLONE_RANGE:
+@@ -2051,17 +2051,25 @@ test(void)
+ 			break;
+ 		}
+ 	case OP_COPY_RANGE:
 -		TRIM_OFF_LEN(offset, size, file_size);
--		offset = offset & ~(block_size - 1);
--		size = size & ~(block_size - 1);
+-		offset -= offset % readbdy;
+-		if (o_direct)
+-			size -= size % readbdy;
 -		do {
 -			offset2 = random();
 -			TRIM_OFF(offset2, maxfilelen);
--			offset2 = offset2 & ~(block_size - 1);
+-			offset2 -= offset2 % writebdy;
 -		} while (range_overlaps(offset, offset2, size) ||
 -			 offset2 + size > maxfilelen);
 -		break;
@@ -92,8 +94,9 @@ index 56479eda..ab64b50a 100644
 +			int tries = 0;
 +
 +			TRIM_OFF_LEN(offset, size, file_size);
-+			offset = offset & ~(block_size - 1);
-+			size = size & ~(block_size - 1);
++			offset -= offset % readbdy;
++			if (o_direct)
++				size -= size % readbdy;
 +			do {
 +				if (tries++ >= 30) {
 +					size = 0;
@@ -101,14 +104,14 @@ index 56479eda..ab64b50a 100644
 +				}
 +				offset2 = random();
 +				TRIM_OFF(offset2, maxfilelen);
-+				offset2 = offset2 & ~(block_size - 1);
++				offset2 -= offset2 % writebdy;
 +			} while (range_overlaps(offset, offset2, size) ||
 +				 offset2 + size > maxfilelen);
 +			break;
 +		}
- 	case OP_DEDUPE_RANGE:
- 		{
- 			int tries = 0;
+ 	}
+ 
+ have_op:
 -- 
 2.11.0
 
