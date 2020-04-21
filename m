@@ -1,85 +1,220 @@
-Return-Path: <SRS0=ARln=6E=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=YmiE=6F=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6FDBCC54FCC
-	for <linux-fstests@archiver.kernel.org>; Mon, 20 Apr 2020 22:39:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 734A0C54FD0
+	for <linux-fstests@archiver.kernel.org>; Tue, 21 Apr 2020 10:25:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3FFA920672
-	for <linux-fstests@archiver.kernel.org>; Mon, 20 Apr 2020 22:39:15 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="LI78ubZ3"
+	by mail.kernel.org (Postfix) with ESMTP id 4848820656
+	for <linux-fstests@archiver.kernel.org>; Tue, 21 Apr 2020 10:25:45 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1587464745;
+	bh=leaT0DWHIo5C9Lt2cWErcLvPCyotAJ+Gj1HBcI56XPc=;
+	h=From:To:Cc:Subject:Date:List-ID:From;
+	b=2m0iOGRw2fgcMcuCc1yM//nBiilrB59kY4YASeEJ7Biyw6QXNzQNz7ebiKPz/BYaA
+	 d8fdo3OgHnICTMrFTPEhoPEArA9TSI6DB7XRE+wmW6hyLkJ9ntnShbGu0JUDOUQQN1
+	 bumJvcYxj3F2ViYoLwEGbVueztTnbD2ZpvN75SKk=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726435AbgDTWjP (ORCPT
+        id S1727043AbgDUKZp (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 20 Apr 2020 18:39:15 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42374 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726006AbgDTWjO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 20 Apr 2020 18:39:14 -0400
-Received: from mail-il1-x12d.google.com (mail-il1-x12d.google.com [IPv6:2607:f8b0:4864:20::12d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 98591C061A0C
-        for <fstests@vger.kernel.org>; Mon, 20 Apr 2020 15:39:14 -0700 (PDT)
-Received: by mail-il1-x12d.google.com with SMTP id z12so11591150ilb.10
-        for <fstests@vger.kernel.org>; Mon, 20 Apr 2020 15:39:14 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:from:date:message-id:subject:to:cc;
-        bh=GsEGQYhQMZvYnRPfAck5zmHt/9Kx4Q6IuQ0U+l5QLqE=;
-        b=LI78ubZ3FxXR5FFc52jJbDoQp6+phZp9Qc0GAZ1QZJpML53e3ovhv2sAZ6nYI0+0uL
-         TAX84AD31dr6V9pwKLLt5PFJ62rqJSZOst50inDFdUmQIPTrUZDzEjiMuaPEbxa+ca/1
-         yAzMrnyRDLugeBjAOI5ppgEpmPF06B2kBEJ4+TCXl/Lk0Uo7uuMAHTpeOByPcuvUVJJq
-         2Kq4jaBLf3a38JfdOr//gDFRnR8hQ3J7kwHdggYV0JGw0X+2FB5FtmhMQxmrloY8JDkB
-         xUJvlm2cqfKN0SqQx+SsmDhjmruWfst4PDzv6inQvSgM/KNdtqMiEOYcWHLkTS3yviE8
-         SuFQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:from:date:message-id:subject:to:cc;
-        bh=GsEGQYhQMZvYnRPfAck5zmHt/9Kx4Q6IuQ0U+l5QLqE=;
-        b=OKuMZJSCmm27Wwe6fJW6IuweLgAY+nMEspdCMOUPMNlt1HA1bP50qG2/amatZWbMp7
-         a4+FyOtYNoEHxI96P8A2A59FBJZAEZsxgk0y7ZkGaSV/7/vUKUM5knJOMHFFfCogrcbp
-         nArVFgkxGuBAgjh3P/e5hC+FsgaZhErK+zvj2q/3HGzHncyHaQlAEeg1KCOCUXnxlUVD
-         DenGtXG++hzzyr+F3tYzPaf9VUEMy1e448MImWBSaSuyTWi50S9v/wINakqAAs7ZhdHP
-         CDjPw7qWk5S7A+nNFK9JMRFP4AsVjHgD0qR+1X9HqQmaL8z/EVaLkwkZroWX1rcDbUY7
-         bhpA==
-X-Gm-Message-State: AGi0PuZ+IuWhIl6DEg05b+BomSpq/OEOF6hG9Jb4zms2KCrgHnS35no/
-        glCX+nolnxi9r4qSM5Z3DxMiuvOTeynZTSwBCmxlRWv6iw==
-X-Google-Smtp-Source: APiQypIsAroiUPfnT7Amcq7r7F7wpCQZ9DtM5BQE3bu9DFBbMN5+E7APsIf1oal56C6n52dIeLlCy9Z2i2/w3Q07G2o=
-X-Received: by 2002:a92:984d:: with SMTP id l74mr18232286ili.195.1587422353593;
- Mon, 20 Apr 2020 15:39:13 -0700 (PDT)
-MIME-Version: 1.0
-From:   Arvind Raghavan <raghavan.arvind@gmail.com>
-Date:   Mon, 20 Apr 2020 17:39:02 -0500
-Message-ID: <CAM2wg3RX8rKzFw+s=Z03gQpWsDcXQqhcan5vNRaw0BFz7URzFQ@mail.gmail.com>
-Subject: Additional Crashmonkey Tests
+        Tue, 21 Apr 2020 06:25:45 -0400
+Received: from mail.kernel.org ([198.145.29.99]:58732 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725920AbgDUKZn (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 21 Apr 2020 06:25:43 -0400
+Received: from debian6.Home (bl8-197-74.dsl.telepac.pt [85.241.197.74])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 61CD22064A;
+        Tue, 21 Apr 2020 10:25:42 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1587464743;
+        bh=leaT0DWHIo5C9Lt2cWErcLvPCyotAJ+Gj1HBcI56XPc=;
+        h=From:To:Cc:Subject:Date:From;
+        b=MiSJiVkvlTiGLUE4xt0bd7g8mmSru87PeJn2lgiTg8hQL3+AX3GHMcd6XrKw5Sw9b
+         dtj0uzHyUxV8n6+6ZYwivp2eycerIng3fU2qYN36rjN7TuFk7bw7Ys5Ad4o52JECJN
+         XtK112aFeMpJ6oI4bCG/tvYS0fu9ghvfoZ5UVmAQ=
+From:   fdmanana@kernel.org
 To:     fstests@vger.kernel.org
-Cc:     Jayashree Mohan <jayashree2912@gmail.com>,
-        Vijay Chidambaram <vijay@cs.utexas.edu>
-Content-Type: text/plain; charset="UTF-8"
+Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] btrfs: add a test for fsync of file with prealloc extents crossing eof
+Date:   Tue, 21 Apr 2020 11:25:39 +0100
+Message-Id: <20200421102539.14786-1-fdmanana@kernel.org>
+X-Mailer: git-send-email 2.11.0
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Hi all,
+From: Filipe Manana <fdmanana@suse.com>
 
-I'm working with the Crashmonkey [1] team at UT, and I wanted to
-follow up on an a patch [2] Jayashree sent a while back.  The
-patch added a test combining 37 test cases for hard link behavior
-into a single test. In that email, she noted there were also
-similar Crashmonkey tests for other operations (falloc, unlink,
-rename, etc.) that she could port if you all were interested. We
-have now built an adapter that would allow us to port these
-Crashmonkey tests over to xfstest.  Is this something that you
-guys would find valuable?
+Test that if we fsync a file with prealloc extents that start before and
+after the file's size, we don't end up with missing parts of the extents
+and implicit file holes after a power failure. Test both without and with
+the NO_HOLES feature.
 
-Thanks,
-Arvind Raghavan
+This currently fails and it is fixed by a patch that has the following
+subject:
 
-[1] https://github.com/utsaslab/crashmonkey
-[2] https://www.spinics.net/lists/fstests/msg10767.html
+  "Btrfs: fix partial loss of prealloc extent past i_size after fsync"
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/btrfs/211     | 112 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/211.out |  10 +++++
+ tests/btrfs/group   |   1 +
+ 3 files changed, 123 insertions(+)
+ create mode 100755 tests/btrfs/211
+ create mode 100644 tests/btrfs/211.out
+
+diff --git a/tests/btrfs/211 b/tests/btrfs/211
+new file mode 100755
+index 00000000..3495b309
+--- /dev/null
++++ b/tests/btrfs/211
+@@ -0,0 +1,112 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2020 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FSQA Test No. 211
++#
++# Test that if we fsync a file with prealloc extents that start before and
++# after the file's size, we don't end up with missing parts of the extents
++# and implicit file holes after a power failure. Test both without and with
++# the NO_HOLES feature.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	_cleanup_flakey
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/dmflakey
++
++# real QA test starts here
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch
++_require_xfs_io_command "falloc" "-k"
++# fiemap needed by _count_extents()
++_require_xfs_io_command "fiemap"
++_require_btrfs_fs_feature "no_holes"
++_require_btrfs_mkfs_feature "no-holes"
++_require_dm_target flakey
++
++rm -f $seqres.full
++
++run_test()
++{
++    # Create our test file with 2 consecutive prealloc extents, each with a size
++    # of 128Kb, and covering the range from 0 to 256Kb, with a file size of 0.
++    # Then fsync the file to record both extents in a log tree.
++    $XFS_IO_PROG -f -c "falloc -k 0 128K" $SCRATCH_MNT/foo
++    $XFS_IO_PROG -c "falloc -k 128K 128K" $SCRATCH_MNT/foo
++    $XFS_IO_PROG -c "fsync" $SCRATCH_MNT/foo
++
++    # Now do a redudant extent allocation for the range from 0 to 64Kb. This will
++    # merely increase the file size from 0 to 64Kb. Instead we could also do a
++    # truncate to set the file size to 64Kb.
++    $XFS_IO_PROG -c "falloc 0 64K" $SCRATCH_MNT/foo
++
++    # Fsync the file, so we update the log with the new file size. Here btrfs
++    # used to incorrectly set the number of bytes to 64Kb for the prealloc extent
++    # that covers the file range from 0 to 128Kb.
++    $XFS_IO_PROG -c "fsync" $SCRATCH_MNT/foo
++
++    # Now set the file size to 256K with a truncate and then fsync the file. We
++    # want to verify the log tree doesn't end up with an implicit hole for the
++    # file range from 64Kb to 128Kb. That would lead to an implicit hole after
++    # replaying the log and losing part of the prealloc extent, so a future write
++    # to anywhere in the file range from 64Kb to 128Kb would result in allocating
++    # a new extent and not use the extent previously allocated with fallocate().
++    $XFS_IO_PROG -c "truncate 256K" -c "fsync" $SCRATCH_MNT/foo
++
++    # Simulate a power failure and then mount again the filesystem to replay the
++    # log tree.
++    _flakey_drop_and_remount
++
++    # Unmount the filesystem and run 'btrfs check'/fsck to verify that we don't
++    # have a missing hole for the file range from 64K to 128K.
++    _unmount_flakey
++    _check_scratch_fs $FLAKEY_DEV
++
++    _mount_flakey
++
++    # Now write to the file range from 0 to 128K. After this we should still have
++    # rwo extents in our file, corresponding to the 2 extents we allocated before
++    # using fallocate(). In particular writing to the file range from 64Kb to
++    # 128Kb should not have allocated a new extent.
++    $XFS_IO_PROG -c "pwrite -S 0xab 0 128K" $SCRATCH_MNT/foo | _filter_xfs_io
++    echo "File extent count after write: $(_count_extents $SCRATCH_MNT/foo)"
++}
++
++_scratch_mkfs -O ^no-holes >>$seqres.full 2>&1
++_require_metadata_journaling $SCRATCH_DEV
++_init_flakey
++_mount_flakey
++
++echo "Testing without NO_HOLES feature"
++run_test
++
++_unmount_flakey
++_cleanup_flakey
++
++_scratch_mkfs -O no-holes >>$seqres.full 2>&1
++_require_metadata_journaling $SCRATCH_DEV
++_init_flakey
++_mount_flakey
++
++echo
++echo "Testing with the NO_HOLES feature"
++run_test
++
++_unmount_flakey
++status=0
++exit
+diff --git a/tests/btrfs/211.out b/tests/btrfs/211.out
+new file mode 100644
+index 00000000..838b1a76
+--- /dev/null
++++ b/tests/btrfs/211.out
+@@ -0,0 +1,10 @@
++QA output created by 211
++Testing without NO_HOLES feature
++wrote 131072/131072 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++File extent count after write: 2
++
++Testing with the NO_HOLES feature
++wrote 131072/131072 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++File extent count after write: 2
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 9426fb17..66b1beac 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -213,3 +213,4 @@
+ 208 auto quick subvol
+ 209 auto quick log
+ 210 auto quick qgroup snapshot
++211 auto quick log prealloc
+-- 
+2.11.0
+
