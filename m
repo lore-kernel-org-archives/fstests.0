@@ -2,195 +2,118 @@ Return-Path: <SRS0=YmiE=6F=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+X-Spam-Status: No, score=-8.3 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
+	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7EE35C54FCC
-	for <linux-fstests@archiver.kernel.org>; Tue, 21 Apr 2020 14:22:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E110FC54FC9
+	for <linux-fstests@archiver.kernel.org>; Tue, 21 Apr 2020 15:26:49 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5DCB320663
-	for <linux-fstests@archiver.kernel.org>; Tue, 21 Apr 2020 14:22:44 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BEB3F2068F
+	for <linux-fstests@archiver.kernel.org>; Tue, 21 Apr 2020 15:26:49 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="SQJpavya"
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="VfE5CocC"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728337AbgDUOWn (ORCPT
+        id S1726489AbgDUP0t (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 21 Apr 2020 10:22:43 -0400
-Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:40941 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726018AbgDUOWn (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 21 Apr 2020 10:22:43 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1587478962;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=NPS8xBoIVdk3F5yWrHwFenuTv4g4z7gntzX2tpFw+qE=;
-        b=SQJpavyaJxZoYNp+W+M5qe0qEqTczb//Tq9/kviVMeA0AuMfNlFPzUEWYbiLIX51XI3O2q
-        UjUAz9E1P/zNQChm35mBR6wblMrtLkjWms7I0OwD4q7seBT7bGlmVh8TaHvi0OIuCE/Bwy
-        UQmznAkRHb971hNlroHs5gruIXVLohM=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-258--waoLJK1OIaXnDuVYHj4sg-1; Tue, 21 Apr 2020 10:22:38 -0400
-X-MC-Unique: -waoLJK1OIaXnDuVYHj4sg-1
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 122301005510;
-        Tue, 21 Apr 2020 14:22:37 +0000 (UTC)
-Received: from bfoster (dhcp-41-2.bos.redhat.com [10.18.41.2])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id 80F50B3A63;
-        Tue, 21 Apr 2020 14:22:36 +0000 (UTC)
-Date:   Tue, 21 Apr 2020 10:22:34 -0400
-From:   Brian Foster <bfoster@redhat.com>
-To:     fdmanana@kernel.org
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-        Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH 4/4] fsx: move range generation logic into a common helper
-Message-ID: <20200421142234.GC32228@bfoster>
-References: <20200420170931.10047-1-fdmanana@kernel.org>
+        Tue, 21 Apr 2020 11:26:49 -0400
+Received: from aserp2120.oracle.com ([141.146.126.78]:56556 "EHLO
+        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725613AbgDUP0t (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 21 Apr 2020 11:26:49 -0400
+Received: from pps.filterd (aserp2120.oracle.com [127.0.0.1])
+        by aserp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 03LFIUe2023952;
+        Tue, 21 Apr 2020 15:26:44 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
+ : subject : message-id : references : mime-version : content-type :
+ in-reply-to; s=corp-2020-01-29;
+ bh=PTq0ksDSmckxGaf58UJYInnMG2VeCAbp4kw0yKbBUNo=;
+ b=VfE5CocCrSGRUX2069kUfOJd4YCZYT/cZLrb1ZP78HKausj3tN0lgajCKCpxb2aeikh4
+ XfQqBypda1ncRwBZ9k/3oxuTfP1OI5pp7ZrhNq1cvME8o0AhnniOhKG7wPRXhF3nW7eL
+ pybyeJxbinC/DsSMZl5aX8TFxEhVZMjv3PXQUnABksn+3SVqLh4kX+SmEU0Femo1Nf+t
+ 6+72S6zvFSp0uGBtAc1g36g2aWRGqXqpcifUElD/YBJGMj6KvlgAXnCqnS67Lj/+sLr0
+ nbbggkOgau/nF2BrYOhtSgPaFmP1NOgO8xDjSq96HgB9kUPZ1Xq/obLNicloq144Dux0 +Q== 
+Received: from userp3020.oracle.com (userp3020.oracle.com [156.151.31.79])
+        by aserp2120.oracle.com with ESMTP id 30fsgkwp2a-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Tue, 21 Apr 2020 15:26:44 +0000
+Received: from pps.filterd (userp3020.oracle.com [127.0.0.1])
+        by userp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 03LFDQH2059511;
+        Tue, 21 Apr 2020 15:26:43 GMT
+Received: from aserv0121.oracle.com (aserv0121.oracle.com [141.146.126.235])
+        by userp3020.oracle.com with ESMTP id 30gb90a66h-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Tue, 21 Apr 2020 15:26:43 +0000
+Received: from abhmp0001.oracle.com (abhmp0001.oracle.com [141.146.116.7])
+        by aserv0121.oracle.com (8.14.4/8.13.8) with ESMTP id 03LFQgCU022859;
+        Tue, 21 Apr 2020 15:26:42 GMT
+Received: from localhost (/67.169.218.210)
+        by default (Oracle Beehive Gateway v4.0)
+        with ESMTP ; Tue, 21 Apr 2020 08:26:41 -0700
+Date:   Tue, 21 Apr 2020 08:26:37 -0700
+From:   "Darrick J. Wong" <darrick.wong@oracle.com>
+To:     Anthony Iliopoulos <ailiop@suse.com>
+Cc:     Eryu Guan <guaneryu@gmail.com>, fstests@vger.kernel.org,
+        linux-xfs@vger.kernel.org
+Subject: Re: [PATCH] xfs/126: make blocktrash work reliably on attrleaf blocks
+Message-ID: <20200421152637.GX6742@magnolia>
+References: <20200421113643.24224-2-ailiop@suse.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20200420170931.10047-1-fdmanana@kernel.org>
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.15
+In-Reply-To: <20200421113643.24224-2-ailiop@suse.com>
+User-Agent: Mutt/1.9.4 (2018-02-28)
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9598 signatures=668686
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxlogscore=999 adultscore=0
+ bulkscore=0 suspectscore=0 malwarescore=0 phishscore=0 spamscore=0
+ mlxscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2003020000 definitions=main-2004210120
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9598 signatures=668686
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 adultscore=0 priorityscore=1501
+ lowpriorityscore=0 mlxlogscore=999 malwarescore=0 clxscore=1015
+ spamscore=0 bulkscore=0 phishscore=0 suspectscore=0 impostorscore=0
+ mlxscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2003020000 definitions=main-2004210120
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Apr 20, 2020 at 06:09:31PM +0100, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
+On Tue, Apr 21, 2020 at 01:36:43PM +0200, Anthony Iliopoulos wrote:
+> Running xfs/126 sometimes fails due to output mismatch. Due to the
+> randomized nature of the test, periodically the selected bits are not
+> relevant to the test, or the selected bits are not flipped. Supply an
+> offset that is close to the start of the metadata block, so that the
+> test will reliably corrupt the header.
 > 
-> We have very similar code that generates the destination range for clone,
-> dedupe and copy_file_range operations, so avoid duplicating the code three
-> times and move it into a helper function.
-> 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> Suggested-by: Darrick J. Wong <darrick.wong@oracle.com>
+> Link: https://lore.kernel.org/linux-xfs/20200116160323.GC2149943@magnolia
+> Signed-off-by: Anthony Iliopoulos <ailiop@suse.com>
+
+Seems fine to me...
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+
+--D
+
 > ---
-
-Reviewed-by: Brian Foster <bfoster@redhat.com>
-
->  ltp/fsx.c | 94 ++++++++++++++++++++++++++-------------------------------------
->  1 file changed, 39 insertions(+), 55 deletions(-)
+>  tests/xfs/126 | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 > 
-> diff --git a/ltp/fsx.c b/ltp/fsx.c
-> index 40cbd401..7c76655a 100644
-> --- a/ltp/fsx.c
-> +++ b/ltp/fsx.c
-> @@ -1939,6 +1939,39 @@ range_overlaps(
->  	return llabs((unsigned long long)off1 - off0) < size;
->  }
+> diff --git a/tests/xfs/126 b/tests/xfs/126
+> index 4f9f8cf9..d01338c9 100755
+> --- a/tests/xfs/126
+> +++ b/tests/xfs/126
+> @@ -72,7 +72,7 @@ echo "+ corrupt xattr"
+>  loff=1
+>  while true; do
+>  	_scratch_xfs_db -x -c "inode ${inode}" -c "ablock ${loff}" -c "stack" | grep -q 'file attr block is unmapped' && break
+> -	_scratch_xfs_db -x -c "inode ${inode}" -c "ablock ${loff}" -c "stack" -c "blocktrash -x 32 -y $((blksz * 8)) -z ${FUZZ_ARGS}" >> $seqres.full
+> +	_scratch_xfs_db -x -c "inode ${inode}" -c "ablock ${loff}" -c "stack" -c "blocktrash -o 4 -x 32 -y $((blksz * 8)) -z ${FUZZ_ARGS}" >> $seqres.full
+>  	loff="$((loff + 1))"
+>  done
 >  
-> +static void generate_dest_range(bool bdy_align,
-> +				unsigned long max_range_end,
-> +				unsigned long *src_offset,
-> +				unsigned long *size,
-> +				unsigned long *dst_offset)
-> +{
-> +	int tries = 0;
-> +
-> +	TRIM_OFF_LEN(*src_offset, *size, file_size);
-> +	if (bdy_align) {
-> +		*src_offset -= *src_offset % readbdy;
-> +		if (o_direct)
-> +			*size -= *size % readbdy;
-> +	} else {
-> +		*src_offset = *src_offset & ~(block_size - 1);
-> +		*size = *size & ~(block_size - 1);
-> +	}
-> +
-> +	do {
-> +		if (tries++ >= 30) {
-> +			*size = 0;
-> +			break;
-> +		}
-> +		*dst_offset = random();
-> +		TRIM_OFF(*dst_offset, max_range_end);
-> +		if (bdy_align)
-> +			*dst_offset -= *dst_offset % writebdy;
-> +		else
-> +			*dst_offset = *dst_offset & ~(block_size - 1);
-> +	} while (range_overlaps(*src_offset, *dst_offset, *size) ||
-> +		 *dst_offset + *size > max_range_end);
-> +}
-> +
->  int
->  test(void)
->  {
-> @@ -2013,63 +2046,14 @@ test(void)
->  			keep_size = random() % 2;
->  		break;
->  	case OP_CLONE_RANGE:
-> -		{
-> -			int tries = 0;
-> -
-> -			TRIM_OFF_LEN(offset, size, file_size);
-> -			offset = offset & ~(block_size - 1);
-> -			size = size & ~(block_size - 1);
-> -			do {
-> -				if (tries++ >= 30) {
-> -					size = 0;
-> -					break;
-> -				}
-> -				offset2 = random();
-> -				TRIM_OFF(offset2, maxfilelen);
-> -				offset2 = offset2 & ~(block_size - 1);
-> -			} while (range_overlaps(offset, offset2, size) ||
-> -				 offset2 + size > maxfilelen);
-> -			break;
-> -		}
-> +		generate_dest_range(false, maxfilelen, &offset, &size, &offset2);
-> +		break;
->  	case OP_DEDUPE_RANGE:
-> -		{
-> -			int tries = 0;
-> -
-> -			TRIM_OFF_LEN(offset, size, file_size);
-> -			offset = offset & ~(block_size - 1);
-> -			size = size & ~(block_size - 1);
-> -			do {
-> -				if (tries++ >= 30) {
-> -					size = 0;
-> -					break;
-> -				}
-> -				offset2 = random();
-> -				TRIM_OFF(offset2, file_size);
-> -				offset2 = offset2 & ~(block_size - 1);
-> -			} while (range_overlaps(offset, offset2, size) ||
-> -				 offset2 + size > file_size);
-> -			break;
-> -		}
-> +		generate_dest_range(false, file_size, &offset, &size, &offset2);
-> +		break;
->  	case OP_COPY_RANGE:
-> -		{
-> -			int tries = 0;
-> -
-> -			TRIM_OFF_LEN(offset, size, file_size);
-> -			offset -= offset % readbdy;
-> -			if (o_direct)
-> -				size -= size % readbdy;
-> -			do {
-> -				if (tries++ >= 30) {
-> -					size = 0;
-> -					break;
-> -				}
-> -				offset2 = random();
-> -				TRIM_OFF(offset2, maxfilelen);
-> -				offset2 -= offset2 % writebdy;
-> -			} while (range_overlaps(offset, offset2, size) ||
-> -				 offset2 + size > maxfilelen);
-> -			break;
-> -		}
-> +		generate_dest_range(true, maxfilelen, &offset, &size, &offset2);
-> +		break;
->  	}
->  
->  have_op:
 > -- 
-> 2.11.0
+> 2.26.2
 > 
-
