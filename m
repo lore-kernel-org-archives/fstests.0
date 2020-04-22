@@ -2,97 +2,176 @@ Return-Path: <SRS0=NJCV=6G=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.0 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7911BC55186
-	for <linux-fstests@archiver.kernel.org>; Wed, 22 Apr 2020 08:33:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 646BBC55189
+	for <linux-fstests@archiver.kernel.org>; Wed, 22 Apr 2020 08:35:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 55082206D6
-	for <linux-fstests@archiver.kernel.org>; Wed, 22 Apr 2020 08:33:44 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 312EA206B9
+	for <linux-fstests@archiver.kernel.org>; Wed, 22 Apr 2020 08:35:00 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="lDGsMxjA"
+	dkim=pass (1024-bit key) header.d=gmx.net header.i=@gmx.net header.b="SSKIlGSE"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725924AbgDVIdo (ORCPT
+        id S1726030AbgDVIfA (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 22 Apr 2020 04:33:44 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46682 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1725810AbgDVIdn (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 22 Apr 2020 04:33:43 -0400
-Received: from mail-io1-xd30.google.com (mail-io1-xd30.google.com [IPv6:2607:f8b0:4864:20::d30])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2CA20C03C1A6
-        for <fstests@vger.kernel.org>; Wed, 22 Apr 2020 01:33:43 -0700 (PDT)
-Received: by mail-io1-xd30.google.com with SMTP id w4so1456164ioc.6
-        for <fstests@vger.kernel.org>; Wed, 22 Apr 2020 01:33:43 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=UixwMrfUL/IgOMwpj9D54FqUJdkqOOvQZPIGPQB998I=;
-        b=lDGsMxjAHnVrUO+ixYbksKV+7W2pAgKAhyMApI7CnqpnakOfeLxwGMYv6/Bq+qWEO5
-         eYDtCjraT/vcHZ93jOjFPaTX3ecKnCh7TtWEc0pNG0Ws/ztb/ADEU+OLiLVnaKbSzIJL
-         11hg/zjkfyj6Whu72iIrHOMmgPuRm0+IjJ1fNn3EkX3Y6U69JBDft5JLBREGr3YND3CH
-         bykui4HF+XjCQ5a8RPn8Bpl9Kz1UyEWw9SdHc2a5gst05pbfXAlXxBxVQyFeFcgSytPu
-         a8wehaO2WXRta52xo1/u43c/lkXXYsBBREPwL3Fu5asQHrzy4i7BFawHQHkR+w73fNem
-         Ineg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=UixwMrfUL/IgOMwpj9D54FqUJdkqOOvQZPIGPQB998I=;
-        b=o7a2zBHBdI0+w+D0J93q5JtAqDuFfbG46OevVZphSuVyEYsjJ2BWOzd8zyAZ5e8RVx
-         pGCVIvj8cTHXijntQOjyV19GO4PyAdiEVRqlhYM5Qrp0Bp/Se+tILvWw/Zasgg7BymTG
-         2I8qDj2Qf5ZS12KHT6fHAOr1iCGemzBMFY5CuMOoIHnp2yOQdglzf2nIqiUnCkrz2cgk
-         lF/rEoniubuVtdaSbHbxtVO6+tvaEcEe/xMPVzjNlEhMBQSKMVcucdAX+9SqaB7Wdx/c
-         XrlufFjrbrhQV8SK61y/HkElXfncQTPkX0A3rLgInah0GXAxcztwWzqgLEeGekmm5Vhu
-         UB8w==
-X-Gm-Message-State: AGi0PuZFkar30sf0JzFmsHQkPvk1nR0+5VAnVQ0bXIWe1H3+06maZlKW
-        BZATU6oLfbfkky+bE4GoQw3HppgtFq9D6aE2wbMv1/Hh
-X-Google-Smtp-Source: APiQypL9lrBE2HjoyL4eq0MhnrGA+/+wbUdWpwhaN4tScmv8i8I8rSRXh3D8T9dEzy7Gil11Tcb25J3lUFFSnSfoloo=
-X-Received: by 2002:a5d:8417:: with SMTP id i23mr24476673ion.186.1587544422380;
- Wed, 22 Apr 2020 01:33:42 -0700 (PDT)
+        Wed, 22 Apr 2020 04:35:00 -0400
+Received: from mout.gmx.net ([212.227.15.15]:50245 "EHLO mout.gmx.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725810AbgDVIe7 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 22 Apr 2020 04:34:59 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net;
+        s=badeba3b8450; t=1587544488;
+        bh=ay07BZl4As/SsCyB5h9qVSVCsdphbWCwVslwwrZPOtU=;
+        h=X-UI-Sender-Class:Subject:To:Cc:References:From:Date:In-Reply-To;
+        b=SSKIlGSEPbE7W0q0yzDPwX0mzcjbq/tQ8NuYluOABUJfZTtYhoL0TE8mxETvJwvVZ
+         mTmPzTQWCt0S01o/0B9L+zLbrySA1cFCApQNO1GU1sQGVF9L1AF4Edxy8fBAHaYJmh
+         xqPJlfE3/HuiTML8GLpHtJlLq9Ec6oH8lSfrj7S8=
+X-UI-Sender-Class: 01bb95c1-4bf8-414a-932a-4f6e2808ef9c
+Received: from [0.0.0.0] ([149.28.201.231]) by mail.gmx.com (mrgmx004
+ [212.227.17.184]) with ESMTPSA (Nemesis) id 1MYvY2-1jeUf13lmi-00Up5N; Wed, 22
+ Apr 2020 10:34:48 +0200
+Subject: Re: [PATCH U-BOOT 03/26] fs: btrfs: Cross-port btrfs_read_dev_super()
+ from btrfs-progs
+To:     Marek Behun <marek.behun@nic.cz>, Qu Wenruo <wqu@suse.com>
+Cc:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org,
+        u-boot@lists.denx.de
+References: <20200422065009.69392-1-wqu@suse.com>
+ <20200422065009.69392-4-wqu@suse.com> <20200422102653.0dee168f@nic.cz>
+From:   Qu Wenruo <quwenruo.btrfs@gmx.com>
+Autocrypt: addr=quwenruo.btrfs@gmx.com; prefer-encrypt=mutual; keydata=
+ mQENBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
+ 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
+ 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
+ 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
+ gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
+ AAG0IlF1IFdlbnJ1byA8cXV3ZW5ydW8uYnRyZnNAZ214LmNvbT6JAU4EEwEIADgCGwMFCwkI
+ BwIGFQgJCgsCBBYCAwECHgECF4AWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCXZw1oQAKCRDC
+ PZHzoSX+qCY6CACd+mWu3okGwRKXju6bou+7VkqCaHTdyXwWFTsr+/0ly5nUdDtT3yEVggPJ
+ 3VP70wjlrxUjNjFb6iIvGYxiPOrop1NGwGYvQktgRhaIhALG6rPoSSAhGNjwGVRw0km0PlIN
+ D29BTj/lYEk+jVM1YL0QLgAE1AI3krihg/lp/fQT53wLhR8YZIF8ETXbClQG1vJ0cllPuEEv
+ efKxRyiTSjB+PsozSvYWhXsPeJ+KKjFen7ebE5reQTPFzSHctCdPnoR/4jSPlnTlnEvLeqcD
+ ZTuKfQe1gWrPeevQzgCtgBF/WjIOeJs41klnYzC3DymuQlmFubss0jShLOW8eSOOWhLRuQEN
+ BFnVga8BCACqU+th4Esy/c8BnvliFAjAfpzhI1wH76FD1MJPmAhA3DnX5JDORcgaCbPEwhLj
+ 1xlwTgpeT+QfDmGJ5B5BlrrQFZVE1fChEjiJvyiSAO4yQPkrPVYTI7Xj34FnscPj/IrRUUka
+ 68MlHxPtFnAHr25VIuOS41lmYKYNwPNLRz9Ik6DmeTG3WJO2BQRNvXA0pXrJH1fNGSsRb+pK
+ EKHKtL1803x71zQxCwLh+zLP1iXHVM5j8gX9zqupigQR/Cel2XPS44zWcDW8r7B0q1eW4Jrv
+ 0x19p4P923voqn+joIAostyNTUjCeSrUdKth9jcdlam9X2DziA/DHDFfS5eq4fEvABEBAAGJ
+ ATwEGAEIACYCGwwWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCXZw1rgUJCWpOfwAKCRDCPZHz
+ oSX+qFcEB/95cs8cM1OQdE/GgOfCGxwgckMeWyzOR7bkAWW0lDVp2hpgJuxBW/gyfmtBnUai
+ fnggx3EE3ev8HTysZU9q0h+TJwwJKGv6sUc8qcTGFDtavnnl+r6xDUY7A6GvXEsSoCEEynby
+ 72byGeSovfq/4AWGNPBG1L61Exl+gbqfvbECP3ziXnob009+z9I4qXodHSYINfAkZkA523JG
+ ap12LndJeLk3gfWNZfXEWyGnuciRGbqESkhIRav8ootsCIops/SqXm0/k+Kcl4gGUO/iD/T5
+ oagaDh0QtOd8RWSMwLxwn8uIhpH84Q4X1LadJ5NCgGa6xPP5qqRuiC+9gZqbq4Nj
+Message-ID: <5888e1c8-6586-9eb3-5bda-fd81b33ff2b0@gmx.com>
+Date:   Wed, 22 Apr 2020 16:34:43 +0800
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.7.0
 MIME-Version: 1.0
-References: <CAM2wg3RX8rKzFw+s=Z03gQpWsDcXQqhcan5vNRaw0BFz7URzFQ@mail.gmail.com>
-In-Reply-To: <CAM2wg3RX8rKzFw+s=Z03gQpWsDcXQqhcan5vNRaw0BFz7URzFQ@mail.gmail.com>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Wed, 22 Apr 2020 11:33:31 +0300
-Message-ID: <CAOQ4uxhOHXFJatXqnxL1PtmMc9wzMhYR0WVj35AAvcd=DFabcA@mail.gmail.com>
-Subject: Re: Additional Crashmonkey Tests
-To:     Arvind Raghavan <raghavan.arvind@gmail.com>
-Cc:     fstests <fstests@vger.kernel.org>,
-        Jayashree Mohan <jayashree2912@gmail.com>,
-        Vijay Chidambaram <vijay@cs.utexas.edu>
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <20200422102653.0dee168f@nic.cz>
+Content-Type: multipart/signed; micalg=pgp-sha256;
+ protocol="application/pgp-signature";
+ boundary="Z9jFIyhKU7i7XoA23SXyyLTpsVyNmHviK"
+X-Provags-ID: V03:K1:SRu/UnOzjG89di9SUJZsqmn6tqlzzkJl28di0GbvsmJGaRdjjFm
+ tFbUJKrglCisZvfLeLeeASZ6Rj83oj7/HR4LDVReH3xq7S0VJxmUKovNRinp32TC7bjpXGt
+ g1/fSqLgKnYud91F2HPKZjTJbKNeBgIo420UY2g25Goh5zd4EQGxPe2lfNTfpj+ANYCdqIc
+ gOCFOLRtVfvR1mCDqkR/w==
+X-UI-Out-Filterresults: notjunk:1;V03:K0:+EOzpHvXkOE=:iim5y8AtzMatXW0ZdWA2Ql
+ f+3M3pdAXgPoXC4zuI/w6wsamtYzyi6y37udJBw1RqTavtyGDmrtfY3KprxG3CFGnhsLG2aDi
+ LyYYUTzxhwLxjOMa0EsQ54q0DD7XTjx3YyohXrUmTsI/+ezCxFCpk/dXJqagclT7F8YULaonv
+ vTWg/SEC1vrxe+2YqTmREZRpcbrgiOpjPUzFOFZQILpHEBpVCttPAIJAI84vZXJa7MWwBMk8v
+ PdkGIKhGmPOGW5Wn5CpKWOCdUfuE/ZEZn7D0eyli/Fn0YFCmxqLiUqfC7objXIWAMOY9uu2El
+ bmbxbHORomYCoXShM2kUDpjpxfCJndWijwcX416OXdsu9AbgHrVfMSByz5G64CiRzylQ44cCS
+ ut6RYMqUEosQ5maMW8UTe1WtefAXAeI306Rzp3vPl2l6+ko+CVvTZpFil19iVM2b00S8IqepV
+ dvAjva58V7MDcbFhuUslz4SkNJXnTYmc/HAbHHKVVnCGtfZLyVZoaRabDNL7V2pe0VoLDHZwn
+ 42Ypl+zLEPUsOC/BPXdlBu5H+y5uCnD/nZLJlrFCN/1az6dY9aI6niREl1lBtzfaj4D8uRFfl
+ NDIPug+rL9suobdEd0IeBdLmOnGjmicZ5hrjAmS+cRqTRI4etxDFZqIJaDq3FWS2WGvCS74ph
+ EP7ibEi5X8owewCIlcqzmZK+jSviwNxvzLeAfnJzmGumLSpGETZ6jbAmwWNA/qWHZYpkMCG8k
+ jijZIT5XqhYe3cPw34MpKhB5kaMlHs/NFowoDUiNFOtGakImN66hiRdZ94xq9/y/8lThG7Chk
+ D+ADj85Xc/IYRQlMPMXjBPCFQaymmr4IN1JGwt6jnDBIqQSNgAB07lYVOd9z8GMZCMDZ3f7f9
+ 2i2orC1Nh/1sVBSFiH62lefvNozXDRqkbhKEmuj779M8AiTye5wCAqX/1FEfbl9TzaOuECjhf
+ zFjx3LO5xekpZbKFQHUwsRAgYFbHVmRoWd0C3PBFmI3jFFW4a93hZbzt7P+AfrjUJIvutzR98
+ SdD6s0PvYgl8ub+Wb5zKv8aLbktR1u9l3fKyF4AU4As+jxInC6DASkLlak6t2F9G/JZ/CAbcM
+ RuOs4/5y6fOi6YTOlDjavNjAtWo5P8Q/pg02r1R0WeIrBmQZjxZ09hFOOUVXcwL5vbhUGauS9
+ pPL6DTux9Wfeg3IFGu2kAFW1/wU0HMu9ZDKOeOXZVGSCohkKF6/rOIxm/YcV2JYJDiEtUwC+X
+ NnHEkynkUWMhetw+o
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Apr 21, 2020 at 1:39 AM Arvind Raghavan
-<raghavan.arvind@gmail.com> wrote:
->
-> Hi all,
->
-> I'm working with the Crashmonkey [1] team at UT, and I wanted to
-> follow up on an a patch [2] Jayashree sent a while back.  The
-> patch added a test combining 37 test cases for hard link behavior
-> into a single test. In that email, she noted there were also
-> similar Crashmonkey tests for other operations (falloc, unlink,
-> rename, etc.) that she could port if you all were interested. We
-> have now built an adapter that would allow us to port these
-> Crashmonkey tests over to xfstest.  Is this something that you
-> guys would find valuable?
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--Z9jFIyhKU7i7XoA23SXyyLTpsVyNmHviK
+Content-Type: multipart/mixed; boundary="FxO7Obre8tlAi8stwZ6owqtNGUAhRfWw2"
 
-Speaking for myself, yes, I find this valuable.
-Jayashree's test was merged, so I think that means that community also
-finds this valuable.
+--FxO7Obre8tlAi8stwZ6owqtNGUAhRfWw2
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: quoted-printable
 
-How many tests you intend to add?
-How many test cases in each test?
-More importantly and how much time each test runs on a typical system?
+
+
+On 2020/4/22 =E4=B8=8B=E5=8D=884:26, Marek Behun wrote:
+> On Wed, 22 Apr 2020 14:49:46 +0800
+> Qu Wenruo <wqu@suse.com> wrote:
+>=20
+>> +/* A simple wraper to for error() from btrfs-progs */
+>> +#define error(...) { printf(__VA_ARGS__); printf("\n"); }
+>=20
+> Is this from btrfs-progs?
+
+Nope, anything in compat.h is mostly for different projects to share the
+same code.
+
+> I don't like these macros much, I prefer to use static inline functions=
+=2E
+>=20
+> static inline void error(const char *fmt, ...)
+> {
+> 	printf(fmt, __builtin_va_arg_pack());
+> 	printf("\n");
+> }
+
+That looks much better, especially we can tell compiler that we want
+printf check on the parameters.
 
 Thanks,
-Amir.
+Qu
+
+>=20
+> Attribute for printf can be added to check printf specifiers:
+>   __attribute__((format (__printf__, 1, 2)))
+>=20
+> It is possible that this won't compile when optimizations are disabled.=
+
+> In that case more attributes are needed
+>   __always_inline __attribute__((__gnu_inline__))
+> These could be defined as a macro in include/linux/compiler-gcc.h
+>   #define __gnu_inline __always_inline __attribute__((__gnu_inline__))
+>=20
+> Marek
+>=20
+
+
+--FxO7Obre8tlAi8stwZ6owqtNGUAhRfWw2--
+
+--Z9jFIyhKU7i7XoA23SXyyLTpsVyNmHviK
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAEBCAAdFiEELd9y5aWlW6idqkLhwj2R86El/qgFAl6gAaMACgkQwj2R86El
+/qjEpAf+N0IdFykDVeeEj7kdhBvHrZiQ22dsVz5iSchIfzTqfbnvzV7xWFg3AGgk
+I+UpR+aa8KrdqEtzHFik4WhRtDImrFM6yWCkbn1XC01v0hg+Tyi5I6GMIwsqRIrY
+GEfwPrj35ZqQSTl5VTvkMc+YUciIk38uE6HD0R3yvlhQK3OnzVqJZWGyJumqU8h/
+tuWZYYd6WKz0iKBdFxi4HAtCChzfUn16bLeqAE0vCcf9gKFHZv+hrLrE/cMWk7/9
+V8WqkLLagvjx/oyolvc1DlGi0xkqG5dcgYxoYnIHDhz/CI9LEh8SHRSNk6JRPTYZ
+iQfa9WU6kF0ZeQWeW1DKhrlC/QqQQQ==
+=allU
+-----END PGP SIGNATURE-----
+
+--Z9jFIyhKU7i7XoA23SXyyLTpsVyNmHviK--
