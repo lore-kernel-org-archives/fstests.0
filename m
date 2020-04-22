@@ -2,82 +2,97 @@ Return-Path: <SRS0=NJCV=6G=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.4 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_2 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BDF17C55186
-	for <linux-fstests@archiver.kernel.org>; Wed, 22 Apr 2020 08:26:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7911BC55186
+	for <linux-fstests@archiver.kernel.org>; Wed, 22 Apr 2020 08:33:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 71C59206E9
-	for <linux-fstests@archiver.kernel.org>; Wed, 22 Apr 2020 08:26:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 55082206D6
+	for <linux-fstests@archiver.kernel.org>; Wed, 22 Apr 2020 08:33:44 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=nic.cz header.i=@nic.cz header.b="vviFJBff"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="lDGsMxjA"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725961AbgDVI0z (ORCPT
+        id S1725924AbgDVIdo (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 22 Apr 2020 04:26:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45634 "EHLO
+        Wed, 22 Apr 2020 04:33:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46682 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1725811AbgDVI0z (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 22 Apr 2020 04:26:55 -0400
-X-Greylist: delayed 794 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Wed, 22 Apr 2020 01:26:54 PDT
-Received: from mail.nic.cz (mail.nic.cz [IPv6:2001:1488:800:400::400])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D9741C03C1A6;
-        Wed, 22 Apr 2020 01:26:54 -0700 (PDT)
-Received: from localhost (unknown [172.20.6.135])
-        by mail.nic.cz (Postfix) with ESMTPSA id 8FEE113F7AB;
-        Wed, 22 Apr 2020 10:26:53 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=nic.cz; s=default;
-        t=1587544013; bh=R+5K8GvpfaB5fPFgBojTvqmfDAV0B1cruWUnLhw+XC8=;
-        h=Date:From:To;
-        b=vviFJBffMyN0U5oWHJ/3UgnliShhXQob5hhCaVPuFp0b6o0j2uaROio9MuW7N1OGk
-         BP5NIWSUcacXWsYJFVKNu+Rpw0DeLsgvV3nqrCVmlkMuMesjP3oYNve8K1G7s0yp99
-         oHhHk2K438wfNoa2EloE2qtaJI9dHy3RV0VMCpLI=
-Date:   Wed, 22 Apr 2020 10:26:53 +0200
-From:   Marek Behun <marek.behun@nic.cz>
-To:     Qu Wenruo <wqu@suse.com>
-Cc:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org,
-        u-boot@lists.denx.de
-Subject: Re: [PATCH U-BOOT 03/26] fs: btrfs: Cross-port
- btrfs_read_dev_super() from btrfs-progs
-Message-ID: <20200422102653.0dee168f@nic.cz>
-In-Reply-To: <20200422065009.69392-4-wqu@suse.com>
-References: <20200422065009.69392-1-wqu@suse.com>
-        <20200422065009.69392-4-wqu@suse.com>
-X-Mailer: Claws Mail 3.17.3 (GTK+ 2.24.32; x86_64-pc-linux-gnu)
+        by vger.kernel.org with ESMTP id S1725810AbgDVIdn (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 22 Apr 2020 04:33:43 -0400
+Received: from mail-io1-xd30.google.com (mail-io1-xd30.google.com [IPv6:2607:f8b0:4864:20::d30])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2CA20C03C1A6
+        for <fstests@vger.kernel.org>; Wed, 22 Apr 2020 01:33:43 -0700 (PDT)
+Received: by mail-io1-xd30.google.com with SMTP id w4so1456164ioc.6
+        for <fstests@vger.kernel.org>; Wed, 22 Apr 2020 01:33:43 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=UixwMrfUL/IgOMwpj9D54FqUJdkqOOvQZPIGPQB998I=;
+        b=lDGsMxjAHnVrUO+ixYbksKV+7W2pAgKAhyMApI7CnqpnakOfeLxwGMYv6/Bq+qWEO5
+         eYDtCjraT/vcHZ93jOjFPaTX3ecKnCh7TtWEc0pNG0Ws/ztb/ADEU+OLiLVnaKbSzIJL
+         11hg/zjkfyj6Whu72iIrHOMmgPuRm0+IjJ1fNn3EkX3Y6U69JBDft5JLBREGr3YND3CH
+         bykui4HF+XjCQ5a8RPn8Bpl9Kz1UyEWw9SdHc2a5gst05pbfXAlXxBxVQyFeFcgSytPu
+         a8wehaO2WXRta52xo1/u43c/lkXXYsBBREPwL3Fu5asQHrzy4i7BFawHQHkR+w73fNem
+         Ineg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=UixwMrfUL/IgOMwpj9D54FqUJdkqOOvQZPIGPQB998I=;
+        b=o7a2zBHBdI0+w+D0J93q5JtAqDuFfbG46OevVZphSuVyEYsjJ2BWOzd8zyAZ5e8RVx
+         pGCVIvj8cTHXijntQOjyV19GO4PyAdiEVRqlhYM5Qrp0Bp/Se+tILvWw/Zasgg7BymTG
+         2I8qDj2Qf5ZS12KHT6fHAOr1iCGemzBMFY5CuMOoIHnp2yOQdglzf2nIqiUnCkrz2cgk
+         lF/rEoniubuVtdaSbHbxtVO6+tvaEcEe/xMPVzjNlEhMBQSKMVcucdAX+9SqaB7Wdx/c
+         XrlufFjrbrhQV8SK61y/HkElXfncQTPkX0A3rLgInah0GXAxcztwWzqgLEeGekmm5Vhu
+         UB8w==
+X-Gm-Message-State: AGi0PuZFkar30sf0JzFmsHQkPvk1nR0+5VAnVQ0bXIWe1H3+06maZlKW
+        BZATU6oLfbfkky+bE4GoQw3HppgtFq9D6aE2wbMv1/Hh
+X-Google-Smtp-Source: APiQypL9lrBE2HjoyL4eq0MhnrGA+/+wbUdWpwhaN4tScmv8i8I8rSRXh3D8T9dEzy7Gil11Tcb25J3lUFFSnSfoloo=
+X-Received: by 2002:a5d:8417:: with SMTP id i23mr24476673ion.186.1587544422380;
+ Wed, 22 Apr 2020 01:33:42 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-X-Virus-Scanned: clamav-milter 0.101.4 at mail
-X-Virus-Status: Clean
+References: <CAM2wg3RX8rKzFw+s=Z03gQpWsDcXQqhcan5vNRaw0BFz7URzFQ@mail.gmail.com>
+In-Reply-To: <CAM2wg3RX8rKzFw+s=Z03gQpWsDcXQqhcan5vNRaw0BFz7URzFQ@mail.gmail.com>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Wed, 22 Apr 2020 11:33:31 +0300
+Message-ID: <CAOQ4uxhOHXFJatXqnxL1PtmMc9wzMhYR0WVj35AAvcd=DFabcA@mail.gmail.com>
+Subject: Re: Additional Crashmonkey Tests
+To:     Arvind Raghavan <raghavan.arvind@gmail.com>
+Cc:     fstests <fstests@vger.kernel.org>,
+        Jayashree Mohan <jayashree2912@gmail.com>,
+        Vijay Chidambaram <vijay@cs.utexas.edu>
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, 22 Apr 2020 14:49:46 +0800
-Qu Wenruo <wqu@suse.com> wrote:
+On Tue, Apr 21, 2020 at 1:39 AM Arvind Raghavan
+<raghavan.arvind@gmail.com> wrote:
+>
+> Hi all,
+>
+> I'm working with the Crashmonkey [1] team at UT, and I wanted to
+> follow up on an a patch [2] Jayashree sent a while back.  The
+> patch added a test combining 37 test cases for hard link behavior
+> into a single test. In that email, she noted there were also
+> similar Crashmonkey tests for other operations (falloc, unlink,
+> rename, etc.) that she could port if you all were interested. We
+> have now built an adapter that would allow us to port these
+> Crashmonkey tests over to xfstest.  Is this something that you
+> guys would find valuable?
 
-> +/* A simple wraper to for error() from btrfs-progs */
-> +#define error(...) { printf(__VA_ARGS__); printf("\n"); }
+Speaking for myself, yes, I find this valuable.
+Jayashree's test was merged, so I think that means that community also
+finds this valuable.
 
-Is this from btrfs-progs?
-I don't like these macros much, I prefer to use static inline functions.
+How many tests you intend to add?
+How many test cases in each test?
+More importantly and how much time each test runs on a typical system?
 
-static inline void error(const char *fmt, ...)
-{
-	printf(fmt, __builtin_va_arg_pack());
-	printf("\n");
-}
-
-Attribute for printf can be added to check printf specifiers:
-  __attribute__((format (__printf__, 1, 2)))
-
-It is possible that this won't compile when optimizations are disabled.
-In that case more attributes are needed
-  __always_inline __attribute__((__gnu_inline__))
-These could be defined as a macro in include/linux/compiler-gcc.h
-  #define __gnu_inline __always_inline __attribute__((__gnu_inline__))
-
-Marek
+Thanks,
+Amir.
