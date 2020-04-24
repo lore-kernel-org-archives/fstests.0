@@ -2,136 +2,68 @@ Return-Path: <SRS0=hCCx=6I=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.7 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	UNPARSEABLE_RELAY,USER_AGENT_GIT autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-3.5 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C931BC55197
-	for <linux-fstests@archiver.kernel.org>; Fri, 24 Apr 2020 09:34:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6A48EC2BA1A
+	for <linux-fstests@archiver.kernel.org>; Fri, 24 Apr 2020 10:30:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B37BC20736
-	for <linux-fstests@archiver.kernel.org>; Fri, 24 Apr 2020 09:34:14 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4777920736
+	for <linux-fstests@archiver.kernel.org>; Fri, 24 Apr 2020 10:30:44 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="o92onYY1"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726774AbgDXJeN (ORCPT
+        id S1726698AbgDXKao (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 24 Apr 2020 05:34:13 -0400
-Received: from out30-131.freemail.mail.aliyun.com ([115.124.30.131]:33698 "EHLO
-        out30-131.freemail.mail.aliyun.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726628AbgDXJeJ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 24 Apr 2020 05:34:09 -0400
-X-Alimail-AntiSpam: AC=PASS;BC=-1|-1;BR=01201311R191e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=e01e07425;MF=jefflexu@linux.alibaba.com;NM=1;PH=DS;RN=4;SR=0;TI=SMTPD_---0TwVx7HD_1587720845;
-Received: from localhost(mailfrom:jefflexu@linux.alibaba.com fp:SMTPD_---0TwVx7HD_1587720845)
-          by smtp.aliyun-inc.com(127.0.0.1);
-          Fri, 24 Apr 2020 17:34:05 +0800
-From:   Jeffle Xu <jefflexu@linux.alibaba.com>
-To:     fstests@vger.kernel.org
-Cc:     linux-ext4@vger.kernel.org, joseph.qi@linux.alibaba.com,
-        Jeffle Xu <jefflexu@linux.alibaba.com>
-Subject: [PATCH RFC 1/2] xfstests: fsx: add support for cluster size
-Date:   Fri, 24 Apr 2020 17:33:49 +0800
-Message-Id: <1587720830-11955-2-git-send-email-jefflexu@linux.alibaba.com>
-X-Mailer: git-send-email 1.8.3.1
-In-Reply-To: <1587720830-11955-1-git-send-email-jefflexu@linux.alibaba.com>
-References: <1587720830-11955-1-git-send-email-jefflexu@linux.alibaba.com>
+        Fri, 24 Apr 2020 06:30:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33354 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726193AbgDXKan (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 24 Apr 2020 06:30:43 -0400
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D2039C09B045;
+        Fri, 24 Apr 2020 03:30:43 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20170209; h=In-Reply-To:Content-Type:MIME-Version
+        :References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=4Sw6XO8HGnt227nUuGdGgUq+h3XmixRIxRJmsIKqIyQ=; b=o92onYY1N76X2/K10Tm44Z3zz1
+        Vb4SXhLYJ00mbArnY4Q30kEVrnPWpXwts7yt3hau500UxZHyTF/j+u1/1ATMuCvSIPwmjoTG1jeCI
+        tlQVfb24/BttGN/YLuyBV3MKBmqruPZdsgortb1/faWTOaGpSGEYWxEVytetXTpHpmGzr7FEdyw5J
+        AKq81cm6uLNHd4Hg4RK2AJuKgS8sj/niED2cWqUqlwED3imeulITMABOhE5uSsJ/mKC0jB1Xipznf
+        /n3Pb+f3CZVkfDep2XGji3Ex7VmiNB/0sSJqsUPlthcbQGh4ygqDWE6YxDUv05CHhY4zhW9bBI2Jp
+        rjC1DVvQ==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.92.3 #3 (Red Hat Linux))
+        id 1jRvbW-0002Yt-Un; Fri, 24 Apr 2020 10:30:42 +0000
+Date:   Fri, 24 Apr 2020 03:30:42 -0700
+From:   Christoph Hellwig <hch@infradead.org>
+To:     "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: Re: [PATCH 4/5] xfs/30[78]: fix regressions due to strengthened AGF
+ checks
+Message-ID: <20200424103042.GA8585@infradead.org>
+References: <158768467175.3019327.8681440148230401150.stgit@magnolia>
+ <158768469665.3019327.1634286381311814235.stgit@magnolia>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <158768469665.3019327.1634286381311814235.stgit@magnolia>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-The offset and size should be aligned with cluster size when inserting
-or collapsing range on ext4 with 'bigalloc' feature enabled. Currently
-I can find only ext4 with this limitation.
+On Thu, Apr 23, 2020 at 04:31:36PM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
+> 
+> Reorder the order in which we tweak AGF fields to avoid falling afoul of
+> the new AGF sanity checks.
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 
-Since fsx should have no assumption of the underlying filesystem, and
-thus add the '-u cluster_size' option. Tests can set this option when
-the underlying filesystem is ext4 with bigalloc enabled.
+Looks good,
 
-Signed-off-by: Jeffle Xu <jefflexu@linux.alibaba.com>
----
- ltp/fsx.c | 20 ++++++++++++++------
- 1 file changed, 14 insertions(+), 6 deletions(-)
-
-diff --git a/ltp/fsx.c b/ltp/fsx.c
-index 9d598a4..5fe5738 100644
---- a/ltp/fsx.c
-+++ b/ltp/fsx.c
-@@ -133,6 +133,7 @@ int	dirpath = 0;			/* -P flag */
- int	fd;				/* fd for our test file */
- 
- blksize_t	block_size = 0;
-+blksize_t	cluster_size = 0;
- off_t		file_size = 0;
- off_t		biggest = 0;
- long long	testcalls = 0;		/* calls to function "test" */
-@@ -2146,8 +2147,8 @@ have_op:
- 		break;
- 	case OP_COLLAPSE_RANGE:
- 		TRIM_OFF_LEN(offset, size, file_size - 1);
--		offset = offset & ~(block_size - 1);
--		size = size & ~(block_size - 1);
-+		offset = offset & ~(cluster_size - 1);
-+		size = size & ~(cluster_size - 1);
- 		if (size == 0) {
- 			log4(OP_COLLAPSE_RANGE, offset, size, FL_SKIPPED);
- 			goto out;
-@@ -2157,8 +2158,8 @@ have_op:
- 	case OP_INSERT_RANGE:
- 		TRIM_OFF(offset, file_size);
- 		TRIM_LEN(file_size, size, maxfilelen);
--		offset = offset & ~(block_size - 1);
--		size = size & ~(block_size - 1);
-+		offset = offset & ~(cluster_size - 1);
-+		size = size & ~(cluster_size - 1);
- 		if (size == 0) {
- 			log4(OP_INSERT_RANGE, offset, size, FL_SKIPPED);
- 			goto out;
-@@ -2231,7 +2232,7 @@ void
- usage(void)
- {
- 	fprintf(stdout, "usage: %s",
--		"fsx [-dknqxABEFJLOWZ] [-b opnum] [-c Prob] [-g filldata] [-i logdev] [-j logid] [-l flen] [-m start:end] [-o oplen] [-p progressinterval] [-r readbdy] [-s style] [-t truncbdy] [-w writebdy] [-D startingop] [-N numops] [-P dirpath] [-S seed] fname\n\
-+		"fsx [-dknqxABEFJLOWZ] [-b opnum] [-c Prob] [-g filldata] [-i logdev] [-j logid] [-l flen] [-m start:end] [-o oplen] [-p progressinterval] [-r readbdy] [-s style] [-t truncbdy] [-u csize] [-w writebdy] [-D startingop] [-N numops] [-P dirpath] [-S seed] fname\n\
- 	-b opnum: beginning operation number (default 1)\n\
- 	-c P: 1 in P chance of file close+open at each op (default infinity)\n\
- 	-d: debug output for all operations\n\
-@@ -2249,6 +2250,7 @@ usage(void)
- 	-r readbdy: 4096 would make reads page aligned (default 1)\n\
- 	-s style: 1 gives smaller truncates (default 0)\n\
- 	-t truncbdy: 4096 would make truncates page aligned (default 1)\n\
-+	-u csize: filesystem specific cluster size that may be used for ops like insert/collapse range\n\
- 	-w writebdy: 4096 would make writes page aligned (default 1)\n\
- 	-x: preallocate file space before starting, XFS only (default 0)\n\
- 	-y synchronize changes to a file\n"
-@@ -2485,7 +2487,7 @@ main(int argc, char **argv)
- 	setvbuf(stdout, (char *)0, _IOLBF, 0); /* line buffered stdout */
- 
- 	while ((ch = getopt_long(argc, argv,
--				 "b:c:dfg:i:j:kl:m:no:p:qr:s:t:w:xyABD:EFJKHzCILN:OP:RS:WXZ",
-+				 "b:c:dfg:i:j:kl:m:no:p:qr:s:t:u:w:xyABD:EFJKHzCILN:OP:RS:WXZ",
- 				 longopts, NULL)) != EOF)
- 		switch (ch) {
- 		case 'b':
-@@ -2579,6 +2581,11 @@ main(int argc, char **argv)
- 			if (truncbdy <= 0)
- 				usage();
- 			break;
-+		case 'u':
-+			cluster_size = getnum(optarg, &endp);
-+			if (cluster_size <= 0)
-+				usage();
-+			break;
- 		case 'w':
- 			writebdy = getnum(optarg, &endp);
- 			if (writebdy <= 0)
-@@ -2720,6 +2727,7 @@ main(int argc, char **argv)
- 		exit(91);
- 	}
- 	block_size = statbuf.st_blksize;
-+	cluster_size = cluster_size ? : block_size;
- #ifdef XFS
- 	if (prealloc) {
- 		xfs_flock64_t	resv = { 0 };
--- 
-1.8.3.1
-
+Reviewed-by: Christoph Hellwig <hch@lst.de>
