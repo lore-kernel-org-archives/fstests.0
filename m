@@ -2,128 +2,141 @@ Return-Path: <SRS0=hCCx=6I=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.7 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5407BC54FCB
-	for <linux-fstests@archiver.kernel.org>; Fri, 24 Apr 2020 11:03:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B5489C54FCB
+	for <linux-fstests@archiver.kernel.org>; Fri, 24 Apr 2020 15:56:22 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0DD4F20728
-	for <linux-fstests@archiver.kernel.org>; Fri, 24 Apr 2020 11:03:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8FF3620767
+	for <linux-fstests@archiver.kernel.org>; Fri, 24 Apr 2020 15:56:22 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="FLVMQztl"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726668AbgDXLDe (ORCPT
+        id S1727796AbgDXP4W (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 24 Apr 2020 07:03:34 -0400
-Received: from mx2.suse.de ([195.135.220.15]:34648 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726489AbgDXLDe (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 24 Apr 2020 07:03:34 -0400
-X-Virus-Scanned: by amavisd-new at test-mx.suse.de
-Received: from relay2.suse.de (unknown [195.135.220.254])
-        by mx2.suse.de (Postfix) with ESMTP id 17F2EACC4;
-        Fri, 24 Apr 2020 11:03:31 +0000 (UTC)
-Date:   Fri, 24 Apr 2020 13:03:30 +0200
-From:   Anthony Iliopoulos <ailiop@suse.com>
-To:     "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc:     Eryu Guan <guaneryu@gmail.com>, fstests@vger.kernel.org,
-        linux-xfs@vger.kernel.org
-Subject: Re: [PATCH] common/fuzzy: don't attempt online scrubbing unless
- supported
-Message-ID: <20200424110330.GV1329@technoir>
-References: <20200421113643.24224-1-ailiop@suse.com>
- <20200421153717.GY6742@magnolia>
+        Fri, 24 Apr 2020 11:56:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56040 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727063AbgDXP4V (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 24 Apr 2020 11:56:21 -0400
+Received: from mail-io1-xd36.google.com (mail-io1-xd36.google.com [IPv6:2607:f8b0:4864:20::d36])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B54BBC09B046
+        for <fstests@vger.kernel.org>; Fri, 24 Apr 2020 08:56:21 -0700 (PDT)
+Received: by mail-io1-xd36.google.com with SMTP id p10so10845005ioh.7
+        for <fstests@vger.kernel.org>; Fri, 24 Apr 2020 08:56:21 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=AT+1BaXu+wwo3N4yUayU0mMauUAnFs/m2kqbDVJ7z7Y=;
+        b=FLVMQztl/AEDH4SdVz8y4WsHJ9wBQJUfDYseKJqXKv0VGUHbW7GOvYTNYWazyloMlM
+         XEt1dmEZlFLEGe2jZmOeWKawzSg9ONmskyqedsukv8BsTcJ7iJi6HijiEEKMcfwkzdAM
+         zsS3lVlQ3+/FJK89V5PgtchmiAGMOjuDs5/J4M+yy9DurXelkKU7xAg0V8ty1wOpbd4B
+         2KNKsoX19T55SzqgCEuDslhVmHftC8jqBhuBK+5boAWYP/bMMslwwkkaUsRnyX03sead
+         Xlu4pXJxYNVMQysTuoeT4q8LTLXUAZro37QAwQUKs16/h+ZF41aMT6NdrYg482q4qm6P
+         /12w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=AT+1BaXu+wwo3N4yUayU0mMauUAnFs/m2kqbDVJ7z7Y=;
+        b=RGI6cF6IYBphNv2YF9irhjwqqyOSFZ+RHtjIVLHjj7cI2efkPLsQ3Ng7l6+lmakZi7
+         fn8S1KwXCqUZTkp1YKE15cvQFK9d4iuUlM47pvEwRTb6t5BT6+zAfmAHkTsPPr97aiiy
+         OoYfAyXdIuMa/PI7TmXJ2synA+ZJhYz8U+oBRjv8OI4M17stAkjgVIc/NaAKs1vLv89M
+         TnA17rMNsgrv+59C1lZlJGnZ4og3J55aeNZ5IdU1LOOEReLqUhinWz6jQO12UwT7BcXt
+         UC8seyQa3nDcaqOh4VBeXg3G5iENW8n2ilIzA4bCkAA3zZqUKtmDgKqF3JkqOgX9OHcV
+         ALoQ==
+X-Gm-Message-State: AGi0Pub8t4aabLP5ty0Vf/QEIFn7XkQfma/5AP2Yk/ZFrTI8o/vpf3Nr
+        voLffaJUBT7MznAmQIIz46rx+61rc7C9VPVLlA==
+X-Google-Smtp-Source: APiQypLtO00jq3oBEaxzIHF2tyl0W3cl4CjPTD8Dxbd1TaF2cqOtBpVHGuStpmXClAnqdvtoPje/Awaw8sQtVo3WYHE=
+X-Received: by 2002:a05:6638:3d2:: with SMTP id r18mr9223303jaq.6.1587743780964;
+ Fri, 24 Apr 2020 08:56:20 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200421153717.GY6742@magnolia>
+References: <CAM2wg3RX8rKzFw+s=Z03gQpWsDcXQqhcan5vNRaw0BFz7URzFQ@mail.gmail.com>
+ <CAOQ4uxhOHXFJatXqnxL1PtmMc9wzMhYR0WVj35AAvcd=DFabcA@mail.gmail.com>
+ <CAM2wg3RXdmU03fxgRE-FVAreArv4C7iXrGqGRKKKMWyKG13qmg@mail.gmail.com> <CAOQ4uxiJFii0kgiR94mLzO6YfX+uooQoam0m2+oOMcLn+shFJQ@mail.gmail.com>
+In-Reply-To: <CAOQ4uxiJFii0kgiR94mLzO6YfX+uooQoam0m2+oOMcLn+shFJQ@mail.gmail.com>
+From:   Arvind Raghavan <raghavan.arvind@gmail.com>
+Date:   Fri, 24 Apr 2020 10:56:10 -0500
+Message-ID: <CAM2wg3QV2Y67hzq4Gf43Vtrm42ChZZ6sdv6g2d24zJDDh8v3Dg@mail.gmail.com>
+Subject: Re: Additional Crashmonkey Tests
+To:     Amir Goldstein <amir73il@gmail.com>, fstests@vger.kernel.org
+Cc:     Jayashree Mohan <jayashree2912@gmail.com>,
+        Vijay Chidambaram <vijay@cs.utexas.edu>
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Apr 21, 2020 at 08:37:17AM -0700, Darrick J. Wong wrote:
-> On Tue, Apr 21, 2020 at 01:36:42PM +0200, Anthony Iliopoulos wrote:
-> > Many xfs metadata fuzzing tests invoke xfs_scrub to detect online errors
-> > even when _scratch_xfs_fuzz_metadata is invoked with "offline". This
-> > causes those tests to fail with output mismatches on kernels that don't
-> > enable CONFIG_XFS_ONLINE_SCRUB. Bypass scrubbing when not supported.
-> > 
-> > Signed-off-by: Anthony Iliopoulos <ailiop@suse.com>
-> > ---
-> >  common/fuzzy | 2 +-
-> >  1 file changed, 1 insertion(+), 1 deletion(-)
-> > 
-> > diff --git a/common/fuzzy b/common/fuzzy
-> > index 988203b1..83ddc3e8 100644
-> > --- a/common/fuzzy
-> > +++ b/common/fuzzy
-> > @@ -238,7 +238,7 @@ __scratch_xfs_fuzz_field_test() {
-> >  	if [ $res -eq 0 ]; then
-> >  		# Try an online scrub unless we're fuzzing ag 0's sb,
-> >  		# which scrub doesn't know how to fix.
-> > -		if [ "${repair}" != "none" ]; then
-> > +		if _supports_xfs_scrub "${SCRATCH_MNT}" "${SCRATCH_DEV}"; then
-> 
-> Huh?
-> 
-> This changes the behavior of the repair=none fuzz tests, which mutate
-> filesystems and then write to them without running any checking tools
-> whatsoever to see if we can trip over the mutations with only regular
-> filesystem operations.  Whereas before, we'd skip xfs_scrub, now we
-> always run it if it's supported.
+On Fri, Apr 24, 2020 at 1:24 AM Amir Goldstein <amir73il@gmail.com> wrote:
+>
+> On Fri, Apr 24, 2020 at 12:53 AM Arvind Raghavan
+> <raghavan.arvind@gmail.com> wrote:
+> >
+> > Hi Amir!
+> >
+> > We have 9 tests each consisting of several tests grouped around a
+> > single operation (rename, falloc, write, dwrite, mmapwrite,
+> > unlink, fsetxattr, removexattr, and truncate). The number of
+> > tests and runtime for each can be varied by changing how many
+> > flags and combinations of files we want to test. Some tests, such
+> > as the falloc test, have so many options that they could contain
+> > >100 tests and take several minutes. Is there an upper time bound
+> > that we should shoot for when building these tests?
+>
+> No there is no upper time bound.
+> It is just important to tag the tests correctly.
+> Tests in group quick usually run well under 1 minute (depending on
+> system and fs).
+>
+> Running all the tests in auto group could take several hours and each non
+> quick test could take several minutes, so it is not uncommon to add tests
+> that run several minutes.
+>
+> However, you should know that more testers run the quick tests and more often
+> that testers running non-quick tests.
+>
+> So the quick tests that you write will end up being run more often on more
+> filesystems by more testers
 
-oops...right, we want to let the verifiers catch the errors here.
+Ah, got it!
 
-Speaking of which, I've been staring at the scripts but it's not clear
-to me how the repair=none fuzz tests are expected to function. Many of
-those tests corrupt AG metadata headers (e.g. the AGI lsn), which means
-mount bails out with an error. But the golden output doesn't account for
-that, so those tests will fail (e.g. xfs/456).
+> > For example, the rename test contains 37 tests and takes around
+> > 12-15 seconds to run, which is around the same amount of time as
+> > Jayashree's initial link test took. I can send out a patch for
+> > that test if that runtime seems reasonable.
+>
+> That would be a good quick test.
+>
+> I think you should also consider tagging your tests with a group
+> more specific to crash consistency test.
 
-Further, for things like inode metadata fuzzing where the fs is usually
-mountable, the tests will always succeed irrespective of the verifiers
-firing or not (e.g. xfs/465).
+Great! It seems that most tests that use
+_flakey_drop_and_remount() are tagged with 'log' and 'metadata',
+and it seems like both of those tags fit here. We can go ahead
+and send the patch with the tags 'auto', 'quick', 'log', and
+'metadata', and if we can agree on a crash consistency group (see
+below), we could retroactively tag those tests in a different
+patch.
 
-I'd assume all those repair=none tests would need to check dmesg for
-metadata corruptions, so something like:
+> I myself did not tag the _log_writes_replay_log tests I submitted
+> for a specific crash consistency group. I used the 'log' group
+> same as Jayashree's test. I think we can come up with a better
+> group name and tag those existing tests as well, probably some
+> others, but I have no suggestion for a good name, sorry.
 
---- a/common/fuzzy
-+++ b/common/fuzzy
-@@ -254,3 +254,3 @@ __scratch_xfs_fuzz_field_test() {
- 		__scratch_xfs_fuzz_unmount
--	else
-+	elif [ "${repair}" != "none" ]; then
- 		(>&2 echo "re-mount failed ($res) with ${field} = ${fuzzverb}.")
+When Jayashree submitted the first Crashmonkey test, Felipe
+mentioned here [1] that the test "should be in the 'quick' and
+'log' groups", and that he wasn't sure if it should be added to
+the new "crash" group. However, I can't seem to find any tests
+labelled with this 'crash' group. Was there a specific reason why
+this group would've been removed?
 
---- a/tests/xfs/456
-+++ b/tests/xfs/456
-@@ -43,2 +43,5 @@ echo "Done fuzzing AGI"
+[1] https://www.spinics.net/lists/fstests/msg10772.html
 
-+_check_dmesg_for "Metadata corruption detected" || \
-+	_fail "Missing metadata corruption messages!"
-+
- # success, all done
-
-If this makes sense, I'll send a separate patch to address it, and fix
-all repair=none tests as above.
-
-> The open-coded repair conditionals scattered through this funciton
-> probably ought to be refactored into helpers, e.g.
-> 
-> __fuzz_want_scrub_check() {
-> 	local repair="$1"
-> 	local field="$2"
-> 
-> 	test "${repair}" != "none" && \
-> 		_supports_xfs_scrub "${SCRATCH_MNT}" "${SCRATCH_DEV}" && \
-> 		[ "${field}" != "sb 0" ]
-> }
-> 
-> if [ $res -eq 0 ]; then
-> 	# Try an online scrub...
-> 	if __fuzz_want_scrub_check "${repair}" "${field}"; then
-> 		_scratch_scrub -n -a 1 -e continue 2>&1
-> 		...
-
-Will do that and send a v2, thanks for the review!
+> Thanks,
+> Amir.
