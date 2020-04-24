@@ -2,141 +2,304 @@ Return-Path: <SRS0=hCCx=6I=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B5489C54FCB
-	for <linux-fstests@archiver.kernel.org>; Fri, 24 Apr 2020 15:56:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B4417C54FD0
+	for <linux-fstests@archiver.kernel.org>; Fri, 24 Apr 2020 16:52:15 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8FF3620767
-	for <linux-fstests@archiver.kernel.org>; Fri, 24 Apr 2020 15:56:22 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 907C620857
+	for <linux-fstests@archiver.kernel.org>; Fri, 24 Apr 2020 16:52:15 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="FLVMQztl"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="miMLd12a"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727796AbgDXP4W (ORCPT
+        id S1728643AbgDXQwO (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 24 Apr 2020 11:56:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56040 "EHLO
+        Fri, 24 Apr 2020 12:52:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37260 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727063AbgDXP4V (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 24 Apr 2020 11:56:21 -0400
-Received: from mail-io1-xd36.google.com (mail-io1-xd36.google.com [IPv6:2607:f8b0:4864:20::d36])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B54BBC09B046
-        for <fstests@vger.kernel.org>; Fri, 24 Apr 2020 08:56:21 -0700 (PDT)
-Received: by mail-io1-xd36.google.com with SMTP id p10so10845005ioh.7
-        for <fstests@vger.kernel.org>; Fri, 24 Apr 2020 08:56:21 -0700 (PDT)
+        with ESMTP id S1728019AbgDXQwO (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 24 Apr 2020 12:52:14 -0400
+Received: from mail-oo1-xc43.google.com (mail-oo1-xc43.google.com [IPv6:2607:f8b0:4864:20::c43])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B19FDC09B046
+        for <fstests@vger.kernel.org>; Fri, 24 Apr 2020 09:52:13 -0700 (PDT)
+Received: by mail-oo1-xc43.google.com with SMTP id r1so2241089oog.7
+        for <fstests@vger.kernel.org>; Fri, 24 Apr 2020 09:52:13 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=AT+1BaXu+wwo3N4yUayU0mMauUAnFs/m2kqbDVJ7z7Y=;
-        b=FLVMQztl/AEDH4SdVz8y4WsHJ9wBQJUfDYseKJqXKv0VGUHbW7GOvYTNYWazyloMlM
-         XEt1dmEZlFLEGe2jZmOeWKawzSg9ONmskyqedsukv8BsTcJ7iJi6HijiEEKMcfwkzdAM
-         zsS3lVlQ3+/FJK89V5PgtchmiAGMOjuDs5/J4M+yy9DurXelkKU7xAg0V8ty1wOpbd4B
-         2KNKsoX19T55SzqgCEuDslhVmHftC8jqBhuBK+5boAWYP/bMMslwwkkaUsRnyX03sead
-         Xlu4pXJxYNVMQysTuoeT4q8LTLXUAZro37QAwQUKs16/h+ZF41aMT6NdrYg482q4qm6P
-         /12w==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=Xue2LdLI/D0JAHJ767TD8KkMFnfnppMokVLpkjqQChk=;
+        b=miMLd12aJF7iVyFohDDgq2/UqrW2UvaSFuKGhmP4N2FmB9H3m0bwWlFEWA005H4uFu
+         4E6cu47mZeQVM30q2T1a77hqHU18pNo0Nj4d78/EPGo//Ea4VrCGDZaKbA18H6uL9u+x
+         9ntbMM+4Ve66ZjsCjkNsW3cqECmpTBL0jAGqaR8zCNt4uCjaEIzmh5KOWwkNwxrHbdwN
+         OJhvPYarw7rjDUEv1h9LTYwbOzQV0gSul9CjuMRAo9iFifoHiC8LAr1/zdANpmldRulK
+         uc57e3hL7q7k/Rgb08RtFihJBylNxLU0gljd84/Kb5ADqb4/OQfGzQWtJqlvYkdF8/cz
+         aeoQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=AT+1BaXu+wwo3N4yUayU0mMauUAnFs/m2kqbDVJ7z7Y=;
-        b=RGI6cF6IYBphNv2YF9irhjwqqyOSFZ+RHtjIVLHjj7cI2efkPLsQ3Ng7l6+lmakZi7
-         fn8S1KwXCqUZTkp1YKE15cvQFK9d4iuUlM47pvEwRTb6t5BT6+zAfmAHkTsPPr97aiiy
-         OoYfAyXdIuMa/PI7TmXJ2synA+ZJhYz8U+oBRjv8OI4M17stAkjgVIc/NaAKs1vLv89M
-         TnA17rMNsgrv+59C1lZlJGnZ4og3J55aeNZ5IdU1LOOEReLqUhinWz6jQO12UwT7BcXt
-         UC8seyQa3nDcaqOh4VBeXg3G5iENW8n2ilIzA4bCkAA3zZqUKtmDgKqF3JkqOgX9OHcV
-         ALoQ==
-X-Gm-Message-State: AGi0Pub8t4aabLP5ty0Vf/QEIFn7XkQfma/5AP2Yk/ZFrTI8o/vpf3Nr
-        voLffaJUBT7MznAmQIIz46rx+61rc7C9VPVLlA==
-X-Google-Smtp-Source: APiQypLtO00jq3oBEaxzIHF2tyl0W3cl4CjPTD8Dxbd1TaF2cqOtBpVHGuStpmXClAnqdvtoPje/Awaw8sQtVo3WYHE=
-X-Received: by 2002:a05:6638:3d2:: with SMTP id r18mr9223303jaq.6.1587743780964;
- Fri, 24 Apr 2020 08:56:20 -0700 (PDT)
-MIME-Version: 1.0
-References: <CAM2wg3RX8rKzFw+s=Z03gQpWsDcXQqhcan5vNRaw0BFz7URzFQ@mail.gmail.com>
- <CAOQ4uxhOHXFJatXqnxL1PtmMc9wzMhYR0WVj35AAvcd=DFabcA@mail.gmail.com>
- <CAM2wg3RXdmU03fxgRE-FVAreArv4C7iXrGqGRKKKMWyKG13qmg@mail.gmail.com> <CAOQ4uxiJFii0kgiR94mLzO6YfX+uooQoam0m2+oOMcLn+shFJQ@mail.gmail.com>
-In-Reply-To: <CAOQ4uxiJFii0kgiR94mLzO6YfX+uooQoam0m2+oOMcLn+shFJQ@mail.gmail.com>
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=Xue2LdLI/D0JAHJ767TD8KkMFnfnppMokVLpkjqQChk=;
+        b=aqVcL+LzhopHa2dPBOwD0kbKVtmGd6raCHk8duoCekRPWf6j5HAHu2/y13jfUwUtfr
+         c3AJYU5QUfHcHbxETHoA2zKBu6HQrDtN36TDfSKze5v0Gbyt9Qjv+fo7EhkxgKTmgNvm
+         eJ9ArLRYBll30S4bQ/cTXMEFzo5zqgxiVxdGRC3PEg2Cvsx3iR7+UMuPABxbfclFwEbL
+         PDZM+ywj3SwfM0Rij/WHrkgSCv3nVd3ZPeKfCWWb23EVB6ZkYdQAfgRJIpQYLTKcw2pE
+         oqrFagUofd6bmFksog0sKtgx7Bi27r752O4x1nn5iuTdv/9C9WL/cZLdMY+HG5RvLxV8
+         MlIw==
+X-Gm-Message-State: AGi0PuaHOuTo/0aWBksL1xsbGDzuqsi7nKPnMRnHF6BGDIiuQd+6Q6Rf
+        yYkewgigvrvTG8ZKx9mTwEROuken2Q==
+X-Google-Smtp-Source: APiQypJoEAmvuYGeijFTAv+0qclK4PwR5W2CPf1p+VcOkRxRm1xDu+dQF723JrXj6KyI7P0JriBvGg==
+X-Received: by 2002:a4a:e60d:: with SMTP id f13mr8621914oot.6.1587747132676;
+        Fri, 24 Apr 2020 09:52:12 -0700 (PDT)
+Received: from localhost.localdomain (cpe-70-114-159-174.austin.res.rr.com. [70.114.159.174])
+        by smtp.gmail.com with ESMTPSA id 60sm1623806ott.17.2020.04.24.09.52.11
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 24 Apr 2020 09:52:12 -0700 (PDT)
 From:   Arvind Raghavan <raghavan.arvind@gmail.com>
-Date:   Fri, 24 Apr 2020 10:56:10 -0500
-Message-ID: <CAM2wg3QV2Y67hzq4Gf43Vtrm42ChZZ6sdv6g2d24zJDDh8v3Dg@mail.gmail.com>
-Subject: Re: Additional Crashmonkey Tests
-To:     Amir Goldstein <amir73il@gmail.com>, fstests@vger.kernel.org
-Cc:     Jayashree Mohan <jayashree2912@gmail.com>,
-        Vijay Chidambaram <vijay@cs.utexas.edu>
-Content-Type: text/plain; charset="UTF-8"
+To:     fstests@vger.kernel.org
+Cc:     amir73il@gmail.com, jayashree2912@gmail.com, vijay@cs.utexas.edu,
+        Arvind Raghavan <raghavan.arvind@gmail.com>
+Subject: [PATCH] fstest: Crashmonkey rename tests ported to xfstest
+Date:   Fri, 24 Apr 2020 12:51:17 -0400
+Message-Id: <20200424165117.6433-1-raghavan.arvind@gmail.com>
+X-Mailer: git-send-email 2.20.1
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Apr 24, 2020 at 1:24 AM Amir Goldstein <amir73il@gmail.com> wrote:
->
-> On Fri, Apr 24, 2020 at 12:53 AM Arvind Raghavan
-> <raghavan.arvind@gmail.com> wrote:
-> >
-> > Hi Amir!
-> >
-> > We have 9 tests each consisting of several tests grouped around a
-> > single operation (rename, falloc, write, dwrite, mmapwrite,
-> > unlink, fsetxattr, removexattr, and truncate). The number of
-> > tests and runtime for each can be varied by changing how many
-> > flags and combinations of files we want to test. Some tests, such
-> > as the falloc test, have so many options that they could contain
-> > >100 tests and take several minutes. Is there an upper time bound
-> > that we should shoot for when building these tests?
->
-> No there is no upper time bound.
-> It is just important to tag the tests correctly.
-> Tests in group quick usually run well under 1 minute (depending on
-> system and fs).
->
-> Running all the tests in auto group could take several hours and each non
-> quick test could take several minutes, so it is not uncommon to add tests
-> that run several minutes.
->
-> However, you should know that more testers run the quick tests and more often
-> that testers running non-quick tests.
->
-> So the quick tests that you write will end up being run more often on more
-> filesystems by more testers
+This patch aims to add tests to the xfstest suite to check whether
+renamed files recover after a crash. These test cases were generated by
+CrashMonkey, a crash-consistency testing framework built at the SASLab
+at UT Austin.
 
-Ah, got it!
+This patch batches 37 tests into a single test, each of which creates a
+file, renames it, syncs one of the files/parent directories, and ensures
+that the synced file/dir is equivalent before and after a crash.
 
-> > For example, the rename test contains 37 tests and takes around
-> > 12-15 seconds to run, which is around the same amount of time as
-> > Jayashree's initial link test took. I can send out a patch for
-> > that test if that runtime seems reasonable.
->
-> That would be a good quick test.
->
-> I think you should also consider tagging your tests with a group
-> more specific to crash consistency test.
+This test takes around 12-15 seconds to run locally and is thus placed
+in the 'quick' group.
 
-Great! It seems that most tests that use
-_flakey_drop_and_remount() are tagged with 'log' and 'metadata',
-and it seems like both of those tags fit here. We can go ahead
-and send the patch with the tags 'auto', 'quick', 'log', and
-'metadata', and if we can agree on a crash consistency group (see
-below), we could retroactively tag those tests in a different
-patch.
+Signed-off-by: Arvind Raghavan <raghavan.arvind@gmail.com>
+---
+ tests/generic/484     | 179 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/484.out |   2 +
+ tests/generic/group   |   1 +
+ 3 files changed, 182 insertions(+)
+ create mode 100755 tests/generic/484
+ create mode 100644 tests/generic/484.out
 
-> I myself did not tag the _log_writes_replay_log tests I submitted
-> for a specific crash consistency group. I used the 'log' group
-> same as Jayashree's test. I think we can come up with a better
-> group name and tag those existing tests as well, probably some
-> others, but I have no suggestion for a good name, sorry.
+diff --git a/tests/generic/484 b/tests/generic/484
+new file mode 100755
+index 00000000..b27d828d
+--- /dev/null
++++ b/tests/generic/484
+@@ -0,0 +1,179 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2020 The University of Texas at Austin.  All Rights Reserved.
++#
++# FS QA Test 484
++#
++# Test case created by CrashMonkey
++#
++# Test if we create a rename a file and persist it that the
++# appropriate files exist.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	_cleanup_flakey
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/dmflakey
++
++# 256MB in byte
++fssize=$((2**20 * 256))
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_scratch_nocheck
++_require_dm_target flakey
++
++# initialize scratch device
++_scratch_mkfs_sized $fssize >> $seqres.full 2>&1
++_require_metadata_journaling $SCRATCH_DEV
++_init_flakey
++
++stat_opt='-c  %n - blocks: %b size: %s inode: %i links: %h'
++
++# Usage: general_stat [--data-only] file1 [--data-only] [file2] ..
++# If the --data-only flag precedes a file, then only that file's
++# data will be printed. If a file is synced, then general_stat
++# should provide identical output before and after a crash.
++general_stat() {
++	local data_only="false"
++	while (( "$#" )); do
++		case $1 in
++			--data-only)
++				data_only="true"
++				;;
++			*)
++				local path="$1"
++				echo "-- $path --"
++				if [ ! -e "$path" ]; then
++					echo "Doesn't exist!"
++				elif [ "$data_only" = "true" ] && [ -d "$path" ]; then
++					echo "Directory Data"
++					[ -z "$(ls -A $path)" ] || ls -1 "$path" | sort
++				elif [ "$data_only" = "true" ]; then
++					echo "File Data"
++					od "$path"
++				elif [ -d "$path" ]; then
++					echo "Directory Metadata"
++					stat "$stat_opt" "$path"
++					echo "Directory Data"
++					[ -z "$(ls -A $path)" ] || ls -1 "$path" | sort
++				else
++					echo "File Metadata"
++					stat "$stat_opt" "$path"
++					echo "File Data"
++					od "$path"
++				fi
++				data_only="false"
++				;;
++		esac
++		shift
++	done
++}
++
++check_consistency()
++{
++	before=$(general_stat "$@")
++	_flakey_drop_and_remount
++	after=$(general_stat "$@")
++
++	if [ "$before" != "$after" ]; then
++		echo -e "Before:\n$before"
++		echo -e "After:\n$after"
++	fi
++
++	# Using _unmount_flakey nondeterministically fails here with
++	# "target is busy". Calling 'sync' doesn't fix the issue. Lazy
++	# unmount waits for lingering processes to exit.
++	$UMOUNT_PROG -l $SCRATCH_MNT
++	_check_scratch_fs $FLAKEY_DEV
++}
++
++clean_dir()
++{
++	_mount_flakey
++	rm -rf $(find $SCRATCH_MNT/* | grep -v "lost+found")
++	$UMOUNT_PROG -l $SCRATCH_MNT
++}
++
++do_fsync_check() {
++	local file="$1"
++	local sync_op="$2"
++
++	if [ $sync_op == "fdatasync" ]; then
++		$XFS_IO_PROG -c "fdatasync" $file
++		check_consistency --data-only $file
++	else
++		$XFS_IO_PROG -c "fsync" $file
++		check_consistency $file
++	fi
++}
++
++# Wraps mv, deletes dest dir if exists.
++rename() {
++	[ -d $1 ] && [ -d $2 ] && rm -rf $2
++	mv $1 $2
++}
++
++function rename_template() {
++	local file1="$1"
++	local file2="$2"
++	local fsync_file="$3"
++	local fsync_command="$4"
++
++	_mount_flakey
++	mkdir -p $(dirname $file1)
++	touch $file1
++	mkdir -p $(dirname $file2)
++	rename $file1 $file2
++	do_fsync_check $fsync_file $fsync_command
++	clean_dir
++}
++
++file1_options=(
++	"$SCRATCH_MNT/A/C/bar"
++	"$SCRATCH_MNT/A/bar"
++	"$SCRATCH_MNT/A/foo"
++	"$SCRATCH_MNT/foo"
++)
++file2_options=(
++	"$SCRATCH_MNT/A/C/bar"
++	"$SCRATCH_MNT/A/bar"
++	"$SCRATCH_MNT/bar"
++)
++
++for file1 in ${file1_options[@]}; do
++	for file2 in ${file2_options[@]}; do
++		[ "$file1" == "$file2" ] && continue
++		to_sync=("$(dirname $file1)" "$(dirname $file2)")
++		uniques=($(for v in ${to_sync[@]}; do echo $v; done | sort -u))
++		for fsync_file in ${uniques[@]}; do
++			for fsync_command in fsync fdatasync; do
++				rename_template $file1 $file2 $fsync_file $fsync_command
++			done
++		done
++	done
++done
++
++# Success, all done
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/generic/484.out b/tests/generic/484.out
+new file mode 100644
+index 00000000..94f2f0bd
+--- /dev/null
++++ b/tests/generic/484.out
+@@ -0,0 +1,2 @@
++QA output created by 484
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index 718575ba..987ad2a0 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -486,6 +486,7 @@
+ 481 auto quick log metadata
+ 482 auto metadata replay thin
+ 483 auto quick log metadata
++484 auto quick log metadata
+ 485 auto quick insert
+ 486 auto quick attr
+ 487 auto quick eio
+-- 
+2.20.1
 
-When Jayashree submitted the first Crashmonkey test, Felipe
-mentioned here [1] that the test "should be in the 'quick' and
-'log' groups", and that he wasn't sure if it should be added to
-the new "crash" group. However, I can't seem to find any tests
-labelled with this 'crash' group. Was there a specific reason why
-this group would've been removed?
-
-[1] https://www.spinics.net/lists/fstests/msg10772.html
-
-> Thanks,
-> Amir.
