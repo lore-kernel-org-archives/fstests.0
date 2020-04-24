@@ -2,67 +2,91 @@ Return-Path: <SRS0=hCCx=6I=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.5 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.7 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	UNPARSEABLE_RELAY,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 49528C2BA1A
-	for <linux-fstests@archiver.kernel.org>; Fri, 24 Apr 2020 06:23:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0BD09C2BA1A
+	for <linux-fstests@archiver.kernel.org>; Fri, 24 Apr 2020 09:11:33 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2467E20700
-	for <linux-fstests@archiver.kernel.org>; Fri, 24 Apr 2020 06:23:22 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="QCpuGEaM"
+	by mail.kernel.org (Postfix) with ESMTP id DA2672074F
+	for <linux-fstests@archiver.kernel.org>; Fri, 24 Apr 2020 09:11:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726667AbgDXGXG (ORCPT
+        id S1726523AbgDXJLc (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 24 Apr 2020 02:23:06 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51288 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726659AbgDXGXG (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 24 Apr 2020 02:23:06 -0400
-Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E8A15C09B045;
-        Thu, 23 Apr 2020 23:23:04 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=bombadil.20170209; h=In-Reply-To:Content-Type:MIME-Version
-        :References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=6ksNm3BBT/lrPcyj1k2Kw1jDxVjgGPPrPYeKfaTWYcc=; b=QCpuGEaMlk3ynU5M2kT76Ps2K2
-        l9Pefr+MlWiU+oiim0H6xNwWU+0k0Uo7IoZK0gJZXaXlnAmAmeD2vBKa8gsOi0cwCiqDul/WJx4Ag
-        EdGKZioaPM8nt9QDkma75xWeeon6qQ8RawRRQARhBAEptIstYvU1952+BhBwNpODkZQCBHvxffkKM
-        s7+BKPdPUhEyj85Bv0wkio7PAcb9JCxyRyYmFUYM5GS7R8rf6KFmY+qMT04LRFueP7vIr9BCZUVkz
-        XHTJW3u5GKvCVouBCkuXiNKVtD62fyxLlpyzXNVXb00ZXbWAn0ucQJkWnB0yn5LIvBosx5LI9gpYO
-        zL2r5etQ==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.92.3 #3 (Red Hat Linux))
-        id 1jRrjs-0003lT-9C; Fri, 24 Apr 2020 06:23:04 +0000
-Date:   Thu, 23 Apr 2020 23:23:04 -0700
-From:   Christoph Hellwig <hch@infradead.org>
-To:     "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org
-Subject: Re: [PATCH 5/5] xfs/122: fix for linux 5.7 stuff
-Message-ID: <20200424062304.GB2537@infradead.org>
-References: <158768467175.3019327.8681440148230401150.stgit@magnolia>
- <158768470283.3019327.12107082366634108750.stgit@magnolia>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <158768470283.3019327.12107082366634108750.stgit@magnolia>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+        Fri, 24 Apr 2020 05:11:32 -0400
+Received: from out30-131.freemail.mail.aliyun.com ([115.124.30.131]:40990 "EHLO
+        out30-131.freemail.mail.aliyun.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726298AbgDXJLc (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 24 Apr 2020 05:11:32 -0400
+X-Alimail-AntiSpam: AC=PASS;BC=-1|-1;BR=01201311R201e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=e01e04357;MF=jefflexu@linux.alibaba.com;NM=1;PH=DS;RN=4;SR=0;TI=SMTPD_---0TwVfhQ._1587719489;
+Received: from localhost(mailfrom:jefflexu@linux.alibaba.com fp:SMTPD_---0TwVfhQ._1587719489)
+          by smtp.aliyun-inc.com(127.0.0.1);
+          Fri, 24 Apr 2020 17:11:30 +0800
+From:   Jeffle Xu <jefflexu@linux.alibaba.com>
+To:     fstests@vger.kernel.org
+Cc:     linux-ext4@vger.kernel.org, joseph.qi@linux.alibaba.com,
+        Tomas Racek <tracek@redhat.com>
+Subject: [PATCH] xfstests: 298: fix failure on ext4 with bigalloc
+Date:   Fri, 24 Apr 2020 17:11:12 +0800
+Message-Id: <1587719472-129572-1-git-send-email-jefflexu@linux.alibaba.com>
+X-Mailer: git-send-email 1.8.3.1
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Apr 23, 2020 at 04:31:42PM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <darrick.wong@oracle.com>
-> 
-> Fix some regressions on xfsprogs 5.7.
-> 
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+From: Tomas Racek <tracek@redhat.com>
 
-Looks good.  I actually had the same changes locally but forgot to send
-them out:
+It is just a resend of this patch from "Tomas Racek <tracek@redhat.com>".
+Recently we run xfstests on ext4 with 'bigalloc' feature enabled, and
+come across some failure due to poor adaption for ext4 bigalloc. One
+if the failed cases is shared/298. I find this patch on internet [1] and
+it works in my case. I have no idea why this patch have not been merged.
+Maybe this buddy didn't send this patch at that time, or it was rejected
+for some reason but I can't find any discussion on internet.
 
-Reviewed-by: Christoph Hellwig <hch@lst.de>
+[1] https://lkml.org/lkml/2013/6/18/329
+
+The original commit log:
+
+Count with cluster size instead of block size if bigalloc is used.
+
+Signed-off-by: Tomas Racek <tracek@redhat.com>
+---
+ tests/shared/298 | 12 +++++++++---
+ 1 file changed, 9 insertions(+), 3 deletions(-)
+
+diff --git a/tests/shared/298 b/tests/shared/298
+index 5d6c6cc..86b7cdc 100755
+--- a/tests/shared/298
++++ b/tests/shared/298
+@@ -60,15 +60,21 @@ get_free_sectors()
+ {
+ 	case $FSTYP in
+ 	ext4)
++	cluster_size=$($DUMPE2FS_PROG $img_file 2>&1 | sed -n 's/Cluster size: *\(.*\)/\1/p')
++	if [ -n "$cluster_size" ]; then
++		blocks_per_cluster=`expr $cluster_size / $block_size`
++	else
++		blocks_per_cluster=1
++	fi
+ 	$UMOUNT_PROG $loop_mnt
+ 	$DUMPE2FS_PROG $img_file  2>&1 | grep " Free blocks" | cut -d ":" -f2- | \
+ 		tr ',' '\n' | $SED_PROG 's/^ //' | \
+-		$AWK_PROG -v spb=$sectors_per_block 'BEGIN{FS="-"};
++		$AWK_PROG -v spb=$sectors_per_block -v bpc=$blocks_per_cluster 'BEGIN{FS="-"};
+ 		     NF {
+ 			if($2 != "") # range of blocks
+-				print spb * $1, spb * ($2 + 1) - 1;
++				print spb * $1, spb * ($2 + bpc) - 1;
+ 			else		# just single block
+-				print spb * $1, spb * ($1 + 1) - 1;
++				print spb * $1, spb * ($1 + bpc) - 1;
+ 		     }'
+ 	;;
+ 	xfs)
+-- 
+1.8.3.1
+
