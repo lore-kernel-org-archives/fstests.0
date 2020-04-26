@@ -1,305 +1,266 @@
-Return-Path: <SRS0=hCCx=6I=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=xJwm=6K=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B4417C54FD0
-	for <linux-fstests@archiver.kernel.org>; Fri, 24 Apr 2020 16:52:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 11EB4C2BA1A
+	for <linux-fstests@archiver.kernel.org>; Sun, 26 Apr 2020 07:29:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 907C620857
-	for <linux-fstests@archiver.kernel.org>; Fri, 24 Apr 2020 16:52:15 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DAFED2071C
+	for <linux-fstests@archiver.kernel.org>; Sun, 26 Apr 2020 07:29:44 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="miMLd12a"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="PMCN8YYa"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728643AbgDXQwO (ORCPT
+        id S1726112AbgDZH3o (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 24 Apr 2020 12:52:14 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37260 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728019AbgDXQwO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 24 Apr 2020 12:52:14 -0400
-Received: from mail-oo1-xc43.google.com (mail-oo1-xc43.google.com [IPv6:2607:f8b0:4864:20::c43])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B19FDC09B046
-        for <fstests@vger.kernel.org>; Fri, 24 Apr 2020 09:52:13 -0700 (PDT)
-Received: by mail-oo1-xc43.google.com with SMTP id r1so2241089oog.7
-        for <fstests@vger.kernel.org>; Fri, 24 Apr 2020 09:52:13 -0700 (PDT)
+        Sun, 26 Apr 2020 03:29:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56852 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1726107AbgDZH3o (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 26 Apr 2020 03:29:44 -0400
+Received: from mail-il1-x142.google.com (mail-il1-x142.google.com [IPv6:2607:f8b0:4864:20::142])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ED026C061A0C
+        for <fstests@vger.kernel.org>; Sun, 26 Apr 2020 00:29:43 -0700 (PDT)
+Received: by mail-il1-x142.google.com with SMTP id s10so13721307iln.11
+        for <fstests@vger.kernel.org>; Sun, 26 Apr 2020 00:29:43 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=Xue2LdLI/D0JAHJ767TD8KkMFnfnppMokVLpkjqQChk=;
-        b=miMLd12aJF7iVyFohDDgq2/UqrW2UvaSFuKGhmP4N2FmB9H3m0bwWlFEWA005H4uFu
-         4E6cu47mZeQVM30q2T1a77hqHU18pNo0Nj4d78/EPGo//Ea4VrCGDZaKbA18H6uL9u+x
-         9ntbMM+4Ve66ZjsCjkNsW3cqECmpTBL0jAGqaR8zCNt4uCjaEIzmh5KOWwkNwxrHbdwN
-         OJhvPYarw7rjDUEv1h9LTYwbOzQV0gSul9CjuMRAo9iFifoHiC8LAr1/zdANpmldRulK
-         uc57e3hL7q7k/Rgb08RtFihJBylNxLU0gljd84/Kb5ADqb4/OQfGzQWtJqlvYkdF8/cz
-         aeoQ==
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=clSNSYqFhwPr396wdJm0dLtlgPcn57cjAtAZZyQxb/4=;
+        b=PMCN8YYaVjRvtU9n4QdW7K11avzbo9mWkY6R3JJ80cOR3sv07F3uxiLh5HzcJHlx9q
+         uUVlmBRVePxGJK9jx5aETIhHycVt1RrnJfjjQHfJhzxOsBMTeghBGxSKmEp4OPI6x+h2
+         kzhu8dYl/e9IGMV4oxKcIUd8xKx2/Yf2rKfYBhZmu5id4unJNyOybA2Ee5cjl8ZpRj6r
+         Dmt/cQWJp+elHJ6+VLOOHGJlbQXiilM71z+a5v9d0R3VGqdxlOcFtbewXNbdJkOh/FXL
+         H8mM8UNM4Lt9jcgkOILbPDuPypOBS3NjgBH/yLPHT0OCNn7pkylydA+vZCuqj3My4WV1
+         UoVw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=Xue2LdLI/D0JAHJ767TD8KkMFnfnppMokVLpkjqQChk=;
-        b=aqVcL+LzhopHa2dPBOwD0kbKVtmGd6raCHk8duoCekRPWf6j5HAHu2/y13jfUwUtfr
-         c3AJYU5QUfHcHbxETHoA2zKBu6HQrDtN36TDfSKze5v0Gbyt9Qjv+fo7EhkxgKTmgNvm
-         eJ9ArLRYBll30S4bQ/cTXMEFzo5zqgxiVxdGRC3PEg2Cvsx3iR7+UMuPABxbfclFwEbL
-         PDZM+ywj3SwfM0Rij/WHrkgSCv3nVd3ZPeKfCWWb23EVB6ZkYdQAfgRJIpQYLTKcw2pE
-         oqrFagUofd6bmFksog0sKtgx7Bi27r752O4x1nn5iuTdv/9C9WL/cZLdMY+HG5RvLxV8
-         MlIw==
-X-Gm-Message-State: AGi0PuaHOuTo/0aWBksL1xsbGDzuqsi7nKPnMRnHF6BGDIiuQd+6Q6Rf
-        yYkewgigvrvTG8ZKx9mTwEROuken2Q==
-X-Google-Smtp-Source: APiQypJoEAmvuYGeijFTAv+0qclK4PwR5W2CPf1p+VcOkRxRm1xDu+dQF723JrXj6KyI7P0JriBvGg==
-X-Received: by 2002:a4a:e60d:: with SMTP id f13mr8621914oot.6.1587747132676;
-        Fri, 24 Apr 2020 09:52:12 -0700 (PDT)
-Received: from localhost.localdomain (cpe-70-114-159-174.austin.res.rr.com. [70.114.159.174])
-        by smtp.gmail.com with ESMTPSA id 60sm1623806ott.17.2020.04.24.09.52.11
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 24 Apr 2020 09:52:12 -0700 (PDT)
-From:   Arvind Raghavan <raghavan.arvind@gmail.com>
-To:     fstests@vger.kernel.org
-Cc:     amir73il@gmail.com, jayashree2912@gmail.com, vijay@cs.utexas.edu,
-        Arvind Raghavan <raghavan.arvind@gmail.com>
-Subject: [PATCH] fstest: Crashmonkey rename tests ported to xfstest
-Date:   Fri, 24 Apr 2020 12:51:17 -0400
-Message-Id: <20200424165117.6433-1-raghavan.arvind@gmail.com>
-X-Mailer: git-send-email 2.20.1
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=clSNSYqFhwPr396wdJm0dLtlgPcn57cjAtAZZyQxb/4=;
+        b=UvTfhEUUiBGPu/vH/1pK/lYncZg4mw87ixKlTuY7kt4hw5vMEAsZoh+R3JnUfqSKiM
+         voQnOTmZKCMbpZkY4EegiM+MaO9tx1ZKJErFckhyCNM7SUwfe+Bs72A0LY6Bb/Kwp1DG
+         TZwy8NBLIXKEUBYvFaAUin/dWMvDT+ydxKdP6tUdj6JBY7/B2B4ELjLRCp71u6wX5P4/
+         GD1Jm66880HsUnYW0D6dkKuVH49tDGwi7zQs7nWBw5lnK2+NFfoXUd5udqcgAxsvUfWp
+         SYThZZ90UGhiW8tovuSeUUyyfv+OrphIHhisQres4kVWdiLjf/nDRcTbGpUdQZqzePvN
+         hBqw==
+X-Gm-Message-State: AGi0Puby5Lt/rMlXycG3lI9t7VLPyWkErRdfBRZLknZLMrd+7PU3D7OP
+        aIvl82713hBjcx+iItwAg8UUiHpNNuqdxalilx5hH7Sm
+X-Google-Smtp-Source: APiQypIVsf6ZXG5oX2hSwCskEL0axUvOMwsKo0fdaqblS4Sk38zn9jPXjPeg/0dYAz5Uz825WnLyZH6Qbf9yNQjiFCo=
+X-Received: by 2002:a92:9e11:: with SMTP id q17mr16653833ili.137.1587886183153;
+ Sun, 26 Apr 2020 00:29:43 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20200424165117.6433-1-raghavan.arvind@gmail.com>
+In-Reply-To: <20200424165117.6433-1-raghavan.arvind@gmail.com>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Sun, 26 Apr 2020 10:29:31 +0300
+Message-ID: <CAOQ4uxi7ZgRbCUzCppmobDZ+2vAmUhzim16SmUgCMB0jYRMNkQ@mail.gmail.com>
+Subject: Re: [PATCH] fstest: Crashmonkey rename tests ported to xfstest
+To:     Arvind Raghavan <raghavan.arvind@gmail.com>
+Cc:     fstests <fstests@vger.kernel.org>,
+        Jayashree Mohan <jayashree2912@gmail.com>,
+        Vijaychidambaram Velayudhan Pillai <vijay@cs.utexas.edu>
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This patch aims to add tests to the xfstest suite to check whether
-renamed files recover after a crash. These test cases were generated by
-CrashMonkey, a crash-consistency testing framework built at the SASLab
-at UT Austin.
+On Fri, Apr 24, 2020 at 7:52 PM Arvind Raghavan
+<raghavan.arvind@gmail.com> wrote:
+>
+> This patch aims to add tests to the xfstest suite to check whether
+> renamed files recover after a crash. These test cases were generated by
+> CrashMonkey, a crash-consistency testing framework built at the SASLab
+> at UT Austin.
+>
+> This patch batches 37 tests into a single test, each of which creates a
+> file, renames it, syncs one of the files/parent directories, and ensures
+> that the synced file/dir is equivalent before and after a crash.
+>
+> This test takes around 12-15 seconds to run locally and is thus placed
+> in the 'quick' group.
+>
+> Signed-off-by: Arvind Raghavan <raghavan.arvind@gmail.com>
 
-This patch batches 37 tests into a single test, each of which creates a
-file, renames it, syncs one of the files/parent directories, and ensures
-that the synced file/dir is equivalent before and after a crash.
+Nice work. Some things to improve...
 
-This test takes around 12-15 seconds to run locally and is thus placed
-in the 'quick' group.
+> ---
+>  tests/generic/484     | 179 ++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/484.out |   2 +
+>  tests/generic/group   |   1 +
+>  3 files changed, 182 insertions(+)
+>  create mode 100755 tests/generic/484
+>  create mode 100644 tests/generic/484.out
+>
+> diff --git a/tests/generic/484 b/tests/generic/484
+> new file mode 100755
+> index 00000000..b27d828d
+> --- /dev/null
+> +++ b/tests/generic/484
+> @@ -0,0 +1,179 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2020 The University of Texas at Austin.  All Rights Reserved.
+> +#
+> +# FS QA Test 484
+> +#
+> +# Test case created by CrashMonkey
+> +#
+> +# Test if we create a rename a file and persist it that the
+> +# appropriate files exist.
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1       # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +       _cleanup_flakey
+> +       cd /
+> +       rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +. ./common/dmflakey
+> +
+> +# 256MB in byte
+> +fssize=$((2**20 * 256))
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +_supported_fs generic
+> +_supported_os Linux
+> +_require_scratch_nocheck
+> +_require_dm_target flakey
+> +
+> +# initialize scratch device
+> +_scratch_mkfs_sized $fssize >> $seqres.full 2>&1
 
-Signed-off-by: Arvind Raghavan <raghavan.arvind@gmail.com>
----
- tests/generic/484     | 179 ++++++++++++++++++++++++++++++++++++++++++
- tests/generic/484.out |   2 +
- tests/generic/group   |   1 +
- 3 files changed, 182 insertions(+)
- create mode 100755 tests/generic/484
- create mode 100644 tests/generic/484.out
+Why limit the fs size?
+In general this results is test coverage for non real life filesystems,
+so sub-optimal IMO.
 
-diff --git a/tests/generic/484 b/tests/generic/484
-new file mode 100755
-index 00000000..b27d828d
---- /dev/null
-+++ b/tests/generic/484
-@@ -0,0 +1,179 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2020 The University of Texas at Austin.  All Rights Reserved.
-+#
-+# FS QA Test 484
-+#
-+# Test case created by CrashMonkey
-+#
-+# Test if we create a rename a file and persist it that the
-+# appropriate files exist.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	_cleanup_flakey
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/dmflakey
-+
-+# 256MB in byte
-+fssize=$((2**20 * 256))
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch_nocheck
-+_require_dm_target flakey
-+
-+# initialize scratch device
-+_scratch_mkfs_sized $fssize >> $seqres.full 2>&1
-+_require_metadata_journaling $SCRATCH_DEV
-+_init_flakey
-+
-+stat_opt='-c  %n - blocks: %b size: %s inode: %i links: %h'
-+
-+# Usage: general_stat [--data-only] file1 [--data-only] [file2] ..
-+# If the --data-only flag precedes a file, then only that file's
-+# data will be printed. If a file is synced, then general_stat
-+# should provide identical output before and after a crash.
-+general_stat() {
-+	local data_only="false"
-+	while (( "$#" )); do
-+		case $1 in
-+			--data-only)
-+				data_only="true"
-+				;;
-+			*)
-+				local path="$1"
-+				echo "-- $path --"
-+				if [ ! -e "$path" ]; then
-+					echo "Doesn't exist!"
-+				elif [ "$data_only" = "true" ] && [ -d "$path" ]; then
-+					echo "Directory Data"
-+					[ -z "$(ls -A $path)" ] || ls -1 "$path" | sort
-+				elif [ "$data_only" = "true" ]; then
-+					echo "File Data"
-+					od "$path"
-+				elif [ -d "$path" ]; then
-+					echo "Directory Metadata"
-+					stat "$stat_opt" "$path"
-+					echo "Directory Data"
-+					[ -z "$(ls -A $path)" ] || ls -1 "$path" | sort
-+				else
-+					echo "File Metadata"
-+					stat "$stat_opt" "$path"
-+					echo "File Data"
-+					od "$path"
-+				fi
-+				data_only="false"
-+				;;
-+		esac
-+		shift
-+	done
-+}
-+
-+check_consistency()
-+{
-+	before=$(general_stat "$@")
-+	_flakey_drop_and_remount
-+	after=$(general_stat "$@")
-+
-+	if [ "$before" != "$after" ]; then
-+		echo -e "Before:\n$before"
-+		echo -e "After:\n$after"
-+	fi
-+
-+	# Using _unmount_flakey nondeterministically fails here with
-+	# "target is busy". Calling 'sync' doesn't fix the issue. Lazy
-+	# unmount waits for lingering processes to exit.
-+	$UMOUNT_PROG -l $SCRATCH_MNT
-+	_check_scratch_fs $FLAKEY_DEV
-+}
-+
-+clean_dir()
-+{
-+	_mount_flakey
-+	rm -rf $(find $SCRATCH_MNT/* | grep -v "lost+found")
-+	$UMOUNT_PROG -l $SCRATCH_MNT
-+}
-+
-+do_fsync_check() {
-+	local file="$1"
-+	local sync_op="$2"
-+
-+	if [ $sync_op == "fdatasync" ]; then
-+		$XFS_IO_PROG -c "fdatasync" $file
-+		check_consistency --data-only $file
-+	else
-+		$XFS_IO_PROG -c "fsync" $file
-+		check_consistency $file
-+	fi
-+}
-+
-+# Wraps mv, deletes dest dir if exists.
-+rename() {
-+	[ -d $1 ] && [ -d $2 ] && rm -rf $2
-+	mv $1 $2
-+}
-+
-+function rename_template() {
-+	local file1="$1"
-+	local file2="$2"
-+	local fsync_file="$3"
-+	local fsync_command="$4"
-+
-+	_mount_flakey
-+	mkdir -p $(dirname $file1)
-+	touch $file1
-+	mkdir -p $(dirname $file2)
-+	rename $file1 $file2
-+	do_fsync_check $fsync_file $fsync_command
-+	clean_dir
-+}
-+
-+file1_options=(
-+	"$SCRATCH_MNT/A/C/bar"
-+	"$SCRATCH_MNT/A/bar"
-+	"$SCRATCH_MNT/A/foo"
-+	"$SCRATCH_MNT/foo"
-+)
-+file2_options=(
-+	"$SCRATCH_MNT/A/C/bar"
-+	"$SCRATCH_MNT/A/bar"
-+	"$SCRATCH_MNT/bar"
-+)
-+
-+for file1 in ${file1_options[@]}; do
-+	for file2 in ${file2_options[@]}; do
-+		[ "$file1" == "$file2" ] && continue
-+		to_sync=("$(dirname $file1)" "$(dirname $file2)")
-+		uniques=($(for v in ${to_sync[@]}; do echo $v; done | sort -u))
-+		for fsync_file in ${uniques[@]}; do
-+			for fsync_command in fsync fdatasync; do
-+				rename_template $file1 $file2 $fsync_file $fsync_command
-+			done
-+		done
-+	done
-+done
-+
-+# Success, all done
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/generic/484.out b/tests/generic/484.out
-new file mode 100644
-index 00000000..94f2f0bd
---- /dev/null
-+++ b/tests/generic/484.out
-@@ -0,0 +1,2 @@
-+QA output created by 484
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index 718575ba..987ad2a0 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -486,6 +486,7 @@
- 481 auto quick log metadata
- 482 auto metadata replay thin
- 483 auto quick log metadata
-+484 auto quick log metadata
- 485 auto quick insert
- 486 auto quick attr
- 487 auto quick eio
--- 
-2.20.1
+> +_require_metadata_journaling $SCRATCH_DEV
+> +_init_flakey
+> +
+> +stat_opt='-c  %n - blocks: %b size: %s inode: %i links: %h'
+> +
+> +# Usage: general_stat [--data-only] file1 [--data-only] [file2] ..
+> +# If the --data-only flag precedes a file, then only that file's
+> +# data will be printed. If a file is synced, then general_stat
+> +# should provide identical output before and after a crash.
 
+This helper seems overly complicated for the use case in this
+test, but it is local to the test. I understand it is auto generated for
+other tests but that's not the way to go.
+I suggest you look into using existing FSSUM_PROG tool.
+
+> +general_stat() {
+> +       local data_only="false"
+> +       while (( "$#" )); do
+> +               case $1 in
+> +                       --data-only)
+> +                               data_only="true"
+> +                               ;;
+> +                       *)
+> +                               local path="$1"
+> +                               echo "-- $path --"
+> +                               if [ ! -e "$path" ]; then
+> +                                       echo "Doesn't exist!"
+> +                               elif [ "$data_only" = "true" ] && [ -d "$path" ]; then
+> +                                       echo "Directory Data"
+> +                                       [ -z "$(ls -A $path)" ] || ls -1 "$path" | sort
+
+[ -z "$(ls -A $path)" ] || seems to add nothing.
+
+> +                               elif [ "$data_only" = "true" ]; then
+> +                                       echo "File Data"
+> +                                       od "$path"
+> +                               elif [ -d "$path" ]; then
+> +                                       echo "Directory Metadata"
+> +                                       stat "$stat_opt" "$path"
+> +                                       echo "Directory Data"
+> +                                       [ -z "$(ls -A $path)" ] || ls -1 "$path" | sort
+> +                               else
+> +                                       echo "File Metadata"
+> +                                       stat "$stat_opt" "$path"
+> +                                       echo "File Data"
+> +                                       od "$path"
+> +                               fi
+> +                               data_only="false"
+> +                               ;;
+> +               esac
+> +               shift
+> +       done
+> +}
+> +
+> +check_consistency()
+> +{
+> +       before=$(general_stat "$@")
+> +       _flakey_drop_and_remount
+> +       after=$(general_stat "$@")
+> +
+> +       if [ "$before" != "$after" ]; then
+> +               echo -e "Before:\n$before"
+> +               echo -e "After:\n$after"
+> +       fi
+> +
+> +       # Using _unmount_flakey nondeterministically fails here with
+> +       # "target is busy". Calling 'sync' doesn't fix the issue. Lazy
+> +       # unmount waits for lingering processes to exit.
+
+No way. None of the other flaky tests have this kludge.
+You must be doing something wrong, or there is another bug
+in the infrastructure that needs to be fixed instead of being papered over.
+
+> +       $UMOUNT_PROG -l $SCRATCH_MNT
+> +       _check_scratch_fs $FLAKEY_DEV
+> +}
+> +
+> +clean_dir()
+> +{
+> +       _mount_flakey
+> +       rm -rf $(find $SCRATCH_MNT/* | grep -v "lost+found")
+
+Use testdir=$SCRATCH_MNT/testdir for base of your test and you
+won't need this blacklisting of lost+found.
+
+> +       $UMOUNT_PROG -l $SCRATCH_MNT
+
+And maybe this is what you are doing wrong??
+Why is this unmount lazy?
+
+> +}
+> +
+> +do_fsync_check() {
+> +       local file="$1"
+> +       local sync_op="$2"
+> +
+> +       if [ $sync_op == "fdatasync" ]; then
+> +               $XFS_IO_PROG -c "fdatasync" $file
+
+You don't really need to put this statement inside if/else
+
+> +               check_consistency --data-only $file
+
+And you could probably also pass sync_op to check_consistency()
+instead of converting it here. In other words, this helper does not
+do much, so you could get rid of it. up to you.
+
+Thanks,
+Amir.
