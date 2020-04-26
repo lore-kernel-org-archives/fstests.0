@@ -2,265 +2,346 @@ Return-Path: <SRS0=xJwm=6K=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 11EB4C2BA1A
-	for <linux-fstests@archiver.kernel.org>; Sun, 26 Apr 2020 07:29:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0DF2CC54FCB
+	for <linux-fstests@archiver.kernel.org>; Sun, 26 Apr 2020 14:52:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DAFED2071C
-	for <linux-fstests@archiver.kernel.org>; Sun, 26 Apr 2020 07:29:44 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D45E9206DD
+	for <linux-fstests@archiver.kernel.org>; Sun, 26 Apr 2020 14:52:00 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="PMCN8YYa"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="aLzezXRX"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726112AbgDZH3o (ORCPT
+        id S1725876AbgDZOvv (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 26 Apr 2020 03:29:44 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56852 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726107AbgDZH3o (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 26 Apr 2020 03:29:44 -0400
-Received: from mail-il1-x142.google.com (mail-il1-x142.google.com [IPv6:2607:f8b0:4864:20::142])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ED026C061A0C
-        for <fstests@vger.kernel.org>; Sun, 26 Apr 2020 00:29:43 -0700 (PDT)
-Received: by mail-il1-x142.google.com with SMTP id s10so13721307iln.11
-        for <fstests@vger.kernel.org>; Sun, 26 Apr 2020 00:29:43 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=clSNSYqFhwPr396wdJm0dLtlgPcn57cjAtAZZyQxb/4=;
-        b=PMCN8YYaVjRvtU9n4QdW7K11avzbo9mWkY6R3JJ80cOR3sv07F3uxiLh5HzcJHlx9q
-         uUVlmBRVePxGJK9jx5aETIhHycVt1RrnJfjjQHfJhzxOsBMTeghBGxSKmEp4OPI6x+h2
-         kzhu8dYl/e9IGMV4oxKcIUd8xKx2/Yf2rKfYBhZmu5id4unJNyOybA2Ee5cjl8ZpRj6r
-         Dmt/cQWJp+elHJ6+VLOOHGJlbQXiilM71z+a5v9d0R3VGqdxlOcFtbewXNbdJkOh/FXL
-         H8mM8UNM4Lt9jcgkOILbPDuPypOBS3NjgBH/yLPHT0OCNn7pkylydA+vZCuqj3My4WV1
-         UoVw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=clSNSYqFhwPr396wdJm0dLtlgPcn57cjAtAZZyQxb/4=;
-        b=UvTfhEUUiBGPu/vH/1pK/lYncZg4mw87ixKlTuY7kt4hw5vMEAsZoh+R3JnUfqSKiM
-         voQnOTmZKCMbpZkY4EegiM+MaO9tx1ZKJErFckhyCNM7SUwfe+Bs72A0LY6Bb/Kwp1DG
-         TZwy8NBLIXKEUBYvFaAUin/dWMvDT+ydxKdP6tUdj6JBY7/B2B4ELjLRCp71u6wX5P4/
-         GD1Jm66880HsUnYW0D6dkKuVH49tDGwi7zQs7nWBw5lnK2+NFfoXUd5udqcgAxsvUfWp
-         SYThZZ90UGhiW8tovuSeUUyyfv+OrphIHhisQres4kVWdiLjf/nDRcTbGpUdQZqzePvN
-         hBqw==
-X-Gm-Message-State: AGi0Puby5Lt/rMlXycG3lI9t7VLPyWkErRdfBRZLknZLMrd+7PU3D7OP
-        aIvl82713hBjcx+iItwAg8UUiHpNNuqdxalilx5hH7Sm
-X-Google-Smtp-Source: APiQypIVsf6ZXG5oX2hSwCskEL0axUvOMwsKo0fdaqblS4Sk38zn9jPXjPeg/0dYAz5Uz825WnLyZH6Qbf9yNQjiFCo=
-X-Received: by 2002:a92:9e11:: with SMTP id q17mr16653833ili.137.1587886183153;
- Sun, 26 Apr 2020 00:29:43 -0700 (PDT)
+        Sun, 26 Apr 2020 10:51:51 -0400
+Received: from us-smtp-1.mimecast.com ([207.211.31.81]:34094 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1725974AbgDZOvv (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 26 Apr 2020 10:51:51 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1587912708;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=Zo9BiW1I6VkbXEMDxxnU6gBXGQSRMnquYpj4uTNnRJ0=;
+        b=aLzezXRXpyvpyi6jFe1Q3f9NFstluXyp/oAqWbJ94zu3Z87anAZy6WskTHnXSXthDYwyqz
+        G8XwQJdaEsdOkRcyxcFQeVtBu5nGsWXo7ZvTvs3P5UnEGLteMtk56ISSH991i2ImXfjlib
+        UV9lgaIZvI5jZY3Y2N9FQ5qWyCKwmQM=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-23-zy_ewKc2NSi0jSecu5yWlQ-1; Sun, 26 Apr 2020 10:51:46 -0400
+X-MC-Unique: zy_ewKc2NSi0jSecu5yWlQ-1
+Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 6F151107ACCA;
+        Sun, 26 Apr 2020 14:51:45 +0000 (UTC)
+Received: from localhost.localdomain.com (ovpn-13-119.pek2.redhat.com [10.72.13.119])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id D29CE60300;
+        Sun, 26 Apr 2020 14:51:43 +0000 (UTC)
+From:   Zorro Lang <zlang@redhat.com>
+To:     fstests@vger.kernel.org
+Cc:     linux-xfs@vger.kernel.org
+Subject: [PATCH v2] generic: test per-type quota softlimit enforcement timeout
+Date:   Sun, 26 Apr 2020 22:51:41 +0800
+Message-Id: <20200426145141.22932-1-zlang@redhat.com>
 MIME-Version: 1.0
-References: <20200424165117.6433-1-raghavan.arvind@gmail.com>
-In-Reply-To: <20200424165117.6433-1-raghavan.arvind@gmail.com>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Sun, 26 Apr 2020 10:29:31 +0300
-Message-ID: <CAOQ4uxi7ZgRbCUzCppmobDZ+2vAmUhzim16SmUgCMB0jYRMNkQ@mail.gmail.com>
-Subject: Re: [PATCH] fstest: Crashmonkey rename tests ported to xfstest
-To:     Arvind Raghavan <raghavan.arvind@gmail.com>
-Cc:     fstests <fstests@vger.kernel.org>,
-        Jayashree Mohan <jayashree2912@gmail.com>,
-        Vijaychidambaram Velayudhan Pillai <vijay@cs.utexas.edu>
-Content-Type: text/plain; charset="UTF-8"
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.11
+Content-Transfer-Encoding: quoted-printable
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Apr 24, 2020 at 7:52 PM Arvind Raghavan
-<raghavan.arvind@gmail.com> wrote:
->
-> This patch aims to add tests to the xfstest suite to check whether
-> renamed files recover after a crash. These test cases were generated by
-> CrashMonkey, a crash-consistency testing framework built at the SASLab
-> at UT Austin.
->
-> This patch batches 37 tests into a single test, each of which creates a
-> file, renames it, syncs one of the files/parent directories, and ensures
-> that the synced file/dir is equivalent before and after a crash.
->
-> This test takes around 12-15 seconds to run locally and is thus placed
-> in the 'quick' group.
->
-> Signed-off-by: Arvind Raghavan <raghavan.arvind@gmail.com>
+Set different block & inode grace timers for user, group and project
+quotas, then test softlimit enforcement timeout, make sure different
+grace timers as expected.
 
-Nice work. Some things to improve...
+Signed-off-by: Zorro Lang <zlang@redhat.com>
+---
 
-> ---
->  tests/generic/484     | 179 ++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/484.out |   2 +
->  tests/generic/group   |   1 +
->  3 files changed, 182 insertions(+)
->  create mode 100755 tests/generic/484
->  create mode 100644 tests/generic/484.out
->
-> diff --git a/tests/generic/484 b/tests/generic/484
-> new file mode 100755
-> index 00000000..b27d828d
-> --- /dev/null
-> +++ b/tests/generic/484
-> @@ -0,0 +1,179 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2020 The University of Texas at Austin.  All Rights Reserved.
-> +#
-> +# FS QA Test 484
-> +#
-> +# Test case created by CrashMonkey
-> +#
-> +# Test if we create a rename a file and persist it that the
-> +# appropriate files exist.
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1       # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +       _cleanup_flakey
-> +       cd /
-> +       rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/dmflakey
-> +
-> +# 256MB in byte
-> +fssize=$((2**20 * 256))
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +_supported_fs generic
-> +_supported_os Linux
-> +_require_scratch_nocheck
-> +_require_dm_target flakey
-> +
-> +# initialize scratch device
-> +_scratch_mkfs_sized $fssize >> $seqres.full 2>&1
+Hi,
 
-Why limit the fs size?
-In general this results is test coverage for non real life filesystems,
-so sub-optimal IMO.
+After generic/594 got merge, I'd like to re-send this case again. It stil=
+l
+fails on XFS, but pass on ext4.
 
-> +_require_metadata_journaling $SCRATCH_DEV
-> +_init_flakey
-> +
-> +stat_opt='-c  %n - blocks: %b size: %s inode: %i links: %h'
-> +
-> +# Usage: general_stat [--data-only] file1 [--data-only] [file2] ..
-> +# If the --data-only flag precedes a file, then only that file's
-> +# data will be printed. If a file is synced, then general_stat
-> +# should provide identical output before and after a crash.
-
-This helper seems overly complicated for the use case in this
-test, but it is local to the test. I understand it is auto generated for
-other tests but that's not the way to go.
-I suggest you look into using existing FSSUM_PROG tool.
-
-> +general_stat() {
-> +       local data_only="false"
-> +       while (( "$#" )); do
-> +               case $1 in
-> +                       --data-only)
-> +                               data_only="true"
-> +                               ;;
-> +                       *)
-> +                               local path="$1"
-> +                               echo "-- $path --"
-> +                               if [ ! -e "$path" ]; then
-> +                                       echo "Doesn't exist!"
-> +                               elif [ "$data_only" = "true" ] && [ -d "$path" ]; then
-> +                                       echo "Directory Data"
-> +                                       [ -z "$(ls -A $path)" ] || ls -1 "$path" | sort
-
-[ -z "$(ls -A $path)" ] || seems to add nothing.
-
-> +                               elif [ "$data_only" = "true" ]; then
-> +                                       echo "File Data"
-> +                                       od "$path"
-> +                               elif [ -d "$path" ]; then
-> +                                       echo "Directory Metadata"
-> +                                       stat "$stat_opt" "$path"
-> +                                       echo "Directory Data"
-> +                                       [ -z "$(ls -A $path)" ] || ls -1 "$path" | sort
-> +                               else
-> +                                       echo "File Metadata"
-> +                                       stat "$stat_opt" "$path"
-> +                                       echo "File Data"
-> +                                       od "$path"
-> +                               fi
-> +                               data_only="false"
-> +                               ;;
-> +               esac
-> +               shift
-> +       done
-> +}
-> +
-> +check_consistency()
-> +{
-> +       before=$(general_stat "$@")
-> +       _flakey_drop_and_remount
-> +       after=$(general_stat "$@")
-> +
-> +       if [ "$before" != "$after" ]; then
-> +               echo -e "Before:\n$before"
-> +               echo -e "After:\n$after"
-> +       fi
-> +
-> +       # Using _unmount_flakey nondeterministically fails here with
-> +       # "target is busy". Calling 'sync' doesn't fix the issue. Lazy
-> +       # unmount waits for lingering processes to exit.
-
-No way. None of the other flaky tests have this kludge.
-You must be doing something wrong, or there is another bug
-in the infrastructure that needs to be fixed instead of being papered over.
-
-> +       $UMOUNT_PROG -l $SCRATCH_MNT
-> +       _check_scratch_fs $FLAKEY_DEV
-> +}
-> +
-> +clean_dir()
-> +{
-> +       _mount_flakey
-> +       rm -rf $(find $SCRATCH_MNT/* | grep -v "lost+found")
-
-Use testdir=$SCRATCH_MNT/testdir for base of your test and you
-won't need this blacklisting of lost+found.
-
-> +       $UMOUNT_PROG -l $SCRATCH_MNT
-
-And maybe this is what you are doing wrong??
-Why is this unmount lazy?
-
-> +}
-> +
-> +do_fsync_check() {
-> +       local file="$1"
-> +       local sync_op="$2"
-> +
-> +       if [ $sync_op == "fdatasync" ]; then
-> +               $XFS_IO_PROG -c "fdatasync" $file
-
-You don't really need to put this statement inside if/else
-
-> +               check_consistency --data-only $file
-
-And you could probably also pass sync_op to check_consistency()
-instead of converting it here. In other words, this helper does not
-do much, so you could get rid of it. up to you.
+V2 add _require_setquota_project
 
 Thanks,
-Amir.
+Zorro
+
+ common/quota          |   4 +
+ tests/generic/597     | 180 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/597.out |  41 ++++++++++
+ tests/generic/group   |   1 +
+ 4 files changed, 226 insertions(+)
+ create mode 100755 tests/generic/597
+ create mode 100644 tests/generic/597.out
+
+diff --git a/common/quota b/common/quota
+index 240e0bbc..1437d5f7 100644
+--- a/common/quota
++++ b/common/quota
+@@ -217,6 +217,10 @@ _qmount()
+     if [ "$FSTYP" !=3D "xfs" ]; then
+         quotacheck -ug $SCRATCH_MNT >>$seqres.full 2>&1
+         quotaon -ug $SCRATCH_MNT >>$seqres.full 2>&1
++        # try to turn on project quota if it's supported
++        if quotaon --help 2>&1 | grep -q '\-\-project'; then
++            quotaon --project $SCRATCH_MNT >>$seqres.full 2>&1
++        fi
+     fi
+     chmod ugo+rwx $SCRATCH_MNT
+ }
+diff --git a/tests/generic/597 b/tests/generic/597
+new file mode 100755
+index 00000000..52138b80
+--- /dev/null
++++ b/tests/generic/597
+@@ -0,0 +1,180 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2020 Red Hat, Inc.  All Rights Reserved.
++#
++# FS QA Test No. 597
++#
++# Test per-type(user, group and project) filesystem quota timers, make s=
+ure
++# enforcement
++#
++seq=3D`basename $0`
++seqres=3D$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=3D`pwd`
++tmp=3D/tmp/$$
++status=3D1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	restore_project
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/quota
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++require_project()
++{
++	rm -f $tmp.projects $tmp.projid
++	if [ -f /etc/projects ];then
++		cat /etc/projects > $tmp.projects
++	fi
++	if [ -f /etc/projid ];then
++		cat /etc/projid > $tmp.projid
++	fi
++
++	cat >/etc/projects <<EOF
++100:$SCRATCH_MNT/t
++EOF
++	cat >/etc/projid <<EOF
++$qa_user:100
++EOF
++	PROJECT_CHANGED=3D1
++}
++
++restore_project()
++{
++	if [ "$PROJECT_CHANGED" =3D "1" ];then
++		rm -f /etc/projects /etc/projid
++		if [ -f $tmp.projects ];then
++			cat $tmp.projects > /etc/projects
++		fi
++		if [ -f $tmp.projid ];then
++			cat $tmp.projid > /etc/projid
++		fi
++	fi
++}
++
++init_files()
++{
++	local dir=3D$1
++
++	echo "### Initialize files, and their mode and ownership"
++	touch $dir/file{1,2} 2>/dev/null
++	chown $qa_user $dir/file{1,2} 2>/dev/null
++	chgrp $qa_user $dir/file{1,2} 2>/dev/null
++	chmod 777 $dir 2>/dev/null
++}
++
++cleanup_files()
++{
++	echo "### Remove all files"
++	rm -f ${1}/file{1,2,3,4,5,6}
++}
++
++test_grace()
++{
++	local type=3D$1
++	local dir=3D$2
++	local bgrace=3D$3
++	local igrace=3D$4
++
++	init_files $dir
++	echo "--- Test block quota ---"
++	# Firstly fit below block soft limit
++	echo "Write 225 blocks..."
++	su $qa_user -c "$XFS_IO_PROG -c 'pwrite 0 $((225 * $BLOCK_SIZE))' \
++		-c fsync $dir/file1" 2>&1 >>$seqres.full | \
++		_filter_xfs_io_error | tee -a $seqres.full
++	repquota -v -$type $SCRATCH_MNT | grep -v "^root" >>$seqres.full 2>&1
++	# Secondly overcome block soft limit
++	echo "Rewrite 250 blocks plus 1 byte, over the block softlimit..."
++	su $qa_user -c "$XFS_IO_PROG -c 'pwrite 0 $((250 * $BLOCK_SIZE + 1))' \
++		-c fsync $dir/file1" 2>&1 >>$seqres.full | \
++		_filter_xfs_io_error | tee -a $seqres.full
++	repquota -v -$type $SCRATCH_MNT | grep -v "^root" >>$seqres.full 2>&1
++	# Reset grace time here, make below grace time test more accurate
++	setquota -$type $qa_user -T $bgrace $igrace $SCRATCH_MNT 2>/dev/null
++	# Now sleep enough grace time and check that softlimit got enforced
++	sleep $((bgrace + 1))
++	echo "Try to write 1 one more block after grace..."
++	su $qa_user -c "$XFS_IO_PROG -c 'truncate 0' -c 'pwrite 0 $BLOCK_SIZE' =
+\
++		$dir/file2" 2>&1 >>$seqres.full | _filter_xfs_io_error | \
++		tee -a $seqres.full
++	repquota -v -$type $SCRATCH_MNT | grep -v "^root" >>$seqres.full 2>&1
++	echo "--- Test inode quota ---"
++	# And now the softlimit test for inodes
++	# First reset space limits so that we don't have problems with
++	# space reservations on XFS
++	setquota -$type $qa_user 0 0 3 100 $SCRATCH_MNT
++	echo "Create 2 more files, over the inode softlimit..."
++	su $qa_user -c "touch $dir/file3 $dir/file4" 2>&1 >>$seqres.full | \
++		_filter_scratch | tee -a $seqres.full
++	repquota -v -$type $SCRATCH_MNT  | grep -v "^root" >>$seqres.full 2>&1
++	# Reset grace time here, make below grace time test more accurate
++	setquota -$type $qa_user -T $bgrace $igrace $SCRATCH_MNT 2>/dev/null
++	# Wait and check grace time enforcement
++	sleep $((igrace+1))
++	echo "Try to create one more inode after grace..."
++	su $qa_user -c "touch $dir/file5" 2>&1 >>$seqres.full |
++		_filter_scratch | tee -a $seqres.full
++	repquota -v -$type $SCRATCH_MNT  | grep -v "^root" >>$seqres.full 2>&1
++	cleanup_files $dir
++}
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++_require_setquota_project
++_require_quota
++_require_user
++_require_group
++
++_scratch_mkfs >$seqres.full 2>&1
++_scratch_enable_pquota
++_qmount_option "usrquota,grpquota,prjquota"
++_qmount
++_require_prjquota $SCRATCH_DEV
++BLOCK_SIZE=3D$(_get_file_block_size $SCRATCH_MNT)
++rm -rf $SCRATCH_MNT/t
++mkdir $SCRATCH_MNT/t
++$XFS_IO_PROG -r -c "chproj 100" -c "chattr +P" $SCRATCH_MNT/t
++require_project
++
++echo "### Set up different grace timers to each type of quota"
++UBGRACE=3D12
++UIGRACE=3D10
++GBGRACE=3D4
++GIGRACE=3D2
++PBGRACE=3D8
++PIGRACE=3D6
++
++setquota -u $qa_user $((250 * $BLOCK_SIZE / 1024)) \
++	$((1000 * $BLOCK_SIZE / 1024)) 3 100 $SCRATCH_MNT
++setquota -u -t $UBGRACE $UIGRACE $SCRATCH_MNT
++setquota -g $qa_user $((250 * $BLOCK_SIZE / 1024)) \
++         $((1000 * $BLOCK_SIZE / 1024)) 3 100 $SCRATCH_MNT
++setquota -g -t $GBGRACE $GIGRACE $SCRATCH_MNT
++setquota -P $qa_user $((250 * $BLOCK_SIZE / 1024)) \
++         $((1000 * $BLOCK_SIZE / 1024)) 3 100 $SCRATCH_MNT
++setquota -P -t $PBGRACE $PIGRACE $SCRATCH_MNT
++
++echo; echo "### Test user quota softlimit and grace time"
++test_grace u $SCRATCH_MNT $UBGRACE $UIGRACE
++echo; echo "### Test group quota softlimit and grace time"
++test_grace g $SCRATCH_MNT $GBGRACE $GIGRACE
++echo; echo "### Test project quota softlimit and grace time"
++test_grace P $SCRATCH_MNT/t $PBGRACE $PIGRACE
++
++# success, all done
++status=3D0
++exit
+diff --git a/tests/generic/597.out b/tests/generic/597.out
+new file mode 100644
+index 00000000..57a68ee1
+--- /dev/null
++++ b/tests/generic/597.out
+@@ -0,0 +1,41 @@
++QA output created by 597
++### Set up different grace timers to each type of quota
++
++### Test user quota softlimit and grace time
++### Initialize files, and their mode and ownership
++--- Test block quota ---
++Write 225 blocks...
++Rewrite 250 blocks plus 1 byte, over the block softlimit...
++Try to write 1 one more block after grace...
++pwrite: Disk quota exceeded
++--- Test inode quota ---
++Create 2 more files, over the inode softlimit...
++Try to create one more inode after grace...
++touch: cannot touch 'SCRATCH_MNT/file5': Disk quota exceeded
++### Remove all files
++
++### Test group quota softlimit and grace time
++### Initialize files, and their mode and ownership
++--- Test block quota ---
++Write 225 blocks...
++Rewrite 250 blocks plus 1 byte, over the block softlimit...
++Try to write 1 one more block after grace...
++pwrite: Disk quota exceeded
++--- Test inode quota ---
++Create 2 more files, over the inode softlimit...
++Try to create one more inode after grace...
++touch: cannot touch 'SCRATCH_MNT/file5': Disk quota exceeded
++### Remove all files
++
++### Test project quota softlimit and grace time
++### Initialize files, and their mode and ownership
++--- Test block quota ---
++Write 225 blocks...
++Rewrite 250 blocks plus 1 byte, over the block softlimit...
++Try to write 1 one more block after grace...
++pwrite: Disk quota exceeded
++--- Test inode quota ---
++Create 2 more files, over the inode softlimit...
++Try to create one more inode after grace...
++touch: cannot touch 'SCRATCH_MNT/t/file5': Disk quota exceeded
++### Remove all files
+diff --git a/tests/generic/group b/tests/generic/group
+index 718575ba..10af4c41 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -598,3 +598,4 @@
+ 594 auto quick quota
+ 595 auto quick encrypt
+ 596 auto quick
++597 auto quick quota
+--=20
+2.20.1
+
