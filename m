@@ -2,114 +2,187 @@ Return-Path: <SRS0=Qan3=6O=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 39E83C8300B
-	for <linux-fstests@archiver.kernel.org>; Thu, 30 Apr 2020 09:48:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3EEE1C8300B
+	for <linux-fstests@archiver.kernel.org>; Thu, 30 Apr 2020 11:59:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 19875214D8
-	for <linux-fstests@archiver.kernel.org>; Thu, 30 Apr 2020 09:48:36 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=mykernel.net header.i=cgxu519@mykernel.net header.b="LPDSBD8l"
+	by mail.kernel.org (Postfix) with ESMTP id 1CB7C20757
+	for <linux-fstests@archiver.kernel.org>; Thu, 30 Apr 2020 11:59:07 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1588247947;
+	bh=MTHhwdAQgoPQj+qDZufQqSCn//NQmghP9mu5ED4ji+k=;
+	h=From:To:Cc:Subject:Date:List-ID:From;
+	b=uoC1+0hQVGN9yokv0XF/pAy2/M9KYhUlo4gAx7JDxKsnwtHKyyiEl/jIUw5LvlzEM
+	 haUa2Qb7StS3PCwgpbVu7XPIjM8T8UjYVCCqEqeM+JtLQe1Z/HkT/zxGTIEJBFnOoE
+	 7jfTbDdCE3lVnMw9p0qF9rGZImoa+LdyKxLpUROI=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726420AbgD3Jsf (ORCPT
+        id S1726515AbgD3L7G (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 30 Apr 2020 05:48:35 -0400
-Received: from sender2-of-o52.zoho.com.cn ([163.53.93.247]:21150 "EHLO
-        sender2-of-o52.zoho.com.cn" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726378AbgD3Jsf (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 30 Apr 2020 05:48:35 -0400
-ARC-Seal: i=1; a=rsa-sha256; t=1588240100; cv=none; 
-        d=zoho.com.cn; s=zohoarc; 
-        b=K3ZBTitxVpt7auBadV3M910oD6eD4npNk91o6a1wl5PBohqX5hWIysc3/8/sv/KwCXIZJGL83V58+FdqZ8kv0TxqA9O5A7uIv1cdbULnwzV8p9I1ZUGi8oCJL8nm4Xd/XBdUeRbeildThRhBT+7rA9K8jr0htKopX1LJct/5Ik0=
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zoho.com.cn; s=zohoarc; 
-        t=1588240100; h=Content-Type:Content-Transfer-Encoding:Cc:Date:From:In-Reply-To:MIME-Version:Message-ID:Reply-To:References:Subject:To; 
-        bh=dI2PKtESwDX/5rsemmkaZawtNKBmdrx+tGkn711BsHg=; 
-        b=lusnvvbDiEb94cFwBSu1bZeXJVix2IAA98xXQU0tajrbzxVFuQa2Bo9EYGJ6Rj75V5c299xwbDs/rPc+/q3iLMeAWH2pT3XGsWHxICF07wGUe8Np0y69wD2C1s/3jD8+6SX0SSSrdX2BNMYPv+/oUynUkqtgIife8wdTfxhsZj8=
-ARC-Authentication-Results: i=1; mx.zoho.com.cn;
-        dkim=pass  header.i=mykernel.net;
-        spf=pass  smtp.mailfrom=cgxu519@mykernel.net;
-        dmarc=pass header.from=<cgxu519@mykernel.net> header.from=<cgxu519@mykernel.net>
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1588240100;
-        s=zohomail; d=mykernel.net; i=cgxu519@mykernel.net;
-        h=Date:From:Reply-To:To:Cc:Message-ID:In-Reply-To:References:Subject:MIME-Version:Content-Type:Content-Transfer-Encoding;
-        bh=dI2PKtESwDX/5rsemmkaZawtNKBmdrx+tGkn711BsHg=;
-        b=LPDSBD8lFBd9nNWylrMsK2BrW9n+nillIyDn5CprUdPDA8QejYI9dFobjQ/IU2tU
-        h7kx1ZGXXoAtkq10u0Cd9Bwrlx69n9czYTcD2GYfBiXzUPWqkZHIEwzJQu3ti8vkxYr
-        WlL/Vwm5LuAgjKdq3Gb1ik/7ds/gTlWRJrHKOWhI=
-Received: from mail.baihui.com by mx.zoho.com.cn
-        with SMTP id 1588240098059538.8860218617385; Thu, 30 Apr 2020 17:48:18 +0800 (CST)
-Date:   Thu, 30 Apr 2020 17:48:18 +0800
-From:   Chengguang Xu <cgxu519@mykernel.net>
-Reply-To: cgxu519@mykernel.net
-To:     "cgxu519" <cgxu519@mykernel.net>
-Cc:     "linux-unionfs" <linux-unionfs@vger.kernel.org>,
-        "fstests" <fstests@vger.kernel.org>,
-        "amir73il" <amir73il@gmail.com>, "miklos" <miklos@szeredi.hu>,
-        "guaneryu" <guaneryu@gmail.com>
-Message-ID: <171ca7ca308.ed1c416b1605.5683082771269054301@mykernel.net>
-In-Reply-To: <171ca5e76d2.11a198ab91526.7776557945472155733@mykernel.net>
-References: <171ca5e76d2.11a198ab91526.7776557945472155733@mykernel.net>
-Subject: =?UTF-8?Q?=E5=9B=9E=E5=A4=8D:system_hang_on_a_syncfs_?=
- =?UTF-8?Q?test_with_nfs=5Fexport_enabled?=
+        Thu, 30 Apr 2020 07:59:06 -0400
+Received: from mail.kernel.org ([198.145.29.99]:51312 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726130AbgD3L7G (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 30 Apr 2020 07:59:06 -0400
+Received: from tleilax.com (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 04C9F2078D;
+        Thu, 30 Apr 2020 11:59:04 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1588247945;
+        bh=MTHhwdAQgoPQj+qDZufQqSCn//NQmghP9mu5ED4ji+k=;
+        h=From:To:Cc:Subject:Date:From;
+        b=WeTofuiXkzp2SmsiIg3utgCWWiJJRSxMoo/Q4jWDdkcIZ6CW5XMUz4U9wA5EiXBSB
+         0TfIPLipbo9RNY2BfdjjmGni6M1WNC5UG8381IY0FkNBiPca3z0YUw+6zOslyvWqBc
+         RTdWE6Zan1ZN/sKa+sXsDwXrxppCTbBfgqNdyIfo=
+From:   Jeff Layton <jlayton@kernel.org>
+To:     guaneryu@gmail.com, fstests@vger.kernel.org
+Cc:     bfoster@redhat.com, linux-fsdevel@vger.kernel.org,
+        akpm@linux-foundation.org
+Subject: [xfstests PATCH] generic: test reporting of wb errors via syncfs
+Date:   Thu, 30 Apr 2020 07:59:02 -0400
+Message-Id: <20200430115902.28613-1-jlayton@kernel.org>
+X-Mailer: git-send-email 2.26.2
 MIME-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-Importance: Medium
-User-Agent: ZohoCN Mail
-X-Mailer: ZohoCN Mail
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
- ---- =E5=9C=A8 =E6=98=9F=E6=9C=9F=E5=9B=9B, 2020-04-30 17:15:20 Chengguang=
- Xu <cgxu519@mykernel.net> =E6=92=B0=E5=86=99 ----
- > Hi=20
- >=20
- > I'm doing some tests for my new version of syncfs improvement patch and =
-I found an=20
- > interesting problem=E2=80=8B when combining dirty data && godown && nfs_=
-export.
- >=20
- > My expectation  is  Pass or Fail  all tests listed below, Test2 looks a =
-bit strange and in my
- > opinion there is no strong connection between nfs_export/index and dirty=
- data.
- > Any idea?
- >=20
- >=20
- > Test env and step like below:
- >=20
- > Test1:
- > Compile module with nfs_export enabled
- > Run xfstest generic/474   =3D=3D> PASS
- >=20
- > Test2:
- > Compile module with nfs_export enabled
- > Comment syncfs step in the test
- > Run xfstest generic/474   =3D=3D> Hang
- >=20
- > Test3:
- > Compile module with nfs_export disabled
- > Run xfstest generic/474   =3D=3D> PASS
- >=20
- > Test4:
- > Compile module with nfs_export disabled
- > Comment syncfs step in the test
- > Run xfstest generic/474   =3D=3D> FAIL
- >=20
+From: Jeff Layton <jlayton@redhat.com>
 
-Additional information:
+Add a test for new syncfs error reporting behavior. When an inode fails
+to be written back, ensure that a subsequent call to syncfs() will also
+report an error.
 
-Overlayfs version: latest next branch of miklos tree (5.7-rc2)
-Underlying fs: xfs
+Reviewed-by: Brian Foster <bfoster@redhat.com>
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
+---
+ tests/generic/999     | 79 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/999.out |  8 +++++
+ tests/generic/group   |  1 +
+ 3 files changed, 88 insertions(+)
+ create mode 100755 tests/generic/999
+ create mode 100644 tests/generic/999.out
 
-Thanks,
-cgxu
+This patch is intended to test new behavior for syncfs that has recently
+gone into linux-next and should make v5.8. See:
 
+https://lore.kernel.org/linux-fsdevel/20200428135155.19223-1-jlayton@kernel.org/
 
-
+diff --git a/tests/generic/999 b/tests/generic/999
+new file mode 100755
+index 000000000000..cdc0772d0774
+--- /dev/null
++++ b/tests/generic/999
+@@ -0,0 +1,79 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0+
++# Copyright (c) 2020, Jeff Layton. All rights reserved.
++# FS QA Test No. 999
++#
++# Open a file and write to it and fsync. Then, flip the data device to throw
++# errors, write to it again and do an fdatasync. Then open an O_RDONLY fd on
++# the same file and call syncfs against it and ensure that an error is reported.
++# Then call syncfs again and ensure that no error is reported. Finally, repeat
++# the open and syncfs and ensure that there is no error reported.
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++	_dmerror_cleanup
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/dmerror
++
++# real QA test starts here
++_supported_os Linux
++_require_scratch_nocheck
++# This test uses "dm" without taking into account the data could be on
++# realtime subvolume, thus the test will fail with rtinherit=1
++_require_no_rtinherit
++_require_dm_target error
++
++rm -f $seqres.full
++
++echo "Format and mount"
++_scratch_mkfs > $seqres.full 2>&1
++_dmerror_init
++_dmerror_mount
++
++
++# create file
++testfile=$SCRATCH_MNT/syncfs-reports-errors
++touch $testfile
++
++# write a page of data to file, and call fsync
++datalen=$(getconf PAGE_SIZE)
++$XFS_IO_PROG -c "pwrite -W -q 0 $datalen" $testfile
++
++# flip device to non-working mode
++_dmerror_load_error_table
++
++# rewrite the data and call fdatasync
++$XFS_IO_PROG -c "pwrite -w -q 0 $datalen" $testfile
++
++# heal the device error
++_dmerror_load_working_table
++
++# open again and call syncfs twice
++echo "One of the following syncfs calls should fail with EIO:"
++$XFS_IO_PROG -r -c syncfs -c syncfs $testfile
++echo "done"
++
++echo "This syncfs call should succeed:"
++$XFS_IO_PROG -r -c syncfs $testfile
++echo "done"
++
++# success, all done
++_dmerror_cleanup
++
++status=0
++exit
+diff --git a/tests/generic/999.out b/tests/generic/999.out
+new file mode 100644
+index 000000000000..950a2ba42503
+--- /dev/null
++++ b/tests/generic/999.out
+@@ -0,0 +1,8 @@
++QA output created by 999
++Format and mount
++fdatasync: Input/output error
++One of the following syncfs calls should fail with EIO:
++syncfs: Input/output error
++done
++This syncfs call should succeed:
++done
+diff --git a/tests/generic/group b/tests/generic/group
+index 718575baeef9..9bcf296fc3dd 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -598,3 +598,4 @@
+ 594 auto quick quota
+ 595 auto quick encrypt
+ 596 auto quick
++999 auto quick
+-- 
+2.26.2
 
