@@ -2,85 +2,72 @@ Return-Path: <SRS0=9PQ0=6T=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+X-Spam-Status: No, score=-0.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	PDS_TONAME_EQ_TOLOCAL_SHORT,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
 	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D2941C47254
-	for <linux-fstests@archiver.kernel.org>; Tue,  5 May 2020 11:23:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9A5A7C47247
+	for <linux-fstests@archiver.kernel.org>; Tue,  5 May 2020 20:16:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 92E16206B9
-	for <linux-fstests@archiver.kernel.org>; Tue,  5 May 2020 11:23:36 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 766222068E
+	for <linux-fstests@archiver.kernel.org>; Tue,  5 May 2020 20:16:41 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="pS3yO39k"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="bejlo+SC"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728514AbgEELXg (ORCPT
+        id S1728914AbgEEUQk (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 5 May 2020 07:23:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50054 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1728497AbgEELXf (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 5 May 2020 07:23:35 -0400
-Received: from mail-io1-xd2a.google.com (mail-io1-xd2a.google.com [IPv6:2607:f8b0:4864:20::d2a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B5CDCC061A0F
-        for <fstests@vger.kernel.org>; Tue,  5 May 2020 04:23:35 -0700 (PDT)
-Received: by mail-io1-xd2a.google.com with SMTP id j8so882728iog.13
-        for <fstests@vger.kernel.org>; Tue, 05 May 2020 04:23:35 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:from:date:message-id:subject:to;
-        bh=QzJd9Ko/KYOfpt686hGh4Yb32zqwiGHF6gZGVd6RO2I=;
-        b=pS3yO39kv0j+UX5Ibj5UkY6AnRWHvbruwZRjCw5cvDcuVIq1iicAxEAOgLCK3DA8MP
-         VI/2qvIU85KfWpNCJG6bbEhQVskIS+CcH4I+4dWjFGKgdeQUUaynLl7lpkIxmswvdWKA
-         Jl77PRD4yv4bm4I476Z0HF1JxS7lIYj4c7PLya/pKaWw+d8a8nDn7eLn9hlJGdkAq6+W
-         epiXXV7RaL23/GmYtS7N1uFu7X4xrDPFGH5PJ28/ju5yCuyh/B40yjTIA0RfiJQw5GDR
-         aPk4u71z54VtP2GuVHwcyYfs6+9EatbPZawMgxbN5qxAFYqoZBm8CHiRMYciX8wE9WP1
-         b9HQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:from:date:message-id:subject:to;
-        bh=QzJd9Ko/KYOfpt686hGh4Yb32zqwiGHF6gZGVd6RO2I=;
-        b=KtQGY0qmpq/nTBZX5o7+EqX4fwqFfBIjft4/0mFzEWlLHAZmtQpJn9f4YUns2xoCd1
-         aYDTeyS03Bl45Ch10fbj/HQC9qMMSDzOIDGDB+VH6FE3nnvcSVeFXh5fil/mcuf0V8Q7
-         J+IwLCQZmHO4yKIg8ruJEg/MmrT/uvXcBNRMu+qJJAMT483nYl3Q8zN49cbwLtr1pGsy
-         rlALpmBAePx/EiipoEFEWVJKfzXzXytfATYU4UEg+kaq+BGG1kpFgU4tUt+/qbo9AxKi
-         H3N2HCCM81YHiLZzpZjWo0aY9SaUvOVk81+EUUhX1jMPSrclAP+1TLSwnSZ00QxAZQKQ
-         STKg==
-X-Gm-Message-State: AGi0PuYrElj0Su1PgR6Z7L/wn1nMu9QIwezlxxHq2Wj3HGcrwveIpI2x
-        vV0VQyET2VFVFB1k5RdXOaSVQ22JRAtbYMPB/UxeUgdD
-X-Google-Smtp-Source: APiQypKRLLKybsHOk6LaptfEsRf81Y+NcMyFI3uD7ZVjRoQKq5dNUF9XW0uHk1gL2SUeiefkW7xAu+ahFWh1L74gwSk=
-X-Received: by 2002:a5e:a90a:: with SMTP id c10mr2831347iod.64.1588677812536;
- Tue, 05 May 2020 04:23:32 -0700 (PDT)
-MIME-Version: 1.0
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Tue, 5 May 2020 14:23:21 +0300
-Message-ID: <CAOQ4uxgzp-OeVeBfUD+QtXUZS068GfP11xeWqPYg_x02hWxbbg@mail.gmail.com>
-Subject: udisks2 causing umount failures
+        Tue, 5 May 2020 16:16:40 -0400
+Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:46153 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1727785AbgEEUQk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 5 May 2020 16:16:40 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1588709799;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=I69Qey/sXnfMOSyhASvj1yZ/z/ENSfABIcXKWlVOkqA=;
+        b=bejlo+SCRUCw4TE2QwEcfpmcQGQJoT8XzRvtow90DQFgaMrqKUMwRlg4Wv4oRkknCbPmlO
+        v/ibFDOUalahDa1k6jQ0pwAeoSukCQOUHfRkF1EC2kZq+wvJeNpIwYxLSahONFUVWx59s8
+        bUe/GocbAkgw8E565TjwfrRpP48Mfp8=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-432-9IzMUbviP8iH53nPxHqvWw-1; Tue, 05 May 2020 16:16:37 -0400
+X-MC-Unique: 9IzMUbviP8iH53nPxHqvWw-1
+Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id AA2DE800D24
+        for <fstests@vger.kernel.org>; Tue,  5 May 2020 20:16:36 +0000 (UTC)
+Received: from [IPv6:::1] (ovpn04.gateway.prod.ext.phx2.redhat.com [10.5.9.4])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id 825A45C1B2
+        for <fstests@vger.kernel.org>; Tue,  5 May 2020 20:16:36 +0000 (UTC)
 To:     fstests <fstests@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+From:   Eric Sandeen <sandeen@redhat.com>
+Subject: [PATCH 0/3] fstests: test restricted file access sysctls
+Message-ID: <99a3164b-ee00-113c-e0aa-41eab9633364@redhat.com>
+Date:   Tue, 5 May 2020 15:16:35 -0500
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:68.0)
+ Gecko/20100101 Thunderbird/68.7.0
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.16
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-For whom it may concern,
+This is a series of tests which test sysctls which restrict file
+access under certain conditions:
 
-I had recently updated packages on a Centos 7 test machine.
-Among many packages updated was:
+fs.restricted_symlinks
+fs.restricted_hardlinks
 
-libudisks2-2.7.3-9.el7.x86_64 =>  2.8.4-1.el7.x86_64
+and
 
-Related or not, after this upgrade xfstest started failing on failures
-to unmount.
-This was especially tests that mounted loop or dm targets, such as xfs/078
-and xfs/311.
+fs.restricted_fifos
+fs.restricted_regular
 
-And no, UDEV_SETTLE_PROG did not help, neither did an extra 1s delay.
-
-In the end, I bisected this down to disabling udisks2 service.
-
-Just posting in case somebody else gets hit by this.
-
-Thanks,
-Amir.
