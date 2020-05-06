@@ -1,148 +1,122 @@
-Return-Path: <SRS0=9PQ0=6T=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=0Rk7=6U=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-14.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C7535C47254
-	for <linux-fstests@archiver.kernel.org>; Tue,  5 May 2020 20:22:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 46FE8C38A2A
+	for <linux-fstests@archiver.kernel.org>; Wed,  6 May 2020 10:16:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 997A22068E
-	for <linux-fstests@archiver.kernel.org>; Tue,  5 May 2020 20:22:01 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2859920575
+	for <linux-fstests@archiver.kernel.org>; Wed,  6 May 2020 10:16:05 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="NCij1GL3"
+	dkim=pass (1024-bit key) header.d=mykernel.net header.i=cgxu519@mykernel.net header.b="VGFH9rUu"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727785AbgEEUWB (ORCPT
+        id S1728314AbgEFKQE (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 5 May 2020 16:22:01 -0400
-Received: from us-smtp-2.mimecast.com ([207.211.31.81]:37099 "EHLO
-        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726593AbgEEUWB (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 5 May 2020 16:22:01 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1588710118;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
-        bh=WPm8aOSWnEVQWS0To3HYRwksxRZQIKyuJxe2vyGDITM=;
-        b=NCij1GL3QUDMBBRCG6NffW4Onvwy1+KaPM4hMRcngw79xwemCILuy0v5UMevfiQUR0pZHD
-        3Z1z54QPRio8qPsJfcupQJpYe0SiUAXcRYnEbxjcGcDJKvZTRFh/440EVz5Q6d/B0Aj9L6
-        zRhAIwcOWTQgQGTwd9QnvMqDJTns6uc=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-375-jtZWDopvNqq0rvzN2IejYQ-1; Tue, 05 May 2020 16:21:56 -0400
-X-MC-Unique: jtZWDopvNqq0rvzN2IejYQ-1
-Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 4C7BD1005510
-        for <fstests@vger.kernel.org>; Tue,  5 May 2020 20:21:55 +0000 (UTC)
-Received: from [IPv6:::1] (ovpn04.gateway.prod.ext.phx2.redhat.com [10.5.9.4])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id 153E110016DA
-        for <fstests@vger.kernel.org>; Tue,  5 May 2020 20:21:55 +0000 (UTC)
-Subject: [PATCH 3/3] fstests: test restricted file access sysctls
-From:   Eric Sandeen <sandeen@redhat.com>
-To:     fstests <fstests@vger.kernel.org>
-References: <99a3164b-ee00-113c-e0aa-41eab9633364@redhat.com>
-Autocrypt: addr=sandeen@redhat.com; prefer-encrypt=mutual; keydata=
- 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
-Message-ID: <8e007b9f-9fdb-c9dd-c2b0-dd273d24a517@redhat.com>
-Date:   Tue, 5 May 2020 15:21:54 -0500
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:68.0)
- Gecko/20100101 Thunderbird/68.7.0
+        Wed, 6 May 2020 06:16:04 -0400
+Received: from sender2-of-o52.zoho.com.cn ([163.53.93.247]:21128 "EHLO
+        sender2-of-o52.zoho.com.cn" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726354AbgEFKQE (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 6 May 2020 06:16:04 -0400
+ARC-Seal: i=1; a=rsa-sha256; t=1588760140; cv=none; 
+        d=zoho.com.cn; s=zohoarc; 
+        b=mm7/+5PPpn1lWayFVZ2bxIhX2UYnTCaDjJD4RfDn0Xxk5tiZHKU7pEhbznl7HgaDl+uQaPZKoYmZQ012QVQnKj6XYxPgWL2YMqCUn5lG+he3VSRENp4Me1F77rOdcnMsw1wGQhe9ZdqsVgSw9O2FpKgEBLs461mqRTV6oWiMxgQ=
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zoho.com.cn; s=zohoarc; 
+        t=1588760140; h=Content-Type:Content-Transfer-Encoding:Cc:Date:From:MIME-Version:Message-ID:Subject:To; 
+        bh=Ggml1o82k6KVm5HD6w6KjbpDYIEsphB7H0u6YgALDCo=; 
+        b=AG8SFEnn5hTbRVM27gBGSESscNOOWh4jA7ZiRWr7RiUrsqH5fVMZm4WQEDvpSZNNRwgRzMC33VY8/IK/Qm+eaFnCskQi4r7WzI9Wh5KIm61taEk7E6sTz+XQHUOAi12zt9AZFKshYG6WDolJ5zmVIFWlTvmVeoJ/MkEP6HQyGu8=
+ARC-Authentication-Results: i=1; mx.zoho.com.cn;
+        dkim=pass  header.i=mykernel.net;
+        spf=pass  smtp.mailfrom=cgxu519@mykernel.net;
+        dmarc=pass header.from=<cgxu519@mykernel.net> header.from=<cgxu519@mykernel.net>
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1588760140;
+        s=zohomail; d=mykernel.net; i=cgxu519@mykernel.net;
+        h=From:To:Cc:Message-ID:Subject:Date:MIME-Version:Content-Transfer-Encoding:Content-Type;
+        bh=Ggml1o82k6KVm5HD6w6KjbpDYIEsphB7H0u6YgALDCo=;
+        b=VGFH9rUu+BUVt090JwxWlhQo4nY/lqWIARbRS1bJL+4VsMd5tnQo6cui/rlrshNJ
+        xK9iorGzMX3UGtveNGezq+o0uvcBI5MZ34iMSNf4NGgzUYgAtAMKrS4j/v7yTjAyJUf
+        7uBgpgqQlJzS8NIWOF4uB5kY2vfoOXLPsKIUsuQo=
+Received: from localhost.localdomain (218.18.229.179 [218.18.229.179]) by mx.zoho.com.cn
+        with SMTPS id 1588760138811260.042708897837; Wed, 6 May 2020 18:15:38 +0800 (CST)
+From:   Chengguang Xu <cgxu519@mykernel.net>
+To:     guan@eryu.me, miklos@szeredi.hu, amir73il@gmail.com
+Cc:     fstests@vger.kernel.org, linux-unionfs@vger.kernel.org,
+        Chengguang Xu <cgxu519@mykernel.net>
+Message-ID: <20200506101528.27359-1-cgxu519@mykernel.net>
+Subject: [PATCH v4] overlay/072: test for whiteout inode sharing
+Date:   Wed,  6 May 2020 18:15:28 +0800
+X-Mailer: git-send-email 2.20.1
 MIME-Version: 1.0
-In-Reply-To: <99a3164b-ee00-113c-e0aa-41eab9633364@redhat.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-X-Scanned-By: MIMEDefang 2.84 on 10.5.11.22
+Content-Transfer-Encoding: quoted-printable
+X-ZohoCNMailClient: External
+Content-Type: text/plain; charset=utf8
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This tests the fs.protected_regular and fs.protected_fifos
-sysctls which restrict access behavior in sticky world-writable
-directories as documented in the kernel at 
-Documentation/admin-guide/sysctl/fs.rst
+This is a test for whiteout inode sharing feature.
 
-Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+Signed-off-by: Chengguang Xu <cgxu519@mykernel.net>
 ---
+v1->v2:
+- Address Amir's comments in v1
 
-diff --git a/tests/generic/901 b/tests/generic/901
+v2->v3:
+- Address Amir's comments in v2=20
+
+v3->v4:
+- Fix test case based on latest kernel patch(removed module param)
+https://git.kernel.org/pub/scm/linux/kernel/git/mszeredi/vfs.git/commit/?h=
+=3Doverlayfs-next&id=3D4e49695244661568130bfefcb6143dd1eaa3d8e7
+
+ tests/overlay/072     | 106 ++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/072.out |   2 +
+ tests/overlay/group   |   1 +
+ 3 files changed, 109 insertions(+)
+ create mode 100755 tests/overlay/072
+ create mode 100644 tests/overlay/072.out
+
+diff --git a/tests/overlay/072 b/tests/overlay/072
 new file mode 100755
-index 00000000..5906b53c
+index 00000000..fc847092
 --- /dev/null
-+++ b/tests/generic/901
-@@ -0,0 +1,127 @@
++++ b/tests/overlay/072
+@@ -0,0 +1,106 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2020 Red Hat, Inc.  All Rights Reserved.
++# Copyright (c) 2020 Chengguang Xu <cgxu519@mykernel.net>.
++# All Rights Reserved.
 +#
-+# FS QA Test 900
++# FS QA Test 072
 +#
-+# Test protected_regular and protected_fifos sysctls
++# Test whiteout inode sharing functionality.
 +#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
++# A "whiteout" is an object that has special meaning in overlayfs.
++# A whiteout on an upper layer will effectively hide a matching file
++# in the lower layer, making it appear as if the file didn't exist.
++#
++# Whiteout inode sharing means multiple whiteout objects will share
++# one inode in upper layer, without this feature every whiteout object
++# will consume one inode in upper layer.
++
++seq=3D`basename $0`
++seqres=3D$RESULT_DIR/$seq
 +echo "QA output created by $seq"
 +
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
++here=3D`pwd`
++tmp=3D/tmp/$$
++status=3D1=09# failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
 +
 +_cleanup()
 +{
-+	rm -rf $TEST_DIR/$seq
-+	sysctl -qw fs.protected_regular=$REGULAR_PROTECTION
-+	sysctl -qw fs.protected_fifos=$FIFO_PROTECTION
-+	cd /
-+	rm -f $tmp.*
++=09cd /
++=09rm -f $tmp.*
 +}
 +
 +# get standard environment, filters and checks
@@ -153,147 +127,92 @@ index 00000000..5906b53c
 +rm -f $seqres.full
 +
 +# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs generic
++_supported_fs overlay
 +_supported_os Linux
-+_require_test
-+_require_sysctl fs.protected_regular
-+_require_sysctl fs.protected_fifos
-+_require_user fsgqa
-+_require_user fsgqa2
++_require_scratch
 +
-+USER1=fsgqa
-+USER2=fsgqa2
++lowerdir=3D$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
++upperdir=3D$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
++workdir=3D$OVL_BASE_SCRATCH_MNT/$OVL_WORK
 +
-+# Save current system state to reset when done
-+REGULAR_PROTECTION=`sysctl -n fs.protected_regular`
-+FIFO_PROTECTION=`sysctl -n fs.protected_fifos`
-+
-+test_access()
++# Make some testing files in lowerdir.
++# Argument:
++# $1: Testing file number
++make_lower_files()
 +{
-+	FILENAME=$1
-+
-+	# sticky dir is world & group writable:
-+	echo "= group & world writable dir"
-+	chmod og+w $TEST_DIR/$seq/sticky_dir
-+	# "open -f" opens O_CREAT
-+	result=`sudo -u $USER2 $XFS_IO_PROG -c "open -f $TEST_DIR/$seq/sticky_dir/$FILENAME" 2>&1` \
-+		&& echo "successfully opened $FILENAME" \
-+		|| echo $result | _filter_test_dir
-+	# sticky dir is only group writable:
-+	echo "= only group writable dir"
-+	chmod o-w $TEST_DIR/$seq/sticky_dir
-+	result=`sudo -u $USER2 $XFS_IO_PROG -c "open -f $TEST_DIR/$seq/sticky_dir/$FILENAME" 2>&1` \
-+		&& echo "successfully opened $FILENAME" \
-+		|| echo $result | _filter_test_dir
++=09for name in `seq ${1}`; do
++=09=09touch $lowerdir/file${name} &>/dev/null
++=09done
 +}
 +
-+setup_tree()
++# Delete all copy-uped files in upperdir.
++make_whiteout_files()
 +{
-+	# Create sticky dir owned by $USER2
-+	mkdir -p $TEST_DIR/$seq
-+	mkdir -p $TEST_DIR/$seq/sticky_dir
-+	chmod 1777 $TEST_DIR/$seq/sticky_dir
-+	chown $USER2.$USER2 $TEST_DIR/$seq/sticky_dir
-+
-+	# Create file & fifo in that dir owned by $USER1, and open
-+	# normal read/write privs for world & group
-+	$XFS_IO_PROG -c "open -f $TEST_DIR/$seq/sticky_dir/file"
-+	chown $USER1.$USER1 $TEST_DIR/$seq/sticky_dir/file
-+	chmod o+rw $TEST_DIR/$seq/sticky_dir/file
-+
-+	mkfifo $TEST_DIR/$seq/sticky_dir/fifo
-+	chown $USER1.$USER1 $TEST_DIR/$seq/sticky_dir/fifo
-+	chmod o+rw $TEST_DIR/$seq/sticky_dir/fifo
++=09rm -f $SCRATCH_MNT/* &>/dev/null
 +}
 +
-+setup_tree
++# Check link count of whiteout files.
++# Arguments:
++# $1: Testing file number
++# $2: Expected link count
++check_whiteout_files()
++{
++=09for name in `seq ${1}`; do
++=09=09local real_count=3D`stat -c %h $upperdir/file${name} 2>/dev/null`
++=09=09if [[ ${2} !=3D $real_count ]]; then
++=09=09=09echo "Expected link count is ${2} but real count is $real_count, =
+file name is file${name}"
++=09=09fi
++=09done
++=09local tmpfile_count=3D`ls $workdir/work/\#* $workdir/index/\#* 2>/dev/n=
+ull |wc -l 2>/dev/null`
++=09if [[ -n "$tmpfile_count" && $tmpfile_count > 1 ]]; then
++=09=09echo "There are more than one whiteout tmpfile in work/index dir!"
++=09=09ls -l $workdir/work/\#* $workdir/index/\#* 2>/dev/null
++=09fi
++}
 +
-+# First test fs.protected_regular
-+# With protection set to 1, O_CREAT opens in a world-writable sticky
-+# directory should fail if the file exists, is owned by another, and
-+# file owner != dir owner
-+#
-+# With protection set to 2, the same goes for group-writable
-+# sticky directories
++# Run test case with specific arguments.
++# Arguments:
++# $1: Testing file number
++# $2: Expected link count
++run_test_case()
++{
++=09_scratch_mkfs
++=09make_lower_files ${1}
++=09_scratch_mount
++=09make_whiteout_files
++=09check_whiteout_files ${1} ${2}
++=09_scratch_unmount
++}
 +
-+echo "== Test file open when owned by another and file owner != dir owner"
-+sysctl -w fs.protected_regular=0
-+test_access file
-+sysctl -w fs.protected_regular=1
-+test_access file
-+sysctl -w fs.protected_regular=2
-+test_access file
-+
-+echo
-+
-+# Now test fs.protected_fifos
-+# With protection set to 1, O_CREAT opens in a world-writable sticky
-+# directory should fail if the fifo exists, is owned by another, and
-+# file owner != dir owner
-+#
-+# With protection set to 2, the same goes for group-writable
-+# sticky directories
-+echo "== Test fifo open when owned by another and fifo owner != dir owner"
-+sysctl -w fs.protected_fifos=0
-+test_access fifo
-+sysctl -w fs.protected_fifos=1
-+test_access fifo
-+sysctl -w fs.protected_fifos=2
-+test_access fifo
++#Test case
++file_count=3D10
++link_count=3D11
++run_test_case $file_count $link_count
 +
 +# success, all done
-+status=0
++echo "Silence is golden"
++status=3D0
 +exit
-diff --git a/tests/generic/901.out b/tests/generic/901.out
+diff --git a/tests/overlay/072.out b/tests/overlay/072.out
 new file mode 100644
-index 00000000..af774ca5
+index 00000000..590bbc6c
 --- /dev/null
-+++ b/tests/generic/901.out
-@@ -0,0 +1,34 @@
-+QA output created by 901
-+== Test file open when owned by another and file owner != dir owner
-+fs.protected_regular = 0
-+= group & world writable dir
-+successfully opened file
-+= only group writable dir
-+successfully opened file
-+fs.protected_regular = 1
-+= group & world writable dir
-+TEST_DIR/901/sticky_dir/file: Permission denied
-+= only group writable dir
-+successfully opened file
-+fs.protected_regular = 2
-+= group & world writable dir
-+TEST_DIR/901/sticky_dir/file: Permission denied
-+= only group writable dir
-+TEST_DIR/901/sticky_dir/file: Permission denied
-+
-+== Test fifo open when owned by another and fifo owner != dir owner
-+fs.protected_fifos = 0
-+= group & world writable dir
-+successfully opened fifo
-+= only group writable dir
-+successfully opened fifo
-+fs.protected_fifos = 1
-+= group & world writable dir
-+TEST_DIR/901/sticky_dir/fifo: Permission denied
-+= only group writable dir
-+successfully opened fifo
-+fs.protected_fifos = 2
-+= group & world writable dir
-+TEST_DIR/901/sticky_dir/fifo: Permission denied
-+= only group writable dir
-+TEST_DIR/901/sticky_dir/fifo: Permission denied
-diff --git a/tests/generic/group b/tests/generic/group
-index 782b0cc3..d1e529d5 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -599,3 +599,4 @@
- 595 auto quick encrypt
- 596 auto quick
- 900 auto quick perms
-+901 auto quick perms
++++ b/tests/overlay/072.out
+@@ -0,0 +1,2 @@
++QA output created by 072
++Silence is golden
+diff --git a/tests/overlay/group b/tests/overlay/group
+index 43ad8a52..8b2276f1 100644
+--- a/tests/overlay/group
++++ b/tests/overlay/group
+@@ -74,3 +74,4 @@
+ 069 auto quick copyup hardlink exportfs nested nonsamefs
+ 070 auto quick copyup redirect nested
+ 071 auto quick copyup redirect nested nonsamefs
++072 auto quick whiteout
+--=20
+2.20.1
 
 
