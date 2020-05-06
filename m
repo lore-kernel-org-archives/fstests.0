@@ -6,26 +6,25 @@ X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6CE87C38A2A
-	for <linux-fstests@archiver.kernel.org>; Wed,  6 May 2020 22:16:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 04845C28CBC
+	for <linux-fstests@archiver.kernel.org>; Wed,  6 May 2020 22:18:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 50F7520870
-	for <linux-fstests@archiver.kernel.org>; Wed,  6 May 2020 22:16:52 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DA2402078C
+	for <linux-fstests@archiver.kernel.org>; Wed,  6 May 2020 22:18:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729981AbgEFWQv (ORCPT
+        id S1729907AbgEFWSW (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 6 May 2020 18:16:51 -0400
-Received: from sandeen.net ([63.231.237.45]:47688 "EHLO sandeen.net"
+        Wed, 6 May 2020 18:18:22 -0400
+Received: from sandeen.net ([63.231.237.45]:47770 "EHLO sandeen.net"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728621AbgEFWQv (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 6 May 2020 18:16:51 -0400
+        id S1729114AbgEFWSW (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 6 May 2020 18:18:22 -0400
 Received: from [10.0.0.4] (liberator [10.0.0.4])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by sandeen.net (Postfix) with ESMTPSA id 7C1712B49;
-        Wed,  6 May 2020 17:16:44 -0500 (CDT)
-Subject: [PATCH 1/2] fstests: update sparse file & negative timestamp tests
- for exfat
+        by sandeen.net (Postfix) with ESMTPSA id DA9802B49;
+        Wed,  6 May 2020 17:18:14 -0500 (CDT)
+Subject: [PATCH 2/2] fstests: add _require_mknod
 From:   Eric Sandeen <sandeen@sandeen.net>
 To:     fstests <fstests@vger.kernel.org>,
         Namjae Jeon <namjae.jeon@samsung.com>
@@ -72,8 +71,8 @@ Autocrypt: addr=sandeen@sandeen.net; prefer-encrypt=mutual; keydata=
  Pk6ah10C4+R1Jc7dyUsKksMfvvhRX1hTIXhth85H16706bneTayZBhlZ/hK18uqTX+s0onG/
  m1F3vYvdlE4p2ts1mmixMF7KajN9/E5RQtiSArvKTbfsB6Two4MthIuLuf+M0mI4gPl9SPlf
  fWCYVPhaU9o83y1KFbD/+lh1pjP7bEu/YudBvz7F2Myjh4/9GUAijrCTNeDTDAgvIJDjXuLX pA==
-Message-ID: <931ccb70-0b72-6532-d859-e355264d299a@sandeen.net>
-Date:   Wed, 6 May 2020 17:16:50 -0500
+Message-ID: <f7caf338-26ec-8a6c-4a91-4a037c12440e@sandeen.net>
+Date:   Wed, 6 May 2020 17:18:20 -0500
 User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:68.0)
  Gecko/20100101 Thunderbird/68.7.0
 MIME-Version: 1.0
@@ -86,8 +85,8 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-exfat cannot do sparse files or negative timestamps, so exclude
-tests which require these.
+Add a _require_mknod test so that filesystems with no ->mknod
+operation will _notrun instead of fail.
 
 Signed-off-by: Eric Sandeen <sandeen@sandeen.net>
 ---
@@ -96,24 +95,103 @@ diff --git a/common/rc b/common/rc
 index 2734dbf6..e90c12a3 100644
 --- a/common/rc
 +++ b/common/rc
-@@ -2357,7 +2357,7 @@ _require_fs_space()
- _require_sparse_files()
- {
-     case $FSTYP in
--    hfsplus)
-+    hfsplus|exfat)
-         _notrun "Sparse files not supported by this filesystem type: $FSTYP"
- 	;;
-     *)
-@@ -4188,9 +4188,10 @@ _check_xfs_scrub_does_unicode() {
- 	return 0
+@@ -4214,6 +4215,12 @@ _require_sysctl()
+ 	sysctl $name &>/dev/null || _notrun "$name sysctl unavailable"
  }
  
-+# exfat timestamps start at 1980 and cannot be prior to epoch
- _require_negative_timestamps() {
- 	case "$FSTYP" in
--	ceph)
-+	ceph|exfat)
- 		_notrun "$FSTYP does not support negative timestamps"
- 		;;
- 	esac
++_require_mknod()
++{
++	mknod $TEST_DIR/$tmp.null c 1 3 || _notrun "$FSTYP does not support mknod/mkfifo"
++	rm -f $TEST_DIR/$tmp.null
++}
++
+ init_rc
+ 
+ ################################################################################
+diff --git a/tests/generic/062 b/tests/generic/062
+index ba744885..d2a0ac9a 100755
+--- a/tests/generic/062
++++ b/tests/generic/062
+@@ -60,6 +60,7 @@ _supported_os Linux
+ _require_scratch
+ _require_attrs
+ _require_symlinks
++_require_mknod
+ 
+ rm -f $tmp.backup1 $tmp.backup2 $seqres.full
+ 
+diff --git a/tests/generic/184 b/tests/generic/184
+index 8aca1a0d..94f4d0e1 100755
+--- a/tests/generic/184
++++ b/tests/generic/184
+@@ -29,6 +29,7 @@ _cleanup()
+ _supported_fs generic
+ _supported_os Linux
+ _require_test
++_require_mknod
+ 
+ rm -f $TEST_DIR/null
+ mknod $TEST_DIR/null c 1 3
+diff --git a/tests/generic/306 b/tests/generic/306
+index 046f4516..6f16a5f5 100755
+--- a/tests/generic/306
++++ b/tests/generic/306
+@@ -34,6 +34,7 @@ _supported_os Linux
+ _require_scratch
+ _require_test
+ _require_symlinks
++_require_mknod
+ 
+ DEVNULL=$SCRATCH_MNT/devnull
+ DEVZERO=$SCRATCH_MNT/devzero
+diff --git a/tests/generic/401 b/tests/generic/401
+index 00e9bbe0..f8b1fd21 100755
+--- a/tests/generic/401
++++ b/tests/generic/401
+@@ -38,6 +38,7 @@ _supported_fs generic
+ _supported_os Linux
+ _require_scratch
+ _require_symlinks
++_require_mknod
+ _require_test_program "t_dir_type"
+ 
+ rm -f $seqres.full
+diff --git a/tests/generic/434 b/tests/generic/434
+index edbf49d3..131c5d99 100755
+--- a/tests/generic/434
++++ b/tests/generic/434
+@@ -30,6 +30,7 @@ _supported_os Linux
+ 
+ _require_xfs_io_command "copy_range"
+ _require_test
++_require_mknod
+ 
+ testdir=$TEST_DIR/test-$seq
+ rm -rf $testdir
+diff --git a/tests/generic/479 b/tests/generic/479
+index aaf864a4..fc0b3b6c 100755
+--- a/tests/generic/479
++++ b/tests/generic/479
+@@ -33,6 +33,7 @@ _supported_fs generic
+ _supported_os Linux
+ _require_scratch
+ _require_symlinks
++_require_mknod
+ _require_dm_target flakey
+ 
+ rm -f $seqres.full
+diff --git a/tests/generic/564 b/tests/generic/564
+index 4958b3b5..b9b21134 100755
+--- a/tests/generic/564
++++ b/tests/generic/564
+@@ -37,6 +37,9 @@ rm -f $seqres.full
+ 
+ _require_test
+ _require_loop
++# for mkfifo
++_require_mknod
++
+ #
+ # This test effectively requires xfs_io with these commits
+ #  2a42470b xfs_io: copy_file_range length is a size_t
+
