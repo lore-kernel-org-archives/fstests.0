@@ -7,86 +7,224 @@ X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1E17AC28CBC
-	for <linux-fstests@archiver.kernel.org>; Wed,  6 May 2020 18:35:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 760BDC28CBC
+	for <linux-fstests@archiver.kernel.org>; Wed,  6 May 2020 18:44:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E5E7F20736
-	for <linux-fstests@archiver.kernel.org>; Wed,  6 May 2020 18:35:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 518AE20735
+	for <linux-fstests@archiver.kernel.org>; Wed,  6 May 2020 18:44:47 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ZQ3fa1Eg"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="YSXhej3d"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730203AbgEFSf2 (ORCPT
+        id S1730219AbgEFSor (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 6 May 2020 14:35:28 -0400
-Received: from us-smtp-1.mimecast.com ([207.211.31.81]:57150 "EHLO
+        Wed, 6 May 2020 14:44:47 -0400
+Received: from us-smtp-2.mimecast.com ([205.139.110.61]:35985 "EHLO
         us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1729757AbgEFSf2 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 6 May 2020 14:35:28 -0400
+        by vger.kernel.org with ESMTP id S1729895AbgEFSoq (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 6 May 2020 14:44:46 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1588790127;
+        s=mimecast20190719; t=1588790684;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=5dbKNBbIu92vmOhezi6gfjcb7stwUXDJ+ShbVJmo6i8=;
-        b=ZQ3fa1Egqe/cBF3xWtIeeiD7dBzp0Rif3nAmf1+usj9fvL7upUKnOS+nUizjiWX51cxw3g
-        E5YuJnOsA5v7RqaJq5Dry5ZiZ5ch2W3EQgX/z/RlclKo0Q5tzhFspBZy7MfRo1A8rpnQ0z
-        yINdOxhzNT9MJxu+lLOlMNrvVedUBZE=
+        bh=k1Av5F4+4mmq6hXNj3JSrhcCsuo/7L+Kl48Cppqw5Gs=;
+        b=YSXhej3dk9NsiVbsVUm1Zlh5JLshBIB6wRkEviFK1cNd/gQBEfzP4AnCJw9YFqGXR68m92
+        Dp/eP0QE5l2yd0kbg6bnunngTNXWSHqpelC7UekfZxapYmfCPwhP5OL+7Xyl+4lb8HEL6Y
+        3TymsKOaJtdJGmUz34cuPBXfgnMc7bU=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-209-ik0TooHHO2O8rXb6Rm_gSg-1; Wed, 06 May 2020 14:35:25 -0400
-X-MC-Unique: ik0TooHHO2O8rXb6Rm_gSg-1
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
+ us-mta-456-1VAgRKy4P5W1lPGO7uUJiA-1; Wed, 06 May 2020 14:44:43 -0400
+X-MC-Unique: 1VAgRKy4P5W1lPGO7uUJiA-1
+Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 6F876835B40
-        for <fstests@vger.kernel.org>; Wed,  6 May 2020 18:35:24 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 13FEB19067E8
+        for <fstests@vger.kernel.org>; Wed,  6 May 2020 18:44:42 +0000 (UTC)
 Received: from redhat.com (ovpn-113-201.rdu2.redhat.com [10.10.113.201])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id 0600A19451;
-        Wed,  6 May 2020 18:35:21 +0000 (UTC)
-Date:   Wed, 6 May 2020 13:35:19 -0500
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id 9F45D707A2;
+        Wed,  6 May 2020 18:44:38 +0000 (UTC)
+Date:   Wed, 6 May 2020 13:44:37 -0500
 From:   Bill O'Donnell <billodo@redhat.com>
 To:     Eric Sandeen <sandeen@redhat.com>
 Cc:     fstests <fstests@vger.kernel.org>
-Subject: Re: [PATCH 1/3] fstests: add _require_sysctl helper
-Message-ID: <20200506183519.GA152947@redhat.com>
+Subject: Re: [PATCH 2/3] fstests: test restricted symlinks & hardlinks sysctls
+Message-ID: <20200506184437.GB152947@redhat.com>
 References: <99a3164b-ee00-113c-e0aa-41eab9633364@redhat.com>
- <2989bb14-5d77-5e91-d415-2a5bdfcff7a6@redhat.com>
+ <294c5739-ff30-285c-8cf7-11a6dff98294@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <2989bb14-5d77-5e91-d415-2a5bdfcff7a6@redhat.com>
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.15
+In-Reply-To: <294c5739-ff30-285c-8cf7-11a6dff98294@redhat.com>
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, May 05, 2020 at 03:17:38PM -0500, Eric Sandeen wrote:
-> New _require_sysctl test to ensure that the sysctl we wish to test is
-> available on the system.
+On Tue, May 05, 2020 at 03:20:10PM -0500, Eric Sandeen wrote:
+> This tests the fs.protected_symlinks and fs.protected_hardlinks
+> sysctls which restrict links behavior in sticky world-writable
+> directories as documented in the kernel at 
+> Documentation/admin-guide/sysctl/fs.rst
 > 
 > Signed-off-by: Eric Sandeen <sandeen@redhat.com>
 > ---
-
-Reviewed-by: Bill O'Donnell <billodo@redhat.com>
-
 > 
-> diff --git a/common/rc b/common/rc
-> index 2000bd9d..2734dbf6 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -4208,6 +4208,12 @@ _require_bsd_process_accounting()
->  	$ACCTON_PROG off >> $seqres.full
->  }
->  
-> +_require_sysctl()
+> diff --git a/tests/generic/900 b/tests/generic/900
+> new file mode 100755
+> index 00000000..f0ac46ef
+> --- /dev/null
+> +++ b/tests/generic/900
+> @@ -0,0 +1,114 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2020 Red Hat, Inc.  All Rights Reserved.
+> +#
+> +# FS QA Test 900
+> +#
+> +# Test protected_symlink and protected_hardlink ioctls
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
 > +{
-> +	name=$1
-> +	sysctl $name &>/dev/null || _notrun "$name sysctl unavailable"
+> +	rm -rf $TEST_DIR/$seq
+> +	sysctl -qw fs.protected_symlinks=$SYMLINK_PROTECTION
+> +	sysctl -qw fs.protected_hardlinks=$HARDLINK_PROTECTION
+> +	cd /
+> +	rm -f $tmp.*
 > +}
 > +
->  init_rc
->  
->  ################################################################################
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs generic
+> +_supported_os Linux
+> +_require_test
+> +_require_sysctl fs.protected_symlinks
+> +_require_sysctl fs.protected_hardlinks
+> +_require_user fsgqa
+> +_require_user fsgqa2
+> +
+> +OWNER=fsgqa
+> +OTHER=fsgqa2
+
+Why fsgqa2 instead of 123456-fsgqa?
+Thanks-
+Bill
+
+
+> +
+> +# Save current system state to reset when done
+> +SYMLINK_PROTECTION=`sysctl -n fs.protected_symlinks`
+> +HARDLINK_PROTECTION=`sysctl -n fs.protected_hardlinks`
+> +
+> +test_symlink()
+> +{
+> +	ln -s $TEST_DIR/$seq/target $TEST_DIR/$seq/sticky_dir/symlink
+> +	chown $OTHER.$OTHER $TEST_DIR/$seq/sticky_dir
+> +	chown $OWNER.$OWNER $TEST_DIR/$seq/sticky_dir/symlink
+> +	# If we can read the target, we followed the link
+> +	sudo -u $OTHER cat $TEST_DIR/$seq/sticky_dir/symlink 2>&1 \
+> +		 | _filter_test_dir
+> +	rm -f $TEST_DIR/$seq/sticky_dir/symlink
+> +}
+> +
+> +test_hardlink()
+> +{
+> +	chown $OWNER.$OWNER $TEST_DIR/$seq/target
+> +	chmod go-rw $TEST_DIR/$seq/target
+> +	sudo -u $OTHER \
+> +	    ln $TEST_DIR/$seq/target $TEST_DIR/$seq/sticky_dir/hardlink 2>&1 \
+> +		| _filter_test_dir
+> +	test -f $TEST_DIR/$seq/sticky_dir/hardlink \
+> +		&& echo "successfully created hardlink"
+> +	rm -f $TEST_DIR/$seq/sticky_dir/hardlink
+> +}
+> +
+> +setup_tree()
+> +{
+> +	# Create world-writable sticky dir
+> +	mkdir -p $TEST_DIR/$seq/sticky_dir
+> +	chmod 1777 $TEST_DIR/$seq/sticky_dir
+> +	# And a file elsewhere that will be linked to from that sticky dir
+> +	mkdir -p $TEST_DIR/$seq
+> +	# If we can read it, we followed the link.
+> +	echo "successfully followed symlink" > $TEST_DIR/$seq/target
+> +}
+> +
+> +setup_tree
+> +
+> +# First test fs.protected_symlinks
+> +# With protection on, symlink follows should fail if the
+> +# link owner != the sticky directory owner, and the process
+> +# is not the link owner.
+> +echo "== Test symlink follow protection when"
+> +echo "== process != link owner and dir owner != link owner"
+> +sysctl -w fs.protected_symlinks=0
+> +test_symlink
+> +sysctl -w fs.protected_symlinks=1
+> +test_symlink
+> +
+> +echo
+> +
+> +# Now test fs.protected_hardlinks
+> +# With protection on, hardlink creation should fail if the
+> +# process does not own the target file, and the process does not have
+> +# read-write access to the target
+> +echo "== Test hardlink create protection when"
+> +echo "== process != target owner and process cannot read target"
+> +sysctl -w fs.protected_hardlinks=0
+> +test_hardlink
+> +sysctl -w fs.protected_hardlinks=1
+> +test_hardlink
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/generic/900.out b/tests/generic/900.out
+> new file mode 100644
+> index 00000000..c9b26dbd
+> --- /dev/null
+> +++ b/tests/generic/900.out
+> @@ -0,0 +1,14 @@
+> +QA output created by 900
+> +== Test symlink follow protection when
+> +== process != link owner and dir owner != link owner
+> +fs.protected_symlinks = 0
+> +successfully followed symlink
+> +fs.protected_symlinks = 1
+> +cat: TEST_DIR/900/sticky_dir/symlink: Permission denied
+> +
+> +== Test hardlink create protection when
+> +== process != target owner and process cannot read target
+> +fs.protected_hardlinks = 0
+> +successfully created hardlink
+> +fs.protected_hardlinks = 1
+> +ln: failed to create hard link 'TEST_DIR/900/sticky_dir/hardlink' => 'TEST_DIR/900/target': Operation not permitted
+> diff --git a/tests/generic/group b/tests/generic/group
+> index 718575ba..782b0cc3 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -598,3 +598,4 @@
+>  594 auto quick quota
+>  595 auto quick encrypt
+>  596 auto quick
+> +900 auto quick perms
+> 
 > 
 
