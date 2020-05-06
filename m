@@ -2,32 +2,34 @@ Return-Path: <SRS0=0Rk7=6U=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,PDS_TONAME_EQ_TOLOCAL_SHORT,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E9778C28CBC
-	for <linux-fstests@archiver.kernel.org>; Wed,  6 May 2020 22:15:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6CE87C38A2A
+	for <linux-fstests@archiver.kernel.org>; Wed,  6 May 2020 22:16:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CDA3E20753
-	for <linux-fstests@archiver.kernel.org>; Wed,  6 May 2020 22:15:15 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 50F7520870
+	for <linux-fstests@archiver.kernel.org>; Wed,  6 May 2020 22:16:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729907AbgEFWPP (ORCPT
+        id S1729981AbgEFWQv (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 6 May 2020 18:15:15 -0400
-Received: from sandeen.net ([63.231.237.45]:47602 "EHLO sandeen.net"
+        Wed, 6 May 2020 18:16:51 -0400
+Received: from sandeen.net ([63.231.237.45]:47688 "EHLO sandeen.net"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729654AbgEFWPO (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 6 May 2020 18:15:14 -0400
+        id S1728621AbgEFWQv (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 6 May 2020 18:16:51 -0400
 Received: from [10.0.0.4] (liberator [10.0.0.4])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by sandeen.net (Postfix) with ESMTPSA id A23532B49;
-        Wed,  6 May 2020 17:15:07 -0500 (CDT)
+        by sandeen.net (Postfix) with ESMTPSA id 7C1712B49;
+        Wed,  6 May 2020 17:16:44 -0500 (CDT)
+Subject: [PATCH 1/2] fstests: update sparse file & negative timestamp tests
+ for exfat
+From:   Eric Sandeen <sandeen@sandeen.net>
 To:     fstests <fstests@vger.kernel.org>,
         Namjae Jeon <namjae.jeon@samsung.com>
-From:   Eric Sandeen <sandeen@sandeen.net>
-Subject: [PATCH 0/2] fstests: 2 more exfat-related fixes
+References: <07e0ecad-11fd-9bc2-7e49-9470f7511b27@sandeen.net>
 Autocrypt: addr=sandeen@sandeen.net; prefer-encrypt=mutual; keydata=
  mQINBE6x99QBEADMR+yNFBc1Y5avoUhzI/sdR9ANwznsNpiCtZlaO4pIWvqQJCjBzp96cpCs
  nQZV32nqJBYnDpBDITBqTa/EF+IrHx8gKq8TaSBLHUq2ju2gJJLfBoL7V3807PQcI18YzkF+
@@ -70,18 +72,48 @@ Autocrypt: addr=sandeen@sandeen.net; prefer-encrypt=mutual; keydata=
  Pk6ah10C4+R1Jc7dyUsKksMfvvhRX1hTIXhth85H16706bneTayZBhlZ/hK18uqTX+s0onG/
  m1F3vYvdlE4p2ts1mmixMF7KajN9/E5RQtiSArvKTbfsB6Two4MthIuLuf+M0mI4gPl9SPlf
  fWCYVPhaU9o83y1KFbD/+lh1pjP7bEu/YudBvz7F2Myjh4/9GUAijrCTNeDTDAgvIJDjXuLX pA==
-Message-ID: <07e0ecad-11fd-9bc2-7e49-9470f7511b27@sandeen.net>
-Date:   Wed, 6 May 2020 17:15:13 -0500
+Message-ID: <931ccb70-0b72-6532-d859-e355264d299a@sandeen.net>
+Date:   Wed, 6 May 2020 17:16:50 -0500
 User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:68.0)
  Gecko/20100101 Thunderbird/68.7.0
 MIME-Version: 1.0
+In-Reply-To: <07e0ecad-11fd-9bc2-7e49-9470f7511b27@sandeen.net>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Teach fstests that exfat can't do sparse files or negative timestamps
-Add a new _require test to see if the filesystem can contain special device nodes (i.e. mknod works)
+exfat cannot do sparse files or negative timestamps, so exclude
+tests which require these.
+
+Signed-off-by: Eric Sandeen <sandeen@sandeen.net>
+---
+
+diff --git a/common/rc b/common/rc
+index 2734dbf6..e90c12a3 100644
+--- a/common/rc
++++ b/common/rc
+@@ -2357,7 +2357,7 @@ _require_fs_space()
+ _require_sparse_files()
+ {
+     case $FSTYP in
+-    hfsplus)
++    hfsplus|exfat)
+         _notrun "Sparse files not supported by this filesystem type: $FSTYP"
+ 	;;
+     *)
+@@ -4188,9 +4188,10 @@ _check_xfs_scrub_does_unicode() {
+ 	return 0
+ }
+ 
++# exfat timestamps start at 1980 and cannot be prior to epoch
+ _require_negative_timestamps() {
+ 	case "$FSTYP" in
+-	ceph)
++	ceph|exfat)
+ 		_notrun "$FSTYP does not support negative timestamps"
+ 		;;
+ 	esac
