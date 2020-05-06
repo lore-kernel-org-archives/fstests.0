@@ -2,260 +2,89 @@ Return-Path: <SRS0=0Rk7=6U=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B672AC28CBC
-	for <linux-fstests@archiver.kernel.org>; Wed,  6 May 2020 18:47:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D4994C28CBC
+	for <linux-fstests@archiver.kernel.org>; Wed,  6 May 2020 18:48:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 93B6620708
-	for <linux-fstests@archiver.kernel.org>; Wed,  6 May 2020 18:47:23 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A6F2720708
+	for <linux-fstests@archiver.kernel.org>; Wed,  6 May 2020 18:48:27 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="BzkUu9Wv"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="alviVLr9"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730383AbgEFSrX (ORCPT
+        id S1730241AbgEFSs1 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 6 May 2020 14:47:23 -0400
-Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:41945 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1730317AbgEFSrX (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 6 May 2020 14:47:23 -0400
+        Wed, 6 May 2020 14:48:27 -0400
+Received: from us-smtp-1.mimecast.com ([207.211.31.81]:51193 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1730145AbgEFSs1 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 6 May 2020 14:48:27 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1588790841;
+        s=mimecast20190719; t=1588790906;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=3zOVLqpSnXerjFlAYhPZHWKJZSvKX+tV2jCb/rKK16g=;
-        b=BzkUu9WvOKyyCu6yXaRs0dJ6SPWe214tlxO9sijYXc1cZHLnwOnTlgz4dKIeylwLy+ivMM
-        cLExIOxW0ac5UIsVSmioyVt4MKwLSJpp4ygE4XIv4x9iN28mIU6WO6EO9DSEJlm8X6oEMw
-        8HlkSGc0pSMY05IvcocrFKL2ssNUWPw=
+        bh=k6mE3gBVpubwELhI23SYOvcrC3Rkj8u95MDZ81kuh48=;
+        b=alviVLr96cIMJ/NlawvhvY6m5gdt9wHCqqE/99MP6qIxNSAX4zzpHPhz8i6iURqAx/cq9d
+        Sdl7Za+76Ni8ttZs5OmotDjT8y7LcAVuDIKc7hytzCtPljcGX4bBaBGxLYUeQojgYdVGW0
+        evPx0gvukSlB0Uj5gfHhr6trwnPDkUg=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-3-zbtneZHFOmWGc9YVPsVuTQ-1; Wed, 06 May 2020 14:47:19 -0400
-X-MC-Unique: zbtneZHFOmWGc9YVPsVuTQ-1
-Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
+ us-mta-481-RtXPQz8JPSm8GcdaUFSMkw-1; Wed, 06 May 2020 14:48:24 -0400
+X-MC-Unique: RtXPQz8JPSm8GcdaUFSMkw-1
+Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 401FC10067B4
-        for <fstests@vger.kernel.org>; Wed,  6 May 2020 18:47:18 +0000 (UTC)
-Received: from redhat.com (ovpn-113-201.rdu2.redhat.com [10.10.113.201])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id 4BE8C5D9C5;
-        Wed,  6 May 2020 18:47:14 +0000 (UTC)
-Date:   Wed, 6 May 2020 13:47:12 -0500
-From:   Bill O'Donnell <billodo@redhat.com>
-To:     Eric Sandeen <sandeen@redhat.com>
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 8CE8280058A
+        for <fstests@vger.kernel.org>; Wed,  6 May 2020 18:48:23 +0000 (UTC)
+Received: from [IPv6:::1] (ovpn04.gateway.prod.ext.phx2.redhat.com [10.5.9.4])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id 9377D19451;
+        Wed,  6 May 2020 18:48:20 +0000 (UTC)
+Subject: Re: [PATCH 2/3] fstests: test restricted symlinks & hardlinks sysctls
+To:     Bill O'Donnell <billodo@redhat.com>
 Cc:     fstests <fstests@vger.kernel.org>
-Subject: Re: [PATCH 3/3] fstests: test restricted file access sysctls
-Message-ID: <20200506184712.GC152947@redhat.com>
 References: <99a3164b-ee00-113c-e0aa-41eab9633364@redhat.com>
- <8e007b9f-9fdb-c9dd-c2b0-dd273d24a517@redhat.com>
+ <294c5739-ff30-285c-8cf7-11a6dff98294@redhat.com>
+ <20200506184437.GB152947@redhat.com>
+From:   Eric Sandeen <sandeen@redhat.com>
+Message-ID: <58bb57c3-2a35-3d29-b994-3072307b006b@redhat.com>
+Date:   Wed, 6 May 2020 13:48:19 -0500
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:68.0)
+ Gecko/20100101 Thunderbird/68.7.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <8e007b9f-9fdb-c9dd-c2b0-dd273d24a517@redhat.com>
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
+In-Reply-To: <20200506184437.GB152947@redhat.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.15
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, May 05, 2020 at 03:21:54PM -0500, Eric Sandeen wrote:
-> This tests the fs.protected_regular and fs.protected_fifos
-> sysctls which restrict access behavior in sticky world-writable
-> directories as documented in the kernel at 
-> Documentation/admin-guide/sysctl/fs.rst
-> 
-> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
-> ---
-> 
-> diff --git a/tests/generic/901 b/tests/generic/901
-> new file mode 100755
-> index 00000000..5906b53c
-> --- /dev/null
-> +++ b/tests/generic/901
-> @@ -0,0 +1,127 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2020 Red Hat, Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test 900
-> +#
-> +# Test protected_regular and protected_fifos sysctls
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	rm -rf $TEST_DIR/$seq
-> +	sysctl -qw fs.protected_regular=$REGULAR_PROTECTION
-> +	sysctl -qw fs.protected_fifos=$FIFO_PROTECTION
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs generic
-> +_supported_os Linux
-> +_require_test
-> +_require_sysctl fs.protected_regular
-> +_require_sysctl fs.protected_fifos
-> +_require_user fsgqa
-> +_require_user fsgqa2
-> +
-> +USER1=fsgqa
-> +USER2=fsgqa2
+On 5/6/20 1:44 PM, Bill O'Donnell wrote:
+> On Tue, May 05, 2020 at 03:20:10PM -0500, Eric Sandeen wrote:
 
-See my fsgqa2 question in previous patch. ;)
--Bill
+...
 
-> +
-> +# Save current system state to reset when done
-> +REGULAR_PROTECTION=`sysctl -n fs.protected_regular`
-> +FIFO_PROTECTION=`sysctl -n fs.protected_fifos`
-> +
-> +test_access()
-> +{
-> +	FILENAME=$1
-> +
-> +	# sticky dir is world & group writable:
-> +	echo "= group & world writable dir"
-> +	chmod og+w $TEST_DIR/$seq/sticky_dir
-> +	# "open -f" opens O_CREAT
-> +	result=`sudo -u $USER2 $XFS_IO_PROG -c "open -f $TEST_DIR/$seq/sticky_dir/$FILENAME" 2>&1` \
-> +		&& echo "successfully opened $FILENAME" \
-> +		|| echo $result | _filter_test_dir
-> +	# sticky dir is only group writable:
-> +	echo "= only group writable dir"
-> +	chmod o-w $TEST_DIR/$seq/sticky_dir
-> +	result=`sudo -u $USER2 $XFS_IO_PROG -c "open -f $TEST_DIR/$seq/sticky_dir/$FILENAME" 2>&1` \
-> +		&& echo "successfully opened $FILENAME" \
-> +		|| echo $result | _filter_test_dir
-> +}
-> +
-> +setup_tree()
-> +{
-> +	# Create sticky dir owned by $USER2
-> +	mkdir -p $TEST_DIR/$seq
-> +	mkdir -p $TEST_DIR/$seq/sticky_dir
-> +	chmod 1777 $TEST_DIR/$seq/sticky_dir
-> +	chown $USER2.$USER2 $TEST_DIR/$seq/sticky_dir
-> +
-> +	# Create file & fifo in that dir owned by $USER1, and open
-> +	# normal read/write privs for world & group
-> +	$XFS_IO_PROG -c "open -f $TEST_DIR/$seq/sticky_dir/file"
-> +	chown $USER1.$USER1 $TEST_DIR/$seq/sticky_dir/file
-> +	chmod o+rw $TEST_DIR/$seq/sticky_dir/file
-> +
-> +	mkfifo $TEST_DIR/$seq/sticky_dir/fifo
-> +	chown $USER1.$USER1 $TEST_DIR/$seq/sticky_dir/fifo
-> +	chmod o+rw $TEST_DIR/$seq/sticky_dir/fifo
-> +}
-> +
-> +setup_tree
-> +
-> +# First test fs.protected_regular
-> +# With protection set to 1, O_CREAT opens in a world-writable sticky
-> +# directory should fail if the file exists, is owned by another, and
-> +# file owner != dir owner
-> +#
-> +# With protection set to 2, the same goes for group-writable
-> +# sticky directories
-> +
-> +echo "== Test file open when owned by another and file owner != dir owner"
-> +sysctl -w fs.protected_regular=0
-> +test_access file
-> +sysctl -w fs.protected_regular=1
-> +test_access file
-> +sysctl -w fs.protected_regular=2
-> +test_access file
-> +
-> +echo
-> +
-> +# Now test fs.protected_fifos
-> +# With protection set to 1, O_CREAT opens in a world-writable sticky
-> +# directory should fail if the fifo exists, is owned by another, and
-> +# file owner != dir owner
-> +#
-> +# With protection set to 2, the same goes for group-writable
-> +# sticky directories
-> +echo "== Test fifo open when owned by another and fifo owner != dir owner"
-> +sysctl -w fs.protected_fifos=0
-> +test_access fifo
-> +sysctl -w fs.protected_fifos=1
-> +test_access fifo
-> +sysctl -w fs.protected_fifos=2
-> +test_access fifo
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/901.out b/tests/generic/901.out
-> new file mode 100644
-> index 00000000..af774ca5
-> --- /dev/null
-> +++ b/tests/generic/901.out
-> @@ -0,0 +1,34 @@
-> +QA output created by 901
-> +== Test file open when owned by another and file owner != dir owner
-> +fs.protected_regular = 0
-> += group & world writable dir
-> +successfully opened file
-> += only group writable dir
-> +successfully opened file
-> +fs.protected_regular = 1
-> += group & world writable dir
-> +TEST_DIR/901/sticky_dir/file: Permission denied
-> += only group writable dir
-> +successfully opened file
-> +fs.protected_regular = 2
-> += group & world writable dir
-> +TEST_DIR/901/sticky_dir/file: Permission denied
-> += only group writable dir
-> +TEST_DIR/901/sticky_dir/file: Permission denied
-> +
-> +== Test fifo open when owned by another and fifo owner != dir owner
-> +fs.protected_fifos = 0
-> += group & world writable dir
-> +successfully opened fifo
-> += only group writable dir
-> +successfully opened fifo
-> +fs.protected_fifos = 1
-> += group & world writable dir
-> +TEST_DIR/901/sticky_dir/fifo: Permission denied
-> += only group writable dir
-> +successfully opened fifo
-> +fs.protected_fifos = 2
-> += group & world writable dir
-> +TEST_DIR/901/sticky_dir/fifo: Permission denied
-> += only group writable dir
-> +TEST_DIR/901/sticky_dir/fifo: Permission denied
-> diff --git a/tests/generic/group b/tests/generic/group
-> index 782b0cc3..d1e529d5 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -599,3 +599,4 @@
->  595 auto quick encrypt
->  596 auto quick
->  900 auto quick perms
-> +901 auto quick perms
+>> +OWNER=fsgqa
+>> +OTHER=fsgqa2
 > 
-> 
+> Why fsgqa2 instead of 123456-fsgqa?
+> Thanks-
+> Bill
+
+Yeah, not quite sure what to do about that.  That username is somewhat specific
+to test generic/381 because it wants to test usernames starting with digits.
+I hate to proliferate required users, though, so not sure what the best way
+to go might be.
+
+I could maybe/probably use root as one of the users, but didn't want to
+over-complicate it with matching admin privs vs. normal user privs.
+
+-Eric
 
