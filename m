@@ -2,307 +2,221 @@ Return-Path: <SRS0=UVRB=6W=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.5 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 76761C47257
-	for <linux-fstests@archiver.kernel.org>; Fri,  8 May 2020 20:15:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BF4C7C38A2A
+	for <linux-fstests@archiver.kernel.org>; Fri,  8 May 2020 21:12:58 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4FF98206D3
-	for <linux-fstests@archiver.kernel.org>; Fri,  8 May 2020 20:15:36 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=mpdesouza.com header.i=@mpdesouza.com header.b="fS7LhX9E"
+	by mail.kernel.org (Postfix) with ESMTP id 9A4D2217BA
+	for <linux-fstests@archiver.kernel.org>; Fri,  8 May 2020 21:12:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726797AbgEHUPg (ORCPT
+        id S1726913AbgEHVM6 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 8 May 2020 16:15:36 -0400
-Received: from gateway31.websitewelcome.com ([192.185.143.4]:21736 "EHLO
-        gateway31.websitewelcome.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726885AbgEHUPf (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 8 May 2020 16:15:35 -0400
-X-Greylist: delayed 1373 seconds by postgrey-1.27 at vger.kernel.org; Fri, 08 May 2020 16:15:34 EDT
-Received: from cm11.websitewelcome.com (cm11.websitewelcome.com [100.42.49.5])
-        by gateway31.websitewelcome.com (Postfix) with ESMTP id 392FD6DD19
-        for <fstests@vger.kernel.org>; Fri,  8 May 2020 14:52:39 -0500 (CDT)
-Received: from br540.hostgator.com.br ([108.179.252.180])
-        by cmsmtp with SMTP
-        id X931jo2boSl8qX931jAfWK; Fri, 08 May 2020 14:52:39 -0500
-X-Authority-Reason: nr=8
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=mpdesouza.com; s=default; h=Content-Transfer-Encoding:MIME-Version:
-        Message-Id:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:Content-ID:
-        Content-Description:Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc
-        :Resent-Message-ID:In-Reply-To:References:List-Id:List-Help:List-Unsubscribe:
-        List-Subscribe:List-Post:List-Owner:List-Archive;
-        bh=gr0dIfhy6RMLLBqFhfcrRgx4n8qmRR+qB0M8zbkN094=; b=fS7LhX9EETqcUkIV3dPwYPy7/m
-        wIpVWNFMtezVoqinbZOSk62pScqh7mdpmDHU9W6CwxquvzzzPDeY4tF1rYX11x6G7NUk/SdRLuINw
-        RAy56ixl1/iziyOm312nY3FkeTEVj2O4DYojMB9sdmOViLpMDMtjS2w5YPtqZaPvFX6xwTQygLZi4
-        OVDEarHgP/z1zET0H8QoaWF8VLAti2mhelVIo9qunUmOlfPuxg/YnZ6nUzYmJF3l+gy1mBFja6Z/h
-        1OrYtSmyvJBwD77eQh7+osFkmNotPCS2XQ+gdvG6FSvMMmRlwWdTwUa6ce86Ep/upTDa8g/2PEmnz
-        Q3ZhKyGQ==;
-Received: from [186.212.88.45] (port=46964 helo=hephaestus.prv.suse.net)
-        by br540.hostgator.com.br with esmtpsa (TLSv1.2:ECDHE-RSA-AES128-GCM-SHA256:128)
-        (Exim 4.92)
-        (envelope-from <marcos@mpdesouza.com>)
-        id 1jX930-003Vp4-Jb; Fri, 08 May 2020 16:52:38 -0300
-From:   Marcos Paulo de Souza <marcos@mpdesouza.com>
-To:     dsterba@suse.com, linux-btrfs@vger.kernel.org, wqu@suse.com,
-        fdmanana@suse.com, fstests@vger.kernel.org
-Cc:     Marcos Paulo de Souza <mpdesouza@suse.com>
-Subject: [PATCH] btrfs: test if the capability is kept on incremental send
-Date:   Fri,  8 May 2020 16:55:48 -0300
-Message-Id: <20200508195548.25429-1-marcos@mpdesouza.com>
-X-Mailer: git-send-email 2.25.1
+        Fri, 8 May 2020 17:12:58 -0400
+Received: from sandeen.net ([63.231.237.45]:52376 "EHLO sandeen.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726883AbgEHVM6 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 8 May 2020 17:12:58 -0400
+Received: from [10.0.0.4] (liberator [10.0.0.4])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by sandeen.net (Postfix) with ESMTPSA id C35674D7;
+        Fri,  8 May 2020 16:12:47 -0500 (CDT)
+Subject: Re: [RFC PATCH] xfs: make sure our default quota warning limits and
+ grace periods survive quotacheck
+To:     "Darrick J. Wong" <darrick.wong@oracle.com>,
+        Eric Sandeen <sandeen@redhat.com>,
+        Eryu Guan <guaneryu@gmail.com>
+Cc:     xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
+References: <20200219003423.GB9511@magnolia>
+From:   Eric Sandeen <sandeen@sandeen.net>
+Autocrypt: addr=sandeen@sandeen.net; prefer-encrypt=mutual; keydata=
+ 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 pA==
+Message-ID: <ae143a2f-7074-2297-1d23-578ab8d0ee94@sandeen.net>
+Date:   Fri, 8 May 2020 16:12:56 -0500
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:68.0)
+ Gecko/20100101 Thunderbird/68.8.0
 MIME-Version: 1.0
+In-Reply-To: <20200219003423.GB9511@magnolia>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
 Content-Transfer-Encoding: 8bit
-X-AntiAbuse: This header was added to track abuse, please include it with any abuse report
-X-AntiAbuse: Primary Hostname - br540.hostgator.com.br
-X-AntiAbuse: Original Domain - vger.kernel.org
-X-AntiAbuse: Originator/Caller UID/GID - [47 12] / [47 12]
-X-AntiAbuse: Sender Address Domain - mpdesouza.com
-X-BWhitelist: no
-X-Source-IP: 186.212.88.45
-X-Source-L: No
-X-Exim-ID: 1jX930-003Vp4-Jb
-X-Source: 
-X-Source-Args: 
-X-Source-Dir: 
-X-Source-Sender: (hephaestus.prv.suse.net) [186.212.88.45]:46964
-X-Source-Auth: marcos@mpdesouza.com
-X-Email-Count: 8
-X-Source-Cap: bXBkZXNvNTM7bXBkZXNvNTM7YnI1NDAuaG9zdGdhdG9yLmNvbS5icg==
-X-Local-Domain: yes
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Marcos Paulo de Souza <mpdesouza@suse.com>
+On 2/18/20 6:34 PM, Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
+> 
+> Make sure that the default quota grace period and maximum warning limits
+> set by the administrator survive quotacheck.
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> ---
+> This is the testcase to go with 'xfs: preserve default grace interval
+> during quotacheck', though Eric and I haven't figured out how we're
+> going to land that one...
 
-There is a situation where the incremental send can drop the capability
-from the receiving side. If you have a file that changed the group, but
-the capability was the same of before the group changed, the current
-kernel code will only emit a chown, since the capability is the same.
+<it landed>
 
-The steps bellow can reproduce the problem.
+This looks fine to me and it works.  Sorry for derailing it thinking that it
+didn't work based on a bug in my patch stack.  :(
 
-$ mount /dev/sda fs1
-$ mount /dev/sdb fs2
+Reviewed-by: Eric Sandeen <sandeen@redhat.com>
 
-$ touch fs1/foo.bar
-$ setcap cap_sys_nice+ep fs1/foo.bar
-$ btrfs subvol snap -r fs1 fs1/snap_init
-$ btrfs send fs1/snap_init | btrfs receive fs2
-
-$ chgrp adm fs1/foo.bar
-$ setcap cap_sys_nice+ep fs1/foo.bar
-
-$ btrfs subvol snap -r fs1 fs1/snap_complete
-$ btrfs subvol snap -r fs1 fs1/snap_incremental
-
-$ btrfs send fs1/snap_complete | btrfs receive fs2
-$ btrfs send -p fs1/snap_init fs1/snap_incremental | btrfs receive fs2
-
-At this point, a chown was emitted by "btrfs send" since only the group
-was changed. This makes the cap_sys_nice capability to be dropped from
-fs2/snap_incremental/foo.bar
-
-This test fails on current kernel, the fix was submitted to the btrfs
-mailing list titled:
-
-"btrfs: send: Emit file capabilities after chown"
-
-Signed-off-by: Marcos Paulo de Souza <mpdesouza@suse.com>
----
- tests/btrfs/211     | 153 ++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/211.out |   6 ++
- tests/btrfs/group   |   1 +
- 3 files changed, 160 insertions(+)
- create mode 100755 tests/btrfs/211
- create mode 100644 tests/btrfs/211.out
-
-diff --git a/tests/btrfs/211 b/tests/btrfs/211
-new file mode 100755
-index 00000000..e9aeaef3
---- /dev/null
-+++ b/tests/btrfs/211
-@@ -0,0 +1,153 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2020 SUSE Linux Products GmbH. All Rights Reserved.
-+#
-+# FS QA Test 211
-+#
-+# Test if the file capabilities aren't lost after full and incremental send
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch
-+_require_command "$SETCAP_PROG" setcap
-+_require_command "$GETCAP_PROG" getcap
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+_check_xattr()
-+{
-+	local RET
-+	local FILE
-+	local CAP
-+	FILE="$1"
-+	CAP="$2"
-+	RET=$($GETCAP_PROG "$FILE")
-+	if [ -z "$RET" ]; then
-+		echo "$RET"
-+		_fail "missing capability in file $FILE"
-+	fi
-+	if [[ "$RET" != *$CAP* ]]; then
-+		echo "$RET"
-+		echo "$CAP"
-+		_fail "Capability do not match. Output: $RET"
-+	fi
-+}
-+
-+_setup()
-+{
-+	_scratch_mkfs >/dev/null
-+	_scratch_mount
-+
-+	FS1="$SCRATCH_MNT/fs1"
-+	FS2="$SCRATCH_MNT/fs2"
-+
-+	$BTRFS_UTIL_PROG subvolume create "$FS1" > /dev/null
-+	$BTRFS_UTIL_PROG subvolume create "$FS2" > /dev/null
-+}
-+
-+_full_nocap_inc_withcap_send()
-+{
-+	_setup
-+
-+	# Test full send containing a file with no capability
-+	touch "$FS1/foo.bar"
-+	$BTRFS_UTIL_PROG subvolume snapshot -r "$FS1" "$FS1/snap_init" >/dev/null
-+	$BTRFS_UTIL_PROG send "$FS1/snap_init" -q | $BTRFS_UTIL_PROG receive "$FS2" -q
-+	# ensure that we don't have caps set
-+	RET=$($GETCAP_PROG "$FS2/snap_init/foo.bar")
-+	if [ -n "$RET" ]; then
-+		_fail "File contain capabilities when it shouldn't"
-+	fi
-+
-+	# Test if  incremental send bring the newly added capability
-+	$SETCAP_PROG "cap_sys_ptrace+ep cap_sys_nice+ep" "$FS1/foo.bar"
-+	$BTRFS_UTIL_PROG subvolume snapshot -r "$FS1" "$FS1/snap_inc" >/dev/null
-+	$BTRFS_UTIL_PROG send -p "$FS1/snap_init" "$FS1/snap_inc" -q | \
-+					$BTRFS_UTIL_PROG receive "$FS2" -q
-+	_check_xattr "$FS2/snap_inc/foo.bar" "cap_sys_ptrace,cap_sys_nice+ep"
-+
-+	_scratch_unmount
-+}
-+
-+_roundtrip_send()
-+{
-+	local FILES
-+	local FS1
-+	local FS2
-+
-+	# FILES should include foo.bar
-+	FILES="$1"
-+
-+	_setup
-+
-+	# create files on fs1, must contain foo.bar
-+	for f in $FILES; do
-+		touch "$FS1/$f"
-+	done
-+
-+	# Test full send, checking if the receiving side keeps the capability
-+	$SETCAP_PROG "cap_sys_ptrace+ep cap_sys_nice+ep" "$FS1/foo.bar"
-+	$BTRFS_UTIL_PROG subvolume snapshot -r "$FS1" "$FS1/snap_init" >/dev/null
-+	$BTRFS_UTIL_PROG send "$FS1/snap_init" -q | $BTRFS_UTIL_PROG receive "$FS2" -q
-+	_check_xattr "$FS2/snap_init/foo.bar" "cap_sys_ptrace,cap_sys_nice+ep"
-+
-+	# Test incremental send with different owner/group but same capability
-+	chgrp 100 "$FS1/foo.bar"
-+	$SETCAP_PROG "cap_sys_ptrace+ep cap_sys_nice+ep" "$FS1/foo.bar"
-+	$BTRFS_UTIL_PROG subvolume snapshot -r "$FS1" "$FS1/snap_inc" >/dev/null
-+	_check_xattr "$FS1/snap_inc/foo.bar" "cap_sys_ptrace,cap_sys_nice+ep"
-+	$BTRFS_UTIL_PROG send -p "$FS1/snap_init" "$FS1/snap_inc" -q | \
-+				$BTRFS_UTIL_PROG receive "$FS2" -q
-+	_check_xattr "$FS2/snap_inc/foo.bar" "cap_sys_ptrace,cap_sys_nice+ep"
-+
-+	# Test capability after incremental send with different capability and group
-+	chgrp 0 "$FS1/foo.bar"
-+	$SETCAP_PROG "cap_sys_time+ep cap_syslog+ep" "$FS1/foo.bar"
-+	$BTRFS_UTIL_PROG subvolume snapshot -r "$FS1" "$FS1/snap_inc2" >/dev/null
-+	_check_xattr "$FS1/snap_inc2/foo.bar" "cap_sys_time,cap_syslog+ep"
-+	$BTRFS_UTIL_PROG send -p "$FS1/snap_inc" "$FS1/snap_inc2" -q | \
-+				$BTRFS_UTIL_PROG receive "$FS2"  -q
-+	_check_xattr "$FS2/snap_inc2/foo.bar" "cap_sys_time,cap_syslog+ep"
-+
-+	_scratch_unmount
-+}
-+
-+# real QA test starts here
-+
-+echo "Test full send + file without caps, then inc send bringing a new cap"
-+_full_nocap_inc_withcap_send
-+
-+echo "Testing if foo.bar alone can keep it's capability"
-+_roundtrip_send "foo.bar"
-+
-+echo "Test foo.bar being the first item among other files"
-+_roundtrip_send "foo.bar foo.bax foo.baz"
-+
-+echo "Test foo.bar with objectid between two other files"
-+_roundtrip_send "foo1 foo.bar foo3"
-+
-+echo "Test foo.bar being the last item among other files"
-+_roundtrip_send "foo1 foo2 foo.bar"
-+
-+status=0
-+exit
-diff --git a/tests/btrfs/211.out b/tests/btrfs/211.out
-new file mode 100644
-index 00000000..fc50c923
---- /dev/null
-+++ b/tests/btrfs/211.out
-@@ -0,0 +1,6 @@
-+QA output created by 211
-+Test full send + file without caps, then inc send bringing a new cap
-+Testing if foo.bar alone can keep it's capability
-+Test foo.bar being the first item among other files
-+Test foo.bar with objectid between two other files
-+Test foo.bar being the last item among other files
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 9426fb17..437d4431 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -213,3 +213,4 @@
- 208 auto quick subvol
- 209 auto quick log
- 210 auto quick qgroup snapshot
-+211 auto quick snapshot
--- 
-2.25.1
-
+> ---
+>  tests/xfs/913     |   69 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/913.out |   13 ++++++++++
+>  tests/xfs/group   |    1 +
+>  3 files changed, 83 insertions(+)
+>  create mode 100755 tests/xfs/913
+>  create mode 100644 tests/xfs/913.out
+> 
+> diff --git a/tests/xfs/913 b/tests/xfs/913
+> new file mode 100755
+> index 00000000..94681b02
+> --- /dev/null
+> +++ b/tests/xfs/913
+> @@ -0,0 +1,69 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0-or-later
+> +# Copyright (c) 2020, Oracle and/or its affiliates.  All Rights Reserved.
+> +#
+> +# FS QA Test No. 913
+> +#
+> +# Make sure that the quota default grace period and maximum warning limits
+> +# survive quotacheck.
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1    # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +. ./common/quota
+> +
+> +# real QA test starts here
+> +_supported_fs xfs
+> +_supported_os Linux
+> +_require_quota
+> +
+> +rm -f $seqres.full
+> +
+> +# Format filesystem and set up quota limits
+> +_scratch_mkfs > $seqres.full
+> +_qmount_option "usrquota"
+> +_scratch_mount >> $seqres.full
+> +
+> +$XFS_QUOTA_PROG -x -c 'timer -u 300m' $SCRATCH_MNT
+> +$XFS_QUOTA_PROG -x -c 'state' $SCRATCH_MNT | grep 'grace time'
+> +_scratch_unmount
+> +
+> +# Remount and check the limits
+> +_scratch_mount >> $seqres.full
+> +$XFS_QUOTA_PROG -x -c 'state' $SCRATCH_MNT | grep 'grace time'
+> +_scratch_unmount
+> +
+> +# Run repair to force quota check
+> +_scratch_xfs_repair >> $seqres.full 2>&1
+> +
+> +# Remount (this time to run quotacheck) and check the limits.  There's a bug
+> +# in quotacheck where we would reset the ondisk default grace period to zero
+> +# while the incore copy stays at whatever was read in prior to quotacheck.
+> +# This will show up after the /next/ remount.
+> +_scratch_mount >> $seqres.full
+> +$XFS_QUOTA_PROG -x -c 'state' $SCRATCH_MNT | grep 'grace time'
+> +_scratch_unmount
+> +
+> +# Remount and check the limits
+> +_scratch_mount >> $seqres.full
+> +$XFS_QUOTA_PROG -x -c 'state' $SCRATCH_MNT | grep 'grace time'
+> +_scratch_unmount
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/913.out b/tests/xfs/913.out
+> new file mode 100644
+> index 00000000..ee989388
+> --- /dev/null
+> +++ b/tests/xfs/913.out
+> @@ -0,0 +1,13 @@
+> +QA output created by 913
+> +Blocks grace time: [0 days 05:00:00]
+> +Inodes grace time: [0 days 05:00:00]
+> +Realtime Blocks grace time: [0 days 05:00:00]
+> +Blocks grace time: [0 days 05:00:00]
+> +Inodes grace time: [0 days 05:00:00]
+> +Realtime Blocks grace time: [0 days 05:00:00]
+> +Blocks grace time: [0 days 05:00:00]
+> +Inodes grace time: [0 days 05:00:00]
+> +Realtime Blocks grace time: [0 days 05:00:00]
+> +Blocks grace time: [0 days 05:00:00]
+> +Inodes grace time: [0 days 05:00:00]
+> +Realtime Blocks grace time: [0 days 05:00:00]
+> diff --git a/tests/xfs/group b/tests/xfs/group
+> index 056072fb..87b3c75d 100644
+> --- a/tests/xfs/group
+> +++ b/tests/xfs/group
+> @@ -539,4 +539,5 @@
+>  910 auto quick inobtcount
+>  911 auto quick bigtime
+>  912 auto quick label
+> +913 auto quick quota
+>  997 auto quick mount
+> 
