@@ -2,116 +2,67 @@ Return-Path: <SRS0=UVRB=6W=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.5 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4FFEBC38A2A
-	for <linux-fstests@archiver.kernel.org>; Fri,  8 May 2020 14:23:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C8886C38A2A
+	for <linux-fstests@archiver.kernel.org>; Fri,  8 May 2020 15:03:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3884A24954
-	for <linux-fstests@archiver.kernel.org>; Fri,  8 May 2020 14:23:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A11C921655
+	for <linux-fstests@archiver.kernel.org>; Fri,  8 May 2020 15:03:17 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="QkXjlA7u"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726922AbgEHOXp (ORCPT
+        id S1726948AbgEHPDR (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 8 May 2020 10:23:45 -0400
-Received: from sandeen.net ([63.231.237.45]:59432 "EHLO sandeen.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726636AbgEHOXo (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 8 May 2020 10:23:44 -0400
-Received: from [10.0.0.4] (liberator [10.0.0.4])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by sandeen.net (Postfix) with ESMTPSA id 26B544D7;
-        Fri,  8 May 2020 09:23:34 -0500 (CDT)
-Subject: [PATCH 2/2 V2] fstests: add _require_mknod
-From:   Eric Sandeen <sandeen@sandeen.net>
-To:     fstests <fstests@vger.kernel.org>,
+        Fri, 8 May 2020 11:03:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53150 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726767AbgEHPDR (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 8 May 2020 11:03:17 -0400
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2870AC061A0C
+        for <fstests@vger.kernel.org>; Fri,  8 May 2020 08:03:17 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20170209; h=In-Reply-To:Content-Type:MIME-Version
+        :References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=FS18PO3CAwX/wgx+WOzz2Mj0xX7TGhO0DkdRAB5/puY=; b=QkXjlA7uWW6LqAGKRnYoP8Cqwe
+        HWdafGSV45mj2lT0lZxXLncQ928oqxaTX7sASvp7rv2mtX5PGaciv8NajO8CUmZwfk5QU5qDU8MO4
+        Fywiu4H1WKUUWNtjisFLH3cmvtAIDsOjWCDQWI+gdbpz5Y7qp1GwFFXMwquk/tVz0+TUsujHm6lyk
+        ytN3in8lTD88iRTpicdKFeCEa/weztM4khywK8PlTFdCvcMcapNuTelajFMFBbaewhMUM9tQR+p7m
+        AeWDTeoZoxk9pTTAiYlOMPBRe33BLe4+1sgBJOWeP/JeCn2V3Fe4MswDYdV1NY8i4bSeGiZ7FsV7J
+        ZPCAU2OQ==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.92.3 #3 (Red Hat Linux))
+        id 1jX4Wy-0005mH-Ra; Fri, 08 May 2020 15:03:16 +0000
+Date:   Fri, 8 May 2020 08:03:16 -0700
+From:   Christoph Hellwig <hch@infradead.org>
+To:     Eric Sandeen <sandeen@sandeen.net>
+Cc:     fstests <fstests@vger.kernel.org>,
         Namjae Jeon <namjae.jeon@samsung.com>,
         Christoph Hellwig <hch@infradead.org>
+Subject: Re: [PATCH 2/2 V2] fstests: add _require_mknod
+Message-ID: <20200508150316.GA22122@infradead.org>
 References: <07e0ecad-11fd-9bc2-7e49-9470f7511b27@sandeen.net>
  <f7caf338-26ec-8a6c-4a91-4a037c12440e@sandeen.net>
-Autocrypt: addr=sandeen@sandeen.net; prefer-encrypt=mutual; keydata=
- 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 pA==
-Message-ID: <42fcddeb-7274-bf41-3475-16eae0f78e92@sandeen.net>
-Date:   Fri, 8 May 2020 09:23:42 -0500
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:68.0)
- Gecko/20100101 Thunderbird/68.8.0
+ <42fcddeb-7274-bf41-3475-16eae0f78e92@sandeen.net>
 MIME-Version: 1.0
-In-Reply-To: <f7caf338-26ec-8a6c-4a91-4a037c12440e@sandeen.net>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <42fcddeb-7274-bf41-3475-16eae0f78e92@sandeen.net>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Add a _require_mknod test so that filesystems with no ->mknod
-operation will _notrun instead of fail.
+On Fri, May 08, 2020 at 09:23:42AM -0500, Eric Sandeen wrote:
+> Add a _require_mknod test so that filesystems with no ->mknod
+> operation will _notrun instead of fail.
+> 
+> Signed-off-by: Eric Sandeen <sandeen@sandeen.net>
 
-Signed-off-by: Eric Sandeen <sandeen@sandeen.net>
----
+Looks good,
 
-V2 trim the long line, sorry.
-
-diff --git a/common/rc b/common/rc
-index 2734dbf6..b50a4294 100644
---- a/common/rc
-+++ b/common/rc
-@@ -4214,6 +4215,13 @@ _require_sysctl()
- 	sysctl $name &>/dev/null || _notrun "$name sysctl unavailable"
- }
- 
-+_require_mknod()
-+{
-+	mknod $TEST_DIR/$tmp.null c 1 3 \
-+		|| _notrun "$FSTYP does not support mknod/mkfifo"
-+	rm -f $TEST_DIR/$tmp.null
-+}
-+
- init_rc
- 
- ################################################################################
-
-
+Reviewed-by: Christoph Hellwig <hch@lst.de>
