@@ -2,151 +2,415 @@ Return-Path: <SRS0=1yPV=6Z=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0A93DC54E4B
-	for <linux-fstests@archiver.kernel.org>; Mon, 11 May 2020 01:32:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5B9EDC47255
+	for <linux-fstests@archiver.kernel.org>; Mon, 11 May 2020 11:52:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DC5D02082E
-	for <linux-fstests@archiver.kernel.org>; Mon, 11 May 2020 01:32:46 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 249962075E
+	for <linux-fstests@archiver.kernel.org>; Mon, 11 May 2020 11:52:50 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=mykernel.net header.i=cgxu519@mykernel.net header.b="DNGSEVnN"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="rCl9Gx79"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729210AbgEKBcq (ORCPT
+        id S1729520AbgEKLwu (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 10 May 2020 21:32:46 -0400
-Received: from sender2-of-o52.zoho.com.cn ([163.53.93.247]:21156 "EHLO
-        sender2-of-o52.zoho.com.cn" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1728468AbgEKBcq (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 10 May 2020 21:32:46 -0400
-ARC-Seal: i=1; a=rsa-sha256; t=1589160742; cv=none; 
-        d=zoho.com.cn; s=zohoarc; 
-        b=oiS0qQXhKv1u7xj80ZeCsVz54jUouDF91KYU5iAMEIlRLjG8VCihory+xRRWiY/BAsWpfnDw8JJaONVgSlcs1lbPGhVz9Tr4VldPsPv8Tdxjk9LZdMIfVH/1gOvnOOgZK6zbcOJbC8+GkItyJfqb4LBR5q4GcAK8uNV64g83sPY=
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zoho.com.cn; s=zohoarc; 
-        t=1589160742; h=Content-Type:Content-Transfer-Encoding:Cc:Date:From:In-Reply-To:MIME-Version:Message-ID:Reply-To:References:Subject:To; 
-        bh=T68Hmv5Nulj0S/5rz1p3pjucba51cYTYyJkFDHDTu8E=; 
-        b=dhDf9T4HPJT/lw98Lz2EfUo7Lf7u8bI9WvJKZRcNP8csofXeZgwCNRW8vKVk251gruGBffH2qtzLjPFxVEVKGStd66DXdqx3asusJokFKkkVakdY5JYPijJOrOc5nFQFeTeRMLmQ5L7uEJ6qeZ8B0tNHMr2RGq5Ueml0YANGtTI=
-ARC-Authentication-Results: i=1; mx.zoho.com.cn;
-        dkim=pass  header.i=mykernel.net;
-        spf=pass  smtp.mailfrom=cgxu519@mykernel.net;
-        dmarc=pass header.from=<cgxu519@mykernel.net> header.from=<cgxu519@mykernel.net>
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1589160742;
-        s=zohomail; d=mykernel.net; i=cgxu519@mykernel.net;
-        h=Date:From:Reply-To:To:Cc:Message-ID:In-Reply-To:References:Subject:MIME-Version:Content-Type:Content-Transfer-Encoding;
-        bh=T68Hmv5Nulj0S/5rz1p3pjucba51cYTYyJkFDHDTu8E=;
-        b=DNGSEVnNu53H/DnW95BBNzzsX3CaLLftItFYQ83b749AdASLEU3Bun1gJFhqoXVs
-        k8YVS4IK0UmJqhr53ZWNNmBXXfAMScSyCEn9lBkgI/HqyQRobsWgb2DVQYjR2DTY/9S
-        GtfOtmh1lEB3cHmlLxsNvw3XraElLRCCO0XhNEKE=
-Received: from mail.baihui.com by mx.zoho.com.cn
-        with SMTP id 1589160740501108.29865526715366; Mon, 11 May 2020 09:32:20 +0800 (CST)
-Date:   Mon, 11 May 2020 09:32:20 +0800
-From:   Chengguang Xu <cgxu519@mykernel.net>
-Reply-To: cgxu519@mykernel.net
-To:     "Eryu Guan" <guan@eryu.me>
-Cc:     "miklos" <miklos@szeredi.hu>, "amir73il" <amir73il@gmail.com>,
-        "fstests" <fstests@vger.kernel.org>,
-        "linux-unionfs" <linux-unionfs@vger.kernel.org>
-Message-ID: <172015c8691.108177c8110122.924760245390345571@mykernel.net>
-In-Reply-To: <20200510155037.GB9345@desktop>
-References: <20200506101528.27359-1-cgxu519@mykernel.net> <20200510155037.GB9345@desktop>
-Subject: Re: [PATCH v4] overlay: test for whiteout inode sharing
+        Mon, 11 May 2020 07:52:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43070 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1729309AbgEKLwt (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 11 May 2020 07:52:49 -0400
+Received: from mail-vs1-xe44.google.com (mail-vs1-xe44.google.com [IPv6:2607:f8b0:4864:20::e44])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0CDF7C061A0C;
+        Mon, 11 May 2020 04:52:48 -0700 (PDT)
+Received: by mail-vs1-xe44.google.com with SMTP id x6so5393232vso.1;
+        Mon, 11 May 2020 04:52:48 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:reply-to:from:date:message-id
+         :subject:to:cc:content-transfer-encoding;
+        bh=7Dry/VmCqvDOvEMPGyU3c0AVpRNc04tYnK1hfrgb+No=;
+        b=rCl9Gx79PfwNmgqe6LRTy2viCVkeAWfhiGrZzWf4iCd0PySg/CX5ym/1HIs/RTWH3g
+         kjaEUgtYuKWrMWPSbZy0flrTA7iJJ32OcPTFCnPfIqAWrQ9mOn4KsSiqM3Gb9jHFy9LR
+         eN1cKx+UFLnvOSRCI7QtYoIHYis9T1/9KHWKrEwzqQeGulrxJH+Mss0ewCf+XUJoYUlt
+         rtytZiON+eoHXTejhQcKz/m9v/A0Cg/grroO2T+NNAL5qR2JP3Bq1BEj6mbsJx8IoOmg
+         E/mDfxmV+08g/9xlZKzTXzdMqEQ/dDuF7jT8p6RdGNap6qC3TAJtd9igGOIUyWzC+F/1
+         YhUA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:reply-to
+         :from:date:message-id:subject:to:cc:content-transfer-encoding;
+        bh=7Dry/VmCqvDOvEMPGyU3c0AVpRNc04tYnK1hfrgb+No=;
+        b=g48Bf9XVgOgYS6K4MhbP+aj3FpeUtkNOm4J7kECj8Iw7HDko05/bUe0Ui0fZIQpZTf
+         3EC+/mQsE1xL76oXthqiwy7cNbLf07bVHbacp9cIE8aAyVwe6lNfWp79ptIidk/ceNmZ
+         /UXf9S9XCsgoLwZqeXOq8/a9DTxXCXWU3ws3GvtcpY0Een/aLwMTCDd459879L7Qx05l
+         LeAqOzmUHvblQ1v6o2VzQ0b6+nqg4MuLlb8E2KXcKi5G1q8wxG1RHHI7un/lQ62MkWiS
+         vrSk3k/aFRO3bMbEPAv4fDfxKbi15D9GgsFEs3+/gMZXNT13kgctc7hZKbAW+LBlRjjm
+         +u8Q==
+X-Gm-Message-State: AGi0PuYzs/wkMFGnl2RXseXNTZvqyxm6ZzbaJH5lJIfE3tJqb2mv7/i7
+        TY2RJpyda6HGyyQ/gDmtpFbPRcfwHye1+DvplnE=
+X-Google-Smtp-Source: APiQypIDvBhP1p/QIikxxV0xz9NvzP0OPhBx+kFfLbCZnPEfeur3PAVizksjPMpYpYkFh7CfNwEQufhy3QcpPQfZ6tw=
+X-Received: by 2002:a67:407:: with SMTP id 7mr10282007vse.95.1589197966361;
+ Mon, 11 May 2020 04:52:46 -0700 (PDT)
 MIME-Version: 1.0
+References: <20200508195548.25429-1-marcos@mpdesouza.com>
+In-Reply-To: <20200508195548.25429-1-marcos@mpdesouza.com>
+Reply-To: fdmanana@gmail.com
+From:   Filipe Manana <fdmanana@gmail.com>
+Date:   Mon, 11 May 2020 12:52:35 +0100
+Message-ID: <CAL3q7H5Xnk6Ds9inLY7xOeT_knq3ySghrYeXQk2z-nQkyr712Q@mail.gmail.com>
+Subject: Re: [PATCH] btrfs: test if the capability is kept on incremental send
+To:     Marcos Paulo de Souza <marcos@mpdesouza.com>
+Cc:     David Sterba <dsterba@suse.com>,
+        linux-btrfs <linux-btrfs@vger.kernel.org>,
+        Qu Wenruo <wqu@suse.com>, fstests <fstests@vger.kernel.org>,
+        Marcos Paulo de Souza <mpdesouza@suse.com>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
-Importance: Medium
-User-Agent: ZohoCN Mail
-X-Mailer: ZohoCN Mail
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
- ---- =E5=9C=A8 =E6=98=9F=E6=9C=9F=E6=97=A5, 2020-05-10 23:50:37 Eryu Guan =
-<guan@eryu.me> =E6=92=B0=E5=86=99 ----
- > On Wed, May 06, 2020 at 06:15:28PM +0800, Chengguang Xu wrote:
- > > This is a test for whiteout inode sharing feature.
- > >=20
- > > Signed-off-by: Chengguang Xu <cgxu519@mykernel.net>
- > > ---
- > > v1->v2:
- > > - Address Amir's comments in v1
- > >=20
- > > v2->v3:
- > > - Address Amir's comments in v2=20
- > >=20
- > > v3->v4:
- > > - Fix test case based on latest kernel patch(removed module param)
- > > https://git.kernel.org/pub/scm/linux/kernel/git/mszeredi/vfs.git/commi=
-t/?h=3Doverlayfs-next&id=3D4e49695244661568130bfefcb6143dd1eaa3d8e7
- > >=20
- > >  tests/overlay/073     | 106 +++++++++++++++++++++++++++++++++++++++++=
-+
- > >  tests/overlay/073.out |   2 +
- > >  tests/overlay/group   |   1 +
- > >  3 files changed, 109 insertions(+)
- > >  create mode 100755 tests/overlay/073
- > >  create mode 100644 tests/overlay/073.out
- > >=20
- > > diff --git a/tests/overlay/073 b/tests/overlay/073
- > > new file mode 100755
- > > index 00000000..fc847092
- > > --- /dev/null
- > > +++ b/tests/overlay/073
- > > @@ -0,0 +1,106 @@
- > > +#! /bin/bash
- > > +# SPDX-License-Identifier: GPL-2.0
- > > +# Copyright (c) 2020 Chengguang Xu <cgxu519@mykernel.net>.
- > > +# All Rights Reserved.
- > > +#
- > > +# FS QA Test 073
- > > +#
- > > +# Test whiteout inode sharing functionality.
- > > +#
- > > +# A "whiteout" is an object that has special meaning in overlayfs.
- > > +# A whiteout on an upper layer will effectively hide a matching file
- > > +# in the lower layer, making it appear as if the file didn't exist.
- > > +#
- > > +# Whiteout inode sharing means multiple whiteout objects will share
- > > +# one inode in upper layer, without this feature every whiteout objec=
-t
- > > +# will consume one inode in upper layer.
- > > +
- > > +seq=3D`basename $0`
- > > +seqres=3D$RESULT_DIR/$seq
- > > +echo "QA output created by $seq"
- > > +
- > > +here=3D`pwd`
- > > +tmp=3D/tmp/$
- > > +status=3D1    # failure is the default!
- > > +trap "_cleanup; exit \$status" 0 1 2 3 15
- > > +
- > > +_cleanup()
- > > +{
- > > +    cd /
- > > +    rm -f $tmp.*
- > > +}
- > > +
- > > +# get standard environment, filters and checks
- > > +. ./common/rc
- > > +. ./common/filter
- > > +
- > > +# remove previous $seqres.full before test
- > > +rm -f $seqres.full
- > > +
- > > +# real QA test starts here
- > > +_supported_fs overlay
- > > +_supported_os Linux
- > > +_require_scratch
- >=20
- > I see no feature detection logic, so test just fails on old kernels
- > without this feature? I tried with v5.7-r4 kernel, test fails because
- > each whiteout file has only one hardlink.
-=20
-That's true.
+On Fri, May 8, 2020 at 9:14 PM Marcos Paulo de Souza
+<marcos@mpdesouza.com> wrote:
+>
+> From: Marcos Paulo de Souza <mpdesouza@suse.com>
+>
+> There is a situation where the incremental send can drop the capability
+> from the receiving side. If you have a file that changed the group, but
+> the capability was the same of before the group changed, the current
+> kernel code will only emit a chown, since the capability is the same.
+>
+> The steps bellow can reproduce the problem.
+>
+> $ mount /dev/sda fs1
+> $ mount /dev/sdb fs2
+>
+> $ touch fs1/foo.bar
+> $ setcap cap_sys_nice+ep fs1/foo.bar
+> $ btrfs subvol snap -r fs1 fs1/snap_init
+> $ btrfs send fs1/snap_init | btrfs receive fs2
+>
+> $ chgrp adm fs1/foo.bar
+> $ setcap cap_sys_nice+ep fs1/foo.bar
+>
+> $ btrfs subvol snap -r fs1 fs1/snap_complete
+> $ btrfs subvol snap -r fs1 fs1/snap_incremental
+>
+> $ btrfs send fs1/snap_complete | btrfs receive fs2
+> $ btrfs send -p fs1/snap_init fs1/snap_incremental | btrfs receive fs2
 
-Thanks,
-cgxu
+It's redundant to put here the steps to trigger the problem, that's
+what the test does.
 
+You just want to say this test exercises full send and incremental
+send operations for cases where files have capabilities, to verify the
+capabilities aren't lost.
+
+>
+> At this point, a chown was emitted by "btrfs send" since only the group
+> was changed. This makes the cap_sys_nice capability to be dropped from
+> fs2/snap_incremental/foo.bar
+
+Explaining in a changelog for a test case why exactly the bug happens
+is out of scope.
+We just want to know what bug are we testing for.
+
+The gory details about why the bug happens usually go the in the
+changelog of the patch that fixes btrfs.
+
+>
+> This test fails on current kernel, the fix was submitted to the btrfs
+> mailing list titled:
+>
+> "btrfs: send: Emit file capabilities after chown"
+>
+> Signed-off-by: Marcos Paulo de Souza <mpdesouza@suse.com>
+> ---
+>  tests/btrfs/211     | 153 ++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/211.out |   6 ++
+>  tests/btrfs/group   |   1 +
+>  3 files changed, 160 insertions(+)
+>  create mode 100755 tests/btrfs/211
+>  create mode 100644 tests/btrfs/211.out
+>
+> diff --git a/tests/btrfs/211 b/tests/btrfs/211
+> new file mode 100755
+> index 00000000..e9aeaef3
+> --- /dev/null
+> +++ b/tests/btrfs/211
+> @@ -0,0 +1,153 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (C) 2020 SUSE Linux Products GmbH. All Rights Reserved.
+> +#
+> +# FS QA Test 211
+> +#
+> +# Test if the file capabilities aren't lost after full and incremental s=
+end
+> +#
+> +seq=3D`basename $0`
+> +seqres=3D$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=3D`pwd`
+> +tmp=3D/tmp/$$
+> +status=3D1       # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +_supported_fs btrfs
+> +_supported_os Linux
+> +_require_scratch
+> +_require_command "$SETCAP_PROG" setcap
+> +_require_command "$GETCAP_PROG" getcap
+> +
+> +_cleanup()
+> +{
+> +       cd /
+> +       rm -f $tmp.*
+> +}
+> +
+> +_check_xattr()
+
+Function names starting with '_' are usually reserved for functions
+provided by fstests, global functions (like the ones in common/*).
+Same comment applies to all the other function names.
+
+Also, a better name would be "check_capabilities" - that they are
+stored in a xattr it's irrelevant as we are using the getcap and
+setcap utilities to read and set them, and not accessing xattrs
+directly.
+
+> +{
+> +       local RET
+> +       local FILE
+> +       local CAP
+> +       FILE=3D"$1"
+> +       CAP=3D"$2"
+
+Variables in uppercase are meant to be used for global variables. Same
+comment applies to all the other functions.
+
+> +       RET=3D$($GETCAP_PROG "$FILE")
+> +       if [ -z "$RET" ]; then
+> +               echo "$RET"
+> +               _fail "missing capability in file $FILE"
+
+This is a practice generally discouraged, we should avoid "_fail"
+unless absolutely necessary.
+The right approach here is just to "echo" the message. That's enough
+to make the test fail as that message is not part of the golden
+output.
+Furthermore, not using _fail allows the test to proceed and
+potentially find other problems.
+
+> +       fi
+> +       if [[ "$RET" !=3D *$CAP* ]]; then
+> +               echo "$RET"
+> +               echo "$CAP"
+> +               _fail "Capability do not match. Output: $RET"
+
+Capability -> Capabilities
+
+> +       fi
+> +}
+> +
+> +_setup()
+> +{
+> +       _scratch_mkfs >/dev/null
+> +       _scratch_mount
+> +
+> +       FS1=3D"$SCRATCH_MNT/fs1"
+> +       FS2=3D"$SCRATCH_MNT/fs2"
+
+To make it easier to follow, perhaps declare this outside this
+function, as they are used by the other functions.
+
+> +
+> +       $BTRFS_UTIL_PROG subvolume create "$FS1" > /dev/null
+> +       $BTRFS_UTIL_PROG subvolume create "$FS2" > /dev/null
+> +}
+> +
+> +_full_nocap_inc_withcap_send()
+> +{
+> +       _setup
+> +
+> +       # Test full send containing a file with no capability
+> +       touch "$FS1/foo.bar"
+> +       $BTRFS_UTIL_PROG subvolume snapshot -r "$FS1" "$FS1/snap_init" >/=
+dev/null
+> +       $BTRFS_UTIL_PROG send "$FS1/snap_init" -q | $BTRFS_UTIL_PROG rece=
+ive "$FS2" -q
+> +       # ensure that we don't have caps set
+> +       RET=3D$($GETCAP_PROG "$FS2/snap_init/foo.bar")
+
+Should be declared local (and lower case name).
+
+> +       if [ -n "$RET" ]; then
+> +               _fail "File contain capabilities when it shouldn't"
+
+echo and contain -> contains
+
+> +       fi
+> +
+> +       # Test if  incremental send bring the newly added capability
+> +       $SETCAP_PROG "cap_sys_ptrace+ep cap_sys_nice+ep" "$FS1/foo.bar"
+> +       $BTRFS_UTIL_PROG subvolume snapshot -r "$FS1" "$FS1/snap_inc" >/d=
+ev/null
+> +       $BTRFS_UTIL_PROG send -p "$FS1/snap_init" "$FS1/snap_inc" -q | \
+> +                                       $BTRFS_UTIL_PROG receive "$FS2" -=
+q
+> +       _check_xattr "$FS2/snap_inc/foo.bar" "cap_sys_ptrace,cap_sys_nice=
++ep"
+> +
+> +       _scratch_unmount
+> +}
+> +
+> +_roundtrip_send()
+> +{
+> +       local FILES
+> +       local FS1
+> +       local FS2
+
+So FS1 and FS2 are declared local but never set. And they were
+previously set as global by "_setup".
+So those two declarations should be removed here.
+
+> +
+> +       # FILES should include foo.bar
+> +       FILES=3D"$1"
+> +
+> +       _setup
+> +
+> +       # create files on fs1, must contain foo.bar
+> +       for f in $FILES; do
+> +               touch "$FS1/$f"
+> +       done
+> +
+> +       # Test full send, checking if the receiving side keeps the capabi=
+lity
+
+capability -> capabilities (as the test sets 2)
+
+> +       $SETCAP_PROG "cap_sys_ptrace+ep cap_sys_nice+ep" "$FS1/foo.bar"
+> +       $BTRFS_UTIL_PROG subvolume snapshot -r "$FS1" "$FS1/snap_init" >/=
+dev/null
+> +       $BTRFS_UTIL_PROG send "$FS1/snap_init" -q | $BTRFS_UTIL_PROG rece=
+ive "$FS2" -q
+> +       _check_xattr "$FS2/snap_init/foo.bar" "cap_sys_ptrace,cap_sys_nic=
+e+ep"
+> +
+> +       # Test incremental send with different owner/group but same capab=
+ility
+
+capability -> capabilities (as the test sets 2)
+
+> +       chgrp 100 "$FS1/foo.bar"
+> +       $SETCAP_PROG "cap_sys_ptrace+ep cap_sys_nice+ep" "$FS1/foo.bar"
+> +       $BTRFS_UTIL_PROG subvolume snapshot -r "$FS1" "$FS1/snap_inc" >/d=
+ev/null
+> +       _check_xattr "$FS1/snap_inc/foo.bar" "cap_sys_ptrace,cap_sys_nice=
++ep"
+> +       $BTRFS_UTIL_PROG send -p "$FS1/snap_init" "$FS1/snap_inc" -q | \
+> +                               $BTRFS_UTIL_PROG receive "$FS2" -q
+> +       _check_xattr "$FS2/snap_inc/foo.bar" "cap_sys_ptrace,cap_sys_nice=
++ep"
+> +
+> +       # Test capability after incremental send with different capabilit=
+y and group
+
+capability -> capabilities (as the test sets 2)
+
+> +       chgrp 0 "$FS1/foo.bar"
+> +       $SETCAP_PROG "cap_sys_time+ep cap_syslog+ep" "$FS1/foo.bar"
+> +       $BTRFS_UTIL_PROG subvolume snapshot -r "$FS1" "$FS1/snap_inc2" >/=
+dev/null
+> +       _check_xattr "$FS1/snap_inc2/foo.bar" "cap_sys_time,cap_syslog+ep=
+"
+> +       $BTRFS_UTIL_PROG send -p "$FS1/snap_inc" "$FS1/snap_inc2" -q | \
+> +                               $BTRFS_UTIL_PROG receive "$FS2"  -q
+> +       _check_xattr "$FS2/snap_inc2/foo.bar" "cap_sys_time,cap_syslog+ep=
+"
+> +
+> +       _scratch_unmount
+> +}
+> +
+> +# real QA test starts here
+> +
+> +echo "Test full send + file without caps, then inc send bringing a new c=
+ap"
+
+inc -> incremental
+
+Also, the abbreviation "caps" is used but in other messages (below)
+the non-abbreviated name "capabilities" is used.
+We should be consistent and use only one form.
+
+> +_full_nocap_inc_withcap_send
+> +
+> +echo "Testing if foo.bar alone can keep it's capability"
+
+it's -> its
+capability -> capabilities (as the test sets 2)
+
+> +_roundtrip_send "foo.bar"
+> +
+> +echo "Test foo.bar being the first item among other files"
+> +_roundtrip_send "foo.bar foo.bax foo.baz"
+> +
+> +echo "Test foo.bar with objectid between two other files"
+> +_roundtrip_send "foo1 foo.bar foo3"
+> +
+> +echo "Test foo.bar being the last item among other files"
+> +_roundtrip_send "foo1 foo2 foo.bar"
+> +
+> +status=3D0
+> +exit
+> diff --git a/tests/btrfs/211.out b/tests/btrfs/211.out
+> new file mode 100644
+> index 00000000..fc50c923
+> --- /dev/null
+> +++ b/tests/btrfs/211.out
+> @@ -0,0 +1,6 @@
+> +QA output created by 211
+> +Test full send + file without caps, then inc send bringing a new cap
+> +Testing if foo.bar alone can keep it's capability
+> +Test foo.bar being the first item among other files
+> +Test foo.bar with objectid between two other files
+> +Test foo.bar being the last item among other files
+> diff --git a/tests/btrfs/group b/tests/btrfs/group
+> index 9426fb17..437d4431 100644
+> --- a/tests/btrfs/group
+> +++ b/tests/btrfs/group
+> @@ -213,3 +213,4 @@
+>  208 auto quick subvol
+>  209 auto quick log
+>  210 auto quick qgroup snapshot
+> +211 auto quick snapshot
+
+Missing the 'send' group.
+
+Other that is looks good and it works as expected (with patched and
+unpatched btrfs)
+Thanks.
+
+> --
+> 2.25.1
+>
+
+
+--=20
+Filipe David Manana,
+
+=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
+ right.=E2=80=9D
