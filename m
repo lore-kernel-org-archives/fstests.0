@@ -1,416 +1,107 @@
-Return-Path: <SRS0=1yPV=6Z=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=Uy/6=62=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5B9EDC47255
-	for <linux-fstests@archiver.kernel.org>; Mon, 11 May 2020 11:52:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 207E0C54E4B
+	for <linux-fstests@archiver.kernel.org>; Tue, 12 May 2020 06:15:55 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 249962075E
-	for <linux-fstests@archiver.kernel.org>; Mon, 11 May 2020 11:52:50 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="rCl9Gx79"
+	by mail.kernel.org (Postfix) with ESMTP id ED76C207DD
+	for <linux-fstests@archiver.kernel.org>; Tue, 12 May 2020 06:15:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729520AbgEKLwu (ORCPT
+        id S1726032AbgELGPy (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 11 May 2020 07:52:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43070 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1729309AbgEKLwt (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 11 May 2020 07:52:49 -0400
-Received: from mail-vs1-xe44.google.com (mail-vs1-xe44.google.com [IPv6:2607:f8b0:4864:20::e44])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0CDF7C061A0C;
-        Mon, 11 May 2020 04:52:48 -0700 (PDT)
-Received: by mail-vs1-xe44.google.com with SMTP id x6so5393232vso.1;
-        Mon, 11 May 2020 04:52:48 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:reply-to:from:date:message-id
-         :subject:to:cc:content-transfer-encoding;
-        bh=7Dry/VmCqvDOvEMPGyU3c0AVpRNc04tYnK1hfrgb+No=;
-        b=rCl9Gx79PfwNmgqe6LRTy2viCVkeAWfhiGrZzWf4iCd0PySg/CX5ym/1HIs/RTWH3g
-         kjaEUgtYuKWrMWPSbZy0flrTA7iJJ32OcPTFCnPfIqAWrQ9mOn4KsSiqM3Gb9jHFy9LR
-         eN1cKx+UFLnvOSRCI7QtYoIHYis9T1/9KHWKrEwzqQeGulrxJH+Mss0ewCf+XUJoYUlt
-         rtytZiON+eoHXTejhQcKz/m9v/A0Cg/grroO2T+NNAL5qR2JP3Bq1BEj6mbsJx8IoOmg
-         E/mDfxmV+08g/9xlZKzTXzdMqEQ/dDuF7jT8p6RdGNap6qC3TAJtd9igGOIUyWzC+F/1
-         YhUA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:reply-to
-         :from:date:message-id:subject:to:cc:content-transfer-encoding;
-        bh=7Dry/VmCqvDOvEMPGyU3c0AVpRNc04tYnK1hfrgb+No=;
-        b=g48Bf9XVgOgYS6K4MhbP+aj3FpeUtkNOm4J7kECj8Iw7HDko05/bUe0Ui0fZIQpZTf
-         3EC+/mQsE1xL76oXthqiwy7cNbLf07bVHbacp9cIE8aAyVwe6lNfWp79ptIidk/ceNmZ
-         /UXf9S9XCsgoLwZqeXOq8/a9DTxXCXWU3ws3GvtcpY0Een/aLwMTCDd459879L7Qx05l
-         LeAqOzmUHvblQ1v6o2VzQ0b6+nqg4MuLlb8E2KXcKi5G1q8wxG1RHHI7un/lQ62MkWiS
-         vrSk3k/aFRO3bMbEPAv4fDfxKbi15D9GgsFEs3+/gMZXNT13kgctc7hZKbAW+LBlRjjm
-         +u8Q==
-X-Gm-Message-State: AGi0PuYzs/wkMFGnl2RXseXNTZvqyxm6ZzbaJH5lJIfE3tJqb2mv7/i7
-        TY2RJpyda6HGyyQ/gDmtpFbPRcfwHye1+DvplnE=
-X-Google-Smtp-Source: APiQypIDvBhP1p/QIikxxV0xz9NvzP0OPhBx+kFfLbCZnPEfeur3PAVizksjPMpYpYkFh7CfNwEQufhy3QcpPQfZ6tw=
-X-Received: by 2002:a67:407:: with SMTP id 7mr10282007vse.95.1589197966361;
- Mon, 11 May 2020 04:52:46 -0700 (PDT)
+        Tue, 12 May 2020 02:15:54 -0400
+Received: from mx2.suse.de ([195.135.220.15]:51940 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725536AbgELGPy (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 12 May 2020 02:15:54 -0400
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+Received: from relay2.suse.de (unknown [195.135.220.254])
+        by mx2.suse.de (Postfix) with ESMTP id 942F5AC84;
+        Tue, 12 May 2020 06:15:54 +0000 (UTC)
+Subject: Re: [PATCH fstests] btrfs/14{2,3}: use dm-dust instead of
+ fail_make_request
+To:     Omar Sandoval <osandov@osandov.com>, fstests@vger.kernel.org
+Cc:     kernel-team@fb.com, linux-btrfs@vger.kernel.org,
+        Eryu Guan <guaneryu@gmail.com>
+References: <d992390752c612acd0893ee3db929e77affded2b.1586983958.git.osandov@fb.com>
+From:   Nikolay Borisov <nborisov@suse.com>
+Autocrypt: addr=nborisov@suse.com; prefer-encrypt=mutual; keydata=
+ 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
+Message-ID: <47d3f830-bd55-c4f1-78d5-7648bc0cd44c@suse.com>
+Date:   Tue, 12 May 2020 09:15:50 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.7.0
 MIME-Version: 1.0
-References: <20200508195548.25429-1-marcos@mpdesouza.com>
-In-Reply-To: <20200508195548.25429-1-marcos@mpdesouza.com>
-Reply-To: fdmanana@gmail.com
-From:   Filipe Manana <fdmanana@gmail.com>
-Date:   Mon, 11 May 2020 12:52:35 +0100
-Message-ID: <CAL3q7H5Xnk6Ds9inLY7xOeT_knq3ySghrYeXQk2z-nQkyr712Q@mail.gmail.com>
-Subject: Re: [PATCH] btrfs: test if the capability is kept on incremental send
-To:     Marcos Paulo de Souza <marcos@mpdesouza.com>
-Cc:     David Sterba <dsterba@suse.com>,
-        linux-btrfs <linux-btrfs@vger.kernel.org>,
-        Qu Wenruo <wqu@suse.com>, fstests <fstests@vger.kernel.org>,
-        Marcos Paulo de Souza <mpdesouza@suse.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+In-Reply-To: <d992390752c612acd0893ee3db929e77affded2b.1586983958.git.osandov@fb.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, May 8, 2020 at 9:14 PM Marcos Paulo de Souza
-<marcos@mpdesouza.com> wrote:
->
-> From: Marcos Paulo de Souza <mpdesouza@suse.com>
->
-> There is a situation where the incremental send can drop the capability
-> from the receiving side. If you have a file that changed the group, but
-> the capability was the same of before the group changed, the current
-> kernel code will only emit a chown, since the capability is the same.
->
-> The steps bellow can reproduce the problem.
->
-> $ mount /dev/sda fs1
-> $ mount /dev/sdb fs2
->
-> $ touch fs1/foo.bar
-> $ setcap cap_sys_nice+ep fs1/foo.bar
-> $ btrfs subvol snap -r fs1 fs1/snap_init
-> $ btrfs send fs1/snap_init | btrfs receive fs2
->
-> $ chgrp adm fs1/foo.bar
-> $ setcap cap_sys_nice+ep fs1/foo.bar
->
-> $ btrfs subvol snap -r fs1 fs1/snap_complete
-> $ btrfs subvol snap -r fs1 fs1/snap_incremental
->
-> $ btrfs send fs1/snap_complete | btrfs receive fs2
-> $ btrfs send -p fs1/snap_init fs1/snap_incremental | btrfs receive fs2
-
-It's redundant to put here the steps to trigger the problem, that's
-what the test does.
-
-You just want to say this test exercises full send and incremental
-send operations for cases where files have capabilities, to verify the
-capabilities aren't lost.
-
->
-> At this point, a chown was emitted by "btrfs send" since only the group
-> was changed. This makes the cap_sys_nice capability to be dropped from
-> fs2/snap_incremental/foo.bar
-
-Explaining in a changelog for a test case why exactly the bug happens
-is out of scope.
-We just want to know what bug are we testing for.
-
-The gory details about why the bug happens usually go the in the
-changelog of the patch that fixes btrfs.
-
->
-> This test fails on current kernel, the fix was submitted to the btrfs
-> mailing list titled:
->
-> "btrfs: send: Emit file capabilities after chown"
->
-> Signed-off-by: Marcos Paulo de Souza <mpdesouza@suse.com>
-> ---
->  tests/btrfs/211     | 153 ++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/211.out |   6 ++
->  tests/btrfs/group   |   1 +
->  3 files changed, 160 insertions(+)
->  create mode 100755 tests/btrfs/211
->  create mode 100644 tests/btrfs/211.out
->
-> diff --git a/tests/btrfs/211 b/tests/btrfs/211
-> new file mode 100755
-> index 00000000..e9aeaef3
-> --- /dev/null
-> +++ b/tests/btrfs/211
-> @@ -0,0 +1,153 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (C) 2020 SUSE Linux Products GmbH. All Rights Reserved.
-> +#
-> +# FS QA Test 211
-> +#
-> +# Test if the file capabilities aren't lost after full and incremental s=
-end
-> +#
-> +seq=3D`basename $0`
-> +seqres=3D$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=3D`pwd`
-> +tmp=3D/tmp/$$
-> +status=3D1       # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +_supported_fs btrfs
-> +_supported_os Linux
-> +_require_scratch
-> +_require_command "$SETCAP_PROG" setcap
-> +_require_command "$GETCAP_PROG" getcap
-> +
-> +_cleanup()
-> +{
-> +       cd /
-> +       rm -f $tmp.*
-> +}
-> +
-> +_check_xattr()
-
-Function names starting with '_' are usually reserved for functions
-provided by fstests, global functions (like the ones in common/*).
-Same comment applies to all the other function names.
-
-Also, a better name would be "check_capabilities" - that they are
-stored in a xattr it's irrelevant as we are using the getcap and
-setcap utilities to read and set them, and not accessing xattrs
-directly.
-
-> +{
-> +       local RET
-> +       local FILE
-> +       local CAP
-> +       FILE=3D"$1"
-> +       CAP=3D"$2"
-
-Variables in uppercase are meant to be used for global variables. Same
-comment applies to all the other functions.
-
-> +       RET=3D$($GETCAP_PROG "$FILE")
-> +       if [ -z "$RET" ]; then
-> +               echo "$RET"
-> +               _fail "missing capability in file $FILE"
-
-This is a practice generally discouraged, we should avoid "_fail"
-unless absolutely necessary.
-The right approach here is just to "echo" the message. That's enough
-to make the test fail as that message is not part of the golden
-output.
-Furthermore, not using _fail allows the test to proceed and
-potentially find other problems.
-
-> +       fi
-> +       if [[ "$RET" !=3D *$CAP* ]]; then
-> +               echo "$RET"
-> +               echo "$CAP"
-> +               _fail "Capability do not match. Output: $RET"
-
-Capability -> Capabilities
-
-> +       fi
-> +}
-> +
-> +_setup()
-> +{
-> +       _scratch_mkfs >/dev/null
-> +       _scratch_mount
-> +
-> +       FS1=3D"$SCRATCH_MNT/fs1"
-> +       FS2=3D"$SCRATCH_MNT/fs2"
-
-To make it easier to follow, perhaps declare this outside this
-function, as they are used by the other functions.
-
-> +
-> +       $BTRFS_UTIL_PROG subvolume create "$FS1" > /dev/null
-> +       $BTRFS_UTIL_PROG subvolume create "$FS2" > /dev/null
-> +}
-> +
-> +_full_nocap_inc_withcap_send()
-> +{
-> +       _setup
-> +
-> +       # Test full send containing a file with no capability
-> +       touch "$FS1/foo.bar"
-> +       $BTRFS_UTIL_PROG subvolume snapshot -r "$FS1" "$FS1/snap_init" >/=
-dev/null
-> +       $BTRFS_UTIL_PROG send "$FS1/snap_init" -q | $BTRFS_UTIL_PROG rece=
-ive "$FS2" -q
-> +       # ensure that we don't have caps set
-> +       RET=3D$($GETCAP_PROG "$FS2/snap_init/foo.bar")
-
-Should be declared local (and lower case name).
-
-> +       if [ -n "$RET" ]; then
-> +               _fail "File contain capabilities when it shouldn't"
-
-echo and contain -> contains
-
-> +       fi
-> +
-> +       # Test if  incremental send bring the newly added capability
-> +       $SETCAP_PROG "cap_sys_ptrace+ep cap_sys_nice+ep" "$FS1/foo.bar"
-> +       $BTRFS_UTIL_PROG subvolume snapshot -r "$FS1" "$FS1/snap_inc" >/d=
-ev/null
-> +       $BTRFS_UTIL_PROG send -p "$FS1/snap_init" "$FS1/snap_inc" -q | \
-> +                                       $BTRFS_UTIL_PROG receive "$FS2" -=
-q
-> +       _check_xattr "$FS2/snap_inc/foo.bar" "cap_sys_ptrace,cap_sys_nice=
-+ep"
-> +
-> +       _scratch_unmount
-> +}
-> +
-> +_roundtrip_send()
-> +{
-> +       local FILES
-> +       local FS1
-> +       local FS2
-
-So FS1 and FS2 are declared local but never set. And they were
-previously set as global by "_setup".
-So those two declarations should be removed here.
-
-> +
-> +       # FILES should include foo.bar
-> +       FILES=3D"$1"
-> +
-> +       _setup
-> +
-> +       # create files on fs1, must contain foo.bar
-> +       for f in $FILES; do
-> +               touch "$FS1/$f"
-> +       done
-> +
-> +       # Test full send, checking if the receiving side keeps the capabi=
-lity
-
-capability -> capabilities (as the test sets 2)
-
-> +       $SETCAP_PROG "cap_sys_ptrace+ep cap_sys_nice+ep" "$FS1/foo.bar"
-> +       $BTRFS_UTIL_PROG subvolume snapshot -r "$FS1" "$FS1/snap_init" >/=
-dev/null
-> +       $BTRFS_UTIL_PROG send "$FS1/snap_init" -q | $BTRFS_UTIL_PROG rece=
-ive "$FS2" -q
-> +       _check_xattr "$FS2/snap_init/foo.bar" "cap_sys_ptrace,cap_sys_nic=
-e+ep"
-> +
-> +       # Test incremental send with different owner/group but same capab=
-ility
-
-capability -> capabilities (as the test sets 2)
-
-> +       chgrp 100 "$FS1/foo.bar"
-> +       $SETCAP_PROG "cap_sys_ptrace+ep cap_sys_nice+ep" "$FS1/foo.bar"
-> +       $BTRFS_UTIL_PROG subvolume snapshot -r "$FS1" "$FS1/snap_inc" >/d=
-ev/null
-> +       _check_xattr "$FS1/snap_inc/foo.bar" "cap_sys_ptrace,cap_sys_nice=
-+ep"
-> +       $BTRFS_UTIL_PROG send -p "$FS1/snap_init" "$FS1/snap_inc" -q | \
-> +                               $BTRFS_UTIL_PROG receive "$FS2" -q
-> +       _check_xattr "$FS2/snap_inc/foo.bar" "cap_sys_ptrace,cap_sys_nice=
-+ep"
-> +
-> +       # Test capability after incremental send with different capabilit=
-y and group
-
-capability -> capabilities (as the test sets 2)
-
-> +       chgrp 0 "$FS1/foo.bar"
-> +       $SETCAP_PROG "cap_sys_time+ep cap_syslog+ep" "$FS1/foo.bar"
-> +       $BTRFS_UTIL_PROG subvolume snapshot -r "$FS1" "$FS1/snap_inc2" >/=
-dev/null
-> +       _check_xattr "$FS1/snap_inc2/foo.bar" "cap_sys_time,cap_syslog+ep=
-"
-> +       $BTRFS_UTIL_PROG send -p "$FS1/snap_inc" "$FS1/snap_inc2" -q | \
-> +                               $BTRFS_UTIL_PROG receive "$FS2"  -q
-> +       _check_xattr "$FS2/snap_inc2/foo.bar" "cap_sys_time,cap_syslog+ep=
-"
-> +
-> +       _scratch_unmount
-> +}
-> +
-> +# real QA test starts here
-> +
-> +echo "Test full send + file without caps, then inc send bringing a new c=
-ap"
-
-inc -> incremental
-
-Also, the abbreviation "caps" is used but in other messages (below)
-the non-abbreviated name "capabilities" is used.
-We should be consistent and use only one form.
-
-> +_full_nocap_inc_withcap_send
-> +
-> +echo "Testing if foo.bar alone can keep it's capability"
-
-it's -> its
-capability -> capabilities (as the test sets 2)
-
-> +_roundtrip_send "foo.bar"
-> +
-> +echo "Test foo.bar being the first item among other files"
-> +_roundtrip_send "foo.bar foo.bax foo.baz"
-> +
-> +echo "Test foo.bar with objectid between two other files"
-> +_roundtrip_send "foo1 foo.bar foo3"
-> +
-> +echo "Test foo.bar being the last item among other files"
-> +_roundtrip_send "foo1 foo2 foo.bar"
-> +
-> +status=3D0
-> +exit
-> diff --git a/tests/btrfs/211.out b/tests/btrfs/211.out
-> new file mode 100644
-> index 00000000..fc50c923
-> --- /dev/null
-> +++ b/tests/btrfs/211.out
-> @@ -0,0 +1,6 @@
-> +QA output created by 211
-> +Test full send + file without caps, then inc send bringing a new cap
-> +Testing if foo.bar alone can keep it's capability
-> +Test foo.bar being the first item among other files
-> +Test foo.bar with objectid between two other files
-> +Test foo.bar being the last item among other files
-> diff --git a/tests/btrfs/group b/tests/btrfs/group
-> index 9426fb17..437d4431 100644
-> --- a/tests/btrfs/group
-> +++ b/tests/btrfs/group
-> @@ -213,3 +213,4 @@
->  208 auto quick subvol
->  209 auto quick log
->  210 auto quick qgroup snapshot
-> +211 auto quick snapshot
-
-Missing the 'send' group.
-
-Other that is looks good and it works as expected (with patched and
-unpatched btrfs)
-Thanks.
-
-> --
-> 2.25.1
->
 
 
---=20
-Filipe David Manana,
+On 15.04.20 г. 23:54 ч., Omar Sandoval wrote:
+> From: Omar Sandoval <osandov@fb.com>
+> 
+> These two tests test direct I/O and buffered read repair, respectively,
+> with fail_make_request. However, by using "fail_make_request/times",
+> they rely on repair having a specific I/O pattern. My pending Btrfs
+> direct I/O refactoring patch series changes this I/O pattern and thus
+> breaks this test.
+> 
+> The dm-dust target (added in v5.2) emulates a device with bad blocks
+> that are fixed when written to (like a device that remaps bad blocks).
+> This is exactly what we want for testing repair. Add some common dm-dust
+> helpers and update the tests to use dm-dust.
+> 
+> Signed-off-by: Omar Sandoval <osandov@fb.com>
 
-=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
- right.=E2=80=9D
+Eryu, are you going to merge this patch ?
