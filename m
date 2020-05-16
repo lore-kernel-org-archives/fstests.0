@@ -2,156 +2,398 @@ Return-Path: <SRS0=jNa4=66=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-1.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 00A26C433DF
-	for <linux-fstests@archiver.kernel.org>; Sat, 16 May 2020 12:10:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A8899C433E0
+	for <linux-fstests@archiver.kernel.org>; Sat, 16 May 2020 15:21:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C84DA20728
-	for <linux-fstests@archiver.kernel.org>; Sat, 16 May 2020 12:10:31 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1589631031;
-	bh=04AbjCXytLCX9HGH+nxYI/rMKrxzV75ANLTUs/yDM/U=;
-	h=Subject:From:To:Cc:Date:In-Reply-To:References:List-ID:From;
-	b=MjFNFB96mTNpc28U5kK/BW119l3+CAlFsWynkeENTlYS/WzN1JMXacsC2M3XcpzTO
-	 Cfs7DhR+/cMX8e+M7Vo4ogQsqYb2uGNlPV/eUBCg7gFXSMeXW86vldAxiH0MocCviW
-	 8VHaj1hxNC+ixOv/BhJ6v40431fGEjQ0RT1SkauY=
+	by mail.kernel.org (Postfix) with ESMTP id 7509320756
+	for <linux-fstests@archiver.kernel.org>; Sat, 16 May 2020 15:21:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726226AbgEPMKb (ORCPT
+        id S1726536AbgEPPVp (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 16 May 2020 08:10:31 -0400
-Received: from mail.kernel.org ([198.145.29.99]:50164 "EHLO mail.kernel.org"
+        Sat, 16 May 2020 11:21:45 -0400
+Received: from sandeen.net ([63.231.237.45]:53890 "EHLO sandeen.net"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726206AbgEPMKb (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sat, 16 May 2020 08:10:31 -0400
-Received: from tleilax.poochiereds.net (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        id S1726362AbgEPPVo (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sat, 16 May 2020 11:21:44 -0400
+Received: from Liberator.local (liberator [10.0.0.4])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 3CDF020657;
-        Sat, 16 May 2020 12:10:29 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1589631030;
-        bh=04AbjCXytLCX9HGH+nxYI/rMKrxzV75ANLTUs/yDM/U=;
-        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=SMTPQgb5Hvr3EbSz8749/ImgGuqyITyV1BhWKkpIsG4uZvS3A8v4N4yBOg2pUraBL
-         1hgcVaRxrBMQYG0UP2evthJttAR0wLXuH+VM4zJiTFU+ORtBk0A7FzFIHVT2ZxNYiw
-         WMKg2+5Mt3WfubCC5gI9laL/Q1s/JC3gYvsbGOt8=
-Message-ID: <61e877867de7e683d88e2cc5d0945b0aecce1d2a.camel@kernel.org>
-Subject: Re: [PATCH] ceph: don't return -ESTALE if there's still an open file
-From:   Jeff Layton <jlayton@kernel.org>
-To:     Amir Goldstein <amir73il@gmail.com>
-Cc:     Luis Henriques <lhenriques@suse.com>,
-        Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org,
-        linux-kernel <linux-kernel@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>,
-        Dave Chinner <dchinner@redhat.com>,
-        Christoph Hellwig <hch@lst.de>,
-        Miklos Szeredi <miklos@szeredi.hu>,
-        "J. Bruce Fields" <bfields@redhat.com>,
-        Linux NFS Mailing List <linux-nfs@vger.kernel.org>
-Date:   Sat, 16 May 2020 08:10:27 -0400
-In-Reply-To: <CAOQ4uxhPzcX6Ti8UX4WOg9gJJn+YTuk9OgU80d9imoJ2QdXaWQ@mail.gmail.com>
-References: <20200514111453.GA99187@suse.com>
-         <8497fe9a11ac1837813ee5f14b6ebae8fa6bf707.camel@kernel.org>
-         <20200514124845.GA12559@suse.com>
-         <4e5bf0e3bf055e53a342b19d168f6cf441781973.camel@kernel.org>
-         <CAOQ4uxhireZBRvcPQzTS8yOoO4gQt78M0ktZo-9yQ-zcaLZbow@mail.gmail.com>
-         <20200515111548.GA54598@suse.com>
-         <61b1f19edcc349641b5383c2ac70cbf9a15ba4bd.camel@kernel.org>
-         <CAOQ4uxiWZoSj3Pjwskd_hu-ErV9096hLt13CDcW6nEEvcwDNVA@mail.gmail.com>
-         <e227d42fdc91587e34bc64ac252970d39d9b4eee.camel@kernel.org>
-         <CAOQ4uxhPzcX6Ti8UX4WOg9gJJn+YTuk9OgU80d9imoJ2QdXaWQ@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"
-User-Agent: Evolution 3.36.2 (3.36.2-1.fc32) 
+        by sandeen.net (Postfix) with ESMTPSA id D0F637B8C;
+        Sat, 16 May 2020 10:21:21 -0500 (CDT)
+Subject: Re: [PATCH v3] generic: test per-type quota softlimit enforcement
+ timeout
+To:     Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org
+Cc:     linux-xfs@vger.kernel.org
+References: <20200508200100.26260-1-zlang@redhat.com>
+From:   Eric Sandeen <sandeen@sandeen.net>
+Autocrypt: addr=sandeen@sandeen.net; prefer-encrypt=mutual; keydata=
+ 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 pA==
+Message-ID: <c2c6952f-379e-1cd0-ccec-d7e5ffcec8c9@sandeen.net>
+Date:   Sat, 16 May 2020 10:21:42 -0500
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:68.0)
+ Gecko/20100101 Thunderbird/68.8.0
 MIME-Version: 1.0
+In-Reply-To: <20200508200100.26260-1-zlang@redhat.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
 Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sat, 2020-05-16 at 09:58 +0300, Amir Goldstein wrote:
-> [pulling in nfs guys]
+On 5/8/20 3:01 PM, Zorro Lang wrote:
+> Set different block & inode grace timers for user, group and project
+> quotas, then test softlimit enforcement timeout, make sure different
+> grace timers as expected.
 > 
-> > > Questions:
-> > > 1. Does sync() result in fully purging inodes on MDS?
-> > 
-> > I don't think so, but again, that code is not trivial to follow. I do
-> > know that the MDS keeps around a "strays directory" which contains
-> > unlinked inodes that are lazily cleaned up. My suspicion is that it's
-> > satisfying lookups out of this cache as well.
-> > 
-> > Which may be fine...the MDS is not required to be POSIX compliant after
-> > all. Only the fs drivers are.
-> > 
-> > > 2. Is i_nlink synchronized among nodes on deferred delete?
-> > > IWO, can inode come back from the dead on client if another node
-> > > has linked it before i_nlink 0 was observed?
-> > 
-> > No, that shouldn't happen. The caps mechanism should ensure that it
-> > can't be observed by other clients until after the change.
-> > 
-> > That said, Luis' current patch doesn't ensure we have the correct caps
-> > to check the i_nlink. We may need to add that in before we can roll with
-> > this.
-> > 
-> > > 3. Can an NFS client be "migrated" from one ceph node to another
-> > > with an open but unlinked file?
-> > > 
-> > 
-> > No. Open files in ceph are generally per-client. You can't pass around a
-> > fd (or equivalent).
+> Signed-off-by: Zorro Lang <zlang@redhat.com>
+> ---
 > 
-> Not sure we are talking about the same thing.
-> It's not ceph fd that is being passed around, it's the NFS client's fd.
-> If there is no case where NFS client would access ceph client2
-> with a handle it got from ceph client1, then there is no reason to satisfy
-> an open_by_handle() call for an unlinked file on client2.
-> If file was opened on client1, it may be "legal" to satisfy open_by_handle()
-> on client2, but I don't see how stopping to satisfy that can break anything.
+> Hi,
 > 
+> Thanks Eric found the overlapping quota timer issue. I set user, group and
+> project quota grace time together, then test them one by one. That cause
+> the user quota test is affected by group/project timers. This v3 patch fix
+> this issue.
+> 
+> But there's still a failure on XFS, about xfs group and project quota
+> always return ENOSPC to instead of EDQUOT, e.g:
+> 
+>     -pwrite: Disk quota exceeded
+>     +pwrite: No space left on device
+> 
+> Should I expect ENOSPC or EDQUOT both in this case?
 
-Not currently, but eventually we may need to allow for that...which is
-another good reason to handle this on the (Ceph) client instead, as the
-client can then decide whether treat an unlinked file as an ESTALE
-return based on its needs.
+Yep, this will somehow need to account for the differences between ext4
+and xfs.  Or, we could commit the ENOSPC version and tell ext4 that they
+did project quotas wrong.  ;)
 
-> > > I think what the test is trying to verify is that a "fully purged" inodes
-> > > cannot be opened db handle, but there is no standard way to verify
-> > > "fully purged", so the test resorts to sync() + another sync() + drop_caches.
-> > > 
-> > 
-> > Got it. That makes sense.
-> > 
-> > > Is there anything else that needs to be done on ceph in order to flush
-> > > all deferred operations from this client to MDS?
-> > 
-> > I'm leaning toward something like what Luis has proposed, but adding in
-> > appropriate cap handling.
-> 
-> That sounds fine.
-> 
-> > Basically, we have to consider the situation where one client has the
-> > file open and another client unlinks it, and then does an
-> > open_by_handle_at. Should it succeed in that case?
-> > 
-> > I can see arguments for either way.
-> 
-> IMO, the behavior should be defined for a client that has the file open.
-> For the rest it does not really matter.
-> 
-> My argument is that is it easy to satisfy the test's expectation and conform
-> to behavior of other filesystems without breaking any real workload.
-> 
-> To satisfy the test's expectation, you only need to change behavior of ceph
-> client in i_count 1 use case. If i_count is 1 need to take all relevant caps
-> to check that i_nlink is "globally" 0, before returning ESTALE.
-> But if i_count > 1, no need to bother.
+> And there's another weird thing is -- why ext4 test passed when there's
+> the overlapping quota timer issue in this case ...
 
-Makes sense. Thanks.
+That'll take more investigation, don't know yet ...
 
--- 
-Jeff Layton <jlayton@kernel.org>
+Thanks for working on this,
+-Eric
 
+> Thanks,
+> Zorro
+> 
+>  common/quota          |   4 +
+>  tests/generic/597     | 187 ++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/597.out |  41 +++++++++
+>  tests/generic/group   |   1 +
+>  4 files changed, 233 insertions(+)
+>  create mode 100755 tests/generic/597
+>  create mode 100644 tests/generic/597.out
+> 
+> diff --git a/common/quota b/common/quota
+> index 240e0bbc..1437d5f7 100644
+> --- a/common/quota
+> +++ b/common/quota
+> @@ -217,6 +217,10 @@ _qmount()
+>      if [ "$FSTYP" != "xfs" ]; then
+>          quotacheck -ug $SCRATCH_MNT >>$seqres.full 2>&1
+>          quotaon -ug $SCRATCH_MNT >>$seqres.full 2>&1
+> +        # try to turn on project quota if it's supported
+> +        if quotaon --help 2>&1 | grep -q '\-\-project'; then
+> +            quotaon --project $SCRATCH_MNT >>$seqres.full 2>&1
+> +        fi
+>      fi
+>      chmod ugo+rwx $SCRATCH_MNT
+>  }
+> diff --git a/tests/generic/597 b/tests/generic/597
+> new file mode 100755
+> index 00000000..f87a7dc7
+> --- /dev/null
+> +++ b/tests/generic/597
+> @@ -0,0 +1,187 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2020 Red Hat, Inc.  All Rights Reserved.
+> +#
+> +# FS QA Test No. 597
+> +#
+> +# Test per-type(user, group and project) filesystem quota timers, make sure
+> +# enforcement
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	restore_project
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +. ./common/quota
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +require_project()
+> +{
+> +	rm -f $tmp.projects $tmp.projid
+> +	if [ -f /etc/projects ];then
+> +		cat /etc/projects > $tmp.projects
+> +	fi
+> +	if [ -f /etc/projid ];then
+> +		cat /etc/projid > $tmp.projid
+> +	fi
+> +
+> +	cat >/etc/projects <<EOF
+> +100:$SCRATCH_MNT/t
+> +EOF
+> +	cat >/etc/projid <<EOF
+> +$qa_user:100
+> +EOF
+> +	PROJECT_CHANGED=1
+> +}
+> +
+> +restore_project()
+> +{
+> +	if [ "$PROJECT_CHANGED" = "1" ];then
+> +		rm -f /etc/projects /etc/projid
+> +		if [ -f $tmp.projects ];then
+> +			cat $tmp.projects > /etc/projects
+> +		fi
+> +		if [ -f $tmp.projid ];then
+> +			cat $tmp.projid > /etc/projid
+> +		fi
+> +	fi
+> +}
+> +
+> +init_files()
+> +{
+> +	local dir=$1
+> +
+> +	echo "### Initialize files, and their mode and ownership"
+> +	touch $dir/file{1,2} 2>/dev/null
+> +	chown $qa_user $dir/file{1,2} 2>/dev/null
+> +	chgrp $qa_user $dir/file{1,2} 2>/dev/null
+> +	chmod 777 $dir 2>/dev/null
+> +}
+> +
+> +cleanup_files()
+> +{
+> +	echo "### Remove all files"
+> +	rm -f ${1}/file{1,2,3,4,5,6}
+> +}
+> +
+> +test_grace()
+> +{
+> +	local type=$1
+> +	local dir=$2
+> +	local bgrace=$3
+> +	local igrace=$4
+> +
+> +	init_files $dir
+> +	echo "--- Test block quota ---"
+> +	# Firstly fit below block soft limit
+> +	echo "Write 225 blocks..."
+> +	su $qa_user -c "$XFS_IO_PROG -c 'pwrite 0 $((225 * $BLOCK_SIZE))' \
+> +		-c fsync $dir/file1" 2>&1 >>$seqres.full | \
+> +		_filter_xfs_io_error | tee -a $seqres.full
+> +	repquota -v -$type $SCRATCH_MNT | grep -v "^root" >>$seqres.full 2>&1
+> +	# Secondly overcome block soft limit
+> +	echo "Rewrite 250 blocks plus 1 byte, over the block softlimit..."
+> +	su $qa_user -c "$XFS_IO_PROG -c 'pwrite 0 $((250 * $BLOCK_SIZE + 1))' \
+> +		-c fsync $dir/file1" 2>&1 >>$seqres.full | \
+> +		_filter_xfs_io_error | tee -a $seqres.full
+> +	repquota -v -$type $SCRATCH_MNT | grep -v "^root" >>$seqres.full 2>&1
+> +	# Reset grace time here, make below grace time test more accurate
+> +	setquota -$type $qa_user -T $bgrace $igrace $SCRATCH_MNT 2>/dev/null
+> +	# Now sleep enough grace time and check that softlimit got enforced
+> +	sleep $((bgrace + 1))
+> +	echo "Try to write 1 one more block after grace..."
+> +	su $qa_user -c "$XFS_IO_PROG -c 'truncate 0' -c 'pwrite 0 $BLOCK_SIZE' \
+> +		$dir/file2" 2>&1 >>$seqres.full | _filter_xfs_io_error | \
+> +		tee -a $seqres.full
+> +	repquota -v -$type $SCRATCH_MNT | grep -v "^root" >>$seqres.full 2>&1
+> +	echo "--- Test inode quota ---"
+> +	# And now the softlimit test for inodes
+> +	# First reset space limits so that we don't have problems with
+> +	# space reservations on XFS
+> +	setquota -$type $qa_user 0 0 3 100 $SCRATCH_MNT
+> +	echo "Create 2 more files, over the inode softlimit..."
+> +	su $qa_user -c "touch $dir/file3 $dir/file4" 2>&1 >>$seqres.full | \
+> +		_filter_scratch | tee -a $seqres.full
+> +	repquota -v -$type $SCRATCH_MNT  | grep -v "^root" >>$seqres.full 2>&1
+> +	# Reset grace time here, make below grace time test more accurate
+> +	setquota -$type $qa_user -T $bgrace $igrace $SCRATCH_MNT 2>/dev/null
+> +	# Wait and check grace time enforcement
+> +	sleep $((igrace+1))
+> +	echo "Try to create one more inode after grace..."
+> +	su $qa_user -c "touch $dir/file5" 2>&1 >>$seqres.full |
+> +		_filter_scratch | tee -a $seqres.full
+> +	repquota -v -$type $SCRATCH_MNT  | grep -v "^root" >>$seqres.full 2>&1
+> +	cleanup_files $dir
+> +}
+> +
+> +# real QA test starts here
+> +_supported_fs generic
+> +_supported_os Linux
+> +_require_scratch
+> +_require_setquota_project
+> +_require_quota
+> +_require_user
+> +_require_group
+> +
+> +_scratch_mkfs >$seqres.full 2>&1
+> +_scratch_enable_pquota
+> +_qmount_option "usrquota,grpquota,prjquota"
+> +_qmount
+> +_require_prjquota $SCRATCH_DEV
+> +BLOCK_SIZE=$(_get_file_block_size $SCRATCH_MNT)
+> +rm -rf $SCRATCH_MNT/t
+> +mkdir $SCRATCH_MNT/t
+> +$XFS_IO_PROG -r -c "chproj 100" -c "chattr +P" $SCRATCH_MNT/t
+> +require_project
+> +
+> +echo "### Set up different grace timers to each type of quota"
+> +UBGRACE=12
+> +UIGRACE=10
+> +GBGRACE=4
+> +GIGRACE=2
+> +PBGRACE=8
+> +PIGRACE=6
+> +
+> +setquota -u $qa_user $((250 * $BLOCK_SIZE / 1024)) \
+> +	$((1000 * $BLOCK_SIZE / 1024)) 3 100 $SCRATCH_MNT
+> +setquota -u -t $UBGRACE $UIGRACE $SCRATCH_MNT
+> +echo; echo "### Test user quota softlimit and grace time"
+> +test_grace u $SCRATCH_MNT $UBGRACE $UIGRACE
+> +# Reset the user quota space & inode limits, avoid it affect later test
+> +setquota -u $qa_user 0 0 0 0 $SCRATCH_MNT
+> +
+> +setquota -g $qa_user $((250 * $BLOCK_SIZE / 1024)) \
+> +	$((1000 * $BLOCK_SIZE / 1024)) 3 100 $SCRATCH_MNT
+> +setquota -g -t $GBGRACE $GIGRACE $SCRATCH_MNT
+> +echo; echo "### Test group quota softlimit and grace time"
+> +test_grace g $SCRATCH_MNT $GBGRACE $GIGRACE
+> +# Reset the group quota space & inode limits, avoid it affect later test
+> +setquota -g $qa_user 0 0 0 0 $SCRATCH_MNT
+> +
+> +setquota -P $qa_user $((250 * $BLOCK_SIZE / 1024)) \
+> +	$((1000 * $BLOCK_SIZE / 1024)) 3 100 $SCRATCH_MNT
+> +setquota -P -t $PBGRACE $PIGRACE $SCRATCH_MNT
+> +echo; echo "### Test project quota softlimit and grace time"
+> +test_grace P $SCRATCH_MNT/t $PBGRACE $PIGRACE
+> +# Reset the project quota space & inode limits
+> +setquota -P $qa_user 0 0 0 0 $SCRATCH_MNT
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/generic/597.out b/tests/generic/597.out
+> new file mode 100644
+> index 00000000..57a68ee1
+> --- /dev/null
+> +++ b/tests/generic/597.out
+> @@ -0,0 +1,41 @@
+> +QA output created by 597
+> +### Set up different grace timers to each type of quota
+> +
+> +### Test user quota softlimit and grace time
+> +### Initialize files, and their mode and ownership
+> +--- Test block quota ---
+> +Write 225 blocks...
+> +Rewrite 250 blocks plus 1 byte, over the block softlimit...
+> +Try to write 1 one more block after grace...
+> +pwrite: Disk quota exceeded
+> +--- Test inode quota ---
+> +Create 2 more files, over the inode softlimit...
+> +Try to create one more inode after grace...
+> +touch: cannot touch 'SCRATCH_MNT/file5': Disk quota exceeded
+> +### Remove all files
+> +
+> +### Test group quota softlimit and grace time
+> +### Initialize files, and their mode and ownership
+> +--- Test block quota ---
+> +Write 225 blocks...
+> +Rewrite 250 blocks plus 1 byte, over the block softlimit...
+> +Try to write 1 one more block after grace...
+> +pwrite: Disk quota exceeded
+> +--- Test inode quota ---
+> +Create 2 more files, over the inode softlimit...
+> +Try to create one more inode after grace...
+> +touch: cannot touch 'SCRATCH_MNT/file5': Disk quota exceeded
+> +### Remove all files
+> +
+> +### Test project quota softlimit and grace time
+> +### Initialize files, and their mode and ownership
+> +--- Test block quota ---
+> +Write 225 blocks...
+> +Rewrite 250 blocks plus 1 byte, over the block softlimit...
+> +Try to write 1 one more block after grace...
+> +pwrite: Disk quota exceeded
+> +--- Test inode quota ---
+> +Create 2 more files, over the inode softlimit...
+> +Try to create one more inode after grace...
+> +touch: cannot touch 'SCRATCH_MNT/t/file5': Disk quota exceeded
+> +### Remove all files
+> diff --git a/tests/generic/group b/tests/generic/group
+> index 718575ba..10af4c41 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -598,3 +598,4 @@
+>  594 auto quick quota
+>  595 auto quick encrypt
+>  596 auto quick
+> +597 auto quick quota
+> 
