@@ -6,34 +6,32 @@ X-Spam-Status: No, score=-8.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A5252C433DF
-	for <linux-fstests@archiver.kernel.org>; Sun, 17 May 2020 21:04:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DD5A1C433DF
+	for <linux-fstests@archiver.kernel.org>; Sun, 17 May 2020 21:13:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8D151207E8
-	for <linux-fstests@archiver.kernel.org>; Sun, 17 May 2020 21:04:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B8F8D207E8
+	for <linux-fstests@archiver.kernel.org>; Sun, 17 May 2020 21:13:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726313AbgEQVEb (ORCPT
+        id S1726444AbgEQVNu (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 17 May 2020 17:04:31 -0400
-Received: from sandeen.net ([63.231.237.45]:58468 "EHLO sandeen.net"
+        Sun, 17 May 2020 17:13:50 -0400
+Received: from sandeen.net ([63.231.237.45]:58920 "EHLO sandeen.net"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726288AbgEQVEb (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 17 May 2020 17:04:31 -0400
+        id S1726372AbgEQVNu (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 17 May 2020 17:13:50 -0400
 Received: from [10.0.0.4] (liberator [10.0.0.4])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by sandeen.net (Postfix) with ESMTPSA id 7384017273;
-        Sun, 17 May 2020 16:04:06 -0500 (CDT)
-Subject: Re: [PATCH 2/2 V2] fstests: add _require_mknod
-To:     Eryu Guan <guan@eryu.me>
-Cc:     fstests <fstests@vger.kernel.org>,
+        by sandeen.net (Postfix) with ESMTPSA id 7F61717273;
+        Sun, 17 May 2020 16:13:25 -0500 (CDT)
+Subject: [PATCH 2/2 V3] fstests: add _require_mknod
+From:   Eric Sandeen <sandeen@sandeen.net>
+To:     fstests <fstests@vger.kernel.org>,
         Namjae Jeon <namjae.jeon@samsung.com>,
         Christoph Hellwig <hch@infradead.org>
 References: <07e0ecad-11fd-9bc2-7e49-9470f7511b27@sandeen.net>
  <f7caf338-26ec-8a6c-4a91-4a037c12440e@sandeen.net>
  <42fcddeb-7274-bf41-3475-16eae0f78e92@sandeen.net>
- <20200517161209.GF2704@desktop>
-From:   Eric Sandeen <sandeen@sandeen.net>
 Autocrypt: addr=sandeen@sandeen.net; prefer-encrypt=mutual; keydata=
  mQINBE6x99QBEADMR+yNFBc1Y5avoUhzI/sdR9ANwznsNpiCtZlaO4pIWvqQJCjBzp96cpCs
  nQZV32nqJBYnDpBDITBqTa/EF+IrHx8gKq8TaSBLHUq2ju2gJJLfBoL7V3807PQcI18YzkF+
@@ -76,12 +74,12 @@ Autocrypt: addr=sandeen@sandeen.net; prefer-encrypt=mutual; keydata=
  Pk6ah10C4+R1Jc7dyUsKksMfvvhRX1hTIXhth85H16706bneTayZBhlZ/hK18uqTX+s0onG/
  m1F3vYvdlE4p2ts1mmixMF7KajN9/E5RQtiSArvKTbfsB6Two4MthIuLuf+M0mI4gPl9SPlf
  fWCYVPhaU9o83y1KFbD/+lh1pjP7bEu/YudBvz7F2Myjh4/9GUAijrCTNeDTDAgvIJDjXuLX pA==
-Message-ID: <7b201ffd-b1db-c6c3-e554-75f3b92325d7@sandeen.net>
-Date:   Sun, 17 May 2020 16:04:29 -0500
+Message-ID: <3d263230-8231-8c2b-dbd4-201e1f3ea40b@sandeen.net>
+Date:   Sun, 17 May 2020 16:13:47 -0500
 User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:68.0)
  Gecko/20100101 Thunderbird/68.8.0
 MIME-Version: 1.0
-In-Reply-To: <20200517161209.GF2704@desktop>
+In-Reply-To: <42fcddeb-7274-bf41-3475-16eae0f78e92@sandeen.net>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
@@ -90,39 +88,119 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 5/17/20 11:12 AM, Eryu Guan wrote:
-> On Fri, May 08, 2020 at 09:23:42AM -0500, Eric Sandeen wrote:
->> Add a _require_mknod test so that filesystems with no ->mknod
->> operation will _notrun instead of fail.
->>
->> Signed-off-by: Eric Sandeen <sandeen@sandeen.net>
->> ---
->>
->> V2 trim the long line, sorry.
->>
->> diff --git a/common/rc b/common/rc
->> index 2734dbf6..b50a4294 100644
->> --- a/common/rc
->> +++ b/common/rc
->> @@ -4214,6 +4215,13 @@ _require_sysctl()
->>  	sysctl $name &>/dev/null || _notrun "$name sysctl unavailable"
->>  }
->>  
->> +_require_mknod()
->> +{
->> +	mknod $TEST_DIR/$tmp.null c 1 3 \
-> 
-> $tmp points to /tmp/$$, so this mknod is trying to make node at
-> 
-> 	$TEST_DIR//tmp/<pid>
-> 
-> which will always fail.
-> 
-> Use $TEST_DIR/$seq.null instead?
-> 
-> And I don't see any callers of this require rule, shouldn't existing
-> tests that use mknod be updated to require this rule?
+Add a _require_mknod test so that filesystems with no ->mknod
+operation will _notrun instead of fail.
 
-I'm sorry Eryu, the original patch added it to all the tests and I somehow
-lost that on V2, I'm really making a mess of patches lately.  :(  I'll send
-a V3 with more care.
+Signed-off-by: Eric Sandeen <sandeen@sandeen.net>
+---
+
+V2 trim the long line, sorry.
+V3 fix temporary node name :(
+   actually add _require test to relevant tests :(
+
+diff --git a/common/rc b/common/rc
+index 88113fe9..acd176ae 100644
+--- a/common/rc
++++ b/common/rc
+@@ -4217,6 +4217,13 @@ _require_sysctl()
+ 	sysctl $name &>/dev/null || _notrun "$name sysctl unavailable"
+ }
+ 
++_require_mknod()
++{
++	mknod $TEST_DIR/$seq.null c 1 3 \
++		|| _notrun "$FSTYP does not support mknod/mkfifo"
++	rm -f $TEST_DIR/$seq.null
++}
++
+ init_rc
+ 
+ ################################################################################
+diff --git a/tests/generic/062 b/tests/generic/062
+index ba744885..d2a0ac9a 100755
+--- a/tests/generic/062
++++ b/tests/generic/062
+@@ -60,6 +60,7 @@ _supported_os Linux
+ _require_scratch
+ _require_attrs
+ _require_symlinks
++_require_mknod
+ 
+ rm -f $tmp.backup1 $tmp.backup2 $seqres.full
+ 
+diff --git a/tests/generic/184 b/tests/generic/184
+index 8aca1a0d..94f4d0e1 100755
+--- a/tests/generic/184
++++ b/tests/generic/184
+@@ -29,6 +29,7 @@ _cleanup()
+ _supported_fs generic
+ _supported_os Linux
+ _require_test
++_require_mknod
+ 
+ rm -f $TEST_DIR/null
+ mknod $TEST_DIR/null c 1 3
+diff --git a/tests/generic/306 b/tests/generic/306
+index 046f4516..6f16a5f5 100755
+--- a/tests/generic/306
++++ b/tests/generic/306
+@@ -34,6 +34,7 @@ _supported_os Linux
+ _require_scratch
+ _require_test
+ _require_symlinks
++_require_mknod
+ 
+ DEVNULL=$SCRATCH_MNT/devnull
+ DEVZERO=$SCRATCH_MNT/devzero
+diff --git a/tests/generic/401 b/tests/generic/401
+index 00e9bbe0..f8b1fd21 100755
+--- a/tests/generic/401
++++ b/tests/generic/401
+@@ -38,6 +38,7 @@ _supported_fs generic
+ _supported_os Linux
+ _require_scratch
+ _require_symlinks
++_require_mknod
+ _require_test_program "t_dir_type"
+ 
+ rm -f $seqres.full
+diff --git a/tests/generic/434 b/tests/generic/434
+index edbf49d3..131c5d99 100755
+--- a/tests/generic/434
++++ b/tests/generic/434
+@@ -30,6 +30,7 @@ _supported_os Linux
+ 
+ _require_xfs_io_command "copy_range"
+ _require_test
++_require_mknod
+ 
+ testdir=$TEST_DIR/test-$seq
+ rm -rf $testdir
+diff --git a/tests/generic/479 b/tests/generic/479
+index aaf864a4..fc0b3b6c 100755
+--- a/tests/generic/479
++++ b/tests/generic/479
+@@ -33,6 +33,7 @@ _supported_fs generic
+ _supported_os Linux
+ _require_scratch
+ _require_symlinks
++_require_mknod
+ _require_dm_target flakey
+ 
+ rm -f $seqres.full
+diff --git a/tests/generic/564 b/tests/generic/564
+index 4958b3b5..b9b21134 100755
+--- a/tests/generic/564
++++ b/tests/generic/564
+@@ -37,6 +37,9 @@ rm -f $seqres.full
+ 
+ _require_test
+ _require_loop
++# for mkfifo
++_require_mknod
++
+ #
+ # This test effectively requires xfs_io with these commits
+ #  2a42470b xfs_io: copy_file_range length is a size_t
+
+
