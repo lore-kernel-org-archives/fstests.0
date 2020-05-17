@@ -6,75 +6,212 @@ X-Spam-Status: No, score=-6.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	UNPARSEABLE_RELAY autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4E5C1C433DF
-	for <linux-fstests@archiver.kernel.org>; Sun, 17 May 2020 15:50:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0ACB9C433E0
+	for <linux-fstests@archiver.kernel.org>; Sun, 17 May 2020 15:55:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 391C6206F4
-	for <linux-fstests@archiver.kernel.org>; Sun, 17 May 2020 15:50:46 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DE17920709
+	for <linux-fstests@archiver.kernel.org>; Sun, 17 May 2020 15:55:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727981AbgEQPup (ORCPT
+        id S1728004AbgEQPzJ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 17 May 2020 11:50:45 -0400
-Received: from out20-86.mail.aliyun.com ([115.124.20.86]:41861 "EHLO
-        out20-86.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727979AbgEQPup (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 17 May 2020 11:50:45 -0400
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.09499673|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_regular_dialog|0.00894501-0.00174143-0.989314;FP=0|0|0|0|0|-1|-1|-1;HT=e02c03311;MF=guan@eryu.me;NM=1;PH=DS;RN=2;RT=2;SR=0;TI=SMTPD_---.HZscXO2_1589730630;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.HZscXO2_1589730630)
-          by smtp.aliyun-inc.com(10.147.41.178);
-          Sun, 17 May 2020 23:50:31 +0800
-Date:   Sun, 17 May 2020 23:50:30 +0800
+        Sun, 17 May 2020 11:55:09 -0400
+Received: from out20-75.mail.aliyun.com ([115.124.20.75]:45439 "EHLO
+        out20-75.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727979AbgEQPzJ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 17 May 2020 11:55:09 -0400
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07449396|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.0118988-0.000837333-0.987264;FP=0|0|0|0|0|-1|-1|-1;HT=e02c03279;MF=guan@eryu.me;NM=1;PH=DS;RN=2;RT=2;SR=0;TI=SMTPD_---.HZsh76H_1589730905;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.HZsh76H_1589730905)
+          by smtp.aliyun-inc.com(10.147.40.200);
+          Sun, 17 May 2020 23:55:05 +0800
+Date:   Sun, 17 May 2020 23:55:05 +0800
 From:   Eryu Guan <guan@eryu.me>
 To:     Eric Sandeen <sandeen@redhat.com>
 Cc:     fstests <fstests@vger.kernel.org>
-Subject: Re: [PATCH 1/3] fstests: add _require_sysctl helper
-Message-ID: <20200517155030.GC2704@desktop>
+Subject: Re: [PATCH 2/3] fstests: test restricted symlinks & hardlinks sysctls
+Message-ID: <20200517155505.GD2704@desktop>
 References: <99a3164b-ee00-113c-e0aa-41eab9633364@redhat.com>
- <2989bb14-5d77-5e91-d415-2a5bdfcff7a6@redhat.com>
+ <294c5739-ff30-285c-8cf7-11a6dff98294@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <2989bb14-5d77-5e91-d415-2a5bdfcff7a6@redhat.com>
+In-Reply-To: <294c5739-ff30-285c-8cf7-11a6dff98294@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, May 05, 2020 at 03:17:38PM -0500, Eric Sandeen wrote:
-> New _require_sysctl test to ensure that the sysctl we wish to test is
-> available on the system.
+On Tue, May 05, 2020 at 03:20:10PM -0500, Eric Sandeen wrote:
+> This tests the fs.protected_symlinks and fs.protected_hardlinks
+> sysctls which restrict links behavior in sticky world-writable
+> directories as documented in the kernel at 
+> Documentation/admin-guide/sysctl/fs.rst
 > 
 > Signed-off-by: Eric Sandeen <sandeen@redhat.com>
 > ---
 > 
-> diff --git a/common/rc b/common/rc
-> index 2000bd9d..2734dbf6 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -4208,6 +4208,12 @@ _require_bsd_process_accounting()
->  	$ACCTON_PROG off >> $seqres.full
->  }
->  
-> +_require_sysctl()
-
-IMHO, this name seems a bit confusing, it looks like it requires the
-sysctl command itself. How about _require_sysctl_entry ?
-
+> diff --git a/tests/generic/900 b/tests/generic/900
+> new file mode 100755
+> index 00000000..f0ac46ef
+> --- /dev/null
+> +++ b/tests/generic/900
+> @@ -0,0 +1,114 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2020 Red Hat, Inc.  All Rights Reserved.
+> +#
+> +# FS QA Test 900
+> +#
+> +# Test protected_symlink and protected_hardlink ioctls
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
 > +{
-> +	name=$1
+> +	rm -rf $TEST_DIR/$seq
+> +	sysctl -qw fs.protected_symlinks=$SYMLINK_PROTECTION
+> +	sysctl -qw fs.protected_hardlinks=$HARDLINK_PROTECTION
 
-Declare local var with 'local'.
+Restore the sysctl only if "SYMLINK_PROTECTION" and
+"HARDLINK_PROTECTION" are set.
 
-> +	sysctl $name &>/dev/null || _notrun "$name sysctl unavailable"
+> +	cd /
+> +	rm -f $tmp.*
 > +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs generic
+> +_supported_os Linux
+> +_require_test
+> +_require_sysctl fs.protected_symlinks
+> +_require_sysctl fs.protected_hardlinks
+> +_require_user fsgqa
+> +_require_user fsgqa2
 
-And I think this patch could be folded into the first test that takes
-use of it, i.e. patch 2.
+New user :) update README as well?
+
+> +
+> +OWNER=fsgqa
+> +OTHER=fsgqa2
+> +
+> +# Save current system state to reset when done
+> +SYMLINK_PROTECTION=`sysctl -n fs.protected_symlinks`
+> +HARDLINK_PROTECTION=`sysctl -n fs.protected_hardlinks`
+> +
+> +test_symlink()
+> +{
+> +	ln -s $TEST_DIR/$seq/target $TEST_DIR/$seq/sticky_dir/symlink
+> +	chown $OTHER.$OTHER $TEST_DIR/$seq/sticky_dir
+> +	chown $OWNER.$OWNER $TEST_DIR/$seq/sticky_dir/symlink
+> +	# If we can read the target, we followed the link
+> +	sudo -u $OTHER cat $TEST_DIR/$seq/sticky_dir/symlink 2>&1 \
+
+Use _user_do instead of sudo?
+
+> +		 | _filter_test_dir
+> +	rm -f $TEST_DIR/$seq/sticky_dir/symlink
+> +}
+> +
+> +test_hardlink()
+> +{
+> +	chown $OWNER.$OWNER $TEST_DIR/$seq/target
+> +	chmod go-rw $TEST_DIR/$seq/target
+> +	sudo -u $OTHER \
+> +	    ln $TEST_DIR/$seq/target $TEST_DIR/$seq/sticky_dir/hardlink 2>&1 \
+> +		| _filter_test_dir
+
+Same here.
 
 Thanks,
 Eryu
 
+> +	test -f $TEST_DIR/$seq/sticky_dir/hardlink \
+> +		&& echo "successfully created hardlink"
+> +	rm -f $TEST_DIR/$seq/sticky_dir/hardlink
+> +}
 > +
->  init_rc
->  
->  ################################################################################
+> +setup_tree()
+> +{
+> +	# Create world-writable sticky dir
+> +	mkdir -p $TEST_DIR/$seq/sticky_dir
+> +	chmod 1777 $TEST_DIR/$seq/sticky_dir
+> +	# And a file elsewhere that will be linked to from that sticky dir
+> +	mkdir -p $TEST_DIR/$seq
+> +	# If we can read it, we followed the link.
+> +	echo "successfully followed symlink" > $TEST_DIR/$seq/target
+> +}
+> +
+> +setup_tree
+> +
+> +# First test fs.protected_symlinks
+> +# With protection on, symlink follows should fail if the
+> +# link owner != the sticky directory owner, and the process
+> +# is not the link owner.
+> +echo "== Test symlink follow protection when"
+> +echo "== process != link owner and dir owner != link owner"
+> +sysctl -w fs.protected_symlinks=0
+> +test_symlink
+> +sysctl -w fs.protected_symlinks=1
+> +test_symlink
+> +
+> +echo
+> +
+> +# Now test fs.protected_hardlinks
+> +# With protection on, hardlink creation should fail if the
+> +# process does not own the target file, and the process does not have
+> +# read-write access to the target
+> +echo "== Test hardlink create protection when"
+> +echo "== process != target owner and process cannot read target"
+> +sysctl -w fs.protected_hardlinks=0
+> +test_hardlink
+> +sysctl -w fs.protected_hardlinks=1
+> +test_hardlink
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/generic/900.out b/tests/generic/900.out
+> new file mode 100644
+> index 00000000..c9b26dbd
+> --- /dev/null
+> +++ b/tests/generic/900.out
+> @@ -0,0 +1,14 @@
+> +QA output created by 900
+> +== Test symlink follow protection when
+> +== process != link owner and dir owner != link owner
+> +fs.protected_symlinks = 0
+> +successfully followed symlink
+> +fs.protected_symlinks = 1
+> +cat: TEST_DIR/900/sticky_dir/symlink: Permission denied
+> +
+> +== Test hardlink create protection when
+> +== process != target owner and process cannot read target
+> +fs.protected_hardlinks = 0
+> +successfully created hardlink
+> +fs.protected_hardlinks = 1
+> +ln: failed to create hard link 'TEST_DIR/900/sticky_dir/hardlink' => 'TEST_DIR/900/target': Operation not permitted
+> diff --git a/tests/generic/group b/tests/generic/group
+> index 718575ba..782b0cc3 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -598,3 +598,4 @@
+>  594 auto quick quota
+>  595 auto quick encrypt
+>  596 auto quick
+> +900 auto quick perms
+> 
