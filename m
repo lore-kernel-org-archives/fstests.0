@@ -2,153 +2,127 @@ Return-Path: <SRS0=PZom=67=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E9BDBC433DF
-	for <linux-fstests@archiver.kernel.org>; Sun, 17 May 2020 16:56:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A5252C433DF
+	for <linux-fstests@archiver.kernel.org>; Sun, 17 May 2020 21:04:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B7FB1206D8
-	for <linux-fstests@archiver.kernel.org>; Sun, 17 May 2020 16:56:33 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="YWGuqhYL"
+	by mail.kernel.org (Postfix) with ESMTP id 8D151207E8
+	for <linux-fstests@archiver.kernel.org>; Sun, 17 May 2020 21:04:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726164AbgEQQ4d (ORCPT
+        id S1726313AbgEQVEb (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 17 May 2020 12:56:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54388 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726031AbgEQQ4d (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 17 May 2020 12:56:33 -0400
-Received: from mail-pf1-x444.google.com (mail-pf1-x444.google.com [IPv6:2607:f8b0:4864:20::444])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D50DFC061A0C
-        for <fstests@vger.kernel.org>; Sun, 17 May 2020 09:56:32 -0700 (PDT)
-Received: by mail-pf1-x444.google.com with SMTP id y18so3706539pfl.9
-        for <fstests@vger.kernel.org>; Sun, 17 May 2020 09:56:32 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=message-id:date:from:to:subject:mime-version:content-disposition;
-        bh=kTd5xUqN5anQJncKEwA1bpEUDBD3MVu03iv937Cdxwo=;
-        b=YWGuqhYLWhfoDipggi8mEbyjx8j3Lm+T/C7JFxlUuaDhoRdNzCut/DfXgtVxanvLbK
-         R/6cdwfyr9jtcNfjl1tIXKeFC2Pu82jgZN06R453WwIGK5M0zhr0gt6YFsmPLHv/wzor
-         B4lFiJiXyJ1hM4XvuhrEAHAMK+js7JYZvuQeB25LWO12eci8vLtERLxkzIJpgbzc+M2h
-         suwHP16JFK0K8dJBg091RclUA4BaSsx5dilRiE/GTzNwsv9Qo8TKhZoWL2KB2U9NPMJf
-         DOhsw6W5P/T921Ok99v6s9R1h1ztPUj3d1ML0yJk7KB8fRblQaD05ocUoEh8r5AbFVlE
-         q4wQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:message-id:date:from:to:subject:mime-version
-         :content-disposition;
-        bh=kTd5xUqN5anQJncKEwA1bpEUDBD3MVu03iv937Cdxwo=;
-        b=D5WJkupzrv0kyu3UG2vGwVOZw9SE8AsvOjHv2FEQhbc4B3NB46ojh1jki+0KyCsNjk
-         HZ2i8Q0EK0iR8REa6s4ZvwQRLOHhPLwz1LN1CB+IEkgYUvyqKON0EFK7HG8yOyeAcBlv
-         6nVreDbFATJiEIf+IVKUtWyx0K5RRAnV1STxWh/abT15hDFFPNvwIeSAjaHRTZWjcwl9
-         bHvHOe4j56Zae7mHCRcCPEnCFNqBD2PxTmvn2nRLGqRwftOwS/7YXSdXjtut8v554LX1
-         2PGuY9cOoJHT8ATvGrrSRJSMIj8+4Zta4L2n0zhZ2TS/JFwrgHnzrCVD7tegEIIM7FPI
-         Zs3Q==
-X-Gm-Message-State: AOAM530rrA3y8MZ7FK/E6EZSx8jikO0BokDm7fhqT+qSZSP8LBjygsov
-        psPaIDhZgjF5FAQwpo0XYafnTPV6
-X-Google-Smtp-Source: ABdhPJzVAZI+JDG2BC0q9LDEUuHLE48wi+jt/lA/Wc1ggijjdZwnL01HISXNwnTTfM4pocGzt/BtjQ==
-X-Received: by 2002:a65:608c:: with SMTP id t12mr11823962pgu.46.1589734591788;
-        Sun, 17 May 2020 09:56:31 -0700 (PDT)
-Received: from localhost ([47.89.231.86])
-        by smtp.gmail.com with ESMTPSA id s199sm6716226pfs.124.2020.05.17.09.56.30
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 17 May 2020 09:56:30 -0700 (PDT)
-Message-ID: <5ec16cbe.1c69fb81.f4ef.e44d@mx.google.com>
-Date:   Mon, 18 May 2020 00:56:27 +0800
-From:   Eryu Guan <guaneryu@gmail.com>
-To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: master branch updated to e2e468d4dd85
+        Sun, 17 May 2020 17:04:31 -0400
+Received: from sandeen.net ([63.231.237.45]:58468 "EHLO sandeen.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726288AbgEQVEb (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 17 May 2020 17:04:31 -0400
+Received: from [10.0.0.4] (liberator [10.0.0.4])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by sandeen.net (Postfix) with ESMTPSA id 7384017273;
+        Sun, 17 May 2020 16:04:06 -0500 (CDT)
+Subject: Re: [PATCH 2/2 V2] fstests: add _require_mknod
+To:     Eryu Guan <guan@eryu.me>
+Cc:     fstests <fstests@vger.kernel.org>,
+        Namjae Jeon <namjae.jeon@samsung.com>,
+        Christoph Hellwig <hch@infradead.org>
+References: <07e0ecad-11fd-9bc2-7e49-9470f7511b27@sandeen.net>
+ <f7caf338-26ec-8a6c-4a91-4a037c12440e@sandeen.net>
+ <42fcddeb-7274-bf41-3475-16eae0f78e92@sandeen.net>
+ <20200517161209.GF2704@desktop>
+From:   Eric Sandeen <sandeen@sandeen.net>
+Autocrypt: addr=sandeen@sandeen.net; prefer-encrypt=mutual; keydata=
+ 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 pA==
+Message-ID: <7b201ffd-b1db-c6c3-e554-75f3b92325d7@sandeen.net>
+Date:   Sun, 17 May 2020 16:04:29 -0500
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:68.0)
+ Gecko/20100101 Thunderbird/68.8.0
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="MQFl2rdWv7oN"
-Content-Disposition: inline
+In-Reply-To: <20200517161209.GF2704@desktop>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+On 5/17/20 11:12 AM, Eryu Guan wrote:
+> On Fri, May 08, 2020 at 09:23:42AM -0500, Eric Sandeen wrote:
+>> Add a _require_mknod test so that filesystems with no ->mknod
+>> operation will _notrun instead of fail.
+>>
+>> Signed-off-by: Eric Sandeen <sandeen@sandeen.net>
+>> ---
+>>
+>> V2 trim the long line, sorry.
+>>
+>> diff --git a/common/rc b/common/rc
+>> index 2734dbf6..b50a4294 100644
+>> --- a/common/rc
+>> +++ b/common/rc
+>> @@ -4214,6 +4215,13 @@ _require_sysctl()
+>>  	sysctl $name &>/dev/null || _notrun "$name sysctl unavailable"
+>>  }
+>>  
+>> +_require_mknod()
+>> +{
+>> +	mknod $TEST_DIR/$tmp.null c 1 3 \
+> 
+> $tmp points to /tmp/$$, so this mknod is trying to make node at
+> 
+> 	$TEST_DIR//tmp/<pid>
+> 
+> which will always fail.
+> 
+> Use $TEST_DIR/$seq.null instead?
+> 
+> And I don't see any callers of this require rule, shouldn't existing
+> tests that use mknod be updated to require this rule?
 
---MQFl2rdWv7oN
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-
-Hi all,
-
-The master branch of the xfstests repository at:
-
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-have just been updated. overlayfs ganis a new test to exercise the newly added
-whiteout inode sharing feature (still in overlayfs-next repo), and a new
-generic test to cover the syncfs writeback error, and this test currently fails
-with latest Linus tree. Other updates are various fixes as usual.
-
-There're still some pending patches sitting in the list, like the new xfs tests
-posted by Darrick. Hopefully they'll be picked up or reviewed in next update.
-
-Thanks,
-Eryu
-
-The new head of the master branch is commit:
-
-e2e468d4dd85 btrfs/14{2,3}: use dm-dust instead of fail_make_request
-
-New commits:
-
-Chengguang Xu (1):
-      [1ee4e5f83d2a] overlay: test for whiteout inode sharing
-
-Eric Sandeen (2):
-      [1636dd169e27] generic/506: fix _require test, use xfs_io vs chattr
-      [52794c5a8a5f] fstests: update sparse file & negative timestamp tests for exfat
-
-Jeff Layton (1):
-      [2e21bf376e9c] generic: test reporting of wb errors via syncfs
-
-Omar Sandoval (1):
-      [e2e468d4dd85] btrfs/14{2,3}: use dm-dust instead of fail_make_request
-
-
-Code Diffstat:
-
- common/dmdust         |  35 +++++++++++++++
- common/rc             |   5 ++-
- tests/btrfs/142       |  88 ++++++++-----------------------------
- tests/btrfs/143       |  90 ++++++++------------------------------
- tests/generic/484     |  84 ++++++++++++++++++++++++++++++++++++
- tests/generic/484.out |   8 ++++
- tests/generic/506     |  12 +++---
- tests/generic/group   |   1 +
- tests/overlay/073     | 117 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/073.out |   2 +
- tests/overlay/group   |   1 +
- 11 files changed, 294 insertions(+), 149 deletions(-)
---
-Eryu Guan
-guaneryu@gmail.com
-
---MQFl2rdWv7oN
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAl7BbH4ACgkQJlKqKVyP
-52PYlRAArOMvJZsj2w/D7w319psF3UdQ1dskvu9MX2Hz/U0rfODea04wO6Y8vJIC
-uPFfyUeIR2XGK0vUJN+9UDAiwPEGR/AwD/dPpwZkvrt3VtV11PJgq2NFYbZrUcWV
-oDPUacPX+fU6EHNFEynBz/W156f7IZuDgtbQsrfcVFg3FZttn4ypPd8zBqv6ZnI4
-VUXefnHwpWKSLGst97pJpdrI6FK7EzcF8CSUAMGuTG4EniEnwwjFun2VPJIU63zf
-6ZMO8dPlv8pimV+r+o8re/7tEXJEEvXpvqTMVk23mLsVVZFj5BEP1pb3ygS5o993
-tlefwAlF8Bjk5m5uOHPT+T1iLyoTaEIvDz59NEUR2+e977nwyPDllchk6rjxCnwx
-itvACByUZLEVbSceRrAio/mVp0iqqAuUUj0xr/gv/3kz1rOysAu0DctxWSesbklp
-PhknuWbT00/swcgFyMRORSHWQKqLYNGZbHmIyxQDCA1nwy2yvXUYJlYIhBHkfBib
-GGV5Vn1T/DbvMnT5RX9Z2DVrtSIgt9CyhPM9w0ccs+G/awAJlnugmxYyAnem5LAa
-A+N0RDQHt2hqahRKaR4oW1rNQ+QuOlwjQwLDZiM5FM5av0bCTGxgrmkTt0asjU7d
-GxQzTF8EluP4I9Uxt3HYR2j6FFux3ObKzbSafMu9nA85OYSG3cM=
-=C1P+
------END PGP SIGNATURE-----
-
---MQFl2rdWv7oN--
+I'm sorry Eryu, the original patch added it to all the tests and I somehow
+lost that on V2, I'm really making a mess of patches lately.  :(  I'll send
+a V3 with more care.
