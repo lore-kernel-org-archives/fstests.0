@@ -2,288 +2,426 @@ Return-Path: <SRS0=Vcut=7A=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C68ECC433E0
-	for <linux-fstests@archiver.kernel.org>; Mon, 18 May 2020 22:30:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A895CC433E0
+	for <linux-fstests@archiver.kernel.org>; Mon, 18 May 2020 22:30:36 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8D24F207ED
-	for <linux-fstests@archiver.kernel.org>; Mon, 18 May 2020 22:30:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 79D7B20835
+	for <linux-fstests@archiver.kernel.org>; Mon, 18 May 2020 22:30:36 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="jF1hG+I/"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="UYVzhNCN"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728313AbgERWa1 (ORCPT
+        id S1728061AbgERWag (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 18 May 2020 18:30:27 -0400
-Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:44770 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1728266AbgERWa0 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 18 May 2020 18:30:26 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1589841025;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=C/P9duv0/aKfl2c6GRTv9GRqCSazu3j7j2Hfg4zLJaA=;
-        b=jF1hG+I/RzdQwlX5zuxXbfzXN3uILjTNbdbzQ1B42ukDTcphWdl0qbnRj+RNy2+EE8Bthb
-        WRwIkLd7I8IUVCDKuagmdc9kCPQe8cS/0Su2fsJrB68RKcn9gbcXoXUhDX0PYqEyG6FCG9
-        V0KeaNx4y5PnbklTP27NiheCcGhVZEg=
-Received: from mail-qv1-f72.google.com (mail-qv1-f72.google.com
- [209.85.219.72]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-9-vLQViKaDMRiT4FuZnJtKjA-1; Mon, 18 May 2020 18:30:22 -0400
-X-MC-Unique: vLQViKaDMRiT4FuZnJtKjA-1
-Received: by mail-qv1-f72.google.com with SMTP id t10so2938243qvz.9
-        for <fstests@vger.kernel.org>; Mon, 18 May 2020 15:30:22 -0700 (PDT)
+        Mon, 18 May 2020 18:30:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48520 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727827AbgERWaf (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 18 May 2020 18:30:35 -0400
+Received: from mail-ot1-x343.google.com (mail-ot1-x343.google.com [IPv6:2607:f8b0:4864:20::343])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CB97FC061A0C
+        for <fstests@vger.kernel.org>; Mon, 18 May 2020 15:30:35 -0700 (PDT)
+Received: by mail-ot1-x343.google.com with SMTP id g25so3844443otp.13
+        for <fstests@vger.kernel.org>; Mon, 18 May 2020 15:30:35 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=U2utvjv9yZ9ilbDezgYpSIEUwedTrSb+C4kp870mhxM=;
+        b=UYVzhNCNoZGu9RfrZQWcpAD1IXlSbAkbMiZE5q/o2+KcDiSOTe6jzBxbYBeflgzMJX
+         zBX8b26kZ1B4gSKiMqfNubgOR1KaIZVKfAKlD8KAWaewZxCjFWp3gYkUqEX8WTVm2Z0l
+         4EjBMy8WU0kjX6OPrIvVpS1EyVGj6CykdV6JpDmfbhI6ieJMO1TUqv0V558X6zPzw5Zs
+         aKxHxIYa/n/B78+LuZ4SPfYHNiih4pM7cSJEwu5BmCorD7Vuy0mEAw5RKMdpb0jnTeCe
+         TpeZ9svS4yoDyWYEk0HCePVdm0Re40ovoXdZAJdzGjTSzDs7jUlp7E8wPUkbyL40rb5U
+         imsw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=C/P9duv0/aKfl2c6GRTv9GRqCSazu3j7j2Hfg4zLJaA=;
-        b=XDornCaSAXv0kseBIaMq54iCb3ToP9ITU/MRBlbQwIYAPRiVMCrmzCJLfmTuh0Omvp
-         XcPeM6QPa2KD8+aOf2pIGrXmPVo07zb9WVyOpOgNNPLc0OP1TzdrWrkasz+beYNefm8c
-         4e4cs/t89acXyNfo8FW/7pQIAQDZwEHXmfECWYTelMfo4k5xGRDyc54STjnNQnnQ0Ztd
-         bZkMaF1kVMvsoUM76+rXCEapBv/cGV/oUoQll6PoozFlWh1jkWWSt3neonAeEFdxlDwj
-         t02+2rnpQOfvJdCmsK7xpAg7Viyc11ghG90jDU3ZnNtn89hUqgAkV76sK/KxP/AkOGlC
-         NZzA==
-X-Gm-Message-State: AOAM530yfV/jxz0g9JFf9ANVZjKsFzr8pAvO3Uo0k7L1cm6O5eY46Rv9
-        +EFAzr0YYHNb8yt18L82dBV3ub5Llt5Jy0n+xL18GgvaKdhh3+NDVhYL62EqOm0dwfkWJPOAxJF
-        n4clQzUWjQXDjDeh2MYd9X06rOO67Y/fm2Q==
-X-Received: by 2002:a37:d92:: with SMTP id 140mr17687315qkn.426.1589841021540;
-        Mon, 18 May 2020 15:30:21 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJz9Fl1T1Bjj+QaEHFJFp5emHB87/fFJq+eicr2/lhbUTABu4TLDQgGHrI6L1oqNUv6gpjFvffNm1aOji0HS+rk=
-X-Received: by 2002:a37:d92:: with SMTP id 140mr17687270qkn.426.1589841020918;
- Mon, 18 May 2020 15:30:20 -0700 (PDT)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=U2utvjv9yZ9ilbDezgYpSIEUwedTrSb+C4kp870mhxM=;
+        b=hToOrHenfj/FDdMIBqpJ2c1rXU774cPRAV5+ktvtR2a+ZupCViaejrLEZ8zGC4INcn
+         cGUKkpCvXZ9gOEB69DfOfTC9cflw4sqO+w3wGCAlSAqNISqPbNhgKf3ro72bmpF8nPQY
+         oa+l1pdB7GaxwgqtQhtU8rNkzx4gyZ1baw8rM8VLUK5ISOTgM+UWGofc2FvySxzjWFHk
+         qk7c49nQKtbRZm0M95TFtgZYJqMJlCnOY1t2Y8vP139Bs+Y9QT/n1boHXbpuk4+DMZyZ
+         DOoCG5ivlzriFolVb8eVF9bll8WIVegnkg5sLhVPxqpuXRFo4QABFgxq91tr1dYYSi72
+         SbXQ==
+X-Gm-Message-State: AOAM532Cu47oII1TpQnayCNnAGM4IVOnonORAT1tm2rHGN3YV907q1qi
+        MMKuq5uDRf2yJ6Xs6BBdnQQ0aiUEOroO
+X-Google-Smtp-Source: ABdhPJyaoxCFgt7PTyCl9DdF/etyFki97TzY1gbkd9OQ8cSOpxmtNlOxMMTY2rV6Aav2tS8Hsyi/Qg==
+X-Received: by 2002:a9d:19af:: with SMTP id k44mr13441181otk.80.1589841034694;
+        Mon, 18 May 2020 15:30:34 -0700 (PDT)
+Received: from localhost.localdomain (cpe-70-114-159-174.austin.res.rr.com. [70.114.159.174])
+        by smtp.gmail.com with ESMTPSA id x17sm3421113ool.38.2020.05.18.15.30.33
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 18 May 2020 15:30:34 -0700 (PDT)
+From:   Arvind Raghavan <raghavan.arvind@gmail.com>
+To:     fstests <fstests@vger.kernel.org>,
+        Amir Goldstein <amir73il@gmail.com>
+Cc:     Arvind Raghavan <raghavan.arvind@gmail.com>,
+        Jayashree Mohan <jaya@cs.utexas.edu>,
+        Vijay Chidambaram <vijay@cs.utexas.edu>
+Subject: [PATCH] src/fssum: Refactor recursive traversal
+Date:   Mon, 18 May 2020 16:15:51 -0400
+Message-Id: <20200518201551.2553-1-raghavan.arvind@gmail.com>
+X-Mailer: git-send-email 2.20.1
 MIME-Version: 1.0
-References: <20200514111453.GA99187@suse.com> <8497fe9a11ac1837813ee5f14b6ebae8fa6bf707.camel@kernel.org>
- <20200514124845.GA12559@suse.com> <4e5bf0e3bf055e53a342b19d168f6cf441781973.camel@kernel.org>
- <CAOQ4uxhireZBRvcPQzTS8yOoO4gQt78M0ktZo-9yQ-zcaLZbow@mail.gmail.com>
- <20200515111548.GA54598@suse.com> <61b1f19edcc349641b5383c2ac70cbf9a15ba4bd.camel@kernel.org>
- <CAOQ4uxiWZoSj3Pjwskd_hu-ErV9096hLt13CDcW6nEEvcwDNVA@mail.gmail.com> <e227d42fdc91587e34bc64ac252970d39d9b4eee.camel@kernel.org>
-In-Reply-To: <e227d42fdc91587e34bc64ac252970d39d9b4eee.camel@kernel.org>
-From:   Gregory Farnum <gfarnum@redhat.com>
-Date:   Mon, 18 May 2020 15:30:09 -0700
-Message-ID: <CAJ4mKGbahd8CbkEauBHBX6o93jipkCVoYe9O-1rAJQJFZkqDsQ@mail.gmail.com>
-Subject: Re: [PATCH] ceph: don't return -ESTALE if there's still an open file
-To:     Jeff Layton <jlayton@kernel.org>
-Cc:     Amir Goldstein <amir73il@gmail.com>,
-        Luis Henriques <lhenriques@suse.com>,
-        Ilya Dryomov <idryomov@gmail.com>,
-        ceph-devel <ceph-devel@vger.kernel.org>,
-        linux-kernel <linux-kernel@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>,
-        Dave Chinner <dchinner@redhat.com>,
-        Christoph Hellwig <hch@lst.de>,
-        Miklos Szeredi <miklos@szeredi.hu>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Maybe we resolved this conversation; I can't quite tell...
+Moves some logic from the recursive directory traversal into a helper
+function to make it easier to add support for regular files. Does not
+change functionality.
 
-On Fri, May 15, 2020 at 12:16 PM Jeff Layton <jlayton@kernel.org> wrote:
->
-> On Fri, 2020-05-15 at 19:56 +0300, Amir Goldstein wrote:
-> > On Fri, May 15, 2020 at 2:38 PM Jeff Layton <jlayton@kernel.org> wrote:
-> > > On Fri, 2020-05-15 at 12:15 +0100, Luis Henriques wrote:
-> > > > On Fri, May 15, 2020 at 09:42:24AM +0300, Amir Goldstein wrote:
-> > > > > +CC: fstests
-> > > > >
-> > > > > On Thu, May 14, 2020 at 4:15 PM Jeff Layton <jlayton@kernel.org> wrote:
-> > > > > > On Thu, 2020-05-14 at 13:48 +0100, Luis Henriques wrote:
-> > > > > > > On Thu, May 14, 2020 at 08:10:09AM -0400, Jeff Layton wrote:
-> > > > > > > > On Thu, 2020-05-14 at 12:14 +0100, Luis Henriques wrote:
-> > > > > > > > > Similarly to commit 03f219041fdb ("ceph: check i_nlink while converting
-> > > > > > > > > a file handle to dentry"), this fixes another corner case with
-> > > > > > > > > name_to_handle_at/open_by_handle_at.  The issue has been detected by
-> > > > > > > > > xfstest generic/467, when doing:
-> > > > > > > > >
-> > > > > > > > >  - name_to_handle_at("/cephfs/myfile")
-> > > > > > > > >  - open("/cephfs/myfile")
-> > > > > > > > >  - unlink("/cephfs/myfile")
-> > > > > > > > >  - open_by_handle_at()
-> > > > > > > > >
-> > > > > > > > > The call to open_by_handle_at should not fail because the file still
-> > > > > > > > > exists and we do have a valid handle to it.
-> > > > > > > > >
-> > > > > > > > > Signed-off-by: Luis Henriques <lhenriques@suse.com>
-> > > > > > > > > ---
-> > > > > > > > >  fs/ceph/export.c | 13 +++++++++++--
-> > > > > > > > >  1 file changed, 11 insertions(+), 2 deletions(-)
-> > > > > > > > >
-> > > > > > > > > diff --git a/fs/ceph/export.c b/fs/ceph/export.c
-> > > > > > > > > index 79dc06881e78..8556df9d94d0 100644
-> > > > > > > > > --- a/fs/ceph/export.c
-> > > > > > > > > +++ b/fs/ceph/export.c
-> > > > > > > > > @@ -171,12 +171,21 @@ struct inode *ceph_lookup_inode(struct super_block *sb, u64 ino)
-> > > > > > > > >
-> > > > > > > > >  static struct dentry *__fh_to_dentry(struct super_block *sb, u64 ino)
-> > > > > > > > >  {
-> > > > > > > > > + struct ceph_inode_info *ci;
-> > > > > > > > >   struct inode *inode = __lookup_inode(sb, ino);
-> > > > > > > > > +
-> > > > > > > > >   if (IS_ERR(inode))
-> > > > > > > > >           return ERR_CAST(inode);
-> > > > > > > > >   if (inode->i_nlink == 0) {
-> > > > > > > > > -         iput(inode);
-> > > > > > > > > -         return ERR_PTR(-ESTALE);
-> > > > > > > > > +         bool is_open;
-> > > > > > > > > +         ci = ceph_inode(inode);
-> > > > > > > > > +         spin_lock(&ci->i_ceph_lock);
-> > > > > > > > > +         is_open = __ceph_is_file_opened(ci);
-> > > > > > > > > +         spin_unlock(&ci->i_ceph_lock);
-> > > > > > > > > +         if (!is_open) {
-> > > > > > > > > +                 iput(inode);
-> > > > > > > > > +                 return ERR_PTR(-ESTALE);
-> > > > > > > > > +         }
-> > > > > > > > >   }
-> > > > > > > > >   return d_obtain_alias(inode);
-> > > > > > > > >  }
-> > > > > > > >
-> > > > > > > > Thanks Luis. Out of curiousity, is there any reason we shouldn't ignore
-> > > > > > > > the i_nlink value here? Does anything obviously break if we do?
-> > > > > > >
-> > > > > > > Yes, the scenario described in commit 03f219041fdb is still valid, which
-> > > > > > > is basically the same but without the extra open(2):
-> > > > > > >
-> > > > > > >   - name_to_handle_at("/cephfs/myfile")
-> > > > > > >   - unlink("/cephfs/myfile")
-> > > > > > >   - open_by_handle_at()
-> > > > > > >
-> > > > > >
-> > > > > > Ok, I guess we end up doing some delayed cleanup, and that allows the
-> > > > > > inode to be found in that situation.
-> > > > > >
-> > > > > > > The open_by_handle_at man page isn't really clear about these 2 scenarios,
-> > > > > > > but generic/426 will fail if -ESTALE isn't returned.  Want me to add a
-> > > > > > > comment to the code, describing these 2 scenarios?
-> > > > > > >
-> > > > > >
-> > > > > > (cc'ing Amir since he added this test)
-> > > > > >
-> > > > > > I don't think there is any hard requirement that open_by_handle_at
-> > > > > > should fail in that situation. It generally does for most filesystems
-> > > > > > due to the way they handle cl794798fa xfsqa: test open_by_handle() on unlinked and freed inode clusters
-> > > > > eaning up unlinked inodes, but I don't
-> > > > > > think it's technically illegal to allow the inode to still be found. If
-> > > > > > the caller cares about whether it has been unlinked it can always test
-> > > > > > i_nlink itself.
-> > > > > >
-> > > > > > Amir, is this required for some reason that I'm not aware of?
-> > > > >
-> > > > > Hi Jeff,
-> > > > >
-> > > > > The origin of this test is in fstests commit:
-> > > > > 794798fa xfsqa: test open_by_handle() on unlinked and freed inode clusters
-> > > > >
-> > > > > It was introduced to catch an xfs bug, so this behavior is the expectation
-> > > > > of xfs filesystem, but note that it is not a general expectation to fail
-> > > > > open_by_handle() after unlink(), it is an expectation to fail open_by_handle()
-> > > > > after unlink() + sync() + drop_caches.
-> > > >
-> > > > Yes, sorry I should have mentioned the sync+drop_caches in the
-> > > > description.
-> > > >
-> > > > > I have later converted the test to generic, because I needed to check the
-> > > > > same expectation for overlayfs use case, which is:
-> > > > > The original inode is always there (in lower layer), unlink creates a whiteout
-> > > > > mark and open_by_handle should treat that as ESTALE, otherwise the
-> > > > > unlinked files would be accessible to nfs clients forever.
-> > > > >
-> > >
-> > > Ok, that makes sense.
-> > >
-> > > The situation with Ceph is a bit different I think. I suspect that we're
-> > > cleaning the inode out of the client's caches after drop_caches, but
-> > > then we end up issuing a lookup by inode number to the MDS and it
-> > > returns an inode that it may be in the process of purging.
-> > >
-> > > > > In overlayfs, we handle the open file case by returning a dentry only
-> > > > > in case the inode with deletion mark in question is already in inode cache,
-> > > > > but we take care not to populate inode cache with the check.
-> > > > > It is easier, because we do not need to get inode into cache for checking
-> > > > > the delete marker.
-> > > > >
-> > > > > Maybe you could instead check in __fh_to_dentry():
-> > > > >
-> > > > >     if (inode->i_nlink == 0 && atomic_read(&inode->i_count) == 1)) {
-> > > > >         iput(inode);
-> > > > >         return ERR_PTR(-ESTALE);
-> > > > >     }
-> > > > >
-> > > > > The above is untested, so I don't know if it's enough to pass generic/426.
-> > > >
-> > > > Yes, I can confirm that this also fixes the issue -- both tests pass.
-> > > > __ceph_is_file_opened() uses some internal counters per inode, incremented
-> > > > each time a file is open in a specific mode.  The problem is that these
-> > > > counters require some extra locking (maybe they should be atomic_t?), so
-> > > > you're suggestion is probably better.
-> > > >
-> > > > > Note that generic/467 also checks the same behavior for rmdir().
-> > > >
-> > > > Yeah, but the only test-case failing with cephfs is the one described
-> > > > above (i.e. "open_by_handle -dkr ...").
-> > > >
-> > > > > If you decide that ceph does not need to comply to this behavior,
-> > > > > then we probably need to whitelist/blocklist the filesystems that
-> > > > > want to test this behavior, which will be a shame.
-> > > >
-> > > > Unless Jeff has any objection, I'm happy sending v2, simplifying the patch
-> > > > to use your simpler solution (and mentioning sync+drop_caches in the
-> > > > commit message).
-> > > >
-> > >
-> > > The real question I have is whether this is truly a client-side issue,
-> > > or if the MDS is satisfying lookup-by-ino requests with inodes that just
-> > > haven't yet been fully purged. If so, then the right fix may be in the
-> > > MDS.
-> > >
-> > > Can we determine that one way or the other?
-> > >
-> >
-> > Questions:
-> > 1. Does sync() result in fully purging inodes on MDS?
->
-> I don't think so, but again, that code is not trivial to follow. I do
-> know that the MDS keeps around a "strays directory" which contains
-> unlinked inodes that are lazily cleaned up. My suspicion is that it's
-> satisfying lookups out of this cache as well.
->
-> Which may be fine...the MDS is not required to be POSIX compliant after
-> all. Only the fs drivers are.
+Signed-off-by: Arvind Raghavan <raghavan.arvind@gmail.com>
+Signed-off-by: Jayashree Mohan <jaya@cs.utexas.edu>
+Signed-off-by: Vijay Chidambaram <vijay@cs.utexas.edu>
+---
+ src/fssum.c | 298 ++++++++++++++++++++++++++++------------------------
+ 1 file changed, 162 insertions(+), 136 deletions(-)
 
-I don't think this is quite that simple. Yes, the MDS is certainly
-giving back stray inodes in response to a lookup-by-ino request. But
-that's for a specific purpose: we need to be able to give back caps on
-unlinked-but-open files. For NFS specifically, I don't know what the
-rules are on NFS file handles and unlinked files, but the Ceph MDS
-won't know when files are closed everywhere, and it translates from
-NFS fh to Ceph inode using that lookup-by-ino functionality.
-
->
-> > 2. Is i_nlink synchronized among nodes on deferred delete?
-> > IWO, can inode come back from the dead on client if another node
-> > has linked it before i_nlink 0 was observed?
->
-> No, that shouldn't happen. The caps mechanism should ensure that it
-> can't be observed by other clients until after the change.
->
-> That said, Luis' current patch doesn't ensure we have the correct caps
-> to check the i_nlink. We may need to add that in before we can roll with
-> this.
->
-> > 3. Can an NFS client be "migrated" from one ceph node to another
-> > with an open but unlinked file?
-> >
->
-> No. Open files in ceph are generally per-client. You can't pass around a
-> fd (or equivalent).
-
-But the NFS file handles I think do work across clients, right?
-
--Greg
+diff --git a/src/fssum.c b/src/fssum.c
+index 3d97a70b..f2325ae0 100644
+--- a/src/fssum.c
++++ b/src/fssum.c
+@@ -502,6 +502,162 @@ malformed:
+ 		excess_file(fn);
+ }
+ 
++void
++sum(int dirfd, int level, sum_t *dircs, char *path_prefix, char *path_in);
++
++void
++sum_one(int dirfd, int level, sum_t *dircs, char *path_prefix,
++		char *path_in, char *name) {
++	sum_t cs;
++	sum_t meta;
++	int fd;
++	int ret;
++	int excl;
++	char* path;
++	struct stat64 st;
++	sum_file_data_t sum_file_data = flags[FLAG_STRUCTURE] ?
++			sum_file_data_strict : sum_file_data_permissive;
++
++	sum_init(&cs);
++	sum_init(&meta);
++	path = alloc(strlen(path_in) + strlen(name) + 3);
++	sprintf(path, "%s/%s", path_in, name);
++	for (excl = 0; excl < n_excludes; ++excl) {
++		if (strncmp(excludes[excl].path, path,
++			excludes[excl].len) == 0)
++			goto out;
++	}
++
++	ret = fchdir(dirfd);
++	if (ret == -1) {
++		perror("fchdir");
++		exit(-1);
++	}
++	ret = lstat64(name, &st);
++	if (ret) {
++		fprintf(stderr, "stat failed for %s/%s: %s\n",
++			path_prefix, path, strerror(errno));
++		exit(-1);
++	}
++
++	sum_add_u64(&meta, level);
++	sum_add(&meta, name, strlen(name));
++	if (!S_ISDIR(st.st_mode))
++		sum_add_u64(&meta, st.st_nlink);
++	if (flags[FLAG_UID])
++		sum_add_u64(&meta, st.st_uid);
++	if (flags[FLAG_GID])
++		sum_add_u64(&meta, st.st_gid);
++	if (flags[FLAG_MODE])
++		sum_add_u64(&meta, st.st_mode);
++	if (flags[FLAG_ATIME])
++		sum_add_time(&meta, st.st_atime);
++	if (flags[FLAG_MTIME])
++		sum_add_time(&meta, st.st_mtime);
++	if (flags[FLAG_CTIME])
++		sum_add_time(&meta, st.st_ctime);
++	if (flags[FLAG_XATTRS] &&
++		(S_ISDIR(st.st_mode) || S_ISREG(st.st_mode))) {
++		fd = openat(dirfd, name, 0);
++		if (fd == -1 && flags[FLAG_OPEN_ERROR]) {
++			sum_add_u64(&meta, errno);
++		} else if (fd == -1) {
++			fprintf(stderr, "open failed for %s/%s: %s\n",
++				path_prefix, path, strerror(errno));
++			exit(-1);
++		} else {
++			ret = sum_xattrs(fd, &meta);
++			close(fd);
++			if (ret < 0) {
++				fprintf(stderr,
++					"failed to read xattrs from "
++					"%s/%s: %s\n",
++					path_prefix, path,
++					strerror(-ret));
++				exit(-1);
++			}
++		}
++	}
++	if (S_ISDIR(st.st_mode)) {
++		fd = openat(dirfd, name, 0);
++		if (fd == -1 && flags[FLAG_OPEN_ERROR]) {
++			sum_add_u64(&meta, errno);
++		} else if (fd == -1) {
++			fprintf(stderr, "open failed for %s/%s: %s\n",
++				path_prefix, path, strerror(errno));
++			exit(-1);
++		} else {
++			sum(fd, level + 1, &cs, path_prefix, path);
++			close(fd);
++		}
++	} else if (S_ISREG(st.st_mode)) {
++		sum_add_u64(&meta, st.st_size);
++		if (flags[FLAG_DATA]) {
++			if (verbose)
++				fprintf(stderr, "file %s\n",
++					name);
++			fd = openat(dirfd, name, 0);
++			if (fd == -1 && flags[FLAG_OPEN_ERROR]) {
++				sum_add_u64(&meta, errno);
++			} else if (fd == -1) {
++				fprintf(stderr,
++					"open failed for %s/%s: %s\n",
++					path_prefix, path,
++					strerror(errno));
++				exit(-1);
++			}
++			if (fd != -1) {
++				ret = sum_file_data(fd, &cs);
++				if (ret < 0) {
++					fprintf(stderr,
++						"read failed for "
++						"%s/%s: %s\n",
++						path_prefix, path,
++						strerror(errno));
++					exit(-1);
++				}
++				close(fd);
++			}
++		}
++	} else if (S_ISLNK(st.st_mode)) {
++		ret = readlink(name, buf, sizeof(buf));
++		if (ret == -1) {
++			perror("readlink");
++			exit(-1);
++		}
++		sum_add(&cs, buf, ret);
++	} else if (S_ISCHR(st.st_mode) || S_ISBLK(st.st_mode)) {
++		sum_add_u64(&cs, major(st.st_rdev));
++		sum_add_u64(&cs, minor(st.st_rdev));
++	}
++	sum_fini(&cs);
++	sum_fini(&meta);
++	if (gen_manifest || in_manifest) {
++		char *fn;
++		char *m;
++		char *c;
++
++		if (S_ISDIR(st.st_mode))
++			strcat(path, "/");
++		fn = escape(path);
++		m = sum_to_string(&meta);
++		c = sum_to_string(&cs);
++
++		if (gen_manifest)
++			fprintf(out_fp, "%s %s %s\n", fn, m, c);
++		if (in_manifest)
++			check_manifest(fn, m, c, 0);
++		free(c);
++		free(m);
++		free(fn);
++	}
++	sum_add_sum(dircs, &cs);
++	sum_add_sum(dircs, &meta);
++
++out:
++	free(path);
++}
++
+ void
+ sum(int dirfd, int level, sum_t *dircs, char *path_prefix, char *path_in)
+ {
+@@ -512,10 +668,6 @@ sum(int dirfd, int level, sum_t *dircs, char *path_prefix, char *path_in)
+ 	int entries = 0;
+ 	int i;
+ 	int ret;
+-	int fd;
+-	int excl;
+-	sum_file_data_t sum_file_data = flags[FLAG_STRUCTURE] ?
+-			sum_file_data_strict : sum_file_data_permissive;
+ 	struct stat64 dir_st;
+ 
+ 	if (fstat64(dirfd, &dir_st)) {
+@@ -550,19 +702,6 @@ sum(int dirfd, int level, sum_t *dircs, char *path_prefix, char *path_in)
+ 	qsort(namelist, entries, sizeof(*namelist), namecmp);
+ 	for (i = 0; i < entries; ++i) {
+ 		struct stat64 st;
+-		sum_t cs;
+-		sum_t meta;
+-		char *path;
+-
+-		sum_init(&cs);
+-		sum_init(&meta);
+-		path = alloc(strlen(path_in) + strlen(namelist[i]) + 3);
+-		sprintf(path, "%s/%s", path_in, namelist[i]);
+-		for (excl = 0; excl < n_excludes; ++excl) {
+-			if (strncmp(excludes[excl].path, path,
+-			    excludes[excl].len) == 0)
+-				goto next;
+-		}
+ 
+ 		ret = fchdir(dirfd);
+ 		if (ret == -1) {
+@@ -571,130 +710,17 @@ sum(int dirfd, int level, sum_t *dircs, char *path_prefix, char *path_in)
+ 		}
+ 		ret = lstat64(namelist[i], &st);
+ 		if (ret) {
+-			fprintf(stderr, "stat failed for %s/%s: %s\n",
+-				path_prefix, path, strerror(errno));
++			fprintf(stderr, "stat failed for %s/%s/%s: %s\n",
++				path_prefix, path_in, namelist[i],
++				strerror(errno));
+ 			exit(-1);
+ 		}
+ 
+ 		/* We are crossing into a different subvol, skip this subtree. */
+ 		if (st.st_dev != dir_st.st_dev)
+-			goto next;
+-
+-		sum_add_u64(&meta, level);
+-		sum_add(&meta, namelist[i], strlen(namelist[i]));
+-		if (!S_ISDIR(st.st_mode))
+-			sum_add_u64(&meta, st.st_nlink);
+-		if (flags[FLAG_UID])
+-			sum_add_u64(&meta, st.st_uid);
+-		if (flags[FLAG_GID])
+-			sum_add_u64(&meta, st.st_gid);
+-		if (flags[FLAG_MODE])
+-			sum_add_u64(&meta, st.st_mode);
+-		if (flags[FLAG_ATIME])
+-			sum_add_time(&meta, st.st_atime);
+-		if (flags[FLAG_MTIME])
+-			sum_add_time(&meta, st.st_mtime);
+-		if (flags[FLAG_CTIME])
+-			sum_add_time(&meta, st.st_ctime);
+-		if (flags[FLAG_XATTRS] &&
+-		    (S_ISDIR(st.st_mode) || S_ISREG(st.st_mode))) {
+-			fd = openat(dirfd, namelist[i], 0);
+-			if (fd == -1 && flags[FLAG_OPEN_ERROR]) {
+-				sum_add_u64(&meta, errno);
+-			} else if (fd == -1) {
+-				fprintf(stderr, "open failed for %s/%s: %s\n",
+-					path_prefix, path, strerror(errno));
+-				exit(-1);
+-			} else {
+-				ret = sum_xattrs(fd, &meta);
+-				close(fd);
+-				if (ret < 0) {
+-					fprintf(stderr,
+-						"failed to read xattrs from "
+-						"%s/%s: %s\n",
+-						path_prefix, path,
+-						strerror(-ret));
+-					exit(-1);
+-				}
+-			}
+-		}
+-		if (S_ISDIR(st.st_mode)) {
+-			fd = openat(dirfd, namelist[i], 0);
+-			if (fd == -1 && flags[FLAG_OPEN_ERROR]) {
+-				sum_add_u64(&meta, errno);
+-			} else if (fd == -1) {
+-				fprintf(stderr, "open failed for %s/%s: %s\n",
+-					path_prefix, path, strerror(errno));
+-				exit(-1);
+-			} else {
+-				sum(fd, level + 1, &cs, path_prefix, path);
+-				close(fd);
+-			}
+-		} else if (S_ISREG(st.st_mode)) {
+-			sum_add_u64(&meta, st.st_size);
+-			if (flags[FLAG_DATA]) {
+-				if (verbose)
+-					fprintf(stderr, "file %s\n",
+-						namelist[i]);
+-				fd = openat(dirfd, namelist[i], 0);
+-				if (fd == -1 && flags[FLAG_OPEN_ERROR]) {
+-					sum_add_u64(&meta, errno);
+-				} else if (fd == -1) {
+-					fprintf(stderr,
+-						"open failed for %s/%s: %s\n",
+-						path_prefix, path,
+-						strerror(errno));
+-					exit(-1);
+-				}
+-				if (fd != -1) {
+-					ret = sum_file_data(fd, &cs);
+-					if (ret < 0) {
+-						fprintf(stderr,
+-							"read failed for "
+-							"%s/%s: %s\n",
+-							path_prefix, path,
+-							strerror(errno));
+-						exit(-1);
+-					}
+-					close(fd);
+-				}
+-			}
+-		} else if (S_ISLNK(st.st_mode)) {
+-			ret = readlink(namelist[i], buf, sizeof(buf));
+-			if (ret == -1) {
+-				perror("readlink");
+-				exit(-1);
+-			}
+-			sum_add(&cs, buf, ret);
+-		} else if (S_ISCHR(st.st_mode) || S_ISBLK(st.st_mode)) {
+-			sum_add_u64(&cs, major(st.st_rdev));
+-			sum_add_u64(&cs, minor(st.st_rdev));
+-		}
+-		sum_fini(&cs);
+-		sum_fini(&meta);
+-		if (gen_manifest || in_manifest) {
+-			char *fn;
+-			char *m;
+-			char *c;
+-
+-			if (S_ISDIR(st.st_mode))
+-				strcat(path, "/");
+-			fn = escape(path);
+-			m = sum_to_string(&meta);
+-			c = sum_to_string(&cs);
+-
+-			if (gen_manifest)
+-				fprintf(out_fp, "%s %s %s\n", fn, m, c);
+-			if (in_manifest)
+-				check_manifest(fn, m, c, 0);
+-			free(c);
+-			free(m);
+-			free(fn);
+-		}
+-		sum_add_sum(dircs, &cs);
+-		sum_add_sum(dircs, &meta);
+-next:
+-		free(path);
++			continue;
++
++		sum_one(dirfd, level, dircs, path_prefix, path_in, namelist[i]);
+ 	}
+ }
+ 
+-- 
+2.20.1
 
