@@ -7,44 +7,44 @@ X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7E847C433DF
-	for <linux-fstests@archiver.kernel.org>; Mon, 18 May 2020 16:15:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D240EC433DF
+	for <linux-fstests@archiver.kernel.org>; Mon, 18 May 2020 16:16:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4E6F620674
-	for <linux-fstests@archiver.kernel.org>; Mon, 18 May 2020 16:15:41 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AA2C320674
+	for <linux-fstests@archiver.kernel.org>; Mon, 18 May 2020 16:16:54 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="LXmu7jVc"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="i2DE0oQp"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727973AbgERQPl (ORCPT
+        id S1727035AbgERQQy (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 18 May 2020 12:15:41 -0400
-Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:52849 "EHLO
+        Mon, 18 May 2020 12:16:54 -0400
+Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:57241 "EHLO
         us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1727782AbgERQPk (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 18 May 2020 12:15:40 -0400
+        with ESMTP id S1726958AbgERQQy (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 18 May 2020 12:16:54 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1589818538;
+        s=mimecast20190719; t=1589818612;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
-        bh=RgWtGio7PbXM46gR/MOQAHF5vazi9PUJKZvk0jgA2lk=;
-        b=LXmu7jVcPwYPjb65C/ok/t5mEoaL1DBmkl0YUlnhSU2kmKl3rywE1gm7IOqugGikn3x+7e
-        fDB4R5S/fASCOCCv81Y70cObIm4HxWCo46fAI8ZYugyana07WKAZcX6aBBz+s2Si/OxFAe
-        LRvFUT3OKQRncqoSIXKsBlJTCerci4Y=
+        bh=i2JZyEB5WU/zHbClWF2rTgCJGJ8RuiVVx0Xcz2lXh7o=;
+        b=i2DE0oQp0kjrv6MAK1Li8Q4mhlvfEfpRVlVoG3f73ipp+/9jFq0Nklp5ZLnnywIsEzT0kf
+        IyHMw5xTIOd2i3iahiU85uLB2/3A2foYfX62/4xJrvMmrb9Cw71gGE9Gmk9bGz53qP+dFs
+        G2g9fmzJCDR7KYGdMuoHNlB1NJdIxx8=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-92-cdcY2I95MPWnZ38N8u2hiA-1; Mon, 18 May 2020 12:15:36 -0400
-X-MC-Unique: cdcY2I95MPWnZ38N8u2hiA-1
-Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
+ us-mta-209-NKPeyQQLPESMmgkjq1Cy3Q-1; Mon, 18 May 2020 12:16:49 -0400
+X-MC-Unique: NKPeyQQLPESMmgkjq1Cy3Q-1
+Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id B304A107ACF5
-        for <fstests@vger.kernel.org>; Mon, 18 May 2020 16:15:35 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id F079C835B75
+        for <fstests@vger.kernel.org>; Mon, 18 May 2020 16:16:48 +0000 (UTC)
 Received: from [IPv6:::1] (ovpn04.gateway.prod.ext.phx2.redhat.com [10.5.9.4])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id 8B6325C1B2
-        for <fstests@vger.kernel.org>; Mon, 18 May 2020 16:15:35 +0000 (UTC)
-Subject: [PATCH 3/5] fstests: test restricted file access sysctls
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id 7E3A25D9DD
+        for <fstests@vger.kernel.org>; Mon, 18 May 2020 16:16:48 +0000 (UTC)
+Subject: [PATCH 4/5] fstests: add _require_mknod
 From:   Eric Sandeen <sandeen@redhat.com>
 To:     fstests <fstests@vger.kernel.org>
 References: <91639515-d639-c155-7cc8-660536b75257@redhat.com>
@@ -90,8 +90,8 @@ Autocrypt: addr=sandeen@redhat.com; prefer-encrypt=mutual; keydata=
  XQLj5HUlzt3JSwqSwx+++FFfWFMheG2HzkfXrvTpud5NrJkGGVn+ErXy6pNf6zSicb+bUXe9
  i92UTina2zWaaLEwXspqM338TlFC2JICu8pNt+wHpPCjgy2Ei4u5/4zSYjiA+X1I+V99YJhU
  +FpT2jzfLUoVsP/6WHWmM/tsS79i50G/PsXYzKOHj/0ZQCKOsJM14NMMCC8gkONe4tek
-Message-ID: <9de038fc-1c35-db0b-3576-cd4bfbe4a70f@redhat.com>
-Date:   Mon, 18 May 2020 11:15:34 -0500
+Message-ID: <5c99e460-11bf-ade8-c2bd-afaccabf4b9f@redhat.com>
+Date:   Mon, 18 May 2020 11:16:47 -0500
 User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:68.0)
  Gecko/20100101 Thunderbird/68.8.0
 MIME-Version: 1.0
@@ -99,204 +99,132 @@ In-Reply-To: <91639515-d639-c155-7cc8-660536b75257@redhat.com>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.16
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This tests the fs.protected_regular and fs.protected_fifos
-sysctls which restrict access behavior in sticky world-writable
-directories as documented in the kernel at
-Documentation/admin-guide/sysctl/fs.rst
+Add a _require_mknod test so that filesystems with no ->mknod
+operation will _notrun instead of fail, and add the helper to
+all necessary tests.
 
 Signed-off-by: Eric Sandeen <sandeen@redhat.com>
 ---
+ common/rc         | 7 +++++++
+ tests/generic/062 | 1 +
+ tests/generic/184 | 1 +
+ tests/generic/306 | 1 +
+ tests/generic/401 | 1 +
+ tests/generic/434 | 1 +
+ tests/generic/479 | 1 +
+ tests/generic/564 | 3 +++
+ 8 files changed, 16 insertions(+)
 
-V2: Same fixes as prior patch
-
- tests/generic/901     | 126 ++++++++++++++++++++++++++++++++++++++++++
- tests/generic/901.out |  28 ++++++++++
- tests/generic/group   |   1 +
- 3 files changed, 155 insertions(+)
- create mode 100755 tests/generic/901
- create mode 100644 tests/generic/901.out
-
-diff --git a/tests/generic/901 b/tests/generic/901
-new file mode 100755
-index 00000000..4e04155e
---- /dev/null
-+++ b/tests/generic/901
-@@ -0,0 +1,126 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2020 Red Hat, Inc.  All Rights Reserved.
-+#
-+# FS QA Test 901
-+#
-+# Test protected_regular and protected_fifos sysctls
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
+diff --git a/common/rc b/common/rc
+index 62952036..310fdc46 100644
+--- a/common/rc
++++ b/common/rc
+@@ -4215,6 +4215,13 @@ _require_sysctl_variable()
+ 	sysctl $name &>/dev/null || _notrun "$name sysctl unavailable"
+ }
+ 
++_require_mknod()
 +{
-+	rm -rf $TEST_DIR/$seq
-+	[ ! -z "$REGULAR_PROTECTION" ] \
-+		&& sysctl -qw fs.protected_regular=$REGULAR_PROTECTION
-+	[ ! -z "$FIFO_PROTECTION" ] \
-+		&& sysctl -qw fs.protected_fifos=$FIFO_PROTECTION
-+	cd /
-+	rm -f $tmp.*
++	mknod $TEST_DIR/$seq.null c 1 3 \
++		|| _notrun "$FSTYP does not support mknod/mkfifo"
++	rm -f $TEST_DIR/$seq.null
 +}
 +
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
+ init_rc
+ 
+ ################################################################################
+diff --git a/tests/generic/062 b/tests/generic/062
+index ba744885..d2a0ac9a 100755
+--- a/tests/generic/062
++++ b/tests/generic/062
+@@ -60,6 +60,7 @@ _supported_os Linux
+ _require_scratch
+ _require_attrs
+ _require_symlinks
++_require_mknod
+ 
+ rm -f $tmp.backup1 $tmp.backup2 $seqres.full
+ 
+diff --git a/tests/generic/184 b/tests/generic/184
+index 8aca1a0d..94f4d0e1 100755
+--- a/tests/generic/184
++++ b/tests/generic/184
+@@ -29,6 +29,7 @@ _cleanup()
+ _supported_fs generic
+ _supported_os Linux
+ _require_test
++_require_mknod
+ 
+ rm -f $TEST_DIR/null
+ mknod $TEST_DIR/null c 1 3
+diff --git a/tests/generic/306 b/tests/generic/306
+index 046f4516..6f16a5f5 100755
+--- a/tests/generic/306
++++ b/tests/generic/306
+@@ -34,6 +34,7 @@ _supported_os Linux
+ _require_scratch
+ _require_test
+ _require_symlinks
++_require_mknod
+ 
+ DEVNULL=$SCRATCH_MNT/devnull
+ DEVZERO=$SCRATCH_MNT/devzero
+diff --git a/tests/generic/401 b/tests/generic/401
+index 00e9bbe0..f8b1fd21 100755
+--- a/tests/generic/401
++++ b/tests/generic/401
+@@ -38,6 +38,7 @@ _supported_fs generic
+ _supported_os Linux
+ _require_scratch
+ _require_symlinks
++_require_mknod
+ _require_test_program "t_dir_type"
+ 
+ rm -f $seqres.full
+diff --git a/tests/generic/434 b/tests/generic/434
+index edbf49d3..131c5d99 100755
+--- a/tests/generic/434
++++ b/tests/generic/434
+@@ -30,6 +30,7 @@ _supported_os Linux
+ 
+ _require_xfs_io_command "copy_range"
+ _require_test
++_require_mknod
+ 
+ testdir=$TEST_DIR/test-$seq
+ rm -rf $testdir
+diff --git a/tests/generic/479 b/tests/generic/479
+index aaf864a4..fc0b3b6c 100755
+--- a/tests/generic/479
++++ b/tests/generic/479
+@@ -33,6 +33,7 @@ _supported_fs generic
+ _supported_os Linux
+ _require_scratch
+ _require_symlinks
++_require_mknod
+ _require_dm_target flakey
+ 
+ rm -f $seqres.full
+diff --git a/tests/generic/564 b/tests/generic/564
+index 4958b3b5..b9b21134 100755
+--- a/tests/generic/564
++++ b/tests/generic/564
+@@ -37,6 +37,9 @@ rm -f $seqres.full
+ 
+ _require_test
+ _require_loop
++# for mkfifo
++_require_mknod
 +
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs generic
-+_supported_os Linux
-+_require_test
-+_require_sysctl_variable fs.protected_regular
-+_require_sysctl_variable fs.protected_fifos
-+_require_user 123456-fsgqa 
-+# Do this SECOND so that qa_user is fsgqa, and _do_user uses that account
-+_require_user fsgqa
-+
-+USER1=123456-fsgqa
-+USER2=fsgqa
-+
-+# Save current system state to reset when done
-+REGULAR_PROTECTION=`sysctl -n fs.protected_regular`
-+FIFO_PROTECTION=`sysctl -n fs.protected_fifos`
-+
-+test_access()
-+{
-+	FILENAME=$1
-+
-+	# sticky dir is world & group writable:
-+	echo "= group & world writable dir"
-+	chmod og+w $TEST_DIR/$seq/sticky_dir
-+	# "open -f" opens O_CREAT
-+	_user_do "$XFS_IO_PROG -c \"open -f $TEST_DIR/$seq/sticky_dir/$FILENAME\""
-+	# sticky dir is only group writable:
-+	echo "= only group writable dir"
-+	chmod o-w $TEST_DIR/$seq/sticky_dir
-+	_user_do "$XFS_IO_PROG -c \"open -f $TEST_DIR/$seq/sticky_dir/$FILENAME\""
-+}
-+
-+setup_tree()
-+{
-+	# Create sticky dir owned by $USER2
-+	mkdir -p $TEST_DIR/$seq
-+	mkdir -p $TEST_DIR/$seq/sticky_dir
-+	chmod 1777 $TEST_DIR/$seq/sticky_dir
-+	chown $USER2.$USER2 $TEST_DIR/$seq/sticky_dir
-+
-+	# Create file & fifo in that dir owned by $USER1, and open
-+	# normal read/write privs for world & group
-+	$XFS_IO_PROG -c "open -f $TEST_DIR/$seq/sticky_dir/file"
-+	chown $USER1.$USER1 $TEST_DIR/$seq/sticky_dir/file
-+	chmod o+rw $TEST_DIR/$seq/sticky_dir/file
-+
-+	mkfifo $TEST_DIR/$seq/sticky_dir/fifo
-+	chown $USER1.$USER1 $TEST_DIR/$seq/sticky_dir/fifo
-+	chmod o+rw $TEST_DIR/$seq/sticky_dir/fifo
-+}
-+
-+setup_tree
-+
-+# First test fs.protected_regular
-+# With protection set to 1, O_CREAT opens in a world-writable sticky
-+# directory should fail if the file exists, is owned by another, and
-+# file owner != dir owner
-+#
-+# With protection set to 2, the same goes for group-writable
-+# sticky directories
-+
-+echo "== Test file open when owned by another and file owner != dir owner"
-+sysctl -w fs.protected_regular=0
-+test_access file
-+sysctl -w fs.protected_regular=1
-+test_access file
-+sysctl -w fs.protected_regular=2
-+test_access file
-+
-+echo
-+
-+# Now test fs.protected_fifos
-+# With protection set to 1, O_CREAT opens in a world-writable sticky
-+# directory should fail if the fifo exists, is owned by another, and
-+# file owner != dir owner
-+#
-+# With protection set to 2, the same goes for group-writable
-+# sticky directories
-+echo "== Test fifo open when owned by another and fifo owner != dir owner"
-+sysctl -w fs.protected_fifos=0
-+test_access fifo
-+sysctl -w fs.protected_fifos=1
-+test_access fifo
-+sysctl -w fs.protected_fifos=2
-+test_access fifo
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/901.out b/tests/generic/901.out
-new file mode 100644
-index 00000000..5f95d9be
---- /dev/null
-+++ b/tests/generic/901.out
-@@ -0,0 +1,28 @@
-+QA output created by 901
-+== Test file open when owned by another and file owner != dir owner
-+fs.protected_regular = 0
-+= group & world writable dir
-+= only group writable dir
-+fs.protected_regular = 1
-+= group & world writable dir
-+Permission denied
-+= only group writable dir
-+fs.protected_regular = 2
-+= group & world writable dir
-+Permission denied
-+= only group writable dir
-+Permission denied
-+
-+== Test fifo open when owned by another and fifo owner != dir owner
-+fs.protected_fifos = 0
-+= group & world writable dir
-+= only group writable dir
-+fs.protected_fifos = 1
-+= group & world writable dir
-+Permission denied
-+= only group writable dir
-+fs.protected_fifos = 2
-+= group & world writable dir
-+Permission denied
-+= only group writable dir
-+Permission denied
-diff --git a/tests/generic/group b/tests/generic/group
-index fd2360ea..50c340a6 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -600,3 +600,4 @@
- 595 auto quick encrypt
- 596 auto quick
- 900 auto quick perms
-+901 auto quick perms
+ #
+ # This test effectively requires xfs_io with these commits
+ #  2a42470b xfs_io: copy_file_range length is a size_t
 -- 
 2.17.0
 
