@@ -7,44 +7,44 @@ X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 947C6C433E0
-	for <linux-fstests@archiver.kernel.org>; Mon, 18 May 2020 16:14:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7E847C433DF
+	for <linux-fstests@archiver.kernel.org>; Mon, 18 May 2020 16:15:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6A85F20674
-	for <linux-fstests@archiver.kernel.org>; Mon, 18 May 2020 16:14:50 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4E6F620674
+	for <linux-fstests@archiver.kernel.org>; Mon, 18 May 2020 16:15:41 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="DL5MSW7i"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="LXmu7jVc"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727006AbgERQOu (ORCPT
+        id S1727973AbgERQPl (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 18 May 2020 12:14:50 -0400
-Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:50167 "EHLO
+        Mon, 18 May 2020 12:15:41 -0400
+Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:52849 "EHLO
         us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726958AbgERQOt (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 18 May 2020 12:14:49 -0400
+        with ESMTP id S1727782AbgERQPk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 18 May 2020 12:15:40 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1589818486;
+        s=mimecast20190719; t=1589818538;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
-        bh=7TJefXKcAkVIG8BHiJMGC0i8JX4aYKZuA5PkXcpUx7s=;
-        b=DL5MSW7iAMD6LEj837rdGDdB923YywtUu7gX2rTI6t5ecdNOHG6BPm6kPYY+e0M4VYvqVV
-        s+9f1C9UOCN3LYoNoAV0PT05CKZpuJ+RlrzOSDGMHJXY3v7m1CwWzzcvYq26XRzN91Cldk
-        BSu30kACh8ZjFEBprcSaeawKYXnQN7k=
+        bh=RgWtGio7PbXM46gR/MOQAHF5vazi9PUJKZvk0jgA2lk=;
+        b=LXmu7jVcPwYPjb65C/ok/t5mEoaL1DBmkl0YUlnhSU2kmKl3rywE1gm7IOqugGikn3x+7e
+        fDB4R5S/fASCOCCv81Y70cObIm4HxWCo46fAI8ZYugyana07WKAZcX6aBBz+s2Si/OxFAe
+        LRvFUT3OKQRncqoSIXKsBlJTCerci4Y=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-378-bwoeJ9jsMiChI0XuPPfQkw-1; Mon, 18 May 2020 12:14:45 -0400
-X-MC-Unique: bwoeJ9jsMiChI0XuPPfQkw-1
-Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
+ us-mta-92-cdcY2I95MPWnZ38N8u2hiA-1; Mon, 18 May 2020 12:15:36 -0400
+X-MC-Unique: cdcY2I95MPWnZ38N8u2hiA-1
+Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 4DAE2EC1A0
-        for <fstests@vger.kernel.org>; Mon, 18 May 2020 16:14:44 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id B304A107ACF5
+        for <fstests@vger.kernel.org>; Mon, 18 May 2020 16:15:35 +0000 (UTC)
 Received: from [IPv6:::1] (ovpn04.gateway.prod.ext.phx2.redhat.com [10.5.9.4])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id 1CC6C78B54
-        for <fstests@vger.kernel.org>; Mon, 18 May 2020 16:14:44 +0000 (UTC)
-Subject: [PATCH 2/5] fstests: test restricted symlinks & hardlinks sysctls
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id 8B6325C1B2
+        for <fstests@vger.kernel.org>; Mon, 18 May 2020 16:15:35 +0000 (UTC)
+Subject: [PATCH 3/5] fstests: test restricted file access sysctls
 From:   Eric Sandeen <sandeen@redhat.com>
 To:     fstests <fstests@vger.kernel.org>
 References: <91639515-d639-c155-7cc8-660536b75257@redhat.com>
@@ -90,8 +90,8 @@ Autocrypt: addr=sandeen@redhat.com; prefer-encrypt=mutual; keydata=
  XQLj5HUlzt3JSwqSwx+++FFfWFMheG2HzkfXrvTpud5NrJkGGVn+ErXy6pNf6zSicb+bUXe9
  i92UTina2zWaaLEwXspqM338TlFC2JICu8pNt+wHpPCjgy2Ei4u5/4zSYjiA+X1I+V99YJhU
  +FpT2jzfLUoVsP/6WHWmM/tsS79i50G/PsXYzKOHj/0ZQCKOsJM14NMMCC8gkONe4tek
-Message-ID: <8640243b-8056-a81a-9c23-d19c4e0dc426@redhat.com>
-Date:   Mon, 18 May 2020 11:14:43 -0500
+Message-ID: <9de038fc-1c35-db0b-3576-cd4bfbe4a70f@redhat.com>
+Date:   Mon, 18 May 2020 11:15:34 -0500
 User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:68.0)
  Gecko/20100101 Thunderbird/68.8.0
 MIME-Version: 1.0
@@ -99,46 +99,42 @@ In-Reply-To: <91639515-d639-c155-7cc8-660536b75257@redhat.com>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.11
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.16
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This tests the fs.protected_symlinks and fs.protected_hardlinks
-sysctls which restrict links behavior in sticky world-writable
+This tests the fs.protected_regular and fs.protected_fifos
+sysctls which restrict access behavior in sticky world-writable
 directories as documented in the kernel at
 Documentation/admin-guide/sysctl/fs.rst
 
 Signed-off-by: Eric Sandeen <sandeen@redhat.com>
 ---
 
-V2: many fixes requested by Eryu
-update copyright
-reset sysctl only if saved
-switch to _user_do
-fix test description in comments
+V2: Same fixes as prior patch
 
- tests/generic/900     | 115 ++++++++++++++++++++++++++++++++++++++++++
- tests/generic/900.out |  14 +++++
+ tests/generic/901     | 126 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/901.out |  28 ++++++++++
  tests/generic/group   |   1 +
- 3 files changed, 130 insertions(+)
- create mode 100755 tests/generic/900
- create mode 100644 tests/generic/900.out
+ 3 files changed, 155 insertions(+)
+ create mode 100755 tests/generic/901
+ create mode 100644 tests/generic/901.out
 
-diff --git a/tests/generic/900 b/tests/generic/900
+diff --git a/tests/generic/901 b/tests/generic/901
 new file mode 100755
-index 00000000..fd54fa4e
+index 00000000..4e04155e
 --- /dev/null
-+++ b/tests/generic/900
-@@ -0,0 +1,115 @@
++++ b/tests/generic/901
+@@ -0,0 +1,126 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
 +# Copyright (c) 2020 Red Hat, Inc.  All Rights Reserved.
 +#
-+# FS QA Test 900
++# FS QA Test 901
 +#
-+# Test protected_symlink and protected_hardlink sysctls
++# Test protected_regular and protected_fifos sysctls
 +#
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
@@ -152,10 +148,10 @@ index 00000000..fd54fa4e
 +_cleanup()
 +{
 +	rm -rf $TEST_DIR/$seq
-+	[ ! -z "$SYMLINK_PROTECTION" ] \
-+		&& sysctl -qw fs.protected_symlinks=$SYMLINK_PROTECTION
-+	[ ! -z "$HARDLINK_PROTECTION" ] \
-+		&& sysctl -qw fs.protected_hardlinks=$HARDLINK_PROTECTION
++	[ ! -z "$REGULAR_PROTECTION" ] \
++		&& sysctl -qw fs.protected_regular=$REGULAR_PROTECTION
++	[ ! -z "$FIFO_PROTECTION" ] \
++		&& sysctl -qw fs.protected_fifos=$FIFO_PROTECTION
 +	cd /
 +	rm -f $tmp.*
 +}
@@ -173,109 +169,134 @@ index 00000000..fd54fa4e
 +_supported_fs generic
 +_supported_os Linux
 +_require_test
-+_require_sysctl_variable fs.protected_symlinks
-+_require_sysctl_variable fs.protected_hardlinks
-+_require_user 123456-fsgqa
++_require_sysctl_variable fs.protected_regular
++_require_sysctl_variable fs.protected_fifos
++_require_user 123456-fsgqa 
 +# Do this SECOND so that qa_user is fsgqa, and _do_user uses that account
 +_require_user fsgqa
 +
-+OWNER=123456-fsgqa
-+OTHER=fsgqa
++USER1=123456-fsgqa
++USER2=fsgqa
 +
 +# Save current system state to reset when done
-+SYMLINK_PROTECTION=`sysctl -n fs.protected_symlinks`
-+HARDLINK_PROTECTION=`sysctl -n fs.protected_hardlinks`
++REGULAR_PROTECTION=`sysctl -n fs.protected_regular`
++FIFO_PROTECTION=`sysctl -n fs.protected_fifos`
 +
-+test_symlink()
++test_access()
 +{
-+	ln -s $TEST_DIR/$seq/target $TEST_DIR/$seq/sticky_dir/symlink
-+	chown $OTHER.$OTHER $TEST_DIR/$seq/sticky_dir
-+	chown $OWNER.$OWNER $TEST_DIR/$seq/sticky_dir/symlink
-+	# If we can read the target, we followed the link
-+	_user_do "cat $TEST_DIR/$seq/sticky_dir/symlink" | _filter_test_dir
-+	rm -f $TEST_DIR/$seq/sticky_dir/symlink
-+}
++	FILENAME=$1
 +
-+test_hardlink()
-+{
-+	chown $OWNER.$OWNER $TEST_DIR/$seq/target
-+	chmod go-rw $TEST_DIR/$seq/target
-+	_user_do "ln $TEST_DIR/$seq/target $TEST_DIR/$seq/sticky_dir/hardlink" \
-+		| _filter_test_dir
-+	test -f $TEST_DIR/$seq/sticky_dir/hardlink \
-+		&& echo "successfully created hardlink"
-+	rm -f $TEST_DIR/$seq/sticky_dir/hardlink
++	# sticky dir is world & group writable:
++	echo "= group & world writable dir"
++	chmod og+w $TEST_DIR/$seq/sticky_dir
++	# "open -f" opens O_CREAT
++	_user_do "$XFS_IO_PROG -c \"open -f $TEST_DIR/$seq/sticky_dir/$FILENAME\""
++	# sticky dir is only group writable:
++	echo "= only group writable dir"
++	chmod o-w $TEST_DIR/$seq/sticky_dir
++	_user_do "$XFS_IO_PROG -c \"open -f $TEST_DIR/$seq/sticky_dir/$FILENAME\""
 +}
 +
 +setup_tree()
 +{
-+	# Create world-writable sticky dir
++	# Create sticky dir owned by $USER2
++	mkdir -p $TEST_DIR/$seq
 +	mkdir -p $TEST_DIR/$seq/sticky_dir
 +	chmod 1777 $TEST_DIR/$seq/sticky_dir
-+	# And a file elsewhere that will be linked to from that sticky dir
-+	mkdir -p $TEST_DIR/$seq
-+	# If we can read it, we followed the link.
-+	echo "successfully followed symlink" > $TEST_DIR/$seq/target
++	chown $USER2.$USER2 $TEST_DIR/$seq/sticky_dir
++
++	# Create file & fifo in that dir owned by $USER1, and open
++	# normal read/write privs for world & group
++	$XFS_IO_PROG -c "open -f $TEST_DIR/$seq/sticky_dir/file"
++	chown $USER1.$USER1 $TEST_DIR/$seq/sticky_dir/file
++	chmod o+rw $TEST_DIR/$seq/sticky_dir/file
++
++	mkfifo $TEST_DIR/$seq/sticky_dir/fifo
++	chown $USER1.$USER1 $TEST_DIR/$seq/sticky_dir/fifo
++	chmod o+rw $TEST_DIR/$seq/sticky_dir/fifo
 +}
 +
 +setup_tree
 +
-+# First test fs.protected_symlinks
-+# With protection on, symlink follows should fail if the
-+# link owner != the sticky directory owner, and the process
-+# is not the link owner.
-+echo "== Test symlink follow protection when"
-+echo "== process != link owner and dir owner != link owner"
-+sysctl -w fs.protected_symlinks=0
-+test_symlink
-+sysctl -w fs.protected_symlinks=1
-+test_symlink
++# First test fs.protected_regular
++# With protection set to 1, O_CREAT opens in a world-writable sticky
++# directory should fail if the file exists, is owned by another, and
++# file owner != dir owner
++#
++# With protection set to 2, the same goes for group-writable
++# sticky directories
++
++echo "== Test file open when owned by another and file owner != dir owner"
++sysctl -w fs.protected_regular=0
++test_access file
++sysctl -w fs.protected_regular=1
++test_access file
++sysctl -w fs.protected_regular=2
++test_access file
 +
 +echo
 +
-+# Now test fs.protected_hardlinks
-+# With protection on, hardlink creation should fail if the
-+# process does not own the target file, and the process does not have
-+# read-write access to the target
-+echo "== Test hardlink create protection when"
-+echo "== process != target owner and process cannot read target"
-+sysctl -w fs.protected_hardlinks=0
-+test_hardlink
-+sysctl -w fs.protected_hardlinks=1
-+test_hardlink
++# Now test fs.protected_fifos
++# With protection set to 1, O_CREAT opens in a world-writable sticky
++# directory should fail if the fifo exists, is owned by another, and
++# file owner != dir owner
++#
++# With protection set to 2, the same goes for group-writable
++# sticky directories
++echo "== Test fifo open when owned by another and fifo owner != dir owner"
++sysctl -w fs.protected_fifos=0
++test_access fifo
++sysctl -w fs.protected_fifos=1
++test_access fifo
++sysctl -w fs.protected_fifos=2
++test_access fifo
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/generic/900.out b/tests/generic/900.out
+diff --git a/tests/generic/901.out b/tests/generic/901.out
 new file mode 100644
-index 00000000..7adf97ed
+index 00000000..5f95d9be
 --- /dev/null
-+++ b/tests/generic/900.out
-@@ -0,0 +1,14 @@
-+QA output created by 900
-+== Test symlink follow protection when
-+== process != link owner and dir owner != link owner
-+fs.protected_symlinks = 0
-+successfully followed symlink
-+fs.protected_symlinks = 1
++++ b/tests/generic/901.out
+@@ -0,0 +1,28 @@
++QA output created by 901
++== Test file open when owned by another and file owner != dir owner
++fs.protected_regular = 0
++= group & world writable dir
++= only group writable dir
++fs.protected_regular = 1
++= group & world writable dir
++Permission denied
++= only group writable dir
++fs.protected_regular = 2
++= group & world writable dir
++Permission denied
++= only group writable dir
 +Permission denied
 +
-+== Test hardlink create protection when
-+== process != target owner and process cannot read target
-+fs.protected_hardlinks = 0
-+successfully created hardlink
-+fs.protected_hardlinks = 1
-+ln: failed to create hard link 'TEST_DIR/900/sticky_dir/hardlink' => 'TEST_DIR/900/target': Operation not permitted
++== Test fifo open when owned by another and fifo owner != dir owner
++fs.protected_fifos = 0
++= group & world writable dir
++= only group writable dir
++fs.protected_fifos = 1
++= group & world writable dir
++Permission denied
++= only group writable dir
++fs.protected_fifos = 2
++= group & world writable dir
++Permission denied
++= only group writable dir
++Permission denied
 diff --git a/tests/generic/group b/tests/generic/group
-index e82004e8..fd2360ea 100644
+index fd2360ea..50c340a6 100644
 --- a/tests/generic/group
 +++ b/tests/generic/group
-@@ -599,3 +599,4 @@
- 594 auto quick quota
+@@ -600,3 +600,4 @@
  595 auto quick encrypt
  596 auto quick
-+900 auto quick perms
+ 900 auto quick perms
++901 auto quick perms
 -- 
 2.17.0
 
