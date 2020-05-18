@@ -2,674 +2,184 @@ Return-Path: <SRS0=Vcut=7A=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 52E8EC433E0
-	for <linux-fstests@archiver.kernel.org>; Mon, 18 May 2020 08:52:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3DFF1C433E0
+	for <linux-fstests@archiver.kernel.org>; Mon, 18 May 2020 14:42:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 24399206D4
-	for <linux-fstests@archiver.kernel.org>; Mon, 18 May 2020 08:52:38 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="HIPAh0M3"
+	by mail.kernel.org (Postfix) with ESMTP id 229CC206D4
+	for <linux-fstests@archiver.kernel.org>; Mon, 18 May 2020 14:42:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726357AbgERIwh (ORCPT
+        id S1727005AbgEROmX (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 18 May 2020 04:52:37 -0400
-Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:42675 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726285AbgERIwh (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 18 May 2020 04:52:37 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1589791954;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=jJm+E8hEhIbYeClsgX3i6KcESRWRE2ykHurC3JXelIg=;
-        b=HIPAh0M3FisIMSzIv+vQFArnvs+Bw73R+/WlITK68wrTZG1CNGMQX4FxIN8lchHjb2ego6
-        vQOFk0KIbp2tc9hW7GeylO2mMNhzGLGzUmAtr/rmBdhUhBQ250glfJ9EXf1OJKTbf58ZBz
-        yuINXQ8JwUIjOBh2NB9Z0ZRMPRaHHyo=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-385-0IMHRkfBMAiSYfJC-XsvWw-1; Mon, 18 May 2020 04:52:30 -0400
-X-MC-Unique: 0IMHRkfBMAiSYfJC-XsvWw-1
-Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        Mon, 18 May 2020 10:42:23 -0400
+Received: from sandeen.net ([63.231.237.45]:57694 "EHLO sandeen.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726918AbgEROmX (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 18 May 2020 10:42:23 -0400
+Received: from [10.0.0.4] (liberator [10.0.0.4])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id B2BB71800D42
-        for <fstests@vger.kernel.org>; Mon, 18 May 2020 08:52:29 +0000 (UTC)
-Received: from localhost.localdomain (unknown [10.40.192.64])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id F135B2DE99
-        for <fstests@vger.kernel.org>; Mon, 18 May 2020 08:52:28 +0000 (UTC)
-From:   Lukas Czerner <lczerner@redhat.com>
-To:     fstests@vger.kernel.org
-Subject: [PATCH v3] ext4: ext4 mount sanity test
-Date:   Mon, 18 May 2020 10:52:26 +0200
-Message-Id: <20200518085226.16914-1-lczerner@redhat.com>
-In-Reply-To: <20200423111829.31657-1-lczerner@redhat.com>
-References: <20200423111829.31657-1-lczerner@redhat.com>
+        by sandeen.net (Postfix) with ESMTPSA id 0E59A3248;
+        Mon, 18 May 2020 09:41:57 -0500 (CDT)
+Subject: Re: [PATCH 2/3] fstests: test restricted symlinks & hardlinks sysctls
+To:     Eryu Guan <guan@eryu.me>, Eric Sandeen <sandeen@redhat.com>
+Cc:     fstests <fstests@vger.kernel.org>
+References: <99a3164b-ee00-113c-e0aa-41eab9633364@redhat.com>
+ <294c5739-ff30-285c-8cf7-11a6dff98294@redhat.com>
+ <20200517155505.GD2704@desktop>
+From:   Eric Sandeen <sandeen@sandeen.net>
+Autocrypt: addr=sandeen@sandeen.net; prefer-encrypt=mutual; keydata=
+ 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 pA==
+Message-ID: <db6173de-a655-024b-3494-19f11a67b792@sandeen.net>
+Date:   Mon, 18 May 2020 09:42:20 -0500
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:68.0)
+ Gecko/20100101 Thunderbird/68.8.0
 MIME-Version: 1.0
+In-Reply-To: <20200517155505.GD2704@desktop>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
 Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 2.84 on 10.5.11.23
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Add test to validate that the ext4 mount options are properly recognized,
-validated and applied to avoid regression as ext4 moves to the new mount
-API.
 
-Signed-off-by: Lukas Czerner <lczerner@redhat.com>
----
-v2: ext4 driver can support ext3 and ext2 as well so check the
-    compatibility for those fs as well
-v3: Use real scratch device node, not the link to determine options
-    Test mount options set in super block via tune2fs
+On 5/17/20 10:55 AM, Eryu Guan wrote:
+> On Tue, May 05, 2020 at 03:20:10PM -0500, Eric Sandeen wrote:
+>> This tests the fs.protected_symlinks and fs.protected_hardlinks
+>> sysctls which restrict links behavior in sticky world-writable
+>> directories as documented in the kernel at 
+>> Documentation/admin-guide/sysctl/fs.rst
+>>
+>> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+>> ---
+>>
+>> diff --git a/tests/generic/900 b/tests/generic/900
+>> new file mode 100755
+>> index 00000000..f0ac46ef
+>> --- /dev/null
+>> +++ b/tests/generic/900
+>> @@ -0,0 +1,114 @@
+>> +#! /bin/bash
+>> +# SPDX-License-Identifier: GPL-2.0
+>> +# Copyright (c) 2020 Red Hat, Inc.  All Rights Reserved.
+>> +#
+>> +# FS QA Test 900
+>> +#
+>> +# Test protected_symlink and protected_hardlink ioctls
+>> +#
+>> +seq=`basename $0`
+>> +seqres=$RESULT_DIR/$seq
+>> +echo "QA output created by $seq"
+>> +
+>> +here=`pwd`
+>> +tmp=/tmp/$$
+>> +status=1	# failure is the default!
+>> +trap "_cleanup; exit \$status" 0 1 2 3 15
+>> +
+>> +_cleanup()
+>> +{
+>> +	rm -rf $TEST_DIR/$seq
+>> +	sysctl -qw fs.protected_symlinks=$SYMLINK_PROTECTION
+>> +	sysctl -qw fs.protected_hardlinks=$HARDLINK_PROTECTION
+> 
+> Restore the sysctl only if "SYMLINK_PROTECTION" and
+> "HARDLINK_PROTECTION" are set.
 
+thankss
 
- tests/ext4/002     | 566 +++++++++++++++++++++++++++++++++++++++++++++
- tests/ext4/002.out |   2 +
- tests/ext4/group   |   1 +
- 3 files changed, 569 insertions(+)
- create mode 100755 tests/ext4/002
- create mode 100644 tests/ext4/002.out
+>> +	cd /
+>> +	rm -f $tmp.*
+>> +}
+>> +
+>> +# get standard environment, filters and checks
+>> +. ./common/rc
+>> +. ./common/filter
+>> +
+>> +# remove previous $seqres.full before test
+>> +rm -f $seqres.full
+>> +
+>> +# real QA test starts here
+>> +
+>> +# Modify as appropriate.
+>> +_supported_fs generic
+>> +_supported_os Linux
+>> +_require_test
+>> +_require_sysctl fs.protected_symlinks
+>> +_require_sysctl fs.protected_hardlinks
+>> +_require_user fsgqa
+>> +_require_user fsgqa2
+> 
+> New user :) update README as well?
 
-diff --git a/tests/ext4/002 b/tests/ext4/002
-new file mode 100755
-index 00000000..6be24bc2
---- /dev/null
-+++ b/tests/ext4/002
-@@ -0,0 +1,566 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2020 Red Hat, Inc., Lukas Czerner <lczerner@redhat.com>.
-+#
-+# FS QA Test 002
-+#
-+# Sanity check of ext4 mount options
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	$UMOUNT_PROG $SCRATCH_MNT > /dev/null 2>&1
-+	if [ -n "$LOOP_LOGDEV" ];then
-+		_destroy_loop_device $LOOP_LOGDEV 2>/dev/null
-+	fi
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/quota
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+echo "Silence is golden."
-+
-+SIZE=$((1024 * 1024))	# 1GB in KB
-+LOGSIZE=$((10 *1024))	# 10MB in KB
-+
-+_supported_fs ext2 ext3 ext4
-+_supported_os Linux
-+_require_scratch_size $SIZE
-+_require_quota
-+_require_loop
-+_require_command "$TUNE2FS_PROG" tune2fs
-+MKE2FS_PROG=$(type -P mke2fs)
-+_require_command "$MKE2FS_PROG" mke2fs
-+
-+LOG=""
-+print_log() {
-+	LOG="$LOG $@"
-+}
-+
-+KERNEL_VERSION=`uname -r | cut -d'.' -f1,2`
-+kernel_gte() {
-+	gte=`echo "$KERNEL_VERSION >= $1" | $BC_PROG`
-+	[ $gte -eq 1 ] && return 0
-+	return 1
-+}
-+
-+# This test is only relevant for the newer kernel
-+kernel_gte 4.19 || _notrun "This test is only relevant for kernel versions 4.19 and higher"
-+
-+IGNORED="remount,defaults,ignored,removed"
-+CHECK_MINFO="lazytime,noatime,nodiratime,noexec,nosuid,ro"
-+ERR=0
-+
-+test_mnt() {
-+	findmnt -n $SCRATCH_DEV > /dev/null 2>&1
-+	[ $? -ne 0 ] && return $?
-+
-+	if [ $# -eq 1 ]; then
-+		OPTS=$1
-+	elif [ $# -eq 2 ]; then
-+		OPTS=$2
-+	else
-+		return 0
-+	fi
-+
-+	print_log "checking \"$OPTS\" "
-+	# test options in /proc/fs/ext4/dev/options
-+	(
-+	ret=0
-+	IFS=','
-+	for option in $OPTS; do
-+		if echo $IGNORED | grep -w $option; then
-+			continue
-+		fi
-+
-+		[ $option = "noload" ] && option="norecovery"
-+
-+		if [[ $option = ^* ]]; then
-+			expected=1
-+		else
-+			expected=0
-+		fi
-+		option=${option#^}
-+
-+		if echo $CHECK_MINFO | grep -w $option; then
-+			findmnt -n -o OPTIONS $SCRATCH_DEV | grep $option
-+			ret=$?
-+		else
-+			grep $option /proc/fs/ext4/$(_short_dev $SCRATCH_DEV)/options
-+			ret=$?
-+		fi
-+
-+		if [ $ret -ne $expected ]; then
-+			exit 1
-+		fi
-+	done
-+	) > /dev/null 2>&1
-+	return $?
-+}
-+
-+fail() {
-+	print_log "   FAILED"
-+	ERR=$((ERR+1))
-+	echo $LOG | tee -a $seqres.full
-+	LOG=""
-+}
-+
-+ok() {
-+	print_log "   OK"
-+	echo $LOG >> $seqres.full
-+	LOG=""
-+}
-+
-+simple_mount() {
-+	_mount $* >> $seqres.full 2>&1
-+}
-+
-+# $1 - can hold -n option, if it does argumetns are shifted
-+# $1 - options to test
-+# $2 - if provided it's the option string to check for
-+do_mnt() {
-+	device=$SCRATCH_DEV
-+	# If -n argument is provided do not specify $SCRATCH_DEV
-+	# usefull for remount
-+	if [ "$1" == "-n" ]; then
-+		unset device
-+		shift
-+	fi
-+
-+	if [ -z "$1" ]; then
-+		simple_mount $device $SCRATCH_MNT
-+		ret=$?
-+	else
-+		simple_mount -o $1 $device $SCRATCH_MNT
-+		ret=$?
-+	fi
-+	if [ $ret -eq 0 ]; then
-+		test_mnt $1 $2
-+		ret=$?
-+		[ $ret -ne 0 ] && print_log "(not found)"
-+	else
-+		print_log "(failed mount)"
-+	fi
-+
-+	return $ret
-+}
-+
-+not_mnt() {
-+	# We don't need -t not not_ variant
-+	if [ "$1" == "-t" ]; then
-+		shift
-+	fi
-+
-+	print_log "SHOULD FAIL mounting $fstype \"$1\" "
-+	do_mnt $@
-+	if [ $? -eq 0 ]; then
-+		fail
-+	else
-+		ok
-+	fi
-+	$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
-+}
-+
-+_mnt() {
-+	print_log "mounting $fstype \"$1\" "
-+	do_mnt $@
-+	if [ $? -ne 0 ]; then
-+		fail
-+	else
-+		ok
-+	fi
-+}
-+
-+mnt() {
-+	# Do we need to run the tune2fs mount option test ?
-+	t2fs=0
-+	if [ "$1" == "-t" ]; then
-+		t2fs=1
-+		shift
-+	fi
-+
-+	_mnt $*
-+	$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
-+
-+	[ "$t2fs" -eq 0 ] && return
-+
-+	op_set=$1
-+	if [ $# -eq 1 ]; then
-+		check=$1
-+	elif [ $# -eq 2 ]; then
-+		check=$2
-+	else
-+		return 0
-+	fi
-+
-+	# some options need translation for tune2fs
-+	op_set=$(echo $op_set | sed -e 's/data=journal/journal_data/' \
-+				    -e 's/data=ordered/journal_data_ordered/' \
-+				    -e 's/data=writeback/journal_data_writeback/')
-+	$TUNE2FS_PROG -o $op_set $SCRATCH_DEV > /dev/null 2>&1
-+	_mnt "defaults" $check
-+	$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
-+	if [ "$op_set" = ^* ]; then
-+		op_set=${op_set#^}
-+	else
-+		op_set="^${op_set}"
-+	fi
-+	$TUNE2FS_PROG -o $op_set $SCRATCH_DEV > /dev/null 2>&1
-+}
-+
-+# $1 - options to mount with
-+# $2 - options to remount with
-+remount() {
-+	# First do this specifying both dev and mnt
-+	print_log "mounting $fstype \"$1\" "
-+	do_mnt $1
-+	[ $? -ne 0 ] && fail && return
-+	print_log "remounting \"$2\" "
-+	do_mnt remount,$2 $3
-+	if [ $? -ne 0 ]; then
-+		fail
-+		$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
-+		return
-+	else
-+		ok
-+	fi
-+	$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
-+
-+	# Now just specify mnt
-+	print_log "mounting $fstype \"$1\" "
-+	do_mnt $1
-+	[ $? -ne 0 ] && fail && return
-+	print_log "remounting (MNT ONLY) \"$2\" "
-+	do_mnt -n remount,$2 $3
-+	if [ $? -ne 0 ]; then
-+		fail
-+	else
-+		ok
-+	fi
-+
-+	$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
-+}
-+
-+# $1 - options to mount with, or -r argument
-+# $2 - options to remount with
-+_not_remount() {
-+	remount_only=0
-+	# If -r is specified we're going to do remount only
-+	if [ "$1" == "-r" ]; then
-+		remount_only=1
-+		# Dont need shift since first argument would
-+		# have been consumed by mount anyway
-+	fi
-+
-+	if [ $remount_only -eq 0 ]; then
-+		print_log "mounting $fstype \"$1\" "
-+		do_mnt $1
-+		[ $? -ne 0 ] && fail && return
-+	fi
-+	print_log "SHOULD FAIL remounting $fstype \"$2\" "
-+	do_mnt remount,$2 $3
-+	if [ $? -eq 0 ]; then
-+		fail
-+	else
-+		ok
-+	fi
-+
-+	# Now just specify mnt
-+	print_log "SHOULD FAIL remounting $fstype (MNT ONLY) \"$2\" "
-+	do_mnt -n remount,$2 $3
-+	if [ $? -eq 0 ]; then
-+		fail
-+	else
-+		ok
-+	fi
-+}
-+
-+not_remount() {
-+	_not_remount $*
-+	$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
-+}
-+
-+
-+do_mkfs() {
-+	$MKE2FS_PROG -T $fstype -Fq $* >> $seqres.full 2>&1 ||
-+	_fail "mkfs failed - $MKFS_EXT4_PROG -Fq $* $SCRATCH_DEV"
-+}
-+
-+not_ext2() {
-+	if [[ $fstype == "ext2" ]]; then
-+		not_$*
-+	else
-+		$*
-+	fi
-+}
-+
-+only_ext4() {
-+	if [[ $fstype == "ext4" ]]; then
-+		$*
-+	else
-+		not_$*
-+	fi
-+}
-+
-+# Create logdev for external journal
-+LOOP_IMG=$tmp.logdev
-+truncate -s ${LOGSIZE}k $LOOP_IMG
-+LOOP_LOGDEV=`_create_loop_device $LOOP_IMG`
-+majmin=`stat -c "%t:%T" $LOOP_LOGDEV`
-+LOGDEV_DEVNUM=`echo "${majmin%:*}*2^8 + ${majmin#*:}" | bc`
-+
-+# Test all the extN file system supported by ext4 driver
-+fstype=
-+for fstype in ext2 ext3 ext4; do
-+
-+	$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
-+	$UMOUNT_PROG $SCRATCH_DEV 2> /dev/null
-+
-+	do_mkfs $SCRATCH_DEV ${SIZE}k
-+
-+	# do we have fstype support ?
-+	do_mnt
-+	if [ $? -ne 0 ]; then
-+		print_log "$fstype not supported. Skipping..."
-+		ok
-+		continue
-+	fi
-+	if [ ! -f /proc/fs/ext4/$(_short_dev $SCRATCH_DEV)/options ]; then
-+		print_log "$fstype not supported. Skipping..."
-+		ok
-+		continue
-+	fi
-+
-+	$UMOUNT_PROG $SCRATCH_MNT 2> /dev/null
-+
-+	not_mnt failme
-+	mnt
-+	mnt bsddf
-+	mnt minixdf
-+	mnt grpid
-+	mnt -t bsdgroups grpid
-+	mnt nogrpid
-+	mnt sysvgroups nogrpid
-+	mnt resgid=1001
-+	mnt resuid=1001
-+	mnt sb=131072
-+	mnt errors=continue
-+	mnt errors=panic
-+	mnt errors=remount-ro
-+	mnt nouid32
-+	mnt debug
-+	mnt oldalloc removed
-+	mnt orlov removed
-+	mnt -t user_xattr
-+	mnt nouser_xattr
-+	mnt -t acl
-+	not_ext2 mnt noload norecovery
-+	mnt bh removed
-+	mnt nobh removed
-+	not_ext2 mnt commit=7
-+	mnt min_batch_time=200
-+	mnt max_batch_time=10000
-+	only_ext4 mnt journal_checksum
-+	only_ext4 mnt nojournal_checksum
-+	only_ext4 mnt journal_async_commit,data=writeback
-+	mnt abort ignored
-+	not_ext2 mnt -t data=journal
-+	not_ext2 mnt -t data=ordered
-+	not_ext2 mnt -t data=writeback
-+	not_ext2 mnt data_err=abort
-+	not_ext2 mnt data_err=ignore ignored
-+	mnt usrjquota=aquota.user,jqfmt=vfsv0
-+	not_mnt usrjquota=aquota.user
-+	mnt usrjquota= ignored
-+	mnt grpjquota=aquota.group,jqfmt=vfsv0
-+	not_mnt grpjquota=aquota.group
-+	mnt grpjquota= ignored
-+	mnt jqfmt=vfsold
-+	mnt jqfmt=vfsv0
-+	mnt jqfmt=vfsv1
-+	mnt grpquota
-+	mnt quota
-+	mnt noquota
-+	mnt usrquota
-+	mnt grpquota
-+	mnt barrier
-+	mnt barrier=0 nobarrier
-+	mnt barrier=1 barrier
-+	mnt barrier=99 barrier
-+	mnt -t nobarrier
-+	mnt i_version
-+	#mnt dax
-+	mnt stripe=512
-+	only_ext4 mnt delalloc
-+	only_ext4 mnt -t nodelalloc
-+	mnt warn_on_error
-+	mnt nowarn_on_error
-+	not_mnt debug_want_extra_isize=512
-+	mnt debug_want_extra_isize=32 ignored
-+	mnt mblk_io_submit removed
-+	mnt nomblk_io_submit removed
-+	mnt -t block_validity
-+	mnt noblock_validity
-+	mnt inode_readahead_blks=16
-+	not_ext2 mnt journal_ioprio=6 ignored
-+	mnt auto_da_alloc=0 noauto_da_alloc
-+	mnt auto_da_alloc=1 auto_da_alloc
-+	mnt auto_da_alloc=95 auto_da_alloc
-+	mnt auto_da_alloc
-+	mnt noauto_da_alloc
-+	only_ext4 mnt dioread_nolock
-+	kernel_gte 5.6 && only_ext4 mnt nodioread_nolock
-+	kernel_gte 5.6 && only_ext4 mnt dioread_lock nodioread_nolock
-+	mnt -t discard
-+	mnt nodiscard
-+	mnt init_itable=20
-+	mnt init_itable
-+	mnt init_itable=0
-+	mnt noinit_itable
-+	mnt max_dir_size_kb=4096
-+	#mnt test_dummy_encryption
-+	mnt nombcache
-+	mnt no_mbcache nombcache
-+	mnt check=none removed
-+	mnt nocheck removed
-+	mnt reservation removed
-+	mnt noreservation removed
-+	not_mnt journal=20
-+	not_mnt nonsenseoption
-+	not_mnt nonsenseoption=value
-+
-+	# generic mount options
-+	mnt lazytime
-+	mnt nolazytime ^lazytime
-+	mnt noatime
-+	mnt nodiratime
-+	mnt noexec
-+	mnt nosuid
-+	mnt ro
-+
-+	# generic remount check
-+	remount barrier nobarrier
-+	remount nobarrier barrier
-+	remount discard nodiscard
-+	remount nodiscard discard
-+
-+	# Quota remount check
-+	remount grpquota usrquota
-+	remount usrquota quota
-+	remount usrquota usrjquota=q.u,jqfmt=vfsv0
-+	remount grpquota grpjquota=q.g,jqfmt=vfsv0
-+
-+	not_remount usrquota grpjquota=q.g,jqfmt=vfsv0
-+	not_remount grpquota usrjquota=q.u,jqfmt=vfsv0
-+
-+	remount quota usrjquota=q.u,jqfmt=vfsv0
-+	not_remount quota grpjquota=q.g,jqfmt=vfsv0
-+
-+	remount usrjquota=q.u,jqfmt=vfsv0 grpjquota=q.g
-+	not_remount usrjquota=q.u,jqfmt=vfsv0 usrjquota=q.ua
-+	not_remount grpjquota=q.g,jqfmt=vfsv0 grpjquota=q.ga
-+
-+	remount usrjquota=q.u,jqfmt=vfsv0 usrquota usrjquota=q.u,jqfmt=vfsv0
-+	remount grpjquota=q.g,jqfmt=vfsv0 grpquota grpjquota=q.g,jqfmt=vfsv0
-+	not_remount usrjquota=q.u,jqfmt=vfsv0 grpquota
-+	not_remount grpjquota=q.g,jqfmt=vfsv0 usrquota
-+
-+	remount grpjquota=q.g,jqfmt=vfsv0 grpjquota= ^grpjquota=
-+	remount usrjquota=q.u,jqfmt=vfsv0 usrjquota= ^usrjquota=
-+	remount grpjquota=q.g,usrjquota=q.u,jqfmt=vfsv0 grpjquota=,usrjquota= ^grpjquota=,^usrjquota=
-+
-+	remount jqfmt=vfsv0 grpjquota=q.g
-+	remount jqfmt=vfsv0 usrjquota=q.u
-+
-+	if [[ $fstype != "ext2" ]]; then
-+		remount noload data=journal norecovery
-+		not_remount data=ordered data=journal
-+		not_remount data=journal data=writeback
-+		not_remount data=writeback data=ordered
-+	fi
-+
-+	do_mkfs -O journal_dev $LOOP_LOGDEV ${LOGSIZE}k
-+	do_mkfs -J device=$LOOP_LOGDEV $SCRATCH_DEV ${SIZE}k
-+	mnt defaults
-+	mnt journal_path=$LOOP_LOGDEV ignored
-+	mnt journal_dev=$LOGDEV_DEVNUM ignored
-+	not_mnt journal_path=${LOOP_LOGDEV}_nonexistent ignored
-+	not_mnt journal_dev=123456 ignored
-+	not_mnt journal_dev=999999999999999 ignored
-+
-+	do_mkfs -E quotatype=prjquota $SCRATCH_DEV ${SIZE}k
-+	mnt prjquota
-+
-+	# test clearing/changing journalled quota when enabled
-+	echo "== Testing active journalled quota" >> $seqres.full
-+	_mnt prjquota,grpjquota=aquota.group,usrjquota=aquota.user,jqfmt=vfsv0
-+
-+	# Prepare and enable quota
-+	quotacheck -vugm $SCRATCH_MNT >> $seqres.full 2>&1
-+	quotaon -vug $SCRATCH_MNT >> $seqres.full 2>&1
-+
-+	_not_remount -r grpjquota=
-+	_not_remount -r usrjquota=aaquota.user
-+	_not_remount -r grpjquota=aaquota.group
-+	_not_remount -r jqfmt=vfsv1
-+	_not_remount -r noquota
-+	_mnt remount,usrquota,grpquota ^usrquota,^grpquota
-+	$UMOUNT_PROG $SCRATCH_MNT > /dev/null 2>&1
-+
-+	# test clearing/changing quota when enabled
-+	do_mkfs -E quotatype=^prjquota $SCRATCH_DEV ${SIZE}k
-+	not_mnt prjquota
-+	echo "== Testing active non-journalled quota" >> $seqres.full
-+	_mnt grpquota,usrquota
-+
-+	# Prepare and enable quota
-+	quotacheck -vugm $SCRATCH_MNT >> $seqres.full 2>&1
-+	quotaon -vug $SCRATCH_MNT >> $seqres.full 2>&1
-+
-+	_not_remount -r noquota
-+	_not_remount -r usrjquota=aquota.user
-+	_not_remount -r grpjquota=aquota.group
-+	_not_remount -r jqfmt=vfsv1
-+	_mnt remount,grpjquota= grpquota,^grpjquota
-+	_mnt remount,usrjquota= usrquota,^usrjquota
-+	_mnt remount,usrquota,grpquota usrquota,grpquota
-+	quotaoff -f $SCRATCH_MNT >> $seqres.full 2>&1
-+	_mnt remount,noquota ^usrquota,^grpquota,quota
-+	$UMOUNT_PROG $SCRATCH_MNT > /dev/null 2>&1
-+
-+	# Quota feature
-+	echo "== Testing quota feature " >> $seqres.full
-+	do_mkfs -O quota -E quotatype=prjquota $SCRATCH_DEV ${SIZE}k
-+	mnt usrjquota=aquota.user,jqfmt=vfsv0 ^usrjquota=
-+	mnt grpjquota=aquota.user,jqfmt=vfsv0 ^grpjquota=
-+	mnt jqfmt=vfsv1 ^jqfmt=
-+	mnt prjquota
-+	mnt usrquota
-+	mnt grpquota
-+	not_remount defaults usrjquota=aquota.user
-+	not_remount defaults grpjquota=aquota.user
-+	not_remount defaults jqfmt=vfsv1
-+	remount defaults grpjquota=,usrjquota= ignored
-+
-+done #for fstype in ext2 ext3 ext4; do
-+
-+$UMOUNT_PROG $SCRATCH_MNT > /dev/null 2>&1
-+echo "$ERR errors encountered" >> $seqres.full
-+
-+status=$ERR
-+exit
-diff --git a/tests/ext4/002.out b/tests/ext4/002.out
-new file mode 100644
-index 00000000..c1642bfd
---- /dev/null
-+++ b/tests/ext4/002.out
-@@ -0,0 +1,2 @@
-+QA output created by 002
-+Silence is golden.
-diff --git a/tests/ext4/group b/tests/ext4/group
-index a1adc553..b0aa781a 100644
---- a/tests/ext4/group
-+++ b/tests/ext4/group
-@@ -4,6 +4,7 @@
- # - comment line before each group is "new" description
- #
- 001 auto prealloc quick zero
-+002 auto mount
- 003 auto quick
- 004 auto dump
- 005 auto quick metadata ioctl rw
--- 
-2.21.3
+Hm, yep.
 
+>> +
+>> +OWNER=fsgqa
+>> +OTHER=fsgqa2
+>> +
+>> +# Save current system state to reset when done
+>> +SYMLINK_PROTECTION=`sysctl -n fs.protected_symlinks`
+>> +HARDLINK_PROTECTION=`sysctl -n fs.protected_hardlinks`
+>> +
+>> +test_symlink()
+>> +{
+>> +	ln -s $TEST_DIR/$seq/target $TEST_DIR/$seq/sticky_dir/symlink
+>> +	chown $OTHER.$OTHER $TEST_DIR/$seq/sticky_dir
+>> +	chown $OWNER.$OWNER $TEST_DIR/$seq/sticky_dir/symlink
+>> +	# If we can read the target, we followed the link
+>> +	sudo -u $OTHER cat $TEST_DIR/$seq/sticky_dir/symlink 2>&1 \
+> 
+> Use _user_do instead of sudo?
+
+but OTHER is "fsgqa2;" _user_do uses "fsgqa" .... hrm.  I suppose I could
+update _user_do to take a username, but is it worth it?
+ 
+Maybe I should just make one of the users root, I'm just worried about accidentally
+running into admin capabilities...
+
+-Eric
