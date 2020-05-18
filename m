@@ -2,34 +2,35 @@ Return-Path: <SRS0=Vcut=7A=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.3 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3DFF1C433E0
-	for <linux-fstests@archiver.kernel.org>; Mon, 18 May 2020 14:42:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C6D24C433DF
+	for <linux-fstests@archiver.kernel.org>; Mon, 18 May 2020 14:46:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 229CC206D4
-	for <linux-fstests@archiver.kernel.org>; Mon, 18 May 2020 14:42:24 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A940820787
+	for <linux-fstests@archiver.kernel.org>; Mon, 18 May 2020 14:46:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727005AbgEROmX (ORCPT
+        id S1728172AbgEROqC (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 18 May 2020 10:42:23 -0400
-Received: from sandeen.net ([63.231.237.45]:57694 "EHLO sandeen.net"
+        Mon, 18 May 2020 10:46:02 -0400
+Received: from sandeen.net ([63.231.237.45]:57916 "EHLO sandeen.net"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726918AbgEROmX (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 18 May 2020 10:42:23 -0400
+        id S1726989AbgEROp7 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 18 May 2020 10:45:59 -0400
 Received: from [10.0.0.4] (liberator [10.0.0.4])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by sandeen.net (Postfix) with ESMTPSA id 0E59A3248;
-        Mon, 18 May 2020 09:41:57 -0500 (CDT)
+        by sandeen.net (Postfix) with ESMTPSA id B3DA43248;
+        Mon, 18 May 2020 09:45:33 -0500 (CDT)
 Subject: Re: [PATCH 2/3] fstests: test restricted symlinks & hardlinks sysctls
 To:     Eryu Guan <guan@eryu.me>, Eric Sandeen <sandeen@redhat.com>
 Cc:     fstests <fstests@vger.kernel.org>
 References: <99a3164b-ee00-113c-e0aa-41eab9633364@redhat.com>
  <294c5739-ff30-285c-8cf7-11a6dff98294@redhat.com>
  <20200517155505.GD2704@desktop>
+ <db6173de-a655-024b-3494-19f11a67b792@sandeen.net>
 From:   Eric Sandeen <sandeen@sandeen.net>
 Autocrypt: addr=sandeen@sandeen.net; prefer-encrypt=mutual; keydata=
  mQINBE6x99QBEADMR+yNFBc1Y5avoUhzI/sdR9ANwznsNpiCtZlaO4pIWvqQJCjBzp96cpCs
@@ -73,113 +74,37 @@ Autocrypt: addr=sandeen@sandeen.net; prefer-encrypt=mutual; keydata=
  Pk6ah10C4+R1Jc7dyUsKksMfvvhRX1hTIXhth85H16706bneTayZBhlZ/hK18uqTX+s0onG/
  m1F3vYvdlE4p2ts1mmixMF7KajN9/E5RQtiSArvKTbfsB6Two4MthIuLuf+M0mI4gPl9SPlf
  fWCYVPhaU9o83y1KFbD/+lh1pjP7bEu/YudBvz7F2Myjh4/9GUAijrCTNeDTDAgvIJDjXuLX pA==
-Message-ID: <db6173de-a655-024b-3494-19f11a67b792@sandeen.net>
-Date:   Mon, 18 May 2020 09:42:20 -0500
+Message-ID: <7ad5d32f-a729-4f53-9a9b-6cbb9a767208@sandeen.net>
+Date:   Mon, 18 May 2020 09:45:57 -0500
 User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:68.0)
  Gecko/20100101 Thunderbird/68.8.0
 MIME-Version: 1.0
-In-Reply-To: <20200517155505.GD2704@desktop>
+In-Reply-To: <db6173de-a655-024b-3494-19f11a67b792@sandeen.net>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+On 5/18/20 9:42 AM, Eric Sandeen wrote:
+>>> +test_symlink()
+>>> +{
+>>> +	ln -s $TEST_DIR/$seq/target $TEST_DIR/$seq/sticky_dir/symlink
+>>> +	chown $OTHER.$OTHER $TEST_DIR/$seq/sticky_dir
+>>> +	chown $OWNER.$OWNER $TEST_DIR/$seq/sticky_dir/symlink
+>>> +	# If we can read the target, we followed the link
+>>> +	sudo -u $OTHER cat $TEST_DIR/$seq/sticky_dir/symlink 2>&1 \
+>> Use _user_do instead of sudo?
+> but OTHER is "fsgqa2;" _user_do uses "fsgqa" .... hrm.  I suppose I could
+> update _user_do to take a username, but is it worth it?
+>  
+> Maybe I should just make one of the users root, I'm just worried about accidentally
+> running into admin capabilities...
 
-On 5/17/20 10:55 AM, Eryu Guan wrote:
-> On Tue, May 05, 2020 at 03:20:10PM -0500, Eric Sandeen wrote:
->> This tests the fs.protected_symlinks and fs.protected_hardlinks
->> sysctls which restrict links behavior in sticky world-writable
->> directories as documented in the kernel at 
->> Documentation/admin-guide/sysctl/fs.rst
->>
->> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
->> ---
->>
->> diff --git a/tests/generic/900 b/tests/generic/900
->> new file mode 100755
->> index 00000000..f0ac46ef
->> --- /dev/null
->> +++ b/tests/generic/900
->> @@ -0,0 +1,114 @@
->> +#! /bin/bash
->> +# SPDX-License-Identifier: GPL-2.0
->> +# Copyright (c) 2020 Red Hat, Inc.  All Rights Reserved.
->> +#
->> +# FS QA Test 900
->> +#
->> +# Test protected_symlink and protected_hardlink ioctls
->> +#
->> +seq=`basename $0`
->> +seqres=$RESULT_DIR/$seq
->> +echo "QA output created by $seq"
->> +
->> +here=`pwd`
->> +tmp=/tmp/$$
->> +status=1	# failure is the default!
->> +trap "_cleanup; exit \$status" 0 1 2 3 15
->> +
->> +_cleanup()
->> +{
->> +	rm -rf $TEST_DIR/$seq
->> +	sysctl -qw fs.protected_symlinks=$SYMLINK_PROTECTION
->> +	sysctl -qw fs.protected_hardlinks=$HARDLINK_PROTECTION
-> 
-> Restore the sysctl only if "SYMLINK_PROTECTION" and
-> "HARDLINK_PROTECTION" are set.
+Actually I'll just re-use 123456-fsgq for OWNER, then OTHER can be fsgqa, and
+I'll use _user_do.
 
-thankss
-
->> +	cd /
->> +	rm -f $tmp.*
->> +}
->> +
->> +# get standard environment, filters and checks
->> +. ./common/rc
->> +. ./common/filter
->> +
->> +# remove previous $seqres.full before test
->> +rm -f $seqres.full
->> +
->> +# real QA test starts here
->> +
->> +# Modify as appropriate.
->> +_supported_fs generic
->> +_supported_os Linux
->> +_require_test
->> +_require_sysctl fs.protected_symlinks
->> +_require_sysctl fs.protected_hardlinks
->> +_require_user fsgqa
->> +_require_user fsgqa2
-> 
-> New user :) update README as well?
-
-Hm, yep.
-
->> +
->> +OWNER=fsgqa
->> +OTHER=fsgqa2
->> +
->> +# Save current system state to reset when done
->> +SYMLINK_PROTECTION=`sysctl -n fs.protected_symlinks`
->> +HARDLINK_PROTECTION=`sysctl -n fs.protected_hardlinks`
->> +
->> +test_symlink()
->> +{
->> +	ln -s $TEST_DIR/$seq/target $TEST_DIR/$seq/sticky_dir/symlink
->> +	chown $OTHER.$OTHER $TEST_DIR/$seq/sticky_dir
->> +	chown $OWNER.$OWNER $TEST_DIR/$seq/sticky_dir/symlink
->> +	# If we can read the target, we followed the link
->> +	sudo -u $OTHER cat $TEST_DIR/$seq/sticky_dir/symlink 2>&1 \
-> 
-> Use _user_do instead of sudo?
-
-but OTHER is "fsgqa2;" _user_do uses "fsgqa" .... hrm.  I suppose I could
-update _user_do to take a username, but is it worth it?
- 
-Maybe I should just make one of the users root, I'm just worried about accidentally
-running into admin capabilities...
-
+Thanks,
 -Eric
