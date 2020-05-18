@@ -2,53 +2,53 @@ Return-Path: <SRS0=Vcut=7A=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9992AC433E0
-	for <linux-fstests@archiver.kernel.org>; Mon, 18 May 2020 16:18:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 40613C433DF
+	for <linux-fstests@archiver.kernel.org>; Mon, 18 May 2020 19:59:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 76CFC207D8
-	for <linux-fstests@archiver.kernel.org>; Mon, 18 May 2020 16:18:13 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1DF7020829
+	for <linux-fstests@archiver.kernel.org>; Mon, 18 May 2020 19:59:07 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="MEf2UMjS"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="QEx9y6G3"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728286AbgERQSN (ORCPT
+        id S1726478AbgERT7G (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 18 May 2020 12:18:13 -0400
-Received: from us-smtp-2.mimecast.com ([205.139.110.61]:57233 "EHLO
+        Mon, 18 May 2020 15:59:06 -0400
+Received: from us-smtp-2.mimecast.com ([207.211.31.81]:39088 "EHLO
         us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1728283AbgERQSM (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 18 May 2020 12:18:12 -0400
+        by vger.kernel.org with ESMTP id S1728704AbgERT7G (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 18 May 2020 15:59:06 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1589818692;
+        s=mimecast20190719; t=1589831944;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
-        bh=BG2s4CkLghCs0GxCCEXf3eVz5i2xfrSvtJep0n3EnXk=;
-        b=MEf2UMjS4YG02rOkdp8A7NpNt0WTcdxxQlhToqMi5HtbhgMQVDmS8g76IcjOFyo2osotAd
-        F640s8tzxGJbJ2jcL9SY2n0K/fUbF0z2jS8WlKaNLDdKiOC/Bt/HhnbVkMJgASX9YtK/M8
-        oZMtDDrq/aqyJg8l4zKqmF69k62RWxQ=
+        bh=X6BPHTTPhO++nSGshKFrBLXdhIVEykT4CMuppGYixLo=;
+        b=QEx9y6G3tOeG2wDmCyBVpV11PYVT15qOsaYBuUfrbTIEWSmwUyrhzD7UjEYSQQJPj4/QCO
+        aXGa6sSbMZ4QwHZ6iRAOZPYymhAq16P89iT5EYOa8HXkNTjzF5Ida1aJbMDChb+66tUFyN
+        Ck9dncaMecd/GyXEKJGl8nTXJsiMMyU=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-254-KdYIQz8IMPq6-0FBQGVZZg-1; Mon, 18 May 2020 12:18:09 -0400
-X-MC-Unique: KdYIQz8IMPq6-0FBQGVZZg-1
+ us-mta-317-0vynXJ8EOlSMdoslglOthw-1; Mon, 18 May 2020 15:59:02 -0400
+X-MC-Unique: 0vynXJ8EOlSMdoslglOthw-1
 Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 13FD080B700
-        for <fstests@vger.kernel.org>; Mon, 18 May 2020 16:18:09 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 01BBB80058A;
+        Mon, 18 May 2020 19:59:02 +0000 (UTC)
 Received: from [IPv6:::1] (ovpn04.gateway.prod.ext.phx2.redhat.com [10.5.9.4])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id DBBFD82A1C
-        for <fstests@vger.kernel.org>; Mon, 18 May 2020 16:18:08 +0000 (UTC)
-Subject: [PATCH 5/5] xfstests: check for unknown flag result in
- _require_xfs_io_command
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id B46038206B;
+        Mon, 18 May 2020 19:59:01 +0000 (UTC)
+Subject: [PATCH 0/4] fstests: more quota related tests
 From:   Eric Sandeen <sandeen@redhat.com>
-To:     fstests <fstests@vger.kernel.org>
-References: <91639515-d639-c155-7cc8-660536b75257@redhat.com>
+To:     linux-xfs <linux-xfs@vger.kernel.org>,
+        fstests <fstests@vger.kernel.org>
+References: <ea649599-f8a9-deb9-726e-329939befade@redhat.com>
 Autocrypt: addr=sandeen@redhat.com; prefer-encrypt=mutual; keydata=
  mQINBE6x99QBEADMR+yNFBc1Y5avoUhzI/sdR9ANwznsNpiCtZlaO4pIWvqQJCjBzp96cpCs
  nQZV32nqJBYnDpBDITBqTa/EF+IrHx8gKq8TaSBLHUq2ju2gJJLfBoL7V3807PQcI18YzkF+
@@ -91,12 +91,12 @@ Autocrypt: addr=sandeen@redhat.com; prefer-encrypt=mutual; keydata=
  XQLj5HUlzt3JSwqSwx+++FFfWFMheG2HzkfXrvTpud5NrJkGGVn+ErXy6pNf6zSicb+bUXe9
  i92UTina2zWaaLEwXspqM338TlFC2JICu8pNt+wHpPCjgy2Ei4u5/4zSYjiA+X1I+V99YJhU
  +FpT2jzfLUoVsP/6WHWmM/tsS79i50G/PsXYzKOHj/0ZQCKOsJM14NMMCC8gkONe4tek
-Message-ID: <77631ab5-9354-549e-bd20-71e15c26cc52@redhat.com>
-Date:   Mon, 18 May 2020 11:18:08 -0500
+Message-ID: <9c9a63f3-13ab-d5b6-923c-4ea684b6b2f8@redhat.com>
+Date:   Mon, 18 May 2020 14:59:01 -0500
 User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:68.0)
  Gecko/20100101 Thunderbird/68.8.0
 MIME-Version: 1.0
-In-Reply-To: <91639515-d639-c155-7cc8-660536b75257@redhat.com>
+In-Reply-To: <ea649599-f8a9-deb9-726e-329939befade@redhat.com>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
@@ -106,28 +106,10 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-If we are testing for "xfs_io -c chattr $FOO" be sure to catch any
-unknown flag output and _notrun
+This collects zorro's outstanding patch to test per-type quota
+timers, as well as one test from darrick to test limit survival
+after quotacheck,  plus 2 more from me to test grace time extension.
 
-Signed-off-by: Eric Sandeen <sandeen@redhat.com>
----
- common/rc | 2 ++
- 1 file changed, 2 insertions(+)
-
-diff --git a/common/rc b/common/rc
-index 310fdc46..a6967831 100644
---- a/common/rc
-+++ b/common/rc
-@@ -2255,6 +2255,8 @@ _require_xfs_io_command()
- 		_notrun "xfs_io $command $param_checked not supported on $FSTYP"
- 	echo $testio | grep -q "Function not implemented" && \
- 		_notrun "xfs_io $command $param_checked support is missing (missing syscall?)"
-+	echo $testio | grep -q "unknown flag" && \
-+		_notrun "xfs_io $command $param_checked support is missing (unknown flag)"
- 
- 	[ -n "$param" ] || return
- 
--- 
-2.17.0
-
+zorro's still needs ENOSPC vs. EDQUOT filtering, darrick's might
+need to be made generic, and mine are new.
 
