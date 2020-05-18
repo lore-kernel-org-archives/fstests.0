@@ -7,44 +7,45 @@ X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D240EC433DF
-	for <linux-fstests@archiver.kernel.org>; Mon, 18 May 2020 16:16:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9992AC433E0
+	for <linux-fstests@archiver.kernel.org>; Mon, 18 May 2020 16:18:13 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AA2C320674
-	for <linux-fstests@archiver.kernel.org>; Mon, 18 May 2020 16:16:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 76CFC207D8
+	for <linux-fstests@archiver.kernel.org>; Mon, 18 May 2020 16:18:13 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="i2DE0oQp"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="MEf2UMjS"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727035AbgERQQy (ORCPT
+        id S1728286AbgERQSN (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 18 May 2020 12:16:54 -0400
-Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:57241 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726958AbgERQQy (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 18 May 2020 12:16:54 -0400
+        Mon, 18 May 2020 12:18:13 -0400
+Received: from us-smtp-2.mimecast.com ([205.139.110.61]:57233 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1728283AbgERQSM (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 18 May 2020 12:18:12 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1589818612;
+        s=mimecast20190719; t=1589818692;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
-        bh=i2JZyEB5WU/zHbClWF2rTgCJGJ8RuiVVx0Xcz2lXh7o=;
-        b=i2DE0oQp0kjrv6MAK1Li8Q4mhlvfEfpRVlVoG3f73ipp+/9jFq0Nklp5ZLnnywIsEzT0kf
-        IyHMw5xTIOd2i3iahiU85uLB2/3A2foYfX62/4xJrvMmrb9Cw71gGE9Gmk9bGz53qP+dFs
-        G2g9fmzJCDR7KYGdMuoHNlB1NJdIxx8=
+        bh=BG2s4CkLghCs0GxCCEXf3eVz5i2xfrSvtJep0n3EnXk=;
+        b=MEf2UMjS4YG02rOkdp8A7NpNt0WTcdxxQlhToqMi5HtbhgMQVDmS8g76IcjOFyo2osotAd
+        F640s8tzxGJbJ2jcL9SY2n0K/fUbF0z2jS8WlKaNLDdKiOC/Bt/HhnbVkMJgASX9YtK/M8
+        oZMtDDrq/aqyJg8l4zKqmF69k62RWxQ=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-209-NKPeyQQLPESMmgkjq1Cy3Q-1; Mon, 18 May 2020 12:16:49 -0400
-X-MC-Unique: NKPeyQQLPESMmgkjq1Cy3Q-1
-Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
+ us-mta-254-KdYIQz8IMPq6-0FBQGVZZg-1; Mon, 18 May 2020 12:18:09 -0400
+X-MC-Unique: KdYIQz8IMPq6-0FBQGVZZg-1
+Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id F079C835B75
-        for <fstests@vger.kernel.org>; Mon, 18 May 2020 16:16:48 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 13FD080B700
+        for <fstests@vger.kernel.org>; Mon, 18 May 2020 16:18:09 +0000 (UTC)
 Received: from [IPv6:::1] (ovpn04.gateway.prod.ext.phx2.redhat.com [10.5.9.4])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id 7E3A25D9DD
-        for <fstests@vger.kernel.org>; Mon, 18 May 2020 16:16:48 +0000 (UTC)
-Subject: [PATCH 4/5] fstests: add _require_mknod
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id DBBFD82A1C
+        for <fstests@vger.kernel.org>; Mon, 18 May 2020 16:18:08 +0000 (UTC)
+Subject: [PATCH 5/5] xfstests: check for unknown flag result in
+ _require_xfs_io_command
 From:   Eric Sandeen <sandeen@redhat.com>
 To:     fstests <fstests@vger.kernel.org>
 References: <91639515-d639-c155-7cc8-660536b75257@redhat.com>
@@ -90,8 +91,8 @@ Autocrypt: addr=sandeen@redhat.com; prefer-encrypt=mutual; keydata=
  XQLj5HUlzt3JSwqSwx+++FFfWFMheG2HzkfXrvTpud5NrJkGGVn+ErXy6pNf6zSicb+bUXe9
  i92UTina2zWaaLEwXspqM338TlFC2JICu8pNt+wHpPCjgy2Ei4u5/4zSYjiA+X1I+V99YJhU
  +FpT2jzfLUoVsP/6WHWmM/tsS79i50G/PsXYzKOHj/0ZQCKOsJM14NMMCC8gkONe4tek
-Message-ID: <5c99e460-11bf-ade8-c2bd-afaccabf4b9f@redhat.com>
-Date:   Mon, 18 May 2020 11:16:47 -0500
+Message-ID: <77631ab5-9354-549e-bd20-71e15c26cc52@redhat.com>
+Date:   Mon, 18 May 2020 11:18:08 -0500
 User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:68.0)
  Gecko/20100101 Thunderbird/68.8.0
 MIME-Version: 1.0
@@ -99,132 +100,33 @@ In-Reply-To: <91639515-d639-c155-7cc8-660536b75257@redhat.com>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Add a _require_mknod test so that filesystems with no ->mknod
-operation will _notrun instead of fail, and add the helper to
-all necessary tests.
+If we are testing for "xfs_io -c chattr $FOO" be sure to catch any
+unknown flag output and _notrun
 
 Signed-off-by: Eric Sandeen <sandeen@redhat.com>
 ---
- common/rc         | 7 +++++++
- tests/generic/062 | 1 +
- tests/generic/184 | 1 +
- tests/generic/306 | 1 +
- tests/generic/401 | 1 +
- tests/generic/434 | 1 +
- tests/generic/479 | 1 +
- tests/generic/564 | 3 +++
- 8 files changed, 16 insertions(+)
+ common/rc | 2 ++
+ 1 file changed, 2 insertions(+)
 
 diff --git a/common/rc b/common/rc
-index 62952036..310fdc46 100644
+index 310fdc46..a6967831 100644
 --- a/common/rc
 +++ b/common/rc
-@@ -4215,6 +4215,13 @@ _require_sysctl_variable()
- 	sysctl $name &>/dev/null || _notrun "$name sysctl unavailable"
- }
+@@ -2255,6 +2255,8 @@ _require_xfs_io_command()
+ 		_notrun "xfs_io $command $param_checked not supported on $FSTYP"
+ 	echo $testio | grep -q "Function not implemented" && \
+ 		_notrun "xfs_io $command $param_checked support is missing (missing syscall?)"
++	echo $testio | grep -q "unknown flag" && \
++		_notrun "xfs_io $command $param_checked support is missing (unknown flag)"
  
-+_require_mknod()
-+{
-+	mknod $TEST_DIR/$seq.null c 1 3 \
-+		|| _notrun "$FSTYP does not support mknod/mkfifo"
-+	rm -f $TEST_DIR/$seq.null
-+}
-+
- init_rc
+ 	[ -n "$param" ] || return
  
- ################################################################################
-diff --git a/tests/generic/062 b/tests/generic/062
-index ba744885..d2a0ac9a 100755
---- a/tests/generic/062
-+++ b/tests/generic/062
-@@ -60,6 +60,7 @@ _supported_os Linux
- _require_scratch
- _require_attrs
- _require_symlinks
-+_require_mknod
- 
- rm -f $tmp.backup1 $tmp.backup2 $seqres.full
- 
-diff --git a/tests/generic/184 b/tests/generic/184
-index 8aca1a0d..94f4d0e1 100755
---- a/tests/generic/184
-+++ b/tests/generic/184
-@@ -29,6 +29,7 @@ _cleanup()
- _supported_fs generic
- _supported_os Linux
- _require_test
-+_require_mknod
- 
- rm -f $TEST_DIR/null
- mknod $TEST_DIR/null c 1 3
-diff --git a/tests/generic/306 b/tests/generic/306
-index 046f4516..6f16a5f5 100755
---- a/tests/generic/306
-+++ b/tests/generic/306
-@@ -34,6 +34,7 @@ _supported_os Linux
- _require_scratch
- _require_test
- _require_symlinks
-+_require_mknod
- 
- DEVNULL=$SCRATCH_MNT/devnull
- DEVZERO=$SCRATCH_MNT/devzero
-diff --git a/tests/generic/401 b/tests/generic/401
-index 00e9bbe0..f8b1fd21 100755
---- a/tests/generic/401
-+++ b/tests/generic/401
-@@ -38,6 +38,7 @@ _supported_fs generic
- _supported_os Linux
- _require_scratch
- _require_symlinks
-+_require_mknod
- _require_test_program "t_dir_type"
- 
- rm -f $seqres.full
-diff --git a/tests/generic/434 b/tests/generic/434
-index edbf49d3..131c5d99 100755
---- a/tests/generic/434
-+++ b/tests/generic/434
-@@ -30,6 +30,7 @@ _supported_os Linux
- 
- _require_xfs_io_command "copy_range"
- _require_test
-+_require_mknod
- 
- testdir=$TEST_DIR/test-$seq
- rm -rf $testdir
-diff --git a/tests/generic/479 b/tests/generic/479
-index aaf864a4..fc0b3b6c 100755
---- a/tests/generic/479
-+++ b/tests/generic/479
-@@ -33,6 +33,7 @@ _supported_fs generic
- _supported_os Linux
- _require_scratch
- _require_symlinks
-+_require_mknod
- _require_dm_target flakey
- 
- rm -f $seqres.full
-diff --git a/tests/generic/564 b/tests/generic/564
-index 4958b3b5..b9b21134 100755
---- a/tests/generic/564
-+++ b/tests/generic/564
-@@ -37,6 +37,9 @@ rm -f $seqres.full
- 
- _require_test
- _require_loop
-+# for mkfifo
-+_require_mknod
-+
- #
- # This test effectively requires xfs_io with these commits
- #  2a42470b xfs_io: copy_file_range length is a size_t
 -- 
 2.17.0
 
