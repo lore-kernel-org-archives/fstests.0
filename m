@@ -2,225 +2,288 @@ Return-Path: <SRS0=Vcut=7A=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 52363C433E1
-	for <linux-fstests@archiver.kernel.org>; Mon, 18 May 2020 20:01:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C68ECC433E0
+	for <linux-fstests@archiver.kernel.org>; Mon, 18 May 2020 22:30:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2A709206D4
-	for <linux-fstests@archiver.kernel.org>; Mon, 18 May 2020 20:01:15 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8D24F207ED
+	for <linux-fstests@archiver.kernel.org>; Mon, 18 May 2020 22:30:27 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="dmtYFoWH"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="jF1hG+I/"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726369AbgERUBO (ORCPT
+        id S1728313AbgERWa1 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 18 May 2020 16:01:14 -0400
-Received: from us-smtp-1.mimecast.com ([207.211.31.81]:21689 "EHLO
-        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726367AbgERUBO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 18 May 2020 16:01:14 -0400
+        Mon, 18 May 2020 18:30:27 -0400
+Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:44770 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1728266AbgERWa0 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 18 May 2020 18:30:26 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1589832072;
+        s=mimecast20190719; t=1589841025;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
-        bh=ZLOA4z01ceJ5aOvYxHarIfpLYoT+JyFiuBv9Mze9XkM=;
-        b=dmtYFoWHoHE+0cc5qDjROlE0gz385EbcoBUjbCovY6/0sx86k+ikouyeZjbjjBwSepICsR
-        HQn+T6LnBQNofg/AeojSAHNXh4wYZdt4t0NgZFyebyvqlUoXbwOEcI8SkqOkWosqt2PEEh
-        VmeKDaSdiRsuoaj/xKFAG8gs8LyelME=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-341-qmCndoW8Pn-Y_CgF44KFOQ-1; Mon, 18 May 2020 16:01:10 -0400
-X-MC-Unique: qmCndoW8Pn-Y_CgF44KFOQ-1
-Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 82B09835B43;
-        Mon, 18 May 2020 20:01:09 +0000 (UTC)
-Received: from [IPv6:::1] (ovpn04.gateway.prod.ext.phx2.redhat.com [10.5.9.4])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id 1892819634;
-        Mon, 18 May 2020 20:01:09 +0000 (UTC)
-Subject: [PATCH 4/4] fstests: individual user grace period extension via
- xfs_quota
-From:   Eric Sandeen <sandeen@redhat.com>
-To:     linux-xfs <linux-xfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>
-References: <ea649599-f8a9-deb9-726e-329939befade@redhat.com>
- <9c9a63f3-13ab-d5b6-923c-4ea684b6b2f8@redhat.com>
-Autocrypt: addr=sandeen@redhat.com; prefer-encrypt=mutual; keydata=
- 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
-Message-ID: <b4810aff-10c4-744a-2b36-053a1606e70f@redhat.com>
-Date:   Mon, 18 May 2020 15:01:08 -0500
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:68.0)
- Gecko/20100101 Thunderbird/68.8.0
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=C/P9duv0/aKfl2c6GRTv9GRqCSazu3j7j2Hfg4zLJaA=;
+        b=jF1hG+I/RzdQwlX5zuxXbfzXN3uILjTNbdbzQ1B42ukDTcphWdl0qbnRj+RNy2+EE8Bthb
+        WRwIkLd7I8IUVCDKuagmdc9kCPQe8cS/0Su2fsJrB68RKcn9gbcXoXUhDX0PYqEyG6FCG9
+        V0KeaNx4y5PnbklTP27NiheCcGhVZEg=
+Received: from mail-qv1-f72.google.com (mail-qv1-f72.google.com
+ [209.85.219.72]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-9-vLQViKaDMRiT4FuZnJtKjA-1; Mon, 18 May 2020 18:30:22 -0400
+X-MC-Unique: vLQViKaDMRiT4FuZnJtKjA-1
+Received: by mail-qv1-f72.google.com with SMTP id t10so2938243qvz.9
+        for <fstests@vger.kernel.org>; Mon, 18 May 2020 15:30:22 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=C/P9duv0/aKfl2c6GRTv9GRqCSazu3j7j2Hfg4zLJaA=;
+        b=XDornCaSAXv0kseBIaMq54iCb3ToP9ITU/MRBlbQwIYAPRiVMCrmzCJLfmTuh0Omvp
+         XcPeM6QPa2KD8+aOf2pIGrXmPVo07zb9WVyOpOgNNPLc0OP1TzdrWrkasz+beYNefm8c
+         4e4cs/t89acXyNfo8FW/7pQIAQDZwEHXmfECWYTelMfo4k5xGRDyc54STjnNQnnQ0Ztd
+         bZkMaF1kVMvsoUM76+rXCEapBv/cGV/oUoQll6PoozFlWh1jkWWSt3neonAeEFdxlDwj
+         t02+2rnpQOfvJdCmsK7xpAg7Viyc11ghG90jDU3ZnNtn89hUqgAkV76sK/KxP/AkOGlC
+         NZzA==
+X-Gm-Message-State: AOAM530yfV/jxz0g9JFf9ANVZjKsFzr8pAvO3Uo0k7L1cm6O5eY46Rv9
+        +EFAzr0YYHNb8yt18L82dBV3ub5Llt5Jy0n+xL18GgvaKdhh3+NDVhYL62EqOm0dwfkWJPOAxJF
+        n4clQzUWjQXDjDeh2MYd9X06rOO67Y/fm2Q==
+X-Received: by 2002:a37:d92:: with SMTP id 140mr17687315qkn.426.1589841021540;
+        Mon, 18 May 2020 15:30:21 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJz9Fl1T1Bjj+QaEHFJFp5emHB87/fFJq+eicr2/lhbUTABu4TLDQgGHrI6L1oqNUv6gpjFvffNm1aOji0HS+rk=
+X-Received: by 2002:a37:d92:: with SMTP id 140mr17687270qkn.426.1589841020918;
+ Mon, 18 May 2020 15:30:20 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <9c9a63f3-13ab-d5b6-923c-4ea684b6b2f8@redhat.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.11
+References: <20200514111453.GA99187@suse.com> <8497fe9a11ac1837813ee5f14b6ebae8fa6bf707.camel@kernel.org>
+ <20200514124845.GA12559@suse.com> <4e5bf0e3bf055e53a342b19d168f6cf441781973.camel@kernel.org>
+ <CAOQ4uxhireZBRvcPQzTS8yOoO4gQt78M0ktZo-9yQ-zcaLZbow@mail.gmail.com>
+ <20200515111548.GA54598@suse.com> <61b1f19edcc349641b5383c2ac70cbf9a15ba4bd.camel@kernel.org>
+ <CAOQ4uxiWZoSj3Pjwskd_hu-ErV9096hLt13CDcW6nEEvcwDNVA@mail.gmail.com> <e227d42fdc91587e34bc64ac252970d39d9b4eee.camel@kernel.org>
+In-Reply-To: <e227d42fdc91587e34bc64ac252970d39d9b4eee.camel@kernel.org>
+From:   Gregory Farnum <gfarnum@redhat.com>
+Date:   Mon, 18 May 2020 15:30:09 -0700
+Message-ID: <CAJ4mKGbahd8CbkEauBHBX6o93jipkCVoYe9O-1rAJQJFZkqDsQ@mail.gmail.com>
+Subject: Re: [PATCH] ceph: don't return -ESTALE if there's still an open file
+To:     Jeff Layton <jlayton@kernel.org>
+Cc:     Amir Goldstein <amir73il@gmail.com>,
+        Luis Henriques <lhenriques@suse.com>,
+        Ilya Dryomov <idryomov@gmail.com>,
+        ceph-devel <ceph-devel@vger.kernel.org>,
+        linux-kernel <linux-kernel@vger.kernel.org>,
+        fstests <fstests@vger.kernel.org>,
+        Dave Chinner <dchinner@redhat.com>,
+        Christoph Hellwig <hch@lst.de>,
+        Miklos Szeredi <miklos@szeredi.hu>
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Test that we can extend an individual user's grace time once they
-reach their soft limit.
+Maybe we resolved this conversation; I can't quite tell...
 
-Signed-off-by: Eric Sandeen <sandeen@redhat.com>
----
- tests/generic/904     | 78 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/904.out |  1 +
- tests/generic/group   |  1 +
- 3 files changed, 80 insertions(+)
- create mode 100755 tests/generic/904
- create mode 100644 tests/generic/904.out
+On Fri, May 15, 2020 at 12:16 PM Jeff Layton <jlayton@kernel.org> wrote:
+>
+> On Fri, 2020-05-15 at 19:56 +0300, Amir Goldstein wrote:
+> > On Fri, May 15, 2020 at 2:38 PM Jeff Layton <jlayton@kernel.org> wrote:
+> > > On Fri, 2020-05-15 at 12:15 +0100, Luis Henriques wrote:
+> > > > On Fri, May 15, 2020 at 09:42:24AM +0300, Amir Goldstein wrote:
+> > > > > +CC: fstests
+> > > > >
+> > > > > On Thu, May 14, 2020 at 4:15 PM Jeff Layton <jlayton@kernel.org> wrote:
+> > > > > > On Thu, 2020-05-14 at 13:48 +0100, Luis Henriques wrote:
+> > > > > > > On Thu, May 14, 2020 at 08:10:09AM -0400, Jeff Layton wrote:
+> > > > > > > > On Thu, 2020-05-14 at 12:14 +0100, Luis Henriques wrote:
+> > > > > > > > > Similarly to commit 03f219041fdb ("ceph: check i_nlink while converting
+> > > > > > > > > a file handle to dentry"), this fixes another corner case with
+> > > > > > > > > name_to_handle_at/open_by_handle_at.  The issue has been detected by
+> > > > > > > > > xfstest generic/467, when doing:
+> > > > > > > > >
+> > > > > > > > >  - name_to_handle_at("/cephfs/myfile")
+> > > > > > > > >  - open("/cephfs/myfile")
+> > > > > > > > >  - unlink("/cephfs/myfile")
+> > > > > > > > >  - open_by_handle_at()
+> > > > > > > > >
+> > > > > > > > > The call to open_by_handle_at should not fail because the file still
+> > > > > > > > > exists and we do have a valid handle to it.
+> > > > > > > > >
+> > > > > > > > > Signed-off-by: Luis Henriques <lhenriques@suse.com>
+> > > > > > > > > ---
+> > > > > > > > >  fs/ceph/export.c | 13 +++++++++++--
+> > > > > > > > >  1 file changed, 11 insertions(+), 2 deletions(-)
+> > > > > > > > >
+> > > > > > > > > diff --git a/fs/ceph/export.c b/fs/ceph/export.c
+> > > > > > > > > index 79dc06881e78..8556df9d94d0 100644
+> > > > > > > > > --- a/fs/ceph/export.c
+> > > > > > > > > +++ b/fs/ceph/export.c
+> > > > > > > > > @@ -171,12 +171,21 @@ struct inode *ceph_lookup_inode(struct super_block *sb, u64 ino)
+> > > > > > > > >
+> > > > > > > > >  static struct dentry *__fh_to_dentry(struct super_block *sb, u64 ino)
+> > > > > > > > >  {
+> > > > > > > > > + struct ceph_inode_info *ci;
+> > > > > > > > >   struct inode *inode = __lookup_inode(sb, ino);
+> > > > > > > > > +
+> > > > > > > > >   if (IS_ERR(inode))
+> > > > > > > > >           return ERR_CAST(inode);
+> > > > > > > > >   if (inode->i_nlink == 0) {
+> > > > > > > > > -         iput(inode);
+> > > > > > > > > -         return ERR_PTR(-ESTALE);
+> > > > > > > > > +         bool is_open;
+> > > > > > > > > +         ci = ceph_inode(inode);
+> > > > > > > > > +         spin_lock(&ci->i_ceph_lock);
+> > > > > > > > > +         is_open = __ceph_is_file_opened(ci);
+> > > > > > > > > +         spin_unlock(&ci->i_ceph_lock);
+> > > > > > > > > +         if (!is_open) {
+> > > > > > > > > +                 iput(inode);
+> > > > > > > > > +                 return ERR_PTR(-ESTALE);
+> > > > > > > > > +         }
+> > > > > > > > >   }
+> > > > > > > > >   return d_obtain_alias(inode);
+> > > > > > > > >  }
+> > > > > > > >
+> > > > > > > > Thanks Luis. Out of curiousity, is there any reason we shouldn't ignore
+> > > > > > > > the i_nlink value here? Does anything obviously break if we do?
+> > > > > > >
+> > > > > > > Yes, the scenario described in commit 03f219041fdb is still valid, which
+> > > > > > > is basically the same but without the extra open(2):
+> > > > > > >
+> > > > > > >   - name_to_handle_at("/cephfs/myfile")
+> > > > > > >   - unlink("/cephfs/myfile")
+> > > > > > >   - open_by_handle_at()
+> > > > > > >
+> > > > > >
+> > > > > > Ok, I guess we end up doing some delayed cleanup, and that allows the
+> > > > > > inode to be found in that situation.
+> > > > > >
+> > > > > > > The open_by_handle_at man page isn't really clear about these 2 scenarios,
+> > > > > > > but generic/426 will fail if -ESTALE isn't returned.  Want me to add a
+> > > > > > > comment to the code, describing these 2 scenarios?
+> > > > > > >
+> > > > > >
+> > > > > > (cc'ing Amir since he added this test)
+> > > > > >
+> > > > > > I don't think there is any hard requirement that open_by_handle_at
+> > > > > > should fail in that situation. It generally does for most filesystems
+> > > > > > due to the way they handle cl794798fa xfsqa: test open_by_handle() on unlinked and freed inode clusters
+> > > > > eaning up unlinked inodes, but I don't
+> > > > > > think it's technically illegal to allow the inode to still be found. If
+> > > > > > the caller cares about whether it has been unlinked it can always test
+> > > > > > i_nlink itself.
+> > > > > >
+> > > > > > Amir, is this required for some reason that I'm not aware of?
+> > > > >
+> > > > > Hi Jeff,
+> > > > >
+> > > > > The origin of this test is in fstests commit:
+> > > > > 794798fa xfsqa: test open_by_handle() on unlinked and freed inode clusters
+> > > > >
+> > > > > It was introduced to catch an xfs bug, so this behavior is the expectation
+> > > > > of xfs filesystem, but note that it is not a general expectation to fail
+> > > > > open_by_handle() after unlink(), it is an expectation to fail open_by_handle()
+> > > > > after unlink() + sync() + drop_caches.
+> > > >
+> > > > Yes, sorry I should have mentioned the sync+drop_caches in the
+> > > > description.
+> > > >
+> > > > > I have later converted the test to generic, because I needed to check the
+> > > > > same expectation for overlayfs use case, which is:
+> > > > > The original inode is always there (in lower layer), unlink creates a whiteout
+> > > > > mark and open_by_handle should treat that as ESTALE, otherwise the
+> > > > > unlinked files would be accessible to nfs clients forever.
+> > > > >
+> > >
+> > > Ok, that makes sense.
+> > >
+> > > The situation with Ceph is a bit different I think. I suspect that we're
+> > > cleaning the inode out of the client's caches after drop_caches, but
+> > > then we end up issuing a lookup by inode number to the MDS and it
+> > > returns an inode that it may be in the process of purging.
+> > >
+> > > > > In overlayfs, we handle the open file case by returning a dentry only
+> > > > > in case the inode with deletion mark in question is already in inode cache,
+> > > > > but we take care not to populate inode cache with the check.
+> > > > > It is easier, because we do not need to get inode into cache for checking
+> > > > > the delete marker.
+> > > > >
+> > > > > Maybe you could instead check in __fh_to_dentry():
+> > > > >
+> > > > >     if (inode->i_nlink == 0 && atomic_read(&inode->i_count) == 1)) {
+> > > > >         iput(inode);
+> > > > >         return ERR_PTR(-ESTALE);
+> > > > >     }
+> > > > >
+> > > > > The above is untested, so I don't know if it's enough to pass generic/426.
+> > > >
+> > > > Yes, I can confirm that this also fixes the issue -- both tests pass.
+> > > > __ceph_is_file_opened() uses some internal counters per inode, incremented
+> > > > each time a file is open in a specific mode.  The problem is that these
+> > > > counters require some extra locking (maybe they should be atomic_t?), so
+> > > > you're suggestion is probably better.
+> > > >
+> > > > > Note that generic/467 also checks the same behavior for rmdir().
+> > > >
+> > > > Yeah, but the only test-case failing with cephfs is the one described
+> > > > above (i.e. "open_by_handle -dkr ...").
+> > > >
+> > > > > If you decide that ceph does not need to comply to this behavior,
+> > > > > then we probably need to whitelist/blocklist the filesystems that
+> > > > > want to test this behavior, which will be a shame.
+> > > >
+> > > > Unless Jeff has any objection, I'm happy sending v2, simplifying the patch
+> > > > to use your simpler solution (and mentioning sync+drop_caches in the
+> > > > commit message).
+> > > >
+> > >
+> > > The real question I have is whether this is truly a client-side issue,
+> > > or if the MDS is satisfying lookup-by-ino requests with inodes that just
+> > > haven't yet been fully purged. If so, then the right fix may be in the
+> > > MDS.
+> > >
+> > > Can we determine that one way or the other?
+> > >
+> >
+> > Questions:
+> > 1. Does sync() result in fully purging inodes on MDS?
+>
+> I don't think so, but again, that code is not trivial to follow. I do
+> know that the MDS keeps around a "strays directory" which contains
+> unlinked inodes that are lazily cleaned up. My suspicion is that it's
+> satisfying lookups out of this cache as well.
+>
+> Which may be fine...the MDS is not required to be POSIX compliant after
+> all. Only the fs drivers are.
 
-diff --git a/tests/generic/904 b/tests/generic/904
-new file mode 100755
-index 00000000..8a3b52f2
---- /dev/null
-+++ b/tests/generic/904
-@@ -0,0 +1,78 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2020 Red Hat, Inc.  All Rights Reserved.
-+#
-+# FS QA Test No. 902
-+#
-+# Test individual user ID quota grace period extension
-+# This is the xfs_quota version of the test
-+#
-+# This test only exercises user quota because it's not known whether the
-+# filesystem can set individual grace timers for each quota type
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/quota
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch
-+_require_quota
-+_require_user
-+# for xfs_quota on generic fs
-+_require_xfs_quota_foreign
-+# for repquota (if setquota supports it, repquota does too)
-+_require_setquota_project
-+
-+_scratch_mkfs >$seqres.full 2>&1
-+_qmount_option "usrquota"
-+_qmount
-+
-+# Test individual timer update functionality; if "-d" is accepted
-+# this is xfs_quota that can do default /or/ individual timers
-+$XFS_QUOTA_PROG -x -c "timer 0 -d" $SCRATCH_MNT 2>&1 \
-+	| grep -q ^timer \
-+	&& _notrun "xfs_quota does not support individual grace extension"
-+
-+# Set a default user inode grace period of 1 second
-+$XFS_QUOTA_PROG -x -c "timer -u -i -d 1" $SCRATCH_MNT
-+# Soft inode limit 1, hard limit 5
-+$XFS_QUOTA_PROG -x -c "limit -u isoft=1 ihard=5 $qa_user" $SCRATCH_MNT
-+# Run qa user over soft limit and go over grace period
-+su $qa_user -c "touch $SCRATCH_MNT/file1 $SCRATCH_MNT/file2"
-+sleep 3
-+# Extend grace to now + 100s
-+now=`date +%s`
-+let set=now+100
-+$XFS_QUOTA_PROG -x -c "timer -u -i 100 $qa_user" $SCRATCH_MNT
-+# XXX We use repquota because xfs_quota doesn't know how to return
-+# raw ("since epoch") grace expiry
-+get=`repquota -up $SCRATCH_MNT | grep  "^$qa_user" | awk '{print $NF}'`
-+
-+if [ "$get" != "$set" ]; then
-+	echo "set grace to $set but got grace $get"
-+fi
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/904.out b/tests/generic/904.out
-new file mode 100644
-index 00000000..c07a2a3c
---- /dev/null
-+++ b/tests/generic/904.out
-@@ -0,0 +1 @@
-+QA output created by 904
-diff --git a/tests/generic/group b/tests/generic/group
-index ab1b4b8f..d19271aa 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -603,3 +603,4 @@
- 901 auto quick perms
- 902 auto quick quota
- 903 auto quick quota
-+904 auto quick quota
--- 
-2.17.0
+I don't think this is quite that simple. Yes, the MDS is certainly
+giving back stray inodes in response to a lookup-by-ino request. But
+that's for a specific purpose: we need to be able to give back caps on
+unlinked-but-open files. For NFS specifically, I don't know what the
+rules are on NFS file handles and unlinked files, but the Ceph MDS
+won't know when files are closed everywhere, and it translates from
+NFS fh to Ceph inode using that lookup-by-ino functionality.
 
+>
+> > 2. Is i_nlink synchronized among nodes on deferred delete?
+> > IWO, can inode come back from the dead on client if another node
+> > has linked it before i_nlink 0 was observed?
+>
+> No, that shouldn't happen. The caps mechanism should ensure that it
+> can't be observed by other clients until after the change.
+>
+> That said, Luis' current patch doesn't ensure we have the correct caps
+> to check the i_nlink. We may need to add that in before we can roll with
+> this.
+>
+> > 3. Can an NFS client be "migrated" from one ceph node to another
+> > with an open but unlinked file?
+> >
+>
+> No. Open files in ceph are generally per-client. You can't pass around a
+> fd (or equivalent).
+
+But the NFS file handles I think do work across clients, right?
+
+-Greg
 
