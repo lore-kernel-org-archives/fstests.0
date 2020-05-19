@@ -2,157 +2,223 @@ Return-Path: <SRS0=WJEH=7B=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-1.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1AA6AC433E0
-	for <linux-fstests@archiver.kernel.org>; Tue, 19 May 2020 10:43:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 75766C433DF
+	for <linux-fstests@archiver.kernel.org>; Tue, 19 May 2020 16:01:33 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E56C020758
-	for <linux-fstests@archiver.kernel.org>; Tue, 19 May 2020 10:43:13 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1589884993;
-	bh=L/14AxOpD03Run3O+IBY+gN9A7FJED5ePKYXqAc56ws=;
-	h=Subject:From:To:Cc:Date:In-Reply-To:References:List-ID:From;
-	b=yKAdS5Zk5oMtu81feXgn8hDKd3lK9sBUTKu1q9hr8COgqLB+nPtJLrPt9wrO5Xqjc
-	 7FVhkovTR03oOCatr3mVzprRKjxo3Tdnlg4RI/84UI4zcycW6G9SOwRWW6xSLZSuiX
-	 Synp1Fd8w0xWAT3ga/eHIaXCJ7XNElJFN3pxxQRM=
+	by mail.kernel.org (Postfix) with ESMTP id 5198C207C4
+	for <linux-fstests@archiver.kernel.org>; Tue, 19 May 2020 16:01:33 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="LFemkb06"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726508AbgESKnN (ORCPT
+        id S1729361AbgESQBd (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 19 May 2020 06:43:13 -0400
-Received: from mail.kernel.org ([198.145.29.99]:47658 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725911AbgESKnN (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 19 May 2020 06:43:13 -0400
-Received: from tleilax.poochiereds.net (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 5D16F20674;
-        Tue, 19 May 2020 10:43:11 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1589884992;
-        bh=L/14AxOpD03Run3O+IBY+gN9A7FJED5ePKYXqAc56ws=;
-        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=yu54AhMcabq+AvDj6KUaIZzm3VsU3sxprdYjdyBn4/dTgi6hv+V+fb5zg98nfd0c7
-         S4KRXKLI2BF7HS9+UnY87jbiO+9sb5WkqjNckH6HhvEHhOsL4iBfllNifxeTl4GyFq
-         m9nsqEJDYV8sFa4C82IJh/xWQU8YATQrG1pz8cqM=
-Message-ID: <cc459ce1b7314919eaa506a82b9c28df6f41a169.camel@kernel.org>
-Subject: Re: [PATCH] ceph: don't return -ESTALE if there's still an open file
-From:   Jeff Layton <jlayton@kernel.org>
-To:     Amir Goldstein <amir73il@gmail.com>,
-        Gregory Farnum <gfarnum@redhat.com>
-Cc:     Luis Henriques <lhenriques@suse.com>,
-        Ilya Dryomov <idryomov@gmail.com>,
-        ceph-devel <ceph-devel@vger.kernel.org>,
-        linux-kernel <linux-kernel@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>,
-        Dave Chinner <dchinner@redhat.com>,
-        Christoph Hellwig <hch@lst.de>,
-        Miklos Szeredi <miklos@szeredi.hu>
-Date:   Tue, 19 May 2020 06:43:10 -0400
-In-Reply-To: <CAOQ4uxjdu7=wXNBHZBQmtNexcG3qfu=XQov9HsRNi=os+QHAUg@mail.gmail.com>
-References: <20200514111453.GA99187@suse.com>
-         <8497fe9a11ac1837813ee5f14b6ebae8fa6bf707.camel@kernel.org>
-         <20200514124845.GA12559@suse.com>
-         <4e5bf0e3bf055e53a342b19d168f6cf441781973.camel@kernel.org>
-         <CAOQ4uxhireZBRvcPQzTS8yOoO4gQt78M0ktZo-9yQ-zcaLZbow@mail.gmail.com>
-         <20200515111548.GA54598@suse.com>
-         <61b1f19edcc349641b5383c2ac70cbf9a15ba4bd.camel@kernel.org>
-         <CAOQ4uxiWZoSj3Pjwskd_hu-ErV9096hLt13CDcW6nEEvcwDNVA@mail.gmail.com>
-         <e227d42fdc91587e34bc64ac252970d39d9b4eee.camel@kernel.org>
-         <CAJ4mKGbahd8CbkEauBHBX6o93jipkCVoYe9O-1rAJQJFZkqDsQ@mail.gmail.com>
-         <CAOQ4uxjdu7=wXNBHZBQmtNexcG3qfu=XQov9HsRNi=os+QHAUg@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"
-User-Agent: Evolution 3.36.2 (3.36.2-1.fc32) 
+        Tue, 19 May 2020 12:01:33 -0400
+Received: from userp2120.oracle.com ([156.151.31.85]:37318 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729211AbgESQBc (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 19 May 2020 12:01:32 -0400
+Received: from pps.filterd (userp2120.oracle.com [127.0.0.1])
+        by userp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 04JFvRgo166411;
+        Tue, 19 May 2020 16:01:29 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
+ : subject : message-id : references : mime-version : content-type :
+ in-reply-to; s=corp-2020-01-29;
+ bh=6sgfnmYjH4Ag+H52JByKogSR54UMt/4K86xC9eUO4xo=;
+ b=LFemkb06e9NfjeDkd1ylJqto8CD8DMKU6Pya81WApvLBIZaRZJqKRInlMj540aIeoKe/
+ cBwdJI6V8QbAcUkVVGA8fVE9XrZGlL7P54XQU0jE3ReTp9Qu4w8pQwWRh6setQ24UGOw
+ c6T6OJwBzwqWUoyzHCqp02JiBryl0A3uTvmfNbIk5wVYu5axVdwuuvSz4pdjBKqOkYak
+ joqt3k6XKaubFxZDQUJbRmSLPWAz+W0/BiEDlhFkZYbhcL6D7R6gG8WNI6nbjx9Lzn7w
+ g/c9N/qZUm8rtbrZAXZZKh5QT6/gCvZkaXNtkba6bC6+Lfr8QYzSwU4eoW4QIwB2sNFU +w== 
+Received: from userp3030.oracle.com (userp3030.oracle.com [156.151.31.80])
+        by userp2120.oracle.com with ESMTP id 3128tne788-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Tue, 19 May 2020 16:01:28 +0000
+Received: from pps.filterd (userp3030.oracle.com [127.0.0.1])
+        by userp3030.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 04JFwORg067178;
+        Tue, 19 May 2020 16:01:27 GMT
+Received: from userv0121.oracle.com (userv0121.oracle.com [156.151.31.72])
+        by userp3030.oracle.com with ESMTP id 314gm584v8-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Tue, 19 May 2020 16:01:27 +0000
+Received: from abhmp0016.oracle.com (abhmp0016.oracle.com [141.146.116.22])
+        by userv0121.oracle.com (8.14.4/8.13.8) with ESMTP id 04JG1Rjw021335;
+        Tue, 19 May 2020 16:01:27 GMT
+Received: from localhost (/67.169.218.210)
+        by default (Oracle Beehive Gateway v4.0)
+        with ESMTP ; Tue, 19 May 2020 09:01:26 -0700
+Date:   Tue, 19 May 2020 09:01:25 -0700
+From:   "Darrick J. Wong" <darrick.wong@oracle.com>
+To:     Donald Douwsma <ddouwsma@redhat.com>
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH] xfstests: add test for xfs_repair progress reporting
+Message-ID: <20200519160125.GB17621@magnolia>
+References: <20200519065512.232760-1-ddouwsma@redhat.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20200519065512.232760-1-ddouwsma@redhat.com>
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9626 signatures=668686
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 malwarescore=0 mlxlogscore=999
+ adultscore=0 phishscore=0 mlxscore=0 spamscore=0 suspectscore=1
+ bulkscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2004280000 definitions=main-2005190135
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9626 signatures=668686
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 impostorscore=0 bulkscore=0 spamscore=0
+ clxscore=1011 cotscore=-2147483648 suspectscore=1 lowpriorityscore=0
+ adultscore=0 phishscore=0 mlxlogscore=999 mlxscore=0 priorityscore=1501
+ malwarescore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2004280000 definitions=main-2005190135
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, 2020-05-19 at 07:00 +0300, Amir Goldstein wrote:
-> On Tue, May 19, 2020 at 1:30 AM Gregory Farnum <gfarnum@redhat.com> wrote:
-> > Maybe we resolved this conversation; I can't quite tell...
+On Tue, May 19, 2020 at 04:55:12PM +1000, Donald Douwsma wrote:
+> xfs_repair's interval based progress has been broken for
+> some time, create a test based on dmdelay to stretch out
+> the time and use ag_stride to force parallelism.
 > 
-> I think v2 patch wraps it up...
+> Signed-off-by: Donald Douwsma <ddouwsma@redhat.com>
+> ---
+>  tests/xfs/516     | 72 +++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/516.out | 15 ++++++++++
+>  tests/xfs/group   |  1 +
+>  3 files changed, 88 insertions(+)
+>  create mode 100755 tests/xfs/516
+>  create mode 100644 tests/xfs/516.out
 > 
-> [...]
+> diff --git a/tests/xfs/516 b/tests/xfs/516
+> new file mode 100755
+> index 00000000..5ad57fbc
+> --- /dev/null
+> +++ b/tests/xfs/516
+> @@ -0,0 +1,72 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2020 Red Hat, Inc.  All Rights Reserved.
+> +#
+> +# FS QA Test 516
+> +#
+> +# Test xfs_repair's progress reporting
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	_dmsetup_remove delay-test > /dev/null 2>&1
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +. ./common/dmdelay
+> +. ./common/populate
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs xfs
+> +_supported_os Linux
+> +_require_scratch
+> +_require_dm_target delay
+> +
+> +# Filter output specific to the formatters in xfs_repair/progress.c
+> +# Ideally we'd like to see hits on anything that matches
+> +# awk '/{FMT/' repair/progress.c
+> +_filter_repair()
+> +{
+> +	sed -ne '
+> +	s/[0-9]\+/#/g;
+> +	/#:#:#:/p
+> +	'
+> +}
+> +
+> +echo "Format and populate"
+> +_scratch_populate_cached nofill > $seqres.full 2>&1
+> +
+> +echo "Introduce a dmdelay"
+> +_init_delay
+> +
+> +# Introduce a read I/O delay
+> +# The default in common/dmdelay is a bit too agressive
+> +BLK_DEV_SIZE=`blockdev --getsz $SCRATCH_DEV`
+> +DELAY_TABLE_RDELAY="0 $BLK_DEV_SIZE delay $SCRATCH_DEV 0 100 $SCRATCH_DEV 0 0"
+> +_load_delay_table $DELAY_READ
+> +
+> +echo "Run repair"
+> +$XFS_REPAIR_PROG -o ag_stride=4 -t 1 $DELAY_DEV >> $seqres.full 2>&1
+
+Hmm... if the scratch device had an external log device, this raw
+invocation of repair won't run because it won't have the log parameter.
+Normally I'd say just use _scratch_xfs_repair here, but since there's a
+delay device involved, things get trickier...
+
+...or maybe they don't?
+
+	SCRATCH_DEV=$DELAY_DEV _scratch_xfs_repair -o ag_stride...
+
+might work, seeing as we do that in a few places...
+
+> +cat $seqres.full | _filter_repair | sort -u
+
+You also might want to redirect the repair output to a separate file so
+that you can filter and sort /only/ the repair output in the process of
+logging the repair results to stdout and $seqres.full.
+
+--D
+
+> +
+> +_cleanup_delay
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/516.out b/tests/xfs/516.out
+> new file mode 100644
+> index 00000000..bc824d7f
+> --- /dev/null
+> +++ b/tests/xfs/516.out
+> @@ -0,0 +1,15 @@
+> +QA output created by 516
+> +Format and populate
+> +Introduce a dmdelay
+> +Run repair
+> +	- #:#:#: Phase #: #% done - estimated remaining time # minutes, # seconds
+> +	- #:#:#: Phase #: elapsed time # second - processed # inodes per minute
+> +	- #:#:#: Phase #: elapsed time # seconds - processed # inodes per minute
+> +        - #:#:#: check for inodes claiming duplicate blocks - # of # inodes done
+> +        - #:#:#: process known inodes and inode discovery - # of # inodes done
+> +        - #:#:#: process newly discovered inodes - # of # allocation groups done
+> +        - #:#:#: rebuild AG headers and trees - # of # allocation groups done
+> +        - #:#:#: scanning agi unlinked lists - # of # allocation groups done
+> +        - #:#:#: scanning filesystem freespace - # of # allocation groups done
+> +        - #:#:#: setting up duplicate extent list - # of # allocation groups done
+> +        - #:#:#: verify and correct link counts - # of # allocation groups done
+> diff --git a/tests/xfs/group b/tests/xfs/group
+> index 12eb55c9..aeeca23f 100644
+> --- a/tests/xfs/group
+> +++ b/tests/xfs/group
+> @@ -513,3 +513,4 @@
+>  513 auto mount
+>  514 auto quick db
+>  515 auto quick quota
+> +516 repair
+> -- 
+> 2.18.4
 > 
-
-Agreed.
-
-> > > > Questions:
-> > > > 1. Does sync() result in fully purging inodes on MDS?
-> > > 
-> > > I don't think so, but again, that code is not trivial to follow. I do
-> > > know that the MDS keeps around a "strays directory" which contains
-> > > unlinked inodes that are lazily cleaned up. My suspicion is that it's
-> > > satisfying lookups out of this cache as well.
-> > > 
-> > > Which may be fine...the MDS is not required to be POSIX compliant after
-> > > all. Only the fs drivers are.
-> > 
-> > I don't think this is quite that simple. Yes, the MDS is certainly
-> > giving back stray inodes in response to a lookup-by-ino request. But
-> > that's for a specific purpose: we need to be able to give back caps on
-> > unlinked-but-open files. For NFS specifically, I don't know what the
-> > rules are on NFS file handles and unlinked files, but the Ceph MDS
-> > won't know when files are closed everywhere, and it translates from
-> > NFS fh to Ceph inode using that lookup-by-ino functionality.
-> > 
-> 
-> There is no protocol rule that NFS server MUST return ESTALE
-> for file handle of a deleted file, but there is a rule that it MAY return
-> ESTALE for deleted file. For example, on server restart and traditional
-> block filesystem, there is not much choice.
-> 
-> So returning ESTALE when file is deleted but opened on another ceph
-> client is definitely allowed by the protocol standard, the question is
-> whether changing the behavior will break any existing workloads...
-> 
-
-Right -- that was sort of the point of my original question about the
-xfstest. The fact that ceph wasn't returning ESTALE in this situation
-didn't seem to be technically _wrong_ to me, but the xfstest treated
-that as a failure. It's probably best to return ESTALE since that's the
-conventional behavior, but I don't think it's necessarily required for
-correct operation in general.
-
-FWIW, if we ever implement O_TMPFILE in ceph, then we may need to
-revisit this code. With that, you can do a 0->1 transition on i_nlink,
-which blows some of the assumptions we're making here out of the water.
-
-> > > > 2. Is i_nlink synchronized among nodes on deferred delete?
-> > > > IWO, can inode come back from the dead on client if another node
-> > > > has linked it before i_nlink 0 was observed?
-> > > 
-> > > No, that shouldn't happen. The caps mechanism should ensure that it
-> > > can't be observed by other clients until after the change.
-> > > 
-> > > That said, Luis' current patch doesn't ensure we have the correct caps
-> > > to check the i_nlink. We may need to add that in before we can roll with
-> > > this.
-> > > 
-> > > > 3. Can an NFS client be "migrated" from one ceph node to another
-> > > > with an open but unlinked file?
-> > > > 
-> > > 
-> > > No. Open files in ceph are generally per-client. You can't pass around a
-> > > fd (or equivalent).
-> > 
-> > But the NFS file handles I think do work across clients, right?
-> > 
-> 
-> Maybe they can, but that would be like NFS server restart, so
-> all bets are off w.r.t open but deleted files.
-> 
-
-They do work across clients, but a file handle is just an identifier for
-an inode. That's completely orthogonal to whether the file is open.
-
--- 
-Jeff Layton <jlayton@kernel.org>
-
