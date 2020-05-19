@@ -2,157 +2,157 @@ Return-Path: <SRS0=WJEH=7B=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-1.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E96A8C433DF
-	for <linux-fstests@archiver.kernel.org>; Tue, 19 May 2020 08:09:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1AA6AC433E0
+	for <linux-fstests@archiver.kernel.org>; Tue, 19 May 2020 10:43:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C9E9120809
-	for <linux-fstests@archiver.kernel.org>; Tue, 19 May 2020 08:09:55 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=mykernel.net header.i=cgxu519@mykernel.net header.b="EhMaellB"
+	by mail.kernel.org (Postfix) with ESMTP id E56C020758
+	for <linux-fstests@archiver.kernel.org>; Tue, 19 May 2020 10:43:13 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1589884993;
+	bh=L/14AxOpD03Run3O+IBY+gN9A7FJED5ePKYXqAc56ws=;
+	h=Subject:From:To:Cc:Date:In-Reply-To:References:List-ID:From;
+	b=yKAdS5Zk5oMtu81feXgn8hDKd3lK9sBUTKu1q9hr8COgqLB+nPtJLrPt9wrO5Xqjc
+	 7FVhkovTR03oOCatr3mVzprRKjxo3Tdnlg4RI/84UI4zcycW6G9SOwRWW6xSLZSuiX
+	 Synp1Fd8w0xWAT3ga/eHIaXCJ7XNElJFN3pxxQRM=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727987AbgESIJz (ORCPT
+        id S1726508AbgESKnN (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 19 May 2020 04:09:55 -0400
-Received: from sender2-op-o12.zoho.com.cn ([163.53.93.243]:17109 "EHLO
-        sender2-op-o12.zoho.com.cn" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726943AbgESIJz (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 19 May 2020 04:09:55 -0400
-ARC-Seal: i=1; a=rsa-sha256; t=1589875785; cv=none; 
-        d=zoho.com.cn; s=zohoarc; 
-        b=TbDslXawFPlDrk7MfZ7kTHPNdLoWDSalin0O8GghG3/J94KLX+c6BJtJMDRa9/rOeebSuKDTz9ftCLs2tvYXgjhQ7/CGD5i1v9wPb4a+8qVk9Ruuh5Meyq+mMSvXvEz4aR0/bpOUD+8Nb0aWLJ56MWa4J+dzyz+nxCsIr2bPQDQ=
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zoho.com.cn; s=zohoarc; 
-        t=1589875785; h=Content-Type:Content-Transfer-Encoding:Cc:Date:From:MIME-Version:Message-ID:Subject:To; 
-        bh=/grsoLC3wLMOVmOUeNiyU0jilmT1TITVnzWgH4P7dwg=; 
-        b=WnjMeRFULvHx7heON1ln2av5lBzYSjIQsXifs51TYkRe6oo9Ax11Tw+zXFYfTP5LAx6dfSDo6R/YVFymjb4SMcchHQIex48qJKzplfnUW+k6XX4opz5XrV2f/mtxMrZfDFfm+lM7jdxnPyj7vXe45/3TBwwSwE67xy6JGdgWEQk=
-ARC-Authentication-Results: i=1; mx.zoho.com.cn;
-        dkim=pass  header.i=mykernel.net;
-        spf=pass  smtp.mailfrom=cgxu519@mykernel.net;
-        dmarc=pass header.from=<cgxu519@mykernel.net> header.from=<cgxu519@mykernel.net>
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1589875785;
-        s=zohomail; d=mykernel.net; i=cgxu519@mykernel.net;
-        h=From:To:Cc:Message-ID:Subject:Date:MIME-Version:Content-Transfer-Encoding:Content-Type;
-        bh=/grsoLC3wLMOVmOUeNiyU0jilmT1TITVnzWgH4P7dwg=;
-        b=EhMaellBCgRMv92tcZJyQGKKfElBmfsi4NzJ7zrymSNATwPJrRKt9teaX61Q2gOd
-        uC/44D3RnTJUH7gTg9Oh5HvDEBcSxan7oD5cGdY95WSqr4DKjT0NRaWV3HsO0tlG/1k
-        csoSkGTIMUkRwxxs6NfjxLwvaTxaJtXBqmIDmtJA=
-Received: from localhost.localdomain (218.18.229.179 [218.18.229.179]) by mx.zoho.com.cn
-        with SMTPS id 1589875783960843.5830726554441; Tue, 19 May 2020 16:09:43 +0800 (CST)
-From:   Chengguang Xu <cgxu519@mykernel.net>
-To:     guaneryu@gmail.com
-Cc:     fstests@vger.kernel.org, linux-unionfs@vger.kernel.org,
-        Chengguang Xu <cgxu519@mykernel.net>
-Message-ID: <20200519080929.18030-1-cgxu519@mykernel.net>
-Subject: [PATCH v2] generic/597: test data integrity for rdonly remount
-Date:   Tue, 19 May 2020 16:09:29 +0800
-X-Mailer: git-send-email 2.20.1
+        Tue, 19 May 2020 06:43:13 -0400
+Received: from mail.kernel.org ([198.145.29.99]:47658 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725911AbgESKnN (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 19 May 2020 06:43:13 -0400
+Received: from tleilax.poochiereds.net (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 5D16F20674;
+        Tue, 19 May 2020 10:43:11 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1589884992;
+        bh=L/14AxOpD03Run3O+IBY+gN9A7FJED5ePKYXqAc56ws=;
+        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
+        b=yu54AhMcabq+AvDj6KUaIZzm3VsU3sxprdYjdyBn4/dTgi6hv+V+fb5zg98nfd0c7
+         S4KRXKLI2BF7HS9+UnY87jbiO+9sb5WkqjNckH6HhvEHhOsL4iBfllNifxeTl4GyFq
+         m9nsqEJDYV8sFa4C82IJh/xWQU8YATQrG1pz8cqM=
+Message-ID: <cc459ce1b7314919eaa506a82b9c28df6f41a169.camel@kernel.org>
+Subject: Re: [PATCH] ceph: don't return -ESTALE if there's still an open file
+From:   Jeff Layton <jlayton@kernel.org>
+To:     Amir Goldstein <amir73il@gmail.com>,
+        Gregory Farnum <gfarnum@redhat.com>
+Cc:     Luis Henriques <lhenriques@suse.com>,
+        Ilya Dryomov <idryomov@gmail.com>,
+        ceph-devel <ceph-devel@vger.kernel.org>,
+        linux-kernel <linux-kernel@vger.kernel.org>,
+        fstests <fstests@vger.kernel.org>,
+        Dave Chinner <dchinner@redhat.com>,
+        Christoph Hellwig <hch@lst.de>,
+        Miklos Szeredi <miklos@szeredi.hu>
+Date:   Tue, 19 May 2020 06:43:10 -0400
+In-Reply-To: <CAOQ4uxjdu7=wXNBHZBQmtNexcG3qfu=XQov9HsRNi=os+QHAUg@mail.gmail.com>
+References: <20200514111453.GA99187@suse.com>
+         <8497fe9a11ac1837813ee5f14b6ebae8fa6bf707.camel@kernel.org>
+         <20200514124845.GA12559@suse.com>
+         <4e5bf0e3bf055e53a342b19d168f6cf441781973.camel@kernel.org>
+         <CAOQ4uxhireZBRvcPQzTS8yOoO4gQt78M0ktZo-9yQ-zcaLZbow@mail.gmail.com>
+         <20200515111548.GA54598@suse.com>
+         <61b1f19edcc349641b5383c2ac70cbf9a15ba4bd.camel@kernel.org>
+         <CAOQ4uxiWZoSj3Pjwskd_hu-ErV9096hLt13CDcW6nEEvcwDNVA@mail.gmail.com>
+         <e227d42fdc91587e34bc64ac252970d39d9b4eee.camel@kernel.org>
+         <CAJ4mKGbahd8CbkEauBHBX6o93jipkCVoYe9O-1rAJQJFZkqDsQ@mail.gmail.com>
+         <CAOQ4uxjdu7=wXNBHZBQmtNexcG3qfu=XQov9HsRNi=os+QHAUg@mail.gmail.com>
+Content-Type: text/plain; charset="UTF-8"
+User-Agent: Evolution 3.36.2 (3.36.2-1.fc32) 
 MIME-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
-X-ZohoCNMailClient: External
-Content-Type: text/plain; charset=utf8
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This test checks data integrity when remounting from
-rw to ro mode.
+On Tue, 2020-05-19 at 07:00 +0300, Amir Goldstein wrote:
+> On Tue, May 19, 2020 at 1:30 AM Gregory Farnum <gfarnum@redhat.com> wrote:
+> > Maybe we resolved this conversation; I can't quite tell...
+> 
+> I think v2 patch wraps it up...
+> 
+> [...]
+> 
 
-Signed-off-by: Chengguang Xu <cgxu519@mykernel.net>
----
-v1->v2:
-- Add to shutdown greoup.
-- Change case number to 597
+Agreed.
 
- tests/generic/597     | 54 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/597.out |  2 ++
- tests/generic/group   |  1 +
- 3 files changed, 57 insertions(+)
- create mode 100755 tests/generic/597
- create mode 100644 tests/generic/597.out
+> > > > Questions:
+> > > > 1. Does sync() result in fully purging inodes on MDS?
+> > > 
+> > > I don't think so, but again, that code is not trivial to follow. I do
+> > > know that the MDS keeps around a "strays directory" which contains
+> > > unlinked inodes that are lazily cleaned up. My suspicion is that it's
+> > > satisfying lookups out of this cache as well.
+> > > 
+> > > Which may be fine...the MDS is not required to be POSIX compliant after
+> > > all. Only the fs drivers are.
+> > 
+> > I don't think this is quite that simple. Yes, the MDS is certainly
+> > giving back stray inodes in response to a lookup-by-ino request. But
+> > that's for a specific purpose: we need to be able to give back caps on
+> > unlinked-but-open files. For NFS specifically, I don't know what the
+> > rules are on NFS file handles and unlinked files, but the Ceph MDS
+> > won't know when files are closed everywhere, and it translates from
+> > NFS fh to Ceph inode using that lookup-by-ino functionality.
+> > 
+> 
+> There is no protocol rule that NFS server MUST return ESTALE
+> for file handle of a deleted file, but there is a rule that it MAY return
+> ESTALE for deleted file. For example, on server restart and traditional
+> block filesystem, there is not much choice.
+> 
+> So returning ESTALE when file is deleted but opened on another ceph
+> client is definitely allowed by the protocol standard, the question is
+> whether changing the behavior will break any existing workloads...
+> 
 
-diff --git a/tests/generic/597 b/tests/generic/597
-new file mode 100755
-index 00000000..d96e750b
---- /dev/null
-+++ b/tests/generic/597
-@@ -0,0 +1,54 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2020 Chengguang Xu <cgxu519@mykernel.net>.
-+# All Rights Reserved.
-+#
-+# FS QA Test 597
-+#
-+# Test data integrity for ro remount.
-+#
-+seq=3D`basename $0`
-+seqres=3D$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=3D`pwd`
-+tmp=3D/tmp/$$
-+status=3D0
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+=09cd /
-+=09rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_fssum
-+_require_scratch
-+_require_scratch_shutdown
-+
-+_scratch_mkfs &>/dev/null
-+_scratch_mount
-+
-+localdir=3D$SCRATCH_MNT/dir
-+mkdir $localdir
-+sync
-+
-+# fssum used for comparing checksum of test file(data & metedata),
-+# exclude checking about atime, block structure, open error.
-+$FSSUM_PROG -ugomAcdES -f -w $tmp.fssum $localdir
-+_scratch_remount ro
-+_scratch_shutdown
-+_scratch_cycle_mount
-+$FSSUM_PROG -r $tmp.fssum $localdir
-+
-+exit
-diff --git a/tests/generic/597.out b/tests/generic/597.out
-new file mode 100644
-index 00000000..a847cfe2
---- /dev/null
-+++ b/tests/generic/597.out
-@@ -0,0 +1,2 @@
-+QA output created by 597
-+OK
-diff --git a/tests/generic/group b/tests/generic/group
-index e82004e8..d68fee9a 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -599,3 +599,4 @@
- 594 auto quick quota
- 595 auto quick encrypt
- 596 auto quick
-+597 auto quick remount shutdown
---=20
-2.20.1
+Right -- that was sort of the point of my original question about the
+xfstest. The fact that ceph wasn't returning ESTALE in this situation
+didn't seem to be technically _wrong_ to me, but the xfstest treated
+that as a failure. It's probably best to return ESTALE since that's the
+conventional behavior, but I don't think it's necessarily required for
+correct operation in general.
 
+FWIW, if we ever implement O_TMPFILE in ceph, then we may need to
+revisit this code. With that, you can do a 0->1 transition on i_nlink,
+which blows some of the assumptions we're making here out of the water.
+
+> > > > 2. Is i_nlink synchronized among nodes on deferred delete?
+> > > > IWO, can inode come back from the dead on client if another node
+> > > > has linked it before i_nlink 0 was observed?
+> > > 
+> > > No, that shouldn't happen. The caps mechanism should ensure that it
+> > > can't be observed by other clients until after the change.
+> > > 
+> > > That said, Luis' current patch doesn't ensure we have the correct caps
+> > > to check the i_nlink. We may need to add that in before we can roll with
+> > > this.
+> > > 
+> > > > 3. Can an NFS client be "migrated" from one ceph node to another
+> > > > with an open but unlinked file?
+> > > > 
+> > > 
+> > > No. Open files in ceph are generally per-client. You can't pass around a
+> > > fd (or equivalent).
+> > 
+> > But the NFS file handles I think do work across clients, right?
+> > 
+> 
+> Maybe they can, but that would be like NFS server restart, so
+> all bets are off w.r.t open but deleted files.
+> 
+
+They do work across clients, but a file handle is just an identifier for
+an inode. That's completely orthogonal to whether the file is open.
+
+-- 
+Jeff Layton <jlayton@kernel.org>
 
