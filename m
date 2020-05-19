@@ -2,148 +2,151 @@ Return-Path: <SRS0=WJEH=7B=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D4FE4C433DF
-	for <linux-fstests@archiver.kernel.org>; Tue, 19 May 2020 04:00:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 22184C433DF
+	for <linux-fstests@archiver.kernel.org>; Tue, 19 May 2020 04:58:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AF01D206C3
-	for <linux-fstests@archiver.kernel.org>; Tue, 19 May 2020 04:00:43 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DE0E12075F
+	for <linux-fstests@archiver.kernel.org>; Tue, 19 May 2020 04:58:36 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="B8esUJBa"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="S4R1Jnes"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726318AbgESEAn (ORCPT
+        id S1726323AbgESE6g (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 19 May 2020 00:00:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43424 "EHLO
+        Tue, 19 May 2020 00:58:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52350 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725791AbgESEAn (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 19 May 2020 00:00:43 -0400
-Received: from mail-il1-x141.google.com (mail-il1-x141.google.com [IPv6:2607:f8b0:4864:20::141])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F39AEC061A0C;
-        Mon, 18 May 2020 21:00:42 -0700 (PDT)
-Received: by mail-il1-x141.google.com with SMTP id c20so9924282ilk.6;
-        Mon, 18 May 2020 21:00:42 -0700 (PDT)
+        with ESMTP id S1726307AbgESE6g (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 19 May 2020 00:58:36 -0400
+Received: from mail-io1-xd41.google.com (mail-io1-xd41.google.com [IPv6:2607:f8b0:4864:20::d41])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 17040C061A0C
+        for <fstests@vger.kernel.org>; Mon, 18 May 2020 21:58:36 -0700 (PDT)
+Received: by mail-io1-xd41.google.com with SMTP id o5so13137919iow.8
+        for <fstests@vger.kernel.org>; Mon, 18 May 2020 21:58:36 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=YMISo78hL6Pp1LYoLknIURuBMh7SpGTi20rRpTAn94g=;
-        b=B8esUJBa6fAkrFrLfM4cuWFkuP0LC1On+oDVYNt1UfHOSu+8+ucq7iH2Iw2DyT6bRJ
-         aoby3Pok+cG0JUCh/fFekS+fompz5VivbO0VbAv7bnCLxsow4BmlwlrwJ83q0Tc1RFwg
-         F0pZPDKiuMIvAUpulSYJA916RL8f+LPozWN7u1E/xsA1rFtKprPFY0gTlu0qRdQ1ccjh
-         pp1mVvAP73KzNeDTSq3ktwVdegHNTbDIuBdRW1g3SOSGSMSDWMRlsKXqkHlhKXbdqUkR
-         99YAre5ZwH2V5EZAs2Yu6rfrAh/ROGlDufH9JJ4zzofTwl99dDQAvfoeISPcfO53x2hS
-         0dow==
+        bh=FJQmcbQYUXrmpKZSa1udSohYn77pTFdKz3pVD3R9H5M=;
+        b=S4R1Jnes/VRjt5oh7lqo1GbnV8EdZpVqoEDxyesez9JK2CBzMVcW/XP7ORPxgsVNrb
+         0ESXEF+s3g7EabQGGAAjm89nrSZGl9LmErZx3MMOeetLqu2JBFQT/A3JZNh6dmHKhq+L
+         iREAlXsJrao5OE52hYbr+/sONNb/uvtMO1XVW8lzrNI5mSEiLSysM4MXdQfMqRio3TPa
+         BXvfycxc1la/O6Fe/UbG8wVXXyR24beOSonaY8ebILqeh82Y2t+xg59r3RUSR33KiGDp
+         bN6xSVbkDyFqqNrre3dKuSm5LOyF6RBJZYrtHciWfX0OqHrl2kG0mOPf7NxR9TW3yHNv
+         R+Jw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=YMISo78hL6Pp1LYoLknIURuBMh7SpGTi20rRpTAn94g=;
-        b=ENjsf2So1dcwE4gjbIwD/B69quP5nSOPy77vjNKj2LLKgLCGvl0lqYrnvlE5Xrlu4T
-         JBSYDskJWEw1qjeqlAvTHikTF4nadzPTc1PwIi/5Z2zkTKqGH1VpVWOeRn2o610r+Z8m
-         nb3Bzxk66WVtf1+CJKRoh6YVHO8hX23XSMFtyCChHfems2Yprii3OYiJXoVrLXHwFcE8
-         U54SHeU+he5qmaGGKgu3tchsRAeCqvAXKTLPC+2hiXXELq1AtRFXqvmjlMflhLu8s6Sk
-         vXy3mqThOhQiGfusl/j9STVgpmZR1kEHOf1vDDUxCHBGl+BwrRZL+05Q9gENchO72CKz
-         FHNg==
-X-Gm-Message-State: AOAM533lMS9ehTTfMrYfyZud8eTcKXXdn+JdvHtoTgi8y7tHalJwNtX6
-        NDkmevFduwjqFjS6JnndQtJeeArCjGxF1NS/KuA=
-X-Google-Smtp-Source: ABdhPJyQJgR5yTS4N+0JWiF2JGKG283HyP0dTsU4nr0LD+H9udNV7mju1EsjNpxFKEm1nXD/gLi9uncR2XtK80xJUGk=
-X-Received: by 2002:a92:9e11:: with SMTP id q17mr20295545ili.137.1589860842312;
- Mon, 18 May 2020 21:00:42 -0700 (PDT)
+        bh=FJQmcbQYUXrmpKZSa1udSohYn77pTFdKz3pVD3R9H5M=;
+        b=l7yFSCD954DpDQSMxKFjctFiPEgKZ8xrzk0WIYqRWrB2EaUSj6nBpjD2EpOAyoRegI
+         jlmwpZ9aCYOxADOAvv6aIUfmtYQbjvUO0N10N2m5lvS8vr+eqvgFCTNMlZ41VXIj4fw0
+         hAVRC12JfgKljmlN+WG6uspDTAnBStXPcxnBm9Ew+CO/dXFYlWExAm/2TCBYNWQHqb2z
+         FdXkmqe9e0F3zBgUzZhEbDQSEcUpqRYlce0H+a+1Vxjd91OEiXvfJ0YahglfJ1ReZHKK
+         cry9JHz5X2VJRFknoYalmDm8PMBDEkucCcpKuwv3AshLc9LgQVdU1OyedCWci2rY9rhN
+         0jzA==
+X-Gm-Message-State: AOAM530qfVTM6uAqSDt5f/E145K7da3r1r2RE6TD6mM0MOdmB/HE3+be
+        CmSTixgHFFh/PU3j8k68GcM8Jga/TnrTZY0wqUg=
+X-Google-Smtp-Source: ABdhPJxkWxH43BaLYYOiUiE4u8/vyaIp6TJcpAxi7xryFpYaVXYg3MokP4AIyGFqSEe68OTAcCoZBRSoeUQ84bFpdQs=
+X-Received: by 2002:a5d:898a:: with SMTP id m10mr16440825iol.203.1589864315222;
+ Mon, 18 May 2020 21:58:35 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200514111453.GA99187@suse.com> <8497fe9a11ac1837813ee5f14b6ebae8fa6bf707.camel@kernel.org>
- <20200514124845.GA12559@suse.com> <4e5bf0e3bf055e53a342b19d168f6cf441781973.camel@kernel.org>
- <CAOQ4uxhireZBRvcPQzTS8yOoO4gQt78M0ktZo-9yQ-zcaLZbow@mail.gmail.com>
- <20200515111548.GA54598@suse.com> <61b1f19edcc349641b5383c2ac70cbf9a15ba4bd.camel@kernel.org>
- <CAOQ4uxiWZoSj3Pjwskd_hu-ErV9096hLt13CDcW6nEEvcwDNVA@mail.gmail.com>
- <e227d42fdc91587e34bc64ac252970d39d9b4eee.camel@kernel.org> <CAJ4mKGbahd8CbkEauBHBX6o93jipkCVoYe9O-1rAJQJFZkqDsQ@mail.gmail.com>
-In-Reply-To: <CAJ4mKGbahd8CbkEauBHBX6o93jipkCVoYe9O-1rAJQJFZkqDsQ@mail.gmail.com>
+References: <20200518201551.2553-1-raghavan.arvind@gmail.com>
+In-Reply-To: <20200518201551.2553-1-raghavan.arvind@gmail.com>
 From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Tue, 19 May 2020 07:00:31 +0300
-Message-ID: <CAOQ4uxjdu7=wXNBHZBQmtNexcG3qfu=XQov9HsRNi=os+QHAUg@mail.gmail.com>
-Subject: Re: [PATCH] ceph: don't return -ESTALE if there's still an open file
-To:     Gregory Farnum <gfarnum@redhat.com>
-Cc:     Jeff Layton <jlayton@kernel.org>,
-        Luis Henriques <lhenriques@suse.com>,
-        Ilya Dryomov <idryomov@gmail.com>,
-        ceph-devel <ceph-devel@vger.kernel.org>,
-        linux-kernel <linux-kernel@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>,
-        Dave Chinner <dchinner@redhat.com>,
-        Christoph Hellwig <hch@lst.de>,
-        Miklos Szeredi <miklos@szeredi.hu>
+Date:   Tue, 19 May 2020 07:58:23 +0300
+Message-ID: <CAOQ4uxiOQ_BjRX6Sz-URY8DJTuAERa9Ws64YJ18GV_1oaXA3xw@mail.gmail.com>
+Subject: Re: [PATCH] src/fssum: Refactor recursive traversal
+To:     Arvind Raghavan <raghavan.arvind@gmail.com>
+Cc:     fstests <fstests@vger.kernel.org>,
+        Jayashree Mohan <jaya@cs.utexas.edu>,
+        Vijay Chidambaram <vijay@cs.utexas.edu>
 Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, May 19, 2020 at 1:30 AM Gregory Farnum <gfarnum@redhat.com> wrote:
+On Tue, May 19, 2020 at 1:30 AM Arvind Raghavan
+<raghavan.arvind@gmail.com> wrote:
 >
-> Maybe we resolved this conversation; I can't quite tell...
+> Moves some logic from the recursive directory traversal into a helper
+> function to make it easier to add support for regular files. Does not
+> change functionality.
+>
 
-I think v2 patch wraps it up...
+Arvind,
+
+The main comment is that this patch by itself is not eligible for merging.
+It should be part of a patch series.
+
+One more tip for ease of review - don't mix re-factor with moving chunks
+of code. I reviewed this patch by moving sum_one() below sum(), where
+the chunk of code was before the re-factoring and using diff -w.
+Check it out to see how easy it is to review.
+
+There is not really a reason to put the sum_one() helper on top as it
+anyway depends on forward declaration of sum(), so it can be the other
+way around.
+
+See a couple of minor suggestions below.
+
+Thanks,
+Amir.
+
+
+> Signed-off-by: Arvind Raghavan <raghavan.arvind@gmail.com>
+> Signed-off-by: Jayashree Mohan <jaya@cs.utexas.edu>
+> Signed-off-by: Vijay Chidambaram <vijay@cs.utexas.edu>
+> ---
+>  src/fssum.c | 298 ++++++++++++++++++++++++++++------------------------
+>  1 file changed, 162 insertions(+), 136 deletions(-)
+>
+> diff --git a/src/fssum.c b/src/fssum.c
+> index 3d97a70b..f2325ae0 100644
+> --- a/src/fssum.c
+> +++ b/src/fssum.c
+> @@ -502,6 +502,162 @@ malformed:
+>                 excess_file(fn);
+>  }
+>
+> +void
+> +sum(int dirfd, int level, sum_t *dircs, char *path_prefix, char *path_in);
+> +
+> +void
+> +sum_one(int dirfd, int level, sum_t *dircs, char *path_prefix,
+> +               char *path_in, char *name) {
+> +       sum_t cs;
+> +       sum_t meta;
+> +       int fd;
+> +       int ret;
+> +       int excl;
+> +       char* path;
+> +       struct stat64 st;
+> +       sum_file_data_t sum_file_data = flags[FLAG_STRUCTURE] ?
+> +                       sum_file_data_strict : sum_file_data_permissive;
+
+It's silly to do that every "one". flags is global and doesn't change,
+so sum_file_data may be global as well and set on main.
+Do that before refactoring patch.
 
 [...]
 
-> > >
-> > > Questions:
-> > > 1. Does sync() result in fully purging inodes on MDS?
-> >
-> > I don't think so, but again, that code is not trivial to follow. I do
-> > know that the MDS keeps around a "strays directory" which contains
-> > unlinked inodes that are lazily cleaned up. My suspicion is that it's
-> > satisfying lookups out of this cache as well.
-> >
-> > Which may be fine...the MDS is not required to be POSIX compliant after
-> > all. Only the fs drivers are.
 >
-> I don't think this is quite that simple. Yes, the MDS is certainly
-> giving back stray inodes in response to a lookup-by-ino request. But
-> that's for a specific purpose: we need to be able to give back caps on
-> unlinked-but-open files. For NFS specifically, I don't know what the
-> rules are on NFS file handles and unlinked files, but the Ceph MDS
-> won't know when files are closed everywhere, and it translates from
-> NFS fh to Ceph inode using that lookup-by-ino functionality.
->
+>                 ret = fchdir(dirfd);
+>                 if (ret == -1) {
+> @@ -571,130 +710,17 @@ sum(int dirfd, int level, sum_t *dircs, char *path_prefix, char *path_in)
+>                 }
+>                 ret = lstat64(namelist[i], &st);
 
-There is no protocol rule that NFS server MUST return ESTALE
-for file handle of a deleted file, but there is a rule that it MAY return
-ESTALE for deleted file. For example, on server restart and traditional
-block filesystem, there is not much choice.
-
-So returning ESTALE when file is deleted but opened on another ceph
-client is definitely allowed by the protocol standard, the question is
-whether changing the behavior will break any existing workloads...
-
-> >
-> > > 2. Is i_nlink synchronized among nodes on deferred delete?
-> > > IWO, can inode come back from the dead on client if another node
-> > > has linked it before i_nlink 0 was observed?
-> >
-> > No, that shouldn't happen. The caps mechanism should ensure that it
-> > can't be observed by other clients until after the change.
-> >
-> > That said, Luis' current patch doesn't ensure we have the correct caps
-> > to check the i_nlink. We may need to add that in before we can roll with
-> > this.
-> >
-> > > 3. Can an NFS client be "migrated" from one ceph node to another
-> > > with an open but unlinked file?
-> > >
-> >
-> > No. Open files in ceph are generally per-client. You can't pass around a
-> > fd (or equivalent).
->
-> But the NFS file handles I think do work across clients, right?
->
-
-Maybe they can, but that would be like NFS server restart, so
-all bets are off w.r.t open but deleted files.
+If you change that to fstatat(dirfd, ... AT_SYMLINK_NOFOLLOW),
+fchdir() above will not be needed.
+that change you can do with the refactoring patch.
 
 Thanks,
 Amir.
