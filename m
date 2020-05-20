@@ -2,110 +2,68 @@ Return-Path: <SRS0=sY46=7C=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 54962C433E0
-	for <linux-fstests@archiver.kernel.org>; Wed, 20 May 2020 03:53:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1DBC7C433E0
+	for <linux-fstests@archiver.kernel.org>; Wed, 20 May 2020 06:59:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 14F1B2081A
-	for <linux-fstests@archiver.kernel.org>; Wed, 20 May 2020 03:53:30 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="MJG7F6iD"
+	by mail.kernel.org (Postfix) with ESMTP id EAEC9207D3
+	for <linux-fstests@archiver.kernel.org>; Wed, 20 May 2020 06:59:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728176AbgETDx3 (ORCPT
+        id S1726439AbgETG7N (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 19 May 2020 23:53:29 -0400
-Received: from us-smtp-1.mimecast.com ([207.211.31.81]:21947 "EHLO
-        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726938AbgETDx3 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 19 May 2020 23:53:29 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1589946806;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:in-reply-to:in-reply-to:references:references;
-        bh=Y3HTKPlIJbtBtMsP1jAkuNttAPTG0h+wqvf9AMksg5A=;
-        b=MJG7F6iDLHTEx/sEYMrVSmVO7txFBFeB8jJOCPehbwmo+j23530OYzULWatZpekB0ZKQ44
-        Vt1VDd0eS4ZgfuNw6utvX9GeEzucbO/81lGpxJ3ZJOz6gC//JvssE34VFKXp/zN+4xOWa1
-        ARtBBgLdCJ2C6ItkrRm90SCxfJqPKHY=
-Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com
- [209.85.216.70]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-395-s8I6b96LOFm1Egd_D-g3CA-1; Tue, 19 May 2020 23:53:24 -0400
-X-MC-Unique: s8I6b96LOFm1Egd_D-g3CA-1
-Received: by mail-pj1-f70.google.com with SMTP id o89so1701946pjo.3
-        for <fstests@vger.kernel.org>; Tue, 19 May 2020 20:53:24 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references;
-        bh=Y3HTKPlIJbtBtMsP1jAkuNttAPTG0h+wqvf9AMksg5A=;
-        b=frYThglN4DoE3po7oCmQPdq6mWaPkKE9kR8u4RfCSbfbiZwJXdzmb/M7fZM5Z1qZYN
-         lzp5tPX7quKLJvtg5xTFnlxeHwQ7kFlrD0Dy1rKCtHhq2/6mCZTqyeKrm53Cir1gX2Us
-         TpWH2VwNJlwQtlCaHoSIqpXHc/cBzNoMFAG7tGC8nm6u3VjorLgQlEXqFq9EFt2rtC/b
-         Efgz4SB7JSYjokUkNryssD1kMalI1xPK/xllzNu/y9LHFQl5bi2JlleyPuPewVThzBkG
-         TjGK8rSkJjzKVjs5Yj4ydh9XR4Lq41LBOa/mycabP2eB1AGaSosmEaHoG/yUrIhX3eMn
-         mVSQ==
-X-Gm-Message-State: AOAM533k9m9cQJIJEhsZscXC6Z0EUtaspfT44hWNycgMRud/5EPBs5+5
-        EawmvjqS/5gg7py8MTzC/LlpN0ADPY2v9NhPh2VSzihC4w9eZ2zE6vVVYOfRkQmEUb5m4ClKajl
-        ibe3evn9vVkbwx0WuHA==
-X-Received: by 2002:a17:90a:3262:: with SMTP id k89mr2935713pjb.33.1589946803550;
-        Tue, 19 May 2020 20:53:23 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJyTJSIC2fSkoW1Mv4jAscRcz7moZ025Fsw3acYh1/dXPWSfufxy9P8/ijRq0yXoWa19tEMa2Q==
-X-Received: by 2002:a17:90a:3262:: with SMTP id k89mr2935699pjb.33.1589946803240;
-        Tue, 19 May 2020 20:53:23 -0700 (PDT)
-Received: from don.com ([60.224.129.195])
-        by smtp.gmail.com with ESMTPSA id t23sm769649pji.32.2020.05.19.20.53.20
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 19 May 2020 20:53:22 -0700 (PDT)
-From:   Donald Douwsma <ddouwsma@redhat.com>
-To:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Cc:     "Darrick J . Wong" <darrick.wong@oracle.com>,
-        Donald Douwsma <ddouwsma@redhat.com>
-Subject: [PATCH v2] xfstests: add test for xfs_repair progress reporting
-Date:   Wed, 20 May 2020 13:52:58 +1000
-Message-Id: <20200520035258.298516-1-ddouwsma@redhat.com>
-X-Mailer: git-send-email 2.18.4
-In-Reply-To: <20200519160125.GB17621@magnolia>
-References: <20200519160125.GB17621@magnolia>
+        Wed, 20 May 2020 02:59:13 -0400
+Received: from mx2.suse.de ([195.135.220.15]:42458 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726369AbgETG7N (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 20 May 2020 02:59:13 -0400
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+Received: from relay2.suse.de (unknown [195.135.220.254])
+        by mx2.suse.de (Postfix) with ESMTP id 78681AC77;
+        Wed, 20 May 2020 06:59:14 +0000 (UTC)
+From:   Qu Wenruo <wqu@suse.com>
+To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: [PATCH] btrfs: Add a test for dead looping balance after balance cancel
+Date:   Wed, 20 May 2020 14:59:07 +0800
+Message-Id: <20200520065907.12794-1-wqu@suse.com>
+X-Mailer: git-send-email 2.26.2
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-xfs_repair's interval based progress has been broken for
-some time, create a test based on dmdelay to stretch out
-the time and use ag_stride to force parallelism.
+Test if canceling a running balance can cause later balance to dead
+loop.
 
-Signed-off-by: Donald Douwsma <ddouwsma@redhat.com>
+The ifx is titled "btrfs: relocation: Clear the DEAD_RELOC_TREE bit for
+ orphan roots to prevent runaway balance".
+
+Signed-off-by: Qu Wenruo <wqu@suse.com>
 ---
-Changes since v1:
-- Use _scratch_xfs_repair
-- Filter only repair output
-- Make the filter more tolerant of whitespace and plurals
-- Take golden output from 'xfs_repair: fix progress reporting'
+ tests/btrfs/213     | 66 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/213.out |  2 ++
+ tests/btrfs/group   |  1 +
+ 3 files changed, 69 insertions(+)
+ create mode 100755 tests/btrfs/213
+ create mode 100644 tests/btrfs/213.out
 
- tests/xfs/516     | 76 +++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/516.out | 15 ++++++++++
- tests/xfs/group   |  1 +
- 3 files changed, 92 insertions(+)
- create mode 100755 tests/xfs/516
- create mode 100644 tests/xfs/516.out
-
-diff --git a/tests/xfs/516 b/tests/xfs/516
+diff --git a/tests/btrfs/213 b/tests/btrfs/213
 new file mode 100755
-index 00000000..1c0508ef
+index 00000000..72c32bab
 --- /dev/null
-+++ b/tests/xfs/516
-@@ -0,0 +1,76 @@
++++ b/tests/btrfs/213
+@@ -0,0 +1,66 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2020 Red Hat, Inc.  All Rights Reserved.
++# Copyright (C) 2020 SUSE Linux Products GmbH. All Rights Reserved.
 +#
-+# FS QA Test 516
++# FS QA Test 213
 +#
-+# Test xfs_repair's progress reporting
++# Test if canceling a running balance can lead to dead looping balance
 +#
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
@@ -119,92 +77,69 @@ index 00000000..1c0508ef
 +_cleanup()
 +{
 +	cd /
-+	_dmsetup_remove delay-test > /dev/null 2>&1
++	rm -f $tmp.*
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+. ./common/dmdelay
-+. ./common/populate
 +
 +# remove previous $seqres.full before test
 +rm -f $seqres.full
 +
-+# real QA test starts here
-+
 +# Modify as appropriate.
-+_supported_fs xfs
++_supported_fs btrfs
 +_supported_os Linux
 +_require_scratch
-+_require_dm_target delay
++_require_command "$KILLALL_PROG" killall
 +
-+# Filter output specific to the formatters in xfs_repair/progress.c
-+# Ideally we'd like to see hits on anything that matches
-+# awk '/{FMT/' repair/progress.c
-+_filter_repair()
-+{
-+	sed -ne '
-+	s/[0-9]\+/#/g;
-+	s/^\s\+/ /g;
-+	s/\(second\|minute\)s/\1/g
-+	/#:#:#:/p
-+	'
-+}
++_scratch_mkfs >> $seqres.full
++_scratch_mount
 +
-+echo "Format and populate"
-+_scratch_populate_cached nofill > $seqres.full 2>&1
++runtime=4
 +
-+echo "Introduce a dmdelay"
-+_init_delay
++# Create enough IO so that we need around $runtime seconds to relocate it
++dd if=/dev/zero bs=1M of="$SCRATCH_MNT/file" oflag=sync status=none \
++	&> /dev/null &
++dd_pid=$!
++sleep $runtime
++"$KILLALL_PROG" -q dd &> /dev/null
++wait $dd_pid
 +
-+# Introduce a read I/O delay
-+# The default in common/dmdelay is a bit too agressive
-+BLK_DEV_SIZE=`blockdev --getsz $SCRATCH_DEV`
-+DELAY_TABLE_RDELAY="0 $BLK_DEV_SIZE delay $SCRATCH_DEV 0 100 $SCRATCH_DEV 0 0"
-+_load_delay_table $DELAY_READ
++ps aux >> $seqres.full
++# Now balance should take at least $runtime seconds, we can cancel it at
++# $runtime/2 to ensure a success cancel.
++$BTRFS_UTIL_PROG balance start -d --bg "$SCRATCH_MNT"
++sleep $(($runtime / 2))
++$BTRFS_UTIL_PROG balance cancel "$SCRATCH_MNT"
 +
-+echo "Run repair"
-+SCRATCH_DEV=$DELAY_DEV _scratch_xfs_repair -o ag_stride=4 -t 1 2>&1 |
-+        tee -a $seqres.full > $seqres.xfs_repair.out
++# Now check if we can finish relocating metadata, which should finish very
++# quickly
++$BTRFS_UTIL_PROG balance start -m "$SCRATCH_MNT" >> $seqres.full
 +
-+cat $seqres.xfs_repair.out | _filter_repair | sort -u
-+
-+_cleanup_delay
++lsof > /tmp/lsof
++echo "Silence is golden"
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/xfs/516.out b/tests/xfs/516.out
+diff --git a/tests/btrfs/213.out b/tests/btrfs/213.out
 new file mode 100644
-index 00000000..85018b93
+index 00000000..bd8f2430
 --- /dev/null
-+++ b/tests/xfs/516.out
-@@ -0,0 +1,15 @@
-+QA output created by 516
-+Format and populate
-+Introduce a dmdelay
-+Run repair
-+ - #:#:#: Phase #: #% done - estimated remaining time # minute, # second
-+ - #:#:#: Phase #: elapsed time # second - processed # inodes per minute
-+ - #:#:#: check for inodes claiming duplicate blocks - # of # inodes done
-+ - #:#:#: process known inodes and inode discovery - # of # inodes done
-+ - #:#:#: process newly discovered inodes - # of # allocation groups done
-+ - #:#:#: rebuild AG headers and trees - # of # allocation groups done
-+ - #:#:#: scanning agi unlinked lists - # of # allocation groups done
-+ - #:#:#: scanning filesystem freespace - # of # allocation groups done
-+ - #:#:#: setting up duplicate extent list - # of # allocation groups done
-+ - #:#:#: verify and correct link counts - # of # allocation groups done
-+ - #:#:#: zeroing log - # of # blocks done
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 12eb55c9..aeeca23f 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -513,3 +513,4 @@
- 513 auto mount
- 514 auto quick db
- 515 auto quick quota
-+516 repair
++++ b/tests/btrfs/213.out
+@@ -0,0 +1,2 @@
++QA output created by 213
++Silence is golden
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 8d65bddd..fe4d5bb3 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -215,3 +215,4 @@
+ 210 auto quick qgroup snapshot
+ 211 auto quick log prealloc
+ 212 auto balance dangerous
++213 auto fast balance dangerous
 -- 
-2.18.4
+2.26.2
 
