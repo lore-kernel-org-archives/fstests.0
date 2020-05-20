@@ -2,119 +2,229 @@ Return-Path: <SRS0=sY46=7C=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 93DE4C433E0
-	for <linux-fstests@archiver.kernel.org>; Wed, 20 May 2020 08:53:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 69ABCC433E0
+	for <linux-fstests@archiver.kernel.org>; Wed, 20 May 2020 09:25:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7201120823
-	for <linux-fstests@archiver.kernel.org>; Wed, 20 May 2020 08:53:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3EE24207D3
+	for <linux-fstests@archiver.kernel.org>; Wed, 20 May 2020 09:25:56 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Wp2ok8BI"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="HWkiT5Pr"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726560AbgETIxz (ORCPT
+        id S1726403AbgETJZ4 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 20 May 2020 04:53:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60150 "EHLO
+        Wed, 20 May 2020 05:25:56 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36886 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726403AbgETIxy (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 20 May 2020 04:53:54 -0400
-Received: from mail-ed1-x544.google.com (mail-ed1-x544.google.com [IPv6:2a00:1450:4864:20::544])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 84DE4C061A0E;
-        Wed, 20 May 2020 01:53:53 -0700 (PDT)
-Received: by mail-ed1-x544.google.com with SMTP id h16so2167206eds.5;
-        Wed, 20 May 2020 01:53:53 -0700 (PDT)
+        with ESMTP id S1726224AbgETJZz (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 20 May 2020 05:25:55 -0400
+Received: from mail-vs1-xe41.google.com (mail-vs1-xe41.google.com [IPv6:2607:f8b0:4864:20::e41])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 84349C061A0E;
+        Wed, 20 May 2020 02:25:55 -0700 (PDT)
+Received: by mail-vs1-xe41.google.com with SMTP id u7so1418992vsp.7;
+        Wed, 20 May 2020 02:25:55 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id;
-        bh=wBCjoUxDQQSEVQCtDCv2UPHFf/qLW4ILv+ZdQhlRJWA=;
-        b=Wp2ok8BIgG7VKcY+lSEDIpjTMJNdjzWLyZB3ItIhQZ/3M0qGQh28AmzR7/GWiLbBh7
-         hUbK5eOAmoB4LWXN0LUnJQSsIhjzvfqFFggr4rCFsNbrSAlHy94e/QqtSzt7GcV3DtxH
-         5H8CdRxwCcGim2FqWMov5VSDc0Tb8cmbu+DLBEkNNbT6U3iRBzoOGiSY2GTBAgOLNbuS
-         3GYAmdK60g4x7pGnmW+wzxEnTTwu7qwXHqpXmCpZylwkX5iCIVFN9LbjFIsJkBKcVr5v
-         js3uNoAPRqbEjx6v4i8VszMv0BqQqJ85XeomeQlBuGPkUhuS2sVxyPfAz/ZNXBm4qDm5
-         AUBA==
+        h=mime-version:references:in-reply-to:reply-to:from:date:message-id
+         :subject:to:cc:content-transfer-encoding;
+        bh=zkW4TjVRoZsKHMZ+rba136e+jXkLgxqOEABLFO6R6v8=;
+        b=HWkiT5PrOtIHfjWkYHLbFCv7PzMKBAcTNz4kPPbgT/xeAkjFmpiKDN5lr5sm3J6ITw
+         +lGXYGd/Sm9F3amJS5CN0E9r5CjhAGuq0pMxMmPAJfof5/1LFjXsdPxQoGmfWor9jDQw
+         odxpeZGOTTr+5nEyxpFs+d0G8ZQv7uS2VPvpxXM0Ng45CY42lQEFwNnbXLJx7ZGwVfkT
+         JdH4dFSP4Ph18KMfeL+piD1VYtscMczFcI/7w6tiNQ1ddEZf++cEW/fdzkB/iz/aCCxm
+         n1Iku70UtlKDn96oBrsvyn9S1OxS60aCcaQiVUgIcONAy3mJPLxBM/hGwVy+OCB3YtS3
+         ugwg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id;
-        bh=wBCjoUxDQQSEVQCtDCv2UPHFf/qLW4ILv+ZdQhlRJWA=;
-        b=HGQX8R3ssh5FoPEQ1eed7lrgqf8RPYrHGjgV2KRSO9DFGTltHK0LjTJbDGrz6lKPIw
-         MBdqjU8NEQl+QFv3+UP5W7C3K1AF4QpUUO0czqf7AU0z5XvVDEdfLM+G2x5s/BFUCn48
-         6itJ0yFdCuL8YKflifCJxElOcU3WFtl24ObkvX1AmZVTldigILYqYplTq3dgVer7p0Zh
-         x1aB8FiDTfzBEMSf7r7t/oDkRzWSLRpyqiDKS9eqwuLQtRdjTn9Mr7lLdUzP/81yRwsc
-         +3NzAYeJysdwU49Cs8arS+Grx8dI7WFgxgWmbtW4y2BylIpwN493lQOxZkOPl5p9oCV2
-         PnwA==
-X-Gm-Message-State: AOAM531pEfTEYiGlqpLG1uzm9dl3tAuZ+tpFzoIyNvfC3gSK0k/q9kb4
-        fGkVBoi+CeDPVvqwz5taUB0=
-X-Google-Smtp-Source: ABdhPJykKArnyZSRMTUnF2LTcfeJzxuexjCjo2qQrLxn0AD8EQydDJujxu0N7sWjavPFpJyXjC/hkw==
-X-Received: by 2002:aa7:cd5a:: with SMTP id v26mr2547307edw.320.1589964832303;
-        Wed, 20 May 2020 01:53:52 -0700 (PDT)
-Received: from localhost.localdomain ([141.226.12.123])
-        by smtp.gmail.com with ESMTPSA id b16sm1228285edu.89.2020.05.20.01.53.50
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 20 May 2020 01:53:51 -0700 (PDT)
-From:   Amir Goldstein <amir73il@gmail.com>
-To:     Eryu Guan <guaneryu@gmail.com>
-Cc:     Chengguang Xu <cgxu519@mykernel.net>,
-        zhangyi <yi.zhang@huawei.com>,
-        Miklos Szeredi <miklos@szeredi.hu>,
-        linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: [PATCH] overlay/031: fix failure with whiteout inode sharing
-Date:   Wed, 20 May 2020 11:53:44 +0300
-Message-Id: <20200520085344.2223-1-amir73il@gmail.com>
-X-Mailer: git-send-email 2.17.1
+        h=x-gm-message-state:mime-version:references:in-reply-to:reply-to
+         :from:date:message-id:subject:to:cc:content-transfer-encoding;
+        bh=zkW4TjVRoZsKHMZ+rba136e+jXkLgxqOEABLFO6R6v8=;
+        b=lBO9wWHRk8I+hOvZUytLPSxCQL0XQ4A1BoqS0smesftlA/IGHBtmooX56Pz3E/G69Y
+         ZLnceKvcjYqYLY3L98AnRrBc2Crt4DjPxdqU296V4hJTUr86wg6tjzIktCxRyvJLr91O
+         sZS30xcy2JGpfpMQNZleZTVrb5qBumrKEHXExKeiK6UROssOFFzHSuyUpgeoS1AghNtO
+         RBjtwkY38c5CxNcVzW85b5QHjf2wT9ppV6Pajpxlf1uI8VQiVrCdONHVP3voM/UFA1Wl
+         aZuRFDRygHv5rzlAdBiEN9FTT0btdoHp6G4YRPK3FlqvtywotRTNIDkM3FlzdThn7i9N
+         RU/w==
+X-Gm-Message-State: AOAM533krqnqKipu8RaAGIhMRwOR/5iuA3OrVA9g94KZLN9AYFxQm3uJ
+        Tb/qQuWSbsLuTW0WnDEQNHpdkAd0wF2ZIAIg9p8=
+X-Google-Smtp-Source: ABdhPJy13PlqWaaAW127N1CFZ1ahCQ6mQe21edfZFNJ2mQbmi/pBEa2Bi08F2NcpxQRoUeC3lxa/rC91rJ7VWFL6XBs=
+X-Received: by 2002:a67:c813:: with SMTP id u19mr2646449vsk.206.1589966754674;
+ Wed, 20 May 2020 02:25:54 -0700 (PDT)
+MIME-Version: 1.0
+References: <20200519021331.14028-1-wqu@suse.com>
+In-Reply-To: <20200519021331.14028-1-wqu@suse.com>
+Reply-To: fdmanana@gmail.com
+From:   Filipe Manana <fdmanana@gmail.com>
+Date:   Wed, 20 May 2020 10:25:43 +0100
+Message-ID: <CAL3q7H6GqgL9wAmgdUtHBWN8ex1r-BdRT9uuodEDXTrQn7OJqA@mail.gmail.com>
+Subject: Re: [PATCH] btrfs: Add a test for leaking root crash at unmount time
+To:     Qu Wenruo <wqu@suse.com>
+Cc:     linux-btrfs <linux-btrfs@vger.kernel.org>,
+        fstests <fstests@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Kernel commit c21c839b8448 "ovl: whiteout inode sharing" results in
-a temp whiteout file resident inside work dir.
+On Tue, May 19, 2020 at 3:14 AM Qu Wenruo <wqu@suse.com> wrote:
+>
+> Test if canceled balance could lead to root leakage.
+> If the kernel has CONFIG_BTRFS_DEBUG compiled, unmount time root leakge
+> check would detect it, and cause NULL pointer dereference as the pages
+> of the leaked root is already freed.
 
-Test overlay/031 is a regression test for two user visible bugs:
-1. Exposed whiteouts in overlay
-2. Failure to remove directory
+is -> are
 
-It also has a sanity tests for a harmless by-product of the bug -
-a residue file in work dir.
+>
+> The fix is titled "btrfs: relocation: Fix reloc root leakage and the NULL
+>  pointer reference caused by the leakage".
+>
+> Signed-off-by: Qu Wenruo <wqu@suse.com>
+> ---
+>  tests/btrfs/212     | 85 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/212.out |  2 ++
+>  tests/btrfs/group   |  1 +
+>  3 files changed, 88 insertions(+)
+>  create mode 100755 tests/btrfs/212
+>  create mode 100644 tests/btrfs/212.out
+>
+> diff --git a/tests/btrfs/212 b/tests/btrfs/212
+> new file mode 100755
+> index 00000000..4f4e177b
+> --- /dev/null
+> +++ b/tests/btrfs/212
+> @@ -0,0 +1,85 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (C) 2020 SUSE Linux Products GmbH. All Rights Reserved.
+> +#
+> +# FS QA Test 212
+> +#
+> +# Test if unmounting a fs with balance canceled can lead to crash.
+> +# This needs CONFIG_BTRFS_DEBUG compiled, which includes extra unmount t=
+ime self-test
 
-The new temp whiteout file looks like a residue and causes the test
-to fail.
+includes -> adds
 
-Drop this sanity test, because it is not vital to the regression test.
-We could also check if the residue is a single whiteout, but that is
-not really needed, so best not poke into overlay internal work dir.
+> +#
+> +seq=3D`basename $0`
+> +seqres=3D$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=3D`pwd`
+> +tmp=3D/tmp/$$
+> +status=3D1       # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +       cd /
+> +       rm -f $tmp.*
+> +       kill $balance_pid &> /dev/null
+> +       kill $cancel_pid &> /dev/null
+> +       "$KILLALL_PROG" -q $FSSTRESS_PROG &> /dev/null
+> +       $BTRFS_UTIL_PROG balance cancel $SCRATCH_MNT &> /dev/null
+> +       wait
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs btrfs
+> +_supported_os Linux
+> +_require_scratch
+> +_require_command "$KILLALL_PROG" killall
+> +
+> +_scratch_mkfs >> $seqres.full
+> +_scratch_mount
+> +
+> +runtime=3D15
+> +
+> +balance_workload()
+> +{
+> +       trap "wait; exit" SIGTERM
+> +       while true; do
+> +               $BTRFS_UTIL_PROG balance start -f --full $SCRATCH_MNT &> =
+/dev/null
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
+Please use the helper _run_btrfs_balance_start(), it will
+automatically add --full-balance if the installed btrfs-progs version
+requires it.
 
-Eryu,
+After that you can add:
 
-This fixes a failure on overlayfs-next.
-Test works fine on old kernels after the change of course.
+Reviewed-by: Filipe Manana <fdmanana@suse.com>
 
-Thanks,
-Amir.
+> +       done
+> +}
+> +
+> +cancel_workload()
+> +{
+> +       trap "wait; exit" SIGTERM
+> +       while true; do
+> +               $BTRFS_UTIL_PROG balance cancel $SCRATCH_MNT &> /dev/null
+> +               sleep 2
+> +       done
+> +}
+> +
+> +$FSSTRESS_PROG -d $SCRATCH_MNT -w -n 100000  >> $seqres.full 2>/dev/null=
+ &
+> +balance_workload &
+> +balance_pid=3D$!
+> +
+> +cancel_workload &
+> +cancel_pid=3D$!
+> +
+> +sleep $runtime
+> +
+> +kill $balance_pid
+> +kill $cancel_pid
+> +"$KILLALL_PROG" -q $FSSTRESS_PROG &> /dev/null
+> +$BTRFS_UTIL_PROG balance cancel $SCRATCH_MNT &> /dev/null
+> +wait
+> +
+> +echo "Silence is golden"
+> +# success, all done
+> +status=3D0
+> +exit
+> diff --git a/tests/btrfs/212.out b/tests/btrfs/212.out
+> new file mode 100644
+> index 00000000..32d11390
+> --- /dev/null
+> +++ b/tests/btrfs/212.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 212
+> +Silence is golden
+> diff --git a/tests/btrfs/group b/tests/btrfs/group
+> index 66b1beac..8d65bddd 100644
+> --- a/tests/btrfs/group
+> +++ b/tests/btrfs/group
+> @@ -214,3 +214,4 @@
+>  209 auto quick log
+>  210 auto quick qgroup snapshot
+>  211 auto quick log prealloc
+> +212 auto balance dangerous
+> --
+> 2.26.2
+>
 
- tests/overlay/031 | 1 -
- 1 file changed, 1 deletion(-)
 
-diff --git a/tests/overlay/031 b/tests/overlay/031
-index 2740c7c3..d7a5adb9 100755
---- a/tests/overlay/031
-+++ b/tests/overlay/031
-@@ -94,7 +94,6 @@ _overlay_scratch_mount_dirs $lowerdir1 $upperdir $workdir
- # try to remove test dir from overlay dir, trigger ovl_remove_and_whiteout,
- # it will not clean up the dir and lead to residue.
- rm -rf $SCRATCH_MNT/testdir 2>&1 | _filter_scratch
--ls $workdir/work
- 
- $UMOUNT_PROG $SCRATCH_MNT
- 
--- 
-2.17.1
+--=20
+Filipe David Manana,
 
+=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
+ right.=E2=80=9D
