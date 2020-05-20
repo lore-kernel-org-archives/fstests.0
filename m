@@ -4,30 +4,31 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+	URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1DBC7C433E0
-	for <linux-fstests@archiver.kernel.org>; Wed, 20 May 2020 06:59:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DBFFDC433DF
+	for <linux-fstests@archiver.kernel.org>; Wed, 20 May 2020 07:19:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id EAEC9207D3
-	for <linux-fstests@archiver.kernel.org>; Wed, 20 May 2020 06:59:13 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A8C6120708
+	for <linux-fstests@archiver.kernel.org>; Wed, 20 May 2020 07:19:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726439AbgETG7N (ORCPT
+        id S1726407AbgETHTr (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 20 May 2020 02:59:13 -0400
-Received: from mx2.suse.de ([195.135.220.15]:42458 "EHLO mx2.suse.de"
+        Wed, 20 May 2020 03:19:47 -0400
+Received: from mx2.suse.de ([195.135.220.15]:53766 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726369AbgETG7N (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 20 May 2020 02:59:13 -0400
+        id S1726224AbgETHTr (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 20 May 2020 03:19:47 -0400
 X-Virus-Scanned: by amavisd-new at test-mx.suse.de
 Received: from relay2.suse.de (unknown [195.135.220.254])
-        by mx2.suse.de (Postfix) with ESMTP id 78681AC77;
-        Wed, 20 May 2020 06:59:14 +0000 (UTC)
+        by mx2.suse.de (Postfix) with ESMTP id 05B33B21C;
+        Wed, 20 May 2020 07:19:47 +0000 (UTC)
 From:   Qu Wenruo <wqu@suse.com>
 To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: [PATCH] btrfs: Add a test for dead looping balance after balance cancel
-Date:   Wed, 20 May 2020 14:59:07 +0800
-Message-Id: <20200520065907.12794-1-wqu@suse.com>
+Subject: [PATCH v2] btrfs: Add a test for dead looping balance after balance cancel
+Date:   Wed, 20 May 2020 15:19:38 +0800
+Message-Id: <20200520071938.14253-1-wqu@suse.com>
 X-Mailer: git-send-email 2.26.2
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -44,19 +45,23 @@ The ifx is titled "btrfs: relocation: Clear the DEAD_RELOC_TREE bit for
 
 Signed-off-by: Qu Wenruo <wqu@suse.com>
 ---
- tests/btrfs/213     | 66 +++++++++++++++++++++++++++++++++++++++++++++
+Changelog:
+v2:
+- Remove debugging command
+---
+ tests/btrfs/213     | 65 +++++++++++++++++++++++++++++++++++++++++++++
  tests/btrfs/213.out |  2 ++
  tests/btrfs/group   |  1 +
- 3 files changed, 69 insertions(+)
+ 3 files changed, 68 insertions(+)
  create mode 100755 tests/btrfs/213
  create mode 100644 tests/btrfs/213.out
 
 diff --git a/tests/btrfs/213 b/tests/btrfs/213
 new file mode 100755
-index 00000000..72c32bab
+index 00000000..145378cb
 --- /dev/null
 +++ b/tests/btrfs/213
-@@ -0,0 +1,66 @@
+@@ -0,0 +1,65 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
 +# Copyright (C) 2020 SUSE Linux Products GmbH. All Rights Reserved.
@@ -117,7 +122,6 @@ index 00000000..72c32bab
 +# quickly
 +$BTRFS_UTIL_PROG balance start -m "$SCRATCH_MNT" >> $seqres.full
 +
-+lsof > /tmp/lsof
 +echo "Silence is golden"
 +
 +# success, all done
