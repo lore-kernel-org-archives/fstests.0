@@ -5,34 +5,34 @@ X-Spam-Level:
 X-Spam-Status: No, score=-8.0 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8CE07C433DF
-	for <linux-fstests@archiver.kernel.org>; Wed, 20 May 2020 10:02:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 94D60C433E0
+	for <linux-fstests@archiver.kernel.org>; Wed, 20 May 2020 11:32:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 49433207C4
-	for <linux-fstests@archiver.kernel.org>; Wed, 20 May 2020 10:02:46 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 596D120758
+	for <linux-fstests@archiver.kernel.org>; Wed, 20 May 2020 11:32:35 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=gmx.net header.i=@gmx.net header.b="PU8n73WR"
+	dkim=pass (1024-bit key) header.d=gmx.net header.i=@gmx.net header.b="TjkMTLMr"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726435AbgETKCq (ORCPT
+        id S1726443AbgETLcf (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 20 May 2020 06:02:46 -0400
-Received: from mout.gmx.net ([212.227.17.20]:48457 "EHLO mout.gmx.net"
+        Wed, 20 May 2020 07:32:35 -0400
+Received: from mout.gmx.net ([212.227.15.19]:57389 "EHLO mout.gmx.net"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726224AbgETKCp (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 20 May 2020 06:02:45 -0400
+        id S1726224AbgETLce (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 20 May 2020 07:32:34 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net;
-        s=badeba3b8450; t=1589968958;
-        bh=lFIq20MaKhTddS4o/cxTSfr8N8L2CtIq6Qq5thdALHI=;
+        s=badeba3b8450; t=1589974346;
+        bh=kYT5Z3clkOeU/C2FJw4PsKEcu20UYv6LoWbyjp8KQ8c=;
         h=X-UI-Sender-Class:Subject:To:Cc:References:From:Date:In-Reply-To;
-        b=PU8n73WRL7ngJC7dENkCzzwMWP6Z5q8WXOnc6PgCMCVY7Zh5epauj0WWPu5ocMeDb
-         jTt/+n2H9+gg7POMC8oLKbjMEOt82lm5IqluwA9aQogF/p7BrO35T7v1fQPiKjgfw6
-         ryfBEGQZpYreFls4kd9tf/RNeH8wRhFS/hQ+A0Eg=
+        b=TjkMTLMr4FqcC7PDefPkQK1hJtHd6jDskAq8K2gXofcAbpj6DnpLD0EEW7f1MoelK
+         R+5f0r8U9Zuxptf68+q3WolbIDgV/PzBV1wWH2oI/6RdX5qGW0J5WoW04r8pSbnTzr
+         hVIEQUwWF5a0vnFki1llBStMxikT9n5+97z86f7k=
 X-UI-Sender-Class: 01bb95c1-4bf8-414a-932a-4f6e2808ef9c
-Received: from [0.0.0.0] ([149.28.201.231]) by mail.gmx.com (mrgmx104
- [212.227.17.174]) with ESMTPSA (Nemesis) id 1Mq2jC-1jG5cN2KQc-00nBLA; Wed, 20
- May 2020 12:02:38 +0200
+Received: from [0.0.0.0] ([149.28.201.231]) by mail.gmx.com (mrgmx004
+ [212.227.17.184]) with ESMTPSA (Nemesis) id 1MtfNl-1im9wr0CuF-00v88i; Wed, 20
+ May 2020 13:32:26 +0200
 Subject: Re: [PATCH v3] btrfs: Add a test for dead looping balance after
  balance cancel
 To:     fdmanana@gmail.com, Qu Wenruo <wqu@suse.com>
@@ -40,6 +40,7 @@ Cc:     linux-btrfs <linux-btrfs@vger.kernel.org>,
         fstests <fstests@vger.kernel.org>
 References: <20200520075746.16245-1-wqu@suse.com>
  <CAL3q7H7fY0fyiPS=LiFYDxHBAXqQF_WuZu7z=jKQv8DTkPadMA@mail.gmail.com>
+ <b109c38d-288b-3a4f-de7b-6a2d52c2be7a@gmx.com>
 From:   Qu Wenruo <quwenruo.btrfs@gmx.com>
 Autocrypt: addr=quwenruo.btrfs@gmx.com; prefer-encrypt=mutual; keydata=
  mQENBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
@@ -65,234 +66,249 @@ Autocrypt: addr=quwenruo.btrfs@gmx.com; prefer-encrypt=mutual; keydata=
  72byGeSovfq/4AWGNPBG1L61Exl+gbqfvbECP3ziXnob009+z9I4qXodHSYINfAkZkA523JG
  ap12LndJeLk3gfWNZfXEWyGnuciRGbqESkhIRav8ootsCIops/SqXm0/k+Kcl4gGUO/iD/T5
  oagaDh0QtOd8RWSMwLxwn8uIhpH84Q4X1LadJ5NCgGa6xPP5qqRuiC+9gZqbq4Nj
-Message-ID: <b109c38d-288b-3a4f-de7b-6a2d52c2be7a@gmx.com>
-Date:   Wed, 20 May 2020 18:02:34 +0800
+Message-ID: <e374561f-397a-8ab3-e2d4-cac423da6636@gmx.com>
+Date:   Wed, 20 May 2020 19:32:22 +0800
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
  Thunderbird/68.8.0
 MIME-Version: 1.0
-In-Reply-To: <CAL3q7H7fY0fyiPS=LiFYDxHBAXqQF_WuZu7z=jKQv8DTkPadMA@mail.gmail.com>
+In-Reply-To: <b109c38d-288b-3a4f-de7b-6a2d52c2be7a@gmx.com>
 Content-Type: multipart/signed; micalg=pgp-sha256;
  protocol="application/pgp-signature";
- boundary="VBCp8KnonVTEuBebq4h9bZmEumP4rE9Zj"
-X-Provags-ID: V03:K1:xV6z3jMx0wk2lG1OFHLhxLRxUjDwv/YSygGNjeXDSaMCJY4J4CP
- cMVCaLlwuq4GlFpF8MTFPYndZpOCPCHkIU/L6gkVDCLprMFzZULl8QuR4oug9ObKvJov1Fb
- 0zcM/Zpee4g+4mCoUAwg+Uwg7nOK2DQePZIvtoY+/dGV8/X0+bnr/y2s0dvpCBYtMWpZTct
- ykTBvJqKXOI+o25VMpMww==
-X-UI-Out-Filterresults: notjunk:1;V03:K0:YMkYYT9gATU=:sUkPcvNFt9gHKTZiw2tpX7
- AKzGSsrZh6xoYKrBZCUjB470cEcdykNUZXnNkEcOS/23a8e6jdjVuAN7wRrQuLJC1PztOP357
- c6uOXCXJXPiFixI0sTALM6MoZF5N5PykYlm73M2NGulea3biZkRfhaL0OPl8jvKodl8J5hFMr
- hKQr2aSVHQyBgAbuPaqHjAnHyoIBcK6NBAk/de60FGgiGq+0G5x8lIOZPkgERdpPRoHQYIazg
- DXGpPbz5/kfNrt9T1zmwf05jUiCj4VP6YvD8iJvWKySt9FDImyGtI7qic+tIGJWvCm+gX3hvT
- W8MQCdDESPUu2MWFTzBQXFbG3JnlVMel+ZB7t5ZGY5FbbEraS8jmQceXb13GGdRPaVgzUB9hz
- k0Ux0OZFk3jy6T1RF12eBnT/pWds+2QwSsjwgkrzWSPEnrQUoVDCgdN746WHghzOcLDka/P0G
- Cx9bvDIDKN0KDgxH0vBWCE2QcQpjg2UJjzDpsuLLnVtPG3KY4znv5oTaYtl6n1ZmZgoiBal6v
- SaYoo/KT+hDa5i8DdFA2hp7urUvLdWZD7uJ7hHi+vV1Grpmg4MehNoLt3LA5LC6UnPT+qn/WB
- YQaZEs3qN72aevP5Q1EdBfseLxa0qVgFn6JY+3iJUP15wLvW+3+OVLq+npGfatqEhWvBZ7kzS
- RZrbwOcHr92r+L5ggbVWG9704wz+11c4X1QGYsO5FmCIVCnU9qvAr/8ibqkwcirXPYOQqcTNH
- /nU7iVBAkeM6m7y2tncTUGBCp+JRVOwO2kzAp0+jBTo/DGHLP39r+ejWRGRaNzf904etfsXAA
- SiMwdV2Y6GFY5+CNgyGuV9eSjp7qeV4KoLPakKZLpsJmK/g88+P24azSwfwwbwBL1AK7TjvIG
- h/PUO4wydQFP/UWN2iWyem+IeY3ycxkuqwfT6CiSmY7GVd4bcTQ/yLiyH5aQqbuMtcrWxa0uI
- QmwRUbFW6W5NeCFn2u+aTl5xIn2bJt5uNl2fqo97yKzsGf9eAdIkBNZzIN2pUUt32Cnq+nefI
- Obm10Ebcbk9BDbzXV6V0Etlfzr3zt9X3mtubyU1M4rhXBoZjyVQm3zFKZkHRLorFA1FEiEO9e
- UmVvh1/ydTg7+QxQWhN0l/XAzcPXlCo06yxslrb3NkmJf7CQUnm1NYuVVTF9cRihpI3iK5znc
- LnCzQrpaSFM+5C+3hUhSTvSYP5OgMfAauXQCEkbAWvKIyiiO59fRE1Fh/4eSogPn/nNOiQi5q
- TMS0Brfrpdm9mL9zY
+ boundary="GIZ6FKBruG2hudBTxAQqfPezs13IGRnTr"
+X-Provags-ID: V03:K1:zZMTWnlx1xwg1/HhetK0JZbZzAgpCjnmsDGDEvb8fy7Q3WoIBfs
+ fiYNFZe+KMOA4UT/jBxD2Q1WB4UbDIeqEaJtstpPII8BWwwmalYXvIE/PgxxoOwenEjaMPY
+ 18k7GxqKoSbL10NgdcHfJsdrg+OySkHcwttSaN5uQukHlEERFJvt2v6rmKh211vI57GdXLo
+ /8LXJe0A/EIMyTaadVbLQ==
+X-UI-Out-Filterresults: notjunk:1;V03:K0:08Uguz2j0eM=:5C0MhhIju+hIv1BsQqk68r
+ aCwRQZ2JQIEqFDOSmG/ObnzjaOHLmDdhvllmja2i1krs9zOvQn6jj1/am9Ej2dIVhuWMRkSsw
+ quiRHldXEsTE+xCBBST077UvfzvA8Od52eWuGBtCkcN5FPPFd1xzMVMgCuD05nGsfgknwaery
+ ssnJiJcQ65MrdaQejQRz7vq5JeeGZS/ZPMvxqwX8x/Jg3f7nstw2h4AoFAKskIj7cBGYNfO5X
+ Rmh9G2GUJtbmJIa2NSFgyN5ef8JdUCkJidWm/6HhB/xwVlJvdl7KgeKazxrw5S7qULu+yYWMM
+ dJKSASnvLh2IJmJ2aaC+2jAOvk51z4U9hVo2GrX0GOVbyV/bjjI/cPisRD5l4iGSC90lZfoBf
+ danqkPHKFTVYIFBjC7s8623Og98HANOgypjrV1xeEHaRqVeBEV/sOLqPVXQ/5RTEQcwR1xJc0
+ 7elQGL0KwEaX0YYkGrGlMdi8KgjwOWIa0CTea52rk7TuVDmJmPreP3ILP0y3X90+7LvvxBMEK
+ okiPt10SvSwChj+WaQm6nxKRCmgnAVU6mvnNMp1k3vElG4mDV01yDUes8+FH2pDlSD/FXfvyd
+ m7dzDK8m/9e2nnIF6vCBu7NNUeHRjzMYoXJiQ/mkY3jXaaczV84jxiVjxfkB7ySyPs5s4oP7R
+ gWxGbTSXS4AQoEo0TFFLF9SBvL2BLrfWy5EsB5fRoibAmJsM8YtKzmgqb2YTrdwiqWuOAhhbo
+ 3Iz0O8v3/5Tcm1NV1ztm425buc/m7t1dcvHO8MedpbddsMC388dRoBtaVZFRtx9sxTHiGb9Mz
+ dYu6z9S4ysehRY255lKqcWaKd52oXsmBqNYr4pHG2gFo3g3DqWIViXaDuwVtm/8i9Q6nhVlyR
+ U0YlFgx4n7xcGZWwAyEC79Tw9G8doBnY/0+kq9RF/H0qcHYYqXgwxtX7XA0RkyZdsCXZGxPZX
+ 6hyeSi3Ey00whvrNx4gJ2cT/ftpsNBVPxF5TVfRSMCyqh9EQ+BpTVqnnrIVPVCcGNSDzbx/AB
+ 5vrEKLWUu+w2XXEiall/+O5/FLYja7oB4n7GZpvGAh+/3NHcxYo8p/AH0v5QOlfNXAXK8czyv
+ cVOxMWG040/ojAhpAefrxG92BB44vFHlAIh3Rfncl7Cbakt15ijm+0nzWx8KEX53BdhYZ7iqz
+ ChquT/4PzCLWfYzG4h2WmiLP+gUQrfEZEBViyh2Tl8w30MHwE+jdbOYR/COWJWemrxz+Nh/J8
+ r7POvE/km+TGpxCnM
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
 This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---VBCp8KnonVTEuBebq4h9bZmEumP4rE9Zj
-Content-Type: multipart/mixed; boundary="4AWvP8gyhHU2OWgKA3Xs8hvryLn7Fu0B3"
+--GIZ6FKBruG2hudBTxAQqfPezs13IGRnTr
+Content-Type: multipart/mixed; boundary="2f5q1z8PMaVdIeAt6BBT99NWWjmXlTOKW"
 
---4AWvP8gyhHU2OWgKA3Xs8hvryLn7Fu0B3
+--2f5q1z8PMaVdIeAt6BBT99NWWjmXlTOKW
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
 Content-Transfer-Encoding: quoted-printable
 
 
 
-On 2020/5/20 =E4=B8=8B=E5=8D=885:29, Filipe Manana wrote:
-> On Wed, May 20, 2020 at 8:59 AM Qu Wenruo <wqu@suse.com> wrote:
->>
->> Test if canceling a running balance can cause later balance to dead
->> loop.
->>
->> The ifx is titled "btrfs: relocation: Clear the DEAD_RELOC_TREE bit fo=
-r
->>  orphan roots to prevent runaway balance".
->>
->> Signed-off-by: Qu Wenruo <wqu@suse.com>
->> ---
->> Changelog:
->> v2:
->> - Remove lsof debug output
->> v3:
->> - Remove ps debug output
->> ---
->>  tests/btrfs/213     | 64 ++++++++++++++++++++++++++++++++++++++++++++=
-+
->>  tests/btrfs/213.out |  2 ++
->>  tests/btrfs/group   |  1 +
->>  3 files changed, 67 insertions(+)
->>  create mode 100755 tests/btrfs/213
->>  create mode 100644 tests/btrfs/213.out
->>
->> diff --git a/tests/btrfs/213 b/tests/btrfs/213
->> new file mode 100755
->> index 00000000..f56b0279
->> --- /dev/null
->> +++ b/tests/btrfs/213
->> @@ -0,0 +1,64 @@
->> +#! /bin/bash
->> +# SPDX-License-Identifier: GPL-2.0
->> +# Copyright (C) 2020 SUSE Linux Products GmbH. All Rights Reserved.
->> +#
->> +# FS QA Test 213
->> +#
->> +# Test if canceling a running balance can lead to dead looping balanc=
-e
->> +#
->> +seq=3D`basename $0`
->> +seqres=3D$RESULT_DIR/$seq
->> +echo "QA output created by $seq"
->> +
->> +here=3D`pwd`
->> +tmp=3D/tmp/$$
->> +status=3D1       # failure is the default!
->> +trap "_cleanup; exit \$status" 0 1 2 3 15
->> +
->> +_cleanup()
->> +{
->> +       cd /
->> +       rm -f $tmp.*
->> +}
->> +
->> +# get standard environment, filters and checks
->> +. ./common/rc
->> +. ./common/filter
->> +
->> +# remove previous $seqres.full before test
->> +rm -f $seqres.full
->> +
->> +# Modify as appropriate.
->> +_supported_fs btrfs
->> +_supported_os Linux
->> +_require_scratch
->> +_require_command "$KILLALL_PROG" killall
->> +
->> +_scratch_mkfs >> $seqres.full
->> +_scratch_mount
->> +
->> +runtime=3D4
->> +
->> +# Create enough IO so that we need around $runtime seconds to relocat=
-e it
->> +dd if=3D/dev/zero bs=3D1M of=3D"$SCRATCH_MNT/file" oflag=3Dsync statu=
-s=3Dnone \
->> +       &> /dev/null &
->> +dd_pid=3D$!
->> +sleep $runtime
->> +"$KILLALL_PROG" -q dd &> /dev/null
+On 2020/5/20 =E4=B8=8B=E5=8D=886:02, Qu Wenruo wrote:
 >=20
-> Do we really need the killall program? There's only one dd process.
 >=20
-> We should also kill the dd process at _cleanup(), as killing the test
-> during the sleep above will result in the dd process not being killed.
-
-The main problem here is, I can't find a good way to kill dd.
-plain 'kill $dd_pid' doesn't seem to kill it properly, as my debug
-lsof/ps still shows dd running and failed to unmount the fs.
-
-'kill -KILL $dd_pid' kills it well, but causes extra output for the
-terminated dd.
-
-Only 'killall -q dd' works as expected.
-
-Any good advice on this?
+> On 2020/5/20 =E4=B8=8B=E5=8D=885:29, Filipe Manana wrote:
+>> On Wed, May 20, 2020 at 8:59 AM Qu Wenruo <wqu@suse.com> wrote:
+>>>
+>>> Test if canceling a running balance can cause later balance to dead
+>>> loop.
+>>>
+>>> The ifx is titled "btrfs: relocation: Clear the DEAD_RELOC_TREE bit f=
+or
+>>>  orphan roots to prevent runaway balance".
+>>>
+>>> Signed-off-by: Qu Wenruo <wqu@suse.com>
+>>> ---
+>>> Changelog:
+>>> v2:
+>>> - Remove lsof debug output
+>>> v3:
+>>> - Remove ps debug output
+>>> ---
+>>>  tests/btrfs/213     | 64 +++++++++++++++++++++++++++++++++++++++++++=
+++
+>>>  tests/btrfs/213.out |  2 ++
+>>>  tests/btrfs/group   |  1 +
+>>>  3 files changed, 67 insertions(+)
+>>>  create mode 100755 tests/btrfs/213
+>>>  create mode 100644 tests/btrfs/213.out
+>>>
+>>> diff --git a/tests/btrfs/213 b/tests/btrfs/213
+>>> new file mode 100755
+>>> index 00000000..f56b0279
+>>> --- /dev/null
+>>> +++ b/tests/btrfs/213
+>>> @@ -0,0 +1,64 @@
+>>> +#! /bin/bash
+>>> +# SPDX-License-Identifier: GPL-2.0
+>>> +# Copyright (C) 2020 SUSE Linux Products GmbH. All Rights Reserved.
+>>> +#
+>>> +# FS QA Test 213
+>>> +#
+>>> +# Test if canceling a running balance can lead to dead looping balan=
+ce
+>>> +#
+>>> +seq=3D`basename $0`
+>>> +seqres=3D$RESULT_DIR/$seq
+>>> +echo "QA output created by $seq"
+>>> +
+>>> +here=3D`pwd`
+>>> +tmp=3D/tmp/$$
+>>> +status=3D1       # failure is the default!
+>>> +trap "_cleanup; exit \$status" 0 1 2 3 15
+>>> +
+>>> +_cleanup()
+>>> +{
+>>> +       cd /
+>>> +       rm -f $tmp.*
+>>> +}
+>>> +
+>>> +# get standard environment, filters and checks
+>>> +. ./common/rc
+>>> +. ./common/filter
+>>> +
+>>> +# remove previous $seqres.full before test
+>>> +rm -f $seqres.full
+>>> +
+>>> +# Modify as appropriate.
+>>> +_supported_fs btrfs
+>>> +_supported_os Linux
+>>> +_require_scratch
+>>> +_require_command "$KILLALL_PROG" killall
+>>> +
+>>> +_scratch_mkfs >> $seqres.full
+>>> +_scratch_mount
+>>> +
+>>> +runtime=3D4
+>>> +
+>>> +# Create enough IO so that we need around $runtime seconds to reloca=
+te it
+>>> +dd if=3D/dev/zero bs=3D1M of=3D"$SCRATCH_MNT/file" oflag=3Dsync stat=
+us=3Dnone \
+>>> +       &> /dev/null &
+>>> +dd_pid=3D$!
+>>> +sleep $runtime
+>>> +"$KILLALL_PROG" -q dd &> /dev/null
+>>
+>> Do we really need the killall program? There's only one dd process.
+>>
+>> We should also kill the dd process at _cleanup(), as killing the test
+>> during the sleep above will result in the dd process not being killed.=
 
 >=20
->> +wait $dd_pid
->> +
->> +# Now balance should take at least $runtime seconds, we can cancel it=
- at
->> +# $runtime/2 to ensure a success cancel.
->> +$BTRFS_UTIL_PROG balance start -d --bg "$SCRATCH_MNT"
->> +sleep $(($runtime / 2))
->> +$BTRFS_UTIL_PROG balance cancel "$SCRATCH_MNT"
->> +
->> +# Now check if we can finish relocating metadata, which should finish=
- very
->> +# quickly
->> +$BTRFS_UTIL_PROG balance start -m "$SCRATCH_MNT" >> $seqres.full
+> The main problem here is, I can't find a good way to kill dd.
+> plain 'kill $dd_pid' doesn't seem to kill it properly, as my debug
+> lsof/ps still shows dd running and failed to unmount the fs.
 >=20
-> Why redirect this one to $seqres.full and not the other balance? What
-> kind of useful information it provides?
+> 'kill -KILL $dd_pid' kills it well, but causes extra output for the
+> terminated dd.
+>=20
+> Only 'killall -q dd' works as expected.
+>=20
+> Any good advice on this?
 
-Not really much, just an indicator to show that the balance finishes as
-expected.
-And we don't want to output it golden output, as mkfs change may create
-more metadata chunks and cause difference.
-
-For other ones, like the one to be canceled, we don't really care that mu=
-ch.
+Oh, the fstests "kindly" overrides dd, "kill $dd_pid" only kills the
+child bash running that dd function, not the real dd command.
+I'll use xfs_io to ensure we get no extra wrapper.
 
 Thanks,
 Qu
+
 >=20
->> +
->> +echo "Silence is golden"
->> +
->> +# success, all done
->> +status=3D0
->> +exit
->> diff --git a/tests/btrfs/213.out b/tests/btrfs/213.out
->> new file mode 100644
->> index 00000000..bd8f2430
->> --- /dev/null
->> +++ b/tests/btrfs/213.out
->> @@ -0,0 +1,2 @@
->> +QA output created by 213
->> +Silence is golden
->> diff --git a/tests/btrfs/group b/tests/btrfs/group
->> index 8d65bddd..fe4d5bb3 100644
->> --- a/tests/btrfs/group
->> +++ b/tests/btrfs/group
->> @@ -215,3 +215,4 @@
->>  210 auto quick qgroup snapshot
->>  211 auto quick log prealloc
->>  212 auto balance dangerous
->> +213 auto fast balance dangerous
+>>
+>>> +wait $dd_pid
+>>> +
+>>> +# Now balance should take at least $runtime seconds, we can cancel i=
+t at
+>>> +# $runtime/2 to ensure a success cancel.
+>>> +$BTRFS_UTIL_PROG balance start -d --bg "$SCRATCH_MNT"
+>>> +sleep $(($runtime / 2))
+>>> +$BTRFS_UTIL_PROG balance cancel "$SCRATCH_MNT"
+>>> +
+>>> +# Now check if we can finish relocating metadata, which should finis=
+h very
+>>> +# quickly
+>>> +$BTRFS_UTIL_PROG balance start -m "$SCRATCH_MNT" >> $seqres.full
+>>
+>> Why redirect this one to $seqres.full and not the other balance? What
+>> kind of useful information it provides?
 >=20
-> fast -> quick
+> Not really much, just an indicator to show that the balance finishes as=
+
+> expected.
+> And we don't want to output it golden output, as mkfs change may create=
+
+> more metadata chunks and cause difference.
 >=20
-> Thanks.
+> For other ones, like the one to be canceled, we don't really care that =
+much.
 >=20
->> --
->> 2.26.2
+> Thanks,
+> Qu
+>>
+>>> +
+>>> +echo "Silence is golden"
+>>> +
+>>> +# success, all done
+>>> +status=3D0
+>>> +exit
+>>> diff --git a/tests/btrfs/213.out b/tests/btrfs/213.out
+>>> new file mode 100644
+>>> index 00000000..bd8f2430
+>>> --- /dev/null
+>>> +++ b/tests/btrfs/213.out
+>>> @@ -0,0 +1,2 @@
+>>> +QA output created by 213
+>>> +Silence is golden
+>>> diff --git a/tests/btrfs/group b/tests/btrfs/group
+>>> index 8d65bddd..fe4d5bb3 100644
+>>> --- a/tests/btrfs/group
+>>> +++ b/tests/btrfs/group
+>>> @@ -215,3 +215,4 @@
+>>>  210 auto quick qgroup snapshot
+>>>  211 auto quick log prealloc
+>>>  212 auto balance dangerous
+>>> +213 auto fast balance dangerous
+>>
+>> fast -> quick
+>>
+>> Thanks.
+>>
+>>> --
+>>> 2.26.2
+>>>
+>>
 >>
 >=20
->=20
 
 
---4AWvP8gyhHU2OWgKA3Xs8hvryLn7Fu0B3--
+--2f5q1z8PMaVdIeAt6BBT99NWWjmXlTOKW--
 
---VBCp8KnonVTEuBebq4h9bZmEumP4rE9Zj
+--GIZ6FKBruG2hudBTxAQqfPezs13IGRnTr
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQEzBAEBCAAdFiEELd9y5aWlW6idqkLhwj2R86El/qgFAl7FADoACgkQwj2R86El
-/qg5TAf/c8gYpjbAq70yvVYib6lPKKNes40x9cQgKEvXneWMKc9u22mJVlTXSrb8
-FL70h2iqJ6QohcCVkPgVp0oDHDkLAaTtiL5HlT8HP9uKlAqnL79T+7es54btagxI
-X9cDENssZsfFU5dTpUpYh5u0Rsof/Yz/JhXwpIX2qOf9R9Qng9XDEMKQAL2z3HJ+
-M2zSdYyzW6Wz2h+jAH3BBp+GvrfTfRLNsjsSGCTS/XRiXVpXWru8OejanUEDnpOd
-0CEwqHPfjg33FMELFdh4vN6aeAhpQHn5Uu+Dadj/qwn/izX0JEobNwjL8S5YWIlc
-1hgQ5PJqeWT6gAHfVvAFcnrGv7kfAA==
-=7aJc
+iQEzBAEBCAAdFiEELd9y5aWlW6idqkLhwj2R86El/qgFAl7FFUYACgkQwj2R86El
+/qjcKwgAnuaDFur9A+FZpoMmH4g/bwvuvNoIEk51MaQ1KnXBym5ZX6VJfHwfEYMV
+ilOWRdaLfNouZC12mrKfRyj0/9sdIEC05tYEDwZmlON5oRLXKs4S/MvQjbupVad3
+AUrhf3vxis4KpVKbTDAeFlhEqIVtL/uG5SwDT52Rrs/3/bN7j8h0VAu5QhaDY5Mf
+Yj2imZbDoRoWuYPZNCGE4M94zFZOAa5oSEP+JLUtb6XVIYDUZvQMSO0pS67GSMlE
+pdcjC4SJ+c587sNm3tYc+KPh73tsxMxOG/zWADnA6OzJLDrN/TrF48BpklkmCJMd
+HCeRkux6a/HaWKBnk0PMMdcPHCX6CA==
+=kxDV
 -----END PGP SIGNATURE-----
 
---VBCp8KnonVTEuBebq4h9bZmEumP4rE9Zj--
+--GIZ6FKBruG2hudBTxAQqfPezs13IGRnTr--
