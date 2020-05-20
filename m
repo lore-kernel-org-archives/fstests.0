@@ -8,65 +8,64 @@ X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A7E8DC433DF
-	for <linux-fstests@archiver.kernel.org>; Wed, 20 May 2020 12:41:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C00F4C433E1
+	for <linux-fstests@archiver.kernel.org>; Wed, 20 May 2020 15:09:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 83D3E207C4
-	for <linux-fstests@archiver.kernel.org>; Wed, 20 May 2020 12:41:26 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9EA85206B6
+	for <linux-fstests@archiver.kernel.org>; Wed, 20 May 2020 15:09:35 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="a/PCIt5e"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="YL0Emu/w"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726510AbgETMl0 (ORCPT
+        id S1726775AbgETPJf (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 20 May 2020 08:41:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39328 "EHLO
+        Wed, 20 May 2020 11:09:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34280 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726443AbgETMl0 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 20 May 2020 08:41:26 -0400
-Received: from mail-vs1-xe43.google.com (mail-vs1-xe43.google.com [IPv6:2607:f8b0:4864:20::e43])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A6A37C061A0E;
-        Wed, 20 May 2020 05:41:22 -0700 (PDT)
-Received: by mail-vs1-xe43.google.com with SMTP id w65so1694752vsw.11;
-        Wed, 20 May 2020 05:41:22 -0700 (PDT)
+        with ESMTP id S1726486AbgETPJe (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 20 May 2020 11:09:34 -0400
+Received: from mail-vs1-xe42.google.com (mail-vs1-xe42.google.com [IPv6:2607:f8b0:4864:20::e42])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ACC41C061A0E;
+        Wed, 20 May 2020 08:09:34 -0700 (PDT)
+Received: by mail-vs1-xe42.google.com with SMTP id v26so2035619vsa.1;
+        Wed, 20 May 2020 08:09:34 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=mime-version:references:in-reply-to:reply-to:from:date:message-id
          :subject:to:cc:content-transfer-encoding;
-        bh=5IVQbqd47LVHfYEPI+JZLN7Nu6+ehfOcH9Yro26bql0=;
-        b=a/PCIt5eVvWhA++kkRsRVkQvbCZVJ6TTve+dTIX55Xm5K3nOUgNftBT4abL6nqdZL8
-         sPD0kC+2iLcfDQOYXJT2sG6YZWXCDRf7mIK6/Llb0EoXbA1pHsC6PFQbrM9uK1TcUe9I
-         kxa7/BiSByy7ZteMYX/Be9fyATIKK/ClWgxMJDHHxHt5ovHKPW5rWyeH50m0aeHBBY0Z
-         Mri240/g+Vpp7HN+4eIVM9PEZKSfXlo4XjgbcSaB02wwUsPAxDnq49IXBrLdX3g9Fy1s
-         a1+dSpFdXXCHCbHWXuDLYle4a7Sa7eb2mHYGkwmwAjG4lqmJDncU/K2L9szQjxPvvtnQ
-         tx1Q==
+        bh=Zt0rJdpfwVaRClF7yWcTgjaZat7i1LmocQVlHy92Vww=;
+        b=YL0Emu/wsvQdfsRdSjskce3wFjghZ1X3iiiuEM+QcwWQt7Yfkc3Ze2itJ9o9fiOMF6
+         hlNm7D/6Dk2eiaLRLdBAeAR2dpQjvDGarltKuKnftsZHj5kRMsjDOFiyIuGG66I8yt4i
+         cJx/Mngr8brt4mscu2zcVOg/6DILkwOvTxLkKz8TAcW7ZPtmrRMaJbUbbBdS5z+1dd14
+         36tawV8aH+jreQYdNlbomT4zJXo210UXSKPxVU+s1UoIMSN/EdIi+tiWtKS2sn4dddss
+         CjMVwWO6f+Tc1BKx4kRcGllWaxY593VyqAdqXC0lYrPd8jVLMynr/gQ4tKXe5+/udryw
+         7o4w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:reply-to
          :from:date:message-id:subject:to:cc:content-transfer-encoding;
-        bh=5IVQbqd47LVHfYEPI+JZLN7Nu6+ehfOcH9Yro26bql0=;
-        b=AvJsE53Tpp8OJBsKLrP3kuSHOsBgROCcBi+LRsxwC1luyWvOkkEIV6TqhY+TtrbQTi
-         yJLjiUevaLhhMJKGFuhkJKpkcH3XrNs1pLfXHNa6tOtZHD7Jw1uILTss7S42zX0XAG8t
-         BRK57VHwmZaIxMohj1wgcYyT3Ybcbo8jey94Yvm3ZFlGmegy5Fl21B86ERAZhxr0uE7+
-         PNKlmrmdd5Bs0MXzCaXBXuP1cVJwLJEXde97PJd1GnUix1tOIhgHbih7+hAhESYqAGjD
-         /5HZgHX9xnZEgkHIpASMmUlj+/7C7pXmCz0qUppMPgS+94iiBGwW80qlWdGZfhWjSvxQ
-         JnLw==
-X-Gm-Message-State: AOAM5321LBORpmTM2y2UYs7pd2I7Z50c/mJLjpy/UiBNaEzRZo4zIeIW
-        csxsZgcI99mpOzvDMA01yUTvvjHCJK+A1BbKgz0=
-X-Google-Smtp-Source: ABdhPJxh4MOhkCiS4YNqDq2CbfP6MWWIC1LBMUTT+CMX9iDGXHnOmpVImka7BWsohkf90W+xWZl2VvqFhrNEjfPl/eQ=
-X-Received: by 2002:a67:407:: with SMTP id 7mr2906029vse.95.1589978481697;
- Wed, 20 May 2020 05:41:21 -0700 (PDT)
+        bh=Zt0rJdpfwVaRClF7yWcTgjaZat7i1LmocQVlHy92Vww=;
+        b=ZTnbIogb3F8mSQvBArjzRplP4L4t0wlWQZnPOeuLVzOLd2CnkuBWZo9Dzoj6YsPSsF
+         ghcAt2OR5zAMKlqI8Sfl8SaKW3g3X+HOFdNFIAK5Yc+EtBdsXFfPWyWZ/Q/CrIy1pdtK
+         OEUzyf3IX98ZRc2rEPNF9CX1rVjbQ6nKOWAFV4A89DkNZ3A2YRz+Ok0aaABiJQa6Ajfj
+         1Ii4L29MKw+03zJdaDrBy0f20GIFAeI/eyNumtmRy8oqRXe30JcAufpus6hssHIp62Cf
+         dR0uhNQdjGkc8M7F90rw0MY0M3Gx4WwB5Izcq8SYDg4Ly0fRCzSCnJ7TfY1NtaOWVwMK
+         AA/g==
+X-Gm-Message-State: AOAM5311NYOkf4GP1rDTHgPpF/hkz33xTBDnL/MEEOWAqcxB/u1nYWrh
+        QA/LdXr535ZiFm1XpfWRNFnYajOQxfAwuc6PCeI=
+X-Google-Smtp-Source: ABdhPJxTi3+891HtVeZHnTj+GWxC6HiwivP7fwkEFpNOd6ZfuaHisjuxA3/838d0QZiLng4VUDLV+l6V12UmB/w7wF0=
+X-Received: by 2002:a67:e297:: with SMTP id g23mr3452571vsf.90.1589987373895;
+ Wed, 20 May 2020 08:09:33 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200520114443.21143-1-wqu@suse.com> <20200520114443.21143-2-wqu@suse.com>
-In-Reply-To: <20200520114443.21143-2-wqu@suse.com>
+References: <20200519080929.18030-1-cgxu519@mykernel.net>
+In-Reply-To: <20200519080929.18030-1-cgxu519@mykernel.net>
 Reply-To: fdmanana@gmail.com
 From:   Filipe Manana <fdmanana@gmail.com>
-Date:   Wed, 20 May 2020 13:41:10 +0100
-Message-ID: <CAL3q7H7XNJKA9SNab6zZpvPs1bGD9sMs2BniR9AconmvzZokQQ@mail.gmail.com>
-Subject: Re: [PATCH 2/2] btrfs: Add a test for dead looping balance after
- balance cancel
-To:     Qu Wenruo <wqu@suse.com>
-Cc:     linux-btrfs <linux-btrfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>
+Date:   Wed, 20 May 2020 16:09:23 +0100
+Message-ID: <CAL3q7H4aObeXLuhv05AOyrLU1B_3M81y_ddH1cY0pAEEEO+Law@mail.gmail.com>
+Subject: Re: [PATCH v2] generic/597: test data integrity for rdonly remount
+To:     Chengguang Xu <cgxu519@mykernel.net>
+Cc:     Eryu Guan <guaneryu@gmail.com>, fstests <fstests@vger.kernel.org>,
+        linux-unionfs@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 Sender: fstests-owner@vger.kernel.org
@@ -74,48 +73,38 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, May 20, 2020 at 12:47 PM Qu Wenruo <wqu@suse.com> wrote:
+On Tue, May 19, 2020 at 9:10 AM Chengguang Xu <cgxu519@mykernel.net> wrote:
 >
-> Test if canceling a running balance can cause later balance to dead
-> loop.
+> This test checks data integrity when remounting from
+> rw to ro mode.
 >
-> The fix is titled "btrfs: relocation: Clear the DEAD_RELOC_TREE bit for
->  orphan roots to prevent runaway balance".
->
-> Signed-off-by: Qu Wenruo <wqu@suse.com>
+> Signed-off-by: Chengguang Xu <cgxu519@mykernel.net>
 > ---
-> Changelog:
-> v2:
-> - Remove lsof debug output
-> v3:
-> - Remove ps debug output
-> v4:
-> - Use $XFS_IO_PROG directly to avoid wrapped dd command
->   This allows us to kill the writer and wait it correctly, other than
->   killing the bash process running the wrapper function.
-> - Fix typos
-> - Use _run_btrfs_balance_start() wrapper
-> ---
->  tests/btrfs/213     | 65 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/213.out |  2 ++
->  tests/btrfs/group   |  1 +
->  3 files changed, 68 insertions(+)
->  create mode 100755 tests/btrfs/213
->  create mode 100644 tests/btrfs/213.out
+> v1->v2:
+> - Add to shutdown greoup.
+> - Change case number to 597
 >
-> diff --git a/tests/btrfs/213 b/tests/btrfs/213
+>  tests/generic/597     | 54 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/597.out |  2 ++
+>  tests/generic/group   |  1 +
+>  3 files changed, 57 insertions(+)
+>  create mode 100755 tests/generic/597
+>  create mode 100644 tests/generic/597.out
+>
+> diff --git a/tests/generic/597 b/tests/generic/597
 > new file mode 100755
-> index 00000000..a3a2afe0
+> index 00000000..d96e750b
 > --- /dev/null
-> +++ b/tests/btrfs/213
-> @@ -0,0 +1,65 @@
+> +++ b/tests/generic/597
+> @@ -0,0 +1,54 @@
 > +#! /bin/bash
 > +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (C) 2020 SUSE Linux Products GmbH. All Rights Reserved.
+> +# Copyright (c) 2020 Chengguang Xu <cgxu519@mykernel.net>.
+> +# All Rights Reserved.
 > +#
-> +# FS QA Test 213
+> +# FS QA Test 597
 > +#
-> +# Test if canceling a running balance can lead to dead looping balance
+> +# Test data integrity for ro remount.
 > +#
 > +seq=3D`basename $0`
 > +seqres=3D$RESULT_DIR/$seq
@@ -123,7 +112,7 @@ On Wed, May 20, 2020 at 12:47 PM Qu Wenruo <wqu@suse.com> wrote:
 > +
 > +here=3D`pwd`
 > +tmp=3D/tmp/$$
-> +status=3D1       # failure is the default!
+> +status=3D0
 > +trap "_cleanup; exit \$status" 0 1 2 3 15
 > +
 > +_cleanup()
@@ -139,75 +128,56 @@ On Wed, May 20, 2020 at 12:47 PM Qu Wenruo <wqu@suse.com> wrote:
 > +# remove previous $seqres.full before test
 > +rm -f $seqres.full
 > +
-> +# Modify as appropriate.
-> +_supported_fs btrfs
+> +# real QA test starts here
+> +_supported_fs generic
 > +_supported_os Linux
+> +_require_fssum
 > +_require_scratch
-> +_require_xfs_io_command pwrite -D
-> +
-> +_scratch_mkfs >> $seqres.full
-> +_scratch_mount
-> +
-> +runtime=3D4
-> +
-> +# Create enough IO so that we need around $runtime seconds to relocate i=
-t.
-> +#
-> +# Here we don't want any wrapper, as we want full control of the process=
-.
-> +$XFS_IO_PROG -f -c "pwrite -D -b 1M 0 1024T" "$SCRATCH_MNT/file" &> /dev=
-/null &
-> +write_pid=3D$!
-> +sleep $runtime
+> +_require_scratch_shutdown
 
-Probably you forgot, but as I said before, we should make sure the
-xfs_io process is killed in _cleanup() too, in case we abort the test
-while it is in that sleep above.
-
-With that added,
-
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
+Couldn't the test be using dm's flakey instead of shutdown?
+As shutdown is not implemented by all filesystems (btrfs for example),
+it would allow more coverage.
 
 Thanks.
 
-> +kill $write_pid
-> +wait $write_pid
 > +
-> +# Now balance should take at least $runtime seconds, we can cancel it at
-> +# $runtime/2 to ensure a success cancel.
-> +_run_btrfs_balance_start -d --bg "$SCRATCH_MNT"
-> +sleep $(($runtime / 2))
-> +$BTRFS_UTIL_PROG balance cancel "$SCRATCH_MNT"
+> +_scratch_mkfs &>/dev/null
+> +_scratch_mount
 > +
-> +# Now check if we can finish relocating metadata, which should finish ve=
-ry
-> +# quickly.
-> +$BTRFS_UTIL_PROG balance start -m "$SCRATCH_MNT" >> $seqres.full
+> +localdir=3D$SCRATCH_MNT/dir
+> +mkdir $localdir
+> +sync
 > +
-> +echo "Silence is golden"
+> +# fssum used for comparing checksum of test file(data & metedata),
+> +# exclude checking about atime, block structure, open error.
+> +$FSSUM_PROG -ugomAcdES -f -w $tmp.fssum $localdir
+> +_scratch_remount ro
+> +_scratch_shutdown
+> +_scratch_cycle_mount
+> +$FSSUM_PROG -r $tmp.fssum $localdir
 > +
-> +# success, all done
-> +status=3D0
 > +exit
-> diff --git a/tests/btrfs/213.out b/tests/btrfs/213.out
+> diff --git a/tests/generic/597.out b/tests/generic/597.out
 > new file mode 100644
-> index 00000000..bd8f2430
+> index 00000000..a847cfe2
 > --- /dev/null
-> +++ b/tests/btrfs/213.out
+> +++ b/tests/generic/597.out
 > @@ -0,0 +1,2 @@
-> +QA output created by 213
-> +Silence is golden
-> diff --git a/tests/btrfs/group b/tests/btrfs/group
-> index 8d65bddd..59e8ecce 100644
-> --- a/tests/btrfs/group
-> +++ b/tests/btrfs/group
-> @@ -215,3 +215,4 @@
->  210 auto quick qgroup snapshot
->  211 auto quick log prealloc
->  212 auto balance dangerous
-> +213 auto quick balance dangerous
+> +QA output created by 597
+> +OK
+> diff --git a/tests/generic/group b/tests/generic/group
+> index e82004e8..d68fee9a 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -599,3 +599,4 @@
+>  594 auto quick quota
+>  595 auto quick encrypt
+>  596 auto quick
+> +597 auto quick remount shutdown
 > --
-> 2.26.2
+> 2.20.1
+>
 >
 
 
