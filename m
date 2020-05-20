@@ -2,187 +2,466 @@ Return-Path: <SRS0=sY46=7C=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
+X-Spam-Status: No, score=-0.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=no autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C00F4C433E1
-	for <linux-fstests@archiver.kernel.org>; Wed, 20 May 2020 15:09:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9AF2AC433DF
+	for <linux-fstests@archiver.kernel.org>; Wed, 20 May 2020 15:39:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9EA85206B6
-	for <linux-fstests@archiver.kernel.org>; Wed, 20 May 2020 15:09:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6119E206B6
+	for <linux-fstests@archiver.kernel.org>; Wed, 20 May 2020 15:39:30 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="YL0Emu/w"
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="P/f+y3MZ"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726775AbgETPJf (ORCPT
+        id S1726720AbgETPja (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 20 May 2020 11:09:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34280 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726486AbgETPJe (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 20 May 2020 11:09:34 -0400
-Received: from mail-vs1-xe42.google.com (mail-vs1-xe42.google.com [IPv6:2607:f8b0:4864:20::e42])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ACC41C061A0E;
-        Wed, 20 May 2020 08:09:34 -0700 (PDT)
-Received: by mail-vs1-xe42.google.com with SMTP id v26so2035619vsa.1;
-        Wed, 20 May 2020 08:09:34 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:reply-to:from:date:message-id
-         :subject:to:cc:content-transfer-encoding;
-        bh=Zt0rJdpfwVaRClF7yWcTgjaZat7i1LmocQVlHy92Vww=;
-        b=YL0Emu/wsvQdfsRdSjskce3wFjghZ1X3iiiuEM+QcwWQt7Yfkc3Ze2itJ9o9fiOMF6
-         hlNm7D/6Dk2eiaLRLdBAeAR2dpQjvDGarltKuKnftsZHj5kRMsjDOFiyIuGG66I8yt4i
-         cJx/Mngr8brt4mscu2zcVOg/6DILkwOvTxLkKz8TAcW7ZPtmrRMaJbUbbBdS5z+1dd14
-         36tawV8aH+jreQYdNlbomT4zJXo210UXSKPxVU+s1UoIMSN/EdIi+tiWtKS2sn4dddss
-         CjMVwWO6f+Tc1BKx4kRcGllWaxY593VyqAdqXC0lYrPd8jVLMynr/gQ4tKXe5+/udryw
-         7o4w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:reply-to
-         :from:date:message-id:subject:to:cc:content-transfer-encoding;
-        bh=Zt0rJdpfwVaRClF7yWcTgjaZat7i1LmocQVlHy92Vww=;
-        b=ZTnbIogb3F8mSQvBArjzRplP4L4t0wlWQZnPOeuLVzOLd2CnkuBWZo9Dzoj6YsPSsF
-         ghcAt2OR5zAMKlqI8Sfl8SaKW3g3X+HOFdNFIAK5Yc+EtBdsXFfPWyWZ/Q/CrIy1pdtK
-         OEUzyf3IX98ZRc2rEPNF9CX1rVjbQ6nKOWAFV4A89DkNZ3A2YRz+Ok0aaABiJQa6Ajfj
-         1Ii4L29MKw+03zJdaDrBy0f20GIFAeI/eyNumtmRy8oqRXe30JcAufpus6hssHIp62Cf
-         dR0uhNQdjGkc8M7F90rw0MY0M3Gx4WwB5Izcq8SYDg4Ly0fRCzSCnJ7TfY1NtaOWVwMK
-         AA/g==
-X-Gm-Message-State: AOAM5311NYOkf4GP1rDTHgPpF/hkz33xTBDnL/MEEOWAqcxB/u1nYWrh
-        QA/LdXr535ZiFm1XpfWRNFnYajOQxfAwuc6PCeI=
-X-Google-Smtp-Source: ABdhPJxTi3+891HtVeZHnTj+GWxC6HiwivP7fwkEFpNOd6ZfuaHisjuxA3/838d0QZiLng4VUDLV+l6V12UmB/w7wF0=
-X-Received: by 2002:a67:e297:: with SMTP id g23mr3452571vsf.90.1589987373895;
- Wed, 20 May 2020 08:09:33 -0700 (PDT)
+        Wed, 20 May 2020 11:39:30 -0400
+Received: from userp2120.oracle.com ([156.151.31.85]:51104 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726510AbgETPj3 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 20 May 2020 11:39:29 -0400
+Received: from pps.filterd (userp2120.oracle.com [127.0.0.1])
+        by userp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 04KFbTfG139191;
+        Wed, 20 May 2020 15:39:25 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
+ : subject : message-id : references : mime-version : content-type :
+ in-reply-to; s=corp-2020-01-29;
+ bh=DnIbBOQWzn3gEc+GRfJ4HeB3M/uVanf2ZHm6GqKg5q8=;
+ b=P/f+y3MZ6+J/OtTfxiF9wrs9ixFzgFF6MAvhkhbeUbNrYPPS0FZAXktCdpLnIomgMq86
+ 0MeNx6eu16B36m/LZ4IQuGJqg9l5Pjp6FYOsgmu5RDiI69pUqscXvMZuuVoam6zhb5Gs
+ 4g9GtFDFpa1QibM5bO0hArXEjnbbiPjfoYK/2mS7WrUwiO1PDFRU9mLRUClpgvsUOZb4
+ SAKNiWzTVrMon27dOfEtsUpJnq3POq5aAWLQ4YPZU6QC25twAJe0cHmLxImVulpIUGLk
+ tR+vxDtFceFqYu9sINKFGi4j9cBwduxmlSBiDfI97sgCgNegufN2HaQlndB/6q6CCt+Z lQ== 
+Received: from userp3030.oracle.com (userp3030.oracle.com [156.151.31.80])
+        by userp2120.oracle.com with ESMTP id 31501racjs-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Wed, 20 May 2020 15:39:25 +0000
+Received: from pps.filterd (userp3030.oracle.com [127.0.0.1])
+        by userp3030.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 04KFcdWv056978;
+        Wed, 20 May 2020 15:39:24 GMT
+Received: from aserv0122.oracle.com (aserv0122.oracle.com [141.146.126.236])
+        by userp3030.oracle.com with ESMTP id 314gm79p8d-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Wed, 20 May 2020 15:39:24 +0000
+Received: from abhmp0010.oracle.com (abhmp0010.oracle.com [141.146.116.16])
+        by aserv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 04KFdNTP015977;
+        Wed, 20 May 2020 15:39:23 GMT
+Received: from localhost (/67.169.218.210)
+        by default (Oracle Beehive Gateway v4.0)
+        with ESMTP ; Wed, 20 May 2020 08:39:23 -0700
+Date:   Wed, 20 May 2020 08:39:22 -0700
+From:   "Darrick J. Wong" <darrick.wong@oracle.com>
+To:     Eric Sandeen <sandeen@redhat.com>
+Cc:     linux-xfs <linux-xfs@vger.kernel.org>,
+        fstests <fstests@vger.kernel.org>
+Subject: Re: [PATCH 0/4] fstests: more quota related tests
+Message-ID: <20200520153922.GU17627@magnolia>
+References: <ea649599-f8a9-deb9-726e-329939befade@redhat.com>
+ <9c9a63f3-13ab-d5b6-923c-4ea684b6b2f8@redhat.com>
 MIME-Version: 1.0
-References: <20200519080929.18030-1-cgxu519@mykernel.net>
-In-Reply-To: <20200519080929.18030-1-cgxu519@mykernel.net>
-Reply-To: fdmanana@gmail.com
-From:   Filipe Manana <fdmanana@gmail.com>
-Date:   Wed, 20 May 2020 16:09:23 +0100
-Message-ID: <CAL3q7H4aObeXLuhv05AOyrLU1B_3M81y_ddH1cY0pAEEEO+Law@mail.gmail.com>
-Subject: Re: [PATCH v2] generic/597: test data integrity for rdonly remount
-To:     Chengguang Xu <cgxu519@mykernel.net>
-Cc:     Eryu Guan <guaneryu@gmail.com>, fstests <fstests@vger.kernel.org>,
-        linux-unionfs@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <9c9a63f3-13ab-d5b6-923c-4ea684b6b2f8@redhat.com>
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9626 signatures=668686
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 malwarescore=0 mlxlogscore=999
+ adultscore=0 phishscore=0 mlxscore=0 spamscore=0 suspectscore=1
+ bulkscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2004280000 definitions=main-2005200127
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9626 signatures=668686
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 lowpriorityscore=0 spamscore=0
+ mlxlogscore=999 clxscore=1015 priorityscore=1501 cotscore=-2147483648
+ impostorscore=0 bulkscore=0 adultscore=0 malwarescore=0 phishscore=0
+ mlxscore=0 suspectscore=1 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2004280000 definitions=main-2005200127
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, May 19, 2020 at 9:10 AM Chengguang Xu <cgxu519@mykernel.net> wrote:
->
-> This test checks data integrity when remounting from
-> rw to ro mode.
->
-> Signed-off-by: Chengguang Xu <cgxu519@mykernel.net>
-> ---
-> v1->v2:
-> - Add to shutdown greoup.
-> - Change case number to 597
->
->  tests/generic/597     | 54 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/597.out |  2 ++
->  tests/generic/group   |  1 +
->  3 files changed, 57 insertions(+)
->  create mode 100755 tests/generic/597
->  create mode 100644 tests/generic/597.out
->
-> diff --git a/tests/generic/597 b/tests/generic/597
-> new file mode 100755
-> index 00000000..d96e750b
-> --- /dev/null
-> +++ b/tests/generic/597
-> @@ -0,0 +1,54 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2020 Chengguang Xu <cgxu519@mykernel.net>.
-> +# All Rights Reserved.
-> +#
-> +# FS QA Test 597
-> +#
-> +# Test data integrity for ro remount.
-> +#
-> +seq=3D`basename $0`
-> +seqres=3D$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=3D`pwd`
-> +tmp=3D/tmp/$$
-> +status=3D0
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +       cd /
-> +       rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +_supported_fs generic
-> +_supported_os Linux
-> +_require_fssum
-> +_require_scratch
-> +_require_scratch_shutdown
+On Mon, May 18, 2020 at 02:59:01PM -0500, Eric Sandeen wrote:
+> This collects zorro's outstanding patch to test per-type quota
+> timers, as well as one test from darrick to test limit survival
+> after quotacheck,  plus 2 more from me to test grace time extension.
+> 
+> zorro's still needs ENOSPC vs. EDQUOT filtering, darrick's might
+> need to be made generic, and mine are new.
 
-Couldn't the test be using dm's flakey instead of shutdown?
-As shutdown is not implemented by all filesystems (btrfs for example),
-it would allow more coverage.
+Err, I saw the following quota fstests regressions overnight.  Are these
+expected?  Note that I didn't patch any of the userspace, nor have I
+added any of the tests in this series...
 
-Thanks.
+--D
 
-> +
-> +_scratch_mkfs &>/dev/null
-> +_scratch_mount
-> +
-> +localdir=3D$SCRATCH_MNT/dir
-> +mkdir $localdir
-> +sync
-> +
-> +# fssum used for comparing checksum of test file(data & metedata),
-> +# exclude checking about atime, block structure, open error.
-> +$FSSUM_PROG -ugomAcdES -f -w $tmp.fssum $localdir
-> +_scratch_remount ro
-> +_scratch_shutdown
-> +_scratch_cycle_mount
-> +$FSSUM_PROG -r $tmp.fssum $localdir
-> +
-> +exit
-> diff --git a/tests/generic/597.out b/tests/generic/597.out
-> new file mode 100644
-> index 00000000..a847cfe2
-> --- /dev/null
-> +++ b/tests/generic/597.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 597
-> +OK
-> diff --git a/tests/generic/group b/tests/generic/group
-> index e82004e8..d68fee9a 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -599,3 +599,4 @@
->  594 auto quick quota
->  595 auto quick encrypt
->  596 auto quick
-> +597 auto quick remount shutdown
-> --
-> 2.20.1
->
->
-
-
---=20
-Filipe David Manana,
-
-=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
- right.=E2=80=9D
+--- RESULTS FOR HOST: doh-mtr00.local
+FSTESTS LOG DIR "/var/tmp/fstests":
+SECTION      -- -no-sections-
+FSTYP        -- xfs
+MKFS_OPTIONS --  -m reflink=1,rmapbt=1, -i sparse=1,
+MOUNT_OPTIONS --  -o usrquota,grpquota,prjquota,
+HOST_OPTIONS -- local.config
+CHECK_OPTIONS -- -g auto
+XFS_MKFS_OPTIONS -- -bsize=4096
+TIME_FACTOR  -- 1
+LOAD_FACTOR  -- 1
+TEST_DIR     -- /mnt
+TEST_DEV     -- /dev/sda
+SCRATCH_DEV  -- /dev/sdf
+SCRATCH_MNT  -- /opt
+OVL_UPPER    -- ovl-upper
+OVL_LOWER    -- ovl-lower
+OVL_WORK     -- ovl-work
+KERNEL       -- 5.7.0-rc4-djw
+--- xfs/106.out
++++ xfs/106.out.bad
+@@ -151,7 +151,7 @@
+ checking restore command (type=u)
+ 
+ checking report command (type=u)
+-fsgqa 1024 512 2048 00 [7 days] 15 10 20 00 [7 days]
++fsgqa 1024 512 2048 00 [0 days] 15 10 20 00 [0 days]
+ 
+ 
+ checking state command (type=u)
+@@ -159,9 +159,9 @@
+  Accounting: ON
+  Enforcement: ON
+  Inode: #[INO] (X blocks, Y extents)
+-Blocks grace time: [7 days]
+-Inodes grace time: [7 days]
+-Realtime Blocks grace time: [7 days]
++Blocks grace time: [--------]
++Inodes grace time: [--------]
++Realtime Blocks grace time: [--------]
+ cleanup files
+ ----------------------- gquota,sync ---------------------------
+ init quota limit and timer, and dump it
+@@ -315,7 +315,7 @@
+ checking restore command (type=g)
+ 
+ checking report command (type=g)
+-fsgqa 1024 512 2048 00 [7 days] 15 10 20 00 [7 days]
++fsgqa 1024 512 2048 00 [0 days] 15 10 20 00 [0 days]
+ 
+ 
+ checking state command (type=g)
+@@ -323,9 +323,9 @@
+  Accounting: ON
+  Enforcement: ON
+  Inode: #[INO] (X blocks, Y extents)
+-Blocks grace time: [7 days]
+-Inodes grace time: [7 days]
+-Realtime Blocks grace time: [7 days]
++Blocks grace time: [--------]
++Inodes grace time: [--------]
++Realtime Blocks grace time: [--------]
+ cleanup files
+ ----------------------- pquota,sync ---------------------------
+ init quota limit and timer, and dump it
+@@ -479,7 +479,7 @@
+ checking restore command (type=p)
+ 
+ checking report command (type=p)
+-fsgqa 1024 512 2048 00 [7 days] 15 10 20 00 [7 days]
++fsgqa 1024 512 2048 00 [0 days] 15 10 20 00 [0 days]
+ 
+ 
+ checking state command (type=p)
+@@ -487,7 +487,7 @@
+  Accounting: ON
+  Enforcement: ON
+  Inode: #[INO] (X blocks, Y extents)
+-Blocks grace time: [7 days]
+-Inodes grace time: [7 days]
+-Realtime Blocks grace time: [7 days]
++Blocks grace time: [--------]
++Inodes grace time: [--------]
++Realtime Blocks grace time: [--------]
+ cleanup files
+--- xfs/299.out
++++ xfs/299.out.bad
+@@ -16,19 +16,19 @@
+ 
+ *** push past the soft inode limit
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 0 100 500 00 [--------] 5 4 10 00 [7 days] 0 0 0 00 [--------]
++[NAME] 0 100 500 00 [--------] 5 4 10 00 [0 days] 0 0 0 00 [--------]
+ 
+ *** push past the soft block limit
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 200 100 500 00 [7 days] 6 4 10 00 [7 days] 0 0 0 00 [--------]
++[NAME] 200 100 500 00 [7 days] 6 4 10 00 [0 days] 0 0 0 00 [--------]
+ 
+ *** push past the hard inode limit (expect EDQUOT)
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 200 100 500 00 [7 days] 9 4 10 00 [7 days] 0 0 0 00 [--------]
++[NAME] 200 100 500 00 [7 days] 9 4 10 00 [0 days] 0 0 0 00 [--------]
+ 
+ *** push past the hard block limit (expect EDQUOT)
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] =OK= 100 500 0 [7 days] 9 4 10 00 [7 days] 0 0 0 00 [--------]
++[NAME] =OK= 100 500 0 [7 days] 9 4 10 00 [0 days] 0 0 0 00 [--------]
+ 
+ 
+ *** report no quota settings
+--- xfs/050.out
++++ xfs/050.out.bad
+@@ -16,19 +16,20 @@
+ 
+ *** push past the soft inode limit
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 0 200 1000 00 [--------] 5 4 10 00 [7 days] 0 0 0 00 [--------]
++[NAME] 0 200 1000 00 [--------] 5 4 10 00 [0 days] 0 0 0 00 [--------]
+ 
+ *** push past the soft block limit
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 300 200 1000 00 [7 days] 6 4 10 00 [7 days] 0 0 0 00 [--------]
++[NAME] 0 200 1000 00 [--------] 5 4 10 00 [0 days] 0 0 0 00 [--------]
+ 
+ *** push past the hard inode limit (expect EDQUOT)
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 300 200 1000 00 [7 days] 10 4 10 00 [7 days] 0 0 0 00 [--------]
++[NAME] 0 200 1000 00 [--------] 5 4 10 00 [0 days] 0 0 0 00 [--------]
+ 
+ *** push past the hard block limit (expect EDQUOT)
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] =OK= 200 1000 0 [7 days] 10 4 10 00 [7 days] 0 0 0 00 [--------]
++[NAME] =OK= 200 1000 0 [--------] 5 4 10 00 [0 days] 0 0 0 00 [--------]
++ URK 65534: 0 is out of range! [3481600,4096000]
+ 
+ *** unmount
+ *** group
+@@ -48,19 +49,19 @@
+ 
+ *** push past the soft inode limit
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 0 200 1000 00 [--------] 5 4 10 00 [7 days] 0 0 0 00 [--------]
++[NAME] 0 200 1000 00 [--------] 5 4 10 00 [0 days] 0 0 0 00 [--------]
+ 
+ *** push past the soft block limit
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 300 200 1000 00 [7 days] 6 4 10 00 [7 days] 0 0 0 00 [--------]
++[NAME] 300 200 1000 00 [7 days] 6 4 10 00 [0 days] 0 0 0 00 [--------]
+ 
+ *** push past the hard inode limit (expect EDQUOT)
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 300 200 1000 00 [7 days] 10 4 10 00 [7 days] 0 0 0 00 [--------]
++[NAME] 300 200 1000 00 [7 days] 10 4 10 00 [0 days] 0 0 0 00 [--------]
+ 
+ *** push past the hard block limit (expect EDQUOT)
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] =OK= 200 1000 0 [7 days] 10 4 10 00 [7 days] 0 0 0 00 [--------]
++[NAME] =OK= 200 1000 0 [7 days] 10 4 10 00 [0 days] 0 0 0 00 [--------]
+ 
+ *** unmount
+ *** uqnoenforce
+@@ -144,19 +145,19 @@
+ 
+ *** push past the soft inode limit
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 0 200 1000 00 [--------] 5 4 10 00 [7 days] 0 0 0 00 [--------]
++[NAME] 0 200 1000 00 [--------] 5 4 10 00 [0 days] 0 0 0 00 [--------]
+ 
+ *** push past the soft block limit
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 300 200 1000 00 [7 days] 6 4 10 00 [7 days] 0 0 0 00 [--------]
++[NAME] 300 200 1000 00 [7 days] 6 4 10 00 [0 days] 0 0 0 00 [--------]
+ 
+ *** push past the hard inode limit (expect EDQUOT)
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 300 200 1000 00 [7 days] 9 4 10 00 [7 days] 0 0 0 00 [--------]
++[NAME] 300 200 1000 00 [7 days] 9 4 10 00 [0 days] 0 0 0 00 [--------]
+ 
+ *** push past the hard block limit (expect EDQUOT)
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] =OK= 200 1000 0 [7 days] 9 4 10 00 [7 days] 0 0 0 00 [--------]
++[NAME] =OK= 200 1000 0 [7 days] 9 4 10 00 [0 days] 0 0 0 00 [--------]
+ 
+ *** unmount
+ *** pqnoenforce
+--- generic/594.out
++++ generic/594.out.bad
+@@ -5,31 +5,31 @@
+ *** Report for group quotas on device SCRATCH_DEV
+ Block grace time: DEF_TIME; Inode grace time: DEF_TIME
+ *** Report for project quotas on device SCRATCH_DEV
+-Block grace time: 00:10; Inode grace time: 00:20
++Block grace time: DEF_TIME; Inode grace time: DEF_TIME
+ 
+ 2. set group quota timer
+ *** Report for user quotas on device SCRATCH_DEV
+ Block grace time: DEF_TIME; Inode grace time: DEF_TIME
+ *** Report for group quotas on device SCRATCH_DEV
+-Block grace time: 00:30; Inode grace time: 00:40
++Block grace time: DEF_TIME; Inode grace time: DEF_TIME
+ *** Report for project quotas on device SCRATCH_DEV
+-Block grace time: 00:10; Inode grace time: 00:20
++Block grace time: DEF_TIME; Inode grace time: DEF_TIME
+ 
+ 3. set user quota timer
+ *** Report for user quotas on device SCRATCH_DEV
+ Block grace time: 00:50; Inode grace time: 01:00
+ *** Report for group quotas on device SCRATCH_DEV
+-Block grace time: 00:30; Inode grace time: 00:40
++Block grace time: 00:50; Inode grace time: 01:00
+ *** Report for project quotas on device SCRATCH_DEV
+-Block grace time: 00:10; Inode grace time: 00:20
++Block grace time: 00:50; Inode grace time: 01:00
+ 
+ 4. cycle mount test-1
+ *** Report for user quotas on device SCRATCH_DEV
+ Block grace time: 00:50; Inode grace time: 01:00
+ *** Report for group quotas on device SCRATCH_DEV
+-Block grace time: 00:30; Inode grace time: 00:40
++Block grace time: 00:50; Inode grace time: 01:00
+ *** Report for project quotas on device SCRATCH_DEV
+-Block grace time: 00:10; Inode grace time: 00:20
++Block grace time: 00:50; Inode grace time: 01:00
+ 
+ 5. fsck to force quota check
+ 
+@@ -37,14 +37,14 @@
+ *** Report for user quotas on device SCRATCH_DEV
+ Block grace time: 00:50; Inode grace time: 01:00
+ *** Report for group quotas on device SCRATCH_DEV
+-Block grace time: 00:30; Inode grace time: 00:40
++Block grace time: 00:50; Inode grace time: 01:00
+ *** Report for project quotas on device SCRATCH_DEV
+-Block grace time: 00:10; Inode grace time: 00:20
++Block grace time: 00:50; Inode grace time: 01:00
+ 
+ 7. cycle mount test-3
+ *** Report for user quotas on device SCRATCH_DEV
+ Block grace time: 00:50; Inode grace time: 01:00
+ *** Report for group quotas on device SCRATCH_DEV
+-Block grace time: 00:30; Inode grace time: 00:40
++Block grace time: 00:50; Inode grace time: 01:00
+ *** Report for project quotas on device SCRATCH_DEV
+-Block grace time: 00:10; Inode grace time: 00:20
++Block grace time: 00:50; Inode grace time: 01:00
+--- generic/235.out
++++ generic/235.out.bad
+@@ -1,25 +1,25 @@
+ QA output created by 235
+ *** Report for user quotas on device SCRATCH_DEV
+-Block grace time: 7days; Inode grace time: 7days
++Block grace time: 00:00; Inode grace time: 00:00
+                         Block limits                File limits
+ User            used    soft    hard  grace    used  soft  hard  grace
+ ----------------------------------------------------------------------
+ fsgqa     --       0       0       0              1     0     0       
+ *** Report for group quotas on device SCRATCH_DEV
+-Block grace time: 7days; Inode grace time: 7days
++Block grace time: 00:00; Inode grace time: 00:00
+                         Block limits                File limits
+ Group           used    soft    hard  grace    used  soft  hard  grace
+ ----------------------------------------------------------------------
+ fsgqa     --       0       0       0              1     0     0       
+ touch: cannot touch 'SCRATCH_MNT/failed': Read-only file system
+ *** Report for user quotas on device SCRATCH_DEV
+-Block grace time: 7days; Inode grace time: 7days
++Block grace time: 00:00; Inode grace time: 00:00
+                         Block limits                File limits
+ User            used    soft    hard  grace    used  soft  hard  grace
+ ----------------------------------------------------------------------
+ fsgqa     --       0       0       0              2     0     0       
+ *** Report for group quotas on device SCRATCH_DEV
+-Block grace time: 7days; Inode grace time: 7days
++Block grace time: 00:00; Inode grace time: 00:00
+                         Block limits                File limits
+ Group           used    soft    hard  grace    used  soft  hard  grace
+ ----------------------------------------------------------------------
+--- xfs/263.out
++++ xfs/263.out.bad
+@@ -14,9 +14,9 @@
+   Accounting: OFF
+   Enforcement: OFF
+   Inode: N/A
+-Blocks grace time: [7 days]
+-Inodes grace time: [7 days]
+-Realtime Blocks grace time: [7 days]
++Blocks grace time: [--------]
++Inodes grace time: [--------]
++Realtime Blocks grace time: [--------]
+ == Options: grpquota,rw ==
+ User quota state on SCRATCH_MNT (SCRATCH_DEV)
+   Accounting: OFF
+@@ -30,9 +30,9 @@
+   Accounting: OFF
+   Enforcement: OFF
+   Inode: N/A
+-Blocks grace time: [7 days]
+-Inodes grace time: [7 days]
+-Realtime Blocks grace time: [7 days]
++Blocks grace time: [--------]
++Inodes grace time: [--------]
++Realtime Blocks grace time: [--------]
+ == Options: usrquota,grpquota,rw ==
+ User quota state on SCRATCH_MNT (SCRATCH_DEV)
+   Accounting: ON
+@@ -62,9 +62,9 @@
+   Accounting: ON
+   Enforcement: ON
+   Inode #XXX (1 blocks, 1 extents)
+-Blocks grace time: [7 days]
+-Inodes grace time: [7 days]
+-Realtime Blocks grace time: [7 days]
++Blocks grace time: [--------]
++Inodes grace time: [--------]
++Realtime Blocks grace time: [--------]
+ == Options: usrquota,prjquota,rw ==
+ User quota state on SCRATCH_MNT (SCRATCH_DEV)
+   Accounting: ON
+@@ -98,9 +98,9 @@
+   Accounting: OFF
+   Enforcement: OFF
+   Inode: N/A
+-Blocks grace time: [7 days]
+-Inodes grace time: [7 days]
+-Realtime Blocks grace time: [7 days]
++Blocks grace time: [--------]
++Inodes grace time: [--------]
++Realtime Blocks grace time: [--------]
+ == Options: grpquota,rw ==
+ User quota state on SCRATCH_MNT (SCRATCH_DEV)
+   Accounting: OFF
+@@ -114,9 +114,9 @@
+   Accounting: OFF
+   Enforcement: OFF
+   Inode: N/A
+-Blocks grace time: [7 days]
+-Inodes grace time: [7 days]
+-Realtime Blocks grace time: [7 days]
++Blocks grace time: [--------]
++Inodes grace time: [--------]
++Realtime Blocks grace time: [--------]
+ == Options: usrquota,grpquota,rw ==
+ User quota state on SCRATCH_MNT (SCRATCH_DEV)
+   Accounting: ON
+@@ -146,9 +146,9 @@
+   Accounting: ON
+   Enforcement: ON
+   Inode #XXX (1 blocks, 1 extents)
+-Blocks grace time: [7 days]
+-Inodes grace time: [7 days]
+-Realtime Blocks grace time: [7 days]
++Blocks grace time: [--------]
++Inodes grace time: [--------]
++Realtime Blocks grace time: [--------]
+ == Options: usrquota,prjquota,rw ==
+ User quota state on SCRATCH_MNT (SCRATCH_DEV)
+   Accounting: ON
+@@ -178,9 +178,9 @@
+   Accounting: ON
+   Enforcement: ON
+   Inode #XXX (1 blocks, 1 extents)
+-Blocks grace time: [7 days]
+-Inodes grace time: [7 days]
+-Realtime Blocks grace time: [7 days]
++Blocks grace time: [--------]
++Inodes grace time: [--------]
++Realtime Blocks grace time: [--------]
+ == Options: usrquota,grpquota,prjquota,rw ==
+ User quota state on SCRATCH_MNT (SCRATCH_DEV)
+   Accounting: ON
