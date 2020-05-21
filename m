@@ -2,160 +2,151 @@ Return-Path: <SRS0=XlT/=7D=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 390E6C433E0
-	for <linux-fstests@archiver.kernel.org>; Thu, 21 May 2020 00:52:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 515F9C433E0
+	for <linux-fstests@archiver.kernel.org>; Thu, 21 May 2020 09:18:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0736720758
-	for <linux-fstests@archiver.kernel.org>; Thu, 21 May 2020 00:52:23 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1D15C20759
+	for <linux-fstests@archiver.kernel.org>; Thu, 21 May 2020 09:18:24 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="G+z/rHOy"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726886AbgEUAwW (ORCPT
+        id S1728693AbgEUJSX (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 20 May 2020 20:52:22 -0400
-Received: from mx2.suse.de ([195.135.220.15]:41014 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726819AbgEUAwW (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 20 May 2020 20:52:22 -0400
-X-Virus-Scanned: by amavisd-new at test-mx.suse.de
-Received: from relay2.suse.de (unknown [195.135.220.254])
-        by mx2.suse.de (Postfix) with ESMTP id 7A86CAB99;
-        Thu, 21 May 2020 00:52:23 +0000 (UTC)
-From:   Qu Wenruo <wqu@suse.com>
-To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Cc:     Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH v5 2/2] btrfs: Add a test for dead looping balance after balance cancel
-Date:   Thu, 21 May 2020 08:52:15 +0800
-Message-Id: <20200521005215.13652-1-wqu@suse.com>
-X-Mailer: git-send-email 2.26.2
+        Thu, 21 May 2020 05:18:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34648 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728686AbgEUJSX (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 21 May 2020 05:18:23 -0400
+Received: from mail-io1-xd42.google.com (mail-io1-xd42.google.com [IPv6:2607:f8b0:4864:20::d42])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 421EAC061A0E
+        for <fstests@vger.kernel.org>; Thu, 21 May 2020 02:18:23 -0700 (PDT)
+Received: by mail-io1-xd42.google.com with SMTP id h10so6653972iob.10
+        for <fstests@vger.kernel.org>; Thu, 21 May 2020 02:18:23 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=IGun0qSkBRusqZ7DXqs0UBxrrCyciDj7nUpEa311pCY=;
+        b=G+z/rHOyMi4o7f3moWJ4Ezg6RRaLyxh49B9Xs2HT77eJURv6AZ6nZxiPGraTv+WKk+
+         WgFKcB63mkGm9zndJ0Yg9+QiZM0V+M/dpo5i4iYFKBd/2qz8bOuXR0Liy6PWolCsD0ar
+         dcSeJcHfEq8hHkLJaI+Cdqi0VV7rpFBZxQc/AE4eb7kobgWzrxzLnaCiAmLOIlt1Txuk
+         HvK0WEyCNLMHnvru/A0khimzsgUKi+DHPr2Lx6WGLN84vkqd0HkTgPeRC7V7CRcHfCYl
+         I418M0VnJYA41LxHJPEA9H43BGDNAJENG2yOqHNCvw1qYVxoaQgYjYljjUj0xJd+8Trg
+         0txA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=IGun0qSkBRusqZ7DXqs0UBxrrCyciDj7nUpEa311pCY=;
+        b=WZ5gOhbVt4KjK9bW9vjzyS/OC80Brk82O8SzvvTQu/8oaAPPasV12BxR6rQX/kFLlE
+         6QLngopalBvYGue5CnOtxaaQJf1375Ypb1SUC9uen009cWdzjl13SleQGz9/59kp3o3A
+         FkpgZ7XwUg06H54cy1ejGDIIWcs8tuYkLpaGQpugFzCDlZo3By0lAr9u3f7l1TbWnTGA
+         kmCsD/QShQrVRDcogQ9wEIj4I+EghIFbi425FFq4DoVSNAFT9Vx1hzVdHeypiMuAmZsE
+         9WRkLYVGRrDCnx/bfVJYgtr1hB0K3xPhy5M85MYDDY/RQdmtBoVa7TM4UrZ16FBM1hJS
+         bbZQ==
+X-Gm-Message-State: AOAM5339NVocjj//JThjviHHBNWa2hlDz9rGoWvFTD2x+rrJmbhTGcOg
+        WIdf8Mhd5YWibA3VRnVHi7cOcRT+U5OeBT13a1aydg0l
+X-Google-Smtp-Source: ABdhPJy//v+JThAxMOL9mDPbf5e5HcmFYXp7V442QtYqHnctsKIsh3V49ua7LzlNNHISBNedI//hljJwTA3SdAetDTI=
+X-Received: by 2002:a02:b141:: with SMTP id s1mr2820102jah.123.1590052702504;
+ Thu, 21 May 2020 02:18:22 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <cover.1590006879.git.raghavan.arvind@gmail.com> <91a82230f5929b45a6093576b7c7afd311fde97a.1590006879.git.raghavan.arvind@gmail.com>
+In-Reply-To: <91a82230f5929b45a6093576b7c7afd311fde97a.1590006879.git.raghavan.arvind@gmail.com>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Thu, 21 May 2020 12:18:11 +0300
+Message-ID: <CAOQ4uxi5C=XOpTS67hS8YOpb-Fo4f6PA5qsoNiDY_k=58r4qJg@mail.gmail.com>
+Subject: Re: [PATCH 5/6] src/fssum: Allow single file input
+To:     Arvind Raghavan <raghavan.arvind@gmail.com>
+Cc:     fstests <fstests@vger.kernel.org>,
+        Jayashree Mohan <jaya@cs.utexas.edu>,
+        Vijay Chidambaram <vijay@cs.utexas.edu>
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Test if canceling a running balance can cause later balance to dead
-loop.
+On Thu, May 21, 2020 at 3:10 AM Arvind Raghavan
+<raghavan.arvind@gmail.com> wrote:
+>
+> Allow regular links and symlinks to be passed as input to fssum.
+>
+> Signed-off-by: Arvind Raghavan <raghavan.arvind@gmail.com>
+> Signed-off-by: Jayashree Mohan <jaya@cs.utexas.edu>
+> Signed-off-by: Vijay Chidambaram <vijay@cs.utexas.edu>
+> ---
+>  src/fssum.c | 35 ++++++++++++++++++++++++++++++++++-
+>  1 file changed, 34 insertions(+), 1 deletion(-)
+>
+> diff --git a/src/fssum.c b/src/fssum.c
+> index ece0f556..2d1624ca 100644
+> --- a/src/fssum.c
+> +++ b/src/fssum.c
+> @@ -29,6 +29,7 @@
+>  #include <inttypes.h>
+>  #include <assert.h>
+>  #include <endian.h>
+> +#include <libgen.h>
+>
+>  #define CS_SIZE 16
+>  #define CHUNKS 128
+> @@ -884,8 +885,40 @@ main(int argc, char *argv[])
+>         if (gen_manifest)
+>                 fprintf(out_fp, "Flags: %s\n", flagstring);
+>
+> +       struct stat64 path_st;
+> +       if (fstat64(fd, &path_st)) {
+> +               perror("fstat");
+> +               exit(-1);
+> +       }
+> +
+>         sum_init(&cs);
+> -       sum(fd, 1, &cs, path, "");
+> +
+> +       if (S_ISDIR(path_st.st_mode)) {
+> +               sum(fd, 1, &cs, path, "");
+> +       } else if (S_ISREG(path_st.st_mode) || S_ISLNK(path_st.st_mode)) {
+> +               // Copy because dirname may modify path
+> +               char* path_copy = alloc(strlen(path));
+> +               strcpy(path_copy, path);
+> +
+> +               char* dir_path = dirname(path);
+> +               char* name = basename(path_copy);
+> +
+> +               int dirfd = open(dir_path, O_RDONLY);
+> +               if (fd == -1) {
+> +                       fprintf(stderr, "failed to open %s: %s\n", dir_path,
+> +                               strerror(errno));
+> +                       exit(-1);
+> +               }
+> +
+> +               sum_one(dirfd, 1, &cs, dir_path, "", name);
 
-The fix is titled "btrfs: relocation: Clear the DEAD_RELOC_TREE bit for
- orphan roots to prevent runaway balance".
+Instead of all of the above, how about just:
+               sum_one(fd, 1, &cs, path, "", "");
 
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
-Signed-off-by: Qu Wenruo <wqu@suse.com>
----
-Changelog:
-v2:
-- Remove lsof debug output
-v3:
-- Remove ps debug output
-v4:
-- Use $XFS_IO_PROG directly to avoid wrapped dd command
-  This allows us to kill the writer and wait it correctly, other than
-  killing the bash process running the wrapper function.
-- Fix typos
-- Use _run_btrfs_balance_start() wrapper
-v5:
-- Add the xfs_io kill in cleanup()
----
- tests/btrfs/213     | 66 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/213.out |  2 ++
- tests/btrfs/group   |  1 +
- 3 files changed, 69 insertions(+)
- create mode 100755 tests/btrfs/213
- create mode 100644 tests/btrfs/213.out
+From looking at sum_one() code, it seems to me like that will work,
+but I may be missing something.
+It's not that you *want* the name in the checksum, it is not even
+part of the metadata that is being synced with fsync.
 
-diff --git a/tests/btrfs/213 b/tests/btrfs/213
-new file mode 100755
-index 00000000..a125eb62
---- /dev/null
-+++ b/tests/btrfs/213
-@@ -0,0 +1,66 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2020 SUSE Linux Products GmbH. All Rights Reserved.
-+#
-+# FS QA Test 213
-+#
-+# Test if canceling a running balance can lead to dead looping balance
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	kill $write_pid &> /dev/null
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# Modify as appropriate.
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch
-+_require_xfs_io_command pwrite -D
-+
-+_scratch_mkfs >> $seqres.full
-+_scratch_mount
-+
-+runtime=4
-+
-+# Create enough IO so that we need around $runtime seconds to relocate it.
-+#
-+# Here we don't want any wrapper, as we want full control of the process.
-+$XFS_IO_PROG -f -c "pwrite -D -b 1M 0 1024T" "$SCRATCH_MNT/file" &> /dev/null &
-+write_pid=$!
-+sleep $runtime
-+kill $write_pid
-+wait $write_pid
-+
-+# Now balance should take at least $runtime seconds, we can cancel it at
-+# $runtime/2 to ensure a success cancel.
-+_run_btrfs_balance_start -d --bg "$SCRATCH_MNT"
-+sleep $(($runtime / 2))
-+$BTRFS_UTIL_PROG balance cancel "$SCRATCH_MNT"
-+
-+# Now check if we can finish relocating metadata, which should finish very
-+# quickly.
-+$BTRFS_UTIL_PROG balance start -m "$SCRATCH_MNT" >> $seqres.full
-+
-+echo "Silence is golden"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/213.out b/tests/btrfs/213.out
-new file mode 100644
-index 00000000..bd8f2430
---- /dev/null
-+++ b/tests/btrfs/213.out
-@@ -0,0 +1,2 @@
-+QA output created by 213
-+Silence is golden
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 8d65bddd..59e8ecce 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -215,3 +215,4 @@
- 210 auto quick qgroup snapshot
- 211 auto quick log prealloc
- 212 auto balance dangerous
-+213 auto quick balance dangerous
--- 
-2.26.2
+Other than that patch set looks excellent.
+Very pleasant for review :-)
 
+One little thing is missing from the cover letter -
+Which tests did you run to verify these changes do not regress existing
+tests?
+
+Feel free to add to all the other patches in the series:
+Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+
+If you are able to change sum_one() of empty name as I suggested,
+feel free to add that to this patch as well.
+
+Thanks,
+Amir.
