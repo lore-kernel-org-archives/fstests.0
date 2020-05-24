@@ -1,206 +1,233 @@
-Return-Path: <SRS0=W8IY=7E=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=tq7v=7G=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	UNPARSEABLE_RELAY autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DEA27C433DF
-	for <linux-fstests@archiver.kernel.org>; Fri, 22 May 2020 05:37:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 808F0C433DF
+	for <linux-fstests@archiver.kernel.org>; Sun, 24 May 2020 15:17:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id ABE43206F6
-	for <linux-fstests@archiver.kernel.org>; Fri, 22 May 2020 05:37:50 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="jJwCPtVX"
+	by mail.kernel.org (Postfix) with ESMTP id 6797620787
+	for <linux-fstests@archiver.kernel.org>; Sun, 24 May 2020 15:17:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726421AbgEVFhu (ORCPT
+        id S1729913AbgEXPRA (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 22 May 2020 01:37:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55654 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725894AbgEVFhu (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 22 May 2020 01:37:50 -0400
-Received: from mail-il1-x141.google.com (mail-il1-x141.google.com [IPv6:2607:f8b0:4864:20::141])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 16147C061A0E
-        for <fstests@vger.kernel.org>; Thu, 21 May 2020 22:37:50 -0700 (PDT)
-Received: by mail-il1-x141.google.com with SMTP id l20so9540658ilj.10
-        for <fstests@vger.kernel.org>; Thu, 21 May 2020 22:37:49 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=w731qtK1JyHqMPplb0Kq/2Uyb7l77x2A9Kr6M8+AKV4=;
-        b=jJwCPtVXa7Z8ItIhPJrYu8dv98f+BXkM+DllPws5YzgAuVQtngFgOuMcl7IwFYsega
-         bECAn+QEDeEroODuQkDNw2uHwEfR8vQoLPDKeJ66ctGwj0qPFHjYopcTjHuGX+Wr0zal
-         fNB0aVNXtEMlijwbS5nfgNYGu481UGjqqGCtkjnq9TcVlaEUmyLyZUZrx+91LladRlNg
-         jauWKhl9N16hbQCpFlD/hlr10UHkXbNFqPdEaH2PP51hz0RG5fyFsSvYYrpUctNpOJYM
-         Zi7Fwcg8i6tcIXyaLUAJvUaMTUkxuywJtdeqye44gXIxG20Zv67jhm1Q1+EDIXCWlIgS
-         dQMA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=w731qtK1JyHqMPplb0Kq/2Uyb7l77x2A9Kr6M8+AKV4=;
-        b=O0nrIODsN5Z3TtYZtJVTCPJchqAy3/vqG2yZYXA+WoZOrwWnftI4YSCKJ51Ny8T5Po
-         MOCxaptqR8j1na85YohTK7ygEyIjvaV+5tgU0v8flEPtG/HWzEALaux6kK6qM1JAeX+n
-         5Uevmheev+UreAO23cbLGd8+VMp9mdjnXmv4ctTPdvI4aCMX262deSICbWqb0VI+I5BU
-         eVxIcqeODPew5KQxhe2L/xyMQjK3rOgylQ9Y7fy4VvBi2VyCJKYYsZsC+bZuySwNMtE5
-         qm7ghT9xurd6FvrDqwKWiudPKzGIy/gQj7e1Ksa8lASCqgGm5jR+l/rL6amZGGrGZVEX
-         Umfg==
-X-Gm-Message-State: AOAM5307LEn0Ec50EFpplqq7TZuyNdUyWihy4HjwZYCx77kwH1ninec5
-        spktA4nWgU3OuAH6DVrFmgNbryWVdfkte+fk1ODpkL1h
-X-Google-Smtp-Source: ABdhPJxVjbIFqBI47mv2t+lOSvIo06a+jpGEpusEtMsAhNl8ky6XtRcvI4rL7e4D/P14kjQyg9zAsYjZgSUIkseTHW4=
-X-Received: by 2002:a92:4015:: with SMTP id n21mr4197351ila.137.1590125869238;
- Thu, 21 May 2020 22:37:49 -0700 (PDT)
+        Sun, 24 May 2020 11:17:00 -0400
+Received: from out20-62.mail.aliyun.com ([115.124.20.62]:45982 "EHLO
+        out20-62.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729776AbgEXPQ7 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 24 May 2020 11:16:59 -0400
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07454326|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.0176242-0.000679014-0.981697;FP=0|0|0|0|0|-1|-1|-1;HT=e01a16368;MF=guan@eryu.me;NM=1;PH=DS;RN=2;RT=2;SR=0;TI=SMTPD_---.HcxzAG4_1590333415;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.HcxzAG4_1590333415)
+          by smtp.aliyun-inc.com(10.147.44.145);
+          Sun, 24 May 2020 23:16:55 +0800
+Date:   Sun, 24 May 2020 23:16:55 +0800
+From:   Eryu Guan <guan@eryu.me>
+To:     Eric Sandeen <sandeen@redhat.com>
+Cc:     fstests <fstests@vger.kernel.org>
+Subject: Re: [PATCH 2/5] fstests: test restricted symlinks & hardlinks sysctls
+Message-ID: <20200524151544.GA3363@desktop>
+References: <91639515-d639-c155-7cc8-660536b75257@redhat.com>
+ <8640243b-8056-a81a-9c23-d19c4e0dc426@redhat.com>
 MIME-Version: 1.0
-References: <cover.1590006879.git.raghavan.arvind@gmail.com>
- <91a82230f5929b45a6093576b7c7afd311fde97a.1590006879.git.raghavan.arvind@gmail.com>
- <CAOQ4uxi5C=XOpTS67hS8YOpb-Fo4f6PA5qsoNiDY_k=58r4qJg@mail.gmail.com> <20200522010652.x34k3tx7e47jmzzk@gmail.com>
-In-Reply-To: <20200522010652.x34k3tx7e47jmzzk@gmail.com>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Fri, 22 May 2020 08:37:38 +0300
-Message-ID: <CAOQ4uxi9B5XBay9+VVYoO_f-1h-jTG-JvTijmt_GZpoy=Jq1ZQ@mail.gmail.com>
-Subject: Re: [PATCH 5/6] src/fssum: Allow single file input
-To:     Arvind Raghavan <raghavan.arvind@gmail.com>
-Cc:     fstests <fstests@vger.kernel.org>,
-        Jayashree Mohan <jaya@cs.utexas.edu>,
-        Vijay Chidambaram <vijay@cs.utexas.edu>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <8640243b-8056-a81a-9c23-d19c4e0dc426@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, May 22, 2020 at 4:06 AM Arvind Raghavan
-<raghavan.arvind@gmail.com> wrote:
->
-> On 05/21, Amir Goldstein wrote:
-> > On Thu, May 21, 2020 at 3:10 AM Arvind Raghavan
-> > <raghavan.arvind@gmail.com> wrote:
-> > >
-> > > Allow regular links and symlinks to be passed as input to fssum.
-> > >
-> > > Signed-off-by: Arvind Raghavan <raghavan.arvind@gmail.com>
-> > > Signed-off-by: Jayashree Mohan <jaya@cs.utexas.edu>
-> > > Signed-off-by: Vijay Chidambaram <vijay@cs.utexas.edu>
-> > > ---
-> > >  src/fssum.c | 35 ++++++++++++++++++++++++++++++++++-
-> > >  1 file changed, 34 insertions(+), 1 deletion(-)
-> > >
-> > > diff --git a/src/fssum.c b/src/fssum.c
-> > > index ece0f556..2d1624ca 100644
-> > > --- a/src/fssum.c
-> > > +++ b/src/fssum.c
-> > > @@ -29,6 +29,7 @@
-> > >  #include <inttypes.h>
-> > >  #include <assert.h>
-> > >  #include <endian.h>
-> > > +#include <libgen.h>
-> > >
-> > >  #define CS_SIZE 16
-> > >  #define CHUNKS 128
-> > > @@ -884,8 +885,40 @@ main(int argc, char *argv[])
-> > >         if (gen_manifest)
-> > >                 fprintf(out_fp, "Flags: %s\n", flagstring);
-> > >
-> > > +       struct stat64 path_st;
-> > > +       if (fstat64(fd, &path_st)) {
-> > > +               perror("fstat");
-> > > +               exit(-1);
-> > > +       }
-> > > +
-> > >         sum_init(&cs);
-> > > -       sum(fd, 1, &cs, path, "");
-> > > +
-> > > +       if (S_ISDIR(path_st.st_mode)) {
-> > > +               sum(fd, 1, &cs, path, "");
-> > > +       } else if (S_ISREG(path_st.st_mode) || S_ISLNK(path_st.st_mode)) {
-> > > +               // Copy because dirname may modify path
-> > > +               char* path_copy = alloc(strlen(path));
-> > > +               strcpy(path_copy, path);
+On Mon, May 18, 2020 at 11:14:43AM -0500, Eric Sandeen wrote:
+> This tests the fs.protected_symlinks and fs.protected_hardlinks
+> sysctls which restrict links behavior in sticky world-writable
+> directories as documented in the kernel at
+> Documentation/admin-guide/sysctl/fs.rst
+> 
+> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+> ---
+> 
+> V2: many fixes requested by Eryu
+> update copyright
+> reset sysctl only if saved
+> switch to _user_do
+> fix test description in comments
 
-If you stay with this code please use strdup().
+Thanks a lot for the update, Eric!
 
-> > > +
-> > > +               char* dir_path = dirname(path);
-> > > +               char* name = basename(path_copy);
-> > > +
-> > > +               int dirfd = open(dir_path, O_RDONLY);
-> > > +               if (fd == -1) {
-> > > +                       fprintf(stderr, "failed to open %s: %s\n", dir_path,
-> > > +                               strerror(errno));
-> > > +                       exit(-1);
-> > > +               }
-> > > +
-> > > +               sum_one(dirfd, 1, &cs, dir_path, "", name);
-> >
-> > Instead of all of the above, how about just:
-> >                sum_one(fd, 1, &cs, path, "", "");
-> >
-> > From looking at sum_one() code, it seems to me like that will work,
-> > but I may be missing something.
-> > It's not that you *want* the name in the checksum, it is not even
-> > part of the metadata that is being synced with fsync.
->
-> The issue here is that we preserved the code from sum which does
-> all its opens using openat with the parent directory fd and a
-> filename. Since we're trying to reuse that code I believe we need
-> to have this somewhat ugly boilerplate.
+> 
+>  tests/generic/900     | 115 ++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/900.out |  14 +++++
+>  tests/generic/group   |   1 +
+>  3 files changed, 130 insertions(+)
+>  create mode 100755 tests/generic/900
+>  create mode 100644 tests/generic/900.out
+> 
+> diff --git a/tests/generic/900 b/tests/generic/900
+> new file mode 100755
+> index 00000000..fd54fa4e
+> --- /dev/null
+> +++ b/tests/generic/900
+> @@ -0,0 +1,115 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2020 Red Hat, Inc.  All Rights Reserved.
+> +#
+> +# FS QA Test 900
+> +#
+> +# Test protected_symlink and protected_hardlink sysctls
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	rm -rf $TEST_DIR/$seq
+> +	[ ! -z "$SYMLINK_PROTECTION" ] \
+> +		&& sysctl -qw fs.protected_symlinks=$SYMLINK_PROTECTION
+> +	[ ! -z "$HARDLINK_PROTECTION" ] \
+> +		&& sysctl -qw fs.protected_hardlinks=$HARDLINK_PROTECTION
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs generic
+> +_supported_os Linux
+> +_require_test
+> +_require_sysctl_variable fs.protected_symlinks
+> +_require_sysctl_variable fs.protected_hardlinks
+> +_require_user 123456-fsgqa
 
-Ok. But if you stay with this please add a comment about why
-this is done with a hint for the future how to fix this properly.
+The su in _require_user prints warnings about user name starts with
+digit and test fails like:
 
-Or (up to you) you can fix it by calling this helper instead of openat():
+ + User or group name "123456-fsgqa" starts with a digit, accepting for compatibility.
 
-int open_one(int dirfd, const char *name)
-{
-    if (!name || !*name)
-        return dup(dirfd);
-    return openat(dirfd, name, 0);
-}
+So I discarded the output of _require_user here, also in generic/901.
 
-fstatat() can take empty name with AT_EMPTY_PATH flag.
-readlinkat() should be able to take an empty name, but documentation
-is not clear whether fd must be O_PATH - need to verify if it works with
-non O_PATH fd.
-
-Again, you don't have to do this to get my reviewed-by its just if you
-want to and then of course do it in a prep patch, the same one that
-gets rid of fchdir and converts to fstatat() and readlinkat().
-
->
-> > Other than that patch set looks excellent.
-> > Very pleasant for review :-)
->
-> Thanks! :)
->
-> > One little thing is missing from the cover letter -
-> > Which tests did you run to verify these changes do not regress existing
-> > tests?
->
-> I just ran the relevant tests and encountered a small issue with
-> the refactoring patch. This is my bad, since we changed lstat to
-> use fstatat, we are no longer doing a fchdir which a readlink
-> call later on relies on. I can fix it by changing the readlink to
-> a readlinkat.
->
-
-I see two valid options. please chose the one you like.
-
-1. Revert removal of fchdir. let refactoring be only refactoring.
-2. Remove fchdir and convert to fstatat/readlinkat in separate prep patch
-    (with or without the empty name support suggested above)
-
-> I'll add that change and add the set of relevant patches to the
-> cover letter in a V2.
-
-For patches that did not change from v1 please add my reviewed-by
-so I know I do not need to re-review them.
-
-Please include summary of "changes since v1" in cover letter.
+_require_user 123456-fsgqa >/dev/null 2>&1
 
 Thanks,
-Amir.
+Eryu
+
+> +# Do this SECOND so that qa_user is fsgqa, and _do_user uses that account
+> +_require_user fsgqa
+> +
+> +OWNER=123456-fsgqa
+> +OTHER=fsgqa
+> +
+> +# Save current system state to reset when done
+> +SYMLINK_PROTECTION=`sysctl -n fs.protected_symlinks`
+> +HARDLINK_PROTECTION=`sysctl -n fs.protected_hardlinks`
+> +
+> +test_symlink()
+> +{
+> +	ln -s $TEST_DIR/$seq/target $TEST_DIR/$seq/sticky_dir/symlink
+> +	chown $OTHER.$OTHER $TEST_DIR/$seq/sticky_dir
+> +	chown $OWNER.$OWNER $TEST_DIR/$seq/sticky_dir/symlink
+> +	# If we can read the target, we followed the link
+> +	_user_do "cat $TEST_DIR/$seq/sticky_dir/symlink" | _filter_test_dir
+> +	rm -f $TEST_DIR/$seq/sticky_dir/symlink
+> +}
+> +
+> +test_hardlink()
+> +{
+> +	chown $OWNER.$OWNER $TEST_DIR/$seq/target
+> +	chmod go-rw $TEST_DIR/$seq/target
+> +	_user_do "ln $TEST_DIR/$seq/target $TEST_DIR/$seq/sticky_dir/hardlink" \
+> +		| _filter_test_dir
+> +	test -f $TEST_DIR/$seq/sticky_dir/hardlink \
+> +		&& echo "successfully created hardlink"
+> +	rm -f $TEST_DIR/$seq/sticky_dir/hardlink
+> +}
+> +
+> +setup_tree()
+> +{
+> +	# Create world-writable sticky dir
+> +	mkdir -p $TEST_DIR/$seq/sticky_dir
+> +	chmod 1777 $TEST_DIR/$seq/sticky_dir
+> +	# And a file elsewhere that will be linked to from that sticky dir
+> +	mkdir -p $TEST_DIR/$seq
+> +	# If we can read it, we followed the link.
+> +	echo "successfully followed symlink" > $TEST_DIR/$seq/target
+> +}
+> +
+> +setup_tree
+> +
+> +# First test fs.protected_symlinks
+> +# With protection on, symlink follows should fail if the
+> +# link owner != the sticky directory owner, and the process
+> +# is not the link owner.
+> +echo "== Test symlink follow protection when"
+> +echo "== process != link owner and dir owner != link owner"
+> +sysctl -w fs.protected_symlinks=0
+> +test_symlink
+> +sysctl -w fs.protected_symlinks=1
+> +test_symlink
+> +
+> +echo
+> +
+> +# Now test fs.protected_hardlinks
+> +# With protection on, hardlink creation should fail if the
+> +# process does not own the target file, and the process does not have
+> +# read-write access to the target
+> +echo "== Test hardlink create protection when"
+> +echo "== process != target owner and process cannot read target"
+> +sysctl -w fs.protected_hardlinks=0
+> +test_hardlink
+> +sysctl -w fs.protected_hardlinks=1
+> +test_hardlink
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/generic/900.out b/tests/generic/900.out
+> new file mode 100644
+> index 00000000..7adf97ed
+> --- /dev/null
+> +++ b/tests/generic/900.out
+> @@ -0,0 +1,14 @@
+> +QA output created by 900
+> +== Test symlink follow protection when
+> +== process != link owner and dir owner != link owner
+> +fs.protected_symlinks = 0
+> +successfully followed symlink
+> +fs.protected_symlinks = 1
+> +Permission denied
+> +
+> +== Test hardlink create protection when
+> +== process != target owner and process cannot read target
+> +fs.protected_hardlinks = 0
+> +successfully created hardlink
+> +fs.protected_hardlinks = 1
+> +ln: failed to create hard link 'TEST_DIR/900/sticky_dir/hardlink' => 'TEST_DIR/900/target': Operation not permitted
+> diff --git a/tests/generic/group b/tests/generic/group
+> index e82004e8..fd2360ea 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -599,3 +599,4 @@
+>  594 auto quick quota
+>  595 auto quick encrypt
+>  596 auto quick
+> +900 auto quick perms
+> -- 
+> 2.17.0
+> 
