@@ -1,269 +1,192 @@
-Return-Path: <SRS0=tq7v=7G=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=KtBG=7H=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AFB77C433E0
-	for <linux-fstests@archiver.kernel.org>; Sun, 24 May 2020 17:20:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7529FC433E1
+	for <linux-fstests@archiver.kernel.org>; Mon, 25 May 2020 02:17:36 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8B399207DA
-	for <linux-fstests@archiver.kernel.org>; Sun, 24 May 2020 17:20:20 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5508D20787
+	for <linux-fstests@archiver.kernel.org>; Mon, 25 May 2020 02:17:36 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="r8OrbeYm"
+	dkim=pass (1024-bit key) header.d=mykernel.net header.i=cgxu519@mykernel.net header.b="AZlWIkUw"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2387718AbgEXRUU (ORCPT
+        id S2388685AbgEYCRf (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 24 May 2020 13:20:20 -0400
-Received: from userp2120.oracle.com ([156.151.31.85]:44720 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2387707AbgEXRUU (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 24 May 2020 13:20:20 -0400
-Received: from pps.filterd (userp2120.oracle.com [127.0.0.1])
-        by userp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 04OHHbv1055836;
-        Sun, 24 May 2020 17:20:13 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
- : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=corp-2020-01-29;
- bh=jmEIjMmvJVIF9L5jVo6wkn6qlPJp23/w8YSV1is0J9g=;
- b=r8OrbeYmjWL8xgWidLYsg+fwJgOlqjO9IzNr/3udTDowQhXOEwCzBmFoJSdW9z4pTWRy
- Jo78ujWp7vnlNzlDpLISh6dy+KNzj0lSmxwhWS468rA+oQdPZWL21TsDhC6jAKwevGD2
- ybvyj7TGSxDhfEJHHqFzQMOq7xXNnWs++PdBjqtFVeETUIOSXe8+Xgtdi+aFH6KZ6CUG
- Qpg+NtApP2oZuyjn7gkH6KFRxA+Sg5jxzz44lSOeCytDuC0AKrsSvJFx/fchwUIqP+I0
- tTctsgdjbShIIuX6BNUkx9eCmw1BK3QWFBsd9eYW05J6r7W7Xn7iFP4Tv7pDsMy2Ry5d vA== 
-Received: from userp3030.oracle.com (userp3030.oracle.com [156.151.31.80])
-        by userp2120.oracle.com with ESMTP id 316vfn3399-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Sun, 24 May 2020 17:20:13 +0000
-Received: from pps.filterd (userp3030.oracle.com [127.0.0.1])
-        by userp3030.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 04OHCedK055366;
-        Sun, 24 May 2020 17:18:13 GMT
-Received: from aserv0121.oracle.com (aserv0121.oracle.com [141.146.126.235])
-        by userp3030.oracle.com with ESMTP id 317dru62qx-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Sun, 24 May 2020 17:18:12 +0000
-Received: from abhmp0001.oracle.com (abhmp0001.oracle.com [141.146.116.7])
-        by aserv0121.oracle.com (8.14.4/8.13.8) with ESMTP id 04OHIBAA019664;
-        Sun, 24 May 2020 17:18:12 GMT
-Received: from localhost (/67.169.218.210)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Sun, 24 May 2020 10:18:11 -0700
-Date:   Sun, 24 May 2020 10:18:10 -0700
-From:   "Darrick J. Wong" <darrick.wong@oracle.com>
-To:     Eryu Guan <guan@eryu.me>
-Cc:     Donald Douwsma <ddouwsma@redhat.com>, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org
-Subject: Re: [PATCH v2] xfstests: add test for xfs_repair progress reporting
-Message-ID: <20200524171810.GB252930@magnolia>
-References: <20200519160125.GB17621@magnolia>
- <20200520035258.298516-1-ddouwsma@redhat.com>
- <20200524164648.GB3363@desktop>
+        Sun, 24 May 2020 22:17:35 -0400
+Received: from sender2-op-o12.zoho.com.cn ([163.53.93.243]:17148 "EHLO
+        sender2-op-o12.zoho.com.cn" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S2388308AbgEYCRf (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 24 May 2020 22:17:35 -0400
+ARC-Seal: i=1; a=rsa-sha256; t=1590373039; cv=none; 
+        d=zoho.com.cn; s=zohoarc; 
+        b=bW0O/N0Rlum7EN6Pcfvfvw/Ntq3RSd6bOc1QJAC5JZb0Ngf1LN0K19JGZLEHH8Qrb/iJpKKmeVOsAjcFOgd045ICttcpKBuU5hbglejRwrq6R5YSr2mCAIBwOAP2ZXZCVIQ/minigpqw0et+3qN4zDfWvS/tlmqO1glQqdFvaos=
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zoho.com.cn; s=zohoarc; 
+        t=1590373039; h=Content-Type:Content-Transfer-Encoding:Cc:Date:From:In-Reply-To:MIME-Version:Message-ID:References:Subject:To; 
+        bh=e4hCrP9Qq/Fpb+5Fj4itrcGuD/o8Xgut2R9oLeeZYac=; 
+        b=ADR4+DnoQo1mjBt0mpjPJxD1fCKq8A9/aT0IGvEXbXI5lQVVwnU3ol9G3xHlrsxz7DVys7q4UIKVaQdh/8aAG2Zw+nmlOTxqEUC7Ws+na6ASuZ8cfkY94NMYq5GdAYdy9ba56gZf5lAcIrQGk70cydtKXpUOojfnYN19/Abzn7U=
+ARC-Authentication-Results: i=1; mx.zoho.com.cn;
+        dkim=pass  header.i=mykernel.net;
+        spf=pass  smtp.mailfrom=cgxu519@mykernel.net;
+        dmarc=pass header.from=<cgxu519@mykernel.net> header.from=<cgxu519@mykernel.net>
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1590373039;
+        s=zohomail; d=mykernel.net; i=cgxu519@mykernel.net;
+        h=Subject:To:Cc:References:From:Message-ID:Date:MIME-Version:In-Reply-To:Content-Type:Content-Transfer-Encoding;
+        bh=e4hCrP9Qq/Fpb+5Fj4itrcGuD/o8Xgut2R9oLeeZYac=;
+        b=AZlWIkUwdStxge2byHkl/jeblVtn6lhKXlkXgUcHm92IUA0dGaA6I+WUr0+rwC+z
+        bBwszso3LQpNI2g8MkRUK1OKwXjguDdu2GTWP4Daa1h1qRvf5HF53xzfbMkh9C0Qhmm
+        r2RMNLRXm4JE0XoQSPXwc2yWD1MhpjeDvlfVmVlg=
+Received: from [192.168.166.138] (218.18.229.179 [218.18.229.179]) by mx.zoho.com.cn
+        with SMTPS id 159037303616935.78440166541725; Mon, 25 May 2020 10:17:16 +0800 (CST)
+Subject: Re: [PATCH v2] generic/597: test data integrity for rdonly remount
+To:     fdmanana@gmail.com
+Cc:     Eryu Guan <guaneryu@gmail.com>, fstests <fstests@vger.kernel.org>,
+        linux-unionfs@vger.kernel.org
+References: <20200519080929.18030-1-cgxu519@mykernel.net>
+ <CAL3q7H4aObeXLuhv05AOyrLU1B_3M81y_ddH1cY0pAEEEO+Law@mail.gmail.com>
+From:   cgxu <cgxu519@mykernel.net>
+Message-ID: <69537fa5-ebd7-c233-0741-5fc4f9798abd@mykernel.net>
+Date:   Mon, 25 May 2020 10:17:15 +0800
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.2.2
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200524164648.GB3363@desktop>
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9631 signatures=668686
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 spamscore=0 phishscore=0 malwarescore=0
- mlxlogscore=999 adultscore=0 suspectscore=2 bulkscore=0 mlxscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2004280000
- definitions=main-2005240143
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9631 signatures=668686
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 phishscore=0 clxscore=1011
- priorityscore=1501 mlxscore=0 malwarescore=0 spamscore=0 impostorscore=0
- mlxlogscore=999 lowpriorityscore=0 bulkscore=0 adultscore=0 suspectscore=2
- cotscore=-2147483648 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2004280000 definitions=main-2005240144
+In-Reply-To: <CAL3q7H4aObeXLuhv05AOyrLU1B_3M81y_ddH1cY0pAEEEO+Law@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+X-ZohoCNMailClient: External
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, May 25, 2020 at 12:46:48AM +0800, Eryu Guan wrote:
-> On Wed, May 20, 2020 at 01:52:58PM +1000, Donald Douwsma wrote:
-> > xfs_repair's interval based progress has been broken for
-> > some time, create a test based on dmdelay to stretch out
-> > the time and use ag_stride to force parallelism.
-> > 
-> > Signed-off-by: Donald Douwsma <ddouwsma@redhat.com>
-> > ---
-> > Changes since v1:
-> > - Use _scratch_xfs_repair
-> > - Filter only repair output
-> > - Make the filter more tolerant of whitespace and plurals
-> > - Take golden output from 'xfs_repair: fix progress reporting'
+On 5/20/20 11:09 PM, Filipe Manana wrote:
+> On Tue, May 19, 2020 at 9:10 AM Chengguang Xu <cgxu519@mykernel.net> wrote:
+>>
+>> This test checks data integrity when remounting from
+>> rw to ro mode.
+>>
+>> Signed-off-by: Chengguang Xu <cgxu519@mykernel.net>
+>> ---
+>> v1->v2:
+>> - Add to shutdown greoup.
+>> - Change case number to 597
+>>
+>>   tests/generic/597     | 54 +++++++++++++++++++++++++++++++++++++++++++
+>>   tests/generic/597.out |  2 ++
+>>   tests/generic/group   |  1 +
+>>   3 files changed, 57 insertions(+)
+>>   create mode 100755 tests/generic/597
+>>   create mode 100644 tests/generic/597.out
+>>
+>> diff --git a/tests/generic/597 b/tests/generic/597
+>> new file mode 100755
+>> index 00000000..d96e750b
+>> --- /dev/null
+>> +++ b/tests/generic/597
+>> @@ -0,0 +1,54 @@
+>> +#! /bin/bash
+>> +# SPDX-License-Identifier: GPL-2.0
+>> +# Copyright (c) 2020 Chengguang Xu <cgxu519@mykernel.net>.
+>> +# All Rights Reserved.
+>> +#
+>> +# FS QA Test 597
+>> +#
+>> +# Test data integrity for ro remount.
+>> +#
+>> +seq=`basename $0`
+>> +seqres=$RESULT_DIR/$seq
+>> +echo "QA output created by $seq"
+>> +
+>> +here=`pwd`
+>> +tmp=/tmp/$$
+>> +status=0
+>> +trap "_cleanup; exit \$status" 0 1 2 3 15
+>> +
+>> +_cleanup()
+>> +{
+>> +       cd /
+>> +       rm -f $tmp.*
+>> +}
+>> +
+>> +# get standard environment, filters and checks
+>> +. ./common/rc
+>> +. ./common/filter
+>> +
+>> +# remove previous $seqres.full before test
+>> +rm -f $seqres.full
+>> +
+>> +# real QA test starts here
+>> +_supported_fs generic
+>> +_supported_os Linux
+>> +_require_fssum
+>> +_require_scratch
+>> +_require_scratch_shutdown
 > 
-> I saw failures like below, and I'm using v5.7-rc4 kernel and v5.4.0
-> xfsprogs, is this expected failure?
+> Couldn't the test be using dm's flakey instead of shutdown?
+> As shutdown is not implemented by all filesystems (btrfs for example),
+> it would allow more coverage.
 > 
-> @@ -2,8 +2,6 @@
->  Format and populate
->  Introduce a dmdelay
->  Run repair
-> - - #:#:#: Phase #: #% done - estimated remaining time # minute, # second
-> - - #:#:#: Phase #: elapsed time # second - processed # inodes per minute
->   - #:#:#: check for inodes claiming duplicate blocks - # of # inodes done
->   - #:#:#: process known inodes and inode discovery - # of # inodes done
->   - #:#:#: process newly discovered inodes - # of # allocation groups done
-> @@ -12,4 +10,3 @@
->   - #:#:#: scanning filesystem freespace - # of # allocation groups done
->   - #:#:#: setting up duplicate extent list - # of # allocation groups done
->   - #:#:#: verify and correct link counts - # of # allocation groups done
-> - - #:#:#: zeroing log - # of # blocks done
 
-Yeah, there's an xfsprogs patch pending, IIRC.
+Thanks for the suggestion, I tried with dmflakey but unfortunately it 
+could not work on overlayfs, a possible solution is that move current 
+test case to overlay specific directory and create new test case with 
+dmflakey for generic purpose.
 
---D
 
-> 
-> > 
-> >  tests/xfs/516     | 76 +++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/xfs/516.out | 15 ++++++++++
-> >  tests/xfs/group   |  1 +
-> >  3 files changed, 92 insertions(+)
-> >  create mode 100755 tests/xfs/516
-> >  create mode 100644 tests/xfs/516.out
-> > 
-> > diff --git a/tests/xfs/516 b/tests/xfs/516
-> > new file mode 100755
-> > index 00000000..1c0508ef
-> > --- /dev/null
-> > +++ b/tests/xfs/516
-> > @@ -0,0 +1,76 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2020 Red Hat, Inc.  All Rights Reserved.
-> > +#
-> > +# FS QA Test 516
-> > +#
-> > +# Test xfs_repair's progress reporting
-> > +#
-> > +seq=`basename $0`
-> > +seqres=$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +
-> > +here=`pwd`
-> > +tmp=/tmp/$$
-> > +status=1	# failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +_cleanup()
-> > +{
-> 
-> 	rm -f $tmp.*
-> 
-> As some common helpers would use $tmp. files as well.
-> 
-> > +	cd /
-> > +	_dmsetup_remove delay-test > /dev/null 2>&1
-> 
-> I think we could do _cleanup_delay here and discard the outputs.
-> 
-> > +}
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +. ./common/filter
-> > +. ./common/dmdelay
-> > +. ./common/populate
-> > +
-> > +# remove previous $seqres.full before test
-> > +rm -f $seqres.full
-> > +
-> > +# real QA test starts here
-> > +
-> > +# Modify as appropriate.
-> > +_supported_fs xfs
-> > +_supported_os Linux
-> > +_require_scratch
-> > +_require_dm_target delay
-> > +
-> > +# Filter output specific to the formatters in xfs_repair/progress.c
-> > +# Ideally we'd like to see hits on anything that matches
-> > +# awk '/{FMT/' repair/progress.c
-> > +_filter_repair()
-> 
-> Function names with the leading underscore are reserved for common
-> helpers, filter_repair would be fine.
-> 
-> > +{
-> > +	sed -ne '
-> > +	s/[0-9]\+/#/g;
-> > +	s/^\s\+/ /g;
-> > +	s/\(second\|minute\)s/\1/g
-> > +	/#:#:#:/p
-> > +	'
-> > +}
-> > +
-> > +echo "Format and populate"
-> > +_scratch_populate_cached nofill > $seqres.full 2>&1
-> > +
-> > +echo "Introduce a dmdelay"
-> > +_init_delay
-> > +
-> > +# Introduce a read I/O delay
-> > +# The default in common/dmdelay is a bit too agressive
-> > +BLK_DEV_SIZE=`blockdev --getsz $SCRATCH_DEV`
-> > +DELAY_TABLE_RDELAY="0 $BLK_DEV_SIZE delay $SCRATCH_DEV 0 100 $SCRATCH_DEV 0 0"
-> > +_load_delay_table $DELAY_READ
-> > +
-> > +echo "Run repair"
-> > +SCRATCH_DEV=$DELAY_DEV _scratch_xfs_repair -o ag_stride=4 -t 1 2>&1 |
-> > +        tee -a $seqres.full > $seqres.xfs_repair.out
-> > +
-> > +cat $seqres.xfs_repair.out | _filter_repair | sort -u
-> 
-> I agreed with Darrick here. redirect output to $tmp.repair is better, as
-> we already cleanup $tmp.* in _cleanup, and no one is cleaning up
-> $seqres.xfs_repair.out file.
-> 
-> > +
-> > +_cleanup_delay
-> 
-> We could remove this one if do it in _cleanup.
-> 
-> > +
-> > +# success, all done
-> > +status=0
-> > +exit
-> > diff --git a/tests/xfs/516.out b/tests/xfs/516.out
-> > new file mode 100644
-> > index 00000000..85018b93
-> > --- /dev/null
-> > +++ b/tests/xfs/516.out
-> > @@ -0,0 +1,15 @@
-> > +QA output created by 516
-> > +Format and populate
-> > +Introduce a dmdelay
-> > +Run repair
-> > + - #:#:#: Phase #: #% done - estimated remaining time # minute, # second
-> > + - #:#:#: Phase #: elapsed time # second - processed # inodes per minute
-> > + - #:#:#: check for inodes claiming duplicate blocks - # of # inodes done
-> > + - #:#:#: process known inodes and inode discovery - # of # inodes done
-> > + - #:#:#: process newly discovered inodes - # of # allocation groups done
-> > + - #:#:#: rebuild AG headers and trees - # of # allocation groups done
-> > + - #:#:#: scanning agi unlinked lists - # of # allocation groups done
-> > + - #:#:#: scanning filesystem freespace - # of # allocation groups done
-> > + - #:#:#: setting up duplicate extent list - # of # allocation groups done
-> > + - #:#:#: verify and correct link counts - # of # allocation groups done
-> > + - #:#:#: zeroing log - # of # blocks done
-> > diff --git a/tests/xfs/group b/tests/xfs/group
-> > index 12eb55c9..aeeca23f 100644
-> > --- a/tests/xfs/group
-> > +++ b/tests/xfs/group
-> > @@ -513,3 +513,4 @@
-> >  513 auto mount
-> >  514 auto quick db
-> >  515 auto quick quota
-> > +516 repair
-> 
-> Should be in auto group as well? Only tests in auto (and quick, which is
-> a sub-set of auto) will be run by default.
-> 
-> Thanks,
-> Eryu
-> 
-> > -- 
-> > 2.18.4
+Test results with dmflakey on xfs, btrfs and overlayfs.
+
+[root@hades xfstests-dev]# ./check  generic/597
+FSTYP         -- xfs (non-debug)
+PLATFORM      -- Linux/x86_64 hades 5.6.0-rc3+ #31 SMP Fri May 22 
+11:27:07 CST 2020
+MKFS_OPTIONS  -- -f -bsize=4096 /dev/nvme0n1p8
+MOUNT_OPTIONS -- /dev/nvme0n1p8 /mnt/scratch
+
+generic/597 1s ...  0s
+Ran: generic/597
+Passed all 1 tests
+
+
+[root@hades xfstests-dev]# ./check generic/597
+FSTYP         -- btrfs
+PLATFORM      -- Linux/x86_64 hades 5.6.0-rc3+ #31 SMP Fri May 22 
+11:27:07 CST 2020
+MKFS_OPTIONS  -- /dev/nvme0n1p8
+MOUNT_OPTIONS -- /dev/nvme0n1p8 /mnt/scratch
+
+generic/597 0s ...  0s
+Ran: generic/597
+Passed all 1 tests
+
+
+[root@hades xfstests-dev]# ./check -overlay generic/597
+FSTYP         -- overlay
+PLATFORM      -- Linux/x86_64 hades 5.6.0-rc3+ #31 SMP Fri May 22 
+11:27:07 CST 2020
+MKFS_OPTIONS  -- /mnt/scratch
+MOUNT_OPTIONS -- /mnt/scratch /mnt/scratch/ovl-mnt
+
+generic/597 0s ... [not run] require /mnt/scratch to be valid block disk
+Ran: generic/597
+Not run: generic/597
+Passed all 1 tests
+
+
+Thanks,
+cgxu
+
+
+
+
+
+
+
+
+
+
+
