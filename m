@@ -7,94 +7,222 @@ X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ABC49C433E0
-	for <linux-fstests@archiver.kernel.org>; Fri, 29 May 2020 04:36:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3FC67C433DF
+	for <linux-fstests@archiver.kernel.org>; Fri, 29 May 2020 07:55:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 854BB20707
-	for <linux-fstests@archiver.kernel.org>; Fri, 29 May 2020 04:36:56 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 16222206C3
+	for <linux-fstests@archiver.kernel.org>; Fri, 29 May 2020 07:55:14 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="KqSM5l1A"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ddQf9R+4"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725790AbgE2Eg4 (ORCPT
+        id S1726086AbgE2HzN (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 29 May 2020 00:36:56 -0400
-Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:39222 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1725601AbgE2Eg4 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 29 May 2020 00:36:56 -0400
+        Fri, 29 May 2020 03:55:13 -0400
+Received: from us-smtp-2.mimecast.com ([207.211.31.81]:46093 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1725865AbgE2HzN (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 29 May 2020 03:55:13 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1590727014;
+        s=mimecast20190719; t=1590738912;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:mime-version:mime-version:content-type:content-type:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=OsJQ7HE5pbYkB90/p5XHSyPuieFk9BMVpHlPQ8fS1Tk=;
-        b=KqSM5l1A1wpeQ2IbNlcnVXO97hVqha3fZ3vr9IPmKoansrAWj+ORVuREABjEuxi6xeI1Sj
-        T4fPycMmLEFS8nLOkbKaphIu5seFta1pdCWl79PngdUKTp0s1k/kHBgDU+nwyMSluQr1wz
-        IeQO9aKiX9jRcU0w/U1IV3Qh6DHoFTI=
+        bh=En9iqDDkuHc+j7IesCF6VH5ztuWH6X0PvMLsfV011cE=;
+        b=ddQf9R+4dQg/iHXsn0Zpdg8tqg2gKvZ0wYfvlSgzfBu1py2ZV7L/m/+W+FPj2uRk6VUlRf
+        HVzPuDOoi+r3vooqXnG0vhee1xkJaC7ZCRW3aR/R5/ffPY7u4DROHzf1rulBDGWr1ibsiF
+        Jf4WwOvAUlBgweafndnYI6beIhMrK/0=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-184-IDZCbyRKOFS2Nk-zpykq6w-1; Fri, 29 May 2020 00:36:52 -0400
-X-MC-Unique: IDZCbyRKOFS2Nk-zpykq6w-1
-Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
+ us-mta-487-pzMevHawPR-h3xeLTUd8lA-1; Fri, 29 May 2020 03:55:10 -0400
+X-MC-Unique: pzMevHawPR-h3xeLTUd8lA-1
+Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.phx2.redhat.com [10.5.11.23])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 42DF31005510
-        for <fstests@vger.kernel.org>; Fri, 29 May 2020 04:36:51 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 0115D8018A5;
+        Fri, 29 May 2020 07:55:09 +0000 (UTC)
 Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id B5355579A5
-        for <fstests@vger.kernel.org>; Fri, 29 May 2020 04:36:50 +0000 (UTC)
-Date:   Fri, 29 May 2020 12:48:22 +0800
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 6C76619723;
+        Fri, 29 May 2020 07:55:08 +0000 (UTC)
+Date:   Fri, 29 May 2020 16:06:40 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     fstests@vger.kernel.org
-Subject: Re: [PATCH] generic/484: add _require_xfs_io_command "syncfs"
-Message-ID: <20200529044821.GG1938@dhcp-12-102.nay.redhat.com>
-Mail-Followup-To: fstests@vger.kernel.org
-References: <1590651179-5695-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
+To:     Donald Douwsma <ddouwsma@redhat.com>
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org,
+        "Darrick J . Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH v2] xfstests: add test for xfs_repair progress reporting
+Message-ID: <20200529080640.GH1938@dhcp-12-102.nay.redhat.com>
+Mail-Followup-To: Donald Douwsma <ddouwsma@redhat.com>,
+        linux-xfs@vger.kernel.org, fstests@vger.kernel.org,
+        "Darrick J . Wong" <darrick.wong@oracle.com>
+References: <20200519160125.GB17621@magnolia>
+ <20200520035258.298516-1-ddouwsma@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1590651179-5695-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
+In-Reply-To: <20200520035258.298516-1-ddouwsma@redhat.com>
 User-Agent: Mutt/1.10.1 (2018-07-13)
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
+X-Scanned-By: MIMEDefang 2.84 on 10.5.11.23
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, May 28, 2020 at 03:32:59PM +0800, Yang Xu wrote:
-> When using old xfsprogs version, xfs_io doesn't support syncfs command.
-> It was not fixed until xfsprogs commit eb24bcffc0("xfs_io: fix missing syncfs command").
-> Add a require for this so that we can skip this case if xfs_io doesn't
-> support syncfs command.
+On Wed, May 20, 2020 at 01:52:58PM +1000, Donald Douwsma wrote:
+> xfs_repair's interval based progress has been broken for
+> some time, create a test based on dmdelay to stretch out
+> the time and use ag_stride to force parallelism.
 > 
-> Reported-by: Feiyu Zhu <zhufy.jy@cn.fujitsu.com>
-> Signed-off-by: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+> Signed-off-by: Donald Douwsma <ddouwsma@redhat.com>
 > ---
->  tests/generic/484 | 1 +
->  1 file changed, 1 insertion(+)
+> Changes since v1:
+> - Use _scratch_xfs_repair
+> - Filter only repair output
+> - Make the filter more tolerant of whitespace and plurals
+> - Take golden output from 'xfs_repair: fix progress reporting'
 > 
-> diff --git a/tests/generic/484 b/tests/generic/484
-> index cf257c6b..dad411e9 100755
-> --- a/tests/generic/484
-> +++ b/tests/generic/484
-> @@ -42,6 +42,7 @@ _require_scratch_nocheck
->  # realtime subvolume, thus the test will fail with rtinherit=1
->  _require_no_rtinherit
->  _require_dm_target error
-> +_require_xfs_io_command "syncfs"
+>  tests/xfs/516     | 76 +++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/516.out | 15 ++++++++++
+>  tests/xfs/group   |  1 +
+>  3 files changed, 92 insertions(+)
+>  create mode 100755 tests/xfs/516
+>  create mode 100644 tests/xfs/516.out
+> 
+> diff --git a/tests/xfs/516 b/tests/xfs/516
+> new file mode 100755
+> index 00000000..1c0508ef
+> --- /dev/null
+> +++ b/tests/xfs/516
+> @@ -0,0 +1,76 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2020 Red Hat, Inc.  All Rights Reserved.
+> +#
+> +# FS QA Test 516
+> +#
+> +# Test xfs_repair's progress reporting
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	_dmsetup_remove delay-test > /dev/null 2>&1
 
-That's good to me, as ext4/034 and generic/474 already had this 'requirement'.
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+How about use the helper, avoid using the 'delay-test' name at here?
+_cleanup_delay > /dev/null 2>&1
+
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +. ./common/dmdelay
+> +. ./common/populate
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs xfs
+> +_supported_os Linux
+> +_require_scratch
+> +_require_dm_target delay
+> +
+> +# Filter output specific to the formatters in xfs_repair/progress.c
+> +# Ideally we'd like to see hits on anything that matches
+> +# awk '/{FMT/' repair/progress.c
+> +_filter_repair()
+> +{
+> +	sed -ne '
+> +	s/[0-9]\+/#/g;
+> +	s/^\s\+/ /g;
+> +	s/\(second\|minute\)s/\1/g
+> +	/#:#:#:/p
+> +	'
+> +}
+> +
+> +echo "Format and populate"
+> +_scratch_populate_cached nofill > $seqres.full 2>&1
+> +
+> +echo "Introduce a dmdelay"
+> +_init_delay
+> +
+> +# Introduce a read I/O delay
+> +# The default in common/dmdelay is a bit too agressive
+> +BLK_DEV_SIZE=`blockdev --getsz $SCRATCH_DEV`
+> +DELAY_TABLE_RDELAY="0 $BLK_DEV_SIZE delay $SCRATCH_DEV 0 100 $SCRATCH_DEV 0 0"
+> +_load_delay_table $DELAY_READ
+> +
+> +echo "Run repair"
+> +SCRATCH_DEV=$DELAY_DEV _scratch_xfs_repair -o ag_stride=4 -t 1 2>&1 |
+> +        tee -a $seqres.full > $seqres.xfs_repair.out
+> +
+> +cat $seqres.xfs_repair.out | _filter_repair | sort -u
+> +
+> +_cleanup_delay
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/516.out b/tests/xfs/516.out
+> new file mode 100644
+> index 00000000..85018b93
+> --- /dev/null
+> +++ b/tests/xfs/516.out
+> @@ -0,0 +1,15 @@
+> +QA output created by 516
+> +Format and populate
+> +Introduce a dmdelay
+> +Run repair
+> + - #:#:#: Phase #: #% done - estimated remaining time # minute, # second
+
+I just tested on latest upstream xfsprogs-dev for-next branch, it failed as:
+--- /root/git/xfstests-dev/tests/xfs/516.out    2020-05-29 15:31:06.602440261 +0800
++++ /root/git/xfstests-dev/results//xfs/516.out.bad     2020-05-29 15:40:13.401777675 +0800
+@@ -3,6 +3,7 @@
+ Introduce a dmdelay
+ Run repair
+  - #:#:#: Phase #: #% done - estimated remaining time # minute, # second
++ - #:#:#: Phase #: #% done - estimated remaining time # second
+  - #:#:#: Phase #: elapsed time # second - processed # inodes per minute
+  - #:#:#: check for inodes claiming duplicate blocks - # of # inodes done
+  - #:#:#: process known inodes and inode discovery - # of # inodes done
+
+
+> + - #:#:#: Phase #: elapsed time # second - processed # inodes per minute
+> + - #:#:#: check for inodes claiming duplicate blocks - # of # inodes done
+> + - #:#:#: process known inodes and inode discovery - # of # inodes done
+> + - #:#:#: process newly discovered inodes - # of # allocation groups done
+> + - #:#:#: rebuild AG headers and trees - # of # allocation groups done
+> + - #:#:#: scanning agi unlinked lists - # of # allocation groups done
+> + - #:#:#: scanning filesystem freespace - # of # allocation groups done
+> + - #:#:#: setting up duplicate extent list - # of # allocation groups done
+> + - #:#:#: verify and correct link counts - # of # allocation groups done
+> + - #:#:#: zeroing log - # of # blocks done
+> diff --git a/tests/xfs/group b/tests/xfs/group
+> index 12eb55c9..aeeca23f 100644
+> --- a/tests/xfs/group
+> +++ b/tests/xfs/group
+> @@ -513,3 +513,4 @@
+>  513 auto mount
+>  514 auto quick db
+>  515 auto quick quota
+> +516 repair
+
+Is there a reason why this case shouldn't be in auto group?
 
 Thanks,
 Zorro
 
->  
->  rm -f $seqres.full
->  
 > -- 
-> 2.23.0
-> 
-> 
+> 2.18.4
 > 
 
