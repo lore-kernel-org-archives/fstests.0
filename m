@@ -1,228 +1,181 @@
-Return-Path: <SRS0=wZFd=7L=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=JK2a=7N=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3FC67C433DF
-	for <linux-fstests@archiver.kernel.org>; Fri, 29 May 2020 07:55:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 591BDC433DF
+	for <linux-fstests@archiver.kernel.org>; Sun, 31 May 2020 11:02:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 16222206C3
-	for <linux-fstests@archiver.kernel.org>; Fri, 29 May 2020 07:55:14 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 39ED320671
+	for <linux-fstests@archiver.kernel.org>; Sun, 31 May 2020 11:02:06 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ddQf9R+4"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Vzd/SsZg"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726086AbgE2HzN (ORCPT
+        id S1728056AbgEaLCF (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 29 May 2020 03:55:13 -0400
-Received: from us-smtp-2.mimecast.com ([207.211.31.81]:46093 "EHLO
-        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1725865AbgE2HzN (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 29 May 2020 03:55:13 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1590738912;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=En9iqDDkuHc+j7IesCF6VH5ztuWH6X0PvMLsfV011cE=;
-        b=ddQf9R+4dQg/iHXsn0Zpdg8tqg2gKvZ0wYfvlSgzfBu1py2ZV7L/m/+W+FPj2uRk6VUlRf
-        HVzPuDOoi+r3vooqXnG0vhee1xkJaC7ZCRW3aR/R5/ffPY7u4DROHzf1rulBDGWr1ibsiF
-        Jf4WwOvAUlBgweafndnYI6beIhMrK/0=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-487-pzMevHawPR-h3xeLTUd8lA-1; Fri, 29 May 2020 03:55:10 -0400
-X-MC-Unique: pzMevHawPR-h3xeLTUd8lA-1
-Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 0115D8018A5;
-        Fri, 29 May 2020 07:55:09 +0000 (UTC)
-Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 6C76619723;
-        Fri, 29 May 2020 07:55:08 +0000 (UTC)
-Date:   Fri, 29 May 2020 16:06:40 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Donald Douwsma <ddouwsma@redhat.com>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org,
-        "Darrick J . Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH v2] xfstests: add test for xfs_repair progress reporting
-Message-ID: <20200529080640.GH1938@dhcp-12-102.nay.redhat.com>
-Mail-Followup-To: Donald Douwsma <ddouwsma@redhat.com>,
-        linux-xfs@vger.kernel.org, fstests@vger.kernel.org,
-        "Darrick J . Wong" <darrick.wong@oracle.com>
-References: <20200519160125.GB17621@magnolia>
- <20200520035258.298516-1-ddouwsma@redhat.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200520035258.298516-1-ddouwsma@redhat.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
-X-Scanned-By: MIMEDefang 2.84 on 10.5.11.23
+        Sun, 31 May 2020 07:02:05 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59936 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726020AbgEaLCE (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 31 May 2020 07:02:04 -0400
+Received: from mail-wm1-x32a.google.com (mail-wm1-x32a.google.com [IPv6:2a00:1450:4864:20::32a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 959F8C061A0E;
+        Sun, 31 May 2020 04:02:04 -0700 (PDT)
+Received: by mail-wm1-x32a.google.com with SMTP id v19so8078520wmj.0;
+        Sun, 31 May 2020 04:02:04 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id;
+        bh=s5twvfxyAa1mllFYuUr59UMhuctZ8Rx8Cqr21XhINSM=;
+        b=Vzd/SsZgcIoObw58XwjtGKEbCCZnM/RZXq1EtKTebe0moW7JMbPdOj3dD/8PPR0qeP
+         KBXDG5PsnQy8tK6npXJhty9QyFaalAyjvcmQDcK2gAuJqJWG4e9MoXv2EKJzO01ZjOtO
+         ccxCFKxaOzPLvWYPAdrnr1C/sJNqkHRe1N19+L6pc2qBsa2sTRrX+iaLXnQ9ycPLvdh7
+         AR91X5I4BkCORg9Fd2pLmICU96MI2HsSkSvZMycxinEOd4ltblCwMjlT0lI9YuHQLJ50
+         cWbnvEZyJBgheiYBBWTnYcZSdnx6cSTnUF/9pZ97ff6RM56UWyUvEsAXgZTBkVmCKeV3
+         JTvg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id;
+        bh=s5twvfxyAa1mllFYuUr59UMhuctZ8Rx8Cqr21XhINSM=;
+        b=GMDVfb5wwn2MBcWV3iYp8ZPp22LmWRWNpXlp9gpLUvp8FUq+YdA1GgPN+UM19ZMDG0
+         uP1eg+jXYI1Br8ndhDhHQJ7iB9a//GlslzRi8+QMCbxXsqkZH1Rshok/fP5u+k1fmA7g
+         oHMiyRy3Ju6dbItHbnsPV6nqoPMF3iy4sj6+s5kCGhCjpFwzntr2TV5z39fPFdMQVMoe
+         0D9mh6oQ8FWHBfzKdg1EhY8F5lWcCerzlCLNRM1IRlngLN1ZPqCnyDjnsqjPoRdBpUvO
+         9bZE/FhTrH2wEZ1JQR66EvSbGh1Tbvp8cbBqV51anWFn/Ce8zfMALz1z3YKpqi7IjYgS
+         kcHQ==
+X-Gm-Message-State: AOAM531OLNUPkO0S4sFHEW2oJ2gna9oDq9+WSvISrq/C89ZONwJAw5/P
+        LYYSN0t9+Tnrgm4CYgSr554=
+X-Google-Smtp-Source: ABdhPJxPZBk6NoFp5i5p9A2Cf4cHrkao5CTRKyHaUemslQcFVDboCx+cT185okLoLt9U354iL6eDfg==
+X-Received: by 2002:a7b:c5d4:: with SMTP id n20mr17876666wmk.106.1590922923321;
+        Sun, 31 May 2020 04:02:03 -0700 (PDT)
+Received: from localhost.localdomain ([141.226.12.123])
+        by smtp.gmail.com with ESMTPSA id j190sm7846430wmb.33.2020.05.31.04.02.01
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 31 May 2020 04:02:02 -0700 (PDT)
+From:   Amir Goldstein <amir73il@gmail.com>
+To:     Eryu Guan <guaneryu@gmail.com>
+Cc:     Miklos Szeredi <miklos@szeredi.hu>,
+        Vivek Goyal <vgoyal@redhat.com>, linux-unionfs@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: [PATCH 0/3] Running unionmount testsuite from xfstests
+Date:   Sun, 31 May 2020 14:01:53 +0300
+Message-Id: <20200531110156.6613-1-amir73il@gmail.com>
+X-Mailer: git-send-email 2.17.1
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, May 20, 2020 at 01:52:58PM +1000, Donald Douwsma wrote:
-> xfs_repair's interval based progress has been broken for
-> some time, create a test based on dmdelay to stretch out
-> the time and use ag_stride to force parallelism.
-> 
-> Signed-off-by: Donald Douwsma <ddouwsma@redhat.com>
-> ---
-> Changes since v1:
-> - Use _scratch_xfs_repair
-> - Filter only repair output
-> - Make the filter more tolerant of whitespace and plurals
-> - Take golden output from 'xfs_repair: fix progress reporting'
-> 
->  tests/xfs/516     | 76 +++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/516.out | 15 ++++++++++
->  tests/xfs/group   |  1 +
->  3 files changed, 92 insertions(+)
->  create mode 100755 tests/xfs/516
->  create mode 100644 tests/xfs/516.out
-> 
-> diff --git a/tests/xfs/516 b/tests/xfs/516
-> new file mode 100755
-> index 00000000..1c0508ef
-> --- /dev/null
-> +++ b/tests/xfs/516
-> @@ -0,0 +1,76 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2020 Red Hat, Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test 516
-> +#
-> +# Test xfs_repair's progress reporting
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	_dmsetup_remove delay-test > /dev/null 2>&1
+Eryu,
 
-How about use the helper, avoid using the 'delay-test' name at here?
-_cleanup_delay > /dev/null 2>&1
+unionmount testsuite has a lot more test coverage than the overlay
+xfstests, but it has a lot less exposure to testers.
 
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/dmdelay
-> +. ./common/populate
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs xfs
-> +_supported_os Linux
-> +_require_scratch
-> +_require_dm_target delay
-> +
-> +# Filter output specific to the formatters in xfs_repair/progress.c
-> +# Ideally we'd like to see hits on anything that matches
-> +# awk '/{FMT/' repair/progress.c
-> +_filter_repair()
-> +{
-> +	sed -ne '
-> +	s/[0-9]\+/#/g;
-> +	s/^\s\+/ /g;
-> +	s/\(second\|minute\)s/\1/g
-> +	/#:#:#:/p
-> +	'
-> +}
-> +
-> +echo "Format and populate"
-> +_scratch_populate_cached nofill > $seqres.full 2>&1
-> +
-> +echo "Introduce a dmdelay"
-> +_init_delay
-> +
-> +# Introduce a read I/O delay
-> +# The default in common/dmdelay is a bit too agressive
-> +BLK_DEV_SIZE=`blockdev --getsz $SCRATCH_DEV`
-> +DELAY_TABLE_RDELAY="0 $BLK_DEV_SIZE delay $SCRATCH_DEV 0 100 $SCRATCH_DEV 0 0"
-> +_load_delay_table $DELAY_READ
-> +
-> +echo "Run repair"
-> +SCRATCH_DEV=$DELAY_DEV _scratch_xfs_repair -o ag_stride=4 -t 1 2>&1 |
-> +        tee -a $seqres.full > $seqres.xfs_repair.out
-> +
-> +cat $seqres.xfs_repair.out | _filter_repair | sort -u
-> +
-> +_cleanup_delay
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/516.out b/tests/xfs/516.out
-> new file mode 100644
-> index 00000000..85018b93
-> --- /dev/null
-> +++ b/tests/xfs/516.out
-> @@ -0,0 +1,15 @@
-> +QA output created by 516
-> +Format and populate
-> +Introduce a dmdelay
-> +Run repair
-> + - #:#:#: Phase #: #% done - estimated remaining time # minute, # second
+The various test setups that I have added to unionmount testsuite since
+I took over the maintanace of the testsuite have even smaller exposure
+to testers.
 
-I just tested on latest upstream xfsprogs-dev for-next branch, it failed as:
---- /root/git/xfstests-dev/tests/xfs/516.out    2020-05-29 15:31:06.602440261 +0800
-+++ /root/git/xfstests-dev/results//xfs/516.out.bad     2020-05-29 15:40:13.401777675 +0800
-@@ -3,6 +3,7 @@
- Introduce a dmdelay
- Run repair
-  - #:#:#: Phase #: #% done - estimated remaining time # minute, # second
-+ - #:#:#: Phase #: #% done - estimated remaining time # second
-  - #:#:#: Phase #: elapsed time # second - processed # inodes per minute
-  - #:#:#: check for inodes claiming duplicate blocks - # of # inodes done
-  - #:#:#: process known inodes and inode discovery - # of # inodes done
+These patches add overlay tests that are used as a harness to run
+different setups of unionmount testsuite.  I have been using this method
+for over two year for testing my overlayfs branches.
 
+What does it take to install unionmount testsuite?
+As README.overlay says:
 
-> + - #:#:#: Phase #: elapsed time # second - processed # inodes per minute
-> + - #:#:#: check for inodes claiming duplicate blocks - # of # inodes done
-> + - #:#:#: process known inodes and inode discovery - # of # inodes done
-> + - #:#:#: process newly discovered inodes - # of # allocation groups done
-> + - #:#:#: rebuild AG headers and trees - # of # allocation groups done
-> + - #:#:#: scanning agi unlinked lists - # of # allocation groups done
-> + - #:#:#: scanning filesystem freespace - # of # allocation groups done
-> + - #:#:#: setting up duplicate extent list - # of # allocation groups done
-> + - #:#:#: verify and correct link counts - # of # allocation groups done
-> + - #:#:#: zeroing log - # of # blocks done
-> diff --git a/tests/xfs/group b/tests/xfs/group
-> index 12eb55c9..aeeca23f 100644
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
-> @@ -513,3 +513,4 @@
->  513 auto mount
->  514 auto quick db
->  515 auto quick quota
-> +516 repair
-
-Is there a reason why this case shouldn't be in auto group?
+  git clone https://github.com/amir73il/unionmount-testsuite.git
+  ln -s $PWD/unionmount-testsuite <path-to-xfstests>/src/
 
 Thanks,
-Zorro
+Amir.
 
-> -- 
-> 2.18.4
-> 
+Amir Goldstein (3):
+  overlay: run unionmount testsuite test cases
+  overlay: add unionmount tests with multi lower layers
+  overlay: add unionmount tests with nested overlay
+
+ README.overlay        | 15 ++++++++++++
+ common/config         |  2 ++
+ common/overlay        | 54 +++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/100     | 38 ++++++++++++++++++++++++++++++
+ tests/overlay/100.out |  2 ++
+ tests/overlay/101     | 39 +++++++++++++++++++++++++++++++
+ tests/overlay/101.out |  2 ++
+ tests/overlay/102     | 40 ++++++++++++++++++++++++++++++++
+ tests/overlay/102.out |  2 ++
+ tests/overlay/103     | 38 ++++++++++++++++++++++++++++++
+ tests/overlay/103.out |  2 ++
+ tests/overlay/104     | 39 +++++++++++++++++++++++++++++++
+ tests/overlay/104.out |  2 ++
+ tests/overlay/105     | 40 ++++++++++++++++++++++++++++++++
+ tests/overlay/105.out |  2 ++
+ tests/overlay/106     | 41 ++++++++++++++++++++++++++++++++
+ tests/overlay/106.out |  2 ++
+ tests/overlay/107     | 41 ++++++++++++++++++++++++++++++++
+ tests/overlay/107.out |  2 ++
+ tests/overlay/108     | 41 ++++++++++++++++++++++++++++++++
+ tests/overlay/108.out |  2 ++
+ tests/overlay/109     | 41 ++++++++++++++++++++++++++++++++
+ tests/overlay/109.out |  2 ++
+ tests/overlay/110     | 39 +++++++++++++++++++++++++++++++
+ tests/overlay/110.out |  2 ++
+ tests/overlay/111     | 40 ++++++++++++++++++++++++++++++++
+ tests/overlay/111.out |  2 ++
+ tests/overlay/112     | 40 ++++++++++++++++++++++++++++++++
+ tests/overlay/112.out |  2 ++
+ tests/overlay/113     | 41 ++++++++++++++++++++++++++++++++
+ tests/overlay/113.out |  2 ++
+ tests/overlay/114     | 39 +++++++++++++++++++++++++++++++
+ tests/overlay/114.out |  2 ++
+ tests/overlay/115     | 40 ++++++++++++++++++++++++++++++++
+ tests/overlay/115.out |  2 ++
+ tests/overlay/116     | 40 ++++++++++++++++++++++++++++++++
+ tests/overlay/116.out |  2 ++
+ tests/overlay/117     | 41 ++++++++++++++++++++++++++++++++
+ tests/overlay/117.out |  2 ++
+ tests/overlay/group   | 18 +++++++++++++++
+ 40 files changed, 843 insertions(+)
+ create mode 100755 tests/overlay/100
+ create mode 100644 tests/overlay/100.out
+ create mode 100755 tests/overlay/101
+ create mode 100644 tests/overlay/101.out
+ create mode 100755 tests/overlay/102
+ create mode 100644 tests/overlay/102.out
+ create mode 100755 tests/overlay/103
+ create mode 100644 tests/overlay/103.out
+ create mode 100755 tests/overlay/104
+ create mode 100644 tests/overlay/104.out
+ create mode 100755 tests/overlay/105
+ create mode 100644 tests/overlay/105.out
+ create mode 100755 tests/overlay/106
+ create mode 100644 tests/overlay/106.out
+ create mode 100755 tests/overlay/107
+ create mode 100644 tests/overlay/107.out
+ create mode 100755 tests/overlay/108
+ create mode 100644 tests/overlay/108.out
+ create mode 100755 tests/overlay/109
+ create mode 100644 tests/overlay/109.out
+ create mode 100755 tests/overlay/110
+ create mode 100644 tests/overlay/110.out
+ create mode 100755 tests/overlay/111
+ create mode 100644 tests/overlay/111.out
+ create mode 100755 tests/overlay/112
+ create mode 100644 tests/overlay/112.out
+ create mode 100755 tests/overlay/113
+ create mode 100644 tests/overlay/113.out
+ create mode 100755 tests/overlay/114
+ create mode 100644 tests/overlay/114.out
+ create mode 100755 tests/overlay/115
+ create mode 100644 tests/overlay/115.out
+ create mode 100755 tests/overlay/116
+ create mode 100644 tests/overlay/116.out
+ create mode 100755 tests/overlay/117
+ create mode 100644 tests/overlay/117.out
+
+-- 
+2.17.1
 
