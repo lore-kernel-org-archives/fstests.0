@@ -2,517 +2,341 @@ Return-Path: <SRS0=JK2a=7N=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.7 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	UNPARSEABLE_RELAY autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D5ACEC433E1
-	for <linux-fstests@archiver.kernel.org>; Sun, 31 May 2020 11:02:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0379FC433E0
+	for <linux-fstests@archiver.kernel.org>; Sun, 31 May 2020 16:15:26 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B0963206E2
-	for <linux-fstests@archiver.kernel.org>; Sun, 31 May 2020 11:02:17 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="J7MZzG7s"
+	by mail.kernel.org (Postfix) with ESMTP id CE172206C3
+	for <linux-fstests@archiver.kernel.org>; Sun, 31 May 2020 16:15:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726020AbgEaLCQ (ORCPT
+        id S1728105AbgEaQPZ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 31 May 2020 07:02:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59950 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728277AbgEaLCI (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 31 May 2020 07:02:08 -0400
-Received: from mail-wm1-x341.google.com (mail-wm1-x341.google.com [IPv6:2a00:1450:4864:20::341])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A2B44C05BD43;
-        Sun, 31 May 2020 04:02:07 -0700 (PDT)
-Received: by mail-wm1-x341.google.com with SMTP id f185so8557521wmf.3;
-        Sun, 31 May 2020 04:02:07 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references;
-        bh=6y6ybSFvJzj8la441aFZb6Q4CuXXKgdXsZPwGPiuBEA=;
-        b=J7MZzG7sxeToKzXANPZ9hVDL/o2Sij/z2BRXjSJJbustIq51hNUuYSzsl4gQW9zhYc
-         ce9mz8n+ixjSQQi+M/PM6eM8Eflr2nZZDAnLjnJbwOA6SnkY2QNFsd6X/WtnJAJRhl1P
-         UbbcNSo72q8zvECLEN/mnO+1yxP69OAOEzQx7qnXh97yQ0XdwYcXNEw8jS5+W3l6JwWt
-         WUVVPOuBGEw++ZxaBWf0urvuNHy58QNJLH+3UzSirlBqdF9F9rRlXODdjKKTz02PX43G
-         NhbeM4pw8vlLVXz3DZBi3z0oLigamy+NQNQDcViF/QBLlXa3bVabM5oIAXAOlrecAU2b
-         GIUg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references;
-        bh=6y6ybSFvJzj8la441aFZb6Q4CuXXKgdXsZPwGPiuBEA=;
-        b=Hct5/tRHyRclpSPvCp2fcORxBw0d/xJmTOqK+t3slQjCZhiOoMuoPMSDF9HPOsE27L
-         EIeMvPZpW5j0SQ9oyKJCaJBLFMkNgwFUYtSSwNyrggDdr164YUuDqNxhs4TqUPXfYfV8
-         EzJZoyhTeOZY2o7TnNUpmkMIKgm175HeZGLOcZaBpTnKyVJ04fWTs2lRkgoc6jbGSO7R
-         PERZC2TM81nM3pDsgnEa3i5MyxIysR2yx4yodjZ7y/j1IkWQyb8S3jC2ixq69ysJoKbY
-         JFXykXySgb38bwywiZBEaxNfSROZbLH8Wkhgs9n2TiS2eP0/SfDO9IMDgVSsTRMtr9nr
-         dXEw==
-X-Gm-Message-State: AOAM532+jdALjGwMSgHwNstPPf88vVkuupzTPd4zzYn4OQig6rsyJTlK
-        TN3iLhGJIkixye/AHhJ1Goo=
-X-Google-Smtp-Source: ABdhPJyfWfMF2AlGIFcGe6qswDUlvvFIyuDWJ36NsBbZX0SekQirBCb8CxWAK8II68pVMRj7qgSghg==
-X-Received: by 2002:a1c:7e52:: with SMTP id z79mr17689605wmc.104.1590922926213;
-        Sun, 31 May 2020 04:02:06 -0700 (PDT)
-Received: from localhost.localdomain ([141.226.12.123])
-        by smtp.gmail.com with ESMTPSA id j190sm7846430wmb.33.2020.05.31.04.02.04
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 31 May 2020 04:02:05 -0700 (PDT)
-From:   Amir Goldstein <amir73il@gmail.com>
-To:     Eryu Guan <guaneryu@gmail.com>
-Cc:     Miklos Szeredi <miklos@szeredi.hu>,
-        Vivek Goyal <vgoyal@redhat.com>, linux-unionfs@vger.kernel.org,
-        fstests@vger.kernel.org
-Subject: [PATCH 2/3] overlay: add unionmount tests with multi lower layers
-Date:   Sun, 31 May 2020 14:01:55 +0300
-Message-Id: <20200531110156.6613-3-amir73il@gmail.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20200531110156.6613-1-amir73il@gmail.com>
-References: <20200531110156.6613-1-amir73il@gmail.com>
+        Sun, 31 May 2020 12:15:25 -0400
+Received: from out20-27.mail.aliyun.com ([115.124.20.27]:54263 "EHLO
+        out20-27.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726081AbgEaQPX (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 31 May 2020 12:15:23 -0400
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07436282|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.34676-0.00407862-0.649161;FP=0|0|0|0|0|-1|-1|-1;HT=e02c03307;MF=guan@eryu.me;NM=1;PH=DS;RN=4;RT=4;SR=0;TI=SMTPD_---.HgHWt4t_1590941718;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.HgHWt4t_1590941718)
+          by smtp.aliyun-inc.com(10.147.43.95);
+          Mon, 01 Jun 2020 00:15:18 +0800
+Date:   Mon, 1 Jun 2020 00:15:17 +0800
+From:   Eryu Guan <guan@eryu.me>
+To:     Eric Sandeen <sandeen@redhat.com>
+Cc:     linux-xfs <linux-xfs@vger.kernel.org>,
+        fstests <fstests@vger.kernel.org>, zlang@redhat.com
+Subject: Re: [PATCH 2/4] generic: test per-type quota softlimit enforcement
+ timeout
+Message-ID: <20200531161517.GC3363@desktop>
+References: <ea649599-f8a9-deb9-726e-329939befade@redhat.com>
+ <9c9a63f3-13ab-d5b6-923c-4ea684b6b2f8@redhat.com>
+ <7102e1e3-bee6-7aa2-dce6-c0e7e0ce2983@redhat.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <7102e1e3-bee6-7aa2-dce6-c0e7e0ce2983@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-The tests with multi lower layers rotate the upper layer into a lower
-layer on specific operations such as mkdir, rename and link.
-That provides test coverage for redirect_dir and index features.
+On Mon, May 18, 2020 at 03:00:11PM -0500, Eric Sandeen wrote:
+> From: Zorro Lang <zlang@redhat.com>
+> 
+> Set different block & inode grace timers for user, group and project
+> quotas, then test softlimit enforcement timeout, make sure different
+> grace timers as expected.
+> 
+> Signed-off-by: Zorro Lang <zlang@redhat.com>
+> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+> ---
 
-The following variations are covered:
-1. All layers all on scratch fs (--ov=10 --samefs)
-2. All layers on scratch fs expect for lowermost on test fs (--ov=10)
-3. Lowermost layer on test fs, one layer on tmpfs and the rest
-   on sratch fs (--ov=10 --maxfs=1)
-4. Lowermost layer on test fs, one layer on scratch fs and the rest
-   are unique tmpfs instances (--ov=10 --maxfs=10)
+I saw the following failure as well on xfs (as Zorro mentioned in his v3
+patch)
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
- tests/overlay/103     | 38 ++++++++++++++++++++++++++++++++++++++
- tests/overlay/103.out |  2 ++
- tests/overlay/104     | 39 +++++++++++++++++++++++++++++++++++++++
- tests/overlay/104.out |  2 ++
- tests/overlay/105     | 40 ++++++++++++++++++++++++++++++++++++++++
- tests/overlay/105.out |  2 ++
- tests/overlay/106     | 41 +++++++++++++++++++++++++++++++++++++++++
- tests/overlay/106.out |  2 ++
- tests/overlay/107     | 41 +++++++++++++++++++++++++++++++++++++++++
- tests/overlay/107.out |  2 ++
- tests/overlay/108     | 41 +++++++++++++++++++++++++++++++++++++++++
- tests/overlay/108.out |  2 ++
- tests/overlay/109     | 41 +++++++++++++++++++++++++++++++++++++++++
- tests/overlay/109.out |  2 ++
- tests/overlay/group   |  7 +++++++
- 15 files changed, 302 insertions(+)
- create mode 100755 tests/overlay/103
- create mode 100644 tests/overlay/103.out
- create mode 100755 tests/overlay/104
- create mode 100644 tests/overlay/104.out
- create mode 100755 tests/overlay/105
- create mode 100644 tests/overlay/105.out
- create mode 100755 tests/overlay/106
- create mode 100644 tests/overlay/106.out
- create mode 100755 tests/overlay/107
- create mode 100644 tests/overlay/107.out
- create mode 100755 tests/overlay/108
- create mode 100644 tests/overlay/108.out
- create mode 100755 tests/overlay/109
- create mode 100644 tests/overlay/109.out
+     -pwrite: Disk quota exceeded                                                                                                                                                                                   
+     +pwrite: No space left on device
 
-diff --git a/tests/overlay/103 b/tests/overlay/103
-new file mode 100755
-index 00000000..fb7fce0c
---- /dev/null
-+++ b/tests/overlay/103
-@@ -0,0 +1,38 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2020 CTERA Networks. All Rights Reserved.
-+#
-+# FS QA Test 103
-+#
-+# Run unionmount testsuite to verify correctness
-+# with multi lower layers on same fs as upper
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_unionmount_testsuite_cleanup; exit \$status" 0 1 2 3 15
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+_supported_fs overlay
-+_supported_os Linux
-+_require_scratch
-+_require_unionmount_testsuite
-+
-+_unionmount_testsuite_run --ov=10 --samefs --verify
-+
-+# success, all done
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/overlay/103.out b/tests/overlay/103.out
-new file mode 100644
-index 00000000..78212a3d
---- /dev/null
-+++ b/tests/overlay/103.out
-@@ -0,0 +1,2 @@
-+QA output created by 103
-+Silence is golden
-diff --git a/tests/overlay/104 b/tests/overlay/104
-new file mode 100755
-index 00000000..f867f345
---- /dev/null
-+++ b/tests/overlay/104
-@@ -0,0 +1,39 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2020 CTERA Networks. All Rights Reserved.
-+#
-+# FS QA Test 104
-+#
-+# Run unionmount testsuite to verify correctness
-+# with multi lower layers, lowermost on unique fs
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_unionmount_testsuite_cleanup; exit \$status" 0 1 2 3 15
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+_supported_fs overlay
-+_supported_os Linux
-+_require_test
-+_require_scratch
-+_require_unionmount_testsuite
-+
-+_unionmount_testsuite_run --ov=10 --verify
-+
-+# success, all done
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/overlay/104.out b/tests/overlay/104.out
-new file mode 100644
-index 00000000..3f3bd2e8
---- /dev/null
-+++ b/tests/overlay/104.out
-@@ -0,0 +1,2 @@
-+QA output created by 104
-+Silence is golden
-diff --git a/tests/overlay/105 b/tests/overlay/105
-new file mode 100755
-index 00000000..f964c58e
---- /dev/null
-+++ b/tests/overlay/105
-@@ -0,0 +1,40 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2020 CTERA Networks. All Rights Reserved.
-+#
-+# FS QA Test 105
-+#
-+# Run unionmount testsuite to verify correctness
-+# with multi lower layers, lowermost on unique fs,
-+# with xino enabled
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_unionmount_testsuite_cleanup; exit \$status" 0 1 2 3 15
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+_supported_fs overlay
-+_supported_os Linux
-+_require_test
-+_require_scratch
-+_require_unionmount_testsuite
-+
-+_unionmount_testsuite_run --ov=10 --xino --verify
-+
-+# success, all done
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/overlay/105.out b/tests/overlay/105.out
-new file mode 100644
-index 00000000..edaafd46
---- /dev/null
-+++ b/tests/overlay/105.out
-@@ -0,0 +1,2 @@
-+QA output created by 105
-+Silence is golden
-diff --git a/tests/overlay/106 b/tests/overlay/106
-new file mode 100755
-index 00000000..52d6c7d0
---- /dev/null
-+++ b/tests/overlay/106
-@@ -0,0 +1,41 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2020 CTERA Networks. All Rights Reserved.
-+#
-+# FS QA Test 106
-+#
-+# Run unionmount testsuite to verify correctness
-+# with multi lower layers, some layers on unique fs,
-+# one layer is on tmpfs.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_unionmount_testsuite_cleanup; exit \$status" 0 1 2 3 15
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+_supported_fs overlay
-+_supported_os Linux
-+_require_tmpfs
-+_require_test
-+_require_scratch
-+_require_unionmount_testsuite
-+
-+_unionmount_testsuite_run --ov=10 --maxfs=1 --verify
-+
-+# success, all done
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/overlay/106.out b/tests/overlay/106.out
-new file mode 100644
-index 00000000..85af05d8
---- /dev/null
-+++ b/tests/overlay/106.out
-@@ -0,0 +1,2 @@
-+QA output created by 106
-+Silence is golden
-diff --git a/tests/overlay/107 b/tests/overlay/107
-new file mode 100755
-index 00000000..abcde30c
---- /dev/null
-+++ b/tests/overlay/107
-@@ -0,0 +1,41 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2020 CTERA Networks. All Rights Reserved.
-+#
-+# FS QA Test 107
-+#
-+# Run unionmount testsuite to verify correctness
-+# with multi lower layers, some layers on unique fs,
-+# one layer is on tmpfs with xino enabled.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_unionmount_testsuite_cleanup; exit \$status" 0 1 2 3 15
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+_supported_fs overlay
-+_supported_os Linux
-+_require_tmpfs
-+_require_test
-+_require_scratch
-+_require_unionmount_testsuite
-+
-+_unionmount_testsuite_run --ov=10 --maxfs=1 --xino --verify
-+
-+# success, all done
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/overlay/107.out b/tests/overlay/107.out
-new file mode 100644
-index 00000000..862bdfbd
---- /dev/null
-+++ b/tests/overlay/107.out
-@@ -0,0 +1,2 @@
-+QA output created by 107
-+Silence is golden
-diff --git a/tests/overlay/108 b/tests/overlay/108
-new file mode 100755
-index 00000000..d4e9b570
---- /dev/null
-+++ b/tests/overlay/108
-@@ -0,0 +1,41 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2020 CTERA Networks. All Rights Reserved.
-+#
-+# FS QA Test 108
-+#
-+# Run unionmount testsuite to verify correctness
-+# with multi lower layers, all layers on unique fs,
-+# some layers are on tmpfs.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_unionmount_testsuite_cleanup; exit \$status" 0 1 2 3 15
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+_supported_fs overlay
-+_supported_os Linux
-+_require_tmpfs
-+_require_test
-+_require_scratch
-+_require_unionmount_testsuite
-+
-+_unionmount_testsuite_run --ov=10 --maxfs=10 --verify
-+
-+# success, all done
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/overlay/108.out b/tests/overlay/108.out
-new file mode 100644
-index 00000000..326ffa96
---- /dev/null
-+++ b/tests/overlay/108.out
-@@ -0,0 +1,2 @@
-+QA output created by 108
-+Silence is golden
-diff --git a/tests/overlay/109 b/tests/overlay/109
-new file mode 100755
-index 00000000..71072982
---- /dev/null
-+++ b/tests/overlay/109
-@@ -0,0 +1,41 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2020 CTERA Networks. All Rights Reserved.
-+#
-+# FS QA Test 109
-+#
-+# Run unionmount testsuite to verify correctness
-+# with multi lower layers, all layers on unique fs,
-+# some layers are on tmpfs with xino enabled.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_unionmount_testsuite_cleanup; exit \$status" 0 1 2 3 15
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+_supported_fs overlay
-+_supported_os Linux
-+_require_tmpfs
-+_require_test
-+_require_scratch
-+_require_unionmount_testsuite
-+
-+_unionmount_testsuite_run --ov=10 --maxfs=10 --xino --verify
-+
-+# success, all done
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/overlay/109.out b/tests/overlay/109.out
-new file mode 100644
-index 00000000..8356befa
---- /dev/null
-+++ b/tests/overlay/109.out
-@@ -0,0 +1,2 @@
-+QA output created by 109
-+Silence is golden
-diff --git a/tests/overlay/group b/tests/overlay/group
-index 267161f4..079ff0af 100644
---- a/tests/overlay/group
-+++ b/tests/overlay/group
-@@ -80,3 +80,10 @@
- 100 auto quick union samefs
- 101 auto quick union nonsamefs
- 102 auto quick union nonsamefs xino
-+103 auto union rotate samefs
-+104 auto union rotate nonsamefs
-+105 auto union rotate nonsamefs xino
-+106 auto union rotate nonsamefs
-+107 auto union rotate nonsamefs xino
-+108 auto union rotate nonsamefs
-+109 auto union rotate nonsamefs xino
--- 
-2.17.1
+So this is an xfs issue that needs to be fixed? Just want to make sure
+the current expected test result.
 
+>  common/quota          |   4 +
+>  tests/generic/600     | 187 ++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/600.out |  41 +++++++++
+>  tests/generic/group   |   1 +
+>  4 files changed, 233 insertions(+)
+>  create mode 100755 tests/generic/600
+>  create mode 100644 tests/generic/600.out
+> 
+> diff --git a/common/quota b/common/quota
+> index 240e0bbc..1437d5f7 100644
+> --- a/common/quota
+> +++ b/common/quota
+> @@ -217,6 +217,10 @@ _qmount()
+>      if [ "$FSTYP" != "xfs" ]; then
+>          quotacheck -ug $SCRATCH_MNT >>$seqres.full 2>&1
+>          quotaon -ug $SCRATCH_MNT >>$seqres.full 2>&1
+> +        # try to turn on project quota if it's supported
+> +        if quotaon --help 2>&1 | grep -q '\-\-project'; then
+> +            quotaon --project $SCRATCH_MNT >>$seqres.full 2>&1
+> +        fi
+>      fi
+>      chmod ugo+rwx $SCRATCH_MNT
+>  }
+> diff --git a/tests/generic/600 b/tests/generic/600
+> new file mode 100755
+> index 00000000..03b4dcb3
+> --- /dev/null
+> +++ b/tests/generic/600
+> @@ -0,0 +1,187 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2020 Red Hat, Inc.  All Rights Reserved.
+> +#
+> +# FS QA Test No. 600
+> +#
+> +# Test per-type(user, group and project) filesystem quota timers, make sure
+> +# enforcement
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	restore_project
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +. ./common/quota
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +require_project()
+> +{
+> +	rm -f $tmp.projects $tmp.projid
+> +	if [ -f /etc/projects ];then
+> +		cat /etc/projects > $tmp.projects
+> +	fi
+> +	if [ -f /etc/projid ];then
+> +		cat /etc/projid > $tmp.projid
+> +	fi
+> +
+> +	cat >/etc/projects <<EOF
+> +100:$SCRATCH_MNT/t
+> +EOF
+> +	cat >/etc/projid <<EOF
+> +$qa_user:100
+> +EOF
+> +	PROJECT_CHANGED=1
+> +}
+> +
+> +restore_project()
+> +{
+> +	if [ "$PROJECT_CHANGED" = "1" ];then
+> +		rm -f /etc/projects /etc/projid
+> +		if [ -f $tmp.projects ];then
+> +			cat $tmp.projects > /etc/projects
+> +		fi
+> +		if [ -f $tmp.projid ];then
+> +			cat $tmp.projid > /etc/projid
+> +		fi
+> +	fi
+> +}
+> +
+> +init_files()
+> +{
+> +	local dir=$1
+> +
+> +	echo "### Initialize files, and their mode and ownership"
+> +	touch $dir/file{1,2} 2>/dev/null
+> +	chown $qa_user $dir/file{1,2} 2>/dev/null
+> +	chgrp $qa_user $dir/file{1,2} 2>/dev/null
+> +	chmod 777 $dir 2>/dev/null
+> +}
+> +
+> +cleanup_files()
+> +{
+> +	echo "### Remove all files"
+> +	rm -f ${1}/file{1,2,3,4,5,6}
+> +}
+> +
+> +test_grace()
+> +{
+> +	local type=$1
+> +	local dir=$2
+> +	local bgrace=$3
+> +	local igrace=$4
+> +
+> +	init_files $dir
+> +	echo "--- Test block quota ---"
+> +	# Firstly fit below block soft limit
+> +	echo "Write 225 blocks..."
+> +	su $qa_user -c "$XFS_IO_PROG -c 'pwrite 0 $((225 * $BLOCK_SIZE))' \
+> +		-c fsync $dir/file1" 2>&1 >>$seqres.full | \
+> +		_filter_xfs_io_error | tee -a $seqres.full
+> +	repquota -v -$type $SCRATCH_MNT | grep -v "^root" >>$seqres.full 2>&1
+> +	# Secondly overcome block soft limit
+> +	echo "Rewrite 250 blocks plus 1 byte, over the block softlimit..."
+> +	su $qa_user -c "$XFS_IO_PROG -c 'pwrite 0 $((250 * $BLOCK_SIZE + 1))' \
+> +		-c fsync $dir/file1" 2>&1 >>$seqres.full | \
+> +		_filter_xfs_io_error | tee -a $seqres.full
+> +	repquota -v -$type $SCRATCH_MNT | grep -v "^root" >>$seqres.full 2>&1
+> +	# Reset grace time here, make below grace time test more accurate
+> +	setquota -$type $qa_user -T $bgrace $igrace $SCRATCH_MNT 2>/dev/null
+> +	# Now sleep enough grace time and check that softlimit got enforced
+> +	sleep $((bgrace + 1))
+> +	echo "Try to write 1 one more block after grace..."
+> +	su $qa_user -c "$XFS_IO_PROG -c 'truncate 0' -c 'pwrite 0 $BLOCK_SIZE' \
+> +		$dir/file2" 2>&1 >>$seqres.full | _filter_xfs_io_error | \
+> +		tee -a $seqres.full
+> +	repquota -v -$type $SCRATCH_MNT | grep -v "^root" >>$seqres.full 2>&1
+> +	echo "--- Test inode quota ---"
+> +	# And now the softlimit test for inodes
+> +	# First reset space limits so that we don't have problems with
+> +	# space reservations on XFS
+> +	setquota -$type $qa_user 0 0 3 100 $SCRATCH_MNT
+> +	echo "Create 2 more files, over the inode softlimit..."
+> +	su $qa_user -c "touch $dir/file3 $dir/file4" 2>&1 >>$seqres.full | \
+> +		_filter_scratch | tee -a $seqres.full
+> +	repquota -v -$type $SCRATCH_MNT  | grep -v "^root" >>$seqres.full 2>&1
+> +	# Reset grace time here, make below grace time test more accurate
+> +	setquota -$type $qa_user -T $bgrace $igrace $SCRATCH_MNT 2>/dev/null
+> +	# Wait and check grace time enforcement
+> +	sleep $((igrace+1))
+> +	echo "Try to create one more inode after grace..."
+> +	su $qa_user -c "touch $dir/file5" 2>&1 >>$seqres.full |
+> +		_filter_scratch | tee -a $seqres.full
+> +	repquota -v -$type $SCRATCH_MNT  | grep -v "^root" >>$seqres.full 2>&1
+> +	cleanup_files $dir
+> +}
+> +
+> +# real QA test starts here
+> +_supported_fs generic
+> +_supported_os Linux
+> +_require_scratch
+> +_require_setquota_project
+> +_require_quota
+> +_require_user
+> +_require_group
+
+Hmm, also needs _require_scratch_xfs_crc when FSTYP is xfs, otherwise v4
+xfs fails as
+
++mount: /mnt/scratch: wrong fs type, bad option, bad superblock on /dev/mapper/testvg-lv2, missing codepage or helper program, or other error.
++qmount failed
+
+and dmesg says
+
+XFS (dm-2): Super block does not support project and group quota together
+
+Thanks,
+Eryu
+
+> +
+> +_scratch_mkfs >$seqres.full 2>&1
+> +_scratch_enable_pquota
+> +_qmount_option "usrquota,grpquota,prjquota"
+> +_qmount
+> +_require_prjquota $SCRATCH_DEV
+> +BLOCK_SIZE=$(_get_file_block_size $SCRATCH_MNT)
+> +rm -rf $SCRATCH_MNT/t
+> +mkdir $SCRATCH_MNT/t
+> +$XFS_IO_PROG -r -c "chproj 100" -c "chattr +P" $SCRATCH_MNT/t
+> +require_project
+> +
+> +echo "### Set up different grace timers to each type of quota"
+> +UBGRACE=12
+> +UIGRACE=10
+> +GBGRACE=4
+> +GIGRACE=2
+> +PBGRACE=8
+> +PIGRACE=6
+> +
+> +setquota -u $qa_user $((250 * $BLOCK_SIZE / 1024)) \
+> +	$((1000 * $BLOCK_SIZE / 1024)) 3 100 $SCRATCH_MNT
+> +setquota -u -t $UBGRACE $UIGRACE $SCRATCH_MNT
+> +echo; echo "### Test user quota softlimit and grace time"
+> +test_grace u $SCRATCH_MNT $UBGRACE $UIGRACE
+> +# Reset the user quota space & inode limits, avoid it affect later test
+> +setquota -u $qa_user 0 0 0 0 $SCRATCH_MNT
+> +
+> +setquota -g $qa_user $((250 * $BLOCK_SIZE / 1024)) \
+> +	$((1000 * $BLOCK_SIZE / 1024)) 3 100 $SCRATCH_MNT
+> +setquota -g -t $GBGRACE $GIGRACE $SCRATCH_MNT
+> +echo; echo "### Test group quota softlimit and grace time"
+> +test_grace g $SCRATCH_MNT $GBGRACE $GIGRACE
+> +# Reset the group quota space & inode limits, avoid it affect later test
+> +setquota -g $qa_user 0 0 0 0 $SCRATCH_MNT
+> +
+> +setquota -P $qa_user $((250 * $BLOCK_SIZE / 1024)) \
+> +	$((1000 * $BLOCK_SIZE / 1024)) 3 100 $SCRATCH_MNT
+> +setquota -P -t $PBGRACE $PIGRACE $SCRATCH_MNT
+> +echo; echo "### Test project quota softlimit and grace time"
+> +test_grace P $SCRATCH_MNT/t $PBGRACE $PIGRACE
+> +# Reset the project quota space & inode limits
+> +setquota -P $qa_user 0 0 0 0 $SCRATCH_MNT
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/generic/600.out b/tests/generic/600.out
+> new file mode 100644
+> index 00000000..6e15eaeb
+> --- /dev/null
+> +++ b/tests/generic/600.out
+> @@ -0,0 +1,41 @@
+> +QA output created by 600
+> +### Set up different grace timers to each type of quota
+> +
+> +### Test user quota softlimit and grace time
+> +### Initialize files, and their mode and ownership
+> +--- Test block quota ---
+> +Write 225 blocks...
+> +Rewrite 250 blocks plus 1 byte, over the block softlimit...
+> +Try to write 1 one more block after grace...
+> +pwrite: Disk quota exceeded
+> +--- Test inode quota ---
+> +Create 2 more files, over the inode softlimit...
+> +Try to create one more inode after grace...
+> +touch: cannot touch 'SCRATCH_MNT/file5': Disk quota exceeded
+> +### Remove all files
+> +
+> +### Test group quota softlimit and grace time
+> +### Initialize files, and their mode and ownership
+> +--- Test block quota ---
+> +Write 225 blocks...
+> +Rewrite 250 blocks plus 1 byte, over the block softlimit...
+> +Try to write 1 one more block after grace...
+> +pwrite: Disk quota exceeded
+> +--- Test inode quota ---
+> +Create 2 more files, over the inode softlimit...
+> +Try to create one more inode after grace...
+> +touch: cannot touch 'SCRATCH_MNT/file5': Disk quota exceeded
+> +### Remove all files
+> +
+> +### Test project quota softlimit and grace time
+> +### Initialize files, and their mode and ownership
+> +--- Test block quota ---
+> +Write 225 blocks...
+> +Rewrite 250 blocks plus 1 byte, over the block softlimit...
+> +Try to write 1 one more block after grace...
+> +pwrite: Disk quota exceeded
+> +--- Test inode quota ---
+> +Create 2 more files, over the inode softlimit...
+> +Try to create one more inode after grace...
+> +touch: cannot touch 'SCRATCH_MNT/t/file5': Disk quota exceeded
+> +### Remove all files
