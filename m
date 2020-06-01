@@ -2,434 +2,107 @@ Return-Path: <SRS0=lb/K=7O=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F14B4C433E0
-	for <linux-fstests@archiver.kernel.org>; Mon,  1 Jun 2020 13:48:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1BA51C433DF
+	for <linux-fstests@archiver.kernel.org>; Mon,  1 Jun 2020 14:36:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AFCDD2068D
-	for <linux-fstests@archiver.kernel.org>; Mon,  1 Jun 2020 13:48:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E11802074B
+	for <linux-fstests@archiver.kernel.org>; Mon,  1 Jun 2020 14:36:40 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="GAdRdQZG"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="iHcYPnne"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726073AbgFANs2 (ORCPT
+        id S1726124AbgFAOgk (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 1 Jun 2020 09:48:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53880 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725976AbgFANs2 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 1 Jun 2020 09:48:28 -0400
-Received: from mail-vk1-xa43.google.com (mail-vk1-xa43.google.com [IPv6:2607:f8b0:4864:20::a43])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C17B8C05BD43;
-        Mon,  1 Jun 2020 06:48:26 -0700 (PDT)
-Received: by mail-vk1-xa43.google.com with SMTP id e1so9092vkd.1;
-        Mon, 01 Jun 2020 06:48:26 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:reply-to:from:date:message-id
-         :subject:to:cc:content-transfer-encoding;
-        bh=hsZFG2Pc7Y3pV9a/fbGgb3+JRht8JuSB85nLZin/uUQ=;
-        b=GAdRdQZG5Z+DHxlvZRCHYnCU1KnKoofLXW681gYwt4mVM8n4iLjUo7CDiI2heUDkA6
-         xCZzrYH/hXXZnEnEzqJ/VOv3+kYI5JosBe4hePZpKtlwp9P82b+RRoojAMj2fXmVRmzl
-         iPKFQIVusMtCeT+lA2lhr4J4s4qlD4k0AcPQsKAZ7Ug5qO3euPemsPg2fMRS4IvwNMs9
-         PuKVOgOqgxB36WiVDrDDYggvt6B69B8P2/WN2EqmA7+ZTBMam9Tg5WIQ1z1R/q6LcZFS
-         6XFBqRk2luD/gNNNLaJQvPAbjkZRs+ibt/GyXZXn6G+KppFmoZxdjglnAAmLLHe8ZCbj
-         cqfw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:reply-to
-         :from:date:message-id:subject:to:cc:content-transfer-encoding;
-        bh=hsZFG2Pc7Y3pV9a/fbGgb3+JRht8JuSB85nLZin/uUQ=;
-        b=tDfIdjEJpj119hsaDZ+4uWjedHXOeeOSiEIQmhQtm88m6/Wl/+sJTLziVbx0jrmmM6
-         q1p9hvJuW0kth+mk3xMMpgRjtgtAilAyXL1LghdwCcFCU7CXIy48j1mRweZJLdmpaGdJ
-         vqJG8pOWhfXNbJL9xLJEiPXaNQRND2yL8m3YwwFuxIR+iitdCQXCnBNa8/APf9MJQ/q3
-         FUMHzNhvFMWdCJLzUOYVt1p3NvcjOXhpfmWOAQOPFbCvDkewA08yyKITQbaYCFiZXQW3
-         TGm2wqn85Ef09ZTWVbpE1Oc630ZVrpnQkkLjES0O7BNiwTX+XaBzOAjVs5JzrMsquxc7
-         z1Yg==
-X-Gm-Message-State: AOAM5305WUm2krBf/4TV4Z5qq/8rpqdAPt6ak3wG1L/ii/IOqPGTlr92
-        XA+blBdy6w6JTZLIN08HKq1vdCsw8Z/vyObcksjipg==
-X-Google-Smtp-Source: ABdhPJzbewlGC4UG9fkDY9KYaXUsMkpwYO85ktvkFRDJRBz1CmJoti/ibKnYS7nrF0LujdFYoj9uLXSR2YeTpEbfdPM=
-X-Received: by 2002:a1f:ae51:: with SMTP id x78mr14073016vke.24.1591019305687;
- Mon, 01 Jun 2020 06:48:25 -0700 (PDT)
+        Mon, 1 Jun 2020 10:36:40 -0400
+Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:43236 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726017AbgFAOgk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 1 Jun 2020 10:36:40 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1591022199;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=uv7AaPwWs8EdPhW2HxHx+aAutiasF6EyoQAK7Tq3G9I=;
+        b=iHcYPnneqb0LIcixWxxK7C82jOJoqzJLMVspKOCyD/2e9g+/yG3nHxZ7ZEi6E6Ez4Cmnqp
+        Xhmkd0xLx5HRJYHjtzJrmGwJ+Wx/UcAvjh960H4BjmwGt18u4Qj04iUhIVxaJhnNJpoC+W
+        g5bGX7BpqkwxuymuHuln7/fdyvYxVNw=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-492-8xidFskNM8Ok98BvM_nhzQ-1; Mon, 01 Jun 2020 10:36:37 -0400
+X-MC-Unique: 8xidFskNM8Ok98BvM_nhzQ-1
+Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id A63128005AA;
+        Mon,  1 Jun 2020 14:36:36 +0000 (UTC)
+Received: from [IPv6:::1] (ovpn04.gateway.prod.ext.phx2.redhat.com [10.5.9.4])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id 28A605D9DD;
+        Mon,  1 Jun 2020 14:36:36 +0000 (UTC)
+Subject: Re: [PATCH 2/4] generic: test per-type quota softlimit enforcement
+ timeout
+To:     Eryu Guan <guan@eryu.me>, linux-xfs <linux-xfs@vger.kernel.org>,
+        fstests <fstests@vger.kernel.org>
+References: <ea649599-f8a9-deb9-726e-329939befade@redhat.com>
+ <9c9a63f3-13ab-d5b6-923c-4ea684b6b2f8@redhat.com>
+ <7102e1e3-bee6-7aa2-dce6-c0e7e0ce2983@redhat.com>
+ <20200531161517.GC3363@desktop>
+ <20200601124844.GI1938@dhcp-12-102.nay.redhat.com>
+From:   Eric Sandeen <sandeen@redhat.com>
+Message-ID: <7d3fcdc7-8c00-8218-60e8-9d35c7f0bf1b@redhat.com>
+Date:   Mon, 1 Jun 2020 09:36:35 -0500
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:68.0)
+ Gecko/20100101 Thunderbird/68.8.1
 MIME-Version: 1.0
-References: <20200508195548.25429-1-marcos@mpdesouza.com> <CAL3q7H5Xnk6Ds9inLY7xOeT_knq3ySghrYeXQk2z-nQkyr712Q@mail.gmail.com>
-In-Reply-To: <CAL3q7H5Xnk6Ds9inLY7xOeT_knq3ySghrYeXQk2z-nQkyr712Q@mail.gmail.com>
-Reply-To: fdmanana@gmail.com
-From:   Filipe Manana <fdmanana@gmail.com>
-Date:   Mon, 1 Jun 2020 14:48:14 +0100
-Message-ID: <CAL3q7H61dS6GQh29vL-Pq+jaDLA-z3dwAkXkBdOgiW2XYgB6PQ@mail.gmail.com>
-Subject: Re: [PATCH] btrfs: test if the capability is kept on incremental send
-To:     Marcos Paulo de Souza <marcos@mpdesouza.com>
-Cc:     David Sterba <dsterba@suse.com>,
-        linux-btrfs <linux-btrfs@vger.kernel.org>,
-        Qu Wenruo <wqu@suse.com>, fstests <fstests@vger.kernel.org>,
-        Marcos Paulo de Souza <mpdesouza@suse.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+In-Reply-To: <20200601124844.GI1938@dhcp-12-102.nay.redhat.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, May 11, 2020 at 12:52 PM Filipe Manana <fdmanana@gmail.com> wrote:
->
-> On Fri, May 8, 2020 at 9:14 PM Marcos Paulo de Souza
-> <marcos@mpdesouza.com> wrote:
-> >
-> > From: Marcos Paulo de Souza <mpdesouza@suse.com>
-> >
-> > There is a situation where the incremental send can drop the capability
-> > from the receiving side. If you have a file that changed the group, but
-> > the capability was the same of before the group changed, the current
-> > kernel code will only emit a chown, since the capability is the same.
-> >
-> > The steps bellow can reproduce the problem.
-> >
-> > $ mount /dev/sda fs1
-> > $ mount /dev/sdb fs2
-> >
-> > $ touch fs1/foo.bar
-> > $ setcap cap_sys_nice+ep fs1/foo.bar
-> > $ btrfs subvol snap -r fs1 fs1/snap_init
-> > $ btrfs send fs1/snap_init | btrfs receive fs2
-> >
-> > $ chgrp adm fs1/foo.bar
-> > $ setcap cap_sys_nice+ep fs1/foo.bar
-> >
-> > $ btrfs subvol snap -r fs1 fs1/snap_complete
-> > $ btrfs subvol snap -r fs1 fs1/snap_incremental
-> >
-> > $ btrfs send fs1/snap_complete | btrfs receive fs2
-> > $ btrfs send -p fs1/snap_init fs1/snap_incremental | btrfs receive fs2
->
-> It's redundant to put here the steps to trigger the problem, that's
-> what the test does.
->
-> You just want to say this test exercises full send and incremental
-> send operations for cases where files have capabilities, to verify the
-> capabilities aren't lost.
->
-> >
-> > At this point, a chown was emitted by "btrfs send" since only the group
-> > was changed. This makes the cap_sys_nice capability to be dropped from
-> > fs2/snap_incremental/foo.bar
->
-> Explaining in a changelog for a test case why exactly the bug happens
-> is out of scope.
-> We just want to know what bug are we testing for.
->
-> The gory details about why the bug happens usually go the in the
-> changelog of the patch that fixes btrfs.
->
-> >
-> > This test fails on current kernel, the fix was submitted to the btrfs
-> > mailing list titled:
-> >
-> > "btrfs: send: Emit file capabilities after chown"
-> >
-> > Signed-off-by: Marcos Paulo de Souza <mpdesouza@suse.com>
-> > ---
-> >  tests/btrfs/211     | 153 ++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/btrfs/211.out |   6 ++
-> >  tests/btrfs/group   |   1 +
-> >  3 files changed, 160 insertions(+)
-> >  create mode 100755 tests/btrfs/211
-> >  create mode 100644 tests/btrfs/211.out
-> >
-> > diff --git a/tests/btrfs/211 b/tests/btrfs/211
-> > new file mode 100755
-> > index 00000000..e9aeaef3
-> > --- /dev/null
-> > +++ b/tests/btrfs/211
-> > @@ -0,0 +1,153 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (C) 2020 SUSE Linux Products GmbH. All Rights Reserved.
-> > +#
-> > +# FS QA Test 211
-> > +#
-> > +# Test if the file capabilities aren't lost after full and incremental=
- send
-> > +#
-> > +seq=3D`basename $0`
-> > +seqres=3D$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +
-> > +here=3D`pwd`
-> > +tmp=3D/tmp/$$
-> > +status=3D1       # failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +. ./common/filter
-> > +
-> > +# remove previous $seqres.full before test
-> > +rm -f $seqres.full
-> > +
-> > +_supported_fs btrfs
-> > +_supported_os Linux
-> > +_require_scratch
-> > +_require_command "$SETCAP_PROG" setcap
-> > +_require_command "$GETCAP_PROG" getcap
-> > +
-> > +_cleanup()
-> > +{
-> > +       cd /
-> > +       rm -f $tmp.*
-> > +}
-> > +
-> > +_check_xattr()
->
-> Function names starting with '_' are usually reserved for functions
-> provided by fstests, global functions (like the ones in common/*).
-> Same comment applies to all the other function names.
->
-> Also, a better name would be "check_capabilities" - that they are
-> stored in a xattr it's irrelevant as we are using the getcap and
-> setcap utilities to read and set them, and not accessing xattrs
-> directly.
->
-> > +{
-> > +       local RET
-> > +       local FILE
-> > +       local CAP
-> > +       FILE=3D"$1"
-> > +       CAP=3D"$2"
->
-> Variables in uppercase are meant to be used for global variables. Same
-> comment applies to all the other functions.
->
-> > +       RET=3D$($GETCAP_PROG "$FILE")
-> > +       if [ -z "$RET" ]; then
-> > +               echo "$RET"
-> > +               _fail "missing capability in file $FILE"
->
-> This is a practice generally discouraged, we should avoid "_fail"
-> unless absolutely necessary.
-> The right approach here is just to "echo" the message. That's enough
-> to make the test fail as that message is not part of the golden
-> output.
-> Furthermore, not using _fail allows the test to proceed and
-> potentially find other problems.
->
-> > +       fi
-> > +       if [[ "$RET" !=3D *$CAP* ]]; then
-> > +               echo "$RET"
-> > +               echo "$CAP"
-> > +               _fail "Capability do not match. Output: $RET"
->
-> Capability -> Capabilities
->
-> > +       fi
-> > +}
-> > +
-> > +_setup()
-> > +{
-> > +       _scratch_mkfs >/dev/null
-> > +       _scratch_mount
-> > +
-> > +       FS1=3D"$SCRATCH_MNT/fs1"
-> > +       FS2=3D"$SCRATCH_MNT/fs2"
->
-> To make it easier to follow, perhaps declare this outside this
-> function, as they are used by the other functions.
->
-> > +
-> > +       $BTRFS_UTIL_PROG subvolume create "$FS1" > /dev/null
-> > +       $BTRFS_UTIL_PROG subvolume create "$FS2" > /dev/null
-> > +}
-> > +
-> > +_full_nocap_inc_withcap_send()
-> > +{
-> > +       _setup
-> > +
-> > +       # Test full send containing a file with no capability
-> > +       touch "$FS1/foo.bar"
-> > +       $BTRFS_UTIL_PROG subvolume snapshot -r "$FS1" "$FS1/snap_init" =
->/dev/null
-> > +       $BTRFS_UTIL_PROG send "$FS1/snap_init" -q | $BTRFS_UTIL_PROG re=
-ceive "$FS2" -q
-> > +       # ensure that we don't have caps set
-> > +       RET=3D$($GETCAP_PROG "$FS2/snap_init/foo.bar")
->
-> Should be declared local (and lower case name).
->
-> > +       if [ -n "$RET" ]; then
-> > +               _fail "File contain capabilities when it shouldn't"
->
-> echo and contain -> contains
->
-> > +       fi
-> > +
-> > +       # Test if  incremental send bring the newly added capability
-> > +       $SETCAP_PROG "cap_sys_ptrace+ep cap_sys_nice+ep" "$FS1/foo.bar"
-> > +       $BTRFS_UTIL_PROG subvolume snapshot -r "$FS1" "$FS1/snap_inc" >=
-/dev/null
-> > +       $BTRFS_UTIL_PROG send -p "$FS1/snap_init" "$FS1/snap_inc" -q | =
-\
-> > +                                       $BTRFS_UTIL_PROG receive "$FS2"=
- -q
-> > +       _check_xattr "$FS2/snap_inc/foo.bar" "cap_sys_ptrace,cap_sys_ni=
-ce+ep"
-> > +
-> > +       _scratch_unmount
-> > +}
-> > +
-> > +_roundtrip_send()
-> > +{
-> > +       local FILES
-> > +       local FS1
-> > +       local FS2
->
-> So FS1 and FS2 are declared local but never set. And they were
-> previously set as global by "_setup".
-> So those two declarations should be removed here.
->
-> > +
-> > +       # FILES should include foo.bar
-> > +       FILES=3D"$1"
-> > +
-> > +       _setup
-> > +
-> > +       # create files on fs1, must contain foo.bar
-> > +       for f in $FILES; do
-> > +               touch "$FS1/$f"
-> > +       done
-> > +
-> > +       # Test full send, checking if the receiving side keeps the capa=
-bility
->
-> capability -> capabilities (as the test sets 2)
->
-> > +       $SETCAP_PROG "cap_sys_ptrace+ep cap_sys_nice+ep" "$FS1/foo.bar"
-> > +       $BTRFS_UTIL_PROG subvolume snapshot -r "$FS1" "$FS1/snap_init" =
->/dev/null
-> > +       $BTRFS_UTIL_PROG send "$FS1/snap_init" -q | $BTRFS_UTIL_PROG re=
-ceive "$FS2" -q
-> > +       _check_xattr "$FS2/snap_init/foo.bar" "cap_sys_ptrace,cap_sys_n=
-ice+ep"
-> > +
-> > +       # Test incremental send with different owner/group but same cap=
-ability
->
-> capability -> capabilities (as the test sets 2)
->
-> > +       chgrp 100 "$FS1/foo.bar"
-> > +       $SETCAP_PROG "cap_sys_ptrace+ep cap_sys_nice+ep" "$FS1/foo.bar"
-> > +       $BTRFS_UTIL_PROG subvolume snapshot -r "$FS1" "$FS1/snap_inc" >=
-/dev/null
-> > +       _check_xattr "$FS1/snap_inc/foo.bar" "cap_sys_ptrace,cap_sys_ni=
-ce+ep"
-> > +       $BTRFS_UTIL_PROG send -p "$FS1/snap_init" "$FS1/snap_inc" -q | =
-\
-> > +                               $BTRFS_UTIL_PROG receive "$FS2" -q
-> > +       _check_xattr "$FS2/snap_inc/foo.bar" "cap_sys_ptrace,cap_sys_ni=
-ce+ep"
-> > +
-> > +       # Test capability after incremental send with different capabil=
-ity and group
->
-> capability -> capabilities (as the test sets 2)
->
-> > +       chgrp 0 "$FS1/foo.bar"
-> > +       $SETCAP_PROG "cap_sys_time+ep cap_syslog+ep" "$FS1/foo.bar"
-> > +       $BTRFS_UTIL_PROG subvolume snapshot -r "$FS1" "$FS1/snap_inc2" =
->/dev/null
-> > +       _check_xattr "$FS1/snap_inc2/foo.bar" "cap_sys_time,cap_syslog+=
-ep"
-> > +       $BTRFS_UTIL_PROG send -p "$FS1/snap_inc" "$FS1/snap_inc2" -q | =
-\
-> > +                               $BTRFS_UTIL_PROG receive "$FS2"  -q
-> > +       _check_xattr "$FS2/snap_inc2/foo.bar" "cap_sys_time,cap_syslog+=
-ep"
-> > +
-> > +       _scratch_unmount
-> > +}
-> > +
-> > +# real QA test starts here
-> > +
-> > +echo "Test full send + file without caps, then inc send bringing a new=
- cap"
->
-> inc -> incremental
->
-> Also, the abbreviation "caps" is used but in other messages (below)
-> the non-abbreviated name "capabilities" is used.
-> We should be consistent and use only one form.
->
-> > +_full_nocap_inc_withcap_send
-> > +
-> > +echo "Testing if foo.bar alone can keep it's capability"
->
-> it's -> its
-> capability -> capabilities (as the test sets 2)
->
-> > +_roundtrip_send "foo.bar"
-> > +
-> > +echo "Test foo.bar being the first item among other files"
-> > +_roundtrip_send "foo.bar foo.bax foo.baz"
-> > +
-> > +echo "Test foo.bar with objectid between two other files"
-> > +_roundtrip_send "foo1 foo.bar foo3"
-> > +
-> > +echo "Test foo.bar being the last item among other files"
-> > +_roundtrip_send "foo1 foo2 foo.bar"
-> > +
-> > +status=3D0
-> > +exit
-> > diff --git a/tests/btrfs/211.out b/tests/btrfs/211.out
-> > new file mode 100644
-> > index 00000000..fc50c923
-> > --- /dev/null
-> > +++ b/tests/btrfs/211.out
-> > @@ -0,0 +1,6 @@
-> > +QA output created by 211
-> > +Test full send + file without caps, then inc send bringing a new cap
-> > +Testing if foo.bar alone can keep it's capability
-> > +Test foo.bar being the first item among other files
-> > +Test foo.bar with objectid between two other files
-> > +Test foo.bar being the last item among other files
-> > diff --git a/tests/btrfs/group b/tests/btrfs/group
-> > index 9426fb17..437d4431 100644
-> > --- a/tests/btrfs/group
-> > +++ b/tests/btrfs/group
-> > @@ -213,3 +213,4 @@
-> >  208 auto quick subvol
-> >  209 auto quick log
-> >  210 auto quick qgroup snapshot
-> > +211 auto quick snapshot
->
-> Missing the 'send' group.
->
-> Other that is looks good and it works as expected (with patched and
-> unpatched btrfs)
-> Thanks.
+On 6/1/20 7:48 AM, Zorro Lang wrote:
+> On Mon, Jun 01, 2020 at 12:15:17AM +0800, Eryu Guan wrote:
+>> On Mon, May 18, 2020 at 03:00:11PM -0500, Eric Sandeen wrote:
+>>> From: Zorro Lang <zlang@redhat.com>
+>>>
+>>> Set different block & inode grace timers for user, group and project
+>>> quotas, then test softlimit enforcement timeout, make sure different
+>>> grace timers as expected.
+>>>
+>>> Signed-off-by: Zorro Lang <zlang@redhat.com>
+>>> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+>>> ---
+>>
+>> I saw the following failure as well on xfs (as Zorro mentioned in his v3
+>> patch)
+>>
+>>      -pwrite: Disk quota exceeded
+>>      +pwrite: No space left on device
+>>
+>> So this is an xfs issue that needs to be fixed? Just want to make sure
+>> the current expected test result.
+> 
+> Hmm.... I think I'd better to filter ENOSPC|EDQUOT. I can't be sure all
+> filesystems will return EDQUOT or ENOSPC 100%, especially for group and project
+> quota.
+> 
+> But I think Eric's trying to change a return value of XFS quota. I don't know the
+> current status.
 
-Marcos, ping. Anything I can help with?
-We should really have this test case in fstests.
+This test will need to be updated, it sounds like ext4 does not plan to switch
+to ENOSPC for project quota, so we'll need modify it to accept either one.
 
-Thanks.
+Zorro, didn't you do that for another test?  Maybe you can do the same here?
 
->
-> > --
-> > 2.25.1
-> >
->
->
-> --
-> Filipe David Manana,
->
-> =E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you'=
-re right.=E2=80=9D
+Thanks,
+-Eric
 
-
-
---=20
-Filipe David Manana,
-
-=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
- right.=E2=80=9D
