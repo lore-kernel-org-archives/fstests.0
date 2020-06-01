@@ -2,183 +2,166 @@ Return-Path: <SRS0=lb/K=7O=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 132BAC433DF
-	for <linux-fstests@archiver.kernel.org>; Mon,  1 Jun 2020 14:55:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6605DC433DF
+	for <linux-fstests@archiver.kernel.org>; Mon,  1 Jun 2020 16:42:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D722920738
-	for <linux-fstests@archiver.kernel.org>; Mon,  1 Jun 2020 14:55:25 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 33A9820663
+	for <linux-fstests@archiver.kernel.org>; Mon,  1 Jun 2020 16:42:08 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=mpdesouza.com header.i=@mpdesouza.com header.b="sQAZTGkA"
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="P8piLE2p"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726067AbgFAOzZ (ORCPT
+        id S1726067AbgFAQmI (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 1 Jun 2020 10:55:25 -0400
-Received: from gateway34.websitewelcome.com ([192.185.148.104]:47075 "EHLO
-        gateway34.websitewelcome.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726289AbgFAOzX (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 1 Jun 2020 10:55:23 -0400
-X-Greylist: delayed 1503 seconds by postgrey-1.27 at vger.kernel.org; Mon, 01 Jun 2020 10:55:21 EDT
-Received: from cm11.websitewelcome.com (cm11.websitewelcome.com [100.42.49.5])
-        by gateway34.websitewelcome.com (Postfix) with ESMTP id 1D57A128E54
-        for <fstests@vger.kernel.org>; Mon,  1 Jun 2020 09:05:57 -0500 (CDT)
-Received: from br540.hostgator.com.br ([108.179.252.180])
-        by cmsmtp with SMTP
-        id fl4ejRzrOSl8qfl4fjgYig; Mon, 01 Jun 2020 09:05:57 -0500
-X-Authority-Reason: nr=8
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=mpdesouza.com; s=default; h=Content-Transfer-Encoding:MIME-Version:
-        Content-Type:References:In-Reply-To:Date:Cc:To:From:Subject:Message-ID:Sender
-        :Reply-To:Content-ID:Content-Description:Resent-Date:Resent-From:
-        Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:List-Id:List-Help:
-        List-Unsubscribe:List-Subscribe:List-Post:List-Owner:List-Archive;
-        bh=4ufNmWmduoR5QeCqDyN/mA4gfe/roRoquvKpGKWqw/M=; b=sQAZTGkA1zcnOq+HI7NMKzyC8f
-        1X3S/aRoNm6bjOTftXSIm833bU0FuVJw+AKZOMcv+MW7RJsS9zP+sGrjYxFVrFx94GoGsycdGcM5r
-        LhKSW96nUgPoI6Wpvto7KCuHapFZwHfX3uJE+xZBl1v0Z1h9IblTk93nfb44OnBhcuGctZEQw1pzi
-        udGyn3f6OInOQJELhlolvRyvQLoU60ODtQxisIiy2mz0wntsyYdphD86iFtatmzLSeFsmeNcO7hOA
-        GMmmaI7TW//OF2KpJblJuiV1ime4qN7EEODWvD6mr4iD+J51SlpMJavMR/9ZX2z2uC/ST9euFLhoN
-        YD+AetAg==;
-Received: from 179.187.207.6.dynamic.adsl.gvt.net.br ([179.187.207.6]:55406 helo=[192.168.0.172])
-        by br540.hostgator.com.br with esmtpsa  (TLS1.2) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-        (Exim 4.93)
-        (envelope-from <marcos@mpdesouza.com>)
-        id 1jfl4d-004Dn9-Ua; Mon, 01 Jun 2020 11:05:56 -0300
-Message-ID: <ecf0925d65d0ac36f36b19fb74dc72a80ae0a698.camel@mpdesouza.com>
-Subject: Re: [PATCH] btrfs: test if the capability is kept on incremental
- send
-From:   Marcos Paulo de Souza <marcos@mpdesouza.com>
-To:     fdmanana@gmail.com
-Cc:     David Sterba <dsterba@suse.com>,
-        linux-btrfs <linux-btrfs@vger.kernel.org>,
-        Qu Wenruo <wqu@suse.com>, fstests <fstests@vger.kernel.org>,
-        Marcos Paulo de Souza <mpdesouza@suse.com>
-Date:   Mon, 01 Jun 2020 11:09:25 -0300
-In-Reply-To: <CAL3q7H61dS6GQh29vL-Pq+jaDLA-z3dwAkXkBdOgiW2XYgB6PQ@mail.gmail.com>
-References: <20200508195548.25429-1-marcos@mpdesouza.com>
-         <CAL3q7H5Xnk6Ds9inLY7xOeT_knq3ySghrYeXQk2z-nQkyr712Q@mail.gmail.com>
-         <CAL3q7H61dS6GQh29vL-Pq+jaDLA-z3dwAkXkBdOgiW2XYgB6PQ@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"
-User-Agent: Evolution 3.36.2 
+        Mon, 1 Jun 2020 12:42:08 -0400
+Received: from userp2130.oracle.com ([156.151.31.86]:37886 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726017AbgFAQmH (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 1 Jun 2020 12:42:07 -0400
+Received: from pps.filterd (userp2130.oracle.com [127.0.0.1])
+        by userp2130.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 051Gg0fA160918;
+        Mon, 1 Jun 2020 16:42:00 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to :
+ subject : message-id : references : mime-version : content-type :
+ in-reply-to; s=corp-2020-01-29;
+ bh=DyrtrBTFj9vQS1OvV1YrokVHnbH/hihhZQkhFsnTNWk=;
+ b=P8piLE2p6pOli5FVOlnPS5w4TOiC7P3Fn6QjWHPAmyLCBuct/W3N/c0Lgngs9Czsvkw6
+ uI5TqFdt3m54R5uk7K/pVaHYP+WD5L7ZKmmEE0H9vhiFQV9v3dwsssAuzkNitmoUJxZz
+ fDxp/XmUOPQS80R2j1nnJKFMs917YjPXt/WyneqCVlaD53Pj3g11RSuu0OmesBiho6bO
+ 48mRbgzS88YUctNOkD5ibl/q0Oah0qFcrEPiggfElzli01v+aHIQCIRxqTM/uI1ASUU4
+ xNQRVaiOcPcEGR5s7VCUzkjZcxhwzMc8LslE/mAzb+/gi5nUYsyVItkjQi4xr2zZrpzF jA== 
+Received: from userp3030.oracle.com (userp3030.oracle.com [156.151.31.80])
+        by userp2130.oracle.com with ESMTP id 31bewqqsuw-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Mon, 01 Jun 2020 16:42:00 +0000
+Received: from pps.filterd (userp3030.oracle.com [127.0.0.1])
+        by userp3030.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 051GdB1r169767;
+        Mon, 1 Jun 2020 16:40:00 GMT
+Received: from aserv0121.oracle.com (aserv0121.oracle.com [141.146.126.235])
+        by userp3030.oracle.com with ESMTP id 31c1dvsw3p-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Mon, 01 Jun 2020 16:40:00 +0000
+Received: from abhmp0010.oracle.com (abhmp0010.oracle.com [141.146.116.16])
+        by aserv0121.oracle.com (8.14.4/8.13.8) with ESMTP id 051Gdw73000658;
+        Mon, 1 Jun 2020 16:39:59 GMT
+Received: from localhost (/67.169.218.210)
+        by default (Oracle Beehive Gateway v4.0)
+        with ESMTP ; Mon, 01 Jun 2020 09:39:57 -0700
+Date:   Mon, 1 Jun 2020 09:39:57 -0700
+From:   "Darrick J. Wong" <darrick.wong@oracle.com>
+To:     Eryu Guan <guan@eryu.me>, Eric Sandeen <sandeen@redhat.com>,
+        linux-xfs <linux-xfs@vger.kernel.org>,
+        fstests <fstests@vger.kernel.org>
+Subject: Re: [PATCH 2/4] generic: test per-type quota softlimit enforcement
+ timeout
+Message-ID: <20200601163957.GX8230@magnolia>
+References: <ea649599-f8a9-deb9-726e-329939befade@redhat.com>
+ <9c9a63f3-13ab-d5b6-923c-4ea684b6b2f8@redhat.com>
+ <7102e1e3-bee6-7aa2-dce6-c0e7e0ce2983@redhat.com>
+ <20200531161517.GC3363@desktop>
+ <20200601124844.GI1938@dhcp-12-102.nay.redhat.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-AntiAbuse: This header was added to track abuse, please include it with any abuse report
-X-AntiAbuse: Primary Hostname - br540.hostgator.com.br
-X-AntiAbuse: Original Domain - vger.kernel.org
-X-AntiAbuse: Originator/Caller UID/GID - [47 12] / [47 12]
-X-AntiAbuse: Sender Address Domain - mpdesouza.com
-X-BWhitelist: no
-X-Source-IP: 179.187.207.6
-X-Source-L: No
-X-Exim-ID: 1jfl4d-004Dn9-Ua
-X-Source: 
-X-Source-Args: 
-X-Source-Dir: 
-X-Source-Sender: 179.187.207.6.dynamic.adsl.gvt.net.br ([192.168.0.172]) [179.187.207.6]:55406
-X-Source-Auth: marcos@mpdesouza.com
-X-Email-Count: 2
-X-Source-Cap: bXBkZXNvNTM7bXBkZXNvNTM7YnI1NDAuaG9zdGdhdG9yLmNvbS5icg==
-X-Local-Domain: yes
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20200601124844.GI1938@dhcp-12-102.nay.redhat.com>
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9639 signatures=668686
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 phishscore=0 mlxlogscore=999
+ spamscore=0 bulkscore=0 adultscore=0 suspectscore=1 mlxscore=0
+ malwarescore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2004280000 definitions=main-2006010122
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9639 signatures=668686
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 priorityscore=1501 bulkscore=0
+ phishscore=0 suspectscore=1 impostorscore=0 cotscore=-2147483648
+ lowpriorityscore=0 mlxscore=0 adultscore=0 spamscore=0 mlxlogscore=999
+ malwarescore=0 clxscore=1015 classifier=spam adjust=0 reason=mlx
+ scancount=1 engine=8.12.0-2004280000 definitions=main-2006010123
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, 2020-06-01 at 14:48 +0100, Filipe Manana wrote:
-> On Mon, May 11, 2020 at 12:52 PM Filipe Manana <fdmanana@gmail.com>
-> wrote:
-> >
-> > On Fri, May 8, 2020 at 9:14 PM Marcos Paulo de Souza
-> > <marcos@mpdesouza.com> wrote:
-> > >
-> > > From: Marcos Paulo de Souza <mpdesouza@suse.com>
-> > >
-> > > There is a situation where the incremental send can drop the
-> capability
-> > > from the receiving side. If you have a file that changed the
-> group, but
-> > > the capability was the same of before the group changed, the
-> current
-> > > kernel code will only emit a chown, since the capability is the
-> same.
-> > >
-> > > The steps bellow can reproduce the problem.
-> > >
-> > > $ mount /dev/sda fs1
-> > > $ mount /dev/sdb fs2
-> > >
-> > > $ touch fs1/foo.bar
-> > > $ setcap cap_sys_nice+ep fs1/foo.bar
-> > > $ btrfs subvol snap -r fs1 fs1/snap_init
-> > > $ btrfs send fs1/snap_init | btrfs receive fs2
-> > >
-> > > $ chgrp adm fs1/foo.bar
-> > > $ setcap cap_sys_nice+ep fs1/foo.bar
-> > >
-> > > $ btrfs subvol snap -r fs1 fs1/snap_complete
-> > > $ btrfs subvol snap -r fs1 fs1/snap_incremental
-> > >
-> > > $ btrfs send fs1/snap_complete | btrfs receive fs2
-> > > $ btrfs send -p fs1/snap_init fs1/snap_incremental | btrfs
-> receive fs2
-> >
-> > It's redundant to put here the steps to trigger the problem, that's
-> > what the test does.
-> >
-> > You just want to say this test exercises full send and incremental
-> > send operations for cases where files have capabilities, to verify
-> the
-> > capabilities aren't lost.
-> >
-> > >
-> > > At this point, a chown was emitted by "btrfs send" since only the
-> group
-> > > was changed. This makes the cap_sys_nice capability to be dropped
-> from
-> > > fs2/snap_incremental/foo.bar
-> >
-> > Explaining in a changelog for a test case why exactly the bug
-> happens
-> > is out of scope.
-> > We just want to know what bug are we testing for.
-> >
-> > The gory details about why the bug happens usually go the in the
-> > changelog of the patch that fixes btrfs.
-> >
-> > >
-> > > This test fails on current kernel, the fix was submitted to the
-> btrfs
-> > > mailing list titled:
-> > >
-> > > "btrfs: send: Emit file capabilities after chown"
-> > >
-> > > Signed-off-by: Marcos Paulo de Souza <mpdesouza@suse.com>
+On Mon, Jun 01, 2020 at 08:48:44PM +0800, Zorro Lang wrote:
+> On Mon, Jun 01, 2020 at 12:15:17AM +0800, Eryu Guan wrote:
+> > On Mon, May 18, 2020 at 03:00:11PM -0500, Eric Sandeen wrote:
+> > > From: Zorro Lang <zlang@redhat.com>
+> > > 
+> > > Set different block & inode grace timers for user, group and project
+> > > quotas, then test softlimit enforcement timeout, make sure different
+> > > grace timers as expected.
+> > > 
+> > > Signed-off-by: Zorro Lang <zlang@redhat.com>
+> > > Signed-off-by: Eric Sandeen <sandeen@redhat.com>
 > > > ---
-> > >  tests/btrfs/211     | 153
-> ++++++++++++++++++++++++++++++++++++++++++++
-> > >  tests/btrfs/211.out |   6 ++
-> > >  tests/btrfs/group   |   1 +
-> > >  3 files changed, 160 insertions(+)
-> > >  create mode 100755 tests/btrfs/211
-> > >  create mode 100644 tests/btrfs/211.out
-> > >
-> > > diff --git a/tests/btrfs/211 b/tests/btrfs/211
+> > 
+> > I saw the following failure as well on xfs (as Zorro mentioned in his v3
+> > patch)
+> > 
+> >      -pwrite: Disk quota exceeded
+> >      +pwrite: No space left on device
+> > 
+> > So this is an xfs issue that needs to be fixed? Just want to make sure
+> > the current expected test result.
+> 
+> Hmm.... I think I'd better to filter ENOSPC|EDQUOT. I can't be sure all
+> filesystems will return EDQUOT or ENOSPC 100%, especially for group and project
+> quota.
+> 
+> But I think Eric's trying to change a return value of XFS quota. I don't know the
+> current status.
+
+Yeah, Eric fixed a few problems where a group quota overage would return
+ENOSPC instead of EDQUOT; and a few more problems where a project quota
+overage would return EDQUOT instead of ENOSPC.
+
+That'll be coming in the 5.8 merge, which I should get on...
+
+--D
+
+> Thanks,
+> Zorro
+> 
+> > 
+> > >  common/quota          |   4 +
+> > >  tests/generic/600     | 187 ++++++++++++++++++++++++++++++++++++++++++
+> > >  tests/generic/600.out |  41 +++++++++
+> > >  tests/generic/group   |   1 +
+> > >  4 files changed, 233 insertions(+)
+> > >  create mode 100755 tests/generic/600
+> > >  create mode 100644 tests/generic/600.out
+> > > 
+> > > diff --git a/common/quota b/common/quota
+> > > index 240e0bbc..1437d5f7 100644
+> > > --- a/common/quota
+> > > +++ b/common/quota
+> > > @@ -217,6 +217,10 @@ _qmount()
+> > >      if [ "$FSTYP" != "xfs" ]; then
+> > >          quotacheck -ug $SCRATCH_MNT >>$seqres.full 2>&1
+> > >          quotaon -ug $SCRATCH_MNT >>$seqres.full 2>&1
+> > > +        # try to turn on project quota if it's supported
+> > > +        if quotaon --help 2>&1 | grep -q '\-\-project'; then
+> > > +            quotaon --project $SCRATCH_MNT >>$seqres.full 2>&1
+> > > +        fi
+> > >      fi
+> > >      chmod ugo+rwx $SCRATCH_MNT
+> > >  }
+> > > diff --git a/tests/generic/600 b/tests/generic/600
 > > > new file mode 100755
-> > > index 00000000..e9aeaef3
+> > > index 00000000..03b4dcb3
 > > > --- /dev/null
-> > > +++ b/tests/btrfs/211
-> > > @@ -0,0 +1,153 @@
+> > > +++ b/tests/generic/600
+> > > @@ -0,0 +1,187 @@
 > > > +#! /bin/bash
 > > > +# SPDX-License-Identifier: GPL-2.0
-> > > +# Copyright (C) 2020 SUSE Linux Products GmbH. All Rights
-> Reserved.
+> > > +# Copyright (c) 2020 Red Hat, Inc.  All Rights Reserved.
 > > > +#
-> > > +# FS QA Test 211
+> > > +# FS QA Test No. 600
 > > > +#
-> > > +# Test if the file capabilities aren't lost after full and
-> incremental send
+> > > +# Test per-type(user, group and project) filesystem quota timers, make sure
+> > > +# enforcement
 > > > +#
 > > > +seq=`basename $0`
 > > > +seqres=$RESULT_DIR/$seq
@@ -186,291 +169,238 @@ On Mon, 2020-06-01 at 14:48 +0100, Filipe Manana wrote:
 > > > +
 > > > +here=`pwd`
 > > > +tmp=/tmp/$$
-> > > +status=1       # failure is the default!
+> > > +status=1	# failure is the default!
 > > > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > > +
+> > > +_cleanup()
+> > > +{
+> > > +	restore_project
+> > > +	cd /
+> > > +	rm -f $tmp.*
+> > > +}
 > > > +
 > > > +# get standard environment, filters and checks
 > > > +. ./common/rc
 > > > +. ./common/filter
+> > > +. ./common/quota
 > > > +
 > > > +# remove previous $seqres.full before test
 > > > +rm -f $seqres.full
 > > > +
-> > > +_supported_fs btrfs
-> > > +_supported_os Linux
-> > > +_require_scratch
-> > > +_require_command "$SETCAP_PROG" setcap
-> > > +_require_command "$GETCAP_PROG" getcap
-> > > +
-> > > +_cleanup()
+> > > +require_project()
 > > > +{
-> > > +       cd /
-> > > +       rm -f $tmp.*
+> > > +	rm -f $tmp.projects $tmp.projid
+> > > +	if [ -f /etc/projects ];then
+> > > +		cat /etc/projects > $tmp.projects
+> > > +	fi
+> > > +	if [ -f /etc/projid ];then
+> > > +		cat /etc/projid > $tmp.projid
+> > > +	fi
+> > > +
+> > > +	cat >/etc/projects <<EOF
+> > > +100:$SCRATCH_MNT/t
+> > > +EOF
+> > > +	cat >/etc/projid <<EOF
+> > > +$qa_user:100
+> > > +EOF
+> > > +	PROJECT_CHANGED=1
 > > > +}
 > > > +
-> > > +_check_xattr()
-> >
-> > Function names starting with '_' are usually reserved for functions
-> > provided by fstests, global functions (like the ones in common/*).
-> > Same comment applies to all the other function names.
-> >
-> > Also, a better name would be "check_capabilities" - that they are
-> > stored in a xattr it's irrelevant as we are using the getcap and
-> > setcap utilities to read and set them, and not accessing xattrs
-> > directly.
-> >
+> > > +restore_project()
 > > > +{
-> > > +       local RET
-> > > +       local FILE
-> > > +       local CAP
-> > > +       FILE="$1"
-> > > +       CAP="$2"
-> >
-> > Variables in uppercase are meant to be used for global variables.
-> Same
-> > comment applies to all the other functions.
-> >
-> > > +       RET=$($GETCAP_PROG "$FILE")
-> > > +       if [ -z "$RET" ]; then
-> > > +               echo "$RET"
-> > > +               _fail "missing capability in file $FILE"
-> >
-> > This is a practice generally discouraged, we should avoid "_fail"
-> > unless absolutely necessary.
-> > The right approach here is just to "echo" the message. That's
-> enough
-> > to make the test fail as that message is not part of the golden
-> > output.
-> > Furthermore, not using _fail allows the test to proceed and
-> > potentially find other problems.
-> >
-> > > +       fi
-> > > +       if [[ "$RET" != *$CAP* ]]; then
-> > > +               echo "$RET"
-> > > +               echo "$CAP"
-> > > +               _fail "Capability do not match. Output: $RET"
-> >
-> > Capability -> Capabilities
-> >
-> > > +       fi
+> > > +	if [ "$PROJECT_CHANGED" = "1" ];then
+> > > +		rm -f /etc/projects /etc/projid
+> > > +		if [ -f $tmp.projects ];then
+> > > +			cat $tmp.projects > /etc/projects
+> > > +		fi
+> > > +		if [ -f $tmp.projid ];then
+> > > +			cat $tmp.projid > /etc/projid
+> > > +		fi
+> > > +	fi
 > > > +}
 > > > +
-> > > +_setup()
+> > > +init_files()
 > > > +{
-> > > +       _scratch_mkfs >/dev/null
-> > > +       _scratch_mount
+> > > +	local dir=$1
 > > > +
-> > > +       FS1="$SCRATCH_MNT/fs1"
-> > > +       FS2="$SCRATCH_MNT/fs2"
-> >
-> > To make it easier to follow, perhaps declare this outside this
-> > function, as they are used by the other functions.
-> >
-> > > +
-> > > +       $BTRFS_UTIL_PROG subvolume create "$FS1" > /dev/null
-> > > +       $BTRFS_UTIL_PROG subvolume create "$FS2" > /dev/null
+> > > +	echo "### Initialize files, and their mode and ownership"
+> > > +	touch $dir/file{1,2} 2>/dev/null
+> > > +	chown $qa_user $dir/file{1,2} 2>/dev/null
+> > > +	chgrp $qa_user $dir/file{1,2} 2>/dev/null
+> > > +	chmod 777 $dir 2>/dev/null
 > > > +}
 > > > +
-> > > +_full_nocap_inc_withcap_send()
+> > > +cleanup_files()
 > > > +{
-> > > +       _setup
-> > > +
-> > > +       # Test full send containing a file with no capability
-> > > +       touch "$FS1/foo.bar"
-> > > +       $BTRFS_UTIL_PROG subvolume snapshot -r "$FS1"
-> "$FS1/snap_init" >/dev/null
-> > > +       $BTRFS_UTIL_PROG send "$FS1/snap_init" -q |
-> $BTRFS_UTIL_PROG receive "$FS2" -q
-> > > +       # ensure that we don't have caps set
-> > > +       RET=$($GETCAP_PROG "$FS2/snap_init/foo.bar")
-> >
-> > Should be declared local (and lower case name).
-> >
-> > > +       if [ -n "$RET" ]; then
-> > > +               _fail "File contain capabilities when it
-> shouldn't"
-> >
-> > echo and contain -> contains
-> >
-> > > +       fi
-> > > +
-> > > +       # Test if  incremental send bring the newly added
-> capability
-> > > +       $SETCAP_PROG "cap_sys_ptrace+ep cap_sys_nice+ep"
-> "$FS1/foo.bar"
-> > > +       $BTRFS_UTIL_PROG subvolume snapshot -r "$FS1"
-> "$FS1/snap_inc" >/dev/null
-> > > +       $BTRFS_UTIL_PROG send -p "$FS1/snap_init" "$FS1/snap_inc"
-> -q | \
-> > > +                                       $BTRFS_UTIL_PROG receive
-> "$FS2" -q
-> > > +       _check_xattr "$FS2/snap_inc/foo.bar"
-> "cap_sys_ptrace,cap_sys_nice+ep"
-> > > +
-> > > +       _scratch_unmount
+> > > +	echo "### Remove all files"
+> > > +	rm -f ${1}/file{1,2,3,4,5,6}
 > > > +}
 > > > +
-> > > +_roundtrip_send()
+> > > +test_grace()
 > > > +{
-> > > +       local FILES
-> > > +       local FS1
-> > > +       local FS2
-> >
-> > So FS1 and FS2 are declared local but never set. And they were
-> > previously set as global by "_setup".
-> > So those two declarations should be removed here.
-> >
+> > > +	local type=$1
+> > > +	local dir=$2
+> > > +	local bgrace=$3
+> > > +	local igrace=$4
 > > > +
-> > > +       # FILES should include foo.bar
-> > > +       FILES="$1"
-> > > +
-> > > +       _setup
-> > > +
-> > > +       # create files on fs1, must contain foo.bar
-> > > +       for f in $FILES; do
-> > > +               touch "$FS1/$f"
-> > > +       done
-> > > +
-> > > +       # Test full send, checking if the receiving side keeps
-> the capability
-> >
-> > capability -> capabilities (as the test sets 2)
-> >
-> > > +       $SETCAP_PROG "cap_sys_ptrace+ep cap_sys_nice+ep"
-> "$FS1/foo.bar"
-> > > +       $BTRFS_UTIL_PROG subvolume snapshot -r "$FS1"
-> "$FS1/snap_init" >/dev/null
-> > > +       $BTRFS_UTIL_PROG send "$FS1/snap_init" -q |
-> $BTRFS_UTIL_PROG receive "$FS2" -q
-> > > +       _check_xattr "$FS2/snap_init/foo.bar"
-> "cap_sys_ptrace,cap_sys_nice+ep"
-> > > +
-> > > +       # Test incremental send with different owner/group but
-> same capability
-> >
-> > capability -> capabilities (as the test sets 2)
-> >
-> > > +       chgrp 100 "$FS1/foo.bar"
-> > > +       $SETCAP_PROG "cap_sys_ptrace+ep cap_sys_nice+ep"
-> "$FS1/foo.bar"
-> > > +       $BTRFS_UTIL_PROG subvolume snapshot -r "$FS1"
-> "$FS1/snap_inc" >/dev/null
-> > > +       _check_xattr "$FS1/snap_inc/foo.bar"
-> "cap_sys_ptrace,cap_sys_nice+ep"
-> > > +       $BTRFS_UTIL_PROG send -p "$FS1/snap_init" "$FS1/snap_inc"
-> -q | \
-> > > +                               $BTRFS_UTIL_PROG receive "$FS2"
-> -q
-> > > +       _check_xattr "$FS2/snap_inc/foo.bar"
-> "cap_sys_ptrace,cap_sys_nice+ep"
-> > > +
-> > > +       # Test capability after incremental send with different
-> capability and group
-> >
-> > capability -> capabilities (as the test sets 2)
-> >
-> > > +       chgrp 0 "$FS1/foo.bar"
-> > > +       $SETCAP_PROG "cap_sys_time+ep cap_syslog+ep"
-> "$FS1/foo.bar"
-> > > +       $BTRFS_UTIL_PROG subvolume snapshot -r "$FS1"
-> "$FS1/snap_inc2" >/dev/null
-> > > +       _check_xattr "$FS1/snap_inc2/foo.bar"
-> "cap_sys_time,cap_syslog+ep"
-> > > +       $BTRFS_UTIL_PROG send -p "$FS1/snap_inc" "$FS1/snap_inc2"
-> -q | \
-> > > +                               $BTRFS_UTIL_PROG receive
-> "$FS2"  -q
-> > > +       _check_xattr "$FS2/snap_inc2/foo.bar"
-> "cap_sys_time,cap_syslog+ep"
-> > > +
-> > > +       _scratch_unmount
+> > > +	init_files $dir
+> > > +	echo "--- Test block quota ---"
+> > > +	# Firstly fit below block soft limit
+> > > +	echo "Write 225 blocks..."
+> > > +	su $qa_user -c "$XFS_IO_PROG -c 'pwrite 0 $((225 * $BLOCK_SIZE))' \
+> > > +		-c fsync $dir/file1" 2>&1 >>$seqres.full | \
+> > > +		_filter_xfs_io_error | tee -a $seqres.full
+> > > +	repquota -v -$type $SCRATCH_MNT | grep -v "^root" >>$seqres.full 2>&1
+> > > +	# Secondly overcome block soft limit
+> > > +	echo "Rewrite 250 blocks plus 1 byte, over the block softlimit..."
+> > > +	su $qa_user -c "$XFS_IO_PROG -c 'pwrite 0 $((250 * $BLOCK_SIZE + 1))' \
+> > > +		-c fsync $dir/file1" 2>&1 >>$seqres.full | \
+> > > +		_filter_xfs_io_error | tee -a $seqres.full
+> > > +	repquota -v -$type $SCRATCH_MNT | grep -v "^root" >>$seqres.full 2>&1
+> > > +	# Reset grace time here, make below grace time test more accurate
+> > > +	setquota -$type $qa_user -T $bgrace $igrace $SCRATCH_MNT 2>/dev/null
+> > > +	# Now sleep enough grace time and check that softlimit got enforced
+> > > +	sleep $((bgrace + 1))
+> > > +	echo "Try to write 1 one more block after grace..."
+> > > +	su $qa_user -c "$XFS_IO_PROG -c 'truncate 0' -c 'pwrite 0 $BLOCK_SIZE' \
+> > > +		$dir/file2" 2>&1 >>$seqres.full | _filter_xfs_io_error | \
+> > > +		tee -a $seqres.full
+> > > +	repquota -v -$type $SCRATCH_MNT | grep -v "^root" >>$seqres.full 2>&1
+> > > +	echo "--- Test inode quota ---"
+> > > +	# And now the softlimit test for inodes
+> > > +	# First reset space limits so that we don't have problems with
+> > > +	# space reservations on XFS
+> > > +	setquota -$type $qa_user 0 0 3 100 $SCRATCH_MNT
+> > > +	echo "Create 2 more files, over the inode softlimit..."
+> > > +	su $qa_user -c "touch $dir/file3 $dir/file4" 2>&1 >>$seqres.full | \
+> > > +		_filter_scratch | tee -a $seqres.full
+> > > +	repquota -v -$type $SCRATCH_MNT  | grep -v "^root" >>$seqres.full 2>&1
+> > > +	# Reset grace time here, make below grace time test more accurate
+> > > +	setquota -$type $qa_user -T $bgrace $igrace $SCRATCH_MNT 2>/dev/null
+> > > +	# Wait and check grace time enforcement
+> > > +	sleep $((igrace+1))
+> > > +	echo "Try to create one more inode after grace..."
+> > > +	su $qa_user -c "touch $dir/file5" 2>&1 >>$seqres.full |
+> > > +		_filter_scratch | tee -a $seqres.full
+> > > +	repquota -v -$type $SCRATCH_MNT  | grep -v "^root" >>$seqres.full 2>&1
+> > > +	cleanup_files $dir
 > > > +}
 > > > +
 > > > +# real QA test starts here
+> > > +_supported_fs generic
+> > > +_supported_os Linux
+> > > +_require_scratch
+> > > +_require_setquota_project
+> > > +_require_quota
+> > > +_require_user
+> > > +_require_group
+> > 
+> > Hmm, also needs _require_scratch_xfs_crc when FSTYP is xfs, otherwise v4
+> > xfs fails as
+> > 
+> > +mount: /mnt/scratch: wrong fs type, bad option, bad superblock on /dev/mapper/testvg-lv2, missing codepage or helper program, or other error.
+> > +qmount failed
+> > 
+> > and dmesg says
+> > 
+> > XFS (dm-2): Super block does not support project and group quota together
+> > 
+> > Thanks,
+> > Eryu
+> > 
 > > > +
-> > > +echo "Test full send + file without caps, then inc send bringing
-> a new cap"
-> >
-> > inc -> incremental
-> >
-> > Also, the abbreviation "caps" is used but in other messages (below)
-> > the non-abbreviated name "capabilities" is used.
-> > We should be consistent and use only one form.
-> >
-> > > +_full_nocap_inc_withcap_send
+> > > +_scratch_mkfs >$seqres.full 2>&1
+> > > +_scratch_enable_pquota
+> > > +_qmount_option "usrquota,grpquota,prjquota"
+> > > +_qmount
+> > > +_require_prjquota $SCRATCH_DEV
+> > > +BLOCK_SIZE=$(_get_file_block_size $SCRATCH_MNT)
+> > > +rm -rf $SCRATCH_MNT/t
+> > > +mkdir $SCRATCH_MNT/t
+> > > +$XFS_IO_PROG -r -c "chproj 100" -c "chattr +P" $SCRATCH_MNT/t
+> > > +require_project
 > > > +
-> > > +echo "Testing if foo.bar alone can keep it's capability"
-> >
-> > it's -> its
-> > capability -> capabilities (as the test sets 2)
-> >
-> > > +_roundtrip_send "foo.bar"
+> > > +echo "### Set up different grace timers to each type of quota"
+> > > +UBGRACE=12
+> > > +UIGRACE=10
+> > > +GBGRACE=4
+> > > +GIGRACE=2
+> > > +PBGRACE=8
+> > > +PIGRACE=6
 > > > +
-> > > +echo "Test foo.bar being the first item among other files"
-> > > +_roundtrip_send "foo.bar foo.bax foo.baz"
+> > > +setquota -u $qa_user $((250 * $BLOCK_SIZE / 1024)) \
+> > > +	$((1000 * $BLOCK_SIZE / 1024)) 3 100 $SCRATCH_MNT
+> > > +setquota -u -t $UBGRACE $UIGRACE $SCRATCH_MNT
+> > > +echo; echo "### Test user quota softlimit and grace time"
+> > > +test_grace u $SCRATCH_MNT $UBGRACE $UIGRACE
+> > > +# Reset the user quota space & inode limits, avoid it affect later test
+> > > +setquota -u $qa_user 0 0 0 0 $SCRATCH_MNT
 > > > +
-> > > +echo "Test foo.bar with objectid between two other files"
-> > > +_roundtrip_send "foo1 foo.bar foo3"
+> > > +setquota -g $qa_user $((250 * $BLOCK_SIZE / 1024)) \
+> > > +	$((1000 * $BLOCK_SIZE / 1024)) 3 100 $SCRATCH_MNT
+> > > +setquota -g -t $GBGRACE $GIGRACE $SCRATCH_MNT
+> > > +echo; echo "### Test group quota softlimit and grace time"
+> > > +test_grace g $SCRATCH_MNT $GBGRACE $GIGRACE
+> > > +# Reset the group quota space & inode limits, avoid it affect later test
+> > > +setquota -g $qa_user 0 0 0 0 $SCRATCH_MNT
 > > > +
-> > > +echo "Test foo.bar being the last item among other files"
-> > > +_roundtrip_send "foo1 foo2 foo.bar"
+> > > +setquota -P $qa_user $((250 * $BLOCK_SIZE / 1024)) \
+> > > +	$((1000 * $BLOCK_SIZE / 1024)) 3 100 $SCRATCH_MNT
+> > > +setquota -P -t $PBGRACE $PIGRACE $SCRATCH_MNT
+> > > +echo; echo "### Test project quota softlimit and grace time"
+> > > +test_grace P $SCRATCH_MNT/t $PBGRACE $PIGRACE
+> > > +# Reset the project quota space & inode limits
+> > > +setquota -P $qa_user 0 0 0 0 $SCRATCH_MNT
 > > > +
+> > > +# success, all done
 > > > +status=0
 > > > +exit
-> > > diff --git a/tests/btrfs/211.out b/tests/btrfs/211.out
+> > > diff --git a/tests/generic/600.out b/tests/generic/600.out
 > > > new file mode 100644
-> > > index 00000000..fc50c923
+> > > index 00000000..6e15eaeb
 > > > --- /dev/null
-> > > +++ b/tests/btrfs/211.out
-> > > @@ -0,0 +1,6 @@
-> > > +QA output created by 211
-> > > +Test full send + file without caps, then inc send bringing a new
-> cap
-> > > +Testing if foo.bar alone can keep it's capability
-> > > +Test foo.bar being the first item among other files
-> > > +Test foo.bar with objectid between two other files
-> > > +Test foo.bar being the last item among other files
-> > > diff --git a/tests/btrfs/group b/tests/btrfs/group
-> > > index 9426fb17..437d4431 100644
-> > > --- a/tests/btrfs/group
-> > > +++ b/tests/btrfs/group
-> > > @@ -213,3 +213,4 @@
-> > >  208 auto quick subvol
-> > >  209 auto quick log
-> > >  210 auto quick qgroup snapshot
-> > > +211 auto quick snapshot
-> >
-> > Missing the 'send' group.
-> >
-> > Other that is looks good and it works as expected (with patched and
-> > unpatched btrfs)
-> > Thanks.
+> > > +++ b/tests/generic/600.out
+> > > @@ -0,0 +1,41 @@
+> > > +QA output created by 600
+> > > +### Set up different grace timers to each type of quota
+> > > +
+> > > +### Test user quota softlimit and grace time
+> > > +### Initialize files, and their mode and ownership
+> > > +--- Test block quota ---
+> > > +Write 225 blocks...
+> > > +Rewrite 250 blocks plus 1 byte, over the block softlimit...
+> > > +Try to write 1 one more block after grace...
+> > > +pwrite: Disk quota exceeded
+> > > +--- Test inode quota ---
+> > > +Create 2 more files, over the inode softlimit...
+> > > +Try to create one more inode after grace...
+> > > +touch: cannot touch 'SCRATCH_MNT/file5': Disk quota exceeded
+> > > +### Remove all files
+> > > +
+> > > +### Test group quota softlimit and grace time
+> > > +### Initialize files, and their mode and ownership
+> > > +--- Test block quota ---
+> > > +Write 225 blocks...
+> > > +Rewrite 250 blocks plus 1 byte, over the block softlimit...
+> > > +Try to write 1 one more block after grace...
+> > > +pwrite: Disk quota exceeded
+> > > +--- Test inode quota ---
+> > > +Create 2 more files, over the inode softlimit...
+> > > +Try to create one more inode after grace...
+> > > +touch: cannot touch 'SCRATCH_MNT/file5': Disk quota exceeded
+> > > +### Remove all files
+> > > +
+> > > +### Test project quota softlimit and grace time
+> > > +### Initialize files, and their mode and ownership
+> > > +--- Test block quota ---
+> > > +Write 225 blocks...
+> > > +Rewrite 250 blocks plus 1 byte, over the block softlimit...
+> > > +Try to write 1 one more block after grace...
+> > > +pwrite: Disk quota exceeded
+> > > +--- Test inode quota ---
+> > > +Create 2 more files, over the inode softlimit...
+> > > +Try to create one more inode after grace...
+> > > +touch: cannot touch 'SCRATCH_MNT/t/file5': Disk quota exceeded
+> > > +### Remove all files
+> > 
 > 
-> Marcos, ping. Anything I can help with?
-
-Sorry, the test was in my radar but somehow I forgot about it. I hope
-to send a new version later today, addressing all your comments.
-
-> We should really have this test case in fstests.
-
-Sure, I agree.
-
->  
-
-> 
-> Thanks.
-> 
-> >
-> > > --
-> > > 2.25.1
-> > >
-> >
-> >
-> > --
-> > Filipe David Manana,
-> >
-> > “Whether you think you can, or you think you can't — you're right.”
-> 
-> 
-> 
-
