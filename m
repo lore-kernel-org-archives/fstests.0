@@ -2,139 +2,150 @@ Return-Path: <SRS0=iucR=7Q=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C06A2C433E0
-	for <linux-fstests@archiver.kernel.org>; Wed,  3 Jun 2020 10:21:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C74B0C433E0
+	for <linux-fstests@archiver.kernel.org>; Wed,  3 Jun 2020 14:07:49 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 98D5720679
-	for <linux-fstests@archiver.kernel.org>; Wed,  3 Jun 2020 10:21:19 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="lBE3ZZob"
+	by mail.kernel.org (Postfix) with ESMTP id AA96220679
+	for <linux-fstests@archiver.kernel.org>; Wed,  3 Jun 2020 14:07:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725881AbgFCKVT (ORCPT
+        id S1725920AbgFCOHt (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 3 Jun 2020 06:21:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45994 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726123AbgFCKVO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 3 Jun 2020 06:21:14 -0400
-Received: from mail-pl1-x62c.google.com (mail-pl1-x62c.google.com [IPv6:2607:f8b0:4864:20::62c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E0042C08C5C0
-        for <fstests@vger.kernel.org>; Wed,  3 Jun 2020 03:21:13 -0700 (PDT)
-Received: by mail-pl1-x62c.google.com with SMTP id q16so675872plr.2
-        for <fstests@vger.kernel.org>; Wed, 03 Jun 2020 03:21:13 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=QGIvRlWNcsPfdG6tx/HBHBHsscgubm3oWVYu3vHnwXA=;
-        b=lBE3ZZobyND3RfMp++F57ma7EwHkHnVHb8kw84A7Q5iY1dhMuNKer8isxe4Pt4T4J1
-         mZ1TEc6KUMZGbWJgBpGzMgr0ZGbmKkopgenjBLOvUNOlRTLSZJb2XmaYGlGAVupHSrf7
-         Ykp7kNddgMHLys+BxTUQkWaY61ikRn7KUWWYCZd+8gbRH9MLWLvvHCtY43uxzvIbclFM
-         EApsROOA6+ikb3T3gHStwbWw7VLB9xwC12NfHVoZluvIo2MgJ6fT8yeiph9bdr+jP9yn
-         HJVLrUOoO6GoveQYBsN7kBJa2GYJBprT9qcAYDdGyzGH/suPy/zWCTzydxm20340Kr4K
-         gEFg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=QGIvRlWNcsPfdG6tx/HBHBHsscgubm3oWVYu3vHnwXA=;
-        b=O1p6PsRB/V36uEwayHJp0aXivcv/plzTJX0T45MJIDsX48W0K+7Un6bNsm0vv0w1oj
-         5MkSq7v80yCN1nkGYQN7z/9m6+m44Al2DY86fcsnDXLFbakBzVuIFMKwV2Fz9LiV/CNx
-         /y7NkXfBmXPTonNaT/e4csb9XQMLRkCAwcIWpgHCNckDeyNoP39EJKOqaITiF54C2psE
-         EeHvQs+dl0rCwSRNFcZpGWP76/KcrGVdnT5d89w1Rw5Rul+bQYCTfS5sn+zOpMUIKzrT
-         2Trusc59IWIrelJZDqql82NW5stOqQxA5W+Az65OOgQGvZA41C5Q51PUrpKaOAG+AmRx
-         0DQQ==
-X-Gm-Message-State: AOAM532YuBjVSoO6s8SFNRO1bLpO/uRfuiv6vJ6Y9fOV8WMKBsRaJKq5
-        OrouPDnDZI3zk8/CShYtUxRj88j2
-X-Google-Smtp-Source: ABdhPJxPHB1kybNdR+HU5td8RV5zdkeNUDTr5V1f7lBjlINZZPBm96yciUiXvrqOW/7uhTQpNWH8mw==
-X-Received: by 2002:a17:902:9f93:: with SMTP id g19mr3414346plq.314.1591179673028;
-        Wed, 03 Jun 2020 03:21:13 -0700 (PDT)
-Received: from linux-50d1.suse.de (li2018-174.members.linode.com. [172.105.125.174])
-        by smtp.gmail.com with ESMTPSA id f14sm2012796pjq.36.2020.06.03.03.21.10
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 03 Jun 2020 03:21:12 -0700 (PDT)
-From:   Yong Sun <sunyong0511@gmail.com>
-X-Google-Original-From: Yong Sun <yosun@suse.com>
-To:     fstests@vger.kernel.org
-Cc:     Yong Sun <yosun@suse.com>
-Subject: [PATCH] fstests: modify user name beginning with non-digit
-Date:   Wed,  3 Jun 2020 18:20:36 +0800
-Message-Id: <20200603102035.552-1-yosun@suse.com>
-X-Mailer: git-send-email 2.26.2
+        Wed, 3 Jun 2020 10:07:49 -0400
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:41828 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1725833AbgFCOHt (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 3 Jun 2020 10:07:49 -0400
+X-IronPort-AV: E=Sophos;i="5.73,467,1583164800"; 
+   d="scan'208";a="93765252"
+Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
+  by heian.cn.fujitsu.com with ESMTP; 03 Jun 2020 22:07:43 +0800
+Received: from G08CNEXMBPEKD05.g08.fujitsu.local (unknown [10.167.33.204])
+        by cn.fujitsu.com (Postfix) with ESMTP id 31A0A50A999D;
+        Wed,  3 Jun 2020 22:07:42 +0800 (CST)
+Received: from G08CNEXCHPEKD04.g08.fujitsu.local (10.167.33.200) by
+ G08CNEXMBPEKD05.g08.fujitsu.local (10.167.33.204) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.2; Wed, 3 Jun 2020 22:07:42 +0800
+Received: from Fedora-30.g08.fujitsu.local (10.167.220.106) by
+ G08CNEXCHPEKD04.g08.fujitsu.local (10.167.33.209) with Microsoft SMTP Server
+ id 15.0.1497.2 via Frontend Transport; Wed, 3 Jun 2020 22:07:42 +0800
+From:   Xiao Yang <yangx.jy@cn.fujitsu.com>
+To:     <fstests@vger.kernel.org>
+CC:     <darrick.wong@oracle.com>, <ira.weiny@intel.com>,
+        Xiao Yang <yangx.jy@cn.fujitsu.com>
+Subject: [PATCH 4/4] xfs/260: Move xfs/260 to generic
+Date:   Wed, 3 Jun 2020 22:01:15 +0800
+Message-ID: <20200603140115.30392-4-yangx.jy@cn.fujitsu.com>
+X-Mailer: git-send-email 2.21.0
+In-Reply-To: <20200603140115.30392-1-yangx.jy@cn.fujitsu.com>
+References: <20200603140115.30392-1-yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-yoursite-MailScanner-ID: 31A0A50A999D.A9B27
+X-yoursite-MailScanner: Found to be clean
+X-yoursite-MailScanner-From: yangx.jy@cn.fujitsu.com
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-openSUSE and SLE don't support username begin with digit, so it will
-skip test generic/597 and generic/598 by lack of 123456-fsgqa user.
-generic/597 and 598 are not test username begin with digit on purpose
-(different with generic/381). It's will be helpful to use an username
-begin with non-digit in this case.
+Both ext4 and xfs support per-inode DAX flag now so move it to generic.
 
-Signed-off-by: Sun Yong <yosun@suse.com>
+Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
 ---
- README            | 1 +
- tests/generic/597 | 4 ++--
- tests/generic/598 | 4 ++--
- 3 files changed, 5 insertions(+), 4 deletions(-)
+ tests/{xfs/260 => generic/602} | 12 ++++++++----
+ tests/generic/602.out          |  2 ++
+ tests/generic/group            |  1 +
+ tests/xfs/260.out              |  2 --
+ tests/xfs/group                |  1 -
+ 5 files changed, 11 insertions(+), 7 deletions(-)
+ rename tests/{xfs/260 => generic/602} (91%)
+ create mode 100644 tests/generic/602.out
+ delete mode 100644 tests/xfs/260.out
 
-diff --git a/README b/README
-index 094a7742..cffa0bc6 100644
---- a/README
-+++ b/README
-@@ -22,6 +22,7 @@ _______________________
- - create fsgqa test user ("sudo useradd -m fsgqa")
- - create fsgqa group ("sudo groupadd fsgqa")
- - create 123456-fsgqa test user ("sudo useradd 123456-fsgqa")
-+- create fsgqa-123456 test user ("sudo useradd fsgqa-123456")
+diff --git a/tests/xfs/260 b/tests/generic/602
+similarity index 91%
+rename from tests/xfs/260
+rename to tests/generic/602
+index fbdc4cd8..0cd20f31 100755
+--- a/tests/xfs/260
++++ b/tests/generic/602
+@@ -2,7 +2,7 @@
+ # SPDX-License-Identifier: GPL-2.0
+ # Copyright (c) 2017 Red Hat Inc.  All Rights Reserved.
+ #
+-# FS QA Test 260
++# FS QA Test 602
+ #
+ # Test per-inode DAX flag by mmap direct/buffered IO.
+ #
+@@ -28,7 +28,7 @@ _cleanup()
+ # remove previous $seqres.full before test
+ rm -f $seqres.full
  
- ______________________
- USING THE FSQA SUITE
-diff --git a/tests/generic/597 b/tests/generic/597
-index 1d87a23a..c4d524b7 100755
---- a/tests/generic/597
-+++ b/tests/generic/597
-@@ -43,11 +43,11 @@ _require_sysctl_variable fs.protected_symlinks
- _require_sysctl_variable fs.protected_hardlinks
- # su in _require_user prints warnings about user name starts with a digit,
- # discard the warning
--_require_user 123456-fsgqa >/dev/null 2>&1
-+_require_user fsgqa-123456 >/dev/null 2>&1
- # Do this SECOND so that qa_user is fsgqa, and _user_do uses that account
- _require_user fsgqa
+-_supported_fs xfs
++_supported_fs generic
+ _supported_os Linux
+ _require_scratch_dax_mountopt "dax"
+ _require_test_program "feature"
+@@ -121,8 +121,12 @@ do_tests()
+ 	t_dax_flag_mmap_dio $((64 * 1024 * 1024))
+ }
  
--OWNER=123456-fsgqa
-+OWNER=fsgqa-123456
- OTHER=fsgqa
+-# make xfs 2Mb aligned for PMD fault testing
+-_scratch_mkfs "-d su=2m,sw=1" > /dev/null 2>&1
++# make 2Mb aligned for PMD fault testing
++mkfs_opts=""
++[ "$FSTYP" = "ext4" ] && mkfs_opts="-E stride=512,stripe_width=1"
++[ "$FSTYP" = "xfs" ] && mkfs_opts="-d su=2m,sw=1"
++
++_scratch_mkfs "$mkfs_opts" > /dev/null 2>&1
  
- # Save current system state to reset when done
-diff --git a/tests/generic/598 b/tests/generic/598
-index 998b62cf..1cf9a3d1 100755
---- a/tests/generic/598
-+++ b/tests/generic/598
-@@ -43,11 +43,11 @@ _require_sysctl_variable fs.protected_regular
- _require_sysctl_variable fs.protected_fifos
- # su in _require_user prints warnings about user name starts with a digit,
- # discard the warning
--_require_user 123456-fsgqa >/dev/null 2>&1
-+_require_user fsgqa-123456 >/dev/null 2>&1
- # Do this SECOND so that qa_user is fsgqa, and _user_do uses that account
- _require_user fsgqa
- 
--USER1=123456-fsgqa
-+USER1=fsgqa-123456
- USER2=fsgqa
- 
- # Save current system state to reset when done
+ # mount with dax option
+ _scratch_mount "-o dax"
+diff --git a/tests/generic/602.out b/tests/generic/602.out
+new file mode 100644
+index 00000000..61976e5e
+--- /dev/null
++++ b/tests/generic/602.out
+@@ -0,0 +1,2 @@
++QA output created by 602
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index c6ce029c..4bda3772 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -604,3 +604,4 @@
+ 599 auto quick remount shutdown
+ 600 auto quick quota
+ 601 auto quick quota
++602 auto attr quick dax
+diff --git a/tests/xfs/260.out b/tests/xfs/260.out
+deleted file mode 100644
+index 18ca517c..00000000
+--- a/tests/xfs/260.out
++++ /dev/null
+@@ -1,2 +0,0 @@
+-QA output created by 260
+-Silence is golden
+diff --git a/tests/xfs/group b/tests/xfs/group
+index daf54add..71c30898 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -257,7 +257,6 @@
+ 257 auto quick clone
+ 258 auto quick clone
+ 259 auto quick
+-260 auto attr quick dax
+ 261 auto quick quota
+ 262 dangerous_fuzzers dangerous_scrub dangerous_online_repair
+ 263 auto quick quota
 -- 
-2.26.2
+2.21.0
+
+
 
