@@ -2,172 +2,139 @@ Return-Path: <SRS0=iucR=7Q=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=no autolearn_force=no
+X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CA98FC433E0
-	for <linux-fstests@archiver.kernel.org>; Wed,  3 Jun 2020 03:51:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C06A2C433E0
+	for <linux-fstests@archiver.kernel.org>; Wed,  3 Jun 2020 10:21:19 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A790220674
-	for <linux-fstests@archiver.kernel.org>; Wed,  3 Jun 2020 03:51:24 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 98D5720679
+	for <linux-fstests@archiver.kernel.org>; Wed,  3 Jun 2020 10:21:19 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="xy2oKhR+"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="lBE3ZZob"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725936AbgFCDvY (ORCPT
+        id S1725881AbgFCKVT (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 2 Jun 2020 23:51:24 -0400
-Received: from userp2120.oracle.com ([156.151.31.85]:55354 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725926AbgFCDvY (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 2 Jun 2020 23:51:24 -0400
-Received: from pps.filterd (userp2120.oracle.com [127.0.0.1])
-        by userp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 0533mFXx106894;
-        Wed, 3 Jun 2020 03:51:07 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
- : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=corp-2020-01-29;
- bh=SJ6Xy9EhhO1mahYBwFQo6lySQegNoTnkZHQ5lceiC3E=;
- b=xy2oKhR+YdTN8HSbkhjBP4oL+y1wFKDBlnPtTuMd9vJlp3hpHCGBcZysDPWuD/W3vKUU
- fZWsx4SU9zretsUJgXDt8Bzd6tDDnlcmsysQ54jIQzWSOXFgh/KoGpM9z0KaSTt2sYmO
- 40JzzBJvgfodLJrI4EBHpipih7Kjrt2RtnX0Ja2h5h5+RYAkRmOqY/t7BXliXfqIdL0w
- F/p9eleUj3wEu4V2yRk30Nd6t4SflCR3IuoISPSZ1N9kkaDojRDtUrBgiEkZgflr2N3s
- C+D2e9ywJT+60c0u65NjgXCsli6rzg+E0QFDhsKyfKD8ZtOC7FfdM0JeaGpddaKgICyj nA== 
-Received: from aserp3020.oracle.com (aserp3020.oracle.com [141.146.126.70])
-        by userp2120.oracle.com with ESMTP id 31dkrum2ds-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Wed, 03 Jun 2020 03:51:06 +0000
-Received: from pps.filterd (aserp3020.oracle.com [127.0.0.1])
-        by aserp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 0533hwFj115116;
-        Wed, 3 Jun 2020 03:49:06 GMT
-Received: from aserv0121.oracle.com (aserv0121.oracle.com [141.146.126.235])
-        by aserp3020.oracle.com with ESMTP id 31c25que0n-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Wed, 03 Jun 2020 03:49:06 +0000
-Received: from abhmp0013.oracle.com (abhmp0013.oracle.com [141.146.116.19])
-        by aserv0121.oracle.com (8.14.4/8.13.8) with ESMTP id 0533n2ma024413;
-        Wed, 3 Jun 2020 03:49:02 GMT
-Received: from localhost (/67.169.218.210)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Tue, 02 Jun 2020 20:49:02 -0700
-Date:   Tue, 2 Jun 2020 20:49:00 -0700
-From:   "Darrick J. Wong" <darrick.wong@oracle.com>
-To:     Xiao Yang <yangx.jy@cn.fujitsu.com>
-Cc:     ira.weiny@intel.com, fstests@vger.kernel.org,
-        linux-kernel@vger.kernel.org,
-        Dan Williams <dan.j.williams@intel.com>,
-        Dave Chinner <david@fromorbit.com>,
-        Christoph Hellwig <hch@lst.de>,
-        "Theodore Y. Ts'o" <tytso@mit.edu>, Jan Kara <jack@suse.cz>,
-        Jeff Moyer <jmoyer@redhat.com>, linux-ext4@vger.kernel.org,
-        linux-xfs@vger.kernel.org, linux-fsdevel@vger.kernel.org
-Subject: Re: [PATCH] xfs/XXX: Add xfs/XXX
-Message-ID: <20200603034900.GZ8230@magnolia>
-References: <20200413054419.1560503-1-ira.weiny@intel.com>
- <20200413163025.GB6742@magnolia>
- <5ED61324.6010300@cn.fujitsu.com>
- <20200602181444.GD8230@magnolia>
- <5ED7033D.7020009@cn.fujitsu.com>
+        Wed, 3 Jun 2020 06:21:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45994 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726123AbgFCKVO (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 3 Jun 2020 06:21:14 -0400
+Received: from mail-pl1-x62c.google.com (mail-pl1-x62c.google.com [IPv6:2607:f8b0:4864:20::62c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E0042C08C5C0
+        for <fstests@vger.kernel.org>; Wed,  3 Jun 2020 03:21:13 -0700 (PDT)
+Received: by mail-pl1-x62c.google.com with SMTP id q16so675872plr.2
+        for <fstests@vger.kernel.org>; Wed, 03 Jun 2020 03:21:13 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=QGIvRlWNcsPfdG6tx/HBHBHsscgubm3oWVYu3vHnwXA=;
+        b=lBE3ZZobyND3RfMp++F57ma7EwHkHnVHb8kw84A7Q5iY1dhMuNKer8isxe4Pt4T4J1
+         mZ1TEc6KUMZGbWJgBpGzMgr0ZGbmKkopgenjBLOvUNOlRTLSZJb2XmaYGlGAVupHSrf7
+         Ykp7kNddgMHLys+BxTUQkWaY61ikRn7KUWWYCZd+8gbRH9MLWLvvHCtY43uxzvIbclFM
+         EApsROOA6+ikb3T3gHStwbWw7VLB9xwC12NfHVoZluvIo2MgJ6fT8yeiph9bdr+jP9yn
+         HJVLrUOoO6GoveQYBsN7kBJa2GYJBprT9qcAYDdGyzGH/suPy/zWCTzydxm20340Kr4K
+         gEFg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=QGIvRlWNcsPfdG6tx/HBHBHsscgubm3oWVYu3vHnwXA=;
+        b=O1p6PsRB/V36uEwayHJp0aXivcv/plzTJX0T45MJIDsX48W0K+7Un6bNsm0vv0w1oj
+         5MkSq7v80yCN1nkGYQN7z/9m6+m44Al2DY86fcsnDXLFbakBzVuIFMKwV2Fz9LiV/CNx
+         /y7NkXfBmXPTonNaT/e4csb9XQMLRkCAwcIWpgHCNckDeyNoP39EJKOqaITiF54C2psE
+         EeHvQs+dl0rCwSRNFcZpGWP76/KcrGVdnT5d89w1Rw5Rul+bQYCTfS5sn+zOpMUIKzrT
+         2Trusc59IWIrelJZDqql82NW5stOqQxA5W+Az65OOgQGvZA41C5Q51PUrpKaOAG+AmRx
+         0DQQ==
+X-Gm-Message-State: AOAM532YuBjVSoO6s8SFNRO1bLpO/uRfuiv6vJ6Y9fOV8WMKBsRaJKq5
+        OrouPDnDZI3zk8/CShYtUxRj88j2
+X-Google-Smtp-Source: ABdhPJxPHB1kybNdR+HU5td8RV5zdkeNUDTr5V1f7lBjlINZZPBm96yciUiXvrqOW/7uhTQpNWH8mw==
+X-Received: by 2002:a17:902:9f93:: with SMTP id g19mr3414346plq.314.1591179673028;
+        Wed, 03 Jun 2020 03:21:13 -0700 (PDT)
+Received: from linux-50d1.suse.de (li2018-174.members.linode.com. [172.105.125.174])
+        by smtp.gmail.com with ESMTPSA id f14sm2012796pjq.36.2020.06.03.03.21.10
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 03 Jun 2020 03:21:12 -0700 (PDT)
+From:   Yong Sun <sunyong0511@gmail.com>
+X-Google-Original-From: Yong Sun <yosun@suse.com>
+To:     fstests@vger.kernel.org
+Cc:     Yong Sun <yosun@suse.com>
+Subject: [PATCH] fstests: modify user name beginning with non-digit
+Date:   Wed,  3 Jun 2020 18:20:36 +0800
+Message-Id: <20200603102035.552-1-yosun@suse.com>
+X-Mailer: git-send-email 2.26.2
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <5ED7033D.7020009@cn.fujitsu.com>
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9640 signatures=668686
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 adultscore=0 suspectscore=1 spamscore=0
- malwarescore=0 bulkscore=0 mlxscore=0 phishscore=0 mlxlogscore=999
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2004280000
- definitions=main-2006030027
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9640 signatures=668686
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 spamscore=0 priorityscore=1501
- mlxscore=0 lowpriorityscore=0 suspectscore=1 malwarescore=0 clxscore=1015
- adultscore=0 mlxlogscore=999 cotscore=-2147483648 phishscore=0 bulkscore=0
- impostorscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2004280000 definitions=main-2006030027
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Jun 03, 2020 at 09:56:13AM +0800, Xiao Yang wrote:
-> On 2020/6/3 2:14, Darrick J. Wong wrote:
-> > On Tue, Jun 02, 2020 at 04:51:48PM +0800, Xiao Yang wrote:
-> > > On 2020/4/14 0:30, Darrick J. Wong wrote:
-> > > > This might be a good time to introduce a few new helpers:
-> > > > 
-> > > > _require_scratch_dax ("Does $SCRATCH_DEV support DAX?")
-> > > > _require_scratch_dax_mountopt ("Does the fs support the DAX mount options?")
-> > > > _require_scratch_daX_iflag ("Does the fs support FS_XFLAG_DAX?")
-> > > Hi Darrick,
-> > > 
-> > > Now, I am trying to introduce these new helpers and have some questions:
-> > > 1) There are five testcases related to old dax implementation, should we
-> > > only convert them to new dax implementation or make them compatible with old
-> > > and new dax implementation?
-> > 
-> > What is the 'old' DAX implementation?  ext2 XIP?
-> Hi Darrick,
-> 
-> Thanks for your quick feedback.
-> 
-> Right, the 'old' DAX implementation means old dax mount option(i.e. -o dax)
-> 
-> Compare new and old dax mount option on ext4 and xfs, is the following logic
-> right?
-> -o dax=always == -o dax
-> -o dax=never == without dax
-> -o dax=inode == nothing
+openSUSE and SLE don't support username begin with digit, so it will
+skip test generic/597 and generic/598 by lack of 123456-fsgqa user.
+generic/597 and 598 are not test username begin with digit on purpose
+(different with generic/381). It's will be helpful to use an username
+begin with non-digit in this case.
 
-No.  -o dax=always is the same as -o dax.
-dax=inode was and still is the behavior you got with no option at all.
--o dax=never is a new option.
+Signed-off-by: Sun Yong <yosun@suse.com>
+---
+ README            | 1 +
+ tests/generic/597 | 4 ++--
+ tests/generic/598 | 4 ++--
+ 3 files changed, 5 insertions(+), 4 deletions(-)
 
-> Of course, we should uses new option if ext4/xfs supports new dax mount
-> option on distros.  But should we fallback to use old option if ext4/xfs
-> doesn't support new dax mount option on some old distros?
-> btw:
-> it seems hard for testcases to use two different sets of mount options(i.e.
-> old and new) so do you have any suggestion?
+diff --git a/README b/README
+index 094a7742..cffa0bc6 100644
+--- a/README
++++ b/README
+@@ -22,6 +22,7 @@ _______________________
+ - create fsgqa test user ("sudo useradd -m fsgqa")
+ - create fsgqa group ("sudo groupadd fsgqa")
+ - create 123456-fsgqa test user ("sudo useradd 123456-fsgqa")
++- create fsgqa-123456 test user ("sudo useradd fsgqa-123456")
+ 
+ ______________________
+ USING THE FSQA SUITE
+diff --git a/tests/generic/597 b/tests/generic/597
+index 1d87a23a..c4d524b7 100755
+--- a/tests/generic/597
++++ b/tests/generic/597
+@@ -43,11 +43,11 @@ _require_sysctl_variable fs.protected_symlinks
+ _require_sysctl_variable fs.protected_hardlinks
+ # su in _require_user prints warnings about user name starts with a digit,
+ # discard the warning
+-_require_user 123456-fsgqa >/dev/null 2>&1
++_require_user fsgqa-123456 >/dev/null 2>&1
+ # Do this SECOND so that qa_user is fsgqa, and _user_do uses that account
+ _require_user fsgqa
+ 
+-OWNER=123456-fsgqa
++OWNER=fsgqa-123456
+ OTHER=fsgqa
+ 
+ # Save current system state to reset when done
+diff --git a/tests/generic/598 b/tests/generic/598
+index 998b62cf..1cf9a3d1 100755
+--- a/tests/generic/598
++++ b/tests/generic/598
+@@ -43,11 +43,11 @@ _require_sysctl_variable fs.protected_regular
+ _require_sysctl_variable fs.protected_fifos
+ # su in _require_user prints warnings about user name starts with a digit,
+ # discard the warning
+-_require_user 123456-fsgqa >/dev/null 2>&1
++_require_user fsgqa-123456 >/dev/null 2>&1
+ # Do this SECOND so that qa_user is fsgqa, and _user_do uses that account
+ _require_user fsgqa
+ 
+-USER1=123456-fsgqa
++USER1=fsgqa-123456
+ USER2=fsgqa
+ 
+ # Save current system state to reset when done
+-- 
+2.26.2
 
-Try dax=never, it should work on any type of storage device if the
-kernel implements the "new" mount options at all.
-
---D
-
-> > 
-> > > 2) I think _require_xfs_io_command "chattr" "x" is enough to check if fs
-> > > supports FS_XFLAG_DAX.  Is it necessary to add _require_scratch_dax_iflag()?
-> > > like this:
-> > > _require_scratch_dax_iflag()
-> > > {
-> > > 	_require_xfs_io_command "chattr" "x"
-> > > }
-> > 
-> > I suggested that list based on the major control knobs that will be
-> > visible to userspace programs.  Even if this is just a one-line helper,
-> > its name is useful for recognizing which of those knobs we're looking
-> > for.
-> > 
-> > Yes, you could probably save a trivial amount of time by skipping one
-> > iteration of bash function calling, but now everyone has to remember
-> > that the xfs_io chattr "x" flag means the dax inode flag, and not
-> > confuse it for chmod +x or something else.
-> 
-> Got it, thanks for your detailed explanation.
-> 
-> Best Regards,
-> Xiao Yang
-> > 
-> > --D
-> > 
-> > > Best Regards,
-> > > Xiao Yang
-> > > 
-> > > 
-> > 
-> > 
-> > .
-> > 
-> 
-> 
-> 
