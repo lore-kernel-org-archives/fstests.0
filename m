@@ -6,52 +6,48 @@ X-Spam-Status: No, score=-0.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EEECDC433E0
-	for <linux-fstests@archiver.kernel.org>; Thu,  4 Jun 2020 10:49:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 978A1C433E0
+	for <linux-fstests@archiver.kernel.org>; Thu,  4 Jun 2020 13:37:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D4837207D5
-	for <linux-fstests@archiver.kernel.org>; Thu,  4 Jun 2020 10:49:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7CAB6206E6
+	for <linux-fstests@archiver.kernel.org>; Thu,  4 Jun 2020 13:37:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725997AbgFDKtb (ORCPT
+        id S1728337AbgFDNhV convert rfc822-to-8bit (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 4 Jun 2020 06:49:31 -0400
-Received: from mx2.suse.de ([195.135.220.15]:45204 "EHLO mx2.suse.de"
+        Thu, 4 Jun 2020 09:37:21 -0400
+Received: from mx2.suse.de ([195.135.220.15]:44870 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725854AbgFDKtb (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 4 Jun 2020 06:49:31 -0400
+        id S1728323AbgFDNhV (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 4 Jun 2020 09:37:21 -0400
 X-Virus-Scanned: by amavisd-new at test-mx.suse.de
 Received: from relay2.suse.de (unknown [195.135.220.254])
-        by mx2.suse.de (Postfix) with ESMTP id A86A8ABE2;
-        Thu,  4 Jun 2020 10:49:33 +0000 (UTC)
-Date:   Thu, 4 Jun 2020 12:49:28 +0200
-From:   Petr Vorel <pvorel@suse.cz>
-To:     Yong Sun <sunyong0511@gmail.com>,
-        Eric Sandeen <sandeen@redhat.com>, fstests@vger.kernel.org,
-        Yong Sun <yosun@suse.com>, Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] fstests: modify user name beginning with non-digit
-Message-ID: <20200604104928.GC26706@dell5510>
-Reply-To: Petr Vorel <pvorel@suse.cz>
-References: <20200603102035.552-1-yosun@suse.com>
- <20200604083023.GA26629@dell5510>
- <20200604093628.GJ1938@dhcp-12-102.nay.redhat.com>
+        by mx2.suse.de (Postfix) with ESMTP id 48EC0AC2C
+        for <fstests@vger.kernel.org>; Thu,  4 Jun 2020 13:37:23 +0000 (UTC)
+From:   aaptel@suse.com (=?utf-8?Q?Aur=C3=A9lien?= Aptel)
+To:     fstests@vger.kernel.org
+Subject: invalid user 123456-fsgqa
+Date:   Thu, 04 Jun 2020 15:37:18 +0200
+Message-ID: <87lfl3hrzl.fsf@suse.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200604093628.GJ1938@dhcp-12-102.nay.redhat.com>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8BIT
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Hi Zorro,
+Hi,
 
-> > Also test tests/generic/381 still uses 123456-fsgqa. Shouldn't be replaced as
-> > well?
+Some tests require a second user named 123456-fsgqa
+(generic/{381,383,597,598}) but that username is invalid on some Linux
+systems (SUSE distros at least) where a username cannot start with a
+digit.
 
-> I don't know why this case need user '123456-fsgqa', but the generic/381 need
-> the 123456-fsgqa necessarily. It cover a bug about how xfs_quota deal with
-> user name begin with digits.
-Thanks for a quick clarification, sorry for overlooking the test description.
+Would it be ok to send a patch to change that second user to "fsgqa2"?
 
-Kind regards,
-Petr
+Cheers,
+-- 
+Aurélien Aptel / SUSE Labs Samba Team
+GPG: 1839 CB5F 9F5B FB9B AA97  8C99 03C8 A49B 521B D5D3
+SUSE Software Solutions Germany GmbH, Maxfeldstr. 5, 90409 Nürnberg, DE
+GF: Felix Imendörffer, Mary Higgins, Sri Rasiah HRB 247165 (AG München)
