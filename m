@@ -1,223 +1,141 @@
-Return-Path: <SRS0=2A/Q=7X=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=h6Hu=7Y=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CA5A2C433DF
-	for <linux-fstests@archiver.kernel.org>; Wed, 10 Jun 2020 16:37:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E433BC433E1
+	for <linux-fstests@archiver.kernel.org>; Thu, 11 Jun 2020 04:51:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A63AE206F4
-	for <linux-fstests@archiver.kernel.org>; Wed, 10 Jun 2020 16:37:17 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C1C0F2075F
+	for <linux-fstests@archiver.kernel.org>; Thu, 11 Jun 2020 04:51:59 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="serw2rLB"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="HBVF+bg2"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726121AbgFJQhR (ORCPT
+        id S1725782AbgFKEv7 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 10 Jun 2020 12:37:17 -0400
-Received: from userp2120.oracle.com ([156.151.31.85]:48412 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726119AbgFJQhP (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 10 Jun 2020 12:37:15 -0400
-Received: from pps.filterd (userp2120.oracle.com [127.0.0.1])
-        by userp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 05AGaaDg075200;
-        Wed, 10 Jun 2020 16:37:09 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
- : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=corp-2020-01-29;
- bh=DdDmDrlNP71G2C0e7oDCm5AtBjmer9qf7TM55BbJH8c=;
- b=serw2rLBmKXrqpnMVgMGbOAKBI0zohSVOkBV3P8d0uMNq/Bf06dh7Ty/vMZvsLBalktU
- gDFKB8Q7co+S2hRNxdT9uEkoMKC8d9NnLynTwFtACQF0hNP7xpmWF0gOgsLUJPMYYORr
- xKh3L5eEltLpEi0Q+gjdk0oSWH7YbxZHI8qh0PdRk0C6Vd4dysCexL38hkxPonvQZIHO
- Xf8ZD8H9IL1NMbLsXk4Cvl8IOe4oBmHjqg4GU7eHGCG22K5QZ/H7Lmqn1s42vWF0x6Ll
- +zt7jvXYmKmjIdVJ0Ye/KlPVVCMgIpLYIy75NXwT7fCvOVvUL670kc0McCMO5PjSwbYh 2g== 
-Received: from userp3020.oracle.com (userp3020.oracle.com [156.151.31.79])
-        by userp2120.oracle.com with ESMTP id 31g3sn3a4j-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Wed, 10 Jun 2020 16:37:09 +0000
-Received: from pps.filterd (userp3020.oracle.com [127.0.0.1])
-        by userp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 05AGYS7x161082;
-        Wed, 10 Jun 2020 16:37:09 GMT
-Received: from userv0122.oracle.com (userv0122.oracle.com [156.151.31.75])
-        by userp3020.oracle.com with ESMTP id 31gmwth1cg-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Wed, 10 Jun 2020 16:37:08 +0000
-Received: from abhmp0014.oracle.com (abhmp0014.oracle.com [141.146.116.20])
-        by userv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 05AGb8DV030228;
-        Wed, 10 Jun 2020 16:37:08 GMT
-Received: from localhost (/67.169.218.210)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Wed, 10 Jun 2020 09:37:08 -0700
-Date:   Wed, 10 Jun 2020 09:37:05 -0700
-From:   "Darrick J. Wong" <darrick.wong@oracle.com>
-To:     Xiao Yang <yangx.jy@cn.fujitsu.com>
-Cc:     fstests@vger.kernel.org, ira.weiny@intel.com
-Subject: Re: [PATCH 1/4] common/rc: Introduce new helpers for DAX mount
- options and FS_XFLAG_DAX
-Message-ID: <20200610163705.GC11242@magnolia>
-References: <20200603140115.30392-1-yangx.jy@cn.fujitsu.com>
- <20200609163908.GA11255@magnolia>
- <5EE03F16.3030402@cn.fujitsu.com>
+        Thu, 11 Jun 2020 00:51:59 -0400
+Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:33102 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1725799AbgFKEv7 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 11 Jun 2020 00:51:59 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1591851117;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=Pvyr7sajDt3PerA3UQ0VglmpF/jaw3iEv0C/FEEuwmw=;
+        b=HBVF+bg2mvYPTENCBKo0ZKOsnYcWkJWhcQWsRYnUc4rzZmkbhSo1/RgpkWqOU3donV07bJ
+        VclHzSg2Vk5UWRKS8QvFJBZTjHIOFJwkHWsdAR/A1ZsBJPoszVLmplNPhoGCHkV2gWeIVD
+        ZvV8Q3B+Oj3Akktcg4P3f2WyPxkBL4o=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-443-dWnslBDfMPisO5vGWM1ALQ-1; Thu, 11 Jun 2020 00:51:53 -0400
+X-MC-Unique: dWnslBDfMPisO5vGWM1ALQ-1
+Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id D738E800053;
+        Thu, 11 Jun 2020 04:51:52 +0000 (UTC)
+Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 52C358FF7C;
+        Thu, 11 Jun 2020 04:51:52 +0000 (UTC)
+Date:   Thu, 11 Jun 2020 13:03:45 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Donald Douwsma <ddouwsma@redhat.com>
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH v2] xfstests: add test for xfs_repair progress reporting
+Message-ID: <20200611050345.GL1938@dhcp-12-102.nay.redhat.com>
+Mail-Followup-To: Donald Douwsma <ddouwsma@redhat.com>,
+        linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+References: <20200519160125.GB17621@magnolia>
+ <20200520035258.298516-1-ddouwsma@redhat.com>
+ <20200529080640.GH1938@dhcp-12-102.nay.redhat.com>
+ <3097a996-c661-d03f-a3e6-aa60ea808f04@redhat.com>
+ <41124f57-55e6-68c4-ef90-b51fc5e3b68f@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <5EE03F16.3030402@cn.fujitsu.com>
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9648 signatures=668680
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=1 spamscore=0 adultscore=0
- mlxscore=0 mlxlogscore=999 bulkscore=0 malwarescore=0 phishscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2004280000
- definitions=main-2006100126
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9648 signatures=668680
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 adultscore=0 priorityscore=1501
- lowpriorityscore=0 impostorscore=0 cotscore=-2147483648 suspectscore=1
- spamscore=0 bulkscore=0 malwarescore=0 phishscore=0 mlxscore=0
- mlxlogscore=999 clxscore=1015 classifier=spam adjust=0 reason=mlx
- scancount=1 engine=8.12.0-2004280000 definitions=main-2006100126
+In-Reply-To: <41124f57-55e6-68c4-ef90-b51fc5e3b68f@redhat.com>
+User-Agent: Mutt/1.10.1 (2018-07-13)
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Jun 10, 2020 at 10:01:58AM +0800, Xiao Yang wrote:
-> Hi Darrick,
+On Mon, Jun 01, 2020 at 01:55:49PM +1000, Donald Douwsma wrote:
 > 
-> Thanks a lot for your comments.
 > 
-> On 2020/6/10 0:39, Darrick J. Wong wrote:
-> > Oh, this wasn't the cover letter. ;)
-> 
-> I will add the cover letter.
-> 
+> On 01/06/2020 10:53, Donald Douwsma wrote:
+> > Hi Zorro,
 > > 
-> > On Wed, Jun 03, 2020 at 10:01:12PM +0800, Xiao Yang wrote:
-> > > 1) _require_scratch_dax_mountopt() checks both old and new DAX mount option
-> > > 2) _require_scratch_daX_iflag() checks FS_XFLAG_DAX
-> > > 
-> > > Signed-off-by: Xiao Yang<yangx.jy@cn.fujitsu.com>
-> > > ---
-> > >   common/rc | 35 +++++++++++++++++++++++++++++++++++
-> > >   1 file changed, 35 insertions(+)
-> > > 
-> > > diff --git a/common/rc b/common/rc
-> > > index a6967831..ec7c19e4 100644
-> > > --- a/common/rc
-> > > +++ b/common/rc
-> > > @@ -3188,6 +3188,41 @@ _require_scratch_dax()
-> > >   	_scratch_unmount
-> > >   }
-> > > 
-> > > +_require_scratch_dax_mountopt()
-> > > +{
-> > > +	local mountopt=$1
-> > > +	local output
-> > > +
-> > > +	_require_scratch
-> > > +	_scratch_mkfs>  /dev/null 2>&1
-> > > +	_try_scratch_mount -o "$mountopt" || \
-> > > +		_notrun "mount $SCRATCH_DEV with $mountopt failed"
+> > On 29/05/2020 18:06, Zorro Lang wrote:
+> >> On Wed, May 20, 2020 at 01:52:58PM +1000, Donald Douwsma wrote:
+> 
+> <snip>
+> 
+> >>> --- a/tests/xfs/group
+> >>> +++ b/tests/xfs/group
+> >>> @@ -513,3 +513,4 @@
+> >>>  513 auto mount
+> >>>  514 auto quick db
+> >>>  515 auto quick quota
+> >>> +516 repair
+> >>
+> >> Is there a reason why this case shouldn't be in auto group?
+> >>
+> >> Thanks,
+> >> Zorro
 > > 
-> > What happens if MOUNT_OPTS already contains a dax option?  Should we
-> > clear it out ala _qmount_option, on the assumption that a test that
-> > cares about specific options probably wants to override whatever the
-> > test runner passed in?
-> 
-> Good point, but it seems that the last dax option is actually used if we
-> mount with multiple dax options, as below:
-> ----------------------------------------------
-> ext4:
-> # blkid /dev/pmem1
-> /dev/pmem1: UUID="cd2eb9f0-af2a-4c89-a381-4d2d9d2e8054" TYPE="ext4"
-> # mount -o dax -odax=inode /dev/pmem1 /mnt/xfstests/scratch/
-> # mount | grep pmem1
-> /dev/pmem1 on /mnt/xfstests/scratch type ext4
-> (rw,relatime,seclabel,dax=inode)
-> 
-> # mount -o dax=never -odax=inode -odax=always /dev/pmem1
-> /mnt/xfstests/scratch/
-> # mount | grep pmem1
-> /dev/pmem1 on /mnt/xfstests/scratch type ext4
-> (rw,relatime,seclabel,dax=always)
-> 
-> # mount -o dax=never -odax /dev/pmem1 /mnt/xfstests/scratch/
-> # mount | grep pmem1
-> /dev/pmem1 on /mnt/xfstests/scratch type ext4
-> (rw,relatime,seclabel,dax=always)
-> 
-> 
-> xfs:
-> # blkid /dev/pmem0
-> /dev/pmem0: UUID="bc830790-1ea8-48fb-9cda-7d5bb96b8961" TYPE="xfs"
-> # mount -o dax=never -o dax=always /dev/pmem0 /mnt/xfstests/test/
-> # mount | grep pmem0
-> /dev/pmem0 on /mnt/xfstests/test type xfs (rw,relatime,seclabel,attr2,dax=always,inode64,logbufs=8,logbsize=32k,noquota)
-> 
-> # mount -o dax=never -o dax=inode /dev/pmem0 /mnt/xfstests/test/
-> # mount | grep pmem0
-> /dev/pmem0 on /mnt/xfstests/test type xfs
-> (rw,relatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,noquota)
-> 
-> # mount -o dax=always -o dax=inode -o dax=never /dev/pmem0
-> /mnt/xfstests/test/
-> # mount | grep pmem0
-> /dev/pmem0 on /mnt/xfstests/test type xfs
-> (rw,relatime,seclabel,attr2,dax=never,inode64,logbufs=8,logbsize=32k,noquota)
-> ----------------------------------------------
-> all dax options are exclusive, so do you think is it necessary to implement
-> a function as _qmount_option?
+> > 
+> > We could work to wards getting it into auto, I wanted to make sure it
+> > was working ok first.
 
-Heh, ok, I guess we don't complain about respecified mount options, so
-(at least for fstests) the current behavior is ok.
+I just rechecked the mail list, sorry I missed this email long time (CC me will
+make sure I won't miss it next time:)
 
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+I think several minutes running time is acceptable to be into auto group, if the
+case is stable enough, won't fail unexpected.
 
---D
+> > 
+> > It takes about 2.5 min to run with the current image used by
+> > _scratch_populate_cached, by its nature it needs time for the progress
+> > code to fire, but that may be ok.
+> > 
+> > It sometimes leaves the delay-test active, I think because I've I used
+> > _dmsetup_remove in _cleanup instead of _cleanup_delay because the later
+> > unmounts the filesystem, which this test doesnt do, but I'd have to look
+> > into this more so it plays well with other tests like the original
+> > dmdelay unmount test 311.
+> 
+> Actually it does clean up delay-test correctly (*cough* I may have been
+> backgrounding xfs_repair in my xfstests tree while testing something
+> else).  I have seen it leave delay-test around if terminated with 
+> ctrl+c, but that seems reasonable if a test is aborted. 
 
-> Best Regards,
-> Xiao Yang
+If use a common helper to DO a test, I'd like to use its corresponding
+helper to cleanup UNDO it. If there's still something wrong, we can fix the
+helpers.
+
+> 
+> > I wasn't completely happy with the filter, it only checks that any of the
+> > progress messages are printing at least once, which for most can still
+> > just match on the end of phase printing, which always worked. Ideally it
+> > would check that some of these messages print multiple times.
 > > 
-> > --D
-> > 
-> > > +
-> > > +	output=$(_fs_options $SCRATCH_DEV)
-> > > +
-> > > +	# For new dax mount option, /proc/mounts shows different outputs if we
-> > > +	# mount with -o dax=inode on ext4 and xfs so skip checking it.
-> > > +	# /proc/mounts shows 'dax=inode' on ext4 but shows nothing on xfs.
-> > > +	if [ "$mountopt" != "dax=inode" ]; then
-> > > +		echo $output | grep -qw "$mountopt" || \
-> > > +			_notrun "$SCRATCH_DEV $FSTYP does not support -o $mountopt"
-> > > +	fi
-> > > +
-> > > +	# For new dax mount option, /proc/mounts shows "dax=never" if we
-> > > +	# mount with -o dax on xfs and underlying device doesn't support dax.
-> > > +	if [ "$mountopt" = "dax" ]; then
-> > > +		echo $output | grep -qw "dax=never"&&  \
-> > > +			_notrun "$SCRATCH_DEV $FSTYP does not support -o $mountopt"
-> > > +	fi
-> > > +
-> > > +	_scratch_unmount
-> > > +}
-> > > +
-> > > +_require_scratch_dax_iflag()
-> > > +{
-> > > +	_require_xfs_io_command "chattr" "x"
-> > > +}
-> > > +
-> > >   # Does norecovery support by this fs?
-> > >   _require_norecovery()
-> > >   {
-> > > --
-> > > 2.21.0
-> > > 
-> > > 
-> > > 
-> > 
-> > 
-> > .
+> > I can work on a V3 if this hasn't merged yet, or a follow up after, thoughts?
+
+Sure, hope the V3 can improve the output mismatch issue, although the filter is
+really boring:)
+
+Thanks,
+Zorro
+
 > > 
 > 
 > 
-> 
+
