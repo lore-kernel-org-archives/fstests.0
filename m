@@ -4,33 +4,33 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 255CBC433DF
-	for <linux-fstests@archiver.kernel.org>; Thu, 11 Jun 2020 08:43:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 72007C433DF
+	for <linux-fstests@archiver.kernel.org>; Thu, 11 Jun 2020 09:18:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0AA6320656
-	for <linux-fstests@archiver.kernel.org>; Thu, 11 Jun 2020 08:43:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5172C2078D
+	for <linux-fstests@archiver.kernel.org>; Thu, 11 Jun 2020 09:18:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726560AbgFKInu (ORCPT
+        id S1726560AbgFKJSH (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 11 Jun 2020 04:43:50 -0400
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:8710 "EHLO
+        Thu, 11 Jun 2020 05:18:07 -0400
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:62147 "EHLO
         heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726864AbgFKInu (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 11 Jun 2020 04:43:50 -0400
+        with ESMTP id S1726817AbgFKJSH (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 11 Jun 2020 05:18:07 -0400
 X-IronPort-AV: E=Sophos;i="5.73,499,1583164800"; 
-   d="scan'208";a="94293915"
+   d="scan'208";a="94297738"
 Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
-  by heian.cn.fujitsu.com with ESMTP; 11 Jun 2020 16:33:18 +0800
+  by heian.cn.fujitsu.com with ESMTP; 11 Jun 2020 17:13:42 +0800
 Received: from G08CNEXMBPEKD06.g08.fujitsu.local (unknown [10.167.33.206])
-        by cn.fujitsu.com (Postfix) with ESMTP id 1B0A44CE26CE;
-        Thu, 11 Jun 2020 16:33:18 +0800 (CST)
+        by cn.fujitsu.com (Postfix) with ESMTP id 719DB4CE26D8;
+        Thu, 11 Jun 2020 17:13:41 +0800 (CST)
 Received: from [10.167.220.69] (10.167.220.69) by
  G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206) with Microsoft SMTP Server
- (TLS) id 15.0.1497.2; Thu, 11 Jun 2020 16:33:15 +0800
-Message-ID: <5EE1EC47.2020501@cn.fujitsu.com>
-Date:   Thu, 11 Jun 2020 16:33:11 +0800
+ (TLS) id 15.0.1497.2; Thu, 11 Jun 2020 17:13:37 +0800
+Message-ID: <5EE1F5BF.8020809@cn.fujitsu.com>
+Date:   Thu, 11 Jun 2020 17:13:35 +0800
 From:   Xiao Yang <yangx.jy@cn.fujitsu.com>
 User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.2; zh-CN; rv:1.9.2.18) Gecko/20110616 Thunderbird/3.1.11
 MIME-Version: 1.0
@@ -44,7 +44,7 @@ Content-Transfer-Encoding: 7bit
 X-Originating-IP: [10.167.220.69]
 X-ClientProxiedBy: G08CNEXCHPEKD05.g08.fujitsu.local (10.167.33.203) To
  G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206)
-X-yoursite-MailScanner-ID: 1B0A44CE26CE.ABC02
+X-yoursite-MailScanner-ID: 719DB4CE26D8.AD08C
 X-yoursite-MailScanner: Found to be clean
 X-yoursite-MailScanner-From: yangx.jy@cn.fujitsu.com
 Sender: fstests-owner@vger.kernel.org
@@ -105,35 +105,67 @@ On 2020/6/10 23:59, Darrick J. Wong wrote:
 >>>> +mkfs_opts=""
 >>>> +[ "$FSTYP" = "ext4" ]&&   mkfs_opts="-E stride=512,stripe_width=1"
 >>>> +[ "$FSTYP" = "xfs" ]&&   mkfs_opts="-d su=2m,sw=1"
->>>
 >>> /me wonders if this ought to be smart enough to sniff out the hugepage
 >>> size on the test machine...
 >> Hi Darrick,
 >>
 >> PMD page is always 2M, I am not sure why we need to sniff out the hugepage
 >> size?  Could you give me an example?
->
 > arm64, which can have 512M hugepages.
 > ppc64, which can have 16M huge pages (I think?)
 Hi Darrick,
 
-Sorry I don't understand what you mean.
-I know different arches have different page size/hugepage size but I 
-don't know the relationship between PMD page fault and hugepage.
+After reading kernel xfs code, do you mean that PMD page fault is only 
+used by hugepage?
+----------------------------------------------------------------
+xfs/xfs_file.c:
+...
+1223 static vm_fault_t
+1224 xfs_filemap_fault(
+1225         struct vm_fault         *vmf)
+1226 {
+1227         /* DAX can shortcut the normal fault path on write faults! */
+1228         return __xfs_filemap_fault(vmf, PE_SIZE_PTE,
+1229                         IS_DAX(file_inode(vmf->vma->vm_file)) &&
+1230                         (vmf->flags & FAULT_FLAG_WRITE));
+1231 }
+1232
+1233 static vm_fault_t
+1234 xfs_filemap_huge_fault(
+1235         struct vm_fault         *vmf,
+1236         enum page_entry_size    pe_size)
+1237 {
+1238         if (!IS_DAX(file_inode(vmf->vma->vm_file)))
+1239                 return VM_FAULT_FALLBACK;
+1240
+1241         /* DAX can shortcut the normal fault path on write faults! */
+1242         return __xfs_filemap_fault(vmf, pe_size,
+1243                         (vmf->flags & FAULT_FLAG_WRITE));
+1244 }
+...
+----------------------------------------------------------------
 
-Accodring to dax.txt in kernel, it seems that we have to format block 
-device with a fixed block size which is equal to kernel's page size.
-mount will fail or disable dax feature if block size is not equal to
-kernel's page size, so do you mean this?
+Another qeustion: ext4 seems not use PMD page fault,does I miss something?
+----------------------------------------------------------------
+ext4/file.c:
+...
+705 static vm_fault_t ext4_dax_fault(struct vm_fault *vmf)
+706 {
+707         return ext4_dax_huge_fault(vmf, PE_SIZE_PTE);
+708 }
+709
+710 static const struct vm_operations_struct ext4_dax_vm_ops = {
+711         .fault          = ext4_dax_fault,
+712         .huge_fault     = ext4_dax_huge_fault,
+...
+----------------------------------------------------------------
 
 Best Regards,
 Xiao Yang
->
 > --D
 >
 >> Best Regards,
 >> Xiao Yang
->>>
 >>> --D
 >>>
 >>>> +
@@ -184,13 +216,10 @@ Xiao Yang
 >>>>
 >>>>
 >>>
->>>
 >>> .
 >>>
 >>
 >>
->>
->
 >
 > .
 >
