@@ -2,35 +2,50 @@ Return-Path: <SRS0=NbcK=7Z=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.7 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	UNPARSEABLE_RELAY,USER_AGENT_GIT autolearn=ham autolearn_force=no
+X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E1E38C433E0
-	for <linux-fstests@archiver.kernel.org>; Fri, 12 Jun 2020 05:18:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C5A1FC433DF
+	for <linux-fstests@archiver.kernel.org>; Fri, 12 Jun 2020 14:06:12 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CB94220878
-	for <linux-fstests@archiver.kernel.org>; Fri, 12 Jun 2020 05:18:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 95DC920835
+	for <linux-fstests@archiver.kernel.org>; Fri, 12 Jun 2020 14:06:12 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1591970772;
+	bh=JkKW22SrwBGg1YIfUL+6cuQmj0l7tbRU8LUoVMzxXo8=;
+	h=From:To:Cc:Subject:Date:List-ID:From;
+	b=aAb3rUIGvL81c0onKyIjXAygRetSpY/kjnphWqdJf3uFfFsUAyW2cfRdCE0eDhiJV
+	 27fbLCgWU4zI9qwXXXpONbaZAh7tgvYDPzKvMoBdP6BgaWtSCb3a6MbIthnuaEsBrv
+	 rUrrcV8GQALzZOjqDgT9sq8RpdkDaBtSqeyloJj4=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726349AbgFLFSs (ORCPT
+        id S1726255AbgFLOGM (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 12 Jun 2020 01:18:48 -0400
-Received: from out30-54.freemail.mail.aliyun.com ([115.124.30.54]:48690 "EHLO
-        out30-54.freemail.mail.aliyun.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726332AbgFLFSs (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 12 Jun 2020 01:18:48 -0400
-X-Alimail-AntiSpam: AC=PASS;BC=-1|-1;BR=01201311R361e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=e01e07484;MF=jefflexu@linux.alibaba.com;NM=1;PH=DS;RN=3;SR=0;TI=SMTPD_---0U.Ka63O_1591939125;
-Received: from localhost(mailfrom:jefflexu@linux.alibaba.com fp:SMTPD_---0U.Ka63O_1591939125)
-          by smtp.aliyun-inc.com(127.0.0.1);
-          Fri, 12 Jun 2020 13:18:45 +0800
-From:   Jeffle Xu <jefflexu@linux.alibaba.com>
+        Fri, 12 Jun 2020 10:06:12 -0400
+Received: from mail.kernel.org ([198.145.29.99]:36018 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726085AbgFLOGL (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 12 Jun 2020 10:06:11 -0400
+Received: from debian8.Home (bl8-197-74.dsl.telepac.pt [85.241.197.74])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id BCC2A2074B;
+        Fri, 12 Jun 2020 14:06:10 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1591970771;
+        bh=JkKW22SrwBGg1YIfUL+6cuQmj0l7tbRU8LUoVMzxXo8=;
+        h=From:To:Cc:Subject:Date:From;
+        b=zmgVVD5hDadZ3XlphcrwdHrfLlSIIPpaK/VTz/PwpWfRobEtalZWvrRYPCSUrkZC6
+         qg5jYqwWDnZcIF4Wa/laQytOedF3gYiBHDCY8m7l4F+0cgIm+kXTAbmhGmWrWop90l
+         A2vlq3Azg7OAoEJyeG4axCcZbv9mgz6PZ7IAqx5g=
+From:   fdmanana@kernel.org
 To:     fstests@vger.kernel.org
-Cc:     joseph.qi@linux.alibaba.com, Jeffle Xu <jefflexu@linux.alibaba.com>
-Subject: [PATCH] common/dmthin: modify DMTHIN_POOL_NAME
-Date:   Fri, 12 Jun 2020 13:18:20 +0800
-Message-Id: <20200612051820.80814-2-jefflexu@linux.alibaba.com>
-X-Mailer: git-send-email 2.27.0
+Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] generic/471: adapt test when running on btrfs to avoid failure on RWF_NOWAIT write
+Date:   Fri, 12 Jun 2020 15:06:03 +0100
+Message-Id: <20200612140604.2790275-1-fdmanana@kernel.org>
+X-Mailer: git-send-email 2.26.2
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
@@ -38,38 +53,60 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-_dmthin_set_queue() gets $cluster_size by 'dmsetup table | grep
-$DMTHIN_POOL_NAME'. The original name 'thin-pool' is accidently
-the same as the fourth field of the output of 'dmsetup table'.
+From: Filipe Manana <fdmanana@suse.com>
 
-For example,
-vg-pool-tpool: 0 64864256 thin-pool 252:0 252:1 128 0 0
+This test currently always fails on btrfs:
 
-Thus if there is other thin-pool in the test environment, except
-for the thin-pool created by _dmthin_init(), the parsed $cluster_size
-may be a multi-line string, which is unexpected.
+generic/471 2s ... - output mismatch (see ...results//generic/471.out.bad)
+    --- tests/generic/471.out   2020-06-10 19:29:03.850519863 +0100
+    +++ /home/fdmanana/git/hub/xfstests/results//generic/471.out.bad   ...
+    @@ -2,12 +2,10 @@
+     pwrite: Resource temporarily unavailable
+     wrote 8388608/8388608 bytes at offset 0
+     XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+    -RWF_NOWAIT time is within limits.
+    +pwrite: Resource temporarily unavailable
+    +(standard_in) 1: syntax error
+    +RWF_NOWAIT took  seconds
 
-This issue caused a failure of generic/347 and generic/500, while the
-dmesg reports 'Invalid argument count'.
+This is because btrfs is a COW filesystem and an attempt to write into a
+previously written file range allocating a new extent (or multiple).
+The only exceptions are when attempting to write to a file range with a
+preallocated/unwritten extent or when writing to a NOCOW file that has
+extents allocated in the target range already.
 
-Signed-off-by: Jeffle Xu <jefflexu@linux.alibaba.com>
+The test currently expects that writing into a previously written file
+range succeeds, but that is not true on btrfs since we are not dealing
+with a NOCOW file. So to make the test pass on btrfs, set the NOCOW bit
+on the file when the filesystem is btrfs.
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
 ---
- common/dmthin | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ tests/generic/471 | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
 
-diff --git a/common/dmthin b/common/dmthin
-index 61dd6f89..c58c3948 100644
---- a/common/dmthin
-+++ b/common/dmthin
-@@ -15,7 +15,7 @@ DMTHIN_DATA_DEV="/dev/mapper/$DMTHIN_DATA_NAME"
- DMTHIN_META_NAME="thin-meta"
- DMTHIN_META_DEV="/dev/mapper/$DMTHIN_META_NAME"
- # Backing pool dev (combination of above)
--DMTHIN_POOL_NAME="thin-pool"
-+DMTHIN_POOL_NAME="thin-provision-pool"
- DMTHIN_POOL_DEV="/dev/mapper/$DMTHIN_POOL_NAME"
- # Thin volume
- DMTHIN_VOL_NAME="thin-vol"
+diff --git a/tests/generic/471 b/tests/generic/471
+index 7513f023..e9856b52 100755
+--- a/tests/generic/471
++++ b/tests/generic/471
+@@ -37,6 +37,17 @@ fi
+ 
+ mkdir $testdir
+ 
++# Btrfs is a COW filesystem, so a RWF_NOWAIT write will always fail with -EAGAIN
++# when writing to a file range except if it's a NOCOW file and an extent for the
++# range already exists or if it's a COW file and preallocated/unwritten extent
++# exists in the target range. So to make sure that the last write succeeds on
++# all filesystems, use a NOCOW file on btrfs.
++if [ $FSTYP == "btrfs" ]; then
++	_require_chattr C
++	touch $testdir/f1
++	$CHATTR_PROG +C $testdir/f1
++fi
++
+ # Create a file with pwrite nowait (will fail with EAGAIN)
+ $XFS_IO_PROG -f -d -c "pwrite -N -V 1 -b 1M 0 1M" $testdir/f1
+ 
 -- 
-2.27.0
+2.26.2
 
