@@ -2,98 +2,157 @@ Return-Path: <SRS0=OS5J=74=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0DEF7C433E0
-	for <linux-fstests@archiver.kernel.org>; Mon, 15 Jun 2020 10:52:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C45BEC433DF
+	for <linux-fstests@archiver.kernel.org>; Mon, 15 Jun 2020 11:54:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D2BB32068E
-	for <linux-fstests@archiver.kernel.org>; Mon, 15 Jun 2020 10:52:42 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="UFr2KbAO"
+	by mail.kernel.org (Postfix) with ESMTP id A328920714
+	for <linux-fstests@archiver.kernel.org>; Mon, 15 Jun 2020 11:54:11 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1592222051;
+	bh=w2Ikr63aPR/zBv8aefHNvfVKdUAbVhmiKMt8IkkE00o=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
+	b=BiizT9YwtPPzsu+yJ0GZ9iS5bkm5b9XVsBSobxk/07nFU+1FQ3dvZ9Ue3/Iqf70XJ
+	 T08GTYr8d+dEis0SUGR8ZQ26chgPoEjg41LXZsZs2+uLZfe5a1yJnfSd7SCz+tpnm4
+	 JZNMGBHJrUI6wuz+B4pUbZjHlXr+NlIOMZHHYF8c=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728860AbgFOKwm (ORCPT
+        id S1729763AbgFOLyK (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 15 Jun 2020 06:52:42 -0400
-Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:35793 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1728815AbgFOKwm (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 15 Jun 2020 06:52:42 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1592218361;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=dlmEEYEzz3MjXrf/l1MCtF+IfVk5Lcg9CdnRTKN11pU=;
-        b=UFr2KbAOIkfWm8NNoGiWtsZ1zZPlxnBHKQeUd4oTCCAOhb6smXDsCbfyZ+ac1zfYN2YLd0
-        EPVf9k9Xw83hQFQouQocQW36DVV28/ibGo0efdIzPJHjaoZPr5UDn+kaRQQUkeoKrPZ30q
-        8IT/IgTaM0Y8T5L9lYF3r6NeXPCVyI8=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-22-Gpe259Z3N6a0EzHeACB8Vg-1; Mon, 15 Jun 2020 06:52:39 -0400
-X-MC-Unique: Gpe259Z3N6a0EzHeACB8Vg-1
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        Mon, 15 Jun 2020 07:54:10 -0400
+Received: from mail.kernel.org ([198.145.29.99]:57920 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1729691AbgFOLyK (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 15 Jun 2020 07:54:10 -0400
+Received: from mail-ua1-f42.google.com (mail-ua1-f42.google.com [209.85.222.42])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 0B0658015CE
-        for <fstests@vger.kernel.org>; Mon, 15 Jun 2020 10:52:39 +0000 (UTC)
-Received: from localhost.localdomain (unknown [10.40.195.22])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 7A210768AE
-        for <fstests@vger.kernel.org>; Mon, 15 Jun 2020 10:52:38 +0000 (UTC)
-From:   Lukas Czerner <lczerner@redhat.com>
-To:     fstests@vger.kernel.org
-Subject: [PATCH] 270: wait for fsstress processes to be killed
-Date:   Mon, 15 Jun 2020 12:52:36 +0200
-Message-Id: <20200615105236.32198-1-lczerner@redhat.com>
+        by mail.kernel.org (Postfix) with ESMTPSA id 6121A20714;
+        Mon, 15 Jun 2020 11:54:09 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1592222049;
+        bh=w2Ikr63aPR/zBv8aefHNvfVKdUAbVhmiKMt8IkkE00o=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=Rk+Jwby//cFxWe+3srgvWEpbEzTN3T6Gkbm7Ft+qfDkeYrUy44k2UjJSsAaRK0XHD
+         N2ShA++qHgxdb3LaaeODMhJ6RZDTdmNwPxdRE0bJr/QeeZ9uRX7ZbFGlo08oWZ+Lun
+         WmfBLQl7bI+KLYaWQxcRuMtENbDdXnGSz0pCGOCI=
+Received: by mail-ua1-f42.google.com with SMTP id r1so5549317uam.6;
+        Mon, 15 Jun 2020 04:54:09 -0700 (PDT)
+X-Gm-Message-State: AOAM533cNaoHAQE1mKiPEQtIo7ASeKsL8OE2/0jAxQQ7B/BLEwnFdRvu
+        2gH9zwo52zCiycqVbQtTGnxJQDbepgj0jakvrAg=
+X-Google-Smtp-Source: ABdhPJyTb3ZGnJwNZA7tfNKQ23pOVqIc7F3zGjALmGdRkzRpvuh++O6ZvvVbdeLC5Pa5DlSfNNUI7bBDvjy6QnriqwU=
+X-Received: by 2002:ab0:224d:: with SMTP id z13mr18467543uan.83.1592222048487;
+ Mon, 15 Jun 2020 04:54:08 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.15
+References: <20200612140604.2790275-1-fdmanana@kernel.org> <89ce0d58-5c7b-2cb9-ba8b-d4320340c234@gmx.com>
+In-Reply-To: <89ce0d58-5c7b-2cb9-ba8b-d4320340c234@gmx.com>
+From:   Filipe Manana <fdmanana@kernel.org>
+Date:   Mon, 15 Jun 2020 12:53:57 +0100
+X-Gmail-Original-Message-ID: <CAL3q7H42yO5Z_DGhmgrSPYoWR3i13WOPawJUm-cqN1sJwDekkw@mail.gmail.com>
+Message-ID: <CAL3q7H42yO5Z_DGhmgrSPYoWR3i13WOPawJUm-cqN1sJwDekkw@mail.gmail.com>
+Subject: Re: [PATCH] generic/471: adapt test when running on btrfs to avoid
+ failure on RWF_NOWAIT write
+To:     Qu Wenruo <quwenruo.btrfs@gmx.com>
+Cc:     fstests <fstests@vger.kernel.org>,
+        linux-btrfs <linux-btrfs@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Currently wait will do nothing, because $pid is empty due to the fact
-that the command was ran on the background in a separate shell so we
-never got the $! set.
+On Sun, Jun 14, 2020 at 6:14 AM Qu Wenruo <quwenruo.btrfs@gmx.com> wrote:
+>
+>
+>
+> On 2020/6/12 =E4=B8=8B=E5=8D=8810:06, fdmanana@kernel.org wrote:
+> > From: Filipe Manana <fdmanana@suse.com>
+> >
+> > This test currently always fails on btrfs:
+> >
+> > generic/471 2s ... - output mismatch (see ...results//generic/471.out.b=
+ad)
+> >     --- tests/generic/471.out   2020-06-10 19:29:03.850519863 +0100
+> >     +++ /home/fdmanana/git/hub/xfstests/results//generic/471.out.bad   =
+...
+> >     @@ -2,12 +2,10 @@
+> >      pwrite: Resource temporarily unavailable
+> >      wrote 8388608/8388608 bytes at offset 0
+> >      XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> >     -RWF_NOWAIT time is within limits.
+> >     +pwrite: Resource temporarily unavailable
+> >     +(standard_in) 1: syntax error
+> >     +RWF_NOWAIT took  seconds
+> >
+> > This is because btrfs is a COW filesystem and an attempt to write into =
+a
+> > previously written file range allocating a new extent (or multiple).
+> > The only exceptions are when attempting to write to a file range with a
+> > preallocated/unwritten extent or when writing to a NOCOW file that has
+> > extents allocated in the target range already.
+> >
+> > The test currently expects that writing into a previously written file
+> > range succeeds, but that is not true on btrfs since we are not dealing
+> > with a NOCOW file. So to make the test pass on btrfs, set the NOCOW bit
+> > on the file when the filesystem is btrfs.
+>
+> Completely agree with the point for btrfs.
+>
+> >
+> > Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> > ---
+> >  tests/generic/471 | 11 +++++++++++
+> >  1 file changed, 11 insertions(+)
+> >
+> > diff --git a/tests/generic/471 b/tests/generic/471
+> > index 7513f023..e9856b52 100755
+> > --- a/tests/generic/471
+> > +++ b/tests/generic/471
+> > @@ -37,6 +37,17 @@ fi
+> >
+> >  mkdir $testdir
+> >
+> > +# Btrfs is a COW filesystem, so a RWF_NOWAIT write will always fail wi=
+th -EAGAIN
+> > +# when writing to a file range except if it's a NOCOW file and an exte=
+nt for the
+> > +# range already exists or if it's a COW file and preallocated/unwritte=
+n extent
+> > +# exists in the target range. So to make sure that the last write succ=
+eeds on
+> > +# all filesystems, use a NOCOW file on btrfs.
+> > +if [ $FSTYP =3D=3D "btrfs" ]; then
+>
+> Although I'm not sure if really only specific to btrfs.
+> XFS has its always_cow sysfs interface to make data write to always do
+> COW, just like what btrfs do by default.
+>
+> Thus I believe this may be needed for all fses, and just ignore the
+> error if the fs doesn't support COW.
 
-This is causing unexpected test failures especially under low memory
-due to the fact that the fsstress is still running when we are
-checking and comparing quota usage.
+I don't understand your point.
+If that flag is enabled on xfs (iirc it's a debug flag), the test
+would fail on xfs even if we attempt chattr +C (afaics xfs doesn't
+support +C).
+So I don't see the benefit of always doing it.
 
-Fix it by using -w argument for killall that will wait for all processes
-to actually die before it exits.
+Thanks.
 
-Signed-off-by: Lukas Czerner <lczerner@redhat.com>
----
- tests/generic/270 | 4 +---
- 1 file changed, 1 insertion(+), 3 deletions(-)
 
-diff --git a/tests/generic/270 b/tests/generic/270
-index 5092ffa4..55779f5e 100755
---- a/tests/generic/270
-+++ b/tests/generic/270
-@@ -38,7 +38,6 @@ _workout()
- 	$SETCAP_PROG cap_chown=epi  $tmp.fsstress.bin
- 
- 	(su $qa_user -c "$tmp.fsstress.bin $args" &) > /dev/null 2>&1
--	pid=$!
- 
- 	echo "Run dd writers in parallel"
- 	for ((i=0; i < num_iterations; i++))
-@@ -50,8 +49,7 @@ _workout()
- 		sleep $enospc_time
- 	done
- 
--	$KILLALL_PROG $tmp.fsstress.bin
--	wait $pid
-+	$KILLALL_PROG -w $tmp.fsstress.bin
- }
- 
- # real QA test starts here
--- 
-2.21.3
-
+>
+> Thanks,
+> Qu
+>
+> > +     _require_chattr C
+> > +     touch $testdir/f1
+> > +     $CHATTR_PROG +C $testdir/f1
+> > +fi
+> > +
+> >  # Create a file with pwrite nowait (will fail with EAGAIN)
+> >  $XFS_IO_PROG -f -d -c "pwrite -N -V 1 -b 1M 0 1M" $testdir/f1
+> >
+> >
+>
