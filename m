@@ -2,245 +2,178 @@ Return-Path: <SRS0=OS5J=74=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.0 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 225BAC433E1
-	for <linux-fstests@archiver.kernel.org>; Mon, 15 Jun 2020 12:03:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 45F68C433DF
+	for <linux-fstests@archiver.kernel.org>; Mon, 15 Jun 2020 17:50:36 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id ED14420707
-	for <linux-fstests@archiver.kernel.org>; Mon, 15 Jun 2020 12:03:46 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=gmx.net header.i=@gmx.net header.b="UELvFH/z"
+	by mail.kernel.org (Postfix) with ESMTP id 23AFF20857
+	for <linux-fstests@archiver.kernel.org>; Mon, 15 Jun 2020 17:50:36 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1592243436;
+	bh=oF9T3WX20U4gIU/vCnvsQ6/wJMcZdnBsn8YMMAZrm34=;
+	h=From:To:Cc:Subject:Date:List-ID:From;
+	b=DNOzUwh/xoIRLK2PHUupTj438hbF3Bg89+szptC/dS45m3njESWVzWl9TesJLmOqn
+	 MlKxHsgLZslmh4H2jpN93ZiPeaWbHtSY3IEi+3WH6b96ES5/qdYki7bsQPJGwpaX9L
+	 kLbCdZNgf7VWeqona8wub+RODBHAWCYsA7tC9fCg=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729665AbgFOMDc (ORCPT
+        id S1731201AbgFORuf (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 15 Jun 2020 08:03:32 -0400
-Received: from mout.gmx.net ([212.227.15.19]:49209 "EHLO mout.gmx.net"
+        Mon, 15 Jun 2020 13:50:35 -0400
+Received: from mail.kernel.org ([198.145.29.99]:55106 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729691AbgFOMDa (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 15 Jun 2020 08:03:30 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net;
-        s=badeba3b8450; t=1592222605;
-        bh=amS7nEItLHUteZ9pzMz1ATTx2KIXM/u9qde4H1jR8MY=;
-        h=X-UI-Sender-Class:Subject:To:Cc:References:From:Date:In-Reply-To;
-        b=UELvFH/zpBg9b7bPtGz17UwB4+HeW/pdc0qRLPyK1BSqx9sqD2EpujrlkF37SGnDR
-         4Pm2ph6KE4LdpTd3+06gD2qS4B9jT7uyKWcJYivtFCmSQYAgLQ1ofGByQnTJQG33Kd
-         8HHmKsVcRZoZmSn5aEV7yJ1hqtiCz0Y3QQVVygb0=
-X-UI-Sender-Class: 01bb95c1-4bf8-414a-932a-4f6e2808ef9c
-Received: from [0.0.0.0] ([149.28.201.231]) by mail.gmx.com (mrgmx004
- [212.227.17.184]) with ESMTPSA (Nemesis) id 1N4hzZ-1ijJj00U5v-011kVf; Mon, 15
- Jun 2020 14:03:25 +0200
-Subject: Re: [PATCH] generic/471: adapt test when running on btrfs to avoid
- failure on RWF_NOWAIT write
-To:     Filipe Manana <fdmanana@kernel.org>
-Cc:     fstests <fstests@vger.kernel.org>,
-        linux-btrfs <linux-btrfs@vger.kernel.org>
-References: <20200612140604.2790275-1-fdmanana@kernel.org>
- <89ce0d58-5c7b-2cb9-ba8b-d4320340c234@gmx.com>
- <CAL3q7H42yO5Z_DGhmgrSPYoWR3i13WOPawJUm-cqN1sJwDekkw@mail.gmail.com>
-From:   Qu Wenruo <quwenruo.btrfs@gmx.com>
-Autocrypt: addr=quwenruo.btrfs@gmx.com; prefer-encrypt=mutual; keydata=
- mQENBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
- 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
- 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
- 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
- gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
- AAG0IlF1IFdlbnJ1byA8cXV3ZW5ydW8uYnRyZnNAZ214LmNvbT6JAU4EEwEIADgCGwMFCwkI
- BwIGFQgJCgsCBBYCAwECHgECF4AWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCXZw1oQAKCRDC
- PZHzoSX+qCY6CACd+mWu3okGwRKXju6bou+7VkqCaHTdyXwWFTsr+/0ly5nUdDtT3yEVggPJ
- 3VP70wjlrxUjNjFb6iIvGYxiPOrop1NGwGYvQktgRhaIhALG6rPoSSAhGNjwGVRw0km0PlIN
- D29BTj/lYEk+jVM1YL0QLgAE1AI3krihg/lp/fQT53wLhR8YZIF8ETXbClQG1vJ0cllPuEEv
- efKxRyiTSjB+PsozSvYWhXsPeJ+KKjFen7ebE5reQTPFzSHctCdPnoR/4jSPlnTlnEvLeqcD
- ZTuKfQe1gWrPeevQzgCtgBF/WjIOeJs41klnYzC3DymuQlmFubss0jShLOW8eSOOWhLRuQEN
- BFnVga8BCACqU+th4Esy/c8BnvliFAjAfpzhI1wH76FD1MJPmAhA3DnX5JDORcgaCbPEwhLj
- 1xlwTgpeT+QfDmGJ5B5BlrrQFZVE1fChEjiJvyiSAO4yQPkrPVYTI7Xj34FnscPj/IrRUUka
- 68MlHxPtFnAHr25VIuOS41lmYKYNwPNLRz9Ik6DmeTG3WJO2BQRNvXA0pXrJH1fNGSsRb+pK
- EKHKtL1803x71zQxCwLh+zLP1iXHVM5j8gX9zqupigQR/Cel2XPS44zWcDW8r7B0q1eW4Jrv
- 0x19p4P923voqn+joIAostyNTUjCeSrUdKth9jcdlam9X2DziA/DHDFfS5eq4fEvABEBAAGJ
- ATwEGAEIACYCGwwWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCXZw1rgUJCWpOfwAKCRDCPZHz
- oSX+qFcEB/95cs8cM1OQdE/GgOfCGxwgckMeWyzOR7bkAWW0lDVp2hpgJuxBW/gyfmtBnUai
- fnggx3EE3ev8HTysZU9q0h+TJwwJKGv6sUc8qcTGFDtavnnl+r6xDUY7A6GvXEsSoCEEynby
- 72byGeSovfq/4AWGNPBG1L61Exl+gbqfvbECP3ziXnob009+z9I4qXodHSYINfAkZkA523JG
- ap12LndJeLk3gfWNZfXEWyGnuciRGbqESkhIRav8ootsCIops/SqXm0/k+Kcl4gGUO/iD/T5
- oagaDh0QtOd8RWSMwLxwn8uIhpH84Q4X1LadJ5NCgGa6xPP5qqRuiC+9gZqbq4Nj
-Message-ID: <ea0c9268-cabb-a09d-ab1b-0b00403a7444@gmx.com>
-Date:   Mon, 15 Jun 2020 20:03:20 +0800
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.9.0
+        id S1728585AbgFORuf (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 15 Jun 2020 13:50:35 -0400
+Received: from debian8.Home (bl8-197-74.dsl.telepac.pt [85.241.197.74])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id DD2CF20679;
+        Mon, 15 Jun 2020 17:50:33 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1592243434;
+        bh=oF9T3WX20U4gIU/vCnvsQ6/wJMcZdnBsn8YMMAZrm34=;
+        h=From:To:Cc:Subject:Date:From;
+        b=PC5hwJTh1jgI/pbSnapPDB3+vLh34S+J0lSKPDdW4e3qXMkLT/eo+lOlxZycnJQe6
+         EYdDQlRHrt65+ZwUznEdIK3ou0GLnAyBzZp1VqLttfeBNZgFK2Ib3otamNX+vJj5ER
+         aL8Nv9PDbDNr2sbHclQCGO0Ix/Z7L+D0v2UC1/rM=
+From:   fdmanana@kernel.org
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] btrfs: test creating a snapshot after RWF_NOWAIT write works as expected
+Date:   Mon, 15 Jun 2020 18:50:28 +0100
+Message-Id: <20200615175028.15090-1-fdmanana@kernel.org>
+X-Mailer: git-send-email 2.26.2
 MIME-Version: 1.0
-In-Reply-To: <CAL3q7H42yO5Z_DGhmgrSPYoWR3i13WOPawJUm-cqN1sJwDekkw@mail.gmail.com>
-Content-Type: multipart/signed; micalg=pgp-sha256;
- protocol="application/pgp-signature";
- boundary="leDR9sdoaRKQhLbAyNH85Mn2MOG1FWbfX"
-X-Provags-ID: V03:K1:AZBWl5Ls+QDCavG+Zd7CWBsEugCzXDv4Q5TgVpuBy2IGU0UIATH
- NhRzpYOoM49Pzl3sF4OjafzqfxjfxQyOi3X4hLO623nB2nkmePwvBG/uU81APLt9zTissYG
- eeqbwSU6ybVlWg4/0JXVXxkMZ75UGUWFBKJz62Gb//ZMudJvgFbF55o0hRsSlFz2SuCReBq
- bKeN8I6WCUpTjrzEXI2gA==
-X-UI-Out-Filterresults: notjunk:1;V03:K0:CA/zGAgW/Xk=:AkVxVqqj8SaffrHgpz48zR
- L1mJbmVJNt1SfKiIe4EhAbLY2400cu4BjPZJTxGtDwPp+FnLyHVOtKprQEa/VY4S8tZC/PufQ
- F6yo3I+UMAtPo777Z6emH0VsG3HMdMtRyjzgm7G/unXZNkgIUBh4E4c3D8/k5dHB3jFVg1XMY
- kf3s8R6/fz3j7G+awVvw0+MwcGbhRvfSfNgvhfogIR2JEnebdhGXqmFAPdWXn/N6rxbFJ+H9D
- ARgiEMS8eCG4LNh6i/QXUbCPZG3JkQJsWRDAjp2o54W8lg5pU+SMV0NdRCprudRM6cMEXy8W6
- fvkWd51RdHE0IpWTWEyb9gNZB/i8oolHi5wmO5zFWGCKUdIQb4ndVY3iJVtUV+xaG13zr37U6
- F870xKrpkoiq1ooETgpqaBAAvpI/nVKEQp1gRohXcO77/M1hSbSCoBha3gQfENpT9yt1AbIH8
- fVrmW0rxYAn5bzIrIL0GQsoOFUHNSJWd9HMFcDzF4AqUL3y/GAseGz8qPJc2Pstz9fqvgMQDx
- YYyo6tSynQTdzgHcw+VUbwzskVehHd1DWSClAvvy+c4RdLxuOKT5vtgsNDd9IkF/DVaX8mbKZ
- 75qETHI+9jc26vaszPDFPYSrtjCZsQYB/mXIsdNtfa9wYSwnE7WOrZj309l7yIuL2/zmEyPHL
- w1crSQoWOfXap4KpAS4GdBaj3sT1u9ZkkvQthpYwcaethi3FIKDfLdfseYZQ83unkeVfhDO3y
- UB00lOquVngWA1dOea4WZLWXiA+ttfv16NP0r3eyBODm4Q0dE1l/xzVTWL/mHXye6BT71yWaj
- LzmkFwaum/9RqIExN8JPckSnSkYLagZW7KhhKWWjpccnU1Etuge2cp/m7zPqyts+mxdkKCZgA
- cSm/pcYrEJe8Nnk2HT+c9NMhA1BM/p2sPWYPK6aU4qWaCyGmCIWRtJWf3wnJlhQWTVgZdQ6kC
- LG+rTUx04HgqBAKLCkwe4nBiEUhiXb//IGUCe9qRauI2rsYEIfqq4ZzZ91m+rBKvCl87Ld5kD
- DPH0W8FoHEpOU1ZMJdD2W+od8UJKjKGBG3RgfM4jIis5K/KP9bAoM2OeYHPq2z5y63+EUjIMF
- c+dt+huzHK2MBBlTYDqauRm8FaU1LXWWUuJQftpeQZEeR3APxY6hP6zVvO5aEHNNv2EwIZjND
- EO+weIpAOL1+EuzsXZEsgaTjV1LRaOkzQ+aYQ3FATaA1kHxZEVZ7+HuB5Ioh2TtZhfwvDc7cZ
- KIKSaQYkCYX2VqJTx
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---leDR9sdoaRKQhLbAyNH85Mn2MOG1FWbfX
-Content-Type: multipart/mixed; boundary="73s9CAh13OvoOVHW8oUhRGDu2E7i47Nce"
+From: Filipe Manana <fdmanana@suse.com>
 
---73s9CAh13OvoOVHW8oUhRGDu2E7i47Nce
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: quoted-printable
+Test that creating a snapshot after writing to a file using a RWF_NOWAIT
+works, does not hang the snapshot creation task, and we are able to read
+the data after.
 
+Currently btrfs hangs when creating the snapshot due to a missing unlock
+of a snapshot lock, but it is fixed by a patch with the following subject:
 
+  "btrfs: fix hang on snapshot creation after RWF_NOWAIT write"
 
-On 2020/6/15 =E4=B8=8B=E5=8D=887:53, Filipe Manana wrote:
-> On Sun, Jun 14, 2020 at 6:14 AM Qu Wenruo <quwenruo.btrfs@gmx.com> wrot=
-e:
->>
->>
->>
->> On 2020/6/12 =E4=B8=8B=E5=8D=8810:06, fdmanana@kernel.org wrote:
->>> From: Filipe Manana <fdmanana@suse.com>
->>>
->>> This test currently always fails on btrfs:
->>>
->>> generic/471 2s ... - output mismatch (see ...results//generic/471.out=
-=2Ebad)
->>>     --- tests/generic/471.out   2020-06-10 19:29:03.850519863 +0100
->>>     +++ /home/fdmanana/git/hub/xfstests/results//generic/471.out.bad =
-  ...
->>>     @@ -2,12 +2,10 @@
->>>      pwrite: Resource temporarily unavailable
->>>      wrote 8388608/8388608 bytes at offset 0
->>>      XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
->>>     -RWF_NOWAIT time is within limits.
->>>     +pwrite: Resource temporarily unavailable
->>>     +(standard_in) 1: syntax error
->>>     +RWF_NOWAIT took  seconds
->>>
->>> This is because btrfs is a COW filesystem and an attempt to write int=
-o a
->>> previously written file range allocating a new extent (or multiple).
->>> The only exceptions are when attempting to write to a file range with=
- a
->>> preallocated/unwritten extent or when writing to a NOCOW file that ha=
-s
->>> extents allocated in the target range already.
->>>
->>> The test currently expects that writing into a previously written fil=
-e
->>> range succeeds, but that is not true on btrfs since we are not dealin=
-g
->>> with a NOCOW file. So to make the test pass on btrfs, set the NOCOW b=
-it
->>> on the file when the filesystem is btrfs.
->>
->> Completely agree with the point for btrfs.
->>
->>>
->>> Signed-off-by: Filipe Manana <fdmanana@suse.com>
->>> ---
->>>  tests/generic/471 | 11 +++++++++++
->>>  1 file changed, 11 insertions(+)
->>>
->>> diff --git a/tests/generic/471 b/tests/generic/471
->>> index 7513f023..e9856b52 100755
->>> --- a/tests/generic/471
->>> +++ b/tests/generic/471
->>> @@ -37,6 +37,17 @@ fi
->>>
->>>  mkdir $testdir
->>>
->>> +# Btrfs is a COW filesystem, so a RWF_NOWAIT write will always fail =
-with -EAGAIN
->>> +# when writing to a file range except if it's a NOCOW file and an ex=
-tent for the
->>> +# range already exists or if it's a COW file and preallocated/unwrit=
-ten extent
->>> +# exists in the target range. So to make sure that the last write su=
-cceeds on
->>> +# all filesystems, use a NOCOW file on btrfs.
->>> +if [ $FSTYP =3D=3D "btrfs" ]; then
->>
->> Although I'm not sure if really only specific to btrfs.
->> XFS has its always_cow sysfs interface to make data write to always do=
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/btrfs/214     | 66 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/214.out | 14 ++++++++++
+ tests/btrfs/group   |  1 +
+ 3 files changed, 81 insertions(+)
+ create mode 100755 tests/btrfs/214
+ create mode 100644 tests/btrfs/214.out
 
->> COW, just like what btrfs do by default.
->>
->> Thus I believe this may be needed for all fses, and just ignore the
->> error if the fs doesn't support COW.
->=20
-> I don't understand your point.
-> If that flag is enabled on xfs (iirc it's a debug flag), the test
-> would fail on xfs even if we attempt chattr +C (afaics xfs doesn't
-> support +C).
+diff --git a/tests/btrfs/214 b/tests/btrfs/214
+new file mode 100755
+index 00000000..c835e844
+--- /dev/null
++++ b/tests/btrfs/214
+@@ -0,0 +1,66 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2020 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FSQA Test No. 214
++#
++# Test that creating a snapshot after writing to a file using a RWF_NOWAIT
++# works, does not hang the snapshot creation task, and we are able to read
++# the data after.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/attr
++
++# real QA test starts here
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch
++_require_odirect
++_require_xfs_io_command pwrite -N
++_require_chattr C
++
++rm -f $seqres.full
++
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++
++# RWF_NOWAIT writes require NOCOW
++touch $SCRATCH_MNT/f
++$CHATTR_PROG +C $SCRATCH_MNT/f
++
++$XFS_IO_PROG -d -c "pwrite -S 0xab 0 64K" $SCRATCH_MNT/f | _filter_xfs_io
++
++# Now do a WEF_WRITE into a range containing a NOCOWable extent.
++$XFS_IO_PROG -d -c "pwrite -N -V 1 -S 0xfe 0 64K" $SCRATCH_MNT/f \
++	| _filter_xfs_io
++
++$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/snap \
++	| _filter_scratch
++
++# Unmount, mount again and verify the file in the subvolume and snapshot has
++# the correct data.
++_scratch_cycle_mount
++
++echo "File data in the subvolume:"
++od -A d -t x1 $SCRATCH_MNT/f
++
++echo "File data in the snapshot:"
++od -A d -t x1 $SCRATCH_MNT/snap/f
++
++status=0
++exit
+diff --git a/tests/btrfs/214.out b/tests/btrfs/214.out
+new file mode 100644
+index 00000000..6cc66972
+--- /dev/null
++++ b/tests/btrfs/214.out
+@@ -0,0 +1,14 @@
++QA output created by 214
++wrote 65536/65536 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 65536/65536 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/snap'
++File data in the subvolume:
++0000000 fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
++*
++0065536
++File data in the snapshot:
++0000000 fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
++*
++0065536
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 9e48ecc1..a3706e7d 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -216,3 +216,4 @@
+ 211 auto quick log prealloc
+ 212 auto balance dangerous
+ 213 auto balance dangerous
++214 auto quick snapshot
+-- 
+2.26.2
 
-Oh, my fault. Didn't know that xfs won't support chattr +C.
-
-Then forget the comment.
-
-Thanks,
-Qu
-> So I don't see the benefit of always doing it.
->=20
-> Thanks.
->=20
->=20
->>
->> Thanks,
->> Qu
->>
->>> +     _require_chattr C
->>> +     touch $testdir/f1
->>> +     $CHATTR_PROG +C $testdir/f1
->>> +fi
->>> +
->>>  # Create a file with pwrite nowait (will fail with EAGAIN)
->>>  $XFS_IO_PROG -f -d -c "pwrite -N -V 1 -b 1M 0 1M" $testdir/f1
->>>
->>>
->>
-
-
---73s9CAh13OvoOVHW8oUhRGDu2E7i47Nce--
-
---leDR9sdoaRKQhLbAyNH85Mn2MOG1FWbfX
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAEBCAAdFiEELd9y5aWlW6idqkLhwj2R86El/qgFAl7nY4gACgkQwj2R86El
-/qgBugf/ckUZfGxuzDhIGZ/+dUanSDKqUW61qPG/KafNSR9Lkc0hf38KzwMhF1qJ
-iU506CrN9gr+LX01DqQQ++hQbGX76oFEqI+vgGs7TwY/tKlYf3BXM3Vo228xKGZN
-th1xd3jdYx4idn7xdhQu0zG7L59WEXH2xHUkPu2St2EP3OGyLUn5ZfZC6CUX6fSr
-0NEMeyxdsx+OKw/DQzaGqCTCO1zR1HfIYnatfNxduWhw9GPn1NLHAx6GOgwlm013
-WB4h/TfyZ1YMbSyryo8kE2fD+OlU/stl3zlQKZ15dWtY1tPj0bZrTRNC5gnSmCgz
-d+GUnWAGGKLmPkd8cV2uwdQSwie75Q==
-=U0Zn
------END PGP SIGNATURE-----
-
---leDR9sdoaRKQhLbAyNH85Mn2MOG1FWbfX--
