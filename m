@@ -8,49 +8,49 @@ X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 25D5EC433DF
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 66FADC433E0
 	for <linux-fstests@archiver.kernel.org>; Wed, 17 Jun 2020 09:47:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id EBF8520739
-	for <linux-fstests@archiver.kernel.org>; Wed, 17 Jun 2020 09:47:52 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3FC8C20739
+	for <linux-fstests@archiver.kernel.org>; Wed, 17 Jun 2020 09:47:53 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=163.com header.i=@163.com header.b="lL9Ib3rm"
+	dkim=pass (1024-bit key) header.d=163.com header.i=@163.com header.b="lvvqKd53"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726339AbgFQJrw (ORCPT
+        id S1726328AbgFQJrx (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 17 Jun 2020 05:47:52 -0400
-Received: from mail-m974.mail.163.com ([123.126.97.4]:58168 "EHLO
+        Wed, 17 Jun 2020 05:47:53 -0400
+Received: from mail-m974.mail.163.com ([123.126.97.4]:58166 "EHLO
         mail-m974.mail.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726328AbgFQJrw (ORCPT
+        with ESMTP id S1726282AbgFQJrw (ORCPT
         <rfc822;fstests@vger.kernel.org>); Wed, 17 Jun 2020 05:47:52 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=163.com;
-        s=s110527; h=From:Subject:Date:Message-Id:MIME-Version; bh=DW5M7
-        1g3DyuCXDwsZ6KNEjKgau4jM4wv2Pr1w7vM3xw=; b=lL9Ib3rmgh6bW9lNF5po1
-        I/Bn+JrD4fr/Hys4Bs3wNuPHPffEJI7pyd2sU2/96MCfjlT3Eqxbis8jbLt9fKpI
-        8OmtrA4H+YOvj8taFBdE1NcG0GrHyv7E1CY2QsvVdRXIZRUlATF3Z71eE+e4234y
-        NhfpVcZFSShuVD+mrV3QrU=
+        s=s110527; h=From:Subject:Date:Message-Id:MIME-Version; bh=SGQde
+        N3AYmxeTF1G/+42M6VDu6xaH83iGO4TT0hC198=; b=lvvqKd53YJxABg+JqT1Aq
+        CIxycNhio858apHonQfHe+MkLxYz5PBqsptZHyA4VTuAax5a/cV2OmssnsdvSDGe
+        I58zfzIO7m2y23NGm6IkgDOkhMtxgtoL6pDjkDmR6Xaw5roykuSPSUqiY+/5yjSS
+        Yuv0GsHO+5teMKionsmcwY=
 Received: from localhost.localdomain (unknown [122.96.44.138])
-        by smtp4 (Coremail) with SMTP id HNxpCgDH8VsW4+leg8edAw--.16498S7;
-        Wed, 17 Jun 2020 17:32:10 +0800 (CST)
+        by smtp4 (Coremail) with SMTP id HNxpCgDH8VsW4+leg8edAw--.16498S8;
+        Wed, 17 Jun 2020 17:32:11 +0800 (CST)
 From:   Xiao Yang <ice_yangxiao@163.com>
 To:     fstests@vger.kernel.org
 Cc:     darrick.wong@oracle.com, ira.weiny@intel.com,
         ross.zwisler@linux.intel.com, Xiao Yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH v2 5/6] generic/413, xfs/260: Improve format operation for PMD fault testing
-Date:   Wed, 17 Jun 2020 17:32:03 +0800
-Message-Id: <20200617093204.20838-6-ice_yangxiao@163.com>
+Subject: [PATCH v2 6/6] xfs/260: Move xfs/260 to generic
+Date:   Wed, 17 Jun 2020 17:32:04 +0800
+Message-Id: <20200617093204.20838-7-ice_yangxiao@163.com>
 X-Mailer: git-send-email 2.21.0
 In-Reply-To: <20200617093204.20838-1-ice_yangxiao@163.com>
 References: <20200617093204.20838-1-ice_yangxiao@163.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-CM-TRANSID: HNxpCgDH8VsW4+leg8edAw--.16498S7
-X-Coremail-Antispam: 1Uf129KBjvJXoW7Aw4fAr15ur1rZw47GF43trb_yoW8ur47pF
-        yfKa45C3W8try2gr17G3Z0qw1fGwn5GrW7GrWSqa42yFs8JFy2grW2ga1UX34rCrWSgw4f
-        Z3yvyryv9r1qq3DanT9S1TB71UUUUUUqnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
-        9KBjDUYxBIdaVFxhVjvjDU0xZFpf9x07jkMa8UUUUU=
+X-CM-TRANSID: HNxpCgDH8VsW4+leg8edAw--.16498S8
+X-Coremail-Antispam: 1Uf129KBjvJXoW7Zr17KFW5Kr1rJryrZw4UXFb_yoW8trWUpa
+        yv9ryrKF4xA3W7AF48GFnFgFykCan7urW29rn7X342vF1kXw17tryIgr17Jr15WrW8ur4S
+        v3ZYyFyF9r48Ga7anT9S1TB71UUUUUUqnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
+        9KBjDUYxBIdaVFxhVjvjDU0xZFpf9x07jnuc_UUUUU=
 X-Originating-IP: [122.96.44.138]
-X-CM-SenderInfo: 5lfhs5xdqj5xldr6il2tof0z/1tbiFhpGXl44LbH2eQAAsh
+X-CM-SenderInfo: 5lfhs5xdqj5xldr6il2tof0z/xtbB0hxGXlUMW8jYLQAAsp
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
@@ -58,73 +58,82 @@ X-Mailing-List: fstests@vger.kernel.org
 
 From: Xiao Yang <yangx.jy@cn.fujitsu.com>
 
-1) Simple code and fix the wrong value of stripe_width by _scratch_mkfs_geom().
-2) Get hugepage size by _get_hugepagesize() and replace fixed 2M with
-   hugepage size because hugepage size/PMD_SIZE is not 2M on some
-   arches.(e.g. hugepage size/PMD_SIZE is 512M on arm64)
-3) For debugging, redirect the output of mkfs to $seqres.full.
+Both ext4 and xfs support per-inode DAX flag now so move it to generic.
 
 Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
 ---
- common/rc         |  7 +++++++
- tests/generic/413 | 10 ++--------
- tests/xfs/260     |  4 ++--
- 3 files changed, 11 insertions(+), 10 deletions(-)
+ tests/{xfs/260 => generic/602} | 4 ++--
+ tests/generic/602.out          | 2 ++
+ tests/generic/group            | 1 +
+ tests/xfs/260.out              | 2 --
+ tests/xfs/group                | 1 -
+ 5 files changed, 5 insertions(+), 5 deletions(-)
+ rename tests/{xfs/260 => generic/602} (98%)
+ create mode 100644 tests/generic/602.out
+ delete mode 100644 tests/xfs/260.out
 
-diff --git a/common/rc b/common/rc
-index bde26010..4852b21b 100644
---- a/common/rc
-+++ b/common/rc
-@@ -170,6 +170,13 @@ _get_filesize()
-     stat -c %s "$1"
- }
- 
-+# get hugepagesize in bytes
-+_get_hugepagesize()
-+{
-+	local hugepgsz=$(awk '/Hugepagesize/ {print $2}' /proc/meminfo)
-+	echo $((hugepgsz * 1024))
-+}
-+
- _mount()
- {
-     $MOUNT_PROG `_mount_ops_filter $*`
-diff --git a/tests/generic/413 b/tests/generic/413
-index 19e1b926..dfe2912b 100755
---- a/tests/generic/413
-+++ b/tests/generic/413
-@@ -111,14 +111,8 @@ do_tests()
- 	t_mmap_dio_dax $((64 * 1024 * 1024))
- }
- 
--# make fs 2Mb aligned for PMD fault testing
--mkfs_opts=""
--if [ "$FSTYP" == "ext4" ]; then
--	mkfs_opts="-E stride=512,stripe_width=1"
--elif [ "$FSTYP" == "xfs" ]; then
--	mkfs_opts="-d su=2m,sw=1"
--fi
--_scratch_mkfs "$mkfs_opts" > /dev/null 2>&1
-+# make fs aligned for PMD fault testing
-+_scratch_mkfs_geom $(_get_hugepagesize) 1 >> $seqres.full 2>&1
- 
- # mount SCRATCH_DEV with dax option, TEST_DEV not
- export MOUNT_OPTIONS=""
-diff --git a/tests/xfs/260 b/tests/xfs/260
-index fbdc4cd8..7afc20f1 100755
+diff --git a/tests/xfs/260 b/tests/generic/602
+similarity index 98%
+rename from tests/xfs/260
+rename to tests/generic/602
+index 7afc20f1..9137c5b9 100755
 --- a/tests/xfs/260
-+++ b/tests/xfs/260
-@@ -121,8 +121,8 @@ do_tests()
- 	t_dax_flag_mmap_dio $((64 * 1024 * 1024))
- }
++++ b/tests/generic/602
+@@ -2,7 +2,7 @@
+ # SPDX-License-Identifier: GPL-2.0
+ # Copyright (c) 2017 Red Hat Inc.  All Rights Reserved.
+ #
+-# FS QA Test 260
++# FS QA Test 602
+ #
+ # Test per-inode DAX flag by mmap direct/buffered IO.
+ #
+@@ -28,7 +28,7 @@ _cleanup()
+ # remove previous $seqres.full before test
+ rm -f $seqres.full
  
--# make xfs 2Mb aligned for PMD fault testing
--_scratch_mkfs "-d su=2m,sw=1" > /dev/null 2>&1
-+# make xfs aligned for PMD fault testing
-+_scratch_mkfs_geom $(_get_hugepagesize) 1 >> $seqres.full 2>&1
- 
- # mount with dax option
- _scratch_mount "-o dax"
+-_supported_fs xfs
++_supported_fs generic
+ _supported_os Linux
+ _require_scratch_dax_mountopt "dax"
+ _require_test_program "feature"
+diff --git a/tests/generic/602.out b/tests/generic/602.out
+new file mode 100644
+index 00000000..61976e5e
+--- /dev/null
++++ b/tests/generic/602.out
+@@ -0,0 +1,2 @@
++QA output created by 602
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index c6ce029c..4bda3772 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -604,3 +604,4 @@
+ 599 auto quick remount shutdown
+ 600 auto quick quota
+ 601 auto quick quota
++602 auto attr quick dax
+diff --git a/tests/xfs/260.out b/tests/xfs/260.out
+deleted file mode 100644
+index 18ca517c..00000000
+--- a/tests/xfs/260.out
++++ /dev/null
+@@ -1,2 +0,0 @@
+-QA output created by 260
+-Silence is golden
+diff --git a/tests/xfs/group b/tests/xfs/group
+index daf54add..71c30898 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -257,7 +257,6 @@
+ 257 auto quick clone
+ 258 auto quick clone
+ 259 auto quick
+-260 auto attr quick dax
+ 261 auto quick quota
+ 262 dangerous_fuzzers dangerous_scrub dangerous_online_repair
+ 263 auto quick quota
 -- 
 2.21.0
 
