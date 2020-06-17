@@ -8,49 +8,49 @@ X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 08C27C433E1
-	for <linux-fstests@archiver.kernel.org>; Wed, 17 Jun 2020 09:47:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 25D5EC433DF
+	for <linux-fstests@archiver.kernel.org>; Wed, 17 Jun 2020 09:47:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DE5CB20739
-	for <linux-fstests@archiver.kernel.org>; Wed, 17 Jun 2020 09:47:32 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EBF8520739
+	for <linux-fstests@archiver.kernel.org>; Wed, 17 Jun 2020 09:47:52 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=163.com header.i=@163.com header.b="AnZsnAan"
+	dkim=pass (1024-bit key) header.d=163.com header.i=@163.com header.b="lL9Ib3rm"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726025AbgFQJrc (ORCPT
+        id S1726339AbgFQJrw (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 17 Jun 2020 05:47:32 -0400
-Received: from mail-m974.mail.163.com ([123.126.97.4]:58004 "EHLO
+        Wed, 17 Jun 2020 05:47:52 -0400
+Received: from mail-m974.mail.163.com ([123.126.97.4]:58168 "EHLO
         mail-m974.mail.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726270AbgFQJrc (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 17 Jun 2020 05:47:32 -0400
+        with ESMTP id S1726328AbgFQJrw (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 17 Jun 2020 05:47:52 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=163.com;
-        s=s110527; h=From:Subject:Date:Message-Id:MIME-Version; bh=7GZzB
-        rzoc4ACSrBMSPUDCRCnDzK9nrcSF3KN+xiCSKo=; b=AnZsnAanigUkpr69t+MIy
-        FYOpsdI3E5/ujGUaw9CufHoIk6UEFs37c4gDw5wZP5g0ORhac8X13w6tcppsLR4R
-        wy5Xk4t2RKpeH4+OMAlPXYaA5x8jkn6Y8DhWyOFZivzIQad3Rmodjbzk7ZMNwfwK
-        1OZ8A7x3bLKmYkqaMhp8vs=
+        s=s110527; h=From:Subject:Date:Message-Id:MIME-Version; bh=DW5M7
+        1g3DyuCXDwsZ6KNEjKgau4jM4wv2Pr1w7vM3xw=; b=lL9Ib3rmgh6bW9lNF5po1
+        I/Bn+JrD4fr/Hys4Bs3wNuPHPffEJI7pyd2sU2/96MCfjlT3Eqxbis8jbLt9fKpI
+        8OmtrA4H+YOvj8taFBdE1NcG0GrHyv7E1CY2QsvVdRXIZRUlATF3Z71eE+e4234y
+        NhfpVcZFSShuVD+mrV3QrU=
 Received: from localhost.localdomain (unknown [122.96.44.138])
-        by smtp4 (Coremail) with SMTP id HNxpCgDH8VsW4+leg8edAw--.16498S6;
+        by smtp4 (Coremail) with SMTP id HNxpCgDH8VsW4+leg8edAw--.16498S7;
         Wed, 17 Jun 2020 17:32:10 +0800 (CST)
 From:   Xiao Yang <ice_yangxiao@163.com>
 To:     fstests@vger.kernel.org
 Cc:     darrick.wong@oracle.com, ira.weiny@intel.com,
         ross.zwisler@linux.intel.com, Xiao Yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH v2 4/6] generic/223: Don't clear all mkfs options for _scratch_mkfs_geom() roughly
-Date:   Wed, 17 Jun 2020 17:32:02 +0800
-Message-Id: <20200617093204.20838-5-ice_yangxiao@163.com>
+Subject: [PATCH v2 5/6] generic/413, xfs/260: Improve format operation for PMD fault testing
+Date:   Wed, 17 Jun 2020 17:32:03 +0800
+Message-Id: <20200617093204.20838-6-ice_yangxiao@163.com>
 X-Mailer: git-send-email 2.21.0
 In-Reply-To: <20200617093204.20838-1-ice_yangxiao@163.com>
 References: <20200617093204.20838-1-ice_yangxiao@163.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-CM-TRANSID: HNxpCgDH8VsW4+leg8edAw--.16498S6
-X-Coremail-Antispam: 1Uf129KBjvJXoW7Zw4Uur4DtrWDGF45ur17Jrb_yoW8Aw45pF
-        s8KFyrCr40qryfZrWkJrsxZ3s3K3Z3Gr1UGFyxXrWIqw4xX3WfJwnFgF109FyftrZ3Xr4Y
-        939YyrykWa18ArJanT9S1TB71UUUUUUqnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
-        9KBjDUYxBIdaVFxhVjvjDU0xZFpf9x07j-hL8UUUUU=
+X-CM-TRANSID: HNxpCgDH8VsW4+leg8edAw--.16498S7
+X-Coremail-Antispam: 1Uf129KBjvJXoW7Aw4fAr15ur1rZw47GF43trb_yoW8ur47pF
+        yfKa45C3W8try2gr17G3Z0qw1fGwn5GrW7GrWSqa42yFs8JFy2grW2ga1UX34rCrWSgw4f
+        Z3yvyryv9r1qq3DanT9S1TB71UUUUUUqnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
+        9KBjDUYxBIdaVFxhVjvjDU0xZFpf9x07jkMa8UUUUU=
 X-Originating-IP: [122.96.44.138]
-X-CM-SenderInfo: 5lfhs5xdqj5xldr6il2tof0z/xtbB0htGXlUMW8jYFwAAsU
+X-CM-SenderInfo: 5lfhs5xdqj5xldr6il2tof0z/1tbiFhpGXl44LbH2eQAAsh
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
@@ -58,54 +58,73 @@ X-Mailing-List: fstests@vger.kernel.org
 
 From: Xiao Yang <yangx.jy@cn.fujitsu.com>
 
-ext4 can accept the last one if the same mkfs options are passed but xfs cannot
-accept the same mkfs options and reports "xxx option is respecified" error.  I
-prefer to override the same mkfs option which is defined in MKFS_OPTION so that
-we can have a chance to pass other mkfs options to _scratch_mkfs_geom().
+1) Simple code and fix the wrong value of stripe_width by _scratch_mkfs_geom().
+2) Get hugepage size by _get_hugepagesize() and replace fixed 2M with
+   hugepage size because hugepage size/PMD_SIZE is not 2M on some
+   arches.(e.g. hugepage size/PMD_SIZE is 512M on arm64)
+3) For debugging, redirect the output of mkfs to $seqres.full.
 
 Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
 ---
- common/rc         | 14 +++++++++++++-
- tests/generic/223 |  1 -
- 2 files changed, 13 insertions(+), 2 deletions(-)
+ common/rc         |  7 +++++++
+ tests/generic/413 | 10 ++--------
+ tests/xfs/260     |  4 ++--
+ 3 files changed, 11 insertions(+), 10 deletions(-)
 
 diff --git a/common/rc b/common/rc
-index dba52002..bde26010 100644
+index bde26010..4852b21b 100644
 --- a/common/rc
 +++ b/common/rc
-@@ -1051,7 +1051,19 @@ _scratch_mkfs_geom()
+@@ -170,6 +170,13 @@ _get_filesize()
+     stat -c %s "$1"
+ }
  
-     case $FSTYP in
-     xfs)
--	MKFS_OPTIONS+=" -b size=$blocksize, -d su=$sunit_bytes,sw=$swidth_mult"
-+	if echo "$MKFS_OPTIONS" | egrep -q "b?size="; then
-+		MKFS_OPTIONS=$(echo "$MKFS_OPTIONS" | sed -r "s/(b?size=)[0-9]+/\1$blocksize/")
-+	else
-+		MKFS_OPTIONS+=" -b size=$blocksize"
-+	fi
++# get hugepagesize in bytes
++_get_hugepagesize()
++{
++	local hugepgsz=$(awk '/Hugepagesize/ {print $2}' /proc/meminfo)
++	echo $((hugepgsz * 1024))
++}
 +
-+	if echo "$MKFS_OPTIONS" | egrep -q "(su|sunit|sw|swidth)="; then
-+		MKFS_OPTIONS=$(echo "$MKFS_OPTIONS" | sed -r \
-+			-e "s/(su|sunit)=[0-9kmg]+/su=$sunit_bytes/" \
-+			-e "s/(sw|swidth)=[0-9kmg]+/sw=$swidth_mult/")
-+	else
-+		MKFS_OPTIONS+=" -d su=$sunit_bytes,sw=$swidth_mult"
-+	fi
- 	;;
-     ext4|ext4dev)
- 	MKFS_OPTIONS+=" -b $blocksize -E stride=$sunit_blocks,stripe_width=$swidth_blocks"
-diff --git a/tests/generic/223 b/tests/generic/223
-index 6cfd00dd..ba7c9a44 100755
---- a/tests/generic/223
-+++ b/tests/generic/223
-@@ -41,7 +41,6 @@ for SUNIT_K in 8 16 32 64 128; do
- 	let SUNIT_BLOCKS=$SUNIT_BYTES/$BLOCKSIZE
+ _mount()
+ {
+     $MOUNT_PROG `_mount_ops_filter $*`
+diff --git a/tests/generic/413 b/tests/generic/413
+index 19e1b926..dfe2912b 100755
+--- a/tests/generic/413
++++ b/tests/generic/413
+@@ -111,14 +111,8 @@ do_tests()
+ 	t_mmap_dio_dax $((64 * 1024 * 1024))
+ }
  
- 	echo "=== mkfs with su $SUNIT_BLOCKS blocks x 4 ==="
--	export MKFS_OPTIONS=""
- 	_scratch_mkfs_geom $SUNIT_BYTES 4 $BLOCKSIZE >> $seqres.full 2>&1
- 	_scratch_mount
+-# make fs 2Mb aligned for PMD fault testing
+-mkfs_opts=""
+-if [ "$FSTYP" == "ext4" ]; then
+-	mkfs_opts="-E stride=512,stripe_width=1"
+-elif [ "$FSTYP" == "xfs" ]; then
+-	mkfs_opts="-d su=2m,sw=1"
+-fi
+-_scratch_mkfs "$mkfs_opts" > /dev/null 2>&1
++# make fs aligned for PMD fault testing
++_scratch_mkfs_geom $(_get_hugepagesize) 1 >> $seqres.full 2>&1
  
+ # mount SCRATCH_DEV with dax option, TEST_DEV not
+ export MOUNT_OPTIONS=""
+diff --git a/tests/xfs/260 b/tests/xfs/260
+index fbdc4cd8..7afc20f1 100755
+--- a/tests/xfs/260
++++ b/tests/xfs/260
+@@ -121,8 +121,8 @@ do_tests()
+ 	t_dax_flag_mmap_dio $((64 * 1024 * 1024))
+ }
+ 
+-# make xfs 2Mb aligned for PMD fault testing
+-_scratch_mkfs "-d su=2m,sw=1" > /dev/null 2>&1
++# make xfs aligned for PMD fault testing
++_scratch_mkfs_geom $(_get_hugepagesize) 1 >> $seqres.full 2>&1
+ 
+ # mount with dax option
+ _scratch_mount "-o dax"
 -- 
 2.21.0
 
