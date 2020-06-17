@@ -4,119 +4,149 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1A722C433E0
-	for <linux-fstests@archiver.kernel.org>; Wed, 17 Jun 2020 20:58:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 13FB7C433E0
+	for <linux-fstests@archiver.kernel.org>; Wed, 17 Jun 2020 20:58:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id EED892166E
-	for <linux-fstests@archiver.kernel.org>; Wed, 17 Jun 2020 20:58:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E61902166E
+	for <linux-fstests@archiver.kernel.org>; Wed, 17 Jun 2020 20:58:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726761AbgFQU6T (ORCPT
+        id S1727015AbgFQU6w (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 17 Jun 2020 16:58:19 -0400
-Received: from mga01.intel.com ([192.55.52.88]:21774 "EHLO mga01.intel.com"
+        Wed, 17 Jun 2020 16:58:52 -0400
+Received: from mga06.intel.com ([134.134.136.31]:55354 "EHLO mga06.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726868AbgFQU6T (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 17 Jun 2020 16:58:19 -0400
-IronPort-SDR: N7aB/Slhh2StVEkWfArxBjvM2HZHwL6Kip22pEvdm4QQI14s1kctSMYnR9qVYTEXcwSq6zEHx9
- f31jOQfu88Ww==
+        id S1726835AbgFQU6w (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 17 Jun 2020 16:58:52 -0400
+IronPort-SDR: FWYbfDvne2Hg52QT71J2yn8fDjMvbVch3H2j3r2TzlAIljbL3GLpuxKb6tnmP6DTMDsYSQM0UI
+ a85/F8de7/oQ==
 X-Amp-Result: SKIPPED(no attachment in message)
 X-Amp-File-Uploaded: False
-Received: from orsmga005.jf.intel.com ([10.7.209.41])
-  by fmsmga101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Jun 2020 13:58:19 -0700
-IronPort-SDR: rSMxXcKnAF7s6TpNfCqnOgLDUt9Fp1qVguwJ5XW7psp3Q+A5f0Y7n2KrAtbKg0dv/JfRae+KBv
- M2UpahpO7pCA==
+Received: from orsmga006.jf.intel.com ([10.7.209.51])
+  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Jun 2020 13:58:51 -0700
+IronPort-SDR: FpkEiCvnLBTuZosku9kHjzYeP5pfi6jCOKqjSnTG0fzLiPWO/2DSy9dw92uRIwxECh/wj3k1Qj
+ 5kCIGg4TQR+g==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="5.73,523,1583222400"; 
-   d="scan'208";a="450388766"
+   d="scan'208";a="277401014"
 Received: from iweiny-desk2.sc.intel.com ([10.3.52.147])
-  by orsmga005.jf.intel.com with ESMTP; 17 Jun 2020 13:58:18 -0700
-Date:   Wed, 17 Jun 2020 13:58:18 -0700
+  by orsmga006.jf.intel.com with ESMTP; 17 Jun 2020 13:58:51 -0700
+Date:   Wed, 17 Jun 2020 13:58:51 -0700
 From:   Ira Weiny <ira.weiny@intel.com>
 To:     Xiao Yang <ice_yangxiao@163.com>
 Cc:     fstests@vger.kernel.org, darrick.wong@oracle.com,
         ross.zwisler@linux.intel.com, Xiao Yang <yangx.jy@cn.fujitsu.com>
-Subject: Re: [PATCH v2 1/6] common/rc: Introduce new helpers for DAX mount
- options and FS_XFLAG_DAX
-Message-ID: <20200617205818.GK4160762@iweiny-DESK2.sc.intel.com>
+Subject: Re: [PATCH v2 2/6] fstests: Use _require_scratch_dax_mountopt() and
+ _require_scratch_dax_iflag()
+Message-ID: <20200617205851.GL4160762@iweiny-DESK2.sc.intel.com>
 References: <20200617093204.20838-1-ice_yangxiao@163.com>
- <20200617093204.20838-2-ice_yangxiao@163.com>
+ <20200617093204.20838-3-ice_yangxiao@163.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20200617093204.20838-2-ice_yangxiao@163.com>
+In-Reply-To: <20200617093204.20838-3-ice_yangxiao@163.com>
 User-Agent: Mutt/1.11.1 (2018-12-01)
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Jun 17, 2020 at 05:31:59PM +0800, Xiao Yang wrote:
+On Wed, Jun 17, 2020 at 05:32:00PM +0800, Xiao Yang wrote:
 > From: Xiao Yang <yangx.jy@cn.fujitsu.com>
 > 
-> 1) _require_scratch_dax_mountopt() checks both old and new DAX mount option
-> 2) _require_scratch_dax_iflag() checks FS_XFLAG_DAX
+> Make related tests use _require_scratch_dax_mountopt() and _require_scratch_dax_iflag()
 > 
 > Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
-
-Thanks for moving this along.  I've been trying to get my tests modified and
-integrated better into the mainline.
-
-Thanks!
 
 Reviewed-by: Ira Weiny <ira.weiny@intel.com>
 
 > ---
->  common/rc | 35 +++++++++++++++++++++++++++++++++++
->  1 file changed, 35 insertions(+)
+>  tests/ext4/030    | 2 +-
+>  tests/ext4/031    | 4 ++--
+>  tests/generic/413 | 2 +-
+>  tests/generic/462 | 2 +-
+>  tests/xfs/260     | 4 ++--
+>  5 files changed, 7 insertions(+), 7 deletions(-)
 > 
-> diff --git a/common/rc b/common/rc
-> index a6967831..ec7c19e4 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -3188,6 +3188,41 @@ _require_scratch_dax()
->  	_scratch_unmount
->  }
+> diff --git a/tests/ext4/030 b/tests/ext4/030
+> index 93bbca86..fb5cf451 100755
+> --- a/tests/ext4/030
+> +++ b/tests/ext4/030
+> @@ -33,7 +33,7 @@ rm -f $seqres.full
+>  # Modify as appropriate.
+>  _supported_os Linux
+>  _supported_fs ext4
+> -_require_scratch_dax
+> +_require_scratch_dax_mountopt "dax"
+>  _require_test_program "t_ext4_dax_journal_corruption"
+>  _require_command "$CHATTR_PROG" chattr
 >  
-> +_require_scratch_dax_mountopt()
-> +{
-> +	local mountopt=$1
-> +	local output
-> +
-> +	_require_scratch
-> +	_scratch_mkfs > /dev/null 2>&1
-> +	_try_scratch_mount -o "$mountopt" || \
-> +		_notrun "mount $SCRATCH_DEV with $mountopt failed"
-> +
-> +	output=$(_fs_options $SCRATCH_DEV)
-> +
-> +	# For new dax mount option, /proc/mounts shows different outputs if we
-> +	# mount with -o dax=inode on ext4 and xfs so skip checking it.
-> +	# /proc/mounts shows 'dax=inode' on ext4 but shows nothing on xfs.
-> +	if [ "$mountopt" != "dax=inode" ]; then
-> +		echo $output | grep -qw "$mountopt" || \
-> +			_notrun "$SCRATCH_DEV $FSTYP does not support -o $mountopt"
-> +	fi
-> +
-> +	# For new dax mount option, /proc/mounts shows "dax=never" if we
-> +	# mount with -o dax on xfs and underlying device doesn't support dax.
-> +	if [ "$mountopt" = "dax" ]; then
-> +		echo $output | grep -qw "dax=never" && \
-> +			_notrun "$SCRATCH_DEV $FSTYP does not support -o $mountopt"
-> +	fi
-> +
-> +	_scratch_unmount
-> +}
-> +
-> +_require_scratch_dax_iflag()
-> +{
-> +	_require_xfs_io_command "chattr" "x"
-> +}
-> +
->  # Does norecovery support by this fs?
->  _require_norecovery()
->  {
+> diff --git a/tests/ext4/031 b/tests/ext4/031
+> index dc58214e..20e2fab7 100755
+> --- a/tests/ext4/031
+> +++ b/tests/ext4/031
+> @@ -37,7 +37,7 @@ MOUNT_OPTIONS=""
+>  # Modify as appropriate.
+>  _supported_os Linux
+>  _supported_fs ext4
+> -_require_scratch_dax
+> +_require_scratch_dax_mountopt "dax"
+>  _require_test_program "t_ext4_dax_inline_corruption"
+>  _require_scratch_ext4_feature "inline_data"
+>  
+> @@ -56,7 +56,7 @@ _scratch_unmount >> $seqres.full 2>&1
+>  _try_scratch_mount "-o dax" >> $seqres.full 2>&1
+>  
+>  if [[ $? != 0 ]]; then
+> -	# _require_scratch_dax already verified that we could mount with DAX.
+> +	# _require_scratch_dax_mountopt already verified that we could mount with DAX.
+>  	# Failure here is expected because we have inline data.
+>  	echo "Silence is golden"
+>  	status=0
+> diff --git a/tests/generic/413 b/tests/generic/413
+> index 1ce89aff..19e1b926 100755
+> --- a/tests/generic/413
+> +++ b/tests/generic/413
+> @@ -31,7 +31,7 @@ rm -f $seqres.full
+>  _supported_fs generic
+>  _supported_os Linux
+>  _require_test
+> -_require_scratch_dax
+> +_require_scratch_dax_mountopt "dax"
+>  _require_test_program "feature"
+>  _require_test_program "t_mmap_dio"
+>  _require_xfs_io_command "falloc"
+> diff --git a/tests/generic/462 b/tests/generic/462
+> index 1ab6cadc..4a940239 100755
+> --- a/tests/generic/462
+> +++ b/tests/generic/462
+> @@ -37,7 +37,7 @@ rm -f $seqres.full
+>  _supported_fs generic
+>  _supported_os Linux
+>  _require_test
+> -_require_scratch_dax
+> +_require_scratch_dax_mountopt "dax"
+>  _require_test_program "t_mmap_write_ro"
+>  # running by unpriviliged user is not necessary to reproduce
+>  # this bug, just trying to test more.
+> diff --git a/tests/xfs/260 b/tests/xfs/260
+> index 3464ffef..fbdc4cd8 100755
+> --- a/tests/xfs/260
+> +++ b/tests/xfs/260
+> @@ -30,10 +30,10 @@ rm -f $seqres.full
+>  
+>  _supported_fs xfs
+>  _supported_os Linux
+> -_require_scratch_dax
+> +_require_scratch_dax_mountopt "dax"
+>  _require_test_program "feature"
+>  _require_test_program "t_mmap_dio"
+> -_require_xfs_io_command "chattr" "x"
+> +_require_scratch_dax_iflag
+>  _require_xfs_io_command "falloc"
+>  
+>  prep_files()
 > -- 
 > 2.21.0
 > 
