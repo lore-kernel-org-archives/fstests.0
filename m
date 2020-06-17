@@ -1,179 +1,153 @@
-Return-Path: <SRS0=OS5J=74=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=zehT=76=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
+X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 45F68C433DF
-	for <linux-fstests@archiver.kernel.org>; Mon, 15 Jun 2020 17:50:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4F68BC433E0
+	for <linux-fstests@archiver.kernel.org>; Wed, 17 Jun 2020 09:47:32 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 23AFF20857
-	for <linux-fstests@archiver.kernel.org>; Mon, 15 Jun 2020 17:50:36 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1592243436;
-	bh=oF9T3WX20U4gIU/vCnvsQ6/wJMcZdnBsn8YMMAZrm34=;
-	h=From:To:Cc:Subject:Date:List-ID:From;
-	b=DNOzUwh/xoIRLK2PHUupTj438hbF3Bg89+szptC/dS45m3njESWVzWl9TesJLmOqn
-	 MlKxHsgLZslmh4H2jpN93ZiPeaWbHtSY3IEi+3WH6b96ES5/qdYki7bsQPJGwpaX9L
-	 kLbCdZNgf7VWeqona8wub+RODBHAWCYsA7tC9fCg=
+	by mail.kernel.org (Postfix) with ESMTP id 2A27E208B3
+	for <linux-fstests@archiver.kernel.org>; Wed, 17 Jun 2020 09:47:32 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=163.com header.i=@163.com header.b="I0L85cFT"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731201AbgFORuf (ORCPT
+        id S1726280AbgFQJrb (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 15 Jun 2020 13:50:35 -0400
-Received: from mail.kernel.org ([198.145.29.99]:55106 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728585AbgFORuf (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 15 Jun 2020 13:50:35 -0400
-Received: from debian8.Home (bl8-197-74.dsl.telepac.pt [85.241.197.74])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id DD2CF20679;
-        Mon, 15 Jun 2020 17:50:33 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1592243434;
-        bh=oF9T3WX20U4gIU/vCnvsQ6/wJMcZdnBsn8YMMAZrm34=;
-        h=From:To:Cc:Subject:Date:From;
-        b=PC5hwJTh1jgI/pbSnapPDB3+vLh34S+J0lSKPDdW4e3qXMkLT/eo+lOlxZycnJQe6
-         EYdDQlRHrt65+ZwUznEdIK3ou0GLnAyBzZp1VqLttfeBNZgFK2Ib3otamNX+vJj5ER
-         aL8Nv9PDbDNr2sbHclQCGO0Ix/Z7L+D0v2UC1/rM=
-From:   fdmanana@kernel.org
+        Wed, 17 Jun 2020 05:47:31 -0400
+Received: from mail-m974.mail.163.com ([123.126.97.4]:57974 "EHLO
+        mail-m974.mail.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725979AbgFQJrb (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 17 Jun 2020 05:47:31 -0400
+X-Greylist: delayed 909 seconds by postgrey-1.27 at vger.kernel.org; Wed, 17 Jun 2020 05:47:31 EDT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=163.com;
+        s=s110527; h=From:Subject:Date:Message-Id:MIME-Version; bh=/L9Ks
+        Ng/ZKtyFQwZGBbkQTXho4O54NivimK024/w26E=; b=I0L85cFTIfvPPWoZb2GEt
+        xK1CNNz6GI3hNeVpKJTmxRlWjtuo0H2sGqTI55WnO0mZG5ia06iYrClKEUbQkJWZ
+        ZYyrEkXwpYgHSfyUo7rmfIJzniRHH8zXPCjPLKlY4gvbkAqBdW6ikjko0gTAeHzj
+        QihUkEliL33UKSCqhflqqI=
+Received: from localhost.localdomain (unknown [122.96.44.138])
+        by smtp4 (Coremail) with SMTP id HNxpCgDH8VsW4+leg8edAw--.16498S4;
+        Wed, 17 Jun 2020 17:32:09 +0800 (CST)
+From:   Xiao Yang <ice_yangxiao@163.com>
 To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH] btrfs: test creating a snapshot after RWF_NOWAIT write works as expected
-Date:   Mon, 15 Jun 2020 18:50:28 +0100
-Message-Id: <20200615175028.15090-1-fdmanana@kernel.org>
-X-Mailer: git-send-email 2.26.2
+Cc:     darrick.wong@oracle.com, ira.weiny@intel.com,
+        ross.zwisler@linux.intel.com, Xiao Yang <yangx.jy@cn.fujitsu.com>
+Subject: [PATCH v2 2/6] fstests: Use _require_scratch_dax_mountopt() and _require_scratch_dax_iflag()
+Date:   Wed, 17 Jun 2020 17:32:00 +0800
+Message-Id: <20200617093204.20838-3-ice_yangxiao@163.com>
+X-Mailer: git-send-email 2.21.0
+In-Reply-To: <20200617093204.20838-1-ice_yangxiao@163.com>
+References: <20200617093204.20838-1-ice_yangxiao@163.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+X-CM-TRANSID: HNxpCgDH8VsW4+leg8edAw--.16498S4
+X-Coremail-Antispam: 1Uf129KBjvJXoWxCF13Aw1xWF1xuw1kJw18Zrb_yoW5ArWrpa
+        y8XFyakrWxJ3WjyrWxCFnrZay0grs8uF4ayr1Fg397XF4kW3W8tFyxKF1xJF18XrZIgrWS
+        vw4vqryrWrsxKFDanT9S1TB71UUUUUUqnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
+        9KBjDUYxBIdaVFxhVjvjDU0xZFpf9x07j30edUUUUU=
+X-Originating-IP: [122.96.44.138]
+X-CM-SenderInfo: 5lfhs5xdqj5xldr6il2tof0z/xtbB0hpGXlUMW8jYBgAAsE
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Filipe Manana <fdmanana@suse.com>
+From: Xiao Yang <yangx.jy@cn.fujitsu.com>
 
-Test that creating a snapshot after writing to a file using a RWF_NOWAIT
-works, does not hang the snapshot creation task, and we are able to read
-the data after.
+Make related tests use _require_scratch_dax_mountopt() and _require_scratch_dax_iflag()
 
-Currently btrfs hangs when creating the snapshot due to a missing unlock
-of a snapshot lock, but it is fixed by a patch with the following subject:
-
-  "btrfs: fix hang on snapshot creation after RWF_NOWAIT write"
-
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
+Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
 ---
- tests/btrfs/214     | 66 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/214.out | 14 ++++++++++
- tests/btrfs/group   |  1 +
- 3 files changed, 81 insertions(+)
- create mode 100755 tests/btrfs/214
- create mode 100644 tests/btrfs/214.out
+ tests/ext4/030    | 2 +-
+ tests/ext4/031    | 4 ++--
+ tests/generic/413 | 2 +-
+ tests/generic/462 | 2 +-
+ tests/xfs/260     | 4 ++--
+ 5 files changed, 7 insertions(+), 7 deletions(-)
 
-diff --git a/tests/btrfs/214 b/tests/btrfs/214
-new file mode 100755
-index 00000000..c835e844
---- /dev/null
-+++ b/tests/btrfs/214
-@@ -0,0 +1,66 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2020 SUSE Linux Products GmbH. All Rights Reserved.
-+#
-+# FSQA Test No. 214
-+#
-+# Test that creating a snapshot after writing to a file using a RWF_NOWAIT
-+# works, does not hang the snapshot creation task, and we are able to read
-+# the data after.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/attr
-+
-+# real QA test starts here
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch
-+_require_odirect
-+_require_xfs_io_command pwrite -N
-+_require_chattr C
-+
-+rm -f $seqres.full
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+
-+# RWF_NOWAIT writes require NOCOW
-+touch $SCRATCH_MNT/f
-+$CHATTR_PROG +C $SCRATCH_MNT/f
-+
-+$XFS_IO_PROG -d -c "pwrite -S 0xab 0 64K" $SCRATCH_MNT/f | _filter_xfs_io
-+
-+# Now do a WEF_WRITE into a range containing a NOCOWable extent.
-+$XFS_IO_PROG -d -c "pwrite -N -V 1 -S 0xfe 0 64K" $SCRATCH_MNT/f \
-+	| _filter_xfs_io
-+
-+$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/snap \
-+	| _filter_scratch
-+
-+# Unmount, mount again and verify the file in the subvolume and snapshot has
-+# the correct data.
-+_scratch_cycle_mount
-+
-+echo "File data in the subvolume:"
-+od -A d -t x1 $SCRATCH_MNT/f
-+
-+echo "File data in the snapshot:"
-+od -A d -t x1 $SCRATCH_MNT/snap/f
-+
-+status=0
-+exit
-diff --git a/tests/btrfs/214.out b/tests/btrfs/214.out
-new file mode 100644
-index 00000000..6cc66972
---- /dev/null
-+++ b/tests/btrfs/214.out
-@@ -0,0 +1,14 @@
-+QA output created by 214
-+wrote 65536/65536 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 65536/65536 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/snap'
-+File data in the subvolume:
-+0000000 fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
-+*
-+0065536
-+File data in the snapshot:
-+0000000 fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
-+*
-+0065536
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 9e48ecc1..a3706e7d 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -216,3 +216,4 @@
- 211 auto quick log prealloc
- 212 auto balance dangerous
- 213 auto balance dangerous
-+214 auto quick snapshot
+diff --git a/tests/ext4/030 b/tests/ext4/030
+index 93bbca86..fb5cf451 100755
+--- a/tests/ext4/030
++++ b/tests/ext4/030
+@@ -33,7 +33,7 @@ rm -f $seqres.full
+ # Modify as appropriate.
+ _supported_os Linux
+ _supported_fs ext4
+-_require_scratch_dax
++_require_scratch_dax_mountopt "dax"
+ _require_test_program "t_ext4_dax_journal_corruption"
+ _require_command "$CHATTR_PROG" chattr
+ 
+diff --git a/tests/ext4/031 b/tests/ext4/031
+index dc58214e..20e2fab7 100755
+--- a/tests/ext4/031
++++ b/tests/ext4/031
+@@ -37,7 +37,7 @@ MOUNT_OPTIONS=""
+ # Modify as appropriate.
+ _supported_os Linux
+ _supported_fs ext4
+-_require_scratch_dax
++_require_scratch_dax_mountopt "dax"
+ _require_test_program "t_ext4_dax_inline_corruption"
+ _require_scratch_ext4_feature "inline_data"
+ 
+@@ -56,7 +56,7 @@ _scratch_unmount >> $seqres.full 2>&1
+ _try_scratch_mount "-o dax" >> $seqres.full 2>&1
+ 
+ if [[ $? != 0 ]]; then
+-	# _require_scratch_dax already verified that we could mount with DAX.
++	# _require_scratch_dax_mountopt already verified that we could mount with DAX.
+ 	# Failure here is expected because we have inline data.
+ 	echo "Silence is golden"
+ 	status=0
+diff --git a/tests/generic/413 b/tests/generic/413
+index 1ce89aff..19e1b926 100755
+--- a/tests/generic/413
++++ b/tests/generic/413
+@@ -31,7 +31,7 @@ rm -f $seqres.full
+ _supported_fs generic
+ _supported_os Linux
+ _require_test
+-_require_scratch_dax
++_require_scratch_dax_mountopt "dax"
+ _require_test_program "feature"
+ _require_test_program "t_mmap_dio"
+ _require_xfs_io_command "falloc"
+diff --git a/tests/generic/462 b/tests/generic/462
+index 1ab6cadc..4a940239 100755
+--- a/tests/generic/462
++++ b/tests/generic/462
+@@ -37,7 +37,7 @@ rm -f $seqres.full
+ _supported_fs generic
+ _supported_os Linux
+ _require_test
+-_require_scratch_dax
++_require_scratch_dax_mountopt "dax"
+ _require_test_program "t_mmap_write_ro"
+ # running by unpriviliged user is not necessary to reproduce
+ # this bug, just trying to test more.
+diff --git a/tests/xfs/260 b/tests/xfs/260
+index 3464ffef..fbdc4cd8 100755
+--- a/tests/xfs/260
++++ b/tests/xfs/260
+@@ -30,10 +30,10 @@ rm -f $seqres.full
+ 
+ _supported_fs xfs
+ _supported_os Linux
+-_require_scratch_dax
++_require_scratch_dax_mountopt "dax"
+ _require_test_program "feature"
+ _require_test_program "t_mmap_dio"
+-_require_xfs_io_command "chattr" "x"
++_require_scratch_dax_iflag
+ _require_xfs_io_command "falloc"
+ 
+ prep_files()
 -- 
-2.26.2
+2.21.0
 
