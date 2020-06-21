@@ -2,105 +2,153 @@ Return-Path: <SRS0=f9yW=AC=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-1.1 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+X-Spam-Status: No, score=-9.1 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CF226C433DF
-	for <linux-fstests@archiver.kernel.org>; Sun, 21 Jun 2020 23:07:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1E366C433DF
+	for <linux-fstests@archiver.kernel.org>; Sun, 21 Jun 2020 23:14:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A2DBB2473D
-	for <linux-fstests@archiver.kernel.org>; Sun, 21 Jun 2020 23:07:40 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DAE5C252EE
+	for <linux-fstests@archiver.kernel.org>; Sun, 21 Jun 2020 23:14:53 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="oSlH/QDq"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ZyMSQVo/"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726398AbgFUXHk (ORCPT
+        id S1726509AbgFUXOx (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 21 Jun 2020 19:07:40 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56478 "EHLO
+        Sun, 21 Jun 2020 19:14:53 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57568 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726064AbgFUXHk (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 21 Jun 2020 19:07:40 -0400
+        with ESMTP id S1726476AbgFUXOw (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 21 Jun 2020 19:14:52 -0400
 Received: from mail-ot1-x344.google.com (mail-ot1-x344.google.com [IPv6:2607:f8b0:4864:20::344])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DCF7DC061794
-        for <fstests@vger.kernel.org>; Sun, 21 Jun 2020 16:07:39 -0700 (PDT)
-Received: by mail-ot1-x344.google.com with SMTP id g7so11590169oti.13
-        for <fstests@vger.kernel.org>; Sun, 21 Jun 2020 16:07:39 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C88B8C061794
+        for <fstests@vger.kernel.org>; Sun, 21 Jun 2020 16:14:52 -0700 (PDT)
+Received: by mail-ot1-x344.google.com with SMTP id 97so11648534otg.3
+        for <fstests@vger.kernel.org>; Sun, 21 Jun 2020 16:14:52 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=m6cBTGqNRhjDKihfnXC3QCuiYUsTnFmF2iQ7lIODmvs=;
-        b=oSlH/QDq9Qg8tNZkKHo0EZth1TOo+YOjT9cTTwL1Y4CxmNY5GzkCCGlOLftbdYHKsd
-         Hff3lbIO4Swo8WTOq0TsbuxQQ3RZT0JvnRF+5NPaL2w4FflhMtrzFgF9/cuYCdIyXCsZ
-         SKm+CV0XQKHeNBT1zx4GsWGdSJ5QvMocHcyvjdcRg5lAMx9z0hGBS5DAaBWPZAsC+o7L
-         Z6pOcvL+VP7Us2qEB3n9whgCAFb9Q6TdahecgOP7WBCrhuKlbDM0ZX9mnav7EOLLrXql
-         Nf4MX1nQaX64xZ2uE0yBoNhOG609hqYfAdSqqcbCoTrVU+JS6tH1mrn+OVoppRt8LoFF
-         nSOw==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=Jpa38r1V+NhS5++nbh/o7Xp6Er63TwATKb8ceCTrSMs=;
+        b=ZyMSQVo/QuMjXkLgLU39yjh9itMaEE/TS5iw843uf1SQ4oCdUeTdlCspgk9UG+bZVZ
+         /eHKTOlLQP5XaXznyxyKKEptlr9gco18MFnR1mZw+r/glJfCH0putrxFVvt5YyK8rZ93
+         sQWHkQ8htd+28SU5/JxZsuhHLD+obl4/Ie+A12BdpdFZhBlvYDTu7eb/+OqV2+itJA5A
+         bb6LhTrCfpXQUl3PF2NzIJaSnyO03N0ZbWyLYCnqPfKnj4XF+pMZSDYq0XuOpPaz287s
+         GKPfGtNxkrfUpLuY/7L1EK8n3XJgfVEIt/I5BPEbwtCkg7ujpKrrGQkYUfnuAFccCMbe
+         wZag==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=m6cBTGqNRhjDKihfnXC3QCuiYUsTnFmF2iQ7lIODmvs=;
-        b=CbdUNFgrjHXaCpQv/MmaViCIJFJwkgFVfPXtQe70z3VYsYUrMDscxnIq07ZfxlajMp
-         Y9T3k97PdwhSfEtTfE3UGwXzkW74yXkWAdA8zUrz6LIw6MW00zSydcqZROKZKrQvNuCU
-         UzYFhMWIEj2P5El9uVLa1ud4OZWxZ+WO33VeQ0k/FZkleo52PaA6tZiqAHbtdinbdrMP
-         j3VI0ryAPivuClzQ4uAtHOMbwT8/UszYuyy0AlIc/79Jvrva+p8Ev8HpTu6eYBhgTZN2
-         /bliarnIvd8XycreHHk3qvCpCaUvxFIyUBq6b34hsH2WiKmyB56HasMHlL9z03+kGa+j
-         RjvQ==
-X-Gm-Message-State: AOAM530T0yjcpoWqWfbfF6HX1Gf2gzsC+Rt2VfoJ/eLqOqSWA4nwxSXm
-        Rw9Ajr+GixjSBaR2hL5HxPhgV1umbg==
-X-Google-Smtp-Source: ABdhPJzbs6WwWTUJeZ6MsWcOz9Hm1mnyjx406UlccIoJjJbVpp1s/oeh+KmRe4z2bq+fyGbvTh5lvA==
-X-Received: by 2002:a9d:65d4:: with SMTP id z20mr11387748oth.84.1592780859280;
-        Sun, 21 Jun 2020 16:07:39 -0700 (PDT)
-Received: from gmail.com (072-182-049-098.res.spectrum.com. [72.182.49.98])
-        by smtp.gmail.com with ESMTPSA id t22sm2906554oth.53.2020.06.21.16.07.38
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=Jpa38r1V+NhS5++nbh/o7Xp6Er63TwATKb8ceCTrSMs=;
+        b=FLS2BI5g8qzdEy9s8hXDl5uiX9tKt8CXziLhDt7pA6M14mOLwjh/iEzHfh38a9tluf
+         Phtqd7/vYeMYtZDosmYwxKC/sa5WfLLBDdlWQGs+kQqNBMCsxo1MA06PhOORVQdWHdDR
+         QF0YWY9lURHHC7T1IlKXIhdJlrrT8JX3emf40qVBKcTdoRui9I05wmnx3I+Eb6h3IcwQ
+         26sm/FQ+BWOUTgBMnGvx9rabjU+qYnxgib3Uw6t5VNGq/VkJdyTQiQ2AEByEGluit4Ln
+         zZR26YSnGsMEyYvRW9rLnz/coBQueMS53K/TwWjQqtXZthck8IMcqvsP+SKmjraplsNW
+         WV8Q==
+X-Gm-Message-State: AOAM53045ttr/IbmUj43y58Go+W0GXysuVBmTto6IcPmG8Wrv70JINEb
+        itodL9Kr6x1+tdAyP8UIt47MJKcgug==
+X-Google-Smtp-Source: ABdhPJzeRCl4jbHsfabregaz10j7W45QRusApRBhlw1acrgbLrC+Ivat77gBwIrfU2zUfZLX9Wtnjg==
+X-Received: by 2002:a9d:d57:: with SMTP id 81mr11554428oti.184.1592781291871;
+        Sun, 21 Jun 2020 16:14:51 -0700 (PDT)
+Received: from localhost.localdomain (072-182-049-098.res.spectrum.com. [72.182.49.98])
+        by smtp.gmail.com with ESMTPSA id p18sm2909058oto.11.2020.06.21.16.14.51
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 21 Jun 2020 16:07:38 -0700 (PDT)
-Date:   Sun, 21 Jun 2020 18:07:36 -0500
+        Sun, 21 Jun 2020 16:14:51 -0700 (PDT)
 From:   Arvind Raghavan <raghavan.arvind@gmail.com>
-To:     Amir Goldstein <amir73il@gmail.com>
-Cc:     fstests <fstests@vger.kernel.org>,
+To:     fstests <fstests@vger.kernel.org>
+Cc:     Amir Goldstein <amir73il@gmail.com>,
         Jayashree Mohan <jaya@cs.utexas.edu>,
-        Vijay Chidambaram <vijay@cs.utexas.edu>
-Subject: Re: [PATCH 5/6] src/fssum: Allow single file input
-Message-ID: <20200621230736.5fqm64ro6cya6yc7@gmail.com>
-References: <cover.1590006879.git.raghavan.arvind@gmail.com>
- <91a82230f5929b45a6093576b7c7afd311fde97a.1590006879.git.raghavan.arvind@gmail.com>
- <CAOQ4uxi5C=XOpTS67hS8YOpb-Fo4f6PA5qsoNiDY_k=58r4qJg@mail.gmail.com>
- <20200522010652.x34k3tx7e47jmzzk@gmail.com>
- <CAOQ4uxi9B5XBay9+VVYoO_f-1h-jTG-JvTijmt_GZpoy=Jq1ZQ@mail.gmail.com>
- <20200531182858.nurku3vcztrzsy43@gmail.com>
- <CAOQ4uxjmgtPMsm2MsA=BjgX63-uCKUpp8swHHCkvwUwgLZvMpQ@mail.gmail.com>
+        Vijay Chidambaram <vijay@cs.utexas.edu>,
+        Arvind Raghavan <raghavan.arvind@gmail.com>
+Subject: [PATCH v2 0/7] Change fssum to support POSIX
+Date:   Sun, 21 Jun 2020 19:14:47 -0400
+Message-Id: <cover.1592779555.git.raghavan.arvind@gmail.com>
+X-Mailer: git-send-email 2.20.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAOQ4uxjmgtPMsm2MsA=BjgX63-uCKUpp8swHHCkvwUwgLZvMpQ@mail.gmail.com>
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 05/31, Amir Goldstein wrote:
-> > I might be doing something wrong but I can't seem to get
-> > AT_EMPTY_PATH to work with fstatat. I don't see it on the man
-> > page and when I pass it to fstatat it errors out with invalid
-> > argument.
-> >
-> 
-> https://www.man7.org/linux/man-pages/man2/stat.2.html
-> 
-> Says:
->        AT_EMPTY_PATH (since Linux 2.6.39)
-> ... This flag is Linux-specific; define _GNU_SOURCE to obtain its definition.
-> 
-> And I see that fssum.c does define _GNU_SOURCE, so not sure what the
-> problem is.
+This patch series modifies fssum to be able to verify POSIX
+fsync/fdatasync guarantees. In particular, it allows single
+files/symlinks to be passed as input, which allows us to verify
+an fsync on a single file without checking the entire directory.
 
-Ah yes, it is in the documentation, and I've got it working now!
-Must've been some other issue I had... I apologize for the delay,
-I'll send out a v2 shortly.
+It also adds an option for non-recursive directory traversal,
+which is useful because POSIX fsync doesn't guarantee that all
+subdirectories are synced. Finally, it adds a flag that allows
+file size to be ignored (currently enabled by default). This is
+useful because POSIX fsync of a directory doesn't guarantee that
+the data in the children is persisted.
 
-Thanks,
-Arvind
+These changes will be followed up with several Crashmonkey [1]
+tests which make use of these changes.
+
+[1] https://github.com/utsaslab/crashmonkey
+
+Changes since v1:
+- Change readlink to readlinkat to fix bug
+- Added helper sum_one function to simplify single file input
+- Moved fstat -> fstatat change and both of the former into separate
+  commit
+
+Manually verified that all of the tests that use fssum still pass for
+each commit:
+
+tests/btrfs/083
+tests/btrfs/050
+tests/btrfs/007
+tests/btrfs/016
+tests/btrfs/128
+tests/btrfs/040
+tests/btrfs/092
+tests/btrfs/087
+tests/btrfs/039
+tests/btrfs/127
+tests/btrfs/044
+tests/btrfs/144
+tests/btrfs/168
+tests/btrfs/134
+tests/btrfs/045
+tests/btrfs/129
+tests/btrfs/043
+tests/btrfs/145
+tests/btrfs/191
+tests/btrfs/147
+tests/btrfs/030
+tests/btrfs/077
+tests/btrfs/155
+tests/btrfs/133
+tests/btrfs/038
+tests/btrfs/053
+tests/btrfs/189
+tests/btrfs/084
+tests/btrfs/135
+tests/btrfs/200
+tests/btrfs/178
+tests/btrfs/051
+tests/generic/474
+tests/generic/547
+
+Arvind Raghavan (7):
+  src/fssum: Make sum_file_data global
+  src/fssum: Refactoring changes for recursive traversal
+  src/fssum: Refactor recursive traversal
+  src/fssum: Add flag -R for non-recursive mode
+  src/fssum: Add a flag for including file size in checksum
+  src/fssum: Allow single file input
+  src/fssum: Fix whitespace in usage
+
+ src/fssum.c | 354 ++++++++++++++++++++++++++++++----------------------
+ 1 file changed, 203 insertions(+), 151 deletions(-)
+
+-- 
+2.20.1
+
