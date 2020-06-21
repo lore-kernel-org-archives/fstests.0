@@ -1,249 +1,198 @@
-Return-Path: <SRS0=Zm54=AA=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=f9yW=AC=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.1 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EBD91C433E3
-	for <linux-fstests@archiver.kernel.org>; Fri, 19 Jun 2020 15:19:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 93972C433E0
+	for <linux-fstests@archiver.kernel.org>; Sun, 21 Jun 2020 18:00:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D13A521919
-	for <linux-fstests@archiver.kernel.org>; Fri, 19 Jun 2020 15:19:09 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6E08424862
+	for <linux-fstests@archiver.kernel.org>; Sun, 21 Jun 2020 18:00:54 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ftBmmhjI"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2392389AbgFSPPP (ORCPT
+        id S1730527AbgFUSAy (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 19 Jun 2020 11:15:15 -0400
-Received: from mga05.intel.com ([192.55.52.43]:41767 "EHLO mga05.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2392381AbgFSPPN (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 19 Jun 2020 11:15:13 -0400
-IronPort-SDR: mr4qfZB5COWVyJjB6NEfeTg3HpG+P3YsfZ9vIFRqzHjmi8UIKaqSdQSF6mJH8dTi0wLNQycIp0
- c/u9uGVnpPtg==
-X-IronPort-AV: E=McAfee;i="6000,8403,9657"; a="227670817"
-X-IronPort-AV: E=Sophos;i="5.75,255,1589266800"; 
-   d="scan'208";a="227670817"
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from fmsmga001.fm.intel.com ([10.253.24.23])
-  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Jun 2020 08:15:12 -0700
-IronPort-SDR: i5iz+B+nl2HTFeWNX5+Qy5zfVkwNnjNRK/vyYOS4l6aPgd0LDts97KbMST3SRML+2RfDv6Ydoc
- FEtGebgcw2zg==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.75,255,1589266800"; 
-   d="scan'208";a="383853815"
-Received: from iweiny-desk2.sc.intel.com ([10.3.52.147])
-  by fmsmga001.fm.intel.com with ESMTP; 19 Jun 2020 08:15:12 -0700
-Date:   Fri, 19 Jun 2020 08:15:12 -0700
-From:   Ira Weiny <ira.weiny@intel.com>
-To:     Xiao Yang <ice_yangxiao@163.com>
-Cc:     fstests@vger.kernel.org, darrick.wong@oracle.com,
-        ross.zwisler@linux.intel.com, Xiao Yang <yangx.jy@cn.fujitsu.com>
-Subject: Re: [PATCH v2 6/6] xfs/260: Move xfs/260 to generic
-Message-ID: <20200619151511.GR4160762@iweiny-DESK2.sc.intel.com>
-References: <20200617093204.20838-1-ice_yangxiao@163.com>
- <20200617093204.20838-7-ice_yangxiao@163.com>
- <20200617214857.GN4160762@iweiny-DESK2.sc.intel.com>
- <a2b565a7-7ff8-7201-1921-4724d8117cbb@163.com>
+        Sun, 21 Jun 2020 14:00:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37226 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1730505AbgFUSAx (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 21 Jun 2020 14:00:53 -0400
+Received: from mail-pg1-x543.google.com (mail-pg1-x543.google.com [IPv6:2607:f8b0:4864:20::543])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 09AE9C061794
+        for <fstests@vger.kernel.org>; Sun, 21 Jun 2020 11:00:53 -0700 (PDT)
+Received: by mail-pg1-x543.google.com with SMTP id e8so1824088pgc.5
+        for <fstests@vger.kernel.org>; Sun, 21 Jun 2020 11:00:53 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=message-id:date:from:to:subject:mime-version:content-disposition;
+        bh=rhV2Qz6+XyDszPk8vz0A+X3gLNilNfq1+MDpS+7mrIc=;
+        b=ftBmmhjI6HRDvuxX1xrMe2d8KKZv+jkwDaRoAgXBlQWN90CZ/FJGroY8/zoGzSbSrY
+         Qd+QJHnwgMOC3u2ZG8RsJf74nJeqlyEqyzkU2ZGdpUHASpahmkxBxx6DC+BMjDtTQ9UG
+         OZ7lKGLJdHoYHcaElhXGFP85N/8b+whR8pQOvya+YKmu2LyHPHqFYsgYOtsmYdE+y96x
+         aglSw82KuBJ4hd+YmsUSGCJVwJaV7cpjDYq7cxZHFnWCfbNcdSwSB66YIH9ni6PJqzBp
+         FQHes5XmGIuesqopNwn1DfUkcZALAb2R02W/5oTMR9TDk2Dgdrlek35b1gzaM+kuikdg
+         I57w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:message-id:date:from:to:subject:mime-version
+         :content-disposition;
+        bh=rhV2Qz6+XyDszPk8vz0A+X3gLNilNfq1+MDpS+7mrIc=;
+        b=sLQVJSgFz7fGpXo6AXT1P2/1WUauaybdF2dih6qBgX4n3R2H83Imc74NM4rEoCBPqo
+         4bMe2VcrntsJWvy/94vj69G8uuUrDEmvLLG7m9Zpuj6gsV7HG8mBX7qjJdhwonYZFobt
+         dVPbzt4X8Fu/K5oJb5EL4IDb2DizT0qBLwGx/8USHW5Xae9n4g/Gsbit5oiQQ/oZGRod
+         wRJNY8znlly9fYcAbk0/qXfvcqWu2P+9wAUrnJoY4WOxpQycG7Z+ezlr7bKusBbKrAmv
+         K18xmQD2Zg46qoAMyC9F69mISBw6XFcuJo3tEA8JSosut456HKKe9hUfO4N4NIdYROzS
+         FcDg==
+X-Gm-Message-State: AOAM533IA1sk0e3geeceBmeHVFv4JAHaq2x9HXrBHX8vZkehkISJnV99
+        8YxFDpKiekaAJy1zN6v+1VoYHcBu
+X-Google-Smtp-Source: ABdhPJwtR9DswOPjaW60snhJyEKfjJcxMraVBsn5B8PKBAldtUjVJ51jCdyIJ/KIJOa2UcENHm8vOA==
+X-Received: by 2002:a63:a558:: with SMTP id r24mr10379273pgu.70.1592762452146;
+        Sun, 21 Jun 2020 11:00:52 -0700 (PDT)
+Received: from localhost ([47.89.231.86])
+        by smtp.gmail.com with ESMTPSA id b14sm11363235pft.23.2020.06.21.11.00.50
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 21 Jun 2020 11:00:50 -0700 (PDT)
+Message-ID: <5eefa052.1c69fb81.fa995.4360@mx.google.com>
+Date:   Mon, 22 Jun 2020 02:00:48 +0800
+From:   Eryu Guan <guaneryu@gmail.com>
+To:     fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: master branch updated to aae8fbecf42b
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="JprSW8tGz6nv"
 Content-Disposition: inline
-In-Reply-To: <a2b565a7-7ff8-7201-1921-4724d8117cbb@163.com>
-User-Agent: Mutt/1.11.1 (2018-12-01)
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Jun 18, 2020 at 11:35:56PM +0800, Xiao Yang wrote:
-> On 6/18/20 5:48 AM, Ira Weiny wrote:
-> > On Wed, Jun 17, 2020 at 05:32:04PM +0800, Xiao Yang wrote:
-> > > From: Xiao Yang <yangx.jy@cn.fujitsu.com>
-> > > 
-> > > Both ext4 and xfs support per-inode DAX flag now so move it to generic.
-> > > 
-> > > Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
-> > Unfortunately this test needs to be modified to work with the final agreed upon
-> > method for switching DAX, patch below.  Feel free to squash it into this patch
-> > for v3.
-> > 
-> > There are more checks I had queued up but I'm happy to wait for this series to
-> > be applied.
-> > 
-> > Again, thanks for moving this along!
-> > Ira
-> > 
-> >  From 97b67a2773627cfe91b5f33a418ab646bb5fd0a8 Mon Sep 17 00:00:00 2001
-> > From: Ira Weiny <ira.weiny@intel.com>
-> > Date: Wed, 17 Jun 2020 14:34:45 -0700
-> > Subject: [PATCH] generic/602: Modify to work with agreed inheritance of DAX flag
-> > 
-> > Modifying the DAX flag on flies does not take effect immediately.  The
-> > easiest way to ensure the file state for this test is to use inheritance
-> > of the parent directory DAX state.
-> 
-> Hi Ira,
-> 
-> Modifying the DAX flag on directories can take effect immediately, right?
 
-Yes and any file created under that directory will inherit the DAX flag
-immediately.
+--JprSW8tGz6nv
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-> 
-> > 
-> > Modify the test to use 2 directories which we can switch the DAX state on
-> > and create the test files in those directories after setting the desired
-> > state.
-> 
-> Good addition, and I will squash it into this v3 patch. :-)
-> 
-> BTW:
-> 
-> I wait someone(Darrick, Eryu or others) to review the code about PMD fault
-> testing in this patch set.
+Hi all,
 
-Yes, thanks.  I don't feel familiar enough with that code to review it.
+The master branch of the xfstests repository at:
 
-Ira
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-> 
-> Best Regards,
-> 
-> Xiao Yang
-> 
-> > 
-> > Signed-off-by: Ira Weiny <ira.weiny@intel.com>
-> > ---
-> >   tests/generic/602 | 81 +++++++++++++++++++++++++++++------------------
-> >   1 file changed, 51 insertions(+), 30 deletions(-)
-> > 
-> > diff --git a/tests/generic/602 b/tests/generic/602
-> > index 9137c5b9385f..20bf2c6bd246 100755
-> > --- a/tests/generic/602
-> > +++ b/tests/generic/602
-> > @@ -36,68 +36,95 @@ _require_test_program "t_mmap_dio"
-> >   _require_scratch_dax_iflag
-> >   _require_xfs_io_command "falloc"
-> > -prep_files()
-> > +SRC_DIR=$SCRATCH_MNT/src
-> > +SRC_FILE=$SRC_DIR/tf_s
-> > +
-> > +DST_DIR=$SCRATCH_MNT/dst
-> > +DST_FILE=$DST_DIR/tf_d
-> > +
-> > +clean_files()
-> >   {
-> > -	rm -f $SCRATCH_MNT/tf_{s,d}
-> > +	rm -f $SRC_FILE
-> > +	rm -f $DST_FILE
-> > +	mkdir -p $SRC_DIR
-> > +	mkdir -p $DST_DIR
-> > +}
-> > +
-> > +prep_files()
-> > +{
-> > +	$XFS_IO_PROG -f -c "falloc 0 $tsize" \
-> > +		$SRC_FILE >> $seqres.full 2>&1
-> >   	$XFS_IO_PROG -f -c "falloc 0 $tsize" \
-> > -		$SCRATCH_MNT/tf_{s,d} >> $seqres.full 2>&1
-> > +		$DST_FILE >> $seqres.full 2>&1
-> >   }
-> >   t_both_dax()
-> >   {
-> > +	clean_files
-> > +	$XFS_IO_PROG -c "chattr +x" $SRC_DIR
-> > +	$XFS_IO_PROG -c "chattr +x" $DST_DIR
-> >   	prep_files
-> > -	$XFS_IO_PROG -c "chattr +x" $SCRATCH_MNT/tf_{s,d}
-> >   	# with O_DIRECT first
-> > -	$here/src/t_mmap_dio $SCRATCH_MNT/tf_{s,d} $1 "dio both dax"
-> > +	$here/src/t_mmap_dio $SRC_FILE $DST_FILE $1 "dio both dax"
-> > +	clean_files
-> > +	$XFS_IO_PROG -c "chattr +x" $SRC_DIR
-> > +	$XFS_IO_PROG -c "chattr +x" $DST_DIR
-> >   	prep_files
-> > -	$XFS_IO_PROG -c "chattr +x" $SCRATCH_MNT/tf_{s,d}
-> >   	# again with buffered IO
-> > -	$here/src/t_mmap_dio -b $SCRATCH_MNT/tf_{s,d} \
-> > +	$here/src/t_mmap_dio -b $SRC_FILE $DST_FILE \
-> >   		$1 "buffered both dax"
-> >   }
-> >   t_nondax_to_dax()
-> >   {
-> > +	clean_files
-> > +	$XFS_IO_PROG -c "chattr -x" $SRC_DIR
-> > +	$XFS_IO_PROG -c "chattr +x" $DST_DIR
-> >   	prep_files
-> > -	$XFS_IO_PROG -c "chattr -x" $SCRATCH_MNT/tf_s
-> > -	$XFS_IO_PROG -c "chattr +x" $SCRATCH_MNT/tf_d
-> > -	$here/src/t_mmap_dio $SCRATCH_MNT/tf_{s,d} \
-> > +	$here/src/t_mmap_dio $SRC_FILE $DST_FILE \
-> >   		$1 "dio nondax to dax"
-> > +	clean_files
-> > +	$XFS_IO_PROG -c "chattr -x" $SRC_DIR
-> > +	$XFS_IO_PROG -c "chattr +x" $DST_DIR
-> >   	prep_files
-> > -	$XFS_IO_PROG -c "chattr -x" $SCRATCH_MNT/tf_s
-> > -	$XFS_IO_PROG -c "chattr +x" $SCRATCH_MNT/tf_d
-> > -	$here/src/t_mmap_dio -b $SCRATCH_MNT/tf_{s,d} \
-> > +	$here/src/t_mmap_dio -b $SRC_FILE $DST_FILE \
-> >   		$1 "buffered nondax to dax"
-> >   }
-> >   t_dax_to_nondax()
-> >   {
-> > +	clean_files
-> > +	$XFS_IO_PROG -c "chattr +x" $SRC_DIR
-> > +	$XFS_IO_PROG -c "chattr -x" $DST_DIR
-> >   	prep_files
-> > -	$XFS_IO_PROG -c "chattr +x" $SCRATCH_MNT/tf_s
-> > -	$XFS_IO_PROG -c "chattr -x" $SCRATCH_MNT/tf_d
-> > -	$here/src/t_mmap_dio $SCRATCH_MNT/tf_{s,d} \
-> > +	$here/src/t_mmap_dio $SRC_FILE $DST_FILE \
-> >   		$1 "dio dax to nondax"
-> > +	clean_files
-> > +	$XFS_IO_PROG -c "chattr +x" $SRC_DIR
-> > +	$XFS_IO_PROG -c "chattr -x" $DST_DIR
-> >   	prep_files
-> > -	$XFS_IO_PROG -c "chattr +x" $SCRATCH_MNT/tf_s
-> > -	$XFS_IO_PROG -c "chattr -x" $SCRATCH_MNT/tf_d
-> > -	$here/src/t_mmap_dio -b $SCRATCH_MNT/tf_{s,d} \
-> > +	$here/src/t_mmap_dio -b $SRC_FILE $DST_FILE \
-> >   		$1 "buffered dax to nondax"
-> >   }
-> >   t_both_nondax()
-> >   {
-> > +	clean_files
-> > +	$XFS_IO_PROG -c "chattr -x" $SRC_DIR
-> > +	$XFS_IO_PROG -c "chattr -x" $DST_DIR
-> >   	prep_files
-> > -	$XFS_IO_PROG -c "chattr -x" $SCRATCH_MNT/tf_{s,d}
-> > -	$here/src/t_mmap_dio $SCRATCH_MNT/tf_{s,d} \
-> > +	$here/src/t_mmap_dio $SRC_FILE $DST_FILE \
-> >   		$1 "dio both nondax"
-> > +	clean_files
-> > +	$XFS_IO_PROG -c "chattr -x" $SRC_DIR
-> > +	$XFS_IO_PROG -c "chattr -x" $DST_DIR
-> >   	prep_files
-> > -	$XFS_IO_PROG -c "chattr -x" $SCRATCH_MNT/tf_{s,d}
-> > -	$here/src/t_mmap_dio -b $SCRATCH_MNT/tf_{s,d} \
-> > +	$here/src/t_mmap_dio -b $SRC_FILE $DST_FILE \
-> >   		$1 "buffered both nondax"
-> >   }
-> > @@ -124,17 +151,11 @@ do_tests()
-> >   # make xfs aligned for PMD fault testing
-> >   _scratch_mkfs_geom $(_get_hugepagesize) 1 >> $seqres.full 2>&1
-> > -# mount with dax option
-> > -_scratch_mount "-o dax"
-> > -
-> >   tsize=$((128 * 1024 * 1024))
-> > -do_tests
-> > -_scratch_unmount
-> > -
-> >   # mount again without dax option
-> >   export MOUNT_OPTIONS=""
-> > -_scratch_mount
-> > +_scratch_mount "-o dax=inode"
-> >   do_tests
-> >   # success, all done
-> 
+have just been updated. As usual, this update mainly contains various bug fixes,
+and there're also 3 new tests, which should all pass with latest v5.8-rc1
+kernel.
+
+My apology for being absent for so long, I've been very busy with other tasks
+in the past a few weeks (and perhaps will be busy too in next a few weeks :( ).
+
+There're still some patches pending in the list, as always, any reviews &
+comments are welcomed!
+
+- the unionmount patchset from Amir Goldstein, I have some concerns on wrapping
+  another testsuite in fstests, but I'll look into it more carefully later
+- ext4 mount option test from Lukas Czerner, I don't like doing kernel version
+  check in the test, but I couldn't find a better way to detect supported mount
+  option automatically, please help review & suggest better ideas
+- the btrfs snapshot test after RWF_NOWAIT write from Filipe Manana, the fix is
+  still pending and the test would hang, so I'll wait for the fix to land in
+  kernel first
+- the afs patch from David Howells and dax related patches from Xiao Yang, I
+  just don't get the chance to look at them yet
+
+Thanks,
+Eryu
+
+The new head of the master branch is commit:
+
+aae8fbecf42b generic/270: wait for fsstress processes to be killed
+
+New commits:
+
+Amir Goldstein (2):
+      [3f4760c2e714] open_by_handle: add option -z to query file handle size
+      [497a269f48c8] overlay: regression test for two file handle bugs
+
+Aurelien Aptel (1):
+      [59877e507165] README: add note about 123456-fsgqa user creation step
+
+Eric Biggers (1):
+      [35fd4ce0b373] generic: verify ciphertext of IV_INO_LBLK_32 encryption policies
+
+Filipe Manana (1):
+      [a38e45b19d1e] generic/471: adapt test when running on btrfs to avoid failure on RWF_NOWAIT write
+
+Gao Xiang (1):
+      [57eba17be8f8] common/fuzzy: try to clear blocking flags first in _scratch_fuzz_modify
+
+Harshad Shirwadkar (1):
+      [8e1388f52196] ext4: add empty lines to mkfs_filter
+
+Jeffle Xu (1):
+      [d6367ec8d2c6] common/dmthin: modify DMTHIN_POOL_NAME
+
+Lukas Czerner (1):
+      [aae8fbecf42b] generic/270: wait for fsstress processes to be killed
+
+Marcos Paulo de Souza (1):
+      [a1c25b75b456] btrfs: test if the capability is kept on incremental send
+
+Yong Sun (1):
+      [1ce2a82c14a5] fstests: modify user name beginning with non-digit
+
+Zorro Lang (1):
+      [f6da66ec96fe] xfs/096: filter out the "Discarding..." output
+
+
+Code Diffstat:
+
+ README                   |   4 ++
+ common/dmthin            |   2 +-
+ common/encrypt           |  18 ++++--
+ common/fuzzy             |   2 +
+ common/rc                |   2 +-
+ src/fscrypt-crypt-util.c | 121 +++++++++++++++++++++++++++++++++----
+ src/open_by_handle.c     |  27 ++++++++-
+ tests/btrfs/214          | 152 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/214.out      |   6 ++
+ tests/btrfs/group        |   1 +
+ tests/generic/270        |   4 +-
+ tests/generic/471        |  11 ++++
+ tests/generic/597        |   6 +-
+ tests/generic/598        |   6 +-
+ tests/generic/602        |  43 ++++++++++++++
+ tests/generic/602.out    |   6 ++
+ tests/generic/group      |   1 +
+ tests/overlay/074        |  92 ++++++++++++++++++++++++++++
+ tests/overlay/074.out    |   2 +
+ tests/overlay/group      |   1 +
+ tests/xfs/096            |   1 +
+ 21 files changed, 474 insertions(+), 34 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
+
+--JprSW8tGz6nv
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAl7vn90ACgkQJlKqKVyP
+52NLaxAAxKqDg8Klfs2gseLyXziNKk5Sw6QL27wZkSUG8d9T6LvJCkR+hjaKn/2D
+SzOuwxTxibj2HTF6AbUOLYMPkpp6V9VS7x75vniEK6cQYzllD9nfOkUA23HHc/g6
+xuVCLkp48jgkMLfYCychdvuON8nToamk1ZEaA28pWvn94jeFclGpD0Vb3Mc4T7MY
+If6yzYendQ1aWCHKgitO00aj4xEou3NiEcMxcwnEc7ABygmNrQLGthdYTWqrTJw8
+aMZIJ68Rc8vogzweXT5lc8l26SJPCV9Iklq+qjMz6TdseDjoMQCndK9aW7QL8GCX
+Vw/5G5K99XCitZHI6FVO25hifS2MWAIqwS+4NRRUND/JK5Sy/thTuC1MiRfm9Gx9
+DqCBo7nz/LPsd8drrvYTvVKrtfrYqrtkU5gh6BSyMBZ+tVddQvLAUFVEY/HDafNE
+fzlwkuTfl3RYhNgSCEgWv9Pn4H+BmDKpYkSxGz28HbDv64hHdEnDeG0GYX0vee54
+LTQeNpF9wPEPVh+XDXdPQ50QITQWl87S6D1Aj4WYvcsIMi+T+Z6k4bUjmydRqVHa
+7rRmLS9rRCVddZNdtnqq35zKdrcxInijHFhwvn95IJNDMAbN89HyOMLq4wwlfUYf
+vhha9AtBhT7IRsB+4TKgnmQ18x5ha+Bh4iHREcZa1p7PJSOd/bI=
+=PWUu
+-----END PGP SIGNATURE-----
+
+--JprSW8tGz6nv--
