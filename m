@@ -5,102 +5,230 @@ X-Spam-Level:
 X-Spam-Status: No, score=-7.1 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0EE1AC433DF
-	for <linux-fstests@archiver.kernel.org>; Mon, 22 Jun 2020 06:57:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7187BC433DF
+	for <linux-fstests@archiver.kernel.org>; Mon, 22 Jun 2020 07:43:12 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D617B251F3
-	for <linux-fstests@archiver.kernel.org>; Mon, 22 Jun 2020 06:57:07 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3FC702547B
+	for <linux-fstests@archiver.kernel.org>; Mon, 22 Jun 2020 07:43:12 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="GTZdGRsP"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="nFyMyriW"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726792AbgFVG5H (ORCPT
+        id S1731431AbgFVHnM (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 22 Jun 2020 02:57:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43444 "EHLO
+        Mon, 22 Jun 2020 03:43:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50532 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725933AbgFVG5H (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 22 Jun 2020 02:57:07 -0400
-Received: from mail-io1-xd41.google.com (mail-io1-xd41.google.com [IPv6:2607:f8b0:4864:20::d41])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E7965C061794
-        for <fstests@vger.kernel.org>; Sun, 21 Jun 2020 23:57:06 -0700 (PDT)
-Received: by mail-io1-xd41.google.com with SMTP id a12so4668497ion.13
-        for <fstests@vger.kernel.org>; Sun, 21 Jun 2020 23:57:06 -0700 (PDT)
+        with ESMTP id S1731381AbgFVHnK (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 22 Jun 2020 03:43:10 -0400
+Received: from mail-io1-xd44.google.com (mail-io1-xd44.google.com [IPv6:2607:f8b0:4864:20::d44])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1B72BC061794
+        for <fstests@vger.kernel.org>; Mon, 22 Jun 2020 00:43:10 -0700 (PDT)
+Received: by mail-io1-xd44.google.com with SMTP id i4so15338095iov.11
+        for <fstests@vger.kernel.org>; Mon, 22 Jun 2020 00:43:10 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=QePiEtlDyLJSpfmuFFNvuITAAC8QSziUR9Cqgt/B5vA=;
-        b=GTZdGRsPDGeDSIv3nH7+CkxcFljLHze1Hjjf8/ndfcZWG/MdOxL5mGW0iz1WapzF0t
-         lHAQa7b1uD/CMtqHHp3KgD78+sI2J85KqhMVy5Eor2vhDvGpUI2eXnPb10WOCPescqlb
-         MPHq1ZHSeCByR9KNQQmbxqZcIWuc4q+VUjxh64IPSAK+B/u4lG2s3/iE8/vr8u4ArlKD
-         euW6rmGcLnWiWDVkLtnhlTXidiKVMUHTArKxc5kBnIkN8QURPm6/M0yZ95McjHtlXr9y
-         0RXq5+vyNyqcXZ2IEYDzpxoktU8olbPbeq2MLr+abO6UaWod+X4iKjpOgwvS4y3X5qzz
-         4JFQ==
+        bh=bYsY0UVJocyG926bzsNzXwBQT9fKAlmMyoMzI3BBgHw=;
+        b=nFyMyriWn/KdTkdhJazZrv9YguNrr6i8SQJoQtHnefDWqUjpDtcULeuSRdjzmPJ21d
+         RTU7Do/eZeoD7J8Al1kpjUjIZ6VL22ZBKqFxC4MCEXqmRj3Nzz5wuBBK3ZsCTc2mDEOi
+         4GQDk/s/HK1erft88+TP1d5KjZzPY+P4HS3B4F5Utx+1VeJNfToLlurGYmBlOwRQWQ5+
+         KOWjQbaCBNdpJBzom+4UNxbfjaBjZuTPguyyxAwQqyW9Cp/dJW6HiTn/ua7WFw641jQ/
+         S7+bdrRlVljaQuM9L0Qu1Hq9CWbq9WMxasUtj72bCjeioRdX7A4R/eE/O73yrFrEowVU
+         ONeQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=QePiEtlDyLJSpfmuFFNvuITAAC8QSziUR9Cqgt/B5vA=;
-        b=sRZksjsnTQlbsrlBF5FQnAWxzSwXZJtB8iO59dAV1zpAuoMneliyDrnZZchylVQdz8
-         Epj7VkIIMPGSlBBp0m3pGkE2p/aQ8nBGUb59mzxnVE7c/9JGdea17sJ4FYiYwKpfZGJM
-         IhbCt923gEzOLIRwn6ttD/leRPOFMEzDojXrow+3VLDsH3o8jp5ySPUkyRXcWC4FYJq3
-         8KugySwT6TPY9FPgozvcDIYqYp0KE/4sbn6ptoCe8UAJCI+vq7vKimexCFSrHwynIOSo
-         jbpZGfYx06NPf7FJnYZjA0uuOXvOerihfqUGHBzwuhvUl1elaXh6CcvOEXgKCCVf8Lmb
-         89Ww==
-X-Gm-Message-State: AOAM5323QF6p+rr9CHqXWpap4xMUFHRnpscSisU6NpoodpNYLYepntJF
-        STAZyLXa7HjRJuZ1Gek8zgQp7VjgpmhmiqFKD74=
-X-Google-Smtp-Source: ABdhPJwVAGvdTbuHda9TlHj5aRN5xl27cE1RidRpjc5f2ZpqWyON/HngNNK/mf9DQIXmKRtbe8uGl/bFxiiLklB8HlI=
-X-Received: by 2002:a05:6602:5c8:: with SMTP id w8mr17871092iox.64.1592809026294;
- Sun, 21 Jun 2020 23:57:06 -0700 (PDT)
+        bh=bYsY0UVJocyG926bzsNzXwBQT9fKAlmMyoMzI3BBgHw=;
+        b=DmOQ88OBGCdHCAx4E7wVtD9VgPt0r4W8sim0IniJ++6pJJ+CjbZ3lDvcVfPX+cdT+m
+         m/C9KnueMprbryZKDi5UVDnwwXSWHFKa3aIY4c4yD30Arp/Xb5fsRqMRpnoewVr6DfjP
+         u9/Cd3XW02VB8dD10fMFDPvsMPGxQVCRW1EkVvWkLZAqLUM1TT6Z6D3mDM5DKOWO0+/B
+         DDcKSmdzRmWZY2p+DCeEeOb6kXDSkNSZDb7fLzS9RkHJJP9plDc3j06ovDWYNPhOTi9Z
+         +a69ppj3+2PYQ+KgbbPyYcQCWGnS9usKzqw0HOVNFOHs7OhkHuUGoKJn/etCQOzHdSth
+         Ob5g==
+X-Gm-Message-State: AOAM533SDJXE+mYoAZSCeN54ttI1/GnPHw71esO/VV+Gu6cSwzQo5tii
+        pi4NeMycUlNJ+uP/n7+MZWoEweype+/teODbYyw=
+X-Google-Smtp-Source: ABdhPJzlHXVTZKTi42nmIIx/oRzTHwopmcpVtdWyHmGuKJt8xRA/h7HmW5fGD9V8qLi6Lgasds5aePqyMlZ+GxkifYM=
+X-Received: by 2002:a05:6602:58a:: with SMTP id v10mr2952690iox.203.1592811789481;
+ Mon, 22 Jun 2020 00:43:09 -0700 (PDT)
 MIME-Version: 1.0
-References: <cover.1592779555.git.raghavan.arvind@gmail.com> <4d2fa44b88c5f4f7aa53074220abba7beafa4fe8.1592779555.git.raghavan.arvind@gmail.com>
-In-Reply-To: <4d2fa44b88c5f4f7aa53074220abba7beafa4fe8.1592779555.git.raghavan.arvind@gmail.com>
+References: <cover.1592779555.git.raghavan.arvind@gmail.com> <c9d63f068a7408080a07d4ea18999db580452df2.1592779555.git.raghavan.arvind@gmail.com>
+In-Reply-To: <c9d63f068a7408080a07d4ea18999db580452df2.1592779555.git.raghavan.arvind@gmail.com>
 From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Mon, 22 Jun 2020 09:56:55 +0300
-Message-ID: <CAOQ4uxhx3NfTY_xF1TKXba3Sur2ZRcF3Okfyk38O+F1FPu8neg@mail.gmail.com>
-Subject: Re: [PATCH v2 6/7] src/fssum: Allow single file input
+Date:   Mon, 22 Jun 2020 10:42:58 +0300
+Message-ID: <CAOQ4uxgSxtNmWMgPtsbXBgtUqn_pd5W1j6uS2yin-hkdmu7jCA@mail.gmail.com>
+Subject: Re: [PATCH v2 3/7] src/fssum: Recursive traversal refactoring
 To:     Arvind Raghavan <raghavan.arvind@gmail.com>
 Cc:     fstests <fstests@vger.kernel.org>,
         Jayashree Mohan <jaya@cs.utexas.edu>,
         Vijay Chidambaram <vijay@cs.utexas.edu>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/mixed; boundary="000000000000e82c4e05a8a764a5"
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+--000000000000e82c4e05a8a764a5
+Content-Type: text/plain; charset="UTF-8"
+
 On Mon, Jun 22, 2020 at 2:16 AM Arvind Raghavan
 <raghavan.arvind@gmail.com> wrote:
 >
-> Allow regular links and symlinks to be passed as input to fssum.
->
-> Signed-off-by: Arvind Raghavan <raghavan.arvind@gmail.com>
-> Signed-off-by: Jayashree Mohan <jaya@cs.utexas.edu>
-> Signed-off-by: Vijay Chidambaram <vijay@cs.utexas.edu>
-Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+> Moves some logic from the recursive directory traversal into a helper
+> function to make it easier to add support for regular files. Does not
+> change functionality.
 
+It is VERY hard to see in review that this does not change functionality.
+As opposed to the attached patches.
 
-> ---
-> Since v1:
->         - Simplified logic by using sum_one
->  src/fssum.c | 21 +++++++++++++++++++--
->  1 file changed, 19 insertions(+), 2 deletions(-)
->
-> diff --git a/src/fssum.c b/src/fssum.c
-> index 26b0096c..c5c27486 100644
-> --- a/src/fssum.c
-> +++ b/src/fssum.c
-> @@ -29,6 +29,7 @@
->  #include <inttypes.h>
->  #include <assert.h>
->  #include <endian.h>
-> +#include <libgen.h>
->
-
-Is this needed by this patch? needed at all?
-Should it have been added in a previous patch?
+I know if we were working with modern code review tools, no need for
+those cheap tricks, although using a helper name argument in the previous
+patch would have helped in any review tool.
 
 Thanks,
 Amir.
+
+--000000000000e82c4e05a8a764a5
+Content-Type: text/plain; charset="US-ASCII"; 
+	name="0001-src-fssum-Refactoring-changes-for-recursive-traversa.patch.txt"
+Content-Disposition: attachment; 
+	filename="0001-src-fssum-Refactoring-changes-for-recursive-traversa.patch.txt"
+Content-Transfer-Encoding: base64
+Content-ID: <f_kbq6xi5l1>
+X-Attachment-Id: f_kbq6xi5l1
+
+RnJvbSAwYzg2OTJmMjhkYWNiY2Y1ZTBkYWUyYjIxNzc0NzA2OTQ2ZTU0NTEwIE1vbiBTZXAgMTcg
+MDA6MDA6MDAgMjAwMQpGcm9tOiBBcnZpbmQgUmFnaGF2YW4gPHJhZ2hhdmFuLmFydmluZEBnbWFp
+bC5jb20+CkRhdGU6IFN1biwgMjEgSnVuIDIwMjAgMTk6MTU6NDQgLTA0MDAKU3ViamVjdDogW1BB
+VENIIDEvMl0gc3JjL2Zzc3VtOiBSZWZhY3RvcmluZyBjaGFuZ2VzIGZvciByZWN1cnNpdmUgdHJh
+dmVyc2FsCgpSZWZhY3RvcmluZyBjaGFuZ2VzIG5lZWRlZCBmb3IgcmVjdXJzaXZlIHRyYXZlcnNh
+bCBhbmQgc2luZ2xlIGZpbGUKaW5wdXQuIE1ha2VzIGZzdGF0IGFuZCByZWFkbGluayB1c2UgdGhl
+ICdhdCcgYWx0ZXJuYXRpdmVzLCBhbmQgY3JlYXRlcyBhCmhlbHBlciBmdW5jdGlvbiBmb3Igb3Bl
+bmluZyBmaWxlcy4KClNpZ25lZC1vZmYtYnk6IEFydmluZCBSYWdoYXZhbiA8cmFnaGF2YW4uYXJ2
+aW5kQGdtYWlsLmNvbT4KU2lnbmVkLW9mZi1ieTogSmF5YXNocmVlIE1vaGFuIDxqYXlhQGNzLnV0
+ZXhhcy5lZHU+ClNpZ25lZC1vZmYtYnk6IFZpamF5IENoaWRhbWJhcmFtIDx2aWpheUBjcy51dGV4
+YXMuZWR1PgotLS0KIHNyYy9mc3N1bS5jIHwgMzIgKysrKysrKysrKysrKysrKystLS0tLS0tLS0t
+LS0tLS0KIDEgZmlsZSBjaGFuZ2VkLCAxNyBpbnNlcnRpb25zKCspLCAxNSBkZWxldGlvbnMoLSkK
+CmRpZmYgLS1naXQgYS9zcmMvZnNzdW0uYyBiL3NyYy9mc3N1bS5jCmluZGV4IDMwZjQ1NmMyLi42
+MTkyZjEwOSAxMDA2NDQKLS0tIGEvc3JjL2Zzc3VtLmMKKysrIGIvc3JjL2Zzc3VtLmMKQEAgLTUw
+Myw2ICs1MDMsMTMgQEAgbWFsZm9ybWVkOgogCQlleGNlc3NfZmlsZShmbik7CiB9CiAKK2ludCBv
+cGVuX29uZShpbnQgZGlyZmQsIGNvbnN0IGNoYXIgKm5hbWUpCit7CisJaWYgKCFuYW1lIHx8ICEq
+bmFtZSkKKwkJcmV0dXJuIGR1cChkaXJmZCk7CisJcmV0dXJuIG9wZW5hdChkaXJmZCwgbmFtZSwg
+MCk7Cit9CisKIHZvaWQKIHN1bShpbnQgZGlyZmQsIGludCBsZXZlbCwgc3VtX3QgKmRpcmNzLCBj
+aGFyICpwYXRoX3ByZWZpeCwgY2hhciAqcGF0aF9pbikKIHsKQEAgLTU1MiwyMyArNTU5LDE5IEBA
+IHN1bShpbnQgZGlyZmQsIGludCBsZXZlbCwgc3VtX3QgKmRpcmNzLCBjaGFyICpwYXRoX3ByZWZp
+eCwgY2hhciAqcGF0aF9pbikKIAkJc3VtX3QgY3M7CiAJCXN1bV90IG1ldGE7CiAJCWNoYXIgKnBh
+dGg7CisJCWNoYXIgKm5hbWUgPSBuYW1lbGlzdFtpXTsKIAogCQlzdW1faW5pdCgmY3MpOwogCQlz
+dW1faW5pdCgmbWV0YSk7Ci0JCXBhdGggPSBhbGxvYyhzdHJsZW4ocGF0aF9pbikgKyBzdHJsZW4o
+bmFtZWxpc3RbaV0pICsgMyk7Ci0JCXNwcmludGYocGF0aCwgIiVzLyVzIiwgcGF0aF9pbiwgbmFt
+ZWxpc3RbaV0pOworCQlwYXRoID0gYWxsb2Moc3RybGVuKHBhdGhfaW4pICsgc3RybGVuKG5hbWUp
+ICsgMyk7CisJCXNwcmludGYocGF0aCwgIiVzLyVzIiwgcGF0aF9pbiwgbmFtZSk7CiAJCWZvciAo
+ZXhjbCA9IDA7IGV4Y2wgPCBuX2V4Y2x1ZGVzOyArK2V4Y2wpIHsKIAkJCWlmIChzdHJuY21wKGV4
+Y2x1ZGVzW2V4Y2xdLnBhdGgsIHBhdGgsCiAJCQkgICAgZXhjbHVkZXNbZXhjbF0ubGVuKSA9PSAw
+KQogCQkJCWdvdG8gbmV4dDsKIAkJfQogCi0JCXJldCA9IGZjaGRpcihkaXJmZCk7Ci0JCWlmIChy
+ZXQgPT0gLTEpIHsKLQkJCXBlcnJvcigiZmNoZGlyIik7Ci0JCQlleGl0KC0xKTsKLQkJfQotCQly
+ZXQgPSBsc3RhdDY0KG5hbWVsaXN0W2ldLCAmc3QpOworCQlyZXQgPSBmc3RhdGF0NjQoZGlyZmQs
+IG5hbWUsICZzdCwgQVRfU1lNTElOS19OT0ZPTExPVyk7CiAJCWlmIChyZXQpIHsKIAkJCWZwcmlu
+dGYoc3RkZXJyLCAic3RhdCBmYWlsZWQgZm9yICVzLyVzOiAlc1xuIiwKIAkJCQlwYXRoX3ByZWZp
+eCwgcGF0aCwgc3RyZXJyb3IoZXJybm8pKTsKQEAgLTU4MCw3ICs1ODMsNyBAQCBzdW0oaW50IGRp
+cmZkLCBpbnQgbGV2ZWwsIHN1bV90ICpkaXJjcywgY2hhciAqcGF0aF9wcmVmaXgsIGNoYXIgKnBh
+dGhfaW4pCiAJCQlnb3RvIG5leHQ7CiAKIAkJc3VtX2FkZF91NjQoJm1ldGEsIGxldmVsKTsKLQkJ
+c3VtX2FkZCgmbWV0YSwgbmFtZWxpc3RbaV0sIHN0cmxlbihuYW1lbGlzdFtpXSkpOworCQlzdW1f
+YWRkKCZtZXRhLCBuYW1lLCBzdHJsZW4obmFtZSkpOwogCQlpZiAoIVNfSVNESVIoc3Quc3RfbW9k
+ZSkpCiAJCQlzdW1fYWRkX3U2NCgmbWV0YSwgc3Quc3RfbmxpbmspOwogCQlpZiAoZmxhZ3NbRkxB
+R19VSURdKQpAQCAtNTk3LDcgKzYwMCw3IEBAIHN1bShpbnQgZGlyZmQsIGludCBsZXZlbCwgc3Vt
+X3QgKmRpcmNzLCBjaGFyICpwYXRoX3ByZWZpeCwgY2hhciAqcGF0aF9pbikKIAkJCXN1bV9hZGRf
+dGltZSgmbWV0YSwgc3Quc3RfY3RpbWUpOwogCQlpZiAoZmxhZ3NbRkxBR19YQVRUUlNdICYmCiAJ
+CSAgICAoU19JU0RJUihzdC5zdF9tb2RlKSB8fCBTX0lTUkVHKHN0LnN0X21vZGUpKSkgewotCQkJ
+ZmQgPSBvcGVuYXQoZGlyZmQsIG5hbWVsaXN0W2ldLCAwKTsKKwkJCWZkID0gb3Blbl9vbmUoZGly
+ZmQsIG5hbWUpOwogCQkJaWYgKGZkID09IC0xICYmIGZsYWdzW0ZMQUdfT1BFTl9FUlJPUl0pIHsK
+IAkJCQlzdW1fYWRkX3U2NCgmbWV0YSwgZXJybm8pOwogCQkJfSBlbHNlIGlmIChmZCA9PSAtMSkg
+ewpAQCAtNjE4LDcgKzYyMSw3IEBAIHN1bShpbnQgZGlyZmQsIGludCBsZXZlbCwgc3VtX3QgKmRp
+cmNzLCBjaGFyICpwYXRoX3ByZWZpeCwgY2hhciAqcGF0aF9pbikKIAkJCX0KIAkJfQogCQlpZiAo
+U19JU0RJUihzdC5zdF9tb2RlKSkgewotCQkJZmQgPSBvcGVuYXQoZGlyZmQsIG5hbWVsaXN0W2ld
+LCAwKTsKKwkJCWZkID0gb3Blbl9vbmUoZGlyZmQsIG5hbWUpOwogCQkJaWYgKGZkID09IC0xICYm
+IGZsYWdzW0ZMQUdfT1BFTl9FUlJPUl0pIHsKIAkJCQlzdW1fYWRkX3U2NCgmbWV0YSwgZXJybm8p
+OwogCQkJfSBlbHNlIGlmIChmZCA9PSAtMSkgewpAQCAtNjMzLDkgKzYzNiw4IEBAIHN1bShpbnQg
+ZGlyZmQsIGludCBsZXZlbCwgc3VtX3QgKmRpcmNzLCBjaGFyICpwYXRoX3ByZWZpeCwgY2hhciAq
+cGF0aF9pbikKIAkJCXN1bV9hZGRfdTY0KCZtZXRhLCBzdC5zdF9zaXplKTsKIAkJCWlmIChmbGFn
+c1tGTEFHX0RBVEFdKSB7CiAJCQkJaWYgKHZlcmJvc2UpCi0JCQkJCWZwcmludGYoc3RkZXJyLCAi
+ZmlsZSAlc1xuIiwKLQkJCQkJCW5hbWVsaXN0W2ldKTsKLQkJCQlmZCA9IG9wZW5hdChkaXJmZCwg
+bmFtZWxpc3RbaV0sIDApOworCQkJCQlmcHJpbnRmKHN0ZGVyciwgImZpbGUgJXNcbiIsIG5hbWUp
+OworCQkJCWZkID0gb3Blbl9vbmUoZGlyZmQsIG5hbWUpOwogCQkJCWlmIChmZCA9PSAtMSAmJiBm
+bGFnc1tGTEFHX09QRU5fRVJST1JdKSB7CiAJCQkJCXN1bV9hZGRfdTY0KCZtZXRhLCBlcnJubyk7
+CiAJCQkJfSBlbHNlIGlmIChmZCA9PSAtMSkgewpAQCAtNjU5LDcgKzY2MSw3IEBAIHN1bShpbnQg
+ZGlyZmQsIGludCBsZXZlbCwgc3VtX3QgKmRpcmNzLCBjaGFyICpwYXRoX3ByZWZpeCwgY2hhciAq
+cGF0aF9pbikKIAkJCQl9CiAJCQl9CiAJCX0gZWxzZSBpZiAoU19JU0xOSyhzdC5zdF9tb2RlKSkg
+ewotCQkJcmV0ID0gcmVhZGxpbmsobmFtZWxpc3RbaV0sIGJ1Ziwgc2l6ZW9mKGJ1ZikpOworCQkJ
+cmV0ID0gcmVhZGxpbmthdChkaXJmZCwgbmFtZSwgYnVmLCBzaXplb2YoYnVmKSk7CiAJCQlpZiAo
+cmV0ID09IC0xKSB7CiAJCQkJcGVycm9yKCJyZWFkbGluayIpOwogCQkJCWV4aXQoLTEpOwotLSAK
+Mi4xNy4xCgo=
+--000000000000e82c4e05a8a764a5
+Content-Type: text/plain; charset="US-ASCII"; 
+	name="0002-src-fssum-Recursive-traversal-refactoring.patch.txt"
+Content-Disposition: attachment; 
+	filename="0002-src-fssum-Recursive-traversal-refactoring.patch.txt"
+Content-Transfer-Encoding: base64
+Content-ID: <f_kbq6xi4b0>
+X-Attachment-Id: f_kbq6xi4b0
+
+RnJvbSBjNTRkMWY4ZmU5MWNmZmU5Njg1MjY4ZWY1NzE3ZTk5OWRhNWE3MzkxIE1vbiBTZXAgMTcg
+MDA6MDA6MDAgMjAwMQpGcm9tOiBBcnZpbmQgUmFnaGF2YW4gPHJhZ2hhdmFuLmFydmluZEBnbWFp
+bC5jb20+CkRhdGU6IFN1biwgMjEgSnVuIDIwMjAgMTk6MTY6MDMgLTA0MDAKU3ViamVjdDogW1BB
+VENIIDIvMl0gc3JjL2Zzc3VtOiBSZWN1cnNpdmUgdHJhdmVyc2FsIHJlZmFjdG9yaW5nCgpNb3Zl
+cyBzb21lIGxvZ2ljIGZyb20gdGhlIHJlY3Vyc2l2ZSBkaXJlY3RvcnkgdHJhdmVyc2FsIGludG8g
+YSBoZWxwZXIKZnVuY3Rpb24gdG8gbWFrZSBpdCBlYXNpZXIgdG8gYWRkIHN1cHBvcnQgZm9yIHJl
+Z3VsYXIgZmlsZXMuIERvZXMgbm90CmNoYW5nZSBmdW5jdGlvbmFsaXR5LgoKU2lnbmVkLW9mZi1i
+eTogQXJ2aW5kIFJhZ2hhdmFuIDxyYWdoYXZhbi5hcnZpbmRAZ21haWwuY29tPgpTaWduZWQtb2Zm
+LWJ5OiBKYXlhc2hyZWUgTW9oYW4gPGpheWFAY3MudXRleGFzLmVkdT4KU2lnbmVkLW9mZi1ieTog
+VmlqYXkgQ2hpZGFtYmFyYW0gPHZpamF5QGNzLnV0ZXhhcy5lZHU+Ci0tLQogc3JjL2Zzc3VtLmMg
+fCA0NCArKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrLS0tLS0tLS0tLQogMSBmaWxl
+IGNoYW5nZWQsIDM0IGluc2VydGlvbnMoKyksIDEwIGRlbGV0aW9ucygtKQoKZGlmZiAtLWdpdCBh
+L3NyYy9mc3N1bS5jIGIvc3JjL2Zzc3VtLmMKaW5kZXggNjE5MmYxMDkuLjdiZmE4YzRmIDEwMDY0
+NAotLS0gYS9zcmMvZnNzdW0uYworKysgYi9zcmMvZnNzdW0uYwpAQCAtNTEwLDYgKzUxMCwxMCBA
+QCBpbnQgb3Blbl9vbmUoaW50IGRpcmZkLCBjb25zdCBjaGFyICpuYW1lKQogCXJldHVybiBvcGVu
+YXQoZGlyZmQsIG5hbWUsIDApOwogfQogCit2b2lkCitzdW1fb25lKGludCBkaXJmZCwgaW50IGxl
+dmVsLCBzdW1fdCAqZGlyY3MsIGNoYXIgKnBhdGhfcHJlZml4LAorCQljaGFyICpwYXRoX2luLCBj
+aGFyICpuYW1lKTsKKwogdm9pZAogc3VtKGludCBkaXJmZCwgaW50IGxldmVsLCBzdW1fdCAqZGly
+Y3MsIGNoYXIgKnBhdGhfcHJlZml4LCBjaGFyICpwYXRoX2luKQogewpAQCAtNTIwLDggKzUyNCw2
+IEBAIHN1bShpbnQgZGlyZmQsIGludCBsZXZlbCwgc3VtX3QgKmRpcmNzLCBjaGFyICpwYXRoX3By
+ZWZpeCwgY2hhciAqcGF0aF9pbikKIAlpbnQgZW50cmllcyA9IDA7CiAJaW50IGk7CiAJaW50IHJl
+dDsKLQlpbnQgZmQ7Ci0JaW50IGV4Y2w7CiAJc3RydWN0IHN0YXQ2NCBkaXJfc3Q7CiAKIAlpZiAo
+ZnN0YXQ2NChkaXJmZCwgJmRpcl9zdCkpIHsKQEAgLTU1NiwxMCArNTU4LDM2IEBAIHN1bShpbnQg
+ZGlyZmQsIGludCBsZXZlbCwgc3VtX3QgKmRpcmNzLCBjaGFyICpwYXRoX3ByZWZpeCwgY2hhciAq
+cGF0aF9pbikKIAlxc29ydChuYW1lbGlzdCwgZW50cmllcywgc2l6ZW9mKCpuYW1lbGlzdCksIG5h
+bWVjbXApOwogCWZvciAoaSA9IDA7IGkgPCBlbnRyaWVzOyArK2kpIHsKIAkJc3RydWN0IHN0YXQ2
+NCBzdDsKKworCQlyZXQgPSBmc3RhdGF0NjQoZGlyZmQsIG5hbWVsaXN0W2ldLCAmc3QsIEFUX1NZ
+TUxJTktfTk9GT0xMT1cpOworCQlpZiAocmV0KSB7CisJCQlmcHJpbnRmKHN0ZGVyciwgInN0YXQg
+ZmFpbGVkIGZvciAlcy8lcy8lczogJXNcbiIsCisJCQkJcGF0aF9wcmVmaXgsIHBhdGhfaW4sIG5h
+bWVsaXN0W2ldLAorCQkJCXN0cmVycm9yKGVycm5vKSk7CisJCQlleGl0KC0xKTsKKwkJfQorCisJ
+CS8qIFdlIGFyZSBjcm9zc2luZyBpbnRvIGEgZGlmZmVyZW50IHN1YnZvbCwgc2tpcCB0aGlzIHN1
+YnRyZWUuICovCisJCWlmIChzdC5zdF9kZXYgIT0gZGlyX3N0LnN0X2RldikKKwkJCWNvbnRpbnVl
+OworCisJCXN1bV9vbmUoZGlyZmQsIGxldmVsLCBkaXJjcywgcGF0aF9wcmVmaXgsIHBhdGhfaW4s
+IG5hbWVsaXN0W2ldKTsKKwl9Cit9CisKK3ZvaWQKK3N1bV9vbmUoaW50IGRpcmZkLCBpbnQgbGV2
+ZWwsIHN1bV90ICpkaXJjcywgY2hhciAqcGF0aF9wcmVmaXgsCisJCWNoYXIgKnBhdGhfaW4sIGNo
+YXIgKm5hbWUpCit7CisJLyogVEVNUE9SQVJZIE5FU1RJTkcgV0lMTCBCRSBSRU1PVkVEIFNPT04g
+Ki8KKwl7CiAJCXN1bV90IGNzOwogCQlzdW1fdCBtZXRhOwotCQljaGFyICpwYXRoOwotCQljaGFy
+ICpuYW1lID0gbmFtZWxpc3RbaV07CisJCWludCBmZDsKKwkJaW50IHJldDsKKwkJaW50IGV4Y2w7
+CisJCWNoYXIqIHBhdGg7CisJCXN0cnVjdCBzdGF0NjQgc3Q7CiAKIAkJc3VtX2luaXQoJmNzKTsK
+IAkJc3VtX2luaXQoJm1ldGEpOwpAQCAtNTY4LDcgKzU5Niw3IEBAIHN1bShpbnQgZGlyZmQsIGlu
+dCBsZXZlbCwgc3VtX3QgKmRpcmNzLCBjaGFyICpwYXRoX3ByZWZpeCwgY2hhciAqcGF0aF9pbikK
+IAkJZm9yIChleGNsID0gMDsgZXhjbCA8IG5fZXhjbHVkZXM7ICsrZXhjbCkgewogCQkJaWYgKHN0
+cm5jbXAoZXhjbHVkZXNbZXhjbF0ucGF0aCwgcGF0aCwKIAkJCSAgICBleGNsdWRlc1tleGNsXS5s
+ZW4pID09IDApCi0JCQkJZ290byBuZXh0OworCQkJCWdvdG8gb3V0OwogCQl9CiAKIAkJcmV0ID0g
+ZnN0YXRhdDY0KGRpcmZkLCBuYW1lLCAmc3QsIEFUX1NZTUxJTktfTk9GT0xMT1cpOwpAQCAtNTc4
+LDEwICs2MDYsNiBAQCBzdW0oaW50IGRpcmZkLCBpbnQgbGV2ZWwsIHN1bV90ICpkaXJjcywgY2hh
+ciAqcGF0aF9wcmVmaXgsIGNoYXIgKnBhdGhfaW4pCiAJCQlleGl0KC0xKTsKIAkJfQogCi0JCS8q
+IFdlIGFyZSBjcm9zc2luZyBpbnRvIGEgZGlmZmVyZW50IHN1YnZvbCwgc2tpcCB0aGlzIHN1YnRy
+ZWUuICovCi0JCWlmIChzdC5zdF9kZXYgIT0gZGlyX3N0LnN0X2RldikKLQkJCWdvdG8gbmV4dDsK
+LQogCQlzdW1fYWRkX3U2NCgmbWV0YSwgbGV2ZWwpOwogCQlzdW1fYWRkKCZtZXRhLCBuYW1lLCBz
+dHJsZW4obmFtZSkpOwogCQlpZiAoIVNfSVNESVIoc3Quc3RfbW9kZSkpCkBAIC02OTQsNyArNzE4
+LDcgQEAgc3VtKGludCBkaXJmZCwgaW50IGxldmVsLCBzdW1fdCAqZGlyY3MsIGNoYXIgKnBhdGhf
+cHJlZml4LCBjaGFyICpwYXRoX2luKQogCQl9CiAJCXN1bV9hZGRfc3VtKGRpcmNzLCAmY3MpOwog
+CQlzdW1fYWRkX3N1bShkaXJjcywgJm1ldGEpOwotbmV4dDoKK291dDoKIAkJZnJlZShwYXRoKTsK
+IAl9CiB9Ci0tIAoyLjE3LjEKCg==
+--000000000000e82c4e05a8a764a5--
