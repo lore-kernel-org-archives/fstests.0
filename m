@@ -7,215 +7,158 @@ X-Spam-Status: No, score=-7.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AA086C433E1
-	for <linux-fstests@archiver.kernel.org>; Tue, 23 Jun 2020 15:24:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9A082C433DF
+	for <linux-fstests@archiver.kernel.org>; Tue, 23 Jun 2020 15:28:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 87A9920776
-	for <linux-fstests@archiver.kernel.org>; Tue, 23 Jun 2020 15:24:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7446D2070E
+	for <linux-fstests@archiver.kernel.org>; Tue, 23 Jun 2020 15:28:37 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="lfbH/Lpm"
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="ssR2iwnt"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1732986AbgFWPYA (ORCPT
+        id S1732910AbgFWP2h (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 23 Jun 2020 11:24:00 -0400
-Received: from userp2120.oracle.com ([156.151.31.85]:59702 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1732985AbgFWPX7 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 23 Jun 2020 11:23:59 -0400
-Received: from pps.filterd (userp2120.oracle.com [127.0.0.1])
-        by userp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 05NFHnLE144604;
-        Tue, 23 Jun 2020 15:23:55 GMT
+        Tue, 23 Jun 2020 11:28:37 -0400
+Received: from userp2130.oracle.com ([156.151.31.86]:40644 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1732781AbgFWP2h (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 23 Jun 2020 11:28:37 -0400
+Received: from pps.filterd (userp2130.oracle.com [127.0.0.1])
+        by userp2130.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 05NFGsiS142563;
+        Tue, 23 Jun 2020 15:28:22 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
  : subject : message-id : references : mime-version : content-type :
  in-reply-to; s=corp-2020-01-29;
- bh=F4XoUV4c2BPolLuK6COIzAznBy3MYhCO6af2ZNMwDJU=;
- b=lfbH/LpmRW47Uk9aKrfcdisC8TBf8T0aw+NOp9F7ecgzRFExvzskKzqd5+L+Qwp1O7HT
- AEa+4MyqhptdaoKPAsZWdGf9/2Lb6pSOVjci31tKwj63dyWITLEzmZaxaA1eoKs59RnD
- gfF2D+i3ss7G/J+SopoMS3QRbhAVZ+U8dU5iaAVwAdgjIfTDwg4GbyjcHIf8udm0GWHz
- /T/54EEtC+oiqQtNTphYxWgnw6Nu0qUJwD9uIc3lRPKIeURPUdTj1MxsvN85CV8JQ3X7
- LAHvd93QGYG1MlUCWiW9hFl1Jxfa66y8wqZrzpcGrXA7bQRsfK7pHJK/nIaGXQMc//vC Kw== 
-Received: from userp3020.oracle.com (userp3020.oracle.com [156.151.31.79])
-        by userp2120.oracle.com with ESMTP id 31uk3c0hjk-1
+ bh=2vOfkvNOPG8ypGhkVbpJP3xmoPc4hYt8q40znDNtkEM=;
+ b=ssR2iwntOt7uCZ/WOpeBBv3RKx+xW310YwG4Ww/Noy1cNEcOPLReOCC4Ef53cT9lFQTP
+ RgUgt1pD7heXd4pxAV/c/fYq8X9vHJ7kIqfwv4KSUwuyW5RrQmc3j9EKz/BDUseOOsDb
+ bxmu9RYHancyTDgxswDwhqZBF2qdn1WGOhD2kx3/SlHmaAHN+kCEmW94NwoWU4WE3cld
+ 9FHLnuKDxDkXG+NW+do2vZ9lk8i3AS09lcGWdTrjbISTGNKol1htrajVv9C4VJS99kSy
+ 8l/wSA1cEUPOLo5EWBuiYxg9emFpQPmAq/1YaJuzoM/8O/lOjfCll6M082GlHg7eUtzZ Cg== 
+Received: from userp3030.oracle.com (userp3030.oracle.com [156.151.31.80])
+        by userp2130.oracle.com with ESMTP id 31uk2rrk4a-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Tue, 23 Jun 2020 15:23:55 +0000
-Received: from pps.filterd (userp3020.oracle.com [127.0.0.1])
-        by userp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 05NFI9p2190701;
-        Tue, 23 Jun 2020 15:23:55 GMT
+        Tue, 23 Jun 2020 15:28:22 +0000
+Received: from pps.filterd (userp3030.oracle.com [127.0.0.1])
+        by userp3030.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 05NFJEpV079235;
+        Tue, 23 Jun 2020 15:28:21 GMT
 Received: from userv0121.oracle.com (userv0121.oracle.com [156.151.31.72])
-        by userp3020.oracle.com with ESMTP id 31uk3jcf52-1
+        by userp3030.oracle.com with ESMTP id 31uk424cj9-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Tue, 23 Jun 2020 15:23:55 +0000
-Received: from abhmp0010.oracle.com (abhmp0010.oracle.com [141.146.116.16])
-        by userv0121.oracle.com (8.14.4/8.13.8) with ESMTP id 05NFNs8Q008305;
-        Tue, 23 Jun 2020 15:23:54 GMT
+        Tue, 23 Jun 2020 15:28:21 +0000
+Received: from abhmp0018.oracle.com (abhmp0018.oracle.com [141.146.116.24])
+        by userv0121.oracle.com (8.14.4/8.13.8) with ESMTP id 05NFSJiA011261;
+        Tue, 23 Jun 2020 15:28:19 GMT
 Received: from localhost (/67.169.218.210)
         by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Tue, 23 Jun 2020 15:23:54 +0000
-Date:   Tue, 23 Jun 2020 08:23:52 -0700
+        with ESMTP ; Tue, 23 Jun 2020 15:28:18 +0000
+Date:   Tue, 23 Jun 2020 08:28:17 -0700
 From:   "Darrick J. Wong" <darrick.wong@oracle.com>
-To:     Gao Xiang <hsiangkao@redhat.com>
-Cc:     fstests <fstests@vger.kernel.org>
-Subject: Re: [PATCH v2] xfs: add test for CVE-2020-12655
-Message-ID: <20200623152352.GA7600@magnolia>
-References: <20200619134419.30705-1-hsiangkao@redhat.com>
- <20200623020447.5924-1-hsiangkao@redhat.com>
+To:     Xiao Yang <ice_yangxiao@163.com>
+Cc:     fstests@vger.kernel.org, ira.weiny@intel.com,
+        ross.zwisler@linux.intel.com, Xiao Yang <yangx.jy@cn.fujitsu.com>
+Subject: Re: [PATCH v2 5/6] generic/413, xfs/260: Improve format operation
+ for PMD fault testing
+Message-ID: <20200623152817.GB7600@magnolia>
+References: <20200617093204.20838-1-ice_yangxiao@163.com>
+ <20200617093204.20838-6-ice_yangxiao@163.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20200623020447.5924-1-hsiangkao@redhat.com>
+In-Reply-To: <20200617093204.20838-6-ice_yangxiao@163.com>
 X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9661 signatures=668680
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 bulkscore=0 mlxscore=0 adultscore=0
- malwarescore=0 mlxlogscore=999 phishscore=0 spamscore=0 suspectscore=1
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 spamscore=0 phishscore=0 mlxscore=0
+ adultscore=0 mlxlogscore=999 bulkscore=0 malwarescore=0 suspectscore=1
  classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006120000
  definitions=main-2006230118
 X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9661 signatures=668680
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 bulkscore=0 impostorscore=0 mlxscore=0
- malwarescore=0 spamscore=0 lowpriorityscore=0 suspectscore=1 adultscore=0
- phishscore=0 mlxlogscore=999 clxscore=1015 priorityscore=1501
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006120000
- definitions=main-2006230118
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 malwarescore=0 adultscore=0
+ phishscore=0 mlxlogscore=999 impostorscore=0 lowpriorityscore=0
+ bulkscore=0 mlxscore=0 spamscore=0 clxscore=1011 suspectscore=1
+ priorityscore=1501 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2006120000 definitions=main-2006230118
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Jun 23, 2020 at 10:04:47AM +0800, Gao Xiang wrote:
-> Add a regression test to see if kernel hangs in order to
-> look after CVE-2020-12655 and check if the corresponding
-> fix is applied as well.
+On Wed, Jun 17, 2020 at 05:32:03PM +0800, Xiao Yang wrote:
+> From: Xiao Yang <yangx.jy@cn.fujitsu.com>
 > 
-> Signed-off-by: Gao Xiang <hsiangkao@redhat.com>
+> 1) Simple code and fix the wrong value of stripe_width by _scratch_mkfs_geom().
+> 2) Get hugepage size by _get_hugepagesize() and replace fixed 2M with
+>    hugepage size because hugepage size/PMD_SIZE is not 2M on some
+>    arches.(e.g. hugepage size/PMD_SIZE is 512M on arm64)
+> 3) For debugging, redirect the output of mkfs to $seqres.full.
+> 
+> Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
 > ---
-> changes since v1:
->  add "Metadata corruption" dmesg check as an auxiliary for specific kernel
+>  common/rc         |  7 +++++++
+>  tests/generic/413 | 10 ++--------
+>  tests/xfs/260     |  4 ++--
+>  3 files changed, 11 insertions(+), 10 deletions(-)
 > 
->  tests/xfs/520     | 87 +++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/520.out |  2 ++
->  tests/xfs/group   |  1 +
->  3 files changed, 90 insertions(+)
->  create mode 100755 tests/xfs/520
->  create mode 100644 tests/xfs/520.out
-> 
-> diff --git a/tests/xfs/520 b/tests/xfs/520
-> new file mode 100755
-> index 00000000..9e21579e
-> --- /dev/null
-> +++ b/tests/xfs/520
-> @@ -0,0 +1,87 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2020 Red Hat, Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test 520
-> +#
-> +# Verify kernel doesn't hang when mounting a crafted image
-> +# with bad agf.freeblks metadata due to CVE-2020-12655.
-> +#
-> +# Also, check if
-> +# commit d0c7feaf8767 ("xfs: add agf freeblocks verify in xfs_agf_verify")
-> +# is included in the current kernel.
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
+> diff --git a/common/rc b/common/rc
+> index bde26010..4852b21b 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -170,6 +170,13 @@ _get_filesize()
+>      stat -c %s "$1"
+>  }
+>  
+> +# get hugepagesize in bytes
+> +_get_hugepagesize()
 > +{
-> +	cd /
-> +	rm -f $tmp.*
-> +	_scratch_unmount > /dev/null 2>&1
+> +	local hugepgsz=$(awk '/Hugepagesize/ {print $2}' /proc/meminfo)
+> +	echo $((hugepgsz * 1024))
 > +}
 > +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs xfs
-> +_supported_os Linux
-> +_disable_dmesg_check
-> +_require_check_dmesg
-> +_require_scratch_nocheck
-> +
-> +force_crafted_metadata() {
-> +	_scratch_mkfs_xfs -f $fsdsopt "$4" >> $seqres.full 2>&1 || _fail "mkfs failed"
-> +	_scratch_xfs_set_metadata_field "$1" "$2" "$3" >> $seqres.full 2>&1
-> +	local kmsg="xfs/$seq: testing $1=$2 at $(date +"%F %T")"
-> +	local mounted=0
-> +	local hasmsg=0
-> +
-> +	echo "${kmsg}" > /dev/kmsg
-> +	_try_scratch_mount >> $seqres.full 2>&1 && mounted=1
-> +
-> +	if [ $mounted -ne 0 ]; then
-> +		dd if=/dev/zero of=$SCRATCH_MNT/test bs=65536 count=1 >> \
-> +			$seqres.full 2>&1
-> +		sync
-> +	fi
-> +
-> +	_dmesg_since_test_start | tac | sed -ne "0,\#${kmsg}#p" | tac | \
-> +		egrep -q 'Metadata corruption detected at' && hasmsg=1
-> +
-> +	_scratch_unmount > /dev/null 2>&1
-> +	[ $mounted -eq 0 -o $hasmsg -eq 1 ] && return
-> +	_fail "potential broken kernel"
+>  _mount()
+>  {
+>      $MOUNT_PROG `_mount_ops_filter $*`
+> diff --git a/tests/generic/413 b/tests/generic/413
+> index 19e1b926..dfe2912b 100755
+> --- a/tests/generic/413
+> +++ b/tests/generic/413
+> @@ -111,14 +111,8 @@ do_tests()
+>  	t_mmap_dio_dax $((64 * 1024 * 1024))
+>  }
+>  
+> -# make fs 2Mb aligned for PMD fault testing
+> -mkfs_opts=""
+> -if [ "$FSTYP" == "ext4" ]; then
+> -	mkfs_opts="-E stride=512,stripe_width=1"
+> -elif [ "$FSTYP" == "xfs" ]; then
+> -	mkfs_opts="-d su=2m,sw=1"
+> -fi
+> -_scratch_mkfs "$mkfs_opts" > /dev/null 2>&1
+> +# make fs aligned for PMD fault testing
+> +_scratch_mkfs_geom $(_get_hugepagesize) 1 >> $seqres.full 2>&1
 
-Could you print both variables in the error message so that it's easier
-to figure out where exactly we went wrong?
+These _get_hugepagesize callsites ought to _notrun the test or something
+if the relevant data cannot be extracted from /proc/meminfo.
 
-> +}
-> +
-> +bigval=100000000
-> +fsdsopt="-d agcount=1,size=64m"
-> +
-> +force_crafted_metadata freeblks 0 "agf 0"
-> +force_crafted_metadata longest $bigval "agf 0"
-> +force_crafted_metadata length $bigval "agf 0"
-> +
-> +_scratch_mkfs_xfs_supported -m reflink=1 >> $seqres.full 2>&1 && \
-> +	force_crafted_metadata refcntblocks $bigval "agf 0" "-m reflink=1"
-> +
-> +_scratch_mkfs_xfs_supported -m rmapbt=1 >> $seqres.full 2>&1 && \
-> +	force_crafted_metadata rmapblocks $bigval "agf 0" "-m rmapbt=1"
-> +
-> +echo "Silence is golden"
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/520.out b/tests/xfs/520.out
-> new file mode 100644
-> index 00000000..2a59b872
-> --- /dev/null
-> +++ b/tests/xfs/520.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 520
-> +Silence is golden
-> diff --git a/tests/xfs/group b/tests/xfs/group
-> index daf54add..433f04d0 100644
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
-> @@ -517,3 +517,4 @@
->  517 auto quick fsmap freeze
->  518 auto quick quota
->  519 auto quick reflink
-> +520 auto quick reflink dangerous
-
-Hmmm... I guess the fix has been out for a while, so it's less shocking
-to put a dangerous test in the auto group?
+Other than that, I like the way this looks. :)
 
 --D
 
+>  
+>  # mount SCRATCH_DEV with dax option, TEST_DEV not
+>  export MOUNT_OPTIONS=""
+> diff --git a/tests/xfs/260 b/tests/xfs/260
+> index fbdc4cd8..7afc20f1 100755
+> --- a/tests/xfs/260
+> +++ b/tests/xfs/260
+> @@ -121,8 +121,8 @@ do_tests()
+>  	t_dax_flag_mmap_dio $((64 * 1024 * 1024))
+>  }
+>  
+> -# make xfs 2Mb aligned for PMD fault testing
+> -_scratch_mkfs "-d su=2m,sw=1" > /dev/null 2>&1
+> +# make xfs aligned for PMD fault testing
+> +_scratch_mkfs_geom $(_get_hugepagesize) 1 >> $seqres.full 2>&1
+>  
+>  # mount with dax option
+>  _scratch_mount "-o dax"
 > -- 
-> 2.18.1
+> 2.21.0
 > 
