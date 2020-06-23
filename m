@@ -2,203 +2,135 @@ Return-Path: <SRS0=gdhN=AE=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.5 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 38230C433E0
-	for <linux-fstests@archiver.kernel.org>; Tue, 23 Jun 2020 02:05:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5B028C433E0
+	for <linux-fstests@archiver.kernel.org>; Tue, 23 Jun 2020 06:01:32 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0A99120720
-	for <linux-fstests@archiver.kernel.org>; Tue, 23 Jun 2020 02:05:38 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="cHfz/toI"
+	by mail.kernel.org (Postfix) with ESMTP id 3F87620716
+	for <linux-fstests@archiver.kernel.org>; Tue, 23 Jun 2020 06:01:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730888AbgFWCFh (ORCPT
+        id S1730447AbgFWGBc (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 22 Jun 2020 22:05:37 -0400
-Received: from us-smtp-1.mimecast.com ([205.139.110.61]:20785 "EHLO
-        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1730845AbgFWCFh (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 22 Jun 2020 22:05:37 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1592877935;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:in-reply-to:in-reply-to:references:references;
-        bh=jG69dWtfdhkm1YcjwmIh/6yJednkRVz/Gx+trraO3Mc=;
-        b=cHfz/toIfV/ILwZ58rO4vaNMxBs0+tzLeRt5ZLiCKZYAU6em6yNF6BIKaQGnDAZOI7v8DS
-        4AGC7LZI6JDesVyadcOUc5y6dtwsNZqu1oJfwzVqRMEMG235En23bvUrNBUih8vdmndVH9
-        PPYRh+6PJz9RcIzH1UBDDrvrsC83zl4=
-Received: from mail-pf1-f197.google.com (mail-pf1-f197.google.com
- [209.85.210.197]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-108-Wvwa1KDsMKmpZwVx8xMheQ-1; Mon, 22 Jun 2020 22:05:33 -0400
-X-MC-Unique: Wvwa1KDsMKmpZwVx8xMheQ-1
-Received: by mail-pf1-f197.google.com with SMTP id o19so14702139pfp.6
-        for <fstests@vger.kernel.org>; Mon, 22 Jun 2020 19:05:33 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references;
-        bh=jG69dWtfdhkm1YcjwmIh/6yJednkRVz/Gx+trraO3Mc=;
-        b=p/fhLBSkiF6J38vQSrCIPX60DR1Rr5sW/x67RU35VeD8TSLWT9rv8/3YPxmo23AoTd
-         ZzNOC/hf2yYD0j/GcBPHrr9fKUbtfWH6wjLxl9mmnKUGjpCeWfE/d4NR2vOfo6eALc4E
-         q7Ev4SYCVx1olH8NwwqULNjkCBkyuwMt3qDP2GtYyZVNPIovDHCvc92KM6/MfGbBUiLn
-         Wp9OLm/O3Dvlp7Mhz9MhB0EnY0qYVEw2QY1TsY7uFF+k3PjjTXpWnZwXaMiI2fiGwrEN
-         94vcuj50i28mdffdEEJuU9d7U/Ob8yHcs4wilm3lbTnRcZYDS8HNNtex58p2JU/oLYdm
-         mcaQ==
-X-Gm-Message-State: AOAM530v7pDywU3+3FCDI8E3T5dJgAEIpZrf2o9tcnX+KlKWtUMnppfJ
-        VoFNpiYWaZmh6b9c7+w4lf1RHenifkujdUO6udnuHOs/iTZ1B3qRiM6dFMzlYmGRhdoTMW6Szj3
-        Bia0EgFgdkmFIHdVPMA==
-X-Received: by 2002:a62:ddc4:: with SMTP id w187mr22482203pff.63.1592877932267;
-        Mon, 22 Jun 2020 19:05:32 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJwruLk25f/JFmEzGy7OCOoC7o6F1cQ6yvG4KEWKyj1gtAuNI5su0Q9aoPJJ5+Z7gSyWmsLF8w==
-X-Received: by 2002:a62:ddc4:: with SMTP id w187mr22482181pff.63.1592877931985;
-        Mon, 22 Jun 2020 19:05:31 -0700 (PDT)
-Received: from xiangao.remote.csb ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id m16sm14908147pfh.187.2020.06.22.19.05.29
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 22 Jun 2020 19:05:31 -0700 (PDT)
-From:   Gao Xiang <hsiangkao@redhat.com>
-To:     fstests <fstests@vger.kernel.org>
-Cc:     Gao Xiang <hsiangkao@redhat.com>
-Subject: [PATCH v2] xfs: add test for CVE-2020-12655
-Date:   Tue, 23 Jun 2020 10:04:47 +0800
-Message-Id: <20200623020447.5924-1-hsiangkao@redhat.com>
-X-Mailer: git-send-email 2.18.1
-In-Reply-To: <20200619134419.30705-1-hsiangkao@redhat.com>
-References: <20200619134419.30705-1-hsiangkao@redhat.com>
+        Tue, 23 Jun 2020 02:01:32 -0400
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:46618 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1730081AbgFWGBb (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 23 Jun 2020 02:01:31 -0400
+X-IronPort-AV: E=Sophos;i="5.75,270,1589212800"; 
+   d="scan'208";a="95131674"
+Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
+  by heian.cn.fujitsu.com with ESMTP; 23 Jun 2020 14:01:05 +0800
+Received: from G08CNEXMBPEKD06.g08.fujitsu.local (unknown [10.167.33.206])
+        by cn.fujitsu.com (Postfix) with ESMTP id 7E1364CE4B00;
+        Tue, 23 Jun 2020 13:50:38 +0800 (CST)
+Received: from [10.167.220.69] (10.167.220.69) by
+ G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.2; Tue, 23 Jun 2020 14:00:58 +0800
+Message-ID: <5EF19A99.7020604@cn.fujitsu.com>
+Date:   Tue, 23 Jun 2020 14:00:57 +0800
+From:   Xiao Yang <yangx.jy@cn.fujitsu.com>
+User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.2; zh-CN; rv:1.9.2.18) Gecko/20110616 Thunderbird/3.1.11
+MIME-Version: 1.0
+To:     <darrick.wong@oracle.com>
+CC:     Xiao Yang <ice_yangxiao@163.com>, <fstests@vger.kernel.org>,
+        <ira.weiny@intel.com>, <ross.zwisler@linux.intel.com>
+Subject: Re: [PATCH v2 5/6] generic/413, xfs/260: Improve format operation
+ for PMD fault testing
+References: <20200617093204.20838-1-ice_yangxiao@163.com> <20200617093204.20838-6-ice_yangxiao@163.com>
+In-Reply-To: <20200617093204.20838-6-ice_yangxiao@163.com>
+Content-Type: text/plain; charset="GB2312"
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.167.220.69]
+X-ClientProxiedBy: G08CNEXCHPEKD06.g08.fujitsu.local (10.167.33.205) To
+ G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206)
+X-yoursite-MailScanner-ID: 7E1364CE4B00.AAD58
+X-yoursite-MailScanner: Found to be clean
+X-yoursite-MailScanner-From: yangx.jy@cn.fujitsu.com
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Add a regression test to see if kernel hangs in order to
-look after CVE-2020-12655 and check if the corresponding
-fix is applied as well.
+Hi Darrick,
 
-Signed-off-by: Gao Xiang <hsiangkao@redhat.com>
----
-changes since v1:
- add "Metadata corruption" dmesg check as an auxiliary for specific kernel
+Sorry to bother you.
+Do you have any comment on this patch? :-)
 
- tests/xfs/520     | 87 +++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/520.out |  2 ++
- tests/xfs/group   |  1 +
- 3 files changed, 90 insertions(+)
- create mode 100755 tests/xfs/520
- create mode 100644 tests/xfs/520.out
+Thanks,
+Xiao Yang
+On 2020/6/17 17:32, Xiao Yang wrote:
+> From: Xiao Yang <yangx.jy@cn.fujitsu.com>
+>
+> 1) Simple code and fix the wrong value of stripe_width by _scratch_mkfs_geom().
+> 2) Get hugepage size by _get_hugepagesize() and replace fixed 2M with
+>    hugepage size because hugepage size/PMD_SIZE is not 2M on some
+>    arches.(e.g. hugepage size/PMD_SIZE is 512M on arm64)
+> 3) For debugging, redirect the output of mkfs to $seqres.full.
+>
+> Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+> ---
+>  common/rc         |  7 +++++++
+>  tests/generic/413 | 10 ++--------
+>  tests/xfs/260     |  4 ++--
+>  3 files changed, 11 insertions(+), 10 deletions(-)
+>
+> diff --git a/common/rc b/common/rc
+> index bde26010..4852b21b 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -170,6 +170,13 @@ _get_filesize()
+>      stat -c %s "$1"
+>  }
+>  
+> +# get hugepagesize in bytes
+> +_get_hugepagesize()
+> +{
+> +	local hugepgsz=$(awk '/Hugepagesize/ {print $2}' /proc/meminfo)
+> +	echo $((hugepgsz * 1024))
+> +}
+> +
+>  _mount()
+>  {
+>      $MOUNT_PROG `_mount_ops_filter $*`
+> diff --git a/tests/generic/413 b/tests/generic/413
+> index 19e1b926..dfe2912b 100755
+> --- a/tests/generic/413
+> +++ b/tests/generic/413
+> @@ -111,14 +111,8 @@ do_tests()
+>  	t_mmap_dio_dax $((64 * 1024 * 1024))
+>  }
+>  
+> -# make fs 2Mb aligned for PMD fault testing
+> -mkfs_opts=""
+> -if [ "$FSTYP" == "ext4" ]; then
+> -	mkfs_opts="-E stride=512,stripe_width=1"
+> -elif [ "$FSTYP" == "xfs" ]; then
+> -	mkfs_opts="-d su=2m,sw=1"
+> -fi
+> -_scratch_mkfs "$mkfs_opts" > /dev/null 2>&1
+> +# make fs aligned for PMD fault testing
+> +_scratch_mkfs_geom $(_get_hugepagesize) 1 >> $seqres.full 2>&1
+>  
+>  # mount SCRATCH_DEV with dax option, TEST_DEV not
+>  export MOUNT_OPTIONS=""
+> diff --git a/tests/xfs/260 b/tests/xfs/260
+> index fbdc4cd8..7afc20f1 100755
+> --- a/tests/xfs/260
+> +++ b/tests/xfs/260
+> @@ -121,8 +121,8 @@ do_tests()
+>  	t_dax_flag_mmap_dio $((64 * 1024 * 1024))
+>  }
+>  
+> -# make xfs 2Mb aligned for PMD fault testing
+> -_scratch_mkfs "-d su=2m,sw=1" > /dev/null 2>&1
+> +# make xfs aligned for PMD fault testing
+> +_scratch_mkfs_geom $(_get_hugepagesize) 1 >> $seqres.full 2>&1
+>  
+>  # mount with dax option
+>  _scratch_mount "-o dax"
 
-diff --git a/tests/xfs/520 b/tests/xfs/520
-new file mode 100755
-index 00000000..9e21579e
---- /dev/null
-+++ b/tests/xfs/520
-@@ -0,0 +1,87 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2020 Red Hat, Inc.  All Rights Reserved.
-+#
-+# FS QA Test 520
-+#
-+# Verify kernel doesn't hang when mounting a crafted image
-+# with bad agf.freeblks metadata due to CVE-2020-12655.
-+#
-+# Also, check if
-+# commit d0c7feaf8767 ("xfs: add agf freeblocks verify in xfs_agf_verify")
-+# is included in the current kernel.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+	_scratch_unmount > /dev/null 2>&1
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs xfs
-+_supported_os Linux
-+_disable_dmesg_check
-+_require_check_dmesg
-+_require_scratch_nocheck
-+
-+force_crafted_metadata() {
-+	_scratch_mkfs_xfs -f $fsdsopt "$4" >> $seqres.full 2>&1 || _fail "mkfs failed"
-+	_scratch_xfs_set_metadata_field "$1" "$2" "$3" >> $seqres.full 2>&1
-+	local kmsg="xfs/$seq: testing $1=$2 at $(date +"%F %T")"
-+	local mounted=0
-+	local hasmsg=0
-+
-+	echo "${kmsg}" > /dev/kmsg
-+	_try_scratch_mount >> $seqres.full 2>&1 && mounted=1
-+
-+	if [ $mounted -ne 0 ]; then
-+		dd if=/dev/zero of=$SCRATCH_MNT/test bs=65536 count=1 >> \
-+			$seqres.full 2>&1
-+		sync
-+	fi
-+
-+	_dmesg_since_test_start | tac | sed -ne "0,\#${kmsg}#p" | tac | \
-+		egrep -q 'Metadata corruption detected at' && hasmsg=1
-+
-+	_scratch_unmount > /dev/null 2>&1
-+	[ $mounted -eq 0 -o $hasmsg -eq 1 ] && return
-+	_fail "potential broken kernel"
-+}
-+
-+bigval=100000000
-+fsdsopt="-d agcount=1,size=64m"
-+
-+force_crafted_metadata freeblks 0 "agf 0"
-+force_crafted_metadata longest $bigval "agf 0"
-+force_crafted_metadata length $bigval "agf 0"
-+
-+_scratch_mkfs_xfs_supported -m reflink=1 >> $seqres.full 2>&1 && \
-+	force_crafted_metadata refcntblocks $bigval "agf 0" "-m reflink=1"
-+
-+_scratch_mkfs_xfs_supported -m rmapbt=1 >> $seqres.full 2>&1 && \
-+	force_crafted_metadata rmapblocks $bigval "agf 0" "-m rmapbt=1"
-+
-+echo "Silence is golden"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/520.out b/tests/xfs/520.out
-new file mode 100644
-index 00000000..2a59b872
---- /dev/null
-+++ b/tests/xfs/520.out
-@@ -0,0 +1,2 @@
-+QA output created by 520
-+Silence is golden
-diff --git a/tests/xfs/group b/tests/xfs/group
-index daf54add..433f04d0 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -517,3 +517,4 @@
- 517 auto quick fsmap freeze
- 518 auto quick quota
- 519 auto quick reflink
-+520 auto quick reflink dangerous
--- 
-2.18.1
+
 
