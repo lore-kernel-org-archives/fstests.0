@@ -2,260 +2,220 @@ Return-Path: <SRS0=gdhN=AE=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.5 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 57D74C433E0
-	for <linux-fstests@archiver.kernel.org>; Tue, 23 Jun 2020 08:52:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AA086C433E1
+	for <linux-fstests@archiver.kernel.org>; Tue, 23 Jun 2020 15:24:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3779320723
-	for <linux-fstests@archiver.kernel.org>; Tue, 23 Jun 2020 08:52:15 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 87A9920776
+	for <linux-fstests@archiver.kernel.org>; Tue, 23 Jun 2020 15:24:00 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="lfbH/Lpm"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731735AbgFWIwO (ORCPT
+        id S1732986AbgFWPYA (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 23 Jun 2020 04:52:14 -0400
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:41560 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1731691AbgFWIwO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 23 Jun 2020 04:52:14 -0400
-X-IronPort-AV: E=Sophos;i="5.75,270,1589212800"; 
-   d="scan'208";a="95142308"
-Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
-  by heian.cn.fujitsu.com with ESMTP; 23 Jun 2020 16:51:38 +0800
-Received: from G08CNEXMBPEKD06.g08.fujitsu.local (unknown [10.167.33.206])
-        by cn.fujitsu.com (Postfix) with ESMTP id 016A94CE3F0C;
-        Tue, 23 Jun 2020 16:41:11 +0800 (CST)
-Received: from [10.167.220.69] (10.167.220.69) by
- G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206) with Microsoft SMTP Server
- (TLS) id 15.0.1497.2; Tue, 23 Jun 2020 16:51:32 +0800
-Message-ID: <5EF1C293.4010104@cn.fujitsu.com>
-Date:   Tue, 23 Jun 2020 16:51:31 +0800
-From:   Xiao Yang <yangx.jy@cn.fujitsu.com>
-User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.2; zh-CN; rv:1.9.2.18) Gecko/20110616 Thunderbird/3.1.11
+        Tue, 23 Jun 2020 11:24:00 -0400
+Received: from userp2120.oracle.com ([156.151.31.85]:59702 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1732985AbgFWPX7 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 23 Jun 2020 11:23:59 -0400
+Received: from pps.filterd (userp2120.oracle.com [127.0.0.1])
+        by userp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 05NFHnLE144604;
+        Tue, 23 Jun 2020 15:23:55 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
+ : subject : message-id : references : mime-version : content-type :
+ in-reply-to; s=corp-2020-01-29;
+ bh=F4XoUV4c2BPolLuK6COIzAznBy3MYhCO6af2ZNMwDJU=;
+ b=lfbH/LpmRW47Uk9aKrfcdisC8TBf8T0aw+NOp9F7ecgzRFExvzskKzqd5+L+Qwp1O7HT
+ AEa+4MyqhptdaoKPAsZWdGf9/2Lb6pSOVjci31tKwj63dyWITLEzmZaxaA1eoKs59RnD
+ gfF2D+i3ss7G/J+SopoMS3QRbhAVZ+U8dU5iaAVwAdgjIfTDwg4GbyjcHIf8udm0GWHz
+ /T/54EEtC+oiqQtNTphYxWgnw6Nu0qUJwD9uIc3lRPKIeURPUdTj1MxsvN85CV8JQ3X7
+ LAHvd93QGYG1MlUCWiW9hFl1Jxfa66y8wqZrzpcGrXA7bQRsfK7pHJK/nIaGXQMc//vC Kw== 
+Received: from userp3020.oracle.com (userp3020.oracle.com [156.151.31.79])
+        by userp2120.oracle.com with ESMTP id 31uk3c0hjk-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Tue, 23 Jun 2020 15:23:55 +0000
+Received: from pps.filterd (userp3020.oracle.com [127.0.0.1])
+        by userp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 05NFI9p2190701;
+        Tue, 23 Jun 2020 15:23:55 GMT
+Received: from userv0121.oracle.com (userv0121.oracle.com [156.151.31.72])
+        by userp3020.oracle.com with ESMTP id 31uk3jcf52-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Tue, 23 Jun 2020 15:23:55 +0000
+Received: from abhmp0010.oracle.com (abhmp0010.oracle.com [141.146.116.16])
+        by userv0121.oracle.com (8.14.4/8.13.8) with ESMTP id 05NFNs8Q008305;
+        Tue, 23 Jun 2020 15:23:54 GMT
+Received: from localhost (/67.169.218.210)
+        by default (Oracle Beehive Gateway v4.0)
+        with ESMTP ; Tue, 23 Jun 2020 15:23:54 +0000
+Date:   Tue, 23 Jun 2020 08:23:52 -0700
+From:   "Darrick J. Wong" <darrick.wong@oracle.com>
+To:     Gao Xiang <hsiangkao@redhat.com>
+Cc:     fstests <fstests@vger.kernel.org>
+Subject: Re: [PATCH v2] xfs: add test for CVE-2020-12655
+Message-ID: <20200623152352.GA7600@magnolia>
+References: <20200619134419.30705-1-hsiangkao@redhat.com>
+ <20200623020447.5924-1-hsiangkao@redhat.com>
 MIME-Version: 1.0
-To:     Ira Weiny <ira.weiny@intel.com>
-CC:     Xiao Yang <ice_yangxiao@163.com>, <fstests@vger.kernel.org>,
-        <darrick.wong@oracle.com>, <ross.zwisler@linux.intel.com>
-Subject: Re: [PATCH v2 6/6] xfs/260: Move xfs/260 to generic
-References: <20200617093204.20838-1-ice_yangxiao@163.com> <20200617093204.20838-7-ice_yangxiao@163.com> <20200617214857.GN4160762@iweiny-DESK2.sc.intel.com> <a2b565a7-7ff8-7201-1921-4724d8117cbb@163.com> <20200619151511.GR4160762@iweiny-DESK2.sc.intel.com>
-In-Reply-To: <20200619151511.GR4160762@iweiny-DESK2.sc.intel.com>
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.167.220.69]
-X-ClientProxiedBy: G08CNEXCHPEKD06.g08.fujitsu.local (10.167.33.205) To
- G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206)
-X-yoursite-MailScanner-ID: 016A94CE3F0C.AFB13
-X-yoursite-MailScanner: Found to be clean
-X-yoursite-MailScanner-From: yangx.jy@cn.fujitsu.com
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20200623020447.5924-1-hsiangkao@redhat.com>
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9661 signatures=668680
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 bulkscore=0 mlxscore=0 adultscore=0
+ malwarescore=0 mlxlogscore=999 phishscore=0 spamscore=0 suspectscore=1
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006120000
+ definitions=main-2006230118
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9661 signatures=668680
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 bulkscore=0 impostorscore=0 mlxscore=0
+ malwarescore=0 spamscore=0 lowpriorityscore=0 suspectscore=1 adultscore=0
+ phishscore=0 mlxlogscore=999 clxscore=1015 priorityscore=1501
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006120000
+ definitions=main-2006230118
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 2020/6/19 23:15, Ira Weiny wrote:
-> On Thu, Jun 18, 2020 at 11:35:56PM +0800, Xiao Yang wrote:
->> On 6/18/20 5:48 AM, Ira Weiny wrote:
->>> On Wed, Jun 17, 2020 at 05:32:04PM +0800, Xiao Yang wrote:
->>>> From: Xiao Yang<yangx.jy@cn.fujitsu.com>
->>>>
->>>> Both ext4 and xfs support per-inode DAX flag now so move it to generic.
->>>>
->>>> Signed-off-by: Xiao Yang<yangx.jy@cn.fujitsu.com>
->>> Unfortunately this test needs to be modified to work with the final agreed upon
->>> method for switching DAX, patch below.  Feel free to squash it into this patch
->>> for v3.
->>>
->>> There are more checks I had queued up but I'm happy to wait for this series to
->>> be applied.
->>>
->>> Again, thanks for moving this along!
->>> Ira
->>>
->>>   From 97b67a2773627cfe91b5f33a418ab646bb5fd0a8 Mon Sep 17 00:00:00 2001
->>> From: Ira Weiny<ira.weiny@intel.com>
->>> Date: Wed, 17 Jun 2020 14:34:45 -0700
->>> Subject: [PATCH] generic/602: Modify to work with agreed inheritance of DAX flag
->>>
->>> Modifying the DAX flag on flies does not take effect immediately.  The
->>> easiest way to ensure the file state for this test is to use inheritance
->>> of the parent directory DAX state.
->> Hi Ira,
->>
->> Modifying the DAX flag on directories can take effect immediately, right?
-> Yes and any file created under that directory will inherit the DAX flag
-> immediately.
->
->>> Modify the test to use 2 directories which we can switch the DAX state on
->>> and create the test files in those directories after setting the desired
->>> state.
->> Good addition, and I will squash it into this v3 patch. :-)
->>
->> BTW:
->>
->> I wait someone(Darrick, Eryu or others) to review the code about PMD fault
->> testing in this patch set.
-> Yes, thanks.  I don't feel familiar enough with that code to review it.
->
-> Ira
->
->> Best Regards,
->>
->> Xiao Yang
->>
->>> Signed-off-by: Ira Weiny<ira.weiny@intel.com>
->>> ---
->>>    tests/generic/602 | 81 +++++++++++++++++++++++++++++------------------
->>>    1 file changed, 51 insertions(+), 30 deletions(-)
->>>
->>> diff --git a/tests/generic/602 b/tests/generic/602
->>> index 9137c5b9385f..20bf2c6bd246 100755
->>> --- a/tests/generic/602
->>> +++ b/tests/generic/602
->>> @@ -36,68 +36,95 @@ _require_test_program "t_mmap_dio"
->>>    _require_scratch_dax_iflag
->>>    _require_xfs_io_command "falloc"
->>> -prep_files()
->>> +SRC_DIR=$SCRATCH_MNT/src
->>> +SRC_FILE=$SRC_DIR/tf_s
->>> +
->>> +DST_DIR=$SCRATCH_MNT/dst
->>> +DST_FILE=$DST_DIR/tf_d
->>> +
->>> +clean_files()
->>>    {
->>> -	rm -f $SCRATCH_MNT/tf_{s,d}
->>> +	rm -f $SRC_FILE
->>> +	rm -f $DST_FILE
->>> +	mkdir -p $SRC_DIR
->>> +	mkdir -p $DST_DIR
->>> +}
->>> +
->>> +prep_files()
->>> +{
->>> +	$XFS_IO_PROG -f -c "falloc 0 $tsize" \
->>> +		$SRC_FILE>>  $seqres.full 2>&1
->>>    	$XFS_IO_PROG -f -c "falloc 0 $tsize" \
->>> -		$SCRATCH_MNT/tf_{s,d}>>  $seqres.full 2>&1
->>> +		$DST_FILE>>  $seqres.full 2>&1
->>>    }
->>>    t_both_dax()
->>>    {
->>> +	clean_files
->>> +	$XFS_IO_PROG -c "chattr +x" $SRC_DIR
->>> +	$XFS_IO_PROG -c "chattr +x" $DST_DIR
->>>    	prep_files
->>> -	$XFS_IO_PROG -c "chattr +x" $SCRATCH_MNT/tf_{s,d}
->>>    	# with O_DIRECT first
->>> -	$here/src/t_mmap_dio $SCRATCH_MNT/tf_{s,d} $1 "dio both dax"
->>> +	$here/src/t_mmap_dio $SRC_FILE $DST_FILE $1 "dio both dax"
->>> +	clean_files
->>> +	$XFS_IO_PROG -c "chattr +x" $SRC_DIR
->>> +	$XFS_IO_PROG -c "chattr +x" $DST_DIR
->>>    	prep_files
->>> -	$XFS_IO_PROG -c "chattr +x" $SCRATCH_MNT/tf_{s,d}
->>>    	# again with buffered IO
->>> -	$here/src/t_mmap_dio -b $SCRATCH_MNT/tf_{s,d} \
->>> +	$here/src/t_mmap_dio -b $SRC_FILE $DST_FILE \
->>>    		$1 "buffered both dax"
->>>    }
->>>    t_nondax_to_dax()
->>>    {
->>> +	clean_files
->>> +	$XFS_IO_PROG -c "chattr -x" $SRC_DIR
->>> +	$XFS_IO_PROG -c "chattr +x" $DST_DIR
->>>    	prep_files
->>> -	$XFS_IO_PROG -c "chattr -x" $SCRATCH_MNT/tf_s
->>> -	$XFS_IO_PROG -c "chattr +x" $SCRATCH_MNT/tf_d
->>> -	$here/src/t_mmap_dio $SCRATCH_MNT/tf_{s,d} \
->>> +	$here/src/t_mmap_dio $SRC_FILE $DST_FILE \
->>>    		$1 "dio nondax to dax"
->>> +	clean_files
->>> +	$XFS_IO_PROG -c "chattr -x" $SRC_DIR
->>> +	$XFS_IO_PROG -c "chattr +x" $DST_DIR
->>>    	prep_files
->>> -	$XFS_IO_PROG -c "chattr -x" $SCRATCH_MNT/tf_s
->>> -	$XFS_IO_PROG -c "chattr +x" $SCRATCH_MNT/tf_d
->>> -	$here/src/t_mmap_dio -b $SCRATCH_MNT/tf_{s,d} \
->>> +	$here/src/t_mmap_dio -b $SRC_FILE $DST_FILE \
->>>    		$1 "buffered nondax to dax"
->>>    }
->>>    t_dax_to_nondax()
->>>    {
->>> +	clean_files
->>> +	$XFS_IO_PROG -c "chattr +x" $SRC_DIR
->>> +	$XFS_IO_PROG -c "chattr -x" $DST_DIR
->>>    	prep_files
->>> -	$XFS_IO_PROG -c "chattr +x" $SCRATCH_MNT/tf_s
->>> -	$XFS_IO_PROG -c "chattr -x" $SCRATCH_MNT/tf_d
->>> -	$here/src/t_mmap_dio $SCRATCH_MNT/tf_{s,d} \
->>> +	$here/src/t_mmap_dio $SRC_FILE $DST_FILE \
->>>    		$1 "dio dax to nondax"
->>> +	clean_files
->>> +	$XFS_IO_PROG -c "chattr +x" $SRC_DIR
->>> +	$XFS_IO_PROG -c "chattr -x" $DST_DIR
->>>    	prep_files
->>> -	$XFS_IO_PROG -c "chattr +x" $SCRATCH_MNT/tf_s
->>> -	$XFS_IO_PROG -c "chattr -x" $SCRATCH_MNT/tf_d
->>> -	$here/src/t_mmap_dio -b $SCRATCH_MNT/tf_{s,d} \
->>> +	$here/src/t_mmap_dio -b $SRC_FILE $DST_FILE \
->>>    		$1 "buffered dax to nondax"
->>>    }
->>>    t_both_nondax()
->>>    {
->>> +	clean_files
->>> +	$XFS_IO_PROG -c "chattr -x" $SRC_DIR
->>> +	$XFS_IO_PROG -c "chattr -x" $DST_DIR
->>>    	prep_files
->>> -	$XFS_IO_PROG -c "chattr -x" $SCRATCH_MNT/tf_{s,d}
->>> -	$here/src/t_mmap_dio $SCRATCH_MNT/tf_{s,d} \
->>> +	$here/src/t_mmap_dio $SRC_FILE $DST_FILE \
->>>    		$1 "dio both nondax"
->>> +	clean_files
->>> +	$XFS_IO_PROG -c "chattr -x" $SRC_DIR
->>> +	$XFS_IO_PROG -c "chattr -x" $DST_DIR
->>>    	prep_files
->>> -	$XFS_IO_PROG -c "chattr -x" $SCRATCH_MNT/tf_{s,d}
->>> -	$here/src/t_mmap_dio -b $SCRATCH_MNT/tf_{s,d} \
->>> +	$here/src/t_mmap_dio -b $SRC_FILE $DST_FILE \
->>>    		$1 "buffered both nondax"
->>>    }
->>> @@ -124,17 +151,11 @@ do_tests()
->>>    # make xfs aligned for PMD fault testing
->>>    _scratch_mkfs_geom $(_get_hugepagesize) 1>>  $seqres.full 2>&1
->>> -# mount with dax option
->>> -_scratch_mount "-o dax"
->>> -
-Hi Ira,
+On Tue, Jun 23, 2020 at 10:04:47AM +0800, Gao Xiang wrote:
+> Add a regression test to see if kernel hangs in order to
+> look after CVE-2020-12655 and check if the corresponding
+> fix is applied as well.
+> 
+> Signed-off-by: Gao Xiang <hsiangkao@redhat.com>
+> ---
+> changes since v1:
+>  add "Metadata corruption" dmesg check as an auxiliary for specific kernel
+> 
+>  tests/xfs/520     | 87 +++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/520.out |  2 ++
+>  tests/xfs/group   |  1 +
+>  3 files changed, 90 insertions(+)
+>  create mode 100755 tests/xfs/520
+>  create mode 100644 tests/xfs/520.out
+> 
+> diff --git a/tests/xfs/520 b/tests/xfs/520
+> new file mode 100755
+> index 00000000..9e21579e
+> --- /dev/null
+> +++ b/tests/xfs/520
+> @@ -0,0 +1,87 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2020 Red Hat, Inc.  All Rights Reserved.
+> +#
+> +# FS QA Test 520
+> +#
+> +# Verify kernel doesn't hang when mounting a crafted image
+> +# with bad agf.freeblks metadata due to CVE-2020-12655.
+> +#
+> +# Also, check if
+> +# commit d0c7feaf8767 ("xfs: add agf freeblocks verify in xfs_agf_verify")
+> +# is included in the current kernel.
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +	_scratch_unmount > /dev/null 2>&1
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs xfs
+> +_supported_os Linux
+> +_disable_dmesg_check
+> +_require_check_dmesg
+> +_require_scratch_nocheck
+> +
+> +force_crafted_metadata() {
+> +	_scratch_mkfs_xfs -f $fsdsopt "$4" >> $seqres.full 2>&1 || _fail "mkfs failed"
+> +	_scratch_xfs_set_metadata_field "$1" "$2" "$3" >> $seqres.full 2>&1
+> +	local kmsg="xfs/$seq: testing $1=$2 at $(date +"%F %T")"
+> +	local mounted=0
+> +	local hasmsg=0
+> +
+> +	echo "${kmsg}" > /dev/kmsg
+> +	_try_scratch_mount >> $seqres.full 2>&1 && mounted=1
+> +
+> +	if [ $mounted -ne 0 ]; then
+> +		dd if=/dev/zero of=$SCRATCH_MNT/test bs=65536 count=1 >> \
+> +			$seqres.full 2>&1
+> +		sync
+> +	fi
+> +
+> +	_dmesg_since_test_start | tac | sed -ne "0,\#${kmsg}#p" | tac | \
+> +		egrep -q 'Metadata corruption detected at' && hasmsg=1
+> +
+> +	_scratch_unmount > /dev/null 2>&1
+> +	[ $mounted -eq 0 -o $hasmsg -eq 1 ] && return
+> +	_fail "potential broken kernel"
 
-Why do you want to remove this combination(i.e. test per-inode DAX flag 
-under mounting with dax option) ?
-Is it because mounting with dax option ignore FS_XFLAG_DAX flag?
-I think it is a reasonable combination. :-)
+Could you print both variables in the error message so that it's easier
+to figure out where exactly we went wrong?
 
->>>    tsize=$((128 * 1024 * 1024))
->>> -do_tests
->>> -_scratch_unmount
->>> -
->>>    # mount again without dax option
->>>    export MOUNT_OPTIONS=""
->>> -_scratch_mount
->>> +_scratch_mount "-o dax=inode"
->>>    do_tests
->>>    # success, all done
+> +}
+> +
+> +bigval=100000000
+> +fsdsopt="-d agcount=1,size=64m"
+> +
+> +force_crafted_metadata freeblks 0 "agf 0"
+> +force_crafted_metadata longest $bigval "agf 0"
+> +force_crafted_metadata length $bigval "agf 0"
+> +
+> +_scratch_mkfs_xfs_supported -m reflink=1 >> $seqres.full 2>&1 && \
+> +	force_crafted_metadata refcntblocks $bigval "agf 0" "-m reflink=1"
+> +
+> +_scratch_mkfs_xfs_supported -m rmapbt=1 >> $seqres.full 2>&1 && \
+> +	force_crafted_metadata rmapblocks $bigval "agf 0" "-m rmapbt=1"
+> +
+> +echo "Silence is golden"
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/520.out b/tests/xfs/520.out
+> new file mode 100644
+> index 00000000..2a59b872
+> --- /dev/null
+> +++ b/tests/xfs/520.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 520
+> +Silence is golden
+> diff --git a/tests/xfs/group b/tests/xfs/group
+> index daf54add..433f04d0 100644
+> --- a/tests/xfs/group
+> +++ b/tests/xfs/group
+> @@ -517,3 +517,4 @@
+>  517 auto quick fsmap freeze
+>  518 auto quick quota
+>  519 auto quick reflink
+> +520 auto quick reflink dangerous
 
-Could we keep _scratch_mount without dax so that this test can run on 
-both old and new kernel?
-See the following reasons:
-1) FS_XFLAG_DAX was introduced by commit 58f88ca("xfs: introduce 
-per-inode DAX enablement") since 2017.
-2) _scratch_mount with dax=inode is equal to _scratch_mount without dax.
+Hmmm... I guess the fix has been out for a while, so it's less shocking
+to put a dangerous test in the auto group?
 
-Best Regards,
-Xiao Yang
->
-> .
->
+--D
 
-
-
+> -- 
+> 2.18.1
+> 
