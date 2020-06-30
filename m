@@ -2,149 +2,145 @@ Return-Path: <SRS0=QKYl=AL=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.0 required=3.0
-	tests=HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
+	URIBL_BLOCKED autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 618FDC433E0
-	for <linux-fstests@archiver.kernel.org>; Tue, 30 Jun 2020 14:27:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4F65CC433DF
+	for <linux-fstests@archiver.kernel.org>; Tue, 30 Jun 2020 15:48:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 47AB520672
-	for <linux-fstests@archiver.kernel.org>; Tue, 30 Jun 2020 14:27:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 297362074F
+	for <linux-fstests@archiver.kernel.org>; Tue, 30 Jun 2020 15:48:38 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="MqxjeqEX"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2388882AbgF3O1F (ORCPT
+        id S2389617AbgF3Psi (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 30 Jun 2020 10:27:05 -0400
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:18341 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1727046AbgF3O1D (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 30 Jun 2020 10:27:03 -0400
-X-IronPort-AV: E=Sophos;i="5.75,297,1589212800"; 
-   d="scan'208";a="95563331"
-Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
-  by heian.cn.fujitsu.com with ESMTP; 30 Jun 2020 22:06:50 +0800
-Received: from G08CNEXMBPEKD04.g08.fujitsu.local (unknown [10.167.33.201])
-        by cn.fujitsu.com (Postfix) with ESMTP id 0B7E44CE4BD8;
-        Tue, 30 Jun 2020 21:56:18 +0800 (CST)
-Received: from G08CNEXCHPEKD04.g08.fujitsu.local (10.167.33.200) by
- G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201) with Microsoft SMTP Server
- (TLS) id 15.0.1497.2; Tue, 30 Jun 2020 22:06:46 +0800
-Received: from Fedora-30.g08.fujitsu.local (10.167.220.106) by
- G08CNEXCHPEKD04.g08.fujitsu.local (10.167.33.209) with Microsoft SMTP Server
- id 15.0.1497.2 via Frontend Transport; Tue, 30 Jun 2020 22:06:45 +0800
-From:   Xiao Yang <yangx.jy@cn.fujitsu.com>
-To:     <fstests@vger.kernel.org>
-CC:     <darrick.wong@oracle.com>, <ira.weiny@intel.com>,
-        Xiao Yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH v3 2/6] fstests: Use _require_scratch_dax_mountopt() and _require_scratch_dax_iflag()
-Date:   Tue, 30 Jun 2020 21:59:47 +0800
-Message-ID: <20200630135951.21202-3-yangx.jy@cn.fujitsu.com>
-X-Mailer: git-send-email 2.21.0
-In-Reply-To: <20200630135951.21202-1-yangx.jy@cn.fujitsu.com>
-References: <20200630135951.21202-1-yangx.jy@cn.fujitsu.com>
+        Tue, 30 Jun 2020 11:48:38 -0400
+Received: from userp2120.oracle.com ([156.151.31.85]:49832 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2389599AbgF3Psh (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 30 Jun 2020 11:48:37 -0400
+Received: from pps.filterd (userp2120.oracle.com [127.0.0.1])
+        by userp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 05UFgMnU007060;
+        Tue, 30 Jun 2020 15:48:23 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
+ : subject : message-id : references : mime-version : content-type :
+ in-reply-to; s=corp-2020-01-29;
+ bh=H9rS7Ab+9g6cFkwkAfkRWaVLmHibz9KDLQr7KikhjyA=;
+ b=MqxjeqEXwKttAJLfyGd9QzHGDVCBfUGKFYeKcwzUKadEXvUe6FVGSIpbNQui15bzSy+Z
+ NhpX6m4wIeZENT9YY5lWETulJ+jR0EcVvH3diTY/618fNhxAyLk0OLpvxOkCq0Xon2yC
+ y9T7LsfS3WownWLyGv7tDbyycL09JfNK7jRjkHdJn9r52w4e57h7KRvYzkXEp9lVcRBn
+ 3R40ClosHVPQCksmwqmuAXkI//De/oQe9l2W9H2EUJrWBQTA9jVhloqk34PMS8eDU5FJ
+ 3OzeXNItk+S/DLu05TKSbMgtS6QwT64pAPgLWhdiSRi6UTN0MywkjX/daDj1oIcdAjsF AQ== 
+Received: from aserp3030.oracle.com (aserp3030.oracle.com [141.146.126.71])
+        by userp2120.oracle.com with ESMTP id 31wxrn5b2t-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Tue, 30 Jun 2020 15:48:23 +0000
+Received: from pps.filterd (aserp3030.oracle.com [127.0.0.1])
+        by aserp3030.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 05UFgpKw153917;
+        Tue, 30 Jun 2020 15:48:22 GMT
+Received: from userv0122.oracle.com (userv0122.oracle.com [156.151.31.75])
+        by aserp3030.oracle.com with ESMTP id 31y52j3bt8-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Tue, 30 Jun 2020 15:48:22 +0000
+Received: from abhmp0002.oracle.com (abhmp0002.oracle.com [141.146.116.8])
+        by userv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 05UFmKYx004654;
+        Tue, 30 Jun 2020 15:48:21 GMT
+Received: from localhost (/67.169.218.210)
+        by default (Oracle Beehive Gateway v4.0)
+        with ESMTP ; Tue, 30 Jun 2020 15:48:20 +0000
+Date:   Tue, 30 Jun 2020 08:48:19 -0700
+From:   "Darrick J. Wong" <darrick.wong@oracle.com>
+To:     Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH] xfs/516: Use scratch_xfs_get/set_sb_field api
+Message-ID: <20200630154819.GD7600@magnolia>
+References: <1593498187-21213-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7BIT
-Content-Type:   text/plain; charset=US-ASCII
-X-yoursite-MailScanner-ID: 0B7E44CE4BD8.AFE51
-X-yoursite-MailScanner: Found to be clean
-X-yoursite-MailScanner-From: yangx.jy@cn.fujitsu.com
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1593498187-21213-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9667 signatures=668680
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 spamscore=0 phishscore=0 mlxscore=0
+ adultscore=0 suspectscore=1 bulkscore=0 malwarescore=0 mlxlogscore=999
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2004280000
+ definitions=main-2006300113
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9667 signatures=668680
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxscore=0 mlxlogscore=999
+ priorityscore=1501 impostorscore=0 bulkscore=0 clxscore=1011
+ malwarescore=0 phishscore=0 adultscore=0 cotscore=-2147483648
+ lowpriorityscore=0 suspectscore=1 spamscore=0 classifier=spam adjust=0
+ reason=mlx scancount=1 engine=8.12.0-2004280000
+ definitions=main-2006300113
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Make related tests use _require_scratch_dax_mountopt() and _require_scratch_dax_iflag()
+On Tue, Jun 30, 2020 at 02:23:07PM +0800, Yang Xu wrote:
+> When using old xfsprogs, this case fails as below:
+>     +write: invalid option -- 'd'
+> 
+> xfs_db write command support -d options since xfsprogs commit
+> 86769b32d01 ("xfs_db: allow recalculating CRCs on invalid metadata").
+> For avoid invalid error, use scratch_xfs_set_sb_field api instead.
+> 
+> Also add missing "rm -f $seqres.full" at the beginning of the test.
+> 
+> Signed-off-by: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
 
-Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
----
- tests/ext4/030    | 2 +-
- tests/ext4/031    | 4 ++--
- tests/generic/413 | 2 +-
- tests/generic/462 | 2 +-
- tests/xfs/260     | 4 ++--
- 5 files changed, 7 insertions(+), 7 deletions(-)
+Looks good to me,
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
 
-diff --git a/tests/ext4/030 b/tests/ext4/030
-index 93bbca86..fb5cf451 100755
---- a/tests/ext4/030
-+++ b/tests/ext4/030
-@@ -33,7 +33,7 @@ rm -f $seqres.full
- # Modify as appropriate.
- _supported_os Linux
- _supported_fs ext4
--_require_scratch_dax
-+_require_scratch_dax_mountopt "dax"
- _require_test_program "t_ext4_dax_journal_corruption"
- _require_command "$CHATTR_PROG" chattr
- 
-diff --git a/tests/ext4/031 b/tests/ext4/031
-index dc58214e..20e2fab7 100755
---- a/tests/ext4/031
-+++ b/tests/ext4/031
-@@ -37,7 +37,7 @@ MOUNT_OPTIONS=""
- # Modify as appropriate.
- _supported_os Linux
- _supported_fs ext4
--_require_scratch_dax
-+_require_scratch_dax_mountopt "dax"
- _require_test_program "t_ext4_dax_inline_corruption"
- _require_scratch_ext4_feature "inline_data"
- 
-@@ -56,7 +56,7 @@ _scratch_unmount >> $seqres.full 2>&1
- _try_scratch_mount "-o dax" >> $seqres.full 2>&1
- 
- if [[ $? != 0 ]]; then
--	# _require_scratch_dax already verified that we could mount with DAX.
-+	# _require_scratch_dax_mountopt already verified that we could mount with DAX.
- 	# Failure here is expected because we have inline data.
- 	echo "Silence is golden"
- 	status=0
-diff --git a/tests/generic/413 b/tests/generic/413
-index 1ce89aff..19e1b926 100755
---- a/tests/generic/413
-+++ b/tests/generic/413
-@@ -31,7 +31,7 @@ rm -f $seqres.full
- _supported_fs generic
- _supported_os Linux
- _require_test
--_require_scratch_dax
-+_require_scratch_dax_mountopt "dax"
- _require_test_program "feature"
- _require_test_program "t_mmap_dio"
- _require_xfs_io_command "falloc"
-diff --git a/tests/generic/462 b/tests/generic/462
-index 1ab6cadc..4a940239 100755
---- a/tests/generic/462
-+++ b/tests/generic/462
-@@ -37,7 +37,7 @@ rm -f $seqres.full
- _supported_fs generic
- _supported_os Linux
- _require_test
--_require_scratch_dax
-+_require_scratch_dax_mountopt "dax"
- _require_test_program "t_mmap_write_ro"
- # running by unpriviliged user is not necessary to reproduce
- # this bug, just trying to test more.
-diff --git a/tests/xfs/260 b/tests/xfs/260
-index 3464ffef..fbdc4cd8 100755
---- a/tests/xfs/260
-+++ b/tests/xfs/260
-@@ -30,10 +30,10 @@ rm -f $seqres.full
- 
- _supported_fs xfs
- _supported_os Linux
--_require_scratch_dax
-+_require_scratch_dax_mountopt "dax"
- _require_test_program "feature"
- _require_test_program "t_mmap_dio"
--_require_xfs_io_command "chattr" "x"
-+_require_scratch_dax_iflag
- _require_xfs_io_command "falloc"
- 
- prep_files()
--- 
-2.21.0
+--D
 
-
-
+> ---
+>  tests/xfs/516 | 14 ++++++++++----
+>  1 file changed, 10 insertions(+), 4 deletions(-)
+> 
+> diff --git a/tests/xfs/516 b/tests/xfs/516
+> index ca8c0412..3a7afd0e 100755
+> --- a/tests/xfs/516
+> +++ b/tests/xfs/516
+> @@ -22,6 +22,8 @@ _cleanup()
+>  	cd /
+>  }
+>  
+> +rm -f $seqres.full
+> +
+>  # get standard environment, filters and checks
+>  . ./common/rc
+>  . ./common/fuzzy
+> @@ -60,7 +62,8 @@ __test_mount_opts()
+>  	else
+>  		echo "mount failed" >> $seqres.full
+>  	fi
+> -	_scratch_xfs_db -c 'sb 0' -c 'p unit width' >> $seqres.full
+> +	_scratch_xfs_get_sb_field unit >> $seqres.full
+> +	_scratch_xfs_get_sb_field width  >> $seqres.full
+>  
+>  	# Run xfs_repair in repair mode to see if it can be baited into nuking
+>  	# the root filesystem on account of the sunit update.
+> @@ -119,9 +122,12 @@ test_repair_detection()
+>  	fi
+>  
+>  	# Update the superblock like the kernel used to do.
+> -	_scratch_xfs_db -c 'sb 0' -c 'p unit width' >> $seqres.full
+> -	_scratch_xfs_db -x -c 'sb 0' -c 'write -d unit 256' -c 'write -d width 1024' >> $seqres.full
+> -	_scratch_xfs_db -c 'sb 0' -c 'p unit width' >> $seqres.full
+> +	_scratch_xfs_get_sb_field unit >> $seqres.full
+> +	_scratch_xfs_get_sb_field width >> $seqres.full
+> +	_scratch_xfs_set_sb_field unit 256 >> $seqres.full
+> +	_scratch_xfs_set_sb_field width 1024 >> $seqres.full
+> +	_scratch_xfs_get_sb_field unit >> $seqres.full
+> +	_scratch_xfs_get_sb_field width >> $seqres.full
+>  
+>  	# Run xfs_repair in repair mode to see if it can be baited into nuking
+>  	# the root filesystem on account of the sunit update.
+> -- 
+> 2.23.0
+> 
+> 
+> 
