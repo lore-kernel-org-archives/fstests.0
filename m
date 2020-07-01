@@ -7,28 +7,28 @@ X-Spam-Status: No, score=-10.0 required=3.0
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A0169C433E0
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 86750C433DF
 	for <linux-fstests@archiver.kernel.org>; Wed,  1 Jul 2020 04:44:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 845AB2074D
+	by mail.kernel.org (Postfix) with ESMTP id 602A82073E
 	for <linux-fstests@archiver.kernel.org>; Wed,  1 Jul 2020 04:44:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725862AbgGAEoV (ORCPT
+        id S1725535AbgGAEoV (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
         Wed, 1 Jul 2020 00:44:21 -0400
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:41301 "EHLO
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:41305 "EHLO
         heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1725774AbgGAEoV (ORCPT
+        with ESMTP id S1725862AbgGAEoV (ORCPT
         <rfc822;fstests@vger.kernel.org>); Wed, 1 Jul 2020 00:44:21 -0400
 X-IronPort-AV: E=Sophos;i="5.75,298,1589212800"; 
-   d="scan'208";a="95609095"
+   d="scan'208";a="95609099"
 Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
-  by heian.cn.fujitsu.com with ESMTP; 01 Jul 2020 12:43:57 +0800
-Received: from G08CNEXMBPEKD06.g08.fujitsu.local (unknown [10.167.33.206])
-        by cn.fujitsu.com (Postfix) with ESMTP id 3C1B34CE4BDE;
-        Wed,  1 Jul 2020 12:33:27 +0800 (CST)
+  by heian.cn.fujitsu.com with ESMTP; 01 Jul 2020 12:43:58 +0800
+Received: from G08CNEXMBPEKD04.g08.fujitsu.local (unknown [10.167.33.201])
+        by cn.fujitsu.com (Postfix) with ESMTP id 0CC234CE4BD0;
+        Wed,  1 Jul 2020 12:33:28 +0800 (CST)
 Received: from G08CNEXCHPEKD04.g08.fujitsu.local (10.167.33.200) by
- G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206) with Microsoft SMTP Server
+ G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201) with Microsoft SMTP Server
  (TLS) id 15.0.1497.2; Wed, 1 Jul 2020 12:43:57 +0800
 Received: from Fedora-30.g08.fujitsu.local (10.167.220.106) by
  G08CNEXCHPEKD04.g08.fujitsu.local (10.167.33.209) with Microsoft SMTP Server
@@ -37,16 +37,16 @@ From:   Xiao Yang <yangx.jy@cn.fujitsu.com>
 To:     <fstests@vger.kernel.org>
 CC:     <darrick.wong@oracle.com>, <ira.weiny@intel.com>,
         Xiao Yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH v4 2/6] fstests: Use _require_scratch_dax_mountopt() and _require_scratch_dax_iflag()
-Date:   Wed, 1 Jul 2020 12:36:56 +0800
-Message-ID: <20200701043700.6473-3-yangx.jy@cn.fujitsu.com>
+Subject: [PATCH v4 3/6] common/rc: Remove unused _require_scratch_dax()
+Date:   Wed, 1 Jul 2020 12:36:57 +0800
+Message-ID: <20200701043700.6473-4-yangx.jy@cn.fujitsu.com>
 X-Mailer: git-send-email 2.21.0
 In-Reply-To: <20200701043700.6473-1-yangx.jy@cn.fujitsu.com>
 References: <20200701043700.6473-1-yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7BIT
 Content-Type:   text/plain; charset=US-ASCII
-X-yoursite-MailScanner-ID: 3C1B34CE4BDE.AC134
+X-yoursite-MailScanner-ID: 0CC234CE4BD0.ADF74
 X-yoursite-MailScanner: Found to be clean
 X-yoursite-MailScanner-From: yangx.jy@cn.fujitsu.com
 Sender: fstests-owner@vger.kernel.org
@@ -54,96 +54,36 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Make related tests use _require_scratch_dax_mountopt() and _require_scratch_dax_iflag()
-
 Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
 Reviewed-by: Ira Weiny <ira.weiny@intel.com>
 ---
- tests/ext4/030    | 2 +-
- tests/ext4/031    | 4 ++--
- tests/generic/413 | 2 +-
- tests/generic/462 | 2 +-
- tests/xfs/260     | 4 ++--
- 5 files changed, 7 insertions(+), 7 deletions(-)
+ common/rc | 13 -------------
+ 1 file changed, 13 deletions(-)
 
-diff --git a/tests/ext4/030 b/tests/ext4/030
-index 93bbca86..fb5cf451 100755
---- a/tests/ext4/030
-+++ b/tests/ext4/030
-@@ -33,7 +33,7 @@ rm -f $seqres.full
- # Modify as appropriate.
- _supported_os Linux
- _supported_fs ext4
--_require_scratch_dax
-+_require_scratch_dax_mountopt "dax"
- _require_test_program "t_ext4_dax_journal_corruption"
- _require_command "$CHATTR_PROG" chattr
+diff --git a/common/rc b/common/rc
+index 09b1175d..929ff6c4 100644
+--- a/common/rc
++++ b/common/rc
+@@ -3175,19 +3175,6 @@ _require_scratch_shutdown()
+ }
  
-diff --git a/tests/ext4/031 b/tests/ext4/031
-index dc58214e..20e2fab7 100755
---- a/tests/ext4/031
-+++ b/tests/ext4/031
-@@ -37,7 +37,7 @@ MOUNT_OPTIONS=""
- # Modify as appropriate.
- _supported_os Linux
- _supported_fs ext4
--_require_scratch_dax
-+_require_scratch_dax_mountopt "dax"
- _require_test_program "t_ext4_dax_inline_corruption"
- _require_scratch_ext4_feature "inline_data"
- 
-@@ -56,7 +56,7 @@ _scratch_unmount >> $seqres.full 2>&1
- _try_scratch_mount "-o dax" >> $seqres.full 2>&1
- 
- if [[ $? != 0 ]]; then
--	# _require_scratch_dax already verified that we could mount with DAX.
-+	# _require_scratch_dax_mountopt already verified that we could mount with DAX.
- 	# Failure here is expected because we have inline data.
- 	echo "Silence is golden"
- 	status=0
-diff --git a/tests/generic/413 b/tests/generic/413
-index 1ce89aff..19e1b926 100755
---- a/tests/generic/413
-+++ b/tests/generic/413
-@@ -31,7 +31,7 @@ rm -f $seqres.full
- _supported_fs generic
- _supported_os Linux
- _require_test
--_require_scratch_dax
-+_require_scratch_dax_mountopt "dax"
- _require_test_program "feature"
- _require_test_program "t_mmap_dio"
- _require_xfs_io_command "falloc"
-diff --git a/tests/generic/462 b/tests/generic/462
-index 1ab6cadc..4a940239 100755
---- a/tests/generic/462
-+++ b/tests/generic/462
-@@ -37,7 +37,7 @@ rm -f $seqres.full
- _supported_fs generic
- _supported_os Linux
- _require_test
--_require_scratch_dax
-+_require_scratch_dax_mountopt "dax"
- _require_test_program "t_mmap_write_ro"
- # running by unpriviliged user is not necessary to reproduce
- # this bug, just trying to test more.
-diff --git a/tests/xfs/260 b/tests/xfs/260
-index 3464ffef..fbdc4cd8 100755
---- a/tests/xfs/260
-+++ b/tests/xfs/260
-@@ -30,10 +30,10 @@ rm -f $seqres.full
- 
- _supported_fs xfs
- _supported_os Linux
--_require_scratch_dax
-+_require_scratch_dax_mountopt "dax"
- _require_test_program "feature"
- _require_test_program "t_mmap_dio"
--_require_xfs_io_command "chattr" "x"
-+_require_scratch_dax_iflag
- _require_xfs_io_command "falloc"
- 
- prep_files()
+ # Does dax mount option work on this dev/fs?
+-_require_scratch_dax()
+-{
+-	_require_scratch
+-	_scratch_mkfs > /dev/null 2>&1
+-	_try_scratch_mount -o dax || \
+-		_notrun "mount $SCRATCH_DEV with dax failed"
+-	# Check options to be sure. XFS ignores dax option
+-	# and goes on if dev underneath does not support dax.
+-	_fs_options $SCRATCH_DEV | grep -qw "dax" || \
+-		_notrun "$SCRATCH_DEV $FSTYP does not support -o dax"
+-	_scratch_unmount
+-}
+-
+ _require_scratch_dax_mountopt()
+ {
+ 	local mountopt=$1
 -- 
 2.21.0
 
