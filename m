@@ -2,128 +2,94 @@ Return-Path: <SRS0=3sLM=AM=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.5 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F0E5BC433DF
-	for <linux-fstests@archiver.kernel.org>; Wed,  1 Jul 2020 16:07:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3614DC433E0
+	for <linux-fstests@archiver.kernel.org>; Wed,  1 Jul 2020 17:52:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DD26D20780
-	for <linux-fstests@archiver.kernel.org>; Wed,  1 Jul 2020 16:07:32 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id F16E0207E8
+	for <linux-fstests@archiver.kernel.org>; Wed,  1 Jul 2020 17:52:07 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1593625928;
+	bh=DEBT7iYZXwwI2EGHfESXZ59bQ2dhEM04u7hoUagj3eM=;
+	h=From:To:Subject:Date:List-ID:From;
+	b=YgqTvLjL9SzsovLIrNK+1tpq+bDLZgdo1atPljsyO0rEB32pnBhhYVT1yMbPKWlm9
+	 V8D42fqFGHIXdPka4eh0KZ8yU3FACFef+kXw0u2VwCHTz2+7ehgnbQ7I7r6o4TXODR
+	 xuZ79yIdG3PBC6jNbW+RFs5HA1Qxl9YD7mZBjiDU=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731751AbgGAQHc (ORCPT
+        id S1731171AbgGARwH (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 1 Jul 2020 12:07:32 -0400
-Received: from mga09.intel.com ([134.134.136.24]:48731 "EHLO mga09.intel.com"
+        Wed, 1 Jul 2020 13:52:07 -0400
+Received: from mail.kernel.org ([198.145.29.99]:43544 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1732160AbgGAQHc (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 1 Jul 2020 12:07:32 -0400
-IronPort-SDR: qhPNxUbExDuDT6MlXWOmJENgIXismqesPGzfYAiohG8todbjWOE6fbou4iJGnWYCa4LCzpDFcF
- XoYIC1LVEB5Q==
-X-IronPort-AV: E=McAfee;i="6000,8403,9669"; a="148173687"
-X-IronPort-AV: E=Sophos;i="5.75,300,1589266800"; 
-   d="scan'208";a="148173687"
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from fmsmga007.fm.intel.com ([10.253.24.52])
-  by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Jul 2020 09:07:31 -0700
-IronPort-SDR: PrqsPcWVIbfMMZ8T9pVHeD1js+4Iz936694EPDv0sS3hpjZCWI+KBM3dwksVAvzD+SXl+Ozm4K
- 4Dep0kId/cKA==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.75,300,1589266800"; 
-   d="scan'208";a="265449002"
-Received: from iweiny-desk2.sc.intel.com ([10.3.52.147])
-  by fmsmga007.fm.intel.com with ESMTP; 01 Jul 2020 09:07:31 -0700
-Date:   Wed, 1 Jul 2020 09:07:31 -0700
-From:   Ira Weiny <ira.weiny@intel.com>
-To:     Xiao Yang <yangx.jy@cn.fujitsu.com>
-Cc:     fstests@vger.kernel.org, darrick.wong@oracle.com
-Subject: Re: [PATCH v3 0/6] Make fstests support new behavior of DAX
-Message-ID: <20200701160731.GB82575@iweiny-DESK2.sc.intel.com>
-References: <20200630135951.21202-1-yangx.jy@cn.fujitsu.com>
- <20200630203422.GV2617015@iweiny-DESK2.sc.intel.com>
- <5EFBE277.7030603@cn.fujitsu.com>
+        id S1726675AbgGARwH (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 1 Jul 2020 13:52:07 -0400
+Received: from tleilax.com (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id C297D20771
+        for <fstests@vger.kernel.org>; Wed,  1 Jul 2020 17:52:06 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1593625927;
+        bh=DEBT7iYZXwwI2EGHfESXZ59bQ2dhEM04u7hoUagj3eM=;
+        h=From:To:Subject:Date:From;
+        b=W429ZfdbyYlhl6FagOa4XRGZF6PnJN0zrjYWKyxpotfgQlLwiFyRFSemFAWCiA4KC
+         +zUYVSINALSFOW4HFKcuq+nsLhp7QhyXsIW3B4He51Oy7uFDsJe7r/gW1ZfbbB7dV1
+         RbupMop96HWFHRdr/a6kECcOF5c9XkZ5DxWWWs/0=
+From:   Jeff Layton <jlayton@kernel.org>
+To:     fstests@vger.kernel.org
+Subject: [PATCH] generic/377: filter out xattrs that don't start with 'user.'
+Date:   Wed,  1 Jul 2020 13:52:05 -0400
+Message-Id: <20200701175205.342650-1-jlayton@kernel.org>
+X-Mailer: git-send-email 2.26.2
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <5EFBE277.7030603@cn.fujitsu.com>
-User-Agent: Mutt/1.11.1 (2018-12-01)
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Jul 01, 2020 at 09:10:15AM +0800, Xiao Yang wrote:
-> On 2020/7/1 4:34, Ira Weiny wrote:
-> > On Tue, Jun 30, 2020 at 09:59:45PM +0800, Xiao Yang wrote:
-> > > The new behavior of DAX on xfs/ext4 has been merged into main kernel
-> > > tree/ext4-dax branch so it is time for fstests to support new behavior
-> > > of DAX.
-> > > 
-> > > References:
-> > > https://lkml.org/lkml/2019/10/20/96
-> > > https://lkml.org/lkml/2020/5/28/949
-> > > 
-> > > Xiao Yang (6):
-> > >    common/rc: Introduce new helpers for DAX mount options and
-> > >      FS_XFLAG_DAX
-> > >    fstests: Use _require_scratch_dax_mountopt() and
-> > >      _require_scratch_dax_iflag()
-> > >    common/rc: Remove unused _require_scratch_dax()
-> > Have the first 3 patches changed?  If not you could have added my Reviewed-by
-> > from v2?[1]
-> > 
-> > Not sure if I need to look at them or not.
-> Hi Ira,
-> 
-> I didn't change the first 3 patches.
-> Sorry, I forget to add your Reviewed-by and will add it in v4 patch.
+Most hosts that I've been testing on seem to display security.selinux in
+listxattr. 377.out doesn't account for that so it routinely fails for me
+in testing.
 
-Cool!  NP I just did not want to go through them if I did not have to!  :-D
+When testing the output of listxattr in generic/377, filter out any xattr
+names that don't start with 'user.'. That should help ensure consistent
+output on SELinux-enabled hosts.
 
-Ira
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
+---
+ tests/generic/377 | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-> 
-> Best Regards,
-> Xiao Yang
-> > Ira
-> > 
-> > [1]
-> > https://lore.kernel.org/fstests/b0d5803e-81e4-bb14-f47b-44036284577e@163.com/T/#mb0235e57045c4f7a3bc70c7745f2b7065bb3e3c1
-> > https://lore.kernel.org/fstests/b0d5803e-81e4-bb14-f47b-44036284577e@163.com/T/#ma472463b67a354484a054cf0c0c1bf3c8567937b
-> > https://lore.kernel.org/fstests/b0d5803e-81e4-bb14-f47b-44036284577e@163.com/T/#m5d44764e500370ceb4a350b4ae0df9bec8c08b56
-> > 
-> > 
-> > >    generic/223: Don't clear all mkfs options for _scratch_mkfs_geom()
-> > >      roughly
-> > >    generic/413, xfs/260: Improve format operation for PMD fault testing
-> > >    xfs/260: Move and update xfs/260
-> > > 
-> > >   common/rc                      | 60 ++++++++++++++++++++++++----
-> > >   tests/ext4/030                 |  2 +-
-> > >   tests/ext4/031                 |  4 +-
-> > >   tests/generic/223              |  1 -
-> > >   tests/generic/413              | 12 ++----
-> > >   tests/generic/462              |  2 +-
-> > >   tests/{xfs/260 =>  generic/603} | 71 +++++++++++++++++-----------------
-> > >   tests/generic/603.out          |  2 +
-> > >   tests/generic/group            |  1 +
-> > >   tests/xfs/260.out              |  2 -
-> > >   tests/xfs/group                |  1 -
-> > >   11 files changed, 97 insertions(+), 61 deletions(-)
-> > >   rename tests/{xfs/260 =>  generic/603} (54%)
-> > >   create mode 100644 tests/generic/603.out
-> > >   delete mode 100644 tests/xfs/260.out
-> > > 
-> > > -- 
-> > > 2.21.0
-> > > 
-> > > 
-> > > 
-> > 
-> > .
-> > 
-> 
-> 
-> 
+I'm not sure why this doesn't fail for most people, unless most are
+turning off SELinux. Is this the right approach?
+
+diff --git a/tests/generic/377 b/tests/generic/377
+index f7835ee8ff9e..f08abdca60a6 100755
+--- a/tests/generic/377
++++ b/tests/generic/377
+@@ -48,7 +48,7 @@ $SETFATTR_PROG -n user.ping -v pong $testfile
+ $SETFATTR_PROG -n user.hello -v there $testfile
+ 
+ # 1. Call listxattr without buffer length argument. This should succeed.
+-$listxattr $testfile | sort
++$listxattr $testfile | grep '^xattr: user\.' | sort
+ 
+ # 2. Calling listxattr on nonexistant file should fail with -ENOENT.
+ $listxattr ""
+@@ -66,7 +66,7 @@ $listxattr $testfile 9
+ $listxattr $testfile 11
+ 
+ # 6. Calling listxattr with buffersize bigger than needed should succeed.
+-$listxattr $testfile 500 | sort
++$listxattr $testfile 500 | grep '^xattr: user\.' | sort
+ 
+ status=0
+ exit
+-- 
+2.26.2
+
