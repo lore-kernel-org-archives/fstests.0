@@ -2,167 +2,90 @@ Return-Path: <SRS0=RsO5=AN=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.0 required=3.0
-	tests=HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.5 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 63708C433E0
-	for <linux-fstests@archiver.kernel.org>; Thu,  2 Jul 2020 14:38:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ACB61C433DF
+	for <linux-fstests@archiver.kernel.org>; Thu,  2 Jul 2020 15:06:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 478FD2065F
-	for <linux-fstests@archiver.kernel.org>; Thu,  2 Jul 2020 14:38:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7F06D206B7
+	for <linux-fstests@archiver.kernel.org>; Thu,  2 Jul 2020 15:06:28 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="Rj1K/FlL"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729508AbgGBOi1 (ORCPT
+        id S1729606AbgGBPG2 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 2 Jul 2020 10:38:27 -0400
-Received: from mx2.suse.de ([195.135.220.15]:51256 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728179AbgGBOi0 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 2 Jul 2020 10:38:26 -0400
-X-Virus-Scanned: by amavisd-new at test-mx.suse.de
-Received: from relay2.suse.de (unknown [195.135.221.27])
-        by mx2.suse.de (Postfix) with ESMTP id 48EB3ADD9;
-        Thu,  2 Jul 2020 14:38:25 +0000 (UTC)
-From:   Nikolay Borisov <nborisov@suse.com>
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Nikolay Borisov <nborisov@suse.com>
-Subject: [PATCH] btrfs: test that corruption counter is incremented correctly
-Date:   Thu,  2 Jul 2020 17:38:23 +0300
-Message-Id: <20200702143823.20333-1-nborisov@suse.com>
-X-Mailer: git-send-email 2.17.1
+        Thu, 2 Jul 2020 11:06:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53354 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729551AbgGBPG1 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 2 Jul 2020 11:06:27 -0400
+Received: from mail-qv1-xf41.google.com (mail-qv1-xf41.google.com [IPv6:2607:f8b0:4864:20::f41])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 831D0C08C5C1
+        for <fstests@vger.kernel.org>; Thu,  2 Jul 2020 08:06:27 -0700 (PDT)
+Received: by mail-qv1-xf41.google.com with SMTP id m9so12830082qvx.5
+        for <fstests@vger.kernel.org>; Thu, 02 Jul 2020 08:06:27 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=0/oQeFGb9q7IFEOtuZsdtgXTlAdH2UK8SamdeT5Jr3c=;
+        b=Rj1K/FlLFv/aZVTsBFLMCeUGuFFlRbEOoFl1VEcYcEZ5GiHLynUkSO3xMfedzKVwoI
+         Eo/VS0x94krv6pQc9letmxEKVnty9BrQhtdlsIGS43SOhVPbHGIK2BxsQD8Dpk9GnHVN
+         nUwKfrnFcasI6JHq0qKChTGLxx3xmpUuAuzdXnggG1UIjYFBbeVeZb3N2kZLKuwFQl55
+         pe6NaGbp8GEgma/ezCqcXh+DMb88h6+VpRn6g8z25s/e55T1kwa7T6MM174Adz+GTGyJ
+         ukrFmjV4GzxUjT/wV4yW3C7b8Cxx3IIx5rpj2BO0VKnQ5A1tOhWydbw2cnlhVwiJpHJP
+         FTKQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=0/oQeFGb9q7IFEOtuZsdtgXTlAdH2UK8SamdeT5Jr3c=;
+        b=S8ZEWkHUbNjslQp3w7LCMrRYXOq0FYK3rqShHnE6SxEqb0rZWGZfiV3mAe5QWLckJ+
+         L+cS8Us6GxIxGVK8/fI9QXrz9GjjLg+NT8ns6RWSgOn+wxrIuQPCBrf409Gj3MvOtXzb
+         1HUafZstjDVu77DMwHFnaAAZcASmUzUiA+K9b4UfeputCp+iNrCR7ZRzrg8qx271DhxP
+         ESByjv3p+hJ/XsgOD35QhPAi27gdOESaYT4QU///jv5sPyo7+ZtdKN/MntVdxiLaoIzW
+         5+S6ZOwTjRgkbBUBvTa7UBAaK1hqGsZSH+CRPf85gkUx5CyxUutUERV18AKmGPC55x1h
+         bifw==
+X-Gm-Message-State: AOAM531kFoJVoS+MM0vDWBQzLkfDPT1Se2odEm3k5WNco/WvShzh/ybq
+        djcCFrjL3KPfxfMvkZrzimAPzw==
+X-Google-Smtp-Source: ABdhPJwBqtyAjoGSEC0aPY6SuFttxTE0NcLPRU+D7OEZWUEe9M1MV3sK2qHPLRzVY2yGskzWJkq8uQ==
+X-Received: by 2002:a05:6214:5a3:: with SMTP id by3mr30462590qvb.201.1593702386588;
+        Thu, 02 Jul 2020 08:06:26 -0700 (PDT)
+Received: from [192.168.1.45] (cpe-174-109-172-136.nc.res.rr.com. [174.109.172.136])
+        by smtp.gmail.com with ESMTPSA id a28sm8006482qko.45.2020.07.02.08.06.25
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 02 Jul 2020 08:06:25 -0700 (PDT)
+Subject: Re: [PATCH] btrfs: test that corruption counter is incremented
+ correctly
+To:     Nikolay Borisov <nborisov@suse.com>, fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org
+References: <20200702143823.20333-1-nborisov@suse.com>
+From:   Josef Bacik <josef@toxicpanda.com>
+Message-ID: <1f11c9ee-52e4-2f39-677a-6d766371a717@toxicpanda.com>
+Date:   Thu, 2 Jul 2020 11:06:24 -0400
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:68.0)
+ Gecko/20100101 Thunderbird/68.9.0
+MIME-Version: 1.0
+In-Reply-To: <20200702143823.20333-1-nborisov@suse.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This patch ensures device corrupted counter is being modified when we try to
-read broken data.
+On 7/2/20 10:38 AM, Nikolay Borisov wrote:
+> This patch ensures device corrupted counter is being modified when we try to
+> read broken data.
+> 
+> Signed-off-by: Nikolay Borisov <nborisov@suse.com>
 
-Signed-off-by: Nikolay Borisov <nborisov@suse.com>
----
- tests/btrfs/215     | 92 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/215.out |  2 +
- tests/btrfs/group   |  1 +
- 3 files changed, 95 insertions(+)
- create mode 100755 tests/btrfs/215
- create mode 100644 tests/btrfs/215.out
+Reviewed-by: Josef Bacik <josef@toxicpanda.com>
 
-diff --git a/tests/btrfs/215 b/tests/btrfs/215
-new file mode 100755
-index 000000000000..d341144c0d97
---- /dev/null
-+++ b/tests/btrfs/215
-@@ -0,0 +1,92 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2020 SUSE Linux Products GmbH. All Rights Reserved.
-+#
-+# FS QA Test 215
-+#
-+# Test that reading corrupted files would correctly increment device status
-+# counters. This is fixed by the following linux kernel commit:
-+# btrfs: Increment device corruption error in case of checksum error
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+get_physical()
-+{
-+	$BTRFS_UTIL_PROG inspect-internal dump-tree -t 3 $SCRATCH_DEV | \
-+		grep $1 -A2 | \
-+		$AWK_PROG "(\$1 ~ /stripe/ && \$3 ~ /devid/ && \$2 ~ /0/) { print \$6 }"
-+}
-+
-+# Modify as appropriate.
-+_supported_fs btrfs
-+_supported_os Linux
-+
-+_scratch_mkfs > /dev/null
-+# disable freespace inode to ensure file is the first thing in the data
-+# blobk group
-+_scratch_mount -o nospace_cache
-+
-+blocksize=$(_get_block_size $SCRATCH_MNT)
-+filesize=$((8*$blocksize))
-+uuid=$(findmnt -n -o UUID "$SCRATCH_MNT")
-+
-+if [ ! -e /sys/fs/btrfs/$uuid/bdi ]; then
-+	_notrun "bdi link not found"
-+fi
-+
-+#create an 8 block file
-+$XFS_IO_PROG -d -f -c "pwrite -S 0xbb -b $filesize 0 $filesize" "$SCRATCH_MNT/foobar" > /dev/null
-+
-+logical_extent=$($FILEFRAG_PROG -v "$SCRATCH_MNT/foobar" | _filter_filefrag | cut -d '#' -f 1)
-+physical_extent=$(get_physical $logical_extent)
-+
-+echo "logical = $logical_extent physical=$physical_extent" >> $seqres.full
-+
-+# corrupt first 4 blocks of file
-+_scratch_unmount
-+$XFS_IO_PROG -d -c "pwrite -S 0xaa -b $blocksize $physical_extent $((4*$blocksize))" $SCRATCH_DEV > /dev/null
-+_scratch_mount
-+
-+# disable readahead to avoid skewing the counter
-+echo 0 > /sys/fs/btrfs/$uuid/bdi/read_ahead_kb
-+
-+# buffered reads whould result in a single error since the read is done
-+# page by page
-+$XFS_IO_PROG -c "pread -b $filesize 0 $filesize" "$SCRATCH_MNT/foobar" > /dev/null 2>&1
-+errs=$($BTRFS_UTIL_PROG device stats $SCRATCH_DEV | awk '/corruption_errs/ { print $2 }')
-+if [ $errs -ne 1 ]; then
-+	_fail "Errors: $errs expected: 1"
-+fi
-+
-+# DIO does check every sector
-+$XFS_IO_PROG -d -c "pread -b $filesize 0 $filesize" "$SCRATCH_MNT/foobar" > /dev/null 2>&1
-+errs=$($BTRFS_UTIL_PROG device stats $SCRATCH_DEV | awk '/corruption_errs/ { print $2 }')
-+if [ $errs -ne 5 ]; then
-+	_fail "Errors: $errs expected: 1"
-+fi
-+
-+# success, all done
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/btrfs/215.out b/tests/btrfs/215.out
-new file mode 100644
-index 000000000000..0a11773bbb32
---- /dev/null
-+++ b/tests/btrfs/215.out
-@@ -0,0 +1,2 @@
-+QA output created by 215
-+Silence is golden
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 505665b54d61..dda0763e543b 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -217,3 +217,4 @@
- 212 auto balance dangerous
- 213 auto balance dangerous
- 214 auto quick send snapshot
-+215 auto quick
---
-2.17.1
+Thanks,
 
+Josef
