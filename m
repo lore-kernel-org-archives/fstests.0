@@ -1,204 +1,139 @@
-Return-Path: <SRS0=AfHv=AO=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=zAcK=AQ=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.0 required=3.0
-	tests=HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2AF44C433E0
-	for <linux-fstests@archiver.kernel.org>; Fri,  3 Jul 2020 01:58:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B7CC8C433E0
+	for <linux-fstests@archiver.kernel.org>; Sun,  5 Jul 2020 11:28:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 096BE20747
-	for <linux-fstests@archiver.kernel.org>; Fri,  3 Jul 2020 01:58:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 937A520771
+	for <linux-fstests@archiver.kernel.org>; Sun,  5 Jul 2020 11:28:45 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="OnvQJoM2"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726072AbgGCB6r (ORCPT
+        id S1726634AbgGEL2p (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 2 Jul 2020 21:58:47 -0400
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:9823 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726048AbgGCB6r (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 2 Jul 2020 21:58:47 -0400
-X-IronPort-AV: E=Sophos;i="5.75,306,1589212800"; 
-   d="scan'208";a="95743162"
-Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
-  by heian.cn.fujitsu.com with ESMTP; 03 Jul 2020 09:58:40 +0800
-Received: from G08CNEXMBPEKD04.g08.fujitsu.local (unknown [10.167.33.201])
-        by cn.fujitsu.com (Postfix) with ESMTP id 838A64CE3F1A;
-        Fri,  3 Jul 2020 09:58:37 +0800 (CST)
-Received: from G08CNEXCHPEKD04.g08.fujitsu.local (10.167.33.200) by
- G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201) with Microsoft SMTP Server
- (TLS) id 15.0.1497.2; Fri, 3 Jul 2020 09:58:38 +0800
-Received: from Fedora-30.g08.fujitsu.local (10.167.220.106) by
- G08CNEXCHPEKD04.g08.fujitsu.local (10.167.33.209) with Microsoft SMTP Server
- id 15.0.1497.2 via Frontend Transport; Fri, 3 Jul 2020 09:58:38 +0800
-From:   Xiao Yang <yangx.jy@cn.fujitsu.com>
-To:     <fstests@vger.kernel.org>
-CC:     <darrick.wong@oracle.com>, <ira.weiny@intel.com>,
-        Xiao Yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH v2] generic: Verify if statx() can qurey S_DAX flag on regular file correctly
-Date:   Fri, 3 Jul 2020 09:51:45 +0800
-Message-ID: <20200703015145.21197-1-yangx.jy@cn.fujitsu.com>
-X-Mailer: git-send-email 2.21.0
+        Sun, 5 Jul 2020 07:28:45 -0400
+Received: from us-smtp-2.mimecast.com ([207.211.31.81]:45734 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1726454AbgGEL2p (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 5 Jul 2020 07:28:45 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1593948523;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=/rCPhGvsGdrOCSeVxjZXiZ2UsWsYquFqzxFjwXFQIGw=;
+        b=OnvQJoM2XXgpfiYkk5qGy8Sk/UjOccB//a4HY/lyuZpWkEQnchk7wMCccaUREEYYW8c+YG
+        JOfDbs2y6JjFxbAXpQQ4vDwC6DPqFHA1d3b/y82pRVdpm/Fo8t2do663DdekZaqSGjx7O8
+        ofhgFRcsxMl/zZX3qZQ2eOuezNQSdec=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-115-ldbt0eBVNkqfJgbVVxEo2A-1; Sun, 05 Jul 2020 07:28:40 -0400
+X-MC-Unique: ldbt0eBVNkqfJgbVVxEo2A-1
+Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id D51B31005510;
+        Sun,  5 Jul 2020 11:28:39 +0000 (UTC)
+Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 4EE5AC0DBA;
+        Sun,  5 Jul 2020 11:28:39 +0000 (UTC)
+Date:   Sun, 5 Jul 2020 19:41:13 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Jeff Layton <jlayton@kernel.org>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH] generic/377: filter out xattrs that don't start with
+ 'user.'
+Message-ID: <20200705114113.GS1938@dhcp-12-102.nay.redhat.com>
+Mail-Followup-To: Jeff Layton <jlayton@kernel.org>, fstests@vger.kernel.org
+References: <20200701175205.342650-1-jlayton@kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7BIT
-Content-Type:   text/plain; charset=US-ASCII
-X-yoursite-MailScanner-ID: 838A64CE3F1A.AB221
-X-yoursite-MailScanner: Found to be clean
-X-yoursite-MailScanner-From: yangx.jy@cn.fujitsu.com
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20200701175205.342650-1-jlayton@kernel.org>
+User-Agent: Mutt/1.10.1 (2018-07-13)
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.15
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-With new kernel(e.g. v5.8-rc1), statx() can be used to qurey S_DAX flag
-on regular file, so add a test to verify the feature.
+On Wed, Jul 01, 2020 at 01:52:05PM -0400, Jeff Layton wrote:
+> Most hosts that I've been testing on seem to display security.selinux in
+> listxattr. 377.out doesn't account for that so it routinely fails for me
+> in testing.
+> 
+> When testing the output of listxattr in generic/377, filter out any xattr
+> names that don't start with 'user.'. That should help ensure consistent
+> output on SELinux-enabled hosts.
+> 
+> Signed-off-by: Jeff Layton <jlayton@kernel.org>
+> ---
 
-Reference:
-https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=712b2698e4c024b561694cbcc1abba13eb0fd9ce
+Yeah, I hit this error[1] too. This patch looks good to me.
 
-Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
----
+One more question, do you hit similar failure on generic/062, likes [2]? 
 
-Note: this patch depends on the following patch set:
-https://www.spinics.net/lists/fstests/msg14252.html
+Thanks,
+Zorro
 
-V1->V2:
-Fix a typo(S_SAX->S_DAX).
+[1]
+--- /dev/fd/63	2020-07-02 12:07:42.948327419 -0400
++++ results/generic/377.out.bad	2020-07-02 12:07:41.990305624 -0400
+@@ -1,4 +1,5 @@
+ QA output created by 377
++xattr: security.selinux
+ xattr: user.foo
+ xattr: user.hello
+ xattr: user.ping
+...
 
- tests/generic/604     | 100 ++++++++++++++++++++++++++++++++++++++++++
- tests/generic/604.out |   2 +
- tests/generic/group   |   1 +
- 3 files changed, 103 insertions(+)
- create mode 100644 tests/generic/604
- create mode 100644 tests/generic/604.out
+[2]
+--- /dev/fd/63	2020-07-02 07:15:09.072853920 -0400
++++ results/generic/062.out.bad	2020-07-02 07:15:08.156833194 -0400
+@@ -52,6 +52,7 @@
+ SCRATCH_MNT/reg: user.name2: No such attribute or operation not permitted
+ *** final list (strings, type=reg, nsp=user)
+ # file: SCRATCH_MNT/reg
++security.selinux=0x73797374656d5f753a6f626a6563745f723a6e66735f743a733000
+ user.name=0xbabe
+ user.name3=0xdeface
+...
 
-diff --git a/tests/generic/604 b/tests/generic/604
-new file mode 100644
-index 00000000..3f0de4f4
---- /dev/null
-+++ b/tests/generic/604
-@@ -0,0 +1,100 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2020 Fujitsu.  All Rights Reserved.
-+#
-+# FS QA Test 604
-+#
-+# By the following cases, verify if statx() can query S_DAX flag
-+# on regular file correctly.
-+# 1) With dax=always option, FS_XFLAG_DAX is ignored and S_DAX flag
-+#    always exists on regular file.
-+# 2) With dax=inode option, setting/clearing FS_XFLAG_DAX can change
-+#    S_DAX flag on regular file.
-+# 3) With dax=never option, FS_XFLAG_DAX is ignored and S_DAX flag
-+#    never exists on regular file.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1        # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch_dax_mountopt "dax=always"
-+_require_scratch_dax_iflag
-+_require_xfs_io_command "statx" "-r"
-+
-+PARENT_DIR=$SCRATCH_MNT/testdir
-+TEST_FILE=$PARENT_DIR/testfile
-+
-+check_s_dax()
-+{
-+	local exp_s_dax=$1
-+
-+	local attributes=$($XFS_IO_PROG -c 'statx -r' $TEST_FILE | awk '/stat.attributes / { print $3 }')
-+	if [ $exp_s_dax -eq 0 ]; then
-+		(( attributes & 0x2000 )) && echo "$TEST_FILE has unexpected S_DAX flag"
-+	else
-+		(( attributes & 0x2000 )) || echo "$TEST_FILE doen't have expected S_DAX flag"
-+	fi
-+}
-+
-+test_s_dax()
-+{
-+	local dax_option=$1
-+	local exp_s_dax1=$2
-+	local exp_s_dax2=$3
-+
-+	# Mount with specified dax option
-+	_scratch_mount "-o $dax_option"
-+
-+	# Prepare directory
-+	mkdir -p $PARENT_DIR
-+
-+	rm -f $TEST_FILE
-+	$XFS_IO_PROG -c "chattr +x" $PARENT_DIR
-+	touch $TEST_FILE
-+	# Check if setting FS_XFLAG_DAX changes S_DAX flag
-+	check_s_dax $exp_s_dax1
-+
-+	rm -f $TEST_FILE
-+	$XFS_IO_PROG -c "chattr -x" $PARENT_DIR
-+	touch $TEST_FILE
-+	# Check if clearing FS_XFLAG_DAX changes S_DAX flag
-+	check_s_dax $exp_s_dax2
-+
-+	_scratch_unmount
-+}
-+
-+do_tests()
-+{
-+	test_s_dax "dax=always" 1 1
-+	test_s_dax "dax=inode" 1 0
-+	test_s_dax "dax=never" 0 0
-+}
-+
-+_scratch_mkfs >> $seqres.full 2>&1
-+
-+do_tests
-+
-+# success, all done
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/generic/604.out b/tests/generic/604.out
-new file mode 100644
-index 00000000..c06a1c7f
---- /dev/null
-+++ b/tests/generic/604.out
-@@ -0,0 +1,2 @@
-+QA output created by 604
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index 1d0d5606..676e0d2e 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -606,3 +606,4 @@
- 601 auto quick quota
- 602 auto quick encrypt
- 603 auto attr quick dax
-+604 auto attr quick dax
--- 
-2.21.0
-
-
+>  tests/generic/377 | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+> 
+> I'm not sure why this doesn't fail for most people, unless most are
+> turning off SELinux. Is this the right approach?
+> 
+> diff --git a/tests/generic/377 b/tests/generic/377
+> index f7835ee8ff9e..f08abdca60a6 100755
+> --- a/tests/generic/377
+> +++ b/tests/generic/377
+> @@ -48,7 +48,7 @@ $SETFATTR_PROG -n user.ping -v pong $testfile
+>  $SETFATTR_PROG -n user.hello -v there $testfile
+>  
+>  # 1. Call listxattr without buffer length argument. This should succeed.
+> -$listxattr $testfile | sort
+> +$listxattr $testfile | grep '^xattr: user\.' | sort
+>  
+>  # 2. Calling listxattr on nonexistant file should fail with -ENOENT.
+>  $listxattr ""
+> @@ -66,7 +66,7 @@ $listxattr $testfile 9
+>  $listxattr $testfile 11
+>  
+>  # 6. Calling listxattr with buffersize bigger than needed should succeed.
+> -$listxattr $testfile 500 | sort
+> +$listxattr $testfile 500 | grep '^xattr: user\.' | sort
+>  
+>  status=0
+>  exit
+> -- 
+> 2.26.2
+> 
 
