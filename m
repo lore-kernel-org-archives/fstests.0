@@ -2,88 +2,114 @@ Return-Path: <SRS0=vVM5=AU=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham
-	autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
+	URIBL_BLOCKED autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 38247C433DF
-	for <linux-fstests@archiver.kernel.org>; Thu,  9 Jul 2020 15:40:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9C2B9C433DF
+	for <linux-fstests@archiver.kernel.org>; Thu,  9 Jul 2020 19:15:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 06D342077D
-	for <linux-fstests@archiver.kernel.org>; Thu,  9 Jul 2020 15:40:02 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 720ED20767
+	for <linux-fstests@archiver.kernel.org>; Thu,  9 Jul 2020 19:15:44 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="AX3LMHoE"
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="lYpySmdD"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726710AbgGIPkB (ORCPT
+        id S1726163AbgGITPo (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 9 Jul 2020 11:40:01 -0400
-Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:32538 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726339AbgGIPkB (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 9 Jul 2020 11:40:01 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1594309200;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=ngeAu4u3++qGhAHcANwYA8BG76ve39q4SngAQaT4vxA=;
-        b=AX3LMHoEHPngQGX5ExWmmUsP/xAz9KJA7NdPhyTbRjuh/nk23K6N8+zzWWgRhUycfhk5Q1
-        8YGQODbh1gNuey/BMJj9kTDOKYWm+zMx64hHblt97qye0mKIXodsgJBD4NWWJ9ltIErD0U
-        HogfG6rYKWabM1SiVTUvlgmcxplEvSs=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-13-5xIMO8U9Naus9fW3CRxsFw-1; Thu, 09 Jul 2020 11:39:58 -0400
-X-MC-Unique: 5xIMO8U9Naus9fW3CRxsFw-1
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 825851DE1;
-        Thu,  9 Jul 2020 15:39:57 +0000 (UTC)
-Received: from redhat.com (ovpn-115-154.rdu2.redhat.com [10.10.115.154])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id 127B65BAEA;
-        Thu,  9 Jul 2020 15:39:56 +0000 (UTC)
-Date:   Thu, 9 Jul 2020 10:39:55 -0500
-From:   Bill O'Donnell <billodo@redhat.com>
-To:     "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc:     Eryu Guan <guaneryu@gmail.com>, fstests <fstests@vger.kernel.org>
-Subject: Re: [PATCH] xfs/518: require scratch device
-Message-ID: <20200709153955.GA198232@redhat.com>
-References: <20200709153655.GG7600@magnolia>
+        Thu, 9 Jul 2020 15:15:44 -0400
+Received: from userp2120.oracle.com ([156.151.31.85]:57996 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726116AbgGITPo (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 9 Jul 2020 15:15:44 -0400
+Received: from pps.filterd (userp2120.oracle.com [127.0.0.1])
+        by userp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 069J6c88049825;
+        Thu, 9 Jul 2020 19:15:41 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
+ : subject : message-id : references : mime-version : content-type :
+ in-reply-to; s=corp-2020-01-29;
+ bh=scD0dRNk66GYxAvzVfjhVk7XV0N9HiU1EB24wa/KmfU=;
+ b=lYpySmdDlEakTQsJASSHisCQtuHxzB57Cj3PEUjiuRNEZJaiJPe9V8E+5QnLl+m5bnAo
+ WL4I5DZc8Dj6dxixgbIMZ0TUKN/qJaP9TzRqAzUBEAKCllSywJHpaeHFdQwxN5f38cil
+ 1JNcN2SI+uGTo4haUdngzrasOZOH7WC5BDYbvQfiI1Skm9A+vEA/rXVo+U70ZmmfxzfY
+ aGLg5/7J0AmAZk2CZ82qWakesyg+SyzsNVocST7eDJounuBI1ih5rkcC8+9Urk4KA0HR
+ 5RnVMY0RBFGVqmVM3/LkO25SwccwfK0cHeI/ad/Elrkt6Z9LAfeg7etD6KKV35vRSxN3 lQ== 
+Received: from aserp3020.oracle.com (aserp3020.oracle.com [141.146.126.70])
+        by userp2120.oracle.com with ESMTP id 325y0akpqw-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Thu, 09 Jul 2020 19:15:40 +0000
+Received: from pps.filterd (aserp3020.oracle.com [127.0.0.1])
+        by aserp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 069J9HEW169804;
+        Thu, 9 Jul 2020 19:13:40 GMT
+Received: from aserv0121.oracle.com (aserv0121.oracle.com [141.146.126.235])
+        by aserp3020.oracle.com with ESMTP id 325k3hrfb4-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Thu, 09 Jul 2020 19:13:40 +0000
+Received: from abhmp0004.oracle.com (abhmp0004.oracle.com [141.146.116.10])
+        by aserv0121.oracle.com (8.14.4/8.13.8) with ESMTP id 069JDd9A030528;
+        Thu, 9 Jul 2020 19:13:39 GMT
+Received: from localhost (/10.159.229.94)
+        by default (Oracle Beehive Gateway v4.0)
+        with ESMTP ; Thu, 09 Jul 2020 12:13:39 -0700
+Date:   Thu, 9 Jul 2020 12:13:38 -0700
+From:   "Darrick J. Wong" <darrick.wong@oracle.com>
+To:     Jan Kara <jack@suse.cz>
+Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org
+Subject: Re: [PATCH] generic/530: Require metadata journaling
+Message-ID: <20200709191338.GA848607@magnolia>
+References: <20200709095753.3514-1-jack@suse.cz>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20200709153655.GG7600@magnolia>
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.15
+In-Reply-To: <20200709095753.3514-1-jack@suse.cz>
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9677 signatures=668680
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 spamscore=0 mlxscore=0 mlxlogscore=999
+ phishscore=0 adultscore=0 suspectscore=1 malwarescore=0 bulkscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
+ definitions=main-2007090131
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9677 signatures=668680
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxscore=0 adultscore=0 malwarescore=0
+ clxscore=1015 impostorscore=0 phishscore=0 suspectscore=1
+ priorityscore=1501 bulkscore=0 lowpriorityscore=0 mlxlogscore=999
+ spamscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2006250000 definitions=main-2007090131
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Jul 09, 2020 at 08:36:55AM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <darrick.wong@oracle.com>
+On Thu, Jul 09, 2020 at 11:57:53AM +0200, Jan Kara wrote:
+> Test generic/530 doesn't make sence without metadata journalling as in
+> that case, there's no way to recover shutdown fs besides fsck. ext4
+> can be configured without a journal and it supports shutdown ioctl even
+> in that mode which makes this test fail for that configuration. Add
+> requirement for metadata journalling to this test so that it's properly
+> skipped.
 > 
-> This test requires the scratch device, so we need to test for it.
-> 
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> Signed-off-by: Jan Kara <jack@suse.cz>
 
-Reviewed-by: Bill O'Donnell <billodo@redhat.com>
+<shudder> Right, I forgot about that...
+
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+
+--D
 
 > ---
->  tests/xfs/518 |    1 +
+>  tests/generic/530 | 1 +
 >  1 file changed, 1 insertion(+)
 > 
-> diff --git a/tests/xfs/518 b/tests/xfs/518
-> index 14457978..da39d8dc 100755
-> --- a/tests/xfs/518
-> +++ b/tests/xfs/518
-> @@ -30,6 +30,7 @@ _cleanup()
->  # real QA test starts here
->  _supported_fs xfs
+> diff --git a/tests/generic/530 b/tests/generic/530
+> index cb874ace902b..153a045dca87 100755
+> --- a/tests/generic/530
+> +++ b/tests/generic/530
+> @@ -33,6 +33,7 @@ _supported_fs generic
 >  _supported_os Linux
-> +_require_scratch
->  _require_quota
+>  _require_scratch
+>  _require_scratch_shutdown
+> +_require_metadata_journaling
+>  _require_test_program "t_open_tmpfiles"
 >  
 >  rm -f $seqres.full
+> -- 
+> 2.16.4
 > 
-
