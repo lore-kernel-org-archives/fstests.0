@@ -2,184 +2,82 @@ Return-Path: <SRS0=s9tj=AV=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7FDE7C433E1
-	for <linux-fstests@archiver.kernel.org>; Fri, 10 Jul 2020 14:35:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DB28AC433DF
+	for <linux-fstests@archiver.kernel.org>; Fri, 10 Jul 2020 14:45:46 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 592CD206A1
-	for <linux-fstests@archiver.kernel.org>; Fri, 10 Jul 2020 14:35:33 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="ikcdKWjs"
+	by mail.kernel.org (Postfix) with ESMTP id C1295206A1
+	for <linux-fstests@archiver.kernel.org>; Fri, 10 Jul 2020 14:45:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726832AbgGJOfd (ORCPT
+        id S1726828AbgGJOpq (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 10 Jul 2020 10:35:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44894 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726820AbgGJOfc (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 10 Jul 2020 10:35:32 -0400
-Received: from mail-qk1-x743.google.com (mail-qk1-x743.google.com [IPv6:2607:f8b0:4864:20::743])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 92911C08C5CE
-        for <fstests@vger.kernel.org>; Fri, 10 Jul 2020 07:35:32 -0700 (PDT)
-Received: by mail-qk1-x743.google.com with SMTP id l6so5393777qkc.6
-        for <fstests@vger.kernel.org>; Fri, 10 Jul 2020 07:35:32 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=6CA0BtWDr6V5amY/gr+CQDO+ySxguynEikD6u0adTEU=;
-        b=ikcdKWjsx0d7PCgrcOHCk1nbxtLDzeifxieurntgjK+aasJFYSe95/HRfp2LSQpyWs
-         N+171k3wzO2n40eddASYhQWSv7Zom7o9R34lWSziedlDCzZC5mHYUJnF6kP4ig0Ot5ws
-         4bHEulqcaJzKK/UntFdPM2/pfkAZRz+54g74LHUndqmszjtpsd1U88XCyCrZrT82dOop
-         gdNc5E0sM5cbP6d/TAgKJOhZ9I/qrwh231S4qALZMG9ilptM6hscv3BZJ2HvnWMgXzF9
-         iTZf+bocfypyulfWu4rXGclUvryIxVIF2crW9WzwqNtekKTWOu7/FaeC04p+lfzwSZSG
-         WWqg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=6CA0BtWDr6V5amY/gr+CQDO+ySxguynEikD6u0adTEU=;
-        b=U0WHB0QRfwSdAFtgjsQxvFnh/mf7wxosZUGzYsCSajcx6SuJdxbVF+0PgbIaD3Uine
-         L5q5nW9f8WtzAiImghDrAC9uLS4f5u4nkd+F0HpIfH2nJu/OYXkaLGTo41IpHvsyG9nL
-         TiBiLwrNjJS5nCJgqFD7wYCov+SnzK8tLUfKUSjHljjMLxoIQalFjFXYVe861cYdF0wG
-         T763613gkuDTO+1zMm4FSYjiboPmmwAOgUL5v59nqKVGszj7TwDOknInhGMePCsSsBqR
-         q+k0qqgK/CV8jtij2SNbWwoIYEKemh61qUOnEUsHr55ogmHNIDRn00i5Zyf9yCczI/EG
-         b7Qw==
-X-Gm-Message-State: AOAM533vSc6fvd1jJo0/cEWhQfzZDTVWyWgQCILeGJ3UPh8vKV/797gG
-        IPD7W3oJmgN8Oq+ZHSRutEMmlw==
-X-Google-Smtp-Source: ABdhPJxjzPbXKwH/FhK4UVmcmnjNToPzxD4irDZSXSWuTADyiUD97ryDlCxnRzOmeE0dzYVKg1xJ7w==
-X-Received: by 2002:a37:2dc3:: with SMTP id t186mr58469954qkh.157.1594391731577;
-        Fri, 10 Jul 2020 07:35:31 -0700 (PDT)
-Received: from [192.168.1.45] (cpe-174-109-172-136.nc.res.rr.com. [174.109.172.136])
-        by smtp.gmail.com with ESMTPSA id j9sm7599869qtr.60.2020.07.10.07.35.30
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 10 Jul 2020 07:35:30 -0700 (PDT)
-Subject: Re: [PATCH] btrfs: add a test for umount racing mount
-To:     Boris Burkov <boris@bur.io>, fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org
-References: <20200710005545.1276395-1-boris@bur.io>
-From:   Josef Bacik <josef@toxicpanda.com>
-Message-ID: <c8bfc2c7-4c13-72e4-3665-c2e2dec99dd4@toxicpanda.com>
-Date:   Fri, 10 Jul 2020 10:35:29 -0400
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:68.0)
- Gecko/20100101 Thunderbird/68.10.0
+        Fri, 10 Jul 2020 10:45:46 -0400
+Received: from mgw-01.mpynet.fi ([82.197.21.90]:52296 "EHLO mgw-01.mpynet.fi"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726820AbgGJOpq (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 10 Jul 2020 10:45:46 -0400
+X-Greylist: delayed 1903 seconds by postgrey-1.27 at vger.kernel.org; Fri, 10 Jul 2020 10:45:45 EDT
+Received: from pps.filterd (mgw-01.mpynet.fi [127.0.0.1])
+        by mgw-01.mpynet.fi (8.16.0.42/8.16.0.42) with SMTP id 06AECZdA082044;
+        Fri, 10 Jul 2020 17:14:00 +0300
+Received: from ex13.tuxera.com (ex13.tuxera.com [178.16.184.72])
+        by mgw-01.mpynet.fi with ESMTP id 326ba70qnd-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-SHA384 bits=256 verify=NOT);
+        Fri, 10 Jul 2020 17:13:59 +0300
+Received: from localhost (194.100.106.190) by tuxera-exch.ad.tuxera.com
+ (10.20.48.11) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Fri, 10 Jul
+ 2020 17:13:59 +0300
+From:   Vladimir Zapolskiy <vladimir@tuxera.com>
+To:     Eryu Guan <guaneryu@gmail.com>
+CC:     <fstests@vger.kernel.org>
+Subject: [PATCH] common/rc: fix false positives due to leaked mkfs output to stderr
+Date:   Fri, 10 Jul 2020 17:13:50 +0300
+Message-ID: <20200710141350.2383-1-vladimir@tuxera.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-In-Reply-To: <20200710005545.1276395-1-boris@bur.io>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-Originating-IP: [194.100.106.190]
+X-ClientProxiedBy: tuxera-exch.ad.tuxera.com (10.20.48.11) To
+ tuxera-exch.ad.tuxera.com (10.20.48.11)
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.235,18.0.687
+ definitions=2020-07-10_07:2020-07-10,2020-07-10 signatures=0
+X-Proofpoint-Spam-Details: rule=mpy_notspam policy=mpy score=0 mlxscore=0 suspectscore=0
+ malwarescore=0 adultscore=0 phishscore=0 mlxlogscore=999 bulkscore=0
+ spamscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2006250000 definitions=main-2007100100
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 7/9/20 8:55 PM, Boris Burkov wrote:
-> Test if dirtying many inodes, which delays the umount in `evict_inodes`,
-> then umounting and quickly mounting again causes the mount to fail.
-> 
-> This race is fixed by the patch:
-> "btrfs: fix mount failure caused by race with umount"
-> 
-> Signed-off-by: Boris Burkov <boris@bur.io>
-> ---
->   tests/btrfs/215     | 52 +++++++++++++++++++++++++++++++++++++++++++++
->   tests/btrfs/215.out |  2 ++
->   tests/btrfs/group   |  1 +
->   3 files changed, 55 insertions(+)
->   create mode 100755 tests/btrfs/215
->   create mode 100644 tests/btrfs/215.out
-> 
-> diff --git a/tests/btrfs/215 b/tests/btrfs/215
-> new file mode 100755
-> index 00000000..b142c2d6
-> --- /dev/null
-> +++ b/tests/btrfs/215
-> @@ -0,0 +1,52 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2020 YOUR NAME HERE.  All Rights Reserved.
+The change fixes false positives reported by a few generic tests under
+circumstances, when an mkfs utility prints its output to stderr and then it
+appears in produced *.out files. The change is intended to fix such issues
+in the tests, which utilize _require_scratch_swapfile().
 
-Facebook should go in "YOUR NAME HERE".
+Signed-off-by: Vladimir Zapolskiy <vladimir@tuxera.com>
+---
+ common/rc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-> +#
-> +# FS QA Test 215
-> +#
-> +# Evicting dirty inodes can take a long time during umount.
-> +# Check that a new mount racing with such a delayed umount succeeds.
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs generic
+diff --git a/common/rc b/common/rc
+index f17b19f2d4cb..1b7b25758d25 100644
+--- a/common/rc
++++ b/common/rc
+@@ -2311,7 +2311,7 @@ _require_scratch_swapfile()
+ 	_require_scratch
+ 	_require_command "$MKSWAP_PROG" "mkswap"
+ 
+-	_scratch_mkfs >/dev/null
++	_scratch_mkfs >/dev/null 2>&1
+ 
+ 	# With mounting SELinux context(e.g. system_u:object_r:root_t:s0),
+ 	# standard mkswap tried to reset the type of default context to
+-- 
+2.25.1
 
-This isn't btrfs specific, so I'd put it in tests/generic/<whatever>
-
-> +_supported_os Linux
-> +_require_test
-> +
-> +_scratch_mkfs > /dev/null 2>&1
-> +_scratch_mount
-> +for i in $(seq 0 500)
-> +	do
-> +		  dd if=/dev/zero of="$SCRATCH_MNT/$i" bs=1M count=1 > /dev/null 2>&1
-> +		  done
-> +		  _scratch_unmount&
-> +		  _scratch_mount
-> +
-
-Looks like your tabbing got carried away here, and add a space between 
-_scratch_unmount and the &.
-
-> +echo "Silence is golden"
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/btrfs/215.out b/tests/btrfs/215.out
-> new file mode 100644
-> index 00000000..0a11773b
-> --- /dev/null
-> +++ b/tests/btrfs/215.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 215
-> +Silence is golden
-> diff --git a/tests/btrfs/group b/tests/btrfs/group
-> index 505665b5..dda0763e 100644
-> --- a/tests/btrfs/group
-> +++ b/tests/btrfs/group
-> @@ -217,3 +217,4 @@
->   212 auto balance dangerous
->   213 auto balance dangerous
->   214 auto quick send snapshot
-> +215 auto quick
-
-Spacing appears to be off here too.  Thanks,
-
-Josef
