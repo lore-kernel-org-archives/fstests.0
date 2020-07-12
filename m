@@ -5,115 +5,167 @@ X-Spam-Level:
 X-Spam-Status: No, score=-11.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 828CFC433DF
-	for <linux-fstests@archiver.kernel.org>; Sun, 12 Jul 2020 11:10:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6A518C433DF
+	for <linux-fstests@archiver.kernel.org>; Sun, 12 Jul 2020 11:25:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5954420725
-	for <linux-fstests@archiver.kernel.org>; Sun, 12 Jul 2020 11:10:04 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 40A262070B
+	for <linux-fstests@archiver.kernel.org>; Sun, 12 Jul 2020 11:25:01 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="hlM0oa8Q"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="fSQOZd1h"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728685AbgGLLKD (ORCPT
+        id S1728795AbgGLLZB (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 12 Jul 2020 07:10:03 -0400
-Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:24560 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1725892AbgGLLKD (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 12 Jul 2020 07:10:03 -0400
+        Sun, 12 Jul 2020 07:25:01 -0400
+Received: from us-smtp-1.mimecast.com ([205.139.110.61]:32771 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1728715AbgGLLZA (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 12 Jul 2020 07:25:00 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1594552200;
+        s=mimecast20190719; t=1594553099;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=Z8iVH0YQXEn/vFF+BjIlUAcEOwmAeBg8c6tXmgKbNi4=;
-        b=hlM0oa8Q6TrkUzwdY4IQXbdR3cNAupr94Hz8oHSv7VQkAOKjCl/FlEfl6di49ra+BxD7MC
-        jSrGApRqIjO3X6f4bqMsoPo4nLLb3C1kRHw06nClxUjr8iS3TiOkPGagXxZWLKxFNUvmHr
-        rR3E2RM/ONG8/7FSn4gPcwG4MdZ6qbw=
+        bh=n/hZzYnvHI04LG9yCpMZWg1IxGU0A7wFj97tewndyiw=;
+        b=fSQOZd1hOLd4cK9clXG7PzAhQWSdYCEJ8SlCVsDxyvsXpDcP8iaL5aoX5PLg/ipfk0FMON
+        cYTNnUaFEAXpG/j1DZDkpYFHKPyFLWC9CiNt8WqgscoT13es8JYfsnmDmMXAgvHADHLW7d
+        Zu0gRH0AIqhWJ9FVwIm/yaYHMKt34Ow=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-194-tCFS3JPNOaqp-V9TpelEKQ-1; Sun, 12 Jul 2020 07:09:58 -0400
-X-MC-Unique: tCFS3JPNOaqp-V9TpelEKQ-1
-Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
+ us-mta-114-ciAJeNEROoy6gb0Y7vR9yQ-1; Sun, 12 Jul 2020 07:24:57 -0400
+X-MC-Unique: ciAJeNEROoy6gb0Y7vR9yQ-1
+Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 7E96F10059AF;
-        Sun, 12 Jul 2020 11:09:57 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 1B11C100CC84;
+        Sun, 12 Jul 2020 11:24:56 +0000 (UTC)
 Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id EF6C45D9D3;
-        Sun, 12 Jul 2020 11:09:56 +0000 (UTC)
-Date:   Sun, 12 Jul 2020 19:22:43 +0800
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 5DC1574F59;
+        Sun, 12 Jul 2020 11:24:55 +0000 (UTC)
+Date:   Sun, 12 Jul 2020 19:37:41 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     Vladimir Zapolskiy <vladimir@tuxera.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] generic: reorder output to stderr and stdout from
- _scratch_mkfs
-Message-ID: <20200712112243.GV1938@dhcp-12-102.nay.redhat.com>
-Mail-Followup-To: Vladimir Zapolskiy <vladimir@tuxera.com>,
-        fstests@vger.kernel.org
-References: <20200711092319.14441-1-vladimir@tuxera.com>
+To:     Boris Burkov <boris@bur.io>
+Cc:     Josef Bacik <josef@toxicpanda.com>, fstests@vger.kernel.org,
+        linux-btrfs@vger.kernel.org
+Subject: Re: [PATCH v2] generic: add a test for umount racing mount
+Message-ID: <20200712113741.GW1938@dhcp-12-102.nay.redhat.com>
+Mail-Followup-To: Boris Burkov <boris@bur.io>,
+        Josef Bacik <josef@toxicpanda.com>, fstests@vger.kernel.org,
+        linux-btrfs@vger.kernel.org
+References: <c8bfc2c7-4c13-72e4-3665-c2e2dec99dd4@toxicpanda.com>
+ <20200710171836.127889-1-boris@bur.io>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20200711092319.14441-1-vladimir@tuxera.com>
+In-Reply-To: <20200710171836.127889-1-boris@bur.io>
 User-Agent: Mutt/1.10.1 (2018-07-13)
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sat, Jul 11, 2020 at 12:23:19PM +0300, Vladimir Zapolskiy wrote:
-> The change fixes false positives from generic/554 and generic/565 tests,
-> when supplementary output of an mkfs utility to stderr apprears to be mixed
-> into the test output, which results into non-empty diff with the expected
-> output found in *.out files.
+On Fri, Jul 10, 2020 at 10:18:36AM -0700, Boris Burkov wrote:
+> Test if dirtying many inodes (which can delay umount) then
+> unmounting and quickly mounting again causes the mount to fail.
 > 
-> The change unifies _scratch_mkfs redirections among all generic tests, these
-> two modified tests are the only ones with the swapped order of output
-> redirections.
+> A race, which breaks the test in btrfs, is fixed by the patch:
+> "btrfs: fix mount failure caused by race with umount"
 > 
-> Signed-off-by: Vladimir Zapolskiy <vladimir@tuxera.com>
+> Signed-off-by: Boris Burkov <boris@bur.io>
 > ---
->  tests/generic/554 | 2 +-
->  tests/generic/565 | 2 +-
->  2 files changed, 2 insertions(+), 2 deletions(-)
+>  tests/generic/603     | 52 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/603.out |  2 ++
+>  tests/generic/group   |  1 +
+>  3 files changed, 55 insertions(+)
+>  create mode 100755 tests/generic/603
+>  create mode 100644 tests/generic/603.out
 > 
-> diff --git a/tests/generic/554 b/tests/generic/554
-> index eaf1f45a8d15..9a23c0eb729f 100755
-> --- a/tests/generic/554
-> +++ b/tests/generic/554
-> @@ -38,7 +38,7 @@ _require_scratch
->  _require_xfs_io_command "copy_range"
->  _require_scratch_swapfile
->  
-> -_scratch_mkfs 2>&1 >> $seqres.full
-> +_scratch_mkfs >>$seqres.full 2>&1
+> diff --git a/tests/generic/603 b/tests/generic/603
+> new file mode 100755
+> index 00000000..e67899cb
+> --- /dev/null
+> +++ b/tests/generic/603
+> @@ -0,0 +1,52 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2020 Facebook  All Rights Reserved.
+> +#
+> +# FS QA Test 603
+> +#
+> +# Evicting dirty inodes can take a long time during umount.
+> +# Check that a new mount racing with such a delayed umount succeeds.
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs generic
+> +_supported_os Linux
+> +_require_test
 
-Make sense to me. If the case hopes to catch the mkfs error, it can remove
-the "2>&1" directly. Or I think it hopes to write both stderr and stdout into
-$seqres.full.
+It should be _require_scratch, due to you never use TEST_DIR below, but you
+used $SCRATCH_MNT.
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+> +
+> +_scratch_mkfs > /dev/null 2>&1
+> +_scratch_mount
+> +for i in $(seq 0 500)
+> +do
+> +	dd if=/dev/zero of="$SCRATCH_MNT/$i" bs=1M count=1 > /dev/null 2>&1
+> +done
+> +_scratch_unmount &
 
->  _scratch_mount
->  
->  rm -f $seqres.full
-> diff --git a/tests/generic/565 b/tests/generic/565
-> index 41d85b919553..e23e97b763f8 100755
-> --- a/tests/generic/565
-> +++ b/tests/generic/565
-> @@ -38,7 +38,7 @@ _require_test
->  _require_scratch
->  _require_xfs_io_command "copy_range"
->  
-> -_scratch_mkfs 2>&1 >> $seqres.full
-> +_scratch_mkfs >>$seqres.full 2>&1
->  _scratch_mount
->  
->  
+I have a question, can we make sure the this umount operation won't affect
+next running case?
+
+> +_scratch_mount
+> +
+> +echo "Silence is golden"
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/generic/603.out b/tests/generic/603.out
+> new file mode 100644
+> index 00000000..6810da89
+> --- /dev/null
+> +++ b/tests/generic/603.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 603
+> +Silence is golden
+> diff --git a/tests/generic/group b/tests/generic/group
+> index d9ab9a31..c0ace35b 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -605,3 +605,4 @@
+>  600 auto quick quota
+>  601 auto quick quota
+>  602 auto quick encrypt
+> +603 auto quick
 > -- 
-> 2.25.1
+> 2.24.1
 > 
 
