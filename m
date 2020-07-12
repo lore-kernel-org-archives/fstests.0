@@ -2,170 +2,93 @@ Return-Path: <SRS0=q2aQ=AX=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.5 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6A518C433DF
-	for <linux-fstests@archiver.kernel.org>; Sun, 12 Jul 2020 11:25:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 032DCC433DF
+	for <linux-fstests@archiver.kernel.org>; Sun, 12 Jul 2020 23:54:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 40A262070B
-	for <linux-fstests@archiver.kernel.org>; Sun, 12 Jul 2020 11:25:01 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="fSQOZd1h"
+	by mail.kernel.org (Postfix) with ESMTP id CFCBA20575
+	for <linux-fstests@archiver.kernel.org>; Sun, 12 Jul 2020 23:54:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728795AbgGLLZB (ORCPT
+        id S1728186AbgGLXy2 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 12 Jul 2020 07:25:01 -0400
-Received: from us-smtp-1.mimecast.com ([205.139.110.61]:32771 "EHLO
-        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1728715AbgGLLZA (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 12 Jul 2020 07:25:00 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1594553099;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=n/hZzYnvHI04LG9yCpMZWg1IxGU0A7wFj97tewndyiw=;
-        b=fSQOZd1hOLd4cK9clXG7PzAhQWSdYCEJ8SlCVsDxyvsXpDcP8iaL5aoX5PLg/ipfk0FMON
-        cYTNnUaFEAXpG/j1DZDkpYFHKPyFLWC9CiNt8WqgscoT13es8JYfsnmDmMXAgvHADHLW7d
-        Zu0gRH0AIqhWJ9FVwIm/yaYHMKt34Ow=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-114-ciAJeNEROoy6gb0Y7vR9yQ-1; Sun, 12 Jul 2020 07:24:57 -0400
-X-MC-Unique: ciAJeNEROoy6gb0Y7vR9yQ-1
-Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 1B11C100CC84;
-        Sun, 12 Jul 2020 11:24:56 +0000 (UTC)
-Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 5DC1574F59;
-        Sun, 12 Jul 2020 11:24:55 +0000 (UTC)
-Date:   Sun, 12 Jul 2020 19:37:41 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Boris Burkov <boris@bur.io>
-Cc:     Josef Bacik <josef@toxicpanda.com>, fstests@vger.kernel.org,
-        linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH v2] generic: add a test for umount racing mount
-Message-ID: <20200712113741.GW1938@dhcp-12-102.nay.redhat.com>
-Mail-Followup-To: Boris Burkov <boris@bur.io>,
-        Josef Bacik <josef@toxicpanda.com>, fstests@vger.kernel.org,
-        linux-btrfs@vger.kernel.org
-References: <c8bfc2c7-4c13-72e4-3665-c2e2dec99dd4@toxicpanda.com>
- <20200710171836.127889-1-boris@bur.io>
+        Sun, 12 Jul 2020 19:54:28 -0400
+Received: from mail108.syd.optusnet.com.au ([211.29.132.59]:58489 "EHLO
+        mail108.syd.optusnet.com.au" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1727932AbgGLXy2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 12 Jul 2020 19:54:28 -0400
+Received: from dread.disaster.area (pa49-180-53-24.pa.nsw.optusnet.com.au [49.180.53.24])
+        by mail108.syd.optusnet.com.au (Postfix) with ESMTPS id 01A6E1A8A08;
+        Mon, 13 Jul 2020 09:54:22 +1000 (AEST)
+Received: from dave by dread.disaster.area with local (Exim 4.92.3)
+        (envelope-from <david@fromorbit.com>)
+        id 1julnY-0000y1-QW; Mon, 13 Jul 2020 09:54:20 +1000
+Date:   Mon, 13 Jul 2020 09:54:20 +1000
+From:   Dave Chinner <david@fromorbit.com>
+To:     Lukas Czerner <lczerner@redhat.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH] check: add CLI option to repeat tests
+Message-ID: <20200712235420.GI5369@dread.disaster.area>
+References: <20200708053513.3259990-1-david@fromorbit.com>
+ <20200708081518.4oqe4menrpifbags@work>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20200710171836.127889-1-boris@bur.io>
+In-Reply-To: <20200708081518.4oqe4menrpifbags@work>
 User-Agent: Mutt/1.10.1 (2018-07-13)
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
+X-Optus-CM-Score: 0
+X-Optus-CM-Analysis: v=2.3 cv=X6os11be c=1 sm=1 tr=0
+        a=moVtWZxmCkf3aAMJKIb/8g==:117 a=moVtWZxmCkf3aAMJKIb/8g==:17
+        a=kj9zAlcOel0A:10 a=_RQrkK6FrEwA:10 a=20KFwNOVAAAA:8 a=7-415B0cAAAA:8
+        a=qj677rFPGuqeTe_-rXgA:9 a=CjuIK1q_8ugA:10 a=biEYGPWJfzWAr4FL6Ov7:22
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Jul 10, 2020 at 10:18:36AM -0700, Boris Burkov wrote:
-> Test if dirtying many inodes (which can delay umount) then
-> unmounting and quickly mounting again causes the mount to fail.
+On Wed, Jul 08, 2020 at 10:15:18AM +0200, Lukas Czerner wrote:
+> On Wed, Jul 08, 2020 at 03:35:13PM +1000, Dave Chinner wrote:
+> > From: Dave Chinner <dchinner@redhat.com>
+> > 
+> > Frequently when trying to reproduce a problem I want to run a set of
+> > specific tests in a loop, over and over again. I run fstests from a
+> > set of run scripts that have non-trivial overhead (e.g. patterning
+> > block devices before the runs start), so if all I want to do is run
+> > the same test 100x, using a shell loop over the entire run
+> > scripts reduces the iteration rate substantially.
+> > 
+> > Hence add an option to check to allow fstests to loop a number of
+> > times over the configured test set without stopping.
 > 
-> A race, which breaks the test in btrfs, is fixed by the patch:
-> "btrfs: fix mount failure caused by race with umount"
+> Hi Dave,
 > 
-> Signed-off-by: Boris Burkov <boris@bur.io>
-> ---
->  tests/generic/603     | 52 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/603.out |  2 ++
->  tests/generic/group   |  1 +
->  3 files changed, 55 insertions(+)
->  create mode 100755 tests/generic/603
->  create mode 100644 tests/generic/603.out
-> 
-> diff --git a/tests/generic/603 b/tests/generic/603
-> new file mode 100755
-> index 00000000..e67899cb
-> --- /dev/null
-> +++ b/tests/generic/603
-> @@ -0,0 +1,52 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2020 Facebook  All Rights Reserved.
-> +#
-> +# FS QA Test 603
-> +#
-> +# Evicting dirty inodes can take a long time during umount.
-> +# Check that a new mount racing with such a delayed umount succeeds.
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs generic
-> +_supported_os Linux
-> +_require_test
+> this is useful as I am often doing the same. However what I am really
+> missing is the ability to end the loop when a test fails and the ability
+> to run tests in infinite loop (or until the test fails).
 
-It should be _require_scratch, due to you never use TEST_DIR below, but you
-used $SCRATCH_MNT.
+To run until a test set fails, I have just been using "-i 10000"
+because if it passes 10000 loops, it isn't going to fail.. :)
 
-> +
-> +_scratch_mkfs > /dev/null 2>&1
-> +_scratch_mount
-> +for i in $(seq 0 500)
-> +do
-> +	dd if=/dev/zero of="$SCRATCH_MNT/$i" bs=1M count=1 > /dev/null 2>&1
-> +done
-> +_scratch_unmount &
+Hence I didn't see a need to complicate things with a specific
+"loop forever" options.
 
-I have a question, can we make sure the this umount operation won't affect
-next running case?
+> It should be easy modification to make, what do you think ?
 
-> +_scratch_mount
-> +
-> +echo "Silence is golden"
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/603.out b/tests/generic/603.out
-> new file mode 100644
-> index 00000000..6810da89
-> --- /dev/null
-> +++ b/tests/generic/603.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 603
-> +Silence is golden
-> diff --git a/tests/generic/group b/tests/generic/group
-> index d9ab9a31..c0ace35b 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -605,3 +605,4 @@
->  600 auto quick quota
->  601 auto quick quota
->  602 auto quick encrypt
-> +603 auto quick
-> -- 
-> 2.24.1
-> 
+Feel free to add send a patch on top of this one to support that -
+all of the failures I've been looking at with this have been "test
+does not complete" failures, so it wasn't important to me.
 
+As it is, right now I don't have time to feature creep simple
+modifications like this into more complex functionality - I really
+only sent this out because Willy mentioned on #xfs that he wished
+there was a way to loop a test and I said "I've got a patch on my
+local tree for that"....
+
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
