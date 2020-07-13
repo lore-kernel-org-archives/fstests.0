@@ -2,188 +2,141 @@ Return-Path: <SRS0=IIXw=AY=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.5 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.0 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C4785C433E5
-	for <linux-fstests@archiver.kernel.org>; Mon, 13 Jul 2020 07:03:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 69C99C433E6
+	for <linux-fstests@archiver.kernel.org>; Mon, 13 Jul 2020 08:43:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A91852075D
-	for <linux-fstests@archiver.kernel.org>; Mon, 13 Jul 2020 07:03:30 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3F85020702
+	for <linux-fstests@archiver.kernel.org>; Mon, 13 Jul 2020 08:43:08 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="ZHaGp2Oq";
+	dkim=pass (1024-bit key) header.d=sharedspace.onmicrosoft.com header.i=@sharedspace.onmicrosoft.com header.b="nouYic8w"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727834AbgGMHDa (ORCPT
+        id S1725969AbgGMInH (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 13 Jul 2020 03:03:30 -0400
-Received: from mx2.suse.de ([195.135.220.15]:58086 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725818AbgGMHDa (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 13 Jul 2020 03:03:30 -0400
-X-Virus-Scanned: by amavisd-new at test-mx.suse.de
-Received: from relay2.suse.de (unknown [195.135.221.27])
-        by mx2.suse.de (Postfix) with ESMTP id DEF81AC82;
-        Mon, 13 Jul 2020 07:03:29 +0000 (UTC)
-Subject: Re: [PATCH] fstests: btrfs test if show_devname returns sprout device
-To:     Anand Jain <anand.jain@oracle.com>, fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, josef@toxicpanda.com
-References: <20200710063738.28368-1-anand.jain@oracle.com>
- <20200713054847.10080-1-anand.jain@oracle.com>
-From:   Nikolay Borisov <nborisov@suse.com>
-Autocrypt: addr=nborisov@suse.com; prefer-encrypt=mutual; keydata=
- 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
-Message-ID: <6dcd6b3c-06a9-51a7-988b-63cb254d7749@suse.com>
-Date:   Mon, 13 Jul 2020 10:03:27 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.10.0
-MIME-Version: 1.0
-In-Reply-To: <20200713054847.10080-1-anand.jain@oracle.com>
-Content-Type: text/plain; charset=utf-8
+        Mon, 13 Jul 2020 04:43:07 -0400
+Received: from esa1.hgst.iphmx.com ([68.232.141.245]:54208 "EHLO
+        esa1.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725830AbgGMInH (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 13 Jul 2020 04:43:07 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1594629786; x=1626165786;
+  h=from:to:cc:subject:date:message-id:references:
+   content-transfer-encoding:mime-version;
+  bh=AojycePWtIwa2u+0U9D7u6u/BxgF3KnTxnqrGhSUM5A=;
+  b=ZHaGp2OqRGe3jg1UjGazUkeIxft64q6CvT74BP6xEkt+b/QeepZEmcMk
+   Qk+yRUHQirAZetrZtjPp8gxm2S07gfZCORa4LnSSDHJF2VQl8fGifBQ/0
+   By3f5aolvsmTX6Q3WEw7YAZxcPT+z2IJ8a0POrrNclLjDfgJAsCyPbK+n
+   0H20SvAvdegpab4L19bD4CwjpGcZlq1VocRkbkLAg3zm475/l39a9lZRJ
+   zEGyUItGZbawukEEACDNzAnqTqdNpuKFvBGoJ39ltnsqp4bvvnVpnaQcU
+   HNKDkhJ+xM7mA9hjb52+IKE3rMERgKHve/QzSyqlW90HxAlDeWWxxghD0
+   g==;
+IronPort-SDR: +P/vEBU/AJ9DfIlkC0SJEsCBKEamxwRZOpj/4ChNKiYetDojj1iUFPEUJYNDrXrQl5luQs5cP/
+ PMQH/AKRmJwbVm6wji1Pib7dhHwNPzwgxIylumAyPdvrS15ddo7z4qCX8RfsyeKCPOgdv3zOaM
+ E1jY4GoIyZkD0lWwzwt5AUrfHX9J66FZgQSfhMe7DMlhqJt12nxShK9PqPc89rkqvVj9EJ3KSi
+ JLitYRs2tT3FPnTR9vVhIEloKL56bkBGuw/UUtbaeyyOxh4jK0e2DL22cq7zBhaQcSIax/Y0bZ
+ 6as=
+X-IronPort-AV: E=Sophos;i="5.75,346,1589212800"; 
+   d="scan'208";a="251558248"
+Received: from mail-mw2nam10lp2105.outbound.protection.outlook.com (HELO NAM10-MW2-obe.outbound.protection.outlook.com) ([104.47.55.105])
+  by ob1.hgst.iphmx.com with ESMTP; 13 Jul 2020 16:43:05 +0800
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=VBKx8ya0ncsjNyVTkehQRgnpLRz3VNIr1gaa0q0t8nPfqdiwxJxgxil8i3ztAVezwlTMTKE2xwjRT0w1npUsO1OR5Av8DObct0iLhKcl/SWlOfjVf/LrJwvAWMtF/fTyijBGCpFb3rLtWpaj6p3LFkf9qTXGKq05RHrnDmf7jhPXytcS3HemXTaR7rRZxqwGEEkkuxr2yqT2Acz96mq38TSRLvKKRdtVO/osiDkboszsBCUG9dfyGFOpXZbZg9+NocveSrSSURFnlpM+CWg5bTBhi6PncEyyHBL2rxP6FARF31mRKwTRGx7/yppHK9dncdqmFCFeQ3R1uC+t56vY1Q==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=AojycePWtIwa2u+0U9D7u6u/BxgF3KnTxnqrGhSUM5A=;
+ b=Dlz/iXQC36HTH0eWgUwYnsrp70OzhzhJKvLwGG/EFvTYLtybFAd9+UUtEDRDIR3/TOTsvOeFA1Ui6Fzh8lIia0ecXzO+ZwyHiV/8ItVcSxpf6+pRMOYDcV77K+TRn+ClCEdmQI1yKdFKo1m3lgZE1RhqZnz4SiFUidXkEd87kTsFLf+06vO5RjmTacOe+EpaNiHc3/6qpcWY4mvdsosYXhvXcB63Ud5wMNutq4h9R7vcOWlXNS8em57MeEcPm/U3/+QwDUMvf5UEp7Pp0+JEKtFN1NbHGIxA5IBQRwTFAg6hWC6a5aXbOY3F6cWO56KCcwQivjKEI1BPG7wUPJ5PVQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
+ header.d=wdc.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=AojycePWtIwa2u+0U9D7u6u/BxgF3KnTxnqrGhSUM5A=;
+ b=nouYic8w06WFVJ0WisJJPuzZDeAAGurVPDuBVLZL/sOwt9L9ElSx9Bjv//e0xQ5hcH9gciBlPRrFmApq2FAegIAyWkSUAxmLSBA8I7IYX27d6I1FKfqOyNIzp9OigLqgvI+PaFFK1CCvbM0mC1WZRyssRuELb4qfzHDGsnWhS7g=
+Received: from SN4PR0401MB3598.namprd04.prod.outlook.com
+ (2603:10b6:803:47::21) by SN2PR04MB2237.namprd04.prod.outlook.com
+ (2603:10b6:804:f::19) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3174.20; Mon, 13 Jul
+ 2020 08:43:04 +0000
+Received: from SN4PR0401MB3598.namprd04.prod.outlook.com
+ ([fe80::1447:186c:326e:30b2]) by SN4PR0401MB3598.namprd04.prod.outlook.com
+ ([fe80::1447:186c:326e:30b2%7]) with mapi id 15.20.3174.024; Mon, 13 Jul 2020
+ 08:43:04 +0000
+From:   Johannes Thumshirn <Johannes.Thumshirn@wdc.com>
+To:     Marcos Paulo de Souza <marcos@mpdesouza.com>,
+        "dsterba@suse.com" <dsterba@suse.com>,
+        "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>,
+        "fstests@vger.kernel.org" <fstests@vger.kernel.org>
+CC:     Marcos Paulo de Souza <mpdesouza@suse.com>
+Subject: Re: [PATCH] btrfs: Ignore output of "btrfs quota rescan"
+Thread-Topic: [PATCH] btrfs: Ignore output of "btrfs quota rescan"
+Thread-Index: AQHWVuvLKsEKGA/55E+KIpQixhyGLA==
+Date:   Mon, 13 Jul 2020 08:43:03 +0000
+Message-ID: <SN4PR0401MB35988C45E7E1BCDCCAF9A07D9B600@SN4PR0401MB3598.namprd04.prod.outlook.com>
+References: <20200710185519.10322-1-marcos@mpdesouza.com>
+Accept-Language: en-US
 Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: mpdesouza.com; dkim=none (message not signed)
+ header.d=none;mpdesouza.com; dmarc=none action=none header.from=wdc.com;
+x-originating-ip: [2001:a62:1515:bd01:3d54:75d5:bb74:f595]
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-ht: Tenant
+x-ms-office365-filtering-correlation-id: 2da16efd-8d70-40eb-49a8-08d82708c1f8
+x-ms-traffictypediagnostic: SN2PR04MB2237:
+x-microsoft-antispam-prvs: <SN2PR04MB22376F4AAE910C6766D2FF8E9B600@SN2PR04MB2237.namprd04.prod.outlook.com>
+wdcipoutbound: EOP-TRUE
+x-ms-oob-tlc-oobclassifiers: OLM:3044;
+x-ms-exchange-senderadcheck: 1
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: d+6H861EfEX0zivR5tjaeNDxQbbK/i4Efrc9Ws9BpcJxsN3j3vMZw7wNsyIggpUiFOp8pdhElTf3XtoxlH+i7khbNlhrR0UCu1VI2WjQwCyVhFftZ9w6YZGx1bE5EiaH+6Xjc479Szvu674CKwV/y7dsMsK5+rYO1Cch+KKBEW0IiT0co+XiDrv3MruWUj1m2sbsJaBGnqIKN4SOGIq4Gf2IwDvp2lY+dEOGA99aMAV2P2Mg3/Mc9p7/NWOe5xJUcN7rOOsfEY5rlEziD0DSTrhg3eHOcJhnA+6Ia5BbTD1h/mhxdLimnfHYX2jHWS9j
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SN4PR0401MB3598.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFTY:;SFS:(4636009)(39860400002)(396003)(366004)(346002)(376002)(136003)(2906002)(478600001)(4326008)(9686003)(55016002)(86362001)(110136005)(8676002)(6506007)(64756008)(66476007)(66556008)(83380400001)(66446008)(66946007)(33656002)(8936002)(53546011)(52536014)(186003)(316002)(15650500001)(7696005)(71200400001)(76116006)(4744005)(91956017)(5660300002);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata: ubXZUstM0ZNX6r9QaoAaHnLwZ8oaGVBPXsuNnWgW7IUdNeS92aPxNtLOZMbc5iJQCYMNBJXlzyx/nRXKoOSaON/GcOaH/6/k2U9GqFJ7e5OsH8c1AWXWl2kNHwQlrstfTOqwG/k8I359QBljguGZQTvbKbhhZxrsTRfUQOdeP8ZbN5fdIpxEfY7Mbi1pz9tJ2LzgMLgFdnYzz5YvAAnfaGmEgvFfiBNL2Cr4+fuRBqIAUkSLzPYI+NSLnWQh6GrjnXOXMeWlv5h4lZuY0PozLmV1fGkg1rRfGC/b6vPyg8FfVOesXjMZZYxgqSD1XyT1wr/V1TJQ7aNvD3qCzFMdWK0fvsvfJpgq+EjxgeNdstZWAfwMCzBq05JdKH6NE6J2f10JGnB1PE4+Q3pffD3rT4iuyCD5xCc8o3Rl1XeiQ/1c3rkdCfLkzYEQu1v+t0DScMWIN4b+qvRunYoXfAvJW2ScS+EFnmBNrEHHB55fUdomrriwVP6NUB4v/WMgrV6u2QK382tItzaaCu3FfoZ/eCxciY88HtKEZPPdtxjBESzf4DhPFXHrHs5xHV/xCDI2
+x-ms-exchange-transport-forked: True
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+MIME-Version: 1.0
+X-OriginatorOrg: wdc.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: SN4PR0401MB3598.namprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 2da16efd-8d70-40eb-49a8-08d82708c1f8
+X-MS-Exchange-CrossTenant-originalarrivaltime: 13 Jul 2020 08:43:03.9251
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: ywcQ6fNU2POYjTPU+lix5ganC9GeZ1AZVii0Q+gp/KBTHCQzmQj8Regv6iUcCbNLicAt6Tziys/0HQTtMVmgy9HfpC7wNL3U1Pwf60CsqoY=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: SN2PR04MB2237
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-
-
-On 13.07.20 г. 8:48 ч., Anand Jain wrote:
-> Test if the show_devname() returns sprout device instead of seed device.
-> 
-> Signed-off-by: Anand Jain <anand.jain@oracle.com>
-> ---
->  tests/btrfs/215     | 59 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/215.out |  2 ++
->  tests/btrfs/group   |  1 +
->  3 files changed, 62 insertions(+)
->  create mode 100755 tests/btrfs/215
->  create mode 100644 tests/btrfs/215.out
-> 
-> diff --git a/tests/btrfs/215 b/tests/btrfs/215
-> new file mode 100755
-> index 000000000000..19eb68437567
-> --- /dev/null
-> +++ b/tests/btrfs/215
-> @@ -0,0 +1,59 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2020 Oracle.  All Rights Reserved.
-> +#
-> +# FS QA Test 215
-> +#
-> +# Test if the show_devname() returns sprout device instead of seed device.
-> +#
-> +# Requires kernel patch:
-> +#   btrfs: btrfs_show_devname don't traverse into the seed fsid
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +_supported_fs btrfs
-> +_supported_os Linux
-> +_require_scratch_dev_pool 2
-> +
-> +_scratch_dev_pool_get 2
-> +
-> +seed=$(echo $SCRATCH_DEV_POOL | awk '{print $1}')
-> +sprout=$(echo $SCRATCH_DEV_POOL | awk '{print $2}')
-> +
-> +_mkfs_dev $seed
-> +$BTRFS_TUNE_PROG -S 1 $seed
-> +_mount $seed $SCRATCH_MNT >> $seqres.full 2>&1
-> +cat /proc/self/mounts | grep $seed >> $seqres.full
-> +$BTRFS_UTIL_PROG device add -f $sprout $SCRATCH_MNT
-> +cat /proc/self/mounts | grep $sprout >> $seqres.full
-> +
-> +#must fail
-> +cat /proc/self/mounts | grep $seed
-
-Checking for presence of specific sprout device will make the test more
-robust rather than checking for the absence of the seed device.
-
-> +
-> +_scratch_dev_pool_put
-> +
-> +echo "Silence is golden"
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/btrfs/215.out b/tests/btrfs/215.out
-> new file mode 100644
-> index 000000000000..0a11773bbb32
-> --- /dev/null
-> +++ b/tests/btrfs/215.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 215
-> +Silence is golden
-> diff --git a/tests/btrfs/group b/tests/btrfs/group
-> index 505665b54d61..76c8b78d08f9 100644
-> --- a/tests/btrfs/group
-> +++ b/tests/btrfs/group
-> @@ -217,3 +217,4 @@
->  212 auto balance dangerous
->  213 auto balance dangerous
->  214 auto quick send snapshot
-> +215 auto quick seed
-> 
+On 10/07/2020 20:56, Marcos Paulo de Souza wrote:=0A=
+> From: Marcos Paulo de Souza <mpdesouza@suse.com>=0A=
+> =0A=
+> Some recent test already ignore this output, while older ones do not.=0A=
+> It can sometimes make tests fail because "quota rescan" can show the=0A=
+> message "quota rescan started". Ignoring the output of the command=0A=
+> solves this problem.=0A=
+> =0A=
+> Signed-off-by: Marcos Paulo de Souza <mpdesouza@suse.com>=0A=
+> ---=0A=
+=0A=
+[...]=0A=
+> -_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT=0A=
+> +_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT >/dev/null=0A=
+=0A=
+I think it's better to filter the "quota rescan started" output instead of=
+=0A=
+redirecting all output to /dev/null. This way you'll get the real errors =
+=0A=
+from 'btrfs quota rescan'.=0A=
