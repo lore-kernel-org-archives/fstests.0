@@ -2,384 +2,162 @@ Return-Path: <SRS0=IIXw=AY=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
+X-Spam-Status: No, score=-10.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	UNPARSEABLE_RELAY,URIBL_BLOCKED autolearn=unavailable autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 80195C433E0
-	for <linux-fstests@archiver.kernel.org>; Mon, 13 Jul 2020 13:37:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ABD8DC433DF
+	for <linux-fstests@archiver.kernel.org>; Mon, 13 Jul 2020 16:46:16 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4865C2072D
-	for <linux-fstests@archiver.kernel.org>; Mon, 13 Jul 2020 13:37:15 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 850DF206F5
+	for <linux-fstests@archiver.kernel.org>; Mon, 13 Jul 2020 16:46:16 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="plsSah3o"
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="xX40pvxM"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729523AbgGMNhP (ORCPT
+        id S1730119AbgGMQqQ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 13 Jul 2020 09:37:15 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49800 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729747AbgGMNhO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 13 Jul 2020 09:37:14 -0400
-Received: from mail-ua1-x943.google.com (mail-ua1-x943.google.com [IPv6:2607:f8b0:4864:20::943])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8DA6AC061755;
-        Mon, 13 Jul 2020 06:37:14 -0700 (PDT)
-Received: by mail-ua1-x943.google.com with SMTP id g4so4067068uaq.10;
-        Mon, 13 Jul 2020 06:37:14 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:reply-to:from:date:message-id
-         :subject:to:cc:content-transfer-encoding;
-        bh=GLkU34sJde24g+wf6WlZUo82RGuDrreNQl4BHmolOOU=;
-        b=plsSah3o1fMBSHhfd8qYhvKXEErer2quMlnP7X0c1SKkjVYYxIIqH7jEwmyeNaDcjU
-         mAaR7XaoKEqf44CgJTyPUdakVfYzCbjsUMv76GOr3g0RAhT8H0c68fd4kHGkPkcnfUn2
-         W8SBOJQT6olmSP7qnmnzMYAnIDub+nCnVI/waxGfF2MHE04MULgi0leIBbsiTCdrz2Sj
-         05wE6vy8pdJImn3r3/3rm0LJUi3aUa7BGvh0P/jM5ZWM98Nfa8HAxR2Ww8Tetki1vPEL
-         5H81FawDlaGE7Iv9yvflhgiPVAxK3KozUg0NQ7PVf9qCjgS0vxw10WQzZ+YJHchMTHqG
-         akIQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:reply-to
-         :from:date:message-id:subject:to:cc:content-transfer-encoding;
-        bh=GLkU34sJde24g+wf6WlZUo82RGuDrreNQl4BHmolOOU=;
-        b=faCPxveT0kjR5eC167Wuu2qhvYimEZ4WabJ5KIcgH+71/53JlFo1w3ZrZxFGEVg4Rl
-         GG3FmQs7LMYJjdn2VwgdJ9ISKSrvTSOHiRTEiIa2kkEKZui9YYo10Y9ucum8jRSwG5un
-         BhCRMFY8q4nDzOYAyhsr2l6zcVTPGqafZ529hjW/xSEP3n06tbzRwOcJ3nAlmc8sKcHu
-         D0IDI9Euy4JKTvbnP1hLJvj30BzW28jVoCCCKXjnIKy0IWbns4EapV4tVYqNjE7xWy+z
-         6aL7q7XLGNXtxsbBCEfu3nUJ0RlAAC62cfdxjFS4mJn+K6BDu4mPOCCKclQ9cvccHo4J
-         umdQ==
-X-Gm-Message-State: AOAM530RAgTvk9m/ORH09nIiWDkF2Zv64AtE84tqV1ftMbPbgiX/faL4
-        7LUQwNHRZDRUF6YtO0iKE7UlPlwq2XYbsnOtygo=
-X-Google-Smtp-Source: ABdhPJxinZZkWgH0/MxgmXttb2F0Mllc57Vz9W/bJ3chg9U+xIGEVue1ENeFdpkYAwMgabztsjkM9Y8JbeU6cgywDPI=
-X-Received: by 2002:ab0:60b2:: with SMTP id f18mr58461546uam.123.1594647433513;
- Mon, 13 Jul 2020 06:37:13 -0700 (PDT)
+        Mon, 13 Jul 2020 12:46:16 -0400
+Received: from userp2130.oracle.com ([156.151.31.86]:53428 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729855AbgGMQqP (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 13 Jul 2020 12:46:15 -0400
+Received: from pps.filterd (userp2130.oracle.com [127.0.0.1])
+        by userp2130.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 06DGM1eo177415;
+        Mon, 13 Jul 2020 16:46:01 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
+ : subject : message-id : references : mime-version : content-type :
+ in-reply-to; s=corp-2020-01-29;
+ bh=XOmZlryJvn0aTQ3GkAhWv3o9MyWP20f8JRun0IvH3w0=;
+ b=xX40pvxMjvvCi3Ywt3x58kqwYokVxG7ab2ykfTwLi9MwqCrh0FEmx/bQr9OOFq4Vi0xb
+ tHQvZsk7IEf8bGcIbV5/mJFjBWbCT35QnX44q5zv+wqQI7lbCnXzYkLcxqcsrON3SyDp
+ DUhTRrUYzgJnrdEQYUYCmujCXZBQ3Qe5KXamObueCXG5397BOQjI/8rEmBN3wSEmEYNI
+ XnCPjZRCiiiCLlfUWbTsgc2nOQLoptre1S8qqlxNr0TkXY0f4VCf8FQIzeGdTm+rbfir
+ tbu6K/Xi55g5SOY7ekG0uUtY/a5MYTz6JNU0YSHVVxvXW6EFcp19K913BPR3m1Tn7Ezp Lw== 
+Received: from aserp3020.oracle.com (aserp3020.oracle.com [141.146.126.70])
+        by userp2130.oracle.com with ESMTP id 3274ur07h8-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Mon, 13 Jul 2020 16:46:01 +0000
+Received: from pps.filterd (aserp3020.oracle.com [127.0.0.1])
+        by aserp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 06DGNVAF024381;
+        Mon, 13 Jul 2020 16:46:00 GMT
+Received: from userv0122.oracle.com (userv0122.oracle.com [156.151.31.75])
+        by aserp3020.oracle.com with ESMTP id 327qb146q1-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Mon, 13 Jul 2020 16:46:00 +0000
+Received: from abhmp0004.oracle.com (abhmp0004.oracle.com [141.146.116.10])
+        by userv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 06DGjtqC000848;
+        Mon, 13 Jul 2020 16:45:56 GMT
+Received: from localhost (/10.159.128.100)
+        by default (Oracle Beehive Gateway v4.0)
+        with ESMTP ; Mon, 13 Jul 2020 09:45:55 -0700
+Date:   Mon, 13 Jul 2020 09:45:54 -0700
+From:   "Darrick J. Wong" <darrick.wong@oracle.com>
+To:     Vladimir Zapolskiy <vladimir@tuxera.com>
+Cc:     Eryu Guan <guaneryu@gmail.com>, fstests@vger.kernel.org
+Subject: Re: [PATCH] generic: assign a number of tests to attr group
+Message-ID: <20200713164554.GI7600@magnolia>
+References: <20200713122628.16781-1-vladimir@tuxera.com>
 MIME-Version: 1.0
-References: <20200710185519.10322-1-marcos@mpdesouza.com> <CAL3q7H4PswiXqS_Zy+w58Oj8cv6iBHj-LYDN4-EmU-Q5PAEubA@mail.gmail.com>
- <2eea62e0d90e6948ae5210bebad80c206314656f.camel@mpdesouza.com>
-In-Reply-To: <2eea62e0d90e6948ae5210bebad80c206314656f.camel@mpdesouza.com>
-Reply-To: fdmanana@gmail.com
-From:   Filipe Manana <fdmanana@gmail.com>
-Date:   Mon, 13 Jul 2020 14:37:02 +0100
-Message-ID: <CAL3q7H7_TeP5e17i-k8OVJ1TzoQn96-VKk4QP7JEqeRW25Nw2w@mail.gmail.com>
-Subject: Re: [PATCH] btrfs: Ignore output of "btrfs quota rescan"
-To:     Marcos Paulo de Souza <marcos@mpdesouza.com>
-Cc:     David Sterba <dsterba@suse.com>,
-        linux-btrfs <linux-btrfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>,
-        Marcos Paulo de Souza <mpdesouza@suse.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20200713122628.16781-1-vladimir@tuxera.com>
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9681 signatures=668680
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxlogscore=999 malwarescore=0
+ mlxscore=0 spamscore=0 phishscore=0 suspectscore=1 bulkscore=0
+ adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2006250000 definitions=main-2007130120
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9681 signatures=668680
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 lowpriorityscore=0 impostorscore=0
+ suspectscore=1 phishscore=0 spamscore=0 mlxlogscore=999 malwarescore=0
+ mlxscore=0 priorityscore=1501 adultscore=0 bulkscore=0 clxscore=1011
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
+ definitions=main-2007130120
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Jul 13, 2020 at 1:22 PM Marcos Paulo de Souza
-<marcos@mpdesouza.com> wrote:
->
-> On Mon, 2020-07-13 at 11:05 +0100, Filipe Manana wrote:
-> > On Fri, Jul 10, 2020 at 7:57 PM Marcos Paulo de Souza
-> > <marcos@mpdesouza.com> wrote:
-> > >
-> > > From: Marcos Paulo de Souza <mpdesouza@suse.com>
-> > >
-> > > Some recent test already ignore this output, while older ones do
-> > not.
-> > > It can sometimes make tests fail because "quota rescan" can show
-> > the
-> > > message "quota rescan started". Ignoring the output of the command
-> > > solves this problem.
-> >
-> >
-> > Hi Marcos,
-> >
-> > Can you elaborate exactly how it fails?
->
-> QA output created by 210
-> quota rescan started
-> Silence is goldenSure, my fault to not clarifying the error I was
-> facing. This only happens with btrfs/210, which fails for me:
->
-> QA output created by 210
-> quota rescan started
-> Silence is golden
+On Mon, Jul 13, 2020 at 03:26:28PM +0300, Vladimir Zapolskiy wrote:
+> A few generic tests have a _require_attrs runtime check for support
+> of extended file attributes by a tested filesystem, review shows that
+> the tests listed below are definitely using extended file attributes,
+> thus this implies that the tested filesystem should provide support of
+> the feature in general.
+> 
+> Adding the tests explicitly to attr group of tests allows to get a better
+> granularity of selecting or deselecting tests by groups in accordance to
+> extended file attributes feature given by a filesystem, the change affects
+> the next list of tests:
+> 
+>   * generic/037
+>   * generic/066
+>   * generic/103
+>   * generic/337
+>   * generic/449
 
-Then this patch should only touch 210.
+Aha! I had long suspected the attr group was missing a few tests...
 
->
-> I've never seen those tests fail due to an unexpected "quota rescan
-> > started" message.
-> >
-> > I also don't see how this change fixes anything, because:
-> >
-> > 1) The quota rescans are always executed - so we should always see
-> > such failure;
->
-> Yes, it's interesting because running other tests touched by this
-> patchset do not trigger the issue, but I thought it would be nice to
-> have this pattern among all tests that start a quota rescan. Any ideas
-> why this happens?
->
-> With this patch, specifically with the change on btrfs/210 solves the
-> issue for me as the message is dropped.
+> Signed-off-by: Vladimir Zapolskiy <vladimir@tuxera.com>
 
-So we should have a changelog that explains why the issue happens.
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
 
-Looking at 210, my guess is that the rescan command starts the rescan
-worker before the quota enable ioctl does (causing the message to be
-printed),
-as starting it is done asynchronously (iirc there were several bugs by
-this in the past, I fixed some of them, others fixed other similar
-problems).
-This needs to be checked/confirmed and then mentioned in the change log.
+--D
 
-Redirecting stdout to /dev/null or the .full file fixes the problem,
-and I'm fine with it if the above is indeed the cause for the
-unexpected message.
-
-Thanks.
-
->
-> Thanks,
->   Marcos
->
-> >
-> > 2) More importantly _run_btrfs_util_prog is:
-> >
-> > _run_btrfs_util_prog()
-> > {
-> >    run_check $BTRFS_UTIL_PROG $*
-> > }
-> >
-> > and run_check:
-> >
-> > run_check()
-> > {
-> >    echo "# $@" >> $seqres.full 2>&1
-> >    "$@" >> $seqres.full 2>&1 || _fail "failed: '$@'"
-> > }
-> >
-> > So any output from _run_btrfs_util_prog is redirected to the test's
-> > .full file.
-> > It will not cause a mismatch with the golden output.
-> >
-> >
-> > >
-> > > Signed-off-by: Marcos Paulo de Souza <mpdesouza@suse.com>
-> > > ---
-> > >  tests/btrfs/017 | 2 +-
-> > >  tests/btrfs/022 | 4 ++--
-> > >  tests/btrfs/028 | 2 +-
-> > >  tests/btrfs/057 | 2 +-
-> > >  tests/btrfs/091 | 2 +-
-> > >  tests/btrfs/104 | 2 +-
-> > >  tests/btrfs/123 | 2 +-
-> > >  tests/btrfs/126 | 2 +-
-> > >  tests/btrfs/139 | 2 +-
-> > >  tests/btrfs/153 | 2 +-
-> > >  tests/btrfs/193 | 2 +-
-> > >  tests/btrfs/210 | 2 +-
-> > >  12 files changed, 13 insertions(+), 13 deletions(-)
-> > >
-> > > diff --git a/tests/btrfs/017 b/tests/btrfs/017
-> > > index 1bb8295b..a888b8db 100755
-> > > --- a/tests/btrfs/017
-> > > +++ b/tests/btrfs/017
-> > > @@ -64,7 +64,7 @@ $CLONER_PROG -s 0 -d 0 -l $EXTENT_SIZE
-> > $SCRATCH_MNT/foo \
-> > >              $SCRATCH_MNT/snap/foo-reflink2
-> > >
-> > >  _run_btrfs_util_prog quota enable $SCRATCH_MNT
-> > > -_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
-> > > +_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT >/dev/null
-> >
-> > So this is pointless, as mentioned before, any output is already
-> > redirected to the test's .full file.
-> > The same applies to all changes below.
-> >
-> > So I fail to see what problem you are trying to solve.
-> >
-> > Thanks.
-> >
-> > >
-> > >  rm -fr $SCRATCH_MNT/foo*
-> > >  rm -fr $SCRATCH_MNT/snap/foo*
-> > > diff --git a/tests/btrfs/022 b/tests/btrfs/022
-> > > index aaa27aaa..442cc05c 100755
-> > > --- a/tests/btrfs/022
-> > > +++ b/tests/btrfs/022
-> > > @@ -38,7 +38,7 @@ _basic_test()
-> > >         echo "=3D=3D=3D basic test =3D=3D=3D" >> $seqres.full
-> > >         _run_btrfs_util_prog subvolume create $SCRATCH_MNT/a
-> > >         _run_btrfs_util_prog quota enable $SCRATCH_MNT/a
-> > > -       _run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
-> > > +       _run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
-> > >/dev/null
-> > >         subvolid=3D$(_btrfs_get_subvolid $SCRATCH_MNT a)
-> > >         $BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | grep
-> > $subvolid >> \
-> > >                 $seqres.full 2>&1
-> > > @@ -77,7 +77,7 @@ _rescan_test()
-> > >         echo "qgroup values before rescan: $output" >> $seqres.full
-> > >         refer=3D$(echo $output | awk '{ print $2 }')
-> > >         excl=3D$(echo $output | awk '{ print $3 }')
-> > > -       _run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
-> > > +       _run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
-> > >/dev/null
-> > >         output=3D$($BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT |
-> > grep "0/$subvolid")
-> > >         echo "qgroup values after rescan: $output" >> $seqres.full
-> > >         [ $refer -eq $(echo $output | awk '{ print $2 }') ] || \
-> > > diff --git a/tests/btrfs/028 b/tests/btrfs/028
-> > > index 98b9c8b9..4a574b8b 100755
-> > > --- a/tests/btrfs/028
-> > > +++ b/tests/btrfs/028
-> > > @@ -42,7 +42,7 @@ _scratch_mkfs >/dev/null
-> > >  _scratch_mount
-> > >
-> > >  _run_btrfs_util_prog quota enable $SCRATCH_MNT
-> > > -_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
-> > > +_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT >/dev/null
-> > >
-> > >  # Increase the probability of generating de-refer extent, and
-> > decrease
-> > >  # other.
-> > > diff --git a/tests/btrfs/057 b/tests/btrfs/057
-> > > index 82e3162e..aa1d429c 100755
-> > > --- a/tests/btrfs/057
-> > > +++ b/tests/btrfs/057
-> > > @@ -47,7 +47,7 @@ run_check $FSSTRESS_PROG -d $SCRATCH_MNT/snap1 -w
-> > -p 5 -n 1000 \
-> > >         $FSSTRESS_AVOID >&/dev/null
-> > >
-> > >  _run_btrfs_util_prog quota enable $SCRATCH_MNT
-> > > -_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
-> > > +_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT >/dev/null
-> > >
-> > >  echo "Silence is golden"
-> > >  # btrfs check will detect any qgroup number mismatch.
-> > > diff --git a/tests/btrfs/091 b/tests/btrfs/091
-> > > index 6d2a23c8..a4aeebc3 100755
-> > > --- a/tests/btrfs/091
-> > > +++ b/tests/btrfs/091
-> > > @@ -59,7 +59,7 @@ _run_btrfs_util_prog subvolume create
-> > $SCRATCH_MNT/subv2
-> > >  _run_btrfs_util_prog subvolume create $SCRATCH_MNT/subv3
-> > >
-> > >  _run_btrfs_util_prog quota enable $SCRATCH_MNT
-> > > -_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
-> > > +_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT >/dev/null
-> > >
-> > >  # if we don't support noinode_cache mount option, then we should
-> > double check
-> > >  # whether inode cache is enabled before executing the real test
-> > payload.
-> > > diff --git a/tests/btrfs/104 b/tests/btrfs/104
-> > > index f0cc67d6..d3338e35 100755
-> > > --- a/tests/btrfs/104
-> > > +++ b/tests/btrfs/104
-> > > @@ -113,7 +113,7 @@ _explode_fs_tree 1 $SCRATCH_MNT/snap2/files-
-> > snap2
-> > >  # Enable qgroups now that we have our filesystem prepared. This
-> > >  # will kick off a scan which we will have to wait for.
-> > >  _run_btrfs_util_prog quota enable $SCRATCH_MNT
-> > > -_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
-> > > +_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT >/dev/null
-> > >
-> > >  # Remount to clear cache, force everything to disk
-> > >  _scratch_cycle_mount
-> > > diff --git a/tests/btrfs/123 b/tests/btrfs/123
-> > > index 65177159..63b6d428 100755
-> > > --- a/tests/btrfs/123
-> > > +++ b/tests/btrfs/123
-> > > @@ -56,7 +56,7 @@ sync
-> > >
-> > >  # enable quota and rescan to get correct number
-> > >  _run_btrfs_util_prog quota enable $SCRATCH_MNT
-> > > -_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
-> > > +_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT >/dev/null
-> > >
-> > >  # now balance data block groups to corrupt qgroup
-> > >  _run_btrfs_balance_start -d $SCRATCH_MNT >> $seqres.full
-> > > diff --git a/tests/btrfs/126 b/tests/btrfs/126
-> > > index 8635791e..eceaabb2 100755
-> > > --- a/tests/btrfs/126
-> > > +++ b/tests/btrfs/126
-> > > @@ -41,7 +41,7 @@ _scratch_mkfs >/dev/null
-> > >  _scratch_mount "-o enospc_debug"
-> > >
-> > >  _run_btrfs_util_prog quota enable $SCRATCH_MNT
-> > > -_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
-> > > +_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT >/dev/null
-> > >  _run_btrfs_util_prog qgroup limit 512K 0/5 $SCRATCH_MNT
-> > >
-> > >  # The amount of written data may change due to different nodesize
-> > at mkfs time,
-> > > diff --git a/tests/btrfs/139 b/tests/btrfs/139
-> > > index 1b636e81..44168e2a 100755
-> > > --- a/tests/btrfs/139
-> > > +++ b/tests/btrfs/139
-> > > @@ -43,7 +43,7 @@ SUBVOL=3D$SCRATCH_MNT/subvol
-> > >
-> > >  _run_btrfs_util_prog subvolume create $SUBVOL
-> > >  _run_btrfs_util_prog quota enable $SCRATCH_MNT
-> > > -_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
-> > > +_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT >/dev/null
-> > >  _run_btrfs_util_prog qgroup limit -e 1G $SUBVOL
-> > >
-> > >
-> > > diff --git a/tests/btrfs/153 b/tests/btrfs/153
-> > > index f343da32..1f8e37e7 100755
-> > > --- a/tests/btrfs/153
-> > > +++ b/tests/btrfs/153
-> > > @@ -41,7 +41,7 @@ _scratch_mkfs >/dev/null
-> > >  _scratch_mount
-> > >
-> > >  _run_btrfs_util_prog quota enable $SCRATCH_MNT
-> > > -_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
-> > > +_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT >/dev/null
-> > >  _run_btrfs_util_prog qgroup limit 100M 0/5 $SCRATCH_MNT
-> > >
-> > >  testfile1=3D$SCRATCH_MNT/testfile1
-> > > diff --git a/tests/btrfs/193 b/tests/btrfs/193
-> > > index 16b7650c..8bdc7566 100755
-> > > --- a/tests/btrfs/193
-> > > +++ b/tests/btrfs/193
-> > > @@ -43,7 +43,7 @@ _scratch_mkfs > /dev/null
-> > >  _scratch_mount
-> > >
-> > >  $BTRFS_UTIL_PROG quota enable "$SCRATCH_MNT" > /dev/null
-> > > -$BTRFS_UTIL_PROG quota rescan -w "$SCRATCH_MNT" > /dev/null
-> > > +$BTRFS_UTIL_PROG quota rescan -w "$SCRATCH_MNT" >/dev/null
-> > >  $BTRFS_UTIL_PROG qgroup limit -e 256M "$SCRATCH_MNT"
-> > >
-> > >  # Create a file with the following layout:
-> > > diff --git a/tests/btrfs/210 b/tests/btrfs/210
-> > > index daa76a87..a9a04951 100755
-> > > --- a/tests/btrfs/210
-> > > +++ b/tests/btrfs/210
-> > > @@ -46,7 +46,7 @@ _pwrite_byte 0xcd 0 16M "$SCRATCH_MNT/src/file" >
-> > /dev/null
-> > >  # by qgroup
-> > >  sync
-> > >  $BTRFS_UTIL_PROG quota enable "$SCRATCH_MNT"
-> > > -$BTRFS_UTIL_PROG quota rescan -w "$SCRATCH_MNT"
-> > > +$BTRFS_UTIL_PROG quota rescan -w "$SCRATCH_MNT" >/dev/null
-> > >  $BTRFS_UTIL_PROG qgroup create 1/0 "$SCRATCH_MNT"
-> > >
-> > >  # Create a snapshot with qgroup inherit
-> > > --
-> > > 2.26.2
-> > >
-> >
-> >
->
-
-
---=20
-Filipe David Manana,
-
-=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
- right.=E2=80=9D
+> ---
+>  tests/generic/group | 10 +++++-----
+>  1 file changed, 5 insertions(+), 5 deletions(-)
+> 
+> diff --git a/tests/generic/group b/tests/generic/group
+> index 3d7effe6d72a..a09c81a09abc 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -39,7 +39,7 @@
+>  034 auto quick metadata log
+>  035 auto quick
+>  036 auto aio rw stress
+> -037 metadata auto quick
+> +037 auto quick attr metadata
+>  038 auto stress
+>  039 metadata auto quick log
+>  040 metadata auto quick log
+> @@ -68,7 +68,7 @@
+>  063 auto quick prealloc punch insert
+>  064 auto quick prealloc collapse insert
+>  065 metadata auto quick log
+> -066 metadata auto quick log
+> +066 auto quick attr metadata log
+>  067 auto quick mount
+>  068 other auto freeze stress
+>  069 rw udf auto quick
+> @@ -105,7 +105,7 @@
+>  100 udf auto
+>  101 auto quick metadata log
+>  102 auto rw
+> -103 auto enospc quick
+> +103 auto quick attr enospc
+>  104 auto quick metadata log
+>  105 acl auto quick
+>  106 auto quick metadata log
+> @@ -339,7 +339,7 @@
+>  334 auto clone
+>  335 auto quick metadata log
+>  336 auto quick metadata log
+> -337 auto quick metadata
+> +337 auto quick attr metadata
+>  338 auto quick rw eio
+>  339 auto dir
+>  340 auto
+> @@ -451,7 +451,7 @@
+>  446 auto quick rw punch
+>  447 auto clone
+>  448 auto quick rw seek
+> -449 auto quick acl enospc
+> +449 auto quick acl attr enospc
+>  450 auto quick rw
+>  451 auto quick rw aio
+>  452 auto quick dax
+> -- 
+> 2.25.1
+> 
