@@ -5,167 +5,116 @@ X-Spam-Level:
 X-Spam-Status: No, score=-11.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no
-	version=3.4.0
+	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B5DBEC433E2
-	for <linux-fstests@archiver.kernel.org>; Tue, 14 Jul 2020 05:08:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 63915C433E3
+	for <linux-fstests@archiver.kernel.org>; Tue, 14 Jul 2020 07:01:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 86541217D9
-	for <linux-fstests@archiver.kernel.org>; Tue, 14 Jul 2020 05:08:26 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 36790221ED
+	for <linux-fstests@archiver.kernel.org>; Tue, 14 Jul 2020 07:01:07 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="YRttWmdQ"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="E6t6RT6q"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725778AbgGNFI0 (ORCPT
+        id S1725876AbgGNHBH (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 14 Jul 2020 01:08:26 -0400
-Received: from us-smtp-1.mimecast.com ([205.139.110.61]:31353 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725306AbgGNFI0 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 14 Jul 2020 01:08:26 -0400
+        Tue, 14 Jul 2020 03:01:07 -0400
+Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:22409 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1725778AbgGNHBG (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 14 Jul 2020 03:01:06 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1594703304;
+        s=mimecast20190719; t=1594710065;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=qgO8HTJnu+5ctZ0vQFoMf+HsrcNfNflyFagdmojxzUU=;
-        b=YRttWmdQUNNevy1mvoMq4EE461KWng+X+0X83OXLqdJKNmpZtTcWruvCAvcbpsi2EB5jt/
-        D0xPCiYxDQdq5Y7PgVZqKg9KJkWiSJ1wEane4bQBajvftLail1twkKH+YHjGDpdzk7ZxXt
-        stWwyTSuKN8xdNmohOP/4JBDwkNe6DI=
+        bh=v0o6vS05dMQd9Z186F31LUjw5ChXs8ly1eNOlRWUGXc=;
+        b=E6t6RT6qwRcvikuHhccEjpSkwgCipOVx66wbFRG20Cw9V7pG8AIE0xnVESMUbw4zlrHuNB
+        Pm/Aly5PDtnglVtHa7sbu8fQyeEqLtrFqQ+3b0fKr0T7VAtLti+63LYuaJTREoLvGb8Awh
+        GUBfTU8KlXdUfwab1Qlba07ds1l4jP4=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-4-xQkAGs8NPuWGCMLZtnrBCw-1; Tue, 14 Jul 2020 01:08:19 -0400
-X-MC-Unique: xQkAGs8NPuWGCMLZtnrBCw-1
-Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+ us-mta-360-IOq-grENOSCtRE7efr8cHA-1; Tue, 14 Jul 2020 03:01:00 -0400
+X-MC-Unique: IOq-grENOSCtRE7efr8cHA-1
+Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 76A271800D42;
-        Tue, 14 Jul 2020 05:08:18 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 519241800D42;
+        Tue, 14 Jul 2020 07:00:59 +0000 (UTC)
 Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id E4DB010013C0;
-        Tue, 14 Jul 2020 05:08:17 +0000 (UTC)
-Date:   Tue, 14 Jul 2020 13:21:06 +0800
+        by smtp.corp.redhat.com (Postfix) with ESMTP id AC1E2797EF;
+        Tue, 14 Jul 2020 07:00:58 +0000 (UTC)
+Date:   Tue, 14 Jul 2020 15:13:46 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     Boris Burkov <boris@bur.io>
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH v3] generic: add a test for umount racing mount
-Message-ID: <20200714052106.GX1938@dhcp-12-102.nay.redhat.com>
-Mail-Followup-To: Boris Burkov <boris@bur.io>, fstests@vger.kernel.org,
-        linux-btrfs@vger.kernel.org
-References: <20200712113741.GW1938@dhcp-12-102.nay.redhat.com>
- <20200713204639.1271794-1-boris@bur.io>
+To:     "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc:     Eryu Guan <guaneryu@gmail.com>, fstests@vger.kernel.org,
+        xfs <linux-xfs@vger.kernel.org>
+Subject: Re: [PATCH] xfs/010,030: filter AG header CRC error warnings
+Message-ID: <20200714071346.GY1938@dhcp-12-102.nay.redhat.com>
+Mail-Followup-To: "Darrick J. Wong" <darrick.wong@oracle.com>,
+        Eryu Guan <guaneryu@gmail.com>, fstests@vger.kernel.org,
+        xfs <linux-xfs@vger.kernel.org>
+References: <20200713184930.GK7600@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20200713204639.1271794-1-boris@bur.io>
+In-Reply-To: <20200713184930.GK7600@magnolia>
 User-Agent: Mutt/1.10.1 (2018-07-13)
-X-Scanned-By: MIMEDefang 2.84 on 10.5.11.22
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Jul 13, 2020 at 01:46:39PM -0700, Boris Burkov wrote:
-> Test if dirtying many inodes (which can delay umount) then
-> unmounting and quickly mounting again causes the mount to fail.
+On Mon, Jul 13, 2020 at 11:49:30AM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
 > 
-> A race, which breaks the test in btrfs, is fixed by the patch:
-> "btrfs: fix mount failure caused by race with umount"
+> Filter out the new AG header CRC verification warnings in xfs_repair
+> since these tests were built before that existed.
 > 
-> Signed-off-by: Boris Burkov <boris@bur.io>
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 > ---
+>  tests/xfs/010 |    6 +++++-
+>  tests/xfs/030 |    2 ++
+>  2 files changed, 7 insertions(+), 1 deletion(-)
+> 
+> diff --git a/tests/xfs/010 b/tests/xfs/010
+> index c341795d..ec23507a 100755
+> --- a/tests/xfs/010
+> +++ b/tests/xfs/010
+> @@ -113,7 +113,11 @@ _check_scratch_fs
+>  # nuke the finobt root, repair will have to regenerate from the inobt
+>  _corrupt_finobt_root $SCRATCH_DEV
+>  
+> -_scratch_xfs_repair 2>&1 | sed -e '/^bad finobt block/d' | _filter_repair_lostblocks
 
-If Eryu won't tend to change dd to XFS_IO_PROG, this version is good to me:)
-
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+I think this patch is based on another patch which hasn't been merged, right?
+Due to I can't find the *sed -e '/^bad finobt block/d'* on current xfstests-dev
+master branch, which HEAD is:
+  aae8fbec  generic/270: wait for fsstress processes to be killed
 
 Thanks,
 Zorro
 
->  tests/generic/603     | 53 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/603.out |  2 ++
->  tests/generic/group   |  1 +
->  3 files changed, 56 insertions(+)
->  create mode 100755 tests/generic/603
->  create mode 100644 tests/generic/603.out
-> 
-> diff --git a/tests/generic/603 b/tests/generic/603
-> new file mode 100755
-> index 00000000..8e9a80e6
-> --- /dev/null
-> +++ b/tests/generic/603
-> @@ -0,0 +1,53 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2020 Facebook  All Rights Reserved.
-> +#
-> +# FS QA Test 603
-> +#
-> +# Evicting dirty inodes can take a long time during umount.
-> +# Check that a new mount racing with such a delayed umount succeeds.
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
+> +filter_finobt_repair() {
+> +	sed -e '/^agi has bad CRC/d' -e '/^bad finobt block/d' | _filter_repair_lostblocks
 > +}
 > +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs generic
-> +_supported_os Linux
-> +_require_scratch
-> +
-> +_scratch_mkfs > /dev/null 2>&1
-> +_scratch_mount
-> +for i in $(seq 0 500)
-> +do
-> +	dd if=/dev/zero of="$SCRATCH_MNT/$i" bs=1M count=1 > /dev/null 2>&1
-> +done
-> +_scratch_unmount &
-> +_scratch_mount
-> +wait
-> +
-> +echo "Silence is golden"
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/603.out b/tests/generic/603.out
-> new file mode 100644
-> index 00000000..6810da89
-> --- /dev/null
-> +++ b/tests/generic/603.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 603
-> +Silence is golden
-> diff --git a/tests/generic/group b/tests/generic/group
-> index d9ab9a31..c0ace35b 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -605,3 +605,4 @@
->  600 auto quick quota
->  601 auto quick quota
->  602 auto quick encrypt
-> +603 auto quick
-> -- 
-> 2.24.1
+> +_scratch_xfs_repair 2>&1 | filter_finobt_repair
+>  
+>  status=0
+>  exit
+> diff --git a/tests/xfs/030 b/tests/xfs/030
+> index 8f95331a..a270e36c 100755
+> --- a/tests/xfs/030
+> +++ b/tests/xfs/030
+> @@ -43,6 +43,8 @@ _check_ag()
+>  			    -e '/^bad agbno AGBNO for rmapbt/d' \
+>  			    -e '/^bad agbno AGBNO for refcntbt/d' \
+>  			    -e '/^bad inobt block count/d' \
+> +			    -e '/^agf has bad CRC/d' \
+> +			    -e '/^agi has bad CRC/d' \
+>  			    -e '/^bad finobt block count/d' \
+>  			    -e '/^Missing reverse-mapping record.*/d' \
+>  			    -e '/^unknown block state, ag AGNO, block.*/d'
 > 
 
