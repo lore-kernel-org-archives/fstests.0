@@ -7,46 +7,46 @@ X-Spam-Status: No, score=-13.0 required=3.0 tests=BAYES_00,
 	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2AA43C433E8
-	for <linux-fstests@archiver.kernel.org>; Tue, 14 Jul 2020 09:47:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 841C0C433E2
+	for <linux-fstests@archiver.kernel.org>; Tue, 14 Jul 2020 09:47:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 10AF821927
-	for <linux-fstests@archiver.kernel.org>; Tue, 14 Jul 2020 09:47:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6447621D7D
+	for <linux-fstests@archiver.kernel.org>; Tue, 14 Jul 2020 09:47:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725884AbgGNJrg (ORCPT
+        id S1725952AbgGNJre (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 14 Jul 2020 05:47:36 -0400
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:64667 "EHLO
+        Tue, 14 Jul 2020 05:47:34 -0400
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:64669 "EHLO
         heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726354AbgGNJrg (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 14 Jul 2020 05:47:36 -0400
+        with ESMTP id S1725955AbgGNJrd (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 14 Jul 2020 05:47:33 -0400
 X-IronPort-AV: E=Sophos;i="5.75,350,1589212800"; 
-   d="scan'208";a="96311045"
+   d="scan'208";a="96311041"
 Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
-  by heian.cn.fujitsu.com with ESMTP; 14 Jul 2020 17:47:32 +0800
-Received: from G08CNEXMBPEKD06.g08.fujitsu.local (unknown [10.167.33.206])
-        by cn.fujitsu.com (Postfix) with ESMTP id E38694CE3F17;
-        Tue, 14 Jul 2020 17:47:28 +0800 (CST)
+  by heian.cn.fujitsu.com with ESMTP; 14 Jul 2020 17:47:26 +0800
+Received: from G08CNEXMBPEKD05.g08.fujitsu.local (unknown [10.167.33.204])
+        by cn.fujitsu.com (Postfix) with ESMTP id 84E7F4CE506F;
+        Tue, 14 Jul 2020 17:47:25 +0800 (CST)
 Received: from G08CNEXCHPEKD05.g08.fujitsu.local (10.167.33.203) by
- G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206) with Microsoft SMTP Server
- (TLS) id 15.0.1497.2; Tue, 14 Jul 2020 17:47:29 +0800
+ G08CNEXMBPEKD05.g08.fujitsu.local (10.167.33.204) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.2; Tue, 14 Jul 2020 17:47:24 +0800
 Received: from Fedora-30.g08.fujitsu.local (10.167.220.106) by
  G08CNEXCHPEKD05.g08.fujitsu.local (10.167.33.209) with Microsoft SMTP Server
- id 15.0.1497.2 via Frontend Transport; Tue, 14 Jul 2020 17:47:26 +0800
+ id 15.0.1497.2 via Frontend Transport; Tue, 14 Jul 2020 17:47:24 +0800
 From:   Xiao Yang <yangx.jy@cn.fujitsu.com>
 To:     <fstests@vger.kernel.org>
 CC:     <darrick.wong@oracle.com>, <ira.weiny@intel.com>,
         Xiao Yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH v6 4/7] generic/413, xfs/260: Improve format operation for PMD fault testing
-Date:   Tue, 14 Jul 2020 17:40:06 +0800
-Message-ID: <20200714094009.8654-5-yangx.jy@cn.fujitsu.com>
+Subject: [PATCH v6 3/7] generic/223: Don't clear all mkfs options for _scratch_mkfs_geom() roughly
+Date:   Tue, 14 Jul 2020 17:40:05 +0800
+Message-ID: <20200714094009.8654-4-yangx.jy@cn.fujitsu.com>
 X-Mailer: git-send-email 2.21.0
 In-Reply-To: <20200714094009.8654-1-yangx.jy@cn.fujitsu.com>
 References: <20200714094009.8654-1-yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7BIT
 Content-Type:   text/plain; charset=US-ASCII
-X-yoursite-MailScanner-ID: E38694CE3F17.A9437
+X-yoursite-MailScanner-ID: 84E7F4CE506F.ABCA1
 X-yoursite-MailScanner: Found to be clean
 X-yoursite-MailScanner-From: yangx.jy@cn.fujitsu.com
 Sender: fstests-owner@vger.kernel.org
@@ -54,76 +54,54 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-1) Simple code and fix the wrong value of stripe_width by _scratch_mkfs_geom().
-2) Get hugepage size by _get_hugepagesize() and replace fixed 2M with
-   hugepage size because hugepage size/PMD_SIZE is not 2M on some
-   arches(e.g. hugepage size/PMD_SIZE is 512M on arm64).
-3) For debugging, redirect the output of mkfs to $seqres.full.
+ext4 can accept the last one if the same mkfs options are passed but xfs cannot
+accept the same mkfs options and reports "xxx option is respecified" error.  I
+prefer to override the same mkfs option which is defined in MKFS_OPTION so that
+we can have a chance to pass other mkfs options to _scratch_mkfs_geom().
 
 Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
 ---
- common/rc         | 10 ++++++++++
- tests/generic/413 | 10 ++--------
- tests/xfs/260     |  4 ++--
- 3 files changed, 14 insertions(+), 10 deletions(-)
+ common/rc         | 14 +++++++++++++-
+ tests/generic/223 |  1 -
+ 2 files changed, 13 insertions(+), 2 deletions(-)
 
 diff --git a/common/rc b/common/rc
-index 567cf83b..b6a48241 100644
+index 6c908f2e..567cf83b 100644
 --- a/common/rc
 +++ b/common/rc
-@@ -170,6 +170,16 @@ _get_filesize()
-     stat -c %s "$1"
- }
+@@ -1051,7 +1051,19 @@ _scratch_mkfs_geom()
  
-+# Get hugepagesize in bytes
-+_get_hugepagesize()
-+{
-+	local hugepgsz=$(awk '/Hugepagesize/ {print $2}' /proc/meminfo)
-+	# Call _notrun if $hugepgsz is not a number
-+	echo "$hugepgsz" | egrep -q ^[0-9]+$ || \
-+		_notrun "Cannot get the value of Hugepagesize"
-+	echo $((hugepgsz * 1024))
-+}
+     case $FSTYP in
+     xfs)
+-	MKFS_OPTIONS+=" -b size=$blocksize, -d su=$sunit_bytes,sw=$swidth_mult"
++	if echo "$MKFS_OPTIONS" | egrep -q "b?size="; then
++		MKFS_OPTIONS=$(echo "$MKFS_OPTIONS" | sed -r "s/(b?size=)[0-9]+/\1$blocksize/")
++	else
++		MKFS_OPTIONS+=" -b size=$blocksize"
++	fi
 +
- _mount()
- {
-     $MOUNT_PROG `_mount_ops_filter $*`
-diff --git a/tests/generic/413 b/tests/generic/413
-index 19e1b926..dfe2912b 100755
---- a/tests/generic/413
-+++ b/tests/generic/413
-@@ -111,14 +111,8 @@ do_tests()
- 	t_mmap_dio_dax $((64 * 1024 * 1024))
- }
++	if echo "$MKFS_OPTIONS" | egrep -q "(su|sunit|sw|swidth)="; then
++		MKFS_OPTIONS=$(echo "$MKFS_OPTIONS" | sed -r \
++			-e "s/(su|sunit)=[0-9kmg]+/su=$sunit_bytes/" \
++			-e "s/(sw|swidth)=[0-9kmg]+/sw=$swidth_mult/")
++	else
++		MKFS_OPTIONS+=" -d su=$sunit_bytes,sw=$swidth_mult"
++	fi
+ 	;;
+     ext4|ext4dev)
+ 	MKFS_OPTIONS+=" -b $blocksize -E stride=$sunit_blocks,stripe_width=$swidth_blocks"
+diff --git a/tests/generic/223 b/tests/generic/223
+index 6cfd00dd..ba7c9a44 100755
+--- a/tests/generic/223
++++ b/tests/generic/223
+@@ -41,7 +41,6 @@ for SUNIT_K in 8 16 32 64 128; do
+ 	let SUNIT_BLOCKS=$SUNIT_BYTES/$BLOCKSIZE
  
--# make fs 2Mb aligned for PMD fault testing
--mkfs_opts=""
--if [ "$FSTYP" == "ext4" ]; then
--	mkfs_opts="-E stride=512,stripe_width=1"
--elif [ "$FSTYP" == "xfs" ]; then
--	mkfs_opts="-d su=2m,sw=1"
--fi
--_scratch_mkfs "$mkfs_opts" > /dev/null 2>&1
-+# make fs aligned for PMD fault testing
-+_scratch_mkfs_geom $(_get_hugepagesize) 1 >> $seqres.full 2>&1
+ 	echo "=== mkfs with su $SUNIT_BLOCKS blocks x 4 ==="
+-	export MKFS_OPTIONS=""
+ 	_scratch_mkfs_geom $SUNIT_BYTES 4 $BLOCKSIZE >> $seqres.full 2>&1
+ 	_scratch_mount
  
- # mount SCRATCH_DEV with dax option, TEST_DEV not
- export MOUNT_OPTIONS=""
-diff --git a/tests/xfs/260 b/tests/xfs/260
-index bcdc6041..81b42f01 100755
---- a/tests/xfs/260
-+++ b/tests/xfs/260
-@@ -121,8 +121,8 @@ do_tests()
- 	t_dax_flag_mmap_dio $((64 * 1024 * 1024))
- }
- 
--# make xfs 2Mb aligned for PMD fault testing
--_scratch_mkfs "-d su=2m,sw=1" > /dev/null 2>&1
-+# make xfs aligned for PMD fault testing
-+_scratch_mkfs_geom $(_get_hugepagesize) 1 >> $seqres.full 2>&1
- 
- # mount with dax option
- _scratch_mount "-o dax"
 -- 
 2.21.0
 
