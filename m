@@ -2,119 +2,132 @@ Return-Path: <SRS0=sm2X=AZ=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.5 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 63915C433E3
-	for <linux-fstests@archiver.kernel.org>; Tue, 14 Jul 2020 07:01:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BC33FC433E2
+	for <linux-fstests@archiver.kernel.org>; Tue, 14 Jul 2020 07:23:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 36790221ED
-	for <linux-fstests@archiver.kernel.org>; Tue, 14 Jul 2020 07:01:07 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="E6t6RT6q"
+	by mail.kernel.org (Postfix) with ESMTP id A0616206F0
+	for <linux-fstests@archiver.kernel.org>; Tue, 14 Jul 2020 07:23:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725876AbgGNHBH (ORCPT
+        id S1725945AbgGNHXo (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 14 Jul 2020 03:01:07 -0400
-Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:22409 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1725778AbgGNHBG (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 14 Jul 2020 03:01:06 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1594710065;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=v0o6vS05dMQd9Z186F31LUjw5ChXs8ly1eNOlRWUGXc=;
-        b=E6t6RT6qwRcvikuHhccEjpSkwgCipOVx66wbFRG20Cw9V7pG8AIE0xnVESMUbw4zlrHuNB
-        Pm/Aly5PDtnglVtHa7sbu8fQyeEqLtrFqQ+3b0fKr0T7VAtLti+63LYuaJTREoLvGb8Awh
-        GUBfTU8KlXdUfwab1Qlba07ds1l4jP4=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-360-IOq-grENOSCtRE7efr8cHA-1; Tue, 14 Jul 2020 03:01:00 -0400
-X-MC-Unique: IOq-grENOSCtRE7efr8cHA-1
-Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 519241800D42;
-        Tue, 14 Jul 2020 07:00:59 +0000 (UTC)
-Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id AC1E2797EF;
-        Tue, 14 Jul 2020 07:00:58 +0000 (UTC)
-Date:   Tue, 14 Jul 2020 15:13:46 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc:     Eryu Guan <guaneryu@gmail.com>, fstests@vger.kernel.org,
-        xfs <linux-xfs@vger.kernel.org>
-Subject: Re: [PATCH] xfs/010,030: filter AG header CRC error warnings
-Message-ID: <20200714071346.GY1938@dhcp-12-102.nay.redhat.com>
-Mail-Followup-To: "Darrick J. Wong" <darrick.wong@oracle.com>,
-        Eryu Guan <guaneryu@gmail.com>, fstests@vger.kernel.org,
-        xfs <linux-xfs@vger.kernel.org>
-References: <20200713184930.GK7600@magnolia>
+        Tue, 14 Jul 2020 03:23:44 -0400
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:36877 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1725925AbgGNHXo (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 14 Jul 2020 03:23:44 -0400
+X-IronPort-AV: E=Sophos;i="5.75,350,1589212800"; 
+   d="scan'208";a="96303384"
+Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
+  by heian.cn.fujitsu.com with ESMTP; 14 Jul 2020 15:23:36 +0800
+Received: from G08CNEXMBPEKD06.g08.fujitsu.local (unknown [10.167.33.206])
+        by cn.fujitsu.com (Postfix) with ESMTP id 03ECA4CE5059;
+        Tue, 14 Jul 2020 15:23:32 +0800 (CST)
+Received: from [10.167.220.69] (10.167.220.69) by
+ G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.2; Tue, 14 Jul 2020 15:23:32 +0800
+Message-ID: <5F0D5D72.5090006@cn.fujitsu.com>
+Date:   Tue, 14 Jul 2020 15:23:30 +0800
+From:   Xiao Yang <yangx.jy@cn.fujitsu.com>
+User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.2; zh-CN; rv:1.9.2.18) Gecko/20110616 Thunderbird/3.1.11
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200713184930.GK7600@magnolia>
-User-Agent: Mutt/1.10.1 (2018-07-13)
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
+To:     Xiao Yang <yangx.jy@cn.fujitsu.com>
+CC:     <fstests@vger.kernel.org>, <darrick.wong@oracle.com>,
+        <ira.weiny@intel.com>
+Subject: Re: [PATCH v5 1/8] common/rc: Introduce new helpers for DAX mount
+ options and FS_XFLAG_DAX
+References: <20200709094917.13923-1-yangx.jy@cn.fujitsu.com> <20200709094917.13923-2-yangx.jy@cn.fujitsu.com>
+In-Reply-To: <20200709094917.13923-2-yangx.jy@cn.fujitsu.com>
+Content-Type: text/plain; charset="GB2312"
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.167.220.69]
+X-ClientProxiedBy: G08CNEXCHPEKD06.g08.fujitsu.local (10.167.33.205) To
+ G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206)
+X-yoursite-MailScanner-ID: 03ECA4CE5059.AD772
+X-yoursite-MailScanner: Found to be clean
+X-yoursite-MailScanner-From: yangx.jy@cn.fujitsu.com
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Jul 13, 2020 at 11:49:30AM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <darrick.wong@oracle.com>
-> 
-> Filter out the new AG header CRC verification warnings in xfs_repair
-> since these tests were built before that existed.
-> 
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+On 2020/7/9 17:49, Xiao Yang wrote:
+> 1) _require_scratch_dax_mountopt() checks both old and new DAX mount option
+> 2) _require_dax_iflag() checks FS_XFLAG_DAX
+>
+> Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+> Reviewed-by: Ira Weiny <ira.weiny@intel.com>
 > ---
->  tests/xfs/010 |    6 +++++-
->  tests/xfs/030 |    2 ++
->  2 files changed, 7 insertions(+), 1 deletion(-)
-> 
-> diff --git a/tests/xfs/010 b/tests/xfs/010
-> index c341795d..ec23507a 100755
-> --- a/tests/xfs/010
-> +++ b/tests/xfs/010
-> @@ -113,7 +113,11 @@ _check_scratch_fs
->  # nuke the finobt root, repair will have to regenerate from the inobt
->  _corrupt_finobt_root $SCRATCH_DEV
+>
+> V4->V5:
+> 1) Rename _require_scratch_dax_iflag to _require_dax_iflag
+> 2) Redirect the output of _try_scratch_mount to /dev/null
+>
+>  common/rc | 35 +++++++++++++++++++++++++++++++++++
+>  1 file changed, 35 insertions(+)
+>
+> diff --git a/common/rc b/common/rc
+> index f17b19f2..498ce230 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -3188,6 +3188,41 @@ _require_scratch_dax()
+>  	_scratch_unmount
+>  }
 >  
-> -_scratch_xfs_repair 2>&1 | sed -e '/^bad finobt block/d' | _filter_repair_lostblocks
+> +_require_scratch_dax_mountopt()
+> +{
+> +	local mountopt=$1
+> +	local output
+> +
+> +	_require_scratch
+> +	_scratch_mkfs > /dev/null 2>&1
+> +	_try_scratch_mount "-o $mountopt" > /dev/null 2>&1 || \
+> +		_notrun "mount $SCRATCH_DEV with $mountopt failed"
+> +
+> +	output=$(_fs_options $SCRATCH_DEV)
+> +
+> +	# For new dax mount option, /proc/mounts shows different outputs if we
+> +	# mount with -o dax=inode on ext4 and xfs so skip checking it.
+> +	# /proc/mounts shows 'dax=inode' on ext4 but shows nothing on xfs.
+> +	if [ "$mountopt" != "dax=inode" ]; then
+> +		echo $output | grep -qw "$mountopt" || \
+> +			_notrun "$SCRATCH_DEV $FSTYP does not support -o $mountopt"
+> +	fi
+> +
+> +	# For new dax mount option, /proc/mounts shows "dax=never" if we
+> +	# mount with -o dax on xfs and underlying device doesn't support dax.
+> +	if [ "$mountopt" = "dax" ]; then
+> +		echo $output | grep -qw "dax=never" && \
+> +			_notrun "$SCRATCH_DEV $FSTYP does not support -o $mountopt"
+> +	fi
+> +
+> +	_scratch_unmount
+> +}
+Hi Darrick, Ira
 
-I think this patch is based on another patch which hasn't been merged, right?
-Due to I can't find the *sed -e '/^bad finobt block/d'* on current xfstests-dev
-master branch, which HEAD is:
-  aae8fbec  generic/270: wait for fsstress processes to be killed
+I wonder if we just need to check two dax options(i.e. old 'dax' option
+and new 'dax=always' option)
+because of the following reasons:
+1) we cannot detect if underlying device supports dax by mounting
+dax=inode or dax=never.
+2) dax=always, dax=inode, dax=never are always introduced together on
+all distros.
 
-Thanks,
-Zorro
-
-> +filter_finobt_repair() {
-> +	sed -e '/^agi has bad CRC/d' -e '/^bad finobt block/d' | _filter_repair_lostblocks
+Best Regards,
+Xiao Yang
+> +
+> +_require_dax_iflag()
+> +{
+> +	_require_xfs_io_command "chattr" "x"
 > +}
 > +
-> +_scratch_xfs_repair 2>&1 | filter_finobt_repair
->  
->  status=0
->  exit
-> diff --git a/tests/xfs/030 b/tests/xfs/030
-> index 8f95331a..a270e36c 100755
-> --- a/tests/xfs/030
-> +++ b/tests/xfs/030
-> @@ -43,6 +43,8 @@ _check_ag()
->  			    -e '/^bad agbno AGBNO for rmapbt/d' \
->  			    -e '/^bad agbno AGBNO for refcntbt/d' \
->  			    -e '/^bad inobt block count/d' \
-> +			    -e '/^agf has bad CRC/d' \
-> +			    -e '/^agi has bad CRC/d' \
->  			    -e '/^bad finobt block count/d' \
->  			    -e '/^Missing reverse-mapping record.*/d' \
->  			    -e '/^unknown block state, ag AGNO, block.*/d'
-> 
+>  # Does norecovery support by this fs?
+>  _require_norecovery()
+>  {
+
+
 
