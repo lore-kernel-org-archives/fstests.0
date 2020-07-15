@@ -4,34 +4,34 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-11.5 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
-	autolearn_force=no version=3.4.0
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 208B0C433DF
-	for <linux-fstests@archiver.kernel.org>; Wed, 15 Jul 2020 08:14:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 78750C433DF
+	for <linux-fstests@archiver.kernel.org>; Wed, 15 Jul 2020 09:45:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0C0CB20720
-	for <linux-fstests@archiver.kernel.org>; Wed, 15 Jul 2020 08:14:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5F4FF206E9
+	for <linux-fstests@archiver.kernel.org>; Wed, 15 Jul 2020 09:45:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729594AbgGOIKO (ORCPT
+        id S1730755AbgGOJpB (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 15 Jul 2020 04:10:14 -0400
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:47053 "EHLO
+        Wed, 15 Jul 2020 05:45:01 -0400
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:20220 "EHLO
         heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1729592AbgGOIKO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 15 Jul 2020 04:10:14 -0400
+        with ESMTP id S1729592AbgGOJpA (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 15 Jul 2020 05:45:00 -0400
 X-IronPort-AV: E=Sophos;i="5.75,354,1589212800"; 
-   d="scan'208";a="96377666"
+   d="scan'208";a="96384620"
 Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
-  by heian.cn.fujitsu.com with ESMTP; 15 Jul 2020 16:10:11 +0800
+  by heian.cn.fujitsu.com with ESMTP; 15 Jul 2020 17:44:56 +0800
 Received: from G08CNEXMBPEKD06.g08.fujitsu.local (unknown [10.167.33.206])
-        by cn.fujitsu.com (Postfix) with ESMTP id 66BA14CE3F17;
-        Wed, 15 Jul 2020 16:10:10 +0800 (CST)
+        by cn.fujitsu.com (Postfix) with ESMTP id C20454CE4BDF;
+        Wed, 15 Jul 2020 17:44:54 +0800 (CST)
 Received: from [10.167.220.69] (10.167.220.69) by
  G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206) with Microsoft SMTP Server
- (TLS) id 15.0.1497.2; Wed, 15 Jul 2020 16:10:11 +0800
-Message-ID: <5F0EB9E1.5050605@cn.fujitsu.com>
-Date:   Wed, 15 Jul 2020 16:10:09 +0800
+ (TLS) id 15.0.1497.2; Wed, 15 Jul 2020 17:44:56 +0800
+Message-ID: <5F0ED015.5090707@cn.fujitsu.com>
+Date:   Wed, 15 Jul 2020 17:44:53 +0800
 From:   Xiao Yang <yangx.jy@cn.fujitsu.com>
 User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.2; zh-CN; rv:1.9.2.18) Gecko/20110616 Thunderbird/3.1.11
 MIME-Version: 1.0
@@ -46,7 +46,7 @@ Content-Transfer-Encoding: 7bit
 X-Originating-IP: [10.167.220.69]
 X-ClientProxiedBy: G08CNEXCHPEKD06.g08.fujitsu.local (10.167.33.205) To
  G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206)
-X-yoursite-MailScanner-ID: 66BA14CE3F17.AAE2A
+X-yoursite-MailScanner-ID: C20454CE4BDF.ACCBD
 X-yoursite-MailScanner: Found to be clean
 X-yoursite-MailScanner-From: yangx.jy@cn.fujitsu.com
 Sender: fstests-owner@vger.kernel.org
@@ -192,6 +192,24 @@ On 2020/7/15 13:39, Xiao Yang wrote:
 > 1) a is the parent directory of b and b is the parent directory of c
 > 2) a and c have xflag, and b doesn't have xflag
 > 3) touch many directories/files in b and c
+Hi Ira,
+
+Sorry for misreading your comment, above is the difference between 3 and 4.
+The correct one is:
+2 constructs the following steps:
+1) a is the parent directory of b
+2) a has xflag and b doesn't have xflag
+3) touch many directories/files in a and b
+
+3 constructs the following steps:
+1) a is the parent directory of b
+2) a doesn't have xflag and b has xflag
+3) touch many directories/files in a and b
+
+Do you think they are same? I can remove one if you think so.
+
+Best Regards,
+Xiao Yang
 >
 > Do you think they are same? I can remove one if you think so.
 >
@@ -275,51 +293,6 @@ On 2020/7/15 13:39, Xiao Yang wrote:
 > used by other tests in future.
 > I also consider to merge the function into 
 > _require_scratch_dax_mountopt().
-For this comment, I try to merge the function into 
-_require_scratch_dax_mountopt(), as below:
-----------------------------------------------------------------------------------------------------------------
-+# Only accept dax/dax=always mount option becasue dax=always, dax=inode
-+# and dax=never are always introduced together.
-+# Return 0 if filesystem/device supports the specified dax option.
-+# Return 1 if mount fails with the specified dax option.
-+# Return 2 if /proc/mounts shows wrong dax option.
-+# Check new dax=inode, dax=always or dax=never option by passing 
-"dax=always".
-+# Check old dax or new dax=always by passing "dax".
-+_check_scratch_dax_mountopt()
-+{
-+       local option=$1
-+
-+       echo "$option" | egrep -q "dax(=always|$)" || \
-+               _notrun "invalid $option, only accept dax/dax=always"
-+
-+       _require_scratch
-+       _scratch_mkfs > /dev/null 2>&1
-+
-+       _try_scratch_mount "-o $option" > /dev/null 2>&1 || return 1
-+
-+       if _fs_options $SCRATCH_DEV | egrep -q "dax(=always|,|$)"; then
-+               _scratch_unmount
-+               return 0
-+       else
-+               _scratch_unmount
-+               return 2
-+       fi
-+}
-+
-+# Throw notrun if _check_scratch_dax_mountopt() returns a non-zero value.
-+_require_scratch_dax_mountopt()
-+{
-+       local mountopt=$1
-+
-+       _check_scratch_dax_mountopt "$mountopt"
-+       local res=$?
-+
-+       [ $res -eq 1 ] && _notrun "mount $SCRATCH_DEV with $mountopt failed"
-+       [ $res -eq 2 ] && _notrun "$SCRATCH_DEV $FSTYP does not support 
--o $mountopt"
-+}
------------------------------------------------------------------------------------------------------------
 >
 >>> +
 >>> +do_tests()
@@ -348,25 +321,6 @@ _require_scratch_dax_mountopt(), as below:
 > This test is designed to verify the inheritance behavior of 
 > FS_XFLAG_DAX(not related to S_DAX)
 > so I think it is fine for both old dax and new dax to run the test.
-For this comment, I try to update it, as below:
--------------------------------------------------------------------------
-+do_tests()
-+{
-+       # Mount without dax option
-+       do_xflag_tests
-+
-+       # Mount with 'dax' or 'dax=always' option if fs supports it.
-+       _check_scratch_dax_mountopt "dax" && do_xflag_tests "-o dax"
-+
-+       # Mount with 'dax=inode' and 'dax=never' options if fs supports 
-them.
-+       if _check_scratch_dax_mountopt "dax=always"; then
-+               for dax_option in "dax=inode" "dax=never"; do
-+                       do_xflag_tests "-o $dax_option"
-+               done
-+       fi
-+}
--------------------------------------------------------------------------
 >
 > Best Regards,
 > Xiao Yang
