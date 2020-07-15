@@ -3,138 +3,138 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
 X-Spam-Status: No, score=-11.5 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2BCF1C433E2
-	for <linux-fstests@archiver.kernel.org>; Wed, 15 Jul 2020 02:54:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C32CBC433E1
+	for <linux-fstests@archiver.kernel.org>; Wed, 15 Jul 2020 03:12:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 141C320663
-	for <linux-fstests@archiver.kernel.org>; Wed, 15 Jul 2020 02:54:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A8C3F2070E
+	for <linux-fstests@archiver.kernel.org>; Wed, 15 Jul 2020 03:12:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727101AbgGOCyF (ORCPT
+        id S1726852AbgGODMm (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 14 Jul 2020 22:54:05 -0400
-Received: from mga18.intel.com ([134.134.136.126]:30139 "EHLO mga18.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726971AbgGOCyF (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 14 Jul 2020 22:54:05 -0400
-IronPort-SDR: XZoDVFQE0iMd69Gbpglf01lbFfJzkdPmEt1P9vMRYXogUxvKDVNBf9yRR3byL981htb0rCyRo6
- kjQ2WHmlgESA==
-X-IronPort-AV: E=McAfee;i="6000,8403,9682"; a="136526567"
-X-IronPort-AV: E=Sophos;i="5.75,353,1589266800"; 
-   d="scan'208";a="136526567"
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from orsmga001.jf.intel.com ([10.7.209.18])
-  by orsmga106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Jul 2020 19:54:04 -0700
-IronPort-SDR: Y0YlXc+ucGE2i09XG3CykxqSN3jRISu9SyCetmnsgtC+IYcL0Yvi5t+AvYI/wGAPj5018pa3/9
- CrbxGUWWwQtw==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.75,353,1589266800"; 
-   d="scan'208";a="360572632"
-Received: from iweiny-desk2.sc.intel.com ([10.3.52.147])
-  by orsmga001.jf.intel.com with ESMTP; 14 Jul 2020 19:54:04 -0700
-Date:   Tue, 14 Jul 2020 19:54:04 -0700
-From:   Ira Weiny <ira.weiny@intel.com>
-To:     Xiao Yang <yangx.jy@cn.fujitsu.com>
-Cc:     fstests@vger.kernel.org, darrick.wong@oracle.com
-Subject: Re: [PATCH] common/dmlogwrites: Update _require_log_writes_dax()
-Message-ID: <20200715025404.GJ3008823@iweiny-DESK2.sc.intel.com>
-References: <20200714110150.11186-1-yangx.jy@cn.fujitsu.com>
+        Tue, 14 Jul 2020 23:12:42 -0400
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:64540 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726624AbgGODMm (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 14 Jul 2020 23:12:42 -0400
+X-IronPort-AV: E=Sophos;i="5.75,353,1589212800"; 
+   d="scan'208";a="96360630"
+Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
+  by heian.cn.fujitsu.com with ESMTP; 15 Jul 2020 11:12:39 +0800
+Received: from G08CNEXMBPEKD06.g08.fujitsu.local (unknown [10.167.33.206])
+        by cn.fujitsu.com (Postfix) with ESMTP id 7AC1A4CE5CEF;
+        Wed, 15 Jul 2020 11:12:39 +0800 (CST)
+Received: from [10.167.220.69] (10.167.220.69) by
+ G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.2; Wed, 15 Jul 2020 11:12:40 +0800
+Message-ID: <5F0E7424.2090709@cn.fujitsu.com>
+Date:   Wed, 15 Jul 2020 11:12:36 +0800
+From:   Xiao Yang <yangx.jy@cn.fujitsu.com>
+User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.2; zh-CN; rv:1.9.2.18) Gecko/20110616 Thunderbird/3.1.11
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200714110150.11186-1-yangx.jy@cn.fujitsu.com>
-User-Agent: Mutt/1.11.1 (2018-12-01)
+To:     Ira Weiny <ira.weiny@intel.com>
+CC:     <fstests@vger.kernel.org>, <darrick.wong@oracle.com>
+Subject: Re: [PATCH v6 3/7] generic/223: Don't clear all mkfs options for
+ _scratch_mkfs_geom() roughly
+References: <20200714094009.8654-1-yangx.jy@cn.fujitsu.com> <20200714094009.8654-4-yangx.jy@cn.fujitsu.com> <20200715023117.GH3008823@iweiny-DESK2.sc.intel.com>
+In-Reply-To: <20200715023117.GH3008823@iweiny-DESK2.sc.intel.com>
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.167.220.69]
+X-ClientProxiedBy: G08CNEXCHPEKD06.g08.fujitsu.local (10.167.33.205) To
+ G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206)
+X-yoursite-MailScanner-ID: 7AC1A4CE5CEF.AE88A
+X-yoursite-MailScanner: Found to be clean
+X-yoursite-MailScanner-From: yangx.jy@cn.fujitsu.com
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Jul 14, 2020 at 07:01:50PM +0800, Xiao Yang wrote:
-> 1) Rename _require_log_writes_dax to _require_log_writes_dax_mountopt
-> 2) Make _require_log_writes_dax_mountopt accept old and new dax option
-> 3) generic/470 takes use of _require_log_writes_dax_mountopt
-> 
-> Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+On 2020/7/15 10:31, Ira Weiny wrote:
+> On Tue, Jul 14, 2020 at 05:40:05PM +0800, Xiao Yang wrote:
+>> ext4 can accept the last one if the same mkfs options are passed but xfs cannot
+> I'm having trouble parsing this commit message.  What does 'last one' refer to?
+>
+>> accept the same mkfs options and reports "xxx option is respecified" error.
+> Ok I think I understand now.  Some FS's (XFS) do not accept an option more than
+> once.  So we can't just blindly add options to the end of the MKFS_OPTIONS.  Is
+> that correct?
+Hi Ira,
 
-Looks reasonable at this time.
+Correct.
+>> I
+>> prefer to override the same mkfs option which is defined in MKFS_OPTION so that
+>> we can have a chance to pass other mkfs options to _scratch_mkfs_geom().
+> Instead the patch parses the current option string and replaces the value if
+> the option is already there.  This allows us to specify MKFS_OPTIONS to
+> generic/223.
+Right. :-)
 
-Reviewed-by: Ira Weiny <ira.weiny@intel.com>
-
-At some point I think we want to deprecate the '-o dax' option in favor of '-o
-dax=always'.  I'm not sure when, how, or even if, that can be done so for now
-this looks good.
-
-Finally, I would really like to Thank you for doing these.  I had 1 big test
-which I was trying to clean up to submit but I've not had time and my
-understanding of xfstests is limited which made it slow going.  So I'd like to
-offer a big Thank You!  :-D
+XFS_MKFS_OPTIONS/MKFS_OPTIONS can be used to specify some custom options by user,
+so I don't want to clear it blindly.
 
 Thanks,
-Ira
+Xiao Yang
+> I think the code is reasonable although my sed skills are not good enough to
+> tell for sure...  ;-)
+>
+> Ira
+>
+>> Signed-off-by: Xiao Yang<yangx.jy@cn.fujitsu.com>
+>> ---
+>>   common/rc         | 14 +++++++++++++-
+>>   tests/generic/223 |  1 -
+>>   2 files changed, 13 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/common/rc b/common/rc
+>> index 6c908f2e..567cf83b 100644
+>> --- a/common/rc
+>> +++ b/common/rc
+>> @@ -1051,7 +1051,19 @@ _scratch_mkfs_geom()
+>>
+>>       case $FSTYP in
+>>       xfs)
+>> -	MKFS_OPTIONS+=" -b size=$blocksize, -d su=$sunit_bytes,sw=$swidth_mult"
+>> +	if echo "$MKFS_OPTIONS" | egrep -q "b?size="; then
+>> +		MKFS_OPTIONS=$(echo "$MKFS_OPTIONS" | sed -r "s/(b?size=)[0-9]+/\1$blocksize/")
+>> +	else
+>> +		MKFS_OPTIONS+=" -b size=$blocksize"
+>> +	fi
+>> +
+>> +	if echo "$MKFS_OPTIONS" | egrep -q "(su|sunit|sw|swidth)="; then
+>> +		MKFS_OPTIONS=$(echo "$MKFS_OPTIONS" | sed -r \
+>> +			-e "s/(su|sunit)=[0-9kmg]+/su=$sunit_bytes/" \
+>> +			-e "s/(sw|swidth)=[0-9kmg]+/sw=$swidth_mult/")
+>> +	else
+>> +		MKFS_OPTIONS+=" -d su=$sunit_bytes,sw=$swidth_mult"
+>> +	fi
+>>   	;;
+>>       ext4|ext4dev)
+>>   	MKFS_OPTIONS+=" -b $blocksize -E stride=$sunit_blocks,stripe_width=$swidth_blocks"
+>> diff --git a/tests/generic/223 b/tests/generic/223
+>> index 6cfd00dd..ba7c9a44 100755
+>> --- a/tests/generic/223
+>> +++ b/tests/generic/223
+>> @@ -41,7 +41,6 @@ for SUNIT_K in 8 16 32 64 128; do
+>>   	let SUNIT_BLOCKS=$SUNIT_BYTES/$BLOCKSIZE
+>>
+>>   	echo "=== mkfs with su $SUNIT_BLOCKS blocks x 4 ==="
+>> -	export MKFS_OPTIONS=""
+>>   	_scratch_mkfs_geom $SUNIT_BYTES 4 $BLOCKSIZE>>  $seqres.full 2>&1
+>>   	_scratch_mount
+>>
+>> -- 
+>> 2.21.0
+>>
+>>
+>>
+>
+> .
+>
 
-> ---
->  common/dmlogwrites | 15 ++++++++++-----
->  tests/generic/470  |  2 +-
->  2 files changed, 11 insertions(+), 6 deletions(-)
-> 
-> diff --git a/common/dmlogwrites b/common/dmlogwrites
-> index 2a7ff612..2e9b2311 100644
-> --- a/common/dmlogwrites
-> +++ b/common/dmlogwrites
-> @@ -23,7 +23,10 @@ _require_log_writes()
->  # explicitly. But this is considered as a temporary workaround, we want to move
->  # all the DAX check back to _require_log_writes when dm-log-writes gains full
->  # DAX support and remove this helper.
-> -_require_log_writes_dax()
-> +#
-> +# Only accept dax/dax=always mount option becasue dax=always, dax=inode
-> +# and dax=never are always introduced together.
-> +_require_log_writes_dax_mountopt()
->  {
->  	[ -z "$LOGWRITES_DEV" -o ! -b "$LOGWRITES_DEV" ] && \
->  		_notrun "This test requires a valid \$LOGWRITES_DEV"
-> @@ -32,16 +35,18 @@ _require_log_writes_dax()
->  	_require_test_program "log-writes/replay-log"
->  
->  	local ret=0
-> +	local mountopt=$1
->  	_log_writes_init $SCRATCH_DEV
->  	_log_writes_mkfs > /dev/null 2>&1
-> -	_log_writes_mount -o dax > /dev/null 2>&1
-> -	# Check options to be sure. XFS ignores dax option
-> +	_log_writes_mount "-o $mountopt" > /dev/null 2>&1
-> +	# Check options to be sure.
-> +	# XFS ignores dax option(or changes it to dax=never)
->  	# and goes on if dev underneath does not support dax.
-> -	_fs_options $LOGWRITES_DMDEV | grep -qw "dax"
-> +	_fs_options $LOGWRITES_DMDEV | egrep -q "dax(=always|,|$)"
->  	ret=$?
->  	_log_writes_cleanup
->  	if [ $ret -ne 0 ]; then
-> -		_notrun "$LOGWRITES_DMDEV $FSTYP does not support -o dax"
-> +		_notrun "$LOGWRITES_DMDEV $FSTYP does not support -o $mountopt"
->  	fi
->  }
->  
-> diff --git a/tests/generic/470 b/tests/generic/470
-> index 93691f4a..fd6da563 100755
-> --- a/tests/generic/470
-> +++ b/tests/generic/470
-> @@ -35,7 +35,7 @@ rm -f $seqres.full
->  _supported_fs generic
->  _supported_os Linux
->  _require_scratch
-> -_require_log_writes_dax
-> +_require_log_writes_dax_mountopt "dax"
->  _require_xfs_io_command "mmap" "-S"
->  _require_xfs_io_command "log_writes"
->  
-> -- 
-> 2.21.0
-> 
-> 
-> 
+
+
