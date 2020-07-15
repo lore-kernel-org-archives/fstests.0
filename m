@@ -4,49 +4,49 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-11.5 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham
-	autolearn_force=no version=3.4.0
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0F390C433E0
-	for <linux-fstests@archiver.kernel.org>; Wed, 15 Jul 2020 05:40:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 980D0C433E0
+	for <linux-fstests@archiver.kernel.org>; Wed, 15 Jul 2020 05:55:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D9B2F2067D
-	for <linux-fstests@archiver.kernel.org>; Wed, 15 Jul 2020 05:40:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7C1D9206D5
+	for <linux-fstests@archiver.kernel.org>; Wed, 15 Jul 2020 05:55:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728398AbgGOFkF (ORCPT
+        id S1728687AbgGOFzV (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 15 Jul 2020 01:40:05 -0400
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:37656 "EHLO
+        Wed, 15 Jul 2020 01:55:21 -0400
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:25190 "EHLO
         heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1727951AbgGOFkF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 15 Jul 2020 01:40:05 -0400
+        with ESMTP id S1725850AbgGOFzU (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 15 Jul 2020 01:55:20 -0400
 X-IronPort-AV: E=Sophos;i="5.75,354,1589212800"; 
-   d="scan'208";a="96369343"
+   d="scan'208";a="96370245"
 Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
-  by heian.cn.fujitsu.com with ESMTP; 15 Jul 2020 13:39:55 +0800
+  by heian.cn.fujitsu.com with ESMTP; 15 Jul 2020 13:55:18 +0800
 Received: from G08CNEXMBPEKD06.g08.fujitsu.local (unknown [10.167.33.206])
-        by cn.fujitsu.com (Postfix) with ESMTP id A7B444CE544C;
-        Wed, 15 Jul 2020 13:39:54 +0800 (CST)
+        by cn.fujitsu.com (Postfix) with ESMTP id A3C0B4CE3F1A;
+        Wed, 15 Jul 2020 13:55:15 +0800 (CST)
 Received: from [10.167.220.69] (10.167.220.69) by
  G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206) with Microsoft SMTP Server
- (TLS) id 15.0.1497.2; Wed, 15 Jul 2020 13:39:55 +0800
-Message-ID: <5F0E96A8.2010705@cn.fujitsu.com>
-Date:   Wed, 15 Jul 2020 13:39:52 +0800
+ (TLS) id 15.0.1497.2; Wed, 15 Jul 2020 13:55:16 +0800
+Message-ID: <5F0E9A42.5010807@cn.fujitsu.com>
+Date:   Wed, 15 Jul 2020 13:55:14 +0800
 From:   Xiao Yang <yangx.jy@cn.fujitsu.com>
 User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.2; zh-CN; rv:1.9.2.18) Gecko/20110616 Thunderbird/3.1.11
 MIME-Version: 1.0
 To:     Ira Weiny <ira.weiny@intel.com>
 CC:     <fstests@vger.kernel.org>, <darrick.wong@oracle.com>
-Subject: Re: [PATCH v6 7/7] generic: Verify the inheritance behavior of FS_XFLAG_DAX
- flag in various combinations
-References: <20200714094009.8654-1-yangx.jy@cn.fujitsu.com> <20200714094009.8654-8-yangx.jy@cn.fujitsu.com> <20200715024838.GI3008823@iweiny-DESK2.sc.intel.com>
-In-Reply-To: <20200715024838.GI3008823@iweiny-DESK2.sc.intel.com>
+Subject: Re: [PATCH v6 1/7] common/rc: Introduce new helpers for DAX mount
+ options and FS_XFLAG_DAX
+References: <20200714094009.8654-1-yangx.jy@cn.fujitsu.com> <20200714094009.8654-2-yangx.jy@cn.fujitsu.com> <20200715015935.GG3008823@iweiny-DESK2.sc.intel.com> <5F0E75DE.8050508@cn.fujitsu.com> <20200715041559.GK3008823@iweiny-DESK2.sc.intel.com>
+In-Reply-To: <20200715041559.GK3008823@iweiny-DESK2.sc.intel.com>
 Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
 Content-Transfer-Encoding: 7bit
 X-Originating-IP: [10.167.220.69]
 X-ClientProxiedBy: G08CNEXCHPEKD06.g08.fujitsu.local (10.167.33.205) To
  G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206)
-X-yoursite-MailScanner-ID: A7B444CE544C.AD494
+X-yoursite-MailScanner-ID: A3C0B4CE3F1A.AC9F0
 X-yoursite-MailScanner: Found to be clean
 X-yoursite-MailScanner-From: yangx.jy@cn.fujitsu.com
 Sender: fstests-owner@vger.kernel.org
@@ -54,283 +54,137 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 2020/7/15 10:48, Ira Weiny wrote:
-> On Tue, Jul 14, 2020 at 05:40:09PM +0800, Xiao Yang wrote:
->> Signed-off-by: Xiao Yang<yangx.jy@cn.fujitsu.com>
->> ---
->>   tests/generic/605     | 199 ++++++++++++++++++++++++++++++++++++++++++
->>   tests/generic/605.out |   2 +
->>   tests/generic/group   |   1 +
->>   3 files changed, 202 insertions(+)
->>   create mode 100644 tests/generic/605
->>   create mode 100644 tests/generic/605.out
+On 2020/7/15 12:15, Ira Weiny wrote:
+> On Wed, Jul 15, 2020 at 11:19:58AM +0800, Xiao Yang wrote:
+>> On 2020/7/15 9:59, Ira Weiny wrote:
+>>> On Tue, Jul 14, 2020 at 05:40:03PM +0800, Xiao Yang wrote:
+>>>> 1) _require_scratch_dax_mountopt() checks both old and new DAX mount option
+>>>> 2) _require_dax_iflag() checks FS_XFLAG_DAX
+>>>>
+>>>> Signed-off-by: Xiao Yang<yangx.jy@cn.fujitsu.com>
+>>> Reviewed-by: Ira Weiny<ira.weiny@intel.com>
+>> Hi Ira,
 >>
->> diff --git a/tests/generic/605 b/tests/generic/605
->> new file mode 100644
->> index 00000000..6924223a
->> --- /dev/null
->> +++ b/tests/generic/605
->> @@ -0,0 +1,199 @@
->> +#! /bin/bash
->> +# SPDX-License-Identifier: GPL-2.0
->> +# Copyright (c) 2020 Fujitsu.  All Rights Reserved.
->> +#
->> +# FS QA Test 605
->> +#
->> +# Verify the inheritance behavior of FS_XFLAG_DAX flag in various combinations.
->> +# 1) New files and directories automatically inherit FS_XFLAG_DAX from their parent directory.
->> +# 2) cp operation make files and directories inherit the FS_XFLAG_DAX from new parent directory.
->> +# 3) mv operation make files and directories preserve the FS_XFLAG_DAX from old parent directory.
->> +# In addition, setting/clearing FS_XFLAG_DAX flag is not impacted by dax mount options.
->> +
->> +seq=`basename $0`
->> +seqres=$RESULT_DIR/$seq
->> +echo "QA output created by $seq"
->> +
->> +here=`pwd`
->> +tmp=/tmp/$$
->> +status=1        # failure is the default!
->> +trap "_cleanup; exit \$status" 0 1 2 3 15
->> +
->> +_cleanup()
->> +{
->> +	cd /
->> +	rm -f $tmp.*
->> +}
->> +
->> +# get standard environment, filters and checks
->> +. ./common/rc
->> +. ./common/filter
->> +
->> +# remove previous $seqres.full before test
->> +rm -f $seqres.full
->> +
->> +_supported_fs generic
->> +_supported_os Linux
->> +_require_scratch
->> +_require_dax_iflag
->> +_require_xfs_io_command "lsattr" "-v"
->> +
->> +check_xflag()
->> +{
->> +	local target=$1
->> +	local exp_xflag=$2
->> +
->> +	if [ $exp_xflag -eq 0 ]; then
->> +		_test_inode_flag dax $target&&  echo "$target has unexpected FS_XFLAG_DAX flag"
->> +	else
->> +		_test_inode_flag dax $target || echo "$target doen't have expected FS_XFLAG_DAX flag"
->> +	fi
->> +}
->> +
->> +test_xflag_inheritance1()
->> +{
->> +	mkdir -p a
->> +	$XFS_IO_PROG -c "chattr +x" a
->> +	mkdir -p a/b/c
->> +	touch a/b/c/d
->> +
->> +	check_xflag a 1
->> +	check_xflag a/b 1
->> +	check_xflag a/b/c 1
->> +	check_xflag a/b/c/d 1
->> +
->> +	rm -rf a
->> +}
->> +
->> +test_xflag_inheritance2()
->> +{
->> +	mkdir -p a/b
->> +	$XFS_IO_PROG -c "chattr +x" a
->> +	mkdir -p a/b/c a/d
->> +	touch a/b/c/e a/d/f
->> +
->> +	check_xflag a 1
->> +	check_xflag a/b 0
->> +	check_xflag a/b/c 0
->> +	check_xflag a/b/c/e 0
->> +	check_xflag a/d 1
->> +	check_xflag a/d/f 1
->> +
->> +	rm -rf a
->> +}
->> +
->> +test_xflag_inheritance3()
->> +{
->> +	mkdir -p a/b
->> +	$XFS_IO_PROG -c "chattr +x" a/b
->> +	mkdir -p a/b/c a/d
->> +	touch a/b/c/e a/d/f
->> +
->> +	check_xflag a 0
->> +	check_xflag a/b 1
->> +	check_xflag a/b/c 1
->> +	check_xflag a/b/c/e 1
->> +	check_xflag a/d 0
->> +	check_xflag a/d/f 0
->> +
->> +	rm -rf a
->> +}
-> It really seems like 2 and 3 test the same thing?
+>> Do you want to check if invalid parameter is passed to
+>> _require_scratch_dax_mountopt? Thought
+>> I think it is not necessary(user should pass correct parament).
+>> Like this:
+>> [ "$mountopt" != "dax" ]&&  [ "$mountopt" != "dax=always" ]&&  _notrun
+>> "$mountopt is invalid"
+> I thought this patch was just checking if the filesystem/device supported DAX
+> such that DAX tests could run using either old _or_ new dax support...
+> But after thinking about it I think we need something more complicated.
+>
+> Something like:
+>
+> if ('-o dax=inode')
+> 	// FS is DAX with per file support (ie ext4 || XFS kernel>= 5.8)
 Hi Ira,
 
-2 constructs the following steps:
-1) a is the parent directory of b
-2) a doesn't have xflag and b has xflag
-3) touch many directories/files in a and b
+dax=inode/dax=never cannot check if underlying device supports dax, so I 
+perfer to use dax=always
+For example:
+XFS:
+# mount -o dax=inode /dev/sda8 /mnt/xfstests/test/
+# mount | grep sda8
+/dev/sda8 on /mnt/xfstests/test type xfs 
+(rw,relatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,noquota)
+...
+# mount -o dax=always /dev/sda8 /mnt/xfstests/test/
+# mount | grep sda8
+/dev/sda8 on /mnt/xfstests/test type xfs 
+(rw,relatime,seclabel,attr2,dax=never,inode64,logbufs=8,logbsize=32k,noquota)
 
-3 constructs the following steps:
-1) a is the parent directory of b and b is the parent directory of c
-2) a and c have xflag, and b doesn't have xflag
-3) touch many directories/files in b and c
+EXT4:
+# mount -o dax=inode /dev/sda8 /mnt/xfstests/test/
+# mount | grep sda8
+/dev/sda8 on /mnt/xfstests/test type ext4 (rw,relatime,seclabel,dax=inode)
+...
+# mount -o dax=always /dev/sda8 /mnt/xfstests/test/
+mount: /mnt/xfstests/test: wrong fs type, bad option, bad superblock on 
+/dev/sda8, missing codepage or helper program, or other error.
+# dmesg | grep DAX
+[597988.165120] EXT4-fs (sda8): DAX unsupported by block device.
 
-Do you think they are same? I can remove one if you think so.
-
->> +
->> +test_xflag_inheritance4()
->> +{
->> +	mkdir -p a
->> +	$XFS_IO_PROG -c "chattr +x" a
->> +	mkdir -p a/b/c
->> +	$XFS_IO_PROG -c "chattr -x" a/b
->> +	mkdir -p a/b/c/d a/b/e
->> +	touch a/b/c/d/f a/b/e/g
->> +
->> +	check_xflag a 1
->> +	check_xflag a/b 0
->> +	check_xflag a/b/c 1
->> +	check_xflag a/b/c/d 1
->> +	check_xflag a/b/c/d/f 1
->> +	check_xflag a/b/e 0
->> +	check_xflag a/b/e/g 0
->> +
->> +	rm -rf a
->> +}
->> +
->> +test_xflag_inheritance5()
->> +{
->> +	mkdir -p a b
->> +	$XFS_IO_PROG -c "chattr +x" a
->> +	mkdir -p a/c a/d b/e b/f
->> +	touch a/g b/h
->> +
->> +	cp -r a/c b/
->> +	cp -r b/e a/
->> +	cp -r a/g b/
->> +	mv a/d b/
->> +	mv b/f a/
->> +	mv b/h a/
->> +
->> +	check_xflag b/c 0
->> +	check_xflag b/d 1
->> +	check_xflag a/e 1
->> +	check_xflag a/f 0
->> +	check_xflag b/g 0
->> +	check_xflag a/h 0
->> +
->> +	rm -rf a b
->> +}
->> +
->> +do_xflag_tests()
->> +{
->> +	local option=$1
->> +
->> +	_scratch_mount "$option"
->> +	cd $SCRATCH_MNT
->> +
->> +	for i in $(seq 1 5); do
->> +		test_xflag_inheritance${i}
->> +	done
->> +
->> +	cd ->  /dev/null
->> +	_scratch_unmount
->> +}
->> +
->> +check_dax_mountopt()
->> +{
->> +	local option=$1
->> +	local ret=0
->> +
->> +	_try_scratch_mount "-o $option">>  $seqres.full 2>&1 || return 1
->> +
->> +	# Match option name exactly
->> +	_fs_options $SCRATCH_DEV | egrep -q "$option(,|$)" || ret=1
->> +
->> +	_scratch_unmount
->> +
->> +	return $ret
->> +}
-> Should this be a common function?
-
-I am not sure if it should be a common function, because it may not be 
-used by other tests in future.
-I also consider to merge the function into _require_scratch_dax_mountopt().
-
->> +
->> +do_tests()
->> +{
->> +	# Mount without dax option
->> +	do_xflag_tests
->> +
->> +	# Mount with old dax option if fs only supports it.
->> +	check_dax_mountopt "dax"&&  do_xflag_tests "-o dax"
-> I don't understand the order here.  If we are on an older kernel and the FS
-> only supports '-o dax' the do_xflag_tests will fail won't it?
-
-With both old dax and new dax, the inheritance behavior of FS_XFLAG_DAX 
-works well.
-
-> So shouldn't we do this first and bail/'not run' this test if that is the case?
->
-> I really don't think there is any point in testing the old XFS behavior because
-> the FS_XFLAG_DAX had no effect.  So even if it is broken it does not matter.
-> Or perhaps I am missing something here?
-
-This test is designed to verify the inheritance behavior of 
-FS_XFLAG_DAX(not related to S_DAX)
-so I think it is fine for both old dax and new dax to run the test.
+If we want to test new dax(i.e. dax=inode, dax=always or dax=never), so 
+pass "dax=always" to  _require_scratch_dax_mountopt
+If we want to test old dax  or new dax=always(either of them), so pass 
+"dax" to _require_scratch_dax_mountopt
 
 Best Regards,
 Xiao Yang
+> else if ('-o dax')
+> 	// FS is DAX (ie ext4 || XFS on kernel<  5.8)
+> else
+> 	// FS has no dax support.
+>
+> Do we do that with 2 functions?
+>
+> 	_require_scratch_dax_mountopt()
+> 	_require_scratch_new_dax_mountopt()
+>
+> If both fail we are in the else clause above?
+>
+> We can use the dax=inode because it is a new option and is not necessarily the
+> option used while running the tests.  (I think.  as I said my xfstests skills
+> are not great so I'm not always sure of the correct patterns)
+>
 > Ira
 >
->> +
->> +	# Mount with new dax options if fs supports them.
->> +	if check_dax_mountopt "dax=always"; then
->> +		for dax_option in "dax=always" "dax=inode" "dax=never"; do
->> +			do_xflag_tests "-o $dax_option"
->> +		done
->> +	fi
->> +}
->> +
->> +_scratch_mkfs>>  $seqres.full 2>&1
->> +
->> +do_tests
->> +
->> +# success, all done
->> +echo "Silence is golden"
->> +status=0
->> +exit
->> diff --git a/tests/generic/605.out b/tests/generic/605.out
->> new file mode 100644
->> index 00000000..1ae20049
->> --- /dev/null
->> +++ b/tests/generic/605.out
->> @@ -0,0 +1,2 @@
->> +QA output created by 605
->> +Silence is golden
->> diff --git a/tests/generic/group b/tests/generic/group
->> index 676e0d2e..a8451862 100644
->> --- a/tests/generic/group
->> +++ b/tests/generic/group
->> @@ -607,3 +607,4 @@
->>   602 auto quick encrypt
->>   603 auto attr quick dax
->>   604 auto attr quick dax
->> +605 auto attr quick dax
->> -- 
->> 2.21.0
->>
+>> Best Regards,
+>> Xiao Yang
+>>>> ---
+>>>>
+>>>> V5->V6:
+>>>> Simplify _require_scratch_dax_mountopt because it is enough to only check
+>>>> dax/dax=always mount option.  See the following reasons:
+>>>> 1) we cannot detect if underlying device supports dax by mounting dax=inode
+>>>>      or dax=never.
+>>>> 2) dax=always, dax=inode, dax=never are always introduced together.
+>>>>
+>>>>    common/rc | 22 ++++++++++++++++++++++
+>>>>    1 file changed, 22 insertions(+)
+>>>>
+>>>> diff --git a/common/rc b/common/rc
+>>>> index f17b19f2..aeec1f11 100644
+>>>> --- a/common/rc
+>>>> +++ b/common/rc
+>>>> @@ -3188,6 +3188,28 @@ _require_scratch_dax()
+>>>>    	_scratch_unmount
+>>>>    }
+>>>>
+>>>> +# Only accept dax/dax=always mount option becasue dax=always, dax=inode
+>>>> +# and dax=never are always introduced together.
+>>>> +_require_scratch_dax_mountopt()
+>>>> +{
+>>>> +	local mountopt=$1
+>>>> +
+>>>> +	_require_scratch
+>>>> +	_scratch_mkfs>   /dev/null 2>&1
+>>>> +	_try_scratch_mount "-o $mountopt">   /dev/null 2>&1 || \
+>>>> +		_notrun "mount $SCRATCH_DEV with $mountopt failed"
+>>>> +
+>>>> +	_fs_options $SCRATCH_DEV | egrep -q "dax(=always|,|$)" || \
+>>>> +		_notrun "$SCRATCH_DEV $FSTYP does not support -o $mountopt"
+>>>> +
+>>>> +	_scratch_unmount
+>>>> +}
+>>>> +
+>>>> +_require_dax_iflag()
+>>>> +{
+>>>> +	_require_xfs_io_command "chattr" "x"
+>>>> +}
+>>>> +
+>>>>    # Does norecovery support by this fs?
+>>>>    _require_norecovery()
+>>>>    {
+>>>> -- 
+>>>> 2.21.0
+>>>>
+>>>>
+>>>>
+>>> .
+>>>
 >>
 >>
 >
