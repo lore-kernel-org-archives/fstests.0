@@ -1,106 +1,117 @@
-Return-Path: <SRS0=TGcZ=A3=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=NoLx=A4=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.5 required=3.0 tests=BAYES_00,
+X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E59D8C433E4
-	for <linux-fstests@archiver.kernel.org>; Thu, 16 Jul 2020 14:45:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D95CFC433EC
+	for <linux-fstests@archiver.kernel.org>; Fri, 17 Jul 2020 04:40:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BF82C206F5
-	for <linux-fstests@archiver.kernel.org>; Thu, 16 Jul 2020 14:45:20 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B773A20737
+	for <linux-fstests@archiver.kernel.org>; Fri, 17 Jul 2020 04:40:48 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="oMUFno+J"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728603AbgGPOpU (ORCPT
+        id S1726333AbgGQEks (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 16 Jul 2020 10:45:20 -0400
-Received: from mga04.intel.com ([192.55.52.120]:34096 "EHLO mga04.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726963AbgGPOpT (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 16 Jul 2020 10:45:19 -0400
-IronPort-SDR: g/aKR3EkcZlPmEzRLvQ9xZH5Cj4Ya+AJwd9MxZWFSlfYA6WJst2hpIntOJ0ktV+0akPPaeV5Kx
- AV7MH1vZ9oOA==
-X-IronPort-AV: E=McAfee;i="6000,8403,9683"; a="146900598"
-X-IronPort-AV: E=Sophos;i="5.75,359,1589266800"; 
-   d="scan'208";a="146900598"
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from fmsmga003.fm.intel.com ([10.253.24.29])
-  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Jul 2020 07:45:19 -0700
-IronPort-SDR: Oe7HWpxlvBCrz+Bvx7a/ZHz+qPCONr+KJVbsi++4yunz8LvEreddKq8BaZOVX9P6c1KExwHL+V
- o4pvda+Lokuw==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.75,359,1589266800"; 
-   d="scan'208";a="325161691"
-Received: from iweiny-desk2.sc.intel.com ([10.3.52.147])
-  by FMSMGA003.fm.intel.com with ESMTP; 16 Jul 2020 07:45:19 -0700
-Date:   Thu, 16 Jul 2020 07:45:19 -0700
-From:   Ira Weiny <ira.weiny@intel.com>
-To:     Xiao Yang <yangx.jy@cn.fujitsu.com>
-Cc:     fstests@vger.kernel.org, darrick.wong@oracle.com
-Subject: Re: [PATCH v2 2/2] common/rc: Update _exclude_scratch_mount_option()
- and _require_dm_target() for new dax option
-Message-ID: <20200716144519.GN3008823@iweiny-DESK2.sc.intel.com>
-References: <20200715162342.15192-1-yangx.jy@cn.fujitsu.com>
- <20200715162342.15192-2-yangx.jy@cn.fujitsu.com>
+        Fri, 17 Jul 2020 00:40:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38086 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726831AbgGQEkp (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 17 Jul 2020 00:40:45 -0400
+Received: from mail-pl1-x62c.google.com (mail-pl1-x62c.google.com [IPv6:2607:f8b0:4864:20::62c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 190FCC061755
+        for <fstests@vger.kernel.org>; Thu, 16 Jul 2020 21:40:45 -0700 (PDT)
+Received: by mail-pl1-x62c.google.com with SMTP id w17so4909353ply.11
+        for <fstests@vger.kernel.org>; Thu, 16 Jul 2020 21:40:45 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=bh0VBvnfrCADCnqnt/VYbiuj15RuKAzy0nwBH+VWdFQ=;
+        b=oMUFno+JCOFyJW0IF53wIcuO+pCyjdKQGT+GSKUpUwHTOeU5uggbsgb35qPomWdQ3N
+         NUPx4FG7yL3wsbgJkbprXdkuv++Y+CJF+ArV/V6gzprSUvSAr3ozoTvvLBUr2CLPxGiv
+         +G/lS7J1jEN8BdbwChEispsLhZL8Pogsnz7cOz/PX7GwqWBrVEBx94ikVvF1EQb+xVG9
+         vVB3RjZnU4cnwpIxzEv81pRNuL2uTo+aq/Guj8w6RIncvopjsubVj9cn9mEFrGtRP39S
+         G9w/W0jxbK7X9P7WeHkphh3SSxQMGTpqf77hectQvJ0zuzguEYixJjY6cLqc2py/WRPy
+         q+WA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=bh0VBvnfrCADCnqnt/VYbiuj15RuKAzy0nwBH+VWdFQ=;
+        b=q4etTh1n/Z1r+IQ7t5Byxg40kw87HAFFuUVDsWH+bDNwPEmAKJHptxBIB/YZt7SPT2
+         b3ZZYuHS0DqCLH/+fY0ddtQp2NvDd9SvR4nCzYKNMnjllIP1NmGfFoVOTCA7jAUAbmne
+         KlYMEyYmW3bdDUTfwesD4WWdKn+DGKqE+ii8wjOzBlYowhjqJKdAt51x2O/MiGuCHpSb
+         RNT+TaaFXv8HmF9icj6t5OUOZQ68qLpNn5zD+nkyDPMg4b/bEw0WZ94RrP5Y3+F/9zAe
+         CVMGFdWLjfv8vUALvefq0zeMyK+S12O3e82vaqU33eOWjcDJ+sbIvGLe2e2NTn0K01wl
+         njIA==
+X-Gm-Message-State: AOAM531lcWFN15hVD3+eGINCXoABPfw1AzZbOSJWMMr0OhRAytYRMlWY
+        KZF2ykwVOfgRCaarN9xbWyD5sR7G
+X-Google-Smtp-Source: ABdhPJwhMqrdza67FKSky9sDbaUJ1l+IRRnwslHoUtqM83tm5/fj0rr/NIC55XhUhNaPixTlHAzZAw==
+X-Received: by 2002:a17:90b:4910:: with SMTP id kr16mr8076324pjb.126.1594960843563;
+        Thu, 16 Jul 2020 21:40:43 -0700 (PDT)
+Received: from xzhoux.usersys.redhat.com ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id 190sm6134788pfz.41.2020.07.16.21.40.41
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 16 Jul 2020 21:40:43 -0700 (PDT)
+From:   Murphy Zhou <jencce.kernel@gmail.com>
+To:     fstests@vger.kernel.org
+Cc:     Murphy Zhou <jencce.kernel@gmail.com>
+Subject: [PATCH] generic/175, generic/176: cleanup testdir before exit
+Date:   Fri, 17 Jul 2020 12:40:17 +0800
+Message-Id: <20200717044017.1598-1-jencce.kernel@gmail.com>
+X-Mailer: git-send-email 2.20.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200715162342.15192-2-yangx.jy@cn.fujitsu.com>
-User-Agent: Mutt/1.11.1 (2018-12-01)
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Jul 16, 2020 at 12:23:42AM +0800, Xiao Yang wrote:
-> Some tests(e.g. ext4/035) cannot include dax option(dax=inode/dax=never
-> is OK) so make _exclude_scratch_mount_option() and _require_dm_target()
-> check if old or new dax option is not defined in $MOUNT_OPTIONS.
-> 
-> Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Usually the _mkfs helper will cleanup these directories at the
+beginning of testcase. However, when testing on NFS, the cleanup
+could be very slow and it is confusing that: We have already
+started to run generic/176 but we get stuck in _mkfs, cleaning
+up files left by the previous testcase generic/175.
 
-Reviewed-by: Ira Weiny <ira.weiny@intel.com>
+To be clear, cleanup testdir before exit. Also, deleting files
+should be part of the stress test.
 
-> ---
->  common/rc | 8 ++++++--
->  1 file changed, 6 insertions(+), 2 deletions(-)
-> 
-> diff --git a/common/rc b/common/rc
-> index 8b19b3f7..7d0b8691 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -1896,7 +1896,7 @@ _require_dm_target()
->  	_require_sane_bdev_flush $SCRATCH_DEV
->  	_require_command "$DMSETUP_PROG" dmsetup
->  
-> -	echo $MOUNT_OPTIONS | grep -q dax
-> +	_normalize_mount_options | egrep -q "dax(=always| |$)"
->  	if [ $? -eq 0 ]; then
->  		case $target in
->  		stripe|linear|log-writes)
-> @@ -3452,12 +3452,16 @@ _normalize_mount_options()
->  }
->  
->  # skip test if MOUNT_OPTIONS contains the given strings
-> +# For dax option, only accept dax/dax=always mount option
->  _exclude_scratch_mount_option()
->  {
->  	local mnt_opts=$(_normalize_mount_options)
-> +	local pattern=$1
-> +
-> +	echo "$pattern" | grep -q 'dax' && pattern="dax(=always| |$)"
->  
->  	while [ $# -gt 0 ]; do
-> -		if echo $mnt_opts | grep -qw "$1"; then
-> +		if echo $mnt_opts | egrep -q "$pattern"; then
->  			_notrun "mount option \"$1\" not allowed in this test"
->  		fi
->  		shift
-> -- 
-> 2.21.0
-> 
-> 
-> 
+Signed-off-by: Murphy Zhou <jencce.kernel@gmail.com>
+---
+ tests/generic/175 | 1 +
+ tests/generic/176 | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/tests/generic/175 b/tests/generic/175
+index 79e5b3d6..bd966a28 100755
+--- a/tests/generic/175
++++ b/tests/generic/175
+@@ -61,6 +61,7 @@ bytes=$((blks * blksz))
+ echo "reflinking $blks blocks, $bytes bytes" >> "$seqres.full"
+ _reflink_range "$testdir/file1" 0 "$testdir/file2" 0 $bytes >> "$seqres.full"
+ 
++rm -rf $testdir
+ # success, all done
+ status=0
+ exit
+diff --git a/tests/generic/176 b/tests/generic/176
+index a084578a..bc83762e 100755
+--- a/tests/generic/176
++++ b/tests/generic/176
+@@ -73,6 +73,7 @@ bytes=$((blocks_needed * blksz))
+ echo "reflinking $((blocks_needed / 2)) blocks, $((bytes / 2)) bytes" >> "$seqres.full"
+ _reflink_range "$testdir/file1" 0 "$testdir/file2" 0 $bytes >> "$seqres.full"
+ 
++rm -rf $testdir
+ # success, all done
+ status=0
+ exit
+-- 
+2.20.1
+
