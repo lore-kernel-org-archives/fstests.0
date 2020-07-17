@@ -2,98 +2,96 @@ Return-Path: <SRS0=NoLx=A4=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.0 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 67BBCC433DF
-	for <linux-fstests@archiver.kernel.org>; Fri, 17 Jul 2020 06:09:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 278FCC433E1
+	for <linux-fstests@archiver.kernel.org>; Fri, 17 Jul 2020 08:22:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 30B5B206BE
-	for <linux-fstests@archiver.kernel.org>; Fri, 17 Jul 2020 06:09:33 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ZUowpkbp"
+	by mail.kernel.org (Postfix) with ESMTP id 015272074B
+	for <linux-fstests@archiver.kernel.org>; Fri, 17 Jul 2020 08:22:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726083AbgGQGJd (ORCPT
+        id S1726201AbgGQIWQ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 17 Jul 2020 02:09:33 -0400
-Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:60407 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1725904AbgGQGJc (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 17 Jul 2020 02:09:32 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1594966171;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=ua8nI+UpEeuCpNik6ej6UlT+WbLn9w4y0bu2Z1jMlo4=;
-        b=ZUowpkbpA3mduEfqM41EmAa7MTBzLA4AfMhZfXd3zfk/yiuH0KUXfngOIYe489+RRFNYf0
-        gyZAgzX4CI/ModzvhLNSryORLS1a/k71oqTsHakAZeIhOGgPe/KHgJG+2VvvExa4qz+oms
-        ZfC0t03jE8bEjZ4CKTE0Rqf9t40WXSU=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-25-nAdnQKJMPbyXnHCbnDBjZw-1; Fri, 17 Jul 2020 02:09:29 -0400
-X-MC-Unique: nAdnQKJMPbyXnHCbnDBjZw-1
-Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 46757800597
-        for <fstests@vger.kernel.org>; Fri, 17 Jul 2020 06:09:28 +0000 (UTC)
-Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id B6BFD5D9E7;
-        Fri, 17 Jul 2020 06:09:27 +0000 (UTC)
-Date:   Fri, 17 Jul 2020 14:22:22 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Lukas Czerner <lczerner@redhat.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] check: clear WARN_ONCE state before each test
-Message-ID: <20200717062222.GC1938@dhcp-12-102.nay.redhat.com>
-Mail-Followup-To: Lukas Czerner <lczerner@redhat.com>,
-        fstests@vger.kernel.org
-References: <20200715114219.18353-1-lczerner@redhat.com>
+        Fri, 17 Jul 2020 04:22:16 -0400
+Received: from mgw-02.mpynet.fi ([82.197.21.91]:35078 "EHLO mgw-02.mpynet.fi"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726793AbgGQIWQ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 17 Jul 2020 04:22:16 -0400
+Received: from pps.filterd (mgw-02.mpynet.fi [127.0.0.1])
+        by mgw-02.mpynet.fi (8.16.0.42/8.16.0.42) with SMTP id 06H89auT093084;
+        Fri, 17 Jul 2020 11:22:14 +0300
+Received: from ex13.tuxera.com (ex13.tuxera.com [178.16.184.72])
+        by mgw-02.mpynet.fi with ESMTP id 32b87w00dm-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-SHA384 bits=256 verify=NOT);
+        Fri, 17 Jul 2020 11:22:13 +0300
+Received: from localhost (194.100.106.190) by tuxera-exch.ad.tuxera.com
+ (10.20.48.11) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Fri, 17 Jul
+ 2020 11:22:13 +0300
+From:   Vladimir Zapolskiy <vladimir@tuxera.com>
+To:     Eryu Guan <guaneryu@gmail.com>
+CC:     <fstests@vger.kernel.org>
+Subject: [PATCH] generic: fix insert test group associations
+Date:   Fri, 17 Jul 2020 11:22:07 +0300
+Message-ID: <20200717082207.21088-1-vladimir@tuxera.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200715114219.18353-1-lczerner@redhat.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-Originating-IP: [194.100.106.190]
+X-ClientProxiedBy: tuxera-exch.ad.tuxera.com (10.20.48.11) To
+ tuxera-exch.ad.tuxera.com (10.20.48.11)
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.235,18.0.687
+ definitions=2020-07-17_04:2020-07-17,2020-07-17 signatures=0
+X-Proofpoint-Spam-Details: rule=mpy_notspam policy=mpy score=0 suspectscore=0 malwarescore=0
+ spamscore=0 mlxscore=0 bulkscore=0 adultscore=0 mlxlogscore=938
+ phishscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2006250000 definitions=main-2007170062
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Jul 15, 2020 at 01:42:19PM +0200, Lukas Czerner wrote:
-> clear WARN_ONCE state before each test to allow a potential problem
-> to be reported for each test
-> 
-> Signed-off-by: Lukas Czerner <lczerner@redhat.com>
-> ---
->  check | 5 +++++
->  1 file changed, 5 insertions(+)
-> 
-> diff --git a/check b/check
-> index 2e148e57..6ba64d5d 100755
-> --- a/check
-> +++ b/check
-> @@ -756,6 +756,11 @@ for section in $HOST_OPTIONS_SECTIONS; do
->  			touch ${RESULT_DIR}/check_dmesg
->  		fi
->  		_try_wipe_scratch_devs > /dev/null 2>&1
-> +
-> +		# clear the WARN_ONCE state to allow a potential problem
-> +		# to be reported for each test
-> +		(echo 1 > /sys/kernel/debug/clear_warn_once) > /dev/null 2>&1
+The change makes one-in-one correspondence between generic tests in
+'insert' test group and tests with $(_require_xfs_io_command "finsert")
+runtime check:
 
-Good to me.
+* generic/348 -- insert group association is removed,
+* generic/458 -- insert group association is added.
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+The intention of the change is to get better summarized association
+between tests and test groups to be able to operate with test groups
+in a better way.
 
-> +
->  		if [ "$DUMP_OUTPUT" = true ]; then
->  			_run_seq 2>&1 | tee $tmp.out
->  			# Because $? would get tee's return code
-> -- 
-> 2.21.3
-> 
+Signed-off-by: Vladimir Zapolskiy <vladimir@tuxera.com>
+---
+ tests/generic/group | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/tests/generic/group b/tests/generic/group
+index d9ab9a31f2ed..764eeafc0f42 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -350,7 +350,7 @@
+ 345 auto
+ 346 auto quick rw
+ 347 auto quick rw thin
+-348 auto quick metadata insert
++348 auto quick metadata
+ 349 blockdev rw zero
+ 350 blockdev rw punch
+ 351 blockdev rw punch collapse insert zero
+@@ -460,7 +460,7 @@
+ 455 auto log replay
+ 456 auto quick metadata collapse zero prealloc
+ 457 auto log replay clone
+-458 auto quick clone collapse zero
++458 auto quick clone collapse insert zero
+ 459 auto freeze thin
+ 460 auto quick rw
+ 461 auto shutdown stress
+-- 
+2.25.1
 
