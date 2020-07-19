@@ -2,239 +2,189 @@ Return-Path: <SRS0=HfNX=A6=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-9.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 06C78C433E0
-	for <linux-fstests@archiver.kernel.org>; Sun, 19 Jul 2020 18:24:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4A50FC433E1
+	for <linux-fstests@archiver.kernel.org>; Sun, 19 Jul 2020 18:36:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D5F8620B1F
-	for <linux-fstests@archiver.kernel.org>; Sun, 19 Jul 2020 18:24:06 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1595183046;
-	bh=EMQ1w3V7wP8iasTNdqlfMZr+zUUZ6WJ1+EOFYxCSaJQ=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
-	b=dNUEFHTXaFHA8WanM+jnJSG4lOw5Rp8oaJ3bbZ9D00o7PU42Q+fs1mPKKqiId/52K
-	 VGttScyQwe3kDrZRDty0sgVLHevj3Y1kpTQH+31pTlAdB5JhcdbW3YlqlWZs4eh6qX
-	 VY8jWyY31gYhAH+sM0pQk1ADKWX0b4hi30JnH3iY=
+	by mail.kernel.org (Postfix) with ESMTP id 2A9622176B
+	for <linux-fstests@archiver.kernel.org>; Sun, 19 Jul 2020 18:36:50 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="d3A/bTHN"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726330AbgGSSYG (ORCPT
+        id S1726049AbgGSSgt (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 19 Jul 2020 14:24:06 -0400
-Received: from mail.kernel.org ([198.145.29.99]:42938 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726009AbgGSSYG (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 19 Jul 2020 14:24:06 -0400
-Received: from mail-ua1-f50.google.com (mail-ua1-f50.google.com [209.85.222.50])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 5E4D720B1F;
-        Sun, 19 Jul 2020 18:24:05 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1595183045;
-        bh=EMQ1w3V7wP8iasTNdqlfMZr+zUUZ6WJ1+EOFYxCSaJQ=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=qC6ABpIrAPnC+snSz0qcLmNp2Hu76I1PnD81qikVB4Tk3IqLzE4k7Nrb+/9sRnNJ1
-         Yt2H6APE+/0+UsEsfKFs2tdXLCF/7exGozg89Bx+2uyNxusS/3pz6xiNPSJyE88Kkf
-         FhMbpvDg0n8zvjD7pnamRBr/1nElfLiUV+tjSok8=
-Received: by mail-ua1-f50.google.com with SMTP id r63so318935uar.9;
-        Sun, 19 Jul 2020 11:24:05 -0700 (PDT)
-X-Gm-Message-State: AOAM533XWTdvEjDtA7FYyYLOfgRC/vBWz7nj5Ux5+vvUEwSZmXo2jYUh
-        6QZVUN9Xdzz9eqf+YL67juGHfNPtCZC8DOJbKfQ=
-X-Google-Smtp-Source: ABdhPJybNdYWUSxamBik5NKrgfpF0502hrkTVnc6LE109OR8Btf+VdU5LpG4rlaKTFCRXIZqxoav25u7F5ErcBDBsK8=
-X-Received: by 2002:ab0:4821:: with SMTP id b30mr13849827uad.83.1595183044474;
- Sun, 19 Jul 2020 11:24:04 -0700 (PDT)
+        Sun, 19 Jul 2020 14:36:49 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42258 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726009AbgGSSgt (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 19 Jul 2020 14:36:49 -0400
+Received: from mail-pf1-x441.google.com (mail-pf1-x441.google.com [IPv6:2607:f8b0:4864:20::441])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 49059C0619D2
+        for <fstests@vger.kernel.org>; Sun, 19 Jul 2020 11:36:49 -0700 (PDT)
+Received: by mail-pf1-x441.google.com with SMTP id q17so7946112pfu.8
+        for <fstests@vger.kernel.org>; Sun, 19 Jul 2020 11:36:49 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=message-id:date:from:to:subject:mime-version:content-disposition;
+        bh=M07jisr+2WThM2lEo+GvT+QHY+RhMzbZBDUM9gDFQVc=;
+        b=d3A/bTHNJlLzRydv0GXjO6l3u1fERipZ2E/89BryhaFAMVSFn/QfgW0ALmmgbfF73f
+         fBy4E1IJ/3d8q6beXpzEuA0rqReaWHY0QBxLA/1KJP51kWzsRcI6yeJtOrG7w6iwcOxh
+         r7HFAOiVxHF23RvZ5Un9+QkoQ22bXY8gJuQy+n1MpEE2y3kZpMunslTbrD5K/feQ+dq+
+         2Uf8qH6+HZoAW2ooeZE0Qxh7hcdeGaKRITinugRDm7iSzx0Bf2xroSZB2IhHipst9Rbt
+         pSZSk+soPaPd0KHclutzFcuhvJgOkgSm995wWAyKAR6jMmpWbqoty5SDOpSQqQyhnDyw
+         a1Mg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:message-id:date:from:to:subject:mime-version
+         :content-disposition;
+        bh=M07jisr+2WThM2lEo+GvT+QHY+RhMzbZBDUM9gDFQVc=;
+        b=IDVyvvd+Hl1ndNov4s0R3tfEBj7usqygVRczt2svjxU1NhesYhN1rchie4Dh2hGAXj
+         fsy9wG10DZgJNsG7J70vk5b4p547q5SEpiS2ZHZvjuKCiCdmZyqjdKLlNlGH3hog0faK
+         yqFDIURIeiEO634n2VxQWoz+TTzGxQQnk6JOkI/7pu9W+ZgYIQreWM5GDW4UirYySOjt
+         OevUfh4+dcxxQ0zewmsbddQOjiup05LYTckAf0zcRobyDPpW4sIYSht0brLof2eBGsoj
+         knz3bNC5tGpNzh7J7PcKOrdTeqBOEQOvVzVSYh/GPhEK5tBCeGcpdWKg7WKVBStaJA+Z
+         +rfQ==
+X-Gm-Message-State: AOAM533mTuktL5QBvBxZ9Bdi6KDAAE6rKq48buoBp8jqpxj3l3THpkh9
+        wanKllP/bYpvS8GfhHr6oWD4iqEj
+X-Google-Smtp-Source: ABdhPJyrIiElPcdFildSieXWRaaNfh9P28g0QuoLxesNDFUoEpjedXKMMb6ymVcm9yjgWa8TDfEmXQ==
+X-Received: by 2002:aa7:8d8b:: with SMTP id i11mr15405836pfr.263.1595183808482;
+        Sun, 19 Jul 2020 11:36:48 -0700 (PDT)
+Received: from localhost ([47.89.231.86])
+        by smtp.gmail.com with ESMTPSA id z62sm13899271pfb.47.2020.07.19.11.36.46
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 19 Jul 2020 11:36:47 -0700 (PDT)
+Message-ID: <5f1492bf.1c69fb81.e6090.d5f8@mx.google.com>
+Date:   Mon, 20 Jul 2020 02:36:44 +0800
+From:   Eryu Guan <guaneryu@gmail.com>
+To:     fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: master branch updated to 04416cee2198
 MIME-Version: 1.0
-References: <20200615175028.15090-1-fdmanana@kernel.org> <20200719164417.GC2557159@desktop>
-In-Reply-To: <20200719164417.GC2557159@desktop>
-From:   Filipe Manana <fdmanana@kernel.org>
-Date:   Sun, 19 Jul 2020 19:23:53 +0100
-X-Gmail-Original-Message-ID: <CAL3q7H6PPBF6UqUHoOGpU1bDo0bg2-jUP9o5h+oCpNzjfM8DRA@mail.gmail.com>
-Message-ID: <CAL3q7H6PPBF6UqUHoOGpU1bDo0bg2-jUP9o5h+oCpNzjfM8DRA@mail.gmail.com>
-Subject: Re: [PATCH] btrfs: test creating a snapshot after RWF_NOWAIT write
- works as expected
-To:     Eryu Guan <guan@eryu.me>
-Cc:     fstests <fstests@vger.kernel.org>,
-        linux-btrfs <linux-btrfs@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="bUc2P1NZ74ww"
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Jul 19, 2020 at 5:44 PM Eryu Guan <guan@eryu.me> wrote:
->
-> On Mon, Jun 15, 2020 at 06:50:28PM +0100, fdmanana@kernel.org wrote:
-> > From: Filipe Manana <fdmanana@suse.com>
-> >
-> > Test that creating a snapshot after writing to a file using a RWF_NOWAIT
-> > works, does not hang the snapshot creation task, and we are able to read
-> > the data after.
-> >
-> > Currently btrfs hangs when creating the snapshot due to a missing unlock
-> > of a snapshot lock, but it is fixed by a patch with the following subject:
-> >
-> >   "btrfs: fix hang on snapshot creation after RWF_NOWAIT write"
-> >
-> > Signed-off-by: Filipe Manana <fdmanana@suse.com>
->
-> So sorry for the late review.. But I hit the following failure with
-> v5.8-rc5 kernel, which contains the mentioned fix
->
->  QA output created by 215
->  wrote 65536/65536 bytes at offset 0
->  XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> -wrote 65536/65536 bytes at offset 0
-> -XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +pwrite: Input/output error
->  Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/snap'
->  File data in the subvolume:
-> -0000000 fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
-> +0000000 ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab
->  *
->  0065536
->  File data in the snapshot:
-> -0000000 fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
-> +0000000 ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab
->  *
->  0065536
->
-> And I did hit hang when testing without the fix. Is this something that
-> should be fixed in the test?
 
-Odd.
+--bUc2P1NZ74ww
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-Works for me on 5.8-rc5:
+Hi all,
 
-$ ./check btrfs/215
-FSTYP         -- btrfs
-PLATFORM      -- Linux/x86_64 debian9 5.8.0-rc5-btrfs-next-63 #1 SMP
-PREEMPT Sun Jul 19 17:53:27 WEST 2020
-MKFS_OPTIONS  -- /dev/sdb
-MOUNT_OPTIONS -- /dev/sdb /home/fdmanana/btrfs-tests/scratch_1
+The master branch of the xfstests repository at:
 
-btrfs/215 1s
-Ran: btrfs/215
-Passed all 1 tests
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-Is there anything in dmesg?
+have just been updated. It's been a month since last update, I'm really sorry
+for the long delay. I'm trying my best keep the weekly update schedule
+afterwards.
+
+As usual, this update contains various new tests and fixes & improvements.
+
+- Dave Chinner adds '-i' option to 'check' to repeat test N times
+- Lukas Czerner clears WARN_ONCE before each test, so it will be triggered
+  multiple times
+- Vladimir Zapolskiy assigns tests with correct groups to summarize them
+  properly
+
+There're still some patches pending in the list, notably the DAX related
+patchsets from Xiao Yang (though most of the patches have been reviewed by
+Darrick and Ira, thanks!). Hopefully I can take them in next update.
+
+Thanks,
+Eryu
+
+The new head of the master branch is commit:
+
+04416cee2198 generic/587: associate the test with quota test group
+
+New commits:
+
+Darrick J. Wong (2):
+      [3c7fd09bc794] generic/361: disable xfs metadata io error retries
+      [81a3c7dc6274] xfs/518: require scratch device
+
+Dave Chinner (1):
+      [ffa3e99f2294] check: add CLI option to repeat tests
+
+Gao Xiang (1):
+      [7db17edfbac9] xfs: add test for CVE-2020-12655
+
+Jan Kara (1):
+      [d9f86e74171d] generic/530: Require metadata journaling
+
+Lukas Czerner (1):
+      [c67ea2347454] check: clear WARN_ONCE state before each test
+
+Nikolay Borisov (1):
+      [5231c9fa1613] btrfs: test that corruption counter is incremented correctly
+
+Vladimir Zapolskiy (7):
+      [1895ea4b4249] common/rc: fix false positives due to leaked mkfs output to stderr
+      [98c3ec60484a] generic: reorder output to stderr and stdout from _scratch_mkfs
+      [dc4c442e531a] generic: assign a number of tests to attr group
+      [8dd4425f53e8] generic/079: remove assignment of the test to acl and attr groups
+      [c5e88064eb80] generic/038: assign the test to trim group of tests
+      [8d31f184d614] generic: fix insert test group associations
+      [04416cee2198] generic/587: associate the test with quota test group
+
+Yang Xu (1):
+      [5e169fbd349c] xfs/516: Use scratch_xfs_get/set_sb_field api
+
+Zorro Lang (1):
+      [3423e3326ebe] generic: test per-type quota softlimit enforcement timeout
 
 
+Code Diffstat:
 
->
-> Thanks,
-> Eryu
->
-> > ---
-> >  tests/btrfs/214     | 66 +++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/btrfs/214.out | 14 ++++++++++
-> >  tests/btrfs/group   |  1 +
-> >  3 files changed, 81 insertions(+)
-> >  create mode 100755 tests/btrfs/214
-> >  create mode 100644 tests/btrfs/214.out
-> >
-> > diff --git a/tests/btrfs/214 b/tests/btrfs/214
-> > new file mode 100755
-> > index 00000000..c835e844
-> > --- /dev/null
-> > +++ b/tests/btrfs/214
-> > @@ -0,0 +1,66 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (C) 2020 SUSE Linux Products GmbH. All Rights Reserved.
-> > +#
-> > +# FSQA Test No. 214
-> > +#
-> > +# Test that creating a snapshot after writing to a file using a RWF_NOWAIT
-> > +# works, does not hang the snapshot creation task, and we are able to read
-> > +# the data after.
-> > +#
-> > +seq=`basename $0`
-> > +seqres=$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +tmp=/tmp/$$
-> > +status=1     # failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +_cleanup()
-> > +{
-> > +     cd /
-> > +     rm -f $tmp.*
-> > +}
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +. ./common/filter
-> > +. ./common/attr
-> > +
-> > +# real QA test starts here
-> > +_supported_fs btrfs
-> > +_supported_os Linux
-> > +_require_scratch
-> > +_require_odirect
-> > +_require_xfs_io_command pwrite -N
-> > +_require_chattr C
-> > +
-> > +rm -f $seqres.full
-> > +
-> > +_scratch_mkfs >>$seqres.full 2>&1
-> > +_scratch_mount
-> > +
-> > +# RWF_NOWAIT writes require NOCOW
-> > +touch $SCRATCH_MNT/f
-> > +$CHATTR_PROG +C $SCRATCH_MNT/f
-> > +
-> > +$XFS_IO_PROG -d -c "pwrite -S 0xab 0 64K" $SCRATCH_MNT/f | _filter_xfs_io
-> > +
-> > +# Now do a WEF_WRITE into a range containing a NOCOWable extent.
-> > +$XFS_IO_PROG -d -c "pwrite -N -V 1 -S 0xfe 0 64K" $SCRATCH_MNT/f \
-> > +     | _filter_xfs_io
-> > +
-> > +$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/snap \
-> > +     | _filter_scratch
-> > +
-> > +# Unmount, mount again and verify the file in the subvolume and snapshot has
-> > +# the correct data.
-> > +_scratch_cycle_mount
-> > +
-> > +echo "File data in the subvolume:"
-> > +od -A d -t x1 $SCRATCH_MNT/f
-> > +
-> > +echo "File data in the snapshot:"
-> > +od -A d -t x1 $SCRATCH_MNT/snap/f
-> > +
-> > +status=0
-> > +exit
-> > diff --git a/tests/btrfs/214.out b/tests/btrfs/214.out
-> > new file mode 100644
-> > index 00000000..6cc66972
-> > --- /dev/null
-> > +++ b/tests/btrfs/214.out
-> > @@ -0,0 +1,14 @@
-> > +QA output created by 214
-> > +wrote 65536/65536 bytes at offset 0
-> > +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> > +wrote 65536/65536 bytes at offset 0
-> > +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> > +Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/snap'
-> > +File data in the subvolume:
-> > +0000000 fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
-> > +*
-> > +0065536
-> > +File data in the snapshot:
-> > +0000000 fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
-> > +*
-> > +0065536
-> > diff --git a/tests/btrfs/group b/tests/btrfs/group
-> > index 9e48ecc1..a3706e7d 100644
-> > --- a/tests/btrfs/group
-> > +++ b/tests/btrfs/group
-> > @@ -216,3 +216,4 @@
-> >  211 auto quick log prealloc
-> >  212 auto balance dangerous
-> >  213 auto balance dangerous
-> > +214 auto quick snapshot
-> > --
-> > 2.26.2
+ check                 |  26 ++++++-
+ common/quota          |   4 +
+ common/rc             |   2 +-
+ tests/btrfs/215       |  92 +++++++++++++++++++++++
+ tests/btrfs/215.out   |   2 +
+ tests/btrfs/group     |   1 +
+ tests/generic/361     |   5 ++
+ tests/generic/530     |   1 +
+ tests/generic/554     |   2 +-
+ tests/generic/565     |   2 +-
+ tests/generic/603     | 202 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/603.out |  41 ++++++++++
+ tests/generic/group   |  21 +++---
+ tests/xfs/516         |  14 +++-
+ tests/xfs/518         |   1 +
+ tests/xfs/520         |  86 +++++++++++++++++++++
+ tests/xfs/520.out     |   2 +
+ tests/xfs/group       |   1 +
+ 18 files changed, 484 insertions(+), 21 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
+
+--bUc2P1NZ74ww
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAl8UklgACgkQJlKqKVyP
+52McJxAAn2aYjD5grYRDFUaNHyugIogSxmSdy9kDtndFkzX8XTA7J+yQmpJGPXnU
+AiEgWhWfTOtWROf3KCqcNoz3uzZfZlojoTn0LvVkZAlX02ZZN95DbhRS8eCL5aCq
+srsqtgsU5ktvfgwVzi7YLYu1C37RYuYPfv8FKEEBjc+hktlWOzT0PMF52TqAQ2uX
+mUz/wSLLd/31xGqr/qndD+0RSXhV9boNK5N4QPZJ8cDtVQTQI19oMbUkrpO8vUUV
+ZQPU9lbwNof1KK3ro7fogOHTp9es3nLU6wehmTALW4lZyQJJcj0v4sWg4ayLhzVC
+VtjEOF+ubF/7XyTSHF/2QETty7QrPKUtSb0RCc9sWZVVpQYN3I7ZAGiLqhRLonn5
+cmmG3KO5gvCce0PqIGU349jIT1iQo80SvjK7zIO40Qapm1u4nFh1iTweznSbCm/K
+20A47DYM0925A4ApMzyGqL2B/djU9pgVawmnX7/3VeaOUjkzcEbj2vRsnxiuc5qR
+QA8cuVw745ufVzKLaJkjcH26ZjhOt5zDe0In/oQ6xxQiloisSWDOfDNfsrAONfYI
+4CCr/Grc52E5ibOCMgSqs4ZLebH1UGunch6zFRVmdW42I5WpAa5D3kLM5fQB1Jqj
+KZX6IsTniaoF0iHeKboOicmJPpRNA+QYtu2oWNQp5JBIVydu63s=
+=3wfO
+-----END PGP SIGNATURE-----
+
+--bUc2P1NZ74ww--
