@@ -7,184 +7,222 @@ X-Spam-Status: No, score=-9.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
 	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4A50FC433E1
-	for <linux-fstests@archiver.kernel.org>; Sun, 19 Jul 2020 18:36:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 77892C433E2
+	for <linux-fstests@archiver.kernel.org>; Sun, 19 Jul 2020 18:36:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2A9622176B
-	for <linux-fstests@archiver.kernel.org>; Sun, 19 Jul 2020 18:36:50 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5363721744
+	for <linux-fstests@archiver.kernel.org>; Sun, 19 Jul 2020 18:36:52 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="d3A/bTHN"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="TxjDrWDg"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726049AbgGSSgt (ORCPT
+        id S1726614AbgGSSgv (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 19 Jul 2020 14:36:49 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42258 "EHLO
+        Sun, 19 Jul 2020 14:36:51 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42264 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726009AbgGSSgt (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 19 Jul 2020 14:36:49 -0400
-Received: from mail-pf1-x441.google.com (mail-pf1-x441.google.com [IPv6:2607:f8b0:4864:20::441])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 49059C0619D2
-        for <fstests@vger.kernel.org>; Sun, 19 Jul 2020 11:36:49 -0700 (PDT)
-Received: by mail-pf1-x441.google.com with SMTP id q17so7946112pfu.8
-        for <fstests@vger.kernel.org>; Sun, 19 Jul 2020 11:36:49 -0700 (PDT)
+        with ESMTP id S1726009AbgGSSgv (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 19 Jul 2020 14:36:51 -0400
+Received: from mail-il1-x144.google.com (mail-il1-x144.google.com [IPv6:2607:f8b0:4864:20::144])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7309FC0619D2;
+        Sun, 19 Jul 2020 11:36:51 -0700 (PDT)
+Received: by mail-il1-x144.google.com with SMTP id o3so11417099ilo.12;
+        Sun, 19 Jul 2020 11:36:51 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=message-id:date:from:to:subject:mime-version:content-disposition;
-        bh=M07jisr+2WThM2lEo+GvT+QHY+RhMzbZBDUM9gDFQVc=;
-        b=d3A/bTHNJlLzRydv0GXjO6l3u1fERipZ2E/89BryhaFAMVSFn/QfgW0ALmmgbfF73f
-         fBy4E1IJ/3d8q6beXpzEuA0rqReaWHY0QBxLA/1KJP51kWzsRcI6yeJtOrG7w6iwcOxh
-         r7HFAOiVxHF23RvZ5Un9+QkoQ22bXY8gJuQy+n1MpEE2y3kZpMunslTbrD5K/feQ+dq+
-         2Uf8qH6+HZoAW2ooeZE0Qxh7hcdeGaKRITinugRDm7iSzx0Bf2xroSZB2IhHipst9Rbt
-         pSZSk+soPaPd0KHclutzFcuhvJgOkgSm995wWAyKAR6jMmpWbqoty5SDOpSQqQyhnDyw
-         a1Mg==
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=EJR/ZsxG7WM2Vu9KbmVQpFIG+nDmhBW9NBHHUpFALn0=;
+        b=TxjDrWDgCCnKalSE1uFI35DTqy3FYqreiNwo6rdWVRwPSwevhYi2MeSroNRqB9x7bQ
+         UQzk2vYDLfy5DxDby8X4Klw+ioN1/FMB6Vby1I+i6k2ucunAciawe/qUn1SVwSWQVYWV
+         oQCbk7l9oMo1D+e9u8bMbjyieG5eUXiuocNefufIOnlAznlXPuhRCxF/PZDDWt7nymBF
+         AYtllJ7ynFH9tYum+YZfqgvNz5Dyw6F/O0llQf2Gjt2N5jjTy/0BnE5WyFSxYGgYLdvi
+         7yv0Zuij4c4w9TMPr3rdrSDifyqAdGuG4ecCGym5piQ1R8YjIniHCojZqQP+gQjFCfTN
+         5eyg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:message-id:date:from:to:subject:mime-version
-         :content-disposition;
-        bh=M07jisr+2WThM2lEo+GvT+QHY+RhMzbZBDUM9gDFQVc=;
-        b=IDVyvvd+Hl1ndNov4s0R3tfEBj7usqygVRczt2svjxU1NhesYhN1rchie4Dh2hGAXj
-         fsy9wG10DZgJNsG7J70vk5b4p547q5SEpiS2ZHZvjuKCiCdmZyqjdKLlNlGH3hog0faK
-         yqFDIURIeiEO634n2VxQWoz+TTzGxQQnk6JOkI/7pu9W+ZgYIQreWM5GDW4UirYySOjt
-         OevUfh4+dcxxQ0zewmsbddQOjiup05LYTckAf0zcRobyDPpW4sIYSht0brLof2eBGsoj
-         knz3bNC5tGpNzh7J7PcKOrdTeqBOEQOvVzVSYh/GPhEK5tBCeGcpdWKg7WKVBStaJA+Z
-         +rfQ==
-X-Gm-Message-State: AOAM533mTuktL5QBvBxZ9Bdi6KDAAE6rKq48buoBp8jqpxj3l3THpkh9
-        wanKllP/bYpvS8GfhHr6oWD4iqEj
-X-Google-Smtp-Source: ABdhPJyrIiElPcdFildSieXWRaaNfh9P28g0QuoLxesNDFUoEpjedXKMMb6ymVcm9yjgWa8TDfEmXQ==
-X-Received: by 2002:aa7:8d8b:: with SMTP id i11mr15405836pfr.263.1595183808482;
-        Sun, 19 Jul 2020 11:36:48 -0700 (PDT)
-Received: from localhost ([47.89.231.86])
-        by smtp.gmail.com with ESMTPSA id z62sm13899271pfb.47.2020.07.19.11.36.46
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 19 Jul 2020 11:36:47 -0700 (PDT)
-Message-ID: <5f1492bf.1c69fb81.e6090.d5f8@mx.google.com>
-Date:   Mon, 20 Jul 2020 02:36:44 +0800
-From:   Eryu Guan <guaneryu@gmail.com>
-To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: master branch updated to 04416cee2198
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=EJR/ZsxG7WM2Vu9KbmVQpFIG+nDmhBW9NBHHUpFALn0=;
+        b=E7GPedCsjB5U9EpPWm3MPeGZxMS/ebdXCSFYh0vZWY177OUbkhPqIwdvsIXClXq2V+
+         s/xdUoThx24QIB0hl+VlBtQ5EnjB4GTWb3oV5zVIt7QUbZGPfgdyZziRVPLMng3e0Xzq
+         MLGbO55myL0PGO4AoIhpPRoS6f4H42j9PH2yC7bVB11T7S2M6ghvQc3qYG7KKe7H3YEN
+         v66hlqoe7L+59//WihPPlK0yuu8a3xK5fUvxWlLMosO0w9XjirW/mj7Xz4Pqwe+759+c
+         v5C2NfgDIfxevgBH6byLOy5XFGY2XXuQ6UGShgfZCaTdIyoPa0Rtubsz071IU5uyvuou
+         D4rg==
+X-Gm-Message-State: AOAM5334k4sg8hVoEQxxp7BuaDqWw76vUHPWcOoEhQQR/D59iSyeD65r
+        j6ChVfvoQu0eFPLz7qCdqih/j2tscMJf93jlU44=
+X-Google-Smtp-Source: ABdhPJxcZFex3YpHFt9X66XzZWlN1qdpzATZl7BNuM6amNfVfQ90UtuP5vw2NwJnu+aBRDfTapMQiPE+tevzdlemYQ8=
+X-Received: by 2002:a92:b6d4:: with SMTP id m81mr19944963ill.72.1595183810847;
+ Sun, 19 Jul 2020 11:36:50 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="bUc2P1NZ74ww"
-Content-Disposition: inline
+References: <20200531110156.6613-1-amir73il@gmail.com> <20200719181116.GG2557159@desktop>
+In-Reply-To: <20200719181116.GG2557159@desktop>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Sun, 19 Jul 2020 21:36:39 +0300
+Message-ID: <CAOQ4uxjY7SqyVEG9vCtv=wB9BxDovpjwZGAQ7h5+VeiZPMKOeQ@mail.gmail.com>
+Subject: Re: [PATCH 0/3] Running unionmount testsuite from xfstests
+To:     Eryu Guan <guan@eryu.me>
+Cc:     Eryu Guan <guaneryu@gmail.com>, Miklos Szeredi <miklos@szeredi.hu>,
+        Vivek Goyal <vgoyal@redhat.com>,
+        overlayfs <linux-unionfs@vger.kernel.org>,
+        fstests <fstests@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+On Sun, Jul 19, 2020 at 9:11 PM Eryu Guan <guan@eryu.me> wrote:
+>
+> Hi Amir,
+>
+> On Sun, May 31, 2020 at 02:01:53PM +0300, Amir Goldstein wrote:
+> > Eryu,
+> >
+> > unionmount testsuite has a lot more test coverage than the overlay
+> > xfstests, but it has a lot less exposure to testers.
+> >
+> > The various test setups that I have added to unionmount testsuite since
+> > I took over the maintanace of the testsuite have even smaller exposure
+> > to testers.
+> >
+> > These patches add overlay tests that are used as a harness to run
+> > different setups of unionmount testsuite.  I have been using this method
+> > for over two year for testing my overlayfs branches.
+> >
+> > What does it take to install unionmount testsuite?
+> > As README.overlay says:
+> >
+> >   git clone https://github.com/amir73il/unionmount-testsuite.git
+> >   ln -s $PWD/unionmount-testsuite <path-to-xfstests>/src/
+>
+> I'm really sorry for the long-long delay..
+>
 
---bUc2P1NZ74ww
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+No worries.
 
-Hi all,
+> The test itself looks really good to me, my only concern is that
+> the updates in unionmount repo are not visible to fstests, and may cause
+> new failures, which are out of fstests' control. But I'm not sure if
+> this really is a problem for people.
+>
+> I came up with two options anyway
+> - add unionmount tests as a submodule of fstests
+> - put unionmount tests in fstests
+>
 
-The master branch of the xfstests repository at:
+I suppose you mean git submodule?
+IMO that's a fairly good option.
+I suspect that some people would want to continue running
+unionmount independently of xfstests and I have some development
+branches, so it's convenient to keep the unionmount repo independent
+of xfstests repo and use git submodule as the "pull request" method
+between us, for keeping control of the flow of changes from my repo
+in the hands of xfstests maintainer.
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-have just been updated. It's been a month since last update, I'm really sorry
-for the long delay. I'm trying my best keep the weekly update schedule
-afterwards.
-
-As usual, this update contains various new tests and fixes & improvements.
-
-- Dave Chinner adds '-i' option to 'check' to repeat test N times
-- Lukas Czerner clears WARN_ONCE before each test, so it will be triggered
-  multiple times
-- Vladimir Zapolskiy assigns tests with correct groups to summarize them
-  properly
-
-There're still some patches pending in the list, notably the DAX related
-patchsets from Xiao Yang (though most of the patches have been reviewed by
-Darrick and Ira, thanks!). Hopefully I can take them in next update.
+But as I wrote before, I am also fine with "handing over" the official
+upstream of unionmount src to xfstests project and be the
+"sub-maintainer" for that module, but I think there is going to be more
+chatter with that option compared to the submodule option.
+Another argument in favor of submodule, is that we can always
+graduate unionmount in the future from submodule to built-in.
 
 Thanks,
-Eryu
+Amir.
 
-The new head of the master branch is commit:
-
-04416cee2198 generic/587: associate the test with quota test group
-
-New commits:
-
-Darrick J. Wong (2):
-      [3c7fd09bc794] generic/361: disable xfs metadata io error retries
-      [81a3c7dc6274] xfs/518: require scratch device
-
-Dave Chinner (1):
-      [ffa3e99f2294] check: add CLI option to repeat tests
-
-Gao Xiang (1):
-      [7db17edfbac9] xfs: add test for CVE-2020-12655
-
-Jan Kara (1):
-      [d9f86e74171d] generic/530: Require metadata journaling
-
-Lukas Czerner (1):
-      [c67ea2347454] check: clear WARN_ONCE state before each test
-
-Nikolay Borisov (1):
-      [5231c9fa1613] btrfs: test that corruption counter is incremented correctly
-
-Vladimir Zapolskiy (7):
-      [1895ea4b4249] common/rc: fix false positives due to leaked mkfs output to stderr
-      [98c3ec60484a] generic: reorder output to stderr and stdout from _scratch_mkfs
-      [dc4c442e531a] generic: assign a number of tests to attr group
-      [8dd4425f53e8] generic/079: remove assignment of the test to acl and attr groups
-      [c5e88064eb80] generic/038: assign the test to trim group of tests
-      [8d31f184d614] generic: fix insert test group associations
-      [04416cee2198] generic/587: associate the test with quota test group
-
-Yang Xu (1):
-      [5e169fbd349c] xfs/516: Use scratch_xfs_get/set_sb_field api
-
-Zorro Lang (1):
-      [3423e3326ebe] generic: test per-type quota softlimit enforcement timeout
-
-
-Code Diffstat:
-
- check                 |  26 ++++++-
- common/quota          |   4 +
- common/rc             |   2 +-
- tests/btrfs/215       |  92 +++++++++++++++++++++++
- tests/btrfs/215.out   |   2 +
- tests/btrfs/group     |   1 +
- tests/generic/361     |   5 ++
- tests/generic/530     |   1 +
- tests/generic/554     |   2 +-
- tests/generic/565     |   2 +-
- tests/generic/603     | 202 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/603.out |  41 ++++++++++
- tests/generic/group   |  21 +++---
- tests/xfs/516         |  14 +++-
- tests/xfs/518         |   1 +
- tests/xfs/520         |  86 +++++++++++++++++++++
- tests/xfs/520.out     |   2 +
- tests/xfs/group       |   1 +
- 18 files changed, 484 insertions(+), 21 deletions(-)
---
-Eryu Guan
-guaneryu@gmail.com
-
---bUc2P1NZ74ww
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAl8UklgACgkQJlKqKVyP
-52McJxAAn2aYjD5grYRDFUaNHyugIogSxmSdy9kDtndFkzX8XTA7J+yQmpJGPXnU
-AiEgWhWfTOtWROf3KCqcNoz3uzZfZlojoTn0LvVkZAlX02ZZN95DbhRS8eCL5aCq
-srsqtgsU5ktvfgwVzi7YLYu1C37RYuYPfv8FKEEBjc+hktlWOzT0PMF52TqAQ2uX
-mUz/wSLLd/31xGqr/qndD+0RSXhV9boNK5N4QPZJ8cDtVQTQI19oMbUkrpO8vUUV
-ZQPU9lbwNof1KK3ro7fogOHTp9es3nLU6wehmTALW4lZyQJJcj0v4sWg4ayLhzVC
-VtjEOF+ubF/7XyTSHF/2QETty7QrPKUtSb0RCc9sWZVVpQYN3I7ZAGiLqhRLonn5
-cmmG3KO5gvCce0PqIGU349jIT1iQo80SvjK7zIO40Qapm1u4nFh1iTweznSbCm/K
-20A47DYM0925A4ApMzyGqL2B/djU9pgVawmnX7/3VeaOUjkzcEbj2vRsnxiuc5qR
-QA8cuVw745ufVzKLaJkjcH26ZjhOt5zDe0In/oQ6xxQiloisSWDOfDNfsrAONfYI
-4CCr/Grc52E5ibOCMgSqs4ZLebH1UGunch6zFRVmdW42I5WpAa5D3kLM5fQB1Jqj
-KZX6IsTniaoF0iHeKboOicmJPpRNA+QYtu2oWNQp5JBIVydu63s=
-=3wfO
------END PGP SIGNATURE-----
-
---bUc2P1NZ74ww--
+> I'd like to hear what people think about this patchset, any other
+> comments & suggestions are welcomed!
+>
+> Thanks,
+> Eryu
+>
+> >
+> > Thanks,
+> > Amir.
+> >
+> > Amir Goldstein (3):
+> >   overlay: run unionmount testsuite test cases
+> >   overlay: add unionmount tests with multi lower layers
+> >   overlay: add unionmount tests with nested overlay
+> >
+> >  README.overlay        | 15 ++++++++++++
+> >  common/config         |  2 ++
+> >  common/overlay        | 54 +++++++++++++++++++++++++++++++++++++++++++
+> >  tests/overlay/100     | 38 ++++++++++++++++++++++++++++++
+> >  tests/overlay/100.out |  2 ++
+> >  tests/overlay/101     | 39 +++++++++++++++++++++++++++++++
+> >  tests/overlay/101.out |  2 ++
+> >  tests/overlay/102     | 40 ++++++++++++++++++++++++++++++++
+> >  tests/overlay/102.out |  2 ++
+> >  tests/overlay/103     | 38 ++++++++++++++++++++++++++++++
+> >  tests/overlay/103.out |  2 ++
+> >  tests/overlay/104     | 39 +++++++++++++++++++++++++++++++
+> >  tests/overlay/104.out |  2 ++
+> >  tests/overlay/105     | 40 ++++++++++++++++++++++++++++++++
+> >  tests/overlay/105.out |  2 ++
+> >  tests/overlay/106     | 41 ++++++++++++++++++++++++++++++++
+> >  tests/overlay/106.out |  2 ++
+> >  tests/overlay/107     | 41 ++++++++++++++++++++++++++++++++
+> >  tests/overlay/107.out |  2 ++
+> >  tests/overlay/108     | 41 ++++++++++++++++++++++++++++++++
+> >  tests/overlay/108.out |  2 ++
+> >  tests/overlay/109     | 41 ++++++++++++++++++++++++++++++++
+> >  tests/overlay/109.out |  2 ++
+> >  tests/overlay/110     | 39 +++++++++++++++++++++++++++++++
+> >  tests/overlay/110.out |  2 ++
+> >  tests/overlay/111     | 40 ++++++++++++++++++++++++++++++++
+> >  tests/overlay/111.out |  2 ++
+> >  tests/overlay/112     | 40 ++++++++++++++++++++++++++++++++
+> >  tests/overlay/112.out |  2 ++
+> >  tests/overlay/113     | 41 ++++++++++++++++++++++++++++++++
+> >  tests/overlay/113.out |  2 ++
+> >  tests/overlay/114     | 39 +++++++++++++++++++++++++++++++
+> >  tests/overlay/114.out |  2 ++
+> >  tests/overlay/115     | 40 ++++++++++++++++++++++++++++++++
+> >  tests/overlay/115.out |  2 ++
+> >  tests/overlay/116     | 40 ++++++++++++++++++++++++++++++++
+> >  tests/overlay/116.out |  2 ++
+> >  tests/overlay/117     | 41 ++++++++++++++++++++++++++++++++
+> >  tests/overlay/117.out |  2 ++
+> >  tests/overlay/group   | 18 +++++++++++++++
+> >  40 files changed, 843 insertions(+)
+> >  create mode 100755 tests/overlay/100
+> >  create mode 100644 tests/overlay/100.out
+> >  create mode 100755 tests/overlay/101
+> >  create mode 100644 tests/overlay/101.out
+> >  create mode 100755 tests/overlay/102
+> >  create mode 100644 tests/overlay/102.out
+> >  create mode 100755 tests/overlay/103
+> >  create mode 100644 tests/overlay/103.out
+> >  create mode 100755 tests/overlay/104
+> >  create mode 100644 tests/overlay/104.out
+> >  create mode 100755 tests/overlay/105
+> >  create mode 100644 tests/overlay/105.out
+> >  create mode 100755 tests/overlay/106
+> >  create mode 100644 tests/overlay/106.out
+> >  create mode 100755 tests/overlay/107
+> >  create mode 100644 tests/overlay/107.out
+> >  create mode 100755 tests/overlay/108
+> >  create mode 100644 tests/overlay/108.out
+> >  create mode 100755 tests/overlay/109
+> >  create mode 100644 tests/overlay/109.out
+> >  create mode 100755 tests/overlay/110
+> >  create mode 100644 tests/overlay/110.out
+> >  create mode 100755 tests/overlay/111
+> >  create mode 100644 tests/overlay/111.out
+> >  create mode 100755 tests/overlay/112
+> >  create mode 100644 tests/overlay/112.out
+> >  create mode 100755 tests/overlay/113
+> >  create mode 100644 tests/overlay/113.out
+> >  create mode 100755 tests/overlay/114
+> >  create mode 100644 tests/overlay/114.out
+> >  create mode 100755 tests/overlay/115
+> >  create mode 100644 tests/overlay/115.out
+> >  create mode 100755 tests/overlay/116
+> >  create mode 100644 tests/overlay/116.out
+> >  create mode 100755 tests/overlay/117
+> >  create mode 100644 tests/overlay/117.out
+> >
+> > --
+> > 2.17.1
+> >
