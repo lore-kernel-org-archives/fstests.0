@@ -1,113 +1,87 @@
-Return-Path: <SRS0=NoLx=A4=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=HfNX=A6=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	UNPARSEABLE_RELAY autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-4.0 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	UNPARSEABLE_RELAY autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4CBD0C433E0
-	for <linux-fstests@archiver.kernel.org>; Fri, 17 Jul 2020 15:57:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1895BC433E0
+	for <linux-fstests@archiver.kernel.org>; Sun, 19 Jul 2020 15:19:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 24066204EA
-	for <linux-fstests@archiver.kernel.org>; Fri, 17 Jul 2020 15:57:00 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="GdeHovjZ"
+	by mail.kernel.org (Postfix) with ESMTP id EBB4522B4D
+	for <linux-fstests@archiver.kernel.org>; Sun, 19 Jul 2020 15:19:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726381AbgGQP47 (ORCPT
+        id S1726093AbgGSPTe (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 17 Jul 2020 11:56:59 -0400
-Received: from userp2130.oracle.com ([156.151.31.86]:34482 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726104AbgGQP47 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 17 Jul 2020 11:56:59 -0400
-Received: from pps.filterd (userp2130.oracle.com [127.0.0.1])
-        by userp2130.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 06HFWGBL044543;
-        Fri, 17 Jul 2020 15:56:53 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
- : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=corp-2020-01-29;
- bh=hFcLP+wJTWhNHjZ1KSpHeel3+ellWfa+PzBT74nvFlI=;
- b=GdeHovjZx336KW946FmnYdCu94xOesRQSJ+d+aP+pSV9yUa4uFD4agJKzAsg1ZWnB6oT
- Mn3CDHwutWO0hyF3hqE3ksfWQQgIDr1wjJDdmi3ezz9LBJY+jBGMXIZaSGFK5nduTdz6
- dDM4V3vWzyPPoTfEDOKtg68NfqRgmAQREJKgniHoCTIqr/EBPdmv92X+G5utJ3sm5YCA
- loKHVt8ll7AM9JVCxZzSEATHh8KWQg/rajR62IKL7XYPfaprZWwlJXrwqNQ1Lus3dTUb
- dZVfjqaiGuVyxsddyY8DnPHJuU6/7GMk/kAchMqq8s9EV0Zd2O0/3Cn7eKWe3y79VP8m RA== 
-Received: from userp3020.oracle.com (userp3020.oracle.com [156.151.31.79])
-        by userp2130.oracle.com with ESMTP id 3274urr48e-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Fri, 17 Jul 2020 15:56:53 +0000
-Received: from pps.filterd (userp3020.oracle.com [127.0.0.1])
-        by userp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 06HFXtwG161226;
-        Fri, 17 Jul 2020 15:56:52 GMT
-Received: from aserv0122.oracle.com (aserv0122.oracle.com [141.146.126.236])
-        by userp3020.oracle.com with ESMTP id 32bbk0kuwt-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Fri, 17 Jul 2020 15:56:52 +0000
-Received: from abhmp0001.oracle.com (abhmp0001.oracle.com [141.146.116.7])
-        by aserv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 06HFupMd007767;
-        Fri, 17 Jul 2020 15:56:51 GMT
-Received: from localhost (/67.169.218.210)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Fri, 17 Jul 2020 08:56:51 -0700
-Date:   Fri, 17 Jul 2020 08:56:50 -0700
-From:   "Darrick J. Wong" <darrick.wong@oracle.com>
-To:     Vladimir Zapolskiy <vladimir@tuxera.com>
-Cc:     Eryu Guan <guaneryu@gmail.com>, fstests@vger.kernel.org
-Subject: Re: [PATCH] generic/587: associate the test with quota test group
-Message-ID: <20200717155650.GN7625@magnolia>
-References: <20200717110936.24602-1-vladimir@tuxera.com>
+        Sun, 19 Jul 2020 11:19:34 -0400
+Received: from out20-123.mail.aliyun.com ([115.124.20.123]:43330 "EHLO
+        out20-123.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726073AbgGSPTe (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 19 Jul 2020 11:19:34 -0400
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.09813765|-1;BR=01201311R141S32rulernew998_84748_2000303;CH=blue;DM=|CONTINUE|false|;DS=CONTINUE|ham_regular_dialog|0.174735-0.00328815-0.821976;FP=0|0|0|0|0|-1|-1|-1;HT=e02c03302;MF=guan@eryu.me;NM=1;PH=DS;RN=6;RT=6;SR=0;TI=SMTPD_---.I4L7d4B_1595171968;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.I4L7d4B_1595171968)
+          by smtp.aliyun-inc.com(10.147.43.95);
+          Sun, 19 Jul 2020 23:19:28 +0800
+Date:   Sun, 19 Jul 2020 23:19:28 +0800
+From:   Eryu Guan <guan@eryu.me>
+To:     Anand Jain <anand.jain@oracle.com>
+Cc:     Nikolay Borisov <nborisov@suse.com>, fstests@vger.kernel.org,
+        linux-btrfs@vger.kernel.org, josef@toxicpanda.com,
+        guaneryu@gmail.com
+Subject: Re: [PATCH v2] fstests: btrfs test if show_devname returns sprout
+ device
+Message-ID: <20200719151928.GB2557159@desktop>
+References: <6dcd6b3c-06a9-51a7-988b-63cb254d7749@suse.com>
+ <20200713110017.66825-1-anand.jain@oracle.com>
+ <f8d76542-f7bb-5207-267e-82dae31e49af@suse.com>
+ <c334d1b4-5d68-f1ce-44b2-2c7501760f53@oracle.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20200717110936.24602-1-vladimir@tuxera.com>
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9685 signatures=668680
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=1 mlxscore=0 adultscore=0
- spamscore=0 mlxlogscore=999 malwarescore=0 phishscore=0 bulkscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
- definitions=main-2007170114
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9685 signatures=668680
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 lowpriorityscore=0 impostorscore=0
- suspectscore=1 phishscore=0 spamscore=0 mlxlogscore=999 malwarescore=0
- mlxscore=0 priorityscore=1501 adultscore=0 bulkscore=0 clxscore=1015
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
- definitions=main-2007170114
+In-Reply-To: <c334d1b4-5d68-f1ce-44b2-2c7501760f53@oracle.com>
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Jul 17, 2020 at 02:09:36PM +0300, Vladimir Zapolskiy wrote:
-> The test checks regressions on quota accounting and therefore it relies
-> on quota support by a tested filesystem, this makes it reasonable to
-> include the test into 'quota' test group for better managing of test
-> groups.
+On Mon, Jul 13, 2020 at 07:32:57PM +0800, Anand Jain wrote:
 > 
-> Signed-off-by: Vladimir Zapolskiy <vladimir@tuxera.com>
-
-Oops, sorry I forgot that.
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
-
---D
-
-> ---
->  tests/generic/group | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
 > 
-> diff --git a/tests/generic/group b/tests/generic/group
-> index 0797cc9984c1..23f9cfdc7fcb 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -589,7 +589,7 @@
->  584 auto quick encrypt
->  585 auto rename
->  586 auto quick rw prealloc
-> -587 auto quick rw prealloc
-> +587 auto quick rw prealloc quota
->  588 auto quick log clone
->  589 auto mount
->  590 auto prealloc preallocrw
-> -- 
-> 2.25.1
 > 
+> > > +# check if the show_devname() returns the sprout device instead of seed device.
+> > > +cat /proc/self/mounts | grep $SCRATCH_MNT | awk '{print $1}' | \
+> > > +							_filter_devs $sprout
+> > 
+> > Why does this have to be so complicated - 4 chained program executions,
+> > 1 additional function...
+> > 
+> 
+> For example:
+>  /dev/sdb /btrfs btrfs ro,relatime,noacl,space_cache,subvolid=5,subvol=/ 0 0
+> 
+>  $1 to $3 remain constant, but $4 options might vary. So to avoid
+>  unnecessary breakage of test case due to kernel updates or mount
+>  options, I just used $1.
+> 
+> > dev=$(grep $SCRATCH_MOUNT /proc/mounts | awk '{printf $1}')
+
+This looks simpler, just use $AWK_PROG instead of bare awk.
+
+> > 
+> > if [ $sprout != $dev ]; then
+> >   _fail "Unexpected device"
+> > fi
+>  fstests prefers use of .out file to look for the expected string.
+>  Will wait for Eryu comments.
+
+Even $dev is not constant, we don't have to filter the device to
+"SCRATCH_DEV" by _filter_devs. Just do
+
+echo "Silence is golden"
+if [ "$sprout" != "$dev" ]; then
+	echo "Unexpected device: $dev"
+fi
+
+Thanks,
+Eryu
