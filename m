@@ -2,227 +2,243 @@ Return-Path: <SRS0=HfNX=A6=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.0 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 77892C433E2
-	for <linux-fstests@archiver.kernel.org>; Sun, 19 Jul 2020 18:36:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 73505C433E1
+	for <linux-fstests@archiver.kernel.org>; Sun, 19 Jul 2020 18:45:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5363721744
-	for <linux-fstests@archiver.kernel.org>; Sun, 19 Jul 2020 18:36:52 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="TxjDrWDg"
+	by mail.kernel.org (Postfix) with ESMTP id 56FB020691
+	for <linux-fstests@archiver.kernel.org>; Sun, 19 Jul 2020 18:45:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726614AbgGSSgv (ORCPT
+        id S1726051AbgGSSpX (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 19 Jul 2020 14:36:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42264 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726009AbgGSSgv (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 19 Jul 2020 14:36:51 -0400
-Received: from mail-il1-x144.google.com (mail-il1-x144.google.com [IPv6:2607:f8b0:4864:20::144])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7309FC0619D2;
-        Sun, 19 Jul 2020 11:36:51 -0700 (PDT)
-Received: by mail-il1-x144.google.com with SMTP id o3so11417099ilo.12;
-        Sun, 19 Jul 2020 11:36:51 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=EJR/ZsxG7WM2Vu9KbmVQpFIG+nDmhBW9NBHHUpFALn0=;
-        b=TxjDrWDgCCnKalSE1uFI35DTqy3FYqreiNwo6rdWVRwPSwevhYi2MeSroNRqB9x7bQ
-         UQzk2vYDLfy5DxDby8X4Klw+ioN1/FMB6Vby1I+i6k2ucunAciawe/qUn1SVwSWQVYWV
-         oQCbk7l9oMo1D+e9u8bMbjyieG5eUXiuocNefufIOnlAznlXPuhRCxF/PZDDWt7nymBF
-         AYtllJ7ynFH9tYum+YZfqgvNz5Dyw6F/O0llQf2Gjt2N5jjTy/0BnE5WyFSxYGgYLdvi
-         7yv0Zuij4c4w9TMPr3rdrSDifyqAdGuG4ecCGym5piQ1R8YjIniHCojZqQP+gQjFCfTN
-         5eyg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=EJR/ZsxG7WM2Vu9KbmVQpFIG+nDmhBW9NBHHUpFALn0=;
-        b=E7GPedCsjB5U9EpPWm3MPeGZxMS/ebdXCSFYh0vZWY177OUbkhPqIwdvsIXClXq2V+
-         s/xdUoThx24QIB0hl+VlBtQ5EnjB4GTWb3oV5zVIt7QUbZGPfgdyZziRVPLMng3e0Xzq
-         MLGbO55myL0PGO4AoIhpPRoS6f4H42j9PH2yC7bVB11T7S2M6ghvQc3qYG7KKe7H3YEN
-         v66hlqoe7L+59//WihPPlK0yuu8a3xK5fUvxWlLMosO0w9XjirW/mj7Xz4Pqwe+759+c
-         v5C2NfgDIfxevgBH6byLOy5XFGY2XXuQ6UGShgfZCaTdIyoPa0Rtubsz071IU5uyvuou
-         D4rg==
-X-Gm-Message-State: AOAM5334k4sg8hVoEQxxp7BuaDqWw76vUHPWcOoEhQQR/D59iSyeD65r
-        j6ChVfvoQu0eFPLz7qCdqih/j2tscMJf93jlU44=
-X-Google-Smtp-Source: ABdhPJxcZFex3YpHFt9X66XzZWlN1qdpzATZl7BNuM6amNfVfQ90UtuP5vw2NwJnu+aBRDfTapMQiPE+tevzdlemYQ8=
-X-Received: by 2002:a92:b6d4:: with SMTP id m81mr19944963ill.72.1595183810847;
- Sun, 19 Jul 2020 11:36:50 -0700 (PDT)
+        Sun, 19 Jul 2020 14:45:23 -0400
+Received: from out20-111.mail.aliyun.com ([115.124.20.111]:60788 "EHLO
+        out20-111.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726009AbgGSSpW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 19 Jul 2020 14:45:22 -0400
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.9239135|0.8991504;CH=green;DM=|SPAM|false|;DS=CONTINUE|ham_system_inform|0.0827289-0.000855932-0.916415;FP=0|0|0|0|0|-1|-1|-1;HT=e01l10422;MF=guan@eryu.me;NM=1;PH=DS;RN=3;RT=3;SR=0;TI=SMTPD_---.I4OqYPw_1595184317;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.I4OqYPw_1595184317)
+          by smtp.aliyun-inc.com(10.147.42.135);
+          Mon, 20 Jul 2020 02:45:17 +0800
+Date:   Mon, 20 Jul 2020 02:45:16 +0800
+From:   Eryu Guan <guan@eryu.me>
+To:     Filipe Manana <fdmanana@kernel.org>
+Cc:     fstests <fstests@vger.kernel.org>,
+        linux-btrfs <linux-btrfs@vger.kernel.org>
+Subject: Re: [PATCH] btrfs: test creating a snapshot after RWF_NOWAIT write
+ works as expected
+Message-ID: <20200719184516.GH2557159@desktop>
+References: <20200615175028.15090-1-fdmanana@kernel.org>
+ <20200719164417.GC2557159@desktop>
+ <CAL3q7H6PPBF6UqUHoOGpU1bDo0bg2-jUP9o5h+oCpNzjfM8DRA@mail.gmail.com>
 MIME-Version: 1.0
-References: <20200531110156.6613-1-amir73il@gmail.com> <20200719181116.GG2557159@desktop>
-In-Reply-To: <20200719181116.GG2557159@desktop>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Sun, 19 Jul 2020 21:36:39 +0300
-Message-ID: <CAOQ4uxjY7SqyVEG9vCtv=wB9BxDovpjwZGAQ7h5+VeiZPMKOeQ@mail.gmail.com>
-Subject: Re: [PATCH 0/3] Running unionmount testsuite from xfstests
-To:     Eryu Guan <guan@eryu.me>
-Cc:     Eryu Guan <guaneryu@gmail.com>, Miklos Szeredi <miklos@szeredi.hu>,
-        Vivek Goyal <vgoyal@redhat.com>,
-        overlayfs <linux-unionfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAL3q7H6PPBF6UqUHoOGpU1bDo0bg2-jUP9o5h+oCpNzjfM8DRA@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Jul 19, 2020 at 9:11 PM Eryu Guan <guan@eryu.me> wrote:
->
-> Hi Amir,
->
-> On Sun, May 31, 2020 at 02:01:53PM +0300, Amir Goldstein wrote:
-> > Eryu,
+On Sun, Jul 19, 2020 at 07:23:53PM +0100, Filipe Manana wrote:
+> On Sun, Jul 19, 2020 at 5:44 PM Eryu Guan <guan@eryu.me> wrote:
 > >
-> > unionmount testsuite has a lot more test coverage than the overlay
-> > xfstests, but it has a lot less exposure to testers.
+> > On Mon, Jun 15, 2020 at 06:50:28PM +0100, fdmanana@kernel.org wrote:
+> > > From: Filipe Manana <fdmanana@suse.com>
+> > >
+> > > Test that creating a snapshot after writing to a file using a RWF_NOWAIT
+> > > works, does not hang the snapshot creation task, and we are able to read
+> > > the data after.
+> > >
+> > > Currently btrfs hangs when creating the snapshot due to a missing unlock
+> > > of a snapshot lock, but it is fixed by a patch with the following subject:
+> > >
+> > >   "btrfs: fix hang on snapshot creation after RWF_NOWAIT write"
+> > >
+> > > Signed-off-by: Filipe Manana <fdmanana@suse.com>
 > >
-> > The various test setups that I have added to unionmount testsuite since
-> > I took over the maintanace of the testsuite have even smaller exposure
-> > to testers.
+> > So sorry for the late review.. But I hit the following failure with
+> > v5.8-rc5 kernel, which contains the mentioned fix
 > >
-> > These patches add overlay tests that are used as a harness to run
-> > different setups of unionmount testsuite.  I have been using this method
-> > for over two year for testing my overlayfs branches.
+> >  QA output created by 215
+> >  wrote 65536/65536 bytes at offset 0
+> >  XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> > -wrote 65536/65536 bytes at offset 0
+> > -XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> > +pwrite: Input/output error
+> >  Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/snap'
+> >  File data in the subvolume:
+> > -0000000 fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+> > +0000000 ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab
+> >  *
+> >  0065536
+> >  File data in the snapshot:
+> > -0000000 fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+> > +0000000 ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab
+> >  *
+> >  0065536
 > >
-> > What does it take to install unionmount testsuite?
-> > As README.overlay says:
-> >
-> >   git clone https://github.com/amir73il/unionmount-testsuite.git
-> >   ln -s $PWD/unionmount-testsuite <path-to-xfstests>/src/
->
-> I'm really sorry for the long-long delay..
->
+> > And I did hit hang when testing without the fix. Is this something that
+> > should be fixed in the test?
+> 
+> Odd.
+> 
+> Works for me on 5.8-rc5:
+> 
+> $ ./check btrfs/215
+> FSTYP         -- btrfs
+> PLATFORM      -- Linux/x86_64 debian9 5.8.0-rc5-btrfs-next-63 #1 SMP
+> PREEMPT Sun Jul 19 17:53:27 WEST 2020
+> MKFS_OPTIONS  -- /dev/sdb
+> MOUNT_OPTIONS -- /dev/sdb /home/fdmanana/btrfs-tests/scratch_1
+> 
+> btrfs/215 1s
+> Ran: btrfs/215
+> Passed all 1 tests
+> 
+> Is there anything in dmesg?
 
-No worries.
+Hmm, there is a dio failure message.
 
-> The test itself looks really good to me, my only concern is that
-> the updates in unionmount repo are not visible to fstests, and may cause
-> new failures, which are out of fstests' control. But I'm not sure if
-> this really is a problem for people.
->
-> I came up with two options anyway
-> - add unionmount tests as a submodule of fstests
-> - put unionmount tests in fstests
->
+[ 8077.648741] run fstests btrfs/216 at 2020-07-20 02:42:37
+[ 8078.169516] BTRFS: device fsid 0de433a0-628f-4f7c-bb81-a9632d690d0f devid 1 transid 5 /dev/mapper/testvg-lv2 scanned by mkfs.btrfs (76661)
+[ 8078.199269] BTRFS info (device dm-5): disk space caching is enabled
+[ 8078.200897] BTRFS info (device dm-5): has skinny extents
+[ 8078.202227] BTRFS info (device dm-5): flagging fs with big metadata feature
+[ 8078.208853] BTRFS info (device dm-5): checking UUID tree
+[ 8078.231519] BTRFS warning (device dm-5): direct IO failed ino 257 rw 1,2131969 sector 0x6800 len 4096 err no 10
+[ 8078.357124] BTRFS info (device dm-5): disk space caching is enabled
+[ 8078.357906] BTRFS info (device dm-5): has skinny extents
 
-I suppose you mean git submodule?
-IMO that's a fairly good option.
-I suspect that some people would want to continue running
-unionmount independently of xfstests and I have some development
-branches, so it's convenient to keep the unionmount repo independent
-of xfstests repo and use git submodule as the "pull request" method
-between us, for keeping control of the flow of changes from my repo
-in the hands of xfstests maintainer.
+My kernel version and btrfs-progs version
 
-But as I wrote before, I am also fine with "handing over" the official
-upstream of unionmount src to xfstests project and be the
-"sub-maintainer" for that module, but I think there is going to be more
-chatter with that option compared to the submodule option.
-Another argument in favor of submodule, is that we can always
-graduate unionmount in the future from submodule to built-in.
+[root@fedoravm xfstests]# uname -a
+Linux fedoravm 5.8.0-rc5 #52 SMP Mon Jul 20 00:25:44 CST 2020 x86_64 x86_64 x86_64 GNU/Linux
+[root@fedoravm xfstests]# btrfs --version
+btrfs-progs v5.4
 
 Thanks,
-Amir.
+Eryu
 
-> I'd like to hear what people think about this patchset, any other
-> comments & suggestions are welcomed!
->
-> Thanks,
-> Eryu
->
+> 
+> 
+> 
 > >
 > > Thanks,
-> > Amir.
+> > Eryu
 > >
-> > Amir Goldstein (3):
-> >   overlay: run unionmount testsuite test cases
-> >   overlay: add unionmount tests with multi lower layers
-> >   overlay: add unionmount tests with nested overlay
-> >
-> >  README.overlay        | 15 ++++++++++++
-> >  common/config         |  2 ++
-> >  common/overlay        | 54 +++++++++++++++++++++++++++++++++++++++++++
-> >  tests/overlay/100     | 38 ++++++++++++++++++++++++++++++
-> >  tests/overlay/100.out |  2 ++
-> >  tests/overlay/101     | 39 +++++++++++++++++++++++++++++++
-> >  tests/overlay/101.out |  2 ++
-> >  tests/overlay/102     | 40 ++++++++++++++++++++++++++++++++
-> >  tests/overlay/102.out |  2 ++
-> >  tests/overlay/103     | 38 ++++++++++++++++++++++++++++++
-> >  tests/overlay/103.out |  2 ++
-> >  tests/overlay/104     | 39 +++++++++++++++++++++++++++++++
-> >  tests/overlay/104.out |  2 ++
-> >  tests/overlay/105     | 40 ++++++++++++++++++++++++++++++++
-> >  tests/overlay/105.out |  2 ++
-> >  tests/overlay/106     | 41 ++++++++++++++++++++++++++++++++
-> >  tests/overlay/106.out |  2 ++
-> >  tests/overlay/107     | 41 ++++++++++++++++++++++++++++++++
-> >  tests/overlay/107.out |  2 ++
-> >  tests/overlay/108     | 41 ++++++++++++++++++++++++++++++++
-> >  tests/overlay/108.out |  2 ++
-> >  tests/overlay/109     | 41 ++++++++++++++++++++++++++++++++
-> >  tests/overlay/109.out |  2 ++
-> >  tests/overlay/110     | 39 +++++++++++++++++++++++++++++++
-> >  tests/overlay/110.out |  2 ++
-> >  tests/overlay/111     | 40 ++++++++++++++++++++++++++++++++
-> >  tests/overlay/111.out |  2 ++
-> >  tests/overlay/112     | 40 ++++++++++++++++++++++++++++++++
-> >  tests/overlay/112.out |  2 ++
-> >  tests/overlay/113     | 41 ++++++++++++++++++++++++++++++++
-> >  tests/overlay/113.out |  2 ++
-> >  tests/overlay/114     | 39 +++++++++++++++++++++++++++++++
-> >  tests/overlay/114.out |  2 ++
-> >  tests/overlay/115     | 40 ++++++++++++++++++++++++++++++++
-> >  tests/overlay/115.out |  2 ++
-> >  tests/overlay/116     | 40 ++++++++++++++++++++++++++++++++
-> >  tests/overlay/116.out |  2 ++
-> >  tests/overlay/117     | 41 ++++++++++++++++++++++++++++++++
-> >  tests/overlay/117.out |  2 ++
-> >  tests/overlay/group   | 18 +++++++++++++++
-> >  40 files changed, 843 insertions(+)
-> >  create mode 100755 tests/overlay/100
-> >  create mode 100644 tests/overlay/100.out
-> >  create mode 100755 tests/overlay/101
-> >  create mode 100644 tests/overlay/101.out
-> >  create mode 100755 tests/overlay/102
-> >  create mode 100644 tests/overlay/102.out
-> >  create mode 100755 tests/overlay/103
-> >  create mode 100644 tests/overlay/103.out
-> >  create mode 100755 tests/overlay/104
-> >  create mode 100644 tests/overlay/104.out
-> >  create mode 100755 tests/overlay/105
-> >  create mode 100644 tests/overlay/105.out
-> >  create mode 100755 tests/overlay/106
-> >  create mode 100644 tests/overlay/106.out
-> >  create mode 100755 tests/overlay/107
-> >  create mode 100644 tests/overlay/107.out
-> >  create mode 100755 tests/overlay/108
-> >  create mode 100644 tests/overlay/108.out
-> >  create mode 100755 tests/overlay/109
-> >  create mode 100644 tests/overlay/109.out
-> >  create mode 100755 tests/overlay/110
-> >  create mode 100644 tests/overlay/110.out
-> >  create mode 100755 tests/overlay/111
-> >  create mode 100644 tests/overlay/111.out
-> >  create mode 100755 tests/overlay/112
-> >  create mode 100644 tests/overlay/112.out
-> >  create mode 100755 tests/overlay/113
-> >  create mode 100644 tests/overlay/113.out
-> >  create mode 100755 tests/overlay/114
-> >  create mode 100644 tests/overlay/114.out
-> >  create mode 100755 tests/overlay/115
-> >  create mode 100644 tests/overlay/115.out
-> >  create mode 100755 tests/overlay/116
-> >  create mode 100644 tests/overlay/116.out
-> >  create mode 100755 tests/overlay/117
-> >  create mode 100644 tests/overlay/117.out
-> >
-> > --
-> > 2.17.1
-> >
+> > > ---
+> > >  tests/btrfs/214     | 66 +++++++++++++++++++++++++++++++++++++++++++++
+> > >  tests/btrfs/214.out | 14 ++++++++++
+> > >  tests/btrfs/group   |  1 +
+> > >  3 files changed, 81 insertions(+)
+> > >  create mode 100755 tests/btrfs/214
+> > >  create mode 100644 tests/btrfs/214.out
+> > >
+> > > diff --git a/tests/btrfs/214 b/tests/btrfs/214
+> > > new file mode 100755
+> > > index 00000000..c835e844
+> > > --- /dev/null
+> > > +++ b/tests/btrfs/214
+> > > @@ -0,0 +1,66 @@
+> > > +#! /bin/bash
+> > > +# SPDX-License-Identifier: GPL-2.0
+> > > +# Copyright (C) 2020 SUSE Linux Products GmbH. All Rights Reserved.
+> > > +#
+> > > +# FSQA Test No. 214
+> > > +#
+> > > +# Test that creating a snapshot after writing to a file using a RWF_NOWAIT
+> > > +# works, does not hang the snapshot creation task, and we are able to read
+> > > +# the data after.
+> > > +#
+> > > +seq=`basename $0`
+> > > +seqres=$RESULT_DIR/$seq
+> > > +echo "QA output created by $seq"
+> > > +tmp=/tmp/$$
+> > > +status=1     # failure is the default!
+> > > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > > +
+> > > +_cleanup()
+> > > +{
+> > > +     cd /
+> > > +     rm -f $tmp.*
+> > > +}
+> > > +
+> > > +# get standard environment, filters and checks
+> > > +. ./common/rc
+> > > +. ./common/filter
+> > > +. ./common/attr
+> > > +
+> > > +# real QA test starts here
+> > > +_supported_fs btrfs
+> > > +_supported_os Linux
+> > > +_require_scratch
+> > > +_require_odirect
+> > > +_require_xfs_io_command pwrite -N
+> > > +_require_chattr C
+> > > +
+> > > +rm -f $seqres.full
+> > > +
+> > > +_scratch_mkfs >>$seqres.full 2>&1
+> > > +_scratch_mount
+> > > +
+> > > +# RWF_NOWAIT writes require NOCOW
+> > > +touch $SCRATCH_MNT/f
+> > > +$CHATTR_PROG +C $SCRATCH_MNT/f
+> > > +
+> > > +$XFS_IO_PROG -d -c "pwrite -S 0xab 0 64K" $SCRATCH_MNT/f | _filter_xfs_io
+> > > +
+> > > +# Now do a WEF_WRITE into a range containing a NOCOWable extent.
+> > > +$XFS_IO_PROG -d -c "pwrite -N -V 1 -S 0xfe 0 64K" $SCRATCH_MNT/f \
+> > > +     | _filter_xfs_io
+> > > +
+> > > +$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/snap \
+> > > +     | _filter_scratch
+> > > +
+> > > +# Unmount, mount again and verify the file in the subvolume and snapshot has
+> > > +# the correct data.
+> > > +_scratch_cycle_mount
+> > > +
+> > > +echo "File data in the subvolume:"
+> > > +od -A d -t x1 $SCRATCH_MNT/f
+> > > +
+> > > +echo "File data in the snapshot:"
+> > > +od -A d -t x1 $SCRATCH_MNT/snap/f
+> > > +
+> > > +status=0
+> > > +exit
+> > > diff --git a/tests/btrfs/214.out b/tests/btrfs/214.out
+> > > new file mode 100644
+> > > index 00000000..6cc66972
+> > > --- /dev/null
+> > > +++ b/tests/btrfs/214.out
+> > > @@ -0,0 +1,14 @@
+> > > +QA output created by 214
+> > > +wrote 65536/65536 bytes at offset 0
+> > > +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> > > +wrote 65536/65536 bytes at offset 0
+> > > +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> > > +Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/snap'
+> > > +File data in the subvolume:
+> > > +0000000 fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+> > > +*
+> > > +0065536
+> > > +File data in the snapshot:
+> > > +0000000 fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+> > > +*
+> > > +0065536
+> > > diff --git a/tests/btrfs/group b/tests/btrfs/group
+> > > index 9e48ecc1..a3706e7d 100644
+> > > --- a/tests/btrfs/group
+> > > +++ b/tests/btrfs/group
+> > > @@ -216,3 +216,4 @@
+> > >  211 auto quick log prealloc
+> > >  212 auto balance dangerous
+> > >  213 auto balance dangerous
+> > > +214 auto quick snapshot
+> > > --
+> > > 2.26.2
