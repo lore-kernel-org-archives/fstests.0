@@ -2,163 +2,184 @@ Return-Path: <SRS0=7bA6=A7=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.5 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	UNPARSEABLE_RELAY,USER_AGENT_GIT autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CA761C433DF
-	for <linux-fstests@archiver.kernel.org>; Mon, 20 Jul 2020 03:40:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B2E27C433E2
+	for <linux-fstests@archiver.kernel.org>; Mon, 20 Jul 2020 03:56:13 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A595920729
-	for <linux-fstests@archiver.kernel.org>; Mon, 20 Jul 2020 03:40:08 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8D61B2250E
+	for <linux-fstests@archiver.kernel.org>; Mon, 20 Jul 2020 03:56:13 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="t3ULx0e5"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726123AbgGTDkI (ORCPT
+        id S1726135AbgGTD4N (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 19 Jul 2020 23:40:08 -0400
-Received: from szxga05-in.huawei.com ([45.249.212.191]:7786 "EHLO huawei.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726109AbgGTDkI (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 19 Jul 2020 23:40:08 -0400
-Received: from DGGEMS405-HUB.china.huawei.com (unknown [172.30.72.60])
-        by Forcepoint Email with ESMTP id 5A940B5D02A33615E4EC;
-        Mon, 20 Jul 2020 11:40:06 +0800 (CST)
-Received: from [10.164.122.247] (10.164.122.247) by smtp.huawei.com
- (10.3.19.205) with Microsoft SMTP Server (TLS) id 14.3.487.0; Mon, 20 Jul
- 2020 11:40:00 +0800
-Subject: Re: [PATCH 1/2] generic: add test for race between listxattr and
- setxatr
-To:     Hou Tao <houtao1@huawei.com>, <guaneryu@gmail.com>,
-        Richard Weinberger <richard@nod.at>
-CC:     <fstests@vger.kernel.org>
-References: <20200717084447.66402-1-houtao1@huawei.com>
- <20200717084447.66402-2-houtao1@huawei.com>
-From:   Chao Yu <yuchao0@huawei.com>
-Message-ID: <364596a1-c9bb-3a10-a132-0f43907c2241@huawei.com>
-Date:   Mon, 20 Jul 2020 11:40:00 +0800
-User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:52.0) Gecko/20100101
- Thunderbird/52.9.1
+        Sun, 19 Jul 2020 23:56:13 -0400
+Received: from aserp2120.oracle.com ([141.146.126.78]:35744 "EHLO
+        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726123AbgGTD4N (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 19 Jul 2020 23:56:13 -0400
+Received: from pps.filterd (aserp2120.oracle.com [127.0.0.1])
+        by aserp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 06K3rH2F080949;
+        Mon, 20 Jul 2020 03:56:06 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=from : to : cc :
+ subject : date : message-id : in-reply-to : references : mime-version :
+ content-transfer-encoding; s=corp-2020-01-29;
+ bh=6XAjsqu1NZRRTDKfocWL/kOEPpFBo13XzXOAYGDf67k=;
+ b=t3ULx0e5gOhS1lXG+ML2pLrG/ECqARiYfiLChUAbqiI8SKK6+EI3zWxDzDGH5gU857zC
+ 2Fu4hLpBb6PTNu4W1ByDrISqLo71xBcWBPQqt5lBzpYdxz/ZH0V1QvLCmI5GyMCa6uDO
+ sQBTbuJeo0HJHmgZ4B8AIT+bduFpFQQFFFt8ff8Kk8k57Keb4OOiSzPc11rhJ+WdSJ31
+ bhZS1X9DZXjWZMxY2EDoWITh3D1wCM6HfaGVALnZHkUzyG+qy7Uip/IlqmYPhFIwuTvl
+ GOMRAQSVJcFvGW9B0ZU5WIwJ7oQZIbI/OtQKzh7hTieGLStXMWkCK673H0CPguwLkN+W Jw== 
+Received: from aserp3020.oracle.com (aserp3020.oracle.com [141.146.126.70])
+        by aserp2120.oracle.com with ESMTP id 32bs1m4e1j-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Mon, 20 Jul 2020 03:56:06 +0000
+Received: from pps.filterd (aserp3020.oracle.com [127.0.0.1])
+        by aserp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 06K3ls5G132146;
+        Mon, 20 Jul 2020 03:56:05 GMT
+Received: from userv0121.oracle.com (userv0121.oracle.com [156.151.31.72])
+        by aserp3020.oracle.com with ESMTP id 32cqm83vdf-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Mon, 20 Jul 2020 03:56:05 +0000
+Received: from abhmp0015.oracle.com (abhmp0015.oracle.com [141.146.116.21])
+        by userv0121.oracle.com (8.14.4/8.13.8) with ESMTP id 06K3u3rg013231;
+        Mon, 20 Jul 2020 03:56:04 GMT
+Received: from localhost.localdomain (/39.109.231.106)
+        by default (Oracle Beehive Gateway v4.0)
+        with ESMTP ; Mon, 20 Jul 2020 03:56:03 +0000
+From:   Anand Jain <anand.jain@oracle.com>
+To:     linux-btrfs@vger.kernel.org
+Cc:     fstests@vger.kernel.org, guan@eryu.me, nborisov@suse.com
+Subject: [PATCH v3] fstests: btrfs test if show_devname returns sprout device
+Date:   Mon, 20 Jul 2020 11:55:54 +0800
+Message-Id: <20200720035554.5549-1-anand.jain@oracle.com>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20200719151928.GB2557159@desktop>
+References: <20200719151928.GB2557159@desktop>
 MIME-Version: 1.0
-In-Reply-To: <20200717084447.66402-2-houtao1@huawei.com>
-Content-Type: text/plain; charset="windows-1252"; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.164.122.247]
-X-CFilter-Loop: Reflected
+Content-Transfer-Encoding: 8bit
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9687 signatures=668680
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxscore=0 spamscore=0 phishscore=0
+ bulkscore=0 malwarescore=0 mlxlogscore=999 adultscore=0 suspectscore=1
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
+ definitions=main-2007200027
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9687 signatures=668680
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=1 bulkscore=0 adultscore=0
+ lowpriorityscore=0 mlxlogscore=999 malwarescore=0 clxscore=1011
+ spamscore=0 mlxscore=0 impostorscore=0 phishscore=0 priorityscore=1501
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
+ definitions=main-2007200027
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Hi Tao,
+Test if the show_devname() returns sprout device instead of seed device.
 
-On 2020/7/17 16:44, Hou Tao wrote:
-> Add reproducer for a bug on ubifs where listxattr() copies
-> the newly created xattr names regardless of the remaining
-> buffer size, fails the assertion of used buffer size,
-> and may corrupt buffer memory.
-> 
-> Signed-off-by: Hou Tao <houtao1@huawei.com>
-> ---
->   tests/generic/998     | 64 +++++++++++++++++++++++++++++++++++++++++++
->   tests/generic/998.out |  2 ++
->   tests/generic/group   |  1 +
->   3 files changed, 67 insertions(+)
->   create mode 100644 tests/generic/998
->   create mode 100644 tests/generic/998.out
-> 
-> diff --git a/tests/generic/998 b/tests/generic/998
-> new file mode 100644
-> index 00000000..b108a969
-> --- /dev/null
-> +++ b/tests/generic/998
-> @@ -0,0 +1,64 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2020 Huawei. All Rights Reserved.
-> +#
-> +# FS QA Test 998
-> +#
-> +# Test race between listxattr() and setxattr(). It reproduces a bug
-> +# on UBIFS where listxattr() copies the newly created xattr names
-> +# regardless of the remaining buffer size, fails the assertion of
-> +# used buffer size, and may corrupt buffer memory.
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +	rm -f $TEST_DIR/$seq
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/attr
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +_supported_fs generic
-> +_supported_os Linux
-> +_require_attrs
-> +
-> +target=$TEST_DIR/$seq
-> +touch $target
-> +
-> +# start a background listxattr
-> +runfile="$tmp.listxattr"
-> +touch $runfile
-> +while [ -e $runfile ]; do
-> +	${GETFATTR_PROG} $target >/dev/null 2>&1
-> +done &
-> +
-> +# add new xattr continuously
-> +largename=`for i in $(seq 0 128); do echo -n a; done`
-> +for i in $(seq 0 99); do
-> +	${SETFATTR_PROG} -n user.${largename}.$i -v $i $target
+Signed-off-by: Anand Jain <anand.jain@oracle.com>
+---
+v2: check for presence of needed sprout device.
+v3: check for not presence of needed sprout device and break the
+silence.
 
-Now, f2fs just supports storing xattr in one 4KB size xattr block +
-inline space in inode, so this testcase will always fail with f2fs,
-would you please consider adjusting parameter to cover f2fs case?
+ tests/btrfs/215     | 63 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/215.out |  2 ++
+ tests/btrfs/group   |  1 +
+ 3 files changed, 66 insertions(+)
+ create mode 100755 tests/btrfs/215
+ create mode 100644 tests/btrfs/215.out
 
-Thanks,
+diff --git a/tests/btrfs/215 b/tests/btrfs/215
+new file mode 100755
+index 000000000000..5be6d0f60192
+--- /dev/null
++++ b/tests/btrfs/215
+@@ -0,0 +1,63 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2020 Oracle.  All Rights Reserved.
++#
++# FS QA Test 215
++#
++# Test if the show_devname() returns sprout device instead of seed device.
++#
++# Fixed in kernel patch:
++#   btrfs: btrfs_show_devname don't traverse into the seed fsid
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch_dev_pool 2
++
++_scratch_dev_pool_get 2
++
++seed=$(echo $SCRATCH_DEV_POOL | awk '{print $1}')
++sprout=$(echo $SCRATCH_DEV_POOL | awk '{print $2}')
++
++_mkfs_dev $seed
++$BTRFS_TUNE_PROG -S 1 $seed
++_mount $seed $SCRATCH_MNT >> $seqres.full 2>&1
++cat /proc/self/mounts | grep $seed >> $seqres.full
++$BTRFS_UTIL_PROG device add -f $sprout $SCRATCH_MNT
++cat /proc/self/mounts | grep $sprout >> $seqres.full
++
++# check if the show_devname() returns the sprout device instead of seed device.
++dev=$(grep $SCRATCH_MNT /proc/self/mounts | $AWK_PROG '{print $1}')
++
++if [ "$sprout" != "$dev" ]; then
++	echo "Unexpected device: $dev"
++fi
++echo "Silence is golden"
++
++_scratch_dev_pool_put
++
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/215.out b/tests/btrfs/215.out
+new file mode 100644
+index 000000000000..0a11773bbb32
+--- /dev/null
++++ b/tests/btrfs/215.out
+@@ -0,0 +1,2 @@
++QA output created by 215
++Silence is golden
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 505665b54d61..76c8b78d08f9 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -217,3 +217,4 @@
+ 212 auto balance dangerous
+ 213 auto balance dangerous
+ 214 auto quick send snapshot
++215 auto quick seed
+-- 
+2.25.1
 
-> +done
-> +
-> +rm -f $runfile
-> +wait > /dev/null 2>&1
-> +rm -f $target
-> +
-> +echo Silence is golden
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/998.out b/tests/generic/998.out
-> new file mode 100644
-> index 00000000..d2679ae0
-> --- /dev/null
-> +++ b/tests/generic/998.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 998
-> +Silence is golden
-> diff --git a/tests/generic/group b/tests/generic/group
-> index d9ab9a31..62697ac5 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -605,3 +605,4 @@
->   600 auto quick quota
->   601 auto quick quota
->   602 auto quick encrypt
-> +998 auto quick attr
-> 
