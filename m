@@ -2,115 +2,117 @@ Return-Path: <SRS0=7bA6=A7=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	UNPARSEABLE_RELAY,USER_AGENT_GIT autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B2E27C433E2
-	for <linux-fstests@archiver.kernel.org>; Mon, 20 Jul 2020 03:56:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6B569C433DF
+	for <linux-fstests@archiver.kernel.org>; Mon, 20 Jul 2020 19:06:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8D61B2250E
-	for <linux-fstests@archiver.kernel.org>; Mon, 20 Jul 2020 03:56:13 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 277202176B
+	for <linux-fstests@archiver.kernel.org>; Mon, 20 Jul 2020 19:06:02 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="t3ULx0e5"
+	dkim=pass (2048-bit key) header.d=bur.io header.i=@bur.io header.b="pjYrifwP";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="SBkqaecq"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726135AbgGTD4N (ORCPT
+        id S1726012AbgGTTGB (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 19 Jul 2020 23:56:13 -0400
-Received: from aserp2120.oracle.com ([141.146.126.78]:35744 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726123AbgGTD4N (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 19 Jul 2020 23:56:13 -0400
-Received: from pps.filterd (aserp2120.oracle.com [127.0.0.1])
-        by aserp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 06K3rH2F080949;
-        Mon, 20 Jul 2020 03:56:06 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=from : to : cc :
- subject : date : message-id : in-reply-to : references : mime-version :
- content-transfer-encoding; s=corp-2020-01-29;
- bh=6XAjsqu1NZRRTDKfocWL/kOEPpFBo13XzXOAYGDf67k=;
- b=t3ULx0e5gOhS1lXG+ML2pLrG/ECqARiYfiLChUAbqiI8SKK6+EI3zWxDzDGH5gU857zC
- 2Fu4hLpBb6PTNu4W1ByDrISqLo71xBcWBPQqt5lBzpYdxz/ZH0V1QvLCmI5GyMCa6uDO
- sQBTbuJeo0HJHmgZ4B8AIT+bduFpFQQFFFt8ff8Kk8k57Keb4OOiSzPc11rhJ+WdSJ31
- bhZS1X9DZXjWZMxY2EDoWITh3D1wCM6HfaGVALnZHkUzyG+qy7Uip/IlqmYPhFIwuTvl
- GOMRAQSVJcFvGW9B0ZU5WIwJ7oQZIbI/OtQKzh7hTieGLStXMWkCK673H0CPguwLkN+W Jw== 
-Received: from aserp3020.oracle.com (aserp3020.oracle.com [141.146.126.70])
-        by aserp2120.oracle.com with ESMTP id 32bs1m4e1j-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Mon, 20 Jul 2020 03:56:06 +0000
-Received: from pps.filterd (aserp3020.oracle.com [127.0.0.1])
-        by aserp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 06K3ls5G132146;
-        Mon, 20 Jul 2020 03:56:05 GMT
-Received: from userv0121.oracle.com (userv0121.oracle.com [156.151.31.72])
-        by aserp3020.oracle.com with ESMTP id 32cqm83vdf-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Mon, 20 Jul 2020 03:56:05 +0000
-Received: from abhmp0015.oracle.com (abhmp0015.oracle.com [141.146.116.21])
-        by userv0121.oracle.com (8.14.4/8.13.8) with ESMTP id 06K3u3rg013231;
-        Mon, 20 Jul 2020 03:56:04 GMT
-Received: from localhost.localdomain (/39.109.231.106)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Mon, 20 Jul 2020 03:56:03 +0000
-From:   Anand Jain <anand.jain@oracle.com>
-To:     linux-btrfs@vger.kernel.org
-Cc:     fstests@vger.kernel.org, guan@eryu.me, nborisov@suse.com
-Subject: [PATCH v3] fstests: btrfs test if show_devname returns sprout device
-Date:   Mon, 20 Jul 2020 11:55:54 +0800
-Message-Id: <20200720035554.5549-1-anand.jain@oracle.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20200719151928.GB2557159@desktop>
-References: <20200719151928.GB2557159@desktop>
+        Mon, 20 Jul 2020 15:06:01 -0400
+Received: from out5-smtp.messagingengine.com ([66.111.4.29]:45757 "EHLO
+        out5-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1728324AbgGTTGB (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 20 Jul 2020 15:06:01 -0400
+Received: from compute4.internal (compute4.nyi.internal [10.202.2.44])
+        by mailout.nyi.internal (Postfix) with ESMTP id 4E5B95C01AE;
+        Mon, 20 Jul 2020 15:06:00 -0400 (EDT)
+Received: from mailfrontend1 ([10.202.2.162])
+  by compute4.internal (MEProxy); Mon, 20 Jul 2020 15:06:00 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bur.io; h=from
+        :to:cc:subject:date:message-id:in-reply-to:references
+        :mime-version:content-transfer-encoding; s=fm1; bh=9CiNHec0Wkun/
+        FlGIJXgJ/90ww716s7zNfWl5nn+b/c=; b=pjYrifwPb8waKNon70/T+boAQPAWk
+        G7dp0ErZxRYQz2QEGsJwBnJGpJkyidz4/LhKES82jWPTF+sxULbRc4BXxou9+r4l
+        gF3f65e+MpsYcYOB1C95F1GloTUigOuYRD5wsqguP+lh0AjPfZ747tFLh4mDOmKW
+        BO4tjomDN99VlP+PuYYfxpfFJCQVVrU2WUdFxn7nN5y1Ujjr8V+93dR7ABIjdd2w
+        irwnsxD/HEDoTzw5xTwVIMnJySTuZAusBly+x/puqSfTEpRXC2mICqphUMeoUQ03
+        hN/ZtFSwueDgjvBir15Jj4gA13OrbWOphXjn/yVRcIyGHlKbRkGX1K/KA==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=cc:content-transfer-encoding:date:from
+        :in-reply-to:message-id:mime-version:references:subject:to
+        :x-me-proxy:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
+        fm3; bh=9CiNHec0Wkun/FlGIJXgJ/90ww716s7zNfWl5nn+b/c=; b=SBkqaecq
+        MmkZO3txEQYeo0I8609IkBQjHNhUpW3amxafGx2vbURF1yDQJFXEqIxCEi/ziTeH
+        Fzb4iIW2LVICQ1XXofvX7l8pARH9qe0Ug/w47qUZzaI8CHhRxWmkHx0+quUTFtTc
+        TB+HlSYAPhPXeEYlPCuHuBhX1uy/0aHt29ACmC2jrfVysi0EsQhBPqTCoYsj3YEq
+        7xanTXTIM/OfJVdjHpq44HVB4TQEpWfP9K2vO5PhHSPuOdvjn9F4f64PmuLDCNYX
+        E8ZmpEJLgt0e1+fmZodZduWif15KtoRuu1dfq3XCzIJo7uRGAzaNl4qgC8DGFH79
+        H6TsLOXIYblqXQ==
+X-ME-Sender: <xms:F-sVX0N6HmpV3WI80aO90Ct9TG7mY3YcOoxOpS6o46KyYgpywyZebw>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeduiedrgeeggdduuddtucetufdoteggodetrfdotf
+    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
+    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
+    cujfgurhephffvufffkffojghfggfgsedtkeertdertddtnecuhfhrohhmpeeuohhrihhs
+    uceuuhhrkhhovhcuoegsohhrihhssegsuhhrrdhioheqnecuggftrfgrthhtvghrnhepie
+    euffeuvdeiueejhfehiefgkeevudejjeejffevvdehtddufeeihfekgeeuheelnecukfhp
+    peduieefrdduudegrddufedvrdefnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrg
+    hmpehmrghilhhfrhhomhepsghorhhishessghurhdrihho
+X-ME-Proxy: <xmx:F-sVX69cjKg7V1k0gAV-ZR-1w-3VrojBlImIgCuokV0CPw7D8m2Z5Q>
+    <xmx:F-sVX7QIvQlxR0ZBrywR8v336hjegja1Lsp8vDKl_eXOZCsv8JQbzg>
+    <xmx:F-sVX8vYIV4LthXvwEmEVezAlD2Lqmx2t3gftdj5Txf8d9AAyeAI5g>
+    <xmx:GOsVX2rWt22GwIulOywUUKdMmd1ey2WfbUudQ3SKkmsLFRa4k5MbrA>
+Received: from localhost (unknown [163.114.132.3])
+        by mail.messagingengine.com (Postfix) with ESMTPA id 7CDFC3280059;
+        Mon, 20 Jul 2020 15:05:59 -0400 (EDT)
+From:   Boris Burkov <boris@bur.io>
+To:     Eryu Guan <guan@eryu.me>, fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org
+Subject: [PATCH v4] generic: add a test for umount racing mount
+Date:   Mon, 20 Jul 2020 12:05:56 -0700
+Message-Id: <20200720190556.3292884-1-boris@bur.io>
+X-Mailer: git-send-email 2.24.1
+In-Reply-To: <20200719171853.GE2557159@desktop>
+References: <20200719171853.GE2557159@desktop>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9687 signatures=668680
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxscore=0 spamscore=0 phishscore=0
- bulkscore=0 malwarescore=0 mlxlogscore=999 adultscore=0 suspectscore=1
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
- definitions=main-2007200027
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9687 signatures=668680
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=1 bulkscore=0 adultscore=0
- lowpriorityscore=0 mlxlogscore=999 malwarescore=0 clxscore=1011
- spamscore=0 mlxscore=0 impostorscore=0 phishscore=0 priorityscore=1501
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
- definitions=main-2007200027
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Test if the show_devname() returns sprout device instead of seed device.
+Test if dirtying many inodes (which can delay umount) then
+unmounting and quickly mounting again causes the mount to fail.
 
-Signed-off-by: Anand Jain <anand.jain@oracle.com>
+A race, which breaks the test in btrfs, is fixed by the patch:
+"btrfs: fix mount failure caused by race with umount"
+
+Signed-off-by: Boris Burkov <boris@bur.io>
 ---
-v2: check for presence of needed sprout device.
-v3: check for not presence of needed sprout device and break the
-silence.
+- dd to XFS_IO_PROG
+- 1M writes to 4k writes
 
- tests/btrfs/215     | 63 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/215.out |  2 ++
- tests/btrfs/group   |  1 +
- 3 files changed, 66 insertions(+)
- create mode 100755 tests/btrfs/215
- create mode 100644 tests/btrfs/215.out
+ tests/generic/603     | 53 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/603.out |  2 ++
+ tests/generic/group   |  1 +
+ 3 files changed, 56 insertions(+)
+ create mode 100755 tests/generic/603
+ create mode 100644 tests/generic/603.out
 
-diff --git a/tests/btrfs/215 b/tests/btrfs/215
+diff --git a/tests/generic/603 b/tests/generic/603
 new file mode 100755
-index 000000000000..5be6d0f60192
+index 00000000..90f0d1d3
 --- /dev/null
-+++ b/tests/btrfs/215
-@@ -0,0 +1,63 @@
++++ b/tests/generic/603
+@@ -0,0 +1,53 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2020 Oracle.  All Rights Reserved.
++# Copyright (c) 2020 Facebook  All Rights Reserved.
 +#
-+# FS QA Test 215
++# FS QA Test 603
 +#
-+# Test if the show_devname() returns sprout device instead of seed device.
++# Evicting dirty inodes can take a long time during umount.
++# Check that a new mount racing with such a delayed umount succeeds.
 +#
-+# Fixed in kernel patch:
-+#   btrfs: btrfs_show_devname don't traverse into the seed fsid
-+
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
 +echo "QA output created by $seq"
@@ -134,52 +136,44 @@ index 000000000000..5be6d0f60192
 +rm -f $seqres.full
 +
 +# real QA test starts here
-+_supported_fs btrfs
++
++# Modify as appropriate.
++_supported_fs generic
 +_supported_os Linux
-+_require_scratch_dev_pool 2
++_require_scratch
 +
-+_scratch_dev_pool_get 2
++_scratch_mkfs > /dev/null 2>&1
++_scratch_mount
++for i in $(seq 0 500)
++do
++	$XFS_IO_PROG -c "pwrite 0 4K" $SCRATCH_MNT/$i >/dev/null 2>&1
++done
++_scratch_unmount &
++_scratch_mount
++wait
 +
-+seed=$(echo $SCRATCH_DEV_POOL | awk '{print $1}')
-+sprout=$(echo $SCRATCH_DEV_POOL | awk '{print $2}')
-+
-+_mkfs_dev $seed
-+$BTRFS_TUNE_PROG -S 1 $seed
-+_mount $seed $SCRATCH_MNT >> $seqres.full 2>&1
-+cat /proc/self/mounts | grep $seed >> $seqres.full
-+$BTRFS_UTIL_PROG device add -f $sprout $SCRATCH_MNT
-+cat /proc/self/mounts | grep $sprout >> $seqres.full
-+
-+# check if the show_devname() returns the sprout device instead of seed device.
-+dev=$(grep $SCRATCH_MNT /proc/self/mounts | $AWK_PROG '{print $1}')
-+
-+if [ "$sprout" != "$dev" ]; then
-+	echo "Unexpected device: $dev"
-+fi
 +echo "Silence is golden"
-+
-+_scratch_dev_pool_put
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/btrfs/215.out b/tests/btrfs/215.out
+diff --git a/tests/generic/603.out b/tests/generic/603.out
 new file mode 100644
-index 000000000000..0a11773bbb32
+index 00000000..6810da89
 --- /dev/null
-+++ b/tests/btrfs/215.out
++++ b/tests/generic/603.out
 @@ -0,0 +1,2 @@
-+QA output created by 215
++QA output created by 603
 +Silence is golden
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 505665b54d61..76c8b78d08f9 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -217,3 +217,4 @@
- 212 auto balance dangerous
- 213 auto balance dangerous
- 214 auto quick send snapshot
-+215 auto quick seed
+diff --git a/tests/generic/group b/tests/generic/group
+index d9ab9a31..c0ace35b 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -605,3 +605,4 @@
+ 600 auto quick quota
+ 601 auto quick quota
+ 602 auto quick encrypt
++603 auto quick
 -- 
-2.25.1
+2.24.1
 
