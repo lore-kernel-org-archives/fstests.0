@@ -1,179 +1,169 @@
-Return-Path: <SRS0=7bA6=A7=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=G+6p=BA=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6B569C433DF
-	for <linux-fstests@archiver.kernel.org>; Mon, 20 Jul 2020 19:06:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AA049C433E3
+	for <linux-fstests@archiver.kernel.org>; Tue, 21 Jul 2020 04:51:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 277202176B
-	for <linux-fstests@archiver.kernel.org>; Mon, 20 Jul 2020 19:06:02 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 81740208E4
+	for <linux-fstests@archiver.kernel.org>; Tue, 21 Jul 2020 04:51:01 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=bur.io header.i=@bur.io header.b="pjYrifwP";
-	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="SBkqaecq"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="R8wy6C1L"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726012AbgGTTGB (ORCPT
+        id S1725774AbgGUEvB (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 20 Jul 2020 15:06:01 -0400
-Received: from out5-smtp.messagingengine.com ([66.111.4.29]:45757 "EHLO
-        out5-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1728324AbgGTTGB (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 20 Jul 2020 15:06:01 -0400
-Received: from compute4.internal (compute4.nyi.internal [10.202.2.44])
-        by mailout.nyi.internal (Postfix) with ESMTP id 4E5B95C01AE;
-        Mon, 20 Jul 2020 15:06:00 -0400 (EDT)
-Received: from mailfrontend1 ([10.202.2.162])
-  by compute4.internal (MEProxy); Mon, 20 Jul 2020 15:06:00 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bur.io; h=from
-        :to:cc:subject:date:message-id:in-reply-to:references
-        :mime-version:content-transfer-encoding; s=fm1; bh=9CiNHec0Wkun/
-        FlGIJXgJ/90ww716s7zNfWl5nn+b/c=; b=pjYrifwPb8waKNon70/T+boAQPAWk
-        G7dp0ErZxRYQz2QEGsJwBnJGpJkyidz4/LhKES82jWPTF+sxULbRc4BXxou9+r4l
-        gF3f65e+MpsYcYOB1C95F1GloTUigOuYRD5wsqguP+lh0AjPfZ747tFLh4mDOmKW
-        BO4tjomDN99VlP+PuYYfxpfFJCQVVrU2WUdFxn7nN5y1Ujjr8V+93dR7ABIjdd2w
-        irwnsxD/HEDoTzw5xTwVIMnJySTuZAusBly+x/puqSfTEpRXC2mICqphUMeoUQ03
-        hN/ZtFSwueDgjvBir15Jj4gA13OrbWOphXjn/yVRcIyGHlKbRkGX1K/KA==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-        messagingengine.com; h=cc:content-transfer-encoding:date:from
-        :in-reply-to:message-id:mime-version:references:subject:to
-        :x-me-proxy:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
-        fm3; bh=9CiNHec0Wkun/FlGIJXgJ/90ww716s7zNfWl5nn+b/c=; b=SBkqaecq
-        MmkZO3txEQYeo0I8609IkBQjHNhUpW3amxafGx2vbURF1yDQJFXEqIxCEi/ziTeH
-        Fzb4iIW2LVICQ1XXofvX7l8pARH9qe0Ug/w47qUZzaI8CHhRxWmkHx0+quUTFtTc
-        TB+HlSYAPhPXeEYlPCuHuBhX1uy/0aHt29ACmC2jrfVysi0EsQhBPqTCoYsj3YEq
-        7xanTXTIM/OfJVdjHpq44HVB4TQEpWfP9K2vO5PhHSPuOdvjn9F4f64PmuLDCNYX
-        E8ZmpEJLgt0e1+fmZodZduWif15KtoRuu1dfq3XCzIJo7uRGAzaNl4qgC8DGFH79
-        H6TsLOXIYblqXQ==
-X-ME-Sender: <xms:F-sVX0N6HmpV3WI80aO90Ct9TG7mY3YcOoxOpS6o46KyYgpywyZebw>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeduiedrgeeggdduuddtucetufdoteggodetrfdotf
-    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
-    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
-    cujfgurhephffvufffkffojghfggfgsedtkeertdertddtnecuhfhrohhmpeeuohhrihhs
-    uceuuhhrkhhovhcuoegsohhrihhssegsuhhrrdhioheqnecuggftrfgrthhtvghrnhepie
-    euffeuvdeiueejhfehiefgkeevudejjeejffevvdehtddufeeihfekgeeuheelnecukfhp
-    peduieefrdduudegrddufedvrdefnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrg
-    hmpehmrghilhhfrhhomhepsghorhhishessghurhdrihho
-X-ME-Proxy: <xmx:F-sVX69cjKg7V1k0gAV-ZR-1w-3VrojBlImIgCuokV0CPw7D8m2Z5Q>
-    <xmx:F-sVX7QIvQlxR0ZBrywR8v336hjegja1Lsp8vDKl_eXOZCsv8JQbzg>
-    <xmx:F-sVX8vYIV4LthXvwEmEVezAlD2Lqmx2t3gftdj5Txf8d9AAyeAI5g>
-    <xmx:GOsVX2rWt22GwIulOywUUKdMmd1ey2WfbUudQ3SKkmsLFRa4k5MbrA>
-Received: from localhost (unknown [163.114.132.3])
-        by mail.messagingengine.com (Postfix) with ESMTPA id 7CDFC3280059;
-        Mon, 20 Jul 2020 15:05:59 -0400 (EDT)
-From:   Boris Burkov <boris@bur.io>
-To:     Eryu Guan <guan@eryu.me>, fstests@vger.kernel.org
+        Tue, 21 Jul 2020 00:51:01 -0400
+Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:51126 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726677AbgGUEvA (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 21 Jul 2020 00:51:00 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1595307058;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=vb2UOgFRAfaLx63n3vDlxINfD7qAtaGzrBh7ybUpiyY=;
+        b=R8wy6C1LtIqHYnanqmuO+HvNIP+gwLd5WMw82iy0Co8VuYwmJ65cBdydmrJMZRirnU3ynP
+        kqSErIgxnYwfhvrZP7korYWP6fUmzKKfnHGlicxEWxaPKxJz0MX/QdzczKUuQOtwIoe7Ab
+        R1G4my/cZ7I00MSX1mq6flgJx8VTViI=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-499-8BVx8wJCNt2zkE3gnSG7Iw-1; Tue, 21 Jul 2020 00:50:56 -0400
+X-MC-Unique: 8BVx8wJCNt2zkE3gnSG7Iw-1
+Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id F3A6F1005504;
+        Tue, 21 Jul 2020 04:50:55 +0000 (UTC)
+Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 6C82A74F45;
+        Tue, 21 Jul 2020 04:50:55 +0000 (UTC)
+Date:   Tue, 21 Jul 2020 13:03:01 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     fstests@vger.kernel.org
 Cc:     linux-btrfs@vger.kernel.org
-Subject: [PATCH v4] generic: add a test for umount racing mount
-Date:   Mon, 20 Jul 2020 12:05:56 -0700
-Message-Id: <20200720190556.3292884-1-boris@bur.io>
-X-Mailer: git-send-email 2.24.1
-In-Reply-To: <20200719171853.GE2557159@desktop>
+Subject: Re: [PATCH v4] generic: add a test for umount racing mount
+Message-ID: <20200721050301.GA3495@dhcp-12-102.nay.redhat.com>
+Mail-Followup-To: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 References: <20200719171853.GE2557159@desktop>
+ <20200720190556.3292884-1-boris@bur.io>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20200720190556.3292884-1-boris@bur.io>
+User-Agent: Mutt/1.10.1 (2018-07-13)
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Test if dirtying many inodes (which can delay umount) then
-unmounting and quickly mounting again causes the mount to fail.
+On Mon, Jul 20, 2020 at 12:05:56PM -0700, Boris Burkov wrote:
+> Test if dirtying many inodes (which can delay umount) then
+> unmounting and quickly mounting again causes the mount to fail.
+> 
+> A race, which breaks the test in btrfs, is fixed by the patch:
+> "btrfs: fix mount failure caused by race with umount"
+> 
+> Signed-off-by: Boris Burkov <boris@bur.io>
+> ---
 
-A race, which breaks the test in btrfs, is fixed by the patch:
-"btrfs: fix mount failure caused by race with umount"
+This version looks good to me,
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
-Signed-off-by: Boris Burkov <boris@bur.io>
----
-- dd to XFS_IO_PROG
-- 1M writes to 4k writes
-
- tests/generic/603     | 53 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/603.out |  2 ++
- tests/generic/group   |  1 +
- 3 files changed, 56 insertions(+)
- create mode 100755 tests/generic/603
- create mode 100644 tests/generic/603.out
-
-diff --git a/tests/generic/603 b/tests/generic/603
-new file mode 100755
-index 00000000..90f0d1d3
---- /dev/null
-+++ b/tests/generic/603
-@@ -0,0 +1,53 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2020 Facebook  All Rights Reserved.
-+#
-+# FS QA Test 603
-+#
-+# Evicting dirty inodes can take a long time during umount.
-+# Check that a new mount racing with such a delayed umount succeeds.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch
-+
-+_scratch_mkfs > /dev/null 2>&1
-+_scratch_mount
-+for i in $(seq 0 500)
-+do
-+	$XFS_IO_PROG -c "pwrite 0 4K" $SCRATCH_MNT/$i >/dev/null 2>&1
-+done
-+_scratch_unmount &
-+_scratch_mount
-+wait
-+
-+echo "Silence is golden"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/603.out b/tests/generic/603.out
-new file mode 100644
-index 00000000..6810da89
---- /dev/null
-+++ b/tests/generic/603.out
-@@ -0,0 +1,2 @@
-+QA output created by 603
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index d9ab9a31..c0ace35b 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -605,3 +605,4 @@
- 600 auto quick quota
- 601 auto quick quota
- 602 auto quick encrypt
-+603 auto quick
--- 
-2.24.1
+> - dd to XFS_IO_PROG
+> - 1M writes to 4k writes
+> 
+>  tests/generic/603     | 53 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/603.out |  2 ++
+>  tests/generic/group   |  1 +
+>  3 files changed, 56 insertions(+)
+>  create mode 100755 tests/generic/603
+>  create mode 100644 tests/generic/603.out
+> 
+> diff --git a/tests/generic/603 b/tests/generic/603
+> new file mode 100755
+> index 00000000..90f0d1d3
+> --- /dev/null
+> +++ b/tests/generic/603
+> @@ -0,0 +1,53 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2020 Facebook  All Rights Reserved.
+> +#
+> +# FS QA Test 603
+> +#
+> +# Evicting dirty inodes can take a long time during umount.
+> +# Check that a new mount racing with such a delayed umount succeeds.
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs generic
+> +_supported_os Linux
+> +_require_scratch
+> +
+> +_scratch_mkfs > /dev/null 2>&1
+> +_scratch_mount
+> +for i in $(seq 0 500)
+> +do
+> +	$XFS_IO_PROG -c "pwrite 0 4K" $SCRATCH_MNT/$i >/dev/null 2>&1
+> +done
+> +_scratch_unmount &
+> +_scratch_mount
+> +wait
+> +
+> +echo "Silence is golden"
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/generic/603.out b/tests/generic/603.out
+> new file mode 100644
+> index 00000000..6810da89
+> --- /dev/null
+> +++ b/tests/generic/603.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 603
+> +Silence is golden
+> diff --git a/tests/generic/group b/tests/generic/group
+> index d9ab9a31..c0ace35b 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -605,3 +605,4 @@
+>  600 auto quick quota
+>  601 auto quick quota
+>  602 auto quick encrypt
+> +603 auto quick
+> -- 
+> 2.24.1
+> 
 
