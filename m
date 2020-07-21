@@ -2,168 +2,126 @@ Return-Path: <SRS0=G+6p=BA=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-13.0 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AA049C433E3
-	for <linux-fstests@archiver.kernel.org>; Tue, 21 Jul 2020 04:51:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 892F9C433E3
+	for <linux-fstests@archiver.kernel.org>; Tue, 21 Jul 2020 09:38:25 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 81740208E4
-	for <linux-fstests@archiver.kernel.org>; Tue, 21 Jul 2020 04:51:01 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="R8wy6C1L"
+	by mail.kernel.org (Postfix) with ESMTP id 647442070A
+	for <linux-fstests@archiver.kernel.org>; Tue, 21 Jul 2020 09:38:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725774AbgGUEvB (ORCPT
+        id S1726892AbgGUJiZ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 21 Jul 2020 00:51:01 -0400
-Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:51126 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726677AbgGUEvA (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 21 Jul 2020 00:51:00 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1595307058;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=vb2UOgFRAfaLx63n3vDlxINfD7qAtaGzrBh7ybUpiyY=;
-        b=R8wy6C1LtIqHYnanqmuO+HvNIP+gwLd5WMw82iy0Co8VuYwmJ65cBdydmrJMZRirnU3ynP
-        kqSErIgxnYwfhvrZP7korYWP6fUmzKKfnHGlicxEWxaPKxJz0MX/QdzczKUuQOtwIoe7Ab
-        R1G4my/cZ7I00MSX1mq6flgJx8VTViI=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-499-8BVx8wJCNt2zkE3gnSG7Iw-1; Tue, 21 Jul 2020 00:50:56 -0400
-X-MC-Unique: 8BVx8wJCNt2zkE3gnSG7Iw-1
-Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id F3A6F1005504;
-        Tue, 21 Jul 2020 04:50:55 +0000 (UTC)
-Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 6C82A74F45;
-        Tue, 21 Jul 2020 04:50:55 +0000 (UTC)
-Date:   Tue, 21 Jul 2020 13:03:01 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH v4] generic: add a test for umount racing mount
-Message-ID: <20200721050301.GA3495@dhcp-12-102.nay.redhat.com>
-Mail-Followup-To: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-References: <20200719171853.GE2557159@desktop>
- <20200720190556.3292884-1-boris@bur.io>
+        Tue, 21 Jul 2020 05:38:25 -0400
+Received: from mgw-02.mpynet.fi ([82.197.21.91]:55032 "EHLO mgw-02.mpynet.fi"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726188AbgGUJiZ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 21 Jul 2020 05:38:25 -0400
+Received: from pps.filterd (mgw-02.mpynet.fi [127.0.0.1])
+        by mgw-02.mpynet.fi (8.16.0.42/8.16.0.42) with SMTP id 06L9cDf1080357;
+        Tue, 21 Jul 2020 12:38:19 +0300
+Received: from ex13.tuxera.com (ex13.tuxera.com [178.16.184.72])
+        by mgw-02.mpynet.fi with ESMTP id 32bvr3jayr-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-SHA384 bits=256 verify=NOT);
+        Tue, 21 Jul 2020 12:38:19 +0300
+Received: from localhost (194.100.106.190) by tuxera-exch.ad.tuxera.com
+ (10.20.48.11) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Tue, 21 Jul
+ 2020 12:38:18 +0300
+From:   Vladimir Zapolskiy <vladimir@tuxera.com>
+To:     Eryu Guan <guaneryu@gmail.com>
+CC:     <fstests@vger.kernel.org>
+Subject: [PATCH] generic: associate a few tests with punch and zero test groups
+Date:   Tue, 21 Jul 2020 12:38:09 +0300
+Message-ID: <20200721093809.12432-1-vladimir@tuxera.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200720190556.3292884-1-boris@bur.io>
-User-Agent: Mutt/1.10.1 (2018-07-13)
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-Originating-IP: [194.100.106.190]
+X-ClientProxiedBy: tuxera-exch.ad.tuxera.com (10.20.48.11) To
+ tuxera-exch.ad.tuxera.com (10.20.48.11)
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.235,18.0.687
+ definitions=2020-07-21_02:2020-07-21,2020-07-21 signatures=0
+X-Proofpoint-Spam-Details: rule=mpy_notspam policy=mpy score=0 suspectscore=0 mlxscore=0 bulkscore=0
+ phishscore=0 mlxlogscore=999 spamscore=0 adultscore=0 malwarescore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
+ definitions=main-2007210067
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Jul 20, 2020 at 12:05:56PM -0700, Boris Burkov wrote:
-> Test if dirtying many inodes (which can delay umount) then
-> unmounting and quickly mounting again causes the mount to fail.
-> 
-> A race, which breaks the test in btrfs, is fixed by the patch:
-> "btrfs: fix mount failure caused by race with umount"
-> 
-> Signed-off-by: Boris Burkov <boris@bur.io>
-> ---
+In runtime the modified tests requires and utilizes fpunch command
+of xfs_io, thus a tested filesystem shall support the feature and
+running a filesystem check by "punch" group selection should include
+these tests:
 
-This version looks good to me,
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+  * generic/176
+  * generic/415
+  * generic/447
+  * generic/469
+  * generic/562
 
-> - dd to XFS_IO_PROG
-> - 1M writes to 4k writes
-> 
->  tests/generic/603     | 53 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/603.out |  2 ++
->  tests/generic/group   |  1 +
->  3 files changed, 56 insertions(+)
->  create mode 100755 tests/generic/603
->  create mode 100644 tests/generic/603.out
-> 
-> diff --git a/tests/generic/603 b/tests/generic/603
-> new file mode 100755
-> index 00000000..90f0d1d3
-> --- /dev/null
-> +++ b/tests/generic/603
-> @@ -0,0 +1,53 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2020 Facebook  All Rights Reserved.
-> +#
-> +# FS QA Test 603
-> +#
-> +# Evicting dirty inodes can take a long time during umount.
-> +# Check that a new mount racing with such a delayed umount succeeds.
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs generic
-> +_supported_os Linux
-> +_require_scratch
-> +
-> +_scratch_mkfs > /dev/null 2>&1
-> +_scratch_mount
-> +for i in $(seq 0 500)
-> +do
-> +	$XFS_IO_PROG -c "pwrite 0 4K" $SCRATCH_MNT/$i >/dev/null 2>&1
-> +done
-> +_scratch_unmount &
-> +_scratch_mount
-> +wait
-> +
-> +echo "Silence is golden"
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/603.out b/tests/generic/603.out
-> new file mode 100644
-> index 00000000..6810da89
-> --- /dev/null
-> +++ b/tests/generic/603.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 603
-> +Silence is golden
-> diff --git a/tests/generic/group b/tests/generic/group
-> index d9ab9a31..c0ace35b 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -605,3 +605,4 @@
->  600 auto quick quota
->  601 auto quick quota
->  602 auto quick encrypt
-> +603 auto quick
-> -- 
-> 2.24.1
-> 
+In addition and due to the same reasons add generic/469 to zero test
+group, the test already contains _require_xfs_io_command "fzero" check.
+
+Signed-off-by: Vladimir Zapolskiy <vladimir@tuxera.com>
+---
+ tests/generic/group | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/tests/generic/group b/tests/generic/group
+index 1d98ed5f29f6..99eca4874c13 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -178,7 +178,7 @@
+ 173 auto quick clone
+ 174 auto quick clone
+ 175 auto clone
+-176 auto clone
++176 auto clone punch
+ 177 auto quick prealloc metadata punch log
+ 178 auto quick clone punch
+ 179 auto quick clone punch
+@@ -417,7 +417,7 @@
+ 412 auto quick metadata
+ 413 auto quick dax
+ 414 auto quick clone
+-415 auto clone
++415 auto clone punch
+ 416 auto enospc
+ 417 auto quick shutdown log
+ 418 auto rw
+@@ -449,7 +449,7 @@
+ 444 auto quick acl
+ 445 auto quick rw seek prealloc
+ 446 auto quick rw punch
+-447 auto clone
++447 auto clone punch
+ 448 auto quick rw seek
+ 449 auto quick acl attr enospc
+ 450 auto quick rw
+@@ -471,7 +471,7 @@
+ 466 auto quick rw
+ 467 auto quick exportfs
+ 468 shutdown auto quick metadata
+-469 auto quick
++469 auto quick punch zero
+ 470 auto quick dax
+ 471 auto quick rw
+ 472 auto quick swap
+@@ -564,7 +564,7 @@
+ 559 auto stress dedupe
+ 560 auto stress dedupe
+ 561 auto stress dedupe
+-562 auto clone
++562 auto clone punch
+ 563 auto quick
+ 564 auto quick copy_range
+ 565 auto quick copy_range
+-- 
+2.25.1
 
