@@ -2,270 +2,218 @@ Return-Path: <SRS0=gsB6=BF=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-8.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 17EFAC433E0
-	for <linux-fstests@archiver.kernel.org>; Sun, 26 Jul 2020 15:02:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 01ECFC433DF
+	for <linux-fstests@archiver.kernel.org>; Sun, 26 Jul 2020 15:16:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E8B0F2065F
-	for <linux-fstests@archiver.kernel.org>; Sun, 26 Jul 2020 15:02:17 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D7830206E3
+	for <linux-fstests@archiver.kernel.org>; Sun, 26 Jul 2020 15:16:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726121AbgGZPCR (ORCPT
+        id S1725982AbgGZPQl (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 26 Jul 2020 11:02:17 -0400
-Received: from out20-27.mail.aliyun.com ([115.124.20.27]:47957 "EHLO
-        out20-27.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725978AbgGZPCR (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 26 Jul 2020 11:02:17 -0400
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07436284|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.395271-0.000302238-0.604427;FP=0|0|0|0|0|-1|-1|-1;HT=e02c03308;MF=guan@eryu.me;NM=1;PH=DS;RN=3;RT=3;SR=0;TI=SMTPD_---.I7peU4V_1595775728;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.I7peU4V_1595775728)
-          by smtp.aliyun-inc.com(10.147.41.137);
-          Sun, 26 Jul 2020 23:02:08 +0800
-Date:   Sun, 26 Jul 2020 23:02:08 +0800
+        Sun, 26 Jul 2020 11:16:41 -0400
+Received: from out20-51.mail.aliyun.com ([115.124.20.51]:56009 "EHLO
+        out20-51.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725978AbgGZPQl (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 26 Jul 2020 11:16:41 -0400
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07436282|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.407085-0.00163315-0.591282;FP=0|0|0|0|0|-1|-1|-1;HT=e02c03308;MF=guan@eryu.me;NM=1;PH=DS;RN=6;RT=6;SR=0;TI=SMTPD_---.I7pjbMo_1595776592;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.I7pjbMo_1595776592)
+          by smtp.aliyun-inc.com(10.147.43.230);
+          Sun, 26 Jul 2020 23:16:32 +0800
+Date:   Sun, 26 Jul 2020 23:16:32 +0800
 From:   Eryu Guan <guan@eryu.me>
-To:     Lukas Czerner <lczerner@redhat.com>
-Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org
-Subject: Re: [PATCH] ext4/309: Test read-only external journal device
-Message-ID: <20200726150208.GI2557159@desktop>
-References: <20200717105544.3201-1-lczerner@redhat.com>
+To:     Amir Goldstein <amir73il@gmail.com>
+Cc:     Eryu Guan <guaneryu@gmail.com>, Miklos Szeredi <miklos@szeredi.hu>,
+        Vivek Goyal <vgoyal@redhat.com>,
+        overlayfs <linux-unionfs@vger.kernel.org>,
+        fstests <fstests@vger.kernel.org>
+Subject: Re: [PATCH 0/3] Running unionmount testsuite from xfstests
+Message-ID: <20200726151632.GJ2557159@desktop>
+References: <20200531110156.6613-1-amir73il@gmail.com>
+ <20200719181116.GG2557159@desktop>
+ <CAOQ4uxjY7SqyVEG9vCtv=wB9BxDovpjwZGAQ7h5+VeiZPMKOeQ@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20200717105544.3201-1-lczerner@redhat.com>
+In-Reply-To: <CAOQ4uxjY7SqyVEG9vCtv=wB9BxDovpjwZGAQ7h5+VeiZPMKOeQ@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-[cc ext4 list for ext4 specific test]
-
-On Fri, Jul 17, 2020 at 12:55:44PM +0200, Lukas Czerner wrote:
-> We should never be able to mount ext4 file system read-write with
-> read-only external journal device. Test it.
+On Sun, Jul 19, 2020 at 09:36:39PM +0300, Amir Goldstein wrote:
+> On Sun, Jul 19, 2020 at 9:11 PM Eryu Guan <guan@eryu.me> wrote:
+> >
+> > Hi Amir,
+> >
+> > On Sun, May 31, 2020 at 02:01:53PM +0300, Amir Goldstein wrote:
+> > > Eryu,
+> > >
+> > > unionmount testsuite has a lot more test coverage than the overlay
+> > > xfstests, but it has a lot less exposure to testers.
+> > >
+> > > The various test setups that I have added to unionmount testsuite since
+> > > I took over the maintanace of the testsuite have even smaller exposure
+> > > to testers.
+> > >
+> > > These patches add overlay tests that are used as a harness to run
+> > > different setups of unionmount testsuite.  I have been using this method
+> > > for over two year for testing my overlayfs branches.
+> > >
+> > > What does it take to install unionmount testsuite?
+> > > As README.overlay says:
+> > >
+> > >   git clone https://github.com/amir73il/unionmount-testsuite.git
+> > >   ln -s $PWD/unionmount-testsuite <path-to-xfstests>/src/
+> >
+> > I'm really sorry for the long-long delay..
+> >
 > 
-> The test was based on generic/050.
+> No worries.
 > 
-> Signed-off-by: Lukas Czerner <lczerner@redhat.com>
-
-Is there a patch or kernel commit that fixes this test failure? I'd be
-better to mention the patch in either commit log or test description, so
-others could know where is the fix easily.
-
-> ---
->  tests/ext4/309     | 135 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/ext4/309.out |  32 +++++++++++
-
-And use next available seq slot under ext4 dir, use
-"./tools/nextid ext4" to get the next available slot, which is 002 at
-this point.
-
->  tests/ext4/group   |   1 +
->  3 files changed, 168 insertions(+)
->  create mode 100755 tests/ext4/309
->  create mode 100644 tests/ext4/309.out
+> > The test itself looks really good to me, my only concern is that
+> > the updates in unionmount repo are not visible to fstests, and may cause
+> > new failures, which are out of fstests' control. But I'm not sure if
+> > this really is a problem for people.
+> >
+> > I came up with two options anyway
+> > - add unionmount tests as a submodule of fstests
+> > - put unionmount tests in fstests
+> >
 > 
-> diff --git a/tests/ext4/309 b/tests/ext4/309
-> new file mode 100755
-> index 00000000..356044c4
-> --- /dev/null
-> +++ b/tests/ext4/309
-> @@ -0,0 +1,135 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2009 Christoph Hellwig.
-> +# Copyright (c) 2020 Lukas Czerner.
-> +#
-> +# FS QA Test No. 309
-> +#
-> +# Copied from tests generic/050 and adjusted to support testing
-> +# read-only external journal device on ext4.
-> +#
-> +# Check out various mount/remount/unmount scenarious on a read-only
-> +# logdev blockdev.
-> +#
-> +seqfull=$0
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	blockdev --setrw $SCRATCH_LOGDEV
+> I suppose you mean git submodule?
 
-Do 'blockdev --setrw $SCRATCH_DEV' here as well to make sure both LOGDEV
-and SCRATCH_DEV are set back to rw mode.
+Exactly.
 
-> +}
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +_supported_fs generic
+But I think I'd merge it as-is, git submodule brings more maintain
+burden on both maintainers and users, especially users that usually
+don't care about overlay tests. Users that care about overlay tests
+should setup unionmount tests explicitly and know that's unionmount
+tests if there's any test failure.
 
-_supported_fs ext4
+> IMO that's a fairly good option.
+> I suspect that some people would want to continue running
+> unionmount independently of xfstests and I have some development
+> branches, so it's convenient to keep the unionmount repo independent
+> of xfstests repo and use git submodule as the "pull request" method
+> between us, for keeping control of the flow of changes from my repo
+> in the hands of xfstests maintainer.
+> 
+> But as I wrote before, I am also fine with "handing over" the official
+> upstream of unionmount src to xfstests project and be the
+> "sub-maintainer" for that module, but I think there is going to be more
+> chatter with that option compared to the submodule option.
+> Another argument in favor of submodule, is that we can always
+> graduate unionmount in the future from submodule to built-in.
 
-Otherwise looks fine to me.
+Agreed, I think making unionmount tests a built-in would be good in the
+future.
 
-Thanks,
+Thanks!
+
 Eryu
 
-> +_supported_os Linux
-> +
-> +_require_scratch_nocheck
-> +_require_scratch_shutdown
-> +_require_logdev
-> +_require_local_device $SCRATCH_DEV
-> +_require_local_device $SCRATCH_LOGDEV
-> +_require_norecovery
-> +
-> +_scratch_mkfs >/dev/null 2>&1
-> +_require_metadata_journaling $SCRATCH_DEV
-> +
-> +#
-> +# Mark the log device read-only
-> +#
-> +echo "setting log device read-only"
-> +blockdev --setro $SCRATCH_LOGDEV
-> +
-> +#
-> +# Mount it, and make sure we can't write to it, and we can unmount it again
-> +#
-> +echo "mounting with read-only log device:"
-> +_try_scratch_mount 2>&1 | _filter_ro_mount | _filter_scratch
-> +if [ "${PIPESTATUS[0]}" -eq 0 ]; then
-> +	echo "touching file on read-only filesystem (should fail)"
-> +	touch $SCRATCH_MNT/foo 2>&1 | _filter_scratch
-> +fi
-> +
-> +echo "unmounting read-only filesystem"
-> +_scratch_unmount 2>&1 | _filter_scratch | _filter_ending_dot
-> +
-> +echo "setting log device read-write"
-> +blockdev --setrw $SCRATCH_LOGDEV
-> +
-> +echo "mounting with read-write log device:"
-> +_try_scratch_mount 2>&1 | _filter_scratch
-> +
-> +echo "touch files"
-> +touch $SCRATCH_MNT/{0,1,2,3,4,5,6,7,8,9}{0,1,2,3,4,5,6,7,8,9}
-> +
-> +echo "going down:"
-> +_scratch_shutdown -f
-> +
-> +echo "unmounting shutdown filesystem:"
-> +_scratch_unmount 2>&1 | _filter_scratch
-> +
-> +echo "setting log device read-only"
-> +blockdev --setro $SCRATCH_LOGDEV
-> +
-> +#
-> +# Mounting a filesystem that requires log-recovery fails even with
-> +# -o norecovery unless the fs device is read only or it's mounted
-> +# read only
-> +#
-> +echo "mounting filesystem that needs recovery with a read-only log device:"
-> +_try_scratch_mount 2>&1 | _filter_ro_mount | _filter_scratch
-> +
-> +echo "unmounting read-only filesystem"
-> +_scratch_unmount 2>&1 | _filter_scratch | _filter_ending_dot
-> +
-> +
-> +echo "mounting filesystem with -o norecovery with a read-only log device:"
-> +_try_scratch_mount -o norecovery 2>&1 | _filter_ro_mount | _filter_scratch
-> +echo "unmounting read-only filesystem"
-> +_scratch_unmount 2>&1 | _filter_scratch | _filter_ending_dot
-> +
-> +#
-> +# This is the way out if the log device really is read-only.
-> +# Doesn't mean it's a good idea in practice, more a last resort
-> +# data recovery hack. Either the underlying fs device needs
-> +# to be read only as well, or we mount the file system read only
-> +#
-> +echo "setting fs device read-only"
-> +blockdev --setro $SCRATCH_DEV
-> +echo "mounting filesystem with -o norecovery with a read-only fs and log device:"
-> +_try_scratch_mount -o norecovery 2>&1 | _filter_ro_mount | _filter_scratch
-> +echo "unmounting read-only filesystem"
-> +_scratch_unmount 2>&1 | _filter_scratch | _filter_ending_dot
-> +echo "setting fs device read-write"
-> +blockdev --setrw $SCRATCH_DEV
-> +
-> +echo "mounting filesystem with -o norecovery,ro with a read-only log device:"
-> +_try_scratch_mount -o norecovery,ro 2>&1 | _filter_ro_mount | _filter_scratch
-> +echo "unmounting read-only filesystem"
-> +_scratch_unmount 2>&1 | _filter_scratch | _filter_ending_dot
-> +
-> +echo "setting log device read-write"
-> +blockdev --setrw $SCRATCH_LOGDEV
-> +
-> +#
-> +# But log recovery is performed when mount with -o ro as long as
-> +# the underlying device is not write protected.
-> +#
-> +echo "mounting filesystem that needs recovery with -o ro:"
-> +_try_scratch_mount -o ro 2>&1 | _filter_scratch
-> +
-> +# success, all done
-> +echo "*** done"
-> +rm -f $seqres.full
-> +status=0
-> diff --git a/tests/ext4/309.out b/tests/ext4/309.out
-> new file mode 100644
-> index 00000000..4b7e136a
-> --- /dev/null
-> +++ b/tests/ext4/309.out
-> @@ -0,0 +1,32 @@
-> +QA output created by 309
-> +setting log device read-only
-> +mounting with read-only log device:
-> +mount: device write-protected, mounting read-only
-> +touching file on read-only filesystem (should fail)
-> +touch: cannot touch 'SCRATCH_MNT/foo': Read-only file system
-> +unmounting read-only filesystem
-> +setting log device read-write
-> +mounting with read-write log device:
-> +touch files
-> +going down:
-> +unmounting shutdown filesystem:
-> +setting log device read-only
-> +mounting filesystem that needs recovery with a read-only log device:
-> +mount: device write-protected, mounting read-only
-> +mount: cannot mount device read-only
-> +unmounting read-only filesystem
-> +umount: SCRATCH_DEV: not mounted
-> +mounting filesystem with -o norecovery with a read-only log device:
-> +mount: SCRATCH_MNT: wrong fs type, bad option, bad superblock on SCRATCH_DEV, missing codepage or helper program, or other error
-> +unmounting read-only filesystem
-> +umount: SCRATCH_DEV: not mounted
-> +setting fs device read-only
-> +mounting filesystem with -o norecovery with a read-only fs and log device:
-> +mount: device write-protected, mounting read-only
-> +unmounting read-only filesystem
-> +setting fs device read-write
-> +mounting filesystem with -o norecovery,ro with a read-only log device:
-> +unmounting read-only filesystem
-> +setting log device read-write
-> +mounting filesystem that needs recovery with -o ro:
-> +*** done
-> diff --git a/tests/ext4/group b/tests/ext4/group
-> index a1adc553..5e80e480 100644
-> --- a/tests/ext4/group
-> +++ b/tests/ext4/group
-> @@ -56,3 +56,4 @@
->  306 auto rw resize quick
->  307 auto ioctl rw defrag
->  308 auto ioctl rw prealloc quick defrag
-> +309 shutdown mount auto quick
-> -- 
-> 2.21.3
+> 
+> Thanks,
+> Amir.
+> 
+> > I'd like to hear what people think about this patchset, any other
+> > comments & suggestions are welcomed!
+> >
+> > Thanks,
+> > Eryu
+> >
+> > >
+> > > Thanks,
+> > > Amir.
+> > >
+> > > Amir Goldstein (3):
+> > >   overlay: run unionmount testsuite test cases
+> > >   overlay: add unionmount tests with multi lower layers
+> > >   overlay: add unionmount tests with nested overlay
+> > >
+> > >  README.overlay        | 15 ++++++++++++
+> > >  common/config         |  2 ++
+> > >  common/overlay        | 54 +++++++++++++++++++++++++++++++++++++++++++
+> > >  tests/overlay/100     | 38 ++++++++++++++++++++++++++++++
+> > >  tests/overlay/100.out |  2 ++
+> > >  tests/overlay/101     | 39 +++++++++++++++++++++++++++++++
+> > >  tests/overlay/101.out |  2 ++
+> > >  tests/overlay/102     | 40 ++++++++++++++++++++++++++++++++
+> > >  tests/overlay/102.out |  2 ++
+> > >  tests/overlay/103     | 38 ++++++++++++++++++++++++++++++
+> > >  tests/overlay/103.out |  2 ++
+> > >  tests/overlay/104     | 39 +++++++++++++++++++++++++++++++
+> > >  tests/overlay/104.out |  2 ++
+> > >  tests/overlay/105     | 40 ++++++++++++++++++++++++++++++++
+> > >  tests/overlay/105.out |  2 ++
+> > >  tests/overlay/106     | 41 ++++++++++++++++++++++++++++++++
+> > >  tests/overlay/106.out |  2 ++
+> > >  tests/overlay/107     | 41 ++++++++++++++++++++++++++++++++
+> > >  tests/overlay/107.out |  2 ++
+> > >  tests/overlay/108     | 41 ++++++++++++++++++++++++++++++++
+> > >  tests/overlay/108.out |  2 ++
+> > >  tests/overlay/109     | 41 ++++++++++++++++++++++++++++++++
+> > >  tests/overlay/109.out |  2 ++
+> > >  tests/overlay/110     | 39 +++++++++++++++++++++++++++++++
+> > >  tests/overlay/110.out |  2 ++
+> > >  tests/overlay/111     | 40 ++++++++++++++++++++++++++++++++
+> > >  tests/overlay/111.out |  2 ++
+> > >  tests/overlay/112     | 40 ++++++++++++++++++++++++++++++++
+> > >  tests/overlay/112.out |  2 ++
+> > >  tests/overlay/113     | 41 ++++++++++++++++++++++++++++++++
+> > >  tests/overlay/113.out |  2 ++
+> > >  tests/overlay/114     | 39 +++++++++++++++++++++++++++++++
+> > >  tests/overlay/114.out |  2 ++
+> > >  tests/overlay/115     | 40 ++++++++++++++++++++++++++++++++
+> > >  tests/overlay/115.out |  2 ++
+> > >  tests/overlay/116     | 40 ++++++++++++++++++++++++++++++++
+> > >  tests/overlay/116.out |  2 ++
+> > >  tests/overlay/117     | 41 ++++++++++++++++++++++++++++++++
+> > >  tests/overlay/117.out |  2 ++
+> > >  tests/overlay/group   | 18 +++++++++++++++
+> > >  40 files changed, 843 insertions(+)
+> > >  create mode 100755 tests/overlay/100
+> > >  create mode 100644 tests/overlay/100.out
+> > >  create mode 100755 tests/overlay/101
+> > >  create mode 100644 tests/overlay/101.out
+> > >  create mode 100755 tests/overlay/102
+> > >  create mode 100644 tests/overlay/102.out
+> > >  create mode 100755 tests/overlay/103
+> > >  create mode 100644 tests/overlay/103.out
+> > >  create mode 100755 tests/overlay/104
+> > >  create mode 100644 tests/overlay/104.out
+> > >  create mode 100755 tests/overlay/105
+> > >  create mode 100644 tests/overlay/105.out
+> > >  create mode 100755 tests/overlay/106
+> > >  create mode 100644 tests/overlay/106.out
+> > >  create mode 100755 tests/overlay/107
+> > >  create mode 100644 tests/overlay/107.out
+> > >  create mode 100755 tests/overlay/108
+> > >  create mode 100644 tests/overlay/108.out
+> > >  create mode 100755 tests/overlay/109
+> > >  create mode 100644 tests/overlay/109.out
+> > >  create mode 100755 tests/overlay/110
+> > >  create mode 100644 tests/overlay/110.out
+> > >  create mode 100755 tests/overlay/111
+> > >  create mode 100644 tests/overlay/111.out
+> > >  create mode 100755 tests/overlay/112
+> > >  create mode 100644 tests/overlay/112.out
+> > >  create mode 100755 tests/overlay/113
+> > >  create mode 100644 tests/overlay/113.out
+> > >  create mode 100755 tests/overlay/114
+> > >  create mode 100644 tests/overlay/114.out
+> > >  create mode 100755 tests/overlay/115
+> > >  create mode 100644 tests/overlay/115.out
+> > >  create mode 100755 tests/overlay/116
+> > >  create mode 100644 tests/overlay/116.out
+> > >  create mode 100755 tests/overlay/117
+> > >  create mode 100644 tests/overlay/117.out
+> > >
+> > > --
+> > > 2.17.1
+> > >
