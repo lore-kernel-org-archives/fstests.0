@@ -2,210 +2,107 @@ Return-Path: <SRS0=gsB6=BF=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-3.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 56181C433E1
-	for <linux-fstests@archiver.kernel.org>; Sun, 26 Jul 2020 15:30:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 63662C433E0
+	for <linux-fstests@archiver.kernel.org>; Sun, 26 Jul 2020 16:22:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2C4802073E
-	for <linux-fstests@archiver.kernel.org>; Sun, 26 Jul 2020 15:30:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 436D920714
+	for <linux-fstests@archiver.kernel.org>; Sun, 26 Jul 2020 16:22:08 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Ijy/I1UH"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Q39whQS6"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726107AbgGZPaJ (ORCPT
+        id S1726570AbgGZQWI (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 26 Jul 2020 11:30:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51432 "EHLO
+        Sun, 26 Jul 2020 12:22:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59454 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726042AbgGZPaJ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 26 Jul 2020 11:30:09 -0400
-Received: from mail-pl1-x643.google.com (mail-pl1-x643.google.com [IPv6:2607:f8b0:4864:20::643])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 51CDCC0619D2
-        for <fstests@vger.kernel.org>; Sun, 26 Jul 2020 08:30:09 -0700 (PDT)
-Received: by mail-pl1-x643.google.com with SMTP id l6so6816067plt.7
-        for <fstests@vger.kernel.org>; Sun, 26 Jul 2020 08:30:09 -0700 (PDT)
+        with ESMTP id S1726044AbgGZQWH (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 26 Jul 2020 12:22:07 -0400
+Received: from mail-io1-xd41.google.com (mail-io1-xd41.google.com [IPv6:2607:f8b0:4864:20::d41])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 69D0BC0619D2;
+        Sun, 26 Jul 2020 09:22:06 -0700 (PDT)
+Received: by mail-io1-xd41.google.com with SMTP id l1so14523014ioh.5;
+        Sun, 26 Jul 2020 09:22:06 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=message-id:date:from:to:subject:mime-version:content-disposition;
-        bh=mlTzlIaw0Kva2ac/C5oaYGOXNRv5ILLdFfVDm50ssUg=;
-        b=Ijy/I1UH51CB1ZafGXAYo6/gmct2qpUCjpHyRwn95bFe5V1+ScbbRjHF6EN1HIzXlo
-         TO/KEK5p4t9JBw6r5ii0ioKnPJpFu++3ilp+2rrbwwpz+oS0z8YbnW5MlJrVJBeBfPiE
-         d2KE4O9HraiV1ED92HWlGfaknYmEzlrL2f2yf9tD5gOfUPO64aHSMQzILU9EH0TeNdxb
-         Z9YyVE0H/KVnKHIVPcj+1fkKH7nzAX1TMWMlzzq+aKZq/yuqb9+Ni8PO6rT2eElpumd7
-         8vRyaNe3zn/HiWJDZZWLrSET2LILoOdGw1KcPcUafLHp7GIVat8qjefeJpcc8k5tqJ2K
-         ZTgg==
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=cWe+O/5s8xcTbT5idzVf89sT9Co/8XqXj3H57IRjIis=;
+        b=Q39whQS6iGJHG6OsJnkiX4MCaAzHNdeH5T7kabWN6TKSsHKFsTwKDGQf4nukh+lz2h
+         l/n1/zBYrPrb4l0X/WyewNl2LdD4bCb7AOzdSqQc+BjI+BlObp8nnthAlmoM/X2/w+3G
+         r2hUwS9lze+04AtHFmOMnNyvNGv5LpSi837C2sGq86QY8iEyZTVDdeAev0XHit/Lib3C
+         CaG511N7MHltb30T0NPD9gei6vhPKF2XNC+UZGMT/Mc8IpGrxtnwE/N59h598kX3+7oY
+         utY+uZaNJIwbRlapvHSti2fSmvDXCxiBiWKEOPRKDSodFz8sTHpm2LPNsbis1If11BCv
+         pqtw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:message-id:date:from:to:subject:mime-version
-         :content-disposition;
-        bh=mlTzlIaw0Kva2ac/C5oaYGOXNRv5ILLdFfVDm50ssUg=;
-        b=A1357yQy2gzOVTNwmBjsc4+/YR7Zw6B9s4WNmVZul8v5EnGczUm0t9NglstUZvCZ3k
-         0JzBh8eglbY9+32GjsT5wcpAZHkMiugGQFHCCSK1MOl0T8TV5ZX1hq5zAOcsucf350oC
-         Kfnjpsi/AX/NLYrm8qUzq5YzhYqhndHKkW9ovHTpyo33pv0pss74kiHPiPPj1a7xbDiF
-         wqYBXvFg3kyUa/j6EJukyiv3Nrkz6UQV5kGGk25izVENVMpG7SXycyhPdgQYXNV/QZXp
-         P/gbpkBcQ9qKyldzBARg4W5qDU8VUvLzhMjechpjCj8VInzgXuONRMFhw4Z3RwLJ641z
-         y7EQ==
-X-Gm-Message-State: AOAM530wCDrtBOW8+LoijySYX/2N2ek/dxm9RMunsDxnEYHVo9ZmIGIH
-        ye3xXOYXt8pJWbGJXBulJUb7TszH
-X-Google-Smtp-Source: ABdhPJwn8kwctLWwccsIJhI7+qrzbIM5fNE9+pguec1JEbrmaB8tbz3WMkThePLWE39rUVeOgmzuQw==
-X-Received: by 2002:a17:902:8206:: with SMTP id x6mr16101749pln.328.1595777408403;
-        Sun, 26 Jul 2020 08:30:08 -0700 (PDT)
-Received: from localhost ([47.89.231.86])
-        by smtp.gmail.com with ESMTPSA id t187sm11657956pgb.76.2020.07.26.08.30.04
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 26 Jul 2020 08:30:04 -0700 (PDT)
-Message-ID: <5f1da17c.1c69fb81.10c70.3d58@mx.google.com>
-Date:   Sun, 26 Jul 2020 23:30:00 +0800
-From:   Eryu Guan <guaneryu@gmail.com>
-To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: master branch updated to 43126346627b
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=cWe+O/5s8xcTbT5idzVf89sT9Co/8XqXj3H57IRjIis=;
+        b=BD5/EF9wRYX4ztA/Tik73xnf1/V0qCRSzvmf97PNIre0l95roBlOVtWF/s9HF3cfHJ
+         8K7XM+upPTMghn0wIIxRdpDSxL4sw/UKVI25fg6VL5Gnrv+BX7BoggKCV4Mv94fIReIH
+         /rNNZHjSKMkVcRF1B1cBYdrt2mvIVVwCovOpvo1nDTB4wnZ/lUcsLNFx0uNocgIbxv5O
+         n+B75AAQHREgd4n7CkFcSfkmAg7qwhVNbji4vG0/YNk/tAgPfffDE8XZdwLbfgfnnPHg
+         53SYoUY7Hor9lcclOn4H4qcGhbpmo9dTysvKU/oAo8zAyJE/B5qJxHqWxhmQAtUv63CN
+         jcVw==
+X-Gm-Message-State: AOAM530VZfWPDWlPBCGiLgA33bjYp+9qwVrE7LZpkLWFiY5N/X0EWTfv
+        0pb5Z6+7wP3zCsiZInaN7H0mPmE7fVkWhcioqDg=
+X-Google-Smtp-Source: ABdhPJyApKxeAGG+TVz+uGLiKt8YEs4bDmTBlC9wQ0/rcOcK4Wok7h/0YaTVqUCwFIZFPfI3tXn/iv7/qfGkZoPlxiM=
+X-Received: by 2002:a05:6638:61b:: with SMTP id g27mr21487338jar.123.1595780524535;
+ Sun, 26 Jul 2020 09:22:04 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="xmU5uxAu29Bv"
-Content-Disposition: inline
+References: <20200531110156.6613-1-amir73il@gmail.com> <20200719181116.GG2557159@desktop>
+ <CAOQ4uxjY7SqyVEG9vCtv=wB9BxDovpjwZGAQ7h5+VeiZPMKOeQ@mail.gmail.com> <20200726151632.GJ2557159@desktop>
+In-Reply-To: <20200726151632.GJ2557159@desktop>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Sun, 26 Jul 2020 19:21:53 +0300
+Message-ID: <CAOQ4uxhfxay_K9R12dY1gGTRw_su5m77YtX3nKXKmph4Vi=g0w@mail.gmail.com>
+Subject: Re: [PATCH 0/3] Running unionmount testsuite from xfstests
+To:     Eryu Guan <guan@eryu.me>
+Cc:     Eryu Guan <guaneryu@gmail.com>, Miklos Szeredi <miklos@szeredi.hu>,
+        Vivek Goyal <vgoyal@redhat.com>,
+        overlayfs <linux-unionfs@vger.kernel.org>,
+        fstests <fstests@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+> >
+> > > The test itself looks really good to me, my only concern is that
+> > > the updates in unionmount repo are not visible to fstests, and may cause
+> > > new failures, which are out of fstests' control. But I'm not sure if
+> > > this really is a problem for people.
+> > >
+> > > I came up with two options anyway
+> > > - add unionmount tests as a submodule of fstests
+> > > - put unionmount tests in fstests
+> > >
+> >
+> > I suppose you mean git submodule?
+>
+> Exactly.
+>
+> But I think I'd merge it as-is, git submodule brings more maintain
+> burden on both maintainers and users, especially users that usually
+> don't care about overlay tests. Users that care about overlay tests
+> should setup unionmount tests explicitly and know that's unionmount
+> tests if there's any test failure.
+>
 
---xmU5uxAu29Bv
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Great!
 
-Hi all,
+I see you also kept my 100+N test numbering, which is very convenient :-)
 
-The master branch of the xfstests repository at:
+I have a patch on my dev branch to run unionmount test cases with
+metacopy enabled that Vivek requested.
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+Will post it this week.
 
-have just been updated. Thanks to Amir Goldstein, fstests is now able to run
-unionmount tests for overlayfs, to do so just set UNIONMOUNT_TESTSUITE to the
-path of unionmount testsuite, for more detailed information please refer to
-README.overlay.
-
-There're also new tests and bug fixes as usual. And btrfs/216 currently fails
-with v5.8-rc6 kernel.
-
-The DAX related patches from Xiao Yang are still pending in my to-review list,
-as I still don't have time to learn the DAX kernel part change :)
-
-Thanks,
-Eryu
-
-The new head of the master branch is commit:
-
-43126346627b btrfs/162: Stop using device mount option
-
-New commits:
-
-Amir Goldstein (3):
-      [35c7a37928fd] overlay: run unionmount testsuite test cases
-      [da3796a56fd9] overlay: add unionmount tests with multi lower layers
-      [41bd77b43a49] overlay: add unionmount tests with nested overlay
-
-Anand Jain (1):
-      [191f1148cf37] btrfs: test if show_devname returns sprout device
-
-Boris Burkov (1):
-      [e444aa56c917] generic: add a test for umount racing mount
-
-Filipe Manana (1):
-      [e0680243e4ff] generic/501: make the test work on machines with a non 4K page size
-
-Marcos Paulo de Souza (1):
-      [3fdb2899df7e] btrfs/210: Ignore output from "quota rescan" after "quota enable"
-
-Nikolay Borisov (1):
-      [43126346627b] btrfs/162: Stop using device mount option
-
-Vladimir Zapolskiy (2):
-      [d16882efc471] generic: associate a few tests with punch and zero test groups
-      [4e723c0f8259] generic: add missing runtime checks for mknod/mkfifo
-
-
-Code Diffstat:
-
- README.overlay        | 15 ++++++++++++
- common/config         |  2 ++
- common/overlay        | 54 +++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/162       |  5 ++--
- tests/btrfs/210       |  2 +-
- tests/btrfs/216       | 63 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/216.out   |  2 ++
- tests/btrfs/group     |  1 +
- tests/generic/157     |  1 +
- tests/generic/158     |  1 +
- tests/generic/294     |  1 +
- tests/generic/423     |  1 +
- tests/generic/501     | 14 +++++++-----
- tests/generic/501.out |  4 ++--
- tests/generic/604     | 52 ++++++++++++++++++++++++++++++++++++++++++
- tests/generic/604.out |  2 ++
- tests/generic/group   | 11 +++++----
- tests/overlay/100     | 38 +++++++++++++++++++++++++++++++
- tests/overlay/100.out |  2 ++
- tests/overlay/101     | 39 +++++++++++++++++++++++++++++++
- tests/overlay/101.out |  2 ++
- tests/overlay/102     | 40 ++++++++++++++++++++++++++++++++
- tests/overlay/102.out |  2 ++
- tests/overlay/103     | 38 +++++++++++++++++++++++++++++++
- tests/overlay/103.out |  2 ++
- tests/overlay/104     | 39 +++++++++++++++++++++++++++++++
- tests/overlay/104.out |  2 ++
- tests/overlay/105     | 40 ++++++++++++++++++++++++++++++++
- tests/overlay/105.out |  2 ++
- tests/overlay/106     | 41 +++++++++++++++++++++++++++++++++
- tests/overlay/106.out |  2 ++
- tests/overlay/107     | 41 +++++++++++++++++++++++++++++++++
- tests/overlay/107.out |  2 ++
- tests/overlay/108     | 41 +++++++++++++++++++++++++++++++++
- tests/overlay/108.out |  2 ++
- tests/overlay/109     | 41 +++++++++++++++++++++++++++++++++
- tests/overlay/109.out |  2 ++
- tests/overlay/110     | 39 +++++++++++++++++++++++++++++++
- tests/overlay/110.out |  2 ++
- tests/overlay/111     | 40 ++++++++++++++++++++++++++++++++
- tests/overlay/111.out |  2 ++
- tests/overlay/112     | 40 ++++++++++++++++++++++++++++++++
- tests/overlay/112.out |  2 ++
- tests/overlay/113     | 41 +++++++++++++++++++++++++++++++++
- tests/overlay/113.out |  2 ++
- tests/overlay/114     | 39 +++++++++++++++++++++++++++++++
- tests/overlay/114.out |  2 ++
- tests/overlay/115     | 40 ++++++++++++++++++++++++++++++++
- tests/overlay/115.out |  2 ++
- tests/overlay/116     | 40 ++++++++++++++++++++++++++++++++
- tests/overlay/116.out |  2 ++
- tests/overlay/117     | 41 +++++++++++++++++++++++++++++++++
- tests/overlay/117.out |  2 ++
- tests/overlay/group   | 18 +++++++++++++++
- 54 files changed, 986 insertions(+), 17 deletions(-)
---
-Eryu Guan
-guaneryu@gmail.com
-
---xmU5uxAu29Bv
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAl8doPMACgkQJlKqKVyP
-52P6Tw//UcTXqN2+xovmYS3qAGYorMQyGe0P70W0okjRhi2uErKHiU7BahSOuv7m
-IrVZLIUzOiU4J94VxL8JG89DJm1lUnRwlopmlH1VrU8J9q5zQC94rPBBIHgZwnHm
-rTK6fy2sG5KQ4+g5KtMK4R9RdRe9cqLIbG/f5BWVzy+9i3QDpma2ciBLwEYtASaE
-05Opv+jOMazcE3NOh23OlBHcaMOEpngZR1EhKpSoqyFzK27ERlaI1KTJp8U/eBMe
-3rRsQgLDvTF8zkTF5HQpLrgE3ksi3T7IghdAuvtsGMNVEFWtPDB1g4S22yZ1PjU9
-lIJYg4RDpfqOYSOaHEZptBtEmG/+b6MHLFpl+sS99zln9DxWECC5qhcEs+57uzRe
-2YsR+6qsVshWSzAnvsr/Y6qwFDUTdl9mZjuC3x/uUEeLvqsDQ5tLSBInnsrV0RI6
-TQme23Hi5zrBGG0yXtzaxdkfTRjhuXnmvWhiJ7DDB15AJTP5IIummWxWVeqQFv3c
-DhLWH9SaEDUdp1oUrceYuI1l827ZOPa29GpYpYLwwjVQhyavCa4+H5smrlid4V8y
-HTsICdYklNZaOwVuu0uIf9z0WUEmRscVJzzH41np6lKkkbYLKSw5qll1NvWzEFJT
-1e17VmsWxFv0VojIkO05BTjxuy293JXCzWbwlrtM20sZv16VvMI=
-=ZIXU
------END PGP SIGNATURE-----
-
---xmU5uxAu29Bv--
+Thanks!
+Amir.
