@@ -2,210 +2,130 @@ Return-Path: <SRS0=d97O=BI=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-11.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham autolearn_force=no
-	version=3.4.0
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AEAEAC433DF
-	for <linux-fstests@archiver.kernel.org>; Wed, 29 Jul 2020 03:21:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 803A8C433DF
+	for <linux-fstests@archiver.kernel.org>; Wed, 29 Jul 2020 04:44:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 83C2520672
-	for <linux-fstests@archiver.kernel.org>; Wed, 29 Jul 2020 03:21:56 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 44DC720786
+	for <linux-fstests@archiver.kernel.org>; Wed, 29 Jul 2020 04:44:06 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="h4gQjQAA"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="acBLZR8+"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726299AbgG2DV4 (ORCPT
+        id S1726341AbgG2EoG (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 28 Jul 2020 23:21:56 -0400
-Received: from userp2130.oracle.com ([156.151.31.86]:44042 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726047AbgG2DVz (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 28 Jul 2020 23:21:55 -0400
-Received: from pps.filterd (userp2130.oracle.com [127.0.0.1])
-        by userp2130.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 06T3H3W2002365;
-        Wed, 29 Jul 2020 03:21:49 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
- : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=corp-2020-01-29;
- bh=r5C2rzYgkLoeCbcQk00khm+0ps9DFpcxujhR7OPsG7w=;
- b=h4gQjQAA6eiWPnaASG2WNuwnRYw49oMyaaKrYQx7BF5r+J+PBGKrV+5GPfIR5ed3yrzo
- G42EzaebMbYo3eEBnnvwfaeUFnVM5d5GCu33FNLgXCI/jGrNhhRCmvsU9InsfVEiYB2w
- oNGJ0bjl83CXPrcfOJ5sOrJb3a/4Uv+OnW4viMcmv+HK8m+P1CZMqYce80P7N2hEHAVz
- 7N/gB0w2sAvX+ZNr/DeQo6rrJjWe3H3hQ5HxFoIyLJ3420KScVyfmLijtKNH3fLRXTXT
- CeChgmqzFoO18wR4tGrFMETmyM20gEpX1BfCXzGWl4cJqkR+j0syuQSQ6W6adZA9PxdP ng== 
-Received: from userp3020.oracle.com (userp3020.oracle.com [156.151.31.79])
-        by userp2130.oracle.com with ESMTP id 32hu1jb2kd-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Wed, 29 Jul 2020 03:21:49 +0000
-Received: from pps.filterd (userp3020.oracle.com [127.0.0.1])
-        by userp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 06T3IaXe091515;
-        Wed, 29 Jul 2020 03:21:49 GMT
-Received: from aserv0122.oracle.com (aserv0122.oracle.com [141.146.126.236])
-        by userp3020.oracle.com with ESMTP id 32hu5u03c6-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Wed, 29 Jul 2020 03:21:48 +0000
-Received: from abhmp0014.oracle.com (abhmp0014.oracle.com [141.146.116.20])
-        by aserv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 06T3LlKn028022;
-        Wed, 29 Jul 2020 03:21:47 GMT
-Received: from localhost (/67.169.218.210)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Tue, 28 Jul 2020 20:21:47 -0700
-Date:   Tue, 28 Jul 2020 20:21:45 -0700
-From:   "Darrick J. Wong" <darrick.wong@oracle.com>
-To:     Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+        Wed, 29 Jul 2020 00:44:06 -0400
+Received: from us-smtp-delivery-74.mimecast.com ([63.128.21.74]:40672 "EHLO
+        us-smtp-delivery-74.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726286AbgG2EoF (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 29 Jul 2020 00:44:05 -0400
+X-Greylist: delayed 385 seconds by postgrey-1.27 at vger.kernel.org; Wed, 29 Jul 2020 00:44:05 EDT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1595997844;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=NW8qJxUGD7UOoxfhEb1hJPfq6/hZauH2emJCDf2UkTo=;
+        b=acBLZR8+eLgGz/z9zwa/bKZ4GVQxTnXLkXrElgMEl2g5L5hj1YWyPm1/Tc3JINOHmMLbv+
+        /pH7rjWRCT782Zf01WVl08retOlpnYd2Je8uK6bi8AMpgWtImpng/v0yt/QVvRDTwpD9rx
+        SgrF0oO4+6H7K91gsF44enSDGfEUwr4=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-312-DGHtrdVSMPi3-2hjeSNikg-1; Wed, 29 Jul 2020 00:37:36 -0400
+X-MC-Unique: DGHtrdVSMPi3-2hjeSNikg-1
+Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id B7A62107BEF5;
+        Wed, 29 Jul 2020 04:37:35 +0000 (UTC)
+Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 2F48D69329;
+        Wed, 29 Jul 2020 04:37:34 +0000 (UTC)
+Date:   Wed, 29 Jul 2020 12:49:56 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     "Darrick J. Wong" <darrick.wong@oracle.com>
 Cc:     Eryu Guan <guaneryu@gmail.com>, fstests <fstests@vger.kernel.org>
-Subject: Re: [PATCH] xfs: test that reflink forces the log if mounted with
- wsync
-Message-ID: <20200729032145.GQ7625@magnolia>
-References: <20200729025203.GX7600@magnolia>
- <0fd7ab73-9b6b-7e71-c50a-c829aaa89326@cn.fujitsu.com>
+Subject: Re: [PATCH] xfs/010,030: filter AG header CRC error warnings
+Message-ID: <20200729044956.GG2937@dhcp-12-102.nay.redhat.com>
+Mail-Followup-To: "Darrick J. Wong" <darrick.wong@oracle.com>,
+        Eryu Guan <guaneryu@gmail.com>, fstests <fstests@vger.kernel.org>
+References: <20200729025119.GV7600@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <0fd7ab73-9b6b-7e71-c50a-c829aaa89326@cn.fujitsu.com>
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9696 signatures=668679
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 adultscore=0 phishscore=0 bulkscore=0
- malwarescore=0 suspectscore=0 spamscore=0 mlxlogscore=999 mlxscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
- definitions=main-2007290024
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9696 signatures=668679
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 adultscore=0 clxscore=1011
- malwarescore=0 spamscore=0 suspectscore=0 bulkscore=0 priorityscore=1501
- phishscore=0 mlxlogscore=999 lowpriorityscore=0 impostorscore=0 mlxscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
- definitions=main-2007290024
+In-Reply-To: <20200729025119.GV7600@magnolia>
+User-Agent: Mutt/1.10.1 (2018-07-13)
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.16
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Jul 29, 2020 at 11:02:09AM +0800, Yang Xu wrote:
-> Hi Darrick
+On Tue, Jul 28, 2020 at 07:51:19PM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
 > 
-> I remember this case has been merged into xfstests.
+> Filter out the new AG header CRC verification warnings in xfs_repair
+> since these tests were built before that existed.
 > 
-> See
-> https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/commit/?id=06fd8dbbfe314410a2f55168f92e98ab93666013
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> ---
 
-DOH.  You're right, sorry about that.  self-NAK.
+Hi Darrick,
 
---D
+I still hit an error[1] on xfs/030 after merge your patch.
 
-> Best Regards
-> Yang Xu
+Thanks,
+Zorro
+
+# diff -u ./tests/xfs/030.out ./results//xfs/030.out.bad                                                          
+--- /root/git/xfstests-dev/tests/xfs/030.out    2020-03-12 11:22:50.063148796 +0800
++++ /root/git/xfstests-dev/results//xfs/030.out.bad     2020-07-29 12:33:08.485428533 +0800
+@@ -105,6 +105,7 @@
+ Phase 2 - using <TYPEOF> log
+         - zero log...
+         - scan filesystem freespace and inode maps...
++bad agbno AGBNO in agfl, agno 0
+         - found root inode chunk
+ Phase 3 - for each AG...
+         - scan and clear agi unlinked lists...
+
+>  tests/xfs/010 |    7 ++++++-
+>  tests/xfs/030 |    2 ++
+>  2 files changed, 8 insertions(+), 1 deletion(-)
 > 
-> > From: Darrick J. Wong <darrick.wong@oracle.com>
-> > 
-> > A code inspection revealed that reflink does not force the log to disk
-> > even if the filesystem is mounted with wsync.  Add a regression test for
-> > commit 5833112df7e9a ("xfs: reflink should force the log out if mounted
-> > with wsync").
-> > 
-> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> > ---
-> >   tests/xfs/914     |   65 +++++++++++++++++++++++++++++++++++++++++++++++++++++
-> >   tests/xfs/914.out |    7 ++++++
-> >   tests/xfs/group   |    1 +
-> >   3 files changed, 73 insertions(+)
-> >   create mode 100755 tests/xfs/914
-> >   create mode 100644 tests/xfs/914.out
-> > 
-> > diff --git a/tests/xfs/914 b/tests/xfs/914
-> > new file mode 100755
-> > index 00000000..b835394a
-> > --- /dev/null
-> > +++ b/tests/xfs/914
-> > @@ -0,0 +1,65 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0-or-later
-> > +# Copyright (c) 2020, Oracle and/or its affiliates.  All Rights Reserved.
-> > +#
-> > +# FS QA Test No. 914
-> > +#
-> > +# Make sure that reflink forces the log out if we mount with wsync.  We test
-> > +# that it actually forced the log by immediately shutting down the fs without
-> > +# flushing the log and then remounting to check file contents.
-> > +
-> > +seq=`basename $0`
-> > +seqres=$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +
-> > +here=`pwd`
-> > +tmp=/tmp/$$
-> > +status=1    # failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +_cleanup()
-> > +{
-> > +	cd /
-> > +	rm -f $tmp.*
-> > +}
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +. ./common/filter
-> > +. ./common/reflink
-> > +
-> > +# real QA test starts here
-> > +_supported_fs xfs
-> > +_supported_os Linux
-> > +_require_scratch_reflink
-> > +_require_cp_reflink
-> > +
-> > +rm -f $seqres.full
-> > +
-> > +# Format filesystem and set up quota limits
-> > +_scratch_mkfs > $seqres.full
-> > +_scratch_mount -o wsync >> $seqres.full
-> > +
-> > +# Set up initial files
-> > +$XFS_IO_PROG -f -c 'pwrite -S 0x58 0 1m -b 1m' $SCRATCH_MNT/a >> $seqres.full
-> > +$XFS_IO_PROG -f -c 'pwrite -S 0x59 0 1m -b 1m' $SCRATCH_MNT/c >> $seqres.full
-> > +_cp_reflink $SCRATCH_MNT/a $SCRATCH_MNT/e
-> > +_cp_reflink $SCRATCH_MNT/c $SCRATCH_MNT/d
-> > +touch $SCRATCH_MNT/b
-> > +sync
-> > +
-> > +# Test that setting the reflink flag on the dest file forces the log
-> > +echo "test reflink flag not set"
-> > +$XFS_IO_PROG -x -c "reflink $SCRATCH_MNT/a" -c 'shutdown' $SCRATCH_MNT/b >> $seqres.full
-> > +_scratch_cycle_mount wsync
-> > +md5sum $SCRATCH_MNT/a $SCRATCH_MNT/b | _filter_scratch
-> > +
-> > +# Test forcing the log even if both files are already reflinked
-> > +echo "test reflink flag already set"
-> > +$XFS_IO_PROG -x -c "reflink $SCRATCH_MNT/a" -c 'shutdown' $SCRATCH_MNT/d >> $seqres.full
-> > +_scratch_cycle_mount wsync
-> > +md5sum $SCRATCH_MNT/a $SCRATCH_MNT/d | _filter_scratch
-> > +
-> > +# success, all done
-> > +status=0
-> > +exit
-> > diff --git a/tests/xfs/914.out b/tests/xfs/914.out
-> > new file mode 100644
-> > index 00000000..6b19fc65
-> > --- /dev/null
-> > +++ b/tests/xfs/914.out
-> > @@ -0,0 +1,7 @@
-> > +QA output created by 914
-> > +test reflink flag not set
-> > +310f146ce52077fcd3308dcbe7632bb2  SCRATCH_MNT/a
-> > +310f146ce52077fcd3308dcbe7632bb2  SCRATCH_MNT/b
-> > +test reflink flag already set
-> > +310f146ce52077fcd3308dcbe7632bb2  SCRATCH_MNT/a
-> > +310f146ce52077fcd3308dcbe7632bb2  SCRATCH_MNT/d
-> > diff --git a/tests/xfs/group b/tests/xfs/group
-> > index d6e8d1c3..a3d87124 100644
-> > --- a/tests/xfs/group
-> > +++ b/tests/xfs/group
-> > @@ -518,3 +518,4 @@
-> >   518 auto quick quota
-> >   519 auto quick reflink
-> >   520 auto quick reflink
-> > +914 auto quick reflink
-> > 
-> > 
+> diff --git a/tests/xfs/010 b/tests/xfs/010
+> index e220a651..b65dd3ba 100755
+> --- a/tests/xfs/010
+> +++ b/tests/xfs/010
+> @@ -113,7 +113,12 @@ _check_scratch_fs
+>  # nuke the finobt root, repair will have to regenerate from the inobt
+>  _corrupt_finobt_root $SCRATCH_DEV
+>  
+> -_scratch_xfs_repair 2>&1 | _filter_repair_lostblocks
+> +filter_finobt_repair() {
+> +	sed -e '/^agi has bad CRC/d' | \
+> +		_filter_repair_lostblocks
+> +}
+> +
+> +_scratch_xfs_repair 2>&1 | filter_finobt_repair
+>  
+>  status=0
+>  exit
+> diff --git a/tests/xfs/030 b/tests/xfs/030
+> index efdb6a18..ebe4c92a 100755
+> --- a/tests/xfs/030
+> +++ b/tests/xfs/030
+> @@ -42,6 +42,8 @@ _check_ag()
+>  			    -e '/^bad agbno AGBNO for finobt/d' \
+>  			    -e '/^bad agbno AGBNO for rmapbt/d' \
+>  			    -e '/^bad agbno AGBNO for refcntbt/d' \
+> +			    -e '/^agf has bad CRC/d' \
+> +			    -e '/^agi has bad CRC/d' \
+>  			    -e '/^Missing reverse-mapping record.*/d' \
+>  			    -e '/^unknown block state, ag AGNO, block.*/d'
+>  	done
 > 
-> 
+
