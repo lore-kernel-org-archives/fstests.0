@@ -1,106 +1,131 @@
-Return-Path: <SRS0=1d3T=BK=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=QF2T=BM=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-11.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0A30EC433E0
-	for <linux-fstests@archiver.kernel.org>; Fri, 31 Jul 2020 17:39:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BBF8FC433DF
+	for <linux-fstests@archiver.kernel.org>; Sun,  2 Aug 2020 17:21:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D4D7E2083B
-	for <linux-fstests@archiver.kernel.org>; Fri, 31 Jul 2020 17:39:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 95AE62075B
+	for <linux-fstests@archiver.kernel.org>; Sun,  2 Aug 2020 17:21:03 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="BIjOfZpE"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="XHji2c5s"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1733236AbgGaRjD (ORCPT
+        id S1726347AbgHBRVD (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 31 Jul 2020 13:39:03 -0400
-Received: from us-smtp-2.mimecast.com ([207.211.31.81]:53072 "EHLO
+        Sun, 2 Aug 2020 13:21:03 -0400
+Received: from us-smtp-2.mimecast.com ([207.211.31.81]:58180 "EHLO
         us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1732973AbgGaRjD (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 31 Jul 2020 13:39:03 -0400
+        by vger.kernel.org with ESMTP id S1725793AbgHBRVD (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 2 Aug 2020 13:21:03 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1596217142;
+        s=mimecast20190719; t=1596388861;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=dGVvhJ4J0WHSd0jnbBtPOzqYG7qcOSeT1PgeJXBIuzw=;
-        b=BIjOfZpERIxw67JPzMZbHa6llDCBmcMcXefxO27h7tusm+ZE7b3KPQTq88pb6I1zf6YX+0
-        MGbH7Js1lZUuoCiwdaKlg6mEGNyeoaSDirAQ8YL//NTeM9TsYJh17GlO71sGkTN8EK+a8T
-        oVICdDmUaficm5XKJy19BrGg+RVDwPI=
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=rQMSjrPRC4wFlmbSDPDwXTgwvvtavqffSQ+AKyhY+pE=;
+        b=XHji2c5sUnzOsa7BtVby2AF6njB6aK9l7ocebRJZh2NN9jdGMa2S+DLXGGHWPdPEiBugGm
+        vr7J2V4+Dftny4d7XjjeTpPA2SB+01rbH1JirV+hXPwpPAcsCKPrkrBJdmGwfVqPo2O9fM
+        WO2e3auFBRyRHAzFjB1vbXETdyJfhVs=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-21-sRe_LAa_M1Cq_iy38zGCQA-1; Fri, 31 Jul 2020 13:37:45 -0400
-X-MC-Unique: sRe_LAa_M1Cq_iy38zGCQA-1
-Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
+ us-mta-483-ei1DFMbVNUitLzHTS7O-6g-1; Sun, 02 Aug 2020 13:19:41 -0400
+X-MC-Unique: ei1DFMbVNUitLzHTS7O-6g-1
+Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 232E58014D7;
-        Fri, 31 Jul 2020 17:37:44 +0000 (UTC)
-Received: from localhost.localdomain.com (ovpn-116-244.rdu2.redhat.com [10.10.116.244])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 6EFBD60BF1;
-        Fri, 31 Jul 2020 17:37:40 +0000 (UTC)
-From:   Bill O'Donnell <billodo@redhat.com>
-To:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org
-Cc:     darrick.wong@oracle.com, sandeen@redhat.com
-Subject: [PATCH] xfs/518: modify timer/state commands to remove new g,p timer output
-Date:   Fri, 31 Jul 2020 12:37:39 -0500
-Message-Id: <20200731173739.390649-1-billodo@redhat.com>
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 24D2F8005B0;
+        Sun,  2 Aug 2020 17:19:40 +0000 (UTC)
+Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 9314C5D9CD;
+        Sun,  2 Aug 2020 17:19:39 +0000 (UTC)
+Date:   Mon, 3 Aug 2020 01:32:10 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Jeff Moyer <jmoyer@redhat.com>
+Cc:     fstests@vger.kernel.org, io-uring@vger.kernel.org
+Subject: Re: [PATCH 2/4] fsstress: reduce the number of events when io_setup
+Message-ID: <20200802173210.GN2937@dhcp-12-102.nay.redhat.com>
+Mail-Followup-To: Jeff Moyer <jmoyer@redhat.com>, fstests@vger.kernel.org,
+        io-uring@vger.kernel.org
+References: <20200728182320.8762-1-zlang@redhat.com>
+ <20200728182320.8762-3-zlang@redhat.com>
+ <x49ft9am7is.fsf@segfault.boston.devel.redhat.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.12
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <x49ft9am7is.fsf@segfault.boston.devel.redhat.com>
+User-Agent: Mutt/1.10.1 (2018-07-13)
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-New xfs_quota kernel and xfsprogs add grace timers for group and project,
-in addition to existing user quota. Adjust xfs/518 to accommodate those
-changes, and avoid regression.
+On Wed, Jul 29, 2020 at 03:43:39PM -0400, Jeff Moyer wrote:
+> Zorro Lang <zlang@redhat.com> writes:
+> 
+> > The original number(128) of aio events for io_setup is a little big.
+> > When try to run lots of fsstress processes(e.g. -p 1000) always hit
+> > io_setup EAGAIN error, due to the nr_events exceeds the limit of
+> > available events. So reduce it from 128 to 64, to make more fsstress
+> > processes can do AIO test.
+> 
+> It looks to me as though there's only ever one request in flight.  I'd
+> just set it to 1.
+> 
+> Also, you've included another change not mentioned in your changelog.
+> Please make sure the changelog matches what's done in the patch.
 
-Signed-off-by: Bill O'Donnell <billodo@redhat.com>
----
- tests/xfs/518 | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+Thanks Jeff, I'll rewrite this patch:) Do you have any review points about
+those two IO_URING related patches (1/4 and 4/4), or it looks good to you?
 
-diff --git a/tests/xfs/518 b/tests/xfs/518
-index da39d8dc..c49c4e4d 100755
---- a/tests/xfs/518
-+++ b/tests/xfs/518
-@@ -41,12 +41,12 @@ _qmount_option "usrquota"
- _scratch_mount >> $seqres.full
- 
- $XFS_QUOTA_PROG -x -c 'timer -u 300m' $SCRATCH_MNT
--$XFS_QUOTA_PROG -x -c 'state' $SCRATCH_MNT | grep 'grace time'
-+$XFS_QUOTA_PROG -x -c 'state -u' $SCRATCH_MNT | grep 'grace time'
- _scratch_unmount
- 
- # Remount and check the limits
- _scratch_mount >> $seqres.full
--$XFS_QUOTA_PROG -x -c 'state' $SCRATCH_MNT | grep 'grace time'
-+$XFS_QUOTA_PROG -x -c 'state -u' $SCRATCH_MNT | grep 'grace time'
- _scratch_unmount
- 
- # Run repair to force quota check
-@@ -57,12 +57,12 @@ _scratch_xfs_repair >> $seqres.full 2>&1
- # while the incore copy stays at whatever was read in prior to quotacheck.
- # This will show up after the /next/ remount.
- _scratch_mount >> $seqres.full
--$XFS_QUOTA_PROG -x -c 'state' $SCRATCH_MNT | grep 'grace time'
-+$XFS_QUOTA_PROG -x -c 'state -u' $SCRATCH_MNT | grep 'grace time'
- _scratch_unmount
- 
- # Remount and check the limits
- _scratch_mount >> $seqres.full
--$XFS_QUOTA_PROG -x -c 'state' $SCRATCH_MNT | grep 'grace time'
-+$XFS_QUOTA_PROG -x -c 'state -u' $SCRATCH_MNT | grep 'grace time'
- _scratch_unmount
- 
- # success, all done
--- 
-2.26.2
+Thanks,
+Zorro
+
+> 
+> -Jeff
+> 
+> >
+> > Signed-off-by: Zorro Lang <zlang@redhat.com>
+> > ---
+> >  ltp/fsstress.c | 7 ++++---
+> >  1 file changed, 4 insertions(+), 3 deletions(-)
+> >
+> > diff --git a/ltp/fsstress.c b/ltp/fsstress.c
+> > index 388ace50..a11206d4 100644
+> > --- a/ltp/fsstress.c
+> > +++ b/ltp/fsstress.c
+> > @@ -28,6 +28,7 @@
+> >  #endif
+> >  #ifdef AIO
+> >  #include <libaio.h>
+> > +#define AIO_ENTRIES	64
+> >  io_context_t	io_ctx;
+> >  #endif
+> >  #ifdef URING
+> > @@ -699,8 +700,8 @@ int main(int argc, char **argv)
+> >  			}
+> >  			procid = i;
+> >  #ifdef AIO
+> > -			if (io_setup(128, &io_ctx) != 0) {
+> > -				fprintf(stderr, "io_setup failed");
+> > +			if (io_setup(AIO_ENTRIES, &io_ctx) != 0) {
+> > +				fprintf(stderr, "io_setup failed\n");
+> >  				exit(1);
+> >  			}
+> >  #endif
+> > @@ -714,7 +715,7 @@ int main(int argc, char **argv)
+> >  				doproc();
+> >  #ifdef AIO
+> >  			if(io_destroy(io_ctx) != 0) {
+> > -				fprintf(stderr, "io_destroy failed");
+> > +				fprintf(stderr, "io_destroy failed\n");
+> >  				return 1;
+> >  			}
+> >  #endif
+> 
 
