@@ -7,46 +7,46 @@ X-Spam-Status: No, score=-13.0 required=3.0 tests=BAYES_00,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6F65DC433DF
-	for <linux-fstests@archiver.kernel.org>; Mon,  3 Aug 2020 08:46:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CD7C2C433E0
+	for <linux-fstests@archiver.kernel.org>; Mon,  3 Aug 2020 08:46:19 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 55D8220678
-	for <linux-fstests@archiver.kernel.org>; Mon,  3 Aug 2020 08:46:17 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B82F32070A
+	for <linux-fstests@archiver.kernel.org>; Mon,  3 Aug 2020 08:46:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726167AbgHCIqR (ORCPT
+        id S1726276AbgHCIqU (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 3 Aug 2020 04:46:17 -0400
+        Mon, 3 Aug 2020 04:46:20 -0400
 Received: from mail.cn.fujitsu.com ([183.91.158.132]:44092 "EHLO
         heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726011AbgHCIqR (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 3 Aug 2020 04:46:17 -0400
+        with ESMTP id S1726011AbgHCIqT (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 3 Aug 2020 04:46:19 -0400
 X-IronPort-AV: E=Sophos;i="5.75,429,1589212800"; 
-   d="scan'208";a="97500113"
+   d="scan'208";a="97500116"
 Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
   by heian.cn.fujitsu.com with ESMTP; 03 Aug 2020 16:46:07 +0800
 Received: from G08CNEXMBPEKD04.g08.fujitsu.local (unknown [10.167.33.201])
-        by cn.fujitsu.com (Postfix) with ESMTP id DF2824CE5466;
-        Mon,  3 Aug 2020 16:46:06 +0800 (CST)
+        by cn.fujitsu.com (Postfix) with ESMTP id 6E6FD4CE545F;
+        Mon,  3 Aug 2020 16:46:05 +0800 (CST)
 Received: from G08CNEXCHPEKD05.g08.fujitsu.local (10.167.33.203) by
  G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201) with Microsoft SMTP Server
- (TLS) id 15.0.1497.2; Mon, 3 Aug 2020 16:46:11 +0800
+ (TLS) id 15.0.1497.2; Mon, 3 Aug 2020 16:46:09 +0800
 Received: from Fedora-30.g08.fujitsu.local (10.167.220.106) by
  G08CNEXCHPEKD05.g08.fujitsu.local (10.167.33.209) with Microsoft SMTP Server
- id 15.0.1497.2 via Frontend Transport; Mon, 3 Aug 2020 16:46:09 +0800
+ id 15.0.1497.2 via Frontend Transport; Mon, 3 Aug 2020 16:46:08 +0800
 From:   Xiao Yang <yangx.jy@cn.fujitsu.com>
 To:     <guaneryu@gmail.com>
 CC:     <fstests@vger.kernel.org>, <darrick.wong@oracle.com>,
         <ira.weiny@intel.com>, Xiao Yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH v8 7/7] generic: Verify the inheritance behavior of FS_XFLAG_DAX flag in various combinations
-Date:   Mon, 3 Aug 2020 16:38:38 +0800
-Message-ID: <20200803083838.26222-8-yangx.jy@cn.fujitsu.com>
+Subject: [PATCH v8 4/7] generic/413, xfs/260: Improve format operation for PMD fault testing
+Date:   Mon, 3 Aug 2020 16:38:35 +0800
+Message-ID: <20200803083838.26222-5-yangx.jy@cn.fujitsu.com>
 X-Mailer: git-send-email 2.21.0
 In-Reply-To: <20200803083838.26222-1-yangx.jy@cn.fujitsu.com>
 References: <20200803083838.26222-1-yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7BIT
 Content-Type:   text/plain; charset=US-ASCII
-X-yoursite-MailScanner-ID: DF2824CE5466.AB42E
+X-yoursite-MailScanner-ID: 6E6FD4CE545F.ADB87
 X-yoursite-MailScanner: Found to be clean
 X-yoursite-MailScanner-From: yangx.jy@cn.fujitsu.com
 Sender: fstests-owner@vger.kernel.org
@@ -54,251 +54,77 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Also factor out _check_xflag() so that other tests can use it in future.
+1) Simple code and fix the wrong value of stripe_width by _scratch_mkfs_geom().
+2) Get hugepage size by _get_hugepagesize() and replace fixed 2M with
+   hugepage size because hugepage size/PMD_SIZE is not 2M on some
+   arches(e.g. hugepage size/PMD_SIZE is 512M on arm64).
+3) For debugging, redirect the output of mkfs to $seqres.full.
 
 Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- common/rc             |  12 +++
- tests/generic/607     | 187 ++++++++++++++++++++++++++++++++++++++++++
- tests/generic/607.out |   2 +
- tests/generic/group   |   1 +
- 4 files changed, 202 insertions(+)
- create mode 100644 tests/generic/607
- create mode 100644 tests/generic/607.out
+ common/rc         | 10 ++++++++++
+ tests/generic/413 | 10 ++--------
+ tests/xfs/260     |  4 ++--
+ 3 files changed, 14 insertions(+), 10 deletions(-)
 
 diff --git a/common/rc b/common/rc
-index a358702e..9af0aa72 100644
+index 0c4d02b9..75b20f96 100644
 --- a/common/rc
 +++ b/common/rc
-@@ -3209,6 +3209,18 @@ _check_s_dax()
- 	fi
+@@ -170,6 +170,16 @@ _get_filesize()
+     stat -c %s "$1"
  }
  
-+_check_xflag()
++# Get hugepagesize in bytes
++_get_hugepagesize()
 +{
-+	local target=$1
-+	local exp_xflag=$2
-+
-+	if [ $exp_xflag -eq 0 ]; then
-+		_test_inode_flag dax $target && echo "$target has unexpected FS_XFLAG_DAX flag"
-+	else
-+		_test_inode_flag dax $target || echo "$target doen't have expected FS_XFLAG_DAX flag"
-+	fi
++	local hugepgsz=$(awk '/Hugepagesize/ {print $2}' /proc/meminfo)
++	# Call _notrun if $hugepgsz is not a number
++	echo "$hugepgsz" | egrep -q ^[0-9]+$ || \
++		_notrun "Cannot get the value of Hugepagesize"
++	echo $((hugepgsz * 1024))
 +}
 +
- # Only accept dax/dax=always mount option becasue dax=always, dax=inode
- # and dax=never are always introduced together.
- # Return 0 if filesystem/device supports the specified dax option.
-diff --git a/tests/generic/607 b/tests/generic/607
-new file mode 100644
-index 00000000..f7e17cb3
---- /dev/null
-+++ b/tests/generic/607
-@@ -0,0 +1,187 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2020 Fujitsu.  All Rights Reserved.
-+#
-+# FS QA Test 607
-+#
-+# Verify the inheritance behavior of FS_XFLAG_DAX flag in various combinations.
-+# 1) New files and directories automatically inherit FS_XFLAG_DAX from their parent directory.
-+# 2) cp operation make files and directories inherit the FS_XFLAG_DAX from new parent directory.
-+# 3) mv operation make files and directories preserve the FS_XFLAG_DAX from old parent directory.
-+# In addition, setting/clearing FS_XFLAG_DAX flag is not impacted by dax mount options.
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1        # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch
-+_require_dax_iflag
-+_require_xfs_io_command "lsattr" "-v"
-+
-+# If a/ is +x, check that a's new children
-+# inherit +x from a/.
-+test_xflag_inheritance1()
-+{
-+	mkdir -p a
-+	$XFS_IO_PROG -c "chattr +x" a
-+	mkdir -p a/b/c
-+	touch a/b/c/d
-+
-+	_check_xflag a 1
-+	_check_xflag a/b 1
-+	_check_xflag a/b/c 1
-+	_check_xflag a/b/c/d 1
-+
-+	rm -rf a
-+}
-+
-+# If a/ is +x and b/ is -x, check that:
-+# 1) b's new children inherit -x from b/.
-+# 2) a's new children(b/ is old) inherit +x from a/.
-+test_xflag_inheritance2()
-+{
-+	mkdir -p a/b
-+	$XFS_IO_PROG -c "chattr +x" a
-+	mkdir -p a/b/c a/d
-+	touch a/b/c/e a/d/f
-+
-+	_check_xflag a 1
-+	_check_xflag a/b 0
-+	_check_xflag a/b/c 0
-+	_check_xflag a/b/c/e 0
-+	_check_xflag a/d 1
-+	_check_xflag a/d/f 1
-+
-+	rm -rf a
-+}
-+
-+# If a/ is -x and b/ is +x, check that:
-+# 1) b's new children inherit +x from b/.
-+# 2) a's new children(b/ is old) inherit -x from a/.
-+test_xflag_inheritance3()
-+{
-+	mkdir -p a/b
-+	$XFS_IO_PROG -c "chattr +x" a/b
-+	mkdir -p a/b/c a/d
-+	touch a/b/c/e a/d/f
-+
-+	_check_xflag a 0
-+	_check_xflag a/b 1
-+	_check_xflag a/b/c 1
-+	_check_xflag a/b/c/e 1
-+	_check_xflag a/d 0
-+	_check_xflag a/d/f 0
-+
-+	rm -rf a
-+}
-+
-+# If a/, c/ are +x and b/ is -x, check that:
-+# 1) c's new children inherit +x from c/.
-+# 2) b's new children(c/ is old) inherit -x from b/.
-+test_xflag_inheritance4()
-+{
-+	mkdir -p a
-+	$XFS_IO_PROG -c "chattr +x" a
-+	mkdir -p a/b/c
-+	$XFS_IO_PROG -c "chattr -x" a/b
-+	mkdir -p a/b/c/d a/b/e
-+	touch a/b/c/d/f a/b/e/g
-+
-+	_check_xflag a 1
-+	_check_xflag a/b 0
-+	_check_xflag a/b/c 1
-+	_check_xflag a/b/c/d 1
-+	_check_xflag a/b/c/d/f 1
-+	_check_xflag a/b/e 0
-+	_check_xflag a/b/e/g 0
-+
-+	rm -rf a
-+}
-+
-+# If a/ is +x and b/ is -x, check that:
-+# 1) new b/c and b/g inherit -x from b/ by cp.
-+# 2) new a/e inherits +x from a/ by cp.
-+# 3) new b/d preserves +x from a/ by mv.
-+# 4) new a/f and a/h preserve -x from b/ by mv.
-+test_xflag_inheritance5()
-+{
-+	mkdir -p a b
-+	$XFS_IO_PROG -c "chattr +x" a
-+	mkdir -p a/c a/d b/e b/f
-+	touch a/g b/h
-+
-+	cp -r a/c b/
-+	cp -r b/e a/
-+	cp -r a/g b/
-+	mv a/d b/
-+	mv b/f a/
-+	mv b/h a/
-+
-+	_check_xflag b/c 0
-+	_check_xflag b/d 1
-+	_check_xflag a/e 1
-+	_check_xflag a/f 0
-+	_check_xflag b/g 0
-+	_check_xflag a/h 0
-+
-+	rm -rf a b
-+}
-+
-+do_xflag_tests()
-+{
-+	local option=$1
-+
-+	_scratch_mkfs >> $seqres.full 2>&1
-+	_scratch_mount "$option"
-+	cd $SCRATCH_MNT
-+
-+	for i in $(seq 1 5); do
-+		test_xflag_inheritance${i}
-+	done
-+
-+	cd - > /dev/null
-+	_scratch_unmount
-+}
-+
-+do_tests()
-+{
-+	# Mount without dax option
-+	do_xflag_tests
-+
-+	# Mount with 'dax' or 'dax=always' option if fs supports it.
-+	_check_scratch_dax_mountopt "dax" && do_xflag_tests "-o dax"
-+
-+	# Mount with 'dax=inode' and 'dax=never' options if fs supports them.
-+	if _check_scratch_dax_mountopt "dax=always"; then
-+		for dax_option in "dax=inode" "dax=never"; do
-+			do_xflag_tests "-o $dax_option"
-+		done
-+	fi
-+}
-+
-+do_tests
-+
-+# success, all done
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/generic/607.out b/tests/generic/607.out
-new file mode 100644
-index 00000000..d02de53b
---- /dev/null
-+++ b/tests/generic/607.out
-@@ -0,0 +1,2 @@
-+QA output created by 607
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index 05c6b02d..5bd289c3 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -609,3 +609,4 @@
- 604 auto quick mount
- 605 auto attr quick dax
- 606 auto attr quick dax
-+607 auto attr quick dax
+ _mount()
+ {
+     $MOUNT_PROG `_mount_ops_filter $*`
+diff --git a/tests/generic/413 b/tests/generic/413
+index 19e1b926..dfe2912b 100755
+--- a/tests/generic/413
++++ b/tests/generic/413
+@@ -111,14 +111,8 @@ do_tests()
+ 	t_mmap_dio_dax $((64 * 1024 * 1024))
+ }
+ 
+-# make fs 2Mb aligned for PMD fault testing
+-mkfs_opts=""
+-if [ "$FSTYP" == "ext4" ]; then
+-	mkfs_opts="-E stride=512,stripe_width=1"
+-elif [ "$FSTYP" == "xfs" ]; then
+-	mkfs_opts="-d su=2m,sw=1"
+-fi
+-_scratch_mkfs "$mkfs_opts" > /dev/null 2>&1
++# make fs aligned for PMD fault testing
++_scratch_mkfs_geom $(_get_hugepagesize) 1 >> $seqres.full 2>&1
+ 
+ # mount SCRATCH_DEV with dax option, TEST_DEV not
+ export MOUNT_OPTIONS=""
+diff --git a/tests/xfs/260 b/tests/xfs/260
+index bcdc6041..81b42f01 100755
+--- a/tests/xfs/260
++++ b/tests/xfs/260
+@@ -121,8 +121,8 @@ do_tests()
+ 	t_dax_flag_mmap_dio $((64 * 1024 * 1024))
+ }
+ 
+-# make xfs 2Mb aligned for PMD fault testing
+-_scratch_mkfs "-d su=2m,sw=1" > /dev/null 2>&1
++# make xfs aligned for PMD fault testing
++_scratch_mkfs_geom $(_get_hugepagesize) 1 >> $seqres.full 2>&1
+ 
+ # mount with dax option
+ _scratch_mount "-o dax"
 -- 
 2.21.0
 
