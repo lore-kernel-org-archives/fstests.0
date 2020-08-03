@@ -1,345 +1,125 @@
-Return-Path: <SRS0=QF2T=BM=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=C+DF=BN=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.0 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 55100C433DF
-	for <linux-fstests@archiver.kernel.org>; Sun,  2 Aug 2020 18:09:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4E5C6C433DF
+	for <linux-fstests@archiver.kernel.org>; Mon,  3 Aug 2020 08:46:13 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 368692075B
-	for <linux-fstests@archiver.kernel.org>; Sun,  2 Aug 2020 18:09:19 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="PdyRW4ia"
+	by mail.kernel.org (Postfix) with ESMTP id 2B9AC206D7
+	for <linux-fstests@archiver.kernel.org>; Mon,  3 Aug 2020 08:46:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726257AbgHBSJS (ORCPT
+        id S1725831AbgHCIqN (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 2 Aug 2020 14:09:18 -0400
-Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:20994 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1725925AbgHBSJS (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 2 Aug 2020 14:09:18 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1596391755;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=63FRSIjJgIws/T8GWZC6LViBQSutCw5Hd18zfq1Vt3M=;
-        b=PdyRW4iaE9BUZzLsmLeh0eJPTPndQG1oxHUrtjE5rr9wxuUfasOo5r/k7C40CcAyKbF9OC
-        uSSoYwBOiHhi9UFH1RBax2x0OPOdKH+H1x5Yn8qTmX2nsSeJeOwqu9rsclv69tK8MMCrWO
-        YPtYhXXtqMo7pmov0+GD+FUM8LyJ7sw=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-205-__2FgH8gO4-sO3Tqn0gZFA-1; Sun, 02 Aug 2020 14:09:13 -0400
-X-MC-Unique: __2FgH8gO4-sO3Tqn0gZFA-1
-Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 7810257;
-        Sun,  2 Aug 2020 18:09:12 +0000 (UTC)
-Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id E494C60C05;
-        Sun,  2 Aug 2020 18:09:11 +0000 (UTC)
-Date:   Mon, 3 Aug 2020 02:21:42 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     fstests@vger.kernel.org
-Cc:     io-uring@vger.kernel.org, jmoyer@redhat.com
-Subject: Re: [PATCH 4/4] fsx: add IO_URING test
-Message-ID: <20200802182142.GO2937@dhcp-12-102.nay.redhat.com>
-Mail-Followup-To: fstests@vger.kernel.org, io-uring@vger.kernel.org,
-        jmoyer@redhat.com
-References: <20200728182320.8762-1-zlang@redhat.com>
- <20200728182320.8762-5-zlang@redhat.com>
+        Mon, 3 Aug 2020 04:46:13 -0400
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:44087 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1725806AbgHCIqN (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 3 Aug 2020 04:46:13 -0400
+X-IronPort-AV: E=Sophos;i="5.75,429,1589212800"; 
+   d="scan'208";a="97500110"
+Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
+  by heian.cn.fujitsu.com with ESMTP; 03 Aug 2020 16:46:07 +0800
+Received: from G08CNEXMBPEKD04.g08.fujitsu.local (unknown [10.167.33.201])
+        by cn.fujitsu.com (Postfix) with ESMTP id E65C64CE5446;
+        Mon,  3 Aug 2020 16:46:03 +0800 (CST)
+Received: from G08CNEXCHPEKD05.g08.fujitsu.local (10.167.33.203) by
+ G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.2; Mon, 3 Aug 2020 16:46:08 +0800
+Received: from Fedora-30.g08.fujitsu.local (10.167.220.106) by
+ G08CNEXCHPEKD05.g08.fujitsu.local (10.167.33.209) with Microsoft SMTP Server
+ id 15.0.1497.2 via Frontend Transport; Mon, 3 Aug 2020 16:46:06 +0800
+From:   Xiao Yang <yangx.jy@cn.fujitsu.com>
+To:     <guaneryu@gmail.com>
+CC:     <fstests@vger.kernel.org>, <darrick.wong@oracle.com>,
+        <ira.weiny@intel.com>, Xiao Yang <yangx.jy@cn.fujitsu.com>
+Subject: [PATCH v8 1/7] common/rc: Introduce helpers for new dax mount options and FS_XFLAG_DAX
+Date:   Mon, 3 Aug 2020 16:38:32 +0800
+Message-ID: <20200803083838.26222-2-yangx.jy@cn.fujitsu.com>
+X-Mailer: git-send-email 2.21.0
+In-Reply-To: <20200803083838.26222-1-yangx.jy@cn.fujitsu.com>
+References: <20200803083838.26222-1-yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200728182320.8762-5-zlang@redhat.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.12
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-yoursite-MailScanner-ID: E65C64CE5446.AA16B
+X-yoursite-MailScanner: Found to be clean
+X-yoursite-MailScanner-From: yangx.jy@cn.fujitsu.com
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Jul 29, 2020 at 02:23:20AM +0800, Zorro Lang wrote:
-> New IO_URING test for fsx, use -U option to enable IO_URING test.
-> 
-> Signed-off-by: Zorro Lang <zlang@redhat.com>
-> ---
->  ltp/fsx.c | 154 +++++++++++++++++++++++++++++++++++++++++++++++++-----
->  1 file changed, 140 insertions(+), 14 deletions(-)
-> 
-> diff --git a/ltp/fsx.c b/ltp/fsx.c
-> index 7c76655a..1b7401a2 100644
-> --- a/ltp/fsx.c
-> +++ b/ltp/fsx.c
-> @@ -34,6 +34,9 @@
->  #ifdef AIO
->  #include <libaio.h>
->  #endif
-> +#ifdef URING
-> +#include <liburing.h>
-> +#endif
->  #include <sys/syscall.h>
->  
->  #ifndef MAP_FILE
-> @@ -176,21 +179,17 @@ int	integrity = 0;			/* -i flag */
->  int	fsxgoodfd = 0;
->  int	o_direct;			/* -Z */
->  int	aio = 0;
-> +int	uring = 0;
->  int	mark_nr = 0;
->  
->  int page_size;
->  int page_mask;
->  int mmap_mask;
-> -#ifdef AIO
-> -int aio_rw(int rw, int fd, char *buf, unsigned len, unsigned offset);
-> +int fsx_rw(int rw, int fd, char *buf, unsigned len, unsigned offset);
->  #define READ 0
->  #define WRITE 1
-> -#define fsxread(a,b,c,d)	aio_rw(READ, a,b,c,d)
-> -#define fsxwrite(a,b,c,d)	aio_rw(WRITE, a,b,c,d)
-> -#else
-> -#define fsxread(a,b,c,d)	read(a,b,c)
-> -#define fsxwrite(a,b,c,d)	write(a,b,c)
-> -#endif
-> +#define fsxread(a,b,c,d)	fsx_rw(READ, a,b,c,d)
-> +#define fsxwrite(a,b,c,d)	fsx_rw(WRITE, a,b,c,d)
->  
->  const char *replayops = NULL;
->  const char *recordops = NULL;
-> @@ -2242,7 +2241,7 @@ void
->  usage(void)
->  {
->  	fprintf(stdout, "usage: %s",
-> -		"fsx [-dknqxABEFJLOWZ] [-b opnum] [-c Prob] [-g filldata] [-i logdev] [-j logid] [-l flen] [-m start:end] [-o oplen] [-p progressinterval] [-r readbdy] [-s style] [-t truncbdy] [-w writebdy] [-D startingop] [-N numops] [-P dirpath] [-S seed] fname\n\
-> +		"fsx [-dknqxBEFJLOWZ][-A|-U] [-b opnum] [-c Prob] [-g filldata] [-i logdev] [-j logid] [-l flen] [-m start:end] [-o oplen] [-p progressinterval] [-r readbdy] [-s style] [-t truncbdy] [-w writebdy] [-D startingop] [-N numops] [-P dirpath] [-S seed] fname\n\
->  	-b opnum: beginning operation number (default 1)\n\
->  	-c P: 1 in P chance of file close+open at each op (default infinity)\n\
->  	-d: debug output for all operations\n\
-> @@ -2265,7 +2264,10 @@ usage(void)
->  	-y synchronize changes to a file\n"
->  
->  #ifdef AIO
-> -"	-A: Use the AIO system calls\n"
-> +"	-A: Use the AIO system calls, -A excludes -U\n"
-> +#endif
-> +#ifdef URING
-> +"	-U: Use the IO_URING system calls, -U excludes -A\n"
->  #endif
->  "	-D startingop: debug output starting at specified operation\n"
->  #ifdef HAVE_LINUX_FALLOC_H
-> @@ -2425,13 +2427,127 @@ out_error:
->  	errno = -ret;
->  	return -1;
->  }
-> +#endif
-> +
-> +#ifdef URING
-> +struct io_uring ring;
-> +#define URING_ENTRIES	1024
-> +int
-> +uring_setup()
-> +{
-> +	int ret;
-> +
-> +	ret = io_uring_queue_init(URING_ENTRIES, &ring, 0);
-> +	if (ret != 0) {
-> +		fprintf(stderr, "uring_setup: io_uring_queue_init failed: %s\n",
-> +                        strerror(ret));
-> +                return -1;
-> +        }
-> +        return 0;
-> +}
->  
-> -int aio_rw(int rw, int fd, char *buf, unsigned len, unsigned offset)
-> +int
-> +__uring_rw(int rw, int fd, char *buf, unsigned len, unsigned offset)
->  {
-> +        struct io_uring_sqe	*sqe;
-> +        struct io_uring_cqe	*cqe;
->  	int ret;
-> +	int res, res2 = 0;
-> +	char *p = buf;
-> +	unsigned l = len;
-> +	unsigned o = offset;
-> +
-> +	/*
-> +	 * Due to io_uring tries non-blocking IOs (especially read), that
-> +	 * always cause 'normal' short reading. To avoid this short read
-> +	 * fail, try to loop read/write (escpecilly read) data.
-> +	 */
-> + uring_loop:
-> +	sqe = io_uring_get_sqe(&ring);
-> +	if (!sqe) {
-> +		fprintf(stderr, "uring_rw: io_uring_get_sqe failed: %s\n",
-> +		        strerror(errno));
-> +		return -1;
-> +        }
-> +
-> +	if (rw == READ) {
-> +		io_uring_prep_read(sqe, fd, p, l, o);
-> +	} else {
-> +		io_uring_prep_write(sqe, fd, p, l, o);
+1) _check_scratch_dax_mountopt() checks old/new dax mount option and
+   returns a value.
+2) _require_scratch_dax_mountopt() throws notrun if _check_scratch_dax_mountopt()
+   returns a non-zero value.
+3) _require_dax_iflag() checks FS_XFLAG_DAX.
 
-I just found some old version liburing doesn't support io_uring_prep_read() and
-io_uring_prep_write() functions:
+Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+---
+ common/rc | 42 ++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 42 insertions(+)
 
-  # make
-  ...
-  /tmp/ccmrsUN8.o: In function `__uring_rw':
-  /home/xfstests-zlang/ltp/fsx.c:2474: undefined reference to `io_uring_prep_read'
-  /home/xfstests-zlang/ltp/fsx.c:2476: undefined reference to `io_uring_prep_write'
-  collect2: error: ld returned 1 exit status
-  ...
-
-  # grep -rsn io_uring_prep_read /usr/include/liburing.h
-  189:static inline void io_uring_prep_readv(struct io_uring_sqe *sqe, int fd,
-  196:static inline void io_uring_prep_read_fixed(struct io_uring_sqe *sqe, int fd,
-
-  # rpm -q liburing
-  liburing-0.2-2.xxx.xxxx
-
-I'll turn to use io_uring_prep_readv() and io_uring_prep_writev() to get better
-compatibility.
-
-Thanks,
-Zorro
+diff --git a/common/rc b/common/rc
+index 1b7b2575..d7926bc5 100644
+--- a/common/rc
++++ b/common/rc
+@@ -3188,6 +3188,48 @@ _require_scratch_dax()
+ 	_scratch_unmount
+ }
+ 
++# Only accept dax/dax=always mount option becasue dax=always, dax=inode
++# and dax=never are always introduced together.
++# Return 0 if filesystem/device supports the specified dax option.
++# Return 1 if mount fails with the specified dax option.
++# Return 2 if /proc/mounts shows wrong dax option.
++# Check new dax=inode, dax=always or dax=never option by passing "dax=always".
++# Check old dax or new dax=always by passing "dax".
++_check_scratch_dax_mountopt()
++{
++	local option=$1
++
++	_require_scratch
++	_scratch_mkfs > /dev/null 2>&1
++
++	_try_scratch_mount "-o $option" > /dev/null 2>&1 || return 1
++
++	if _fs_options $SCRATCH_DEV | egrep -q "dax(=always|,|$)"; then
++		_scratch_unmount
++		return 0
++	else
++		_scratch_unmount
++		return 2
++	fi
++}
++
++# Throw notrun if _check_scratch_dax_mountopt() returns a non-zero value.
++_require_scratch_dax_mountopt()
++{
++	local mountopt=$1
++
++	_check_scratch_dax_mountopt "$mountopt"
++	local res=$?
++
++	[ $res -eq 1 ] && _notrun "mount $SCRATCH_DEV with $mountopt failed"
++	[ $res -eq 2 ] && _notrun "$SCRATCH_DEV $FSTYP does not support -o $mountopt"
++}
++
++_require_dax_iflag()
++{
++	_require_xfs_io_command "chattr" "x"
++}
++
+ # Does norecovery support by this fs?
+ _require_norecovery()
+ {
+-- 
+2.21.0
 
 
-> +	}
-> +
-> +	ret = io_uring_submit(&ring);
-> +	if (ret != 1) {
-> +		fprintf(stderr, "errcode=%d\n", -ret);
-> +		fprintf(stderr, "uring %s: io_uring_submit failed: %s\n",
-> +		        rw == READ ? "read":"write", strerror(-ret));
-> +		goto uring_error;
-> +	}
-> +
-> +	ret = io_uring_wait_cqe(&ring, &cqe);
-> +	if (ret < 0) {
-> +		if (ret == 0)
-> +			fprintf(stderr, "uring %s: no events available\n",
-> +			        rw == READ ? "read":"write");
-> +		else {
-> +			fprintf(stderr, "errcode=%d\n", -ret);
-> +			fprintf(stderr, "uring %s: io_uring_wait_cqe failed: %s\n",
-> +			        rw == READ ? "read":"write", strerror(-ret));
-> +		}
-> +		goto uring_error;
-> +	}
-> +	res = cqe->res;
-> +	io_uring_cqe_seen(&ring, cqe);
-> +
-> +	res2 += res;
-> +	if (len != res2) {
-> +		if (res > 0) {
-> +			o += res;
-> +			l -= res;
-> +			p += res;
-> +			if (l > 0)
-> +				goto uring_loop;
-> +		} else if (res < 0) {
-> +			ret = res;
-> +			fprintf(stderr, "errcode=%d\n", -ret);
-> +			fprintf(stderr, "uring %s: io_uring failed: %s\n",
-> +			        rw == READ ? "read":"write", strerror(-ret));
-> +			goto uring_error;
-> +		} else {
-> +			fprintf(stderr, "uring %s bad io length: %d instead of %u\n",
-> +			        rw == READ ? "read":"write", res2, len);
-> +		}
-> +	}
-> +	return res2;
-> +
-> + uring_error:
-> +	/*
-> +	 * The caller expects error return in traditional libc
-> +	 * convention, i.e. -1 and the errno set to error.
-> +	 */
-> +	errno = -ret;
-> +	return -1;
-> +}
-> +#endif
-> +
-> +int fsx_rw(int rw, int fd, char *buf, unsigned len, unsigned offset)
-> +{
-> +	int ret = -1;
->  
->  	if (aio) {
-> +#ifdef AIO
->  		ret = __aio_rw(rw, fd, buf, len, offset);
-> +#elif
-> +		fprintf(stderr, "io_rw: need AIO support!\n");
-> +		exit(111);
-> +#endif
-> +	} else if (uring) {
-> +#ifdef URING
-> +		ret = __uring_rw(rw, fd, buf, len, offset);
-> +#elif
-> +		fprintf(stderr, "io_rw: need IO_URING support!\n");
-> +		exit(111);
-> +#endif
->  	} else {
->  		if (rw == READ)
->  			ret = read(fd, buf, len);
-> @@ -2441,8 +2557,6 @@ int aio_rw(int rw, int fd, char *buf, unsigned len, unsigned offset)
->  	return ret;
->  }
->  
-> -#endif
-> -
->  #define test_fallocate(mode) __test_fallocate(mode, #mode)
->  
->  int
-> @@ -2496,7 +2610,7 @@ main(int argc, char **argv)
->  	setvbuf(stdout, (char *)0, _IOLBF, 0); /* line buffered stdout */
->  
->  	while ((ch = getopt_long(argc, argv,
-> -				 "b:c:dfg:i:j:kl:m:no:p:qr:s:t:w:xyABD:EFJKHzCILN:OP:RS:WXZ",
-> +				 "b:c:dfg:i:j:kl:m:no:p:qr:s:t:w:xyABD:EFJKHzCILN:OP:RS:UWXZ",
->  				 longopts, NULL)) != EOF)
->  		switch (ch) {
->  		case 'b':
-> @@ -2604,6 +2718,9 @@ main(int argc, char **argv)
->  		case 'A':
->  		        aio = 1;
->  			break;
-> +		case 'U':
-> +		        uring = 1;
-> +			break;
->  		case 'D':
->  			debugstart = getnum(optarg, &endp);
->  			if (debugstart < 1)
-> @@ -2694,6 +2811,11 @@ main(int argc, char **argv)
->  	if (argc != 1)
->  		usage();
->  
-> +	if (aio && uring) {
-> +		fprintf(stderr, "-A and -U shouldn't be used together\n");
-> +		usage();
-> +	}
-> +
->  	if (integrity && !dirpath) {
->  		fprintf(stderr, "option -i <logdev> requires -P <dirpath>\n");
->  		usage();
-> @@ -2784,6 +2906,10 @@ main(int argc, char **argv)
->  	if (aio) 
->  		aio_setup();
->  #endif
-> +#ifdef URING
-> +	if (uring)
-> +		uring_setup();
-> +#endif
->  
->  	if (!(o_flags & O_TRUNC)) {
->  		off_t ret;
-> -- 
-> 2.20.1
-> 
 
