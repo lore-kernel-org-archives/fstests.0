@@ -4,31 +4,31 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-13.0 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B7E2FC433DF
-	for <linux-fstests@archiver.kernel.org>; Mon,  3 Aug 2020 08:46:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E3032C433DF
+	for <linux-fstests@archiver.kernel.org>; Mon,  3 Aug 2020 08:46:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A1590206D7
-	for <linux-fstests@archiver.kernel.org>; Mon,  3 Aug 2020 08:46:25 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C39CA20678
+	for <linux-fstests@archiver.kernel.org>; Mon,  3 Aug 2020 08:46:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726337AbgHCIq0 (ORCPT
+        id S1726197AbgHCIqa (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 3 Aug 2020 04:46:26 -0400
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:44095 "EHLO
+        Mon, 3 Aug 2020 04:46:30 -0400
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:44087 "EHLO
         heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726197AbgHCIqZ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 3 Aug 2020 04:46:25 -0400
+        with ESMTP id S1725806AbgHCIqa (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 3 Aug 2020 04:46:30 -0400
 X-IronPort-AV: E=Sophos;i="5.75,429,1589212800"; 
-   d="scan'208";a="97500118"
+   d="scan'208";a="97500111"
 Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
   by heian.cn.fujitsu.com with ESMTP; 03 Aug 2020 16:46:07 +0800
-Received: from G08CNEXMBPEKD05.g08.fujitsu.local (unknown [10.167.33.204])
-        by cn.fujitsu.com (Postfix) with ESMTP id 65BE84CE545A;
+Received: from G08CNEXMBPEKD06.g08.fujitsu.local (unknown [10.167.33.206])
+        by cn.fujitsu.com (Postfix) with ESMTP id E8DC64CE545D;
         Mon,  3 Aug 2020 16:46:04 +0800 (CST)
 Received: from G08CNEXCHPEKD05.g08.fujitsu.local (10.167.33.203) by
- G08CNEXMBPEKD05.g08.fujitsu.local (10.167.33.204) with Microsoft SMTP Server
+ G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206) with Microsoft SMTP Server
  (TLS) id 15.0.1497.2; Mon, 3 Aug 2020 16:46:07 +0800
 Received: from Fedora-30.g08.fujitsu.local (10.167.220.106) by
  G08CNEXCHPEKD05.g08.fujitsu.local (10.167.33.209) with Microsoft SMTP Server
@@ -37,16 +37,16 @@ From:   Xiao Yang <yangx.jy@cn.fujitsu.com>
 To:     <guaneryu@gmail.com>
 CC:     <fstests@vger.kernel.org>, <darrick.wong@oracle.com>,
         <ira.weiny@intel.com>, Xiao Yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH v8 2/7] fstests: Use _require_scratch_dax_mountopt() and _require_dax_iflag()
-Date:   Mon, 3 Aug 2020 16:38:33 +0800
-Message-ID: <20200803083838.26222-3-yangx.jy@cn.fujitsu.com>
+Subject: [PATCH v8 3/7] generic/223: Don't clear MKFS_OPTION before calling _scratch_mkfs_geom()
+Date:   Mon, 3 Aug 2020 16:38:34 +0800
+Message-ID: <20200803083838.26222-4-yangx.jy@cn.fujitsu.com>
 X-Mailer: git-send-email 2.21.0
 In-Reply-To: <20200803083838.26222-1-yangx.jy@cn.fujitsu.com>
 References: <20200803083838.26222-1-yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7BIT
 Content-Type:   text/plain; charset=US-ASCII
-X-yoursite-MailScanner-ID: 65BE84CE545A.ABABA
+X-yoursite-MailScanner-ID: E8DC64CE545D.AD859
 X-yoursite-MailScanner: Found to be clean
 X-yoursite-MailScanner-From: yangx.jy@cn.fujitsu.com
 Sender: fstests-owner@vger.kernel.org
@@ -54,132 +54,60 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-1) Make related tests use _require_scratch_dax_mountopt() and _require_dax_iflag().
-2) Remove unused _require_scratch_dax().
+Current _scratch_mkfs_geom() adds geometry parameters to the end of the
+MKFS_OPTIONS blindly.  ext4 can accept the last one if geometry parameters
+and original MKFS_OPTION have the same mkfs options but xfs cannot accept
+them and reports "xxx option is respecified" error.  Make _scratch_mkfs_geom()
+override the same mkfs options in original MKFS_OPTION by geometry parameters.
+
+With this change, generic/223 doesn't need to clear original MKFS_OPTION
+before calling _scratch_mkfs_geom() and can use other mkfs options in original
+MKFS_OPTION.
 
 Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Reviewed-by: Ira Weiny <ira.weiny@intel.com>
 Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- common/rc         | 15 +--------------
- tests/ext4/030    |  2 +-
- tests/ext4/031    |  4 ++--
- tests/generic/413 |  2 +-
- tests/generic/462 |  2 +-
- tests/xfs/260     |  4 ++--
- 6 files changed, 8 insertions(+), 21 deletions(-)
+ common/rc         | 14 +++++++++++++-
+ tests/generic/223 |  1 -
+ 2 files changed, 13 insertions(+), 2 deletions(-)
 
 diff --git a/common/rc b/common/rc
-index d7926bc5..1f8c86c0 100644
+index 1f8c86c0..0c4d02b9 100644
 --- a/common/rc
 +++ b/common/rc
-@@ -3174,20 +3174,6 @@ _require_scratch_shutdown()
- 	_scratch_unmount
- }
+@@ -1051,7 +1051,19 @@ _scratch_mkfs_geom()
  
--# Does dax mount option work on this dev/fs?
--_require_scratch_dax()
--{
--	_require_scratch
--	_scratch_mkfs > /dev/null 2>&1
--	_try_scratch_mount -o dax || \
--		_notrun "mount $SCRATCH_DEV with dax failed"
--	# Check options to be sure. XFS ignores dax option
--	# and goes on if dev underneath does not support dax.
--	_fs_options $SCRATCH_DEV | grep -qw "dax" || \
--		_notrun "$SCRATCH_DEV $FSTYP does not support -o dax"
--	_scratch_unmount
--}
--
- # Only accept dax/dax=always mount option becasue dax=always, dax=inode
- # and dax=never are always introduced together.
- # Return 0 if filesystem/device supports the specified dax option.
-@@ -3213,6 +3199,7 @@ _check_scratch_dax_mountopt()
- 	fi
- }
+     case $FSTYP in
+     xfs)
+-	MKFS_OPTIONS+=" -b size=$blocksize, -d su=$sunit_bytes,sw=$swidth_mult"
++	if echo "$MKFS_OPTIONS" | egrep -q "b?size="; then
++		MKFS_OPTIONS=$(echo "$MKFS_OPTIONS" | sed -r "s/(b?size=)[0-9]+/\1$blocksize/")
++	else
++		MKFS_OPTIONS+=" -b size=$blocksize"
++	fi
++
++	if echo "$MKFS_OPTIONS" | egrep -q "(su|sunit|sw|swidth)="; then
++		MKFS_OPTIONS=$(echo "$MKFS_OPTIONS" | sed -r \
++			-e "s/(su|sunit)=[0-9kmg]+/su=$sunit_bytes/" \
++			-e "s/(sw|swidth)=[0-9kmg]+/sw=$swidth_mult/")
++	else
++		MKFS_OPTIONS+=" -d su=$sunit_bytes,sw=$swidth_mult"
++	fi
+ 	;;
+     ext4|ext4dev)
+ 	MKFS_OPTIONS+=" -b $blocksize -E stride=$sunit_blocks,stripe_width=$swidth_blocks"
+diff --git a/tests/generic/223 b/tests/generic/223
+index 6cfd00dd..ba7c9a44 100755
+--- a/tests/generic/223
++++ b/tests/generic/223
+@@ -41,7 +41,6 @@ for SUNIT_K in 8 16 32 64 128; do
+ 	let SUNIT_BLOCKS=$SUNIT_BYTES/$BLOCKSIZE
  
-+# Does dax mount option work on this dev/fs?
- # Throw notrun if _check_scratch_dax_mountopt() returns a non-zero value.
- _require_scratch_dax_mountopt()
- {
-diff --git a/tests/ext4/030 b/tests/ext4/030
-index 93bbca86..fb5cf451 100755
---- a/tests/ext4/030
-+++ b/tests/ext4/030
-@@ -33,7 +33,7 @@ rm -f $seqres.full
- # Modify as appropriate.
- _supported_os Linux
- _supported_fs ext4
--_require_scratch_dax
-+_require_scratch_dax_mountopt "dax"
- _require_test_program "t_ext4_dax_journal_corruption"
- _require_command "$CHATTR_PROG" chattr
+ 	echo "=== mkfs with su $SUNIT_BLOCKS blocks x 4 ==="
+-	export MKFS_OPTIONS=""
+ 	_scratch_mkfs_geom $SUNIT_BYTES 4 $BLOCKSIZE >> $seqres.full 2>&1
+ 	_scratch_mount
  
-diff --git a/tests/ext4/031 b/tests/ext4/031
-index dc58214e..20e2fab7 100755
---- a/tests/ext4/031
-+++ b/tests/ext4/031
-@@ -37,7 +37,7 @@ MOUNT_OPTIONS=""
- # Modify as appropriate.
- _supported_os Linux
- _supported_fs ext4
--_require_scratch_dax
-+_require_scratch_dax_mountopt "dax"
- _require_test_program "t_ext4_dax_inline_corruption"
- _require_scratch_ext4_feature "inline_data"
- 
-@@ -56,7 +56,7 @@ _scratch_unmount >> $seqres.full 2>&1
- _try_scratch_mount "-o dax" >> $seqres.full 2>&1
- 
- if [[ $? != 0 ]]; then
--	# _require_scratch_dax already verified that we could mount with DAX.
-+	# _require_scratch_dax_mountopt already verified that we could mount with DAX.
- 	# Failure here is expected because we have inline data.
- 	echo "Silence is golden"
- 	status=0
-diff --git a/tests/generic/413 b/tests/generic/413
-index 1ce89aff..19e1b926 100755
---- a/tests/generic/413
-+++ b/tests/generic/413
-@@ -31,7 +31,7 @@ rm -f $seqres.full
- _supported_fs generic
- _supported_os Linux
- _require_test
--_require_scratch_dax
-+_require_scratch_dax_mountopt "dax"
- _require_test_program "feature"
- _require_test_program "t_mmap_dio"
- _require_xfs_io_command "falloc"
-diff --git a/tests/generic/462 b/tests/generic/462
-index 1ab6cadc..4a940239 100755
---- a/tests/generic/462
-+++ b/tests/generic/462
-@@ -37,7 +37,7 @@ rm -f $seqres.full
- _supported_fs generic
- _supported_os Linux
- _require_test
--_require_scratch_dax
-+_require_scratch_dax_mountopt "dax"
- _require_test_program "t_mmap_write_ro"
- # running by unpriviliged user is not necessary to reproduce
- # this bug, just trying to test more.
-diff --git a/tests/xfs/260 b/tests/xfs/260
-index 3464ffef..bcdc6041 100755
---- a/tests/xfs/260
-+++ b/tests/xfs/260
-@@ -30,10 +30,10 @@ rm -f $seqres.full
- 
- _supported_fs xfs
- _supported_os Linux
--_require_scratch_dax
-+_require_scratch_dax_mountopt "dax"
- _require_test_program "feature"
- _require_test_program "t_mmap_dio"
--_require_xfs_io_command "chattr" "x"
-+_require_dax_iflag
- _require_xfs_io_command "falloc"
- 
- prep_files()
 -- 
 2.21.0
 
