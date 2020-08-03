@@ -4,49 +4,49 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-13.0 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E3032C433DF
-	for <linux-fstests@archiver.kernel.org>; Mon,  3 Aug 2020 08:46:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D1991C433E0
+	for <linux-fstests@archiver.kernel.org>; Mon,  3 Aug 2020 08:46:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C39CA20678
-	for <linux-fstests@archiver.kernel.org>; Mon,  3 Aug 2020 08:46:29 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B46AA20719
+	for <linux-fstests@archiver.kernel.org>; Mon,  3 Aug 2020 08:46:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726197AbgHCIqa (ORCPT
+        id S1726504AbgHCIqb (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 3 Aug 2020 04:46:30 -0400
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:44087 "EHLO
+        Mon, 3 Aug 2020 04:46:31 -0400
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:44092 "EHLO
         heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1725806AbgHCIqa (ORCPT
+        with ESMTP id S1726279AbgHCIqa (ORCPT
         <rfc822;fstests@vger.kernel.org>); Mon, 3 Aug 2020 04:46:30 -0400
 X-IronPort-AV: E=Sophos;i="5.75,429,1589212800"; 
-   d="scan'208";a="97500111"
+   d="scan'208";a="97500114"
 Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
   by heian.cn.fujitsu.com with ESMTP; 03 Aug 2020 16:46:07 +0800
-Received: from G08CNEXMBPEKD06.g08.fujitsu.local (unknown [10.167.33.206])
-        by cn.fujitsu.com (Postfix) with ESMTP id E8DC64CE545D;
-        Mon,  3 Aug 2020 16:46:04 +0800 (CST)
+Received: from G08CNEXMBPEKD05.g08.fujitsu.local (unknown [10.167.33.204])
+        by cn.fujitsu.com (Postfix) with ESMTP id DF1444CE5442;
+        Mon,  3 Aug 2020 16:46:05 +0800 (CST)
 Received: from G08CNEXCHPEKD05.g08.fujitsu.local (10.167.33.203) by
- G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206) with Microsoft SMTP Server
- (TLS) id 15.0.1497.2; Mon, 3 Aug 2020 16:46:07 +0800
+ G08CNEXMBPEKD05.g08.fujitsu.local (10.167.33.204) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.2; Mon, 3 Aug 2020 16:46:09 +0800
 Received: from Fedora-30.g08.fujitsu.local (10.167.220.106) by
  G08CNEXCHPEKD05.g08.fujitsu.local (10.167.33.209) with Microsoft SMTP Server
- id 15.0.1497.2 via Frontend Transport; Mon, 3 Aug 2020 16:46:07 +0800
+ id 15.0.1497.2 via Frontend Transport; Mon, 3 Aug 2020 16:46:08 +0800
 From:   Xiao Yang <yangx.jy@cn.fujitsu.com>
 To:     <guaneryu@gmail.com>
 CC:     <fstests@vger.kernel.org>, <darrick.wong@oracle.com>,
         <ira.weiny@intel.com>, Xiao Yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH v8 3/7] generic/223: Don't clear MKFS_OPTION before calling _scratch_mkfs_geom()
-Date:   Mon, 3 Aug 2020 16:38:34 +0800
-Message-ID: <20200803083838.26222-4-yangx.jy@cn.fujitsu.com>
+Subject: [PATCH v8 5/7] xfs/260: Move and update xfs/260
+Date:   Mon, 3 Aug 2020 16:38:36 +0800
+Message-ID: <20200803083838.26222-6-yangx.jy@cn.fujitsu.com>
 X-Mailer: git-send-email 2.21.0
 In-Reply-To: <20200803083838.26222-1-yangx.jy@cn.fujitsu.com>
 References: <20200803083838.26222-1-yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7BIT
 Content-Type:   text/plain; charset=US-ASCII
-X-yoursite-MailScanner-ID: E8DC64CE545D.AD859
+X-yoursite-MailScanner-ID: DF1444CE5442.AAC24
 X-yoursite-MailScanner: Found to be clean
 X-yoursite-MailScanner-From: yangx.jy@cn.fujitsu.com
 Sender: fstests-owner@vger.kernel.org
@@ -54,60 +54,217 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Current _scratch_mkfs_geom() adds geometry parameters to the end of the
-MKFS_OPTIONS blindly.  ext4 can accept the last one if geometry parameters
-and original MKFS_OPTION have the same mkfs options but xfs cannot accept
-them and reports "xxx option is respecified" error.  Make _scratch_mkfs_geom()
-override the same mkfs options in original MKFS_OPTION by geometry parameters.
-
-With this change, generic/223 doesn't need to clear original MKFS_OPTION
-before calling _scratch_mkfs_geom() and can use other mkfs options in original
-MKFS_OPTION.
+1) Both ext4 and xfs have supported FS_XFLAG_DAX so move it to generic.
+2) Modifying FS_XFLAG_DAX on flies does not take effect immediately so
+   make files inherit the DAX state of parent directory.
+3) Setting/clearing FS_XFLAG_DAX have no chance to change S_DAX flag if
+   mount with dax option so remove the related subtest.
+4) Setting/clearing FS_XFLAG_DAX doesn't change S_DAX flag on older xfs
+   due to commit 742d84290739 ("xfs: disable per-inode DAX flag") so
+   only do test when fs supports new dax=inode option.
 
 Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Signed-off-by: Ira Weiny <ira.weiny@intel.com>
+Reviewed-by: Ira Weiny <ira.weiny@intel.com>
 Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- common/rc         | 14 +++++++++++++-
- tests/generic/223 |  1 -
- 2 files changed, 13 insertions(+), 2 deletions(-)
+ tests/{xfs/260 => generic/605} | 68 +++++++++++++++++-----------------
+ tests/generic/605.out          |  2 +
+ tests/generic/group            |  1 +
+ tests/xfs/260.out              |  2 -
+ tests/xfs/group                |  1 -
+ 5 files changed, 36 insertions(+), 38 deletions(-)
+ rename tests/{xfs/260 => generic/605} (57%)
+ create mode 100644 tests/generic/605.out
+ delete mode 100644 tests/xfs/260.out
 
-diff --git a/common/rc b/common/rc
-index 1f8c86c0..0c4d02b9 100644
---- a/common/rc
-+++ b/common/rc
-@@ -1051,7 +1051,19 @@ _scratch_mkfs_geom()
+diff --git a/tests/xfs/260 b/tests/generic/605
+similarity index 57%
+rename from tests/xfs/260
+rename to tests/generic/605
+index 81b42f01..00ddb1f0 100755
+--- a/tests/xfs/260
++++ b/tests/generic/605
+@@ -2,7 +2,7 @@
+ # SPDX-License-Identifier: GPL-2.0
+ # Copyright (c) 2017 Red Hat Inc.  All Rights Reserved.
+ #
+-# FS QA Test 260
++# FS QA Test 605
+ #
+ # Test per-inode DAX flag by mmap direct/buffered IO.
+ #
+@@ -28,76 +28,80 @@ _cleanup()
+ # remove previous $seqres.full before test
+ rm -f $seqres.full
  
-     case $FSTYP in
-     xfs)
--	MKFS_OPTIONS+=" -b size=$blocksize, -d su=$sunit_bytes,sw=$swidth_mult"
-+	if echo "$MKFS_OPTIONS" | egrep -q "b?size="; then
-+		MKFS_OPTIONS=$(echo "$MKFS_OPTIONS" | sed -r "s/(b?size=)[0-9]+/\1$blocksize/")
-+	else
-+		MKFS_OPTIONS+=" -b size=$blocksize"
-+	fi
+-_supported_fs xfs
++_supported_fs generic
+ _supported_os Linux
+-_require_scratch_dax_mountopt "dax"
++_require_scratch_dax_mountopt "dax=always"
+ _require_test_program "feature"
+ _require_test_program "t_mmap_dio"
+ _require_dax_iflag
+ _require_xfs_io_command "falloc"
+ 
+-prep_files()
++SRC_DIR=$SCRATCH_MNT/src
++SRC_FILE=$SRC_DIR/tf_s
++DST_DIR=$SCRATCH_MNT/dst
++DST_FILE=$DST_DIR/tf_d
 +
-+	if echo "$MKFS_OPTIONS" | egrep -q "(su|sunit|sw|swidth)="; then
-+		MKFS_OPTIONS=$(echo "$MKFS_OPTIONS" | sed -r \
-+			-e "s/(su|sunit)=[0-9kmg]+/su=$sunit_bytes/" \
-+			-e "s/(sw|swidth)=[0-9kmg]+/sw=$swidth_mult/")
-+	else
-+		MKFS_OPTIONS+=" -d su=$sunit_bytes,sw=$swidth_mult"
-+	fi
- 	;;
-     ext4|ext4dev)
- 	MKFS_OPTIONS+=" -b $blocksize -E stride=$sunit_blocks,stripe_width=$swidth_blocks"
-diff --git a/tests/generic/223 b/tests/generic/223
-index 6cfd00dd..ba7c9a44 100755
---- a/tests/generic/223
-+++ b/tests/generic/223
-@@ -41,7 +41,6 @@ for SUNIT_K in 8 16 32 64 128; do
- 	let SUNIT_BLOCKS=$SUNIT_BYTES/$BLOCKSIZE
++prep_directories()
+ {
+-	rm -f $SCRATCH_MNT/tf_{s,d}
++	mkdir -p $SRC_DIR $DST_DIR
++}
  
- 	echo "=== mkfs with su $SUNIT_BLOCKS blocks x 4 ==="
--	export MKFS_OPTIONS=""
- 	_scratch_mkfs_geom $SUNIT_BYTES 4 $BLOCKSIZE >> $seqres.full 2>&1
- 	_scratch_mount
++prep_files()
++{
++	rm -f $SRC_FILE $DST_FILE
+ 	$XFS_IO_PROG -f -c "falloc 0 $tsize" \
+-		$SCRATCH_MNT/tf_{s,d} >> $seqres.full 2>&1
++		$SRC_FILE $DST_FILE >> $seqres.full 2>&1
+ }
  
+ t_both_dax()
+ {
++	$XFS_IO_PROG -c "chattr +x" $SRC_DIR $DST_DIR
+ 	prep_files
+-	$XFS_IO_PROG -c "chattr +x" $SCRATCH_MNT/tf_{s,d}
+ 	# with O_DIRECT first
+-	$here/src/t_mmap_dio $SCRATCH_MNT/tf_{s,d} $1 "dio both dax"
++	$here/src/t_mmap_dio $SRC_FILE $DST_FILE \
++		$1 "dio both dax"
+ 
+ 	prep_files
+-	$XFS_IO_PROG -c "chattr +x" $SCRATCH_MNT/tf_{s,d}
+ 	# again with buffered IO
+-	$here/src/t_mmap_dio -b $SCRATCH_MNT/tf_{s,d} \
++	$here/src/t_mmap_dio -b $SRC_FILE $DST_FILE \
+ 		$1 "buffered both dax"
+ }
+ 
+ t_nondax_to_dax()
+ {
++	$XFS_IO_PROG -c "chattr -x" $SRC_DIR
++	$XFS_IO_PROG -c "chattr +x" $DST_DIR
+ 	prep_files
+-	$XFS_IO_PROG -c "chattr -x" $SCRATCH_MNT/tf_s
+-	$XFS_IO_PROG -c "chattr +x" $SCRATCH_MNT/tf_d
+-	$here/src/t_mmap_dio $SCRATCH_MNT/tf_{s,d} \
++	$here/src/t_mmap_dio $SRC_FILE $DST_FILE \
+ 		$1 "dio nondax to dax"
+ 
+ 	prep_files
+-	$XFS_IO_PROG -c "chattr -x" $SCRATCH_MNT/tf_s
+-	$XFS_IO_PROG -c "chattr +x" $SCRATCH_MNT/tf_d
+-	$here/src/t_mmap_dio -b $SCRATCH_MNT/tf_{s,d} \
++	$here/src/t_mmap_dio -b $SRC_FILE $DST_FILE \
+ 		$1 "buffered nondax to dax"
+ }
+ 
+ t_dax_to_nondax()
+ {
++	$XFS_IO_PROG -c "chattr +x" $SRC_DIR
++	$XFS_IO_PROG -c "chattr -x" $DST_DIR
+ 	prep_files
+-	$XFS_IO_PROG -c "chattr +x" $SCRATCH_MNT/tf_s
+-	$XFS_IO_PROG -c "chattr -x" $SCRATCH_MNT/tf_d
+-	$here/src/t_mmap_dio $SCRATCH_MNT/tf_{s,d} \
++	$here/src/t_mmap_dio $SRC_FILE $DST_FILE \
+ 		$1 "dio dax to nondax"
+ 
+ 	prep_files
+-	$XFS_IO_PROG -c "chattr +x" $SCRATCH_MNT/tf_s
+-	$XFS_IO_PROG -c "chattr -x" $SCRATCH_MNT/tf_d
+-	$here/src/t_mmap_dio -b $SCRATCH_MNT/tf_{s,d} \
++	$here/src/t_mmap_dio -b $SRC_FILE $DST_FILE \
+ 		$1 "buffered dax to nondax"
+ }
+ 
+ t_both_nondax()
+ {
++	$XFS_IO_PROG -c "chattr -x" $SRC_DIR $DST_DIR
+ 	prep_files
+-	$XFS_IO_PROG -c "chattr -x" $SCRATCH_MNT/tf_{s,d}
+-	$here/src/t_mmap_dio $SCRATCH_MNT/tf_{s,d} \
++	$here/src/t_mmap_dio $SRC_FILE $DST_FILE \
+ 		$1 "dio both nondax"
+ 
+ 	prep_files
+-	$XFS_IO_PROG -c "chattr -x" $SCRATCH_MNT/tf_{s,d}
+-	$here/src/t_mmap_dio -b $SCRATCH_MNT/tf_{s,d} \
++	$here/src/t_mmap_dio -b $SRC_FILE $DST_FILE \
+ 		$1 "buffered both nondax"
+ }
+ 
+@@ -112,6 +116,7 @@ t_dax_flag_mmap_dio()
+ 
+ do_tests()
+ {
++	prep_directories
+ 	# less than page size
+ 	t_dax_flag_mmap_dio 1024
+ 	# page size
+@@ -124,17 +129,10 @@ do_tests()
+ # make xfs aligned for PMD fault testing
+ _scratch_mkfs_geom $(_get_hugepagesize) 1 >> $seqres.full 2>&1
+ 
+-# mount with dax option
+-_scratch_mount "-o dax"
+-
+ tsize=$((128 * 1024 * 1024))
+ 
+-do_tests
+-_scratch_unmount
+-
+-# mount again without dax option
+-export MOUNT_OPTIONS=""
+-_scratch_mount
++# mount with dax=inode option
++_scratch_mount "-o dax=inode"
+ do_tests
+ 
+ # success, all done
+diff --git a/tests/generic/605.out b/tests/generic/605.out
+new file mode 100644
+index 00000000..1ae20049
+--- /dev/null
++++ b/tests/generic/605.out
+@@ -0,0 +1,2 @@
++QA output created by 605
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index 75d56838..d06c1bf6 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -607,3 +607,4 @@
+ 602 auto quick encrypt
+ 603 auto quick quota
+ 604 auto quick mount
++605 auto attr quick dax
+diff --git a/tests/xfs/260.out b/tests/xfs/260.out
+deleted file mode 100644
+index 18ca517c..00000000
+--- a/tests/xfs/260.out
++++ /dev/null
+@@ -1,2 +0,0 @@
+-QA output created by 260
+-Silence is golden
+diff --git a/tests/xfs/group b/tests/xfs/group
+index d6e8d1c3..ed0d389e 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -257,7 +257,6 @@
+ 257 auto quick clone
+ 258 auto quick clone
+ 259 auto quick
+-260 auto attr quick dax
+ 261 auto quick quota
+ 262 dangerous_fuzzers dangerous_scrub dangerous_online_repair
+ 263 auto quick quota
 -- 
 2.21.0
 
