@@ -2,55 +2,79 @@ Return-Path: <SRS0=C+DF=BN=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.5 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	UNPARSEABLE_RELAY autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 12CB9C433DF
-	for <linux-fstests@archiver.kernel.org>; Mon,  3 Aug 2020 19:54:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 375C3C433E0
+	for <linux-fstests@archiver.kernel.org>; Mon,  3 Aug 2020 22:25:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AFBF022BF3
-	for <linux-fstests@archiver.kernel.org>; Mon,  3 Aug 2020 19:54:36 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3EB8820722
+	for <linux-fstests@archiver.kernel.org>; Mon,  3 Aug 2020 22:25:29 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="Fd2T8vkx"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728275AbgHCTyg (ORCPT
+        id S1726276AbgHCWZ2 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 3 Aug 2020 15:54:36 -0400
-Received: from mga18.intel.com ([134.134.136.126]:15668 "EHLO mga18.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728069AbgHCTyf (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 3 Aug 2020 15:54:35 -0400
-IronPort-SDR: 4p8RPS0BVlZpg8e0J3VGrN/Vfs/SLkC+Kekbvj8X1+/H5bm2HphnKifOYGNAdcwVjE9DfD8NEa
- vOfZheQsVxqg==
-X-IronPort-AV: E=McAfee;i="6000,8403,9702"; a="139778265"
-X-IronPort-AV: E=Sophos;i="5.75,431,1589266800"; 
-   d="scan'208";a="139778265"
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from fmsmga001.fm.intel.com ([10.253.24.23])
-  by orsmga106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Aug 2020 12:54:35 -0700
-IronPort-SDR: gdenbtF9/TimXTQFd/TDisS2TRXv3Mmd38vqNQD3Wza59lv1AqEJzD14K/XjogwypgR7XASiwi
- AiXCjFUlGDRQ==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.75,431,1589266800"; 
-   d="scan'208";a="396255062"
-Received: from iweiny-desk2.sc.intel.com ([10.3.52.147])
-  by fmsmga001.fm.intel.com with ESMTP; 03 Aug 2020 12:54:35 -0700
-Date:   Mon, 3 Aug 2020 12:54:35 -0700
-From:   Ira Weiny <ira.weiny@intel.com>
+        Mon, 3 Aug 2020 18:25:28 -0400
+Received: from userp2130.oracle.com ([156.151.31.86]:44076 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726130AbgHCWZ2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 3 Aug 2020 18:25:28 -0400
+Received: from pps.filterd (userp2130.oracle.com [127.0.0.1])
+        by userp2130.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 073MN96a048248;
+        Mon, 3 Aug 2020 22:25:20 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
+ : subject : message-id : references : mime-version : content-type :
+ in-reply-to; s=corp-2020-01-29;
+ bh=ayW/WxnJ3KRhLn/oYrEakGD5KaaMpOk4JFGdlFynsFo=;
+ b=Fd2T8vkxiA1b80ZVN6rTVXnW+ges/57Lgmx7u5xyTw5/tPVHJx+AnRWsUW1fPPqfFdNW
+ zlnYJ+gpyiZs5YUDOFTacL7bNW/VAT4oNzzg/ktnpJvoqP9oQ6unhhLLX7wLg+cXu/Jr
+ e6sgpb6+fuZuRiPSFnf+0crjCP4CoB57LXnIedxyMbWYWm0onOypuEuLY9wZMvQv1biO
+ Qfh7lvOWCKxQATnXp4EXs/jy9WwgDCpuGAEyDlTXovK/UlucmOqUSXyBj7xbeb+2a+Kv
+ lVMrzraVFjX0Ucu16mzTu2imLWpGlrLClQQRakdlkfV7FQ4+4whk6GukpGWRVWZ7Y9H4 vA== 
+Received: from userp3030.oracle.com (userp3030.oracle.com [156.151.31.80])
+        by userp2130.oracle.com with ESMTP id 32pdnq4c6p-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Mon, 03 Aug 2020 22:25:20 +0000
+Received: from pps.filterd (userp3030.oracle.com [127.0.0.1])
+        by userp3030.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 073MNfiC092589;
+        Mon, 3 Aug 2020 22:25:20 GMT
+Received: from userv0121.oracle.com (userv0121.oracle.com [156.151.31.72])
+        by userp3030.oracle.com with ESMTP id 32njavk6c7-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Mon, 03 Aug 2020 22:25:20 +0000
+Received: from abhmp0015.oracle.com (abhmp0015.oracle.com [141.146.116.21])
+        by userv0121.oracle.com (8.14.4/8.13.8) with ESMTP id 073MPJFD018379;
+        Mon, 3 Aug 2020 22:25:19 GMT
+Received: from localhost (/10.159.237.68)
+        by default (Oracle Beehive Gateway v4.0)
+        with ESMTP ; Mon, 03 Aug 2020 15:25:19 -0700
+Date:   Mon, 3 Aug 2020 15:25:16 -0700
+From:   "Darrick J. Wong" <darrick.wong@oracle.com>
 To:     Xiao Yang <yangx.jy@cn.fujitsu.com>
-Cc:     guaneryu@gmail.com, fstests@vger.kernel.org,
-        darrick.wong@oracle.com
+Cc:     guaneryu@gmail.com, fstests@vger.kernel.org, ira.weiny@intel.com
 Subject: Re: [PATCH v8 7/7] generic: Verify the inheritance behavior of
  FS_XFLAG_DAX flag in various combinations
-Message-ID: <20200803195434.GG1573827@iweiny-DESK2.sc.intel.com>
+Message-ID: <20200803222516.GA1203354@magnolia>
 References: <20200803083838.26222-1-yangx.jy@cn.fujitsu.com>
  <20200803083838.26222-8-yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 In-Reply-To: <20200803083838.26222-8-yangx.jy@cn.fujitsu.com>
-User-Agent: Mutt/1.11.1 (2018-12-01)
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9702 signatures=668679
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 bulkscore=0 phishscore=0
+ mlxlogscore=999 mlxscore=0 spamscore=0 malwarescore=0 adultscore=0
+ suspectscore=1 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2006250000 definitions=main-2008030153
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9702 signatures=668679
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 impostorscore=0 mlxscore=0
+ suspectscore=1 clxscore=1015 priorityscore=1501 bulkscore=0 adultscore=0
+ malwarescore=0 phishscore=0 mlxlogscore=999 spamscore=0 lowpriorityscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
+ definitions=main-2008030153
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
@@ -61,7 +85,10 @@ On Mon, Aug 03, 2020 at 04:38:38PM +0800, Xiao Yang wrote:
 > 
 > Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
 
-Reviewed-by: Ira Weiny <ira.weiny@intel.com>
+Looks ok,
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+
+--D
 
 > ---
 >  common/rc             |  12 +++
