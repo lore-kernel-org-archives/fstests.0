@@ -1,183 +1,210 @@
-Return-Path: <SRS0=C+DF=BN=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=m56w=BO=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	UNPARSEABLE_RELAY autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.0 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0529BC433DF
-	for <linux-fstests@archiver.kernel.org>; Mon,  3 Aug 2020 22:26:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 38149C433E0
+	for <linux-fstests@archiver.kernel.org>; Tue,  4 Aug 2020 01:19:12 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 16FF920722
-	for <linux-fstests@archiver.kernel.org>; Mon,  3 Aug 2020 22:26:57 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="NXa173ji"
+	by mail.kernel.org (Postfix) with ESMTP id 495E92076C
+	for <linux-fstests@archiver.kernel.org>; Tue,  4 Aug 2020 01:19:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726356AbgHCW04 (ORCPT
+        id S1726877AbgHDBTL (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 3 Aug 2020 18:26:56 -0400
-Received: from userp2120.oracle.com ([156.151.31.85]:32900 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726130AbgHCW04 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 3 Aug 2020 18:26:56 -0400
-Received: from pps.filterd (userp2120.oracle.com [127.0.0.1])
-        by userp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 073MMpST081511;
-        Mon, 3 Aug 2020 22:26:49 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
- : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=corp-2020-01-29;
- bh=5RcT85Q2U0TBZIaTYqZcYwodp3mdGEfR3cOTlOD9w6I=;
- b=NXa173jiIdFT7DGOpJ11E/njZwy8v9ckkuXF7PPJ+JML2WmeKN/QO2rg0kZ5EYan0kRr
- GH8GB+vBL8e0IsW8+kY8ao9idK4TuyOFyAoy/HFt9P1v0vedja9aB+i6/ENkO7DHDUSh
- ZLFNlbOLWwKIeEdBOIEYCNzisKXNAtrE7T8ImQtK6s0HlDRy933szYY3hEpuMFARElUq
- J5LsTAZRkc8cmWhe8ZXHt5Um/XtriWNK9qAEGo4buduJNRE/l1FXDMv+gh5+c7ZPLydL
- jzwk0edok9b7/eiMcoRQMsNNnjuqcbZVVi8nMerc31bIl/yDgYNV9+SpyKkDRd0+CZk8 kw== 
-Received: from userp3030.oracle.com (userp3030.oracle.com [156.151.31.80])
-        by userp2120.oracle.com with ESMTP id 32n11n11rm-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Mon, 03 Aug 2020 22:26:49 +0000
-Received: from pps.filterd (userp3030.oracle.com [127.0.0.1])
-        by userp3030.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 073MNgHa092662;
-        Mon, 3 Aug 2020 22:26:49 GMT
-Received: from userv0122.oracle.com (userv0122.oracle.com [156.151.31.75])
-        by userp3030.oracle.com with ESMTP id 32njavk84k-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Mon, 03 Aug 2020 22:26:48 +0000
-Received: from abhmp0005.oracle.com (abhmp0005.oracle.com [141.146.116.11])
-        by userv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 073MQmbE023977;
-        Mon, 3 Aug 2020 22:26:48 GMT
-Received: from localhost (/10.159.237.68)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Mon, 03 Aug 2020 15:26:47 -0700
-Date:   Mon, 3 Aug 2020 15:26:45 -0700
-From:   "Darrick J. Wong" <darrick.wong@oracle.com>
-To:     Ira Weiny <ira.weiny@intel.com>
-Cc:     Xiao Yang <yangx.jy@cn.fujitsu.com>, guaneryu@gmail.com,
-        fstests@vger.kernel.org
-Subject: Re: [PATCH v8 1/7] common/rc: Introduce helpers for new dax mount
- options and FS_XFLAG_DAX
-Message-ID: <20200803222645.GB1203354@magnolia>
-References: <20200803083838.26222-1-yangx.jy@cn.fujitsu.com>
- <20200803083838.26222-2-yangx.jy@cn.fujitsu.com>
- <20200803194915.GF1573827@iweiny-DESK2.sc.intel.com>
+        Mon, 3 Aug 2020 21:19:11 -0400
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:64326 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726276AbgHDBTL (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 3 Aug 2020 21:19:11 -0400
+X-IronPort-AV: E=Sophos;i="5.75,432,1589212800"; 
+   d="scan'208";a="97563907"
+Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
+  by heian.cn.fujitsu.com with ESMTP; 04 Aug 2020 09:19:08 +0800
+Received: from G08CNEXMBPEKD06.g08.fujitsu.local (unknown [10.167.33.206])
+        by cn.fujitsu.com (Postfix) with ESMTP id D61864CE545A;
+        Tue,  4 Aug 2020 09:19:07 +0800 (CST)
+Received: from G08CNEXCHPEKD05.g08.fujitsu.local (10.167.33.203) by
+ G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.2; Tue, 4 Aug 2020 09:19:07 +0800
+Received: from Fedora-30.g08.fujitsu.local (10.167.220.106) by
+ G08CNEXCHPEKD05.g08.fujitsu.local (10.167.33.209) with Microsoft SMTP Server
+ id 15.0.1497.2 via Frontend Transport; Tue, 4 Aug 2020 09:19:07 +0800
+From:   Xiao Yang <yangx.jy@cn.fujitsu.com>
+To:     <fstests@vger.kernel.org>
+CC:     <guaneryu@gmail.com>, <darrick.wong@oracle.com>,
+        <ira.weiny@intel.com>, Xiao Yang <yangx.jy@cn.fujitsu.com>
+Subject: [PATCH] generic: Verify how to change the S_DAX flag on an existing file
+Date:   Tue, 4 Aug 2020 09:11:40 +0800
+Message-ID: <20200804011140.26674-1-yangx.jy@cn.fujitsu.com>
+X-Mailer: git-send-email 2.21.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200803194915.GF1573827@iweiny-DESK2.sc.intel.com>
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9702 signatures=668679
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 bulkscore=0 phishscore=0
- mlxlogscore=999 mlxscore=0 spamscore=0 malwarescore=0 adultscore=0
- suspectscore=1 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2006250000 definitions=main-2008030153
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9702 signatures=668679
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 clxscore=1015 priorityscore=1501
- impostorscore=0 lowpriorityscore=0 malwarescore=0 spamscore=0 mlxscore=0
- suspectscore=1 mlxlogscore=999 phishscore=0 adultscore=0 bulkscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
- definitions=main-2008030153
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-yoursite-MailScanner-ID: D61864CE545A.AC742
+X-yoursite-MailScanner: Found to be clean
+X-yoursite-MailScanner-From: yangx.jy@cn.fujitsu.com
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Aug 03, 2020 at 12:49:19PM -0700, Ira Weiny wrote:
-> On Mon, Aug 03, 2020 at 04:38:32PM +0800, Xiao Yang wrote:
-> > 1) _check_scratch_dax_mountopt() checks old/new dax mount option and
-> >    returns a value.
-> > 2) _require_scratch_dax_mountopt() throws notrun if _check_scratch_dax_mountopt()
-> >    returns a non-zero value.
-> > 3) _require_dax_iflag() checks FS_XFLAG_DAX.
-> > 
-> > Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
-> > ---
-> >  common/rc | 42 ++++++++++++++++++++++++++++++++++++++++++
-> >  1 file changed, 42 insertions(+)
-> > 
-> > diff --git a/common/rc b/common/rc
-> > index 1b7b2575..d7926bc5 100644
-> > --- a/common/rc
-> > +++ b/common/rc
-> > @@ -3188,6 +3188,48 @@ _require_scratch_dax()
-> >  	_scratch_unmount
-> >  }
-> >  
-> > +# Only accept dax/dax=always mount option becasue dax=always, dax=inode
-> > +# and dax=never are always introduced together.
-> > +# Return 0 if filesystem/device supports the specified dax option.
-> > +# Return 1 if mount fails with the specified dax option.
-> > +# Return 2 if /proc/mounts shows wrong dax option.
-> > +# Check new dax=inode, dax=always or dax=never option by passing "dax=always".
-> > +# Check old dax or new dax=always by passing "dax".
-> > +_check_scratch_dax_mountopt()
-> 
-> So I think I see what you are trying to say here but I'm not sure the
-> comment/doc is clear.  How about:
-> 
-> # Check if dax mount options are supported
-> #
-> # $1 can be either 'dax=always' or 'dax'
-> #
-> # dax=always
-> #      Check for the new dax options (dax=inode, dax=always or dax=never) by
-> #      passing "dax=always".
-> # dax
-> #      Check for the old dax or new dax=always by passing "dax".
-> #
-> # This only accepts 'dax=always' because dax=always, dax=inode
-> # and dax=never are always supported together.  So if the other options are
-> # required checking for 'dax=always' indicates support for the other 2.
-> #
-> # Return 0 if filesystem/device supports the specified dax option.
-> # Return 1 if mount fails with the specified dax option.
-> # Return 2 if /proc/mounts shows wrong dax option.
+Change FS_XFLAG_DAX on an existing file and check if S_DAX on the
+file can take effect immediately by the following steps:
+1) Stop all applications which are using the file.
+2) Do drop_caches or umount & mount cycle.
 
-/me likes this better.
+Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+---
 
---D
+Note: It is based on the following patch set:
+https://www.spinics.net/lists/fstests/msg14457.html
 
-> Ira
-> 
-> > +{
-> > +	local option=$1
-> > +
-> > +	_require_scratch
-> > +	_scratch_mkfs > /dev/null 2>&1
-> > +
-> > +	_try_scratch_mount "-o $option" > /dev/null 2>&1 || return 1
-> > +
-> > +	if _fs_options $SCRATCH_DEV | egrep -q "dax(=always|,|$)"; then
-> > +		_scratch_unmount
-> > +		return 0
-> > +	else
-> > +		_scratch_unmount
-> > +		return 2
-> > +	fi
-> > +}
-> > +
-> > +# Throw notrun if _check_scratch_dax_mountopt() returns a non-zero value.
-> > +_require_scratch_dax_mountopt()
-> > +{
-> > +	local mountopt=$1
-> > +
-> > +	_check_scratch_dax_mountopt "$mountopt"
-> > +	local res=$?
-> > +
-> > +	[ $res -eq 1 ] && _notrun "mount $SCRATCH_DEV with $mountopt failed"
-> > +	[ $res -eq 2 ] && _notrun "$SCRATCH_DEV $FSTYP does not support -o $mountopt"
-> > +}
-> > +
-> > +_require_dax_iflag()
-> > +{
-> > +	_require_xfs_io_command "chattr" "x"
-> > +}
-> > +
-> >  # Does norecovery support by this fs?
-> >  _require_norecovery()
-> >  {
-> > -- 
-> > 2.21.0
-> > 
-> > 
-> > 
+ tests/generic/608     | 110 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/608.out |   2 +
+ tests/generic/group   |   1 +
+ 3 files changed, 113 insertions(+)
+ create mode 100644 tests/generic/608
+ create mode 100644 tests/generic/608.out
+
+diff --git a/tests/generic/608 b/tests/generic/608
+new file mode 100644
+index 00000000..33c5235d
+--- /dev/null
++++ b/tests/generic/608
+@@ -0,0 +1,110 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2020 Fujitsu.  All Rights Reserved.
++#
++# FS QA Test 608
++# Change FS_XFLAG_DAX on an existing file and check if S_DAX on
++# the file can take effect immediately by the following steps:
++# 1) Stop all applications which are using the file.
++# 2) Do drop_caches or umount & mount cycle.
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1        # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++_supported_fs generic
++_supported_os Linux
++_require_scratch_dax_mountopt "dax=always"
++_require_dax_iflag
++_require_xfs_io_command "lsattr" "-v"
++_require_xfs_io_command "statx" "-r"
++
++test_drop_caches()
++{
++	local t_file=$SCRATCH_MNT/testfile
++
++	rm -f $t_file
++	touch $t_file
++	_check_xflag $t_file 0
++	_check_s_dax $t_file 0
++
++	exec 3< $t_file
++
++	$XFS_IO_PROG -c 'chattr +x' $t_file
++	_check_xflag $t_file 1
++	_check_s_dax $t_file 0
++
++	# One application is using test file and check if S_DAX on
++	# the file doesn't take effect immediately by drop_caches
++	echo 2 > /proc/sys/vm/drop_caches
++	_check_s_dax $t_file 0
++
++	exec 3<&-
++
++	# No application is using test file and check if S_DAX on
++	# the file takes effect immediately by drop_caches
++	echo 2 > /proc/sys/vm/drop_caches
++	_check_s_dax $t_file 1
++}
++
++test_cycle_mount()
++{
++	local t_dir=$SCRATCH_MNT/testdir
++	local t_file=$t_dir/testfile
++
++	mkdir -p $t_dir
++	$XFS_IO_PROG -c 'chattr +x' $t_dir
++	rm -f $t_file
++	touch $t_file
++	_check_xflag $t_file 1
++	_check_s_dax $t_file 1
++
++	exec 3< $t_file
++
++	$XFS_IO_PROG -c 'chattr -x' $t_file
++	_check_xflag $t_file 0
++	_check_s_dax $t_file 1
++
++	exec 3<&-
++
++	# No application is using test file and check if S_DAX on
++	# the file takes effect immediately by umount & mount
++	_scratch_cycle_mount "dax=inode"
++	_check_s_dax $t_file 0
++}
++
++do_tests()
++{
++	test_drop_caches
++
++	test_cycle_mount
++}
++
++_scratch_mkfs >> $seqres.full 2>&1
++
++_scratch_mount "-o dax=inode"
++
++do_tests
++
++# success, all done
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/generic/608.out b/tests/generic/608.out
+new file mode 100644
+index 00000000..1e534458
+--- /dev/null
++++ b/tests/generic/608.out
+@@ -0,0 +1,2 @@
++QA output created by 608
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index 5bd289c3..aa969bcb 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -610,3 +610,4 @@
+ 605 auto attr quick dax
+ 606 auto attr quick dax
+ 607 auto attr quick dax
++608 auto attr quick dax
+-- 
+2.21.0
+
+
+
