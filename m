@@ -7,47 +7,45 @@ X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6E66FC433E0
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9793BC433E3
 	for <linux-fstests@archiver.kernel.org>; Wed,  5 Aug 2020 20:15:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 46BD322CA1
+	by mail.kernel.org (Postfix) with ESMTP id 6DF4C22D03
 	for <linux-fstests@archiver.kernel.org>; Wed,  5 Aug 2020 20:15:18 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
 	s=default; t=1596658518;
-	bh=yTX3/mOOTuG4J9Rqbs7yW/RnrHtMPaNNM1+AYvJ7gq4=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=MZW2X32Udq+nJdTNosBHIeGlRZRMuF+w/VrBfhET85d3Os2yZ4jT++ejfh2L8rfhU
-	 CrPnyATIvzuHLOEE/5dx1CJE/KbiZRdXOwrOV93NfUZiM0xLNsKUbNA3DgbBkknbXy
-	 UqYC/CiXQTCWGvPvfv3GO6qF7IeOhSp9YJzpu6pM=
+	bh=zfG4sPJqMKjYQqd0IqvOAj+s63MBeFClDuUy/b7fIQw=;
+	h=From:To:Cc:Subject:Date:List-ID:From;
+	b=E4y+ZhgXGgJN/OsQpc2/9JZB112GVLwweYACh/ICTVlnRgMhYhhtvrt87kNsIf6vA
+	 MAkckSA6UEkQ/83jdX4gN7ySIKcHjMU0CkfHP4/kLPHo3aq/GT1HaJih9Nvu2CxUU1
+	 YJoWAntvin4u90yHTn3I5oeVQejawdYaLx+qofpI=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729582AbgHEUPR (ORCPT
+        id S1726128AbgHEUPR (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
         Wed, 5 Aug 2020 16:15:17 -0400
-Received: from mail.kernel.org ([198.145.29.99]:48138 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.99]:48140 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726507AbgHEQUR (ORCPT <rfc822;fstests@vger.kernel.org>);
+        id S1726511AbgHEQUR (ORCPT <rfc822;fstests@vger.kernel.org>);
         Wed, 5 Aug 2020 12:20:17 -0400
 Received: from tleilax.com (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id D89F22075D;
+        by mail.kernel.org (Postfix) with ESMTPSA id 5CF2E2075A;
         Wed,  5 Aug 2020 13:53:10 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1596635591;
-        bh=yTX3/mOOTuG4J9Rqbs7yW/RnrHtMPaNNM1+AYvJ7gq4=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=esUaKTMSYzL+34FUR5zw/ItvdO8uIFXxoqg4a+dC4qla8TyJhMEwN7tLvJhpJC4in
-         fROfaN+iqwZNAuQl7WVRv/bUiWgXk86JNhnVlPVBeLOJO7nSbFRQQOCoDVygUuBaqA
-         PP6sJLOvuMIKxJChgLsTaIwlN2i3/dM06sVGT6hQ=
+        s=default; t=1596635590;
+        bh=zfG4sPJqMKjYQqd0IqvOAj+s63MBeFClDuUy/b7fIQw=;
+        h=From:To:Cc:Subject:Date:From;
+        b=iGAEoCEU+jU5XUAE96RO82CdrpH+NnSV1F4NNpo6iVavAWL4rxM3GQ7pXg3adJML9
+         g1vUaUxBYm2ZYxOn6Q72PJj9pqzy72R8qDIPphMrWeSOtYB9Bq9Wc1IxMvom0+kaZI
+         rr0N1VFzYBBSamL11PO7YnNeuytHNMFw520n+CMM=
 From:   Jeff Layton <jlayton@kernel.org>
 To:     fstests@vger.kernel.org
 Cc:     Eryu Guan <guaneryu@gmail.com>
-Subject: [PATCH RESEND 2/2] generic/062: use more restrictive filter when querying for attributes
-Date:   Wed,  5 Aug 2020 09:53:08 -0400
-Message-Id: <20200805135308.14540-2-jlayton@kernel.org>
+Subject: [PATCH RESEND 1/2] generic/377: filter out xattrs that don't start with 'user.'
+Date:   Wed,  5 Aug 2020 09:53:07 -0400
+Message-Id: <20200805135308.14540-1-jlayton@kernel.org>
 X-Mailer: git-send-email 2.26.2
-In-Reply-To: <20200805135308.14540-1-jlayton@kernel.org>
-References: <20200805135308.14540-1-jlayton@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
@@ -55,68 +53,41 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Sometimes we can end up with unexpected xattrs showing up on an inode.
-For instance, on an SELinux-enabled host security.selinux may be set and
-show up in a listing even though we've never set it.
+Most hosts that I've been testing on seem to display security.selinux in
+listxattr. 377.out doesn't account for that so it routinely fails for me
+in testing.
 
-generic/062 lists out all of the xattrs on an inode in some cases, but
-it can't easily account for these "automatic" xattrs being set. Change
-it to use a more restrictive regex when filtering attributes, so that we
-just get the namespaces we're interested in.
+When testing the output of listxattr in generic/377, filter out any xattr
+names that don't start with 'user.'. That should help ensure consistent
+output on SELinux-enabled hosts.
 
-Cc: Zorro Lang <zlang@redhat.com>
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- tests/generic/062 | 10 ++++++----
- 1 file changed, 6 insertions(+), 4 deletions(-)
+ tests/generic/377 | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/tests/generic/062 b/tests/generic/062
-index d2a0ac9a9a21..cab4b4faac7c 100755
---- a/tests/generic/062
-+++ b/tests/generic/062
-@@ -77,8 +77,10 @@ invalid_attribute_filter() {
+diff --git a/tests/generic/377 b/tests/generic/377
+index f7835ee8ff9e..f08abdca60a6 100755
+--- a/tests/generic/377
++++ b/tests/generic/377
+@@ -48,7 +48,7 @@ $SETFATTR_PROG -n user.ping -v pong $testfile
+ $SETFATTR_PROG -n user.hello -v there $testfile
  
- if [ "$USE_ATTR_SECURE" = yes ]; then
-     ATTR_MODES="user security trusted"
-+    ATTR_FILTER="^(user|security|trusted)"
- else
-     ATTR_MODES="user trusted"
-+    ATTR_FILTER="^(user|trusted)"
- fi
- for nsp in $ATTR_MODES; do
- 	for inode in reg dir lnk dev/b dev/c dev/p; do
-@@ -121,7 +123,7 @@ for nsp in $ATTR_MODES; do
- 		getfattr -m $nsp -e hex -n $nsp.name2 $SCRATCH_MNT/$inode 2>&1 | invalid_attribute_filter
+ # 1. Call listxattr without buffer length argument. This should succeed.
+-$listxattr $testfile | sort
++$listxattr $testfile | grep '^xattr: user\.' | sort
  
- 		echo "*** final list (strings, type=$inode, nsp=$nsp)"
--		getfattr -m '.' -e hex $SCRATCH_MNT/$inode
-+		getfattr -m $ATTR_FILTER -e hex $SCRATCH_MNT/$inode
- 	
- 	done
- done
-@@ -151,11 +153,11 @@ _extend_test_bed
+ # 2. Calling listxattr on nonexistant file should fail with -ENOENT.
+ $listxattr ""
+@@ -66,7 +66,7 @@ $listxattr $testfile 9
+ $listxattr $testfile 11
  
- echo
- echo "*** directory descent with us following symlinks"
--getfattr -h -L -R -m '.' -e hex $SCRATCH_MNT | _sort_getfattr_output
-+getfattr -h -L -R -m "$ATTR_FILTER" -e hex $SCRATCH_MNT | _sort_getfattr_output
+ # 6. Calling listxattr with buffersize bigger than needed should succeed.
+-$listxattr $testfile 500 | sort
++$listxattr $testfile 500 | grep '^xattr: user\.' | sort
  
- echo
- echo "*** directory descent without following symlinks"
--getfattr -h -P -R -m '.' -e hex $SCRATCH_MNT | _sort_getfattr_output
-+getfattr -h -P -R -m "$ATTR_FILTER" -e hex $SCRATCH_MNT | _sort_getfattr_output
- 
- # 
- # Test the backup/restore code
-@@ -168,7 +170,7 @@ _backup()
- 	# we *do* sort the output by path, since it otherwise would depend on
- 	# readdir order, which on some filesystems may change after re-creating
- 	# the files.
--	_getfattr --absolute-names -dh -R -m '.' $SCRATCH_MNT | _sort_getfattr_output >$1
-+	_getfattr --absolute-names -dh -R -m $ATTR_FILTER $SCRATCH_MNT | _sort_getfattr_output >$1
- 	echo BACKUP $1 >>$seqres.full
- 	cat $1 >> $seqres.full
- 	[ ! -s $1 ] && echo "warning: $1 (backup file) is empty"
+ status=0
+ exit
 -- 
 2.26.2
 
