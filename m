@@ -2,309 +2,252 @@ Return-Path: <SRS0=LCFT=BQ=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.0 required=3.0 tests=BAYES_00,
+X-Spam-Status: No, score=-11.5 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D4702C433E0
-	for <linux-fstests@archiver.kernel.org>; Thu,  6 Aug 2020 02:21:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ADD9CC433E0
+	for <linux-fstests@archiver.kernel.org>; Thu,  6 Aug 2020 17:49:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C1C922245C
-	for <linux-fstests@archiver.kernel.org>; Thu,  6 Aug 2020 02:21:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0DAFE221E3
+	for <linux-fstests@archiver.kernel.org>; Thu,  6 Aug 2020 17:49:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726551AbgHFCVs (ORCPT
+        id S1727828AbgHFRt2 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 5 Aug 2020 22:21:48 -0400
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:34557 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726524AbgHFCVs (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 5 Aug 2020 22:21:48 -0400
-X-IronPort-AV: E=Sophos;i="5.75,440,1589212800"; 
-   d="scan'208";a="97677619"
-Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
-  by heian.cn.fujitsu.com with ESMTP; 06 Aug 2020 10:21:20 +0800
-Received: from G08CNEXMBPEKD06.g08.fujitsu.local (unknown [10.167.33.206])
-        by cn.fujitsu.com (Postfix) with ESMTP id AA2F34CE34F4;
-        Thu,  6 Aug 2020 10:21:17 +0800 (CST)
-Received: from G08CNEXCHPEKD05.g08.fujitsu.local (10.167.33.203) by
- G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206) with Microsoft SMTP Server
- (TLS) id 15.0.1497.2; Thu, 6 Aug 2020 10:21:17 +0800
-Received: from Fedora-30.g08.fujitsu.local (10.167.220.106) by
- G08CNEXCHPEKD05.g08.fujitsu.local (10.167.33.209) with Microsoft SMTP Server
- id 15.0.1497.2 via Frontend Transport; Thu, 6 Aug 2020 10:21:18 +0800
-From:   Xiao Yang <yangx.jy@cn.fujitsu.com>
-To:     <fstests@vger.kernel.org>
-CC:     <darrick.wong@oracle.com>, <ira.weiny@intel.com>,
-        <guaneryu@gmail.com>, Xiao Yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH v9 7/8] generic: Verify the inheritance behavior of FS_XFLAG_DAX flag in various combinations
-Date:   Thu, 6 Aug 2020 10:13:41 +0800
-Message-ID: <20200806021342.10596-8-yangx.jy@cn.fujitsu.com>
-X-Mailer: git-send-email 2.21.0
-In-Reply-To: <20200806021342.10596-1-yangx.jy@cn.fujitsu.com>
-References: <20200806021342.10596-1-yangx.jy@cn.fujitsu.com>
+        Thu, 6 Aug 2020 13:49:28 -0400
+Received: from mga11.intel.com ([192.55.52.93]:61782 "EHLO mga11.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1727093AbgHFQeQ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 6 Aug 2020 12:34:16 -0400
+IronPort-SDR: sX96oFxhVK0N04KVgHDEFUqE8p11UOU0Yd6Ob1SlhbIDIvvrSRsLoBDtUH/Jj1E1kMRAc8K3rA
+ C3RIWzD1AYvw==
+X-IronPort-AV: E=McAfee;i="6000,8403,9704"; a="150583710"
+X-IronPort-AV: E=Sophos;i="5.75,441,1589266800"; 
+   d="scan'208";a="150583710"
+X-Amp-Result: SKIPPED(no attachment in message)
+X-Amp-File-Uploaded: False
+Received: from fmsmga006.fm.intel.com ([10.253.24.20])
+  by fmsmga102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Aug 2020 09:09:22 -0700
+IronPort-SDR: EP/uYxDrTfw0JReomrah7gYT+yKOpj90ia2Co0OyBrTEE0Ub5DyosFQJVJvQVTGC0om/5HvQJe
+ PUMxUWAb56zw==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.75,441,1589266800"; 
+   d="scan'208";a="493248956"
+Received: from iweiny-desk2.sc.intel.com ([10.3.52.147])
+  by fmsmga006.fm.intel.com with ESMTP; 06 Aug 2020 09:09:22 -0700
+Date:   Thu, 6 Aug 2020 09:09:22 -0700
+From:   Ira Weiny <ira.weiny@intel.com>
+To:     Xiao Yang <yangx.jy@cn.fujitsu.com>
+Cc:     "Darrick J. Wong" <darrick.wong@oracle.com>,
+        fstests@vger.kernel.org, guaneryu@gmail.com
+Subject: Re: [PATCH] generic: Verify how to change the S_DAX flag on an
+ existing file
+Message-ID: <20200806160921.GJ1573827@iweiny-DESK2.sc.intel.com>
+References: <20200804011140.26674-1-yangx.jy@cn.fujitsu.com>
+ <20200804153841.GC1203354@magnolia>
+ <5F2A0401.90708@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7BIT
-Content-Type:   text/plain; charset=US-ASCII
-X-yoursite-MailScanner-ID: AA2F34CE34F4.AE28B
-X-yoursite-MailScanner: Found to be clean
-X-yoursite-MailScanner-From: yangx.jy@cn.fujitsu.com
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <5F2A0401.90708@cn.fujitsu.com>
+User-Agent: Mutt/1.11.1 (2018-12-01)
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Also factor out _check_xflag() so that other tests can use it in future.
+On Wed, Aug 05, 2020 at 08:57:37AM +0800, Xiao Yang wrote:
+> On 2020/8/4 23:38, Darrick J. Wong wrote:
+> > On Tue, Aug 04, 2020 at 09:11:40AM +0800, Xiao Yang wrote:
+> > > Change FS_XFLAG_DAX on an existing file and check if S_DAX on the
+> > > file can take effect immediately by the following steps:
+> > > 1) Stop all applications which are using the file.
+> > > 2) Do drop_caches or umount&  mount cycle.
+> > Slightly related question: is there a test to check that if a filesystem
+> > recognizes dax=always, it will also accept dax=inode and dax=none?  This
+> > test checks that dax=always and dax=inode work, but I don't think I saw
+> > one that tests dax=always ensuring that dax=none works too.
+> Hi Darrick,
+> 
+> Good question.  dax=inode and dax=none have the same behavior so do you want
+> to
+> add another combination(-o dax=none)  for all tests which include dax=inode?
+> Right?
 
-Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+FWIW, it is '-o dax=never'
+
+I had a test for dax=never as well.  Basically FS_XFLAG_DAX=n should result in
+S_DAX=y in that case.
+
+I think this patch is good for what it does though.
+
 Reviewed-by: Ira Weiny <ira.weiny@intel.com>
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
----
- common/rc             |  12 +++
- tests/generic/607     | 189 ++++++++++++++++++++++++++++++++++++++++++
- tests/generic/607.out |   2 +
- tests/generic/group   |   1 +
- 4 files changed, 204 insertions(+)
- create mode 100644 tests/generic/607
- create mode 100644 tests/generic/607.out
 
-diff --git a/common/rc b/common/rc
-index de431c7a..062eb6ba 100644
---- a/common/rc
-+++ b/common/rc
-@@ -3209,6 +3209,18 @@ _check_s_dax()
- 	fi
- }
- 
-+_check_xflag()
-+{
-+	local target=$1
-+	local exp_xflag=$2
-+
-+	if [ $exp_xflag -eq 0 ]; then
-+		_test_inode_flag dax $target && echo "$target has unexpected FS_XFLAG_DAX flag"
-+	else
-+		_test_inode_flag dax $target || echo "$target doen't have expected FS_XFLAG_DAX flag"
-+	fi
-+}
-+
- # Check if dax mount options are supported
- #
- # $1 can be either 'dax=always' or 'dax'
-diff --git a/tests/generic/607 b/tests/generic/607
-new file mode 100644
-index 00000000..b15085ea
---- /dev/null
-+++ b/tests/generic/607
-@@ -0,0 +1,189 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2020 Fujitsu.  All Rights Reserved.
-+#
-+# FS QA Test 607
-+#
-+# Verify the inheritance behavior of FS_XFLAG_DAX flag in various combinations.
-+# 1) New files and directories automatically inherit FS_XFLAG_DAX from their parent directory.
-+# 2) cp operation make files and directories inherit the FS_XFLAG_DAX from new parent directory.
-+# 3) mv operation make files and directories preserve the FS_XFLAG_DAX from old parent directory.
-+# In addition, setting/clearing FS_XFLAG_DAX flag is not impacted by dax mount options.
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1        # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch
-+_require_dax_iflag
-+_require_xfs_io_command "lsattr" "-v"
-+
-+# If a/ is +x, check that a's new children
-+# inherit +x from a/.
-+test_xflag_inheritance1()
-+{
-+	mkdir -p a
-+	$XFS_IO_PROG -c "chattr +x" a
-+	mkdir -p a/b/c
-+	touch a/b/c/d
-+
-+	_check_xflag a 1
-+	_check_xflag a/b 1
-+	_check_xflag a/b/c 1
-+	_check_xflag a/b/c/d 1
-+
-+	rm -rf a
-+}
-+
-+# If a/ is +x and b/ is -x, check that:
-+# 1) b's new children inherit -x from b/.
-+# 2) a's new children(b/ is old) inherit +x from a/.
-+test_xflag_inheritance2()
-+{
-+	mkdir -p a/b
-+	$XFS_IO_PROG -c "chattr +x" a
-+	mkdir -p a/b/c a/d
-+	touch a/b/c/e a/d/f
-+
-+	_check_xflag a 1
-+	_check_xflag a/b 0
-+	_check_xflag a/b/c 0
-+	_check_xflag a/b/c/e 0
-+	_check_xflag a/d 1
-+	_check_xflag a/d/f 1
-+
-+	rm -rf a
-+}
-+
-+# If a/ is -x and b/ is +x, check that:
-+# 1) b's new children inherit +x from b/.
-+# 2) a's new children(b/ is old) inherit -x from a/.
-+test_xflag_inheritance3()
-+{
-+	mkdir -p a/b
-+	$XFS_IO_PROG -c "chattr +x" a/b
-+	mkdir -p a/b/c a/d
-+	touch a/b/c/e a/d/f
-+
-+	_check_xflag a 0
-+	_check_xflag a/b 1
-+	_check_xflag a/b/c 1
-+	_check_xflag a/b/c/e 1
-+	_check_xflag a/d 0
-+	_check_xflag a/d/f 0
-+
-+	rm -rf a
-+}
-+
-+# If a/, c/ are +x and b/ is -x, check that:
-+# 1) c's new children inherit +x from c/.
-+# 2) b's new children(c/ is old) inherit -x from b/.
-+test_xflag_inheritance4()
-+{
-+	mkdir -p a
-+	$XFS_IO_PROG -c "chattr +x" a
-+	mkdir -p a/b/c
-+	$XFS_IO_PROG -c "chattr -x" a/b
-+	mkdir -p a/b/c/d a/b/e
-+	touch a/b/c/d/f a/b/e/g
-+
-+	_check_xflag a 1
-+	_check_xflag a/b 0
-+	_check_xflag a/b/c 1
-+	_check_xflag a/b/c/d 1
-+	_check_xflag a/b/c/d/f 1
-+	_check_xflag a/b/e 0
-+	_check_xflag a/b/e/g 0
-+
-+	rm -rf a
-+}
-+
-+# If a/ is +x and b/ is -x, check that:
-+# 1) new b/c and b/g inherit -x from b/ by cp.
-+# 2) new a/e inherits +x from a/ by cp.
-+# 3) new b/d preserves +x from a/ by mv.
-+# 4) new a/f and a/h preserve -x from b/ by mv.
-+test_xflag_inheritance5()
-+{
-+	mkdir -p a b
-+	$XFS_IO_PROG -c "chattr +x" a
-+	mkdir -p a/c a/d b/e b/f
-+	touch a/g b/h
-+
-+	cp -r a/c b/
-+	cp -r b/e a/
-+	cp -r a/g b/
-+	mv a/d b/
-+	mv b/f a/
-+	mv b/h a/
-+
-+	_check_xflag b/c 0
-+	_check_xflag b/d 1
-+	_check_xflag a/e 1
-+	_check_xflag a/f 0
-+	_check_xflag b/g 0
-+	_check_xflag a/h 0
-+
-+	rm -rf a b
-+}
-+
-+do_xflag_tests()
-+{
-+	local option=$1
-+
-+	_scratch_mount "$option"
-+	cd $SCRATCH_MNT
-+
-+	for i in $(seq 1 5); do
-+		test_xflag_inheritance${i}
-+	done
-+
-+	cd - > /dev/null
-+	_scratch_unmount
-+}
-+
-+do_tests()
-+{
-+	_scratch_mkfs >> $seqres.full 2>&1
-+
-+	# Mount without dax option
-+	export MOUNT_OPTIONS=""
-+	do_xflag_tests
-+
-+	# Mount with 'dax' or 'dax=always' option if fs supports it.
-+	_check_scratch_dax_mountopt "dax" && do_xflag_tests "-o dax"
-+
-+	# Mount with 'dax=inode' and 'dax=never' options if fs supports them.
-+	if _check_scratch_dax_mountopt "dax=always"; then
-+		for dax_option in "dax=inode" "dax=never"; do
-+			do_xflag_tests "-o $dax_option"
-+		done
-+	fi
-+}
-+
-+do_tests
-+
-+# success, all done
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/generic/607.out b/tests/generic/607.out
-new file mode 100644
-index 00000000..d02de53b
---- /dev/null
-+++ b/tests/generic/607.out
-@@ -0,0 +1,2 @@
-+QA output created by 607
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index 05c6b02d..5bd289c3 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -609,3 +609,4 @@
- 604 auto quick mount
- 605 auto attr quick dax
- 606 auto attr quick dax
-+607 auto attr quick dax
--- 
-2.21.0
+Ira
 
-
-
+> 
+> Thanks,
+> Xiao Yang
+> > > Signed-off-by: Xiao Yang<yangx.jy@cn.fujitsu.com>
+> > Seems decent otherwise,
+> > Reviewed-by: Darrick J. Wong<darrick.wong@oracle.com>
+> > 
+> > --D
+> > 
+> > > ---
+> > > 
+> > > Note: It is based on the following patch set:
+> > > https://www.spinics.net/lists/fstests/msg14457.html
+> > > 
+> > >   tests/generic/608     | 110 ++++++++++++++++++++++++++++++++++++++++++
+> > >   tests/generic/608.out |   2 +
+> > >   tests/generic/group   |   1 +
+> > >   3 files changed, 113 insertions(+)
+> > >   create mode 100644 tests/generic/608
+> > >   create mode 100644 tests/generic/608.out
+> > > 
+> > > diff --git a/tests/generic/608 b/tests/generic/608
+> > > new file mode 100644
+> > > index 00000000..33c5235d
+> > > --- /dev/null
+> > > +++ b/tests/generic/608
+> > > @@ -0,0 +1,110 @@
+> > > +#! /bin/bash
+> > > +# SPDX-License-Identifier: GPL-2.0
+> > > +# Copyright (c) 2020 Fujitsu.  All Rights Reserved.
+> > > +#
+> > > +# FS QA Test 608
+> > > +# Change FS_XFLAG_DAX on an existing file and check if S_DAX on
+> > > +# the file can take effect immediately by the following steps:
+> > > +# 1) Stop all applications which are using the file.
+> > > +# 2) Do drop_caches or umount&  mount cycle.
+> > > +
+> > > +seq=`basename $0`
+> > > +seqres=$RESULT_DIR/$seq
+> > > +echo "QA output created by $seq"
+> > > +
+> > > +here=`pwd`
+> > > +tmp=/tmp/$$
+> > > +status=1        # failure is the default!
+> > > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > > +
+> > > +_cleanup()
+> > > +{
+> > > +	cd /
+> > > +	rm -f $tmp.*
+> > > +}
+> > > +
+> > > +# get standard environment, filters and checks
+> > > +. ./common/rc
+> > > +. ./common/filter
+> > > +
+> > > +# remove previous $seqres.full before test
+> > > +rm -f $seqres.full
+> > > +
+> > > +_supported_fs generic
+> > > +_supported_os Linux
+> > > +_require_scratch_dax_mountopt "dax=always"
+> > > +_require_dax_iflag
+> > > +_require_xfs_io_command "lsattr" "-v"
+> > > +_require_xfs_io_command "statx" "-r"
+> > > +
+> > > +test_drop_caches()
+> > > +{
+> > > +	local t_file=$SCRATCH_MNT/testfile
+> > > +
+> > > +	rm -f $t_file
+> > > +	touch $t_file
+> > > +	_check_xflag $t_file 0
+> > > +	_check_s_dax $t_file 0
+> > > +
+> > > +	exec 3<  $t_file
+> > > +
+> > > +	$XFS_IO_PROG -c 'chattr +x' $t_file
+> > > +	_check_xflag $t_file 1
+> > > +	_check_s_dax $t_file 0
+> > > +
+> > > +	# One application is using test file and check if S_DAX on
+> > > +	# the file doesn't take effect immediately by drop_caches
+> > > +	echo 2>  /proc/sys/vm/drop_caches
+> > > +	_check_s_dax $t_file 0
+> > > +
+> > > +	exec 3<&-
+> > > +
+> > > +	# No application is using test file and check if S_DAX on
+> > > +	# the file takes effect immediately by drop_caches
+> > > +	echo 2>  /proc/sys/vm/drop_caches
+> > > +	_check_s_dax $t_file 1
+> > > +}
+> > > +
+> > > +test_cycle_mount()
+> > > +{
+> > > +	local t_dir=$SCRATCH_MNT/testdir
+> > > +	local t_file=$t_dir/testfile
+> > > +
+> > > +	mkdir -p $t_dir
+> > > +	$XFS_IO_PROG -c 'chattr +x' $t_dir
+> > > +	rm -f $t_file
+> > > +	touch $t_file
+> > > +	_check_xflag $t_file 1
+> > > +	_check_s_dax $t_file 1
+> > > +
+> > > +	exec 3<  $t_file
+> > > +
+> > > +	$XFS_IO_PROG -c 'chattr -x' $t_file
+> > > +	_check_xflag $t_file 0
+> > > +	_check_s_dax $t_file 1
+> > > +
+> > > +	exec 3<&-
+> > > +
+> > > +	# No application is using test file and check if S_DAX on
+> > > +	# the file takes effect immediately by umount&  mount
+> > > +	_scratch_cycle_mount "dax=inode"
+> > > +	_check_s_dax $t_file 0
+> > > +}
+> > > +
+> > > +do_tests()
+> > > +{
+> > > +	test_drop_caches
+> > > +
+> > > +	test_cycle_mount
+> > > +}
+> > > +
+> > > +_scratch_mkfs>>  $seqres.full 2>&1
+> > > +
+> > > +_scratch_mount "-o dax=inode"
+> > > +
+> > > +do_tests
+> > > +
+> > > +# success, all done
+> > > +echo "Silence is golden"
+> > > +status=0
+> > > +exit
+> > > diff --git a/tests/generic/608.out b/tests/generic/608.out
+> > > new file mode 100644
+> > > index 00000000..1e534458
+> > > --- /dev/null
+> > > +++ b/tests/generic/608.out
+> > > @@ -0,0 +1,2 @@
+> > > +QA output created by 608
+> > > +Silence is golden
+> > > diff --git a/tests/generic/group b/tests/generic/group
+> > > index 5bd289c3..aa969bcb 100644
+> > > --- a/tests/generic/group
+> > > +++ b/tests/generic/group
+> > > @@ -610,3 +610,4 @@
+> > >   605 auto attr quick dax
+> > >   606 auto attr quick dax
+> > >   607 auto attr quick dax
+> > > +608 auto attr quick dax
+> > > -- 
+> > > 2.21.0
+> > > 
+> > > 
+> > > 
+> > 
+> > .
+> > 
+> 
+> 
+> 
