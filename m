@@ -1,93 +1,220 @@
-Return-Path: <SRS0=/czi=BP=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=LCFT=BQ=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+X-Spam-Status: No, score=-13.0 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9793BC433E3
-	for <linux-fstests@archiver.kernel.org>; Wed,  5 Aug 2020 20:15:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 60BD8C433E0
+	for <linux-fstests@archiver.kernel.org>; Thu,  6 Aug 2020 02:21:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6DF4C22D03
-	for <linux-fstests@archiver.kernel.org>; Wed,  5 Aug 2020 20:15:18 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1596658518;
-	bh=zfG4sPJqMKjYQqd0IqvOAj+s63MBeFClDuUy/b7fIQw=;
-	h=From:To:Cc:Subject:Date:List-ID:From;
-	b=E4y+ZhgXGgJN/OsQpc2/9JZB112GVLwweYACh/ICTVlnRgMhYhhtvrt87kNsIf6vA
-	 MAkckSA6UEkQ/83jdX4gN7ySIKcHjMU0CkfHP4/kLPHo3aq/GT1HaJih9Nvu2CxUU1
-	 YJoWAntvin4u90yHTn3I5oeVQejawdYaLx+qofpI=
+	by mail.kernel.org (Postfix) with ESMTP id 4628820823
+	for <linux-fstests@archiver.kernel.org>; Thu,  6 Aug 2020 02:21:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726128AbgHEUPR (ORCPT
+        id S1726013AbgHFCVe (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 5 Aug 2020 16:15:17 -0400
-Received: from mail.kernel.org ([198.145.29.99]:48140 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726511AbgHEQUR (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 5 Aug 2020 12:20:17 -0400
-Received: from tleilax.com (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 5CF2E2075A;
-        Wed,  5 Aug 2020 13:53:10 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1596635590;
-        bh=zfG4sPJqMKjYQqd0IqvOAj+s63MBeFClDuUy/b7fIQw=;
-        h=From:To:Cc:Subject:Date:From;
-        b=iGAEoCEU+jU5XUAE96RO82CdrpH+NnSV1F4NNpo6iVavAWL4rxM3GQ7pXg3adJML9
-         g1vUaUxBYm2ZYxOn6Q72PJj9pqzy72R8qDIPphMrWeSOtYB9Bq9Wc1IxMvom0+kaZI
-         rr0N1VFzYBBSamL11PO7YnNeuytHNMFw520n+CMM=
-From:   Jeff Layton <jlayton@kernel.org>
-To:     fstests@vger.kernel.org
-Cc:     Eryu Guan <guaneryu@gmail.com>
-Subject: [PATCH RESEND 1/2] generic/377: filter out xattrs that don't start with 'user.'
-Date:   Wed,  5 Aug 2020 09:53:07 -0400
-Message-Id: <20200805135308.14540-1-jlayton@kernel.org>
-X-Mailer: git-send-email 2.26.2
+        Wed, 5 Aug 2020 22:21:34 -0400
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:34557 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726005AbgHFCVd (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 5 Aug 2020 22:21:33 -0400
+X-IronPort-AV: E=Sophos;i="5.75,440,1589212800"; 
+   d="scan'208";a="97677610"
+Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
+  by heian.cn.fujitsu.com with ESMTP; 06 Aug 2020 10:21:19 +0800
+Received: from G08CNEXMBPEKD04.g08.fujitsu.local (unknown [10.167.33.201])
+        by cn.fujitsu.com (Postfix) with ESMTP id 357F84CE34FC;
+        Thu,  6 Aug 2020 10:21:18 +0800 (CST)
+Received: from G08CNEXCHPEKD05.g08.fujitsu.local (10.167.33.203) by
+ G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.2; Thu, 6 Aug 2020 10:21:19 +0800
+Received: from Fedora-30.g08.fujitsu.local (10.167.220.106) by
+ G08CNEXCHPEKD05.g08.fujitsu.local (10.167.33.209) with Microsoft SMTP Server
+ id 15.0.1497.2 via Frontend Transport; Thu, 6 Aug 2020 10:21:18 +0800
+From:   Xiao Yang <yangx.jy@cn.fujitsu.com>
+To:     <fstests@vger.kernel.org>
+CC:     <darrick.wong@oracle.com>, <ira.weiny@intel.com>,
+        <guaneryu@gmail.com>, Xiao Yang <yangx.jy@cn.fujitsu.com>
+Subject: [PATCH v9 8/8] generic: Verify how to change the S_DAX flag on an existing file
+Date:   Thu, 6 Aug 2020 10:13:42 +0800
+Message-ID: <20200806021342.10596-9-yangx.jy@cn.fujitsu.com>
+X-Mailer: git-send-email 2.21.0
+In-Reply-To: <20200806021342.10596-1-yangx.jy@cn.fujitsu.com>
+References: <20200806021342.10596-1-yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-yoursite-MailScanner-ID: 357F84CE34FC.ACA82
+X-yoursite-MailScanner: Found to be clean
+X-yoursite-MailScanner-From: yangx.jy@cn.fujitsu.com
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Most hosts that I've been testing on seem to display security.selinux in
-listxattr. 377.out doesn't account for that so it routinely fails for me
-in testing.
+Change FS_XFLAG_DAX on an existing file and check if S_DAX on the
+file can take effect immediately by the following steps:
+1) Stop all applications which are using the file.
+2) Do drop_caches or umount & mount cycle.
 
-When testing the output of listxattr in generic/377, filter out any xattr
-names that don't start with 'user.'. That should help ensure consistent
-output on SELinux-enabled hosts.
-
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
+Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- tests/generic/377 | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ tests/generic/608     | 121 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/608.out |   2 +
+ tests/generic/group   |   1 +
+ 3 files changed, 124 insertions(+)
+ create mode 100644 tests/generic/608
+ create mode 100644 tests/generic/608.out
 
-diff --git a/tests/generic/377 b/tests/generic/377
-index f7835ee8ff9e..f08abdca60a6 100755
---- a/tests/generic/377
-+++ b/tests/generic/377
-@@ -48,7 +48,7 @@ $SETFATTR_PROG -n user.ping -v pong $testfile
- $SETFATTR_PROG -n user.hello -v there $testfile
- 
- # 1. Call listxattr without buffer length argument. This should succeed.
--$listxattr $testfile | sort
-+$listxattr $testfile | grep '^xattr: user\.' | sort
- 
- # 2. Calling listxattr on nonexistant file should fail with -ENOENT.
- $listxattr ""
-@@ -66,7 +66,7 @@ $listxattr $testfile 9
- $listxattr $testfile 11
- 
- # 6. Calling listxattr with buffersize bigger than needed should succeed.
--$listxattr $testfile 500 | sort
-+$listxattr $testfile 500 | grep '^xattr: user\.' | sort
- 
- status=0
- exit
+diff --git a/tests/generic/608 b/tests/generic/608
+new file mode 100644
+index 00000000..a06fc016
+--- /dev/null
++++ b/tests/generic/608
+@@ -0,0 +1,121 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2020 Fujitsu.  All Rights Reserved.
++#
++# FS QA Test 608
++# Change FS_XFLAG_DAX on an existing file and check if S_DAX on
++# the file can take effect immediately by the following steps:
++# 1) Stop all applications which are using the file.
++# 2) Do drop_caches or umount & mount cycle.
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1        # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++_supported_fs generic
++_supported_os Linux
++_require_scratch_dax_mountopt "dax=always"
++_require_dax_iflag
++_require_xfs_io_command "lsattr" "-v"
++_require_xfs_io_command "statx" "-r"
++
++test_drop_caches()
++{
++	local t_file=$SCRATCH_MNT/testfile
++
++	rm -f $t_file
++	touch $t_file
++	_check_xflag $t_file 0
++	_check_s_dax $t_file 0
++
++	exec 3< $t_file
++
++	$XFS_IO_PROG -c 'chattr +x' $t_file
++	_check_xflag $t_file 1
++	_check_s_dax $t_file 0
++
++	# One application is using test file and check if S_DAX on
++	# the file doesn't take effect immediately by drop_caches
++	echo 2 > /proc/sys/vm/drop_caches
++	_check_s_dax $t_file 0
++
++	exec 3<&-
++
++	# No application is using test file and check if S_DAX on
++	# the file takes effect immediately by drop_caches
++	echo 2 > /proc/sys/vm/drop_caches
++	_check_s_dax $t_file 1
++}
++
++test_cycle_mount()
++{
++	local option=$1
++	local t_dir=$SCRATCH_MNT/testdir
++	local t_file=$t_dir/testfile
++
++	mkdir -p $t_dir
++	$XFS_IO_PROG -c 'chattr +x' $t_dir
++	rm -f $t_file
++	touch $t_file
++	_check_xflag $t_file 1
++	_check_s_dax $t_file 1
++
++	exec 3< $t_file
++
++	$XFS_IO_PROG -c 'chattr -x' $t_file
++	_check_xflag $t_file 0
++	_check_s_dax $t_file 1
++
++	exec 3<&-
++
++	# No application is using test file and check if S_DAX on
++	# the file takes effect immediately by umount & mount
++	_scratch_cycle_mount "$option"
++	_check_s_dax $t_file 0
++}
++
++do_tests()
++{
++	local mount_option=$1
++	local cycle_mount_option=$2
++
++	_scratch_mount "$mount_option"
++
++	test_drop_caches
++
++	test_cycle_mount "$cycle_mount_option"
++
++	_scratch_unmount
++}
++
++_scratch_mkfs >> $seqres.full 2>&1
++
++# Mount with dax option
++do_tests "-o dax=inode" "dax=inode"
++
++# Mount without dax option
++export MOUNT_OPTIONS=""
++do_tests
++
++# success, all done
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/generic/608.out b/tests/generic/608.out
+new file mode 100644
+index 00000000..1e534458
+--- /dev/null
++++ b/tests/generic/608.out
+@@ -0,0 +1,2 @@
++QA output created by 608
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index 5bd289c3..aa969bcb 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -610,3 +610,4 @@
+ 605 auto attr quick dax
+ 606 auto attr quick dax
+ 607 auto attr quick dax
++608 auto attr quick dax
 -- 
-2.26.2
+2.21.0
+
+
 
