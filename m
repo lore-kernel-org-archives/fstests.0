@@ -2,51 +2,51 @@ Return-Path: <SRS0=LCFT=BQ=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.0 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.0 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2382AC433E0
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AAD84C433E1
 	for <linux-fstests@archiver.kernel.org>; Thu,  6 Aug 2020 02:21:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0B5B922B40
+	by mail.kernel.org (Postfix) with ESMTP id 918DB20823
 	for <linux-fstests@archiver.kernel.org>; Thu,  6 Aug 2020 02:21:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726204AbgHFCVi (ORCPT
+        id S1726005AbgHFCVj (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 5 Aug 2020 22:21:38 -0400
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:34557 "EHLO
+        Wed, 5 Aug 2020 22:21:39 -0400
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:64121 "EHLO
         heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726005AbgHFCVi (ORCPT
+        with ESMTP id S1726150AbgHFCVi (ORCPT
         <rfc822;fstests@vger.kernel.org>); Wed, 5 Aug 2020 22:21:38 -0400
 X-IronPort-AV: E=Sophos;i="5.75,440,1589212800"; 
-   d="scan'208";a="97677612"
+   d="scan'208";a="97677614"
 Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
-  by heian.cn.fujitsu.com with ESMTP; 06 Aug 2020 10:21:19 +0800
-Received: from G08CNEXMBPEKD05.g08.fujitsu.local (unknown [10.167.33.204])
-        by cn.fujitsu.com (Postfix) with ESMTP id 337054CE34F5;
-        Thu,  6 Aug 2020 10:21:17 +0800 (CST)
+  by heian.cn.fujitsu.com with ESMTP; 06 Aug 2020 10:21:20 +0800
+Received: from G08CNEXMBPEKD06.g08.fujitsu.local (unknown [10.167.33.206])
+        by cn.fujitsu.com (Postfix) with ESMTP id 38AC44CE34F3;
+        Thu,  6 Aug 2020 10:21:16 +0800 (CST)
 Received: from G08CNEXCHPEKD05.g08.fujitsu.local (10.167.33.203) by
- G08CNEXMBPEKD05.g08.fujitsu.local (10.167.33.204) with Microsoft SMTP Server
- (TLS) id 15.0.1497.2; Thu, 6 Aug 2020 10:21:18 +0800
+ G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.2; Thu, 6 Aug 2020 10:21:16 +0800
 Received: from Fedora-30.g08.fujitsu.local (10.167.220.106) by
  G08CNEXCHPEKD05.g08.fujitsu.local (10.167.33.209) with Microsoft SMTP Server
- id 15.0.1497.2 via Frontend Transport; Thu, 6 Aug 2020 10:21:17 +0800
+ id 15.0.1497.2 via Frontend Transport; Thu, 6 Aug 2020 10:21:16 +0800
 From:   Xiao Yang <yangx.jy@cn.fujitsu.com>
 To:     <fstests@vger.kernel.org>
 CC:     <darrick.wong@oracle.com>, <ira.weiny@intel.com>,
         <guaneryu@gmail.com>, Xiao Yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH v9 6/8] generic: Verify if statx() can qurey S_DAX flag on regular file correctly
-Date:   Thu, 6 Aug 2020 10:13:40 +0800
-Message-ID: <20200806021342.10596-7-yangx.jy@cn.fujitsu.com>
+Subject: [PATCH v9 4/8] generic/413, xfs/260: Improve format operation for PMD fault testing
+Date:   Thu, 6 Aug 2020 10:13:38 +0800
+Message-ID: <20200806021342.10596-5-yangx.jy@cn.fujitsu.com>
 X-Mailer: git-send-email 2.21.0
 In-Reply-To: <20200806021342.10596-1-yangx.jy@cn.fujitsu.com>
 References: <20200806021342.10596-1-yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7BIT
 Content-Type:   text/plain; charset=US-ASCII
-X-yoursite-MailScanner-ID: 337054CE34F5.AA16E
+X-yoursite-MailScanner-ID: 38AC44CE34F3.ACBF9
 X-yoursite-MailScanner: Found to be clean
 X-yoursite-MailScanner-From: yangx.jy@cn.fujitsu.com
 Sender: fstests-owner@vger.kernel.org
@@ -54,164 +54,77 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-1) With new kernel(e.g. v5.8-rc1), statx() can be used to qurey S_DAX flag
-   on regular file, so add a test to verify the feature.
-2) Factor out _check_s_dax() so that other tests can use it in future.
-
-Reference:
-https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=712b2698e4c024b561694cbcc1abba13eb0fd9ce
+1) Simple code and fix the wrong value of stripe_width by _scratch_mkfs_geom().
+2) Get hugepage size by _get_hugepagesize() and replace fixed 2M with
+   hugepage size because hugepage size/PMD_SIZE is not 2M on some
+   arches(e.g. hugepage size/PMD_SIZE is 512M on arm64).
+3) For debugging, redirect the output of mkfs to $seqres.full.
 
 Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Reviewed-by: Ira Weiny <ira.weiny@intel.com>
 Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- common/rc             | 13 ++++++
- tests/generic/606     | 92 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/606.out |  2 +
- tests/generic/group   |  1 +
- 4 files changed, 108 insertions(+)
- create mode 100644 tests/generic/606
- create mode 100644 tests/generic/606.out
+ common/rc         | 10 ++++++++++
+ tests/generic/413 | 10 ++--------
+ tests/xfs/260     |  4 ++--
+ 3 files changed, 14 insertions(+), 10 deletions(-)
 
 diff --git a/common/rc b/common/rc
-index 98bb1454..de431c7a 100644
+index ad4d080d..98bb1454 100644
 --- a/common/rc
 +++ b/common/rc
-@@ -3196,6 +3196,19 @@ _require_scratch_shutdown()
- 	_scratch_unmount
+@@ -170,6 +170,16 @@ _get_filesize()
+     stat -c %s "$1"
  }
  
-+_check_s_dax()
++# Get hugepagesize in bytes
++_get_hugepagesize()
 +{
-+	local target=$1
-+	local exp_s_dax=$2
-+
-+	local attributes=$($XFS_IO_PROG -c 'statx -r' $target | awk '/stat.attributes / { print $3 }')
-+	if [ $exp_s_dax -eq 0 ]; then
-+		(( attributes & 0x2000 )) && echo "$target has unexpected S_DAX flag"
-+	else
-+		(( attributes & 0x2000 )) || echo "$target doen't have expected S_DAX flag"
-+	fi
++	local hugepgsz=$(awk '/Hugepagesize/ {print $2}' /proc/meminfo)
++	# Call _notrun if $hugepgsz is not a number
++	echo "$hugepgsz" | egrep -q ^[0-9]+$ || \
++		_notrun "Cannot get the value of Hugepagesize"
++	echo $((hugepgsz * 1024))
 +}
 +
- # Check if dax mount options are supported
- #
- # $1 can be either 'dax=always' or 'dax'
-diff --git a/tests/generic/606 b/tests/generic/606
-new file mode 100644
-index 00000000..bf7d822d
---- /dev/null
-+++ b/tests/generic/606
-@@ -0,0 +1,92 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2020 Fujitsu.  All Rights Reserved.
-+#
-+# FS QA Test 606
-+#
-+# By the following cases, verify if statx() can query S_DAX flag
-+# on regular file correctly.
-+# 1) With dax=always option, FS_XFLAG_DAX is ignored and S_DAX flag
-+#    always exists on regular file.
-+# 2) With dax=inode option, setting/clearing FS_XFLAG_DAX can change
-+#    S_DAX flag on regular file.
-+# 3) With dax=never option, FS_XFLAG_DAX is ignored and S_DAX flag
-+#    never exists on regular file.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1        # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch_dax_mountopt "dax=always"
-+_require_dax_iflag
-+_require_xfs_io_command "statx" "-r"
-+
-+PARENT_DIR=$SCRATCH_MNT/testdir
-+TEST_FILE=$PARENT_DIR/testfile
-+
-+test_s_dax()
-+{
-+	local dax_option=$1
-+	local exp_s_dax1=$2
-+	local exp_s_dax2=$3
-+
-+	# Mount with specified dax option
-+	_scratch_mount "$dax_option"
-+
-+	# Prepare directory
-+	mkdir -p $PARENT_DIR
-+
-+	rm -f $TEST_FILE
-+	$XFS_IO_PROG -c "chattr +x" $PARENT_DIR
-+	touch $TEST_FILE
-+	# Check if setting FS_XFLAG_DAX changes S_DAX flag
-+	_check_s_dax $TEST_FILE $exp_s_dax1
-+
-+	rm -f $TEST_FILE
-+	$XFS_IO_PROG -c "chattr -x" $PARENT_DIR
-+	touch $TEST_FILE
-+	# Check if clearing FS_XFLAG_DAX changes S_DAX flag
-+	_check_s_dax $TEST_FILE $exp_s_dax2
-+
-+	_scratch_unmount
-+}
-+
-+do_tests()
-+{
-+	_scratch_mkfs >> $seqres.full 2>&1
-+
-+	# Mount with specified dax option
-+	test_s_dax "-o dax=always" 1 1
-+	test_s_dax "-o dax=never" 0 0
-+	test_s_dax "-o dax=inode" 1 0
-+	# Mount without dax option
-+	export MOUNT_OPTIONS=""
-+	test_s_dax "" 1 0
-+}
-+
-+do_tests
-+
-+# success, all done
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/generic/606.out b/tests/generic/606.out
-new file mode 100644
-index 00000000..09bf888e
---- /dev/null
-+++ b/tests/generic/606.out
-@@ -0,0 +1,2 @@
-+QA output created by 606
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index d06c1bf6..05c6b02d 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -608,3 +608,4 @@
- 603 auto quick quota
- 604 auto quick mount
- 605 auto attr quick dax
-+606 auto attr quick dax
+ _mount()
+ {
+     $MOUNT_PROG `_mount_ops_filter $*`
+diff --git a/tests/generic/413 b/tests/generic/413
+index 19e1b926..dfe2912b 100755
+--- a/tests/generic/413
++++ b/tests/generic/413
+@@ -111,14 +111,8 @@ do_tests()
+ 	t_mmap_dio_dax $((64 * 1024 * 1024))
+ }
+ 
+-# make fs 2Mb aligned for PMD fault testing
+-mkfs_opts=""
+-if [ "$FSTYP" == "ext4" ]; then
+-	mkfs_opts="-E stride=512,stripe_width=1"
+-elif [ "$FSTYP" == "xfs" ]; then
+-	mkfs_opts="-d su=2m,sw=1"
+-fi
+-_scratch_mkfs "$mkfs_opts" > /dev/null 2>&1
++# make fs aligned for PMD fault testing
++_scratch_mkfs_geom $(_get_hugepagesize) 1 >> $seqres.full 2>&1
+ 
+ # mount SCRATCH_DEV with dax option, TEST_DEV not
+ export MOUNT_OPTIONS=""
+diff --git a/tests/xfs/260 b/tests/xfs/260
+index bcdc6041..81b42f01 100755
+--- a/tests/xfs/260
++++ b/tests/xfs/260
+@@ -121,8 +121,8 @@ do_tests()
+ 	t_dax_flag_mmap_dio $((64 * 1024 * 1024))
+ }
+ 
+-# make xfs 2Mb aligned for PMD fault testing
+-_scratch_mkfs "-d su=2m,sw=1" > /dev/null 2>&1
++# make xfs aligned for PMD fault testing
++_scratch_mkfs_geom $(_get_hugepagesize) 1 >> $seqres.full 2>&1
+ 
+ # mount with dax option
+ _scratch_mount "-o dax"
 -- 
 2.21.0
 
