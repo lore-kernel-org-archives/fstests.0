@@ -2,62 +2,133 @@ Return-Path: <SRS0=ooC1=BT=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.5 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS,UNPARSEABLE_RELAY,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-4.0 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	UNPARSEABLE_RELAY autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 549CDC433E1
-	for <linux-fstests@archiver.kernel.org>; Sun,  9 Aug 2020 16:22:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A0C19C433E0
+	for <linux-fstests@archiver.kernel.org>; Sun,  9 Aug 2020 17:12:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3EC16206C0
-	for <linux-fstests@archiver.kernel.org>; Sun,  9 Aug 2020 16:22:49 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 86B2B206CD
+	for <linux-fstests@archiver.kernel.org>; Sun,  9 Aug 2020 17:12:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726200AbgHIQWp (ORCPT
+        id S1726210AbgHIRM2 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 9 Aug 2020 12:22:45 -0400
-Received: from out30-43.freemail.mail.aliyun.com ([115.124.30.43]:59014 "EHLO
-        out30-43.freemail.mail.aliyun.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726382AbgHIQWk (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 9 Aug 2020 12:22:40 -0400
-X-Alimail-AntiSpam: AC=PASS;BC=-1|-1;BR=01201311R131e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=e01e01422;MF=eguan@linux.alibaba.com;NM=1;PH=DS;RN=8;SR=0;TI=SMTPD_---0U5D0Fnn_1596990144;
-Received: from localhost(mailfrom:eguan@linux.alibaba.com fp:SMTPD_---0U5D0Fnn_1596990144)
-          by smtp.aliyun-inc.com(127.0.0.1);
-          Mon, 10 Aug 2020 00:22:24 +0800
-Date:   Mon, 10 Aug 2020 00:22:24 +0800
-From:   Eryu Guan <eguan@linux.alibaba.com>
-To:     Eryu Guan <guan@eryu.me>
-Cc:     Bill O'Donnell <billodo@redhat.com>, guaneryu@gmail.com,
-        linux-xfs@vger.kernel.org, fstests@vger.kernel.org,
-        darrick.wong@oracle.com, sandeen@redhat.com
-Subject: Re: [PATCH] xfs/518: modify timer/state commands to remove new g,p
- timer output
-Message-ID: <20200809162224.GC80581@e18g06458.et15sqa>
-References: <20200731173739.390649-1-billodo@redhat.com>
- <20200809154143.GK2557159@desktop>
+        Sun, 9 Aug 2020 13:12:28 -0400
+Received: from out20-3.mail.aliyun.com ([115.124.20.3]:52168 "EHLO
+        out20-3.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726175AbgHIRM1 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 9 Aug 2020 13:12:27 -0400
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.1501089|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.114794-0.00042033-0.884785;FP=0|0|0|0|0|-1|-1|-1;HT=e02c03279;MF=guan@eryu.me;NM=1;PH=DS;RN=5;RT=5;SR=0;TI=SMTPD_---.IEydvzX_1596993140;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.IEydvzX_1596993140)
+          by smtp.aliyun-inc.com(10.147.41.121);
+          Mon, 10 Aug 2020 01:12:20 +0800
+Date:   Mon, 10 Aug 2020 01:12:20 +0800
+From:   Eryu Guan <guan@eryu.me>
+To:     Ira Weiny <ira.weiny@intel.com>,
+        Xiao Yang <yangx.jy@cn.fujitsu.com>
+Cc:     Xiao Yang <yangx.jy@cn.fujitsu.com>, fstests@vger.kernel.org,
+        darrick.wong@oracle.com, guaneryu@gmail.com
+Subject: Re: [PATCH v9 0/8] Make fstests support new behavior of DAX
+Message-ID: <20200809171220.GL2557159@desktop>
+References: <20200806021342.10596-1-yangx.jy@cn.fujitsu.com>
+ <20200807181438.GB2467625@iweiny-DESK2.sc.intel.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20200809154143.GK2557159@desktop>
-User-Agent: Mutt/1.5.21 (2010-09-15)
+In-Reply-To: <20200807181438.GB2467625@iweiny-DESK2.sc.intel.com>
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Aug 09, 2020 at 11:41:43PM +0800, Eryu Guan wrote:
-> On Fri, Jul 31, 2020 at 12:37:39PM -0500, Bill O'Donnell wrote:
-> > New xfs_quota kernel and xfsprogs add grace timers for group and project,
-> > in addition to existing user quota. Adjust xfs/518 to accommodate those
-> > changes, and avoid regression.
-> > 
-> > Signed-off-by: Bill O'Donnell <billodo@redhat.com>
+On Fri, Aug 07, 2020 at 11:14:39AM -0700, Ira Weiny wrote:
+> On Thu, Aug 06, 2020 at 10:13:34AM +0800, Xiao Yang wrote:
+> > The new behavior of DAX on xfs/ext4 has been merged into main kernel
+> > so it is time for fstests to support new behavior of DAX.
 > 
-> This looks good to me. But it'd be great if the kernel & xfsprogs
-> commits that change the behavior could be mentioned in the commit log as
-> well.
+> In case it helps...
+> 
+> I think this series has enough review to be applied.  Further tests/changes can
+> be applied on top of this...  so I'm going to add
+> 
+> Reviewed-by: Ira Weiny <ira.weiny@intel.com>
 
-Not a big deal, I'll take it this time :)
+Thanks a lot for the reviews! Also many thanks to Darrick for his
+review!
+
+> 
+> For the entire series even though I think Xiao has already put a reviewed by on
+> all of the individual patches already.
+
+Xiao, thank you so much for the great patchset!
 
 Thanks,
 Eryu
+
+> 
+> Ira
+> 
+> > 
+> > 1) Refactor common functions and take use of them.
+> > 2) Move and update xfs/260.
+> > 3) Add three new tests to verify some features.
+> > 
+> > References:
+> > https://lkml.org/lkml/2019/10/20/96
+> > https://lkml.org/lkml/2020/5/28/949
+> > 
+> > V7->V8:
+> > 1) Rebase against the latest xfstests.
+> > 2) Factor out _check_s_dax() and _check_xflag().
+> > 
+> > V8->V9:
+> > 1) Squash a new test(generic/608) into the patch set.
+> > 2) Add a new combination(without dax option) for all related tests(generic/605,
+> >    generic/606, generic/608).
+> > 3) In generic/607, factor out _scratch_mkfs() and export MOUNT_OPTIONS=""
+> >    for a combination(without dax option).
+> > 
+> > Xiao Yang (8):
+> >   common/rc: Introduce helpers for new dax mount options and FS_XFLAG_DAX
+> >   fstests: Use _require_scratch_dax_mountopt() and _require_dax_iflag()
+> >   generic/223: Don't clear MKFS_OPTION before calling _scratch_mkfs_geom()
+> >   generic/413, xfs/260: Improve format operation for PMD fault testing
+> >   xfs/260: Move and update xfs/260
+> >   generic: Verify if statx() can qurey S_DAX flag on regular file correctly
+> >   generic: Verify the inheritance behavior of FS_XFLAG_DAX flag in various combinations
+> >   generic: Verify how to change the S_DAX flag on an existing file
+> > 
+> >  common/rc                      | 105 ++++++++++++++++--
+> >  tests/ext4/030                 |   2 +-
+> >  tests/ext4/031                 |   4 +-
+> >  tests/generic/223              |   1 -
+> >  tests/generic/413              |  12 +--
+> >  tests/generic/462              |   2 +-
+> >  tests/{xfs/260 => generic/605} |  79 +++++++-------
+> >  tests/generic/605.out          |   2 +
+> >  tests/generic/606              |  92 ++++++++++++++++
+> >  tests/generic/606.out          |   2 +
+> >  tests/generic/607              | 189 +++++++++++++++++++++++++++++++++
+> >  tests/generic/607.out          |   2 +
+> >  tests/generic/608              | 121 +++++++++++++++++++++
+> >  tests/generic/608.out          |   2 +
+> >  tests/generic/group            |   4 +
+> >  tests/xfs/260.out              |   2 -
+> >  tests/xfs/group                |   1 -
+> >  17 files changed, 559 insertions(+), 63 deletions(-)
+> >  rename tests/{xfs/260 => generic/605} (54%)
+> >  create mode 100644 tests/generic/605.out
+> >  create mode 100644 tests/generic/606
+> >  create mode 100644 tests/generic/606.out
+> >  create mode 100644 tests/generic/607
+> >  create mode 100644 tests/generic/607.out
+> >  create mode 100644 tests/generic/608
+> >  create mode 100644 tests/generic/608.out
+> >  delete mode 100644 tests/xfs/260.out
+> > 
+> > -- 
+> > 2.21.0
+> > 
+> > 
+> > 
