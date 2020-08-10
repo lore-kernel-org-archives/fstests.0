@@ -2,50 +2,49 @@ Return-Path: <SRS0=Jk7F=BU=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.5 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.0 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9793AC433DF
-	for <linux-fstests@archiver.kernel.org>; Mon, 10 Aug 2020 14:09:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6F9F5C433DF
+	for <linux-fstests@archiver.kernel.org>; Mon, 10 Aug 2020 16:37:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7489120678
-	for <linux-fstests@archiver.kernel.org>; Mon, 10 Aug 2020 14:09:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 500E6207DE
+	for <linux-fstests@archiver.kernel.org>; Mon, 10 Aug 2020 16:37:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726859AbgHJOJp (ORCPT
+        id S1727053AbgHJQhK (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 10 Aug 2020 10:09:45 -0400
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:39620 "EHLO
+        Mon, 10 Aug 2020 12:37:10 -0400
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:1242 "EHLO
         heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726814AbgHJOJo (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 10 Aug 2020 10:09:44 -0400
-X-IronPort-AV: E=Sophos;i="5.75,457,1589212800"; 
-   d="scan'208";a="97940533"
+        with ESMTP id S1725873AbgHJQhJ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 10 Aug 2020 12:37:09 -0400
+X-IronPort-AV: E=Sophos;i="5.75,458,1589212800"; 
+   d="scan'208";a="97947357"
 Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
-  by heian.cn.fujitsu.com with ESMTP; 10 Aug 2020 22:09:30 +0800
-Received: from G08CNEXMBPEKD06.g08.fujitsu.local (unknown [10.167.33.206])
-        by cn.fujitsu.com (Postfix) with ESMTP id D62E44CE34EF;
-        Mon, 10 Aug 2020 22:09:28 +0800 (CST)
-Received: from [10.167.220.69] (10.167.220.69) by
- G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206) with Microsoft SMTP Server
- (TLS) id 15.0.1497.2; Mon, 10 Aug 2020 22:09:30 +0800
-Message-ID: <5F315518.2040907@cn.fujitsu.com>
-Date:   Mon, 10 Aug 2020 22:09:28 +0800
+  by heian.cn.fujitsu.com with ESMTP; 11 Aug 2020 00:36:50 +0800
+Received: from G08CNEXMBPEKD04.g08.fujitsu.local (unknown [10.167.33.201])
+        by cn.fujitsu.com (Postfix) with ESMTP id CE3734CE34F1;
+        Tue, 11 Aug 2020 00:36:46 +0800 (CST)
+Received: from G08CNEXCHPEKD05.g08.fujitsu.local (10.167.33.203) by
+ G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.2; Tue, 11 Aug 2020 00:36:51 +0800
+Received: from Fedora-30.g08.fujitsu.local (10.167.220.106) by
+ G08CNEXCHPEKD05.g08.fujitsu.local (10.167.33.209) with Microsoft SMTP Server
+ id 15.0.1497.2 via Frontend Transport; Tue, 11 Aug 2020 00:36:50 +0800
 From:   Xiao Yang <yangx.jy@cn.fujitsu.com>
-User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.2; zh-CN; rv:1.9.2.18) Gecko/20110616 Thunderbird/3.1.11
+To:     <guaneryu@gmail.com>
+CC:     <fstests@vger.kernel.org>, <ira.weiny@intel.com>,
+        <darrick.wong@oracle.com>, Xiao Yang <yangx.jy@cn.fujitsu.com>
+Subject: [PATCH v3 1/2] common/dmlogwrites: Update _require_log_writes_dax() for new dax option
+Date:   Tue, 11 Aug 2020 00:29:08 +0800
+Message-ID: <20200810162909.26665-1-yangx.jy@cn.fujitsu.com>
+X-Mailer: git-send-email 2.21.0
 MIME-Version: 1.0
-To:     Eryu Guan <eguan@linux.alibaba.com>
-CC:     Eryu Guan <guaneryu@gmail.com>, <fstests@vger.kernel.org>
-Subject: Re: [ANNOUNCE] fstests: master branch updated to 59d1f998fd61
-References: <5f3030bc.1c69fb81.7519b.378d@mx.google.com> <5F312B85.5040002@cn.fujitsu.com> <20200810120713.GD80581@e18g06458.et15sqa>
-In-Reply-To: <20200810120713.GD80581@e18g06458.et15sqa>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 8bit
-X-Originating-IP: [10.167.220.69]
-X-ClientProxiedBy: G08CNEXCHPEKD06.g08.fujitsu.local (10.167.33.205) To
- G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206)
-X-yoursite-MailScanner-ID: D62E44CE34EF.AF11B
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-yoursite-MailScanner-ID: CE3734CE34F1.ABF78
 X-yoursite-MailScanner: Found to be clean
 X-yoursite-MailScanner-From: yangx.jy@cn.fujitsu.com
 Sender: fstests-owner@vger.kernel.org
@@ -53,44 +52,85 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-于 2020/8/10 20:07, Eryu Guan 写道:
-> On Mon, Aug 10, 2020 at 07:12:05PM +0800, Xiao Yang wrote:
->> On 2020/8/10 1:21, Eryu Guan wrote:
->>> Hi all,
->>>
->>> The master branch of the xfstests repository at:
->>>
->>> 	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
->>>
->>> have just been updated. The most notable change is the DAX patchset from Xiao
->>> Yang, which update&  add new tests to test the new DAX mount behavior. Many
->>> thanks to Xiao Yang for the patchset, and to Ira Weiny and Darrick J. Wong for
->>> reviewing the patches!
->> Hi Eryu,
->>
->> Thank you for applying my patch set. :-)
->> In addition, I also updated some helpers related to new dax option by
->> another
->> separate patch set[1] and hope you can apply it in next update.
->> [1]:
->> https://www.spinics.net/lists/fstests/msg14360.html
->> https://www.spinics.net/lists/fstests/msg14359.html
->> P.S. The patch set has been reviewed by Ira Weiny.
-> Thanks for the heads-up! I thought you've folded all dax-related patches
-> in the big patchset.. Would you please resend above two patches? with
-> Ira Weiny's reviewed-by tag?
-Hi Eryu,
+1) Rename _require_log_writes_dax to _require_log_writes_dax_mountopt.
+2) Make _require_log_writes_dax_mountopt check if old or new dax option
+   is supported.
+3) generic/470 takes use of _require_log_writes_dax_mountopt.
 
-Sure, I will send v3 patches with some changes soon.
+Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Reviewed-by: Ira Weiny <ira.weiny@intel.com>
+---
 
-Best Regards,
-Xiao Yang
-> Thanks,
-> Eryu
->
->
-> .
->
+V2->V3:
+Update comments.
+
+ common/dmlogwrites | 24 +++++++++++++++++++-----
+ tests/generic/470  |  2 +-
+ 2 files changed, 20 insertions(+), 6 deletions(-)
+
+diff --git a/common/dmlogwrites b/common/dmlogwrites
+index 2a7ff612..573f4b8a 100644
+--- a/common/dmlogwrites
++++ b/common/dmlogwrites
+@@ -23,7 +23,18 @@ _require_log_writes()
+ # explicitly. But this is considered as a temporary workaround, we want to move
+ # all the DAX check back to _require_log_writes when dm-log-writes gains full
+ # DAX support and remove this helper.
+-_require_log_writes_dax()
++#
++# Check if dax mount options are supported
++# $1 can be either 'dax=always' or 'dax'
++# dax=always
++#      Check for the new dax options (dax=inode, dax=always or dax=never)
++#      by passing "dax=always".
++# dax
++#      Check for the old dax or new dax=always by passing "dax".
++# This only accepts 'dax=always' because dax=always, dax=inode and
++# dax=never are always supported together.  So if the other options are
++# required checking for 'dax=always' indicates support for the other 2.
++_require_log_writes_dax_mountopt()
+ {
+ 	[ -z "$LOGWRITES_DEV" -o ! -b "$LOGWRITES_DEV" ] && \
+ 		_notrun "This test requires a valid \$LOGWRITES_DEV"
+@@ -32,16 +43,19 @@ _require_log_writes_dax()
+ 	_require_test_program "log-writes/replay-log"
+ 
+ 	local ret=0
++	local mountopt=$1
++
+ 	_log_writes_init $SCRATCH_DEV
+ 	_log_writes_mkfs > /dev/null 2>&1
+-	_log_writes_mount -o dax > /dev/null 2>&1
+-	# Check options to be sure. XFS ignores dax option
++	_log_writes_mount "-o $mountopt" > /dev/null 2>&1
++	# Check options to be sure.
++	# XFS ignores dax option(or changes it to dax=never)
+ 	# and goes on if dev underneath does not support dax.
+-	_fs_options $LOGWRITES_DMDEV | grep -qw "dax"
++	_fs_options $LOGWRITES_DMDEV | egrep -q "dax(=always|,|$)"
+ 	ret=$?
+ 	_log_writes_cleanup
+ 	if [ $ret -ne 0 ]; then
+-		_notrun "$LOGWRITES_DMDEV $FSTYP does not support -o dax"
++		_notrun "$LOGWRITES_DMDEV $FSTYP does not support -o $mountopt"
+ 	fi
+ }
+ 
+diff --git a/tests/generic/470 b/tests/generic/470
+index 93691f4a..fd6da563 100755
+--- a/tests/generic/470
++++ b/tests/generic/470
+@@ -35,7 +35,7 @@ rm -f $seqres.full
+ _supported_fs generic
+ _supported_os Linux
+ _require_scratch
+-_require_log_writes_dax
++_require_log_writes_dax_mountopt "dax"
+ _require_xfs_io_command "mmap" "-S"
+ _require_xfs_io_command "log_writes"
+ 
+-- 
+2.21.0
 
 
 
