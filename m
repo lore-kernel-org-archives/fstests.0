@@ -4,31 +4,31 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-13.0 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6F9F5C433DF
-	for <linux-fstests@archiver.kernel.org>; Mon, 10 Aug 2020 16:37:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 40C1EC433DF
+	for <linux-fstests@archiver.kernel.org>; Mon, 10 Aug 2020 16:37:12 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 500E6207DE
-	for <linux-fstests@archiver.kernel.org>; Mon, 10 Aug 2020 16:37:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 06528207DE
+	for <linux-fstests@archiver.kernel.org>; Mon, 10 Aug 2020 16:37:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727053AbgHJQhK (ORCPT
+        id S1727906AbgHJQhL (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 10 Aug 2020 12:37:10 -0400
+        Mon, 10 Aug 2020 12:37:11 -0400
 Received: from mail.cn.fujitsu.com ([183.91.158.132]:1242 "EHLO
         heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1725873AbgHJQhJ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 10 Aug 2020 12:37:09 -0400
+        with ESMTP id S1725873AbgHJQhL (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 10 Aug 2020 12:37:11 -0400
 X-IronPort-AV: E=Sophos;i="5.75,458,1589212800"; 
-   d="scan'208";a="97947357"
+   d="scan'208";a="97947358"
 Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
   by heian.cn.fujitsu.com with ESMTP; 11 Aug 2020 00:36:50 +0800
-Received: from G08CNEXMBPEKD04.g08.fujitsu.local (unknown [10.167.33.201])
-        by cn.fujitsu.com (Postfix) with ESMTP id CE3734CE34F1;
-        Tue, 11 Aug 2020 00:36:46 +0800 (CST)
+Received: from G08CNEXMBPEKD05.g08.fujitsu.local (unknown [10.167.33.204])
+        by cn.fujitsu.com (Postfix) with ESMTP id 4817B4CE34F5;
+        Tue, 11 Aug 2020 00:36:47 +0800 (CST)
 Received: from G08CNEXCHPEKD05.g08.fujitsu.local (10.167.33.203) by
- G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201) with Microsoft SMTP Server
+ G08CNEXMBPEKD05.g08.fujitsu.local (10.167.33.204) with Microsoft SMTP Server
  (TLS) id 15.0.1497.2; Tue, 11 Aug 2020 00:36:51 +0800
 Received: from Fedora-30.g08.fujitsu.local (10.167.220.106) by
  G08CNEXCHPEKD05.g08.fujitsu.local (10.167.33.209) with Microsoft SMTP Server
@@ -37,14 +37,16 @@ From:   Xiao Yang <yangx.jy@cn.fujitsu.com>
 To:     <guaneryu@gmail.com>
 CC:     <fstests@vger.kernel.org>, <ira.weiny@intel.com>,
         <darrick.wong@oracle.com>, Xiao Yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH v3 1/2] common/dmlogwrites: Update _require_log_writes_dax() for new dax option
-Date:   Tue, 11 Aug 2020 00:29:08 +0800
-Message-ID: <20200810162909.26665-1-yangx.jy@cn.fujitsu.com>
+Subject: [PATCH v3 2/2] common/rc: Update _exclude_scratch_mount_option() and _require_dm_target() for new dax option
+Date:   Tue, 11 Aug 2020 00:29:09 +0800
+Message-ID: <20200810162909.26665-2-yangx.jy@cn.fujitsu.com>
 X-Mailer: git-send-email 2.21.0
+In-Reply-To: <20200810162909.26665-1-yangx.jy@cn.fujitsu.com>
+References: <20200810162909.26665-1-yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7BIT
 Content-Type:   text/plain; charset=US-ASCII
-X-yoursite-MailScanner-ID: CE3734CE34F1.ABF78
+X-yoursite-MailScanner-ID: 4817B4CE34F5.AAA45
 X-yoursite-MailScanner: Found to be clean
 X-yoursite-MailScanner-From: yangx.jy@cn.fujitsu.com
 Sender: fstests-owner@vger.kernel.org
@@ -52,83 +54,51 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-1) Rename _require_log_writes_dax to _require_log_writes_dax_mountopt.
-2) Make _require_log_writes_dax_mountopt check if old or new dax option
-   is supported.
-3) generic/470 takes use of _require_log_writes_dax_mountopt.
+Some tests(e.g. ext4/035) cannot include dax option(dax=inode/dax=never
+is OK) so make _exclude_scratch_mount_option() and _require_dm_target()
+check if old dax or new dax=always option is not defined in $MOUNT_OPTIONS.
 
 Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
 Reviewed-by: Ira Weiny <ira.weiny@intel.com>
 ---
 
 V2->V3:
-Update comments.
+Update comments and set pattern variable in while().
 
- common/dmlogwrites | 24 +++++++++++++++++++-----
- tests/generic/470  |  2 +-
- 2 files changed, 20 insertions(+), 6 deletions(-)
+ common/rc | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
 
-diff --git a/common/dmlogwrites b/common/dmlogwrites
-index 2a7ff612..573f4b8a 100644
---- a/common/dmlogwrites
-+++ b/common/dmlogwrites
-@@ -23,7 +23,18 @@ _require_log_writes()
- # explicitly. But this is considered as a temporary workaround, we want to move
- # all the DAX check back to _require_log_writes when dm-log-writes gains full
- # DAX support and remove this helper.
--_require_log_writes_dax()
-+#
-+# Check if dax mount options are supported
-+# $1 can be either 'dax=always' or 'dax'
-+# dax=always
-+#      Check for the new dax options (dax=inode, dax=always or dax=never)
-+#      by passing "dax=always".
-+# dax
-+#      Check for the old dax or new dax=always by passing "dax".
-+# This only accepts 'dax=always' because dax=always, dax=inode and
-+# dax=never are always supported together.  So if the other options are
-+# required checking for 'dax=always' indicates support for the other 2.
-+_require_log_writes_dax_mountopt()
- {
- 	[ -z "$LOGWRITES_DEV" -o ! -b "$LOGWRITES_DEV" ] && \
- 		_notrun "This test requires a valid \$LOGWRITES_DEV"
-@@ -32,16 +43,19 @@ _require_log_writes_dax()
- 	_require_test_program "log-writes/replay-log"
+diff --git a/common/rc b/common/rc
+index 062eb6ba..aa5a7409 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1896,7 +1896,7 @@ _require_dm_target()
+ 	_require_sane_bdev_flush $SCRATCH_DEV
+ 	_require_command "$DMSETUP_PROG" dmsetup
  
- 	local ret=0
-+	local mountopt=$1
-+
- 	_log_writes_init $SCRATCH_DEV
- 	_log_writes_mkfs > /dev/null 2>&1
--	_log_writes_mount -o dax > /dev/null 2>&1
--	# Check options to be sure. XFS ignores dax option
-+	_log_writes_mount "-o $mountopt" > /dev/null 2>&1
-+	# Check options to be sure.
-+	# XFS ignores dax option(or changes it to dax=never)
- 	# and goes on if dev underneath does not support dax.
--	_fs_options $LOGWRITES_DMDEV | grep -qw "dax"
-+	_fs_options $LOGWRITES_DMDEV | egrep -q "dax(=always|,|$)"
- 	ret=$?
- 	_log_writes_cleanup
- 	if [ $ret -ne 0 ]; then
--		_notrun "$LOGWRITES_DMDEV $FSTYP does not support -o dax"
-+		_notrun "$LOGWRITES_DMDEV $FSTYP does not support -o $mountopt"
- 	fi
+-	echo $MOUNT_OPTIONS | grep -q dax
++	_normalize_mount_options | egrep -q "dax(=always| |$)"
+ 	if [ $? -eq 0 ]; then
+ 		case $target in
+ 		stripe|linear|log-writes)
+@@ -3483,12 +3483,16 @@ _normalize_mount_options()
  }
  
-diff --git a/tests/generic/470 b/tests/generic/470
-index 93691f4a..fd6da563 100755
---- a/tests/generic/470
-+++ b/tests/generic/470
-@@ -35,7 +35,7 @@ rm -f $seqres.full
- _supported_fs generic
- _supported_os Linux
- _require_scratch
--_require_log_writes_dax
-+_require_log_writes_dax_mountopt "dax"
- _require_xfs_io_command "mmap" "-S"
- _require_xfs_io_command "log_writes"
+ # skip test if MOUNT_OPTIONS contains the given strings
++# Both dax and dax=always are excluded if dax or dax=always is passed
+ _exclude_scratch_mount_option()
+ {
+ 	local mnt_opts=$(_normalize_mount_options)
  
+ 	while [ $# -gt 0 ]; do
+-		if echo $mnt_opts | grep -qw "$1"; then
++		local pattern=$1
++		echo "$pattern" | egrep -q "dax(=always|$)" && \
++			pattern="dax(=always| |$)"
++		if echo $mnt_opts | egrep -q "$pattern"; then
+ 			_notrun "mount option \"$1\" not allowed in this test"
+ 		fi
+ 		shift
 -- 
 2.21.0
 
