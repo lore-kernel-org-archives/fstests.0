@@ -2,129 +2,98 @@ Return-Path: <SRS0=gg96=B4=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 71580C433DF
-	for <linux-fstests@archiver.kernel.org>; Tue, 18 Aug 2020 06:31:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6CB7EC433E1
+	for <linux-fstests@archiver.kernel.org>; Tue, 18 Aug 2020 15:34:13 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4D6762075E
-	for <linux-fstests@archiver.kernel.org>; Tue, 18 Aug 2020 06:31:36 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1597732296;
-	bh=YCIfkNQoZMTK45gIqN25QClyTsdrB5QyhGJVVQrLLA0=;
-	h=From:To:Cc:Subject:Date:List-ID:From;
-	b=yF3r6HXi5pfLx6NqQSSGr+dQucJdF9x3IKzNHxDV4wjsv8B6vCyFSVAdUAkMYl650
-	 7bnfuBttrS8gTJZvkNffoq0fgiiTDZhaFm+uNimG0jTgsCLj9htfPYVckVX2mwofIr
-	 sfzUXNIsAAubSbiTLEUMcY5iFAdQTGPrb69PR+2Y=
+	by mail.kernel.org (Postfix) with ESMTP id 4060720786
+	for <linux-fstests@archiver.kernel.org>; Tue, 18 Aug 2020 15:34:13 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="cKeeFeKJ"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726681AbgHRGbg (ORCPT
+        id S1727836AbgHRPeM (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 18 Aug 2020 02:31:36 -0400
-Received: from mail.kernel.org ([198.145.29.99]:50176 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726675AbgHRGbe (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 18 Aug 2020 02:31:34 -0400
-Received: from sol.hsd1.ca.comcast.net (c-107-3-166-239.hsd1.ca.comcast.net [107.3.166.239])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 010742075E;
-        Tue, 18 Aug 2020 06:31:33 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1597732294;
-        bh=YCIfkNQoZMTK45gIqN25QClyTsdrB5QyhGJVVQrLLA0=;
-        h=From:To:Cc:Subject:Date:From;
-        b=hmwQMQVHI/u25dQ+mNOIO/4UK9GbcA0qvZLH0cmejGHzckP1vfPuApAAMKYB67LsY
-         q2vpWF153vERqu9QPGBM3utSQSaXxOQ2wS9/K66lGhQKb7Y4JyaM/gZ4GuSJe5e03w
-         OX/D84YqVd5C/f9+2f9WPqQ0/Utm590xLwPEGV9Y=
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     fstests@vger.kernel.org
-Cc:     linux-fscrypt@vger.kernel.org
-Subject: [PATCH] generic/574: fix sporadic failure with test_dummy_encryption
-Date:   Mon, 17 Aug 2020 23:30:23 -0700
-Message-Id: <20200818063023.93833-1-ebiggers@kernel.org>
-X-Mailer: git-send-email 2.28.0
+        Tue, 18 Aug 2020 11:34:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34014 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726585AbgHRPeB (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 18 Aug 2020 11:34:01 -0400
+Received: from mail-qt1-x843.google.com (mail-qt1-x843.google.com [IPv6:2607:f8b0:4864:20::843])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D332FC061389
+        for <fstests@vger.kernel.org>; Tue, 18 Aug 2020 08:34:00 -0700 (PDT)
+Received: by mail-qt1-x843.google.com with SMTP id d27so15410306qtg.4
+        for <fstests@vger.kernel.org>; Tue, 18 Aug 2020 08:34:00 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=UuPmgCC+5t/0Fxo6v6dbuZXnEeuw2yq3XgKedOCqjiU=;
+        b=cKeeFeKJ6G1FhWPEs4Eb/48zcRAkynhIaJeTd/qXaqs3rPPXLBCXb/x1Vaqvu0EsvV
+         TlnSEGVBz9N3N2JtLjbVxKwR2PDcjoxC8iOansVWhGVDF+rHALmxs+bRKd50AwChCp+a
+         SVeIWZkA8d6Cm3kplt+ZrmT5gezacVy++iYTDmQDvR+9txdxhTChdsXy/O3Ov4hYY6F7
+         e9bihM0XT53ze1vomw48YpdEgZI8azTP0Ugb7gxHSvRTiYNK+yy/Jgc6mIuB/EJ4IsWE
+         Lz/wk0TRI+d9gZhWOt6Yr6BhuiZ6ksLe1sHm3XSQQolHEEud43Gl6j2Q5EYBYaaPuYOB
+         CMqg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=UuPmgCC+5t/0Fxo6v6dbuZXnEeuw2yq3XgKedOCqjiU=;
+        b=Wk9duZoS6gmUflmOrclYFxZABLZm/7KrmuAXadGmg/mmA4j+rcS3xarGS43jIb6FSX
+         i3CwrozDff1FpWw2ngNITVAgICP6vPtv8xARb/hxLF90rEQwu2LNK5zO6JHSKWwgQx4K
+         4c2+8NSyicaFDKZYsDNqenXsf30yJqO9jn2yPs9n6dno1p0ZyY+q7mPOy9/M+W1CJ+xk
+         yKcuKK3a98EyH6zlwoGXweV0WAARQUeGKNm0OvUcUtqb3fWocdwEYIww5EwwPI5d6IhH
+         jymUV4RD5JOxApgJm+ICKcmJAdvZjinoqcZ56+pEC2BzxSWW8aGbQq/BCj+5VH2PCDZp
+         lqsQ==
+X-Gm-Message-State: AOAM530GURD43Ku8V/hT+jVjtVY8/jOmWhpKUBJpndStogNd1iSvci2P
+        lFf1tIBq0zCLUGcRfS3cJG4OVg==
+X-Google-Smtp-Source: ABdhPJzjPx+170fTqdIUgTDiFxlcb0//NNeqFQYttrMpjUxupsfhz7fwkvmKVSwWU762d4iqqbzCTw==
+X-Received: by 2002:ac8:4511:: with SMTP id q17mr18098083qtn.117.1597764840041;
+        Tue, 18 Aug 2020 08:34:00 -0700 (PDT)
+Received: from ?IPv6:2620:10d:c0a8:11d9::1055? ([2620:10d:c091:480::1:66f8])
+        by smtp.gmail.com with ESMTPSA id i75sm21726760qke.70.2020.08.18.08.33.58
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 18 Aug 2020 08:33:59 -0700 (PDT)
+Subject: Re: [PATCH] fstests: btrfs/218 check if mount opts are applied
+To:     Marcos Paulo de Souza <marcos@mpdesouza.com>, dsterba@suse.com,
+        linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Cc:     Marcos Paulo de Souza <mpdesouza@suse.com>
+References: <20200804205648.11284-1-marcos@mpdesouza.com>
+From:   Josef Bacik <josef@toxicpanda.com>
+Message-ID: <da689149-a332-c69e-a9a7-f63074bcb64c@toxicpanda.com>
+Date:   Tue, 18 Aug 2020 11:33:58 -0400
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:68.0)
+ Gecko/20100101 Thunderbird/68.11.0
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+In-Reply-To: <20200804205648.11284-1-marcos@mpdesouza.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Eric Biggers <ebiggers@google.com>
+On 8/4/20 4:56 PM, Marcos Paulo de Souza wrote:
+> From: Marcos Paulo de Souza <mpdesouza@suse.com>
+> 
+> This new test will apply different mount points and check if they were applied
+> by reading /proc/self/mounts. Almost all available btrfs options are tested
+> here, leaving only device=, which is tested in btrfs/125 and space_cache, tested
+> in btrfs/131.
+> 
+> This test does not apply any workload after the fs is mounted, just checks is
+> the option was set/unset correctly.
+> 
+> Signed-off-by: Marcos Paulo de Souza <mpdesouza@suse.com>
 
-When the "test_dummy_encryption" mount option is specified, the
-fs-verity file corruption test generic/574 is flaky; it fails about 1%
-of the time.  This happens because in the three test cases where a
-single byte of the test file is corrupted, sometimes the new byte
-happens to be the same as the original.  This is specific to
-test_dummy_encryption because the encrypted data is nondeterministic
-(and appears random), unlike the unencrypted data.
+Reviewed-by: Josef Bacik <josef@toxicpanda.com>
 
-Fix this by corrupting 5 bytes instead of 1, so that the probability of
-failure becomes effectively zero.
+Thanks,
 
-Signed-off-by: Eric Biggers <ebiggers@google.com>
----
- tests/generic/574     | 11 ++++++++---
- tests/generic/574.out |  6 +++---
- 2 files changed, 11 insertions(+), 6 deletions(-)
-
-diff --git a/tests/generic/574 b/tests/generic/574
-index 246f0858..da776a24 100755
---- a/tests/generic/574
-+++ b/tests/generic/574
-@@ -135,10 +135,15 @@ corruption_test()
- 	fi
- }
- 
--corruption_test 131072 0 1
--corruption_test 131072 4095 1
-+# Note: these tests just overwrite some bytes without checking their original
-+# values.  Therefore, make sure to overwrite at least 5 or so bytes, to make it
-+# nearly guaranteed that there will be a change -- even when the test file is
-+# encrypted due to the test_dummy_encryption mount option being specified.
-+
-+corruption_test 131072 0 5
-+corruption_test 131072 4091 5
- corruption_test 131072 65536 65536
--corruption_test 131072 131071 1
-+corruption_test 131072 131067 5
- 
- # Non-zeroed bytes in the final partial block beyond EOF should cause reads to
- # fail too.  Such bytes would be visible via mmap().
-diff --git a/tests/generic/574.out b/tests/generic/574.out
-index 5b304c83..d43474c5 100644
---- a/tests/generic/574.out
-+++ b/tests/generic/574.out
-@@ -1,6 +1,6 @@
- QA output created by 574
- 
--# Corruption test: file_len=131072 zap_offset=0 zap_len=1
-+# Corruption test: file_len=131072 zap_offset=0 zap_len=5
- 0dfbe8aa4c20b52e1b8bf3cb6cbdf193  SCRATCH_MNT/file.fsv
- Corrupting bytes...
- Validating corruption (reading full file)...
-@@ -14,7 +14,7 @@ Bus error
- Validating corruption (reading just corrupted part via mmap)...
- Bus error
- 
--# Corruption test: file_len=131072 zap_offset=4095 zap_len=1
-+# Corruption test: file_len=131072 zap_offset=4091 zap_len=5
- 0dfbe8aa4c20b52e1b8bf3cb6cbdf193  SCRATCH_MNT/file.fsv
- Corrupting bytes...
- Validating corruption (reading full file)...
-@@ -42,7 +42,7 @@ Bus error
- Validating corruption (reading just corrupted part via mmap)...
- Bus error
- 
--# Corruption test: file_len=131072 zap_offset=131071 zap_len=1
-+# Corruption test: file_len=131072 zap_offset=131067 zap_len=5
- 0dfbe8aa4c20b52e1b8bf3cb6cbdf193  SCRATCH_MNT/file.fsv
- Corrupting bytes...
- Validating corruption (reading full file)...
--- 
-2.28.0
-
+Josef
