@@ -2,211 +2,129 @@ Return-Path: <SRS0=gg96=B4=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 21004C433DF
-	for <linux-fstests@archiver.kernel.org>; Tue, 18 Aug 2020 06:16:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 71580C433DF
+	for <linux-fstests@archiver.kernel.org>; Tue, 18 Aug 2020 06:31:36 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id F05162065D
-	for <linux-fstests@archiver.kernel.org>; Tue, 18 Aug 2020 06:16:33 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Fzbms95A"
+	by mail.kernel.org (Postfix) with ESMTP id 4D6762075E
+	for <linux-fstests@archiver.kernel.org>; Tue, 18 Aug 2020 06:31:36 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1597732296;
+	bh=YCIfkNQoZMTK45gIqN25QClyTsdrB5QyhGJVVQrLLA0=;
+	h=From:To:Cc:Subject:Date:List-ID:From;
+	b=yF3r6HXi5pfLx6NqQSSGr+dQucJdF9x3IKzNHxDV4wjsv8B6vCyFSVAdUAkMYl650
+	 7bnfuBttrS8gTJZvkNffoq0fgiiTDZhaFm+uNimG0jTgsCLj9htfPYVckVX2mwofIr
+	 sfzUXNIsAAubSbiTLEUMcY5iFAdQTGPrb69PR+2Y=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726382AbgHRGQd (ORCPT
+        id S1726681AbgHRGbg (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 18 Aug 2020 02:16:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58332 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726381AbgHRGQd (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 18 Aug 2020 02:16:33 -0400
-Received: from mail-io1-xd41.google.com (mail-io1-xd41.google.com [IPv6:2607:f8b0:4864:20::d41])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1BA8DC061389;
-        Mon, 17 Aug 2020 23:16:33 -0700 (PDT)
-Received: by mail-io1-xd41.google.com with SMTP id h4so20089569ioe.5;
-        Mon, 17 Aug 2020 23:16:33 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=wX5l5fWiRv/scGbr9LXATXAyYwy0PIHFLJ5vxXRUvlw=;
-        b=Fzbms95AwV4cjbiqWwYKVrySDybK1lK7CmDrStjV4eKtJbsYGCzC6cWsmceAk95VHQ
-         TqriT+VkAJwhP32DizVdpJDNmdWKpn+lBr6C2l7v9ohBWyg5/eENZK/VseS3x/LduuEC
-         e2LN+uBVIegLzp+D5W8bIaBUavXCMejL2s9k9o7VcYUJHrjo3IuB/pXbbDMv7mfOhUvo
-         opz34kd5cqRvUNdqOe+HMQCy8IfkRTD6opT8cGCdsASZMDHEj6gxIvhwjJ9RQCv+wCzp
-         gEFjSaJTS/y7LSvHeZ7kIF4H1N4x1cXxzFaoZRKzXfBNcOeDRgxiJHr1Gl+Iyq/6ZqZr
-         svmw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=wX5l5fWiRv/scGbr9LXATXAyYwy0PIHFLJ5vxXRUvlw=;
-        b=anpxvhkXntPdnIH9K53dgVBRyAiD0dkadB+c4EXIOGuSLquQmD23tA5g2vzm2/KITx
-         IuxAnCDzv35syECK9GGSumvKbaqYfYPCBkK17iB4CP3fGWuEGkhgHXM7tYbDlaAlLMMN
-         4vz84JCv11jVa1WgqayfrmtL+uocRD/p/pcOewC5mzmogYWpSjfTIuU2HPJ09Haf2PHU
-         DskivRus9OFBed9U29tyuUL3JxxLeSPU19UY0Gc0EDU3082aOYujEZs+sti0HB5nePpI
-         zZJYbuxoga3b1DnwZyq72RyGhid5LCuAQAWxBOZ4iitrCbeqwB+EIGfUYQZesgYcbmB4
-         pWxw==
-X-Gm-Message-State: AOAM530g29mMVNjLfWWYJq+GCoOeDpDSH6rlLXPAdpWxhVhm4dlBuRCo
-        o19AuxFt7Gtp0tl49HzqA0VtmFYItXkwK4nCUDM=
-X-Google-Smtp-Source: ABdhPJzlBbx6jbkTn9ZCiMt7UGxCaoD/9X2NsGthGHq4SLI8vnDNO9J5RMcZhdYrT1lH/5M5wsBsuK4Wl9xtzkqmCYE=
-X-Received: by 2002:a05:6602:1405:: with SMTP id t5mr7868751iov.72.1597731392183;
- Mon, 17 Aug 2020 23:16:32 -0700 (PDT)
+        Tue, 18 Aug 2020 02:31:36 -0400
+Received: from mail.kernel.org ([198.145.29.99]:50176 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726675AbgHRGbe (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 18 Aug 2020 02:31:34 -0400
+Received: from sol.hsd1.ca.comcast.net (c-107-3-166-239.hsd1.ca.comcast.net [107.3.166.239])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 010742075E;
+        Tue, 18 Aug 2020 06:31:33 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1597732294;
+        bh=YCIfkNQoZMTK45gIqN25QClyTsdrB5QyhGJVVQrLLA0=;
+        h=From:To:Cc:Subject:Date:From;
+        b=hmwQMQVHI/u25dQ+mNOIO/4UK9GbcA0qvZLH0cmejGHzckP1vfPuApAAMKYB67LsY
+         q2vpWF153vERqu9QPGBM3utSQSaXxOQ2wS9/K66lGhQKb7Y4JyaM/gZ4GuSJe5e03w
+         OX/D84YqVd5C/f9+2f9WPqQ0/Utm590xLwPEGV9Y=
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     fstests@vger.kernel.org
+Cc:     linux-fscrypt@vger.kernel.org
+Subject: [PATCH] generic/574: fix sporadic failure with test_dummy_encryption
+Date:   Mon, 17 Aug 2020 23:30:23 -0700
+Message-Id: <20200818063023.93833-1-ebiggers@kernel.org>
+X-Mailer: git-send-email 2.28.0
 MIME-Version: 1.0
-References: <159770525400.3960575.11977829712550002800.stgit@magnolia> <159770527916.3960575.1560206777561534458.stgit@magnolia>
-In-Reply-To: <159770527916.3960575.1560206777561534458.stgit@magnolia>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Tue, 18 Aug 2020 09:16:21 +0300
-Message-ID: <CAOQ4uxg9MG8N=hF++y=RtXLo7Up0wM3uF=tC3HW8c2ivWsjqCA@mail.gmail.com>
-Subject: Re: [PATCH 4/4] xfs: test upgrading filesystem to bigtime
-To:     "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc:     Eryu Guan <guaneryu@gmail.com>,
-        linux-xfs <linux-xfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>,
-        Deepa Dinamani <deepa.kernel@gmail.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Aug 18, 2020 at 2:23 AM Darrick J. Wong <darrick.wong@oracle.com> wrote:
->
-> From: Darrick J. Wong <darrick.wong@oracle.com>
->
-> Test that we can upgrade an existing filesystem to use bigtime.
->
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> ---
->  common/xfs        |   16 +++++++++++
->  tests/xfs/908     |   74 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/908.out |    3 ++
->  tests/xfs/909     |   77 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/909.out |   12 ++++++++
->  tests/xfs/group   |    2 +
->  6 files changed, 184 insertions(+)
->  create mode 100755 tests/xfs/908
->  create mode 100644 tests/xfs/908.out
->  create mode 100755 tests/xfs/909
->  create mode 100644 tests/xfs/909.out
->
->
-> diff --git a/common/xfs b/common/xfs
-> index 252a5c0d..c0735a51 100644
-> --- a/common/xfs
-> +++ b/common/xfs
-> @@ -985,3 +985,19 @@ _xfs_timestamp_range()
->                 $dbprog -f -c 'timelimit --compact' | awk '{printf("%s %s", $1, $2);}'
->         fi
->  }
-> +
-> +_require_xfs_mkfs_bigtime()
-> +{
-> +       _scratch_mkfs_xfs_supported -m bigtime=1 >/dev/null 2>&1 \
-> +          || _notrun "mkfs.xfs doesn't have bigtime feature"
-> +}
-> +
-> +_require_xfs_scratch_bigtime()
-> +{
-> +       _require_scratch
-> +
-> +       _scratch_mkfs -m bigtime=1 > /dev/null
-> +       _try_scratch_mount || \
-> +               _notrun "bigtime not supported by scratch filesystem type: $FSTYP"
-> +       _scratch_unmount
-> +}
-> diff --git a/tests/xfs/908 b/tests/xfs/908
-> new file mode 100755
-> index 00000000..e313e14b
-> --- /dev/null
-> +++ b/tests/xfs/908
-> @@ -0,0 +1,74 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0-or-later
-> +# Copyright (c) 2020, Oracle and/or its affiliates.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 908
-> +#
-> +# Check that we can upgrade a filesystem to support bigtime and that inode
-> +# timestamps work properly after the upgrade.
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1    # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +       cd /
-> +       rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +_supported_fs xfs
-> +_supported_os Linux
-> +_require_xfs_mkfs_crc
-> +_require_xfs_mkfs_bigtime
-> +_require_xfs_scratch_bigtime
-> +
-> +date --date='Jan 1 00:00:00 UTC 2040' > /dev/null 2>&1 || \
-> +       _notrun "Userspace does not support dates past 2038."
-> +
-> +rm -f $seqres.full
-> +
-> +# Format V5 filesystem without bigtime support and populate it
-> +_scratch_mkfs -m crc=1,bigtime=0 > $seqres.full
-> +_scratch_xfs_db -c 'version' -c 'sb 0' -c 'p' >> $seqres.full
-> +_scratch_mount >> $seqres.full
-> +
-> +touch $SCRATCH_MNT/a
-> +touch $SCRATCH_MNT/b
-> +ls -la $SCRATCH_MNT/* >> $seqres.full
-> +
-> +_scratch_unmount
-> +_check_scratch_fs
-> +
-> +# Now upgrade to bigtime support
-> +_scratch_xfs_admin -O bigtime >> $seqres.full
-> +_check_scratch_fs
-> +_scratch_xfs_db -c 'version' -c 'sb 0' -c 'p' >> $seqres.full
-> +
-> +# Mount again, look at our files
-> +_scratch_mount >> $seqres.full
-> +ls -la $SCRATCH_MNT/* >> $seqres.full
-> +
-> +# Modify some timestamps
-> +touch -d 'Feb 22 22:22:22 UTC 2222' $SCRATCH_MNT/b
-> +
-> +_scratch_cycle_mount
-> +
-> +# Did the timestamp survive?
-> +ls -la $SCRATCH_MNT/* >> $seqres.full
-> +TZ=UTC stat -c '%Y' $SCRATCH_MNT/b
-> +
+From: Eric Biggers <ebiggers@google.com>
 
-Darrick,
+When the "test_dummy_encryption" mount option is specified, the
+fs-verity file corruption test generic/574 is flaky; it fails about 1%
+of the time.  This happens because in the three test cases where a
+single byte of the test file is corrupted, sometimes the new byte
+happens to be the same as the original.  This is specific to
+test_dummy_encryption because the encrypted data is nondeterministic
+(and appears random), unlike the unencrypted data.
 
-These tests look great, but I wonder.
-generic/402 has more test coverage than above.
-It tests several data points and it tests them with and without mount cycle.
+Fix this by corrupting 5 bytes instead of 1, so that the probability of
+failure becomes effectively zero.
 
-With your current tests, bigtime will enjoy this test coverage only if
-the entire
-run is configured with custom XFS_MKFS_OPTIONS or when bigtime
-becomes default for mkfs.
+Signed-off-by: Eric Biggers <ebiggers@google.com>
+---
+ tests/generic/574     | 11 ++++++++---
+ tests/generic/574.out |  6 +++---
+ 2 files changed, 11 insertions(+), 6 deletions(-)
 
-Do you think we should have a temporary clone of generic/402 for xfs which
-enables bigtime for the time being?
+diff --git a/tests/generic/574 b/tests/generic/574
+index 246f0858..da776a24 100755
+--- a/tests/generic/574
++++ b/tests/generic/574
+@@ -135,10 +135,15 @@ corruption_test()
+ 	fi
+ }
+ 
+-corruption_test 131072 0 1
+-corruption_test 131072 4095 1
++# Note: these tests just overwrite some bytes without checking their original
++# values.  Therefore, make sure to overwrite at least 5 or so bytes, to make it
++# nearly guaranteed that there will be a change -- even when the test file is
++# encrypted due to the test_dummy_encryption mount option being specified.
++
++corruption_test 131072 0 5
++corruption_test 131072 4091 5
+ corruption_test 131072 65536 65536
+-corruption_test 131072 131071 1
++corruption_test 131072 131067 5
+ 
+ # Non-zeroed bytes in the final partial block beyond EOF should cause reads to
+ # fail too.  Such bytes would be visible via mmap().
+diff --git a/tests/generic/574.out b/tests/generic/574.out
+index 5b304c83..d43474c5 100644
+--- a/tests/generic/574.out
++++ b/tests/generic/574.out
+@@ -1,6 +1,6 @@
+ QA output created by 574
+ 
+-# Corruption test: file_len=131072 zap_offset=0 zap_len=1
++# Corruption test: file_len=131072 zap_offset=0 zap_len=5
+ 0dfbe8aa4c20b52e1b8bf3cb6cbdf193  SCRATCH_MNT/file.fsv
+ Corrupting bytes...
+ Validating corruption (reading full file)...
+@@ -14,7 +14,7 @@ Bus error
+ Validating corruption (reading just corrupted part via mmap)...
+ Bus error
+ 
+-# Corruption test: file_len=131072 zap_offset=4095 zap_len=1
++# Corruption test: file_len=131072 zap_offset=4091 zap_len=5
+ 0dfbe8aa4c20b52e1b8bf3cb6cbdf193  SCRATCH_MNT/file.fsv
+ Corrupting bytes...
+ Validating corruption (reading full file)...
+@@ -42,7 +42,7 @@ Bus error
+ Validating corruption (reading just corrupted part via mmap)...
+ Bus error
+ 
+-# Corruption test: file_len=131072 zap_offset=131071 zap_len=1
++# Corruption test: file_len=131072 zap_offset=131067 zap_len=5
+ 0dfbe8aa4c20b52e1b8bf3cb6cbdf193  SCRATCH_MNT/file.fsv
+ Corrupting bytes...
+ Validating corruption (reading full file)...
+-- 
+2.28.0
 
-Thanks,
-Amir.
