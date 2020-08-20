@@ -2,68 +2,218 @@ Return-Path: <SRS0=0izJ=B6=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 43E2DC433E4
-	for <linux-fstests@archiver.kernel.org>; Thu, 20 Aug 2020 13:38:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6743EC433DF
+	for <linux-fstests@archiver.kernel.org>; Thu, 20 Aug 2020 18:30:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1BA3422B43
-	for <linux-fstests@archiver.kernel.org>; Thu, 20 Aug 2020 13:38:57 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 33EA021744
+	for <linux-fstests@archiver.kernel.org>; Thu, 20 Aug 2020 18:30:10 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="tILldFch"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728156AbgHTJa0 (ORCPT
+        id S1726977AbgHTSaJ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 20 Aug 2020 05:30:26 -0400
-Received: from mx2.suse.de ([195.135.220.15]:32860 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727937AbgHTJaK (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 20 Aug 2020 05:30:10 -0400
-X-Virus-Scanned: by amavisd-new at test-mx.suse.de
-Received: from relay2.suse.de (unknown [195.135.221.27])
-        by mx2.suse.de (Postfix) with ESMTP id 03CCEAC82;
-        Thu, 20 Aug 2020 09:30:36 +0000 (UTC)
-From:   Nikolay Borisov <nborisov@suse.com>
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Nikolay Borisov <nborisov@suse.com>
-Subject: [PATCH] btrfs/205: Ignore output of chattr command
-Date:   Thu, 20 Aug 2020 12:30:06 +0300
-Message-Id: <20200820093006.26458-1-nborisov@suse.com>
-X-Mailer: git-send-email 2.17.1
+        Thu, 20 Aug 2020 14:30:09 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55904 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726701AbgHTSaH (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 20 Aug 2020 14:30:07 -0400
+Received: from mail-qt1-x843.google.com (mail-qt1-x843.google.com [IPv6:2607:f8b0:4864:20::843])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7FB63C061385
+        for <fstests@vger.kernel.org>; Thu, 20 Aug 2020 11:30:07 -0700 (PDT)
+Received: by mail-qt1-x843.google.com with SMTP id v22so1900359qtq.8
+        for <fstests@vger.kernel.org>; Thu, 20 Aug 2020 11:30:07 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=hJ6AO/Q2DquafDUKfZVdMpafSNrujk86FJYc36tCJiI=;
+        b=tILldFchWdrzvDZmYQMxhagunsdc1q7g3HEcKQ/i1PCmLc8N6Q6n4bJ64ZGdiNsQvO
+         wYiO0xG98WomDM9fRtEsIyQ5Ysta6/IY5TJXd6tVEBdJbfJ++qcF8vPA5xs4FkOu233k
+         JwJoReVpei7QzuTnouPCcq2/am0OhY1yBVpJXgjpjo+CWILT+G0faXZ0prUK+avpY7CZ
+         IOlmKfB1ZrlpVoeJTIFuWiC2NEWVOIndnGo82jdbMiRAUa5Pgy/3ZQxfCTlAb4CHj6cs
+         VqgrHhaBuxbmBB469m/xPkQGzUAaoJ3ij05b6hMcCQz+u8w3Wukw1sP8OXcHjISO28My
+         BJog==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=hJ6AO/Q2DquafDUKfZVdMpafSNrujk86FJYc36tCJiI=;
+        b=XU/2tnvo62iyNRjHwIRPBDhzlXyeABn2jUsMzFzowFcir8gIPOPGt4Wl+DciiSgSuE
+         nAHD+1rXGTjLKJI9tPNIsjSHOP27YcJJQA0KySgM+tf5YBQ9O9oXfr0gRQpYAH1teLew
+         3J+9QA3n4iZdsq1I0qLtILKZ2WT2VXRn0JeABGKvLph6X/DxBzWq20CmCgSE4OWlG1Yp
+         X0dbKKcFJ8kr3qOvVdxhYb6ReosEdr3Bknb9qEAZuZhPVZx3/I/Ib+3QsR5NcvYhcZta
+         OO9KBhsu4YYf1qmGuTsSaLSaxEgV6clr8bBOPVoS+CPzDRndTlbhPArBWUDDv+eKVkSD
+         X4Dg==
+X-Gm-Message-State: AOAM532T7qd6fAP9sQ5u/hApglZlSO7VkPHeH0bVn8I+S848F1o3l54O
+        0MLzYGS3S9xJAESah5iIhGC3CA==
+X-Google-Smtp-Source: ABdhPJzXcGQaUaTUrYvmmheBjoVXwglngmjwcaFRsfZHyOH7YJarfvvPxixkN2AHzBXzk9797a6qRw==
+X-Received: by 2002:aed:3404:: with SMTP id w4mr3988519qtd.181.1597948206446;
+        Thu, 20 Aug 2020 11:30:06 -0700 (PDT)
+Received: from localhost (cpe-174-109-172-136.nc.res.rr.com. [174.109.172.136])
+        by smtp.gmail.com with ESMTPSA id t32sm4085608qtb.3.2020.08.20.11.30.05
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 20 Aug 2020 11:30:05 -0700 (PDT)
+From:   Josef Bacik <josef@toxicpanda.com>
+To:     linux-btrfs@vger.kernel.org, kernel-team@fb.com,
+        fstests@vger.kernel.org
+Cc:     Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH][v2] fstests: btrfs/218 add a test for btrfs seed device stats
+Date:   Thu, 20 Aug 2020 14:30:04 -0400
+Message-Id: <979d061f9957629bc5b89a9d74ae5673d75eb68d.1597948086.git.josef@toxicpanda.com>
+X-Mailer: git-send-email 2.24.1
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-With newer kernels, containing upstream commit f37c563bab42 ("btrfs:
-add missing check for nocow and compression inode flags") chattr would
-produce an error :
+This is a regression test for the issue fixed by
 
-  /usr/bin/chattr: Invalid argument while setting flags on /media/scratch/foo1
+  btrfs: init device stats for seed devices
 
-That's due to the aforementioned commit making the checks stricter. This
-is not critical for the purpose of the test so it can be safely
-ignored.
+We create a seed device, add a sprout device, and then check the device
+stats after a remount to make sure it succeeds.
 
-Signed-off-by: Nikolay Borisov <nborisov@suse.com>
+Reviewed-by: Filipe Manana <fdmanana@suse.com>
+Signed-off-by: Josef Bacik <josef@toxicpanda.com>
 ---
- tests/btrfs/205 | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+v1->v2:
+- killed the run_check usage
+- added the _scratch_dev_pool_put
+- Changed the name since we now have a btrfs/217
 
-diff --git a/tests/btrfs/205 b/tests/btrfs/205
-index 66355678f7d2..ab4261488ebe 100755
---- a/tests/btrfs/205
-+++ b/tests/btrfs/205
-@@ -48,7 +48,7 @@ run_tests()
-     # extent. It has a file size of 128K.
-     echo "Creating file foo1"
-     touch $SCRATCH_MNT/foo1
--    $CHATTR_PROG +c $SCRATCH_MNT/foo1
-+    $CHATTR_PROG +c $SCRATCH_MNT/foo1 > /dev/null 2>&1
-     $XFS_IO_PROG -c "pwrite -S 0xab 0 4K" \
- 		 -c "fsync" \
- 		 -c "pwrite -S 0xab 4K 124K" \
+ tests/btrfs/218     | 73 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/218.out | 25 ++++++++++++++++
+ tests/btrfs/group   |  1 +
+ 3 files changed, 99 insertions(+)
+ create mode 100755 tests/btrfs/218
+ create mode 100644 tests/btrfs/218.out
+
+diff --git a/tests/btrfs/218 b/tests/btrfs/218
+new file mode 100755
+index 00000000..5dce1c09
+--- /dev/null
++++ b/tests/btrfs/218
+@@ -0,0 +1,73 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2020 Facebook.  All Rights Reserved.
++#
++# FS QA Test 218
++#
++# Regression test for the problem fixed by the patch
++#
++#  btrfs: init device stats for seed devices
++#
++# Make a seed device, add a sprout to it, and then make sure we can still read
++# the device stats for both devices after we remount with the new sprout device.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/filter.btrfs
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs btrfs
++_supported_os Linux
++_require_test
++_require_scratch_dev_pool 2
++
++_scratch_dev_pool_get 2
++
++dev_seed=$(echo $SCRATCH_DEV_POOL | awk '{print $1}')
++dev_sprout=$(echo $SCRATCH_DEV_POOL | awk '{print $2}')
++
++# Create the seed device
++_mkfs_dev $dev_seed
++_mount $dev_seed $SCRATCH_MNT
++$XFS_IO_PROG -f -d -c "pwrite -S 0xab 0 1M" $SCRATCH_MNT/foo > /dev/null
++$BTRFS_UTIL_PROG filesystem show -m $SCRATCH_MNT | \
++	_filter_btrfs_filesystem_show
++_scratch_unmount
++$BTRFS_TUNE_PROG -S 1 $dev_seed
++
++# Mount the seed device and add the rw device
++_mount -o ro $dev_seed $SCRATCH_MNT
++_run_btrfs_util_prog device add -f $dev_sprout $SCRATCH_MNT
++$BTRFS_UTIL_PROG device stats $SCRATCH_MNT | _filter_scratch_pool
++_scratch_unmount
++
++# Now remount, validate the device stats do not fail
++_mount $dev_sprout $SCRATCH_MNT
++$BTRFS_UTIL_PROG device stats $SCRATCH_MNT | _filter_scratch_pool
++
++_scratch_dev_pool_put
++
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/218.out b/tests/btrfs/218.out
+new file mode 100644
+index 00000000..7ccf13e9
+--- /dev/null
++++ b/tests/btrfs/218.out
+@@ -0,0 +1,25 @@
++QA output created by 218
++Label: none  uuid: <UUID>
++	Total devices <NUM> FS bytes used <SIZE>
++	devid <DEVID> size <SIZE> used <SIZE> path SCRATCH_DEV
++
++[SCRATCH_DEV].write_io_errs    0
++[SCRATCH_DEV].read_io_errs     0
++[SCRATCH_DEV].flush_io_errs    0
++[SCRATCH_DEV].corruption_errs  0
++[SCRATCH_DEV].generation_errs  0
++[SCRATCH_DEV].write_io_errs    0
++[SCRATCH_DEV].read_io_errs     0
++[SCRATCH_DEV].flush_io_errs    0
++[SCRATCH_DEV].corruption_errs  0
++[SCRATCH_DEV].generation_errs  0
++[SCRATCH_DEV].write_io_errs    0
++[SCRATCH_DEV].read_io_errs     0
++[SCRATCH_DEV].flush_io_errs    0
++[SCRATCH_DEV].corruption_errs  0
++[SCRATCH_DEV].generation_errs  0
++[SCRATCH_DEV].write_io_errs    0
++[SCRATCH_DEV].read_io_errs     0
++[SCRATCH_DEV].flush_io_errs    0
++[SCRATCH_DEV].corruption_errs  0
++[SCRATCH_DEV].generation_errs  0
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 8dcb2315..3295856d 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -220,3 +220,4 @@
+ 215 auto quick
+ 216 auto quick seed
+ 217 auto quick trim dangerous
++218 auto quick volume
 -- 
-2.17.1
+2.24.1
 
