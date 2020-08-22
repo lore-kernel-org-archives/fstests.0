@@ -2,155 +2,181 @@ Return-Path: <SRS0=Oy/H=CA=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
+X-Spam-Status: No, score=-5.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A27C9C433DF
-	for <linux-fstests@archiver.kernel.org>; Sat, 22 Aug 2020 11:34:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4929AC433DF
+	for <linux-fstests@archiver.kernel.org>; Sat, 22 Aug 2020 18:02:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 834ED20738
-	for <linux-fstests@archiver.kernel.org>; Sat, 22 Aug 2020 11:34:46 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2D05D2071A
+	for <linux-fstests@archiver.kernel.org>; Sat, 22 Aug 2020 18:02:09 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="S823tc4C"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727087AbgHVLeq (ORCPT
+        id S1728120AbgHVSCH (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 22 Aug 2020 07:34:46 -0400
-Received: from szxga05-in.huawei.com ([45.249.212.191]:10256 "EHLO huawei.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726920AbgHVLeo (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sat, 22 Aug 2020 07:34:44 -0400
-Received: from DGGEMS406-HUB.china.huawei.com (unknown [172.30.72.58])
-        by Forcepoint Email with ESMTP id D2E7FF755C31E1DF4AE0;
-        Sat, 22 Aug 2020 19:34:42 +0800 (CST)
-Received: from huawei.com (10.90.53.225) by DGGEMS406-HUB.china.huawei.com
- (10.3.19.206) with Microsoft SMTP Server id 14.3.487.0; Sat, 22 Aug 2020
- 19:34:34 +0800
-From:   Hou Tao <houtao1@huawei.com>
-To:     <guaneryu@gmail.com>, <richard@nod.at>, <yuchao0@huawei.com>
-CC:     <fstests@vger.kernel.org>
-Subject: [PATCH v2 1/2] generic: add test for race between listxattr and setxatr
-Date:   Sat, 22 Aug 2020 19:41:32 +0800
-Message-ID: <20200822114132.61227-1-houtao1@huawei.com>
-X-Mailer: git-send-email 2.25.0.4.g0ad7144999
-In-Reply-To: <364596a1-c9bb-3a10-a132-0f43907c2241@huawei.com>
-References: <364596a1-c9bb-3a10-a132-0f43907c2241@huawei.com>
+        Sat, 22 Aug 2020 14:02:07 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:52275 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1728132AbgHVSCG (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 22 Aug 2020 14:02:06 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1598119323;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=W6lgVmh2wlooy/jOjkjYLUIvHE4cxHds3iJ0UWbp83U=;
+        b=S823tc4CFNRquckVaci8+YgjtDKB1n5/hutbTvxfimlaYAiuxDZOwjgbjcSv1danDYERx9
+        rEMqSd+UGBdVZz2Osd+35bVxzKffBYAj9cOSXN5SfaVIl8/DkWeN9Rb+Z4pd6WMm7qJoU/
+        DrDS3hFyZrDWh/NfJUr4uHeUiLOPhUM=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-313-EsJCpst0MDqaXtzRlbEOFw-1; Sat, 22 Aug 2020 14:02:00 -0400
+X-MC-Unique: EsJCpst0MDqaXtzRlbEOFw-1
+Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 10FE51876562;
+        Sat, 22 Aug 2020 18:01:37 +0000 (UTC)
+Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 7FD537AEFE;
+        Sat, 22 Aug 2020 18:01:35 +0000 (UTC)
+Date:   Sun, 23 Aug 2020 02:14:46 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Jens Axboe <axboe@kernel.dk>
+Cc:     fstests@vger.kernel.org, io-uring@vger.kernel.org,
+        jmoyer@redhat.com
+Subject: Re: [PATCH v2 1/4] fsstress: add IO_URING read and write operations
+Message-ID: <20200822181445.GS2937@dhcp-12-102.nay.redhat.com>
+Mail-Followup-To: Jens Axboe <axboe@kernel.dk>, fstests@vger.kernel.org,
+        io-uring@vger.kernel.org, jmoyer@redhat.com
+References: <20200809063040.15521-1-zlang@redhat.com>
+ <20200809063040.15521-2-zlang@redhat.com>
+ <01c7353f-338b-99cd-d7d1-fe92b0badd84@kernel.dk>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7BIT
-Content-Type:   text/plain; charset=US-ASCII
-X-Originating-IP: [10.90.53.225]
-X-CFilter-Loop: Reflected
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <01c7353f-338b-99cd-d7d1-fe92b0badd84@kernel.dk>
+User-Agent: Mutt/1.10.1 (2018-07-13)
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Add reproducer for a bug on ubifs where listxattr() copies
-the newly created xattr names regardless of the remaining
-buffer size, fails the assertion of used buffer size,
-and may corrupt buffer memory.
+On Sun, Aug 09, 2020 at 11:51:45AM -0600, Jens Axboe wrote:
+> On 8/9/20 12:30 AM, Zorro Lang wrote:
+> > @@ -2170,6 +2189,108 @@ do_aio_rw(int opno, long r, int flags)
+> >  }
+> >  #endif
+> >  
+> > +#ifdef URING
+> > +void
+> > +do_uring_rw(int opno, long r, int flags)
+> > +{
+> > +	char		*buf;
+> > +	int		e;
+> > +	pathname_t	f;
+> > +	int		fd;
+> > +	size_t		len;
+> > +	int64_t		lr;
+> > +	off64_t		off;
+> > +	struct stat64	stb;
+> > +	int		v;
+> > +	char		st[1024];
+> > +	struct io_uring_sqe	*sqe;
+> > +	struct io_uring_cqe	*cqe;
+> > +	struct iovec	iovec;
+> > +	int		iswrite = (flags & (O_WRONLY | O_RDWR)) ? 1 : 0;
+> > +
+> > +	init_pathname(&f);
+> > +	if (!get_fname(FT_REGFILE, r, &f, NULL, NULL, &v)) {
+> > +		if (v)
+> > +			printf("%d/%d: do_uring_rw - no filename\n", procid, opno);
+> > +		goto uring_out3;
+> > +	}
+> > +	fd = open_path(&f, flags);
+> > +	e = fd < 0 ? errno : 0;
+> > +	check_cwd();
+> > +	if (fd < 0) {
+> > +		if (v)
+> > +			printf("%d/%d: do_uring_rw - open %s failed %d\n",
+> > +			       procid, opno, f.path, e);
+> > +		goto uring_out3;
+> > +	}
+> > +	if (fstat64(fd, &stb) < 0) {
+> > +		if (v)
+> > +			printf("%d/%d: do_uring_rw - fstat64 %s failed %d\n",
+> > +			       procid, opno, f.path, errno);
+> > +		goto uring_out2;
+> > +	}
+> > +	inode_info(st, sizeof(st), &stb, v);
+> > +	if (!iswrite && stb.st_size == 0) {
+> > +		if (v)
+> > +			printf("%d/%d: do_uring_rw - %s%s zero size\n", procid, opno,
+> > +			       f.path, st);
+> > +		goto uring_out2;
+> > +	}
+> > +	sqe = io_uring_get_sqe(&ring);
+> > +	if (!sqe) {
+> > +		if (v)
+> > +			printf("%d/%d: do_uring_rw - io_uring_get_sqe failed\n",
+> > +			       procid, opno);
+> > +		goto uring_out2;
+> > +	}
+> > +	lr = ((int64_t)random() << 32) + random();
+> > +	len = (random() % FILELEN_MAX) + 1;
+> > +	buf = malloc(len);
+> > +	if (!buf) {
+> > +		if (v)
+> > +			printf("%d/%d: do_uring_rw - malloc failed\n",
+> > +			       procid, opno);
+> > +		goto uring_out2;
+> > +	}
+> > +	iovec.iov_base = buf;
+> > +	iovec.iov_len = len;
+> > +	if (iswrite) {
+> > +		off = (off64_t)(lr % MIN(stb.st_size + (1024 * 1024), MAXFSIZE));
+> > +		off %= maxfsize;
+> > +		memset(buf, nameseq & 0xff, len);
+> > +		io_uring_prep_writev(sqe, fd, &iovec, 1, off);
+> > +	} else {
+> > +		off = (off64_t)(lr % stb.st_size);
+> > +		io_uring_prep_readv(sqe, fd, &iovec, 1, off);
+> > +	}
+> > +
+> > +	if ((e = io_uring_submit(&ring)) != 1) {
+> > +		if (v)
+> > +			printf("%d/%d: %s - io_uring_submit failed %d\n", procid, opno,
+> > +			       iswrite ? "uring_write" : "uring_read", e);
+> > +		goto uring_out1;
+> > +	}
+> > +	if ((e = io_uring_wait_cqe(&ring, &cqe)) < 0) {
+> > +		if (v)
+> > +			printf("%d/%d: %s - io_uring_wait_cqe failed %d\n", procid, opno,
+> > +			       iswrite ? "uring_write" : "uring_read", e);
+> > +		goto uring_out1;
+> > +	}
+> 
+> You could use io_uring_submit_and_wait() here, that'll save a system
+> call for sync IO. Same comment goes for 4/4.
 
-Signed-off-by: Hou Tao <houtao1@huawei.com>
----
-v2: accommodate f2fs by reducing the number of created xattrs for f2fs
+Hi Jens,
 
- tests/generic/998     | 67 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/998.out |  2 ++
- tests/generic/group   |  1 +
- 3 files changed, 70 insertions(+)
- create mode 100644 tests/generic/998
- create mode 100644 tests/generic/998.out
+Sorry I think I haven't learned about io_uring enough, why the
+io_uring_submit_and_wait can save a system call? Is it same with
+io_uring_submit(), except a wait_nr ? The io_uring_wait_cqe() and
+io_uring_cqe_seen() are still needed, right?
 
-diff --git a/tests/generic/998 b/tests/generic/998
-new file mode 100644
-index 00000000..26a5b620
---- /dev/null
-+++ b/tests/generic/998
-@@ -0,0 +1,67 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2020 Huawei. All Rights Reserved.
-+#
-+# FS QA Test 998
-+#
-+# Test race between listxattr() and setxattr(). It reproduces a bug
-+# on UBIFS where listxattr() copies the newly created xattr names
-+# regardless of the remaining buffer size, fails the assertion of
-+# used buffer size, and may corrupt buffer memory.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+	rm -f $TEST_DIR/$seq
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/attr
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_attrs
-+
-+target=$TEST_DIR/$seq
-+touch $target
-+
-+# start a background listxattr
-+runfile="$tmp.listxattr"
-+touch $runfile
-+while [ -e $runfile ]; do
-+	${GETFATTR_PROG} $target >/dev/null 2>&1
-+done &
-+
-+# add new xattr continuously
-+largename=`for i in $(seq 0 128); do echo -n a; done`
-+cnt=100
-+# f2fs has limited spaces for xattr
-+[ $FSTYP == "f2fs" ] && cnt=30
-+for i in $(seq 1 $cnt); do
-+	${SETFATTR_PROG} -n user.${largename}.$i -v $i $target
-+done
-+
-+rm -f $runfile
-+wait > /dev/null 2>&1
-+rm -f $target
-+
-+echo Silence is golden
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/998.out b/tests/generic/998.out
-new file mode 100644
-index 00000000..d2679ae0
---- /dev/null
-+++ b/tests/generic/998.out
-@@ -0,0 +1,2 @@
-+QA output created by 998
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index d9ab9a31..62697ac5 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -605,3 +605,4 @@
- 600 auto quick quota
- 601 auto quick quota
- 602 auto quick encrypt
-+998 auto quick attr
--- 
-2.25.0.4.g0ad7144999
+Thanks,
+Zorro
+
+> 
+> Apart from that, looks pretty straight forward to me.
+> 
+> -- 
+> Jens Axboe
+> 
 
