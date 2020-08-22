@@ -1,118 +1,82 @@
-Return-Path: <SRS0=0izJ=B6=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=Oy/H=CA=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6743EC433DF
-	for <linux-fstests@archiver.kernel.org>; Thu, 20 Aug 2020 18:30:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A27C9C433DF
+	for <linux-fstests@archiver.kernel.org>; Sat, 22 Aug 2020 11:34:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 33EA021744
-	for <linux-fstests@archiver.kernel.org>; Thu, 20 Aug 2020 18:30:10 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="tILldFch"
+	by mail.kernel.org (Postfix) with ESMTP id 834ED20738
+	for <linux-fstests@archiver.kernel.org>; Sat, 22 Aug 2020 11:34:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726977AbgHTSaJ (ORCPT
+        id S1727087AbgHVLeq (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 20 Aug 2020 14:30:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55904 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726701AbgHTSaH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 20 Aug 2020 14:30:07 -0400
-Received: from mail-qt1-x843.google.com (mail-qt1-x843.google.com [IPv6:2607:f8b0:4864:20::843])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7FB63C061385
-        for <fstests@vger.kernel.org>; Thu, 20 Aug 2020 11:30:07 -0700 (PDT)
-Received: by mail-qt1-x843.google.com with SMTP id v22so1900359qtq.8
-        for <fstests@vger.kernel.org>; Thu, 20 Aug 2020 11:30:07 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=hJ6AO/Q2DquafDUKfZVdMpafSNrujk86FJYc36tCJiI=;
-        b=tILldFchWdrzvDZmYQMxhagunsdc1q7g3HEcKQ/i1PCmLc8N6Q6n4bJ64ZGdiNsQvO
-         wYiO0xG98WomDM9fRtEsIyQ5Ysta6/IY5TJXd6tVEBdJbfJ++qcF8vPA5xs4FkOu233k
-         JwJoReVpei7QzuTnouPCcq2/am0OhY1yBVpJXgjpjo+CWILT+G0faXZ0prUK+avpY7CZ
-         IOlmKfB1ZrlpVoeJTIFuWiC2NEWVOIndnGo82jdbMiRAUa5Pgy/3ZQxfCTlAb4CHj6cs
-         VqgrHhaBuxbmBB469m/xPkQGzUAaoJ3ij05b6hMcCQz+u8w3Wukw1sP8OXcHjISO28My
-         BJog==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=hJ6AO/Q2DquafDUKfZVdMpafSNrujk86FJYc36tCJiI=;
-        b=XU/2tnvo62iyNRjHwIRPBDhzlXyeABn2jUsMzFzowFcir8gIPOPGt4Wl+DciiSgSuE
-         nAHD+1rXGTjLKJI9tPNIsjSHOP27YcJJQA0KySgM+tf5YBQ9O9oXfr0gRQpYAH1teLew
-         3J+9QA3n4iZdsq1I0qLtILKZ2WT2VXRn0JeABGKvLph6X/DxBzWq20CmCgSE4OWlG1Yp
-         X0dbKKcFJ8kr3qOvVdxhYb6ReosEdr3Bknb9qEAZuZhPVZx3/I/Ib+3QsR5NcvYhcZta
-         OO9KBhsu4YYf1qmGuTsSaLSaxEgV6clr8bBOPVoS+CPzDRndTlbhPArBWUDDv+eKVkSD
-         X4Dg==
-X-Gm-Message-State: AOAM532T7qd6fAP9sQ5u/hApglZlSO7VkPHeH0bVn8I+S848F1o3l54O
-        0MLzYGS3S9xJAESah5iIhGC3CA==
-X-Google-Smtp-Source: ABdhPJzXcGQaUaTUrYvmmheBjoVXwglngmjwcaFRsfZHyOH7YJarfvvPxixkN2AHzBXzk9797a6qRw==
-X-Received: by 2002:aed:3404:: with SMTP id w4mr3988519qtd.181.1597948206446;
-        Thu, 20 Aug 2020 11:30:06 -0700 (PDT)
-Received: from localhost (cpe-174-109-172-136.nc.res.rr.com. [174.109.172.136])
-        by smtp.gmail.com with ESMTPSA id t32sm4085608qtb.3.2020.08.20.11.30.05
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 20 Aug 2020 11:30:05 -0700 (PDT)
-From:   Josef Bacik <josef@toxicpanda.com>
-To:     linux-btrfs@vger.kernel.org, kernel-team@fb.com,
-        fstests@vger.kernel.org
-Cc:     Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH][v2] fstests: btrfs/218 add a test for btrfs seed device stats
-Date:   Thu, 20 Aug 2020 14:30:04 -0400
-Message-Id: <979d061f9957629bc5b89a9d74ae5673d75eb68d.1597948086.git.josef@toxicpanda.com>
-X-Mailer: git-send-email 2.24.1
+        Sat, 22 Aug 2020 07:34:46 -0400
+Received: from szxga05-in.huawei.com ([45.249.212.191]:10256 "EHLO huawei.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726920AbgHVLeo (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sat, 22 Aug 2020 07:34:44 -0400
+Received: from DGGEMS406-HUB.china.huawei.com (unknown [172.30.72.58])
+        by Forcepoint Email with ESMTP id D2E7FF755C31E1DF4AE0;
+        Sat, 22 Aug 2020 19:34:42 +0800 (CST)
+Received: from huawei.com (10.90.53.225) by DGGEMS406-HUB.china.huawei.com
+ (10.3.19.206) with Microsoft SMTP Server id 14.3.487.0; Sat, 22 Aug 2020
+ 19:34:34 +0800
+From:   Hou Tao <houtao1@huawei.com>
+To:     <guaneryu@gmail.com>, <richard@nod.at>, <yuchao0@huawei.com>
+CC:     <fstests@vger.kernel.org>
+Subject: [PATCH v2 1/2] generic: add test for race between listxattr and setxatr
+Date:   Sat, 22 Aug 2020 19:41:32 +0800
+Message-ID: <20200822114132.61227-1-houtao1@huawei.com>
+X-Mailer: git-send-email 2.25.0.4.g0ad7144999
+In-Reply-To: <364596a1-c9bb-3a10-a132-0f43907c2241@huawei.com>
+References: <364596a1-c9bb-3a10-a132-0f43907c2241@huawei.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-Originating-IP: [10.90.53.225]
+X-CFilter-Loop: Reflected
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This is a regression test for the issue fixed by
+Add reproducer for a bug on ubifs where listxattr() copies
+the newly created xattr names regardless of the remaining
+buffer size, fails the assertion of used buffer size,
+and may corrupt buffer memory.
 
-  btrfs: init device stats for seed devices
-
-We create a seed device, add a sprout device, and then check the device
-stats after a remount to make sure it succeeds.
-
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
-Signed-off-by: Josef Bacik <josef@toxicpanda.com>
+Signed-off-by: Hou Tao <houtao1@huawei.com>
 ---
-v1->v2:
-- killed the run_check usage
-- added the _scratch_dev_pool_put
-- Changed the name since we now have a btrfs/217
+v2: accommodate f2fs by reducing the number of created xattrs for f2fs
 
- tests/btrfs/218     | 73 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/218.out | 25 ++++++++++++++++
- tests/btrfs/group   |  1 +
- 3 files changed, 99 insertions(+)
- create mode 100755 tests/btrfs/218
- create mode 100644 tests/btrfs/218.out
+ tests/generic/998     | 67 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/998.out |  2 ++
+ tests/generic/group   |  1 +
+ 3 files changed, 70 insertions(+)
+ create mode 100644 tests/generic/998
+ create mode 100644 tests/generic/998.out
 
-diff --git a/tests/btrfs/218 b/tests/btrfs/218
-new file mode 100755
-index 00000000..5dce1c09
+diff --git a/tests/generic/998 b/tests/generic/998
+new file mode 100644
+index 00000000..26a5b620
 --- /dev/null
-+++ b/tests/btrfs/218
-@@ -0,0 +1,73 @@
++++ b/tests/generic/998
+@@ -0,0 +1,67 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2020 Facebook.  All Rights Reserved.
++# Copyright (c) 2020 Huawei. All Rights Reserved.
 +#
-+# FS QA Test 218
++# FS QA Test 998
 +#
-+# Regression test for the problem fixed by the patch
-+#
-+#  btrfs: init device stats for seed devices
-+#
-+# Make a seed device, add a sprout to it, and then make sure we can still read
-+# the device stats for both devices after we remount with the new sprout device.
++# Test race between listxattr() and setxattr(). It reproduces a bug
++# on UBIFS where listxattr() copies the newly created xattr names
++# regardless of the remaining buffer size, fails the assertion of
++# used buffer size, and may corrupt buffer memory.
 +#
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
@@ -127,93 +91,66 @@ index 00000000..5dce1c09
 +{
 +	cd /
 +	rm -f $tmp.*
++	rm -f $TEST_DIR/$seq
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
-+. ./common/filter
-+. ./common/filter.btrfs
++. ./common/attr
 +
 +# remove previous $seqres.full before test
 +rm -f $seqres.full
 +
 +# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs btrfs
++_supported_fs generic
 +_supported_os Linux
-+_require_test
-+_require_scratch_dev_pool 2
++_require_attrs
 +
-+_scratch_dev_pool_get 2
++target=$TEST_DIR/$seq
++touch $target
 +
-+dev_seed=$(echo $SCRATCH_DEV_POOL | awk '{print $1}')
-+dev_sprout=$(echo $SCRATCH_DEV_POOL | awk '{print $2}')
++# start a background listxattr
++runfile="$tmp.listxattr"
++touch $runfile
++while [ -e $runfile ]; do
++	${GETFATTR_PROG} $target >/dev/null 2>&1
++done &
 +
-+# Create the seed device
-+_mkfs_dev $dev_seed
-+_mount $dev_seed $SCRATCH_MNT
-+$XFS_IO_PROG -f -d -c "pwrite -S 0xab 0 1M" $SCRATCH_MNT/foo > /dev/null
-+$BTRFS_UTIL_PROG filesystem show -m $SCRATCH_MNT | \
-+	_filter_btrfs_filesystem_show
-+_scratch_unmount
-+$BTRFS_TUNE_PROG -S 1 $dev_seed
++# add new xattr continuously
++largename=`for i in $(seq 0 128); do echo -n a; done`
++cnt=100
++# f2fs has limited spaces for xattr
++[ $FSTYP == "f2fs" ] && cnt=30
++for i in $(seq 1 $cnt); do
++	${SETFATTR_PROG} -n user.${largename}.$i -v $i $target
++done
 +
-+# Mount the seed device and add the rw device
-+_mount -o ro $dev_seed $SCRATCH_MNT
-+_run_btrfs_util_prog device add -f $dev_sprout $SCRATCH_MNT
-+$BTRFS_UTIL_PROG device stats $SCRATCH_MNT | _filter_scratch_pool
-+_scratch_unmount
++rm -f $runfile
++wait > /dev/null 2>&1
++rm -f $target
 +
-+# Now remount, validate the device stats do not fail
-+_mount $dev_sprout $SCRATCH_MNT
-+$BTRFS_UTIL_PROG device stats $SCRATCH_MNT | _filter_scratch_pool
-+
-+_scratch_dev_pool_put
++echo Silence is golden
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/btrfs/218.out b/tests/btrfs/218.out
+diff --git a/tests/generic/998.out b/tests/generic/998.out
 new file mode 100644
-index 00000000..7ccf13e9
+index 00000000..d2679ae0
 --- /dev/null
-+++ b/tests/btrfs/218.out
-@@ -0,0 +1,25 @@
-+QA output created by 218
-+Label: none  uuid: <UUID>
-+	Total devices <NUM> FS bytes used <SIZE>
-+	devid <DEVID> size <SIZE> used <SIZE> path SCRATCH_DEV
-+
-+[SCRATCH_DEV].write_io_errs    0
-+[SCRATCH_DEV].read_io_errs     0
-+[SCRATCH_DEV].flush_io_errs    0
-+[SCRATCH_DEV].corruption_errs  0
-+[SCRATCH_DEV].generation_errs  0
-+[SCRATCH_DEV].write_io_errs    0
-+[SCRATCH_DEV].read_io_errs     0
-+[SCRATCH_DEV].flush_io_errs    0
-+[SCRATCH_DEV].corruption_errs  0
-+[SCRATCH_DEV].generation_errs  0
-+[SCRATCH_DEV].write_io_errs    0
-+[SCRATCH_DEV].read_io_errs     0
-+[SCRATCH_DEV].flush_io_errs    0
-+[SCRATCH_DEV].corruption_errs  0
-+[SCRATCH_DEV].generation_errs  0
-+[SCRATCH_DEV].write_io_errs    0
-+[SCRATCH_DEV].read_io_errs     0
-+[SCRATCH_DEV].flush_io_errs    0
-+[SCRATCH_DEV].corruption_errs  0
-+[SCRATCH_DEV].generation_errs  0
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 8dcb2315..3295856d 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -220,3 +220,4 @@
- 215 auto quick
- 216 auto quick seed
- 217 auto quick trim dangerous
-+218 auto quick volume
++++ b/tests/generic/998.out
+@@ -0,0 +1,2 @@
++QA output created by 998
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index d9ab9a31..62697ac5 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -605,3 +605,4 @@
+ 600 auto quick quota
+ 601 auto quick quota
+ 602 auto quick encrypt
++998 auto quick attr
 -- 
-2.24.1
+2.25.0.4.g0ad7144999
 
