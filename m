@@ -2,181 +2,119 @@ Return-Path: <SRS0=Oy/H=CA=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4929AC433DF
-	for <linux-fstests@archiver.kernel.org>; Sat, 22 Aug 2020 18:02:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AC4EDC433DF
+	for <linux-fstests@archiver.kernel.org>; Sat, 22 Aug 2020 18:05:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2D05D2071A
-	for <linux-fstests@archiver.kernel.org>; Sat, 22 Aug 2020 18:02:09 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8DD862075E
+	for <linux-fstests@archiver.kernel.org>; Sat, 22 Aug 2020 18:05:21 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="S823tc4C"
+	dkim=pass (2048-bit key) header.d=kernel-dk.20150623.gappssmtp.com header.i=@kernel-dk.20150623.gappssmtp.com header.b="vbPpLGrD"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728120AbgHVSCH (ORCPT
+        id S1728380AbgHVSFU (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 22 Aug 2020 14:02:07 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:52275 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1728132AbgHVSCG (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 22 Aug 2020 14:02:06 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1598119323;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=W6lgVmh2wlooy/jOjkjYLUIvHE4cxHds3iJ0UWbp83U=;
-        b=S823tc4CFNRquckVaci8+YgjtDKB1n5/hutbTvxfimlaYAiuxDZOwjgbjcSv1danDYERx9
-        rEMqSd+UGBdVZz2Osd+35bVxzKffBYAj9cOSXN5SfaVIl8/DkWeN9Rb+Z4pd6WMm7qJoU/
-        DrDS3hFyZrDWh/NfJUr4uHeUiLOPhUM=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-313-EsJCpst0MDqaXtzRlbEOFw-1; Sat, 22 Aug 2020 14:02:00 -0400
-X-MC-Unique: EsJCpst0MDqaXtzRlbEOFw-1
-Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 10FE51876562;
-        Sat, 22 Aug 2020 18:01:37 +0000 (UTC)
-Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 7FD537AEFE;
-        Sat, 22 Aug 2020 18:01:35 +0000 (UTC)
-Date:   Sun, 23 Aug 2020 02:14:46 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Jens Axboe <axboe@kernel.dk>
-Cc:     fstests@vger.kernel.org, io-uring@vger.kernel.org,
-        jmoyer@redhat.com
+        Sat, 22 Aug 2020 14:05:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45696 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728120AbgHVSFM (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 22 Aug 2020 14:05:12 -0400
+Received: from mail-pf1-x441.google.com (mail-pf1-x441.google.com [IPv6:2607:f8b0:4864:20::441])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E1DB9C061573
+        for <fstests@vger.kernel.org>; Sat, 22 Aug 2020 11:05:11 -0700 (PDT)
+Received: by mail-pf1-x441.google.com with SMTP id d22so2697940pfn.5
+        for <fstests@vger.kernel.org>; Sat, 22 Aug 2020 11:05:11 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=kernel-dk.20150623.gappssmtp.com; s=20150623;
+        h=subject:to:references:from:message-id:date:user-agent:mime-version
+         :in-reply-to:content-language:content-transfer-encoding;
+        bh=ihNBJDNPSWZRuoXh5a+5v17Soc4HFTOTJzR76aNE+O0=;
+        b=vbPpLGrDfJeCwpYqjLLxcj4OT7IiNMEK+vXxh2OLzJnQk38gW4F5Mefk5KHGceBuUG
+         wDlpv4XTxfyHN2n7NNidRCbT8xoFjtVKYlveD+qVTTdOkmDZCFjgHfcT/UmEIJzveNhm
+         QvviDcIHI0rtQCCYGtHnNE4iBDPW9xd/UC2y19AuY+moHyxOLLXT0p2mIYtjs7p68Tpu
+         eK4EcdK6MPbqpnu5dYtrqMQVN0VkEvibqhoQeK33YBn6afH9ox2F6jC5h++rGZmp7MPi
+         dkQT741HQhqdTEwYqMbabeiEz5m8PG0wT7UVW1bRQLNcXVsvbVoWBD24+7xx1bUXyrRn
+         mFyQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:subject:to:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=ihNBJDNPSWZRuoXh5a+5v17Soc4HFTOTJzR76aNE+O0=;
+        b=OtVfTLZtuWItHVDz9hVuG9/VxeH1lzCDgbolUwfojrrlGO7ajHvROogIQDGIQ+mS6m
+         did3d18Z/LC3inZNUY9YOje6/KIInN/frGHNXL/x+yMGCab2RC4179az2mK9XaUjDOT5
+         KgsXCNGnky+aGZwhpltATp+R/UOfQ2l88/tvFGTT37gj7w5ZjncSEv47eCZ0LwbI/8UA
+         sUsddbSGEWVB0KQrYt2b32M9se5ZIHn5bnv9br2tdF5m07Fkyrgb6q0JQUkS7U9Gxtvb
+         WBMEmOFWEilZ7TeSd4OXWMyoo+fIYhJo4eBBePMLoyxtX2pA/yEr7ai17AHZf95NL083
+         IMmg==
+X-Gm-Message-State: AOAM530p7fPp/ioxA+zm2X82gH+9EeX720j+w7vXATyG8kl2FdqZtTPO
+        8/wzZUCXjV17Jm2FA2l1jgmAtzt4ZQ5/tCPQ
+X-Google-Smtp-Source: ABdhPJxOP6OJTTFVgEeCMuLru8GvBVOpXTB4PV/+kergfc3Qb0DZIXZBZui6BFwjVPttn/2KGhCL7Q==
+X-Received: by 2002:a63:3850:: with SMTP id h16mr5980618pgn.218.1598119511153;
+        Sat, 22 Aug 2020 11:05:11 -0700 (PDT)
+Received: from [192.168.1.182] ([66.219.217.173])
+        by smtp.gmail.com with ESMTPSA id u14sm6164124pfm.103.2020.08.22.11.05.10
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sat, 22 Aug 2020 11:05:10 -0700 (PDT)
 Subject: Re: [PATCH v2 1/4] fsstress: add IO_URING read and write operations
-Message-ID: <20200822181445.GS2937@dhcp-12-102.nay.redhat.com>
-Mail-Followup-To: Jens Axboe <axboe@kernel.dk>, fstests@vger.kernel.org,
-        io-uring@vger.kernel.org, jmoyer@redhat.com
+To:     fstests@vger.kernel.org, io-uring@vger.kernel.org,
+        jmoyer@redhat.com
 References: <20200809063040.15521-1-zlang@redhat.com>
  <20200809063040.15521-2-zlang@redhat.com>
  <01c7353f-338b-99cd-d7d1-fe92b0badd84@kernel.dk>
+ <20200822181445.GS2937@dhcp-12-102.nay.redhat.com>
+From:   Jens Axboe <axboe@kernel.dk>
+Message-ID: <7739965c-e7a0-62a7-9c9e-1178bf280af0@kernel.dk>
+Date:   Sat, 22 Aug 2020 12:05:09 -0600
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.10.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <01c7353f-338b-99cd-d7d1-fe92b0badd84@kernel.dk>
-User-Agent: Mutt/1.10.1 (2018-07-13)
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
+In-Reply-To: <20200822181445.GS2937@dhcp-12-102.nay.redhat.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Aug 09, 2020 at 11:51:45AM -0600, Jens Axboe wrote:
-> On 8/9/20 12:30 AM, Zorro Lang wrote:
-> > @@ -2170,6 +2189,108 @@ do_aio_rw(int opno, long r, int flags)
-> >  }
-> >  #endif
-> >  
-> > +#ifdef URING
-> > +void
-> > +do_uring_rw(int opno, long r, int flags)
-> > +{
-> > +	char		*buf;
-> > +	int		e;
-> > +	pathname_t	f;
-> > +	int		fd;
-> > +	size_t		len;
-> > +	int64_t		lr;
-> > +	off64_t		off;
-> > +	struct stat64	stb;
-> > +	int		v;
-> > +	char		st[1024];
-> > +	struct io_uring_sqe	*sqe;
-> > +	struct io_uring_cqe	*cqe;
-> > +	struct iovec	iovec;
-> > +	int		iswrite = (flags & (O_WRONLY | O_RDWR)) ? 1 : 0;
-> > +
-> > +	init_pathname(&f);
-> > +	if (!get_fname(FT_REGFILE, r, &f, NULL, NULL, &v)) {
-> > +		if (v)
-> > +			printf("%d/%d: do_uring_rw - no filename\n", procid, opno);
-> > +		goto uring_out3;
-> > +	}
-> > +	fd = open_path(&f, flags);
-> > +	e = fd < 0 ? errno : 0;
-> > +	check_cwd();
-> > +	if (fd < 0) {
-> > +		if (v)
-> > +			printf("%d/%d: do_uring_rw - open %s failed %d\n",
-> > +			       procid, opno, f.path, e);
-> > +		goto uring_out3;
-> > +	}
-> > +	if (fstat64(fd, &stb) < 0) {
-> > +		if (v)
-> > +			printf("%d/%d: do_uring_rw - fstat64 %s failed %d\n",
-> > +			       procid, opno, f.path, errno);
-> > +		goto uring_out2;
-> > +	}
-> > +	inode_info(st, sizeof(st), &stb, v);
-> > +	if (!iswrite && stb.st_size == 0) {
-> > +		if (v)
-> > +			printf("%d/%d: do_uring_rw - %s%s zero size\n", procid, opno,
-> > +			       f.path, st);
-> > +		goto uring_out2;
-> > +	}
-> > +	sqe = io_uring_get_sqe(&ring);
-> > +	if (!sqe) {
-> > +		if (v)
-> > +			printf("%d/%d: do_uring_rw - io_uring_get_sqe failed\n",
-> > +			       procid, opno);
-> > +		goto uring_out2;
-> > +	}
-> > +	lr = ((int64_t)random() << 32) + random();
-> > +	len = (random() % FILELEN_MAX) + 1;
-> > +	buf = malloc(len);
-> > +	if (!buf) {
-> > +		if (v)
-> > +			printf("%d/%d: do_uring_rw - malloc failed\n",
-> > +			       procid, opno);
-> > +		goto uring_out2;
-> > +	}
-> > +	iovec.iov_base = buf;
-> > +	iovec.iov_len = len;
-> > +	if (iswrite) {
-> > +		off = (off64_t)(lr % MIN(stb.st_size + (1024 * 1024), MAXFSIZE));
-> > +		off %= maxfsize;
-> > +		memset(buf, nameseq & 0xff, len);
-> > +		io_uring_prep_writev(sqe, fd, &iovec, 1, off);
-> > +	} else {
-> > +		off = (off64_t)(lr % stb.st_size);
-> > +		io_uring_prep_readv(sqe, fd, &iovec, 1, off);
-> > +	}
-> > +
-> > +	if ((e = io_uring_submit(&ring)) != 1) {
-> > +		if (v)
-> > +			printf("%d/%d: %s - io_uring_submit failed %d\n", procid, opno,
-> > +			       iswrite ? "uring_write" : "uring_read", e);
-> > +		goto uring_out1;
-> > +	}
-> > +	if ((e = io_uring_wait_cqe(&ring, &cqe)) < 0) {
-> > +		if (v)
-> > +			printf("%d/%d: %s - io_uring_wait_cqe failed %d\n", procid, opno,
-> > +			       iswrite ? "uring_write" : "uring_read", e);
-> > +		goto uring_out1;
-> > +	}
+On 8/22/20 12:14 PM, Zorro Lang wrote:
+>>> +	if ((e = io_uring_submit(&ring)) != 1) {
+>>> +		if (v)
+>>> +			printf("%d/%d: %s - io_uring_submit failed %d\n", procid, opno,
+>>> +			       iswrite ? "uring_write" : "uring_read", e);
+>>> +		goto uring_out1;
+>>> +	}
+>>> +	if ((e = io_uring_wait_cqe(&ring, &cqe)) < 0) {
+>>> +		if (v)
+>>> +			printf("%d/%d: %s - io_uring_wait_cqe failed %d\n", procid, opno,
+>>> +			       iswrite ? "uring_write" : "uring_read", e);
+>>> +		goto uring_out1;
+>>> +	}
+>>
+>> You could use io_uring_submit_and_wait() here, that'll save a system
+>> call for sync IO. Same comment goes for 4/4.
 > 
-> You could use io_uring_submit_and_wait() here, that'll save a system
-> call for sync IO. Same comment goes for 4/4.
-
-Hi Jens,
-
-Sorry I think I haven't learned about io_uring enough, why the
-io_uring_submit_and_wait can save a system call? Is it same with
-io_uring_submit(), except a wait_nr ? The io_uring_wait_cqe() and
-io_uring_cqe_seen() are still needed, right?
-
-Thanks,
-Zorro
-
+> Hi Jens,
 > 
-> Apart from that, looks pretty straight forward to me.
-> 
-> -- 
-> Jens Axboe
-> 
+> Sorry I think I haven't learned about io_uring enough, why the
+> io_uring_submit_and_wait can save a system call? Is it same with
+> io_uring_submit(), except a wait_nr ? The io_uring_wait_cqe() and
+> io_uring_cqe_seen() are still needed, right?
+
+If you just call io_uring_submit(), it'll enter the kernel and submit
+that IO. Then right after that you're saying "I want to wait for
+completion of a request", which is then another system call. If you do
+io_uring_submit_and_wait() you're entering the kernel with the intent of
+"submit my request(s), and wait for N requests" hence only doing a
+single system call even though it's an async interface.
+
+Nothing else changes, io_uring_wait_cqe() will not enter the kernel if a
+cqe is available in the ring already.
+
+-- 
+Jens Axboe
 
