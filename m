@@ -1,109 +1,142 @@
-Return-Path: <SRS0=8Kmm=CD=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=hfNe=CE=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.5 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 55F0EC433DF
-	for <linux-fstests@archiver.kernel.org>; Tue, 25 Aug 2020 00:14:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 781C4C433E1
+	for <linux-fstests@archiver.kernel.org>; Wed, 26 Aug 2020 08:23:32 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2ADD6206BE
-	for <linux-fstests@archiver.kernel.org>; Tue, 25 Aug 2020 00:14:52 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="htou3NmF"
+	by mail.kernel.org (Postfix) with ESMTP id 5E4DA206FA
+	for <linux-fstests@archiver.kernel.org>; Wed, 26 Aug 2020 08:23:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726189AbgHYAOv (ORCPT
+        id S1726864AbgHZIXc (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 24 Aug 2020 20:14:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40478 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726041AbgHYAOv (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 24 Aug 2020 20:14:51 -0400
-Received: from mail-pf1-x443.google.com (mail-pf1-x443.google.com [IPv6:2607:f8b0:4864:20::443])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AE866C061574;
-        Mon, 24 Aug 2020 17:14:50 -0700 (PDT)
-Received: by mail-pf1-x443.google.com with SMTP id y206so5892874pfb.10;
-        Mon, 24 Aug 2020 17:14:50 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=6iNvXGtlWVHCZui7UJjc+81HAZJSDqhOOP23PD5lEuE=;
-        b=htou3NmFkJ/0pt6eIXd2au79Zj0YZkSufBGug85sV8+pMMuFp4HZ6XmsC2wYajAe8w
-         2xEsaIGDtiJDNH6eUgD7IKIQOzicKafoYKlmASjt1PqAZB2Xfyyhgq4gK0vk1/2IdXHS
-         RHFowNIf5BjcHr/8znTXLTjsVslaKd1Uq06c7iG2780RTm2nD9z8ugY6RL3ZmqTmJZUG
-         81Yn7yePXhAGAL1/loJ+CbbJAMhS/jGN+R1nsSGHVVMM/0cGmQmpj2UkU4CjDZDm80Yv
-         6XjL7O/YJtBZkGCogrFOhPi05AkkxE9U7pay1au8Bva6dgbDKFV49JearvnkLoy47roc
-         4yog==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=6iNvXGtlWVHCZui7UJjc+81HAZJSDqhOOP23PD5lEuE=;
-        b=inrMx3MRNYKq3oXmxY5H3PIJXACTW4ak+5sGyZl33TpbM6rFe37OCwgVTNru+3k08x
-         nj3AU7zqNtdRM90NS0nYbKUwMsGEYZ89dZcWErdQ8cwx/gfhwixW4xNPpdkR6cnFQNBp
-         zkC6B6lQ5P1BT0SO8lOpN1dCrnRvVyv4m8nQXN3jQbl4MpFVYlAIW2KdxiJqs/F1krsA
-         s/FtOO/PZUi3RmJooDy8OSzYj4IEWho9CBUwF6M4oTttJY2WCz4IzeoanPRsCaJC/ykt
-         ot3E+AhLnFn8qFd8xFfqm4I+84NX4k3gMsMBfma15uLTcmwRRku6phHhbOk9ekNvMCkb
-         M9KQ==
-X-Gm-Message-State: AOAM53266euuvDKnFxOYc1rBjnbK7E/c8Bw33eav+mK4rB6J4bxsAAmi
-        QmjDJLMPWm9gh40qwi8eL1A=
-X-Google-Smtp-Source: ABdhPJxxIiZq0nxKe4dr4nofk8GJVRxc4SAZ3OQNBMOWNtgcakWJKrsBltbpWcjBsTYWfSpNBK9VdA==
-X-Received: by 2002:aa7:99c2:: with SMTP id v2mr5985799pfi.274.1598314490244;
-        Mon, 24 Aug 2020 17:14:50 -0700 (PDT)
-Received: from localhost ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id q13sm653411pjj.36.2020.08.24.17.14.48
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 24 Aug 2020 17:14:49 -0700 (PDT)
-Date:   Tue, 25 Aug 2020 08:14:42 +0800
-From:   Murphy Zhou <jencce.kernel@gmail.com>
-To:     Frank van der Linden <fllinden@amazon.com>
-Cc:     Murphy Zhou <jencce.kernel@gmail.com>,
-        Trond Myklebust <trondmy@hammerspace.com>,
-        "linux-nfs@vger.kernel.org" <linux-nfs@vger.kernel.org>,
-        "anna.schumaker@netapp.com" <anna.schumaker@netapp.com>,
-        fstests@vger.kernel.org
-Subject: Re: [PATCH v3 12/13] NFSv4.2: hook in the user extended attribute
- handlers
-Message-ID: <20200825001442.3auz3iqczeefjeli@xzhoux.usersys.redhat.com>
-References: <20200623223904.31643-1-fllinden@amazon.com>
- <20200623223904.31643-13-fllinden@amazon.com>
- <CADJHv_tVZ3KzO_RZ18V=e6QBYEFnX5SbyVU6yhh6yCqYMmvmRQ@mail.gmail.com>
- <20200821160338.GA30541@dev-dsk-fllinden-2c-c1893d73.us-west-2.amazon.com>
- <62aa76de0ea316c029b7f9c22cf36c92b8cba2d9.camel@hammerspace.com>
- <20200824001345.nszimqfcsumd4xil@xzhoux.usersys.redhat.com>
- <20200824161657.GA25229@dev-dsk-fllinden-2c-c1893d73.us-west-2.amazon.com>
+        Wed, 26 Aug 2020 04:23:32 -0400
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:17356 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726016AbgHZIXb (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 26 Aug 2020 04:23:31 -0400
+X-IronPort-AV: E=Sophos;i="5.76,354,1592841600"; 
+   d="scan'208";a="98564249"
+Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
+  by heian.cn.fujitsu.com with ESMTP; 26 Aug 2020 16:23:24 +0800
+Received: from G08CNEXMBPEKD04.g08.fujitsu.local (unknown [10.167.33.201])
+        by cn.fujitsu.com (Postfix) with ESMTP id CA86348990C6;
+        Wed, 26 Aug 2020 16:23:20 +0800 (CST)
+Received: from [10.167.220.84] (10.167.220.84) by
+ G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.2; Wed, 26 Aug 2020 16:23:20 +0800
+Subject: Re: [PATCH] xfs/010,030: filter AG header CRC error warnings
+To:     "Darrick J. Wong" <darrick.wong@oracle.com>,
+        Eryu Guan <guaneryu@gmail.com>,
+        fstests <fstests@vger.kernel.org>
+References: <20200729025119.GV7600@magnolia>
+ <20200729044956.GG2937@dhcp-12-102.nay.redhat.com>
+ <20200729145033.GY7600@magnolia>
+From:   Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+Message-ID: <e23c06f4-e4e8-b916-e4f5-946cd3e01936@cn.fujitsu.com>
+Date:   Wed, 26 Aug 2020 16:23:19 +0800
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101
+ Thunderbird/68.11.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200824161657.GA25229@dev-dsk-fllinden-2c-c1893d73.us-west-2.amazon.com>
+In-Reply-To: <20200729145033.GY7600@magnolia>
+Content-Type: text/plain; charset="gbk"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.167.220.84]
+X-ClientProxiedBy: G08CNEXCHPEKD06.g08.fujitsu.local (10.167.33.205) To
+ G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201)
+X-yoursite-MailScanner-ID: CA86348990C6.AC22F
+X-yoursite-MailScanner: Found to be clean
+X-yoursite-MailScanner-From: xuyang2018.jy@cn.fujitsu.com
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Aug 24, 2020 at 04:16:57PM +0000, Frank van der Linden wrote:
-> On Mon, Aug 24, 2020 at 08:13:45AM +0800, Murphy Zhou wrote:
-> > Thank you guys explanation!
-> > 
-> > I'm asking because after NFSv4.2 xattr update, there are some xfstests
-> > new failures about 'trusted' xattr. Now they can be surely marked as
-> > expected.
-> 
-> I have some patches to xfstests that, amongst other things, split 
-> the xfstests xattr requirement checks in to individual namespace
-> checks, so that tests that use "user" xattrs will be run on NFS, but
-> others, e.g. "trusted" do not.
-> 
-> I should clean them off and send them in.
+Hi Darrick, Eryu
 
-That's perfect. Thanks!
+It seems that fstests missed this patch. I used lastest xfsprogs 
+(include commit a891d871 xfs_repair: complain about ag header crc 
+errors) and xfs/030 still fails because of CRC verification warnings.
 
+Best Regards
+Yang Xu
+> On Wed, Jul 29, 2020 at 12:49:56PM +0800, Zorro Lang wrote:
+>> On Tue, Jul 28, 2020 at 07:51:19PM -0700, Darrick J. Wong wrote:
+>>> From: Darrick J. Wong <darrick.wong@oracle.com>
+>>>
+>>> Filter out the new AG header CRC verification warnings in xfs_repair
+>>> since these tests were built before that existed.
+>>>
+>>> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+>>> ---
+>>
+>> Hi Darrick,
+>>
+>> I still hit an error[1] on xfs/030 after merge your patch.
 > 
-> - Frank
+> D'oh, I forgot to send that one out in this batch.  Will fix that
+> shortly.
+> 
+> --D
+> 
+>> Thanks,
+>> Zorro
+>>
+>> # diff -u ./tests/xfs/030.out ./results//xfs/030.out.bad
+>> --- /root/git/xfstests-dev/tests/xfs/030.out    2020-03-12 11:22:50.063148796 +0800
+>> +++ /root/git/xfstests-dev/results//xfs/030.out.bad     2020-07-29 12:33:08.485428533 +0800
+>> @@ -105,6 +105,7 @@
+>>   Phase 2 - using <TYPEOF> log
+>>           - zero log...
+>>           - scan filesystem freespace and inode maps...
+>> +bad agbno AGBNO in agfl, agno 0
+>>           - found root inode chunk
+>>   Phase 3 - for each AG...
+>>           - scan and clear agi unlinked lists...
+>>
+>>>   tests/xfs/010 |    7 ++++++-
+>>>   tests/xfs/030 |    2 ++
+>>>   2 files changed, 8 insertions(+), 1 deletion(-)
+>>>
+>>> diff --git a/tests/xfs/010 b/tests/xfs/010
+>>> index e220a651..b65dd3ba 100755
+>>> --- a/tests/xfs/010
+>>> +++ b/tests/xfs/010
+>>> @@ -113,7 +113,12 @@ _check_scratch_fs
+>>>   # nuke the finobt root, repair will have to regenerate from the inobt
+>>>   _corrupt_finobt_root $SCRATCH_DEV
+>>>   
+>>> -_scratch_xfs_repair 2>&1 | _filter_repair_lostblocks
+>>> +filter_finobt_repair() {
+>>> +	sed -e '/^agi has bad CRC/d' | \
+>>> +		_filter_repair_lostblocks
+>>> +}
+>>> +
+>>> +_scratch_xfs_repair 2>&1 | filter_finobt_repair
+>>>   
+>>>   status=0
+>>>   exit
+>>> diff --git a/tests/xfs/030 b/tests/xfs/030
+>>> index efdb6a18..ebe4c92a 100755
+>>> --- a/tests/xfs/030
+>>> +++ b/tests/xfs/030
+>>> @@ -42,6 +42,8 @@ _check_ag()
+>>>   			    -e '/^bad agbno AGBNO for finobt/d' \
+>>>   			    -e '/^bad agbno AGBNO for rmapbt/d' \
+>>>   			    -e '/^bad agbno AGBNO for refcntbt/d' \
+>>> +			    -e '/^agf has bad CRC/d' \
+>>> +			    -e '/^agi has bad CRC/d' \
+>>>   			    -e '/^Missing reverse-mapping record.*/d' \
+>>>   			    -e '/^unknown block state, ag AGNO, block.*/d'
+>>>   	done
+>>>
+>>
+> 
+> 
 
--- 
-Murphy
+
