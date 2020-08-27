@@ -2,117 +2,79 @@ Return-Path: <SRS0=o5lg=CF=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.0 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-3.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 44173C433E3
-	for <linux-fstests@archiver.kernel.org>; Thu, 27 Aug 2020 15:57:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 84C35C433E1
+	for <linux-fstests@archiver.kernel.org>; Thu, 27 Aug 2020 17:02:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1BAB22177B
-	for <linux-fstests@archiver.kernel.org>; Thu, 27 Aug 2020 15:57:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 518B020737
+	for <linux-fstests@archiver.kernel.org>; Thu, 27 Aug 2020 17:02:45 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="LEP9G9et"
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="hw34L5cs"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726321AbgH0P5J (ORCPT
+        id S1726871AbgH0RCp (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 27 Aug 2020 11:57:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43662 "EHLO
+        Thu, 27 Aug 2020 13:02:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53952 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726938AbgH0P5I (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 27 Aug 2020 11:57:08 -0400
-Received: from mail-qk1-x744.google.com (mail-qk1-x744.google.com [IPv6:2607:f8b0:4864:20::744])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D5E16C061264
-        for <fstests@vger.kernel.org>; Thu, 27 Aug 2020 08:57:07 -0700 (PDT)
-Received: by mail-qk1-x744.google.com with SMTP id n129so6311699qkd.6
-        for <fstests@vger.kernel.org>; Thu, 27 Aug 2020 08:57:07 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=2d/kLksGLg8BmoGE94UbDXQhgCXyKqUn+Wd/kGZnKp4=;
-        b=LEP9G9ete+wX6Own3Eg51JDXOHDeJTvnZE0CP0YxcxHZfQlPv8sxL3Y1SRtYoe1aJv
-         g+ihMkbBCMrqVlXpC7KO649zuQQ0lR3b/B8PovP34g6Sm/Fw5AhHRpXr7lHfVYuWRvFL
-         s4CpitXVdtR0fvsme+0Nb6l/gT3WciW2gvNYvDVJz61n8SxwG426vfHJnZzcNxbCtcqq
-         xOhRrhm+D7Mm0f/xLOd+WvPcpRKcyS4fnXoX4XjUMp3VIwqORQjLj8VJz3hH/vCU14zW
-         IrtKX8X2Y9M1xihF9jgC4H9FlXIKJC2tB7rDllTYcUbXl89BiSIM8NcVkSd4Lh6SIag2
-         CSRw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=2d/kLksGLg8BmoGE94UbDXQhgCXyKqUn+Wd/kGZnKp4=;
-        b=toYWnjx//KDCsTf/mLsgQHvTUeFQothLmMpdxRSlH7PGKCT6m75XLJWUAFTXH2/nwR
-         EiiSBnviWqYuazyRz655FMamHZ4/8NpfW7VP4oCu88N7e3CvH1et0hn8jfbBs9npaKwf
-         GN/mkh8PORdZ1hdi7g76aOxGnH65LKozhfRnzBYH9fwMGUZxMc/S0gfBzyDOOEpb5qGr
-         owmDupqW/tUO9SOtM02pkKKA84GYIT7X3n8yqMa0nRvNf38oh3U5TvNW3fMrDPRTzaec
-         lvfaZXkk6XRMO7BoWJxzb3QcYgEGaOJluDcrEBdkmhCuF+INJPwzePjK1UfhyUFT4Dm2
-         le0w==
-X-Gm-Message-State: AOAM530VcGSHcoVQpAiCvqocAoB486uOlWvDnIQ9uce+gPsR76X4S3Bp
-        IKH5OajVXNfxpLACnxSOGVCaNQ==
-X-Google-Smtp-Source: ABdhPJzyfjpD0FGKP9jCR5+pk+mS6EwehghX6FdkGLGoHlaFemUZBTkMdTgvpRl0uNi5ncjVA17Wrw==
-X-Received: by 2002:a37:ad0a:: with SMTP id f10mr19298391qkm.154.1598543825741;
-        Thu, 27 Aug 2020 08:57:05 -0700 (PDT)
-Received: from [192.168.1.210] (cpe-174-109-172-136.nc.res.rr.com. [174.109.172.136])
-        by smtp.gmail.com with ESMTPSA id h25sm2011175qka.106.2020.08.27.08.57.04
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 27 Aug 2020 08:57:05 -0700 (PDT)
-Subject: Re: [PATCH 1/4] generic: require discard zero behavior for
- dmlogwrites on XFS
-To:     Christoph Hellwig <hch@infradead.org>,
-        Amir Goldstein <amir73il@gmail.com>
-Cc:     Brian Foster <bfoster@redhat.com>,
+        with ESMTP id S1726093AbgH0RCo (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 27 Aug 2020 13:02:44 -0400
+Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9B04CC061264;
+        Thu, 27 Aug 2020 10:02:44 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
+        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=/P1CBRr7WnQXAFXX1qifS3jS0DbNGykoEg2K9mn9nSk=; b=hw34L5cs2lB4lAA4qKHfCJtLIu
+        GT0mXeKCC/apWuXnxLPv7Sc45Tj4qsMD3vZ67spwVVXssrpH2lD5CJkpUrRH+c4JMXpUBYuIumNgD
+        bxi4tK3Ujc3kH6Kou4EWyLsAdSqpCT5KjSL414YOd+nNSqU2Y2/QDVCp6ZmbFLvqyIz4lnRvucAXF
+        SDki+CukCWH6ITPeDtAIr+olPxuKhzZh4ZTXuFPb4NuFOhwyyJLd/nlEbOrClCqVrnxPMGLVT030d
+        zJ7uUpceDKhRxfSzfgdLEQDAzUsmcw8C7Nq1z6OYFckRXwosEq/EwhUQPoF6ARqMhLJ6W5BREan+s
+        CGz+BNDw==;
+Received: from hch by casper.infradead.org with local (Exim 4.92.3 #3 (Red Hat Linux))
+        id 1kBLIQ-0004Sb-Bl; Thu, 27 Aug 2020 17:02:42 +0000
+Date:   Thu, 27 Aug 2020 18:02:42 +0100
+From:   Christoph Hellwig <hch@infradead.org>
+To:     Josef Bacik <josef@toxicpanda.com>
+Cc:     Christoph Hellwig <hch@infradead.org>,
+        Amir Goldstein <amir73il@gmail.com>,
+        Brian Foster <bfoster@redhat.com>,
         fstests <fstests@vger.kernel.org>,
         linux-xfs <linux-xfs@vger.kernel.org>
+Subject: Re: [PATCH 1/4] generic: require discard zero behavior for
+ dmlogwrites on XFS
+Message-ID: <20200827170242.GA16905@infradead.org>
 References: <20200826143815.360002-1-bfoster@redhat.com>
  <20200826143815.360002-2-bfoster@redhat.com>
  <CAOQ4uxjYf2Hb4+Zid7KeWUcu3sOgqR30de_0KwwjVbwNw1HfJg@mail.gmail.com>
  <20200827070237.GA22194@infradead.org>
  <CAOQ4uxhhN6Gj9AZBvEHUDLjTRKWi7=rOhitmbDLWFA=dCZQxXw@mail.gmail.com>
  <20200827073700.GA30374@infradead.org>
-From:   Josef Bacik <josef@toxicpanda.com>
-Message-ID: <c59a4ed6-2698-ab61-6a73-143e273d9e22@toxicpanda.com>
-Date:   Thu, 27 Aug 2020 11:57:03 -0400
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.10.0
+ <c59a4ed6-2698-ab61-6a73-143e273d9e22@toxicpanda.com>
 MIME-Version: 1.0
-In-Reply-To: <20200827073700.GA30374@infradead.org>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <c59a4ed6-2698-ab61-6a73-143e273d9e22@toxicpanda.com>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by casper.infradead.org. See http://www.infradead.org/rpr.html
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 8/27/20 3:37 AM, Christoph Hellwig wrote:
-> On Thu, Aug 27, 2020 at 10:29:05AM +0300, Amir Goldstein wrote:
->> I figured you'd say something like that :)
->> but since we are talking about dm-thin as a solution for predictable
->> behavior at the moment and this sanity check helps avoiding adding
->> new tests that can fail to some extent, is the proposed bandaid good enough
->> to keep those tests alive until a better solution is proposed?
-> 
-> Well, the problem is that a test that wants to reliable nuke data needs
-> to... *drumroll* reliably nuke data.  Which means zeroing or at least
-> a known pattern.  discard doesn't give you that.
-> 
-> I don't see how a plain discard is going to work for any file system
-> for that particular case.
-> 
+On Thu, Aug 27, 2020 at 11:57:03AM -0400, Josef Bacik wrote:
+> This sort of brings up a good point, the whole point of DISCARD support in
+> log-writes was to expose problems where we may have been discarding real
+> data we cared about, hence adding the forced zero'ing stuff for devices that
+> didn't support discard.  But that made the incorrect assumption that a drive
+> with actual discard support would actually return 0's for discarded data.
+> That assumption was based on hardware that did actually do that, but now we
+> live in the brave new world of significantly shittier drives.  Does dm-thinp
+> reliably unmap the ranges we discard, and thus give us this zero'ing
+> behavior?  Because we might as well just use that for everything so
+> log-writes doesn't have to resort to pwrite()'ing zeros everywhere.  Thanks,
 
-This sort of brings up a good point, the whole point of DISCARD support 
-in log-writes was to expose problems where we may have been discarding 
-real data we cared about, hence adding the forced zero'ing stuff for 
-devices that didn't support discard.  But that made the incorrect 
-assumption that a drive with actual discard support would actually 
-return 0's for discarded data.  That assumption was based on hardware 
-that did actually do that, but now we live in the brave new world of 
-significantly shittier drives.  Does dm-thinp reliably unmap the ranges 
-we discard, and thus give us this zero'ing behavior?  Because we might 
-as well just use that for everything so log-writes doesn't have to 
-resort to pwrite()'ing zeros everywhere.  Thanks,
-
-Josef
+We have a write zeroes operation in the block layer.  For some devices
+this is as efficient as discard, and that should (I think) dm.
