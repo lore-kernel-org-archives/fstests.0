@@ -1,116 +1,164 @@
-Return-Path: <SRS0=hfNe=CE=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=o5lg=CF=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.5 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2AA4DC433E1
-	for <linux-fstests@archiver.kernel.org>; Wed, 26 Aug 2020 16:05:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2213BC433E3
+	for <linux-fstests@archiver.kernel.org>; Thu, 27 Aug 2020 06:58:22 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1221B2075E
-	for <linux-fstests@archiver.kernel.org>; Wed, 26 Aug 2020 16:05:18 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0246E22CB2
+	for <linux-fstests@archiver.kernel.org>; Thu, 27 Aug 2020 06:58:22 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="uDbHUAs7"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727948AbgHZQEv (ORCPT
+        id S1726882AbgH0G6V (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 26 Aug 2020 12:04:51 -0400
-Received: from mx2.suse.de ([195.135.220.15]:44894 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726862AbgHZQE3 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 26 Aug 2020 12:04:29 -0400
-X-Virus-Scanned: by amavisd-new at test-mx.suse.de
-Received: from relay2.suse.de (unknown [195.135.221.27])
-        by mx2.suse.de (Postfix) with ESMTP id C218BAD88;
-        Wed, 26 Aug 2020 16:04:58 +0000 (UTC)
-Subject: Re: [PATCH] common/config: Allow sections names to contain hyphen
-To:     guaneryu@gmail.com
-Cc:     fstests@vger.kernel.org
-References: <20200625123744.17812-1-nborisov@suse.com>
-From:   Nikolay Borisov <nborisov@suse.com>
-Autocrypt: addr=nborisov@suse.com; prefer-encrypt=mutual; keydata=
- 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
-Message-ID: <71ffb1d9-2752-52f9-4860-ccb3671cb365@suse.com>
-Date:   Wed, 26 Aug 2020 19:04:26 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.10.0
+        Thu, 27 Aug 2020 02:58:21 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43704 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726157AbgH0G6V (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 27 Aug 2020 02:58:21 -0400
+Received: from mail-il1-x144.google.com (mail-il1-x144.google.com [IPv6:2607:f8b0:4864:20::144])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CC15FC061264;
+        Wed, 26 Aug 2020 23:58:20 -0700 (PDT)
+Received: by mail-il1-x144.google.com with SMTP id c6so3983172ilo.13;
+        Wed, 26 Aug 2020 23:58:20 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=umXYkWphpijjeghdwFU5ZWoU2/HsPMaTEPL14+6DbZ0=;
+        b=uDbHUAs7Ku9OZNTfklnf42MnyA2DgTl7NVJbP3mxSQzwG2BeWLeLMdHLJSbJ85d0Rq
+         6cCIX8NZuz4OOrPo48vrCRBjeWO5s6XG9yWk5TogbfEE9cLuJMnmDVOWSoicBR9AMHhc
+         /PK5FC/nDZp/jEa3BPzWL2KsJJ6pU1IL7lzKXwD7OR5halo6BctcZvE/vGtS+Kf0/DhP
+         tVwNiFv2hqmw8F4iFcyghbey/itIJqguY4H8HKVUJMEdDjDt/fwSsnXbjAGSbrHXSbAl
+         X0PTBnME5zRy4wGdHdfti5erFDworUoAAnmSwTEmTvAcHx19R9Ha+cOPEUpmzPCPWsUZ
+         sLgQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=umXYkWphpijjeghdwFU5ZWoU2/HsPMaTEPL14+6DbZ0=;
+        b=OSMf8RwiF9MTTgkOTJU6X9U/rY/0n6jWXBGVk8cIaYKgCJQxHK4NJAE5V7hDiFo4X8
+         uZWxoZ7Np0m8MX6+umPWS8S96sxCyBSn3Hd4nsG5XIPSM/u4mIsNw2lDA1anwrqrMb90
+         wGR1zPo12WxlBxyWxxy1Qr5C8bJFqAo3nAdAExdKNyPeVhmYlXmo4KOgUJvggy4ANABI
+         966iEvD0G10LE244eeMCdMyv/fiqhc1SXEBkHeuAPXtaOMQL/VkK7Wpd/eujo9fuTgT/
+         E//dDOAVi4azOA56uki9w9a5feb7pJKIlGZEovpL4b/UinlY1MTVzrvR2YQnQcw4GZXW
+         NJNA==
+X-Gm-Message-State: AOAM530okO7g68AYd5Ec6x/w6otXRVqk/pUZiXLdokVN7Uw5Gr11k/XC
+        6sXslrhrp7Vb9WqKBd3VPpttACmFao3+v6cBgTAvlik3
+X-Google-Smtp-Source: ABdhPJxSGGRw/M8Q4dCQmp7i/tNFsXBNg8QutPs/3qHq2iE6CPXKY1nXIKFlm7yyXuc515sIYlpZ7GU5z1ikXz3cZgo=
+X-Received: by 2002:a92:da0a:: with SMTP id z10mr16004358ilm.275.1598511500164;
+ Wed, 26 Aug 2020 23:58:20 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <20200625123744.17812-1-nborisov@suse.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+References: <20200826143815.360002-1-bfoster@redhat.com> <20200826143815.360002-2-bfoster@redhat.com>
+In-Reply-To: <20200826143815.360002-2-bfoster@redhat.com>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Thu, 27 Aug 2020 09:58:09 +0300
+Message-ID: <CAOQ4uxjYf2Hb4+Zid7KeWUcu3sOgqR30de_0KwwjVbwNw1HfJg@mail.gmail.com>
+Subject: Re: [PATCH 1/4] generic: require discard zero behavior for
+ dmlogwrites on XFS
+To:     Brian Foster <bfoster@redhat.com>
+Cc:     fstests <fstests@vger.kernel.org>,
+        linux-xfs <linux-xfs@vger.kernel.org>,
+        Christoph Hellwig <hch@infradead.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-
-
-On 25.06.20 г. 15:37 ч., Nikolay Borisov wrote:
-> Current regular expression in get_config_sections allows section names
-> to consist of alphanumeric character and underscore. Extend it to
-> also allow the hyphen '-' character.
-> 
-> Signed-off-by: Nikolay Borisov <nborisov@suse.com>
+On Wed, Aug 26, 2020 at 5:38 PM Brian Foster <bfoster@redhat.com> wrote:
+>
+> Several generic fstests use dm-log-writes to test the filesystem for
+> consistency at various crash recovery points. dm-log-writes and the
+> associated replay mechanism rely on zeroing via discard to clear
+> stale blocks when moving to various points in time of the fs. If the
+> storage doesn't provide zeroing or the discard requests exceed the
+> hardcoded maximum (128MB) of the fallback solution to physically
+> write zeroes, stale blocks are left around in the target fs. This
+> scheme is known to cause issues on XFS v5 superblocks if recovery
+> observes metadata from a future variant of an fs that has been
+> replayed to an older point in time. This corrupts the filesystem and
+> leads to false test failures.
+>
+> generic/482 already works around this problem by using a thin volume
+> as the target device, which provides consistent and efficient
+> discard zeroing behavior, but other tests have seen similar issues
+> on XFS. Add an XFS specific check to the dmlogwrites init time code
+> that requires discard zeroing support and otherwise skips the test
+> to avoid false positive failures.
+>
+> Signed-off-by: Brian Foster <bfoster@redhat.com>
 > ---
+>  common/dmlogwrites | 10 ++++++++--
+>  common/rc          | 14 ++++++++++++++
+>  tests/generic/470  |  2 +-
+>  3 files changed, 23 insertions(+), 3 deletions(-)
+>
+> diff --git a/common/dmlogwrites b/common/dmlogwrites
+> index 573f4b8a..92cc6ce2 100644
+> --- a/common/dmlogwrites
+> +++ b/common/dmlogwrites
+> @@ -43,9 +43,10 @@ _require_log_writes_dax_mountopt()
+>         _require_test_program "log-writes/replay-log"
+>
+>         local ret=0
+> -       local mountopt=$1
+> +       local dev=$1
+> +       local mountopt=$2
+>
+> -       _log_writes_init $SCRATCH_DEV
+> +       _log_writes_init $dev
+>         _log_writes_mkfs > /dev/null 2>&1
+>         _log_writes_mount "-o $mountopt" > /dev/null 2>&1
+>         # Check options to be sure.
+> @@ -66,6 +67,11 @@ _log_writes_init()
+>         [ -z "$blkdev" ] && _fail \
+>         "block dev must be specified for _log_writes_init"
+>
+> +       # XFS requires discard zeroing support on the target device to work
+> +       # reliably with dm-log-writes. Use dm-thin devices in tests that want
+> +       # to provide reliable discard zeroing support.
+> +       [ $FSTYP == "xfs" ] && _require_discard_zeroes $blkdev
+> +
 
-This patch seems to have fallen through the cracks so - ping ?
+I imagine that ext4 could also be burned by this.
+Do we have a reason to limit this requirement to xfs?
+I prefer to make it generic.
 
->  common/config | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/common/config b/common/config
-> index 8023273da115..63d486125a76 100644
-> --- a/common/config
-> +++ b/common/config
-> @@ -449,7 +449,7 @@ known_hosts()
->  # in the section name otherwise the section will not be resognised.
->  # Section name must be contained between square brackets.
->  get_config_sections() {
-> -	sed -n -e "s/^\[\([[:alnum:]_]*\)\]/\1/p" < $1
-> +	sed -n -e "s/^\[\([[:alnum:]_-]*\)\]/\1/p" < $1
+>         local BLK_DEV_SIZE=`blockdev --getsz $blkdev`
+>         LOGWRITES_NAME=logwrites-test
+>         LOGWRITES_DMDEV=/dev/mapper/$LOGWRITES_NAME
+> diff --git a/common/rc b/common/rc
+> index aa5a7409..fedb5221 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -4313,6 +4313,20 @@ _require_mknod()
+>         rm -f $TEST_DIR/$seq.null
 >  }
->  
->  if [ ! -f "$HOST_OPTIONS" ]; then
-> 
+>
+> +# check that discard is supported and subsequent reads return zeroes
+> +_require_discard_zeroes()
+> +{
+> +       local dev=$1
+> +
+> +       _require_command "$BLKDISCARD_PROG" blkdiscard
+> +
+> +       $XFS_IO_PROG -c "pwrite -S 0xcd 0 4k" $dev > /dev/null 2>&1 ||
+> +               _fail "write error"
+> +       $BLKDISCARD_PROG -o 0 -l 1m $dev || _notrun "no discard support"
+> +       hexdump -n 4096 $dev | head -n 1 | grep cdcd &&
+> +               _notrun "no discard zeroing support"
+> +}
+> +
+
+I am fine with your solution, but if there was a discussion on the best way to
+solve the problem, I missed it, so would like to hear what Chritoph has to say.
+
+Thanks,
+Amir.
