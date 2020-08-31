@@ -7,47 +7,50 @@ X-Spam-Status: No, score=-11.7 required=3.0 tests=BAYES_00,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CA058C433E2
-	for <linux-fstests@archiver.kernel.org>; Mon, 31 Aug 2020 01:20:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 93E5AC433E6
+	for <linux-fstests@archiver.kernel.org>; Mon, 31 Aug 2020 03:01:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B10E32083E
-	for <linux-fstests@archiver.kernel.org>; Mon, 31 Aug 2020 01:20:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 790D1206FA
+	for <linux-fstests@archiver.kernel.org>; Mon, 31 Aug 2020 03:01:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726726AbgHaBUF (ORCPT
+        id S1726573AbgHaDBU (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 30 Aug 2020 21:20:05 -0400
-Received: from szxga07-in.huawei.com ([45.249.212.35]:54548 "EHLO huawei.com"
+        Sun, 30 Aug 2020 23:01:20 -0400
+Received: from szxga05-in.huawei.com ([45.249.212.191]:10737 "EHLO huawei.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726618AbgHaBUF (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 30 Aug 2020 21:20:05 -0400
-Received: from DGGEMS406-HUB.china.huawei.com (unknown [172.30.72.59])
-        by Forcepoint Email with ESMTP id DAE2F743C62DC1A6E310;
-        Mon, 31 Aug 2020 09:20:02 +0800 (CST)
-Received: from [10.136.114.67] (10.136.114.67) by smtp.huawei.com
- (10.3.19.206) with Microsoft SMTP Server (TLS) id 14.3.487.0; Mon, 31 Aug
- 2020 09:19:55 +0800
+        id S1726692AbgHaDBT (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 30 Aug 2020 23:01:19 -0400
+Received: from DGGEMS405-HUB.china.huawei.com (unknown [172.30.72.60])
+        by Forcepoint Email with ESMTP id 03DAFF58F00AAFC64728;
+        Mon, 31 Aug 2020 11:01:16 +0800 (CST)
+Received: from [10.174.177.167] (10.174.177.167) by
+ DGGEMS405-HUB.china.huawei.com (10.3.19.205) with Microsoft SMTP Server id
+ 14.3.487.0; Mon, 31 Aug 2020 11:01:05 +0800
 Subject: Re: [PATCH v2 1/2] generic: add test for race between listxattr and
  setxatr
-To:     Eryu Guan <guan@eryu.me>, Hou Tao <houtao1@huawei.com>
-CC:     <guaneryu@gmail.com>, <richard@nod.at>, <fstests@vger.kernel.org>
+To:     Eryu Guan <guan@eryu.me>, <richard@nod.at>
+CC:     <guaneryu@gmail.com>, <yuchao0@huawei.com>,
+        <fstests@vger.kernel.org>
 References: <364596a1-c9bb-3a10-a132-0f43907c2241@huawei.com>
  <20200822114132.61227-1-houtao1@huawei.com> <20200830162322.GD3853@desktop>
-From:   Chao Yu <yuchao0@huawei.com>
-Message-ID: <dae02f57-d7b8-b371-d32b-3eab77c7d628@huawei.com>
-Date:   Mon, 31 Aug 2020 09:19:54 +0800
-User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:52.0) Gecko/20100101
- Thunderbird/52.9.1
+From:   Hou Tao <houtao1@huawei.com>
+Message-ID: <c41ee2c2-f08f-be1f-b7a3-5cc52b49d29a@huawei.com>
+Date:   Mon, 31 Aug 2020 11:01:05 +0800
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101
+ Thunderbird/68.10.0
 MIME-Version: 1.0
 In-Reply-To: <20200830162322.GD3853@desktop>
-Content-Type: text/plain; charset="windows-1252"; format=flowed
+Content-Type: text/plain; charset="utf-8"
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.136.114.67]
+X-Originating-IP: [10.174.177.167]
 X-CFilter-Loop: Reflected
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
+
+Hi,
 
 On 2020/8/31 0:23, Eryu Guan wrote:
 > On Sat, Aug 22, 2020 at 07:41:32PM +0800, Hou Tao wrote:
@@ -64,29 +67,24 @@ On 2020/8/31 0:23, Eryu Guan wrote:
 > bug? If so would you please mention the kernel commit ID in commit log
 > as well?
 > 
+The fixes [1] have not been reviewed yet, so we may need to hold on until the fixes get merged ?
+
+[1]: https://lore.kernel.org/linux-mtd/20200630130438.141649-1-houtao1@huawei.com/
+
+Regards,
+Tao
+
 > Chao, would you please help check the update regarding to f2fs? Thanks!
-
-Hi, all,
-
-Sorry for the delay.
-
-I've ran the test, it looks fine to f2fs, and also parameter value 'cnt=30'
-is just touch upper boundary of xattr space size. :)
-
-Reviewed-by: Chao Yu <yuchao0@huawei.com>
-
-Thanks,
-
 > 
 > Eryu
 > 
 >>
->>   tests/generic/998     | 67 +++++++++++++++++++++++++++++++++++++++++++
->>   tests/generic/998.out |  2 ++
->>   tests/generic/group   |  1 +
->>   3 files changed, 70 insertions(+)
->>   create mode 100644 tests/generic/998
->>   create mode 100644 tests/generic/998.out
+>>  tests/generic/998     | 67 +++++++++++++++++++++++++++++++++++++++++++
+>>  tests/generic/998.out |  2 ++
+>>  tests/generic/group   |  1 +
+>>  3 files changed, 70 insertions(+)
+>>  create mode 100644 tests/generic/998
+>>  create mode 100644 tests/generic/998.out
 >>
 >> diff --git a/tests/generic/998 b/tests/generic/998
 >> new file mode 100644
@@ -174,9 +172,9 @@ Thanks,
 >> --- a/tests/generic/group
 >> +++ b/tests/generic/group
 >> @@ -605,3 +605,4 @@
->>   600 auto quick quota
->>   601 auto quick quota
->>   602 auto quick encrypt
+>>  600 auto quick quota
+>>  601 auto quick quota
+>>  602 auto quick encrypt
 >> +998 auto quick attr
 >> -- 
 >> 2.25.0.4.g0ad7144999
