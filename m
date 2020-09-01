@@ -5,51 +5,51 @@ X-Spam-Level:
 X-Spam-Status: No, score=-10.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS
-	autolearn=ham autolearn_force=no version=3.4.0
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C6ED2C433E2
-	for <linux-fstests@archiver.kernel.org>; Tue,  1 Sep 2020 13:48:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3833FC433E6
+	for <linux-fstests@archiver.kernel.org>; Tue,  1 Sep 2020 13:48:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A43E2206FA
-	for <linux-fstests@archiver.kernel.org>; Tue,  1 Sep 2020 13:48:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1355A20767
+	for <linux-fstests@archiver.kernel.org>; Tue,  1 Sep 2020 13:48:02 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="AY1inSel"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="XdMdYVkm"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728241AbgIANr6 (ORCPT
+        id S1727109AbgIANrm (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 1 Sep 2020 09:47:58 -0400
-Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:34300 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1728257AbgIANro (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 1 Sep 2020 09:47:44 -0400
+        Tue, 1 Sep 2020 09:47:42 -0400
+Received: from us-smtp-2.mimecast.com ([207.211.31.81]:38226 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1728249AbgIANrd (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 1 Sep 2020 09:47:33 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1598968052;
+        s=mimecast20190719; t=1598968051;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=NHE/nZbwiOoblJJMtTZR2g1xUXRlA7Vnz3roC9Mkkck=;
-        b=AY1inSelnZZ26/9Cg+ybU3jFzo7Lqtifkp3syliLF49WbTbG8Vdzrlvf/D7iTi4vxyWIc6
-        rWKmrJEfEPMJyYXfmKu8sF5PeNSG2aghZjB66++Q/CUSQgDQrXVcvrZHJy0JIwt9xKbTSX
-        OPZIlbyzK5aNn7Yu24egDuZFyNht3KI=
+        bh=BAjoWMEzpDcrIGtK3T9GxKod+8xS53mLbcVkLV2jYWg=;
+        b=XdMdYVkmeQXEXK/9zVetiZWvNQy5mDKKcdRMHNqrXjG1H+WNe0LhSbjOeZywr66AlyHN4e
+        dK+gToyy8bYK3EzbYfJHreGMscHAPjzQ4yLyZFd9CxoNKjZwtnPuJIEaYxqihBH4MaLG6c
+        jBUs1H8m3Ru3eG8+r+tthudbUBz+brE=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-173-_eHR8xQtNzKdHCHsmy6hmg-1; Tue, 01 Sep 2020 09:47:30 -0400
-X-MC-Unique: _eHR8xQtNzKdHCHsmy6hmg-1
+ us-mta-477-KLO1mvKHO4m0x091pbNtqg-1; Tue, 01 Sep 2020 09:47:30 -0400
+X-MC-Unique: KLO1mvKHO4m0x091pbNtqg-1
 Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id CAE4C1007B01;
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 5965D80F054;
         Tue,  1 Sep 2020 13:47:29 +0000 (UTC)
 Received: from bfoster.redhat.com (ovpn-113-130.rdu2.redhat.com [10.10.113.130])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 7C0DE7DA53;
-        Tue,  1 Sep 2020 13:47:29 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 0877D18B59;
+        Tue,  1 Sep 2020 13:47:28 +0000 (UTC)
 From:   Brian Foster <bfoster@redhat.com>
 To:     fstests@vger.kernel.org
 Cc:     linux-xfs@vger.kernel.org
-Subject: [PATCH v3 2/3] generic/457: use thin volume for dmlogwrites target device
-Date:   Tue,  1 Sep 2020 09:47:27 -0400
-Message-Id: <20200901134728.185353-3-bfoster@redhat.com>
+Subject: [PATCH v3 1/3] generic/455: use thin volume for dmlogwrites target device
+Date:   Tue,  1 Sep 2020 09:47:26 -0400
+Message-Id: <20200901134728.185353-2-bfoster@redhat.com>
 In-Reply-To: <20200901134728.185353-1-bfoster@redhat.com>
 References: <20200901134728.185353-1-bfoster@redhat.com>
 MIME-Version: 1.0
@@ -66,14 +66,14 @@ allow it to run consistently and reliably on XFS.
 
 Signed-off-by: Brian Foster <bfoster@redhat.com>
 ---
- tests/generic/457 | 33 +++++++++++++++++++++------------
- 1 file changed, 21 insertions(+), 12 deletions(-)
+ tests/generic/455 | 36 ++++++++++++++++++++++--------------
+ 1 file changed, 22 insertions(+), 14 deletions(-)
 
-diff --git a/tests/generic/457 b/tests/generic/457
-index 82367304..42a064d8 100755
---- a/tests/generic/457
-+++ b/tests/generic/457
-@@ -16,6 +16,7 @@ status=1	# failure is the default!
+diff --git a/tests/generic/455 b/tests/generic/455
+index 05621220..72a44fda 100755
+--- a/tests/generic/455
++++ b/tests/generic/455
+@@ -16,12 +16,14 @@ status=1	# failure is the default!
  _cleanup()
  {
  	_log_writes_cleanup
@@ -81,23 +81,22 @@ index 82367304..42a064d8 100755
  }
  trap "_cleanup; exit \$status" 0 1 2 3 15
  
-@@ -23,6 +24,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+ # get standard environment, filters and checks
  . ./common/rc
  . ./common/filter
- . ./common/reflink
 +. ./common/dmthin
  . ./common/dmlogwrites
  
  # real QA test starts here
-@@ -32,6 +34,7 @@ _require_test
- _require_scratch_reflink
- _require_cp_reflink
+@@ -30,6 +32,7 @@ _supported_os Linux
+ _require_test
+ _require_scratch_nocheck
  _require_log_writes
 +_require_dm_target thin-pool
  
  rm -f $seqres.full
  
-@@ -44,13 +47,12 @@ check_files()
+@@ -42,13 +45,12 @@ check_files()
  		local filename=$(basename $i)
  		local mark="${filename##*.}"
  		echo "checking $filename" >> $seqres.full
@@ -114,7 +113,7 @@ index 82367304..42a064d8 100755
  	done
  }
  
-@@ -58,8 +60,16 @@ SANITY_DIR=$TEST_DIR/fsxtests
+@@ -56,8 +58,16 @@ SANITY_DIR=$TEST_DIR/fsxtests
  rm -rf $SANITY_DIR
  mkdir $SANITY_DIR
  
@@ -132,7 +131,7 @@ index 82367304..42a064d8 100755
  
  _log_writes_mkfs >> $seqres.full 2>&1
  
-@@ -92,14 +102,13 @@ _log_writes_mark last
+@@ -88,14 +98,13 @@ _log_writes_mark last
  _log_writes_unmount
  _log_writes_mark end
  _log_writes_remove
@@ -151,7 +150,7 @@ index 82367304..42a064d8 100755
  
  for j in `seq 0 $((NUM_FILES-1))`; do
  	check_files testfile$j
-@@ -107,8 +116,8 @@ done
+@@ -103,14 +112,13 @@ done
  
  # Check the end
  echo "checking post umount" >> $seqres.full
@@ -162,6 +161,13 @@ index 82367304..42a064d8 100755
  for j in `seq 0 $((NUM_FILES-1))`; do
  	md5=$(_md5_checksum $SCRATCH_MNT/testfile$j)
  	[ "${md5}" != "${test_md5[$j]}" ] && _fail "testfile$j end md5sum mismatched"
+ done
+-_scratch_unmount
+-_check_scratch_fs
++_dmthin_check_fs
+ 
+ echo "Silence is golden"
+ status=0
 -- 
 2.25.4
 
