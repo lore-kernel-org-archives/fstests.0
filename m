@@ -2,172 +2,97 @@ Return-Path: <SRS0=r5/b=CK=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3833FC433E6
-	for <linux-fstests@archiver.kernel.org>; Tue,  1 Sep 2020 13:48:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5D5BDC433E7
+	for <linux-fstests@archiver.kernel.org>; Tue,  1 Sep 2020 14:18:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1355A20767
-	for <linux-fstests@archiver.kernel.org>; Tue,  1 Sep 2020 13:48:02 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 27203206EF
+	for <linux-fstests@archiver.kernel.org>; Tue,  1 Sep 2020 14:18:29 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="XdMdYVkm"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="s763gG5r"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727109AbgIANrm (ORCPT
+        id S1726326AbgIAOSR (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 1 Sep 2020 09:47:42 -0400
-Received: from us-smtp-2.mimecast.com ([207.211.31.81]:38226 "EHLO
-        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1728249AbgIANrd (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 1 Sep 2020 09:47:33 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1598968051;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=BAjoWMEzpDcrIGtK3T9GxKod+8xS53mLbcVkLV2jYWg=;
-        b=XdMdYVkmeQXEXK/9zVetiZWvNQy5mDKKcdRMHNqrXjG1H+WNe0LhSbjOeZywr66AlyHN4e
-        dK+gToyy8bYK3EzbYfJHreGMscHAPjzQ4yLyZFd9CxoNKjZwtnPuJIEaYxqihBH4MaLG6c
-        jBUs1H8m3Ru3eG8+r+tthudbUBz+brE=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-477-KLO1mvKHO4m0x091pbNtqg-1; Tue, 01 Sep 2020 09:47:30 -0400
-X-MC-Unique: KLO1mvKHO4m0x091pbNtqg-1
-Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 5965D80F054;
-        Tue,  1 Sep 2020 13:47:29 +0000 (UTC)
-Received: from bfoster.redhat.com (ovpn-113-130.rdu2.redhat.com [10.10.113.130])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 0877D18B59;
-        Tue,  1 Sep 2020 13:47:28 +0000 (UTC)
-From:   Brian Foster <bfoster@redhat.com>
-To:     fstests@vger.kernel.org
-Cc:     linux-xfs@vger.kernel.org
-Subject: [PATCH v3 1/3] generic/455: use thin volume for dmlogwrites target device
-Date:   Tue,  1 Sep 2020 09:47:26 -0400
-Message-Id: <20200901134728.185353-2-bfoster@redhat.com>
-In-Reply-To: <20200901134728.185353-1-bfoster@redhat.com>
-References: <20200901134728.185353-1-bfoster@redhat.com>
+        Tue, 1 Sep 2020 10:18:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42810 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728245AbgIAOQo (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 1 Sep 2020 10:16:44 -0400
+Received: from mail-il1-x143.google.com (mail-il1-x143.google.com [IPv6:2607:f8b0:4864:20::143])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B1635C061245;
+        Tue,  1 Sep 2020 07:05:05 -0700 (PDT)
+Received: by mail-il1-x143.google.com with SMTP id w3so1261971ilh.5;
+        Tue, 01 Sep 2020 07:05:05 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=QfanSJsnDHXMBJydOhcBySoqPAhHQDknT274Z3FU9oY=;
+        b=s763gG5rUSl5/Ne7hAD9UlsMJFSpVWC70EtUTsVOJY+lWd9DcdZQGbSSOLALXL61VJ
+         N2cBtp2Jpt7egCQG42hRzvZZV4e6EX/GDErjMRXfMXhGvT0AM3Pwq2T6b6+msY7JYUn6
+         3jHqcAGjgE++6Dcm+Dj3Ne4UGWF6lIO7nDZbEaohtAGBzRIBGnNkkj8JFuafjCe51TBC
+         +uV7yxFAMf1xuGpi+udidYHVd7/Yrsrp881T/sg6WV/Qw0HBrxi31LqN2GoME3ea+tMU
+         em0vXU5ReipxFi0IbMl/DJJ0T7caFiQER92Bs/z4TPFft/BTBPXtLgdPK9YeGwIu80a1
+         XnyQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=QfanSJsnDHXMBJydOhcBySoqPAhHQDknT274Z3FU9oY=;
+        b=R/oqau17hM/EInvbdneuFO3T38TXdvV3OMnXyPN2go1VfbUt05QzOn2SYle55wmola
+         LY4EmOhZz/QvHPonJaKSu/e0OMP6Rf2h/RQ2Fng5bQRkawCGqv/e8ZiFVgrK82eBlUzW
+         fUzg3zyYsVWksyeXVWF732SZOviUKpXblGRGa61Tv/mmyDFP3SfHBoIFOPskTy2WSiED
+         pBw1zIk228qd8aJK0TUdQO1F2opghZ3LZYXswLpD5x8JVHdGL3LgyjQCjx69MQbAt3/1
+         sAfakMbHbAu8ExAIlt6hzhS1p5uwsUUJ80+43aSeHPLrDgTaiGCLqPeTB7rlfjK8b8OZ
+         6YHA==
+X-Gm-Message-State: AOAM53007urUBccPynj5SjbpETeDlBOiyfgW8Em/cVYZIxUPVpBgR+wz
+        cZ8PxYETdO35sJhhUdlRSUJx79/IWrYDXWjOWIM=
+X-Google-Smtp-Source: ABdhPJxdPa8glBoHPUvSTojjOn7Xx4AKgY6EUMb+cwPV9k9BSCGsB1FpeCWWnH51mobvJEpdbe78enkZ4mh74VOQBw4=
+X-Received: by 2002:a05:6e02:685:: with SMTP id o5mr1434383ils.72.1598969104493;
+ Tue, 01 Sep 2020 07:05:04 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.11
+References: <20200827145329.435398-1-bfoster@redhat.com> <20200829064850.GC29069@infradead.org>
+ <20200831133732.GB2667@bfoster> <CAOQ4uxiqtoDTfkDvwL2Vs28reRmgLqg1ZVGoQEk=bkU1o-Mwrw@mail.gmail.com>
+ <20200901123130.GA174813@bfoster>
+In-Reply-To: <20200901123130.GA174813@bfoster>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Tue, 1 Sep 2020 17:04:53 +0300
+Message-ID: <CAOQ4uxi=OD5Pk3c44AFhyH9fv=76U=ygj5+_rAuFgks_Eu2jtw@mail.gmail.com>
+Subject: Re: [PATCH v2] generic: disable dmlogwrites tests on XFS
+To:     Brian Foster <bfoster@redhat.com>
+Cc:     Christoph Hellwig <hch@infradead.org>,
+        fstests <fstests@vger.kernel.org>,
+        linux-xfs <linux-xfs@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-dmlogwrites support for XFS depends on discard zeroing support of
-the intended target device. Update the test to use a thin volume and
-allow it to run consistently and reliably on XFS.
+> I don't see much difference with zero/punch on dm-thinp. An
+> fallocate(FL_PUNCH_HOLE|FL_KEEP_SIZE) doesn't work because it explicitly
+> requests hardware zeroing, which I don't have.
+> fallocate(FL_ZERO_RANGE|FL_KEEP_SIZE) works, but takes a minute or two
+> on my 10G device because it falls back to manual zeroing. There is a
+> NO_HIDE_STALE variant of PUNCH_HOLE, but I don't seem to have any
+> userspace tools that define NO_HIDE_STALE and it looks like it just
+> sends discards anyways. Of course, a 'blkdiscard -o 0 -l 10g <thindev>'
+> unmaps nearly the entire device in ~1s, but then we're back to the
+> argument of using discard for zeroing. :P
+>
 
-Signed-off-by: Brian Foster <bfoster@redhat.com>
----
- tests/generic/455 | 36 ++++++++++++++++++++++--------------
- 1 file changed, 22 insertions(+), 14 deletions(-)
+I don't think that is a problem if we build the test around thinp and its
+well defined behavior on discard. This is what I was getting at:
+1. Move dm-thinp setup inside the dm-logwrite helpers, so dm-logwrites
+    tests cannot be written without dm-thinp by mistake.
+2. Use explicit discard in start of replay helper to zap everything before
+    replay
 
-diff --git a/tests/generic/455 b/tests/generic/455
-index 05621220..72a44fda 100755
---- a/tests/generic/455
-+++ b/tests/generic/455
-@@ -16,12 +16,14 @@ status=1	# failure is the default!
- _cleanup()
- {
- 	_log_writes_cleanup
-+	_dmthin_cleanup
- }
- trap "_cleanup; exit \$status" 0 1 2 3 15
- 
- # get standard environment, filters and checks
- . ./common/rc
- . ./common/filter
-+. ./common/dmthin
- . ./common/dmlogwrites
- 
- # real QA test starts here
-@@ -30,6 +32,7 @@ _supported_os Linux
- _require_test
- _require_scratch_nocheck
- _require_log_writes
-+_require_dm_target thin-pool
- 
- rm -f $seqres.full
- 
-@@ -42,13 +45,12 @@ check_files()
- 		local filename=$(basename $i)
- 		local mark="${filename##*.}"
- 		echo "checking $filename" >> $seqres.full
--		_log_writes_replay_log $filename $SCRATCH_DEV
--		_scratch_mount
-+		_log_writes_replay_log $filename $DMTHIN_VOL_DEV
-+		_dmthin_mount
- 		local expected_md5=$(_md5_checksum $i)
- 		local md5=$(_md5_checksum $SCRATCH_MNT/$name)
- 		[ "${md5}" != "${expected_md5}" ] && _fail "$filename md5sum mismatched"
--		_scratch_unmount
--		_check_scratch_fs
-+		_dmthin_check_fs
- 	done
- }
- 
-@@ -56,8 +58,16 @@ SANITY_DIR=$TEST_DIR/fsxtests
- rm -rf $SANITY_DIR
- mkdir $SANITY_DIR
- 
-+devsize=$((1024*1024*200 / 512))        # 200m phys/virt size
-+csize=$((1024*64 / 512))                # 64k cluster size
-+lowspace=$((1024*1024 / 512))           # 1m low space threshold
-+
-+# Use a thin device to provide deterministic discard behavior. Discards are used
-+# by the log replay tool for fast zeroing to prevent out-of-order replay issues.
-+_dmthin_init $devsize $devsize $csize $lowspace
-+
- # Create the log
--_log_writes_init $SCRATCH_DEV
-+_log_writes_init $DMTHIN_VOL_DEV
- 
- _log_writes_mkfs >> $seqres.full 2>&1
- 
-@@ -88,14 +98,13 @@ _log_writes_mark last
- _log_writes_unmount
- _log_writes_mark end
- _log_writes_remove
--_check_scratch_fs
-+_dmthin_check_fs
- 
- # check pre umount
- echo "checking pre umount" >> $seqres.full
--_log_writes_replay_log last $SCRATCH_DEV
--_scratch_mount
--_scratch_unmount
--_check_scratch_fs
-+_log_writes_replay_log last $DMTHIN_VOL_DEV
-+_dmthin_mount
-+_dmthin_check_fs
- 
- for j in `seq 0 $((NUM_FILES-1))`; do
- 	check_files testfile$j
-@@ -103,14 +112,13 @@ done
- 
- # Check the end
- echo "checking post umount" >> $seqres.full
--_log_writes_replay_log end $SCRATCH_DEV
--_scratch_mount
-+_log_writes_replay_log end $DMTHIN_VOL_DEV
-+_dmthin_mount
- for j in `seq 0 $((NUM_FILES-1))`; do
- 	md5=$(_md5_checksum $SCRATCH_MNT/testfile$j)
- 	[ "${md5}" != "${test_md5[$j]}" ] && _fail "testfile$j end md5sum mismatched"
- done
--_scratch_unmount
--_check_scratch_fs
-+_dmthin_check_fs
- 
- echo "Silence is golden"
- status=0
--- 
-2.25.4
+I'll add to my TODO list.
 
+Thanks,
+Amir.
