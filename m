@@ -2,56 +2,53 @@ Return-Path: <SRS0=r5/b=CK=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-4.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS
-	autolearn=ham autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DAFD3C433E2
-	for <linux-fstests@archiver.kernel.org>; Tue,  1 Sep 2020 13:47:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 21021C433E7
+	for <linux-fstests@archiver.kernel.org>; Tue,  1 Sep 2020 13:47:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 99DFB20767
-	for <linux-fstests@archiver.kernel.org>; Tue,  1 Sep 2020 13:47:52 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DAC1920767
+	for <linux-fstests@archiver.kernel.org>; Tue,  1 Sep 2020 13:47:53 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="JZCJv3YF"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="PRk1Eesj"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728252AbgIANrs (ORCPT
+        id S1728273AbgIANrr (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 1 Sep 2020 09:47:48 -0400
-Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:36982 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1728258AbgIANro (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 1 Sep 2020 09:47:44 -0400
+        Tue, 1 Sep 2020 09:47:47 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:32371 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1728254AbgIANrn (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 1 Sep 2020 09:47:43 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1598968053;
+        s=mimecast20190719; t=1598968051;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=Qgv/eZdubjSdzyFtA36yZA5ZIJFNBvPlf+GhEC11yX0=;
-        b=JZCJv3YFHmlWBpDs35O0EuAjcqWAh9XDVyXq3a3nv7rJB0PzvuEz6tfn7pPULc9Dt8DB+p
-        q6teUpKhL5If9zd/kItVe6mriKSbOAnKCtzKKfm2LbHEu/x412eWYoieoin4KbFBOMmyug
-        wtbQO/JotRtCO4haRc0XdiSbFaGd8HE=
+         content-transfer-encoding:content-transfer-encoding;
+        bh=oCf1QGobn460Drc7SJRWhqB/MEU+sW6uCK6zUFoOZho=;
+        b=PRk1EesjIORwCEAChEK3NUGzP99X54tS6YZZY5WkgM8GZZR2z9z79Q1kc/yRiO6SOi0O8Y
+        wzO9DE95/lWLyZ+m6vfTBKax59W2JckYgUzMghN7O0fS6pu8xIVI+7zOsPFTq0xiE98uxd
+        DSTXK2A2I74SOa8FLYKjH+yo7F44H+E=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-304-SvFhGqkIPRi2GJhX7PrrkQ-1; Tue, 01 Sep 2020 09:47:31 -0400
-X-MC-Unique: SvFhGqkIPRi2GJhX7PrrkQ-1
+ us-mta-143-nr6UoAV_PT-H7rTgf7GJ9Q-1; Tue, 01 Sep 2020 09:47:29 -0400
+X-MC-Unique: nr6UoAV_PT-H7rTgf7GJ9Q-1
 Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 4B43D10ABDB7;
-        Tue,  1 Sep 2020 13:47:30 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id D99BE80F044;
+        Tue,  1 Sep 2020 13:47:28 +0000 (UTC)
 Received: from bfoster.redhat.com (ovpn-113-130.rdu2.redhat.com [10.10.113.130])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id ED0EE18B59;
-        Tue,  1 Sep 2020 13:47:29 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 8BEA218B59;
+        Tue,  1 Sep 2020 13:47:28 +0000 (UTC)
 From:   Brian Foster <bfoster@redhat.com>
 To:     fstests@vger.kernel.org
 Cc:     linux-xfs@vger.kernel.org
-Subject: [PATCH v3 3/3] generic/470: use thin volume for dmlogwrites target device
-Date:   Tue,  1 Sep 2020 09:47:28 -0400
-Message-Id: <20200901134728.185353-4-bfoster@redhat.com>
-In-Reply-To: <20200901134728.185353-1-bfoster@redhat.com>
-References: <20200901134728.185353-1-bfoster@redhat.com>
+Subject: [PATCH v3 0/3] fix up generic dmlogwrites tests to work with XFS
+Date:   Tue,  1 Sep 2020 09:47:25 -0400
+Message-Id: <20200901134728.185353-1-bfoster@redhat.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 X-Scanned-By: MIMEDefang 2.79 on 10.5.11.11
@@ -60,77 +57,36 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-dmlogwrites support for XFS depends on discard zeroing support of
-the intended target device. Update the test to use a thin volume and
-allow it to run consistently and reliably on XFS.
+Hi all,
 
-Signed-off-by: Brian Foster <bfoster@redhat.com>
----
+This version removes the discard zeroing check as Christoph points out
+that discard behavior is generally not predictable. The remaining
+generic dm-logwrites tests are still updated to use dm-thinp such that
+discards from the recovery tool clear block ranges reasonably reliably.
+This allows the tests to function correctly on filesystems like XFS
+while a more generic solution is investigated.
+
+Brian
+
+v3:
+- Re-add dm-thinp changes.
+- Drop discard checks (from v1) and XFS disablement (from v2).
+- Use _require_scratch_nocheck in generic/470 to avoid spurious repair
+  noise now that the test no longer runs mkfs on the scratch dev.
+v2: https://lore.kernel.org/fstests/20200827145329.435398-1-bfoster@redhat.com/
+- Drop all dmthinp changes. Unconditionally disable tests on XFS.
+v1: https://lore.kernel.org/fstests/20200826143815.360002-2-bfoster@redhat.com/
+
+Brian Foster (3):
+  generic/455: use thin volume for dmlogwrites target device
+  generic/457: use thin volume for dmlogwrites target device
+  generic/470: use thin volume for dmlogwrites target device
+
+ tests/generic/455 | 36 ++++++++++++++++++++++--------------
+ tests/generic/457 | 33 +++++++++++++++++++++------------
  tests/generic/470 | 23 +++++++++++++++++------
- 1 file changed, 17 insertions(+), 6 deletions(-)
+ 3 files changed, 60 insertions(+), 32 deletions(-)
 
-diff --git a/tests/generic/470 b/tests/generic/470
-index fd6da563..c77499a2 100755
---- a/tests/generic/470
-+++ b/tests/generic/470
-@@ -20,12 +20,14 @@ _cleanup()
- {
- 	cd /
- 	_log_writes_cleanup
-+	_dmthin_cleanup
- 	rm -f $tmp.*
- }
- 
- # get standard environment, filters and checks
- . ./common/rc
- . ./common/filter
-+. ./common/dmthin
- . ./common/dmlogwrites
- 
- # remove previous $seqres.full before test
-@@ -34,12 +36,21 @@ rm -f $seqres.full
- # real QA test starts here
- _supported_fs generic
- _supported_os Linux
--_require_scratch
-+_require_scratch_nocheck
- _require_log_writes_dax_mountopt "dax"
-+_require_dm_target thin-pool
- _require_xfs_io_command "mmap" "-S"
- _require_xfs_io_command "log_writes"
- 
--_log_writes_init $SCRATCH_DEV
-+devsize=$((1024*1024*200 / 512))        # 200m phys/virt size
-+csize=$((1024*64 / 512))                # 64k cluster size
-+lowspace=$((1024*1024 / 512))           # 1m low space threshold
-+
-+# Use a thin device to provide deterministic discard behavior. Discards are used
-+# by the log replay tool for fast zeroing to prevent out-of-order replay issues.
-+_dmthin_init $devsize $devsize $csize $lowspace
-+
-+_log_writes_init $DMTHIN_VOL_DEV
- _log_writes_mkfs >> $seqres.full 2>&1
- _log_writes_mount -o dax
- 
-@@ -52,14 +63,14 @@ $XFS_IO_PROG -t -c "truncate $LEN" -c "mmap -S 0 $LEN" -c "mwrite 0 $LEN" \
- # Unmount the scratch dir and tear down the log writes target
- _log_writes_unmount
- _log_writes_remove
--_check_scratch_fs
-+_dmthin_check_fs
- 
- # destroy previous filesystem so we can be sure our rebuild works
--_scratch_mkfs >> $seqres.full 2>&1
-+_mkfs_dev $DMTHIN_VOL_DEV >> $seqres.full 2>&1
- 
- # check pre-unmap state
--_log_writes_replay_log preunmap $SCRATCH_DEV
--_scratch_mount
-+_log_writes_replay_log preunmap $DMTHIN_VOL_DEV
-+_dmthin_mount
- 
- # We should see $SCRATCH_MNT/test as having 1 MiB in block allocations
- du -sh $SCRATCH_MNT/test | _filter_scratch | _filter_spaces
 -- 
 2.25.4
 
