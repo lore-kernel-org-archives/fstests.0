@@ -7,113 +7,117 @@ X-Spam-Status: No, score=-10.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	UNPARSEABLE_RELAY autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0B0A8C433E2
-	for <linux-fstests@archiver.kernel.org>; Wed,  2 Sep 2020 16:44:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7162CC2BBD0
+	for <linux-fstests@archiver.kernel.org>; Wed,  2 Sep 2020 16:52:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C2BA820829
-	for <linux-fstests@archiver.kernel.org>; Wed,  2 Sep 2020 16:44:13 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4A7C3208CA
+	for <linux-fstests@archiver.kernel.org>; Wed,  2 Sep 2020 16:52:56 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="fRVUR6h1"
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="YGtPF4fP"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726323AbgIBQoN (ORCPT
+        id S1728180AbgIBQwz (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 2 Sep 2020 12:44:13 -0400
-Received: from userp2120.oracle.com ([156.151.31.85]:34362 "EHLO
+        Wed, 2 Sep 2020 12:52:55 -0400
+Received: from userp2120.oracle.com ([156.151.31.85]:40814 "EHLO
         userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726942AbgIBQoK (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 2 Sep 2020 12:44:10 -0400
+        with ESMTP id S1726938AbgIBQwv (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 2 Sep 2020 12:52:51 -0400
 Received: from pps.filterd (userp2120.oracle.com [127.0.0.1])
-        by userp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 082GhnuB148690;
-        Wed, 2 Sep 2020 16:43:49 GMT
+        by userp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 082Gnl4o153969;
+        Wed, 2 Sep 2020 16:52:47 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
  : subject : message-id : references : mime-version : content-type :
  in-reply-to; s=corp-2020-01-29;
- bh=1SKghxvR7y4Ha1ggTXJzwwj3wTtP05V3IBH03BAwu8c=;
- b=fRVUR6h1xghxqnwNRL/147hRlZ5BF2m//tShUQghKEezeg9HV8fles1K517TBCQlPvdM
- ee3wboHGbcWKuRQKx7iaoLgM9Nbe+0haNb2L419tySdLOmPMO62pBJ6oQTrBhV9p4A++
- q/XdXWGgfOWRCb36RfWwitnn0q69zIZr2B0zF786ufvlAFiiqvh8jDbFcT5gfxazRWYO
- CiH997r6ElnivrlL3ZfTqjRYyoS8T5iHUnihG2aDKF2dil5QJEmMV9Wh66jR49VNTTVq
- JshchawcmI35ZKrEtn24J+egzTJvpZJV9wuHDYNjs0m5tjvf4bniTIJn1ADl6nWqsKWR wQ== 
-Received: from userp3020.oracle.com (userp3020.oracle.com [156.151.31.79])
-        by userp2120.oracle.com with ESMTP id 339dmn28tn-1
+ bh=jxr21YykYZKdullgKkPHFfg+o0ZD8pj+EE1nxrBvYr8=;
+ b=YGtPF4fP8Hn+/VT3GSH7KJB+wzo6IZcu9uFbTR/KNIdguSiFdQ6P+Mrqqwyc4eXKmmqK
+ 9ufDRsdhUy/JIbuIY4Y8gbIkZO3l2NUvZd9LmeapKDLwByNIT41qEjo2veKFQF+cTL/x
+ wGWCsjoCoyW5J+d1KhfAZhtd2SHHN7hgH0wRzXpf2mAE6lh5rovPttId61+bes0bNgdR
+ N9v/gnTiaL9j9Lw5mC8bRncJa4u24DRxVnKSDTPM+UQkIICRMbcRKvW2qBzCOxr/x1Tg
+ y8/LVbp2HCQhxzFcuKUQt16Vg7qSG0d0jlmcZnd0awDellpIcMcji4fdRod/HNfPsBoL zw== 
+Received: from userp3030.oracle.com (userp3030.oracle.com [156.151.31.80])
+        by userp2120.oracle.com with ESMTP id 339dmn2ag8-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Wed, 02 Sep 2020 16:43:49 +0000
-Received: from pps.filterd (userp3020.oracle.com [127.0.0.1])
-        by userp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 082Gf40D046776;
-        Wed, 2 Sep 2020 16:43:49 GMT
-Received: from aserv0122.oracle.com (aserv0122.oracle.com [141.146.126.236])
-        by userp3020.oracle.com with ESMTP id 3380su9x4m-1
+        Wed, 02 Sep 2020 16:52:47 +0000
+Received: from pps.filterd (userp3030.oracle.com [127.0.0.1])
+        by userp3030.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 082GnjAS137913;
+        Wed, 2 Sep 2020 16:50:47 GMT
+Received: from userv0122.oracle.com (userv0122.oracle.com [156.151.31.75])
+        by userp3030.oracle.com with ESMTP id 3380y021ae-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Wed, 02 Sep 2020 16:43:49 +0000
-Received: from abhmp0005.oracle.com (abhmp0005.oracle.com [141.146.116.11])
-        by aserv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 082GhkEH006971;
-        Wed, 2 Sep 2020 16:43:48 GMT
+        Wed, 02 Sep 2020 16:50:46 +0000
+Received: from abhmp0004.oracle.com (abhmp0004.oracle.com [141.146.116.10])
+        by userv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 082Gojd7016554;
+        Wed, 2 Sep 2020 16:50:46 GMT
 Received: from localhost (/67.169.218.210)
         by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Wed, 02 Sep 2020 09:43:46 -0700
-Date:   Wed, 2 Sep 2020 09:43:45 -0700
+        with ESMTP ; Wed, 02 Sep 2020 09:50:45 -0700
+Date:   Wed, 2 Sep 2020 09:50:44 -0700
 From:   "Darrick J. Wong" <darrick.wong@oracle.com>
-To:     Hou Tao <houtao1@huawei.com>
-Cc:     guaneryu@gmail.com, richard@nod.at, yuchao0@huawei.com,
-        fstests@vger.kernel.org
-Subject: Re: [PATCH v2 1/2] generic: add test for race between listxattr and
- setxatr
-Message-ID: <20200902164345.GD191798@magnolia>
-References: <364596a1-c9bb-3a10-a132-0f43907c2241@huawei.com>
- <20200822114132.61227-1-houtao1@huawei.com>
+To:     Josef Bacik <josef@toxicpanda.com>
+Cc:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org,
+        Johannes Thumshirn <johannes.thumshirn@wdc.com>
+Subject: Re: [PATCH][v3 fstests: add generic/609 to test O_DIRECT|O_DSYNC
+Message-ID: <20200902165044.GE191798@magnolia>
+References: <f5ba8625d6277035b69e466f6ea87f19620f7fcb.1599058822.git.josef@toxicpanda.com>
+ <20200902160044.266690-1-josef@toxicpanda.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20200822114132.61227-1-houtao1@huawei.com>
+In-Reply-To: <20200902160044.266690-1-josef@toxicpanda.com>
 X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9732 signatures=668679
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxlogscore=999 adultscore=0
- phishscore=0 malwarescore=0 mlxscore=0 spamscore=0 bulkscore=0
- suspectscore=1 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2006250000 definitions=main-2009020159
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 spamscore=0 adultscore=0 phishscore=0
+ malwarescore=0 bulkscore=0 mlxscore=0 mlxlogscore=999 suspectscore=1
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
+ definitions=main-2009020161
 X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9732 signatures=668679
 X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 bulkscore=0 phishscore=0
  mlxlogscore=999 adultscore=0 impostorscore=0 mlxscore=0 suspectscore=1
- spamscore=0 clxscore=1011 malwarescore=0 lowpriorityscore=0
+ spamscore=0 clxscore=1015 malwarescore=0 lowpriorityscore=0
  priorityscore=1501 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2006250000 definitions=main-2009020160
+ engine=8.12.0-2006250000 definitions=main-2009020161
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sat, Aug 22, 2020 at 07:41:32PM +0800, Hou Tao wrote:
-> Add reproducer for a bug on ubifs where listxattr() copies
-> the newly created xattr names regardless of the remaining
-> buffer size, fails the assertion of used buffer size,
-> and may corrupt buffer memory.
+On Wed, Sep 02, 2020 at 12:00:44PM -0400, Josef Bacik wrote:
+> We had a problem recently where btrfs would deadlock with
+> O_DIRECT|O_DSYNC because of an unexpected dependency on ->fsync in
+> iomap.  This was only caught by chance with aiostress, because weirdly
+> we don't actually test this particular configuration anywhere in
+> xfstests.  Fix this by adding a basic test that just does
+> O_DIRECT|O_DSYNC writes.  With this test the box deadlocks right away
+> with Btrfs, which would have been helpful in finding this issue before
+> the patches were merged.
 > 
-> Signed-off-by: Hou Tao <houtao1@huawei.com>
+> Reviewed-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
+> Signed-off-by: Josef Bacik <josef@toxicpanda.com>
 > ---
-> v2: accommodate f2fs by reducing the number of created xattrs for f2fs
+> v2->v3:
+> - This time with 609.out added, verified it passed with xfs.
 > 
->  tests/generic/998     | 67 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/998.out |  2 ++
+>  tests/generic/609     | 43 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/609.out |  3 +++
 >  tests/generic/group   |  1 +
->  3 files changed, 70 insertions(+)
->  create mode 100644 tests/generic/998
->  create mode 100644 tests/generic/998.out
+>  3 files changed, 47 insertions(+)
+>  create mode 100755 tests/generic/609
+>  create mode 100644 tests/generic/609.out
 > 
-> diff --git a/tests/generic/998 b/tests/generic/998
-> new file mode 100644
-> index 00000000..26a5b620
+> diff --git a/tests/generic/609 b/tests/generic/609
+> new file mode 100755
+> index 00000000..3d1c97b2
 > --- /dev/null
-> +++ b/tests/generic/998
-> @@ -0,0 +1,67 @@
+> +++ b/tests/generic/609
+> @@ -0,0 +1,43 @@
 > +#! /bin/bash
 > +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2020 Huawei. All Rights Reserved.
+> +# Copyright (c) 2020 Josef Bacik.  All Rights Reserved.
 > +#
-> +# FS QA Test 998
+> +# FS QA Test 609
 > +#
-> +# Test race between listxattr() and setxattr(). It reproduces a bug
-> +# on UBIFS where listxattr() copies the newly created xattr names
-> +# regardless of the remaining buffer size, fails the assertion of
-> +# used buffer size, and may corrupt buffer memory.
+> +# iomap can call generic_write_sync() if we're O_DSYNC, so write a basic test to
+> +# exercise O_DSYNC so any unsuspecting file systems will get lockdep warnings if
+> +# their locking isn't compatible.
 > +#
 > +seq=`basename $0`
 > +seqres=$RESULT_DIR/$seq
@@ -128,80 +132,64 @@ On Sat, Aug 22, 2020 at 07:41:32PM +0800, Hou Tao wrote:
 > +{
 > +	cd /
 > +	rm -f $tmp.*
-> +	rm -f $TEST_DIR/$seq
+> +	rm -rf $TEST_DIR/file
 > +}
 > +
 > +# get standard environment, filters and checks
 > +. ./common/rc
-> +. ./common/attr
+> +. ./common/filter
 > +
 > +# remove previous $seqres.full before test
 > +rm -f $seqres.full
 > +
-> +# real QA test starts here
+> +# Modify as appropriate.
 > +_supported_fs generic
 > +_supported_os Linux
-> +_require_attrs
+> +_require_test
+> +_require_xfs_io_command "pwrite" "-DV"
 > +
-> +target=$TEST_DIR/$seq
-> +touch $target
+> +$XFS_IO_PROG -f -d -c "pwrite -D -V 1 0 4k"  $TEST_DIR/file | _filter_xfs_io
+
+I wonder, does this also work if you did:
+
+$XFS_IO_PROG -f -d -s -c 'pwrite 0 4k' $TEST_DIR/file
+
+In other words, can you reproduce the problem with good old pwrite() and
+a file descriptor opened O_SYNC?  Or do you specifically have to have
+pwritev2 with RWF_DSYNC?
+
+(I might also write 64k to future proof this testcase for the day when
+someone builds an fs that can only do 64k direct writes, but maybe
+that's crazy...)
+
 > +
-> +# start a background listxattr
-> +runfile="$tmp.listxattr"
-> +touch $runfile
-> +while [ -e $runfile ]; do
-> +	${GETFATTR_PROG} $target >/dev/null 2>&1
+> +status=0
+> +exit
+> diff --git a/tests/generic/609.out b/tests/generic/609.out
+> new file mode 100644
+> index 00000000..db3242cb
+> --- /dev/null
+> +++ b/tests/generic/609.out
+> @@ -0,0 +1,3 @@
+> +QA output created by 609
+> +wrote 4096/4096 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> diff --git a/tests/generic/group b/tests/generic/group
+> index aa969bcb..ae2567a0 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -611,3 +611,4 @@
+>  606 auto attr quick dax
+>  607 auto attr quick dax
+>  608 auto attr quick dax
+> +609 auto quick
 
-Er, if the listxattr corrupts the buffer memory, how does this test
-detect that?  Does the kernel crash or something?
+This probably ought to be 'auto quick rw' since it's a write test.
 
-> +done &
-> +
-> +# add new xattr continuously
-> +largename=`for i in $(seq 0 128); do echo -n a; done`
-> +cnt=100
-> +# f2fs has limited spaces for xattr
-> +[ $FSTYP == "f2fs" ] && cnt=30
-> +for i in $(seq 1 $cnt); do
-> +	${SETFATTR_PROG} -n user.${largename}.$i -v $i $target
-
-Seeing as each filesystem has different xattr limits, I wonder if
-instead of special casing of f2fs we ought to capture the
-stdout/stderr of SETFATTR_PROG and filter out the ENOSPC message?
-
-AFAICT this test isn't trying to check that setting xattrs succeeds, but
-I'm a little confused on how we detect the corrupted buffer...
+The rest of the logic looks sound to me though.
 
 --D
 
-> +done
-> +
-> +rm -f $runfile
-> +wait > /dev/null 2>&1
-> +rm -f $target
-> +
-> +echo Silence is golden
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/998.out b/tests/generic/998.out
-> new file mode 100644
-> index 00000000..d2679ae0
-> --- /dev/null
-> +++ b/tests/generic/998.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 998
-> +Silence is golden
-> diff --git a/tests/generic/group b/tests/generic/group
-> index d9ab9a31..62697ac5 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -605,3 +605,4 @@
->  600 auto quick quota
->  601 auto quick quota
->  602 auto quick encrypt
-> +998 auto quick attr
 > -- 
-> 2.25.0.4.g0ad7144999
+> 2.28.0
 > 
