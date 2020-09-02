@@ -1,189 +1,261 @@
-Return-Path: <SRS0=r5/b=CK=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=Km02=CL=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1521AC433E6
-	for <linux-fstests@archiver.kernel.org>; Tue,  1 Sep 2020 14:43:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3AB7AC433E7
+	for <linux-fstests@archiver.kernel.org>; Wed,  2 Sep 2020 09:04:46 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E5AE621655
-	for <linux-fstests@archiver.kernel.org>; Tue,  1 Sep 2020 14:43:18 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1037320709
+	for <linux-fstests@archiver.kernel.org>; Wed,  2 Sep 2020 09:04:46 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="pHOhf8qo"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="fn1EXaPf"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728520AbgIAOnG (ORCPT
+        id S1726637AbgIBJEp (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 1 Sep 2020 10:43:06 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42806 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728298AbgIAOQo (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 1 Sep 2020 10:16:44 -0400
-Received: from mail-io1-xd44.google.com (mail-io1-xd44.google.com [IPv6:2607:f8b0:4864:20::d44])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5A01EC061249;
-        Tue,  1 Sep 2020 07:06:38 -0700 (PDT)
-Received: by mail-io1-xd44.google.com with SMTP id g128so1310606iof.11;
-        Tue, 01 Sep 2020 07:06:38 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=SlcdSlLzZ6hPoD339tdXeJ72A7Nyi9kOiMrYaOpBy5U=;
-        b=pHOhf8qoVh/AFXmH4TccYjS5k6OcqKrB7FttLc2BOuiibG46DtUBwjyk9rInCvNv3j
-         z5v1mcQtwdNlqdube8aLR34xKOqXAu/iVVnCYV7SVwzkENtThq3lYUmGbTQD4+EKFijc
-         kgHXHzJfbMMuavY6wAdp2yN+RKYQTivnT4Nzbdtb7QlJigTrE3w4iRikn5XgEO94r6wK
-         IsSdg0qZrkDzuBOVL2EKZlUzLp1KiqW8vmjq1LIS/KxVnFDl4lLDvOPTR0nvfwUr30Eo
-         0ULcidz9B4VXLuLjkuicTGVoKU4i8Xoz1b3MqR58imFp8nOm43SXwUWlk4hhdiZPlXaC
-         Wx5w==
+        Wed, 2 Sep 2020 05:04:45 -0400
+Received: from us-smtp-1.mimecast.com ([207.211.31.81]:46659 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1726814AbgIBJEo (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 2 Sep 2020 05:04:44 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1599037481;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=mJx2CZpvT++3g4OCpAdAP1tjKdf5XEuitI5I8CH2nZg=;
+        b=fn1EXaPf1T0TOKsMmtY4b7lVPHtc6OMZnrzBJraMgVb7MTC3YWr9Jm90lX1j2wrOvPLkIN
+        CHsKhCKzsNs/AhGWL/CKmVHMSOBOsrJZadzXRM4kpfJXR8qwjB4d/UGwckJMEHA+fISrBT
+        g0r/07Svy7UNuzTqsfrymb3/pN8A87g=
+Received: from mail-pg1-f199.google.com (mail-pg1-f199.google.com
+ [209.85.215.199]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-177-qXplxjcaOi6j7cqM9WHFLQ-1; Wed, 02 Sep 2020 05:04:35 -0400
+X-MC-Unique: qXplxjcaOi6j7cqM9WHFLQ-1
+Received: by mail-pg1-f199.google.com with SMTP id n32so2210018pgb.22
+        for <fstests@vger.kernel.org>; Wed, 02 Sep 2020 02:04:34 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=SlcdSlLzZ6hPoD339tdXeJ72A7Nyi9kOiMrYaOpBy5U=;
-        b=HUE+v2qUE0H4vwHyYytBLMtoMSKooHP9rZsjXKxqnjaVQUWncQVrD79SoTjF2wxZGc
-         Q4hq4pTL7WCnTW/frz0ly4c5yHsgHmkTblt0Sfx9E926YMabqiV7cM7vyPkNoe2LSgUw
-         JhbUEj2eZPjDED1b5CydDRAwvt4/teGZq8snXZv/jOArMNvy65iMpPZRj7WUS9nOt4LP
-         lANwqdZrcYbrEec5+GmGpQ8gGJFjgYka0+N8ZoZubETLrB0jRZxQl7H/CI9V3G9UCG+o
-         2HKqZT1q5CYPMWxDwIfmSN6tYKmkuSKqXOuxvhuRz49lTvXtMQYVln+SrCbXXglyWWoH
-         snSA==
-X-Gm-Message-State: AOAM530SurxTWca2qO5y+o3yJ/XJGqV9ceu99RejtIqPZPSlK2sha65h
-        /7YMM2d2bp3xkvrNfP+6MF7ZMJQRjICW2ntWQrLzqX8WF5Q=
-X-Google-Smtp-Source: ABdhPJxpcc+GxRAGWCYtALIphgwrRGKv7puf/8IeXL7vW8gJH3XwTM6vArnfJeKmRarcLFVM45mgN7UgWrm1mTzYLkw=
-X-Received: by 2002:a05:6602:1d6:: with SMTP id w22mr1620315iot.64.1598969197660;
- Tue, 01 Sep 2020 07:06:37 -0700 (PDT)
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=mJx2CZpvT++3g4OCpAdAP1tjKdf5XEuitI5I8CH2nZg=;
+        b=Bzv3Z3u24nT6Q3KzdkTGsFkGy9fyZNJbc0ALaKaxQuZadAaSVQmx/0HXAkq4qjhcon
+         /H57EaA9mjH8jshj5Q0rk6AFDM6d00foGgN8TBJHhyARZloTB5CvlpFz8st3jzB4+IuJ
+         e/CMxvxg3ZIx47vRgDgZ+rwMSw2fvaMpjHGYPVcAzmfwYVC2RaOmXJS4mxN4g2h6EDIG
+         rabjLqlbPI6OCXR0kEhD9FIdA2i0yxkF9dobT4OIebcPjBeJWJxdb7mMCS6jLejaAvX6
+         SkyliMVuLwXKl4R/XSpVImwxXFxefSnKee+0trfbpTLoL3iCnMZetUusCy23qrnPbL0g
+         iAOw==
+X-Gm-Message-State: AOAM531YZeVYs3t1sP84VtP2xjRGThdAmrPoxFv8v7/qOsq1V2l6sBN1
+        yi5zoiOkpZddy9UUbAhXzCStZE03vbS8G9NY61XAP1UwC/mmxX/t0+2daM7wsctkVzQDxzY2iWU
+        dwOtRP8brEN5pZz8gZg==
+X-Received: by 2002:a63:e20:: with SMTP id d32mr1168961pgl.53.1599037473973;
+        Wed, 02 Sep 2020 02:04:33 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJyaU4Yx70gvnYd16i4d/40ICBeCbhWsWdFny4BC0C7dC8APkL57eONzT4TB9Ouodx40RPSuhg==
+X-Received: by 2002:a63:e20:: with SMTP id d32mr1168931pgl.53.1599037473541;
+        Wed, 02 Sep 2020 02:04:33 -0700 (PDT)
+Received: from don.don ([60.224.129.195])
+        by smtp.gmail.com with ESMTPSA id h193sm4847117pgc.42.2020.09.02.02.04.30
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 02 Sep 2020 02:04:33 -0700 (PDT)
+Subject: Re: [PATCH v3] xfstests: add test for xfs_repair progress reporting
+To:     Eryu Guan <guaneryu@gmail.com>
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org,
+        "Darrick J . Wong" <darrick.wong@oracle.com>,
+        Eryu Guan <guan@eryu.me>, Zorro Lang <zlang@redhat.com>
+References: <20200524164648.GB3363@desktop>
+ <20200817075313.1484879-1-ddouwsma@redhat.com>
+ <20200830155723.GA3853@desktop>
+From:   Donald Douwsma <ddouwsma@redhat.com>
+Message-ID: <eebaff94-d73d-2b0d-b433-dab3fb42602d@redhat.com>
+Date:   Wed, 2 Sep 2020 19:04:27 +1000
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.10.0
 MIME-Version: 1.0
-References: <20200901134728.185353-1-bfoster@redhat.com> <20200901134728.185353-2-bfoster@redhat.com>
-In-Reply-To: <20200901134728.185353-2-bfoster@redhat.com>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Tue, 1 Sep 2020 17:06:26 +0300
-Message-ID: <CAOQ4uxiEW9LmftT5a-4RPgqj3v29Z+1Y7m_ZKELHf+uAz6xueA@mail.gmail.com>
-Subject: Re: [PATCH v3 1/3] generic/455: use thin volume for dmlogwrites
- target device
-To:     Brian Foster <bfoster@redhat.com>
-Cc:     fstests <fstests@vger.kernel.org>,
-        linux-xfs <linux-xfs@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <20200830155723.GA3853@desktop>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Sep 1, 2020 at 4:48 PM Brian Foster <bfoster@redhat.com> wrote:
->
-> dmlogwrites support for XFS depends on discard zeroing support of
-> the intended target device. Update the test to use a thin volume and
-> allow it to run consistently and reliably on XFS.
->
-> Signed-off-by: Brian Foster <bfoster@redhat.com>
-> ---
-Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+On 31/08/2020 01:57, Eryu Guan wrote:
+> On Mon, Aug 17, 2020 at 05:53:13PM +1000, Donald Douwsma wrote:
+>> xfs_repair's interval based progress has been broken for
+>> some time, create a test based on dmdelay to stretch out
+>> the time and use ag_stride to force parallelism.
+>>
+>> Signed-off-by: Donald Douwsma <ddouwsma@redhat.com>
+> 
+> Thanks for the revision! But I'm still seeing the following diff with
+> v5.9-rc2 kernel and latest xfsprogs for-next branch, which should
+> contains the progress reporting patches I guess (HEAD is commit
+> 2cf166bca8a2 ("xfs_db: set b_ops to NULL in set_cur for types without
+> verifiers"))
+> 
+>  Format and populate
+>  Introduce a dmdelay
+>  Run repair
+> + - #:#:#: Phase #: #% done - estimated remaining time 
+>   - #:#:#: Phase #: #% done - estimated remaining time # minute, # second
+>   - #:#:#: Phase #: elapsed time # second - processed # inodes per minute
+>   - #:#:#: check for inodes claiming duplicate blocks - # of # inodes done
 
 
->  tests/generic/455 | 36 ++++++++++++++++++++++--------------
->  1 file changed, 22 insertions(+), 14 deletions(-)
->
-> diff --git a/tests/generic/455 b/tests/generic/455
-> index 05621220..72a44fda 100755
-> --- a/tests/generic/455
-> +++ b/tests/generic/455
-> @@ -16,12 +16,14 @@ status=1    # failure is the default!
->  _cleanup()
->  {
->         _log_writes_cleanup
-> +       _dmthin_cleanup
->  }
->  trap "_cleanup; exit \$status" 0 1 2 3 15
->
->  # get standard environment, filters and checks
->  . ./common/rc
->  . ./common/filter
-> +. ./common/dmthin
->  . ./common/dmlogwrites
->
->  # real QA test starts here
-> @@ -30,6 +32,7 @@ _supported_os Linux
->  _require_test
->  _require_scratch_nocheck
->  _require_log_writes
-> +_require_dm_target thin-pool
->
->  rm -f $seqres.full
->
-> @@ -42,13 +45,12 @@ check_files()
->                 local filename=$(basename $i)
->                 local mark="${filename##*.}"
->                 echo "checking $filename" >> $seqres.full
-> -               _log_writes_replay_log $filename $SCRATCH_DEV
-> -               _scratch_mount
-> +               _log_writes_replay_log $filename $DMTHIN_VOL_DEV
-> +               _dmthin_mount
->                 local expected_md5=$(_md5_checksum $i)
->                 local md5=$(_md5_checksum $SCRATCH_MNT/$name)
->                 [ "${md5}" != "${expected_md5}" ] && _fail "$filename md5sum mismatched"
-> -               _scratch_unmount
-> -               _check_scratch_fs
-> +               _dmthin_check_fs
->         done
->  }
->
-> @@ -56,8 +58,16 @@ SANITY_DIR=$TEST_DIR/fsxtests
->  rm -rf $SANITY_DIR
->  mkdir $SANITY_DIR
->
-> +devsize=$((1024*1024*200 / 512))        # 200m phys/virt size
-> +csize=$((1024*64 / 512))                # 64k cluster size
-> +lowspace=$((1024*1024 / 512))           # 1m low space threshold
-> +
-> +# Use a thin device to provide deterministic discard behavior. Discards are used
-> +# by the log replay tool for fast zeroing to prevent out-of-order replay issues.
-> +_dmthin_init $devsize $devsize $csize $lowspace
-> +
->  # Create the log
-> -_log_writes_init $SCRATCH_DEV
-> +_log_writes_init $DMTHIN_VOL_DEV
->
->  _log_writes_mkfs >> $seqres.full 2>&1
->
-> @@ -88,14 +98,13 @@ _log_writes_mark last
->  _log_writes_unmount
->  _log_writes_mark end
->  _log_writes_remove
-> -_check_scratch_fs
-> +_dmthin_check_fs
->
->  # check pre umount
->  echo "checking pre umount" >> $seqres.full
-> -_log_writes_replay_log last $SCRATCH_DEV
-> -_scratch_mount
-> -_scratch_unmount
-> -_check_scratch_fs
-> +_log_writes_replay_log last $DMTHIN_VOL_DEV
-> +_dmthin_mount
-> +_dmthin_check_fs
->
->  for j in `seq 0 $((NUM_FILES-1))`; do
->         check_files testfile$j
-> @@ -103,14 +112,13 @@ done
->
->  # Check the end
->  echo "checking post umount" >> $seqres.full
-> -_log_writes_replay_log end $SCRATCH_DEV
-> -_scratch_mount
-> +_log_writes_replay_log end $DMTHIN_VOL_DEV
-> +_dmthin_mount
->  for j in `seq 0 $((NUM_FILES-1))`; do
->         md5=$(_md5_checksum $SCRATCH_MNT/testfile$j)
->         [ "${md5}" != "${test_md5[$j]}" ] && _fail "testfile$j end md5sum mismatched"
->  done
-> -_scratch_unmount
-> -_check_scratch_fs
-> +_dmthin_check_fs
->
->  echo "Silence is golden"
->  status=0
-> --
-> 2.25.4
->
+When testing this I only saw cases with minute(s) and second(s), but it turns
+out that the duration function in xfs_repair/progress.c can produce an empty 
+string or combinations of second, seconds, minute, minutes, day, days, week, 
+or weeks.
+
+This can affect the estimate string, but also the elapsed time like
+    #:#:#: Phase #: #% done - estimated remaining time # second
+    #:#:#: Phase #: elapsed time # second - processed # inodes per minute
+    #:#:#: Phase #: elapsed time # seconds - processed # inodes per minute
+
+I'll need to filter output from progress() specifically.
+
+Thanks for pointing this out. 
+
+Don
+
+
+> 
+>> ---
+>> Changes since v2:
+>> - Fix cleanup handling and function naming
+>> - Added to auto group
+>> Changes since v1:
+>> - Use _scratch_xfs_repair
+>> - Filter only repair output
+>> - Make the filter more tolerant of whitespace and plurals
+>> - Take golden output from 'xfs_repair: fix progress reporting'
+>>
+>>  tests/xfs/521     | 75 +++++++++++++++++++++++++++++++++++++++++++++++
+>>  tests/xfs/521.out | 15 ++++++++++
+>>  tests/xfs/group   |  1 +
+>>  3 files changed, 91 insertions(+)
+>>  create mode 100755 tests/xfs/521
+>>  create mode 100644 tests/xfs/521.out
+>>
+>> diff --git a/tests/xfs/521 b/tests/xfs/521
+>> new file mode 100755
+>> index 00000000..c16c82bf
+>> --- /dev/null
+>> +++ b/tests/xfs/521
+>> @@ -0,0 +1,75 @@
+>> +#! /bin/bash
+>> +# SPDX-License-Identifier: GPL-2.0
+>> +# Copyright (c) 2020 Red Hat, Inc.  All Rights Reserved.
+>> +#
+>> +# FS QA Test 521
+>> +#
+>> +# Test xfs_repair's progress reporting
+>> +#
+>> +seq=`basename $0`
+>> +seqres=$RESULT_DIR/$seq
+>> +echo "QA output created by $seq"
+>> +
+>> +here=`pwd`
+>> +tmp=/tmp/$$
+>> +status=1	# failure is the default!
+>> +trap "_cleanup; exit \$status" 0 1 2 3 15
+>> +
+>> +_cleanup()
+>> +{
+>> +	cd /
+>> +	rm -f $tmp.*
+>> +	_cleanup_delay > /dev/null 2>&1
+>> +}
+>> +
+>> +# get standard environment, filters and checks
+>> +. ./common/rc
+>> +. ./common/filter
+>> +. ./common/dmdelay
+>> +. ./common/populate
+>> +
+>> +# remove previous $seqres.full before test
+>> +rm -f $seqres.full
+>> +
+>> +# real QA test starts here
+>> +
+>> +# Modify as appropriate.
+>> +_supported_fs xfs
+>> +_supported_os Linux
+>> +_require_scratch
+>> +_require_dm_target delay
+>> +
+>> +# Filter output specific to the formatters in xfs_repair/progress.c
+>> +# Ideally we'd like to see hits on anything that matches
+>> +# awk '/{FMT/' repair/progress.c
+>> +filter_repair()
+>> +{
+>> +	sed -ne '
+>> +	s/[0-9]\+/#/g;
+>> +	s/^\s\+/ /g;
+>> +	s/\(second\|minute\)s/\1/g
+>> +	/#:#:#:/p
+>> +	'
+>> +}
+>> +
+>> +echo "Format and populate"
+>> +_scratch_populate_cached nofill > $seqres.full 2>&1
+>> +
+>> +echo "Introduce a dmdelay"
+>> +_init_delay
+>> +
+>> +# Introduce a read I/O delay
+>> +# The default in common/dmdelay is a bit too agressive
+>> +BLK_DEV_SIZE=`blockdev --getsz $SCRATCH_DEV`
+>> +DELAY_TABLE_RDELAY="0 $BLK_DEV_SIZE delay $SCRATCH_DEV 0 100 $SCRATCH_DEV 0 0"
+>> +_load_delay_table $DELAY_READ
+>> +
+>> +echo "Run repair"
+>> +SCRATCH_DEV=$DELAY_DEV _scratch_xfs_repair -o ag_stride=4 -t 1 2>&1 |
+>> +        tee -a $seqres.full > $tmp.repair
+>> +
+>> +cat $tmp.repair | filter_repair | sort -u
+>> +
+>> +# success, all done
+>> +status=0
+>> +exit
+>> diff --git a/tests/xfs/521.out b/tests/xfs/521.out
+>> new file mode 100644
+>> index 00000000..03337083
+>> --- /dev/null
+>> +++ b/tests/xfs/521.out
+>> @@ -0,0 +1,15 @@
+>> +QA output created by 521
+>> +Format and populate
+>> +Introduce a dmdelay
+>> +Run repair
+>> + - #:#:#: Phase #: #% done - estimated remaining time # minute, # second
+>> + - #:#:#: Phase #: elapsed time # second - processed # inodes per minute
+>> + - #:#:#: check for inodes claiming duplicate blocks - # of # inodes done
+>> + - #:#:#: process known inodes and inode discovery - # of # inodes done
+>> + - #:#:#: process newly discovered inodes - # of # allocation groups done
+>> + - #:#:#: rebuild AG headers and trees - # of # allocation groups done
+>> + - #:#:#: scanning agi unlinked lists - # of # allocation groups done
+>> + - #:#:#: scanning filesystem freespace - # of # allocation groups done
+>> + - #:#:#: setting up duplicate extent list - # of # allocation groups done
+>> + - #:#:#: verify and correct link counts - # of # allocation groups done
+>> + - #:#:#: zeroing log - # of # blocks done
+>> diff --git a/tests/xfs/group b/tests/xfs/group
+>> index ed0d389e..1c8ec5fa 100644
+>> --- a/tests/xfs/group
+>> +++ b/tests/xfs/group
+>> @@ -517,3 +517,4 @@
+>>  518 auto quick quota
+>>  519 auto quick reflink
+>>  520 auto quick reflink
+>> +521 auto repair
+>> -- 
+>> 2.18.4
+> 
+
