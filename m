@@ -2,77 +2,167 @@ Return-Path: <SRS0=Km02=CL=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.0 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS,UNPARSEABLE_RELAY,URIBL_BLOCKED autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-13.0 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A0548C433E7
-	for <linux-fstests@archiver.kernel.org>; Wed,  2 Sep 2020 15:51:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0AAC3C433E2
+	for <linux-fstests@archiver.kernel.org>; Wed,  2 Sep 2020 16:00:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7F4D32072A
-	for <linux-fstests@archiver.kernel.org>; Wed,  2 Sep 2020 15:51:23 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D40172071B
+	for <linux-fstests@archiver.kernel.org>; Wed,  2 Sep 2020 16:00:49 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="m+Au2Fks"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726323AbgIBPvV (ORCPT
+        id S1727800AbgIBQAs (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 2 Sep 2020 11:51:21 -0400
-Received: from out20-97.mail.aliyun.com ([115.124.20.97]:47387 "EHLO
-        out20-97.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726814AbgIBPvU (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 2 Sep 2020 11:51:20 -0400
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.1132874|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_regular_dialog|0.0700758-0.000428012-0.929496;FP=0|0|0|0|0|-1|-1|-1;HT=e01a16367;MF=guan@eryu.me;NM=1;PH=DS;RN=6;RT=6;SR=0;TI=SMTPD_---.IRrhU6._1599061862;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.IRrhU6._1599061862)
-          by smtp.aliyun-inc.com(10.147.41.231);
-          Wed, 02 Sep 2020 23:51:02 +0800
-Date:   Wed, 2 Sep 2020 23:50:57 +0800
-From:   Eryu Guan <guan@eryu.me>
-To:     dsterba@suse.cz, Marcos Paulo de Souza <marcos@mpdesouza.com>,
-        dsterba@suse.com, linux-btrfs@vger.kernel.org,
-        fstests@vger.kernel.org, Marcos Paulo de Souza <mpdesouza@suse.com>
-Subject: Re: [PATCH] fstests: btrfs/218 check if mount opts are applied
-Message-ID: <20200902155057.GG3853@desktop>
-References: <20200804205648.11284-1-marcos@mpdesouza.com>
- <20200830161519.GC3853@desktop>
- <20200831114503.GU28318@twin.jikos.cz>
+        Wed, 2 Sep 2020 12:00:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54736 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726247AbgIBQAr (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 2 Sep 2020 12:00:47 -0400
+Received: from mail-qk1-x743.google.com (mail-qk1-x743.google.com [IPv6:2607:f8b0:4864:20::743])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4F372C061244
+        for <fstests@vger.kernel.org>; Wed,  2 Sep 2020 09:00:47 -0700 (PDT)
+Received: by mail-qk1-x743.google.com with SMTP id f142so85304qke.13
+        for <fstests@vger.kernel.org>; Wed, 02 Sep 2020 09:00:47 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=LP/jccXDFzVTMIOyCM8pXlDUczn0AoO1cdGq1ecfNWY=;
+        b=m+Au2FksrPKilr13iLcjDh/6pDDadSFOvRUNE5ebcDT/lqs333Yq833R333g4MOwMf
+         DaOqlecl+NhNusYgyo/jsUX7NY8f8Cv0U2pf1lcs5zcSMkyHRd+FOQY2jv/rT5p8i6Wx
+         OO1vY/HfPKxCat+YUt2HtTavHKpLbJgYZ2DhIr77T+MFT0n1W8VxTkjATji6k1BtU9Cz
+         UCBR1fiqstzVgzZjb/qpPFrfI7BYfbu4HXhD2avkY3iji3brCUl2EVGloT73zm4KbIQ0
+         PIALtRvru38VLb84i/EDz7Txbik3CSa/up7TO9JKTYg/VhP3MqEYtqA8uxBRAkkPuKtu
+         rmBg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=LP/jccXDFzVTMIOyCM8pXlDUczn0AoO1cdGq1ecfNWY=;
+        b=Y1um3I0xFPldfFDc6rfZ/cN0Z+oqPM0vb2HAIwiuotCd7IRHwZihxfxrZpCoQtiwvt
+         0bKOylNOzYOoeZNPufWi99NAKvqu2YTCZEo0txg0DQVJPBw9eaVEhKtVpi2BtFG0zTKR
+         wm5UVpEpRSP4XxhJv4nSElHxmLrrYn4S1CUX2CDR118eH4IjpJgWdZeByByjhwFTHasJ
+         QgDJtSGQk4OcTPN5jOl/Py6AGHZid5Q1st04x4RL/HvrMjNywmAHxdfQAfYx3ymIzl8I
+         vrnWW2QRHr3H16nGmUDw4F27I/UtAU2ek5xSoyO13KA01pFU9b6jAUIJMeopsMaTYqD0
+         56Iw==
+X-Gm-Message-State: AOAM531jIn8fg4Pygw720nm77kip8cmmshdzI7IlY+xUsFdb9Yc1Zzxx
+        4mohGvR6fYDDjb/ECRdgy3Gr7EUz0QUveXC0p+U=
+X-Google-Smtp-Source: ABdhPJwc/Bk/yHitrxXg1+4ZdoMry31ZlSzSGMlNSzqt6gZc41iZbMFulcL9z/vnCds5FqyUaqmn4w==
+X-Received: by 2002:a37:a84a:: with SMTP id r71mr7299748qke.481.1599062446342;
+        Wed, 02 Sep 2020 09:00:46 -0700 (PDT)
+Received: from localhost (cpe-174-109-172-136.nc.res.rr.com. [174.109.172.136])
+        by smtp.gmail.com with ESMTPSA id h17sm23016qke.68.2020.09.02.09.00.45
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 02 Sep 2020 09:00:45 -0700 (PDT)
+From:   Josef Bacik <josef@toxicpanda.com>
+To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Cc:     Johannes Thumshirn <johannes.thumshirn@wdc.com>
+Subject: [PATCH][v3 fstests: add generic/609 to test O_DIRECT|O_DSYNC
+Date:   Wed,  2 Sep 2020 12:00:44 -0400
+Message-Id: <20200902160044.266690-1-josef@toxicpanda.com>
+X-Mailer: git-send-email 2.26.2
+In-Reply-To: <f5ba8625d6277035b69e466f6ea87f19620f7fcb.1599058822.git.josef@toxicpanda.com>
+References: <f5ba8625d6277035b69e466f6ea87f19620f7fcb.1599058822.git.josef@toxicpanda.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200831114503.GU28318@twin.jikos.cz>
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Aug 31, 2020 at 01:45:03PM +0200, David Sterba wrote:
-> On Mon, Aug 31, 2020 at 12:15:19AM +0800, Eryu Guan wrote:
-> > On Tue, Aug 04, 2020 at 05:56:48PM -0300, Marcos Paulo de Souza wrote:
-> > > From: Marcos Paulo de Souza <mpdesouza@suse.com>
-> > > 
-> > > This new test will apply different mount points and check if they were applied
-> > > by reading /proc/self/mounts. Almost all available btrfs options are tested
-> > > here, leaving only device=, which is tested in btrfs/125 and space_cache, tested
-> > > in btrfs/131.
-> > > 
-> > > This test does not apply any workload after the fs is mounted, just checks is
-> > > the option was set/unset correctly.
-> > > 
-> > > Signed-off-by: Marcos Paulo de Souza <mpdesouza@suse.com>
-> > 
-> > I'm seeing this diff when testing with v5.9-rc2 kernel and v5.4
-> > btrfs-progs, is that expected?
-> > 
-> >     +Could not find 'relatime,compress=lzo,space_cache,subvolid' in 'rw,relatime,compress=lzo:3,space_cache,subvolid=5,subvol=/', using 'compress=lzo'
-> >     +Could not find 'relatime,compress=lzo,space_cache,subvolid' in 'rw,relatime,compress=lzo:3,space_cache,subvolid=5,subvol=/', using 'compress=lzo'
-> >     +Could not find 'relatime,compress-force=lzo,space_cache,subvolid' in 'rw,relatime,compress-force=lzo:4,space_cache,subvolid=5,subvol=/', using 'compress-force=lzo'
-> >     +Could not find 'relatime,compress-force=lzo,space_cache,subvolid' in 'rw,relatime,compress-force=lzo:4,space_cache,subvolid=5,subvol=/', using 'compress-force=lzo'
-> >      Silence is golden
-> 
-> This should be fixed by 282dd7d77184 ("btrfs: reset compression level
-> for lzo on remount") that is in v5.9-rc3.
+We had a problem recently where btrfs would deadlock with
+O_DIRECT|O_DSYNC because of an unexpected dependency on ->fsync in
+iomap.  This was only caught by chance with aiostress, because weirdly
+we don't actually test this particular configuration anywhere in
+xfstests.  Fix this by adding a basic test that just does
+O_DIRECT|O_DSYNC writes.  With this test the box deadlocks right away
+with Btrfs, which would have been helpful in finding this issue before
+the patches were merged.
 
-Great!
+Reviewed-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
+Signed-off-by: Josef Bacik <josef@toxicpanda.com>
+---
+v2->v3:
+- This time with 609.out added, verified it passed with xfs.
 
-Marcos, would you please refresh the patch to include the kernel fix in
-commit log? Thanks!
+ tests/generic/609     | 43 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/609.out |  3 +++
+ tests/generic/group   |  1 +
+ 3 files changed, 47 insertions(+)
+ create mode 100755 tests/generic/609
+ create mode 100644 tests/generic/609.out
 
-Eryu
+diff --git a/tests/generic/609 b/tests/generic/609
+new file mode 100755
+index 00000000..3d1c97b2
+--- /dev/null
++++ b/tests/generic/609
+@@ -0,0 +1,43 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2020 Josef Bacik.  All Rights Reserved.
++#
++# FS QA Test 609
++#
++# iomap can call generic_write_sync() if we're O_DSYNC, so write a basic test to
++# exercise O_DSYNC so any unsuspecting file systems will get lockdep warnings if
++# their locking isn't compatible.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++	rm -rf $TEST_DIR/file
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# Modify as appropriate.
++_supported_fs generic
++_supported_os Linux
++_require_test
++_require_xfs_io_command "pwrite" "-DV"
++
++$XFS_IO_PROG -f -d -c "pwrite -D -V 1 0 4k"  $TEST_DIR/file | _filter_xfs_io
++
++status=0
++exit
+diff --git a/tests/generic/609.out b/tests/generic/609.out
+new file mode 100644
+index 00000000..db3242cb
+--- /dev/null
++++ b/tests/generic/609.out
+@@ -0,0 +1,3 @@
++QA output created by 609
++wrote 4096/4096 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+diff --git a/tests/generic/group b/tests/generic/group
+index aa969bcb..ae2567a0 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -611,3 +611,4 @@
+ 606 auto attr quick dax
+ 607 auto attr quick dax
+ 608 auto attr quick dax
++609 auto quick
+-- 
+2.28.0
+
