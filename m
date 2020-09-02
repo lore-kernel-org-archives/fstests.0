@@ -2,249 +2,125 @@ Return-Path: <SRS0=Km02=CL=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	NICE_REPLY_A,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-4.0 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5DDA2C433E7
-	for <linux-fstests@archiver.kernel.org>; Wed,  2 Sep 2020 15:30:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0AFCFC433E7
+	for <linux-fstests@archiver.kernel.org>; Wed,  2 Sep 2020 15:37:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3008620767
-	for <linux-fstests@archiver.kernel.org>; Wed,  2 Sep 2020 15:30:04 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CFC0D207EA
+	for <linux-fstests@archiver.kernel.org>; Wed,  2 Sep 2020 15:37:20 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="IEpT4YXg"
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="d+W4al6D";
+	dkim=pass (1024-bit key) header.d=sharedspace.onmicrosoft.com header.i=@sharedspace.onmicrosoft.com header.b="hdIO2sEF"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728274AbgIBPaB (ORCPT
+        id S1728287AbgIBPhQ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 2 Sep 2020 11:30:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49974 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728306AbgIBP3z (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 2 Sep 2020 11:29:55 -0400
-Received: from mail-qv1-xf44.google.com (mail-qv1-xf44.google.com [IPv6:2607:f8b0:4864:20::f44])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1CE86C061245
-        for <fstests@vger.kernel.org>; Wed,  2 Sep 2020 08:29:55 -0700 (PDT)
-Received: by mail-qv1-xf44.google.com with SMTP id m14so2394232qvt.1
-        for <fstests@vger.kernel.org>; Wed, 02 Sep 2020 08:29:55 -0700 (PDT)
+        Wed, 2 Sep 2020 11:37:16 -0400
+Received: from esa4.hgst.iphmx.com ([216.71.154.42]:28861 "EHLO
+        esa4.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728130AbgIBPDq (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 2 Sep 2020 11:03:46 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1599059025; x=1630595025;
+  h=from:to:subject:date:message-id:references:
+   content-transfer-encoding:mime-version;
+  bh=8i15wle1U4g9zkPMNWCzeLegDLgwEpE+FRiKCRShuK0=;
+  b=d+W4al6DwcOEFbLyjnx3mAqNGItXOC3JxWdYBgBnH/mjqcYu4MjVSOiq
+   2C9NyL7aqL8ytG8GVfDQ/dZkUdXn+XS7KDfwFzpeoNZs4t3sWTlnxHqOq
+   w8UAQ/VaJC+KyhNebiWUbwtfTWcC1bVpVbAuxSQQTZKbIx17yf4Yw9+NI
+   XBFof436Ki2uDR/hICcSthxi5/e5K8YIzMb1M6HQZ5hm2t3EuGAl7S/Nq
+   kl4drysIXovJkpPGivOq4cFrC7uTaKNy7otGzy/L0sNS4DG9IPTJJfGpv
+   gqPhRkBQEP4cglTXaaGrj8s5djgnfbVBefR9SVrgIAbMNQMKd+etWb1jY
+   g==;
+IronPort-SDR: JewXucGFTXSP/vHd08v3WpAXetJg4hng86zb3BoeJ/+Um/czRyFC/c207txzE2fPQAHIPbS9ls
+ xP5+uxcchHXeUCUqaMTgWRh/qC2LnqIeym5De2gU5RErw4OMBal5xzyWtmVdW8mZjc/eO9l+pL
+ gApevTvHY2Fd2Ub38NWvPGSnG4or5tlyWiv/u/Wy2GA42Y1mlWn5zthE8x2GZAnEOa0bH1FRQz
+ K3ohPP2A2KooohzB36A9F8vdNIJnvjt+2zA+14ednNKNfmTJtKI5p+ZcQIUk19TVFPm8MIkXL4
+ t2k=
+X-IronPort-AV: E=Sophos;i="5.76,383,1592841600"; 
+   d="scan'208";a="146345515"
+Received: from mail-mw2nam10lp2109.outbound.protection.outlook.com (HELO NAM10-MW2-obe.outbound.protection.outlook.com) ([104.47.55.109])
+  by ob1.hgst.iphmx.com with ESMTP; 02 Sep 2020 23:03:44 +0800
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=IfVyH2UmyujZf2TSZMCugjEMQ2ydvNQJsn/0y//51n8/o3n94WgT6wbWElzA0r7E1WifTv9eiheOahH9f22FbQN0/ctZC9CzIDQsU+JQJnyLthaxoSXpBrqh4gvkHYnG0uGTweNg5x89YefNJnPPMRLZIBERLL9y9QnQ/UjG9JwS9bP2YSyQD1eTchWK6LcnKTFuybbSyoKsSr3J2LK7vGDg7dduf1MyElbbFJ2w0RQxxJDgw0YNeX0SsUPPIQTlhDdczaWCrbdwdOzZ70koZsp/KFgJXA+x30jIRaU9ezkAW4kZh8PY7MlMk9yKkP6ehaQJLeJtotUSct/L5zbSlw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=8i15wle1U4g9zkPMNWCzeLegDLgwEpE+FRiKCRShuK0=;
+ b=EMPMJEl4SLVxLLPp80wFIIVUpyFk3CZF806Jo8z3/z8mQgl/1IdWiGebJb5NuHIb4yrTGjwV/HY8qEA4bvT6yY+6t8YFM/Wx6Ftnk1YhGMg+iw7NjfwKtHmGHyrv6KgqTDJEaYYPdRKpMi70K7lgkD8Okdd4jA1Yp8XPzA4Pjg9rKvRuToUMpYpIybMykbwEhEAkdrCBfzTAyOulei6yBTlA+JvJoRlQDpOT1b1g3aJ+hpZIqgJjlqf8U16YL65+fxZoIrYS5B2aFX6n0Et0EHDcc54GSISLaXxrqPMrpzcpm/0gmf3nvSBcdWlANu5REHFGJCRKd8oLE7m0kksBzg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
+ header.d=wdc.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=NDGtHV3+xZ+QgHAPo/ikKnk1UyAjOinZA/yddNp58eo=;
-        b=IEpT4YXgeD3Ril/IndxdyXZOz8FjUL/o7Fvgf2p6tr2TlXS3m+4d4LiZ+ww/6Fg6KQ
-         yYqsISvKzEL8nZSb+/jrm6vsL0bMouLGcb3BeQVMp3yPyPwVXwqmHCuMU/0mq7sbToa+
-         iAfOHyP61gg3OiYxowgey5qFLKRIKNsliQebtLg800JXYcnt0Ezh/dj7WndLis2zXVP1
-         vqQgGAjaxWKem5AFk/ymMULj3aCCk9acdN4iLKfPcZAe60+N/pYV+aV39i7Xe49Y3p8O
-         KP5EXzmB9ZXlmFkXKj9I5dP9toHd5YFEW1o3GQv27+c8oOD8GzXiFJk0wsAInsGx+kgH
-         wCYg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=NDGtHV3+xZ+QgHAPo/ikKnk1UyAjOinZA/yddNp58eo=;
-        b=DmDO7Za7mYFxQyt3Rgr+QQpwiVSrXbqQtWenD8L2H5dIx++upVAvQuWGwrxhYK03Cf
-         7HbfxiyVAOtM53qi31ILuse2y6kfIeMrmOhhiy2vyoJJTTcfqtTPXBEQubFMtlE9pQEl
-         pqKVoNXLBgucXBjswlDAe8CNz+/aZ+EuTQMr82q0i1CmZBAiBXE9bz3UwkUaRrKi3Cul
-         zGtwEU1J5JEnxR9K9pSrdFla0pOHMHLzyTuiKg2YfpF9eX3lHFGzWAEW+h92tFL1DY7G
-         +WfD3VQmMct7KZENDeyaPf8uwYgp2UWMneyHv7cEtK0hOFJec9jDvlq1N1pDmSQm8z22
-         pG9A==
-X-Gm-Message-State: AOAM531R3gK1m29I0/6LlE+AEmBEh3+OVSqjKX/tWVHzrEbt1mbROJPP
-        yCz5yxLbyJcKvuhQAG4XbURE/jHB3lx2QEG4bEg=
-X-Google-Smtp-Source: ABdhPJwkIHT5mNGTbhNPgD4xPNTrA7+U4P37ua0k7LDtQjVL6ftn4oXayMpgzlgWHKjaDp5WpJfAJw==
-X-Received: by 2002:a0c:c3cb:: with SMTP id p11mr3067961qvi.101.1599060593704;
-        Wed, 02 Sep 2020 08:29:53 -0700 (PDT)
-Received: from [192.168.1.45] (cpe-174-109-172-136.nc.res.rr.com. [174.109.172.136])
-        by smtp.gmail.com with ESMTPSA id i65sm4756556qkf.126.2020.09.02.08.29.52
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 02 Sep 2020 08:29:52 -0700 (PDT)
+ d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=8i15wle1U4g9zkPMNWCzeLegDLgwEpE+FRiKCRShuK0=;
+ b=hdIO2sEFsdZcTjsbQajnZTfzDj3GknWv7dB5MrG89qmiL5QvALnFWaeUSVTCHL0J7kDXNp+l0NmwLL/Yg5PpmeC+VmH++NCC5grmQM5jYDqYpRGXAr71ImUp/aT8vXRD+tAHa/mbAumLtbCpzka8UeyyQeFFNpQGIMfxq8y14Xo=
+Received: from SN4PR0401MB3598.namprd04.prod.outlook.com
+ (2603:10b6:803:47::21) by SN6PR04MB3965.namprd04.prod.outlook.com
+ (2603:10b6:805:44::30) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3326.24; Wed, 2 Sep
+ 2020 15:03:43 +0000
+Received: from SN4PR0401MB3598.namprd04.prod.outlook.com
+ ([fe80::457e:5fe9:2ae3:e738]) by SN4PR0401MB3598.namprd04.prod.outlook.com
+ ([fe80::457e:5fe9:2ae3:e738%7]) with mapi id 15.20.3326.023; Wed, 2 Sep 2020
+ 15:03:43 +0000
+From:   Johannes Thumshirn <Johannes.Thumshirn@wdc.com>
+To:     Josef Bacik <josef@toxicpanda.com>,
+        "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>,
+        "fstests@vger.kernel.org" <fstests@vger.kernel.org>
 Subject: Re: [PATCH] fstests: add generic/609 to test O_DIRECT|O_DSYNC
-To:     fdmanana@gmail.com
-Cc:     linux-btrfs <linux-btrfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>
+Thread-Topic: [PATCH] fstests: add generic/609 to test O_DIRECT|O_DSYNC
+Thread-Index: AQHWgTneDcWxsIEHCkGWset2dorjTw==
+Date:   Wed, 2 Sep 2020 15:03:43 +0000
+Message-ID: <SN4PR0401MB35983E735C2BDCCE839570ED9B2F0@SN4PR0401MB3598.namprd04.prod.outlook.com>
 References: <f5ba8625d6277035b69e466f6ea87f19620f7fcb.1599058822.git.josef@toxicpanda.com>
- <CAL3q7H5VEHK3rduT5gELdSd9EF3g8LLqJgkyHKdA-VUYSni37w@mail.gmail.com>
-From:   Josef Bacik <josef@toxicpanda.com>
-Message-ID: <3a696ffa-905f-fd28-1d25-790ac450ec0f@toxicpanda.com>
-Date:   Wed, 2 Sep 2020 11:29:51 -0400
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:68.0)
- Gecko/20100101 Thunderbird/68.12.0
-MIME-Version: 1.0
-In-Reply-To: <CAL3q7H5VEHK3rduT5gELdSd9EF3g8LLqJgkyHKdA-VUYSni37w@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
+Accept-Language: en-US
 Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: toxicpanda.com; dkim=none (message not signed)
+ header.d=none;toxicpanda.com; dmarc=none action=none header.from=wdc.com;
+x-originating-ip: [2001:a62:1590:f101:1584:4722:fd5f:b30e]
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-ht: Tenant
+x-ms-office365-filtering-correlation-id: d4e9e615-5ab3-4557-d6a5-08d84f5162a3
+x-ms-traffictypediagnostic: SN6PR04MB3965:
+x-microsoft-antispam-prvs: <SN6PR04MB39655C9B59B4E05A5C62BB529B2F0@SN6PR04MB3965.namprd04.prod.outlook.com>
+wdcipoutbound: EOP-TRUE
+x-ms-oob-tlc-oobclassifiers: OLM:2201;
+x-ms-exchange-senderadcheck: 1
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: fj6q/0anFNYB27zJwag6Ld6W4AMQL9HJyLZf8x4T4sKN6cFOAC3r26D5hwrZAAV7KwrTfIOghML6dhcI6kPJcM731wFhd3Y4gh27QT5CRJk41K9wMtmzfzddlMHBOOI3W6BVP5/f1CmAerSHmLa5Ma1lj+tm8sUG0+EQ6vZbUHEFOM2DhqyJUh8P9ioNyzCBuaYYe7qF8E40luquRpqC484ekd7cAcxeJL58EHNMkVC6zkU+WJk43HHX7vfx/vCvXx0nNFBcDL2yWXs4/UmUjfKB6RRSYHfl26SvBkdB1XyVVyctzX7S4udv/jNe/p9pBIk6ra8ju25rLbXUU/GhY7ynnph++kGU4OV6jImlZ6KSICmrLF+bNs0+JgtL0NwB
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SN4PR0401MB3598.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(366004)(136003)(346002)(39850400004)(396003)(376002)(52536014)(110136005)(316002)(478600001)(55016002)(8936002)(83380400001)(9686003)(71200400001)(5660300002)(8676002)(186003)(64756008)(66446008)(558084003)(66476007)(66946007)(86362001)(66556008)(6506007)(33656002)(76116006)(2906002)(53546011)(7696005)(91956017)(41533002);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata: QnO17YSPg2RYYdLDaKMFJjhcbGxkiaIu33qolBIebPAwwcZK9OSfkANZGRd5ik3h+JjekXicR4Npz+TnP6Rk00k3v6VZkJL97YtrEtfsUpZBzTW7MNhpoZQM+uQm2Ius5kehOh2AN5tEM1Gc7f/1IAIa1PZ2H3/kpcT3CR/AyOVKavvTAZNkxnkPVOO1Piyn4JcsGuusHxECwdpMUmLLtirsMKYXgMkAb9RisCsoCymJ3jqsRPiqzpHw3iRCHfGrR6JMkiZci9j1aLX0azzFKcmAA4vr4UVNshpv3tgcpuTUgQMmLats8RyKx6Hkok2hjH7Rlsxu4vxmqGCCfW4t7TdNlO0ONKBIUhhcE99ABICh8iukP1L3/RXP6IDfF1ct6yjLx96LMlSQsLOZrEtK/LMVnBQR9NcGfSmCC2au6w/yeHAcNhdGvaHc/eAKmkQ2yUOaSZJHD83lvAW1ktJH913M6bf2PpOZG/LhCPqI62zHRzDKk9gp4T7JUUpM6rUmk1bhG7G1vtuNFjhmpcpovSuxZ4QASGUSlOrGN/XzknowgUmm9fz6p+2lCy8SC2CWEO8YSslR1l6aw6eUAnhpBEzv0l/osMI0wU5QBRzpBadpRIleSZ6jBaHN6KZwPtKxdC6yYq3ODJHwDQ78D/NKNum3sndnqExgYZhELQbbkzOH7OrCodwPJjIofrNso7EL1J/B5ZeHeXLL6WUiloV6dQ==
+x-ms-exchange-transport-forked: True
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+MIME-Version: 1.0
+X-OriginatorOrg: wdc.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: SN4PR0401MB3598.namprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: d4e9e615-5ab3-4557-d6a5-08d84f5162a3
+X-MS-Exchange-CrossTenant-originalarrivaltime: 02 Sep 2020 15:03:43.6716
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: K301U/fwa056+FxENt05bpQ1uSNA2f9fml5wCnIIA8sS9TM2mBMAwq0yrShpFwZp+i7W2vz4PfxxnGfHX5aH2NGLedBdwUu8W8IwHw5MTl4=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: SN6PR04MB3965
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 9/2/20 11:18 AM, Filipe Manana wrote:
-> On Wed, Sep 2, 2020 at 4:03 PM Josef Bacik <josef@toxicpanda.com> wrote:
->>
->> We had a problem recently where btrfs would deadlock with
->> O_DIRECT|O_DSYNC because of an unexpected dependency on ->fsync in
->> iomap.  This was only caught by chance with aiostress, because weirdly
->> we don't actually test this particular configuration anywhere in
->> xfstests.  Fix this by adding a basic test that just does
->> O_DIRECT|O_DSYNC writes.  With this test the box deadlocks right away
->> with Btrfs, which would have been helpful in finding this issue before
->> the patches were merged.
->>
->> Signed-off-by: Josef Bacik <josef@toxicpanda.com>
->> ---
->>   .gitignore                      |  1 +
->>   src/aio-dio-regress/dio-dsync.c | 61 +++++++++++++++++++++++++++++++++
->>   tests/generic/609               | 44 ++++++++++++++++++++++++
->>   tests/generic/group             |  1 +
->>   4 files changed, 107 insertions(+)
->>   create mode 100644 src/aio-dio-regress/dio-dsync.c
->>   create mode 100755 tests/generic/609
->>
->> diff --git a/.gitignore b/.gitignore
->> index 5f5c4a0f..07c8014b 100644
->> --- a/.gitignore
->> +++ b/.gitignore
->> @@ -175,6 +175,7 @@
->>   /src/aio-dio-regress/aio-last-ref-held-by-io
->>   /src/aio-dio-regress/aiocp
->>   /src/aio-dio-regress/aiodio_sparse2
->> +/src/aio-dio-regress/dio-dsync
->>   /src/log-writes/replay-log
->>   /src/perf/*.pyc
->>
->> diff --git a/src/aio-dio-regress/dio-dsync.c b/src/aio-dio-regress/dio-dsync.c
->> new file mode 100644
->> index 00000000..53cda9ac
->> --- /dev/null
->> +++ b/src/aio-dio-regress/dio-dsync.c
->> @@ -0,0 +1,61 @@
->> +// SPDX-License-Identifier: GPL-2.0-or-newer
->> +/*
->> + * Copyright (c) 2020 Facebook.
->> + * All Rights Reserved.
->> + *
->> + * Do some O_DIRECT writes with O_DSYNC to exercise this path.
->> + */
->> +#include <stdio.h>
->> +#include <sys/types.h>
->> +#include <sys/stat.h>
->> +#include <fcntl.h>
->> +#include <unistd.h>
->> +#include <stdlib.h>
->> +#include <errno.h>
->> +#include <string.h>
->> +
->> +int main(int argc, char **argv)
->> +{
->> +       struct stat st;
->> +       char *buf;
->> +       ssize_t ret;
->> +       int fd, i;
->> +       int bufsize;
->> +
->> +       if (argc != 2) {
->> +               printf("Usage: %s filename\n", argv[0]);
->> +               return 1;
->> +       }
->> +
->> +       fd = open(argv[1], O_DIRECT | O_RDWR | O_TRUNC | O_CREAT | O_DSYNC,
->> +                 0644);
->> +       if (fd < 0) {
->> +               perror(argv[1]);
->> +               return 1;
->> +       }
->> +
->> +       if (fstat(fd, &st)) {
->> +               perror(argv[1]);
->> +               return 1;
->> +       }
->> +       bufsize = st.st_blksize * 10;
->> +
->> +       ret = posix_memalign((void **)&buf, st.st_blksize, bufsize);
->> +       if (ret) {
->> +               errno = ret;
->> +               perror("allocating buffer");
->> +               return 1;
->> +       }
->> +
->> +       memset(buf, 'a', bufsize);
->> +       for (i = 0; i < 10; i++) {
->> +               ret = write(fd, buf, bufsize);
->> +               if (ret < 0) {
->> +                       perror("writing");
->> +                       return 1;
->> +               }
->> +       }
->> +       free(buf);
->> +       close(fd);
->> +       return 0;
->> +}
->> diff --git a/tests/generic/609 b/tests/generic/609
->> new file mode 100755
->> index 00000000..8a888eb9
->> --- /dev/null
->> +++ b/tests/generic/609
->> @@ -0,0 +1,44 @@
->> +#! /bin/bash
->> +# SPDX-License-Identifier: GPL-2.0
->> +# Copyright (c) 2020 Josef Bacik.  All Rights Reserved.
->> +#
->> +# FS QA Test 609
->> +#
->> +# iomap can call generic_write_sync() if we're O_DSYNC, so write a basic test to
->> +# exercise O_DSYNC so any unsuspecting file systems will get lockdep warnings if
->> +# they're locking isn't compatible.
->> +#
->> +seq=`basename $0`
->> +seqres=$RESULT_DIR/$seq
->> +echo "QA output created by $seq"
->> +
->> +here=`pwd`
->> +tmp=/tmp/$$
->> +status=1       # failure is the default!
->> +trap "_cleanup; exit \$status" 0 1 2 3 15
->> +
->> +_cleanup()
->> +{
->> +       cd /
->> +       rm -f $tmp.*
->> +       rm -rf $TEST_DIR/file
->> +}
->> +
->> +# get standard environment, filters and checks
->> +. ./common/rc
->> +. ./common/filter
->> +
->> +# remove previous $seqres.full before test
->> +rm -f $seqres.full
->> +
->> +# Modify as appropriate.
->> +_supported_fs generic
->> +_supported_os Linux
->> +_require_test
->> +_require_aiodio dio-dsync
->> +
->> +$AIO_TEST $TEST_DIR/file
-> 
-> This can be triggered with xfs_io and without adding a new test program:
-> 
-> #!/bin/bash
-> 
-> mkfs.btrfs -f /dev/sdj
-> mount /dev/sdj /mnt/sdj
-> 
-> xfs_io -f -d -c "pwrite -D -V 1 0 4K" /mnt/sdj/foobar
-> 
->
-
-Ah that's how you do it, I didn't realize I could pass the open flags on the 
-command line, so I had done something wonkey like
-
-xfs_io -c "open -fds FILE" -c "pwrite"
-
-and it hadn't worked, I really didn't want to write a bunch of code.  Thanks, 
-I'll fix that,
-
-Josef
+On 02/09/2020 17:00, Josef Bacik wrote:=0A=
+> +# they're locking isn't compatible.=0A=
+=0A=
+Nit: their isn't it?=0A=
+=0A=
+Otherwise looks good,=0A=
+Reviewed-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>=0A=
