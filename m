@@ -2,158 +2,73 @@ Return-Path: <SRS0=Km02=CL=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.0 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.0 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS,UNPARSEABLE_RELAY autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0970DC433E2
-	for <linux-fstests@archiver.kernel.org>; Wed,  2 Sep 2020 15:37:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5C96DC433E7
+	for <linux-fstests@archiver.kernel.org>; Wed,  2 Sep 2020 15:49:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C54C8207EA
-	for <linux-fstests@archiver.kernel.org>; Wed,  2 Sep 2020 15:37:26 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="A0T8u3lf"
+	by mail.kernel.org (Postfix) with ESMTP id 308FF204FD
+	for <linux-fstests@archiver.kernel.org>; Wed,  2 Sep 2020 15:49:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728330AbgIBPhV (ORCPT
+        id S1726377AbgIBPtQ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 2 Sep 2020 11:37:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51116 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727095AbgIBPhN (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 2 Sep 2020 11:37:13 -0400
-Received: from mail-qt1-x841.google.com (mail-qt1-x841.google.com [IPv6:2607:f8b0:4864:20::841])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 880B4C061245
-        for <fstests@vger.kernel.org>; Wed,  2 Sep 2020 08:37:12 -0700 (PDT)
-Received: by mail-qt1-x841.google.com with SMTP id d27so3872154qtg.4
-        for <fstests@vger.kernel.org>; Wed, 02 Sep 2020 08:37:12 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=Bdk4rkVQAGGmlAI+Nb0YCJGt7pD1sH8ZFCaFtWkmtl0=;
-        b=A0T8u3lfOgOilEsxl8/PZL3imRS+3vfvEtQbkaqXi0F2JnD1oTjoiS6a+MgFQHyCky
-         y43F07gjVzJqU+xJ8LbnmXmlcoufnxDdfXSb9YCvm7P+8kV9NzCpSYjjxx3eOqiPG0Ax
-         1CdqOePJ/yeaYz+jMePT1u5J29S0ESB6AGWURNl2vRfERCQnCuBuCcjpBfItIRwaYW50
-         LRtAhkDBztGP8gnctEWyZR29+9XKZkd3fEgAMTmZ5elTrUrO9Q/8OVbMGzzQbtUurH0W
-         fb+uIVsWEVOa2BBrjB48JgQxT4ytkzm0xrXTslx47g0fsXL0J73EXD8BDD867ZJmAna8
-         zGqg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=Bdk4rkVQAGGmlAI+Nb0YCJGt7pD1sH8ZFCaFtWkmtl0=;
-        b=Bhh8C5tP/7wHyLGLUJfKMna6dmzH39OqZl0dI/VIZ85QG/c1Ga1C84KmV4t0kshEty
-         TmooRWPOwrjaOpxsQDIegclwzBsJ1HbfXdXJwM+Kz3+eXQa5wVkw1CPBgfKKu/q5cuCJ
-         HUV4tr0dFrBnc60nyjVP0m8qApQiuE/gMVbQgPjBDm/mm6C/I1NU+CwHzV29XojZAcrD
-         5poIYCVX6oiahL8IkbxYZ+q8lyyryZcO/NQRXlOawUSneaMYSc74WbODkQYr9s0Ln/DT
-         If3Kn1lmNpeUeFSZsW3k4EtzzYjO5pWqWZEAHjU1DhzrydcOkvg/pJf/RdvhXk4XwKT3
-         aO8Q==
-X-Gm-Message-State: AOAM531UdStVrmCKooi1uOQoXFEi/86MrEOhBOINKhOTqnhm2ZMt7Vcf
-        +4TTCa9iHpxB3aAYpP/bgNikQZ6I4FAotClgkYI=
-X-Google-Smtp-Source: ABdhPJy5JZGjDYdLKOtJQBLghQh0G5jQyYTP4dCoC7N1Oa4N132EvmjJ/j13FEQe2zLAxSg2vKSI9g==
-X-Received: by 2002:ac8:47d3:: with SMTP id d19mr7389544qtr.263.1599061031698;
-        Wed, 02 Sep 2020 08:37:11 -0700 (PDT)
-Received: from localhost (cpe-174-109-172-136.nc.res.rr.com. [174.109.172.136])
-        by smtp.gmail.com with ESMTPSA id x126sm5046655qkb.101.2020.09.02.08.37.10
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 02 Sep 2020 08:37:11 -0700 (PDT)
-From:   Josef Bacik <josef@toxicpanda.com>
-To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Cc:     Johannes Thumshirn <johannes.thumshirn@wdc.com>
-Subject: [PATCH][v2] fstests: add generic/609 to test O_DIRECT|O_DSYNC
-Date:   Wed,  2 Sep 2020 11:37:09 -0400
-Message-Id: <32b2e9a1d92e875a60ff6ff83ba5e1e386118df5.1599060956.git.josef@toxicpanda.com>
-X-Mailer: git-send-email 2.26.2
-In-Reply-To: <f5ba8625d6277035b69e466f6ea87f19620f7fcb.1599058822.git.josef@toxicpanda.com>
-References: <f5ba8625d6277035b69e466f6ea87f19620f7fcb.1599058822.git.josef@toxicpanda.com>
+        Wed, 2 Sep 2020 11:49:16 -0400
+Received: from out20-50.mail.aliyun.com ([115.124.20.50]:35782 "EHLO
+        out20-50.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726193AbgIBPtN (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 2 Sep 2020 11:49:13 -0400
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07754757|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_social|0.00410682-0.00142377-0.994469;FP=0|0|0|0|0|-1|-1|-1;HT=e02c03307;MF=guan@eryu.me;NM=1;PH=DS;RN=5;RT=5;SR=0;TI=SMTPD_---.IRsBH2L_1599061740;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.IRsBH2L_1599061740)
+          by smtp.aliyun-inc.com(10.147.40.200);
+          Wed, 02 Sep 2020 23:49:01 +0800
+Date:   Wed, 2 Sep 2020 23:48:55 +0800
+From:   Eryu Guan <guan@eryu.me>
+To:     Hou Tao <houtao1@huawei.com>
+Cc:     richard@nod.at, guaneryu@gmail.com, yuchao0@huawei.com,
+        fstests@vger.kernel.org
+Subject: Re: [PATCH v2 1/2] generic: add test for race between listxattr and
+ setxatr
+Message-ID: <20200902154855.GF3853@desktop>
+References: <364596a1-c9bb-3a10-a132-0f43907c2241@huawei.com>
+ <20200822114132.61227-1-houtao1@huawei.com>
+ <20200830162322.GD3853@desktop>
+ <c41ee2c2-f08f-be1f-b7a3-5cc52b49d29a@huawei.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <c41ee2c2-f08f-be1f-b7a3-5cc52b49d29a@huawei.com>
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-We had a problem recently where btrfs would deadlock with
-O_DIRECT|O_DSYNC because of an unexpected dependency on ->fsync in
-iomap.  This was only caught by chance with aiostress, because weirdly
-we don't actually test this particular configuration anywhere in
-xfstests.  Fix this by adding a basic test that just does
-O_DIRECT|O_DSYNC writes.  With this test the box deadlocks right away
-with Btrfs, which would have been helpful in finding this issue before
-the patches were merged.
+On Mon, Aug 31, 2020 at 11:01:05AM +0800, Hou Tao wrote:
+> Hi,
+> 
+> On 2020/8/31 0:23, Eryu Guan wrote:
+> > On Sat, Aug 22, 2020 at 07:41:32PM +0800, Hou Tao wrote:
+> >> Add reproducer for a bug on ubifs where listxattr() copies
+> >> the newly created xattr names regardless of the remaining
+> >> buffer size, fails the assertion of used buffer size,
+> >> and may corrupt buffer memory.
+> >>
+> >> Signed-off-by: Hou Tao <houtao1@huawei.com>
+> >> ---
+> >> v2: accommodate f2fs by reducing the number of created xattrs for f2fs
+> > 
+> > Thanks for the test and revision! Is there a fix available for the ubifs
+> > bug? If so would you please mention the kernel commit ID in commit log
+> > as well?
+> > 
+> The fixes [1] have not been reviewed yet, so we may need to hold on until the fixes get merged ?
+> 
+> [1]: https://lore.kernel.org/linux-mtd/20200630130438.141649-1-houtao1@huawei.com/
 
-Reviewed-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
-Signed-off-by: Josef Bacik <josef@toxicpanda.com>
----
-v1->v2:
-- Fix the spelling thing Johannes spotted.
-- Use xfs_io like a normal person.
+It's better to have the fixes merged first, but we do merge tests before
+the fixes landed in. But I'd like to see at least some reviews/acks on
+the fixes first.
 
- tests/generic/609   | 44 ++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/group |  1 +
- 2 files changed, 45 insertions(+)
- create mode 100755 tests/generic/609
-
-diff --git a/tests/generic/609 b/tests/generic/609
-new file mode 100755
-index 00000000..6f3ab055
---- /dev/null
-+++ b/tests/generic/609
-@@ -0,0 +1,44 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2020 Josef Bacik.  All Rights Reserved.
-+#
-+# FS QA Test 609
-+#
-+# iomap can call generic_write_sync() if we're O_DSYNC, so write a basic test to
-+# exercise O_DSYNC so any unsuspecting file systems will get lockdep warnings if
-+# their locking isn't compatible.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+	rm -rf $TEST_DIR/file
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# Modify as appropriate.
-+_supported_fs generic
-+_supported_os Linux
-+_require_test
-+_require_xfs_io_command "pwrite" "-DV"
-+
-+$XFS_IO_PROG -f -d -c "pwrite -D -V 1 0 4k"  $TEST_DIR/file
-+
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/generic/group b/tests/generic/group
-index aa969bcb..ae2567a0 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -611,3 +611,4 @@
- 606 auto attr quick dax
- 607 auto attr quick dax
- 608 auto attr quick dax
-+609 auto quick
--- 
-2.26.2
-
+Thanks,
+Eryu
