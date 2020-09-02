@@ -7,63 +7,66 @@ X-Spam-Status: No, score=-13.0 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CBB11C433E2
-	for <linux-fstests@archiver.kernel.org>; Wed,  2 Sep 2020 17:03:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 732AEC433E2
+	for <linux-fstests@archiver.kernel.org>; Wed,  2 Sep 2020 17:10:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A663B2067C
-	for <linux-fstests@archiver.kernel.org>; Wed,  2 Sep 2020 17:03:52 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 369B9207EA
+	for <linux-fstests@archiver.kernel.org>; Wed,  2 Sep 2020 17:10:42 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="MzN16LBu"
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="DefJW2za"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726293AbgIBRDw (ORCPT
+        id S1726947AbgIBRKl (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 2 Sep 2020 13:03:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36312 "EHLO
+        Wed, 2 Sep 2020 13:10:41 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37398 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728115AbgIBRDt (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 2 Sep 2020 13:03:49 -0400
-Received: from mail-qv1-xf42.google.com (mail-qv1-xf42.google.com [IPv6:2607:f8b0:4864:20::f42])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3D7F6C061244
-        for <fstests@vger.kernel.org>; Wed,  2 Sep 2020 10:03:49 -0700 (PDT)
-Received: by mail-qv1-xf42.google.com with SMTP id cy2so2558166qvb.0
-        for <fstests@vger.kernel.org>; Wed, 02 Sep 2020 10:03:49 -0700 (PDT)
+        with ESMTP id S1726669AbgIBRKj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 2 Sep 2020 13:10:39 -0400
+Received: from mail-qk1-x742.google.com (mail-qk1-x742.google.com [IPv6:2607:f8b0:4864:20::742])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 442A3C061244
+        for <fstests@vger.kernel.org>; Wed,  2 Sep 2020 10:10:39 -0700 (PDT)
+Received: by mail-qk1-x742.google.com with SMTP id w186so410358qkd.1
+        for <fstests@vger.kernel.org>; Wed, 02 Sep 2020 10:10:39 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
-        h=from:to:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=e+oALn4aqSmROLT+VxjsY66j3/hBoe5K1t3AGWj4s84=;
-        b=MzN16LBud4anPVdSKQ91PIPcLMzBqdlzePpF1PoBodluMvaX+mRzBnGearE1eE+eCT
-         BX5iblJ8VZ7d5dhaJb7wAT4HslOVPiS+w680k5jhVDF3TUk6o6mSqlxZZVD6XDbTwBVo
-         xAKCPjtJJDMv+wN+a5zn+ool0Hpwerj/iqSZJe+6WIzYZ/sqSczl4aYTmdbK+Ynw34IM
-         pgIYYMcBKUlTDjzooYp60tNAelqprBTNigqMB3TCZQEfmp2ilVkD26NoOz530TipT8qL
-         PbRZvkq+CT/E7h/p5dc2OM5jJG4hJCgUagEQsdM3GRhr6r6UON6LIwcJXST49WD6X31u
-         HVMA==
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=/g6cqMHXVmB8wRLu+eAmzUbroOhh00B3gBSFyDzIicE=;
+        b=DefJW2zaytREjYgLyzG/oekWAAna2PFpCyMl4BZe0e+X1sUo6kvqwGMz768Hi77ZNH
+         dgnOsW84K6siZFmI12pcstm6O5st4CDN4uWBzv2EHOVI3YJhApKLJvS7f+xMvBDN2MCc
+         hPAhJHUVhEZMajfpFnSTVxoZx9qGZbxqzNvWI5cv6YzwUIB9D6loG3ieyZ+Da/rv95oq
+         K6HBK6JhW/+s4dXFxTAklCsPvAJcnVCT6b3l7mZzrhmmZ1u/rCuNK63q5A78FqeDSKc3
+         XQ8Fy5lvkBV8AWV7VkvXsNGm+vSzWuDry4b/RwZn3ljENtOmafkFWc81SQcFXQt3yfto
+         kCcQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=e+oALn4aqSmROLT+VxjsY66j3/hBoe5K1t3AGWj4s84=;
-        b=tiZKd79VaN35ZAHOYlk2qqWAtAQuHk8FJ0jD1F4sJ7SLr1SwFvMU0VNlAyh/M1NJ3b
-         seHrZp3uuCIKXJLiacXn7xaqy7p/bHenlCaculCsvfu7K1rN1ZSqmLHH7U6jMBFLZ+RY
-         9mQQmat03qIPXrWabvtdaFIBqKW7Pd0JBxaJQVVAp4giy7Q2z4qaN2dP8uscQhzzl7ZC
-         7WVDUff/jk4asC0Gxr6cunmmRksPxc6HtsWGyuxoxqHmJMlIy8X/VBOAQnmr8yySxOVJ
-         RkVzJwcEWDrBUKLrFculQrp6mr6QxFMnIDVF4dYINeSUJ8ncXG7YGWk7AzJfYXiEIeOv
-         6UbQ==
-X-Gm-Message-State: AOAM533e64CdmRdQJDU0peBa3yfeXKs0CfQrVRFeIabLZh35csO5Ee3+
-        z+LmsUwLcVXKLQwDkWOJxH2nbw==
-X-Google-Smtp-Source: ABdhPJwW1Ft0dYscciZN7QBlQLKbhMWvOetw+1z2dblTEdZzkrdpXyfRf2UHVVFZ2f4X7+N5O0sUhw==
-X-Received: by 2002:a0c:9c4d:: with SMTP id w13mr7737895qve.231.1599066228205;
-        Wed, 02 Sep 2020 10:03:48 -0700 (PDT)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=/g6cqMHXVmB8wRLu+eAmzUbroOhh00B3gBSFyDzIicE=;
+        b=O8cYSAzCYOEofGI91i3kxexWYrFqjFkgMv9uSQGzmDc9K4B5/Iqz5XK8o4Ih0QZV8z
+         6TxWnaD/Al25tbuRej+n9gK0OMOF5QL7iTy9fyJrIGMDbQlcXW6jSvspRVnIwDduSmAx
+         UIocAc+PfI0inB2mw4cyH858FaxCmIWeBpW+HBcMVfBbDBgHEa0Zukmq7s5o4wxPOJDh
+         re4sRr8EBXhc24m6RERu0kCS4Ek4fWuIm8k7iy4DSmBDDAlqaJ0UgPUBm1VBaNgBf5mN
+         A+2Qb3ognMK4mF6ZSYwSlL4suj0oUSgp9Ta7SDZUnM5jgJmjsYLsy1oBL5DKyBVW0Go9
+         p4Zw==
+X-Gm-Message-State: AOAM5318NpF7YrsixjlOYdOAd4kJCgieZtNzsK21iimW1SChbEOxdlv0
+        yvTUvWfXcC7MxB9OJ34FfjKg7Q==
+X-Google-Smtp-Source: ABdhPJxtXW0b5t8DfDSgLolp0STQChAoBvzb8QY2s5PLHeEZBTsV2GDhaSmvObNFg75A7/YysQlufw==
+X-Received: by 2002:a37:30d:: with SMTP id 13mr7933558qkd.44.1599066638237;
+        Wed, 02 Sep 2020 10:10:38 -0700 (PDT)
 Received: from localhost (cpe-174-109-172-136.nc.res.rr.com. [174.109.172.136])
-        by smtp.gmail.com with ESMTPSA id x124sm138923qkd.72.2020.09.02.10.03.47
+        by smtp.gmail.com with ESMTPSA id l1sm5067151qtp.96.2020.09.02.10.10.37
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 02 Sep 2020 10:03:47 -0700 (PDT)
+        Wed, 02 Sep 2020 10:10:37 -0700 (PDT)
 From:   Josef Bacik <josef@toxicpanda.com>
 To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: [PATCH] fstests: btrfs/219 add a test for some disk caching usecases
-Date:   Wed,  2 Sep 2020 13:03:45 -0400
-Message-Id: <8e841e0e05934baaf6119363414440b271426a03.1599065695.git.josef@toxicpanda.com>
+Cc:     Johannes Thumshirn <johannes.thumshirn@wdc.com>
+Subject: [PATCH][v4] fstests: add generic/609 to test O_DIRECT|O_DSYNC
+Date:   Wed,  2 Sep 2020 13:10:36 -0400
+Message-Id: <20200902171036.273416-1-josef@toxicpanda.com>
 X-Mailer: git-send-email 2.26.2
+In-Reply-To: <8e841e0e05934baaf6119363414440b271426a03.1599065695.git.josef@toxicpanda.com>
+References: <8e841e0e05934baaf6119363414440b271426a03.1599065695.git.josef@toxicpanda.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
@@ -71,44 +74,46 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This is a test to check the behavior of the disk caching code inside
-btrfs.  It's a regression test for the patch
+We had a problem recently where btrfs would deadlock with
+O_DIRECT|O_DSYNC because of an unexpected dependency on ->fsync in
+iomap.  This was only caught by chance with aiostress, because weirdly
+we don't actually test this particular configuration anywhere in
+xfstests.  Fix this by adding a basic test that just does
+O_DIRECT|O_DSYNC writes.  With this test the box deadlocks right away
+with Btrfs, which would have been helpful in finding this issue before
+the patches were merged.
 
-  btrfs: allow single disk devices to mount with older generations
-
-Thanks,
-
+Reviewed-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
 Signed-off-by: Josef Bacik <josef@toxicpanda.com>
 ---
- tests/btrfs/219     | 101 ++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/219.out |   2 +
- tests/btrfs/group   |   1 +
- 3 files changed, 104 insertions(+)
- create mode 100755 tests/btrfs/219
- create mode 100644 tests/btrfs/219.out
+v3->v4:
+- Trying to see how many times I can fuck this thing up.
+- Simplified the xfs_io command per Darrick's suggestion.
+- Added it to the rw group.
 
-diff --git a/tests/btrfs/219 b/tests/btrfs/219
+ tests/generic/609     | 43 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/609.out |  3 +++
+ tests/generic/group   |  1 +
+ 3 files changed, 47 insertions(+)
+ create mode 100755 tests/generic/609
+ create mode 100644 tests/generic/609.out
+
+diff --git a/tests/generic/609 b/tests/generic/609
 new file mode 100755
-index 00000000..14e2792f
+index 00000000..6c74ae63
 --- /dev/null
-+++ b/tests/btrfs/219
-@@ -0,0 +1,101 @@
++++ b/tests/generic/609
+@@ -0,0 +1,43 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2020 Facebook.  All Rights Reserved.
++# Copyright (c) 2020 Josef Bacik.  All Rights Reserved.
 +#
-+# FS QA Test 219
++# FS QA Test 609
 +#
-+# Test a variety of stale device usecases.  We cache the device and generation
-+# to make sure we do not allow stale devices, which can end up with some wonky
-+# behavior for loop back devices.  This was changed with
++# iomap can call generic_write_sync() if we're O_DSYNC, so write a basic test to
++# exercise O_DSYNC so any unsuspecting file systems will get lockdep warnings if
++# their locking isn't compatible.
 +#
-+#   btrfs: allow single disk devices to mount with older generations
-+#
-+# But I've added a few other test cases so it's clear what we expect to happen
-+# currently.
-+#
-+
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
 +echo "QA output created by $seq"
@@ -122,11 +127,7 @@ index 00000000..14e2792f
 +{
 +	cd /
 +	rm -f $tmp.*
-+	$UMOUNT_PROG $loop_mnt
-+	rm -rf $loop_mnt
-+	rm -rf $loop_mnt1
-+	rm -f $fs_img2 $fs_img1
-+	[ ! -z "$loop_dev" ] && _destroy_loop_device $loop_dev
++	rm -rf $TEST_DIR/file
 +}
 +
 +# get standard environment, filters and checks
@@ -136,81 +137,34 @@ index 00000000..14e2792f
 +# remove previous $seqres.full before test
 +rm -f $seqres.full
 +
-+# real QA test starts here
-+
-+_supported_fs btrfs
++# Modify as appropriate.
++_supported_fs generic
 +_supported_os Linux
 +_require_test
-+_require_loop
-+_require_btrfs_forget_or_module_loadable
++_require_xfs_io_command "pwrite"
 +
-+loop_mnt=$TEST_DIR/$seq.mnt
-+loop_mnt1=$TEST_DIR/$seq.mnt1
-+fs_img1=$TEST_DIR/$seq.img1
-+fs_img2=$TEST_DIR/$seq.img2
++$XFS_IO_PROG -f -d -s -c "pwrite 0 64k" $TEST_DIR/file | _filter_xfs_io
 +
-+mkdir $loop_mnt
-+mkdir $loop_mnt1
-+
-+$XFS_IO_PROG -f -c "truncate 256m" $fs_img1 >>$seqres.full 2>&1
-+
-+_mkfs_dev $fs_img1 >>$seqres.full 2>&1
-+cp $fs_img1 $fs_img2
-+
-+# Normal single device case, should pass just fine
-+_mount -o loop $fs_img1 $loop_mnt > /dev/null  2>&1 || \
-+	_fail "Couldn't do initial mount"
-+$UMOUNT_PROG $loop_mnt
-+
-+_btrfs_forget_or_module_reload
-+
-+# Now mount the new version again to get the higher generation cached, umount
-+# and try to mount the old version.  Mount the new version again just for good
-+# measure.
-+loop_dev=`_create_loop_device $fs_img1`
-+
-+_mount $loop_dev $loop_mnt > /dev/null 2>&1 || \
-+	_fail "Failed to mount the second time"
-+$UMOUNT_PROG $loop_mnt
-+
-+_mount -o loop $fs_img2 $loop_mnt > /dev/null 2>&1 || \
-+	_fail "We couldn't mount the old generation"
-+$UMOUNT_PROG $loop_mnt
-+
-+_mount $loop_dev $loop_mnt > /dev/null 2>&1 || \
-+	_fail "Failed to mount the second time"
-+$UMOUNT_PROG $loop_mnt
-+
-+# Now we definitely can't mount them at the same time, because we're still tied
-+# to the limitation of one fs_devices per fsid.
-+_btrfs_forget_or_module_reload
-+
-+_mount $loop_dev $loop_mnt > /dev/null 2>&1 || \
-+	_fail "Failed to mount the third time"
-+_mount -o loop $fs_img2 $loop_mnt1 > /dev/null 2>&1 && \
-+	_fail "We were allowed to mount when we should have failed"
-+
-+# success, all done
-+echo "Silence is golden"
 +status=0
 +exit
-diff --git a/tests/btrfs/219.out b/tests/btrfs/219.out
+diff --git a/tests/generic/609.out b/tests/generic/609.out
 new file mode 100644
-index 00000000..162074d3
+index 00000000..111c7fe9
 --- /dev/null
-+++ b/tests/btrfs/219.out
-@@ -0,0 +1,2 @@
-+QA output created by 219
-+Silence is golden
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 3295856d..660cdc25 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -221,3 +221,4 @@
- 216 auto quick seed
- 217 auto quick trim dangerous
- 218 auto quick volume
-+219 auto quick volume
++++ b/tests/generic/609.out
+@@ -0,0 +1,3 @@
++QA output created by 609
++wrote 65536/65536 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+diff --git a/tests/generic/group b/tests/generic/group
+index aa969bcb..ae2567a0 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -611,3 +611,4 @@
+ 606 auto attr quick dax
+ 607 auto attr quick dax
+ 608 auto attr quick dax
++609 auto quick rw
 -- 
-2.24.1
+2.28.0
 
