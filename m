@@ -2,101 +2,144 @@ Return-Path: <SRS0=Tbzv=CM=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	UNPARSEABLE_RELAY,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ADD64C433E7
-	for <linux-fstests@archiver.kernel.org>; Thu,  3 Sep 2020 03:15:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D063EC433E9
+	for <linux-fstests@archiver.kernel.org>; Thu,  3 Sep 2020 11:36:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8758B20773
-	for <linux-fstests@archiver.kernel.org>; Thu,  3 Sep 2020 03:15:04 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9929A2071B
+	for <linux-fstests@archiver.kernel.org>; Thu,  3 Sep 2020 11:36:56 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="hZ7yXQ+w"
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="PI9OU564"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726686AbgICDPE (ORCPT
+        id S1728372AbgICLgj (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 2 Sep 2020 23:15:04 -0400
-Received: from aserp2120.oracle.com ([141.146.126.78]:55384 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726528AbgICDPD (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 2 Sep 2020 23:15:03 -0400
-Received: from pps.filterd (aserp2120.oracle.com [127.0.0.1])
-        by aserp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 0833C6Et131000;
-        Thu, 3 Sep 2020 03:15:01 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=subject : to :
- references : from : message-id : date : mime-version : in-reply-to :
- content-type : content-transfer-encoding; s=corp-2020-01-29;
- bh=uSIhunwDl2BLTZ5BTUx/BRUK4Tcif98Ck9hCQW4VlKQ=;
- b=hZ7yXQ+w494xvx/LphAoyQJEoIJMxZ+O6MeG8N/PVtQ3g/mnA3Ohe+jpPWG0V6+iifcu
- XlXFdmyAOmfYSf6HCTEb7tI9nqGklrtUlzeYzNzGFr6xr0L4KbPTgN15qnVjsFC31NR7
- BwAfaL6A9iquPQD+5evuLRRZpIHP0/6epnie40vFfre3mk9z0M2IQLnUkG+bmeqJE/8W
- 5hoXGV+zyKCxKnAP3pr3thD/QJtZ1a3EnMyGa2w7z+M4ikiVsYEIpImVi8AA9ifOEBO2
- qa/g18Sxkg4QCfbGQP0Hf7E30XY5mGRPul7efiGXZKi7EkZlu41mQFvSEK9o9YjvDIFx sA== 
-Received: from userp3020.oracle.com (userp3020.oracle.com [156.151.31.79])
-        by aserp2120.oracle.com with ESMTP id 337eyme5g1-1
+        Thu, 3 Sep 2020 07:36:39 -0400
+Received: from userp2130.oracle.com ([156.151.31.86]:55242 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726327AbgICLgD (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 3 Sep 2020 07:36:03 -0400
+Received: from pps.filterd (userp2130.oracle.com [127.0.0.1])
+        by userp2130.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 083BYvkL067495;
+        Thu, 3 Sep 2020 11:35:59 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=from : to : cc :
+ subject : date : message-id : in-reply-to : references : mime-version :
+ content-transfer-encoding; s=corp-2020-01-29;
+ bh=IfHPE+ts1nqR/b1zTYKW4SBk9DCHsmArX3d9aYEecKQ=;
+ b=PI9OU564GDpWadhPd44HhZPyXVo2DLOc1/0pp6rmRfl9SFNyAm2sCRsQ6/x8S+kOqcuw
+ Rp1Sv9AT7ZuZxLTaLxyngrULAWXvum2oqGF0a90aTc5AwjWCqSEg+rgRJlANOpJqO6iZ
+ HEBkPwEsEN8mevNxWn/JE1a44UjZQQ1oOBa0Np/7D31VBO7JDgfKbL9f9KoNTMrEPSg5
+ 7dlJo+4maRC8v4bM/7WRB0Iqweb1R/qzkgCdvnQi8ZFcrYzRwo2hIMgzn1T43RVr0khC
+ 7QDUgQaDpcgOESVT7sCZvNO5hKapTzFGq8iZjPJDB1datFNAGLXJOyPa4Ro7mS3FbfzA bA== 
+Received: from aserp3030.oracle.com (aserp3030.oracle.com [141.146.126.71])
+        by userp2130.oracle.com with ESMTP id 337eer875s-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Thu, 03 Sep 2020 03:15:01 +0000
-Received: from pps.filterd (userp3020.oracle.com [127.0.0.1])
-        by userp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 0833B5EU098852;
-        Thu, 3 Sep 2020 03:13:01 GMT
-Received: from userv0122.oracle.com (userv0122.oracle.com [156.151.31.75])
-        by userp3020.oracle.com with ESMTP id 3380sv6r6h-1
+        Thu, 03 Sep 2020 11:35:59 +0000
+Received: from pps.filterd (aserp3030.oracle.com [127.0.0.1])
+        by aserp3030.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 083BZOpt027581;
+        Thu, 3 Sep 2020 11:35:58 GMT
+Received: from aserv0122.oracle.com (aserv0122.oracle.com [141.146.126.236])
+        by aserp3030.oracle.com with ESMTP id 3380krmerx-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Thu, 03 Sep 2020 03:13:01 +0000
-Received: from abhmp0009.oracle.com (abhmp0009.oracle.com [141.146.116.15])
-        by userv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 0833D0Ta014455;
-        Thu, 3 Sep 2020 03:13:00 GMT
-Received: from [192.168.1.102] (/39.109.231.106)
+        Thu, 03 Sep 2020 11:35:58 +0000
+Received: from abhmp0003.oracle.com (abhmp0003.oracle.com [141.146.116.9])
+        by aserv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 083BZvKX011173;
+        Thu, 3 Sep 2020 11:35:57 GMT
+Received: from localhost.localdomain (/39.109.231.106)
         by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Wed, 02 Sep 2020 20:12:59 -0700
-Subject: Re: [PATCH] fstests: btrfs/219 add a test for some disk caching
- usecases
-To:     Josef Bacik <josef@toxicpanda.com>, linux-btrfs@vger.kernel.org,
-        fstests@vger.kernel.org
-References: <8e841e0e05934baaf6119363414440b271426a03.1599065695.git.josef@toxicpanda.com>
+        with ESMTP ; Thu, 03 Sep 2020 04:35:57 -0700
 From:   Anand Jain <anand.jain@oracle.com>
-Message-ID: <0ae4f962-34b2-902e-b7d4-ec55ccac3dfb@oracle.com>
-Date:   Thu, 3 Sep 2020 11:12:56 +0800
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.2.1
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, nborisov@suse.com
+Subject: [PATCH] fstests: btrfs/161: extend the test case to delete seed
+Date:   Thu,  3 Sep 2020 19:35:48 +0800
+Message-Id: <71d375fd6409806ff919415bb1947f437a404367.1599132513.git.anand.jain@oracle.com>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <cover.1599091832.git.anand.jain@oracle.com>
+References: <cover.1599091832.git.anand.jain@oracle.com>
 MIME-Version: 1.0
-In-Reply-To: <8e841e0e05934baaf6119363414440b271426a03.1599065695.git.josef@toxicpanda.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9732 signatures=668679
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxlogscore=999 adultscore=0
- phishscore=0 malwarescore=0 mlxscore=0 spamscore=0 bulkscore=0
- suspectscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2006250000 definitions=main-2009030029
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 phishscore=0 spamscore=0 adultscore=0
+ mlxscore=0 suspectscore=38 malwarescore=0 mlxlogscore=999 bulkscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
+ definitions=main-2009030108
 X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9732 signatures=668679
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=0 adultscore=0
- priorityscore=1501 phishscore=0 mlxlogscore=999 mlxscore=0
- lowpriorityscore=0 clxscore=1011 spamscore=0 bulkscore=0 impostorscore=0
- malwarescore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2006250000 definitions=main-2009030029
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 clxscore=1015 priorityscore=1501
+ lowpriorityscore=0 malwarescore=0 adultscore=0 spamscore=0 mlxscore=0
+ phishscore=0 impostorscore=0 mlxlogscore=999 bulkscore=0 suspectscore=38
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
+ definitions=main-2009030108
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 3/9/20 1:03 am, Josef Bacik wrote:
-> This is a test to check the behavior of the disk caching code inside
-> btrfs.  It's a regression test for the patch
-> 
->    btrfs: allow single disk devices to mount with older generations
-> 
-> Thanks,
-> 
-> Signed-off-by: Josef Bacik <josef@toxicpanda.com>
+This test case btrfs/161 does the sprout tests, so after sprout
+this patch deletes the seed to verify.
 
-Looks good.
+Signed-off-by: Anand Jain <anand.jain@oracle.com>
+---
+ tests/btrfs/161     | 16 ++++++++++++++--
+ tests/btrfs/161.out |  4 ++++
+ 2 files changed, 18 insertions(+), 2 deletions(-)
 
-Reviewed-by: Anand Jain <anand.jain@oracle.com>
+diff --git a/tests/btrfs/161 b/tests/btrfs/161
+index dfff8b871fa3..feaa7a4de6c2 100755
+--- a/tests/btrfs/161
++++ b/tests/btrfs/161
+@@ -5,9 +5,13 @@
+ # FS QA Test 161
+ #
+ # seed sprout functionality test
+-#  Create a seed device, mount it and, add a new device to create a
+-#  sprout filesystem.
++#  Create seed
++#  Create sprout
++#  Delete seed
+ #
++# The null kobject free warning is address by the kernel patch
++#   btrfs: initialize sysfs devid and device link for seed device
++
+ seq=`basename $0`
+ seqres=$RESULT_DIR/$seq
+ echo "QA output created by $seq"
+@@ -64,11 +68,19 @@ create_sprout()
+ 	run_check _mount $dev_sprout $SCRATCH_MNT
+ 	echo -- sprout --
+ 	od -x $SCRATCH_MNT/foobar
++}
++
++delete_seed()
++{
++	$BTRFS_UTIL_PROG device delete $dev_seed $SCRATCH_MNT
++	echo -- seed removed --
++	od -x $SCRATCH_MNT/foobar
+ 	_scratch_unmount
+ }
+ 
+ create_seed
+ create_sprout
++delete_seed
+ 
+ _scratch_dev_pool_put
+ 
+diff --git a/tests/btrfs/161.out b/tests/btrfs/161.out
+index 363b8217f45c..0fe9c128dcde 100644
+--- a/tests/btrfs/161.out
++++ b/tests/btrfs/161.out
+@@ -7,3 +7,7 @@ QA output created by 161
+ 0000000 abab abab abab abab abab abab abab abab
+ *
+ 1000000
++-- seed removed --
++0000000 abab abab abab abab abab abab abab abab
++*
++1000000
+-- 
+2.25.1
 
-Also thanks for adding the kernel patch information in the test case header.
-
--Anand
