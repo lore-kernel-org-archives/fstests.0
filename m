@@ -2,144 +2,266 @@ Return-Path: <SRS0=Tbzv=CM=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-10.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	UNPARSEABLE_RELAY,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+	URIBL_BLOCKED autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D063EC433E9
-	for <linux-fstests@archiver.kernel.org>; Thu,  3 Sep 2020 11:36:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 38618C433E2
+	for <linux-fstests@archiver.kernel.org>; Thu,  3 Sep 2020 12:46:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9929A2071B
-	for <linux-fstests@archiver.kernel.org>; Thu,  3 Sep 2020 11:36:56 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0742D2072A
+	for <linux-fstests@archiver.kernel.org>; Thu,  3 Sep 2020 12:46:34 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="PI9OU564"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="iuPc9Iss"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728372AbgICLgj (ORCPT
+        id S1728775AbgICMqY (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 3 Sep 2020 07:36:39 -0400
-Received: from userp2130.oracle.com ([156.151.31.86]:55242 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726327AbgICLgD (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 3 Sep 2020 07:36:03 -0400
-Received: from pps.filterd (userp2130.oracle.com [127.0.0.1])
-        by userp2130.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 083BYvkL067495;
-        Thu, 3 Sep 2020 11:35:59 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=from : to : cc :
- subject : date : message-id : in-reply-to : references : mime-version :
- content-transfer-encoding; s=corp-2020-01-29;
- bh=IfHPE+ts1nqR/b1zTYKW4SBk9DCHsmArX3d9aYEecKQ=;
- b=PI9OU564GDpWadhPd44HhZPyXVo2DLOc1/0pp6rmRfl9SFNyAm2sCRsQ6/x8S+kOqcuw
- Rp1Sv9AT7ZuZxLTaLxyngrULAWXvum2oqGF0a90aTc5AwjWCqSEg+rgRJlANOpJqO6iZ
- HEBkPwEsEN8mevNxWn/JE1a44UjZQQ1oOBa0Np/7D31VBO7JDgfKbL9f9KoNTMrEPSg5
- 7dlJo+4maRC8v4bM/7WRB0Iqweb1R/qzkgCdvnQi8ZFcrYzRwo2hIMgzn1T43RVr0khC
- 7QDUgQaDpcgOESVT7sCZvNO5hKapTzFGq8iZjPJDB1datFNAGLXJOyPa4Ro7mS3FbfzA bA== 
-Received: from aserp3030.oracle.com (aserp3030.oracle.com [141.146.126.71])
-        by userp2130.oracle.com with ESMTP id 337eer875s-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Thu, 03 Sep 2020 11:35:59 +0000
-Received: from pps.filterd (aserp3030.oracle.com [127.0.0.1])
-        by aserp3030.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 083BZOpt027581;
-        Thu, 3 Sep 2020 11:35:58 GMT
-Received: from aserv0122.oracle.com (aserv0122.oracle.com [141.146.126.236])
-        by aserp3030.oracle.com with ESMTP id 3380krmerx-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Thu, 03 Sep 2020 11:35:58 +0000
-Received: from abhmp0003.oracle.com (abhmp0003.oracle.com [141.146.116.9])
-        by aserv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 083BZvKX011173;
-        Thu, 3 Sep 2020 11:35:57 GMT
-Received: from localhost.localdomain (/39.109.231.106)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Thu, 03 Sep 2020 04:35:57 -0700
-From:   Anand Jain <anand.jain@oracle.com>
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, nborisov@suse.com
-Subject: [PATCH] fstests: btrfs/161: extend the test case to delete seed
-Date:   Thu,  3 Sep 2020 19:35:48 +0800
-Message-Id: <71d375fd6409806ff919415bb1947f437a404367.1599132513.git.anand.jain@oracle.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <cover.1599091832.git.anand.jain@oracle.com>
-References: <cover.1599091832.git.anand.jain@oracle.com>
+        Thu, 3 Sep 2020 08:46:24 -0400
+Received: from us-smtp-1.mimecast.com ([205.139.110.61]:37333 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1728941AbgICMpj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 3 Sep 2020 08:45:39 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1599137104;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=gLLlaUC6kgpja0Jy2m76JUTgKW/9yyssJ2ScaQ1W1hA=;
+        b=iuPc9IssnbRjNrV4c4sYs+ht2xKBPul7/F77stKa7Yal11sROGxiyV4KXolnYyFVVlOlQP
+        kYmJynirvzqm0Z2JZ7z4rIk38ugYeRBJ1fBOxmyD1rW1/gFVf8uaO8Z1a0m2SRLDZCGxEn
+        P6RWzhEsC/2/jW204sGaJH2BI+Zh+dQ=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-202-vHqdFC9lOzCHWnpyRoUQ8w-1; Thu, 03 Sep 2020 08:42:51 -0400
+X-MC-Unique: vHqdFC9lOzCHWnpyRoUQ8w-1
+Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 0EA6364086;
+        Thu,  3 Sep 2020 12:42:50 +0000 (UTC)
+Received: from bfoster (ovpn-113-130.rdu2.redhat.com [10.10.113.130])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id 3F1BC5C22D;
+        Thu,  3 Sep 2020 12:42:49 +0000 (UTC)
+Date:   Thu, 3 Sep 2020 08:42:47 -0400
+From:   Brian Foster <bfoster@redhat.com>
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     fstests@vger.kernel.org, axboe@kernel.dk, io-uring@vger.kernel.org
+Subject: Re: [PATCH v3 1/4] fsstress: add IO_URING read and write operations
+Message-ID: <20200903124247.GA444163@bfoster>
+References: <20200823063032.17297-1-zlang@redhat.com>
+ <20200823063032.17297-2-zlang@redhat.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9732 signatures=668679
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 phishscore=0 spamscore=0 adultscore=0
- mlxscore=0 suspectscore=38 malwarescore=0 mlxlogscore=999 bulkscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
- definitions=main-2009030108
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9732 signatures=668679
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 clxscore=1015 priorityscore=1501
- lowpriorityscore=0 malwarescore=0 adultscore=0 spamscore=0 mlxscore=0
- phishscore=0 impostorscore=0 mlxlogscore=999 bulkscore=0 suspectscore=38
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
- definitions=main-2009030108
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20200823063032.17297-2-zlang@redhat.com>
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.16
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This test case btrfs/161 does the sprout tests, so after sprout
-this patch deletes the seed to verify.
+On Sun, Aug 23, 2020 at 02:30:29PM +0800, Zorro Lang wrote:
+> IO_URING is a new feature of curent linux kernel, add basic IO_URING
+> read/write into fsstess to cover this kind of IO testing.
+> 
+> Signed-off-by: Zorro Lang <zlang@redhat.com>
+> ---
+>  README                 |   4 +-
+>  configure.ac           |   1 +
+>  include/builddefs.in   |   1 +
+>  ltp/Makefile           |   5 ++
+>  ltp/fsstress.c         | 139 ++++++++++++++++++++++++++++++++++++++++-
+>  m4/Makefile            |   1 +
+>  m4/package_liburing.m4 |   4 ++
+>  7 files changed, 152 insertions(+), 3 deletions(-)
+>  create mode 100644 m4/package_liburing.m4
+> 
+...
+> diff --git a/ltp/fsstress.c b/ltp/fsstress.c
+> index 709fdeec..7a0e278a 100644
+> --- a/ltp/fsstress.c
+> +++ b/ltp/fsstress.c
+...
+> @@ -2170,6 +2189,108 @@ do_aio_rw(int opno, long r, int flags)
+>  }
+>  #endif
+>  
+> +#ifdef URING
+> +void
+> +do_uring_rw(int opno, long r, int flags)
+> +{
+> +	char		*buf;
+> +	int		e;
+> +	pathname_t	f;
+> +	int		fd;
+> +	size_t		len;
+> +	int64_t		lr;
+> +	off64_t		off;
+> +	struct stat64	stb;
+> +	int		v;
+> +	char		st[1024];
+> +	struct io_uring_sqe	*sqe;
+> +	struct io_uring_cqe	*cqe;
+> +	struct iovec	iovec;
+> +	int		iswrite = (flags & (O_WRONLY | O_RDWR)) ? 1 : 0;
+> +
+> +	init_pathname(&f);
+> +	if (!get_fname(FT_REGFILE, r, &f, NULL, NULL, &v)) {
+> +		if (v)
+> +			printf("%d/%d: do_uring_rw - no filename\n", procid, opno);
+> +		goto uring_out3;
+> +	}
+> +	fd = open_path(&f, flags);
+> +	e = fd < 0 ? errno : 0;
+> +	check_cwd();
+> +	if (fd < 0) {
+> +		if (v)
+> +			printf("%d/%d: do_uring_rw - open %s failed %d\n",
+> +			       procid, opno, f.path, e);
+> +		goto uring_out3;
+> +	}
+> +	if (fstat64(fd, &stb) < 0) {
+> +		if (v)
+> +			printf("%d/%d: do_uring_rw - fstat64 %s failed %d\n",
+> +			       procid, opno, f.path, errno);
+> +		goto uring_out2;
+> +	}
+> +	inode_info(st, sizeof(st), &stb, v);
+> +	if (!iswrite && stb.st_size == 0) {
+> +		if (v)
+> +			printf("%d/%d: do_uring_rw - %s%s zero size\n", procid, opno,
+> +			       f.path, st);
+> +		goto uring_out2;
+> +	}
+> +	sqe = io_uring_get_sqe(&ring);
+> +	if (!sqe) {
+> +		if (v)
+> +			printf("%d/%d: do_uring_rw - io_uring_get_sqe failed\n",
+> +			       procid, opno);
+> +		goto uring_out2;
+> +	}
 
-Signed-off-by: Anand Jain <anand.jain@oracle.com>
----
- tests/btrfs/161     | 16 ++++++++++++++--
- tests/btrfs/161.out |  4 ++++
- 2 files changed, 18 insertions(+), 2 deletions(-)
+I'm not familiar with the io_uring bits, but do we have to do anything
+to clean up this sqe object (or the cqe) before we return?
 
-diff --git a/tests/btrfs/161 b/tests/btrfs/161
-index dfff8b871fa3..feaa7a4de6c2 100755
---- a/tests/btrfs/161
-+++ b/tests/btrfs/161
-@@ -5,9 +5,13 @@
- # FS QA Test 161
- #
- # seed sprout functionality test
--#  Create a seed device, mount it and, add a new device to create a
--#  sprout filesystem.
-+#  Create seed
-+#  Create sprout
-+#  Delete seed
- #
-+# The null kobject free warning is address by the kernel patch
-+#   btrfs: initialize sysfs devid and device link for seed device
-+
- seq=`basename $0`
- seqres=$RESULT_DIR/$seq
- echo "QA output created by $seq"
-@@ -64,11 +68,19 @@ create_sprout()
- 	run_check _mount $dev_sprout $SCRATCH_MNT
- 	echo -- sprout --
- 	od -x $SCRATCH_MNT/foobar
-+}
-+
-+delete_seed()
-+{
-+	$BTRFS_UTIL_PROG device delete $dev_seed $SCRATCH_MNT
-+	echo -- seed removed --
-+	od -x $SCRATCH_MNT/foobar
- 	_scratch_unmount
- }
- 
- create_seed
- create_sprout
-+delete_seed
- 
- _scratch_dev_pool_put
- 
-diff --git a/tests/btrfs/161.out b/tests/btrfs/161.out
-index 363b8217f45c..0fe9c128dcde 100644
---- a/tests/btrfs/161.out
-+++ b/tests/btrfs/161.out
-@@ -7,3 +7,7 @@ QA output created by 161
- 0000000 abab abab abab abab abab abab abab abab
- *
- 1000000
-+-- seed removed --
-+0000000 abab abab abab abab abab abab abab abab
-+*
-+1000000
--- 
-2.25.1
+> +	lr = ((int64_t)random() << 32) + random();
+> +	len = (random() % FILELEN_MAX) + 1;
+> +	buf = malloc(len);
+> +	if (!buf) {
+> +		if (v)
+> +			printf("%d/%d: do_uring_rw - malloc failed\n",
+> +			       procid, opno);
+> +		goto uring_out2;
+> +	}
+> +	iovec.iov_base = buf;
+> +	iovec.iov_len = len;
+> +	if (iswrite) {
+> +		off = (off64_t)(lr % MIN(stb.st_size + (1024 * 1024), MAXFSIZE));
+> +		off %= maxfsize;
+> +		memset(buf, nameseq & 0xff, len);
+> +		io_uring_prep_writev(sqe, fd, &iovec, 1, off);
+> +	} else {
+> +		off = (off64_t)(lr % stb.st_size);
+> +		io_uring_prep_readv(sqe, fd, &iovec, 1, off);
+> +	}
+> +
+> +	if ((e = io_uring_submit_and_wait(&ring, 1)) != 1) {
+> +		if (v)
+> +			printf("%d/%d: %s - io_uring_submit failed %d\n", procid, opno,
+> +			       iswrite ? "uring_write" : "uring_read", e);
+> +		goto uring_out1;
+> +	}
+> +	if ((e = io_uring_wait_cqe(&ring, &cqe)) < 0) {
+> +		if (v)
+> +			printf("%d/%d: %s - io_uring_wait_cqe failed %d\n", procid, opno,
+> +			       iswrite ? "uring_write" : "uring_read", e);
+> +		goto uring_out1;
+> +	}
+> +	if (v)
+> +		printf("%d/%d: %s %s%s [%lld, %d(res=%d)] %d\n",
+> +		       procid, opno, iswrite ? "uring_write" : "uring_read",
+> +		       f.path, st, (long long)off, (int)len, cqe->res, e);
+> +	io_uring_cqe_seen(&ring, cqe);
+> +
+> + uring_out1:
+> +	free(buf);
+> + uring_out2:
+> +	close(fd);
+> + uring_out3:
+> +	free_pathname(&f);
+
+It looks like the free_pathname() call is unconditional on exit. Could
+we just initialize the other two variables properly and have something
+like:
+
+{
+	...
+out:
+	if (buf)
+		free(buf);
+	if (fd != -1)
+		close(fd);
+	free_pathname(&f);
+}
+
+... and then we don't have to worry about using three different exit
+labels in the right places?
+
+Brian
+
+> +}
+> +#endif
+> +
+>  void
+>  aread_f(int opno, long r)
+>  {
+> @@ -5044,6 +5165,22 @@ unresvsp_f(int opno, long r)
+>  	close(fd);
+>  }
+>  
+> +void
+> +uring_read_f(int opno, long r)
+> +{
+> +#ifdef URING
+> +	do_uring_rw(opno, r, O_RDONLY);
+> +#endif
+> +}
+> +
+> +void
+> +uring_write_f(int opno, long r)
+> +{
+> +#ifdef URING
+> +	do_uring_rw(opno, r, O_WRONLY);
+> +#endif
+> +}
+> +
+>  void
+>  write_f(int opno, long r)
+>  {
+> diff --git a/m4/Makefile b/m4/Makefile
+> index 7fbff822..0352534d 100644
+> --- a/m4/Makefile
+> +++ b/m4/Makefile
+> @@ -14,6 +14,7 @@ LSRCFILES = \
+>  	package_dmapidev.m4 \
+>  	package_globals.m4 \
+>  	package_libcdev.m4 \
+> +	package_liburing.m4 \
+>  	package_ncurses.m4 \
+>  	package_pthread.m4 \
+>  	package_ssldev.m4 \
+> diff --git a/m4/package_liburing.m4 b/m4/package_liburing.m4
+> new file mode 100644
+> index 00000000..c92cc02a
+> --- /dev/null
+> +++ b/m4/package_liburing.m4
+> @@ -0,0 +1,4 @@
+> +AC_DEFUN([AC_PACKAGE_WANT_URING],
+> +  [ AC_CHECK_HEADERS(liburing.h, [ have_uring=true ], [ have_uring=false ])
+> +    AC_SUBST(have_uring)
+> +  ])
+> -- 
+> 2.20.1
+> 
 
