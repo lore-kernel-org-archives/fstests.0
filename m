@@ -2,91 +2,90 @@ Return-Path: <SRS0=Tbzv=CM=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+X-Spam-Status: No, score=-10.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6258BC43461
-	for <linux-fstests@archiver.kernel.org>; Thu,  3 Sep 2020 15:12:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4502EC433E2
+	for <linux-fstests@archiver.kernel.org>; Thu,  3 Sep 2020 15:25:43 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 29D2C20716
-	for <linux-fstests@archiver.kernel.org>; Thu,  3 Sep 2020 15:12:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1633F2072A
+	for <linux-fstests@archiver.kernel.org>; Thu,  3 Sep 2020 15:25:43 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="d/c5vM2C"
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="C3s14jKI"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729510AbgICPMu (ORCPT
+        id S1728719AbgICPZm (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 3 Sep 2020 11:12:50 -0400
-Received: from esa3.hgst.iphmx.com ([216.71.153.141]:25800 "EHLO
-        esa3.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728662AbgICMTH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 3 Sep 2020 08:19:07 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1599135547; x=1630671547;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=VfLOlmE/2aCMCl8VZCY6JBjqufmAUHpAoMuPvGfpSEk=;
-  b=d/c5vM2CJJBbBp18cWiFI7Ka4uWpuNDkGQ0fC3tEKubpTAFPK0Fk52Ki
-   y2zJ8FQl2xvJMXWAsk6AQ7xbpL1vXIjFri8mhGaSpgNQO+MMcU4Rv9toG
-   9wNCTttKimllt2oisxy1/UCsaRHTmmC207rczlVhwo6MlVnnhcmQ0ZPoA
-   ZD4RIQv88/d2kKe2PdtO4BDi914SyokNHDGxnaVVTqRzgVRMpvAh7PTcO
-   Ueq5z7S9LDpFv/sYefvb3t8S3WxQ2oMN3D4ih5aJzVregJuspm4jmeqW+
-   DUFmvXsM7V2WHySdSSXewWYKn8MJZYFvCAF+CHRHnbjBqmWWxl1/V3eTk
-   A==;
-IronPort-SDR: ubY60Qc8no5mSewcoBvn6a2/s2Ed6YN5EIkhKgzKwD4j2CmFblA8h/CFFq03qfaglGocpZ8jWY
- soyZ1AaUUO10JlDG57BCyNRO48ugR3Z64Oi+Y9Ga6EiDroYfsfydJGyZtw+xkKaysIn560gho4
- pc5f0T/MUaxVqgsqJoLOoPiJs9FAf8BqFeSi7/Rid0weNU9x5PEMjfCIDRnbVQB5MawwiIPro4
- u9/WggTp8gQe8zVwU6q2tsZEGpkSUiBrAd3qW/IIt0BQf5COA8pU7vCQCl8ebgXBLx4Fx3hTb7
- Qe0=
-X-IronPort-AV: E=Sophos;i="5.76,386,1592841600"; 
-   d="scan'208";a="150839210"
-Received: from uls-op-cesaip02.wdc.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
-  by ob1.hgst.iphmx.com with ESMTP; 03 Sep 2020 20:18:22 +0800
-IronPort-SDR: solpUvhkaisHpFYNuWmWfcrjRe3HKU6yNgZah538E0JjVgwPfRGIUjitUzg8ukKfhh3FW90tLV
- TfYvdlFyA0ww==
-Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
-  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Sep 2020 05:04:56 -0700
-IronPort-SDR: I2381ld81JVgHFK1lo/RADNWh60NX6p/nVpdAl4vjz1jQzTJSkhChf/uEMRck13buKzDrohMBR
- cB6WmRSIIppA==
-WDCIronportException: Internal
-Received: from unknown (HELO redsun60.ssa.fujisawa.hgst.com) ([10.149.66.36])
-  by uls-op-cesaip02.wdc.com with ESMTP; 03 Sep 2020 05:18:21 -0700
-From:   Johannes Thumshirn <johannes.thumshirn@wdc.com>
-To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Cc:     Johannes Thumshirn <johannes.thumshirn@wdc.com>
-Subject: [PATCH] btrfs/011: skip if on too small devices
-Date:   Thu,  3 Sep 2020 21:18:15 +0900
-Message-Id: <20200903121815.7797-1-johannes.thumshirn@wdc.com>
-X-Mailer: git-send-email 2.26.2
+        Thu, 3 Sep 2020 11:25:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44812 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728525AbgICPZl (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 3 Sep 2020 11:25:41 -0400
+Received: from mail-qk1-x743.google.com (mail-qk1-x743.google.com [IPv6:2607:f8b0:4864:20::743])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6B812C061245
+        for <fstests@vger.kernel.org>; Thu,  3 Sep 2020 08:25:41 -0700 (PDT)
+Received: by mail-qk1-x743.google.com with SMTP id f2so3437471qkh.3
+        for <fstests@vger.kernel.org>; Thu, 03 Sep 2020 08:25:41 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
+        h=subject:to:references:from:message-id:date:user-agent:mime-version
+         :in-reply-to:content-language:content-transfer-encoding;
+        bh=R/vwlE9cotrE5bF1HG/3J+pmzzBO2FvouGDghb20Twg=;
+        b=C3s14jKIewUb/T2LNA4mIaFff+1F0i51goIY66znsk9DHLF1XD+GDrI8bMnNlq87KA
+         0jpExC4qh955TFejIunNn1EtXwRsD7063bJFvFhUkDsppGvoGgnH7WUyHcnf9MJMoUyy
+         SGz0DO8LVkUAZvCqa92LCGzQPame2BgzZkuEz7FbKnrNw+CHPV3ULq9zL+7Vpi8F4s0F
+         LHGOzCIOecOANc8I3XspoSTYscgSm/IhTMgYpkkAy9sjW7qFDmIGT4xsOzuZXWXKU7+W
+         QnZOOh5FJg4jLQYM1d2t1JqiOA3VJzoX7OB5XRSvWLKzPQz1rSbef4uuOa4ZIpW9BgW/
+         FI+Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:subject:to:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=R/vwlE9cotrE5bF1HG/3J+pmzzBO2FvouGDghb20Twg=;
+        b=bNuRQGRP10Iaixig9gdwLL2RKF5Bi4nTpVPtvRTjtbGv52EzfihgvQwCmQEeMbPf4+
+         hVNSqkcS33njA18vDX+jFCwmu63w69czQr9FY8zO1SeasLxSq12C9/P8WQgugHDJOjCQ
+         wXn3t5FDtRGaXJ4kMG9Zk5+Mbqut2iChgCd74AadjamDv7/bXme/zRut8d/ezFsveBEk
+         0k4siqfsiAeT9OQzyILvawtohfsitnD2yUs4B2pq262jltRUZYHNIyAyCh8IrNHid+Vm
+         C+Q219q6V6hmjJfLHXzeVsn6QdsO9uLGpLMQge3Yw8m6ZIfJvFmq2EgMZD2Ub/kS2uCr
+         PJlQ==
+X-Gm-Message-State: AOAM532g4tSWaxDzBCmqsG8+hK47R3x9SCuZOzSZpAuGcwK1VUHNJN78
+        eSyInYDRm1SszvBMZRtH4AUwZYlpZ8vvz+pG
+X-Google-Smtp-Source: ABdhPJy/yqeBqsjf92CcgO9/A6oGH/gPfzk2dcKO80W15DN8x1IeCj13jUAI92znENUGX7F99NPFSQ==
+X-Received: by 2002:a05:620a:211c:: with SMTP id l28mr3466200qkl.395.1599146737168;
+        Thu, 03 Sep 2020 08:25:37 -0700 (PDT)
+Received: from [192.168.1.45] (cpe-174-109-172-136.nc.res.rr.com. [174.109.172.136])
+        by smtp.gmail.com with ESMTPSA id o6sm2292347qki.16.2020.09.03.08.25.36
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 03 Sep 2020 08:25:36 -0700 (PDT)
+Subject: Re: [PATCH] btrfs/011: skip if on too small devices
+To:     Johannes Thumshirn <johannes.thumshirn@wdc.com>,
+        linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+References: <20200903121815.7797-1-johannes.thumshirn@wdc.com>
+From:   Josef Bacik <josef@toxicpanda.com>
+Message-ID: <a1c29b06-7ae4-717a-9429-bf4c08ea91f4@toxicpanda.com>
+Date:   Thu, 3 Sep 2020 11:25:35 -0400
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:68.0)
+ Gecko/20100101 Thunderbird/68.12.0
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+In-Reply-To: <20200903121815.7797-1-johannes.thumshirn@wdc.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-btrfs/011 does require a spare device of at least 10GB, skip if we don't
-have big enough devices, e.g. when testing on ramdisks.
+On 9/3/20 8:18 AM, Johannes Thumshirn wrote:
+> btrfs/011 does require a spare device of at least 10GB, skip if we don't
+> have big enough devices, e.g. when testing on ramdisks.
+> 
+> Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
 
-Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
----
- tests/btrfs/011 | 1 +
- 1 file changed, 1 insertion(+)
+Reviewed-by: Josef Bacik <josef@toxicpanda.com>
 
-diff --git a/tests/btrfs/011 b/tests/btrfs/011
-index de424f876e6e..f96d11ce6ee6 100755
---- a/tests/btrfs/011
-+++ b/tests/btrfs/011
-@@ -51,6 +51,7 @@ _supported_fs btrfs
- _require_scratch_nocheck
- _require_scratch_dev_pool 5
- _require_scratch_dev_pool_equal_size
-+_require_scratch_size $((10 * 1024 * 1024)) #kB
- _require_command "$WIPEFS_PROG" wipefs
- 
- rm -f $seqres.full
--- 
-2.26.2
+Thanks,
 
+Josef
