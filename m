@@ -2,193 +2,220 @@ Return-Path: <SRS0=cvSl=CN=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
+X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	UNPARSEABLE_RELAY,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3B17CC433E2
-	for <linux-fstests@archiver.kernel.org>; Fri,  4 Sep 2020 13:13:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 254DFC43461
+	for <linux-fstests@archiver.kernel.org>; Fri,  4 Sep 2020 23:25:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0E7242074D
-	for <linux-fstests@archiver.kernel.org>; Fri,  4 Sep 2020 13:13:57 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C86042084D
+	for <linux-fstests@archiver.kernel.org>; Fri,  4 Sep 2020 23:25:33 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="gR2oJLOP"
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="Ukk8bdrV"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730446AbgIDNNz (ORCPT
+        id S1728235AbgIDXZd (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 4 Sep 2020 09:13:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48376 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1730010AbgIDNNO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 4 Sep 2020 09:13:14 -0400
-Received: from mail-vs1-xe44.google.com (mail-vs1-xe44.google.com [IPv6:2607:f8b0:4864:20::e44])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3F8E1C061244;
-        Fri,  4 Sep 2020 06:12:48 -0700 (PDT)
-Received: by mail-vs1-xe44.google.com with SMTP id x203so3584895vsc.11;
-        Fri, 04 Sep 2020 06:12:48 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:reply-to:from:date:message-id
-         :subject:to:cc:content-transfer-encoding;
-        bh=gfb2AhcU5HAB2r1+fuCznj9LqQxhvenWwmExpytzLRY=;
-        b=gR2oJLOPlBNQoq52skRHOya3rgLPoXwPMeiU6ssh/at9tu8MePU9s3SygXWY4wdP2h
-         zJSQEDkWcMhJM18E819SKohiCtpX2mvaQ5AiRGCXPFvT95CKOXAeJwkCS2cxhNMTPnLT
-         O1kYGmRAM6AbNfJVUD/AUWN0lreYcH8Il8PPIB8LYakFJAo9IjUdIgXuIi01K83Pi0XK
-         DJIXxexPFlJgofdf6OQb52XbFPDYthxcTxBVuCfigD1RxcXkIx/pDjPObkthUArtCz/+
-         5U0BXA20akCZj4TjBPKlT8oCib/F7XX4d5JC1tdRzS9gcUEB8cJfYQl1d0v80A3jzwYJ
-         cRDA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:reply-to
-         :from:date:message-id:subject:to:cc:content-transfer-encoding;
-        bh=gfb2AhcU5HAB2r1+fuCznj9LqQxhvenWwmExpytzLRY=;
-        b=NHCY4VKmtvHSw8svuyS5t+nwYNzYnrbqmMS9Odslt8fC50PUpzfqq9oQ4pAjH0ArJG
-         AlWbnS4Utq4Nt9fYDUwR+If1HPtcYbxUizUoboxPBfTRs92cJOLoWJbqNhBMQiKRUFWw
-         XyuGRmhhikxzIAdip6Qt6BS5vPnISGvTy2uR6FcfcMkx8BdQQWhfbTN5A93WfeXhAR14
-         kIHjo0Mx6EnbFE42mepxL+u2JX4lj6nOBnW/mF9Fnhud8WSsaU43UbjVrMyV9TvwYZc9
-         OAzwyeJVU9wz4hKGI9QwEYO2XmzAFSolhlEREaWoJUfj39CtvmGvcPlcZ/WHox9kGZpi
-         Rx2A==
-X-Gm-Message-State: AOAM530Td8H7ksr85I/IC3HsnqdYYQt5Mu6RMoNdGXHqUvWQr/+iw7pn
-        Utpm2frw+bX6TYe6TrY6CfzTZXk7MrRmmYkkiF6tPgvIuUSrpg==
-X-Google-Smtp-Source: ABdhPJxm0yN+k093JuLZ1+pU68x97Sy0yirXHoItz512No9DTO9slAwvOzINoCJDTyL2LhfjkquHT0ktckdtKODCpzc=
-X-Received: by 2002:a67:d48e:: with SMTP id g14mr5432030vsj.70.1599225166588;
- Fri, 04 Sep 2020 06:12:46 -0700 (PDT)
+        Fri, 4 Sep 2020 19:25:33 -0400
+Received: from aserp2120.oracle.com ([141.146.126.78]:42948 "EHLO
+        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728222AbgIDXZc (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 4 Sep 2020 19:25:32 -0400
+Received: from pps.filterd (aserp2120.oracle.com [127.0.0.1])
+        by aserp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 084NPSDM085989;
+        Fri, 4 Sep 2020 23:25:28 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=from : to : cc :
+ subject : date : message-id : in-reply-to : references : mime-version :
+ content-transfer-encoding; s=corp-2020-01-29;
+ bh=9OTAy4sU/21plY2WHNOUqrYfzjwcm/BarrkAYF8QnbY=;
+ b=Ukk8bdrVYKdGNSW7MyRwEJxSEVDBmhAVtSJuRz7ArYZF4IrAUPKwYWcI5XfeoFnBeQAp
+ EruYiCwuUqi2iaLvEhZ8ZS8a3sD3vY3vzar/HjA5vGPOcB3QGCGHvI0EJPF1P+AMwKsi
+ 2SHA+PGKsqJwBaAUrKdN6Xr5fWxndSGAfNxOW4HxgLZhaqCfjLhqujQDesPjnWH5N7dL
+ /LZqETTI4goEMO0cXyRKOrG1gdfyoyceTrijaIEIcq3u370gcu5feHHUN0Nihozvc3qg
+ FyIHZSSWlkv0lEqWIVb4ck3ldWLqYp+npcEw3afAOkHSP5TzuVTCoFF3J9e5PkJZTxWz zQ== 
+Received: from aserp3030.oracle.com (aserp3030.oracle.com [141.146.126.71])
+        by aserp2120.oracle.com with ESMTP id 337eymrrhs-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Fri, 04 Sep 2020 23:25:28 +0000
+Received: from pps.filterd (aserp3030.oracle.com [127.0.0.1])
+        by aserp3030.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 084NPMos022078;
+        Fri, 4 Sep 2020 23:25:28 GMT
+Received: from userv0122.oracle.com (userv0122.oracle.com [156.151.31.75])
+        by aserp3030.oracle.com with ESMTP id 3380ku6mdw-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Fri, 04 Sep 2020 23:25:27 +0000
+Received: from abhmp0011.oracle.com (abhmp0011.oracle.com [141.146.116.17])
+        by userv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 084NPQs8026746;
+        Fri, 4 Sep 2020 23:25:26 GMT
+Received: from localhost.localdomain (/39.109.231.106)
+        by default (Oracle Beehive Gateway v4.0)
+        with ESMTP ; Fri, 04 Sep 2020 16:25:26 -0700
+From:   Anand Jain <anand.jain@oracle.com>
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, dsterba@suse.com
+Subject: [PATCH v2 1/2] btrfs: add a test case for btrfs seed device delete
+Date:   Sat,  5 Sep 2020 07:25:15 +0800
+Message-Id: <53f76be87a0b414d6074f358b45b40cf1419950b.1599233551.git.anand.jain@oracle.com>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <cover.1599233551.git.anand.jain@oracle.com>
+References: <cover.1599233551.git.anand.jain@oracle.com>
 MIME-Version: 1.0
-References: <8e841e0e05934baaf6119363414440b271426a03.1599065695.git.josef@toxicpanda.com>
- <20200902171036.273416-1-josef@toxicpanda.com>
-In-Reply-To: <20200902171036.273416-1-josef@toxicpanda.com>
-Reply-To: fdmanana@gmail.com
-From:   Filipe Manana <fdmanana@gmail.com>
-Date:   Fri, 4 Sep 2020 14:12:35 +0100
-Message-ID: <CAL3q7H4sZguHFddwAeEFOkdOtbTZ-MHmDPuOR2obHVPro0nkkw@mail.gmail.com>
-Subject: Re: [PATCH][v4] fstests: add generic/609 to test O_DIRECT|O_DSYNC
-To:     Josef Bacik <josef@toxicpanda.com>
-Cc:     linux-btrfs <linux-btrfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>,
-        Johannes Thumshirn <johannes.thumshirn@wdc.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9734 signatures=668679
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 phishscore=0 spamscore=0 adultscore=0
+ mlxscore=0 suspectscore=1 malwarescore=0 mlxlogscore=999 bulkscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
+ definitions=main-2009040197
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9734 signatures=668679
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=1 adultscore=0
+ priorityscore=1501 phishscore=0 mlxlogscore=999 mlxscore=0
+ lowpriorityscore=0 clxscore=1015 spamscore=0 bulkscore=0 impostorscore=0
+ malwarescore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2006250000 definitions=main-2009040197
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Sep 2, 2020 at 6:11 PM Josef Bacik <josef@toxicpanda.com> wrote:
->
-> We had a problem recently where btrfs would deadlock with
-> O_DIRECT|O_DSYNC because of an unexpected dependency on ->fsync in
-> iomap.  This was only caught by chance with aiostress, because weirdly
-> we don't actually test this particular configuration anywhere in
-> xfstests.  Fix this by adding a basic test that just does
-> O_DIRECT|O_DSYNC writes.  With this test the box deadlocks right away
-> with Btrfs, which would have been helpful in finding this issue before
-> the patches were merged.
->
-> Reviewed-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
-> Signed-off-by: Josef Bacik <josef@toxicpanda.com>
-> ---
-> v3->v4:
-> - Trying to see how many times I can fuck this thing up.
-> - Simplified the xfs_io command per Darrick's suggestion.
-> - Added it to the rw group.
->
->  tests/generic/609     | 43 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/609.out |  3 +++
->  tests/generic/group   |  1 +
->  3 files changed, 47 insertions(+)
->  create mode 100755 tests/generic/609
->  create mode 100644 tests/generic/609.out
->
-> diff --git a/tests/generic/609 b/tests/generic/609
-> new file mode 100755
-> index 00000000..6c74ae63
-> --- /dev/null
-> +++ b/tests/generic/609
-> @@ -0,0 +1,43 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2020 Josef Bacik.  All Rights Reserved.
-> +#
-> +# FS QA Test 609
-> +#
-> +# iomap can call generic_write_sync() if we're O_DSYNC, so write a basic=
- test to
-> +# exercise O_DSYNC so any unsuspecting file systems will get lockdep war=
-nings if
-> +# their locking isn't compatible.
-> +#
-> +seq=3D`basename $0`
-> +seqres=3D$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=3D`pwd`
-> +tmp=3D/tmp/$$
-> +status=3D1       # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +       cd /
-> +       rm -f $tmp.*
-> +       rm -rf $TEST_DIR/file
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# Modify as appropriate.
-> +_supported_fs generic
-> +_supported_os Linux
-> +_require_test
-> +_require_xfs_io_command "pwrite"
+This is a regression test for the issue fixed by the kernel patch
+   btrfs: fix put of uninitialized kobject after seed device delete
 
-missing a:
+In this test case, we verify the seed device delete on a sprouted
+filesystem.
 
-_require_odirect
+Signed-off-by: Anand Jain <anand.jain@oracle.com>
+---
+v2 drop the sysfs layout check as it breaks the test-case backward
+compatibility.
 
-Other than that, it looks good. Perhaps Eryu can add that when picking
-this, so you avoid sending a v5.
+ tests/btrfs/219     | 83 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/219.out | 15 ++++++++
+ tests/btrfs/group   |  1 +
+ 3 files changed, 99 insertions(+)
+ create mode 100755 tests/btrfs/219
+ create mode 100644 tests/btrfs/219.out
 
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
+diff --git a/tests/btrfs/219 b/tests/btrfs/219
+new file mode 100755
+index 000000000000..86f2a6991bd7
+--- /dev/null
++++ b/tests/btrfs/219
+@@ -0,0 +1,83 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2020 Oracle. All Rights Reserved.
++#
++# FS QA Test 219
++#
++# Test for seed device-delete on a sprouted FS.
++# Requires kernel patch
++#    btrfs: fix put of uninitialized kobject after seed device delete
++#
++# Steps:
++#  Create a seed FS. Add a RW device to make it sprout FS and then delete
++#  the seed device.
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs generic
++_supported_os Linux
++_require_test
++_require_scratch_dev_pool 2
++
++_scratch_dev_pool_get 2
++
++seed=$(echo $SCRATCH_DEV_POOL | awk '{print $1}')
++sprout=$(echo $SCRATCH_DEV_POOL | awk '{print $2}')
++
++_mkfs_dev $seed
++_mount $seed $SCRATCH_MNT
++
++$XFS_IO_PROG -f -d -c "pwrite -S 0xab 0 1M" $SCRATCH_MNT/foo > /dev/null
++_scratch_unmount
++$BTRFS_TUNE_PROG -S 1 $seed
++
++# Mount the seed device and add the rw device
++_mount -o ro $seed $SCRATCH_MNT
++$BTRFS_UTIL_PROG device add -f $sprout $SCRATCH_MNT
++_scratch_unmount
++
++# Now remount
++_mount $sprout $SCRATCH_MNT
++$XFS_IO_PROG -f -d -c "pwrite -S 0xcd 0 1M" $SCRATCH_MNT/bar > /dev/null
++
++echo --- before delete ----
++od -x $SCRATCH_MNT/foo
++od -x $SCRATCH_MNT/bar
++
++$BTRFS_UTIL_PROG device delete $seed $SCRATCH_MNT
++_scratch_unmount
++_btrfs_forget_or_module_reload
++_mount $sprout $SCRATCH_MNT
++
++echo --- after delete ----
++od -x $SCRATCH_MNT/foo
++od -x $SCRATCH_MNT/bar
++
++_scratch_dev_pool_put
++
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/219.out b/tests/btrfs/219.out
+new file mode 100644
+index 000000000000..d39e0d8ffafd
+--- /dev/null
++++ b/tests/btrfs/219.out
+@@ -0,0 +1,15 @@
++QA output created by 219
++--- before delete ----
++0000000 abab abab abab abab abab abab abab abab
++*
++4000000
++0000000 cdcd cdcd cdcd cdcd cdcd cdcd cdcd cdcd
++*
++4000000
++--- after delete ----
++0000000 abab abab abab abab abab abab abab abab
++*
++4000000
++0000000 cdcd cdcd cdcd cdcd cdcd cdcd cdcd cdcd
++*
++4000000
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 3295856d0c8c..3633fa66abe4 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -221,3 +221,4 @@
+ 216 auto quick seed
+ 217 auto quick trim dangerous
+ 218 auto quick volume
++219 auto quick volume seed
+-- 
+2.25.1
 
-Thanks.
-
-> +
-> +$XFS_IO_PROG -f -d -s -c "pwrite 0 64k" $TEST_DIR/file | _filter_xfs_io
-> +
-> +status=3D0
-> +exit
-> diff --git a/tests/generic/609.out b/tests/generic/609.out
-> new file mode 100644
-> index 00000000..111c7fe9
-> --- /dev/null
-> +++ b/tests/generic/609.out
-> @@ -0,0 +1,3 @@
-> +QA output created by 609
-> +wrote 65536/65536 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> diff --git a/tests/generic/group b/tests/generic/group
-> index aa969bcb..ae2567a0 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -611,3 +611,4 @@
->  606 auto attr quick dax
->  607 auto attr quick dax
->  608 auto attr quick dax
-> +609 auto quick rw
-> --
-> 2.28.0
->
-
-
---=20
-Filipe David Manana,
-
-=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
- right.=E2=80=9D
