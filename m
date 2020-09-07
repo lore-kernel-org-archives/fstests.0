@@ -1,281 +1,98 @@
-Return-Path: <SRS0=Wi2o=CP=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=97GG=CQ=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-10.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS
-	autolearn=ham autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,NICE_REPLY_A,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B61EAC43461
-	for <linux-fstests@archiver.kernel.org>; Sun,  6 Sep 2020 17:55:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7122AC433E2
+	for <linux-fstests@archiver.kernel.org>; Mon,  7 Sep 2020 09:26:26 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 85E6F2078E
-	for <linux-fstests@archiver.kernel.org>; Sun,  6 Sep 2020 17:55:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 376B02078E
+	for <linux-fstests@archiver.kernel.org>; Mon,  7 Sep 2020 09:26:26 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="FKGA0a1s"
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="tQcoR3qm"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729106AbgIFRzn (ORCPT
+        id S1728093AbgIGJ0Z (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 6 Sep 2020 13:55:43 -0400
-Received: from us-smtp-1.mimecast.com ([207.211.31.81]:23926 "EHLO
-        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1729089AbgIFRzm (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 6 Sep 2020 13:55:42 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1599414940;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=q7/ktaaObrCq+OcqVs2zkrgTdkdNx16sEsv04wrIfBs=;
-        b=FKGA0a1sxjVObriAPxUFkzOq4Cp0Wx9L4TVkdy7IgVUj6T5lNN2Ps2Ef+UDpXLJtAGS8lS
-        TnexJHyD1nXlTtswDYSEYaKTRrHAxCu9cME6j9mCxSCuR714Ezo48y634CU/9qhcD0GYx8
-        WrsK7+620GEYDKiXBlArHNsjP7E/oKU=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-203--0EjIqzGM7qE_AnBTLQN6A-1; Sun, 06 Sep 2020 13:55:38 -0400
-X-MC-Unique: -0EjIqzGM7qE_AnBTLQN6A-1
-Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 67B8118A224C;
-        Sun,  6 Sep 2020 17:55:37 +0000 (UTC)
-Received: from bogon.redhat.com (ovpn-12-98.pek2.redhat.com [10.72.12.98])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id CF8F99CBA;
-        Sun,  6 Sep 2020 17:55:35 +0000 (UTC)
-From:   Zorro Lang <zlang@redhat.com>
-To:     fstests@vger.kernel.org
-Cc:     bfoster@redhat.com, io-uring@vger.kernel.org
-Subject: [PATCH v4 5/5] fsx: add IO_URING test
-Date:   Mon,  7 Sep 2020 01:55:13 +0800
-Message-Id: <20200906175513.17595-6-zlang@redhat.com>
-In-Reply-To: <20200906175513.17595-1-zlang@redhat.com>
-References: <20200906175513.17595-1-zlang@redhat.com>
+        Mon, 7 Sep 2020 05:26:25 -0400
+Received: from aserp2120.oracle.com ([141.146.126.78]:37474 "EHLO
+        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727122AbgIGJ0Y (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 7 Sep 2020 05:26:24 -0400
+Received: from pps.filterd (aserp2120.oracle.com [127.0.0.1])
+        by aserp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 0879OsG7030052;
+        Mon, 7 Sep 2020 09:26:22 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=subject : to :
+ references : from : message-id : date : mime-version : in-reply-to :
+ content-type : content-transfer-encoding; s=corp-2020-01-29;
+ bh=XcPXiR2VG/RsUv7LK7pnHMx3bhMsodD0OguMMQUMNOo=;
+ b=tQcoR3qmafX+PuCJw3/Y8Pspjztop0fzvrj90JqBGD9mhDLyhec3hPw85vCEoFSgIWoF
+ w9cdSZjCSF5nS7MyLFxDgC1YeKPDByjCde1pWnGr3LsLr2AHhIfdShV5aLbRw0tu+AeX
+ /7nS9lvlKZ/v2DoVlfIt1Ja+gnvD2GQaa3sI+0DxJvz95y3Wj5+wJxWWAR1L9EH14ul0
+ 6C8obD8USAburmHUja0BSSxQMK8DiUN9dLKx42FWx8tX9llEP+AXDwdzN6Hmfy2p7CB7
+ ECCooJccOtJl0JDQG9ZC7naS3kHkRJuOThSnaEPK7FlYpt9pf3kmH6usWW+loUbhw2ib fw== 
+Received: from aserp3020.oracle.com (aserp3020.oracle.com [141.146.126.70])
+        by aserp2120.oracle.com with ESMTP id 33c2mknm93-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Mon, 07 Sep 2020 09:26:22 +0000
+Received: from pps.filterd (aserp3020.oracle.com [127.0.0.1])
+        by aserp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 0879PCPl116924;
+        Mon, 7 Sep 2020 09:26:22 GMT
+Received: from aserv0122.oracle.com (aserv0122.oracle.com [141.146.126.236])
+        by aserp3020.oracle.com with ESMTP id 33cmk04ryn-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Mon, 07 Sep 2020 09:26:22 +0000
+Received: from abhmp0019.oracle.com (abhmp0019.oracle.com [141.146.116.25])
+        by aserv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 0879QL54011326;
+        Mon, 7 Sep 2020 09:26:21 GMT
+Received: from [192.168.1.102] (/39.109.231.106)
+        by default (Oracle Beehive Gateway v4.0)
+        with ESMTP ; Mon, 07 Sep 2020 02:26:21 -0700
+Subject: Re: [PATCH] btrfs/154: remove test for fix that never landed
+To:     Johannes Thumshirn <johannes.thumshirn@wdc.com>,
+        linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+References: <20200904114530.21746-1-johannes.thumshirn@wdc.com>
+From:   Anand Jain <anand.jain@oracle.com>
+Message-ID: <2ae0d906-4af4-0b7a-2a7f-fcc449191a79@oracle.com>
+Date:   Mon, 7 Sep 2020 17:26:11 +0800
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.2.1
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.11
+In-Reply-To: <20200904114530.21746-1-johannes.thumshirn@wdc.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9736 signatures=668679
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 spamscore=0 malwarescore=0 phishscore=0
+ mlxlogscore=999 bulkscore=0 adultscore=0 mlxscore=0 suspectscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
+ definitions=main-2009070092
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9736 signatures=668679
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxscore=0 priorityscore=1501
+ phishscore=0 adultscore=0 bulkscore=0 clxscore=1011 mlxlogscore=999
+ malwarescore=0 suspectscore=0 lowpriorityscore=0 spamscore=0
+ impostorscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2006250000 definitions=main-2009070092
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-New IO_URING test for fsx, use -U option to enable IO_URING test.
 
-Signed-off-by: Zorro Lang <zlang@redhat.com>
----
- ltp/fsx.c | 134 ++++++++++++++++++++++++++++++++++++++++++++++++++++--
- 1 file changed, 131 insertions(+), 3 deletions(-)
 
-diff --git a/ltp/fsx.c b/ltp/fsx.c
-index 92f506ba..e7f23d15 100644
---- a/ltp/fsx.c
-+++ b/ltp/fsx.c
-@@ -34,6 +34,9 @@
- #ifdef AIO
- #include <libaio.h>
- #endif
-+#ifdef URING
-+#include <liburing.h>
-+#endif
- #include <sys/syscall.h>
- 
- #ifndef MAP_FILE
-@@ -176,6 +179,7 @@ int	integrity = 0;			/* -i flag */
- int	fsxgoodfd = 0;
- int	o_direct;			/* -Z */
- int	aio = 0;
-+int	uring = 0;
- int	mark_nr = 0;
- 
- int page_size;
-@@ -2237,7 +2241,7 @@ void
- usage(void)
- {
- 	fprintf(stdout, "usage: %s",
--		"fsx [-dknqxABEFJLOWZ] [-b opnum] [-c Prob] [-g filldata] [-i logdev] [-j logid] [-l flen] [-m start:end] [-o oplen] [-p progressinterval] [-r readbdy] [-s style] [-t truncbdy] [-w writebdy] [-D startingop] [-N numops] [-P dirpath] [-S seed] fname\n\
-+		"fsx [-dknqxBEFJLOWZ][-A|-U] [-b opnum] [-c Prob] [-g filldata] [-i logdev] [-j logid] [-l flen] [-m start:end] [-o oplen] [-p progressinterval] [-r readbdy] [-s style] [-t truncbdy] [-w writebdy] [-D startingop] [-N numops] [-P dirpath] [-S seed] fname\n\
- 	-b opnum: beginning operation number (default 1)\n\
- 	-c P: 1 in P chance of file close+open at each op (default infinity)\n\
- 	-d: debug output for all operations\n\
-@@ -2260,8 +2264,11 @@ usage(void)
- 	-y synchronize changes to a file\n"
- 
- #ifdef AIO
--"	-A: Use the AIO system calls\n"
-+"	-A: Use the AIO system calls, -A excludes -U\n"
- #endif
-+#ifdef URING
-+"	-U: Use the IO_URING system calls, -U excludes -A\n"
-+ #endif
- "	-D startingop: debug output starting at specified operation\n"
- #ifdef HAVE_LINUX_FALLOC_H
- "	-F: Do not use fallocate (preallocation) calls\n"
-@@ -2429,6 +2436,113 @@ aio_rw(int rw, int fd, char *buf, unsigned len, unsigned offset)
- }
- #endif
- 
-+#ifdef URING
-+
-+struct io_uring ring;
-+#define URING_ENTRIES	1024
-+
-+int
-+uring_setup()
-+{
-+	int ret;
-+
-+	ret = io_uring_queue_init(URING_ENTRIES, &ring, 0);
-+	if (ret != 0) {
-+		fprintf(stderr, "uring_setup: io_uring_queue_init failed: %s\n",
-+				strerror(ret));
-+		return -1;
-+	}
-+	return 0;
-+}
-+
-+int
-+uring_rw(int rw, int fd, char *buf, unsigned len, unsigned offset)
-+{
-+	struct io_uring_sqe     *sqe;
-+	struct io_uring_cqe     *cqe;
-+	struct iovec            iovec;
-+	int ret;
-+	int res, res2 = 0;
-+	char *p = buf;
-+	unsigned l = len;
-+	unsigned o = offset;
-+
-+	/*
-+	 * Due to io_uring tries non-blocking IOs (especially read), that
-+	 * always cause 'normal' short reading. To avoid this short read
-+	 * fail, try to loop read/write (escpecilly read) data.
-+	 */
-+	while (l > 0) {
-+		sqe = io_uring_get_sqe(&ring);
-+		if (!sqe) {
-+			fprintf(stderr, "uring_rw: io_uring_get_sqe failed: %s\n",
-+					strerror(errno));
-+			return -1;
-+		}
-+
-+		iovec.iov_base = p;
-+		iovec.iov_len = l;
-+		if (rw == READ) {
-+			io_uring_prep_readv(sqe, fd, &iovec, 1, o);
-+		} else {
-+			io_uring_prep_writev(sqe, fd, &iovec, 1, o);
-+		}
-+
-+		ret = io_uring_submit_and_wait(&ring, 1);
-+		if (ret != 1) {
-+			fprintf(stderr, "errcode=%d\n", -ret);
-+			fprintf(stderr, "uring %s: io_uring_submit failed: %s\n",
-+					rw == READ ? "read":"write", strerror(-ret));
-+			goto uring_error;
-+		}
-+
-+		ret = io_uring_wait_cqe(&ring, &cqe);
-+		if (ret != 0) {
-+			fprintf(stderr, "errcode=%d\n", -ret);
-+			fprintf(stderr, "uring %s: io_uring_wait_cqe failed: %s\n",
-+					rw == READ ? "read":"write", strerror(-ret));
-+			goto uring_error;
-+		}
-+
-+		res = cqe->res;
-+		io_uring_cqe_seen(&ring, cqe);
-+
-+		if (res > 0) {
-+			o += res;
-+			l -= res;
-+			p += res;
-+			res2 += res;
-+		} else if (res < 0) {
-+			ret = res;
-+			fprintf(stderr, "errcode=%d\n", -ret);
-+			fprintf(stderr, "uring %s: io_uring failed: %s\n",
-+					rw == READ ? "read":"write", strerror(-ret));
-+			goto uring_error;
-+		} else {
-+			fprintf(stderr, "uring %s bad io length: %d instead of %u\n",
-+					rw == READ ? "read":"write", res2, len);
-+			break;
-+		}
-+	}
-+	return res2;
-+
-+ uring_error:
-+	/*
-+	 * The caller expects error return in traditional libc
-+	 * convention, i.e. -1 and the errno set to error.
-+	 */
-+	errno = -ret;
-+	return -1;
-+}
-+#else
-+int
-+uring_rw(int rw, int fd, char *buf, unsigned len, unsigned offset)
-+{
-+	fprintf(stderr, "io_rw: need IO_URING support!\n");
-+	exit(111);
-+}
-+#endif
-+
- int
- fsx_rw(int rw, int fd, char *buf, unsigned len, unsigned offset)
- {
-@@ -2436,6 +2550,8 @@ fsx_rw(int rw, int fd, char *buf, unsigned len, unsigned offset)
- 
- 	if (aio) {
- 		ret = aio_rw(rw, fd, buf, len, offset);
-+	} else if (uring) {
-+		ret = uring_rw(rw, fd, buf, len, offset);
- 	} else {
- 		if (rw == READ)
- 			ret = read(fd, buf, len);
-@@ -2498,7 +2614,7 @@ main(int argc, char **argv)
- 	setvbuf(stdout, (char *)0, _IOLBF, 0); /* line buffered stdout */
- 
- 	while ((ch = getopt_long(argc, argv,
--				 "b:c:dfg:i:j:kl:m:no:p:qr:s:t:w:xyABD:EFJKHzCILN:OP:RS:WXZ",
-+				 "b:c:dfg:i:j:kl:m:no:p:qr:s:t:w:xyABD:EFJKHzCILN:OP:RS:UWXZ",
- 				 longopts, NULL)) != EOF)
- 		switch (ch) {
- 		case 'b':
-@@ -2606,6 +2722,9 @@ main(int argc, char **argv)
- 		case 'A':
- 			aio = 1;
- 			break;
-+		case 'U':
-+			uring = 1;
-+			break;
- 		case 'D':
- 			debugstart = getnum(optarg, &endp);
- 			if (debugstart < 1)
-@@ -2696,6 +2815,11 @@ main(int argc, char **argv)
- 	if (argc != 1)
- 		usage();
- 
-+	if (aio && uring) {
-+		fprintf(stderr, "-A and -U shouldn't be used together\n");
-+		usage();
-+	}
-+
- 	if (integrity && !dirpath) {
- 		fprintf(stderr, "option -i <logdev> requires -P <dirpath>\n");
- 		usage();
-@@ -2786,6 +2910,10 @@ main(int argc, char **argv)
- 	if (aio) 
- 		aio_setup();
- #endif
-+#ifdef URING
-+	if (uring)
-+		uring_setup();
-+#endif
- 
- 	if (!(o_flags & O_TRUNC)) {
- 		off_t ret;
--- 
-2.20.1
+On 4/9/20 7:45 pm, Johannes Thumshirn wrote:
+> The btrfs/154 testcase fails if the kernel patch "btrfs: handle
+> dynamically reappearing missing device" isn't applied, but this patch was
+> never merged into the upstream kernel.
+> 
+> Delete the test so we have one less testcase that will always fail.
+> 
+> Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
 
+
+Reviewed-by: Anand Jain <anand.jain@oracle.com>
+
+Thanks, Anand
