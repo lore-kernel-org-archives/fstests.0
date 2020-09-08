@@ -4,117 +4,157 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-9.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS
-	autolearn=ham autolearn_force=no version=3.4.0
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EBA07C43461
-	for <linux-fstests@archiver.kernel.org>; Tue,  8 Sep 2020 18:35:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 82AC6C43461
+	for <linux-fstests@archiver.kernel.org>; Tue,  8 Sep 2020 18:35:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B0FF92098B
-	for <linux-fstests@archiver.kernel.org>; Tue,  8 Sep 2020 18:35:38 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4F86B2080A
+	for <linux-fstests@archiver.kernel.org>; Tue,  8 Sep 2020 18:35:45 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="FBZeSNV4"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="FWbN+RAs"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731368AbgIHSfh (ORCPT
+        id S1731661AbgIHSf2 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 8 Sep 2020 14:35:37 -0400
-Received: from us-smtp-1.mimecast.com ([207.211.31.81]:51033 "EHLO
-        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1731561AbgIHSf3 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 8 Sep 2020 14:35:29 -0400
+        Tue, 8 Sep 2020 14:35:28 -0400
+Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:24729 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1729014AbgIHSfL (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 8 Sep 2020 14:35:11 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1599590128;
+        s=mimecast20190719; t=1599590110;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=Fv6gc7xhcdij2MKCbLF80ijHtpETi3w0Dc0YpgtmLiw=;
-        b=FBZeSNV4iCYWQSemBFeBxWUkvc5t+251j6sHtkpRim+LWaPo6IwuksHBpFJJZKAcAkMz6x
-        Xh3CsUvPElBUWvvjSnY39G10EvSkW88OP3tVM4UhrdhcydneEXNQ4U/p9QgN2dV3vgrb63
-        jujrindNzADkD4/inPizrwU7u15iarQ=
+        bh=l0XHW41c6f+gjb9r8ZN7wT6ql3QbHwHSiktKn1mWqls=;
+        b=FWbN+RAsn9t0Njv6h4hZnJHJ4xayUsEWg5QF5dUYnmQLTk7B9FVemFkUlTEg7tS684UfIi
+        6pve1f0gluPzGYedBgxiW66apgmgRbk1q608ryN0JJwrf8Mzg9G2LdRHkqtbRL+C3UBYC3
+        mDi8WqGxilRj1l8NP/E0k+JcR/zFx7U=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-501-vLVa0lTfNIu8NPK8CYfOOA-1; Tue, 08 Sep 2020 14:35:25 -0400
-X-MC-Unique: vLVa0lTfNIu8NPK8CYfOOA-1
-Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
+ us-mta-576-lkUh3mT0N92oVuACH5FpMQ-1; Tue, 08 Sep 2020 14:34:56 -0400
+X-MC-Unique: lkUh3mT0N92oVuACH5FpMQ-1
+Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id EA818393B1;
-        Tue,  8 Sep 2020 18:35:24 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id A584110062B8;
+        Tue,  8 Sep 2020 18:34:52 +0000 (UTC)
 Received: from bfoster (ovpn-113-130.rdu2.redhat.com [10.10.113.130])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id 7A09B5D9E8;
-        Tue,  8 Sep 2020 18:35:24 +0000 (UTC)
-Date:   Tue, 8 Sep 2020 14:35:22 -0400
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id 34D3A8246B;
+        Tue,  8 Sep 2020 18:34:52 +0000 (UTC)
+Date:   Tue, 8 Sep 2020 14:34:50 -0400
 From:   Brian Foster <bfoster@redhat.com>
 To:     Zorro Lang <zlang@redhat.com>
 Cc:     fstests@vger.kernel.org, io-uring@vger.kernel.org
-Subject: Re: [PATCH v4 3/5] fsstress: fix memory leak in do_aio_rw
-Message-ID: <20200908183522.GC737175@bfoster>
+Subject: Re: [PATCH v4 1/5] fsstress: add IO_URING read and write operations
+Message-ID: <20200908183450.GA737175@bfoster>
 References: <20200906175513.17595-1-zlang@redhat.com>
- <20200906175513.17595-4-zlang@redhat.com>
+ <20200906175513.17595-2-zlang@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20200906175513.17595-4-zlang@redhat.com>
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
+In-Reply-To: <20200906175513.17595-2-zlang@redhat.com>
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.15
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Sep 07, 2020 at 01:55:11AM +0800, Zorro Lang wrote:
-> If io_submit or io_getevents fails, the do_aio_rw() won't free the
-> "buf" and cause memory leak.
+On Mon, Sep 07, 2020 at 01:55:09AM +0800, Zorro Lang wrote:
+> IO_URING is a new feature of curent linux kernel, add basic IO_URING
+> read/write into fsstess to cover this kind of IO testing.
 > 
 > Signed-off-by: Zorro Lang <zlang@redhat.com>
 > ---
->  ltp/fsstress.c | 39 +++++++++++++++++++--------------------
->  1 file changed, 19 insertions(+), 20 deletions(-)
+>  README                 |   4 +-
+>  configure.ac           |   1 +
+>  include/builddefs.in   |   1 +
+>  ltp/Makefile           |   5 ++
+>  ltp/fsstress.c         | 139 ++++++++++++++++++++++++++++++++++++++++-
+>  m4/Makefile            |   1 +
+>  m4/package_liburing.m4 |   4 ++
+>  7 files changed, 152 insertions(+), 3 deletions(-)
+>  create mode 100644 m4/package_liburing.m4
 > 
+...
 > diff --git a/ltp/fsstress.c b/ltp/fsstress.c
-> index b4a51376..c0e587a3 100644
+> index 709fdeec..2c584ef0 100644
 > --- a/ltp/fsstress.c
 > +++ b/ltp/fsstress.c
 ...
-> @@ -2166,27 +2166,26 @@ do_aio_rw(int opno, long r, int flags)
->  		if (v)
->  			printf("%d/%d: %s - io_submit failed %d\n",
->  			       procid, opno, iswrite ? "awrite" : "aread", e);
-> -		free_pathname(&f);
-> -		close(fd);
-> -		return;
-> +		goto aio_out;
->  	}
->  	if ((e = io_getevents(io_ctx, 1, 1, &event, NULL)) != 1) {
->  		if (v)
->  			printf("%d/%d: %s - io_getevents failed %d\n",
->  			       procid, opno, iswrite ? "awrite" : "aread", e);
-> -		free_pathname(&f);
-> -		close(fd);
-> -		return;
-> +		goto aio_out;
->  	}
->  
->  	e = event.res != len ? event.res2 : 0;
-> -	free(buf);
->  	if (v)
->  		printf("%d/%d: %s %s%s [%lld,%d] %d\n",
->  		       procid, opno, iswrite ? "awrite" : "aread",
->  		       f.path, st, (long long)off, (int)len, e);
-> + aio_out:
-> +	if (buf)
-> +		free(buf);
-> +	if (fd > 0)
-> +		close(fd);
-
-Same nit here as patch 1. Otherwise LGTM:
-
-Reviewed-by: Brian Foster <bfoster@redhat.com>
-
->  	free_pathname(&f);
-> -	close(fd);
+> @@ -2170,6 +2189,108 @@ do_aio_rw(int opno, long r, int flags)
 >  }
 >  #endif
 >  
+> +#ifdef URING
+> +void
+> +do_uring_rw(int opno, long r, int flags)
+> +{
+...
+> +
+> + uring_out:
+> +	if (buf)
+> +		free(buf);
+> +	if (fd > 0)
+
+Nit: I'd replace this with (fd != -1), but otherwise:
+
+Reviewed-by: Brian Foster <bfoster@redhat.com>
+
+> +		close(fd);
+> +	free_pathname(&f);
+> +}
+> +#endif
+> +
+>  void
+>  aread_f(int opno, long r)
+>  {
+> @@ -5044,6 +5165,22 @@ unresvsp_f(int opno, long r)
+>  	close(fd);
+>  }
+>  
+> +void
+> +uring_read_f(int opno, long r)
+> +{
+> +#ifdef URING
+> +	do_uring_rw(opno, r, O_RDONLY);
+> +#endif
+> +}
+> +
+> +void
+> +uring_write_f(int opno, long r)
+> +{
+> +#ifdef URING
+> +	do_uring_rw(opno, r, O_WRONLY);
+> +#endif
+> +}
+> +
+>  void
+>  write_f(int opno, long r)
+>  {
+> diff --git a/m4/Makefile b/m4/Makefile
+> index 7fbff822..0352534d 100644
+> --- a/m4/Makefile
+> +++ b/m4/Makefile
+> @@ -14,6 +14,7 @@ LSRCFILES = \
+>  	package_dmapidev.m4 \
+>  	package_globals.m4 \
+>  	package_libcdev.m4 \
+> +	package_liburing.m4 \
+>  	package_ncurses.m4 \
+>  	package_pthread.m4 \
+>  	package_ssldev.m4 \
+> diff --git a/m4/package_liburing.m4 b/m4/package_liburing.m4
+> new file mode 100644
+> index 00000000..c92cc02a
+> --- /dev/null
+> +++ b/m4/package_liburing.m4
+> @@ -0,0 +1,4 @@
+> +AC_DEFUN([AC_PACKAGE_WANT_URING],
+> +  [ AC_CHECK_HEADERS(liburing.h, [ have_uring=true ], [ have_uring=false ])
+> +    AC_SUBST(have_uring)
+> +  ])
 > -- 
 > 2.20.1
 > 
