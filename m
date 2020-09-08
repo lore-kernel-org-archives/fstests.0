@@ -4,157 +4,163 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-9.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED autolearn=ham autolearn_force=no version=3.4.0
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 82AC6C43461
-	for <linux-fstests@archiver.kernel.org>; Tue,  8 Sep 2020 18:35:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D7D46C433E2
+	for <linux-fstests@archiver.kernel.org>; Tue,  8 Sep 2020 18:35:46 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4F86B2080A
-	for <linux-fstests@archiver.kernel.org>; Tue,  8 Sep 2020 18:35:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A8C4E2080C
+	for <linux-fstests@archiver.kernel.org>; Tue,  8 Sep 2020 18:35:46 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="FWbN+RAs"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="CJCFQDDA"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731661AbgIHSf2 (ORCPT
+        id S1728879AbgIHSfq (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 8 Sep 2020 14:35:28 -0400
-Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:24729 "EHLO
+        Tue, 8 Sep 2020 14:35:46 -0400
+Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:31825 "EHLO
         us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1729014AbgIHSfL (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 8 Sep 2020 14:35:11 -0400
+        with ESMTP id S1731561AbgIHSfj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 8 Sep 2020 14:35:39 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1599590110;
+        s=mimecast20190719; t=1599590138;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=l0XHW41c6f+gjb9r8ZN7wT6ql3QbHwHSiktKn1mWqls=;
-        b=FWbN+RAsn9t0Njv6h4hZnJHJ4xayUsEWg5QF5dUYnmQLTk7B9FVemFkUlTEg7tS684UfIi
-        6pve1f0gluPzGYedBgxiW66apgmgRbk1q608ryN0JJwrf8Mzg9G2LdRHkqtbRL+C3UBYC3
-        mDi8WqGxilRj1l8NP/E0k+JcR/zFx7U=
+        bh=yDsbqbNxazB8KuM6/XLE+gyOYKJD7VRvtvYdfri7Z2M=;
+        b=CJCFQDDAKO4CHugQLSq9ScNFimnu+5xalvNmzeDQCnAUVU3p0vT/QEris0UsZbsmuPoOdF
+        u5xl5JDse1ThFWwTO11X0tl07AWH0Zxg4WJ7jlX4GFvstM4NVuoc2Rvq5uLVy0OHtwhs62
+        3HUkM2L3ZFM7w0d7jFvmWrgD9vV4JqM=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-576-lkUh3mT0N92oVuACH5FpMQ-1; Tue, 08 Sep 2020 14:34:56 -0400
-X-MC-Unique: lkUh3mT0N92oVuACH5FpMQ-1
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
+ us-mta-524-CU7IISGTN0KVs293cQDrqg-1; Tue, 08 Sep 2020 14:35:34 -0400
+X-MC-Unique: CU7IISGTN0KVs293cQDrqg-1
+Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id A584110062B8;
-        Tue,  8 Sep 2020 18:34:52 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 5614F191E2A0;
+        Tue,  8 Sep 2020 18:35:33 +0000 (UTC)
 Received: from bfoster (ovpn-113-130.rdu2.redhat.com [10.10.113.130])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id 34D3A8246B;
-        Tue,  8 Sep 2020 18:34:52 +0000 (UTC)
-Date:   Tue, 8 Sep 2020 14:34:50 -0400
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id DB1C05D9EF;
+        Tue,  8 Sep 2020 18:35:32 +0000 (UTC)
+Date:   Tue, 8 Sep 2020 14:35:31 -0400
 From:   Brian Foster <bfoster@redhat.com>
 To:     Zorro Lang <zlang@redhat.com>
 Cc:     fstests@vger.kernel.org, io-uring@vger.kernel.org
-Subject: Re: [PATCH v4 1/5] fsstress: add IO_URING read and write operations
-Message-ID: <20200908183450.GA737175@bfoster>
+Subject: Re: [PATCH v4 4/5] fsx: introduce fsx_rw to combine aio_rw with
+ general read and write
+Message-ID: <20200908183531.GD737175@bfoster>
 References: <20200906175513.17595-1-zlang@redhat.com>
- <20200906175513.17595-2-zlang@redhat.com>
+ <20200906175513.17595-5-zlang@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20200906175513.17595-2-zlang@redhat.com>
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.15
+In-Reply-To: <20200906175513.17595-5-zlang@redhat.com>
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Sep 07, 2020 at 01:55:09AM +0800, Zorro Lang wrote:
-> IO_URING is a new feature of curent linux kernel, add basic IO_URING
-> read/write into fsstess to cover this kind of IO testing.
+On Mon, Sep 07, 2020 at 01:55:12AM +0800, Zorro Lang wrote:
+> The fsx contains different read and write operations, especially the
+> AIO and general IO read/write. The fsx chooses one kind of read/write
+> from AIO and general IO to run. To make the logic clear, use a common
+> fsx_rw() function to swith between these two kinds of read/write.
 > 
 > Signed-off-by: Zorro Lang <zlang@redhat.com>
 > ---
->  README                 |   4 +-
->  configure.ac           |   1 +
->  include/builddefs.in   |   1 +
->  ltp/Makefile           |   5 ++
->  ltp/fsstress.c         | 139 ++++++++++++++++++++++++++++++++++++++++-
->  m4/Makefile            |   1 +
->  m4/package_liburing.m4 |   4 ++
->  7 files changed, 152 insertions(+), 3 deletions(-)
->  create mode 100644 m4/package_liburing.m4
-> 
-...
-> diff --git a/ltp/fsstress.c b/ltp/fsstress.c
-> index 709fdeec..2c584ef0 100644
-> --- a/ltp/fsstress.c
-> +++ b/ltp/fsstress.c
-...
-> @@ -2170,6 +2189,108 @@ do_aio_rw(int opno, long r, int flags)
->  }
->  #endif
->  
-> +#ifdef URING
-> +void
-> +do_uring_rw(int opno, long r, int flags)
-> +{
-...
-> +
-> + uring_out:
-> +	if (buf)
-> +		free(buf);
-> +	if (fd > 0)
-
-Nit: I'd replace this with (fd != -1), but otherwise:
 
 Reviewed-by: Brian Foster <bfoster@redhat.com>
 
-> +		close(fd);
-> +	free_pathname(&f);
-> +}
-> +#endif
-> +
->  void
->  aread_f(int opno, long r)
+>  ltp/fsx.c | 32 +++++++++++++++++---------------
+>  1 file changed, 17 insertions(+), 15 deletions(-)
+> 
+> diff --git a/ltp/fsx.c b/ltp/fsx.c
+> index 7c76655a..92f506ba 100644
+> --- a/ltp/fsx.c
+> +++ b/ltp/fsx.c
+> @@ -181,16 +181,11 @@ int	mark_nr = 0;
+>  int page_size;
+>  int page_mask;
+>  int mmap_mask;
+> -#ifdef AIO
+> -int aio_rw(int rw, int fd, char *buf, unsigned len, unsigned offset);
+> +int fsx_rw(int rw, int fd, char *buf, unsigned len, unsigned offset);
+>  #define READ 0
+>  #define WRITE 1
+> -#define fsxread(a,b,c,d)	aio_rw(READ, a,b,c,d)
+> -#define fsxwrite(a,b,c,d)	aio_rw(WRITE, a,b,c,d)
+> -#else
+> -#define fsxread(a,b,c,d)	read(a,b,c)
+> -#define fsxwrite(a,b,c,d)	write(a,b,c)
+> -#endif
+> +#define fsxread(a,b,c,d)	fsx_rw(READ, a,b,c,d)
+> +#define fsxwrite(a,b,c,d)	fsx_rw(WRITE, a,b,c,d)
+>  
+>  const char *replayops = NULL;
+>  const char *recordops = NULL;
+> @@ -2347,7 +2342,8 @@ getnum(char *s, char **e)
+>  io_context_t	io_ctx;
+>  struct iocb 	iocb;
+>  
+> -int aio_setup()
+> +int
+> +aio_setup()
 >  {
-> @@ -5044,6 +5165,22 @@ unresvsp_f(int opno, long r)
->  	close(fd);
+>  	int ret;
+>  	ret = io_queue_init(QSZ, &io_ctx);
+> @@ -2360,7 +2356,7 @@ int aio_setup()
 >  }
 >  
-> +void
-> +uring_read_f(int opno, long r)
-> +{
-> +#ifdef URING
-> +	do_uring_rw(opno, r, O_RDONLY);
-> +#endif
-> +}
-> +
-> +void
-> +uring_write_f(int opno, long r)
-> +{
-> +#ifdef URING
-> +	do_uring_rw(opno, r, O_WRONLY);
-> +#endif
-> +}
-> +
->  void
->  write_f(int opno, long r)
+>  int
+> -__aio_rw(int rw, int fd, char *buf, unsigned len, unsigned offset)
+> +aio_rw(int rw, int fd, char *buf, unsigned len, unsigned offset)
 >  {
-> diff --git a/m4/Makefile b/m4/Makefile
-> index 7fbff822..0352534d 100644
-> --- a/m4/Makefile
-> +++ b/m4/Makefile
-> @@ -14,6 +14,7 @@ LSRCFILES = \
->  	package_dmapidev.m4 \
->  	package_globals.m4 \
->  	package_libcdev.m4 \
-> +	package_liburing.m4 \
->  	package_ncurses.m4 \
->  	package_pthread.m4 \
->  	package_ssldev.m4 \
-> diff --git a/m4/package_liburing.m4 b/m4/package_liburing.m4
-> new file mode 100644
-> index 00000000..c92cc02a
-> --- /dev/null
-> +++ b/m4/package_liburing.m4
-> @@ -0,0 +1,4 @@
-> +AC_DEFUN([AC_PACKAGE_WANT_URING],
-> +  [ AC_CHECK_HEADERS(liburing.h, [ have_uring=true ], [ have_uring=false ])
-> +    AC_SUBST(have_uring)
-> +  ])
+>  	struct io_event event;
+>  	static struct timespec ts;
+> @@ -2425,13 +2421,21 @@ out_error:
+>  	errno = -ret;
+>  	return -1;
+>  }
+> +#else
+> +aio_rw(int rw, int fd, char *buf, unsigned len, unsigned offset)
+> +{
+> +	fprintf(stderr, "io_rw: need AIO support!\n");
+> +	exit(111);
+> +}
+> +#endif
+>  
+> -int aio_rw(int rw, int fd, char *buf, unsigned len, unsigned offset)
+> +int
+> +fsx_rw(int rw, int fd, char *buf, unsigned len, unsigned offset)
+>  {
+>  	int ret;
+>  
+>  	if (aio) {
+> -		ret = __aio_rw(rw, fd, buf, len, offset);
+> +		ret = aio_rw(rw, fd, buf, len, offset);
+>  	} else {
+>  		if (rw == READ)
+>  			ret = read(fd, buf, len);
+> @@ -2441,8 +2445,6 @@ int aio_rw(int rw, int fd, char *buf, unsigned len, unsigned offset)
+>  	return ret;
+>  }
+>  
+> -#endif
+> -
+>  #define test_fallocate(mode) __test_fallocate(mode, #mode)
+>  
+>  int
+> @@ -2602,7 +2604,7 @@ main(int argc, char **argv)
+>  			do_fsync = 1;
+>  			break;
+>  		case 'A':
+> -		        aio = 1;
+> +			aio = 1;
+>  			break;
+>  		case 'D':
+>  			debugstart = getnum(optarg, &endp);
 > -- 
 > 2.20.1
 > 
