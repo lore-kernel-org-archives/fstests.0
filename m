@@ -2,242 +2,108 @@ Return-Path: <SRS0=yQZq=CR=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1E083C43461
-	for <linux-fstests@archiver.kernel.org>; Tue,  8 Sep 2020 18:36:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 95B27C43461
+	for <linux-fstests@archiver.kernel.org>; Tue,  8 Sep 2020 19:30:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C7CEC2080A
-	for <linux-fstests@archiver.kernel.org>; Tue,  8 Sep 2020 18:36:34 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5A9942078B
+	for <linux-fstests@archiver.kernel.org>; Tue,  8 Sep 2020 19:30:10 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="gcuJqxKy"
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="CFPjJ9Fa"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731561AbgIHSgd (ORCPT
+        id S1732031AbgIHTaH (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 8 Sep 2020 14:36:33 -0400
-Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:28172 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1731461AbgIHSgc (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 8 Sep 2020 14:36:32 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1599590190;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=JOX2wfp/oNHO1AHpEBxtIyNSLrTSVIlWL74m8ntWUno=;
-        b=gcuJqxKy35Bj38WmW2CvLZEf8lJ4mOQLvXmq2BoEXw3LEhkjTmDTm9ImSVeTgjb+fSTOoO
-        RTKmbVU/OHJgZfvg78qyaFJu79UcslV7U+w2QYcseUOzCTixnBpNKZwTmfX8XatDijyZxT
-        eYELGfxWL+xw13tgMAU6UvXVu9wUe/s=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-126-GMhivUUuOpqfSyOPorkB3A-1; Tue, 08 Sep 2020 14:36:28 -0400
-X-MC-Unique: GMhivUUuOpqfSyOPorkB3A-1
-Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 9D9978030A9;
-        Tue,  8 Sep 2020 18:36:27 +0000 (UTC)
-Received: from bfoster (ovpn-113-130.rdu2.redhat.com [10.10.113.130])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id 20A0E1002D52;
-        Tue,  8 Sep 2020 18:36:27 +0000 (UTC)
-Date:   Tue, 8 Sep 2020 14:36:25 -0400
-From:   Brian Foster <bfoster@redhat.com>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     fstests@vger.kernel.org, io-uring@vger.kernel.org
-Subject: Re: [PATCH v4 5/5] fsx: add IO_URING test
-Message-ID: <20200908183625.GE737175@bfoster>
-References: <20200906175513.17595-1-zlang@redhat.com>
- <20200906175513.17595-6-zlang@redhat.com>
+        Tue, 8 Sep 2020 15:30:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54338 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1731001AbgIHP6F (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 8 Sep 2020 11:58:05 -0400
+Received: from mail-qk1-x741.google.com (mail-qk1-x741.google.com [IPv6:2607:f8b0:4864:20::741])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1E731C0612F5
+        for <fstests@vger.kernel.org>; Tue,  8 Sep 2020 08:42:29 -0700 (PDT)
+Received: by mail-qk1-x741.google.com with SMTP id w186so15737554qkd.1
+        for <fstests@vger.kernel.org>; Tue, 08 Sep 2020 08:42:29 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
+        h=from:to:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=Ub+ai6wTBMm1hsBF5QjaKfqBZmTSAb3mMkHmjBwuXV0=;
+        b=CFPjJ9FamcFky9IgoxXh1bCC/p3QfhMNAxcPZFapy2d24SFFrPIdlfg2zL6Opip6Nh
+         L9kHGLUWSYOVnGClfvz9HQpFjo8oxHsHxft5yp2usklyG4c5b7hcfFDV2UYo/Qp2jBdC
+         U6YJnzpARPyPWATelTf/XW2rdOxkXc9EDMQEDHEfwXMBxfzj44SsY//dwAJLgZNNZK5n
+         sxkL7J/ut3O0jGbgxGG++OL3mGi+3u0IxdZsSObIwbgL6IU75mCPXj+h1zx51W9u1Xmk
+         y3qQ5ejfH1I0Ninga+0u6UwJw5MXMCdEVUglyQpC1AVQal0WsvpdmsWRhjfTVZayY24a
+         9UkA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=Ub+ai6wTBMm1hsBF5QjaKfqBZmTSAb3mMkHmjBwuXV0=;
+        b=BtZUGzkW8ZOzMTJdrA1PCpNGfgtRS5Z2XPG/aO3poHmNfyVht9s1evEYGLG+StCnHY
+         92UeBQ2PXi9ZNsdEQUdiUc0rOIP8QyUINBROBKbBDRajFAkFHC3b1V3o04VM2iew8FnL
+         IOlgD/QfdQ4E4fs+LThIZDiH6ovyqaWHzMdCw+b7epebNPVnSSMzd/A7d5tdDHe6aQcm
+         OqoQPTs5gIZGKGBcWLZiIMs1ybSZmhuHLCTN8j93+NAFf2oV3zEUr46eIWTtVyHbHzId
+         zp0CFt8jo6wt70wBVH42fOwxF/KJJV/MraAL0wHIATYpJCwO99+MKSY2rG4bOyfecKa1
+         W10w==
+X-Gm-Message-State: AOAM530NtFtc0jEP8kVcdyTfT0dV8y6wOnYNY3IidtNwKSO0dloT1AGO
+        UU7x4Ql4h6j6O75wwja+488BHbiBrks9OhEJ
+X-Google-Smtp-Source: ABdhPJwoG3atD+Y8lF3ICXBzgXrnXoV2cZXcZOqqPtnWua1P5o93bXKPkLAZisETCBl0GFS3r1qmgw==
+X-Received: by 2002:a37:9a8e:: with SMTP id c136mr611976qke.211.1599579748076;
+        Tue, 08 Sep 2020 08:42:28 -0700 (PDT)
+Received: from localhost (cpe-174-109-172-136.nc.res.rr.com. [174.109.172.136])
+        by smtp.gmail.com with ESMTPSA id 134sm9269637qkj.53.2020.09.08.08.42.27
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 08 Sep 2020 08:42:27 -0700 (PDT)
+From:   Josef Bacik <josef@toxicpanda.com>
+To:     linux-btrfs@vger.kernel.org, kernel-team@fb.com,
+        fstests@vger.kernel.org
+Subject: [PATCH] fstests: add a _require_scratch_mountopt helper
+Date:   Tue,  8 Sep 2020 11:42:26 -0400
+Message-Id: <125326dc030857fcfa7361ca72c2e19adfdb9c2f.1599579734.git.josef@toxicpanda.com>
+X-Mailer: git-send-email 2.26.2
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200906175513.17595-6-zlang@redhat.com>
-X-Scanned-By: MIMEDefang 2.84 on 10.5.11.22
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Sep 07, 2020 at 01:55:13AM +0800, Zorro Lang wrote:
-> New IO_URING test for fsx, use -U option to enable IO_URING test.
-> 
-> Signed-off-by: Zorro Lang <zlang@redhat.com>
-> ---
+I want to add a test that requires a new mount option, so add a helper
+to safely _notrun if the kernel doesn't support the new mount option.
 
-Just a couple nits...
+Signed-off-by: Josef Bacik <josef@toxicpanda.com>
+---
+ common/rc | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
 
->  ltp/fsx.c | 134 ++++++++++++++++++++++++++++++++++++++++++++++++++++--
->  1 file changed, 131 insertions(+), 3 deletions(-)
-> 
-> diff --git a/ltp/fsx.c b/ltp/fsx.c
-> index 92f506ba..e7f23d15 100644
-> --- a/ltp/fsx.c
-> +++ b/ltp/fsx.c
-...
-> @@ -2429,6 +2436,113 @@ aio_rw(int rw, int fd, char *buf, unsigned len, unsigned offset)
-...
-> +int
-> +uring_rw(int rw, int fd, char *buf, unsigned len, unsigned offset)
-> +{
-> +	struct io_uring_sqe     *sqe;
-> +	struct io_uring_cqe     *cqe;
-> +	struct iovec            iovec;
-> +	int ret;
-> +	int res, res2 = 0;
-> +	char *p = buf;
-> +	unsigned l = len;
-> +	unsigned o = offset;
-
-It looks a little odd that some variable names are aligned with tabs
-while others use a single space.. I'm not sure we care one way or
-another for xfstests, but perhaps use one approach or the other..?
-
-> +
-> +	/*
-> +	 * Due to io_uring tries non-blocking IOs (especially read), that
-> +	 * always cause 'normal' short reading. To avoid this short read
-> +	 * fail, try to loop read/write (escpecilly read) data.
-> +	 */
-> +	while (l > 0) {
-> +		sqe = io_uring_get_sqe(&ring);
-> +		if (!sqe) {
-> +			fprintf(stderr, "uring_rw: io_uring_get_sqe failed: %s\n",
-> +					strerror(errno));
-> +			return -1;
-> +		}
-> +
-> +		iovec.iov_base = p;
-> +		iovec.iov_len = l;
-> +		if (rw == READ) {
-> +			io_uring_prep_readv(sqe, fd, &iovec, 1, o);
-> +		} else {
-> +			io_uring_prep_writev(sqe, fd, &iovec, 1, o);
-> +		}
-> +
-> +		ret = io_uring_submit_and_wait(&ring, 1);
-> +		if (ret != 1) {
-> +			fprintf(stderr, "errcode=%d\n", -ret);
-> +			fprintf(stderr, "uring %s: io_uring_submit failed: %s\n",
-> +					rw == READ ? "read":"write", strerror(-ret));
-> +			goto uring_error;
-> +		}
-> +
-> +		ret = io_uring_wait_cqe(&ring, &cqe);
-> +		if (ret != 0) {
-> +			fprintf(stderr, "errcode=%d\n", -ret);
-> +			fprintf(stderr, "uring %s: io_uring_wait_cqe failed: %s\n",
-> +					rw == READ ? "read":"write", strerror(-ret));
-> +			goto uring_error;
-> +		}
-> +
-> +		res = cqe->res;
-
-If we assign ret here instead of res, it looks like we could optimize
-away res entirely.
-
-Nits and my limited experience with uring aside, the patch otherwise
-LGTM. Are you planning any new tests to take advantage of this,
-particularly since it looks like -A (-U disabled) is the default? In any
-event, a quick test run of fsstress/fsx doesn't seem to explode:
-
-Reviewed-by: Brian Foster <bfoster@redhat.com>
-
-> +		io_uring_cqe_seen(&ring, cqe);
-> +
-> +		if (res > 0) {
-> +			o += res;
-> +			l -= res;
-> +			p += res;
-> +			res2 += res;
-> +		} else if (res < 0) {
-> +			ret = res;
-> +			fprintf(stderr, "errcode=%d\n", -ret);
-> +			fprintf(stderr, "uring %s: io_uring failed: %s\n",
-> +					rw == READ ? "read":"write", strerror(-ret));
-> +			goto uring_error;
-> +		} else {
-> +			fprintf(stderr, "uring %s bad io length: %d instead of %u\n",
-> +					rw == READ ? "read":"write", res2, len);
-> +			break;
-> +		}
-> +	}
-> +	return res2;
-> +
-> + uring_error:
-> +	/*
-> +	 * The caller expects error return in traditional libc
-> +	 * convention, i.e. -1 and the errno set to error.
-> +	 */
-> +	errno = -ret;
-> +	return -1;
-> +}
-> +#else
-> +int
-> +uring_rw(int rw, int fd, char *buf, unsigned len, unsigned offset)
-> +{
-> +	fprintf(stderr, "io_rw: need IO_URING support!\n");
-> +	exit(111);
-> +}
-> +#endif
-> +
->  int
->  fsx_rw(int rw, int fd, char *buf, unsigned len, unsigned offset)
->  {
-> @@ -2436,6 +2550,8 @@ fsx_rw(int rw, int fd, char *buf, unsigned len, unsigned offset)
->  
->  	if (aio) {
->  		ret = aio_rw(rw, fd, buf, len, offset);
-> +	} else if (uring) {
-> +		ret = uring_rw(rw, fd, buf, len, offset);
->  	} else {
->  		if (rw == READ)
->  			ret = read(fd, buf, len);
-> @@ -2498,7 +2614,7 @@ main(int argc, char **argv)
->  	setvbuf(stdout, (char *)0, _IOLBF, 0); /* line buffered stdout */
->  
->  	while ((ch = getopt_long(argc, argv,
-> -				 "b:c:dfg:i:j:kl:m:no:p:qr:s:t:w:xyABD:EFJKHzCILN:OP:RS:WXZ",
-> +				 "b:c:dfg:i:j:kl:m:no:p:qr:s:t:w:xyABD:EFJKHzCILN:OP:RS:UWXZ",
->  				 longopts, NULL)) != EOF)
->  		switch (ch) {
->  		case 'b':
-> @@ -2606,6 +2722,9 @@ main(int argc, char **argv)
->  		case 'A':
->  			aio = 1;
->  			break;
-> +		case 'U':
-> +			uring = 1;
-> +			break;
->  		case 'D':
->  			debugstart = getnum(optarg, &endp);
->  			if (debugstart < 1)
-> @@ -2696,6 +2815,11 @@ main(int argc, char **argv)
->  	if (argc != 1)
->  		usage();
->  
-> +	if (aio && uring) {
-> +		fprintf(stderr, "-A and -U shouldn't be used together\n");
-> +		usage();
-> +	}
-> +
->  	if (integrity && !dirpath) {
->  		fprintf(stderr, "option -i <logdev> requires -P <dirpath>\n");
->  		usage();
-> @@ -2786,6 +2910,10 @@ main(int argc, char **argv)
->  	if (aio) 
->  		aio_setup();
->  #endif
-> +#ifdef URING
-> +	if (uring)
-> +		uring_setup();
-> +#endif
->  
->  	if (!(o_flags & O_TRUNC)) {
->  		off_t ret;
-> -- 
-> 2.20.1
-> 
+diff --git a/common/rc b/common/rc
+index aa5a7409..431855a7 100644
+--- a/common/rc
++++ b/common/rc
+@@ -3281,6 +3281,19 @@ _require_norecovery()
+ 	_scratch_unmount
+ }
+ 
++# notrun if we can't mount scratch with the given mount option
++_require_scratch_mountopt()
++{
++	local option=$1
++
++	_require_scratch
++	_scratch_mkfs > /dev/null 2>&1
++
++	_try_scratch_mount "-o $option" > /dev/null 2>&1 || \
++		_notrun "$SCRATCH_DEV $FSTYP does not support -o $option"
++	_scratch_unmount
++}
++
+ # Does this filesystem support metadata journaling?
+ # We exclude ones here that don't; otherwise we assume that it does, so the
+ # test will run, fail, and motivate someone to update this test for a new
+-- 
+2.26.2
 
