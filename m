@@ -5,65 +5,65 @@ X-Spam-Level:
 X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 95B27C43461
-	for <linux-fstests@archiver.kernel.org>; Tue,  8 Sep 2020 19:30:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 63473C433E2
+	for <linux-fstests@archiver.kernel.org>; Tue,  8 Sep 2020 19:42:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5A9942078B
-	for <linux-fstests@archiver.kernel.org>; Tue,  8 Sep 2020 19:30:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2CC3920578
+	for <linux-fstests@archiver.kernel.org>; Tue,  8 Sep 2020 19:42:52 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="CFPjJ9Fa"
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="xCacUG2p"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1732031AbgIHTaH (ORCPT
+        id S1731500AbgIHTma (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 8 Sep 2020 15:30:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54338 "EHLO
+        Tue, 8 Sep 2020 15:42:30 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53400 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1731001AbgIHP6F (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 8 Sep 2020 11:58:05 -0400
-Received: from mail-qk1-x741.google.com (mail-qk1-x741.google.com [IPv6:2607:f8b0:4864:20::741])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1E731C0612F5
-        for <fstests@vger.kernel.org>; Tue,  8 Sep 2020 08:42:29 -0700 (PDT)
-Received: by mail-qk1-x741.google.com with SMTP id w186so15737554qkd.1
-        for <fstests@vger.kernel.org>; Tue, 08 Sep 2020 08:42:29 -0700 (PDT)
+        with ESMTP id S1730859AbgIHPws (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 8 Sep 2020 11:52:48 -0400
+Received: from mail-qk1-x744.google.com (mail-qk1-x744.google.com [IPv6:2607:f8b0:4864:20::744])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 030B2C061249
+        for <fstests@vger.kernel.org>; Tue,  8 Sep 2020 08:42:47 -0700 (PDT)
+Received: by mail-qk1-x744.google.com with SMTP id v123so4258337qkd.9
+        for <fstests@vger.kernel.org>; Tue, 08 Sep 2020 08:42:46 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
         h=from:to:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=Ub+ai6wTBMm1hsBF5QjaKfqBZmTSAb3mMkHmjBwuXV0=;
-        b=CFPjJ9FamcFky9IgoxXh1bCC/p3QfhMNAxcPZFapy2d24SFFrPIdlfg2zL6Opip6Nh
-         L9kHGLUWSYOVnGClfvz9HQpFjo8oxHsHxft5yp2usklyG4c5b7hcfFDV2UYo/Qp2jBdC
-         U6YJnzpARPyPWATelTf/XW2rdOxkXc9EDMQEDHEfwXMBxfzj44SsY//dwAJLgZNNZK5n
-         sxkL7J/ut3O0jGbgxGG++OL3mGi+3u0IxdZsSObIwbgL6IU75mCPXj+h1zx51W9u1Xmk
-         y3qQ5ejfH1I0Ninga+0u6UwJw5MXMCdEVUglyQpC1AVQal0WsvpdmsWRhjfTVZayY24a
-         9UkA==
+        bh=IQlLeQqrtds9GcsUFdhbQtPfqvpKT3wxoDrNcMBhrWE=;
+        b=xCacUG2pKL/2se+6r1IzpPdodiGDKHTObdLxGUFq7Je0KYn3xDVEqd2TuF3Fto1Z7n
+         rfMrTzaoLtnupfsl02iVwbsUKq/Iehktrq6IzvSEZGL+bHlVhF3dJrvKqovuG+ppi137
+         8UxfO0ghUWrZcRi/cQnjaIpUsLqrgoFOjKycwlfyKduX8O+glt8iz4B21bXWft5fSY72
+         07MM5THHJiwzc+Sb6SQrc2RDoXOj2xQluixbQcSCLANGigobanh3LwWfqjtUuBqPgZQu
+         VOxTltxXsbUwpqR81k4CAzUOv996Rd0sbWnz2EzRZ2sZurqabkoV0DG7QNI81bQ/sqkS
+         lDrA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=Ub+ai6wTBMm1hsBF5QjaKfqBZmTSAb3mMkHmjBwuXV0=;
-        b=BtZUGzkW8ZOzMTJdrA1PCpNGfgtRS5Z2XPG/aO3poHmNfyVht9s1evEYGLG+StCnHY
-         92UeBQ2PXi9ZNsdEQUdiUc0rOIP8QyUINBROBKbBDRajFAkFHC3b1V3o04VM2iew8FnL
-         IOlgD/QfdQ4E4fs+LThIZDiH6ovyqaWHzMdCw+b7epebNPVnSSMzd/A7d5tdDHe6aQcm
-         OqoQPTs5gIZGKGBcWLZiIMs1ybSZmhuHLCTN8j93+NAFf2oV3zEUr46eIWTtVyHbHzId
-         zp0CFt8jo6wt70wBVH42fOwxF/KJJV/MraAL0wHIATYpJCwO99+MKSY2rG4bOyfecKa1
-         W10w==
-X-Gm-Message-State: AOAM530NtFtc0jEP8kVcdyTfT0dV8y6wOnYNY3IidtNwKSO0dloT1AGO
-        UU7x4Ql4h6j6O75wwja+488BHbiBrks9OhEJ
-X-Google-Smtp-Source: ABdhPJwoG3atD+Y8lF3ICXBzgXrnXoV2cZXcZOqqPtnWua1P5o93bXKPkLAZisETCBl0GFS3r1qmgw==
-X-Received: by 2002:a37:9a8e:: with SMTP id c136mr611976qke.211.1599579748076;
-        Tue, 08 Sep 2020 08:42:28 -0700 (PDT)
+        bh=IQlLeQqrtds9GcsUFdhbQtPfqvpKT3wxoDrNcMBhrWE=;
+        b=BmD0RwdcZDyoGIm+eKlixv7F1ccn8408mhwiHCxkplIt0gF4jDUQbdHXSL28mZdtQa
+         eOQa8RwHJNi2wHJGNnxaP6kCVESjRI6n+W/0k4/4u3MmBWsp9OimVjtFl5sPOmDfz5hZ
+         QneypqlFVk4lnjHOKxfh2flRKMUGkwyR41d+v2NXOCuJcdk35GAlmuL09bO3bw3TwRtH
+         5MwQsiKLD/yX0X9K5dWJcpAayJAc66WW3pNmDaDbHiCQVKhmLpqNXKhiTHHldbz/q37o
+         T8I6t7uBnJ9ue3kMVPSAJ7xpNhCpqEotcmUiA6MYfyUeJ9OnMo4bZLsSHvdsug36WIkV
+         CPag==
+X-Gm-Message-State: AOAM532AVIj5qG4+0AKthePwy/QV2rw2ITxm0OqaThZJQhZhTPq03zqQ
+        riIjwFXPRcttWbKFgYFps9bL6g==
+X-Google-Smtp-Source: ABdhPJwzJhCe9kMPzZxGz2XJgc85D8zVDSm+UG5MCXAEhIM4rQCrMeDc24kKCJ78XtkTG2ucNF7+bw==
+X-Received: by 2002:a37:81c1:: with SMTP id c184mr620467qkd.151.1599579766074;
+        Tue, 08 Sep 2020 08:42:46 -0700 (PDT)
 Received: from localhost (cpe-174-109-172-136.nc.res.rr.com. [174.109.172.136])
-        by smtp.gmail.com with ESMTPSA id 134sm9269637qkj.53.2020.09.08.08.42.27
+        by smtp.gmail.com with ESMTPSA id l19sm15459821qtu.16.2020.09.08.08.42.45
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 08 Sep 2020 08:42:27 -0700 (PDT)
+        Tue, 08 Sep 2020 08:42:45 -0700 (PDT)
 From:   Josef Bacik <josef@toxicpanda.com>
-To:     linux-btrfs@vger.kernel.org, kernel-team@fb.com,
-        fstests@vger.kernel.org
-Subject: [PATCH] fstests: add a _require_scratch_mountopt helper
-Date:   Tue,  8 Sep 2020 11:42:26 -0400
-Message-Id: <125326dc030857fcfa7361ca72c2e19adfdb9c2f.1599579734.git.josef@toxicpanda.com>
+To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org,
+        kernel-team@fb.com
+Subject: [PATCH] fstests: btrfs/219 add a test to test -o rescue=all
+Date:   Tue,  8 Sep 2020 11:42:44 -0400
+Message-Id: <5e29c56193c6de8bbc364f22595479d292da13d3.1599579754.git.josef@toxicpanda.com>
 X-Mailer: git-send-email 2.26.2
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -72,38 +72,96 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-I want to add a test that requires a new mount option, so add a helper
-to safely _notrun if the kernel doesn't support the new mount option.
+This new mount option makes sure we can still mount the file system if
+any of the core roots are corrupted.  This test corrupts each of these
+roots and validates that it can still mount the fs and read the file.
 
 Signed-off-by: Josef Bacik <josef@toxicpanda.com>
 ---
- common/rc | 13 +++++++++++++
- 1 file changed, 13 insertions(+)
+ tests/btrfs/219     | 54 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/219.out |  2 ++
+ tests/btrfs/group   |  1 +
+ 3 files changed, 57 insertions(+)
+ create mode 100755 tests/btrfs/219
+ create mode 100644 tests/btrfs/219.out
 
-diff --git a/common/rc b/common/rc
-index aa5a7409..431855a7 100644
---- a/common/rc
-+++ b/common/rc
-@@ -3281,6 +3281,19 @@ _require_norecovery()
- 	_scratch_unmount
- }
- 
-+# notrun if we can't mount scratch with the given mount option
-+_require_scratch_mountopt()
+diff --git a/tests/btrfs/219 b/tests/btrfs/219
+new file mode 100755
+index 00000000..b63bf899
+--- /dev/null
++++ b/tests/btrfs/219
+@@ -0,0 +1,54 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2020 Facebook.  All Rights Reserved.
++#
++# FS QA Test 219
++#
++# A test to exercise the various failure scenarios for -o rescue=all.  This is
++# mainly a regression test for
++#
++#   btrfs: introduce rescue=all
++#
++# We simply corrupt a bunch of core roots and validate that it works the way we
++# expect it to.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
 +{
-+	local option=$1
-+
-+	_require_scratch
-+	_scratch_mkfs > /dev/null 2>&1
-+
-+	_try_scratch_mount "-o $option" > /dev/null 2>&1 || \
-+		_notrun "$SCRATCH_DEV $FSTYP does not support -o $option"
-+	_scratch_unmount
++	cd /
++	rm -f $tmp.*
 +}
 +
- # Does this filesystem support metadata journaling?
- # We exclude ones here that don't; otherwise we assume that it does, so the
- # test will run, fail, and motivate someone to update this test for a new
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs generic
++_supported_os Linux
++_require_test
++_require_scratch_mountopt "-o rescue=all,ro"
++
++# if error
++exit
++
++# optional stuff if your test has verbose output to help resolve problems
++#echo
++#echo "If failure, check $seqres.full (this) and $seqres.full.ok (reference)"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/219.out b/tests/btrfs/219.out
+new file mode 100644
+index 00000000..162074d3
+--- /dev/null
++++ b/tests/btrfs/219.out
+@@ -0,0 +1,2 @@
++QA output created by 219
++Silence is golden
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 3295856d..f4dbfafb 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -221,3 +221,4 @@
+ 216 auto quick seed
+ 217 auto quick trim dangerous
+ 218 auto quick volume
++219 auto quick
 -- 
 2.26.2
 
