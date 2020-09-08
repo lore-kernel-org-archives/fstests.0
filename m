@@ -2,164 +2,129 @@ Return-Path: <SRS0=yQZq=CR=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 16CE4C43461
-	for <linux-fstests@archiver.kernel.org>; Tue,  8 Sep 2020 10:32:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 934F4C43461
+	for <linux-fstests@archiver.kernel.org>; Tue,  8 Sep 2020 14:26:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DFDDF208C7
-	for <linux-fstests@archiver.kernel.org>; Tue,  8 Sep 2020 10:32:34 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1599561154;
-	bh=rAjNo2Ow6A7FccLur3eqVizb+qWyU/wl7RM1COPNrOA=;
-	h=From:To:Cc:Subject:Date:List-ID:From;
-	b=kQMUom8844TUK181ot7wnamHiv3a+aqHFKoXOaBFcXaLMOrtOwUhcJIX5ERTq8ruK
-	 2awm0JfgkujT9XmP2xoJiBu7roERxJ67mb1r4YL7VnTB2wg9tlAWpt0GOORaKCppvF
-	 tkAymSF3tKwGETLCFyEdCq79kOXro8ufPdM3WzBQ=
+	by mail.kernel.org (Postfix) with ESMTP id 569B8224B8
+	for <linux-fstests@archiver.kernel.org>; Tue,  8 Sep 2020 14:26:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729791AbgIHKcP (ORCPT
+        id S1729548AbgIHO0C (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 8 Sep 2020 06:32:15 -0400
-Received: from mail.kernel.org ([198.145.29.99]:40022 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729767AbgIHKcM (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 8 Sep 2020 06:32:12 -0400
-Received: from debian8.Home (bl8-197-74.dsl.telepac.pt [85.241.197.74])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id EADD9206DB;
-        Tue,  8 Sep 2020 10:32:08 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1599561129;
-        bh=rAjNo2Ow6A7FccLur3eqVizb+qWyU/wl7RM1COPNrOA=;
-        h=From:To:Cc:Subject:Date:From;
-        b=yBN2DEeDhX7j8nVVWr6P5BQYarg2Ms0KI3m9m5QUJ8dFVGayzNUJMqyF2R0ZrOW+o
-         yyhwSQKpTS1JrwuAJTDZWvkuAYE1O+T21o2JDZY8kKZPhO9tZ+IjNESeAr5VBc9i8f
-         knDiO7B41lNfaK1BlEJS4ADzKoHt5fPMffLFXBf4=
-From:   fdmanana@kernel.org
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH] generic: add test for zero range over a file range with many small extents
-Date:   Tue,  8 Sep 2020 11:32:02 +0100
-Message-Id: <e038bd2419f60f0b4c5ac13da78bfba345f4dba7.1599560067.git.fdmanana@suse.com>
-X-Mailer: git-send-email 2.26.2
+        Tue, 8 Sep 2020 10:26:02 -0400
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:36614 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1729057AbgIHOZB (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 8 Sep 2020 10:25:01 -0400
+X-IronPort-AV: E=Sophos;i="5.76,405,1592841600"; 
+   d="scan'208";a="99008941"
+Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
+  by heian.cn.fujitsu.com with ESMTP; 08 Sep 2020 21:23:48 +0800
+Received: from G08CNEXMBPEKD06.g08.fujitsu.local (unknown [10.167.33.206])
+        by cn.fujitsu.com (Postfix) with ESMTP id 3538948990E5;
+        Tue,  8 Sep 2020 21:23:47 +0800 (CST)
+Received: from G08CNEXCHPEKD05.g08.fujitsu.local (10.167.33.203) by
+ G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.2; Tue, 8 Sep 2020 21:23:46 +0800
+Received: from Fedora-30.g08.fujitsu.local (10.167.220.106) by
+ G08CNEXCHPEKD05.g08.fujitsu.local (10.167.33.209) with Microsoft SMTP Server
+ id 15.0.1497.2 via Frontend Transport; Tue, 8 Sep 2020 21:23:42 +0800
+From:   Xiao Yang <yangx.jy@cn.fujitsu.com>
+To:     <fstests@vger.kernel.org>
+CC:     <darrick.wong@oracle.com>, <david@fromorbit.com>,
+        <ira.weiny@intel.com>, <linux-xfs@vger.kernel.org>,
+        Xiao Yang <yangx.jy@cn.fujitsu.com>
+Subject: [PATCH 2/2] common/rc: Add extra check for xfs_io -c "chattr" on XFS
+Date:   Tue, 8 Sep 2020 21:15:23 +0800
+Message-ID: <20200908131523.20899-2-yangx.jy@cn.fujitsu.com>
+X-Mailer: git-send-email 2.21.0
+In-Reply-To: <20200908131523.20899-1-yangx.jy@cn.fujitsu.com>
+References: <20200908131523.20899-1-yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-yoursite-MailScanner-ID: 3538948990E5.A9CDD
+X-yoursite-MailScanner: Found to be clean
+X-yoursite-MailScanner-From: yangx.jy@cn.fujitsu.com
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Filipe Manana <fdmanana@suse.com>
+On XFS, ioctl(FSSETXATTR)(called by xfs_io -c "chattr") maskes off unsupported
+or invalid flags silently.  For example,
+1) With kernel v4.4 which doesn't support dax flag, try to set dax flag on a
+file by the lastest xfs_io -c "chattr" command:
+--------------------------------------------
+# xfs_io -f -c "chattr +x" testfile;echo $?
+0
+# xfs_io -c "lsattr" testfile
+----------------X testfile
+--------------------------------------------
+2) Realtime inheritance flag is only valid for a directory and try to set
+realtime inheritance flag on a file:
+--------------------------------------------
+# xfs_io -f -c "chattr +t" testfile;echo $?
+0
+# xfs_io -c "lsattr" testfile
+----------------X testfile
+--------------------------------------------
 
-Test a fallocate() zero range operation against a large file range for which
-there are many small extents allocated. Verify the operation does not fail
-and the respective range return zeroes on subsequent reads.
-
-This test is motivated by a bug found on btrfs. The patch that fixes the
-bug on btrfs has the following subject:
-
- "btrfs: fix metadata reservation for fallocate that leads to transaction aborts"
-
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
+Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
 ---
- tests/generic/609     | 61 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/609.out |  5 ++++
- tests/generic/group   |  1 +
- 3 files changed, 67 insertions(+)
- create mode 100755 tests/generic/609
- create mode 100644 tests/generic/609.out
+ common/rc | 16 ++++++++++++++++
+ 1 file changed, 16 insertions(+)
 
-diff --git a/tests/generic/609 b/tests/generic/609
-new file mode 100755
-index 00000000..cda2b3dc
---- /dev/null
-+++ b/tests/generic/609
-@@ -0,0 +1,61 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2020 SUSE Linux Products GmbH. All Rights Reserved.
-+#
-+# FS QA Test No. 609
-+#
-+# Test a fallocate() zero range operation against a large file range for which
-+# there are many small extents allocated. Verify the operation does not fail
-+# and the respective range return zeroes on subsequent reads.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
+diff --git a/common/rc b/common/rc
+index cf31eebc..e40f0a8a 100644
+--- a/common/rc
++++ b/common/rc
+@@ -2158,6 +2158,7 @@ _require_xfs_io_command()
+ 	local param="$*"
+ 	local param_checked=""
+ 	local opts=""
++	local attr_info=""
+ 
+ 	local testfile=$TEST_DIR/$$.xfs_io
+ 	local testio
+@@ -2171,9 +2172,11 @@ _require_xfs_io_command()
+ 		# 'tPnE' flags are only valid for a directory so check them on a directory.
+ 		if echo "$param" | egrep -q 't|P|n|E'; then
+ 			testio=`$XFS_IO_PROG -F -c "chattr +$param" $TEST_DIR 2>&1`
++			attr_info=`$XFS_IO_PROG -F -r -c "lsattr" $TEST_DIR | awk '{print $1}'`
+ 			$XFS_IO_PROG -F -r -c "chattr -$param" $TEST_DIR 2>&1
+ 		else
+ 			testio=`$XFS_IO_PROG -F -f -c "chattr +$param" $testfile 2>&1`
++			attr_info=`$XFS_IO_PROG -F -r -c "lsattr" $testfile | awk '{print $1}'`
+ 			$XFS_IO_PROG -F -r -c "chattr -$param" $testfile 2>&1
+ 		fi
+ 		param_checked="+$param"
+@@ -2297,6 +2300,19 @@ _require_xfs_io_command()
+ 		echo $testio | grep -q "\(invalid option\|not supported\)" && \
+ 			_notrun "xfs_io $command doesn't support $param"
+ 	fi
 +
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch
-+_require_xfs_io_command "fzero"
-+_require_xfs_io_command "fpunch"
-+_require_test_program "punch-alternating"
-+
-+rm -f $seqres.full
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+
-+# Create a file with many small extents. To speed up file creation, do
-+# buffered writes and then punch a hole on every other block.
-+$XFS_IO_PROG -f -c "pwrite -S 0xab -b 10M 0 100M" \
-+	$SCRATCH_MNT/foobar >>$seqres.full
-+$here/src/punch-alternating $SCRATCH_MNT/foobar >>$seqres.full
-+
-+# For btrfs, trigger a transaction commit to force metadata COW for the
-+# following fallocate zero range operation.
-+sync
-+
-+$XFS_IO_PROG -c "fzero 0 100M" $SCRATCH_MNT/foobar
-+
-+# Check the file content after umounting and mounting again the fs, to verify
-+# everything was persisted.
-+_scratch_cycle_mount
-+
-+echo "File content after zero range operation:"
-+od -A d -t x1 $SCRATCH_MNT/foobar
-+
-+status=0
-+exit
-diff --git a/tests/generic/609.out b/tests/generic/609.out
-new file mode 100644
-index 00000000..feb8c211
---- /dev/null
-+++ b/tests/generic/609.out
-@@ -0,0 +1,5 @@
-+QA output created by 609
-+File content after zero range operation:
-+0000000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-+*
-+104857600
-diff --git a/tests/generic/group b/tests/generic/group
-index aa969bcb..f8eabc0a 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -611,3 +611,4 @@
- 606 auto attr quick dax
- 607 auto attr quick dax
- 608 auto attr quick dax
-+609 auto quick prealloc zero
++	# On XFS, ioctl(FSSETXATTR)(called by xfs_io -c "chattr") maskes off unsupported
++	# or invalid flags silently so need to check these flags by extra ioctl(FSGETXATTR)
++	# (called by xfs_io -c "lsattr").
++	# The following URL explains why we don't change the behavior of XFS.
++	# https://www.spinics.net/lists/linux-xfs/msg44725.html
++	if [ -n "$attr_info" -a "$FSTYP" = "xfs" ]; then
++		local num=${#param}
++		for i in $(seq 0 $((num-1))); do
++			echo $attr_info | grep -q "${param:$i:1}" || \
++				_notrun "xfs_io $command +${param:$i:1} support is missing (unknown flag in kernel)"
++		done
++	fi
+ }
+ 
+ # check that kernel and filesystem support direct I/O
 -- 
-2.26.2
+2.21.0
+
+
 
