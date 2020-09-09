@@ -2,257 +2,146 @@ Return-Path: <SRS0=dLE8=CS=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4A431C433E2
-	for <linux-fstests@archiver.kernel.org>; Wed,  9 Sep 2020 03:44:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 72FC3C433E2
+	for <linux-fstests@archiver.kernel.org>; Wed,  9 Sep 2020 07:15:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id F257020EDD
-	for <linux-fstests@archiver.kernel.org>; Wed,  9 Sep 2020 03:44:32 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1E3DC2078E
+	for <linux-fstests@archiver.kernel.org>; Wed,  9 Sep 2020 07:15:35 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="GkgHXFku"
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="LL8weDzc";
+	dkim=pass (1024-bit key) header.d=sharedspace.onmicrosoft.com header.i=@sharedspace.onmicrosoft.com header.b="LZWLJNSV"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726226AbgIIDoc (ORCPT
+        id S1726883AbgIIHPe (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 8 Sep 2020 23:44:32 -0400
-Received: from us-smtp-2.mimecast.com ([207.211.31.81]:59335 "EHLO
-        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726109AbgIIDo1 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 8 Sep 2020 23:44:27 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1599623066;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=kl3ykfqlCfmI1FYDEWFA5ocyrEq9f27pvma5ikAQwbE=;
-        b=GkgHXFkucu3w+9GZ65bghCcx5iaxKBQvL8JhsMsutJZTIrKB3y2liDjNBMg4vBNFTa/C3q
-        63spG0DZdp/ysHMLyAk/5HtgG0hRjJQQootWEUkyY9r4W6S2h9SntBnWP1+LcXOP/HWsqI
-        uPNMJmdKAtG7ne0SVM+5IAqpRMNyp6A=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-391-a_jamZHCMBKhDM0QnDJW-Q-1; Tue, 08 Sep 2020 23:44:24 -0400
-X-MC-Unique: a_jamZHCMBKhDM0QnDJW-Q-1
-Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 674561019632;
-        Wed,  9 Sep 2020 03:44:23 +0000 (UTC)
-Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id D4CEF7E46E;
-        Wed,  9 Sep 2020 03:44:22 +0000 (UTC)
-Date:   Wed, 9 Sep 2020 11:58:07 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Brian Foster <bfoster@redhat.com>
-Cc:     fstests@vger.kernel.org, io-uring@vger.kernel.org
-Subject: Re: [PATCH v4 5/5] fsx: add IO_URING test
-Message-ID: <20200909035807.GE2937@dhcp-12-102.nay.redhat.com>
-Mail-Followup-To: Brian Foster <bfoster@redhat.com>,
-        fstests@vger.kernel.org, io-uring@vger.kernel.org
-References: <20200906175513.17595-1-zlang@redhat.com>
- <20200906175513.17595-6-zlang@redhat.com>
- <20200908183625.GE737175@bfoster>
+        Wed, 9 Sep 2020 03:15:34 -0400
+Received: from esa6.hgst.iphmx.com ([216.71.154.45]:29424 "EHLO
+        esa6.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725826AbgIIHPd (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 9 Sep 2020 03:15:33 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1599635732; x=1631171732;
+  h=from:to:subject:date:message-id:references:
+   content-transfer-encoding:mime-version;
+  bh=Uen599ign/yi+3a4VkIJ0Y5JBI7liTLRWukF9dBqOJE=;
+  b=LL8weDzccIQLbWyy+Nh5VJP9oNlOY8N3yxwZtVOZL2My+9M2VgfBTpQ0
+   yOMrLyuOFwts3lYbXDZwwvMAGYxDIrEfShhGoLj9GiflTCVPmt65VGomo
+   66Q16ibVnuyvhVL2u1YWT39SIzhB9DtzK+bf3nP6dQGVdeDzoi8QI0JNf
+   tsdii0LFG35Ae87oLmjV35iB5LvphhbWPtp1xoPeDSqhR3CpdROobVMJz
+   bId6D4tV0xqOd2MQ7vh9vEm/h+mRofuoEA+o9f35tx+MDRBzl4sEZQetg
+   STHHKJhpH2BrhwscRQE1HVn7eRYkRr6nU4L/26GIwcCAlmfQyVnPoZbyp
+   w==;
+IronPort-SDR: nrgCzFFP+uiEj6KkZSvHfYb+xZlKg6jX2u4qmXv/xejmYp64jPXP7N/7bVEPGNlT1XKgl5pqG4
+ 5hBXhnKjZxquIQeFUgzodKh49eMopc94o6jmAozlcXHBZppYv5Nn8Xb6MbO5uwBXNoKwf3m1Yd
+ uBahjK/AdGHU/aS0zXA2NGZkoqQ97XaVJynilLiI/XOnPwugeWpfA6KEeOp0qQ7RF+tSt8ZNhR
+ /uQaVjenANbaBG66dXjz/HwegkGmUJEgE/WaWElpXGqYBr1UHHksEQ1U+KxvZMZcfdruBD2Q+w
+ 5CM=
+X-IronPort-AV: E=Sophos;i="5.76,408,1592841600"; 
+   d="scan'208";a="148131813"
+Received: from mail-bl2nam02lp2053.outbound.protection.outlook.com (HELO NAM02-BL2-obe.outbound.protection.outlook.com) ([104.47.38.53])
+  by ob1.hgst.iphmx.com with ESMTP; 09 Sep 2020 15:15:32 +0800
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=dRFJ2+EbubCr6YNDlmiV2YZ+6Jf1WkXkIuM24xfkh762fy5SyDfbpRMHgd1xtLlgjWvMFR9SW7098t3gueCPXP8fqgMAJ4OiWoliVoSCS2eIeYjCvOojaGCt9bYoaLTnvEEXqL/Pbedt8UKz346uo5BwS4UUJIEP6n1+/28YK55BCdAg241eHYqK0ltyqofXMpCYhtZYbCr8WrQXTgsmexf0bY/b01roiFMwgU93p8h2QdWTFzhH6gVhPyYpcAHn68u3SSltnuSGg6+Nay3X5vS2I7eXP1OSB5IQXtIu+jOIYxTqiYjcKTwZinKwuYo8LlFXMlWZxu+AHg9y210mgg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=Uen599ign/yi+3a4VkIJ0Y5JBI7liTLRWukF9dBqOJE=;
+ b=IxJslDconjuo4C9xd+FgJ0dncQ0+ZLg1uvAW8g50Y+gUXSacaw7L9bp/6dlPiNBUaUtAgDUSVRhzqRPezG08w+7SEIOrcdCJ1OXaUmLE4xk+ItvJEpeJYBHy/n9Rx5XrdrBWGkOqaIGVwww03dVs82bsCQ4qlsGN3r/4sGdzmlcdXw8degnl9pCC0RMFU17KAvy8EQzRVz9LLepvt23F3udcanT+Kyh+KhJxRz6Wb31TI5CVofw2RdxaV3mHdihzJhjConz8I9xOljqvAjDjAhFaSsvG1n1srHN2DeKB95DsNuMpt5+RDctvFxypAT6ckjVAmCXnKMw0PylrGuIgZQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
+ header.d=wdc.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=Uen599ign/yi+3a4VkIJ0Y5JBI7liTLRWukF9dBqOJE=;
+ b=LZWLJNSVfr6r5+/mr6KzQ1T3FMyfeZkHfEVAazGgqV2VKNLD5p9ShhcebbrHPk5AuzIWIeLv26OtC32L6UCZg8F+5ZTCR+cwCBR4jG9sbS47cfOnm6etEck8IJmH08ksMRKQO1Nv8/0cY+u3iRJttZWDLznepoQolSfIFQkfuc4=
+Received: from SN4PR0401MB3598.namprd04.prod.outlook.com
+ (2603:10b6:803:47::21) by SN6PR04MB4688.namprd04.prod.outlook.com
+ (2603:10b6:805:ab::10) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3348.15; Wed, 9 Sep
+ 2020 07:15:30 +0000
+Received: from SN4PR0401MB3598.namprd04.prod.outlook.com
+ ([fe80::457e:5fe9:2ae3:e738]) by SN4PR0401MB3598.namprd04.prod.outlook.com
+ ([fe80::457e:5fe9:2ae3:e738%7]) with mapi id 15.20.3348.019; Wed, 9 Sep 2020
+ 07:15:30 +0000
+From:   Johannes Thumshirn <Johannes.Thumshirn@wdc.com>
+To:     Josef Bacik <josef@toxicpanda.com>,
+        "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>,
+        "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
+        "kernel-team@fb.com" <kernel-team@fb.com>
+Subject: Re: [PATCH] fstests: btrfs/219 add a test to test -o rescue=all
+Thread-Topic: [PATCH] fstests: btrfs/219 add a test to test -o rescue=all
+Thread-Index: AQHWhhfENfNfB2b+30qn/1kB6qe7oQ==
+Date:   Wed, 9 Sep 2020 07:15:30 +0000
+Message-ID: <SN4PR0401MB35985107123C67C711DE69E79B260@SN4PR0401MB3598.namprd04.prod.outlook.com>
+References: <5e29c56193c6de8bbc364f22595479d292da13d3.1599579754.git.josef@toxicpanda.com>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: toxicpanda.com; dkim=none (message not signed)
+ header.d=none;toxicpanda.com; dmarc=none action=none header.from=wdc.com;
+x-originating-ip: [62.216.205.181]
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-ht: Tenant
+x-ms-office365-filtering-correlation-id: ee9ee6a1-3da6-41d7-dfc3-08d8549022b2
+x-ms-traffictypediagnostic: SN6PR04MB4688:
+x-microsoft-antispam-prvs: <SN6PR04MB46889F99027B4CC2728B396D9B260@SN6PR04MB4688.namprd04.prod.outlook.com>
+wdcipoutbound: EOP-TRUE
+x-ms-oob-tlc-oobclassifiers: OLM:5797;
+x-ms-exchange-senderadcheck: 1
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: wDq+fsO273nHbT/ZReRnPSMVHm+vrxIurCQAm3PZXPV03B4Ta0BBjhoOcginkSvkkVlAWPCR23bhh9xNRyPOgurQ+ymk7mRWxQ/yi2coLpW1qjkPeZGCjbq6vEi/l40jwb7AKYELgnU1FPeTHdK4Z6R5INscbKTVsVsGDKUSC1pgO2e3hGuOa4Wq8sbU7aLnN8k+zP7pUTrVKlsnnnr1C6XphyY9hTbFUKKR4FJ11GK9OPVTJaaWzpVKic85WdLYnjUvxnEjoGZQHFGvFYH3bo+twwMeAs5HMKDNMcWpVDcFccpx4zyoJB4SV+Jb4MYDJWMFWFfbsasH5Q/2a+eKvjvaakVXBk4WYbP7/UnwQu9b4WG6ezSnNxYj1nzYu9AG
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SN4PR0401MB3598.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(376002)(136003)(396003)(366004)(346002)(39860400002)(55016002)(52536014)(478600001)(76116006)(66946007)(33656002)(91956017)(6506007)(86362001)(83380400001)(71200400001)(53546011)(7696005)(8676002)(26005)(186003)(8936002)(2906002)(110136005)(66446008)(64756008)(66556008)(66476007)(316002)(5660300002)(4744005)(9686003)(151823002);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata: 2PFlBHguw5fDs4dQbu948l9i93uRgAMiGtjJXyOaS1J44RrGtJLfpWu8S6RUZBLHBLS/wjk9+zcnTPTQLHiAvQHX0fKZtnaSkeJr+gi2raNwRwwGFlZxL081SGnLg1q7WsLYeihRg/t/XXCoP6wPvOtV+KUchqSG3At/hrfWBqIzsdoIo8R+NuQcE3tRiKxcorARRwn+L7PP0ydQ5iEgfjoAkBThvhPqHiLm1gsUaeXd8wjTxfOG0f06MMfHplX7F/kxvvUjKjRID2mV0u+74oqrh1IPJzcOdCF3/UXziEljMVSO0EqFuJQtAJ4vmQidnu9m1ZIn5XGsrRcc3TheYFHyXT+eGFjDfI1Fm5JDaNK6JeUPXiau6IvBfFsZ9uk1WqxsR2fX44zivKWag5F6NV6Uxcwz0G//8wHFGnWELzJiSidbzA6zDA4ToQSo8+byAPNNjCpox5V9mnBg8cMjfVeHUNQdzfzooMSa0n3N8iMPijp8e1q0qfZ+OdtLmhRO768Ga+5yRKgrC+k/5LEgzu9TWFAAQBNvCapWmCeCK5lErXwcl4kpFB5BZNXSa+mmOALwi7fLAzM7gYuZEfLQ9960czBSLHuseBUmzgQlW3hFB1Cv2cj3HoKyhKLgn6qmcfr6khd5KXUVDVayLc2M3A==
+x-ms-exchange-transport-forked: True
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200908183625.GE737175@bfoster>
-User-Agent: Mutt/1.10.1 (2018-07-13)
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
+X-OriginatorOrg: wdc.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: SN4PR0401MB3598.namprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: ee9ee6a1-3da6-41d7-dfc3-08d8549022b2
+X-MS-Exchange-CrossTenant-originalarrivaltime: 09 Sep 2020 07:15:30.6097
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: IwYKbFb1FN36ebtOgzgvjBPUffeJYiEwqnqN+YsHMNeK1Bn0lcslN2fuDgptPdEJ+Pc0XcvbBOEeGsCRkLQR9HZhDaIFUJ0Fm44f1etDmxY=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: SN6PR04MB4688
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Sep 08, 2020 at 02:36:25PM -0400, Brian Foster wrote:
-> On Mon, Sep 07, 2020 at 01:55:13AM +0800, Zorro Lang wrote:
-> > New IO_URING test for fsx, use -U option to enable IO_URING test.
-> > 
-> > Signed-off-by: Zorro Lang <zlang@redhat.com>
-> > ---
-> 
-> Just a couple nits...
-> 
-> >  ltp/fsx.c | 134 ++++++++++++++++++++++++++++++++++++++++++++++++++++--
-> >  1 file changed, 131 insertions(+), 3 deletions(-)
-> > 
-> > diff --git a/ltp/fsx.c b/ltp/fsx.c
-> > index 92f506ba..e7f23d15 100644
-> > --- a/ltp/fsx.c
-> > +++ b/ltp/fsx.c
-> ...
-> > @@ -2429,6 +2436,113 @@ aio_rw(int rw, int fd, char *buf, unsigned len, unsigned offset)
-> ...
-> > +int
-> > +uring_rw(int rw, int fd, char *buf, unsigned len, unsigned offset)
-> > +{
-> > +	struct io_uring_sqe     *sqe;
-> > +	struct io_uring_cqe     *cqe;
-> > +	struct iovec            iovec;
-> > +	int ret;
-> > +	int res, res2 = 0;
-> > +	char *p = buf;
-> > +	unsigned l = len;
-> > +	unsigned o = offset;
-> 
-> It looks a little odd that some variable names are aligned with tabs
-> while others use a single space.. I'm not sure we care one way or
-> another for xfstests, but perhaps use one approach or the other..?
-> 
-> > +
-> > +	/*
-> > +	 * Due to io_uring tries non-blocking IOs (especially read), that
-> > +	 * always cause 'normal' short reading. To avoid this short read
-> > +	 * fail, try to loop read/write (escpecilly read) data.
-> > +	 */
-> > +	while (l > 0) {
-> > +		sqe = io_uring_get_sqe(&ring);
-> > +		if (!sqe) {
-> > +			fprintf(stderr, "uring_rw: io_uring_get_sqe failed: %s\n",
-> > +					strerror(errno));
-> > +			return -1;
-> > +		}
-> > +
-> > +		iovec.iov_base = p;
-> > +		iovec.iov_len = l;
-> > +		if (rw == READ) {
-> > +			io_uring_prep_readv(sqe, fd, &iovec, 1, o);
-> > +		} else {
-> > +			io_uring_prep_writev(sqe, fd, &iovec, 1, o);
-> > +		}
-> > +
-> > +		ret = io_uring_submit_and_wait(&ring, 1);
-> > +		if (ret != 1) {
-> > +			fprintf(stderr, "errcode=%d\n", -ret);
-> > +			fprintf(stderr, "uring %s: io_uring_submit failed: %s\n",
-> > +					rw == READ ? "read":"write", strerror(-ret));
-> > +			goto uring_error;
-> > +		}
-> > +
-> > +		ret = io_uring_wait_cqe(&ring, &cqe);
-> > +		if (ret != 0) {
-> > +			fprintf(stderr, "errcode=%d\n", -ret);
-> > +			fprintf(stderr, "uring %s: io_uring_wait_cqe failed: %s\n",
-> > +					rw == READ ? "read":"write", strerror(-ret));
-> > +			goto uring_error;
-> > +		}
-> > +
-> > +		res = cqe->res;
-> 
-> If we assign ret here instead of res, it looks like we could optimize
-> away res entirely.
-
-I think you're right, I'll think more about that, then send V5 patches out.
-As you've ACKed this patchset, I'll add "Reviewed-by Brian" in V5, many
-thanks for your review :)
-
-> 
-> Nits and my limited experience with uring aside, the patch otherwise
-> LGTM. Are you planning any new tests to take advantage of this,
-> particularly since it looks like -A (-U disabled) is the default? In any
-> event, a quick test run of fsstress/fsx doesn't seem to explode:
-
-Yes, I'm preparing more patches to use the -U option of fsx. I'll send them
-out after this patchset get merged :)
-
-> 
-> Reviewed-by: Brian Foster <bfoster@redhat.com>
-> 
-> > +		io_uring_cqe_seen(&ring, cqe);
-> > +
-> > +		if (res > 0) {
-> > +			o += res;
-> > +			l -= res;
-> > +			p += res;
-> > +			res2 += res;
-> > +		} else if (res < 0) {
-> > +			ret = res;
-> > +			fprintf(stderr, "errcode=%d\n", -ret);
-> > +			fprintf(stderr, "uring %s: io_uring failed: %s\n",
-> > +					rw == READ ? "read":"write", strerror(-ret));
-> > +			goto uring_error;
-> > +		} else {
-> > +			fprintf(stderr, "uring %s bad io length: %d instead of %u\n",
-> > +					rw == READ ? "read":"write", res2, len);
-> > +			break;
-> > +		}
-> > +	}
-> > +	return res2;
-> > +
-> > + uring_error:
-> > +	/*
-> > +	 * The caller expects error return in traditional libc
-> > +	 * convention, i.e. -1 and the errno set to error.
-> > +	 */
-> > +	errno = -ret;
-> > +	return -1;
-> > +}
-> > +#else
-> > +int
-> > +uring_rw(int rw, int fd, char *buf, unsigned len, unsigned offset)
-> > +{
-> > +	fprintf(stderr, "io_rw: need IO_URING support!\n");
-> > +	exit(111);
-> > +}
-> > +#endif
-> > +
-> >  int
-> >  fsx_rw(int rw, int fd, char *buf, unsigned len, unsigned offset)
-> >  {
-> > @@ -2436,6 +2550,8 @@ fsx_rw(int rw, int fd, char *buf, unsigned len, unsigned offset)
-> >  
-> >  	if (aio) {
-> >  		ret = aio_rw(rw, fd, buf, len, offset);
-> > +	} else if (uring) {
-> > +		ret = uring_rw(rw, fd, buf, len, offset);
-> >  	} else {
-> >  		if (rw == READ)
-> >  			ret = read(fd, buf, len);
-> > @@ -2498,7 +2614,7 @@ main(int argc, char **argv)
-> >  	setvbuf(stdout, (char *)0, _IOLBF, 0); /* line buffered stdout */
-> >  
-> >  	while ((ch = getopt_long(argc, argv,
-> > -				 "b:c:dfg:i:j:kl:m:no:p:qr:s:t:w:xyABD:EFJKHzCILN:OP:RS:WXZ",
-> > +				 "b:c:dfg:i:j:kl:m:no:p:qr:s:t:w:xyABD:EFJKHzCILN:OP:RS:UWXZ",
-> >  				 longopts, NULL)) != EOF)
-> >  		switch (ch) {
-> >  		case 'b':
-> > @@ -2606,6 +2722,9 @@ main(int argc, char **argv)
-> >  		case 'A':
-> >  			aio = 1;
-> >  			break;
-> > +		case 'U':
-> > +			uring = 1;
-> > +			break;
-> >  		case 'D':
-> >  			debugstart = getnum(optarg, &endp);
-> >  			if (debugstart < 1)
-> > @@ -2696,6 +2815,11 @@ main(int argc, char **argv)
-> >  	if (argc != 1)
-> >  		usage();
-> >  
-> > +	if (aio && uring) {
-> > +		fprintf(stderr, "-A and -U shouldn't be used together\n");
-> > +		usage();
-> > +	}
-> > +
-> >  	if (integrity && !dirpath) {
-> >  		fprintf(stderr, "option -i <logdev> requires -P <dirpath>\n");
-> >  		usage();
-> > @@ -2786,6 +2910,10 @@ main(int argc, char **argv)
-> >  	if (aio) 
-> >  		aio_setup();
-> >  #endif
-> > +#ifdef URING
-> > +	if (uring)
-> > +		uring_setup();
-> > +#endif
-> >  
-> >  	if (!(o_flags & O_TRUNC)) {
-> >  		off_t ret;
-> > -- 
-> > 2.20.1
-> > 
-> 
-
+On 08/09/2020 21:39, Josef Bacik wrote:=0A=
+> +# Modify as appropriate.=0A=
+> +_supported_fs generic=0A=
+> +_supported_os Linux=0A=
+> +_require_test=0A=
+> +_require_scratch_mountopt "-o rescue=3Dall,ro"=0A=
+> +=0A=
+> +# if error=0A=
+> +exit=0A=
+> +=0A=
+> +# optional stuff if your test has verbose output to help resolve problem=
+s=0A=
+> +#echo=0A=
+> +#echo "If failure, check $seqres.full (this) and $seqres.full.ok (refere=
+nce)"=0A=
+> +=0A=
+> +# success, all done=0A=
+> +status=3D0=0A=
+> +exit=0A=
+=0A=
+This looks very much like the test template. The only thing it does is chec=
+k if =0A=
+the mount option exit and then exit, doesn't it?=0A=
+=0A=
+So it either gets skipped if the mount option isn't present or it exits wit=
+h a =0A=
+failure.=0A=
