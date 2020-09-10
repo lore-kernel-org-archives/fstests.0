@@ -2,201 +2,114 @@ Return-Path: <SRS0=k6dn=CT=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E0592C43461
-	for <linux-fstests@archiver.kernel.org>; Thu, 10 Sep 2020 03:02:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 57C24C433E2
+	for <linux-fstests@archiver.kernel.org>; Thu, 10 Sep 2020 05:53:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9950E21D40
-	for <linux-fstests@archiver.kernel.org>; Thu, 10 Sep 2020 03:02:11 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0BAC020829
+	for <linux-fstests@archiver.kernel.org>; Thu, 10 Sep 2020 05:53:30 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="V5TLwRkQ"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="VtNhlIlw"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728207AbgIJDBz (ORCPT
+        id S1727805AbgIJFx0 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 9 Sep 2020 23:01:55 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:26614 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726738AbgIJDA5 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 9 Sep 2020 23:00:57 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1599706856;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=GQalugFKq465b5k5xiN1MGjI2fh4gdBNAsOArzwMH9o=;
-        b=V5TLwRkQX95TCB3SW+dmpQh30CnAdmVwBCuDQ4MlpLFibZEo/XKmjn3d0jIIet2Kwps+uo
-        +wEppHmJogvNoYNvECALjDtDWkliZTKAnMsSlLyqVeoJ9bAQGmvyPj0A1kPYLUkDWJS6UY
-        OVqytt/pii6R7rnWjxXR08z7t80/lnk=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-189-5rWQ1AP0N-KDefoSq5Boeg-1; Wed, 09 Sep 2020 23:00:54 -0400
-X-MC-Unique: 5rWQ1AP0N-KDefoSq5Boeg-1
-Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 3B79E57057;
-        Thu, 10 Sep 2020 03:00:53 +0000 (UTC)
-Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 9D7926FEFE;
-        Thu, 10 Sep 2020 03:00:52 +0000 (UTC)
-Date:   Thu, 10 Sep 2020 11:14:39 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc:     fdmanana@kernel.org, fstests@vger.kernel.org,
-        linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH] generic: add test for zero range over a file range with
- many small extents
-Message-ID: <20200910031439.GF2937@dhcp-12-102.nay.redhat.com>
-Mail-Followup-To: "Darrick J. Wong" <darrick.wong@oracle.com>,
-        fdmanana@kernel.org, fstests@vger.kernel.org,
-        linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-References: <e038bd2419f60f0b4c5ac13da78bfba345f4dba7.1599560067.git.fdmanana@suse.com>
- <20200909190213.GA7943@magnolia>
+        Thu, 10 Sep 2020 01:53:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59964 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725912AbgIJFvS (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 10 Sep 2020 01:51:18 -0400
+Received: from mail-pg1-x541.google.com (mail-pg1-x541.google.com [IPv6:2607:f8b0:4864:20::541])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B53B1C061573;
+        Wed,  9 Sep 2020 22:51:18 -0700 (PDT)
+Received: by mail-pg1-x541.google.com with SMTP id j34so3645737pgi.7;
+        Wed, 09 Sep 2020 22:51:18 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=date:from:to:cc:subject:message-id:mime-version:content-disposition;
+        bh=eBRsxxtAEF+UcUxae450mFqgjq0asEolfNJdI0cbnJc=;
+        b=VtNhlIlwU3kSG20a2/rM77x1lTAS1LYlIm+36QGHJj5ufnFO9IV7XVNZRJvIMEQC/Z
+         3qIXjrP8hYr5ECyFDw/DNMqK4r32S4T3c3Nvy8e+oninKW3BuEBtnIyJJms/r+4hiZKv
+         kM4BPh9DU6Xo3SHA4W/QRgpTIcpOWPFUVrfObLXWRuTGLe7ybUvSqNQbZV6tXHnGZ5hT
+         HWtY5bMRH4WdnmRR06L9hO8kdc2iA0WgTmkTYT+HqNhqDMZY+yjBk+W79oQImOXqgSKI
+         GVisP+HUiRZxJifeazpht00MamF6PJCr7RrHd2EtC9wZpGhPd0Kqdgv3N8mCjg1+8ZjX
+         /7OA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:mime-version
+         :content-disposition;
+        bh=eBRsxxtAEF+UcUxae450mFqgjq0asEolfNJdI0cbnJc=;
+        b=LbLF7IJl3lA32UKTdsqPkfS4E7OKDR4xZGjt3UnxmHIogE8E/NCXJ1AIj4PcKgK+6w
+         Y69ypBZkYq7+7alYLDLqbz8yrwG6lZlSAdqWHhCN5ytR8gm8ENyd2wLBytfnQMd1sMHu
+         r/WCkOcq2+O0Fo8rOGMN6teQUUyN8nnVex1TR+nraDpfrcZW3E7ga0KpNA82n0PMnRoX
+         /iz61YB16pybSFdSmhxubd3QOHuNk/+KehGGebHNdnkWbl3mQ8ruzmvMeFWsg+FuKaFF
+         PEVv1HpJRC9BsT9gvK5sQSGSXon0M08/ThoMOI/D4a49/vFnXpEFEj/rCFh+UlTNnbTp
+         JH/A==
+X-Gm-Message-State: AOAM530u4gSyG2evfS87HgFu18zTG7Wk7cPnOlWKZoKvWLmlZMJAX7iw
+        e6tcFbT7UTvWNy2k+JNP66A=
+X-Google-Smtp-Source: ABdhPJzF07ngf8MuLvi6xMHJ3CkJ7kaRjGbv2+lOZ23L/uhQrZqPSHxUrGmNtdkKU1CxmvbWPimTig==
+X-Received: by 2002:a63:ff01:: with SMTP id k1mr3289200pgi.141.1599717078275;
+        Wed, 09 Sep 2020 22:51:18 -0700 (PDT)
+Received: from localhost ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id x140sm4518008pfc.211.2020.09.09.22.51.17
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 09 Sep 2020 22:51:17 -0700 (PDT)
+Date:   Thu, 10 Sep 2020 13:51:10 +0800
+From:   Murphy Zhou <jencce.kernel@gmail.com>
+To:     Chengguang Xu <cgxu519@mykernel.net>,
+        Miklos Szeredi <miklos@szeredi.hu>,
+        Amir Goldstein <amir73il@gmail.com>
+Cc:     linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: [PATCH] overlay/073: test with nfs_export being off
+Message-ID: <20200910055110.3lumztku3ld4vf2j@xzhoux.usersys.redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20200909190213.GA7943@magnolia>
-User-Agent: Mutt/1.10.1 (2018-07-13)
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.12
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Sep 09, 2020 at 12:02:13PM -0700, Darrick J. Wong wrote:
-> On Tue, Sep 08, 2020 at 11:32:02AM +0100, fdmanana@kernel.org wrote:
-> > From: Filipe Manana <fdmanana@suse.com>
-> > 
-> > Test a fallocate() zero range operation against a large file range for which
-> > there are many small extents allocated. Verify the operation does not fail
-> > and the respective range return zeroes on subsequent reads.
-> 
-> LOL, we didn't already have a stress test for fzero? :/
+When nfs_export is enabled, the link count of upper dir
+objects are more then the expected number in this testcase.
+Because extra index entries are linked to upper inodes.
 
-We have lots of test for fzero, but they always test on a file with about 2~2000
-blocks, none of them test with so many small extents.
+ QA output created by 073
++Expected link count is 12 but real count is 23, file name is dir
++Expected link count is 12 but real count is 23, file name is 1
+...
++Expected link count is 12 but real count is 23, file name is 10
+ Silence is golden
 
-We might need to think about this missing test coverage more, not only fzero
-operation :)
+Signed-off-by: Murphy Zhou <jencce.kernel@gmail.com>
+---
+Hi folks,
 
-Thanks,
-Zorro
+Please help review that with nfs_export enabled, this is expected.
+I think so but I'm not 100% sure about it. Maybe it's a bug in
+the kernel.
 
-> 
-> > This test is motivated by a bug found on btrfs. The patch that fixes the
-> > bug on btrfs has the following subject:
-> > 
-> >  "btrfs: fix metadata reservation for fallocate that leads to transaction aborts"
-> > 
-> > Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> 
-> Looks good to me!
-> 
-> Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
-> 
-> --D
-> 
-> > ---
-> >  tests/generic/609     | 61 +++++++++++++++++++++++++++++++++++++++++++
-> >  tests/generic/609.out |  5 ++++
-> >  tests/generic/group   |  1 +
-> >  3 files changed, 67 insertions(+)
-> >  create mode 100755 tests/generic/609
-> >  create mode 100644 tests/generic/609.out
-> > 
-> > diff --git a/tests/generic/609 b/tests/generic/609
-> > new file mode 100755
-> > index 00000000..cda2b3dc
-> > --- /dev/null
-> > +++ b/tests/generic/609
-> > @@ -0,0 +1,61 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (C) 2020 SUSE Linux Products GmbH. All Rights Reserved.
-> > +#
-> > +# FS QA Test No. 609
-> > +#
-> > +# Test a fallocate() zero range operation against a large file range for which
-> > +# there are many small extents allocated. Verify the operation does not fail
-> > +# and the respective range return zeroes on subsequent reads.
-> > +#
-> > +seq=`basename $0`
-> > +seqres=$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +tmp=/tmp/$$
-> > +status=1	# failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +_cleanup()
-> > +{
-> > +	cd /
-> > +	rm -f $tmp.*
-> > +}
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +. ./common/filter
-> > +
-> > +# real QA test starts here
-> > +_supported_fs generic
-> > +_supported_os Linux
-> > +_require_scratch
-> > +_require_xfs_io_command "fzero"
-> > +_require_xfs_io_command "fpunch"
-> > +_require_test_program "punch-alternating"
-> > +
-> > +rm -f $seqres.full
-> > +
-> > +_scratch_mkfs >>$seqres.full 2>&1
-> > +_scratch_mount
-> > +
-> > +# Create a file with many small extents. To speed up file creation, do
-> > +# buffered writes and then punch a hole on every other block.
-> > +$XFS_IO_PROG -f -c "pwrite -S 0xab -b 10M 0 100M" \
-> > +	$SCRATCH_MNT/foobar >>$seqres.full
-> > +$here/src/punch-alternating $SCRATCH_MNT/foobar >>$seqres.full
-> > +
-> > +# For btrfs, trigger a transaction commit to force metadata COW for the
-> > +# following fallocate zero range operation.
-> > +sync
-> > +
-> > +$XFS_IO_PROG -c "fzero 0 100M" $SCRATCH_MNT/foobar
-> > +
-> > +# Check the file content after umounting and mounting again the fs, to verify
-> > +# everything was persisted.
-> > +_scratch_cycle_mount
-> > +
-> > +echo "File content after zero range operation:"
-> > +od -A d -t x1 $SCRATCH_MNT/foobar
-> > +
-> > +status=0
-> > +exit
-> > diff --git a/tests/generic/609.out b/tests/generic/609.out
-> > new file mode 100644
-> > index 00000000..feb8c211
-> > --- /dev/null
-> > +++ b/tests/generic/609.out
-> > @@ -0,0 +1,5 @@
-> > +QA output created by 609
-> > +File content after zero range operation:
-> > +0000000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-> > +*
-> > +104857600
-> > diff --git a/tests/generic/group b/tests/generic/group
-> > index aa969bcb..f8eabc0a 100644
-> > --- a/tests/generic/group
-> > +++ b/tests/generic/group
-> > @@ -611,3 +611,4 @@
-> >  606 auto attr quick dax
-> >  607 auto attr quick dax
-> >  608 auto attr quick dax
-> > +609 auto quick prealloc zero
-> > -- 
-> > 2.26.2
-> > 
-> 
+Thanks.
+
+ tests/overlay/073 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tests/overlay/073 b/tests/overlay/073
+index 37860c92..b78551eb 100755
+--- a/tests/overlay/073
++++ b/tests/overlay/073
+@@ -99,7 +99,7 @@ run_test_case()
+ {
+ 	_scratch_mkfs
+ 	make_lower_files ${1}
+-	_scratch_mount -o "index=on"
++	_scratch_mount -o "index=on,nfs_export=off"
+ 	make_whiteout_files
+ 	check_whiteout_files ${1} ${2}
+ 	_scratch_unmount
+-- 
+2.20.1
 
