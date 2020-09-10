@@ -2,122 +2,102 @@ Return-Path: <SRS0=k6dn=CT=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E9201C43461
-	for <linux-fstests@archiver.kernel.org>; Thu, 10 Sep 2020 14:12:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0781DC433E2
+	for <linux-fstests@archiver.kernel.org>; Thu, 10 Sep 2020 19:44:22 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AEE8E206B7
-	for <linux-fstests@archiver.kernel.org>; Thu, 10 Sep 2020 14:12:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AA7E021D91
+	for <linux-fstests@archiver.kernel.org>; Thu, 10 Sep 2020 19:44:21 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="BOLC6ok+"
+	dkim=pass (1024-bit key) header.d=amazon.com header.i=@amazon.com header.b="QIQZaKK+"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731077AbgIJOKy (ORCPT
+        id S1725866AbgIJToP (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 10 Sep 2020 10:10:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52620 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1731057AbgIJOJr (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 10 Sep 2020 10:09:47 -0400
-Received: from mail-il1-x141.google.com (mail-il1-x141.google.com [IPv6:2607:f8b0:4864:20::141])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0BC93C06179E;
-        Thu, 10 Sep 2020 07:00:03 -0700 (PDT)
-Received: by mail-il1-x141.google.com with SMTP id b17so5755782ilh.4;
-        Thu, 10 Sep 2020 07:00:03 -0700 (PDT)
+        Thu, 10 Sep 2020 15:44:15 -0400
+Received: from smtp-fw-4101.amazon.com ([72.21.198.25]:64168 "EHLO
+        smtp-fw-4101.amazon.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725372AbgIJToI (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 10 Sep 2020 15:44:08 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=lvPkRRhrBGbOAlVQcxU7oQ3T9OZp7RX6WB3tEAcEMIM=;
-        b=BOLC6ok+FtrWxvDoFQHvg1oXi/Li71f3ZP9QY39h/3aOjLanIvFM9Nt8+imGdoHPAQ
-         Ax2UZCIlWvuqE4lz7pZkGbT4vG4/bgCZ83WGRB77i2+UFRtM+X05Baa5pP0TW+boNel8
-         ZKnfC7rplPWkLfSg8eFACDLqLLX/blObYEZQlPYK5KrDtWiNby7orVH9TLaOUHd8VhB2
-         JncmogazqXpFrYdZcX6hRWsj56fwhaRavrAy7Q8qFbCCtZ81/RjF7ngxO8UWLLDz2XAX
-         H3lzG9bd1DDYutcuY/DmNQsaP2qZ0HIcSIg8L5pE69ok0w1Ua8kPu4/lhsOt1usR1tVs
-         Dpvw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=lvPkRRhrBGbOAlVQcxU7oQ3T9OZp7RX6WB3tEAcEMIM=;
-        b=offtcsy5x6CGEiacHJgK8tjKCOzmmkU+2d4/FShxrJiiopjoYUntRNK86F+gpOXSjn
-         zWxoUg03pttqIaherjkVAge6ZkbZtbiRjIGAsSEmdoKuuB+234Q+p1FuCbt7QhM5sDpX
-         m1VDzosM7M4IOcUNCviJqXHjAIFogDd73LwsKQTeP63ZeK2V4YIJL4do1EQPfuT8KWrR
-         sbVlB7m4gWPAIzq4+tnwdSpLhUVutNsbzozmDWXsUxNitQ+AP03tsQWioxDUxUaQHxKO
-         kQoAEBV7t+C0OY5rBQ/v+Z2YBS/zbYNaJsRHqMS+EXKHRG365drG9Cn3lQLB5MlyockB
-         CbqA==
-X-Gm-Message-State: AOAM532ncgyd9Zr54bW0+xEKeZSrq7epLHrKVaiaw1cD4xiPYO/x1VsV
-        oYMAPG6u6qgEg+z1NdR2ZiuJQvrRbXQJGM8gpbg=
-X-Google-Smtp-Source: ABdhPJz7yCF3IRdTtj8SfS9zPkBKUsxpLDdYgI9tnCpdTmGaG2UcbqmPuZSeBl2BBLPJ/SYwLWuV8StOqK8vHb3oAF4=
-X-Received: by 2002:a05:6e02:1141:: with SMTP id o1mr7798003ill.275.1599746401618;
- Thu, 10 Sep 2020 07:00:01 -0700 (PDT)
+  d=amazon.com; i=@amazon.com; q=dns/txt; s=amazon201209;
+  t=1599767048; x=1631303048;
+  h=from:to:cc:subject:date:message-id:in-reply-to:
+   references:mime-version;
+  bh=JdeE5S5BkzjhhMMAdlB7SxXk6Vsu4NC+W7hi2SgDYDU=;
+  b=QIQZaKK+4+JwnNliDlBcpq1mzOaC9QXwZpo09Fh5Bz0XhgTAA5vZnKY5
+   6pJ7KtVqp61hDCezbX+X5+L/rRw6rSYMsaDQzIYBYZhLdFqIdwqrYa67e
+   z7LsJ6GYxnEBTnXsMWMwDW0F9sCQ3rqTDflWl5Wo6E0/OLmVWRkAf3LME
+   g=;
+X-IronPort-AV: E=Sophos;i="5.76,413,1592870400"; 
+   d="scan'208";a="53318928"
+Received: from iad12-co-svc-p1-lb1-vlan3.amazon.com (HELO email-inbound-relay-1a-e34f1ddc.us-east-1.amazon.com) ([10.43.8.6])
+  by smtp-border-fw-out-4101.iad4.amazon.com with ESMTP; 10 Sep 2020 19:43:57 +0000
+Received: from EX13MTAUWB001.ant.amazon.com (iad12-ws-svc-p26-lb9-vlan3.iad.amazon.com [10.40.163.38])
+        by email-inbound-relay-1a-e34f1ddc.us-east-1.amazon.com (Postfix) with ESMTPS id 848CDA1E05;
+        Thu, 10 Sep 2020 19:43:56 +0000 (UTC)
+Received: from EX13D13UWB002.ant.amazon.com (10.43.161.21) by
+ EX13MTAUWB001.ant.amazon.com (10.43.161.249) with Microsoft SMTP Server (TLS)
+ id 15.0.1497.2; Thu, 10 Sep 2020 19:43:55 +0000
+Received: from EX13MTAUWC001.ant.amazon.com (10.43.162.135) by
+ EX13D13UWB002.ant.amazon.com (10.43.161.21) with Microsoft SMTP Server (TLS)
+ id 15.0.1497.2; Thu, 10 Sep 2020 19:43:55 +0000
+Received: from dev-dsk-fllinden-2c-c1893d73.us-west-2.amazon.com
+ (172.23.141.97) by mail-relay.amazon.com (10.43.162.232) with Microsoft SMTP
+ Server id 15.0.1497.2 via Frontend Transport; Thu, 10 Sep 2020 19:43:55 +0000
+Received: by dev-dsk-fllinden-2c-c1893d73.us-west-2.amazon.com (Postfix, from userid 6262777)
+        id 9AE52C1429; Thu, 10 Sep 2020 19:43:55 +0000 (UTC)
+From:   Frank van der Linden <fllinden@amazon.com>
+To:     <fstests@vger.kernel.org>
+CC:     <linux-nfs@vger.kernel.org>,
+        Frank van der Linden <fllinden@amazon.com>
+Subject: [PATCH 2/3] common/attr: set MAX_ATTR values correctly for NFS
+Date:   Thu, 10 Sep 2020 19:43:54 +0000
+Message-ID: <20200910194355.5977-2-fllinden@amazon.com>
+X-Mailer: git-send-email 2.16.6
+In-Reply-To: <20200910194355.5977-1-fllinden@amazon.com>
+References: <20200910194355.5977-1-fllinden@amazon.com>
 MIME-Version: 1.0
-References: <20200910055110.3lumztku3ld4vf2j@xzhoux.usersys.redhat.com>
-In-Reply-To: <20200910055110.3lumztku3ld4vf2j@xzhoux.usersys.redhat.com>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Thu, 10 Sep 2020 16:59:50 +0300
-Message-ID: <CAOQ4uxh+ppPMOSeAZU3sdwxwb_ixMHEpHLF9ZO_MTiedNJRgsw@mail.gmail.com>
-Subject: Re: [PATCH] overlay/073: test with nfs_export being off
-To:     Murphy Zhou <jencce.kernel@gmail.com>
-Cc:     Chengguang Xu <cgxu519@mykernel.net>,
-        Miklos Szeredi <miklos@szeredi.hu>,
-        overlayfs <linux-unionfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Sep 10, 2020 at 8:51 AM Murphy Zhou <jencce.kernel@gmail.com> wrote:
->
-> When nfs_export is enabled, the link count of upper dir
-> objects are more then the expected number in this testcase.
-> Because extra index entries are linked to upper inodes.
->
->  QA output created by 073
-> +Expected link count is 12 but real count is 23, file name is dir
-> +Expected link count is 12 but real count is 23, file name is 1
-> ...
-> +Expected link count is 12 but real count is 23, file name is 10
->  Silence is golden
->
-> Signed-off-by: Murphy Zhou <jencce.kernel@gmail.com>
-> ---
-> Hi folks,
->
-> Please help review that with nfs_export enabled, this is expected.
-> I think so but I'm not 100% sure about it. Maybe it's a bug in
-> the kernel.
->
+Now that NFS can handle user xattrs, set the MAX_ATTR
+and MAX_ATTRVAL_SIZE to reflect the applicable limits
+for that filesystem.
 
-Indeed this is expected.
-With nfs_export, for every unlinked lower file/dir there is a whiteout
-"tombstone" in the index directory, whose name is the file handle
-of the unlinked inode.
+Signed-off-by: Frank van der Linden <fllinden@amazon.com>
+---
+ common/attr | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-So this test creates extra 11 tombstones with nfs_export enabled.
+diff --git a/common/attr b/common/attr
+index c60cb6ed..fb856449 100644
+--- a/common/attr
++++ b/common/attr
+@@ -251,7 +251,7 @@ _getfattr()
+ 
+ # set maximum total attr space based on fs type
+ case "$FSTYP" in
+-xfs|udf|pvfs2|9p|ceph)
++xfs|udf|pvfs2|9p|ceph|nfs)
+ 	MAX_ATTRS=1000
+ 	;;
+ *)
+@@ -271,7 +271,7 @@ xfs|udf|btrfs)
+ pvfs2)
+ 	MAX_ATTRVAL_SIZE=8192
+ 	;;
+-9p|ceph)
++9p|ceph|nfs)
+ 	MAX_ATTRVAL_SIZE=65536
+ 	;;
+ *)
+-- 
+2.16.6
 
-> Thanks.
->
->  tests/overlay/073 | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/tests/overlay/073 b/tests/overlay/073
-> index 37860c92..b78551eb 100755
-> --- a/tests/overlay/073
-> +++ b/tests/overlay/073
-> @@ -99,7 +99,7 @@ run_test_case()
->  {
->         _scratch_mkfs
->         make_lower_files ${1}
-> -       _scratch_mount -o "index=on"
-> +       _scratch_mount -o "index=on,nfs_export=off"
-
-So the fix looks fine, but let's document why nfs_export=off is needed.
-
-Thanks,
-Amir.
