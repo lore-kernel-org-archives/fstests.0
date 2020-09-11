@@ -2,106 +2,96 @@ Return-Path: <SRS0=EKaY=CU=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2C5C0C43461
-	for <linux-fstests@archiver.kernel.org>; Fri, 11 Sep 2020 02:27:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 22E3BC43461
+	for <linux-fstests@archiver.kernel.org>; Fri, 11 Sep 2020 07:16:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DB3B62076D
-	for <linux-fstests@archiver.kernel.org>; Fri, 11 Sep 2020 02:27:30 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CACCD20731
+	for <linux-fstests@archiver.kernel.org>; Fri, 11 Sep 2020 07:16:22 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="l+fKGVqw"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="I20OQuwz"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725440AbgIKC1a (ORCPT
+        id S1725768AbgIKHQV (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 10 Sep 2020 22:27:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54888 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725300AbgIKC1Y (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 10 Sep 2020 22:27:24 -0400
-Received: from mail-io1-xd42.google.com (mail-io1-xd42.google.com [IPv6:2607:f8b0:4864:20::d42])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3E7F3C061573;
-        Thu, 10 Sep 2020 19:27:24 -0700 (PDT)
-Received: by mail-io1-xd42.google.com with SMTP id g128so9419727iof.11;
-        Thu, 10 Sep 2020 19:27:24 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=Ux1GKKyrONJOhwhWD6nhJU/dB/RXXJ31hFVy+2EHZyc=;
-        b=l+fKGVqwTc6l6ugGzosyni9oKAPVl9UZz8eZkgtjGvAalxO9aYQxhXPVb4PX5OGMLw
-         Phxh2BlzEaBjMJQYdbf0JyRDaFXLro5Vw+tPLFR2ZHW2yAg+Zhx0eoYgJp7nlVtZH4+S
-         VvQFO8bX1x12d7I6R7nRrqw3ssrqS8j3xF5/KPpnPhftbPKMQHKKeIZwlEn9HZLu6cJa
-         nTfMcOo3WedE07JH55tAaj/11gqjVHDPnjrC7Q4lPjcFxnmtCJV958OYb4Ov+m4paHKg
-         20APH96c7TlGk9n3jhf8aUFaZzBOSqUZPLE7QlceCMPLjAi2WCJiTfJC1h9fHkwLb5VK
-         3bAQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=Ux1GKKyrONJOhwhWD6nhJU/dB/RXXJ31hFVy+2EHZyc=;
-        b=uih0bph3AkDXINVZ9XCejiDkTJ9eDzVAVP87HbDaONxfXSWeOiwKtccCJEeofWXdoQ
-         /etcwPWZGGLtgxA6CKFuzxEiZhhJnwVwk35KpGdaXHWQSiaLWhi2rAnBtIrUyAt/n1lZ
-         gOeecXanMsz+2RTUtOMVGovP54cK44C3TiBUUei7ryb7fCYSO3xQU3AvF7ch5cWehY5M
-         dchIeNBPH120510uHMmD3Ko7YtM052iKXrNyim/2zIweQ4//JummrNmJRIpG5jfIC8vz
-         msMAu6NcwUWOkU5FsChkMhVDIYPOv1yLe7kCBOnr7V7xHeAeCsaxeFsgZhb8oVhP/aTw
-         Gi8Q==
-X-Gm-Message-State: AOAM533FY0+hBadVqwhgzQxUa3wk0CDvULST00sP3/JGx02ttYDB+wvO
-        9+RQ4BMNLh/Cg3MkngOEPUeBFYUjWEYidiU28U4=
-X-Google-Smtp-Source: ABdhPJyBwgknh3qslnJhE0LAQxrg8auZoHU8vIfsVUoZ/UnozwbDLqg/pTO1emAcDB9Wbb7OqIPiRlvM9D7wmbneg+k=
-X-Received: by 2002:a05:6602:240c:: with SMTP id s12mr49109ioa.5.1599791243661;
- Thu, 10 Sep 2020 19:27:23 -0700 (PDT)
+        Fri, 11 Sep 2020 03:16:21 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:49654 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1725562AbgIKHQR (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 11 Sep 2020 03:16:17 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1599808572;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=DLVtd4jc7WIysp+BwLRq9U6acYvBeB98NU2Xohop5Zw=;
+        b=I20OQuwzS99cCHwBzpXzL/E6S7CygFrrB2YLIGnsxIhhRj02rDUp5r4m9qPnn1JTp6sWV7
+        ZIJ3YoFL6VGo90ItsBng63epq0shieB9IOsJZKQafqrFv6/eqfUmw+Ok4C5yqRM7UqG/M4
+        iiTgty6m0yjryoKTDdmFXi8Dn0f9NUk=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-138-VRaa2WGMMQG0oqBrSjCxpA-1; Fri, 11 Sep 2020 03:16:08 -0400
+X-MC-Unique: VRaa2WGMMQG0oqBrSjCxpA-1
+Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id A130B64084
+        for <fstests@vger.kernel.org>; Fri, 11 Sep 2020 07:16:07 +0000 (UTC)
+Received: from bogon.redhat.com (ovpn-12-40.pek2.redhat.com [10.72.12.40])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id C1F3B1002D41
+        for <fstests@vger.kernel.org>; Fri, 11 Sep 2020 07:16:05 +0000 (UTC)
+From:   Zorro Lang <zlang@redhat.com>
+To:     fstests@vger.kernel.org
+Subject: [PATCH v5 0/5] fsstress,fsx: add io_uring test and do some fix
+Date:   Fri, 11 Sep 2020 15:15:50 +0800
+Message-Id: <20200911071555.31506-1-zlang@redhat.com>
 MIME-Version: 1.0
-References: <CAOQ4uxh+ppPMOSeAZU3sdwxwb_ixMHEpHLF9ZO_MTiedNJRgsw@mail.gmail.com>
- <20200911021813.o6vtueabupevfgab@xzhoux.usersys.redhat.com>
-In-Reply-To: <20200911021813.o6vtueabupevfgab@xzhoux.usersys.redhat.com>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Fri, 11 Sep 2020 05:27:12 +0300
-Message-ID: <CAOQ4uxhd8Sn54iWRiPAgPnOXqt=PaPuQchrVzeARhgUCVzASgA@mail.gmail.com>
-Subject: Re: [PATCH v2] overlay/073: test with nfs_export being off
-To:     Murphy Zhou <jencce.kernel@gmail.com>
-Cc:     fstests <fstests@vger.kernel.org>,
-        Chengguang Xu <cgxu519@mykernel.net>,
-        Miklos Szeredi <miklos@szeredi.hu>,
-        overlayfs <linux-unionfs@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 2.84 on 10.5.11.22
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Sep 11, 2020 at 5:18 AM Murphy Zhou <jencce.kernel@gmail.com> wrote:
->
-> When nfs_export is enabled, the link count of upper dir
-> objects are more then the expected number in this testcase.
-> Because extra index entries are linked to upper inodes.
->
-> Signed-off-by: Murphy Zhou <jencce.kernel@gmail.com>
+This patchset tries to add new IO_URING test into fsstress [1/5] and fsx
+[4/5 and 5/5]. And then do some changes and bug fix by the way [2/5 and 3/5].
 
-Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+fsstress and fsx are important tools in xfstests to do filesystem I/Os test,
+lots of test cases use it. So add IO_URING operation into fsstress and fsx
+will help to cover IO_URING test from fs side.
 
-> ---
->  tests/overlay/073 | 4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
->
-> diff --git a/tests/overlay/073 b/tests/overlay/073
-> index 37860c92..c5deccc6 100755
-> --- a/tests/overlay/073
-> +++ b/tests/overlay/073
-> @@ -99,7 +99,9 @@ run_test_case()
->  {
->         _scratch_mkfs
->         make_lower_files ${1}
-> -       _scratch_mount -o "index=on"
-> +       # There will be extra hard links with nfs_export enabled which
-> +       # is expected. Turn it off explicitly to avoid the false alarm.
-> +       _scratch_mount -o "index=on,nfs_export=off"
->         make_whiteout_files
->         check_whiteout_files ${1} ${2}
->         _scratch_unmount
-> --
-> 2.20.1
->
+I'm not an IO_URING expert, so cc io-uring@ list, please feel free to
+tell me if you find something wrong or have any suggestions to improve
+the test.
+
+V2 did below changes:
+1) 1/4 change the definition of URING_ENTRIES to 1
+2) 2/4 change the difinition of AIO_ENTRIES to 1, undo an unrelated changed line
+3) 4/4 turn to use io_uring_prep_readv/io_uring_prep_writev, due to old
+       liburing(0.2-2) doesn't support io_uring_prep_read/io_uring_prep_write.
+
+V3 changed io_uring_submit(&ring) to io_uring_submit_and_wait(&ring, 1). I'm
+not sure if this's the real mean of Jens Axboe's review point, please check.
+  https://marc.info/?l=fstests&m=159811932808057&w=2
+
+V4 did below changes:
+1) 1/5 change the "goto" related code of do_uring_rw()
+2) 3/5 similar change as above
+3) 4/5 new patch, separated from original 4/4 patch
+3) 5/5 change #elif to #else
+4) 5/5 change __uring_rw to uring_rw.
+5) 5/5 change the loop logic in uring_rw().
+
+V5 did below changes:
+1) 1/5 turn to use (fd != -1)
+2) 3/5 turn to use (fd != -1)
+3) 5/5 change res to ret, change res2 to res.
+
+Thanks,
+Zorro
+
+
+
