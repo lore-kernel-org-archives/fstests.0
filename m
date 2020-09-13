@@ -7,128 +7,81 @@ X-Spam-Status: No, score=-9.7 required=3.0 tests=BAYES_00,
 	SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,URIBL_BLOCKED autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 288BDC43461
-	for <linux-fstests@archiver.kernel.org>; Sun, 13 Sep 2020 15:04:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BB3FBC43461
+	for <linux-fstests@archiver.kernel.org>; Sun, 13 Sep 2020 15:35:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D8F5C206BE
-	for <linux-fstests@archiver.kernel.org>; Sun, 13 Sep 2020 15:04:04 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8059E208FE
+	for <linux-fstests@archiver.kernel.org>; Sun, 13 Sep 2020 15:35:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725938AbgIMPED (ORCPT
+        id S1725938AbgIMPe7 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 13 Sep 2020 11:04:03 -0400
-Received: from out20-27.mail.aliyun.com ([115.124.20.27]:37945 "EHLO
-        out20-27.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725937AbgIMPED (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 13 Sep 2020 11:04:03 -0400
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.09061719|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_regular_dialog|0.6934-0.00242062-0.304179;FP=0|0|0|0|0|-1|-1|-1;HT=e01l07440;MF=guan@eryu.me;NM=1;PH=DS;RN=5;RT=5;SR=0;TI=SMTPD_---.IWZn-ZV_1600009437;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.IWZn-ZV_1600009437)
-          by smtp.aliyun-inc.com(10.147.41.187);
-          Sun, 13 Sep 2020 23:03:57 +0800
-Date:   Sun, 13 Sep 2020 23:03:57 +0800
+        Sun, 13 Sep 2020 11:34:59 -0400
+Received: from out20-38.mail.aliyun.com ([115.124.20.38]:42520 "EHLO
+        out20-38.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725933AbgIMPe6 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 13 Sep 2020 11:34:58 -0400
+X-Alimail-AntiSpam: AC=PASS;BC=0.09806292|-1;BR=01201311R371ee;CH=green;DM=|CONTINUE|false|;DS=SPAM|spam_ad|0.930493-0.00369937-0.0658081;FP=0|0|0|0|0|-1|-1|-1;HT=e02c03306;MF=guan@eryu.me;NM=1;PH=DS;RN=6;RT=6;SR=0;TI=SMTPD_---.IWZdkuY_1600011291;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.IWZdkuY_1600011291)
+          by smtp.aliyun-inc.com(10.147.44.129);
+          Sun, 13 Sep 2020 23:34:51 +0800
+Date:   Sun, 13 Sep 2020 23:34:51 +0800
 From:   Eryu Guan <guan@eryu.me>
-To:     Filipe Manana <fdmanana@gmail.com>
-Cc:     Josef Bacik <josef@toxicpanda.com>,
-        linux-btrfs <linux-btrfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>,
-        Johannes Thumshirn <johannes.thumshirn@wdc.com>
-Subject: Re: [PATCH][v4] fstests: add generic/609 to test O_DIRECT|O_DSYNC
-Message-ID: <20200913150357.GH3853@desktop>
-References: <8e841e0e05934baaf6119363414440b271426a03.1599065695.git.josef@toxicpanda.com>
- <20200902171036.273416-1-josef@toxicpanda.com>
- <CAL3q7H4sZguHFddwAeEFOkdOtbTZ-MHmDPuOR2obHVPro0nkkw@mail.gmail.com>
+To:     Xiao Yang <yangx.jy@cn.fujitsu.com>
+Cc:     fstests@vger.kernel.org, darrick.wong@oracle.com,
+        david@fromorbit.com, ira.weiny@intel.com, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 1/2] common/rc: Check 'tPnE' flags on a directory instead
+ of a regilar file
+Message-ID: <20200913153451.GI3853@desktop>
+References: <20200908131523.20899-1-yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAL3q7H4sZguHFddwAeEFOkdOtbTZ-MHmDPuOR2obHVPro0nkkw@mail.gmail.com>
+In-Reply-To: <20200908131523.20899-1-yangx.jy@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Sep 04, 2020 at 02:12:35PM +0100, Filipe Manana wrote:
-> On Wed, Sep 2, 2020 at 6:11 PM Josef Bacik <josef@toxicpanda.com> wrote:
-> >
-> > We had a problem recently where btrfs would deadlock with
-> > O_DIRECT|O_DSYNC because of an unexpected dependency on ->fsync in
-> > iomap.  This was only caught by chance with aiostress, because weirdly
-> > we don't actually test this particular configuration anywhere in
-> > xfstests.  Fix this by adding a basic test that just does
-> > O_DIRECT|O_DSYNC writes.  With this test the box deadlocks right away
-> > with Btrfs, which would have been helpful in finding this issue before
-> > the patches were merged.
-> >
-> > Reviewed-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
-> > Signed-off-by: Josef Bacik <josef@toxicpanda.com>
-> > ---
-> > v3->v4:
-> > - Trying to see how many times I can fuck this thing up.
-> > - Simplified the xfs_io command per Darrick's suggestion.
-> > - Added it to the rw group.
-> >
-> >  tests/generic/609     | 43 +++++++++++++++++++++++++++++++++++++++++++
-> >  tests/generic/609.out |  3 +++
-> >  tests/generic/group   |  1 +
-> >  3 files changed, 47 insertions(+)
-> >  create mode 100755 tests/generic/609
-> >  create mode 100644 tests/generic/609.out
-> >
-> > diff --git a/tests/generic/609 b/tests/generic/609
-> > new file mode 100755
-> > index 00000000..6c74ae63
-> > --- /dev/null
-> > +++ b/tests/generic/609
-> > @@ -0,0 +1,43 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2020 Josef Bacik.  All Rights Reserved.
-> > +#
-> > +# FS QA Test 609
-> > +#
-> > +# iomap can call generic_write_sync() if we're O_DSYNC, so write a basic test to
-> > +# exercise O_DSYNC so any unsuspecting file systems will get lockdep warnings if
-> > +# their locking isn't compatible.
-> > +#
-> > +seq=`basename $0`
-> > +seqres=$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +
-> > +here=`pwd`
-> > +tmp=/tmp/$$
-> > +status=1       # failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +_cleanup()
-> > +{
-> > +       cd /
-> > +       rm -f $tmp.*
-> > +       rm -rf $TEST_DIR/file
-> > +}
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +. ./common/filter
-> > +
-> > +# remove previous $seqres.full before test
-> > +rm -f $seqres.full
-> > +
-> > +# Modify as appropriate.
-> > +_supported_fs generic
-> > +_supported_os Linux
-> > +_require_test
-> > +_require_xfs_io_command "pwrite"
+On Tue, Sep 08, 2020 at 09:15:22PM +0800, Xiao Yang wrote:
+> 'tPnE' flags are only valid for a directory so check them on a directory.
 > 
-> missing a:
+> Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+> ---
+>  common/rc | 10 ++++++++--
+>  1 file changed, 8 insertions(+), 2 deletions(-)
 > 
-> _require_odirect
-> 
-> Other than that, it looks good. Perhaps Eryu can add that when picking
-> this, so you avoid sending a v5.
+> diff --git a/common/rc b/common/rc
+> index aa5a7409..cf31eebc 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -2168,8 +2168,14 @@ _require_xfs_io_command()
+>  		fi
+>  		# Test xfs_io chattr support AND
+>  		# filesystem FS_IOC_FSSETXATTR support
+> -		testio=`$XFS_IO_PROG -F -f -c "chattr +$param" $testfile 2>&1`
+> -		$XFS_IO_PROG -F -f -r -c "chattr -$param" $testfile 2>&1
+> +		# 'tPnE' flags are only valid for a directory so check them on a directory.
+> +		if echo "$param" | egrep -q 't|P|n|E'; then
+> +			testio=`$XFS_IO_PROG -F -c "chattr +$param" $TEST_DIR 2>&1`
+> +			$XFS_IO_PROG -F -r -c "chattr -$param" $TEST_DIR 2>&1
 
-Yeah, I've added that on commit.
+I don't think it's a good idea to try chattr on $TEST_DIR, it may change
+the behavior of all sub-dirs and files in it and cause unexpected
+failures. (I know we do "chattr -$param" right away, but it still looks
+dangerous to me.) It's better to create a new $testdir like $testfile to
+try on, and remove it after test.
 
-> 
-> Reviewed-by: Filipe Manana <fdmanana@suse.com>
-
-Thanks for the review!
-
+Thanks,
 Eryu
+
+> +		else
+> +			testio=`$XFS_IO_PROG -F -f -c "chattr +$param" $testfile 2>&1`
+> +			$XFS_IO_PROG -F -r -c "chattr -$param" $testfile 2>&1
+> +		fi
+>  		param_checked="+$param"
+>  		;;
+>  	"chproj")
+> -- 
+> 2.21.0
+> 
+> 
