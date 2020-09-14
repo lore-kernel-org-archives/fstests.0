@@ -2,132 +2,74 @@ Return-Path: <SRS0=R9JC=CX=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.5 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5BBEEC433E2
-	for <linux-fstests@archiver.kernel.org>; Mon, 14 Sep 2020 05:22:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 28918C433E2
+	for <linux-fstests@archiver.kernel.org>; Mon, 14 Sep 2020 07:26:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3050A21655
-	for <linux-fstests@archiver.kernel.org>; Mon, 14 Sep 2020 05:22:32 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D163B2192A
+	for <linux-fstests@archiver.kernel.org>; Mon, 14 Sep 2020 07:26:17 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="Bkg124Qo"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726032AbgINFWb (ORCPT
+        id S1725968AbgINH0R (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 14 Sep 2020 01:22:31 -0400
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:46893 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726026AbgINFW3 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 14 Sep 2020 01:22:29 -0400
-X-IronPort-AV: E=Sophos;i="5.76,424,1592841600"; 
-   d="scan'208";a="99192379"
-Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
-  by heian.cn.fujitsu.com with ESMTP; 14 Sep 2020 13:22:27 +0800
-Received: from G08CNEXMBPEKD06.g08.fujitsu.local (unknown [10.167.33.206])
-        by cn.fujitsu.com (Postfix) with ESMTP id BCF8B48990DF;
-        Mon, 14 Sep 2020 13:22:24 +0800 (CST)
-Received: from G08CNEXCHPEKD05.g08.fujitsu.local (10.167.33.203) by
- G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206) with Microsoft SMTP Server
- (TLS) id 15.0.1497.2; Mon, 14 Sep 2020 13:22:22 +0800
-Received: from Fedora-30.g08.fujitsu.local (10.167.220.106) by
- G08CNEXCHPEKD05.g08.fujitsu.local (10.167.33.209) with Microsoft SMTP Server
- id 15.0.1497.2 via Frontend Transport; Mon, 14 Sep 2020 13:22:24 +0800
-From:   Xiao Yang <yangx.jy@cn.fujitsu.com>
-To:     <fstests@vger.kernel.org>
-CC:     <darrick.wong@oracle.com>, <david@fromorbit.com>,
-        <ira.weiny@intel.com>, <linux-xfs@vger.kernel.org>, <guan@eryu.me>,
-        Xiao Yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH v2 2/2] common/rc: Add extra check for xfs_io -c "chattr" on XFS
-Date:   Mon, 14 Sep 2020 13:14:00 +0800
-Message-ID: <20200914051400.32057-2-yangx.jy@cn.fujitsu.com>
-X-Mailer: git-send-email 2.21.0
-In-Reply-To: <20200914051400.32057-1-yangx.jy@cn.fujitsu.com>
+        Mon, 14 Sep 2020 03:26:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56950 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725944AbgINH0Q (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 14 Sep 2020 03:26:16 -0400
+Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4438EC06174A;
+        Mon, 14 Sep 2020 00:26:16 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
+        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=5Y3f08R8O4gzFa/D7wQ+KFB3LbGnU10uhROXIbnFpy8=; b=Bkg124Qoyv5L1NH/oE0j7Tb6Se
+        WW8Y6tHKBfj4hT9snshWtEgGyBXmReflDwHkeKB2EY0z/p/zQltrSSGdWozrSO35dh0N7VETTtkVD
+        wzEfz1+deh4BDz/pGfgWgyXDbzBm+BfnLZXIIWP8EX5kczUR7JPavRm1NPxBkhjIAfgocpZv00kKR
+        aDR4o+nAs60l+RMv/Rf961y16l/kQf+TXsBjUFE86VUwyS/aQcsL7Z90cRIVxh57FMrz5ou+0nQZm
+        lBPt59ViHe45HMEKBCnYl+b5sScH/dmTrNyZSbsdR5WKxshrCK6HsCTOPz9m2LliBg8LY9Yk8msc3
+        Oo7tnCiQ==;
+Received: from hch by casper.infradead.org with local (Exim 4.92.3 #3 (Red Hat Linux))
+        id 1kHisN-0007lX-Ca; Mon, 14 Sep 2020 07:26:11 +0000
+Date:   Mon, 14 Sep 2020 08:26:11 +0100
+From:   Christoph Hellwig <hch@infradead.org>
+To:     Xiao Yang <yangx.jy@cn.fujitsu.com>
+Cc:     fstests@vger.kernel.org, darrick.wong@oracle.com,
+        david@fromorbit.com, ira.weiny@intel.com,
+        linux-xfs@vger.kernel.org, guan@eryu.me
+Subject: Re: [PATCH v2 1/2] common/rc: Check 'tPnE' flags on a directory
+ instead of a regilar file
+Message-ID: <20200914072611.GB29046@infradead.org>
 References: <20200914051400.32057-1-yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7BIT
-Content-Type:   text/plain; charset=US-ASCII
-X-yoursite-MailScanner-ID: BCF8B48990DF.ABB43
-X-yoursite-MailScanner: Found to be clean
-X-yoursite-MailScanner-From: yangx.jy@cn.fujitsu.com
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20200914051400.32057-1-yangx.jy@cn.fujitsu.com>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by casper.infradead.org. See http://www.infradead.org/rpr.html
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On XFS, ioctl(FSSETXATTR)(called by xfs_io -c "chattr") maskes off unsupported
-or invalid flags silently.  For example,
-1) With kernel v4.4 which doesn't support dax flag, try to set dax flag on a
-file by the lastest xfs_io -c "chattr" command:
---------------------------------------------
-# xfs_io -f -c "chattr +x" testfile;echo $?
-0
-# xfs_io -c "lsattr" testfile
-----------------X testfile
---------------------------------------------
-2) Realtime inheritance flag is only valid for a directory and try to set
-realtime inheritance flag on a file:
---------------------------------------------
-# xfs_io -f -c "chattr +t" testfile;echo $?
-0
-# xfs_io -c "lsattr" testfile
-----------------X testfile
---------------------------------------------
+On Mon, Sep 14, 2020 at 01:13:59PM +0800, Xiao Yang wrote:
+> 'tPnE' flags are only valid for a directory so check them on a directory.
+> 
+> Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
 
-In this case, we need to check these flags by extra ioctl(FSGETXATTR)(called
-by xfs_io -c "lsattr").
+The change looks good, but I wonder if we should split the chattr
+tests into
 
-Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
----
- common/rc | 16 ++++++++++++++++
- 1 file changed, 16 insertions(+)
+_require_chattr_file_flag
 
-diff --git a/common/rc b/common/rc
-index 6487b9f2..807a1f6c 100644
---- a/common/rc
-+++ b/common/rc
-@@ -2158,6 +2158,7 @@ _require_xfs_io_command()
- 	local param="$*"
- 	local param_checked=""
- 	local opts=""
-+	local attr_info=""
- 
- 	local testfile=$TEST_DIR/$$.xfs_io
- 	local testio
-@@ -2173,9 +2174,11 @@ _require_xfs_io_command()
- 		# 'tPnE' flags are only valid for a directory so check them on a directory.
- 		if echo "$param" | egrep -q 't|P|n|E'; then
- 			testio=`$XFS_IO_PROG -F -c "chattr +$param" $testdir 2>&1`
-+			attr_info=`$XFS_IO_PROG -F -r -c "lsattr" $testdir | awk '{print $1}'`
- 			$XFS_IO_PROG -F -r -c "chattr -$param" $testdir 2>&1
- 		else
- 			testio=`$XFS_IO_PROG -F -f -c "chattr +$param" $testfile 2>&1`
-+			attr_info=`$XFS_IO_PROG -F -r -c "lsattr" $testfile | awk '{print $1}'`
- 			$XFS_IO_PROG -F -r -c "chattr -$param" $testfile 2>&1
- 		fi
- 		param_checked="+$param"
-@@ -2300,6 +2303,19 @@ _require_xfs_io_command()
- 		echo $testio | grep -q "\(invalid option\|not supported\)" && \
- 			_notrun "xfs_io $command doesn't support $param"
- 	fi
-+
-+	# On XFS, ioctl(FSSETXATTR)(called by xfs_io -c "chattr") maskes off unsupported
-+	# or invalid flags silently so need to check these flags by extra ioctl(FSGETXATTR)
-+	# (called by xfs_io -c "lsattr").
-+	# The following URL explains why we don't change the behavior of XFS.
-+	# https://www.spinics.net/lists/linux-xfs/msg44725.html
-+	if [ -n "$attr_info" -a "$FSTYP" = "xfs" ]; then
-+		local num=${#param}
-+		for i in $(seq 0 $((num-1))); do
-+			echo $attr_info | grep -q "${param:$i:1}" || \
-+				_notrun "xfs_io $command +${param:$i:1} support is missing (unknown flag in kernel)"
-+		done
-+	fi
- }
- 
- # check that kernel and filesystem support direct I/O
--- 
-2.21.0
+and
 
+_require_chattr_dir_flag
 
+to make the whole thing a little less convoluted..
 
