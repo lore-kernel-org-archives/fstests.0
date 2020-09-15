@@ -2,86 +2,92 @@ Return-Path: <SRS0=6hky=CY=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3B4C1C433E2
-	for <linux-fstests@archiver.kernel.org>; Tue, 15 Sep 2020 08:48:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8C182C433E2
+	for <linux-fstests@archiver.kernel.org>; Tue, 15 Sep 2020 11:51:49 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D63CF21D24
-	for <linux-fstests@archiver.kernel.org>; Tue, 15 Sep 2020 08:48:49 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4A35121973
+	for <linux-fstests@archiver.kernel.org>; Tue, 15 Sep 2020 11:51:49 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="GYBYduF9"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="V0BAiJsJ"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726198AbgIOIss (ORCPT
+        id S1726362AbgIOLvn (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 15 Sep 2020 04:48:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37874 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726123AbgIOIsq (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 15 Sep 2020 04:48:46 -0400
-Received: from mail-io1-xd44.google.com (mail-io1-xd44.google.com [IPv6:2607:f8b0:4864:20::d44])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 59568C06174A;
-        Tue, 15 Sep 2020 01:48:46 -0700 (PDT)
-Received: by mail-io1-xd44.google.com with SMTP id u6so3167221iow.9;
-        Tue, 15 Sep 2020 01:48:46 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=GfhLVgRMJ2Uaz4wqw/1QGz+EqR3zSee7S6K5qC/BaWQ=;
-        b=GYBYduF9P1Zn2HNNWUlTEjmYqplrFqJ/OQwQi72bnrjWMdwd/bYMjBfRLihktwLZFB
-         VbKX4yWZBOeisJUURA8UyklhUslOrBC1bpzQu1CM8f/3d2Q5TL76Wn/4JNArcnt6T6qN
-         FNQyjJOhFFD7+dmpYqQhAhWied0KNyKx19P/rvIm2YyohNZPbyoL5xedQiXmDrQ1S5Vq
-         tKfpo9vBeEVLnmLtFDMLQ4+TLEHHGCcoE2Qq8YOp2/kccwQK96f9qoQg9zJ6ThY65nOQ
-         27F16YcVzv6FOS44VZwaOGUle/xxU/wn23ijIMAsKAkyBLib9HqYovPjIt5h0kqqRC1v
-         6pvw==
+        Tue, 15 Sep 2020 07:51:43 -0400
+Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:24953 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726454AbgIOLvO (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 15 Sep 2020 07:51:14 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1600170616;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=04wN3Gk18wpigTKbmJEGYbTabSws/Lo0r4QSpf8BSss=;
+        b=V0BAiJsJfjjVGlfhLoNzVq5RXxRMXvnGoDlqeG0DnEjcoFhq8r0VYnWMnaRXoWd0x/rqCT
+        nOsvFMlXTnYFjIXHnd25tDaNCfl/3XtLO8qV4TeVOIJdgRIOmQEa86OKE0l/ag3+ePY21/
+        tSyNB/qpHM7XXXLajnBvpPxK2iR9j/Q=
+Received: from mail-wm1-f69.google.com (mail-wm1-f69.google.com
+ [209.85.128.69]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-445-Jev6FHvFNP6cr6PHh5caiA-1; Tue, 15 Sep 2020 07:50:14 -0400
+X-MC-Unique: Jev6FHvFNP6cr6PHh5caiA-1
+Received: by mail-wm1-f69.google.com with SMTP id x6so817358wmi.1
+        for <fstests@vger.kernel.org>; Tue, 15 Sep 2020 04:50:14 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=GfhLVgRMJ2Uaz4wqw/1QGz+EqR3zSee7S6K5qC/BaWQ=;
-        b=r4ZFBVLWhJRfgn0yPbt1Aw/eDT6vDJJqIF8Zx9eaXiSZzi+KOMTf2/jyXAVy03Fxk6
-         OcLoX23/jI5oH6rQNv42SpLU5MVoWyWjTT5FHhM4+qt069x7h5Sr0QRR/GDK7jEZRU0C
-         DB3d8cPhawPF7PwowbO7SX+hB2uCBfQfi3fhyqPCz7jpnk+7vQzWLW8l6LdwGAGzhfl2
-         /lknx+nBvYhaqnQRdADjPD/jCZr2MiwZ/O99Yeol+Fjx1abJmn3US2F+roR5GKfiAc/U
-         qnIFfEwOW5Curm6bTIbKMXTljqGCtSQzrFtYhy5fZYJgRVPISmFi1IeqYBLUjQdDlfFu
-         aTYw==
-X-Gm-Message-State: AOAM533W25deyoh19FB77xciMOIg8HPXiK89EheWG0A1IeutOlqj4krf
-        lJfCOu3j8i1d4MII4Bm3AznGaf2Ez636ckQ2c7lgCKVMIW8=
-X-Google-Smtp-Source: ABdhPJzispuPkFF2WshKu6dqY4Uwyx9SyGpi20z5JljBv2k0TRb3GQ6wZHBI9/MLC4iiGAVvUxebtoa0hIc63azp3qY=
-X-Received: by 2002:a02:734f:: with SMTP id a15mr17341979jae.120.1600159725747;
- Tue, 15 Sep 2020 01:48:45 -0700 (PDT)
+        h=x-gm-message-state:subject:to:references:cc:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=04wN3Gk18wpigTKbmJEGYbTabSws/Lo0r4QSpf8BSss=;
+        b=YP4zs+1cxVcY6KZR+YgeYxciTaGyipiEEjdOBPwfnUMNPnqvJyBXiXMMGkoK/XQRBZ
+         GS/CMB61Q2z3NUkIxnITYDDBEsx/ySqyy7h3m1OCjP204Te1MFneFyaVi+IWzNP2W6X4
+         10c1zELqFHjW9y8i27byrxNxvVUWDG0EDwqFuIdI8mtfcqqRBIk53r3XPYxsXBhoPi91
+         hPWa7cYCE7k7c2ebRRAaYp2xshwMbPJHpjrWrzk1AsNotdOc4EI9JN6nZv1o1zUoyC79
+         okMZIh3wjrguTHV0YpyBDvk0xDyw8ooZuUnB8zqF1YmsSODYpG8wtmhwy9eI+ACrScwv
+         MW6Q==
+X-Gm-Message-State: AOAM531NZT8aqUnf2fWduXmkpeIp+MxvYOq2qO3m4leTj8MzHI2W+5IC
+        WVc1sijy3SKBx7cE7r/aW4PNOZ1ern7PDAH+IisNiWyQN/brV6b+LKtSKUWmjtB/vPaT3nr6Zx9
+        UBYnwPBhdnMybI+OYNA==
+X-Received: by 2002:a1c:7d0c:: with SMTP id y12mr4347367wmc.103.1600170612775;
+        Tue, 15 Sep 2020 04:50:12 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJzHU/JaRI7QuafztE4DZsiVzpFti86J+jhXA8HazqzKDx+qBEjM0qN/gAUV2Dh0hFNSX7W9SQ==
+X-Received: by 2002:a1c:7d0c:: with SMTP id y12mr4347355wmc.103.1600170612624;
+        Tue, 15 Sep 2020 04:50:12 -0700 (PDT)
+Received: from localhost.localdomain ([84.19.91.81])
+        by smtp.gmail.com with ESMTPSA id q20sm23383911wmj.5.2020.09.15.04.50.11
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 15 Sep 2020 04:50:12 -0700 (PDT)
+Subject: Re: [PATCH v4 1/1] generic: add test for boundary in
+ xfs_attr_shortform_verify
+To:     fstests@vger.kernel.org
+References: <20200914153213.76894-1-preichl@redhat.com>
+ <20200914153213.76894-2-preichl@redhat.com>
+ <20200915115612.GP2937@dhcp-12-102.nay.redhat.com>
+Cc:     Zorro Lang <zlang@redhat.com>
+From:   Pavel Reichl <preichl@redhat.com>
+Message-ID: <5ab30d99-6a9e-8751-d60b-57ceb89846fe@redhat.com>
+Date:   Tue, 15 Sep 2020 13:50:11 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.11.0
 MIME-Version: 1.0
-References: <160013417420.2923511.6825722200699287884.stgit@magnolia> <160013424591.2923511.7236445306723372509.stgit@magnolia>
-In-Reply-To: <160013424591.2923511.7236445306723372509.stgit@magnolia>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Tue, 15 Sep 2020 11:48:34 +0300
-Message-ID: <CAOQ4uxiyUWS+PzUsbz5V4ebgtpcbhr4E5cSFkBE3eeT7nhiY0A@mail.gmail.com>
-Subject: Re: [PATCH 11/24] overlay/{069,071}: fix undefined variables
-To:     "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc:     Eryu Guan <guaneryu@gmail.com>,
-        linux-xfs <linux-xfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <20200915115612.GP2937@dhcp-12-102.nay.redhat.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Sep 15, 2020 at 4:44 AM Darrick J. Wong <darrick.wong@oracle.com> wrote:
->
-> From: Darrick J. Wong <darrick.wong@oracle.com>
->
-> Change OVL_BASE_TEST_MNT -> OVL_BASE_TEST_DIR, since the former is not
-> actually defined anywhere.
->
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> ---
 
-Oops...
-Thanks for fixing this.
+> 
+> If you don't need fsck at here, the _scratch_unmount (and the comment) isn't
+> needed either :)
 
-Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+Hi, thanks for the comment. I guess it's not important for the test itself...should I fix it and send another revision of the patch?
+
