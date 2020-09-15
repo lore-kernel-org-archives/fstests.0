@@ -2,158 +2,143 @@ Return-Path: <SRS0=6hky=CY=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,
+	UNPARSEABLE_RELAY autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 37D62C433E2
-	for <linux-fstests@archiver.kernel.org>; Tue, 15 Sep 2020 00:22:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4967CC43461
+	for <linux-fstests@archiver.kernel.org>; Tue, 15 Sep 2020 01:43:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E9DCC208DB
-	for <linux-fstests@archiver.kernel.org>; Tue, 15 Sep 2020 00:22:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E790A208DB
+	for <linux-fstests@archiver.kernel.org>; Tue, 15 Sep 2020 01:43:01 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="fr3UJ7SO"
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="fmEmMpau"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725994AbgIOAWx (ORCPT
+        id S1726061AbgIOBnB (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 14 Sep 2020 20:22:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45090 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726013AbgIOAWv (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 14 Sep 2020 20:22:51 -0400
-Received: from mail-qk1-x729.google.com (mail-qk1-x729.google.com [IPv6:2607:f8b0:4864:20::729])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ACDCBC061788
-        for <fstests@vger.kernel.org>; Mon, 14 Sep 2020 17:22:49 -0700 (PDT)
-Received: by mail-qk1-x729.google.com with SMTP id o16so2482901qkj.10
-        for <fstests@vger.kernel.org>; Mon, 14 Sep 2020 17:22:49 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
-        h=from:to:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=K7B5+G4uwMRmHs/RTKS5x+bZoePKMB3g169/BIqYaVk=;
-        b=fr3UJ7SOb5+TehlCaFDa1QWB8ua+4iCFeftltOhvMitAMpBjjuQNRE9Kgop8eAdvUO
-         KFVt0gXo4sToIH80XPBDR4W1RrhPszn/STMBtbrWlIyfAiuzy7NQNnzqxwXDm+ERDeZ4
-         Zcn9Yk18I2crD6bVIEOK9cHVhOn0j0RrB7fCqihHCI4BnvIDYOIBAidmao0DAkjLEo+l
-         LrnBnOSR1oyhvquAk9JoOA+SvKlNqeV1DLIeFPPKpTZ7iVN6iDq6SenZnWeZWLlnvyHb
-         fiG48zwAgMhlJRzgvhGErHHXdNQKczdsvUPdVVIjWLGqMk+TJdJh3W7DEoiuOOiXp6J3
-         AqVQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=K7B5+G4uwMRmHs/RTKS5x+bZoePKMB3g169/BIqYaVk=;
-        b=gz5MEg//5Ci+KAKw0eZd2aEZBIu2rq2Ae7yzl3wqwNhLoeR0Ce1RC14aQ5A3CksJI8
-         GciD9HVnapCN5j4rdQx3/7PLw7j8HFxb33k17pxq4dfZOkdHFcbYnT8DtpYfFol3Zuye
-         gxQuszeU+K6fnwgb1hLuSdH4XKNX+GtyaNyS5NPJMDf1PSaltMS5GReiTW4Y2R/9IIH4
-         hoGCVRnv3wnLZFQD76s1ip5IbUw4kjNhE1PmFro9xywYXn1/ez/m+3pAUmPsELH1KPRN
-         /uu5g1tkb3UyRzOlhUlqDnl6fZGDtgXgPU6NzN4vIAYFtaDJxYZKnE5H81IoB0ugq6BH
-         ez+A==
-X-Gm-Message-State: AOAM5336dx3NzEgfxNue5q9LjNP492xjTQu7Mr+ROAT9un2OzUKElw9B
-        oL2kreemNlMNUDy/Uy1SxF8ySd+yrVBbh0TF
-X-Google-Smtp-Source: ABdhPJxVVmYwuXkmf8MAiJ2/RMcCaGqeynA1A50TXWNiTxxSTFNiSG9hkstgkBAQY+uc1xNTfU7HYg==
-X-Received: by 2002:a37:cd5:: with SMTP id 204mr14219818qkm.303.1600129365437;
-        Mon, 14 Sep 2020 17:22:45 -0700 (PDT)
-Received: from localhost (cpe-174-109-172-136.nc.res.rr.com. [174.109.172.136])
-        by smtp.gmail.com with ESMTPSA id 205sm16338042qki.118.2020.09.14.17.22.44
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 14 Sep 2020 17:22:44 -0700 (PDT)
-From:   Josef Bacik <josef@toxicpanda.com>
-To:     linux-btrfs@vger.kernel.org, kernel-team@fb.com,
-        fstests@vger.kernel.org
-Subject: [PATCH] fstests: drop check.log and check.time into section specific results dir
-Date:   Mon, 14 Sep 2020 20:22:43 -0400
-Message-Id: <20200915002243.57729-1-josef@toxicpanda.com>
-X-Mailer: git-send-email 2.26.2
+        Mon, 14 Sep 2020 21:43:01 -0400
+Received: from userp2130.oracle.com ([156.151.31.86]:44390 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726034AbgIOBm7 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 14 Sep 2020 21:42:59 -0400
+Received: from pps.filterd (userp2130.oracle.com [127.0.0.1])
+        by userp2130.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 08F1eDRO130215;
+        Tue, 15 Sep 2020 01:42:57 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=subject : from : to :
+ cc : date : message-id : mime-version : content-type :
+ content-transfer-encoding; s=corp-2020-01-29;
+ bh=z1se613xpkVWIZe7F27AVwF755VcurHiWhrBRIs/T+k=;
+ b=fmEmMpaurdZ5yQY8exmPsATE4LiXMN3to7Vuyg+mg6IODo9vhVBR7nkTMqJwAkGk5S3y
+ H/xmZvCNPfUGfxQZpKlmM5uvZ4455p5+UxM1dZfMnv6HvjghMpDEWGIWEPkrw+Ett88N
+ +15R090tSNuHPQLuXY6jMdgcDuPxBypmD+oZI9KXlY6kRH+hY0ZhIkYuy1Se6wVQvIpD
+ 4wTQZlq7u0x9CmsQNxDWvQKMRc2cORhjh74SysLavR+eZYUMM6H0FY++GL2Ne+7dqk/J
+ Ah9CflWxrEY13ZONxQ3Iyw0ouUe+PGmXLTVNPgb4PtUhT2aZUpUE8vPKX8rTYXos8W+G fg== 
+Received: from aserp3020.oracle.com (aserp3020.oracle.com [141.146.126.70])
+        by userp2130.oracle.com with ESMTP id 33gnrqsxru-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Tue, 15 Sep 2020 01:42:57 +0000
+Received: from pps.filterd (aserp3020.oracle.com [127.0.0.1])
+        by aserp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 08F1fV8f109659;
+        Tue, 15 Sep 2020 01:42:56 GMT
+Received: from aserv0121.oracle.com (aserv0121.oracle.com [141.146.126.235])
+        by aserp3020.oracle.com with ESMTP id 33h8837wj4-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Tue, 15 Sep 2020 01:42:56 +0000
+Received: from abhmp0004.oracle.com (abhmp0004.oracle.com [141.146.116.10])
+        by aserv0121.oracle.com (8.14.4/8.13.8) with ESMTP id 08F1gtaL003886;
+        Tue, 15 Sep 2020 01:42:55 GMT
+Received: from localhost (/10.159.147.241)
+        by default (Oracle Beehive Gateway v4.0)
+        with ESMTP ; Tue, 15 Sep 2020 01:42:55 +0000
+Subject: [PATCH 00/24] fstests: tons of random fixes
+From:   "Darrick J. Wong" <darrick.wong@oracle.com>
+To:     darrick.wong@oracle.com, guaneryu@gmail.com
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Date:   Mon, 14 Sep 2020 18:42:54 -0700
+Message-ID: <160013417420.2923511.6825722200699287884.stgit@magnolia>
+User-Agent: StGit/0.19
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9744 signatures=668679
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxscore=0 spamscore=0 adultscore=0
+ suspectscore=0 phishscore=0 malwarescore=0 bulkscore=0 mlxlogscore=950
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
+ definitions=main-2009150011
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9744 signatures=668679
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 phishscore=0 spamscore=0
+ lowpriorityscore=0 malwarescore=0 mlxscore=0 bulkscore=0 suspectscore=0
+ clxscore=1015 mlxlogscore=999 adultscore=0 priorityscore=1501
+ impostorscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2006250000 definitions=main-2009150011
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Right now we only track check.log and check.time globally, it would be nice
-to do it per-section as well.  This makes it easier to parse results from
-systems that run a bunch of different configurations at once.
+Hi all,
 
-Signed-off-by: Josef Bacik <josef@toxicpanda.com>
+So now that I have a cloud account, I suddenly have much more resources
+to find out if things like external log devices and realtime volumes
+actually work.  This means that I've found a couple dozen minor issues
+all over fstests; most of the front patches in this series try to
+address them.
+
+At the end, there is also a new test to try unloading and reloading the
+filesystem module between tests, to detect problems with resource
+allocations not being freed.
+
+If you're going to start using this mess, you probably ought to just
+pull from my git trees, which are linked below.
+
+This is an extraordinary way to destroy everything.  Enjoy!
+Comments and questions are, as always, welcome.
+
+--D
+
+fstests git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=random-stuff
 ---
- check | 28 +++++++++++++++++++++-------
- 1 file changed, 21 insertions(+), 7 deletions(-)
-
-diff --git a/check b/check
-index 5ffa8777..6a79825d 100755
---- a/check
-+++ b/check
-@@ -391,6 +391,13 @@ _wipe_counters()
- 	unset try notrun bad
- }
- 
-+_global_log() {
-+	echo "$1" >> $check.log
-+	if $OPTIONS_HAVE_SECIONS; then
-+		echo "$1" >> ${REPORT_DIR}/check.log
-+	fi
-+}
-+
- _wrapup()
- {
- 	seq="check"
-@@ -415,10 +422,13 @@ _wrapup()
- 				}' \
- 				| sort -n >$tmp.out
- 			mv $tmp.out $check.time
-+			if $OPTIONS_HAVE_SECTIONS; then
-+				cp $check.time ${REPORT_DIR}/check.time
-+			fi
- 		fi
- 
--		echo "" >>$check.log
--		date >>$check.log
-+		_global_log ""
-+		_global_log "$(date)"
- 
- 		echo "SECTION       -- $section" >>$tmp.summary
- 		echo "=========================" >>$tmp.summary
-@@ -427,29 +437,33 @@ _wrapup()
- 				echo "Ran:$try"
- 				echo "Ran:$try" >>$tmp.summary
- 			fi
--			echo "Ran:$try" >>$check.log
-+			_global_log "Ran:$try"
- 		fi
- 
- 		$interrupt && echo "Interrupted!" | tee -a $check.log
-+		if $OPTIONS_HAVE_SECIONS; then
-+			$interrupt && echo "Interrupted!" | tee -a \
-+				${REPORT_DIR}/check.log
-+		fi
- 
- 		if [ ! -z "$notrun" ]; then
- 			if [ $brief_test_summary == "false" ]; then
- 				echo "Not run:$notrun"
- 				echo "Not run:$notrun" >>$tmp.summary
- 			fi
--			echo "Not run:$notrun" >>$check.log
-+			_global_log "Not run:$notrun"
- 		fi
- 
- 		if [ ! -z "$n_bad" -a $n_bad != 0 ]; then
- 			echo "Failures:$bad"
- 			echo "Failed $n_bad of $n_try tests"
--			echo "Failures:$bad" >>$check.log
--			echo "Failed $n_bad of $n_try tests" >>$check.log
-+			_global_log "Failures:$bad"
-+			_global_log "Failed $n_bad of $n_try tests"
- 			echo "Failures:$bad" >>$tmp.summary
- 			echo "Failed $n_bad of $n_try tests" >>$tmp.summary
- 		else
- 			echo "Passed all $n_try tests"
--			echo "Passed all $n_try tests" >>$check.log
-+			_global_log "Passed all $n_try tests"
- 			echo "Passed all $n_try tests" >>$tmp.summary
- 		fi
- 		echo "" >>$tmp.summary
--- 
-2.28.0
+ README            |    3 +++
+ check             |    9 +++++++++
+ common/rc         |   20 ++++++++++++++++----
+ common/xfs        |   28 +++++++++++++++++++++++++++-
+ tests/generic/204 |    9 +++++++--
+ tests/generic/600 |    4 +++-
+ tests/generic/601 |    4 +++-
+ tests/generic/607 |    5 +++++
+ tests/overlay/020 |    6 ++++++
+ tests/overlay/069 |    2 +-
+ tests/overlay/071 |    2 +-
+ tests/xfs/003     |   14 +++++++-------
+ tests/xfs/016     |    4 ++--
+ tests/xfs/019     |    5 +++++
+ tests/xfs/031     |    5 +++++
+ tests/xfs/032     |    4 +---
+ tests/xfs/045     |    2 +-
+ tests/xfs/070     |    4 +++-
+ tests/xfs/073     |    5 +----
+ tests/xfs/077     |    3 +--
+ tests/xfs/098     |    8 +++++++-
+ tests/xfs/111     |    2 +-
+ tests/xfs/135     |    2 +-
+ tests/xfs/137     |    4 ++--
+ tests/xfs/141     |    4 +++-
+ tests/xfs/171     |    1 +
+ tests/xfs/172     |    1 +
+ tests/xfs/173     |    1 +
+ tests/xfs/174     |    1 +
+ tests/xfs/194     |    3 +++
+ tests/xfs/205     |    1 +
+ tests/xfs/284     |    3 +--
+ tests/xfs/291     |    6 ++++--
+ tests/xfs/306     |    1 +
+ tests/xfs/318     |    1 +
+ tests/xfs/331     |    1 +
+ tests/xfs/424     |    8 +++++++-
+ tests/xfs/444     |    1 +
+ tests/xfs/449     |    4 +++-
+ tests/xfs/503     |    1 +
+ 40 files changed, 149 insertions(+), 43 deletions(-)
 
