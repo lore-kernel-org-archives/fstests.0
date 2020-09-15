@@ -1,207 +1,103 @@
-Return-Path: <SRS0=6hky=CY=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=FsZq=CZ=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	UNPARSEABLE_RELAY autolearn=ham autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 01BE0C43461
-	for <linux-fstests@archiver.kernel.org>; Tue, 15 Sep 2020 19:21:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 72EC1C31E49
+	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 00:36:49 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B60CB206B2
-	for <linux-fstests@archiver.kernel.org>; Tue, 15 Sep 2020 19:21:46 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 366B9207DE
+	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 00:36:49 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="U5rRpS8P"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="G02NrVvo"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727637AbgIOTVp (ORCPT
+        id S1726625AbgIPAgY (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 15 Sep 2020 15:21:45 -0400
-Received: from userp2130.oracle.com ([156.151.31.86]:45606 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727579AbgIOTVk (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 15 Sep 2020 15:21:40 -0400
-Received: from pps.filterd (userp2130.oracle.com [127.0.0.1])
-        by userp2130.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 08FG3ZHe133880;
-        Tue, 15 Sep 2020 16:05:34 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
- : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=corp-2020-01-29;
- bh=lyvU4v7amMXQTFyOYZMnZH3TZTiX7S3hG+kfb9JFSgU=;
- b=U5rRpS8PE1TuN6+blvddhUbrJs7HQpdBy815o/B+snlYUHiqiIxFmC5YZ1JjV9p2h26f
- fKOjcwPtCQ1h7VW+l0H3kV2fthFvyVMdMQjWnTcLmtl/zAlIeOLVRgm7EBVq6T+Qa3N8
- 6aL2X0yO5gMlVuZ/XRFjlzZBk+xqmpueuv8AORRL+3QERGvDnOE2JFv207aptNMEpEYO
- /Dv8ZtZewmoiZ8GleTF8Y5D+0zVxGoee88ofFOxX8KnCRbkqawOTYXpaNQ2aygdedfb9
- tlZBaLdt5I8iACaFEJWbURZeJlpE//1Dja4SKOLKvjfjM52oZuj3BW631XE6qlAFQQUP ZA== 
-Received: from userp3020.oracle.com (userp3020.oracle.com [156.151.31.79])
-        by userp2130.oracle.com with ESMTP id 33gnrqx37m-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Tue, 15 Sep 2020 16:05:34 +0000
-Received: from pps.filterd (userp3020.oracle.com [127.0.0.1])
-        by userp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 08FFjpvX091003;
-        Tue, 15 Sep 2020 16:05:34 GMT
-Received: from aserv0121.oracle.com (aserv0121.oracle.com [141.146.126.235])
-        by userp3020.oracle.com with ESMTP id 33hm30tdbd-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Tue, 15 Sep 2020 16:05:34 +0000
-Received: from abhmp0009.oracle.com (abhmp0009.oracle.com [141.146.116.15])
-        by aserv0121.oracle.com (8.14.4/8.13.8) with ESMTP id 08FG5X3p029431;
-        Tue, 15 Sep 2020 16:05:33 GMT
-Received: from localhost (/67.169.218.210)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Tue, 15 Sep 2020 16:05:33 +0000
-Date:   Tue, 15 Sep 2020 09:05:32 -0700
-From:   "Darrick J. Wong" <darrick.wong@oracle.com>
-To:     Chandan Babu R <chandanrlinux@gmail.com>
-Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
-        guaneryu@gmail.com, zlang@redhat.com
-Subject: Re: [PATCH V2] xfs: Check if rt summary/bitmap buffers are logged
- with correct xfs_buf type
-Message-ID: <20200915160532.GC7955@magnolia>
-References: <20200915054748.1765-1-chandanrlinux@gmail.com>
+        Tue, 15 Sep 2020 20:36:24 -0400
+Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:50973 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726638AbgION1M (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 15 Sep 2020 09:27:12 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1600176417;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=yDmsELX9CsZ63Mr3ny+tjlipxBZQVIYS1ngT09eWPc4=;
+        b=G02NrVvo2RIhDolVBbkkLzOMGMEkbEdAmhONLrGtNmEhTMywA1EZsx29mGbPOwLcl5PM9j
+        vWenZhL5iGTj/vJnNRHQD+SJPmvME6XuLhVTlgVVt0qA8jYpmEOXfJ+dhzxboT9EN3xqEG
+        MPeWRMkj66hgQIFwqzAkLDCbtwUSmCw=
+Received: from mail-wm1-f72.google.com (mail-wm1-f72.google.com
+ [209.85.128.72]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-259-3R8Q-YdrOGiHv0dCBQouuw-1; Tue, 15 Sep 2020 09:26:55 -0400
+X-MC-Unique: 3R8Q-YdrOGiHv0dCBQouuw-1
+Received: by mail-wm1-f72.google.com with SMTP id u5so902617wme.3
+        for <fstests@vger.kernel.org>; Tue, 15 Sep 2020 06:26:55 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=yDmsELX9CsZ63Mr3ny+tjlipxBZQVIYS1ngT09eWPc4=;
+        b=Ph4TvFxk0GoDofvJumPIW/dfau/Bc2tQ9KwZzK/cbfFeLnSxjmSDwiOIWB4IUKXSCV
+         JlzilDCl2UouptgVGrD1lEoNiXRpkKdE8NVsgBH9n5SGm72Ooi2ojyaZxFBRS5U8H1D6
+         ccYiwE2YlZZEg6uqUsaCL+1O0GBf5JlbOjAFd+i81MbZvcFO6QE5ns9btc2fzcnxPIQX
+         v2j5XvaFiou/z9YUfBpUXuyRUHeYWHDFlQUUzkFBLPe7X9EP51LordzG1vCep5P6LI87
+         ZLqFW61Rwf1qWYhoN6t5jvwtmtdVlFygMHT/Dnh8qOURmX5BlVWIJfn57amGAkJP86mI
+         qyOA==
+X-Gm-Message-State: AOAM530/Zaf37qv92MFaMi1aYqCB+8vO6BUlp2iToykUYRdHDrIpKVMU
+        PRYeT5TXDpfSMtz8DN5ISc+wrF+ZgNRbQLGNJr6umUbZsXyBurm7KnpFu+Covhz92vXh74SHcTV
+        BTdkELGW07fuIlUkPmQ==
+X-Received: by 2002:a1c:a557:: with SMTP id o84mr4633209wme.96.1600176414145;
+        Tue, 15 Sep 2020 06:26:54 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJzIrR+6SCUtqIKuEFj8yQPDrJQK/V4rESXolHBqDd2OI/f4uZWhJ8BVfXKqfINanIPipSUKCA==
+X-Received: by 2002:a1c:a557:: with SMTP id o84mr4633189wme.96.1600176413949;
+        Tue, 15 Sep 2020 06:26:53 -0700 (PDT)
+Received: from localhost.localdomain.com ([84.19.91.81])
+        by smtp.gmail.com with ESMTPSA id q15sm25375832wrr.8.2020.09.15.06.26.52
+        for <fstests@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 15 Sep 2020 06:26:53 -0700 (PDT)
+From:   Pavel Reichl <preichl@redhat.com>
+To:     fstests@vger.kernel.org
+Subject: [PATCH v5 0/1] generic: add test for boundary in xfs_attr_shortform_verify
+Date:   Tue, 15 Sep 2020 15:26:50 +0200
+Message-Id: <20200915132651.238212-1-preichl@redhat.com>
+X-Mailer: git-send-email 2.26.2
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200915054748.1765-1-chandanrlinux@gmail.com>
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9745 signatures=668679
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 spamscore=0 bulkscore=0 mlxlogscore=999
- malwarescore=0 mlxscore=0 phishscore=0 adultscore=0 suspectscore=1
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
- definitions=main-2009150129
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9745 signatures=668679
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 phishscore=0 spamscore=0
- lowpriorityscore=0 malwarescore=0 mlxscore=0 bulkscore=0 suspectscore=1
- clxscore=1011 mlxlogscore=999 adultscore=0 priorityscore=1501
- impostorscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2006250000 definitions=main-2009150130
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Sep 15, 2020 at 11:17:48AM +0530, Chandan Babu R wrote:
-> This commit adds a test to check if growing a real-time device can end
-> up logging an xfs_buf with the "type" subfield of
-> bip->bli_formats->blf_flags set to XFS_BLFT_UNKNOWN_BUF. When this
-> occurs the following call trace is printed on the console,
-> 
-> XFS: Assertion failed: (bip->bli_flags & XFS_BLI_STALE) || (xfs_blft_from_flags(&bip->__bli_format) > XFS_BLFT_UNKNOWN_BUF && xfs_blft_from_flags(&bip->__bli_format) < XFS_BLFT_MAX_BUF), file: fs/xfs/xfs_buf_item.c, line: 331
-> Call Trace:
->  xfs_buf_item_format+0x632/0x680
->  ? kmem_alloc_large+0x29/0x90
->  ? kmem_alloc+0x70/0x120
->  ? xfs_log_commit_cil+0x132/0x940
->  xfs_log_commit_cil+0x26f/0x940
->  ? xfs_buf_item_init+0x1ad/0x240
->  ? xfs_growfs_rt_alloc+0x1fc/0x280
->  __xfs_trans_commit+0xac/0x370
->  xfs_growfs_rt_alloc+0x1fc/0x280
->  xfs_growfs_rt+0x1a0/0x5e0
->  xfs_file_ioctl+0x3fd/0xc70
->  ? selinux_file_ioctl+0x174/0x220
->  ksys_ioctl+0x87/0xc0
->  __x64_sys_ioctl+0x16/0x20
->  do_syscall_64+0x3e/0x70
->  entry_SYSCALL_64_after_hwframe+0x44/0xa9
-> 
-> The kernel patch "xfs: Set xfs_buf type flag when growing summary/bitmap
-> files" is required to fix this issue.
-> 
-> Signed-off-by: Chandan Babu R <chandanrlinux@gmail.com>
+Add test for XFS bug that corrupted metadata if extended attribute name
+of length 1 was used.
 
-Looks good to me
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+V4 did the following changes:
+1) replaced the system-wide cache drop and sleep by _scratch_cycle_mount
+2) output of getfattr is grepped for attribute name to simplify expected
+output
+3) dropped explicit _check_scratch_fs
+4) renamed the test from 609 to 611 - to resolve the conflict after the
+recent update of master branch.
 
---D
+V5 did the following changes:
+* dropped the the _scratch_unmount and the relevant comment
 
-> ---
->  tests/xfs/260     | 53 +++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/260.out |  2 ++
->  tests/xfs/group   |  1 +
->  3 files changed, 56 insertions(+)
->  create mode 100755 tests/xfs/260
->  create mode 100644 tests/xfs/260.out
-> 
-> diff --git a/tests/xfs/260 b/tests/xfs/260
-> new file mode 100755
-> index 00000000..078d4a11
-> --- /dev/null
-> +++ b/tests/xfs/260
-> @@ -0,0 +1,53 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2020 Chandan Babu R.  All Rights Reserved.
-> +#
-> +# FS QA Test 260
-> +#
-> +# Test to check if growing a real-time device can end up logging an xfs_buf with
-> +# the "type" subfield of bip->bli_formats->blf_flags set to
-> +# XFS_BLFT_UNKNOWN_BUF.
-> +#
-> +# This is a regression test for the kernel patch "xfs: Set xfs_buf type flag
-> +# when growing summary/bitmap files".
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +_supported_fs xfs
-> +_supported_os Linux
-> +_require_realtime
-> +
-> +_scratch_mkfs -r size=10M  >> $seqres.full
-> +
-> +_scratch_mount >> $seqres.full
-> +
-> +$XFS_GROWFS_PROG $SCRATCH_MNT >> $seqres.full
-> +
-> +_scratch_unmount
-> +
-> +echo "Silence is golden"
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/260.out b/tests/xfs/260.out
-> new file mode 100644
-> index 00000000..18ca517c
-> --- /dev/null
-> +++ b/tests/xfs/260.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 260
-> +Silence is golden
-> diff --git a/tests/xfs/group b/tests/xfs/group
-> index ed0d389e..68676064 100644
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
-> @@ -257,6 +257,7 @@
->  257 auto quick clone
->  258 auto quick clone
->  259 auto quick
-> +260 auto quick growfs realtime
->  261 auto quick quota
->  262 dangerous_fuzzers dangerous_scrub dangerous_online_repair
->  263 auto quick quota
-> -- 
-> 2.28.0
-> 
+Pavel Reichl (1):
+  generic: add test for boundary in xfs_attr_shortform_verify
+
+ tests/generic/611     | 58 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/611.out |  2 ++
+ tests/generic/group   |  1 +
+ 3 files changed, 61 insertions(+)
+ create mode 100755 tests/generic/611
+ create mode 100644 tests/generic/611.out
+
+-- 
+2.26.2
+
