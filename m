@@ -7,89 +7,174 @@ X-Spam-Status: No, score=-14.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A7C78C433E2
-	for <linux-fstests@archiver.kernel.org>; Tue, 15 Sep 2020 12:26:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 50D16C433E2
+	for <linux-fstests@archiver.kernel.org>; Tue, 15 Sep 2020 12:35:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 64D03208E4
-	for <linux-fstests@archiver.kernel.org>; Tue, 15 Sep 2020 12:26:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0161220770
+	for <linux-fstests@archiver.kernel.org>; Tue, 15 Sep 2020 12:35:16 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="flP2WkzT"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="hSaz3vOp"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726189AbgIOM0x (ORCPT
+        id S1726371AbgIOMfJ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 15 Sep 2020 08:26:53 -0400
-Received: from us-smtp-2.mimecast.com ([205.139.110.61]:55066 "EHLO
-        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726267AbgIOM0G (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 15 Sep 2020 08:26:06 -0400
+        Tue, 15 Sep 2020 08:35:09 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:53146 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726447AbgIOLm2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 15 Sep 2020 07:42:28 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1600172765;
+        s=mimecast20190719; t=1600170139;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:mime-version:mime-version:content-type:content-type:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=OkKYSkKyk8wqT+OScl34FkUVe3j0wndiq0Ur+o1OS04=;
-        b=flP2WkzTGHkIMsV1VrcPJvjDT4qkA0kNlrDoK009acU9k/OeOuqbutXRjxVk18V6nVjlIC
-        4BgYbY1g81ZfrDfjP3fWTE5BNdEQMvWqlGmJTuVekIEeX/EU4WJWaA6xnI4kZGhv1P0Nar
-        upTLXq1C0rOAxL1gdMcAI6b64RHZKlI=
+        bh=ZEUt37s9RxOuhY2PQqrIUIuUKoTmEBVgguESlNRL21o=;
+        b=hSaz3vOpUNXKidz7Ww5l9GseHuCvP17ntGIb213mUzWteOT+NGOQ8ImiwcN6uHTm1ASBcG
+        4mWG2jHRV0hYF5Rv8RlO1FyTZvsh49mr6lkiop8VaS0Wymlxm7Jaq/4I8UsRgUi9M701Vz
+        gB5B5ps3TYsP9w49aZUAbALRtl1qRFQ=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-290-kVF_AJT_OhyqOe5C87zZeg-1; Tue, 15 Sep 2020 08:26:03 -0400
-X-MC-Unique: kVF_AJT_OhyqOe5C87zZeg-1
-Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.phx2.redhat.com [10.5.11.23])
+ us-mta-162-iuBgqxzAN1qfrO5TzUHZhg-1; Tue, 15 Sep 2020 07:42:17 -0400
+X-MC-Unique: iuBgqxzAN1qfrO5TzUHZhg-1
+Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 6D7E419611CB
-        for <fstests@vger.kernel.org>; Tue, 15 Sep 2020 12:25:56 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 641C21084C86
+        for <fstests@vger.kernel.org>; Tue, 15 Sep 2020 11:42:16 +0000 (UTC)
 Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 28ACA19C4F
-        for <fstests@vger.kernel.org>; Tue, 15 Sep 2020 12:25:55 +0000 (UTC)
-Date:   Tue, 15 Sep 2020 20:39:53 +0800
+        by smtp.corp.redhat.com (Postfix) with ESMTP id D404E75141;
+        Tue, 15 Sep 2020 11:42:15 +0000 (UTC)
+Date:   Tue, 15 Sep 2020 19:56:12 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     fstests@vger.kernel.org
-Subject: Re: [PATCH 01/24] xfs/331: don't run this test if fallocate isn't
- supported
-Message-ID: <20200915123952.GR2937@dhcp-12-102.nay.redhat.com>
-Mail-Followup-To: fstests@vger.kernel.org
-References: <160013417420.2923511.6825722200699287884.stgit@magnolia>
- <160013418077.2923511.4423324916550074038.stgit@magnolia>
+To:     Pavel Reichl <preichl@redhat.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH v4 1/1] generic: add test for boundary in
+ xfs_attr_shortform_verify
+Message-ID: <20200915115612.GP2937@dhcp-12-102.nay.redhat.com>
+Mail-Followup-To: Pavel Reichl <preichl@redhat.com>,
+        fstests@vger.kernel.org
+References: <20200914153213.76894-1-preichl@redhat.com>
+ <20200914153213.76894-2-preichl@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <160013418077.2923511.4423324916550074038.stgit@magnolia>
+In-Reply-To: <20200914153213.76894-2-preichl@redhat.com>
 User-Agent: Mutt/1.10.1 (2018-07-13)
-X-Scanned-By: MIMEDefang 2.84 on 10.5.11.23
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.15
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Sep 14, 2020 at 06:43:00PM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <darrick.wong@oracle.com>
+On Mon, Sep 14, 2020 at 05:32:13PM +0200, Pavel Reichl wrote:
+> Add a regression test to check that the boundary test
+> for the fixed-offset parts of xfs_attr_sf_entry
+> in xfs_attr_shortform_verify is not off by one.
 > 
-> This test requires fallocate, so make sure that actually works before
-> running it.
+> This can be shown by:
 > 
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> touch file
+> setfattr -n user.a file
+> 
+> With help from Zorro. Thanks very much.
+> 
+> Signed-off-by: Pavel Reichl <preichl@redhat.com>
 > ---
->  tests/xfs/331 |    1 +
->  1 file changed, 1 insertion(+)
+>  tests/generic/611     | 61 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/611.out |  2 ++
+>  tests/generic/group   |  1 +
+>  3 files changed, 64 insertions(+)
+>  create mode 100755 tests/generic/611
+>  create mode 100644 tests/generic/611.out
 > 
-> 
-> diff --git a/tests/xfs/331 b/tests/xfs/331
-> index b26ea155..501dd1f8 100755
-> --- a/tests/xfs/331
-> +++ b/tests/xfs/331
-> @@ -32,6 +32,7 @@ _supported_fs xfs
->  _require_scratch
->  _require_xfs_scratch_rmapbt
->  _require_scratch_reflink
-> +_require_xfs_io_command "falloc"
+> diff --git a/tests/generic/611 b/tests/generic/611
+> new file mode 100755
+> index 00000000..283327e4
+> --- /dev/null
+> +++ b/tests/generic/611
+> @@ -0,0 +1,61 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2020 Red Hat, Inc. All Rights Reserved.
+> +#
+> +# FS QA Test 611
+> +#
+> +# Verify that metadata won't get corrupted when extended attribute
+> +# name of size one is set.
+> +#
+> +# This test verifies the problem fixed in kernel with commit
+> +# f4020438fab0 ("xfs: fix boundary test in xfs_attr_shortform_verify")
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +. ./common/attr
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +_supported_fs generic
+> +_supported_os Linux
+> +_require_scratch
+> +_require_attrs
+> +
+> +_scratch_mkfs > $seqres.full 2>&1
+> +_scratch_mount
+> +
+> +localfile="${SCRATCH_MNT}/testfile"
+> +
+> +touch "${localfile}"
+> +"${SETFATTR_PROG}" -n user.a "${localfile}"
+> +
+> +# Make sure that changes are written to disk
+> +_scratch_cycle_mount
+> +
+> +# If the target bug isn't fixed, getfattr fails
+> +${GETFATTR_PROG} --absolute-names -n user.a $localfile | grep 'user.a'
+> +
+> +# Make sure the filesystem isn't corrupted manually
+> +_scratch_unmount
 
-Good to me.
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+If you don't need fsck at here, the _scratch_unmount (and the comment) isn't
+needed either :)
 
->  _require_test_program "punch-alternating"
->  
->  rm -f "$seqres.full"
+> +
+> +status=0
+> +exit
+> diff --git a/tests/generic/611.out b/tests/generic/611.out
+> new file mode 100644
+> index 00000000..1ab12434
+> --- /dev/null
+> +++ b/tests/generic/611.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 611
+> +user.a=""
+> diff --git a/tests/generic/group b/tests/generic/group
+> index 8eba6c98..4af4b494 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -613,3 +613,4 @@
+>  608 auto attr quick dax
+>  609 auto quick rw
+>  610 auto quick prealloc zero
+> +611 auto quick attr
+> -- 
+> 2.26.2
 > 
 
