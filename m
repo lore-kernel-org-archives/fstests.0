@@ -1,75 +1,70 @@
-Return-Path: <SRS0=R9JC=CX=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=6hky=CY=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 94C79C43461
-	for <linux-fstests@archiver.kernel.org>; Mon, 14 Sep 2020 15:32:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 37D62C433E2
+	for <linux-fstests@archiver.kernel.org>; Tue, 15 Sep 2020 00:22:55 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 61CF42076C
-	for <linux-fstests@archiver.kernel.org>; Mon, 14 Sep 2020 15:32:40 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E9DCC208DB
+	for <linux-fstests@archiver.kernel.org>; Tue, 15 Sep 2020 00:22:54 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="SO8GfuQo"
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="fr3UJ7SO"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726131AbgINPc2 (ORCPT
+        id S1725994AbgIOAWx (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 14 Sep 2020 11:32:28 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:56478 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726411AbgINPcV (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 14 Sep 2020 11:32:21 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1600097539;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=lNI9l2O5DEC+WGqBqsR+k9wfYeCOh33pqrCF2O/fGtk=;
-        b=SO8GfuQoCN/AD5V0Q1SmoLp/wQWRbGuuBROLtHJ2mnqST3bkhokeAXxZQOgCWpDr03Nleo
-        h4p0RPDaelmuZGilOJxDiwqtf1yEu1UsXQwlbDsI3UbvMWdLjrvXtcKzro+eE7xl4op2Zc
-        ZJzvwKQCCjCF//FYqHzuKtJU+svDjgg=
-Received: from mail-wr1-f71.google.com (mail-wr1-f71.google.com
- [209.85.221.71]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-141-zFGIZx5pNKqycGpAOHed5w-1; Mon, 14 Sep 2020 11:32:17 -0400
-X-MC-Unique: zFGIZx5pNKqycGpAOHed5w-1
-Received: by mail-wr1-f71.google.com with SMTP id l9so5742wrq.20
-        for <fstests@vger.kernel.org>; Mon, 14 Sep 2020 08:32:17 -0700 (PDT)
+        Mon, 14 Sep 2020 20:22:53 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45090 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726013AbgIOAWv (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 14 Sep 2020 20:22:51 -0400
+Received: from mail-qk1-x729.google.com (mail-qk1-x729.google.com [IPv6:2607:f8b0:4864:20::729])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ACDCBC061788
+        for <fstests@vger.kernel.org>; Mon, 14 Sep 2020 17:22:49 -0700 (PDT)
+Received: by mail-qk1-x729.google.com with SMTP id o16so2482901qkj.10
+        for <fstests@vger.kernel.org>; Mon, 14 Sep 2020 17:22:49 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
+        h=from:to:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=K7B5+G4uwMRmHs/RTKS5x+bZoePKMB3g169/BIqYaVk=;
+        b=fr3UJ7SOb5+TehlCaFDa1QWB8ua+4iCFeftltOhvMitAMpBjjuQNRE9Kgop8eAdvUO
+         KFVt0gXo4sToIH80XPBDR4W1RrhPszn/STMBtbrWlIyfAiuzy7NQNnzqxwXDm+ERDeZ4
+         Zcn9Yk18I2crD6bVIEOK9cHVhOn0j0RrB7fCqihHCI4BnvIDYOIBAidmao0DAkjLEo+l
+         LrnBnOSR1oyhvquAk9JoOA+SvKlNqeV1DLIeFPPKpTZ7iVN6iDq6SenZnWeZWLlnvyHb
+         fiG48zwAgMhlJRzgvhGErHHXdNQKczdsvUPdVVIjWLGqMk+TJdJh3W7DEoiuOOiXp6J3
+         AqVQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=lNI9l2O5DEC+WGqBqsR+k9wfYeCOh33pqrCF2O/fGtk=;
-        b=bAcQpsUDhrJZgWzi4JMY1af9CqX9WX+KzrES5GR+S7fM27DBbUv/6ABfrxHx7jjZbC
-         S98lymW0Pl/sxkwLKBJCUzX9tv1HGA2p/EedcugH6XxM03JeozQdIj7zbPa1lJ+pma+4
-         kLCW9CzEfwSM5OUxkIAjdDT0ynYsZqD58epgZ76zaKj7hRm9hAw8moTvOJfAd8wJeYH6
-         bt82fp+/oWNasevyKBAs/pH9AVKtzgaIV774Q04hagz23cjbSzX7HiULC+9y+76t4NB1
-         CLVBiWI1TIZpuhtHRmZO+biUhTC7hdcBITS9r9yMg7G5rOOHfK6tnQJP5vuHsMHQdT+I
-         Dn/w==
-X-Gm-Message-State: AOAM530l8XlQFUAU1hc5Cn3AE4eFFWZE6FqqGuijepdZnIIo0zZXXsAX
-        Vv3FwQ4NMbrWPmo4Rc30CH+7Z+ZazOWsZIyrjjAtS7fbjXXMIHaQGi7BMsCNMFFo+jHVnAbUWAa
-        6EfU1BfM4TRlk/zIxDg==
-X-Received: by 2002:adf:e9c1:: with SMTP id l1mr16675052wrn.68.1600097536156;
-        Mon, 14 Sep 2020 08:32:16 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJxoYYlJUqaHjDxOqkbN1Ilqxy3kyoSg4Xcdqt4XbC7g5cNdJLLPlgcR5NY1erYQZvrYOv3IOw==
-X-Received: by 2002:adf:e9c1:: with SMTP id l1mr16675035wrn.68.1600097535965;
-        Mon, 14 Sep 2020 08:32:15 -0700 (PDT)
-Received: from localhost.localdomain.com ([84.19.91.81])
-        by smtp.gmail.com with ESMTPSA id c14sm14000582wrm.64.2020.09.14.08.32.15
-        for <fstests@vger.kernel.org>
+        h=x-gm-message-state:from:to:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=K7B5+G4uwMRmHs/RTKS5x+bZoePKMB3g169/BIqYaVk=;
+        b=gz5MEg//5Ci+KAKw0eZd2aEZBIu2rq2Ae7yzl3wqwNhLoeR0Ce1RC14aQ5A3CksJI8
+         GciD9HVnapCN5j4rdQx3/7PLw7j8HFxb33k17pxq4dfZOkdHFcbYnT8DtpYfFol3Zuye
+         gxQuszeU+K6fnwgb1hLuSdH4XKNX+GtyaNyS5NPJMDf1PSaltMS5GReiTW4Y2R/9IIH4
+         hoGCVRnv3wnLZFQD76s1ip5IbUw4kjNhE1PmFro9xywYXn1/ez/m+3pAUmPsELH1KPRN
+         /uu5g1tkb3UyRzOlhUlqDnl6fZGDtgXgPU6NzN4vIAYFtaDJxYZKnE5H81IoB0ugq6BH
+         ez+A==
+X-Gm-Message-State: AOAM5336dx3NzEgfxNue5q9LjNP492xjTQu7Mr+ROAT9un2OzUKElw9B
+        oL2kreemNlMNUDy/Uy1SxF8ySd+yrVBbh0TF
+X-Google-Smtp-Source: ABdhPJxVVmYwuXkmf8MAiJ2/RMcCaGqeynA1A50TXWNiTxxSTFNiSG9hkstgkBAQY+uc1xNTfU7HYg==
+X-Received: by 2002:a37:cd5:: with SMTP id 204mr14219818qkm.303.1600129365437;
+        Mon, 14 Sep 2020 17:22:45 -0700 (PDT)
+Received: from localhost (cpe-174-109-172-136.nc.res.rr.com. [174.109.172.136])
+        by smtp.gmail.com with ESMTPSA id 205sm16338042qki.118.2020.09.14.17.22.44
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 14 Sep 2020 08:32:15 -0700 (PDT)
-From:   Pavel Reichl <preichl@redhat.com>
-To:     fstests@vger.kernel.org
-Subject: [PATCH v4 1/1] generic: add test for boundary in xfs_attr_shortform_verify
-Date:   Mon, 14 Sep 2020 17:32:13 +0200
-Message-Id: <20200914153213.76894-2-preichl@redhat.com>
+        Mon, 14 Sep 2020 17:22:44 -0700 (PDT)
+From:   Josef Bacik <josef@toxicpanda.com>
+To:     linux-btrfs@vger.kernel.org, kernel-team@fb.com,
+        fstests@vger.kernel.org
+Subject: [PATCH] fstests: drop check.log and check.time into section specific results dir
+Date:   Mon, 14 Sep 2020 20:22:43 -0400
+Message-Id: <20200915002243.57729-1-josef@toxicpanda.com>
 X-Mailer: git-send-email 2.26.2
-In-Reply-To: <20200914153213.76894-1-preichl@redhat.com>
-References: <20200914153213.76894-1-preichl@redhat.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
@@ -77,110 +72,88 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Add a regression test to check that the boundary test
-for the fixed-offset parts of xfs_attr_sf_entry
-in xfs_attr_shortform_verify is not off by one.
+Right now we only track check.log and check.time globally, it would be nice
+to do it per-section as well.  This makes it easier to parse results from
+systems that run a bunch of different configurations at once.
 
-This can be shown by:
-
-touch file
-setfattr -n user.a file
-
-With help from Zorro. Thanks very much.
-
-Signed-off-by: Pavel Reichl <preichl@redhat.com>
+Signed-off-by: Josef Bacik <josef@toxicpanda.com>
 ---
- tests/generic/611     | 61 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/611.out |  2 ++
- tests/generic/group   |  1 +
- 3 files changed, 64 insertions(+)
- create mode 100755 tests/generic/611
- create mode 100644 tests/generic/611.out
+ check | 28 +++++++++++++++++++++-------
+ 1 file changed, 21 insertions(+), 7 deletions(-)
 
-diff --git a/tests/generic/611 b/tests/generic/611
-new file mode 100755
-index 00000000..283327e4
---- /dev/null
-+++ b/tests/generic/611
-@@ -0,0 +1,61 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2020 Red Hat, Inc. All Rights Reserved.
-+#
-+# FS QA Test 611
-+#
-+# Verify that metadata won't get corrupted when extended attribute
-+# name of size one is set.
-+#
-+# This test verifies the problem fixed in kernel with commit
-+# f4020438fab0 ("xfs: fix boundary test in xfs_attr_shortform_verify")
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
+diff --git a/check b/check
+index 5ffa8777..6a79825d 100755
+--- a/check
++++ b/check
+@@ -391,6 +391,13 @@ _wipe_counters()
+ 	unset try notrun bad
+ }
+ 
++_global_log() {
++	echo "$1" >> $check.log
++	if $OPTIONS_HAVE_SECIONS; then
++		echo "$1" >> ${REPORT_DIR}/check.log
++	fi
 +}
 +
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/attr
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch
-+_require_attrs
-+
-+_scratch_mkfs > $seqres.full 2>&1
-+_scratch_mount
-+
-+localfile="${SCRATCH_MNT}/testfile"
-+
-+touch "${localfile}"
-+"${SETFATTR_PROG}" -n user.a "${localfile}"
-+
-+# Make sure that changes are written to disk
-+_scratch_cycle_mount
-+
-+# If the target bug isn't fixed, getfattr fails
-+${GETFATTR_PROG} --absolute-names -n user.a $localfile | grep 'user.a'
-+
-+# Make sure the filesystem isn't corrupted manually
-+_scratch_unmount
-+
-+status=0
-+exit
-diff --git a/tests/generic/611.out b/tests/generic/611.out
-new file mode 100644
-index 00000000..1ab12434
---- /dev/null
-+++ b/tests/generic/611.out
-@@ -0,0 +1,2 @@
-+QA output created by 611
-+user.a=""
-diff --git a/tests/generic/group b/tests/generic/group
-index 8eba6c98..4af4b494 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -613,3 +613,4 @@
- 608 auto attr quick dax
- 609 auto quick rw
- 610 auto quick prealloc zero
-+611 auto quick attr
+ _wrapup()
+ {
+ 	seq="check"
+@@ -415,10 +422,13 @@ _wrapup()
+ 				}' \
+ 				| sort -n >$tmp.out
+ 			mv $tmp.out $check.time
++			if $OPTIONS_HAVE_SECTIONS; then
++				cp $check.time ${REPORT_DIR}/check.time
++			fi
+ 		fi
+ 
+-		echo "" >>$check.log
+-		date >>$check.log
++		_global_log ""
++		_global_log "$(date)"
+ 
+ 		echo "SECTION       -- $section" >>$tmp.summary
+ 		echo "=========================" >>$tmp.summary
+@@ -427,29 +437,33 @@ _wrapup()
+ 				echo "Ran:$try"
+ 				echo "Ran:$try" >>$tmp.summary
+ 			fi
+-			echo "Ran:$try" >>$check.log
++			_global_log "Ran:$try"
+ 		fi
+ 
+ 		$interrupt && echo "Interrupted!" | tee -a $check.log
++		if $OPTIONS_HAVE_SECIONS; then
++			$interrupt && echo "Interrupted!" | tee -a \
++				${REPORT_DIR}/check.log
++		fi
+ 
+ 		if [ ! -z "$notrun" ]; then
+ 			if [ $brief_test_summary == "false" ]; then
+ 				echo "Not run:$notrun"
+ 				echo "Not run:$notrun" >>$tmp.summary
+ 			fi
+-			echo "Not run:$notrun" >>$check.log
++			_global_log "Not run:$notrun"
+ 		fi
+ 
+ 		if [ ! -z "$n_bad" -a $n_bad != 0 ]; then
+ 			echo "Failures:$bad"
+ 			echo "Failed $n_bad of $n_try tests"
+-			echo "Failures:$bad" >>$check.log
+-			echo "Failed $n_bad of $n_try tests" >>$check.log
++			_global_log "Failures:$bad"
++			_global_log "Failed $n_bad of $n_try tests"
+ 			echo "Failures:$bad" >>$tmp.summary
+ 			echo "Failed $n_bad of $n_try tests" >>$tmp.summary
+ 		else
+ 			echo "Passed all $n_try tests"
+-			echo "Passed all $n_try tests" >>$check.log
++			_global_log "Passed all $n_try tests"
+ 			echo "Passed all $n_try tests" >>$tmp.summary
+ 		fi
+ 		echo "" >>$tmp.summary
 -- 
-2.26.2
+2.28.0
 
