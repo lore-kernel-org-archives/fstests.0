@@ -7,66 +7,68 @@ X-Spam-Status: No, score=-14.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 082F2C433E2
-	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 17:07:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DD5C1C43461
+	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 17:15:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A3F2822287
-	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 17:07:52 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9122D22263
+	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 17:15:09 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Ltdlf9+I"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="esKdqBsg"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726686AbgIPRHl (ORCPT
+        id S1726772AbgIPROy (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 16 Sep 2020 13:07:41 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:25956 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726764AbgIPRFj (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 16 Sep 2020 13:05:39 -0400
+        Wed, 16 Sep 2020 13:14:54 -0400
+Received: from us-smtp-2.mimecast.com ([205.139.110.61]:45493 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1726918AbgIPRMz (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 16 Sep 2020 13:12:55 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1600275919;
+        s=mimecast20190719; t=1600276345;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=Y/agz4GNcXrJHHBE6tYbNPsvfJC8Zssrd12CYI04k6w=;
-        b=Ltdlf9+IowrlD1QoGb+FOhpTK8ltFam5R0TkJTWXv+w3VxHLHzVevv4mNnoAC5iWaXhOHr
-        0g2+MrtuP27yBIEenx9um3QWgeJn5l/Qb6zHvT4PDDm2N0UXUkzSajYI7ZOwy+UHZCTcBp
-        +hgfKIZto0d2QRCXemzTyQK1mRbWXP0=
+        bh=9YLqjZbQbluq3b80KilT+H7ZG4w6xHsDff36L9vI2iI=;
+        b=esKdqBsgAa//JhW57Qg1yjV3nK6+HSCxdFvRoFmZMbz4JQhB9sQE1eTUKr5c3LbOXr7TGv
+        dbSg9izWSsshEWQVZrOPUt6P5NuUxhg28kGz8hxuNZqGr73y+H4Q9zxKyoCgiIhseD7NK4
+        tleRkiU1vhqSegDtY2JMa3HFITeVZ3M=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-285-RcmA32exNnaQ7U946tbc5Q-1; Wed, 16 Sep 2020 07:25:37 -0400
-X-MC-Unique: RcmA32exNnaQ7U946tbc5Q-1
-Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
+ us-mta-427-w41ZjtiUMneSihr4G8PmsA-1; Wed, 16 Sep 2020 07:36:24 -0400
+X-MC-Unique: w41ZjtiUMneSihr4G8PmsA-1
+Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.phx2.redhat.com [10.5.11.23])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 8E1C8186DD23
-        for <fstests@vger.kernel.org>; Wed, 16 Sep 2020 11:25:36 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id BB7EA1019624
+        for <fstests@vger.kernel.org>; Wed, 16 Sep 2020 11:36:23 +0000 (UTC)
 Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 0A2885DA71
-        for <fstests@vger.kernel.org>; Wed, 16 Sep 2020 11:25:35 +0000 (UTC)
-Date:   Wed, 16 Sep 2020 19:39:35 +0800
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 364D519D61
+        for <fstests@vger.kernel.org>; Wed, 16 Sep 2020 11:36:22 +0000 (UTC)
+Date:   Wed, 16 Sep 2020 19:50:22 +0800
 From:   Zorro Lang <zlang@redhat.com>
 To:     fstests@vger.kernel.org
-Subject: Re: [PATCH 17/24] xfs: refactor _xfs_check calls to the scratch
- device
-Message-ID: <20200916113935.GH2937@dhcp-12-102.nay.redhat.com>
+Subject: Re: [PATCH 20/24] xfs/449: fix xfs info report output if realtime
+ device specified
+Message-ID: <20200916115021.GK2937@dhcp-12-102.nay.redhat.com>
 Mail-Followup-To: fstests@vger.kernel.org
 References: <160013417420.2923511.6825722200699287884.stgit@magnolia>
- <160013428386.2923511.798805055641192515.stgit@magnolia>
+ <160013430267.2923511.8202421356162568130.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <160013428386.2923511.798805055641192515.stgit@magnolia>
+In-Reply-To: <160013430267.2923511.8202421356162568130.stgit@magnolia>
 User-Agent: Mutt/1.10.1 (2018-07-13)
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
+X-Scanned-By: MIMEDefang 2.84 on 10.5.11.23
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Sep 14, 2020 at 06:44:43PM -0700, Darrick J. Wong wrote:
+On Mon, Sep 14, 2020 at 06:45:02PM -0700, Darrick J. Wong wrote:
 > From: Darrick J. Wong <darrick.wong@oracle.com>
 > 
-> Use _scratch_xfs_check, not _xfs_check $SCRATCH_DEV.
+> Modify the mkfs.xfs output so that "realtime =/dev/XXX" becomes
+> "realtime =external" so that the output will match xfs_db, which doesn't
+> take a rt device argument and thus does not know.
 > 
 > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 > ---
@@ -74,22 +76,24 @@ On Mon, Sep 14, 2020 at 06:44:43PM -0700, Darrick J. Wong wrote:
 Good to me,
 Reviewed-by: Zorro Lang <zlang@redhat.com>
 
->  tests/xfs/291 |    2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  tests/xfs/449 |    4 +++-
+>  1 file changed, 3 insertions(+), 1 deletion(-)
 > 
 > 
-> diff --git a/tests/xfs/291 b/tests/xfs/291
-> index 8a4b1354..adef2536 100755
-> --- a/tests/xfs/291
-> +++ b/tests/xfs/291
-> @@ -102,7 +102,7 @@ done
->  _scratch_unmount
->  # Can xfs_repair and xfs_check cope with this monster?
->  _scratch_xfs_repair >> $seqres.full 2>&1 || _fail "xfs_repair failed"
-> -_xfs_check $SCRATCH_DEV >> $seqres.full 2>&1 || _fail "xfs_check failed"
-> +_scratch_xfs_check >> $seqres.full 2>&1 || _fail "xfs_check failed"
+> diff --git a/tests/xfs/449 b/tests/xfs/449
+> index 83c3c493..938dbe28 100755
+> --- a/tests/xfs/449
+> +++ b/tests/xfs/449
+> @@ -46,7 +46,9 @@ cat $tmp.mkfs >> $seqres.full
+>  _scratch_xfs_db -c "info" > $tmp.dbinfo
+>  echo DB >> $seqres.full
+>  cat $tmp.dbinfo >> $seqres.full
+> -diff -u $tmp.mkfs $tmp.dbinfo
+> +# xfs_db doesn't take a rtdev argument, so it reports "realtime=external".
+> +# mkfs does, so make a quick substitution
+> +diff -u <(cat $tmp.mkfs | sed -e 's/realtime =\/.*extsz=/realtime =external               extsz=/g') $tmp.dbinfo
 >  
->  # Yes they can!  Now...
->  # Can xfs_metadump cope with this monster?
+>  _scratch_mount
+>  
 > 
 
