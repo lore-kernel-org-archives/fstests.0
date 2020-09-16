@@ -2,156 +2,118 @@ Return-Path: <SRS0=FsZq=CZ=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 816C4C43461
-	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 17:48:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3A70FC43461
+	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 18:33:46 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2A00F206DC
-	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 17:48:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 08B5F21D43
+	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 18:33:46 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="DD4nMJDv"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="FReByZtt"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727499AbgIPRsk (ORCPT
+        id S1727995AbgIPS3P (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 16 Sep 2020 13:48:40 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:25846 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1727471AbgIPRsI (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 16 Sep 2020 13:48:08 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1600278487;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=idfy7Syf4ATJlYyYq2/4nEP2ORzJWyRGssBVYHwWpOI=;
-        b=DD4nMJDvj/HPzLyHoHdyPhO7GBorhQuZSyic1XDLgBQLb5O5iukeKuiy7AXyRp+ANNA8iq
-        tAnBA2veaY4cl0bUTwnypnNkSlbgizGfQq0aw1grjMfdTa2CzMNWDXpUKo6T1jRvgkpXQQ
-        PAhv4YoBA+m9Iy8JjEdExvlD7/GfdiQ=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-214-PtReMQkWPneVuCI-zqhfwg-1; Wed, 16 Sep 2020 08:23:47 -0400
-X-MC-Unique: PtReMQkWPneVuCI-zqhfwg-1
-Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 33C988015A4;
-        Wed, 16 Sep 2020 12:23:46 +0000 (UTC)
-Received: from bogon.redhat.com (ovpn-13-242.pek2.redhat.com [10.72.13.242])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id E729D7E46E;
-        Wed, 16 Sep 2020 12:23:44 +0000 (UTC)
-From:   Zorro Lang <zlang@redhat.com>
-To:     fstests@vger.kernel.org
-Cc:     io-uring@vger.kernel.org
-Subject: [PATCH 3/3] generic: IO_URING direct IO fsx test
-Date:   Wed, 16 Sep 2020 20:23:27 +0800
-Message-Id: <20200916122327.398-4-zlang@redhat.com>
-In-Reply-To: <20200916122327.398-1-zlang@redhat.com>
-References: <20200916122327.398-1-zlang@redhat.com>
+        Wed, 16 Sep 2020 14:29:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42128 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727817AbgIPS2t (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 16 Sep 2020 14:28:49 -0400
+Received: from mail-pl1-x644.google.com (mail-pl1-x644.google.com [IPv6:2607:f8b0:4864:20::644])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0F445C014DC9;
+        Wed, 16 Sep 2020 06:12:01 -0700 (PDT)
+Received: by mail-pl1-x644.google.com with SMTP id bg9so3169893plb.2;
+        Wed, 16 Sep 2020 06:12:01 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=lN1y5ZTbcI1+0bV+O1/fXyIzONA1l1uRaxiHigfQAzc=;
+        b=FReByZttRw5q+oiP4c3s1yT3kiNpuVOSF/U1uHq56d4clZhv3DeBcB+BLcJkn2gIaO
+         xNTDVJZ+Zuzeb4KcTz0Lf1rbvHwZ47ibuseKWo5AqgrqZC80WxXZs3zkTc5mlRc5c14M
+         ADUJKuoC0ORb4sQTJRTReVharmNxmgqxwUy6lOXP4hUNHqBegpCxsLahzxuQZmFYthPQ
+         WtsCE9cV5n0zIIJeIbbRUUnFvZcMr38rMj1+7YRTxo3YntPgxWrFa/cbB0c9u4LlJIS0
+         dHiIiG+4QJXhkA1n+dxWNVqDz+Z4OFx3ktVqTwbchbKNgVH8I0UqpoZ9FgEwpstEePG/
+         5sCg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=lN1y5ZTbcI1+0bV+O1/fXyIzONA1l1uRaxiHigfQAzc=;
+        b=bKZywDb5fBx6VlEKPy53yJUDAh5Drymjg2FZny7RtAvJQLRZRshIv6756jQozw/LjZ
+         bTyEvo2Gw5kT45aidFUeCFSUNpyJBq8H0rpS/4XoiCF7Mzd1E+GxSL6rHjHmNmtmnTqf
+         TBksW7vwMnWCSGXiilIRfolE0ucS17TyuSQaITkwcuYGf8heVReVwtLRK4v6Pusvq8CR
+         Z/2JnabQHdE3y4CEdj/OpRcPiUjHQUlvMx/QqaBzydD5Yfi6DvtItk3OHlUKhjZ1edim
+         IpvX73QzrW3uA3r8QHZ4CbkdVH7cqE8/F0IsLk5bxvx8PNWnNOZJkIXwr27qA0MYbFSZ
+         4MdQ==
+X-Gm-Message-State: AOAM533784u66z1+zxaggGQ5AmTOrOydoZSIgJgTURuE8wHdlF1oSeTH
+        YSXWBBEjnw542AGBaidr4n4=
+X-Google-Smtp-Source: ABdhPJxurqrYk6oFjBlW+DX8ptvO0wC1UXx7GcJ5j5j/1VYxwVNRM5mq7wV6lHfUxI4+uesGRDJSXw==
+X-Received: by 2002:a17:90a:8981:: with SMTP id v1mr4096218pjn.54.1600261920629;
+        Wed, 16 Sep 2020 06:12:00 -0700 (PDT)
+Received: from garuda.localnet ([171.48.17.146])
+        by smtp.gmail.com with ESMTPSA id d77sm17084222pfd.121.2020.09.16.06.11.58
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 16 Sep 2020 06:11:59 -0700 (PDT)
+From:   Chandan Babu R <chandanrlinux@gmail.com>
+To:     guaneryu@gmail.com
+Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
+        darrick.wong@oracle.com, zlang@redhat.com
+Subject: Re: [PATCH V2 2/2] xfs: Check if rt summary/bitmap buffers are logged with correct xfs_buf type
+Date:   Wed, 16 Sep 2020 18:41:55 +0530
+Message-ID: <2438001.59BAfK7u84@garuda>
+In-Reply-To: <20200916053407.2036-2-chandanrlinux@gmail.com>
+References: <20200916053407.2036-1-chandanrlinux@gmail.com> <20200916053407.2036-2-chandanrlinux@gmail.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
+Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset="us-ascii"
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-After fsx supports IO_URING read/write, add IO_URING direct IO fsx
-test with different read/write size and concurrent buffered IO.
+On Wednesday 16 September 2020 11:04:07 AM IST Chandan Babu R wrote:
+> This commit adds a test to check if growing a real-time device can end
+> up logging an xfs_buf with the "type" subfield of
+> bip->bli_formats->blf_flags set to XFS_BLFT_UNKNOWN_BUF. When this
+> occurs the following call trace is printed on the console,
+> 
+> XFS: Assertion failed: (bip->bli_flags & XFS_BLI_STALE) || (xfs_blft_from_flags(&bip->__bli_format) > XFS_BLFT_UNKNOWN_BUF && xfs_blft_from_flags(&bip->__bli_format) < XFS_BLFT_MAX_BUF), file: fs/xfs/xfs_buf_item.c, line: 331
+> Call Trace:
+>  xfs_buf_item_format+0x632/0x680
+>  ? kmem_alloc_large+0x29/0x90
+>  ? kmem_alloc+0x70/0x120
+>  ? xfs_log_commit_cil+0x132/0x940
+>  xfs_log_commit_cil+0x26f/0x940
+>  ? xfs_buf_item_init+0x1ad/0x240
+>  ? xfs_growfs_rt_alloc+0x1fc/0x280
+>  __xfs_trans_commit+0xac/0x370
+>  xfs_growfs_rt_alloc+0x1fc/0x280
+>  xfs_growfs_rt+0x1a0/0x5e0
+>  xfs_file_ioctl+0x3fd/0xc70
+>  ? selinux_file_ioctl+0x174/0x220
+>  ksys_ioctl+0x87/0xc0
+>  __x64_sys_ioctl+0x16/0x20
+>  do_syscall_64+0x3e/0x70
+>  entry_SYSCALL_64_after_hwframe+0x44/0xa9
+> 
+> The kernel patch "xfs: Set xfs_buf type flag when growing summary/bitmap
+> files" is required to fix this issue.
+>
 
-Signed-off-by: Zorro Lang <zlang@redhat.com>
----
- tests/generic/610     | 52 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/610.out |  7 ++++++
- tests/generic/group   |  1 +
- 3 files changed, 60 insertions(+)
- create mode 100755 tests/generic/610
- create mode 100644 tests/generic/610.out
+Eryu,
 
-diff --git a/tests/generic/610 b/tests/generic/610
-new file mode 100755
-index 00000000..fc3f4c2a
---- /dev/null
-+++ b/tests/generic/610
-@@ -0,0 +1,52 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2020 YOUR NAME HERE.  All Rights Reserved.
-+#
-+# FS QA Test 610
-+#
-+# IO_URING direct IO fsx test
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_test
-+_require_odirect
-+_require_io_uring
-+
-+psize=`$here/src/feature -s`
-+bsize=`_min_dio_alignment $TEST_DEV`
-+run_fsx -S 0 -U -N 20000           -l 600000 -r PSIZE -w BSIZE -Z -R -W
-+run_fsx -S 0 -U -N 20000 -o 8192   -l 600000 -r PSIZE -w BSIZE -Z -R -W
-+run_fsx -S 0 -U -N 20000 -o 128000 -l 600000 -r PSIZE -w BSIZE -Z -R -W
-+
-+# change readbdy/writebdy to double page size
-+psize=$((psize * 2))
-+run_fsx -S 0 -U -N 20000           -l 600000 -r PSIZE -w PSIZE -Z -R -W
-+run_fsx -S 0 -U -N 20000 -o 256000 -l 600000 -r PSIZE -w PSIZE -Z -R -W
-+run_fsx -S 0 -U -N 20000 -o 128000 -l 600000 -r PSIZE -w BSIZE -Z -W
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/610.out b/tests/generic/610.out
-new file mode 100644
-index 00000000..97ad41a3
---- /dev/null
-+++ b/tests/generic/610.out
-@@ -0,0 +1,7 @@
-+QA output created by 610
-+fsx -S 0 -U -N 20000 -l 600000 -r PSIZE -w BSIZE -Z -R -W
-+fsx -S 0 -U -N 20000 -o 8192 -l 600000 -r PSIZE -w BSIZE -Z -R -W
-+fsx -S 0 -U -N 20000 -o 128000 -l 600000 -r PSIZE -w BSIZE -Z -R -W
-+fsx -S 0 -U -N 20000 -l 600000 -r PSIZE -w PSIZE -Z -R -W
-+fsx -S 0 -U -N 20000 -o 256000 -l 600000 -r PSIZE -w PSIZE -Z -R -W
-+fsx -S 0 -U -N 20000 -o 128000 -l 600000 -r PSIZE -w BSIZE -Z -W
-diff --git a/tests/generic/group b/tests/generic/group
-index cf50f4a1..60280dc2 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -612,3 +612,4 @@
- 607 auto attr quick dax
- 608 auto attr quick dax
- 609 auto rw io_uring
-+610 auto rw io_uring
+Sorry, I forgot to add Darrick's RVB tag. Please let me know if I have to
+resend the patch with the missing RVB.
+
+> Reviewed-by: Zorro Lang <zlang@redhat.com>
+> Signed-off-by: Chandan Babu R <chandanrlinux@gmail.com>
+
 -- 
-2.20.1
+chandan
+
+
 
