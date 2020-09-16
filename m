@@ -2,118 +2,117 @@ Return-Path: <SRS0=FsZq=CZ=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-14.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3A70FC43461
-	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 18:33:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 92141C433E2
+	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 18:58:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 08B5F21D43
-	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 18:33:46 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 352DD20732
+	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 18:58:53 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="FReByZtt"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="M4BZhENe"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727995AbgIPS3P (ORCPT
+        id S1727610AbgIPS6v (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 16 Sep 2020 14:29:15 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42128 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727817AbgIPS2t (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 16 Sep 2020 14:28:49 -0400
-Received: from mail-pl1-x644.google.com (mail-pl1-x644.google.com [IPv6:2607:f8b0:4864:20::644])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0F445C014DC9;
-        Wed, 16 Sep 2020 06:12:01 -0700 (PDT)
-Received: by mail-pl1-x644.google.com with SMTP id bg9so3169893plb.2;
-        Wed, 16 Sep 2020 06:12:01 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=lN1y5ZTbcI1+0bV+O1/fXyIzONA1l1uRaxiHigfQAzc=;
-        b=FReByZttRw5q+oiP4c3s1yT3kiNpuVOSF/U1uHq56d4clZhv3DeBcB+BLcJkn2gIaO
-         xNTDVJZ+Zuzeb4KcTz0Lf1rbvHwZ47ibuseKWo5AqgrqZC80WxXZs3zkTc5mlRc5c14M
-         ADUJKuoC0ORb4sQTJRTReVharmNxmgqxwUy6lOXP4hUNHqBegpCxsLahzxuQZmFYthPQ
-         WtsCE9cV5n0zIIJeIbbRUUnFvZcMr38rMj1+7YRTxo3YntPgxWrFa/cbB0c9u4LlJIS0
-         dHiIiG+4QJXhkA1n+dxWNVqDz+Z4OFx3ktVqTwbchbKNgVH8I0UqpoZ9FgEwpstEePG/
-         5sCg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=lN1y5ZTbcI1+0bV+O1/fXyIzONA1l1uRaxiHigfQAzc=;
-        b=bKZywDb5fBx6VlEKPy53yJUDAh5Drymjg2FZny7RtAvJQLRZRshIv6756jQozw/LjZ
-         bTyEvo2Gw5kT45aidFUeCFSUNpyJBq8H0rpS/4XoiCF7Mzd1E+GxSL6rHjHmNmtmnTqf
-         TBksW7vwMnWCSGXiilIRfolE0ucS17TyuSQaITkwcuYGf8heVReVwtLRK4v6Pusvq8CR
-         Z/2JnabQHdE3y4CEdj/OpRcPiUjHQUlvMx/QqaBzydD5Yfi6DvtItk3OHlUKhjZ1edim
-         IpvX73QzrW3uA3r8QHZ4CbkdVH7cqE8/F0IsLk5bxvx8PNWnNOZJkIXwr27qA0MYbFSZ
-         4MdQ==
-X-Gm-Message-State: AOAM533784u66z1+zxaggGQ5AmTOrOydoZSIgJgTURuE8wHdlF1oSeTH
-        YSXWBBEjnw542AGBaidr4n4=
-X-Google-Smtp-Source: ABdhPJxurqrYk6oFjBlW+DX8ptvO0wC1UXx7GcJ5j5j/1VYxwVNRM5mq7wV6lHfUxI4+uesGRDJSXw==
-X-Received: by 2002:a17:90a:8981:: with SMTP id v1mr4096218pjn.54.1600261920629;
-        Wed, 16 Sep 2020 06:12:00 -0700 (PDT)
-Received: from garuda.localnet ([171.48.17.146])
-        by smtp.gmail.com with ESMTPSA id d77sm17084222pfd.121.2020.09.16.06.11.58
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 16 Sep 2020 06:11:59 -0700 (PDT)
-From:   Chandan Babu R <chandanrlinux@gmail.com>
-To:     guaneryu@gmail.com
-Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
-        darrick.wong@oracle.com, zlang@redhat.com
-Subject: Re: [PATCH V2 2/2] xfs: Check if rt summary/bitmap buffers are logged with correct xfs_buf type
-Date:   Wed, 16 Sep 2020 18:41:55 +0530
-Message-ID: <2438001.59BAfK7u84@garuda>
-In-Reply-To: <20200916053407.2036-2-chandanrlinux@gmail.com>
-References: <20200916053407.2036-1-chandanrlinux@gmail.com> <20200916053407.2036-2-chandanrlinux@gmail.com>
+        Wed, 16 Sep 2020 14:58:51 -0400
+Received: from us-smtp-1.mimecast.com ([207.211.31.81]:21753 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1727338AbgIPRvU (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 16 Sep 2020 13:51:20 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1600278671;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=8ppAddFWBY5GKELxLK2gBWTu6Ghql/eVZT5FuPia91Y=;
+        b=M4BZhENeg19q1jAETNHBrRfPB7reAipgGw1cXS9o+WnsXTDF8duKz67VB8+HCdr/bkIXwH
+        Kp1XsN6N0ow7pKtc9h/Gs72NQiusY+AaLyWDYn649IROBQjzSuifN9cVBA6nOVqmv3hNDU
+        9Rg7O1rpsu3Qs4y+phfEZiqFp/wY4tI=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-326-rK_dmSbDPQmfP_XhM-L4Sw-1; Wed, 16 Sep 2020 07:11:39 -0400
+X-MC-Unique: rK_dmSbDPQmfP_XhM-L4Sw-1
+Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.phx2.redhat.com [10.5.11.23])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id EAD4C8018A7;
+        Wed, 16 Sep 2020 11:11:37 +0000 (UTC)
+Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 649E619D61;
+        Wed, 16 Sep 2020 11:11:37 +0000 (UTC)
+Date:   Wed, 16 Sep 2020 19:25:36 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH 09/24] xfs/070: add scratch log device options to direct
+ repair invocation
+Message-ID: <20200916112536.GE2937@dhcp-12-102.nay.redhat.com>
+Mail-Followup-To: "Darrick J. Wong" <darrick.wong@oracle.com>,
+        linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+References: <160013417420.2923511.6825722200699287884.stgit@magnolia>
+ <160013423329.2923511.3252823001209034556.stgit@magnolia>
+ <20200916024247.GA2937@dhcp-12-102.nay.redhat.com>
+ <20200916034201.GC7954@magnolia>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7Bit
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20200916034201.GC7954@magnolia>
+User-Agent: Mutt/1.10.1 (2018-07-13)
+X-Scanned-By: MIMEDefang 2.84 on 10.5.11.23
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wednesday 16 September 2020 11:04:07 AM IST Chandan Babu R wrote:
-> This commit adds a test to check if growing a real-time device can end
-> up logging an xfs_buf with the "type" subfield of
-> bip->bli_formats->blf_flags set to XFS_BLFT_UNKNOWN_BUF. When this
-> occurs the following call trace is printed on the console,
+On Tue, Sep 15, 2020 at 08:42:01PM -0700, Darrick J. Wong wrote:
+> On Wed, Sep 16, 2020 at 10:42:47AM +0800, Zorro Lang wrote:
+> > On Mon, Sep 14, 2020 at 06:43:53PM -0700, Darrick J. Wong wrote:
+> > > From: Darrick J. Wong <darrick.wong@oracle.com>
+> > > 
+> > > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > > ---
+> > >  tests/xfs/070 |    4 +++-
+> > >  1 file changed, 3 insertions(+), 1 deletion(-)
+> > > 
+> > > 
+> > > diff --git a/tests/xfs/070 b/tests/xfs/070
+> > > index 5d52a830..313864b7 100755
+> > > --- a/tests/xfs/070
+> > > +++ b/tests/xfs/070
+> > > @@ -41,9 +41,11 @@ _cleanup()
+> > >  _xfs_repair_noscan()
+> > >  {
+> > >  	# invoke repair directly so we can kill the process if need be
+> > > +	[ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ] && \
+> > > +		log_repair_opts="-l $SCRATCH_LOGDEV"
+> > >  	[ "$USE_EXTERNAL" = yes ] && [ -n "$SCRATCH_RTDEV" ] && \
+> > >  		rt_repair_opts="-r $SCRATCH_RTDEV"
+> > > -	$XFS_REPAIR_PROG $rt_repair_opts $SCRATCH_DEV 2>&1 |
+> > > +	$XFS_REPAIR_PROG $log_repair_opts $rt_repair_opts $SCRATCH_DEV 2>&1 |
+> > >  		tee -a $seqres.full > $tmp.repair &
+> > 
+> > Why not use _scratch_xfs_repair at here?
+> > 
+> > Thanks,
+> > Zorro
+> > 
+> > >  	repair_pid=$!
 > 
-> XFS: Assertion failed: (bip->bli_flags & XFS_BLI_STALE) || (xfs_blft_from_flags(&bip->__bli_format) > XFS_BLFT_UNKNOWN_BUF && xfs_blft_from_flags(&bip->__bli_format) < XFS_BLFT_MAX_BUF), file: fs/xfs/xfs_buf_item.c, line: 331
-> Call Trace:
->  xfs_buf_item_format+0x632/0x680
->  ? kmem_alloc_large+0x29/0x90
->  ? kmem_alloc+0x70/0x120
->  ? xfs_log_commit_cil+0x132/0x940
->  xfs_log_commit_cil+0x26f/0x940
->  ? xfs_buf_item_init+0x1ad/0x240
->  ? xfs_growfs_rt_alloc+0x1fc/0x280
->  __xfs_trans_commit+0xac/0x370
->  xfs_growfs_rt_alloc+0x1fc/0x280
->  xfs_growfs_rt+0x1a0/0x5e0
->  xfs_file_ioctl+0x3fd/0xc70
->  ? selinux_file_ioctl+0x174/0x220
->  ksys_ioctl+0x87/0xc0
->  __x64_sys_ioctl+0x16/0x20
->  do_syscall_64+0x3e/0x70
->  entry_SYSCALL_64_after_hwframe+0x44/0xa9
+>         ^^^^^^^^^^^^^
+
+Oh, right! That's good to me now.
+Reviewed-by: Zorro Lang <zlang@redhat.com>
+
+> Because this test needs to hang on to the pid of the repair process in
+> order to kill it, which you can't do if do if you use the wrapper.
 > 
-> The kernel patch "xfs: Set xfs_buf type flag when growing summary/bitmap
-> files" is required to fix this issue.
->
-
-Eryu,
-
-Sorry, I forgot to add Darrick's RVB tag. Please let me know if I have to
-resend the patch with the missing RVB.
-
-> Reviewed-by: Zorro Lang <zlang@redhat.com>
-> Signed-off-by: Chandan Babu R <chandanrlinux@gmail.com>
-
--- 
-chandan
-
-
+> --D
+> 
+> > >  
+> > > 
+> > 
+> 
 
