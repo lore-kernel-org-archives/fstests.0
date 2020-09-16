@@ -4,183 +4,126 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	UNPARSEABLE_RELAY autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7BE6AC35257
-	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 20:58:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 08C45C43461
+	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 21:08:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 15A9F21941
-	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 20:58:17 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9FF93206D4
+	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 21:08:04 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="BOE0jWKZ"
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="mgKPL2ua"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727837AbgIPU6G (ORCPT
+        id S1726426AbgIPVIC (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 16 Sep 2020 16:58:06 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:60398 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726353AbgIPQwV (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 16 Sep 2020 12:52:21 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1600275085;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=QS+wO1bOb/MZuessqndV980gLlA0r3NSlKNgcyqbDF8=;
-        b=BOE0jWKZ9QsPGZ2ZTw/QXwTdOEnaEvYIUX/+IF1FiRhkSfEqUKrTrOl4DinTZrhGMywQue
-        nUbODcetjlqoWsz5vFhZa5vNTmiThV2t95hciybZF28xTqiRT6GnK1HZ07INlJPAq6dG0o
-        /pB2/dtbaFVxJv8IwJWr7ZuGNyL7peE=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-381-fIqzzWSuPbaV0gnv8ucXqQ-1; Wed, 16 Sep 2020 08:30:18 -0400
-X-MC-Unique: fIqzzWSuPbaV0gnv8ucXqQ-1
-Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 407BCEDA6C;
-        Wed, 16 Sep 2020 12:30:17 +0000 (UTC)
-Received: from bogon.redhat.com (ovpn-13-242.pek2.redhat.com [10.72.13.242])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 9972068D77;
-        Wed, 16 Sep 2020 12:30:15 +0000 (UTC)
-From:   Zorro Lang <zlang@redhat.com>
-To:     fstests@vger.kernel.org
-Cc:     io-uring@vger.kernel.org
-Subject: [PATCH 2/3] generic: fsx IO_URING soak tests
-Date:   Wed, 16 Sep 2020 20:30:04 +0800
-Message-Id: <20200916123005.2139-3-zlang@redhat.com>
-In-Reply-To: <20200916123005.2139-1-zlang@redhat.com>
-References: <20200916123005.2139-1-zlang@redhat.com>
+        Wed, 16 Sep 2020 17:08:02 -0400
+Received: from aserp2120.oracle.com ([141.146.126.78]:32778 "EHLO
+        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726249AbgIPVHv (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 16 Sep 2020 17:07:51 -0400
+Received: from pps.filterd (aserp2120.oracle.com [127.0.0.1])
+        by aserp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 08GL5FIm157017;
+        Wed, 16 Sep 2020 21:07:49 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to :
+ subject : message-id : references : mime-version : content-type :
+ in-reply-to; s=corp-2020-01-29;
+ bh=ZjMXcRsrsvjEHFqTqgBX1phkrX531Zpn+V13oGidxs0=;
+ b=mgKPL2ua9dD+kHq3pu2Hou1ne706NBhmeCbHpSUmxVN8Ldxv1WvDES82uVzyp97W9+fz
+ UwzcyvJveW9kBNQKSWQTLOlS7qkOokbFoZRg9I1535h5QxAJZZq9RgfOjz/KEOOjK2g1
+ T6DMZyXl0cc12GybseenvqJtPpr1H21VfPFNCE9vOGC3l7oTVMf8TFp+bsDNboi1j/70
+ r0iiA4RBwvsKH7yMmZqhEyMMW2es/Amup3Mdh31TlzA4Nxu8jizpBRsL1PPMeImthZKe
+ sDSjHIpXJ6JHIE4Rlk2NxIlfe21kp2mM1+rds8Z9yX+MthC4RM0vCz64FfQteogpW+qb uQ== 
+Received: from aserp3020.oracle.com (aserp3020.oracle.com [141.146.126.70])
+        by aserp2120.oracle.com with ESMTP id 33gp9mdh1v-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Wed, 16 Sep 2020 21:07:49 +0000
+Received: from pps.filterd (aserp3020.oracle.com [127.0.0.1])
+        by aserp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 08GL5WwJ163712;
+        Wed, 16 Sep 2020 21:07:49 GMT
+Received: from aserv0121.oracle.com (aserv0121.oracle.com [141.146.126.235])
+        by aserp3020.oracle.com with ESMTP id 33h889a56r-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Wed, 16 Sep 2020 21:07:49 +0000
+Received: from abhmp0017.oracle.com (abhmp0017.oracle.com [141.146.116.23])
+        by aserv0121.oracle.com (8.14.4/8.13.8) with ESMTP id 08GL7mU3022478;
+        Wed, 16 Sep 2020 21:07:49 GMT
+Received: from localhost (/67.169.218.210)
+        by default (Oracle Beehive Gateway v4.0)
+        with ESMTP ; Wed, 16 Sep 2020 21:07:48 +0000
+Date:   Wed, 16 Sep 2020 14:07:47 -0700
+From:   "Darrick J. Wong" <darrick.wong@oracle.com>
+To:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: Re: [PATCH 15/24] xfs/194: actually check if we got 512-byte blocks
+ before proceeding
+Message-ID: <20200916210747.GK7955@magnolia>
+References: <160013417420.2923511.6825722200699287884.stgit@magnolia>
+ <160013427110.2923511.12673259176007024613.stgit@magnolia>
+ <20200916113400.GF2937@dhcp-12-102.nay.redhat.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.16
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20200916113400.GF2937@dhcp-12-102.nay.redhat.com>
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9746 signatures=668679
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxscore=0 spamscore=0 adultscore=0
+ suspectscore=1 phishscore=0 malwarescore=0 bulkscore=0 mlxlogscore=999
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
+ definitions=main-2009160154
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9746 signatures=668679
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 bulkscore=0 mlxlogscore=999
+ adultscore=0 malwarescore=0 clxscore=1015 lowpriorityscore=0 phishscore=0
+ spamscore=0 priorityscore=1501 suspectscore=1 impostorscore=0 mlxscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
+ definitions=main-2009160154
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-After fsx supports IO_URING read/write, add a test to do IO_URING
-soak test of fsx.
+On Wed, Sep 16, 2020 at 07:34:00PM +0800, Zorro Lang wrote:
+> On Mon, Sep 14, 2020 at 06:44:31PM -0700, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <darrick.wong@oracle.com>
+> > 
+> > This test has specific fs block size requirements, so make sure that's
+> > what we got before we proceed with the test.
+> > 
+> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > ---
+> >  tests/xfs/194 |    3 +++
+> >  1 file changed, 3 insertions(+)
+> > 
+> > 
+> > diff --git a/tests/xfs/194 b/tests/xfs/194
+> > index 9001a146..90b74c8f 100755
+> > --- a/tests/xfs/194
+> > +++ b/tests/xfs/194
+> > @@ -84,6 +84,9 @@ unset XFS_MKFS_OPTIONS
+> >  # we need 512 byte block size, so crc's are turned off
+> >  _scratch_mkfs_xfs -m crc=0 -b size=$blksize >/dev/null 2>&1
+> >  _scratch_mount
+> > +test "$(_get_block_size $SCRATCH_MNT)" = 512 || \
+> > +	_notrun "Could not get 512-byte blocks"
+> > +
+> 
+> If this case is only for 512 byte blocksize, the "blksize=`expr $pgsize / 8`"
+> and all things with the "$blksize" looks redundant, right?
 
-Signed-off-by: Zorro Lang <zlang@redhat.com>
----
- common/rc             | 16 ++++++++++++
- tests/generic/609     | 58 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/609.out |  2 ++
- tests/generic/group   |  1 +
- 4 files changed, 77 insertions(+)
- create mode 100755 tests/generic/609
- create mode 100644 tests/generic/609.out
+Hmm... in hindsight I shouldn't have hardwired the right hand argument.
+This needs only to be a simple equivalence test:
 
-diff --git a/common/rc b/common/rc
-index aa5a7409..b6b39eba 100644
---- a/common/rc
-+++ b/common/rc
-@@ -1984,6 +1984,22 @@ _require_aiodio()
-     _require_odirect
- }
- 
-+# this test requires that the kernel supports IO_URING
-+_require_io_uring()
-+{
-+	$here/src/feature -R
-+	case $? in
-+	0)
-+		;;
-+	1)
-+		_notrun "kernel does not support IO_URING"
-+		;;
-+	*)
-+		_fail "unexpected error testing for IO_URING support"
-+		;;
-+	esac
-+}
-+
- # this test requires that a test program exists under src/
- # $1 - command (require)
- #
-diff --git a/tests/generic/609 b/tests/generic/609
-new file mode 100755
-index 00000000..1d9b6fed
---- /dev/null
-+++ b/tests/generic/609
-@@ -0,0 +1,58 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2020 Red Hat Inc.  All Rights Reserved.
-+#
-+# FS QA Test 609
-+#
-+# IO_URING soak buffered fsx test
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs generic
-+_supported_os Linux
-+_require_test
-+_require_io_uring
-+
-+# Run fsx for a million ops or more
-+nr_ops=$((100000 * TIME_FACTOR))
-+op_sz=$((128000 * LOAD_FACTOR))
-+file_sz=$((600000 * LOAD_FACTOR))
-+fsx_file=$TEST_DIR/fsx.$seq
-+
-+fsx_args=(-S 0)
-+fsx_args+=(-U)
-+fsx_args+=(-q)
-+fsx_args+=(-N $nr_ops)
-+fsx_args+=(-p $((nr_ops / 100)))
-+fsx_args+=(-o $op_sz)
-+fsx_args+=(-l $file_sz)
-+
-+run_fsx "${fsx_args[@]}" | sed -e '/^fsx.*/d'
-+
-+# success, all done
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/generic/609.out b/tests/generic/609.out
-new file mode 100644
-index 00000000..0d75b384
---- /dev/null
-+++ b/tests/generic/609.out
-@@ -0,0 +1,2 @@
-+QA output created by 609
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index aa969bcb..cf50f4a1 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -611,3 +611,4 @@
- 606 auto attr quick dax
- 607 auto attr quick dax
- 608 auto attr quick dax
-+609 auto rw io_uring
--- 
-2.20.1
+test "$(_get_block_size $SCRATCH_MNT)" = $blksize || \
+	_notrun "Could not get $blksize-byte blocks"
 
+Will fix and resend.
+
+--D
+
+> Thanks,
+> Zorro
+> 
+> >  
+> >  # 512b block / 4k page example:
+> >  #
+> > 
+> 
