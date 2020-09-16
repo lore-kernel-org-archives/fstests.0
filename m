@@ -1,113 +1,105 @@
-Return-Path: <SRS0=EKaY=CU=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=FsZq=CZ=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MISSING_SUBJECT,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-14.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5936EC43461
-	for <linux-fstests@archiver.kernel.org>; Fri, 11 Sep 2020 02:16:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 25FBFC43461
+	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 15:30:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1BF6D2076D
-	for <linux-fstests@archiver.kernel.org>; Fri, 11 Sep 2020 02:16:29 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CF53B22243
+	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 15:30:53 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="vEjBmARv"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ArcDWBgF"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725355AbgIKCQ2 (ORCPT
+        id S1726368AbgIPPa1 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 10 Sep 2020 22:16:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53212 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725306AbgIKCQZ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 10 Sep 2020 22:16:25 -0400
-Received: from mail-pf1-x433.google.com (mail-pf1-x433.google.com [IPv6:2607:f8b0:4864:20::433])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3A085C061573;
-        Thu, 10 Sep 2020 19:16:25 -0700 (PDT)
-Received: by mail-pf1-x433.google.com with SMTP id f18so6050334pfa.10;
-        Thu, 10 Sep 2020 19:16:25 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=date:from:to:cc:message-id:mime-version:content-disposition;
-        bh=h6RteTEWRGaRRul/zeyNJMwRQ9wMfdVP93BUTmIAZ+Q=;
-        b=vEjBmARvPmeZGNE4zcmlYrBJj5M+13i9O9pfg2VaiXHvRf2hMRZ72ujKDMIRBU5xvj
-         LtK68xI+1Pw+6QlSlPK6Add3HbsYvwIqtqOdepnmUeyDt7VbO8U9zEASDQwD2HAEPsz7
-         BGR0vE0FS4njCkeEgsbYwqaPV8DBLIhBf+wox4sb6LWhX+SO/aTsQZnzkK7eENWiTTff
-         T/PSaQexvofON3sXZMRcYii8T5woOURllvzmRndsvFFT1HbhthctGnrtSiJBr19s2JLh
-         YruhQBl+8xRBtO1ePHUSNohZtOqADkE5yqalONXkS2FWkNwHvr7kpL6DPtiQ0r508qKJ
-         Ik7g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:message-id:mime-version
-         :content-disposition;
-        bh=h6RteTEWRGaRRul/zeyNJMwRQ9wMfdVP93BUTmIAZ+Q=;
-        b=UbKMY5rLAFXu2asv7+4bnEHpRPXZzNzTz8HAJGLdha9p3xvU+aG5jt9oM1QfzLP04g
-         SrF7evaPcI3TzG+uq2n/2LimutFOkaeYlfm+M6JrCHOKi9Cwzy5JvWNviMsKr9Oep9U2
-         BQ/TBcmEzo768KzQyY9ylVYxfiFK0cg5dF77DzhSt8yv4r9xDzKFNYzx346W7LrlsF75
-         dRo9kfHZVRlfUdE7opQzh3hds6Kb34RNNos3vFxga6KpdVgqEd+/3ppzxM36/btwK5ot
-         +aLsjew7g6AvdNQEoIDc/70Lf2na6rXYMe+P/bKkX5NCSjpPt2gDowkbt0GF5OM5OY8K
-         TjwA==
-X-Gm-Message-State: AOAM532SrLE6JnVPfTBlZQGOnkd3+yiK61MWB3p8viTaZ3bdqQoMAprp
-        ZNJgefEZfZ59Dj7zHUzmWQAWCPuFe+s=
-X-Google-Smtp-Source: ABdhPJy5CVsMktsX6SKj9aqIv93hK9DZBtQ9SnQM8ypVx7ZHChv2V1o8+/s1s8VaKVTTAqKq6HF2Rg==
-X-Received: by 2002:a62:1ac3:0:b029:13f:7c9b:5a8a with SMTP id a186-20020a621ac30000b029013f7c9b5a8amr125223pfa.12.1599790584628;
-        Thu, 10 Sep 2020 19:16:24 -0700 (PDT)
-Received: from localhost ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id j9sm388571pfe.170.2020.09.10.19.16.23
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 10 Sep 2020 19:16:24 -0700 (PDT)
-Date:   Fri, 11 Sep 2020 10:16:16 +0800
-From:   Murphy Zhou <jencce.kernel@gmail.com>
-To:     Amir Goldstein <amir73il@gmail.com>,
-        fstests <fstests@vger.kernel.org>
-Cc:     Murphy Zhou <jencce.kernel@gmail.com>,
-        Chengguang Xu <cgxu519@mykernel.net>,
-        Miklos Szeredi <miklos@szeredi.hu>,
-        overlayfs <linux-unionfs@vger.kernel.org>
-Message-ID: <20200911021616.rguccu54epvxso4d@xzhoux.usersys.redhat.com>
+        Wed, 16 Sep 2020 11:30:27 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:38211 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726285AbgIPPaU (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 16 Sep 2020 11:30:20 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1600270159;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=O91AcBk+Stsv/EpIfLQmYWxEAtbjvbv3YRg1vLXs/w4=;
+        b=ArcDWBgF0Hae6YenLZVI5MnkOUhZHkAgnpUCdzMlWJyd1SUK2Pwk/fMtXP0PQ/Cqqt4C5U
+        puTTLq/mSGBJwlFXSTo4PQad97PVqdHaps9MMmdgDr1In1961AbUD/iQjriGwLWZAYaEU9
+        yQZj/GppN9mdqbd1egfxnvoK2HpldD8=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-250-e24EcKLsPt65lkt1twXRiA-1; Wed, 16 Sep 2020 07:51:54 -0400
+X-MC-Unique: e24EcKLsPt65lkt1twXRiA-1
+Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.phx2.redhat.com [10.5.11.23])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 479EC8B7CE2
+        for <fstests@vger.kernel.org>; Wed, 16 Sep 2020 11:51:43 +0000 (UTC)
+Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id B754319D6C
+        for <fstests@vger.kernel.org>; Wed, 16 Sep 2020 11:51:42 +0000 (UTC)
+Date:   Wed, 16 Sep 2020 20:05:41 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     fstests@vger.kernel.org
+Subject: Re: [PATCH 22/24] xfs/141: run for longer with TIME_FACTOR
+Message-ID: <20200916120541.GM2937@dhcp-12-102.nay.redhat.com>
+Mail-Followup-To: fstests@vger.kernel.org
+References: <160013417420.2923511.6825722200699287884.stgit@magnolia>
+ <160013431528.2923511.17636617456077025611.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <160013431528.2923511.17636617456077025611.stgit@magnolia>
+User-Agent: Mutt/1.10.1 (2018-07-13)
+X-Scanned-By: MIMEDefang 2.84 on 10.5.11.23
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Bcc:
-Subject: [PATCH v2] overlay/073: test with nfs_export being off
-Reply-To:
-In-Reply-To: <CAOQ4uxh+ppPMOSeAZU3sdwxwb_ixMHEpHLF9ZO_MTiedNJRgsw@mail.gmail.com>
+On Mon, Sep 14, 2020 at 06:45:15PM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
+> 
+> Allow the test runner to run the crash loop in this test for longer by
+> setting TIME_FACTOR.  This has been useful for finding bugs in log
+> recovery.
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> ---
 
-When nfs_export is enabled, the link count of upper dir
-objects are more then the expected number in this testcase.
-Because extra index entries are linked to upper inodes.
+Good to me,
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
-Signed-off-by: Murphy Zhou <jencce.kernel@gmail.com>
----
-v2: Add comment about why we need it
-
-Thanks Amir!
-
- tests/overlay/073 | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
-
-diff --git a/tests/overlay/073 b/tests/overlay/073
-index 37860c92..c5deccc6 100755
---- a/tests/overlay/073
-+++ b/tests/overlay/073
-@@ -99,7 +99,9 @@ run_test_case()
- {
- 	_scratch_mkfs
- 	make_lower_files ${1}
--	_scratch_mount -o "index=on"
-+	# There will be extra hard links with nfs_export enabled which
-+	# is expected. Turn it off explicitly to avoid the false alarm.
-+	_scratch_mount -o "index=on,nfs_export=off"
- 	make_whiteout_files
- 	check_whiteout_files ${1} ${2}
- 	_scratch_unmount
--- 
-2.20.1
+>  tests/xfs/141 |    4 +++-
+>  1 file changed, 3 insertions(+), 1 deletion(-)
+> 
+> 
+> diff --git a/tests/xfs/141 b/tests/xfs/141
+> index 754ca37a..ef7210ff 100755
+> --- a/tests/xfs/141
+> +++ b/tests/xfs/141
+> @@ -50,7 +50,8 @@ _scratch_mount
+>  
+>  sdev=$(_short_dev $SCRATCH_DEV)
+>  
+> -for i in $(seq 1 5); do
+> +nr_times=$((TIME_FACTOR * 5))
+> +while [ $nr_times -gt 0 ]; do
+>  	# Enable error injection. Use a random bad crc factor up to 100
+>  	# (increase this value to run fsstress longer).
+>  	factor=$((RANDOM % 100 + 1))
+> @@ -65,6 +66,7 @@ for i in $(seq 1 5); do
+>  	# write.
+>  	_scratch_unmount
+>  	_scratch_mount
+> +	nr_times=$((nr_times - 1))
+>  done
+>  
+>  # success, all done
+> 
 
