@@ -2,156 +2,94 @@ Return-Path: <SRS0=FsZq=CZ=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-14.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS
-	autolearn=ham autolearn_force=no version=3.4.0
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4229EC43461
-	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 15:59:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 082F2C433E2
+	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 17:07:55 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D9669224D2
-	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 15:59:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A3F2822287
+	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 17:07:52 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="fWBJXbyx"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Ltdlf9+I"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726410AbgIPP7p (ORCPT
+        id S1726686AbgIPRHl (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 16 Sep 2020 11:59:45 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:20512 "EHLO
+        Wed, 16 Sep 2020 13:07:41 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:25956 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726217AbgIPP42 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 16 Sep 2020 11:56:28 -0400
+        by vger.kernel.org with ESMTP id S1726764AbgIPRFj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 16 Sep 2020 13:05:39 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1600271779;
+        s=mimecast20190719; t=1600275919;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
+         to:to:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=idfy7Syf4ATJlYyYq2/4nEP2ORzJWyRGssBVYHwWpOI=;
-        b=fWBJXbyxNeLnrA+RVUopArMLmXEyg1OPx/wwEUnJLqrUCMi5wZ86odeRPDT5q0+Q2Oe/Wt
-        Q2X27l+90Unr3V5HYEWU3F4KNVhi8VYKe8cKuUFaphsLMxbbZ1kWA00TwMhIdWwk3SkLbe
-        XGiHeTOs+IhoPQ3ZV+f/0Ax/bHWFaP8=
+        bh=Y/agz4GNcXrJHHBE6tYbNPsvfJC8Zssrd12CYI04k6w=;
+        b=Ltdlf9+IowrlD1QoGb+FOhpTK8ltFam5R0TkJTWXv+w3VxHLHzVevv4mNnoAC5iWaXhOHr
+        0g2+MrtuP27yBIEenx9um3QWgeJn5l/Qb6zHvT4PDDm2N0UXUkzSajYI7ZOwy+UHZCTcBp
+        +hgfKIZto0d2QRCXemzTyQK1mRbWXP0=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-466-HoTBlWikOXKh5LV0qne60Q-1; Wed, 16 Sep 2020 08:30:25 -0400
-X-MC-Unique: HoTBlWikOXKh5LV0qne60Q-1
-Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
+ us-mta-285-RcmA32exNnaQ7U946tbc5Q-1; Wed, 16 Sep 2020 07:25:37 -0400
+X-MC-Unique: RcmA32exNnaQ7U946tbc5Q-1
+Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 0B2A9100A971;
-        Wed, 16 Sep 2020 12:30:20 +0000 (UTC)
-Received: from bogon.redhat.com (ovpn-13-242.pek2.redhat.com [10.72.13.242])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id B49D368D77;
-        Wed, 16 Sep 2020 12:30:18 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 8E1C8186DD23
+        for <fstests@vger.kernel.org>; Wed, 16 Sep 2020 11:25:36 +0000 (UTC)
+Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 0A2885DA71
+        for <fstests@vger.kernel.org>; Wed, 16 Sep 2020 11:25:35 +0000 (UTC)
+Date:   Wed, 16 Sep 2020 19:39:35 +0800
 From:   Zorro Lang <zlang@redhat.com>
 To:     fstests@vger.kernel.org
-Cc:     io-uring@vger.kernel.org
-Subject: [PATCH 3/3] generic: IO_URING direct IO fsx test
-Date:   Wed, 16 Sep 2020 20:30:05 +0800
-Message-Id: <20200916123005.2139-4-zlang@redhat.com>
-In-Reply-To: <20200916123005.2139-1-zlang@redhat.com>
-References: <20200916123005.2139-1-zlang@redhat.com>
+Subject: Re: [PATCH 17/24] xfs: refactor _xfs_check calls to the scratch
+ device
+Message-ID: <20200916113935.GH2937@dhcp-12-102.nay.redhat.com>
+Mail-Followup-To: fstests@vger.kernel.org
+References: <160013417420.2923511.6825722200699287884.stgit@magnolia>
+ <160013428386.2923511.798805055641192515.stgit@magnolia>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.16
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <160013428386.2923511.798805055641192515.stgit@magnolia>
+User-Agent: Mutt/1.10.1 (2018-07-13)
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-After fsx supports IO_URING read/write, add IO_URING direct IO fsx
-test with different read/write size and concurrent buffered IO.
+On Mon, Sep 14, 2020 at 06:44:43PM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
+> 
+> Use _scratch_xfs_check, not _xfs_check $SCRATCH_DEV.
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> ---
 
-Signed-off-by: Zorro Lang <zlang@redhat.com>
----
- tests/generic/610     | 52 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/610.out |  7 ++++++
- tests/generic/group   |  1 +
- 3 files changed, 60 insertions(+)
- create mode 100755 tests/generic/610
- create mode 100644 tests/generic/610.out
+Good to me,
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
-diff --git a/tests/generic/610 b/tests/generic/610
-new file mode 100755
-index 00000000..fc3f4c2a
---- /dev/null
-+++ b/tests/generic/610
-@@ -0,0 +1,52 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2020 YOUR NAME HERE.  All Rights Reserved.
-+#
-+# FS QA Test 610
-+#
-+# IO_URING direct IO fsx test
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_test
-+_require_odirect
-+_require_io_uring
-+
-+psize=`$here/src/feature -s`
-+bsize=`_min_dio_alignment $TEST_DEV`
-+run_fsx -S 0 -U -N 20000           -l 600000 -r PSIZE -w BSIZE -Z -R -W
-+run_fsx -S 0 -U -N 20000 -o 8192   -l 600000 -r PSIZE -w BSIZE -Z -R -W
-+run_fsx -S 0 -U -N 20000 -o 128000 -l 600000 -r PSIZE -w BSIZE -Z -R -W
-+
-+# change readbdy/writebdy to double page size
-+psize=$((psize * 2))
-+run_fsx -S 0 -U -N 20000           -l 600000 -r PSIZE -w PSIZE -Z -R -W
-+run_fsx -S 0 -U -N 20000 -o 256000 -l 600000 -r PSIZE -w PSIZE -Z -R -W
-+run_fsx -S 0 -U -N 20000 -o 128000 -l 600000 -r PSIZE -w BSIZE -Z -W
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/610.out b/tests/generic/610.out
-new file mode 100644
-index 00000000..97ad41a3
---- /dev/null
-+++ b/tests/generic/610.out
-@@ -0,0 +1,7 @@
-+QA output created by 610
-+fsx -S 0 -U -N 20000 -l 600000 -r PSIZE -w BSIZE -Z -R -W
-+fsx -S 0 -U -N 20000 -o 8192 -l 600000 -r PSIZE -w BSIZE -Z -R -W
-+fsx -S 0 -U -N 20000 -o 128000 -l 600000 -r PSIZE -w BSIZE -Z -R -W
-+fsx -S 0 -U -N 20000 -l 600000 -r PSIZE -w PSIZE -Z -R -W
-+fsx -S 0 -U -N 20000 -o 256000 -l 600000 -r PSIZE -w PSIZE -Z -R -W
-+fsx -S 0 -U -N 20000 -o 128000 -l 600000 -r PSIZE -w BSIZE -Z -W
-diff --git a/tests/generic/group b/tests/generic/group
-index cf50f4a1..60280dc2 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -612,3 +612,4 @@
- 607 auto attr quick dax
- 608 auto attr quick dax
- 609 auto rw io_uring
-+610 auto rw io_uring
--- 
-2.20.1
+>  tests/xfs/291 |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> 
+> diff --git a/tests/xfs/291 b/tests/xfs/291
+> index 8a4b1354..adef2536 100755
+> --- a/tests/xfs/291
+> +++ b/tests/xfs/291
+> @@ -102,7 +102,7 @@ done
+>  _scratch_unmount
+>  # Can xfs_repair and xfs_check cope with this monster?
+>  _scratch_xfs_repair >> $seqres.full 2>&1 || _fail "xfs_repair failed"
+> -_xfs_check $SCRATCH_DEV >> $seqres.full 2>&1 || _fail "xfs_check failed"
+> +_scratch_xfs_check >> $seqres.full 2>&1 || _fail "xfs_check failed"
+>  
+>  # Yes they can!  Now...
+>  # Can xfs_metadump cope with this monster?
+> 
 
