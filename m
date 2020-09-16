@@ -2,98 +2,185 @@ Return-Path: <SRS0=FsZq=CZ=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DD5C1C43461
-	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 17:15:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 88B41C43461
+	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 17:47:49 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9122D22263
-	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 17:15:09 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4890B206DC
+	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 17:47:49 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="esKdqBsg"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="elcpeMng"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726772AbgIPROy (ORCPT
+        id S1727338AbgIPRro (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 16 Sep 2020 13:14:54 -0400
-Received: from us-smtp-2.mimecast.com ([205.139.110.61]:45493 "EHLO
-        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726918AbgIPRMz (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 16 Sep 2020 13:12:55 -0400
+        Wed, 16 Sep 2020 13:47:44 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:59512 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1727459AbgIPRrM (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 16 Sep 2020 13:47:12 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1600276345;
+        s=mimecast20190719; t=1600278427;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:mime-version:mime-version:content-type:content-type:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=9YLqjZbQbluq3b80KilT+H7ZG4w6xHsDff36L9vI2iI=;
-        b=esKdqBsgAa//JhW57Qg1yjV3nK6+HSCxdFvRoFmZMbz4JQhB9sQE1eTUKr5c3LbOXr7TGv
-        dbSg9izWSsshEWQVZrOPUt6P5NuUxhg28kGz8hxuNZqGr73y+H4Q9zxKyoCgiIhseD7NK4
-        tleRkiU1vhqSegDtY2JMa3HFITeVZ3M=
+        bh=QS+wO1bOb/MZuessqndV980gLlA0r3NSlKNgcyqbDF8=;
+        b=elcpeMngm+z9pwKBVyQp08s5uoG4/XIY31goMWtgYMq0+gJaejapgwNa5rDkWoayK8YYrS
+        9931PtA8tbTv+cL0IPWc5Bs2qvFbOjHuYngoLSQmpeBPS9xNNbOeErOVq+IwHUwgDsp+zw
+        wTTrOEVmyD0VpF4PQgsVsHIFEeZHLBs=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-427-w41ZjtiUMneSihr4G8PmsA-1; Wed, 16 Sep 2020 07:36:24 -0400
-X-MC-Unique: w41ZjtiUMneSihr4G8PmsA-1
-Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.phx2.redhat.com [10.5.11.23])
+ us-mta-556-B_RPiNdQNTKus9GkBKoErw-1; Wed, 16 Sep 2020 08:23:43 -0400
+X-MC-Unique: B_RPiNdQNTKus9GkBKoErw-1
+Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id BB7EA1019624
-        for <fstests@vger.kernel.org>; Wed, 16 Sep 2020 11:36:23 +0000 (UTC)
-Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 364D519D61
-        for <fstests@vger.kernel.org>; Wed, 16 Sep 2020 11:36:22 +0000 (UTC)
-Date:   Wed, 16 Sep 2020 19:50:22 +0800
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 7DDC464089;
+        Wed, 16 Sep 2020 12:23:42 +0000 (UTC)
+Received: from bogon.redhat.com (ovpn-13-242.pek2.redhat.com [10.72.13.242])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 3E6277EB7C;
+        Wed, 16 Sep 2020 12:23:40 +0000 (UTC)
 From:   Zorro Lang <zlang@redhat.com>
 To:     fstests@vger.kernel.org
-Subject: Re: [PATCH 20/24] xfs/449: fix xfs info report output if realtime
- device specified
-Message-ID: <20200916115021.GK2937@dhcp-12-102.nay.redhat.com>
-Mail-Followup-To: fstests@vger.kernel.org
-References: <160013417420.2923511.6825722200699287884.stgit@magnolia>
- <160013430267.2923511.8202421356162568130.stgit@magnolia>
+Cc:     io-uring@vger.kernel.org
+Subject: [PATCH 2/3] generic: fsx IO_URING soak tests
+Date:   Wed, 16 Sep 2020 20:23:26 +0800
+Message-Id: <20200916122327.398-3-zlang@redhat.com>
+In-Reply-To: <20200916122327.398-1-zlang@redhat.com>
+References: <20200916122327.398-1-zlang@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <160013430267.2923511.8202421356162568130.stgit@magnolia>
-User-Agent: Mutt/1.10.1 (2018-07-13)
-X-Scanned-By: MIMEDefang 2.84 on 10.5.11.23
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Sep 14, 2020 at 06:45:02PM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <darrick.wong@oracle.com>
-> 
-> Modify the mkfs.xfs output so that "realtime =/dev/XXX" becomes
-> "realtime =external" so that the output will match xfs_db, which doesn't
-> take a rt device argument and thus does not know.
-> 
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> ---
+After fsx supports IO_URING read/write, add a test to do IO_URING
+soak test of fsx.
 
-Good to me,
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+Signed-off-by: Zorro Lang <zlang@redhat.com>
+---
+ common/rc             | 16 ++++++++++++
+ tests/generic/609     | 58 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/609.out |  2 ++
+ tests/generic/group   |  1 +
+ 4 files changed, 77 insertions(+)
+ create mode 100755 tests/generic/609
+ create mode 100644 tests/generic/609.out
 
->  tests/xfs/449 |    4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
-> 
-> 
-> diff --git a/tests/xfs/449 b/tests/xfs/449
-> index 83c3c493..938dbe28 100755
-> --- a/tests/xfs/449
-> +++ b/tests/xfs/449
-> @@ -46,7 +46,9 @@ cat $tmp.mkfs >> $seqres.full
->  _scratch_xfs_db -c "info" > $tmp.dbinfo
->  echo DB >> $seqres.full
->  cat $tmp.dbinfo >> $seqres.full
-> -diff -u $tmp.mkfs $tmp.dbinfo
-> +# xfs_db doesn't take a rtdev argument, so it reports "realtime=external".
-> +# mkfs does, so make a quick substitution
-> +diff -u <(cat $tmp.mkfs | sed -e 's/realtime =\/.*extsz=/realtime =external               extsz=/g') $tmp.dbinfo
->  
->  _scratch_mount
->  
-> 
+diff --git a/common/rc b/common/rc
+index aa5a7409..b6b39eba 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1984,6 +1984,22 @@ _require_aiodio()
+     _require_odirect
+ }
+ 
++# this test requires that the kernel supports IO_URING
++_require_io_uring()
++{
++	$here/src/feature -R
++	case $? in
++	0)
++		;;
++	1)
++		_notrun "kernel does not support IO_URING"
++		;;
++	*)
++		_fail "unexpected error testing for IO_URING support"
++		;;
++	esac
++}
++
+ # this test requires that a test program exists under src/
+ # $1 - command (require)
+ #
+diff --git a/tests/generic/609 b/tests/generic/609
+new file mode 100755
+index 00000000..1d9b6fed
+--- /dev/null
++++ b/tests/generic/609
+@@ -0,0 +1,58 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2020 Red Hat Inc.  All Rights Reserved.
++#
++# FS QA Test 609
++#
++# IO_URING soak buffered fsx test
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs generic
++_supported_os Linux
++_require_test
++_require_io_uring
++
++# Run fsx for a million ops or more
++nr_ops=$((100000 * TIME_FACTOR))
++op_sz=$((128000 * LOAD_FACTOR))
++file_sz=$((600000 * LOAD_FACTOR))
++fsx_file=$TEST_DIR/fsx.$seq
++
++fsx_args=(-S 0)
++fsx_args+=(-U)
++fsx_args+=(-q)
++fsx_args+=(-N $nr_ops)
++fsx_args+=(-p $((nr_ops / 100)))
++fsx_args+=(-o $op_sz)
++fsx_args+=(-l $file_sz)
++
++run_fsx "${fsx_args[@]}" | sed -e '/^fsx.*/d'
++
++# success, all done
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/generic/609.out b/tests/generic/609.out
+new file mode 100644
+index 00000000..0d75b384
+--- /dev/null
++++ b/tests/generic/609.out
+@@ -0,0 +1,2 @@
++QA output created by 609
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index aa969bcb..cf50f4a1 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -611,3 +611,4 @@
+ 606 auto attr quick dax
+ 607 auto attr quick dax
+ 608 auto attr quick dax
++609 auto rw io_uring
+-- 
+2.20.1
 
