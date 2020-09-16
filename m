@@ -2,79 +2,93 @@ Return-Path: <SRS0=FsZq=CZ=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-14.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
-	version=3.4.0
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 37A9EC433E2
-	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 19:53:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3DF06C43461
+	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 20:22:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D167F21D1B
-	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 19:53:25 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C68B121973
+	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 20:22:00 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="cKrDGL1W"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="RIKJhCaH"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726930AbgIPTxU (ORCPT
+        id S1728312AbgIPUVt (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 16 Sep 2020 15:53:20 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:42364 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1727138AbgIPRhc (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 16 Sep 2020 13:37:32 -0400
+        Wed, 16 Sep 2020 16:21:49 -0400
+Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:25975 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1727142AbgIPRaN (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 16 Sep 2020 13:30:13 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1600277848;
+        s=mimecast20190719; t=1600277401;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=F9u9qYwCYGwnKvUW3Qwuq0EBArWLV1qdPypf2tsQD8g=;
-        b=cKrDGL1Wc2DRH0YOCjAyLj/r7Gf0qm3+lP+BRhjwIHmESUl5pfJxWY0zReoYA3ILzf2lBv
-        SoJtGQiekzsoOTRqgZF7fwQmcQhawJqGyp9eI2e/0JRkx+Czgr4l+Zl+ERp39T8cXu+lcU
-        ZmClSEpg5PXO2DsiSUudziNXkdN+2/k=
+         to:to:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=Z9SGEkl2tJCTg6z808hcratmTXsl/8ZVN6vKTdThQe4=;
+        b=RIKJhCaHyx6L/rae58iMrqrkY1Jb8drWleNqevPqSDkiKAeX3exa67GtqhsftdIOYwSBKG
+        pS15Zf3CbiJjCgIkLEiGAW5+RHr7tPtpSRY59UIJSptboIYI2sRmQUYvyal6uz2F5nUMI7
+        +KV3Ig901uJxgZ5D0cEL/y3QAaEYuC8=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-596-9Rilj4t0OBON2eJ6IztSgQ-1; Wed, 16 Sep 2020 09:11:46 -0400
-X-MC-Unique: 9Rilj4t0OBON2eJ6IztSgQ-1
+ us-mta-15-fQuAgGunMZK30vnZHf-wjg-1; Wed, 16 Sep 2020 07:56:13 -0400
+X-MC-Unique: fQuAgGunMZK30vnZHf-wjg-1
 Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.phx2.redhat.com [10.5.11.23])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 8D881801F9B;
-        Wed, 16 Sep 2020 13:11:45 +0000 (UTC)
-Received: from bogon.redhat.com (ovpn-13-242.pek2.redhat.com [10.72.13.242])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 194A01A4D7;
-        Wed, 16 Sep 2020 13:11:42 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 6424888EF38
+        for <fstests@vger.kernel.org>; Wed, 16 Sep 2020 11:55:46 +0000 (UTC)
+Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id D434419D61
+        for <fstests@vger.kernel.org>; Wed, 16 Sep 2020 11:55:45 +0000 (UTC)
+Date:   Wed, 16 Sep 2020 20:09:45 +0800
 From:   Zorro Lang <zlang@redhat.com>
 To:     fstests@vger.kernel.org
-Cc:     io-uring@vger.kernel.org
-Subject: [PATCH 0/3] xfstests: new io_uring fsx test
-Date:   Wed, 16 Sep 2020 21:11:36 +0800
-Message-Id: <20200916131139.11497-1-zlang@redhat.com>
+Subject: Re: [PATCH 23/24] generic/204: sync before scrub hits EIO
+Message-ID: <20200916120945.GN2937@dhcp-12-102.nay.redhat.com>
+Mail-Followup-To: fstests@vger.kernel.org
+References: <160013417420.2923511.6825722200699287884.stgit@magnolia>
+ <160013432161.2923511.669329888874845585.stgit@magnolia>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <160013432161.2923511.669329888874845585.stgit@magnolia>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 X-Scanned-By: MIMEDefang 2.84 on 10.5.11.23
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This patchset bases on https://patchwork.kernel.org/cover/11769847/, which
-makes xfstests fsstress and fsx supports IO_URING.
+On Mon, Sep 14, 2020 at 06:45:21PM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
+> 
+> Let's see if we can prevent fs corruption warnings by flushing dirty
+> data to disk before the test ends.
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> ---
 
-The io_uring IOs in fsstress will be run automatically when fsstress get
-running. But fsx need a special option '-U' to run IO_URING read/write, so
-add two new cases to xfstests to do fsx buffered and direct IO IO_URING
-test.
+At least it won't break more things:)
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
-[1/3] new helper to require io_uring feature
-[2/3] fsx buffered IO io_uring test
-[3/3] fsx direct IO io_uring test
-
-And the [2/3] just found an io_uring regression bug (need LVM TEST_DEV):
-https://bugzilla.kernel.org/show_bug.cgi?id=209243
-
-Feel free to tell me, if you have more suggestions to test io_uring on
-filesystem.
-
-Thanks,
-Zorro
+>  tests/generic/204 |    1 +
+>  1 file changed, 1 insertion(+)
+> 
+> 
+> diff --git a/tests/generic/204 b/tests/generic/204
+> index 7250c00a..22d6fed5 100755
+> --- a/tests/generic/204
+> +++ b/tests/generic/204
+> @@ -18,6 +18,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+>  _cleanup()
+>  {
+>  	rm -f $tmp.*
+> +	sync
+>  }
+>  
+>  # get standard environment, filters and checks
+> 
 
