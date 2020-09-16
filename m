@@ -2,56 +2,53 @@ Return-Path: <SRS0=FsZq=CZ=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-6.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS
-	autolearn=ham autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A406FC433E2
-	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 20:52:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2DDB3C43461
+	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 20:52:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4575521941
+	by mail.kernel.org (Postfix) with ESMTP id C66A220731
 	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 20:52:44 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="LVn+FIyq"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="MJB+9Mu7"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726518AbgIPUwm (ORCPT
+        id S1726655AbgIPUwo (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 16 Sep 2020 16:52:42 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:23682 "EHLO
+        Wed, 16 Sep 2020 16:52:44 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:52591 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726450AbgIPQy3 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 16 Sep 2020 12:54:29 -0400
+        by vger.kernel.org with ESMTP id S1726308AbgIPQy2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 16 Sep 2020 12:54:28 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
         s=mimecast20190719; t=1600275267;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=Y180oUkejY14cXgK4vjnfdc8RXLi2L7JY7EbjdRpGtM=;
-        b=LVn+FIyqSWmsZutGhpz6wrKgMqb8bEC1uInF039vdQ3yOZDGISBmTHQeFc/KHwBeANKonA
-        mcSml3etlBu93CeKHCw9y7u++/Iyq+9h4LQqf1f7XzsEhRoaNxoYWEsSsUhJUtJm/nsQrt
-        NPxSkmzP750uUkEINEeyYqgkng65rUE=
+         content-transfer-encoding:content-transfer-encoding;
+        bh=F9u9qYwCYGwnKvUW3Qwuq0EBArWLV1qdPypf2tsQD8g=;
+        b=MJB+9Mu7ld5BlSEfk44QhcDDFz9Ks6SXceJuZDFhV/nFS3xAO4gfDTTLbm/Rqy5y11Pb7n
+        Etuj0CRZ6KCJZ3SQ5tf/pxNFbVih+3aT0IR0zG4+ly14IdS3ROSs6x5S+0sdLptPi3vB7x
+        zPND2vULT+Pefb5Iv7Zr23d3DIlClAs=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-495-lVKny8I4MwG2X-wdA-bQAQ-1; Wed, 16 Sep 2020 08:30:15 -0400
-X-MC-Unique: lVKny8I4MwG2X-wdA-bQAQ-1
+ us-mta-59-lPe5Bw8nOZaB1-J5s__MYQ-1; Wed, 16 Sep 2020 08:30:12 -0400
+X-MC-Unique: lPe5Bw8nOZaB1-J5s__MYQ-1
 Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id E4CD11007C88;
-        Wed, 16 Sep 2020 12:30:13 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 1BAB518C89D8;
+        Wed, 16 Sep 2020 12:30:11 +0000 (UTC)
 Received: from bogon.redhat.com (ovpn-13-242.pek2.redhat.com [10.72.13.242])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id C98986887C;
-        Wed, 16 Sep 2020 12:30:12 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id D2FCB6886C;
+        Wed, 16 Sep 2020 12:30:09 +0000 (UTC)
 From:   Zorro Lang <zlang@redhat.com>
 To:     fstests@vger.kernel.org
 Cc:     io-uring@vger.kernel.org
-Subject: [PATCH 1/3] src/feature: add IO_URING feature checking
-Date:   Wed, 16 Sep 2020 20:30:03 +0800
-Message-Id: <20200916123005.2139-2-zlang@redhat.com>
-In-Reply-To: <20200916123005.2139-1-zlang@redhat.com>
-References: <20200916123005.2139-1-zlang@redhat.com>
+Subject: [PATCH 0/3] xfstests: new io_uring fsx test
+Date:   Wed, 16 Sep 2020 20:30:02 +0800
+Message-Id: <20200916123005.2139-1-zlang@redhat.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 X-Scanned-By: MIMEDefang 2.79 on 10.5.11.16
@@ -60,139 +57,24 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-IO_URING is a new feature for GNU/Linux system, if someone case of
-xfstests tests this feature, better to check if current system
-supports it, or need _notrun.
+This patchset bases on https://patchwork.kernel.org/cover/11769847/, which
+makes xfstests fsstress and fsx supports IO_URING.
 
-Signed-off-by: Zorro Lang <zlang@redhat.com>
----
- src/Makefile  |  4 ++++
- src/feature.c | 41 ++++++++++++++++++++++++++++++++++++++---
- 2 files changed, 42 insertions(+), 3 deletions(-)
+The io_uring IOs in fsstress will be run automatically when fsstress get
+running. But fsx need a special option '-U' to run IO_URING read/write, so
+add two new cases to xfstests to do fsx buffered and direct IO IO_URING
+test.
 
-diff --git a/src/Makefile b/src/Makefile
-index 643c1916..f1422c5c 100644
---- a/src/Makefile
-+++ b/src/Makefile
-@@ -65,6 +65,10 @@ SUBDIRS += aio-dio-regress
- LLDLIBS += -laio
- endif
- 
-+ifeq ($(HAVE_URING), true)
-+LLDLIBS += -luring
-+endif
-+
- CFILES = $(TARGETS:=.c)
- LDIRT = $(TARGETS) fssum
- 
-diff --git a/src/feature.c b/src/feature.c
-index a7eb7595..df550cf6 100644
---- a/src/feature.c
-+++ b/src/feature.c
-@@ -19,6 +19,7 @@
-  *
-  * Test for machine features
-  *   -A  test whether AIO syscalls are available
-+ *   -R  test whether IO_URING syscalls are available
-  *   -o  report a number of online cpus
-  *   -s  report pagesize
-  *   -w  report bits per long
-@@ -39,6 +40,10 @@
- #include <libaio.h>
- #endif
- 
-+#ifdef HAVE_LIBURING_H
-+#include <liburing.h>
-+#endif
-+
- #ifndef USRQUOTA
- #define USRQUOTA  0
- #endif
-@@ -59,7 +64,7 @@ usage(void)
- 	fprintf(stderr, "Usage: feature [-v] -<q|u|g|p|U|G|P> <filesystem>\n");
- 	fprintf(stderr, "       feature [-v] -c <file>\n");
- 	fprintf(stderr, "       feature [-v] -t <file>\n");
--	fprintf(stderr, "       feature -A | -o | -s | -w\n");
-+	fprintf(stderr, "       feature -A | -R | -o | -s | -w\n");
- 	exit(1);
- }
- 
-@@ -215,6 +220,29 @@ check_aio_support(void)
- #endif
- }
- 
-+static int
-+check_uring_support(void)
-+{
-+#ifdef HAVE_LIBURING_H
-+	struct io_uring ring;
-+	int err;
-+
-+	err = io_uring_queue_init(1, &ring, 0);
-+	if (err == 0)
-+		return 0;
-+
-+	if (err == -ENOSYS) /* CONFIG_IO_URING=n */
-+		return 1;
-+
-+	fprintf(stderr, "unexpected error from io_uring_queue_init(): %s\n",
-+		strerror(-err));
-+	return 2;
-+#else
-+	/* liburing is unavailable, assume IO_URING is unsupported */
-+	return 1;
-+#endif
-+}
-+
- 
- int
- main(int argc, char **argv)
-@@ -228,6 +256,7 @@ main(int argc, char **argv)
- 	int	pflag = 0;
- 	int	Pflag = 0;
- 	int	qflag = 0;
-+	int	Rflag = 0;
- 	int	sflag = 0;
- 	int	uflag = 0;
- 	int	Uflag = 0;
-@@ -235,7 +264,7 @@ main(int argc, char **argv)
- 	int	oflag = 0;
- 	char	*fs = NULL;
- 
--	while ((c = getopt(argc, argv, "ActgGopPqsuUvw")) != EOF) {
-+	while ((c = getopt(argc, argv, "ActgGopPqRsuUvw")) != EOF) {
- 		switch (c) {
- 		case 'A':
- 			Aflag++;
-@@ -264,6 +293,9 @@ main(int argc, char **argv)
- 		case 'q':
- 			qflag++;
- 			break;
-+		case 'R':
-+			Rflag++;
-+			break;
- 		case 's':
- 			sflag++;
- 			break;
-@@ -289,7 +321,7 @@ main(int argc, char **argv)
- 		if (optind != argc-1)	/* need a device */
- 			usage();
- 		fs = argv[argc-1];
--	} else if (Aflag || wflag || sflag || oflag) {
-+	} else if (Aflag || Rflag || wflag || sflag || oflag) {
- 		if (optind != argc)
- 			usage();
- 	} else 
-@@ -317,6 +349,9 @@ main(int argc, char **argv)
- 	if (Aflag)
- 		return(check_aio_support());
- 
-+	if (Rflag)
-+		return(check_uring_support());
-+
- 	if (sflag) {
- 		printf("%d\n", getpagesize());
- 		exit(0);
--- 
-2.20.1
+[1/3] new helper to require io_uring feature
+[2/3] fsx buffered IO io_uring test
+[3/3] fsx direct IO io_uring test
+
+And the [2/3] just found an io_uring regression bug (need LVM TEST_DEV):
+https://bugzilla.kernel.org/show_bug.cgi?id=209243
+
+Feel free to tell me, if you have more suggestions to test io_uring on
+filesystem.
+
+Thanks,
+Zorro
 
