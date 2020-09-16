@@ -7,54 +7,55 @@ X-Spam-Status: No, score=-14.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3DF06C43461
-	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 20:22:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B1C22C43461
+	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 20:25:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C68B121973
-	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 20:22:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5610720715
+	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 20:25:39 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="RIKJhCaH"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="E1Z0H/rx"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728312AbgIPUVt (ORCPT
+        id S1727995AbgIPUZR (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 16 Sep 2020 16:21:49 -0400
-Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:25975 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1727142AbgIPRaN (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 16 Sep 2020 13:30:13 -0400
+        Wed, 16 Sep 2020 16:25:17 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:39107 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1727067AbgIPR1j (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 16 Sep 2020 13:27:39 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1600277401;
+        s=mimecast20190719; t=1600277245;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=Z9SGEkl2tJCTg6z808hcratmTXsl/8ZVN6vKTdThQe4=;
-        b=RIKJhCaHyx6L/rae58iMrqrkY1Jb8drWleNqevPqSDkiKAeX3exa67GtqhsftdIOYwSBKG
-        pS15Zf3CbiJjCgIkLEiGAW5+RHr7tPtpSRY59UIJSptboIYI2sRmQUYvyal6uz2F5nUMI7
-        +KV3Ig901uJxgZ5D0cEL/y3QAaEYuC8=
+        bh=TcpXfm0TNTF1g84Eqf3UxdKZf2GYA94zn580KQ26wMQ=;
+        b=E1Z0H/rxKvGoQ+ptTT/kfqggl+EnMlE/6ZbX0eVeGmEZ2C+czMiPH4C0FXdFfV9sIruUbM
+        5jjiEfuvJVL8MuYlcz87Y802lMoti3/pmrHJgoCYOwnjlDBW/PoZnzx4FqNXpqLrVbpIan
+        5TrSW/A4sy05IXf8xJfgTa7AFIICZB8=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-15-fQuAgGunMZK30vnZHf-wjg-1; Wed, 16 Sep 2020 07:56:13 -0400
-X-MC-Unique: fQuAgGunMZK30vnZHf-wjg-1
+ us-mta-252-u8NSzOwlPnenokA06Grfmw-1; Wed, 16 Sep 2020 07:48:53 -0400
+X-MC-Unique: u8NSzOwlPnenokA06Grfmw-1
 Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.phx2.redhat.com [10.5.11.23])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 6424888EF38
-        for <fstests@vger.kernel.org>; Wed, 16 Sep 2020 11:55:46 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id E14F810BBED5
+        for <fstests@vger.kernel.org>; Wed, 16 Sep 2020 11:48:52 +0000 (UTC)
 Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id D434419D61
-        for <fstests@vger.kernel.org>; Wed, 16 Sep 2020 11:55:45 +0000 (UTC)
-Date:   Wed, 16 Sep 2020 20:09:45 +0800
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 5CE0F1975E
+        for <fstests@vger.kernel.org>; Wed, 16 Sep 2020 11:48:52 +0000 (UTC)
+Date:   Wed, 16 Sep 2020 20:02:51 +0800
 From:   Zorro Lang <zlang@redhat.com>
 To:     fstests@vger.kernel.org
-Subject: Re: [PATCH 23/24] generic/204: sync before scrub hits EIO
-Message-ID: <20200916120945.GN2937@dhcp-12-102.nay.redhat.com>
+Subject: Re: [PATCH 21/24] common/rc: teach _scratch_mkfs_sized to set a size
+ on an xfs realtime volume
+Message-ID: <20200916120251.GL2937@dhcp-12-102.nay.redhat.com>
 Mail-Followup-To: fstests@vger.kernel.org
 References: <160013417420.2923511.6825722200699287884.stgit@magnolia>
- <160013432161.2923511.669329888874845585.stgit@magnolia>
+ <160013430895.2923511.7033338053997588353.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <160013432161.2923511.669329888874845585.stgit@magnolia>
+In-Reply-To: <160013430895.2923511.7033338053997588353.stgit@magnolia>
 User-Agent: Mutt/1.10.1 (2018-07-13)
 X-Scanned-By: MIMEDefang 2.84 on 10.5.11.23
 Sender: fstests-owner@vger.kernel.org
@@ -62,33 +63,56 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Sep 14, 2020 at 06:45:21PM -0700, Darrick J. Wong wrote:
+On Mon, Sep 14, 2020 at 06:45:08PM -0700, Darrick J. Wong wrote:
 > From: Darrick J. Wong <darrick.wong@oracle.com>
 > 
-> Let's see if we can prevent fs corruption warnings by flushing dirty
-> data to disk before the test ends.
+> Generally speaking, tests that call _scratch_mkfs_sized are trying to
+> constrain a test's run time by formatting a filesystem that's smaller
+> than the device.  The current helper does this for the scratch device,
+> but it doesn't do this for the xfs realtime volume.
+> 
+> If fstests has been configured to create files on the realtime device by
+> default ("-d rtinherit=1) then those tests that want to run with a small
+> volume size will instead be running with a huge realtime device.  This
+> makes certain tests take forever to run, so apply the same sizing to the
+> rt volume if one exists.
 > 
 > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 > ---
 
-At least it won't break more things:)
+Good to me,
 Reviewed-by: Zorro Lang <zlang@redhat.com>
 
->  tests/generic/204 |    1 +
->  1 file changed, 1 insertion(+)
+>  common/rc |   10 ++++++++--
+>  1 file changed, 8 insertions(+), 2 deletions(-)
 > 
 > 
-> diff --git a/tests/generic/204 b/tests/generic/204
-> index 7250c00a..22d6fed5 100755
-> --- a/tests/generic/204
-> +++ b/tests/generic/204
-> @@ -18,6 +18,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
->  _cleanup()
->  {
->  	rm -f $tmp.*
-> +	sync
->  }
+> diff --git a/common/rc b/common/rc
+> index f78b1cfc..b2d45fa2 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -976,14 +976,20 @@ _scratch_mkfs_sized()
+>  	[ "$fssize" -gt "$devsize" ] && _notrun "Scratch device too small"
+>      fi
 >  
->  # get standard environment, filters and checks
+> +    if [ "$HOSTOS" == "Linux" ] && [ "$FSTYP" = "xfs" ] && [ -b "$SCRATCH_RTDEV" ]; then
+> +	local rtdevsize=`blockdev --getsize64 $SCRATCH_RTDEV`
+> +	[ "$fssize" -gt "$rtdevsize" ] && _notrun "Scratch rt device too small"
+> +	rt_ops="-r size=$fssize"
+> +    fi
+> +
+>      case $FSTYP in
+>      xfs)
+>  	# don't override MKFS_OPTIONS that set a block size.
+>  	echo $MKFS_OPTIONS |egrep -q "b?size="
+>  	if [ $? -eq 0 ]; then
+> -		_scratch_mkfs_xfs -d size=$fssize
+> +		_scratch_mkfs_xfs -d size=$fssize $rt_ops
+>  	else
+> -		_scratch_mkfs_xfs -d size=$fssize -b size=$blocksize
+> +		_scratch_mkfs_xfs -d size=$fssize $rt_ops -b size=$blocksize
+>  	fi
+>  	;;
+>      ext2|ext3|ext4|ext4dev)
 > 
 
