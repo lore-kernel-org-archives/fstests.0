@@ -7,68 +7,70 @@ X-Spam-Status: No, score=-14.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 16895C433E2
-	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 20:34:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F26D9C43461
+	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 20:40:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A463E21D1B
-	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 20:34:13 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9B9CE221E5
+	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 20:40:28 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="dfmyZn6h"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="EPPtWrG6"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726900AbgIPUeH (ORCPT
+        id S1726678AbgIPUkF (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 16 Sep 2020 16:34:07 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:23906 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726898AbgIPRMy (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 16 Sep 2020 13:12:54 -0400
+        Wed, 16 Sep 2020 16:40:05 -0400
+Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:30971 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726802AbgIPRGN (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 16 Sep 2020 13:06:13 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1600276331;
+        s=mimecast20190719; t=1600275962;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:mime-version:mime-version:content-type:content-type:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=zCnyhxSmKF8P6lnAJEr7cg9JvXN2aPIvaTDGaBOlIo4=;
-        b=dfmyZn6hdjQjTGF7PC4gnHAPYPeL0J77XpX6VM7RoNdmrJr56YlXS7b9x8hbrBwxMNcHza
-        yGL/lEHoR7a5qI/mZs8px7SeKVJBNhsc7Y7sV6uEoazzFcqVqgDsq9FLMCQgqtTVekHMUD
-        oAXMD5uYhSx+DnbrYaknjMRtJdyMRXU=
+        bh=sxawlgz87adndHvu34+9iWnaxmw0uAi2OWjOyCN0ATg=;
+        b=EPPtWrG63SHMLi76DlelLOtz7NluBM0mwOPXQzyhV9w+siV18Eyui2LcTT2Mkd/+PMWE1s
+        EPV7qGWDtsD9R0Ul9z7aU2RXX30Ccnq/39vdKkSKSyEctm7pXziJVT6+F5X9xc0ry3Z15q
+        mDdFH5oRzmyYp/gedzL7ngaOqBNEtnk=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-332-gpW7HsCVPHGpqUgTSRSVtw-1; Wed, 16 Sep 2020 07:34:31 -0400
-X-MC-Unique: gpW7HsCVPHGpqUgTSRSVtw-1
-Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
+ us-mta-244-swFOcsk0P1KrfmtfgL4amw-1; Wed, 16 Sep 2020 07:27:43 -0400
+X-MC-Unique: swFOcsk0P1KrfmtfgL4amw-1
+Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id C14301017DD1
-        for <fstests@vger.kernel.org>; Wed, 16 Sep 2020 11:34:30 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id BFF158030BD;
+        Wed, 16 Sep 2020 11:27:42 +0000 (UTC)
 Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 3BF4478806
-        for <fstests@vger.kernel.org>; Wed, 16 Sep 2020 11:34:29 +0000 (UTC)
-Date:   Wed, 16 Sep 2020 19:48:29 +0800
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 38C975FC36;
+        Wed, 16 Sep 2020 11:27:41 +0000 (UTC)
+Date:   Wed, 16 Sep 2020 19:41:41 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     fstests@vger.kernel.org
-Subject: Re: [PATCH 19/24] xfs/424: disable external devices
-Message-ID: <20200916114829.GJ2937@dhcp-12-102.nay.redhat.com>
-Mail-Followup-To: fstests@vger.kernel.org
+To:     "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: Re: [PATCH 18/24] xfs/291: fix open-coded repair call to mdrestore'd
+ fs image
+Message-ID: <20200916114141.GI2937@dhcp-12-102.nay.redhat.com>
+Mail-Followup-To: "Darrick J. Wong" <darrick.wong@oracle.com>,
+        guaneryu@gmail.com, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org
 References: <160013417420.2923511.6825722200699287884.stgit@magnolia>
- <160013429643.2923511.17476130717295164051.stgit@magnolia>
+ <160013429012.2923511.7187414322832672163.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <160013429643.2923511.17476130717295164051.stgit@magnolia>
+In-Reply-To: <160013429012.2923511.7187414322832672163.stgit@magnolia>
 User-Agent: Mutt/1.10.1 (2018-07-13)
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.11
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.16
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Sep 14, 2020 at 06:44:56PM -0700, Darrick J. Wong wrote:
+On Mon, Sep 14, 2020 at 06:44:50PM -0700, Darrick J. Wong wrote:
 > From: Darrick J. Wong <darrick.wong@oracle.com>
 > 
-> This test uses an open-coded call to mkfs, so we need to disable the
-> external devices so that _scratch_xfs_db doesn't get confused.  We also
-> disable the post-check fsck because it's run by the parent ./check
-> program, which won't know that we didn't use the external devices.
+> Attach any external log devices to the open-coded repair call.
 > 
 > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 > ---
@@ -76,28 +78,24 @@ On Mon, Sep 14, 2020 at 06:44:56PM -0700, Darrick J. Wong wrote:
 Good to me,
 Reviewed-by: Zorro Lang <zlang@redhat.com>
 
->  tests/xfs/424 |    8 +++++++-
->  1 file changed, 7 insertions(+), 1 deletion(-)
+>  tests/xfs/291 |    4 +++-
+>  1 file changed, 3 insertions(+), 1 deletion(-)
 > 
 > 
-> diff --git a/tests/xfs/424 b/tests/xfs/424
-> index 66d79458..4907cf0f 100755
-> --- a/tests/xfs/424
-> +++ b/tests/xfs/424
-> @@ -47,7 +47,13 @@ rm -f $seqres.full
->  # Modify as appropriate
->  _supported_os Linux
->  _supported_fs xfs
-> -_require_scratch
-> +
-> +# Since we have an open-coded mkfs call, disable the external devices and
-> +# don't let the post-check fsck actually run since it'll trip over us not
-> +# using the external devices.
-> +_require_scratch_nocheck
-> +export SCRATCH_LOGDEV=
-> +export SCRATCH_RTDEV=
+> diff --git a/tests/xfs/291 b/tests/xfs/291
+> index adef2536..5d4f1ac4 100755
+> --- a/tests/xfs/291
+> +++ b/tests/xfs/291
+> @@ -110,7 +110,9 @@ _scratch_metadump $tmp.metadump || _fail "xfs_metadump failed"
+>  xfs_mdrestore $tmp.metadump $tmp.img || _fail "xfs_mdrestore failed"
+>  [ "$USE_EXTERNAL" = yes ] && [ -n "$SCRATCH_RTDEV" ] && \
+>  	rt_repair_opts="-r $SCRATCH_RTDEV"
+> -$XFS_REPAIR_PROG $rt_repair_opts -f $tmp.img >> $seqres.full 2>&1 || \
+> +[ "$USE_EXTERNAL" = yes ] && [ -n "$SCRATCH_LOGDEV" ] && \
+> +	log_repair_opts="-l $SCRATCH_LOGDEV"
+> +$XFS_REPAIR_PROG $rt_repair_opts $log_repair_opts -f $tmp.img >> $seqres.full 2>&1 || \
+>  	_fail "xfs_repair of metadump failed"
 >  
->  echo "Silence is golden."
->  
+>  # Yes it can; success, all done
 > 
 
