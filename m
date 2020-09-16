@@ -2,117 +2,79 @@ Return-Path: <SRS0=FsZq=CZ=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-6.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 92141C433E2
-	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 18:58:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 52C54C43461
+	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 18:59:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 352DD20732
-	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 18:58:53 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 00C8D20732
+	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 18:59:22 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="M4BZhENe"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="O5x6eD0n"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727610AbgIPS6v (ORCPT
+        id S1727653AbgIPS6u (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 16 Sep 2020 14:58:51 -0400
-Received: from us-smtp-1.mimecast.com ([207.211.31.81]:21753 "EHLO
-        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1727338AbgIPRvU (ORCPT
+        Wed, 16 Sep 2020 14:58:50 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:26620 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1727610AbgIPRvU (ORCPT
         <rfc822;fstests@vger.kernel.org>); Wed, 16 Sep 2020 13:51:20 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1600278671;
+        s=mimecast20190719; t=1600278670;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=8ppAddFWBY5GKELxLK2gBWTu6Ghql/eVZT5FuPia91Y=;
-        b=M4BZhENeg19q1jAETNHBrRfPB7reAipgGw1cXS9o+WnsXTDF8duKz67VB8+HCdr/bkIXwH
-        Kp1XsN6N0ow7pKtc9h/Gs72NQiusY+AaLyWDYn649IROBQjzSuifN9cVBA6nOVqmv3hNDU
-        9Rg7O1rpsu3Qs4y+phfEZiqFp/wY4tI=
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=F9u9qYwCYGwnKvUW3Qwuq0EBArWLV1qdPypf2tsQD8g=;
+        b=O5x6eD0nPykKAPBGiMeogfEvlMaIbPpHFF0F8BmGm+I+wmdx5wEfn4nZ6I0X899z2Ogj71
+        jo+Nf6LDk+neN7ETfjiBUBG+08CzQpQSvTJxVaPGUQtz0RbayeOqXW+B3PRNzxqe47JESG
+        gpe2u3jmsCtmuOx6zNEGKMUUJDpHhak=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-326-rK_dmSbDPQmfP_XhM-L4Sw-1; Wed, 16 Sep 2020 07:11:39 -0400
-X-MC-Unique: rK_dmSbDPQmfP_XhM-L4Sw-1
-Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.phx2.redhat.com [10.5.11.23])
+ us-mta-52-2wAkm_qOOlCvPo6x_Jpw7A-1; Wed, 16 Sep 2020 08:23:36 -0400
+X-MC-Unique: 2wAkm_qOOlCvPo6x_Jpw7A-1
+Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id EAD4C8018A7;
-        Wed, 16 Sep 2020 11:11:37 +0000 (UTC)
-Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 649E619D61;
-        Wed, 16 Sep 2020 11:11:37 +0000 (UTC)
-Date:   Wed, 16 Sep 2020 19:25:36 +0800
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 225D580F04E;
+        Wed, 16 Sep 2020 12:23:35 +0000 (UTC)
+Received: from bogon.redhat.com (ovpn-13-242.pek2.redhat.com [10.72.13.242])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id BDBC87EEA7;
+        Wed, 16 Sep 2020 12:23:30 +0000 (UTC)
 From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 09/24] xfs/070: add scratch log device options to direct
- repair invocation
-Message-ID: <20200916112536.GE2937@dhcp-12-102.nay.redhat.com>
-Mail-Followup-To: "Darrick J. Wong" <darrick.wong@oracle.com>,
-        linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-References: <160013417420.2923511.6825722200699287884.stgit@magnolia>
- <160013423329.2923511.3252823001209034556.stgit@magnolia>
- <20200916024247.GA2937@dhcp-12-102.nay.redhat.com>
- <20200916034201.GC7954@magnolia>
+To:     fstests@vger.kernel.org
+Cc:     io-uring@vger.kernel.org
+Subject: [PATCH 0/3] src/feature: add IO_URING feature checking
+Date:   Wed, 16 Sep 2020 20:23:24 +0800
+Message-Id: <20200916122327.398-1-zlang@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200916034201.GC7954@magnolia>
-User-Agent: Mutt/1.10.1 (2018-07-13)
-X-Scanned-By: MIMEDefang 2.84 on 10.5.11.23
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Sep 15, 2020 at 08:42:01PM -0700, Darrick J. Wong wrote:
-> On Wed, Sep 16, 2020 at 10:42:47AM +0800, Zorro Lang wrote:
-> > On Mon, Sep 14, 2020 at 06:43:53PM -0700, Darrick J. Wong wrote:
-> > > From: Darrick J. Wong <darrick.wong@oracle.com>
-> > > 
-> > > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> > > ---
-> > >  tests/xfs/070 |    4 +++-
-> > >  1 file changed, 3 insertions(+), 1 deletion(-)
-> > > 
-> > > 
-> > > diff --git a/tests/xfs/070 b/tests/xfs/070
-> > > index 5d52a830..313864b7 100755
-> > > --- a/tests/xfs/070
-> > > +++ b/tests/xfs/070
-> > > @@ -41,9 +41,11 @@ _cleanup()
-> > >  _xfs_repair_noscan()
-> > >  {
-> > >  	# invoke repair directly so we can kill the process if need be
-> > > +	[ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ] && \
-> > > +		log_repair_opts="-l $SCRATCH_LOGDEV"
-> > >  	[ "$USE_EXTERNAL" = yes ] && [ -n "$SCRATCH_RTDEV" ] && \
-> > >  		rt_repair_opts="-r $SCRATCH_RTDEV"
-> > > -	$XFS_REPAIR_PROG $rt_repair_opts $SCRATCH_DEV 2>&1 |
-> > > +	$XFS_REPAIR_PROG $log_repair_opts $rt_repair_opts $SCRATCH_DEV 2>&1 |
-> > >  		tee -a $seqres.full > $tmp.repair &
-> > 
-> > Why not use _scratch_xfs_repair at here?
-> > 
-> > Thanks,
-> > Zorro
-> > 
-> > >  	repair_pid=$!
-> 
->         ^^^^^^^^^^^^^
+This patchset bases on https://patchwork.kernel.org/cover/11769847/, which
+makes xfstests fsstress and fsx supports IO_URING.
 
-Oh, right! That's good to me now.
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+The io_uring IOs in fsstress will be run automatically when fsstress get
+running. But fsx need a special option '-U' to run IO_URING read/write, so
+add two new cases to xfstests to do fsx buffered and direct IO IO_URING
+test.
 
-> Because this test needs to hang on to the pid of the repair process in
-> order to kill it, which you can't do if do if you use the wrapper.
-> 
-> --D
-> 
-> > >  
-> > > 
-> > 
-> 
+[1/3] new helper to require io_uring feature
+[2/3] fsx buffered IO io_uring test
+[3/3] fsx direct IO io_uring test
+
+And the [2/3] just found an io_uring regression bug (need LVM TEST_DEV):
+https://bugzilla.kernel.org/show_bug.cgi?id=209243
+
+Feel free to tell me, if you have more suggestions to test io_uring on
+filesystem.
+
+Thanks,
+Zorro
 
