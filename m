@@ -7,66 +7,73 @@ X-Spam-Status: No, score=-14.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4EEEFC43461
-	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 03:15:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2707AC433E2
+	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 04:00:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E60A0206B6
-	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 03:15:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BB56321655
+	for <linux-fstests@archiver.kernel.org>; Wed, 16 Sep 2020 04:00:16 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="aO6iP+ot"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="dhdWmGzN"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726093AbgIPDPr (ORCPT
+        id S1726135AbgIPEAQ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 15 Sep 2020 23:15:47 -0400
-Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:34699 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726155AbgIPDPr (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 15 Sep 2020 23:15:47 -0400
+        Wed, 16 Sep 2020 00:00:16 -0400
+Received: from us-smtp-2.mimecast.com ([207.211.31.81]:35282 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1726100AbgIPEAP (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 16 Sep 2020 00:00:15 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1600226145;
+        s=mimecast20190719; t=1600228812;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=V9xHxsQ7raS+5hbRLf2Sc2grxmMqbHTauGlg5nNJSjE=;
-        b=aO6iP+ot2zo49rlUhyliGz+19KzPwvrJ8JkTiTxhogFdhZzGsmk0Z9U2gn5ZzqWY2KqAKJ
-        prpRP1cltNcJYMSOHAdbo3DUOOA/SnemEg0PgHUiV7uEQ/IHobYWj2bNofE58YjdcM2iNO
-        P/MeT4WFep/UDrlagnkgayt+89YWEvk=
+        bh=OSQR3xRsI/8C2lLDGmXm0XpDkJyuE0+yE2taiXGlnIM=;
+        b=dhdWmGzN7V7Gai39mk894K8Q8vadOEjK3ZLoIdl3iMy8cFX/yk8tl1D/iz8FwSrzENdw38
+        MF6yn92gtJfyhmaeCwrfsI/tEcugfKHSbX4DtUDnRnL81uAZCVjLsXojeXKcw1DlqK8uhp
+        KOtlgfXX0bOH5HlA2qZh6yhJGavH6N0=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-276-qfzkVY5UMgCOf99xcmUQ6w-1; Tue, 15 Sep 2020 23:15:43 -0400
-X-MC-Unique: qfzkVY5UMgCOf99xcmUQ6w-1
-Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
+ us-mta-317-QDhbG2vjPW28HxyMSie7Jg-1; Wed, 16 Sep 2020 00:00:09 -0400
+X-MC-Unique: QDhbG2vjPW28HxyMSie7Jg-1
+Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 58BFF1021D21
-        for <fstests@vger.kernel.org>; Wed, 16 Sep 2020 03:15:42 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 6D06C1006704
+        for <fstests@vger.kernel.org>; Wed, 16 Sep 2020 04:00:08 +0000 (UTC)
 Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id C8FFE7EB7C
-        for <fstests@vger.kernel.org>; Wed, 16 Sep 2020 03:15:41 +0000 (UTC)
-Date:   Wed, 16 Sep 2020 11:29:40 +0800
+        by smtp.corp.redhat.com (Postfix) with ESMTP id DA5977514D
+        for <fstests@vger.kernel.org>; Wed, 16 Sep 2020 04:00:07 +0000 (UTC)
+Date:   Wed, 16 Sep 2020 12:14:06 +0800
 From:   Zorro Lang <zlang@redhat.com>
 To:     fstests@vger.kernel.org
-Subject: Re: [PATCH 10/24] xfs: add a _require_xfs_copy helper
-Message-ID: <20200916032940.GB2937@dhcp-12-102.nay.redhat.com>
+Subject: Re: [PATCH 13/24] generic/204: don't flood stdout with ENOSPC
+ messages on an ENOSPC test
+Message-ID: <20200916041406.GC2937@dhcp-12-102.nay.redhat.com>
 Mail-Followup-To: fstests@vger.kernel.org
 References: <160013417420.2923511.6825722200699287884.stgit@magnolia>
- <160013423963.2923511.3348023490177095472.stgit@magnolia>
+ <160013425839.2923511.10488499486430760605.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <160013423963.2923511.3348023490177095472.stgit@magnolia>
+In-Reply-To: <160013425839.2923511.10488499486430760605.stgit@magnolia>
 User-Agent: Mutt/1.10.1 (2018-07-13)
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.15
 Sender: fstests-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Sep 14, 2020 at 06:43:59PM -0700, Darrick J. Wong wrote:
+On Mon, Sep 14, 2020 at 06:44:18PM -0700, Darrick J. Wong wrote:
 > From: Darrick J. Wong <darrick.wong@oracle.com>
 > 
-> Add a _require helper so that tests can ensure that they're running in
-> the correct environment for xfs_copy to work (no external devices).
+> This test has been on and off my bad list for many years due to the fact
+> that it will spew potentially millions of "No space left on device"
+> errors if the file count calculations are wrong.  The calculations
+> should be correct for the XFS data device, but they don't apply to other
+> filesystems.
+> 
+> Therefore, filter out the ENOSPC messages when the files are not going
+> to be created on the xfs data device (e.g. ext4, xfs realtime, etc.)
 > 
 > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 > ---
@@ -74,100 +81,29 @@ On Mon, Sep 14, 2020 at 06:43:59PM -0700, Darrick J. Wong wrote:
 Good to me,
 Reviewed-by: Zorro Lang <zlang@redhat.com>
 
->  common/xfs    |    7 +++++++
->  tests/xfs/032 |    4 +---
->  tests/xfs/073 |    5 +----
->  tests/xfs/077 |    3 +--
->  tests/xfs/284 |    3 +--
->  tests/xfs/503 |    1 +
->  6 files changed, 12 insertions(+), 11 deletions(-)
+>  tests/generic/204 |    8 ++++++--
+>  1 file changed, 6 insertions(+), 2 deletions(-)
 > 
 > 
-> diff --git a/common/xfs b/common/xfs
-> index eab5e292..f4a47dfb 100644
-> --- a/common/xfs
-> +++ b/common/xfs
-> @@ -945,3 +945,10 @@ _try_wipe_scratch_xfs()
->  	fi
->  	rm -f $tmp.mkfs
->  }
-> +
-> +_require_xfs_copy()
-> +{
-> +	[ -n "$XFS_COPY_PROG" ] || _notrun "xfs_copy binary not yet installed"
-> +	[ "$USE_EXTERNAL" = yes ] && \
-> +		_notrun "Cannot xfs_copy with external devices"
+> diff --git a/tests/generic/204 b/tests/generic/204
+> index 349f5eff..7250c00a 100755
+> --- a/tests/generic/204
+> +++ b/tests/generic/204
+> @@ -76,9 +76,13 @@ files=$((space / (direntlen + isize + dbsize)))
+>  echo files $files, resvblks $resv_blks >> $seqres.full
+>  _scratch_resvblks $resv_blks >> $seqres.full 2>&1
+>  
+> +filter() {
+> +	test $FSTYP != xfs && sed -e '/No space left on device/d'
 > +}
-> diff --git a/tests/xfs/032 b/tests/xfs/032
-> index af18f755..8ece957d 100755
-> --- a/tests/xfs/032
-> +++ b/tests/xfs/032
-> @@ -25,9 +25,7 @@ _supported_os Linux
+> +
+>  for i in `seq -w 1 $files`; do
+> -    echo -n > $SCRATCH_MNT/$i
+> -    echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX > $SCRATCH_MNT/$i
+> +	(echo -n > $SCRATCH_MNT/$i;
+> +	 echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX > $SCRATCH_MNT/$i) 2>&1 | filter
+>  done
 >  
->  _require_scratch
->  _require_test_program "feature"
-> -
-> -[ "$USE_EXTERNAL" = yes ] && _notrun "Cannot xfs_copy with external devices"
-> -[ -n "$XFS_COPY_PROG" ] || _notrun "xfs_copy binary not yet installed"
-> +_require_xfs_copy
->  
->  rm -f $seqres.full
->  
-> diff --git a/tests/xfs/073 b/tests/xfs/073
-> index 6939e102..dc0cde4f 100755
-> --- a/tests/xfs/073
-> +++ b/tests/xfs/073
-> @@ -113,10 +113,7 @@ _supported_fs xfs
->  _supported_os Linux
->  _require_test
->  _require_attrs
-> -
-> -[ "$USE_EXTERNAL" = yes ] && _notrun "Cannot xfs_copy with external devices"
-> -[ -n "$XFS_COPY_PROG" ] || _notrun "xfs_copy binary not yet installed"
-> -
-> +_require_xfs_copy
->  _require_scratch
->  _require_loop
->  
-> diff --git a/tests/xfs/077 b/tests/xfs/077
-> index 02bcc9f7..b11b2c07 100755
-> --- a/tests/xfs/077
-> +++ b/tests/xfs/077
-> @@ -35,8 +35,7 @@ _cleanup()
->  
->  _supported_fs xfs
->  _supported_os Linux
-> -# xfs_copy does not support realtime devices
-> -_require_no_realtime
-> +_require_xfs_copy
->  _require_scratch
->  _require_no_large_scratch_dev
->  _require_xfs_crc
-> diff --git a/tests/xfs/284 b/tests/xfs/284
-> index 7af77634..8f997e17 100755
-> --- a/tests/xfs/284
-> +++ b/tests/xfs/284
-> @@ -34,8 +34,7 @@ rm -f $seqres.full
->  # real QA test starts here
->  _supported_fs xfs
->  _supported_os Linux
-> -# xfs_copy does not support realtime devices
-> -_require_no_realtime
-> +_require_xfs_copy
->  _require_test
->  _require_scratch
->  _require_no_large_scratch_dev
-> diff --git a/tests/xfs/503 b/tests/xfs/503
-> index 41754353..756bcda3 100755
-> --- a/tests/xfs/503
-> +++ b/tests/xfs/503
-> @@ -33,6 +33,7 @@ testdir=$TEST_DIR/test-$seq
->  _supported_os Linux
->  _supported_fs xfs
->  
-> +_require_xfs_copy
->  _require_scratch_nocheck
->  _require_populate_commands
->  
+>  # success, all done
 > 
 
