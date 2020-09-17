@@ -2,97 +2,198 @@ Return-Path: <SRS0=PSS3=C2=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham
-	autolearn_force=no version=3.4.0
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	UNPARSEABLE_RELAY autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E2D7DC433E2
-	for <linux-fstests@archiver.kernel.org>; Thu, 17 Sep 2020 03:58:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 40F21C433E2
+	for <linux-fstests@archiver.kernel.org>; Thu, 17 Sep 2020 03:58:33 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9337320770
-	for <linux-fstests@archiver.kernel.org>; Thu, 17 Sep 2020 03:58:11 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D9D0D20770
+	for <linux-fstests@archiver.kernel.org>; Thu, 17 Sep 2020 03:58:32 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="h/ttQ57j"
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="vQTCi/TS"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726109AbgIQD6L (ORCPT
+        id S1725987AbgIQD6c (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 16 Sep 2020 23:58:11 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:45822 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1725886AbgIQD6J (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 16 Sep 2020 23:58:09 -0400
-X-Greylist: delayed 306 seconds by postgrey-1.27 at vger.kernel.org; Wed, 16 Sep 2020 23:58:08 EDT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1600315087;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=zRnjsjM+bZcokNABizcWKx42JBN6OfYS2zb31dj0Zo0=;
-        b=h/ttQ57jvcjTFStCmMe14KnX6j/HQP4Zrav0pP8TP5vfMdUOSQF8LMWQKTJoEj4NO3hITy
-        c1MAW1TG86QRCvafQjyK+3pw7JCddrH/GfLAU4ZkzCIomlu8jGagCCrETNgcmVZXX9+OrN
-        DIhljl+HBXSmdWwuow5t/wY1ZFezqhY=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-240-s_z3h0ZSMiOQtw3PLgPB8A-1; Wed, 16 Sep 2020 23:51:48 -0400
-X-MC-Unique: s_z3h0ZSMiOQtw3PLgPB8A-1
-Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 49B52427F2;
-        Thu, 17 Sep 2020 03:51:47 +0000 (UTC)
-Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id B834E10021AA;
-        Thu, 17 Sep 2020 03:51:46 +0000 (UTC)
-Date:   Thu, 17 Sep 2020 12:05:47 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     fstests@vger.kernel.org
-Cc:     io-uring@vger.kernel.org
-Subject: Re: [PATCH 0/3] src/feature: add IO_URING feature checking
-Message-ID: <20200917040546.GO2937@dhcp-12-102.nay.redhat.com>
-Mail-Followup-To: fstests@vger.kernel.org, io-uring@vger.kernel.org
-References: <20200916122327.398-1-zlang@redhat.com>
+        Wed, 16 Sep 2020 23:58:32 -0400
+Received: from userp2130.oracle.com ([156.151.31.86]:41578 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725886AbgIQD6a (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 16 Sep 2020 23:58:30 -0400
+X-Greylist: delayed 1848 seconds by postgrey-1.27 at vger.kernel.org; Wed, 16 Sep 2020 23:58:29 EDT
+Received: from pps.filterd (userp2130.oracle.com [127.0.0.1])
+        by userp2130.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 08H3rdbd018557;
+        Thu, 17 Sep 2020 03:58:22 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
+ : subject : message-id : references : mime-version : content-type :
+ content-transfer-encoding : in-reply-to; s=corp-2020-01-29;
+ bh=xGJ0Gw9EIIuDd2XwFxfA1gZbfQntM6aWY+QCKO/mcR0=;
+ b=vQTCi/TSvlS84PVrJOG6TeF74B71bvR6bgLJ8V5BKkngY0j5EDQJCHEfFJwIcqiLz51P
+ Z9m4yNmVqow8MZ2YXg64YKKowkuYYRhh0uRUi6yVV3RSFbc4Zx6oCMCyupiIIKZ5b8qN
+ 1LL0nIiSYbdvt77MSDJo7fEeiHpbar3QPRXXrfaKZpyO6/oFH9CPo6Iv6CgSuiZL84j6
+ ezK766132C+1D37yg2jnPV260eEK7GhkuOaCAMmlJfAsgf9CZogrDCEzgApalkoyP1yK
+ ceif8CvjT33BBGOSjKDux6HpJErW0+3IFEY2fpSwQzWER4I/Qbv8oY79qaCuTlM8y0Fi NA== 
+Received: from userp3020.oracle.com (userp3020.oracle.com [156.151.31.79])
+        by userp2130.oracle.com with ESMTP id 33gnrr6mbw-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Thu, 17 Sep 2020 03:58:22 +0000
+Received: from pps.filterd (userp3020.oracle.com [127.0.0.1])
+        by userp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 08H3ttYL062330;
+        Thu, 17 Sep 2020 03:56:22 GMT
+Received: from userv0121.oracle.com (userv0121.oracle.com [156.151.31.72])
+        by userp3020.oracle.com with ESMTP id 33hm341twn-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Thu, 17 Sep 2020 03:56:22 +0000
+Received: from abhmp0004.oracle.com (abhmp0004.oracle.com [141.146.116.10])
+        by userv0121.oracle.com (8.14.4/8.13.8) with ESMTP id 08H3uLJk025601;
+        Thu, 17 Sep 2020 03:56:21 GMT
+Received: from localhost (/67.169.218.210)
+        by default (Oracle Beehive Gateway v4.0)
+        with ESMTP ; Thu, 17 Sep 2020 03:56:21 +0000
+Date:   Wed, 16 Sep 2020 20:56:20 -0700
+From:   "Darrick J. Wong" <darrick.wong@oracle.com>
+To:     Xiao Yang <yangx.jy@cn.fujitsu.com>
+Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: Re: [PATCH 03/24] generic/607: don't break on filesystems that don't
+ support FSGETXATTR on dirs
+Message-ID: <20200917035620.GR7955@magnolia>
+References: <160013417420.2923511.6825722200699287884.stgit@magnolia>
+ <160013419510.2923511.4577521065964693699.stgit@magnolia>
+ <5F62BEAD.3090602@cn.fujitsu.com>
+ <20200917032730.GQ7955@magnolia>
+ <5F62DB4E.9040506@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20200916122327.398-1-zlang@redhat.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
-X-Scanned-By: MIMEDefang 2.84 on 10.5.11.22
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <5F62DB4E.9040506@cn.fujitsu.com>
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9746 signatures=668679
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 spamscore=0 bulkscore=0 mlxlogscore=999
+ malwarescore=0 mlxscore=0 phishscore=0 adultscore=0 suspectscore=1
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
+ definitions=main-2009170026
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9746 signatures=668679
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 phishscore=0 spamscore=0
+ lowpriorityscore=0 malwarescore=0 mlxscore=0 bulkscore=0 suspectscore=1
+ clxscore=1015 mlxlogscore=999 adultscore=0 priorityscore=1501
+ impostorscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2006250000 definitions=main-2009170026
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Sep 16, 2020 at 08:23:24PM +0800, Zorro Lang wrote:
-> This patchset bases on https://patchwork.kernel.org/cover/11769847/, which
-> makes xfstests fsstress and fsx supports IO_URING.
+On Thu, Sep 17, 2020 at 11:43:10AM +0800, Xiao Yang wrote:
+> 于 2020/9/17 11:27, Darrick J. Wong 写道:
+> > On Thu, Sep 17, 2020 at 09:41:01AM +0800, Xiao Yang wrote:
+> > > On 2020/9/15 9:43, Darrick J. Wong wrote:
+> > > > From: Darrick J. Wong<darrick.wong@oracle.com>
+> > > > 
+> > > > This test requires that the filesystem support calling FSGETXATTR on
+> > > > regular files and directories to make sure the FS_XFLAG_DAX flag works.
+> > > > The _require_xfs_io_command tests a regular file but doesn't check
+> > > > directories, so generic/607 should do that itself.  Also fix some typos.
+> > > > 
+> > > > Signed-off-by: Darrick J. Wong<darrick.wong@oracle.com>
+> > > > ---
+> > > >    common/rc         |   10 ++++++++--
+> > > >    tests/generic/607 |    5 +++++
+> > > >    2 files changed, 13 insertions(+), 2 deletions(-)
+> > > > 
+> > > > 
+> > > > diff --git a/common/rc b/common/rc
+> > > > index aa5a7409..f78b1cfc 100644
+> > > > --- a/common/rc
+> > > > +++ b/common/rc
+> > > > @@ -2162,6 +2162,12 @@ _require_xfs_io_command()
+> > > >    	local testfile=$TEST_DIR/$$.xfs_io
+> > > >    	local testio
+> > > >    	case $command in
+> > > > +	"lsattr")
+> > > > +		# Test xfs_io lsattr support and filesystem FS_IOC_FSSETXATTR
+> > > > +		# support.
+> > > > +		testio=`$XFS_IO_PROG -F -f -c "lsattr $param" $testfile 2>&1`
+> > > > +		param_checked="$param"
+> > > > +		;;
+> > > >    	"chattr")
+> > > >    		if [ -z "$param" ]; then
+> > > >    			param=s
+> > > > @@ -3205,7 +3211,7 @@ _check_s_dax()
+> > > >    	if [ $exp_s_dax -eq 0 ]; then
+> > > >    		(( attributes&   0x2000 ))&&   echo "$target has unexpected S_DAX flag"
+> > > >    	else
+> > > > -		(( attributes&   0x2000 )) || echo "$target doen't have expected S_DAX flag"
+> > > > +		(( attributes&   0x2000 )) || echo "$target doesn't have expected S_DAX flag"
+> > > >    	fi
+> > > >    }
+> > > > 
+> > > > @@ -3217,7 +3223,7 @@ _check_xflag()
+> > > >    	if [ $exp_xflag -eq 0 ]; then
+> > > >    		_test_inode_flag dax $target&&   echo "$target has unexpected FS_XFLAG_DAX flag"
+> > > >    	else
+> > > > -		_test_inode_flag dax $target || echo "$target doen't have expected FS_XFLAG_DAX flag"
+> > > > +		_test_inode_flag dax $target || echo "$target doesn't have expected FS_XFLAG_DAX flag"
+> > > >    	fi
+> > > >    }
+> > > > 
+> > > > diff --git a/tests/generic/607 b/tests/generic/607
+> > > > index b15085ea..14d2c05f 100755
+> > > > --- a/tests/generic/607
+> > > > +++ b/tests/generic/607
+> > > > @@ -38,6 +38,11 @@ _require_scratch
+> > > >    _require_dax_iflag
+> > > >    _require_xfs_io_command "lsattr" "-v"
+> > > > 
+> > > > +# Make sure we can call FSGETXATTR on a directory...
+> > > > +output="$($XFS_IO_PROG -c "lsattr -v" $TEST_DIR 2>&1)"
+> > > > +echo "$output" | grep -q "Inappropriate ioctl for device"&&   \
+> > > > +	_notrun "$FSTYP: FSGETXATTR not supported on directories."
+> > > Hi Darrick,
+> > > 
+> > > Could you tell me which kernel version gets the issue? :-)
+> > ext4.
+> Hi Darrick,
 > 
-> The io_uring IOs in fsstress will be run automatically when fsstress get
-> running. But fsx need a special option '-U' to run IO_URING read/write, so
-> add two new cases to xfstests to do fsx buffered and direct IO IO_URING
-> test.
-> 
-> [1/3] new helper to require io_uring feature
-> [2/3] fsx buffered IO io_uring test
-> [3/3] fsx direct IO io_uring test
-> 
-> And the [2/3] just found an io_uring regression bug (need LVM TEST_DEV):
-> https://bugzilla.kernel.org/show_bug.cgi?id=209243
-> 
-> Feel free to tell me, if you have more suggestions to test io_uring on
-> filesystem.
-> 
+> I didn't get the issue by v5.7.0 xfs_io on v5.8.0 kernel:
+> ----------------------------------------------------------------------------------
+> # blkid /dev/pmem0
+> /dev/pmem0: UUID="181f4d76-bc21-45b7-a6d2-e486f6cc479b" TYPE="ext4"
+> # df -h | grep pmem0
+> /dev/pmem0 2.0G 28K 1.8G 1% /mnt/xfstests/test
+> # strace -e ioctl xfs_io -c "lsattr -v" /mnt/xfstests/test
+> ioctl(3, FS_IOC_FSGETXATTR, 0x7ffdc7061d10) = 0
+> [] /mnt/xfstests/test
+> ----------------------------------------------------------------------------------
+> Do I miss something?
+
+Oops, sorry, I was reading the wrong VM report.  It's overlayfs (atop
+xfs though I don't think that matters) that doesn't support FSGETXATTR
+on directories.
+
+--D
+
 > Thanks,
-> Zorro
-
-Err... Sorry about 3 duplicate patchset. I tried to sent this patchset 3 times
-yesterday, but all failed, and I got feedback from server:
-  "The message you sent to fstests@vger.kernel.org hasn't been delivered yet due to: Communications error."
-
-I thought these emails have been abandoned, never know they're delayed. Please
-only review the last patchset of these duplicate things.
-
-Thanks,
-Zorro
-
+> Xiao Yang
+> > --D
+> > 
+> > > Best Regards,
+> > > Xiao Yang
+> > > > +
+> > > >    # If a/ is +x, check that a's new children
+> > > >    # inherit +x from a/.
+> > > >    test_xflag_inheritance1()
+> > > > 
+> > > > 
+> > > > 
+> > > > .
+> > > > 
+> > > 
+> > > 
+> > 
+> > .
+> > 
 > 
-
+> 
+> 
