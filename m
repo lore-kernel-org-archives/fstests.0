@@ -2,180 +2,104 @@ Return-Path: <SRS0=PSS3=C2=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7A191C2BBD1
-	for <linux-fstests@archiver.kernel.org>; Thu, 17 Sep 2020 14:28:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C24F3C433E2
+	for <linux-fstests@archiver.kernel.org>; Thu, 17 Sep 2020 15:59:46 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 356EE21734
-	for <linux-fstests@archiver.kernel.org>; Thu, 17 Sep 2020 14:28:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7D5A122224
+	for <linux-fstests@archiver.kernel.org>; Thu, 17 Sep 2020 15:59:46 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="GxieKqna"
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="K0n/UwNZ"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727416AbgIQO1g (ORCPT
+        id S1728209AbgIQP7T (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 17 Sep 2020 10:27:36 -0400
-Received: from esa5.hgst.iphmx.com ([216.71.153.144]:14453 "EHLO
-        esa5.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727308AbgIQOZe (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 17 Sep 2020 10:25:34 -0400
-X-Greylist: delayed 395 seconds by postgrey-1.27 at vger.kernel.org; Thu, 17 Sep 2020 10:25:34 EDT
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1600352735; x=1631888735;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=2MhW77oV8btirfWfFIKBYhQGaaBDhy1fd69LnN2i+xA=;
-  b=GxieKqnatBxTvUhY4zwgyTja1oiUeRrrEGwhWJTW3gRW42Exgv2c+8pD
-   a4kz7ZjEPyt2+LhM4FXZ6+aDmx92qhRgrTYThgloTGi2l55RjuVHyj8Kh
-   UCuC6ghFhd1NzCul9iPSGCYcCLT9V9xyyzM9+S4SdwtXF2SoHwJEd6hD1
-   Pr484ShcMfn6KzMoD4skKcRpymtzYOck6qinTeGm1znDYGLnVNyDA1o5f
-   p7JGguGnOCFBhVFYIkUs9f6yoVfKIpRj9tmhpIXXe8ZEmb5/JjAOEP3Uz
-   PTiBpZcq2Dzvi5HaEKTW1QAE8b5Pq7mGMhMJg9xlNoI5EhECb/cw6seA/
-   Q==;
-IronPort-SDR: FbR+bcugjQYrEROFYG3fPglSnU9Rada7yMSIoZ2KYCtMwQNJZsV/Wozd8HOxBJSHE85myKBy/6
- btLnZpcxIYM/3zVpnebkiigEV6y78wJEhHTgukCq4wjx0OwbgKs9G7yjImBPDKdpS4YNob+ki1
- 5xrNR9dfxvy8W/FRtxglDAsZXfbFBBiItrPPkKTuwC9eBlVK4BOVpqtpPphQmPU6Riq0IbSYMS
- Gl2Ogh45Wp8cdy2Y4KPbfjWULYkAYFfahOKrwn0Ks2iuQrQs3KVAIXwSWbTVcLI3eU5UkbBWhF
- Qjw=
-X-IronPort-AV: E=Sophos;i="5.76,437,1592841600"; 
-   d="scan'208";a="147638775"
-Received: from uls-op-cesaip02.wdc.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
-  by ob1.hgst.iphmx.com with ESMTP; 17 Sep 2020 22:14:01 +0800
-IronPort-SDR: SvbERTDKonVVshoKMq+/bI753In2W9vxBEBJ1gsvXYfwEjlcRYm2K+l5lrg0W0P4Nzb/2gUr0m
- CNQw3Ac2tF4Q==
-Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
-  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Sep 2020 07:00:14 -0700
-IronPort-SDR: jr3kRM/333wMLiHcd3GluVGxz/zGxef56AhH4KaTET9ME33pmzylY79BpRxeK6LmCzNIb3VoO6
- /5fR+J2V5hZg==
-WDCIronportException: Internal
-Received: from unknown (HELO redsun60.ssa.fujisawa.hgst.com) ([10.149.66.36])
-  by uls-op-cesaip01.wdc.com with ESMTP; 17 Sep 2020 07:14:00 -0700
-From:   Johannes Thumshirn <johannes.thumshirn@wdc.com>
-To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Cc:     Anand Jain <anand.jain@oracle.com>,
-        Johannes Thumshirn <johannes.thumshirn@wdc.com>
-Subject: [PATCH] btrfs: remove stale test for alien devices
-Date:   Thu, 17 Sep 2020 23:13:53 +0900
-Message-Id: <20200917141353.28566-1-johannes.thumshirn@wdc.com>
-X-Mailer: git-send-email 2.26.2
+        Thu, 17 Sep 2020 11:59:19 -0400
+Received: from aserp2120.oracle.com ([141.146.126.78]:37814 "EHLO
+        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727833AbgIQP7M (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 17 Sep 2020 11:59:12 -0400
+Received: from pps.filterd (aserp2120.oracle.com [127.0.0.1])
+        by aserp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 08HFj8oo113659;
+        Thu, 17 Sep 2020 15:57:50 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
+ : subject : message-id : references : mime-version : content-type :
+ in-reply-to; s=corp-2020-01-29;
+ bh=hwUrswj24HzngvcxHTdgEdyfpRjx7dESa+0TQhuf1d8=;
+ b=K0n/UwNZSOkMZWd+XntdKgFSjrwlbJ2w14KSsatsPLzfxW3d+TJPKIKbs72fu02XxN66
+ fOYhpOfdzSjyUYGNHKkNXni4usXoFE2RARMzAuAHAwrFzL9hRc3bst3DbfrToK8Yy47t
+ IQyFUHIdrfYK6yZXbaee1vVgAqwFaYiER8L99H9dA1vMEUYJ8Y4Ii1ZJecGeVv1/qRLa
+ A8xnCENRmuFJTg6r7NwOLiIFgAfxxKdBCR4ZxcBvFPX6Mg5HWskbdLu0ntEQ6lgvywJX
+ HyrerQyq/Ht6lmiBCM68AuokQwSJI7cpQ5+MmRIhmRj5L+nbpLH96Ddvyd00zAek2YkH ZA== 
+Received: from aserp3030.oracle.com (aserp3030.oracle.com [141.146.126.71])
+        by aserp2120.oracle.com with ESMTP id 33gp9mj5xv-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Thu, 17 Sep 2020 15:57:50 +0000
+Received: from pps.filterd (aserp3030.oracle.com [127.0.0.1])
+        by aserp3030.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 08HFkL2I067178;
+        Thu, 17 Sep 2020 15:57:50 GMT
+Received: from userv0121.oracle.com (userv0121.oracle.com [156.151.31.72])
+        by aserp3030.oracle.com with ESMTP id 33khpn99vv-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Thu, 17 Sep 2020 15:57:50 +0000
+Received: from abhmp0015.oracle.com (abhmp0015.oracle.com [141.146.116.21])
+        by userv0121.oracle.com (8.14.4/8.13.8) with ESMTP id 08HFvmFr016280;
+        Thu, 17 Sep 2020 15:57:49 GMT
+Received: from localhost (/67.169.218.210)
+        by default (Oracle Beehive Gateway v4.0)
+        with ESMTP ; Thu, 17 Sep 2020 15:57:48 +0000
+Date:   Thu, 17 Sep 2020 08:57:47 -0700
+From:   "Darrick J. Wong" <darrick.wong@oracle.com>
+To:     Christoph Hellwig <hch@infradead.org>
+Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: Re: [PATCH 05/24] xfs/031: make sure we don't set rtinherit=1 on mkfs
+Message-ID: <20200917155747.GZ7955@magnolia>
+References: <160013417420.2923511.6825722200699287884.stgit@magnolia>
+ <160013420779.2923511.9462939883966946313.stgit@magnolia>
+ <20200917075351.GE26262@infradead.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20200917075351.GE26262@infradead.org>
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9747 signatures=668679
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 malwarescore=0 suspectscore=1
+ mlxlogscore=999 phishscore=0 mlxscore=0 adultscore=0 spamscore=0
+ bulkscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2006250000 definitions=main-2009170120
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9747 signatures=668679
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 bulkscore=0 mlxlogscore=999
+ adultscore=0 malwarescore=0 clxscore=1015 lowpriorityscore=0 phishscore=0
+ spamscore=0 priorityscore=1501 suspectscore=1 impostorscore=0 mlxscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
+ definitions=main-2009170120
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-btrfs/198 is supposed to be a test for the patch
-"btrfs: remove identified alien device in open_fs_devices" but this patch
-was never merged in btrfs.
+On Thu, Sep 17, 2020 at 08:53:51AM +0100, Christoph Hellwig wrote:
+> On Mon, Sep 14, 2020 at 06:43:27PM -0700, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <darrick.wong@oracle.com>
+> > 
+> > mkfs.xfs does not support setting rtinherit on the root directory /and/
+> > pre-populating the filesystem with protofiles, so don't run this test if
+> > rtinherit is in the mkfs options.
+> 
+> That is a bit of a weird limitation.  Any reason we can't fix this in
+> mkfs instead?
 
-Remove the test from fstests as it is constantly failing.
+Userspace doesn't implement the rt allocator at all, and the last few
+times I've tried to do any serious surgery in the protofile code, Dave
+grumbled that we should just kill it off instead.
 
-Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
----
- tests/btrfs/198   | 77 -----------------------------------------------
- tests/btrfs/group |  1 -
- 2 files changed, 78 deletions(-)
- delete mode 100755 tests/btrfs/198
+Do people actually /use/ protofile support?  Do they like it?  Or would
+they rather have an option like mke2fs -D, where you point it at a
+directory and it uses ftw to copy-in all the files in that directory
+tree, attributes and all?
 
-diff --git a/tests/btrfs/198 b/tests/btrfs/198
-deleted file mode 100755
-index 2df075e27134..000000000000
---- a/tests/btrfs/198
-+++ /dev/null
-@@ -1,77 +0,0 @@
--#! /bin/bash
--# SPDX-License-Identifier: GPL-2.0
--# Copyright (c) 2019 Oracle.  All Rights Reserved.
--#
--# FS QA Test 198
--#
--# Test stale and alien non-btrfs device in the fs devices list.
--#  Bug fixed in:
--#    btrfs: remove identified alien device in open_fs_devices
--#
--seq=`basename $0`
--seqres=$RESULT_DIR/$seq
--echo "QA output created by $seq"
--
--here=`pwd`
--tmp=/tmp/$$
--status=1	# failure is the default!
--trap "_cleanup; exit \$status" 0 1 2 3 15
--
--_cleanup()
--{
--	cd /
--	rm -f $tmp.*
--}
--
--# get standard environment, filters and checks
--. ./common/rc
--. ./common/filter
--. ./common/filter.btrfs
--
--# remove previous $seqres.full before test
--rm -f $seqres.full
--
--# real QA test starts here
--_supported_fs btrfs
--_supported_os Linux
--_require_command "$WIPEFS_PROG" wipefs
--_require_scratch
--_require_scratch_dev_pool 4
--
--workout()
--{
--	raid=$1
--	device_nr=$2
--
--	echo $raid
--	_scratch_dev_pool_get $device_nr
--
--	_scratch_pool_mkfs "-d$raid -m$raid" >> $seqres.full 2>&1 || \
--							_fail "mkfs failed"
--
--	# Make device_1 a free btrfs device for the raid created above by
--	# clearing its superblock
--
--	# don't test with the first device as auto fs check (_check_scratch_fs)
--	# picks the first device
--	device_1=$(echo $SCRATCH_DEV_POOL | awk '{print $2}')
--	$WIPEFS_PROG -a $device_1 >> $seqres.full 2>&1
--
--	device_2=$(echo $SCRATCH_DEV_POOL | awk '{print $1}')
--	_mount -o degraded $device_2 $SCRATCH_MNT
--	# Check if missing device is reported as in the 196.out
--	$BTRFS_UTIL_PROG filesystem show -m $SCRATCH_MNT | \
--						_filter_btrfs_filesystem_show
--
--	_scratch_unmount
--	_scratch_dev_pool_put
--}
--
--workout "raid1" "2"
--workout "raid5" "3"
--workout "raid6" "4"
--workout "raid10" "4"
--
--# success, all done
--status=0
--exit
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 1b5fa695a9f7..d5330cd85cd5 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -199,7 +199,6 @@
- 195 auto volume balance
- 196 auto metadata log volume
- 197 auto quick volume
--198 auto quick volume
- 199 auto quick trim
- 200 auto quick send clone
- 201 auto quick punch log
--- 
-2.26.2
+(I guess I could propose deprecating it and see who pops out. :P)
 
+--D
