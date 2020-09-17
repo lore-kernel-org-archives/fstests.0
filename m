@@ -2,98 +2,169 @@ Return-Path: <SRS0=PSS3=C2=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,URIBL_BLOCKED
-	autolearn=no autolearn_force=no version=3.4.0
+	INCLUDES_PATCH,LOTS_OF_MONEY,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 934FDC433E2
-	for <linux-fstests@archiver.kernel.org>; Thu, 17 Sep 2020 18:52:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B45BBC43464
+	for <linux-fstests@archiver.kernel.org>; Thu, 17 Sep 2020 20:37:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 40A2A21973
-	for <linux-fstests@archiver.kernel.org>; Thu, 17 Sep 2020 18:52:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 68B6620838
+	for <linux-fstests@archiver.kernel.org>; Thu, 17 Sep 2020 20:37:07 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="jD4KuLTS"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="bTrZsHd0"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726584AbgIQSwi (ORCPT
+        id S1726338AbgIQUhH (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 17 Sep 2020 14:52:38 -0400
-Received: from userp2130.oracle.com ([156.151.31.86]:42038 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726414AbgIQSwZ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 17 Sep 2020 14:52:25 -0400
-Received: from pps.filterd (userp2130.oracle.com [127.0.0.1])
-        by userp2130.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 08HG3siJ083484;
-        Thu, 17 Sep 2020 16:05:08 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
- : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=corp-2020-01-29;
- bh=5nCHMqCDDuOJbmUFxnoQcyA6VOcDV0ryXaHOMGCU39U=;
- b=jD4KuLTSeziq0wpV+kGocElBigXYurRvBTu3spreIX0WSJm6/OkfbF/7DBA/mNuCfw0G
- qHESz0wSosfO7emU3ofNx2eKphGPqVgJ4u9GYxoX8butDvNzYyaf1rL+kR1wmK0957UU
- FHgqXD1ySj2KTrc5LHq1VB9k1aqP27+/c2AhUg6e1selU5vV/N8jhBf4WrmnFewydDXU
- Kmn2AN1f2mFByfAacG8D5/hdtdD6BurGZ0Kp7rxmLLRPA+DVI6a9XX/Hvm2FO5AhcptJ
- Xjt5JI8T9Zm4FVFRI4S39j+0XhqWznJhqUTBF8tS6i4P9Q9BVRS+b9pNZYezyAEzwpt2 GA== 
-Received: from aserp3020.oracle.com (aserp3020.oracle.com [141.146.126.70])
-        by userp2130.oracle.com with ESMTP id 33gnrra9u0-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Thu, 17 Sep 2020 16:05:08 +0000
-Received: from pps.filterd (aserp3020.oracle.com [127.0.0.1])
-        by aserp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 08HFjoYk048601;
-        Thu, 17 Sep 2020 16:03:07 GMT
-Received: from aserv0122.oracle.com (aserv0122.oracle.com [141.146.126.236])
-        by aserp3020.oracle.com with ESMTP id 33h88brtrr-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Thu, 17 Sep 2020 16:03:07 +0000
-Received: from abhmp0006.oracle.com (abhmp0006.oracle.com [141.146.116.12])
-        by aserv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 08HG37D8029274;
-        Thu, 17 Sep 2020 16:03:07 GMT
-Received: from localhost (/67.169.218.210)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Thu, 17 Sep 2020 16:03:06 +0000
-Date:   Thu, 17 Sep 2020 09:03:04 -0700
-From:   "Darrick J. Wong" <darrick.wong@oracle.com>
-To:     Christoph Hellwig <hch@infradead.org>
-Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org
-Subject: Re: [PATCH 17/24] xfs: refactor _xfs_check calls to the scratch
- device
-Message-ID: <20200917160304.GB7955@magnolia>
-References: <160013417420.2923511.6825722200699287884.stgit@magnolia>
- <160013428386.2923511.798805055641192515.stgit@magnolia>
- <20200917075856.GN26262@infradead.org>
+        Thu, 17 Sep 2020 16:37:07 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:23326 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726244AbgIQUhG (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 17 Sep 2020 16:37:06 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1600375025;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=bBnVH1rWNGRXJxsjn9bSR0679UcJ5h+xV8lSVgzx0TQ=;
+        b=bTrZsHd0Si1FMq00cSXDrL1oL6JA34MvfSIToBuEwO6K/HEsrsEiX4x4VmIu6sUuMnuV1z
+        UlF0iBzxjFo0T3AVRMI32+ghTlzxEIooNrXmlwGiJ+zTgsOWAjfYA3BEUeqB+wLLWf+MVP
+        Fcrg8gT25EuaroNiCBR0UHfQYUBT0Tw=
+Received: from mail-wm1-f69.google.com (mail-wm1-f69.google.com
+ [209.85.128.69]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-56-rXVR3_MYP8OdL0Zho5K2Hw-1; Thu, 17 Sep 2020 16:36:48 -0400
+X-MC-Unique: rXVR3_MYP8OdL0Zho5K2Hw-1
+Received: by mail-wm1-f69.google.com with SMTP id l15so1173000wmh.9
+        for <fstests@vger.kernel.org>; Thu, 17 Sep 2020 13:36:44 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=bBnVH1rWNGRXJxsjn9bSR0679UcJ5h+xV8lSVgzx0TQ=;
+        b=OmpmAPhVVYkv7b52OxhEd4km7lkxvDXZcez/wj+bSigFzgVeDPHl+EX0C4Yy302s8p
+         Rq9GWnsHpFi6KMnegs+byeTmO29RHMmk/LK5cI2q2Y4DO/pTXLnzFWcDCvGoFTiEuszc
+         DFrvkuzP30s4yg1+Rc9PysJgbd98bnv2ACX3krAGvlJ/5e8ymE59zTfFs7efex/eaFlm
+         f9M1z/8hjnw6K7qwKSn/k5OqS3SIHSywfWC4hjq9qO5dHhihqwS1z5ZP+XMbyphn+Mvk
+         XAMs+iKAOdUJLC8BFs3W25BrJ2w5wDg7MMnpxDnc4L1VgkC/LCNUYr57/W8E34APgXRa
+         yJxA==
+X-Gm-Message-State: AOAM532cB86Gs/YMjbSpuCZf/MZGANY2Kqs0D8sJ3cu73Irg/JuMKm07
+        TAOsV5LyPZNYGEfFJcQ0aFpa6VRpLULVVUk6ZUJXvhZx8v5vWu22Q1+gyzXGvdTHzv5ppvjYsiD
+        LdlWF0OXXnJzlq+bmzA==
+X-Received: by 2002:a05:600c:2207:: with SMTP id z7mr12038067wml.42.1600375001200;
+        Thu, 17 Sep 2020 13:36:41 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJzdxwk4OFrcqPi6PH0u7rdHSgSo/2K3uZDFJMP+a59fMihGZD+Xv38v2PNX8J4peZwSFGBIww==
+X-Received: by 2002:a05:600c:2207:: with SMTP id z7mr12038056wml.42.1600375001017;
+        Thu, 17 Sep 2020 13:36:41 -0700 (PDT)
+Received: from localhost.localdomain ([84.19.91.81])
+        by smtp.gmail.com with ESMTPSA id u13sm977171wrm.77.2020.09.17.13.36.40
+        for <fstests@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 17 Sep 2020 13:36:40 -0700 (PDT)
+From:   Pavel Reichl <preichl@redhat.com>
+To:     fstests@vger.kernel.org
+Subject: [PATCH] xfs: Add test for too-small device with stripe geometry
+Date:   Thu, 17 Sep 2020 22:36:39 +0200
+Message-Id: <20200917203639.104000-1-preichl@redhat.com>
+X-Mailer: git-send-email 2.26.2
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200917075856.GN26262@infradead.org>
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9747 signatures=668679
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxscore=0 spamscore=0 adultscore=0
- suspectscore=1 phishscore=0 malwarescore=0 bulkscore=0 mlxlogscore=999
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
- definitions=main-2009170120
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9747 signatures=668679
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 phishscore=0 spamscore=0
- lowpriorityscore=0 malwarescore=0 mlxscore=0 bulkscore=0 suspectscore=1
- clxscore=1015 mlxlogscore=999 adultscore=0 priorityscore=1501
- impostorscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2006250000 definitions=main-2009170121
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Sep 17, 2020 at 08:58:56AM +0100, Christoph Hellwig wrote:
-> On Mon, Sep 14, 2020 at 06:44:43PM -0700, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <darrick.wong@oracle.com>
-> > 
-> > Use _scratch_xfs_check, not _xfs_check $SCRATCH_DEV.
-> 
-> This looks ok:
-> 
-> Reviewed-by: Christoph Hellwig <hch@lst.de>
-> 
-> But shouldn't we finally kill off all xfs_check alls instead? :)
+Verify hat an attempt to create a too-small device with stripe geometry,
+is handled gracefully instead of hitting an assert in align_ag_geometry()
 
-I will some day, but I keep finding more bugs and missed stuff in
-xfs_repair. :(
+Signed-off-by: Pavel Reichl <preichl@redhat.com>
+---
+ tests/xfs/260     | 54 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/260.out |  2 ++
+ tests/xfs/group   |  1 +
+ 3 files changed, 57 insertions(+)
+ create mode 100755 tests/xfs/260
+ create mode 100644 tests/xfs/260.out
 
---D
+diff --git a/tests/xfs/260 b/tests/xfs/260
+new file mode 100755
+index 00000000..11c9dc1e
+--- /dev/null
++++ b/tests/xfs/260
+@@ -0,0 +1,54 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2020 YOUR NAME HERE.  All Rights Reserved.
++#
++# FS QA Test 260
++#
++# Verify that an attempt to create a too-small device with stripe geometry,
++# is handled gracefully instead of hitting an assert in align_ag_geometry()
++#
++# This test verifies the problem fixed in kernel with commit
++# (mkfs.xfs: fix ASSERT on too-small device with stripe geometry)
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++#. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++echo 'Silence is golden'
++
++_supported_fs xfs
++_supported_os Linux
++_require_scratch
++
++_scratch_mkfs > $seqres.full 2>&1
++_scratch_mount
++
++localfile="${SCRATCH_MNT}/testfile"
++truncate --size=10444800 $localfile
++
++$MKFS_XFS_PROG -dsu=65536,sw=1 $localfile >> $seqres.full 2>&1
++
++[ $? -ne 1 ] && echo "${MKFS_XFS_PROG} should fail gracefully"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/260.out b/tests/xfs/260.out
+new file mode 100644
+index 00000000..18ca517c
+--- /dev/null
++++ b/tests/xfs/260.out
+@@ -0,0 +1,2 @@
++QA output created by 260
++Silence is golden
+diff --git a/tests/xfs/group b/tests/xfs/group
+index ed0d389e..7a6dfed7 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -257,6 +257,7 @@
+ 257 auto quick clone
+ 258 auto quick clone
+ 259 auto quick
++260 auto quick mkfs
+ 261 auto quick quota
+ 262 dangerous_fuzzers dangerous_scrub dangerous_online_repair
+ 263 auto quick quota
+-- 
+2.26.2
+
