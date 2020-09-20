@@ -2,146 +2,176 @@ Return-Path: <SRS0=ByK3=C5=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+	SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A09BBC43465
-	for <linux-fstests@archiver.kernel.org>; Sun, 20 Sep 2020 08:58:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BC5B4C43463
+	for <linux-fstests@archiver.kernel.org>; Sun, 20 Sep 2020 15:51:26 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 667C420EDD
-	for <linux-fstests@archiver.kernel.org>; Sun, 20 Sep 2020 08:58:45 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Plgt9bgL"
+	by mail.kernel.org (Postfix) with ESMTP id 82C2920888
+	for <linux-fstests@archiver.kernel.org>; Sun, 20 Sep 2020 15:51:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726250AbgITI6p (ORCPT
+        id S1726333AbgITPv0 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 20 Sep 2020 04:58:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52678 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726201AbgITI6p (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 20 Sep 2020 04:58:45 -0400
-Received: from mail-pl1-x641.google.com (mail-pl1-x641.google.com [IPv6:2607:f8b0:4864:20::641])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DC2DCC061755;
-        Sun, 20 Sep 2020 01:58:44 -0700 (PDT)
-Received: by mail-pl1-x641.google.com with SMTP id q12so5313874plr.12;
-        Sun, 20 Sep 2020 01:58:44 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=kkzfTh7DhmBVBq+EkhqaG5Kztu1aiM+Ht4R++Xy4/Lo=;
-        b=Plgt9bgLdAa144i6kugLh5Dv3Y9bI111u4BMC7luZpMJIZfmigP3g8mfv9PlczYvRj
-         GB5sK2lUMTlmU8tvt0VfVSNjgWBtGQjaFNUevhxAFzDDP+9xOt97L/HqOm0ruJxN/TBZ
-         TJoMGhSN7rldCQ61YBJ9IVoMV6CULaN4QBdGdT9xLm04c8WagG0Z+QzqKJbQbdqb6ZTW
-         WMAyP833EuCC5p/OegHZR16TN6SjOxLFZrNwdzCiwZ3KZkUGEGprkzLKnbldiMSdU+4B
-         zCWmup7SWZ/hrRE20yFbn+OIaxu/uC8KgDijkAxzhtTXPuwjWqcdHSAQIxLUhd6F5lHa
-         9mQg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=kkzfTh7DhmBVBq+EkhqaG5Kztu1aiM+Ht4R++Xy4/Lo=;
-        b=tMMPSW1hOESV5A049n/R5q0mFlmEOEEzSN4efWhVKRKK97ZdaMB1B22S3Sva9c31+T
-         yA24vgPDnJoh8L1h7YzqnvVWtm200QHDdsibnOrjg1lUbmUh8LABNlEI7yv4IwOQmBo+
-         s2JYMvHVSSrS5hCcLpU/PHCkTnkdoXiAia0Ur3QS1M9lXIiSKKKVfQnPR/FzaUk7LAYY
-         uJav5V6U4pZZfBmllW3tQLBL8jppHCu4jlFLIZoe1m8h/QL0cBCy7Gr87BCEirItA9A6
-         6IW+SpFqhCYtsRFnunK6+GWFMuTIphopEKbgdtqqKrL4GH2RXIhlWR8Nm+os2iAg7+u5
-         +Nug==
-X-Gm-Message-State: AOAM530SFWMdHlbKS2XIWodY8gBMalW7jKebfmNUiHbgkextP2NfIch+
-        gBgnVOlKMv5hZC6Yd3r7RFpAj1MsH/U=
-X-Google-Smtp-Source: ABdhPJyULjqwhaTK21TWzzku566YHfYL70kLseQ/7Wzlu6Hx6lucPg0NBjHCr/TtOmZDM9MDSm/kXw==
-X-Received: by 2002:a17:902:522:b029:d1:9bc8:15df with SMTP id 31-20020a1709020522b02900d19bc815dfmr41117711plf.25.1600592324039;
-        Sun, 20 Sep 2020 01:58:44 -0700 (PDT)
-Received: from localhost.localdomain ([112.216.230.34])
-        by smtp.googlemail.com with ESMTPSA id 99sm7433863pjo.40.2020.09.20.01.58.41
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 20 Sep 2020 01:58:43 -0700 (PDT)
-From:   Sidong Yang <realwakka@gmail.com>
-To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Cc:     Sidong Yang <realwakka@gmail.com>, Qu Wenruo <wqu@suse.com>,
-        Josef Bacik <josef@toxicpanda.com>
-Subject: [PATCH] btrfs/022: Add qgroup assign test
-Date:   Sun, 20 Sep 2020 08:57:53 +0000
-Message-Id: <20200920085753.277590-1-realwakka@gmail.com>
-X-Mailer: git-send-email 2.25.1
+        Sun, 20 Sep 2020 11:51:26 -0400
+Received: from out20-49.mail.aliyun.com ([115.124.20.49]:48253 "EHLO
+        out20-49.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726267AbgITPvZ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 20 Sep 2020 11:51:25 -0400
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07454271|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.0507663-0.00145358-0.94778;FP=0|0|0|0|0|-1|-1|-1;HT=e01l07447;MF=guan@eryu.me;NM=1;PH=DS;RN=6;RT=6;SR=0;TI=SMTPD_---.IZmLs-k_1600617078;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.IZmLs-k_1600617078)
+          by smtp.aliyun-inc.com(10.147.41.178);
+          Sun, 20 Sep 2020 23:51:19 +0800
+Date:   Sun, 20 Sep 2020 23:51:18 +0800
+From:   Eryu Guan <guan@eryu.me>
+To:     Chandan Babu R <chandanrlinux@gmail.com>
+Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
+        guaneryu@gmail.com, darrick.wong@oracle.com, zlang@redhat.com
+Subject: Re: [PATCH V2] xfs: Check if rt summary/bitmap buffers are logged
+ with correct xfs_buf type
+Message-ID: <20200920155118.GN3853@desktop>
+References: <20200915054748.1765-1-chandanrlinux@gmail.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20200915054748.1765-1-chandanrlinux@gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-The btrfs/022 test is basic test about qgroup. but it doesn't have
-test with qgroup assign function. This patch adds parent assign
-test. parent assign test make two subvolumes and a qgroup for assign.
-Assign two subvolumes with a qgroup and check that quota of group
-has same value with sum of two subvolumes.
+On Tue, Sep 15, 2020 at 11:17:48AM +0530, Chandan Babu R wrote:
+> This commit adds a test to check if growing a real-time device can end
+> up logging an xfs_buf with the "type" subfield of
+> bip->bli_formats->blf_flags set to XFS_BLFT_UNKNOWN_BUF. When this
+> occurs the following call trace is printed on the console,
+> 
+> XFS: Assertion failed: (bip->bli_flags & XFS_BLI_STALE) || (xfs_blft_from_flags(&bip->__bli_format) > XFS_BLFT_UNKNOWN_BUF && xfs_blft_from_flags(&bip->__bli_format) < XFS_BLFT_MAX_BUF), file: fs/xfs/xfs_buf_item.c, line: 331
+> Call Trace:
+>  xfs_buf_item_format+0x632/0x680
+>  ? kmem_alloc_large+0x29/0x90
+>  ? kmem_alloc+0x70/0x120
+>  ? xfs_log_commit_cil+0x132/0x940
+>  xfs_log_commit_cil+0x26f/0x940
+>  ? xfs_buf_item_init+0x1ad/0x240
+>  ? xfs_growfs_rt_alloc+0x1fc/0x280
+>  __xfs_trans_commit+0xac/0x370
+>  xfs_growfs_rt_alloc+0x1fc/0x280
+>  xfs_growfs_rt+0x1a0/0x5e0
+>  xfs_file_ioctl+0x3fd/0xc70
+>  ? selinux_file_ioctl+0x174/0x220
+>  ksys_ioctl+0x87/0xc0
+>  __x64_sys_ioctl+0x16/0x20
+>  do_syscall_64+0x3e/0x70
+>  entry_SYSCALL_64_after_hwframe+0x44/0xa9
+> 
+> The kernel patch "xfs: Set xfs_buf type flag when growing summary/bitmap
+> files" is required to fix this issue.
 
-Signed-off-by: Sidong Yang <realwakka@gmail.com>
----
- tests/btrfs/022 | 40 ++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 40 insertions(+)
+Thanks for the patch! Also thanks to Darrick and Zorro for reviewing!
 
-diff --git a/tests/btrfs/022 b/tests/btrfs/022
-index aaa27aaa..cafaa8b2 100755
---- a/tests/btrfs/022
-+++ b/tests/btrfs/022
-@@ -110,6 +110,40 @@ _limit_test_noexceed()
- 	[ $? -eq 0 ] || _fail "should have been allowed to write"
- }
- 
-+#basic assign testing
-+_parent_assign_test()
-+{
-+	echo "=== parent assign test ===" >> $seqres.full
-+	_run_btrfs_util_prog subvolume create $SCRATCH_MNT/a
-+	_run_btrfs_util_prog quota enable $SCRATCH_MNT
-+	subvolid_a=$(_btrfs_get_subvolid $SCRATCH_MNT a)
-+
-+	_run_btrfs_util_prog subvolume create $SCRATCH_MNT/b
-+	_run_btrfs_util_prog quota enable $SCRATCH_MNT
-+	subvolid_b=$(_btrfs_get_subvolid $SCRATCH_MNT b)
-+
-+	_run_btrfs_util_prog qgroup create 1/100 $SCRATCH_MNT
-+
-+	_run_btrfs_util_prog qgroup assign 0/$subvolid_a 1/100 $SCRATCH_MNT
-+	_run_btrfs_util_prog qgroup assign 0/$subvolid_b 1/100 $SCRATCH_MNT
-+
-+	_ddt of=$SCRATCH_MNT/a/file bs=4M count=1 >> $seqres.full 2>&1
-+	_ddt of=$SCRATCH_MNT/b/file bs=4M count=1 >> $seqres.full 2>&1
-+	sync
-+
-+	a_shared=$($BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | grep "0/$subvolid_a")
-+	a_shared=$(echo $a_shared | awk '{ print $2 }' | tr -dc '0-9')
-+
-+	b_shared=$($BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | grep "0/$subvolid_b")
-+	b_shared=$(echo $b_shared | awk '{ print $2 }' | tr -dc '0-9')
-+	sum=$(expr $b_shared  + $a_shared)
-+
-+	q_shared=$($BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | grep "1/100")
-+	q_shared=$(echo $q_shared | awk '{ print $2 }' | tr -dc '0-9')
-+
-+	[ $sum -eq $q_shared ] || _fail "shared values don't match"
-+}
-+
- units=`_btrfs_qgroup_units`
- 
- _scratch_mkfs > /dev/null 2>&1
-@@ -133,6 +167,12 @@ _check_scratch_fs
- _scratch_mkfs > /dev/null 2>&1
- _scratch_mount
- _limit_test_noexceed
-+_scratch_unmount
-+_check_scratch_fs
-+
-+_scratch_mkfs > /dev/null 2>&1
-+_scratch_mount
-+_parent_assign_test
- 
- # success, all done
- echo "Silence is golden"
--- 
-2.25.1
+The test would crash kernel without above fix, so I'd merge it after the
+fix landing upstream.
 
+Would you please remind me when the fix is merged by replying this
+thread? And perhaps with the correct commit ID updated :)
+
+> 
+> Signed-off-by: Chandan Babu R <chandanrlinux@gmail.com>
+> ---
+>  tests/xfs/260     | 53 +++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/260.out |  2 ++
+>  tests/xfs/group   |  1 +
+>  3 files changed, 56 insertions(+)
+>  create mode 100755 tests/xfs/260
+>  create mode 100644 tests/xfs/260.out
+> 
+> diff --git a/tests/xfs/260 b/tests/xfs/260
+> new file mode 100755
+> index 00000000..078d4a11
+> --- /dev/null
+> +++ b/tests/xfs/260
+> @@ -0,0 +1,53 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2020 Chandan Babu R.  All Rights Reserved.
+> +#
+> +# FS QA Test 260
+> +#
+> +# Test to check if growing a real-time device can end up logging an xfs_buf with
+> +# the "type" subfield of bip->bli_formats->blf_flags set to
+> +# XFS_BLFT_UNKNOWN_BUF.
+> +#
+> +# This is a regression test for the kernel patch "xfs: Set xfs_buf type flag
+> +# when growing summary/bitmap files".
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +_supported_fs xfs
+> +_supported_os Linux
+> +_require_realtime
+> +
+> +_scratch_mkfs -r size=10M  >> $seqres.full
+> +
+> +_scratch_mount >> $seqres.full
+> +
+> +$XFS_GROWFS_PROG $SCRATCH_MNT >> $seqres.full
+> +
+> +_scratch_unmount
+
+Any reason to do umount manually here? The test harness will umount it
+after test anyway.
+
+Thanks,
+Eryu
+
+> +
+> +echo "Silence is golden"
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/260.out b/tests/xfs/260.out
+> new file mode 100644
+> index 00000000..18ca517c
+> --- /dev/null
+> +++ b/tests/xfs/260.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 260
+> +Silence is golden
+> diff --git a/tests/xfs/group b/tests/xfs/group
+> index ed0d389e..68676064 100644
+> --- a/tests/xfs/group
+> +++ b/tests/xfs/group
+> @@ -257,6 +257,7 @@
+>  257 auto quick clone
+>  258 auto quick clone
+>  259 auto quick
+> +260 auto quick growfs realtime
+>  261 auto quick quota
+>  262 dangerous_fuzzers dangerous_scrub dangerous_online_repair
+>  263 auto quick quota
+> -- 
+> 2.28.0
