@@ -4,114 +4,110 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-6.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
 	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DC006C43465
-	for <linux-fstests@archiver.kernel.org>; Mon, 21 Sep 2020 02:40:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4670CC43463
+	for <linux-fstests@archiver.kernel.org>; Mon, 21 Sep 2020 02:47:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 88EFF2078E
-	for <linux-fstests@archiver.kernel.org>; Mon, 21 Sep 2020 02:40:01 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E694F2078E
+	for <linux-fstests@archiver.kernel.org>; Mon, 21 Sep 2020 02:47:58 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="GkRfnGR+"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="akfoHahE"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726186AbgIUCkB (ORCPT
+        id S1726265AbgIUCr6 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 20 Sep 2020 22:40:01 -0400
-Received: from userp2120.oracle.com ([156.151.31.85]:50908 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726104AbgIUCkA (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 20 Sep 2020 22:40:00 -0400
-Received: from pps.filterd (userp2120.oracle.com [127.0.0.1])
-        by userp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 08L2dvU7165586;
-        Mon, 21 Sep 2020 02:39:57 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=subject : to : cc :
- references : from : message-id : date : mime-version : in-reply-to :
- content-type : content-transfer-encoding; s=corp-2020-01-29;
- bh=/Pvc5rDqaLFxES0tjIeKk7xdNZ0zegmmpbZDH3QO+3Q=;
- b=GkRfnGR+gfXERzTwyM7es5PuKKMcUXGsfwaA8/maxAkBJe6SSMYSxWH9LipRktBV51Kf
- 7sFsaBFU9ApxJoXvLi9t2AUJqh6hZDmUh6KnG25mWLLglCeopdhFs3ZdqrJyG89h2Azv
- /8/k3sOoODvcKXRBibJlQKovB37aZskVKg39cCNQNuSPff4QVnac8CGXJ39gpl4ITEIJ
- /57gFHBE7f8R0A1PtkAVxZhS+RcA+5DTrP6HlQvG93olNhkVvKzCYWF2h8l6OcjqKBS+
- KlG70KqY/6l6C8SNWi6+Ar4/LRV63XP2nE1VYbO4UQfFB9/rJJJnnAkjiQIEmOCYID4t kg== 
-Received: from aserp3020.oracle.com (aserp3020.oracle.com [141.146.126.70])
-        by userp2120.oracle.com with ESMTP id 33ndnu2weu-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Mon, 21 Sep 2020 02:39:56 +0000
-Received: from pps.filterd (aserp3020.oracle.com [127.0.0.1])
-        by aserp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 08L2Zk5Z185640;
-        Mon, 21 Sep 2020 02:37:56 GMT
-Received: from userv0122.oracle.com (userv0122.oracle.com [156.151.31.75])
-        by aserp3020.oracle.com with ESMTP id 33nuvyf93y-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Mon, 21 Sep 2020 02:37:56 +0000
-Received: from abhmp0010.oracle.com (abhmp0010.oracle.com [141.146.116.16])
-        by userv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 08L2bsRJ016144;
-        Mon, 21 Sep 2020 02:37:54 GMT
-Received: from [192.168.1.102] (/39.109.231.106)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Sun, 20 Sep 2020 19:37:54 -0700
-Subject: Re: [PATCH] btrfs: remove stale test for alien devices
-To:     Eryu Guan <guan@eryu.me>,
-        Johannes Thumshirn <Johannes.Thumshirn@wdc.com>
-Cc:     "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>,
-        "fstests@vger.kernel.org" <fstests@vger.kernel.org>
-References: <20200917141353.28566-1-johannes.thumshirn@wdc.com>
- <f4606506-78a1-4771-96cd-6bc28e6a7074@oracle.com>
- <SN4PR0401MB35987D9F6868271DAD0A05009B3F0@SN4PR0401MB3598.namprd04.prod.outlook.com>
- <20200920161532.GP3853@desktop>
-From:   Anand Jain <anand.jain@oracle.com>
-Message-ID: <0763fac7-d9a8-e486-ef20-670e139deb14@oracle.com>
-Date:   Mon, 21 Sep 2020 10:37:49 +0800
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.2.2
+        Sun, 20 Sep 2020 22:47:58 -0400
+Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:54996 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726104AbgIUCr6 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 20 Sep 2020 22:47:58 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1600656477;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=pvrO1ekBqVsW+Yzw5ZPy8FmC9GoI9w9kuLOZN8pgLvs=;
+        b=akfoHahEUlldpgxVwZmCPXoNvvvUTsygRQ7xtC6PNlQ0In+2nrJPMiBnpQG4atMD06fSXT
+        F/D93c4m2fFpe31NKi9YrrBJ9LtyfF/rGeRlprDkSHdzlXuctfFMd1sKLtvU/2Jd0ktGfN
+        wL4SS+YD5twpaOCpbATblmpm2Sk5QHM=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-160-eG8RLIM5Pk-4TccYuO7uXA-1; Sun, 20 Sep 2020 22:47:52 -0400
+X-MC-Unique: eG8RLIM5Pk-4TccYuO7uXA-1
+Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 842DD1074647;
+        Mon, 21 Sep 2020 02:47:51 +0000 (UTC)
+Received: from localhost (dhcp-12-102.nay.redhat.com [10.66.12.102])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id F064F60C47;
+        Mon, 21 Sep 2020 02:47:50 +0000 (UTC)
+Date:   Mon, 21 Sep 2020 11:01:59 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     guaneryu@gmail.com
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH v5 0/5] fsstress,fsx: add io_uring test and do some fix
+Message-ID: <20200921030159.GQ2937@dhcp-12-102.nay.redhat.com>
+Mail-Followup-To: guaneryu@gmail.com, fstests@vger.kernel.org
+References: <20200911071555.31506-1-zlang@redhat.com>
 MIME-Version: 1.0
-In-Reply-To: <20200920161532.GP3853@desktop>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9750 signatures=668679
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 spamscore=0 phishscore=0 malwarescore=0
- mlxscore=0 suspectscore=0 adultscore=0 mlxlogscore=999 bulkscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
- definitions=main-2009210017
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9750 signatures=668679
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 priorityscore=1501 malwarescore=0
- lowpriorityscore=0 phishscore=0 adultscore=0 suspectscore=0 bulkscore=0
- clxscore=1011 impostorscore=0 mlxlogscore=999 mlxscore=0 spamscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
- definitions=main-2009210018
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20200911071555.31506-1-zlang@redhat.com>
+User-Agent: Mutt/1.10.1 (2018-07-13)
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.12
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-
-
-On 21/9/20 12:15 am, Eryu Guan wrote:
-> On Fri, Sep 18, 2020 at 07:06:42AM +0000, Johannes Thumshirn wrote:
->> On 18/09/2020 02:15, Anand Jain wrote:
->>> The fix is not too far. It got stuck whether to use EUCLEAN or not.
->>> Its better to fix the fix rather than killing the messenger in this case.
->>
->> OK how about removing the test from the auto group then until the fix is merged?
->> It's a constant failure and hiding real regressions. And having to maintain an
->> expunge list doesn't scale either.
->>
->> Thoughts?
+On Fri, Sep 11, 2020 at 03:15:50PM +0800, Zorro Lang wrote:
+> This patchset tries to add new IO_URING test into fsstress [1/5] and fsx
+> [4/5 and 5/5]. And then do some changes and bug fix by the way [2/5 and 3/5].
 > 
+> fsstress and fsx are important tools in xfstests to do filesystem I/Os test,
+> lots of test cases use it. So add IO_URING operation into fsstress and fsx
+> will help to cover IO_URING test from fs side.
+> 
+> I'm not an IO_URING expert, so cc io-uring@ list, please feel free to
+> tell me if you find something wrong or have any suggestions to improve
+> the test.
 
-The patch is in the ML for review.
+Hi Eryu,
 
-  [PATCH] btrfs: free device without BTRFS_MAGIC
+We're waiting for this patchset get merged. It's been reviewed-by Brian, do you
+still need more ACK?
 
-  https://patchwork.kernel.org/patch/11786607/
+Thanks,
+Zorro
 
-I am OK if you still think it has to be removed from the auto.
-But I don't think it is required now.
-
-
-> Yeah, please remove it from the auto group then.
+> 
+> V2 did below changes:
+> 1) 1/4 change the definition of URING_ENTRIES to 1
+> 2) 2/4 change the difinition of AIO_ENTRIES to 1, undo an unrelated changed line
+> 3) 4/4 turn to use io_uring_prep_readv/io_uring_prep_writev, due to old
+>        liburing(0.2-2) doesn't support io_uring_prep_read/io_uring_prep_write.
+> 
+> V3 changed io_uring_submit(&ring) to io_uring_submit_and_wait(&ring, 1). I'm
+> not sure if this's the real mean of Jens Axboe's review point, please check.
+>   https://marc.info/?l=fstests&m=159811932808057&w=2
+> 
+> V4 did below changes:
+> 1) 1/5 change the "goto" related code of do_uring_rw()
+> 2) 3/5 similar change as above
+> 3) 4/5 new patch, separated from original 4/4 patch
+> 3) 5/5 change #elif to #else
+> 4) 5/5 change __uring_rw to uring_rw.
+> 5) 5/5 change the loop logic in uring_rw().
+> 
+> V5 did below changes:
+> 1) 1/5 turn to use (fd != -1)
+> 2) 3/5 turn to use (fd != -1)
+> 3) 5/5 change res to ret, change res2 to res.
 > 
 > Thanks,
-> Eryu
->>
+> Zorro
+> 
+> 
+> 
+
