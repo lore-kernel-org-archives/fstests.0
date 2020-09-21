@@ -2,250 +2,101 @@ Return-Path: <SRS0=Zf7U=C6=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1C727C43466
-	for <linux-fstests@archiver.kernel.org>; Mon, 21 Sep 2020 13:15:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D6861C43465
+	for <linux-fstests@archiver.kernel.org>; Mon, 21 Sep 2020 14:31:32 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D28C821BE5
-	for <linux-fstests@archiver.kernel.org>; Mon, 21 Sep 2020 13:15:40 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1600694140;
-	bh=qJhpdYjpnba+2A/Z0duqTIyXEWwPxdXaL2zODSwbcjo=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=ikiP56ySGLV1LKiNAZn9H5cuIM1LMgBM5mb4Br43rly0hj3XHcHkiTnNJygp6WS7A
-	 //QC28/km3tbUZw6iz9mAtbHyUG88L5HlqlkCSyoJRDODMLZqpPju8Qh+GJfhwEb6K
-	 sUsWGIE3WQan5xwC0k5cafQGiIV94FCcQIC178IY=
+	by mail.kernel.org (Postfix) with ESMTP id 8E5702220C
+	for <linux-fstests@archiver.kernel.org>; Mon, 21 Sep 2020 14:31:32 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="FmsFIJVi"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727028AbgIUNPk (ORCPT
+        id S1726818AbgIUObb (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 21 Sep 2020 09:15:40 -0400
-Received: from mail.kernel.org ([198.145.29.99]:44354 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726445AbgIUNPk (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 21 Sep 2020 09:15:40 -0400
-Received: from debian8.Home (bl8-197-74.dsl.telepac.pt [85.241.197.74])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 408BE21789;
-        Mon, 21 Sep 2020 13:15:38 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1600694139;
-        bh=qJhpdYjpnba+2A/Z0duqTIyXEWwPxdXaL2zODSwbcjo=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=1+RwN+STFHNZB2tl/zsDY/hie5g0VzrGAGPidZL8NY5ebwFrn5urVbCoE3ARekBs6
-         55wdfo87tj4T5Y31ViWELG/nzXOE4SjAIUXhn9Qsju/1REBihJgxAxoA/VE1ns2bvd
-         hszlwPmg5inhYT4mn0y+fFTwhKj3nbv6RNk50/24=
-From:   fdmanana@kernel.org
-To:     fstests@vger.kernel.org
+        Mon, 21 Sep 2020 10:31:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41710 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726855AbgIUObb (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 21 Sep 2020 10:31:31 -0400
+Received: from mail-qt1-x843.google.com (mail-qt1-x843.google.com [IPv6:2607:f8b0:4864:20::843])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8BDB2C0613CF
+        for <fstests@vger.kernel.org>; Mon, 21 Sep 2020 07:31:31 -0700 (PDT)
+Received: by mail-qt1-x843.google.com with SMTP id v54so12421186qtj.7
+        for <fstests@vger.kernel.org>; Mon, 21 Sep 2020 07:31:31 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=xup/6l0/GUl/Q1GS1OD6QBEEYkQUDiMG4VGCKb3WaZ4=;
+        b=FmsFIJViZvZbOhXuN7WcjJZgLOdjjtAt45r1K8gsDunmRnuL7o5IKpmfNY4rY/d1R6
+         ywSUAYXfeOuVjF/GiZvaDhV6s8003W3ZCjqozUi2KJ7OQCaBMeNf6nWQ8VL0mm2XeZPA
+         HcosbleoTU3fngKiPEoWC2ii/TBePj1+cOF4Tfg8vL2odygAzO0dlX0iD1pJqOWIKJuV
+         H+x5Q8P3cwkF8bGFnDZe7KX6zxA/UiK7qfNFtRyiAnbmu45sYOP4nUQsSMjb3eeZytG7
+         FZCiDyNxevjGY+QVHVUJ0yjqrsd9UX49ikVoaTdQXd9e4FOSgtalklvOIlColvL7yUpn
+         gpzA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=xup/6l0/GUl/Q1GS1OD6QBEEYkQUDiMG4VGCKb3WaZ4=;
+        b=WXs42OTXgXl6LBGmaLhOOtsrd/9Kolg+CwkAkvfmHBhM7FoPF29s79kgr2UmSihU8a
+         c0tArMt08coINz2E4iiO78/mZejgPbOu4g/OCLAw8+WKcCmcViqyqUT76X0Fzt/kCtv2
+         +XYyo/E9JEDW7AmeILyydOJG0DZcxMEKNG8+JH8EPEcVxsTtu/ktPavPb7qYVSPWDJGr
+         5/x4Gjxx3jl+vl82UxtB1a9eBqFfwGRV3eLM7FvzPD1cROH8tsR5+bSkbEr/RCO3mguf
+         n+mQ6YlIAh9OvhjQrCkXZ1Luk++cC2zM1exe11jM6808OdUv5PLYCHowY7ZVIeW56Yac
+         aKPw==
+X-Gm-Message-State: AOAM5323qhTeufXyoP3ptirI0lT7MoLeVpAJvKqx7MzyxU5Gixzn/r4J
+        rLxjmmlH9YGwef6OMoRhzoz83Q==
+X-Google-Smtp-Source: ABdhPJwPrbg4Ym2iu6C3wPjA2uv+X0G28SeKTQvf82EsiBtY3Q30LKsaXtcWF9P06HDkn3mCxI0BZQ==
+X-Received: by 2002:aed:23fc:: with SMTP id k57mr27040226qtc.216.1600698690610;
+        Mon, 21 Sep 2020 07:31:30 -0700 (PDT)
+Received: from [192.168.1.45] (cpe-174-109-172-136.nc.res.rr.com. [174.109.172.136])
+        by smtp.gmail.com with ESMTPSA id n136sm8847639qkn.14.2020.09.21.07.31.29
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 21 Sep 2020 07:31:29 -0700 (PDT)
+Subject: Re: [PATCH 1/2] btrfs: test incremental send after a succession of
+ rename and link operations
+To:     fdmanana@kernel.org, fstests@vger.kernel.org
 Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH 2/2] btrfs: test incremental send after swapping same file with two directories
-Date:   Mon, 21 Sep 2020 14:15:32 +0100
-Message-Id: <86d811965c984a6b16afa12ecb7e6e7512780ba6.1600693732.git.fdmanana@suse.com>
-X-Mailer: git-send-email 2.26.2
-In-Reply-To: <cover.1600693732.git.fdmanana@suse.com>
 References: <cover.1600693732.git.fdmanana@suse.com>
+ <83001e537cdf42258dd4b4e3212546dfd099a337.1600693732.git.fdmanana@suse.com>
+From:   Josef Bacik <josef@toxicpanda.com>
+Message-ID: <f2073f68-2491-54e0-a504-2b18fb00d86d@toxicpanda.com>
+Date:   Mon, 21 Sep 2020 10:31:28 -0400
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0)
+ Gecko/20100101 Thunderbird/78.2.2
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+In-Reply-To: <83001e537cdf42258dd4b4e3212546dfd099a337.1600693732.git.fdmanana@suse.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Filipe Manana <fdmanana@suse.com>
+On 9/21/20 9:15 AM, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
+> 
+> Test that an incremental send operation emits the correct path for link
+> and rename operation after swapping the names and locations of several
+> inodes in a way that creates a nasty dependency of rename and link
+> operations. Notably one file has its name and location swapped with a
+> directory for which it used to have a directory entry in it.
+> 
+> This test currently fails but a kernel patch for it exists and has the
+> following subject:
+> 
+>    "btrfs: send, orphanize first all conflicting inodes when processing references"
+> 
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
 
-Test an incremental send operation after doing a series of changes in a
-tree such that one inode gets two hardlinks with names and locations
-swapped with two other inodes that correspond to different directories,
-and one of these directories is the parent of the other directory.
+Reviewed-by: Josef Bacik <josef@toxicpanda.com>
 
-This currently fails on btrfs, the receive of the incremental send stream
-fails. This is fixed by a patchset for btrfs which has two patches with the
-following subjects:
+Thanks,
 
-  "btrfs: send, orphanize first all conflicting inodes when processing references"
-  "btrfs: send, recompute reference path after orphanization of a directory"
-
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
- tests/btrfs/222     | 142 ++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/222.out |   6 ++
- tests/btrfs/group   |   1 +
- 3 files changed, 149 insertions(+)
- create mode 100755 tests/btrfs/222
- create mode 100644 tests/btrfs/222.out
-
-diff --git a/tests/btrfs/222 b/tests/btrfs/222
-new file mode 100755
-index 00000000..51fd052a
---- /dev/null
-+++ b/tests/btrfs/222
-@@ -0,0 +1,142 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2020 SUSE Linux Products GmbH. All Rights Reserved.
-+#
-+# FS QA Test No. btrfs/222
-+#
-+# Test an incremental send operation after doing a series of changes in a tree
-+# such that one inode gets two hardlinks with names and locations swapped with
-+# two other inodes that correspond to different directories, and one of these
-+# directories is the parent of the other directory.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -fr $send_files_dir
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs btrfs
-+_require_test
-+_require_scratch
-+_require_fssum
-+
-+send_files_dir=$TEST_DIR/btrfs-test-$seq
-+
-+rm -f $seqres.full
-+rm -fr $send_files_dir
-+mkdir $send_files_dir
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+
-+touch $SCRATCH_MNT/f1
-+touch $SCRATCH_MNT/f2
-+mkdir $SCRATCH_MNT/d1
-+mkdir $SCRATCH_MNT/d1/d2
-+
-+# Filesystem looks like:
-+#
-+# .                                     (ino 256)
-+# |----- f1                             (ino 257)
-+# |----- f2                             (ino 258)
-+# |----- d1/                            (ino 259)
-+#        |----- d2/                     (ino 260)
-+#
-+$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
-+	$SCRATCH_MNT/mysnap1 > /dev/null
-+
-+$BTRFS_UTIL_PROG send -f $send_files_dir/1.snap \
-+	$SCRATCH_MNT/mysnap1 2>&1 1>/dev/null | _filter_scratch
-+
-+# Now do a series of changes such that:
-+#
-+# *) inode 258 has one new hardlink and the previous name changed
-+#
-+# *) both names conflict with the old names of two other inodes:
-+#
-+#    1) the new name "d1" conflicts with the old name of inode 259, under
-+#       directory inode 256 (root)
-+#
-+#    2) the new name "d2" conflicts with the old name of inode 260 under
-+#       directory inode 259
-+#
-+# *) inodes 259 and 260 now have the old names of inode 258
-+#
-+# *) inode 257 is now located under inode 260 - an inode with a number
-+#    smaller than the inode (258) for which we created a second hard link
-+#    and swapped its names with inodes 259 and 260
-+#
-+ln $SCRATCH_MNT/f2 $SCRATCH_MNT/d1/f2_link
-+mv $SCRATCH_MNT/f1 $SCRATCH_MNT/d1/d2/f1
-+
-+# Swap d1 and f2.
-+mv $SCRATCH_MNT/d1 $SCRATCH_MNT/tmp
-+mv $SCRATCH_MNT/f2 $SCRATCH_MNT/d1
-+mv $SCRATCH_MNT/tmp $SCRATCH_MNT/f2
-+
-+# Swap d2 and f2_link
-+mv $SCRATCH_MNT/f2/d2 $SCRATCH_MNT/tmp
-+mv $SCRATCH_MNT/f2/f2_link $SCRATCH_MNT/f2/d2
-+mv $SCRATCH_MNT/tmp $SCRATCH_MNT/f2/f2_link
-+
-+# Filesystem now looks like:
-+#
-+# .                                     (ino 256)
-+# |----- d1                             (ino 258)
-+# |----- f2/                            (ino 259)
-+#        |----- f2_link/                (ino 260)
-+#        |       |----- f1              (ino 257)
-+#        |
-+#        |----- d2                      (ino 258)
-+#
-+
-+$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
-+		 $SCRATCH_MNT/mysnap2 > /dev/null
-+$BTRFS_UTIL_PROG send -p $SCRATCH_MNT/mysnap1 -f $send_files_dir/2.snap \
-+		 $SCRATCH_MNT/mysnap2 2>&1 1>/dev/null | _filter_scratch
-+
-+$FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
-+$FSSUM_PROG -A -f -w $send_files_dir/2.fssum \
-+	-x $SCRATCH_MNT/mysnap2/mysnap1 $SCRATCH_MNT/mysnap2
-+
-+# Now recreate the filesystem by receiving both send streams and verify we get
-+# the same content that the original filesystem had.
-+_scratch_unmount
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+
-+$BTRFS_UTIL_PROG receive -f $send_files_dir/1.snap $SCRATCH_MNT > /dev/null
-+
-+# The receive operation below used to fail with the following error:
-+#
-+#    ERROR: rename d1/d2 -> o260-6-0 failed: No such file or directory
-+#
-+# Because when processing inode 258, the kernel orphanized first inode 259,
-+# renaming it from "d1" to "o259-6-0", since it the new reference named "d1"
-+# for inode 258 conflicts with the old one of inode 259, which was not yet
-+# processed. After that, because the new reference named "d2" for inode 258
-+# conflicts with the old reference of the not yet processed inode 260, it
-+# tried to orphanize inode 260 - however the corresponding rename operation
-+# used a source path of "d1/d2", instead of "o259-6-0/d2".
-+#
-+$BTRFS_UTIL_PROG receive -f $send_files_dir/2.snap $SCRATCH_MNT > /dev/null
-+
-+$FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
-+$FSSUM_PROG -r $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
-+
-+status=0
-+exit
-diff --git a/tests/btrfs/222.out b/tests/btrfs/222.out
-new file mode 100644
-index 00000000..4fea113d
---- /dev/null
-+++ b/tests/btrfs/222.out
-@@ -0,0 +1,6 @@
-+QA output created by 222
-+At subvol SCRATCH_MNT/mysnap1
-+At subvol SCRATCH_MNT/mysnap2
-+At subvol mysnap1
-+OK
-+OK
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 8b285dbb..3b009220 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -223,3 +223,4 @@
- 219 auto quick volume
- 220 auto quick
- 221 auto quick send
-+222 auto quick send
--- 
-2.26.2
-
+Josef
