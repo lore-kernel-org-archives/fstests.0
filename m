@@ -2,97 +2,211 @@ Return-Path: <SRS0=Zf7U=C6=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 91F11C43465
-	for <linux-fstests@archiver.kernel.org>; Mon, 21 Sep 2020 14:37:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4D59FC43466
+	for <linux-fstests@archiver.kernel.org>; Mon, 21 Sep 2020 15:16:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 532E22311D
-	for <linux-fstests@archiver.kernel.org>; Mon, 21 Sep 2020 14:37:58 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 10CFA2076E
+	for <linux-fstests@archiver.kernel.org>; Mon, 21 Sep 2020 15:16:50 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="DES+sJzI"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="TJEgDfp4"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727560AbgIUOhw (ORCPT
+        id S1727171AbgIUPQt (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 21 Sep 2020 10:37:52 -0400
-Received: from esa4.hgst.iphmx.com ([216.71.154.42]:63724 "EHLO
-        esa4.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727360AbgIUOhv (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 21 Sep 2020 10:37:51 -0400
-X-Greylist: delayed 426 seconds by postgrey-1.27 at vger.kernel.org; Mon, 21 Sep 2020 10:37:51 EDT
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1600699071; x=1632235071;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=hIPCgkv88milcjNzRRkd5ayi8pFW3zweK7LgZUTxAMg=;
-  b=DES+sJzItdUXK0m9CgSHaEjiyKl46P/2xOCDrlNdNBuQa0dcvfcj6rrR
-   zBrzfMmDrQBrxW7x36lSDx0Exw9/EhQQROimjMjXUclgv9ErF8P16Q+Ro
-   KjpwIxAOjSSie1na8zYuem2Sg1OiTZez2wx4HxRqiQ+DflSkMp+5wsuFD
-   35Uia65d2YPmU2CLhSAIAOc/buT/iscIEwM3WintavlgoLYYX2hGimmtQ
-   VBGF+qbA7jSuvCCs+5OCYPm9VseAjIq6Fk9hvYOoXH24Za1yvnp7R8jq+
-   ngFZ5ZCU3wJCz+J3BL6Z6j/0mUZlyZiyDX0X7t38KHXABjIhEFm234sna
-   g==;
-IronPort-SDR: HrdlCHP/a3zB4kUB2yCP9kvQsKhOmP7+rgQOq5YdmGqSCXPv0G653ViIJ6p7vsbFpc5H4ILj0l
- yMOvzbQYgNhOvOjU1jM4uCMTiPchLqEbf8WW1/MaoYp/vOm2PItm/vfjlZz60400SbCvwO+JQw
- q7v6YSSo1wVqvjZVbp8GJMitOlkLMoQG6xW7NuioXHLWvR3eh+ZqF9A2yuMJPVkLM0TSWN6diw
- 4MT01MSaFWRYZm4Co9z6mb2+3lAAXRDcGPCFAVzSNZL9/xcnQUsPEy5D9MfOWhT8zvrH4pV9c5
- cdg=
-X-IronPort-AV: E=Sophos;i="5.77,286,1596470400"; 
-   d="scan'208";a="147817423"
-Received: from h199-255-45-15.hgst.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
-  by ob1.hgst.iphmx.com with ESMTP; 21 Sep 2020 22:30:44 +0800
-IronPort-SDR: YvYMhTQUDQAHbfLCpKFjq4DvgF05FFVN2sxoMeAt7LhiZfM+kOR+aVryur/c+hcvD7+tUxiq0k
- g9RNgp5XSEdQ==
-Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
-  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 21 Sep 2020 07:16:53 -0700
-IronPort-SDR: GY+GIzqLqM90CxrW4fcL5TNTmEV0P2OMP4B+HO30k/odRS8+c9+2h/GDdw2uJVlgioX94Ve7lz
- B36PcZDW8h/Q==
-WDCIronportException: Internal
-Received: from unknown (HELO redsun60.ssa.fujisawa.hgst.com) ([10.149.66.36])
-  by uls-op-cesaip01.wdc.com with ESMTP; 21 Sep 2020 07:30:44 -0700
-From:   Johannes Thumshirn <johannes.thumshirn@wdc.com>
-To:     Eryu Guan <guan@eryu.me>
-Cc:     linux-btrfs@vger.kernel.org, Anand Jain <anand.jain@oracle.com>,
-        fstests@vger.kernel.org,
-        Johannes Thumshirn <johannes.thumshirn@wdc.com>
-Subject: [PATCH v2] btrfs: remove stale test for alien devices from auto group
-Date:   Mon, 21 Sep 2020 23:30:35 +0900
-Message-Id: <20200921143035.26282-1-johannes.thumshirn@wdc.com>
-X-Mailer: git-send-email 2.26.2
+        Mon, 21 Sep 2020 11:16:49 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48804 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726413AbgIUPQt (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 21 Sep 2020 11:16:49 -0400
+Received: from mail-pj1-x1041.google.com (mail-pj1-x1041.google.com [IPv6:2607:f8b0:4864:20::1041])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 63902C061755;
+        Mon, 21 Sep 2020 08:16:49 -0700 (PDT)
+Received: by mail-pj1-x1041.google.com with SMTP id fa1so7659632pjb.0;
+        Mon, 21 Sep 2020 08:16:49 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:content-transfer-encoding:in-reply-to;
+        bh=v0bwgH8M+hJR8c9PL6tRoyaPzlRe3/aI8+ZUjZ7VAfc=;
+        b=TJEgDfp46XQVIWrFlafpGQPqVmgDUTqlSCN+mq/w1eFHE3Kspa9JwMnV7yfNlLaS3p
+         H1DKwdW/bbK3ZTV6c2/T96boHjClMkgaJBd6+k+aiFv0XH2zZgH+z54UC/r1L+/VGqZQ
+         ZqUO4cXbW7HQOw5oQhSphM4ioW74xu3Sj2LMa3ov4z5xgbav32vj8pWpDQvj4GDP42br
+         Qy83SpR5CGhTx+cAYIYqKnOvmV2nN6yxKbYF79XqvYkoZYbBhXNcYyUvfANOGywiSebV
+         YewlY7mkixDNwvy49C2RaMI9TPRLQNcfPqwOKpYF7hNt3y687RZOZDjn4DShgB4Tuv3i
+         EggQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:content-transfer-encoding
+         :in-reply-to;
+        bh=v0bwgH8M+hJR8c9PL6tRoyaPzlRe3/aI8+ZUjZ7VAfc=;
+        b=I+eEkkQyZbW+mtxF/nmV3GPMVqgQP9UjDoPkKhyJBpsaNRPX5oJo39bkLE2IpZpEDZ
+         SLyFgnPchU15g5KJK2j1snWS2REWjdhsR4Lmpm476KGt3NFCwu0fXzKPO09gZ9a2n2tg
+         3BfC7gqvDNsrQ9opWAJJY4eo9PKxMtdEV6BK/ZV1XUUrrZyTdG6OY+vJ6sMfbPgqlaD+
+         TZZALtKh05TXZbvEKGyGnunNFLmHkVFz+MwY+PspDFnuhp8oDeWGnejSYk0IvpBrZKC+
+         tRFR28fK2BFL7tfHtFbUeDDLNRhJrMBwy7sadt+zQUuJgZDWX2dN4yFHMiNrknvWasKN
+         ouyQ==
+X-Gm-Message-State: AOAM5306K0ZYehb9m3Dc3L3ADPaAh0h+0QsVhuxPNCDHMdtMnR7FIY1L
+        l4GQpnqy0I6RWI291SZ6ceY=
+X-Google-Smtp-Source: ABdhPJyuVoDguPTyFLFU8/J1dx9cdfvhCc43xZbf4RuJHvHA5r/Eu5QC9z6YriD58jnxidaS5ETntA==
+X-Received: by 2002:a17:90b:317:: with SMTP id ay23mr253852pjb.68.1600701408462;
+        Mon, 21 Sep 2020 08:16:48 -0700 (PDT)
+Received: from realwakka ([175.195.128.78])
+        by smtp.gmail.com with ESMTPSA id n127sm11883103pfn.155.2020.09.21.08.16.45
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 21 Sep 2020 08:16:47 -0700 (PDT)
+Date:   Mon, 21 Sep 2020 15:16:41 +0000
+From:   Sidong Yang <realwakka@gmail.com>
+To:     Qu Wenruo <wqu@suse.com>
+Cc:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org,
+        Josef Bacik <josef@toxicpanda.com>
+Subject: Re: [PATCH] btrfs/022: Add qgroup assign test
+Message-ID: <20200921151641.GB28122@realwakka>
+References: <20200920085753.277590-1-realwakka@gmail.com>
+ <585901fa-663a-b9e6-3f2f-9d060cd345c7@suse.com>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
+In-Reply-To: <585901fa-663a-b9e6-3f2f-9d060cd345c7@suse.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-btrfs/198 is supposed to be a test for the patch
-"btrfs: remove identified alien device in open_fs_devices" but this patch
-was never merged in btrfs.
+On Mon, Sep 21, 2020 at 09:21:33AM +0800, Qu Wenruo wrote:
+> 
+> 
+> On 2020/9/20 下午4:57, Sidong Yang wrote:
+> > The btrfs/022 test is basic test about qgroup. but it doesn't have
+> > test with qgroup assign function. This patch adds parent assign
+> > test. parent assign test make two subvolumes and a qgroup for assign.
+> > Assign two subvolumes with a qgroup and check that quota of group
+> > has same value with sum of two subvolumes.
 
-Remove the test from fstests' auto group, as it is constantly failing.
+Hi Qu!
+Thanks for review!
 
-Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
----
- tests/btrfs/group | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> A little surprised that I haven't submitted such test case, especially
+> we had a fix in kernel.
+> 
+> cbab8ade585a ("btrfs: qgroup: mark qgroup inconsistent if we're
+> inherting snapshot to a new qgroup")
 
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 1b5fa695a9f7..a1ec54c51631 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -199,7 +199,7 @@
- 195 auto volume balance
- 196 auto metadata log volume
- 197 auto quick volume
--198 auto quick volume
-+198 quick volume
- 199 auto quick trim
- 200 auto quick send clone
- 201 auto quick punch log
--- 
-2.26.2
+Yeah, there was no test code for qgroup.
 
+> 
+> Despite the comment from Eryu, some btrfs specific comment inlined below.
+> 
+> > 
+> > Signed-off-by: Sidong Yang <realwakka@gmail.com>
+> > ---
+> >  tests/btrfs/022 | 40 ++++++++++++++++++++++++++++++++++++++++
+> >  1 file changed, 40 insertions(+)
+> > 
+> > diff --git a/tests/btrfs/022 b/tests/btrfs/022
+> > index aaa27aaa..cafaa8b2 100755
+> > --- a/tests/btrfs/022
+> > +++ b/tests/btrfs/022
+> > @@ -110,6 +110,40 @@ _limit_test_noexceed()
+> >  	[ $? -eq 0 ] || _fail "should have been allowed to write"
+> >  }
+> >  
+> > +#basic assign testing
+> > +_parent_assign_test()
+> > +{
+> > +	echo "=== parent assign test ===" >> $seqres.full
+> > +	_run_btrfs_util_prog subvolume create $SCRATCH_MNT/a
+> > +	_run_btrfs_util_prog quota enable $SCRATCH_MNT
+> > +	subvolid_a=$(_btrfs_get_subvolid $SCRATCH_MNT a)
+> > +
+> > +	_run_btrfs_util_prog subvolume create $SCRATCH_MNT/b
+> > +	_run_btrfs_util_prog quota enable $SCRATCH_MNT
+> > +	subvolid_b=$(_btrfs_get_subvolid $SCRATCH_MNT b)
+> > +
+> > +	_run_btrfs_util_prog qgroup create 1/100 $SCRATCH_MNT
+> > +
+> > +	_run_btrfs_util_prog qgroup assign 0/$subvolid_a 1/100 $SCRATCH_MNT
+> > +	_run_btrfs_util_prog qgroup assign 0/$subvolid_b 1/100 $SCRATCH_MNT
+> 
+> The coverage is not good enough.
+> 
+> Qgroup assign (or inherit) happens not only during "btrfs qgroup assign"
+> but also "btrfs subvolume snapshot -i".
+> 
+> And we also need to consider cases like shared extents between two
+> subvolumes (either caused by snapshot or reflink).
+> 
+> That means we have two factors, assign or snapshot -i, subvolumes with
+> shared extents or not.
+> That means we need at least 3 combinations:
+> 
+> - assign, no shared extents
+> - assign, shared extents
+> - snapshot -i, shared extents
+> 
+> (snapshot -i, no shared extents is invalid, as snapshot will always
+> cause shared extents)
+
+Thanks for good example!
+but there is a question. How can I make shared extents in test code?
+It's okay that write some file and make a snapshot from it?
+
+> 
+> > +
+> > +	_ddt of=$SCRATCH_MNT/a/file bs=4M count=1 >> $seqres.full 2>&1
+> > +	_ddt of=$SCRATCH_MNT/b/file bs=4M count=1 >> $seqres.full 2>&1
+> > +	sync
+> > +
+> > +	a_shared=$($BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | grep "0/$subvolid_a")
+> > +	a_shared=$(echo $a_shared | awk '{ print $2 }' | tr -dc '0-9')
+> > +
+> > +	b_shared=$($BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | grep "0/$subvolid_b")
+> > +	b_shared=$(echo $b_shared | awk '{ print $2 }' | tr -dc '0-9')
+> > +	sum=$(expr $b_shared  + $a_shared)
+> > +
+> > +	q_shared=$($BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | grep "1/100")
+> > +	q_shared=$(echo $q_shared | awk '{ print $2 }' | tr -dc '0-9')
+> > +
+> > +	[ $sum -eq $q_shared ] || _fail "shared values don't match"
+> 
+> Nope, we don't need to do such complex checking all by ourselves.
+> 
+> Just let "btrfs check" to handle it, as it will also check the qgroup
+> numbers.
+
+It's very easy way to check! Thanks.
+
+Taken together, I'll work for new test case that tests qgroup cases.
+
+Sincerely,
+Sidong
+
+> 
+> Thanks,
+> Qu
+> 
+> > +}
+> > +
+> >  units=`_btrfs_qgroup_units`
+> >  
+> >  _scratch_mkfs > /dev/null 2>&1
+> > @@ -133,6 +167,12 @@ _check_scratch_fs
+> >  _scratch_mkfs > /dev/null 2>&1
+> >  _scratch_mount
+> >  _limit_test_noexceed
+> > +_scratch_unmount
+> > +_check_scratch_fs
+> > +
+> > +_scratch_mkfs > /dev/null 2>&1
+> > +_scratch_mount
+> > +_parent_assign_test
+> >  
+> >  # success, all done
+> >  echo "Silence is golden"
+> > 
+> 
