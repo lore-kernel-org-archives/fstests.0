@@ -7,71 +7,71 @@ X-Spam-Status: No, score=-8.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D6861C43465
-	for <linux-fstests@archiver.kernel.org>; Mon, 21 Sep 2020 14:31:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 834B1C43465
+	for <linux-fstests@archiver.kernel.org>; Mon, 21 Sep 2020 14:32:33 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8E5702220C
-	for <linux-fstests@archiver.kernel.org>; Mon, 21 Sep 2020 14:31:32 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 42F0921D95
+	for <linux-fstests@archiver.kernel.org>; Mon, 21 Sep 2020 14:32:33 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="FmsFIJVi"
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="WG7b0iQI"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726818AbgIUObb (ORCPT
+        id S1727131AbgIUOcd (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 21 Sep 2020 10:31:31 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41710 "EHLO
+        Mon, 21 Sep 2020 10:32:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41862 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726855AbgIUObb (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 21 Sep 2020 10:31:31 -0400
-Received: from mail-qt1-x843.google.com (mail-qt1-x843.google.com [IPv6:2607:f8b0:4864:20::843])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8BDB2C0613CF
-        for <fstests@vger.kernel.org>; Mon, 21 Sep 2020 07:31:31 -0700 (PDT)
-Received: by mail-qt1-x843.google.com with SMTP id v54so12421186qtj.7
-        for <fstests@vger.kernel.org>; Mon, 21 Sep 2020 07:31:31 -0700 (PDT)
+        with ESMTP id S1726341AbgIUOcc (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 21 Sep 2020 10:32:32 -0400
+Received: from mail-qk1-x741.google.com (mail-qk1-x741.google.com [IPv6:2607:f8b0:4864:20::741])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A16E0C061755
+        for <fstests@vger.kernel.org>; Mon, 21 Sep 2020 07:32:32 -0700 (PDT)
+Received: by mail-qk1-x741.google.com with SMTP id g72so15181993qke.8
+        for <fstests@vger.kernel.org>; Mon, 21 Sep 2020 07:32:32 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
         h=subject:to:cc:references:from:message-id:date:user-agent
          :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=xup/6l0/GUl/Q1GS1OD6QBEEYkQUDiMG4VGCKb3WaZ4=;
-        b=FmsFIJViZvZbOhXuN7WcjJZgLOdjjtAt45r1K8gsDunmRnuL7o5IKpmfNY4rY/d1R6
-         ywSUAYXfeOuVjF/GiZvaDhV6s8003W3ZCjqozUi2KJ7OQCaBMeNf6nWQ8VL0mm2XeZPA
-         HcosbleoTU3fngKiPEoWC2ii/TBePj1+cOF4Tfg8vL2odygAzO0dlX0iD1pJqOWIKJuV
-         H+x5Q8P3cwkF8bGFnDZe7KX6zxA/UiK7qfNFtRyiAnbmu45sYOP4nUQsSMjb3eeZytG7
-         FZCiDyNxevjGY+QVHVUJ0yjqrsd9UX49ikVoaTdQXd9e4FOSgtalklvOIlColvL7yUpn
-         gpzA==
+        bh=6dZ3EvzRkCcCGT/GK1udb+gln1If7UAoQ4HyiwtMBQA=;
+        b=WG7b0iQIVC1Z7Z1LNc+Y+U7eao3v7UJjvvJZDte6WzSv2RhZ7XhZ5T9Fln+sYAbiA1
+         j34NrogjD9q5sytKAkjKN6LqM+yfVnvbf/blMxagAC678cloRRjH9nvEL/zJq2zq/Vhw
+         RMnUfnNoHG0aBXl3OS0X1tEenNB2Xt+8Iwp5xP4UrVWzXmiGMqTfRNxb64xKSac+fIcs
+         zPjlAyh0SJnTIV0T9cW/xhic1ss6fGzEUA5Rg+WCLrVCoLxbkv5jhSYFMK2iGZS3Wdg6
+         4M1cu6TP+EkA5vVPqo5gZTO+DTopevHFxAQSqskp6hX79t0blCi+BKc3khxdmvxH7qIZ
+         HSwg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:subject:to:cc:references:from:message-id:date
          :user-agent:mime-version:in-reply-to:content-language
          :content-transfer-encoding;
-        bh=xup/6l0/GUl/Q1GS1OD6QBEEYkQUDiMG4VGCKb3WaZ4=;
-        b=WXs42OTXgXl6LBGmaLhOOtsrd/9Kolg+CwkAkvfmHBhM7FoPF29s79kgr2UmSihU8a
-         c0tArMt08coINz2E4iiO78/mZejgPbOu4g/OCLAw8+WKcCmcViqyqUT76X0Fzt/kCtv2
-         +XYyo/E9JEDW7AmeILyydOJG0DZcxMEKNG8+JH8EPEcVxsTtu/ktPavPb7qYVSPWDJGr
-         5/x4Gjxx3jl+vl82UxtB1a9eBqFfwGRV3eLM7FvzPD1cROH8tsR5+bSkbEr/RCO3mguf
-         n+mQ6YlIAh9OvhjQrCkXZ1Luk++cC2zM1exe11jM6808OdUv5PLYCHowY7ZVIeW56Yac
-         aKPw==
-X-Gm-Message-State: AOAM5323qhTeufXyoP3ptirI0lT7MoLeVpAJvKqx7MzyxU5Gixzn/r4J
-        rLxjmmlH9YGwef6OMoRhzoz83Q==
-X-Google-Smtp-Source: ABdhPJwPrbg4Ym2iu6C3wPjA2uv+X0G28SeKTQvf82EsiBtY3Q30LKsaXtcWF9P06HDkn3mCxI0BZQ==
-X-Received: by 2002:aed:23fc:: with SMTP id k57mr27040226qtc.216.1600698690610;
-        Mon, 21 Sep 2020 07:31:30 -0700 (PDT)
+        bh=6dZ3EvzRkCcCGT/GK1udb+gln1If7UAoQ4HyiwtMBQA=;
+        b=DoiT3+SrHfs93lQiO2v5x2qwbsnYorhpaXpApF0rSDWiBJjp1s+EiQBTA6FyfSiz4M
+         nCD6u3VNN8IPsReUKlmsNbY/IXqSVr74NIF3tYn0BHz1lFLpSqdz+ZzsIpehrpFoIuYv
+         Jt/e2hjMb5DuTDA0rNKWVKEQIbq7m86Hkr+n+z4EN+GOofYwKdNzt5SjwZa+LS48VGkK
+         hHLtMIvgNESbq90dwafJtfzjEtpVC6pW6vX3gGmqTpsMX7EH4cmfv0mlxxteLG/6GFYm
+         1z2oa7np4VuWNHtOyOuLA1P/JoWfMSNhgWSLgpjLD9uc21qckLPKlDr9Ch8ZCEg1043j
+         bOKg==
+X-Gm-Message-State: AOAM532MqIhSQy3LISBZ58BxjFuYoB33Ra9YitOpkDvQiPHVhHPN7uut
+        VFQVyb/W+cU+JXhzYJqUw5AWdA==
+X-Google-Smtp-Source: ABdhPJwC25YuXXsNzkaMfQbN9xeukPmKL0pWGXzl5iT1HPQ7U8fLCi1AP0+gdJtBRVhvK5Fhg3MQbw==
+X-Received: by 2002:a05:620a:1274:: with SMTP id b20mr82424qkl.220.1600698751809;
+        Mon, 21 Sep 2020 07:32:31 -0700 (PDT)
 Received: from [192.168.1.45] (cpe-174-109-172-136.nc.res.rr.com. [174.109.172.136])
-        by smtp.gmail.com with ESMTPSA id n136sm8847639qkn.14.2020.09.21.07.31.29
+        by smtp.gmail.com with ESMTPSA id z3sm9130259qkf.92.2020.09.21.07.32.30
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 21 Sep 2020 07:31:29 -0700 (PDT)
-Subject: Re: [PATCH 1/2] btrfs: test incremental send after a succession of
- rename and link operations
+        Mon, 21 Sep 2020 07:32:30 -0700 (PDT)
+Subject: Re: [PATCH 2/2] btrfs: test incremental send after swapping same file
+ with two directories
 To:     fdmanana@kernel.org, fstests@vger.kernel.org
 Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 References: <cover.1600693732.git.fdmanana@suse.com>
- <83001e537cdf42258dd4b4e3212546dfd099a337.1600693732.git.fdmanana@suse.com>
+ <86d811965c984a6b16afa12ecb7e6e7512780ba6.1600693732.git.fdmanana@suse.com>
 From:   Josef Bacik <josef@toxicpanda.com>
-Message-ID: <f2073f68-2491-54e0-a504-2b18fb00d86d@toxicpanda.com>
-Date:   Mon, 21 Sep 2020 10:31:28 -0400
+Message-ID: <a85ca026-17ea-144d-dd8b-169e11081b28@toxicpanda.com>
+Date:   Mon, 21 Sep 2020 10:32:30 -0400
 User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0)
  Gecko/20100101 Thunderbird/78.2.2
 MIME-Version: 1.0
-In-Reply-To: <83001e537cdf42258dd4b4e3212546dfd099a337.1600693732.git.fdmanana@suse.com>
+In-Reply-To: <86d811965c984a6b16afa12ecb7e6e7512780ba6.1600693732.git.fdmanana@suse.com>
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
@@ -82,16 +82,17 @@ X-Mailing-List: fstests@vger.kernel.org
 On 9/21/20 9:15 AM, fdmanana@kernel.org wrote:
 > From: Filipe Manana <fdmanana@suse.com>
 > 
-> Test that an incremental send operation emits the correct path for link
-> and rename operation after swapping the names and locations of several
-> inodes in a way that creates a nasty dependency of rename and link
-> operations. Notably one file has its name and location swapped with a
-> directory for which it used to have a directory entry in it.
+> Test an incremental send operation after doing a series of changes in a
+> tree such that one inode gets two hardlinks with names and locations
+> swapped with two other inodes that correspond to different directories,
+> and one of these directories is the parent of the other directory.
 > 
-> This test currently fails but a kernel patch for it exists and has the
-> following subject:
+> This currently fails on btrfs, the receive of the incremental send stream
+> fails. This is fixed by a patchset for btrfs which has two patches with the
+> following subjects:
 > 
 >    "btrfs: send, orphanize first all conflicting inodes when processing references"
+>    "btrfs: send, recompute reference path after orphanization of a directory"
 > 
 > Signed-off-by: Filipe Manana <fdmanana@suse.com>
 
