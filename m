@@ -2,75 +2,83 @@ Return-Path: <SRS0=Zf7U=C6=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 82835C43464
-	for <linux-fstests@archiver.kernel.org>; Mon, 21 Sep 2020 04:14:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C56F2C43464
+	for <linux-fstests@archiver.kernel.org>; Mon, 21 Sep 2020 04:31:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 222B32086A
-	for <linux-fstests@archiver.kernel.org>; Mon, 21 Sep 2020 04:13:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6285B2085B
+	for <linux-fstests@archiver.kernel.org>; Mon, 21 Sep 2020 04:31:53 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Mivosw4g"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="fKDFwnAl"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726186AbgIUEN7 (ORCPT
+        id S1726186AbgIUEbx (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 21 Sep 2020 00:13:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59152 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726011AbgIUEN7 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 21 Sep 2020 00:13:59 -0400
-Received: from mail-ej1-x629.google.com (mail-ej1-x629.google.com [IPv6:2a00:1450:4864:20::629])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F0668C061755
-        for <fstests@vger.kernel.org>; Sun, 20 Sep 2020 21:13:58 -0700 (PDT)
-Received: by mail-ej1-x629.google.com with SMTP id p9so15742336ejf.6
-        for <fstests@vger.kernel.org>; Sun, 20 Sep 2020 21:13:58 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:from:date:message-id:subject:to;
-        bh=xXw9rsvjUhKaYVTl3fcKgUe1QE2MPWX4MHKe0Nt6K0A=;
-        b=Mivosw4g+s43enU2u7samVyRNH/2TNkwMeelMNXbzxbHZbWdE2Vxn212Fm4HXOL6MD
-         ourKO6AcEnimrsp9SuhxlChlw1imfO+PnxxcmCYnSkiDW8CzTodRJLMyVe7Tir7bYfzA
-         FTZ2WPq0GcAJ5bd8eDVZ0GLKxOi3LKlKPp8ByEi+0sAI1OCgVMOo7tmmuqLkr7YBpMPl
-         G7uSp/fvNukSPvWHmputGNhnt5wIN+cYf4mm/62SINtXEk6Ri92MR0g8zx2Jf35THfzH
-         xyP+Yw+uWgdDlnFu3+cNvzxxNZvHyBpfiMbvs1BvvLXRohNUR6DzdK0FHPAaFLNcMklV
-         7w9Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:from:date:message-id:subject:to;
-        bh=xXw9rsvjUhKaYVTl3fcKgUe1QE2MPWX4MHKe0Nt6K0A=;
-        b=dSVQ3lzf7WsOV56p6FsZiWZemeWXJqJ9JqO3/tqMGm0osgIt5O3DbeJY5ZZ5KjbCZj
-         JZdLbQE/AfpX4UrYLiUA8QH7xUY0Jx5BVk+UozfHMovr/g2LunPnq15VBw/Ld/QBsMPV
-         5C6hnUnlfgcquoF6/ij6XXR65+rHuYrMvmnt5T15yAIWf+19+zQoTJLfbCkCialGYmkP
-         OpCOfopwnW0ER/OP9OvuqPPkgVMI9qFX9V6BHNxiTFDIpKnWCC38XgIOajRECAmDNSi3
-         dFSgfEuwQ/vq4BtyD84q0il5QqtQR9sFMPuf7+icv1xGoq8HgqAe13fzKN4123g4Um6A
-         hajw==
-X-Gm-Message-State: AOAM531KhnH4pSBx6rgVVh/Dqb+pgN6yH5n4kS8BdX0I6AjrdLQa8/Xu
-        qqvJo3LGofNGFFYqXnKmx+MaTlLDlY0dHUgV7RsUpkExruk=
-X-Google-Smtp-Source: ABdhPJx6BYbigrYyKgIyjfHZ/IWNq8ZS2RPMsIQpoCK0ebt9ZXfkKZHinQLJ4AkT0SD6uEtUXWMBWC6Di0Q5Q/lj504=
-X-Received: by 2002:a17:906:770c:: with SMTP id q12mr46725915ejm.518.1600661637323;
- Sun, 20 Sep 2020 21:13:57 -0700 (PDT)
-MIME-Version: 1.0
-From:   Zheng Wu <zhengwu0330@gmail.com>
-Date:   Mon, 21 Sep 2020 12:13:44 +0800
-Message-ID: <CADQqeeTOw9vXQ2dKQS1a9RLRVaD_4N6-d4+bcuSt1-zUTzoMWQ@mail.gmail.com>
-Subject: The feature of Block size > PAGE_SIZE support
+        Mon, 21 Sep 2020 00:31:53 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:52286 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726011AbgIUEbx (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 21 Sep 2020 00:31:53 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1600662712;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=CNX23uHYr3lFnjJMu77aiM1cipkze/wJ+JFtt7pB/Es=;
+        b=fKDFwnAluYvn2ULpwrDXUzLt6nnXACDbP+P2PGpseJbeIXlKpXqFpH/XwfOU+6OFAhWRhQ
+        roTvnH214OJ6zlUntSthbuK2N8yCCiAzkKfC59nT8zik1O/krooKvc1ue7VjCOiVem4Qw/
+        LqdqmeQmfC/IypEE97tDt2QusqDnohk=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-43-fKGNEIfEOUqetg8GvoiAaA-1; Mon, 21 Sep 2020 00:31:49 -0400
+X-MC-Unique: fKGNEIfEOUqetg8GvoiAaA-1
+Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id DA8DA56B36
+        for <fstests@vger.kernel.org>; Mon, 21 Sep 2020 04:31:48 +0000 (UTC)
+Received: from bogon.redhat.com (ovpn-13-221.pek2.redhat.com [10.72.13.221])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id CDF9A5C1DC
+        for <fstests@vger.kernel.org>; Mon, 21 Sep 2020 04:31:47 +0000 (UTC)
+From:   Zorro Lang <zlang@redhat.com>
 To:     fstests@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Subject: [PATCH] generic/611: remove _supported_os line
+Date:   Mon, 21 Sep 2020 12:31:44 +0800
+Message-Id: <20200921043144.8057-1-zlang@redhat.com>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.16
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Hi experts,
+The current xfstests doesn't support _supported_os() function, the
+generic/611 always hit an error:
 
-We know that the feature of Block size > PAGE_SIZE will be supported in XFS.
-Just, I can't test successfully in the last version of Linux.
+  xfstests-dev/tests/generic/611: line 39: _supported_os: command not found
 
-When is this feature of  Block size > PAGE_SIZE available in upstream?
+So remove the "_supported_os Linux" line directly.
 
-Thanks.
+Signed-off-by: Zorro Lang <zlang@redhat.com>
+---
+ tests/generic/611 | 1 -
+ 1 file changed, 1 deletion(-)
 
-Best Regards
-Zheng Wu
+diff --git a/tests/generic/611 b/tests/generic/611
+index 069db6f9..f4158bb3 100755
+--- a/tests/generic/611
++++ b/tests/generic/611
+@@ -36,7 +36,6 @@ rm -f $seqres.full
+ # real QA test starts here
+ 
+ _supported_fs generic
+-_supported_os Linux
+ _require_scratch
+ _require_attrs
+ 
+-- 
+2.20.1
+
