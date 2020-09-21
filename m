@@ -2,179 +2,292 @@ Return-Path: <SRS0=Zf7U=C6=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	UNPARSEABLE_RELAY autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.0 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CF3BBC43466
-	for <linux-fstests@archiver.kernel.org>; Mon, 21 Sep 2020 17:12:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BD0FAC4727C
+	for <linux-fstests@archiver.kernel.org>; Mon, 21 Sep 2020 23:54:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 86F512085B
-	for <linux-fstests@archiver.kernel.org>; Mon, 21 Sep 2020 17:12:07 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6FBDF23A6C
+	for <linux-fstests@archiver.kernel.org>; Mon, 21 Sep 2020 23:54:35 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="sysABkR5"
+	dkim=pass (1024-bit key) header.d=gmx.net header.i=@gmx.net header.b="fglQZGRG"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727269AbgIURMH (ORCPT
+        id S1729019AbgIUXyf (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 21 Sep 2020 13:12:07 -0400
-Received: from aserp2130.oracle.com ([141.146.126.79]:49210 "EHLO
-        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726818AbgIURMH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 21 Sep 2020 13:12:07 -0400
-X-Greylist: delayed 1731 seconds by postgrey-1.27 at vger.kernel.org; Mon, 21 Sep 2020 13:12:06 EDT
-Received: from pps.filterd (aserp2130.oracle.com [127.0.0.1])
-        by aserp2130.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 08LGdV40145874;
-        Mon, 21 Sep 2020 16:43:12 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
- : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=corp-2020-01-29;
- bh=Y2/BWtSbRk7hXsQd75ORBVbrmhAVRNg40nmFv8yzQSw=;
- b=sysABkR5rN7scJ6420g+dAbpt2aY4Q37E6VT7ebngajymG0jeINdV1Jf0dunWVs5zfTW
- /dLAfdcVRaCDE1eID6XsgJLUfKggQwruGbnKHrGrduHAmQ20jRpVq+qW1Drfit4d4xAJ
- RY4ooeVx1ogQYRdlg/DpqBs/EQM/vcI2bNtOiqkkq21WhWEeZmBKC87OvS40HG4F/3cp
- 2EHbygqgcAaAtsuVNLyNC5tkOu3fE/CDpwyf0mhsaHHsG/mY/DBFdwtP+AiL3KZ459po
- 2r05ZbE7rSDx1dFFNxP9Tsgf9d3xwKOHEOqKJZfPa/J73WxwLh3+X17WRlp+NFrKpfkx Pg== 
-Received: from userp3020.oracle.com (userp3020.oracle.com [156.151.31.79])
-        by aserp2130.oracle.com with ESMTP id 33n7ga9hd0-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Mon, 21 Sep 2020 16:43:12 +0000
-Received: from pps.filterd (userp3020.oracle.com [127.0.0.1])
-        by userp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 08LGgKv0033830;
-        Mon, 21 Sep 2020 16:43:12 GMT
-Received: from userv0122.oracle.com (userv0122.oracle.com [156.151.31.75])
-        by userp3020.oracle.com with ESMTP id 33nurr4bhd-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Mon, 21 Sep 2020 16:43:11 +0000
-Received: from abhmp0008.oracle.com (abhmp0008.oracle.com [141.146.116.14])
-        by userv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 08LGhBfZ026828;
-        Mon, 21 Sep 2020 16:43:11 GMT
-Received: from localhost (/67.169.218.210)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Mon, 21 Sep 2020 09:43:10 -0700
-Date:   Mon, 21 Sep 2020 09:43:09 -0700
-From:   "Darrick J. Wong" <darrick.wong@oracle.com>
-To:     Pavel Reichl <preichl@redhat.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH v3] xfs: Add test for too-small device with stripe
- geometry
-Message-ID: <20200921164309.GO7954@magnolia>
-References: <20200921085511.98739-1-preichl@redhat.com>
+        Mon, 21 Sep 2020 19:54:35 -0400
+Received: from mout.gmx.net ([212.227.15.19]:36251 "EHLO mout.gmx.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726913AbgIUXye (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 21 Sep 2020 19:54:34 -0400
+X-Greylist: delayed 306 seconds by postgrey-1.27 at vger.kernel.org; Mon, 21 Sep 2020 19:54:33 EDT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net;
+        s=badeba3b8450; t=1600732472;
+        bh=b5MIxytuutY6FEopVEBlxAjD0Z5KIymJ1J/FJw2bCRo=;
+        h=X-UI-Sender-Class:Subject:To:Cc:References:From:Date:In-Reply-To;
+        b=fglQZGRGK84EWgSQfXeZ8vBYx01poOLmLX6T9lqvhBdJBNP6MZmvUZyQI+odMK5ih
+         hZjtbP7ienOPhieQK5CutNcnRIm4iFU0rDoeClJ7VPUJho/PEO1/l3G6Jqm4V6p/gQ
+         iASW0RK2XNOykrDyYZaSyOEkHx5C+D6TAnP9bW7M=
+X-UI-Sender-Class: 01bb95c1-4bf8-414a-932a-4f6e2808ef9c
+Received: from [0.0.0.0] ([149.28.201.231]) by mail.gmx.com (mrgmx004
+ [212.227.17.184]) with ESMTPSA (Nemesis) id 1MeU0k-1kuwJ43Y4S-00aYgW; Tue, 22
+ Sep 2020 01:49:23 +0200
+Subject: Re: [PATCH] btrfs/022: Add qgroup assign test
+To:     Sidong Yang <realwakka@gmail.com>, Qu Wenruo <wqu@suse.com>
+Cc:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org,
+        Josef Bacik <josef@toxicpanda.com>
+References: <20200920085753.277590-1-realwakka@gmail.com>
+ <585901fa-663a-b9e6-3f2f-9d060cd345c7@suse.com>
+ <20200921151641.GB28122@realwakka>
+From:   Qu Wenruo <quwenruo.btrfs@gmx.com>
+Autocrypt: addr=quwenruo.btrfs@gmx.com; prefer-encrypt=mutual; keydata=
+ mQENBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
+ 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
+ 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
+ 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
+ gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
+ AAG0IlF1IFdlbnJ1byA8cXV3ZW5ydW8uYnRyZnNAZ214LmNvbT6JAU4EEwEIADgCGwMFCwkI
+ BwIGFQgJCgsCBBYCAwECHgECF4AWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCXZw1oQAKCRDC
+ PZHzoSX+qCY6CACd+mWu3okGwRKXju6bou+7VkqCaHTdyXwWFTsr+/0ly5nUdDtT3yEVggPJ
+ 3VP70wjlrxUjNjFb6iIvGYxiPOrop1NGwGYvQktgRhaIhALG6rPoSSAhGNjwGVRw0km0PlIN
+ D29BTj/lYEk+jVM1YL0QLgAE1AI3krihg/lp/fQT53wLhR8YZIF8ETXbClQG1vJ0cllPuEEv
+ efKxRyiTSjB+PsozSvYWhXsPeJ+KKjFen7ebE5reQTPFzSHctCdPnoR/4jSPlnTlnEvLeqcD
+ ZTuKfQe1gWrPeevQzgCtgBF/WjIOeJs41klnYzC3DymuQlmFubss0jShLOW8eSOOWhLRuQEN
+ BFnVga8BCACqU+th4Esy/c8BnvliFAjAfpzhI1wH76FD1MJPmAhA3DnX5JDORcgaCbPEwhLj
+ 1xlwTgpeT+QfDmGJ5B5BlrrQFZVE1fChEjiJvyiSAO4yQPkrPVYTI7Xj34FnscPj/IrRUUka
+ 68MlHxPtFnAHr25VIuOS41lmYKYNwPNLRz9Ik6DmeTG3WJO2BQRNvXA0pXrJH1fNGSsRb+pK
+ EKHKtL1803x71zQxCwLh+zLP1iXHVM5j8gX9zqupigQR/Cel2XPS44zWcDW8r7B0q1eW4Jrv
+ 0x19p4P923voqn+joIAostyNTUjCeSrUdKth9jcdlam9X2DziA/DHDFfS5eq4fEvABEBAAGJ
+ ATwEGAEIACYCGwwWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCXZw1rgUJCWpOfwAKCRDCPZHz
+ oSX+qFcEB/95cs8cM1OQdE/GgOfCGxwgckMeWyzOR7bkAWW0lDVp2hpgJuxBW/gyfmtBnUai
+ fnggx3EE3ev8HTysZU9q0h+TJwwJKGv6sUc8qcTGFDtavnnl+r6xDUY7A6GvXEsSoCEEynby
+ 72byGeSovfq/4AWGNPBG1L61Exl+gbqfvbECP3ziXnob009+z9I4qXodHSYINfAkZkA523JG
+ ap12LndJeLk3gfWNZfXEWyGnuciRGbqESkhIRav8ootsCIops/SqXm0/k+Kcl4gGUO/iD/T5
+ oagaDh0QtOd8RWSMwLxwn8uIhpH84Q4X1LadJ5NCgGa6xPP5qqRuiC+9gZqbq4Nj
+Message-ID: <4538473b-eff3-8e2f-2ac4-b66d90beebb9@gmx.com>
+Date:   Tue, 22 Sep 2020 07:49:19 +0800
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.12.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200921085511.98739-1-preichl@redhat.com>
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9751 signatures=668679
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 adultscore=0 malwarescore=0
- phishscore=0 mlxlogscore=999 bulkscore=0 mlxscore=0 suspectscore=1
- spamscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2006250000 definitions=main-2009210118
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9751 signatures=668679
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 lowpriorityscore=0 bulkscore=0
- mlxscore=0 suspectscore=1 impostorscore=0 malwarescore=0 spamscore=0
- phishscore=0 mlxlogscore=999 clxscore=1015 adultscore=0 priorityscore=1501
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
- definitions=main-2009210118
+In-Reply-To: <20200921151641.GB28122@realwakka>
+Content-Type: multipart/signed; micalg=pgp-sha256;
+ protocol="application/pgp-signature";
+ boundary="9sxVCYXqFExXiGZiYrQcgAZlzltE78ayJ"
+X-Provags-ID: V03:K1:ddrrWZg4UP3p8h8yUDzZrNzLTnMliIOlaVhxkyUXtvkwnJ2r5g4
+ Aa4rpbo+ydJQ1usm2ry2LSXIu6eq7E8RdV8IauMnX4le4Ea5wDGAQJCy5X9tGD61iDnNo2V
+ gxcSNUOr6D/PI55tYsPpy1n7p0mn3z+TqUkoEJ0JanX5p4jcSmIIVjC6vkL21o5NoDK7Sw7
+ /SG8XCUFkYfu7lgHnkXsQ==
+X-UI-Out-Filterresults: notjunk:1;V03:K0:DyTqjWUlIOA=:POfjnbNG+0xJtYukJVEb5g
+ d0705XpsGMoPXA4Wt+ttBm3ncr+BPRzubXHIQWp+ozT0GBo/BGKnktLMAX01PJhbXI0DuZprG
+ t4xxDix8Ba91GrEbqPem7z9GbOv8i72BC44tSQaDlebLl8qVj0v7F2FThywEcUYJnbY5dzTr9
+ XuwKbI6nrMQwq+SZDodqdY0iyt2vDjv3CKDFMZww2UNq0fGwBQOhHjl/gpbPGIzK6hnebVDfO
+ kBvrei2+ZCeTKBiYPiZfiVpNcFvLrZqgoxfkLCzd2SybrYZ1GBDYR6uYu3dX9jfjyVEdeGdmC
+ Gqn/C+EJwDnvD9zzL5WR9v39I7MM6brNr3ZVvkg0guF9R7us1oxacD1xfUjwddp82G1CEU4bb
+ Qv7LevsTt5gueSnlJJPCiBnuRLERX+dUVSs5P61CczsPS+S0IfDsFsXj3QyNy+U+Gxvm/d8tu
+ rsNqGNNNcGgvXFvgbxq90i1nlyWakRpwAyEeRQPp1+hkNj1/N8daupwxgj0vxWb0Nvd2KaDRu
+ FKwOfjqIWSnUVdtnWfSzLOCQ3J6DoXHxy49/sSE2nVuatQ9IGBF4wuEwo2QUwX8/yedJ22XPr
+ Gq0OXvhdg7x9fZJNyWcLgx4/vMZxI82SFGEEl0f9u7t4V4e0qAVgwu7TA0yk7Mv7tyJxNDzu5
+ W7bUN0U9advpdbN9V+bE+MVFMMKvQdS+0E4QqJNtirCjKOMC0eB/3J9M5nI8j8e81UJtHHXpp
+ KIbiL6+KgfPd9vV4AWJFeIv/gV5H25i8HZ8XyH/4ed2NCt1lM67+cMcoeVEfkYdqpdTtJy5Zm
+ ifbsgN5C+iXYOedQUALPIG7xIQ4OVjgKc9WkLCONzt9+1DcvbVyAmDPWWpp2eqhZN4lpT6l3Z
+ 6eXSW77nhGJ9AUmjrCNNXgH5aDiUVd13i+pm+f/SbR6ZkUd+YBozHe7P/VMoJPPYRVH6tu+0D
+ A7JOOnfqeQa2Ggil2U6UGQ1FpL61LUPRAfw5ChyKWZfsGM3Nv8H2jB2VocBppBDkhHmGJctwu
+ ExFr/XOoCrnKpq6P5XjmmcRSMcENfNRN0fGCDu/EU0PT55rkIELfUXGCS9JqwyIco7+0JF7Y/
+ Hn57X1En0HXQyjjEc+tRvb5G9nBgKCZpTBaNUdwnh0D8+NKHAVUHNlg7nYQ5SV0+Um+QHJ7KG
+ /PtNrMSEfnYlk9IvGZeTg4sUUZSF3nok08TGpSzHa7ljeJ3HxAfZPuX+/VLL5RVWOeWHeFODC
+ TmImrAu5d2VIG784wc/gpPNjnbc6rO0M6qq34pg==
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Sep 21, 2020 at 10:55:11AM +0200, Pavel Reichl wrote:
-> Verify hat an attempt to create a too-small device with stripe geometry,
-> is handled gracefully instead of hitting an assert in align_ag_geometry()
-> 
-> Signed-off-by: Pavel Reichl <preichl@redhat.com>
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--9sxVCYXqFExXiGZiYrQcgAZlzltE78ayJ
+Content-Type: multipart/mixed; boundary="qy3YxZTpM0DwGnE6wTUUDWSN5SDMOC6Rb"
 
-Looks ok (afaict the only change was removing _supported_os?)
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+--qy3YxZTpM0DwGnE6wTUUDWSN5SDMOC6Rb
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: quoted-printable
 
---D
 
-> ---
->  tests/xfs/260     | 51 +++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/260.out |  2 ++
->  tests/xfs/group   |  1 +
->  3 files changed, 54 insertions(+)
->  create mode 100755 tests/xfs/260
->  create mode 100644 tests/xfs/260.out
-> 
-> diff --git a/tests/xfs/260 b/tests/xfs/260
-> new file mode 100755
-> index 00000000..f4da0302
-> --- /dev/null
-> +++ b/tests/xfs/260
-> @@ -0,0 +1,51 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2020 Red Hat, Inc.. All Rights Reserved.
-> +#
-> +# FS QA Test 260
-> +#
-> +# Verify that an attempt to create a too-small device with stripe geometry,
-> +# is handled gracefully instead of hitting an assert in align_ag_geometry()
-> +#
-> +# This test verifies the problem fixed in xfsprogs with commit
-> +# (mkfs.xfs: fix ASSERT on too-small device with stripe geometry)
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +	rm -f $localfile
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +echo 'Silence is golden'
-> +
-> +_supported_fs xfs
-> +_require_test
-> +
-> +localfile=$TEST_DIR/$seq.$$
-> +
-> +$XFS_IO_PROG -f -c "truncate 10444800" $localfile
-> +
-> +$MKFS_XFS_PROG -dsu=65536,sw=1 $localfile >> $seqres.full 2>&1
-> +
-> +[ $? -ne 1 ] && echo "${MKFS_XFS_PROG} should fail gracefully"
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/260.out b/tests/xfs/260.out
-> new file mode 100644
-> index 00000000..18ca517c
-> --- /dev/null
-> +++ b/tests/xfs/260.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 260
-> +Silence is golden
-> diff --git a/tests/xfs/group b/tests/xfs/group
-> index b8374359..c8713ca5 100644
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
-> @@ -257,6 +257,7 @@
->  257 auto quick clone
->  258 auto quick clone
->  259 auto quick
-> +260 auto quick mkfs
->  261 auto quick quota
->  262 dangerous_fuzzers dangerous_scrub dangerous_online_repair
->  263 auto quick quota
-> -- 
-> 2.26.2
-> 
+
+On 2020/9/21 =E4=B8=8B=E5=8D=8811:16, Sidong Yang wrote:
+> On Mon, Sep 21, 2020 at 09:21:33AM +0800, Qu Wenruo wrote:
+>>
+>>
+>> On 2020/9/20 =E4=B8=8B=E5=8D=884:57, Sidong Yang wrote:
+>>> The btrfs/022 test is basic test about qgroup. but it doesn't have
+>>> test with qgroup assign function. This patch adds parent assign
+>>> test. parent assign test make two subvolumes and a qgroup for assign.=
+
+>>> Assign two subvolumes with a qgroup and check that quota of group
+>>> has same value with sum of two subvolumes.
+>=20
+> Hi Qu!
+> Thanks for review!
+>=20
+>>
+>> A little surprised that I haven't submitted such test case, especially=
+
+>> we had a fix in kernel.
+>>
+>> cbab8ade585a ("btrfs: qgroup: mark qgroup inconsistent if we're
+>> inherting snapshot to a new qgroup")
+>=20
+> Yeah, there was no test code for qgroup.
+>=20
+>>
+>> Despite the comment from Eryu, some btrfs specific comment inlined bel=
+ow.
+>>
+>>>
+>>> Signed-off-by: Sidong Yang <realwakka@gmail.com>
+>>> ---
+>>>  tests/btrfs/022 | 40 ++++++++++++++++++++++++++++++++++++++++
+>>>  1 file changed, 40 insertions(+)
+>>>
+>>> diff --git a/tests/btrfs/022 b/tests/btrfs/022
+>>> index aaa27aaa..cafaa8b2 100755
+>>> --- a/tests/btrfs/022
+>>> +++ b/tests/btrfs/022
+>>> @@ -110,6 +110,40 @@ _limit_test_noexceed()
+>>>  	[ $? -eq 0 ] || _fail "should have been allowed to write"
+>>>  }
+>>> =20
+>>> +#basic assign testing
+>>> +_parent_assign_test()
+>>> +{
+>>> +	echo "=3D=3D=3D parent assign test =3D=3D=3D" >> $seqres.full
+>>> +	_run_btrfs_util_prog subvolume create $SCRATCH_MNT/a
+>>> +	_run_btrfs_util_prog quota enable $SCRATCH_MNT
+>>> +	subvolid_a=3D$(_btrfs_get_subvolid $SCRATCH_MNT a)
+>>> +
+>>> +	_run_btrfs_util_prog subvolume create $SCRATCH_MNT/b
+>>> +	_run_btrfs_util_prog quota enable $SCRATCH_MNT
+>>> +	subvolid_b=3D$(_btrfs_get_subvolid $SCRATCH_MNT b)
+>>> +
+>>> +	_run_btrfs_util_prog qgroup create 1/100 $SCRATCH_MNT
+>>> +
+>>> +	_run_btrfs_util_prog qgroup assign 0/$subvolid_a 1/100 $SCRATCH_MNT=
+
+>>> +	_run_btrfs_util_prog qgroup assign 0/$subvolid_b 1/100 $SCRATCH_MNT=
+
+>>
+>> The coverage is not good enough.
+>>
+>> Qgroup assign (or inherit) happens not only during "btrfs qgroup assig=
+n"
+>> but also "btrfs subvolume snapshot -i".
+>>
+>> And we also need to consider cases like shared extents between two
+>> subvolumes (either caused by snapshot or reflink).
+>>
+>> That means we have two factors, assign or snapshot -i, subvolumes with=
+
+>> shared extents or not.
+>> That means we need at least 3 combinations:
+>>
+>> - assign, no shared extents
+>> - assign, shared extents
+>> - snapshot -i, shared extents
+>>
+>> (snapshot -i, no shared extents is invalid, as snapshot will always
+>> cause shared extents)
+>=20
+> Thanks for good example!
+> but there is a question. How can I make shared extents in test code?
+
+Reflink is the most simple solution.
+
+> It's okay that write some file and make a snapshot from it?
+
+If you only want some shared extents, reflink is easier than snapshot.
+
+Thanks,
+Qu
+
+>=20
+>>
+>>> +
+>>> +	_ddt of=3D$SCRATCH_MNT/a/file bs=3D4M count=3D1 >> $seqres.full 2>&=
+1
+>>> +	_ddt of=3D$SCRATCH_MNT/b/file bs=3D4M count=3D1 >> $seqres.full 2>&=
+1
+>>> +	sync
+>>> +
+>>> +	a_shared=3D$($BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | gre=
+p "0/$subvolid_a")
+>>> +	a_shared=3D$(echo $a_shared | awk '{ print $2 }' | tr -dc '0-9')
+>>> +
+>>> +	b_shared=3D$($BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | gre=
+p "0/$subvolid_b")
+>>> +	b_shared=3D$(echo $b_shared | awk '{ print $2 }' | tr -dc '0-9')
+>>> +	sum=3D$(expr $b_shared  + $a_shared)
+>>> +
+>>> +	q_shared=3D$($BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | gre=
+p "1/100")
+>>> +	q_shared=3D$(echo $q_shared | awk '{ print $2 }' | tr -dc '0-9')
+>>> +
+>>> +	[ $sum -eq $q_shared ] || _fail "shared values don't match"
+>>
+>> Nope, we don't need to do such complex checking all by ourselves.
+>>
+>> Just let "btrfs check" to handle it, as it will also check the qgroup
+>> numbers.
+>=20
+> It's very easy way to check! Thanks.
+>=20
+> Taken together, I'll work for new test case that tests qgroup cases.
+>=20
+> Sincerely,
+> Sidong
+>=20
+>>
+>> Thanks,
+>> Qu
+>>
+>>> +}
+>>> +
+>>>  units=3D`_btrfs_qgroup_units`
+>>> =20
+>>>  _scratch_mkfs > /dev/null 2>&1
+>>> @@ -133,6 +167,12 @@ _check_scratch_fs
+>>>  _scratch_mkfs > /dev/null 2>&1
+>>>  _scratch_mount
+>>>  _limit_test_noexceed
+>>> +_scratch_unmount
+>>> +_check_scratch_fs
+>>> +
+>>> +_scratch_mkfs > /dev/null 2>&1
+>>> +_scratch_mount
+>>> +_parent_assign_test
+>>> =20
+>>>  # success, all done
+>>>  echo "Silence is golden"
+>>>
+>>
+
+
+--qy3YxZTpM0DwGnE6wTUUDWSN5SDMOC6Rb--
+
+--9sxVCYXqFExXiGZiYrQcgAZlzltE78ayJ
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAEBCAAdFiEELd9y5aWlW6idqkLhwj2R86El/qgFAl9pO/8ACgkQwj2R86El
+/qg8Ugf+PhRow7QrLgb0ZTZJMY9W1+hCZ5Q9vNdfN6loP7aUXdA0R4CowIhsk+8Q
+PhbMA5hKnf9ixJPkzJw9HC8kRIsQG0D5+jFV8RiCcS0A+DncYGofKSFs50samMpL
+MSeBaljsY/GofcgV+LK9MFNN0k/wXGqWNzQndwJqo0B7Tj7iOjPrsMoDIqOyZEsF
+/Vj3d10UrqyKjnnG2M2Y7cElicUOfsa73p4hv/fCSVMTRAOGkiR3+CwF/D+adBfR
+fFyF/4F//CXKQWHzOAIM8KCJ8+xZqFGywKfnNoOgte1M1B4OSCheC5BvbugoM/Zx
+dFMATsG5XLfyLFYbNGr3uNt6iqeuxg==
+=3Xhs
+-----END PGP SIGNATURE-----
+
+--9sxVCYXqFExXiGZiYrQcgAZlzltE78ayJ--
