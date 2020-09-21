@@ -2,86 +2,104 @@ Return-Path: <SRS0=Zf7U=C6=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 63857C43463
-	for <linux-fstests@archiver.kernel.org>; Mon, 21 Sep 2020 09:00:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CDAECC43465
+	for <linux-fstests@archiver.kernel.org>; Mon, 21 Sep 2020 09:09:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 14F4720874
-	for <linux-fstests@archiver.kernel.org>; Mon, 21 Sep 2020 09:00:53 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 94D4B20874
+	for <linux-fstests@archiver.kernel.org>; Mon, 21 Sep 2020 09:09:41 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="OZiGKjA4"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="n+rdN8pY"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726355AbgIUJAw (ORCPT
+        id S1726359AbgIUJJl (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 21 Sep 2020 05:00:52 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:29032 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726353AbgIUJAw (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 21 Sep 2020 05:00:52 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1600678851;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=Glq6BNgaCJMk7a9WMizCP5W2rAXj8izaokGYFW+fyzw=;
-        b=OZiGKjA45hLwcf+H65swWT7KeXaeYMsryk7L/ERvJpC1WO/whrY9iJFuRtfpLM1nhezkz8
-        qrOdNNK0Qn7cuhBqW4fQNHRLNSOm3hTTCs1INkgL8usRH11w1Il3/7RvnP2hQWYKlcyRIT
-        LRlEYM5bd7vSfcSyXxFAY6MrQuxOwV8=
-Received: from mail-wr1-f69.google.com (mail-wr1-f69.google.com
- [209.85.221.69]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-341-r0MBLoxdM16-ldbEhDSjtw-1; Mon, 21 Sep 2020 05:00:48 -0400
-X-MC-Unique: r0MBLoxdM16-ldbEhDSjtw-1
-Received: by mail-wr1-f69.google.com with SMTP id r16so5574418wrm.18
-        for <fstests@vger.kernel.org>; Mon, 21 Sep 2020 02:00:48 -0700 (PDT)
+        Mon, 21 Sep 2020 05:09:41 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48112 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726341AbgIUJJk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 21 Sep 2020 05:09:40 -0400
+Received: from mail-il1-x142.google.com (mail-il1-x142.google.com [IPv6:2607:f8b0:4864:20::142])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9FBF2C061755;
+        Mon, 21 Sep 2020 02:09:40 -0700 (PDT)
+Received: by mail-il1-x142.google.com with SMTP id h2so12938671ilo.12;
+        Mon, 21 Sep 2020 02:09:40 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=/sDkrkrhqpXsn1Gqof4RKPAhDHfhg/8IddrNAB2HIEE=;
+        b=n+rdN8pYG5NsF+grD9KNE87KmGb5HVSg6YsQhF4zm3d+nenZlVS+XrgcH/o6Ra6YU7
+         199bkREPEbRkiC4yX+1c/+l0uvBfeM4PD5tOuDR/lX4lJ/UlmmnRUm3Nm4rJKlQA5iLY
+         PKBOTrtix/7EWnj07KvaaPTVVcLO+KgMQIYz47gqG4EWePyrIJqRTIve/noOtXIymRjO
+         SzDxiX2/7ngPfpc/ryQr6eQ6hrBZOgNW1QcLQu8Uc6wyVCSeYDz8YZby1oDxcENf9En/
+         RTKrRKAPb14IBe7VRGKZYJWCfUcjsZF7Ll/lmcBrBuKBqTGtL/XxREieSuk1Ii9ZaF2f
+         xVIg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=Glq6BNgaCJMk7a9WMizCP5W2rAXj8izaokGYFW+fyzw=;
-        b=najb45M3OfAaap5AtrdvKFeW4sTga99JLWIBa1Uc5BCTg/Vsren8cfn7PS+BlVfJsy
-         D5E0cj8X5sxuBzn81il8NPjRpPqHMGEvW+o9CUVX4TRIjpB4Jet19l4iHedyoDxN/660
-         GIDdTVtrXaVh6Cvi4GKdZSljbSwww6AgzwclksDp4KQsOVMcwODriKD5VMmsDYZcUSve
-         qABaNJYytUfScorXWyzgAaOHdzKK90yjIkjwxZMfCJ8D2dq1D9TJaHP2zP/kep8zo7J/
-         wqQJUxR8Z9TKNsFf0xlZVxaOwlLJx6zsSZqeSHAKROcCqnWqU+GToCyzg953Sw/TjJSv
-         YNrQ==
-X-Gm-Message-State: AOAM533BBBaN7FM3bPk5aN3/byoykMcKt75s/Ebvcn3dWH6THBxEc4I+
-        +YwIFm1W45iovDYrGePEkI2CqZhEJLeQtvmUMZ4yhs0d1t+rn+06qB0fVcaS9yXTqfTHdD+RgrB
-        cCL3e+YlK3MLvFvqvIg==
-X-Received: by 2002:adf:ee8d:: with SMTP id b13mr55524626wro.249.1600678847377;
-        Mon, 21 Sep 2020 02:00:47 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJxUersjfdrdljmg6JWUintD8tXAgo8EnzlewrSCacyh8H/m9xNkCd+3SwSn0nF6FuR4WMXLBg==
-X-Received: by 2002:adf:ee8d:: with SMTP id b13mr55524614wro.249.1600678847260;
-        Mon, 21 Sep 2020 02:00:47 -0700 (PDT)
-Received: from localhost.localdomain ([84.19.91.81])
-        by smtp.gmail.com with ESMTPSA id k6sm18372154wmi.1.2020.09.21.02.00.46
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 21 Sep 2020 02:00:46 -0700 (PDT)
-Subject: Re: [PATCH] generic/611: remove _supported_os line
-To:     Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org
-References: <20200921043144.8057-1-zlang@redhat.com>
-From:   Pavel Reichl <preichl@redhat.com>
-Message-ID: <baec92ca-8515-a2f0-17da-51612e9a4297@redhat.com>
-Date:   Mon, 21 Sep 2020 11:00:45 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.11.0
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=/sDkrkrhqpXsn1Gqof4RKPAhDHfhg/8IddrNAB2HIEE=;
+        b=dDXYK4JOJ81Jn648bd4fCiOm4Dv0cMbWN4Y3u4HsCKtEyPXHF2axnu6xMb2sSnVS2S
+         2ZNFhgoTLv991XxoG5zeQWKiyoJ9p2zvC3pjYDg7g1wtlBV3D3QTRWyS1P8TSOBa4aY8
+         vha3wYzHTnYGOd4E3I8A8FrnHIcIsnbhXfjPo0cyAr7cSalsh2pAuwC90S0npJ3PDk1m
+         k3svtDPptbKgD+QcjWDIwEJBrcVTyneB1RI5X7wBhVUWvqNjgrBlyMSJmTJ/+vrrLbsq
+         Ak4rrdj+hKvVwLHo6CLhGzxNUrQF/+3tGFozmCwhUHrKyLvEhozQw1tmdQfM6ySyRGhs
+         rY8Q==
+X-Gm-Message-State: AOAM532YtrIUhqtzJBj1a+QVAuco3DQqu5w9XgCr3qWUGqRf3lARMF0r
+        mM879eEez1Zh7vnvVBDq9SCm/ImQ2b7NJ5Giatc=
+X-Google-Smtp-Source: ABdhPJwPrs9N3C7D7CaTfCxDYGAMY80U2ZX5M0PTApU6biwp12t8sVVLVCvIzV5PpLCyl9Bws49JRvm6jlqIXFMB0wA=
+X-Received: by 2002:a92:d0c7:: with SMTP id y7mr3445665ila.250.1600679379959;
+ Mon, 21 Sep 2020 02:09:39 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <20200921043144.8057-1-zlang@redhat.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+References: <20200921072127.373125-1-yangx.jy@cn.fujitsu.com>
+ <CAOQ4uxitZDVjbvBnb95UHWD6CzaBeoJ8deqR6nbmgRRJ3P2=UA@mail.gmail.com> <5F686A74.4040002@cn.fujitsu.com>
+In-Reply-To: <5F686A74.4040002@cn.fujitsu.com>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Mon, 21 Sep 2020 12:09:28 +0300
+Message-ID: <CAOQ4uxhfUbFhecA9ShKUxyjS=LsMoyztXwWUJw-ZXm+Z0eJ6DQ@mail.gmail.com>
+Subject: Re: [PATCH] ovl: Support FS_IOC_[SG]ETFLAGS and FS_IOC_FS[SG]ETXATTR
+ ioctls on directories
+To:     Xiao Yang <yangx.jy@cn.fujitsu.com>
+Cc:     overlayfs <linux-unionfs@vger.kernel.org>,
+        Miklos Szeredi <miklos@szeredi.hu>,
+        "Darrick J. Wong" <darrick.wong@oracle.com>,
+        Christoph Hellwig <hch@infradead.org>,
+        fstests <fstests@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Hi,
+On Mon, Sep 21, 2020 at 11:55 AM Xiao Yang <yangx.jy@cn.fujitsu.com> wrote:
+>
+> On 2020/9/21 16:17, Amir Goldstein wrote:
+> > On Mon, Sep 21, 2020 at 10:41 AM Xiao Yang<yangx.jy@cn.fujitsu.com>  wrote:
+> >> Factor out ovl_ioctl() and ovl_compat_ioctl() and take use of them for
+> >> directories.
+> >>
+> >> Signed-off-by: Xiao Yang<yangx.jy@cn.fujitsu.com>
+> >> ---
+> > This change is buggy. I had already posted it and self NACKed myself [1].
+> >
+> > You can find an hopefully non-buggy version of it on my ovl-shutdown [2] branch.
+> >
+> > As long as you are changing ovl_ioctl(), please also take the second
+> > commit on that
+> > branch to replace the open coded capability check with the
+> > vfs_ioc_setflags_prepare()
+> > generic helper.
+> Hi Amir,
+>
+> Thanks a lot for your quick reply. :-)
+> I will try to read and understand the metioned patches on your
+> ovl-shutdown branch.
 
-Looks good to me,
+Please also verify my claim in the patch commit message, that the
+the test result of xfstest generic/079 changes from "notrun" to "success".
 
-Reviewed-by: Pavel Reichl <preichl@redhat.com>
-
+Thanks,
+Amir.
