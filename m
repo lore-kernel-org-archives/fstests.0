@@ -2,138 +2,245 @@ Return-Path: <SRS0=QBZa=C7=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 83896C4727D
-	for <linux-fstests@archiver.kernel.org>; Tue, 22 Sep 2020 12:01:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0DB94C4363D
+	for <linux-fstests@archiver.kernel.org>; Tue, 22 Sep 2020 15:36:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3DFC123A74
-	for <linux-fstests@archiver.kernel.org>; Tue, 22 Sep 2020 12:01:42 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AF4822220D
+	for <linux-fstests@archiver.kernel.org>; Tue, 22 Sep 2020 15:36:39 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="rsVGjE0t"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ZvNMys0S"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726558AbgIVMBl (ORCPT
+        id S1726694AbgIVPgj (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 22 Sep 2020 08:01:41 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43262 "EHLO
+        Tue, 22 Sep 2020 11:36:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48148 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726554AbgIVMBl (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 22 Sep 2020 08:01:41 -0400
-Received: from mail-io1-xd43.google.com (mail-io1-xd43.google.com [IPv6:2607:f8b0:4864:20::d43])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 70102C061755;
-        Tue, 22 Sep 2020 05:01:41 -0700 (PDT)
-Received: by mail-io1-xd43.google.com with SMTP id j2so19185382ioj.7;
-        Tue, 22 Sep 2020 05:01:41 -0700 (PDT)
+        with ESMTP id S1726566AbgIVPgj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 22 Sep 2020 11:36:39 -0400
+Received: from mail-pf1-x42c.google.com (mail-pf1-x42c.google.com [IPv6:2607:f8b0:4864:20::42c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3769FC061755;
+        Tue, 22 Sep 2020 08:36:39 -0700 (PDT)
+Received: by mail-pf1-x42c.google.com with SMTP id d9so12808478pfd.3;
+        Tue, 22 Sep 2020 08:36:39 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=thN+8j8fzPRcGR/K/n7KMucCVe+4w8v81WWL2C+eee0=;
-        b=rsVGjE0tEzc5C/NTe5WIIU72p4hdYywYNOgni3vtzPRQVLbk+RW/if18Zhh1ZxPVCq
-         KHDE2+VSLf6g/3p7UM+TOI/zn9HAarDkIxArHAPgEG72GXXb8bH3VccJU/xsgBzNW+ho
-         iGn6dofDLi55L9/lwXZ2iCtwWCvdHyd9QNdnxkApXiNsZJCWCJqfYwg4jTzozlJjDuaj
-         8krGRhvd61FhCCygJ9Q2C7+8dE9gMUxRYLee9SfdGcjlBRYLCM8sjqaq7A81pWitEJQI
-         AvAu3xpMX+J00vusiA1NmFezjBzGx0Uzwpar8+b/MGPa0w6SAJsUlY96Bl1VxbKxk1Ol
-         m9yw==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=+qleegQzhL3aP/thA/lVYXShrxssvhK8yLa+w5r2S/Q=;
+        b=ZvNMys0SfEBIIG22u/e5wTpG4pb/P/+Zy88oF9AdcE6ier0melzF/LvMY4fGOr8hI0
+         Ifrs3F65hpZtZ6Z7AYyrErW/gQaJvAECeU1jO6K76FO5nCjrsq0kAk+qwxTOQWh0PJPa
+         hSYrtzo1HcpHHfFRV5M5boxzK2+IKOfC2FCg744F/yX3zvKdx7lPZgbzoo6gckdo3jpH
+         RRapQQhakMGNt6jKUOO3lIUpt4oSTZSQwpli9Q8bKYwVh7rK2JoUdtaeyL0XwrpY3xoM
+         pnyfxw5Kssmlt0t644Nw+vkdPjNgxx+DGOyoE0JmAxEdtlVaajoqS2siqE2o6072AGiX
+         5qWg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=thN+8j8fzPRcGR/K/n7KMucCVe+4w8v81WWL2C+eee0=;
-        b=VuI/f/HWJWpt9JzM6B1N73pVdZ59GTwBtX/x2cuElRSeiLIUk3fsO6i4PgEiTjnyF4
-         pw2KmXKpbwYunxBkd7UwtPo0t58BeXXUFfz4/jvecIRhdCU6CZmRVF7lXjzBF0mkio7S
-         ZXEl9qb7U2zNdkr/z423jykrrFmz/QYNxN7P95ezxqdzqYGSUCDoz0ByBlTdJ/857TFc
-         pUq958/Xnl974uu5tapjrbG4EVnEB/tDhmySmb109Y6tKJzq0Q+Aj295yUctbjoYhubC
-         5eF7IL8IaC/Dm+0zQrEMZ8P9NSWSdFWlZl69AMflu1lciAphj9ANUgg2SqXL7tZr/ZDm
-         I3gg==
-X-Gm-Message-State: AOAM533hixYiDrDYuLeufsKWM3rL3PBhOFfXZ6RPw2HBsR9cI2JmiSQl
-        aTepatHkhkYK94HzmIiFkwpYFgS96CUX4VJdxfQwFmY7KDg=
-X-Google-Smtp-Source: ABdhPJxwUIF+YBi31uZ7a6gaPPe6crkKq4vWE9W+i/9tHvfgdpesx7B2CaG/91tyK2pMIn+I7/k6wHyjVN88jzMlSKs=
-X-Received: by 2002:a05:6638:4:: with SMTP id z4mr3639214jao.123.1600776100669;
- Tue, 22 Sep 2020 05:01:40 -0700 (PDT)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=+qleegQzhL3aP/thA/lVYXShrxssvhK8yLa+w5r2S/Q=;
+        b=IIQzHA+ogbW1hAfnRYqpkRTIhC8VtnHrqGwQlA62gqCLv9pak8bwzPaQ9GBVS2fW6X
+         LP2D6iihc4SKXWjlEoyeMFJx8KLTO5awEs90jLCi/g9PJWTNMBm8BsZoJQ8jcbh150Do
+         vjJf5AMplTLeaAYAl5a6kqC62VW+SJ2OnqFh6BsFMXaIN02eEMYXypf6txwsd7+f1pID
+         Hr/7ZvaN0vjDC5PkOWQ3cb7DL3YqlkUwb/HyF5VjsW6l8y5HgVZQh6yxSaqTHfdEM/xJ
+         4FXbolkRshhb2z2mzcwD0LspehhQ+nZ2To36O/ss99TbS7Rew/FiaJaMQKZhevyecRuW
+         9X0g==
+X-Gm-Message-State: AOAM5306/RVCsFUBjJU1AbqOts9sbnn4XhtN+Vxyg88jwkRhjMmLOqaN
+        77gIu6WthvDsLmQIC45n7+RQkkkVEtACge9u
+X-Google-Smtp-Source: ABdhPJzsu5XewU04GWOmo2/j2uxkgIoSqDXgXbhyoM711ktHC0pg+/Lx2atgjSNN+k31UDCfdBNryw==
+X-Received: by 2002:a17:902:82c3:b029:d2:29fc:bee9 with SMTP id u3-20020a17090282c3b02900d229fcbee9mr5213242plz.72.1600788994927;
+        Tue, 22 Sep 2020 08:36:34 -0700 (PDT)
+Received: from localhost.localdomain ([175.195.128.78])
+        by smtp.googlemail.com with ESMTPSA id n72sm16449582pfd.27.2020.09.22.08.36.31
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 22 Sep 2020 08:36:34 -0700 (PDT)
+From:   Sidong Yang <realwakka@gmail.com>
+To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Cc:     Sidong Yang <realwakka@gmail.com>, Qu Wenruo <wqu@suse.com>,
+        Josef Bacik <josef@toxicpanda.com>, Eryu Guan <guan@eryu.me>
+Subject: [PATCH v2] btrfs: Add new test for qgroup assign functionality
+Date:   Tue, 22 Sep 2020 15:36:04 +0000
+Message-Id: <20200922153604.10004-1-realwakka@gmail.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-References: <20200921072127.373125-1-yangx.jy@cn.fujitsu.com>
- <CAOQ4uxitZDVjbvBnb95UHWD6CzaBeoJ8deqR6nbmgRRJ3P2=UA@mail.gmail.com>
- <5F686A74.4040002@cn.fujitsu.com> <CAOQ4uxhfUbFhecA9ShKUxyjS=LsMoyztXwWUJw-ZXm+Z0eJ6DQ@mail.gmail.com>
- <5F69B2A4.2050407@cn.fujitsu.com>
-In-Reply-To: <5F69B2A4.2050407@cn.fujitsu.com>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Tue, 22 Sep 2020 15:01:29 +0300
-Message-ID: <CAOQ4uxg-4xOSVxkLZrH_zrd9054z+SH_+YdcPnT3PVNYogJ3gw@mail.gmail.com>
-Subject: Re: [PATCH] ovl: Support FS_IOC_[SG]ETFLAGS and FS_IOC_FS[SG]ETXATTR
- ioctls on directories
-To:     Xiao Yang <yangx.jy@cn.fujitsu.com>
-Cc:     overlayfs <linux-unionfs@vger.kernel.org>,
-        Miklos Szeredi <miklos@szeredi.hu>,
-        "Darrick J. Wong" <darrick.wong@oracle.com>,
-        Christoph Hellwig <hch@infradead.org>,
-        fstests <fstests@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Sep 22, 2020 at 11:15 AM Xiao Yang <yangx.jy@cn.fujitsu.com> wrote:
->
-> On 2020/9/21 17:09, Amir Goldstein wrote:
-> > On Mon, Sep 21, 2020 at 11:55 AM Xiao Yang<yangx.jy@cn.fujitsu.com>  wr=
-ote:
-> >> On 2020/9/21 16:17, Amir Goldstein wrote:
-> >>> On Mon, Sep 21, 2020 at 10:41 AM Xiao Yang<yangx.jy@cn.fujitsu.com>  =
- wrote:
-> >>>> Factor out ovl_ioctl() and ovl_compat_ioctl() and take use of them f=
-or
-> >>>> directories.
-> >>>>
-> >>>> Signed-off-by: Xiao Yang<yangx.jy@cn.fujitsu.com>
-> >>>> ---
-> >>> This change is buggy. I had already posted it and self NACKed myself =
-[1].
-> >>>
-> >>> You can find an hopefully non-buggy version of it on my ovl-shutdown =
-[2] branch.
-> >>>
-> >>> As long as you are changing ovl_ioctl(), please also take the second
-> >>> commit on that
-> >>> branch to replace the open coded capability check with the
-> >>> vfs_ioc_setflags_prepare()
-> >>> generic helper.
-> >> Hi Amir,
-> >>
-> >> Thanks a lot for your quick reply. :-)
-> >> I will try to read and understand the metioned patches on your
-> >> ovl-shutdown branch.
-> > Please also verify my claim in the patch commit message, that the
-> > the test result of xfstest generic/079 changes from "notrun" to "succes=
-s".
-> Hi Amir,
->
-> With your patches, I have confirmed that generic/079 actually changed fro=
-m
-> "notrun" to "success".  Besides, one minor issue:
-> Could we avoid the following compiler warning?
-> -------------------------------------------------
-> fs/overlayfs/readdir.c: In function =E2=80=98ovl_dir_real_file=E2=80=99:
-> fs/overlayfs/readdir.c:883:37: warning: passing argument 1 of
-> =E2=80=98ovl_dir_open_realfile=E2=80=99 discards =E2=80=98const=E2=80=99 =
-qualifier from pointer target
-> type [-Wdiscarded-qualifiers]
->    883 |    realfile =3D ovl_dir_open_realfile(file, &upperpath);
->        |                                     ^~~~
-> fs/overlayfs/readdir.c:842:56: note: expected =E2=80=98struct file *=E2=
-=80=99 but
-> argument is of type =E2=80=98const struct file *=E2=80=99
->    842 | static struct file *ovl_dir_open_realfile(struct file *file,
->        |                                           ~~~~~~~~~~~~~^~~~
-> -------------------------------------------------
->
+This new test will test btrfs's qgroup assign functionality. The
+test has 3 cases.
 
-Shouldn't be a problem to change ovl_dir_open_realfile()
-to take a const struct file * argument I think.
+ - assign, no shared extents
+ - assign, shared extents
+ - snapshot -i, shared extents
 
-Thanks,
-Amir.
+Each cases create subvolumes and assign qgroup in their own way
+and check with the command "btrfs check".
+
+Cc: Qu Wenruo <wqu@suse.com>
+Cc: Eryu Guan <guan@eryu.me>
+
+Signed-off-by: Sidong Yang <realwakka@gmail.com>
+---
+v2: create new test and use the cases
+---
+ tests/btrfs/221     | 121 ++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/221.out |   2 +
+ tests/btrfs/group   |   1 +
+ 3 files changed, 124 insertions(+)
+ create mode 100755 tests/btrfs/221
+ create mode 100644 tests/btrfs/221.out
+
+diff --git a/tests/btrfs/221 b/tests/btrfs/221
+new file mode 100755
+index 00000000..7fe5d78f
+--- /dev/null
++++ b/tests/btrfs/221
+@@ -0,0 +1,121 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2020 YOUR NAME HERE.  All Rights Reserved.
++#
++# FS QA Test 221
++#
++# Test the assign functionality of qgroups
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/reflink
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs generic
++_supported_os Linux
++
++_require_test
++_require_scratch
++_require_btrfs_qgroup_report
++_require_cp_reflink
++
++# Test assign qgroup for submodule with shared extents by reflink
++assign_shared_test()
++{
++	echo "=== qgroup assign shared test ===" >> $seqres.full
++	_run_btrfs_util_prog quota enable $SCRATCH_MNT
++	_run_btrfs_util_prog qgroup create 1/100 $SCRATCH_MNT
++
++	_run_btrfs_util_prog subvolume create $SCRATCH_MNT/a
++	subvolid=$(_btrfs_get_subvolid $SCRATCH_MNT a)
++	_run_btrfs_util_prog qgroup assign 0/$subvolid 1/100 $SCRATCH_MNT
++
++	_run_btrfs_util_prog subvolume create $SCRATCH_MNT/b
++	subvolid=$(_btrfs_get_subvolid $SCRATCH_MNT b)
++	_run_btrfs_util_prog qgroup assign 0/$subvolid 1/100 $SCRATCH_MNT
++	_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
++
++	_ddt of="$SCRATCH_MNT"/a/file1 bs=1M count=1 >> $seqres.full 2>&1
++	cp --reflink=always "$SCRATCH_MNT"/a/file1 "$SCRATCH_MNT"/b/file1 >> $seqres.full 2>&1
++
++	_scratch_unmount
++	_run_btrfs_util_prog check $SCRATCH_DEV
++}
++
++# Test assign qgroup for submodule without shared extents
++assign_no_shared_test()
++{
++	echo "=== qgroup assign no shared test ===" >> $seqres.full
++	_run_btrfs_util_prog quota enable $SCRATCH_MNT
++	_run_btrfs_util_prog qgroup create 1/100 $SCRATCH_MNT
++
++	_run_btrfs_util_prog subvolume create $SCRATCH_MNT/a
++	subvolid=$(_btrfs_get_subvolid $SCRATCH_MNT a)
++	_run_btrfs_util_prog qgroup assign 0/$subvolid 1/100 $SCRATCH_MNT
++
++	_run_btrfs_util_prog subvolume create $SCRATCH_MNT/b
++	subvolid=$(_btrfs_get_subvolid $SCRATCH_MNT b)
++	_run_btrfs_util_prog qgroup assign 0/$subvolid 1/100 $SCRATCH_MNT
++
++	_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
++	_scratch_unmount
++
++	_run_btrfs_util_prog check $SCRATCH_DEV
++}
++
++# Test snapshot with assigning qgroup for submodule
++snapshot_test()
++{
++	echo "=== qgroup snapshot test ===" >> $seqres.full
++	_run_btrfs_util_prog quota enable $SCRATCH_MNT
++
++	_run_btrfs_util_prog subvolume create $SCRATCH_MNT/a
++	subvolid=$(_btrfs_get_subvolid $SCRATCH_MNT a)
++
++	_run_btrfs_util_prog subvolume snapshot -i 0/$subvolid $SCRATCH_MNT/a $SCRATCH_MNT/b
++	subvolid=$(_btrfs_get_subvolid $SCRATCH_MNT b)
++
++	_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
++	_scratch_unmount
++
++	_run_btrfs_util_prog check $SCRATCH_DEV
++}
++
++
++_scratch_mkfs > /dev/null 2>&1
++_scratch_mount
++assign_no_shared_test
++
++_scratch_mkfs > /dev/null 2>&1
++_scratch_mount
++assign_shared_test
++
++_scratch_mkfs > /dev/null 2>&1
++_scratch_mount
++snapshot_test
++
++# success, all done
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/btrfs/221.out b/tests/btrfs/221.out
+new file mode 100644
+index 00000000..aa4351cd
+--- /dev/null
++++ b/tests/btrfs/221.out
+@@ -0,0 +1,2 @@
++QA output created by 221
++Silence is golden
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 1b5fa695..cdda38f3 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -222,3 +222,4 @@
+ 218 auto quick volume
+ 219 auto quick volume
+ 220 auto quick
++221 auto quick qgroup
+-- 
+2.25.1
+
