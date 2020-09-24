@@ -2,115 +2,222 @@ Return-Path: <SRS0=YkYO=DB=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	NICE_REPLY_A,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 51FF4C4346E
-	for <linux-fstests@archiver.kernel.org>; Thu, 24 Sep 2020 08:32:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E1687C4363D
+	for <linux-fstests@archiver.kernel.org>; Thu, 24 Sep 2020 14:29:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 00A912376F
-	for <linux-fstests@archiver.kernel.org>; Thu, 24 Sep 2020 08:32:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 890F22311A
+	for <linux-fstests@archiver.kernel.org>; Thu, 24 Sep 2020 14:29:06 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="QWnM2DxL"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="qStbee9s"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726960AbgIXIcz (ORCPT
+        id S1728064AbgIXO3G (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 24 Sep 2020 04:32:55 -0400
-Received: from mx2.suse.de ([195.135.220.15]:35286 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726849AbgIXIcz (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 24 Sep 2020 04:32:55 -0400
-X-Virus-Scanned: by amavisd-new at test-mx.suse.de
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-        t=1600936373;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
-        bh=3qMiDqx8IRE9Q/EnpX4RbcQTEA0PuUapV58FkgSF1U8=;
-        b=QWnM2DxLPSji4goDkMUxsGJJqzZrmfohEz8dAg6Jfoxig0IcvXHy9nDQxhulyoS5fOkRBX
-        lhbaJPjRyOOhN+GNmbDuogIviaB2Pcv037+dfG6etY2q1ZjUliGlW9c8kenw3y3ppb4nRh
-        8+7QymM76fMKgYdIvl3EjAPDflvzXkQ=
-Received: from relay2.suse.de (unknown [195.135.221.27])
-        by mx2.suse.de (Postfix) with ESMTP id F4045AC0C;
-        Thu, 24 Sep 2020 08:33:30 +0000 (UTC)
-Subject: Re: [PATCH] btrfs: test fstrim after doing a device replace
-To:     fdmanana@kernel.org, fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-References: <a8f27095c014466444a70b77810ba826df68e623.1600870988.git.fdmanana@suse.com>
-From:   Nikolay Borisov <nborisov@suse.com>
-Autocrypt: addr=nborisov@suse.com; prefer-encrypt=mutual; keydata=
- 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
-Message-ID: <4e77797e-3d0a-b90b-6ea8-ae2880a10d9b@suse.com>
-Date:   Thu, 24 Sep 2020 11:32:52 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.10.0
+        Thu, 24 Sep 2020 10:29:06 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57884 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727974AbgIXO3G (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 24 Sep 2020 10:29:06 -0400
+Received: from mail-pl1-x644.google.com (mail-pl1-x644.google.com [IPv6:2607:f8b0:4864:20::644])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D8FD8C0613CE;
+        Thu, 24 Sep 2020 07:29:05 -0700 (PDT)
+Received: by mail-pl1-x644.google.com with SMTP id d19so1789130pld.0;
+        Thu, 24 Sep 2020 07:29:05 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:content-transfer-encoding:in-reply-to;
+        bh=tzHGsyzPcS+DvGM3a/i0s4+6MJ1r5aPfjoy4Xoy7aKo=;
+        b=qStbee9sHsKcTyuS7/kI0suQCV44bRvaRzp+kfW5Dukg6OsAaNX8UAPLpoalck6rrz
+         cOFmrxA+LWvhDPFdtGXc/dNGggfDXe1sxaBK2wbKgLpGVKVLGzADkq8vnmpuqqHsHszW
+         IvKvQMfEjXL1LjQEJKZ+h6e37j5g565+HVx3DodRBrTk0JFYVlI9HHS3ARiYr7wq2Apo
+         n5whfsy36w/QBHVKb6Azvg1lm5Dr1Wk7Swn3hJGeBT3qIBeaUn/Mhw51+Iw2ua2Mavjg
+         tKtxNijoejjEZLZcLGhF+54V0DoZ5YuVtEO7UvXStY/MRaG2hgFHu/UcOxHVh2LuNVkH
+         O/Vg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:content-transfer-encoding
+         :in-reply-to;
+        bh=tzHGsyzPcS+DvGM3a/i0s4+6MJ1r5aPfjoy4Xoy7aKo=;
+        b=az+b3PsiY4xdMrOBJGqtHi4u8dxmXVD/AHvA9yvJvm41tkLlA56SgbI/1Z3Dzvj/XG
+         QcTW43TGg+MKFrshNpRE7+tXWWyvmGSxMQZtE1saZEii4ErEJyYSigXi1VVofqfjT9S8
+         fA3/SP9qOyDzMZm+e6qHZmm2SrwertoY3fX5xfS3KcJLvKEzq2TID3O64dyZJwgO1NjU
+         XN+2dpGhD73AzKts/BlaxSuXp8+oHz6qqPD3IKYxKKs/aRFJV/QG6gRtXFXRaw+9IxZf
+         HYOzWAUYAOxvbH/LwwUbX9+u8ZL3g+gs4coKmQD7ttwT0LooBERe2QfVDR6sHt7bUF0P
+         63ZQ==
+X-Gm-Message-State: AOAM5331LxAR+IpSRDMsscy4Uwz/QQas6JuHiyD8VMEdTJQ3+kJ71waO
+        M7VohecXSjsRh4NQhE4cVE2UmQ44Y6EAYKmU
+X-Google-Smtp-Source: ABdhPJwiAowAro03RDbVZtJ9yIcY44HKmEF8r/MK8vYRMiXHv+gb5kPTNwCANMypQ9snAquhg98g6w==
+X-Received: by 2002:a17:90a:c83:: with SMTP id v3mr4126074pja.229.1600957745271;
+        Thu, 24 Sep 2020 07:29:05 -0700 (PDT)
+Received: from realwakka ([175.195.128.78])
+        by smtp.gmail.com with ESMTPSA id x6sm2650920pjp.25.2020.09.24.07.29.02
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 24 Sep 2020 07:29:04 -0700 (PDT)
+Date:   Thu, 24 Sep 2020 14:28:54 +0000
+From:   Sidong Yang <realwakka@gmail.com>
+To:     Qu Wenruo <wqu@suse.com>
+Cc:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org,
+        Josef Bacik <josef@toxicpanda.com>, Eryu Guan <guan@eryu.me>
+Subject: Re: [PATCH v3] btrfs: Add new test for qgroup assign functionality
+Message-ID: <20200924142854.GA43851@realwakka>
+References: <20200924041146.32577-1-realwakka@gmail.com>
+ <d67277a5-c0a9-cee5-cddd-54ab8610fc41@suse.com>
 MIME-Version: 1.0
-In-Reply-To: <a8f27095c014466444a70b77810ba826df68e623.1600870988.git.fdmanana@suse.com>
 Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
+Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
+In-Reply-To: <d67277a5-c0a9-cee5-cddd-54ab8610fc41@suse.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+On Thu, Sep 24, 2020 at 01:08:13PM +0800, Qu Wenruo wrote:
+> 
+> 
+> On 2020/9/24 下午12:11, Sidong Yang wrote:
+> > This new test will test btrfs's qgroup assign functionality. The
+> > test has 3 cases.
+> > 
+> >  - assign, no shared extents
+> >  - assign, shared extents
+> >  - snapshot -i, shared extents
+> > 
+> > Each cases create subvolumes and assign qgroup in their own way
+> > and check with the command "btrfs check".
+> > 
+> > Cc: Qu Wenruo <wqu@suse.com>
+> > Cc: Eryu Guan <guan@eryu.me>
+> > 
+> > Signed-off-by: Sidong Yang <realwakka@gmail.com>
+> 
+> This version is much better overall.
+Thanks to you.
+> 
+> The remaining small problems are mostly fstests related then.
+> ...
+> > +# Test assign qgroup for submodule with shared extents by reflink
+> > +assign_shared_test()
+> > +{
+> > +	_scratch_mkfs > /dev/null 2>&1
+> > +	_scratch_mount
+> > +
+> > +	echo "=== qgroup assign shared test ===" >> $seqres.full
+> > +	$BTRFS_UTIL_PROG quota enable $SCRATCH_MNT
+> > +	$BTRFS_UTIL_PROG quota rescan -w $SCRATCH_MNT >> $seqres.full
+> > +
+> > +	$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/a >> $seqres.full
+> > +	$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/b >> $seqres.full
+> > +
+> > +	_ddt of="$SCRATCH_MNT"/a/file1 bs=1M count=1 >> $seqres.full 2>&1
+> > +	cp --reflink=always "$SCRATCH_MNT"/a/file1 "$SCRATCH_MNT"/b/file1
+> > +
+> > +	$BTRFS_UTIL_PROG qgroup create 1/100 $SCRATCH_MNT
+> > +	$BTRFS_UTIL_PROG qgroup assign $SCRATCH_MNT/a 1/100 $SCRATCH_MNT
+> > +	$BTRFS_UTIL_PROG qgroup assign $SCRATCH_MNT/b 1/100 $SCRATCH_MNT
+> > +
+> > +	_scratch_unmount
+> > +	$BTRFS_UTIL_PROG check $SCRATCH_DEV >> $seqres.full 2>&1
+> 
+> We have _check_scratch_fs() function to do it properly already.
+Okay!
+> 
+> > +	[ $? -eq 0 ] || _fail "btrfs check failed"
+> > +}
+> > +
+> > +# Test assign qgroup for submodule without shared extents
+> > +assign_no_shared_test()
+> > +{
+> > +	_scratch_mkfs > /dev/null 2>&1
+> > +	_scratch_mount
+> > +
+> > +	echo "=== qgroup assign no shared test ===" >> $seqres.full
+> > +	$BTRFS_UTIL_PROG quota enable $SCRATCH_MNT
+> 
+> It's recommended to call "quota rescan -w" to ensure we finished rescan.
+> 
+> As fast enough system can go to next command before the auto rescan even
+> finished.
+Yeah, I need to call "quota rescan -w" after enabling quota.
 
+> 
+> Not sure if Eryu would have extra comments.
+I'm continuously ccing Eryu.
+I'll write a new v4 patch.
 
-On 23.09.20 г. 17:31 ч., fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
-> 
-> Test that after replacing a device, if we run fstrim against the filesystem
-> we do not trim/discard allocated chunks in the new device. We verify that
-> allocated chunks in the new device were not trim/discarded by mounting the
-> new device only in degraded mode, as this is the easiest way to verify it.
-> 
-> This currently fails on btrfs (since kernel 5.2) and is fixed by a patch
-> that has the following subject:
-> 
->   "btrfs: fix filesystem corruption after a device replace"
-> 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+Thanks!
+Sidong
 
-Reviewed-by: Nikolay Borisov <nborisov@suse.com>
+> 
+> Thanks,
+> Qu
+> 
+> > +	$BTRFS_UTIL_PROG qgroup create 1/100 $SCRATCH_MNT
+> > +
+> > +	$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/a >> $seqres.full
+> > +	$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/b >> $seqres.full
+> > +
+> > +	$BTRFS_UTIL_PROG qgroup assign $SCRATCH_MNT/a 1/100 $SCRATCH_MNT
+> > +	$BTRFS_UTIL_PROG qgroup assign $SCRATCH_MNT/b 1/100 $SCRATCH_MNT
+> > +	_scratch_unmount
+> > +
+> > +	$BTRFS_UTIL_PROG check $SCRATCH_DEV >> $seqres.full 2>&1
+> > +	[ $? -eq 0 ] || _fail "btrfs check failed"
+> > +}
+> > +
+> > +# Test snapshot with assigning qgroup for submodule
+> > +snapshot_test()
+> > +{
+> > +	_scratch_mkfs > /dev/null 2>&1
+> > +	_scratch_mount
+> > +
+> > +	echo "=== qgroup snapshot test ===" >> $seqres.full
+> > +	$BTRFS_UTIL_PROG quota enable $SCRATCH_MNT
+> > +	$BTRFS_UTIL_PROG quota rescan -w $SCRATCH_MNT >> $seqres.full
+> > +
+> > +	$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/a >> $seqres.full
+> > +	_ddt of="$SCRATCH_MNT"/a/file1 bs=1M count=1 >> $seqres.full 2>&1
+> > +	subvolid=$(_btrfs_get_subvolid $SCRATCH_MNT a)
+> > +	$BTRFS_UTIL_PROG subvolume snapshot -i 0/$subvolid $SCRATCH_MNT/a $SCRATCH_MNT/b >> $seqres.full
+> > +	_scratch_unmount
+> > +
+> > +	$BTRFS_UTIL_PROG check $SCRATCH_DEV >> $seqres.full 2>&1
+> > +	[ $? -eq 0 ] || _fail "btrfs check failed"
+> > +}
+> > +
+> > +
+> > +assign_no_shared_test
+> > +
+> > +assign_shared_test
+> > +
+> > +snapshot_test
+> > +
+> > +# success, all done
+> > +echo "Silence is golden"
+> > +status=0
+> > +exit
+> > diff --git a/tests/btrfs/221.out b/tests/btrfs/221.out
+> > new file mode 100644
+> > index 00000000..aa4351cd
+> > --- /dev/null
+> > +++ b/tests/btrfs/221.out
+> > @@ -0,0 +1,2 @@
+> > +QA output created by 221
+> > +Silence is golden
+> > diff --git a/tests/btrfs/group b/tests/btrfs/group
+> > index 1b5fa695..cdda38f3 100644
+> > --- a/tests/btrfs/group
+> > +++ b/tests/btrfs/group
+> > @@ -222,3 +222,4 @@
+> >  218 auto quick volume
+> >  219 auto quick volume
+> >  220 auto quick
+> > +221 auto quick qgroup
+> > 
+> 
