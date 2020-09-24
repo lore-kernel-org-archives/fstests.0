@@ -2,263 +2,115 @@ Return-Path: <SRS0=YkYO=DB=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,MSGID_FROM_MTA_HEADER,NICE_REPLY_A,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	NICE_REPLY_A,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 89DD8C4346E
-	for <linux-fstests@archiver.kernel.org>; Thu, 24 Sep 2020 05:08:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 51FF4C4346E
+	for <linux-fstests@archiver.kernel.org>; Thu, 24 Sep 2020 08:32:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 14A252311A
-	for <linux-fstests@archiver.kernel.org>; Thu, 24 Sep 2020 05:08:32 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 00A912376F
+	for <linux-fstests@archiver.kernel.org>; Thu, 24 Sep 2020 08:32:55 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="Mqb65tl1"
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="QWnM2DxL"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726697AbgIXFIc (ORCPT
+        id S1726960AbgIXIcz (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 24 Sep 2020 01:08:32 -0400
-Received: from de-smtp-delivery-102.mimecast.com ([62.140.7.102]:51189 "EHLO
-        de-smtp-delivery-102.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726683AbgIXFIc (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 24 Sep 2020 01:08:32 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=mimecast20200619;
-        t=1600924108;
+        Thu, 24 Sep 2020 04:32:55 -0400
+Received: from mx2.suse.de ([195.135.220.15]:35286 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726849AbgIXIcz (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 24 Sep 2020 04:32:55 -0400
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+        t=1600936373;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
-        bh=5TOuyrrVbhz42jLB8ZNy8xafolLdUx3sMQ5hdSrHlqE=;
-        b=Mqb65tl1px8+ebuNXzQy7K+k/T6VpACdWO1kz87D7LcekPMnjJd/rfJfVpLea0RMarxGmO
-        NiCvufqNNNERkGLbyDZyXvXniwa2tMy0Fczc3GtQXAy/1DYESB8Za0kfOmG1rNRrmv3S/L
-        F8LyjvjQxWvOAYDNNGWDvaoCSKKxigk=
-Received: from EUR04-VI1-obe.outbound.protection.outlook.com
- (mail-vi1eur04lp2053.outbound.protection.outlook.com [104.47.14.53]) (Using
- TLS) by relay.mimecast.com with ESMTP id
- de-mta-22-2nlqWkGhO-GLqCEcznCA0w-1; Thu, 24 Sep 2020 07:08:26 +0200
-X-MC-Unique: 2nlqWkGhO-GLqCEcznCA0w-1
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=X8/FBZPXDwoffOdue9u3ZuFmFBBZ6yxgIMVMBbBFHBfyAwaS/cpf0/kYRX3tbpvFfaodwIRxmhcR6/EwEQh2RZmr1oSYRoGGhW512wv+SzJO6nYeTbgbHJC8p8zVJozMiBP1eaCU53ngu96HGowGzrAhiu6pJvmLPyqX7bBxphNdQf3tCQIpmy5zTPPhDbVKbICoN3BoLizRTUx3obWvqpGyPCLzR6rxiIsOTEbexCbZjNS78Byntwbb3TPwHiT8+pFHEov9iVexXV1rIQEDTzuab7J2+hFXTC6gl8mEfNJDjKP3HmlZ+Z+6CMzyejZ7BJ89HtRPgidtj9DYBo0ghQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=m5xJifC4eHUM9fgaarkxzc2O70jKYp1fPfoUhQAGHKY=;
- b=aF+p04i3Hoz39F7ulKKzEvM9gUMEEex3wS7hjlCi5aWS6IYy5uP1mMdimc4VNynZAsRMitFMVZ9q15BWqJzNdYfVmdjLLUkM2Beq9DQxx1jhVP5+hO1xGv78nTlz58q0rnq5BFcgc2x5e7QMH/HEcUxCUZFNzwq+tEkvLrsqukPFvQpv0A7dmpU/NFiC3/g+/SLsIdYDGxsNHZNrMM1iHa6fOC6AKRITjwOt0cXldVfAE2y2GNYohQu5BP8b5a2foa/e3ogyuFXqOpmr0n/i6YzStHSVScLea19KXOaujm+9tFQNg3S2IbjocoqOj9lKAvcz6hmvupEiFwQ496ViIQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=suse.com; dmarc=pass action=none header.from=suse.com;
- dkim=pass header.d=suse.com; arc=none
-Authentication-Results: eryu.me; dkim=none (message not signed)
- header.d=none;eryu.me; dmarc=none action=none header.from=suse.com;
-Received: from AM0PR04MB6195.eurprd04.prod.outlook.com (2603:10a6:208:13c::13)
- by AM8PR04MB7236.eurprd04.prod.outlook.com (2603:10a6:20b:1d9::7) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3412.20; Thu, 24 Sep
- 2020 05:08:25 +0000
-Received: from AM0PR04MB6195.eurprd04.prod.outlook.com
- ([fe80::e9b0:22ea:e2da:1315]) by AM0PR04MB6195.eurprd04.prod.outlook.com
- ([fe80::e9b0:22ea:e2da:1315%5]) with mapi id 15.20.3412.020; Thu, 24 Sep 2020
- 05:08:25 +0000
-Subject: Re: [PATCH v3] btrfs: Add new test for qgroup assign functionality
-To:     Sidong Yang <realwakka@gmail.com>, linux-btrfs@vger.kernel.org,
-        fstests@vger.kernel.org
-CC:     Josef Bacik <josef@toxicpanda.com>, Eryu Guan <guan@eryu.me>
-References: <20200924041146.32577-1-realwakka@gmail.com>
-From:   Qu Wenruo <wqu@suse.com>
-Autocrypt: addr=wqu@suse.com; keydata=
- mQENBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
- 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
- 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
- 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
- gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
- AAG0GFF1IFdlbnJ1byA8d3F1QHN1c2UuY29tPokBTQQTAQgAOAIbAwULCQgHAgYVCAkKCwIE
- FgIDAQIeAQIXgBYhBC3fcuWlpVuonapC4cI9kfOhJf6oBQJdnDWhAAoJEMI9kfOhJf6oZgoH
- 90uqoGyUh5UWtiT9zjUcvlMTCpd/QSgwagDuY+tEdVPaKlcnTNAvZKWSit8VuocjrOFbTLwb
- vZ43n5f/l/1QtwMgQei/RMY2XhW+totimzlHVuxVaIDwkF+zc+pUI6lDPnULZHS3mWhbVr9N
- vZAAYVV7GesyyFpZiNm7GLvLmtEdYbc9OnIAOZb3eKfY3mWEs0eU0MxikcZSOYy3EWY3JES7
- J9pFgBrCn4hF83tPH2sphh1GUFii+AUGBMY/dC6VgMKbCugg+u/dTZEcBXxD17m+UcbucB/k
- F2oxqZBEQrb5SogdIq7Y9dZdlf1m3GRRJTX7eWefZw10HhFhs1mwx7kBDQRZ1YGvAQgAqlPr
- YeBLMv3PAZ75YhQIwH6c4SNcB++hQ9TCT5gIQNw51+SQzkXIGgmzxMIS49cZcE4KXk/kHw5h
- ieQeQZa60BWVRNXwoRI4ib8okgDuMkD5Kz1WEyO149+BZ7HD4/yK0VFJGuvDJR8T7RZwB69u
- VSLjkuNZZmCmDcDzS0c/SJOg5nkxt1iTtgUETb1wNKV6yR9XzRkrEW/qShChyrS9fNN8e9c0
- MQsC4fsyz9Ylx1TOY/IF/c6rqYoEEfwnpdlz0uOM1nA1vK+wdKtXluCa79MdfaeD/dt76Kp/
- o6CAKLLcjU1Iwnkq1HSrYfY3HZWpvV9g84gPwxwxX0uXquHxLwARAQABiQE8BBgBCAAmAhsM
- FiEELd9y5aWlW6idqkLhwj2R86El/qgFAl2cNa4FCQlqTn8ACgkQwj2R86El/qhXBAf/eXLP
- HDNTkHRPxoDnwhscIHJDHlsszke25AFltJQ1adoaYCbsQVv4Mn5rQZ1Gon54IMdxBN3r/B08
- rGVPatIfkycMCShr+rFHPKnExhQ7Wr555fq+sQ1GOwOhr1xLEqAhBMp28u9m8hnkqL36v+AF
- hjTwRtS+tRMZfoG6n72xAj984l56G9NPfs/SOKl6HR0mCDXwJGZAOdtyRmqddi53SXi5N4H1
- jWX1xFshp7nIkRm6hEpISEWr/KKLbAiKKbP0ql5tP5PinJeIBlDv4g/0+aGoGg4dELTnfEVk
- jMC8cJ/LiIaR/OEOF9S2nSeTQoBmusTz+aqkbogvvYGam6uDYw==
-Message-ID: <d67277a5-c0a9-cee5-cddd-54ab8610fc41@suse.com>
-Date:   Thu, 24 Sep 2020 13:08:13 +0800
+        bh=3qMiDqx8IRE9Q/EnpX4RbcQTEA0PuUapV58FkgSF1U8=;
+        b=QWnM2DxLPSji4goDkMUxsGJJqzZrmfohEz8dAg6Jfoxig0IcvXHy9nDQxhulyoS5fOkRBX
+        lhbaJPjRyOOhN+GNmbDuogIviaB2Pcv037+dfG6etY2q1ZjUliGlW9c8kenw3y3ppb4nRh
+        8+7QymM76fMKgYdIvl3EjAPDflvzXkQ=
+Received: from relay2.suse.de (unknown [195.135.221.27])
+        by mx2.suse.de (Postfix) with ESMTP id F4045AC0C;
+        Thu, 24 Sep 2020 08:33:30 +0000 (UTC)
+Subject: Re: [PATCH] btrfs: test fstrim after doing a device replace
+To:     fdmanana@kernel.org, fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+References: <a8f27095c014466444a70b77810ba826df68e623.1600870988.git.fdmanana@suse.com>
+From:   Nikolay Borisov <nborisov@suse.com>
+Autocrypt: addr=nborisov@suse.com; prefer-encrypt=mutual; keydata=
+ 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
+Message-ID: <4e77797e-3d0a-b90b-6ea8-ae2880a10d9b@suse.com>
+Date:   Thu, 24 Sep 2020 11:32:52 +0300
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.12.0
-In-Reply-To: <20200924041146.32577-1-realwakka@gmail.com>
+ Thunderbird/68.10.0
+MIME-Version: 1.0
+In-Reply-To: <a8f27095c014466444a70b77810ba826df68e623.1600870988.git.fdmanana@suse.com>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
-Content-Transfer-Encoding: quoted-printable
-X-ClientProxiedBy: BYAPR03CA0034.namprd03.prod.outlook.com
- (2603:10b6:a02:a8::47) To AM0PR04MB6195.eurprd04.prod.outlook.com
- (2603:10a6:208:13c::13)
-MIME-Version: 1.0
-X-MS-Exchange-MessageSentRepresentingType: 1
-Received: from [0.0.0.0] (149.28.201.231) by BYAPR03CA0034.namprd03.prod.outlook.com (2603:10b6:a02:a8::47) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3412.22 via Frontend Transport; Thu, 24 Sep 2020 05:08:22 +0000
-X-Originating-IP: [149.28.201.231]
-X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: a4b34a28-fce7-4993-bb6a-08d86047ddb3
-X-MS-TrafficTypeDiagnostic: AM8PR04MB7236:
-X-Microsoft-Antispam-PRVS: <AM8PR04MB72366013C764EE58C29BD1BCD6390@AM8PR04MB7236.eurprd04.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:5236;
-X-MS-Exchange-SenderADCheck: 1
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: Qa128ig9Ku3JbMpuOlZ2osBwp0G0AjKqqECen6hNa61KZIIjeVVmDeiaNqeUw03v6r/vAFJMxdR+6hbNEQ7l5+z8PwPhy87XiXb0izTzI/3My8vcahPXPaDCD4r0amo17IAwVMOiZ90zvm76LaxZ9DbDQw8VNJM0PN/YvN1eUAMedqGY6nRHzh+muboyPblOEy/WVe+TbQAcqgrQAPAEFbO8D+poqXBOBz3toOzqo0jj8rqBHm5HxBXWnNT8q+o4Q5wUCyJbNMpTFQSMn5d13phpKDLVVNAjTzutz8wRQvW/eo9/x+ji5ko24A4OXsjxFKRa/l8egkdzFzeZ1Pzyo4hzs31OJ3d+zR88pUt0lOMqsqRT8rm3gXpKRhq5ngqfjh8NkTUryOJpZcCn6oxPiw==
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:AM0PR04MB6195.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(366004)(396003)(39850400004)(346002)(376002)(136003)(52116002)(186003)(16576012)(478600001)(36756003)(86362001)(26005)(31686004)(6706004)(4326008)(6666004)(6486002)(5660300002)(16526019)(316002)(8676002)(2906002)(66476007)(83380400001)(54906003)(66946007)(31696002)(956004)(2616005)(66556008)(8936002)(78286007)(43740500002);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData: mIhRoQh5UJL0OeNdPtWuMZvw2lxgtXBfTwQrvCgCV0MRNOzkGyjbj+nlLWvaQs6oCPXMrGVKipcqgsauTj6l8tcW3Yt3DL8DPd3Q9u8CFtygN363cgJDMsI/J2vEoVeQtH5KZ9SGLJaxoiWfislK4/YoPebk59bdmVdTfuRdv8NesKMBn9N6WqPOOqPlBukEdygZBAcU6COwuktEYtwmTr0/57Yq23zqRuUsJSFPLMNPwePK5kHXqUKU48zBrnGE9ItWuLsWRpYFPNEO/hdmkq0EcHEfbWb1e2QP3kjPTqVari61ajY97qLSLM3xe+BtXTyBalgSrKkjXQDUOf/ec8s8Km5bdvF7xbmW1XIYyVOp1QpVb2b7u1Vd2ZGEDY6Zpt53bTcNiA7kIYuz97wz1CmA7EXjLJUleXowRc6uo/QXfHGiq/JTke4mmxtFfED7jZn+uqw6Y9A2ITflHHwBLwA3BmWV+g7w0xRvf8vG2jOGPfxeAXdzZ2ivNdhFBjZg5uW+osFkoeIpxL+v7RBYeFTTKVWZul8+hMM1clECaLlHrDbMHRMu1qEOJsPF3rwSOZPIVbLC5+nhgVimwm4zodNgkj1/IhKqeaxBlafiDEMtjAOu0VujsQGF0CyWV2l6egLvTxWlUmM3T81ypnNoOQ==
-X-OriginatorOrg: suse.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: a4b34a28-fce7-4993-bb6a-08d86047ddb3
-X-MS-Exchange-CrossTenant-AuthSource: AM0PR04MB6195.eurprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 24 Sep 2020 05:08:25.3372
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: f7a17af6-1c5c-4a36-aa8b-f5be247aa4ba
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: gfiFQSmMDAyDAy53WA42fgIIi6DfXcNo4AjHBnQ0dy7d/BuMKMdkAnqL17Cm9rNu
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: AM8PR04MB7236
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
 
 
-On 2020/9/24 =E4=B8=8B=E5=8D=8812:11, Sidong Yang wrote:
-> This new test will test btrfs's qgroup assign functionality. The
-> test has 3 cases.
->=20
->  - assign, no shared extents
->  - assign, shared extents
->  - snapshot -i, shared extents
->=20
-> Each cases create subvolumes and assign qgroup in their own way
-> and check with the command "btrfs check".
->=20
-> Cc: Qu Wenruo <wqu@suse.com>
-> Cc: Eryu Guan <guan@eryu.me>
->=20
-> Signed-off-by: Sidong Yang <realwakka@gmail.com>
+On 23.09.20 г. 17:31 ч., fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
+> 
+> Test that after replacing a device, if we run fstrim against the filesystem
+> we do not trim/discard allocated chunks in the new device. We verify that
+> allocated chunks in the new device were not trim/discarded by mounting the
+> new device only in degraded mode, as this is the easiest way to verify it.
+> 
+> This currently fails on btrfs (since kernel 5.2) and is fixed by a patch
+> that has the following subject:
+> 
+>   "btrfs: fix filesystem corruption after a device replace"
+> 
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
 
-This version is much better overall.
-
-The remaining small problems are mostly fstests related then.
-...
-> +# Test assign qgroup for submodule with shared extents by reflink
-> +assign_shared_test()
-> +{
-> +	_scratch_mkfs > /dev/null 2>&1
-> +	_scratch_mount
-> +
-> +	echo "=3D=3D=3D qgroup assign shared test =3D=3D=3D" >> $seqres.full
-> +	$BTRFS_UTIL_PROG quota enable $SCRATCH_MNT
-> +	$BTRFS_UTIL_PROG quota rescan -w $SCRATCH_MNT >> $seqres.full
-> +
-> +	$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/a >> $seqres.full
-> +	$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/b >> $seqres.full
-> +
-> +	_ddt of=3D"$SCRATCH_MNT"/a/file1 bs=3D1M count=3D1 >> $seqres.full 2>&1
-> +	cp --reflink=3Dalways "$SCRATCH_MNT"/a/file1 "$SCRATCH_MNT"/b/file1
-> +
-> +	$BTRFS_UTIL_PROG qgroup create 1/100 $SCRATCH_MNT
-> +	$BTRFS_UTIL_PROG qgroup assign $SCRATCH_MNT/a 1/100 $SCRATCH_MNT
-> +	$BTRFS_UTIL_PROG qgroup assign $SCRATCH_MNT/b 1/100 $SCRATCH_MNT
-> +
-> +	_scratch_unmount
-> +	$BTRFS_UTIL_PROG check $SCRATCH_DEV >> $seqres.full 2>&1
-
-We have _check_scratch_fs() function to do it properly already.
-
-> +	[ $? -eq 0 ] || _fail "btrfs check failed"
-> +}
-> +
-> +# Test assign qgroup for submodule without shared extents
-> +assign_no_shared_test()
-> +{
-> +	_scratch_mkfs > /dev/null 2>&1
-> +	_scratch_mount
-> +
-> +	echo "=3D=3D=3D qgroup assign no shared test =3D=3D=3D" >> $seqres.full
-> +	$BTRFS_UTIL_PROG quota enable $SCRATCH_MNT
-
-It's recommended to call "quota rescan -w" to ensure we finished rescan.
-
-As fast enough system can go to next command before the auto rescan even
-finished.
-
-Not sure if Eryu would have extra comments.
-
-Thanks,
-Qu
-
-> +	$BTRFS_UTIL_PROG qgroup create 1/100 $SCRATCH_MNT
-> +
-> +	$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/a >> $seqres.full
-> +	$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/b >> $seqres.full
-> +
-> +	$BTRFS_UTIL_PROG qgroup assign $SCRATCH_MNT/a 1/100 $SCRATCH_MNT
-> +	$BTRFS_UTIL_PROG qgroup assign $SCRATCH_MNT/b 1/100 $SCRATCH_MNT
-> +	_scratch_unmount
-> +
-> +	$BTRFS_UTIL_PROG check $SCRATCH_DEV >> $seqres.full 2>&1
-> +	[ $? -eq 0 ] || _fail "btrfs check failed"
-> +}
-> +
-> +# Test snapshot with assigning qgroup for submodule
-> +snapshot_test()
-> +{
-> +	_scratch_mkfs > /dev/null 2>&1
-> +	_scratch_mount
-> +
-> +	echo "=3D=3D=3D qgroup snapshot test =3D=3D=3D" >> $seqres.full
-> +	$BTRFS_UTIL_PROG quota enable $SCRATCH_MNT
-> +	$BTRFS_UTIL_PROG quota rescan -w $SCRATCH_MNT >> $seqres.full
-> +
-> +	$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/a >> $seqres.full
-> +	_ddt of=3D"$SCRATCH_MNT"/a/file1 bs=3D1M count=3D1 >> $seqres.full 2>&1
-> +	subvolid=3D$(_btrfs_get_subvolid $SCRATCH_MNT a)
-> +	$BTRFS_UTIL_PROG subvolume snapshot -i 0/$subvolid $SCRATCH_MNT/a $SCRA=
-TCH_MNT/b >> $seqres.full
-> +	_scratch_unmount
-> +
-> +	$BTRFS_UTIL_PROG check $SCRATCH_DEV >> $seqres.full 2>&1
-> +	[ $? -eq 0 ] || _fail "btrfs check failed"
-> +}
-> +
-> +
-> +assign_no_shared_test
-> +
-> +assign_shared_test
-> +
-> +snapshot_test
-> +
-> +# success, all done
-> +echo "Silence is golden"
-> +status=3D0
-> +exit
-> diff --git a/tests/btrfs/221.out b/tests/btrfs/221.out
-> new file mode 100644
-> index 00000000..aa4351cd
-> --- /dev/null
-> +++ b/tests/btrfs/221.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 221
-> +Silence is golden
-> diff --git a/tests/btrfs/group b/tests/btrfs/group
-> index 1b5fa695..cdda38f3 100644
-> --- a/tests/btrfs/group
-> +++ b/tests/btrfs/group
-> @@ -222,3 +222,4 @@
->  218 auto quick volume
->  219 auto quick volume
->  220 auto quick
-> +221 auto quick qgroup
->=20
-
+Reviewed-by: Nikolay Borisov <nborisov@suse.com>
