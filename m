@@ -1,251 +1,235 @@
-Return-Path: <SRS0=/6m1=DE=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=Yh8Q=DG=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-17.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 44F34C4346E
-	for <linux-fstests@archiver.kernel.org>; Sun, 27 Sep 2020 17:15:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D16D9C4741F
+	for <linux-fstests@archiver.kernel.org>; Tue, 29 Sep 2020 07:47:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id ED38023976
-	for <linux-fstests@archiver.kernel.org>; Sun, 27 Sep 2020 17:15:28 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="fvaYWIT2"
+	by mail.kernel.org (Postfix) with ESMTP id A69482075E
+	for <linux-fstests@archiver.kernel.org>; Tue, 29 Sep 2020 07:47:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726281AbgI0RP2 (ORCPT
+        id S1725776AbgI2Hrh (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 27 Sep 2020 13:15:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41772 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726255AbgI0RP2 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 27 Sep 2020 13:15:28 -0400
-Received: from mail-pg1-x52e.google.com (mail-pg1-x52e.google.com [IPv6:2607:f8b0:4864:20::52e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 76EA2C0613CE;
-        Sun, 27 Sep 2020 10:15:28 -0700 (PDT)
-Received: by mail-pg1-x52e.google.com with SMTP id 7so6184120pgm.11;
-        Sun, 27 Sep 2020 10:15:28 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=bCB/gR5DCf/duOs2FcxvscpF3biWclepxbmD5HHNBoQ=;
-        b=fvaYWIT2/1nVyTBMOd34hdm6YE0a0B2yo9iud5iCajIs4fK3VSs9aSIkU99IJmg0+z
-         Ak57wtviiRtBntAEi0Fyf5Zt+X3d5pwByPwm7QUFcToWQfMR2RfEZtVdfTou7PhuhgfC
-         DUfiHVNAxTpKkY1r9WSieiOsHvU5G4r/APTVzus2pTrfws0W1jh2zzrxA+gWxhpd1MKu
-         D2unhZQenpUInnloccG4ohYrNAyMLU1dFaORWuq9GZhNxEtPFzFrpjaJpJ77EO1IP9L7
-         p/GJkzqpFSaCh6uISrPlcbTWHK1GI40vQfTFWxmN8zx1pVR8YGxk/xbj6YAaozepMeAt
-         eR3Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=bCB/gR5DCf/duOs2FcxvscpF3biWclepxbmD5HHNBoQ=;
-        b=FhCW8qw/943Orcj0mslyf0jAwBzAYAWobpvK7OMbFq5yA4HMQJ903YDygpikH6bVMZ
-         OfDLQQX9c0Q/nHlrnTARB5M6sbQ87QUbSpROV7ufhEQkAFcZju5A1FaEqEYpkgYrMzwO
-         fulM0xg8aqmt4mn9n3yW88IXO4WqvgNqPMPkmzyREN2+3wg1nd9BuuEc8ZVRlN+EaCoD
-         v2FMylYNrDShhdjGCLQS60jA+9wSic8kNIGeYaVv83n6jGSJtD36JJVah3fXDzhBXhY9
-         qJOKb6oxoheD2gG6Ynp6ZMXTlHSf9r/mz6jXiOUD3/SCS3PqdvIQJ6KszFRewMQp3+t/
-         AMKw==
-X-Gm-Message-State: AOAM531PrPEEdUQo+JUYD1cVzJUWs7HiZIllSoo0wTp/skOj3Mh/5agH
-        aFFyoDVtyQCXRKMwJ1oihmk2K5FcQ093Uvho
-X-Google-Smtp-Source: ABdhPJzKVDpaGrr0DinRJ0FJU1fKuzykxhYwTFwy1S1ONliPmskXtVTtgwnp5RxXLWtLCQKs4MsqtA==
-X-Received: by 2002:a63:5d0e:: with SMTP id r14mr6040901pgb.278.1601226927377;
-        Sun, 27 Sep 2020 10:15:27 -0700 (PDT)
-Received: from localhost.localdomain ([175.195.128.78])
-        by smtp.googlemail.com with ESMTPSA id m188sm8867248pfd.56.2020.09.27.10.15.24
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 27 Sep 2020 10:15:26 -0700 (PDT)
-From:   Sidong Yang <realwakka@gmail.com>
-To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Cc:     Sidong Yang <realwakka@gmail.com>, Qu Wenruo <wqu@suse.com>,
-        Josef Bacik <josef@toxicpanda.com>, Eryu Guan <guan@eryu.me>
-Subject: [PATCH v5] btrfs: Add new test for qgroup assign functionality
-Date:   Sun, 27 Sep 2020 17:15:12 +0000
-Message-Id: <20200927171512.1253-1-realwakka@gmail.com>
+        Tue, 29 Sep 2020 03:47:37 -0400
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:16796 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1725535AbgI2Hrh (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 29 Sep 2020 03:47:37 -0400
+X-IronPort-AV: E=Sophos;i="5.77,317,1596470400"; 
+   d="scan'208";a="99706518"
+Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
+  by heian.cn.fujitsu.com with ESMTP; 29 Sep 2020 15:47:32 +0800
+Received: from G08CNEXMBPEKD05.g08.fujitsu.local (unknown [10.167.33.204])
+        by cn.fujitsu.com (Postfix) with ESMTP id 0389048990E8;
+        Tue, 29 Sep 2020 15:47:27 +0800 (CST)
+Received: from G08CNEXCHPEKD06.g08.fujitsu.local (10.167.33.205) by
+ G08CNEXMBPEKD05.g08.fujitsu.local (10.167.33.204) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.2; Tue, 29 Sep 2020 15:47:26 +0800
+Received: from Fedora-31.g08.fujitsu.local (10.167.220.31) by
+ G08CNEXCHPEKD06.g08.fujitsu.local (10.167.33.205) with Microsoft SMTP Server
+ id 15.0.1497.2 via Frontend Transport; Tue, 29 Sep 2020 15:47:23 +0800
+From:   Xiao Yang <yangx.jy@cn.fujitsu.com>
+To:     <linux-unionfs@vger.kernel.org>
+CC:     <miklos@szeredi.hu>, <amir73il@gmail.com>, <hch@infradead.org>,
+        <darrick.wong@oracle.com>, <fstests@vger.kernel.org>,
+        Xiao Yang <yangx.jy@cn.fujitsu.com>
+Subject: [PATCH v2 1/2] ovl: support [S|G]ETFLAGS and FS[S|G]ETXATTR ioctls for directories
+Date:   Tue, 29 Sep 2020 15:28:47 +0800
+Message-ID: <20200929072848.853877-1-yangx.jy@cn.fujitsu.com>
 X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-yoursite-MailScanner-ID: 0389048990E8.AC791
+X-yoursite-MailScanner: Found to be clean
+X-yoursite-MailScanner-From: yangx.jy@cn.fujitsu.com
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This new test will test btrfs's qgroup assign functionality. The
-test has 3 cases.
+From: Amir Goldstein <amir73il@gmail.com>
 
- - assign, no shared extents
- - assign, shared extents
- - snapshot -i, shared extents
+[S|G]ETFLAGS and FS[S|G]ETXATTR ioctls are applicable to both files and
+directories, so add ioctl operations to dir as well.
 
-Each cases create subvolumes and assign qgroup in their own way
-and check with the command "btrfs check".
+We teach ovl_real_fdget() to get the realfile of directories which use
+a different type of file->private_data.
 
-Signed-off-by: Sidong Yang <realwakka@gmail.com>
-Reviewed-by: Qu Wenruo <wqu@suse.com>
-Reviewed-by: Eryu Guan <guan@eryu.me>
+ifdef away compat ioctl implementation to conform to standard practice.
 
+With this change, xfstest generic/079 which tests these ioctls on files
+and directories passes.
+
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Reviewed-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
 ---
-v2:
- - Create new test and use the cases
-v3:
- - Fix some minor mistakes
- - Make that write some data before assign or snapshot in test
- - Put mkfs & mount pair in test function
-v4:
- - Add rescan command for assign no shared
- - Use _check_scratch_fs for checking
-v5:
- - Remove trailing whitespaces
----
- tests/btrfs/221     | 116 ++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/221.out |   2 +
- tests/btrfs/group   |   1 +
- 3 files changed, 119 insertions(+)
- create mode 100755 tests/btrfs/221
- create mode 100644 tests/btrfs/221.out
 
-diff --git a/tests/btrfs/221 b/tests/btrfs/221
-new file mode 100755
-index 00000000..19b3740b
---- /dev/null
-+++ b/tests/btrfs/221
-@@ -0,0 +1,116 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2020 Sidong Yang.  All Rights Reserved.
-+#
-+# FS QA Test 221
-+#
-+# Test the assign functionality of qgroups
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
+V1->v2:
+1) Rename subject
+2) Rebase on top of the following branch:
+   git://git.kernel.org/pub/scm/linux/kernel/git/mszeredi/vfs.git overlayfs-next
+
+ fs/overlayfs/file.c      | 16 +++++++++++++---
+ fs/overlayfs/overlayfs.h |  3 +++
+ fs/overlayfs/readdir.c   | 33 ++++++++++++++++++++++++++++-----
+ 3 files changed, 44 insertions(+), 8 deletions(-)
+
+diff --git a/fs/overlayfs/file.c b/fs/overlayfs/file.c
+index 3582c3ae819c..90b9aaebdf57 100644
+--- a/fs/overlayfs/file.c
++++ b/fs/overlayfs/file.c
+@@ -136,6 +136,13 @@ static int ovl_real_fdget_meta(const struct file *file, struct fd *real,
+ 
+ static int ovl_real_fdget(const struct file *file, struct fd *real)
+ {
++	if (d_is_dir(file_dentry(file))) {
++	    real->flags = 0;
++	    real->file = ovl_dir_real_file(file, false);
 +
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
++	    return PTR_ERR_OR_ZERO(real->file);
++	}
 +
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
+ 	return ovl_real_fdget_meta(file, real, false);
+ }
+ 
+@@ -648,7 +655,7 @@ static long ovl_ioctl_set_fsxflags(struct file *file, unsigned int cmd,
+ 				   ovl_fsxflags_to_iflags(fa.fsx_xflags));
+ }
+ 
+-static long ovl_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
++long ovl_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+ {
+ 	long ret;
+ 
+@@ -673,8 +680,8 @@ static long ovl_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+ 	return ret;
+ }
+ 
+-static long ovl_compat_ioctl(struct file *file, unsigned int cmd,
+-			     unsigned long arg)
++#ifdef CONFIG_COMPAT
++long ovl_compat_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+ {
+ 	switch (cmd) {
+ 	case FS_IOC32_GETFLAGS:
+@@ -691,6 +698,7 @@ static long ovl_compat_ioctl(struct file *file, unsigned int cmd,
+ 
+ 	return ovl_ioctl(file, cmd, arg);
+ }
++#endif
+ 
+ enum ovl_copyop {
+ 	OVL_COPY,
+@@ -792,7 +800,9 @@ const struct file_operations ovl_file_operations = {
+ 	.fallocate	= ovl_fallocate,
+ 	.fadvise	= ovl_fadvise,
+ 	.unlocked_ioctl	= ovl_ioctl,
++#ifdef CONFIG_COMPAT
+ 	.compat_ioctl	= ovl_compat_ioctl,
++#endif
+ 	.splice_read    = ovl_splice_read,
+ 	.splice_write   = ovl_splice_write,
+ 
+diff --git a/fs/overlayfs/overlayfs.h b/fs/overlayfs/overlayfs.h
+index 7bce2469fe55..f8880aa2ba0e 100644
+--- a/fs/overlayfs/overlayfs.h
++++ b/fs/overlayfs/overlayfs.h
+@@ -416,6 +416,7 @@ static inline int ovl_verify_upper(struct ovl_fs *ofs, struct dentry *index,
+ 
+ /* readdir.c */
+ extern const struct file_operations ovl_dir_operations;
++struct file *ovl_dir_real_file(const struct file *file, bool want_upper);
+ int ovl_check_empty_dir(struct dentry *dentry, struct list_head *list);
+ void ovl_cleanup_whiteouts(struct dentry *upper, struct list_head *list);
+ void ovl_cache_free(struct list_head *list);
+@@ -503,6 +504,8 @@ struct dentry *ovl_create_temp(struct dentry *workdir, struct ovl_cattr *attr);
+ extern const struct file_operations ovl_file_operations;
+ int __init ovl_aio_request_cache_init(void);
+ void ovl_aio_request_cache_destroy(void);
++long ovl_ioctl(struct file *file, unsigned int cmd, unsigned long arg);
++long ovl_compat_ioctl(struct file *file, unsigned int cmd, unsigned long arg);
+ 
+ /* copy_up.c */
+ int ovl_copy_up(struct dentry *dentry);
+diff --git a/fs/overlayfs/readdir.c b/fs/overlayfs/readdir.c
+index 596002054ac6..392efbbe9242 100644
+--- a/fs/overlayfs/readdir.c
++++ b/fs/overlayfs/readdir.c
+@@ -853,16 +853,22 @@ static struct file *ovl_dir_open_realfile(struct file *file,
+ 	return res;
+ }
+ 
+-static int ovl_dir_fsync(struct file *file, loff_t start, loff_t end,
+-			 int datasync)
++/*
++ * Like ovl_real_fdget(), returns upperfile if dir was copied up since open.
++ * Unlike ovl_real_fdget(), this caches upperfile in file->private_data.
++ *
++ * TODO: use same abstract type for file->private_data of dir and file so
++ * upperfile could also be cached for files as well.
++ */
++struct file *ovl_dir_real_file(const struct file *file, bool want_upper)
+ {
++
+ 	struct ovl_dir_file *od = file->private_data;
+ 	struct dentry *dentry = file->f_path.dentry;
+ 	struct file *realfile = od->realfile;
+ 
+-	/* Nothing to sync for lower */
+ 	if (!OVL_TYPE_UPPER(ovl_path_type(dentry)))
+-		return 0;
++		return want_upper ? NULL : realfile;
+ 
+ 	if (!ovl_should_sync(OVL_FS(dentry->d_sb)))
+ 		return 0;
+@@ -884,7 +890,7 @@ static int ovl_dir_fsync(struct file *file, loff_t start, loff_t end,
+ 			if (!od->upperfile) {
+ 				if (IS_ERR(realfile)) {
+ 					inode_unlock(inode);
+-					return PTR_ERR(realfile);
++					return realfile;
+ 				}
+ 				smp_store_release(&od->upperfile, realfile);
+ 			} else {
+@@ -897,6 +903,19 @@ static int ovl_dir_fsync(struct file *file, loff_t start, loff_t end,
+ 		}
+ 	}
+ 
++	return realfile;
 +}
 +
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/reflink
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs btrfs
-+_supported_os Linux
-+
-+_require_scratch
-+_require_btrfs_qgroup_report
-+_require_cp_reflink
-+
-+# Test assign qgroup for submodule with shared extents by reflink
-+assign_shared_test()
++static int ovl_dir_fsync(struct file *file, loff_t start, loff_t end,
++			 int datasync)
 +{
-+	_scratch_mkfs > /dev/null 2>&1
-+	_scratch_mount
++	struct file *realfile = ovl_dir_real_file(file, true);
++	int err = PTR_ERR_OR_ZERO(realfile);
 +
-+	echo "=== qgroup assign shared test ===" >> $seqres.full
-+	$BTRFS_UTIL_PROG quota enable $SCRATCH_MNT
-+	$BTRFS_UTIL_PROG quota rescan -w $SCRATCH_MNT >> $seqres.full
++	/* Nothing to sync for lower */
++	if (!realfile || err)
++		return err;
 +
-+	$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/a >> $seqres.full
-+	$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/b >> $seqres.full
-+
-+	_ddt of="$SCRATCH_MNT"/a/file1 bs=1M count=1 >> $seqres.full 2>&1
-+	cp --reflink=always "$SCRATCH_MNT"/a/file1 "$SCRATCH_MNT"/b/file1
-+
-+	$BTRFS_UTIL_PROG qgroup create 1/100 $SCRATCH_MNT
-+	$BTRFS_UTIL_PROG qgroup assign $SCRATCH_MNT/a 1/100 $SCRATCH_MNT
-+	$BTRFS_UTIL_PROG qgroup assign $SCRATCH_MNT/b 1/100 $SCRATCH_MNT
-+
-+	_scratch_unmount
-+	_check_scratch_fs
-+}
-+
-+# Test assign qgroup for submodule without shared extents
-+assign_no_shared_test()
-+{
-+	_scratch_mkfs > /dev/null 2>&1
-+	_scratch_mount
-+
-+	echo "=== qgroup assign no shared test ===" >> $seqres.full
-+	$BTRFS_UTIL_PROG quota enable $SCRATCH_MNT
-+	$BTRFS_UTIL_PROG quota rescan -w $SCRATCH_MNT >> $seqres.full
-+
-+	$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/a >> $seqres.full
-+	$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/b >> $seqres.full
-+
-+	$BTRFS_UTIL_PROG qgroup create 1/100 $SCRATCH_MNT
-+	$BTRFS_UTIL_PROG qgroup assign $SCRATCH_MNT/a 1/100 $SCRATCH_MNT
-+	$BTRFS_UTIL_PROG qgroup assign $SCRATCH_MNT/b 1/100 $SCRATCH_MNT
-+
-+	_scratch_unmount
-+	_check_scratch_fs
-+}
-+
-+# Test snapshot with assigning qgroup for submodule
-+snapshot_test()
-+{
-+	_scratch_mkfs > /dev/null 2>&1
-+	_scratch_mount
-+
-+	echo "=== qgroup snapshot test ===" >> $seqres.full
-+	$BTRFS_UTIL_PROG quota enable $SCRATCH_MNT
-+	$BTRFS_UTIL_PROG quota rescan -w $SCRATCH_MNT >> $seqres.full
-+
-+	$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/a >> $seqres.full
-+	_ddt of="$SCRATCH_MNT"/a/file1 bs=1M count=1 >> $seqres.full 2>&1
-+	subvolid=$(_btrfs_get_subvolid $SCRATCH_MNT a)
-+	$BTRFS_UTIL_PROG subvolume snapshot -i 0/$subvolid $SCRATCH_MNT/a $SCRATCH_MNT/b >> $seqres.full
-+
-+	_scratch_unmount
-+	_check_scratch_fs
-+}
-+
-+
-+assign_no_shared_test
-+
-+assign_shared_test
-+
-+snapshot_test
-+
-+# success, all done
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/btrfs/221.out b/tests/btrfs/221.out
-new file mode 100644
-index 00000000..aa4351cd
---- /dev/null
-+++ b/tests/btrfs/221.out
-@@ -0,0 +1,2 @@
-+QA output created by 221
-+Silence is golden
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 1b5fa695..cdda38f3 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -222,3 +222,4 @@
- 218 auto quick volume
- 219 auto quick volume
- 220 auto quick
-+221 auto quick qgroup
+ 	return vfs_fsync_range(realfile, start, end, datasync);
+ }
+ 
+@@ -949,6 +968,10 @@ const struct file_operations ovl_dir_operations = {
+ 	.llseek		= ovl_dir_llseek,
+ 	.fsync		= ovl_dir_fsync,
+ 	.release	= ovl_dir_release,
++	.unlocked_ioctl	= ovl_ioctl,
++#ifdef CONFIG_COMPAT
++	.compat_ioctl	= ovl_compat_ioctl,
++#endif
+ };
+ 
+ int ovl_check_empty_dir(struct dentry *dentry, struct list_head *list)
 -- 
 2.25.1
+
+
 
