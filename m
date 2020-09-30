@@ -2,202 +2,98 @@ Return-Path: <SRS0=elmR=DH=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.5 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 48822C4727E
-	for <linux-fstests@archiver.kernel.org>; Wed, 30 Sep 2020 10:03:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2FD30C4727E
+	for <linux-fstests@archiver.kernel.org>; Wed, 30 Sep 2020 12:42:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DDA702076B
-	for <linux-fstests@archiver.kernel.org>; Wed, 30 Sep 2020 10:03:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CDEA920789
+	for <linux-fstests@archiver.kernel.org>; Wed, 30 Sep 2020 12:42:38 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="rFoWSG+a"
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="FMTzZsZY"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728655AbgI3KDh (ORCPT
+        id S1729742AbgI3Mmi (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 30 Sep 2020 06:03:37 -0400
-Received: from aserp2120.oracle.com ([141.146.126.78]:42496 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728169AbgI3KDh (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 30 Sep 2020 06:03:37 -0400
-Received: from pps.filterd (aserp2120.oracle.com [127.0.0.1])
-        by aserp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 08UA3YOW027808;
-        Wed, 30 Sep 2020 10:03:34 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=subject : to : cc :
- references : from : message-id : date : mime-version : in-reply-to :
- content-type : content-transfer-encoding; s=corp-2020-01-29;
- bh=XuDqjil38Kd49vivUQ/quzDelvJ2/ScvG7HpfQ3/5Cc=;
- b=rFoWSG+azOCuwMqW6+JRoUUVfxV2maXht3cj6iz3fN1wAGmJBoTeLYHtDvBLknxsA4dR
- DwkkuQbPCat6Hxpaw+dSXjI0qvNQmkHSHEaZ9WMUl6lMlyQHda6tCkJG87qE0D1PzBtV
- CQXgMM3bhn8QHlPHUdF4gG30wpsoa0k9SfUFFrFdHdYGQe5xFit7w2pI1M/wUTQaCwdg
- rIPyRuLGRw4Rg+iwfyZOctZf660aie1xJU64dzuJrEFm94AWMdxcw36obWwR+8qk6ZaL
- N1oCxYgBf3O342vnG1tP50vBdbYQpcLqzmvoYuuH1ob5DhCZDupNRowfA4rE3bJDMMFS eA== 
-Received: from aserp3030.oracle.com (aserp3030.oracle.com [141.146.126.71])
-        by aserp2120.oracle.com with ESMTP id 33swkkynae-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Wed, 30 Sep 2020 10:03:34 +0000
-Received: from pps.filterd (aserp3030.oracle.com [127.0.0.1])
-        by aserp3030.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 08U9stBC019527;
-        Wed, 30 Sep 2020 10:01:32 GMT
-Received: from userv0121.oracle.com (userv0121.oracle.com [156.151.31.72])
-        by aserp3030.oracle.com with ESMTP id 33uv2f4tsf-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Wed, 30 Sep 2020 10:01:32 +0000
-Received: from abhmp0002.oracle.com (abhmp0002.oracle.com [141.146.116.8])
-        by userv0121.oracle.com (8.14.4/8.13.8) with ESMTP id 08UA1VmE026817;
-        Wed, 30 Sep 2020 10:01:31 GMT
-Received: from [192.168.1.102] (/39.109.231.106)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Wed, 30 Sep 2020 03:01:31 -0700
-Subject: Re: [PATCH] fstests: delete btrfs/064 it makes no sense
-To:     fdmanana@gmail.com
-Cc:     Josef Bacik <josef@toxicpanda.com>,
-        fstests <fstests@vger.kernel.org>,
-        linux-btrfs <linux-btrfs@vger.kernel.org>,
-        Eryu Guan <guaneryu@gmail.com>,
-        Johannes Thumshirn <johannes.thumshirn@wdc.com>
+        Wed, 30 Sep 2020 08:42:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44776 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725776AbgI3Mmi (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 30 Sep 2020 08:42:38 -0400
+Received: from mail-qk1-x741.google.com (mail-qk1-x741.google.com [IPv6:2607:f8b0:4864:20::741])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 35D42C0613D0
+        for <fstests@vger.kernel.org>; Wed, 30 Sep 2020 05:42:38 -0700 (PDT)
+Received: by mail-qk1-x741.google.com with SMTP id c2so1161875qkf.10
+        for <fstests@vger.kernel.org>; Wed, 30 Sep 2020 05:42:38 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=fmBkEup4lpsTX6MGr+G/TGCMTytcueGDwXZdpwelDo0=;
+        b=FMTzZsZYubwiSFoTTxX5zsAhHGOifphNqwFClABjwDkL48X5eL7h1nWLDJJLjOAL3a
+         vmGVjiriea/4+VB5Vzm727Q3CDNUHG19Pn0EfIxTzV8q8y1liIvuzLkxXTajj4yWsf1E
+         i2DD2h+1vvSq9EPU5/kRxI+c9HCeUXrRrYQjQgjrTORNvYu5YAgD+eJgEB8GVB75RMiL
+         hP84gRG52nKD7Q5vzf+N2MuHvKD5w1pgcTqL7klueSudGAvkHXec6DP2v9S+jDdudIa/
+         yVqzdV63f/O348WQv3cwJ44Y8/Nwv5WJT3/9N8L6tQepaMAV0ACq/mAAtiy4wi5sFclx
+         2XkA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=fmBkEup4lpsTX6MGr+G/TGCMTytcueGDwXZdpwelDo0=;
+        b=UEFJthCVcmaDIIh/FHyLqTRPNNfQySuJp3WnJPP+PLVQPPjZX1WFGdlzvtiZtT7tBB
+         PjwFcqfJeZ+DjIVieUF4AfUE8aAtSaMcBPSLHeWwOimJrmHwexct+BKdvi75nyggAXBi
+         0zFqxOtWzjhbmI2FhBBYaft4es2J2uJHww6q8e7a1QKaoRoR8XUqGPRKNfF3IjJo8U9c
+         K4FVEdYf5cHOYjA49WK1cfpxirasia0lGO6UutXKyOniJRdtqi8OvzEBe2/uUleSgwKU
+         ThgLYFrfR3Kj1kZ9Ye8BK2qdgCuY6uRuFAkG+BhpyEY6Y4+vCrwWjr3EFnl1Qq6zwrS9
+         kVZg==
+X-Gm-Message-State: AOAM530IjJer8mHH7tGoSWEP8IcMLGTsG+BpuTAZvg6d3ubsL1mcCoee
+        DAB8Annq7pOdoqudwddlEYYmDA==
+X-Google-Smtp-Source: ABdhPJw8MfuhKZ3oKyGEbYzhKVM81mqcgGmemT2JhSU2iy29lP1aED73ikM1SWgj0W5Z2y6qJLBU/g==
+X-Received: by 2002:a37:a607:: with SMTP id p7mr2354490qke.118.1601469757267;
+        Wed, 30 Sep 2020 05:42:37 -0700 (PDT)
+Received: from [192.168.1.45] (cpe-174-109-172-136.nc.res.rr.com. [174.109.172.136])
+        by smtp.gmail.com with ESMTPSA id d76sm1938762qkc.81.2020.09.30.05.42.36
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 30 Sep 2020 05:42:36 -0700 (PDT)
+Subject: Re: [PATCH v2] fstests: btrfs/064 add a comment to the test case
+ header
+To:     Anand Jain <anand.jain@oracle.com>, fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, guaneryu@gmail.com,
+        johannes.thumshirn@wdc.com
 References: <f36fdfad33395cbf99520479b162590935f3cfd1.1601394562.git.anand.jain@oracle.com>
- <CAL3q7H7QLe6EpK_g1S6MVhOPKaEsaYY9MeAHexdsEO=nz_qubQ@mail.gmail.com>
- <eba12792-b4b0-ca2e-3b78-7648ae60571c@toxicpanda.com>
- <CAL3q7H6qkVXMrJXeDnQWzVa95KS2QTEniKEEQbepEugPKMDrHQ@mail.gmail.com>
- <9dff9883-6275-d92c-e8d1-d5f0ef771613@toxicpanda.com>
- <a6c80503-df28-f25d-6437-657640bf8ade@oracle.com>
- <CAL3q7H6k4c9om0+of6yjib=OnNecnLvQMEi1n1NJWXK8L0MY5w@mail.gmail.com>
-From:   Anand Jain <anand.jain@oracle.com>
-Message-ID: <cd4a76d9-4401-b07e-dca8-8d69356bed44@oracle.com>
-Date:   Wed, 30 Sep 2020 18:01:26 +0800
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.3.1
+ <c224d095bf56d5cac6268829d2d285a48aca77e2.1601440484.git.anand.jain@oracle.com>
+From:   Josef Bacik <josef@toxicpanda.com>
+Message-ID: <35d6a7ab-5993-fff0-a775-7d533266f434@toxicpanda.com>
+Date:   Wed, 30 Sep 2020 08:42:35 -0400
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0)
+ Gecko/20100101 Thunderbird/78.2.2
 MIME-Version: 1.0
-In-Reply-To: <CAL3q7H6k4c9om0+of6yjib=OnNecnLvQMEi1n1NJWXK8L0MY5w@mail.gmail.com>
+In-Reply-To: <c224d095bf56d5cac6268829d2d285a48aca77e2.1601440484.git.anand.jain@oracle.com>
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9759 signatures=668680
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 phishscore=0 spamscore=0 adultscore=0
- suspectscore=1 malwarescore=0 bulkscore=0 mlxlogscore=999 mlxscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
- definitions=main-2009300078
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9759 signatures=668680
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 malwarescore=0 mlxscore=0 phishscore=0
- suspectscore=1 mlxlogscore=999 clxscore=1015 priorityscore=1501
- impostorscore=0 lowpriorityscore=0 bulkscore=0 spamscore=0 adultscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
- definitions=main-2009300079
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+On 9/30/20 12:44 AM, Anand Jain wrote:
+> It appears that the goal of this case was to test balance and
+> replace concurrency. But these two operations aren't meant to run
+> concurrently and the replace failing errors are captured in the
+> seqres.full output. Which are expected errors. To avoid further
+> confusion, this patch adds comments. The reason to keep this
+> test case is at the Link.
+> 
+> Link: https://patchwork.kernel.org/patch/11806307/
+> Reported-by: Josef Bacik <josef@toxicpanda.com>
+> Signed-off-by: Anand Jain <anand.jain@oracle.com>
 
+Reviewed-by: Josef Bacik <josef@toxicpanda.com>
 
-On 30/9/20 5:16 pm, Filipe Manana wrote:
-> On Wed, Sep 30, 2020 at 5:14 AM Anand Jain <anand.jain@oracle.com> wrote:
->>
->> On 30/9/20 1:26 am, Josef Bacik wrote:
->>> On 9/29/20 12:13 PM, Filipe Manana wrote:
->>>> On Tue, Sep 29, 2020 at 5:02 PM Josef Bacik <josef@toxicpanda.com> wrote:
->>>>>
->>>>> On 9/29/20 11:55 AM, Filipe Manana wrote:
->>>>>> On Tue, Sep 29, 2020 at 4:50 PM Anand Jain <anand.jain@oracle.com>
->>>>>> wrote:
->>>>>>>
->>>>>>> btrfs/064 aimed to test balance and replace concurrency while the
->>>>>>> stress
->>>>>>> test is running in the background.
->>>>>>>
->>>>>>> However, as the balance and the replace operation are mutually
->>>>>>> exclusive, so they can never run concurrently.
->>>>>>
->>>>>> And it's good to have a test that verifies that attempting to run them
->>>>>> concurrently doesn't cause any problems, like crashes, memory leaks or
->>>>>> some sort of filesystem corruption.
->>>>>>
->>>>>> For example btrfs/187, which I wrote sometime ago, tests that running
->>>>>> send, balance and deduplication in parallel doesn't result in crashes,
->>>>>> since in the past they were allowed to run concurrently.
->>>>>>
->>>>>> I see no point in removing the test, it's useful.
->>>>>
->>>>> My confusion was around whether this test was actually testing what we
->>>>> think it should be testing.  If this test was meant to make sure that
->>>>> replace works while we've got load on the fs, then clearly it's not
->>>>> doing what we think it's doing.
->>>>
->>>> Given that neither the test's description nor the changelog mention
->>>> that it expects device replace and balance to be able to run
->>>> concurrently,
->>>> that errors are explicitly ignored and redirected to $seqres.full, and
->>>> we don't do any sort of validation after device replace operations, it
->>>> makes it clear to me it's a stress test.
->>>>
->>>
->>> Sure but I spent a while looking at it when it was failing being very
->>> confused.  In my mind my snapshot-stress.sh is a stress test, because
->>> its meant to run without errors.  The changelog and description are
->>> sufficiently vague enough that it appeared that Eryu meant to write a
->>> test that actually did a replace and balance at the same time.  The test
->>> clearly isn't doing that, so we need to update the description so it's
->>> clear that's what's going on.  And then I wanted to make sure that we do
->>> in fact have a test that stresses replace in these scenarios, because I
->>> want to make sure we actually test replace as well.
->>>
->>> Not ripping it out is fine, but updating the description so I'm not
->>> confused in a couple years when I trip over this again would be nice.
->>> Thanks,
->>>
->>
->> As of now, we have the following balance concurrency tests.
->> -----
->> 028 balance and unlink fsstress concurrency [1]
->> 060 balance and subvol ops concurrency with fsstress [2]
->> 061 balance and scrub concurrency with fsstress [2]
->> 062 balance and defrag concurrency with fsstress [2]
->> 063 balance and remount concurrency with fsstress [2]
->> 064 balance and replace concurrency with fsstress  [2]
->> 177 balance and resize concurrency
-> 
-> No, 177 does not test balance and resize concurrency.
-> It tests balance when a swap file exists. And the resize happens
-> (starts and ends) before setting the swap file and before doing the
-> balance.
+Thanks,
 
-   You are right. Thanks for correcting.
--Anand
-
-> 
-> Thanks.
-> 
-> 
->> 187 balance, send and dedupe concurrency
->> 190 balance with qgroup
->>
->> [1]
->> args=`_scale_fsstress_args -z \
->>           -f write=10 -f unlink=10 \
->>           -f creat=10 -f fsync=10 \
->>           -f fsync=10 -n 100000 -p 2 \
->>           -d $SCRATCH_MNT/stress_dir`
->>
->> [2]
->> args=`_scale_fsstress_args -p 20 -n 100 $FSSTRESS_AVOID -d
->> $SCRATCH_MNT/stressdir`
->> -----
->>
->> 064 shall test balance with fsstress in the background. The replace
->> thread is kept out with the early check of BTRFS_FS_EXCL_OP in the kernel.
->> I am ok with the 064 headers updated, will send v2.
->>
->>
->> Also, it turns out that this test case helped to find a btrfs-progs bug.
->> Its patch [1] is sent to the ML.
->>     [1] btrfs-progs: fix return code for failed replace start
->>
->> Thanks, Anand
->>
->>
->>> Josef
->>
-> 
-> 
+Josef
