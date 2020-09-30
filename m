@@ -2,130 +2,80 @@ Return-Path: <SRS0=elmR=DH=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	UNPARSEABLE_RELAY,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B90F9C2D0A8
-	for <linux-fstests@archiver.kernel.org>; Wed, 30 Sep 2020 04:44:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6F75AC4727F
+	for <linux-fstests@archiver.kernel.org>; Wed, 30 Sep 2020 05:22:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 62A1E207C3
-	for <linux-fstests@archiver.kernel.org>; Wed, 30 Sep 2020 04:44:28 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="wgF06E2/"
+	by mail.kernel.org (Postfix) with ESMTP id 2D332216C4
+	for <linux-fstests@archiver.kernel.org>; Wed, 30 Sep 2020 05:22:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725385AbgI3Eo1 (ORCPT
+        id S1725771AbgI3FW4 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 30 Sep 2020 00:44:27 -0400
-Received: from aserp2120.oracle.com ([141.146.126.78]:51334 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725372AbgI3Eo1 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 30 Sep 2020 00:44:27 -0400
-Received: from pps.filterd (aserp2120.oracle.com [127.0.0.1])
-        by aserp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 08U4hgsN106374;
-        Wed, 30 Sep 2020 04:44:25 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=from : to : cc :
- subject : date : message-id : in-reply-to : references : mime-version :
- content-transfer-encoding; s=corp-2020-01-29;
- bh=pL4b2ORY//0zhLARhKqFVfcZS6Fa2CI6iKYTsnHCBcU=;
- b=wgF06E2/HoiQGsgsJhriz4BHUxHX2vBN6cYkxu2BHaCkzn7ccDRiReGuKHcd3fTIjXJU
- K3KZ4ldiPBBzzQ1rUCl1B8Esh9EcfwHKy7dG9lQr3moaoP+/k2GMSCYd50uHMsiV4GMb
- 4aW0N55UST2JCabu85BDRKV9ctYXhiUQRN1xr8k4MCduFRxDT1IA+sAM0fPNhJvuodwu
- f6mWNTo8f1N49Al70fmUfj6jy6+UFDz41yaFn2GCdfCJTJ+RIn8umjcWqFpZIvCZwlv5
- LprotJLWkcGe+IAtjIVbQPfsxaC42Fma/npqfVc8WTDaooYrIDBsvclhNkAdHijkQh3G kQ== 
-Received: from aserp3020.oracle.com (aserp3020.oracle.com [141.146.126.70])
-        by aserp2120.oracle.com with ESMTP id 33swkkxe18-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Wed, 30 Sep 2020 04:44:25 +0000
-Received: from pps.filterd (aserp3020.oracle.com [127.0.0.1])
-        by aserp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 08U4eSi5054782;
-        Wed, 30 Sep 2020 04:44:25 GMT
-Received: from aserv0121.oracle.com (aserv0121.oracle.com [141.146.126.235])
-        by aserp3020.oracle.com with ESMTP id 33tfhyhw4f-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Wed, 30 Sep 2020 04:44:24 +0000
-Received: from abhmp0018.oracle.com (abhmp0018.oracle.com [141.146.116.24])
-        by aserv0121.oracle.com (8.14.4/8.13.8) with ESMTP id 08U4iOKt022219;
-        Wed, 30 Sep 2020 04:44:24 GMT
-Received: from localhost.localdomain (/39.109.231.106)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Tue, 29 Sep 2020 21:44:23 -0700
-From:   Anand Jain <anand.jain@oracle.com>
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, josef@toxicpanda.com,
-        guaneryu@gmail.com, johannes.thumshirn@wdc.com
-Subject: [PATCH v2] fstests: btrfs/064 add a comment to the test case header
-Date:   Wed, 30 Sep 2020 12:44:16 +0800
-Message-Id: <c224d095bf56d5cac6268829d2d285a48aca77e2.1601440484.git.anand.jain@oracle.com>
+        Wed, 30 Sep 2020 01:22:56 -0400
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:8355 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1725879AbgI3FWy (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 30 Sep 2020 01:22:54 -0400
+X-IronPort-AV: E=Sophos;i="5.77,321,1596470400"; 
+   d="scan'208";a="99769467"
+Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
+  by heian.cn.fujitsu.com with ESMTP; 30 Sep 2020 13:22:49 +0800
+Received: from G08CNEXMBPEKD04.g08.fujitsu.local (unknown [10.167.33.201])
+        by cn.fujitsu.com (Postfix) with ESMTP id 1147848990F2;
+        Wed, 30 Sep 2020 13:22:49 +0800 (CST)
+Received: from G08CNEXCHPEKD06.g08.fujitsu.local (10.167.33.205) by
+ G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.2; Wed, 30 Sep 2020 13:22:48 +0800
+Received: from Fedora-31.g08.fujitsu.local (10.167.220.31) by
+ G08CNEXCHPEKD06.g08.fujitsu.local (10.167.33.205) with Microsoft SMTP Server
+ id 15.0.1497.2 via Frontend Transport; Wed, 30 Sep 2020 13:22:45 +0800
+From:   Xiao Yang <yangx.jy@cn.fujitsu.com>
+To:     <fstests@vger.kernel.org>
+CC:     <amir73il@gmail.com>, Xiao Yang <yangx.jy@cn.fujitsu.com>
+Subject: [PATCH] overlay/071: Fix undefined OVL_BASE_SCRATCH_DIR
+Date:   Wed, 30 Sep 2020 13:04:09 +0800
+Message-ID: <20200930050409.24705-1-yangx.jy@cn.fujitsu.com>
 X-Mailer: git-send-email 2.25.1
-In-Reply-To: <f36fdfad33395cbf99520479b162590935f3cfd1.1601394562.git.anand.jain@oracle.com>
-References: <f36fdfad33395cbf99520479b162590935f3cfd1.1601394562.git.anand.jain@oracle.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9759 signatures=668680
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 spamscore=0 mlxlogscore=999 bulkscore=0
- phishscore=0 malwarescore=0 adultscore=0 suspectscore=1 mlxscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
- definitions=main-2009300035
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9759 signatures=668680
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 malwarescore=0 mlxscore=0 phishscore=0
- suspectscore=1 mlxlogscore=999 clxscore=1015 priorityscore=1501
- impostorscore=0 lowpriorityscore=0 bulkscore=0 spamscore=0 adultscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
- definitions=main-2009300035
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-yoursite-MailScanner-ID: 1147848990F2.AA2F8
+X-yoursite-MailScanner: Found to be clean
+X-yoursite-MailScanner-From: yangx.jy@cn.fujitsu.com
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-It appears that the goal of this case was to test balance and
-replace concurrency. But these two operations aren't meant to run
-concurrently and the replace failing errors are captured in the
-seqres.full output. Which are expected errors. To avoid further
-confusion, this patch adds comments. The reason to keep this
-test case is at the Link.
+Replace undefined OVL_BASE_SCRATCH_DIR with OVL_BASE_SCRATCH_MNT
 
-Link: https://patchwork.kernel.org/patch/11806307/
-Reported-by: Josef Bacik <josef@toxicpanda.com>
-Signed-off-by: Anand Jain <anand.jain@oracle.com>
+Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
 ---
-v2: 
-Instead of removing the test case, add comments to clarify.
-Title is changed
- old: fstests: delete btrfs/064 it makes no sens
+ tests/overlay/071 | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
- tests/btrfs/064 | 10 +++++++---
- 1 file changed, 7 insertions(+), 3 deletions(-)
-
-diff --git a/tests/btrfs/064 b/tests/btrfs/064
-index 683a69f113bf..ce73acf7872a 100755
---- a/tests/btrfs/064
-+++ b/tests/btrfs/064
-@@ -4,9 +4,11 @@
- #
- # FSQA Test No. btrfs/064
- #
--# Run btrfs balance and replace operations simultaneously with fsstress
--# running in background.
--#
-+# Run btrfs balance and replace operations simultaneously with fsstress running
-+# in the background, check with the scrub if all the blocks are ok.
-+# Balance and replace operations are mutually exclusive operations they can't
-+# run simultaneously. One of them is expected to fail when the other is running.
-+
- seq=`basename $0`
- seqres=$RESULT_DIR/$seq
- echo "QA output created by $seq"
-@@ -62,6 +64,8 @@ run_test()
- 	$FSSTRESS_PROG $args >/dev/null 2>&1 &
- 	fsstress_pid=$!
+diff --git a/tests/overlay/071 b/tests/overlay/071
+index f18429c9..ac2324c8 100755
+--- a/tests/overlay/071
++++ b/tests/overlay/071
+@@ -59,9 +59,9 @@ lower=$OVL_BASE_TEST_DIR/$OVL_LOWER-$seq
+ upper=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
+ work=$OVL_BASE_SCRATCH_MNT/$OVL_WORK
+ # Lower dir of nested overlay is the scratch overlay mount at SCRATCH_MNT
+-upper2=$OVL_BASE_SCRATCH_DIR/$OVL_UPPER.2
+-work2=$OVL_BASE_SCRATCH_DIR/$OVL_WORK.2
+-mnt2=$OVL_BASE_SCRATCH_DIR/$OVL_MNT.2
++upper2=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER.2
++work2=$OVL_BASE_SCRATCH_MNT/$OVL_WORK.2
++mnt2=$OVL_BASE_SCRATCH_MNT/$OVL_MNT.2
  
-+	# Start both balance and replace in the background.
-+	# Either balance or replace shall run, the other fails.
- 	echo -n "Start balance worker: " >>$seqres.full
- 	_btrfs_stress_balance $SCRATCH_MNT >/dev/null 2>&1 &
- 	balance_pid=$!
+ lowerdir=$lower/lowertestdir
+ upperdir=$upper/uppertestdir
 -- 
 2.25.1
+
+
 
