@@ -4,50 +4,50 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-13.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 612B5C47420
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CD059C4742B
 	for <linux-fstests@archiver.kernel.org>; Thu,  1 Oct 2020 00:25:33 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2488821531
+	by mail.kernel.org (Postfix) with ESMTP id 99ADD2087D
 	for <linux-fstests@archiver.kernel.org>; Thu,  1 Oct 2020 00:25:33 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
 	s=default; t=1601511933;
-	bh=VBMU9zqlg9ziA+/O/cMqrobWj/zYBNWxbE24XEi8/AU=;
+	bh=pB9+XDQedKRY2rzT9jphCHX3wT7Ws8YKXXmwKKr3fqI=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=Dh4uxba9SqGHdh/pk2ZSLS7RvRqYr1H/b5sLZjUfV2eMKKYKExHT0NReaGdJs+hV3
-	 /oWTZpj3jhoh/R6/0RpNM8LG1lyhbdSQ1YYSSDGe/mT15uq1qzoxdMsmzzxyXBA389
-	 wlVTSSIcuNlJ5tDxTU1L26Ff7jYM5QCZvChfJBEY=
+	b=PMOEf8S2nAA2Y4Jjc3U1t5WCdj+wY3zE1pc4pF8v3vuOJ5akJ6z8kwGKltafxmll6
+	 VQBlAuGgUF19h+7xz0wHoUWzvnw3p6qvD2BakJ2PNFIbhvi1s9k/VRUztV2ycdYZsc
+	 6/rotQeWqREb0B4ealDIaA9Bl/nHnngD831W33Lo=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731959AbgJAAZc (ORCPT
+        id S1731964AbgJAAZd (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 30 Sep 2020 20:25:32 -0400
-Received: from mail.kernel.org ([198.145.29.99]:54442 "EHLO mail.kernel.org"
+        Wed, 30 Sep 2020 20:25:33 -0400
+Received: from mail.kernel.org ([198.145.29.99]:54480 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1730031AbgJAAZc (ORCPT <rfc822;fstests@vger.kernel.org>);
+        id S1730258AbgJAAZc (ORCPT <rfc822;fstests@vger.kernel.org>);
         Wed, 30 Sep 2020 20:25:32 -0400
 Received: from sol.attlocal.net (172-10-235-113.lightspeed.sntcca.sbcglobal.net [172.10.235.113])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 6CBC5206B6;
+        by mail.kernel.org (Postfix) with ESMTPSA id F408021D41;
         Thu,  1 Oct 2020 00:25:31 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1601511931;
-        bh=VBMU9zqlg9ziA+/O/cMqrobWj/zYBNWxbE24XEi8/AU=;
+        s=default; t=1601511932;
+        bh=pB9+XDQedKRY2rzT9jphCHX3wT7Ws8YKXXmwKKr3fqI=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=AugeuiLRw3N7KlPmLepNKhjwvFgVeDxBUEXbg+LSFZlH2CVtQlJR6d/Cld+l0Afp8
-         xLj2lKNGXvlnjdU+tTxNOLTGUkfME3T5UG8Wqr7PXzqscjVo1qAjqnVWoVqX4lzk06
-         eLD6IjeXdUfyS+G85rHJW4Xsc+RRbthsY9xI+djs=
+        b=yfKcrQRXtoPbngq70GQzXwip6neeb4NWmPs8QuC2hGTDqQ8YKwt4vguf8qcZPeguP
+         Y7qwwXqMqq6u7RH+CxurGR6yDQQNEt2L6ej9h6y9vDW+ng6xFBeFNbg2k49d+0W6rS
+         +PsEMNKbwf0p0xH6Fsv0lw2cYVYATsS+j3e2clb8=
 From:   Eric Biggers <ebiggers@kernel.org>
 To:     fstests@vger.kernel.org
 Cc:     linux-fscrypt@vger.kernel.org,
         linux-f2fs-devel@lists.sourceforge.net,
         Jaegeuk Kim <jaegeuk@kernel.org>, Chao Yu <yuchao0@huawei.com>,
         Daeho Jeong <daeho43@gmail.com>
-Subject: [PATCH 2/5] fscrypt-crypt-util: fix IV incrementing for --iv-ino-lblk-32
-Date:   Wed, 30 Sep 2020 17:25:04 -0700
-Message-Id: <20201001002508.328866-3-ebiggers@kernel.org>
+Subject: [PATCH 4/5] common/f2fs: add _require_scratch_f2fs_compression()
+Date:   Wed, 30 Sep 2020 17:25:06 -0700
+Message-Id: <20201001002508.328866-5-ebiggers@kernel.org>
 X-Mailer: git-send-email 2.28.0
 In-Reply-To: <20201001002508.328866-1-ebiggers@kernel.org>
 References: <20201001002508.328866-1-ebiggers@kernel.org>
@@ -59,145 +59,50 @@ X-Mailing-List: fstests@vger.kernel.org
 
 From: Eric Biggers <ebiggers@google.com>
 
-fscrypt-crypt-util treats the "block number" part of the IV as 64-bit
-when incrementing it.  That's wrong for --iv-ino-lblk-32 and
---iv-ino-lblk-64, as in those cases the block number should be 32-bit.
+Create the file common/f2fs, which will contain f2fs-specific utilities.
 
-Fix this by using the correct length for the block number.
-
-For --iv-ino-lblk-64 this doesn't actually matter, since in that case
-the block number starts at 0 and never exceeds UINT32_MAX.
-
-But for --iv-ino-lblk-32, the hashed inode number gets added to the
-original block number to produce the IV block number, which can later
-wrap around from UINT32_MAX to 0.  As a result, this change fixes
-generic/602, though since the wraparound case isn't specifically tested
-currently, the chance of failure was extremely small.
+Then add a function _require_scratch_f2fs_compression(), which checks
+for f2fs compression support on the scratch filesystem.
 
 Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- src/fscrypt-crypt-util.c | 54 ++++++++++++++++++++++++++++------------
- 1 file changed, 38 insertions(+), 16 deletions(-)
+ common/f2fs | 27 +++++++++++++++++++++++++++
+ 1 file changed, 27 insertions(+)
+ create mode 100644 common/f2fs
 
-diff --git a/src/fscrypt-crypt-util.c b/src/fscrypt-crypt-util.c
-index d9189346..5c065116 100644
---- a/src/fscrypt-crypt-util.c
-+++ b/src/fscrypt-crypt-util.c
-@@ -1692,16 +1692,32 @@ static const struct fscrypt_cipher *find_fscrypt_cipher(const char *name)
- 	return NULL;
- }
- 
--struct fscrypt_iv {
--	union {
--		__le64 block_num;
--		u8 bytes[32];
-+union fscrypt_iv {
-+	/* usual IV format */
-+	struct {
-+		/* logical block number within the file */
-+		__le64 block_number;
+diff --git a/common/f2fs b/common/f2fs
+new file mode 100644
+index 00000000..1b39d8ce
+--- /dev/null
++++ b/common/f2fs
+@@ -0,0 +1,27 @@
++#!/bin/bash
++# SPDX-License-Identifier: GPL-2.0-only
++# Copyright 2020 Google LLC
 +
-+		/* per-file nonce; only set in DIRECT_KEY mode */
-+		u8 nonce[FILE_NONCE_SIZE];
-+	};
-+	/* IV format for IV_INO_LBLK_* modes */
-+	struct {
-+		/*
-+		 * IV_INO_LBLK_64: logical block number within the file
-+		 * IV_INO_LBLK_32: hashed inode number + logical block number
-+		 *		   within the file, mod 2^32
-+		 */
-+		__le32 block_number32;
++# Require f2fs compression support on the scratch filesystem.
++# Optionally, check for support for a specific compression algorithm.
++_require_scratch_f2fs_compression()
++{
++	local algorithm=$1
 +
-+		/* IV_INO_LBLK_64: inode number */
-+		__le32 inode_number;
- 	};
- };
- 
- static void crypt_loop(const struct fscrypt_cipher *cipher, const u8 *key,
--		       struct fscrypt_iv *iv, bool decrypting,
--		       size_t block_size, size_t padding)
-+		       union fscrypt_iv *iv, bool decrypting,
-+		       size_t block_size, size_t padding, bool is_bnum_32bit)
- {
- 	u8 *buf = xmalloc(block_size);
- 	size_t res;
-@@ -1718,13 +1734,18 @@ static void crypt_loop(const struct fscrypt_cipher *cipher, const u8 *key,
- 		memset(&buf[res], 0, crypt_len - res);
- 
- 		if (decrypting)
--			cipher->decrypt(key, iv->bytes, buf, buf, crypt_len);
-+			cipher->decrypt(key, (u8 *)iv, buf, buf, crypt_len);
- 		else
--			cipher->encrypt(key, iv->bytes, buf, buf, crypt_len);
-+			cipher->encrypt(key, (u8 *)iv, buf, buf, crypt_len);
- 
- 		full_write(STDOUT_FILENO, buf, crypt_len);
- 
--		iv->block_num = cpu_to_le64(le64_to_cpu(iv->block_num) + 1);
-+		if (is_bnum_32bit)
-+			iv->block_number32 = cpu_to_le32(
-+					le32_to_cpu(iv->block_number32) + 1);
-+		else
-+			iv->block_number = cpu_to_le64(
-+					le64_to_cpu(iv->block_number) + 1);
- 	}
- 	free(buf);
- }
-@@ -1806,7 +1827,7 @@ static u32 hash_inode_number(const struct key_and_iv_params *params)
-  */
- static void get_key_and_iv(const struct key_and_iv_params *params,
- 			   u8 *real_key, size_t real_key_size,
--			   struct fscrypt_iv *iv)
-+			   union fscrypt_iv *iv)
- {
- 	bool file_nonce_in_iv = false;
- 	struct aes_key aes_key;
-@@ -1860,14 +1881,14 @@ static void get_key_and_iv(const struct key_and_iv_params *params,
- 			info[infolen++] = params->mode_num;
- 			memcpy(&info[infolen], params->fs_uuid, UUID_SIZE);
- 			infolen += UUID_SIZE;
--			put_unaligned_le32(params->inode_number, &iv->bytes[4]);
-+			iv->inode_number = cpu_to_le32(params->inode_number);
- 		} else if (params->iv_ino_lblk_32) {
- 			info[infolen++] = HKDF_CONTEXT_IV_INO_LBLK_32_KEY;
- 			info[infolen++] = params->mode_num;
- 			memcpy(&info[infolen], params->fs_uuid, UUID_SIZE);
- 			infolen += UUID_SIZE;
--			put_unaligned_le32(hash_inode_number(params),
--					   iv->bytes);
-+			iv->block_number32 =
-+				cpu_to_le32(hash_inode_number(params));
- 		} else if (params->mode_num != 0) {
- 			info[infolen++] = HKDF_CONTEXT_DIRECT_KEY;
- 			info[infolen++] = params->mode_num;
-@@ -1888,7 +1909,7 @@ static void get_key_and_iv(const struct key_and_iv_params *params,
- 	}
- 
- 	if (file_nonce_in_iv && params->file_nonce_specified)
--		memcpy(&iv->bytes[8], params->file_nonce, FILE_NONCE_SIZE);
-+		memcpy(iv->nonce, params->file_nonce, FILE_NONCE_SIZE);
- }
- 
- enum {
-@@ -1928,7 +1949,7 @@ int main(int argc, char *argv[])
- 	size_t padding = 0;
- 	const struct fscrypt_cipher *cipher;
- 	u8 real_key[MAX_KEY_SIZE];
--	struct fscrypt_iv iv;
-+	union fscrypt_iv iv;
- 	char *tmp;
- 	int c;
- 
-@@ -2025,6 +2046,7 @@ int main(int argc, char *argv[])
- 
- 	get_key_and_iv(&params, real_key, cipher->keysize, &iv);
- 
--	crypt_loop(cipher, real_key, &iv, decrypting, block_size, padding);
-+	crypt_loop(cipher, real_key, &iv, decrypting, block_size, padding,
-+		   params.iv_ino_lblk_64 || params.iv_ino_lblk_32);
- 	return 0;
- }
++	_require_scratch
++
++	if [ ! -e /sys/fs/f2fs/features/compression ]; then
++		_notrun "Kernel doesn't support f2fs compression"
++	fi
++	# Note: '-O compression' is only accepted when used in
++	# combination with extra_attr.
++	if ! _scratch_mkfs -O compression,extra_attr >> $seqres.full; then
++		_notrun "f2fs-tools doesn't support compression"
++	fi
++	if [ -n "$algorithm" ]; then
++		if ! _scratch_mount "-o compress_algorithm=$algorithm"; then
++			_notrun "Kernel doesn't support $algorithm compression algorithm for f2fs"
++		fi
++		_scratch_unmount
++	fi
++}
 -- 
 2.28.0
 
