@@ -1,168 +1,89 @@
-Return-Path: <SRS0=crIS=DJ=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=D0rD=DK=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A23ECC4363D
-	for <linux-fstests@archiver.kernel.org>; Fri,  2 Oct 2020 18:20:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0F522C46466
+	for <linux-fstests@archiver.kernel.org>; Sat,  3 Oct 2020 03:56:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3E0B320795
-	for <linux-fstests@archiver.kernel.org>; Fri,  2 Oct 2020 18:20:38 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="dMlSRi+L"
+	by mail.kernel.org (Postfix) with ESMTP id CE65D20672
+	for <linux-fstests@archiver.kernel.org>; Sat,  3 Oct 2020 03:56:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2387908AbgJBSUi (ORCPT
+        id S1725772AbgJCD41 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 2 Oct 2020 14:20:38 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:50443 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1725991AbgJBSUh (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 2 Oct 2020 14:20:37 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1601662836;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=lqqL3jwW0Qxyljotmq4NPWT4XpzpY6tFGrdJ6FJR2t4=;
-        b=dMlSRi+LJzbKdyP9hMsuvtzg9R6vuSX/UtTsBK0mwOxNhWrcCiwIAWJP1e8DJTCrwXEv/1
-        cbdLraIEGWOrMrtsllFUslvjIAG4+bqMwaP4KDvIM+EZwtzqo6JGMs5m9tBjOl0P/sQ8AS
-        SNTArvIGqmC3f/ENb6j7EBSwO5JBb+o=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-565-U-JaIaSIMKi43Vr2Vudc8Q-1; Fri, 02 Oct 2020 14:20:34 -0400
-X-MC-Unique: U-JaIaSIMKi43Vr2Vudc8Q-1
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id B12C3801ADA;
-        Fri,  2 Oct 2020 18:20:33 +0000 (UTC)
-Received: from bfoster (ovpn-114-177.rdu2.redhat.com [10.10.114.177])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id 4DEFA55784;
-        Fri,  2 Oct 2020 18:20:33 +0000 (UTC)
-Date:   Fri, 2 Oct 2020 14:20:31 -0400
-From:   Brian Foster <bfoster@redhat.com>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     fstests@vger.kernel.org, io-uring@vger.kernel.org
-Subject: Re: [PATCH 3/3] generic: IO_URING direct IO fsx test
-Message-ID: <20201002182031.GE4708@bfoster>
-References: <20200916171443.29546-1-zlang@redhat.com>
- <20200916171443.29546-4-zlang@redhat.com>
+        Fri, 2 Oct 2020 23:56:27 -0400
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:40791 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1725801AbgJCD41 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 2 Oct 2020 23:56:27 -0400
+X-IronPort-AV: E=Sophos;i="5.77,330,1596470400"; 
+   d="scan'208";a="99856001"
+Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
+  by heian.cn.fujitsu.com with ESMTP; 03 Oct 2020 11:56:25 +0800
+Received: from G08CNEXMBPEKD04.g08.fujitsu.local (unknown [10.167.33.201])
+        by cn.fujitsu.com (Postfix) with ESMTP id 164EE48990D5;
+        Sat,  3 Oct 2020 11:56:21 +0800 (CST)
+Received: from G08CNEXCHPEKD06.g08.fujitsu.local (10.167.33.205) by
+ G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.2; Sat, 3 Oct 2020 11:56:21 +0800
+Received: from Fedora-31.g08.fujitsu.local (10.167.220.31) by
+ G08CNEXCHPEKD06.g08.fujitsu.local (10.167.33.205) with Microsoft SMTP Server
+ id 15.0.1497.2 via Frontend Transport; Sat, 3 Oct 2020 11:56:18 +0800
+From:   Xiao Yang <yangx.jy@cn.fujitsu.com>
+To:     <fstests@vger.kernel.org>
+CC:     <amir73il@gmail.com>, Xiao Yang <yangx.jy@cn.fujitsu.com>
+Subject: [PATCH] overlay/071: Don't compare inode numbers in lower overlay and nested overlay
+Date:   Sat, 3 Oct 2020 11:37:35 +0800
+Message-ID: <20201003033735.32452-1-yangx.jy@cn.fujitsu.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200916171443.29546-4-zlang@redhat.com>
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.15
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-yoursite-MailScanner-ID: 164EE48990D5.AE67C
+X-yoursite-MailScanner: Found to be clean
+X-yoursite-MailScanner-From: yangx.jy@cn.fujitsu.com
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Sep 17, 2020 at 01:14:43AM +0800, Zorro Lang wrote:
-> After fsx supports IO_URING read/write, add IO_URING direct IO fsx
-> test with different read/write size and concurrent buffered IO.
-> 
-> Signed-off-by: Zorro Lang <zlang@redhat.com>
-> ---
->  tests/generic/610     | 52 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/610.out |  7 ++++++
->  tests/generic/group   |  1 +
->  3 files changed, 60 insertions(+)
->  create mode 100755 tests/generic/610
->  create mode 100644 tests/generic/610.out
-> 
-> diff --git a/tests/generic/610 b/tests/generic/610
-> new file mode 100755
-> index 00000000..fc3f4c2a
-> --- /dev/null
-> +++ b/tests/generic/610
-> @@ -0,0 +1,52 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2020 YOUR NAME HERE.  All Rights Reserved.
+1) If underlying filesystem is ext4, the lower overlay inodes do not
+   have the MSB set (e.g. file ino 8590721028 = 0x2000C0004) because
+   ext4 has a known inode number limit of 32bit (see ovl_can_decode_fh).
+2) With nested xino feature, the nested overlay inodes have the MSB set
+   (e.g. file ino 9223372045445496836  = 0x80000002000C0004).
+It is expected different inode numbers which casue the failure of
+overlay/071, so fix this failure by removing the unneeded comparision.
 
-The copyright needs fixing.
+Suggested-by: Amir Goldstein <amir73il@gmail.com>
+Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+---
+ tests/overlay/071 | 6 +-----
+ 1 file changed, 1 insertion(+), 5 deletions(-)
 
-> +#
-> +# FS QA Test 610
-> +#
-> +# IO_URING direct IO fsx test
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +_supported_fs generic
-> +_supported_os Linux
-> +_require_test
-> +_require_odirect
-> +_require_io_uring
-> +
-> +psize=`$here/src/feature -s`
-> +bsize=`_min_dio_alignment $TEST_DEV`
-> +run_fsx -S 0 -U -N 20000           -l 600000 -r PSIZE -w BSIZE -Z -R -W
-> +run_fsx -S 0 -U -N 20000 -o 8192   -l 600000 -r PSIZE -w BSIZE -Z -R -W
-> +run_fsx -S 0 -U -N 20000 -o 128000 -l 600000 -r PSIZE -w BSIZE -Z -R -W
-> +
-> +# change readbdy/writebdy to double page size
-> +psize=$((psize * 2))
-> +run_fsx -S 0 -U -N 20000           -l 600000 -r PSIZE -w PSIZE -Z -R -W
-> +run_fsx -S 0 -U -N 20000 -o 256000 -l 600000 -r PSIZE -w PSIZE -Z -R -W
-> +run_fsx -S 0 -U -N 20000 -o 128000 -l 600000 -r PSIZE -w BSIZE -Z -W
-> +
+diff --git a/tests/overlay/071 b/tests/overlay/071
+index ac2324c8..90770936 100755
+--- a/tests/overlay/071
++++ b/tests/overlay/071
+@@ -194,12 +194,8 @@ mount_dirs
+ record_inode_numbers $SCRATCH_MNT/lowertestdir $tmp.lower.lo
+ record_inode_numbers $SCRATCH_MNT/uppertestdir $tmp.lower.up
+ 
+-# Compare inode numbers in lower overlay vs. nested overlay
+-# With nested xino lower/lower, all inode numbers overflow xino bits and
+-# d_ino/i_ino in nested overlay are the same as in lower overlay.
+-check_inode_numbers $lowertestdir $tmp.lower.lo $tmp.before.lo
+-
+ # Record inode numbers before copy up from nested upper
++record_inode_numbers $lowertestdir $tmp.before.lo
+ record_inode_numbers $uppertestdir $tmp.before.up
+ 
+ # Copy up all files
+-- 
+2.25.1
 
-Can you elaborate on why PSIZE/BSIZE are used where they are for the
-writebdy option? Also is -R intentionally dropped from the final test?
 
-Brian
-
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/610.out b/tests/generic/610.out
-> new file mode 100644
-> index 00000000..97ad41a3
-> --- /dev/null
-> +++ b/tests/generic/610.out
-> @@ -0,0 +1,7 @@
-> +QA output created by 610
-> +fsx -S 0 -U -N 20000 -l 600000 -r PSIZE -w BSIZE -Z -R -W
-> +fsx -S 0 -U -N 20000 -o 8192 -l 600000 -r PSIZE -w BSIZE -Z -R -W
-> +fsx -S 0 -U -N 20000 -o 128000 -l 600000 -r PSIZE -w BSIZE -Z -R -W
-> +fsx -S 0 -U -N 20000 -l 600000 -r PSIZE -w PSIZE -Z -R -W
-> +fsx -S 0 -U -N 20000 -o 256000 -l 600000 -r PSIZE -w PSIZE -Z -R -W
-> +fsx -S 0 -U -N 20000 -o 128000 -l 600000 -r PSIZE -w BSIZE -Z -W
-> diff --git a/tests/generic/group b/tests/generic/group
-> index cf50f4a1..60280dc2 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -612,3 +612,4 @@
->  607 auto attr quick dax
->  608 auto attr quick dax
->  609 auto rw io_uring
-> +610 auto rw io_uring
-> -- 
-> 2.20.1
-> 
 
