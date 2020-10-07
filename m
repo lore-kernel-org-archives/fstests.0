@@ -2,115 +2,77 @@ Return-Path: <SRS0=+nUq=DO=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	UNPARSEABLE_RELAY autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 85732C4727E
-	for <linux-fstests@archiver.kernel.org>; Wed,  7 Oct 2020 04:27:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B339EC41604
+	for <linux-fstests@archiver.kernel.org>; Wed,  7 Oct 2020 17:52:16 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3135121548
-	for <linux-fstests@archiver.kernel.org>; Wed,  7 Oct 2020 04:27:27 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="EhToGAaE"
+	by mail.kernel.org (Postfix) with ESMTP id 698B62176B
+	for <linux-fstests@archiver.kernel.org>; Wed,  7 Oct 2020 17:52:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726490AbgJGE10 (ORCPT
+        id S1728557AbgJGRwP (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 7 Oct 2020 00:27:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51706 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726388AbgJGE10 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 7 Oct 2020 00:27:26 -0400
-Received: from mail-lf1-x144.google.com (mail-lf1-x144.google.com [IPv6:2a00:1450:4864:20::144])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 29AB3C061755;
-        Tue,  6 Oct 2020 21:27:26 -0700 (PDT)
-Received: by mail-lf1-x144.google.com with SMTP id d24so714451lfa.8;
-        Tue, 06 Oct 2020 21:27:26 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=sUSZKx+gAK2d8TpziPDTnI010bDZH5RIn0lG0CrorxI=;
-        b=EhToGAaEsGAqO68+MxGfBW8HsmilYDiQnH5ejOkdoO8NVh2+yc/e6/7tOvK5uKE+mQ
-         p30LDK2A2b8CXeCbGyLeBHGKADkuftlCwmR024aQHG81Uw6a0dWfA3mJyVSxnGfiLHS2
-         zjCgpzm9BQHmxPtTB0IaaixtQgKdx7j7Ju75AnonGE/E75JyD34+PoQPrBFa0cw676eI
-         1NcbK3BI2VB3Y3OKb/02Ym+diAk9Q05l0BHUTaGOScoN+Zy/pDUH0CAPgdhlEfBpZ8LY
-         DQt92H++HWhYBcRWFFgx9itGkZb+jX5Ds4guywwixbPv4sLqx1ve+BPOAJNoeLnpoRTS
-         m/kQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=sUSZKx+gAK2d8TpziPDTnI010bDZH5RIn0lG0CrorxI=;
-        b=TMjhFLZxnBH0eqUwxd8fs9olmAQD2DkiHm57obWOuSs4PWGkiD0+UJMN4JPq/uA4Fv
-         vW5nAG9JqMscC6C8xEVfYcXhBmbYu4Kmsp+W0rwrHA67F9dhLZCmJWhnZGtIWA+sU516
-         sxdgZZKmrj4pmmIk2ehykzzpegOkP36zu/ix20hSBE8CMKhLIJw1Yf53UYTejuWstIQo
-         T1ZJRFhqm/qAMSC4WNYQkrLSZb7JTT4Lls+5MkHpuE5SGSgd8OAW2fbcltQ2VHBDw+xi
-         xHULLmnxHe6XdoSdcG3AuqlqH8e88o8/g5r1yxcrkRPkvpasUatJU6Bzo7k1RCP0emdJ
-         Bd4Q==
-X-Gm-Message-State: AOAM530uLpbMec6HvpEBQw+neuAhmyBS46Lk32pTx3pS2iR/IRCAIgNg
-        AFHLlqAfqLIJY59AL8ed80VDcKAAKTzIwml16Qk=
-X-Google-Smtp-Source: ABdhPJyUDcHzDGEc1CwuNP8Hyo/bka2ZO6QsyZpz2VRXt7oWU2vzx59FQfJBikHOHgajYTY72TQ2Uw8SXUGTV8CsHk4=
-X-Received: by 2002:a19:e042:: with SMTP id g2mr309118lfj.122.1602044844482;
- Tue, 06 Oct 2020 21:27:24 -0700 (PDT)
+        Wed, 7 Oct 2020 13:52:15 -0400
+Received: from mx2.suse.de ([195.135.220.15]:39598 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1727293AbgJGRwP (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 7 Oct 2020 13:52:15 -0400
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+Received: from relay2.suse.de (unknown [195.135.221.27])
+        by mx2.suse.de (Postfix) with ESMTP id D6169AD04;
+        Wed,  7 Oct 2020 17:52:13 +0000 (UTC)
+Received: from localhost (brahms [local])
+        by brahms (OpenSMTPD) with ESMTPA id 93f83a9d;
+        Wed, 7 Oct 2020 17:52:14 +0000 (UTC)
+From:   Luis Henriques <lhenriques@suse.de>
+To:     fstests@vger.kernel.org
+Cc:     Jeff Layton <jlayton@kernel.org>, ceph-devel@vger.kernel.org,
+        Luis Henriques <lhenriques@suse.de>
+Subject: [PATCH 0/3] Initial CephFS tests (take 2)
+Date:   Wed,  7 Oct 2020 18:52:09 +0100
+Message-Id: <20201007175212.16218-1-lhenriques@suse.de>
 MIME-Version: 1.0
-References: <20201001002508.328866-1-ebiggers@kernel.org> <20201007034829.GA912@sol.localdomain>
-In-Reply-To: <20201007034829.GA912@sol.localdomain>
-From:   Daeho Jeong <daeho43@gmail.com>
-Date:   Wed, 7 Oct 2020 13:27:13 +0900
-Message-ID: <CACOAw_xO83YJjDoAK3O7aCK53pEihg=fTp-bMgkDsVM9_rMwEg@mail.gmail.com>
-Subject: Re: [f2fs-dev] [PATCH 0/5] xfstests: test f2fs compression+encryption
-To:     Eric Biggers <ebiggers@kernel.org>
-Cc:     Jaegeuk Kim <jaegeuk@kernel.org>, Chao Yu <yuchao0@huawei.com>,
-        Daeho Jeong <daehojeong@google.com>,
-        linux-fscrypt@vger.kernel.org, fstests@vger.kernel.org,
-        linux-f2fs-devel@lists.sourceforge.net
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Sorry for the late reply. We had a long holiday last week.
-The patch looks good to me~
+This is my second attempt to have an initial set of ceph-specific tests
+merged into fstests.  In this patchset I'm pushing a different set of
+tests, focusing on the copy_file_range testing, although I *do* plan to
+get back to the quota tests soon.
 
-Thanks,
+This syscall has a few peculiarities in ceph as it is able to use remote
+object copies without the need to download/upload data from the OSDs.
+However, in order to take advantage of this remote copy, the copy ranges
+and sizes need to include at least one object.  Thus, all the currently
+existing generic tests won't actually take advantage of this feature.
 
-2020=EB=85=84 10=EC=9B=94 7=EC=9D=BC (=EC=88=98) =EC=98=A4=ED=9B=84 12:49, =
-Eric Biggers <ebiggers@kernel.org>=EB=8B=98=EC=9D=B4 =EC=9E=91=EC=84=B1:
->
-> On Wed, Sep 30, 2020 at 05:25:02PM -0700, Eric Biggers wrote:
-> > Add a test which verifies that encryption is done correctly when a file
-> > on f2fs uses both compression and encryption at the same time.
-> >
-> > Patches 1-4 add prerequisites for the test, while patch 5 adds the
-> > actual test.  Patch 2 also fixes a bug which could cause the existing
-> > test generic/602 to fail in extremely rare cases.  See the commit
-> > messages for details.
-> >
-> > The new test passes both with and without the inlinecrypt mount option.
-> > It requires CONFIG_F2FS_FS_COMPRESSION=3Dy.
-> >
-> > I'd appreciate the f2fs developers taking a look.
-> >
-> > Note, there is a quirk where the IVs in compressed files are off by one
-> > from the "natural" values.  It's still secure, though it made the test
-> > slightly harder to write.  I'm not sure how intentional this quirk was.
-> >
-> > Eric Biggers (5):
-> >   fscrypt-crypt-util: clean up parsing --block-size and --inode-number
-> >   fscrypt-crypt-util: fix IV incrementing for --iv-ino-lblk-32
-> >   fscrypt-crypt-util: add --block-number option
-> >   common/f2fs: add _require_scratch_f2fs_compression()
-> >   f2fs: verify ciphertext of compressed+encrypted file
->
-> Jaegeuk, Chao, Daeho: any comments on this?
->
-> - Eric
->
->
-> _______________________________________________
-> Linux-f2fs-devel mailing list
-> Linux-f2fs-devel@lists.sourceforge.net
-> https://lists.sourceforge.net/lists/listinfo/linux-f2fs-devel
+Let me know any comments/concerns about this patchset.  Also note that
+currently, in order to enable copy_file_range in cephfs, the additional
+'copyfrom' mount parameter is required.  (Hopefully this additional param
+may be dropped in the future.)
+
+Luis Henriques (3):
+  ceph: add copy_file_range (remote copy operation) testing
+  ceph: test combination of copy_file_range with truncate
+  ceph: test copy_file_range with infile = outfile
+
+ tests/ceph/001     | 233 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/ceph/001.out | 129 +++++++++++++++++++++++++
+ tests/ceph/002     |  74 ++++++++++++++
+ tests/ceph/002.out |   8 ++
+ tests/ceph/003     | 118 +++++++++++++++++++++++
+ tests/ceph/003.out |  11 +++
+ tests/ceph/group   |   3 +
+ 7 files changed, 576 insertions(+)
+ create mode 100644 tests/ceph/001
+ create mode 100644 tests/ceph/001.out
+ create mode 100644 tests/ceph/002
+ create mode 100644 tests/ceph/002.out
+ create mode 100644 tests/ceph/003
+ create mode 100644 tests/ceph/003.out
+ create mode 100644 tests/ceph/group
+
