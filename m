@@ -1,207 +1,101 @@
-Return-Path: <SRS0=+nUq=DO=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=DKBz=DP=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.7 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,URIBL_BLOCKED autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	UNPARSEABLE_RELAY autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1DCFFC41604
-	for <linux-fstests@archiver.kernel.org>; Wed,  7 Oct 2020 17:52:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 24AA0C433E7
+	for <linux-fstests@archiver.kernel.org>; Thu,  8 Oct 2020 03:55:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B85E021775
-	for <linux-fstests@archiver.kernel.org>; Wed,  7 Oct 2020 17:52:22 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AB4952145D
+	for <linux-fstests@archiver.kernel.org>; Thu,  8 Oct 2020 03:55:53 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="XK5zWDWM"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728638AbgJGRwW (ORCPT
+        id S1728299AbgJHDzx (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 7 Oct 2020 13:52:22 -0400
-Received: from mx2.suse.de ([195.135.220.15]:39650 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728535AbgJGRwW (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 7 Oct 2020 13:52:22 -0400
-X-Virus-Scanned: by amavisd-new at test-mx.suse.de
-Received: from relay2.suse.de (unknown [195.135.221.27])
-        by mx2.suse.de (Postfix) with ESMTP id F2C5CAD04;
-        Wed,  7 Oct 2020 17:52:19 +0000 (UTC)
-Received: from localhost (brahms [local])
-        by brahms (OpenSMTPD) with ESMTPA id 92f51191;
-        Wed, 7 Oct 2020 17:52:20 +0000 (UTC)
-From:   Luis Henriques <lhenriques@suse.de>
-To:     fstests@vger.kernel.org
-Cc:     Jeff Layton <jlayton@kernel.org>, ceph-devel@vger.kernel.org,
-        Luis Henriques <lhenriques@suse.com>
-Subject: [PATCH 3/3] ceph: test copy_file_range with infile = outfile
-Date:   Wed,  7 Oct 2020 18:52:12 +0100
-Message-Id: <20201007175212.16218-4-lhenriques@suse.de>
-In-Reply-To: <20201007175212.16218-1-lhenriques@suse.de>
-References: <20201007175212.16218-1-lhenriques@suse.de>
+        Wed, 7 Oct 2020 23:55:53 -0400
+Received: from aserp2120.oracle.com ([141.146.126.78]:54896 "EHLO
+        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726469AbgJHDzx (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 7 Oct 2020 23:55:53 -0400
+Received: from pps.filterd (aserp2120.oracle.com [127.0.0.1])
+        by aserp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 0983nw1w021133;
+        Thu, 8 Oct 2020 03:55:51 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
+ : subject : message-id : mime-version : content-type; s=corp-2020-01-29;
+ bh=PhvpBYECYdlIwGdCKRpY5n4PUlnFDUS/6sJI01IqrM8=;
+ b=XK5zWDWMLDTSHYmxtjFS8iI2AjlkgW2pccJQLw7tdU7tIC5Sjlpx8hgY4qRtf7IFhmSv
+ hV7w8AnaRhd5us+iYkgNQmeB8tj1Wuhs0iGN+LzoVygjsaiStj+ihQR+gtEeQ+w2JQu1
+ 2MEOjQUvx83gegpxHrKLcUwWk7FHOyabZZfI0CrgWebY99DQhn4hohrT/H3sx9qBzBSw
+ CXyTjhUXsFDsfwUbib5T+vOnqkwjDIch/nAI+ch7k5B6EsLGs9S3UuEB/5xEwqzDp7Fa
+ ED8JbBzDDuCqFai57USAkny4zdWlbN8NdieUPwA5dGUnYWyaLaUDJCLP9vBydIN89cE1 Dw== 
+Received: from aserp3020.oracle.com (aserp3020.oracle.com [141.146.126.70])
+        by aserp2120.oracle.com with ESMTP id 33ym34teau-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Thu, 08 Oct 2020 03:55:51 +0000
+Received: from pps.filterd (aserp3020.oracle.com [127.0.0.1])
+        by aserp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 0983isu2142488;
+        Thu, 8 Oct 2020 03:53:51 GMT
+Received: from userv0122.oracle.com (userv0122.oracle.com [156.151.31.75])
+        by aserp3020.oracle.com with ESMTP id 3410k0fdqf-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Thu, 08 Oct 2020 03:53:50 +0000
+Received: from abhmp0016.oracle.com (abhmp0016.oracle.com [141.146.116.22])
+        by userv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 0983rnMT013853;
+        Thu, 8 Oct 2020 03:53:49 GMT
+Received: from localhost (/10.159.134.247)
+        by default (Oracle Beehive Gateway v4.0)
+        with ESMTP ; Wed, 07 Oct 2020 20:53:49 -0700
+Date:   Wed, 7 Oct 2020 20:53:48 -0700
+From:   "Darrick J. Wong" <darrick.wong@oracle.com>
+To:     Eryu Guan <guaneryu@gmail.com>
+Cc:     fstests <fstests@vger.kernel.org>, xfs <linux-xfs@vger.kernel.org>
+Subject: [PATCH] xfs/194: actually check if we got the desired block size
+ before proceeding
+Message-ID: <20201008035348.GA6539@magnolia>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9767 signatures=668680
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxscore=0 mlxlogscore=999 spamscore=0
+ adultscore=0 bulkscore=0 malwarescore=0 suspectscore=1 phishscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
+ definitions=main-2010080030
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9767 signatures=668680
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 impostorscore=0 priorityscore=1501
+ mlxscore=0 mlxlogscore=999 clxscore=1015 bulkscore=0 spamscore=0
+ malwarescore=0 phishscore=0 suspectscore=1 adultscore=0 lowpriorityscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
+ definitions=main-2010080030
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Luis Henriques <lhenriques@suse.com>
+From: Darrick J. Wong <darrick.wong@oracle.com>
 
-This test runs a set of simple checks where the infile file is the same as
-the outfile.
+This test has specific fs block size requirements, so make sure that's
+what we got before we proceed with the test.
 
-Signed-off-by: Luis Henriques <lhenriques@suse.com>
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- tests/ceph/003     | 118 +++++++++++++++++++++++++++++++++++++++++++++
- tests/ceph/003.out |  11 +++++
- tests/ceph/group   |   1 +
- 3 files changed, 130 insertions(+)
- create mode 100644 tests/ceph/003
- create mode 100644 tests/ceph/003.out
+ tests/xfs/194 |    3 +++
+ 1 file changed, 3 insertions(+)
 
-diff --git a/tests/ceph/003 b/tests/ceph/003
-new file mode 100644
-index 000000000000..6fc5e6812545
---- /dev/null
-+++ b/tests/ceph/003
-@@ -0,0 +1,118 @@
-+#!/bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2020 SUSE Linux Products GmbH. All Rights Reserved.
-+#
-+# FS QA Test No. ceph/005
-+#
-+# Test copy_file_range with infile = outfile
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
+diff --git a/tests/xfs/194 b/tests/xfs/194
+index c36499c2..238db5c3 100755
+--- a/tests/xfs/194
++++ b/tests/xfs/194
+@@ -83,6 +83,9 @@ unset XFS_MKFS_OPTIONS
+ # we need 512 byte block size, so crc's are turned off
+ _scratch_mkfs_xfs -m crc=0 -b size=$blksize >/dev/null 2>&1
+ _scratch_mount
++test "$(_get_block_size $SCRATCH_MNT)" = $blksize || \
++	_notrun "Could not get $blksize-byte blocks"
 +
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -rf $tmp.*
-+}
-+
-+# get standard environment
-+. common/rc
-+. common/filter
-+. common/attr
-+. common/reflink
-+
-+# real QA test starts here
-+_supported_fs ceph
-+
-+_require_xfs_io_command "copy_range"
-+_require_attrs
-+_require_test
-+
-+workdir=$TEST_DIR/test-$seq
-+rm -rf $workdir
-+mkdir $workdir
-+rm -f $seqres.full
-+
-+check_range()
-+{
-+	local file=$1
-+	local off0=$2
-+	local off1=$3
-+	local val=$4
-+	_read_range $file $off0 $off1 | grep -v -q $val
-+	[ $? -eq 0 ] && echo "file $file is not '$val' in [ $off0 $off1 ]"
-+}
-+
-+objsz=4194304
-+halfobj=$(($objsz / 2))
-+file="$workdir/file-$objsz"
-+copy="$workdir/copy-$objsz"
-+dest="$workdir/dest-$objsz"
-+backup="$file.backup"
-+touch $file $backup
-+
-+# object_size has to be a multiple of stripe_unit
-+$SETFATTR_PROG -n ceph.file.layout \
-+	       -v "stripe_unit=$objsz stripe_count=1 object_size=$objsz" \
-+	       $file $backup
-+
-+$XFS_IO_PROG -c "pwrite -S 0x61 0 $objsz" $file >> $seqres.full 2>&1
-+$XFS_IO_PROG -c "pwrite -S 0x62 $objsz $objsz" $file >> $seqres.full 2>&1
-+$XFS_IO_PROG -c "pwrite -S 0x63 $(($objsz * 2)) $objsz" $file >> $seqres.full 2>&1
-+
-+cp $file $backup
-+
-+echo "  Copy single object to the end:"
-+echo "    aaaa|bbbb|cccc => aaaa|bbbb|aaaa"
-+$XFS_IO_PROG -c "copy_range -s 0 -d $(($objsz * 2)) -l $objsz $file" "$file"
-+check_range $file 0 $objsz 61
-+check_range $file $objsz $objsz 62
-+check_range $file $(($objsz * 2)) $objsz 61
-+
-+echo "  Copy single object to the beginning:"
-+echo "    aaaa|bbbb|aaaa => bbbb|bbbb|aaaa"
-+$XFS_IO_PROG -c "copy_range -s $objsz -d 0 -l $objsz $file" "$file"
-+check_range $file 0 $(($objsz * 2)) 62
-+check_range $file $(($objsz * 2)) $objsz 61
-+
-+echo "  Copy single object to the middle:"
-+echo "    bbbb|bbbb|aaaa => bbbb|aaaa|aaaa"
-+$XFS_IO_PROG -c "copy_range -s $(($objsz * 2)) -d $objsz -l $objsz $file" "$file"
-+check_range $file 0 $objsz 62
-+check_range $file $objsz $(($objsz * 2)) 61
-+
-+cp $backup $file
-+echo "  Cross object boundary (no full object copy)"
-+echo "    aaaa|bbbb|cccc => aaaa|bbaa|aacc"
-+$XFS_IO_PROG -c "copy_range -s 0 -d $(($objsz + $halfobj)) -l $objsz $file" "$file"
-+check_range $file 0 $objsz 61
-+check_range $file $objsz $halfobj 62
-+check_range $file $(($objsz + $halfobj)) $objsz 61
-+check_range $file $(($objsz * 2 + $halfobj)) $halfobj 63
-+
-+cp $backup $file
-+echo "    aaaa|bbbb|cccc => aaaa|bbaa|bbcc"
-+$XFS_IO_PROG -c "copy_range -s $halfobj -d $(($objsz + $halfobj)) -l $objsz $file" "$file"
-+check_range $file 0 $objsz 61
-+check_range $file $objsz $halfobj 62
-+check_range $file $(($objsz + $halfobj)) $halfobj 61
-+check_range $file $(($objsz * 2)) $halfobj 62
-+check_range $file $(($objsz * 2 + $halfobj)) $halfobj 63
-+
-+cp $backup $file
-+echo "    aaaa|bbbb|cccc => aaaa|bbbb|aabb"
-+$XFS_IO_PROG -c "copy_range -s $halfobj -d $(($objsz * 2)) -l $objsz $file" "$file"
-+check_range $file 0 $objsz 61
-+check_range $file $objsz $objsz 62
-+check_range $file $(($objsz * 2)) $halfobj 61
-+check_range $file $(($objsz * 2 + $halfobj)) $halfobj 62
-+
-+#success, all done
-+status=0
-+exit
-diff --git a/tests/ceph/003.out b/tests/ceph/003.out
-new file mode 100644
-index 000000000000..76c83b265253
---- /dev/null
-+++ b/tests/ceph/003.out
-@@ -0,0 +1,11 @@
-+QA output created by 003
-+  Copy single object to the end:
-+    aaaa|bbbb|cccc => aaaa|bbbb|aaaa
-+  Copy single object to the beginning:
-+    aaaa|bbbb|aaaa => bbbb|bbbb|aaaa
-+  Copy single object to the middle:
-+    bbbb|bbbb|aaaa => bbbb|aaaa|aaaa
-+  Cross object boundary (no full object copy)
-+    aaaa|bbbb|cccc => aaaa|bbaa|aacc
-+    aaaa|bbbb|cccc => aaaa|bbaa|bbcc
-+    aaaa|bbbb|cccc => aaaa|bbbb|aabb
-diff --git a/tests/ceph/group b/tests/ceph/group
-index c28fe473c1a4..adbf61547766 100644
---- a/tests/ceph/group
-+++ b/tests/ceph/group
-@@ -1,2 +1,3 @@
- 001 auto quick copy
- 002 auto quick copy
-+003 auto quick copy
+ 
+ # 512b block / 4k page example:
+ #
