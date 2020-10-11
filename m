@@ -2,181 +2,352 @@ Return-Path: <SRS0=fsOW=DS=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EBA61C433DF
-	for <linux-fstests@archiver.kernel.org>; Sun, 11 Oct 2020 12:21:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F2470C433DF
+	for <linux-fstests@archiver.kernel.org>; Sun, 11 Oct 2020 12:39:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 97EE020781
-	for <linux-fstests@archiver.kernel.org>; Sun, 11 Oct 2020 12:21:40 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="AM5VMrfp"
+	by mail.kernel.org (Postfix) with ESMTP id A0046207F7
+	for <linux-fstests@archiver.kernel.org>; Sun, 11 Oct 2020 12:39:00 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1602419940;
+	bh=yCTXbQ6tzPZwjjwZsz3Y21eD4yXv9/9T/SWpvj87iz4=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
+	b=h9UCl9cxFiCRu4zeNq3LRNZCfRrdnoH0xkzaD3OJs++hTX5BfSsgBu2bjVpekgzj+
+	 /poOLoORV1gr/MyYp/cxKTruXMko5abaIglItOOW+rSgnLZTynfPvGqMLrqyoEW/AD
+	 sz0+Xmm9VtJRgjh4M6Qk6QlejwbdeT6sU6O8PVlg=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2387771AbgJKMVk (ORCPT
+        id S1729971AbgJKMjA (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 11 Oct 2020 08:21:40 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:25488 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S2387744AbgJKMVj (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 11 Oct 2020 08:21:39 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1602418898;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=cDM9B2W9yUKmVin7xCP4+0fq5TGI9pLh8I9/Eu8Fy4o=;
-        b=AM5VMrfpbf04YRSIPfnOqIY3b8KrwQY3u4WWaj5E9C/n4f6YnRk8wCtikE1vBn+09Z9u4T
-        tgvPenyzVDAm621n3zyTUAVVUrTbaQt3c/40QjaK3mDIBgnNTGPYC8t6g/Jx8TsN2wxPN1
-        2kgTUCydhUzn+Q88m0V88tyBsaFDGEQ=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-177-RHd0Khu4PtOD3HewqY499A-1; Sun, 11 Oct 2020 08:21:36 -0400
-X-MC-Unique: RHd0Khu4PtOD3HewqY499A-1
-Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        Sun, 11 Oct 2020 08:39:00 -0400
+Received: from mail.kernel.org ([198.145.29.99]:55138 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1729954AbgJKMi7 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 11 Oct 2020 08:38:59 -0400
+Received: from debian8.Home (bl8-197-74.dsl.telepac.pt [85.241.197.74])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 427FF80B702;
-        Sun, 11 Oct 2020 12:21:35 +0000 (UTC)
-Received: from localhost (unknown [10.66.61.36])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id B0EA76EF55;
-        Sun, 11 Oct 2020 12:21:34 +0000 (UTC)
-Date:   Sun, 11 Oct 2020 20:36:23 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH 3/3] generic: IO_URING direct IO fsx test
-Message-ID: <20201011123623.GB17190@localhost.localdomain>
-Mail-Followup-To: "Darrick J. Wong" <darrick.wong@oracle.com>,
-        fstests@vger.kernel.org
-References: <20200916171443.29546-1-zlang@redhat.com>
- <20200916171443.29546-4-zlang@redhat.com>
- <20201005164510.GG49541@magnolia>
+        by mail.kernel.org (Postfix) with ESMTPSA id 283B4207E8;
+        Sun, 11 Oct 2020 12:38:57 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1602419938;
+        bh=yCTXbQ6tzPZwjjwZsz3Y21eD4yXv9/9T/SWpvj87iz4=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=Oe/66wTOrcColSzovqIir+TogiNBDTs+NO+dk2XjbeVs0rVaPvQ9Iu1R2P5BKBXrU
+         Uhxq8M5ltJLxH+00XUr2vE5MDH7Ntr9HlMpmI1pNnKM07J/lBV1FKzkYqlQVNRbQGH
+         B5UMy40EGidS7G/HDHISC11ZY6iMApeQsVrqw9LU=
+From:   fdmanana@kernel.org
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, guan@eryu.me,
+        Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH v2] fstests: add a filter for the new getcap output
+Date:   Sun, 11 Oct 2020 13:38:52 +0100
+Message-Id: <76fff10e7f920de923010b00d0b68bc2edc5448e.1602419494.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.28.0
+In-Reply-To: <f2980ed83a5268a96b3ff9da15c58477ff24d7a4.1602334589.git.fdmanana@suse.com>
+References: <f2980ed83a5268a96b3ff9da15c58477ff24d7a4.1602334589.git.fdmanana@suse.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20201005164510.GG49541@magnolia>
-User-Agent: Mutt/1.10.1 (2018-07-13)
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Oct 05, 2020 at 09:45:10AM -0700, Darrick J. Wong wrote:
-> On Thu, Sep 17, 2020 at 01:14:43AM +0800, Zorro Lang wrote:
-> > After fsx supports IO_URING read/write, add IO_URING direct IO fsx
-> > test with different read/write size and concurrent buffered IO.
-> > 
-> > Signed-off-by: Zorro Lang <zlang@redhat.com>
-> 
-> Funny, I would have expected this to be a clone of generic/521, much
-> like the previous test was a clone of g/522.  I guess it's fine to test
-> various fsx parameters, but in that case, is there a reason /not/ to
-> have a long soak io_uring directio test?
+From: Filipe Manana <fdmanana@suse.com>
 
-This case is copied from generic/091 :) Even the previous test was a clone
-of g/522, but I reduce the default test time. The g/521 and g/522 takes too long
-time, I'd like to have io_uring buffer and direct IO basic test cases which
-doesn't take long time at first. From this side, I think g/091 does more test :-p
+Starting with version 2.41 of libcap, the output of the getcap program
+changed and therefore some existing tests fail when the installed version
+of libcap is >= 2.41 (the latest version available at the moment is 2.44).
 
-Thanks,
-Zorro
+The change was made by the following commit of libcap:
 
-> 
-> --D
-> 
-> > ---
-> >  tests/generic/610     | 52 +++++++++++++++++++++++++++++++++++++++++++
-> >  tests/generic/610.out |  7 ++++++
-> >  tests/generic/group   |  1 +
-> >  3 files changed, 60 insertions(+)
-> >  create mode 100755 tests/generic/610
-> >  create mode 100644 tests/generic/610.out
-> > 
-> > diff --git a/tests/generic/610 b/tests/generic/610
-> > new file mode 100755
-> > index 00000000..fc3f4c2a
-> > --- /dev/null
-> > +++ b/tests/generic/610
-> > @@ -0,0 +1,52 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2020 YOUR NAME HERE.  All Rights Reserved.
-> > +#
-> > +# FS QA Test 610
-> > +#
-> > +# IO_URING direct IO fsx test
-> > +#
-> > +seq=`basename $0`
-> > +seqres=$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +
-> > +here=`pwd`
-> > +tmp=/tmp/$$
-> > +status=1	# failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +_cleanup()
-> > +{
-> > +	cd /
-> > +	rm -f $tmp.*
-> > +}
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +. ./common/filter
-> > +
-> > +# remove previous $seqres.full before test
-> > +rm -f $seqres.full
-> > +
-> > +# real QA test starts here
-> > +_supported_fs generic
-> > +_supported_os Linux
-> > +_require_test
-> > +_require_odirect
-> > +_require_io_uring
-> > +
-> > +psize=`$here/src/feature -s`
-> > +bsize=`_min_dio_alignment $TEST_DEV`
-> > +run_fsx -S 0 -U -N 20000           -l 600000 -r PSIZE -w BSIZE -Z -R -W
-> > +run_fsx -S 0 -U -N 20000 -o 8192   -l 600000 -r PSIZE -w BSIZE -Z -R -W
-> > +run_fsx -S 0 -U -N 20000 -o 128000 -l 600000 -r PSIZE -w BSIZE -Z -R -W
-> > +
-> > +# change readbdy/writebdy to double page size
-> > +psize=$((psize * 2))
-> > +run_fsx -S 0 -U -N 20000           -l 600000 -r PSIZE -w PSIZE -Z -R -W
-> > +run_fsx -S 0 -U -N 20000 -o 256000 -l 600000 -r PSIZE -w PSIZE -Z -R -W
-> > +run_fsx -S 0 -U -N 20000 -o 128000 -l 600000 -r PSIZE -w BSIZE -Z -W
-> > +
-> > +# success, all done
-> > +status=0
-> > +exit
-> > diff --git a/tests/generic/610.out b/tests/generic/610.out
-> > new file mode 100644
-> > index 00000000..97ad41a3
-> > --- /dev/null
-> > +++ b/tests/generic/610.out
-> > @@ -0,0 +1,7 @@
-> > +QA output created by 610
-> > +fsx -S 0 -U -N 20000 -l 600000 -r PSIZE -w BSIZE -Z -R -W
-> > +fsx -S 0 -U -N 20000 -o 8192 -l 600000 -r PSIZE -w BSIZE -Z -R -W
-> > +fsx -S 0 -U -N 20000 -o 128000 -l 600000 -r PSIZE -w BSIZE -Z -R -W
-> > +fsx -S 0 -U -N 20000 -l 600000 -r PSIZE -w PSIZE -Z -R -W
-> > +fsx -S 0 -U -N 20000 -o 256000 -l 600000 -r PSIZE -w PSIZE -Z -R -W
-> > +fsx -S 0 -U -N 20000 -o 128000 -l 600000 -r PSIZE -w BSIZE -Z -W
-> > diff --git a/tests/generic/group b/tests/generic/group
-> > index cf50f4a1..60280dc2 100644
-> > --- a/tests/generic/group
-> > +++ b/tests/generic/group
-> > @@ -612,3 +612,4 @@
-> >  607 auto attr quick dax
-> >  608 auto attr quick dax
-> >  609 auto rw io_uring
-> > +610 auto rw io_uring
-> > -- 
-> > 2.20.1
-> > 
-> 
+  commit 177cd418031b1acfcf73fe3b1af9f3279828681c
+  Author: Andrew G. Morgan <morgan@kernel.org>
+  Date:   Tue Jul 21 22:58:05 2020 -0700
+
+      A more compact form for the text representation of capabilities.
+
+      While this does not change anything about the supported range of
+      equivalent text specifications for capabilities, as accepted by
+      cap_from_text(), this does alter the preferred output format of
+      cap_to_text() to be two characters shorter in most cases. That is,
+      what used to be summarized as:
+
+         "= cap_foo+..."
+
+      is now converted to the equivalent text:
+
+         "cap_foo=..."
+
+      which is also more intuitive.
+
+So add a filter to change the old format to the new one, an helper that
+calls getcap with that filter, make existing tests use the new helper and
+update their golden output to match the new output format of getcap.
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+
+V2: Added _getcap() helper that makes use of the filter, make tests use it.
+
+ common/filter         | 28 ++++++++++++++++++++++++++++
+ common/rc             |  6 ++++++
+ tests/btrfs/214       | 16 ++++++++--------
+ tests/generic/093     |  4 ++--
+ tests/generic/093.out |  2 +-
+ tests/generic/513     |  4 ++--
+ tests/overlay/064     |  4 ++--
+ tests/overlay/064.out |  4 ++--
+ tests/xfs/296         |  4 ++--
+ tests/xfs/296.out     |  4 ++--
+ 10 files changed, 55 insertions(+), 21 deletions(-)
+
+diff --git a/common/filter b/common/filter
+index 2477f386..a8b3882f 100644
+--- a/common/filter
++++ b/common/filter
+@@ -603,5 +603,33 @@ _filter_assert_dmesg()
+ 	    -e "s#$warn2#Intentional warnings in assfail#"
+ }
+ 
++# With version 2.41 of libcap, the output format of getcap changed.
++# More specifically such change was added by the following commit:
++#
++# commit 177cd418031b1acfcf73fe3b1af9f3279828681c
++# Author: Andrew G. Morgan <morgan@kernel.org>
++# Date:   Tue Jul 21 22:58:05 2020 -0700
++#
++#     A more compact form for the text representation of capabilities.
++#
++#     While this does not change anything about the supported range of
++#     equivalent text specifications for capabilities, as accepted by
++#     cap_from_text(), this does alter the preferred output format of
++#     cap_to_text() to be two characters shorter in most cases. That is,
++#     what used to be summarized as:
++#
++#        "= cap_foo+..."
++#
++#     is now converted to the equivalent text:
++#
++#        "cap_foo=..."
++#
++#     which is also more intuitive.
++#
++_filter_getcap()
++{
++        sed -e "s/= //" -e "s/\+/=/g"
++}
++
+ # make sure this script returns success
+ /bin/true
+diff --git a/common/rc b/common/rc
+index 23095d4f..27a27ea3 100644
+--- a/common/rc
++++ b/common/rc
+@@ -4315,6 +4315,12 @@ _require_mknod()
+ 	rm -f $TEST_DIR/$seq.null
+ }
+ 
++_getcap()
++{
++	$GETCAP_PROG "$@" | _filter_getcap
++	return ${PIPESTATUS[0]}
++}
++
+ init_rc
+ 
+ ################################################################################
+diff --git a/tests/btrfs/214 b/tests/btrfs/214
+index 35c4656c..123c4cbf 100755
+--- a/tests/btrfs/214
++++ b/tests/btrfs/214
+@@ -43,7 +43,7 @@ check_capabilities()
+ 	local ret
+ 	file="$1"
+ 	cap="$2"
+-	ret=$($GETCAP_PROG "$file")
++	ret=$(_getcap "$file")
+ 	if [ -z "$ret" ]; then
+ 		echo "$ret"
+ 		echo "missing capability in file $file"
+@@ -74,7 +74,7 @@ full_nocap_inc_withcap_send()
+ 	$BTRFS_UTIL_PROG subvolume snapshot -r "$FS1" "$FS1/snap_init" >/dev/null
+ 	$BTRFS_UTIL_PROG send "$FS1/snap_init" -q | $BTRFS_UTIL_PROG receive "$FS2" -q
+ 	# ensure that we don't have capabilities set
+-	ret=$($GETCAP_PROG "$FS2/snap_init/foo.bar")
++	ret=$(_getcap "$FS2/snap_init/foo.bar")
+ 	if [ -n "$ret" ]; then
+ 		echo "File contains capabilities when it shouldn't"
+ 	fi
+@@ -84,7 +84,7 @@ full_nocap_inc_withcap_send()
+ 	$BTRFS_UTIL_PROG subvolume snapshot -r "$FS1" "$FS1/snap_inc" >/dev/null
+ 	$BTRFS_UTIL_PROG send -p "$FS1/snap_init" "$FS1/snap_inc" -q | \
+ 					$BTRFS_UTIL_PROG receive "$FS2" -q
+-	check_capabilities "$FS2/snap_inc/foo.bar" "cap_sys_ptrace,cap_sys_nice+ep"
++	check_capabilities "$FS2/snap_inc/foo.bar" "cap_sys_ptrace,cap_sys_nice=ep"
+ 
+ 	_scratch_unmount
+ }
+@@ -107,25 +107,25 @@ roundtrip_send()
+ 	$SETCAP_PROG "cap_sys_ptrace+ep cap_sys_nice+ep" "$FS1/foo.bar"
+ 	$BTRFS_UTIL_PROG subvolume snapshot -r "$FS1" "$FS1/snap_init" >/dev/null
+ 	$BTRFS_UTIL_PROG send "$FS1/snap_init" -q | $BTRFS_UTIL_PROG receive "$FS2" -q
+-	check_capabilities "$FS2/snap_init/foo.bar" "cap_sys_ptrace,cap_sys_nice+ep"
++	check_capabilities "$FS2/snap_init/foo.bar" "cap_sys_ptrace,cap_sys_nice=ep"
+ 
+ 	# Test incremental send with different owner/group but same capabilities
+ 	chgrp 100 "$FS1/foo.bar"
+ 	$SETCAP_PROG "cap_sys_ptrace+ep cap_sys_nice+ep" "$FS1/foo.bar"
+ 	$BTRFS_UTIL_PROG subvolume snapshot -r "$FS1" "$FS1/snap_inc" >/dev/null
+-	check_capabilities "$FS1/snap_inc/foo.bar" "cap_sys_ptrace,cap_sys_nice+ep"
++	check_capabilities "$FS1/snap_inc/foo.bar" "cap_sys_ptrace,cap_sys_nice=ep"
+ 	$BTRFS_UTIL_PROG send -p "$FS1/snap_init" "$FS1/snap_inc" -q | \
+ 				$BTRFS_UTIL_PROG receive "$FS2" -q
+-	check_capabilities "$FS2/snap_inc/foo.bar" "cap_sys_ptrace,cap_sys_nice+ep"
++	check_capabilities "$FS2/snap_inc/foo.bar" "cap_sys_ptrace,cap_sys_nice=ep"
+ 
+ 	# Test capabilities after incremental send with different group and capabilities
+ 	chgrp 0 "$FS1/foo.bar"
+ 	$SETCAP_PROG "cap_sys_time+ep cap_syslog+ep" "$FS1/foo.bar"
+ 	$BTRFS_UTIL_PROG subvolume snapshot -r "$FS1" "$FS1/snap_inc2" >/dev/null
+-	check_capabilities "$FS1/snap_inc2/foo.bar" "cap_sys_time,cap_syslog+ep"
++	check_capabilities "$FS1/snap_inc2/foo.bar" "cap_sys_time,cap_syslog=ep"
+ 	$BTRFS_UTIL_PROG send -p "$FS1/snap_inc" "$FS1/snap_inc2" -q | \
+ 				$BTRFS_UTIL_PROG receive "$FS2"  -q
+-	check_capabilities "$FS2/snap_inc2/foo.bar" "cap_sys_time,cap_syslog+ep"
++	check_capabilities "$FS2/snap_inc2/foo.bar" "cap_sys_time,cap_syslog=ep"
+ 
+ 	_scratch_unmount
+ }
+diff --git a/tests/generic/093 b/tests/generic/093
+index 0f835e7e..48ffec5c 100755
+--- a/tests/generic/093
++++ b/tests/generic/093
+@@ -51,10 +51,10 @@ touch $file
+ 
+ echo "**** Verifying that appending to file clears capabilities ****"
+ $SETCAP_PROG cap_chown+ep $file
+-$GETCAP_PROG $file | filefilter
++_getcap $file | filefilter
+ echo data1 >> $file
+ cat $file
+-$GETCAP_PROG $file | filefilter
++_getcap $file | filefilter
+ echo
+ 
+ echo "**** Verifying that appending to file doesn't clear other xattrs ****"
+diff --git a/tests/generic/093.out b/tests/generic/093.out
+index cb29153e..fe6dfe5c 100644
+--- a/tests/generic/093.out
++++ b/tests/generic/093.out
+@@ -1,7 +1,7 @@
+ QA output created by 093
+ 
+ **** Verifying that appending to file clears capabilities ****
+-file = cap_chown+ep
++file cap_chown=ep
+ data1
+ 
+ **** Verifying that appending to file doesn't clear other xattrs ****
+diff --git a/tests/generic/513 b/tests/generic/513
+index 15b4aded..70687877 100755
+--- a/tests/generic/513
++++ b/tests/generic/513
+@@ -40,14 +40,14 @@ $XFS_IO_PROG -f -c "pwrite -S 0x20 0 1m" $SCRATCH_MNT/bar >>$seqres.full
+ 
+ $SETCAP_PROG cap_setgid,cap_setuid+ep $SCRATCH_MNT/bar
+ 
+-before_cap="$($GETCAP_PROG -v $SCRATCH_MNT/bar)"
++before_cap="$(_getcap -v $SCRATCH_MNT/bar)"
+ before_ctime="$(stat -c '%z' $SCRATCH_MNT/bar)"
+ 
+ sleep 1
+ 
+ $XFS_IO_PROG -c "reflink $SCRATCH_MNT/foo" $SCRATCH_MNT/bar >> $seqres.full 2>&1
+ 
+-after_cap="$($GETCAP_PROG -v $SCRATCH_MNT/bar)"
++after_cap="$(_getcap -v $SCRATCH_MNT/bar)"
+ after_ctime="$(stat -c '%z' $SCRATCH_MNT/bar)"
+ 
+ echo "$before_cap $before_ctime" >> $seqres.full
+diff --git a/tests/overlay/064 b/tests/overlay/064
+index f5d5df1b..8d3d1e4c 100755
+--- a/tests/overlay/064
++++ b/tests/overlay/064
+@@ -55,7 +55,7 @@ _scratch_mount "-o metacopy=on"
+ $XFS_IO_PROG -c "stat" ${SCRATCH_MNT}/file1 >>$seqres.full
+ 
+ # Make sure cap_setuid is still there
+-$GETCAP_PROG ${SCRATCH_MNT}/file1 | _filter_scratch
++_getcap ${SCRATCH_MNT}/file1 | _filter_scratch
+ 
+ # Trigger metadata only copy-up
+ chmod 000 ${SCRATCH_MNT}/file2
+@@ -64,7 +64,7 @@ chmod 000 ${SCRATCH_MNT}/file2
+ $XFS_IO_PROG -c "stat" ${SCRATCH_MNT}/file2 >>$seqres.full
+ 
+ # Make sure cap_setuid is still there
+-$GETCAP_PROG ${SCRATCH_MNT}/file2 | _filter_scratch
++_getcap ${SCRATCH_MNT}/file2 | _filter_scratch
+ 
+ # success, all done
+ status=0
+diff --git a/tests/overlay/064.out b/tests/overlay/064.out
+index cdd3064d..07f89fbd 100644
+--- a/tests/overlay/064.out
++++ b/tests/overlay/064.out
+@@ -1,3 +1,3 @@
+ QA output created by 064
+-SCRATCH_MNT/file1 = cap_setuid+ep
+-SCRATCH_MNT/file2 = cap_setuid+ep
++SCRATCH_MNT/file1 cap_setuid=ep
++SCRATCH_MNT/file2 cap_setuid=ep
+diff --git a/tests/xfs/296 b/tests/xfs/296
+index 915ffa0c..77726e54 100755
+--- a/tests/xfs/296
++++ b/tests/xfs/296
+@@ -49,7 +49,7 @@ $SETCAP_PROG cap_setgid,cap_setuid+ep $dump_dir/testfile
+ echo "Checking for xattr on source file"
+ getfattr --absolute-names -m user.name $dump_dir/testfile | _dir_filter
+ echo "Checking for capability on source file"
+-$GETCAP_PROG $dump_dir/testfile | _dir_filter
++_getcap $dump_dir/testfile | _dir_filter
+ getfattr --absolute-names -m security.capability $dump_dir/testfile | _dir_filter
+ 
+ _do_dump_file -f $tmp.df.0
+@@ -62,7 +62,7 @@ _diff_compare
+ echo "Checking for xattr on restored file"
+ getfattr --absolute-names -m user.name $restore_dir/$dump_sdir/testfile | _dir_filter
+ echo "Checking for capability on restored file"
+-$GETCAP_PROG $restore_dir/$dump_sdir/testfile | _dir_filter
++_getcap $restore_dir/$dump_sdir/testfile | _dir_filter
+ getfattr --absolute-names -m security.capability $restore_dir/$dump_sdir/testfile | _dir_filter
+ 
+ status=0
+diff --git a/tests/xfs/296.out b/tests/xfs/296.out
+index c279465c..f5cc624e 100644
+--- a/tests/xfs/296.out
++++ b/tests/xfs/296.out
+@@ -4,7 +4,7 @@ Checking for xattr on source file
+ user.name
+ 
+ Checking for capability on source file
+-DUMP_DIR/testfile = cap_setgid,cap_setuid+ep
++DUMP_DIR/testfile cap_setgid,cap_setuid=ep
+ # file: DUMP_DIR/testfile
+ security.capability
+ 
+@@ -50,7 +50,7 @@ Checking for xattr on restored file
+ user.name
+ 
+ Checking for capability on restored file
+-RESTORE_DIR/DUMP_SUBDIR/testfile = cap_setgid,cap_setuid+ep
++RESTORE_DIR/DUMP_SUBDIR/testfile cap_setgid,cap_setuid=ep
+ # file: RESTORE_DIR/DUMP_SUBDIR/testfile
+ security.capability
+ 
+-- 
+2.28.0
 
