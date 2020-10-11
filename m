@@ -2,168 +2,175 @@ Return-Path: <SRS0=fsOW=DS=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9DF74C433DF
-	for <linux-fstests@archiver.kernel.org>; Sun, 11 Oct 2020 11:17:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DA1B5C433DF
+	for <linux-fstests@archiver.kernel.org>; Sun, 11 Oct 2020 12:00:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 603AA207F7
-	for <linux-fstests@archiver.kernel.org>; Sun, 11 Oct 2020 11:17:14 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 89607208C7
+	for <linux-fstests@archiver.kernel.org>; Sun, 11 Oct 2020 12:00:37 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="L5FNzmoX"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="BxbIrA3L"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729782AbgJKLRO (ORCPT
+        id S2387743AbgJKMAh (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 11 Oct 2020 07:17:14 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42128 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725863AbgJKLRM (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 11 Oct 2020 07:17:12 -0400
-Received: from mail-pf1-x441.google.com (mail-pf1-x441.google.com [IPv6:2607:f8b0:4864:20::441])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0D1BCC0613CE
-        for <fstests@vger.kernel.org>; Sun, 11 Oct 2020 04:17:11 -0700 (PDT)
-Received: by mail-pf1-x441.google.com with SMTP id w21so10841800pfc.7
-        for <fstests@vger.kernel.org>; Sun, 11 Oct 2020 04:17:11 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=message-id:date:from:to:subject:mime-version:content-disposition;
-        bh=QFpLTVjBPnFKyARp+02Oci1lQfstDVDjHyHnGQ6q1hc=;
-        b=L5FNzmoXwwnYAI9Gk94YnQ3gi7/cfOT1X7h7bCzChe1qMMehoWdnOKncJtKgW7g9L6
-         xKNjtYnMvazP7cbxnoPfeGDw1+u5iqnRWauqaa1cqZlcAhk8Xy4mHd5J9sTIN8eS7BvD
-         vbMpc0m+dpNFkklvTmn1NnneacVeExgGzLqA+H8bbPTkjgjwc9XBg0zaeLjVpDjTlekV
-         sqn+zc2pjUJD3TvHyHjlrIqe4LQvFDDq4dXd7Gyj6kRnj07nWbl4t3aMmQkYjZVTrKBU
-         U8xi+EgZAiiS0oGU2dxj84stD8l5qoZTxGkD5M+HFOMh+pc+kUm0AHT6wIdLsAnfbELZ
-         culw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:message-id:date:from:to:subject:mime-version
-         :content-disposition;
-        bh=QFpLTVjBPnFKyARp+02Oci1lQfstDVDjHyHnGQ6q1hc=;
-        b=X1JdyfiRmtgcM95FNbI638p171JlqoEiJKuS6yw4GKACpdaVUFmhY6zQhoy82jJFEz
-         h+9hcPhKYA1dTu9me1ZYlprYhkR++X8nptqhfbOChio8u5lDEy/P1z8PmGXUF1S18D27
-         eEGeg3KvRbgL7yxJA+HKf+fn6+q0pj3TdKfHjtritN2TbKtAW4YJ9lDH5+bXD7qUKQkQ
-         Yq2On5k9Apkutm3qkN1DuVks6SHMMxDbFxecDQeLxm0shhUOnKyO5J1UWXwyPR0+Ensp
-         jBKYvhI09RBtdajw9XTZ4G1ez1EnLql9xwuqc4qHbBrGdUiVuEDXPqyPdIg6ebAmrNPr
-         HGAQ==
-X-Gm-Message-State: AOAM531eBMDhss6Vr+YbxnnCyWq9yXtIs2Y2VbCG79tqPfqIA2lCrkKZ
-        ZloE9ZEU3RF1NlOPSw7I0AnkubziRdM=
-X-Google-Smtp-Source: ABdhPJwC5DV04tyElIWqYIZwqu+A8o6d7hhCDAoj6nKJkT6ObyCZMqgSBWxusPkTCDSnOgdi+DbVPQ==
-X-Received: by 2002:a63:d80e:: with SMTP id b14mr9751061pgh.114.1602415030331;
-        Sun, 11 Oct 2020 04:17:10 -0700 (PDT)
-Received: from localhost ([47.89.231.86])
-        by smtp.gmail.com with ESMTPSA id s14sm18947474pjr.39.2020.10.11.04.17.08
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 11 Oct 2020 04:17:09 -0700 (PDT)
-Message-ID: <5f82e9b5.1c69fb81.8c00a.3b4e@mx.google.com>
-Date:   Sun, 11 Oct 2020 19:17:06 +0800
-From:   Eryu Guan <guaneryu@gmail.com>
-To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: master branch updated to ab3df57e8659
+        Sun, 11 Oct 2020 08:00:37 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:50335 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S2387742AbgJKMAg (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 11 Oct 2020 08:00:36 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1602417634;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=lgjd6Zp54Q3W1Ctqglr324KkDXKaA6mPXMN2FG1uOZs=;
+        b=BxbIrA3LiavcI7Wy2mJX8OqrTW3a0zP1psgK3tOxEwl2LGFrHSUxNxbG7MfdpRjL13dQMr
+        a7qrjPaHhL6GKOdfVd00+bD9xd59Loy1UqnwkUZyWgreHus5NEmpq6SlBEHFGa1dqXZqDi
+        fuV13OecXJOZ2rJTlJIUw3fFxxuWZRQ=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-377-bgj7r8aKPpyBXFIRz2i1wQ-1; Sun, 11 Oct 2020 08:00:33 -0400
+X-MC-Unique: bgj7r8aKPpyBXFIRz2i1wQ-1
+Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 1939E8030A6
+        for <fstests@vger.kernel.org>; Sun, 11 Oct 2020 12:00:32 +0000 (UTC)
+Received: from localhost (unknown [10.66.61.36])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 8709673675;
+        Sun, 11 Oct 2020 12:00:31 +0000 (UTC)
+Date:   Sun, 11 Oct 2020 20:15:20 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Brian Foster <bfoster@redhat.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH 3/3] generic: IO_URING direct IO fsx test
+Message-ID: <20201011121520.GA17190@localhost.localdomain>
+Mail-Followup-To: Brian Foster <bfoster@redhat.com>,
+        fstests@vger.kernel.org
+References: <20200916171443.29546-1-zlang@redhat.com>
+ <20200916171443.29546-4-zlang@redhat.com>
+ <20201002182031.GE4708@bfoster>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="4ToMXE3nmZt7"
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <20201002182031.GE4708@bfoster>
+User-Agent: Mutt/1.10.1 (2018-07-13)
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+On Fri, Oct 02, 2020 at 02:20:31PM -0400, Brian Foster wrote:
+> On Thu, Sep 17, 2020 at 01:14:43AM +0800, Zorro Lang wrote:
+> > After fsx supports IO_URING read/write, add IO_URING direct IO fsx
+> > test with different read/write size and concurrent buffered IO.
+> > 
+> > Signed-off-by: Zorro Lang <zlang@redhat.com>
+> > ---
+> >  tests/generic/610     | 52 +++++++++++++++++++++++++++++++++++++++++++
+> >  tests/generic/610.out |  7 ++++++
+> >  tests/generic/group   |  1 +
+> >  3 files changed, 60 insertions(+)
+> >  create mode 100755 tests/generic/610
+> >  create mode 100644 tests/generic/610.out
+> > 
+> > diff --git a/tests/generic/610 b/tests/generic/610
+> > new file mode 100755
+> > index 00000000..fc3f4c2a
+> > --- /dev/null
+> > +++ b/tests/generic/610
+> > @@ -0,0 +1,52 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (c) 2020 YOUR NAME HERE.  All Rights Reserved.
+> 
+> The copyright needs fixing.
+> 
+> > +#
+> > +# FS QA Test 610
+> > +#
+> > +# IO_URING direct IO fsx test
+> > +#
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +
+> > +here=`pwd`
+> > +tmp=/tmp/$$
+> > +status=1	# failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	rm -f $tmp.*
+> > +}
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/filter
+> > +
+> > +# remove previous $seqres.full before test
+> > +rm -f $seqres.full
+> > +
+> > +# real QA test starts here
+> > +_supported_fs generic
+> > +_supported_os Linux
+> > +_require_test
+> > +_require_odirect
+> > +_require_io_uring
+> > +
+> > +psize=`$here/src/feature -s`
+> > +bsize=`_min_dio_alignment $TEST_DEV`
+> > +run_fsx -S 0 -U -N 20000           -l 600000 -r PSIZE -w BSIZE -Z -R -W
+> > +run_fsx -S 0 -U -N 20000 -o 8192   -l 600000 -r PSIZE -w BSIZE -Z -R -W
+> > +run_fsx -S 0 -U -N 20000 -o 128000 -l 600000 -r PSIZE -w BSIZE -Z -R -W
+> > +
+> > +# change readbdy/writebdy to double page size
+> > +psize=$((psize * 2))
+> > +run_fsx -S 0 -U -N 20000           -l 600000 -r PSIZE -w PSIZE -Z -R -W
+> > +run_fsx -S 0 -U -N 20000 -o 256000 -l 600000 -r PSIZE -w PSIZE -Z -R -W
+> > +run_fsx -S 0 -U -N 20000 -o 128000 -l 600000 -r PSIZE -w BSIZE -Z -W
+> > +
+> 
+> Can you elaborate on why PSIZE/BSIZE are used where they are for the
+> writebdy option? Also is -R intentionally dropped from the final test?
 
---4ToMXE3nmZt7
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Sure:) This test is copied from generic/091.
 
-Hi all,
+> 
+> Brian
+> 
+> > +# success, all done
+> > +status=0
+> > +exit
+> > diff --git a/tests/generic/610.out b/tests/generic/610.out
+> > new file mode 100644
+> > index 00000000..97ad41a3
+> > --- /dev/null
+> > +++ b/tests/generic/610.out
+> > @@ -0,0 +1,7 @@
+> > +QA output created by 610
+> > +fsx -S 0 -U -N 20000 -l 600000 -r PSIZE -w BSIZE -Z -R -W
+> > +fsx -S 0 -U -N 20000 -o 8192 -l 600000 -r PSIZE -w BSIZE -Z -R -W
+> > +fsx -S 0 -U -N 20000 -o 128000 -l 600000 -r PSIZE -w BSIZE -Z -R -W
+> > +fsx -S 0 -U -N 20000 -l 600000 -r PSIZE -w PSIZE -Z -R -W
+> > +fsx -S 0 -U -N 20000 -o 256000 -l 600000 -r PSIZE -w PSIZE -Z -R -W
+> > +fsx -S 0 -U -N 20000 -o 128000 -l 600000 -r PSIZE -w BSIZE -Z -W
+> > diff --git a/tests/generic/group b/tests/generic/group
+> > index cf50f4a1..60280dc2 100644
+> > --- a/tests/generic/group
+> > +++ b/tests/generic/group
+> > @@ -612,3 +612,4 @@
+> >  607 auto attr quick dax
+> >  608 auto attr quick dax
+> >  609 auto rw io_uring
+> > +610 auto rw io_uring
+> > -- 
+> > 2.20.1
+> > 
 
-The master branch of the xfstests repository at:
-
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-have just been updated. This update pulls in the f2fs compression+encryption
-test from Eric Biggers. There're also two new tests, one generic test and one
-xfs test. Note that the new xfs/521 may crash your kernel when XFS_DEBUG is on.
-
-Thanks,
-Eryu
-
-The new head of the master branch is commit:
-
-ab3df57e8659 generic/611: Use _getfattr instead of GETFATTR_PROG
-
-New commits:
-
-Anand Jain (1):
-      [65a20890998e] btrfs/064: add a comment to the test case header
-
-Darrick J. Wong (2):
-      [5f35d3df8a14] xfs/194: actually check if we got the desired block size before proceeding
-      [6df280a68476] xfs: test running growfs on the realtime volume
-
-Eric Biggers (5):
-      [fa650493ef9f] fscrypt-crypt-util: clean up parsing --block-size and --inode-number
-      [65cd8e8a8e81] fscrypt-crypt-util: fix IV incrementing for --iv-ino-lblk-32
-      [300cd3558f43] fscrypt-crypt-util: add --block-number option
-      [4057f495d572] common/f2fs: add _require_scratch_f2fs_compression()
-      [8b28dae4ac8c] f2fs: verify ciphertext of compressed+encrypted file
-
-Eric Sandeen (1):
-      [b3170bfe8da1] generic: test reflinked file corruption after short COW
-
-Vladimir Zapolskiy (1):
-      [fce0f68a946f] generic/120: add the test to atime test group
-
-Xiao Yang (2):
-      [4616ec0a9df2] overlay/071: Fix undefined OVL_BASE_SCRATCH_DIR
-      [72a84addd227] overlay/071: Don't compare inode numbers in lower overlay and nested overlay
-
-Yang Xu (1):
-      [ab3df57e8659] generic/611: Use _getfattr instead of GETFATTR_PROG
-
-
-Code Diffstat:
-
- common/config            |   1 +
- common/f2fs              |  27 ++++++
- src/fscrypt-crypt-util.c |  98 ++++++++++++++-------
- tests/btrfs/064          |  10 ++-
- tests/f2fs/002           | 217 +++++++++++++++++++++++++++++++++++++++++++++++
- tests/f2fs/002.out       |  21 +++++
- tests/f2fs/group         |   1 +
- tests/generic/611        |   2 +-
- tests/generic/611.out    |   2 +-
- tests/generic/612        |  85 +++++++++++++++++++
- tests/generic/612.out    |  18 ++++
- tests/generic/group      |   3 +-
- tests/overlay/071        |  12 +--
- tests/xfs/194            |   3 +
- tests/xfs/521            |  82 ++++++++++++++++++
- tests/xfs/521.out        |  10 +++
- tests/xfs/group          |   1 +
- 17 files changed, 548 insertions(+), 45 deletions(-)
---
-Eryu Guan
-guaneryu@gmail.com
-
---4ToMXE3nmZt7
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAl+C6JoACgkQJlKqKVyP
-52MimA/+Mwwyzx/OQ1gqX/gRbVoYMZEyTpVs480h9iVK4iVqK12pud/7I/EOKos/
-GWYW48hRAQ+9fAwk1k8GfRldDvDJuOS1yEROUgGd2RcaAUK5TgZt217SvTQ+Rsaj
-ZlNsFAPWbiUBjaQiPbbWZSRreKOWV0dx83xa23DkbhTtLmPTAlCRYLv/dHcg19Tt
-UyY7n3I73n6QJd8VtLeoZ57lHFqgu4dhWdlzRj/LXp19abJz5fUyvSsJeOdb4g2u
-x25hjRgyNt9iKvS4a6CB95NtyOKKOsPcybLdFHYMAPgbqfchGbEs7Yic8W6uRtPW
-f9yerZnLTyubUFz8eu4zfdyMMSa9LJwX7IXcxfSZ7iBwM4dUUzZ2UtUv8MRsRjg9
-202m87MapTihXK1JcUsdnes6mmShEAjihXbl1767Zk++hDkwVfTyDqCAYlQR4th1
-NC2UZihg29U+vyxY+nORXpwIf7rUVjGpUhrCtnIHwAgS3g8+YEvBizqHQot88reN
-IWzCdk1h4VDZb2tMqyjbF6K43xYZfEloNHcWEvTGYAocjNakvZmobQxd1tzU6B1C
-6ucUXJn63GnFsEXi8ylByadCyUmxcJgCGIPSnSL812JSzMmGttmQzl5uZN7tewpp
-eadJ3w1hPZ480lB7Ph0nimN//u2ri8234uJ3gwP92r+YNlny04w=
-=xj4k
------END PGP SIGNATURE-----
-
---4ToMXE3nmZt7--
