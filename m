@@ -2,252 +2,168 @@ Return-Path: <SRS0=fsOW=DS=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-8.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 90207C433E7
-	for <linux-fstests@archiver.kernel.org>; Sun, 11 Oct 2020 06:20:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9DF74C433DF
+	for <linux-fstests@archiver.kernel.org>; Sun, 11 Oct 2020 11:17:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 39BB820795
-	for <linux-fstests@archiver.kernel.org>; Sun, 11 Oct 2020 06:20:36 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 603AA207F7
+	for <linux-fstests@archiver.kernel.org>; Sun, 11 Oct 2020 11:17:14 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Xno7MNZA"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="L5FNzmoX"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726547AbgJKGUf (ORCPT
+        id S1729782AbgJKLRO (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 11 Oct 2020 02:20:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53336 "EHLO
+        Sun, 11 Oct 2020 07:17:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42128 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725882AbgJKGUf (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 11 Oct 2020 02:20:35 -0400
-Received: from mail-pf1-x42e.google.com (mail-pf1-x42e.google.com [IPv6:2607:f8b0:4864:20::42e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0B719C0613CE;
-        Sat, 10 Oct 2020 23:20:34 -0700 (PDT)
-Received: by mail-pf1-x42e.google.com with SMTP id a200so10526446pfa.10;
-        Sat, 10 Oct 2020 23:20:33 -0700 (PDT)
+        with ESMTP id S1725863AbgJKLRM (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 11 Oct 2020 07:17:12 -0400
+Received: from mail-pf1-x441.google.com (mail-pf1-x441.google.com [IPv6:2607:f8b0:4864:20::441])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0D1BCC0613CE
+        for <fstests@vger.kernel.org>; Sun, 11 Oct 2020 04:17:11 -0700 (PDT)
+Received: by mail-pf1-x441.google.com with SMTP id w21so10841800pfc.7
+        for <fstests@vger.kernel.org>; Sun, 11 Oct 2020 04:17:11 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=KBcRdIkSC2vwcAFXSyLPcmONcXV6jKUgHSkyYWfK/uo=;
-        b=Xno7MNZA+qHkGAYMM4kGu7JWjThlrAPNxoHXD23zRQk7OAefspSjgb3o7X+ofkkPVb
-         k5zU/U0fbrHssChpgxaXC33DlPhOaLf6m1+mmGWQ7zDpI0n6a6txVHzfeBTExuRGs/O2
-         KyKGGOUXdH5yASb8eonqAzAwkbYNi2sVebTRrCDE5B6DIfkka07a7v7prkC0N9GF/HTR
-         Ah4eskA5lPukAk9NnIPbWlGLEEkD4NhdUvqpcTgLCGb9LQITvsoYLOLh96ORFr9YwFlp
-         uNA9KGhsmPjySY9oUouSajkrO2pzu1FurYNV4Hx1ui/fZF/NbIMRMjoRvVESKFjJvTfl
-         8BIQ==
+        h=message-id:date:from:to:subject:mime-version:content-disposition;
+        bh=QFpLTVjBPnFKyARp+02Oci1lQfstDVDjHyHnGQ6q1hc=;
+        b=L5FNzmoXwwnYAI9Gk94YnQ3gi7/cfOT1X7h7bCzChe1qMMehoWdnOKncJtKgW7g9L6
+         xKNjtYnMvazP7cbxnoPfeGDw1+u5iqnRWauqaa1cqZlcAhk8Xy4mHd5J9sTIN8eS7BvD
+         vbMpc0m+dpNFkklvTmn1NnneacVeExgGzLqA+H8bbPTkjgjwc9XBg0zaeLjVpDjTlekV
+         sqn+zc2pjUJD3TvHyHjlrIqe4LQvFDDq4dXd7Gyj6kRnj07nWbl4t3aMmQkYjZVTrKBU
+         U8xi+EgZAiiS0oGU2dxj84stD8l5qoZTxGkD5M+HFOMh+pc+kUm0AHT6wIdLsAnfbELZ
+         culw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=KBcRdIkSC2vwcAFXSyLPcmONcXV6jKUgHSkyYWfK/uo=;
-        b=W0fcDp4GMa6YkKm1RL1ZommezBLLyWKvGXHqNTdimVmT0NIsjbMMmdPCHwb7QAHHQo
-         njqqA+3pRvzrXeKjKd/bAO6DQyRDNVOjCxNIujiObvYeeIouo2iLjGF941/CPwJtU6W2
-         gan0fUSHhE8tvM352nN41gpem3wEhRzt9dJE0SGv/nnEcKREXxiZUCN6BRbxT/2MHuIa
-         AIP+4X1hUSt/Yk05zR37/O4dxgpWq6T9BaNbujwSLgOrpsstoiyWFGNgfSGt8TCXfTsT
-         eL/uaJ1MDBpdCPnL1BiEJDYtzOQGl+UF7ZSYDWs91Z0UVOp6ia2HyimoOb1iz7kbMECv
-         r7ow==
-X-Gm-Message-State: AOAM532O6nSfxIIi6IsREq6dZkJqSfUSi/BqOipR7AU4eI5Qs58Z3o1t
-        sky8U/Du7HmOL17n+L19vbfll3/ajsqwq3vs
-X-Google-Smtp-Source: ABdhPJydUGkZCmEvFwZLsWh+ew10QWLeEHPVOX2GueIhVmHzzlksAOHkLuPP+DlW9BkWjHNLo2qP1w==
-X-Received: by 2002:a17:90a:7c03:: with SMTP id v3mr13446241pjf.233.1602397232401;
-        Sat, 10 Oct 2020 23:20:32 -0700 (PDT)
-Received: from localhost.localdomain ([175.195.128.78])
-        by smtp.googlemail.com with ESMTPSA id q15sm18563559pjp.26.2020.10.10.23.20.29
+        h=x-gm-message-state:message-id:date:from:to:subject:mime-version
+         :content-disposition;
+        bh=QFpLTVjBPnFKyARp+02Oci1lQfstDVDjHyHnGQ6q1hc=;
+        b=X1JdyfiRmtgcM95FNbI638p171JlqoEiJKuS6yw4GKACpdaVUFmhY6zQhoy82jJFEz
+         h+9hcPhKYA1dTu9me1ZYlprYhkR++X8nptqhfbOChio8u5lDEy/P1z8PmGXUF1S18D27
+         eEGeg3KvRbgL7yxJA+HKf+fn6+q0pj3TdKfHjtritN2TbKtAW4YJ9lDH5+bXD7qUKQkQ
+         Yq2On5k9Apkutm3qkN1DuVks6SHMMxDbFxecDQeLxm0shhUOnKyO5J1UWXwyPR0+Ensp
+         jBKYvhI09RBtdajw9XTZ4G1ez1EnLql9xwuqc4qHbBrGdUiVuEDXPqyPdIg6ebAmrNPr
+         HGAQ==
+X-Gm-Message-State: AOAM531eBMDhss6Vr+YbxnnCyWq9yXtIs2Y2VbCG79tqPfqIA2lCrkKZ
+        ZloE9ZEU3RF1NlOPSw7I0AnkubziRdM=
+X-Google-Smtp-Source: ABdhPJwC5DV04tyElIWqYIZwqu+A8o6d7hhCDAoj6nKJkT6ObyCZMqgSBWxusPkTCDSnOgdi+DbVPQ==
+X-Received: by 2002:a63:d80e:: with SMTP id b14mr9751061pgh.114.1602415030331;
+        Sun, 11 Oct 2020 04:17:10 -0700 (PDT)
+Received: from localhost ([47.89.231.86])
+        by smtp.gmail.com with ESMTPSA id s14sm18947474pjr.39.2020.10.11.04.17.08
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 10 Oct 2020 23:20:31 -0700 (PDT)
-From:   Sidong Yang <realwakka@gmail.com>
-To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Cc:     Sidong Yang <realwakka@gmail.com>, Qu Wenruo <wqu@suse.com>,
-        Josef Bacik <josef@toxicpanda.com>, Eryu Guan <guan@eryu.me>
-Subject: [PATCH v6] btrfs: Add new test for qgroup assign functionality
-Date:   Sun, 11 Oct 2020 06:20:19 +0000
-Message-Id: <20201011062019.3798-1-realwakka@gmail.com>
-X-Mailer: git-send-email 2.25.1
+        Sun, 11 Oct 2020 04:17:09 -0700 (PDT)
+Message-ID: <5f82e9b5.1c69fb81.8c00a.3b4e@mx.google.com>
+Date:   Sun, 11 Oct 2020 19:17:06 +0800
+From:   Eryu Guan <guaneryu@gmail.com>
+To:     fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: master branch updated to ab3df57e8659
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="4ToMXE3nmZt7"
+Content-Disposition: inline
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This new test will test btrfs's qgroup assign functionality. The
-test has 3 cases.
 
- - assign, no shared extents
- - assign, shared extents
- - snapshot -i, shared extents
+--4ToMXE3nmZt7
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-Each cases create subvolumes and assign qgroup in their own way
-and check with the command "btrfs check".
+Hi all,
 
-Cc: Qu Wenruo <wqu@suse.com>
-Cc: Eryu Guan <guan@eryu.me>
+The master branch of the xfstests repository at:
 
-Signed-off-by: Sidong Yang <realwakka@gmail.com>
----
-v2:
- - Create new test and use the cases
-v3:
- - Fix some minor mistakes
- - Make that write some data before assign or snapshot in test
- - Put mkfs & mount pair in test function
-v4:
- - Add rescan command for assign no shared
- - Use _check_scratch_fs for checking
-v5:
- - Remove trailing whitespaces
-v6:
- - Use _cp_reflink helper
----
- tests/btrfs/221     | 116 ++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/221.out |   2 +
- tests/btrfs/group   |   1 +
- 3 files changed, 119 insertions(+)
- create mode 100755 tests/btrfs/221
- create mode 100644 tests/btrfs/221.out
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-diff --git a/tests/btrfs/221 b/tests/btrfs/221
-new file mode 100755
-index 00000000..9208d762
---- /dev/null
-+++ b/tests/btrfs/221
-@@ -0,0 +1,116 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2020 Sidong Yang.  All Rights Reserved.
-+#
-+# FS QA Test 221
-+#
-+# Test the assign functionality of qgroups
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/reflink
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs btrfs
-+_supported_os Linux
-+
-+_require_scratch
-+_require_btrfs_qgroup_report
-+_require_cp_reflink
-+
-+# Test assign qgroup for submodule with shared extents by reflink
-+assign_shared_test()
-+{
-+	_scratch_mkfs > /dev/null 2>&1
-+	_scratch_mount
-+
-+	echo "=== qgroup assign shared test ===" >> $seqres.full
-+	$BTRFS_UTIL_PROG quota enable $SCRATCH_MNT
-+	$BTRFS_UTIL_PROG quota rescan -w $SCRATCH_MNT >> $seqres.full
-+
-+	$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/a >> $seqres.full
-+	$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/b >> $seqres.full
-+
-+	_ddt of="$SCRATCH_MNT"/a/file1 bs=1M count=1 >> $seqres.full 2>&1
-+	_cp_reflink "$SCRATCH_MNT"/a/file1 "$SCRATCH_MNT"/b/file1
-+
-+	$BTRFS_UTIL_PROG qgroup create 1/100 $SCRATCH_MNT
-+	$BTRFS_UTIL_PROG qgroup assign $SCRATCH_MNT/a 1/100 $SCRATCH_MNT
-+	$BTRFS_UTIL_PROG qgroup assign $SCRATCH_MNT/b 1/100 $SCRATCH_MNT
-+
-+	_scratch_unmount
-+	_check_scratch_fs
-+}
-+
-+# Test assign qgroup for submodule without shared extents
-+assign_no_shared_test()
-+{
-+	_scratch_mkfs > /dev/null 2>&1
-+	_scratch_mount
-+
-+	echo "=== qgroup assign no shared test ===" >> $seqres.full
-+	$BTRFS_UTIL_PROG quota enable $SCRATCH_MNT
-+	$BTRFS_UTIL_PROG quota rescan -w $SCRATCH_MNT >> $seqres.full
-+
-+	$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/a >> $seqres.full
-+	$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/b >> $seqres.full
-+
-+	$BTRFS_UTIL_PROG qgroup create 1/100 $SCRATCH_MNT
-+	$BTRFS_UTIL_PROG qgroup assign $SCRATCH_MNT/a 1/100 $SCRATCH_MNT
-+	$BTRFS_UTIL_PROG qgroup assign $SCRATCH_MNT/b 1/100 $SCRATCH_MNT
-+
-+	_scratch_unmount
-+	_check_scratch_fs
-+}
-+
-+# Test snapshot with assigning qgroup for submodule
-+snapshot_test()
-+{
-+	_scratch_mkfs > /dev/null 2>&1
-+	_scratch_mount
-+
-+	echo "=== qgroup snapshot test ===" >> $seqres.full
-+	$BTRFS_UTIL_PROG quota enable $SCRATCH_MNT
-+	$BTRFS_UTIL_PROG quota rescan -w $SCRATCH_MNT >> $seqres.full
-+
-+	$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/a >> $seqres.full
-+	_ddt of="$SCRATCH_MNT"/a/file1 bs=1M count=1 >> $seqres.full 2>&1
-+	subvolid=$(_btrfs_get_subvolid $SCRATCH_MNT a)
-+	$BTRFS_UTIL_PROG subvolume snapshot -i 0/$subvolid $SCRATCH_MNT/a $SCRATCH_MNT/b >> $seqres.full
-+
-+	_scratch_unmount
-+	_check_scratch_fs
-+}
-+
-+
-+assign_no_shared_test
-+
-+assign_shared_test
-+
-+snapshot_test
-+
-+# success, all done
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/btrfs/221.out b/tests/btrfs/221.out
-new file mode 100644
-index 00000000..aa4351cd
---- /dev/null
-+++ b/tests/btrfs/221.out
-@@ -0,0 +1,2 @@
-+QA output created by 221
-+Silence is golden
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 1b5fa695..cdda38f3 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -222,3 +222,4 @@
- 218 auto quick volume
- 219 auto quick volume
- 220 auto quick
-+221 auto quick qgroup
--- 
-2.25.1
+have just been updated. This update pulls in the f2fs compression+encryption
+test from Eric Biggers. There're also two new tests, one generic test and one
+xfs test. Note that the new xfs/521 may crash your kernel when XFS_DEBUG is on.
 
+Thanks,
+Eryu
+
+The new head of the master branch is commit:
+
+ab3df57e8659 generic/611: Use _getfattr instead of GETFATTR_PROG
+
+New commits:
+
+Anand Jain (1):
+      [65a20890998e] btrfs/064: add a comment to the test case header
+
+Darrick J. Wong (2):
+      [5f35d3df8a14] xfs/194: actually check if we got the desired block size before proceeding
+      [6df280a68476] xfs: test running growfs on the realtime volume
+
+Eric Biggers (5):
+      [fa650493ef9f] fscrypt-crypt-util: clean up parsing --block-size and --inode-number
+      [65cd8e8a8e81] fscrypt-crypt-util: fix IV incrementing for --iv-ino-lblk-32
+      [300cd3558f43] fscrypt-crypt-util: add --block-number option
+      [4057f495d572] common/f2fs: add _require_scratch_f2fs_compression()
+      [8b28dae4ac8c] f2fs: verify ciphertext of compressed+encrypted file
+
+Eric Sandeen (1):
+      [b3170bfe8da1] generic: test reflinked file corruption after short COW
+
+Vladimir Zapolskiy (1):
+      [fce0f68a946f] generic/120: add the test to atime test group
+
+Xiao Yang (2):
+      [4616ec0a9df2] overlay/071: Fix undefined OVL_BASE_SCRATCH_DIR
+      [72a84addd227] overlay/071: Don't compare inode numbers in lower overlay and nested overlay
+
+Yang Xu (1):
+      [ab3df57e8659] generic/611: Use _getfattr instead of GETFATTR_PROG
+
+
+Code Diffstat:
+
+ common/config            |   1 +
+ common/f2fs              |  27 ++++++
+ src/fscrypt-crypt-util.c |  98 ++++++++++++++-------
+ tests/btrfs/064          |  10 ++-
+ tests/f2fs/002           | 217 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/f2fs/002.out       |  21 +++++
+ tests/f2fs/group         |   1 +
+ tests/generic/611        |   2 +-
+ tests/generic/611.out    |   2 +-
+ tests/generic/612        |  85 +++++++++++++++++++
+ tests/generic/612.out    |  18 ++++
+ tests/generic/group      |   3 +-
+ tests/overlay/071        |  12 +--
+ tests/xfs/194            |   3 +
+ tests/xfs/521            |  82 ++++++++++++++++++
+ tests/xfs/521.out        |  10 +++
+ tests/xfs/group          |   1 +
+ 17 files changed, 548 insertions(+), 45 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
+
+--4ToMXE3nmZt7
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAl+C6JoACgkQJlKqKVyP
+52MimA/+Mwwyzx/OQ1gqX/gRbVoYMZEyTpVs480h9iVK4iVqK12pud/7I/EOKos/
+GWYW48hRAQ+9fAwk1k8GfRldDvDJuOS1yEROUgGd2RcaAUK5TgZt217SvTQ+Rsaj
+ZlNsFAPWbiUBjaQiPbbWZSRreKOWV0dx83xa23DkbhTtLmPTAlCRYLv/dHcg19Tt
+UyY7n3I73n6QJd8VtLeoZ57lHFqgu4dhWdlzRj/LXp19abJz5fUyvSsJeOdb4g2u
+x25hjRgyNt9iKvS4a6CB95NtyOKKOsPcybLdFHYMAPgbqfchGbEs7Yic8W6uRtPW
+f9yerZnLTyubUFz8eu4zfdyMMSa9LJwX7IXcxfSZ7iBwM4dUUzZ2UtUv8MRsRjg9
+202m87MapTihXK1JcUsdnes6mmShEAjihXbl1767Zk++hDkwVfTyDqCAYlQR4th1
+NC2UZihg29U+vyxY+nORXpwIf7rUVjGpUhrCtnIHwAgS3g8+YEvBizqHQot88reN
+IWzCdk1h4VDZb2tMqyjbF6K43xYZfEloNHcWEvTGYAocjNakvZmobQxd1tzU6B1C
+6ucUXJn63GnFsEXi8ylByadCyUmxcJgCGIPSnSL812JSzMmGttmQzl5uZN7tewpp
+eadJ3w1hPZ480lB7Ph0nimN//u2ri8234uJ3gwP92r+YNlny04w=
+=xj4k
+-----END PGP SIGNATURE-----
+
+--4ToMXE3nmZt7--
