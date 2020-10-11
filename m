@@ -7,69 +7,86 @@ X-Spam-Status: No, score=-11.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DA1B5C433DF
-	for <linux-fstests@archiver.kernel.org>; Sun, 11 Oct 2020 12:00:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EBA61C433DF
+	for <linux-fstests@archiver.kernel.org>; Sun, 11 Oct 2020 12:21:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 89607208C7
-	for <linux-fstests@archiver.kernel.org>; Sun, 11 Oct 2020 12:00:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 97EE020781
+	for <linux-fstests@archiver.kernel.org>; Sun, 11 Oct 2020 12:21:40 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="BxbIrA3L"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="AM5VMrfp"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2387743AbgJKMAh (ORCPT
+        id S2387771AbgJKMVk (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 11 Oct 2020 08:00:37 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:50335 "EHLO
+        Sun, 11 Oct 2020 08:21:40 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:25488 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S2387742AbgJKMAg (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 11 Oct 2020 08:00:36 -0400
+        by vger.kernel.org with ESMTP id S2387744AbgJKMVj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 11 Oct 2020 08:21:39 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1602417634;
+        s=mimecast20190719; t=1602418898;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=lgjd6Zp54Q3W1Ctqglr324KkDXKaA6mPXMN2FG1uOZs=;
-        b=BxbIrA3LiavcI7Wy2mJX8OqrTW3a0zP1psgK3tOxEwl2LGFrHSUxNxbG7MfdpRjL13dQMr
-        a7qrjPaHhL6GKOdfVd00+bD9xd59Loy1UqnwkUZyWgreHus5NEmpq6SlBEHFGa1dqXZqDi
-        fuV13OecXJOZ2rJTlJIUw3fFxxuWZRQ=
+        bh=cDM9B2W9yUKmVin7xCP4+0fq5TGI9pLh8I9/Eu8Fy4o=;
+        b=AM5VMrfpbf04YRSIPfnOqIY3b8KrwQY3u4WWaj5E9C/n4f6YnRk8wCtikE1vBn+09Z9u4T
+        tgvPenyzVDAm621n3zyTUAVVUrTbaQt3c/40QjaK3mDIBgnNTGPYC8t6g/Jx8TsN2wxPN1
+        2kgTUCydhUzn+Q88m0V88tyBsaFDGEQ=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-377-bgj7r8aKPpyBXFIRz2i1wQ-1; Sun, 11 Oct 2020 08:00:33 -0400
-X-MC-Unique: bgj7r8aKPpyBXFIRz2i1wQ-1
+ us-mta-177-RHd0Khu4PtOD3HewqY499A-1; Sun, 11 Oct 2020 08:21:36 -0400
+X-MC-Unique: RHd0Khu4PtOD3HewqY499A-1
 Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 1939E8030A6
-        for <fstests@vger.kernel.org>; Sun, 11 Oct 2020 12:00:32 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 427FF80B702;
+        Sun, 11 Oct 2020 12:21:35 +0000 (UTC)
 Received: from localhost (unknown [10.66.61.36])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 8709673675;
-        Sun, 11 Oct 2020 12:00:31 +0000 (UTC)
-Date:   Sun, 11 Oct 2020 20:15:20 +0800
+        by smtp.corp.redhat.com (Postfix) with ESMTP id B0EA76EF55;
+        Sun, 11 Oct 2020 12:21:34 +0000 (UTC)
+Date:   Sun, 11 Oct 2020 20:36:23 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     Brian Foster <bfoster@redhat.com>
+To:     "Darrick J. Wong" <darrick.wong@oracle.com>
 Cc:     fstests@vger.kernel.org
 Subject: Re: [PATCH 3/3] generic: IO_URING direct IO fsx test
-Message-ID: <20201011121520.GA17190@localhost.localdomain>
-Mail-Followup-To: Brian Foster <bfoster@redhat.com>,
+Message-ID: <20201011123623.GB17190@localhost.localdomain>
+Mail-Followup-To: "Darrick J. Wong" <darrick.wong@oracle.com>,
         fstests@vger.kernel.org
 References: <20200916171443.29546-1-zlang@redhat.com>
  <20200916171443.29546-4-zlang@redhat.com>
- <20201002182031.GE4708@bfoster>
+ <20201005164510.GG49541@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20201002182031.GE4708@bfoster>
+In-Reply-To: <20201005164510.GG49541@magnolia>
 User-Agent: Mutt/1.10.1 (2018-07-13)
 X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Oct 02, 2020 at 02:20:31PM -0400, Brian Foster wrote:
+On Mon, Oct 05, 2020 at 09:45:10AM -0700, Darrick J. Wong wrote:
 > On Thu, Sep 17, 2020 at 01:14:43AM +0800, Zorro Lang wrote:
 > > After fsx supports IO_URING read/write, add IO_URING direct IO fsx
 > > test with different read/write size and concurrent buffered IO.
 > > 
 > > Signed-off-by: Zorro Lang <zlang@redhat.com>
+> 
+> Funny, I would have expected this to be a clone of generic/521, much
+> like the previous test was a clone of g/522.  I guess it's fine to test
+> various fsx parameters, but in that case, is there a reason /not/ to
+> have a long soak io_uring directio test?
+
+This case is copied from generic/091 :) Even the previous test was a clone
+of g/522, but I reduce the default test time. The g/521 and g/522 takes too long
+time, I'd like to have io_uring buffer and direct IO basic test cases which
+doesn't take long time at first. From this side, I think g/091 does more test :-p
+
+Thanks,
+Zorro
+
+> 
+> --D
+> 
 > > ---
 > >  tests/generic/610     | 52 +++++++++++++++++++++++++++++++++++++++++++
 > >  tests/generic/610.out |  7 ++++++
@@ -87,9 +104,6 @@ On Fri, Oct 02, 2020 at 02:20:31PM -0400, Brian Foster wrote:
 > > +#! /bin/bash
 > > +# SPDX-License-Identifier: GPL-2.0
 > > +# Copyright (c) 2020 YOUR NAME HERE.  All Rights Reserved.
-> 
-> The copyright needs fixing.
-> 
 > > +#
 > > +# FS QA Test 610
 > > +#
@@ -136,15 +150,6 @@ On Fri, Oct 02, 2020 at 02:20:31PM -0400, Brian Foster wrote:
 > > +run_fsx -S 0 -U -N 20000 -o 256000 -l 600000 -r PSIZE -w PSIZE -Z -R -W
 > > +run_fsx -S 0 -U -N 20000 -o 128000 -l 600000 -r PSIZE -w BSIZE -Z -W
 > > +
-> 
-> Can you elaborate on why PSIZE/BSIZE are used where they are for the
-> writebdy option? Also is -R intentionally dropped from the final test?
-
-Sure:) This test is copied from generic/091.
-
-> 
-> Brian
-> 
 > > +# success, all done
 > > +status=0
 > > +exit
@@ -173,4 +178,5 @@ Sure:) This test is copied from generic/091.
 > > -- 
 > > 2.20.1
 > > 
+> 
 
