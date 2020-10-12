@@ -1,353 +1,293 @@
-Return-Path: <SRS0=fsOW=DS=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=+QVP=DT=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+X-Spam-Status: No, score=-11.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	NICE_REPLY_A,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F2470C433DF
-	for <linux-fstests@archiver.kernel.org>; Sun, 11 Oct 2020 12:39:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2EC6CC433E7
+	for <linux-fstests@archiver.kernel.org>; Mon, 12 Oct 2020 04:17:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A0046207F7
-	for <linux-fstests@archiver.kernel.org>; Sun, 11 Oct 2020 12:39:00 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1602419940;
-	bh=yCTXbQ6tzPZwjjwZsz3Y21eD4yXv9/9T/SWpvj87iz4=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=h9UCl9cxFiCRu4zeNq3LRNZCfRrdnoH0xkzaD3OJs++hTX5BfSsgBu2bjVpekgzj+
-	 /poOLoORV1gr/MyYp/cxKTruXMko5abaIglItOOW+rSgnLZTynfPvGqMLrqyoEW/AD
-	 sz0+Xmm9VtJRgjh4M6Qk6QlejwbdeT6sU6O8PVlg=
+	by mail.kernel.org (Postfix) with ESMTP id 9D2ED206DC
+	for <linux-fstests@archiver.kernel.org>; Mon, 12 Oct 2020 04:17:04 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="RHLMdiKQ"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729971AbgJKMjA (ORCPT
+        id S1727202AbgJLERE (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 11 Oct 2020 08:39:00 -0400
-Received: from mail.kernel.org ([198.145.29.99]:55138 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729954AbgJKMi7 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 11 Oct 2020 08:38:59 -0400
-Received: from debian8.Home (bl8-197-74.dsl.telepac.pt [85.241.197.74])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 283B4207E8;
-        Sun, 11 Oct 2020 12:38:57 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1602419938;
-        bh=yCTXbQ6tzPZwjjwZsz3Y21eD4yXv9/9T/SWpvj87iz4=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=Oe/66wTOrcColSzovqIir+TogiNBDTs+NO+dk2XjbeVs0rVaPvQ9Iu1R2P5BKBXrU
-         Uhxq8M5ltJLxH+00XUr2vE5MDH7Ntr9HlMpmI1pNnKM07J/lBV1FKzkYqlQVNRbQGH
-         B5UMy40EGidS7G/HDHISC11ZY6iMApeQsVrqw9LU=
-From:   fdmanana@kernel.org
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, guan@eryu.me,
-        Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH v2] fstests: add a filter for the new getcap output
-Date:   Sun, 11 Oct 2020 13:38:52 +0100
-Message-Id: <76fff10e7f920de923010b00d0b68bc2edc5448e.1602419494.git.fdmanana@suse.com>
-X-Mailer: git-send-email 2.28.0
-In-Reply-To: <f2980ed83a5268a96b3ff9da15c58477ff24d7a4.1602334589.git.fdmanana@suse.com>
-References: <f2980ed83a5268a96b3ff9da15c58477ff24d7a4.1602334589.git.fdmanana@suse.com>
+        Mon, 12 Oct 2020 00:17:04 -0400
+Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:55408 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1726706AbgJLERD (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 12 Oct 2020 00:17:03 -0400
+Received: from pps.filterd (m0098413.ppops.net [127.0.0.1])
+        by mx0b-001b2d01.pphosted.com (8.16.0.42/8.16.0.42) with SMTP id 09C41pWZ036410;
+        Mon, 12 Oct 2020 00:16:56 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=subject : to : cc :
+ references : from : message-id : date : mime-version : in-reply-to :
+ content-type : content-transfer-encoding; s=pp1;
+ bh=4K7e/pn/Ugv4bADUOXwFaTWkV7AIfgCYDv3meoOLUfg=;
+ b=RHLMdiKQMORjy8xGDjup4wHeFncRF/Pc5hr9SfGVtA6REAwn+9zdm9Q8KCjfCOoI9l+V
+ 9y/3NyS877zMusnB8vURUwfDJL2OnmywK3z9n1JGbNt8PnSdTxMqVuITVzjP/JLLoScR
+ DCJYBQ4zwkp0/iJwJMhVkQjdm/sc0WrTYiXLzspWe4DvYw7SKVqzQw0oflKModQAXFlG
+ YjM2SssqOYaKQIsj2Kcbe74c9CuRl2McUyH4pHuX+DUI36aO/q5x/KYKyvto/8dobEEG
+ NAMEOHAGauumrV0/cgAvoZjQpWAKxm0GKfsSiGv5jixPYGMLSuvKXotXD69miZHj7CPG 4g== 
+Received: from ppma04ams.nl.ibm.com (63.31.33a9.ip4.static.sl-reverse.com [169.51.49.99])
+        by mx0b-001b2d01.pphosted.com with ESMTP id 344fr5gahy-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 12 Oct 2020 00:16:56 -0400
+Received: from pps.filterd (ppma04ams.nl.ibm.com [127.0.0.1])
+        by ppma04ams.nl.ibm.com (8.16.0.42/8.16.0.42) with SMTP id 09C47dGv008979;
+        Mon, 12 Oct 2020 04:16:55 GMT
+Received: from b06cxnps4076.portsmouth.uk.ibm.com (d06relay13.portsmouth.uk.ibm.com [9.149.109.198])
+        by ppma04ams.nl.ibm.com with ESMTP id 3434k7sm8t-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 12 Oct 2020 04:16:54 +0000
+Received: from d06av22.portsmouth.uk.ibm.com (d06av22.portsmouth.uk.ibm.com [9.149.105.58])
+        by b06cxnps4076.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 09C4Gq3s27591028
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Mon, 12 Oct 2020 04:16:52 GMT
+Received: from d06av22.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id 9D81C4C040;
+        Mon, 12 Oct 2020 04:16:52 +0000 (GMT)
+Received: from d06av22.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id 975284C04A;
+        Mon, 12 Oct 2020 04:16:50 +0000 (GMT)
+Received: from [9.199.36.105] (unknown [9.199.36.105])
+        by d06av22.portsmouth.uk.ibm.com (Postfix) with ESMTP;
+        Mon, 12 Oct 2020 04:16:50 +0000 (GMT)
+Subject: Re: [PATCH 1/1] ext4/046: Add test to verify unwritten extent
+ conversion in buff-io
+To:     Eryu Guan <guan@eryu.me>
+Cc:     fstests@vger.kernel.org, tytso@mit.edu, jack@suse.cz,
+        anju@linux.vnet.ibm.com, aneesh.kumar@linux.ibm.com
+References: <5baabca9c454e09e796a5a97127ca9d73840d8bd.1602243041.git.riteshh@linux.ibm.com>
+ <20201011061153.GX3853@desktop>
+From:   Ritesh Harjani <riteshh@linux.ibm.com>
+Message-ID: <8a6a4bff-8e26-5aaa-e39f-c822b3b6a235@linux.ibm.com>
+Date:   Mon, 12 Oct 2020 09:46:49 +0530
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.11.0
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+In-Reply-To: <20201011061153.GX3853@desktop>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+X-TM-AS-GCONF: 00
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.235,18.0.687
+ definitions=2020-10-12_01:2020-10-12,2020-10-12 signatures=0
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 phishscore=0 clxscore=1011
+ adultscore=0 priorityscore=1501 suspectscore=0 malwarescore=0 mlxscore=0
+ lowpriorityscore=0 spamscore=0 bulkscore=0 impostorscore=0 mlxlogscore=999
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2009150000
+ definitions=main-2010120029
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Filipe Manana <fdmanana@suse.com>
 
-Starting with version 2.41 of libcap, the output of the getcap program
-changed and therefore some existing tests fail when the installed version
-of libcap is >= 2.41 (the latest version available at the moment is 2.44).
+Thanks Eryu for detailed review.
 
-The change was made by the following commit of libcap:
+On 10/11/20 11:41 AM, Eryu Guan wrote:
+> On Fri, Oct 09, 2020 at 05:12:24PM +0530, Ritesh Harjani wrote:
+>> There was an issue where with with filesize > 4G, map.m_lblk
+>> was getting overflow in buff-IO path while converting unwritten to
+>> written extent with dioread_nolock mount option with bs < ps.
+>> Adding a testcase for the same.
+>> This test doesn't force any explicit mount option within the test,
+>> as it will be set anyway along with test config, although it does
+>> force for blocksize < pagesize config (as this test is specific to
+> 
+> I don't think we need to force blksize < pagesize either, as testing
+> different blocksize configs is a common test setup and is part of
+> tester's resposibility.
 
-  commit 177cd418031b1acfcf73fe3b1af9f3279828681c
-  Author: Andrew G. Morgan <morgan@kernel.org>
-  Date:   Tue Jul 21 22:58:05 2020 -0700
+Right, but generally bs < ps configuration is not tested for every mount 
+option. The issue mentioned here happens with bs < ps for dioread_nolock 
+mount opt.
+So I need to force at least bs < ps or the mount option of dioread_nolock.
+I think since it is mainly ext4 specific, maybe I will change the patch 
+to enforce this for dioread_nolock mount opt. Then since bs < ps by 
+default everyone tests, so this test will get exercised automatically.
 
-      A more compact form for the text representation of capabilities.
 
-      While this does not change anything about the supported range of
-      equivalent text specifications for capabilities, as accepted by
-      cap_from_text(), this does alter the preferred output format of
-      cap_to_text() to be two characters shorter in most cases. That is,
-      what used to be summarized as:
+> 
+>> that). Patch at [1] fixes the issue.
+>>
+>> [1]: https://patchwork.ozlabs.org/patch/1378632
+>>
+>> Signed-off-by: Ritesh Harjani <riteshh@linux.ibm.com>
+>> ---
+>>   tests/ext4/046     | 101 +++++++++++++++++++++++++++++++++++++++++++++
+>>   tests/ext4/046.out |   2 +
+>>   tests/ext4/group   |   1 +
+>>   3 files changed, 104 insertions(+)
+>>   create mode 100755 tests/ext4/046
+>>   create mode 100644 tests/ext4/046.out
+>>
+>> diff --git a/tests/ext4/046 b/tests/ext4/046
+>> new file mode 100755
+>> index 000000000000..49de6bbb2c89
+>> --- /dev/null
+>> +++ b/tests/ext4/046
+>> @@ -0,0 +1,101 @@
+>> +#! /bin/bash
+>> +# SPDX-License-Identifier: GPL-2.0
+>> +# Copyright (c) 2020 IBM Corporation. All Rights Reserved.
+>> +#
+>> +# FS QA Test No. generic/046
+>> +#
+>> +# Test writes to falloc file with filesize > 4GB and make sure to verify
+>> +# the file checksum both before and after mount.
+>> +# This test is to check whether unwritten extents gets properly converted
+>> +# to written extent on a filesystem with bs < ps.
+> 
+> Mention dioread_nolock mount option as well here?
 
-         "= cap_foo+..."
+yup, will mention that.
 
-      is now converted to the equivalent text:
+> 
+>> +#
+>> +seq=`basename $0`
+>> +seqres=$RESULT_DIR/$seq
+>> +echo "QA output created by $seq"
+>> +
+>> +here=`pwd`
+>> +tmp=/tmp/$$
+>> +status=1	# failure is the default!
+>> +trap "_cleanup; exit \$status" 0 1 2 3 15
+>> +
+>> +_cleanup()
+>> +{
+>> +	cd /
+>> +	rm -f $tmp.*
+>> +}
+>> +
+>> +# get standard environment, filters and checks
+>> +. ./common/rc
+>> +. ./common/filter
+>> +
+>> +# remove previous $seqres.full before test
+>> +rm -f $seqres.full
+>> +
+>> +# Modify as appropriate.
+>> +_supported_fs ext4
+> 
+> I don't see any ext4 specific setups in the test, so it could be a
+> generic test.
 
-         "cap_foo=..."
+as mentioned in above comments. Let me enforce the dioread_nolock
+ext4 mount opt for this test.
 
-      which is also more intuitive.
+> 
+>> +_supported_os Linux
+> 
+> "_suppored_os" is removed, just drop this line.
 
-So add a filter to change the old format to the new one, an helper that
-calls getcap with that filter, make existing tests use the new helper and
-update their golden output to match the new output format of getcap.
+ok.
 
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
+> 
+>> +_require_scratch
+>> +_require_xfs_io_command "falloc"
+>> +
+>> +# keep 4k as a blksz for 64k pagesz
+>> +pagesz=$(getconf PAGE_SIZE)
+>> +if [ $pagesz -eq 65536 ]; then
+>> +	blksz=4096
+>> +else
+>> +	blksz=$(($pagesz/4))
+>> +fi
+>> +
+>> +devsize=`blockdev --getsize64 $SCRATCH_DEV`
+>> +if [ $devsize -lt 6442450944 ]; then
+>> +	_notrun "Too small scratch device, need at least 6G"
+>> +fi
+> 
+> _require_scratch_size is used to do this check.
 
-V2: Added _getcap() helper that makes use of the filter, make tests use it.
+ok.
 
- common/filter         | 28 ++++++++++++++++++++++++++++
- common/rc             |  6 ++++++
- tests/btrfs/214       | 16 ++++++++--------
- tests/generic/093     |  4 ++--
- tests/generic/093.out |  2 +-
- tests/generic/513     |  4 ++--
- tests/overlay/064     |  4 ++--
- tests/overlay/064.out |  4 ++--
- tests/xfs/296         |  4 ++--
- tests/xfs/296.out     |  4 ++--
- 10 files changed, 55 insertions(+), 21 deletions(-)
+> 
+>> +
+>> +# Test for bs < ps
+>> +export MKFS_OPTIONS="-F -b $blksz"
+>> +_scratch_mkfs >> $seqres.full 2>&1
+>> +_scratch_mount >> $seqres.full 2>&1
+>> +
+>> +# check blksz
+>> +real_blksz=$(_get_file_block_size $SCRATCH_MNT)
+>> +test $real_blksz != $blksz && _notrun "Failed to format with small blocksize."
+>> +
+>> +testfile=$SCRATCH_MNT/testfile-$seq
+>> +
+>> +# Fallocate testfile with size > 4G
+>> +fsize=$((5 * 1024 * 1024 * 1024))
+>> +$XFS_IO_PROG -f -c "falloc 0 $fsize" $testfile >> $seqres.full 2>&1
+>> +
+>> +# First write at offset < 4G (at few alternative blks)
+>> +off=$((3 * 1024 * 1024 * 1024))
+>> +for i in 1 2 3 4; do
+>> +	$XFS_IO_PROG -f \
+>> +		-c "pwrite $off $blksz" \
+>> +		$testfile >> $seqres.full 2>&1
+>> +	off=$(($off + (2*$blksz)))
+>> +done
+>> +
+>> +# Then write at offset > 4G (at few alternative blks) to check
+>> +# any 32bit overflow case in map.m_lblk
+>> +off=$((4 * 1024 * 1024 * 1024))
+>> +for i in 1 2 3 4; do
+>> +	$XFS_IO_PROG -f \
+>> +		-c "pwrite $off $blksz" \
+>> +		$testfile >> $seqres.full 2>&1
+>> +	off=$(($off + (2*$blksz)))
+>> +done
+>> +
+>> +# ==== Pre-Remount ===
+>> +md5_pre=`md5sum $testfile | cut -d' ' -f1`
+>> +echo "Pre-Remount md5sum of $testfile = $md5_pre" >> $seqres.full
+>> +
+>> +_scratch_cycle_mount
+>> +
+>> +# ==== Post-Remount ===
+>> +md5_post=`md5sum $testfile | cut -d' ' -f1`
+>> +echo "Post-Remount md5sum of $testfile = $md5_post" >> $seqres.full
+>> +test $md5_pre != $md5_post && echo "md5sum mismatch"
+>> +
+>> +# success, all done
+>> +echo "Silence is golden"
+>> +status=0
+>> +exit
+>> diff --git a/tests/ext4/046.out b/tests/ext4/046.out
+>> new file mode 100644
+>> index 000000000000..52c445eb70bb
+>> --- /dev/null
+>> +++ b/tests/ext4/046.out
+>> @@ -0,0 +1,2 @@
+>> +QA output created by 046
+>> +Silence is golden
+>> diff --git a/tests/ext4/group b/tests/ext4/group
+>> index 40351fd9ca0c..02a499a9d220 100644
+>> --- a/tests/ext4/group
+>> +++ b/tests/ext4/group
+>> @@ -48,6 +48,7 @@
+>>   043 auto quick
+>>   044 auto quick
+>>   045 auto dir
+>> +046 auto quick
+> 
+> Also add 'prealloc' group
 
-diff --git a/common/filter b/common/filter
-index 2477f386..a8b3882f 100644
---- a/common/filter
-+++ b/common/filter
-@@ -603,5 +603,33 @@ _filter_assert_dmesg()
- 	    -e "s#$warn2#Intentional warnings in assfail#"
- }
- 
-+# With version 2.41 of libcap, the output format of getcap changed.
-+# More specifically such change was added by the following commit:
-+#
-+# commit 177cd418031b1acfcf73fe3b1af9f3279828681c
-+# Author: Andrew G. Morgan <morgan@kernel.org>
-+# Date:   Tue Jul 21 22:58:05 2020 -0700
-+#
-+#     A more compact form for the text representation of capabilities.
-+#
-+#     While this does not change anything about the supported range of
-+#     equivalent text specifications for capabilities, as accepted by
-+#     cap_from_text(), this does alter the preferred output format of
-+#     cap_to_text() to be two characters shorter in most cases. That is,
-+#     what used to be summarized as:
-+#
-+#        "= cap_foo+..."
-+#
-+#     is now converted to the equivalent text:
-+#
-+#        "cap_foo=..."
-+#
-+#     which is also more intuitive.
-+#
-+_filter_getcap()
-+{
-+        sed -e "s/= //" -e "s/\+/=/g"
-+}
-+
- # make sure this script returns success
- /bin/true
-diff --git a/common/rc b/common/rc
-index 23095d4f..27a27ea3 100644
---- a/common/rc
-+++ b/common/rc
-@@ -4315,6 +4315,12 @@ _require_mknod()
- 	rm -f $TEST_DIR/$seq.null
- }
- 
-+_getcap()
-+{
-+	$GETCAP_PROG "$@" | _filter_getcap
-+	return ${PIPESTATUS[0]}
-+}
-+
- init_rc
- 
- ################################################################################
-diff --git a/tests/btrfs/214 b/tests/btrfs/214
-index 35c4656c..123c4cbf 100755
---- a/tests/btrfs/214
-+++ b/tests/btrfs/214
-@@ -43,7 +43,7 @@ check_capabilities()
- 	local ret
- 	file="$1"
- 	cap="$2"
--	ret=$($GETCAP_PROG "$file")
-+	ret=$(_getcap "$file")
- 	if [ -z "$ret" ]; then
- 		echo "$ret"
- 		echo "missing capability in file $file"
-@@ -74,7 +74,7 @@ full_nocap_inc_withcap_send()
- 	$BTRFS_UTIL_PROG subvolume snapshot -r "$FS1" "$FS1/snap_init" >/dev/null
- 	$BTRFS_UTIL_PROG send "$FS1/snap_init" -q | $BTRFS_UTIL_PROG receive "$FS2" -q
- 	# ensure that we don't have capabilities set
--	ret=$($GETCAP_PROG "$FS2/snap_init/foo.bar")
-+	ret=$(_getcap "$FS2/snap_init/foo.bar")
- 	if [ -n "$ret" ]; then
- 		echo "File contains capabilities when it shouldn't"
- 	fi
-@@ -84,7 +84,7 @@ full_nocap_inc_withcap_send()
- 	$BTRFS_UTIL_PROG subvolume snapshot -r "$FS1" "$FS1/snap_inc" >/dev/null
- 	$BTRFS_UTIL_PROG send -p "$FS1/snap_init" "$FS1/snap_inc" -q | \
- 					$BTRFS_UTIL_PROG receive "$FS2" -q
--	check_capabilities "$FS2/snap_inc/foo.bar" "cap_sys_ptrace,cap_sys_nice+ep"
-+	check_capabilities "$FS2/snap_inc/foo.bar" "cap_sys_ptrace,cap_sys_nice=ep"
- 
- 	_scratch_unmount
- }
-@@ -107,25 +107,25 @@ roundtrip_send()
- 	$SETCAP_PROG "cap_sys_ptrace+ep cap_sys_nice+ep" "$FS1/foo.bar"
- 	$BTRFS_UTIL_PROG subvolume snapshot -r "$FS1" "$FS1/snap_init" >/dev/null
- 	$BTRFS_UTIL_PROG send "$FS1/snap_init" -q | $BTRFS_UTIL_PROG receive "$FS2" -q
--	check_capabilities "$FS2/snap_init/foo.bar" "cap_sys_ptrace,cap_sys_nice+ep"
-+	check_capabilities "$FS2/snap_init/foo.bar" "cap_sys_ptrace,cap_sys_nice=ep"
- 
- 	# Test incremental send with different owner/group but same capabilities
- 	chgrp 100 "$FS1/foo.bar"
- 	$SETCAP_PROG "cap_sys_ptrace+ep cap_sys_nice+ep" "$FS1/foo.bar"
- 	$BTRFS_UTIL_PROG subvolume snapshot -r "$FS1" "$FS1/snap_inc" >/dev/null
--	check_capabilities "$FS1/snap_inc/foo.bar" "cap_sys_ptrace,cap_sys_nice+ep"
-+	check_capabilities "$FS1/snap_inc/foo.bar" "cap_sys_ptrace,cap_sys_nice=ep"
- 	$BTRFS_UTIL_PROG send -p "$FS1/snap_init" "$FS1/snap_inc" -q | \
- 				$BTRFS_UTIL_PROG receive "$FS2" -q
--	check_capabilities "$FS2/snap_inc/foo.bar" "cap_sys_ptrace,cap_sys_nice+ep"
-+	check_capabilities "$FS2/snap_inc/foo.bar" "cap_sys_ptrace,cap_sys_nice=ep"
- 
- 	# Test capabilities after incremental send with different group and capabilities
- 	chgrp 0 "$FS1/foo.bar"
- 	$SETCAP_PROG "cap_sys_time+ep cap_syslog+ep" "$FS1/foo.bar"
- 	$BTRFS_UTIL_PROG subvolume snapshot -r "$FS1" "$FS1/snap_inc2" >/dev/null
--	check_capabilities "$FS1/snap_inc2/foo.bar" "cap_sys_time,cap_syslog+ep"
-+	check_capabilities "$FS1/snap_inc2/foo.bar" "cap_sys_time,cap_syslog=ep"
- 	$BTRFS_UTIL_PROG send -p "$FS1/snap_inc" "$FS1/snap_inc2" -q | \
- 				$BTRFS_UTIL_PROG receive "$FS2"  -q
--	check_capabilities "$FS2/snap_inc2/foo.bar" "cap_sys_time,cap_syslog+ep"
-+	check_capabilities "$FS2/snap_inc2/foo.bar" "cap_sys_time,cap_syslog=ep"
- 
- 	_scratch_unmount
- }
-diff --git a/tests/generic/093 b/tests/generic/093
-index 0f835e7e..48ffec5c 100755
---- a/tests/generic/093
-+++ b/tests/generic/093
-@@ -51,10 +51,10 @@ touch $file
- 
- echo "**** Verifying that appending to file clears capabilities ****"
- $SETCAP_PROG cap_chown+ep $file
--$GETCAP_PROG $file | filefilter
-+_getcap $file | filefilter
- echo data1 >> $file
- cat $file
--$GETCAP_PROG $file | filefilter
-+_getcap $file | filefilter
- echo
- 
- echo "**** Verifying that appending to file doesn't clear other xattrs ****"
-diff --git a/tests/generic/093.out b/tests/generic/093.out
-index cb29153e..fe6dfe5c 100644
---- a/tests/generic/093.out
-+++ b/tests/generic/093.out
-@@ -1,7 +1,7 @@
- QA output created by 093
- 
- **** Verifying that appending to file clears capabilities ****
--file = cap_chown+ep
-+file cap_chown=ep
- data1
- 
- **** Verifying that appending to file doesn't clear other xattrs ****
-diff --git a/tests/generic/513 b/tests/generic/513
-index 15b4aded..70687877 100755
---- a/tests/generic/513
-+++ b/tests/generic/513
-@@ -40,14 +40,14 @@ $XFS_IO_PROG -f -c "pwrite -S 0x20 0 1m" $SCRATCH_MNT/bar >>$seqres.full
- 
- $SETCAP_PROG cap_setgid,cap_setuid+ep $SCRATCH_MNT/bar
- 
--before_cap="$($GETCAP_PROG -v $SCRATCH_MNT/bar)"
-+before_cap="$(_getcap -v $SCRATCH_MNT/bar)"
- before_ctime="$(stat -c '%z' $SCRATCH_MNT/bar)"
- 
- sleep 1
- 
- $XFS_IO_PROG -c "reflink $SCRATCH_MNT/foo" $SCRATCH_MNT/bar >> $seqres.full 2>&1
- 
--after_cap="$($GETCAP_PROG -v $SCRATCH_MNT/bar)"
-+after_cap="$(_getcap -v $SCRATCH_MNT/bar)"
- after_ctime="$(stat -c '%z' $SCRATCH_MNT/bar)"
- 
- echo "$before_cap $before_ctime" >> $seqres.full
-diff --git a/tests/overlay/064 b/tests/overlay/064
-index f5d5df1b..8d3d1e4c 100755
---- a/tests/overlay/064
-+++ b/tests/overlay/064
-@@ -55,7 +55,7 @@ _scratch_mount "-o metacopy=on"
- $XFS_IO_PROG -c "stat" ${SCRATCH_MNT}/file1 >>$seqres.full
- 
- # Make sure cap_setuid is still there
--$GETCAP_PROG ${SCRATCH_MNT}/file1 | _filter_scratch
-+_getcap ${SCRATCH_MNT}/file1 | _filter_scratch
- 
- # Trigger metadata only copy-up
- chmod 000 ${SCRATCH_MNT}/file2
-@@ -64,7 +64,7 @@ chmod 000 ${SCRATCH_MNT}/file2
- $XFS_IO_PROG -c "stat" ${SCRATCH_MNT}/file2 >>$seqres.full
- 
- # Make sure cap_setuid is still there
--$GETCAP_PROG ${SCRATCH_MNT}/file2 | _filter_scratch
-+_getcap ${SCRATCH_MNT}/file2 | _filter_scratch
- 
- # success, all done
- status=0
-diff --git a/tests/overlay/064.out b/tests/overlay/064.out
-index cdd3064d..07f89fbd 100644
---- a/tests/overlay/064.out
-+++ b/tests/overlay/064.out
-@@ -1,3 +1,3 @@
- QA output created by 064
--SCRATCH_MNT/file1 = cap_setuid+ep
--SCRATCH_MNT/file2 = cap_setuid+ep
-+SCRATCH_MNT/file1 cap_setuid=ep
-+SCRATCH_MNT/file2 cap_setuid=ep
-diff --git a/tests/xfs/296 b/tests/xfs/296
-index 915ffa0c..77726e54 100755
---- a/tests/xfs/296
-+++ b/tests/xfs/296
-@@ -49,7 +49,7 @@ $SETCAP_PROG cap_setgid,cap_setuid+ep $dump_dir/testfile
- echo "Checking for xattr on source file"
- getfattr --absolute-names -m user.name $dump_dir/testfile | _dir_filter
- echo "Checking for capability on source file"
--$GETCAP_PROG $dump_dir/testfile | _dir_filter
-+_getcap $dump_dir/testfile | _dir_filter
- getfattr --absolute-names -m security.capability $dump_dir/testfile | _dir_filter
- 
- _do_dump_file -f $tmp.df.0
-@@ -62,7 +62,7 @@ _diff_compare
- echo "Checking for xattr on restored file"
- getfattr --absolute-names -m user.name $restore_dir/$dump_sdir/testfile | _dir_filter
- echo "Checking for capability on restored file"
--$GETCAP_PROG $restore_dir/$dump_sdir/testfile | _dir_filter
-+_getcap $restore_dir/$dump_sdir/testfile | _dir_filter
- getfattr --absolute-names -m security.capability $restore_dir/$dump_sdir/testfile | _dir_filter
- 
- status=0
-diff --git a/tests/xfs/296.out b/tests/xfs/296.out
-index c279465c..f5cc624e 100644
---- a/tests/xfs/296.out
-+++ b/tests/xfs/296.out
-@@ -4,7 +4,7 @@ Checking for xattr on source file
- user.name
- 
- Checking for capability on source file
--DUMP_DIR/testfile = cap_setgid,cap_setuid+ep
-+DUMP_DIR/testfile cap_setgid,cap_setuid=ep
- # file: DUMP_DIR/testfile
- security.capability
- 
-@@ -50,7 +50,7 @@ Checking for xattr on restored file
- user.name
- 
- Checking for capability on restored file
--RESTORE_DIR/DUMP_SUBDIR/testfile = cap_setgid,cap_setuid+ep
-+RESTORE_DIR/DUMP_SUBDIR/testfile cap_setgid,cap_setuid=ep
- # file: RESTORE_DIR/DUMP_SUBDIR/testfile
- security.capability
- 
--- 
-2.28.0
+ok.
 
+> 
+> Thanks,
+> Eryu
+> 
+>>   271 auto rw quick
+>>   301 aio auto ioctl rw stress defrag
+>>   302 aio auto ioctl rw stress defrag
+>> -- 
+>> 2.26.2
