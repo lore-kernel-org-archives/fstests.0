@@ -1,184 +1,201 @@
-Return-Path: <SRS0=+QVP=DT=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=vCPN=DW=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS
+X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6E418C433DF
-	for <linux-fstests@archiver.kernel.org>; Mon, 12 Oct 2020 17:55:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F236EC433DF
+	for <linux-fstests@archiver.kernel.org>; Thu, 15 Oct 2020 15:36:49 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2A83020776
-	for <linux-fstests@archiver.kernel.org>; Mon, 12 Oct 2020 17:55:56 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="du56RrNO"
+	by mail.kernel.org (Postfix) with ESMTP id 8A27122255
+	for <linux-fstests@archiver.kernel.org>; Thu, 15 Oct 2020 15:36:49 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1602776209;
+	bh=iDrwb+wpqra6bNPqHPQf6M1LsY3Yl8q1XG6uj9Tzvs4=;
+	h=From:To:Cc:Subject:Date:List-ID:From;
+	b=ddNUHGjGx00fu99M4hSyRD/AhRaO7vHiRIoi6Jane3WH/BNT2q8W8ZmCWCjNjcRaC
+	 Cn5fP8gWb3c47Un518l2ffm77pxyGLN6uz0LHgC6cjChqj0d9yUFObwQIDi+7f8TA/
+	 2sFNTS4MCoEcr5UxbFG+jFfgcB3edwHKZGcHAiro=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2390190AbgJLRzz (ORCPT
+        id S1730085AbgJOPgt (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 12 Oct 2020 13:55:55 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:21508 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S2389562AbgJLRzz (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 12 Oct 2020 13:55:55 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1602525353;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=9u5HmCT8A7IgMLqzlDL9iLUuImOEy9DfsOep0sOMftY=;
-        b=du56RrNOGxyUg8tMBloNi2m17PzH8olY5bKunfnzN2DM4It5r8ZEMZJ0s2s6MWtmplnpbx
-        0hB06NZbJv5Orch0Z6/4QYBBfxPfxqcFT68JnkLe0GMzWxkETZ+hTAbFoUgHaI7MwJI9La
-        s7aPXhMmPVRi5BYY8K3UkgogUFJg9lg=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-56-DpHW40toNa-1RblLZxN9GA-1; Mon, 12 Oct 2020 13:55:51 -0400
-X-MC-Unique: DpHW40toNa-1RblLZxN9GA-1
-Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        Thu, 15 Oct 2020 11:36:49 -0400
+Received: from mail.kernel.org ([198.145.29.99]:42824 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1729327AbgJOPgt (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 15 Oct 2020 11:36:49 -0400
+Received: from debian8.Home (bl8-197-74.dsl.telepac.pt [85.241.197.74])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id C210718A0724
-        for <fstests@vger.kernel.org>; Mon, 12 Oct 2020 17:55:50 +0000 (UTC)
-Received: from bfoster (ovpn-112-249.rdu2.redhat.com [10.10.112.249])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id 7B76A10013BD
-        for <fstests@vger.kernel.org>; Mon, 12 Oct 2020 17:55:50 +0000 (UTC)
-Date:   Mon, 12 Oct 2020 13:55:48 -0400
-From:   Brian Foster <bfoster@redhat.com>
+        by mail.kernel.org (Postfix) with ESMTPSA id 4391522254;
+        Thu, 15 Oct 2020 15:36:47 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1602776208;
+        bh=iDrwb+wpqra6bNPqHPQf6M1LsY3Yl8q1XG6uj9Tzvs4=;
+        h=From:To:Cc:Subject:Date:From;
+        b=AkgmMSTZ3lPUKO/Gx+gEnV1vYXj6wxV9eKE1e50W6RU8Qd3bfKaefgzxkMpR4ZbG4
+         cpmcXr49BbXHySkkjvM+Twzzw/R70Gp+tC7Qwfv/fFlK2nwwKuy5tAWEhOu+cgsCav
+         Xf9PhcBqIEm5iKu2h5tiUAPl/E93HUUUBMFzDtgQ=
+From:   fdmanana@kernel.org
 To:     fstests@vger.kernel.org
-Subject: Re: [PATCH 3/3] generic: IO_URING direct IO fsx test
-Message-ID: <20201012175548.GL917726@bfoster>
-References: <20200916171443.29546-1-zlang@redhat.com>
- <20200916171443.29546-4-zlang@redhat.com>
- <20201002182031.GE4708@bfoster>
- <20201011121520.GA17190@localhost.localdomain>
+Cc:     linux-btrfs@vger.kernel.org, jack@suse.cz,
+        Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] generic: test the correctness of several cases of RWF_NOWAIT writes
+Date:   Thu, 15 Oct 2020 16:36:38 +0100
+Message-Id: <aa8318c5beb380a9e99142d1b5e776b739d04bdb.1602774113.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.28.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20201011121520.GA17190@localhost.localdomain>
-X-Scanned-By: MIMEDefang 2.84 on 10.5.11.22
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Oct 11, 2020 at 08:15:20PM +0800, Zorro Lang wrote:
-> On Fri, Oct 02, 2020 at 02:20:31PM -0400, Brian Foster wrote:
-> > On Thu, Sep 17, 2020 at 01:14:43AM +0800, Zorro Lang wrote:
-> > > After fsx supports IO_URING read/write, add IO_URING direct IO fsx
-> > > test with different read/write size and concurrent buffered IO.
-> > > 
-> > > Signed-off-by: Zorro Lang <zlang@redhat.com>
-> > > ---
-> > >  tests/generic/610     | 52 +++++++++++++++++++++++++++++++++++++++++++
-> > >  tests/generic/610.out |  7 ++++++
-> > >  tests/generic/group   |  1 +
-> > >  3 files changed, 60 insertions(+)
-> > >  create mode 100755 tests/generic/610
-> > >  create mode 100644 tests/generic/610.out
-> > > 
-> > > diff --git a/tests/generic/610 b/tests/generic/610
-> > > new file mode 100755
-> > > index 00000000..fc3f4c2a
-> > > --- /dev/null
-> > > +++ b/tests/generic/610
-> > > @@ -0,0 +1,52 @@
-> > > +#! /bin/bash
-> > > +# SPDX-License-Identifier: GPL-2.0
-> > > +# Copyright (c) 2020 YOUR NAME HERE.  All Rights Reserved.
-> > 
-> > The copyright needs fixing.
-> > 
-> > > +#
-> > > +# FS QA Test 610
-> > > +#
-> > > +# IO_URING direct IO fsx test
-> > > +#
-> > > +seq=`basename $0`
-> > > +seqres=$RESULT_DIR/$seq
-> > > +echo "QA output created by $seq"
-> > > +
-> > > +here=`pwd`
-> > > +tmp=/tmp/$$
-> > > +status=1	# failure is the default!
-> > > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > > +
-> > > +_cleanup()
-> > > +{
-> > > +	cd /
-> > > +	rm -f $tmp.*
-> > > +}
-> > > +
-> > > +# get standard environment, filters and checks
-> > > +. ./common/rc
-> > > +. ./common/filter
-> > > +
-> > > +# remove previous $seqres.full before test
-> > > +rm -f $seqres.full
-> > > +
-> > > +# real QA test starts here
-> > > +_supported_fs generic
-> > > +_supported_os Linux
-> > > +_require_test
-> > > +_require_odirect
-> > > +_require_io_uring
-> > > +
-> > > +psize=`$here/src/feature -s`
-> > > +bsize=`_min_dio_alignment $TEST_DEV`
-> > > +run_fsx -S 0 -U -N 20000           -l 600000 -r PSIZE -w BSIZE -Z -R -W
-> > > +run_fsx -S 0 -U -N 20000 -o 8192   -l 600000 -r PSIZE -w BSIZE -Z -R -W
-> > > +run_fsx -S 0 -U -N 20000 -o 128000 -l 600000 -r PSIZE -w BSIZE -Z -R -W
-> > > +
-> > > +# change readbdy/writebdy to double page size
-> > > +psize=$((psize * 2))
-> > > +run_fsx -S 0 -U -N 20000           -l 600000 -r PSIZE -w PSIZE -Z -R -W
-> > > +run_fsx -S 0 -U -N 20000 -o 256000 -l 600000 -r PSIZE -w PSIZE -Z -R -W
-> > > +run_fsx -S 0 -U -N 20000 -o 128000 -l 600000 -r PSIZE -w BSIZE -Z -W
-> > > +
-> > 
-> > Can you elaborate on why PSIZE/BSIZE are used where they are for the
-> > writebdy option? Also is -R intentionally dropped from the final test?
-> 
-> Sure:) This test is copied from generic/091.
-> 
+From: Filipe Manana <fdmanana@suse.com>
 
-Hmm.. but generic/091 doesn't seem to use the same values and always
-passes a writebdy of BSIZE (at least for the tests that aren't commented
-out). It kind of looks like this tweaks some values across the board,
-then randomly selects some of the commented and non-commented test
-commands without any explanation.
+Verify some attempts to write into a file using RWF_NOWAIT:
 
-Brian
+1) Writing into a fallocated extent that starts at eof should work;
+2) Writing into a hole should fail;
+3) Writing into a range that is partially allocated should fail.
 
-> > 
-> > Brian
-> > 
-> > > +# success, all done
-> > > +status=0
-> > > +exit
-> > > diff --git a/tests/generic/610.out b/tests/generic/610.out
-> > > new file mode 100644
-> > > index 00000000..97ad41a3
-> > > --- /dev/null
-> > > +++ b/tests/generic/610.out
-> > > @@ -0,0 +1,7 @@
-> > > +QA output created by 610
-> > > +fsx -S 0 -U -N 20000 -l 600000 -r PSIZE -w BSIZE -Z -R -W
-> > > +fsx -S 0 -U -N 20000 -o 8192 -l 600000 -r PSIZE -w BSIZE -Z -R -W
-> > > +fsx -S 0 -U -N 20000 -o 128000 -l 600000 -r PSIZE -w BSIZE -Z -R -W
-> > > +fsx -S 0 -U -N 20000 -l 600000 -r PSIZE -w PSIZE -Z -R -W
-> > > +fsx -S 0 -U -N 20000 -o 256000 -l 600000 -r PSIZE -w PSIZE -Z -R -W
-> > > +fsx -S 0 -U -N 20000 -o 128000 -l 600000 -r PSIZE -w BSIZE -Z -W
-> > > diff --git a/tests/generic/group b/tests/generic/group
-> > > index cf50f4a1..60280dc2 100644
-> > > --- a/tests/generic/group
-> > > +++ b/tests/generic/group
-> > > @@ -612,3 +612,4 @@
-> > >  607 auto attr quick dax
-> > >  608 auto attr quick dax
-> > >  609 auto rw io_uring
-> > > +610 auto rw io_uring
-> > > -- 
-> > > 2.20.1
-> > > 
-> 
+This is motivated by several bugs that btrfs and ext4 had and were fixed
+by the following kernel commits:
+
+  4b1946284dd6 ("btrfs: fix failure of RWF_NOWAIT write into prealloc extent beyond eof")
+  260a63395f90 ("btrfs: fix RWF_NOWAIT write not failling when we need to cow")
+  0b3171b6d195 ("ext4: do not block RWF_NOWAIT dio write on unallocated space")
+
+At the moment, on a 5.9-rc6 kernel at least, ext4 is failing for case 1),
+but when I found and fixed case 1) in btrfs, around kernel 5.7, it was not
+failing on ext4, so some regression happened in the meanwhile. For xfs and
+btrfs on a 5.9 kernel, all the three cases pass.
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/generic/613     | 74 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/613.out | 19 +++++++++++
+ tests/generic/group   |  1 +
+ 3 files changed, 94 insertions(+)
+ create mode 100755 tests/generic/613
+ create mode 100644 tests/generic/613.out
+
+diff --git a/tests/generic/613 b/tests/generic/613
+new file mode 100755
+index 00000000..931876dc
+--- /dev/null
++++ b/tests/generic/613
+@@ -0,0 +1,74 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2020 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test No. 613
++#
++# Verify some attempts to write into a file using RWF_NOWAIT:
++#
++# 1) Writing into a fallocated extent that starts at eof should work;
++# 2) Writing into a hole should fail;
++# 3) Writing into a range that is partially allocated should fail.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++_supported_fs generic
++_require_scratch
++_require_odirect
++_require_xfs_io_command pwrite -N
++_require_xfs_io_command falloc -k
++_require_xfs_io_command fpunch
++
++rm -f $seqres.full
++
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++
++echo "Creating file"
++$XFS_IO_PROG -f -d -c "pwrite -S 0xab 0 512K" $SCRATCH_MNT/foo | _filter_xfs_io
++
++# Now add an unwritten extent using fallocate without bumping the file size and
++# then attempt to do a  RWF_NOWAIT write into this extent. It should not fail.
++echo "Writing into fallocated extent at eof"
++$XFS_IO_PROG -c "falloc -k 512K 512K" \
++	     -d -c "pwrite -N -V 1 -S 0xcd -b 512K 512K 512K" \
++	     $SCRATCH_MNT/foo | _filter_xfs_io
++
++# Now punch a hole and try a RWF_NOWAIT write into the hole. It should fail.
++echo "Writing into a hole"
++$XFS_IO_PROG -c "fpunch 0 256K" \
++	     -d -c "pwrite -N -V 1 -S 0xff -b 128K 0 128K" \
++	     $SCRATCH_MNT/foo | _filter_xfs_io
++
++# Allocate an extent for the first half of the hole, then attempt to write into
++# a range that covers the new extent and the hole. It should fail.
++echo "Writing into a range partially allocated (ending with a hole)"
++$XFS_IO_PROG -c "falloc 0 128K" \
++	     -d -c "pwrite -N -V 1 -S 0xef -b 256K 0 256K" \
++	     $SCRATCH_MNT/foo | _filter_xfs_io
++
++# Just double check none of the writes above that should fail did not change the
++# file data in an unexpected way. First 256K of file data should be all zeros,
++# the range from 256K to 512K should have all bytes with a value of 0xab and the
++# range from 512K to 1M should have all bytes with a value of 0xcd.
++echo "Final file content:"
++od -A d -t x1 $SCRATCH_MNT/foo
++
++status=0
++exit
+diff --git a/tests/generic/613.out b/tests/generic/613.out
+new file mode 100644
+index 00000000..a542fa5b
+--- /dev/null
++++ b/tests/generic/613.out
+@@ -0,0 +1,19 @@
++QA output created by 613
++Creating file
++wrote 524288/524288 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++Writing into fallocated extent at eof
++wrote 524288/524288 bytes at offset 524288
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++Writing into a hole
++pwrite: Resource temporarily unavailable
++Writing into a range partially allocated (ending with a hole)
++pwrite: Resource temporarily unavailable
++Final file content:
++0000000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
++*
++0262144 ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab
++*
++0524288 cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd
++*
++1048576
+diff --git a/tests/generic/group b/tests/generic/group
+index 8054d874..b8bf8ec1 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -615,3 +615,4 @@
+ 610 auto quick prealloc zero
+ 611 auto quick attr
+ 612 auto quick clone
++613 auto quick rw prealloc punch
+-- 
+2.28.0
 
