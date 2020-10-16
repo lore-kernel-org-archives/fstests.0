@@ -2,135 +2,76 @@ Return-Path: <SRS0=RNsM=DX=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5B2D0C433E7
-	for <linux-fstests@archiver.kernel.org>; Fri, 16 Oct 2020 09:26:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1353FC433E7
+	for <linux-fstests@archiver.kernel.org>; Fri, 16 Oct 2020 09:32:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E7E2F20EDD
-	for <linux-fstests@archiver.kernel.org>; Fri, 16 Oct 2020 09:26:00 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1602840361;
-	bh=ZIFdCdaDAkaPMybI9x5q3GOJwy0ogix4SCHyqwGyE7I=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
-	b=Qt4QutaAon6uQExiGw+4ok/7q02ktFzUPHX21YBntuJZ6ebDhczV2AnDeMvxBhKhp
-	 I6oF8+nzLdtdAxVo/Jwimr4+CYFpSoVfr/rrE9j/uG7J0Yg57cMGTisYn7z9CjasZC
-	 VUIsIMT47xLKyegADXK+RXhkuNunq5h2djC9PDzc=
+	by mail.kernel.org (Postfix) with ESMTP id B758A206ED
+	for <linux-fstests@archiver.kernel.org>; Fri, 16 Oct 2020 09:32:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2395252AbgJPJ0A (ORCPT
+        id S2405891AbgJPJcX (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 16 Oct 2020 05:26:00 -0400
-Received: from mail.kernel.org ([198.145.29.99]:48276 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2395031AbgJPJ0A (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 16 Oct 2020 05:26:00 -0400
-Received: from mail-qt1-f176.google.com (mail-qt1-f176.google.com [209.85.160.176])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 1DC65206DD;
-        Fri, 16 Oct 2020 09:25:59 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1602840359;
-        bh=ZIFdCdaDAkaPMybI9x5q3GOJwy0ogix4SCHyqwGyE7I=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=mh5tCoR8FWDTlsL0SDstCjrH2yZGm0hN3VKGp2zKF/oK4SrHxiWuZbKB8ZCOHmdb2
-         qHZ0fh0Bw8juJHUfUuSqNM0pyWe4yQZfFBX0Soxeujjr6wTZzxkNc31QsohsSqGY4+
-         me9dbaUOhGsfTPG3RxU9pp/GnfEONi8K8gR5lvYo=
-Received: by mail-qt1-f176.google.com with SMTP id z33so1193844qth.8;
-        Fri, 16 Oct 2020 02:25:59 -0700 (PDT)
-X-Gm-Message-State: AOAM533d9wSBNOl8mdYoWaZ09TtczJqoR21AXIz4WsFKLO7+c4BSbf8y
-        g5MbJOr6mkL7vchU/0PPlQtMpZu5rMtMa2cAdZU=
-X-Google-Smtp-Source: ABdhPJzac7iB5EEvVUiAI0+5S2np1DZmnSowCY/Cr0hgtoywO3pJ8CkEahASJwwR6qouJkEn9L/LuMF5RkpY3pctIgY=
-X-Received: by 2002:ac8:5a53:: with SMTP id o19mr2346093qta.183.1602840358071;
- Fri, 16 Oct 2020 02:25:58 -0700 (PDT)
+        Fri, 16 Oct 2020 05:32:23 -0400
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:56744 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S2405871AbgJPJcW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 16 Oct 2020 05:32:22 -0400
+X-IronPort-AV: E=Sophos;i="5.77,382,1596470400"; 
+   d="scan'208";a="100227468"
+Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
+  by heian.cn.fujitsu.com with ESMTP; 16 Oct 2020 17:32:19 +0800
+Received: from G08CNEXMBPEKD04.g08.fujitsu.local (unknown [10.167.33.201])
+        by cn.fujitsu.com (Postfix) with ESMTP id 1456B48990F8;
+        Fri, 16 Oct 2020 17:32:16 +0800 (CST)
+Received: from localhost.localdomain (10.167.220.84) by
+ G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.2; Fri, 16 Oct 2020 17:32:15 +0800
+From:   Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+To:     <guaneryu@gmail.com>
+CC:     <fstests@vger.kernel.org>, Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+Subject: [PATCH 1/2] xfs/521: use _try_scratch_mount instead of _scratch_mount
+Date:   Fri, 16 Oct 2020 17:31:23 +0800
+Message-ID: <1602840684-25524-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
+X-Mailer: git-send-email 1.8.3.1
 MIME-Version: 1.0
-References: <aa8318c5beb380a9e99142d1b5e776b739d04bdb.1602774113.git.fdmanana@suse.com>
- <20201015161355.GI7037@quack2.suse.cz> <20201016055757.GA7322@dread.disaster.area>
- <20201016084613.GJ7037@quack2.suse.cz>
-In-Reply-To: <20201016084613.GJ7037@quack2.suse.cz>
-From:   Filipe Manana <fdmanana@kernel.org>
-Date:   Fri, 16 Oct 2020 10:25:47 +0100
-X-Gmail-Original-Message-ID: <CAL3q7H4XNkQwQP2b2wToDfjaVccR3MvtivMD3f6eYpjLmjJSWA@mail.gmail.com>
-Message-ID: <CAL3q7H4XNkQwQP2b2wToDfjaVccR3MvtivMD3f6eYpjLmjJSWA@mail.gmail.com>
-Subject: Re: [PATCH] generic: test the correctness of several cases of
- RWF_NOWAIT writes
-To:     Jan Kara <jack@suse.cz>
-Cc:     Dave Chinner <david@fromorbit.com>,
-        fstests <fstests@vger.kernel.org>,
-        linux-btrfs <linux-btrfs@vger.kernel.org>,
-        Filipe Manana <fdmanana@suse.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain
+X-Originating-IP: [10.167.220.84]
+X-ClientProxiedBy: G08CNEXCHPEKD06.g08.fujitsu.local (10.167.33.205) To
+ G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201)
+X-yoursite-MailScanner-ID: 1456B48990F8.AB727
+X-yoursite-MailScanner: Found to be clean
+X-yoursite-MailScanner-From: xuyang2018.jy@cn.fujitsu.com
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Oct 16, 2020 at 9:46 AM Jan Kara <jack@suse.cz> wrote:
->
-> On Fri 16-10-20 16:57:57, Dave Chinner wrote:
-> > On Thu, Oct 15, 2020 at 06:13:56PM +0200, Jan Kara wrote:
-> > > On Thu 15-10-20 16:36:38, fdmanana@kernel.org wrote:
-> > > > From: Filipe Manana <fdmanana@suse.com>
-> > > >
-> > > > Verify some attempts to write into a file using RWF_NOWAIT:
-> > > >
-> > > > 1) Writing into a fallocated extent that starts at eof should work;
-> > >
-> > > Why? We need to update i_size which requires transaction start and e.g.
-> > > ext4 does not support that in non-blocking mode...
-> >
-> > Right, different filesystems behave differently given similar
-> > pre-conditions. That's not a bug, that's exactly how RWF_NOWAIT is
-> > expected to be implemented by each filesystem....
-> >
-> > > > 2) Writing into a hole should fail;
-> > > > 3) Writing into a range that is partially allocated should fail.
-> >
-> > Same for these - these are situations where a -specific filesystem
-> > implementation- might block, not a situation where the RWF_NOWAIT
-> > API specification says that IO submission "should fail" and hence
-> > return EAGAIN.
-> >
-> > > > This is motivated by several bugs that btrfs and ext4 had and were fixed
-> > > > by the following kernel commits:
-> > > >
-> > > >   4b1946284dd6 ("btrfs: fix failure of RWF_NOWAIT write into prealloc extent beyond eof")
-> > > >   260a63395f90 ("btrfs: fix RWF_NOWAIT write not failling when we need to cow")
-> > > >   0b3171b6d195 ("ext4: do not block RWF_NOWAIT dio write on unallocated space")
-> > > >
-> > > > At the moment, on a 5.9-rc6 kernel at least, ext4 is failing for case 1),
-> > > > but when I found and fixed case 1) in btrfs, around kernel 5.7, it was not
-> > > > failing on ext4, so some regression happened in the meanwhile. For xfs and
-> > > > btrfs on a 5.9 kernel, all the three cases pass.
-> >
-> > Sure, until we propagate IOMAP_NOWAIT far enough into the allocation
-> > code that allocation will either succeed without blocking or fail
-> > without changing anything.  At which point, the filesystem behaviour
-> > is absolutely correct according to the RWF_NOWAIT specification, but
-> > the test is most definitely wrong.
-> >
-> > IOWs, I think any test that says "RWF_NOWAIT IO in a <specific
-> > situation> must do <specific thing>" is incorrect. RWF_NOWAIT simply
-> > does not not define behaviour like this, and different filesystems
-> > will do different things given the same file layouts...
->
-> I agree with this. That being said it would be still worthwhile to have
-> some tests verifying RWF_NOWAIT behavior is sane - that we don't block with
-> RWF_NOWAIT (this is a requirement), and that what used to work with
-> RWF_NOWAIT didn't unexpectedly regress (this is more a sanity check)... I'm
-> not sure how to test that in an automated way through.
+Here will check the return code of mount option. So update it
+to use _try_scratch_mount.
 
-Yes, my intention was to serve more as a regression test than anything
-else (as it's not a new feature anyway).
-I only excluded here cases that are obviously btrfs specific like when
-trying to write into a file range that has extents shared by
-snapshots.
+Signed-off-by: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+---
+ tests/xfs/521 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Thanks.
+diff --git a/tests/xfs/521 b/tests/xfs/521
+index 3aaa1296..e6c417b8 100755
+--- a/tests/xfs/521
++++ b/tests/xfs/521
+@@ -49,7 +49,7 @@ echo "Format and mount 100m rt volume"
+ export USE_EXTERNAL=yes
+ export SCRATCH_RTDEV=$rtdev
+ _scratch_mkfs -r size=100m > $seqres.full
+-_scratch_mount || _notrun "Could not mount scratch with synthetic rt volume"
++_try_scratch_mount || _notrun "Could not mount scratch with synthetic rt volume"
+ 
+ testdir=$SCRATCH_MNT/test-$seq
+ mkdir $testdir
+-- 
+2.23.0
 
->
->                                                                 Honza
-> --
-> Jan Kara <jack@suse.com>
-> SUSE Labs, CR
+
+
