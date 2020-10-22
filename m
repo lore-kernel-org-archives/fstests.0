@@ -1,186 +1,220 @@
-Return-Path: <SRS0=vxMy=D4=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=0eua=D5=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	NICE_REPLY_A,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3B561C4363A
-	for <linux-fstests@archiver.kernel.org>; Wed, 21 Oct 2020 18:41:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BFE0DC388F2
+	for <linux-fstests@archiver.kernel.org>; Thu, 22 Oct 2020 12:16:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AD18E221F7
-	for <linux-fstests@archiver.kernel.org>; Wed, 21 Oct 2020 18:41:08 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 49E92223BF
+	for <linux-fstests@archiver.kernel.org>; Thu, 22 Oct 2020 12:16:51 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="q1+6xs0y"
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="OduVbq1/"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2411307AbgJUSlI (ORCPT
+        id S2898001AbgJVMQu (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 21 Oct 2020 14:41:08 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47774 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2411305AbgJUSlI (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 21 Oct 2020 14:41:08 -0400
-Received: from mail-qt1-x841.google.com (mail-qt1-x841.google.com [IPv6:2607:f8b0:4864:20::841])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A0B05C0613CE
-        for <fstests@vger.kernel.org>; Wed, 21 Oct 2020 11:41:06 -0700 (PDT)
-Received: by mail-qt1-x841.google.com with SMTP id p88so2886402qtd.12
-        for <fstests@vger.kernel.org>; Wed, 21 Oct 2020 11:41:06 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=1mBURGHGPVz7Y4aQBGjAz07r/tWWJJfBDfwgChjPdcM=;
-        b=q1+6xs0ynvC+sjVXX1p9JIoetZpw2JW+IHnrcKdtkS358BwRkIXhL+F7qvAxWrlw8T
-         IMvYja82mbgnNmvyCVnOv/qDCTJdgckxYbd0xbkdv3TkIOTkIdiiFCr2Y+G5xQk3hsCY
-         eixlBni5keBYbmLU7uNNNCm0H9/c4kh2UVTzWJE54qQtXrt35OryDrTuVdb44+uXQvjN
-         AUCLQwS/bjVvm9rvYINqcLAhUcV6gvddH2K6kQHHMAjmLayqrste5xMmI+yF1ygWlcqj
-         R8QdybjnJXsOK6HIUWFrMJ8Y8ui4BbhOL8GHwnnKVACL65I1Vy/mr+l8zMGpMwKKp6P0
-         E4fg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=1mBURGHGPVz7Y4aQBGjAz07r/tWWJJfBDfwgChjPdcM=;
-        b=TRDur5xglZNChyFAXrNR5+8xqimJeg9ZvQM6IxfaidWjinzNp+s45zRmOkVIw4+9BC
-         Zvv5RPKhXCYVkQ6mSInC/Ug+EbAKJdzbVUPFnUImf+RjgFCuseY5H7iMgrimn9R1SeZn
-         kqea9z7PvuBvlLeyYAwKZmbYACX8bVUT8HrcW9WfWxY3cudUFbHmVIwPviGW04XQMaSd
-         nSbOCxdrwSIMwBUH/iV8OY0DAHacOaMxmihzzGzBevyMi0tXadmedJPuVWb1hpIN6I+5
-         BwrTbGphGEvLZMTWJHp1l3a2muD6nMma4D4vPv8uJJKuFiMKcIMv2YT5W3mFx5nMjh6e
-         oUpQ==
-X-Gm-Message-State: AOAM531J/Na7H2bmsC07+gscnFifIBgtcrCK6sF3GOcBptcqQvij0uIj
-        1ruV/KeI5X41alm8CnAyvmljYFYNLP6JFQ==
-X-Google-Smtp-Source: ABdhPJzuWmU8dzvbsY3Mrl2G3A/4Lew45XWOkePTYt2+VB6Y6MEH0kWOj3f/sfqkIVycYf1+oAAKeA==
-X-Received: by 2002:ac8:4e49:: with SMTP id e9mr4326447qtw.114.1603305664811;
-        Wed, 21 Oct 2020 11:41:04 -0700 (PDT)
-Received: from ?IPv6:2620:10d:c0a8:11d9::1363? ([2620:10d:c091:480::1:39ba])
-        by smtp.gmail.com with ESMTPSA id 61sm1764397qta.19.2020.10.21.11.41.03
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 21 Oct 2020 11:41:03 -0700 (PDT)
-Subject: Re: [PATCH] btrfs: add test case for rwf_nowait writes
-To:     Filipe Manana <fdmanana@kernel.org>
-Cc:     fstests <fstests@vger.kernel.org>,
-        linux-btrfs <linux-btrfs@vger.kernel.org>,
-        Filipe Manana <fdmanana@suse.com>
-References: <5cfe8cb86da5593dda6c03b4ac404fa3b4c8b0d8.1603204654.git.fdmanana@suse.com>
- <1aa6d939-6818-f8f3-d857-642237e56cf8@toxicpanda.com>
- <CAL3q7H7RsANt+xYjuVrasz8xONm5qLyEHQbzDP_MONP_9_=wQA@mail.gmail.com>
-From:   Josef Bacik <josef@toxicpanda.com>
-Message-ID: <aebb596f-a3a5-a1a8-69d3-4554c4ea454d@toxicpanda.com>
-Date:   Wed, 21 Oct 2020 14:41:02 -0400
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0)
- Gecko/20100101 Thunderbird/78.3.3
+        Thu, 22 Oct 2020 08:16:50 -0400
+Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:2622 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S2898000AbgJVMQu (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 22 Oct 2020 08:16:50 -0400
+Received: from pps.filterd (m0098414.ppops.net [127.0.0.1])
+        by mx0b-001b2d01.pphosted.com (8.16.0.42/8.16.0.42) with SMTP id 09MCAlNR067435;
+        Thu, 22 Oct 2020 08:16:41 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=from : to : cc : subject
+ : date : message-id : mime-version : content-transfer-encoding; s=pp1;
+ bh=q9Pvc3QCiuxx8fHnxoAhn5RLk8n4ipW4vbOVALG1wgY=;
+ b=OduVbq1/8VfTz/PbVr2bYMJMYDIhka4NSn/o1evmN+pfjtm/rSRXZnHBZyxWTTnQhia+
+ WPJy1e4n40rw3XxR5zi85IjcVHz/jATfNUdSQvqc39Q4lQblhelTuI0eoVUOJY4mE/Lg
+ J/GmBIrORDA8Iqw6Lra4oquSQeF6BQgefnCNsikITYZsoHk5G02WxAHWN2C5ZE+awslE
+ 5k/g7oxTY/uPLgnlmALdzDzTWNbQjoc7NsqkkO0oUh1YJVOrRjU/n0xE5WLL7BNxQOHk
+ qm2RwEQni0Pfq2LX6JPYbZ2L6LzFCLDRkqNqKOPhYpR4EP3kb9DW2azDhoSONJC949rc fg== 
+Received: from ppma02fra.de.ibm.com (47.49.7a9f.ip4.static.sl-reverse.com [159.122.73.71])
+        by mx0b-001b2d01.pphosted.com with ESMTP id 34b0wnpb2w-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Thu, 22 Oct 2020 08:16:41 -0400
+Received: from pps.filterd (ppma02fra.de.ibm.com [127.0.0.1])
+        by ppma02fra.de.ibm.com (8.16.0.42/8.16.0.42) with SMTP id 09MCD6ep004599;
+        Thu, 22 Oct 2020 12:16:39 GMT
+Received: from b06cxnps3075.portsmouth.uk.ibm.com (d06relay10.portsmouth.uk.ibm.com [9.149.109.195])
+        by ppma02fra.de.ibm.com with ESMTP id 347r882t9p-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Thu, 22 Oct 2020 12:16:39 +0000
+Received: from d06av26.portsmouth.uk.ibm.com (d06av26.portsmouth.uk.ibm.com [9.149.105.62])
+        by b06cxnps3075.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 09MCGas620906316
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Thu, 22 Oct 2020 12:16:36 GMT
+Received: from d06av26.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id B8AC4AE055;
+        Thu, 22 Oct 2020 12:16:36 +0000 (GMT)
+Received: from d06av26.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id EEFD9AE045;
+        Thu, 22 Oct 2020 12:16:34 +0000 (GMT)
+Received: from riteshh-domain.ibmuc.com (unknown [9.199.40.6])
+        by d06av26.portsmouth.uk.ibm.com (Postfix) with ESMTP;
+        Thu, 22 Oct 2020 12:16:34 +0000 (GMT)
+From:   Ritesh Harjani <riteshh@linux.ibm.com>
+To:     fstests@vger.kernel.org
+Cc:     tytso@mit.edu, jack@suse.cz, anju@linux.vnet.ibm.com,
+        aneesh.kumar@linux.ibm.com, guan@eryu.me,
+        Ritesh Harjani <riteshh@linux.ibm.com>
+Subject: [PATCHv2 1/1] ext4/046: Add test to verify unwritten extent conversion in buff-io
+Date:   Thu, 22 Oct 2020 17:46:32 +0530
+Message-Id: <be872186537a7272bb8b6d215786a25d64b43791.1603368465.git.riteshh@linux.ibm.com>
+X-Mailer: git-send-email 2.26.2
 MIME-Version: 1.0
-In-Reply-To: <CAL3q7H7RsANt+xYjuVrasz8xONm5qLyEHQbzDP_MONP_9_=wQA@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+X-TM-AS-GCONF: 00
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.235,18.0.737
+ definitions=2020-10-22_06:2020-10-20,2020-10-22 signatures=0
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 clxscore=1015 bulkscore=0
+ spamscore=0 mlxscore=0 lowpriorityscore=0 phishscore=0 adultscore=0
+ priorityscore=1501 mlxlogscore=821 suspectscore=0 malwarescore=0
+ impostorscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2009150000 definitions=main-2010220085
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 10/21/20 12:39 PM, Filipe Manana wrote:
-> On Wed, Oct 21, 2020 at 3:39 PM Josef Bacik <josef@toxicpanda.com> wrote:
->>
->> On 10/20/20 10:43 AM, fdmanana@kernel.org wrote:
->>> From: Filipe Manana <fdmanana@suse.com>
->>>
->>> Test several scenarios for RWF_NOWAIT writes, to verify we don't regress
->>> on btrfs specific behaviour (snapshots, cow files, reflinks, holes,
->>> prealloc extent beyond eof).
->>>
->>> We had some bugs in the past related to RWF_NOWAIT writes not failing on
->>> btrfs when they should or failing when they shouldn't, these were fixed by
->>> the following kernel commits:
->>>
->>>     4b1946284dd6 ("btrfs: fix failure of RWF_NOWAIT write into prealloc extent beyond eof")
->>>     260a63395f90 ("btrfs: fix RWF_NOWAIT write not failling when we need to cow")
->>>
->>> Signed-off-by: Filipe Manana <fdmanana@suse.com>
->>> ---
->>>    tests/btrfs/225     | 140 ++++++++++++++++++++++++++++++++++++++++++++
->>>    tests/btrfs/225.out |  70 ++++++++++++++++++++++
->>>    tests/btrfs/group   |   1 +
->>>    3 files changed, 211 insertions(+)
->>>    create mode 100755 tests/btrfs/225
->>>    create mode 100644 tests/btrfs/225.out
->>>
->>> diff --git a/tests/btrfs/225 b/tests/btrfs/225
->>> new file mode 100755
->>> index 00000000..f55e8c80
->>> --- /dev/null
->>> +++ b/tests/btrfs/225
->>> @@ -0,0 +1,140 @@
->>> +#! /bin/bash
->>> +# SPDX-License-Identifier: GPL-2.0
->>> +# Copyright (C) 2020 SUSE Linux Products GmbH. All Rights Reserved.
->>> +#
->>> +# FS QA Test No. btrfs/225
->>> +#
->>> +# Test several (btrfs specific) scenarios with RWF_NOWAIT writes, cases where
->>> +# they should fail and cases where they should succeed.
->>> +#
->>> +seq=`basename $0`
->>> +seqres=$RESULT_DIR/$seq
->>> +echo "QA output created by $seq"
->>> +
->>> +tmp=/tmp/$$
->>> +status=1     # failure is the default!
->>> +trap "_cleanup; exit \$status" 0 1 2 3 15
->>> +
->>> +_cleanup()
->>> +{
->>> +     cd /
->>> +     rm -f $tmp.*
->>> +}
->>> +
->>> +# get standard environment, filters and checks
->>> +. ./common/rc
->>> +. ./common/filter
->>> +. ./common/reflink
->>> +
->>> +# real QA test starts here
->>> +_supported_fs btrfs
->>> +_require_scratch_reflink
->>> +_require_chattr C
->>> +_require_odirect
->>> +_require_xfs_io_command pwrite -N
->>> +_require_xfs_io_command falloc -k
->>> +_require_xfs_io_command fpunch
->>> +
->>> +rm -f $seqres.full
->>> +
->>> +_scratch_mkfs >>$seqres.full 2>&1
->>> +_scratch_mount
->>> +
->>> +# Test a write against COW file/extent - should fail with -EAGAIN. Disable the
->>> +# NOCOW attribute of the file just in case MOUNT_OPTIONS has "-o nodatacow".
->>> +echo "Testing write against COW file"
->>> +touch $SCRATCH_MNT/f1
->>> +$CHATTR_PROG -C $SCRATCH_MNT/f1
->>> +$XFS_IO_PROG -s -c "pwrite -S 0xab 0 128K" $SCRATCH_MNT/f1 | _filter_xfs_io
->>> +$XFS_IO_PROG -d -c "pwrite -N -V 1 -S 0xff 32K 64K" $SCRATCH_MNT/f1
->>
->> Should we do something like
->>
->> expected_to_fail_command > /dev/null 2>&1 || echo "FAILED!"
->>
->> so we don't get screwed by error strings changing in the future or some such
->> other nonsense?  Thanks,
-> 
-> 1) That's generally considered an anti-pattern in fstests.
-> 
-> 2) More importantly, I want to make sure the failure reason is -EAGAIN
-> ("Resource temporarily unavailable") and not something else, in which
-> case it means we have a regression and we want to notice it.
-> 
+There was an issue where with filesize > 4G, map.m_lblk
+was getting overflow in buff-IO path while converting unwritten to
+written extent with dioread_nolock mount option with bs < ps.
 
-Fair enough
+Adding a testcase to test for such regressions with dioread_nolock
+mount option. To reproduce the same regression w/o the fix
+in the kernel, test with bs < ps config.
+Patch at [1] fixes the issue in linux.
 
-Reviewed-by: Josef Bacik <josef@toxicpanda.com>
+[1]: https://patchwork.ozlabs.org/patch/1378632
 
-Thanks,
+Signed-off-by: Ritesh Harjani <riteshh@linux.ibm.com>
+---
+v1 -> v2:-
+Addressed review comments from Eryu. 
 
-Josef
+ tests/ext4/046     | 86 ++++++++++++++++++++++++++++++++++++++++++++++
+ tests/ext4/046.out |  2 ++
+ tests/ext4/group   |  1 +
+ 3 files changed, 89 insertions(+)
+ create mode 100755 tests/ext4/046
+ create mode 100644 tests/ext4/046.out
+
+diff --git a/tests/ext4/046 b/tests/ext4/046
+new file mode 100755
+index 000000000000..a66a301af5ba
+--- /dev/null
++++ b/tests/ext4/046
+@@ -0,0 +1,86 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2020 IBM Corporation. All Rights Reserved.
++#
++# FS QA Test No. ext4/046
++#
++# Test writes to falloc file with filesize > 4GB and make sure to verify
++# the file checksum both before and after mount.
++# This test is to check whether unwritten extents gets properly converted
++# to written extent on a filesystem with bs < ps with dioread_nolock.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# Modify as appropriate.
++_supported_fs ext4
++_require_scratch
++_require_xfs_io_command "falloc"
++_require_scratch_size $((6 * 1024 * 1024)) #kB
++
++# Test for bs < ps
++_scratch_mkfs >> $seqres.full 2>&1
++_scratch_mount "-o dioread_nolock" >> $seqres.full 2>&1
++
++# Get blksz
++blksz=$(_get_file_block_size $SCRATCH_MNT)
++
++testfile=$SCRATCH_MNT/testfile-$seq
++
++# Fallocate testfile with size > 4G
++fsize=$((5 * 1024 * 1024 * 1024))
++$XFS_IO_PROG -f -c "falloc 0 $fsize" $testfile >> $seqres.full 2>&1
++
++# First write at offset < 4G (at few alternative blks)
++off=$((3 * 1024 * 1024 * 1024))
++for i in 1 2 3 4; do
++	$XFS_IO_PROG -f \
++		-c "pwrite $off $blksz" \
++		$testfile >> $seqres.full 2>&1
++	off=$(($off + (2*$blksz)))
++done
++
++# Then write at offset > 4G (at few alternative blks) to check
++# any 32bit overflow case in map.m_lblk
++off=$((4 * 1024 * 1024 * 1024))
++for i in 1 2 3 4; do
++	$XFS_IO_PROG -f \
++		-c "pwrite $off $blksz" \
++		$testfile >> $seqres.full 2>&1
++	off=$(($off + (2*$blksz)))
++done
++
++# ==== Pre-Remount ===
++md5_pre=`md5sum $testfile | cut -d' ' -f1`
++echo "Pre-Remount md5sum of $testfile = $md5_pre" >> $seqres.full
++
++_scratch_cycle_mount
++
++# ==== Post-Remount ===
++md5_post=`md5sum $testfile | cut -d' ' -f1`
++echo "Post-Remount md5sum of $testfile = $md5_post" >> $seqres.full
++test $md5_pre != $md5_post && echo "md5sum mismatch"
++
++# success, all done
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/ext4/046.out b/tests/ext4/046.out
+new file mode 100644
+index 000000000000..52c445eb70bb
+--- /dev/null
++++ b/tests/ext4/046.out
+@@ -0,0 +1,2 @@
++QA output created by 046
++Silence is golden
+diff --git a/tests/ext4/group b/tests/ext4/group
+index 40351fd9ca0c..70c0bca64cb8 100644
+--- a/tests/ext4/group
++++ b/tests/ext4/group
+@@ -48,6 +48,7 @@
+ 043 auto quick
+ 044 auto quick
+ 045 auto dir
++046 auto prealloc quick
+ 271 auto rw quick
+ 301 aio auto ioctl rw stress defrag
+ 302 aio auto ioctl rw stress defrag
+-- 
+2.26.2
+
