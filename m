@@ -1,118 +1,109 @@
-Return-Path: <SRS0=eVm0=D6=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=Qh5O=EB=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-8.7 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,URIBL_BLOCKED autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CFEDEC388F9
-	for <linux-fstests@archiver.kernel.org>; Fri, 23 Oct 2020 16:05:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3115FC2D0A3
+	for <linux-fstests@archiver.kernel.org>; Mon, 26 Oct 2020 06:55:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6D76D21D47
-	for <linux-fstests@archiver.kernel.org>; Fri, 23 Oct 2020 16:05:02 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="U56fv3G9"
+	by mail.kernel.org (Postfix) with ESMTP id E859F22247
+	for <linux-fstests@archiver.kernel.org>; Mon, 26 Oct 2020 06:55:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1751267AbgJWQFC (ORCPT
+        id S1768370AbgJZGzR (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 23 Oct 2020 12:05:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44466 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751266AbgJWQFC (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 23 Oct 2020 12:05:02 -0400
-Received: from mail-qt1-x844.google.com (mail-qt1-x844.google.com [IPv6:2607:f8b0:4864:20::844])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CA04EC0613CE;
-        Fri, 23 Oct 2020 09:05:01 -0700 (PDT)
-Received: by mail-qt1-x844.google.com with SMTP id m65so1298643qte.11;
-        Fri, 23 Oct 2020 09:05:01 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:reply-to:from:date:message-id
-         :subject:to:cc:content-transfer-encoding;
-        bh=yTCzHYPdYLHi4diF0/ruypHQOAN5hiU4l+mxBwYTpSg=;
-        b=U56fv3G986zLG5e6YTDZtvFsFxHixRc94+EX7ZsEXRAC3z32AAxZoAaqmoLSIEtW5d
-         lCsaaeLcduBsnkvzq8juEGN3qh8aBqgAYcRuI24GeU2LB8DutntYr+bWqBdo0Ypb6Q6r
-         P6xn8Gicjo1EMABvneLbcnud4Qkgr63VoxITmCtRaVCnR4ELkFxydi+iRqLV8d234zL7
-         erwF8Z8rymec75UNTMCP6UYHlbVIqASlRmip7Od+zj/J+mf+xnGGkQf832/SHkAXiFN+
-         A5CEMpPNB4AvrSDkCdrDRbLDd0r4fbd4G46MaTlADVqf0rI5spRc1v08/wLhTQ57KHg0
-         5bcA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:reply-to
-         :from:date:message-id:subject:to:cc:content-transfer-encoding;
-        bh=yTCzHYPdYLHi4diF0/ruypHQOAN5hiU4l+mxBwYTpSg=;
-        b=RO33nDhmvqX4ctbastTvks+Uew/7EC3RN1EKbLg2eWPYvmgTy0Gc4BgJ1G6AlVabsV
-         AKCuVM2/Rd5jO6VtEabFNj3lJhIrZKU0dt+ZFFErlhaV/DGz0bNSAqh7AXyz0/lSLY0s
-         FSjoJ4M7PulyIIC4390BMQO2FPQ4gxMUxNlc5ozrY1ez8WlyJW+xjtQe4lGRb18eI9/b
-         GuDJAIL21LzGnUWm89yf+9i6sWpJqmdKmwcl8FNStSuxVH2J9z1V+xfISFJWzCVTYSaP
-         hJlPhHWopVo1SmZgoyVLJyZY3CQbi8kWJqhB7AIdZL2IZY/iOQht5qxDkdj4dlFFA4Fa
-         j2Wg==
-X-Gm-Message-State: AOAM530tDa366TngHgqE411t8XD3nuWZ7K4m5U2B1eVR0aWyepYngwo5
-        js1TQSOuzs/STYK2DdrQ+AoxwYJGnGywrdWwWAF9h3VeduM=
-X-Google-Smtp-Source: ABdhPJzpRQW5DDJGHG/Fp9yI6f+o6nmwgmeJ3Jitcvck408lzBuKltxIzRLXkssn7z8h89qEacwk572MReQubQ+nemQ=
-X-Received: by 2002:ac8:5743:: with SMTP id 3mr2932690qtx.259.1603469101013;
- Fri, 23 Oct 2020 09:05:01 -0700 (PDT)
+        Mon, 26 Oct 2020 02:55:17 -0400
+Received: from out20-73.mail.aliyun.com ([115.124.20.73]:37397 "EHLO
+        out20-73.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1768361AbgJZGzR (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 26 Oct 2020 02:55:17 -0400
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07814372|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_regular_dialog|0.0118585-0.000592491-0.987549;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047206;MF=guan@eryu.me;NM=1;PH=DS;RN=1;RT=1;SR=0;TI=SMTPD_---.IoUJyXB_1603695314;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.IoUJyXB_1603695314)
+          by smtp.aliyun-inc.com(10.147.41.121);
+          Mon, 26 Oct 2020 14:55:14 +0800
+Date:   Mon, 26 Oct 2020 14:55:13 +0800
+From:   Eryu Guan <guan@eryu.me>
+To:     fstests@vger.kernel.org
+Subject: Re: [ANNOUNCE] fstests: master branch updated to 31f6949f385a
+Message-ID: <20201026065513.GC3853@desktop>
 MIME-Version: 1.0
-References: <20201022184924.42kt4pqgngfclc6x@fiona>
-In-Reply-To: <20201022184924.42kt4pqgngfclc6x@fiona>
-Reply-To: fdmanana@gmail.com
-From:   Filipe Manana <fdmanana@gmail.com>
-Date:   Fri, 23 Oct 2020 17:04:49 +0100
-Message-ID: <CAL3q7H6=7Wm5Zw=M5huUthtG-NDMbjxTqHkf3u9st-8wuxK5eg@mail.gmail.com>
-Subject: Re: [PATCH] common/config: Allow environment defined btrfs mkfs options
-To:     Goldwyn Rodrigues <rgoldwyn@suse.de>
-Cc:     fstests <fstests@vger.kernel.org>,
-        linux-btrfs <linux-btrfs@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Oct 22, 2020 at 7:52 PM Goldwyn Rodrigues <rgoldwyn@suse.de> wrote:
->
-> btrfs does not have options of defining mkfs options via the
-> environment. Use BTRFS_MKFS_OPTIONS environment variable to set
-> MKFS_OPTIONS for btrfs.
->
-> Signed-off-by: Goldwyn Rodrigues <rgoldwyn@suse.com>
+[Seems this ANNOUNCE didn't hit the list, quote it and send again]
 
-Looks good,
-
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
-
-Since this is btrfs specific, in the future please cc the btrfs
-mailing list as well.
-Thanks.
-
-> ---
->  common/config | 3 +++
->  1 file changed, 3 insertions(+)
->
-> diff --git a/common/config b/common/config
-> index 285b7d1f..d83dfb28 100644
-> --- a/common/config
-> +++ b/common/config
-> @@ -410,6 +410,9 @@ _mkfs_opts()
->         f2fs)
->                 export MKFS_OPTIONS=3D"$F2FS_MKFS_OPTIONS"
->                 ;;
-> +       btrfs)
-> +               export MKFS_OPTIONS=3D"$BTRFS_MKFS_OPTIONS"
-> +               ;;
->         *)
->                 ;;
->         esac
+On Sun, Oct 25, 2020 at 07:02:50PM +0800, Eryu Guan wrote:
+> Hi all,
+> 
+> The master branch of the xfstests repository at:
+> 
+> 	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+> 
+> have just been updated. This is a normal new test & bug fix update. There're
+> two new btrfs tests and one ext4 test, and they should all pass with latest
+> 5.9.0+ kernel. The rest of the update is random fixes, the only user-visible
+> change is that btrfs now supports setting BTRFS_MKFS_OPTIONS as well to define
+> the btrfs mkfs options.
+> 
+> Thanks,
+> Eryu
+> 
+> The new head of the master branch is commit:
+> 
+> 31f6949f385a ext4: verify unwritten extent conversion in buff-io
+> 
+> New commits:
+> 
+> Anand Jain (2):
+>       [0cea5f97ef18] btrfs: add a test case for btrfs seed device delete
+>       [4504deda8ba7] btrfs/163: replace sprout instead of seed
+> 
+> Filipe Manana (2):
+>       [2eb35a8594dc] check: fix misspelled variable name for sections
+>       [a7fdd2e1b1dc] btrfs: add test case for rwf_nowait writes
+> 
+> Goldwyn Rodrigues (1):
+>       [da60e675f641] common/config: Allow environment defined btrfs mkfs options
+> 
+> Matthew Wilcox (1):
+>       [2f65e8db375e] generic/127: to exit if any subtest fails
+> 
+> Murphy Zhou (1):
+>       [85a3354edab0] overlay/073: test with nfs_export being off
+> 
+> Ritesh Harjani (1):
+>       [31f6949f385a] ext4: verify unwritten extent conversion in buff-io
+> 
+> Yang Xu (1):
+>       [e944dd5b9df6] generic/402: Drop useless fail message
+> 
+> 
+> Code Diffstat:
+> 
+>  check               |   4 +-
+>  common/config       |   3 ++
+>  tests/btrfs/163     |  25 +++++++---
+>  tests/btrfs/163.out |   5 +-
+>  tests/btrfs/225     |  82 ++++++++++++++++++++++++++++++
+>  tests/btrfs/225.out |  15 ++++++
+>  tests/btrfs/226     | 140 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/226.out |  70 ++++++++++++++++++++++++++
+>  tests/btrfs/group   |   2 +
+>  tests/ext4/046      |  84 +++++++++++++++++++++++++++++++
+>  tests/ext4/046.out  |   2 +
+>  tests/ext4/group    |   1 +
+>  tests/generic/127   |  12 ++---
+>  tests/generic/402   |   2 +-
+>  tests/overlay/073   |   4 +-
+>  15 files changed, 433 insertions(+), 18 deletions(-)
 > --
-> 2.26.2
+> Eryu Guan
+> guan@eryu.me
 
 
-
---=20
-Filipe David Manana,
-
-=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
- right.=E2=80=9D
