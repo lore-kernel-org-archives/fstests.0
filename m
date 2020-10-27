@@ -2,161 +2,823 @@ Return-Path: <SRS0=OTwx=EC=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,
-	UNPARSEABLE_RELAY autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6EDCAC4363A
-	for <linux-fstests@archiver.kernel.org>; Tue, 27 Oct 2020 19:06:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5C557C4363A
+	for <linux-fstests@archiver.kernel.org>; Tue, 27 Oct 2020 20:54:58 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2CF3A21556
-	for <linux-fstests@archiver.kernel.org>; Tue, 27 Oct 2020 19:06:04 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="AKfrOsxi"
+	by mail.kernel.org (Postfix) with ESMTP id EA1D522202
+	for <linux-fstests@archiver.kernel.org>; Tue, 27 Oct 2020 20:54:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1829358AbgJ0TGD (ORCPT
+        id S373405AbgJ0Uy5 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 27 Oct 2020 15:06:03 -0400
-Received: from aserp2120.oracle.com ([141.146.126.78]:49268 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2503794AbgJ0TGD (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 27 Oct 2020 15:06:03 -0400
-Received: from pps.filterd (aserp2120.oracle.com [127.0.0.1])
-        by aserp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 09RIt6wd108088;
-        Tue, 27 Oct 2020 19:06:01 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=subject : from : to :
- cc : date : message-id : mime-version : content-type :
- content-transfer-encoding; s=corp-2020-01-29;
- bh=F1eqUbYboSqXHRNYVDWUvPtnDvXpczmOTMrRhEMoYLQ=;
- b=AKfrOsxi4u501n6X3Xuyolj0pJeHgYUhTPK7i+rPTKIq1RfGj+rS4oDPUODrNTWN3NXl
- U6jYlvOZ78hNjP5x+eWBezkpu1VuRpswrPDaTm7qt9nelfeiivyFfpCSYSbYDH9ENblr
- G7QbwIUY0QNd8IOhu6dgFUbS5E2fN+r3xhlbcdhtRdAqDlt3aVV0F10gl8pxtswHU8Je
- u2ep5zNmf7AV89V6Wtve0firQWUq0bQaJUxGOcjqBBk2jYLyytvaDyzaIHL7FM1g6TIX
- KdOut1Z4l7Dm/L4Wrv6iLn1Rwt/4MvTmj6eQnzKVOVqCYjVDL9OL2BKoHKfeb05rKFdF kw== 
-Received: from userp3030.oracle.com (userp3030.oracle.com [156.151.31.80])
-        by aserp2120.oracle.com with ESMTP id 34cc7kuv7w-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Tue, 27 Oct 2020 19:06:01 +0000
-Received: from pps.filterd (userp3030.oracle.com [127.0.0.1])
-        by userp3030.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 09RItK9e019886;
-        Tue, 27 Oct 2020 19:04:00 GMT
-Received: from userv0122.oracle.com (userv0122.oracle.com [156.151.31.75])
-        by userp3030.oracle.com with ESMTP id 34cx6wbnwu-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Tue, 27 Oct 2020 19:04:00 +0000
-Received: from abhmp0003.oracle.com (abhmp0003.oracle.com [141.146.116.9])
-        by userv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 09RJ3x09028369;
-        Tue, 27 Oct 2020 19:03:59 GMT
-Received: from localhost (/10.159.243.144)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Tue, 27 Oct 2020 12:03:55 -0700
-Subject: [PATCH RFC v6 0/4] xfstests: widen timestamps to deal with y2038+
-From:   "Darrick J. Wong" <darrick.wong@oracle.com>
-To:     darrick.wong@oracle.com, guaneryu@gmail.com
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Date:   Tue, 27 Oct 2020 12:03:54 -0700
-Message-ID: <160382543472.1203848.8335854864075548402.stgit@magnolia>
-User-Agent: StGit/0.19
+        Tue, 27 Oct 2020 16:54:57 -0400
+Received: from mail105.syd.optusnet.com.au ([211.29.132.249]:36561 "EHLO
+        mail105.syd.optusnet.com.au" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S373393AbgJ0Uy5 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 27 Oct 2020 16:54:57 -0400
+Received: from dread.disaster.area (pa49-179-6-140.pa.nsw.optusnet.com.au [49.179.6.140])
+        by mail105.syd.optusnet.com.au (Postfix) with ESMTPS id BA8D73A913A;
+        Wed, 28 Oct 2020 07:54:51 +1100 (AEDT)
+Received: from discord.disaster.area ([192.168.253.110])
+        by dread.disaster.area with esmtp (Exim 4.92.3)
+        (envelope-from <david@fromorbit.com>)
+        id 1kXVzX-004zzd-85; Wed, 28 Oct 2020 07:54:51 +1100
+Received: from dave by discord.disaster.area with local (Exim 4.94)
+        (envelope-from <david@fromorbit.com>)
+        id 1kXVzW-00BqtR-Tv; Wed, 28 Oct 2020 07:54:51 +1100
+From:   Dave Chinner <david@fromorbit.com>
+To:     fstests@vger.kernel.org
+Cc:     linux-xfs@vger.kernel.org
+Subject: [PATCH] xfs: test mkfs.xfs config files
+Date:   Wed, 28 Oct 2020 07:54:50 +1100
+Message-Id: <20201027205450.2824888-1-david@fromorbit.com>
+X-Mailer: git-send-email 2.28.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9787 signatures=668682
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 adultscore=0 phishscore=0 spamscore=0
- bulkscore=0 malwarescore=0 mlxlogscore=999 mlxscore=0 suspectscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2009150000
- definitions=main-2010270110
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9787 signatures=668682
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 lowpriorityscore=0 adultscore=0
- malwarescore=0 spamscore=0 clxscore=1015 mlxscore=0 suspectscore=0
- priorityscore=1501 impostorscore=0 bulkscore=0 phishscore=0
- mlxlogscore=999 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2009150000 definitions=main-2010270110
+Content-Transfer-Encoding: 8bit
+X-Optus-CM-Score: 0
+X-Optus-CM-Analysis: v=2.3 cv=F8MpiZpN c=1 sm=1 tr=0 cx=a_idp_d
+        a=uDU3YIYVKEaHT0eX+MXYOQ==:117 a=uDU3YIYVKEaHT0eX+MXYOQ==:17
+        a=afefHYAZSVUA:10 a=yPCof4ZbAAAA:8 a=20KFwNOVAAAA:8
+        a=Zr2xEDy0rTSaxiGKlZEA:9
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Hi all,
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
 
-This series performs some refactoring of our timestamp and inode
-encoding functions, then retrofits the timestamp union to handle
-timestamps as a 64-bit nanosecond counter.  Next, it adds bit shifting
-to the non-root dquot timer fields to boost their effective size to 34
-bits.  These two changes enable correct time handling on XFS through the
-year 2486.
+Simple tests of the upcoming mkfs.xfs config file feature.  First we
+have some simple tests of properly formatted config files, then
+improperly formatted config files, and finally we try to spot
+conflicts between config file options and the cli.
 
-On a current V5 filesystem, inodes timestamps are a signed 32-bit
-seconds counter, with 0 being the Unix epoch.  Quota timers are an
-unsigned 32-bit seconds counter, with 0 also being the Unix epoch.
+[dchinner: updated for new libinih-based implementation.]
 
-This means that inode timestamps can range from:
--(2^31-1) (13 Dec 1901) through (2^31-1) (19 Jan 2038).
-
-And quota timers can range from:
-0 (1 Jan 1970) through (2^32-1) (7 Feb 2106).
-
-With the bigtime encoding turned on, inode timestamps are an unsigned
-64-bit nanoseconds counter, with 0 being the 1901 epoch.  Quota timers
-are a 34-bit unsigned second counter right shifted two bits, with 0
-being the Unix epoch, and capped at the maximum inode timestamp value.
-
-This means that inode timestamps can range from:
-0 (13 Dec 1901) through (2^64-1 / 1e9) (2 Jul 2486)
-
-Quota timers could theoretically range from:
-0 (1 Jan 1970) through (((2^34-1) + (2^31-1)) & ~3) (16 Jun 2582).
-
-But with the capping in place, the quota timers maximum is:
-max((2^64-1 / 1e9) - (2^31-1), (((2^34-1) + (2^31-1)) & ~3) (2 Jul 2486).
-
-v2: rebase to 5.9, having landed the quota refactoring
-v3: various suggestions by Amir and Dave
-v4: drop the timestamp unions, add "is bigtime?" predicates everywhere
-v5: reintroduce timestamp unions as *legacy* timestamp unions
-v6: minor stylistic changes
-
-If you're going to start using this mess, you probably ought to just
-pull from my git trees, which are linked below.
-
-This is an extraordinary way to destroy everything.  Enjoy!
-Comments and questions are, as always, welcome.
-
---D
-
-kernel git tree:
-https://git.kernel.org/cgit/linux/kernel/git/djwong/xfs-linux.git/log/?h=bigtime
-
-xfsprogs git tree:
-https://git.kernel.org/cgit/linux/kernel/git/djwong/xfsprogs-dev.git/log/?h=bigtime
-
-fstests git tree:
-https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=bigtime
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+Signed-off-by: Dave Chinner <dchinner@redhat.com>
 ---
- common/rc             |    2 -
- common/xfs            |   30 ++++++++++
- tests/generic/721     |  117 +++++++++++++++++++++++++++++++++++++
- tests/generic/721.out |    1 
- tests/generic/722     |  120 ++++++++++++++++++++++++++++++++++++++
- tests/generic/722.out |    1 
- tests/generic/group   |    2 +
- tests/xfs/122         |    1 
- tests/xfs/122.out     |    1 
- tests/xfs/908         |   87 ++++++++++++++++++++++++++++
- tests/xfs/908.out     |   10 +++
- tests/xfs/909         |  153 +++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/909.out     |    4 +
- tests/xfs/911         |   44 ++++++++++++++
- tests/xfs/911.out     |   15 +++++
- tests/xfs/group       |    3 +
- 16 files changed, 590 insertions(+), 1 deletion(-)
- create mode 100755 tests/generic/721
- create mode 100644 tests/generic/721.out
- create mode 100755 tests/generic/722
- create mode 100644 tests/generic/722.out
- create mode 100755 tests/xfs/908
- create mode 100644 tests/xfs/908.out
- create mode 100755 tests/xfs/909
- create mode 100644 tests/xfs/909.out
- create mode 100755 tests/xfs/911
- create mode 100644 tests/xfs/911.out
+ common/xfs        |  10 +++
+ tests/xfs/716     | 219 ++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/716.out |  16 ++++
+ tests/xfs/717     | 195 +++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/717.out |  13 +++
+ tests/xfs/718     |  65 ++++++++++++++
+ tests/xfs/718.out |   2 +
+ tests/xfs/719     |  62 +++++++++++++
+ tests/xfs/719.out |   2 +
+ tests/xfs/720     |  64 ++++++++++++++
+ tests/xfs/720.out |   3 +
+ tests/xfs/group   |   5 ++
+ 12 files changed, 656 insertions(+)
+ create mode 100755 tests/xfs/716
+ create mode 100644 tests/xfs/716.out
+ create mode 100755 tests/xfs/717
+ create mode 100644 tests/xfs/717.out
+ create mode 100755 tests/xfs/718
+ create mode 100644 tests/xfs/718.out
+ create mode 100755 tests/xfs/719
+ create mode 100644 tests/xfs/719.out
+ create mode 100755 tests/xfs/720
+ create mode 100644 tests/xfs/720.out
+
+diff --git a/common/xfs b/common/xfs
+index 79dab058..abfd8a15 100644
+--- a/common/xfs
++++ b/common/xfs
+@@ -700,6 +700,16 @@ _require_xfs_mkfs_ciname()
+ 		|| _notrun "need case-insensitive naming support in mkfs.xfs"
+ }
+ 
++# this test requires mkfs.xfs have configuration file support
++_require_xfs_mkfs_cfgfile()
++{
++	echo > /tmp/a
++	_scratch_mkfs_xfs_supported -c options=/tmp/a >/dev/null 2>&1
++	res=$?
++	rm -rf /tmp/a
++	test $res -eq 0 || _notrun "need configuration file support in mkfs.xfs"
++}
++
+ # XFS_DEBUG requirements
+ _require_xfs_debug()
+ {
+diff --git a/tests/xfs/716 b/tests/xfs/716
+new file mode 100755
+index 00000000..d8ee7350
+--- /dev/null
++++ b/tests/xfs/716
+@@ -0,0 +1,219 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0-or-later
++# Copyright (c) 2020 Oracle.  All Rights Reserved.
++#
++# FS QA Test 716
++#
++# Feed valid mkfs config files to the mkfs parser to ensure that they are
++# recognized as valid.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap '_cleanup; exit $status' 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.* $def_cfgfile $fsimg
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs generic
++_require_test
++_require_scratch_nocheck
++_require_xfs_mkfs_cfgfile
++
++def_cfgfile=$TEST_DIR/a
++fsimg=$TEST_DIR/a.img
++rm -rf $def_cfgfile $fsimg
++truncate -s 20t $fsimg
++
++test_mkfs_config() {
++	local cfgfile="$1"
++	if [ -z "$cfgfile" ] || [ "$cfgfile" = "-" ]; then
++		cfgfile=$def_cfgfile
++		cat > $cfgfile
++	fi
++	$MKFS_XFS_PROG -c options=$cfgfile -f -N $fsimg >> $seqres.full 2> $tmp.err
++	cat $tmp.err | _filter_test_dir
++}
++
++echo Simplest config file
++cat > $def_cfgfile << ENDL
++[metadata]
++crc = 0
++ENDL
++test_mkfs_config $def_cfgfile
++
++echo Piped-in config file
++test_mkfs_config << ENDL
++[metadata]
++crc = 0
++ENDL
++test_mkfs_config << ENDL
++[metadata]
++crc = 1
++ENDL
++
++echo Full line comment
++test_mkfs_config << ENDL
++# This is a full line comment.
++[metadata]
++crc = 0
++ENDL
++test_mkfs_config << ENDL
++ # This is a full line comment.
++[metadata]
++crc = 0
++ENDL
++test_mkfs_config << ENDL
++#This is a full line comment.
++[metadata]
++crc = 0
++ENDL
++
++echo End of line comment
++test_mkfs_config << ENDL
++[metadata]
++crc = 0 ; This is an eol comment.
++ENDL
++test_mkfs_config << ENDL
++[metadata]
++crc = 0 ;This is an eol comment.
++ENDL
++
++echo Multiple directives
++test_mkfs_config << ENDL
++[metadata]
++crc = 0
++finobt = 0
++ENDL
++
++echo Multiple sections
++test_mkfs_config << ENDL
++[metadata]
++crc = 0
++
++[inode]
++sparse = 0
++ENDL
++
++echo No directives at all
++test_mkfs_config << ENDL
++[metadata]
++ENDL
++
++echo Space around the section name
++test_mkfs_config << ENDL
++ [metadata]
++crc = 0
++ENDL
++test_mkfs_config << ENDL
++[metadata] 
++crc = 0
++ENDL
++test_mkfs_config << ENDL
++ [metadata] 
++crc = 0
++ENDL
++
++echo Single space around the key/value directive
++test_mkfs_config << ENDL
++[metadata]
++ crc=0
++ENDL
++test_mkfs_config << ENDL
++[metadata]
++crc =0
++ENDL
++test_mkfs_config << ENDL
++[metadata]
++crc= 0
++ENDL
++test_mkfs_config << ENDL
++[metadata]
++crc=0 
++ENDL
++
++echo Two spaces around the key/value directive
++test_mkfs_config << ENDL
++[metadata]
++ crc =0
++ENDL
++test_mkfs_config << ENDL
++[metadata]
++ crc= 0
++ENDL
++test_mkfs_config << ENDL
++[metadata]
++ crc=0 
++ENDL
++test_mkfs_config << ENDL
++[metadata]
++crc = 0
++ENDL
++test_mkfs_config << ENDL
++[metadata]
++crc =0 
++ENDL
++test_mkfs_config << ENDL
++[metadata]
++crc= 0 
++ENDL
++
++echo Three spaces around the key/value directive
++test_mkfs_config << ENDL
++[metadata]
++ crc = 0
++ENDL
++test_mkfs_config << ENDL
++[metadata]
++ crc= 0 
++ENDL
++test_mkfs_config << ENDL
++[metadata]
++crc = 0 
++ENDL
++
++echo Four spaces around the key/value directive
++test_mkfs_config << ENDL
++[metadata]
++ crc = 0 
++ENDL
++
++echo Arbitrary spaces and tabs
++test_mkfs_config << ENDL
++[metadata]
++	  crc 	  	=   	  	 0	  	 	  
++ENDL
++
++echo ambiguous comment/section names
++test_mkfs_config << ENDL
++[metadata]
++#[data]
++crc = 0
++ENDL
++
++echo ambiguous comment/variable names
++test_mkfs_config << ENDL
++[metadata]
++#foo = 0 ; is this a comment or a key '#foo' ?
++ENDL
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/716.out b/tests/xfs/716.out
+new file mode 100644
+index 00000000..4c6e9fad
+--- /dev/null
++++ b/tests/xfs/716.out
+@@ -0,0 +1,16 @@
++QA output created by 716
++Simplest config file
++Piped-in config file
++Full line comment
++End of line comment
++Multiple directives
++Multiple sections
++No directives at all
++Space around the section name
++Single space around the key/value directive
++Two spaces around the key/value directive
++Three spaces around the key/value directive
++Four spaces around the key/value directive
++Arbitrary spaces and tabs
++ambiguous comment/section names
++ambiguous comment/variable names
+diff --git a/tests/xfs/717 b/tests/xfs/717
+new file mode 100755
+index 00000000..031d59f1
+--- /dev/null
++++ b/tests/xfs/717
+@@ -0,0 +1,195 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0-or-later
++# Copyright (c) 2020 Oracle.  All Rights Reserved.
++#
++# FS QA Test 717
++#
++# Feed invalid mkfs config files to the mkfs parser to ensure that they are
++# recognized as invalid.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap '_cleanup; exit $status' 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.* $def_cfgfile $fsimg
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs generic
++_require_test
++_require_scratch_nocheck
++_require_xfs_mkfs_cfgfile
++
++def_cfgfile=$TEST_DIR/a
++fsimg=$TEST_DIR/a.img
++rm -rf $def_cfgfile $fsimg
++truncate -s 20t $fsimg
++
++test_mkfs_config() {
++	local cfgfile="$1"
++	if [ -z "$cfgfile" ] || [ "$cfgfile" = "-" ]; then
++		cfgfile=$def_cfgfile
++		cat > $cfgfile
++	fi
++	$MKFS_XFS_PROG -c options=$cfgfile -f -N $fsimg >> $seqres.full 2> $tmp.err
++	if [ $? -eq 0 ]; then
++		echo "Test passed, should have failed! Config file parameters:"
++		cat $cfgfile
++	fi
++}
++
++echo Spaces in a section name
++test_mkfs_config << ENDL
++[meta data]
++crc = 0
++ENDL
++test_mkfs_config << ENDL
++[meta	data]
++crc = 0
++ENDL
++test_mkfs_config << ENDL
++[ metadata]
++crc = 0
++ENDL
++test_mkfs_config << ENDL
++[metadata ]
++crc = 0
++ENDL
++test_mkfs_config << ENDL
++[ metadata ]
++crc = 0
++ENDL
++test_mkfs_config << ENDL
++[ metadata] 
++crc = 0
++ENDL
++test_mkfs_config << ENDL
++[metadata ] 
++crc = 0
++ENDL
++test_mkfs_config << ENDL
++ [ metadata]
++crc = 0
++ENDL
++test_mkfs_config << ENDL
++ [metadata ]
++crc = 0
++ENDL
++test_mkfs_config << ENDL
++ [ metadata ]
++crc = 0
++ENDL
++test_mkfs_config << ENDL
++ [metadata ] 
++crc = 0
++ENDL
++test_mkfs_config << ENDL
++ [ metadata ] 
++crc = 0
++ENDL
++test_mkfs_config << ENDL
++   	 		 	 [	  	 		metadata		  	  	    	  ] 	 	 	    	
++crc = 0
++ENDL
++
++echo Spaces in the middle of a key name
++test_mkfs_config << ENDL
++[metadata]
++c rc = 0
++ENDL
++
++echo Invalid value
++test_mkfs_config << ENDL
++[metadata]
++crc = waffles
++ENDL
++
++echo Nonexistent sections
++test_mkfs_config << ENDL
++[goober]
++crc = 0
++ENDL
++
++echo Nonexistent keys
++test_mkfs_config << ENDL
++[metadata]
++goober = 0
++ENDL
++
++echo Only zero or one
++test_mkfs_config << ENDL
++[metadata]
++crc = 50
++ENDL
++test_mkfs_config << ENDL
++[metadata]
++crc = -1
++ENDL
++
++echo sysctl style files
++test_mkfs_config << ENDL
++metadata.crc = 1
++ENDL
++
++echo binaries
++test_mkfs_config $MKFS_XFS_PROG 2>&1 | sed -e "s#$MKFS_XFS_PROG#MKFS_XFS_PROG#g"
++
++echo respecified options
++test_mkfs_config << ENDL
++[metadata]
++crc = 0
++crc = 1
++ENDL
++
++echo respecified sections
++test_mkfs_config << ENDL
++[metadata]
++crc = 0
++[metadata]
++crc = 1
++ENDL
++
++echo ambiguous comment/section names
++test_mkfs_config << ENDL
++[meta#data]
++crc = 0
++ENDL
++
++echo ambiguous comment/variable names
++test_mkfs_config << ENDL
++[metadata]
++fo#o = 0
++ENDL
++test_mkfs_config << ENDL
++[metadata]
++foo#=# 0
++ENDL
++test_mkfs_config << ENDL
++[metadata]
++foo =# 0
++ENDL
++test_mkfs_config << ENDL
++[metadata]
++crc = 0;This is an eol comment.
++ENDL
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/717.out b/tests/xfs/717.out
+new file mode 100644
+index 00000000..61fff561
+--- /dev/null
++++ b/tests/xfs/717.out
+@@ -0,0 +1,13 @@
++QA output created by 717
++Spaces in a section name
++Spaces in the middle of a key name
++Invalid value
++Nonexistent sections
++Nonexistent keys
++Only zero or one
++sysctl style files
++binaries
++respecified options
++respecified sections
++ambiguous comment/section names
++ambiguous comment/variable names
+diff --git a/tests/xfs/718 b/tests/xfs/718
+new file mode 100755
+index 00000000..e2beca41
+--- /dev/null
++++ b/tests/xfs/718
+@@ -0,0 +1,65 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0-or-later
++# Copyright (c) 2020 Oracle.  All Rights Reserved.
++#
++# FS QA Test 718
++#
++# Test formatting with a well known config file.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap '_cleanup; exit $status' 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.* $def_cfgfile $fsimg
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs generic
++_require_test
++_require_scratch_nocheck
++_require_xfs_mkfs_cfgfile
++
++echo "Silence is golden"
++
++def_cfgfile=$TEST_DIR/a
++fsimg=$TEST_DIR/a.img
++rm -rf $def_cfgfile $fsimg
++truncate -s 20t $fsimg
++
++cat > $def_cfgfile << ENDL
++[metadata]
++crc = 1
++rmapbt = 1
++reflink = 1
++
++[inode]
++sparse = 1
++ENDL
++
++$MKFS_XFS_PROG -c options=$def_cfgfile -f $SCRATCH_DEV > $tmp.mkfs
++cat $tmp.mkfs >> $seqres.full
++grep -q 'crc=1' $tmp.mkfs || echo 'v5 not enabled'
++grep -q 'rmapbt=1' $tmp.mkfs || echo 'rmap not enabled'
++grep -q 'reflink=1' $tmp.mkfs || echo 'reflink not enabled'
++grep -q 'sparse=1' $tmp.mkfs || echo 'sparse inodes not enabled'
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/718.out b/tests/xfs/718.out
+new file mode 100644
+index 00000000..1dad5ab3
+--- /dev/null
++++ b/tests/xfs/718.out
+@@ -0,0 +1,2 @@
++QA output created by 718
++Silence is golden
+diff --git a/tests/xfs/719 b/tests/xfs/719
+new file mode 100755
+index 00000000..15ff3f27
+--- /dev/null
++++ b/tests/xfs/719
+@@ -0,0 +1,62 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0-or-later
++# Copyright (c) 2020 Oracle.  All Rights Reserved.
++#
++# FS QA Test 719
++#
++# Test formatting with a config file that contains conflicting options.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap '_cleanup; exit $status' 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.* $def_cfgfile
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs generic
++_require_test
++_require_scratch_nocheck
++_require_xfs_mkfs_cfgfile
++
++echo "Silence is golden"
++
++def_cfgfile=$TEST_DIR/a
++rm -rf $def_cfgfile
++
++cat > $def_cfgfile << ENDL
++[metadata]
++crc = 0
++rmapbt = 1
++reflink = 1
++
++[inode]
++sparse = 1
++ENDL
++
++$MKFS_XFS_PROG -c options=$def_cfgfile -f $SCRATCH_DEV > $tmp.mkfs 2>&1
++if [ $? -eq 0 ]; then
++	echo "mkfs.xfs did not fail!"
++	cat $tmp.mkfs
++fi
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/719.out b/tests/xfs/719.out
+new file mode 100644
+index 00000000..25585fa0
+--- /dev/null
++++ b/tests/xfs/719.out
+@@ -0,0 +1,2 @@
++QA output created by 719
++Silence is golden
+diff --git a/tests/xfs/720 b/tests/xfs/720
+new file mode 100755
+index 00000000..a917e9a6
+--- /dev/null
++++ b/tests/xfs/720
+@@ -0,0 +1,64 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0-or-later
++# Copyright (c) 2020 Oracle.  All Rights Reserved.
++#
++# FS QA Test 720
++#
++# Test formatting with conflicts between the config file and the cli.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap '_cleanup; exit $status' 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.* $def_cfgfile
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs generic
++_require_test
++_require_scratch_nocheck
++_require_xfs_mkfs_cfgfile
++
++cfgfile=$TEST_DIR/a
++rm -rf $cfgfile
++
++# disable crc in config file, enable rmapbt (which requires crc=1) in cli
++cat > $cfgfile << ENDL
++[metadata]
++crc = 0
++ENDL
++
++$MKFS_XFS_PROG -c options=$cfgfile -f -m rmapbt=1 $SCRATCH_DEV > $tmp.mkfs 2>&1
++cat $tmp.mkfs >> $seqres.full
++grep 'rmapbt not supported without CRC support' $tmp.mkfs
++
++# enable rmapbt (which requires crc=1) in config file, disable crc in cli
++cat > $cfgfile << ENDL
++[metadata]
++rmapbt = 1
++ENDL
++
++$MKFS_XFS_PROG -c options=$cfgfile -f -m crc=0 $SCRATCH_DEV > $tmp.mkfs 2>&1
++cat $tmp.mkfs >> $seqres.full
++grep 'rmapbt not supported without CRC support' $tmp.mkfs
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/720.out b/tests/xfs/720.out
+new file mode 100644
+index 00000000..1d2cf2ef
+--- /dev/null
++++ b/tests/xfs/720.out
+@@ -0,0 +1,3 @@
++QA output created by 720
++rmapbt not supported without CRC support
++rmapbt not supported without CRC support
+diff --git a/tests/xfs/group b/tests/xfs/group
+index b89c0a4e..4d558e22 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -519,3 +519,8 @@
+ 519 auto quick reflink
+ 520 auto quick reflink
+ 521 auto quick realtime growfs
++716 auto quick mkfs
++717 auto quick mkfs
++718 auto quick mkfs
++719 auto quick mkfs
++720 auto quick mkfs
+-- 
+2.28.0
 
