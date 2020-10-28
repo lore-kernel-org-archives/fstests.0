@@ -2,176 +2,305 @@ Return-Path: <SRS0=Sugc=ED=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-12.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	UNPARSEABLE_RELAY autolearn=unavailable autolearn_force=no version=3.4.0
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 962AAC56201
-	for <linux-fstests@archiver.kernel.org>; Wed, 28 Oct 2020 22:26:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CD679C4363A
+	for <linux-fstests@archiver.kernel.org>; Wed, 28 Oct 2020 23:10:33 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3754320706
-	for <linux-fstests@archiver.kernel.org>; Wed, 28 Oct 2020 22:26:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6AFAF20791
+	for <linux-fstests@archiver.kernel.org>; Wed, 28 Oct 2020 23:10:33 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="mXIIOKjS"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="cEvKu4Kt"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1732582AbgJ1WYp (ORCPT
+        id S1725921AbgJ1XKd (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 28 Oct 2020 18:24:45 -0400
-Received: from aserp2130.oracle.com ([141.146.126.79]:44474 "EHLO
-        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1732941AbgJ1WY0 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 28 Oct 2020 18:24:26 -0400
-Received: from pps.filterd (aserp2130.oracle.com [127.0.0.1])
-        by aserp2130.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 09SMJFPM172285;
-        Wed, 28 Oct 2020 22:24:14 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
- : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=corp-2020-01-29;
- bh=9z10xMVcuhTeCp1KBESvCxRUUhDSAblD5Dwcu8HA9ec=;
- b=mXIIOKjSezussF3BeD1gp1G+O/SEgu6uz2/dwynYj9ncwaSv8Is8EnoZfiub8i7rX1s1
- 7bAxgbUxejQp70aWJthwyuMiEu0IknJQAzTBOQhDY7mQr4HLzjBYihqQESP+PuFceNew
- mhGuu0EFHyyQqSJL/iEj24JvETHtJr4q+E9Bdfxta0CIl3G7lzbCf7vK9mFXXyqL/HO6
- jCgwBhzcu9bKgIz7XYW/krCkBBBFRcsonn9AFWRGCxzb1xmui+/c70qrty7s6ehFHshY
- RvgUjYID0EheJlwBtzjfecw5VrrqkfcDC1muiQBaYKq1hjbhGe4B3xgE+rwSh+SJ9mH0 Gw== 
-Received: from userp3020.oracle.com (userp3020.oracle.com [156.151.31.79])
-        by aserp2130.oracle.com with ESMTP id 34c9sb25xq-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Wed, 28 Oct 2020 22:24:14 +0000
-Received: from pps.filterd (userp3020.oracle.com [127.0.0.1])
-        by userp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 09SMKLah180153;
-        Wed, 28 Oct 2020 22:24:14 GMT
-Received: from userv0121.oracle.com (userv0121.oracle.com [156.151.31.72])
-        by userp3020.oracle.com with ESMTP id 34cx1shev4-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Wed, 28 Oct 2020 22:24:13 +0000
-Received: from abhmp0011.oracle.com (abhmp0011.oracle.com [141.146.116.17])
-        by userv0121.oracle.com (8.14.4/8.13.8) with ESMTP id 09SMODvk001220;
-        Wed, 28 Oct 2020 22:24:13 GMT
-Received: from localhost (/67.169.218.210)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Wed, 28 Oct 2020 15:24:12 -0700
-Date:   Wed, 28 Oct 2020 15:24:11 -0700
-From:   "Darrick J. Wong" <darrick.wong@oracle.com>
-To:     Christoph Hellwig <hch@infradead.org>
-Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org, linux-ext4@vger.kernel.org
-Subject: Re: [PATCH 1/9] common: extract rt extent size for
- _get_file_block_size
-Message-ID: <20201028222411.GE1061252@magnolia>
-References: <160382528936.1202316.2338876126552815991.stgit@magnolia>
- <160382529579.1202316.931742119756545034.stgit@magnolia>
- <20201028074119.GA2750@infradead.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20201028074119.GA2750@infradead.org>
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9788 signatures=668682
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 spamscore=0 phishscore=0 bulkscore=0
- suspectscore=1 malwarescore=0 mlxlogscore=999 mlxscore=0 adultscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2009150000
- definitions=main-2010280137
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9788 signatures=668682
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxscore=0 impostorscore=0
- mlxlogscore=999 malwarescore=0 lowpriorityscore=0 bulkscore=0
- priorityscore=1501 spamscore=0 phishscore=0 clxscore=1015 suspectscore=1
- adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2009150000 definitions=main-2010280137
+        Wed, 28 Oct 2020 19:10:33 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:57971 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726537AbgJ1XKU (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 28 Oct 2020 19:10:20 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1603926616;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc; bh=T9IgPOcRgHhwtc8vhW0vmFhp+0Lk8VbhiSQiXN63iec=;
+        b=cEvKu4KtUaLjI8HOhoC5hipYjtSU6jknifT7VBS4bmZoQk/46xMI5WR0AgUIE56AJzkDIl
+        m3IRBkhPNFccHq9U+eeGBaF/G/C1yXyQHw7UCatzswK/WbsyMkNiIYsXVtUum5hGGF5REH
+        nOgsIdDLpHmhFb3Cjt4mUO8vb4HEZrw=
+Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com
+ [209.85.210.200]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-225-lkLhUsffMYCJBpHJS4liRQ-1; Wed, 28 Oct 2020 19:10:14 -0400
+X-MC-Unique: lkLhUsffMYCJBpHJS4liRQ-1
+Received: by mail-pf1-f200.google.com with SMTP id y198so606674pfb.16
+        for <fstests@vger.kernel.org>; Wed, 28 Oct 2020 16:10:14 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id;
+        bh=T9IgPOcRgHhwtc8vhW0vmFhp+0Lk8VbhiSQiXN63iec=;
+        b=kl2L96jbVaOazYVxuUjeC81Mj4zNkNR+u9pzC6VGnn2O7y917VCgryun8/Klff+X/R
+         zNfMhRJzgoIehlb0GasTyeX/KuXwR+gSWxB7swNoesp2pfe0ynkePJQ7OLfO1eIHMd6X
+         zX4VJTwRYj8a8zB9WlAfgiWt95dR69UW+L25Bvw5w8WbgukrXbeU9hz8veEEZ6Lnmd9Q
+         2Uju3Buzu8bOuBgPejKX4ydeOWG4nb0AUy1P4aUJSj4gUARwjNHKRX2EzN6zjdJB7SUS
+         3fWdxr3xem4PNmFe3cJhhrrmJOhAFAbneim3+dlz8lIJZ9Ulyjag8MjzvVyFMoqLdVy/
+         ww1A==
+X-Gm-Message-State: AOAM530DgLHgWtjV0U7jkwKq5QtgOB++3CdcTS1IjYqNzjwVJhrGfhJ4
+        rRzMUw/dpQ2CMaINfEWtXgwptvCM7weeBZ4ZmXyNKy7wvUvqspXQ1y82/aeNI4iApy1eg+PRJV1
+        unhRUTBJwuRBsbaTNtA==
+X-Received: by 2002:a62:ea0c:0:b029:164:3789:547b with SMTP id t12-20020a62ea0c0000b02901643789547bmr1523911pfh.27.1603926613203;
+        Wed, 28 Oct 2020 16:10:13 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJwYT1tKt35m97ib3vTsCPYXp65Lr/mm02Y+vE3msZ8TNkexISurdlI8A69vY/5EZU/eXY4eKg==
+X-Received: by 2002:a62:ea0c:0:b029:164:3789:547b with SMTP id t12-20020a62ea0c0000b02901643789547bmr1523889pfh.27.1603926612867;
+        Wed, 28 Oct 2020 16:10:12 -0700 (PDT)
+Received: from xiangao.remote.csb ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id u4sm451136pjy.19.2020.10.28.16.10.10
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 28 Oct 2020 16:10:12 -0700 (PDT)
+From:   Gao Xiang <hsiangkao@redhat.com>
+To:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Cc:     Gao Xiang <hsiangkao@redhat.com>
+Subject: [WIP] [RFC PATCH] xfs: add test on shrinking unused space in the last AG
+Date:   Thu, 29 Oct 2020 07:09:09 +0800
+Message-Id: <20201028230909.639698-1-hsiangkao@redhat.com>
+X-Mailer: git-send-email 2.18.1
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Oct 28, 2020 at 07:41:19AM +0000, Christoph Hellwig wrote:
-> On Tue, Oct 27, 2020 at 12:01:35PM -0700, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <darrick.wong@oracle.com>
-> > 
-> > _get_file_block_size is intended to return the size (in bytes) of the
-> > fundamental allocation unit for a file.  This is required for remapping
-> > operations like fallocate and reflink, which can only operate on
-> > allocation units.  Since the XFS realtime volume can be configure for
-> > allocation units larger than 1 fs block, we need to factor that in here.
-> 
-> Should this also cover the ext4 bigalloc clusters?  Or do they not
-> matter for fallocate?
+This adds a testcase to test shrinking unused space as much
+as possible in the last AG with background fsstress workload.
 
-They don't matter for fallocate, because ext4 doesn't require clusters
-to be fully allocated like ocfs2 and xfs do.
+The expectation is that no crash happens with expected output.
 
-This means that all the bigalloc codepaths have this horrible "implied
-cluster allocation" thing sprinkled everywhere where to map in a single
-block you have to scan left and right in the extent map to see if anyone
-already mapped something.  And even more strangely, extent tree blocks
-don't do this, so it seems to waste the entire cluster past the first fs
-block.
+Signed-off-by: Gao Xiang <hsiangkao@redhat.com>
+---
+ tests/xfs/522     | 125 ++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/522.out |  73 +++++++++++++++++++++++++++
+ tests/xfs/group   |   1 +
+ 3 files changed, 199 insertions(+)
+ create mode 100755 tests/xfs/522
+ create mode 100644 tests/xfs/522.out
 
-But I guess it /does/ mean that _get_file_block_size doesn't have to do
-anything special for ext*.
+diff --git a/tests/xfs/522 b/tests/xfs/522
+new file mode 100755
+index 00000000..e427a33a
+--- /dev/null
++++ b/tests/xfs/522
+@@ -0,0 +1,125 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2020 Red Hat, Inc.  All Rights Reserved.
++#
++# FS QA Test 522
++#
++# XFS online shrinkfs-while-allocating tests
++#
++# This test attempts to shrink unused space as much as possible with
++# background fsstress workload. It will decrease the shrink size if
++# larger size fails. And totally repeat 6 times.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "rm -f $tmp.*; exit \$status" 0 1 2 3 15
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++_create_scratch()
++{
++	echo "*** mkfs"
++	_scratch_mkfs_xfs $@ | tee -a $seqres.full | _filter_mkfs 2>$tmp.mkfs
++	. $tmp.mkfs
++
++	echo "*** mount"
++	if ! _try_scratch_mount 2>/dev/null
++	then
++		echo "failed to mount $SCRATCH_DEV"
++		exit 1
++	fi
++
++	# fix the reserve block pool to a known size so that the enospc
++	# calculations work out correctly.
++	_scratch_resvblks 1024 >  /dev/null 2>&1
++}
++
++_fill_scratch()
++{
++	$XFS_IO_PROG -f -c "resvsp 0 ${1}" $SCRATCH_MNT/resvfile
++}
++
++_stress_scratch()
++{
++	procs=3
++	nops=1000
++	# -w ensures that the only ops are ones which cause write I/O
++	FSSTRESS_ARGS=`_scale_fsstress_args -d $SCRATCH_MNT -w -p $procs \
++	    -n $nops $FSSTRESS_AVOID`
++	$FSSTRESS_PROG $FSSTRESS_ARGS >> $seqres.full 2>&1 &
++}
++
++# real QA test starts here
++_supported_fs xfs
++_require_scratch
++_require_xfs_io_command "falloc"
++
++rm -f $seqres.full
++_scratch_mkfs_xfs | tee -a $seqres.full | _filter_mkfs 2>$tmp.mkfs
++. $tmp.mkfs	# extract blocksize and data size for scratch device
++
++endsize=`expr 125 \* 1048576`	# stop after shrinking this big
++[ `expr $endsize / $dbsize` -lt $dblocks ] || _notrun "Scratch device too small"
++
++nags=2
++totalcount=6
++
++while [ $totalcount -gt 0 ]; do
++	size=`expr 1010 \* 1048576`	# 1010 megabytes initially
++	echo "*** creating scratch filesystem"
++	logblks=$(_scratch_find_xfs_min_logblocks -dsize=${size} -dagcount=${nags})
++
++	_create_scratch -lsize=${logblks}b -dsize=${size} -dagcount=${nags}
++
++	echo "*** using some initial space on scratch filesystem"
++	for i in `seq 125 -1 90`; do
++		fillsize=`expr $i \* 1048576`
++		out="$(_fill_scratch $fillsize 2>&1)"
++		echo "$out" | grep -q 'No space left on device' && continue
++		test -n "${out}" && echo "$out"
++		break
++	done
++
++	decsize=`expr  42 \* 1048576`	# shrink in chunks of this size at most
++
++	echo "*** stressing filesystem"
++	while [ $size -gt $endsize ]; do
++		_stress_scratch
++		sleep 1
++
++		decb=`expr $decsize / $dbsize`    # in data blocks
++		while [ $decb -gt 0 ]; do
++			sizeb=`expr $size / $dbsize - $decb`
++
++			xfs_growfs -D ${sizeb} $SCRATCH_MNT 2>&1 \
++				| tee -a $seqres.full | _filter_mkfs 2>$tmp.growfs > /dev/null
++
++			ret="${PIPESTATUS[0]}"
++			. $tmp.growfs
++
++			[ $ret -eq 0 ] && break
++
++			[ $decb -gt 100 ] && decb=`expr $decb + $RANDOM % 10`
++			decb=`expr $decb / 2`
++		done
++
++		wait
++		[ $decb -eq 0 ] && break
++
++		size=`expr $size - $decb \* $dbsize`
++	done
++
++	_scratch_unmount
++	_repair_scratch_fs >> $seqres.full
++	totalcount=`expr $totalcount - 1`
++done
++
++status=0
++exit
+diff --git a/tests/xfs/522.out b/tests/xfs/522.out
+new file mode 100644
+index 00000000..03d512f5
+--- /dev/null
++++ b/tests/xfs/522.out
+@@ -0,0 +1,73 @@
++QA output created by 522
++meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
++data     = bsize=XXX blocks=XXX, imaxpct=PCT
++         = sunit=XXX swidth=XXX, unwritten=X
++naming   =VERN bsize=XXX
++log      =LDEV bsize=XXX blocks=XXX
++realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
++*** creating scratch filesystem
++*** mkfs
++meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
++data     = bsize=XXX blocks=XXX, imaxpct=PCT
++         = sunit=XXX swidth=XXX, unwritten=X
++naming   =VERN bsize=XXX
++log      =LDEV bsize=XXX blocks=XXX
++realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
++*** mount
++*** using some initial space on scratch filesystem
++*** stressing filesystem
++*** creating scratch filesystem
++*** mkfs
++meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
++data     = bsize=XXX blocks=XXX, imaxpct=PCT
++         = sunit=XXX swidth=XXX, unwritten=X
++naming   =VERN bsize=XXX
++log      =LDEV bsize=XXX blocks=XXX
++realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
++*** mount
++*** using some initial space on scratch filesystem
++*** stressing filesystem
++*** creating scratch filesystem
++*** mkfs
++meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
++data     = bsize=XXX blocks=XXX, imaxpct=PCT
++         = sunit=XXX swidth=XXX, unwritten=X
++naming   =VERN bsize=XXX
++log      =LDEV bsize=XXX blocks=XXX
++realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
++*** mount
++*** using some initial space on scratch filesystem
++*** stressing filesystem
++*** creating scratch filesystem
++*** mkfs
++meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
++data     = bsize=XXX blocks=XXX, imaxpct=PCT
++         = sunit=XXX swidth=XXX, unwritten=X
++naming   =VERN bsize=XXX
++log      =LDEV bsize=XXX blocks=XXX
++realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
++*** mount
++*** using some initial space on scratch filesystem
++*** stressing filesystem
++*** creating scratch filesystem
++*** mkfs
++meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
++data     = bsize=XXX blocks=XXX, imaxpct=PCT
++         = sunit=XXX swidth=XXX, unwritten=X
++naming   =VERN bsize=XXX
++log      =LDEV bsize=XXX blocks=XXX
++realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
++*** mount
++*** using some initial space on scratch filesystem
++*** stressing filesystem
++*** creating scratch filesystem
++*** mkfs
++meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
++data     = bsize=XXX blocks=XXX, imaxpct=PCT
++         = sunit=XXX swidth=XXX, unwritten=X
++naming   =VERN bsize=XXX
++log      =LDEV bsize=XXX blocks=XXX
++realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
++*** mount
++*** using some initial space on scratch filesystem
++*** stressing filesystem
+diff --git a/tests/xfs/group b/tests/xfs/group
+index b89c0a4e..ab762ed6 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -519,3 +519,4 @@
+ 519 auto quick reflink
+ 520 auto quick reflink
+ 521 auto quick realtime growfs
++522 auto quick growfs
+-- 
+2.18.1
 
---D
-
-> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> > ---
-> >  common/rc  |   13 ++++++++++---
-> >  common/xfs |   20 ++++++++++++++++++++
-> >  2 files changed, 30 insertions(+), 3 deletions(-)
-> > 
-> > 
-> > diff --git a/common/rc b/common/rc
-> > index 27a27ea3..41f93047 100644
-> > --- a/common/rc
-> > +++ b/common/rc
-> > @@ -3974,11 +3974,18 @@ _get_file_block_size()
-> >  		echo "Missing mount point argument for _get_file_block_size"
-> >  		exit 1
-> >  	fi
-> > -	if [ "$FSTYP" = "ocfs2" ]; then
-> > +
-> > +	case "$FSTYP" in
-> > +	"ocfs2")
-> >  		stat -c '%o' $1
-> > -	else
-> > +		;;
-> > +	"xfs")
-> > +		_xfs_get_file_block_size $1
-> > +		;;
-> > +	*)
-> >  		_get_block_size $1
-> > -	fi
-> > +		;;
-> > +	esac
-> >  }
-> >  
-> >  # Get the minimum block size of an fs.
-> > diff --git a/common/xfs b/common/xfs
-> > index 79dab058..3f5c14ba 100644
-> > --- a/common/xfs
-> > +++ b/common/xfs
-> > @@ -174,6 +174,26 @@ _scratch_mkfs_xfs()
-> >  	return $mkfs_status
-> >  }
-> >  
-> > +# Get the size of an allocation unit of a file.  Normally this is just the
-> > +# block size of the file, but for realtime files, this is the realtime extent
-> > +# size.
-> > +_xfs_get_file_block_size()
-> > +{
-> > +	local path="$1"
-> > +
-> > +	if ! ($XFS_IO_PROG -c "stat -v" "$path" 2>&1 | egrep -q '(rt-inherit|realtime)'); then
-> > +		_get_block_size "$path"
-> > +		return
-> > +	fi
-> > +
-> > +	# Otherwise, call xfs_info until we find a mount point or the root.
-> > +	path="$(readlink -m "$path")"
-> > +	while ! $XFS_INFO_PROG "$path" &>/dev/null && [ "$path" != "/" ]; do
-> > +		path="$(dirname "$path")"
-> > +	done
-> > +	$XFS_INFO_PROG "$path" | grep realtime | sed -e 's/^.*extsz=\([0-9]*\).*$/\1/g'
-> > +}
-> > +
-> >  # xfs_check script is planned to be deprecated. But, we want to
-> >  # be able to invoke "xfs_check" behavior in xfstests in order to
-> >  # maintain the current verification levels.
-> > 
-> ---end quoted text---
