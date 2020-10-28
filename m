@@ -2,69 +2,132 @@ Return-Path: <SRS0=Sugc=ED=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.8 required=3.0 tests=BAYES_00,DATE_IN_PAST_12_24,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E0031C55179
-	for <linux-fstests@archiver.kernel.org>; Wed, 28 Oct 2020 21:51:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3828DC56201
+	for <linux-fstests@archiver.kernel.org>; Wed, 28 Oct 2020 21:52:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7CAD524786
-	for <linux-fstests@archiver.kernel.org>; Wed, 28 Oct 2020 21:51:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CF6A72475D
+	for <linux-fstests@archiver.kernel.org>; Wed, 28 Oct 2020 21:52:02 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="vhBW71DF"
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="cYP454bu"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728230AbgJ1Vvy (ORCPT
+        id S1728183AbgJ1Vv6 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 28 Oct 2020 17:51:54 -0400
+        Wed, 28 Oct 2020 17:51:58 -0400
 Received: from casper.infradead.org ([90.155.50.34]:44160 "EHLO
         casper.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728183AbgJ1Vvx (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 28 Oct 2020 17:51:53 -0400
+        with ESMTP id S1728236AbgJ1Vv6 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 28 Oct 2020 17:51:58 -0400
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
         d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
         References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
         Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=Le0I1dBERuiC3K+KVa6VwoeMrpWRddpd5K+WfHHhKpY=; b=vhBW71DFY60N7h3ZiDrorT+syx
-        6MrX70yU5/3+AEyP09RXQ5NFq8XEIgYoeJiJBzwWHbo/Zg+uPPZahiwoeEGRjgJTdT5v5TdpQaee6
-        sIiHtzY6kEwebqVEFSi98rC79RditDMiCpqLf2PsQ3jNugJo0idU+qokNtfc+pqyZN2e3QPzEJnI3
-        ARugCN6+CmS7Om//YCoMuPfc4G4YmRiRYfiTET5T2NUmPFcV4lp8j0dttajeknT4J5OZtQy1UcgRf
-        gydX5P2SgiPJ35KYo1z2xBcuOK5vKd/y+kU134pm6E3XW+p3kjQrYdSfj2Ko1/ZgRKHdXtI+M7SX3
-        +qLwbwQA==;
+        bh=RJipvKeo6bBp4cPWGXHfpRPcW39oO1hr0FF/uzNT9Bc=; b=cYP454buF6rSUDA8DaA4NtBD+i
+        Jkt3a3bodzkYFWwfOdorISSnbba5yG40PcmqIsNgkcUkhJlN1f10UyBQLp7Y2YR9EHaHnRfa9GXuY
+        UaBuqAjxw9u9FSLQZMfTt/Pl7fIfw7HrO4OWAndKZZaMMOb6EaQSPhRO/0esbWE6Y8keHqsI6lxWX
+        pD06lCUHKjZ2REd7Dll9rb0pysHXvD7E/TNfZ08EghrzbVChuHNb7BxpJaLN0bYMygCtphpqKuh9I
+        g5zW54ZQ8omcooloQqdxobWQTzom9CPbsNH//k2s1DBymTm+zR95iqV3SklbxQXyTOoXNEQFH/k1W
+        vbf7D4DA==;
 Received: from hch by casper.infradead.org with local (Exim 4.92.3 #3 (Red Hat Linux))
-        id 1kXg6T-0000pZ-NB; Wed, 28 Oct 2020 07:42:42 +0000
-Date:   Wed, 28 Oct 2020 07:42:41 +0000
+        id 1kXg59-0000l6-SR; Wed, 28 Oct 2020 07:41:19 +0000
+Date:   Wed, 28 Oct 2020 07:41:19 +0000
 From:   Christoph Hellwig <hch@infradead.org>
 To:     "Darrick J. Wong" <darrick.wong@oracle.com>
 Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org
-Subject: Re: [PATCH 5/9] xfs/327: fix inode reflink flag checking
-Message-ID: <20201028074241.GE2750@infradead.org>
+        fstests@vger.kernel.org, linux-ext4@vger.kernel.org
+Subject: Re: [PATCH 1/9] common: extract rt extent size for
+ _get_file_block_size
+Message-ID: <20201028074119.GA2750@infradead.org>
 References: <160382528936.1202316.2338876126552815991.stgit@magnolia>
- <160382532250.1202316.4733915561999380155.stgit@magnolia>
+ <160382529579.1202316.931742119756545034.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <160382532250.1202316.4733915561999380155.stgit@magnolia>
+In-Reply-To: <160382529579.1202316.931742119756545034.stgit@magnolia>
 X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by casper.infradead.org. See http://www.infradead.org/rpr.html
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Oct 27, 2020 at 12:02:02PM -0700, Darrick J. Wong wrote:
+On Tue, Oct 27, 2020 at 12:01:35PM -0700, Darrick J. Wong wrote:
 > From: Darrick J. Wong <darrick.wong@oracle.com>
 > 
-> This is a regression test that tried to make sure that repair correctly
-> clears the XFS inode reflink flag when it detects files that do not
-> share any blocks.  However, it does this checking by looking at the
-> (online) lsattr output.  This worked fine during development when we
-> exposed the reflink state via the stat ioctls, but that has long since
-> been removed.  Now the only way to check is via xfs_db, so switch it to
-> use that.
-> 
+> _get_file_block_size is intended to return the size (in bytes) of the
+> fundamental allocation unit for a file.  This is required for remapping
+> operations like fallocate and reflink, which can only operate on
+> allocation units.  Since the XFS realtime volume can be configure for
+> allocation units larger than 1 fs block, we need to factor that in here.
+
+Should this also cover the ext4 bigalloc clusters?  Or do they not
+matter for fallocate?
+
 > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-
-Looks good,
-
-Reviewed-by: Christoph Hellwig <hch@lst.de>
+> ---
+>  common/rc  |   13 ++++++++++---
+>  common/xfs |   20 ++++++++++++++++++++
+>  2 files changed, 30 insertions(+), 3 deletions(-)
+> 
+> 
+> diff --git a/common/rc b/common/rc
+> index 27a27ea3..41f93047 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -3974,11 +3974,18 @@ _get_file_block_size()
+>  		echo "Missing mount point argument for _get_file_block_size"
+>  		exit 1
+>  	fi
+> -	if [ "$FSTYP" = "ocfs2" ]; then
+> +
+> +	case "$FSTYP" in
+> +	"ocfs2")
+>  		stat -c '%o' $1
+> -	else
+> +		;;
+> +	"xfs")
+> +		_xfs_get_file_block_size $1
+> +		;;
+> +	*)
+>  		_get_block_size $1
+> -	fi
+> +		;;
+> +	esac
+>  }
+>  
+>  # Get the minimum block size of an fs.
+> diff --git a/common/xfs b/common/xfs
+> index 79dab058..3f5c14ba 100644
+> --- a/common/xfs
+> +++ b/common/xfs
+> @@ -174,6 +174,26 @@ _scratch_mkfs_xfs()
+>  	return $mkfs_status
+>  }
+>  
+> +# Get the size of an allocation unit of a file.  Normally this is just the
+> +# block size of the file, but for realtime files, this is the realtime extent
+> +# size.
+> +_xfs_get_file_block_size()
+> +{
+> +	local path="$1"
+> +
+> +	if ! ($XFS_IO_PROG -c "stat -v" "$path" 2>&1 | egrep -q '(rt-inherit|realtime)'); then
+> +		_get_block_size "$path"
+> +		return
+> +	fi
+> +
+> +	# Otherwise, call xfs_info until we find a mount point or the root.
+> +	path="$(readlink -m "$path")"
+> +	while ! $XFS_INFO_PROG "$path" &>/dev/null && [ "$path" != "/" ]; do
+> +		path="$(dirname "$path")"
+> +	done
+> +	$XFS_INFO_PROG "$path" | grep realtime | sed -e 's/^.*extsz=\([0-9]*\).*$/\1/g'
+> +}
+> +
+>  # xfs_check script is planned to be deprecated. But, we want to
+>  # be able to invoke "xfs_check" behavior in xfstests in order to
+>  # maintain the current verification levels.
+> 
+---end quoted text---
