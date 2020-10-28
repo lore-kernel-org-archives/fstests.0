@@ -2,136 +2,221 @@ Return-Path: <SRS0=FwvB=EE=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E4862C388F7
-	for <linux-fstests@archiver.kernel.org>; Thu, 29 Oct 2020 01:04:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 797D6C4363A
+	for <linux-fstests@archiver.kernel.org>; Thu, 29 Oct 2020 02:02:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7CF9D20791
-	for <linux-fstests@archiver.kernel.org>; Thu, 29 Oct 2020 01:04:17 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1884A20720
+	for <linux-fstests@archiver.kernel.org>; Thu, 29 Oct 2020 02:02:40 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="d2Z7UnsG"
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="NZbdzUrG"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727798AbgJ2BEQ (ORCPT
+        id S1727129AbgJ1Vsv (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 28 Oct 2020 21:04:16 -0400
-Received: from userp2120.oracle.com ([156.151.31.85]:55474 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1730416AbgJ2BEP (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 28 Oct 2020 21:04:15 -0400
-Received: from pps.filterd (userp2120.oracle.com [127.0.0.1])
-        by userp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 09T0l3m1022758;
-        Thu, 29 Oct 2020 01:04:07 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
- : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=corp-2020-01-29;
- bh=c3LNCcBqqLUo+k2y04dTOEa7tP0v+qRJt/Vn4t88m1I=;
- b=d2Z7UnsGjA3ShP3DOv6v+t4YYvRgNtR2OadX9+ubUr+0Ru681Bsp1yo5jSNbZpqKRs/T
- NOv0VXYpKTqPBdsCnIUCBUjW9olXyJ32yifD9HVnwR53jSqan7B0SvmoZcoEBEP3FbM/
- +VAXw0to9Nw9r07t6gofnOYp/979kgJTcWy/Owp4Ajcs/2o3QDG5PNrX6a7gWNiqzWoK
- LeTQ/PsphtiEHxI3TpYg7BCbhdmNey4YaWw3Mb07/072aUMgpBMJ42zTo6rNbxpfhWdB
- WaqXGjm/UVoDESfBslh5TxvzW5ftFrb0dt5JkPfyeJKYHDGfbWhJn0B6J5/OI4oMfh01 jA== 
-Received: from userp3030.oracle.com (userp3030.oracle.com [156.151.31.80])
-        by userp2120.oracle.com with ESMTP id 34dgm47y56-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Thu, 29 Oct 2020 01:04:06 +0000
-Received: from pps.filterd (userp3030.oracle.com [127.0.0.1])
-        by userp3030.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 09T0jO0n028731;
-        Thu, 29 Oct 2020 01:04:06 GMT
-Received: from aserv0122.oracle.com (aserv0122.oracle.com [141.146.126.236])
-        by userp3030.oracle.com with ESMTP id 34cx6xvys4-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Thu, 29 Oct 2020 01:04:06 +0000
-Received: from abhmp0013.oracle.com (abhmp0013.oracle.com [141.146.116.19])
-        by aserv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 09T145ai022014;
-        Thu, 29 Oct 2020 01:04:05 GMT
-Received: from localhost (/67.169.218.210)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Wed, 28 Oct 2020 18:04:05 -0700
-Date:   Wed, 28 Oct 2020 18:04:04 -0700
-From:   "Darrick J. Wong" <darrick.wong@oracle.com>
-To:     Christoph Hellwig <hch@infradead.org>
-Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org
-Subject: Re: [PATCH 8/9] check: run tests in a systemd scope for mandatory
- test cleanup
-Message-ID: <20201029010404.GJ1061252@magnolia>
-References: <160382528936.1202316.2338876126552815991.stgit@magnolia>
- <160382534122.1202316.7161591166906029132.stgit@magnolia>
- <20201028074407.GH2750@infradead.org>
+        Wed, 28 Oct 2020 17:48:51 -0400
+Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:35556 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726080AbgJ1VnW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 28 Oct 2020 17:43:22 -0400
+Received: from pps.filterd (m0098410.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.0.42/8.16.0.42) with SMTP id 09S6VwT8041644;
+        Wed, 28 Oct 2020 02:45:05 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=from : to : cc : subject
+ : date : message-id : mime-version : content-transfer-encoding; s=pp1;
+ bh=Bbgs0Z0QSxiyBsuFYhMyOmSTvVA6L0TfO+yMN5+y2ds=;
+ b=NZbdzUrG4jTNHFo5W/bU3UWfg2aaiw3VFlbGBBoh4HOOvbEk9gZAJdBNDIXJcbZDerKC
+ nTVb49oxuFfZaaTl5D43pXQBEK2/Jz/u1RVeIWoLDhKHMSq/Jem07JH7nd0a/pngp2nd
+ DewwQqgxf8WH5XDRo7W7VHXM7rUsMVYgXG2TeDO0x084dnvDmdaw1Ne+eEA2xRXyw1eN
+ Wq8KQ2+uQ/gmt5fT8It31jn2ePARPeXpx8R3wzX9SAjRIcZNBs9m8RcIcU/j0vfc5vRz
+ 9KARPi/+SDY3sjw/SXv4AFT9MGVjpnKlpEFOGHgbHwABtOttUOrTkxZWmWbhsWtd8fI4 iw== 
+Received: from ppma02fra.de.ibm.com (47.49.7a9f.ip4.static.sl-reverse.com [159.122.73.71])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 34esjkf1hv-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Wed, 28 Oct 2020 02:45:05 -0400
+Received: from pps.filterd (ppma02fra.de.ibm.com [127.0.0.1])
+        by ppma02fra.de.ibm.com (8.16.0.42/8.16.0.42) with SMTP id 09S6g2iJ017266;
+        Wed, 28 Oct 2020 06:45:03 GMT
+Received: from b06cxnps3074.portsmouth.uk.ibm.com (d06relay09.portsmouth.uk.ibm.com [9.149.109.194])
+        by ppma02fra.de.ibm.com with ESMTP id 34esn307ra-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Wed, 28 Oct 2020 06:45:02 +0000
+Received: from d06av24.portsmouth.uk.ibm.com (mk.ibm.com [9.149.105.60])
+        by b06cxnps3074.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 09S6j0a110420512
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Wed, 28 Oct 2020 06:45:00 GMT
+Received: from d06av24.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id 7BBB742047;
+        Wed, 28 Oct 2020 06:45:00 +0000 (GMT)
+Received: from d06av24.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id B599D42042;
+        Wed, 28 Oct 2020 06:44:58 +0000 (GMT)
+Received: from riteshh-domain.ibmuc.com (unknown [9.199.33.247])
+        by d06av24.portsmouth.uk.ibm.com (Postfix) with ESMTP;
+        Wed, 28 Oct 2020 06:44:58 +0000 (GMT)
+From:   Ritesh Harjani <riteshh@linux.ibm.com>
+To:     fstests@vger.kernel.org
+Cc:     Jan Kara <jack@suse.cz>, anju@linux.vnet.ibm.com,
+        Eryu Guan <guan@eryu.me>,
+        Christian Kujau <lists@nerdbynature.de>,
+        linux-ext4@vger.kernel.org, Ritesh Harjani <riteshh@linux.ibm.com>
+Subject: [PATCH 1/1] generic: Add test to check for mounting a huge sparse dm device
+Date:   Wed, 28 Oct 2020 12:14:52 +0530
+Message-Id: <daec44e9f2e3ce483b7845065db3bf148ff5cd2c.1603864280.git.riteshh@linux.ibm.com>
+X-Mailer: git-send-email 2.26.2
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20201028074407.GH2750@infradead.org>
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9788 signatures=668682
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 adultscore=0 phishscore=0 spamscore=0
- bulkscore=0 malwarescore=0 mlxlogscore=999 mlxscore=0 suspectscore=1
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2009150000
- definitions=main-2010290001
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9788 signatures=668682
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 lowpriorityscore=0 impostorscore=0
- adultscore=0 bulkscore=0 spamscore=0 phishscore=0 mlxlogscore=999
- suspectscore=1 clxscore=1015 mlxscore=0 malwarescore=0 priorityscore=1501
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2009150000
- definitions=main-2010290001
+Content-Transfer-Encoding: 8bit
+X-TM-AS-GCONF: 00
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.312,18.0.737
+ definitions=2020-10-28_01:2020-10-26,2020-10-28 signatures=0
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 mlxlogscore=999 spamscore=0
+ adultscore=0 mlxscore=0 phishscore=0 bulkscore=0 lowpriorityscore=0
+ malwarescore=0 clxscore=1015 priorityscore=1501 suspectscore=0
+ impostorscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2009150000 definitions=main-2010280038
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-[resend; I can't keep track of which messages actually got NOSEND
-warnings and which ones just dropped off...]
+Add this test (which Christian Kujau reported) to check for regression
+caused due to ext4 bmap aops implementation was moved to use iomap APIs.
+jbd2 calls bmap() kernel function from fs/inode.c which was failing since
+iomap_bmap() implementation earlier returned 0 for block addr > INT_MAX.
+This regression was fixed with following kernel commit [1]
+commit b75dfde1212991b24b220c3995101c60a7b8ae74
+("fibmap: Warn and return an error in case of block > INT_MAX")
+[1]: https://patchwork.ozlabs.org/patch/1279914
 
-On Wed, Oct 28, 2020 at 07:44:07AM +0000, Christoph Hellwig wrote:
-> On Tue, Oct 27, 2020 at 12:02:21PM -0700, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <darrick.wong@oracle.com>
-> > 
-> > If systemd is available, run each test in its own temporary systemd
-> > scope.  This enables the test harness to forcibly clean up all of the
-> > test's child processes (if it does not do so itself) so that we can move
-> > into the post-test unmount and check cleanly.
-> 
-> Can you explain what this mean in more detail?  Most importantly what
-> problems it fixes.
+w/o the kernel fix we get below error and mount fails
 
-I'll answer these in reverse order. :)
+[ 1461.988701] run fstests generic/613 at 2020-10-27 19:57:34
+[ 1530.511978] jbd2_journal_init_inode: Cannot locate journal superblock
+[ 1530.513310] EXT4-fs (dm-1): Could not load journal inode
 
-I frequently run fstests in "low" memory situations (2GB!) to force the
-kernel to do interesting things.  There are a few tests like generic/224
-and generic/561 that put processes in the background and occasionally
-trigger the OOM killer.  Most of the time the OOM killer correctly
-shoots down fsstress or duperemove, but once in a while it's stupid
-enough to shoot down the test control process (i.e. tests/generic/224)
-instead.  fsstress is still running in the background, and the one
-process that knew about that is dead.
+Signed-off-by: Ritesh Harjani <riteshh@linux.ibm.com>
+---
+ common/rc             | 10 +++++++
+ tests/generic/613     | 66 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/613.out |  3 ++
+ tests/generic/group   |  1 +
+ 4 files changed, 80 insertions(+)
+ create mode 100755 tests/generic/613
+ create mode 100644 tests/generic/613.out
 
-When the control process dies, ./check moves on to the post-test fsck,
-which fails because fsstress is still running and we can't unmount.
-After fsck fails, ./check moves on to the next test, which fails because
-fsstress is /still/ writing to the filesystem and we can't unmount or
-format.
+diff --git a/common/rc b/common/rc
+index 27a27ea36f75..b0c353c4c107 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1607,6 +1607,16 @@ _require_scratch_size()
+ 	[ $devsize -lt $1 ] && _notrun "scratch dev too small"
+ }
 
-The end result is that that one OOM kill causes cascading test failures,
-and I have to re-start fstests to see if I get a clean(er) run.  This is
-frustrating in the -rc1 days, where I more frequently observe problems
-with memory reclaim and OOM kills.  (Note: those problems are usually
-gone by -rc3.)
++# require a scratch dev of a minimum size (in kb) and should not be checked
++# post test
++_require_scratch_size_nocheck()
++{
++	[ $# -eq 1 ] || _fail "_require_scratch_size: expected size param"
++
++	_require_scratch_nocheck
++	local devsize=`_get_device_size $SCRATCH_DEV`
++	[ $devsize -lt $1 ] && _notrun "scratch dev too small"
++}
 
-So, the solution I present in this patch is to teach ./check to try to
-run the test script in a systemd scope.  If that succeeds, ./check will
-tell systemd to kill the scope when the test script exits and returns
-control to ./check.  Concretely, this means that systemd creates a new
-cgroup, stuffs the processes in that cgroup, and when we kill the scope,
-systemd kills all the processes in that cgroup and deletes the cgroup.
+ # this test needs a test partition - check we're ok & mount it
+ #
+diff --git a/tests/generic/613 b/tests/generic/613
+new file mode 100755
+index 000000000000..b426ef91cacf
+--- /dev/null
++++ b/tests/generic/613
+@@ -0,0 +1,66 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2020 Christian Kujau. All Rights Reserved.
++# Copyright (c) 2020 Ritesh Harjani. All Rights Reserved.
++#
++# FS QA Test generic/613
++#
++# Since the test is not specific to ext4, hence adding it to generic.
++# Add this test to check for regression which was reported when ext4 bmap
++# aops was moved to use iomap APIs. jbd2 calls bmap() kernel function
++# from fs/inode.c which was failing since iomap_bmap() implementation earlier
++# returned 0 for block addr > INT_MAX.
++# This regression was fixed with following kernel commit [1]
++# commit b75dfde1212991b24b220c3995101c60a7b8ae74
++# ("fibmap: Warn and return an error in case of block > INT_MAX")
++# [1]: https://patchwork.ozlabs.org/patch/1279914
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	_dmhugedisk_cleanup
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/dmhugedisk
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# Modify as appropriate.
++_supported_fs generic
++_require_dmhugedisk
++_require_scratch_size_nocheck $((4 * 1024 * 1024)) #kB
++
++# For 1k bs with ext4, mkfs was failing maybe due to size limitation.
++if [ "$FSTYP" = "ext4" ]; then
++	export MKFS_OPTIONS="-F -b 4096"
++fi
++
++# 17TB dm huge-test-zer0 device
++# (in terms of 512 sectors)
++sectors=$((2*1024*1024*1024*17))
++chunk_size=128
++
++_dmhugedisk_init $sectors $chunk_size
++_mkfs_dev $DMHUGEDISK_DEV
++_mount $DMHUGEDISK_DEV $SCRATCH_MNT || _fail "mount failed for $DMHUGEDISK_DEV $SCRATCH_MNT"
++testfile=$SCRATCH_MNT/testfile-$seq
++
++$XFS_IO_PROG -fc "pwrite -S 0xaa 0 1m" -c "fsync" $testfile | _filter_xfs_io
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/613.out b/tests/generic/613.out
+new file mode 100644
+index 000000000000..4747b7596499
+--- /dev/null
++++ b/tests/generic/613.out
+@@ -0,0 +1,3 @@
++QA output created by 613
++wrote 1048576/1048576 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+diff --git a/tests/generic/group b/tests/generic/group
+index 8054d874f005..360d145d2036 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -615,3 +615,4 @@
+ 610 auto quick prealloc zero
+ 611 auto quick attr
+ 612 auto quick clone
++613 auto mount quick
+--
+2.26.2
 
-The end result is that fstests now has an easy way to ensure that /all/
-child processes of a test are dead before we try to unmount the test and
-scratch devices.  I've designed this to be optional, because not
-everyone does or wants or likes to run systemd, but it makes QA easier.
-
-Hmm, this might make a better commit log.  I'll excerpt this into the
-patch message.
-
---D
