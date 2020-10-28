@@ -2,64 +2,69 @@ Return-Path: <SRS0=Sugc=ED=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.8 required=3.0 tests=BAYES_00,DATE_IN_PAST_12_24,
+X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DATE_IN_PAST_12_24,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
-	version=3.4.0
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7DD01C4363A
-	for <linux-fstests@archiver.kernel.org>; Wed, 28 Oct 2020 21:52:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CB3D3C63699
+	for <linux-fstests@archiver.kernel.org>; Wed, 28 Oct 2020 21:54:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 273F9208C7
-	for <linux-fstests@archiver.kernel.org>; Wed, 28 Oct 2020 21:52:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7AA9E24724
+	for <linux-fstests@archiver.kernel.org>; Wed, 28 Oct 2020 21:54:09 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="Lgmtcdfy"
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="VozUVnB3"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728347AbgJ1Vwa (ORCPT
+        id S1728254AbgJ1VwD (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 28 Oct 2020 17:52:30 -0400
-Received: from casper.infradead.org ([90.155.50.34]:44310 "EHLO
+        Wed, 28 Oct 2020 17:52:03 -0400
+Received: from casper.infradead.org ([90.155.50.34]:44160 "EHLO
         casper.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728343AbgJ1Vwa (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 28 Oct 2020 17:52:30 -0400
+        with ESMTP id S1728233AbgJ1VwA (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 28 Oct 2020 17:52:00 -0400
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
         d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
         References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
         Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=7bzRZY7TBHeEQ/2417FS//whgYfR5YmoYwEt/p0xlAw=; b=LgmtcdfyTZTGcMF5sd4j2Wm5lz
-        dxDmts7e6Elvzy9RArmr1ZWMlHy6gUXobHdPF02qAukoYkyEO+fM18I0rL+M0D+1N0ONvcDAY8oXt
-        My7xsQEFOJ5x2wEswRiIblLZxfRZ6kJZdW+PwWvJDK+P7/PYATnV/FvpQFAPkBth9uSWTcB8uSYcz
-        OofghRfjr0p/k30Yc92MydlLVziLu7EY25YYM3JglGnnz0orsAWCihh3w68ha/TAcc5b8Ys1TFvXY
-        antHPqRVtkDohL38kfG1tPdnuITdZHymtyMOIp2HAtQ4BNkDRtrioSkiZyNlyoToWvgL2TrnDclEx
-        FPC6r/Zw==;
+        bh=6BRl/yiz4IDbFiZyHrMawAP/X7UidoypffzQVa4xOX0=; b=VozUVnB30MVi/lKCELAeAiPvND
+        HdXDGvNRCdb4KL0AI2+FvYGVj3Qe3xis4sGoyo1K30SSTk+pAgI8BorZO6VmJIrPNxsjhGi1ZNZ0F
+        yv/Q4ZTt+CrD9P9raAAN+giCfKPorFtuEVdt4UDldyoRqNsimoCDGK+Cutc9YqkkZ8p8LCo16+f+F
+        uhUch9f+OydU91iW7M0UIVhusQboq1RobIyXOsS8ZgV4DFvMNbHcUnwW1S6NeJLE+TW4sGXQwoMHb
+        f5ieEB+ppxOak9PsSbij/h1UakTMyDUsdBSM5144aQD+dQVlO8TKTUnrojreBNs5lH82qA23WtrN+
+        0puJ8Bew==;
 Received: from hch by casper.infradead.org with local (Exim 4.92.3 #3 (Red Hat Linux))
-        id 1kXg7r-0000sp-P7; Wed, 28 Oct 2020 07:44:07 +0000
-Date:   Wed, 28 Oct 2020 07:44:07 +0000
+        id 1kXg5N-0000mw-Sl; Wed, 28 Oct 2020 07:41:33 +0000
+Date:   Wed, 28 Oct 2020 07:41:33 +0000
 From:   Christoph Hellwig <hch@infradead.org>
 To:     "Darrick J. Wong" <darrick.wong@oracle.com>
 Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
         fstests@vger.kernel.org
-Subject: Re: [PATCH 8/9] check: run tests in a systemd scope for mandatory
- test cleanup
-Message-ID: <20201028074407.GH2750@infradead.org>
+Subject: Re: [PATCH 2/9] xfs/520: disable external devices
+Message-ID: <20201028074133.GB2750@infradead.org>
 References: <160382528936.1202316.2338876126552815991.stgit@magnolia>
- <160382534122.1202316.7161591166906029132.stgit@magnolia>
+ <160382530205.1202316.9303713563959751852.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <160382534122.1202316.7161591166906029132.stgit@magnolia>
+In-Reply-To: <160382530205.1202316.9303713563959751852.stgit@magnolia>
 X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by casper.infradead.org. See http://www.infradead.org/rpr.html
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Oct 27, 2020 at 12:02:21PM -0700, Darrick J. Wong wrote:
+On Tue, Oct 27, 2020 at 12:01:42PM -0700, Darrick J. Wong wrote:
 > From: Darrick J. Wong <darrick.wong@oracle.com>
 > 
-> If systemd is available, run each test in its own temporary systemd
-> scope.  This enables the test harness to forcibly clean up all of the
-> test's child processes (if it does not do so itself) so that we can move
-> into the post-test unmount and check cleanly.
+> This is a regression test for a specific bug that requires a specific
+> configuration of the data device.  Realtime volumes and external logs
+> don't affect the efficacy of the test, but the test can fail mkfs if the
+> realtime device is very large.
+> 
+> Therefore, unset USE_EXTERNAL so that we always run this regression
+> test, even if the tester enabled realtime.
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 
-Can you explain what this mean in more detail?  Most importantly what
-problems it fixes.
+Looks good,
+
+Reviewed-by: Christoph Hellwig <hch@lst.de>
