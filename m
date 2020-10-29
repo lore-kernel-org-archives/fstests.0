@@ -2,188 +2,102 @@ Return-Path: <SRS0=FwvB=EE=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-20.4 required=3.0 tests=BAYES_00,DKIMWL_WL_MED,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT,USER_IN_DEF_DKIM_WL autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B19D9C61DD8
-	for <linux-fstests@archiver.kernel.org>; Thu, 29 Oct 2020 07:23:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 70563C55178
+	for <linux-fstests@archiver.kernel.org>; Thu, 29 Oct 2020 07:38:16 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5A23121D6C
-	for <linux-fstests@archiver.kernel.org>; Thu, 29 Oct 2020 07:23:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0A1EC21D24
+	for <linux-fstests@archiver.kernel.org>; Thu, 29 Oct 2020 07:38:15 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Y6zL7Jho"
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="i3QQII73"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726156AbgJ2HVU (ORCPT
+        id S1729729AbgJ2HiO (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 29 Oct 2020 03:21:20 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54756 "EHLO
+        Thu, 29 Oct 2020 03:38:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55378 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725993AbgJ2HVB (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 29 Oct 2020 03:21:01 -0400
+        with ESMTP id S1727940AbgJ2HYy (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 29 Oct 2020 03:24:54 -0400
 Received: from mail-pf1-x442.google.com (mail-pf1-x442.google.com [IPv6:2607:f8b0:4864:20::442])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C3AC8C08E750;
-        Wed, 28 Oct 2020 23:45:26 -0700 (PDT)
-Received: by mail-pf1-x442.google.com with SMTP id j18so1554085pfa.0;
-        Wed, 28 Oct 2020 23:45:26 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7D8C2C0613AA
+        for <fstests@vger.kernel.org>; Wed, 28 Oct 2020 21:41:33 -0700 (PDT)
+Received: by mail-pf1-x442.google.com with SMTP id c20so1308938pfr.8
+        for <fstests@vger.kernel.org>; Wed, 28 Oct 2020 21:41:33 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=Hzhmc22DJRpPAi0cmRK+04lfxbZmgdcrPj0UsBGZmOQ=;
-        b=Y6zL7Jho/cdHZT0xnoCICLR5/y0c5kzgY7YEu6ekJYv3WlEmu+f8akgEaRVBFrwVu1
-         +JiM+IiWf0pX0z+BhN1aKqOEO2NlZag9lVawYH5rqZfGqxi4gDXY1VhbU5WtyKe5Eif8
-         MUM0ItYgfjstWinRbchEtSsB8rQxrOlaxW08A02JogeHt/JRZvrBumrZvZx9xTxiDmyz
-         cQoQG0E2dK9jfyljLX1BBTtHmF4nqRyAiD5+hA0+TKZq9jvzeUM7E3iPnElWfxPoip55
-         XO/i1myYSUAdVklADWsOU1eUD7UNXcij0YkDII65wGBrE8eoFI1pKQQlR7kImGVaFrDn
-         6fxw==
+        d=google.com; s=20161025;
+        h=subject:date:message-id:mime-version:content-transfer-encoding:cc
+         :from:to;
+        bh=XKHCS3l0ebiE0VNk0QTJSgX8/jgCvzZHl1FZlDd/ub0=;
+        b=i3QQII73MWS5HLYBtve3qmDS4LnTo/W4Vh7oAWVuwphTYpo6MyBSh4tyI/nVCKDhlQ
+         SAI9NFY82EJEQP/sodTKkmrhN/MC6BcWA+0xPljsAu9e1ocfGNghyI7phj13FVG3ggOD
+         A9pZRgbhmHyJUOSvJY3y157TjmQoKUNQawwvpybAQp1pbHGAgq/KyBKEw1D/sdCHyvvN
+         nUCKOCUlp/oqPmQo3A9RtHg4lBDgknfNjR97pU0nDNQ5gmUko6qlG1wy2ZTNtOoNATMC
+         ftOiF9RsNir1TXhoWtsSfwqO0DCNzKCxaahJHCGuiJmQSoFz63SkszTtHrCkylEszg10
+         zj7A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=Hzhmc22DJRpPAi0cmRK+04lfxbZmgdcrPj0UsBGZmOQ=;
-        b=poC8xwpAK8fKijmbWLCIf8sXGZgZHGdKsfFNYHaxjBMdp/jY0RQw0JbuiZA+fSCiEw
-         HV0uRySzBvO69rAN3Jc7UKJtjf+z94l7vHwuu1UiSC8ZcbiyugykRn1E3wALHWKfFnhA
-         x4ng1j0gjNbXJEcFqU8O+WbH5heF44eYh4LW2cNBGNlwHsRZWsFzN2p6fHm3mHdWwa4v
-         mwTSqbuZT9YC8QybQysmz4VlN/QVNDY52lxUHdn81sTXvge4lnel5NlXrd4tycDd1wcq
-         HSZI8fam1piRG212tyS+kDBVL3TSbFE369QJ+SyCZFGSJc5flsGiQiTs0ag/obGH04ix
-         HBHw==
-X-Gm-Message-State: AOAM533IPjbliFY8wvndgLZHYl1HHM0bRmFaJSPnmvSZ7RoTAKIQhka9
-        IweWsq21hyu/PiCePy6QQyA=
-X-Google-Smtp-Source: ABdhPJx90LTo/G8SNn9E28b5ptY1haFY6RuzOezFDtzygEGH8cHjjQG+aBI2m+6IcifOgH2u5GTRVg==
-X-Received: by 2002:a17:90b:14ca:: with SMTP id jz10mr2284419pjb.180.1603953926245;
-        Wed, 28 Oct 2020 23:45:26 -0700 (PDT)
-Received: from garuda.localnet ([122.179.67.57])
-        by smtp.gmail.com with ESMTPSA id g15sm1372073pgi.89.2020.10.28.23.45.23
+        h=x-gm-message-state:subject:date:message-id:mime-version
+         :content-transfer-encoding:cc:from:to;
+        bh=XKHCS3l0ebiE0VNk0QTJSgX8/jgCvzZHl1FZlDd/ub0=;
+        b=ctAh5/oJlsf04BlVnMdOmSxbwj73KJAVXm0TXAsFs3ru5iqVipZx19cbZAHPd7+f6Q
+         Y21NL5LbX8JD1zQhT42vN8rtuf04jgiv4bReD7w/wHyOIx5RBmtZk683CY6W94wQu5jo
+         6woTUVrPhxLDB8PJO7vP9Rzg30JISqefxOsvc95rEi35K1qYHoqTOAHfQj2FjhgF4ziF
+         zetjP/m0IqNynqWd4wz90iGl0MSFuGzmWflo5Wu055J49XgQaTSX+T6PjTyyIU32Km9n
+         XnxWL3iA10X/wZ2Es/rUbwr69+7CAs8Nd4CkDPXK1doZbj3R0LhSwSsyZIbRHhm3WiwC
+         meoQ==
+X-Gm-Message-State: AOAM532zcsBEQ+iqBPwjaAs++3nehg2wwJJiw34iNOHdSTc81teCifsJ
+        AUKhAc3ZvJr5hBW4LZX7qygnMQ==
+X-Google-Smtp-Source: ABdhPJyg/Ibb5D7x+XvFvWBQ0NcXtNMqX/79ur3Gk88/5nq/95d+Z0tZpbVcAzynzXEIWN/7wednSg==
+X-Received: by 2002:a63:313:: with SMTP id 19mr2402171pgd.18.1603946492800;
+        Wed, 28 Oct 2020 21:41:32 -0700 (PDT)
+Received: from localhost (76-210-143-223.lightspeed.sntcca.sbcglobal.net. [76.210.143.223])
+        by smtp.gmail.com with ESMTPSA id z16sm1229492pfq.33.2020.10.28.21.41.30
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 28 Oct 2020 23:45:25 -0700 (PDT)
-From:   Chandan Babu R <chandanrlinux@gmail.com>
-To:     "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org
-Subject: Re: [PATCH 2/7] xfs: test regression in xfs_bmap_validate_extent
-Date:   Thu, 29 Oct 2020 12:15:22 +0530
-Message-ID: <2826717.ElUu2ovCxt@garuda>
-In-Reply-To: <160382536365.1203387.5299416996869850602.stgit@magnolia>
-References: <160382535113.1203387.16777876271740782481.stgit@magnolia> <160382536365.1203387.5299416996869850602.stgit@magnolia>
+        Wed, 28 Oct 2020 21:41:32 -0700 (PDT)
+Subject: [PATCH] open_by_handle: Don't use MAX_HANDLE_SZ
+Date:   Wed, 28 Oct 2020 21:03:39 -0700
+Message-Id: <20201029040338.238990-1-palmerdabbelt@google.com>
+X-Mailer: git-send-email 2.29.1.341.ge80a0c044ae-goog
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7Bit
-Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8bit
+Cc:     Palmer Dabbelt <palmerdabbelt@google.com>
+From:   Palmer Dabbelt <palmerdabbelt@google.com>
+To:     fstests@vger.kernel.org
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wednesday 28 October 2020 12:32:43 AM IST Darrick J. Wong wrote:
-> From: Darrick J. Wong <darrick.wong@oracle.com>
-> 
-> This is a regression test to make sure that we can have realtime files
-> with xattr blocks and not trip the verifiers.
->
+When I compile this normally I end up with the definition of
+MAX_HANDLE_SZ, but when I compile it in a minimal buildroot-based
+environment I don't.  I'm not sure where this is supposed to come from,
+but as of 3f4760c2 ("open_by_handle: add option -z to query file handle
+size") it appears to be unnecessary.
 
-Looks good to me.
+Signed-off-by: Palmer Dabbelt <palmerdabbelt@google.com>
+---
+I haven't actually run this, as I haven't figured out how to yet.  It
+does build, though.
+---
+ src/open_by_handle.c | 1 -
+ 1 file changed, 1 deletion(-)
 
-Reviewed-by: Chandan Babu R <chandanrlinux@gmail.com>
-
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> ---
->  tests/xfs/758     |   59 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/758.out |    2 ++
->  tests/xfs/group   |    1 +
->  3 files changed, 62 insertions(+)
->  create mode 100755 tests/xfs/758
->  create mode 100644 tests/xfs/758.out
-> 
-> 
-> diff --git a/tests/xfs/758 b/tests/xfs/758
-> new file mode 100755
-> index 00000000..e522ae28
-> --- /dev/null
-> +++ b/tests/xfs/758
-> @@ -0,0 +1,59 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0-or-later
-> +# Copyright (c) 2020, Oracle.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 758
-> +#
-> +# This is a regression test for "xfs: fix xfs_bmap_validate_extent_raw when
-> +# checking attr fork of rt files", which fixes the bmap record validator so
-> +# that it will not check the attr fork extent mappings of a realtime file
-> +# against the size of the realtime volume.
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1    # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +_supported_fs xfs
-> +_require_scratch
-> +_require_realtime
-> +
-> +rm -f $seqres.full
-> +
-> +# Format filesystem with very tiny realtime volume
-> +_scratch_mkfs -r size=256k > $seqres.full
-> +_scratch_mount >> $seqres.full
-> +
-> +# Create a realtime file
-> +$XFS_IO_PROG -f -R -c 'pwrite 0 64k' -c stat $SCRATCH_MNT/v >> $seqres.full
-> +
-> +# Add enough xattr data to force creation of xattr blocks at a higher address
-> +# on the data device than the size of the realtime volume
-> +for i in `seq 0 16`; do
-> +	$ATTR_PROG -s user.test$i $SCRATCH_MNT/v < $SCRATCH_MNT/v >> $seqres.full
-> +done
-> +
-> +# Force flushing extent maps to disk to trip the verifier
-> +_scratch_cycle_mount
-> +
-> +# Now let that unmount
-> +echo Silence is golden.
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/758.out b/tests/xfs/758.out
-> new file mode 100644
-> index 00000000..6d219f8e
-> --- /dev/null
-> +++ b/tests/xfs/758.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 758
-> +Silence is golden.
-> diff --git a/tests/xfs/group b/tests/xfs/group
-> index ffd18166..771680cf 100644
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
-> @@ -519,4 +519,5 @@
->  519 auto quick reflink
->  520 auto quick reflink
->  521 auto quick realtime growfs
-> +758 auto quick rw attr realtime
->  763 auto quick rw realtime
-> 
-> 
-
-
+diff --git a/src/open_by_handle.c b/src/open_by_handle.c
+index 0f74ed08..ddeffb7a 100644
+--- a/src/open_by_handle.c
++++ b/src/open_by_handle.c
+@@ -92,7 +92,6 @@ Examples:
+ 
+ struct handle {
+ 	struct file_handle fh;
+-	unsigned char fid[MAX_HANDLE_SZ];
+ } handle[MAXFILES], dir_handle;
+ 
+ void usage(void)
 -- 
-chandan
-
-
+2.29.1.341.ge80a0c044ae-goog
 
