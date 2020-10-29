@@ -2,305 +2,188 @@ Return-Path: <SRS0=FwvB=EE=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6AAE2C55179
-	for <linux-fstests@archiver.kernel.org>; Thu, 29 Oct 2020 02:44:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B19D9C61DD8
+	for <linux-fstests@archiver.kernel.org>; Thu, 29 Oct 2020 07:23:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1057D207BC
-	for <linux-fstests@archiver.kernel.org>; Thu, 29 Oct 2020 02:44:38 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5A23121D6C
+	for <linux-fstests@archiver.kernel.org>; Thu, 29 Oct 2020 07:23:03 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="DCM1ENEW"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Y6zL7Jho"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726494AbgJ1VeZ (ORCPT
+        id S1726156AbgJ2HVU (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 28 Oct 2020 17:34:25 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:59307 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726555AbgJ1VeW (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 28 Oct 2020 17:34:22 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1603920860;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc; bh=T9IgPOcRgHhwtc8vhW0vmFhp+0Lk8VbhiSQiXN63iec=;
-        b=DCM1ENEWJZg8ai0UWLPWjhaRjQIMyeZo4UdJx11/+v6apcHIJR9cmWIHtdrt/BWK7MeBAT
-        tjzPJXxdUjcZJB307MWPhFOaiON3bIEevSI7bmfvYKFuhNhAZo1ySgu8Yhv2PMKXiYEDA+
-        9Rv0ST0j+p/Pw1O1FgnDXgaLc6nRsGc=
-Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com
- [209.85.216.69]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-587-9-_soslBNr-6NoBFXMUsgA-1; Wed, 28 Oct 2020 07:31:23 -0400
-X-MC-Unique: 9-_soslBNr-6NoBFXMUsgA-1
-Received: by mail-pj1-f69.google.com with SMTP id w3so2555113pjt.6
-        for <fstests@vger.kernel.org>; Wed, 28 Oct 2020 04:31:22 -0700 (PDT)
+        Thu, 29 Oct 2020 03:21:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54756 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725993AbgJ2HVB (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 29 Oct 2020 03:21:01 -0400
+Received: from mail-pf1-x442.google.com (mail-pf1-x442.google.com [IPv6:2607:f8b0:4864:20::442])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C3AC8C08E750;
+        Wed, 28 Oct 2020 23:45:26 -0700 (PDT)
+Received: by mail-pf1-x442.google.com with SMTP id j18so1554085pfa.0;
+        Wed, 28 Oct 2020 23:45:26 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=Hzhmc22DJRpPAi0cmRK+04lfxbZmgdcrPj0UsBGZmOQ=;
+        b=Y6zL7Jho/cdHZT0xnoCICLR5/y0c5kzgY7YEu6ekJYv3WlEmu+f8akgEaRVBFrwVu1
+         +JiM+IiWf0pX0z+BhN1aKqOEO2NlZag9lVawYH5rqZfGqxi4gDXY1VhbU5WtyKe5Eif8
+         MUM0ItYgfjstWinRbchEtSsB8rQxrOlaxW08A02JogeHt/JRZvrBumrZvZx9xTxiDmyz
+         cQoQG0E2dK9jfyljLX1BBTtHmF4nqRyAiD5+hA0+TKZq9jvzeUM7E3iPnElWfxPoip55
+         XO/i1myYSUAdVklADWsOU1eUD7UNXcij0YkDII65wGBrE8eoFI1pKQQlR7kImGVaFrDn
+         6fxw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id;
-        bh=T9IgPOcRgHhwtc8vhW0vmFhp+0Lk8VbhiSQiXN63iec=;
-        b=L0vozZc7FaTsuja+l5qyR+zeBZTKTsZZ1e6GJicZpl5sL/Rcg0RLt6IzLrrKLbot7G
-         MWHbJsmNVW0p78jeyQbn0JYwvV4+eWCykYaJjrXwGFNGMkAvaDRTBo9EX9A7wVDMzyQg
-         xNry9tPZvlB8acm/eRlrUp+xykXA/mi4MX30qjo9wwx0xva04aSO4xPWOGIz6tlXC0y8
-         tnkkw4hI2jeTZMAaxSm/tJesvHkxYW+fVitP59W/Stsb9vyCsCXzm5NzFFef5+uf7Z9G
-         SRbKJbrpJh8AyI7ah9vruMiMFZWUjPv8HjHL0+ZHf9q6yVkiWsGAtKZkTZRLjOCTymu+
-         w9BA==
-X-Gm-Message-State: AOAM53206OVaRARwZIBwrP+OfNB86JwOGod7PIrBeUOWmhBNXYg545cq
-        q7OnGa7eO3RM9xtp1m30t/WMA9sHPazZ1nUcvH+SOPpX/LkKQr1YKMwjm/apQs+3CjMNseI5xZ6
-        BGw4OSvGDk4ByN7zgkg==
-X-Received: by 2002:aa7:9255:0:b029:158:ca2e:3f33 with SMTP id 21-20020aa792550000b0290158ca2e3f33mr6849245pfp.59.1603884681951;
-        Wed, 28 Oct 2020 04:31:21 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJwP9/rGbwO01u/y6WBQVTdsSD4rhbja7crwpQvrQCX6nshzovbXdAzvGC/oPrn6gGSxVyBLFA==
-X-Received: by 2002:aa7:9255:0:b029:158:ca2e:3f33 with SMTP id 21-20020aa792550000b0290158ca2e3f33mr6849222pfp.59.1603884681599;
-        Wed, 28 Oct 2020 04:31:21 -0700 (PDT)
-Received: from xiangao.remote.csb ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id j5sm5051712pjb.56.2020.10.28.04.31.17
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=Hzhmc22DJRpPAi0cmRK+04lfxbZmgdcrPj0UsBGZmOQ=;
+        b=poC8xwpAK8fKijmbWLCIf8sXGZgZHGdKsfFNYHaxjBMdp/jY0RQw0JbuiZA+fSCiEw
+         HV0uRySzBvO69rAN3Jc7UKJtjf+z94l7vHwuu1UiSC8ZcbiyugykRn1E3wALHWKfFnhA
+         x4ng1j0gjNbXJEcFqU8O+WbH5heF44eYh4LW2cNBGNlwHsRZWsFzN2p6fHm3mHdWwa4v
+         mwTSqbuZT9YC8QybQysmz4VlN/QVNDY52lxUHdn81sTXvge4lnel5NlXrd4tycDd1wcq
+         HSZI8fam1piRG212tyS+kDBVL3TSbFE369QJ+SyCZFGSJc5flsGiQiTs0ag/obGH04ix
+         HBHw==
+X-Gm-Message-State: AOAM533IPjbliFY8wvndgLZHYl1HHM0bRmFaJSPnmvSZ7RoTAKIQhka9
+        IweWsq21hyu/PiCePy6QQyA=
+X-Google-Smtp-Source: ABdhPJx90LTo/G8SNn9E28b5ptY1haFY6RuzOezFDtzygEGH8cHjjQG+aBI2m+6IcifOgH2u5GTRVg==
+X-Received: by 2002:a17:90b:14ca:: with SMTP id jz10mr2284419pjb.180.1603953926245;
+        Wed, 28 Oct 2020 23:45:26 -0700 (PDT)
+Received: from garuda.localnet ([122.179.67.57])
+        by smtp.gmail.com with ESMTPSA id g15sm1372073pgi.89.2020.10.28.23.45.23
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 28 Oct 2020 04:31:21 -0700 (PDT)
-From:   Gao Xiang <hsiangkao@redhat.com>
-To:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Cc:     Gao Xiang <hsiangkao@redhat.com>
-Subject: [WIP] [RFC PATCH] xfs: add test on shrinking unused space in the last AG
-Date:   Wed, 28 Oct 2020 19:30:37 +0800
-Message-Id: <20201028113037.542737-1-hsiangkao@redhat.com>
-X-Mailer: git-send-email 2.18.1
+        Wed, 28 Oct 2020 23:45:25 -0700 (PDT)
+From:   Chandan Babu R <chandanrlinux@gmail.com>
+To:     "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: Re: [PATCH 2/7] xfs: test regression in xfs_bmap_validate_extent
+Date:   Thu, 29 Oct 2020 12:15:22 +0530
+Message-ID: <2826717.ElUu2ovCxt@garuda>
+In-Reply-To: <160382536365.1203387.5299416996869850602.stgit@magnolia>
+References: <160382535113.1203387.16777876271740782481.stgit@magnolia> <160382536365.1203387.5299416996869850602.stgit@magnolia>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset="us-ascii"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This adds a testcase to test shrinking unused space as much
-as possible in the last AG with background fsstress workload.
+On Wednesday 28 October 2020 12:32:43 AM IST Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
+> 
+> This is a regression test to make sure that we can have realtime files
+> with xattr blocks and not trip the verifiers.
+>
 
-The expectation is that no crash happens with expected output.
+Looks good to me.
 
-Signed-off-by: Gao Xiang <hsiangkao@redhat.com>
----
- tests/xfs/522     | 125 ++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/522.out |  73 +++++++++++++++++++++++++++
- tests/xfs/group   |   1 +
- 3 files changed, 199 insertions(+)
- create mode 100755 tests/xfs/522
- create mode 100644 tests/xfs/522.out
+Reviewed-by: Chandan Babu R <chandanrlinux@gmail.com>
 
-diff --git a/tests/xfs/522 b/tests/xfs/522
-new file mode 100755
-index 00000000..e427a33a
---- /dev/null
-+++ b/tests/xfs/522
-@@ -0,0 +1,125 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2020 Red Hat, Inc.  All Rights Reserved.
-+#
-+# FS QA Test 522
-+#
-+# XFS online shrinkfs-while-allocating tests
-+#
-+# This test attempts to shrink unused space as much as possible with
-+# background fsstress workload. It will decrease the shrink size if
-+# larger size fails. And totally repeat 6 times.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "rm -f $tmp.*; exit \$status" 0 1 2 3 15
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+_create_scratch()
-+{
-+	echo "*** mkfs"
-+	_scratch_mkfs_xfs $@ | tee -a $seqres.full | _filter_mkfs 2>$tmp.mkfs
-+	. $tmp.mkfs
-+
-+	echo "*** mount"
-+	if ! _try_scratch_mount 2>/dev/null
-+	then
-+		echo "failed to mount $SCRATCH_DEV"
-+		exit 1
-+	fi
-+
-+	# fix the reserve block pool to a known size so that the enospc
-+	# calculations work out correctly.
-+	_scratch_resvblks 1024 >  /dev/null 2>&1
-+}
-+
-+_fill_scratch()
-+{
-+	$XFS_IO_PROG -f -c "resvsp 0 ${1}" $SCRATCH_MNT/resvfile
-+}
-+
-+_stress_scratch()
-+{
-+	procs=3
-+	nops=1000
-+	# -w ensures that the only ops are ones which cause write I/O
-+	FSSTRESS_ARGS=`_scale_fsstress_args -d $SCRATCH_MNT -w -p $procs \
-+	    -n $nops $FSSTRESS_AVOID`
-+	$FSSTRESS_PROG $FSSTRESS_ARGS >> $seqres.full 2>&1 &
-+}
-+
-+# real QA test starts here
-+_supported_fs xfs
-+_require_scratch
-+_require_xfs_io_command "falloc"
-+
-+rm -f $seqres.full
-+_scratch_mkfs_xfs | tee -a $seqres.full | _filter_mkfs 2>$tmp.mkfs
-+. $tmp.mkfs	# extract blocksize and data size for scratch device
-+
-+endsize=`expr 125 \* 1048576`	# stop after shrinking this big
-+[ `expr $endsize / $dbsize` -lt $dblocks ] || _notrun "Scratch device too small"
-+
-+nags=2
-+totalcount=6
-+
-+while [ $totalcount -gt 0 ]; do
-+	size=`expr 1010 \* 1048576`	# 1010 megabytes initially
-+	echo "*** creating scratch filesystem"
-+	logblks=$(_scratch_find_xfs_min_logblocks -dsize=${size} -dagcount=${nags})
-+
-+	_create_scratch -lsize=${logblks}b -dsize=${size} -dagcount=${nags}
-+
-+	echo "*** using some initial space on scratch filesystem"
-+	for i in `seq 125 -1 90`; do
-+		fillsize=`expr $i \* 1048576`
-+		out="$(_fill_scratch $fillsize 2>&1)"
-+		echo "$out" | grep -q 'No space left on device' && continue
-+		test -n "${out}" && echo "$out"
-+		break
-+	done
-+
-+	decsize=`expr  42 \* 1048576`	# shrink in chunks of this size at most
-+
-+	echo "*** stressing filesystem"
-+	while [ $size -gt $endsize ]; do
-+		_stress_scratch
-+		sleep 1
-+
-+		decb=`expr $decsize / $dbsize`    # in data blocks
-+		while [ $decb -gt 0 ]; do
-+			sizeb=`expr $size / $dbsize - $decb`
-+
-+			xfs_growfs -D ${sizeb} $SCRATCH_MNT 2>&1 \
-+				| tee -a $seqres.full | _filter_mkfs 2>$tmp.growfs > /dev/null
-+
-+			ret="${PIPESTATUS[0]}"
-+			. $tmp.growfs
-+
-+			[ $ret -eq 0 ] && break
-+
-+			[ $decb -gt 100 ] && decb=`expr $decb + $RANDOM % 10`
-+			decb=`expr $decb / 2`
-+		done
-+
-+		wait
-+		[ $decb -eq 0 ] && break
-+
-+		size=`expr $size - $decb \* $dbsize`
-+	done
-+
-+	_scratch_unmount
-+	_repair_scratch_fs >> $seqres.full
-+	totalcount=`expr $totalcount - 1`
-+done
-+
-+status=0
-+exit
-diff --git a/tests/xfs/522.out b/tests/xfs/522.out
-new file mode 100644
-index 00000000..03d512f5
---- /dev/null
-+++ b/tests/xfs/522.out
-@@ -0,0 +1,73 @@
-+QA output created by 522
-+meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
-+data     = bsize=XXX blocks=XXX, imaxpct=PCT
-+         = sunit=XXX swidth=XXX, unwritten=X
-+naming   =VERN bsize=XXX
-+log      =LDEV bsize=XXX blocks=XXX
-+realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
-+*** creating scratch filesystem
-+*** mkfs
-+meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
-+data     = bsize=XXX blocks=XXX, imaxpct=PCT
-+         = sunit=XXX swidth=XXX, unwritten=X
-+naming   =VERN bsize=XXX
-+log      =LDEV bsize=XXX blocks=XXX
-+realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
-+*** mount
-+*** using some initial space on scratch filesystem
-+*** stressing filesystem
-+*** creating scratch filesystem
-+*** mkfs
-+meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
-+data     = bsize=XXX blocks=XXX, imaxpct=PCT
-+         = sunit=XXX swidth=XXX, unwritten=X
-+naming   =VERN bsize=XXX
-+log      =LDEV bsize=XXX blocks=XXX
-+realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
-+*** mount
-+*** using some initial space on scratch filesystem
-+*** stressing filesystem
-+*** creating scratch filesystem
-+*** mkfs
-+meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
-+data     = bsize=XXX blocks=XXX, imaxpct=PCT
-+         = sunit=XXX swidth=XXX, unwritten=X
-+naming   =VERN bsize=XXX
-+log      =LDEV bsize=XXX blocks=XXX
-+realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
-+*** mount
-+*** using some initial space on scratch filesystem
-+*** stressing filesystem
-+*** creating scratch filesystem
-+*** mkfs
-+meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
-+data     = bsize=XXX blocks=XXX, imaxpct=PCT
-+         = sunit=XXX swidth=XXX, unwritten=X
-+naming   =VERN bsize=XXX
-+log      =LDEV bsize=XXX blocks=XXX
-+realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
-+*** mount
-+*** using some initial space on scratch filesystem
-+*** stressing filesystem
-+*** creating scratch filesystem
-+*** mkfs
-+meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
-+data     = bsize=XXX blocks=XXX, imaxpct=PCT
-+         = sunit=XXX swidth=XXX, unwritten=X
-+naming   =VERN bsize=XXX
-+log      =LDEV bsize=XXX blocks=XXX
-+realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
-+*** mount
-+*** using some initial space on scratch filesystem
-+*** stressing filesystem
-+*** creating scratch filesystem
-+*** mkfs
-+meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
-+data     = bsize=XXX blocks=XXX, imaxpct=PCT
-+         = sunit=XXX swidth=XXX, unwritten=X
-+naming   =VERN bsize=XXX
-+log      =LDEV bsize=XXX blocks=XXX
-+realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
-+*** mount
-+*** using some initial space on scratch filesystem
-+*** stressing filesystem
-diff --git a/tests/xfs/group b/tests/xfs/group
-index b89c0a4e..ab762ed6 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -519,3 +519,4 @@
- 519 auto quick reflink
- 520 auto quick reflink
- 521 auto quick realtime growfs
-+522 auto quick growfs
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> ---
+>  tests/xfs/758     |   59 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/758.out |    2 ++
+>  tests/xfs/group   |    1 +
+>  3 files changed, 62 insertions(+)
+>  create mode 100755 tests/xfs/758
+>  create mode 100644 tests/xfs/758.out
+> 
+> 
+> diff --git a/tests/xfs/758 b/tests/xfs/758
+> new file mode 100755
+> index 00000000..e522ae28
+> --- /dev/null
+> +++ b/tests/xfs/758
+> @@ -0,0 +1,59 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0-or-later
+> +# Copyright (c) 2020, Oracle.  All Rights Reserved.
+> +#
+> +# FS QA Test No. 758
+> +#
+> +# This is a regression test for "xfs: fix xfs_bmap_validate_extent_raw when
+> +# checking attr fork of rt files", which fixes the bmap record validator so
+> +# that it will not check the attr fork extent mappings of a realtime file
+> +# against the size of the realtime volume.
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1    # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_fs xfs
+> +_require_scratch
+> +_require_realtime
+> +
+> +rm -f $seqres.full
+> +
+> +# Format filesystem with very tiny realtime volume
+> +_scratch_mkfs -r size=256k > $seqres.full
+> +_scratch_mount >> $seqres.full
+> +
+> +# Create a realtime file
+> +$XFS_IO_PROG -f -R -c 'pwrite 0 64k' -c stat $SCRATCH_MNT/v >> $seqres.full
+> +
+> +# Add enough xattr data to force creation of xattr blocks at a higher address
+> +# on the data device than the size of the realtime volume
+> +for i in `seq 0 16`; do
+> +	$ATTR_PROG -s user.test$i $SCRATCH_MNT/v < $SCRATCH_MNT/v >> $seqres.full
+> +done
+> +
+> +# Force flushing extent maps to disk to trip the verifier
+> +_scratch_cycle_mount
+> +
+> +# Now let that unmount
+> +echo Silence is golden.
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/758.out b/tests/xfs/758.out
+> new file mode 100644
+> index 00000000..6d219f8e
+> --- /dev/null
+> +++ b/tests/xfs/758.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 758
+> +Silence is golden.
+> diff --git a/tests/xfs/group b/tests/xfs/group
+> index ffd18166..771680cf 100644
+> --- a/tests/xfs/group
+> +++ b/tests/xfs/group
+> @@ -519,4 +519,5 @@
+>  519 auto quick reflink
+>  520 auto quick reflink
+>  521 auto quick realtime growfs
+> +758 auto quick rw attr realtime
+>  763 auto quick rw realtime
+> 
+> 
+
+
 -- 
-2.18.1
+chandan
+
+
 
