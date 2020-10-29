@@ -5,108 +5,110 @@ X-Spam-Level:
 X-Spam-Status: No, score=-9.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0DE8CC55179
-	for <linux-fstests@archiver.kernel.org>; Thu, 29 Oct 2020 09:57:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 372B9C55178
+	for <linux-fstests@archiver.kernel.org>; Thu, 29 Oct 2020 10:12:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9F7D520796
-	for <linux-fstests@archiver.kernel.org>; Thu, 29 Oct 2020 09:57:12 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C8A942076E
+	for <linux-fstests@archiver.kernel.org>; Thu, 29 Oct 2020 10:12:43 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="jC3/1/4w"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="d5bBmAbz"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725839AbgJ2J5M (ORCPT
+        id S1726020AbgJ2KMk (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 29 Oct 2020 05:57:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51070 "EHLO
+        Thu, 29 Oct 2020 06:12:40 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53546 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725779AbgJ2J5M (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 29 Oct 2020 05:57:12 -0400
-Received: from mail-il1-x144.google.com (mail-il1-x144.google.com [IPv6:2607:f8b0:4864:20::144])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B1176C0613D5
-        for <fstests@vger.kernel.org>; Thu, 29 Oct 2020 02:57:10 -0700 (PDT)
-Received: by mail-il1-x144.google.com with SMTP id x7so2388265ili.5
-        for <fstests@vger.kernel.org>; Thu, 29 Oct 2020 02:57:10 -0700 (PDT)
+        with ESMTP id S1725957AbgJ2KMk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 29 Oct 2020 06:12:40 -0400
+Received: from mail-pg1-x541.google.com (mail-pg1-x541.google.com [IPv6:2607:f8b0:4864:20::541])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DC11AC0613D3;
+        Thu, 29 Oct 2020 03:12:09 -0700 (PDT)
+Received: by mail-pg1-x541.google.com with SMTP id g12so1932194pgm.8;
+        Thu, 29 Oct 2020 03:12:09 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=otEqV9AFNvb+StaAd3Y8+G8sZ0r6bKY4wKauOTFDiCk=;
-        b=jC3/1/4w1g4g1xk1FEqz6xkuvtRSwuAbl6/e6eUG1Nujphc0pypHC5FFejn7rvtdHe
-         IUkNnnjbcrNotfPYVvKTU+L8B/kW/xkKhK9mYaSkqfBcKq/vyfWbe4+sXGUgV4QFekDG
-         i5REaAxfpmZfWSrPnO32JDnPUIbwwOBczUura5n/83NsIfmsFG4LMYcrIEvjED1O6o4G
-         MCkoSHOl7Z7LgR0Llf44tAg67EfAcIY4vw9/XS0HqkBGBaIUExzsZO6jyc/zYVGHXpA2
-         0TaK2K/+yp/JnKG2jQq3DdyaBlGJ71k4Hbdz+S55FwStBAbHv7afIiIAajdyDkj/lojc
-         B1vA==
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=ya7F/cXAS2kW6YPBdx/WL0ZD+cLn/kNmmmClJevJfXc=;
+        b=d5bBmAbzdD2PBuaQbQz+t1c1ec+qtu/yvQkM8etz62vzwBpqbV78hgEU5Uj+mdAyAG
+         PFWdPh7yYRXHhgYauTfDpxBOGUWQYJ35vcTYdKbT4IimptHx0tLr1a2Z8IBLk5jALDvK
+         xT4b59La+6Jq3pnUVCwitn8l87agIPK19DoEi8NqwDLfncXNmgIxN0OtSU/P+nga4aLZ
+         LJhj4mQEEbHVNInMUUyFSA7XjeumB4Peno20mDhHUfftVQc/Vaf6McPrnaFGPy7GteEA
+         IDzk7EEh2VqYKGRlZRfXr9be1mMLzkNhS2mhXAiMecPzs9z0ZeIWfXIjfYR8+g/AEw2z
+         F1vQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=otEqV9AFNvb+StaAd3Y8+G8sZ0r6bKY4wKauOTFDiCk=;
-        b=KHfz7YF9dBfIp0LA63F7tfK2HLGog87FBQZhPNAGguB+UHTmwtdkONIQAPXPcUcytk
-         deAvF6gRZ5ScmsnpRa2od6XzzIotaIK55LjSb+MQ1pqFURX2+Rs9jeDwVEz/4ngODr5x
-         t/DzVZQuA+XT8OhZL0jBncdez3CQSB1tOZF+GaqgslYNBORXpBFcV1UwPB9GIy8DZNq1
-         hm17iFzViHzhwpIYIo2F+rdPtlHkjiEd589X6GkPOzOX+Yoo8FOFoVC4ntA7KJ/QhDP0
-         Y/oZNjm+0LsY5o4tR7fj6WrvIMeNlDURr8LvmCKTlr5wCPpCwon54rUYsyF7yDfiVdzN
-         fMPA==
-X-Gm-Message-State: AOAM532mG/7cpI8y4iEpFNrpNOldU0h6irbQRuoxsz95/O7N4L8mhJ9U
-        MVVxju7SCA0eXJKJ8n53cNO0OXHLmN5f7oAZnpguZzRbwMA=
-X-Google-Smtp-Source: ABdhPJwW3xFaT71FvbMvD2ZDodxTlcP/aMo2cwd3dKnSYfGPLkFglrPs78/ETGC/gWZ+armM5ZT2t3ZoQFSkmwTIbh4=
-X-Received: by 2002:a92:d30f:: with SMTP id x15mr713386ila.9.1603965429949;
- Thu, 29 Oct 2020 02:57:09 -0700 (PDT)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=ya7F/cXAS2kW6YPBdx/WL0ZD+cLn/kNmmmClJevJfXc=;
+        b=FYZEFe43UiPErQjhHPzOj0S9+7nxFsEm2/t0cWHwfxRmOTnyFAC47U4h6cGjTTGI+u
+         YO96YSvacBpzJFv1VC+Jqgcx4AEl5E6fdihyWvSN/IISWzklrSLKl9jAtl4JPcW8HNvZ
+         AcH0FRa5MCuRki9TbIE1cDEmFOKmXUz4H97DJQJLEEHXflfysPsGwqLTJUHhqGUmeRZ3
+         M4+kXxiRQfVrdlryK66KKGZGRQOxzZf8sGpmY8tCoHH7QXc3+4OyHOgOpGlxbOUkhzdN
+         h1OuW4nPVdnIQoo8yhVRYyI8ELVMtzIwYawajGAmpATBKZxmRwBO/hri2FgsmSaqjj0l
+         kKKg==
+X-Gm-Message-State: AOAM532dVazgfUi1fjIoqeoUTyhVVYqer0qAqJMe7MlBv3Ldy98r8UWY
+        m3Jxq5hq0qoZtamD1WZkLcc=
+X-Google-Smtp-Source: ABdhPJwh70efz1n80imUMV8pe8qfg99QftGB6EoXHE2FbGd/t1qdc7z3Ivu0AzeqhHrGi1kgX1p6HA==
+X-Received: by 2002:a17:90a:8906:: with SMTP id u6mr3701899pjn.35.1603966329528;
+        Thu, 29 Oct 2020 03:12:09 -0700 (PDT)
+Received: from garuda.localnet ([122.179.67.57])
+        by smtp.gmail.com with ESMTPSA id 204sm2431639pfz.74.2020.10.29.03.12.06
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 29 Oct 2020 03:12:08 -0700 (PDT)
+From:   Chandan Babu R <chandanrlinux@gmail.com>
+To:     "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: Re: [PATCH 7/7] xfs/122: fix test for xfs_attr_shortform_t conversion
+Date:   Thu, 29 Oct 2020 15:42:05 +0530
+Message-ID: <2035765.IcyYpOg2Bb@garuda>
+In-Reply-To: <160382539620.1203387.14717204905418805283.stgit@magnolia>
+References: <160382535113.1203387.16777876271740782481.stgit@magnolia> <160382539620.1203387.14717204905418805283.stgit@magnolia>
 MIME-Version: 1.0
-References: <20201029040338.238990-1-palmerdabbelt@google.com>
-In-Reply-To: <20201029040338.238990-1-palmerdabbelt@google.com>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Thu, 29 Oct 2020 11:56:58 +0200
-Message-ID: <CAOQ4uxj2NiyC7ZrNBNYQR7PuMex-Dm4XwXoGKcK05QizoD9ztg@mail.gmail.com>
-Subject: Re: [PATCH] open_by_handle: Don't use MAX_HANDLE_SZ
-To:     Palmer Dabbelt <palmerdabbelt@google.com>
-Cc:     fstests <fstests@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset="us-ascii"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Oct 29, 2020 at 11:01 AM Palmer Dabbelt
-<palmerdabbelt@google.com> wrote:
+On Wednesday 28 October 2020 12:33:16 AM IST Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
+> 
+> The typedef xfs_attr_shortform_t was converted to a struct in 5.10.
+> Update this test to pass.
 >
-> When I compile this normally I end up with the definition of
-> MAX_HANDLE_SZ, but when I compile it in a minimal buildroot-based
-> environment I don't.  I'm not sure where this is supposed to come from,
-> but as of 3f4760c2 ("open_by_handle: add option -z to query file handle
-> size") it appears to be unnecessary.
->
-> Signed-off-by: Palmer Dabbelt <palmerdabbelt@google.com>
+
+Looks good to me.
+
+Reviewed-by: Chandan Babu R <chandanrlinux@gmail.com>
+
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 > ---
-> I haven't actually run this, as I haven't figured out how to yet.  It
-> does build, though.
-> ---
->  src/open_by_handle.c | 1 -
->  1 file changed, 1 deletion(-)
->
-> diff --git a/src/open_by_handle.c b/src/open_by_handle.c
-> index 0f74ed08..ddeffb7a 100644
-> --- a/src/open_by_handle.c
-> +++ b/src/open_by_handle.c
-> @@ -92,7 +92,6 @@ Examples:
->
->  struct handle {
->         struct file_handle fh;
-> -       unsigned char fid[MAX_HANDLE_SZ];
->  } handle[MAXFILES], dir_handle;
+>  tests/xfs/122.out |    1 +
+>  1 file changed, 1 insertion(+)
+> 
+> 
+> diff --git a/tests/xfs/122.out b/tests/xfs/122.out
+> index 45c42e59..cfe09c6d 100644
+> --- a/tests/xfs/122.out
+> +++ b/tests/xfs/122.out
+> @@ -62,6 +62,7 @@ sizeof(struct xfs_agfl) = 36
+>  sizeof(struct xfs_attr3_leaf_hdr) = 80
+>  sizeof(struct xfs_attr3_leafblock) = 88
+>  sizeof(struct xfs_attr3_rmt_hdr) = 56
+> +sizeof(struct xfs_attr_shortform) = 8
+>  sizeof(struct xfs_btree_block) = 72
+>  sizeof(struct xfs_btree_block_lhdr) = 64
+>  sizeof(struct xfs_btree_block_shdr) = 48
+> 
+> 
 
-This is absolutely wrong!
 
-I don't know what's the best way to fix the build error,
-but this fid member is absolutely needed.
+-- 
+chandan
 
-For all I care, you can define MAX_TEST_HANDLE_SZ to 128 or to
-MAX_HANDLE_SZ if it is defined.
 
-The test doesn't really care what the value of MAX_HANDLE_SZ is.
-It just needs to be large enough to accomodate for the size of file handles
-of the tested filesystem.
 
-Thanks,
-Amir.
