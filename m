@@ -2,161 +2,104 @@ Return-Path: <SRS0=FwvB=EE=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 517F5C4363A
-	for <linux-fstests@archiver.kernel.org>; Thu, 29 Oct 2020 18:56:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0D77FC2D0A3
+	for <linux-fstests@archiver.kernel.org>; Thu, 29 Oct 2020 19:53:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D682B20825
-	for <linux-fstests@archiver.kernel.org>; Thu, 29 Oct 2020 18:56:40 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 759F520838
+	for <linux-fstests@archiver.kernel.org>; Thu, 29 Oct 2020 19:53:16 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="BBidAWnU"
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="IVr8Zf6A"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725763AbgJ2S4k (ORCPT
+        id S1725820AbgJ2TxQ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 29 Oct 2020 14:56:40 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50660 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725648AbgJ2S4k (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 29 Oct 2020 14:56:40 -0400
-Received: from mail-il1-x142.google.com (mail-il1-x142.google.com [IPv6:2607:f8b0:4864:20::142])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ECA67C0613CF;
-        Thu, 29 Oct 2020 11:56:39 -0700 (PDT)
-Received: by mail-il1-x142.google.com with SMTP id v18so4143476ilg.1;
-        Thu, 29 Oct 2020 11:56:39 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=kI/Crql0FNrlDa/ubfAXL2ewr6hUN9HF7DMpMQOLpos=;
-        b=BBidAWnUi5C23d9DhOWDOzNMcXAtx7SLfwBimeHZiJoMuNVJhvv0GBfEFcaAbJjNZ3
-         MJimk6nSvGHwAJQkVX4zNRoq9I6xC77AmN9hgiUOCSmfGq1jTvNEdXXUbxxSKgakCZPW
-         7uO4PoApZATR/Z3JXAHE4Q83+IMm7pKKASiVhQ2uFf+rPlPZPCouXfqerq/VXwZwTrUo
-         6wqcd0+VgqY2rrcD3yqpzYFQk8h1Z/q161zvBRw1LuylVh0c/ygRIeKxGY81MKl//hkU
-         I93ynQxKTOVIP5O9cqqDix+3caG/Yi26Y2W5B5432Qk9rTrSf5n91IirVxmcOxAJKUwJ
-         Oo1A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=kI/Crql0FNrlDa/ubfAXL2ewr6hUN9HF7DMpMQOLpos=;
-        b=ZvfaPcCBqmQpbetsuJpibdZbPzvW6uM+Z29/ivwURuTJkN/5oQOocUVFo0v/Q89G/Q
-         Nv7Myb74mJiI5G90/WN3ShakyhAfm6z0NrpCRx2r1XF2+pclcqyvh+GfqbI3/5kDkJGs
-         3ALxDK4CRN73WcteC0KWajIWeVqMMAtrFnEXkLjjLdDZI6eik6oorZpPDMxIJUWju1Ax
-         +gRDR6PSamjJ8WLw2XKAsgMIrhVJINOVYmNnYetrJ6iukcikynmIXELUFgsQxIhvIZ8Z
-         fu1+TZV6QYifWzBQa0JFxuSyj0MQHmqsWqIpTGkfKwXf/JnTII7pM4Lvz1QEcXcFAqAz
-         RSiw==
-X-Gm-Message-State: AOAM531Y5uhI7X84QYQA8jjOuRHtTZ0W4iWSpvTt7/GxM5ZJyI3wnB+I
-        ed4sBDW5fWNV04Hw1frODRqXGhnAnwAk8PNt6CY=
-X-Google-Smtp-Source: ABdhPJxON1hmj6X9tUJGCHVExUCOkn3uqr3SjA0b9qm1V/2xenLm9xgWyGIHMeoL4x9cadgCBUn1FTX++Bdngmjf/E4=
-X-Received: by 2002:a92:d30f:: with SMTP id x15mr2673971ila.9.1603997799356;
- Thu, 29 Oct 2020 11:56:39 -0700 (PDT)
+        Thu, 29 Oct 2020 15:53:16 -0400
+Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:38726 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1725780AbgJ2TxP (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 29 Oct 2020 15:53:15 -0400
+Received: from pps.filterd (m0098410.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.0.42/8.16.0.42) with SMTP id 09TJWGvv099474;
+        Thu, 29 Oct 2020 15:53:13 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=from : to : cc : subject
+ : date : message-id : mime-version : content-transfer-encoding; s=pp1;
+ bh=6ckVYkG3rz+Dh40rH7ktk+hyT+SyLyYm11nHgXNnLQ8=;
+ b=IVr8Zf6A2Smqj0VJPdBptw7p/tQ/l90vLTEqS3FTx96qVqhJtbbgY7uH8YFZw+LgG7P0
+ TBLn0UfGloQIW3PQmZLrib5dHCuOTaeLd/vM2iTDxJnBYDqY5kXwRLRolwFJ8VsgAE0T
+ yU0dnkAF4XI24YpIKpwQbmdTF6DEDJyGlOzxC4OOfLpCwUuW4OzwbxrEje6kdDZ9ZOHI
+ OSWej308esATxW4ENiYBBVDctWNhue6/0vGWXJLd/aaFobgSfaGgLVJemd7q6Z8iz2qm
+ OeuIBtj/43ky0NxWOzxqiDpjV5Q/m22/AzscyEnNlkAPJ8xBOiRiquTDqLTrD19mb+iq Uw== 
+Received: from ppma02fra.de.ibm.com (47.49.7a9f.ip4.static.sl-reverse.com [159.122.73.71])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 34fnh068x9-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Thu, 29 Oct 2020 15:53:12 -0400
+Received: from pps.filterd (ppma02fra.de.ibm.com [127.0.0.1])
+        by ppma02fra.de.ibm.com (8.16.0.42/8.16.0.42) with SMTP id 09TJmK1O025113;
+        Thu, 29 Oct 2020 19:53:10 GMT
+Received: from b06cxnps4076.portsmouth.uk.ibm.com (d06relay13.portsmouth.uk.ibm.com [9.149.109.198])
+        by ppma02fra.de.ibm.com with ESMTP id 34fvc487cr-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Thu, 29 Oct 2020 19:53:10 +0000
+Received: from d06av22.portsmouth.uk.ibm.com (d06av22.portsmouth.uk.ibm.com [9.149.105.58])
+        by b06cxnps4076.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 09TJr8uF33948084
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Thu, 29 Oct 2020 19:53:08 GMT
+Received: from d06av22.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id 533E94C050;
+        Thu, 29 Oct 2020 19:53:08 +0000 (GMT)
+Received: from d06av22.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id 92EB54C044;
+        Thu, 29 Oct 2020 19:53:06 +0000 (GMT)
+Received: from riteshh-domain.ibmuc.com (unknown [9.199.33.247])
+        by d06av22.portsmouth.uk.ibm.com (Postfix) with ESMTP;
+        Thu, 29 Oct 2020 19:53:06 +0000 (GMT)
+From:   Ritesh Harjani <riteshh@linux.ibm.com>
+To:     fstests@vger.kernel.org
+Cc:     anju@linux.vnet.ibm.com, Eryu Guan <guan@eryu.me>,
+        linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org,
+        linux-xfs@vger.kernel.org, Ritesh Harjani <riteshh@linux.ibm.com>
+Subject: [PATCH 0/3] fstests: Fix tests which checks for swapfile support
+Date:   Fri, 30 Oct 2020 01:22:50 +0530
+Message-Id: <cover.1604000570.git.riteshh@linux.ibm.com>
+X-Mailer: git-send-email 2.26.2
 MIME-Version: 1.0
-References: <160382543472.1203848.8335854864075548402.stgit@magnolia>
- <160382545348.1203848.12227735405144915534.stgit@magnolia>
- <CAOQ4uxhNpej-U-7NjA1VuU3OH=ttT7npwYrzODqThdta5Qka1A@mail.gmail.com> <20201029182747.GU1061252@magnolia>
-In-Reply-To: <20201029182747.GU1061252@magnolia>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Thu, 29 Oct 2020 20:56:28 +0200
-Message-ID: <CAOQ4uxhHjfGdkHdyDDRbfu7vzb2r__89CyrQ4HikBCXpVspmUQ@mail.gmail.com>
-Subject: Re: [PATCH 3/4] xfs: detect time limits from filesystem
-To:     "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc:     Eryu Guan <guaneryu@gmail.com>,
-        linux-xfs <linux-xfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>,
-        Deepa Dinamani <deepa.kernel@gmail.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+X-TM-AS-GCONF: 00
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.312,18.0.737
+ definitions=2020-10-29_11:2020-10-29,2020-10-29 signatures=0
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 bulkscore=0 spamscore=0
+ mlxlogscore=852 lowpriorityscore=0 clxscore=1011 impostorscore=0
+ suspectscore=13 priorityscore=1501 adultscore=0 phishscore=0
+ malwarescore=0 mlxscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2009150000 definitions=main-2010290131
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Oct 29, 2020 at 8:27 PM Darrick J. Wong <darrick.wong@oracle.com> wrote:
->
-> On Thu, Oct 29, 2020 at 12:47:32PM +0200, Amir Goldstein wrote:
-> > On Wed, Oct 28, 2020 at 10:24 PM Darrick J. Wong
-> > <darrick.wong@oracle.com> wrote:
-> > >
-> > > From: Darrick J. Wong <darrick.wong@oracle.com>
-> > >
-> > > Teach fstests to extract timestamp limits of a filesystem using the new
-> > > xfs_db timelimit command.
-> > >
-> > > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> > > ---
-> > >  common/rc         |    2 +-
-> > >  common/xfs        |   14 ++++++++++++++
-> > >  tests/xfs/911     |   44 ++++++++++++++++++++++++++++++++++++++++++++
-> > >  tests/xfs/911.out |   15 +++++++++++++++
-> > >  tests/xfs/group   |    1 +
-> > >  5 files changed, 75 insertions(+), 1 deletion(-)
-> > >  create mode 100755 tests/xfs/911
-> > >  create mode 100644 tests/xfs/911.out
-> > >
-> > >
-> > > diff --git a/common/rc b/common/rc
-> > > index 41f93047..162d957a 100644
-> > > --- a/common/rc
-> > > +++ b/common/rc
-> > > @@ -2029,7 +2029,7 @@ _filesystem_timestamp_range()
-> > >                 echo "0 $u32max"
-> > >                 ;;
-> > >         xfs)
-> > > -               echo "$s32min $s32max"
-> > > +               _xfs_timestamp_range "$device"
-> > >                 ;;
-> > >         btrfs)
-> > >                 echo "$s64min $s64max"
-> > > diff --git a/common/xfs b/common/xfs
-> > > index e548a0a1..19ccee03 100644
-> > > --- a/common/xfs
-> > > +++ b/common/xfs
-> > > @@ -994,3 +994,17 @@ _require_xfs_scratch_inobtcount()
-> > >                 _notrun "inobtcount not supported by scratch filesystem type: $FSTYP"
-> > >         _scratch_unmount
-> > >  }
-> > > +
-> > > +_xfs_timestamp_range()
-> > > +{
-> > > +       local use_db=0
-> > > +       local dbprog="$XFS_DB_PROG $device"
->
-> Heh, device isn't defined, I'll fix that.
->
-> > > +       test "$device" = "$SCRATCH_DEV" && dbprog=_scratch_xfs_db
-> > > +
-> > > +       $dbprog -f -c 'help timelimit' | grep -v -q 'not found' && use_db=1
-> > > +       if [ $use_db -eq 0 ]; then
-> > > +               echo "-$((1<<31)) $(((1<<31)-1))"
-> >
-> > This embodies an assumption that the tested filesystem does not have
-> > bigtime enabled if xfs_db tool is not uptodate.
->
-> If the xfs_db tool doesn't support the timelimit command then it doesn't
-> support formatting with bigtime.  I don't think it's reasonable to
-> expect to be able to run fstests on a test filesystem that xfsprogs
-> doesn't support.  Hence it's fine to output the old limits if the
-> timelimit command doesn't exist.
+For more details, pls refer commit msg of each patch.
 
-ok.
+Patch-1: modifies _require_scratch_swapfile() to check swapon only for btrfs
+Patch-2: adds a swapfile test for fallocate files for ext4, xfs (assuming
+both FS supports and thus should pass).
+Patch-3: added to support tests to run when multiple config section present
+in local.config file.
 
->
-> > Maybe it makes sense, but it may be safer to return "-1 -1" and not_run
-> > generic/402 if xfs_db is not uptodate, perhaps with an extra message
-> > hinting the user to upgrade xfs_db.
->
-> TBH it boggles my mind that there *still* is no way to ask the kernel
-> for the supported timestamp range of a mounted filesystem.  The
-> timelimit command and this mess in fstests was supposed to be a
-> temporary workaround that would (in my ideal world) have become
-> unnecessary before this landed, but ... ugh.
->
+Ritesh Harjani (3):
+  common/rc: Make swapon check in _require_scratch_swapfile() specific to btrfs
+  shared/001: Verify swapon on fallocated files for supported FS
+  common/rc: source common/xfs and common/btrfs
 
-Oh well, consider this
+ common/rc            | 20 +++++----
+ tests/shared/001     | 97 ++++++++++++++++++++++++++++++++++++++++++++
+ tests/shared/001.out |  6 +++
+ tests/shared/group   |  1 +
+ 4 files changed, 116 insertions(+), 8 deletions(-)
+ create mode 100755 tests/shared/001
+ create mode 100644 tests/shared/001.out
 
-Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+--
+2.26.2
 
-Thanks,
-Amir.
