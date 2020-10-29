@@ -2,103 +2,159 @@ Return-Path: <SRS0=FwvB=EE=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7D895C2D0A3
-	for <linux-fstests@archiver.kernel.org>; Thu, 29 Oct 2020 11:28:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9603FC5DF9D
+	for <linux-fstests@archiver.kernel.org>; Thu, 29 Oct 2020 12:09:25 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 15E5B20796
-	for <linux-fstests@archiver.kernel.org>; Thu, 29 Oct 2020 11:28:21 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="jiXmTQpS"
+	by mail.kernel.org (Postfix) with ESMTP id 402DA20809
+	for <linux-fstests@archiver.kernel.org>; Thu, 29 Oct 2020 12:09:25 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1603973365;
+	bh=xDv0fFIb+9ZB8QRwEh93Uhu9zJuKx+xX55+qBlezrso=;
+	h=From:To:Cc:Subject:Date:List-ID:From;
+	b=r+Vp0ahXxv32ex52EgS3QKHRiffU2Qxxoe7Oz1c55bgkbIk9Oc1kwUZfqryMUbFmy
+	 /5AwonJ20+JSem57gkvzYDhRwdY+t9J1o6nxX/RfAXSI939nGMXjgL3Zr/jp0UiBqS
+	 EG8rufIgrlPU1E9wcy7K7i4Uzlkmx6GSGUjUjzuk=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726404AbgJ2L2U (ORCPT
+        id S1726126AbgJ2MJU (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 29 Oct 2020 07:28:20 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37162 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725774AbgJ2L2U (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 29 Oct 2020 07:28:20 -0400
-Received: from mail-io1-xd42.google.com (mail-io1-xd42.google.com [IPv6:2607:f8b0:4864:20::d42])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 946C0C0613CF;
-        Thu, 29 Oct 2020 04:28:18 -0700 (PDT)
-Received: by mail-io1-xd42.google.com with SMTP id p7so2930860ioo.6;
-        Thu, 29 Oct 2020 04:28:18 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=hfi+UtL37/p8gDwiSQgVd9ExgUieCTKeWhlouG7mSq8=;
-        b=jiXmTQpSaXOBu9pHohffNcwieSx4dv4YPeq3gl2FXe7ZgJOCzurCjj/KNwCn4EchRA
-         DF+vuok80qNTw2r96c0slcvoDDpmH+EZ2UXe7OqNIsAX5f131LiNrmCWT9hmrMa4qukY
-         2SrFeq+hcFJDaiBf68n6kY0ahQ/tgmNkbWQexBqU57ijiCPLtUTcUKbWNxuHYL8g6zd1
-         8O0u0CNOwWtv6F39gWKuk123QjPKCCEQsC7mW3QgVW2iajRfvnjM0SbsuGAawNmhXdKD
-         oS1CWN1jGif+Y2wEqTY7lvSocXCB9B+d6GKRJYGjv6zM1Y67ffAM3Nv1iKX+nffTsrBm
-         fjVA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=hfi+UtL37/p8gDwiSQgVd9ExgUieCTKeWhlouG7mSq8=;
-        b=VTZzUgKPN/BZnkMVBPI3poAgDnIIqm1JGhm/EPPBrH2Mn/srt2rvJbA7d5JZonc1Z2
-         olRTiCee1sxNr4/xYnUZKkXNybDklE0q1kH2r5biTsKEPVQfyWKadaSOVHzZ1UEh5nS9
-         QUsTZo2wFs+sqnwSkvV1TR4JbdVhMNqlCh5K8Eu/fDUaP0NJWx3yzs6gyLMY1JiAyMmf
-         2J4YeNwef34Vc1QqCD2Q1VbleXj1Cx6AIOS0JGN+Bi/IjBc1JqhCQll/BbWjEWbVJCyr
-         xjSHVunbRtC1I6uYpgU9RmHgDwX1VKko0i5tWuJEgmzmvgkCszialA3UhxI5pnOxzHBz
-         8z2w==
-X-Gm-Message-State: AOAM532X/97cI55df4oOkzBxDFTsj+ztLh6ON74GN4Ofhljo/UlRu4Tr
-        GwWWRJxtnYGrCdZCGQjxppDuipp8rfwCRFu43jem+ktJ+7k=
-X-Google-Smtp-Source: ABdhPJzOyKchjWQ2rMofI1cglsYAktjmXh0lvE8ihOlCN63XxYlzHeIRganUbbCag85OiRGE5YJkaksjVfezVYMl6NE=
-X-Received: by 2002:a5e:c107:: with SMTP id v7mr2982186iol.203.1603970898054;
- Thu, 29 Oct 2020 04:28:18 -0700 (PDT)
+        Thu, 29 Oct 2020 08:09:20 -0400
+Received: from mail.kernel.org ([198.145.29.99]:37554 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726044AbgJ2MJO (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 29 Oct 2020 08:09:14 -0400
+Received: from debian8.Home (bl8-197-74.dsl.telepac.pt [85.241.197.74])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 7AF7D2076E;
+        Thu, 29 Oct 2020 12:09:12 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1603973353;
+        bh=xDv0fFIb+9ZB8QRwEh93Uhu9zJuKx+xX55+qBlezrso=;
+        h=From:To:Cc:Subject:Date:From;
+        b=fECxBQkbyyr75Wn1X3frKsOg1+LdUHVpd8W7A8iKC2dOUA3L0hC6BprR5h6aTuQmT
+         7dui6EP1vL4j1wuv53g2jAs78pXNF0aJ3qcfAKaLIPVKe82xgNW/5HRAV3Lkk/O0JG
+         mKEDw2U7V3G4QKPc3fZJYK59zpHMQpfd2uhcSoZ8=
+From:   fdmanana@kernel.org
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] fstests: add missing remove of the $seqres.full file for some tests
+Date:   Thu, 29 Oct 2020 12:09:06 +0000
+Message-Id: <8bc766361cbe31af4bc1b71f077e9561a1828ba7.1603973261.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.28.0
 MIME-Version: 1.0
-References: <160382543472.1203848.8335854864075548402.stgit@magnolia> <160382544732.1203848.9001133589345314135.stgit@magnolia>
-In-Reply-To: <160382544732.1203848.9001133589345314135.stgit@magnolia>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Thu, 29 Oct 2020 13:28:07 +0200
-Message-ID: <CAOQ4uxi8=dYG95SJMc07oTidcc1nJheUzPVhNThykrtmT5a+kg@mail.gmail.com>
-Subject: Re: [PATCH 2/4] xfs/122: add legacy timestamps to ondisk checker
-To:     "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc:     Eryu Guan <guaneryu@gmail.com>,
-        linux-xfs <linux-xfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Oct 28, 2020 at 10:25 PM Darrick J. Wong
-<darrick.wong@oracle.com> wrote:
->
-> From: Darrick J. Wong <darrick.wong@oracle.com>
->
-> Add these new ondisk structures.
->
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+From: Filipe Manana <fdmanana@suse.com>
 
-Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+Some test cases are missing the 'rm -f $seqres.full' line but are appending
+to that file, so everytime they run that file gets bigger and bigger (some
+of them are using about a dozen megabytes on one of my test boxes).
 
-> ---
->  tests/xfs/122     |    1 +
->  tests/xfs/122.out |    1 +
->  2 files changed, 2 insertions(+)
->
->
-> diff --git a/tests/xfs/122 b/tests/xfs/122
-> index a4248031..db21f2d5 100755
-> --- a/tests/xfs/122
-> +++ b/tests/xfs/122
-> @@ -182,6 +182,7 @@ struct xfs_iext_cursor
->  struct xfs_ino_geometry
->  struct xfs_attrlist
->  struct xfs_attrlist_ent
-> +struct xfs_legacy_ictimestamp
+So just add the 'rm -f $seqres.full' line to them, together with the comment
+that the 'new' script generates for new test cases.
 
-<OCD move near xfs_ictimestamp_t similar to other adjacent struct and
-typedefs />
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/btrfs/033  | 3 +++
+ tests/btrfs/036  | 3 +++
+ tests/btrfs/114  | 3 +++
+ tests/btrfs/115  | 3 +++
+ tests/btrfs/205  | 3 +++
+ tests/shared/298 | 3 +++
+ 6 files changed, 18 insertions(+)
 
-Thanks,
-Amir.
+diff --git a/tests/btrfs/033 b/tests/btrfs/033
+index 0b9fbe27..d1f8a4db 100755
+--- a/tests/btrfs/033
++++ b/tests/btrfs/033
+@@ -25,6 +25,9 @@ trap "_cleanup ; exit \$status" 0 1 2 3 15
+ . ./common/rc
+ . ./common/filter
+ 
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
+ # real QA test starts here
+ _supported_fs btrfs
+ _require_scratch
+diff --git a/tests/btrfs/036 b/tests/btrfs/036
+index cd7a81e5..36b652fd 100755
+--- a/tests/btrfs/036
++++ b/tests/btrfs/036
+@@ -49,6 +49,9 @@ trap "_cleanup ; exit \$status" 0 1 2 3 15
+ . ./common/rc
+ . ./common/filter
+ 
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
+ # real QA test starts here
+ _supported_fs btrfs
+ _require_scratch
+diff --git a/tests/btrfs/114 b/tests/btrfs/114
+index a4b8bafa..2d9546a1 100755
+--- a/tests/btrfs/114
++++ b/tests/btrfs/114
+@@ -26,6 +26,9 @@ _cleanup()
+ . ./common/rc
+ . ./common/filter
+ 
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
+ # real QA test starts here
+ _supported_fs btrfs
+ _require_scratch
+diff --git a/tests/btrfs/115 b/tests/btrfs/115
+index eac0e33d..02ae4e1d 100755
+--- a/tests/btrfs/115
++++ b/tests/btrfs/115
+@@ -26,6 +26,9 @@ _cleanup()
+ . ./common/rc
+ . ./common/filter
+ 
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
+ # real QA test starts here
+ _supported_fs btrfs
+ _require_scratch
+diff --git a/tests/btrfs/205 b/tests/btrfs/205
+index b335ac3d..b53e0e52 100755
+--- a/tests/btrfs/205
++++ b/tests/btrfs/205
+@@ -31,6 +31,9 @@ _cleanup()
+ . ./common/filter
+ . ./common/reflink
+ 
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
+ # real QA test starts here
+ _supported_fs btrfs
+ _require_scratch_reflink
+diff --git a/tests/shared/298 b/tests/shared/298
+index 416a89d3..5cb30fc9 100755
+--- a/tests/shared/298
++++ b/tests/shared/298
+@@ -15,6 +15,9 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+ 
+ . ./common/rc
+ 
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
+ _supported_fs ext4 xfs btrfs
+ _require_test
+ _require_loop
+-- 
+2.28.0
+
