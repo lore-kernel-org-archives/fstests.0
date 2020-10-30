@@ -2,101 +2,148 @@ Return-Path: <SRS0=qEBK=EF=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3B884C388F9
-	for <linux-fstests@archiver.kernel.org>; Fri, 30 Oct 2020 11:37:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8B27FC4363A
+	for <linux-fstests@archiver.kernel.org>; Fri, 30 Oct 2020 13:18:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D38B1207DE
-	for <linux-fstests@archiver.kernel.org>; Fri, 30 Oct 2020 11:37:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0AF2320731
+	for <linux-fstests@archiver.kernel.org>; Fri, 30 Oct 2020 13:18:38 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Lf8p/BEQ"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="gXdQIRyp"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726616AbgJ3LhQ (ORCPT
+        id S1726625AbgJ3NSi (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 30 Oct 2020 07:37:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35966 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726612AbgJ3Lgm (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 30 Oct 2020 07:36:42 -0400
-Received: from mail-il1-x12d.google.com (mail-il1-x12d.google.com [IPv6:2607:f8b0:4864:20::12d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 291B7C0613D4;
-        Fri, 30 Oct 2020 04:36:42 -0700 (PDT)
-Received: by mail-il1-x12d.google.com with SMTP id k1so6174317ilc.10;
-        Fri, 30 Oct 2020 04:36:42 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:from:date:message-id:subject:to:cc;
-        bh=Ew4StMpVo5ez/gEFLEgiv2+lcmSuiaGgtLUtTDkvJwo=;
-        b=Lf8p/BEQUhthouU+btyK82bWtOqlH6j+tun8LQ2ImKsTkxUHsHb5+GN+hxt72GN9fe
-         fmQMgtAeAwqWNXH+W3cJxBIFAHF27J17AQpdWKKdeh1RjkCObSktx8sV/JYv98cfl4ZI
-         YMnjtZQLg9TFYrgCjS9ErR0O0HSI4Ns8WUUcz/fDV/XU8C2UZNCGo1CCS8KaW9UubxON
-         dqL8IE71wUvGVQefVF1LQ5fxVDZo68cpE2kRUON9aSVULMXeY/pYeqCFjmq2NfCGiE3w
-         vip2Hifunp9agDufsEnquFjeFy1L7QEvcaY1Fr4SetVaVYYT0/d0nhaGwfuw7t0LbIdw
-         7zFA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:from:date:message-id:subject:to:cc;
-        bh=Ew4StMpVo5ez/gEFLEgiv2+lcmSuiaGgtLUtTDkvJwo=;
-        b=T7sxqYriwqhG4ymZT+jYDqdU9p1lz0cGefmmWt5y6tS70ZPxeGZ74bDKxtQu0oNxbM
-         abjR4C03GCkhGGki8aRAcN6a0hntzo7d4flHyQOVTtxfaphbcfcF9+7EZUM58RVwmWMY
-         FRvIjlyw6zR2uODcy5DM8RE/t0+R1yulqtrDCfF9fEoKLYaq+4CWXIGkorAI3tL68Iby
-         2Hqn9EDuEsjlAgTFmjpe383mnIQxGGNMnEbG4TLV7Khd8z1qEvUKqrdwt4+igTMP9RWU
-         y0z9GrhxUPmi6as2JMcuacUGUzK8yA0DfO41oaKhCFQMk/s+g1f0PgKHVahuGso4fwPy
-         q0DA==
-X-Gm-Message-State: AOAM5313KNESrL7FQJAQCBIkAqqHhY2btMCMacYQ4BKXcaDTHpxMSqMs
-        hf4biHhcj3m/dpU1Uc4EXQDONYR9Ox4v0GDdiqQ=
-X-Google-Smtp-Source: ABdhPJxqH9M8AIb8SmhcdDwUNFZKXLMtHK1hDHZ5JOyAaF0QPeUmS+TCTxpLKzJuKPwyUkiggZXt1qHu7upJZt8uPjg=
-X-Received: by 2002:a05:6e02:c1:: with SMTP id r1mr1500489ilq.250.1604057801608;
- Fri, 30 Oct 2020 04:36:41 -0700 (PDT)
+        Fri, 30 Oct 2020 09:18:38 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:34836 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726612AbgJ3NSh (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 30 Oct 2020 09:18:37 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1604063916;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=IpBz9HE0+LF1roOf+93vzSdfOChLyFY4c0u+B2Dio2o=;
+        b=gXdQIRypedSj06Bt48/L2+ZORCQnxiiSqjqugwVnSs6fnqGUD9SoF2Lz+DEjlRL1ckp/vi
+        mNWkkK5WWyl0NA4jDqXIOfVlowx2CjcTCv5SJgmQziNyfqvy822X51p6B9qiWP/0VuP9Bd
+        nIQNRoYBo1G1AtFBUl8vD/AIkf7Jc7o=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-373-UgVc5cf0MX2JsHjS2xyaxg-1; Fri, 30 Oct 2020 09:18:34 -0400
+X-MC-Unique: UgVc5cf0MX2JsHjS2xyaxg-1
+Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 75044188C130;
+        Fri, 30 Oct 2020 13:18:32 +0000 (UTC)
+Received: from bfoster (ovpn-113-186.rdu2.redhat.com [10.10.113.186])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id 97D875B4A7;
+        Fri, 30 Oct 2020 13:18:31 +0000 (UTC)
+Date:   Fri, 30 Oct 2020 09:18:29 -0400
+From:   Brian Foster <bfoster@redhat.com>
+To:     Ritesh Harjani <riteshh@linux.ibm.com>
+Cc:     fstests@vger.kernel.org, anju@linux.vnet.ibm.com,
+        Eryu Guan <guan@eryu.me>, linux-ext4@vger.kernel.org,
+        linux-btrfs@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 1/3] common/rc: Make swapon check in
+ _require_scratch_swapfile() specific to btrfs
+Message-ID: <20201030131829.GB1794672@bfoster>
+References: <cover.1604000570.git.riteshh@linux.ibm.com>
+ <6070d16aab6a61bbbc988fc68cc727c21ec7baef.1604000570.git.riteshh@linux.ibm.com>
 MIME-Version: 1.0
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Fri, 30 Oct 2020 13:36:30 +0200
-Message-ID: <CAOQ4uxjia_L5mzEa=R9221sdO9KrsmvyGyKGcrmYKc47msJ=bg@mail.gmail.com>
-Subject: Random xfs_check errors
-To:     "Darrick J. Wong" <darrick.wong@oracle.com>,
-        Sasha Levin <sashal@kernel.org>, Eryu Guan <guaneryu@gmail.com>
-Cc:     linux-xfs <linux-xfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <6070d16aab6a61bbbc988fc68cc727c21ec7baef.1604000570.git.riteshh@linux.ibm.com>
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.11
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Hi guys,
+On Fri, Oct 30, 2020 at 01:22:51AM +0530, Ritesh Harjani wrote:
+> swapon/off check in _require_scratch_swapfile() was specifically added
+> for btrfs[1]/[2] since in previous kernels, swapfile was not supported on btrfs.
+> This rather masks the issue sometimes with swapon system call in
+> case if it fails.
+> for e.g. in latest ext4 upstream tree when "-g quick" (which ran swap tests too)
+> was tested, all swap tests resulted into "_notrun" since swapon failed
+> inside _require_scratch_swapfile() itself.
+> Whereas this failure on ext4 was actually due to a regression with latest
+> fast-commit patch, which went un-noticed.
+> Hence make this swapon/off check only specific to btrfs.
+> Tested default config of xfs/btrfs/ext4/f2fs with this patch.
+> 
+> With this change on buggy kernel, we could clearly catch the swap failures.
+> e.g.
+> generic/472 17s ...
+> <...>
+> @@ -1,4 +1,7 @@
+> QA output created by 472
+> regular swap
+> +swapon: Invalid argument
+> too long swap
+> +swapon: Invalid argument
+> tiny swap
+> +swapon: Invalid argument
+> ...
+> (Run 'diff -u /home/qemu/src/tools-work/xfstests-dev/tests/generic/472.out \
+> /home/qemu/src/tools-work/xfstests-dev/results//ext4/generic/472.out.bad' \
+> to see the entire diff)
+> 
+> [1]: 8c96cfbfe530 ("generic/35[67]: disable swapfile tests on Btrfs")
+> [2]: bd6d67ee598e ("generic: enable swapfile tests on Btrfs")
+> 
+> Signed-off-by: Ritesh Harjani <riteshh@linux.ibm.com>
+> ---
+>  common/rc | 18 ++++++++++--------
+>  1 file changed, 10 insertions(+), 8 deletions(-)
+> 
+> diff --git a/common/rc b/common/rc
+> index b0c353c4c107..4c59968a6bd3 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -2358,18 +2358,20 @@ _require_scratch_swapfile()
+>  	[ -n "$SELINUX_MOUNT_OPTIONS" ] && export \
+>  		SELINUX_MOUNT_OPTIONS="-o context=system_u:object_r:swapfile_t:s0"
+>  
+> -	_scratch_mount
+> +	if [ "$FSTYP" = "btrfs" ]; then
+> +		_scratch_mount
+> +
+> +		# Minimum size for mkswap is 10 pages
+> +		_format_swapfile "$SCRATCH_MNT/swap" $(($(get_page_size) * 10))
+>  
+> -	# Minimum size for mkswap is 10 pages
+> -	_format_swapfile "$SCRATCH_MNT/swap" $(($(get_page_size) * 10))
+> +		if ! swapon "$SCRATCH_MNT/swap" >/dev/null 2>&1; then
+> +			_scratch_unmount
+> +			_notrun "swapfiles are not supported"
+> +		fi
+>  
+> -	if ! swapon "$SCRATCH_MNT/swap" >/dev/null 2>&1; then
+> +		swapoff "$SCRATCH_MNT/swap" >/dev/null 2>&1
+>  		_scratch_unmount
+> -		_notrun "swapfiles are not supported"
+>  	fi
+> -
+> -	swapoff "$SCRATCH_MNT/swap" >/dev/null 2>&1
+> -	_scratch_unmount
+>  }
 
-I've been running the latest xfstests with xfsprogs v5.9 and stable
-kernel v5.9.y past week (including v5.9.2 today) and I'm getting
-reports like below after random tests.
+This factors out the majority of this function for !btrfs cases to the
+point where it doesn't do anything swap related. Perhaps it would be
+more clear to do something like '[ $FSTYP = "btrfs" ] &&
+_require_scratch_swapfile()' in the actual tests that require filtering
+out on btrfs..?
 
-This one was after generic/466, but already got similar reports
-(with more blocks) after generic/511,518,519 on different test runs.
+Brian
 
-Is anyone else seeing this?
-Any advice on what to look for?
+>  
+>  # Check that a fs has enough free space (in 1024b blocks)
+> -- 
+> 2.26.2
+> 
 
-Did not get to test v5.10-rc1 yet. I thought I would ask here first
-in case it's a known issue.
-
-Sasha, I am wondering which xfsprogs version are you using
-when verifying stable kernel patches, because I have just recently
-upgraded xfsprogs to v5.9 in my stable test environment.
-
-Thanks,
-Amir.
-
-
-_check_xfs_filesystem: filesystem on
-/dev/mapper/0fce4d2d--779b--44e8--91d0--2cb1b252f68e-xfs_scratch is
-inconsistent (c)
-*** xfs_check output ***
-block 0/10 expected type unknown got free1
-agf_freeblks 1310702, counted 1310701 in ag 0
-agi_freecount 61, counted 58 in ag 0
-sb_ifree 61, counted 58
-sb_fdblocks 5240288, counted 5240287
-sb_fdblocks 5240288, aggregate AGF count 5240287
-*** end xfs_check output
