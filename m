@@ -2,121 +2,101 @@ Return-Path: <SRS0=qEBK=EF=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	UNPARSEABLE_RELAY autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EA680C55178
-	for <linux-fstests@archiver.kernel.org>; Fri, 30 Oct 2020 01:57:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3B884C388F9
+	for <linux-fstests@archiver.kernel.org>; Fri, 30 Oct 2020 11:37:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 918E020739
-	for <linux-fstests@archiver.kernel.org>; Fri, 30 Oct 2020 01:57:30 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D38B1207DE
+	for <linux-fstests@archiver.kernel.org>; Fri, 30 Oct 2020 11:37:19 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="N4Oz3H6z"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Lf8p/BEQ"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725771AbgJ3B52 (ORCPT
+        id S1726616AbgJ3LhQ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 29 Oct 2020 21:57:28 -0400
-Received: from aserp2130.oracle.com ([141.146.126.79]:39976 "EHLO
-        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725372AbgJ3B52 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 29 Oct 2020 21:57:28 -0400
-Received: from pps.filterd (aserp2130.oracle.com [127.0.0.1])
-        by aserp2130.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 09TKxMhp076672;
-        Thu, 29 Oct 2020 21:04:32 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
- : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=corp-2020-01-29;
- bh=b9Eybl/kXwCQLEYPHlsMF9500flCIdapjz1uqSSLeGA=;
- b=N4Oz3H6zho41m1HWactdv86yx+yYx1oGG9QQecIdaViuGrwv4svCDlC0knSTZre4pEF0
- vZxQtTGuwG5MLrcwzB+8rSCt9TqcX9O0ho9kNeFt5UnouC2sWfBNvUAr3eXbyyRXX2Pg
- /VcErpRKGfTNSKrnUr4iLiyirmGwHyQn6coRdwJuDb/M6IRv/V1zNGCDJhELsdG4lfSv
- r/lzw19t3sqgWfFM/y7txqFWp8O/If0jdXNC4vWzw7GXCX1i1Iu2/u96oZDF32eVlvm1
- Df50R9iNSRBAIUVBmDa4VSZXMFz2t4vay1/ifRCAtbR7S3tL+s5nrRpqHbk6nhqcirmR ww== 
-Received: from userp3020.oracle.com (userp3020.oracle.com [156.151.31.79])
-        by aserp2130.oracle.com with ESMTP id 34c9sb7797-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Thu, 29 Oct 2020 21:04:32 +0000
-Received: from pps.filterd (userp3020.oracle.com [127.0.0.1])
-        by userp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 09TKuPw5172410;
-        Thu, 29 Oct 2020 21:04:31 GMT
-Received: from aserv0122.oracle.com (aserv0122.oracle.com [141.146.126.236])
-        by userp3020.oracle.com with ESMTP id 34cx1tp8tc-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Thu, 29 Oct 2020 21:04:31 +0000
-Received: from abhmp0007.oracle.com (abhmp0007.oracle.com [141.146.116.13])
-        by aserv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 09TL4PmC019065;
-        Thu, 29 Oct 2020 21:04:25 GMT
-Received: from localhost (/10.159.244.77)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Thu, 29 Oct 2020 14:04:25 -0700
-Date:   Thu, 29 Oct 2020 14:04:24 -0700
-From:   "Darrick J. Wong" <darrick.wong@oracle.com>
-To:     Ritesh Harjani <riteshh@linux.ibm.com>
-Cc:     fstests@vger.kernel.org, anju@linux.vnet.ibm.com,
-        Eryu Guan <guan@eryu.me>, linux-ext4@vger.kernel.org,
-        linux-btrfs@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 3/3] common/rc: source common/xfs and common/btrfs
-Message-ID: <20201029210424.GD1061252@magnolia>
-References: <cover.1604000570.git.riteshh@linux.ibm.com>
- <8d7db41971a227c5bd83677464d139399607e720.1604000570.git.riteshh@linux.ibm.com>
+        Fri, 30 Oct 2020 07:37:16 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35966 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726612AbgJ3Lgm (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 30 Oct 2020 07:36:42 -0400
+Received: from mail-il1-x12d.google.com (mail-il1-x12d.google.com [IPv6:2607:f8b0:4864:20::12d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 291B7C0613D4;
+        Fri, 30 Oct 2020 04:36:42 -0700 (PDT)
+Received: by mail-il1-x12d.google.com with SMTP id k1so6174317ilc.10;
+        Fri, 30 Oct 2020 04:36:42 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:from:date:message-id:subject:to:cc;
+        bh=Ew4StMpVo5ez/gEFLEgiv2+lcmSuiaGgtLUtTDkvJwo=;
+        b=Lf8p/BEQUhthouU+btyK82bWtOqlH6j+tun8LQ2ImKsTkxUHsHb5+GN+hxt72GN9fe
+         fmQMgtAeAwqWNXH+W3cJxBIFAHF27J17AQpdWKKdeh1RjkCObSktx8sV/JYv98cfl4ZI
+         YMnjtZQLg9TFYrgCjS9ErR0O0HSI4Ns8WUUcz/fDV/XU8C2UZNCGo1CCS8KaW9UubxON
+         dqL8IE71wUvGVQefVF1LQ5fxVDZo68cpE2kRUON9aSVULMXeY/pYeqCFjmq2NfCGiE3w
+         vip2Hifunp9agDufsEnquFjeFy1L7QEvcaY1Fr4SetVaVYYT0/d0nhaGwfuw7t0LbIdw
+         7zFA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:from:date:message-id:subject:to:cc;
+        bh=Ew4StMpVo5ez/gEFLEgiv2+lcmSuiaGgtLUtTDkvJwo=;
+        b=T7sxqYriwqhG4ymZT+jYDqdU9p1lz0cGefmmWt5y6tS70ZPxeGZ74bDKxtQu0oNxbM
+         abjR4C03GCkhGGki8aRAcN6a0hntzo7d4flHyQOVTtxfaphbcfcF9+7EZUM58RVwmWMY
+         FRvIjlyw6zR2uODcy5DM8RE/t0+R1yulqtrDCfF9fEoKLYaq+4CWXIGkorAI3tL68Iby
+         2Hqn9EDuEsjlAgTFmjpe383mnIQxGGNMnEbG4TLV7Khd8z1qEvUKqrdwt4+igTMP9RWU
+         y0z9GrhxUPmi6as2JMcuacUGUzK8yA0DfO41oaKhCFQMk/s+g1f0PgKHVahuGso4fwPy
+         q0DA==
+X-Gm-Message-State: AOAM5313KNESrL7FQJAQCBIkAqqHhY2btMCMacYQ4BKXcaDTHpxMSqMs
+        hf4biHhcj3m/dpU1Uc4EXQDONYR9Ox4v0GDdiqQ=
+X-Google-Smtp-Source: ABdhPJxqH9M8AIb8SmhcdDwUNFZKXLMtHK1hDHZ5JOyAaF0QPeUmS+TCTxpLKzJuKPwyUkiggZXt1qHu7upJZt8uPjg=
+X-Received: by 2002:a05:6e02:c1:: with SMTP id r1mr1500489ilq.250.1604057801608;
+ Fri, 30 Oct 2020 04:36:41 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <8d7db41971a227c5bd83677464d139399607e720.1604000570.git.riteshh@linux.ibm.com>
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9789 signatures=668682
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 spamscore=0 phishscore=0 bulkscore=0
- suspectscore=1 malwarescore=0 mlxlogscore=999 mlxscore=0 adultscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2009150000
- definitions=main-2010290146
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9789 signatures=668682
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxscore=0 impostorscore=0
- mlxlogscore=999 malwarescore=0 lowpriorityscore=0 bulkscore=0
- priorityscore=1501 spamscore=0 phishscore=0 clxscore=1011 suspectscore=1
- adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2009150000 definitions=main-2010290146
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Fri, 30 Oct 2020 13:36:30 +0200
+Message-ID: <CAOQ4uxjia_L5mzEa=R9221sdO9KrsmvyGyKGcrmYKc47msJ=bg@mail.gmail.com>
+Subject: Random xfs_check errors
+To:     "Darrick J. Wong" <darrick.wong@oracle.com>,
+        Sasha Levin <sashal@kernel.org>, Eryu Guan <guaneryu@gmail.com>
+Cc:     linux-xfs <linux-xfs@vger.kernel.org>,
+        fstests <fstests@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Oct 30, 2020 at 01:22:53AM +0530, Ritesh Harjani wrote:
-> Without this patch I am unable to test for multiple different
-> filesystem sections for the same tests. Since we anyway have only
-> function definitions in these files, so it should be ok to source it
-> by default too.
-> e.g. when I run ./check -s btrfs tests/generic/613 with 3 different [***_fs]
-> sections from local.config file, I see below failures.
-> 
-> ./common/rc: line 2801: _check_btrfs_filesystem: command not found
-> 
-> ./check -s xfs_4k -g swap (for XFS this fails like below)
-> ./common/rc: line 749: _scratch_mkfs_xfs: command not found
-> check: failed to mkfs $SCRATCH_DEV using specified options
-> 
-> Signed-off-by: Ritesh Harjani <riteshh@linux.ibm.com>
-> ---
->  common/rc | 2 ++
->  1 file changed, 2 insertions(+)
-> 
-> diff --git a/common/rc b/common/rc
-> index 4c59968a6bd3..e9ba1b6e8265 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -3,6 +3,8 @@
->  # Copyright (c) 2000-2006 Silicon Graphics, Inc.  All Rights Reserved.
->  
->  . common/config
-> +. ./common/xfs
-> +. ./common/btrfs
+Hi guys,
 
-Uhh, what happens if you run xfs and nfs one after the other?
+I've been running the latest xfstests with xfsprogs v5.9 and stable
+kernel v5.9.y past week (including v5.9.2 today) and I'm getting
+reports like below after random tests.
 
---D
+This one was after generic/466, but already got similar reports
+(with more blocks) after generic/511,518,519 on different test runs.
 
->  
->  BC=$(which bc 2> /dev/null) || BC=
->  
-> -- 
-> 2.26.2
-> 
+Is anyone else seeing this?
+Any advice on what to look for?
+
+Did not get to test v5.10-rc1 yet. I thought I would ask here first
+in case it's a known issue.
+
+Sasha, I am wondering which xfsprogs version are you using
+when verifying stable kernel patches, because I have just recently
+upgraded xfsprogs to v5.9 in my stable test environment.
+
+Thanks,
+Amir.
+
+
+_check_xfs_filesystem: filesystem on
+/dev/mapper/0fce4d2d--779b--44e8--91d0--2cb1b252f68e-xfs_scratch is
+inconsistent (c)
+*** xfs_check output ***
+block 0/10 expected type unknown got free1
+agf_freeblks 1310702, counted 1310701 in ag 0
+agi_freecount 61, counted 58 in ag 0
+sb_ifree 61, counted 58
+sb_fdblocks 5240288, counted 5240287
+sb_fdblocks 5240288, aggregate AGF count 5240287
+*** end xfs_check output
