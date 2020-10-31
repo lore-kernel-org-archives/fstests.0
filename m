@@ -1,232 +1,168 @@
-Return-Path: <SRS0=qEBK=EF=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=eswJ=EG=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AAA08C00A89
-	for <linux-fstests@archiver.kernel.org>; Fri, 30 Oct 2020 13:19:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 85BF9C4742C
+	for <linux-fstests@archiver.kernel.org>; Sat, 31 Oct 2020 05:41:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 47EE7221FA
-	for <linux-fstests@archiver.kernel.org>; Fri, 30 Oct 2020 13:19:16 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="gFLOuElK"
+	by mail.kernel.org (Postfix) with ESMTP id 32F132087E
+	for <linux-fstests@archiver.kernel.org>; Sat, 31 Oct 2020 05:41:28 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1604122888;
+	bh=nCGTBX9tDEqmWbzaPbBBKNNXSVAAPdzmhCtdaU5JG3o=;
+	h=From:To:Cc:Subject:Date:List-ID:From;
+	b=eDEdHJ9yH3d2YJT9jhfms0nawTMrmRk2N5zzGNH7MwQqRoNYYpxWHuXluWxhOGDlT
+	 8ME4m2+trf3lIWFUUgcU95yQmJmHMM4na+DDOyfR1JE0bF04xxNYBq1Of+rhgtnql4
+	 4i2XpUyO9THIFK6h3Rixh4p+1JMnHBY8OFjlMncQ=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725999AbgJ3NTQ (ORCPT
+        id S1725890AbgJaFl1 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 30 Oct 2020 09:19:16 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:36536 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726178AbgJ3NTP (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 30 Oct 2020 09:19:15 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1604063953;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=MNMgeoRyZngGrsMkBeY+FVhigg852k0h/oZRRCOeEy8=;
-        b=gFLOuElKxn6FXw4EO5Sx6TUragmVJJKOunS6IfspfuEWZIAA0aHkDMgFkXkhoAbvb1yp7A
-        H8UcyP58m3Ck+vLT06bw6Z5B1pnDgim6iL6Bzl7/nS2BqX0/aT2oB2HEbt83ZCPgtiAVnj
-        MUN6UvkOZpk/kjSJD/LxMpylm9xGDkw=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-554-_ov3KqdkMGeMFm0L1iR8Pg-1; Fri, 30 Oct 2020 09:19:12 -0400
-X-MC-Unique: _ov3KqdkMGeMFm0L1iR8Pg-1
-Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        Sat, 31 Oct 2020 01:41:27 -0400
+Received: from mail.kernel.org ([198.145.29.99]:38522 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725822AbgJaFl1 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sat, 31 Oct 2020 01:41:27 -0400
+Received: from sol.attlocal.net (172-10-235-113.lightspeed.sntcca.sbcglobal.net [172.10.235.113])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 9C21C1030984;
-        Fri, 30 Oct 2020 13:19:10 +0000 (UTC)
-Received: from bfoster (ovpn-113-186.rdu2.redhat.com [10.10.113.186])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id CADDE10023A5;
-        Fri, 30 Oct 2020 13:19:09 +0000 (UTC)
-Date:   Fri, 30 Oct 2020 09:19:08 -0400
-From:   Brian Foster <bfoster@redhat.com>
-To:     Ritesh Harjani <riteshh@linux.ibm.com>
-Cc:     fstests@vger.kernel.org, anju@linux.vnet.ibm.com,
-        Eryu Guan <guan@eryu.me>, linux-ext4@vger.kernel.org,
-        linux-btrfs@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 2/3] shared/001: Verify swapon on fallocated files for
- supported FS
-Message-ID: <20201030131908.GC1794672@bfoster>
-References: <cover.1604000570.git.riteshh@linux.ibm.com>
- <5750e38bb14440b6357a46470f2cd769cde1a349.1604000570.git.riteshh@linux.ibm.com>
+        by mail.kernel.org (Postfix) with ESMTPSA id 31EF020791;
+        Sat, 31 Oct 2020 05:41:26 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1604122886;
+        bh=nCGTBX9tDEqmWbzaPbBBKNNXSVAAPdzmhCtdaU5JG3o=;
+        h=From:To:Cc:Subject:Date:From;
+        b=vbYpcCy1kQQaKf4LqRHnEVba/ssq8svKbX7T+GqeFwFIATHBOmYg0fJN0wubI1xi8
+         seCRpkyF1v+Vk0cK5nkD+Hhm0OT87E3IuzXzJirzq3l7ITC/KxbhxLXY4gY7Fb0zTf
+         mR9RPAn2bMi1bwsGJ967jUWx2hwlfEdlynTr/j4s=
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     fstests@vger.kernel.org
+Cc:     linux-fscrypt@vger.kernel.org
+Subject: [PATCH] generic/395: remove workarounds for wrong error codes
+Date:   Fri, 30 Oct 2020 22:40:18 -0700
+Message-Id: <20201031054018.695314-1-ebiggers@kernel.org>
+X-Mailer: git-send-email 2.29.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <5750e38bb14440b6357a46470f2cd769cde1a349.1604000570.git.riteshh@linux.ibm.com>
-X-Scanned-By: MIMEDefang 2.84 on 10.5.11.22
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Oct 30, 2020 at 01:22:52AM +0530, Ritesh Harjani wrote:
-> Currently generic/496 tests if swapon works with fallocated files or not
-> on the given FS and bails out with _not_run if it doesn't. Due to this
-> 2 of the regressions went unnoticed in ext4.
-> Hence this test is created specifically for FS (ext4, xfs) which does
-> support swap functionality on unwritten extents to report an error
-> if it swapon fails with fallocated fils.
-> 
-> Signed-off-by: Ritesh Harjani <riteshh@linux.ibm.com>
-> ---
->  tests/shared/001     | 97 ++++++++++++++++++++++++++++++++++++++++++++
->  tests/shared/001.out |  6 +++
->  tests/shared/group   |  1 +
->  3 files changed, 104 insertions(+)
->  create mode 100755 tests/shared/001
->  create mode 100644 tests/shared/001.out
-> 
+From: Eric Biggers <ebiggers@google.com>
 
-I could be mistaken, but I thought we were phasing out shared tests in
-favor of generic tests..?
+generic/395 contains workarounds to allow for some of the fscrypt ioctls
+to fail with different error codes.  However, the error codes were all
+fixed up and documented years ago:
 
-> diff --git a/tests/shared/001 b/tests/shared/001
-> new file mode 100755
-> index 000000000000..ad7285bdb709
-> --- /dev/null
-> +++ b/tests/shared/001
-> @@ -0,0 +1,97 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2018 Oracle.  All Rights Reserved.
-> +#
-> +# FS QA Test 001
-> +#
-> +# This is similar to generic/472 and generic/496.
-> +# Except that generic/496 is modified to focefully verify if
-> +# swap works on fallocate files for given supported filesystems
-> +# or not instead of bailing out with _not_run, if swapon cmd fails.
-> +# Modified by Ritesh Harjani <riteshh@linux.ibm.com>
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	swapoff $swapfile 2> /dev/null
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# Modify as appropriate.
-> +_supported_fs ext4 xfs
-> +_require_scratch_swapfile
-> +_require_test_program mkswap
-> +_require_test_program swapon
-> +_require_xfs_io_command "falloc"
-> +
-> +_scratch_mkfs >>$seqres.full 2>&1
-> +_scratch_mount >>$seqres.full 2>&1
-> +
-> +swapfile=$SCRATCH_MNT/swap
-> +len=$((2 * 1048576))
-> +page_size=$(get_page_size)
-> +
-> +swapfile_cycle() {
-> +	local swapfile="$1"
-> +
-> +	if [ $# -eq 2 ]; then
-> +		local len="$2"
-> +		_pwrite_byte 0x58 0 $len $swapfile >> $seqres.full
-> +	fi
-> +	"$here/src/mkswap" $swapfile >> $seqres.full
-> +	"$here/src/swapon" $swapfile 2>&1 | _filter_scratch
-> +	swapoff $swapfile 2>> $seqres.full
+- FS_IOC_GET_ENCRYPTION_POLICY on ext4 failed with ENOENT instead of
+  ENODATA on unencrypted files.  Fixed by commit db717d8e26c2
+  ("fscrypto: move ioctl processing more fully into common code").
 
-It might be a little more readable to define and use per-cmd variables
-like $MKSWAP, etc., if we don't have those already.
+- FS_IOC_SET_ENCRYPTION_POLICY failed with EINVAL instead of EEXIST
+  on encrypted files.  Fixed by commit 8488cd96ff88 ("fscrypt: use
+  EEXIST when file already uses different policy").
 
-> +	rm -f $swapfile
-> +}
-> +
-> +# from here similar to generic/472
-> +touch $swapfile
-> +
-> +# Create a regular swap file
-> +echo "regular swap" | tee -a $seqres.full
-> +swapfile_cycle $swapfile $len
-> +
-> +# Create a swap file with a little too much junk on the end
-> +echo "too long swap" | tee -a $seqres.full
-> +swapfile_cycle $swapfile $((len + 3))
-> +
-> +# Create a ridiculously small swap file.  Each swap file must have at least
-> +# two pages after the header page.
-> +echo "tiny swap" | tee -a $seqres.full
-> +swapfile_cycle $swapfile $(($(get_page_size) * 3))
-> +
-> +# From here similar to generic/496
-> +echo "fallocate swap" | tee -a $seqres.full
-> +$XFS_IO_PROG -f -c "falloc 0 $len" $swapfile >> $seqres.full
-> +"$here/src/mkswap" $swapfile
-> +"$here/src/swapon" $swapfile 2>&1 | _filter_scratch
-> +swapoff $swapfile
-> +
-> +# Create a fallocated swap file and touch every other $PAGE_SIZE to create
-> +# a mess of written/unwritten extent records
-> +echo "mixed swap" | tee -a $seqres.full
-> +$XFS_IO_PROG -f -c "falloc 0 $len" $swapfile >> $seqres.full
+- FS_IOC_SET_ENCRYPTION_POLICY failed with EINVAL instead of ENOTDIR
+  on nondirectories.  Fixed by commit dffd0cfa06d4 ("fscrypt: use
+  ENOTDIR when setting encryption policy on nondirectory").
 
-We probably want to recreate the file here. It looks like we reuse the
-file from the previous test, since it didn't call swapfile_cycle().
+It's been long enough, so update the test to expect the correct behavior
+only, so we don't accidentally reintroduce the wrong behavior.
 
-I also wonder whether it's really worth duplicating previous test code
-just to prevent incorrect _notrun cases that should be considered test
-failures. One could argue that's a bug in the original test that could
-be fixed. Could we modify those tests to only filter out the btrfs case?
+Signed-off-by: Eric Biggers <ebiggers@google.com>
+---
+ tests/generic/395 | 31 ++++++++-----------------------
+ 1 file changed, 8 insertions(+), 23 deletions(-)
 
-Brian
-
-> +seq $page_size $((page_size * 2)) $len | while read offset; do
-> +	_pwrite_byte 0x58 $offset 1 $swapfile >> $seqres.full
-> +done
-> +swapfile_cycle $swapfile
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/shared/001.out b/tests/shared/001.out
-> new file mode 100644
-> index 000000000000..2d7655e19422
-> --- /dev/null
-> +++ b/tests/shared/001.out
-> @@ -0,0 +1,6 @@
-> +QA output created by 001
-> +regular swap
-> +too long swap
-> +tiny swap
-> +fallocate swap
-> +mixed swap
-> diff --git a/tests/shared/group b/tests/shared/group
-> index a8b926d877d2..5a41b23c7010 100644
-> --- a/tests/shared/group
-> +++ b/tests/shared/group
-> @@ -3,6 +3,7 @@
->  # - do not start group names with a digit
->  # - comment line before each group is "new" description
->  #
-> +001 auto swap quick
->  002 auto metadata quick log
->  032 mkfs auto quick
->  298 auto trim
-> --
-> 2.26.2
-> 
+diff --git a/tests/generic/395 b/tests/generic/395
+index 3fa2a823..34121dd9 100755
+--- a/tests/generic/395
++++ b/tests/generic/395
+@@ -38,31 +38,19 @@ _require_user
+ _scratch_mkfs_encrypted &>> $seqres.full
+ _scratch_mount
+ 
+-check_no_policy()
+-{
+-	# When a file is unencrypted, FS_IOC_GET_ENCRYPTION_POLICY currently
+-	# fails with ENOENT on ext4 but with ENODATA on f2fs.  TODO: it's
+-	# planned to consistently use ENODATA.  For now this test accepts both.
+-	_get_encpolicy $1 |&
+-		sed -e 's/No such file or directory/No data available/'
+-}
+-
+ # Should be able to set an encryption policy on an empty directory
+ empty_dir=$SCRATCH_MNT/empty_dir
+ echo -e "\n*** Setting encryption policy on empty directory ***"
+ mkdir $empty_dir
+-check_no_policy $empty_dir |& _filter_scratch
++_get_encpolicy $empty_dir |& _filter_scratch
+ _set_encpolicy $empty_dir 0000111122223333
+ _get_encpolicy $empty_dir | _filter_scratch
+ 
+ # Should be able to set the same policy again, but not a different one.
+-# TODO: the error code for "already has a different policy" is planned to switch
+-# from EINVAL to EEXIST.  For now this test accepts both.
+ echo -e "\n*** Setting encryption policy again ***"
+ _set_encpolicy $empty_dir 0000111122223333
+ _get_encpolicy $empty_dir | _filter_scratch
+-_set_encpolicy $empty_dir 4444555566667777 |& \
+-	_filter_scratch | sed -e 's/Invalid argument/File exists/'
++_set_encpolicy $empty_dir 4444555566667777 |& _filter_scratch
+ _get_encpolicy $empty_dir | _filter_scratch
+ 
+ # Should *not* be able to set an encryption policy on a nonempty directory
+@@ -71,19 +59,16 @@ echo -e "\n*** Setting encryption policy on nonempty directory ***"
+ mkdir $nonempty_dir
+ touch $nonempty_dir/file
+ _set_encpolicy $nonempty_dir |& _filter_scratch
+-check_no_policy $nonempty_dir |& _filter_scratch
++_get_encpolicy $nonempty_dir |& _filter_scratch
+ 
+ # Should *not* be able to set an encryption policy on a nondirectory file, even
+ # an empty one.  Regression test for 002ced4be642: "fscrypto: only allow setting
+ # encryption policy on directories".
+-# TODO: the error code for "not a directory" is planned to switch from EINVAL to
+-# ENOTDIR.  For now this test accepts both.
+ nondirectory=$SCRATCH_MNT/nondirectory
+ echo -e "\n*** Setting encryption policy on nondirectory ***"
+ touch $nondirectory
+-_set_encpolicy $nondirectory |& \
+-	_filter_scratch | sed -e 's/Invalid argument/Not a directory/'
+-check_no_policy $nondirectory |& _filter_scratch
++_set_encpolicy $nondirectory |& _filter_scratch
++_get_encpolicy $nondirectory |& _filter_scratch
+ 
+ # Should *not* be able to set an encryption policy on another user's directory.
+ # Regression test for 163ae1c6ad62: "fscrypto: add authorization check for
+@@ -92,7 +77,7 @@ unauthorized_dir=$SCRATCH_MNT/unauthorized_dir
+ echo -e "\n*** Setting encryption policy on another user's directory ***"
+ mkdir $unauthorized_dir
+ _user_do_set_encpolicy $unauthorized_dir |& _filter_scratch
+-check_no_policy $unauthorized_dir |& _filter_scratch
++_get_encpolicy $unauthorized_dir |& _filter_scratch
+ 
+ # Should *not* be able to set an encryption policy on a directory on a
+ # filesystem mounted readonly.  Regression test for ba63f23d69a3: "fscrypto:
+@@ -102,12 +87,12 @@ echo -e "\n*** Setting encryption policy on readonly filesystem ***"
+ mkdir $SCRATCH_MNT/ro_dir $SCRATCH_MNT/ro_bind_mnt
+ _scratch_remount ro
+ _set_encpolicy $SCRATCH_MNT/ro_dir |& _filter_scratch
+-check_no_policy $SCRATCH_MNT/ro_dir |& _filter_scratch
++_get_encpolicy $SCRATCH_MNT/ro_dir |& _filter_scratch
+ _scratch_remount rw
+ mount --bind $SCRATCH_MNT $SCRATCH_MNT/ro_bind_mnt
+ mount -o remount,ro,bind $SCRATCH_MNT/ro_bind_mnt
+ _set_encpolicy $SCRATCH_MNT/ro_bind_mnt/ro_dir |& _filter_scratch
+-check_no_policy $SCRATCH_MNT/ro_bind_mnt/ro_dir |& _filter_scratch
++_get_encpolicy $SCRATCH_MNT/ro_bind_mnt/ro_dir |& _filter_scratch
+ umount $SCRATCH_MNT/ro_bind_mnt
+ 
+ # success, all done
+-- 
+2.29.1
 
