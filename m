@@ -1,110 +1,92 @@
-Return-Path: <SRS0=eswJ=EG=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=/bTx=EH=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.7 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	UNPARSEABLE_RELAY autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1D990C388F9
-	for <linux-fstests@archiver.kernel.org>; Sat, 31 Oct 2020 18:10:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5254EC2D0A3
+	for <linux-fstests@archiver.kernel.org>; Sun,  1 Nov 2020 16:04:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C0753206DD
-	for <linux-fstests@archiver.kernel.org>; Sat, 31 Oct 2020 18:10:51 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1604167851;
-	bh=z7eLb6mT4ZNOM7Y1jKdRASrr1qXT+vc1NOboctZGTSQ=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=M6L/WA3aDvIIyS2YvBUXoZwPFG9NcznfiCDOCbOhX5TSugMjaIR345iQE0bg6ttM7
-	 sCw0NtYZi7/Locy94mc9GwusRteiJn8NAtWdrXuI62Ok2y9ebIaqe5HGU8Ugn36a79
-	 ImCYPz2IUWFy/dtdY095v9CB/KyGd5mNNXkzZa5s=
+	by mail.kernel.org (Postfix) with ESMTP id 05D842084C
+	for <linux-fstests@archiver.kernel.org>; Sun,  1 Nov 2020 16:04:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728223AbgJaSKv (ORCPT
+        id S1726839AbgKAQEF (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 31 Oct 2020 14:10:51 -0400
-Received: from mail.kernel.org ([198.145.29.99]:45398 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728211AbgJaSKu (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sat, 31 Oct 2020 14:10:50 -0400
-Received: from sol.localdomain (172-10-235-113.lightspeed.sntcca.sbcglobal.net [172.10.235.113])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 20FC12068D;
-        Sat, 31 Oct 2020 18:10:50 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1604167850;
-        bh=z7eLb6mT4ZNOM7Y1jKdRASrr1qXT+vc1NOboctZGTSQ=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=b42ncufVY6xwyISzZL6ljJRP2KAyBYar9tO6moqofidmLIsBVVC05i+cleBc3ESuu
-         QVOCAaeGhTKPeAfVvXOIu0MwhS+3ohE+JwLZcb+QPgJrANwFgPxQBFbWvZ1L3o/lhG
-         xPZgdcgEa5gFGXwleMTCZ6+d9HW3dxLh9Ph0l6zw=
-Date:   Sat, 31 Oct 2020 11:10:48 -0700
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     "Theodore Y. Ts'o" <tytso@mit.edu>
-Cc:     fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org
-Subject: Re: [PATCH] generic/395: remove workarounds for wrong error codes
-Message-ID: <20201031181048.GA936@sol.localdomain>
-References: <20201031054018.695314-1-ebiggers@kernel.org>
- <20201031173439.GA1750809@mit.edu>
+        Sun, 1 Nov 2020 11:04:05 -0500
+Received: from out20-86.mail.aliyun.com ([115.124.20.86]:56011 "EHLO
+        out20-86.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726730AbgKAQEF (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 1 Nov 2020 11:04:05 -0500
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07738414|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_regular_dialog|0.0063493-0.00161519-0.992036;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047204;MF=guan@eryu.me;NM=1;PH=DS;RN=6;RT=6;SR=0;TI=SMTPD_---.IrDNSlR_1604246637;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.IrDNSlR_1604246637)
+          by smtp.aliyun-inc.com(10.147.44.118);
+          Mon, 02 Nov 2020 00:03:57 +0800
+Date:   Mon, 2 Nov 2020 00:03:57 +0800
+From:   Eryu Guan <guan@eryu.me>
+To:     Ritesh Harjani <riteshh@linux.ibm.com>
+Cc:     fstests@vger.kernel.org, anju@linux.vnet.ibm.com,
+        linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org,
+        linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 0/3] fstests: Fix tests which checks for swapfile support
+Message-ID: <20201101160357.GE3853@desktop>
+References: <cover.1604000570.git.riteshh@linux.ibm.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20201031173439.GA1750809@mit.edu>
+In-Reply-To: <cover.1604000570.git.riteshh@linux.ibm.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sat, Oct 31, 2020 at 01:34:39PM -0400, Theodore Y. Ts'o wrote:
-> On Fri, Oct 30, 2020 at 10:40:18PM -0700, Eric Biggers wrote:
-> > From: Eric Biggers <ebiggers@google.com>
-> > 
-> > generic/395 contains workarounds to allow for some of the fscrypt ioctls
-> > to fail with different error codes.  However, the error codes were all
-> > fixed up and documented years ago:
-> > 
-> > - FS_IOC_GET_ENCRYPTION_POLICY on ext4 failed with ENOENT instead of
-> >   ENODATA on unencrypted files.  Fixed by commit db717d8e26c2
-> >   ("fscrypto: move ioctl processing more fully into common code").
-> > 
-> > - FS_IOC_SET_ENCRYPTION_POLICY failed with EINVAL instead of EEXIST
-> >   on encrypted files.  Fixed by commit 8488cd96ff88 ("fscrypt: use
-> >   EEXIST when file already uses different policy").
-> > 
-> > - FS_IOC_SET_ENCRYPTION_POLICY failed with EINVAL instead of ENOTDIR
-> >   on nondirectories.  Fixed by commit dffd0cfa06d4 ("fscrypt: use
-> >   ENOTDIR when setting encryption policy on nondirectory").
-> > 
-> > It's been long enough, so update the test to expect the correct behavior
-> > only, so we don't accidentally reintroduce the wrong behavior.
-> > 
-> > Signed-off-by: Eric Biggers <ebiggers@google.com>
+On Fri, Oct 30, 2020 at 01:22:50AM +0530, Ritesh Harjani wrote:
+> For more details, pls refer commit msg of each patch.
 > 
-> LGTM
+> Patch-1: modifies _require_scratch_swapfile() to check swapon only for btrfs
+
+I don't think it's a good idea, if a new fs without swapfile support is
+tested by fstests, test would get false failure, where it should
+_notrun. And making a generic requirement check to fs-specific doesn't
+seem quite right either.
+
+> Patch-2: adds a swapfile test for fallocate files for ext4, xfs (assuming
+> both FS supports and thus should pass).
+
+As Brian mentioned in his review, we're in the process to convert all
+shared tests to generic or fs-specific tests (very slow though), that
+said we don't want new shared tests.
+
+I think we could whitelist fs types in _require_scratch_swapfile() and
+don't _notrun for such filesystems, something like what we did in
+_fstyp_has_non_default_seek_data_hole(), so that we won't miss silent
+regressions on sucn filesystems, and we'll do sanity check as well on
+other filesystems.
+
+> Patch-3: added to support tests to run when multiple config section present
+> in local.config file.
+
+I have a patch[1] that should fix the issue 3 years ago, but it never
+got reviewed, would you please check and see if it fixed the bug for you?
+
+[1] https://patchwork.kernel.org/project/fstests/patch/20171117070022.14002-1-eguan@redhat.com/
+
+Thanks,
+Eryu
+
 > 
-> Did these fixes get backported into the stable kernels (and the
-> relevant Android trees)?
+> Ritesh Harjani (3):
+>   common/rc: Make swapon check in _require_scratch_swapfile() specific to btrfs
+>   shared/001: Verify swapon on fallocated files for supported FS
+>   common/rc: source common/xfs and common/btrfs
 > 
-
-Some of them.  Regarding stable kernels, currently if these 3 xfstests patches
-are applied, generic/395 will fail on 4.9 and earlier, generic/397 will fail on
-ubifs on 4.19 and earlier, and generic/398 will fail on 4.19 and earlier.
-
-In Android kernels, the fscrypt support tends to be somewhat more up-to-date
-than in the corresponding LTS kernels, as the latest fscrypt-related patches
-were backported to them while they were open for development.  E.g., the latest
-3.18, 4.4, and 4.9 Android common kernels have fs/crypto/ at the equivalent of
-upstream 4.17 or 4.18.  Those branches are closed for development though, so
-they won't be getting anything newer than that except through LTS.  (And devices
-using those kernel versions don't necessarily get kernel updates anymore.)
-
-Backporting these patches can be tricky since the fscrypt code has changed a
-lot, so in most cases they would require writing custom backports.
-
-So there's only so much I can do about older kernels.
-
-But probably the most important patch I should backport to LTS is f5e55e777cc9
-("fscrypt: return -EXDEV for incompatible rename or link into encrypted dir"),
-as that would get the tests passing on ext4 and f2fs on 4.14 and 4.19, and that
-patch was a fix for a bug that was causing problems for people.
-
-- Eric
+>  common/rc            | 20 +++++----
+>  tests/shared/001     | 97 ++++++++++++++++++++++++++++++++++++++++++++
+>  tests/shared/001.out |  6 +++
+>  tests/shared/group   |  1 +
+>  4 files changed, 116 insertions(+), 8 deletions(-)
+>  create mode 100755 tests/shared/001
+>  create mode 100644 tests/shared/001.out
+> 
+> --
+> 2.26.2
