@@ -2,202 +2,169 @@ Return-Path: <SRS0=/bTx=EH=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.7 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-8.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 80FDFC388F2
-	for <linux-fstests@archiver.kernel.org>; Sun,  1 Nov 2020 16:24:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 50D57C2D0A3
+	for <linux-fstests@archiver.kernel.org>; Sun,  1 Nov 2020 16:31:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4F86A2344C
-	for <linux-fstests@archiver.kernel.org>; Sun,  1 Nov 2020 16:24:41 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EC0552071E
+	for <linux-fstests@archiver.kernel.org>; Sun,  1 Nov 2020 16:31:58 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="An8RYPfv"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727016AbgKAQYj (ORCPT
+        id S1726790AbgKAQb6 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 1 Nov 2020 11:24:39 -0500
-Received: from out20-73.mail.aliyun.com ([115.124.20.73]:44653 "EHLO
-        out20-73.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726549AbgKAQYj (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 1 Nov 2020 11:24:39 -0500
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07438824|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.0365477-0.00737177-0.95608;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047199;MF=guan@eryu.me;NM=1;PH=DS;RN=6;RT=6;SR=0;TI=SMTPD_---.IrDrt1W_1604247868;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.IrDrt1W_1604247868)
-          by smtp.aliyun-inc.com(10.147.40.2);
-          Mon, 02 Nov 2020 00:24:28 +0800
-Date:   Mon, 2 Nov 2020 00:24:27 +0800
-From:   Eryu Guan <guan@eryu.me>
-To:     Ritesh Harjani <riteshh@linux.ibm.com>
-Cc:     fstests@vger.kernel.org, Jan Kara <jack@suse.cz>,
-        anju@linux.vnet.ibm.com, Christian Kujau <lists@nerdbynature.de>,
-        linux-ext4@vger.kernel.org
-Subject: Re: [PATCH 1/1] generic: Add test to check for mounting a huge
- sparse dm device
-Message-ID: <20201101162427.GF3853@desktop>
-References: <daec44e9f2e3ce483b7845065db3bf148ff5cd2c.1603864280.git.riteshh@linux.ibm.com>
+        Sun, 1 Nov 2020 11:31:58 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44000 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726549AbgKAQb6 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 1 Nov 2020 11:31:58 -0500
+Received: from mail-pg1-x52b.google.com (mail-pg1-x52b.google.com [IPv6:2607:f8b0:4864:20::52b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 979B8C0617A6
+        for <fstests@vger.kernel.org>; Sun,  1 Nov 2020 08:31:56 -0800 (PST)
+Received: by mail-pg1-x52b.google.com with SMTP id i7so6788036pgh.6
+        for <fstests@vger.kernel.org>; Sun, 01 Nov 2020 08:31:56 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=message-id:date:from:to:subject:mime-version:content-disposition;
+        bh=AgZyQdp397ijrVis1JSmP6KCExFQBc8bGQ81O4RCcko=;
+        b=An8RYPfvkwOYPZd7p8Ow/CdPVq8xVjuEjH/yTp4roxYYl35LZFqnb7uQMPDtgDBlNW
+         CR/RH2R8tWKWmqXbwpMa1i9c+IPYyteHnJhuyiM+gpW+q6b3gHNqQy1bPp+Ad3bYKpQ+
+         dgilWZIvhystsOv8W1xAlsOj94cNYES6LlQUg9FYJQc3XoclThZBWCne1RbU+Zty1Fa5
+         N95i4uW6vzMJG+4jhalcBMwviOVO3LLvX17JuNYv7NoRFF7HFfmNSB+k1zZecQaQ6V1o
+         GrnkCN+/5bCD/gmFEqBk8GAOCmRzy5Taly+8ziK9H0YD74FOk5W/7MJm7BLIWjY6UePu
+         MZzw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:message-id:date:from:to:subject:mime-version
+         :content-disposition;
+        bh=AgZyQdp397ijrVis1JSmP6KCExFQBc8bGQ81O4RCcko=;
+        b=gsuoy6JKWm0XjrpyxvlFr0+l46xhV9uSfikqGbt61ZfMLqpP0cMhYAJxmgOQp0w0rk
+         SH2QxKR5e8GdPsie061DthGMeZsFFoP7mXmSJaHMU0ym1iZD66fGFU8UYIr4BJDL8XQk
+         KQJ1i57l940ZcgiAsgsak2bZlj6AFUK/+j88jvu0I+teafz6s66YEWRqa/Uyzt0XC22S
+         V/OX4QTR0b86qBaVwKuKe3/wSe8ELl2GT2Ze/tY0EaYJ64qqUp0gBEkQFQpkVrlsdu4R
+         xJQ/vG3fj9bH0atL6akvTgygrICIV/euxrZbPaK7TMpeu0ONYSGiOOl3spXl729sgoSO
+         VFXQ==
+X-Gm-Message-State: AOAM530Rv3Du0QOvnbmWowvbq3xAL5JNzqW+VQBPf5LoUIKwaFsr7uC2
+        RxGlRzp1Vs3kIsVADL0iQAXtn00CTrE=
+X-Google-Smtp-Source: ABdhPJxa1yPiP0VfYgX3OdgpsP25NuHyZPSQEdXjuxvqfuZeql1RhCiNJwcirBnqezes4H52Z4RUbw==
+X-Received: by 2002:a63:4141:: with SMTP id o62mr10127669pga.363.1604248315634;
+        Sun, 01 Nov 2020 08:31:55 -0800 (PST)
+Received: from localhost ([47.89.231.86])
+        by smtp.gmail.com with ESMTPSA id u194sm11992952pfc.176.2020.11.01.08.31.53
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 01 Nov 2020 08:31:54 -0800 (PST)
+Message-ID: <5f9ee2fa.1c69fb81.abde7.f5f4@mx.google.com>
+Date:   Mon, 02 Nov 2020 00:31:37 +0800
+From:   Eryu Guan <guaneryu@gmail.com>
+To:     fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: master branch updated to b09ba3318ebb
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="2Zsnr0CLQQnP"
 Content-Disposition: inline
-In-Reply-To: <daec44e9f2e3ce483b7845065db3bf148ff5cd2c.1603864280.git.riteshh@linux.ibm.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Oct 28, 2020 at 12:14:52PM +0530, Ritesh Harjani wrote:
-> Add this test (which Christian Kujau reported) to check for regression
-> caused due to ext4 bmap aops implementation was moved to use iomap APIs.
-> jbd2 calls bmap() kernel function from fs/inode.c which was failing since
-> iomap_bmap() implementation earlier returned 0 for block addr > INT_MAX.
-> This regression was fixed with following kernel commit [1]
-> commit b75dfde1212991b24b220c3995101c60a7b8ae74
-> ("fibmap: Warn and return an error in case of block > INT_MAX")
-> [1]: https://patchwork.ozlabs.org/patch/1279914
-> 
-> w/o the kernel fix we get below error and mount fails
-> 
-> [ 1461.988701] run fstests generic/613 at 2020-10-27 19:57:34
-> [ 1530.511978] jbd2_journal_init_inode: Cannot locate journal superblock
-> [ 1530.513310] EXT4-fs (dm-1): Could not load journal inode
-> 
-> Signed-off-by: Ritesh Harjani <riteshh@linux.ibm.com>
-> ---
->  common/rc             | 10 +++++++
->  tests/generic/613     | 66 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/613.out |  3 ++
->  tests/generic/group   |  1 +
->  4 files changed, 80 insertions(+)
->  create mode 100755 tests/generic/613
->  create mode 100644 tests/generic/613.out
-> 
-> diff --git a/common/rc b/common/rc
-> index 27a27ea36f75..b0c353c4c107 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -1607,6 +1607,16 @@ _require_scratch_size()
->  	[ $devsize -lt $1 ] && _notrun "scratch dev too small"
->  }
-> 
-> +# require a scratch dev of a minimum size (in kb) and should not be checked
-> +# post test
-> +_require_scratch_size_nocheck()
-> +{
-> +	[ $# -eq 1 ] || _fail "_require_scratch_size: expected size param"
-> +
-> +	_require_scratch_nocheck
-> +	local devsize=`_get_device_size $SCRATCH_DEV`
-> +	[ $devsize -lt $1 ] && _notrun "scratch dev too small"
-> +}
 
-Seems there's no need to introduce this new helper, just open-coded
+--2Zsnr0CLQQnP
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-# comments on why we use _nocheck here
-_require_scratch_nocheck
-_require_scratch_size $size
+Hi all,
 
-> 
->  # this test needs a test partition - check we're ok & mount it
->  #
-> diff --git a/tests/generic/613 b/tests/generic/613
-> new file mode 100755
-> index 000000000000..b426ef91cacf
-> --- /dev/null
-> +++ b/tests/generic/613
-> @@ -0,0 +1,66 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2020 Christian Kujau. All Rights Reserved.
-> +# Copyright (c) 2020 Ritesh Harjani. All Rights Reserved.
-> +#
-> +# FS QA Test generic/613
-> +#
-> +# Since the test is not specific to ext4, hence adding it to generic.
-> +# Add this test to check for regression which was reported when ext4 bmap
-> +# aops was moved to use iomap APIs. jbd2 calls bmap() kernel function
-> +# from fs/inode.c which was failing since iomap_bmap() implementation earlier
-> +# returned 0 for block addr > INT_MAX.
-> +# This regression was fixed with following kernel commit [1]
-> +# commit b75dfde1212991b24b220c3995101c60a7b8ae74
-> +# ("fibmap: Warn and return an error in case of block > INT_MAX")
-> +# [1]: https://patchwork.ozlabs.org/patch/1279914
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	_dmhugedisk_cleanup
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/dmhugedisk
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# Modify as appropriate.
-> +_supported_fs generic
-> +_require_dmhugedisk
-> +_require_scratch_size_nocheck $((4 * 1024 * 1024)) #kB
-> +
-> +# For 1k bs with ext4, mkfs was failing maybe due to size limitation.
+The master branch of the xfstests repository at:
 
-I think that's because only 4k blocksize ext4 supports filesystems
-greater than 16T.
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-> +if [ "$FSTYP" = "ext4" ]; then
-> +	export MKFS_OPTIONS="-F -b 4096"
-> +fi
-
-I'd check for fs block size after mkfs and _notrun if it's ext4 and
-block_size < 4k. So we don't have to overwrite MKFS_OPTIONS and run the
-test multiple times forcely in, for example ext4-1k config & ext4-4k
-config.
+have just been updated. We're having more ceph-specific copy_file_range tests
+in this update, one fs-encryption test and one new ext4 test. Others are random
+bug fixes.
 
 Thanks,
 Eryu
 
-> +
-> +# 17TB dm huge-test-zer0 device
-> +# (in terms of 512 sectors)
-> +sectors=$((2*1024*1024*1024*17))
-> +chunk_size=128
-> +
-> +_dmhugedisk_init $sectors $chunk_size
-> +_mkfs_dev $DMHUGEDISK_DEV
-> +_mount $DMHUGEDISK_DEV $SCRATCH_MNT || _fail "mount failed for $DMHUGEDISK_DEV $SCRATCH_MNT"
-> +testfile=$SCRATCH_MNT/testfile-$seq
-> +
-> +$XFS_IO_PROG -fc "pwrite -S 0xaa 0 1m" -c "fsync" $testfile | _filter_xfs_io
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/613.out b/tests/generic/613.out
-> new file mode 100644
-> index 000000000000..4747b7596499
-> --- /dev/null
-> +++ b/tests/generic/613.out
-> @@ -0,0 +1,3 @@
-> +QA output created by 613
-> +wrote 1048576/1048576 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> diff --git a/tests/generic/group b/tests/generic/group
-> index 8054d874f005..360d145d2036 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -615,3 +615,4 @@
->  610 auto quick prealloc zero
->  611 auto quick attr
->  612 auto quick clone
-> +613 auto mount quick
-> --
-> 2.26.2
+The new head of the master branch is commit:
+
+b09ba3318ebb generic: test that encryption nonces are unique and random
+
+New commits:
+
+Eric Biggers (4):
+      [c8e29174c923] generic/397: remove workarounds for wrong error codes
+      [faf1f9356ef1] generic/395: remove workarounds for wrong error codes
+      [59b43407a9cc] generic/398: remove workarounds for wrong error codes
+      [b09ba3318ebb] generic: test that encryption nonces are unique and random
+
+Filipe Manana (1):
+      [eb7f35472b2e] fstests: add missing remove of the $seqres.full file for some tests
+
+Luis Henriques (3):
+      [10f3f9707cca] ceph: add copy_file_range (remote copy operation) testing
+      [5f460552c8f4] ceph: test combination of copy_file_range with truncate
+      [fce32d21f868] ceph: test copy_file_range with infile = outfile
+
+Xiao Yang (1):
+      [27774be17b64] ext4: Add a test for inline_data vs. DAX inode flag
+
+Zorro Lang (1):
+      [f81829d98ca6] common/repair: filter unknown block state properly
+
+
+Code Diffstat:
+
+ common/ceph           |  23 +++++
+ common/rc             |   1 +
+ common/repair         |   4 +-
+ tests/btrfs/033       |   3 +
+ tests/btrfs/036       |   3 +
+ tests/btrfs/114       |   3 +
+ tests/btrfs/115       |   3 +
+ tests/btrfs/205       |   3 +
+ tests/ceph/001        | 233 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/ceph/001.out    | 129 ++++++++++++++++++++++++++++
+ tests/ceph/002        |  79 +++++++++++++++++
+ tests/ceph/002.out    |   8 ++
+ tests/ceph/003        | 116 +++++++++++++++++++++++++
+ tests/ceph/003.out    |  11 +++
+ tests/ceph/group      |   3 +
+ tests/ext4/047        |  56 ++++++++++++
+ tests/ext4/047.out    |   2 +
+ tests/ext4/group      |   1 +
+ tests/generic/395     |  31 ++-----
+ tests/generic/397     |  25 ++----
+ tests/generic/398     |  35 ++------
+ tests/generic/613     | 118 +++++++++++++++++++++++++
+ tests/generic/613.out |  16 ++++
+ tests/generic/group   |   1 +
+ tests/shared/298      |   3 +
+ 25 files changed, 840 insertions(+), 70 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
+
+--2Zsnr0CLQQnP
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAl+e4pUACgkQJlKqKVyP
+52O76Q/+Igwny2+o+LiPkF2MmJ6Ac0QxQ+SV31MpldgslPVDk3nCRvDUkzfERBZc
+6ru9TzgGR1w114CKwrPAq5i2Vt/+3FS8vfhKwHm4jARNZFM/XzfBiTYqg+9Pre5Y
+pFokTwDyx6A9m1mEnZWN/gz1UsR5zy+LZGRo7uxebz4giU9jH+KIeTdplrIeg06j
+ma2oOa9pH15FA38XIuAtnKHu4ruZb/4A2QQpoTnAFinhWn9i3ws4QD0OdjW9XEj0
+0K4T5F0+pQ2KrVoHpCdIzn2TgE6UFvmLhyCS0Aed1tamSrF7pdUIVnK8Kb6WoTi3
+6aagHkr01ZEXMOs/Oq1FYnS6c5I/UAJ2ZmHAVWPTXMe1w2QSVwbTsNbeb1WjbADt
++ux6QmAtYNlaBRvw2FYk4InDi90nF4Gc3Mb/dAPbhMWy/xCMx0gdatzWKvATzTnM
+xbTiaAVDru8R7YwPhXT28MGdhO6TV8W84D7ahDAMBbj8FeIlwLZAh/tw2XxRL9/4
+8SOw83jR25Dvy9ekispVZ3oTUuWVnkZh9dGJhLHTURnOg7+ZzggEq7I78ktTcKbk
+ZSlqmPy67+A0qSODeohstgffaJEUeWQASYLCUq4+Tu2HCr95FYS1JbFWtm4+H5zw
+2ZYwV5R6K2szUkPVpYkHMjMXiXhZy0GfH6i60mIynBM7uOqS/E8=
+=PhIK
+-----END PGP SIGNATURE-----
+
+--2Zsnr0CLQQnP--
