@@ -1,75 +1,152 @@
-Return-Path: <SRS0=/nFb=EJ=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=o0pw=EK=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.2 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 94284C2D0A3
-	for <linux-fstests@archiver.kernel.org>; Tue,  3 Nov 2020 11:27:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A82AAC55178
+	for <linux-fstests@archiver.kernel.org>; Wed,  4 Nov 2020 11:13:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 416C820731
-	for <linux-fstests@archiver.kernel.org>; Tue,  3 Nov 2020 11:27:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4F961223AB
+	for <linux-fstests@archiver.kernel.org>; Wed,  4 Nov 2020 11:13:48 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1604488428;
+	bh=rgHl1wCbLFW7G9jYHhhzzPLH0vXrYyHOigkIv81RW8Q=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
+	b=TQ3NRkveAQbCMtimsJcrry2m43cGZSUMrfvMsesplQTMvUbPJGJ/xM43T5mnOsT7D
+	 cLxwSnATB9P6yMJjMQzuHbsTo4KDZdzb/Okpb1Fyc8KYZ4AduGj+IgjrMsJjN5mh2L
+	 6dhd2h3YeOpT3jBISLV4p4z4WmFOQKF5RmGbpL0w=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728092AbgKCL12 (ORCPT
+        id S1729110AbgKDLNq (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 3 Nov 2020 06:27:28 -0500
-Received: from mgw-02.mpynet.fi ([82.197.21.91]:48184 "EHLO mgw-02.mpynet.fi"
+        Wed, 4 Nov 2020 06:13:46 -0500
+Received: from mail.kernel.org ([198.145.29.99]:54178 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728383AbgKCL11 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 3 Nov 2020 06:27:27 -0500
-Received: from pps.filterd (mgw-02.mpynet.fi [127.0.0.1])
-        by mgw-02.mpynet.fi (8.16.0.42/8.16.0.42) with SMTP id 0A3BNucT120458;
-        Tue, 3 Nov 2020 13:27:21 +0200
-Received: from ex13.tuxera.com (ex13.tuxera.com [178.16.184.72])
-        by mgw-02.mpynet.fi with ESMTP id 34gvg0k4d1-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-SHA384 bits=256 verify=NOT);
-        Tue, 03 Nov 2020 13:27:21 +0200
-Received: from [192.168.108.50] (194.100.106.190) by tuxera-exch.ad.tuxera.com
- (10.20.48.11) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Tue, 3 Nov
- 2020 13:27:20 +0200
-Subject: Re: [PATCH] tests/ceph: add Makefile
-To:     Eric Biggers <ebiggers@kernel.org>, <fstests@vger.kernel.org>
-CC:     Luis Henriques <lhenriques@suse.com>
-References: <20201101171619.323800-1-ebiggers@kernel.org>
-From:   Vladimir Zapolskiy <vladimir@tuxera.com>
-Message-ID: <94cc4e53-a1ef-eddb-b732-95b48bf2f3ba@tuxera.com>
-Date:   Tue, 3 Nov 2020 13:27:20 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.5.0
+        id S1726344AbgKDLNp (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 4 Nov 2020 06:13:45 -0500
+Received: from debian8.Home (bl8-197-74.dsl.telepac.pt [85.241.197.74])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 2446121556;
+        Wed,  4 Nov 2020 11:13:43 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1604488424;
+        bh=rgHl1wCbLFW7G9jYHhhzzPLH0vXrYyHOigkIv81RW8Q=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=VL1WjIB5plrGRjf5XV70VkKj9vA5Q4PvnHk0bLwA0CnrKsP/oAtsGvxYpVPA2ljuV
+         //+4TIpeBgtZDLVMNNd1Ble0wa8bq0babVLcuxVH1fr42SkH8yFuL2zOAklNE9jrPS
+         J3mTljN8zroE1ZZzg+J+bewHuc9B7XW1wxmpHVKY=
+From:   fdmanana@kernel.org
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH 1/2] generic: test number of blocks used by a file after mwrite into a hole
+Date:   Wed,  4 Nov 2020 11:13:37 +0000
+Message-Id: <289e1444dc95cb86945126b2677ca25879fdb8dd.1604487838.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.28.0
+In-Reply-To: <cover.1604487838.git.fdmanana@suse.com>
+References: <cover.1604487838.git.fdmanana@suse.com>
 MIME-Version: 1.0
-In-Reply-To: <20201101171619.323800-1-ebiggers@kernel.org>
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [194.100.106.190]
-X-ClientProxiedBy: tuxera-exch.ad.tuxera.com (10.20.48.11) To
- tuxera-exch.ad.tuxera.com (10.20.48.11)
-X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.312,18.0.737
- definitions=2020-11-03_08:2020-11-03,2020-11-03 signatures=0
-X-Proofpoint-Spam-Details: rule=mpy_notspam policy=mpy score=0 phishscore=0 suspectscore=0
- malwarescore=0 mlxscore=0 mlxlogscore=891 spamscore=0 bulkscore=0
- adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2009150000 definitions=main-2011030077
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 11/1/20 7:16 PM, Eric Biggers wrote:
-> From: Eric Biggers <ebiggers@google.com>
-> 
-> 'make install' stopped working because the tests/ceph/ directory is
-> missing a Makefile.  Add it.
-> 
-> Signed-off-by: Eric Biggers <ebiggers@google.com>
+From: Filipe Manana <fdmanana@suse.com>
 
-Thank you for the fix.
+Test that after doing a memory mapped write to an empty file, a call to
+stat(2) reports a non-zero number of used blocks.
 
-Reviewed-by: Vladimir Zapolskiy <vladimir@tuxera.com>
-Tested-by: Vladimir Zapolskiy <vladimir@tuxera.com>
+This is motivated by a bug in btrfs where the number of blocks used does
+not change. It currenly fails on btrfs and it is fixed by a patch that
+has the following subject:
 
---
-Best wishes,
-Vladimir
+  "btrfs: fix missing delalloc new bit for new delalloc ranges"
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/generic/614     | 50 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/614.out |  2 ++
+ tests/generic/group   |  1 +
+ 3 files changed, 53 insertions(+)
+ create mode 100755 tests/generic/614
+ create mode 100644 tests/generic/614.out
+
+diff --git a/tests/generic/614 b/tests/generic/614
+new file mode 100755
+index 00000000..80edf9cd
+--- /dev/null
++++ b/tests/generic/614
+@@ -0,0 +1,50 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2020 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test No. 614
++#
++# Test that after doing a memory mapped write to an empty file, a call to
++# stat(2) reports a non-zero number of used blocks.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++_supported_fs generic
++_require_scratch
++
++rm -f $seqres.full
++
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++
++$XFS_IO_PROG -f -c "truncate 64K"      \
++	     -c "mmap -w 0 64K"        \
++	     -c "mwrite -S 0xab 0 64K" \
++	     -c "munmap"               \
++	     $SCRATCH_MNT/foobar | _filter_xfs_io
++
++blocks_used=$(stat -c %b $SCRATCH_MNT/foobar)
++if [ $blocks_used -eq 0 ]; then
++    echo "error: stat(2) reported 0 used blocks"
++fi
++
++echo "Silence is golden"
++
++status=0
++exit
+diff --git a/tests/generic/614.out b/tests/generic/614.out
+new file mode 100644
+index 00000000..3db70236
+--- /dev/null
++++ b/tests/generic/614.out
+@@ -0,0 +1,2 @@
++QA output created by 614
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index 31057ac8..ab8ae74e 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -616,3 +616,4 @@
+ 611 auto quick attr
+ 612 auto quick clone
+ 613 auto quick encrypt
++614 auto quick rw
+-- 
+2.28.0
+
