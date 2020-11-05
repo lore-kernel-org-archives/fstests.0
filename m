@@ -7,43 +7,43 @@ X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 18D2BC4741F
-	for <linux-fstests@archiver.kernel.org>; Thu,  5 Nov 2020 15:05:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 94F6DC4741F
+	for <linux-fstests@archiver.kernel.org>; Thu,  5 Nov 2020 15:09:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B2D6822203
-	for <linux-fstests@archiver.kernel.org>; Thu,  5 Nov 2020 15:05:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2F97C22203
+	for <linux-fstests@archiver.kernel.org>; Thu,  5 Nov 2020 15:09:39 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1604588748;
-	bh=MP6njW8ShHxE65vdMUWFoD+Fot1oyxca+fP/B662WwA=;
+	s=default; t=1604588979;
+	bh=NInS1xaqKtMaJb3hU4Rio5IcTGnMowPvHCGsMv1nOMc=;
 	h=From:To:Subject:Date:List-ID:From;
-	b=hl8W4WsDfDaoWN9ORHw7IT4suFLpiLj8z44jTcrGhb/YVQ4KGo2/dczmH4sMUADgq
-	 pQyBCxC6jJ6d8xMgPIPgFB/3j7qGbsOBUyJTghbxW30TmF9WvjCDgwX/g5FwL5JEjw
-	 FpTVk1xs4hNeEogYKdXrONvv8ar24fvMHdzqVblY=
+	b=OyetNFfmJ+TwUg8IhSYjBmm7v/WKjfrfakTGeRPAdKHmFatiqu/zt34FLYcNVaazt
+	 qv1sLngGAWuXNiv2nvrHWcnAPOoafmpB4i5BWvs3fKohdEPnNJPrGB0KcSwmmXi6Y4
+	 vP+J0fG2b9oEYXNFnJ1n0brOWNtodSJNlJ9BOsRg=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730669AbgKEPFr (ORCPT
+        id S1731013AbgKEPJi (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 5 Nov 2020 10:05:47 -0500
-Received: from mail.kernel.org ([198.145.29.99]:55908 "EHLO mail.kernel.org"
+        Thu, 5 Nov 2020 10:09:38 -0500
+Received: from mail.kernel.org ([198.145.29.99]:56610 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1730501AbgKEPFq (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 5 Nov 2020 10:05:46 -0500
+        id S1728371AbgKEPJi (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 5 Nov 2020 10:09:38 -0500
 Received: from tleilax.com (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 6B9D221D81
-        for <fstests@vger.kernel.org>; Thu,  5 Nov 2020 15:05:45 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id D63FC20715
+        for <fstests@vger.kernel.org>; Thu,  5 Nov 2020 15:09:37 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1604588745;
-        bh=MP6njW8ShHxE65vdMUWFoD+Fot1oyxca+fP/B662WwA=;
+        s=default; t=1604588978;
+        bh=NInS1xaqKtMaJb3hU4Rio5IcTGnMowPvHCGsMv1nOMc=;
         h=From:To:Subject:Date:From;
-        b=NXbrUJSkMaxE8I1bS0EJgNNyUo+5hRHcjuRIZEyKiWyp5HlrWJQJOfJDGTMXCqfHn
-         VzeFi7s6iVtnLz4boDwdiR1BqTCwN1P32AHMWHIcG9SAs92akluKUZxefp0Y1fWUcM
-         lOqUB3FeUVwGwcaMelEGr/pyKUqK8sQhbnZ/9+WE=
+        b=HvSOnU2I07GEBHmDpjvBzwljPYrxcXMhIDUBQckEam857BiauYiCug4ylTIDhw/uD
+         om4Uggl7/DQfclW69Z430s0Ab0Xk/cNwndoTeoyKqw/Jc9IGpRkFRUImg/SqDTa1WS
+         jbjcKhgDGVuODiIA7L5N5jqeT9vKuld2j7KipeZc=
 From:   Jeff Layton <jlayton@kernel.org>
 To:     fstests@vger.kernel.org
-Subject: [PATCH] src/append_reader.c: print more info when it reads bad data
-Date:   Thu,  5 Nov 2020 10:05:43 -0500
-Message-Id: <20201105150543.403712-1-jlayton@kernel.org>
+Subject: [PATCH] common/rc: allow setting $SCRATCH_FS_MOUNT_OPTS
+Date:   Thu,  5 Nov 2020 10:09:36 -0500
+Message-Id: <20201105150936.410407-1-jlayton@kernel.org>
 X-Mailer: git-send-email 2.28.0
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -51,28 +51,28 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-When append_reader gets bad data, print the actual and expected values.
-This was helpful to me when hunting a failure in generic/069 on ceph
-recently.
+We already have a $TEST_FS_MOUNT_OPTS which gets applied only to the
+test mount, but we don't have a corresponding variable for the scratch
+mount. Add one.
 
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- src/append_reader.c | 2 +-
+ common/rc | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/src/append_reader.c b/src/append_reader.c
-index 6b9e4f68e572..4660268f2f52 100644
---- a/src/append_reader.c
-+++ b/src/append_reader.c
-@@ -34,7 +34,7 @@ int main(int argc, char **argv)
- 		}
+diff --git a/common/rc b/common/rc
+index 65ebfe201139..23874d1e5b8e 100644
+--- a/common/rc
++++ b/common/rc
+@@ -308,7 +308,7 @@ _scratch_mount_options()
+ {
+ 	_scratch_options mount
  
- 		if (d != i) {
--			fprintf(stderr, "bad data, offset = %u", i * 4);
-+			fprintf(stderr, "bad data, offset = %u, got %d wanted %d\n", i * 4, d, i);
- 			exit(1);
- 		}
- 	}
+-	echo `_common_dev_mount_options $*` $SCRATCH_OPTIONS \
++	echo `_common_dev_mount_options $*` $SCRATCH_OPTIONS $SCRATCH_FS_MOUNT_OPTS \
+ 					$SCRATCH_DEV $SCRATCH_MNT
+ }
+ 
 -- 
 2.28.0
 
