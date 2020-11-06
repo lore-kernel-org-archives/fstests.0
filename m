@@ -7,71 +7,71 @@ X-Spam-Status: No, score=-8.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 567E0C2D0A3
-	for <linux-fstests@archiver.kernel.org>; Fri,  6 Nov 2020 16:55:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F1FEBC388F2
+	for <linux-fstests@archiver.kernel.org>; Fri,  6 Nov 2020 16:56:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DFDDA22227
-	for <linux-fstests@archiver.kernel.org>; Fri,  6 Nov 2020 16:55:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9E86C217A0
+	for <linux-fstests@archiver.kernel.org>; Fri,  6 Nov 2020 16:56:24 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="bov0KpVI"
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="xdEJ3w3L"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725868AbgKFQz0 (ORCPT
+        id S1726139AbgKFQ4Y (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 6 Nov 2020 11:55:26 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38416 "EHLO
+        Fri, 6 Nov 2020 11:56:24 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38568 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726139AbgKFQzZ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 6 Nov 2020 11:55:25 -0500
-Received: from mail-qk1-x742.google.com (mail-qk1-x742.google.com [IPv6:2607:f8b0:4864:20::742])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9BCC6C0613D2
-        for <fstests@vger.kernel.org>; Fri,  6 Nov 2020 08:55:25 -0800 (PST)
-Received: by mail-qk1-x742.google.com with SMTP id k9so1658796qki.6
-        for <fstests@vger.kernel.org>; Fri, 06 Nov 2020 08:55:25 -0800 (PST)
+        with ESMTP id S1725868AbgKFQ4Y (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 6 Nov 2020 11:56:24 -0500
+Received: from mail-qk1-x741.google.com (mail-qk1-x741.google.com [IPv6:2607:f8b0:4864:20::741])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9C709C0613CF
+        for <fstests@vger.kernel.org>; Fri,  6 Nov 2020 08:56:22 -0800 (PST)
+Received: by mail-qk1-x741.google.com with SMTP id 140so1676455qko.2
+        for <fstests@vger.kernel.org>; Fri, 06 Nov 2020 08:56:22 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
         h=subject:to:cc:references:from:message-id:date:user-agent
          :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=0vgzfQKA3GmsK2EHkYTj3FFm2v+OkGyAzmdVge3mu3c=;
-        b=bov0KpVIDnpkWzcbHSo6yim2dgl2Jc5o0by25RvMIF7Szvbuy8pSxCgokUS5m5kdxv
-         JASiX3IatXarFEPCJxm31MozROgnofWJlOMNZ7vU+HUWO4FJP9I7uyJYeEtUK3l1wwKA
-         tcn7ls7E+dzmM0pdjFjTOC6kt3rRskHkmNVUZ/o//VZGG5NrJ7vAec8ClYC9obLNKVb5
-         atH39DnRh860JFPpYCbp6NVHi+JJd9M2UbaWoC1Jlk9ZOQKXaJjskgzufgn5/x3x0ff8
-         IoMEwiz1y/XKEWYLBke0NgG5U/3WOrBUpfP6objBs0OBNW5400ImEq6ytrMYjUphX+DD
-         imng==
+        bh=5DPyLTvKCkZu5/xFD6a34X8cFJzkX/jTMspZzaDlUQY=;
+        b=xdEJ3w3LAKxJ/k6A1HSOj4ibxzb/mFf9TjV0OHVUssWPVpWT0S5+Wt0Vtjyf54jUVh
+         fRDmilERMoxrzC1rjr9008Ou4qGDJfTeplCp3sDcEg2FYv4163//zwGIAO05sgq90sKe
+         j+HfBY8a91ehEGfTtOo9i2l748XN0hfNyutnGDP3CA0Xo4UGF0XLHqQTJVtCZWIqWgG/
+         wGRQXigjLJlyY4Oq47mI5Pg8MqQQyqBGgHc1KE9NtzeQmQ8apb92ciLmokuoBqz6RW9C
+         2WxXcl74tFsixTVuOQkvmgIuG9AUy6lW8Ch26E1jVtIHqI5EATbCH9SAgxHYNmcTP1Dp
+         c5UQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:subject:to:cc:references:from:message-id:date
          :user-agent:mime-version:in-reply-to:content-language
          :content-transfer-encoding;
-        bh=0vgzfQKA3GmsK2EHkYTj3FFm2v+OkGyAzmdVge3mu3c=;
-        b=ZEVGMS+994dT+U4GlxD1AVYKDMcry9JajTDLp4v0Cw/xi06iyhb+tTDlo5D2tUVocF
-         v/f+uNadSSVAn6XhZOWa0QouYgu5aUTS2l3H8/Coq5mWHpxJ3iiezSk8rVjnUoG8aGNG
-         flaQqqbeNO+swbMi4xuk7msb7x1duvvvIQAfQJKudhNPu8k4PRxItHIneNmICVP1uAyJ
-         doAwDr0DZfAL17oiIclC55gtfK02QWSxvQuyewPJeFadkr1ZKSzi6gHQucHC/3071qhu
-         q5tDvAFJZDtsVNjgKwK/B6fH1AfPeEXL/+xJxJiu+J2SHPkdZMUs4Gr6xbZtLydMy5mg
-         YLZw==
-X-Gm-Message-State: AOAM530DgVn8BnbkMqjcnsk0uKxmGhyNMlXE27cJRX+cbDqhEah9zRqA
-        mWWoWXAVEaBMvBUFmDnz9CCgHZzWfdHqrzOU
-X-Google-Smtp-Source: ABdhPJz6zoAS+w+Nx/nIgI5cHblOeDPEj3bZm0XroafbwcZ1wMdPBLRuOPB9REntwfM5SiRyow1XLg==
-X-Received: by 2002:ae9:f404:: with SMTP id y4mr2489647qkl.372.1604681724794;
-        Fri, 06 Nov 2020 08:55:24 -0800 (PST)
+        bh=5DPyLTvKCkZu5/xFD6a34X8cFJzkX/jTMspZzaDlUQY=;
+        b=d9MCO3J4P/UjM+Nl0fVo1mi/qVOZ+rUNKQjFg3SRz4A8eIxS3oLV0i+z1RCKviXyFB
+         zAEK9S5LyUf/JBmkYOHd63smL2VpyFUZge3BcAXhrdhFiD31EjotcOcaEkImQ+rHBrHM
+         KZSG1uv/whL0mEMIw+L8FukPlQJrj8s0SxDv7NYz6iZX1QEZDaO/OeXK8ecy33xWgTrf
+         jU9gTBnNGw8+i+XZuLfpryA8+CkMoDwCgC25wSM1PJ+cadS6zUUQvgfmisY9n+n2XGWa
+         Esfb8vzSLNygPCV8ke5arQj65ziMCBWoCeWGuAzM8WR1MIu130wOQcZYIhY9yueDPS0u
+         gYCg==
+X-Gm-Message-State: AOAM532KGE6CAeJRlOQKuNvLCLqLEa9KmVll7rVbUf9eNJhR5us5HlOh
+        TTNQEV7eLRypuccr0/0o8T7W/g==
+X-Google-Smtp-Source: ABdhPJxbmBraJRitK4KYTTO6kbkOZY/riJXgxnRTQI6jFzcjNJjdK+QcZv7cjY5nvT7omtDrVVa/OQ==
+X-Received: by 2002:a37:58c1:: with SMTP id m184mr2456795qkb.305.1604681781870;
+        Fri, 06 Nov 2020 08:56:21 -0800 (PST)
 Received: from [192.168.1.45] (cpe-174-109-172-136.nc.res.rr.com. [174.109.172.136])
-        by smtp.gmail.com with ESMTPSA id 185sm872761qke.16.2020.11.06.08.55.23
+        by smtp.gmail.com with ESMTPSA id y17sm849348qki.134.2020.11.06.08.56.20
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 06 Nov 2020 08:55:23 -0800 (PST)
-Subject: Re: [PATCH 1/2] generic: test number of blocks used by a file after
- mwrite into a hole
+        Fri, 06 Nov 2020 08:56:21 -0800 (PST)
+Subject: Re: [PATCH 2/2] generic: test for non-zero used blocks while writing
+ into a file
 To:     fdmanana@kernel.org, fstests@vger.kernel.org
 Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 References: <cover.1604487838.git.fdmanana@suse.com>
- <289e1444dc95cb86945126b2677ca25879fdb8dd.1604487838.git.fdmanana@suse.com>
+ <97125f898446b152fd759eba2f2c5963d3daadc0.1604487838.git.fdmanana@suse.com>
 From:   Josef Bacik <josef@toxicpanda.com>
-Message-ID: <eda0fe7a-5bb6-50e1-0664-d4e553a1b2c4@toxicpanda.com>
-Date:   Fri, 6 Nov 2020 11:55:23 -0500
+Message-ID: <b2ffc7e2-32d6-3bbf-c54d-bc1629be6e61@toxicpanda.com>
+Date:   Fri, 6 Nov 2020 11:56:19 -0500
 User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0)
  Gecko/20100101 Thunderbird/78.4.0
 MIME-Version: 1.0
-In-Reply-To: <289e1444dc95cb86945126b2677ca25879fdb8dd.1604487838.git.fdmanana@suse.com>
+In-Reply-To: <97125f898446b152fd759eba2f2c5963d3daadc0.1604487838.git.fdmanana@suse.com>
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
@@ -82,14 +82,17 @@ X-Mailing-List: fstests@vger.kernel.org
 On 11/4/20 6:13 AM, fdmanana@kernel.org wrote:
 > From: Filipe Manana <fdmanana@suse.com>
 > 
-> Test that after doing a memory mapped write to an empty file, a call to
-> stat(2) reports a non-zero number of used blocks.
+> Test that if we keep overwriting an entire file, either with buffered
+> writes or direct IO writes, the number of used blocks reported by stat(2)
+> is never zero while the writes and writeback are in progress.
 > 
-> This is motivated by a bug in btrfs where the number of blocks used does
-> not change. It currenly fails on btrfs and it is fixed by a patch that
-> has the following subject:
+> This is motivated by a bug in btrfs and currently fails on btrfs only. It
+> is fixed a patchset for btrfs that has the following patches:
 > 
->    "btrfs: fix missing delalloc new bit for new delalloc ranges"
+>    btrfs: fix missing delalloc new bit for new delalloc ranges
+>    btrfs: refactor btrfs_drop_extents() to make it easier to extend
+>    btrfs: fix race when defragging that leads to unnecessary IO
+>    btrfs: update the number of bytes used by an inode atomically
 > 
 > Signed-off-by: Filipe Manana <fdmanana@suse.com>
 
