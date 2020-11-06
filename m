@@ -1,78 +1,100 @@
-Return-Path: <SRS0=6DS6=EL=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=bqnA=EM=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 94F6DC4741F
-	for <linux-fstests@archiver.kernel.org>; Thu,  5 Nov 2020 15:09:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 567E0C2D0A3
+	for <linux-fstests@archiver.kernel.org>; Fri,  6 Nov 2020 16:55:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2F97C22203
-	for <linux-fstests@archiver.kernel.org>; Thu,  5 Nov 2020 15:09:39 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1604588979;
-	bh=NInS1xaqKtMaJb3hU4Rio5IcTGnMowPvHCGsMv1nOMc=;
-	h=From:To:Subject:Date:List-ID:From;
-	b=OyetNFfmJ+TwUg8IhSYjBmm7v/WKjfrfakTGeRPAdKHmFatiqu/zt34FLYcNVaazt
-	 qv1sLngGAWuXNiv2nvrHWcnAPOoafmpB4i5BWvs3fKohdEPnNJPrGB0KcSwmmXi6Y4
-	 vP+J0fG2b9oEYXNFnJ1n0brOWNtodSJNlJ9BOsRg=
+	by mail.kernel.org (Postfix) with ESMTP id DFDDA22227
+	for <linux-fstests@archiver.kernel.org>; Fri,  6 Nov 2020 16:55:27 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="bov0KpVI"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731013AbgKEPJi (ORCPT
+        id S1725868AbgKFQz0 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 5 Nov 2020 10:09:38 -0500
-Received: from mail.kernel.org ([198.145.29.99]:56610 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728371AbgKEPJi (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 5 Nov 2020 10:09:38 -0500
-Received: from tleilax.com (68-20-15-154.lightspeed.rlghnc.sbcglobal.net [68.20.15.154])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id D63FC20715
-        for <fstests@vger.kernel.org>; Thu,  5 Nov 2020 15:09:37 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1604588978;
-        bh=NInS1xaqKtMaJb3hU4Rio5IcTGnMowPvHCGsMv1nOMc=;
-        h=From:To:Subject:Date:From;
-        b=HvSOnU2I07GEBHmDpjvBzwljPYrxcXMhIDUBQckEam857BiauYiCug4ylTIDhw/uD
-         om4Uggl7/DQfclW69Z430s0Ab0Xk/cNwndoTeoyKqw/Jc9IGpRkFRUImg/SqDTa1WS
-         jbjcKhgDGVuODiIA7L5N5jqeT9vKuld2j7KipeZc=
-From:   Jeff Layton <jlayton@kernel.org>
-To:     fstests@vger.kernel.org
-Subject: [PATCH] common/rc: allow setting $SCRATCH_FS_MOUNT_OPTS
-Date:   Thu,  5 Nov 2020 10:09:36 -0500
-Message-Id: <20201105150936.410407-1-jlayton@kernel.org>
-X-Mailer: git-send-email 2.28.0
+        Fri, 6 Nov 2020 11:55:26 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38416 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726139AbgKFQzZ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 6 Nov 2020 11:55:25 -0500
+Received: from mail-qk1-x742.google.com (mail-qk1-x742.google.com [IPv6:2607:f8b0:4864:20::742])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9BCC6C0613D2
+        for <fstests@vger.kernel.org>; Fri,  6 Nov 2020 08:55:25 -0800 (PST)
+Received: by mail-qk1-x742.google.com with SMTP id k9so1658796qki.6
+        for <fstests@vger.kernel.org>; Fri, 06 Nov 2020 08:55:25 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=0vgzfQKA3GmsK2EHkYTj3FFm2v+OkGyAzmdVge3mu3c=;
+        b=bov0KpVIDnpkWzcbHSo6yim2dgl2Jc5o0by25RvMIF7Szvbuy8pSxCgokUS5m5kdxv
+         JASiX3IatXarFEPCJxm31MozROgnofWJlOMNZ7vU+HUWO4FJP9I7uyJYeEtUK3l1wwKA
+         tcn7ls7E+dzmM0pdjFjTOC6kt3rRskHkmNVUZ/o//VZGG5NrJ7vAec8ClYC9obLNKVb5
+         atH39DnRh860JFPpYCbp6NVHi+JJd9M2UbaWoC1Jlk9ZOQKXaJjskgzufgn5/x3x0ff8
+         IoMEwiz1y/XKEWYLBke0NgG5U/3WOrBUpfP6objBs0OBNW5400ImEq6ytrMYjUphX+DD
+         imng==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=0vgzfQKA3GmsK2EHkYTj3FFm2v+OkGyAzmdVge3mu3c=;
+        b=ZEVGMS+994dT+U4GlxD1AVYKDMcry9JajTDLp4v0Cw/xi06iyhb+tTDlo5D2tUVocF
+         v/f+uNadSSVAn6XhZOWa0QouYgu5aUTS2l3H8/Coq5mWHpxJ3iiezSk8rVjnUoG8aGNG
+         flaQqqbeNO+swbMi4xuk7msb7x1duvvvIQAfQJKudhNPu8k4PRxItHIneNmICVP1uAyJ
+         doAwDr0DZfAL17oiIclC55gtfK02QWSxvQuyewPJeFadkr1ZKSzi6gHQucHC/3071qhu
+         q5tDvAFJZDtsVNjgKwK/B6fH1AfPeEXL/+xJxJiu+J2SHPkdZMUs4Gr6xbZtLydMy5mg
+         YLZw==
+X-Gm-Message-State: AOAM530DgVn8BnbkMqjcnsk0uKxmGhyNMlXE27cJRX+cbDqhEah9zRqA
+        mWWoWXAVEaBMvBUFmDnz9CCgHZzWfdHqrzOU
+X-Google-Smtp-Source: ABdhPJz6zoAS+w+Nx/nIgI5cHblOeDPEj3bZm0XroafbwcZ1wMdPBLRuOPB9REntwfM5SiRyow1XLg==
+X-Received: by 2002:ae9:f404:: with SMTP id y4mr2489647qkl.372.1604681724794;
+        Fri, 06 Nov 2020 08:55:24 -0800 (PST)
+Received: from [192.168.1.45] (cpe-174-109-172-136.nc.res.rr.com. [174.109.172.136])
+        by smtp.gmail.com with ESMTPSA id 185sm872761qke.16.2020.11.06.08.55.23
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 06 Nov 2020 08:55:23 -0800 (PST)
+Subject: Re: [PATCH 1/2] generic: test number of blocks used by a file after
+ mwrite into a hole
+To:     fdmanana@kernel.org, fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+References: <cover.1604487838.git.fdmanana@suse.com>
+ <289e1444dc95cb86945126b2677ca25879fdb8dd.1604487838.git.fdmanana@suse.com>
+From:   Josef Bacik <josef@toxicpanda.com>
+Message-ID: <eda0fe7a-5bb6-50e1-0664-d4e553a1b2c4@toxicpanda.com>
+Date:   Fri, 6 Nov 2020 11:55:23 -0500
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0)
+ Gecko/20100101 Thunderbird/78.4.0
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+In-Reply-To: <289e1444dc95cb86945126b2677ca25879fdb8dd.1604487838.git.fdmanana@suse.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-We already have a $TEST_FS_MOUNT_OPTS which gets applied only to the
-test mount, but we don't have a corresponding variable for the scratch
-mount. Add one.
+On 11/4/20 6:13 AM, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
+> 
+> Test that after doing a memory mapped write to an empty file, a call to
+> stat(2) reports a non-zero number of used blocks.
+> 
+> This is motivated by a bug in btrfs where the number of blocks used does
+> not change. It currenly fails on btrfs and it is fixed by a patch that
+> has the following subject:
+> 
+>    "btrfs: fix missing delalloc new bit for new delalloc ranges"
+> 
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
 
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
----
- common/rc | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Reviewed-by: Josef Bacik <josef@toxicpanda.com>
 
-diff --git a/common/rc b/common/rc
-index 65ebfe201139..23874d1e5b8e 100644
---- a/common/rc
-+++ b/common/rc
-@@ -308,7 +308,7 @@ _scratch_mount_options()
- {
- 	_scratch_options mount
- 
--	echo `_common_dev_mount_options $*` $SCRATCH_OPTIONS \
-+	echo `_common_dev_mount_options $*` $SCRATCH_OPTIONS $SCRATCH_FS_MOUNT_OPTS \
- 					$SCRATCH_DEV $SCRATCH_MNT
- }
- 
--- 
-2.28.0
+Thanks,
 
+Josef
