@@ -2,162 +2,134 @@ Return-Path: <SRS0=C4aD=EO=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-8.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS
-	autolearn=ham autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,
+	UNPARSEABLE_RELAY autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 616AEC5517A
-	for <linux-fstests@archiver.kernel.org>; Sun,  8 Nov 2020 12:26:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8853FC4742C
+	for <linux-fstests@archiver.kernel.org>; Sun,  8 Nov 2020 17:23:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 28918206ED
-	for <linux-fstests@archiver.kernel.org>; Sun,  8 Nov 2020 12:26:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 47877206DC
+	for <linux-fstests@archiver.kernel.org>; Sun,  8 Nov 2020 17:23:44 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="aitXudJs"
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="F+jhItV7"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727844AbgKHM0o (ORCPT
+        id S1728766AbgKHRXn (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 8 Nov 2020 07:26:44 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:28229 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726210AbgKHM0o (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 8 Nov 2020 07:26:44 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1604838403;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=ER/NyJGpQwUqZJM97xFSHkujono1u03XWWtdABECXhQ=;
-        b=aitXudJsTua5/Ku5ItLkBKboORCNfKAr2WlDUvyMxMF8Dei968M4N/keKhc4ZfIJdtqEAX
-        NIl7WyehVmx1jtBjrszfzgJpPtyQuMwJZMeqEBQq3fBvje3rv+QDzZFcmp5JH4Skx5SJuq
-        4bPOgehBIP4qpWFC4RfnL7/nsYSlNCE=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-589-wFRD_3YZOwOSCDx5H78Ylg-1; Sun, 08 Nov 2020 07:26:41 -0500
-X-MC-Unique: wFRD_3YZOwOSCDx5H78Ylg-1
-Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id AA4C08014D9
-        for <fstests@vger.kernel.org>; Sun,  8 Nov 2020 12:26:40 +0000 (UTC)
-Received: from bogon.redhat.com (ovpn-12-53.pek2.redhat.com [10.72.12.53])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id AE1F75B4B5
-        for <fstests@vger.kernel.org>; Sun,  8 Nov 2020 12:26:39 +0000 (UTC)
-From:   Zorro Lang <zlang@redhat.com>
-To:     fstests@vger.kernel.org
-Subject: [PATCH 3/3] generic: fsx IO_URING direct-IO soak tests
-Date:   Sun,  8 Nov 2020 20:26:23 +0800
-Message-Id: <20201108122623.12980-4-zlang@redhat.com>
-In-Reply-To: <20201108122623.12980-1-zlang@redhat.com>
-References: <20201108122623.12980-1-zlang@redhat.com>
+        Sun, 8 Nov 2020 12:23:43 -0500
+Received: from aserp2120.oracle.com ([141.146.126.78]:59238 "EHLO
+        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727570AbgKHRXn (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 8 Nov 2020 12:23:43 -0500
+Received: from pps.filterd (aserp2120.oracle.com [127.0.0.1])
+        by aserp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 0A8HLG19035200;
+        Sun, 8 Nov 2020 17:23:38 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
+ : subject : message-id : references : mime-version : content-type :
+ in-reply-to; s=corp-2020-01-29;
+ bh=7mMuOXewHH2gDKdI+XEH/kD1aOQ26wKvm3w0FcIgKX4=;
+ b=F+jhItV7aQ7NkdfEDxy/9j/yWdNhzMchksLuUimNg9hFJDUekjVqczhaEQBv3e8sJUHu
+ Lq0sVghKKckCRvDtU5cJ26avsJY8JjAbr3yuGERvBv6265X5VX05K6uP1HRdU9qndNqU
+ 8Q8xhTqwTeBgqZxRAGKP9yZeSQ36oaK535TRjor0Jfbh9qYEK0FtjOf86kl2bA8wVQVC
+ SRI/HoaK5nD6O3yCXton7e8rUUhkpbVRmA3G5hIrZQShjbj2pak2Em4ouupZJCnqDKOC
+ 10x+jplZVh8MHpsx37tR2r+i1GbS12TcdtKIF+hXLvqWSkY627MZREo1uS/mGifMAv+m oQ== 
+Received: from aserp3030.oracle.com (aserp3030.oracle.com [141.146.126.71])
+        by aserp2120.oracle.com with ESMTP id 34nkhkjwjg-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Sun, 08 Nov 2020 17:23:38 +0000
+Received: from pps.filterd (aserp3030.oracle.com [127.0.0.1])
+        by aserp3030.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 0A8HL4bF191890;
+        Sun, 8 Nov 2020 17:23:38 GMT
+Received: from aserv0122.oracle.com (aserv0122.oracle.com [141.146.126.236])
+        by aserp3030.oracle.com with ESMTP id 34p55k0me1-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Sun, 08 Nov 2020 17:23:38 +0000
+Received: from abhmp0014.oracle.com (abhmp0014.oracle.com [141.146.116.20])
+        by aserv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 0A8HNZOY008372;
+        Sun, 8 Nov 2020 17:23:37 GMT
+Received: from localhost (/67.169.218.210)
+        by default (Oracle Beehive Gateway v4.0)
+        with ESMTP ; Sun, 08 Nov 2020 09:23:35 -0800
+Date:   Sun, 8 Nov 2020 09:23:33 -0800
+From:   "Darrick J. Wong" <darrick.wong@oracle.com>
+To:     Eryu Guan <guan@eryu.me>
+Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: Re: [PATCH 0/9] xfstests: random fixes
+Message-ID: <20201108172333.GB9695@magnolia>
+References: <160382528936.1202316.2338876126552815991.stgit@magnolia>
+ <20201108100532.GI3853@desktop>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.11
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20201108100532.GI3853@desktop>
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9799 signatures=668682
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 adultscore=0 spamscore=0 phishscore=0
+ mlxlogscore=999 mlxscore=0 malwarescore=0 bulkscore=0 suspectscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2009150000
+ definitions=main-2011080124
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9799 signatures=668682
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 phishscore=0 priorityscore=1501
+ mlxscore=0 suspectscore=0 mlxlogscore=999 lowpriorityscore=0 spamscore=0
+ malwarescore=0 adultscore=0 clxscore=1015 bulkscore=0 impostorscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2009150000
+ definitions=main-2011080124
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-After fsx supports IO_URING read/write, add a test to do IO_URING
-direct-IO test by fsx
+On Sun, Nov 08, 2020 at 06:05:32PM +0800, Eryu Guan wrote:
+> Hi Darric,
+> 
+> On Tue, Oct 27, 2020 at 12:01:29PM -0700, Darrick J. Wong wrote:
+> > Hi all,
+> > 
+> > This series contains random fixes to fstests.
+> 
+> I applied patch 2-7 in this patchset, which were reviewed by Christoph,
+> and seems other patches need rework.
+> 
+> And regarding to your other patchsets, I'm a bit lost, it seems some of
+> them need rework as well. So I'd wait for your refresh version :)
 
-Signed-off-by: Zorro Lang <zlang@redhat.com>
----
- tests/generic/614     | 65 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/614.out |  2 ++
- tests/generic/group   |  1 +
- 3 files changed, 68 insertions(+)
- create mode 100755 tests/generic/614
- create mode 100644 tests/generic/614.out
+Yes.  I'll try to send a revised series this week, though I got bogged
+down in a bug hunt.
 
-diff --git a/tests/generic/614 b/tests/generic/614
-new file mode 100755
-index 00000000..3f07f204
---- /dev/null
-+++ b/tests/generic/614
-@@ -0,0 +1,65 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2020 Red Hat Inc.  All Rights Reserved.
-+#
-+# FS QA Test No. 614
-+#
-+# IO_URING soak direct-IO fsx test, copy from generic/521 but reduce the number
-+# fsx ops to limit the testing time to be an auto group test.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs generic
-+_supported_os Linux
-+_require_test
-+_require_odirect
-+_require_io_uring
-+
-+# Run fsx for 20 thousand ops or more
-+nr_ops=$((20000 * TIME_FACTOR))
-+op_sz=$((128000 * LOAD_FACTOR))
-+file_sz=$((600000 * LOAD_FACTOR))
-+fsx_file=$TEST_DIR/fsx.$seq
-+min_dio_sz=$(_min_dio_alignment)
-+
-+fsx_args=(-S 0)
-+fsx_args+=(-U)
-+fsx_args+=(-q)
-+fsx_args+=(-N $nr_ops)
-+fsx_args+=(-p $((nr_ops / 100)))
-+fsx_args+=(-o $op_sz)
-+fsx_args+=(-l $file_sz)
-+fsx_args+=(-r $min_dio_sz)
-+fsx_args+=(-t $min_dio_sz)
-+fsx_args+=(-w $min_dio_sz)
-+fsx_args+=(-Z)
-+
-+run_fsx "${fsx_args[@]}" | sed -e '/^fsx.*/d'
-+
-+# success, all done
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/generic/614.out b/tests/generic/614.out
-new file mode 100644
-index 00000000..3db70236
---- /dev/null
-+++ b/tests/generic/614.out
-@@ -0,0 +1,2 @@
-+QA output created by 614
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index 348cc2bd..79d386ca 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -612,3 +612,4 @@
- 607 auto attr quick dax
- 608 auto attr quick dax
- 613 auto rw io_uring
-+614 auto rw io_uring
--- 
-2.25.4
+--D
 
+> Thanks,
+> Eryu
+> 
+> > 
+> > If you're going to start using this mess, you probably ought to just
+> > pull from my git trees, which are linked below.
+> > 
+> > This is an extraordinary way to destroy everything.  Enjoy!
+> > Comments and questions are, as always, welcome.
+> > 
+> > --D
+> > 
+> > kernel git tree:
+> > https://git.kernel.org/cgit/linux/kernel/git/djwong/xfs-linux.git/log/?h=random-fixes
+> > 
+> > xfsprogs git tree:
+> > https://git.kernel.org/cgit/linux/kernel/git/djwong/xfsprogs-dev.git/log/?h=random-fixes
+> > 
+> > fstests git tree:
+> > https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=random-fixes
+> > ---
+> >  check             |   21 ++++++++++++++++++++-
+> >  common/populate   |    5 +++++
+> >  common/rc         |   13 ++++++++++---
+> >  common/repair     |    1 +
+> >  common/xfs        |   20 ++++++++++++++++++++
+> >  tests/xfs/030     |    1 +
+> >  tests/xfs/272     |    3 +++
+> >  tests/xfs/276     |    8 +++++++-
+> >  tests/xfs/327     |   18 ++++++++++++++++--
+> >  tests/xfs/327.out |   13 +++++++------
+> >  tests/xfs/328     |    2 +-
+> >  tests/xfs/341     |    8 +++++---
+> >  tests/xfs/520     |    3 +++
+> >  13 files changed, 99 insertions(+), 17 deletions(-)
