@@ -7,68 +7,194 @@ X-Spam-Status: No, score=-9.7 required=3.0 tests=BAYES_00,
 	SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 256FAC388F9
-	for <linux-fstests@archiver.kernel.org>; Sun,  8 Nov 2020 06:37:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D8821C388F2
+	for <linux-fstests@archiver.kernel.org>; Sun,  8 Nov 2020 09:17:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D269820719
-	for <linux-fstests@archiver.kernel.org>; Sun,  8 Nov 2020 06:37:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A4373206E3
+	for <linux-fstests@archiver.kernel.org>; Sun,  8 Nov 2020 09:17:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726014AbgKHGhG (ORCPT
+        id S1726206AbgKHJRR (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 8 Nov 2020 01:37:06 -0500
-Received: from out20-1.mail.aliyun.com ([115.124.20.1]:53873 "EHLO
-        out20-1.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725980AbgKHGhG (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 8 Nov 2020 01:37:06 -0500
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.213337|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_news_journal|0.0140567-0.00171047-0.984233;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047211;MF=guan@eryu.me;NM=1;PH=DS;RN=2;RT=2;SR=0;TI=SMTPD_---.Iu0Klfi_1604817421;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.Iu0Klfi_1604817421)
-          by smtp.aliyun-inc.com(10.147.43.230);
-          Sun, 08 Nov 2020 14:37:02 +0800
-Date:   Sun, 8 Nov 2020 14:37:01 +0800
+        Sun, 8 Nov 2020 04:17:17 -0500
+Received: from out20-14.mail.aliyun.com ([115.124.20.14]:42876 "EHLO
+        out20-14.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726099AbgKHJRQ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 8 Nov 2020 04:17:16 -0500
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.0748932|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.0348434-0.000312966-0.964844;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047198;MF=guan@eryu.me;NM=1;PH=DS;RN=4;RT=4;SR=0;TI=SMTPD_---.Iu2wzla_1604827033;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.Iu2wzla_1604827033)
+          by smtp.aliyun-inc.com(10.147.44.145);
+          Sun, 08 Nov 2020 17:17:13 +0800
+Date:   Sun, 8 Nov 2020 17:17:07 +0800
 From:   Eryu Guan <guan@eryu.me>
-To:     Jeff Layton <jlayton@kernel.org>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] common/rc: allow setting $SCRATCH_FS_MOUNT_OPTS
-Message-ID: <20201108063701.GG3853@desktop>
-References: <20201105150936.410407-1-jlayton@kernel.org>
+To:     fdmanana@kernel.org
+Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+        Filipe Manana <fdmanana@suse.com>
+Subject: Re: [PATCH 2/2] generic: test for non-zero used blocks while writing
+ into a file
+Message-ID: <20201108091707.GH3853@desktop>
+References: <cover.1604487838.git.fdmanana@suse.com>
+ <97125f898446b152fd759eba2f2c5963d3daadc0.1604487838.git.fdmanana@suse.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20201105150936.410407-1-jlayton@kernel.org>
+In-Reply-To: <97125f898446b152fd759eba2f2c5963d3daadc0.1604487838.git.fdmanana@suse.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Nov 05, 2020 at 10:09:36AM -0500, Jeff Layton wrote:
-> We already have a $TEST_FS_MOUNT_OPTS which gets applied only to the
-> test mount, but we don't have a corresponding variable for the scratch
-> mount. Add one.
+On Wed, Nov 04, 2020 at 11:13:53AM +0000, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
+> 
+> Test that if we keep overwriting an entire file, either with buffered
+> writes or direct IO writes, the number of used blocks reported by stat(2)
+> is never zero while the writes and writeback are in progress.
+> 
+> This is motivated by a bug in btrfs and currently fails on btrfs only. It
+> is fixed a patchset for btrfs that has the following patches:
+> 
+>   btrfs: fix missing delalloc new bit for new delalloc ranges
+>   btrfs: refactor btrfs_drop_extents() to make it easier to extend
+>   btrfs: fix race when defragging that leads to unnecessary IO
+>   btrfs: update the number of bytes used by an inode atomically
+> 
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> ---
+>  tests/generic/615     | 77 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/615.out |  3 ++
+>  tests/generic/group   |  1 +
+>  3 files changed, 81 insertions(+)
+>  create mode 100755 tests/generic/615
+>  create mode 100644 tests/generic/615.out
+> 
+> diff --git a/tests/generic/615 b/tests/generic/615
+> new file mode 100755
+> index 00000000..e392c4a5
+> --- /dev/null
+> +++ b/tests/generic/615
+> @@ -0,0 +1,77 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (C) 2020 SUSE Linux Products GmbH. All Rights Reserved.
+> +#
+> +# FS QA Test No. 615
+> +#
+> +# Test that if we keep overwriting an entire file, either with buffered writes
+> +# or direct IO writes, the number of used blocks reported by stat(2) is never
+> +# zero while the writes and writeback are in progress.
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_fs generic
+> +_require_scratch
+> +_require_odirect
+> +
+> +rm -f $seqres.full
+> +
+> +stat_loop()
+> +{
+> +	trap "wait; exit" SIGTERM
+> +	local filepath=$1
+> +	local blocks
+> +
+> +	while :; do
+> +		blocks=$(stat -c %b $filepath)
+> +		if [ $blocks -eq 0 ]; then
+> +		    echo "error: stat(2) reported zero blocks"
+> +		fi
+> +	done
+> +}
+> +
+> +_scratch_mkfs >>$seqres.full 2>&1
+> +_scratch_mount
+> +
+> +$XFS_IO_PROG -f -s -c "pwrite -b 64K 0 64K" $SCRATCH_MNT/foo >>$seqres.full
+> +
+> +stat_loop $SCRATCH_MNT/foo &
+> +loop_pid=$!
+> +
+> +echo "Testing buffered writes"
+> +
+> +# Now keep overwriting the entire file, triggering writeback after each write,
+> +# while another process is calling stat(2) on the file. We expect the number of
+> +# used blocks reported by stat(2) to be always greater than 0.
+> +for ((i = 0; i < 5000; i++)); do
+> +	$XFS_IO_PROG -s -c "pwrite -b 64K 0 64K" $SCRATCH_MNT/foo >>$seqres.full
+> +done
 
-MOUNT_OPTIONS is used for the scratch mount, and
-_common_dev_mount_options includes it. Would you please confirm if that
-works for you?
+Test 5000 loops of sync write takes 3 mins to 5 mins for me on my test
+vm, which has 2 vcpus and 8G memory.
+
+I think we could reduce the test time by
+- lower the loop count, maybe 2000, in my test it usually reproduces
+  within 1000 iterations.
+- drop "-s" option, it speeds up the test from ~180s to ~25s, and btrfs
+  still reproduces the bug. But it seems dropping "-s" make it harder to
+  hit the bug, perhaps 3000-5000 iteration should be fine.
+- reduce the write buffer size, a 16K write still reproduce the bug on
+  btrfs for me. But if we want to cover 64K page size env, I think 64K
+  buffer is fine, as long as "-s" is dropped.
+
+Further, I think we could exit early when "zero blocks" is found, e.g.
+call "_fail" instead of "echo" in stat_loop() and in the write loop,
+check for $loop_pid before every write, and break the loop if $loop_pid
+died. So we could report failure as soon as possible. For example
+
+for ((i = 0; i < 5000; i++)); do
+	if ! kill -s 0 $loop_pid; then
+		echo "Bug reproduced at iteration $i"
+		break
+	fi
+	$XFS_IO_PROG -s -c "pwrite -b 64K 0 64K" $SCRATCH_MNT/foo >>$seqres.full
+done
 
 Thanks,
 Eryu
 
-> 
-> Signed-off-by: Jeff Layton <jlayton@kernel.org>
-> ---
->  common/rc | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/common/rc b/common/rc
-> index 65ebfe201139..23874d1e5b8e 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -308,7 +308,7 @@ _scratch_mount_options()
->  {
->  	_scratch_options mount
->  
-> -	echo `_common_dev_mount_options $*` $SCRATCH_OPTIONS \
-> +	echo `_common_dev_mount_options $*` $SCRATCH_OPTIONS $SCRATCH_FS_MOUNT_OPTS \
->  					$SCRATCH_DEV $SCRATCH_MNT
->  }
->  
+> +echo "Testing direct IO writes"
+> +
+> +# Now similar to what we did before but for direct IO writes.
+> +for ((i = 0; i < 5000; i++)); do
+> +	$XFS_IO_PROG -d -c "pwrite -b 64K 0 64K" $SCRATCH_MNT/foo >>$seqres.full
+> +done
+> +
+> +kill $loop_pid &> /dev/null
+> +wait
+> +
+> +status=0
+> +exit
+> diff --git a/tests/generic/615.out b/tests/generic/615.out
+> new file mode 100644
+> index 00000000..3b549e96
+> --- /dev/null
+> +++ b/tests/generic/615.out
+> @@ -0,0 +1,3 @@
+> +QA output created by 615
+> +Testing buffered writes
+> +Testing direct IO writes
+> diff --git a/tests/generic/group b/tests/generic/group
+> index ab8ae74e..fb3c638c 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -617,3 +617,4 @@
+>  612 auto quick clone
+>  613 auto quick encrypt
+>  614 auto quick rw
+> +615 auto rw
 > -- 
 > 2.28.0
