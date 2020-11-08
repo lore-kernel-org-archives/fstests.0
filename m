@@ -1,103 +1,74 @@
-Return-Path: <SRS0=bqnA=EM=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=C4aD=EO=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.7 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F1FEBC388F2
-	for <linux-fstests@archiver.kernel.org>; Fri,  6 Nov 2020 16:56:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 256FAC388F9
+	for <linux-fstests@archiver.kernel.org>; Sun,  8 Nov 2020 06:37:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9E86C217A0
-	for <linux-fstests@archiver.kernel.org>; Fri,  6 Nov 2020 16:56:24 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=toxicpanda-com.20150623.gappssmtp.com header.i=@toxicpanda-com.20150623.gappssmtp.com header.b="xdEJ3w3L"
+	by mail.kernel.org (Postfix) with ESMTP id D269820719
+	for <linux-fstests@archiver.kernel.org>; Sun,  8 Nov 2020 06:37:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726139AbgKFQ4Y (ORCPT
+        id S1726014AbgKHGhG (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 6 Nov 2020 11:56:24 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38568 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725868AbgKFQ4Y (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 6 Nov 2020 11:56:24 -0500
-Received: from mail-qk1-x741.google.com (mail-qk1-x741.google.com [IPv6:2607:f8b0:4864:20::741])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9C709C0613CF
-        for <fstests@vger.kernel.org>; Fri,  6 Nov 2020 08:56:22 -0800 (PST)
-Received: by mail-qk1-x741.google.com with SMTP id 140so1676455qko.2
-        for <fstests@vger.kernel.org>; Fri, 06 Nov 2020 08:56:22 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=5DPyLTvKCkZu5/xFD6a34X8cFJzkX/jTMspZzaDlUQY=;
-        b=xdEJ3w3LAKxJ/k6A1HSOj4ibxzb/mFf9TjV0OHVUssWPVpWT0S5+Wt0Vtjyf54jUVh
-         fRDmilERMoxrzC1rjr9008Ou4qGDJfTeplCp3sDcEg2FYv4163//zwGIAO05sgq90sKe
-         j+HfBY8a91ehEGfTtOo9i2l748XN0hfNyutnGDP3CA0Xo4UGF0XLHqQTJVtCZWIqWgG/
-         wGRQXigjLJlyY4Oq47mI5Pg8MqQQyqBGgHc1KE9NtzeQmQ8apb92ciLmokuoBqz6RW9C
-         2WxXcl74tFsixTVuOQkvmgIuG9AUy6lW8Ch26E1jVtIHqI5EATbCH9SAgxHYNmcTP1Dp
-         c5UQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=5DPyLTvKCkZu5/xFD6a34X8cFJzkX/jTMspZzaDlUQY=;
-        b=d9MCO3J4P/UjM+Nl0fVo1mi/qVOZ+rUNKQjFg3SRz4A8eIxS3oLV0i+z1RCKviXyFB
-         zAEK9S5LyUf/JBmkYOHd63smL2VpyFUZge3BcAXhrdhFiD31EjotcOcaEkImQ+rHBrHM
-         KZSG1uv/whL0mEMIw+L8FukPlQJrj8s0SxDv7NYz6iZX1QEZDaO/OeXK8ecy33xWgTrf
-         jU9gTBnNGw8+i+XZuLfpryA8+CkMoDwCgC25wSM1PJ+cadS6zUUQvgfmisY9n+n2XGWa
-         Esfb8vzSLNygPCV8ke5arQj65ziMCBWoCeWGuAzM8WR1MIu130wOQcZYIhY9yueDPS0u
-         gYCg==
-X-Gm-Message-State: AOAM532KGE6CAeJRlOQKuNvLCLqLEa9KmVll7rVbUf9eNJhR5us5HlOh
-        TTNQEV7eLRypuccr0/0o8T7W/g==
-X-Google-Smtp-Source: ABdhPJxbmBraJRitK4KYTTO6kbkOZY/riJXgxnRTQI6jFzcjNJjdK+QcZv7cjY5nvT7omtDrVVa/OQ==
-X-Received: by 2002:a37:58c1:: with SMTP id m184mr2456795qkb.305.1604681781870;
-        Fri, 06 Nov 2020 08:56:21 -0800 (PST)
-Received: from [192.168.1.45] (cpe-174-109-172-136.nc.res.rr.com. [174.109.172.136])
-        by smtp.gmail.com with ESMTPSA id y17sm849348qki.134.2020.11.06.08.56.20
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 06 Nov 2020 08:56:21 -0800 (PST)
-Subject: Re: [PATCH 2/2] generic: test for non-zero used blocks while writing
- into a file
-To:     fdmanana@kernel.org, fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-References: <cover.1604487838.git.fdmanana@suse.com>
- <97125f898446b152fd759eba2f2c5963d3daadc0.1604487838.git.fdmanana@suse.com>
-From:   Josef Bacik <josef@toxicpanda.com>
-Message-ID: <b2ffc7e2-32d6-3bbf-c54d-bc1629be6e61@toxicpanda.com>
-Date:   Fri, 6 Nov 2020 11:56:19 -0500
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0)
- Gecko/20100101 Thunderbird/78.4.0
+        Sun, 8 Nov 2020 01:37:06 -0500
+Received: from out20-1.mail.aliyun.com ([115.124.20.1]:53873 "EHLO
+        out20-1.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725980AbgKHGhG (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 8 Nov 2020 01:37:06 -0500
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.213337|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_news_journal|0.0140567-0.00171047-0.984233;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047211;MF=guan@eryu.me;NM=1;PH=DS;RN=2;RT=2;SR=0;TI=SMTPD_---.Iu0Klfi_1604817421;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.Iu0Klfi_1604817421)
+          by smtp.aliyun-inc.com(10.147.43.230);
+          Sun, 08 Nov 2020 14:37:02 +0800
+Date:   Sun, 8 Nov 2020 14:37:01 +0800
+From:   Eryu Guan <guan@eryu.me>
+To:     Jeff Layton <jlayton@kernel.org>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH] common/rc: allow setting $SCRATCH_FS_MOUNT_OPTS
+Message-ID: <20201108063701.GG3853@desktop>
+References: <20201105150936.410407-1-jlayton@kernel.org>
 MIME-Version: 1.0
-In-Reply-To: <97125f898446b152fd759eba2f2c5963d3daadc0.1604487838.git.fdmanana@suse.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20201105150936.410407-1-jlayton@kernel.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 11/4/20 6:13 AM, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
-> 
-> Test that if we keep overwriting an entire file, either with buffered
-> writes or direct IO writes, the number of used blocks reported by stat(2)
-> is never zero while the writes and writeback are in progress.
-> 
-> This is motivated by a bug in btrfs and currently fails on btrfs only. It
-> is fixed a patchset for btrfs that has the following patches:
-> 
->    btrfs: fix missing delalloc new bit for new delalloc ranges
->    btrfs: refactor btrfs_drop_extents() to make it easier to extend
->    btrfs: fix race when defragging that leads to unnecessary IO
->    btrfs: update the number of bytes used by an inode atomically
-> 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+On Thu, Nov 05, 2020 at 10:09:36AM -0500, Jeff Layton wrote:
+> We already have a $TEST_FS_MOUNT_OPTS which gets applied only to the
+> test mount, but we don't have a corresponding variable for the scratch
+> mount. Add one.
 
-Reviewed-by: Josef Bacik <josef@toxicpanda.com>
+MOUNT_OPTIONS is used for the scratch mount, and
+_common_dev_mount_options includes it. Would you please confirm if that
+works for you?
 
 Thanks,
+Eryu
 
-Josef
+> 
+> Signed-off-by: Jeff Layton <jlayton@kernel.org>
+> ---
+>  common/rc | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/common/rc b/common/rc
+> index 65ebfe201139..23874d1e5b8e 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -308,7 +308,7 @@ _scratch_mount_options()
+>  {
+>  	_scratch_options mount
+>  
+> -	echo `_common_dev_mount_options $*` $SCRATCH_OPTIONS \
+> +	echo `_common_dev_mount_options $*` $SCRATCH_OPTIONS $SCRATCH_FS_MOUNT_OPTS \
+>  					$SCRATCH_DEV $SCRATCH_MNT
+>  }
+>  
+> -- 
+> 2.28.0
