@@ -1,135 +1,255 @@
-Return-Path: <SRS0=C4aD=EO=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <SRS0=DFLh=EP=vger.kernel.org=fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,
-	UNPARSEABLE_RELAY autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8853FC4742C
-	for <linux-fstests@archiver.kernel.org>; Sun,  8 Nov 2020 17:23:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 380FBC2D0A3
+	for <linux-fstests@archiver.kernel.org>; Mon,  9 Nov 2020 11:57:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 47877206DC
-	for <linux-fstests@archiver.kernel.org>; Sun,  8 Nov 2020 17:23:44 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="F+jhItV7"
+	by mail.kernel.org (Postfix) with ESMTP id D28762084C
+	for <linux-fstests@archiver.kernel.org>; Mon,  9 Nov 2020 11:57:17 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1604923037;
+	bh=PXCY6qSCdTgNgfvkvHIaRJLY2bz4O4JR2TzlDlTRYL8=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
+	b=MsfGWL/LT6XHiSpca2/iaMZ2mBuyPp5+uAbvTU4iZUwVUWVtONA6IIYC1vUYsTw9C
+	 775GYw4NbiCOiYYixFtb/2Ezgs2hSHYqNp/C3yzZRSPa90OxZ0XwcKVtN2OXaQsApj
+	 sikVy5JqIO5jjxkIsfQ0CcSL8fv2EWy/cJxNeZJw=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728766AbgKHRXn (ORCPT
+        id S1727311AbgKIL5R (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 8 Nov 2020 12:23:43 -0500
-Received: from aserp2120.oracle.com ([141.146.126.78]:59238 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727570AbgKHRXn (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 8 Nov 2020 12:23:43 -0500
-Received: from pps.filterd (aserp2120.oracle.com [127.0.0.1])
-        by aserp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 0A8HLG19035200;
-        Sun, 8 Nov 2020 17:23:38 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
- : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=corp-2020-01-29;
- bh=7mMuOXewHH2gDKdI+XEH/kD1aOQ26wKvm3w0FcIgKX4=;
- b=F+jhItV7aQ7NkdfEDxy/9j/yWdNhzMchksLuUimNg9hFJDUekjVqczhaEQBv3e8sJUHu
- Lq0sVghKKckCRvDtU5cJ26avsJY8JjAbr3yuGERvBv6265X5VX05K6uP1HRdU9qndNqU
- 8Q8xhTqwTeBgqZxRAGKP9yZeSQ36oaK535TRjor0Jfbh9qYEK0FtjOf86kl2bA8wVQVC
- SRI/HoaK5nD6O3yCXton7e8rUUhkpbVRmA3G5hIrZQShjbj2pak2Em4ouupZJCnqDKOC
- 10x+jplZVh8MHpsx37tR2r+i1GbS12TcdtKIF+hXLvqWSkY627MZREo1uS/mGifMAv+m oQ== 
-Received: from aserp3030.oracle.com (aserp3030.oracle.com [141.146.126.71])
-        by aserp2120.oracle.com with ESMTP id 34nkhkjwjg-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Sun, 08 Nov 2020 17:23:38 +0000
-Received: from pps.filterd (aserp3030.oracle.com [127.0.0.1])
-        by aserp3030.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 0A8HL4bF191890;
-        Sun, 8 Nov 2020 17:23:38 GMT
-Received: from aserv0122.oracle.com (aserv0122.oracle.com [141.146.126.236])
-        by aserp3030.oracle.com with ESMTP id 34p55k0me1-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Sun, 08 Nov 2020 17:23:38 +0000
-Received: from abhmp0014.oracle.com (abhmp0014.oracle.com [141.146.116.20])
-        by aserv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 0A8HNZOY008372;
-        Sun, 8 Nov 2020 17:23:37 GMT
-Received: from localhost (/67.169.218.210)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Sun, 08 Nov 2020 09:23:35 -0800
-Date:   Sun, 8 Nov 2020 09:23:33 -0800
-From:   "Darrick J. Wong" <darrick.wong@oracle.com>
-To:     Eryu Guan <guan@eryu.me>
-Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org
-Subject: Re: [PATCH 0/9] xfstests: random fixes
-Message-ID: <20201108172333.GB9695@magnolia>
-References: <160382528936.1202316.2338876126552815991.stgit@magnolia>
- <20201108100532.GI3853@desktop>
+        Mon, 9 Nov 2020 06:57:17 -0500
+Received: from mail.kernel.org ([198.145.29.99]:37642 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726956AbgKIL5R (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 9 Nov 2020 06:57:17 -0500
+Received: from mail-qt1-f174.google.com (mail-qt1-f174.google.com [209.85.160.174])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 9BC8F20789;
+        Mon,  9 Nov 2020 11:57:15 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1604923035;
+        bh=PXCY6qSCdTgNgfvkvHIaRJLY2bz4O4JR2TzlDlTRYL8=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=IKy+16oZopbCynh2CSv/k64q64Y1N17X7xONcl22nELjYaiw2ALHoOjzEStepdsrj
+         Xqw40aKbqkzhpfrqHhapAXXay2VETcCjTM0sjPURqHaRSzRXTloaLsUU4rEpqhizVU
+         9RG7L+zFvXykBhO/9zuof2Bp+/KMfs8Nx4Iw+9sg=
+Received: by mail-qt1-f174.google.com with SMTP id f93so5719835qtb.10;
+        Mon, 09 Nov 2020 03:57:15 -0800 (PST)
+X-Gm-Message-State: AOAM532a/Q6P9REbUDpmRCBzdLF7i8iddpicA5RgucV6NZK831qXSgXl
+        FdBMyfHbgOxWiJT3f1rQPiYl1aH3WjiOYyZ3k2Y=
+X-Google-Smtp-Source: ABdhPJxq6Ziqs4FTzcUuJiUGd2xo3sd7fuVtGJ5pogKrkajiBv6F5eu92qaWSxFTpyK95KFWtYcbZ+S+PGhvVz7twh4=
+X-Received: by 2002:ac8:5a04:: with SMTP id n4mr4087425qta.21.1604923034674;
+ Mon, 09 Nov 2020 03:57:14 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20201108100532.GI3853@desktop>
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9799 signatures=668682
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 adultscore=0 spamscore=0 phishscore=0
- mlxlogscore=999 mlxscore=0 malwarescore=0 bulkscore=0 suspectscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2009150000
- definitions=main-2011080124
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9799 signatures=668682
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 phishscore=0 priorityscore=1501
- mlxscore=0 suspectscore=0 mlxlogscore=999 lowpriorityscore=0 spamscore=0
- malwarescore=0 adultscore=0 clxscore=1015 bulkscore=0 impostorscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2009150000
- definitions=main-2011080124
+References: <cover.1604487838.git.fdmanana@suse.com> <97125f898446b152fd759eba2f2c5963d3daadc0.1604487838.git.fdmanana@suse.com>
+ <20201108091707.GH3853@desktop>
+In-Reply-To: <20201108091707.GH3853@desktop>
+From:   Filipe Manana <fdmanana@kernel.org>
+Date:   Mon, 9 Nov 2020 11:57:03 +0000
+X-Gmail-Original-Message-ID: <CAL3q7H4_Ce5v7UPKbs+1dayQ7wceub2VNbbG6uoXRO4S7AGhWA@mail.gmail.com>
+Message-ID: <CAL3q7H4_Ce5v7UPKbs+1dayQ7wceub2VNbbG6uoXRO4S7AGhWA@mail.gmail.com>
+Subject: Re: [PATCH 2/2] generic: test for non-zero used blocks while writing
+ into a file
+To:     Eryu Guan <guan@eryu.me>
+Cc:     fstests <fstests@vger.kernel.org>,
+        linux-btrfs <linux-btrfs@vger.kernel.org>,
+        Filipe Manana <fdmanana@suse.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Nov 08, 2020 at 06:05:32PM +0800, Eryu Guan wrote:
-> Hi Darric,
-> 
-> On Tue, Oct 27, 2020 at 12:01:29PM -0700, Darrick J. Wong wrote:
-> > Hi all,
-> > 
-> > This series contains random fixes to fstests.
-> 
-> I applied patch 2-7 in this patchset, which were reviewed by Christoph,
-> and seems other patches need rework.
-> 
-> And regarding to your other patchsets, I'm a bit lost, it seems some of
-> them need rework as well. So I'd wait for your refresh version :)
+On Sun, Nov 8, 2020 at 9:17 AM Eryu Guan <guan@eryu.me> wrote:
+>
+> On Wed, Nov 04, 2020 at 11:13:53AM +0000, fdmanana@kernel.org wrote:
+> > From: Filipe Manana <fdmanana@suse.com>
+> >
+> > Test that if we keep overwriting an entire file, either with buffered
+> > writes or direct IO writes, the number of used blocks reported by stat(2)
+> > is never zero while the writes and writeback are in progress.
+> >
+> > This is motivated by a bug in btrfs and currently fails on btrfs only. It
+> > is fixed a patchset for btrfs that has the following patches:
+> >
+> >   btrfs: fix missing delalloc new bit for new delalloc ranges
+> >   btrfs: refactor btrfs_drop_extents() to make it easier to extend
+> >   btrfs: fix race when defragging that leads to unnecessary IO
+> >   btrfs: update the number of bytes used by an inode atomically
+> >
+> > Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> > ---
+> >  tests/generic/615     | 77 +++++++++++++++++++++++++++++++++++++++++++
+> >  tests/generic/615.out |  3 ++
+> >  tests/generic/group   |  1 +
+> >  3 files changed, 81 insertions(+)
+> >  create mode 100755 tests/generic/615
+> >  create mode 100644 tests/generic/615.out
+> >
+> > diff --git a/tests/generic/615 b/tests/generic/615
+> > new file mode 100755
+> > index 00000000..e392c4a5
+> > --- /dev/null
+> > +++ b/tests/generic/615
+> > @@ -0,0 +1,77 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (C) 2020 SUSE Linux Products GmbH. All Rights Reserved.
+> > +#
+> > +# FS QA Test No. 615
+> > +#
+> > +# Test that if we keep overwriting an entire file, either with buffered writes
+> > +# or direct IO writes, the number of used blocks reported by stat(2) is never
+> > +# zero while the writes and writeback are in progress.
+> > +#
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +tmp=/tmp/$$
+> > +status=1     # failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +     cd /
+> > +     rm -f $tmp.*
+> > +}
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/filter
+> > +
+> > +# real QA test starts here
+> > +_supported_fs generic
+> > +_require_scratch
+> > +_require_odirect
+> > +
+> > +rm -f $seqres.full
+> > +
+> > +stat_loop()
+> > +{
+> > +     trap "wait; exit" SIGTERM
+> > +     local filepath=$1
+> > +     local blocks
+> > +
+> > +     while :; do
+> > +             blocks=$(stat -c %b $filepath)
+> > +             if [ $blocks -eq 0 ]; then
+> > +                 echo "error: stat(2) reported zero blocks"
+> > +             fi
+> > +     done
+> > +}
+> > +
+> > +_scratch_mkfs >>$seqres.full 2>&1
+> > +_scratch_mount
+> > +
+> > +$XFS_IO_PROG -f -s -c "pwrite -b 64K 0 64K" $SCRATCH_MNT/foo >>$seqres.full
+> > +
+> > +stat_loop $SCRATCH_MNT/foo &
+> > +loop_pid=$!
+> > +
+> > +echo "Testing buffered writes"
+> > +
+> > +# Now keep overwriting the entire file, triggering writeback after each write,
+> > +# while another process is calling stat(2) on the file. We expect the number of
+> > +# used blocks reported by stat(2) to be always greater than 0.
+> > +for ((i = 0; i < 5000; i++)); do
+> > +     $XFS_IO_PROG -s -c "pwrite -b 64K 0 64K" $SCRATCH_MNT/foo >>$seqres.full
+> > +done
+>
+> Test 5000 loops of sync write takes 3 mins to 5 mins for me on my test
+> vm, which has 2 vcpus and 8G memory.
 
-Yes.  I'll try to send a revised series this week, though I got bogged
-down in a bug hunt.
+That's slow yes. It takes ~60 seconds on my vms with 4 and 8 cpus (and
+8Gb of ram).
 
---D
+>
+> I think we could reduce the test time by
+> - lower the loop count, maybe 2000, in my test it usually reproduces
+>   within 1000 iterations.
 
+I can leave it to 2000 iterations per write type. For me sometimes it
+doesn't reproduce with 1000.
+
+> - drop "-s" option, it speeds up the test from ~180s to ~25s, and btrfs
+>   still reproduces the bug. But it seems dropping "-s" make it harder to
+>   hit the bug, perhaps 3000-5000 iteration should be fine.
+
+The -s is important here for buffered writes.
+The purpose, as the comment and test description mention, is to
+trigger a race between stat and writeback.
+In your case, because it runs much slower, even without -s writeback
+is still being triggered a few times, so that's probably why you see
+it fail for the buffered writes case.
+
+> - reduce the write buffer size, a 16K write still reproduce the bug on
+>   btrfs for me. But if we want to cover 64K page size env, I think 64K
+>   buffer is fine, as long as "-s" is dropped.
+
+Yes, the 64K is there so that it works on the 64K page size case.
+
+>
+> Further, I think we could exit early when "zero blocks" is found, e.g.
+> call "_fail" instead of "echo" in stat_loop() and in the write loop,
+> check for $loop_pid before every write, and break the loop if $loop_pid
+> died. So we could report failure as soon as possible. For example
+>
+> for ((i = 0; i < 5000; i++)); do
+>         if ! kill -s 0 $loop_pid; then
+>                 echo "Bug reproduced at iteration $i"
+>                 break
+>         fi
+>         $XFS_IO_PROG -s -c "pwrite -b 64K 0 64K" $SCRATCH_MNT/foo >>$seqres.full
+> done
+
+I can do that, and added in v2 in fact, together with 2000 iterations
+instead of 5000.
+
+I don't think however it's that much important to make it fail faster.
+What is more useful is to make it run faster in the success (expected)
+case while still being able to trigger the btrfs race frequently
+enough.
+
+Thanks.
+
+>
 > Thanks,
 > Eryu
-> 
-> > 
-> > If you're going to start using this mess, you probably ought to just
-> > pull from my git trees, which are linked below.
-> > 
-> > This is an extraordinary way to destroy everything.  Enjoy!
-> > Comments and questions are, as always, welcome.
-> > 
-> > --D
-> > 
-> > kernel git tree:
-> > https://git.kernel.org/cgit/linux/kernel/git/djwong/xfs-linux.git/log/?h=random-fixes
-> > 
-> > xfsprogs git tree:
-> > https://git.kernel.org/cgit/linux/kernel/git/djwong/xfsprogs-dev.git/log/?h=random-fixes
-> > 
-> > fstests git tree:
-> > https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=random-fixes
-> > ---
-> >  check             |   21 ++++++++++++++++++++-
-> >  common/populate   |    5 +++++
-> >  common/rc         |   13 ++++++++++---
-> >  common/repair     |    1 +
-> >  common/xfs        |   20 ++++++++++++++++++++
-> >  tests/xfs/030     |    1 +
-> >  tests/xfs/272     |    3 +++
-> >  tests/xfs/276     |    8 +++++++-
-> >  tests/xfs/327     |   18 ++++++++++++++++--
-> >  tests/xfs/327.out |   13 +++++++------
-> >  tests/xfs/328     |    2 +-
-> >  tests/xfs/341     |    8 +++++---
-> >  tests/xfs/520     |    3 +++
-> >  13 files changed, 99 insertions(+), 17 deletions(-)
+>
+> > +echo "Testing direct IO writes"
+> > +
+> > +# Now similar to what we did before but for direct IO writes.
+> > +for ((i = 0; i < 5000; i++)); do
+> > +     $XFS_IO_PROG -d -c "pwrite -b 64K 0 64K" $SCRATCH_MNT/foo >>$seqres.full
+> > +done
+> > +
+> > +kill $loop_pid &> /dev/null
+> > +wait
+> > +
+> > +status=0
+> > +exit
+> > diff --git a/tests/generic/615.out b/tests/generic/615.out
+> > new file mode 100644
+> > index 00000000..3b549e96
+> > --- /dev/null
+> > +++ b/tests/generic/615.out
+> > @@ -0,0 +1,3 @@
+> > +QA output created by 615
+> > +Testing buffered writes
+> > +Testing direct IO writes
+> > diff --git a/tests/generic/group b/tests/generic/group
+> > index ab8ae74e..fb3c638c 100644
+> > --- a/tests/generic/group
+> > +++ b/tests/generic/group
+> > @@ -617,3 +617,4 @@
+> >  612 auto quick clone
+> >  613 auto quick encrypt
+> >  614 auto quick rw
+> > +615 auto rw
+> > --
+> > 2.28.0
