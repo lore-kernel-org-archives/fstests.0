@@ -1,195 +1,132 @@
-Return-Path: <SRS0=DFLh=EP=vger.kernel.org=fstests-owner@kernel.org>
+Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8654EC2D0A3
-	for <linux-fstests@archiver.kernel.org>; Mon,  9 Nov 2020 12:01:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6105DC388F7
+	for <linux-fstests@archiver.kernel.org>; Mon,  9 Nov 2020 18:24:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 36DCF2084C
-	for <linux-fstests@archiver.kernel.org>; Mon,  9 Nov 2020 12:01:14 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1604923274;
-	bh=K3+MLZ6OLyOLZqizAFwSRzbHo8qs/vXVFtFsKstAwXc=;
-	h=From:To:Cc:Subject:Date:List-ID:From;
-	b=vz3HptqrH+YOhb8Ot25i6YKja4U/i0wMHeq+zC0SaXzHIEKQoDMsHVUdXHwihXW57
-	 GcOt1vv1OT37dytnNaeGejk7zI9mTGVegKLvWEIKXYgdE6jqlQXpE4v3gr90p239DL
-	 LEczJzvL/zq1qoQarunLFr+kuXgAstTeZd4gmMKE=
+	by mail.kernel.org (Postfix) with ESMTP id 03DFE206A1
+	for <linux-fstests@archiver.kernel.org>; Mon,  9 Nov 2020 18:24:40 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="kSddjMmE"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729150AbgKIMBN (ORCPT
+        id S1729875AbgKISYk (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 9 Nov 2020 07:01:13 -0500
-Received: from mail.kernel.org ([198.145.29.99]:38606 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727077AbgKIMBN (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 9 Nov 2020 07:01:13 -0500
-Received: from debian8.Home (bl8-197-74.dsl.telepac.pt [85.241.197.74])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id E401720789;
-        Mon,  9 Nov 2020 12:01:11 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1604923272;
-        bh=K3+MLZ6OLyOLZqizAFwSRzbHo8qs/vXVFtFsKstAwXc=;
-        h=From:To:Cc:Subject:Date:From;
-        b=pZk2YCMmim72X/ui/czkJ8CshVAn5dF+YuXKUxyGGq8Zb8i3ZjJ3p49adTQolsKf1
-         raz8/ezof7UiH1XLrkISQ/BrEDnje7qjbeadldMToWsSer+RDMKqczS76bH7dexwRA
-         r6PfA6OG2RJXLHLJSDwXwLyIa6uVjCg+V/6awiHY=
-From:   fdmanana@kernel.org
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>,
-        Josef Bacik <josef@toxicpanda.com>
-Subject: [PATCH v2] generic: test for non-zero used blocks while writing into a file
-Date:   Mon,  9 Nov 2020 12:01:06 +0000
-Message-Id: <97713761507590924e1d893357de97c09836c1b6.1604923113.git.fdmanana@suse.com>
-X-Mailer: git-send-email 2.28.0
+        Mon, 9 Nov 2020 13:24:40 -0500
+Received: from aserp2130.oracle.com ([141.146.126.79]:33732 "EHLO
+        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729119AbgKISYi (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 9 Nov 2020 13:24:38 -0500
+Received: from pps.filterd (aserp2130.oracle.com [127.0.0.1])
+        by aserp2130.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 0A9IOBA7149678;
+        Mon, 9 Nov 2020 18:24:34 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
+ : subject : message-id : references : mime-version : content-type :
+ in-reply-to; s=corp-2020-01-29;
+ bh=ZczM8jT2pX5OudjOCcgeUpVPt7vuG9fPdj0uqHUzPtU=;
+ b=kSddjMmEUPZixXpEtEIclJS4Y+BfmJ3sX1cv2jnHzMIVGygGbCcYK7gwUf3Fd2tcXmQO
+ rGxXzNkY5V5fx+V1HE5PWb0n4OWg6WR87o35qozKGNW3ijVYHrQ4d9Z5n38H+kDF8+KO
+ 0FbkKDu9LTHwiIh654r/qQOwsZeWPebIUzSyebUc/dBG/UT4J2y42KSytLK/wUk2Hd42
+ klQa+4NJov85p3sXsYZUnz6Zv+TsLbwVZ9fFZSLThMqF7GshAtDNGQMEei9Rz/AsMUrZ
+ NtwQG51KBh4hjhPG6myBeQLtgRo/Z4U1vbtUb19tryTVOMX/LgJ56bj2PzQNkgVS8IL6 dw== 
+Received: from userp3020.oracle.com (userp3020.oracle.com [156.151.31.79])
+        by aserp2130.oracle.com with ESMTP id 34nh3aqpmj-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Mon, 09 Nov 2020 18:24:34 +0000
+Received: from pps.filterd (userp3020.oracle.com [127.0.0.1])
+        by userp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 0A9IB19E136667;
+        Mon, 9 Nov 2020 18:22:33 GMT
+Received: from userv0122.oracle.com (userv0122.oracle.com [156.151.31.75])
+        by userp3020.oracle.com with ESMTP id 34p5bqv7vw-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Mon, 09 Nov 2020 18:22:33 +0000
+Received: from abhmp0008.oracle.com (abhmp0008.oracle.com [141.146.116.14])
+        by userv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 0A9IMWps029884;
+        Mon, 9 Nov 2020 18:22:32 GMT
+Received: from localhost (/10.159.239.129)
+        by default (Oracle Beehive Gateway v4.0)
+        with ESMTP ; Mon, 09 Nov 2020 10:22:32 -0800
+Date:   Mon, 9 Nov 2020 10:22:31 -0800
+From:   "Darrick J. Wong" <darrick.wong@oracle.com>
+To:     Amir Goldstein <amir73il@gmail.com>
+Cc:     Sasha Levin <sashal@kernel.org>, Eryu Guan <guaneryu@gmail.com>,
+        linux-xfs <linux-xfs@vger.kernel.org>,
+        fstests <fstests@vger.kernel.org>
+Subject: Re: Random xfs_check errors
+Message-ID: <20201109182231.GB9699@magnolia>
+References: <CAOQ4uxjia_L5mzEa=R9221sdO9KrsmvyGyKGcrmYKc47msJ=bg@mail.gmail.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAOQ4uxjia_L5mzEa=R9221sdO9KrsmvyGyKGcrmYKc47msJ=bg@mail.gmail.com>
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9800 signatures=668682
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 adultscore=0 malwarescore=0
+ phishscore=0 spamscore=0 mlxlogscore=999 bulkscore=0 suspectscore=1
+ mlxscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2009150000 definitions=main-2011090126
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9800 signatures=668682
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 lowpriorityscore=0 priorityscore=1501
+ clxscore=1015 malwarescore=0 mlxscore=0 spamscore=0 suspectscore=1
+ mlxlogscore=999 impostorscore=0 phishscore=0 adultscore=0 bulkscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2009150000
+ definitions=main-2011090127
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Filipe Manana <fdmanana@suse.com>
+On Fri, Oct 30, 2020 at 01:36:30PM +0200, Amir Goldstein wrote:
+> Hi guys,
+> 
+> I've been running the latest xfstests with xfsprogs v5.9 and stable
+> kernel v5.9.y past week (including v5.9.2 today) and I'm getting
+> reports like below after random tests.
+> 
+> This one was after generic/466, but already got similar reports
+> (with more blocks) after generic/511,518,519 on different test runs.
+> 
+> Is anyone else seeing this?
+> Any advice on what to look for?
+> 
+> Did not get to test v5.10-rc1 yet. I thought I would ask here first
+> in case it's a known issue.
+> 
+> Sasha, I am wondering which xfsprogs version are you using
+> when verifying stable kernel patches, because I have just recently
+> upgraded xfsprogs to v5.9 in my stable test environment.
 
-Test that if we keep overwriting an entire file, either with buffered
-writes or direct IO writes, the number of used blocks reported by stat(2)
-is never zero while the writes and writeback are in progress.
+FWIW I patched xfs_check out of fstests years ago.
 
-This is motivated by a bug in btrfs and currently fails on btrfs only. It
-is fixed a patchset for btrfs that has the following patches:
+Once Eric merges the large(ish) pile of xfs_repair patches I sent him
+for 5.10 I think we'll be at the point where there aren't any
+corruptions caught by xfs_check but not by xfs_repair.
 
-  btrfs: fix missing delalloc new bit for new delalloc ranges
-  btrfs: refactor btrfs_drop_extents() to make it easier to extend
-  btrfs: fix race when defragging that leads to unnecessary IO
-  btrfs: update the number of bytes used by an inode atomically
+Soon I'll also submit my rewrite of the fstests fuzzer code to Eryu, and
+when that lands upstream then the rest of you will be able to check my
+assertion.
 
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
-Reviewed-by: Josef Bacik <josef@toxicpanda.com>
----
+Assuming none of you find new coverage holes that I didn't, we will
+finally be able to drop xfs_check (which is bitrotting) from fstests
+entirely.
 
-v2: Use 2000 iterations for each write type instead of 5000.
-    Make the test stop after the first time stat returns 0 used blocks.
-    On my test vm now it takes ~30 seconds instead of ~60 seconds.
+--D
 
- tests/generic/615     | 84 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/615.out |  3 ++
- tests/generic/group   |  1 +
- 3 files changed, 88 insertions(+)
- create mode 100755 tests/generic/615
- create mode 100644 tests/generic/615.out
-
-diff --git a/tests/generic/615 b/tests/generic/615
-new file mode 100755
-index 00000000..b36ab328
---- /dev/null
-+++ b/tests/generic/615
-@@ -0,0 +1,84 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2020 SUSE Linux Products GmbH. All Rights Reserved.
-+#
-+# FS QA Test No. 615
-+#
-+# Test that if we keep overwriting an entire file, either with buffered writes
-+# or direct IO writes, the number of used blocks reported by stat(2) is never
-+# zero while writeback is in progress.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs generic
-+_require_scratch
-+_require_odirect
-+
-+rm -f $seqres.full
-+
-+stat_loop()
-+{
-+	trap "wait; exit" SIGTERM
-+	local filepath=$1
-+	local blocks
-+
-+	while :; do
-+		blocks=$(stat -c %b $filepath)
-+		if [ $blocks -eq 0 ]; then
-+		    echo "error: stat(2) reported zero blocks"
-+		    break
-+		fi
-+	done
-+}
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+
-+$XFS_IO_PROG -f -s -c "pwrite -b 64K 0 64K" $SCRATCH_MNT/foo > /dev/null
-+
-+stat_loop $SCRATCH_MNT/foo &
-+loop_pid=$!
-+
-+echo "Testing buffered writes"
-+
-+# Now keep overwriting the entire file, triggering writeback after each write,
-+# while another process is calling stat(2) on the file. We expect the number of
-+# used blocks reported by stat(2) to be always greater than 0.
-+for ((i = 0; i < 2000; i++)); do
-+	if ! kill -s 0 $loop_pid &> /dev/null; then
-+	    break
-+	fi
-+	$XFS_IO_PROG -s -c "pwrite -b 64K 0 64K" $SCRATCH_MNT/foo > /dev/null
-+done
-+
-+echo "Testing direct IO writes"
-+
-+# Now similar to what we did before but for direct IO writes.
-+for ((i = 0; i < 2000; i++)); do
-+	if ! kill -s 0 $loop_pid &> /dev/null; then
-+	    break
-+	fi
-+	$XFS_IO_PROG -d -c "pwrite -b 64K 0 64K" $SCRATCH_MNT/foo > /dev/null
-+done
-+
-+kill $loop_pid &> /dev/null
-+wait
-+
-+status=0
-+exit
-diff --git a/tests/generic/615.out b/tests/generic/615.out
-new file mode 100644
-index 00000000..3b549e96
---- /dev/null
-+++ b/tests/generic/615.out
-@@ -0,0 +1,3 @@
-+QA output created by 615
-+Testing buffered writes
-+Testing direct IO writes
-diff --git a/tests/generic/group b/tests/generic/group
-index ab8ae74e..fb3c638c 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -617,3 +617,4 @@
- 612 auto quick clone
- 613 auto quick encrypt
- 614 auto quick rw
-+615 auto rw
--- 
-2.28.0
-
+> Thanks,
+> Amir.
+> 
+> 
+> _check_xfs_filesystem: filesystem on
+> /dev/mapper/0fce4d2d--779b--44e8--91d0--2cb1b252f68e-xfs_scratch is
+> inconsistent (c)
+> *** xfs_check output ***
+> block 0/10 expected type unknown got free1
+> agf_freeblks 1310702, counted 1310701 in ag 0
+> agi_freecount 61, counted 58 in ag 0
+> sb_ifree 61, counted 58
+> sb_fdblocks 5240288, counted 5240287
+> sb_fdblocks 5240288, aggregate AGF count 5240287
+> *** end xfs_check output
