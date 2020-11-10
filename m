@@ -2,73 +2,71 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-4.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CB2D7C2D0A3
-	for <linux-fstests@archiver.kernel.org>; Tue, 10 Nov 2020 02:35:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D2477C5517A
+	for <linux-fstests@archiver.kernel.org>; Tue, 10 Nov 2020 04:41:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6A7A8205ED
-	for <linux-fstests@archiver.kernel.org>; Tue, 10 Nov 2020 02:35:01 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 80E072080A
+	for <linux-fstests@archiver.kernel.org>; Tue, 10 Nov 2020 04:41:38 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=kernel.org header.i=@kernel.org header.b="jXgI0r8Y"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728066AbgKJCfB (ORCPT
+        id S1730921AbgKJEli (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 9 Nov 2020 21:35:01 -0500
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:5946 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1727311AbgKJCfA (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 9 Nov 2020 21:35:00 -0500
-X-IronPort-AV: E=Sophos;i="5.77,464,1596470400"; 
-   d="scan'208";a="101125476"
-Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
-  by heian.cn.fujitsu.com with ESMTP; 10 Nov 2020 10:34:59 +0800
-Received: from G08CNEXMBPEKD04.g08.fujitsu.local (unknown [10.167.33.201])
-        by cn.fujitsu.com (Postfix) with ESMTP id 2475B48990FC
-        for <fstests@vger.kernel.org>; Tue, 10 Nov 2020 10:34:55 +0800 (CST)
-Received: from G08CNEXCHPEKD05.g08.fujitsu.local (10.167.33.203) by
- G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201) with Microsoft SMTP Server
- (TLS) id 15.0.1497.2; Tue, 10 Nov 2020 10:34:53 +0800
-Received: from Fedora-30.g08.fujitsu.local (10.167.220.106) by
- G08CNEXCHPEKD05.g08.fujitsu.local (10.167.33.209) with Microsoft SMTP Server
- id 15.0.1497.2 via Frontend Transport; Tue, 10 Nov 2020 10:34:52 +0800
-From:   Xiao Yang <yangx.jy@cn.fujitsu.com>
-To:     <fstests@vger.kernel.org>
-CC:     Xiao Yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH] generic/426: Remove unused opt variable in create_test_files()
-Date:   Tue, 10 Nov 2020 10:25:26 +0800
-Message-ID: <20201110022526.7149-1-yangx.jy@cn.fujitsu.com>
-X-Mailer: git-send-email 2.21.0
+        Mon, 9 Nov 2020 23:41:38 -0500
+Received: from mail.kernel.org ([198.145.29.99]:50118 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1729661AbgKJElh (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 9 Nov 2020 23:41:37 -0500
+Received: from sol.localdomain (172-10-235-113.lightspeed.sntcca.sbcglobal.net [172.10.235.113])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 610B2206B6;
+        Tue, 10 Nov 2020 04:41:37 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1604983297;
+        bh=VDADBIQU8MLhJESJ/oASxtoZyu+l/Vyn9yb8+9Nfe/E=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=jXgI0r8YEFow/BZwWeo20kxuxQzgvDls907DcysrYEWwvdWx5DEUa5Bzc04uWGHFa
+         n0+uGawwvXwjAs26b5/p8bM391KWMdghErlq0SR/notsLlEC0u4oXoJSmb09qKAxhn
+         ovtYJV6EAab48YelxsWNx7Zqboug/UaH3Pee47AI=
+Date:   Mon, 9 Nov 2020 20:41:36 -0800
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     "Theodore Y. Ts'o" <tytso@mit.edu>
+Cc:     fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org
+Subject: Re: [PATCH] generic/395: remove workarounds for wrong error codes
+Message-ID: <20201110044136.GD853@sol.localdomain>
+References: <20201031054018.695314-1-ebiggers@kernel.org>
+ <20201031173439.GA1750809@mit.edu>
+ <20201031181048.GA936@sol.localdomain>
+ <20201109234051.GC853@sol.localdomain>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7BIT
-Content-Type:   text/plain; charset=US-ASCII
-X-yoursite-MailScanner-ID: 2475B48990FC.A99A0
-X-yoursite-MailScanner: Found to be clean
-X-yoursite-MailScanner-From: yangx.jy@cn.fujitsu.com
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20201109234051.GC853@sol.localdomain>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
----
- tests/generic/426 | 1 -
- 1 file changed, 1 deletion(-)
+On Mon, Nov 09, 2020 at 03:40:51PM -0800, Eric Biggers wrote:
+> 
+> I ended up backporting some of the missing patches to some of the LTS kernels.
+> 
+> Now the status of the "encrypt" group tests is:
+> 
+> 5.10-rc3: all pass, but generic/602 is flaky on ext4, which will be fixed by
+>           https://lkml.kernel.org/linux-fscrypt/20201109231151.GB853@sol.localdomain
+> 
+> 5.4: all pass.
+> 
 
-diff --git a/tests/generic/426 b/tests/generic/426
-index e34d0aca..0bb75f81 100755
---- a/tests/generic/426
-+++ b/tests/generic/426
-@@ -43,7 +43,6 @@ mkdir -p $testdir
- create_test_files()
- {
- 	local dir=$1
--	local opt=$2
- 
- 	mkdir -p $dir
- 	rm -f $dir/*
--- 
-2.21.0
+Correction: there are two more test failures on upstream and on 5.4.
+generic/580 fails on f2fs due to the lazytime bug
+(https://lkml.kernel.org/r/20200306004555.GB225345@gmail.com), and generic/595
+fails on ubifs due to a longstanding race condition where a file can be created
+using a negative "no-key" dentry.  I'm planning to fix these.
 
-
-
+- Eric
