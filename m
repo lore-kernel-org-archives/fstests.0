@@ -5,67 +5,67 @@ X-Spam-Level:
 X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7EB5EC56202
-	for <linux-fstests@archiver.kernel.org>; Fri, 13 Nov 2020 11:28:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 54940C388F7
+	for <linux-fstests@archiver.kernel.org>; Fri, 13 Nov 2020 11:30:15 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2A6D8207DE
-	for <linux-fstests@archiver.kernel.org>; Fri, 13 Nov 2020 11:28:26 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EE17B2137B
+	for <linux-fstests@archiver.kernel.org>; Fri, 13 Nov 2020 11:30:14 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="J2ziz39v"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="U9NrPQ4c"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726563AbgKML2W (ORCPT
+        id S1726489AbgKML24 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 13 Nov 2020 06:28:22 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58118 "EHLO
+        Fri, 13 Nov 2020 06:28:56 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58130 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726493AbgKML1n (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 13 Nov 2020 06:27:43 -0500
-Received: from mail-pf1-x433.google.com (mail-pf1-x433.google.com [IPv6:2607:f8b0:4864:20::433])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9C14FC061A04;
-        Fri, 13 Nov 2020 03:27:36 -0800 (PST)
-Received: by mail-pf1-x433.google.com with SMTP id c20so7375910pfr.8;
-        Fri, 13 Nov 2020 03:27:36 -0800 (PST)
+        with ESMTP id S1726405AbgKML2H (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 13 Nov 2020 06:28:07 -0500
+Received: from mail-pg1-x533.google.com (mail-pg1-x533.google.com [IPv6:2607:f8b0:4864:20::533])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 105F6C061A4B;
+        Fri, 13 Nov 2020 03:27:56 -0800 (PST)
+Received: by mail-pg1-x533.google.com with SMTP id r186so6886693pgr.0;
+        Fri, 13 Nov 2020 03:27:56 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=8ehVuNvOmS0r5As9G9ddM7RoBFx7tHtjMsmcu9AMKtU=;
-        b=J2ziz39vLs1r8M7RzYmVmo0TXDbzvA8X4fGoAd5KcdVdtjIc9IkmS2qUSnW8ZMkbtF
-         JzqpYy7IzNUJUOEZ8UnPEKDiO72AKWg9WosP37rFFtEAtBnX5t4RMvCezFV0PaFnJbMT
-         xOpgpXE41zCtdyz5XiV6LT02j1IbAkL/0KJi8Uu3qGgBfUtX9HwiA2kgbU4ZIy5sAqw5
-         dosEvnUJ2d7b6o2pSNh+usw+Dh95sojmuwtygop/cfQwJfdhXeAjW/ict1A47Kzbq8ib
-         rbsDIMe2RVzdfIQDGRkB1GoJIRs1pqo5HvpGEp35hsEryVpW2DZNKVA1fLVIZAdzCFWx
-         wwuw==
+        bh=Rfh6r8h4r1l5e9rz2uPEKmppi0Azq2EOi1A6KcIRpTM=;
+        b=U9NrPQ4cTUgytfjmgn56s0mIbMqZuup0oblQM2gSH03T+K4Sz8Exjgy7S/JC6lxiwy
+         aF3jDSGdm7lAAhLOz0tXwEPqSSi3iiHop+Bj2KuCp5wYlnoJWcFSuCsAY3ChguOi7VnX
+         GmXv5ZMBVjPzL4cGkkVZPsRpCMMGw4Klu2/0w643WDlqRnshUFslDURvTFVSwv0V+vp8
+         eXEjsL4ZvFxZooynNHRBLU+/uA72ke4RPD1BCiFa8h604MWCjUohLWUyZMjjHTnC3Ys4
+         +nfKEwQIvFAmGbUjegUszTnhQ20d4Z7vfYPwv6FExsaCGL1p1OyxBOB2YmUyaGGX4Gjt
+         kZsA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=8ehVuNvOmS0r5As9G9ddM7RoBFx7tHtjMsmcu9AMKtU=;
-        b=TILs8ojsWGBNcCZ4TK+Fo9kVEGuTa12w1e8IcLcSI2tNPKNPdXlhAMuIfWfVCajaAu
-         R8XiErGrYmE8X5rjUjvVIYTy2Cr4wU50/sAE6ju1Qu6bONbkHDYGDji9JE1+cBDguBhq
-         3jlJOC8H/9XNAEeIiSKndkje/Cjnib3Pvq7qso6vx7ivwOyVtHtWLceDd6FBm+/jgL8J
-         bxdamQtw9fnG15YUHh/dNonJSqWabZHvrIKHwBFuxUzwNG8J/KJyrK2LDubIEl5XPhnT
-         zF6etTka3ClxhFRxrnbuqQOWVm0Uu6TsjF2JbGi61vKpej7lXaa38Rz/0nmDq6yNhHfS
-         4WnA==
-X-Gm-Message-State: AOAM530+S/tJurdRFNHq5DxbAnJ5MJFxrRGYREci2ssS5c8tyml7spky
-        qzQ+YBK/2ajRKAbbUOKvsCzU75i3FVA=
-X-Google-Smtp-Source: ABdhPJxqBA+wpiehq0G7y2MyxDaKAjHJm1Da7eb79DzmJ2FyeOnJ+Hs+UB4xkr03oPYPcySWUwulEg==
-X-Received: by 2002:a65:62ca:: with SMTP id m10mr1687709pgv.407.1605266855423;
-        Fri, 13 Nov 2020 03:27:35 -0800 (PST)
+        bh=Rfh6r8h4r1l5e9rz2uPEKmppi0Azq2EOi1A6KcIRpTM=;
+        b=oRb41vnSt1wg1Um9zcEZdRTb1i5WHnMWtwkhzg4NZLgqs1j0qDZawQn3Wg0P1i4LNG
+         NmKgrAclWbBd3Cnlh8Q2aJUHFvGgbXs/JIKqMcMG486FrEUb/fvjLiLPm9H2Wwy4fbMn
+         CulXVdEP8DDXSDCAGjaooMQpGGBBCsnnJbzdAigIBGdkH+4oIhniWpxgHIJ/Ce2GlaHI
+         sbCENAWHZwRHt7dhu6OYhomKfst0e7z+NuNBsfCFZczr1GRX6URV3QN9xZlK8rVlHbud
+         H3b/0ePlJNsyIJWQ1edfEujnv12hnfYMp3LWx4qnU71hcKxHEexETB/NFTgxTFX9SqJR
+         ZPlg==
+X-Gm-Message-State: AOAM5300dWHBg3sTXROqKFJuK/cQAdIELv2fANFbdNRapmxa0CCN3DY+
+        I3ZFYduBnKI3fm8FP8X5RgLJLnkW4KE=
+X-Google-Smtp-Source: ABdhPJxFvUTwceo2pjzxFAVWUSXhbPZqQ3i6fGfKZMNQ/vL/9kTzPCdE3jAXwly2chlwrw9ckMZYaQ==
+X-Received: by 2002:a63:5754:: with SMTP id h20mr1683521pgm.378.1605266875344;
+        Fri, 13 Nov 2020 03:27:55 -0800 (PST)
 Received: from localhost.localdomain ([122.172.185.167])
-        by smtp.gmail.com with ESMTPSA id w131sm9410857pfd.14.2020.11.13.03.27.33
+        by smtp.gmail.com with ESMTPSA id w131sm9410857pfd.14.2020.11.13.03.27.53
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 13 Nov 2020 03:27:34 -0800 (PST)
+        Fri, 13 Nov 2020 03:27:54 -0800 (PST)
 From:   Chandan Babu R <chandanrlinux@gmail.com>
 To:     fstests@vger.kernel.org
 Cc:     Chandan Babu R <chandanrlinux@gmail.com>,
         linux-xfs@vger.kernel.org, darrick.wong@oracle.com
-Subject: [PATCH 02/11] xfs: Check for extent overflow when trivally adding a new extent
-Date:   Fri, 13 Nov 2020 16:56:54 +0530
-Message-Id: <20201113112704.28798-3-chandanrlinux@gmail.com>
+Subject: [PATCH 10/11] xfs: Check for extent overflow when swapping extents
+Date:   Fri, 13 Nov 2020 16:57:02 +0530
+Message-Id: <20201113112704.28798-11-chandanrlinux@gmail.com>
 X-Mailer: git-send-email 2.28.0
 In-Reply-To: <20201113112704.28798-1-chandanrlinux@gmail.com>
 References: <20201113112704.28798-1-chandanrlinux@gmail.com>
@@ -76,34 +76,31 @@ List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
 This test verifies that XFS does not cause inode fork's extent count to
-overflow when adding a single extent while there's no possibility of
-splitting an existing mapping (limited to non-realtime files).
+overflow when swapping forks across two files.
 
 Signed-off-by: Chandan Babu R <chandanrlinux@gmail.com>
 ---
- tests/xfs/522     | 214 ++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/522.out |  24 ++++++
+ tests/xfs/530     | 115 ++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/530.out |  13 ++++++
  tests/xfs/group   |   1 +
- 3 files changed, 239 insertions(+)
- create mode 100755 tests/xfs/522
- create mode 100644 tests/xfs/522.out
+ 3 files changed, 129 insertions(+)
+ create mode 100755 tests/xfs/530
+ create mode 100644 tests/xfs/530.out
 
-diff --git a/tests/xfs/522 b/tests/xfs/522
+diff --git a/tests/xfs/530 b/tests/xfs/530
 new file mode 100755
-index 00000000..a54fe136
+index 00000000..fccc6de7
 --- /dev/null
-+++ b/tests/xfs/522
-@@ -0,0 +1,214 @@
++++ b/tests/xfs/530
+@@ -0,0 +1,115 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
 +# Copyright (c) 2020 Chandan Babu R.  All Rights Reserved.
 +#
-+# FS QA Test 522
++# FS QA Test 530
 +#
 +# Verify that XFS does not cause inode fork's extent count to overflow when
-+# adding a single extent while there's no possibility of splitting an existing
-+# mapping (limited to non-realtime files).
-+
++# swapping forks between files
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
 +echo "QA output created by $seq"
@@ -122,7 +119,6 @@ index 00000000..a54fe136
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+. ./common/quota
 +. ./common/inject
 +
 +# remove previous $seqres.full before test
@@ -132,221 +128,114 @@ index 00000000..a54fe136
 +
 +_supported_fs xfs
 +_require_scratch
-+_require_xfs_quota
 +_require_xfs_debug
-+_require_xfs_io_command "falloc"
++_require_xfs_scratch_rmapbt
++_require_xfs_io_command "fcollapse"
++_require_xfs_io_command "swapext"
 +_require_xfs_io_error_injection "reduce_max_iextents"
-+_require_xfs_io_error_injection "bmap_alloc_minlen_extent"
 +
-+delalloc_to_written_extent()
-+{
-+	echo "* Delalloc to written extent conversion"
++echo "* Swap extent forks"
 +
-+	echo "Format and mount fs"
-+	_scratch_mkfs >> $seqres.full
-+	_scratch_mount >> $seqres.full
++echo "Format and mount fs"
++_scratch_mkfs >> $seqres.full
++_scratch_mount >> $seqres.full
 +
-+	testfile=$SCRATCH_MNT/testfile
-+	bsize=$(_get_block_size $SCRATCH_MNT)
++bsize=$(_get_block_size $SCRATCH_MNT)
 +
-+	echo "Inject reduce_max_iextents error tag"
-+	xfs_io -x -c 'inject reduce_max_iextents' $SCRATCH_MNT
++srcfile=${SCRATCH_MNT}/srcfile
++donorfile=${SCRATCH_MNT}/donorfile
 +
-+	nr_blks=$((15 * 2))
++echo "Create \$donorfile having an extent of length 17 blocks"
++xfs_io -f -c "pwrite -b $((17 * bsize)) 0 $((17 * bsize))" -c fsync $donorfile \
++       >> $seqres.full
 +
-+	echo "Create fragmented file"
-+	for i in $(seq 0 2 $((nr_blks - 1))); do
-+		xfs_io -f -c "pwrite $((i * bsize)) $bsize" -c fsync $testfile >> $seqres.full 2>&1
-+		[[ $? != 0 ]] && break
-+	done
++# After the for loop the donor file will have the following extent layout
++# | 0-4 | 5 | 6 | 7 | 8 | 9 | 10 |
++echo "Fragment \$donorfile"
++for i in $(seq 5 10); do
++	start_offset=$((i * bsize))
++	xfs_io -f -c "fcollapse $start_offset $bsize" $donorfile >> $seqres.full
++done
++donorino=$(stat -c "%i" $donorfile)
 +
-+	testino=$(stat -c "%i" $testfile)
++echo "Create \$srcfile having an extent of length 18 blocks"
++xfs_io -f -c "pwrite -b $((18 * bsize)) 0 $((18 * bsize))" -c fsync $srcfile \
++       >> $seqres.full
 +
-+	_scratch_unmount >> $seqres.full
++echo "Fragment \$srcfile"
++# After the for loop the src file will have the following extent layout
++# | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7-10 |
++for i in $(seq 1 7); do
++	start_offset=$((i * bsize))
++	xfs_io -f -c "fcollapse $start_offset $bsize" $srcfile >> $seqres.full
++done
++srcino=$(stat -c "%i" $srcfile)
 +
-+	echo "Verify \$testfile's extent count"
++_scratch_unmount >> $seqres.full
 +
-+	nextents=$(_scratch_get_iext_count $testino data || \
-+			   _fail "Unable to obtain inode fork's extent count")
-+	if (( $nextents > 10 )); then
-+		echo "Extent count overflow check failed: nextents = $nextents"
-+		exit 1
-+	fi
-+}
++echo "Collect \$donorfile's extent count"
++donor_nr_exts=$(_scratch_get_iext_count $donorino data || \
++		_fail "Unable to obtain inode fork's extent count")
 +
-+falloc_unwritten_extent()
-+{
-+	echo "* Fallocate of unwritten extents"
++echo "Collect \$srcfile's extent count"
++src_nr_exts=$(_scratch_get_iext_count $srcino data || \
++		_fail "Unable to obtain inode fork's extent count")
 +
-+	echo "Format and mount fs"
-+	_scratch_mkfs >> $seqres.full
-+	_scratch_mount >> $seqres.full
++_scratch_mount >> $seqres.full
 +
-+	testfile=$SCRATCH_MNT/testfile
-+	bsize=$(_get_block_size $SCRATCH_MNT)
++echo "Inject reduce_max_iextents error tag"
++xfs_io -x -c 'inject reduce_max_iextents' $SCRATCH_MNT
 +
-+	echo "Inject reduce_max_iextents error tag"
-+	xfs_io -x -c 'inject reduce_max_iextents' $SCRATCH_MNT
++echo "Swap \$srcfile's and \$donorfile's extent forks"
++xfs_io -f -c "swapext $donorfile" $srcfile >> $seqres.full 2>&1
 +
-+	nr_blks=$((15 * 2))
++_scratch_unmount >> $seqres.full
 +
-+	echo "Fallocate fragmented file"
-+	for i in $(seq 0 2 $((nr_blks - 1))); do
-+		xfs_io -f -c "falloc $((i * bsize)) $bsize" $testfile >> $seqres.full 2>&1
-+		[[ $? != 0 ]] && break
-+	done
++echo "Check for \$donorfile's extent count overflow"
++nextents=$(_scratch_get_iext_count $donorino data || \
++		_fail "Unable to obtain inode fork's extent count")
++if (( $nextents == $src_nr_exts )); then
++	echo "\$donorfile: Extent count overflow check failed"
++fi
 +
-+	testino=$(stat -c "%i" $testfile)
-+
-+	_scratch_unmount >> $seqres.full
-+
-+	echo "Verify \$testfile's extent count"
-+
-+	nextents=$(_scratch_get_iext_count $testino data || \
-+			   _fail "Unable to obtain inode fork's extent count")
-+	if (( $nextents > 10 )); then
-+		echo "Extent count overflow check failed: nextents = $nextents"
-+		exit 1
-+	fi
-+}
-+
-+quota_inode_extend()
-+{
-+	echo "* Extend quota inodes"
-+
-+	echo "Format and mount fs"
-+	_scratch_mkfs_sized $((512 * 1024 * 1024)) >> $seqres.full
-+	_scratch_mount -o uquota >> $seqres.full
-+
-+	testfile=$SCRATCH_MNT/testfile
-+	bsize=$(_get_block_size $SCRATCH_MNT)
-+
-+	echo "Consume free space"
-+	dd if=/dev/zero of=${testfile} bs=${bsize} >> $seqres.full 2>&1
-+	sync
-+
-+	echo "Create fragmented filesystem"
-+	$here/src/punch-alternating $testfile >> $seqres.full
-+	sync
-+
-+	echo "Inject reduce_max_iextents error tag"
-+	xfs_io -x -c 'inject reduce_max_iextents' $SCRATCH_MNT
-+
-+	echo "Inject bmap_alloc_minlen_extent error tag"
-+	xfs_io -x -c 'inject bmap_alloc_minlen_extent' $SCRATCH_MNT
-+
-+	nr_blks=20
-+
-+	# This is a rough calculation; It doesn't take block headers into
-+	# consideration.
-+	# gdb -batch vmlinux -ex 'print sizeof(struct xfs_disk_dquot)'
-+	# $1 = 104
-+	nr_quotas_per_block=$((bsize / 104))
-+	nr_quotas=$((nr_quotas_per_block * nr_blks))
-+
-+	echo "Extend uquota file"
-+	for i in $(seq 0 $nr_quotas); do
-+		chown $i $testfile >> $seqres.full 2>&1
-+		[[ $? != 0 ]] && break
-+	done
-+
-+	_scratch_unmount >> $seqres.full
-+
-+	echo "Verify uquota inode's extent count"
-+	uquotino=$(_scratch_xfs_db -c sb -c "print uquotino")
-+	uquotino=${uquotino##uquotino = }
-+
-+	nextents=$(_scratch_get_iext_count $uquotino data || \
-+			   _fail "Unable to obtain inode fork's extent count")
-+	if (( $nextents > 10 )); then
-+		echo "Extent count overflow check failed: nextents = $nextents"
-+		exit 1
-+	fi
-+}
-+
-+directio_write()
-+{
-+	echo "* Directio write"
-+
-+	echo "Format and mount fs"
-+	_scratch_mkfs >> $seqres.full
-+	_scratch_mount >> $seqres.full
-+
-+	testfile=$SCRATCH_MNT/testfile
-+	bsize=$(_get_block_size $SCRATCH_MNT)
-+
-+	echo "Inject reduce_max_iextents error tag"
-+	xfs_io -x -c 'inject reduce_max_iextents' $SCRATCH_MNT
-+
-+	nr_blks=$((15 * 2))
-+
-+	echo "Create fragmented file via directio writes"
-+	for i in $(seq 0 2 $((nr_blks - 1))); do
-+		xfs_io -d -f -c "pwrite $((i * bsize)) $bsize" -c fsync $testfile >> $seqres.full 2>&1
-+		[[ $? != 0 ]] && break
-+	done
-+
-+	testino=$(stat -c "%i" $testfile)
-+
-+	_scratch_unmount >> $seqres.full
-+
-+	echo "Verify \$testfile's extent count"
-+
-+	nextents=$(_scratch_get_iext_count $testino data || \
-+			   _fail "Unable to obtain inode fork's extent count")
-+	if (( $nextents > 10 )); then
-+		echo "Extent count overflow check failed: nextents = $nextents"
-+		exit 1
-+	fi
-+}
-+
-+delalloc_to_written_extent
-+falloc_unwritten_extent
-+quota_inode_extend
-+directio_write
++echo "Check for \$srcfile's extent count overflow"
++nextents=$(_scratch_get_iext_count $srcino data || \
++		_fail "Unable to obtain inode fork's extent count")
++if (( $nextents == $donor_nr_exts )); then
++	echo "\$srcfile: Extent count overflow check failed"
++fi
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/xfs/522.out b/tests/xfs/522.out
+diff --git a/tests/xfs/530.out b/tests/xfs/530.out
 new file mode 100644
-index 00000000..98791aae
+index 00000000..996af959
 --- /dev/null
-+++ b/tests/xfs/522.out
-@@ -0,0 +1,24 @@
-+QA output created by 522
-+* Delalloc to written extent conversion
++++ b/tests/xfs/530.out
+@@ -0,0 +1,13 @@
++QA output created by 530
++* Swap extent forks
 +Format and mount fs
++Create $donorfile having an extent of length 17 blocks
++Fragment $donorfile
++Create $srcfile having an extent of length 18 blocks
++Fragment $srcfile
++Collect $donorfile's extent count
++Collect $srcfile's extent count
 +Inject reduce_max_iextents error tag
-+Create fragmented file
-+Verify $testfile's extent count
-+* Fallocate of unwritten extents
-+Format and mount fs
-+Inject reduce_max_iextents error tag
-+Fallocate fragmented file
-+Verify $testfile's extent count
-+* Extend quota inodes
-+Format and mount fs
-+Consume free space
-+Create fragmented filesystem
-+Inject reduce_max_iextents error tag
-+Inject bmap_alloc_minlen_extent error tag
-+Extend uquota file
-+Verify uquota inode's extent count
-+* Directio write
-+Format and mount fs
-+Inject reduce_max_iextents error tag
-+Create fragmented file via directio writes
-+Verify $testfile's extent count
++Swap $srcfile's and $donorfile's extent forks
++Check for $donorfile's extent count overflow
++Check for $srcfile's extent count overflow
 diff --git a/tests/xfs/group b/tests/xfs/group
-index b89c0a4e..1831f0b5 100644
+index bc3958b3..81a15582 100644
 --- a/tests/xfs/group
 +++ b/tests/xfs/group
-@@ -519,3 +519,4 @@
- 519 auto quick reflink
- 520 auto quick reflink
- 521 auto quick realtime growfs
-+522 auto quick quota
+@@ -527,3 +527,4 @@
+ 527 auto quick
+ 528 auto quick reflink
+ 529 auto quick reflink
++530 auto quick
 -- 
 2.28.0
 
