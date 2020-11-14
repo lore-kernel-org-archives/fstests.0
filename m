@@ -2,253 +2,165 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	UNPARSEABLE_RELAY autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.0 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5A74FC4742C
-	for <linux-fstests@archiver.kernel.org>; Sat, 14 Nov 2020 00:08:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ED934C4742C
+	for <linux-fstests@archiver.kernel.org>; Sat, 14 Nov 2020 00:09:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0409722258
-	for <linux-fstests@archiver.kernel.org>; Sat, 14 Nov 2020 00:08:40 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 816D82224D
+	for <linux-fstests@archiver.kernel.org>; Sat, 14 Nov 2020 00:09:59 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="Vr/aQOHp"
+	dkim=pass (1024-bit key) header.d=gmx.net header.i=@gmx.net header.b="W0Szskmk"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726163AbgKNAIk (ORCPT
+        id S1726166AbgKNAJ7 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 13 Nov 2020 19:08:40 -0500
-Received: from aserp2120.oracle.com ([141.146.126.78]:41728 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726020AbgKNAIk (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 13 Nov 2020 19:08:40 -0500
-Received: from pps.filterd (aserp2120.oracle.com [127.0.0.1])
-        by aserp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 0AE0422i169098;
-        Sat, 14 Nov 2020 00:08:37 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
- : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=corp-2020-01-29;
- bh=4anXfsMzl466In0jjz6zFTjDXm4fAVtuQxbcYXqK73I=;
- b=Vr/aQOHp3R9Nz5smMkS9ys+9d42n9kHRwKj1MDdsAkQzhlkaMNguLqYZtp7662z+47lV
- Gz891sC6Bt4FhX/wZsKGfwRa9zTnmuYrKQ5SSvnjix/V8xwR2V6eFCIGEN6o8fzzeQqd
- g0Tu3GSJhu1e5KUD7KvIvtKfDgX7VY5uaf2RcIc4EHuvwrpQQrr6Gh42yKao/EcPw33+
- b5ew4xD3XvoZDI+9+IRLRCEDgaT7LnzOSxC9n9EcAfBTyeSkkbri40YIGdPrfTDb98ij
- /sBdX2XZjOLwgSTXUb5ThJeCx8Bf8UTssWBXmCmnyw7ozi+k5XGH1kW4fOGGyaC9Hkwo pg== 
-Received: from userp3030.oracle.com (userp3030.oracle.com [156.151.31.80])
-        by aserp2120.oracle.com with ESMTP id 34nkhmcq9c-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Sat, 14 Nov 2020 00:08:37 +0000
-Received: from pps.filterd (userp3030.oracle.com [127.0.0.1])
-        by userp3030.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 0AE06IOs119341;
-        Sat, 14 Nov 2020 00:08:37 GMT
-Received: from userv0122.oracle.com (userv0122.oracle.com [156.151.31.75])
-        by userp3030.oracle.com with ESMTP id 34t4bs876k-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Sat, 14 Nov 2020 00:08:36 +0000
-Received: from abhmp0004.oracle.com (abhmp0004.oracle.com [141.146.116.10])
-        by userv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 0AE08alZ014679;
-        Sat, 14 Nov 2020 00:08:36 GMT
-Received: from localhost (/67.169.218.210)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Fri, 13 Nov 2020 16:08:35 -0800
-Date:   Fri, 13 Nov 2020 16:08:35 -0800
-From:   "Darrick J. Wong" <darrick.wong@oracle.com>
-To:     Chandan Babu R <chandanrlinux@gmail.com>
-Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 10/11] xfs: Check for extent overflow when swapping
- extents
-Message-ID: <20201114000835.GA9695@magnolia>
-References: <20201113112704.28798-1-chandanrlinux@gmail.com>
- <20201113112704.28798-11-chandanrlinux@gmail.com>
+        Fri, 13 Nov 2020 19:09:59 -0500
+Received: from mout.gmx.net ([212.227.17.22]:34725 "EHLO mout.gmx.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726072AbgKNAJ6 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 13 Nov 2020 19:09:58 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net;
+        s=badeba3b8450; t=1605312593;
+        bh=fQQJhamnsVOiGu8oqE1jApgEJ0qTxW2ciMn7n1TTYsY=;
+        h=X-UI-Sender-Class:Subject:To:References:From:Date:In-Reply-To;
+        b=W0Szskmk9wuHE3naC08YWcpskSicsMJOJ4vsMs4RkH+ey95JMsmHM1U3pkiipXhgT
+         oaTe6kYMq2fyqgM5KneupbPJixNpqCgfyxcYa/YYhAV7SnootRtFSMwQteXoY5h2K/
+         ZyJ0hwkWBvIbeB/YUcESyMow+IhV+neSTQF8U/sM=
+X-UI-Sender-Class: 01bb95c1-4bf8-414a-932a-4f6e2808ef9c
+Received: from [0.0.0.0] ([149.28.201.231]) by mail.gmx.com (mrgmx104
+ [212.227.17.174]) with ESMTPSA (Nemesis) id 1N6KYb-1kFS812Ka1-016jWm; Sat, 14
+ Nov 2020 01:09:53 +0100
+Subject: Re: [PATCH] fstests: btrfs: check qgroup doesn't crash when beyond
+ limit
+To:     dsterba@suse.cz, fdmanana@gmail.com, Qu Wenruo <wqu@suse.com>,
+        linux-btrfs <linux-btrfs@vger.kernel.org>,
+        fstests <fstests@vger.kernel.org>
+References: <20201111113152.136729-1-wqu@suse.com>
+ <CAL3q7H5W6U4jYGBszQF59RLi-aehO9vBTNU_HMTi8hRfK7gjGg@mail.gmail.com>
+ <d5cabe8e-37cb-42b7-9bd4-ba7ddca68b20@gmx.com>
+ <20201113151946.GY6756@twin.jikos.cz>
+From:   Qu Wenruo <quwenruo.btrfs@gmx.com>
+Autocrypt: addr=quwenruo.btrfs@gmx.com; prefer-encrypt=mutual; keydata=
+ mQENBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
+ 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
+ 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
+ 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
+ gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
+ AAG0IlF1IFdlbnJ1byA8cXV3ZW5ydW8uYnRyZnNAZ214LmNvbT6JAU4EEwEIADgCGwMFCwkI
+ BwIGFQgJCgsCBBYCAwECHgECF4AWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCXZw1oQAKCRDC
+ PZHzoSX+qCY6CACd+mWu3okGwRKXju6bou+7VkqCaHTdyXwWFTsr+/0ly5nUdDtT3yEVggPJ
+ 3VP70wjlrxUjNjFb6iIvGYxiPOrop1NGwGYvQktgRhaIhALG6rPoSSAhGNjwGVRw0km0PlIN
+ D29BTj/lYEk+jVM1YL0QLgAE1AI3krihg/lp/fQT53wLhR8YZIF8ETXbClQG1vJ0cllPuEEv
+ efKxRyiTSjB+PsozSvYWhXsPeJ+KKjFen7ebE5reQTPFzSHctCdPnoR/4jSPlnTlnEvLeqcD
+ ZTuKfQe1gWrPeevQzgCtgBF/WjIOeJs41klnYzC3DymuQlmFubss0jShLOW8eSOOWhLRuQEN
+ BFnVga8BCACqU+th4Esy/c8BnvliFAjAfpzhI1wH76FD1MJPmAhA3DnX5JDORcgaCbPEwhLj
+ 1xlwTgpeT+QfDmGJ5B5BlrrQFZVE1fChEjiJvyiSAO4yQPkrPVYTI7Xj34FnscPj/IrRUUka
+ 68MlHxPtFnAHr25VIuOS41lmYKYNwPNLRz9Ik6DmeTG3WJO2BQRNvXA0pXrJH1fNGSsRb+pK
+ EKHKtL1803x71zQxCwLh+zLP1iXHVM5j8gX9zqupigQR/Cel2XPS44zWcDW8r7B0q1eW4Jrv
+ 0x19p4P923voqn+joIAostyNTUjCeSrUdKth9jcdlam9X2DziA/DHDFfS5eq4fEvABEBAAGJ
+ ATwEGAEIACYCGwwWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCXZw1rgUJCWpOfwAKCRDCPZHz
+ oSX+qFcEB/95cs8cM1OQdE/GgOfCGxwgckMeWyzOR7bkAWW0lDVp2hpgJuxBW/gyfmtBnUai
+ fnggx3EE3ev8HTysZU9q0h+TJwwJKGv6sUc8qcTGFDtavnnl+r6xDUY7A6GvXEsSoCEEynby
+ 72byGeSovfq/4AWGNPBG1L61Exl+gbqfvbECP3ziXnob009+z9I4qXodHSYINfAkZkA523JG
+ ap12LndJeLk3gfWNZfXEWyGnuciRGbqESkhIRav8ootsCIops/SqXm0/k+Kcl4gGUO/iD/T5
+ oagaDh0QtOd8RWSMwLxwn8uIhpH84Q4X1LadJ5NCgGa6xPP5qqRuiC+9gZqbq4Nj
+Message-ID: <705e1226-2aaf-0d5f-45ed-03b25457e680@gmx.com>
+Date:   Sat, 14 Nov 2020 08:09:49 +0800
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.12.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20201113112704.28798-11-chandanrlinux@gmail.com>
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9804 signatures=668682
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=1 adultscore=0
- mlxlogscore=999 spamscore=0 malwarescore=0 bulkscore=0 mlxscore=0
- phishscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2009150000 definitions=main-2011130155
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9804 signatures=668682
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 phishscore=0 priorityscore=1501
- mlxscore=0 suspectscore=1 mlxlogscore=999 lowpriorityscore=0 spamscore=0
- malwarescore=0 adultscore=0 clxscore=1015 bulkscore=0 impostorscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2009150000
- definitions=main-2011130155
+In-Reply-To: <20201113151946.GY6756@twin.jikos.cz>
+Content-Type: multipart/signed; micalg=pgp-sha256;
+ protocol="application/pgp-signature";
+ boundary="UTQodH9m26fZgqrfvHLSUejYJRWrs7Nye"
+X-Provags-ID: V03:K1:Fa8T3ftXZGlpUJw6V9iH1oBfloZ0cgfVpi1FXNV0ouUXYWD0wWn
+ 7KWwjdIDXbmR5te4/pLSVmq9RQu1yzEvri/bUm4vYI8TPaDTI8Zfn1OLytxwMkOQXrFEKbr
+ x38QjocNbFA3tghmeBCzr8m7A8IoNr5FmhNTZn9L7auk6BLE6xauj4Jb4xJyJ39MVOgm0qx
+ lnUsg88Sn70PntNRt/Y7Q==
+X-UI-Out-Filterresults: notjunk:1;V03:K0:kUSolHjDAhI=:oT8hdw8ZFMnpkyUFVDqjSm
+ SdDL2swGywG10c3wzgTT8pz09+fSpTp1kf6C3soGLTqSM1JAqO/IW7SfQfFAotyGIsVcgeNy0
+ Y4QfT5saWk81jUkY0h/UfszbEuS6dlRYfKWStEH/phTE1jNbL4owQ6jHcdLWzm78kd7+elei2
+ NTDGun4XAzctkAYF+NqAWwsQSOAwF1xHwsOwTMjxhfREX5LcR7vT7h77MDug1r54CcU+40uFv
+ UKYPc/FU6zdVaQ2RwBHnGo1YynnImUq/8zMmIPsnvIbB4Z5+LuRebvoyQEJjrbE//XZ9bel/p
+ hFmMFZRnx6aZ5c2N+UJrHuOiLjjTa/CIkOOekjn7F1hYLUN4YIhmZu60d/0s5MokY6iOESAg9
+ AAEU6NXxjUqsmDwSE0mlrbmmAzNKZ14j8Urd7i8qT0VT0H+GKvEBYznaV0120cPGGDI5ZiOh9
+ LGSPrWK3goJ/mBobpOMiHsd4MYRirPbUY/LAMTcBkldw7TPcFRK5lBOUGHtAEi497HM1MArKZ
+ rZpT20wPaiFhM79spZZFG/hqZYJUwNvsx7XvUClaky/D4G+xXRpI637V5SzEDHCe+kiHjLLyT
+ D0b50NjaQ72eUOvfzmOv+W+EhYF4Af8yTW4FbE26vF4DLK6Xdi4Op2VRAdg/UYrh3sEafPNK8
+ i2VSsvfJZ4VBzF7hVIdMsIrOfHwQ+F2Zfj7xEx5L7Zs2InG9jblgNVDCRzPhkYErJkgjL/jWm
+ z4q4rVsfncHSrvUsjgzCdxp9bipOWTjwGdGuZ2OBsj2y/Z28nx9Mj6+2q7c6BuApg82TXi9sl
+ UgSqeUEikCn0AF33lNa8NDF3ulbmg96tT1T73zrAEREB2k93Uh9vLYZ0DL/u+vmzaFRniA9E4
+ NClDP5dCTzStvUmIqYBQ==
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Nov 13, 2020 at 04:57:02PM +0530, Chandan Babu R wrote:
-> This test verifies that XFS does not cause inode fork's extent count to
-> overflow when swapping forks across two files.
-> 
-> Signed-off-by: Chandan Babu R <chandanrlinux@gmail.com>
-> ---
->  tests/xfs/530     | 115 ++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/530.out |  13 ++++++
->  tests/xfs/group   |   1 +
->  3 files changed, 129 insertions(+)
->  create mode 100755 tests/xfs/530
->  create mode 100644 tests/xfs/530.out
-> 
-> diff --git a/tests/xfs/530 b/tests/xfs/530
-> new file mode 100755
-> index 00000000..fccc6de7
-> --- /dev/null
-> +++ b/tests/xfs/530
-> @@ -0,0 +1,115 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2020 Chandan Babu R.  All Rights Reserved.
-> +#
-> +# FS QA Test 530
-> +#
-> +# Verify that XFS does not cause inode fork's extent count to overflow when
-> +# swapping forks between files
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/inject
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +_supported_fs xfs
-> +_require_scratch
-> +_require_xfs_debug
-> +_require_xfs_scratch_rmapbt
-> +_require_xfs_io_command "fcollapse"
-> +_require_xfs_io_command "swapext"
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--UTQodH9m26fZgqrfvHLSUejYJRWrs7Nye
+Content-Type: multipart/mixed; boundary="rRk0Cupkunh4BCoNOibrqI8nJ9D7xAeaZ"
 
-FWIW it's going to be a while before the swapext command goes upstream.
-Right now it's a part of the atomic file range exchange patchset.
+--rRk0Cupkunh4BCoNOibrqI8nJ9D7xAeaZ
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: quoted-printable
 
-Do you want me to try to speed that up?
 
---D
 
-> +_require_xfs_io_error_injection "reduce_max_iextents"
-> +
-> +echo "* Swap extent forks"
-> +
-> +echo "Format and mount fs"
-> +_scratch_mkfs >> $seqres.full
-> +_scratch_mount >> $seqres.full
-> +
-> +bsize=$(_get_block_size $SCRATCH_MNT)
-> +
-> +srcfile=${SCRATCH_MNT}/srcfile
-> +donorfile=${SCRATCH_MNT}/donorfile
-> +
-> +echo "Create \$donorfile having an extent of length 17 blocks"
-> +xfs_io -f -c "pwrite -b $((17 * bsize)) 0 $((17 * bsize))" -c fsync $donorfile \
-> +       >> $seqres.full
-> +
-> +# After the for loop the donor file will have the following extent layout
-> +# | 0-4 | 5 | 6 | 7 | 8 | 9 | 10 |
-> +echo "Fragment \$donorfile"
-> +for i in $(seq 5 10); do
-> +	start_offset=$((i * bsize))
-> +	xfs_io -f -c "fcollapse $start_offset $bsize" $donorfile >> $seqres.full
-> +done
-> +donorino=$(stat -c "%i" $donorfile)
-> +
-> +echo "Create \$srcfile having an extent of length 18 blocks"
-> +xfs_io -f -c "pwrite -b $((18 * bsize)) 0 $((18 * bsize))" -c fsync $srcfile \
-> +       >> $seqres.full
-> +
-> +echo "Fragment \$srcfile"
-> +# After the for loop the src file will have the following extent layout
-> +# | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7-10 |
-> +for i in $(seq 1 7); do
-> +	start_offset=$((i * bsize))
-> +	xfs_io -f -c "fcollapse $start_offset $bsize" $srcfile >> $seqres.full
-> +done
-> +srcino=$(stat -c "%i" $srcfile)
-> +
-> +_scratch_unmount >> $seqres.full
-> +
-> +echo "Collect \$donorfile's extent count"
-> +donor_nr_exts=$(_scratch_get_iext_count $donorino data || \
-> +		_fail "Unable to obtain inode fork's extent count")
-> +
-> +echo "Collect \$srcfile's extent count"
-> +src_nr_exts=$(_scratch_get_iext_count $srcino data || \
-> +		_fail "Unable to obtain inode fork's extent count")
-> +
-> +_scratch_mount >> $seqres.full
-> +
-> +echo "Inject reduce_max_iextents error tag"
-> +xfs_io -x -c 'inject reduce_max_iextents' $SCRATCH_MNT
-> +
-> +echo "Swap \$srcfile's and \$donorfile's extent forks"
-> +xfs_io -f -c "swapext $donorfile" $srcfile >> $seqres.full 2>&1
-> +
-> +_scratch_unmount >> $seqres.full
-> +
-> +echo "Check for \$donorfile's extent count overflow"
-> +nextents=$(_scratch_get_iext_count $donorino data || \
-> +		_fail "Unable to obtain inode fork's extent count")
-> +if (( $nextents == $src_nr_exts )); then
-> +	echo "\$donorfile: Extent count overflow check failed"
-> +fi
-> +
-> +echo "Check for \$srcfile's extent count overflow"
-> +nextents=$(_scratch_get_iext_count $srcino data || \
-> +		_fail "Unable to obtain inode fork's extent count")
-> +if (( $nextents == $donor_nr_exts )); then
-> +	echo "\$srcfile: Extent count overflow check failed"
-> +fi
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/530.out b/tests/xfs/530.out
-> new file mode 100644
-> index 00000000..996af959
-> --- /dev/null
-> +++ b/tests/xfs/530.out
-> @@ -0,0 +1,13 @@
-> +QA output created by 530
-> +* Swap extent forks
-> +Format and mount fs
-> +Create $donorfile having an extent of length 17 blocks
-> +Fragment $donorfile
-> +Create $srcfile having an extent of length 18 blocks
-> +Fragment $srcfile
-> +Collect $donorfile's extent count
-> +Collect $srcfile's extent count
-> +Inject reduce_max_iextents error tag
-> +Swap $srcfile's and $donorfile's extent forks
-> +Check for $donorfile's extent count overflow
-> +Check for $srcfile's extent count overflow
-> diff --git a/tests/xfs/group b/tests/xfs/group
-> index bc3958b3..81a15582 100644
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
-> @@ -527,3 +527,4 @@
->  527 auto quick
->  528 auto quick reflink
->  529 auto quick reflink
-> +530 auto quick
-> -- 
-> 2.28.0
-> 
+On 2020/11/13 =E4=B8=8B=E5=8D=8811:19, David Sterba wrote:
+> On Thu, Nov 12, 2020 at 07:50:22AM +0800, Qu Wenruo wrote:
+>>>> +$BTRFS_UTIL_PROG quota enable $SCRATCH_MNT
+>>>> +$BTRFS_UTIL_PROG quota rescan -w $SCRATCH_MNT >> $seqres.full
+>>>> +
+>>>> +# Set the limit to just 512MiB, which is way below the existing usa=
+ge
+>>>> +$BTRFS_UTIL_PROG qgroup limit  512M $SCRATCH_MNT $SCRATCH_MNT
+>>>
+>>> $SCRATCH_MNT twice by mistake, though the command still works and the=
+
+>>> test still reproduces the issue.
+>>
+>> Nope, that's the expected behavior.
+>>
+>> Btrfs qgroup limit <size> <path>|<qgroupid> <path>
+>>
+>> The first path is to determine qgroupid, while the last path is to
+>> determine the fs.
+>>
+>> In this particular case, since we're limit the 0/5 qgroup, it's also t=
+he
+>> as the mount point, thus we specific it twice.
+>=20
+> So why didn't you specify 0/5 so it's clear?
+>=20
+Oh no, my brain just shorted, and forgot that it's 0/5 fixed for fs tree.=
+
+
+0/5 is indeed much better.
+
+Thanks,
+Qu
+
+
+--rRk0Cupkunh4BCoNOibrqI8nJ9D7xAeaZ--
+
+--UTQodH9m26fZgqrfvHLSUejYJRWrs7Nye
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAEBCAAdFiEELd9y5aWlW6idqkLhwj2R86El/qgFAl+vIE0ACgkQwj2R86El
+/qhdYgf8Dk5/Ni85Ct1bMlPrgckoqo62c7j6gdwtyfFlCIM/rnyhaabZd3JMXikP
+y8PvL8YznfSUcEiCngmHXzbkz77hpBmr03hPI93xVDBxdwdAEgERqXubMb1gNxCl
+RrH147bDCycgYhOPL0gyDBJLhF6loqUtWa7k7DWztE7aOblcpp5aWDmLD6lkeBQV
+RqmHh/2ztf5XcQuS/JEBqD5SQYn/6N0DxTCmyAW6exApTQqnDWJLw9y2P6AI+0U3
+cbGjpWh/1WKcaXYQghYgJli+MA3NFYvpILETrBfnGQRJdmFGrAfKbEK5A7lxi8cF
+1pMTIs21frEsYs/Pc6yx6Lh090ASlg==
+=s88X
+-----END PGP SIGNATURE-----
+
+--UTQodH9m26fZgqrfvHLSUejYJRWrs7Nye--
