@@ -2,165 +2,136 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.0 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	UNPARSEABLE_RELAY autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ED934C4742C
-	for <linux-fstests@archiver.kernel.org>; Sat, 14 Nov 2020 00:09:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 38D09C4742C
+	for <linux-fstests@archiver.kernel.org>; Sat, 14 Nov 2020 00:10:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 816D82224D
-	for <linux-fstests@archiver.kernel.org>; Sat, 14 Nov 2020 00:09:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0390C221EB
+	for <linux-fstests@archiver.kernel.org>; Sat, 14 Nov 2020 00:10:36 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=gmx.net header.i=@gmx.net header.b="W0Szskmk"
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="RjGvUPzP"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726166AbgKNAJ7 (ORCPT
+        id S1726028AbgKNAKg (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 13 Nov 2020 19:09:59 -0500
-Received: from mout.gmx.net ([212.227.17.22]:34725 "EHLO mout.gmx.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726072AbgKNAJ6 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 13 Nov 2020 19:09:58 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net;
-        s=badeba3b8450; t=1605312593;
-        bh=fQQJhamnsVOiGu8oqE1jApgEJ0qTxW2ciMn7n1TTYsY=;
-        h=X-UI-Sender-Class:Subject:To:References:From:Date:In-Reply-To;
-        b=W0Szskmk9wuHE3naC08YWcpskSicsMJOJ4vsMs4RkH+ey95JMsmHM1U3pkiipXhgT
-         oaTe6kYMq2fyqgM5KneupbPJixNpqCgfyxcYa/YYhAV7SnootRtFSMwQteXoY5h2K/
-         ZyJ0hwkWBvIbeB/YUcESyMow+IhV+neSTQF8U/sM=
-X-UI-Sender-Class: 01bb95c1-4bf8-414a-932a-4f6e2808ef9c
-Received: from [0.0.0.0] ([149.28.201.231]) by mail.gmx.com (mrgmx104
- [212.227.17.174]) with ESMTPSA (Nemesis) id 1N6KYb-1kFS812Ka1-016jWm; Sat, 14
- Nov 2020 01:09:53 +0100
-Subject: Re: [PATCH] fstests: btrfs: check qgroup doesn't crash when beyond
- limit
-To:     dsterba@suse.cz, fdmanana@gmail.com, Qu Wenruo <wqu@suse.com>,
-        linux-btrfs <linux-btrfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>
-References: <20201111113152.136729-1-wqu@suse.com>
- <CAL3q7H5W6U4jYGBszQF59RLi-aehO9vBTNU_HMTi8hRfK7gjGg@mail.gmail.com>
- <d5cabe8e-37cb-42b7-9bd4-ba7ddca68b20@gmx.com>
- <20201113151946.GY6756@twin.jikos.cz>
-From:   Qu Wenruo <quwenruo.btrfs@gmx.com>
-Autocrypt: addr=quwenruo.btrfs@gmx.com; prefer-encrypt=mutual; keydata=
- mQENBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
- 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
- 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
- 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
- gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
- AAG0IlF1IFdlbnJ1byA8cXV3ZW5ydW8uYnRyZnNAZ214LmNvbT6JAU4EEwEIADgCGwMFCwkI
- BwIGFQgJCgsCBBYCAwECHgECF4AWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCXZw1oQAKCRDC
- PZHzoSX+qCY6CACd+mWu3okGwRKXju6bou+7VkqCaHTdyXwWFTsr+/0ly5nUdDtT3yEVggPJ
- 3VP70wjlrxUjNjFb6iIvGYxiPOrop1NGwGYvQktgRhaIhALG6rPoSSAhGNjwGVRw0km0PlIN
- D29BTj/lYEk+jVM1YL0QLgAE1AI3krihg/lp/fQT53wLhR8YZIF8ETXbClQG1vJ0cllPuEEv
- efKxRyiTSjB+PsozSvYWhXsPeJ+KKjFen7ebE5reQTPFzSHctCdPnoR/4jSPlnTlnEvLeqcD
- ZTuKfQe1gWrPeevQzgCtgBF/WjIOeJs41klnYzC3DymuQlmFubss0jShLOW8eSOOWhLRuQEN
- BFnVga8BCACqU+th4Esy/c8BnvliFAjAfpzhI1wH76FD1MJPmAhA3DnX5JDORcgaCbPEwhLj
- 1xlwTgpeT+QfDmGJ5B5BlrrQFZVE1fChEjiJvyiSAO4yQPkrPVYTI7Xj34FnscPj/IrRUUka
- 68MlHxPtFnAHr25VIuOS41lmYKYNwPNLRz9Ik6DmeTG3WJO2BQRNvXA0pXrJH1fNGSsRb+pK
- EKHKtL1803x71zQxCwLh+zLP1iXHVM5j8gX9zqupigQR/Cel2XPS44zWcDW8r7B0q1eW4Jrv
- 0x19p4P923voqn+joIAostyNTUjCeSrUdKth9jcdlam9X2DziA/DHDFfS5eq4fEvABEBAAGJ
- ATwEGAEIACYCGwwWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCXZw1rgUJCWpOfwAKCRDCPZHz
- oSX+qFcEB/95cs8cM1OQdE/GgOfCGxwgckMeWyzOR7bkAWW0lDVp2hpgJuxBW/gyfmtBnUai
- fnggx3EE3ev8HTysZU9q0h+TJwwJKGv6sUc8qcTGFDtavnnl+r6xDUY7A6GvXEsSoCEEynby
- 72byGeSovfq/4AWGNPBG1L61Exl+gbqfvbECP3ziXnob009+z9I4qXodHSYINfAkZkA523JG
- ap12LndJeLk3gfWNZfXEWyGnuciRGbqESkhIRav8ootsCIops/SqXm0/k+Kcl4gGUO/iD/T5
- oagaDh0QtOd8RWSMwLxwn8uIhpH84Q4X1LadJ5NCgGa6xPP5qqRuiC+9gZqbq4Nj
-Message-ID: <705e1226-2aaf-0d5f-45ed-03b25457e680@gmx.com>
-Date:   Sat, 14 Nov 2020 08:09:49 +0800
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.12.0
+        Fri, 13 Nov 2020 19:10:36 -0500
+Received: from userp2120.oracle.com ([156.151.31.85]:35760 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726020AbgKNAKg (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 13 Nov 2020 19:10:36 -0500
+Received: from pps.filterd (userp2120.oracle.com [127.0.0.1])
+        by userp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 0AE03vvS022929;
+        Sat, 14 Nov 2020 00:10:34 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
+ : subject : message-id : references : mime-version : content-type :
+ in-reply-to; s=corp-2020-01-29;
+ bh=b+cxr6qd5FWMN/9844mJuV/IA607U68H2F1hXt4xqvE=;
+ b=RjGvUPzPFHmt+G3tcpcM5NXlFqzvQBzdPTqfV7yUykEC7cTFcI8xhIh8+WTfJZebFjvX
+ 2bIz1BIFPyB51qxU8/NrxxZYlM/HjhujlqM7nZ87ie3SPfU3g8B34rEdITSqD4UXU4hO
+ 4b9rInhAPe+hDIVtig9bwP2/q1IcB1vNkJeydvOjdcbxNrnb8SnWSNXBevMWsd67I/lc
+ BbNC84x9jvvOhksumerXxcARXHhcrRzAqz3Pd/aoZvpleYlrCsH9zFm5iEAmSPjTbcWP
+ mzTRE+mkDgqrV8k5GPOIhp7JJ5Le8dgLQ0HcAwoECI79PO1sesmphJwlYEme4lu6Xr89 rA== 
+Received: from aserp3020.oracle.com (aserp3020.oracle.com [141.146.126.70])
+        by userp2120.oracle.com with ESMTP id 34p72f2wyv-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Sat, 14 Nov 2020 00:10:34 +0000
+Received: from pps.filterd (aserp3020.oracle.com [127.0.0.1])
+        by aserp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 0AE0542l063844;
+        Sat, 14 Nov 2020 00:10:33 GMT
+Received: from userv0121.oracle.com (userv0121.oracle.com [156.151.31.72])
+        by aserp3020.oracle.com with ESMTP id 34p5g5q5y8-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Sat, 14 Nov 2020 00:10:33 +0000
+Received: from abhmp0011.oracle.com (abhmp0011.oracle.com [141.146.116.17])
+        by userv0121.oracle.com (8.14.4/8.13.8) with ESMTP id 0AE0AWJN030085;
+        Sat, 14 Nov 2020 00:10:32 GMT
+Received: from localhost (/67.169.218.210)
+        by default (Oracle Beehive Gateway v4.0)
+        with ESMTP ; Fri, 13 Nov 2020 16:10:31 -0800
+Date:   Fri, 13 Nov 2020 16:10:30 -0800
+From:   "Darrick J. Wong" <darrick.wong@oracle.com>
+To:     Chandan Babu R <chandanrlinux@gmail.com>
+Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 01/11] common/xfs: Add a helper to get an inode fork's
+ extent count
+Message-ID: <20201114001030.GB9695@magnolia>
+References: <20201113112704.28798-1-chandanrlinux@gmail.com>
+ <20201113112704.28798-2-chandanrlinux@gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <20201113151946.GY6756@twin.jikos.cz>
-Content-Type: multipart/signed; micalg=pgp-sha256;
- protocol="application/pgp-signature";
- boundary="UTQodH9m26fZgqrfvHLSUejYJRWrs7Nye"
-X-Provags-ID: V03:K1:Fa8T3ftXZGlpUJw6V9iH1oBfloZ0cgfVpi1FXNV0ouUXYWD0wWn
- 7KWwjdIDXbmR5te4/pLSVmq9RQu1yzEvri/bUm4vYI8TPaDTI8Zfn1OLytxwMkOQXrFEKbr
- x38QjocNbFA3tghmeBCzr8m7A8IoNr5FmhNTZn9L7auk6BLE6xauj4Jb4xJyJ39MVOgm0qx
- lnUsg88Sn70PntNRt/Y7Q==
-X-UI-Out-Filterresults: notjunk:1;V03:K0:kUSolHjDAhI=:oT8hdw8ZFMnpkyUFVDqjSm
- SdDL2swGywG10c3wzgTT8pz09+fSpTp1kf6C3soGLTqSM1JAqO/IW7SfQfFAotyGIsVcgeNy0
- Y4QfT5saWk81jUkY0h/UfszbEuS6dlRYfKWStEH/phTE1jNbL4owQ6jHcdLWzm78kd7+elei2
- NTDGun4XAzctkAYF+NqAWwsQSOAwF1xHwsOwTMjxhfREX5LcR7vT7h77MDug1r54CcU+40uFv
- UKYPc/FU6zdVaQ2RwBHnGo1YynnImUq/8zMmIPsnvIbB4Z5+LuRebvoyQEJjrbE//XZ9bel/p
- hFmMFZRnx6aZ5c2N+UJrHuOiLjjTa/CIkOOekjn7F1hYLUN4YIhmZu60d/0s5MokY6iOESAg9
- AAEU6NXxjUqsmDwSE0mlrbmmAzNKZ14j8Urd7i8qT0VT0H+GKvEBYznaV0120cPGGDI5ZiOh9
- LGSPrWK3goJ/mBobpOMiHsd4MYRirPbUY/LAMTcBkldw7TPcFRK5lBOUGHtAEi497HM1MArKZ
- rZpT20wPaiFhM79spZZFG/hqZYJUwNvsx7XvUClaky/D4G+xXRpI637V5SzEDHCe+kiHjLLyT
- D0b50NjaQ72eUOvfzmOv+W+EhYF4Af8yTW4FbE26vF4DLK6Xdi4Op2VRAdg/UYrh3sEafPNK8
- i2VSsvfJZ4VBzF7hVIdMsIrOfHwQ+F2Zfj7xEx5L7Zs2InG9jblgNVDCRzPhkYErJkgjL/jWm
- z4q4rVsfncHSrvUsjgzCdxp9bipOWTjwGdGuZ2OBsj2y/Z28nx9Mj6+2q7c6BuApg82TXi9sl
- UgSqeUEikCn0AF33lNa8NDF3ulbmg96tT1T73zrAEREB2k93Uh9vLYZ0DL/u+vmzaFRniA9E4
- NClDP5dCTzStvUmIqYBQ==
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20201113112704.28798-2-chandanrlinux@gmail.com>
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9804 signatures=668682
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxscore=0 spamscore=0 malwarescore=0
+ adultscore=0 phishscore=0 bulkscore=0 mlxlogscore=999 suspectscore=1
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2009150000
+ definitions=main-2011130155
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9804 signatures=668682
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 bulkscore=0 mlxlogscore=999 mlxscore=0
+ malwarescore=0 suspectscore=1 lowpriorityscore=0 adultscore=0 phishscore=0
+ priorityscore=1501 spamscore=0 impostorscore=0 clxscore=1015
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2009150000
+ definitions=main-2011130155
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---UTQodH9m26fZgqrfvHLSUejYJRWrs7Nye
-Content-Type: multipart/mixed; boundary="rRk0Cupkunh4BCoNOibrqI8nJ9D7xAeaZ"
+On Fri, Nov 13, 2020 at 04:56:53PM +0530, Chandan Babu R wrote:
+> This commit adds the helper _scratch_get_iext_count() which returns an
+> inode fork's extent count.
+> 
+> Signed-off-by: Chandan Babu R <chandanrlinux@gmail.com>
+> ---
+>  common/xfs | 22 ++++++++++++++++++++++
+>  1 file changed, 22 insertions(+)
+> 
+> diff --git a/common/xfs b/common/xfs
+> index 79dab058..45cd329c 100644
+> --- a/common/xfs
+> +++ b/common/xfs
+> @@ -883,6 +883,28 @@ _scratch_get_bmx_prefix() {
+>  	return 1
+>  }
+>  
+> +_scratch_get_iext_count()
+> +{
+> +	ino=$1
+> +	whichfork=$2
+> +
+> +	case $whichfork in
+> +		"attr")
+> +			field=core.naextents
+> +			;;
+> +		"data")
+> +			field=core.nextents
+> +			;;
+> +		*)
+> +			return 1
+> +	esac
+> +
+> +	nextents=$(_scratch_xfs_db  -c "inode $ino" -c "print $field")
+> +	nextents=${nextents##${field} = }
 
---rRk0Cupkunh4BCoNOibrqI8nJ9D7xAeaZ
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: quoted-printable
+This helper looks fine, but looking at the callers spread over the next
+10 patches, I notice that you unmount to call this helper and
+immediately remount the fs.
 
+I wonder, is there a specific reason for grabbing the extent count that
+way?  You can extract the same info online with `xfs_io -c 'stat' /moo',
+right?
 
+--D
 
-On 2020/11/13 =E4=B8=8B=E5=8D=8811:19, David Sterba wrote:
-> On Thu, Nov 12, 2020 at 07:50:22AM +0800, Qu Wenruo wrote:
->>>> +$BTRFS_UTIL_PROG quota enable $SCRATCH_MNT
->>>> +$BTRFS_UTIL_PROG quota rescan -w $SCRATCH_MNT >> $seqres.full
->>>> +
->>>> +# Set the limit to just 512MiB, which is way below the existing usa=
-ge
->>>> +$BTRFS_UTIL_PROG qgroup limit  512M $SCRATCH_MNT $SCRATCH_MNT
->>>
->>> $SCRATCH_MNT twice by mistake, though the command still works and the=
-
->>> test still reproduces the issue.
->>
->> Nope, that's the expected behavior.
->>
->> Btrfs qgroup limit <size> <path>|<qgroupid> <path>
->>
->> The first path is to determine qgroupid, while the last path is to
->> determine the fs.
->>
->> In this particular case, since we're limit the 0/5 qgroup, it's also t=
-he
->> as the mount point, thus we specific it twice.
->=20
-> So why didn't you specify 0/5 so it's clear?
->=20
-Oh no, my brain just shorted, and forgot that it's 0/5 fixed for fs tree.=
-
-
-0/5 is indeed much better.
-
-Thanks,
-Qu
-
-
---rRk0Cupkunh4BCoNOibrqI8nJ9D7xAeaZ--
-
---UTQodH9m26fZgqrfvHLSUejYJRWrs7Nye
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAEBCAAdFiEELd9y5aWlW6idqkLhwj2R86El/qgFAl+vIE0ACgkQwj2R86El
-/qhdYgf8Dk5/Ni85Ct1bMlPrgckoqo62c7j6gdwtyfFlCIM/rnyhaabZd3JMXikP
-y8PvL8YznfSUcEiCngmHXzbkz77hpBmr03hPI93xVDBxdwdAEgERqXubMb1gNxCl
-RrH147bDCycgYhOPL0gyDBJLhF6loqUtWa7k7DWztE7aOblcpp5aWDmLD6lkeBQV
-RqmHh/2ztf5XcQuS/JEBqD5SQYn/6N0DxTCmyAW6exApTQqnDWJLw9y2P6AI+0U3
-cbGjpWh/1WKcaXYQghYgJli+MA3NFYvpILETrBfnGQRJdmFGrAfKbEK5A7lxi8cF
-1pMTIs21frEsYs/Pc6yx6Lh090ASlg==
-=s88X
------END PGP SIGNATURE-----
-
---UTQodH9m26fZgqrfvHLSUejYJRWrs7Nye--
+> +
+> +	echo $nextents
+> +}
+> +
+>  #
+>  # Ensures that we don't pass any mount options incompatible with XFS v4
+>  #
+> -- 
+> 2.28.0
+> 
