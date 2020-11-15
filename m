@@ -2,104 +2,66 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+X-Spam-Status: No, score=-8.7 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B64E5C61DD8
-	for <linux-fstests@archiver.kernel.org>; Sun, 15 Nov 2020 03:16:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4BC08C2D0E4
+	for <linux-fstests@archiver.kernel.org>; Sun, 15 Nov 2020 09:13:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6C20320773
-	for <linux-fstests@archiver.kernel.org>; Sun, 15 Nov 2020 03:16:12 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=kernel.org header.i=@kernel.org header.b="nUgS+OqF"
+	by mail.kernel.org (Postfix) with ESMTP id 0BA112244C
+	for <linux-fstests@archiver.kernel.org>; Sun, 15 Nov 2020 09:13:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726301AbgKODPv (ORCPT
+        id S1726537AbgKOJNi (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 14 Nov 2020 22:15:51 -0500
-Received: from mail.kernel.org ([198.145.29.99]:59278 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726230AbgKODPv (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sat, 14 Nov 2020 22:15:51 -0500
-Received: from sol.attlocal.net (172-10-235-113.lightspeed.sntcca.sbcglobal.net [172.10.235.113])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 2BE8920773;
-        Sun, 15 Nov 2020 03:15:50 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1605410150;
-        bh=xLUPJemfVglpcrSPqXa8cTZsEYz0D/H4dKq7o72KZRw=;
-        h=From:To:Cc:Subject:Date:From;
-        b=nUgS+OqFttfmlbVybEV9+vrceADYBp/G7OjlU3MLJ9vVTY+oIzn3ek3UV02M3r3bO
-         /lAWJY1vrjgsjw5FtDynn4og+nlo1me6ju3/US3P86AvXY1ypo2geDFpJivFxufhD6
-         UEurLwjUKm9stgwpxxquae9gLcC9qfJpAyHEqhGs=
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     fstests@vger.kernel.org
-Cc:     linux-fscrypt@vger.kernel.org
-Subject: [xfstests PATCH] fscrypt-crypt-util: fix maximum IV size
-Date:   Sat, 14 Nov 2020 19:15:36 -0800
-Message-Id: <20201115031536.1469955-1-ebiggers@kernel.org>
-X-Mailer: git-send-email 2.29.2
+        Sun, 15 Nov 2020 04:13:38 -0500
+Received: from out20-63.mail.aliyun.com ([115.124.20.63]:44908 "EHLO
+        out20-63.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726754AbgKOJN1 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 15 Nov 2020 04:13:27 -0500
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.31313|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_social|0.013626-0.00129578-0.985078;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047202;MF=guan@eryu.me;NM=1;PH=DS;RN=4;RT=4;SR=0;TI=SMTPD_---.IwxUCR7_1605431573;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.IwxUCR7_1605431573)
+          by smtp.aliyun-inc.com(10.147.40.44);
+          Sun, 15 Nov 2020 17:12:53 +0800
+Date:   Sun, 15 Nov 2020 17:12:53 +0800
+From:   Eryu Guan <guan@eryu.me>
+To:     "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: Re: [PATCH 0/4] xfstests: fix compiler warnings with fsx/fsstress
+Message-ID: <20201115091253.GJ3853@desktop>
+References: <160505547722.1389938.14377167906399924976.stgit@magnolia>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <160505547722.1389938.14377167906399924976.stgit@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Eric Biggers <ebiggers@google.com>
+On Tue, Nov 10, 2020 at 04:44:37PM -0800, Darrick J. Wong wrote:
+> Hi all,
+> 
+> Fix all the compiler warnings emitted when building fsstress and fsx.
 
-In commit 65cd8e8a8e81 ("fscrypt-crypt-util: fix IV incrementing for
---iv-ino-lblk-32") I mistakenly decreased the size of fscrypt_iv to 24
-bytes, which is the most that is explicitly needed by any of the IV
-generation methods.  However, Adiantum encryption takes a 32-byte IV, so
-the buffer still needs to be 32 bytes, with any extra bytes zeroed.
+I've taken the first 3 patches, and left the last one for now :)
 
-So restore the size to 32 bytes.
+Thanks,
+Eryu
 
-This fixes a buffer overread that caused generic/550 and generic/584 to
-sometimes fail, depending on the build of the fscrypt-crypt-util binary.
-(Most of the time it still worked by chance.)
-
-Fixes: 65cd8e8a8e81 ("fscrypt-crypt-util: fix IV incrementing for --iv-ino-lblk-32")
-Signed-off-by: Eric Biggers <ebiggers@google.com>
----
- src/fscrypt-crypt-util.c | 7 +++++--
- 1 file changed, 5 insertions(+), 2 deletions(-)
-
-diff --git a/src/fscrypt-crypt-util.c b/src/fscrypt-crypt-util.c
-index 26698d7a..03cc3c4a 100644
---- a/src/fscrypt-crypt-util.c
-+++ b/src/fscrypt-crypt-util.c
-@@ -1642,6 +1642,7 @@ static u64 siphash_1u64(const u64 key[2], u64 data)
- #define FILE_NONCE_SIZE		16
- #define UUID_SIZE		16
- #define MAX_KEY_SIZE		64
-+#define MAX_IV_SIZE		ADIANTUM_IV_SIZE
- 
- static const struct fscrypt_cipher {
- 	const char *name;
-@@ -1715,6 +1716,8 @@ union fscrypt_iv {
- 		/* IV_INO_LBLK_64: inode number */
- 		__le32 inode_number;
- 	};
-+	/* Any extra bytes up to the algorithm's IV size must be zeroed */
-+	u8 bytes[MAX_IV_SIZE];
- };
- 
- static void crypt_loop(const struct fscrypt_cipher *cipher, const u8 *key,
-@@ -1736,9 +1739,9 @@ static void crypt_loop(const struct fscrypt_cipher *cipher, const u8 *key,
- 		memset(&buf[res], 0, crypt_len - res);
- 
- 		if (decrypting)
--			cipher->decrypt(key, (u8 *)iv, buf, buf, crypt_len);
-+			cipher->decrypt(key, iv->bytes, buf, buf, crypt_len);
- 		else
--			cipher->encrypt(key, (u8 *)iv, buf, buf, crypt_len);
-+			cipher->encrypt(key, iv->bytes, buf, buf, crypt_len);
- 
- 		full_write(STDOUT_FILENO, buf, crypt_len);
- 
--- 
-2.29.2
-
+> 
+> If you're going to start using this mess, you probably ought to just
+> pull from my git trees, which are linked below.
+> 
+> This is an extraordinary way to destroy everything.  Enjoy!
+> Comments and questions are, as always, welcome.
+> 
+> --D
+> 
+> fstests git tree:
+> https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=fix-fsx-and-fsstress-warnings
+> ---
+>  ltp/fsstress.c |  102 ++++++++++++++++++++++++++------------------------------
+>  ltp/fsx.c      |    5 +--
+>  2 files changed, 50 insertions(+), 57 deletions(-)
