@@ -2,110 +2,172 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,
+X-Spam-Status: No, score=-13.7 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=ham autolearn_force=no version=3.4.0
+	LOTS_OF_MONEY,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
+	URIBL_BLOCKED autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 75009C6369E
-	for <linux-fstests@archiver.kernel.org>; Wed, 18 Nov 2020 16:44:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 051CBC63798
+	for <linux-fstests@archiver.kernel.org>; Thu, 19 Nov 2020 14:19:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 13B32208CA
-	for <linux-fstests@archiver.kernel.org>; Wed, 18 Nov 2020 16:44:44 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B698422226
+	for <linux-fstests@archiver.kernel.org>; Thu, 19 Nov 2020 14:19:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725948AbgKRQon (ORCPT
+        id S1727211AbgKSOTp (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 18 Nov 2020 11:44:43 -0500
-Received: from sandeen.net ([63.231.237.45]:41504 "EHLO sandeen.net"
+        Thu, 19 Nov 2020 09:19:45 -0500
+Received: from mx2.suse.de ([195.135.220.15]:57192 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725874AbgKRQom (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 18 Nov 2020 11:44:42 -0500
-Received: from liberator.sandeen.net (liberator.sandeen.net [10.0.0.146])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by sandeen.net (Postfix) with ESMTPSA id 48E78D70;
-        Wed, 18 Nov 2020 10:44:15 -0600 (CST)
-To:     "Darrick J. Wong" <darrick.wong@oracle.com>, guaneryu@gmail.com
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-References: <160382541643.1203756.12015378093281554469.stgit@magnolia>
- <160382542877.1203756.11339393830951325848.stgit@magnolia>
-From:   Eric Sandeen <sandeen@sandeen.net>
-Subject: Re: [PATCH 2/2] xfs: test inobtcount upgrade
-Message-ID: <de3588f9-e80a-b9ba-cb03-16d538060675@sandeen.net>
-Date:   Wed, 18 Nov 2020 10:44:40 -0600
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0)
- Gecko/20100101 Thunderbird/78.4.3
+        id S1727464AbgKSOTo (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 19 Nov 2020 09:19:44 -0500
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+Received: from relay2.suse.de (unknown [195.135.221.27])
+        by mx2.suse.de (Postfix) with ESMTP id 5F65CABD6;
+        Thu, 19 Nov 2020 14:19:42 +0000 (UTC)
+Received: from localhost (brahms [local])
+        by brahms (OpenSMTPD) with ESMTPA id d4284579;
+        Thu, 19 Nov 2020 14:19:57 +0000 (UTC)
+From:   Luis Henriques <lhenriques@suse.de>
+To:     fstests@vger.kernel.org
+Cc:     ceph-devel@vger.kernel.org, Jeff Layton <jlayton@kernel.org>,
+        Luis Henriques <lhenriques@suse.de>
+Subject: [PATCH] ceph: add a new test for cross quota realms renames
+Date:   Thu, 19 Nov 2020 14:19:56 +0000
+Message-Id: <20201119141956.6488-1-lhenriques@suse.de>
 MIME-Version: 1.0
-In-Reply-To: <160382542877.1203756.11339393830951325848.stgit@magnolia>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 10/27/20 2:03 PM, Darrick J. Wong wrote:
-> From: Darrick J. Wong <darrick.wong@oracle.com>
-> 
-> Make sure we can actually upgrade filesystems to support inobtcounts.
-> 
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> ---
->  common/xfs        |   16 ++++++++++++
->  tests/xfs/910     |   72 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/910.out |    3 ++
->  tests/xfs/group   |    1 +
->  4 files changed, 92 insertions(+)
->  create mode 100755 tests/xfs/910
->  create mode 100644 tests/xfs/910.out
-> 
-> 
-> diff --git a/common/xfs b/common/xfs
-> index 3f5c14ba..e548a0a1 100644
-> --- a/common/xfs
-> +++ b/common/xfs
-> @@ -978,3 +978,19 @@ _require_xfs_copy()
->  	[ "$USE_EXTERNAL" = yes ] && \
->  		_notrun "Cannot xfs_copy with external devices"
->  }
-> +
-> +_require_xfs_mkfs_inobtcount()
-> +{
-> +	_scratch_mkfs_xfs_supported -m inobtcount=1 >/dev/null 2>&1 \
-> +	   || _notrun "mkfs.xfs doesn't have inobtcount feature"
-> +}
+For the moment cross quota realms renames has been disabled in CephFS
+after a bug has been found while renaming files created and truncated.
+This allowed clients to easily circumvent quotas.
 
-I'd like to also add:
+Link: https://tracker.ceph.com/issues/48203
+Signed-off-by: Luis Henriques <lhenriques@suse.de>
+---
+ tests/ceph/004     | 94 ++++++++++++++++++++++++++++++++++++++++++++++
+ tests/ceph/004.out |  2 +
+ tests/ceph/group   |  1 +
+ 3 files changed, 97 insertions(+)
+ create mode 100755 tests/ceph/004
+ create mode 100644 tests/ceph/004.out
 
-+_require_xfs_admin_upgrade()
-+{
-+	local feature="$1"
+diff --git a/tests/ceph/004 b/tests/ceph/004
+new file mode 100755
+index 000000000000..4021666b138e
+--- /dev/null
++++ b/tests/ceph/004
+@@ -0,0 +1,94 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2020 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test 004
++#
++# Tests a bug fix found in cephfs quotas handling.  Here's a simplified testcase
++# that *should* fail:
++#
++#    mkdir files limit
++#    truncate files/file -s 10G
++#    setfattr limit -n ceph.quota.max_bytes -v 1000000
++#    mv files limit/
++#
++# Because we're creating a new file and truncating it, we have Fx caps and thus
++# the truncate operation will be cached.  This prevents the MDSs from updating
++# the quota realms and thus the client will allow the above rename(2) to happen.
++#
++# The bug resulted in dropping support for cross quota-realms renames, reverting
++# kernel commit dffdcd71458e ("ceph: allow rename operation under different
++# quota realms").
++#
++# So, the above test will now fail with a -EXDEV or, in the future (when we have
++# a proper fix), with -EDQUOT.
++#
++# This bug was tracker here:
++#
++#   https://tracker.ceph.com/issues/48203
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
 +
-+	_require_scratch
-+	# Catch missing "-O" or missing feature handling
-+	_scratch_xfs_admin -O $feature 2>&1 | grep "illegal option\|Cannot change" \
-+		&& _notrun "xfs_admin does not support upgrading $1"
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
 +}
-
-and then:
-
-...
-
-> +# real QA test starts here
-> +_supported_fs xfs
-> +_require_command "$XFS_ADMIN_PROG" "xfs_admin"
-> +_require_xfs_mkfs_inobtcount
-> +_require_xfs_scratch_inobtcount
-
-+_require_xfs_admin_upgrade "inobtcount"
-
-to be sure that the upgrade command is also supported by xfs_admin.  By the time
-we get to release, both mkfs & xfs_admin should both support it, but I'm hedging
-my bets on the upgrade path just a little,and it seems best to explicitly test
-both requirements.
-
-that helper can be re-used on the bigtime upgrade test as well and anything else
-that requires an xfs_admin upgrade path ...
-
-Thanks,
--Eric
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/attr
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++_supported_fs ceph
++_require_attrs
++_require_test
++
++workdir=$TEST_DIR/test-$seq
++
++orig1=$workdir/orig1
++orig2=$workdir/orig2
++file1=$orig1/file
++file2=$orig2/file
++dest=$workdir/dest
++
++rm -rf $workdir
++mkdir $workdir
++mkdir $orig1 $orig2 $dest
++
++# set quota to 1m
++$SETFATTR_PROG -n ceph.quota.max_bytes -v 1000000 $dest
++# set quota to 20g
++$SETFATTR_PROG -n ceph.quota.max_bytes -v 20000000000 $orig2
++
++#
++# The following 2 testcases shall fail with either -EXDEV or -EDQUOT
++#
++
++# from 'root' realm to $dest realm
++$XFS_IO_PROG -f -c "truncate 10G" $file1
++$here/src/rename $orig1 $dest/new1 >> $seqres.full 2>&1
++[ $? -ne 1 ] && _fatal "cross quota realms rename succeeded"
++
++# from $orig2 realm to $dest realm
++$XFS_IO_PROG -f -c "truncate 10G" $file2
++$here/src/rename $orig2 $dest/new2 >> $seqres.full 2>&1
++[ $? -ne 1 ] && _fatal "cross quota realms rename succeeded"
++
++echo "Silence is golden"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/ceph/004.out b/tests/ceph/004.out
+new file mode 100644
+index 000000000000..af8614ae45ac
+--- /dev/null
++++ b/tests/ceph/004.out
+@@ -0,0 +1,2 @@
++QA output created by 004
++Silence is golden
+diff --git a/tests/ceph/group b/tests/ceph/group
+index adbf61547766..47903d21966c 100644
+--- a/tests/ceph/group
++++ b/tests/ceph/group
+@@ -1,3 +1,4 @@
+ 001 auto quick copy
+ 002 auto quick copy
+ 003 auto quick copy
++004 auto quick quota
