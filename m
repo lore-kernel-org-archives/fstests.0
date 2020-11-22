@@ -2,206 +2,108 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4AD91C63697
-	for <linux-fstests@archiver.kernel.org>; Sat, 21 Nov 2020 08:24:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4CAB7C5519F
+	for <linux-fstests@archiver.kernel.org>; Sun, 22 Nov 2020 14:30:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 10FA02224A
-	for <linux-fstests@archiver.kernel.org>; Sat, 21 Nov 2020 08:24:33 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="BtaJfDqO"
+	by mail.kernel.org (Postfix) with ESMTP id 0ED9A20789
+	for <linux-fstests@archiver.kernel.org>; Sun, 22 Nov 2020 14:30:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727267AbgKUIYO (ORCPT
+        id S1727745AbgKVOaJ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 21 Nov 2020 03:24:14 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57230 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727200AbgKUIYN (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 21 Nov 2020 03:24:13 -0500
-Received: from mail-pl1-x62c.google.com (mail-pl1-x62c.google.com [IPv6:2607:f8b0:4864:20::62c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6CC49C0613CF;
-        Sat, 21 Nov 2020 00:24:12 -0800 (PST)
-Received: by mail-pl1-x62c.google.com with SMTP id 18so6151148pli.13;
-        Sat, 21 Nov 2020 00:24:12 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=FZgARtFP3MafucsdIxRriBvkxf7XoFVmTv9PLFeynHY=;
-        b=BtaJfDqOtZiJYyaUxTulMy1/OYKrqs7vthgS3xU9AWEfuPyWzsXO8LUfNNJFR7Xywj
-         E2fDQEKHlWWyQVyIWJzLfQU7jDY/ytNhhV286VXXoaY7UQAFfZKWzL2lFABMQgutFQoX
-         5cNFSYpqHvfld2f4wxSw4KPwU/7QULl1nf9U0me+5za7B4W1CQIf73VamPd4SVBRgU2Q
-         d2fq9lda16XMeHUH+QwpaemmzdrJuKeKSuXBgfEqmCDq6qw2WvILzX3D/no/e+x6R65F
-         sn47NuWnGPRwKj1sZtmCfzVClJZG48Mz40lsZjBjwjKokmXw1QSlO3UFnob9sUfPYt2k
-         0rJQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=FZgARtFP3MafucsdIxRriBvkxf7XoFVmTv9PLFeynHY=;
-        b=qALF7eUVLWv0VX7od64FSML3C1Rbpm4Wpx/FsZcACSNQg1s0PrFBSg/ROK0n9yLGVn
-         Xpq1zvODupRWP+KFbxuuAJxJEjxwL8W7iSIgGG9mkJxbEfX1uNjf9XSpkchtFmRSxJ5R
-         pdFpQbGf10t0uTRQPQHe9JE9MU1dzdjnBNGUmyvji/eNKJCrosjubb2zQXJRvgUuphHu
-         MBBqjvWLtUFUhOkYICJgVtQOclrsT30+nP092vdpxXUEkb/N8byQZnaDXfGRJngXsv0f
-         AfCm7DDL+vHLqMvrw18PmyafEYh9DqjQyQPNyjk29jBjufysTJ5Tnsd2RyUMJyAjlApY
-         oNrw==
-X-Gm-Message-State: AOAM533QdIFVBBN/A6fugMfnwuznr9Kts0vBQkLOLvubVdY44+IAzzwI
-        y5wSqumR8gbVYl+oKJDkwnfQfkAi8h4=
-X-Google-Smtp-Source: ABdhPJyck96xRpxghgCuwFMrJzEey0Raijd0xeJHBxMF+/0PFKWEYebz27qZWutZNrMzaVL0EZRV8w==
-X-Received: by 2002:a17:902:864c:b029:d8:b3b1:b91c with SMTP id y12-20020a170902864cb02900d8b3b1b91cmr17657160plt.79.1605947051699;
-        Sat, 21 Nov 2020 00:24:11 -0800 (PST)
-Received: from localhost.localdomain ([122.167.41.102])
-        by smtp.gmail.com with ESMTPSA id e22sm6167148pfd.153.2020.11.21.00.24.09
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 21 Nov 2020 00:24:11 -0800 (PST)
-From:   Chandan Babu R <chandanrlinux@gmail.com>
-To:     fstests@vger.kernel.org
-Cc:     Chandan Babu R <chandanrlinux@gmail.com>,
-        linux-xfs@vger.kernel.org, darrick.wong@oracle.com
-Subject: [PATCH V2 11/11] xfs: Stress test with with bmap_alloc_minlen_extent error tag enabled
-Date:   Sat, 21 Nov 2020 13:53:32 +0530
-Message-Id: <20201121082332.89739-12-chandanrlinux@gmail.com>
-X-Mailer: git-send-email 2.29.2
-In-Reply-To: <20201121082332.89739-1-chandanrlinux@gmail.com>
-References: <20201121082332.89739-1-chandanrlinux@gmail.com>
+        Sun, 22 Nov 2020 09:30:09 -0500
+Received: from out20-49.mail.aliyun.com ([115.124.20.49]:50572 "EHLO
+        out20-49.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726436AbgKVOaJ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 22 Nov 2020 09:30:09 -0500
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07725626|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.0810306-0.00218023-0.916789;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047198;MF=guan@eryu.me;NM=1;PH=DS;RN=5;RT=5;SR=0;TI=SMTPD_---.IzrW-Lh_1606055264;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.IzrW-Lh_1606055264)
+          by smtp.aliyun-inc.com(10.147.40.44);
+          Sun, 22 Nov 2020 22:27:45 +0800
+Date:   Sun, 22 Nov 2020 22:27:44 +0800
+From:   Eryu Guan <guan@eryu.me>
+To:     "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc:     guaneryu@gmail.com, Chandan Babu R <chandanrlinux@gmail.com>,
+        linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH 0/7] various: test xfs things fixed in 5.10
+Message-ID: <20201122142744.GK3853@desktop>
+References: <160505542802.1388823.10368384826199448253.stgit@magnolia>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <160505542802.1388823.10368384826199448253.stgit@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This commit adds a stress test that executes fsstress with
-bmap_alloc_minlen_extent error tag enabled.
+On Tue, Nov 10, 2020 at 04:43:48PM -0800, Darrick J. Wong wrote:
+> Hi all,
+> 
+> Here are a bunch of new tests for problems that were fixed in 5.10.
+> Er.... 5.10 and 5.9.  I have not been good at sending to fstests
+> upstream lately. :( :(
 
-Signed-off-by: Chandan Babu R <chandanrlinux@gmail.com>
----
- tests/xfs/531     | 84 +++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/531.out |  7 ++++
- tests/xfs/group   |  1 +
- 3 files changed, 92 insertions(+)
- create mode 100755 tests/xfs/531
- create mode 100644 tests/xfs/531.out
+It seems all these tests are regression tests for bugs that have been
+fixed in v5.10 cycle, and some of the tests didn't list the associated
+commits that fixed the bug, and some tests listed the patch titles but
+not the commit IDs. Would you please fix them up as well?
 
-diff --git a/tests/xfs/531 b/tests/xfs/531
-new file mode 100755
-index 00000000..983524b4
---- /dev/null
-+++ b/tests/xfs/531
-@@ -0,0 +1,84 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2020 Chandan Babu R.  All Rights Reserved.
-+#
-+# FS QA Test 531
-+#
-+# Execute fsstress with bmap_alloc_minlen_extent error tag enabled.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/inject
-+. ./common/populate
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+_supported_fs xfs
-+_require_scratch
-+_require_xfs_debug
-+_require_test_program "punch-alternating"
-+_require_xfs_io_error_injection "bmap_alloc_minlen_extent"
-+
-+echo "Format and mount fs"
-+_scratch_mkfs_sized $((1024 * 1024 * 1024)) >> $seqres.full
-+_scratch_mount >> $seqres.full
-+
-+bsize=$(_get_file_block_size $SCRATCH_MNT)
-+
-+echo "Consume free space"
-+fillerdir=$SCRATCH_MNT/fillerdir
-+nr_free_blks=$(stat -f -c '%f' $SCRATCH_MNT)
-+nr_free_blks=$((nr_free_blks * 90 / 100))
-+
-+_fill_fs $((bsize * nr_free_blks)) $fillerdir $bsize 0 >> $seqres.full 2>&1
-+
-+echo "Create fragmented filesystem"
-+for dentry in $(ls -1 $fillerdir/); do
-+	$here/src/punch-alternating $fillerdir/$dentry >> $seqres.full
-+done
-+
-+echo "Inject bmap_alloc_minlen_extent error tag"
-+_scratch_inject_error bmap_alloc_minlen_extent 1
-+
-+echo "Scale fsstress args"
-+args=$(_scale_fsstress_args -p 75 -n 10000)
-+
-+echo "Execute fsstress in background"
-+$FSSTRESS_PROG -d $SCRATCH_MNT $args \
-+		 -f bulkstat=0 \
-+		 -f bulkstat1=0 \
-+		 -f fiemap=0 \
-+		 -f getattr=0 \
-+		 -f getdents=0 \
-+		 -f getfattr=0 \
-+		 -f listfattr=0 \
-+		 -f mread=0 \
-+		 -f read=0 \
-+		 -f readlink=0 \
-+		 -f readv=0 \
-+		 -f stat=0 \
-+		 -f aread=0 \
-+		 -f dread=0 > /dev/null 2>&1
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/531.out b/tests/xfs/531.out
-new file mode 100644
-index 00000000..67f40654
---- /dev/null
-+++ b/tests/xfs/531.out
-@@ -0,0 +1,7 @@
-+QA output created by 531
-+Format and mount fs
-+Consume free space
-+Create fragmented filesystem
-+Inject bmap_alloc_minlen_extent error tag
-+Scale fsstress args
-+Execute fsstress in background
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 289a082d..f09c742b 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -528,6 +528,7 @@
- 528 auto quick reflink
- 529 auto quick reflink
- 530 auto quick
-+531 auto stress
- 758 auto quick rw attr realtime
- 759 auto quick rw realtime
- 760 auto quick rw collapse punch insert zero prealloc
--- 
-2.29.2
+> 
+> If you're going to start using this mess, you probably ought to just
+> pull from my git trees, which are linked below.
+> 
+> This is an extraordinary way to destroy everything.  Enjoy!
+> Comments and questions are, as always, welcome.
+> 
+> --D
+> 
+> fstests git tree:
+> https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=test-fixes-5.10
+> ---
+>  tests/generic/947     |  117 ++++++++++++++++++++++++++++++++
+>  tests/generic/947.out |   15 ++++
+>  tests/generic/948     |   90 ++++++++++++++++++++++++
+>  tests/generic/948.out |    9 ++
+>  tests/generic/group   |    2 +
+>  tests/xfs/122         |    1 
+>  tests/xfs/122.out     |    1 
+>  tests/xfs/758         |   59 ++++++++++++++++
+>  tests/xfs/758.out     |    2 +
+>  tests/xfs/759         |   99 +++++++++++++++++++++++++++
+>  tests/xfs/759.out     |    2 +
+>  tests/xfs/760         |   66 ++++++++++++++++++
+>  tests/xfs/760.out     |    9 ++
+>  tests/xfs/761         |   42 +++++++++++
+>  tests/xfs/761.out     |    1 
 
+"Silence is golden" is missed in 761.out :)
+
+Thanks,
+Eryu
+
+>  tests/xfs/763         |  181 +++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/763.out     |   91 +++++++++++++++++++++++++
+>  tests/xfs/915         |  176 ++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/915.out     |  151 +++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/group       |    6 ++
+>  20 files changed, 1119 insertions(+), 1 deletion(-)
+>  create mode 100755 tests/generic/947
+>  create mode 100644 tests/generic/947.out
+>  create mode 100755 tests/generic/948
+>  create mode 100644 tests/generic/948.out
+>  create mode 100755 tests/xfs/758
+>  create mode 100644 tests/xfs/758.out
+>  create mode 100755 tests/xfs/759
+>  create mode 100644 tests/xfs/759.out
+>  create mode 100755 tests/xfs/760
+>  create mode 100644 tests/xfs/760.out
+>  create mode 100755 tests/xfs/761
+>  create mode 100644 tests/xfs/761.out
+>  create mode 100755 tests/xfs/763
+>  create mode 100644 tests/xfs/763.out
+>  create mode 100755 tests/xfs/915
+>  create mode 100644 tests/xfs/915.out
