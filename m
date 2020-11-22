@@ -2,149 +2,212 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-12.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 52BB5C64E7B
-	for <linux-fstests@archiver.kernel.org>; Sun, 22 Nov 2020 15:39:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C37B6C63697
+	for <linux-fstests@archiver.kernel.org>; Sun, 22 Nov 2020 15:54:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 15A722084C
-	for <linux-fstests@archiver.kernel.org>; Sun, 22 Nov 2020 15:39:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8421820789
+	for <linux-fstests@archiver.kernel.org>; Sun, 22 Nov 2020 15:54:10 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="qVrBHiyB"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Z2/nck3c"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728039AbgKVPj2 (ORCPT
+        id S1727728AbgKVPxu (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 22 Nov 2020 10:39:28 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33532 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727935AbgKVPj2 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 22 Nov 2020 10:39:28 -0500
-Received: from mail-pf1-x432.google.com (mail-pf1-x432.google.com [IPv6:2607:f8b0:4864:20::432])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A05EBC0613CF
-        for <fstests@vger.kernel.org>; Sun, 22 Nov 2020 07:39:26 -0800 (PST)
-Received: by mail-pf1-x432.google.com with SMTP id b63so12498042pfg.12
-        for <fstests@vger.kernel.org>; Sun, 22 Nov 2020 07:39:26 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=message-id:date:from:to:subject:mime-version:content-disposition;
-        bh=MpplByWthoD2RvlmNMLjT6nt5lF116Gfe2dmU91Xlfc=;
-        b=qVrBHiyBoMozFn9AmFx1wjysoKuHd7HYPJjRt9BupGpcclDGpQ6ZSGXGLzVzzbPRxq
-         oAsnn6jpoiJ5msXlpxz6ajnBtpdovhIWQc2NDzVXfKgk976VBi0uc3HdRJqoCD6dX04s
-         IzYW9hGEcDltj3X6+QTDssgJ0jBBOHvWtGwILgt8sxSMB9A/17mVjr7jzlgEOyaofjyc
-         AgPDKz/2w2hNR4yoUuiZ6SkbklA5h3KErMOkQ+6Ib5WvO/5pv6+1cUV72m8dGlGlSwud
-         +9GYyruJGCQVzICXBnN53mALIbSzrlt6GxGMHoFUIPWwP8q1Jps6Wq9zCso5vss74vMh
-         lWkQ==
+        Sun, 22 Nov 2020 10:53:50 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:39374 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1727745AbgKVPxt (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 22 Nov 2020 10:53:49 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1606060427;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=YxggdvLZ3Wmjetpl6/VmN4AqR/tTtBrWLP7W2iSue6Q=;
+        b=Z2/nck3cJFwQxieWmF8QsZB9+IwwAGQCC4plJotYFMvekl74UBjefr09A12DbOOpogv/G8
+        eCZHV18KMme0O/9CWdYrXL3KDXUxoclXqT+jitdYc/d6XSVCNtb5RpbegSg1Iw/u8FBL0M
+        TzmUYUlXHr9ZoLXujJrdaunZqT4ZfKk=
+Received: from mail-pg1-f197.google.com (mail-pg1-f197.google.com
+ [209.85.215.197]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-195-jiBaqXfyMGywwkNpOi6jVw-1; Sun, 22 Nov 2020 10:53:45 -0500
+X-MC-Unique: jiBaqXfyMGywwkNpOi6jVw-1
+Received: by mail-pg1-f197.google.com with SMTP id i6so10708898pgg.10
+        for <fstests@vger.kernel.org>; Sun, 22 Nov 2020 07:53:45 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:message-id:date:from:to:subject:mime-version
-         :content-disposition;
-        bh=MpplByWthoD2RvlmNMLjT6nt5lF116Gfe2dmU91Xlfc=;
-        b=M1+XHY0kI5/QpGroN/+0klHlVTzjzJ9iKJDCVqtktwYwVL7+aSVoGW6Mr37T58C0KT
-         fCl1BdTVn/HekaiX3VlhKArMRJRUWLTvwns/SM+GY5bulrE/X/A+6kCm50AfVhiYk4JV
-         ssHhODs4g1xeCtQv3DqqFoUXawfpHrItC8slnNctm1zS/kMZQd9E2XSSmhvhBMFw4oEo
-         hunQ199mM/5f4Z3RIJPfGjagJB++grWQsFZP4VxhpCBrXqEE/RrM2oYdxi7FID3OoPqm
-         1NRuB85Dx5qUBerG4Gqw9jOuzco6dlNl8UHgg5/e7bdf5i+GG6MChdRG6kkC2xsy3P9j
-         f+3A==
-X-Gm-Message-State: AOAM532pbB1yafxO/XwySZz+U22hcWsyFpBAcJwKTEbIV260Oe9i+wFg
-        XrPKeXWEnS2/gkh9k8Y5TJiuc/xLCgA=
-X-Google-Smtp-Source: ABdhPJzSpqHMFKgCC4EPAaCBFyeFUSjIEGoflKsDxiLXAIrlIpv4qrPqI4lUeGgve9PLxsoPN4oNeQ==
-X-Received: by 2002:a17:90a:de0c:: with SMTP id m12mr20598843pjv.224.1606059565929;
-        Sun, 22 Nov 2020 07:39:25 -0800 (PST)
-Received: from localhost ([47.89.231.86])
-        by smtp.gmail.com with ESMTPSA id ge21sm10730430pjb.5.2020.11.22.07.39.23
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to:user-agent;
+        bh=YxggdvLZ3Wmjetpl6/VmN4AqR/tTtBrWLP7W2iSue6Q=;
+        b=d+sW6sM3c+skygsH6qHQFKLWqvu8Um7+bd0Pdilfi1Wk8IW43Bl9N2PASmtj2IhY2d
+         xhaF8UT/gwMXiTB0FOAMxIyU3tZJ/Jc7r1Fm5E05t7Xdg7bIvlwU8hV91wzgn4eKpXgC
+         rOBWieuXQY/bfygChWyKUr4PEhFxx2eXrxorX/qAp9T/NmBsRuu7m+K8/OArsm6sxK6b
+         kycf4JKAqiG/jM1jR0NVySRXwaya9c+SNXiMOLn1XyadS5AxKBTh9FM8CORrtoeB0rCm
+         lT9BLIHopdCtlXyJeiK8Zxj8aQqoPgREoBPC37F9DTqkaZhZrQ6FPq/1YNiloH1bVCNG
+         AAHg==
+X-Gm-Message-State: AOAM531Ajf2pber4Jdj5zc51wTcQ5BelAjeWylXhdkvI7R7wxSDS4g+A
+        G+wf3N1tldR1BBMC1Q32ZM9ZFEKAZ0Lh3AnCF1vjVj1Hk9JvGDhPEOEpn1Fo19JKIGBDNUMiNCf
+        Hj8qsJ5wrtOr/daPoBw==
+X-Received: by 2002:a63:fc5b:: with SMTP id r27mr199106pgk.100.1606060424424;
+        Sun, 22 Nov 2020 07:53:44 -0800 (PST)
+X-Google-Smtp-Source: ABdhPJyZq9jLmzslgXLEc+50rAbupGMuPCYuRBazovAmlCfGSMarqinbRpUahgK+PEAHFnzCHdJ7Dg==
+X-Received: by 2002:a63:fc5b:: with SMTP id r27mr199093pgk.100.1606060424060;
+        Sun, 22 Nov 2020 07:53:44 -0800 (PST)
+Received: from xiangao.remote.csb ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id k73sm8319397pga.88.2020.11.22.07.53.40
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 22 Nov 2020 07:39:24 -0800 (PST)
-Message-ID: <5fba862c.1c69fb81.fa930.68ec@mx.google.com>
-Date:   Sun, 22 Nov 2020 23:39:19 +0800
-From:   Eryu Guan <guaneryu@gmail.com>
-To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: master branch updated to 37d4f926b525
+        Sun, 22 Nov 2020 07:53:43 -0800 (PST)
+Date:   Sun, 22 Nov 2020 23:53:32 +0800
+From:   Gao Xiang <hsiangkao@redhat.com>
+To:     Eryu Guan <guan@eryu.me>
+Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
+        "Darrick J. Wong" <darrick.wong@oracle.com>,
+        Eric Sandeen <sandeen@redhat.com>
+Subject: Re: [PATCH] generic: add test for XFS forkoff miscalcution on 32-bit
+ platform
+Message-ID: <20201122155332.GA2797706@xiangao.remote.csb>
+References: <20201118060258.1939824-1-hsiangkao@redhat.com>
+ <20201122144633.GM3853@desktop>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="f7bcaE7Uz1vz"
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
+In-Reply-To: <20201122144633.GM3853@desktop>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+Hi Eryu,
 
---f7bcaE7Uz1vz
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+On Sun, Nov 22, 2020 at 10:46:33PM +0800, Eryu Guan wrote:
+> On Wed, Nov 18, 2020 at 02:02:58PM +0800, Gao Xiang wrote:
 
-Hi all,
+...
 
-The master branch of the xfstests repository at:
+> > +# xxxxxxxxxxxx ("xfs: fix forkoff miscalculation related to XFS_LITINO(mp)")
+> 
+> Would you please re-post when the commit is upstream? With the commit ID
+> updated.
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+Sure will definitely do tomorrow.
 
-have just been updated. This update pulls in the random fixes from Darrick J.
-Wong. One notable change is that test is now run under systemd scope for
-mandatory test cleanup, if your host has systemd enabled. Please see the commit
-log for details.
+> 
+> > +
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +
+> > +here=`pwd`
+> > +tmp=/tmp/$$
+> > +status=1	# failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	rm -f $tmp.*
+> > +}
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/filter
+> > +. ./common/attr
+> > +
+> > +# remove previous $seqres.full before test
+> > +rm -f $seqres.full
+> > +
+> > +# real QA test starts here
+> > +
+> > +_supported_fs generic
+> > +_require_test
+> > +_require_attrs user
+> > +
+> > +localfile="${TEST_DIR}/testfile"
+> 
+> Usually we use a testfile prefixed with $seq, e.g.
+> 
+> localfile=${TEST_DIR}/$seq.testfile
+> 
+> And remove it before test to avoid side effects from previous runs.
+> 
+> rm -f $localfile
+> touch $localfile
+
+okay, will fix.
+
+Actually I didn't take much time on this (just copy from
+generic/611 and use $TEST_DIR instead.) 
+
+> 
+> > +
+> > +touch "${localfile}"
+> > +"${SETFATTR_PROG}" -n user.0 -v "`seq 0 80`" "${localfile}"
+> > +"${SETFATTR_PROG}" -n user.1 -v "`seq 0 80`" "${localfile}"
+> 
+> I'd be better to add comments on why we need two user attrs and why we
+> need such long attr value.
+
+There is no specific reason of using "user attrs" and this
+combination, just the example in
+commit ada49d64fb35 ("xfs: fix forkoff miscalculation related to XFS_LITINO(mp)")
+
+long xattrs which acrosses inline xattr shortform fork can
+trigger this issue. As I said in the patch, the bug itself
+is xfs-specific, but the testcase is generic.
+
+> 
+> > +
+> > +# Make sure that changes are written to disk
+> > +_test_cycle_mount
+> > +
+> > +# check getfattr result as well
+> 
+> Also, better to document the test failure behavior, e.g. kernel crash or
+> hung or just a getfattr failure.
+
+It depends, since ASSERT already fails in the second setfattr
+and similar as
+https://bugzilla.redhat.com/show_bug.cgi?id=1894177
+
+if CONFIG_XFS_ASSERT_FATAL=n, what I saw was that hung on
+the _getfattr line. But in any case, _getfattr won't success
+with the correct result. So I don't think it needs to document
+such unstable status.
 
 Thanks,
-Eryu
+Gao Xiang
 
-The new head of the master branch is commit:
+> 
+> Thanks,
+> Eryu
+> 
+> > +_getfattr --absolute-names -ebase64 -d $localfile | tail -n +2 | sort
+> > +
+> > +status=0
+> > +exit
+> > diff --git a/tests/generic/618.out b/tests/generic/618.out
+> > new file mode 100644
+> > index 00000000..848fdc58
+> > --- /dev/null
+> > +++ b/tests/generic/618.out
+> > @@ -0,0 +1,4 @@
+> > +QA output created by 618
+> > +
+> > +user.0=0sMAoxCjIKMwo0CjUKNgo3CjgKOQoxMAoxMQoxMgoxMwoxNAoxNQoxNgoxNwoxOAoxOQoyMAoyMQoyMgoyMwoyNAoyNQoyNgoyNwoyOAoyOQozMAozMQozMgozMwozNAozNQozNgozNwozOAozOQo0MAo0MQo0Mgo0Mwo0NAo0NQo0Ngo0Nwo0OAo0OQo1MAo1MQo1Mgo1Mwo1NAo1NQo1Ngo1Nwo1OAo1OQo2MAo2MQo2Mgo2Mwo2NAo2NQo2Ngo2Nwo2OAo2OQo3MAo3MQo3Mgo3Mwo3NAo3NQo3Ngo3Nwo3OAo3OQo4MA==
+> > +user.1=0sMAoxCjIKMwo0CjUKNgo3CjgKOQoxMAoxMQoxMgoxMwoxNAoxNQoxNgoxNwoxOAoxOQoyMAoyMQoyMgoyMwoyNAoyNQoyNgoyNwoyOAoyOQozMAozMQozMgozMwozNAozNQozNgozNwozOAozOQo0MAo0MQo0Mgo0Mwo0NAo0NQo0Ngo0Nwo0OAo0OQo1MAo1MQo1Mgo1Mwo1NAo1NQo1Ngo1Nwo1OAo1OQo2MAo2MQo2Mgo2Mwo2NAo2NQo2Ngo2Nwo2OAo2OQo3MAo3MQo3Mgo3Mwo3NAo3NQo3Ngo3Nwo3OAo3OQo4MA==
+> > diff --git a/tests/generic/group b/tests/generic/group
+> > index 94e860b8..eca9d619 100644
+> > --- a/tests/generic/group
+> > +++ b/tests/generic/group
+> > @@ -620,3 +620,4 @@
+> >  615 auto rw
+> >  616 auto rw io_uring stress
+> >  617 auto rw io_uring stress
+> > +618 auto quick attr
+> > -- 
+> > 2.18.4
+> 
 
-37d4f926b525 xfs/033: use _scratch_xfs_db wrapper
-
-New commits:
-
-Darrick J. Wong (6):
-      [f02ccfb24b9e] common: extract rt extent size for _get_file_block_size
-      [c0be121e126f] check: run tests in a systemd scope for mandatory test cleanup
-      [85bf3af7c205] common/populate: make sure _scratch_xfs_populate puts its files on the data device
-      [f220ab921e1d] misc: fix $MKFS_PROG.$FSTYP usage treewide
-      [0d444a9a29e3] misc: fix _get_file_block_size usage
-      [37d4f926b525] xfs/033: use _scratch_xfs_db wrapper
-
-
-Code Diffstat:
-
- check             | 26 +++++++++++++++++++++++++-
- common/populate   | 11 +++++++++++
- common/rc         | 29 ++++++++++++++++++-----------
- common/xfs        | 20 ++++++++++++++++++++
- tests/ext4/032    |  2 +-
- tests/generic/157 |  2 +-
- tests/generic/175 |  2 +-
- tests/shared/032  |  2 +-
- tests/xfs/033     |  2 +-
- tests/xfs/129     |  2 +-
- tests/xfs/169     |  2 +-
- tests/xfs/208     |  2 +-
- tests/xfs/336     |  2 +-
- tests/xfs/344     |  2 +-
- tests/xfs/345     |  2 +-
- 15 files changed, 85 insertions(+), 23 deletions(-)
---
-Eryu Guan
-guaneryu@gmail.com
-
---f7bcaE7Uz1vz
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAl+6hc8ACgkQJlKqKVyP
-52Ppnw/9FofcdOECfJpHW62o54rGvHUoU9iOWmHNETwrVEQNN6gO2A0iWq2bOSt4
-EIFgCcp0KE+2bY6nDq+1h1SpBAPE5Ud1fAuIagMawlcmhhKYw0yAp/nhl7tyPqfR
-U7+6r7LGXWuWNrdQt68E//IEn+Qba1sELZfS6k6Nr560TRjALGOlfBgJalJqwm2n
-avpef3N4RzWK4z1uh/QkpNmJvlSqbk1Y7weFVDxdAhlSblSdYL+n3rfFvUaXCWps
-1fHU7mCAXDSZEbOyYchSLBsaw7wIzxYhECxhOkJFa6wEKGLqDbu82xgxQDy06Y89
-qa39CGaOWwKfytiF/FCgKl5El4aZEb4jKTkoFyR2AY1kzMrgXuShRXFUSPbp2O7u
-f8DNGU7yxLoAFZbuVlGBMTVKKn4+wF7cjP/RaIrDHMGxW+8XoO3DGnEkuyX2VaKg
-lEfdVm6Dy3CaPnnmHkPiJtUtEZM2hCjAQ2qQVgRjIeQM7gjlkcFYFRCVKKeG4lQC
-DRUJoWfwq0xOpBLUxxBPBhSnlBxh/iXyhat1+nmORz3FDMn5dhx+PRP15AvJc3Yu
-F1brg4NqNJhYE0snBBh7con0fjMEC0MEj4ds4oEyZz9hH6dW7qBtouY/ZBmkPSXA
-GuGyVj8V0Ysa8zPCP3OsQYR16G07Fn6pP6RXkyudeuvXWwVu4U8=
-=U5nx
------END PGP SIGNATURE-----
-
---f7bcaE7Uz1vz--
