@@ -2,197 +2,205 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.7 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	LOTS_OF_MONEY,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
+	URIBL_BLOCKED autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 29410C2D0E4
-	for <linux-fstests@archiver.kernel.org>; Mon, 23 Nov 2020 08:21:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A98EFC64E75
+	for <linux-fstests@archiver.kernel.org>; Mon, 23 Nov 2020 09:57:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A7CAF20719
-	for <linux-fstests@archiver.kernel.org>; Mon, 23 Nov 2020 08:21:40 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="gAORvJsI"
+	by mail.kernel.org (Postfix) with ESMTP id 773672100A
+	for <linux-fstests@archiver.kernel.org>; Mon, 23 Nov 2020 09:57:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728042AbgKWIVk (ORCPT
+        id S1728598AbgKWJ4v (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 23 Nov 2020 03:21:40 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:54564 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1727800AbgKWIVj (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 23 Nov 2020 03:21:39 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1606119698;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:in-reply-to:in-reply-to:references:references;
-        bh=QUQiy85GJjP0eouI6Gu5Tczh5zKuKGXXxvT492WzoOU=;
-        b=gAORvJsIVb5VtTr/XuyUDP14xNdxvuswi5rSJMdRKJ9R1s+w/+XZkM/USFswnJDrYzvDuL
-        G13RMxwAZjuDCXWW1YwZ0Fqm4Hj76FG+PxuedhhOrZEtsq3n6VAqphxLkl7rZnLnWuSDFE
-        p8bI1x/wrt+lhMqbBXJcy9DH1x5KxSI=
-Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
- [209.85.214.199]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-40-c3KINEIVPPqjfWnhxQomJg-1; Mon, 23 Nov 2020 03:21:36 -0500
-X-MC-Unique: c3KINEIVPPqjfWnhxQomJg-1
-Received: by mail-pl1-f199.google.com with SMTP id f3so10696490plb.11
-        for <fstests@vger.kernel.org>; Mon, 23 Nov 2020 00:21:36 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references;
-        bh=QUQiy85GJjP0eouI6Gu5Tczh5zKuKGXXxvT492WzoOU=;
-        b=ZH7UimWWoKF1keRPCy8toCycElnaUS2BLwMlTx3s/9iYYDFmO8YZsFGm9Pc3hF4mbV
-         U/eZIwkRmlRq5CMOy0YYKOUCpBzJ9r6vRUmw5WLpaq0Sl5Bz7Z5YrPz8It7Ws3hMiv2t
-         0e6wnvXVtCODKz45w31iu4drxweP2cNotKH3MUadNDVqDn/JgCT6q9tGQk33ZjF8GA5i
-         akIMOxw2pPAVDKwV2af6/s11+P5cGT7rgFNR5bDLZXtIpB9IL3CPc4sQiFTJMqpaOR+G
-         e/1yML4OqVL0NoGEHE1lqClmRCR1KQrg5llfSsA9B/CEoVXbuO8HGG8icugnoMuPHWRT
-         ZStw==
-X-Gm-Message-State: AOAM531fwafo9NMcLjLsfod3fnzbScjXFlWKXkWy3bWqwO/ZuiVk3cH+
-        nKKKbtlrDhjNx+80LEQCfieZ32P+1SLsTIZ6EeijDgq63vksgoIn+0i4gqFvXP5RlBDIJYaVPP2
-        L2sSjZWoQYLk+4IEyGCo2tfqem4Y9JPkxnqj+1+Hu6rTbs26yomMOxIcCg1BUXMDBJovlsdY=
-X-Received: by 2002:a17:90a:7ac2:: with SMTP id b2mr24250022pjl.226.1606119695314;
-        Mon, 23 Nov 2020 00:21:35 -0800 (PST)
-X-Google-Smtp-Source: ABdhPJxkjMSUcDsM4b0Yz/qnejvRBIYjSUKk1CzuqVfpchCSkv1OTX84MXzlKAXKA8tBHpBW9jtIMQ==
-X-Received: by 2002:a17:90a:7ac2:: with SMTP id b2mr24250002pjl.226.1606119695028;
-        Mon, 23 Nov 2020 00:21:35 -0800 (PST)
-Received: from xiangao.remote.csb ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id k4sm5802840pfg.174.2020.11.23.00.21.32
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 23 Nov 2020 00:21:34 -0800 (PST)
-From:   Gao Xiang <hsiangkao@redhat.com>
-To:     fstests@vger.kernel.org
-Cc:     linux-xfs@vger.kernel.org,
-        "Darrick J. Wong" <darrick.wong@oracle.com>,
-        Eric Sandeen <sandeen@redhat.com>,
-        Gao Xiang <hsiangkao@redhat.com>
-Subject: [PATCH v2] generic: add test for XFS forkoff miscalcution on 32-bit platform
-Date:   Mon, 23 Nov 2020 16:20:47 +0800
-Message-Id: <20201123082047.2991878-1-hsiangkao@redhat.com>
-X-Mailer: git-send-email 2.18.4
-In-Reply-To: <20201118060258.1939824-1-hsiangkao@redhat.com>
-References: <20201118060258.1939824-1-hsiangkao@redhat.com>
+        Mon, 23 Nov 2020 04:56:51 -0500
+Received: from mx2.suse.de ([195.135.220.15]:46384 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1728596AbgKWJ4v (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 23 Nov 2020 04:56:51 -0500
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+Received: from relay2.suse.de (unknown [195.135.221.27])
+        by mx2.suse.de (Postfix) with ESMTP id 84A5EAC24;
+        Mon, 23 Nov 2020 09:56:49 +0000 (UTC)
+Received: from localhost (brahms [local])
+        by brahms (OpenSMTPD) with ESMTPA id 3a50062e;
+        Mon, 23 Nov 2020 09:57:06 +0000 (UTC)
+From:   Luis Henriques <lhenriques@suse.de>
+To:     Eryu Guan <guan@eryu.me>
+Cc:     fstests@vger.kernel.org, ceph-devel@vger.kernel.org,
+        Jeff Layton <jlayton@kernel.org>
+Subject: Re: [PATCH] ceph: add a new test for cross quota realms renames
+References: <20201119141956.6488-1-lhenriques@suse.de>
+        <20201122153229.GN3853@desktop>
+Date:   Mon, 23 Nov 2020 09:57:06 +0000
+In-Reply-To: <20201122153229.GN3853@desktop> (Eryu Guan's message of "Sun, 22
+        Nov 2020 23:32:29 +0800")
+Message-ID: <87sg90s8el.fsf@suse.de>
+MIME-Version: 1.0
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-There is a regression that recent XFS_LITINO(mp) update causes
-xfs_attr_shortform_bytesfit() returns maxforkoff rather than 0.
+Eryu Guan <guan@eryu.me> writes:
 
-Therefore, one result is
-  "ASSERT(new_size <= XFS_IFORK_SIZE(ip, whichfork));"
+> On Thu, Nov 19, 2020 at 02:19:56PM +0000, Luis Henriques wrote:
+>> For the moment cross quota realms renames has been disabled in CephFS
+>> after a bug has been found while renaming files created and truncated.
+>> This allowed clients to easily circumvent quotas.
+>> 
+>> Link: https://tracker.ceph.com/issues/48203
+>> Signed-off-by: Luis Henriques <lhenriques@suse.de>
+>
+> Thanks for the test! It'd be great if ceph folks could help review &
+> test it as well, as I don't have a cephfs test env yet..
+>
+> Some minor comments below.
 
-Add a regression test in fstests generic to look after that since
-the testcase itself isn't xfs-specific.
+Thanks for your review, Eryu.  I'll send out v2 with your comments
+implemented.
 
-Signed-off-by: Gao Xiang <hsiangkao@redhat.com>
----
-changes since v1:
- - update commit id since the fix has been upstreamed (Eryu);
- - switch to use scratch_mkfs instead since fixed inode size is
-   prefered to keep XFS_LITINO value can trigger the issue for
-   v4 (412) and v5 (336); and no need to use TEST_DIR
-   "rm localfile" way
- - refine some inlined comments.
-
- tests/generic/618     | 67 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/618.out |  4 +++
- tests/generic/group   |  1 +
- 3 files changed, 72 insertions(+)
- create mode 100755 tests/generic/618
- create mode 100644 tests/generic/618.out
-
-diff --git a/tests/generic/618 b/tests/generic/618
-new file mode 100755
-index 00000000..bdaa3874
---- /dev/null
-+++ b/tests/generic/618
-@@ -0,0 +1,67 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2020 Red Hat, Inc. All Rights Reserved.
-+#
-+# FS QA Test 618
-+#
-+# Verify that forkoff can be returned as 0 properly if it isn't
-+# able to fit inline for XFS.
-+# However, this test is fs-neutral and can be done quickly so
-+# leave it in generic
-+# This test verifies the problem fixed in kernel with commit
-+# ada49d64fb35 ("xfs: fix forkoff miscalculation related to XFS_LITINO(mp)")
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/attr
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+_supported_fs generic
-+_require_scratch
-+_require_attrs user
-+
-+# Use fixed inode size 512, so both v4 and v5 can be tested,
-+# and also make sure the issue can be triggered if the default
-+# inode size is changed later.
-+[ $FSTYP = "xfs" ] && MKFS_OPTIONS="$MKFS_OPTIONS -i size=512"
-+_scratch_mkfs > $seqres.full 2>&1
-+_scratch_mount
-+
-+localfile="${SCRATCH_MNT}/testfile"
-+touch $localfile
-+
-+# value cannot exceed XFS_ATTR_SF_ENTSIZE_MAX (256) or it will turn into
-+# leaf form directly; the following combination can trigger the issue for
-+# both v4 (XFS_LITINO = 412) & v5 (XFS_LITINO = 336) fses.
-+"${SETFATTR_PROG}" -n user.0 -v "`seq 0 80`" "${localfile}"
-+"${SETFATTR_PROG}" -n user.1 -v "`seq 0 80`" "${localfile}"
-+
-+# Make sure that changes are written to disk
-+_scratch_cycle_mount
-+
-+# getfattr won't succeed with the expected result if fails
-+_getfattr --absolute-names -ebase64 -d $localfile | tail -n +2 | sort
-+
-+_scratch_unmount
-+status=0
-+exit
-diff --git a/tests/generic/618.out b/tests/generic/618.out
-new file mode 100644
-index 00000000..848fdc58
---- /dev/null
-+++ b/tests/generic/618.out
-@@ -0,0 +1,4 @@
-+QA output created by 618
-+
-+user.0=0sMAoxCjIKMwo0CjUKNgo3CjgKOQoxMAoxMQoxMgoxMwoxNAoxNQoxNgoxNwoxOAoxOQoyMAoyMQoyMgoyMwoyNAoyNQoyNgoyNwoyOAoyOQozMAozMQozMgozMwozNAozNQozNgozNwozOAozOQo0MAo0MQo0Mgo0Mwo0NAo0NQo0Ngo0Nwo0OAo0OQo1MAo1MQo1Mgo1Mwo1NAo1NQo1Ngo1Nwo1OAo1OQo2MAo2MQo2Mgo2Mwo2NAo2NQo2Ngo2Nwo2OAo2OQo3MAo3MQo3Mgo3Mwo3NAo3NQo3Ngo3Nwo3OAo3OQo4MA==
-+user.1=0sMAoxCjIKMwo0CjUKNgo3CjgKOQoxMAoxMQoxMgoxMwoxNAoxNQoxNgoxNwoxOAoxOQoyMAoyMQoyMgoyMwoyNAoyNQoyNgoyNwoyOAoyOQozMAozMQozMgozMwozNAozNQozNgozNwozOAozOQo0MAo0MQo0Mgo0Mwo0NAo0NQo0Ngo0Nwo0OAo0OQo1MAo1MQo1Mgo1Mwo1NAo1NQo1Ngo1Nwo1OAo1OQo2MAo2MQo2Mgo2Mwo2NAo2NQo2Ngo2Nwo2OAo2OQo3MAo3MQo3Mgo3Mwo3NAo3NQo3Ngo3Nwo3OAo3OQo4MA==
-diff --git a/tests/generic/group b/tests/generic/group
-index 94e860b8..eca9d619 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -620,3 +620,4 @@
- 615 auto rw
- 616 auto rw io_uring stress
- 617 auto rw io_uring stress
-+618 auto quick attr
+Cheers,
 -- 
-2.18.4
+Luis
 
+>> ---
+>>  tests/ceph/004     | 94 ++++++++++++++++++++++++++++++++++++++++++++++
+>>  tests/ceph/004.out |  2 +
+>>  tests/ceph/group   |  1 +
+>>  3 files changed, 97 insertions(+)
+>>  create mode 100755 tests/ceph/004
+>>  create mode 100644 tests/ceph/004.out
+>> 
+>> diff --git a/tests/ceph/004 b/tests/ceph/004
+>> new file mode 100755
+>> index 000000000000..4021666b138e
+>> --- /dev/null
+>> +++ b/tests/ceph/004
+>> @@ -0,0 +1,94 @@
+>> +#! /bin/bash
+>> +# SPDX-License-Identifier: GPL-2.0
+>> +# Copyright (c) 2020 SUSE Linux Products GmbH. All Rights Reserved.
+>> +#
+>> +# FS QA Test 004
+>> +#
+>> +# Tests a bug fix found in cephfs quotas handling.  Here's a simplified testcase
+>> +# that *should* fail:
+>> +#
+>> +#    mkdir files limit
+>> +#    truncate files/file -s 10G
+>> +#    setfattr limit -n ceph.quota.max_bytes -v 1000000
+>> +#    mv files limit/
+>> +#
+>> +# Because we're creating a new file and truncating it, we have Fx caps and thus
+>> +# the truncate operation will be cached.  This prevents the MDSs from updating
+>> +# the quota realms and thus the client will allow the above rename(2) to happen.
+>> +#
+>> +# The bug resulted in dropping support for cross quota-realms renames, reverting
+>> +# kernel commit dffdcd71458e ("ceph: allow rename operation under different
+>> +# quota realms").
+>> +#
+>> +# So, the above test will now fail with a -EXDEV or, in the future (when we have
+>> +# a proper fix), with -EDQUOT.
+>> +#
+>> +# This bug was tracker here:
+>> +#
+>> +#   https://tracker.ceph.com/issues/48203
+>> +#
+>> +seq=`basename $0`
+>> +seqres=$RESULT_DIR/$seq
+>> +echo "QA output created by $seq"
+>> +
+>> +here=`pwd`
+>> +tmp=/tmp/$$
+>> +status=1	# failure is the default!
+>> +trap "_cleanup; exit \$status" 0 1 2 3 15
+>> +
+>> +_cleanup()
+>> +{
+>> +	cd /
+>> +	rm -f $tmp.*
+>> +}
+>> +
+>> +# get standard environment, filters and checks
+>> +. ./common/rc
+>> +. ./common/filter
+>> +. ./common/attr
+>> +
+>> +# remove previous $seqres.full before test
+>> +rm -f $seqres.full
+>> +
+>> +# real QA test starts here
+>> +
+>> +_supported_fs ceph
+>> +_require_attrs
+>> +_require_test
+>
+> Need '_require_test_program "rename"' as well.
+>
+>> +
+>> +workdir=$TEST_DIR/test-$seq
+>> +
+>> +orig1=$workdir/orig1
+>> +orig2=$workdir/orig2
+>> +file1=$orig1/file
+>> +file2=$orig2/file
+>> +dest=$workdir/dest
+>> +
+>> +rm -rf $workdir
+>> +mkdir $workdir
+>> +mkdir $orig1 $orig2 $dest
+>> +
+>> +# set quota to 1m
+>> +$SETFATTR_PROG -n ceph.quota.max_bytes -v 1000000 $dest
+>> +# set quota to 20g
+>> +$SETFATTR_PROG -n ceph.quota.max_bytes -v 20000000000 $orig2
+>> +
+>> +#
+>> +# The following 2 testcases shall fail with either -EXDEV or -EDQUOT
+>> +#
+>> +
+>> +# from 'root' realm to $dest realm
+>> +$XFS_IO_PROG -f -c "truncate 10G" $file1
+>> +$here/src/rename $orig1 $dest/new1 >> $seqres.full 2>&1
+>> +[ $? -ne 1 ] && _fatal "cross quota realms rename succeeded"
+>
+> Use _fail instead of _fatal in test, _fatal is usually used in common
+> helpers, to report internal errors such as wrong usage of helpers.
+>
+>> +
+>> +# from $orig2 realm to $dest realm
+>> +$XFS_IO_PROG -f -c "truncate 10G" $file2
+>> +$here/src/rename $orig2 $dest/new2 >> $seqres.full 2>&1
+>> +[ $? -ne 1 ] && _fatal "cross quota realms rename succeeded"
+>
+> Same here.
+>
+> Thanks,
+> Eryu
+>
+>> +
+>> +echo "Silence is golden"
+>> +
+>> +# success, all done
+>> +status=0
+>> +exit
+>> diff --git a/tests/ceph/004.out b/tests/ceph/004.out
+>> new file mode 100644
+>> index 000000000000..af8614ae45ac
+>> --- /dev/null
+>> +++ b/tests/ceph/004.out
+>> @@ -0,0 +1,2 @@
+>> +QA output created by 004
+>> +Silence is golden
+>> diff --git a/tests/ceph/group b/tests/ceph/group
+>> index adbf61547766..47903d21966c 100644
+>> --- a/tests/ceph/group
+>> +++ b/tests/ceph/group
+>> @@ -1,3 +1,4 @@
+>>  001 auto quick copy
+>>  002 auto quick copy
+>>  003 auto quick copy
+>> +004 auto quick quota
