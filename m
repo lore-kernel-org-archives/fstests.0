@@ -2,215 +2,196 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-12.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	UNPARSEABLE_RELAY autolearn=ham autolearn_force=no version=3.4.0
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AF775C63697
-	for <linux-fstests@archiver.kernel.org>; Mon, 23 Nov 2020 18:24:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A6865C2D0E4
+	for <linux-fstests@archiver.kernel.org>; Tue, 24 Nov 2020 01:56:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 51AC12080A
-	for <linux-fstests@archiver.kernel.org>; Mon, 23 Nov 2020 18:24:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 33DB72072C
+	for <linux-fstests@archiver.kernel.org>; Tue, 24 Nov 2020 01:56:07 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="WYwmvf3s"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ajpTdOn1"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728930AbgKWSYH (ORCPT
+        id S1726736AbgKXBzq (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 23 Nov 2020 13:24:07 -0500
-Received: from aserp2130.oracle.com ([141.146.126.79]:39798 "EHLO
-        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726514AbgKWSYH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 23 Nov 2020 13:24:07 -0500
-Received: from pps.filterd (aserp2130.oracle.com [127.0.0.1])
-        by aserp2130.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 0ANIEb7U127862;
-        Mon, 23 Nov 2020 18:24:04 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
- : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=corp-2020-01-29;
- bh=V7zTuy0xd6rvbq1X7iY8IPCVCFZwosuMH/dnmrw3X9s=;
- b=WYwmvf3sNJrt6cPX+aglW4FH4whGnO4ls5b5GEfuVUwN2DlAAWspgxIbhFqnQuheSMGX
- t3OTq+Orj2wUlRuzVr1/Dk/CbKJvqE9QoF0u/C8ALpb3DB10T4V+5MhTXi/E7+mguj3m
- TLQiknPIoiUM+trLlqVaxansvES87pXek8ckmIlQ1iaL68azeyXrqIwMacycRie6Y+O3
- rclzA6zSaSypCUjVruwZQLQxGRtZKKo1weacs+ugZwtot+YfloEwKOphgM5RSKSGSKoR
- OzRdNs2SrSTF8czIz5IJB1bTuOI3bAplYtxvFSCYOs9Ln+73CABSMPQ33nyC/xFT2266 LQ== 
-Received: from aserp3030.oracle.com (aserp3030.oracle.com [141.146.126.71])
-        by aserp2130.oracle.com with ESMTP id 34xrdapu2g-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Mon, 23 Nov 2020 18:24:03 +0000
-Received: from pps.filterd (aserp3030.oracle.com [127.0.0.1])
-        by aserp3030.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 0ANIFv0g056516;
-        Mon, 23 Nov 2020 18:24:03 GMT
-Received: from userv0122.oracle.com (userv0122.oracle.com [156.151.31.75])
-        by aserp3030.oracle.com with ESMTP id 34ycfm7y5y-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Mon, 23 Nov 2020 18:24:03 +0000
-Received: from abhmp0016.oracle.com (abhmp0016.oracle.com [141.146.116.22])
-        by userv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 0ANIO2fm020093;
-        Mon, 23 Nov 2020 18:24:02 GMT
-Received: from localhost (/67.169.218.210)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Mon, 23 Nov 2020 10:24:01 -0800
-Date:   Mon, 23 Nov 2020 10:24:00 -0800
-From:   "Darrick J. Wong" <darrick.wong@oracle.com>
-To:     Gao Xiang <hsiangkao@redhat.com>
+        Mon, 23 Nov 2020 20:55:46 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:60040 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726715AbgKXBzq (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 23 Nov 2020 20:55:46 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1606182944;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=VGcoD9cJyIoraWzK6hKk5qDVwHUv+H8uXT6RPGfb/Jg=;
+        b=ajpTdOn1ijqa/y/mDvyBoVf6/7aVUjO2fVS6nola1+9GnVXFG2/UCIFf9Vi/VOrmsUTT1p
+        WNCTWp/PoVwSTcqRWJUPIp+ZzmAgPCqpa+5JpBWs1yQjCiBMp5NlSqJnae1mjvBm6LG26a
+        Oi9HXNRTeXQTeW4IpxeKfvY8hKliHlg=
+Received: from mail-pg1-f198.google.com (mail-pg1-f198.google.com
+ [209.85.215.198]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-26-FrpyKq48N5Kz6EwQGRc1GQ-1; Mon, 23 Nov 2020 20:55:42 -0500
+X-MC-Unique: FrpyKq48N5Kz6EwQGRc1GQ-1
+Received: by mail-pg1-f198.google.com with SMTP id t7so13903664pgr.13
+        for <fstests@vger.kernel.org>; Mon, 23 Nov 2020 17:55:42 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to:user-agent;
+        bh=VGcoD9cJyIoraWzK6hKk5qDVwHUv+H8uXT6RPGfb/Jg=;
+        b=KGWAEZ0hmo57AcdvAspuIV9dcWvKveKs5vW4JqSkwrxjMJWTv7Zl6D664u/k9cPxvr
+         oUXUXgf/qHN0ML9m/VqSkPmupjVp/Wg4QSxfHlAPvxvYHSqj6LzUckA77Ckp/2hgrJ7n
+         OTLdRd1e0KMKg1j7BdrP6MK3Fmc+/IpwNzBOhZIbDQmezf1ZzDGCa91YuWX2/XGMaeRe
+         FO3VW6rwwbNTsQo2mrcze9c7CB3JVACgOVf+dlXRxFhir9In9WOz08LIck8bpIYe5Xon
+         NTknyXDA8yRGv/jgH5upxOHpJh7lBecizC8hhLx8P5WbbJyop8vXkRpux8wunNtJffoX
+         3NxQ==
+X-Gm-Message-State: AOAM530v2Lhre2fKl+2a6lHe/9bASEzb6SmKS0z/a4sY9LzDhLJvpJ7c
+        9G04Qe6ES25oxTsqwvUFaDcNa6rhUapOZ6o9cLmzPOD3hEC6wvJaopBaLN+U9TEHUWCWaSiTNBD
+        YX22+uSwcPyoq8nDu4w==
+X-Received: by 2002:a17:90a:f314:: with SMTP id ca20mr2124853pjb.191.1606182941014;
+        Mon, 23 Nov 2020 17:55:41 -0800 (PST)
+X-Google-Smtp-Source: ABdhPJwOERy6YQDTd4yvMOmWdY1TucX213z+RoPyE86xDRv8QQM4Q6XXSAOPEPqX8h9a9FwiW8mHlQ==
+X-Received: by 2002:a17:90a:f314:: with SMTP id ca20mr2124837pjb.191.1606182940792;
+        Mon, 23 Nov 2020 17:55:40 -0800 (PST)
+Received: from xiangao.remote.csb ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id e14sm11300058pgv.64.2020.11.23.17.55.38
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 23 Nov 2020 17:55:40 -0800 (PST)
+Date:   Tue, 24 Nov 2020 09:55:30 +0800
+From:   Gao Xiang <hsiangkao@redhat.com>
+To:     "Darrick J. Wong" <darrick.wong@oracle.com>
 Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
         Eric Sandeen <sandeen@redhat.com>
 Subject: Re: [PATCH v2] generic: add test for XFS forkoff miscalcution on
  32-bit platform
-Message-ID: <20201123182400.GD7880@magnolia>
+Message-ID: <20201124015530.GA3096505@xiangao.remote.csb>
 References: <20201118060258.1939824-1-hsiangkao@redhat.com>
  <20201123082047.2991878-1-hsiangkao@redhat.com>
+ <20201123182400.GD7880@magnolia>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20201123082047.2991878-1-hsiangkao@redhat.com>
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9814 signatures=668682
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 phishscore=0 mlxscore=0 spamscore=0
- adultscore=0 bulkscore=0 suspectscore=1 malwarescore=0 mlxlogscore=999
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2009150000
- definitions=main-2011230121
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9814 signatures=668682
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 bulkscore=0 impostorscore=0 mlxscore=0
- mlxlogscore=999 spamscore=0 phishscore=0 clxscore=1015 malwarescore=0
- lowpriorityscore=0 adultscore=0 suspectscore=1 priorityscore=1501
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2009150000
- definitions=main-2011230121
+In-Reply-To: <20201123182400.GD7880@magnolia>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Nov 23, 2020 at 04:20:47PM +0800, Gao Xiang wrote:
-> There is a regression that recent XFS_LITINO(mp) update causes
-> xfs_attr_shortform_bytesfit() returns maxforkoff rather than 0.
-> 
-> Therefore, one result is
->   "ASSERT(new_size <= XFS_IFORK_SIZE(ip, whichfork));"
-> 
-> Add a regression test in fstests generic to look after that since
-> the testcase itself isn't xfs-specific.
-> 
-> Signed-off-by: Gao Xiang <hsiangkao@redhat.com>
-> ---
-> changes since v1:
->  - update commit id since the fix has been upstreamed (Eryu);
->  - switch to use scratch_mkfs instead since fixed inode size is
->    prefered to keep XFS_LITINO value can trigger the issue for
->    v4 (412) and v5 (336); and no need to use TEST_DIR
->    "rm localfile" way
->  - refine some inlined comments.
-> 
->  tests/generic/618     | 67 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/618.out |  4 +++
->  tests/generic/group   |  1 +
->  3 files changed, 72 insertions(+)
->  create mode 100755 tests/generic/618
->  create mode 100644 tests/generic/618.out
-> 
-> diff --git a/tests/generic/618 b/tests/generic/618
-> new file mode 100755
-> index 00000000..bdaa3874
-> --- /dev/null
-> +++ b/tests/generic/618
-> @@ -0,0 +1,67 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2020 Red Hat, Inc. All Rights Reserved.
-> +#
-> +# FS QA Test 618
-> +#
-> +# Verify that forkoff can be returned as 0 properly if it isn't
-> +# able to fit inline for XFS.
-> +# However, this test is fs-neutral and can be done quickly so
-> +# leave it in generic
-> +# This test verifies the problem fixed in kernel with commit
-> +# ada49d64fb35 ("xfs: fix forkoff miscalculation related to XFS_LITINO(mp)")
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/attr
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +_supported_fs generic
-> +_require_scratch
-> +_require_attrs user
+Hi Darrick,
 
-Does this require
+On Mon, Nov 23, 2020 at 10:24:00AM -0800, Darrick J. Wong wrote:
+> On Mon, Nov 23, 2020 at 04:20:47PM +0800, Gao Xiang wrote:
 
-_require_no_xfs_bug_on_assert ?
+...
 
-> +
-> +# Use fixed inode size 512, so both v4 and v5 can be tested,
-> +# and also make sure the issue can be triggered if the default
-> +# inode size is changed later.
-> +[ $FSTYP = "xfs" ] && MKFS_OPTIONS="$MKFS_OPTIONS -i size=512"
-> +_scratch_mkfs > $seqres.full 2>&1
-> +_scratch_mount
-> +
-> +localfile="${SCRATCH_MNT}/testfile"
-> +touch $localfile
-> +
-> +# value cannot exceed XFS_ATTR_SF_ENTSIZE_MAX (256) or it will turn into
-> +# leaf form directly; the following combination can trigger the issue for
-> +# both v4 (XFS_LITINO = 412) & v5 (XFS_LITINO = 336) fses.
-> +"${SETFATTR_PROG}" -n user.0 -v "`seq 0 80`" "${localfile}"
-> +"${SETFATTR_PROG}" -n user.1 -v "`seq 0 80`" "${localfile}"
-
-It's probably worth mentioning that the second setattr causes an integer
-underflow that is incorrectly typecast, leading to the assert
-triggering.  Otherwise this seems reasonable to me.
-
---D
-
-> +
-> +# Make sure that changes are written to disk
-> +_scratch_cycle_mount
-> +
-> +# getfattr won't succeed with the expected result if fails
-> +_getfattr --absolute-names -ebase64 -d $localfile | tail -n +2 | sort
-> +
-> +_scratch_unmount
-> +status=0
-> +exit
-> diff --git a/tests/generic/618.out b/tests/generic/618.out
-> new file mode 100644
-> index 00000000..848fdc58
-> --- /dev/null
-> +++ b/tests/generic/618.out
-> @@ -0,0 +1,4 @@
-> +QA output created by 618
-> +
-> +user.0=0sMAoxCjIKMwo0CjUKNgo3CjgKOQoxMAoxMQoxMgoxMwoxNAoxNQoxNgoxNwoxOAoxOQoyMAoyMQoyMgoyMwoyNAoyNQoyNgoyNwoyOAoyOQozMAozMQozMgozMwozNAozNQozNgozNwozOAozOQo0MAo0MQo0Mgo0Mwo0NAo0NQo0Ngo0Nwo0OAo0OQo1MAo1MQo1Mgo1Mwo1NAo1NQo1Ngo1Nwo1OAo1OQo2MAo2MQo2Mgo2Mwo2NAo2NQo2Ngo2Nwo2OAo2OQo3MAo3MQo3Mgo3Mwo3NAo3NQo3Ngo3Nwo3OAo3OQo4MA==
-> +user.1=0sMAoxCjIKMwo0CjUKNgo3CjgKOQoxMAoxMQoxMgoxMwoxNAoxNQoxNgoxNwoxOAoxOQoyMAoyMQoyMgoyMwoyNAoyNQoyNgoyNwoyOAoyOQozMAozMQozMgozMwozNAozNQozNgozNwozOAozOQo0MAo0MQo0Mgo0Mwo0NAo0NQo0Ngo0Nwo0OAo0OQo1MAo1MQo1Mgo1Mwo1NAo1NQo1Ngo1Nwo1OAo1OQo2MAo2MQo2Mgo2Mwo2NAo2NQo2Ngo2Nwo2OAo2OQo3MAo3MQo3Mgo3Mwo3NAo3NQo3Ngo3Nwo3OAo3OQo4MA==
-> diff --git a/tests/generic/group b/tests/generic/group
-> index 94e860b8..eca9d619 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -620,3 +620,4 @@
->  615 auto rw
->  616 auto rw io_uring stress
->  617 auto rw io_uring stress
-> +618 auto quick attr
-> -- 
-> 2.18.4
+> > +_supported_fs generic
+> > +_require_scratch
+> > +_require_attrs user
 > 
+> Does this require
+> 
+> _require_no_xfs_bug_on_assert ?
+> 
+
+For the sake of harmless testcase, I think that is fine and I will
+add it in the next version as
+[ $FSTYP = "xfs" ] && _require_no_xfs_bug_on_assert
+
+
+To clarify the synotom:
+if bug_on_assert is on, it will bug_on on the second setfattr,
+_scratch_cycle_mount will fail due to
+umount: can't unmount /tmp/mnt: Device or resource busy
+
+if _scratch_cycle_mount is removed, _getfattr will hung due to
+(I think) unbalanced xfs_ilock(dp, XFS_ILOCK_EXCL) in xfs_attr_set()
+and xfs_attr_get() will take the lock again.
+
+
+if bug_on_assert is off, it will fail on _scratch_cycle_mount due to
+log recovery replay fail when mounting as below
+
+[  856.786226] XFS (sda): Mounting V5 Filesystem                       
+[  856.802704] XFS (sda): Starting recovery (logdev: internal)                                                                                                                                                    
+[  856.806362] XFS: Assertion failed: len <= XFS_DFORK_ASIZE(dip, mp), file: fs/xfs/xfs_inode_item_recover.c, line: 426
+
+but if the line of _scratch_cycle_mount is removed, _getfattr will
+success due to
+	ifp->if_u1.if_data = krealloc(ifp->if_u1.if_data, roundup(new_size, 4),
+				      GFP_NOFS | __GFP_NOFAIL);
+	ifp->if_bytes = new_size;
+in xfs_idata_realloc(), and xfs_attr_shortform_getvalue() will
+temporary ok. yet this testcase have _scratch_cycle_mount anyway.
+
+In any case, it's fine with _getfattr after _scratch_cycle_mount
+for this testcase.
+
+And "bug_on_assert is off" does no harm to the system stablity itself
+so I think that's better.
+
+> > +
+> > +# Use fixed inode size 512, so both v4 and v5 can be tested,
+> > +# and also make sure the issue can be triggered if the default
+> > +# inode size is changed later.
+> > +[ $FSTYP = "xfs" ] && MKFS_OPTIONS="$MKFS_OPTIONS -i size=512"
+> > +_scratch_mkfs > $seqres.full 2>&1
+> > +_scratch_mount
+> > +
+> > +localfile="${SCRATCH_MNT}/testfile"
+> > +touch $localfile
+> > +
+> > +# value cannot exceed XFS_ATTR_SF_ENTSIZE_MAX (256) or it will turn into
+> > +# leaf form directly; the following combination can trigger the issue for
+> > +# both v4 (XFS_LITINO = 412) & v5 (XFS_LITINO = 336) fses.
+> > +"${SETFATTR_PROG}" -n user.0 -v "`seq 0 80`" "${localfile}"
+> > +"${SETFATTR_PROG}" -n user.1 -v "`seq 0 80`" "${localfile}"
+> 
+> It's probably worth mentioning that the second setattr causes an integer
+> underflow that is incorrectly typecast, leading to the assert
+> triggering.  Otherwise this seems reasonable to me.
+
+Ok, will try to add in the next version as well.
+
+Thanks,
+Gao Xiang
+
+> 
+> --D
+> 
+> > +
+> > +# Make sure that changes are written to disk
+> > +_scratch_cycle_mount
+> > +
+> > +# getfattr won't succeed with the expected result if fails
+> > +_getfattr --absolute-names -ebase64 -d $localfile | tail -n +2 | sort
+> > +
+> > +_scratch_unmount
+> > +status=0
+> > +exit
+> > diff --git a/tests/generic/618.out b/tests/generic/618.out
+> > new file mode 100644
+> > index 00000000..848fdc58
+> > --- /dev/null
+> > +++ b/tests/generic/618.out
+> > @@ -0,0 +1,4 @@
+> > +QA output created by 618
+> > +
+> > +user.0=0sMAoxCjIKMwo0CjUKNgo3CjgKOQoxMAoxMQoxMgoxMwoxNAoxNQoxNgoxNwoxOAoxOQoyMAoyMQoyMgoyMwoyNAoyNQoyNgoyNwoyOAoyOQozMAozMQozMgozMwozNAozNQozNgozNwozOAozOQo0MAo0MQo0Mgo0Mwo0NAo0NQo0Ngo0Nwo0OAo0OQo1MAo1MQo1Mgo1Mwo1NAo1NQo1Ngo1Nwo1OAo1OQo2MAo2MQo2Mgo2Mwo2NAo2NQo2Ngo2Nwo2OAo2OQo3MAo3MQo3Mgo3Mwo3NAo3NQo3Ngo3Nwo3OAo3OQo4MA==
+> > +user.1=0sMAoxCjIKMwo0CjUKNgo3CjgKOQoxMAoxMQoxMgoxMwoxNAoxNQoxNgoxNwoxOAoxOQoyMAoyMQoyMgoyMwoyNAoyNQoyNgoyNwoyOAoyOQozMAozMQozMgozMwozNAozNQozNgozNwozOAozOQo0MAo0MQo0Mgo0Mwo0NAo0NQo0Ngo0Nwo0OAo0OQo1MAo1MQo1Mgo1Mwo1NAo1NQo1Ngo1Nwo1OAo1OQo2MAo2MQo2Mgo2Mwo2NAo2NQo2Ngo2Nwo2OAo2OQo3MAo3MQo3Mgo3Mwo3NAo3NQo3Ngo3Nwo3OAo3OQo4MA==
+> > diff --git a/tests/generic/group b/tests/generic/group
+> > index 94e860b8..eca9d619 100644
+> > --- a/tests/generic/group
+> > +++ b/tests/generic/group
+> > @@ -620,3 +620,4 @@
+> >  615 auto rw
+> >  616 auto rw io_uring stress
+> >  617 auto rw io_uring stress
+> > +618 auto quick attr
+> > -- 
+> > 2.18.4
+> > 
+> 
+
