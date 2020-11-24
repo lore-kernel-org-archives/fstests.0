@@ -2,196 +2,182 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A6865C2D0E4
-	for <linux-fstests@archiver.kernel.org>; Tue, 24 Nov 2020 01:56:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E6C23C63777
+	for <linux-fstests@archiver.kernel.org>; Tue, 24 Nov 2020 08:37:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 33DB72072C
-	for <linux-fstests@archiver.kernel.org>; Tue, 24 Nov 2020 01:56:07 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 828B72076E
+	for <linux-fstests@archiver.kernel.org>; Tue, 24 Nov 2020 08:37:44 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ajpTdOn1"
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="fDvpss/I"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726736AbgKXBzq (ORCPT
+        id S1730529AbgKXIhn (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 23 Nov 2020 20:55:46 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:60040 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726715AbgKXBzq (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 23 Nov 2020 20:55:46 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1606182944;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=VGcoD9cJyIoraWzK6hKk5qDVwHUv+H8uXT6RPGfb/Jg=;
-        b=ajpTdOn1ijqa/y/mDvyBoVf6/7aVUjO2fVS6nola1+9GnVXFG2/UCIFf9Vi/VOrmsUTT1p
-        WNCTWp/PoVwSTcqRWJUPIp+ZzmAgPCqpa+5JpBWs1yQjCiBMp5NlSqJnae1mjvBm6LG26a
-        Oi9HXNRTeXQTeW4IpxeKfvY8hKliHlg=
-Received: from mail-pg1-f198.google.com (mail-pg1-f198.google.com
- [209.85.215.198]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-26-FrpyKq48N5Kz6EwQGRc1GQ-1; Mon, 23 Nov 2020 20:55:42 -0500
-X-MC-Unique: FrpyKq48N5Kz6EwQGRc1GQ-1
-Received: by mail-pg1-f198.google.com with SMTP id t7so13903664pgr.13
-        for <fstests@vger.kernel.org>; Mon, 23 Nov 2020 17:55:42 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to:user-agent;
-        bh=VGcoD9cJyIoraWzK6hKk5qDVwHUv+H8uXT6RPGfb/Jg=;
-        b=KGWAEZ0hmo57AcdvAspuIV9dcWvKveKs5vW4JqSkwrxjMJWTv7Zl6D664u/k9cPxvr
-         oUXUXgf/qHN0ML9m/VqSkPmupjVp/Wg4QSxfHlAPvxvYHSqj6LzUckA77Ckp/2hgrJ7n
-         OTLdRd1e0KMKg1j7BdrP6MK3Fmc+/IpwNzBOhZIbDQmezf1ZzDGCa91YuWX2/XGMaeRe
-         FO3VW6rwwbNTsQo2mrcze9c7CB3JVACgOVf+dlXRxFhir9In9WOz08LIck8bpIYe5Xon
-         NTknyXDA8yRGv/jgH5upxOHpJh7lBecizC8hhLx8P5WbbJyop8vXkRpux8wunNtJffoX
-         3NxQ==
-X-Gm-Message-State: AOAM530v2Lhre2fKl+2a6lHe/9bASEzb6SmKS0z/a4sY9LzDhLJvpJ7c
-        9G04Qe6ES25oxTsqwvUFaDcNa6rhUapOZ6o9cLmzPOD3hEC6wvJaopBaLN+U9TEHUWCWaSiTNBD
-        YX22+uSwcPyoq8nDu4w==
-X-Received: by 2002:a17:90a:f314:: with SMTP id ca20mr2124853pjb.191.1606182941014;
-        Mon, 23 Nov 2020 17:55:41 -0800 (PST)
-X-Google-Smtp-Source: ABdhPJwOERy6YQDTd4yvMOmWdY1TucX213z+RoPyE86xDRv8QQM4Q6XXSAOPEPqX8h9a9FwiW8mHlQ==
-X-Received: by 2002:a17:90a:f314:: with SMTP id ca20mr2124837pjb.191.1606182940792;
-        Mon, 23 Nov 2020 17:55:40 -0800 (PST)
-Received: from xiangao.remote.csb ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id e14sm11300058pgv.64.2020.11.23.17.55.38
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 23 Nov 2020 17:55:40 -0800 (PST)
-Date:   Tue, 24 Nov 2020 09:55:30 +0800
-From:   Gao Xiang <hsiangkao@redhat.com>
-To:     "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
-        Eric Sandeen <sandeen@redhat.com>
-Subject: Re: [PATCH v2] generic: add test for XFS forkoff miscalcution on
- 32-bit platform
-Message-ID: <20201124015530.GA3096505@xiangao.remote.csb>
-References: <20201118060258.1939824-1-hsiangkao@redhat.com>
- <20201123082047.2991878-1-hsiangkao@redhat.com>
- <20201123182400.GD7880@magnolia>
+        Tue, 24 Nov 2020 03:37:43 -0500
+Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:28964 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1730517AbgKXIhm (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 24 Nov 2020 03:37:42 -0500
+Received: from pps.filterd (m0098399.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.0.42/8.16.0.42) with SMTP id 0AO8WuqT084178;
+        Tue, 24 Nov 2020 03:37:41 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=from : to : cc : subject
+ : date : message-id : mime-version : content-transfer-encoding; s=pp1;
+ bh=oaYejTJTvjVZ/b/El+q9ijAJiyr169LNIdWHN+qsbqM=;
+ b=fDvpss/I/MAlTaoHfzSgDYgsk5LP5FTDoJHpvjg+k4TtI8E46VVy3d2pHkr0b5bs8QUh
+ wGhVmzN1N9SKGxoEOb/N4lBkFJMWzPa9EXIadI3IjgSZ/W59d7/VjGJ0OVAJ+R6NJiLp
+ fJwIKQwTpmAVA5f72mzCZGgziEnBiEDoLC1U6Jg0L+DUKrjOCGcbPcag2AHqiNFTk9lr
+ 3xMgjMy7myu1MaoMUY6FUl2hHWunJ1OvTFgUZpp702mJEKEPXST9qg9oVOl8BYizKMWM
+ XCV2oeW5fdHjy7VGFW3mlFDXkoUNkhvFqUdDVYGx1hsp0G/fqJ0uYC2cdbo1VVUZSGgi 8g== 
+Received: from ppma03ams.nl.ibm.com (62.31.33a9.ip4.static.sl-reverse.com [169.51.49.98])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 350rb0u9ue-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 24 Nov 2020 03:37:41 -0500
+Received: from pps.filterd (ppma03ams.nl.ibm.com [127.0.0.1])
+        by ppma03ams.nl.ibm.com (8.16.0.42/8.16.0.42) with SMTP id 0AO8S6RR000356;
+        Tue, 24 Nov 2020 08:37:39 GMT
+Received: from b06cxnps3075.portsmouth.uk.ibm.com (d06relay10.portsmouth.uk.ibm.com [9.149.109.195])
+        by ppma03ams.nl.ibm.com with ESMTP id 34xth8bcc2-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 24 Nov 2020 08:37:38 +0000
+Received: from d06av23.portsmouth.uk.ibm.com (d06av23.portsmouth.uk.ibm.com [9.149.105.59])
+        by b06cxnps3075.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 0AO8ba5p42336748
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Tue, 24 Nov 2020 08:37:36 GMT
+Received: from d06av23.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id B3974A4040;
+        Tue, 24 Nov 2020 08:37:36 +0000 (GMT)
+Received: from d06av23.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id B26DFA4059;
+        Tue, 24 Nov 2020 08:37:35 +0000 (GMT)
+Received: from localhost.localdomain.com (unknown [9.199.51.32])
+        by d06av23.portsmouth.uk.ibm.com (Postfix) with ESMTP;
+        Tue, 24 Nov 2020 08:37:35 +0000 (GMT)
+From:   Anju T Sudhakar <anju@linux.vnet.ibm.com>
+To:     fstests@vger.kernel.org
+Cc:     david@fromorbit.com, anju@linux.vnet.ibm.com
+Subject: [PATCH] generic/031: Modify fcollapse arguments to work on non-4k block sized fs instances
+Date:   Tue, 24 Nov 2020 14:07:33 +0530
+Message-Id: <20201124083733.1795978-1-anju@linux.vnet.ibm.com>
+X-Mailer: git-send-email 2.25.4
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <20201123182400.GD7880@magnolia>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+Content-Transfer-Encoding: 8bit
+X-TM-AS-GCONF: 00
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.312,18.0.737
+ definitions=2020-11-24_03:2020-11-24,2020-11-23 signatures=0
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 phishscore=0 malwarescore=0
+ mlxscore=0 priorityscore=1501 adultscore=0 clxscore=1011 spamscore=0
+ lowpriorityscore=0 suspectscore=1 bulkscore=0 mlxlogscore=999
+ impostorscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2009150000 definitions=main-2011240048
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Hi Darrick,
+This write vs fcollapse test does a sequence of operations to create a
+page which has non-contiguous mix of dirty and clean blocks. But when
+running the test with 64k block size, fallocate returns with EINVAL
+error, as the offset and length parameters for fcollapse are not
+multiples of fs blocksize.
 
-On Mon, Nov 23, 2020 at 10:24:00AM -0800, Darrick J. Wong wrote:
-> On Mon, Nov 23, 2020 at 04:20:47PM +0800, Gao Xiang wrote:
+Modify the offset and length arguments for fcollapse in the test, to run
+the test with non-4k block sized fs instances also.
 
-...
+Without the patch:
+-------------------
+# ./check generic/031
+SECTION       -- ext4_test
+FSTYP         -- ext4
+PLATFORM      -- Linux/ppc64le localhost_ubuntu 4.15.0-15-generic
+MKFS_OPTIONS  -- -b 65536 /dev/loop5
+MOUNT_OPTIONS -- -o acl,user_xattr /dev/loop5 /mnt2/scratch
 
-> > +_supported_fs generic
-> > +_require_scratch
-> > +_require_attrs user
-> 
-> Does this require
-> 
-> _require_no_xfs_bug_on_assert ?
-> 
+     QA output created by 031
+    +fallocate: Invalid argument
+    +fallocate: Invalid argument
+     wrote 55756/55756 bytes at offset 185332
+     XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+     wrote 63394/63394 bytes at offset 133228
+    ...
 
-For the sake of harmless testcase, I think that is fine and I will
-add it in the next version as
-[ $FSTYP = "xfs" ] && _require_no_xfs_bug_on_assert
+(Note: Same failure observed for xfs also)
 
+With the patch:
+----------------- 
+v# ./check generic/031
+SECTION       -- ext4_test
+FSTYP         -- ext4
+PLATFORM      -- Linux/ppc64le localhost_ubuntu 4.15.0-15-generic #
+MKFS_OPTIONS  -- -b 65536 /dev/loop5
+MOUNT_OPTIONS -- -o acl,user_xattr /dev/loop5 /mnt2/scratch
 
-To clarify the synotom:
-if bug_on_assert is on, it will bug_on on the second setfattr,
-_scratch_cycle_mount will fail due to
-umount: can't unmount /tmp/mnt: Device or resource busy
+generic/031 2s ...  2s
+Ran: generic/031
+Passed all 1 tests
 
-if _scratch_cycle_mount is removed, _getfattr will hung due to
-(I think) unbalanced xfs_ilock(dp, XFS_ILOCK_EXCL) in xfs_attr_set()
-and xfs_attr_get() will take the lock again.
+SECTION       -- ext4_test
+=========================
+Ran: generic/031
+Passed all 1 tests
 
+Signed-off-by: Anju T Sudhakar <anju@linux.vnet.ibm.com> 
+---
+ tests/generic/031     |  6 +++---
+ tests/generic/031.out | 14 +++++++-------
+ 2 files changed, 10 insertions(+), 10 deletions(-)
 
-if bug_on_assert is off, it will fail on _scratch_cycle_mount due to
-log recovery replay fail when mounting as below
-
-[  856.786226] XFS (sda): Mounting V5 Filesystem                       
-[  856.802704] XFS (sda): Starting recovery (logdev: internal)                                                                                                                                                    
-[  856.806362] XFS: Assertion failed: len <= XFS_DFORK_ASIZE(dip, mp), file: fs/xfs/xfs_inode_item_recover.c, line: 426
-
-but if the line of _scratch_cycle_mount is removed, _getfattr will
-success due to
-	ifp->if_u1.if_data = krealloc(ifp->if_u1.if_data, roundup(new_size, 4),
-				      GFP_NOFS | __GFP_NOFAIL);
-	ifp->if_bytes = new_size;
-in xfs_idata_realloc(), and xfs_attr_shortform_getvalue() will
-temporary ok. yet this testcase have _scratch_cycle_mount anyway.
-
-In any case, it's fine with _getfattr after _scratch_cycle_mount
-for this testcase.
-
-And "bug_on_assert is off" does no harm to the system stablity itself
-so I think that's better.
-
-> > +
-> > +# Use fixed inode size 512, so both v4 and v5 can be tested,
-> > +# and also make sure the issue can be triggered if the default
-> > +# inode size is changed later.
-> > +[ $FSTYP = "xfs" ] && MKFS_OPTIONS="$MKFS_OPTIONS -i size=512"
-> > +_scratch_mkfs > $seqres.full 2>&1
-> > +_scratch_mount
-> > +
-> > +localfile="${SCRATCH_MNT}/testfile"
-> > +touch $localfile
-> > +
-> > +# value cannot exceed XFS_ATTR_SF_ENTSIZE_MAX (256) or it will turn into
-> > +# leaf form directly; the following combination can trigger the issue for
-> > +# both v4 (XFS_LITINO = 412) & v5 (XFS_LITINO = 336) fses.
-> > +"${SETFATTR_PROG}" -n user.0 -v "`seq 0 80`" "${localfile}"
-> > +"${SETFATTR_PROG}" -n user.1 -v "`seq 0 80`" "${localfile}"
-> 
-> It's probably worth mentioning that the second setattr causes an integer
-> underflow that is incorrectly typecast, leading to the assert
-> triggering.  Otherwise this seems reasonable to me.
-
-Ok, will try to add in the next version as well.
-
-Thanks,
-Gao Xiang
-
-> 
-> --D
-> 
-> > +
-> > +# Make sure that changes are written to disk
-> > +_scratch_cycle_mount
-> > +
-> > +# getfattr won't succeed with the expected result if fails
-> > +_getfattr --absolute-names -ebase64 -d $localfile | tail -n +2 | sort
-> > +
-> > +_scratch_unmount
-> > +status=0
-> > +exit
-> > diff --git a/tests/generic/618.out b/tests/generic/618.out
-> > new file mode 100644
-> > index 00000000..848fdc58
-> > --- /dev/null
-> > +++ b/tests/generic/618.out
-> > @@ -0,0 +1,4 @@
-> > +QA output created by 618
-> > +
-> > +user.0=0sMAoxCjIKMwo0CjUKNgo3CjgKOQoxMAoxMQoxMgoxMwoxNAoxNQoxNgoxNwoxOAoxOQoyMAoyMQoyMgoyMwoyNAoyNQoyNgoyNwoyOAoyOQozMAozMQozMgozMwozNAozNQozNgozNwozOAozOQo0MAo0MQo0Mgo0Mwo0NAo0NQo0Ngo0Nwo0OAo0OQo1MAo1MQo1Mgo1Mwo1NAo1NQo1Ngo1Nwo1OAo1OQo2MAo2MQo2Mgo2Mwo2NAo2NQo2Ngo2Nwo2OAo2OQo3MAo3MQo3Mgo3Mwo3NAo3NQo3Ngo3Nwo3OAo3OQo4MA==
-> > +user.1=0sMAoxCjIKMwo0CjUKNgo3CjgKOQoxMAoxMQoxMgoxMwoxNAoxNQoxNgoxNwoxOAoxOQoyMAoyMQoyMgoyMwoyNAoyNQoyNgoyNwoyOAoyOQozMAozMQozMgozMwozNAozNQozNgozNwozOAozOQo0MAo0MQo0Mgo0Mwo0NAo0NQo0Ngo0Nwo0OAo0OQo1MAo1MQo1Mgo1Mwo1NAo1NQo1Ngo1Nwo1OAo1OQo2MAo2MQo2Mgo2Mwo2NAo2NQo2Ngo2Nwo2OAo2OQo3MAo3MQo3Mgo3Mwo3NAo3NQo3Ngo3Nwo3OAo3OQo4MA==
-> > diff --git a/tests/generic/group b/tests/generic/group
-> > index 94e860b8..eca9d619 100644
-> > --- a/tests/generic/group
-> > +++ b/tests/generic/group
-> > @@ -620,3 +620,4 @@
-> >  615 auto rw
-> >  616 auto rw io_uring stress
-> >  617 auto rw io_uring stress
-> > +618 auto quick attr
-> > -- 
-> > 2.18.4
-> > 
-> 
+diff --git a/tests/generic/031 b/tests/generic/031
+index db84031b..2b253c3c 100755
+--- a/tests/generic/031
++++ b/tests/generic/031
+@@ -41,9 +41,9 @@ _scratch_mount
+ 
+ $XFS_IO_PROG -f \
+ 	-c "pwrite 185332 55756" \
+-	-c "fcollapse 28672 40960" \
+-	-c "pwrite 133228 63394" \
+-	-c "fcollapse 0 4096" \
++	-c "fcollapse 65536 65536" \
++	-c "pwrite 67692 63394" \
++	-c "fcollapse 0 65536" \
+ $testfile | _filter_xfs_io
+ 
+ echo "==== Pre-Remount ==="
+diff --git a/tests/generic/031.out b/tests/generic/031.out
+index 194bfa45..b096694f 100644
+--- a/tests/generic/031.out
++++ b/tests/generic/031.out
+@@ -1,19 +1,19 @@
+ QA output created by 031
+ wrote 55756/55756 bytes at offset 185332
+ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-wrote 63394/63394 bytes at offset 133228
++wrote 63394/63394 bytes at offset 67692
+ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+ ==== Pre-Remount ===
+ 00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+ *
+-0001f860  00 00 00 00 00 00 00 00  00 00 00 00 cd cd cd cd  |................|
+-0001f870  cd cd cd cd cd cd cd cd  cd cd cd cd cd cd cd cd  |................|
++00000860  00 00 00 00 00 00 00 00  00 00 00 00 cd cd cd cd  |................|
++00000870  cd cd cd cd cd cd cd cd  cd cd cd cd cd cd cd cd  |................|
+ *
+-0002fdc0
++0001adc0
+ ==== Post-Remount ==
+ 00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+ *
+-0001f860  00 00 00 00 00 00 00 00  00 00 00 00 cd cd cd cd  |................|
+-0001f870  cd cd cd cd cd cd cd cd  cd cd cd cd cd cd cd cd  |................|
++00000860  00 00 00 00 00 00 00 00  00 00 00 00 cd cd cd cd  |................|
++00000870  cd cd cd cd cd cd cd cd  cd cd cd cd cd cd cd cd  |................|
+ *
+-0002fdc0
++0001adc0
+-- 
+2.15.1
 
