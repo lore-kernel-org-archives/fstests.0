@@ -2,213 +2,132 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	UNPARSEABLE_RELAY autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 167EDC63777
-	for <linux-fstests@archiver.kernel.org>; Tue, 24 Nov 2020 16:53:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C6681C56202
+	for <linux-fstests@archiver.kernel.org>; Thu, 26 Nov 2020 03:54:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A643F206F9
-	for <linux-fstests@archiver.kernel.org>; Tue, 24 Nov 2020 16:53:11 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 48D0E217A0
+	for <linux-fstests@archiver.kernel.org>; Thu, 26 Nov 2020 03:54:00 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="hCELUgOL"
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="h2nirmbZ"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2390626AbgKXQwu (ORCPT
+        id S2387516AbgKZDyA (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 24 Nov 2020 11:52:50 -0500
-Received: from aserp2130.oracle.com ([141.146.126.79]:43170 "EHLO
-        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1731531AbgKXQwu (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 24 Nov 2020 11:52:50 -0500
-Received: from pps.filterd (aserp2130.oracle.com [127.0.0.1])
-        by aserp2130.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 0AOGmrUt181460;
-        Tue, 24 Nov 2020 16:52:47 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
- : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=corp-2020-01-29;
- bh=4jf4amatsj2lieNy/ni30DNFsNjjBEkV8BKuAi2YL2E=;
- b=hCELUgOLjyRRSNzjtxjlowGXLaVDeARzggJaapCrjprM+bj+fzj/+PWsM5lcfIG3CzFy
- 9ek9WIy1UckWJx3QPGBbYXUFbW3pgFwMw5cT8zXzeX4RpkFl8cbVMa3ZrOQAcQqV97U9
- VDN8TVIZuYytweTCz+zVbXlWHFlKwyovC+E+R3flhBonF4BM3TazRdAmX5wTv2Jl9faE
- NqkOLPhgiD5bGpJpxqNKIWGSNbgnt6yjGcbQRfDlurSjPPouVCOSYiXPqAhnuCCDieLt
- 8s6LRN6JnH3u5hX7DbMJ1LKztCKvdXbva5wnIKvKvQpRbPw/wr4Fgc/Nj0h5ket+3BEH zw== 
-Received: from aserp3030.oracle.com (aserp3030.oracle.com [141.146.126.71])
-        by aserp2130.oracle.com with ESMTP id 34xrdav0jx-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Tue, 24 Nov 2020 16:52:47 +0000
-Received: from pps.filterd (aserp3030.oracle.com [127.0.0.1])
-        by aserp3030.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 0AOGo0MM123979;
-        Tue, 24 Nov 2020 16:52:46 GMT
-Received: from userv0121.oracle.com (userv0121.oracle.com [156.151.31.72])
-        by aserp3030.oracle.com with ESMTP id 34ycfnjwjw-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Tue, 24 Nov 2020 16:52:46 +0000
-Received: from abhmp0019.oracle.com (abhmp0019.oracle.com [141.146.116.25])
-        by userv0121.oracle.com (8.14.4/8.13.8) with ESMTP id 0AOGqjTY030908;
-        Tue, 24 Nov 2020 16:52:45 GMT
-Received: from localhost (/67.169.218.210)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Tue, 24 Nov 2020 08:52:45 -0800
-Date:   Tue, 24 Nov 2020 08:52:44 -0800
-From:   "Darrick J. Wong" <darrick.wong@oracle.com>
-To:     Gao Xiang <hsiangkao@redhat.com>
-Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
-        Eric Sandeen <sandeen@redhat.com>
-Subject: Re: [PATCH v3] generic: add test for XFS forkoff miscalcution on
- 32-bit platform
-Message-ID: <20201124165244.GI7880@magnolia>
-References: <20201123082047.2991878-1-hsiangkao@redhat.com>
- <20201124101145.3230728-1-hsiangkao@redhat.com>
+        Wed, 25 Nov 2020 22:54:00 -0500
+Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:13170 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1730187AbgKZDx7 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 25 Nov 2020 22:53:59 -0500
+Received: from pps.filterd (m0098409.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.0.42/8.16.0.42) with SMTP id 0AQ3p2eN106232;
+        Wed, 25 Nov 2020 22:53:57 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=subject : to : cc :
+ references : from : message-id : date : mime-version : in-reply-to :
+ content-type : content-transfer-encoding; s=pp1;
+ bh=kqINen3i/bNXMyyBdnQBchA7tQeXPs2uRmFNT/lCS/0=;
+ b=h2nirmbZJC9bsVDpHrIhNUtRmjuG3Nz+3H2XzW2n9kOD6TOIEm3TKM9y0mqAbFjfqOCp
+ sW0b2oEh6h2QwWVdPgERyyCrn17fmVpgr/FZZuWuGjUp6Od8cWf/rezRZwHAujlmvHbB
+ aurKF/0us+1bQuFsN9k4m0oTv2VJ6f8jl48AXGy20Z1ZmD4LMKACrpAUhwuoFlDet1Xj
+ cVAd7U2fWad/mLlG9A2QREsZvcrxyLJsJf3tN4vWja4jdrzQzv3QcgMjeOwARzM4FyZz
+ c55pUP81UDn/kOIX0AH/wTAZBJqNob3azV4dPVAhkUYg8P2BvqX6SzTrvBWjJZvlhVBV 0w== 
+Received: from ppma03fra.de.ibm.com (6b.4a.5195.ip4.static.sl-reverse.com [149.81.74.107])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 3524tqg1h5-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Wed, 25 Nov 2020 22:53:57 -0500
+Received: from pps.filterd (ppma03fra.de.ibm.com [127.0.0.1])
+        by ppma03fra.de.ibm.com (8.16.0.42/8.16.0.42) with SMTP id 0AQ3rZHj003209;
+        Thu, 26 Nov 2020 03:53:54 GMT
+Received: from b06cxnps4076.portsmouth.uk.ibm.com (d06relay13.portsmouth.uk.ibm.com [9.149.109.198])
+        by ppma03fra.de.ibm.com with ESMTP id 34yy8r2ct7-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Thu, 26 Nov 2020 03:53:54 +0000
+Received: from d06av24.portsmouth.uk.ibm.com (mk.ibm.com [9.149.105.60])
+        by b06cxnps4076.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 0AQ3pMNA8061690
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Thu, 26 Nov 2020 03:51:22 GMT
+Received: from d06av24.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id A3DFD42045;
+        Thu, 26 Nov 2020 03:51:22 +0000 (GMT)
+Received: from d06av24.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id 225F142041;
+        Thu, 26 Nov 2020 03:51:21 +0000 (GMT)
+Received: from [9.199.32.61] (unknown [9.199.32.61])
+        by d06av24.portsmouth.uk.ibm.com (Postfix) with ESMTP;
+        Thu, 26 Nov 2020 03:51:20 +0000 (GMT)
+Subject: Re: [PATCH 0/3] fstests: Fix tests which checks for swapfile support
+To:     Eryu Guan <guan@eryu.me>
+Cc:     fstests@vger.kernel.org, anju@linux.vnet.ibm.com,
+        linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org,
+        linux-xfs@vger.kernel.org
+References: <cover.1604000570.git.riteshh@linux.ibm.com>
+ <20201101160357.GE3853@desktop>
+From:   Ritesh Harjani <riteshh@linux.ibm.com>
+Message-ID: <c2f91a8e-b831-52c5-7e5e-79dcc7175cd3@linux.ibm.com>
+Date:   Thu, 26 Nov 2020 09:21:19 +0530
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.11.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20201124101145.3230728-1-hsiangkao@redhat.com>
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9815 signatures=668682
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 phishscore=0 mlxscore=0 spamscore=0
- adultscore=0 bulkscore=0 suspectscore=1 malwarescore=0 mlxlogscore=999
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2009150000
- definitions=main-2011240104
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9815 signatures=668682
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 bulkscore=0 impostorscore=0 mlxscore=0
- mlxlogscore=999 spamscore=0 phishscore=0 clxscore=1015 malwarescore=0
- lowpriorityscore=0 adultscore=0 suspectscore=1 priorityscore=1501
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2009150000
- definitions=main-2011240104
+In-Reply-To: <20201101160357.GE3853@desktop>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+X-TM-AS-GCONF: 00
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.312,18.0.737
+ definitions=2020-11-25_14:2020-11-25,2020-11-25 signatures=0
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 mlxscore=0 phishscore=0
+ suspectscore=0 bulkscore=0 adultscore=0 mlxlogscore=999 clxscore=1011
+ priorityscore=1501 malwarescore=0 lowpriorityscore=0 impostorscore=0
+ spamscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2009150000 definitions=main-2011260016
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Nov 24, 2020 at 06:11:45PM +0800, Gao Xiang wrote:
-> There is a regression that recent XFS_LITINO(mp) update causes
-> xfs_attr_shortform_bytesfit() returns maxforkoff rather than 0.
-> 
-> Therefore, one result is
->   "ASSERT(new_size <= XFS_IFORK_SIZE(ip, whichfork));"
-> 
-> Add a regression test in fstests generic to look after that since
-> the testcase itself isn't xfs-specific.
-> 
-> Signed-off-by: Gao Xiang <hsiangkao@redhat.com>
 
-Looks good to me,
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
 
---D
+On 11/1/20 9:33 PM, Eryu Guan wrote:
+> On Fri, Oct 30, 2020 at 01:22:50AM +0530, Ritesh Harjani wrote:
+>> For more details, pls refer commit msg of each patch.
+>>
+>> Patch-1: modifies _require_scratch_swapfile() to check swapon only for btrfs
+> 
+> I don't think it's a good idea, if a new fs without swapfile support is
+> tested by fstests, test would get false failure, where it should
+> _notrun. And making a generic requirement check to fs-specific doesn't
+> seem quite right either.
+> 
+>> Patch-2: adds a swapfile test for fallocate files for ext4, xfs (assuming
+>> both FS supports and thus should pass).
+> 
+> As Brian mentioned in his review, we're in the process to convert all
+> shared tests to generic or fs-specific tests (very slow though), that
+> said we don't want new shared tests.
+> 
+> I think we could whitelist fs types in _require_scratch_swapfile() and
+> don't _notrun for such filesystems, something like what we did in
+> _fstyp_has_non_default_seek_data_hole(), so that we won't miss silent
+> regressions on sucn filesystems, and we'll do sanity check as well on
+> other filesystems.
 
-> ---
-> changes since v2:
->  - "_require_no_xfs_bug_on_assert" to avoid crashing the system (Darrick);
->  - refine a commit for more details (Darrick)
+Nice idea. Let me check that part.
+
 > 
->  tests/generic/618     | 75 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/618.out |  4 +++
->  tests/generic/group   |  1 +
->  3 files changed, 80 insertions(+)
->  create mode 100755 tests/generic/618
->  create mode 100644 tests/generic/618.out
+>> Patch-3: added to support tests to run when multiple config section present
+>> in local.config file.
 > 
-> diff --git a/tests/generic/618 b/tests/generic/618
-> new file mode 100755
-> index 00000000..f1c1605e
-> --- /dev/null
-> +++ b/tests/generic/618
-> @@ -0,0 +1,75 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2020 Red Hat, Inc. All Rights Reserved.
-> +#
-> +# FS QA Test 618
-> +#
-> +# Verify that forkoff can be returned as 0 properly if it isn't
-> +# able to fit inline for XFS.
-> +# However, this test is fs-neutral and can be done quickly so
-> +# leave it in generic
-> +# This test verifies the problem fixed in kernel with commit
-> +# ada49d64fb35 ("xfs: fix forkoff miscalculation related to XFS_LITINO(mp)")
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/attr
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +_supported_fs generic
-> +_require_scratch
-> +_require_attrs user
-> +
-> +if [ $FSTYP = "xfs" ]; then
-> +	# avoid crashing the system if possible
-> +	_require_no_xfs_bug_on_assert
-> +
-> +	# Use fixed inode size 512, so both v4 and v5 can be tested,
-> +	# and also make sure the issue can be triggered if the default
-> +	# inode size is changed later.
-> +	MKFS_OPTIONS="$MKFS_OPTIONS -i size=512"
-> +fi
-> +
-> +_scratch_mkfs > $seqres.full 2>&1
-> +_scratch_mount
-> +
-> +localfile="${SCRATCH_MNT}/testfile"
-> +touch $localfile
-> +
-> +# value cannot exceed XFS_ATTR_SF_ENTSIZE_MAX (256) or it will turn into leaf
-> +# form directly; the following combination can trigger the issue for both v4
-> +# (XFS_LITINO = 412) & v5 (XFS_LITINO = 336) fses, in details the 2nd setattr
-> +# causes an integer underflow that is incorrectly typecast, leading to the
-> +# assert triggering.
-> +"${SETFATTR_PROG}" -n user.0 -v "`seq 0 80`" "${localfile}"
-> +"${SETFATTR_PROG}" -n user.1 -v "`seq 0 80`" "${localfile}"
-> +
-> +# Make sure that changes are written to disk
-> +_scratch_cycle_mount
-> +
-> +# getfattr won't succeed with the expected result if fails
-> +_getfattr --absolute-names -ebase64 -d $localfile | tail -n +2 | sort
-> +
-> +_scratch_unmount
-> +status=0
-> +exit
-> diff --git a/tests/generic/618.out b/tests/generic/618.out
-> new file mode 100644
-> index 00000000..848fdc58
-> --- /dev/null
-> +++ b/tests/generic/618.out
-> @@ -0,0 +1,4 @@
-> +QA output created by 618
-> +
-> +user.0=0sMAoxCjIKMwo0CjUKNgo3CjgKOQoxMAoxMQoxMgoxMwoxNAoxNQoxNgoxNwoxOAoxOQoyMAoyMQoyMgoyMwoyNAoyNQoyNgoyNwoyOAoyOQozMAozMQozMgozMwozNAozNQozNgozNwozOAozOQo0MAo0MQo0Mgo0Mwo0NAo0NQo0Ngo0Nwo0OAo0OQo1MAo1MQo1Mgo1Mwo1NAo1NQo1Ngo1Nwo1OAo1OQo2MAo2MQo2Mgo2Mwo2NAo2NQo2Ngo2Nwo2OAo2OQo3MAo3MQo3Mgo3Mwo3NAo3NQo3Ngo3Nwo3OAo3OQo4MA==
-> +user.1=0sMAoxCjIKMwo0CjUKNgo3CjgKOQoxMAoxMQoxMgoxMwoxNAoxNQoxNgoxNwoxOAoxOQoyMAoyMQoyMgoyMwoyNAoyNQoyNgoyNwoyOAoyOQozMAozMQozMgozMwozNAozNQozNgozNwozOAozOQo0MAo0MQo0Mgo0Mwo0NAo0NQo0Ngo0Nwo0OAo0OQo1MAo1MQo1Mgo1Mwo1NAo1NQo1Ngo1Nwo1OAo1OQo2MAo2MQo2Mgo2Mwo2NAo2NQo2Ngo2Nwo2OAo2OQo3MAo3MQo3Mgo3Mwo3NAo3NQo3Ngo3Nwo3OAo3OQo4MA==
-> diff --git a/tests/generic/group b/tests/generic/group
-> index 94e860b8..eca9d619 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -620,3 +620,4 @@
->  615 auto rw
->  616 auto rw io_uring stress
->  617 auto rw io_uring stress
-> +618 auto quick attr
-> -- 
-> 2.18.4
+> I have a patch[1] that should fix the issue 3 years ago, but it never
+> got reviewed, would you please check and see if it fixed the bug for you?
 > 
+> [1] https://patchwork.kernel.org/project/fstests/patch/20171117070022.14002-1-eguan@redhat.com/
+
+Sure, will test it and get back.
+
+Sorry about the delay from my end on this patch series. I got pulled
+into something else. Let me work on your suggestions.
+
+
+-ritesh
