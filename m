@@ -2,220 +2,206 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.7 required=3.0 tests=BAYES_00,
+X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	LOTS_OF_MONEY,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
-	URIBL_BLOCKED autolearn=ham autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4DAFEC2D0E4
-	for <linux-fstests@archiver.kernel.org>; Fri, 27 Nov 2020 12:37:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2B011C8301A
+	for <linux-fstests@archiver.kernel.org>; Sat, 28 Nov 2020 22:07:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id F2AFF22243
-	for <linux-fstests@archiver.kernel.org>; Fri, 27 Nov 2020 12:37:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0CFCE2224A
+	for <linux-fstests@archiver.kernel.org>; Sat, 28 Nov 2020 22:07:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729134AbgK0Mhd (ORCPT
+        id S1731458AbgK1WGt (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 27 Nov 2020 07:37:33 -0500
-Received: from mx2.suse.de ([195.135.220.15]:43316 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728740AbgK0Mhd (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 27 Nov 2020 07:37:33 -0500
-X-Virus-Scanned: by amavisd-new at test-mx.suse.de
-Received: from relay2.suse.de (unknown [195.135.221.27])
-        by mx2.suse.de (Postfix) with ESMTP id 01CE9ABD7;
-        Fri, 27 Nov 2020 12:37:31 +0000 (UTC)
-Received: from localhost (brahms [local])
-        by brahms (OpenSMTPD) with ESMTPA id 7d5da8c7;
-        Fri, 27 Nov 2020 12:37:44 +0000 (UTC)
-From:   Luis Henriques <lhenriques@suse.de>
-To:     Eryu Guan <guan@eryu.me>, Jeff Layton <jlayton@kernel.org>
-Cc:     fstests@vger.kernel.org, ceph-devel@vger.kernel.org,
-        Luis Henriques <lhenriques@suse.de>
-Subject: [PATCH v3] ceph: add a new test for cross quota realms renames
-Date:   Fri, 27 Nov 2020 12:37:42 +0000
-Message-Id: <20201127123742.561-1-lhenriques@suse.de>
+        Sat, 28 Nov 2020 17:06:49 -0500
+Received: from youngberry.canonical.com ([91.189.89.112]:55201 "EHLO
+        youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726122AbgK1WGr (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 28 Nov 2020 17:06:47 -0500
+Received: from ip5f5af0a0.dynamic.kabel-deutschland.de ([95.90.240.160] helo=wittgenstein.fritz.box)
+        by youngberry.canonical.com with esmtpsa (TLS1.2:ECDHE_RSA_AES_128_GCM_SHA256:128)
+        (Exim 4.86_2)
+        (envelope-from <christian.brauner@ubuntu.com>)
+        id 1kj83X-0002aM-3g; Sat, 28 Nov 2020 21:46:59 +0000
+From:   Christian Brauner <christian.brauner@ubuntu.com>
+To:     Alexander Viro <viro@zeniv.linux.org.uk>,
+        Christoph Hellwig <hch@infradead.org>,
+        linux-fsdevel@vger.kernel.org
+Cc:     John Johansen <john.johansen@canonical.com>,
+        James Morris <jmorris@namei.org>,
+        Mimi Zohar <zohar@linux.ibm.com>,
+        Dmitry Kasatkin <dmitry.kasatkin@gmail.com>,
+        Stephen Smalley <stephen.smalley.work@gmail.com>,
+        Casey Schaufler <casey@schaufler-ca.com>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Andreas Dilger <adilger.kernel@dilger.ca>,
+        OGAWA Hirofumi <hirofumi@mail.parknet.co.jp>,
+        Geoffrey Thomas <geofft@ldpreload.com>,
+        Mrunal Patel <mpatel@redhat.com>,
+        Josh Triplett <josh@joshtriplett.org>,
+        Andy Lutomirski <luto@kernel.org>,
+        Theodore Tso <tytso@mit.edu>, Alban Crequy <alban@kinvolk.io>,
+        Tycho Andersen <tycho@tycho.ws>,
+        David Howells <dhowells@redhat.com>,
+        James Bottomley <James.Bottomley@hansenpartnership.com>,
+        Seth Forshee <seth.forshee@canonical.com>,
+        =?UTF-8?q?St=C3=A9phane=20Graber?= <stgraber@ubuntu.com>,
+        Aleksa Sarai <cyphar@cyphar.com>,
+        Lennart Poettering <lennart@poettering.net>,
+        "Eric W. Biederman" <ebiederm@xmission.com>, smbarber@chromium.org,
+        Phil Estes <estesp@gmail.com>, Serge Hallyn <serge@hallyn.com>,
+        Kees Cook <keescook@chromium.org>,
+        Todd Kjos <tkjos@google.com>, Paul Moore <paul@paul-moore.com>,
+        Jonathan Corbet <corbet@lwn.net>,
+        containers@lists.linux-foundation.org, fstests@vger.kernel.org,
+        linux-security-module@vger.kernel.org, linux-api@vger.kernel.org,
+        linux-ext4@vger.kernel.org, linux-integrity@vger.kernel.org,
+        selinux@vger.kernel.org,
+        Christian Brauner <christian.brauner@ubuntu.com>,
+        Christoph Hellwig <hch@lst.de>
+Subject: [PATCH v3 32/38] fat: handle idmapped mounts
+Date:   Sat, 28 Nov 2020 22:35:21 +0100
+Message-Id: <20201128213527.2669807-33-christian.brauner@ubuntu.com>
+X-Mailer: git-send-email 2.29.2
+In-Reply-To: <20201128213527.2669807-1-christian.brauner@ubuntu.com>
+References: <20201128213527.2669807-1-christian.brauner@ubuntu.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-For the moment cross quota realms renames has been disabled in CephFS
-after a bug has been found while renaming files created and truncated.
-This allowed clients to easily circumvent quotas.
+Let fat handle idmapped mounts. This allows to have the same fat mount appear
+in multiple locations with different id mappings. This allows to expose a vfat
+formatted USB stick to multiple user with different ids on the host or in user
+namespaces allowing for dac permissions:
 
-Link: https://tracker.ceph.com/issues/48203
-Signed-off-by: Luis Henriques <lhenriques@suse.de>
+mount -o uid=1000,gid=1000 /dev/sdb /mnt
+
+u1001@f2-vm:/lower1$ ls -ln /mnt/
+total 4
+-rwxr-xr-x 1 1000 1000 4 Oct 28 03:44 aaa
+-rwxr-xr-x 1 1000 1000 0 Oct 28 01:09 bbb
+-rwxr-xr-x 1 1000 1000 0 Oct 28 01:10 ccc
+-rwxr-xr-x 1 1000 1000 0 Oct 28 03:46 ddd
+-rwxr-xr-x 1 1000 1000 0 Oct 28 04:01 eee
+
+mount2 --idmap both:1000:1001:1
+
+u1001@f2-vm:/lower1$ ls -ln /lower1/
+total 4
+-rwxr-xr-x 1 1001 1001 4 Oct 28 03:44 aaa
+-rwxr-xr-x 1 1001 1001 0 Oct 28 01:09 bbb
+-rwxr-xr-x 1 1001 1001 0 Oct 28 01:10 ccc
+-rwxr-xr-x 1 1001 1001 0 Oct 28 03:46 ddd
+-rwxr-xr-x 1 1001 1001 0 Oct 28 04:01 eee
+
+u1001@f2-vm:/lower1$ touch /lower1/fff
+
+u1001@f2-vm:/lower1$ ls -ln /lower1/fff
+-rwxr-xr-x 1 1001 1001 0 Oct 28 04:03 /lower1/fff
+
+u1001@f2-vm:/lower1$ ls -ln /mnt/fff
+-rwxr-xr-x 1 1000 1000 0 Oct 28 04:03 /mnt/fff
+
+Cc: Christoph Hellwig <hch@lst.de>
+Cc: David Howells <dhowells@redhat.com>
+Cc: Al Viro <viro@zeniv.linux.org.uk>
+Cc: linux-fsdevel@vger.kernel.org
+Signed-off-by: Christian Brauner <christian.brauner@ubuntu.com>
 ---
-v3: added file caps check, as suggested by Jeff Layton.
-This required commit "ceph: add ceph.caps vxattr" (not yet in mainline),
-which made me also introduce function _require_ceph_vxattr_caps.
+/* v2 */
+unchanged
 
-v2: implemented Eryu review comments:
-- Added _require_test_program "rename"
-- Use _fail instead of _fatal
-common/ceph        |   7 +++
- tests/ceph/004     | 119 +++++++++++++++++++++++++++++++++++++++++++++
- tests/ceph/004.out |   2 +
- tests/ceph/group   |   1 +
- 4 files changed, 129 insertions(+)
- create mode 100755 tests/ceph/004
- create mode 100644 tests/ceph/004.out
+/* v3 */
+unchanged
+---
+ fs/fat/file.c        | 15 ++++++++-------
+ fs/fat/namei_msdos.c |  2 +-
+ fs/fat/namei_vfat.c  |  2 +-
+ 3 files changed, 10 insertions(+), 9 deletions(-)
 
-diff --git a/common/ceph b/common/ceph
-index f80209f98b23..ca756dda8dd3 100644
---- a/common/ceph
-+++ b/common/ceph
-@@ -21,3 +21,10 @@ _ceph_create_file_layout()
- 		-v "stripe_unit=$objsz stripe_count=1 object_size=$objsz" \
- 		$fname
+diff --git a/fs/fat/file.c b/fs/fat/file.c
+index 5b12cf209801..15dc8d27aa72 100644
+--- a/fs/fat/file.c
++++ b/fs/fat/file.c
+@@ -398,7 +398,7 @@ int fat_getattr(const struct path *path, struct kstat *stat,
+ 		u32 request_mask, unsigned int flags)
+ {
+ 	struct inode *inode = d_inode(path->dentry);
+-	generic_fillattr(&init_user_ns, inode, stat);
++	generic_fillattr(mnt_user_ns(path->mnt), inode, stat);
+ 	stat->blksize = MSDOS_SB(inode->i_sb)->cluster_size;
+ 
+ 	if (MSDOS_SB(inode->i_sb)->options.nfs == FAT_NFS_NOSTALE_RO) {
+@@ -447,12 +447,13 @@ static int fat_sanitize_mode(const struct msdos_sb_info *sbi,
+ 	return 0;
  }
-+
-+# this test requires to access file capabilities through vxattr 'ceph.caps'.
-+_require_ceph_vxattr_caps()
-+{
-+	$GETFATTR_PROG -n "ceph.caps" $TEST_DIR >/dev/null 2>&1 \
-+	  || _notrun "ceph.caps vxattr not supported"
-+}
-diff --git a/tests/ceph/004 b/tests/ceph/004
-new file mode 100755
-index 000000000000..1de19b39acb5
---- /dev/null
-+++ b/tests/ceph/004
-@@ -0,0 +1,119 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2020 SUSE Linux Products GmbH. All Rights Reserved.
-+#
-+# FS QA Test 004
-+#
-+# Tests a bug fix found in cephfs quotas handling.  Here's a simplified testcase
-+# that *should* fail:
-+#
-+#    mkdir files limit
-+#    truncate files/file -s 10G
-+#    setfattr limit -n ceph.quota.max_bytes -v 1000000
-+#    mv files limit/
-+#
-+# Because we're creating a new file and truncating it, we have Fx caps and thus
-+# the truncate operation will be cached.  This prevents the MDSs from updating
-+# the quota realms and thus the client will allow the above rename(2) to happen.
-+#
-+# The bug resulted in dropping support for cross quota-realms renames, reverting
-+# kernel commit dffdcd71458e ("ceph: allow rename operation under different
-+# quota realms").
-+#
-+# So, the above test will now fail with a -EXDEV or, in the future (when we have
-+# a proper fix), with -EDQUOT.
-+#
-+# This bug was tracker here:
-+#
-+#   https://tracker.ceph.com/issues/48203
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/attr
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+_supported_fs ceph
-+_require_attrs
-+_require_test
-+_require_test_program "rename"
-+_require_ceph_vxattr_caps # we need to get file capabilities
-+
-+workdir=$TEST_DIR/test-$seq
-+
-+orig1=$workdir/orig1
-+orig2=$workdir/orig2
-+file1=$orig1/file
-+file2=$orig2/file
-+dest=$workdir/dest
-+
-+rm -rf $workdir
-+mkdir $workdir
-+mkdir $orig1 $orig2 $dest
-+
-+# get only the hexadecimal value of the ceph.caps vxattr, which has the
-+# following format:
-+#   ceph.caps="pAsLsXsFscr/0xd55"
-+get_ceph_caps()
-+{
-+	$GETFATTR_PROG --only-values -n "ceph.caps" $1 2>/dev/null \
-+	    | cut -d / -f2
-+}
-+
-+# check that a file has cephfs capabilities 'Fs'
-+check_Fs_caps()
-+{
-+	caps=`get_ceph_caps $1`
-+	# Fs cap is bit (1 << 8)
-+	Fs=$((1 << 8))
-+	res=$(($caps & $Fs))
-+	if [ $res -ne $Fs ]; then
-+		_fail "File $1 doesn't have Fs caps ($caps)"
-+	fi
-+}
-+
-+# set quota to 1m
-+$SETFATTR_PROG -n ceph.quota.max_bytes -v 1000000 $dest
-+# set quota to 20g
-+$SETFATTR_PROG -n ceph.quota.max_bytes -v 20000000000 $orig2
-+
-+#
-+# The following 2 testcases shall fail with either -EXDEV or -EDQUOT
-+#
-+
-+# from 'root' realm to $dest realm
-+$XFS_IO_PROG -f -c "truncate 10G" $file1
-+check_Fs_caps $file1
-+$here/src/rename $orig1 $dest/new1 >> $seqres.full 2>&1
-+[ $? -ne 1 ] && _fail "cross quota realms rename succeeded"
-+
-+# from $orig2 realm to $dest realm
-+$XFS_IO_PROG -f -c "truncate 10G" $file2
-+check_Fs_caps $file2
-+$here/src/rename $orig2 $dest/new2 >> $seqres.full 2>&1
-+[ $? -ne 1 ] && _fail "cross quota realms rename succeeded"
-+
-+echo "Silence is golden"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/ceph/004.out b/tests/ceph/004.out
-new file mode 100644
-index 000000000000..af8614ae45ac
---- /dev/null
-+++ b/tests/ceph/004.out
-@@ -0,0 +1,2 @@
-+QA output created by 004
-+Silence is golden
-diff --git a/tests/ceph/group b/tests/ceph/group
-index adbf61547766..47903d21966c 100644
---- a/tests/ceph/group
-+++ b/tests/ceph/group
-@@ -1,3 +1,4 @@
- 001 auto quick copy
- 002 auto quick copy
- 003 auto quick copy
-+004 auto quick quota
+ 
+-static int fat_allow_set_time(struct msdos_sb_info *sbi, struct inode *inode)
++static int fat_allow_set_time(struct user_namespace *user_ns,
++			      struct msdos_sb_info *sbi, struct inode *inode)
+ {
+ 	umode_t allow_utime = sbi->options.allow_utime;
+ 
+-	if (!uid_eq(current_fsuid(), inode->i_uid)) {
+-		if (in_group_p(inode->i_gid))
++	if (!uid_eq(current_fsuid(), i_uid_into_mnt(user_ns, inode))) {
++		if (in_group_p(i_gid_into_mnt(user_ns, inode)))
+ 			allow_utime >>= 3;
+ 		if (allow_utime & MAY_WRITE)
+ 			return 1;
+@@ -477,11 +478,11 @@ int fat_setattr(struct user_namespace *user_ns, struct dentry *dentry,
+ 	/* Check for setting the inode time. */
+ 	ia_valid = attr->ia_valid;
+ 	if (ia_valid & TIMES_SET_FLAGS) {
+-		if (fat_allow_set_time(sbi, inode))
++		if (fat_allow_set_time(user_ns, sbi, inode))
+ 			attr->ia_valid &= ~TIMES_SET_FLAGS;
+ 	}
+ 
+-	error = setattr_prepare(&init_user_ns, dentry, attr);
++	error = setattr_prepare(user_ns, dentry, attr);
+ 	attr->ia_valid = ia_valid;
+ 	if (error) {
+ 		if (sbi->options.quiet)
+@@ -551,7 +552,7 @@ int fat_setattr(struct user_namespace *user_ns, struct dentry *dentry,
+ 		fat_truncate_time(inode, &attr->ia_mtime, S_MTIME);
+ 	attr->ia_valid &= ~(ATTR_ATIME|ATTR_CTIME|ATTR_MTIME);
+ 
+-	setattr_copy(&init_user_ns, inode, attr);
++	setattr_copy(user_ns, inode, attr);
+ 	mark_inode_dirty(inode);
+ out:
+ 	return error;
+diff --git a/fs/fat/namei_msdos.c b/fs/fat/namei_msdos.c
+index 608b0606f3ca..0f871a1b6620 100644
+--- a/fs/fat/namei_msdos.c
++++ b/fs/fat/namei_msdos.c
+@@ -666,7 +666,7 @@ static struct file_system_type msdos_fs_type = {
+ 	.name		= "msdos",
+ 	.mount		= msdos_mount,
+ 	.kill_sb	= kill_block_super,
+-	.fs_flags	= FS_REQUIRES_DEV,
++	.fs_flags	= FS_REQUIRES_DEV | FS_ALLOW_IDMAP,
+ };
+ MODULE_ALIAS_FS("msdos");
+ 
+diff --git a/fs/fat/namei_vfat.c b/fs/fat/namei_vfat.c
+index 34903d14d6a6..177d939b95da 100644
+--- a/fs/fat/namei_vfat.c
++++ b/fs/fat/namei_vfat.c
+@@ -1063,7 +1063,7 @@ static struct file_system_type vfat_fs_type = {
+ 	.name		= "vfat",
+ 	.mount		= vfat_mount,
+ 	.kill_sb	= kill_block_super,
+-	.fs_flags	= FS_REQUIRES_DEV,
++	.fs_flags	= FS_REQUIRES_DEV | FS_ALLOW_IDMAP,
+ };
+ MODULE_ALIAS_FS("vfat");
+ 
+-- 
+2.29.2
+
