@@ -2,92 +2,119 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.2 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 98481C83010
-	for <linux-fstests@archiver.kernel.org>; Sat, 28 Nov 2020 22:55:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 90B3AC3E8C5
+	for <linux-fstests@archiver.kernel.org>; Sun, 29 Nov 2020 07:20:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6A8BB22257
-	for <linux-fstests@archiver.kernel.org>; Sat, 28 Nov 2020 22:55:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4EF6820825
+	for <linux-fstests@archiver.kernel.org>; Sun, 29 Nov 2020 07:20:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1732424AbgK1Wzd (ORCPT
+        id S1725925AbgK2HTz (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 28 Nov 2020 17:55:33 -0500
-Received: from mail.hallyn.com ([178.63.66.53]:60772 "EHLO mail.hallyn.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727070AbgK1Wzd (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sat, 28 Nov 2020 17:55:33 -0500
-Received: by mail.hallyn.com (Postfix, from userid 1001)
-        id 65BD38AB; Sat, 28 Nov 2020 16:54:50 -0600 (CST)
-Date:   Sat, 28 Nov 2020 16:54:50 -0600
-From:   "Serge E. Hallyn" <serge@hallyn.com>
-To:     Christian Brauner <christian.brauner@ubuntu.com>
-Cc:     Alexander Viro <viro@zeniv.linux.org.uk>,
-        Christoph Hellwig <hch@infradead.org>,
-        linux-fsdevel@vger.kernel.org,
-        John Johansen <john.johansen@canonical.com>,
-        James Morris <jmorris@namei.org>,
-        Mimi Zohar <zohar@linux.ibm.com>,
-        Dmitry Kasatkin <dmitry.kasatkin@gmail.com>,
-        Stephen Smalley <stephen.smalley.work@gmail.com>,
-        Casey Schaufler <casey@schaufler-ca.com>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Andreas Dilger <adilger.kernel@dilger.ca>,
-        OGAWA Hirofumi <hirofumi@mail.parknet.co.jp>,
-        Geoffrey Thomas <geofft@ldpreload.com>,
-        Mrunal Patel <mpatel@redhat.com>,
-        Josh Triplett <josh@joshtriplett.org>,
-        Andy Lutomirski <luto@kernel.org>,
-        Theodore Tso <tytso@mit.edu>, Alban Crequy <alban@kinvolk.io>,
-        Tycho Andersen <tycho@tycho.ws>,
-        David Howells <dhowells@redhat.com>,
-        James Bottomley <James.Bottomley@hansenpartnership.com>,
-        Seth Forshee <seth.forshee@canonical.com>,
-        =?iso-8859-1?Q?St=E9phane?= Graber <stgraber@ubuntu.com>,
-        Aleksa Sarai <cyphar@cyphar.com>,
-        Lennart Poettering <lennart@poettering.net>,
-        "Eric W. Biederman" <ebiederm@xmission.com>, smbarber@chromium.org,
-        Phil Estes <estesp@gmail.com>, Serge Hallyn <serge@hallyn.com>,
-        Kees Cook <keescook@chromium.org>,
-        Todd Kjos <tkjos@google.com>, Paul Moore <paul@paul-moore.com>,
-        Jonathan Corbet <corbet@lwn.net>,
-        containers@lists.linux-foundation.org, fstests@vger.kernel.org,
-        linux-security-module@vger.kernel.org, linux-api@vger.kernel.org,
-        linux-ext4@vger.kernel.org, linux-integrity@vger.kernel.org,
-        selinux@vger.kernel.org
-Subject: Re: [PATCH v3 00/38] idmapped mounts
-Message-ID: <20201128225450.GC22812@mail.hallyn.com>
-References: <20201128213527.2669807-1-christian.brauner@ubuntu.com>
+        Sun, 29 Nov 2020 02:19:55 -0500
+Received: from out20-87.mail.aliyun.com ([115.124.20.87]:47253 "EHLO
+        out20-87.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725852AbgK2HTz (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 29 Nov 2020 02:19:55 -0500
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07535394|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.399659-0.00197455-0.598366;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047193;MF=guan@eryu.me;NM=1;PH=DS;RN=4;RT=4;SR=0;TI=SMTPD_---.J0Yt7M8_1606634344;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.J0Yt7M8_1606634344)
+          by smtp.aliyun-inc.com(10.147.41.138);
+          Sun, 29 Nov 2020 15:19:04 +0800
+Date:   Sun, 29 Nov 2020 15:19:04 +0800
+From:   Eryu Guan <guan@eryu.me>
+To:     ethanwu <ethanwu@synology.com>
+Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+        fdmanana@gmail.com
+Subject: Re: [PATCH] btrfs: test if rename handles dir item collision
+ correctly
+Message-ID: <20201129071904.GO3853@desktop>
+References: <20201126105013.246270-1-ethanwu@synology.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20201128213527.2669807-1-christian.brauner@ubuntu.com>
-User-Agent: Mutt/1.9.4 (2018-02-28)
+In-Reply-To: <20201126105013.246270-1-ethanwu@synology.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sat, Nov 28, 2020 at 10:34:49PM +0100, Christian Brauner wrote:
-> Hey everyone,
+On Thu, Nov 26, 2020 at 06:50:13PM +0800, ethanwu wrote:
+> This is a regression test for the issue fixed by the kernel commit titled
+> "Btrfs: correctly calculate item size used when item key collision happends"
+> 
+> In this case, we'll simply rename many forged filename that cause collision
+> under a directory to see if rename failed and filesystem is forced readonly.
+> 
+> Signed-off-by: ethanwu <ethanwu@synology.com>
+> ---
+>  tests/btrfs/227     | 311 ++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/227.out |   2 +
+>  tests/btrfs/group   |   1 +
+>  3 files changed, 314 insertions(+)
+>  create mode 100755 tests/btrfs/227
+>  create mode 100644 tests/btrfs/227.out
+> 
+> diff --git a/tests/btrfs/227 b/tests/btrfs/227
+> new file mode 100755
+> index 00000000..ba1cd359
+> --- /dev/null
+> +++ b/tests/btrfs/227
+> @@ -0,0 +1,311 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2020 Synology.  All Rights Reserved.
+> +#
+> +# FS QA Test 227
+> +#
+> +# Test if btrfs rename handle dir item collision correctly
+> +# Without patch fix, rename will fail with EOVERFLOW, and filesystem
+> +# is forced readonly.
+> +#
+> +# This bug is going to be fxied by a patch for kernel titled
+> +# "Btrfs: correctly calculate item size used when item key collision happends"
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +    cd /
+> +    rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +
+> +_supported_fs btrfs
+> +_require_scratch
+> +
+> +rm -f $seqres.full
+> +
+> +# Currently in btrfs the node/leaf size can not be smaller than the page
+> +# size (but it can be greater than the page size). So use the largest
+> +# supported node/leaf size (64Kb) so that the test can run on any platform
+> +# that Linux supports.
+> +_scratch_mkfs "--nodesize 65536" >>$seqres.full 2>&1
+> +_scratch_mount
+> +
+> +file_name_list=(d6d0dIka505ebc681949a25a3f1a4e7464f18bfcdb04a103b8ece40cddf61ccc9e690232878008edceecda8633591197bce8c0105891d2717425cb4bd04223bb08426de820da732c0e16b8a9fa236bb5b5260e526639780dacd378ca79428f640a0300a11a98f4f92719c62d6f7d756fa80f0aa654ae06
 
-Hey Christian,
+The file names are too long for the test, I'm wondering how are the
+names that could cause collisions generated in the first place? Is it
+possible to re-generate them at runtime? Instead of hard-coding them in
+the array.
 
-a general request.  Argue with me if it seems misguided.
-
-When looking at a patch or a small hunk of code, these days, if a variable
-called 'ns' or 'user_ns' is seen passed to a function, it can be easy to
-assume which user_ns it is based on what you think would make sense, but if
-your assumption is wrong, your patch review will be wrong.
-
-Can we stick to a convention where we have maybe
-
-subj_userns - the userns of the task seeking some action
-obj_userns - the userns of the thing being acted on - task, superblock,...
-mnt_userns - the userns of a mountpoint through which an object is seen
-
-You're replacing a lot of such callers and callsites in this patchset, so
-this would be a great time to start doing that.
-
--serge
+Thanks,
+Eryu
