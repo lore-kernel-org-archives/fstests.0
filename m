@@ -2,61 +2,62 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5BACFC63777
-	for <linux-fstests@archiver.kernel.org>; Mon, 30 Nov 2020 22:51:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 571FEC64E7B
+	for <linux-fstests@archiver.kernel.org>; Mon, 30 Nov 2020 22:52:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 072182076E
-	for <linux-fstests@archiver.kernel.org>; Mon, 30 Nov 2020 22:51:46 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C73702076C
+	for <linux-fstests@archiver.kernel.org>; Mon, 30 Nov 2020 22:52:58 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=kinvolk.io header.i=@kinvolk.io header.b="FjoZwlqR"
+	dkim=pass (1024-bit key) header.d=kinvolk.io header.i=@kinvolk.io header.b="QuqQG9AD"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2388676AbgK3Wvq (ORCPT
+        id S2388740AbgK3Ww6 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 30 Nov 2020 17:51:46 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41188 "EHLO
+        Mon, 30 Nov 2020 17:52:58 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41394 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2388132AbgK3Wvq (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 30 Nov 2020 17:51:46 -0500
-Received: from mail-lj1-x233.google.com (mail-lj1-x233.google.com [IPv6:2a00:1450:4864:20::233])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 44CF9C0617A7
-        for <fstests@vger.kernel.org>; Mon, 30 Nov 2020 14:50:21 -0800 (PST)
-Received: by mail-lj1-x233.google.com with SMTP id y16so20753640ljk.1
-        for <fstests@vger.kernel.org>; Mon, 30 Nov 2020 14:50:21 -0800 (PST)
+        with ESMTP id S2388678AbgK3Ww5 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 30 Nov 2020 17:52:57 -0500
+Received: from mail-lf1-x144.google.com (mail-lf1-x144.google.com [IPv6:2a00:1450:4864:20::144])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 43762C0613D3
+        for <fstests@vger.kernel.org>; Mon, 30 Nov 2020 14:52:17 -0800 (PST)
+Received: by mail-lf1-x144.google.com with SMTP id z21so25097274lfe.12
+        for <fstests@vger.kernel.org>; Mon, 30 Nov 2020 14:52:17 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=kinvolk.io; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=1bDJzC+7/EeDz8Z4TYtcl8pVmXB1VZfQyZ+oFPIZuXs=;
-        b=FjoZwlqRl25v3f0bwesiLG6VMDJ0cdT+WZsk9oJG7qotZdfQy3Bnzm/ErkRC6KEF0Q
-         V8tXzsGFOERVPlB9fDDUrXunF4OR96Byp7o91ITmQ4f6ghX4OplZA9VRfMBWotgDeDXS
-         4fMHVDZZFkLBQZtMZ9inRIOYwvw2PRu8hX+wE=
+        bh=PQg0SNNWkwV7My6wc0FC7IpKl7QLq5MHv/j5j0aPpNA=;
+        b=QuqQG9ADdDmV18jCrPnWfHcW15X5FNFPRcNOsTuadXp0R1ofszUYyn14cFgcYm1xt9
+         Ohx+O/XrOQeBzi2yNeMof2W9YaRXAoKumW+LWK+qJSn1igYlensrTdITOtBIwPZWx8hE
+         yhr6LcaDWCZeMzfGxo8TOF8bDqi5UbWdB4uhs=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=1bDJzC+7/EeDz8Z4TYtcl8pVmXB1VZfQyZ+oFPIZuXs=;
-        b=gFvX7Viql1Zitul7e4EocB9ic3VuVQDxSSM7LuwD9palBHBrBX1w61K9YK3IGxJuqa
-         cyQPQE2Fn/vS5jp/e936lVhmya7gNdq2BgBu+cVhv8NByV1wTnh361IBZVTD8bG+pgic
-         q4sSCmRiKSUxXTud1O8O3BQYzHv+Cq/TAbakF81ubBzBsA1IQSGezWMIba5rYo3HgTHd
-         XJHx18nqFJsYssl+f5iEYnAvE76cIQ9YIekmYEfa/uVw36cV1WLUVp0ttBF7db/66gkM
-         jP74NbewfNgUNdWWdYI13QnOysxq8fFJm78+XfeLrSbZnIayrhLLaskcb77tDN/22iz/
-         AOHQ==
-X-Gm-Message-State: AOAM531oSwrrAMHE9/tlSbgS5pVEynEdshLL1RJwnkJ/A1gyEchGdoMR
-        ABtTMqKGZ32+d7qq7jaqd4sJlaLhxFyO22l4HHk64g==
-X-Google-Smtp-Source: ABdhPJyMsQBDmsS07l72ppmPq7n5DMn6hdGTx4GyLQK7ar2TSxkO0y0Q1aohyJmtrB+4dMWzWOlvHMr1zq5pbE7LHlg=
-X-Received: by 2002:a2e:b386:: with SMTP id f6mr10646917lje.320.1606776619482;
- Mon, 30 Nov 2020 14:50:19 -0800 (PST)
+        bh=PQg0SNNWkwV7My6wc0FC7IpKl7QLq5MHv/j5j0aPpNA=;
+        b=rppPHeXCThhfnA41MAQ9xek4yMmt8m1fyY+Qmgqa308vqnRzfKWrZC5FZRKXr1jIyN
+         J2p0xuB9+tO0sRckfJ+EzDmpJ6OjTfPHx2ob+BilgD4Mneh8jTX4NkOo7bgaZJplDHYN
+         jfEXLzuAVZgZKqE08gTLtjiktrvjx2fuh00E8gM3GH44+alPrHmsHzSknG4d23Rh2te2
+         kqaLvuzd0vJ47o6R8x3pG6+A6gqATfTZT6fdiXk0a1VPZ37dczLFoUAOru5AqtaoFsW4
+         d2uTT9Z55vkjoMwG/q7jcf4LBCLCsCuhnQQy3eFLPYgOOnlVRQqJIyZFK3zIWVh7UaNZ
+         EydQ==
+X-Gm-Message-State: AOAM531e8wjmTDMrzyvCG66lxEDvooc8FuQ8Fa8VORwEfYJG7XTmgG4g
+        aAFUg7H3tL4iKG4ojztnVdl2E8W5Q7ZttfQT2wJJMg==
+X-Google-Smtp-Source: ABdhPJz6lQl/wsVF1Ne7U27EUw+OIPqS46oDCHQlHg6Xbv5haiwWr87dAhx/ApTPrUOy9koOzRi6b9gPinDiWazEth4=
+X-Received: by 2002:a19:8684:: with SMTP id i126mr841376lfd.561.1606776735655;
+ Mon, 30 Nov 2020 14:52:15 -0800 (PST)
 MIME-Version: 1.0
-References: <20201128213527.2669807-1-christian.brauner@ubuntu.com> <20201128213527.2669807-33-christian.brauner@ubuntu.com>
-In-Reply-To: <20201128213527.2669807-33-christian.brauner@ubuntu.com>
+References: <20201128213527.2669807-1-christian.brauner@ubuntu.com> <20201128213527.2669807-34-christian.brauner@ubuntu.com>
+In-Reply-To: <20201128213527.2669807-34-christian.brauner@ubuntu.com>
 From:   =?UTF-8?Q?Mauricio_V=C3=A1squez_Bernal?= <mauricio@kinvolk.io>
-Date:   Mon, 30 Nov 2020 17:50:08 -0500
-Message-ID: <CAHap4zu3wjCqjbxaXbsPqz2Q_oNRm0Q=xQMudPStwN8h92Stcw@mail.gmail.com>
-Subject: Re: [PATCH v3 32/38] fat: handle idmapped mounts
+Date:   Mon, 30 Nov 2020 17:52:04 -0500
+Message-ID: <CAHap4zvDuSpZzeyZPc61mQURu_0oGKjkiROohYXkAFYyD85Vvw@mail.gmail.com>
+Subject: Re: [PATCH v3 33/38] ext4: support idmapped mounts
 To:     Christian Brauner <christian.brauner@ubuntu.com>
 Cc:     Alexander Viro <viro@zeniv.linux.org.uk>,
         Christoph Hellwig <hch@infradead.org>,
@@ -94,8 +95,21 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+> diff --git a/fs/ext4/Kconfig b/fs/ext4/Kconfig
+> index 619dd35ddd48..5918c05cfe5b 100644
+> --- a/fs/ext4/Kconfig
+> +++ b/fs/ext4/Kconfig
+> @@ -118,3 +118,12 @@ config EXT4_KUNIT_TESTS
+>           to the KUnit documentation in Documentation/dev-tools/kunit/.
 >
-> mount2 --idmap both:1000:1001:1
->
+>           If unsure, say N.
+> +
+> +config EXT4_IDMAP_MOUNTS
+> +       bool "Support vfs idmapped mounts in ext4"
+> +       depends on EXT4_FS
+> +       default n
+> +       help
+> +         The vfs allows to expose a filesystem at different mountpoints with
+> +         differnet idmappings. Allow ext4 to be exposed through idmapped
 
-Nit: missing arguments to mount2.
+s/differnet/different/g
