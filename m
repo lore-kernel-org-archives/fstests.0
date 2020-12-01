@@ -2,122 +2,119 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-17.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 931FDC64E7B
-	for <linux-fstests@archiver.kernel.org>; Tue,  1 Dec 2020 13:27:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5322CC64E7A
+	for <linux-fstests@archiver.kernel.org>; Tue,  1 Dec 2020 16:06:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2376920770
-	for <linux-fstests@archiver.kernel.org>; Tue,  1 Dec 2020 13:27:02 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E47C42222A
+	for <linux-fstests@archiver.kernel.org>; Tue,  1 Dec 2020 16:06:29 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="GMSa62U6"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2387606AbgLAN05 (ORCPT
+        id S2391986AbgLAQGR (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 1 Dec 2020 08:26:57 -0500
-Received: from new4-smtp.messagingengine.com ([66.111.4.230]:43731 "EHLO
-        new4-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1725977AbgLAN04 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 1 Dec 2020 08:26:56 -0500
-Received: from compute6.internal (compute6.nyi.internal [10.202.2.46])
-        by mailnew.nyi.internal (Postfix) with ESMTP id 0FAC65804FE;
-        Tue,  1 Dec 2020 08:26:10 -0500 (EST)
-Received: from mailfrontend1 ([10.202.2.162])
-  by compute6.internal (MEProxy); Tue, 01 Dec 2020 08:26:10 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=tycho.pizza; h=
-        date:from:to:cc:subject:message-id:references:mime-version
-        :content-type:in-reply-to; s=fm1; bh=1ZjibMafBhi5wreHWpqyE5n4OJZ
-        RTh26ucXByqksgjc=; b=YGvdN742MswMjFFMm/nVhATPfG25MN3g8NDEhq46bSv
-        7LXrAhU6GGnySSKTS+nutqhRkW96v0W05mNjCzdA1iunVOLgtCO7ajC6Mz8LB3u2
-        5lnL64w4bFnzTvhjZEdQ4cbHNiB1RBznGNAlnAnNqk3UyQlEM6ETUJWnfZLt5Qg+
-        T/eqHabfIeLU2JN+i3IjB4v4i6qzmkRLIZJbVTesFO9VwftF9+xJogYimU2W93rY
-        /mndsKNjwtvuxWa4etSPsEAJd7vhdUaPBcy0Xh25FF7lbp/ZE9fA/h1S+KTmYHYb
-        AwgwS4zJ5xYzQnVHOZdCVJPhST7hEIk4wyUW9UR4oEw==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-        messagingengine.com; h=cc:content-type:date:from:in-reply-to
-        :message-id:mime-version:references:subject:to:x-me-proxy
-        :x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm1; bh=1ZjibM
-        afBhi5wreHWpqyE5n4OJZRTh26ucXByqksgjc=; b=ralXkkm/Ttr5dNKX1KdXyE
-        NyUpN8X1tWhN5hv6cKVaH3Fh1yAQkTWbxIXHlmQimcia77Ck3NJxEywB4C6llwlq
-        KYr79SBCuyD3+CGe/lOFvqLppWQ/qJLY5+X1C4uM1eGZq4pMt1/y5ELRl+sg6z7q
-        1SB0jehI669qSfkTJaF2PMR6wQ2TKyRTJaaPp1sgXdRFPFsIqXvSkFXhWs2p8GNK
-        IT5R/AjjNb3Ul8X1o8PA97XTaEOyjBBdnYY5ZY02uHCVFCRHlSsoULBB2U/fD90Y
-        xHH17x2yc0diRyv8G/4f3qfU6HvrFm51qA3YXcZRMIo1abiGeBraPBZEs2GUOSdQ
-        ==
-X-ME-Sender: <xms:b0TGX1QtZp99ufXf40j1YmqeWuwPzFStbU854K9q9zsAwrIVZa4AAA>
-    <xme:b0TGX-zgoJRocphuNxw6tUPjgEV3pJeQrXPD6ApV6X_omYXz6uCwX8BKkyK8N-SJv
-    _qzX9W7ns057PEY9uo>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedujedrudeivddgheegucetufdoteggodetrfdotf
-    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
-    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
-    cujfgurhepfffhvffukfhfgggtuggjsehttdertddttddvnecuhfhrohhmpefvhigthhho
-    ucetnhguvghrshgvnhcuoehthigthhhosehthigthhhordhpihiiiigrqeenucggtffrrg
-    htthgvrhhnpeegkeefjeegkedtjefgfeduleekueetjeeghffhuefgffefleehgeeifedv
-    gfethfenucfkphepuddvkedruddtjedrvdeguddrudektdenucevlhhushhtvghrufhiii
-    gvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpehthigthhhosehthigthhhordhpihii
-    iigr
-X-ME-Proxy: <xmx:b0TGX60khMu7LzGd7Yn3aL7UjilWQHaWM61HxQVYHDyS-_xY28R6Zg>
-    <xmx:b0TGX9B3lnqfdWmGNRFc_HxXwZfb28_nQ1Vf02IqXYseMVIQ6jvF8w>
-    <xmx:b0TGX-inuXGa4Vvr-SNyGJpIv-GfZKcep4apN-VsGGzfbu_D1MfZQg>
-    <xmx:ckTGX3AJxVIy7LI81lMLNHF1N1bnSjcw78XxLmR0kT7zBUg_ll9Ypg>
-Received: from cisco (unknown [128.107.241.180])
-        by mail.messagingengine.com (Postfix) with ESMTPA id 4F6533280065;
-        Tue,  1 Dec 2020 08:25:59 -0500 (EST)
-Date:   Tue, 1 Dec 2020 08:25:56 -0500
-From:   Tycho Andersen <tycho@tycho.pizza>
-To:     Christoph Hellwig <hch@lst.de>
-Cc:     Christian Brauner <christian.brauner@ubuntu.com>,
-        Lennart Poettering <lennart@poettering.net>,
-        Mimi Zohar <zohar@linux.ibm.com>,
-        David Howells <dhowells@redhat.com>,
-        Andreas Dilger <adilger.kernel@dilger.ca>,
-        containers@lists.linux-foundation.org,
-        Paul Moore <paul@paul-moore.com>,
-        Jonathan Corbet <corbet@lwn.net>, smbarber@chromium.org,
-        Christoph Hellwig <hch@infradead.org>,
-        Alban Crequy <alban@kinvolk.io>, linux-ext4@vger.kernel.org,
-        Mrunal Patel <mpatel@redhat.com>,
-        Kees Cook <keescook@chromium.org>,
-        Arnd Bergmann <arnd@arndb.de>, selinux@vger.kernel.org,
-        Josh Triplett <josh@joshtriplett.org>,
-        Seth Forshee <seth.forshee@canonical.com>,
-        Aleksa Sarai <cyphar@cyphar.com>,
-        Alexander Viro <viro@zeniv.linux.org.uk>,
-        Andy Lutomirski <luto@kernel.org>,
-        OGAWA Hirofumi <hirofumi@mail.parknet.co.jp>,
-        Geoffrey Thomas <geofft@ldpreload.com>,
-        James Bottomley <James.Bottomley@hansenpartnership.com>,
-        John Johansen <john.johansen@canonical.com>,
-        Theodore Tso <tytso@mit.edu>,
-        Dmitry Kasatkin <dmitry.kasatkin@gmail.com>,
-        Stephen Smalley <stephen.smalley.work@gmail.com>,
-        fstests@vger.kernel.org, linux-security-module@vger.kernel.org,
-        "Eric W. Biederman" <ebiederm@xmission.com>,
-        linux-api@vger.kernel.org,
-        Casey Schaufler <casey@schaufler-ca.com>,
-        linux-fsdevel@vger.kernel.org, linux-integrity@vger.kernel.org,
-        Todd Kjos <tkjos@google.com>
-Subject: Re: [PATCH v3 07/38] mount: attach mappings to mounts
-Message-ID: <20201201132556.GD103125@cisco>
-References: <20201128213527.2669807-1-christian.brauner@ubuntu.com>
- <20201128213527.2669807-8-christian.brauner@ubuntu.com>
- <20201201105025.GF27730@lst.de>
+        Tue, 1 Dec 2020 11:06:17 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:32354 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S2388498AbgLAQGR (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 1 Dec 2020 11:06:17 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1606838690;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=YxnZ5lhh8lFZ7pIwm+W8wTgupfO78lfU3+PUAveUGDQ=;
+        b=GMSa62U6hCH8IZMG+cIUjJ/QOsaKGVDJbh5TpIBU23aAZrU62kMnmpoikIDvW0yH2Gf/de
+        vuOzolMsDVlHTIhG+r7AHR/tXb6YuEVdaQDfgLVoeHL6hrNx/dYJQd79vn+JjKNREdcwXt
+        zEyooKzCNz4dg1FS3fI3Q2YuRMf2g90=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-471-yiXsBZMtMOeQDjZg0Pas8g-1; Tue, 01 Dec 2020 11:04:49 -0500
+X-MC-Unique: yiXsBZMtMOeQDjZg0Pas8g-1
+Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id F1319100C663;
+        Tue,  1 Dec 2020 16:04:47 +0000 (UTC)
+Received: from colo-mx.corp.redhat.com (colo-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.21])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id EAC9D60C17;
+        Tue,  1 Dec 2020 16:04:47 +0000 (UTC)
+Received: from zmail23.collab.prod.int.phx2.redhat.com (zmail23.collab.prod.int.phx2.redhat.com [10.5.83.28])
+        by colo-mx.corp.redhat.com (Postfix) with ESMTP id CEFA74BB7B;
+        Tue,  1 Dec 2020 16:04:47 +0000 (UTC)
+Date:   Tue, 1 Dec 2020 11:04:46 -0500 (EST)
+From:   Xiaoli Feng <xifeng@redhat.com>
+To:     Eryu Guan <guan@eryu.me>
+Cc:     fstests@vger.kernel.org
+Message-ID: <1382422020.60382586.1606838686869.JavaMail.zimbra@redhat.com>
+In-Reply-To: <20201129081234.GP3853@desktop>
+References: <20201123062526.18465-1-xifeng@redhat.com> <20201129081234.GP3853@desktop>
+Subject: Re: [PATCH] common/rc: add _filter_scratch in _test_inode_flag
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20201201105025.GF27730@lst.de>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.72.13.128, 10.4.195.30]
+Thread-Topic: common/rc: add _filter_scratch in _test_inode_flag
+Thread-Index: Klu7A4s53TIBr2UFxit0c4zEoVM5AQ==
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.12
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Dec 01, 2020 at 11:50:25AM +0100, Christoph Hellwig wrote:
-> The READ_ONCE still looks suspect as it generally needs to be paired
-> with a WRITE_ONCE.  The rest looks sane to me.
+Hi,
 
-Yeah, the comment from the other location is,
+----- Original Message -----
+> From: "Eryu Guan" <guan@eryu.me>
+> To: "XiaoLi Feng" <xifeng@redhat.com>
+> Cc: fstests@vger.kernel.org
+> Sent: Sunday, November 29, 2020 4:12:34 PM
+> Subject: Re: [PATCH] common/rc: add _filter_scratch in _test_inode_flag
+> 
+> On Mon, Nov 23, 2020 at 02:25:26PM +0800, Xiaoli Feng wrote:
+> > From: Xiaoli Feng <xifeng@redhat.com>
+> > 
+> > Avoid the invalid failure when the path of file include test flag.
+> > 
+> > Signed-off-by: Xiaoli Feng <xifeng@redhat.com>
+> 
+> Would you please elaborate this issue in more details? It seems your
+> SCRATCH_MNT contains a string that matches $flag so _test_inode_flag
+> returns a false positive. But that only fixes SCRATCH_MNT, what if
+> TEST_DIR contains the string as well?
 
-/* Pairs with smp_load_acquire() in mnt_user_ns(). */
+When test generic/608 for dax on xfs, "_check_xflag $t_file 0" is always 
+failed if the $f_file has dax string. Yes, here should also include filter
+for TEST_DIR.
 
-So I think it's just a typo that needs to be fixed.
+> 
+> Thanks,
+> Eryu
+> 
+> > ---
+> >  common/rc | 2 +-
+> >  1 file changed, 1 insertion(+), 1 deletion(-)
+> > 
+> > diff --git a/common/rc b/common/rc
+> > index b5a504e0..04080331 100644
+> > --- a/common/rc
+> > +++ b/common/rc
+> > @@ -3069,7 +3069,7 @@ _test_inode_flag()
+> >  	local flag=$1
+> >  	local file=$2
+> >  
+> > -	if $XFS_IO_PROG -r -c 'lsattr -v' "$file" | grep -q "$flag" ; then
+> > +	if $XFS_IO_PROG -r -c 'lsattr -v' "$file" | _filter_scratch | grep -q
+> > "$flag" ; then
+> >  		return 0
+> >  	fi
+> >  	return 1
+> > --
+> > 2.18.1
+> 
+> 
 
-Tycho
