@@ -2,77 +2,93 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.2 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EB9CBC83017
-	for <linux-fstests@archiver.kernel.org>; Wed,  2 Dec 2020 10:02:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 40A44C64E7C
+	for <linux-fstests@archiver.kernel.org>; Wed,  2 Dec 2020 10:16:36 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 313BA20679
-	for <linux-fstests@archiver.kernel.org>; Wed,  2 Dec 2020 10:02:01 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DE64A221FA
+	for <linux-fstests@archiver.kernel.org>; Wed,  2 Dec 2020 10:16:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2388259AbgLBKCA (ORCPT
+        id S1729431AbgLBKQf (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 2 Dec 2020 05:02:00 -0500
-Received: from verein.lst.de ([213.95.11.211]:53409 "EHLO verein.lst.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2388089AbgLBKCA (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 2 Dec 2020 05:02:00 -0500
-Received: by verein.lst.de (Postfix, from userid 2407)
-        id C39C267373; Wed,  2 Dec 2020 11:01:14 +0100 (CET)
-Date:   Wed, 2 Dec 2020 11:01:14 +0100
-From:   Christoph Hellwig <hch@lst.de>
-To:     Christian Brauner <christian.brauner@ubuntu.com>
-Cc:     Christoph Hellwig <hch@lst.de>,
-        Alexander Viro <viro@zeniv.linux.org.uk>,
-        Christoph Hellwig <hch@infradead.org>,
-        linux-fsdevel@vger.kernel.org,
-        John Johansen <john.johansen@canonical.com>,
-        James Morris <jmorris@namei.org>,
-        Mimi Zohar <zohar@linux.ibm.com>,
-        Dmitry Kasatkin <dmitry.kasatkin@gmail.com>,
-        Stephen Smalley <stephen.smalley.work@gmail.com>,
-        Casey Schaufler <casey@schaufler-ca.com>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Andreas Dilger <adilger.kernel@dilger.ca>,
-        OGAWA Hirofumi <hirofumi@mail.parknet.co.jp>,
-        Geoffrey Thomas <geofft@ldpreload.com>,
-        Mrunal Patel <mpatel@redhat.com>,
-        Josh Triplett <josh@joshtriplett.org>,
-        Andy Lutomirski <luto@kernel.org>,
-        Theodore Tso <tytso@mit.edu>, Alban Crequy <alban@kinvolk.io>,
-        Tycho Andersen <tycho@tycho.ws>,
-        David Howells <dhowells@redhat.com>,
-        James Bottomley <James.Bottomley@hansenpartnership.com>,
-        Seth Forshee <seth.forshee@canonical.com>,
-        =?iso-8859-1?Q?St=E9phane?= Graber <stgraber@ubuntu.com>,
-        Aleksa Sarai <cyphar@cyphar.com>,
-        Lennart Poettering <lennart@poettering.net>,
-        "Eric W. Biederman" <ebiederm@xmission.com>, smbarber@chromium.org,
-        Phil Estes <estesp@gmail.com>, Serge Hallyn <serge@hallyn.com>,
-        Kees Cook <keescook@chromium.org>,
-        Todd Kjos <tkjos@google.com>, Paul Moore <paul@paul-moore.com>,
-        Jonathan Corbet <corbet@lwn.net>,
-        containers@lists.linux-foundation.org, fstests@vger.kernel.org,
-        linux-security-module@vger.kernel.org, linux-api@vger.kernel.org,
-        linux-ext4@vger.kernel.org, linux-integrity@vger.kernel.org,
-        selinux@vger.kernel.org
-Subject: Re: [PATCH v3 04/38] fs: add mount_setattr()
-Message-ID: <20201202100114.GA7360@lst.de>
-References: <20201128213527.2669807-1-christian.brauner@ubuntu.com> <20201128213527.2669807-5-christian.brauner@ubuntu.com> <20201201104907.GD27730@lst.de> <20201202094218.ym5zqnulwz6gj6eo@wittgenstein> <20201202094751.GA6129@lst.de> <20201202095547.GA6408@lst.de> <20201202095745.bhazopysyw5kbiee@wittgenstein>
+        Wed, 2 Dec 2020 05:16:35 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59988 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728730AbgLBKQf (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 2 Dec 2020 05:16:35 -0500
+Received: from mail-pl1-x642.google.com (mail-pl1-x642.google.com [IPv6:2607:f8b0:4864:20::642])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 08A30C0613D6
+        for <fstests@vger.kernel.org>; Wed,  2 Dec 2020 02:15:55 -0800 (PST)
+Received: by mail-pl1-x642.google.com with SMTP id x4so861071pln.8
+        for <fstests@vger.kernel.org>; Wed, 02 Dec 2020 02:15:55 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=cij6uNUMwWdEvMmnCRBAigcL3KFuqXr/lH4oDDprerA=;
+        b=CUt5wF93GFMbrCte7GCu91dLn31t8gxxUep1gW1e1tyeEQtZTRtr83AdotFeB6APCM
+         vE3X/MTJghMxxUrSEOiUvFqe0Ri4nN91cg7ikzrwGCEg5N94cc4tfDHsqZztsKm9Bbo3
+         /FH6V+FITkSeXTarEMXtM0a6XLsDrOeJicf6T4y/7QQgsaNNWFfDRglxAWoXDdDC2jZ5
+         xKBc+PGrGW7ilc4ipB5qkk+YjUMXpuUehJkFQqOjlh8XurEfn/oqEJmxT18WEz1+0lhv
+         OMAXLcQOdEb+MwChT+ddjNovBGMV/GkE+9CKGQQGAs9GmQyUK5eI1KHPygViIGAha9Ta
+         HT/Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=cij6uNUMwWdEvMmnCRBAigcL3KFuqXr/lH4oDDprerA=;
+        b=BYhpu5LLiwqD8FnkvUgWdRniQtBxJZ4b/ZKjPw5xgl7ZUV7rCbFnAiz5sn5IbICiDy
+         usgotEKu3lxJcMnbqNxp3I6P5UsSRpkK7W1ZyIRk10G8RPHo0VvopQfJe2ph2l3/HozD
+         8unJkkqTTDJ3mDWm/MmJ/FgERs6GUdKkJJPFJb1ePdGy+aWh0JTyL8lO/bNAGwdJ+Avr
+         nNmbOrfZSXOmkjUVNiZjOiA+4IF4kbqsfGEwCjbmrAPq/rIpmGLeVLoEKri0tEee+r4V
+         kv3TgSpz/LAWwoy/thW438UQB8UA7KWOXaFNtpmvksPpqMoUakGoTVnh5i4P85YcFx36
+         SBLg==
+X-Gm-Message-State: AOAM533uhNKduNZynsHJgRYqk5z9UgvliFktSJjDBBwbJE4l2SYdWhSr
+        A6s4ZhSD1mDO3SLH4Ey48/5FBRkTamk=
+X-Google-Smtp-Source: ABdhPJyvKQEFwMQkT8mr9yibXP/yzLHQgMuGbaPLd1gJtLGV0Zr10qG9p62nlyQFZG8WDFElgtXeLQ==
+X-Received: by 2002:a17:90b:8d3:: with SMTP id ds19mr1745100pjb.186.1606904154338;
+        Wed, 02 Dec 2020 02:15:54 -0800 (PST)
+Received: from xzhoux.usersys.redhat.com ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id c3sm1596223pgm.41.2020.12.02.02.15.52
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 02 Dec 2020 02:15:53 -0800 (PST)
+From:   Murphy Zhou <jencce.kernel@gmail.com>
+To:     fstests@vger.kernel.org
+Cc:     darrick.wong@oracle.com, Murphy Zhou <jencce.kernel@gmail.com>
+Subject: [PATCH] generic/506: require prjquota
+Date:   Wed,  2 Dec 2020 18:15:21 +0800
+Message-Id: <20201202101521.15405-1-jencce.kernel@gmail.com>
+X-Mailer: git-send-email 2.20.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20201202095745.bhazopysyw5kbiee@wittgenstein>
-User-Agent: Mutt/1.5.17 (2007-11-01)
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Dec 02, 2020 at 10:57:45AM +0100, Christian Brauner wrote:
-> Sounds good!
-> If we make this a preparatory patch do you want to be recorded in the
-> author field?
+To avoid false failure on overlayfs.
 
-No need to record me in any way.  This was just whiteboard coding.
+Signed-off-by: Murphy Zhou <jencce.kernel@gmail.com>
+---
+ tests/generic/506 | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/tests/generic/506 b/tests/generic/506
+index d5b28cad..edcda6db 100755
+--- a/tests/generic/506
++++ b/tests/generic/506
+@@ -42,6 +42,7 @@ rm -f $seqres.full
+ # real QA test starts here
+ _supported_fs generic
+ 
++_require_prjquota
+ _require_scratch
+ _require_scratch_shutdown
+ 
+-- 
+2.20.1
+
