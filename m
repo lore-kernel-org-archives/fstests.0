@@ -2,93 +2,88 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+X-Spam-Status: No, score=-12.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 40A44C64E7C
-	for <linux-fstests@archiver.kernel.org>; Wed,  2 Dec 2020 10:16:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 57BB7C64E8A
+	for <linux-fstests@archiver.kernel.org>; Wed,  2 Dec 2020 10:29:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DE64A221FA
-	for <linux-fstests@archiver.kernel.org>; Wed,  2 Dec 2020 10:16:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EDA642086A
+	for <linux-fstests@archiver.kernel.org>; Wed,  2 Dec 2020 10:29:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729431AbgLBKQf (ORCPT
+        id S2388593AbgLBK3G (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 2 Dec 2020 05:16:35 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59988 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728730AbgLBKQf (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 2 Dec 2020 05:16:35 -0500
-Received: from mail-pl1-x642.google.com (mail-pl1-x642.google.com [IPv6:2607:f8b0:4864:20::642])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 08A30C0613D6
-        for <fstests@vger.kernel.org>; Wed,  2 Dec 2020 02:15:55 -0800 (PST)
-Received: by mail-pl1-x642.google.com with SMTP id x4so861071pln.8
-        for <fstests@vger.kernel.org>; Wed, 02 Dec 2020 02:15:55 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=cij6uNUMwWdEvMmnCRBAigcL3KFuqXr/lH4oDDprerA=;
-        b=CUt5wF93GFMbrCte7GCu91dLn31t8gxxUep1gW1e1tyeEQtZTRtr83AdotFeB6APCM
-         vE3X/MTJghMxxUrSEOiUvFqe0Ri4nN91cg7ikzrwGCEg5N94cc4tfDHsqZztsKm9Bbo3
-         /FH6V+FITkSeXTarEMXtM0a6XLsDrOeJicf6T4y/7QQgsaNNWFfDRglxAWoXDdDC2jZ5
-         xKBc+PGrGW7ilc4ipB5qkk+YjUMXpuUehJkFQqOjlh8XurEfn/oqEJmxT18WEz1+0lhv
-         OMAXLcQOdEb+MwChT+ddjNovBGMV/GkE+9CKGQQGAs9GmQyUK5eI1KHPygViIGAha9Ta
-         HT/Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=cij6uNUMwWdEvMmnCRBAigcL3KFuqXr/lH4oDDprerA=;
-        b=BYhpu5LLiwqD8FnkvUgWdRniQtBxJZ4b/ZKjPw5xgl7ZUV7rCbFnAiz5sn5IbICiDy
-         usgotEKu3lxJcMnbqNxp3I6P5UsSRpkK7W1ZyIRk10G8RPHo0VvopQfJe2ph2l3/HozD
-         8unJkkqTTDJ3mDWm/MmJ/FgERs6GUdKkJJPFJb1ePdGy+aWh0JTyL8lO/bNAGwdJ+Avr
-         nNmbOrfZSXOmkjUVNiZjOiA+4IF4kbqsfGEwCjbmrAPq/rIpmGLeVLoEKri0tEee+r4V
-         kv3TgSpz/LAWwoy/thW438UQB8UA7KWOXaFNtpmvksPpqMoUakGoTVnh5i4P85YcFx36
-         SBLg==
-X-Gm-Message-State: AOAM533uhNKduNZynsHJgRYqk5z9UgvliFktSJjDBBwbJE4l2SYdWhSr
-        A6s4ZhSD1mDO3SLH4Ey48/5FBRkTamk=
-X-Google-Smtp-Source: ABdhPJyvKQEFwMQkT8mr9yibXP/yzLHQgMuGbaPLd1gJtLGV0Zr10qG9p62nlyQFZG8WDFElgtXeLQ==
-X-Received: by 2002:a17:90b:8d3:: with SMTP id ds19mr1745100pjb.186.1606904154338;
-        Wed, 02 Dec 2020 02:15:54 -0800 (PST)
-Received: from xzhoux.usersys.redhat.com ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id c3sm1596223pgm.41.2020.12.02.02.15.52
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 02 Dec 2020 02:15:53 -0800 (PST)
-From:   Murphy Zhou <jencce.kernel@gmail.com>
+        Wed, 2 Dec 2020 05:29:06 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:28623 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S2388076AbgLBK3G (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 2 Dec 2020 05:29:06 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1606904859;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc; bh=VnQpv7xx5Dd9yERok39y0nG8oM/egbE9/sgEABTPfbo=;
+        b=SKLcRrcASa3CrLn3ccUUDRPqT+XEYgJlbHpYoI3NVBe1t0AFIWJBCXZqhAtNqtHm4fcIl5
+        Uh9vLU1d6OPWpAPHYlMZiQL0Iucv7uLpCmI56fJeiUI68Gp4vwXeD28TXzdacFxastTvO3
+        DAFKLa/8SKNtwQWupFSL90OZ7bLSWf0=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-47-Pv2luWIVOrqIuz2bK5gVeg-1; Wed, 02 Dec 2020 05:27:38 -0500
+X-MC-Unique: Pv2luWIVOrqIuz2bK5gVeg-1
+Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 4AD148049C1
+        for <fstests@vger.kernel.org>; Wed,  2 Dec 2020 10:27:37 +0000 (UTC)
+Received: from localhost.localdomain.com (unknown [10.66.60.98])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 15A2160BFA;
+        Wed,  2 Dec 2020 10:27:32 +0000 (UTC)
+From:   XiaoLi Feng <xifeng@redhat.com>
 To:     fstests@vger.kernel.org
-Cc:     darrick.wong@oracle.com, Murphy Zhou <jencce.kernel@gmail.com>
-Subject: [PATCH] generic/506: require prjquota
-Date:   Wed,  2 Dec 2020 18:15:21 +0800
-Message-Id: <20201202101521.15405-1-jencce.kernel@gmail.com>
-X-Mailer: git-send-email 2.20.1
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Cc:     Xiaoli Feng <xifeng@redhat.com>
+Subject: [PATCH v1] generic/275: use free block counts to check if fs is filled sufficiently.
+Date:   Wed,  2 Dec 2020 18:27:31 +0800
+Message-Id: <20201202102731.22350-1-xifeng@redhat.com>
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.12
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-To avoid false failure on overlayfs.
+From: Xiaoli Feng <xifeng@redhat.com>
 
-Signed-off-by: Murphy Zhou <jencce.kernel@gmail.com>
+For large block size, such as 64k, there're maybe leave more than 768k
+space when disk is full. I met one. When I test 64k for dax. It leaves
+about 800k space when disk is full. So change to jude the free block
+for >4k fs.
 ---
- tests/generic/506 | 1 +
- 1 file changed, 1 insertion(+)
+ tests/generic/275 | 13 ++++++++++---
+ 1 file changed, 10 insertions(+), 3 deletions(-)
 
-diff --git a/tests/generic/506 b/tests/generic/506
-index d5b28cad..edcda6db 100755
---- a/tests/generic/506
-+++ b/tests/generic/506
-@@ -42,6 +42,7 @@ rm -f $seqres.full
- # real QA test starts here
- _supported_fs generic
- 
-+_require_prjquota
- _require_scratch
- _require_scratch_shutdown
- 
+diff --git a/tests/generic/275 b/tests/generic/275
+index 3a016037..2c5a807f 100755
+--- a/tests/generic/275
++++ b/tests/generic/275
+@@ -62,9 +62,16 @@ rm -f $SCRATCH_MNT/tmp1
+ sync
+ echo "Post rm space:" >> $seqres.full
+ $DF_PROG $SCRATCH_MNT >>$seqres.full 2>&1
+-_freespace=`$DF_PROG -k $SCRATCH_MNT | tail -n 1 | awk '{print $5}'`
+-[ $_freespace -gt 1024 ] && _fail "could not sufficiently fill filesystem"
+-
++bsize=$(_get_file_block_size $SCRATCH_MNT)
++bsize=$((bsize / 1024))
++_freespace=`$DF_PROG -k  $SCRATCH_MNT | tail -n 1 | awk '{print $5}'`
++# When block size is >4k, use the free counts of block to judge
++if [ "$bsize" -gt 4 ]; then
++	_freeblock=$((_freespace / bsize))
++	[ "$_freeblock" -gt 256 ] && _fail "could not sufficiently fill filesystem"
++else
++	[ "$_freespace" -gt 1024 ] && _fail "could not sufficiently fill filesystem"
++fi
+ # Try to write more than available space in chunks that will allow at least one
+ # full write to succeed.
+ dd if=/dev/zero of=$SCRATCH_MNT/tmp1 bs=128k count=8 >>$seqres.full 2>&1
 -- 
-2.20.1
+2.18.1
 
