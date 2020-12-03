@@ -2,31 +2,30 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.2 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
-	NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.2 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D08FFC0018C
-	for <linux-fstests@archiver.kernel.org>; Thu,  3 Dec 2020 17:56:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0A477C0018C
+	for <linux-fstests@archiver.kernel.org>; Thu,  3 Dec 2020 18:09:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 74155206F0
-	for <linux-fstests@archiver.kernel.org>; Thu,  3 Dec 2020 17:56:49 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CA03A207BD
+	for <linux-fstests@archiver.kernel.org>; Thu,  3 Dec 2020 18:09:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726090AbgLCR4c (ORCPT
+        id S1731012AbgLCSJY (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 3 Dec 2020 12:56:32 -0500
-Received: from sandeen.net ([63.231.237.45]:44968 "EHLO sandeen.net"
+        Thu, 3 Dec 2020 13:09:24 -0500
+Received: from verein.lst.de ([213.95.11.211]:59661 "EHLO verein.lst.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725987AbgLCR4c (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 3 Dec 2020 12:56:32 -0500
-Received: from liberator.sandeen.net (liberator.sandeen.net [10.0.0.146])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by sandeen.net (Postfix) with ESMTPSA id 306A17906;
-        Thu,  3 Dec 2020 11:55:32 -0600 (CST)
-To:     Christoph Hellwig <hch@lst.de>, ira.weiny@intel.com
-Cc:     fstests@vger.kernel.org, Eric Sandeen <sandeen@redhat.com>,
+        id S1730964AbgLCSJY (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 3 Dec 2020 13:09:24 -0500
+Received: by verein.lst.de (Postfix, from userid 2407)
+        id 302CF67357; Thu,  3 Dec 2020 19:08:39 +0100 (CET)
+Date:   Thu, 3 Dec 2020 19:08:39 +0100
+From:   Christoph Hellwig <hch@lst.de>
+To:     Eric Sandeen <sandeen@sandeen.net>
+Cc:     Christoph Hellwig <hch@lst.de>, ira.weiny@intel.com,
+        fstests@vger.kernel.org, Eric Sandeen <sandeen@redhat.com>,
         linux-kernel@vger.kernel.org,
         "Darrick J. Wong" <darrick.wong@oracle.com>,
         Dan Williams <dan.j.williams@intel.com>,
@@ -35,51 +34,21 @@ Cc:     fstests@vger.kernel.org, Eric Sandeen <sandeen@redhat.com>,
         Jeff Moyer <jmoyer@redhat.com>, linux-ext4@vger.kernel.org,
         linux-xfs@vger.kernel.org, linux-fsdevel@vger.kernel.org,
         David Howells <dhowells@redhat.com>
-References: <20201202214145.1563433-1-ira.weiny@intel.com>
- <20201203081556.GA15306@lst.de>
-From:   Eric Sandeen <sandeen@sandeen.net>
 Subject: Re: [PATCH] common/rc: Fix _check_s_dax()
-Message-ID: <b757842d-b020-49c9-498c-df5de89f10af@sandeen.net>
-Date:   Thu, 3 Dec 2020 11:55:50 -0600
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0)
- Gecko/20100101 Thunderbird/78.5.0
+Message-ID: <20201203180838.GA25196@lst.de>
+References: <20201202214145.1563433-1-ira.weiny@intel.com> <20201203081556.GA15306@lst.de> <b757842d-b020-49c9-498c-df5de89f10af@sandeen.net>
 MIME-Version: 1.0
-In-Reply-To: <20201203081556.GA15306@lst.de>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <b757842d-b020-49c9-498c-df5de89f10af@sandeen.net>
+User-Agent: Mutt/1.5.17 (2007-11-01)
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+On Thu, Dec 03, 2020 at 11:55:50AM -0600, Eric Sandeen wrote:
+> *nod* and my suggestion was to explicitly test for the old/wrong value and
+> offer the test-runner a hint about why it may have been set (missing the
+> fix commit), but we should still ultimately fail the test when it is seen.
 
-
-On 12/3/20 2:15 AM, Christoph Hellwig wrote:
-> On Wed, Dec 02, 2020 at 01:41:45PM -0800, ira.weiny@intel.com wrote:
->> From: Ira Weiny <ira.weiny@intel.com>
->>
->> There is a conflict with the user visible statx bits 'mount root' and
->> 'dax'.  The kernel is changing the dax bit to correct this conflict.[1]
->>
->> Adjust _check_s_dax() to use the new bit.  Because DAX tests do not run
->> on root mounts, STATX_ATTR_MOUNT_ROOT should always be 0, therefore we
->> can allow either bit to indicate DAX and cover any kernel which may be
->> running.
->>
->> [1] https://lore.kernel.org/lkml/3e28d2c7-fbe5-298a-13ba-dcd8fd504666@redhat.com/
->>
->> Signed-off-by: Ira Weiny <ira.weiny@intel.com>
->> ---
->>
->> I went ahead and used Christoph's suggestion regarding using both bits.
-> 
-> That wasn't my suggestion.  I think we should always error out when
-> the bit value shared with STATX_ATTR_MOUNT_ROOT is seen.  Because that
-> means the kernel is not using or fixed ABI we agreed to use going
-> forward.
-
-*nod* and my suggestion was to explicitly test for the old/wrong value and
-offer the test-runner a hint about why it may have been set (missing the
-fix commit), but we should still ultimately fail the test when it is seen.
-
--Eric
+Yes, that's what I'd prefer.
