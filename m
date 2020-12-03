@@ -2,43 +2,32 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.2 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 21362C71155
-	for <linux-fstests@archiver.kernel.org>; Wed,  2 Dec 2020 21:47:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AE616C83012
+	for <linux-fstests@archiver.kernel.org>; Thu,  3 Dec 2020 08:17:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C0E1722203
-	for <linux-fstests@archiver.kernel.org>; Wed,  2 Dec 2020 21:47:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5CF1D20BED
+	for <linux-fstests@archiver.kernel.org>; Thu,  3 Dec 2020 08:17:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728166AbgLBVrN (ORCPT
+        id S2388212AbgLCIQk (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 2 Dec 2020 16:47:13 -0500
-Received: from mga12.intel.com ([192.55.52.136]:35055 "EHLO mga12.intel.com"
+        Thu, 3 Dec 2020 03:16:40 -0500
+Received: from verein.lst.de ([213.95.11.211]:57534 "EHLO verein.lst.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726646AbgLBVrM (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 2 Dec 2020 16:47:12 -0500
-IronPort-SDR: d5tK3cdokoC6yc2tGvy2mpAu6eMaUmzsPGvCwwxn+BY+eInw+2mikHo9PWv8IxtsIYRZm0j/Zh
- jytjM1UMS7HQ==
-X-IronPort-AV: E=McAfee;i="6000,8403,9823"; a="152346583"
-X-IronPort-AV: E=Sophos;i="5.78,387,1599548400"; 
-   d="scan'208";a="152346583"
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from orsmga004.jf.intel.com ([10.7.209.38])
-  by fmsmga106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Dec 2020 13:46:32 -0800
-IronPort-SDR: 63r2hOH28lGBrb5+aNs8JtEfc3rF5jVDNVCmUbmcxKHQ/Cjrr2iCKMsMUYShTiJvbihV7WLpvX
- lZxC9VHeIrSw==
-X-IronPort-AV: E=Sophos;i="5.78,387,1599548400"; 
-   d="scan'208";a="481714327"
-Received: from iweiny-desk2.sc.intel.com (HELO localhost) ([10.3.52.147])
-  by orsmga004-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Dec 2020 13:46:31 -0800
-From:   ira.weiny@intel.com
-To:     fstests@vger.kernel.org, Christoph Hellwig <hch@lst.de>,
-        Eric Sandeen <sandeen@redhat.com>
-Cc:     Ira Weiny <ira.weiny@intel.com>, linux-kernel@vger.kernel.org,
+        id S1728193AbgLCIQk (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 3 Dec 2020 03:16:40 -0500
+Received: by verein.lst.de (Postfix, from userid 2407)
+        id 018BA67373; Thu,  3 Dec 2020 09:15:56 +0100 (CET)
+Date:   Thu, 3 Dec 2020 09:15:56 +0100
+From:   Christoph Hellwig <hch@lst.de>
+To:     ira.weiny@intel.com
+Cc:     fstests@vger.kernel.org, Christoph Hellwig <hch@lst.de>,
+        Eric Sandeen <sandeen@redhat.com>,
+        linux-kernel@vger.kernel.org,
         "Darrick J. Wong" <darrick.wong@oracle.com>,
         Dan Williams <dan.j.williams@intel.com>,
         Dave Chinner <david@fromorbit.com>,
@@ -46,70 +35,37 @@ Cc:     Ira Weiny <ira.weiny@intel.com>, linux-kernel@vger.kernel.org,
         Jeff Moyer <jmoyer@redhat.com>, linux-ext4@vger.kernel.org,
         linux-xfs@vger.kernel.org, linux-fsdevel@vger.kernel.org,
         David Howells <dhowells@redhat.com>
-Subject: [PATCH V2] common/rc: Fix _check_s_dax()
-Date:   Wed,  2 Dec 2020 13:46:29 -0800
-Message-Id: <20201202214629.1563760-1-ira.weiny@intel.com>
-X-Mailer: git-send-email 2.28.0.rc0.12.gb6a658bd00c9
-In-Reply-To: <20201202214145.1563433-1-ira.weiny@intel.com>
+Subject: Re: [PATCH] common/rc: Fix _check_s_dax()
+Message-ID: <20201203081556.GA15306@lst.de>
 References: <20201202214145.1563433-1-ira.weiny@intel.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20201202214145.1563433-1-ira.weiny@intel.com>
+User-Agent: Mutt/1.5.17 (2007-11-01)
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Ira Weiny <ira.weiny@intel.com>
+On Wed, Dec 02, 2020 at 01:41:45PM -0800, ira.weiny@intel.com wrote:
+> From: Ira Weiny <ira.weiny@intel.com>
+> 
+> There is a conflict with the user visible statx bits 'mount root' and
+> 'dax'.  The kernel is changing the dax bit to correct this conflict.[1]
+> 
+> Adjust _check_s_dax() to use the new bit.  Because DAX tests do not run
+> on root mounts, STATX_ATTR_MOUNT_ROOT should always be 0, therefore we
+> can allow either bit to indicate DAX and cover any kernel which may be
+> running.
+> 
+> [1] https://lore.kernel.org/lkml/3e28d2c7-fbe5-298a-13ba-dcd8fd504666@redhat.com/
+> 
+> Signed-off-by: Ira Weiny <ira.weiny@intel.com>
+> ---
+> 
+> I went ahead and used Christoph's suggestion regarding using both bits.
 
-There is a conflict with the user visible statx bits 'mount root' and
-'dax'.  The kernel is changing the dax bit to correct this conflict.[1]
-
-Adjust _check_s_dax() to use the new bit.  Because DAX tests do not run
-on root mounts, STATX_ATTR_MOUNT_ROOT should always be 0, therefore we
-can allow either bit to indicate DAX and cover any kernel which may be
-running.
-
-[1] https://lore.kernel.org/lkml/3e28d2c7-fbe5-298a-13ba-dcd8fd504666@redhat.com/
-
-Signed-off-by: Ira Weiny <ira.weiny@intel.com>
----
-
-Changes for V2:
-	Fix bad indentation whitespace.
-
- common/rc | 19 ++++++++++++++++---
- 1 file changed, 16 insertions(+), 3 deletions(-)
-
-diff --git a/common/rc b/common/rc
-index b5a504e0dcb4..9418f7bc8dab 100644
---- a/common/rc
-+++ b/common/rc
-@@ -3221,10 +3221,23 @@ _check_s_dax()
- 	local exp_s_dax=$2
- 
- 	local attributes=$($XFS_IO_PROG -c 'statx -r' $target | awk '/stat.attributes / { print $3 }')
--	if [ $exp_s_dax -eq 0 ]; then
--		(( attributes & 0x2000 )) && echo "$target has unexpected S_DAX flag"
-+
-+	# The attribute bit value, STATX_ATTR_DAX (0x2000), conflicted with
-+	# STATX_ATTR_MOUNT_ROOT.  Therefore, STATX_ATTR_DAX was changed to
-+	# 0x00200000.
-+	#
-+	# Because DAX tests do not run on root mounts, STATX_ATTR_MOUNT_ROOT
-+	# should always be 0, therefore we can allow either bit to indicate DAX
-+	# and cover any kernel which may be running.
-+
-+	if [ $(( attributes & 0x00200000 )) -ne 0 ] || [ $(( attributes & 0x2000 )) -ne 0 ]; then
-+		if [ $exp_s_dax -eq 0 ]; then
-+			echo "$target has unexpected S_DAX flag"
-+		fi
- 	else
--		(( attributes & 0x2000 )) || echo "$target doesn't have expected S_DAX flag"
-+		if [ $exp_s_dax -ne 0 ]; then
-+			echo "$target doesn't have expected S_DAX flag"
-+		fi
- 	fi
- }
- 
--- 
-2.28.0.rc0.12.gb6a658bd00c9
-
+That wasn't my suggestion.  I think we should always error out when
+the bit value shared with STATX_ATTR_MOUNT_ROOT is seen.  Because that
+means the kernel is not using or fixed ABI we agreed to use going
+forward.
