@@ -2,70 +2,93 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.2 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-18.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AE616C83012
-	for <linux-fstests@archiver.kernel.org>; Thu,  3 Dec 2020 08:17:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2E0AEC64E8A
+	for <linux-fstests@archiver.kernel.org>; Thu,  3 Dec 2020 12:12:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5CF1D20BED
-	for <linux-fstests@archiver.kernel.org>; Thu,  3 Dec 2020 08:17:07 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CFFEB22203
+	for <linux-fstests@archiver.kernel.org>; Thu,  3 Dec 2020 12:12:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2388212AbgLCIQk (ORCPT
+        id S2387995AbgLCMM2 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 3 Dec 2020 03:16:40 -0500
-Received: from verein.lst.de ([213.95.11.211]:57534 "EHLO verein.lst.de"
+        Thu, 3 Dec 2020 07:12:28 -0500
+Received: from mx2.suse.de ([195.135.220.15]:38302 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728193AbgLCIQk (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 3 Dec 2020 03:16:40 -0500
-Received: by verein.lst.de (Postfix, from userid 2407)
-        id 018BA67373; Thu,  3 Dec 2020 09:15:56 +0100 (CET)
-Date:   Thu, 3 Dec 2020 09:15:56 +0100
-From:   Christoph Hellwig <hch@lst.de>
-To:     ira.weiny@intel.com
-Cc:     fstests@vger.kernel.org, Christoph Hellwig <hch@lst.de>,
-        Eric Sandeen <sandeen@redhat.com>,
-        linux-kernel@vger.kernel.org,
-        "Darrick J. Wong" <darrick.wong@oracle.com>,
-        Dan Williams <dan.j.williams@intel.com>,
-        Dave Chinner <david@fromorbit.com>,
-        "Theodore Y. Ts'o" <tytso@mit.edu>, Jan Kara <jack@suse.cz>,
-        Jeff Moyer <jmoyer@redhat.com>, linux-ext4@vger.kernel.org,
-        linux-xfs@vger.kernel.org, linux-fsdevel@vger.kernel.org,
-        David Howells <dhowells@redhat.com>
-Subject: Re: [PATCH] common/rc: Fix _check_s_dax()
-Message-ID: <20201203081556.GA15306@lst.de>
-References: <20201202214145.1563433-1-ira.weiny@intel.com>
+        id S2387902AbgLCMM1 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 3 Dec 2020 07:12:27 -0500
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+        t=1606997500; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+        bh=KijhJFnaJxlywHD7iGARW5yW57oVj1YmtlgcIagDiGE=;
+        b=LjbVSH7IxPJdIGCrfQsDhz6wgts5qJdF/qmRSJO+QR+zF9kCI6NJqahqqI6UM9zdF8q17k
+        FmKCSsMR/iSmuo9ScSfU3I/JY6smFWAljDX1ZGwgYr98CsTAaJx030cldmgiIn1zS7ddOj
+        OJnHhdKSw/9eD1V4GYy0coZAs1PIt2g=
+Received: from relay2.suse.de (unknown [195.135.221.27])
+        by mx2.suse.de (Postfix) with ESMTP id A4A66AC6A;
+        Thu,  3 Dec 2020 12:11:40 +0000 (UTC)
+From:   Nikolay Borisov <nborisov@suse.com>
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, Nikolay Borisov <nborisov@suse.com>
+Subject: [PATCH] btrfs: Update btrfs/215
+Date:   Thu,  3 Dec 2020 14:11:39 +0200
+Message-Id: <20201203121139.754305-1-nborisov@suse.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20201202214145.1563433-1-ira.weiny@intel.com>
-User-Agent: Mutt/1.5.17 (2007-11-01)
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Dec 02, 2020 at 01:41:45PM -0800, ira.weiny@intel.com wrote:
-> From: Ira Weiny <ira.weiny@intel.com>
-> 
-> There is a conflict with the user visible statx bits 'mount root' and
-> 'dax'.  The kernel is changing the dax bit to correct this conflict.[1]
-> 
-> Adjust _check_s_dax() to use the new bit.  Because DAX tests do not run
-> on root mounts, STATX_ATTR_MOUNT_ROOT should always be 0, therefore we
-> can allow either bit to indicate DAX and cover any kernel which may be
-> running.
-> 
-> [1] https://lore.kernel.org/lkml/3e28d2c7-fbe5-298a-13ba-dcd8fd504666@redhat.com/
-> 
-> Signed-off-by: Ira Weiny <ira.weiny@intel.com>
-> ---
-> 
-> I went ahead and used Christoph's suggestion regarding using both bits.
+This patch updates btrfs/215 to work with latest upstream kernel. That's
+required since commit 324bcf54c449 ("mm: use limited read-ahead to satisfy read")
+changed readahead logic to always issue a read even if the RA pages are
+set to 0. This results in 1 extra io being issued so the counts in the
+test should be incremented by 1. Also use the opportunity to update the
+commit reference since it's been merged in the upstream kernel.
 
-That wasn't my suggestion.  I think we should always error out when
-the bit value shared with STATX_ATTR_MOUNT_ROOT is seen.  Because that
-means the kernel is not using or fixed ABI we agreed to use going
-forward.
+Signed-off-by: Nikolay Borisov <nborisov@suse.com>
+---
+ tests/btrfs/215 | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/tests/btrfs/215 b/tests/btrfs/215
+index 4acc288a9f60..2647fa41ef86 100755
+--- a/tests/btrfs/215
++++ b/tests/btrfs/215
+@@ -6,7 +6,7 @@
+ #
+ # Test that reading corrupted files would correctly increment device status
+ # counters. This is fixed by the following linux kernel commit:
+-# btrfs: Increment device corruption error in case of checksum error
++# 814723e0a55a ("btrfs: increment device corruption error in case of checksum error")
+ #
+ seq=`basename $0`
+ seqres=$RESULT_DIR/$seq
+@@ -74,15 +74,15 @@ echo 0 > /sys/fs/btrfs/$uuid/bdi/read_ahead_kb
+ # page by page
+ $XFS_IO_PROG -c "pread -b $filesize 0 $filesize" "$SCRATCH_MNT/foobar" > /dev/null 2>&1
+ errs=$($BTRFS_UTIL_PROG device stats $SCRATCH_DEV | awk '/corruption_errs/ { print $2 }')
+-if [ $errs -ne 1 ]; then
+-	_fail "Errors: $errs expected: 1"
++if [ $errs -ne 2 ]; then
++	_fail "Errors: $errs expected: 2"
+ fi
+ 
+ # DIO does check every sector
+ $XFS_IO_PROG -d -c "pread -b $filesize 0 $filesize" "$SCRATCH_MNT/foobar" > /dev/null 2>&1
+ errs=$($BTRFS_UTIL_PROG device stats $SCRATCH_DEV | awk '/corruption_errs/ { print $2 }')
+-if [ $errs -ne 5 ]; then
+-	_fail "Errors: $errs expected: 1"
++if [ $errs -ne 6 ]; then
++	_fail "Errors: $errs expected: 6"
+ fi
+ 
+ # success, all done
+-- 
+2.17.1
+
