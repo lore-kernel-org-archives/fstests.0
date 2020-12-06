@@ -4,96 +4,210 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-13.7 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham
-	autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A1BF9C19425
-	for <linux-fstests@archiver.kernel.org>; Sun,  6 Dec 2020 13:31:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0D508C4361B
+	for <linux-fstests@archiver.kernel.org>; Sun,  6 Dec 2020 13:51:46 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6971F2312E
-	for <linux-fstests@archiver.kernel.org>; Sun,  6 Dec 2020 13:31:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C216223121
+	for <linux-fstests@archiver.kernel.org>; Sun,  6 Dec 2020 13:51:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727696AbgLFNbS (ORCPT
+        id S1727423AbgLFNva (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 6 Dec 2020 08:31:18 -0500
-Received: from out20-25.mail.aliyun.com ([115.124.20.25]:36864 "EHLO
-        out20-25.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728398AbgLFNbR (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 6 Dec 2020 08:31:17 -0500
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.09829937|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.0668307-0.0145915-0.918578;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047188;MF=guan@eryu.me;NM=1;PH=DS;RN=3;RT=3;SR=0;TI=SMTPD_---.J3e4GpS_1607261431;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.J3e4GpS_1607261431)
-          by smtp.aliyun-inc.com(10.147.41.137);
-          Sun, 06 Dec 2020 21:30:32 +0800
-Date:   Sun, 6 Dec 2020 21:30:31 +0800
+        Sun, 6 Dec 2020 08:51:30 -0500
+Received: from out20-85.mail.aliyun.com ([115.124.20.85]:52525 "EHLO
+        out20-85.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725767AbgLFNva (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 6 Dec 2020 08:51:30 -0500
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07437902|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.0369986-0.00195795-0.961043;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047205;MF=guan@eryu.me;NM=1;PH=DS;RN=4;RT=4;SR=0;TI=SMTPD_---.J3e3CJk_1607262643;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.J3e3CJk_1607262643)
+          by smtp.aliyun-inc.com(10.147.42.16);
+          Sun, 06 Dec 2020 21:50:43 +0800
+Date:   Sun, 6 Dec 2020 21:50:43 +0800
 From:   Eryu Guan <guan@eryu.me>
-To:     Nikolay Borisov <nborisov@suse.com>
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH] btrfs: Update btrfs/215
-Message-ID: <20201206133031.GU3853@desktop>
-References: <20201203121139.754305-1-nborisov@suse.com>
+To:     Ritesh Harjani <riteshh@linux.ibm.com>
+Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
+        anju@linux.vnet.ibm.com
+Subject: Re: [PATCH 2/2] generic: Add test to check for mounting a huge
+ sparse dm device
+Message-ID: <20201206135043.GV3853@desktop>
+References: <cover.1607078368.git.riteshh@linux.ibm.com>
+ <cc6f28972d73a50fb84a3797172ff44d396a6bef.1607078368.git.riteshh@linux.ibm.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20201203121139.754305-1-nborisov@suse.com>
+In-Reply-To: <cc6f28972d73a50fb84a3797172ff44d396a6bef.1607078368.git.riteshh@linux.ibm.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Dec 03, 2020 at 02:11:39PM +0200, Nikolay Borisov wrote:
-> This patch updates btrfs/215 to work with latest upstream kernel. That's
-> required since commit 324bcf54c449 ("mm: use limited read-ahead to satisfy read")
-> changed readahead logic to always issue a read even if the RA pages are
-> set to 0. This results in 1 extra io being issued so the counts in the
-> test should be incremented by 1. Also use the opportunity to update the
-> commit reference since it's been merged in the upstream kernel.
+On Fri, Dec 04, 2020 at 04:13:54PM +0530, Ritesh Harjani wrote:
+> Add this test to check for regression which was reported when ext4 bmap
+> aops was moved to use iomap APIs. jbd2 calls bmap() kernel function
+> from fs/inode.c which was failing since iomap_bmap() implementation earlier
+> returned 0 for block addr > INT_MAX.
+> This regression was fixed with following kernel commit [1]
+> commit b75dfde1212991b24b220c3995101c60a7b8ae74
+> ("fibmap: Warn and return an error in case of block > INT_MAX")
+> [1]: https://patchwork.ozlabs.org/patch/1279914
 > 
-> Signed-off-by: Nikolay Borisov <nborisov@suse.com>
+> w/o the kernel fix we get below errors and mount fails
+> 
+> [ 1461.988701] run fstests generic/613 at 2020-10-27 19:57:34
+> [ 1530.406645] ------------[ cut here ]------------
+> [ 1530.407332] would truncate bmap result
+> [ 1530.408956] WARNING: CPU: 0 PID: 6401 at fs/iomap/fiemap.c:116
+> iomap_bmap_actor+0x43/0x50
+> [ 1530.410607] Modules linked in:
+> [ 1530.411024] CPU: 0 PID: 6401 Comm: mount Tainted: G        W
+> <...>
+>  1530.511978] jbd2_journal_init_inode: Cannot locate journal superblock
+>  [ 1530.513310] EXT4-fs (dm-1): Could not load journal inode
+> 
+> Signed-off-by: Ritesh Harjani <riteshh@linux.ibm.com>
 > ---
->  tests/btrfs/215 | 10 +++++-----
->  1 file changed, 5 insertions(+), 5 deletions(-)
+>  common/rc             | 10 +++++++
+>  tests/generic/618     | 70 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/618.out |  3 ++
+>  tests/generic/group   |  1 +
+>  4 files changed, 84 insertions(+)
+>  create mode 100755 tests/generic/618
+>  create mode 100644 tests/generic/618.out
 > 
-> diff --git a/tests/btrfs/215 b/tests/btrfs/215
-> index 4acc288a9f60..2647fa41ef86 100755
-> --- a/tests/btrfs/215
-> +++ b/tests/btrfs/215
-> @@ -6,7 +6,7 @@
+> diff --git a/common/rc b/common/rc
+> index b5a504e0dcb4..128d75226958 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -1608,6 +1608,16 @@ _require_scratch_size()
+>  	[ $devsize -lt $1 ] && _notrun "scratch dev too small"
+>  }
+>  
+> +# require a scratch dev of a minimum size (in kb) and should not be checked
+> +# post test
+> +_require_scratch_size_nocheck()
+> +{
+> +	[ $# -eq 1 ] || _fail "_require_scratch_size: expected size param"
+> +
+> +	_require_scratch_nocheck
+> +	local devsize=`_get_device_size $SCRATCH_DEV`
+> +	[ $devsize -lt $1 ] && _notrun "scratch dev too small"
+> +}
+>  
+>  # this test needs a test partition - check we're ok & mount it
 >  #
->  # Test that reading corrupted files would correctly increment device status
->  # counters. This is fixed by the following linux kernel commit:
-> -# btrfs: Increment device corruption error in case of checksum error
-> +# 814723e0a55a ("btrfs: increment device corruption error in case of checksum error")
->  #
->  seq=`basename $0`
->  seqres=$RESULT_DIR/$seq
-> @@ -74,15 +74,15 @@ echo 0 > /sys/fs/btrfs/$uuid/bdi/read_ahead_kb
->  # page by page
+> diff --git a/tests/generic/618 b/tests/generic/618
+> new file mode 100755
+> index 000000000000..45c14da80c06
+> --- /dev/null
+> +++ b/tests/generic/618
+> @@ -0,0 +1,70 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2020 Christian Kujau. All Rights Reserved.
+> +# Copyright (c) 2020 Ritesh Harjani. All Rights Reserved.
+> +#
+> +# FS QA Test generic/618
+> +#
+> +# Since the test is not specific to ext4, hence adding it to generic.
+> +# Add this test to check for regression which was reported when ext4 bmap
+> +# aops was moved to use iomap APIs. jbd2 calls bmap() kernel function
+> +# from fs/inode.c which was failing since iomap_bmap() implementation earlier
+> +# returned 0 for block addr > INT_MAX.
+> +# This regression was fixed with following kernel commit [1]
+> +# commit b75dfde1212991b24b220c3995101c60a7b8ae74
+> +# ("fibmap: Warn and return an error in case of block > INT_MAX")
+> +# [1]: https://patchwork.ozlabs.org/patch/1279914
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	_dmhugedisk_cleanup
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +. ./common/dmhugedisk
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# Modify as appropriate.
+> +_supported_fs generic
+> +_require_dmhugedisk
+> +_require_scratch_size_nocheck $((4 * 1024 * 1024)) #kB
+> +
+> +# For 1k bs with ext4, mkfs was failing due to size limitation and also it
+> +# becomes too slow when doing an mkfs on a huge sparse ext4 FS with 1k bs.
+> +# Hence on ext4 run only for 4K bs.
+> +if [ "$FSTYP" == "ext4" ]; then
+> +	_scratch_mkfs > /dev/null 2>&1
+> +	blksz=$(sudo debugfs -R stats $SCRATCH_DEV 2> /dev/null |grep "Block size" |cut -d ':' -f 2)
+> +	test $blksz -lt 4096 && _notrun "This test requires ext4 with minimum 4k bs"
+> +fi
 
-The comments above this line should be updated as well.
+As this is a generic test, the same check should be done with ext2 and
+ext3. And actually this test requires > 16T fs support. So I'd suggest
+add a new helper, maybe called _require_16T_support, to check if $FSTYP
+supports filesystem size > 16T. And for now, we could only check for
+extN.
 
-# buffered reads whould result in a single error since the read is done
+Also, there's no need to run command with sudo in fstests, as all tests
+are required to be run by root.
 
-And I think it's better to describe the 1 extra io in comments as well.
+And there's a helper to get fs block size called _get_block_size, no
+need to parse output of debugfs.
 
 Thanks,
 Eryu
 
->  $XFS_IO_PROG -c "pread -b $filesize 0 $filesize" "$SCRATCH_MNT/foobar" > /dev/null 2>&1
->  errs=$($BTRFS_UTIL_PROG device stats $SCRATCH_DEV | awk '/corruption_errs/ { print $2 }')
-> -if [ $errs -ne 1 ]; then
-> -	_fail "Errors: $errs expected: 1"
-> +if [ $errs -ne 2 ]; then
-> +	_fail "Errors: $errs expected: 2"
->  fi
->  
->  # DIO does check every sector
->  $XFS_IO_PROG -d -c "pread -b $filesize 0 $filesize" "$SCRATCH_MNT/foobar" > /dev/null 2>&1
->  errs=$($BTRFS_UTIL_PROG device stats $SCRATCH_DEV | awk '/corruption_errs/ { print $2 }')
-> -if [ $errs -ne 5 ]; then
-> -	_fail "Errors: $errs expected: 1"
-> +if [ $errs -ne 6 ]; then
-> +	_fail "Errors: $errs expected: 6"
->  fi
->  
->  # success, all done
+P.S. I've applied patch 1 in the patchset, no need to resend in v2,
+thanks!
+
+> +
+> +# 17TB dm huge-test-zer0 device
+> +# (in terms of 512 sectors)
+> +sectors=$((2*1024*1024*1024*17))
+> +chunk_size=128
+> +
+> +_dmhugedisk_init $sectors $chunk_size
+> +_mkfs_dev $DMHUGEDISK_DEV
+> +_mount $DMHUGEDISK_DEV $SCRATCH_MNT || _fail "mount failed for $DMHUGEDISK_DEV $SCRATCH_MNT"
+> +testfile=$SCRATCH_MNT/testfile-$seq
+> +
+> +$XFS_IO_PROG -fc "pwrite -S 0xaa 0 1m" -c "fsync" $testfile | _filter_xfs_io
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/generic/618.out b/tests/generic/618.out
+> new file mode 100644
+> index 000000000000..b920fe4d907a
+> --- /dev/null
+> +++ b/tests/generic/618.out
+> @@ -0,0 +1,3 @@
+> +QA output created by 618
+> +wrote 1048576/1048576 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> diff --git a/tests/generic/group b/tests/generic/group
+> index 94e860b8c380..39e3ffb224a9 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -620,3 +620,4 @@
+>  615 auto rw
+>  616 auto rw io_uring stress
+>  617 auto rw io_uring stress
+> +618 auto mount quick
 > -- 
-> 2.17.1
+> 2.26.2
