@@ -2,114 +2,170 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-18.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 036F6C4167B
-	for <linux-fstests@archiver.kernel.org>; Mon,  7 Dec 2020 11:42:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8C995C4361B
+	for <linux-fstests@archiver.kernel.org>; Mon,  7 Dec 2020 15:37:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C1BB92335A
-	for <linux-fstests@archiver.kernel.org>; Mon,  7 Dec 2020 11:41:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4B64623730
+	for <linux-fstests@archiver.kernel.org>; Mon,  7 Dec 2020 15:37:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727032AbgLGLlw (ORCPT
+        id S1725781AbgLGPhX (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 7 Dec 2020 06:41:52 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42102 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727017AbgLGLlw (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 7 Dec 2020 06:41:52 -0500
-Received: from mail-pg1-x542.google.com (mail-pg1-x542.google.com [IPv6:2607:f8b0:4864:20::542])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 13F2FC0613D4;
-        Mon,  7 Dec 2020 03:41:12 -0800 (PST)
-Received: by mail-pg1-x542.google.com with SMTP id g18so8684509pgk.1;
-        Mon, 07 Dec 2020 03:41:12 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id;
-        bh=6zSVjtY1d9QALf7Z3xafnrnUyNcyTc7ZED1RIPazjEI=;
-        b=KxwUY1pPb0NY86JdyT6q5w1gHjaBb1YoY11kxscYF/JFZnmMFJ/3yFbu1Ajoc1ZTH1
-         nkypYvmgxYnCinz1YiEgu3RtEa1yc+JOrrtccu0M9D/WK+USkFjlSAApYoeFMLSdNV6F
-         pMoTl2T9Z4GF2exfrpvcOaD/rTLj1LukbXuZqNgWQlhrhzLfgQuiC5reYQj7Fu0J6VQu
-         Mu55MxZKrBUJD0mjVOMFr0EoeoQY/Hxu4PDiKRuDmxe8xsBfNDsy1X4qlSSMuR1sjvAg
-         mQF8YkfRHWS04JWCLRpcEskGTxp6oE9/Us+584eNRC+c2sVxSfhYbmjUiR99eIvlGuK5
-         YOVw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id;
-        bh=6zSVjtY1d9QALf7Z3xafnrnUyNcyTc7ZED1RIPazjEI=;
-        b=WHVzwU9lZhuT2pTvO6VaiEhwqSz3QxtNFK5gSsfbifUDwW6xVxjoHZKbAf0pap0Vji
-         kZpdsoxYOTnXbCLOm6YzeqPT1AjInBgOKmo0lLQ96oldiftiPBGseoL6FaBDfDQH7az6
-         oKxN0a0GfwWKrAyy0g/vp5Byza5/R1uG0B3wctGOrxLv/3AtshvleG82iiJZSjSKtR9Z
-         +Ipv0lOKb66DORmVu5tFpUcnYbAh+Ggt3KiPLYORK/Wwvuz1vciF/uzuXfkxjJMkZssm
-         TChpIX7/0aUHm0z755wsvE41/NxhWVpBra9N1GWkkiVxvVVabjerc16w3Fh2lU2Miois
-         oHhg==
-X-Gm-Message-State: AOAM5300EZVv1hw6dughSpCD4lf6f8xuFSqmpyzqEEGfXfR2AvmunNdT
-        7M2iVtuZyAhPDcuTXJ+YY1euvHV3Wg==
-X-Google-Smtp-Source: ABdhPJxR74EyYf3Tj+iR51lak5YJkseWhVEZDrHiUSA9VbSCSYrX/ojLzV/cYaEfdvE0ba3aXcXyMQ==
-X-Received: by 2002:a65:5949:: with SMTP id g9mr18267968pgu.52.1607341271339;
-        Mon, 07 Dec 2020 03:41:11 -0800 (PST)
-Received: from he-cluster.localdomain (67.216.221.250.16clouds.com. [67.216.221.250])
-        by smtp.gmail.com with ESMTPSA id q35sm10503888pjh.38.2020.12.07.03.41.10
-        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 07 Dec 2020 03:41:10 -0800 (PST)
-From:   xiakaixu1987@gmail.com
-X-Google-Original-From: kaixuxia@tencent.com
-To:     fstests@vger.kernel.org
-Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
-        darrick.wong@oracle.com, Kaixu Xia <kaixuxia@tencent.com>
-Subject: [PATCH] xfs/513: fix the regression caused by mount option uqnoenforce
-Date:   Mon,  7 Dec 2020 19:41:05 +0800
-Message-Id: <1607341265-24200-1-git-send-email-kaixuxia@tencent.com>
-X-Mailer: git-send-email 1.8.3.1
+        Mon, 7 Dec 2020 10:37:23 -0500
+Received: from mx2.suse.de ([195.135.220.15]:50114 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725774AbgLGPhW (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 7 Dec 2020 10:37:22 -0500
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+        t=1607355395; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=3TsXrGYYYhEvhh2kUg2A1mTIRQEUXnyeOczxjA7Bdog=;
+        b=SMIHhMsgnMhS+OA3aO+YSvoEt8wgpZedxy2XD8Goa5D99x2YeB+JbVQTMAoEMt130Jni7N
+        xVUXjmSK3z3W+eEOE17UPk/kVGAYi8qz5E/ZFSrAjUt2RFKw1mSdnmdO5QNKELkOF/l8VB
+        DYPS2iydAVZTFe1GcEV2qFqEZJHiKLc=
+Received: from relay2.suse.de (unknown [195.135.221.27])
+        by mx2.suse.de (Postfix) with ESMTP id 73789AB63;
+        Mon,  7 Dec 2020 15:36:35 +0000 (UTC)
+From:   Nikolay Borisov <nborisov@suse.com>
+To:     linux-btrfs@vger.kernel
+Cc:     fstests@vger.kernel.org, Nikolay Borisov <nborisov@suse.com>
+Subject: [PATCH] btrfs: Add test 154
+Date:   Mon,  7 Dec 2020 17:34:50 +0200
+Message-Id: <20201207153450.1074107-1-nborisov@suse.com>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20201207153237.1073887-1-nborisov@suse.com>
+References: <20201207153237.1073887-1-nborisov@suse.com>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Kaixu Xia <kaixuxia@tencent.com>
+This test verifies btrfs' free objectid management. I.e it ensures that
+the first objectid is always 256 in an fs tree.
 
-The mount options uqnoenforce and qnoenforce no longer cause 'usrquota'
-to be emitted in /proc/mounts, so there is a regression in xfs/513. Fix
-it by using proper output option uqnoenforce.
-
-Signed-off-by: Kaixu Xia <kaixuxia@tencent.com>
+Signed-off-by: Nikolay Borisov <nborisov@suse.com>
 ---
- tests/xfs/513     | 4 ++--
- tests/xfs/513.out | 4 ++--
- 2 files changed, 4 insertions(+), 4 deletions(-)
+ tests/btrfs/154     | 80 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/154.out |  2 ++
+ tests/btrfs/group   |  1 +
+ 3 files changed, 83 insertions(+)
+ create mode 100755 tests/btrfs/154
+ create mode 100644 tests/btrfs/154.out
 
-diff --git a/tests/xfs/513 b/tests/xfs/513
-index dfb25a8b..9045dbb5 100755
---- a/tests/xfs/513
-+++ b/tests/xfs/513
-@@ -302,8 +302,8 @@ do_test "" pass "usrquota" "false"
- do_test "-o uquota" pass "usrquota" "true"
- do_test "-o usrquota" pass "usrquota" "true"
- do_test "-o quota" pass "usrquota" "true"
--do_test "-o uqnoenforce" pass "usrquota" "true"
--do_test "-o qnoenforce" pass "usrquota" "true"
-+do_test "-o uqnoenforce" pass "uqnoenforce" "true"
-+do_test "-o qnoenforce" pass "uqnoenforce" "true"
- 
- # Test gquota/grpquota/gqnoenforce
- do_test "" pass "grpquota" "false"
-diff --git a/tests/xfs/513.out b/tests/xfs/513.out
-index 6681a7e8..eec8155d 100644
---- a/tests/xfs/513.out
-+++ b/tests/xfs/513.out
-@@ -76,8 +76,8 @@ TEST: "" "pass" "usrquota" "false"
- TEST: "-o uquota" "pass" "usrquota" "true"
- TEST: "-o usrquota" "pass" "usrquota" "true"
- TEST: "-o quota" "pass" "usrquota" "true"
--TEST: "-o uqnoenforce" "pass" "usrquota" "true"
--TEST: "-o qnoenforce" "pass" "usrquota" "true"
-+TEST: "-o uqnoenforce" "pass" "uqnoenforce" "true"
-+TEST: "-o qnoenforce" "pass" "uqnoenforce" "true"
- TEST: "" "pass" "grpquota" "false"
- TEST: "-o gquota" "pass" "grpquota" "true"
- TEST: "-o grpquota" "pass" "grpquota" "true"
+diff --git a/tests/btrfs/154 b/tests/btrfs/154
+new file mode 100755
+index 000000000000..6aee204e05cb
+--- /dev/null
++++ b/tests/btrfs/154
+@@ -0,0 +1,80 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2020 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test 154
++#
++# Test correct operation of free objectid related functionality
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs btrfs
++_require_scratch
++
++
++_scratch_mkfs > /dev/null
++_scratch_mount
++
++# create a new subvolume to validate its objectid is initialized accordingly
++$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/newvol >> $seqres.full 2>&1 \
++	|| _fail "couldn't create subvol"
++
++$BTRFS_UTIL_PROG inspect-internal dump-tree -t1 $SCRATCH_DEV \
++	| grep -q "256 ROOT_ITEM"  ||	_fail "First subvol with id 256 doesn't exist"
++
++# create new file in the new subvolume to validate its objectid is set as
++# expected
++touch $SCRATCH_MNT/newvol/file1
++
++# ensure we have consistent view on-disk
++sync
++
++# get output related to the new root's dir entry
++output=$($BTRFS_UTIL_PROG inspect-internal dump-tree -t5 $SCRATCH_DEV | grep -A2 "256 DIR_ITEM 1903355334")
++
++# get the objectid of the new root
++new_root_id=$(echo "$output" | awk '/location key/{printf $3}' | tr -d  '(')
++[ $new_root_id -eq 256 ] || _fail "New root id not equal to 256"
++
++# the given root should always be item number 2, since it's the only item
++item_seq=$(echo "$output" | awk '/item/ {printf $2}')
++[ $item_seq -eq 2 ] || _fail "New root not at item idx 2"
++
++# now parse the structure of the new subvol's tree
++output=$($BTRFS_UTIL_PROG inspect-internal dump-tree -t256 $SCRATCH_DEV)
++
++# this is the subvol's own ino
++first_ino=$(echo "$output" | awk '/item 0/{printf $4}' | tr -d '(')
++[ $first_ino -eq 256 ] || _fail "First ino objectid in subvol not 256"
++
++# this is ino of first file in subvol
++second_ino=$(echo "$output" | awk '/item 4/{printf $4}' | tr -d '(')
++[ $second_ino -eq 257 ] || _fail "Second ino objectid in subvol not 257"
++
++# success, all done
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/btrfs/154.out b/tests/btrfs/154.out
+new file mode 100644
+index 000000000000..a18c304305c4
+--- /dev/null
++++ b/tests/btrfs/154.out
+@@ -0,0 +1,2 @@
++QA output created by 154
++Silence is golden
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index d18450c7552e..44d33222def0 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -156,6 +156,7 @@
+ 151 auto quick volume
+ 152 auto quick metadata qgroup send
+ 153 auto quick qgroup limit
++154 auto quick
+ 155 auto quick send
+ 156 auto quick trim balance
+ 157 auto quick raid
 -- 
-2.20.0
+2.17.1
 
