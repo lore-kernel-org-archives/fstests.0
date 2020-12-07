@@ -2,95 +2,133 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	UNPARSEABLE_RELAY,URIBL_BLOCKED autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 62CA4C0018C
-	for <linux-fstests@archiver.kernel.org>; Mon,  7 Dec 2020 16:37:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 86F63C4361B
+	for <linux-fstests@archiver.kernel.org>; Mon,  7 Dec 2020 17:02:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 35B0622B40
-	for <linux-fstests@archiver.kernel.org>; Mon,  7 Dec 2020 16:37:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3A0472388A
+	for <linux-fstests@archiver.kernel.org>; Mon,  7 Dec 2020 17:02:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727571AbgLGQhH (ORCPT
+        id S1726979AbgLGRCo (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 7 Dec 2020 11:37:07 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60038 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726007AbgLGQhH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 7 Dec 2020 11:37:07 -0500
-Received: from mail-qt1-x843.google.com (mail-qt1-x843.google.com [IPv6:2607:f8b0:4864:20::843])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 068B6C061793
-        for <fstests@vger.kernel.org>; Mon,  7 Dec 2020 08:36:27 -0800 (PST)
-Received: by mail-qt1-x843.google.com with SMTP id y15so2239771qtv.5
-        for <fstests@vger.kernel.org>; Mon, 07 Dec 2020 08:36:26 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20150623.gappssmtp.com; s=20150623;
-        h=subject:to:references:from:message-id:date:user-agent:mime-version
-         :in-reply-to:content-language:content-transfer-encoding;
-        bh=CTjZ8dE2k5crFaQt3/sG5vMR1Jb4//r+r9eAPESAD8c=;
-        b=n1bvWZUJAZjbc5dxs6ktfVBCpgQyL+pT9pThn769U2ebHl8VwPYrrllruW04iky1xp
-         scz4fItn5z/j94x6YQIlDDVSioRlFttgl4jjeC37zNzDlNXo1jVgdasmzeHAxG+X/7Jz
-         1hvXSNkX1r/OobvAZ+e3p2DVy36750MKhItj3gw/zEhmlaRtTcUqsVAyuf2l5DYDQgdz
-         ZGMkEXtJxBZXWGjoD4tDtuLs0NHJmwz2HhOj7YXGq4j8BT9mjbHpXpI/osU2+MBg1I3I
-         NTgK0l2NN4IVU80m2d9TMBeKeOKv5aFfc0E1+eYSPeorwmwkGfcqJmeBLpDbrC0KC7AJ
-         ujpA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=CTjZ8dE2k5crFaQt3/sG5vMR1Jb4//r+r9eAPESAD8c=;
-        b=fFe/xdrcD9fBTnbUEoet0dvfkWMJz3Ko60hP0M7r5yI9riA19SOJyjD9TSaiFRzOqn
-         SzZHGfSUuHWK8IW7pRELF5R299zeZHUMYNW3NVFTCHncn3KhMjA41G7xK4nc/ugwmo4p
-         oq/Ivt+6b0SlvEwWrgYRA9MQTyMTFYRJp1jP77Zv3qYIYvy+ZHMh+Y9W8863GtgxXXi4
-         wHiMGCHTc/tQuy//v/DCYpyzTYgUmYBgtnxbYK1JSi22j/wQH8OPqfd1+0ePu/9GfSq/
-         F027ZDuWMd/GlCK+Nw2+8p6dUTV3cZDORLyWDuxWPUNq15socEm/vsCmFbNM2DZu9Eqk
-         29Ew==
-X-Gm-Message-State: AOAM532zzDNDtIUdxAaCHD4IShi1rZwmsIfr+EDYrryz08A2gm/aa/cN
-        v79ab71p9zuqV4b5lzx8QPztSnjUPzCzN0tK
-X-Google-Smtp-Source: ABdhPJwYr4CkuXcA+b3JBL9lvrPalA5tRN/s/SQLc8GuNjbGggE9Lbo413HzCHxG1NwxsjH2fXNTpg==
-X-Received: by 2002:a05:622a:109:: with SMTP id u9mr24593514qtw.213.1607358985003;
-        Mon, 07 Dec 2020 08:36:25 -0800 (PST)
-Received: from [192.168.1.45] (cpe-174-109-172-136.nc.res.rr.com. [174.109.172.136])
-        by smtp.gmail.com with ESMTPSA id b19sm2209575qtr.39.2020.12.07.08.36.23
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 07 Dec 2020 08:36:24 -0800 (PST)
-Subject: Re: [PATCH v2] btrfs: Update btrfs/215
-To:     Nikolay Borisov <nborisov@suse.com>, linux-btrfs@vger.kernel.org,
-        fstests@vger.kernel.org
-References: <20201207092318.950548-1-nborisov@suse.com>
-From:   Josef Bacik <josef@toxicpanda.com>
-Message-ID: <1c23bd14-3c30-603f-0014-a1aeeb8ef8ab@toxicpanda.com>
-Date:   Mon, 7 Dec 2020 11:36:23 -0500
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0)
- Gecko/20100101 Thunderbird/78.5.1
+        Mon, 7 Dec 2020 12:02:44 -0500
+Received: from aserp2120.oracle.com ([141.146.126.78]:46278 "EHLO
+        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727059AbgLGRCn (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 7 Dec 2020 12:02:43 -0500
+Received: from pps.filterd (aserp2120.oracle.com [127.0.0.1])
+        by aserp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 0B7GxFJw196346;
+        Mon, 7 Dec 2020 17:01:10 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
+ : subject : message-id : references : mime-version : content-type :
+ in-reply-to; s=corp-2020-01-29;
+ bh=qoyp8AMENxhlhZkzKH4xkNFruJ3riTejOLmVfMSJdPk=;
+ b=Rc5dghWvvBnSPXM2KfO+0VbSsJu74E9OK3KhEgKfBotTCgOYOFPANdZj1OGuQhy/+Rd2
+ rqez0wc7j8uMddNo/ZZf1GiaI741a+c/N5QlW4Wyk5aVFgO7Z/Qx4zuxvtAx2jULQzBB
+ uvcUug1oOYb2ZW6XTnWBu2J7z1tZkLWpgr+JjO+k/T7NtQQB6JPvCLf7uTkZ2dOlvCTE
+ VoN7iefFpRgCGmKOuwz/1F9hguAIyUniM6GklC+YNM9RarKzJfVqKrrfK37BgaFiTcfk
+ +2YE3iytb4zrd9+o/lpNqd0sDEVFaCNKAAegvH6TnCSHPwM/Nr1O5fNCUMqhIeHG+bzE iw== 
+Received: from userp3030.oracle.com (userp3030.oracle.com [156.151.31.80])
+        by aserp2120.oracle.com with ESMTP id 35825kxdv4-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Mon, 07 Dec 2020 17:01:10 +0000
+Received: from pps.filterd (userp3030.oracle.com [127.0.0.1])
+        by userp3030.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 0B7Gxfvt120557;
+        Mon, 7 Dec 2020 17:01:09 GMT
+Received: from userv0122.oracle.com (userv0122.oracle.com [156.151.31.75])
+        by userp3030.oracle.com with ESMTP id 358m4wh0re-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Mon, 07 Dec 2020 17:01:09 +0000
+Received: from abhmp0007.oracle.com (abhmp0007.oracle.com [141.146.116.13])
+        by userv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 0B7H16OG019433;
+        Mon, 7 Dec 2020 17:01:06 GMT
+Received: from localhost (/67.169.218.210)
+        by default (Oracle Beehive Gateway v4.0)
+        with ESMTP ; Mon, 07 Dec 2020 09:01:05 -0800
+Date:   Mon, 7 Dec 2020 09:01:04 -0800
+From:   "Darrick J. Wong" <darrick.wong@oracle.com>
+To:     xiakaixu1987@gmail.com
+Cc:     fstests@vger.kernel.org, guaneryu@gmail.com,
+        linux-xfs@vger.kernel.org, Kaixu Xia <kaixuxia@tencent.com>
+Subject: Re: [PATCH] xfs/513: fix the regression caused by mount option
+ uqnoenforce
+Message-ID: <20201207170104.GO629293@magnolia>
+References: <1607341265-24200-1-git-send-email-kaixuxia@tencent.com>
 MIME-Version: 1.0
-In-Reply-To: <20201207092318.950548-1-nborisov@suse.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1607341265-24200-1-git-send-email-kaixuxia@tencent.com>
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9827 signatures=668682
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxscore=0 spamscore=0 suspectscore=3
+ bulkscore=0 malwarescore=0 phishscore=0 adultscore=0 mlxlogscore=999
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2009150000
+ definitions=main-2012070109
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9827 signatures=668682
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=3 adultscore=0 bulkscore=0
+ phishscore=0 mlxlogscore=999 clxscore=1011 priorityscore=1501 mlxscore=0
+ spamscore=0 lowpriorityscore=0 malwarescore=0 impostorscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2009150000
+ definitions=main-2012070109
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 12/7/20 4:23 AM, Nikolay Borisov wrote:
-> This patch updates btrfs/215 to work with latest upstream kernel. That's
-> required since commit 324bcf54c449 ("mm: use limited read-ahead to satisfy read")
-> changed readahead logic to always issue a read even if the RA pages are
-> set to 0. This results in 1 extra io being issued so the counts in the
-> test should be incremented by 1. Also use the opportunity to update the
-> commit reference since it's been merged in the upstream kernel.
+On Mon, Dec 07, 2020 at 07:41:05PM +0800, xiakaixu1987@gmail.com wrote:
+> From: Kaixu Xia <kaixuxia@tencent.com>
 > 
-> Signed-off-by: Nikolay Borisov <nborisov@suse.com>
+> The mount options uqnoenforce and qnoenforce no longer cause 'usrquota'
+> to be emitted in /proc/mounts, so there is a regression in xfs/513. Fix
+> it by using proper output option uqnoenforce.
+> 
+> Signed-off-by: Kaixu Xia <kaixuxia@tencent.com>
+
+Seems reasonable once the upstream change gets a commit id so that we
+can point people at how to fix this new regression.
+
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+
+--D
+
 > ---
-> V2:
->   * Updated comment above buffered read issue command to better describe why 2
->   failures are expected.
-
-Do we want to just test for non-zero, since the original problem was that we 
-weren't getting any error stats at all?  Then we don't have to worry about new 
-edge cases in the future.  Thanks,
-
-Josef
+>  tests/xfs/513     | 4 ++--
+>  tests/xfs/513.out | 4 ++--
+>  2 files changed, 4 insertions(+), 4 deletions(-)
+> 
+> diff --git a/tests/xfs/513 b/tests/xfs/513
+> index dfb25a8b..9045dbb5 100755
+> --- a/tests/xfs/513
+> +++ b/tests/xfs/513
+> @@ -302,8 +302,8 @@ do_test "" pass "usrquota" "false"
+>  do_test "-o uquota" pass "usrquota" "true"
+>  do_test "-o usrquota" pass "usrquota" "true"
+>  do_test "-o quota" pass "usrquota" "true"
+> -do_test "-o uqnoenforce" pass "usrquota" "true"
+> -do_test "-o qnoenforce" pass "usrquota" "true"
+> +do_test "-o uqnoenforce" pass "uqnoenforce" "true"
+> +do_test "-o qnoenforce" pass "uqnoenforce" "true"
+>  
+>  # Test gquota/grpquota/gqnoenforce
+>  do_test "" pass "grpquota" "false"
+> diff --git a/tests/xfs/513.out b/tests/xfs/513.out
+> index 6681a7e8..eec8155d 100644
+> --- a/tests/xfs/513.out
+> +++ b/tests/xfs/513.out
+> @@ -76,8 +76,8 @@ TEST: "" "pass" "usrquota" "false"
+>  TEST: "-o uquota" "pass" "usrquota" "true"
+>  TEST: "-o usrquota" "pass" "usrquota" "true"
+>  TEST: "-o quota" "pass" "usrquota" "true"
+> -TEST: "-o uqnoenforce" "pass" "usrquota" "true"
+> -TEST: "-o qnoenforce" "pass" "usrquota" "true"
+> +TEST: "-o uqnoenforce" "pass" "uqnoenforce" "true"
+> +TEST: "-o qnoenforce" "pass" "uqnoenforce" "true"
+>  TEST: "" "pass" "grpquota" "false"
+>  TEST: "-o gquota" "pass" "grpquota" "true"
+>  TEST: "-o grpquota" "pass" "grpquota" "true"
+> -- 
+> 2.20.0
+> 
