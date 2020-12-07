@@ -2,125 +2,244 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-15.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3B5C6C433FE
-	for <linux-fstests@archiver.kernel.org>; Mon,  7 Dec 2020 06:54:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B0022C433FE
+	for <linux-fstests@archiver.kernel.org>; Mon,  7 Dec 2020 08:41:19 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E3CB2229C4
-	for <linux-fstests@archiver.kernel.org>; Mon,  7 Dec 2020 06:54:36 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 62E6F225A9
+	for <linux-fstests@archiver.kernel.org>; Mon,  7 Dec 2020 08:41:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725933AbgLGGyV (ORCPT
+        id S1726083AbgLGIlD (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 7 Dec 2020 01:54:21 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54136 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725918AbgLGGyV (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 7 Dec 2020 01:54:21 -0500
-Received: from mail-pf1-x444.google.com (mail-pf1-x444.google.com [IPv6:2607:f8b0:4864:20::444])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F1D1AC0613D0
-        for <fstests@vger.kernel.org>; Sun,  6 Dec 2020 22:53:40 -0800 (PST)
-Received: by mail-pf1-x444.google.com with SMTP id s21so8836968pfu.13
-        for <fstests@vger.kernel.org>; Sun, 06 Dec 2020 22:53:40 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=vFjncU9BZ8XJ9WQT/fIknFspVHs3K9jZoMJe+zoHaXo=;
-        b=quHd368AfewhcRMKUUv5tNQ9dJEe0d7sz6vYpem25qh3xNNrCvzRcmAcoQrNFaS9B9
-         V14wAsKfppCfTWZmSXVvd/0rvKsQ5NjXcVEVs03fpdoNQ95bZKkZ59lTTw3j0I8PY38i
-         xQYyR3YWyAdLKZAymys/AY+10bxwCqz5JAJAhLRllGxd4c7IBam+siNOQxj9oPQnK2xi
-         kLqE2WAXrqISdFSD8D6/uG+sDjc+J1Z+X57gVMczYWaHWAf+WbW0wY+1/K8wtnOAT9Gk
-         K5Ln2bbi57PHrgo2X/ddZPASIYXCxtByaFeGhCbcW/5qCimsUFMJB7/j/x6n308tjORp
-         4rFw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=vFjncU9BZ8XJ9WQT/fIknFspVHs3K9jZoMJe+zoHaXo=;
-        b=PsgLgMYnCJBIJhwVmmGzYsK5DPLaYityd0pFiDXoSjKkz7juP/mSB2agzeb07o7YIT
-         qQEQk3AY8CLiiruEDorFXxLOrsMQVwTFW5Mq718P49Lyove+WBqYd6a3gjqm8ZYGpvn+
-         mx9VyL8oHoGK+W2QbH+vBQ/Gv43IWCk59l30vSUXXIUDgGF/0G482SorIAdvVw3Vhu9t
-         uft+CFZ4ob1WwU4WLm8FlJRnPIVPiV+9n81w4wvwox2TNDNcO3eGGd33UQEMLyPMXyWa
-         PFmh9heIVldYqLx1+09qPRnLA8iRPA0zAaBPjMQXhqm6/zIXjdvWbBzxqJkCq9DYN9An
-         iK9Q==
-X-Gm-Message-State: AOAM531RKjv0UWBti7Lem7yGdHG8Uq+0Y4AmPrATqeIT76tCmVG89ma+
-        gm4NS4NwRXuRx5cfJwO6aH8=
-X-Google-Smtp-Source: ABdhPJwiL+Ei35cJrIQkgG5Au3QQ1rSMyYjiPcy+DBuArQPqlSqtVDbEpIZUjkwx0qnTEdyRsmkadQ==
-X-Received: by 2002:a17:902:6b89:b029:da:fc41:baec with SMTP id p9-20020a1709026b89b02900dafc41baecmr2187954plk.39.1607324020438;
-        Sun, 06 Dec 2020 22:53:40 -0800 (PST)
-Received: from localhost ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id x5sm9305768pjr.38.2020.12.06.22.53.39
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 06 Dec 2020 22:53:39 -0800 (PST)
-Date:   Mon, 7 Dec 2020 14:53:32 +0800
-From:   Murphy Zhou <jencce.kernel@gmail.com>
+        Mon, 7 Dec 2020 03:41:03 -0500
+Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:3692 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1725905AbgLGIlD (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 7 Dec 2020 03:41:03 -0500
+Received: from pps.filterd (m0187473.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.0.42/8.16.0.42) with SMTP id 0B78cCDr073381;
+        Mon, 7 Dec 2020 03:40:19 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=subject : to : cc :
+ references : from : message-id : date : mime-version : in-reply-to :
+ content-type : content-transfer-encoding; s=pp1;
+ bh=DVmedtedZGXbUvl/8RYyTlol/VS26qHsVvPEIt+zr5Q=;
+ b=pMJpf36cSpUUn/Fh7HRqouqxJijbIaB1PoJ2zsyYm2Yd9lJtshCG88rjPvTuCK5onc6L
+ A1GR6LlMtZ2LUZ3oALXE4HidC8F9KW25OmxgKFKOPifJx222BJSm+u34wth6Qc0KInQS
+ HYFTgWdTSNvMCM8D3vbC3o0kHe5cXNyHYOdsXp0BVxdsT05+GLE+V5UEr178+3/+mCma
+ PMXcDQve2IwExvfn0mRpb8lt4vuQ8NOGNegQQ3ELQ2J8aH6TU6hfbBSr8SX3v+05QxsU
+ VIujSnjoi5N52ONRAW8RYB85rGkJoDHQJ0r4wdGWxLjALLzabyCrLe/UtoOUv6yi3TYR VQ== 
+Received: from ppma03fra.de.ibm.com (6b.4a.5195.ip4.static.sl-reverse.com [149.81.74.107])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 359d5nn7dj-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 07 Dec 2020 03:40:18 -0500
+Received: from pps.filterd (ppma03fra.de.ibm.com [127.0.0.1])
+        by ppma03fra.de.ibm.com (8.16.0.42/8.16.0.42) with SMTP id 0B78bSsP014932;
+        Mon, 7 Dec 2020 08:40:09 GMT
+Received: from b06cxnps4074.portsmouth.uk.ibm.com (d06relay11.portsmouth.uk.ibm.com [9.149.109.196])
+        by ppma03fra.de.ibm.com with ESMTP id 3581u8kcp4-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 07 Dec 2020 08:40:09 +0000
+Received: from d06av26.portsmouth.uk.ibm.com (d06av26.portsmouth.uk.ibm.com [9.149.105.62])
+        by b06cxnps4074.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 0B78bb2c55312728
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Mon, 7 Dec 2020 08:37:37 GMT
+Received: from d06av26.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id 9D913AE058;
+        Mon,  7 Dec 2020 08:37:37 +0000 (GMT)
+Received: from d06av26.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id 82B01AE051;
+        Mon,  7 Dec 2020 08:37:36 +0000 (GMT)
+Received: from [9.199.35.222] (unknown [9.199.35.222])
+        by d06av26.portsmouth.uk.ibm.com (Postfix) with ESMTP;
+        Mon,  7 Dec 2020 08:37:36 +0000 (GMT)
+Subject: Re: [PATCH 2/2] generic: Add test to check for mounting a huge sparse
+ dm device
 To:     Eryu Guan <guan@eryu.me>
-Cc:     Murphy Zhou <jencce.kernel@gmail.com>, fstests@vger.kernel.org,
-        darrick.wong@oracle.com
-Subject: Re: [PATCH] generic/506: require prjquota
-Message-ID: <20201207065332.tfgdlroxgiiuxim6@xzhoux.usersys.redhat.com>
-References: <20201202101521.15405-1-jencce.kernel@gmail.com>
- <20201206132116.GT3853@desktop>
+Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
+        anju@linux.vnet.ibm.com
+References: <cover.1607078368.git.riteshh@linux.ibm.com>
+ <cc6f28972d73a50fb84a3797172ff44d396a6bef.1607078368.git.riteshh@linux.ibm.com>
+ <20201206135043.GV3853@desktop> <20201206141423.GX3853@desktop>
+From:   Ritesh Harjani <riteshh@linux.ibm.com>
+Message-ID: <7c63549a-cf53-c229-5f0b-0d97f4cec20d@linux.ibm.com>
+Date:   Mon, 7 Dec 2020 14:07:35 +0530
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.11.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20201206132116.GT3853@desktop>
+In-Reply-To: <20201206141423.GX3853@desktop>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+X-TM-AS-GCONF: 00
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.312,18.0.737
+ definitions=2020-12-07_05:2020-12-04,2020-12-07 signatures=0
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 clxscore=1015 bulkscore=0
+ spamscore=0 mlxlogscore=999 priorityscore=1501 mlxscore=0 impostorscore=0
+ lowpriorityscore=0 malwarescore=0 suspectscore=0 adultscore=0 phishscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2009150000
+ definitions=main-2012070054
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Dec 06, 2020 at 09:21:16PM +0800, Eryu Guan wrote:
-> On Wed, Dec 02, 2020 at 06:15:21PM +0800, Murphy Zhou wrote:
-> > To avoid false failure on overlayfs.
-> > 
-> > Signed-off-by: Murphy Zhou <jencce.kernel@gmail.com>
-> > ---
-> >  tests/generic/506 | 1 +
-> >  1 file changed, 1 insertion(+)
-> > 
-> > diff --git a/tests/generic/506 b/tests/generic/506
-> > index d5b28cad..edcda6db 100755
-> > --- a/tests/generic/506
-> > +++ b/tests/generic/506
-> > @@ -42,6 +42,7 @@ rm -f $seqres.full
-> >  # real QA test starts here
-> >  _supported_fs generic
-> >  
-> > +_require_prjquota
-> >  _require_scratch
-> >  _require_scratch_shutdown
+
+
+On 12/6/20 7:44 PM, Eryu Guan wrote:
+> On Sun, Dec 06, 2020 at 09:50:43PM +0800, Eryu Guan wrote:
+>> On Fri, Dec 04, 2020 at 04:13:54PM +0530, Ritesh Harjani wrote:
+>>> Add this test to check for regression which was reported when ext4 bmap
+>>> aops was moved to use iomap APIs. jbd2 calls bmap() kernel function
+>>> from fs/inode.c which was failing since iomap_bmap() implementation earlier
+>>> returned 0 for block addr > INT_MAX.
+>>> This regression was fixed with following kernel commit [1]
+>>> commit b75dfde1212991b24b220c3995101c60a7b8ae74
+>>> ("fibmap: Warn and return an error in case of block > INT_MAX")
+>>> [1]: https://patchwork.ozlabs.org/patch/1279914
+>>>
+>>> w/o the kernel fix we get below errors and mount fails
+>>>
+>>> [ 1461.988701] run fstests generic/613 at 2020-10-27 19:57:34
+>>> [ 1530.406645] ------------[ cut here ]------------
+>>> [ 1530.407332] would truncate bmap result
+>>> [ 1530.408956] WARNING: CPU: 0 PID: 6401 at fs/iomap/fiemap.c:116
+>>> iomap_bmap_actor+0x43/0x50
+>>> [ 1530.410607] Modules linked in:
+>>> [ 1530.411024] CPU: 0 PID: 6401 Comm: mount Tainted: G        W
+>>> <...>
+>>>   1530.511978] jbd2_journal_init_inode: Cannot locate journal superblock
+>>>   [ 1530.513310] EXT4-fs (dm-1): Could not load journal inode
+>>>
+>>> Signed-off-by: Ritesh Harjani <riteshh@linux.ibm.com>
+>>> ---
+>>>   common/rc             | 10 +++++++
+>>>   tests/generic/618     | 70 +++++++++++++++++++++++++++++++++++++++++++
+>>>   tests/generic/618.out |  3 ++
+>>>   tests/generic/group   |  1 +
+>>>   4 files changed, 84 insertions(+)
+>>>   create mode 100755 tests/generic/618
+>>>   create mode 100644 tests/generic/618.out
+>>>
+>>> diff --git a/common/rc b/common/rc
+>>> index b5a504e0dcb4..128d75226958 100644
+>>> --- a/common/rc
+>>> +++ b/common/rc
+>>> @@ -1608,6 +1608,16 @@ _require_scratch_size()
+>>>   	[ $devsize -lt $1 ] && _notrun "scratch dev too small"
+>>>   }
+>>>   
+>>> +# require a scratch dev of a minimum size (in kb) and should not be checked
+>>> +# post test
+>>> +_require_scratch_size_nocheck()
+>>> +{
+>>> +	[ $# -eq 1 ] || _fail "_require_scratch_size: expected size param"
+>>> +
+>>> +	_require_scratch_nocheck
+>>> +	local devsize=`_get_device_size $SCRATCH_DEV`
+>>> +	[ $devsize -lt $1 ] && _notrun "scratch dev too small"
+>>> +}
+>>>   
+>>>   # this test needs a test partition - check we're ok & mount it
+>>>   #
+>>> diff --git a/tests/generic/618 b/tests/generic/618
+>>> new file mode 100755
+>>> index 000000000000..45c14da80c06
+>>> --- /dev/null
+>>> +++ b/tests/generic/618
+>>> @@ -0,0 +1,70 @@
+>>> +#! /bin/bash
+>>> +# SPDX-License-Identifier: GPL-2.0
+>>> +# Copyright (c) 2020 Christian Kujau. All Rights Reserved.
+>>> +# Copyright (c) 2020 Ritesh Harjani. All Rights Reserved.
+>>> +#
+>>> +# FS QA Test generic/618
+>>> +#
+>>> +# Since the test is not specific to ext4, hence adding it to generic.
+>>> +# Add this test to check for regression which was reported when ext4 bmap
+>>> +# aops was moved to use iomap APIs. jbd2 calls bmap() kernel function
+>>> +# from fs/inode.c which was failing since iomap_bmap() implementation earlier
+>>> +# returned 0 for block addr > INT_MAX.
+>>> +# This regression was fixed with following kernel commit [1]
+>>> +# commit b75dfde1212991b24b220c3995101c60a7b8ae74
+>>> +# ("fibmap: Warn and return an error in case of block > INT_MAX")
+>>> +# [1]: https://patchwork.ozlabs.org/patch/1279914
+>>> +#
+>>> +seq=`basename $0`
+>>> +seqres=$RESULT_DIR/$seq
+>>> +echo "QA output created by $seq"
+>>> +
+>>> +here=`pwd`
+>>> +tmp=/tmp/$$
+>>> +status=1	# failure is the default!
+>>> +trap "_cleanup; exit \$status" 0 1 2 3 15
+>>> +
+>>> +_cleanup()
+>>> +{
+>>> +	_dmhugedisk_cleanup
+>>> +	cd /
+>>> +	rm -f $tmp.*
+>>> +}
+>>> +
+>>> +# get standard environment, filters and checks
+>>> +. ./common/rc
+>>> +. ./common/filter
+>>> +. ./common/dmhugedisk
+>>> +
+>>> +# remove previous $seqres.full before test
+>>> +rm -f $seqres.full
+>>> +
+>>> +# Modify as appropriate.
+>>> +_supported_fs generic
+>>> +_require_dmhugedisk
+>>> +_require_scratch_size_nocheck $((4 * 1024 * 1024)) #kB
+>>> +
+>>> +# For 1k bs with ext4, mkfs was failing due to size limitation and also it
+>>> +# becomes too slow when doing an mkfs on a huge sparse ext4 FS with 1k bs.
+>>> +# Hence on ext4 run only for 4K bs.
+>>> +if [ "$FSTYP" == "ext4" ]; then
+>>> +	_scratch_mkfs > /dev/null 2>&1
+>>> +	blksz=$(sudo debugfs -R stats $SCRATCH_DEV 2> /dev/null |grep "Block size" |cut -d ':' -f 2)
+>>> +	test $blksz -lt 4096 && _notrun "This test requires ext4 with minimum 4k bs"
+>>> +fi
+>>
+>> As this is a generic test, the same check should be done with ext2 and
+>> ext3. And actually this test requires > 16T fs support. So I'd suggest
+>> add a new helper, maybe called _require_16T_support, to check if $FSTYP
+>> supports filesystem size > 16T. And for now, we could only check for
+>> extN.
+>>
+>> Also, there's no need to run command with sudo in fstests, as all tests
+>> are required to be run by root.
+>>
+>> And there's a helper to get fs block size called _get_block_size, no
+>> need to parse output of debugfs. >
+> Maybe something like (not tested)
 > 
-> generic/506 already has _require_prjquota below, and it requires the
-> device to be mounted first.
-> 
-> _qmount_option "prjquota"                                                                                                                                                                                                                      
-> _qmount
-> _require_prjquota $SCRATCH_DEV
-> 
-> So would you please give more details on the failure you want to fix?
+> _require_scratch_16T_support()
+> {
+> 	case $FSTYP in
+> 	ext2|ext3)
+> 		_notrun "$FSTYP doesn't support >16T filesystem"
+> 	ext4)
+> 		_scratch_mkfs >> $seqres.full 2>&1
+> 		_scratch_mount
+> 		local blocksize=$(_get_block_size $SCRATCH_MNT)
+> 		if [ $blocksize -lt 4096 ]; then
+> 			_notrun "This test requires >16T fs support"
+> 		fi
+> 		;;
+> 	*)
+> 		;;
+> 	esac
+> }
 
-qmount failed on overlayfs.
+Sure, agreed. Let me add this in v2.
+Will add f2fs along with ext2/3 as not supported (as listed below).
 
-    -Silence is golden
-    +mount: /loopsch/ovl-mnt: wrong fs type, bad option, bad superblock on /loopsch, missing codepage or helper program, or other error.
-    +qmount failed> 
+https://android.googlesource.com/platform/external/f2fs-tools/+/refs/heads/master/lib/libf2fs.c#1183
 
-Since it's required to be mounted before checking, I guess it's better
-to exclue this one for overlayfs.
-
-Thanks for reviewing!
-
-> Thanks,
-> Eryu
-> 
-> >  
-> > -- 
-> > 2.20.1
-
--- 
-Murphy
+Thanks
+-ritesh
