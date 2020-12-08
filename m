@@ -2,126 +2,171 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2CE75C433FE
-	for <linux-fstests@archiver.kernel.org>; Tue,  8 Dec 2020 08:16:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 37949C4361B
+	for <linux-fstests@archiver.kernel.org>; Tue,  8 Dec 2020 10:43:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E6EC023A52
-	for <linux-fstests@archiver.kernel.org>; Tue,  8 Dec 2020 08:16:32 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id F344222ADF
+	for <linux-fstests@archiver.kernel.org>; Tue,  8 Dec 2020 10:43:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727135AbgLHIQc (ORCPT
+        id S1728870AbgLHKnk (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 8 Dec 2020 03:16:32 -0500
-Received: from mx2.suse.de ([195.135.220.15]:38242 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725927AbgLHIQc (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 8 Dec 2020 03:16:32 -0500
-X-Virus-Scanned: by amavisd-new at test-mx.suse.de
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-        t=1607415345; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
-        bh=EF4RzSGP3m5k1xh+u5qNbFFALPVHv7TpZm8SJnGkXwk=;
-        b=szMcNzjzKgxl1js1kjjfLqPymXJneGgYyicGhck0jGaEzk0Vr3atjcL+QEAj15Ga2fQMAK
-        pWg34eEaOlX6OuOPC8MdaseCguxaKEbFiqneVrVujpmgeV+P8EmCN7cGb4O/Wcnq2S8zAD
-        9udNsJ0ylk4fryiifJe7Uv3fE/vqRIc=
-Received: from relay2.suse.de (unknown [195.135.221.27])
-        by mx2.suse.de (Postfix) with ESMTP id DF7EBAB63;
-        Tue,  8 Dec 2020 08:15:44 +0000 (UTC)
-Subject: Re: [PATCH v2] btrfs: Update btrfs/215
-To:     Josef Bacik <josef@toxicpanda.com>, linux-btrfs@vger.kernel.org,
-        fstests@vger.kernel.org
-References: <20201207092318.950548-1-nborisov@suse.com>
- <1c23bd14-3c30-603f-0014-a1aeeb8ef8ab@toxicpanda.com>
-From:   Nikolay Borisov <nborisov@suse.com>
-Autocrypt: addr=nborisov@suse.com; prefer-encrypt=mutual; keydata=
- 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
-Message-ID: <935d9d3b-4cd1-d1a7-d911-424ee0ccbecc@suse.com>
-Date:   Tue, 8 Dec 2020 10:15:44 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.10.0
+        Tue, 8 Dec 2020 05:43:40 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59074 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727845AbgLHKnk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 8 Dec 2020 05:43:40 -0500
+Received: from mail-pl1-x629.google.com (mail-pl1-x629.google.com [IPv6:2607:f8b0:4864:20::629])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 45966C061749
+        for <fstests@vger.kernel.org>; Tue,  8 Dec 2020 02:42:54 -0800 (PST)
+Received: by mail-pl1-x629.google.com with SMTP id y10so5317704plr.10
+        for <fstests@vger.kernel.org>; Tue, 08 Dec 2020 02:42:54 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=date:from:to:subject:message-id:mime-version:content-disposition;
+        bh=xQKkLM83zbG1sXM1Wp+/iyauEyG+NpWxZ8lND5RI3+o=;
+        b=m0YlUtpRQQVE6KYeR4Eoprb+jKRouoO1AJ/Rxunt9jgVhAPIZlPmM6ZbZeXPyW7zk5
+         LTdpU4uAECdFtrRZlEtdbIAwOlgHLRmqJqoxYKkrTTKG9U9OAo2WIz2xL5QX575m0xJY
+         VvajqLhfVtLWtUjGR/wG7OHB6MTNFTu66P/maptem/YfjObY5PXz+NdDURnx9Zo2HRns
+         2QE8BYvlfBh8JNxVEjoTZWrDoXoQ6b3x3pY1t3ZSXKdodl6nOGfdgu8LGUB+wtgzOGbO
+         z3jZXUBXejl6i8bzv4NSv/2R5WwEQyAtqTiAjme+q5Xb7TZmC3naX55qcz+XBZu9v3zJ
+         vtIw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:subject:message-id:mime-version
+         :content-disposition;
+        bh=xQKkLM83zbG1sXM1Wp+/iyauEyG+NpWxZ8lND5RI3+o=;
+        b=K+8hhqWy06KTzmH2Tmeejq9lyEFLjQDU9PKfI0p4XFGs/1NLBnBQ1OCgDXxLnCsCxF
+         urij36pn+G4CihNbQJlqGbaXhKirqsVc75oeIsW0L4iX09ezrOBPLaCeCQqIZ79AMXVT
+         6Yc04ucuWgKKen0EeOf8YoQv0zI4wm8mS5GyaGRFHoafKlkdnh4DreOUzE5G5LTTi+O4
+         zBW+ognZHPzXYP6c5w0HOdhmTBuK/tTf20RWaDWF1C05xLp+My4hlGsEJjDMn/ePgmfZ
+         ySiO6BgNMc5iLsXvHzGB6OuY0d9DO7eLIRdfBbPvnn36Ly6qYNsU+YqlsCR8Ii+jpB9P
+         zfPQ==
+X-Gm-Message-State: AOAM5319FsUDmCT6HykOkEFbfE0DgN5LZkOors4wpO1RiKDBvrLxi221
+        b6N0AG1HkvagJvLhenPO7pGR6MD0dHo=
+X-Google-Smtp-Source: ABdhPJydahbHgjZmc4lrDMq/e3DfbCi3mGaYcv0jyZL2mNoIenfaKl34pz5ZofowsHdBGf+rD5FyBw==
+X-Received: by 2002:a17:902:d20d:b029:da:632a:d2bc with SMTP id t13-20020a170902d20db02900da632ad2bcmr20747051ply.43.1607424173273;
+        Tue, 08 Dec 2020 02:42:53 -0800 (PST)
+Received: from localhost ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id o62sm2899222pjo.17.2020.12.08.02.42.52
+        for <fstests@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 08 Dec 2020 02:42:52 -0800 (PST)
+Date:   Tue, 8 Dec 2020 18:42:45 +0800
+From:   Murphy Zhou <jencce.kernel@gmail.com>
+To:     fstests@vger.kernel.org
+Subject: [PATCH] common/filter: add _filter_stat
+Message-ID: <20201208104245.2dtfn6xz7qr6uga3@xzhoux.usersys.redhat.com>
 MIME-Version: 1.0
-In-Reply-To: <1c23bd14-3c30-603f-0014-a1aeeb8ef8ab@toxicpanda.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+New stat(2) starts to use statx(7) call. Then if file does not
+exist, it breaks golden output like this:
 
+-stat: cannot stat 'SCRATCH_MNT/xxx': No such file or directory
++stat: cannot statx 'SCRATCH_MNT/xxx': No such file or directory
 
-On 7.12.20 г. 18:36 ч., Josef Bacik wrote:
-> On 12/7/20 4:23 AM, Nikolay Borisov wrote:
->> This patch updates btrfs/215 to work with latest upstream kernel. That's
->> required since commit 324bcf54c449 ("mm: use limited read-ahead to
->> satisfy read")
->> changed readahead logic to always issue a read even if the RA pages are
->> set to 0. This results in 1 extra io being issued so the counts in the
->> test should be incremented by 1. Also use the opportunity to update the
->> commit reference since it's been merged in the upstream kernel.
->>
->> Signed-off-by: Nikolay Borisov <nborisov@suse.com>
->> ---
->> V2:
->>   * Updated comment above buffered read issue command to better
->> describe why 2
->>   failures are expected.
-> 
-> Do we want to just test for non-zero, since the original problem was
-> that we weren't getting any error stats at all?  Then we don't have to
-> worry about new edge cases in the future.  Thanks,
+Add this filter to fix it, and add this filter to testcases that
+need it.
 
+Signed-off-by: Murphy Zhou <jencce.kernel@gmail.com>
+---
+ common/filter     | 6 ++++++
+ tests/generic/397 | 6 +++---
+ tests/generic/435 | 2 +-
+ tests/generic/440 | 2 +-
+ tests/xfs/348     | 2 +-
+ 5 files changed, 12 insertions(+), 6 deletions(-)
 
-I'da rather have precise numbers so that when something changes and the
-test blips red I can go and do a targeted investigation. Esp. with the
-subapge rework pending.
+diff --git a/common/filter b/common/filter
+index a8b3882f..6fbf70c2 100644
+--- a/common/filter
++++ b/common/filter
+@@ -510,6 +510,12 @@ _filter_mv()
+ 	sed -e "s/^renamed //"
+ }
+ 
++# New stat(2) uses statx(7)
++_filter_stat()
++{
++	sed -e "s/cannot statx/cannot stat/"
++}
++
+ _filter_lostfound()
+ {
+ 	sed -e '/^lost+found$/d'
+diff --git a/tests/generic/397 b/tests/generic/397
+index 97111555..bb4de31c 100755
+--- a/tests/generic/397
++++ b/tests/generic/397
+@@ -83,8 +83,8 @@ _unlink_session_encryption_key $keydesc
+ _scratch_cycle_mount
+ 
+ # Check that unencrypted names aren't there
+-stat $SCRATCH_MNT/edir/empty |& _filter_scratch
+-stat $SCRATCH_MNT/edir/symlink |& _filter_scratch
++stat $SCRATCH_MNT/edir/empty |& _filter_stat |& _filter_scratch
++stat $SCRATCH_MNT/edir/symlink |& _filter_stat |& _filter_scratch
+ 
+ # Check that the correct numbers of files and subdirectories are there
+ ls $SCRATCH_MNT/edir | wc -l
+@@ -106,7 +106,7 @@ ln -s foo $SCRATCH_MNT/edir/0123456789abcdef |& _filter_scratch
+ 
+ # Delete the encrypted directory (should succeed)
+ rm -r $SCRATCH_MNT/edir
+-stat $SCRATCH_MNT/edir |& _filter_scratch
++stat $SCRATCH_MNT/edir |& _filter_stat |& _filter_scratch
+ 
+ # success, all done
+ status=0
+diff --git a/tests/generic/435 b/tests/generic/435
+index 9f54c6c4..71c5a3f0 100755
+--- a/tests/generic/435
++++ b/tests/generic/435
+@@ -73,7 +73,7 @@ _scratch_cycle_mount
+ # and ext4 reported a "Structure needs cleaning" error when removing files.
+ find $SCRATCH_MNT/edir/ -type f | xargs stat -c %i | sort | uniq | wc -l
+ rm -rf $SCRATCH_MNT/edir |& head -n 10
+-stat $SCRATCH_MNT/edir |& _filter_scratch
++stat $SCRATCH_MNT/edir |& _filter_stat |& _filter_scratch
+ 
+ # success, all done
+ status=0
+diff --git a/tests/generic/440 b/tests/generic/440
+index d775f1e0..8a81d60a 100755
+--- a/tests/generic/440
++++ b/tests/generic/440
+@@ -87,7 +87,7 @@ _scratch_cycle_mount
+ cat $SCRATCH_MNT/edir2/link
+ exec 3< $SCRATCH_MNT/edir2/link # pin inode with cached key in memory
+ _unlink_session_encryption_key $keydesc
+-stat $SCRATCH_MNT/edir/file |& _filter_scratch
++stat $SCRATCH_MNT/edir/file |& _filter_stat |& _filter_scratch
+ cat "$(find $SCRATCH_MNT/edir/ -type f)"
+ exec 3>&-
+ 
+diff --git a/tests/xfs/348 b/tests/xfs/348
+index 194d9f99..208382fb 100755
+--- a/tests/xfs/348
++++ b/tests/xfs/348
+@@ -112,7 +112,7 @@ for dt in $dtypes; do
+ 		rm -f $tmp.stat.err
+ 		ftype=$(stat --printf=%F $testdir/$file 2>$tmp.stat.err)
+ 		if [ -s $tmp.stat.err ]; then
+-			cat $tmp.stat.err
++			cat $tmp.stat.err | _filter_stat
+ 		else
+ 			echo "stat: '$testdir/$file' is a $ftype"
+ 			# Verify that readlink of a file posing as a symlink
+-- 
+2.20.1
 
-> 
-> Josef
-> 
