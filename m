@@ -2,109 +2,126 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 46E01C4361B
-	for <linux-fstests@archiver.kernel.org>; Tue,  8 Dec 2020 07:01:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2CE75C433FE
+	for <linux-fstests@archiver.kernel.org>; Tue,  8 Dec 2020 08:16:33 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0CD2B23A6C
-	for <linux-fstests@archiver.kernel.org>; Tue,  8 Dec 2020 07:01:49 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E6EC023A52
+	for <linux-fstests@archiver.kernel.org>; Tue,  8 Dec 2020 08:16:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725881AbgLHHBs (ORCPT
+        id S1727135AbgLHIQc (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 8 Dec 2020 02:01:48 -0500
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:62514 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726026AbgLHHBs (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 8 Dec 2020 02:01:48 -0500
-X-IronPort-AV: E=Sophos;i="5.78,401,1599494400"; 
-   d="scan'208";a="102168462"
-Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
-  by heian.cn.fujitsu.com with ESMTP; 08 Dec 2020 15:00:36 +0800
-Received: from G08CNEXMBPEKD06.g08.fujitsu.local (unknown [10.167.33.206])
-        by cn.fujitsu.com (Postfix) with ESMTP id 787724CE6000;
-        Tue,  8 Dec 2020 15:00:34 +0800 (CST)
-Received: from G08CNEXCHPEKD06.g08.fujitsu.local (10.167.33.205) by
- G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206) with Microsoft SMTP Server
- (TLS) id 15.0.1497.2; Tue, 8 Dec 2020 15:00:33 +0800
-Received: from Fedora-31.g08.fujitsu.local (10.167.220.31) by
- G08CNEXCHPEKD06.g08.fujitsu.local (10.167.33.205) with Microsoft SMTP Server
- id 15.0.1497.2 via Frontend Transport; Tue, 8 Dec 2020 15:00:33 +0800
-From:   Xiao Yang <yangx.jy@cn.fujitsu.com>
-To:     <darrick.wong@oracle.com>, <guaneryu@gmail.com>
-CC:     <fstests@vger.kernel.org>, Xiao Yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH 2/2] src/dmiperf: Stop using attr_setf
-Date:   Tue, 8 Dec 2020 14:40:05 +0800
-Message-ID: <20201208064005.1187031-2-yangx.jy@cn.fujitsu.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20201208064005.1187031-1-yangx.jy@cn.fujitsu.com>
-References: <20201208064005.1187031-1-yangx.jy@cn.fujitsu.com>
+        Tue, 8 Dec 2020 03:16:32 -0500
+Received: from mx2.suse.de ([195.135.220.15]:38242 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725927AbgLHIQc (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 8 Dec 2020 03:16:32 -0500
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+        t=1607415345; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
+        bh=EF4RzSGP3m5k1xh+u5qNbFFALPVHv7TpZm8SJnGkXwk=;
+        b=szMcNzjzKgxl1js1kjjfLqPymXJneGgYyicGhck0jGaEzk0Vr3atjcL+QEAj15Ga2fQMAK
+        pWg34eEaOlX6OuOPC8MdaseCguxaKEbFiqneVrVujpmgeV+P8EmCN7cGb4O/Wcnq2S8zAD
+        9udNsJ0ylk4fryiifJe7Uv3fE/vqRIc=
+Received: from relay2.suse.de (unknown [195.135.221.27])
+        by mx2.suse.de (Postfix) with ESMTP id DF7EBAB63;
+        Tue,  8 Dec 2020 08:15:44 +0000 (UTC)
+Subject: Re: [PATCH v2] btrfs: Update btrfs/215
+To:     Josef Bacik <josef@toxicpanda.com>, linux-btrfs@vger.kernel.org,
+        fstests@vger.kernel.org
+References: <20201207092318.950548-1-nborisov@suse.com>
+ <1c23bd14-3c30-603f-0014-a1aeeb8ef8ab@toxicpanda.com>
+From:   Nikolay Borisov <nborisov@suse.com>
+Autocrypt: addr=nborisov@suse.com; prefer-encrypt=mutual; keydata=
+ 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
+Message-ID: <935d9d3b-4cd1-d1a7-d911-424ee0ccbecc@suse.com>
+Date:   Tue, 8 Dec 2020 10:15:44 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.10.0
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7BIT
-Content-Type:   text/plain; charset=US-ASCII
-X-yoursite-MailScanner-ID: 787724CE6000.A6D83
-X-yoursite-MailScanner: Found to be clean
-X-yoursite-MailScanner-From: yangx.jy@cn.fujitsu.com
+In-Reply-To: <1c23bd14-3c30-603f-0014-a1aeeb8ef8ab@toxicpanda.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Avoid the following warning by replacing deprecated
-attr_setf with fsetxattr:
----------------------------------------------------
-dmiperf.c:192:2: warning: 'attr_setf' is deprecated: Use fsetxattr instead [-Wdeprecated-declarations]
----------------------------------------------------
-
-Also remove unneeded <attr/attributes.h> and $(LIBATTR).
-
-Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
----
- src/Makefile  | 2 +-
- src/dmiperf.c | 6 +++---
- 2 files changed, 4 insertions(+), 4 deletions(-)
-
-diff --git a/src/Makefile b/src/Makefile
-index 32940142..c0688520 100644
---- a/src/Makefile
-+++ b/src/Makefile
-@@ -33,7 +33,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
- 
- SUBDIRS = log-writes perf
- 
--LLDLIBS = $(LIBATTR) $(LIBHANDLE) $(LIBACL) -lpthread -lrt
-+LLDLIBS = $(LIBHANDLE) $(LIBACL) -lpthread -lrt
- 
- ifeq ($(HAVE_XLOG_ASSIGN_LSN), true)
- LINUX_TARGETS += loggen
-diff --git a/src/dmiperf.c b/src/dmiperf.c
-index 4026dcfb..f9415953 100644
---- a/src/dmiperf.c
-+++ b/src/dmiperf.c
-@@ -17,7 +17,7 @@
- #include <stdlib.h>
- #include <string.h>
- #include <unistd.h>
--#include <attr/attributes.h>
-+#include <sys/xattr.h>
- 
- typedef unsigned int uint_t;
- 
-@@ -189,8 +189,8 @@ mkfile(char *name, char *attr)
- 		perror("open");
- 		exit(1);
- 	}
--	if (attr_setf(fd, DMFATTRNAME, attr, DMFATTRLEN, ATTR_ROOT) < 0) {
--		perror("attr_setf");
-+	if (fsetxattr(fd, DMFATTRNAME, attr, DMFATTRLEN, 0) < 0) {
-+		perror("fsetxattr");
- 		exit(1);
- 	}
- 	while (bytes > 0) {
--- 
-2.23.0
 
 
+On 7.12.20 г. 18:36 ч., Josef Bacik wrote:
+> On 12/7/20 4:23 AM, Nikolay Borisov wrote:
+>> This patch updates btrfs/215 to work with latest upstream kernel. That's
+>> required since commit 324bcf54c449 ("mm: use limited read-ahead to
+>> satisfy read")
+>> changed readahead logic to always issue a read even if the RA pages are
+>> set to 0. This results in 1 extra io being issued so the counts in the
+>> test should be incremented by 1. Also use the opportunity to update the
+>> commit reference since it's been merged in the upstream kernel.
+>>
+>> Signed-off-by: Nikolay Borisov <nborisov@suse.com>
+>> ---
+>> V2:
+>>   * Updated comment above buffered read issue command to better
+>> describe why 2
+>>   failures are expected.
+> 
+> Do we want to just test for non-zero, since the original problem was
+> that we weren't getting any error stats at all?  Then we don't have to
+> worry about new edge cases in the future.  Thanks,
 
+
+I'da rather have precise numbers so that when something changes and the
+test blips red I can go and do a targeted investigation. Esp. with the
+subapge rework pending.
+
+> 
+> Josef
+> 
