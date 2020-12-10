@@ -2,207 +2,132 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-17.0 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 65345C433FE
-	for <linux-fstests@archiver.kernel.org>; Thu, 10 Dec 2020 12:10:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6795EC4361B
+	for <linux-fstests@archiver.kernel.org>; Thu, 10 Dec 2020 16:16:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 015BB239D1
-	for <linux-fstests@archiver.kernel.org>; Thu, 10 Dec 2020 12:10:08 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 360B22312D
+	for <linux-fstests@archiver.kernel.org>; Thu, 10 Dec 2020 16:16:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731564AbgLJMKI (ORCPT
+        id S1733029AbgLJQP6 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 10 Dec 2020 07:10:08 -0500
-Received: from mail.kernel.org ([198.145.29.99]:55398 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728217AbgLJMKH (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 10 Dec 2020 07:10:07 -0500
-From:   fdmanana@kernel.org
-Authentication-Results: mail.kernel.org; dkim=permerror (bad message/signature format)
+        Thu, 10 Dec 2020 11:15:58 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:22637 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1733165AbgLJQPz (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 10 Dec 2020 11:15:55 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1607616869;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=xO0REKef6ln0r2Cj4AmYa58bHSJ5C9KPWnK0/ofGDJo=;
+        b=ao7lOPrOTqknP/Wm7Fx77ZJQ7NzQt1WvMMBrRQmEZravQxisbUXtJZyyZqh3Fp/WbUWq4g
+        lck5QdH56EK06OLqoUXtbJeWLvbPc3rHLI/2UvP4uZmPAad+aSlimrw5LPfmyZV1eZIVeZ
+        RBN/BU922k62SE4Xib2BjZSn1w3d2Mc=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-409-pRZFbh8zOYyNYPNDKIF04g-1; Thu, 10 Dec 2020 11:14:27 -0500
+X-MC-Unique: pRZFbh8zOYyNYPNDKIF04g-1
+Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id D058659
+        for <fstests@vger.kernel.org>; Thu, 10 Dec 2020 16:14:26 +0000 (UTC)
+Received: from bfoster.redhat.com (ovpn-112-184.rdu2.redhat.com [10.10.112.184])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 8D5C95C1C4
+        for <fstests@vger.kernel.org>; Thu, 10 Dec 2020 16:14:26 +0000 (UTC)
+From:   Brian Foster <bfoster@redhat.com>
 To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH] btrfs: test incremental send after removing a directory and all its files
-Date:   Thu, 10 Dec 2020 12:09:17 +0000
-Message-Id: <ea077f0f8a54ab3ea303494e45eb1b166de7e758.1607602049.git.fdmanana@suse.com>
-X-Mailer: git-send-email 2.28.0
+Subject: [PATCH] generic/563: use a loop device to avoid partition incompatibility
+Date:   Thu, 10 Dec 2020 11:14:26 -0500
+Message-Id: <20201210161426.1927144-1-bfoster@redhat.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.16
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Filipe Manana <fdmanana@suse.com>
+cgroup writeback accounting does not track partition level
+statistics. Instead, I/O is accounted against the parent device. As
+a result, the test fails if the scratch device happens to be a
+device partition. Since parent level stats are potentially polluted
+by factors external to the test, wrap the scratch device in a
+loopback device to guarantee the test always runs on a top-level
+block device.
 
-Test that an incremental send operation succeeds, and produces the
-correct results, after removing a directory and all its files, unmounting
-the filesystem, mounting the filesystem again and creating a new file (or
-directory).
-
-This currently fails on btrfs, but is fixed by a patch that has the
-following subject:
-
-  btrfs: send, fix wrong file path when there is an inode with a pending rmdir
-
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
+Reported-by: Boyang Xue <bxue@redhat.com>
+Signed-off-by: Brian Foster <bfoster@redhat.com>
 ---
- tests/btrfs/227     | 122 ++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/227.out |   6 +++
- tests/btrfs/group   |   1 +
- 3 files changed, 129 insertions(+)
- create mode 100755 tests/btrfs/227
- create mode 100644 tests/btrfs/227.out
+ tests/generic/563 | 21 ++++++++++++++-------
+ 1 file changed, 14 insertions(+), 7 deletions(-)
 
-diff --git a/tests/btrfs/227 b/tests/btrfs/227
-new file mode 100755
-index 00000000..1cf63c85
---- /dev/null
-+++ b/tests/btrfs/227
-@@ -0,0 +1,122 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2020 SUSE Linux Products GmbH. All Rights Reserved.
-+#
-+# FS QA Test No. btrfs/227
-+#
-+# Test that an incremental send operation succeeds, and produces the correct
-+# results, after removing a directory and all its files, unmounting the
-+# filesystem, mounting the filesystem again and creating a new file (or
-+# directory).
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
+diff --git a/tests/generic/563 b/tests/generic/563
+index 51deaa2f..9292dece 100755
+--- a/tests/generic/563
++++ b/tests/generic/563
+@@ -2,7 +2,7 @@
+ # SPDX-License-Identifier: GPL-2.0
+ # Copyright (c) 2019 Red Hat, Inc.  All Rights Reserved.
+ #
+-# FS QA Test No. 011
++# FS QA Test No. 563
+ #
+ # This test verifies that cgroup aware writeback properly accounts I/Os in
+ # various scenarios. We perform reads/writes from different combinations of
+@@ -26,6 +26,8 @@ _cleanup()
+ 
+ 	echo $$ > $cgdir/cgroup.procs
+ 	rmdir $cgdir/$seq-cg* > /dev/null 2>&1
++	umount $SCRATCH_MNT > /dev/null 2>&1
++	_destroy_loop_device $LOOP_DEV > /dev/null 2>&1
+ }
+ 
+ # get standard environment, filters and checks
+@@ -42,14 +44,12 @@ rm -f $seqres.full
+ _supported_fs generic
+ _require_scratch
+ _require_cgroup2 io
++_require_loop
+ 
+ # cgroup v2 writeback is only support on block devices so far
+ _require_block_device $SCRATCH_DEV
+ 
+-smajor=$((0x`stat -L -c %t $SCRATCH_DEV`))
+-sminor=$((0x`stat -L -c %T $SCRATCH_DEV`))
+ cgdir=$CGROUP2_PATH
+-
+ iosize=$((1024 * 1024 * 8))
+ 
+ # Check cgroup read/write charges against expected values. Allow for some
+@@ -89,12 +89,19 @@ reset()
+ 	rmdir $cgdir/$seq-cg* > /dev/null 2>&1
+ 	$XFS_IO_PROG -fc "pwrite 0 $iosize" $SCRATCH_MNT/file \
+ 		>> $seqres.full 2>&1
+-	_scratch_cycle_mount || _fail "mount failed"
++	umount $SCRATCH_MNT || _fail "umount failed"
++	_mount $LOOP_DEV $SCRATCH_MNT || _fail "mount failed"
+ 	stat $SCRATCH_MNT/file > /dev/null
+ }
+ 
+-_scratch_mkfs >> $seqres.full 2>&1
+-_scratch_mount
++# cgroup I/O accounting doesn't work on partitions. Use a loop device to rule
++# that out.
++LOOP_DEV=$(_create_loop_device $SCRATCH_DEV)
++smajor=$((0x`stat -L -c %t $LOOP_DEV`))
++sminor=$((0x`stat -L -c %T $LOOP_DEV`))
 +
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -fr $send_files_dir
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs btrfs
-+_require_test
-+_require_scratch
-+_require_fssum
-+
-+send_files_dir=$TEST_DIR/btrfs-test-$seq
-+
-+rm -f $seqres.full
-+rm -fr $send_files_dir
-+mkdir $send_files_dir
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+
-+mkdir $SCRATCH_MNT/dir
-+touch $SCRATCH_MNT/dir/file1
-+touch $SCRATCH_MNT/dir/file2
-+touch $SCRATCH_MNT/dir/file3
-+
-+# Filesystem looks like:
-+#
-+# .                                     (ino 256)
-+# |----- dir/                           (ino 257)
-+#         |----- file1                  (ino 258)
-+#         |----- file2                  (ino 259)
-+#         |----- file3                  (ino 260)
-+#
-+
-+# Now create the base snapshot, which is going to be the parent snapshot for
-+# a later incremental send.
-+$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
-+	$SCRATCH_MNT/mysnap1 > /dev/null
-+
-+$BTRFS_UTIL_PROG send -f $send_files_dir/1.snap \
-+	$SCRATCH_MNT/mysnap1 2>&1 1>/dev/null | _filter_scratch
-+
-+# Now remove our directory and all its files.
-+rm -fr $SCRATCH_MNT/dir
-+
-+# Unmount the filesystem and mount it again. This is to ensure that the next
-+# inode that is created ends up with the same inode number that our directory
-+# "dir" had, 257, which is the first free "objectid" available after mounting
-+# again the filesystem.
-+_scratch_cycle_mount
-+
-+# Now create a new file (it could be a directory as well).
-+touch $SCRATCH_MNT/newfile
-+
-+# Filesystem now looks like:
-+#
-+# .                                     (ino 256)
-+# |----- newfile                        (ino 257)
-+#
-+
-+$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
-+		 $SCRATCH_MNT/mysnap2 > /dev/null
-+$BTRFS_UTIL_PROG send -p $SCRATCH_MNT/mysnap1 -f $send_files_dir/2.snap \
-+		 $SCRATCH_MNT/mysnap2 2>&1 1>/dev/null | _filter_scratch
-+
-+$FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
-+$FSSUM_PROG -A -f -w $send_files_dir/2.fssum \
-+	-x $SCRATCH_MNT/mysnap2/mysnap1 $SCRATCH_MNT/mysnap2
-+
-+# Now recreate the filesystem by receiving both send streams and verify we get
-+# the same content that the original filesystem had.
-+_scratch_unmount
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+
-+$BTRFS_UTIL_PROG receive -f $send_files_dir/1.snap $SCRATCH_MNT > /dev/null
-+
-+# The receive operation below used to fail with the following error:
-+#
-+#    ERROR: chown o257-9-0 failed: No such file or directory
-+#
-+# This is because when the kernel was processing old inode 257 (the directory),
-+# it had to delay its removal because its children inodes, "file1", "file2" and
-+# "file3", have higher inode numbers and will be processed (and unlinked) later.
-+# Then when it processed the new inode 257 (named "newfile"), it got confused
-+# and though that this inode was the one with a delayed removal and therefore
-+# generate an orphan name for it ("o257-9-0") instead of its current name of
-+# "newfile", causing the receiver to fail since there is no file with that
-+# orphan name.
-+#
-+$BTRFS_UTIL_PROG receive -f $send_files_dir/2.snap $SCRATCH_MNT > /dev/null
-+
-+$FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
-+$FSSUM_PROG -r $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
-+
-+status=0
-+exit
-diff --git a/tests/btrfs/227.out b/tests/btrfs/227.out
-new file mode 100644
-index 00000000..251de2d5
---- /dev/null
-+++ b/tests/btrfs/227.out
-@@ -0,0 +1,6 @@
-+QA output created by 227
-+At subvol SCRATCH_MNT/mysnap1
-+At subvol SCRATCH_MNT/mysnap2
-+At subvol mysnap1
-+OK
-+OK
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index d18450c7..a9e53832 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -228,3 +228,4 @@
- 224 auto quick qgroup
- 225 auto quick volume seed
- 226 auto quick rw snapshot clone prealloc punch
-+227 auto quick send
++_mkfs_dev $LOOP_DEV >> $seqres.full 2>&1
++_mount $LOOP_DEV $SCRATCH_MNT || _fail "mount failed"
+ 
+ echo "+io" > $cgdir/cgroup.subtree_control || _fail "subtree control"
+ 
 -- 
-2.28.0
+2.26.2
 
