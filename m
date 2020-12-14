@@ -2,141 +2,267 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-17.0 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5DB85C2BB40
-	for <linux-fstests@archiver.kernel.org>; Mon, 14 Dec 2020 17:20:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6D90FC2BB48
+	for <linux-fstests@archiver.kernel.org>; Mon, 14 Dec 2020 23:48:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2707922516
-	for <linux-fstests@archiver.kernel.org>; Mon, 14 Dec 2020 17:20:49 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 391ED20857
+	for <linux-fstests@archiver.kernel.org>; Mon, 14 Dec 2020 23:48:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2408424AbgLNRUd (ORCPT
+        id S1728240AbgLNXsk (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 14 Dec 2020 12:20:33 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:29978 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S2408394AbgLNRUZ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 14 Dec 2020 12:20:25 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1607966337;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=LbPJzX2fQjw6ZEi0DRO3qNZNaBNyU9cXab+vZS/iZM4=;
-        b=DgS3UjgYhKM5QErC7mY3e/EZxhdfdAxqOkN816kiCfy+OHmc7hH33v1MDjkmcI5lJmUKR7
-        KBHC36/I/BfVQmJNuOM4lsHqX4KS0VcVTt3l35tHsMBoLCUmbkzBsHvK+h1mlPA5KrX/VR
-        K4v7oJvnjfY3dNhtK8g5HGKTZzAEEL4=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-574-0mD7BccbN52yRCW3L2Futw-1; Mon, 14 Dec 2020 12:18:56 -0500
-X-MC-Unique: 0mD7BccbN52yRCW3L2Futw-1
-Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 236DA1015CAB
-        for <fstests@vger.kernel.org>; Mon, 14 Dec 2020 17:18:55 +0000 (UTC)
-Received: from bfoster.redhat.com (ovpn-112-184.rdu2.redhat.com [10.10.112.184])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id D351E6085A
-        for <fstests@vger.kernel.org>; Mon, 14 Dec 2020 17:18:54 +0000 (UTC)
-From:   Brian Foster <bfoster@redhat.com>
+        Mon, 14 Dec 2020 18:48:40 -0500
+Received: from mail.kernel.org ([198.145.29.99]:53436 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1727916AbgLNXsi (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 14 Dec 2020 18:48:38 -0500
+From:   Eric Biggers <ebiggers@kernel.org>
+Authentication-Results: mail.kernel.org; dkim=permerror (bad message/signature format)
 To:     fstests@vger.kernel.org
-Subject: [PATCH v2] generic/563: use a loop device to avoid partition incompatibility
-Date:   Mon, 14 Dec 2020 12:18:54 -0500
-Message-Id: <20201214171854.2260900-1-bfoster@redhat.com>
+Cc:     linux-fscrypt@vger.kernel.org
+Subject: [xfstests PATCH v2] generic: test for creating duplicate filenames in encrypted dir
+Date:   Mon, 14 Dec 2020 15:47:20 -0800
+Message-Id: <20201214234720.12764-1-ebiggers@kernel.org>
+X-Mailer: git-send-email 2.29.2
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-cgroup writeback accounting does not track partition level
-statistics. Instead, I/O is accounted against the parent device. As
-a result, the test fails if the scratch device happens to be a
-device partition. Since parent level stats are potentially polluted
-by factors external to the test, wrap the scratch device in a
-loopback device to guarantee the test always runs on a top-level
-block device.
+From: Eric Biggers <ebiggers@google.com>
 
-Reported-by: Boyang Xue <bxue@redhat.com>
-Signed-off-by: Brian Foster <bfoster@redhat.com>
+Test for a race condition where a duplicate filename could be created in
+an encrypted directory while the directory's encryption key was being
+added concurrently.
+
+generic/595 was already failing on ubifs due to this bug, but only by
+accident.  This new test detects the bug on both ext4 and ubifs.  I
+wasn't able to get it to detect the bug on f2fs.
+
+Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
 
-v2:
-- Use _require_scratch_nocheck() since the scratch device is not used
-  directly.
-v1: https://lore.kernel.org/fstests/20201210161426.1927144-1-bfoster@redhat.com/
+v2: added commit IDs now that the commits are upstream.
 
- tests/generic/563 | 23 +++++++++++++++--------
- 1 file changed, 15 insertions(+), 8 deletions(-)
+ tests/generic/900     | 166 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/900.out |  21 ++++++
+ tests/generic/group   |   1 +
+ 3 files changed, 188 insertions(+)
+ create mode 100755 tests/generic/900
+ create mode 100644 tests/generic/900.out
 
-diff --git a/tests/generic/563 b/tests/generic/563
-index 51deaa2f..b113eacf 100755
---- a/tests/generic/563
-+++ b/tests/generic/563
-@@ -2,7 +2,7 @@
- # SPDX-License-Identifier: GPL-2.0
- # Copyright (c) 2019 Red Hat, Inc.  All Rights Reserved.
- #
--# FS QA Test No. 011
-+# FS QA Test No. 563
- #
- # This test verifies that cgroup aware writeback properly accounts I/Os in
- # various scenarios. We perform reads/writes from different combinations of
-@@ -26,6 +26,8 @@ _cleanup()
- 
- 	echo $$ > $cgdir/cgroup.procs
- 	rmdir $cgdir/$seq-cg* > /dev/null 2>&1
-+	umount $SCRATCH_MNT > /dev/null 2>&1
-+	_destroy_loop_device $LOOP_DEV > /dev/null 2>&1
- }
- 
- # get standard environment, filters and checks
-@@ -40,16 +42,14 @@ rm -f $seqres.full
- 
- # Modify as appropriate.
- _supported_fs generic
--_require_scratch
-+_require_scratch_nocheck
- _require_cgroup2 io
-+_require_loop
- 
- # cgroup v2 writeback is only support on block devices so far
- _require_block_device $SCRATCH_DEV
- 
--smajor=$((0x`stat -L -c %t $SCRATCH_DEV`))
--sminor=$((0x`stat -L -c %T $SCRATCH_DEV`))
- cgdir=$CGROUP2_PATH
--
- iosize=$((1024 * 1024 * 8))
- 
- # Check cgroup read/write charges against expected values. Allow for some
-@@ -89,12 +89,19 @@ reset()
- 	rmdir $cgdir/$seq-cg* > /dev/null 2>&1
- 	$XFS_IO_PROG -fc "pwrite 0 $iosize" $SCRATCH_MNT/file \
- 		>> $seqres.full 2>&1
--	_scratch_cycle_mount || _fail "mount failed"
-+	umount $SCRATCH_MNT || _fail "umount failed"
-+	_mount $LOOP_DEV $SCRATCH_MNT || _fail "mount failed"
- 	stat $SCRATCH_MNT/file > /dev/null
- }
- 
--_scratch_mkfs >> $seqres.full 2>&1
--_scratch_mount
-+# cgroup I/O accounting doesn't work on partitions. Use a loop device to rule
-+# that out.
-+LOOP_DEV=$(_create_loop_device $SCRATCH_DEV)
-+smajor=$((0x`stat -L -c %t $LOOP_DEV`))
-+sminor=$((0x`stat -L -c %T $LOOP_DEV`))
+diff --git a/tests/generic/900 b/tests/generic/900
+new file mode 100755
+index 00000000..b0f4c447
+--- /dev/null
++++ b/tests/generic/900
+@@ -0,0 +1,166 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright 2020 Google LLC
++#
++# FS QA Test No. 900
++#
++# Test for a race condition where a duplicate filename could be created in an
++# encrypted directory while the directory's encryption key was being added
++# concurrently.  This is a regression test for the following kernel commits:
++#
++#       968dd6d0c6d6 ("fscrypt: fix race allowing rename() and link() of ciphertext dentries")
++#       75d18cd1868c ("ext4: prevent creating duplicate encrypted filenames")
++#       bfc2b7e85189 ("f2fs: prevent creating duplicate encrypted filenames")
++#       76786a0f0834 ("ubifs: prevent creating duplicate encrypted filenames")
++#
++# The first commit fixed the bug for the rename() and link() syscalls.
++# The others fixed the bug for the other syscalls that create new filenames.
++#
++# Note, the bug wasn't actually reproducible on f2fs.
++#
++# The race condition worked as follows:
++#    1. Initial state: an encrypted directory "dir" contains a file "foo",
++#       but the directory's key hasn't been added yet so 'ls dir' shows an
++#       encoded no-key name rather than "foo".
++#    2. The key is added concurrently with mkdir("dir/foo") or another syscall
++#       that creates a new filename and should fail if it already exists.
++#        a. The syscall looks up "dir/foo", creating a negative no-key dentry
++#           for "foo" since the directory's key hasn't been added yet.
++#        b. The directory's key is added.
++#        c. The syscall does the actual fs-level operation to create the
++#           filename.  With the bug, the filesystem failed to detect that the
++#           dentry was created without the key, potentially causing the
++#           operation to unexpectedly succeed and add a duplicate filename.
++#
++# To test this, we try to reproduce the above race.  Afterwards we check for
++# duplicate filenames, plus a few other things.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
 +
-+_mkfs_dev $LOOP_DEV >> $seqres.full 2>&1
-+_mount $LOOP_DEV $SCRATCH_MNT || _fail "mount failed"
- 
- echo "+io" > $cgdir/cgroup.subtree_control || _fail "subtree control"
- 
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	touch $tmp.done
++	wait
++	rm -f $tmp.*
++}
++
++. ./common/rc
++. ./common/filter
++. ./common/encrypt
++. ./common/renameat2
++
++rm -f $seqres.full
++
++_supported_fs generic
++_require_scratch_encryption -v 2
++_require_renameat2 noreplace
++
++_scratch_mkfs_encrypted &>> $seqres.full
++_scratch_mount
++
++runtime=$((5 * TIME_FACTOR))
++dir=$SCRATCH_MNT/dir
++
++echo -e "\n# Creating encrypted directory containing files"
++mkdir $dir
++_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY"
++_set_encpolicy $dir $TEST_KEY_IDENTIFIER
++for i in {1..100}; do
++	touch $dir/$i
++done
++
++# This is the filename which we'll try to duplicate.
++inode=$(stat -c %i $dir/100)
++
++# ext4 checks for duplicate dentries when inserting one, which can hide the bug
++# this test is testing for.  However, ext4 stops checking for duplicates once it
++# finds space for the new dentry.  Therefore, we can circumvent ext4's duplicate
++# checking by creating space at the beginning of the directory block.
++rm $dir/1
++
++echo -e "\n# Starting duplicate filename creator process"
++(
++	# Repeatedly try to create the filename $dir/100 (which already exists)
++	# using syscalls that should fail if the file already exists: mkdir(),
++	# mknod(), symlink(), link(), and renameat2(RENAME_NOREPLACE).  This
++	# hopefully detects any one of them having the bug.  TODO: we should
++	# also try open(O_EXCL|O_CREAT), but it needs a command-line tool.
++	while [ ! -e $tmp.done ]; do
++		if mkdir $dir/100 &> /dev/null; then
++			touch $tmp.mkdir_succeeded
++		fi
++		if mknod $dir/100 c 5 5 &> /dev/null; then
++			touch $tmp.mknod_succeeded
++		fi
++		if ln -s target $dir/100 &> /dev/null; then
++			touch $tmp.symlink_succeeded
++		fi
++		if ln $dir/50 $dir/100 &> /dev/null; then
++			touch $tmp.link_succeeded
++		fi
++		if $here/src/renameat2 -n $dir/50 $dir/100 &> /dev/null; then
++			touch $tmp.rename_noreplace_succeeded
++		fi
++	done
++) &
++
++echo -e "\n# Starting add/remove enckey process"
++(
++	# Repeatedly add and remove the encryption key for $dir.  The actual
++	# race this test is trying to reproduce occurs when adding the key.
++	while [ ! -e $tmp.done ]; do
++		_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY" > /dev/null
++		_rm_enckey $SCRATCH_MNT $TEST_KEY_IDENTIFIER > /dev/null
++	done
++) &
++
++echo -e "\n# Running for a few seconds..."
++sleep $runtime
++echo -e "\n# Stopping subprocesses"
++touch $tmp.done
++wait
++
++_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY" > /dev/null
++
++# Check for failure in several different ways, since different ways work on
++# different filesystems.  E.g. ext4 shows duplicate filenames but ubifs doesn't.
++
++echo -e "\n# Checking for duplicate filenames via readdir"
++ls $dir | grep 100
++
++echo -e "\n# Checking for unexpected change in inode number"
++new_inode=$(stat -c %i $dir/100)
++if [ $new_inode != $inode ]; then
++	echo "Dentry changed inode number $inode => $new_inode!"
++fi
++
++echo -e "\n# Checking for operations that unexpectedly succeeded on an existing filename"
++for op in "mkdir" "mknod" "symlink" "link" "rename_noreplace"; do
++	if [ -e $tmp.${op}_succeeded ]; then
++		echo "$op operation(s) on existing filename unexpectedly succeeded!"
++	fi
++done
++
++# Also check that the fsck program can't find any duplicate filenames.
++# For ext4, override _check_scratch_fs() so that we can specify -D (optimize
++# directories); otherwise e2fsck doesn't check for duplicate filenames.
++echo -e "\n# Checking for duplicate filenames via fsck"
++_scratch_unmount
++if [ "$FSTYP" = ext4 ]; then
++	if ! e2fsck -f -y -D $SCRATCH_DEV &>> $seqres.full; then
++		_log_err "filesystem on $SCRATCH_DEV is inconsistent"
++	fi
++else
++	_check_scratch_fs
++fi
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/900.out b/tests/generic/900.out
+new file mode 100644
+index 00000000..62aa3744
+--- /dev/null
++++ b/tests/generic/900.out
+@@ -0,0 +1,21 @@
++QA output created by 900
++
++# Creating encrypted directory containing files
++Added encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
++
++# Starting duplicate filename creator process
++
++# Starting add/remove enckey process
++
++# Running for a few seconds...
++
++# Stopping subprocesses
++
++# Checking for duplicate filenames via readdir
++100
++
++# Checking for unexpected change in inode number
++
++# Checking for operations that unexpectedly succeeded on an existing filename
++
++# Checking for duplicate filenames via fsck
+diff --git a/tests/generic/group b/tests/generic/group
+index 15a2f40e..01b0693e 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -622,3 +622,4 @@
+ 617 auto rw io_uring stress
+ 618 auto quick attr
+ 619 auto rw enospc
++900 auto quick encrypt
 -- 
-2.26.2
+2.29.2
 
