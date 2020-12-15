@@ -2,156 +2,261 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-17.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2B441C4361B
-	for <linux-fstests@archiver.kernel.org>; Tue, 15 Dec 2020 00:00:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0E8A9C4361B
+	for <linux-fstests@archiver.kernel.org>; Tue, 15 Dec 2020 04:00:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DFEFB2173E
-	for <linux-fstests@archiver.kernel.org>; Tue, 15 Dec 2020 00:00:14 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BE5F1224B1
+	for <linux-fstests@archiver.kernel.org>; Tue, 15 Dec 2020 04:00:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727383AbgLNX76 (ORCPT
+        id S1725821AbgLOEAG (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 14 Dec 2020 18:59:58 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:56151 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1727014AbgLNX75 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 14 Dec 2020 18:59:57 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1607990310;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=M5ARNejCw4bf9lcZfjULO0iKXRxHe2DxxtNsfy3OtsM=;
-        b=IcFmiGRYhO0ttmEmvtCwZwFvWJ7L8I4Kq6L70ztGF7uBu1QshG7G/wt4SZawxLPocwRJf/
-        0JSUogBs6IQGhHWjSOB0/+stJpm0KyKTfJL6TNGEdOwcYc4ZQqsJKxcfn1BbfNsFcf5Mqp
-        FwnHJTjjACr+ZyzlxY7qatEOuz7D8GQ=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-507-WANdRWGCPmKsT9yT4Lmutw-1; Mon, 14 Dec 2020 18:58:29 -0500
-X-MC-Unique: WANdRWGCPmKsT9yT4Lmutw-1
-Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 062FA803621
-        for <fstests@vger.kernel.org>; Mon, 14 Dec 2020 23:58:28 +0000 (UTC)
-Received: from localhost (unknown [10.66.61.36])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 7678660BE2;
-        Mon, 14 Dec 2020 23:58:27 +0000 (UTC)
-Date:   Tue, 15 Dec 2020 08:13:49 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Brian Foster <bfoster@redhat.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH v2] generic/563: use a loop device to avoid partition
- incompatibility
-Message-ID: <20201215001349.GB14354@localhost.localdomain>
-Mail-Followup-To: Brian Foster <bfoster@redhat.com>,
-        fstests@vger.kernel.org
-References: <20201214171854.2260900-1-bfoster@redhat.com>
+        Mon, 14 Dec 2020 23:00:06 -0500
+Received: from mail.synology.com ([211.23.38.101]:34740 "EHLO synology.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1725945AbgLOEAG (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 14 Dec 2020 23:00:06 -0500
+From:   ethanwu <ethanwu@synology.com>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=synology.com; s=123;
+        t=1608004764; bh=eONTHYlh7hFNP11s5x3eVU8vMw7z9yd3I51VV3uawqM=;
+        h=From:To:Cc:Subject:Date;
+        b=cooldKHJQAjaGdZtzD4kVRVwXF4w3OtphUXjhSDAQmML/Ckhds6btxp1OtIF8siRy
+         bQGW0eC0nkjT4o61KF5qjQ/YJCS0FnzQbQMc5eG9v8ifuQRSoODRPxsEKcaqFtupyQ
+         tfrHcn7BK2XY3+kjWbxjSS6m+WOxBTAwoMPx30S0=
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, ethanwu <ethanwu@synology.com>
+Subject: [PATCH v2] btrfs: test if rename handles dir item collision correctly
+Date:   Tue, 15 Dec 2020 11:59:06 +0800
+Message-Id: <20201215035906.233272-1-ethanwu@synology.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20201214171854.2260900-1-bfoster@redhat.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.12
+Content-Transfer-Encoding: 8bit
+X-Synology-MCP-Status: no
+X-Synology-Spam-Flag: no
+X-Synology-Spam-Status: score=0, required 6, WHITELIST_FROM_ADDRESS 0
+X-Synology-Virus-Status: no
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Dec 14, 2020 at 12:18:54PM -0500, Brian Foster wrote:
-> cgroup writeback accounting does not track partition level
-> statistics. Instead, I/O is accounted against the parent device. As
-> a result, the test fails if the scratch device happens to be a
-> device partition. Since parent level stats are potentially polluted
-> by factors external to the test, wrap the scratch device in a
-> loopback device to guarantee the test always runs on a top-level
-> block device.
-> 
-> Reported-by: Boyang Xue <bxue@redhat.com>
-> Signed-off-by: Brian Foster <bfoster@redhat.com>
-> ---
-> 
-> v2:
-> - Use _require_scratch_nocheck() since the scratch device is not used
->   directly.
+This is a regression test for the issue fixed by the kernel commit titled
+"btrfs: correctly calculate item size used when item key collision happens"
 
-V2 looks good to me, thanks Brian.
+In this case, we'll simply rename many forged filename that cause collision
+under a directory to see if rename failed and filesystem is forced readonly.
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+Signed-off-by: ethanwu <ethanwu@synology.com>
+---
+v2:
+- Add a python script to generate the forged name at run-time rather than
+from hardcoded names
+- Fix , Btrfs->btrfs, and typo mentioned in v1
 
-> v1: https://lore.kernel.org/fstests/20201210161426.1927144-1-bfoster@redhat.com/
-> 
->  tests/generic/563 | 23 +++++++++++++++--------
->  1 file changed, 15 insertions(+), 8 deletions(-)
-> 
-> diff --git a/tests/generic/563 b/tests/generic/563
-> index 51deaa2f..b113eacf 100755
-> --- a/tests/generic/563
-> +++ b/tests/generic/563
-> @@ -2,7 +2,7 @@
->  # SPDX-License-Identifier: GPL-2.0
->  # Copyright (c) 2019 Red Hat, Inc.  All Rights Reserved.
->  #
-> -# FS QA Test No. 011
-> +# FS QA Test No. 563
->  #
->  # This test verifies that cgroup aware writeback properly accounts I/Os in
->  # various scenarios. We perform reads/writes from different combinations of
-> @@ -26,6 +26,8 @@ _cleanup()
->  
->  	echo $$ > $cgdir/cgroup.procs
->  	rmdir $cgdir/$seq-cg* > /dev/null 2>&1
-> +	umount $SCRATCH_MNT > /dev/null 2>&1
-> +	_destroy_loop_device $LOOP_DEV > /dev/null 2>&1
->  }
->  
->  # get standard environment, filters and checks
-> @@ -40,16 +42,14 @@ rm -f $seqres.full
->  
->  # Modify as appropriate.
->  _supported_fs generic
-> -_require_scratch
-> +_require_scratch_nocheck
->  _require_cgroup2 io
-> +_require_loop
->  
->  # cgroup v2 writeback is only support on block devices so far
->  _require_block_device $SCRATCH_DEV
->  
-> -smajor=$((0x`stat -L -c %t $SCRATCH_DEV`))
-> -sminor=$((0x`stat -L -c %T $SCRATCH_DEV`))
->  cgdir=$CGROUP2_PATH
-> -
->  iosize=$((1024 * 1024 * 8))
->  
->  # Check cgroup read/write charges against expected values. Allow for some
-> @@ -89,12 +89,19 @@ reset()
->  	rmdir $cgdir/$seq-cg* > /dev/null 2>&1
->  	$XFS_IO_PROG -fc "pwrite 0 $iosize" $SCRATCH_MNT/file \
->  		>> $seqres.full 2>&1
-> -	_scratch_cycle_mount || _fail "mount failed"
-> +	umount $SCRATCH_MNT || _fail "umount failed"
-> +	_mount $LOOP_DEV $SCRATCH_MNT || _fail "mount failed"
->  	stat $SCRATCH_MNT/file > /dev/null
->  }
->  
-> -_scratch_mkfs >> $seqres.full 2>&1
-> -_scratch_mount
-> +# cgroup I/O accounting doesn't work on partitions. Use a loop device to rule
-> +# that out.
-> +LOOP_DEV=$(_create_loop_device $SCRATCH_DEV)
-> +smajor=$((0x`stat -L -c %t $LOOP_DEV`))
-> +sminor=$((0x`stat -L -c %T $LOOP_DEV`))
-> +
-> +_mkfs_dev $LOOP_DEV >> $seqres.full 2>&1
-> +_mount $LOOP_DEV $SCRATCH_MNT || _fail "mount failed"
->  
->  echo "+io" > $cgdir/cgroup.subtree_control || _fail "subtree control"
->  
-> -- 
-> 2.26.2
-> 
+ src/btrfs_crc32c_forged_name.py | 92 +++++++++++++++++++++++++++++++++
+ tests/btrfs/228                 | 72 ++++++++++++++++++++++++++
+ tests/btrfs/228.out             |  2 +
+ tests/btrfs/group               |  1 +
+ 4 files changed, 167 insertions(+)
+ create mode 100755 src/btrfs_crc32c_forged_name.py
+ create mode 100755 tests/btrfs/228
+ create mode 100644 tests/btrfs/228.out
+
+diff --git a/src/btrfs_crc32c_forged_name.py b/src/btrfs_crc32c_forged_name.py
+new file mode 100755
+index 00000000..d8abedde
+--- /dev/null
++++ b/src/btrfs_crc32c_forged_name.py
+@@ -0,0 +1,92 @@
++# SPDX-License-Identifier: GPL-2.0
++
++import struct
++import sys
++import os
++import argparse
++
++class CRC32(object):
++  """A class to calculate and manipulate CRC32."""
++  def __init__(self):
++    self.polynom = 0x82F63B78
++    self.table, self.reverse = [0]*256, [0]*256
++    self._build_tables()
++
++  def _build_tables(self):
++    for i in range(256):
++      fwd = i
++      rev = i << 24
++      for j in range(8, 0, -1):
++        # build normal table
++        if (fwd & 1) == 1:
++          fwd = (fwd >> 1) ^ self.polynom
++        else:
++          fwd >>= 1
++        self.table[i] = fwd & 0xffffffff
++        # build reverse table =)
++        if rev & 0x80000000 == 0x80000000:
++          rev = ((rev ^ self.polynom) << 1) | 1
++        else:
++          rev <<= 1
++        rev &= 0xffffffff
++        self.reverse[i] = rev
++
++  def calc(self, s):
++    """Calculate crc32 of a string.
++       Same crc32 as in (binascii.crc32)&0xffffffff.
++    """
++    crc = 0xffffffff
++    for c in s:
++      crc = (crc >> 8) ^ self.table[(crc ^ ord(c)) & 0xff]
++    return crc^0xffffffff
++
++  def forge(self, wanted_crc, s, pos=None):
++    """Forge crc32 of a string by adding 4 bytes at position pos."""
++    if pos is None:
++      pos = len(s)
++
++    # forward calculation of CRC up to pos, sets current forward CRC state
++    fwd_crc = 0xffffffff
++    for c in s[:pos]:
++      fwd_crc = (fwd_crc >> 8) ^ self.table[(fwd_crc ^ ord(c)) & 0xff]
++
++    # backward calculation of CRC up to pos, sets wanted backward CRC state
++    bkd_crc = wanted_crc^0xffffffff
++    for c in s[pos:][::-1]:
++      bkd_crc = ((bkd_crc << 8) & 0xffffffff) ^ self.reverse[bkd_crc >> 24]
++      bkd_crc ^= ord(c)
++
++    # deduce the 4 bytes we need to insert
++    for c in struct.pack('<L',fwd_crc)[::-1]:
++      bkd_crc = ((bkd_crc << 8) & 0xffffffff) ^ self.reverse[bkd_crc >> 24]
++      bkd_crc ^= ord(c)
++
++    res = s[:pos] + struct.pack('<L', bkd_crc) + s[pos:]
++    return res
++
++  def parse_args(self):
++    parser = argparse.ArgumentParser()
++    parser.add_argument("-d", default=os.getcwd(), dest='dir',
++                        help="directory to generate forged names")
++    parser.add_argument("-c", default=1, type=int, dest='count',
++                        help="number of forged names to create")
++    return parser.parse_args()
++
++if __name__=='__main__':
++
++  crc = CRC32()
++  wanted_crc = 0x00000000
++  count = 0
++  args = crc.parse_args()
++  dirpath=args.dir
++  while count < args.count :
++    origname = os.urandom (89).encode ("hex")[:-1].strip ("\x00")
++    forgename = crc.forge(wanted_crc, origname, 4)
++    if ("/" not in forgename) and ("\x00" not in forgename):
++      srcpath=dirpath + '/' + str(count)
++      dstpath=dirpath + '/' + forgename
++      file (srcpath, 'a').close()
++      os.rename(srcpath, dstpath)
++      os.system('btrfs fi sync %s' % (dirpath))
++      count+=1;
++
+diff --git a/tests/btrfs/228 b/tests/btrfs/228
+new file mode 100755
+index 00000000..e38da19b
+--- /dev/null
++++ b/tests/btrfs/228
+@@ -0,0 +1,72 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2020 Synology.  All Rights Reserved.
++#
++# FS QA Test 228
++#
++# Test if btrfs rename handle dir item collision correctly
++# Without patch fix, rename will fail with EOVERFLOW, and filesystem
++# is forced readonly.
++#
++# This bug is going to be fixed by a patch for kernel titled
++# "btrfs: correctly calculate item size used when item key collision happens"
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++
++_supported_fs btrfs
++_require_scratch
++_require_command $PYTHON2_PROG python2
++
++rm -f $seqres.full
++
++# Currently in btrfs the node/leaf size can not be smaller than the page
++# size (but it can be greater than the page size). So use the largest
++# supported node/leaf size (64Kb) so that the test can run on any platform
++# that Linux supports.
++_scratch_mkfs "--nodesize 65536" >>$seqres.full 2>&1
++_scratch_mount
++
++#
++# In the following for loop, we'll create a leaf fully occupied by
++# only one dir item with many forged collision names in it.
++#
++# leaf 22544384 items 1 free space 0 generation 6 owner FS_TREE
++# leaf 22544384 flags 0x1(WRITTEN) backref revision 1
++# fs uuid 9064ba52-3d2c-4840-8e26-35db08fa17d7
++# chunk uuid 9ba39317-3159-46c9-a75a-965ab1e94267
++#    item 0 key (256 DIR_ITEM 3737737011) itemoff 25 itemsize 65410
++#    ...
++#
++
++$PYTHON2_PROG $here/src/btrfs_crc32c_forged_name.py -d $SCRATCH_MNT -c 310
++
++ISRW=$(_fs_options $SCRATCH_DEV | grep -w "rw")
++if [ -n "$ISRW" ]; then
++	echo "FS is Read-Write Test OK"
++else
++	echo "FS is Read-Only. Test Failed"
++	status=1
++	exit
++fi
++
++# success, all done
++status=0; exit
+diff --git a/tests/btrfs/228.out b/tests/btrfs/228.out
+new file mode 100644
+index 00000000..eae514f0
+--- /dev/null
++++ b/tests/btrfs/228.out
+@@ -0,0 +1,2 @@
++QA output created by 228
++FS is Read-Write Test OK
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index d18450c7..f8021668 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -228,3 +228,4 @@
+ 224 auto quick qgroup
+ 225 auto quick volume seed
+ 226 auto quick rw snapshot clone prealloc punch
++228 auto quick
+-- 
+2.25.1
 
