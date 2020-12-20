@@ -2,137 +2,187 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 401EDC3526C
-	for <linux-fstests@archiver.kernel.org>; Sat, 19 Dec 2020 10:48:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 798C7C4361B
+	for <linux-fstests@archiver.kernel.org>; Sun, 20 Dec 2020 14:33:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 119E623BE2
-	for <linux-fstests@archiver.kernel.org>; Sat, 19 Dec 2020 10:48:29 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2A44522D6D
+	for <linux-fstests@archiver.kernel.org>; Sun, 20 Dec 2020 14:33:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726479AbgLSKsN (ORCPT
+        id S1727396AbgLTOdd (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 19 Dec 2020 05:48:13 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48726 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726439AbgLSKsM (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 19 Dec 2020 05:48:12 -0500
-Received: from mail-ej1-x631.google.com (mail-ej1-x631.google.com [IPv6:2a00:1450:4864:20::631])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 28626C0617B0;
-        Sat, 19 Dec 2020 02:47:32 -0800 (PST)
-Received: by mail-ej1-x631.google.com with SMTP id g20so6901170ejb.1;
-        Sat, 19 Dec 2020 02:47:32 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=7RCxr2G8Gt9Tpg30dIx8aJnCI03LYya8f6xqrrEIwgQ=;
-        b=F8DkGaRUKepQE9SldCQtmUIyZt10j7iC++XoV+CQEwJgXYhAf0bQSJtyDVdqO2QyP/
-         mnqz0ACr94Ix4AoCVBl4mr4ehYg6k7fN4NUWqadydIivBgskcB5p2rzGbtfxeUNk+OI9
-         xeTt4LuVdZ7zyUnYpfiRcF32IV98WTupgte2+lJFhhX81RN1zde5VwNi5rcjdjD2+Q1C
-         FcVeJm0Pgkp5LTZxq0orWgIJz4JP+MN+9G+yaEznOGzsCsCYu7lHusC7UsdijLGAmqwc
-         qVP68hneUSrifuQ8eZPiMekt6fasthOAJ2fOeaeITu/EdIwnt0kX99inOgnBUq5JSj8h
-         JyjQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=7RCxr2G8Gt9Tpg30dIx8aJnCI03LYya8f6xqrrEIwgQ=;
-        b=M3HA+KKvJxxG1JPDOQC9Gr4PcaGvG6ICXlF5sYZzsBo3AdvbwWneoQYOh4hABhR1X1
-         JhtuOkRbZO7Pn6IgxyRkAg1oxkAf+L44AAXmZs5ZZ8EsuaxbeMUit/Q0j0Hu5CNfgpY6
-         RWavH5rGS2DbIb5U4ru9IjlEpNnbKWyWgqTckpjcdIn1AF7ETuNj/N8SWWOsMuqlaujV
-         UOzZdLWOCfCGJQfAqv4X6dZxBbRYCHfZR1MMWM1mXMn0tI0B+8PwM8VjBpwLNxlrQXQ9
-         wryUw3dKNQLfXTPn1KXlAJ8pXjo9AaqTqOg+FI+9C3u8hQmXg3n5N09oYX3SzckkMaHq
-         0EaQ==
-X-Gm-Message-State: AOAM531Z7Ux+iaCPlnW4JRkeFdHhapoZV0Pt2dDtdG/59+kjjt9WlFbs
-        CxcVxTB7ZLKeaXxcRzTOYUc2m707dqI=
-X-Google-Smtp-Source: ABdhPJyIa0bmAlZ9wHn/1Zqt0Z+KoQd79s6iv0ZgPWhV2g/VRIH34lM2EkwBTaTrdN5rMwNq6rGxLQ==
-X-Received: by 2002:a17:906:2f8b:: with SMTP id w11mr2768976eji.246.1608374850937;
-        Sat, 19 Dec 2020 02:47:30 -0800 (PST)
-Received: from localhost.localdomain ([31.210.181.203])
-        by smtp.gmail.com with ESMTPSA id o10sm6598724eju.89.2020.12.19.02.47.29
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 19 Dec 2020 02:47:30 -0800 (PST)
-From:   Amir Goldstein <amir73il@gmail.com>
-To:     Eryu Guan <guaneryu@gmail.com>
-Cc:     Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org,
-        fstests@vger.kernel.org
-Subject: [PATCH] overlay: run unionmount tests with custom overlay mount options
-Date:   Sat, 19 Dec 2020 12:47:27 +0200
-Message-Id: <20201219104727.18737-1-amir73il@gmail.com>
-X-Mailer: git-send-email 2.25.1
+        Sun, 20 Dec 2020 09:33:33 -0500
+Received: from out20-86.mail.aliyun.com ([115.124.20.86]:58695 "EHLO
+        out20-86.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727251AbgLTOdd (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 20 Dec 2020 09:33:33 -0500
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07436582|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.0562625-0.00115523-0.942582;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047187;MF=guan@eryu.me;NM=1;PH=DS;RN=3;RT=3;SR=0;TI=SMTPD_---.J9NOF22_1608474762;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.J9NOF22_1608474762)
+          by smtp.aliyun-inc.com(10.147.42.22);
+          Sun, 20 Dec 2020 22:32:42 +0800
+Date:   Sun, 20 Dec 2020 22:32:41 +0800
+From:   Eryu Guan <guan@eryu.me>
+To:     Nikolay Borisov <nborisov@suse.com>
+Cc:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [RESEND PATCH] btrfs: Add test 154
+Message-ID: <20201220143241.GY3853@desktop>
+References: <20201207153237.1073887-1-nborisov@suse.com>
+ <20201207161900.1079190-1-nborisov@suse.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20201207161900.1079190-1-nborisov@suse.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Assign $OVERLAY_MOUNT_OPTIONS to UNIONMOUNT_MNTOPTIONS and require
-that unionmount supports UNIONMOUNT_MNTOPTIONS if OVERLAY_MOUNT_OPTIONS
-was provided.
+On Mon, Dec 07, 2020 at 06:19:00PM +0200, Nikolay Borisov wrote:
+> This test verifies btrfs' free objectid management. I.e it ensures that
+> the first objectid is always 256 in an fs tree.
+> 
+> Signed-off-by: Nikolay Borisov <nborisov@suse.com>
 
-For example, when the mount option metacopy=on is set in
-$OVERLAY_MOUNT_OPTIONS, it enables the --meta test option and affects
-the test verifications after copy up.
+Some minor issues below, but I'd like btrfs folks to help review to see
+if the free objectid management test is reasonable.
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
+> ---
+> 
+> Resend it as I fudged btrfs' mailing list address so the patch didn't get to it.
+>  tests/btrfs/154     | 80 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/154.out |  2 ++
+>  tests/btrfs/group   |  1 +
+>  3 files changed, 83 insertions(+)
+>  create mode 100755 tests/btrfs/154
+>  create mode 100644 tests/btrfs/154.out
+> 
+> diff --git a/tests/btrfs/154 b/tests/btrfs/154
+> new file mode 100755
+> index 000000000000..6aee204e05cb
+> --- /dev/null
+> +++ b/tests/btrfs/154
+> @@ -0,0 +1,80 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (C) 2020 SUSE Linux Products GmbH. All Rights Reserved.
+> +#
+> +# FS QA Test 154
+> +#
+> +# Test correct operation of free objectid related functionality
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs btrfs
+> +_require_scratch
+> +
+> +
+> +_scratch_mkfs > /dev/null
+> +_scratch_mount
+> +
+> +# create a new subvolume to validate its objectid is initialized accordingly
+> +$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/newvol >> $seqres.full 2>&1 \
+> +	|| _fail "couldn't create subvol"
+> +
+> +$BTRFS_UTIL_PROG inspect-internal dump-tree -t1 $SCRATCH_DEV \
+> +	| grep -q "256 ROOT_ITEM"  ||	_fail "First subvol with id 256 doesn't exist"
 
-Eryu,
+This also requires
 
-I've added support to configurable mount option to unionmount-testsuite.
-This change intergates xfstests configurable mount option to unionmount
-test wrappers.
+_require_btrfs_command inspect-internal dump-tree
 
-For users who do not have OVERLAY_MOUNT_OPTIONS defined, this change
-makes no difference.
+And it's better to explain why '256' is the expected value, where does
+it come from.
 
-For users that have OVERLAY_MOUNT_OPTIONS defined, the overlay/union
-tests will be skipped after this change is applied and print:
+> +
+> +# create new file in the new subvolume to validate its objectid is set as
+> +# expected
+> +touch $SCRATCH_MNT/newvol/file1
+> +
+> +# ensure we have consistent view on-disk
+> +sync
+> +
+> +# get output related to the new root's dir entry
+> +output=$($BTRFS_UTIL_PROG inspect-internal dump-tree -t5 $SCRATCH_DEV | grep -A2 "256 DIR_ITEM 1903355334")
+> +
+> +# get the objectid of the new root
+> +new_root_id=$(echo "$output" | awk '/location key/{printf $3}' | tr -d  '(')
 
-  overlay/100 -- newer version of unionmount testsuite required to \
-                 support OVERLAY_MOUNT_OPTIONS.
+I'd dump the output to a tmp file (and the following outputs in the
+test), as saving the output in a variable may cause unexpected results,
+something like ignoring "\n", and make it harder to debug.
 
-Updating the unionmount src code to current master commit 95be14e
-("Allow user provided options with or without -o") will fix this and
-overlay/union tests will be run with the defined OVERLAY_MOUNT_OPTIONS.
+> +[ $new_root_id -eq 256 ] || _fail "New root id not equal to 256"
+> +
+> +# the given root should always be item number 2, since it's the only item
+> +item_seq=$(echo "$output" | awk '/item/ {printf $2}')
+
+$AWK_PROG
 
 Thanks,
-Amir.
+Eryu
 
- common/overlay | 8 ++++++++
- 1 file changed, 8 insertions(+)
-
-diff --git a/common/overlay b/common/overlay
-index 5e6a7e0f..1ca37e29 100644
---- a/common/overlay
-+++ b/common/overlay
-@@ -376,6 +376,13 @@ _require_unionmount_testsuite()
- 	local usage=`UNIONMOUNT_BASEDIR=_ "$UNIONMOUNT_TESTSUITE/run" 2>&1`
- 	echo $usage | grep -wq "UNIONMOUNT_BASEDIR" || \
- 		_notrun "newer version of unionmount testsuite required."
-+
-+	[ -n "$OVERLAY_MOUNT_OPTIONS" ] || return
-+	# If custom overlay mount options are used
-+	# verify that UNIONMOUNT_MNTOPTIONS var is supported
-+	local usage=`UNIONMOUNT_MNTOPTIONS=_ "$UNIONMOUNT_TESTSUITE/run" 2>&1`
-+	echo $usage | grep -wq "UNIONMOUNT_MNTOPTIONS" || \
-+		_notrun "newer version of unionmount testsuite required to support OVERLAY_MOUNT_OPTIONS."
- }
- 
- _unionmount_testsuite_run()
-@@ -394,6 +401,7 @@ _unionmount_testsuite_run()
- 		export UNIONMOUNT_LOWERDIR=$OVL_BASE_TEST_DIR/union
- 	fi
- 	export UNIONMOUNT_BASEDIR=$OVL_BASE_SCRATCH_MNT/union
-+	export UNIONMOUNT_MNTOPTIONS="$OVERLAY_MOUNT_OPTIONS"
- 
- 	_scratch_mkfs
- 	rm -rf $UNIONMOUNT_BASEDIR $UNIONMOUNT_LOWERDIR
--- 
-2.25.1
-
+> +[ $item_seq -eq 2 ] || _fail "New root not at item idx 2"
+> +
+> +# now parse the structure of the new subvol's tree
+> +output=$($BTRFS_UTIL_PROG inspect-internal dump-tree -t256 $SCRATCH_DEV)
+> +
+> +# this is the subvol's own ino
+> +first_ino=$(echo "$output" | awk '/item 0/{printf $4}' | tr -d '(')
+> +[ $first_ino -eq 256 ] || _fail "First ino objectid in subvol not 256"
+> +
+> +# this is ino of first file in subvol
+> +second_ino=$(echo "$output" | awk '/item 4/{printf $4}' | tr -d '(')
+> +[ $second_ino -eq 257 ] || _fail "Second ino objectid in subvol not 257"
+> +
+> +# success, all done
+> +echo "Silence is golden"
+> +status=0
+> +exit
+> diff --git a/tests/btrfs/154.out b/tests/btrfs/154.out
+> new file mode 100644
+> index 000000000000..a18c304305c4
+> --- /dev/null
+> +++ b/tests/btrfs/154.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 154
+> +Silence is golden
+> diff --git a/tests/btrfs/group b/tests/btrfs/group
+> index d18450c7552e..44d33222def0 100644
+> --- a/tests/btrfs/group
+> +++ b/tests/btrfs/group
+> @@ -156,6 +156,7 @@
+>  151 auto quick volume
+>  152 auto quick metadata qgroup send
+>  153 auto quick qgroup limit
+> +154 auto quick
+>  155 auto quick send
+>  156 auto quick trim balance
+>  157 auto quick raid
+> --
+> 2.17.1
