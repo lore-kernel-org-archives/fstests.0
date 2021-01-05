@@ -2,95 +2,126 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 45FDAC433E0
-	for <linux-fstests@archiver.kernel.org>; Tue,  5 Jan 2021 12:00:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8C6D3C433E0
+	for <linux-fstests@archiver.kernel.org>; Tue,  5 Jan 2021 14:32:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E561022A83
-	for <linux-fstests@archiver.kernel.org>; Tue,  5 Jan 2021 12:00:14 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 56EDC22A84
+	for <linux-fstests@archiver.kernel.org>; Tue,  5 Jan 2021 14:32:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729684AbhAEMAO (ORCPT
+        id S1726499AbhAEOci (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 5 Jan 2021 07:00:14 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:23184 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1727394AbhAEMAO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 5 Jan 2021 07:00:14 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1609847928;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=Qb8J8Y9ijZ6TqL99I9DAa9n5/16P5cL0/LvtQAx8fPg=;
-        b=XKJfAj6xst1EVC5G7JMZ8rVsUhQKNIVPL4QFJIilT9/ngBkbe6kCivD84B59SM54EYPgbi
-        RaqduAzKUzIrg0sZi6JEqn38NvkKvVudzULNmplTfenv9AEGa4Zks3LFAMju8sf2uxPKn+
-        VKhjz1adB9BHczVVOyC+RfTynv3Fcxk=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-283-FevQtQkwO-m4TbST9aLCIg-1; Tue, 05 Jan 2021 06:58:46 -0500
-X-MC-Unique: FevQtQkwO-m4TbST9aLCIg-1
-Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 8C50B802B40;
-        Tue,  5 Jan 2021 11:58:45 +0000 (UTC)
-Received: from bfoster.redhat.com (ovpn-114-23.rdu2.redhat.com [10.10.114.23])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 281F65D9C6;
-        Tue,  5 Jan 2021 11:58:45 +0000 (UTC)
-From:   Brian Foster <bfoster@redhat.com>
+        Tue, 5 Jan 2021 09:32:38 -0500
+Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:59392 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726429AbhAEOch (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 5 Jan 2021 09:32:37 -0500
+Received: from pps.filterd (m0098410.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.0.42/8.16.0.42) with SMTP id 105EAOJe115940;
+        Tue, 5 Jan 2021 09:31:53 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=from : to : cc : subject
+ : date : message-id : mime-version : content-transfer-encoding; s=pp1;
+ bh=mhxO1yNpwDzubrD22PikR7AmV6DiGBm6utdbPUIFYCc=;
+ b=hcb4GuxmhLkwHq2Lq/baCfAjpqfPSlhVg9Cd3B0Vm0nGkjSF6GibsH/85bI+HuUZ2c3I
+ 46qr9wdWbSFTgDRMOu0nwykGh/D1jlOOJotoP386asLdtfzOuE8fzYs2WLPRe1W1jw3a
+ wvtm9c3RYqWHYL2HcgijUfu36VTOzgsBgEmYTQ75VqkO96ssxabhCi7GWOsglnOB9Ajk
+ DHoasWea7RBYEdH3Pqv+pCKERFjoGeJH5o/+twcqUysdD0brMf3lYmco9FA/2XZtU1vD
+ Z/bHrYe5RTjYyGXmsih/WeyjfPgojCfsCkezM8YC1pbwMhjeN8AD6TaAxuZOZCChgNFU aQ== 
+Received: from ppma03fra.de.ibm.com (6b.4a.5195.ip4.static.sl-reverse.com [149.81.74.107])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 35vsn20p5b-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 05 Jan 2021 09:31:53 -0500
+Received: from pps.filterd (ppma03fra.de.ibm.com [127.0.0.1])
+        by ppma03fra.de.ibm.com (8.16.0.42/8.16.0.42) with SMTP id 105ESqdr027842;
+        Tue, 5 Jan 2021 14:31:49 GMT
+Received: from b06cxnps3074.portsmouth.uk.ibm.com (d06relay09.portsmouth.uk.ibm.com [9.149.109.194])
+        by ppma03fra.de.ibm.com with ESMTP id 35tgf8hhdx-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 05 Jan 2021 14:31:49 +0000
+Received: from d06av22.portsmouth.uk.ibm.com (d06av22.portsmouth.uk.ibm.com [9.149.105.58])
+        by b06cxnps3074.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 105EVk8Z22610226
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Tue, 5 Jan 2021 14:31:47 GMT
+Received: from d06av22.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id C08074C052;
+        Tue,  5 Jan 2021 14:31:46 +0000 (GMT)
+Received: from d06av22.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id 813294C058;
+        Tue,  5 Jan 2021 14:31:45 +0000 (GMT)
+Received: from riteshh-domain.ibmuc.com (unknown [9.199.32.130])
+        by d06av22.portsmouth.uk.ibm.com (Postfix) with ESMTP;
+        Tue,  5 Jan 2021 14:31:45 +0000 (GMT)
+From:   Ritesh Harjani <riteshh@linux.ibm.com>
 To:     fstests@vger.kernel.org
-Cc:     linux-xfs@vger.kernel.org
-Subject: [PATCH v2] generic/388: randomly recover via read-only mounts
-Date:   Tue,  5 Jan 2021 06:58:44 -0500
-Message-Id: <20210105115844.293207-1-bfoster@redhat.com>
+Cc:     linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org,
+        anju@linux.vnet.ibm.com, guan@eryu.me, darrick.wong@oracle.com,
+        Ritesh Harjani <riteshh@linux.ibm.com>
+Subject: [PATCHv3 1/2] common/rc: swapon should not fail for given FS in _require_scratch_swapfile()
+Date:   Tue,  5 Jan 2021 20:01:42 +0530
+Message-Id: <aad3aeb9c717c76fc4e5fd124037da2510f51054.1609848797.git.riteshh@linux.ibm.com>
+X-Mailer: git-send-email 2.26.2
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
+X-TM-AS-GCONF: 00
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.343,18.0.737
+ definitions=2021-01-05_02:2021-01-05,2021-01-05 signatures=0
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 mlxscore=0 impostorscore=0
+ clxscore=1011 spamscore=0 bulkscore=0 adultscore=0 lowpriorityscore=0
+ phishscore=0 priorityscore=1501 suspectscore=0 mlxlogscore=773
+ malwarescore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2009150000 definitions=main-2101050089
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-XFS has an issue where superblock counters may not be properly
-synced when recovery occurs via a read-only mount. This causes the
-filesystem to become inconsistent after unmount. To cover this test
-case, update generic/388 to switch between read-only and read-write
-mounts to perform log recovery.
+Filesystems e.g. ext* and XFS supports swapon by default and an error
+returned with swapon should be treated as a failure.
 
-Signed-off-by: Brian Foster <bfoster@redhat.com>
+Signed-off-by: Ritesh Harjani <riteshh@linux.ibm.com>
 ---
+v2 -> v3:
+1. Removed whitelisted naming convention.
+2. Added ext2/ext3 as well as supported FS for swapon.
+3. Removed local variable $fstyp, instead used $FSTYP directly in switch case.
 
-v2:
-- Tweak ro -> rw mount cycle error message to be unique.
-v1: https://lore.kernel.org/fstests/20201217145941.2513069-1-bfoster@redhat.com/
+ common/rc | 20 ++++++++++++++++----
+ 1 file changed, 16 insertions(+), 4 deletions(-)
 
- tests/generic/388 | 10 ++++++++--
- 1 file changed, 8 insertions(+), 2 deletions(-)
+diff --git a/common/rc b/common/rc
+index 33b5b598a198..649b1cfd884a 100644
+--- a/common/rc
++++ b/common/rc
+@@ -2401,10 +2401,22 @@ _require_scratch_swapfile()
+ 	# Minimum size for mkswap is 10 pages
+ 	_format_swapfile "$SCRATCH_MNT/swap" $(($(get_page_size) * 10))
 
-diff --git a/tests/generic/388 b/tests/generic/388
-index 451a6be2..2f97f266 100755
---- a/tests/generic/388
-+++ b/tests/generic/388
-@@ -66,8 +66,14 @@ for i in $(seq 1 $((50 * TIME_FACTOR)) ); do
- 		ps -e | grep fsstress > /dev/null 2>&1
- 	done
- 
--	# quit if mount fails so we don't shutdown the host fs
--	_scratch_cycle_mount || _fail "cycle mount failed"
-+	# Toggle between rw and ro mounts for recovery. Quit if any mount
-+	# attempt fails so we don't shutdown the host fs.
-+	if [ $((RANDOM % 2)) -eq 0 ]; then
-+		_scratch_cycle_mount || _fail "cycle mount failed"
-+	else
-+		_scratch_cycle_mount "ro" || _fail "cycle ro mount failed"
-+		_scratch_cycle_mount || _fail "cycle rw mount failed"
-+	fi
- done
- 
- # success, all done
--- 
+-	if ! swapon "$SCRATCH_MNT/swap" >/dev/null 2>&1; then
+-		_scratch_unmount
+-		_notrun "swapfiles are not supported"
+-	fi
++	# ext* and xfs have supported all variants of swap files since their
++	# introduction, so swapon should not fail.
++	case "$FSTYP" in
++	ext2|ext3|ext4|xfs)
++		if ! swapon "$SCRATCH_MNT/swap" >/dev/null 2>&1; then
++			_scratch_unmount
++			_fail "swapon failed for $FSTYP"
++		fi
++		;;
++	*)
++		if ! swapon "$SCRATCH_MNT/swap" >/dev/null 2>&1; then
++			_scratch_unmount
++			_notrun "swapfiles are not supported"
++		fi
++		;;
++	esac
+
+ 	swapoff "$SCRATCH_MNT/swap" >/dev/null 2>&1
+ 	_scratch_unmount
+--
 2.26.2
 
