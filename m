@@ -2,374 +2,155 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-19.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.5 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D4E16C43331
-	for <linux-fstests@archiver.kernel.org>; Tue,  5 Jan 2021 01:06:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6F0B9C433E0
+	for <linux-fstests@archiver.kernel.org>; Tue,  5 Jan 2021 11:02:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B6D0D22581
-	for <linux-fstests@archiver.kernel.org>; Tue,  5 Jan 2021 01:06:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 18A32229C7
+	for <linux-fstests@archiver.kernel.org>; Tue,  5 Jan 2021 11:02:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729047AbhAEBGt (ORCPT
+        id S1728006AbhAELCF (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 4 Jan 2021 20:06:49 -0500
-Received: from mail.kernel.org ([198.145.29.99]:39222 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728045AbhAEBAl (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 4 Jan 2021 20:00:41 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id CDB56225AA;
-        Tue,  5 Jan 2021 00:59:25 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1609808366;
-        bh=ZieGW3Et/wQUMZmGqWV7pv9/jbVeskaboo7z3aGg9o8=;
-        h=From:To:Cc:Subject:Date:From;
-        b=CvzIms4HkPnUFfJjuIdaKwwV4sT2TsQkN6U6J0de/eVKQSXkSjsraaf+nOkhBuuDk
-         9Z0vfgYlL3vSmDgs2p419yMAEVe15/DuKPvNP0sAguFfr7JGfBBxVGHywap4WLp2K/
-         LWESIn9maybFZ7Wyh3f5D5SDXPY7l0rN+I+qCBNAO7N2mJOMfhHraZ5ySnM+0DzY0u
-         FtwtvUsQuyphJGPUt/yB3oh2Ej2zuqB9HPN2ERmhX9WdMS/fg4BEnCocsbgqffBKXw
-         l0Z4xTrYb50jf4s/eLyxP6/5sqnYhERc6+n/YB5fUS0Ojs12jEznmPyQez987YauOq
-         aeQNUA7K6wPPw==
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     fstests@vger.kernel.org
-Cc:     linux-fsdevel@vger.kernel.org, linux-ext4@vger.kernel.org,
-        linux-f2fs-devel@lists.sourceforge.net, linux-xfs@vger.kernel.org,
-        Theodore Ts'o <tytso@mit.edu>, Christoph Hellwig <hch@lst.de>
-Subject: [xfstests RFC PATCH] generic: test for lazytime timestamp updates
-Date:   Mon,  4 Jan 2021 16:58:18 -0800
-Message-Id: <20210105005818.92978-1-ebiggers@kernel.org>
-X-Mailer: git-send-email 2.30.0
+        Tue, 5 Jan 2021 06:02:05 -0500
+Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:11240 "EHLO
+        mx0b-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1728175AbhAELCD (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 5 Jan 2021 06:02:03 -0500
+Received: from pps.filterd (m0127361.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.0.42/8.16.0.42) with SMTP id 105AVu1N038618;
+        Tue, 5 Jan 2021 06:01:17 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=subject : to : cc :
+ references : from : message-id : date : mime-version : in-reply-to :
+ content-type : content-transfer-encoding; s=pp1;
+ bh=p15zEV4D+9XYfzCqfaNsH+8wxq6VnaBwWqF0rU+ciI4=;
+ b=XbNtsGo8Kv4SQzajQLMR7i094c9kAgLbaCReqWihrI44V7OG/ubRO9wjyvmK8gN3fkek
+ SbU4IvwekjZg2g0sXhkegLRMdNfGtp/KedcyJNIrWjHnkuHXmaFlKk5DKdIws8gA0+dX
+ U6zfb60ZOBOJ/zJQ7lxkV3ffkNfjaFZGI+dBmaGMDnlS7MU8eQQyLAD+GGzHENPgp6FX
+ LTB8V5fw/JnpY2ybUKUeDC8DHBmkT00KVkEah5NolfV7/5P/tUHIzpiomH1cSULK8kO/
+ nTlvOHk3+2cCDerfaQGVxNqcBpvXXc6ZkRIAony8DoHeF/I0uyOfIONWV0HiG1S/RhG7 kQ== 
+Received: from ppma03ams.nl.ibm.com (62.31.33a9.ip4.static.sl-reverse.com [169.51.49.98])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 35vp6s9324-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 05 Jan 2021 06:01:16 -0500
+Received: from pps.filterd (ppma03ams.nl.ibm.com [127.0.0.1])
+        by ppma03ams.nl.ibm.com (8.16.0.42/8.16.0.42) with SMTP id 105AwRLF003340;
+        Tue, 5 Jan 2021 11:00:31 GMT
+Received: from b06cxnps3075.portsmouth.uk.ibm.com (d06relay10.portsmouth.uk.ibm.com [9.149.109.195])
+        by ppma03ams.nl.ibm.com with ESMTP id 35tgf8assu-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 05 Jan 2021 11:00:31 +0000
+Received: from b06wcsmtp001.portsmouth.uk.ibm.com (b06wcsmtp001.portsmouth.uk.ibm.com [9.149.105.160])
+        by b06cxnps3075.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 105B0TvI48759162
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Tue, 5 Jan 2021 11:00:29 GMT
+Received: from b06wcsmtp001.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id 0B5B7A4066;
+        Tue,  5 Jan 2021 11:00:29 +0000 (GMT)
+Received: from b06wcsmtp001.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id BE854A407A;
+        Tue,  5 Jan 2021 11:00:27 +0000 (GMT)
+Received: from [9.199.32.130] (unknown [9.199.32.130])
+        by b06wcsmtp001.portsmouth.uk.ibm.com (Postfix) with ESMTP;
+        Tue,  5 Jan 2021 11:00:27 +0000 (GMT)
+Subject: Re: [PATCHv2 1/2] common/rc: Add whitelisted FS support in
+ _require_scratch_swapfile()
+To:     "Darrick J. Wong" <darrick.wong@oracle.com>,
+        Eryu Guan <guan@eryu.me>
+Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
+        linux-xfs@vger.kernel.org, anju@linux.vnet.ibm.com
+References: <f161a49e6e3476d83c35b8e6a111644110ec4c8c.1608094988.git.riteshh@linux.ibm.com>
+ <3bd1f738-93b7-038d-6db9-7bf6a330b1ea@linux.ibm.com>
+ <20201220153906.GC3853@desktop> <20210104182545.GF6908@magnolia>
+From:   Ritesh Harjani <riteshh@linux.ibm.com>
+Message-ID: <24b16894-0ab5-b769-d05e-e55fa334706e@linux.ibm.com>
+Date:   Tue, 5 Jan 2021 16:30:27 +0530
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.11.0
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+In-Reply-To: <20210104182545.GF6908@magnolia>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+X-TM-AS-GCONF: 00
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.343,18.0.737
+ definitions=2021-01-05_01:2021-01-05,2021-01-05 signatures=0
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 mlxlogscore=999 clxscore=1015
+ lowpriorityscore=0 impostorscore=0 phishscore=0 malwarescore=0
+ priorityscore=1501 adultscore=0 bulkscore=0 spamscore=0 mlxscore=0
+ suspectscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2009150000 definitions=main-2101050061
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Eric Biggers <ebiggers@google.com>
 
-Test that when the lazytime mount option is enabled, updates to atime,
-mtime, and ctime get persisted in the cases when they should be.
 
-Note that this doesn't test that updates aren't persisted when they
-shouldn't be, as that would be harder to do.  (This also means that we
-don't have to check whether the filesystem supports lazytime before
-running the test.  If lazytime is ignored, the test will pass.)
+On 1/4/21 11:55 PM, Darrick J. Wong wrote:
+> On Sun, Dec 20, 2020 at 11:39:06PM +0800, Eryu Guan wrote:
+>> On Wed, Dec 16, 2020 at 10:53:45AM +0530, Ritesh Harjani wrote:
+>>>
+>>>
+>>> On 12/16/20 10:47 AM, Ritesh Harjani wrote:
+>>>> Filesystems e.g. ext4 and XFS supports swapon by default and an error
+>>>> returned with swapon should be treated as a failure. Hence
+>>>> add ext4/xfs as whitelisted fstype in _require_scratch_swapfile()
+>>>>
+>>>> Signed-off-by: Ritesh Harjani <riteshh@linux.ibm.com>
+>>>> ---
+>>>> v1->v2: Addressed comments from Eryu @[1]
+>>>> [1]: https://patchwork.kernel.org/project/fstests/cover/cover.1604000570.git.riteshh@linux.ibm.com/
+>>>>
+>>>>    common/rc | 20 ++++++++++++++++----
+>>>>    1 file changed, 16 insertions(+), 4 deletions(-)
+>>>>
+>>>> diff --git a/common/rc b/common/rc
+>>>> index 33b5b598a198..635b77a005c6 100644
+>>>> --- a/common/rc
+>>>> +++ b/common/rc
+>>>> @@ -2380,6 +2380,7 @@ _format_swapfile() {
+>>>>    # Check that the filesystem supports swapfiles
+>>>>    _require_scratch_swapfile()
+>>>>    {
+>>>> +	local fstyp=$FSTYP
+>>>>    	_require_scratch
+>>>>    	_require_command "$MKSWAP_PROG" "mkswap"
+>>>>
+>>>> @@ -2401,10 +2402,21 @@ _require_scratch_swapfile()
+>>>>    	# Minimum size for mkswap is 10 pages
+>>>>    	_format_swapfile "$SCRATCH_MNT/swap" $(($(get_page_size) * 10))
+>>>>
+>>>> -	if ! swapon "$SCRATCH_MNT/swap" >/dev/null 2>&1; then
+>>>> -		_scratch_unmount
+>>>> -		_notrun "swapfiles are not supported"
+>>>> -	fi
+>>>> +	# For whitelisted fstyp swapon should not fail.
+> 
+> I would use a different phase than 'whitelisted', since that doesn't
+> tell us why ext4 and xfs are special:
+> 
+> # ext* and xfs have supported all variants of swap files since their
+> # introduction, so swapon should not fail.
 
-As this test requires support for the shutdown ioctl, it currently runs
-only on ext4, f2fs, and xfs.  It passes on ext4 and f2fs, but it fails
-on xfs because xfs has a bug where it doesn't persist lazytime timestamp
-updates on user-triggered syncs or after dirtytime_expire_seconds has
-elapsed.  I've sent out patches to fix this bug.
+Sounds ok to me.
 
-Signed-off-by: Eric Biggers <ebiggers@google.com>
----
 
-RFC for now, since the XFS fix
-(https://lore.kernel.org/r/20210105005452.92521-14-ebiggers@kernel.org)
-hasn't been merged yet.
+> 
+>>>> +	case "$fstyp" in
+> 
+> $FSTYP, not $fstyp
 
- tests/generic/900     | 235 ++++++++++++++++++++++++++++++++++++++++++
- tests/generic/900.out |  37 +++++++
- tests/generic/group   |   1 +
- 3 files changed, 273 insertions(+)
- create mode 100755 tests/generic/900
- create mode 100644 tests/generic/900.out
+sure I will use $FSTYP directly and remove local fstyp variable.
 
-diff --git a/tests/generic/900 b/tests/generic/900
-new file mode 100755
-index 00000000..cbd4b12a
---- /dev/null
-+++ b/tests/generic/900
-@@ -0,0 +1,235 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0-only
-+# Copyright 2021 Google LLC
-+#
-+# FS QA Test No. 900
-+#
-+# Test that when the lazytime mount option is enabled, updates to atime, mtime,
-+# and ctime are persisted in (at least) the four cases when they should be:
-+#
-+# - the inode needs to be updated for some change unrelated to file timestamps
-+# - userspace calls fsync(), syncfs(), or sync()
-+# - the inode is evicted from memory
-+# - more than dirtytime_expire_seconds have elapsed
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+DIRTY_EXPIRE_CENTISECS_ORIG=$(</proc/sys/vm/dirty_expire_centisecs)
-+DIRTY_WRITEBACK_CENTISECS_ORIG=$(</proc/sys/vm/dirty_writeback_centisecs)
-+DIRTYTIME_EXPIRE_SECONDS_ORIG=$(</proc/sys/vm/dirtytime_expire_seconds)
-+
-+restore_expiration_settings()
-+{
-+	echo "$DIRTY_EXPIRE_CENTISECS_ORIG" > /proc/sys/vm/dirty_expire_centisecs
-+	echo "$DIRTY_WRITEBACK_CENTISECS_ORIG" > /proc/sys/vm/dirty_writeback_centisecs
-+	echo "$DIRTYTIME_EXPIRE_SECONDS_ORIG" > /proc/sys/vm/dirtytime_expire_seconds
-+}
-+
-+# Enable continuous writeback of dirty inodes, so that we don't have to wait
-+# for the typical 30 seconds default.
-+__expire_inodes()
-+{
-+	echo 1 > /proc/sys/vm/dirty_expire_centisecs
-+	echo 1 > /proc/sys/vm/dirty_writeback_centisecs
-+}
-+
-+# Trigger and wait for writeback of any dirty inodes (not dirtytime inodes).
-+expire_inodes()
-+{
-+	__expire_inodes
-+	# Userspace doesn't have direct visibility into when inodes are dirty,
-+	# so the best we can do is sleep for a couple seconds.
-+	sleep 2
-+	restore_expiration_settings
-+}
-+
-+# Trigger and wait for writeback of any dirtytime inodes.
-+expire_timestamps()
-+{
-+	# Enable immediate expiration of lazytime timestamps, so that we don't
-+	# have to wait for the typical 24 hours default.  This should quickly
-+	# turn dirtytime inodes into regular dirty inodes.
-+	echo 1 > /proc/sys/vm/dirtytime_expire_seconds
-+
-+	# Enable continuous writeback of dirty inodes.
-+	__expire_inodes
-+
-+	# Userspace doesn't have direct visibility into when inodes are dirty,
-+	# so the best we can do is sleep for a couple seconds.
-+	sleep 2
-+	restore_expiration_settings
-+}
-+
-+_cleanup()
-+{
-+	restore_expiration_settings
-+	rm -f $tmp.*
-+}
-+
-+. ./common/rc
-+. ./common/filter
-+
-+rm -f $seqres.full
-+
-+_supported_fs generic
-+# This test uses the shutdown command, so it has to use the scratch filesystem
-+# rather than the test filesystem.
-+_require_scratch
-+_require_scratch_shutdown
-+_require_xfs_io_command "pwrite"
-+_require_xfs_io_command "fsync"
-+_require_xfs_io_command "syncfs"
-+# This test doesn't have to check that the filesystem supports "lazytime", since
-+# "lazytime" is a VFS-level option, and at worst it just will be ignored.  This
-+# test will still pass in that case, as it only tests that timestamp updates are
-+# persisted when they should be; it doesn't test that timestamp updates aren't
-+# persisted when they shouldn't be.
-+
-+_scratch_mkfs &>> $seqres.full
-+_scratch_mount
-+
-+# Create the test file for which we'll update and check the timestamps.
-+file=$SCRATCH_MNT/file
-+$XFS_IO_PROG -f $file -c "pwrite 0 100" > /dev/null
-+
-+# Get the specified timestamp of $file in nanoseconds since the epoch.
-+get_timestamp()
-+{
-+	local timestamp_type=$1
-+
-+	local arg
-+	case $timestamp_type in
-+	atime)	arg=X ;;
-+	mtime)	arg=Y ;;
-+	ctime)	arg=Z ;;
-+	*)	_fail "Unhandled timestamp_type: $timestamp_type" ;;
-+	esac
-+	stat -c "%.9${arg}" $file | tr -d '.'
-+}
-+
-+do_test()
-+{
-+	local timestamp_type=$1
-+	local persist_method=$2
-+
-+	echo -e "\n# Testing that lazytime $timestamp_type update is persisted by $persist_method"
-+
-+	# Mount the filesystem with lazytime.  If atime is being tested, then
-+	# also use strictatime, since otherwise the filesystem may default to
-+	# relatime and not do the atime updates.
-+	if [[ $timestamp_type == atime ]]; then
-+		_scratch_cycle_mount lazytime,strictatime
-+	else
-+		_scratch_cycle_mount lazytime
-+	fi
-+
-+	# Update the specified timestamp on the file.
-+	local orig_time=$(get_timestamp $timestamp_type)
-+	sleep 0.1
-+	case $timestamp_type in
-+	atime)
-+		# Read from the file to update its atime.
-+		cat $file > /dev/null
-+		;;
-+	mtime)
-+		# Write to the file to update its mtime.  Make sure to not write
-+		# past the end of the file, as that would change i_size, which
-+		# would be an inode change which would cause the timestamp to
-+		# always be written -- thus making the test not detect bugs
-+		# where the timestamp doesn't get written.
-+		#
-+		# Also do the write twice, since XFS updates i_version the first
-+		# time, which likewise causes mtime to be written.  We want the
-+		# last thing done to just update mtime.
-+		$XFS_IO_PROG -f $file -c "pwrite 0 100" > /dev/null
-+		$XFS_IO_PROG -f $file -c "pwrite 0 100" > /dev/null
-+		;;
-+	ctime)
-+		# It isn't possible to update just ctime, so use 'touch -a'
-+		# to update both atime and ctime.
-+		touch -a $file
-+		;;
-+	esac
-+	local expected_time=$(get_timestamp $timestamp_type)
-+	if (( expected_time <= orig_time )); then
-+		echo "FAIL: $timestamp_type didn't increase after updating it (in-memory)"
-+	fi
-+
-+	# Do something that should cause the timestamp to be persisted.
-+	case $persist_method in
-+	other_inode_change)
-+		# Make a non-timestamp-related change to the inode.
-+		chmod 777 $file
-+		if [[ $timestamp_type == ctime ]]; then
-+			# The inode change will have updated ctime again.
-+			expected_time=$(get_timestamp ctime)
-+		fi
-+		# The inode may have been marked dirty but not actually written
-+		# yet.  Expire it by tweaking the VM settings and waiting.
-+		expire_inodes
-+		;;
-+	sync)
-+		# Execute the sync() system call.
-+		sync
-+		;;
-+	fsync)
-+		# Execute the fsync() system call on the file.
-+		$XFS_IO_PROG -r $file -c fsync
-+		;;
-+	syncfs)
-+		# Execute the syncfs() system call on the filesystem.
-+		$XFS_IO_PROG $SCRATCH_MNT -c syncfs
-+		;;
-+	eviction)
-+		# Evict the inode from memory.  In theory, drop_caches should do
-+		# the trick by itself.  But that actually just dirties the
-+		# inodes that need a lazytime update.  So we still need to wait
-+		# for inode writeback too.
-+		echo 2 > /proc/sys/vm/drop_caches
-+		expire_inodes
-+		;;
-+	expiration)
-+		# Expire the lazy timestamps via dirtytime_expire_seconds.
-+		expire_timestamps
-+		;;
-+	*)
-+		_fail "Unhandled persist_method: $persist_method"
-+	esac
-+
-+	# Use the shutdown ioctl to abort the filesystem.
-+	#
-+	# The timestamp might have just been written to the log and not *fully*
-+	# persisted yet, so use -f to ensure the log gets flushed.
-+	_scratch_shutdown -f
-+
-+	# Now remount the filesystem and verify that the timestamp really got
-+	# updated as expected.
-+	_scratch_cycle_mount
-+	local ondisk_time=$(get_timestamp $timestamp_type)
-+	if (( ondisk_time != expected_time )); then
-+		# Fail the test by printing unexpected output rather than by
-+		# calling _fail(), since we can still run the other test cases.
-+		echo "FAIL: lazytime $timestamp_type wasn't persisted by $persist_method"
-+		echo "ondisk_time ($ondisk_time) != expected_time ($expected_time)"
-+	fi
-+}
-+
-+for timestamp_type in atime mtime ctime; do
-+	do_test $timestamp_type other_inode_change
-+	do_test $timestamp_type sync
-+	do_test $timestamp_type fsync
-+	do_test $timestamp_type syncfs
-+	do_test $timestamp_type eviction
-+	do_test $timestamp_type expiration
-+done
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/900.out b/tests/generic/900.out
-new file mode 100644
-index 00000000..53bd2e29
---- /dev/null
-+++ b/tests/generic/900.out
-@@ -0,0 +1,37 @@
-+QA output created by 900
-+
-+# Testing that lazytime atime update is persisted by other_inode_change
-+
-+# Testing that lazytime atime update is persisted by sync
-+
-+# Testing that lazytime atime update is persisted by fsync
-+
-+# Testing that lazytime atime update is persisted by syncfs
-+
-+# Testing that lazytime atime update is persisted by eviction
-+
-+# Testing that lazytime atime update is persisted by expiration
-+
-+# Testing that lazytime mtime update is persisted by other_inode_change
-+
-+# Testing that lazytime mtime update is persisted by sync
-+
-+# Testing that lazytime mtime update is persisted by fsync
-+
-+# Testing that lazytime mtime update is persisted by syncfs
-+
-+# Testing that lazytime mtime update is persisted by eviction
-+
-+# Testing that lazytime mtime update is persisted by expiration
-+
-+# Testing that lazytime ctime update is persisted by other_inode_change
-+
-+# Testing that lazytime ctime update is persisted by sync
-+
-+# Testing that lazytime ctime update is persisted by fsync
-+
-+# Testing that lazytime ctime update is persisted by syncfs
-+
-+# Testing that lazytime ctime update is persisted by eviction
-+
-+# Testing that lazytime ctime update is persisted by expiration
-diff --git a/tests/generic/group b/tests/generic/group
-index fec35d8e..2c19381c 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -624,3 +624,4 @@
- 619 auto rw enospc
- 620 auto mount quick
- 621 auto quick encrypt
-+900 auto
--- 
-2.30.0
+> 
+>>>> +	ext4|xfs)
+> 
+> I would also add a few more FSTYPs here, since at least ext2 and ext3
+> supported swap files.  Are there other old fses that do?
 
+Sure, agreed. I will add ext2 & ext3 too.
+
+-ritesh
