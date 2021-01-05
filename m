@@ -2,149 +2,123 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	UNPARSEABLE_RELAY autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7B174C433DB
-	for <linux-fstests@archiver.kernel.org>; Tue,  5 Jan 2021 14:33:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5ABE8C433DB
+	for <linux-fstests@archiver.kernel.org>; Tue,  5 Jan 2021 17:32:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4B78F22AAE
-	for <linux-fstests@archiver.kernel.org>; Tue,  5 Jan 2021 14:33:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 31AF822D3E
+	for <linux-fstests@archiver.kernel.org>; Tue,  5 Jan 2021 17:32:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726352AbhAEOdC (ORCPT
+        id S1730225AbhAERc0 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 5 Jan 2021 09:33:02 -0500
-Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:30696 "EHLO
-        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726076AbhAEOdC (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 5 Jan 2021 09:33:02 -0500
-Received: from pps.filterd (m0098394.ppops.net [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com (8.16.0.42/8.16.0.42) with SMTP id 105EW9f6071208;
-        Tue, 5 Jan 2021 09:32:13 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=from : to : cc : subject
- : date : message-id : in-reply-to : references : mime-version :
- content-transfer-encoding; s=pp1;
- bh=VjOyvlwRQ8IN757uWSoatarB17Xy/ESK3JmlD7zhSzw=;
- b=Q82bEc6D5A4V3Q3Z/1RlTKKNdAii4rHl19rG4de5xMgHS2C0zbfN59KlYw5HwsFAAaZZ
- 24Ek3lOt++lVKTf4B2+ZUdB8QkFN92BIT4jLr2WKaR2Xo91auicM+klrxc2YTRe3icAb
- ayO1yRlt1U33XhOH1unI0nEWUBNk1UgjVZTe7ePDtTd/rHmysEeTjXZkGN9PWXFzzMOJ
- JPcHCSblMIPMxvtrI6z3CcbBUjC0tXTrcuWc3JbmoigaovoMgiPs6SuCvB2NUedx3cFO
- iutVBOOuSS45TQKXvE7g+mAdeT1/t8onM4cbXbfRcPbeo/J6GR51iSTCQH1+iopRr5w/ Nw== 
-Received: from ppma06fra.de.ibm.com (48.49.7a9f.ip4.static.sl-reverse.com [159.122.73.72])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 35vs671rpe-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Tue, 05 Jan 2021 09:32:12 -0500
-Received: from pps.filterd (ppma06fra.de.ibm.com [127.0.0.1])
-        by ppma06fra.de.ibm.com (8.16.0.42/8.16.0.42) with SMTP id 105ESAKd030134;
-        Tue, 5 Jan 2021 14:31:50 GMT
-Received: from b06cxnps4074.portsmouth.uk.ibm.com (d06relay11.portsmouth.uk.ibm.com [9.149.109.196])
-        by ppma06fra.de.ibm.com with ESMTP id 35tg3hhhg4-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Tue, 05 Jan 2021 14:31:50 +0000
-Received: from d06av22.portsmouth.uk.ibm.com (d06av22.portsmouth.uk.ibm.com [9.149.105.58])
-        by b06cxnps4074.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 105EVmZS41877910
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Tue, 5 Jan 2021 14:31:48 GMT
-Received: from d06av22.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 7155B4C050;
-        Tue,  5 Jan 2021 14:31:48 +0000 (GMT)
-Received: from d06av22.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 1AB5D4C040;
-        Tue,  5 Jan 2021 14:31:47 +0000 (GMT)
-Received: from riteshh-domain.ibmuc.com (unknown [9.199.32.130])
-        by d06av22.portsmouth.uk.ibm.com (Postfix) with ESMTP;
-        Tue,  5 Jan 2021 14:31:46 +0000 (GMT)
-From:   Ritesh Harjani <riteshh@linux.ibm.com>
-To:     fstests@vger.kernel.org
-Cc:     linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org,
-        anju@linux.vnet.ibm.com, guan@eryu.me, darrick.wong@oracle.com,
-        Ritesh Harjani <riteshh@linux.ibm.com>
-Subject: [PATCHv3 2/2] generic/496: ext4 and xfs supports swapon on fallocated file
-Date:   Tue,  5 Jan 2021 20:01:43 +0530
-Message-Id: <12d1420a4a3fe6be0918a8a13a1960db47032330.1609848797.git.riteshh@linux.ibm.com>
-X-Mailer: git-send-email 2.26.2
-In-Reply-To: <aad3aeb9c717c76fc4e5fd124037da2510f51054.1609848797.git.riteshh@linux.ibm.com>
-References: <aad3aeb9c717c76fc4e5fd124037da2510f51054.1609848797.git.riteshh@linux.ibm.com>
+        Tue, 5 Jan 2021 12:32:26 -0500
+Received: from aserp2130.oracle.com ([141.146.126.79]:33914 "EHLO
+        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726151AbhAERc0 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 5 Jan 2021 12:32:26 -0500
+Received: from pps.filterd (aserp2130.oracle.com [127.0.0.1])
+        by aserp2130.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 105HSqCZ011284;
+        Tue, 5 Jan 2021 17:31:44 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
+ : subject : message-id : references : mime-version : content-type :
+ in-reply-to; s=corp-2020-01-29;
+ bh=PuciWH11jiVANDjy/k7JXxf92CnSQttqHdqP/OmTB0Q=;
+ b=bJkhE8fP0EScfehQUkFHG7p0OzF2Xy7J2dGTROZ2zcSS8n/SdtMBTpK7+PFrqQNT9foG
+ MH0vbmXRLSW7IPfpl9FKA5CM3MWS4XGODUbgBbpI84NWCIAnbZY2Pd3WOeOU2ioq91P/
+ AGtbP+m+F0FprKcYxa3SukqjjLJ5A4Voxcku4WOiV70OJPsn60kMKZ+yjpbXP55fFPBX
+ d9KV3uL4MqO+EJ7ro1Gg/9oMpod7qtdZBh94XtU3agqKQdxnyKnRGnm9xQB6z797fK+V
+ ZRoXuZRrGvJoMagOJAjCm442DFBFixTTi//JdKhDeZjdE7Wtxs0apHFrQQwWMt7Vi6ME 0A== 
+Received: from userp3020.oracle.com (userp3020.oracle.com [156.151.31.79])
+        by aserp2130.oracle.com with ESMTP id 35tebasye8-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Tue, 05 Jan 2021 17:31:43 +0000
+Received: from pps.filterd (userp3020.oracle.com [127.0.0.1])
+        by userp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 105HUOAf175210;
+        Tue, 5 Jan 2021 17:31:43 GMT
+Received: from aserv0122.oracle.com (aserv0122.oracle.com [141.146.126.236])
+        by userp3020.oracle.com with ESMTP id 35uxnsyckf-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Tue, 05 Jan 2021 17:31:43 +0000
+Received: from abhmp0016.oracle.com (abhmp0016.oracle.com [141.146.116.22])
+        by aserv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 105HVfkb007005;
+        Tue, 5 Jan 2021 17:31:42 GMT
+Received: from localhost (/67.169.218.210)
+        by default (Oracle Beehive Gateway v4.0)
+        with ESMTP ; Tue, 05 Jan 2021 17:31:41 +0000
+Date:   Tue, 5 Jan 2021 09:31:41 -0800
+From:   "Darrick J. Wong" <darrick.wong@oracle.com>
+To:     Brian Foster <bfoster@redhat.com>
+Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH v2] generic/388: randomly recover via read-only mounts
+Message-ID: <20210105173141.GY6918@magnolia>
+References: <20210105115844.293207-1-bfoster@redhat.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-TM-AS-GCONF: 00
-X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.343,18.0.737
- definitions=2021-01-05_02:2021-01-05,2021-01-05 signatures=0
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 phishscore=0 malwarescore=0
- mlxlogscore=728 bulkscore=0 mlxscore=0 lowpriorityscore=0 spamscore=0
- clxscore=1015 suspectscore=0 impostorscore=0 adultscore=0
- priorityscore=1501 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2009150000 definitions=main-2101050089
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210105115844.293207-1-bfoster@redhat.com>
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9855 signatures=668683
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 adultscore=0 phishscore=0 spamscore=0
+ malwarescore=0 mlxscore=0 mlxlogscore=999 suspectscore=0 bulkscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2009150000
+ definitions=main-2101050103
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9855 signatures=668683
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=0 phishscore=0
+ priorityscore=1501 spamscore=0 mlxscore=0 clxscore=1015 bulkscore=0
+ lowpriorityscore=0 impostorscore=0 mlxlogscore=999 adultscore=0
+ malwarescore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2009150000 definitions=main-2101050103
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-ext4, xfs should not fail swapon on fallocated file. Currently if this
-fails the fstst was not returning a failure. Fix those for given
-filesystems (for now added ext4/xfs).
-There were some regressions which went unnoticed due to this in ext4
-tree, which later got fixed as part of this patch [1]
+On Tue, Jan 05, 2021 at 06:58:44AM -0500, Brian Foster wrote:
+> XFS has an issue where superblock counters may not be properly
+> synced when recovery occurs via a read-only mount. This causes the
+> filesystem to become inconsistent after unmount. To cover this test
+> case, update generic/388 to switch between read-only and read-write
+> mounts to perform log recovery.
+> 
+> Signed-off-by: Brian Foster <bfoster@redhat.com>
 
-[1]: https://patchwork.ozlabs.org/patch/1357275
+Looks good to me,
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
 
-Signed-off-by: Ritesh Harjani <riteshh@linux.ibm.com>
----
-v2 -> v3:
-1. Removed whitelisted naming convention.
+--D
 
- tests/generic/496   | 16 +++++++++++++---
- tests/generic/group |  2 +-
- 2 files changed, 14 insertions(+), 4 deletions(-)
-
-diff --git a/tests/generic/496 b/tests/generic/496
-index 805c6ac1c0ea..1bfd16411b8a 100755
---- a/tests/generic/496
-+++ b/tests/generic/496
-@@ -5,7 +5,7 @@
- # FS QA Test No. 496
- #
- # Test various swapfile activation oddities on filesystems that support
--# fallocated swapfiles.
-+# fallocated swapfiles (for given fs ext4/xfs)
- #
- seq=`basename $0`
- seqres=$RESULT_DIR/$seq
-@@ -61,8 +61,18 @@ touch $swapfile
- $CHATTR_PROG +C $swapfile >> $seqres.full 2>&1
- $XFS_IO_PROG -f -c "falloc 0 $len" $swapfile >> $seqres.full
- "$here/src/mkswap" $swapfile
--"$here/src/swapon" $swapfile >> $seqres.full 2>&1 || \
--	_notrun "fallocated swap not supported here"
-+
-+# ext4/xfs should not fail for swapon on fallocated files
-+case $FSTYP in
-+ext4|xfs)
-+	"$here/src/swapon" $swapfile >> $seqres.full 2>&1 || \
-+		_fail "swapon failed on fallocated file"
-+	;;
-+*)
-+	"$here/src/swapon" $swapfile >> $seqres.full 2>&1 || \
-+		_notrun "fallocated swap not supported here"
-+	;;
-+esac
- swapoff $swapfile
-
- # Create a fallocated swap file and touch every other $PAGE_SIZE to create
-diff --git a/tests/generic/group b/tests/generic/group
-index fec35d8e7b12..30a73605610d 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -498,7 +498,7 @@
- 493 auto quick swap dedupe
- 494 auto quick swap punch
- 495 auto quick swap
--496 auto quick swap
-+496 auto quick swap prealloc
- 497 auto quick swap collapse
- 498 auto quick log
- 499 auto quick rw collapse zero
---
-2.26.2
-
+> ---
+> 
+> v2:
+> - Tweak ro -> rw mount cycle error message to be unique.
+> v1: https://lore.kernel.org/fstests/20201217145941.2513069-1-bfoster@redhat.com/
+> 
+>  tests/generic/388 | 10 ++++++++--
+>  1 file changed, 8 insertions(+), 2 deletions(-)
+> 
+> diff --git a/tests/generic/388 b/tests/generic/388
+> index 451a6be2..2f97f266 100755
+> --- a/tests/generic/388
+> +++ b/tests/generic/388
+> @@ -66,8 +66,14 @@ for i in $(seq 1 $((50 * TIME_FACTOR)) ); do
+>  		ps -e | grep fsstress > /dev/null 2>&1
+>  	done
+>  
+> -	# quit if mount fails so we don't shutdown the host fs
+> -	_scratch_cycle_mount || _fail "cycle mount failed"
+> +	# Toggle between rw and ro mounts for recovery. Quit if any mount
+> +	# attempt fails so we don't shutdown the host fs.
+> +	if [ $((RANDOM % 2)) -eq 0 ]; then
+> +		_scratch_cycle_mount || _fail "cycle mount failed"
+> +	else
+> +		_scratch_cycle_mount "ro" || _fail "cycle ro mount failed"
+> +		_scratch_cycle_mount || _fail "cycle rw mount failed"
+> +	fi
+>  done
+>  
+>  # success, all done
+> -- 
+> 2.26.2
+> 
