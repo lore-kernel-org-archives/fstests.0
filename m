@@ -2,224 +2,121 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-19.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 21AA6C433E0
-	for <linux-fstests@archiver.kernel.org>; Mon, 11 Jan 2021 11:42:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E9C01C433E0
+	for <linux-fstests@archiver.kernel.org>; Mon, 11 Jan 2021 12:16:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E42A9224D3
-	for <linux-fstests@archiver.kernel.org>; Mon, 11 Jan 2021 11:42:43 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AA3D2221E3
+	for <linux-fstests@archiver.kernel.org>; Mon, 11 Jan 2021 12:16:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729729AbhAKLmm (ORCPT
+        id S1726215AbhAKMQd (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 11 Jan 2021 06:42:42 -0500
-Received: from mail.kernel.org ([198.145.29.99]:35196 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729674AbhAKLmm (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 11 Jan 2021 06:42:42 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 7BD1820735;
-        Mon, 11 Jan 2021 11:42:00 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1610365321;
-        bh=8iWjMGAjtpoEUdqOeZSy456SqX09Ik6Edy26Nr/njsQ=;
-        h=From:To:Cc:Subject:Date:From;
-        b=ZCA9MBXfLNpRy9xDCBj9H1pcrBrhqqPP9nXns+uHkrZQtymekFs7Km1WYjGuwqWoT
-         GAERn6yCI2wprg4sG/+AucVKonAG6LuSVelWWN4UMd7fNtPB48AhQDSJIZvAmfGIgG
-         IG8fOnh6ULUUK39aq+0pTLHsRdA/+sNMfIRrLti/0stiJiNOZqSUhLWDzg+HCVohdQ
-         MdnxlrqvFg4TBQsZFjofcne6xyDM1EgWFssT9qc5W7fojXYfnPknLC5fDjdDK/0g4G
-         BoM1rEjHkWtfh9IDRTHu+QXciiyPV2FFiSEwClbhtgHuteCmzGOO6koV9DTSjSchN9
-         n30W1hHFwk55Q==
-From:   fdmanana@kernel.org
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH] btrfs: test incremental send after cloning extents from the same file
-Date:   Mon, 11 Jan 2021 11:41:54 +0000
-Message-Id: <8337e3633d362dba6c2df168bd13ff3b75c68a92.1610363747.git.fdmanana@suse.com>
-X-Mailer: git-send-email 2.28.0
+        Mon, 11 Jan 2021 07:16:33 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37130 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725919AbhAKMQb (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 11 Jan 2021 07:16:31 -0500
+Received: from mail-qt1-x833.google.com (mail-qt1-x833.google.com [IPv6:2607:f8b0:4864:20::833])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ABD5AC061795;
+        Mon, 11 Jan 2021 04:15:50 -0800 (PST)
+Received: by mail-qt1-x833.google.com with SMTP id e15so1117329qte.9;
+        Mon, 11 Jan 2021 04:15:50 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:reply-to:from:date:message-id
+         :subject:to:cc:content-transfer-encoding;
+        bh=IsF5dCerd4QVTKKX8OpS9mFHO2oe9mdyNl5ZiwNxlOo=;
+        b=bj6MWYx1aigP6bu7V8Zoix2RcDJ3G+StSNhrWKDLV8Sd1ybTbIi99UzLhErqBPp23z
+         U8d32IUok6KscrVZ124udmb6Pw0QZVvhHjpKPWOaXQBc9DaLSEz5CvTKspFoUsFDtE3Y
+         K6dBVFB2GQ/jqDtmHHwnzZUG7NYHhtKR+SQ6wrqVBKOMScubPOZYi+4BiYOjSRi87W0c
+         zCXjtsb1AmYMZaIX9H64PcgUjYLJpk9ynLl7pG32wlODzLxGPOuVJ+tPog/69qf18Hls
+         qUeRhYJJ38KZaQ4k5tDWiNo2o9oAq26xmA/zxrbj+ElvUFSw+lzgvoFwZTQZ1h3GkMNK
+         tRDA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:reply-to
+         :from:date:message-id:subject:to:cc:content-transfer-encoding;
+        bh=IsF5dCerd4QVTKKX8OpS9mFHO2oe9mdyNl5ZiwNxlOo=;
+        b=bwWjzd85God8QBJD2dJq3zvBFdffxsAUnZFFS9nF/0Jqudcpos1Eu3C69uiCY2ULmo
+         h0l8V4SaTDnXDPPlU/ZgrI/A14g37uplDAnf30ePcMjdjq3UOMbe2/dQsi4Nf2Ip0A4+
+         tXzBTX0OmpmmE/UCcXqKdaMUYKOLrhibaqD8hg5mDvCAs24WFTdkLl+g5l5NyEkYjrtr
+         oRk9fLzB61DpVCb6QRcFc1OM7F9i4mGjGZYoMPL3uUWyHrHw8xTT+QME+5aFSEbh/h3a
+         Hv4OgijsTRmbaSvjY/cIAdaWkDKP5G3BBBnmoNFJw9OZn7W+bq/l1uBq/PXf3LPcws6w
+         Z0yg==
+X-Gm-Message-State: AOAM533zwOG66a/eciuLu42w/IKvvqHwojscexYO6bFEq9IMt2xcY89W
+        yFr9n+O0OeZL6J+2jJxe/WzBpu3ffVaEq9RCM5M=
+X-Google-Smtp-Source: ABdhPJynCpOZKGejF+uFRZtWZmw8lxdKl5nGvKfHtDADqsltWP78tSgb++8S7q2U3x4A0DM7+6T9DoALCTYaBh1emxA=
+X-Received: by 2002:ac8:4cda:: with SMTP id l26mr7649532qtv.213.1610367348507;
+ Mon, 11 Jan 2021 04:15:48 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20201111113152.136729-1-wqu@suse.com> <CAL3q7H5W6U4jYGBszQF59RLi-aehO9vBTNU_HMTi8hRfK7gjGg@mail.gmail.com>
+ <d5cabe8e-37cb-42b7-9bd4-ba7ddca68b20@gmx.com> <20201113151946.GY6756@twin.jikos.cz>
+ <705e1226-2aaf-0d5f-45ed-03b25457e680@gmx.com>
+In-Reply-To: <705e1226-2aaf-0d5f-45ed-03b25457e680@gmx.com>
+Reply-To: fdmanana@gmail.com
+From:   Filipe Manana <fdmanana@gmail.com>
+Date:   Mon, 11 Jan 2021 12:15:37 +0000
+Message-ID: <CAL3q7H7_-p1hKvJ9twWq3dd5Qj3QS4ujUaYwsy+H_j6u2uWThw@mail.gmail.com>
+Subject: Re: [PATCH] fstests: btrfs: check qgroup doesn't crash when beyond limit
+To:     Qu Wenruo <quwenruo.btrfs@gmx.com>
+Cc:     dsterba@suse.cz, Qu Wenruo <wqu@suse.com>,
+        linux-btrfs <linux-btrfs@vger.kernel.org>,
+        fstests <fstests@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Filipe Manana <fdmanana@suse.com>
+On Sat, Nov 14, 2020 at 12:09 AM Qu Wenruo <quwenruo.btrfs@gmx.com> wrote:
+>
+>
+>
+> On 2020/11/13 =E4=B8=8B=E5=8D=8811:19, David Sterba wrote:
+> > On Thu, Nov 12, 2020 at 07:50:22AM +0800, Qu Wenruo wrote:
+> >>>> +$BTRFS_UTIL_PROG quota enable $SCRATCH_MNT
+> >>>> +$BTRFS_UTIL_PROG quota rescan -w $SCRATCH_MNT >> $seqres.full
+> >>>> +
+> >>>> +# Set the limit to just 512MiB, which is way below the existing usa=
+ge
+> >>>> +$BTRFS_UTIL_PROG qgroup limit  512M $SCRATCH_MNT $SCRATCH_MNT
+> >>>
+> >>> $SCRATCH_MNT twice by mistake, though the command still works and the
+> >>> test still reproduces the issue.
+> >>
+> >> Nope, that's the expected behavior.
+> >>
+> >> Btrfs qgroup limit <size> <path>|<qgroupid> <path>
+> >>
+> >> The first path is to determine qgroupid, while the last path is to
+> >> determine the fs.
+> >>
+> >> In this particular case, since we're limit the 0/5 qgroup, it's also t=
+he
+> >> as the mount point, thus we specific it twice.
+> >
+> > So why didn't you specify 0/5 so it's clear?
+> >
+> Oh no, my brain just shorted, and forgot that it's 0/5 fixed for fs tree.
+>
+> 0/5 is indeed much better.
 
-Test that an incremental send operation correctly issues clone operations
-for a file that had different parts of one of its extents cloned into
-itself, at different offsets, and a large part of that extent was
-overwritten, so all the reflinks only point to subranges of the extent.
+Any reason this wasn't merged? What happened?
 
-This currently fails on btrfs but is fixed by a patch for the kernel that
-has the following subject:
+Thanks.
 
- "btrfs: send, fix invalid clone operations when cloning from the same file and root"
+>
+> Thanks,
+> Qu
+>
 
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
- tests/btrfs/228     | 109 ++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/228.out |  24 ++++++++++
- tests/btrfs/group   |   1 +
- 3 files changed, 134 insertions(+)
- create mode 100755 tests/btrfs/228
- create mode 100644 tests/btrfs/228.out
 
-diff --git a/tests/btrfs/228 b/tests/btrfs/228
-new file mode 100755
-index 00000000..0a3fb249
---- /dev/null
-+++ b/tests/btrfs/228
-@@ -0,0 +1,109 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2021 SUSE Linux Products GmbH. All Rights Reserved.
-+#
-+# FS QA Test No. btrfs/228
-+#
-+# Test that an incremental send operation correctly issues clone operations for
-+# a file that had different parts of one of its extents cloned into itself, at
-+# different offsets, and a large part of that extent was overwritten, so all the
-+# reflinks only point to subranges of the extent.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -fr $send_files_dir
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/reflink
-+
-+# real QA test starts here
-+_supported_fs btrfs
-+_require_test
-+_require_scratch_reflink
-+
-+send_files_dir=$TEST_DIR/btrfs-test-$seq
-+
-+rm -f $seqres.full
-+rm -fr $send_files_dir
-+mkdir $send_files_dir
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+
-+# Create our test file with a single and large extent (1M) and with different
-+# content for different file ranges that will be reflinked later.
-+$XFS_IO_PROG -f \
-+	     -c "pwrite -S 0xab 0 128K" \
-+	     -c "pwrite -S 0xcd 128K 128K" \
-+	     -c "pwrite -S 0xef 256K 256K" \
-+	     -c "pwrite -S 0x1a 512K 512K" \
-+	     $SCRATCH_MNT/foobar | _filter_xfs_io
-+
-+# Now create the base snapshot, which is going to be the parent snapshot for
-+# a later incremental send.
-+$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
-+	$SCRATCH_MNT/mysnap1 > /dev/null
-+
-+$BTRFS_UTIL_PROG send -f $send_files_dir/1.snap \
-+	$SCRATCH_MNT/mysnap1 2>&1 1>/dev/null | _filter_scratch
-+
-+# Now do a series of changes to our file such that we end up with different
-+# parts of the extent reflinked into different file offsets and we overwrite
-+# a large part of the extent too, so no file extent items refer to that part
-+# that was overwritten. This used to confure the algorithm used by the kernel
-+# to figure out which file ranges to clone, making it attempt to clone from
-+# a source range starting at the current eof of the file, resulting in the
-+# receiver to fail since it is an invalid clone operation.
-+#
-+$XFS_IO_PROG -c "reflink $SCRATCH_MNT/foobar 64K 1M 960K" \
-+	     -c "reflink $SCRATCH_MNT/foobar 0K 512K 256K" \
-+	     -c "reflink $SCRATCH_MNT/foobar 512K 128K 256K" \
-+	     -c "pwrite -S 0x73 384K 640K" \
-+	     $SCRATCH_MNT/foobar | _filter_xfs_io
-+
-+$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
-+		 $SCRATCH_MNT/mysnap2 > /dev/null
-+$BTRFS_UTIL_PROG send -p $SCRATCH_MNT/mysnap1 -f $send_files_dir/2.snap \
-+		 $SCRATCH_MNT/mysnap2 2>&1 1>/dev/null | _filter_scratch
-+
-+echo "File digest in the original filesystem:"
-+_md5_checksum $SCRATCH_MNT/mysnap2/foobar
-+
-+# Now recreate the filesystem by receiving both send streams and verify we get
-+# the same content that the original filesystem had.
-+_scratch_unmount
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+
-+$BTRFS_UTIL_PROG receive -f $send_files_dir/1.snap $SCRATCH_MNT > /dev/null
-+
-+# The receive operation below used to fail with the following error:
-+#
-+#    ERROR: failed to clone extents to foobar: Invalid argument
-+#
-+# This is because the send stream included a clone operation to clone from the
-+# current file eof into eof (we can't clone from eof and neither the source
-+# range can overlap with the destination range), resulting in the receiver to
-+# fail with -EINVAL when attempting the clone operation.
-+#
-+$BTRFS_UTIL_PROG receive -f $send_files_dir/2.snap $SCRATCH_MNT > /dev/null
-+
-+# Must match what we had in the original filesystem.
-+echo "File digest in the new filesystem:"
-+_md5_checksum $SCRATCH_MNT/mysnap2/foobar
-+
-+status=0
-+exit
-diff --git a/tests/btrfs/228.out b/tests/btrfs/228.out
-new file mode 100644
-index 00000000..b6e76fe3
---- /dev/null
-+++ b/tests/btrfs/228.out
-@@ -0,0 +1,24 @@
-+QA output created by 228
-+wrote 131072/131072 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 131072/131072 bytes at offset 131072
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 262144/262144 bytes at offset 262144
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 524288/524288 bytes at offset 524288
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+At subvol SCRATCH_MNT/mysnap1
-+linked 983040/983040 bytes at offset 1048576
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+linked 262144/262144 bytes at offset 524288
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+linked 262144/262144 bytes at offset 131072
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 655360/655360 bytes at offset 393216
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+At subvol SCRATCH_MNT/mysnap2
-+File digest in the original filesystem:
-+9c13c61cb0b9f5abf45344375cb04dfa
-+At subvol mysnap1
-+File digest in the new filesystem:
-+9c13c61cb0b9f5abf45344375cb04dfa
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index a9e53832..61e14bf4 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -229,3 +229,4 @@
- 225 auto quick volume seed
- 226 auto quick rw snapshot clone prealloc punch
- 227 auto quick send
-+228 auto quick send clone
--- 
-2.28.0
+--=20
+Filipe David Manana,
 
+=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
+ right.=E2=80=9D
