@@ -2,144 +2,175 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E88B0C433DB
-	for <linux-fstests@archiver.kernel.org>; Sun, 10 Jan 2021 11:14:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 053ECC433E9
+	for <linux-fstests@archiver.kernel.org>; Mon, 11 Jan 2021 09:18:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B785722581
-	for <linux-fstests@archiver.kernel.org>; Sun, 10 Jan 2021 11:14:08 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BAEF322AAA
+	for <linux-fstests@archiver.kernel.org>; Mon, 11 Jan 2021 09:18:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726215AbhAJLNx (ORCPT
+        id S1728190AbhAKJSc (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 10 Jan 2021 06:13:53 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55918 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726069AbhAJLNw (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 10 Jan 2021 06:13:52 -0500
-Received: from mail-pf1-x433.google.com (mail-pf1-x433.google.com [IPv6:2607:f8b0:4864:20::433])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 90F19C061786
-        for <fstests@vger.kernel.org>; Sun, 10 Jan 2021 03:13:12 -0800 (PST)
-Received: by mail-pf1-x433.google.com with SMTP id 11so9224171pfu.4
-        for <fstests@vger.kernel.org>; Sun, 10 Jan 2021 03:13:12 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=message-id:date:from:to:subject:mime-version:content-disposition;
-        bh=k1PqSGYxvbvYsrI0kVP/49o/60J9tDX/X+O+ZScsYgQ=;
-        b=fjwDoZkZvj08JNkhcGvzPSgx63JjViHTM/EXOqsHLAwccTc8fkYTqVxD8GCVUgM8ur
-         2kiyWVenV3xtL4f9lt+YJyC7iWlsPQW8fsktMCc+DlkYRqFsHaMtV85UWZXyZEf5evaN
-         vWy1/A7ZpAgd0rJPlBBtzzHzOLQThY7FykGhaavQgJtjHMbe92kbDxFq3jHgi6sdffT4
-         umFp2wK+t5+8lI1GjqQYYCILucWRG4azBJ+8rnPBK8b+S16lliYQ91S5L53i/Ak4ZDTK
-         ry+XnJK6TS9B+56pn34a/V7NWxH3zKEVPssBBmye5sUgE5mrjxyRL1CUT1oVjSY1DGpr
-         gwxQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:message-id:date:from:to:subject:mime-version
-         :content-disposition;
-        bh=k1PqSGYxvbvYsrI0kVP/49o/60J9tDX/X+O+ZScsYgQ=;
-        b=Isg7mPwUslw5en6D1tpg9u86lQi6eYgx19l0XUa9FDQF8CDaKzGKhk9cHV2or07G1g
-         T2YyKOYRxZ6giQPeXj2czdalarScVYqI3OPizE2s5niU1Zq7NjM5G7KNp7YWPVt2P1SU
-         yW6p26kBgSKvZZRDiiHfpPVDTi8tSE5YNCWQ7f43/wSlmfB3V2/pDcX+egt06V69WT72
-         SqI827qrxPHYMbipzRH0yJDbopIPxyi5d7KT9seyvVcn//J4LlEOsVgv7YrI0jGUFeNh
-         w45FRyL7mA1XcQLtMFTkDvF0A65TLD9TF2dt97+kG1iFK+8kV877w6rTDuQLYvJtoDWE
-         SvdA==
-X-Gm-Message-State: AOAM532/1+WmIRmyOOh6Whe333LuoXj26tdTb4hvK87V37BHymdZhcRL
-        FtL3fqojV/sYYQav0o9art7plt52OmBAFg==
-X-Google-Smtp-Source: ABdhPJyfRXNgAuXBJT7DVB+thmMiiHsiy6msm+pC8OxJeIsYkqfzSDrAl2ljd2xK+J53xvGnDl9gTw==
-X-Received: by 2002:a63:d601:: with SMTP id q1mr15041648pgg.417.1610277191408;
-        Sun, 10 Jan 2021 03:13:11 -0800 (PST)
-Received: from localhost ([47.89.231.86])
-        by smtp.gmail.com with ESMTPSA id e21sm15611774pgv.74.2021.01.10.03.13.07
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 10 Jan 2021 03:13:10 -0800 (PST)
-Message-ID: <5ffae146.1c69fb81.ca05c.2992@mx.google.com>
-Date:   Sun, 10 Jan 2021 19:13:04 +0800
-From:   Eryu Guan <guaneryu@gmail.com>
+        Mon, 11 Jan 2021 04:18:32 -0500
+Received: from mx2.suse.de ([195.135.220.15]:50514 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1727839AbhAKJSb (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 11 Jan 2021 04:18:31 -0500
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+        t=1610356664; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+        bh=C+fCrcCNqrWxb+SBNtPVwbzNK7gFCw3wNGpJKXcJdfA=;
+        b=PYkK82kCDVIJ2/HBCtT95/oqchus81YfdU6hnTfPu1zuT0MMP2PXPUgAEmViMCMvWj7EsP
+        g/ReZpsIAIGDOPfvzQtpErzrKFfjx61Sc2yhrbXVTfMFl+NE8+N6D/RDpLwlQW86DlOmga
+        6HPCH2TpIoGK8EP6YvA4fdtQdroBGc0=
+Received: from relay2.suse.de (unknown [195.135.221.27])
+        by mx2.suse.de (Postfix) with ESMTP id 4825AAD11;
+        Mon, 11 Jan 2021 09:17:44 +0000 (UTC)
+From:   Nikolay Borisov <nborisov@suse.com>
 To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: master branch updated to 2080ad637bbb
+Cc:     linux-btrfs@vger.kernel.org, Nikolay Borisov <nborisov@suse.com>
+Subject: [PATCH v2] btrfs: Add test 154
+Date:   Mon, 11 Jan 2021 11:17:42 +0200
+Message-Id: <20210111091742.393039-1-nborisov@suse.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="K7NM6muRSuJO"
-Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+This test verifies btrfs' free objectid management. I.e it ensures that
+the first objectid is always 256 in an fs tree.
 
---K7NM6muRSuJO
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Signed-off-by: Nikolay Borisov <nborisov@suse.com>
+---
+* Changes since V1:
+ - Added _require_btrfs_command
+ - Save temporary output to a file and parse it from there
+ - Call $AWK_PROG instead of plain 'awk'
+ - Described the meaning of '256'
 
-Hi all,
+ tests/btrfs/154     | 83 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/154.out |  2 ++
+ tests/btrfs/group   |  1 +
+ 3 files changed, 86 insertions(+)
+ create mode 100755 tests/btrfs/154
+ create mode 100644 tests/btrfs/154.out
 
-The master branch of the xfstests repository at:
-
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-have just been updated. This is the first update in 2021, a late Happy New Year
-to all! And many thanks to all fstests contributors!
-
-This update fixed the compile error introduced in last update (because of /me
-merged only part of a patchset..), and enhanced swap support detection. Also,
-generic/388 is updated to cover a new bug, which should have been fixed in
-latest v5.11-rc2 kernel.
-
-Thanks,
-Eryu
-
-The new head of the master branch is commit:
-
-2080ad637bbb generic/496: ext4 and xfs supports swapon on fallocated file
-
-New commits:
-
-Brian Foster (1):
-      [02f7e9feb9f9] generic/388: randomly recover via read-only mounts
-
-Ritesh Harjani (2):
-      [725feeff94cc] common/rc: swapon should not fail for given FS in _require_scratch_swapfile()
-      [2080ad637bbb] generic/496: ext4 and xfs supports swapon on fallocated file
-
-Xiao Yang (1):
-      [c13150fe02fd] src/dmiperf: Remove obsolete dmiperf
-
-
-Code Diffstat:
-
- .gitignore          |   1 -
- common/rc           |  20 +++-
- src/Makefile        |   2 +-
- src/dmiperf.c       | 275 ----------------------------------------------------
- tests/generic/388   |  10 +-
- tests/generic/496   |  16 ++-
- tests/generic/group |   2 +-
- 7 files changed, 39 insertions(+), 287 deletions(-)
+diff --git a/tests/btrfs/154 b/tests/btrfs/154
+new file mode 100755
+index 000000000000..5a33380ce315
+--- /dev/null
++++ b/tests/btrfs/154
+@@ -0,0 +1,83 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2020 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test 154
++#
++# Test correct operation of free objectid related functionality
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs btrfs
++_require_scratch
++_require_btrfs_command inspect-internal dump-tree
++
++_scratch_mkfs > /dev/null
++_scratch_mount
++
++# create a new subvolume to validate its objectid is initialized accordingly,
++# the expected value is 256 as this is the first free objectid in a new file
++# system
++$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/newvol >> $seqres.full 2>&1 \
++	|| _fail "couldn't create subvol"
++
++$BTRFS_UTIL_PROG inspect-internal dump-tree -t1 $SCRATCH_DEV \
++	| grep -q "256 ROOT_ITEM"  ||	_fail "First subvol with id 256 doesn't exist"
++
++# create new file in the new subvolume to validate its objectid is set as
++# expected
++touch $SCRATCH_MNT/newvol/file1 || _fail "Cannot create file in new subvol"
++
++# ensure we have consistent view on-disk
++sync
++
++# get output related to the new root's dir entry
++output_file=$tmp.output
++$BTRFS_UTIL_PROG inspect-internal dump-tree -t5 $SCRATCH_DEV | grep -A2 "256 DIR_ITEM 1903355334" > $output_file
++
++# get the objectid of the new root
++new_root_id=$($AWK_PROG '/location key/{printf $3}' $output_file | tr -d  '(')
++[ $new_root_id -eq 256 ] || _fail "New root id not equal to 256"
++
++# the given root should always be item number 2, since it's the only item
++item_seq=$($AWK_PROG '/item/ {printf $2}' $output_file)
++[ $item_seq -eq 2 ] || _fail "New root not at item idx 2"
++
++# now parse the structure of the new subvol's tree
++$BTRFS_UTIL_PROG inspect-internal dump-tree -t256 $SCRATCH_DEV > $output_file
++
++# this is the subvol's own ino
++first_ino=$($AWK_PROG '/item 0/{printf $4}' $output_file | tr -d '(')
++[ $first_ino -eq 256 ] || _fail "First ino objectid in subvol not 256"
++
++# this is ino of first file in subvol
++second_ino=$($AWK_PROG '/item 4/{printf $4}' $output_file | tr -d '(')
++[ $second_ino -eq 257 ] || _fail "Second ino objectid in subvol not 257"
++
++# success, all done
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/btrfs/154.out b/tests/btrfs/154.out
+new file mode 100644
+index 000000000000..a18c304305c4
+--- /dev/null
++++ b/tests/btrfs/154.out
+@@ -0,0 +1,2 @@
++QA output created by 154
++Silence is golden
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index d18450c7552e..44d33222def0 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -156,6 +156,7 @@
+ 151 auto quick volume
+ 152 auto quick metadata qgroup send
+ 153 auto quick qgroup limit
++154 auto quick
+ 155 auto quick send
+ 156 auto quick trim balance
+ 157 auto quick raid
 --
-Eryu Guan
-guaneryu@gmail.com
+2.17.1
 
---K7NM6muRSuJO
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAl/64PAACgkQJlKqKVyP
-52Nx8Q/+OUpsTePQAiOb+9fGttUzFdfogOe9hEfC+PBzLQIzAJtRUK3eemOL0sVw
-Log5dP+Ur2l6mkeE2iZmD08+CSWdvP6U/IpLCI0zNo0w5A9VJdTfoqABIEaL4hPL
-Gb6XfkP6Aa3zk0D2TfLWTT17wWMKpk/8okT5nJ7ypdIK5VGGk3zLhmngpXRhOAsz
-Eoowj4dDD9sEjxPfk6dBofwwYBDGeE9/kpCjtIsL6MZIQBlK8gz/RSODrjFWgv0O
-fao2XbmFIUdUT/l01TBWB3T4gh39+quJ6qqg0x5SAL/ZaVX+W80JL/DCkV0IitfW
-ab4d3Lzr9536RTnigQUERsSUz9EH7qB87peMbtODRKCPgFn+0pgYSYWm87+Zi1Hz
-XdCjN6Uj3r1HeLSPXorCKzTNlx5yrRQMJ5r9RwByBjpExgLpEZL1sFXhPuXppksQ
-EtcfELwUMDOH8Zy1s5Q/SBhv8qQpD/YFdjI0s6qDmpF0cStksVNKX+iKX7Tpvnf+
-knpz1kdiupGJj9dh4iwBF5ZAPetg0AVf5/ZFtYUMKF7XEfe30F3TqKN8yXpCOMzi
-5kTJWj8JtzamKqD+2bcNI/xOjNw0Ua4EaxyH1svG7FNy032xy8HoIW15QkMXGChv
-nZBbviQhN98I2Mc2rJNj6HPfvEQTAhav0bHrV8TIELidhJJClns=
-=7+os
------END PGP SIGNATURE-----
-
---K7NM6muRSuJO--
