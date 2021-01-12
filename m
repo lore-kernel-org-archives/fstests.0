@@ -5,66 +5,66 @@ X-Spam-Level:
 X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3BBA6C43331
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6305FC4332E
 	for <linux-fstests@archiver.kernel.org>; Tue, 12 Jan 2021 07:42:26 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0899D22E02
-	for <linux-fstests@archiver.kernel.org>; Tue, 12 Jan 2021 07:42:25 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2FC7D22DFA
+	for <linux-fstests@archiver.kernel.org>; Tue, 12 Jan 2021 07:42:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2391936AbhALHmM (ORCPT
+        id S2392004AbhALHmN (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 12 Jan 2021 02:42:12 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33816 "EHLO
+        Tue, 12 Jan 2021 02:42:13 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33826 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2387522AbhALHmL (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 12 Jan 2021 02:42:11 -0500
-Received: from mail-pl1-x634.google.com (mail-pl1-x634.google.com [IPv6:2607:f8b0:4864:20::634])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C4B73C0617A6;
-        Mon, 11 Jan 2021 23:41:04 -0800 (PST)
-Received: by mail-pl1-x634.google.com with SMTP id j1so963952pld.3;
-        Mon, 11 Jan 2021 23:41:04 -0800 (PST)
+        with ESMTP id S2391988AbhALHmN (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 12 Jan 2021 02:42:13 -0500
+Received: from mail-pl1-x631.google.com (mail-pl1-x631.google.com [IPv6:2607:f8b0:4864:20::631])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 81ABCC0617A9;
+        Mon, 11 Jan 2021 23:41:09 -0800 (PST)
+Received: by mail-pl1-x631.google.com with SMTP id d4so142848plh.5;
+        Mon, 11 Jan 2021 23:41:09 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=vfcHfUVSSoz92RXngnOC7EatAp4YfY5+S3rf8SFIR2A=;
-        b=iU4vZ5sfkA+BbSFuJKI53TCJHJOnn5Vjmc1/qQvEMjeKIRawhqslQ3uHS2hREjUqNB
-         XBVShY9qkKlodUpPFdWk3ta8KSe7g15A1qjdXel/+zbcYusasOnjmsR+E5vHE1WRytiX
-         +BRpTFsRuvGBcBKtN7CNjylJmZ2wZzmSdb1J5fyVObSbPuhgOIZbaHZ55yqLE8x4TIVh
-         38OrbO8yMSOKd/gju0+qUfqQ41J5tYMFY3HGxEtn8YpJHKq0Upw1UvlEnjWHhyeMFMBA
-         mUixGAw573nuZdki2t/20BGuhMDEFSXTNu+jCyUc26Msv9JVUjeL9Ce4clA8IRUr0BZq
-         ceoA==
+        bh=i+DjE1xlEGRuZgveocTfgsgzOpdaBbBaWwg71VYt1cU=;
+        b=XYA1shr41n4lYlHAk4YlodFDXvtHdMDJZGuYQ2FHYmeoYu3XtniQW9PaVzFF5lM67p
+         IgjxTYJmWCJ9eI0VYHcL5jwKfANSSKjLEJ88mZrqJVKgfnQa7GwoCK6f7ihvdxujvY0z
+         11w8eX7MWwnycFZLAqLXzJwICSmdBqYFl+/SjqMNqU4DPFmoeFv8Gvw4G3q90Lat3HS6
+         iBSHv2NQCvVCJYEu6r5I9JgcJdHCT7gBDhiL5qcMqYmJOdFkO4zGr0Z7rE1p0wYBvzyj
+         Yld8ZJVrrhUOAXp46G6BvpfFWbllab8tQ6Qshezgo2ydHNQcdIwwTD8nDy00kinIP2fk
+         yhuQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=vfcHfUVSSoz92RXngnOC7EatAp4YfY5+S3rf8SFIR2A=;
-        b=awNBviaplwnlAkhYEpFc/k3aUaR89VohbXexHyhmKQGKkQnGRsGxqPxPe73mvbj69E
-         S6NZbYrJnR3fwAjI/tKkz36K6IRYP4JaM8nRwWPNYiBLqlopeKGbBQmRWepQ7Dwddl1f
-         rhbpZXLGUqe7DTPAcJNp18hZ8KmaeecGHsqjuZlqpf0nblCj3mUQYdLUTOC/gBBhhbvS
-         xVDDRe/poJkzLWLcyWQEzRtsTrlLvavzbh0kOq19qAPj7tZaBIRMOufbp2v76UXBpbmn
-         hcaIYSVSrFJFRYuVzEgcQhoZr+qh4P1NsLAl3NUwboKZl1cEJ+jSlbDh3KUmf7gXCan/
-         B0Aw==
-X-Gm-Message-State: AOAM530mZEP/MntL4Nb1xmmArPIkc5aYhSab2gHD9VVbujXdH6qttqLS
-        2iXXQXyZDaedjiydmzcFfD5bKFBUtPw=
-X-Google-Smtp-Source: ABdhPJx9n90fsIe9F2vkkqBJun7C0dvuoGv7ZVjuAbDjMchLY4mCz8dmEtq8VLjhvMfpFJZKr16cog==
-X-Received: by 2002:a17:90a:cb0b:: with SMTP id z11mr3148560pjt.101.1610437264230;
-        Mon, 11 Jan 2021 23:41:04 -0800 (PST)
+        bh=i+DjE1xlEGRuZgveocTfgsgzOpdaBbBaWwg71VYt1cU=;
+        b=G4v8n8IALp0DoMjHQZCRhwIxIdYs9sN/TEqhQQaW2DUWRIV7y+z8t1mTWlMIk+Fgt0
+         3cWMVay33j1ETHreWOpuxEOHuEotVFZGg/FjeX8P+q0C5oQS9lXshYpYcWKJwzu23Mst
+         pQrCOmmvnKPPJCeNmRxyUxqho+ykJ5dy04qVwMi0KYpete7d+BhdW9C/WWi5S9fg0i5F
+         P1yjNQ/5WmYItHvQ0YKxclyYFT0L61uIFgqW21rrYnzaGhGGSMwiAVtAM4rsBtWesyJ5
+         hXIYVWSQsURXOpVcgCBgj1KaLDESzbqo/IN7KDoASiIYmbGrMY0gL8FRUUz/9A4QGrm3
+         bg/g==
+X-Gm-Message-State: AOAM5329V57PW6wOcoHgDpisySv4gyUhV0y/Duim8V/7Ydf/sND2iRxS
+        yysdi5yiHLybaA8a7n49tSrdn2pe2g0=
+X-Google-Smtp-Source: ABdhPJyGmy0oab9b05z49ZGFDiG8zLz59AxJ4lQLknYlpzRXPoE+ZLwbLjaw0UyFdkiJWioXRmKrAg==
+X-Received: by 2002:a17:903:22c9:b029:dc:9b7f:bd13 with SMTP id y9-20020a17090322c9b02900dc9b7fbd13mr3891642plg.67.1610437268922;
+        Mon, 11 Jan 2021 23:41:08 -0800 (PST)
 Received: from localhost.localdomain ([122.171.39.105])
-        by smtp.gmail.com with ESMTPSA id mj5sm1962340pjb.20.2021.01.11.23.41.02
+        by smtp.gmail.com with ESMTPSA id mj5sm1962340pjb.20.2021.01.11.23.41.06
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 11 Jan 2021 23:41:03 -0800 (PST)
+        Mon, 11 Jan 2021 23:41:08 -0800 (PST)
 From:   Chandan Babu R <chandanrlinux@gmail.com>
 To:     fstests@vger.kernel.org
 Cc:     Chandan Babu R <chandanrlinux@gmail.com>,
         linux-xfs@vger.kernel.org, darrick.wong@oracle.com,
         djwong@kernel.org
-Subject: [PATCH V3 07/11] xfs: Check for extent overflow when writing to unwritten extent
-Date:   Tue, 12 Jan 2021 13:10:23 +0530
-Message-Id: <20210112074027.10311-8-chandanrlinux@gmail.com>
+Subject: [PATCH V3 09/11] xfs: Check for extent overflow when remapping an extent
+Date:   Tue, 12 Jan 2021 13:10:25 +0530
+Message-Id: <20210112074027.10311-10-chandanrlinux@gmail.com>
 X-Mailer: git-send-email 2.29.2
 In-Reply-To: <20210112074027.10311-1-chandanrlinux@gmail.com>
 References: <20210112074027.10311-1-chandanrlinux@gmail.com>
@@ -75,31 +75,31 @@ List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
 This test verifies that XFS does not cause inode fork's extent count to
-overflow when writing to an unwritten extent.
+overflow when remapping extents from one file's inode fork to another.
 
 Signed-off-by: Chandan Babu R <chandanrlinux@gmail.com>
 ---
- tests/xfs/527     | 89 +++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/527.out | 11 ++++++
+ tests/xfs/529     | 82 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/529.out |  8 +++++
  tests/xfs/group   |  1 +
- 3 files changed, 101 insertions(+)
- create mode 100755 tests/xfs/527
- create mode 100644 tests/xfs/527.out
+ 3 files changed, 91 insertions(+)
+ create mode 100755 tests/xfs/529
+ create mode 100644 tests/xfs/529.out
 
-diff --git a/tests/xfs/527 b/tests/xfs/527
+diff --git a/tests/xfs/529 b/tests/xfs/529
 new file mode 100755
-index 00000000..cd67bce4
+index 00000000..f6a5922f
 --- /dev/null
-+++ b/tests/xfs/527
-@@ -0,0 +1,89 @@
++++ b/tests/xfs/529
+@@ -0,0 +1,82 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
 +# Copyright (c) 2020 Chandan Babu R.  All Rights Reserved.
 +#
-+# FS QA Test 527
++# FS QA Test 529
 +#
 +# Verify that XFS does not cause inode fork's extent count to overflow when
-+# writing to an unwritten extent.
++# remapping extents from one file's inode fork to another.
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
 +echo "QA output created by $seq"
@@ -118,6 +118,7 @@ index 00000000..cd67bce4
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
++. ./common/reflink
 +. ./common/inject
 +
 +# remove previous $seqres.full before test
@@ -127,86 +128,75 @@ index 00000000..cd67bce4
 +
 +_supported_fs xfs
 +_require_scratch
++_require_scratch_reflink
 +_require_xfs_debug
-+_require_xfs_io_command "falloc"
++_require_xfs_io_command "reflink"
 +_require_xfs_io_error_injection "reduce_max_iextents"
 +
++echo "* Reflink remap extents"
++
 +echo "Format and mount fs"
-+_scratch_mkfs_sized $((1024 * 1024 * 1024)) >> $seqres.full
++_scratch_mkfs >> $seqres.full
 +_scratch_mount >> $seqres.full
 +
-+bsize=$(_get_file_block_size $SCRATCH_MNT)
++bsize=$(_get_block_size $SCRATCH_MNT)
 +
-+testfile=${SCRATCH_MNT}/testfile
++srcfile=${SCRATCH_MNT}/srcfile
++dstfile=${SCRATCH_MNT}/dstfile
++
++nr_blks=15
++
++echo "Create \$srcfile having an extent of length $nr_blks blocks"
++$XFS_IO_PROG -f -c "pwrite -b $((nr_blks * bsize))  0 $((nr_blks * bsize))" \
++       -c fsync $srcfile >> $seqres.full
++
++echo "Create \$dstfile having an extent of length $nr_blks blocks"
++$XFS_IO_PROG -f -c "pwrite -b $((nr_blks * bsize))  0 $((nr_blks * bsize))" \
++       -c fsync $dstfile >> $seqres.full
 +
 +echo "Inject reduce_max_iextents error tag"
 +_scratch_inject_error reduce_max_iextents 1
 +
-+nr_blks=15
-+
-+for io in Buffered Direct; do
-+	echo "* $io write to unwritten extent"
-+
-+	echo "Fallocate $nr_blks blocks"
-+	$XFS_IO_PROG -f -c "falloc 0 $((nr_blks * bsize))" $testfile >> $seqres.full
-+
-+	if [[ $io == "Buffered" ]]; then
-+		xfs_io_flag=""
-+	else
-+		xfs_io_flag="-d"
-+	fi
-+
-+	echo "$io write to every other block of fallocated space"
-+	for i in $(seq 1 2 $((nr_blks - 1))); do
-+		$XFS_IO_PROG -f -s $xfs_io_flag -c "pwrite $((i * bsize)) $bsize" \
-+		       $testfile >> $seqres.full 2>&1
-+		[[ $? != 0 ]] && break
-+	done
-+
-+	echo "Verify \$testfile's extent count"
-+	nextents=$($XFS_IO_PROG -c 'stat' $testfile | grep nextents)
-+	nextents=${nextents##fsxattr.nextents = }
-+	if (( $nextents > 10 )); then
-+		echo "Extent count overflow check failed: nextents = $nextents"
-+		exit 1
-+	fi
-+
-+	rm $testfile
++echo "Reflink every other block from \$srcfile into \$dstfile"
++for i in $(seq 1 2 $((nr_blks - 1))); do
++	$XFS_IO_PROG -f -c "reflink $srcfile $((i * bsize)) $((i * bsize)) $bsize" \
++	       $dstfile >> $seqres.full 2>&1
 +done
 +
-+# super_block->s_wb_err will have a newer seq value when compared to "/"'s
-+# file->f_sb_err. Consume it here so that xfs_scrub can does not error out.
-+$XFS_IO_PROG -c syncfs $SCRATCH_MNT >> $seqres.full 2>&1
++echo "Verify \$dstfile's extent count"
++nextents=$($XFS_IO_PROG -c 'stat' $dstfile | grep nextents)
++nextents=${nextents##fsxattr.nextents = }
++if (( $nextents > 10 )); then
++	echo "Extent count overflow check failed: nextents = $nextents"
++	exit 1
++fi
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/xfs/527.out b/tests/xfs/527.out
+diff --git a/tests/xfs/529.out b/tests/xfs/529.out
 new file mode 100644
-index 00000000..3597ad92
+index 00000000..687a8bd2
 --- /dev/null
-+++ b/tests/xfs/527.out
-@@ -0,0 +1,11 @@
-+QA output created by 527
++++ b/tests/xfs/529.out
+@@ -0,0 +1,8 @@
++QA output created by 529
++* Reflink remap extents
 +Format and mount fs
++Create $srcfile having an extent of length 15 blocks
++Create $dstfile having an extent of length 15 blocks
 +Inject reduce_max_iextents error tag
-+* Buffered write to unwritten extent
-+Fallocate 15 blocks
-+Buffered write to every other block of fallocated space
-+Verify $testfile's extent count
-+* Direct write to unwritten extent
-+Fallocate 15 blocks
-+Direct write to every other block of fallocated space
-+Verify $testfile's extent count
++Reflink every other block from $srcfile into $dstfile
++Verify $dstfile's extent count
 diff --git a/tests/xfs/group b/tests/xfs/group
-index 0e98d623..c17bc140 100644
+index ea892308..96e40901 100644
 --- a/tests/xfs/group
 +++ b/tests/xfs/group
-@@ -524,6 +524,7 @@
- 524 auto quick punch zero insert collapse
- 525 auto quick attr
+@@ -526,6 +526,7 @@
  526 auto quick dir hardlink symlink
-+527 auto quick
+ 527 auto quick
+ 528 auto quick reflink
++529 auto quick reflink
  758 auto quick rw attr realtime
  759 auto quick rw realtime
  760 auto quick rw collapse punch insert zero prealloc
