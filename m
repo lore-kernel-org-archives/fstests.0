@@ -2,543 +2,161 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8E079C433E6
-	for <linux-fstests@archiver.kernel.org>; Tue, 12 Jan 2021 05:32:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5A279C433E0
+	for <linux-fstests@archiver.kernel.org>; Tue, 12 Jan 2021 07:41:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 621A322CBE
-	for <linux-fstests@archiver.kernel.org>; Tue, 12 Jan 2021 05:32:18 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0C74121707
+	for <linux-fstests@archiver.kernel.org>; Tue, 12 Jan 2021 07:41:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731814AbhALFcH (ORCPT
+        id S1732023AbhALHlQ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 12 Jan 2021 00:32:07 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34192 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727288AbhALFcG (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 12 Jan 2021 00:32:06 -0500
-Received: from mail-pf1-x42f.google.com (mail-pf1-x42f.google.com [IPv6:2607:f8b0:4864:20::42f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 47A45C061795
-        for <fstests@vger.kernel.org>; Mon, 11 Jan 2021 21:31:26 -0800 (PST)
-Received: by mail-pf1-x42f.google.com with SMTP id m6so724039pfk.1
-        for <fstests@vger.kernel.org>; Mon, 11 Jan 2021 21:31:26 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=B6Ju4UvdBmdTUldb83LIvDLPBwmJtBf4Ke1gngu4tUM=;
-        b=MsKFx4gK0HZsTfbjWaYyueOoztIvOQC8TYN1SpNEPiGjMkdPrvB0215hzVxotSHvwt
-         iZdjXzN2OdRx7TkWnZ7zIsm9eSZir3A0b7vUBa8BMi27UuoZVNXkmujAHBwTcBxK065c
-         I0gGdA8Ai/uomZS7zHVDpY4rTGVUSc59NNAl5AL31L40GsuevGD09az8ZahDu4TSVm9s
-         ywUXM9c5SZUeBQvu1isIvfB4dxhPGRmKAFn4CsE6i9GjJw7vcf+ZLQhnZVyv7XKZZpA1
-         Uh91Rj/zmpJVt0GoAYGivjdCdY5/ybDoPZeJolEbRgn4pN379Lozh8Rb2/q+YkLCdNQu
-         uviQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=B6Ju4UvdBmdTUldb83LIvDLPBwmJtBf4Ke1gngu4tUM=;
-        b=ThQ/TDa2xL1OiWD5BK0ejTVTseghK4ZtURKPaKT+0sBgFfFJWEQMvgdvi1EdQgW5xF
-         UaXadz/E49EcFHrTooX9RZ+/10N2IadgURavb8eY/rG+S2VKj4YQsWBMNUaM2oVhykLg
-         Hg2oR9Lf5NxfWOkGR7BuXdBUZxpTJy3BHtW+DgQV4SwbrB0wOTv+ON1xuVa6ZxBIXiEJ
-         TbdtN+6taEDq/QuJwXTOxjUKurJgUDsmFWTzjlOozTz4NWQ0GL8jsKUzzZUHinn/YQpE
-         kswvu6VG9N+jER/yOW3ILX3SHvpgKhh/9p1xKvLpzEPHq/VF/eSDMTGYLJRAJihK+PHo
-         +ahA==
-X-Gm-Message-State: AOAM533WK4VrFfgrtJPswcyzCtr4gHdT+4zBryTjvdLFMa3y0OcitWXQ
-        e+WfZcj8DyXogl7fC35P6hk=
-X-Google-Smtp-Source: ABdhPJy2HNVfqx80jZRy0g90r1qgEsn4Kqd2F5/F9YGt2i5EY8MmkPm0VYVYwrJ5fiAPLidZSS52IQ==
-X-Received: by 2002:a62:7d90:0:b029:19d:917b:6c65 with SMTP id y138-20020a627d900000b029019d917b6c65mr3268338pfc.28.1610429485692;
-        Mon, 11 Jan 2021 21:31:25 -0800 (PST)
-Received: from localhost ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id 184sm1739789pgi.92.2021.01.11.21.31.23
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 11 Jan 2021 21:31:24 -0800 (PST)
-Date:   Tue, 12 Jan 2021 13:31:16 +0800
-From:   Murphy Zhou <jencce.kernel@gmail.com>
-To:     Eryu Guan <guaneryu@gmail.com>
-Cc:     Murphy Zhou <jencce.kernel@gmail.com>, fstests@vger.kernel.org
-Subject: [PATCH v3] common/filter: add _filter_stat
-Message-ID: <20210112053116.mifl2hama7axdjst@xzhoux.usersys.redhat.com>
-References: <20201208104245.2dtfn6xz7qr6uga3@xzhoux.usersys.redhat.com>
- <20210110100757.GA2519@desktop>
+        Tue, 12 Jan 2021 02:41:16 -0500
+Received: from mx2.suse.de ([195.135.220.15]:35648 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1731152AbhALHlQ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 12 Jan 2021 02:41:16 -0500
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+        t=1610437229; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+        bh=l+17Z8U17hn65EbMyeS56FVSsrCwYzu5MR5vEvORGN8=;
+        b=OvG2OkYtSDMeir66Y+UoD3lzyL8mIx92kqV7iX6zEZ32ZhLQnk+eZsDYovDHQYgA6EDgfK
+        7y7WwM+gsq8ZXMzMEZEaby91IjHIBwBT1y/OBVJWIB1B/TcGes1y4DO4ic3DU/pjluqpaJ
+        j+iVUfc8XvpN3UXjZ/ngCIpjiv1pmYE=
+Received: from relay2.suse.de (unknown [195.135.221.27])
+        by mx2.suse.de (Postfix) with ESMTP id 22E36AB92;
+        Tue, 12 Jan 2021 07:40:29 +0000 (UTC)
+From:   Qu Wenruo <wqu@suse.com>
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH v2] fstests: btrfs: check qgroup doesn't crash when beyond limit
+Date:   Tue, 12 Jan 2021 15:40:24 +0800
+Message-Id: <20210112074024.85020-1-wqu@suse.com>
+X-Mailer: git-send-email 2.29.2
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210110100757.GA2519@desktop>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Since coreutils upstream v8.32~47
+There is a bug that, when btrfs is beyond qgroup limit, touching a file
+could crash btrfs.
 
-commit a99ab266110795ed94a9cb4d2765ddad9c4310da
-Author: Jeff Layton <jlayton@kernel.org>
-Date:   Thu Sep 19 11:59:45 2019 -0400
+Such beyond limit situation needs to be intentionally created, e.g.
+writing 1GiB file, then limit the subvolume to 512 MiB.
+As current qgroup works pretty well at preventing us from reaching the
+limit.
 
-    ls: use statx instead of stat when available
+This makes existing qgroup test cases unable to detect it.
 
-stat(1) starts to use statx(2) call.
+The regression is introduced by commit c53e9653605d ("btrfs: qgroup: try
+to flush qgroup space when we get -EDQUOT"), and the fix is titled
+"btrfs: qgroup: don't commit transaction when we have already
+ hold a transaction handler"
 
-In some testcase, if file does not exist, this breaks golden
-output like this:
-
--stat: cannot stat 'SCRATCH_MNT/xxx': No such file or directory
-+stat: cannot statx 'SCRATCH_MNT/xxx': No such file or directory
-
-Add this filter to fix it, and add this filter to testcases that
-need it.
-
-Signed-off-by: Murphy Zhou <jencce.kernel@gmail.com>
+Link: https://bugzilla.suse.com/show_bug.cgi?id=1178634
+Reviewed-by: Filipe Manana <fdmanana@suse.com>
+Signed-off-by: Qu Wenruo <wqu@suse.com>
 ---
-
-Thanks Eryu's reviewing!
-
-v3:
-  details about stat(1) change
-
+Changelog:
 v2:
-  filter "stat" to "statx"
+- Use "0/5" to replace the double "$SCRATCH_MNT" in btrfs qgroup command
+  To reduce confusion.
+---
+ tests/btrfs/228     | 59 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/228.out |  2 ++
+ tests/btrfs/group   |  1 +
+ 3 files changed, 62 insertions(+)
+ create mode 100755 tests/btrfs/228
+ create mode 100644 tests/btrfs/228.out
 
- common/filter         |   6 ++
- tests/generic/397     |   6 +-
- tests/generic/397.out |   6 +-
- tests/generic/435     |   2 +-
- tests/generic/435.out |   2 +-
- tests/generic/440     |   2 +-
- tests/generic/440.out |   2 +-
- tests/xfs/348         |   2 +-
- tests/xfs/348.out     | 188 +++++++++++++++++++++---------------------
- 9 files changed, 111 insertions(+), 105 deletions(-)
-
-diff --git a/common/filter b/common/filter
-index a8b3882f..2f3277f7 100644
---- a/common/filter
-+++ b/common/filter
-@@ -510,6 +510,12 @@ _filter_mv()
- 	sed -e "s/^renamed //"
- }
- 
-+# New stat(1) uses statx(2)
-+_filter_stat()
+diff --git a/tests/btrfs/228 b/tests/btrfs/228
+new file mode 100755
+index 00000000..ecca3181
+--- /dev/null
++++ b/tests/btrfs/228
+@@ -0,0 +1,59 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2020 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test 228
++#
++# Test if btrfs qgroup would crash if we're modifying the fs
++# after exceeding the limit
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
 +{
-+	sed -e "s/\<cannot stat\>/cannot statx/"
++	cd /
++	rm -f $tmp.*
 +}
 +
- _filter_lostfound()
- {
- 	sed -e '/^lost+found$/d'
-diff --git a/tests/generic/397 b/tests/generic/397
-index 97111555..bb4de31c 100755
---- a/tests/generic/397
-+++ b/tests/generic/397
-@@ -83,8 +83,8 @@ _unlink_session_encryption_key $keydesc
- _scratch_cycle_mount
- 
- # Check that unencrypted names aren't there
--stat $SCRATCH_MNT/edir/empty |& _filter_scratch
--stat $SCRATCH_MNT/edir/symlink |& _filter_scratch
-+stat $SCRATCH_MNT/edir/empty |& _filter_stat |& _filter_scratch
-+stat $SCRATCH_MNT/edir/symlink |& _filter_stat |& _filter_scratch
- 
- # Check that the correct numbers of files and subdirectories are there
- ls $SCRATCH_MNT/edir | wc -l
-@@ -106,7 +106,7 @@ ln -s foo $SCRATCH_MNT/edir/0123456789abcdef |& _filter_scratch
- 
- # Delete the encrypted directory (should succeed)
- rm -r $SCRATCH_MNT/edir
--stat $SCRATCH_MNT/edir |& _filter_scratch
-+stat $SCRATCH_MNT/edir |& _filter_stat |& _filter_scratch
- 
- # success, all done
- status=0
-diff --git a/tests/generic/397.out b/tests/generic/397.out
-index 2f55c5d6..6804c7ab 100644
---- a/tests/generic/397.out
-+++ b/tests/generic/397.out
-@@ -1,6 +1,6 @@
- QA output created by 397
--stat: cannot stat 'SCRATCH_MNT/edir/empty': No such file or directory
--stat: cannot stat 'SCRATCH_MNT/edir/symlink': No such file or directory
-+stat: cannot statx 'SCRATCH_MNT/edir/empty': No such file or directory
-+stat: cannot statx 'SCRATCH_MNT/edir/symlink': No such file or directory
- 8
- 1
- Required key not available
-@@ -10,4 +10,4 @@ mkdir: cannot create directory 'SCRATCH_MNT/edir/newdir': Required key not avail
- mkdir: cannot create directory 'SCRATCH_MNT/edir/0123456789abcdef': Required key not available
- ln: failed to create symbolic link 'SCRATCH_MNT/edir/newlink': Required key not available
- ln: failed to create symbolic link 'SCRATCH_MNT/edir/0123456789abcdef': Required key not available
--stat: cannot stat 'SCRATCH_MNT/edir': No such file or directory
-+stat: cannot statx 'SCRATCH_MNT/edir': No such file or directory
-diff --git a/tests/generic/435 b/tests/generic/435
-index 9f54c6c4..71c5a3f0 100755
---- a/tests/generic/435
-+++ b/tests/generic/435
-@@ -73,7 +73,7 @@ _scratch_cycle_mount
- # and ext4 reported a "Structure needs cleaning" error when removing files.
- find $SCRATCH_MNT/edir/ -type f | xargs stat -c %i | sort | uniq | wc -l
- rm -rf $SCRATCH_MNT/edir |& head -n 10
--stat $SCRATCH_MNT/edir |& _filter_scratch
-+stat $SCRATCH_MNT/edir |& _filter_stat |& _filter_scratch
- 
- # success, all done
- status=0
-diff --git a/tests/generic/435.out b/tests/generic/435.out
-index 9ed547dd..3628b8f9 100644
---- a/tests/generic/435.out
-+++ b/tests/generic/435.out
-@@ -1,4 +1,4 @@
- QA output created by 435
- 100000
- 100000
--stat: cannot stat 'SCRATCH_MNT/edir': No such file or directory
-+stat: cannot statx 'SCRATCH_MNT/edir': No such file or directory
-diff --git a/tests/generic/440 b/tests/generic/440
-index d775f1e0..8a81d60a 100755
---- a/tests/generic/440
-+++ b/tests/generic/440
-@@ -87,7 +87,7 @@ _scratch_cycle_mount
- cat $SCRATCH_MNT/edir2/link
- exec 3< $SCRATCH_MNT/edir2/link # pin inode with cached key in memory
- _unlink_session_encryption_key $keydesc
--stat $SCRATCH_MNT/edir/file |& _filter_scratch
-+stat $SCRATCH_MNT/edir/file |& _filter_stat |& _filter_scratch
- cat "$(find $SCRATCH_MNT/edir/ -type f)"
- exec 3>&-
- 
-diff --git a/tests/generic/440.out b/tests/generic/440.out
-index 372b7975..82b89b83 100644
---- a/tests/generic/440.out
-+++ b/tests/generic/440.out
-@@ -9,5 +9,5 @@ cat: SCRATCH_MNT/edir/symlink: No such file or directory
- 
- ***** Child has key, but parent doesn't *****
- contents
--stat: cannot stat 'SCRATCH_MNT/edir/file': No such file or directory
-+stat: cannot statx 'SCRATCH_MNT/edir/file': No such file or directory
- contents
-diff --git a/tests/xfs/348 b/tests/xfs/348
-index 194d9f99..208382fb 100755
---- a/tests/xfs/348
-+++ b/tests/xfs/348
-@@ -112,7 +112,7 @@ for dt in $dtypes; do
- 		rm -f $tmp.stat.err
- 		ftype=$(stat --printf=%F $testdir/$file 2>$tmp.stat.err)
- 		if [ -s $tmp.stat.err ]; then
--			cat $tmp.stat.err
-+			cat $tmp.stat.err | _filter_stat
- 		else
- 			echo "stat: '$testdir/$file' is a $ftype"
- 			# Verify that readlink of a file posing as a symlink
-diff --git a/tests/xfs/348.out b/tests/xfs/348.out
-index 17d9be23..0d407718 100644
---- a/tests/xfs/348.out
-+++ b/tests/xfs/348.out
-@@ -23,13 +23,13 @@ would have junked entry "DIR" in directory PARENT_INO
- would have junked entry "EMPTY" in directory PARENT_INO
- would have junked entry "FIFO" in directory PARENT_INO
- would have junked entry "SYMLINK" in directory PARENT_INO
--stat: cannot stat 'SCRATCH_MNT/test/DIR': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/DATA': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/EMPTY': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/SYMLINK': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/CHRDEV': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/BLKDEV': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/FIFO': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/DIR': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/DATA': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/EMPTY': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/SYMLINK': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/CHRDEV': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/BLKDEV': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/FIFO': Structure needs cleaning
- 
- ===== Setting dt=1 to all files:
- core.mode = 010644
-@@ -43,10 +43,10 @@ would have junked entry "DATA" in directory PARENT_INO
- would have junked entry "DIR" in directory PARENT_INO
- would have junked entry "EMPTY" in directory PARENT_INO
- would have junked entry "SYMLINK" in directory PARENT_INO
--stat: cannot stat 'SCRATCH_MNT/test/DIR': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/DATA': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/EMPTY': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/SYMLINK': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/DIR': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/DATA': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/EMPTY': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/SYMLINK': Structure needs cleaning
- stat: 'SCRATCH_MNT/test/CHRDEV' is a fifo
- stat: 'SCRATCH_MNT/test/BLKDEV' is a fifo
- stat: 'SCRATCH_MNT/test/FIFO' is a fifo
-@@ -63,10 +63,10 @@ would have junked entry "DATA" in directory PARENT_INO
- would have junked entry "DIR" in directory PARENT_INO
- would have junked entry "EMPTY" in directory PARENT_INO
- would have junked entry "SYMLINK" in directory PARENT_INO
--stat: cannot stat 'SCRATCH_MNT/test/DIR': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/DATA': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/EMPTY': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/SYMLINK': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/DIR': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/DATA': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/EMPTY': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/SYMLINK': Structure needs cleaning
- stat: 'SCRATCH_MNT/test/CHRDEV' is a character special file
- stat: 'SCRATCH_MNT/test/BLKDEV' is a character special file
- stat: 'SCRATCH_MNT/test/FIFO' is a character special file
-@@ -86,13 +86,13 @@ would have junked entry "DIR" in directory PARENT_INO
- would have junked entry "EMPTY" in directory PARENT_INO
- would have junked entry "FIFO" in directory PARENT_INO
- would have junked entry "SYMLINK" in directory PARENT_INO
--stat: cannot stat 'SCRATCH_MNT/test/DIR': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/DATA': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/EMPTY': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/SYMLINK': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/CHRDEV': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/BLKDEV': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/FIFO': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/DIR': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/DATA': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/EMPTY': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/SYMLINK': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/CHRDEV': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/BLKDEV': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/FIFO': Structure needs cleaning
- 
- ===== Setting dt=4 to all files:
- core.mode = 040644
-@@ -109,11 +109,11 @@ would have junked entry "EMPTY" in directory PARENT_INO
- would have junked entry "FIFO" in directory PARENT_INO
- stat: 'SCRATCH_MNT/test/DIR' is a directory
- stat: 'SCRATCH_MNT/test/DATA' is a directory
--stat: cannot stat 'SCRATCH_MNT/test/EMPTY': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/SYMLINK': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/CHRDEV': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/BLKDEV': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/FIFO': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/EMPTY': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/SYMLINK': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/CHRDEV': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/BLKDEV': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/FIFO': Structure needs cleaning
- 
- ===== Setting dt=5 to all files:
- core.mode = 050644
-@@ -130,13 +130,13 @@ would have junked entry "DIR" in directory PARENT_INO
- would have junked entry "EMPTY" in directory PARENT_INO
- would have junked entry "FIFO" in directory PARENT_INO
- would have junked entry "SYMLINK" in directory PARENT_INO
--stat: cannot stat 'SCRATCH_MNT/test/DIR': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/DATA': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/EMPTY': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/SYMLINK': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/CHRDEV': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/BLKDEV': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/FIFO': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/DIR': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/DATA': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/EMPTY': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/SYMLINK': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/CHRDEV': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/BLKDEV': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/FIFO': Structure needs cleaning
- 
- ===== Setting dt=6 to all files:
- core.mode = 060644
-@@ -150,10 +150,10 @@ would have junked entry "DATA" in directory PARENT_INO
- would have junked entry "DIR" in directory PARENT_INO
- would have junked entry "EMPTY" in directory PARENT_INO
- would have junked entry "SYMLINK" in directory PARENT_INO
--stat: cannot stat 'SCRATCH_MNT/test/DIR': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/DATA': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/EMPTY': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/SYMLINK': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/DIR': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/DATA': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/EMPTY': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/SYMLINK': Structure needs cleaning
- stat: 'SCRATCH_MNT/test/CHRDEV' is a block special file
- stat: 'SCRATCH_MNT/test/BLKDEV' is a block special file
- stat: 'SCRATCH_MNT/test/FIFO' is a block special file
-@@ -173,13 +173,13 @@ would have junked entry "DIR" in directory PARENT_INO
- would have junked entry "EMPTY" in directory PARENT_INO
- would have junked entry "FIFO" in directory PARENT_INO
- would have junked entry "SYMLINK" in directory PARENT_INO
--stat: cannot stat 'SCRATCH_MNT/test/DIR': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/DATA': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/EMPTY': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/SYMLINK': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/CHRDEV': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/BLKDEV': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/FIFO': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/DIR': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/DATA': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/EMPTY': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/SYMLINK': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/CHRDEV': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/BLKDEV': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/FIFO': Structure needs cleaning
- 
- ===== Setting dt=10 to all files:
- core.mode = 0100644
-@@ -194,13 +194,13 @@ would have junked entry "CHRDEV" in directory PARENT_INO
- would have junked entry "DIR" in directory PARENT_INO
- would have junked entry "FIFO" in directory PARENT_INO
- would have junked entry "SYMLINK" in directory PARENT_INO
--stat: cannot stat 'SCRATCH_MNT/test/DIR': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/DIR': Structure needs cleaning
- stat: 'SCRATCH_MNT/test/DATA' is a regular file
- stat: 'SCRATCH_MNT/test/EMPTY' is a regular empty file
--stat: cannot stat 'SCRATCH_MNT/test/SYMLINK': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/CHRDEV': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/BLKDEV': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/FIFO': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/SYMLINK': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/CHRDEV': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/BLKDEV': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/FIFO': Structure needs cleaning
- 
- ===== Setting dt=11 to all files:
- core.mode = 0110644
-@@ -217,13 +217,13 @@ would have junked entry "DIR" in directory PARENT_INO
- would have junked entry "EMPTY" in directory PARENT_INO
- would have junked entry "FIFO" in directory PARENT_INO
- would have junked entry "SYMLINK" in directory PARENT_INO
--stat: cannot stat 'SCRATCH_MNT/test/DIR': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/DATA': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/EMPTY': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/SYMLINK': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/CHRDEV': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/BLKDEV': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/FIFO': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/DIR': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/DATA': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/EMPTY': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/SYMLINK': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/CHRDEV': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/BLKDEV': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/FIFO': Structure needs cleaning
- 
- ===== Setting dt=12 to all files:
- core.mode = 0120644
-@@ -239,13 +239,13 @@ would have junked entry "DATA" in directory PARENT_INO
- would have junked entry "DIR" in directory PARENT_INO
- would have junked entry "EMPTY" in directory PARENT_INO
- would have junked entry "FIFO" in directory PARENT_INO
--stat: cannot stat 'SCRATCH_MNT/test/DIR': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/DIR': Structure needs cleaning
- stat: 'SCRATCH_MNT/test/DATA' is a symbolic link
--stat: cannot stat 'SCRATCH_MNT/test/EMPTY': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/EMPTY': Structure needs cleaning
- stat: 'SCRATCH_MNT/test/SYMLINK' is a symbolic link
--stat: cannot stat 'SCRATCH_MNT/test/CHRDEV': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/BLKDEV': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/FIFO': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/CHRDEV': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/BLKDEV': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/FIFO': Structure needs cleaning
- 
- ===== Setting dt=13 to all files:
- core.mode = 0130644
-@@ -262,13 +262,13 @@ would have junked entry "DIR" in directory PARENT_INO
- would have junked entry "EMPTY" in directory PARENT_INO
- would have junked entry "FIFO" in directory PARENT_INO
- would have junked entry "SYMLINK" in directory PARENT_INO
--stat: cannot stat 'SCRATCH_MNT/test/DIR': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/DATA': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/EMPTY': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/SYMLINK': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/CHRDEV': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/BLKDEV': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/FIFO': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/DIR': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/DATA': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/EMPTY': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/SYMLINK': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/CHRDEV': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/BLKDEV': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/FIFO': Structure needs cleaning
- 
- ===== Setting dt=14 to all files:
- core.mode = 0140644
-@@ -282,10 +282,10 @@ would have junked entry "DATA" in directory PARENT_INO
- would have junked entry "DIR" in directory PARENT_INO
- would have junked entry "EMPTY" in directory PARENT_INO
- would have junked entry "SYMLINK" in directory PARENT_INO
--stat: cannot stat 'SCRATCH_MNT/test/DIR': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/DATA': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/EMPTY': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/SYMLINK': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/DIR': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/DATA': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/EMPTY': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/SYMLINK': Structure needs cleaning
- stat: 'SCRATCH_MNT/test/CHRDEV' is a socket
- stat: 'SCRATCH_MNT/test/BLKDEV' is a socket
- stat: 'SCRATCH_MNT/test/FIFO' is a socket
-@@ -305,13 +305,13 @@ would have junked entry "DIR" in directory PARENT_INO
- would have junked entry "EMPTY" in directory PARENT_INO
- would have junked entry "FIFO" in directory PARENT_INO
- would have junked entry "SYMLINK" in directory PARENT_INO
--stat: cannot stat 'SCRATCH_MNT/test/DIR': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/DATA': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/EMPTY': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/SYMLINK': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/CHRDEV': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/BLKDEV': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/FIFO': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/DIR': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/DATA': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/EMPTY': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/SYMLINK': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/CHRDEV': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/BLKDEV': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/FIFO': Structure needs cleaning
- 
- ===== Setting dt=16 to all files:
- core.mode = 0160644
-@@ -328,13 +328,13 @@ would have junked entry "DIR" in directory PARENT_INO
- would have junked entry "EMPTY" in directory PARENT_INO
- would have junked entry "FIFO" in directory PARENT_INO
- would have junked entry "SYMLINK" in directory PARENT_INO
--stat: cannot stat 'SCRATCH_MNT/test/DIR': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/DATA': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/EMPTY': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/SYMLINK': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/CHRDEV': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/BLKDEV': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/FIFO': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/DIR': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/DATA': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/EMPTY': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/SYMLINK': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/CHRDEV': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/BLKDEV': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/FIFO': Structure needs cleaning
- 
- ===== Setting dt=17 to all files:
- core.mode = 0170644
-@@ -351,10 +351,10 @@ would have junked entry "DIR" in directory PARENT_INO
- would have junked entry "EMPTY" in directory PARENT_INO
- would have junked entry "FIFO" in directory PARENT_INO
- would have junked entry "SYMLINK" in directory PARENT_INO
--stat: cannot stat 'SCRATCH_MNT/test/DIR': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/DATA': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/EMPTY': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/SYMLINK': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/CHRDEV': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/BLKDEV': Structure needs cleaning
--stat: cannot stat 'SCRATCH_MNT/test/FIFO': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/DIR': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/DATA': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/EMPTY': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/SYMLINK': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/CHRDEV': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/BLKDEV': Structure needs cleaning
-+stat: cannot statx 'SCRATCH_MNT/test/FIFO': Structure needs cleaning
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++_supported_fs btrfs
++
++# Need at least 2GiB
++_require_scratch_size $((2 * 1024 * 1024))
++_scratch_mkfs > /dev/null 2>&1
++_scratch_mount
++
++_pwrite_byte 0xcd 0 1G $SCRATCH_MNT/file >> $seqres.full
++# Make sure the data reach disk so later qgroup scan can see it
++sync
++
++$BTRFS_UTIL_PROG quota enable $SCRATCH_MNT
++$BTRFS_UTIL_PROG quota rescan -w $SCRATCH_MNT >> $seqres.full
++
++# Set the limit to just 512MiB, which is way below the existing usage
++$BTRFS_UTIL_PROG qgroup limit  512M 0/5 $SCRATCH_MNT
++
++# Touch above file, if kernel not patched, it will trigger an ASSERT()
++#
++# Even for patched kernel, we will still get EDQUOT error, but that
++# is expected behavior.
++touch $SCRATCH_MNT/file 2>&1 | _filter_scratch
++
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/228.out b/tests/btrfs/228.out
+new file mode 100644
+index 00000000..9c250148
+--- /dev/null
++++ b/tests/btrfs/228.out
+@@ -0,0 +1,2 @@
++QA output created by 228
++touch: setting times of 'SCRATCH_MNT/file': Disk quota exceeded
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 1868208e..9b0dc5ca 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -230,3 +230,4 @@
+ 225 auto quick volume seed
+ 226 auto quick rw snapshot clone prealloc punch
+ 227 auto quick send
++228 auto quick qgroup limit
 -- 
-2.20.1
+2.28.0
 
