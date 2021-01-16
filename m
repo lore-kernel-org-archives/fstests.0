@@ -8,52 +8,52 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A7119C433E0
-	for <linux-fstests@archiver.kernel.org>; Sat, 16 Jan 2021 17:08:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4D262C433E0
+	for <linux-fstests@archiver.kernel.org>; Sat, 16 Jan 2021 17:09:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7095C22AAF
-	for <linux-fstests@archiver.kernel.org>; Sat, 16 Jan 2021 17:08:12 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 14BC820700
+	for <linux-fstests@archiver.kernel.org>; Sat, 16 Jan 2021 17:09:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726395AbhAPRHq (ORCPT
+        id S1726906AbhAPRJN (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 16 Jan 2021 12:07:46 -0500
-Received: from mail-lf1-f45.google.com ([209.85.167.45]:37395 "EHLO
-        mail-lf1-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725964AbhAPRHe (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 16 Jan 2021 12:07:34 -0500
-Received: by mail-lf1-f45.google.com with SMTP id o17so17909564lfg.4;
-        Sat, 16 Jan 2021 09:07:15 -0800 (PST)
+        Sat, 16 Jan 2021 12:09:13 -0500
+Received: from mail-lj1-f179.google.com ([209.85.208.179]:45933 "EHLO
+        mail-lj1-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727995AbhAPRJA (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 16 Jan 2021 12:09:00 -0500
+Received: by mail-lj1-f179.google.com with SMTP id f17so13751620ljg.12;
+        Sat, 16 Jan 2021 09:08:44 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=wa2CXXj6gWguxDo1AA/mB/lnLHXaE5PDB4GKaYCGK0Y=;
-        b=tW5vX254OruXkfZ/pSraa6c04oiYgSfLbFzRaf69g6tKUsPs0Bx4ViPIehDTFWBXmZ
-         2CsDi5/gNmmebU0kSwZ56/JBoHfEzBUD8Dzy1iTUTl4aRcBWZ6992XFfGwGAv5sHR9Mo
-         mGa6MOFkpqdOO+sC8c2VEXCrLByvg537vrw03OPQ4ouBF8Ub4F0xpBRMnBjfcjhcXobQ
-         5XkMYzT50TK4/99H0Q9CLC0Y3fLB0wNbjqhPMd0lG+/NaFXSIgYhrV0FcPBSamSyEKZi
-         JeHddInik9iPwqGs8cqOkCpzG5SwDYfD7xhJ4YrFEgnbd8gA4sAcxdFAiVel6WINz2wd
-         RbTw==
+        bh=C2k4AmnHtUh0OVe9iECxCs78XogrR+lg0yB62QXs+9E=;
+        b=Yk96M01xL3zhyHglIQQyCKEFzMXcr3c71sqsYNkB0ra0zcMUqq1L2TjJ3KBBvUY6tC
+         EsRBsp9GM8crOmRYicRCiOxJZbtUtUFZo8yCKuiwxk7D+XRL5wR+1UM8iDbNshPSF+DY
+         nzHxpq0FcLi9Egiib6K3u4GMKyercQEQoV8ENhZSS2XoPbfZjY6R53Dah/9JyMSeCAFC
+         oUz2neveT5X10QVUyPOmeTAISD2dYB7PPmKtRa4dJKyZkVdkB4CSfKNk5IFhsNYfRzUl
+         vmChCHqSm1IqQH59nLFT63McEMfr9ilGmIvgYVX5J1bmdeX+0Ve5vxyw2BxadwliLibI
+         qW6Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=wa2CXXj6gWguxDo1AA/mB/lnLHXaE5PDB4GKaYCGK0Y=;
-        b=ieROmw/D8eTRgLms78XsT8e7xaNou71xTdGa5NOA6u73rJ/DV/BYLJm6HQe/a5/pAf
-         mBObJ3z1T5zES+BFd8soYuFKc/jVV/mXqJuKi5qWCDCMwrl4Z4JQAxPPPfthLw+dfVJD
-         DYwcSqL+C5odizD17AifQk8vSWtL1K7ZZACsOtzzrf+KZik8ICraE67/DxNzbjsgUBbi
-         ErDO0ZkzhTTdIqTc3GFqvpQ+7SW3nI1aie7Vsq7etFvAiOPOVHa02tY2Yo8JQSh7KP75
-         TQ8a0xugXHHv7b5Th40hpMOfwOmLgqhccCwIE1Jktm+RGYi3WrU/yaTrRX6jCvgOmQt6
-         dBew==
-X-Gm-Message-State: AOAM531LwynuWWEdV7NOj1C/N57GkZMhyGSkmPxqCwON+w1dIWtPm3uy
-        mKFIzPikCTt22qYtQZGRHGUmA+Zn4mk=
-X-Google-Smtp-Source: ABdhPJxvvsYLlyc8CoVBJHJpBeR+QZVukpiGzksJwMXMrRvleAWgelFWcZszGNBXhTNrpdgkNNTOVg==
-X-Received: by 2002:a17:906:5907:: with SMTP id h7mr2624661ejq.252.1610816186517;
-        Sat, 16 Jan 2021 08:56:26 -0800 (PST)
-Received: from localhost.localdomain ([31.210.181.203])
-        by smtp.gmail.com with ESMTPSA id zn8sm7061063ejb.39.2021.01.16.08.56.25
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        bh=C2k4AmnHtUh0OVe9iECxCs78XogrR+lg0yB62QXs+9E=;
+        b=hfbpE4xUvdhzogbwfPUz/mzGMOBz3FYUYJoiGycX6wRdqUHpsmU8nmBH2jAZqjVDJJ
+         DeeAPfrzctprfAIzV+a7iB5kRADx+YhBtsgQyRFzXNA4ZSkod2tqKRfIT+1zgBeNIclm
+         alXBrnhBkCx/2f1bPQJ2HuwIqStURUyVr5xSZJiAROB45KcSrZX1uitiD3JIwqCG8CXv
+         yKzHhqaor3ajtRW01Wnkia4dVsIMB8RYgeOLxuazNmdAyD/eBDziVfZFzZMF65WupsYS
+         rO+Ml+BDNz8dGW40MiloqFOmMdLvPjFOf468q9CFGk3UfRiF9NOeSuvzr+GgF/UkUkWQ
+         oO3A==
+X-Gm-Message-State: AOAM531Sai2ESZQP4NmT3BtqsySageJbxxGqvuURTyCUW6XUUrFebVnU
+        SaFR+53sC6U+F6/ECg8jyJXLYC1yQ2U=
+X-Google-Smtp-Source: ABdhPJx9Zd0nrQANJgwoxf8Q+MLgyW8iVEd3FgSg3ftv1b6owDjISDZUT7DvTDWWkoHAgBRnj68gVw==
+X-Received: by 2002:a17:906:f1cc:: with SMTP id gx12mr11934663ejb.164.1610816185015;
         Sat, 16 Jan 2021 08:56:25 -0800 (PST)
+Received: from localhost.localdomain ([31.210.181.203])
+        by smtp.gmail.com with ESMTPSA id zn8sm7061063ejb.39.2021.01.16.08.56.23
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 16 Jan 2021 08:56:24 -0800 (PST)
 From:   Amir Goldstein <amir73il@gmail.com>
 To:     Eryu Guan <guaneryu@gmail.com>
 Cc:     Icenowy Zheng <icenowy@aosc.io>,
@@ -61,9 +61,9 @@ Cc:     Icenowy Zheng <icenowy@aosc.io>,
         Xiao Yang <yangx.jy@cn.fujitsu.com>,
         Miklos Szeredi <miklos@szeredi.hu>,
         linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: [PATCH 2/4] src/t_immutable: factor out some helpers
-Date:   Sat, 16 Jan 2021 18:56:17 +0200
-Message-Id: <20210116165619.494265-3-amir73il@gmail.com>
+Subject: [PATCH 1/4] overlay/030: Update comment w.r.t upstream kernel
+Date:   Sat, 16 Jan 2021 18:56:16 +0200
+Message-Id: <20210116165619.494265-2-amir73il@gmail.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20210116165619.494265-1-amir73il@gmail.com>
 References: <20210116165619.494265-1-amir73il@gmail.com>
@@ -73,360 +73,33 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Reduce boilerplate code.
-define _GNU_SOURCE needed for asprintf.
+commit 61536bed2149 ("ovl: support [S|G]ETFLAGS and FS[S|G]ETXATTR
+ioctls for directories") makes the comment in test header inaccurate.
+Fix the comment to include this information.
 
 Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 ---
- src/t_immutable.c | 221 ++++++++++++++++++++++------------------------
- 1 file changed, 104 insertions(+), 117 deletions(-)
+ tests/overlay/030 | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
 
-diff --git a/src/t_immutable.c b/src/t_immutable.c
-index 86c567ed..b6a76af0 100644
---- a/src/t_immutable.c
-+++ b/src/t_immutable.c
-@@ -8,6 +8,9 @@
- 
- #define TEST_UTIME
- 
-+#ifndef _GNU_SOURCE
-+#define _GNU_SOURCE
-+#endif
- #include <stdio.h>
- #include <stdlib.h>
- #include <string.h>
-@@ -1895,13 +1898,66 @@ static int check_test_area(const char *dir)
-      return 0;
- }
- 
-+static int create_dir(char **ppath, const char *fmt, const char *dir)
-+{
-+     const char *path;
-+     struct stat st;
-+
-+     if (asprintf(ppath, fmt, dir) == -1) {
-+	  return -1;
-+     }
-+     path = *ppath;
-+     if (stat(path, &st) == 0) {
-+	  fprintf(stderr, "%s: Test area directory %s must not exist for test area creation.\n",
-+		  __progname, path);
-+	  return 1;
-+     }
-+     if (mkdir(path, 0777) != 0) {
-+	  fprintf(stderr, "%s: error creating directory %s: %s\n", __progname, path, strerror(errno));
-+	  return -1;
-+     }
-+     return 0;
-+}
-+
-+static int create_file(char **ppath, const char *fmt, const char *dir)
-+{
-+     const char *path;
-+     int fd;
-+
-+     if (asprintf(ppath, fmt, dir) == -1) {
-+	  return -1;
-+     }
-+     path = *ppath;
-+     if ((fd = open(path, O_WRONLY|O_CREAT|O_EXCL, 0666)) == -1) {
-+	  fprintf(stderr, "%s: error creating file %s: %s\n", __progname, path, strerror(errno));
-+          return -1;
-+     }
-+     return fd;
-+}
-+
-+static int create_xattrs(int fd)
-+{
-+     if (fsetxattr(fd, "trusted.test", "readonly", strlen("readonly"), XATTR_CREATE) != 0) {
-+	  if (errno != EOPNOTSUPP) {
-+	       perror("setxattr");
-+	       return 1;
-+	  }
-+     }
-+     if (fsetxattr(fd, "user.test", "readonly", strlen("readonly"), XATTR_CREATE) != 0) {
-+	  if (errno != EOPNOTSUPP) {
-+	       perror("setxattr");
-+	       return 1;
-+	  }
-+     }
-+     return 0;
-+}
-+
- static int create_test_area(const char *dir)
- {
-      int fd;
-      char *path;
-      static const char *acl_u_text = "u::rw-,g::rw-,o::rw-,u:nobody:rw-,m::rw-";
-      static const char *acl_u_text_d = "u::rwx,g::rwx,o::rwx,u:nobody:rwx,m::rwx";
--     struct stat st;
-      static const char *immutable = "This is an immutable file.\nIts contents cannot be altered.\n";
-      static const char *append_only = "This is an append-only file.\nIts contents cannot be altered.\n"
- 	  "Data can only be appended.\n---\n";
-@@ -1911,79 +1967,45 @@ static int create_test_area(const char *dir)
- 	  return 1;
-      }
- 
--     if (stat(dir, &st) == 0) {
--	  fprintf(stderr, "%s: Test area directory %s must not exist for test area creation.\n",
--		  __progname, dir);
--	  return 1;
--     }
--
-      umask(0000);
--     if (mkdir(dir, 0777) != 0) {
--	  fprintf(stderr, "%s: error creating directory %s: %s\n", __progname, dir, strerror(errno));
-+     if (create_dir(&path, "%s", dir)) {
- 	  return 1;
-      }
--
--     asprintf(&path, "%s/immutable.d", dir);
--     if (mkdir(path, 0777) != 0) {
--          fprintf(stderr, "%s: error creating directory %s: %s\n", __progname, path, strerror(errno));
--          return 1;
--     }
-      free(path);
- 
--     asprintf(&path, "%s/empty-immutable.d", dir);
--     if (mkdir(path, 0777) != 0) {
--          fprintf(stderr, "%s: error creating directory %s: %s\n", __progname, path, strerror(errno));
--          return 1;
-+     if (create_dir(&path, "%s/append-only.d", dir)) {
-+	  return 1;
-      }
-      free(path);
- 
--     asprintf(&path, "%s/append-only.d", dir);
--     if (mkdir(path, 0777) != 0) {
--          fprintf(stderr, "%s: error creating directory %s: %s\n", __progname, path, strerror(errno));
--          return 1;
-+     if (create_dir(&path, "%s/append-only.d/dir", dir)) {
-+	  return 1;
-      }
-      free(path);
- 
--     asprintf(&path, "%s/empty-append-only.d", dir);
--     if (mkdir(path, 0777) != 0) {
--          fprintf(stderr, "%s: error creating directory %s: %s\n", __progname, path, strerror(errno));
-+     if ((fd = create_file(&path, "%s/append-only.d/file", dir)) == -1) {
-           return 1;
-      }
-+     close(fd);
-      free(path);
- 
--     asprintf(&path, "%s/immutable.d/dir", dir);
--     if (mkdir(path, 0777) != 0) {
--          fprintf(stderr, "%s: error creating directory %s: %s\n", __progname, path, strerror(errno));
--          return 1;
-+     if (create_dir(&path, "%s/immutable.d", dir)) {
-+	  return 1;
-      }
-      free(path);
- 
--     asprintf(&path, "%s/append-only.d/dir", dir);
--     if (mkdir(path, 0777) != 0) {
--          fprintf(stderr, "%s: error creating directory %s: %s\n", __progname, path, strerror(errno));
--          return 1;
-+     if (create_dir(&path, "%s/immutable.d/dir", dir)) {
-+	  return 1;
-      }
-      free(path);
- 
--     asprintf(&path, "%s/append-only.d/file", dir);
--     if ((fd = open(path, O_WRONLY|O_CREAT|O_EXCL, 0666)) == -1) {
--	  fprintf(stderr, "%s: error creating file %s: %s\n", __progname, path, strerror(errno));
-+     if ((fd = create_file(&path, "%s/immutable.d/file", dir)) == -1) {
-           return 1;
-      }
-      close(fd);
-      free(path);
- 
--     asprintf(&path, "%s/immutable.d/file", dir);
--     if ((fd = open(path, O_WRONLY|O_CREAT|O_EXCL, 0666)) == -1) {
--          fprintf(stderr, "%s: error creating file %s: %s\n", __progname, path, strerror(errno));
--          return 1;
--     }
--     close(fd);
--     free(path);
--
--     asprintf(&path, "%s/immutable.f", dir);
--     if ((fd = open(path, O_WRONLY|O_CREAT|O_EXCL, 0666)) == -1) {
--          fprintf(stderr, "%s: error creating file %s: %s\n", __progname, path, strerror(errno));
-+     if ((fd = create_file(&path, "%s/immutable.f", dir)) == -1) {
-           return 1;
-      }
-      if (write(fd, immutable, strlen(immutable)) != strlen(immutable)) {
-@@ -1994,17 +2016,8 @@ static int create_test_area(const char *dir)
- 	  perror("acl");
- 	  return 1;
-      }
--     if (fsetxattr(fd, "trusted.test", "readonly", strlen("readonly"), XATTR_CREATE) != 0) {
--	  if (errno != EOPNOTSUPP) {
--	       perror("setxattr");
--	       return 1;
--	  }
--     }
--     if (fsetxattr(fd, "user.test", "readonly", strlen("readonly"), XATTR_CREATE) != 0) {
--	  if (errno != EOPNOTSUPP) {
--	       perror("setxattr");
--	       return 1;
--	  }
-+     if (create_xattrs(fd)) {
-+	  return 1;
-      }
-      if (fsetflag(path, fd, 1, 1)) {
-           perror("fsetflag");
-@@ -2014,8 +2027,7 @@ static int create_test_area(const char *dir)
-      close(fd);
-      free(path);
- 
--     asprintf(&path, "%s/append-only.f", dir);
--     if ((fd = open(path, O_WRONLY|O_CREAT|O_EXCL, 0666)) == -1) {
-+     if ((fd = create_file(&path, "%s/append-only.f", dir)) == -1) {
-           fprintf(stderr, "%s: error creating file %s: %s\n", __progname, path, strerror(errno));
-           return 1;
-      }
-@@ -2027,17 +2039,8 @@ static int create_test_area(const char *dir)
-           perror("acl");
-           return 1;
-      }
--     if (fsetxattr(fd, "trusted.test", "readonly", strlen("readonly"), XATTR_CREATE) != 0) {
--	  if (errno != EOPNOTSUPP) {
--	       perror("setxattr");
--	       return 1;
--	  }
--     }
--     if (fsetxattr(fd, "user.test", "readonly", strlen("readonly"), XATTR_CREATE) != 0) {
--	  if (errno != EOPNOTSUPP) {
--	       perror("setxattr");
--	       return 1;
--	  }
-+     if (create_xattrs(fd)) {
-+	  return 1;
-      }
-      if (fsetflag(path, fd, 1, 0)) {
-           perror("fsetflag");
-@@ -2056,17 +2059,8 @@ static int create_test_area(const char *dir)
-           perror("acl");
-           return 1;
-      }
--     if (fsetxattr(fd, "trusted.test", "readonly", strlen("readonly"), XATTR_CREATE) != 0) {
--	  if (errno != EOPNOTSUPP) {
--	       perror("setxattr");
--	       return 1;
--	  }
--     }
--     if (fsetxattr(fd, "user.test", "readonly", strlen("readonly"), XATTR_CREATE) != 0) {
--	  if (errno != EOPNOTSUPP) {
--	       perror("setxattr");
--	       return 1;
--	  }
-+     if (create_xattrs(fd)) {
-+	  return 1;
-      }
-      if (fsetflag(path, fd, 1, 1)) {
-           perror("fsetflag");
-@@ -2076,7 +2070,9 @@ static int create_test_area(const char *dir)
-      close(fd);
-      free(path);
- 
--     asprintf(&path, "%s/empty-immutable.d", dir);
-+     if (create_dir(&path, "%s/empty-immutable.d", dir)) {
-+	  return 1;
-+     }
-      if ((fd = open(path, O_RDONLY)) == -1) {
-           fprintf(stderr, "%s: error opening %s: %s\n", __progname, path, strerror(errno));
-           return 1;
-@@ -2098,17 +2094,8 @@ static int create_test_area(const char *dir)
-           perror("acl");
-           return 1;
-      }
--     if (fsetxattr(fd, "trusted.test", "readonly", strlen("readonly"), XATTR_CREATE) != 0) {
--	  if (errno != EOPNOTSUPP) {
--	       perror("setxattr");
--	       return 1;
--	  }
--     }
--     if (fsetxattr(fd, "user.test", "readonly", strlen("readonly"), XATTR_CREATE) != 0) {
--	  if (errno != EOPNOTSUPP) {
--	       perror("setxattr");
--	       return 1;
--	  }
-+     if (create_xattrs(fd)) {
-+	  return 1;
-      }
-      if (fsetflag(path, fd, 1, 0)) {
-           perror("fsetflag");
-@@ -2118,7 +2105,9 @@ static int create_test_area(const char *dir)
-      close(fd);
-      free(path);
- 
--     asprintf(&path, "%s/empty-append-only.d", dir);
-+     if (create_dir(&path, "%s/empty-append-only.d", dir)) {
-+	  return 1;
-+     }
-      if ((fd = open(path, O_RDONLY)) == -1) {
-           fprintf(stderr, "%s: error opening %s: %s\n", __progname, path, strerror(errno));
-           return 1;
-@@ -2242,6 +2231,7 @@ int main(int argc, char **argv)
- {
-      int ret;
-      int failed = 0;
-+     int runtest = 1, create = 0, remove = 0;
- 
- /* this arg parsing is gross, but who cares, its a test program */
- 
-@@ -2251,32 +2241,29 @@ int main(int argc, char **argv)
-      }
- 
-      if (!strcmp(argv[1], "-c")) {
--	  if (argc == 3) {
--	       if ((ret = create_test_area(argv[argc-1])))
--		    return ret;
--	  } else {
--	       fprintf(stderr, "usage: t_immutable -c test_area_dir\n");
--	       return 1;
--	  }
-+	  create = 1;
-      } else if (!strcmp(argv[1], "-C")) {
--          if (argc == 3) {
--               return create_test_area(argv[argc-1]);
--          } else {
--               fprintf(stderr, "usage: t_immutable -C test_area_dir\n");
--               return 1;
--          }
-+	  /* Prepare test area without running tests */
-+	  create = 1;
-+	  runtest = 0;
-      } else if (!strcmp(argv[1], "-r")) {
--	  if (argc == 3)
--	       return remove_test_area(argv[argc-1]);
--	  else {
--	       fprintf(stderr, "usage: t_immutable -r test_area_dir\n");
--	       return 1;
--	  }
--     } else if (argc != 2) {
--	  fprintf(stderr, "usage: t_immutable [-c|-r] test_area_dir\n");
-+	  remove = 1;
-+     }
-+
-+     if (argc != 2 + (create | remove)) {
-+	  fprintf(stderr, "usage: t_immutable [-C|-c|-r] test_area_dir\n");
- 	  return 1;
-      }
- 
-+     if (create) {
-+	  ret = create_test_area(argv[argc-1]);
-+	  if (ret || !runtest) {
-+               return ret;
-+	  }
-+     } else if (remove) {
-+	  return remove_test_area(argv[argc-1]);
-+     }
-+
-      umask(0000);
- 
-      if (check_test_area(argv[argc-1]))
+diff --git a/tests/overlay/030 b/tests/overlay/030
+index 3ef206b6..c461e502 100755
+--- a/tests/overlay/030
++++ b/tests/overlay/030
+@@ -8,8 +8,11 @@
+ # and directories in an overlayfs upper directory.
+ #
+ # This test is similar and was derived from generic/079, but
+-# the original test is _notrun on overlay mount because FS_IOC_GETFLAGS
+-# FS_IOC_SETFLAGS ioctls fail on overlay directory inodes.
++# the original test is _notrun with FSTYP=overlay on kernel < v5.10
++# because prior to commit 61536bed2149 ("ovl: support [S|G]ETFLAGS
++# and FS[S|G]ETXATTR ioctls for directories"), t_immutable -c would
++# fail to prepare immutable/append-only directories on the overlay
++# mount path.
+ #
+ seq=`basename $0`
+ seqres=$RESULT_DIR/$seq
 -- 
 2.25.1
 
