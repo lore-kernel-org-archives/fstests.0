@@ -2,108 +2,114 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7836DC433E6
-	for <linux-fstests@archiver.kernel.org>; Sat, 16 Jan 2021 17:09:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 814D5C433DB
+	for <linux-fstests@archiver.kernel.org>; Sun, 17 Jan 2021 15:08:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 427FC2310F
-	for <linux-fstests@archiver.kernel.org>; Sat, 16 Jan 2021 17:09:30 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 470D021D81
+	for <linux-fstests@archiver.kernel.org>; Sun, 17 Jan 2021 15:08:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727995AbhAPRJN (ORCPT
+        id S1729248AbhAQPH3 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 16 Jan 2021 12:09:13 -0500
-Received: from mail-ej1-f41.google.com ([209.85.218.41]:39712 "EHLO
-        mail-ej1-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727943AbhAPRJI (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 16 Jan 2021 12:09:08 -0500
-Received: by mail-ej1-f41.google.com with SMTP id n26so17758144eju.6;
-        Sat, 16 Jan 2021 09:08:52 -0800 (PST)
+        Sun, 17 Jan 2021 10:07:29 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36386 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728875AbhAQPHN (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 17 Jan 2021 10:07:13 -0500
+Received: from mail-pg1-x52b.google.com (mail-pg1-x52b.google.com [IPv6:2607:f8b0:4864:20::52b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A5DDCC061757
+        for <fstests@vger.kernel.org>; Sun, 17 Jan 2021 07:06:32 -0800 (PST)
+Received: by mail-pg1-x52b.google.com with SMTP id i5so9347150pgo.1
+        for <fstests@vger.kernel.org>; Sun, 17 Jan 2021 07:06:32 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=RJfG7pg+lF3o2vHmOwx3NGS+XNFGTvNg7y9ruvorZDo=;
-        b=Ye5y8KSnWof3++d4v7yt6jP0TRUFgJcqYzh11REo59mquug4YVJnYMt8xGpMbPPfAo
-         DAvUCvqgxENIkRIkbXSk4lSBkkbLjd6nbCoFfro6RlqjLKWEd/PD2kJnhoQcm3jeORjD
-         DPC0RTkarTuINBIudMQ5rt8Z9XLcz0Aqj8eb5hAAvVmfJHYaa/nBsFd6NI5oZypC8wZz
-         7DNQ1jO6/fmcpRkCHCGF3uMwsXdhT35vxZstGkJBMGuKPjTzXuohqSOd0GpKpMwNLv7s
-         f5Dc+oVYedOt6fudebVcGNiBdQgMkUzGhfMrooNOwzinuljCvbdP/bdr2KU3pu8fH3wX
-         K5Nw==
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=3Ry62NCfuXJdQPzkASImldSyJSTiKgprZLe1YXT7MFM=;
+        b=Hf43Nf2gu7XBYM2bZI/Jk4xcvHB8VXFtSWpNJrvwvO65X1QYiITmWxDiiVHm/zLtIQ
+         g0QcYN5vQBv02P/dKFRFpTDQAc46oxEYxBDph1aNVutAKj7FsdU/ZZUXF/7iMfceEcVx
+         Kn3+W4ipJPm61kTdVQxOfvE2v3lMZqYlZESVmwmRQlxJhma20SQBDVhE86s7BXxZOX2m
+         pp0Asqv9vnx/clEMlT5dyO1R+6nfFcL3UNKC3SlYGARAeIo21bKzd+bRUna2KEZjPewh
+         uaQanMXXYaCGtC4T2TBA1ehKD7/gEvkpSF4mCHaOZ16Kph+M1WinWx0pMcXuKVRVCVx4
+         XfrA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=RJfG7pg+lF3o2vHmOwx3NGS+XNFGTvNg7y9ruvorZDo=;
-        b=igQ0vYcVDnLEaPSYWnZVUYX4PedRa+kFpkyNUFL4HS5cmecjyB52B5SryQg6fX5Hc2
-         fCzDqeZ5DU6dZfaGoc7PCZOU8gYH21B40P4r21fZRt6kxrkMF/y+wtd87lWXYDxhy8e7
-         hMJmsGWnojn4he/lfhMXIcnlhMKj43ZAN0hAu9cPJrGQFgWBh3BhnVOAP4np/TsVnzBm
-         yqtERENEFE2NSPSzyzKVyR9ttwZzNqAj1zBfte6hCdWstTevevC1jr1jvlXVe9YcI56X
-         6FL33doozKpU1txOoU2F7TSFEOP3T+vs3HYGZ6fjF05UDk/jCSc0R8u8drP/mD/2Elgw
-         VptQ==
-X-Gm-Message-State: AOAM532BGeDCR/5gaemKMbC0/W3qCOxqTxp9sBDFxtLknPXJFAatWorC
-        LfAqofL95NTHNJIByjmpdBlOc4z7vH0=
-X-Google-Smtp-Source: ABdhPJyjP9jTw9K7koDiyWVjlblNP6yNrZzbLuyemVHWD252up4U2U8GfWua0m66FfZ9g8N9UPsUpA==
-X-Received: by 2002:a17:906:2a4c:: with SMTP id k12mr4291944eje.305.1610816183341;
-        Sat, 16 Jan 2021 08:56:23 -0800 (PST)
-Received: from localhost.localdomain ([31.210.181.203])
-        by smtp.gmail.com with ESMTPSA id zn8sm7061063ejb.39.2021.01.16.08.56.21
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=3Ry62NCfuXJdQPzkASImldSyJSTiKgprZLe1YXT7MFM=;
+        b=h+5AkyMaKw5NNMuJoDWId48ysAuu5YjqFRoof/0ZDshmaBD0lXVCSpyckmvwzHEWr2
+         SeXkvD4exRjEFXnC4zjKDUNUp1vBu/JjoCF09gcrFPEj0UJKQ2vmPKMPTV9nLw40aeBh
+         IESIeU1iXug1MquKB6eWeKNxTGpIR+qQGxQY0lEcNHEgsI6epJuK1PHfs8Cb0TltSh9z
+         zrps+2oeA/CuiuuKhspDfqCI6IYN7StN5LfboF/7xcqLI1aU0d8+B4jTOPhqaUvZ4U1f
+         W98w2B4qMxuZx7cw7/L3tBckVdNi+BRirpPy3lqy/lBzDhgtCJSploxZX78kUPvOD6TE
+         QvDQ==
+X-Gm-Message-State: AOAM532rbtiGVshBxfbF3ZgQqb9hQbGzb8tf1juhtg4E/WtbHFZfFovN
+        PWkxsX+jdahH2deoEoP9bZVOzGxPQkJDyg==
+X-Google-Smtp-Source: ABdhPJw5v6Q/OoGsiKBeyLeJ6Clu5jmgbJs7VdOXO5r5GMPBPR+c/P7TLbXdwa49htCi4L71nPeASA==
+X-Received: by 2002:a63:f44f:: with SMTP id p15mr22339458pgk.141.1610895992294;
+        Sun, 17 Jan 2021 07:06:32 -0800 (PST)
+Received: from localhost ([47.89.231.86])
+        by smtp.gmail.com with ESMTPSA id a136sm14214170pfd.149.2021.01.17.07.06.30
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 16 Jan 2021 08:56:22 -0800 (PST)
-From:   Amir Goldstein <amir73il@gmail.com>
-To:     Eryu Guan <guaneryu@gmail.com>
-Cc:     Icenowy Zheng <icenowy@aosc.io>,
-        Chengguang Xu <cgxu519@mykernel.net>,
-        Xiao Yang <yangx.jy@cn.fujitsu.com>,
-        Miklos Szeredi <miklos@szeredi.hu>,
-        linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: [PATCH 0/4] Tests for overlayfs immutable/append-only files
-Date:   Sat, 16 Jan 2021 18:56:15 +0200
-Message-Id: <20210116165619.494265-1-amir73il@gmail.com>
-X-Mailer: git-send-email 2.25.1
+        Sun, 17 Jan 2021 07:06:31 -0800 (PST)
+Date:   Sun, 17 Jan 2021 23:06:24 +0800
+From:   Eryu Guan <guaneryu@gmail.com>
+To:     Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH] ext4/046: skip test when ext4 doesn't support bs < ps
+ with dioread_nolock
+Message-ID: <20210117150624.GA2347@desktop>
+References: <1610596503-17149-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1610596503-17149-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Eryu,
+On Thu, Jan 14, 2021 at 11:55:03AM +0800, Yang Xu wrote:
+> When testing arm machine, this case fails because ps > bs and kernel doesn't
+> introduced commit c8cc88163f40 ("ext4: Add support for blocksize < pagesize in dioread_nolock").
+> Only skip this case when mounting failed.
 
-Overlayfs never had full support for immutable/append-only files.
-Whatever works is covered by generic/079 and overlay/030 tests.
-Both tests cover only upper files and directories.
-generic/079 is notrun on kernel < 5.10 and passes on >= 5.10.
+Perhaps it's the kernel that should be fixed? i.e. backport the
+mentioned patch? Depends on if we treat it as a bug or a feature I
+think..
 
-This series improves the t_immutable test program and adds a new test
-to cover lower files and directories - the test fails on upstream kernel.
-Fixing this requires some VFS API changes that Miklos has proposed [1].
+> 
+> Signed-off-by: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+> ---
+>  tests/ext4/046 | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
+> 
+> diff --git a/tests/ext4/046 b/tests/ext4/046
+> index 5524024e..e307cbf1 100755
+> --- a/tests/ext4/046
+> +++ b/tests/ext4/046
+> @@ -37,7 +37,8 @@ _require_xfs_io_command "falloc"
+>  _require_scratch_size $((6 * 1024 * 1024)) #kB
+>  
+>  _scratch_mkfs >> $seqres.full 2>&1
+> -_scratch_mount "-o dioread_nolock" >> $seqres.full 2>&1
+> +_try_scratch_mount "-o dioread_nolock" >>$seqres.full 2>&1 || \
+> +	_notrun "mount failed, ext4 doesn't support bs < ps with dioread_nolock?"
 
-The new test covers two reported bug, one of them is a deadlock.
-The deadlock trigger is commented out until we have a fix upstream.
+At least we should check if it's really the bs < ps case before _notrun
+the test, otherwise we may fail to find dioread_nolock mount regression.
 
 Thanks,
-Amir. 
+Eryu
 
-[1] https://lore.kernel.org/linux-unionfs/20201123141207.GC327006@miu.piliscsaba.redhat.com/
-
-Amir Goldstein (4):
-  overlay/030: Update comment w.r.t upstream kernel
-  src/t_immutable: factor out some helpers
-  src/t_immutable: Allow setting flags on existing files
-  overlay: Test lost immutable/append-only flags on copy-up
-
- src/t_immutable.c     | 241 +++++++++++++++++++++---------------------
- tests/overlay/030     |   7 +-
- tests/overlay/075     |  97 +++++++++++++++++
- tests/overlay/075.out |  11 ++
- tests/overlay/group   |   1 +
- 5 files changed, 237 insertions(+), 120 deletions(-)
- create mode 100755 tests/overlay/075
- create mode 100644 tests/overlay/075.out
-
--- 
-2.25.1
-
+>  
+>  # Get blksz
+>  blksz=$(_get_file_block_size $SCRATCH_MNT)
+> -- 
+> 2.23.0
+> 
+> 
