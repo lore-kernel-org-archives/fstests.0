@@ -2,152 +2,75 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-8.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D69C7C433E0
-	for <linux-fstests@archiver.kernel.org>; Sun, 17 Jan 2021 15:24:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 49945C433E0
+	for <linux-fstests@archiver.kernel.org>; Sun, 17 Jan 2021 23:45:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A213A2251F
-	for <linux-fstests@archiver.kernel.org>; Sun, 17 Jan 2021 15:24:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 179D8206ED
+	for <linux-fstests@archiver.kernel.org>; Sun, 17 Jan 2021 23:45:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729288AbhAQPYT (ORCPT
+        id S1730832AbhAQXpN (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 17 Jan 2021 10:24:19 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40062 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729223AbhAQPYP (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 17 Jan 2021 10:24:15 -0500
-Received: from mail-pf1-x433.google.com (mail-pf1-x433.google.com [IPv6:2607:f8b0:4864:20::433])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 81B64C061573
-        for <fstests@vger.kernel.org>; Sun, 17 Jan 2021 07:23:33 -0800 (PST)
-Received: by mail-pf1-x433.google.com with SMTP id c12so8676822pfo.10
-        for <fstests@vger.kernel.org>; Sun, 17 Jan 2021 07:23:33 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=message-id:date:from:to:subject:mime-version:content-disposition;
-        bh=FO7P0/4rmYy403WvBTm1G57ctFsYORvGwXILEMkMlHs=;
-        b=HjcQu2SUeyJwQPh36VMHY24U3HY5KQboK8KVeu8S9CnGaX3n5i59e0mvZkV1DYrxzY
-         Zvs+sJQRAPtTN+OO7P0+hG94/QYgXyw0e0fGG92tP2HAuBpJa1/duW37wkViMXFEp6Bd
-         4hUwC2EqE7mnXdzGG7GKXW9XD+zR9vtrqyyBJVmrLMvSNr9SVLfCk3LOwR+pq7cXmXSt
-         FDOjgIjbMXAhNNA6mPfSlsx33hbHScSYuWJLSsh5y6LAue5IRpwkXoVZGkn/u7bxtAKh
-         AiIn6vOeA4LihHNzNXYU6IOyhH4LKwfT50PHh4mtJsr2buGCxxF31IyNUDIFk7enW8aT
-         ozAQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:message-id:date:from:to:subject:mime-version
-         :content-disposition;
-        bh=FO7P0/4rmYy403WvBTm1G57ctFsYORvGwXILEMkMlHs=;
-        b=g8tSrLRB9rBYTvVdTXdjjkTytGZFF0bR5O0OYNW4YIqNQUwcbodVbYJvWPPSXZHMr/
-         W1PI97qdHgn1Btw3mKyLTeVhgEcFtW+ufBsvQY6dTJKlPM6TJ/3B3d2A8fBrHPxvrIL2
-         Wx/WL5vwteAQGzDh7F/II+2FizPOZh+5ommOte+GSFGjGkRPcOGRYIBPtzdhHGIxRCjG
-         IxmuEk9mV5/VtzUafeLKRkLdyTP8ntUvhUkJVdPQoGqOQG4QB7vMCCVcG3hZEcda7cbF
-         eiS7TBuqO1udmnpQLp2nERkPVWJYBdp2rjd3ecwBybWGrR2Jy/AuNgf27dZvj9H3Ykuf
-         +oOA==
-X-Gm-Message-State: AOAM530DF8htkY4E7RU4MQEOzlxWt5eIPMY3IcionZsH2rcoiSZ2GnZQ
-        WB+sbHtgn8XcKq0R7Par+LN5aENMs5FDVg==
-X-Google-Smtp-Source: ABdhPJzBZMw8nLZZRcmHT4u0gaWPGgYiAys5TkMgFREVsDKfvVKuhPetAKG5KWQXYeQRuV4/M9g47Q==
-X-Received: by 2002:a62:8895:0:b029:19e:92ec:6886 with SMTP id l143-20020a6288950000b029019e92ec6886mr22194231pfd.12.1610897012713;
-        Sun, 17 Jan 2021 07:23:32 -0800 (PST)
-Received: from localhost ([47.89.231.86])
-        by smtp.gmail.com with ESMTPSA id y1sm13665271pff.17.2021.01.17.07.23.27
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 17 Jan 2021 07:23:31 -0800 (PST)
-Message-ID: <60045673.1c69fb81.4c51.2709@mx.google.com>
-Date:   Sun, 17 Jan 2021 23:23:20 +0800
-From:   Eryu Guan <guaneryu@gmail.com>
-To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: master branch updated to 0e195a4ca997
+        Sun, 17 Jan 2021 18:45:13 -0500
+Received: from mail109.syd.optusnet.com.au ([211.29.132.80]:45696 "EHLO
+        mail109.syd.optusnet.com.au" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1730812AbhAQXo6 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 17 Jan 2021 18:44:58 -0500
+X-Greylist: delayed 1518 seconds by postgrey-1.27 at vger.kernel.org; Sun, 17 Jan 2021 18:44:57 EST
+Received: from dread.disaster.area (pa49-181-54-82.pa.nsw.optusnet.com.au [49.181.54.82])
+        by mail109.syd.optusnet.com.au (Postfix) with ESMTPS id C02198E56;
+        Mon, 18 Jan 2021 10:18:50 +1100 (AEDT)
+Received: from dave by dread.disaster.area with local (Exim 4.92.3)
+        (envelope-from <david@fromorbit.com>)
+        id 1l1HJo-0013AE-FF; Mon, 18 Jan 2021 10:18:48 +1100
+Date:   Mon, 18 Jan 2021 10:18:48 +1100
+From:   Dave Chinner <david@fromorbit.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH] xfs: test mkfs.xfs config files
+Message-ID: <20210117231848.GB78965@dread.disaster.area>
+References: <20201027205450.2824888-1-david@fromorbit.com>
+ <20201029212713.GF1061260@magnolia>
+ <20210116014607.GE3134581@magnolia>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="6kC4IzYQZjNM"
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <20210116014607.GE3134581@magnolia>
+X-Optus-CM-Score: 0
+X-Optus-CM-Analysis: v=2.3 cv=YKPhNiOx c=1 sm=1 tr=0 cx=a_idp_d
+        a=NAd5MxazP4FGoF8nXO8esw==:117 a=NAd5MxazP4FGoF8nXO8esw==:17
+        a=kj9zAlcOel0A:10 a=EmqxpYm9HcoA:10 a=NHsjDDs8AAAA:20 a=7-415B0cAAAA:8
+        a=yABiCH9rjB4m46n2Nk8A:9 a=CjuIK1q_8ugA:10 a=biEYGPWJfzWAr4FL6Ov7:22
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+On Fri, Jan 15, 2021 at 05:46:07PM -0800, Darrick J. Wong wrote:
+> On Thu, Oct 29, 2020 at 02:27:13PM -0700, Darrick J. Wong wrote:
+> > On Wed, Oct 28, 2020 at 07:54:50AM +1100, Dave Chinner wrote:
+> > > +echo End of line comment
+> > > +test_mkfs_config << ENDL
+> > > +[metadata]
+> > > +crc = 0 ; This is an eol comment.
+> > 
+> > Hey, wait a minute, the manpage didn't say I could use semicolon
+> > comments! :)
+> > 
+> > The libinih page https://github.com/benhoyt/inih says you can though.
+> > 
+> > Would you mind making a note of that in patch 5 above, please?
+> 
+> Ping?  The mkfs code has been merged upstream; we ought to land the
+> functionality tests.
 
---6kC4IzYQZjNM
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Nothing in this patch needs to change, AFAIA, because you were
+referring to the xfsprogs mkfs patchset in your comment. So this
+is really only waiting on review, right? Do I need to repost it?
 
-Hi all,
-
-The master branch of the xfstests repository at:
-
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-have just been updated. There're mainly 3 new btrfs tests added in this update,
-and btrfs/229 currently fails with latest v5.11-rc3 kernel, the other two
-should pass. Also there's a bug fix to filter "cannot stat" to "cannot statx"
-for newer coreutils.
-
-Thanks,
-Eryu
-
-The new head of the master branch is commit:
-
-0e195a4ca997 btrfs: check qgroup doesn't crash when beyond limit
-
-New commits:
-
-Filipe Manana (1):
-      [c1537fc9f212] btrfs: test incremental send after cloning extents from the same file
-
-Murphy Zhou (1):
-      [d6dafbf074d3] common/filter: add _filter_stat
-
-Nikolay Borisov (1):
-      [3334128e4f53] btrfs: test correct operation of free objectid related functionality
-
-Qu Wenruo (1):
-      [0e195a4ca997] btrfs: check qgroup doesn't crash when beyond limit
-
-
-Code Diffstat:
-
- common/filter         |   6 ++
- tests/btrfs/228       |  83 ++++++++++++++++++++++
- tests/btrfs/228.out   |   2 +
- tests/btrfs/229       | 109 +++++++++++++++++++++++++++++
- tests/btrfs/229.out   |  24 +++++++
- tests/btrfs/230       |  59 ++++++++++++++++
- tests/btrfs/230.out   |   2 +
- tests/btrfs/group     |   3 +
- tests/generic/397     |   6 +-
- tests/generic/397.out |   6 +-
- tests/generic/435     |   2 +-
- tests/generic/435.out |   2 +-
- tests/generic/440     |   2 +-
- tests/generic/440.out |   2 +-
- tests/xfs/348         |   2 +-
- tests/xfs/348.out     | 188 +++++++++++++++++++++++++-------------------------
- 16 files changed, 393 insertions(+), 105 deletions(-)
---
-Eryu Guan
-guaneryu@gmail.com
-
---6kC4IzYQZjNM
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAmAEVfoACgkQJlKqKVyP
-52ML0xAAqoZSLC6IHP0RCc+vfWQadY/dzne4RrbK6afKiIylka87J54STQ0EaVrr
-S715CUg7ZqB0PMnJmyvBS++q2JWsnsytUJmJeXg6Mp/p7niCA0uevauhoBoI4xmA
-SlYsz7xtn3f92mKLH1Oylpgh+jCn14wXbvw31Y9jZnqJG3S0PhAEx6iDUtqCHS33
-qJ5Y4rfS2IhBeA1k1fV9UZFrDZFw+b+EJp6PzvpB4XE03SXhC1cpyyqinDzTrwit
-kd88xpnP4fyqanFQk2Gflz/JnL5DOXApLcwidtby401hq8X6F3lynhahdVLlaJgf
-cS3bfbKKB3pYEMhOSbngWHg5uDXApLFexkp9PG5dJMBuxlVsNcVkIiiJvDsdiiYp
-dLqjU53+BcdXj0NTpsmTL+02JiVOaPZ7ZBTjJ6QRIkE5Hn8yY2a3RLjbpDOu5nqx
-eWWOZdJtdsd416vcSmdrrlxY0HlNFjshh427NYhBvMcMSWlDHKPT5OtG0D6SH7iG
-5QGW+CPDQw+EzZ0z/a1dYq01M5U/ZiQBMDXH9e2EnNd1w/dobAdxRHXODlIpqZvP
-WTil0e4vkO9nNMYOTNaZegoDJU9UAERfEJNyKZtx5cmep6VD4zgnsIB1CM71GzcH
-ghQRtLi2jNhVfSBWw5SjYrlfR2GjNhaYwmWwpMknj8FtpqDmIEc=
-=KtKQ
------END PGP SIGNATURE-----
-
---6kC4IzYQZjNM--
+-Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
