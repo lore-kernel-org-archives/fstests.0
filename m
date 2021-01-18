@@ -2,75 +2,83 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 49945C433E0
-	for <linux-fstests@archiver.kernel.org>; Sun, 17 Jan 2021 23:45:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2A202C433E0
+	for <linux-fstests@archiver.kernel.org>; Mon, 18 Jan 2021 04:28:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 179D8206ED
-	for <linux-fstests@archiver.kernel.org>; Sun, 17 Jan 2021 23:45:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DC73622460
+	for <linux-fstests@archiver.kernel.org>; Mon, 18 Jan 2021 04:28:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730832AbhAQXpN (ORCPT
+        id S1728277AbhARE1r (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 17 Jan 2021 18:45:13 -0500
-Received: from mail109.syd.optusnet.com.au ([211.29.132.80]:45696 "EHLO
-        mail109.syd.optusnet.com.au" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1730812AbhAQXo6 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 17 Jan 2021 18:44:58 -0500
-X-Greylist: delayed 1518 seconds by postgrey-1.27 at vger.kernel.org; Sun, 17 Jan 2021 18:44:57 EST
-Received: from dread.disaster.area (pa49-181-54-82.pa.nsw.optusnet.com.au [49.181.54.82])
-        by mail109.syd.optusnet.com.au (Postfix) with ESMTPS id C02198E56;
-        Mon, 18 Jan 2021 10:18:50 +1100 (AEDT)
-Received: from dave by dread.disaster.area with local (Exim 4.92.3)
-        (envelope-from <david@fromorbit.com>)
-        id 1l1HJo-0013AE-FF; Mon, 18 Jan 2021 10:18:48 +1100
-Date:   Mon, 18 Jan 2021 10:18:48 +1100
-From:   Dave Chinner <david@fromorbit.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
+        Sun, 17 Jan 2021 23:27:47 -0500
+Received: from mail.kernel.org ([198.145.29.99]:55630 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725794AbhARE1q (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 17 Jan 2021 23:27:46 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 5D5E722460;
+        Mon, 18 Jan 2021 04:27:05 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1610944025;
+        bh=peG0aLbqCZ0j7iIducyN4yIz4ANzWdbK60RGNBPEYRs=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=PQBK+D7iw3awskTVzxhI+GQtnwQuogm610pxurTN88v3XgOWQnRpRf3PAHmWU3WET
+         35TPceoGxTjqW9Nmin4nxxMcweR/JyflBiNzEfuuSqnrctcfrp7pB6xNvomoQk9ZT4
+         buh0yd0DpitGTj6G5NdCac8kUWoLRickRKli/BoP8iIU71CExGcfGGXwbnftJovCSf
+         Ff65JHN6JE4MVkbbz/J1o8f5XVBAJ8oaZiINU6u8Gdn3x55PlEfIr8WMF54JXBhrXr
+         ltGGkDiqx2edPJbisJcVL8dOD7Cv9V8GSNP28Y3zoEanZPHGG+V7X9rV/Jk5qp81jI
+         BghhGt3zoQjQA==
+Date:   Sun, 17 Jan 2021 20:27:04 -0800
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Dave Chinner <david@fromorbit.com>
 Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 Subject: Re: [PATCH] xfs: test mkfs.xfs config files
-Message-ID: <20210117231848.GB78965@dread.disaster.area>
+Message-ID: <20210118042704.GG3134581@magnolia>
 References: <20201027205450.2824888-1-david@fromorbit.com>
  <20201029212713.GF1061260@magnolia>
  <20210116014607.GE3134581@magnolia>
+ <20210117231848.GB78965@dread.disaster.area>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210116014607.GE3134581@magnolia>
-X-Optus-CM-Score: 0
-X-Optus-CM-Analysis: v=2.3 cv=YKPhNiOx c=1 sm=1 tr=0 cx=a_idp_d
-        a=NAd5MxazP4FGoF8nXO8esw==:117 a=NAd5MxazP4FGoF8nXO8esw==:17
-        a=kj9zAlcOel0A:10 a=EmqxpYm9HcoA:10 a=NHsjDDs8AAAA:20 a=7-415B0cAAAA:8
-        a=yABiCH9rjB4m46n2Nk8A:9 a=CjuIK1q_8ugA:10 a=biEYGPWJfzWAr4FL6Ov7:22
+In-Reply-To: <20210117231848.GB78965@dread.disaster.area>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Jan 15, 2021 at 05:46:07PM -0800, Darrick J. Wong wrote:
-> On Thu, Oct 29, 2020 at 02:27:13PM -0700, Darrick J. Wong wrote:
-> > On Wed, Oct 28, 2020 at 07:54:50AM +1100, Dave Chinner wrote:
-> > > +echo End of line comment
-> > > +test_mkfs_config << ENDL
-> > > +[metadata]
-> > > +crc = 0 ; This is an eol comment.
+On Mon, Jan 18, 2021 at 10:18:48AM +1100, Dave Chinner wrote:
+> On Fri, Jan 15, 2021 at 05:46:07PM -0800, Darrick J. Wong wrote:
+> > On Thu, Oct 29, 2020 at 02:27:13PM -0700, Darrick J. Wong wrote:
+> > > On Wed, Oct 28, 2020 at 07:54:50AM +1100, Dave Chinner wrote:
+> > > > +echo End of line comment
+> > > > +test_mkfs_config << ENDL
+> > > > +[metadata]
+> > > > +crc = 0 ; This is an eol comment.
+> > > 
+> > > Hey, wait a minute, the manpage didn't say I could use semicolon
+> > > comments! :)
+> > > 
+> > > The libinih page https://github.com/benhoyt/inih says you can though.
+> > > 
+> > > Would you mind making a note of that in patch 5 above, please?
 > > 
-> > Hey, wait a minute, the manpage didn't say I could use semicolon
-> > comments! :)
-> > 
-> > The libinih page https://github.com/benhoyt/inih says you can though.
-> > 
-> > Would you mind making a note of that in patch 5 above, please?
+> > Ping?  The mkfs code has been merged upstream; we ought to land the
+> > functionality tests.
 > 
-> Ping?  The mkfs code has been merged upstream; we ought to land the
-> functionality tests.
+> Nothing in this patch needs to change, AFAIA, because you were
+> referring to the xfsprogs mkfs patchset in your comment. So this
+> is really only waiting on review, right? Do I need to repost it?
 
-Nothing in this patch needs to change, AFAIA, because you were
-referring to the xfsprogs mkfs patchset in your comment. So this
-is really only waiting on review, right? Do I need to repost it?
+Probably, as it's entirely possible that it's gotten lost in Eryu's mail
+stream.
 
--Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+--D
+
+> -Dave.
+> -- 
+> Dave Chinner
+> david@fromorbit.com
