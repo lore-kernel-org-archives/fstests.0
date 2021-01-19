@@ -2,211 +2,104 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+X-Spam-Status: No, score=-15.4 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 66784C433DB
-	for <linux-fstests@archiver.kernel.org>; Mon, 18 Jan 2021 06:23:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8D8B3C433DB
+	for <linux-fstests@archiver.kernel.org>; Tue, 19 Jan 2021 03:00:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3C0CC22597
-	for <linux-fstests@archiver.kernel.org>; Mon, 18 Jan 2021 06:23:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 62D542067B
+	for <linux-fstests@archiver.kernel.org>; Tue, 19 Jan 2021 03:00:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1732105AbhARGWx (ORCPT
+        id S2389450AbhASDAl (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 18 Jan 2021 01:22:53 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33966 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1732091AbhARGWP (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 18 Jan 2021 01:22:15 -0500
-Received: from mail-pl1-x631.google.com (mail-pl1-x631.google.com [IPv6:2607:f8b0:4864:20::631])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2E5C9C0613D6;
-        Sun, 17 Jan 2021 22:21:00 -0800 (PST)
-Received: by mail-pl1-x631.google.com with SMTP id q4so8067100plr.7;
-        Sun, 17 Jan 2021 22:21:00 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=gj45JGvYkk5W0jnWrfD2y/z7Uml5Qb0gG1OtUd9hCwI=;
-        b=nHDIMit//PWT82oWBKX//4Pd9lfIYSYvGeqrCpF9S8WEGvLW75uo3P16j4FW+t7SRe
-         Lp6UCQ8fBUT6vdFrTEEzudPLjJ6QnRS3RHywmbd/fPRZaCA+0uZlRcg47/f1jRWYLUrh
-         hMGQ5W849ugH56aEt9EndilDX3sgQ0Oe1G0LEyRLdevp14uwXAVWRgl2LkNF/5ypFCAb
-         kBtpcgEbQ2Pvhn8mnih/yv7VxGeqB/Zv+fmr5RO/LSzoQvG1BULDV/oSxhfatVxjZv6M
-         5BqE3aAsI4RRKjK91/eVPOsfiQeQ13ZSd29W/lFo451unP7nKBPHIK0Ijips/Le0f2f7
-         8CQA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=gj45JGvYkk5W0jnWrfD2y/z7Uml5Qb0gG1OtUd9hCwI=;
-        b=lmvkgwrsrNTxxJCBzbAQ+EugL/P+DrbdnxzvHJ2hr33yUHd9fbptu/ArOxImnNFNG5
-         EkD6S4/dlZmVwz2ltYQNjA8tSEW9QolYEeU00Iob9Wkvt42NpSI/s+6M0B/zMCWr6Qo9
-         4E5QxHP3roDh/Cpv033Ziyy4smYsEqE4fZWsI2JbQKcTmY9OTZolP5MAcMCk3/Kdx9YS
-         JfsNVSI1ktOT/+RuaGzZmRv0x5GG1g14sG339Yv6lLfEN/D4bBsvrNS8lOzzly/z9w8t
-         vIWgRVouMSR+ngL4TShuJydPlfaW2hfKrSiko8bmAaUZAvWmn6HHxcWX/YrgB1FBSuZ9
-         n0+Q==
-X-Gm-Message-State: AOAM530mSJNn4V0wbi+o07sTE7fOBNeShFyqZ4/YEHa/GbpgaeX5ziUn
-        iardLO7/wgMP/OGSqOZ7iEogAITHQuI=
-X-Google-Smtp-Source: ABdhPJwPWxJ+xZ25KsHt/HqIyDOtiAQSSW8WQXMyBrTDglsOyHXpZUj1vx6CSQyG2P1wPzxeRZA+vw==
-X-Received: by 2002:a17:90a:517:: with SMTP id h23mr3693425pjh.108.1610950859645;
-        Sun, 17 Jan 2021 22:20:59 -0800 (PST)
-Received: from localhost.localdomain ([122.179.96.31])
-        by smtp.gmail.com with ESMTPSA id t1sm14608423pfq.154.2021.01.17.22.20.57
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 17 Jan 2021 22:20:59 -0800 (PST)
-From:   Chandan Babu R <chandanrlinux@gmail.com>
-To:     fstests@vger.kernel.org
-Cc:     Chandan Babu R <chandanrlinux@gmail.com>,
-        linux-xfs@vger.kernel.org, darrick.wong@oracle.com,
-        djwong@kernel.org
-Subject: [PATCH V4 07/11] xfs: Check for extent overflow when writing to unwritten extent
-Date:   Mon, 18 Jan 2021 11:50:18 +0530
-Message-Id: <20210118062022.15069-8-chandanrlinux@gmail.com>
-X-Mailer: git-send-email 2.29.2
-In-Reply-To: <20210118062022.15069-1-chandanrlinux@gmail.com>
-References: <20210118062022.15069-1-chandanrlinux@gmail.com>
+        Mon, 18 Jan 2021 22:00:41 -0500
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:7640 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1728406AbhASDAk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 18 Jan 2021 22:00:40 -0500
+X-IronPort-AV: E=Sophos;i="5.79,357,1602518400"; 
+   d="scan'208";a="103602996"
+Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
+  by heian.cn.fujitsu.com with ESMTP; 19 Jan 2021 10:59:52 +0800
+Received: from G08CNEXMBPEKD04.g08.fujitsu.local (unknown [10.167.33.201])
+        by cn.fujitsu.com (Postfix) with ESMTP id B426C4CE6033;
+        Tue, 19 Jan 2021 10:59:49 +0800 (CST)
+Received: from [10.167.220.84] (10.167.220.84) by
+ G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.2; Tue, 19 Jan 2021 10:59:48 +0800
+Message-ID: <60064B4B.1060108@cn.fujitsu.com>
+Date:   Tue, 19 Jan 2021 11:00:27 +0800
+From:   Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.2; zh-CN; rv:1.9.2.18) Gecko/20110616 Thunderbird/3.1.11
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+To:     Eryu Guan <guaneryu@gmail.com>
+CC:     <fstests@vger.kernel.org>
+Subject: Re: [PATCH] ext4/046: skip test when ext4 doesn't support bs < ps
+ with dioread_nolock
+References: <1610596503-17149-1-git-send-email-xuyang2018.jy@cn.fujitsu.com> <20210117150624.GA2347@desktop>
+In-Reply-To: <20210117150624.GA2347@desktop>
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.167.220.84]
+X-ClientProxiedBy: G08CNEXCHPEKD06.g08.fujitsu.local (10.167.33.205) To
+ G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201)
+X-yoursite-MailScanner-ID: B426C4CE6033.AAD2A
+X-yoursite-MailScanner: Found to be clean
+X-yoursite-MailScanner-From: xuyang2018.jy@cn.fujitsu.com
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This test verifies that XFS does not cause inode fork's extent count to
-overflow when writing to an unwritten extent.
+Hi Eryu
+> On Thu, Jan 14, 2021 at 11:55:03AM +0800, Yang Xu wrote:
+>> When testing arm machine, this case fails because ps>  bs and kernel doesn't
+>> introduced commit c8cc88163f40 ("ext4: Add support for blocksize<  pagesize in dioread_nolock").
+>> Only skip this case when mounting failed.
+>
+> Perhaps it's the kernel that should be fixed? i.e. backport the
+> mentioned patch? Depends on if we treat it as a bug or a feature I
+> think..
+IMO, it is a feature instead of a bug.
+>
+>>
+>> Signed-off-by: Yang Xu<xuyang2018.jy@cn.fujitsu.com>
+>> ---
+>>   tests/ext4/046 | 3 ++-
+>>   1 file changed, 2 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/tests/ext4/046 b/tests/ext4/046
+>> index 5524024e..e307cbf1 100755
+>> --- a/tests/ext4/046
+>> +++ b/tests/ext4/046
+>> @@ -37,7 +37,8 @@ _require_xfs_io_command "falloc"
+>>   _require_scratch_size $((6 * 1024 * 1024)) #kB
+>>
+>>   _scratch_mkfs>>  $seqres.full 2>&1
+>> -_scratch_mount "-o dioread_nolock">>  $seqres.full 2>&1
+>> +_try_scratch_mount "-o dioread_nolock">>$seqres.full 2>&1 || \
+>> +	_notrun "mount failed, ext4 doesn't support bs<  ps with dioread_nolock?"
+>
+> At least we should check if it's really the bs<  ps case before _notrun
+> the test, otherwise we may fail to find dioread_nolock mount regression.
+Ok. Will send v2.
+>
+> Thanks,
+> Eryu
+>
+>>
+>>   # Get blksz
+>>   blksz=$(_get_file_block_size $SCRATCH_MNT)
+>> --
+>> 2.23.0
+>>
+>>
+>
+>
+> .
+>
 
-Signed-off-by: Chandan Babu R <chandanrlinux@gmail.com>
----
- tests/xfs/527     | 89 +++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/527.out | 11 ++++++
- tests/xfs/group   |  1 +
- 3 files changed, 101 insertions(+)
- create mode 100755 tests/xfs/527
- create mode 100644 tests/xfs/527.out
 
-diff --git a/tests/xfs/527 b/tests/xfs/527
-new file mode 100755
-index 00000000..cd67bce4
---- /dev/null
-+++ b/tests/xfs/527
-@@ -0,0 +1,89 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2020 Chandan Babu R.  All Rights Reserved.
-+#
-+# FS QA Test 527
-+#
-+# Verify that XFS does not cause inode fork's extent count to overflow when
-+# writing to an unwritten extent.
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/inject
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+_supported_fs xfs
-+_require_scratch
-+_require_xfs_debug
-+_require_xfs_io_command "falloc"
-+_require_xfs_io_error_injection "reduce_max_iextents"
-+
-+echo "Format and mount fs"
-+_scratch_mkfs_sized $((1024 * 1024 * 1024)) >> $seqres.full
-+_scratch_mount >> $seqres.full
-+
-+bsize=$(_get_file_block_size $SCRATCH_MNT)
-+
-+testfile=${SCRATCH_MNT}/testfile
-+
-+echo "Inject reduce_max_iextents error tag"
-+_scratch_inject_error reduce_max_iextents 1
-+
-+nr_blks=15
-+
-+for io in Buffered Direct; do
-+	echo "* $io write to unwritten extent"
-+
-+	echo "Fallocate $nr_blks blocks"
-+	$XFS_IO_PROG -f -c "falloc 0 $((nr_blks * bsize))" $testfile >> $seqres.full
-+
-+	if [[ $io == "Buffered" ]]; then
-+		xfs_io_flag=""
-+	else
-+		xfs_io_flag="-d"
-+	fi
-+
-+	echo "$io write to every other block of fallocated space"
-+	for i in $(seq 1 2 $((nr_blks - 1))); do
-+		$XFS_IO_PROG -f -s $xfs_io_flag -c "pwrite $((i * bsize)) $bsize" \
-+		       $testfile >> $seqres.full 2>&1
-+		[[ $? != 0 ]] && break
-+	done
-+
-+	echo "Verify \$testfile's extent count"
-+	nextents=$($XFS_IO_PROG -c 'stat' $testfile | grep nextents)
-+	nextents=${nextents##fsxattr.nextents = }
-+	if (( $nextents > 10 )); then
-+		echo "Extent count overflow check failed: nextents = $nextents"
-+		exit 1
-+	fi
-+
-+	rm $testfile
-+done
-+
-+# super_block->s_wb_err will have a newer seq value when compared to "/"'s
-+# file->f_sb_err. Consume it here so that xfs_scrub can does not error out.
-+$XFS_IO_PROG -c syncfs $SCRATCH_MNT >> $seqres.full 2>&1
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/527.out b/tests/xfs/527.out
-new file mode 100644
-index 00000000..3597ad92
---- /dev/null
-+++ b/tests/xfs/527.out
-@@ -0,0 +1,11 @@
-+QA output created by 527
-+Format and mount fs
-+Inject reduce_max_iextents error tag
-+* Buffered write to unwritten extent
-+Fallocate 15 blocks
-+Buffered write to every other block of fallocated space
-+Verify $testfile's extent count
-+* Direct write to unwritten extent
-+Fallocate 15 blocks
-+Direct write to every other block of fallocated space
-+Verify $testfile's extent count
-diff --git a/tests/xfs/group b/tests/xfs/group
-index d089797b..627813fe 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -524,3 +524,4 @@
- 524 auto quick punch zero insert collapse
- 525 auto quick attr
- 526 auto quick dir hardlink symlink
-+527 auto quick
--- 
-2.29.2
 
