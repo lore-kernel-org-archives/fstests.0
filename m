@@ -2,95 +2,137 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1B81BC433E6
-	for <linux-fstests@archiver.kernel.org>; Tue, 19 Jan 2021 06:23:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9D768C433E0
+	for <linux-fstests@archiver.kernel.org>; Wed, 20 Jan 2021 06:58:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DDF1A230FF
-	for <linux-fstests@archiver.kernel.org>; Tue, 19 Jan 2021 06:23:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 44C2F2313C
+	for <linux-fstests@archiver.kernel.org>; Wed, 20 Jan 2021 06:58:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726155AbhASGXm (ORCPT
+        id S1726477AbhATG61 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 19 Jan 2021 01:23:42 -0500
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:52176 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1728626AbhASGNg (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 19 Jan 2021 01:13:36 -0500
-X-IronPort-AV: E=Sophos;i="5.79,357,1602518400"; 
-   d="scan'208";a="103608811"
-Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
-  by heian.cn.fujitsu.com with ESMTP; 19 Jan 2021 14:13:10 +0800
-Received: from G08CNEXMBPEKD04.g08.fujitsu.local (unknown [10.167.33.201])
-        by cn.fujitsu.com (Postfix) with ESMTP id 97C454CE603A;
-        Tue, 19 Jan 2021 14:13:05 +0800 (CST)
-Received: from localhost.localdomain (10.167.220.84) by
- G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201) with Microsoft SMTP Server
- (TLS) id 15.0.1497.2; Tue, 19 Jan 2021 14:13:04 +0800
-From:   Yang Xu <xuyang2018.jy@cn.fujitsu.com>
-To:     <guaneryu@gmail.com>, <tytso@mit.edu>
-CC:     <fstests@vger.kernel.org>, Yang Xu <xuyang2018.jy@cn.fujitsu.com>
-Subject: [PATCH v2] ext4/046: skip test when ext4 doesn't support bs < ps with dioread_nolock
-Date:   Tue, 19 Jan 2021 14:13:39 +0800
-Message-ID: <1611036819-5633-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
-X-Mailer: git-send-email 1.8.3.1
-In-Reply-To: <20210117150624.GA2347@desktop>
-References: <20210117150624.GA2347@desktop>
+        Wed, 20 Jan 2021 01:58:27 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40802 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725827AbhATG6U (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 20 Jan 2021 01:58:20 -0500
+Received: from mail-io1-xd34.google.com (mail-io1-xd34.google.com [IPv6:2607:f8b0:4864:20::d34])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E9CCAC061575;
+        Tue, 19 Jan 2021 22:57:39 -0800 (PST)
+Received: by mail-io1-xd34.google.com with SMTP id p72so20149462iod.12;
+        Tue, 19 Jan 2021 22:57:39 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=8Bzkf7Ld2rxa9FcnXEU6RIP9KlVPZQPWVVVy1sBXrxc=;
+        b=D6owGlKuLWuHRp6fVEbwbq/7wQS31AaZL+rfslaqriM91tGkiPPt+U83dCNDagIo1E
+         XC1cJUdLxIwtPrZkd++CRg9NhTLlF5gAZ8Uy7Zt/FZmLz84yCtH+z+J400cosgm9swG9
+         bH+m52U+YKVuFJ4fO+bhJI3iTdr+3Rv4Jl+l2x2g+yD8XZhmGbjT+dDIx3j9R/FyRQbd
+         SIQv0OvdqsbhAKPJ7vpvfRX8cuK7p454226X3OoIl3UHaWEPmGqqEtqDY+J3LHcdVJgo
+         i62imdLUTtFI/X3tgtQVs7/ufkuL8LHEhXgh1Ix5K9bCPCw51W5w169V+nUHXmUysFPV
+         Tc0A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=8Bzkf7Ld2rxa9FcnXEU6RIP9KlVPZQPWVVVy1sBXrxc=;
+        b=XmsXIIA5EYVqUycJFYdFSXGsAjoHRRjnsH+oJAFFui1LFnU7kPbLKsslRkr+HQgx61
+         VFo13FtU6+BN/2ClGyuF2a0yKjWIRYdJjA1WX/O5PQjEk5XSkEXuV8b1P0zIGKNZPYBo
+         DQNzj01vWrgWeM6/vlRtR/jq8D0NsMm7InD5cX6TlzZwrezu/+pORhZkwDYZ/aYMWsVF
+         3XWp3lRU7fIrKOC4xgW6AAp3F5xxam889gVqIfRI7XWDbzqjndzXebS+48Zl28s/ADR3
+         VoFRF5FjdO8QzpeH1X6DC09dQsVMVq/E8mOLvMCEsIjhEuKQCmgZiDJFgpIxQ5F5H0vO
+         mZmg==
+X-Gm-Message-State: AOAM5302705afKx3xg0SkfqfsjQAAXe1jq1j2CA8Lqt2jNOpYzv/Jx7D
+        yxZUYp6AJi8+4/oUjSCKkfCaWtFEoN6PVtfVUy8=
+X-Google-Smtp-Source: ABdhPJwsqxZP9Ik77Oi4FzXkuY+RChRCD1RWmoEAQ4BWZiKI7oWwdcJuKkQ6hr4p2rVsoNx4sTPjj4FO/rOjLBPwMgM=
+X-Received: by 2002:a02:b0dc:: with SMTP id w28mr6527528jah.123.1611125859315;
+ Tue, 19 Jan 2021 22:57:39 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain
-X-Originating-IP: [10.167.220.84]
-X-ClientProxiedBy: G08CNEXCHPEKD06.g08.fujitsu.local (10.167.33.205) To
- G08CNEXMBPEKD04.g08.fujitsu.local (10.167.33.201)
-X-yoursite-MailScanner-ID: 97C454CE603A.AC24E
-X-yoursite-MailScanner: Found to be clean
-X-yoursite-MailScanner-From: xuyang2018.jy@cn.fujitsu.com
+References: <20210105062857.3566-1-yangerkun@huawei.com> <X/+/3ui/TQ9LjtNZ@mit.edu>
+In-Reply-To: <X/+/3ui/TQ9LjtNZ@mit.edu>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Wed, 20 Jan 2021 08:57:28 +0200
+Message-ID: <CAOQ4uxh2V6LF_t8ZaAOr=CbDrY3A5d0qSR7XWVX8dStR9mME5w@mail.gmail.com>
+Subject: Re: [PATCH v3] ext4: fix bug for rename with RENAME_WHITEOUT
+To:     "Theodore Ts'o" <tytso@mit.edu>,
+        harshad shirwadkar <harshadshirwadkar@gmail.com>
+Cc:     yangerkun <yangerkun@huawei.com>,
+        Ext4 <linux-ext4@vger.kernel.org>,
+        Andreas Dilger <adilger.kernel@dilger.ca>,
+        Jan Kara <jack@suse.cz>, "zhangyi (F)" <yi.zhang@huawei.com>,
+        lihaotian9@huawei.com, lutianxiong@huawei.com,
+        linfeilong@huawei.com, fstests <fstests@vger.kernel.org>,
+        Miklos Szeredi <miklos@szeredi.hu>,
+        Vijaychidambaram Velayudhan Pillai <vijay@cs.utexas.edu>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-When testing arm machine, this case fails because ps > bs and kernel doesn't
-introduced commit c8cc88163f40 ("ext4: Add support for blocksize < pagesize in dioread_nolock").
-Only skip this case when kernel complains about bs!=ps error, so we can find
-dioread_nolock mount regression in the future.
+On Thu, Jan 14, 2021 at 5:53 AM Theodore Ts'o <tytso@mit.edu> wrote:
+>
+> On Tue, Jan 05, 2021 at 02:28:57PM +0800, yangerkun wrote:
+> > We got a "deleted inode referenced" warning cross our fsstress test. The
+> > bug can be reproduced easily with following steps:
+> >
+> >   cd /dev/shm
+> >   mkdir test/
+> >   fallocate -l 128M img
+> >   mkfs.ext4 -b 1024 img
+> >   mount img test/
+> >   dd if=/dev/zero of=test/foo bs=1M count=128
+> >   mkdir test/dir/ && cd test/dir/
+> >   for ((i=0;i<1000;i++)); do touch file$i; done # consume all block
+> >   cd ~ && renameat2(AT_FDCWD, /dev/shm/test/dir/file1, AT_FDCWD,
+> >     /dev/shm/test/dir/dst_file, RENAME_WHITEOUT) # ext4_add_entry in
+> >     ext4_rename will return ENOSPC!!
+> >   cd /dev/shm/ && umount test/ && mount img test/ && ls -li test/dir/file1
+> >   We will get the output:
+> >   "ls: cannot access 'test/dir/file1': Structure needs cleaning"
+> >   and the dmesg show:
+> >   "EXT4-fs error (device loop0): ext4_lookup:1626: inode #2049: comm ls:
+> >   deleted inode referenced: 139"
+> >
+> > ext4_rename will create a special inode for whiteout and use this 'ino'
+> > to replace the source file's dir entry 'ino'. Once error happens
+> > latter(the error above was the ENOSPC return from ext4_add_entry in
+> > ext4_rename since all space has been consumed), the cleanup do drop the
+> > nlink for whiteout, but forget to restore 'ino' with source file. This
+> > will trigger the bug describle as above.
+> >
+> > Signed-off-by: yangerkun <yangerkun@huawei.com>
+>
 
-Signed-off-by: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
----
- tests/ext4/046 | 11 ++++++++++-
- 1 file changed, 10 insertions(+), 1 deletion(-)
+Apropos RENAME_WHITEOUT, it seems to be missing __ext4_fc_track_link().
+I guess test coverage of RENAME_WHITEOUT in fstests is not much.
+I have been seeing trickles of bug fixes for RENAME_WHITEOUT for almost
+every filesystem that supports it.
 
-diff --git a/tests/ext4/046 b/tests/ext4/046
-index 5524024e..c6f7a051 100755
---- a/tests/ext4/046
-+++ b/tests/ext4/046
-@@ -31,13 +31,22 @@ _cleanup()
- # remove previous $seqres.full before test
- rm -f $seqres.full
- 
-+_require_check_dmesg
- _supported_fs ext4
- _require_scratch
- _require_xfs_io_command "falloc"
- _require_scratch_size $((6 * 1024 * 1024)) #kB
- 
- _scratch_mkfs >> $seqres.full 2>&1
--_scratch_mount "-o dioread_nolock" >> $seqres.full 2>&1
-+if ! _try_scratch_mount "-o dioread_nolock" >> $seqres.full 2>&1; then
-+	err_str="can't mount with dioread_nolock if block size != PAGE_SIZE"
-+	_check_dmesg_for ${err_str}
-+	if [ $? -eq 0 ]; then
-+		_notrun "mount failed, ext4 doesn't support bs < ps with dioread_nolock"
-+	else
-+		_fail "mount failed with dioread_nolock"
-+	fi
-+fi
- 
- # Get blksz
- blksz=$(_get_file_block_size $SCRATCH_MNT)
--- 
-2.23.0
+But I must say it would have been very hard to catch missing ext4_fc_track_*
+without specialized fs fuzzer such as the CrashMonkey generated tests.
 
+And as long as I am ranting, I'd like to point out that it is a shame
+that whiteout
+was not implemented as a special (constant) inode whose nlink is irrelevant
+(or a special dirent with d_ino 0 and d_type DT_WHT for that matter).
+It would have been a rather small RO_COMPAT on-disk change for ext4.
+It could also be implemented in slightly more backward compat manner by
+maintaining a valid nlink and postpone setting the RO_COMPAT flag until
+EXT4_LINK_MAX is reached.
 
+As things stand now, overlayfs makes an effort to maintain a singleton
+hardlinked whiteout inode, without being able to use it with RENAME_WHITEOUT
+and filesystems have to take special care to journal the metadata of all
+individual whiteout inodes, without any added value to the only user
+(overlayfs).
 
+But I guess that train has left the station long ago...
+
+Thanks,
+Amir.
