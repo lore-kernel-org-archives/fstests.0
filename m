@@ -2,66 +2,67 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-2.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BDDD7C433E0
-	for <linux-fstests@archiver.kernel.org>; Fri, 22 Jan 2021 19:51:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 83565C433DB
+	for <linux-fstests@archiver.kernel.org>; Fri, 22 Jan 2021 20:36:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7DCC223B01
-	for <linux-fstests@archiver.kernel.org>; Fri, 22 Jan 2021 19:51:26 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2CBD623AFE
+	for <linux-fstests@archiver.kernel.org>; Fri, 22 Jan 2021 20:36:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728190AbhAVTrw (ORCPT
+        id S1730391AbhAVUf3 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 22 Jan 2021 14:47:52 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58682 "EHLO
+        Fri, 22 Jan 2021 15:35:29 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45946 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729751AbhAVTVo (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 22 Jan 2021 14:21:44 -0500
-Received: from mail-ed1-x533.google.com (mail-ed1-x533.google.com [IPv6:2a00:1450:4864:20::533])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C175FC06174A;
-        Fri, 22 Jan 2021 11:21:03 -0800 (PST)
-Received: by mail-ed1-x533.google.com with SMTP id s11so7835373edd.5;
-        Fri, 22 Jan 2021 11:21:03 -0800 (PST)
+        with ESMTP id S1731173AbhAVUdl (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 22 Jan 2021 15:33:41 -0500
+Received: from mail-io1-xd2d.google.com (mail-io1-xd2d.google.com [IPv6:2607:f8b0:4864:20::d2d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DE468C0613D6;
+        Fri, 22 Jan 2021 12:33:00 -0800 (PST)
+Received: by mail-io1-xd2d.google.com with SMTP id d81so13858713iof.3;
+        Fri, 22 Jan 2021 12:33:00 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=jPGDLWhtw1WqN3jTG3M8qUep0kdSjYnn3VbsFPVjaH8=;
-        b=TBPIKXfiMvcPysXekQiPUond5fjkCL4F/n12iTBqOp3WlvKlwMMr6yXX1UZKqK/eNi
-         0m2zCYixD4UGgNJB4AHUkEsHDluxNdAToYd3LhtJ6Qv/r1rItDqsdkaxbGEzWb1VPHII
-         lcDm2jIXtTltoEzzurmAcXB7Pa132j6fmaCmv/zgoWVLPkeqlOIwpYoi4Z6HBaqN5qD6
-         SiN8Eh4ZiJis5h8DhWK8qL0inVzHFyfCRNaJS+onXMKSfVekfaH3L+9YWQoX0QSe+FiH
-         zZ16mSPzObgkcym7E1FnW2ZqMl/k2V5UNr4+E9TSEzCNVPETpvEQHG9t8iV8SqfRxteU
-         Lorg==
+        bh=2BF/+WC1bYp0JjVV6KmxdUfvQ/+TryiQiWRjN6NPCsg=;
+        b=a4Rqc5gNXuqXv3OZEdcHe5M5XEF4OPKXq4GWyXZJoyk5kpZXdyTql7wlpohSYpe24k
+         B7/M3v1xmcZPyYarCeKbEc+R/cwbgV2zLjRnwXsyOSGL/7JQk59YwZD4TOttBbSll0bL
+         CWSUyUy98as3tyKxDWrR8trmkgZ/1jnK8yzjU6Guo5I/OGLR9zVItOhYtQpL2GreZa79
+         JqjjbLUGF41DR+VqjVeYWQdkUBL4ZxvcsWAK0Fvc5C78RtLlZpasKg4mZRzsxdXpV5F2
+         dmBha86UwJcppPaxx7JZfb3lqUlNYhQxt8cLqsBYSDahbLHYbYZLdMVFsBgRnxmd4OmA
+         7NvA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=jPGDLWhtw1WqN3jTG3M8qUep0kdSjYnn3VbsFPVjaH8=;
-        b=TqGOOPEmcX+/PKtMf8MfEcgVZhx7IVXl/zISYNaYI9Ue5PfDocqDtc+TJwz+NveBT0
-         +uaHqLqxAwPIRRqOsRDyTH8h0aMgrBWjV49T0+rz3XsEYNGeawvT1ScuSFtHIUDK+VWF
-         /iXT+3j8bCW+yOCtzEI22cTSzPzybBoSnUhf0z59mZ51YbijBL/lHOBjiUWK0ITjLWwT
-         9wrOXe0zexwDArJEH/0Dnfy2MJOwTSrfs51fzTCLcusS26teP1tgjDSpcqFiyuvXqfp+
-         5Z1GFjS3NoWAydtK73+/QgZejTZB01qIRlAB2MP/Hqu2bEH1Uh8Lebckt689riN+iF+e
-         b6jA==
-X-Gm-Message-State: AOAM530VcSJM0gzUdziWRwgYy4D4m4oqvjOnYZHCNZR8Sef4HB3HkpCY
-        43w3A+fXndJS0Bj/hqCh63hs+kFWAXDmW+GB1AM=
-X-Google-Smtp-Source: ABdhPJxkkOVDxbuERF9i4jR5TCXtqrxZ5rwCWEll6LdTdMkoEfROubLpTPP3N7aQfx8GWajudaBidvUufMKqbrPajNs=
-X-Received: by 2002:a50:eacd:: with SMTP id u13mr4303251edp.382.1611343262454;
- Fri, 22 Jan 2021 11:21:02 -0800 (PST)
+        bh=2BF/+WC1bYp0JjVV6KmxdUfvQ/+TryiQiWRjN6NPCsg=;
+        b=TEwbPxIc0rkuvH5Q2XUnJxM5GkbYzzQCoZNMBt/N7gFvBP1nH7a22HRkYcxHBYJBrG
+         O4X/gQPaDcnVuMm1T2ZReYMVDn+3EfLaKBGBzRb8U/WzTfVkM0YXM116pSNkRQsMMorh
+         yuFk6h6clmPFSEGwbTkwtpjDZ4qnljh29XA0C1M5bjHSBFK92QSjZ9xaGaWpO4LutS8v
+         yGKbxQW+OqwIisfdZqJixy9TM37UipceBppT82c1YdmCXf5vI2jQMQao2LKz5GvAO0o+
+         orwpGrDxYbyZSbDNaZjxa9al3c9KPMEzSHlScAS9tVi0rSoGB/llqGMPDTnW3CPKzZLh
+         G+Kw==
+X-Gm-Message-State: AOAM5332hFi1tDyBRA8oN2C1517S6knveD8qsoBXzI4QsZvV/9I+ZPN+
+        bLErNTtyy8dH2cjgYAXn/vzRX6WJ38joGZ9SHZg=
+X-Google-Smtp-Source: ABdhPJyYn8ObdOTN41iMF20fviR6EuLXOPVPOviwV3WyzBfkM/0Mh5zpPxagnsV4Tfv+edbVaCfrDAKEaxJSbTDb0rI=
+X-Received: by 2002:a5d:938f:: with SMTP id c15mr3006042iol.72.1611347580230;
+ Fri, 22 Jan 2021 12:33:00 -0800 (PST)
 MIME-Version: 1.0
 References: <20210105062857.3566-1-yangerkun@huawei.com> <X/+/3ui/TQ9LjtNZ@mit.edu>
- <CAOQ4uxh2V6LF_t8ZaAOr=CbDrY3A5d0qSR7XWVX8dStR9mME5w@mail.gmail.com> <CAJfpegsVYF2wCiMKfRUzS_MpH9UKPh8g7ucG6w9uOcQodAzRAQ@mail.gmail.com>
-In-Reply-To: <CAJfpegsVYF2wCiMKfRUzS_MpH9UKPh8g7ucG6w9uOcQodAzRAQ@mail.gmail.com>
-From:   harshad shirwadkar <harshadshirwadkar@gmail.com>
-Date:   Fri, 22 Jan 2021 11:20:51 -0800
-Message-ID: <CAD+ocbyEyeAbH1vqKieK9ENmM5k3K-WF1jMuqAzRwPfPC2Np8A@mail.gmail.com>
+ <CAOQ4uxh2V6LF_t8ZaAOr=CbDrY3A5d0qSR7XWVX8dStR9mME5w@mail.gmail.com>
+ <CAJfpegsVYF2wCiMKfRUzS_MpH9UKPh8g7ucG6w9uOcQodAzRAQ@mail.gmail.com> <CAD+ocbyEyeAbH1vqKieK9ENmM5k3K-WF1jMuqAzRwPfPC2Np8A@mail.gmail.com>
+In-Reply-To: <CAD+ocbyEyeAbH1vqKieK9ENmM5k3K-WF1jMuqAzRwPfPC2Np8A@mail.gmail.com>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Fri, 22 Jan 2021 22:32:48 +0200
+Message-ID: <CAOQ4uxiDk6t+pNwm31L6eoj5+kq1E8-oX1zL9HzQE4fMjPK4yQ@mail.gmail.com>
 Subject: Re: [PATCH v3] ext4: fix bug for rename with RENAME_WHITEOUT
-To:     Miklos Szeredi <miklos@szeredi.hu>
-Cc:     Amir Goldstein <amir73il@gmail.com>,
+To:     harshad shirwadkar <harshadshirwadkar@gmail.com>
+Cc:     Miklos Szeredi <miklos@szeredi.hu>,
         "Theodore Ts'o" <tytso@mit.edu>, yangerkun <yangerkun@huawei.com>,
         Ext4 <linux-ext4@vger.kernel.org>,
         Andreas Dilger <adilger.kernel@dilger.ca>,
@@ -75,53 +76,28 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Thanks Amir for pointing that out. Yes we are missing fast commit
-tracking in whiteout. I'll send out a fix for that.
+On Fri, Jan 22, 2021 at 9:21 PM harshad shirwadkar
+<harshadshirwadkar@gmail.com> wrote:
+>
+> Thanks Amir for pointing that out. Yes we are missing fast commit
+> tracking in whiteout. I'll send out a fix for that.
+>
+> > But I must say it would have been very hard to catch missing ext4_fc_track_*
+> > without specialized fs fuzzer such as the CrashMonkey generated tests.
+>
+> I agree, it's been on my to-do list to run CrashMonkey tests with fast
+> commits. I'm curious what kind of CrashMonkey tests you ran that
+> helped you catch this? Were you running Overlayfs on top of Ext4 with
+> fast commits?
+>
 
-> But I must say it would have been very hard to catch missing ext4_fc_track_*
-> without specialized fs fuzzer such as the CrashMonkey generated tests.
-
-I agree, it's been on my to-do list to run CrashMonkey tests with fast
-commits. I'm curious what kind of CrashMonkey tests you ran that
-helped you catch this? Were you running Overlayfs on top of Ext4 with
-fast commits?
+Neither. I just guessed RENAME_WHITEOUT might be missed as
+developers are rarely aware of it.
+I never ran CrashMonkey tests myself.
+I found a few crash consistency bugs using xfstest generic/455.
+I suggest that you run it with fast commits
+and try using NUM_OPS and NUM_FILES larger than the test defaults
+to let the test run for a longer time.
 
 Thanks,
-Harshad
-
-On Wed, Jan 20, 2021 at 12:42 AM Miklos Szeredi <miklos@szeredi.hu> wrote:
->
-> On Wed, Jan 20, 2021 at 7:57 AM Amir Goldstein <amir73il@gmail.com> wrote:
->
-> > And as long as I am ranting, I'd like to point out that it is a shame
-> > that whiteout
-> > was not implemented as a special (constant) inode whose nlink is irrelevant
-> > (or a special dirent with d_ino 0 and d_type DT_WHT for that matter).
-> > It would have been a rather small RO_COMPAT on-disk change for ext4.
-> > It could also be implemented in slightly more backward compat manner by
-> > maintaining a valid nlink and postpone setting the RO_COMPAT flag until
-> > EXT4_LINK_MAX is reached.
-> >
-> > As things stand now, overlayfs makes an effort to maintain a singleton
-> > hardlinked whiteout inode, without being able to use it with RENAME_WHITEOUT
-> > and filesystems have to take special care to journal the metadata of all
-> > individual whiteout inodes, without any added value to the only user
-> > (overlayfs).
-> >
-> > But I guess that train has left the station long ago...
->
-> Not so, I believe.  Kernel internal interfaces are easy to change, and
-> adding support for DT_WHT to overlayfs would mostly be a trivial
-> undertaking.
->
-> The big issue (as always) is userspace API's and not introducing
-> DT_WHT there was a very deliberate choice.  Adding a translation layer
-> from an internal whiteout representation to the userspace API also
-> does not seem to be a very complex problem, but I haven't looked into
-> that deeply.
->
-> So AFAICS there's really nothing preventing the addition of whiteout
-> objects to filesystems, other than developer dedication.
->
-> Thanks,
-> Miklos
+Amir.
