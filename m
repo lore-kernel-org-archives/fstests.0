@@ -2,373 +2,126 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-19.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B919FC433E0
-	for <linux-fstests@archiver.kernel.org>; Fri, 22 Jan 2021 01:46:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BDDD7C433E0
+	for <linux-fstests@archiver.kernel.org>; Fri, 22 Jan 2021 19:51:26 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 82B5622B43
-	for <linux-fstests@archiver.kernel.org>; Fri, 22 Jan 2021 01:46:20 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7DCC223B01
+	for <linux-fstests@archiver.kernel.org>; Fri, 22 Jan 2021 19:51:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726635AbhAVBpz (ORCPT
+        id S1728190AbhAVTrw (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 21 Jan 2021 20:45:55 -0500
-Received: from mail.kernel.org ([198.145.29.99]:52520 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726630AbhAVBpx (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 21 Jan 2021 20:45:53 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 37F63223C8;
-        Fri, 22 Jan 2021 01:45:10 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1611279910;
-        bh=tIZKoD9FjEGIJuhgcCASN9kC2KnJio/calleGdZuYP4=;
-        h=From:To:Cc:Subject:Date:From;
-        b=rqCUIPR+3AJEvhGVYBa7+P7zQet+Bsx6FaeKJ1eUl5JPf0MIgaNf4DYRtPlS07Coy
-         4wnyYditKQpqPttZE3jwcUPYosaJUOa8DTC21eU/lBxiSKnrC7tlDz14P8z/yGHDmg
-         KQeJlS4lMKkdfB5ba3lm1YnEvOdPf5U8flJ7ohsq55rY4HLbbGdtV14F4goRWSC3EX
-         ZZitiJJaR8WrSwG9bZS6P0Hgv0PP5U/Mb1usCWZ+PiGOalYBqXMqfLA+uI/jQNF3ug
-         Xo6fInsXMXCIkU0RdzDJcXAJnblefHGYFUKJWEKwkapgoD28zbH09ojyjY9GwoEzpR
-         j0VYcyJIbhY1A==
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     fstests@vger.kernel.org
-Cc:     linux-ext4@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net,
-        linux-xfs@vger.kernel.org
-Subject: [xfstests PATCH v2] generic: test for lazytime timestamp updates
-Date:   Thu, 21 Jan 2021 17:44:34 -0800
-Message-Id: <20210122014434.110196-1-ebiggers@kernel.org>
-X-Mailer: git-send-email 2.30.0
+        Fri, 22 Jan 2021 14:47:52 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58682 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729751AbhAVTVo (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 22 Jan 2021 14:21:44 -0500
+Received: from mail-ed1-x533.google.com (mail-ed1-x533.google.com [IPv6:2a00:1450:4864:20::533])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C175FC06174A;
+        Fri, 22 Jan 2021 11:21:03 -0800 (PST)
+Received: by mail-ed1-x533.google.com with SMTP id s11so7835373edd.5;
+        Fri, 22 Jan 2021 11:21:03 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=jPGDLWhtw1WqN3jTG3M8qUep0kdSjYnn3VbsFPVjaH8=;
+        b=TBPIKXfiMvcPysXekQiPUond5fjkCL4F/n12iTBqOp3WlvKlwMMr6yXX1UZKqK/eNi
+         0m2zCYixD4UGgNJB4AHUkEsHDluxNdAToYd3LhtJ6Qv/r1rItDqsdkaxbGEzWb1VPHII
+         lcDm2jIXtTltoEzzurmAcXB7Pa132j6fmaCmv/zgoWVLPkeqlOIwpYoi4Z6HBaqN5qD6
+         SiN8Eh4ZiJis5h8DhWK8qL0inVzHFyfCRNaJS+onXMKSfVekfaH3L+9YWQoX0QSe+FiH
+         zZ16mSPzObgkcym7E1FnW2ZqMl/k2V5UNr4+E9TSEzCNVPETpvEQHG9t8iV8SqfRxteU
+         Lorg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=jPGDLWhtw1WqN3jTG3M8qUep0kdSjYnn3VbsFPVjaH8=;
+        b=TqGOOPEmcX+/PKtMf8MfEcgVZhx7IVXl/zISYNaYI9Ue5PfDocqDtc+TJwz+NveBT0
+         +uaHqLqxAwPIRRqOsRDyTH8h0aMgrBWjV49T0+rz3XsEYNGeawvT1ScuSFtHIUDK+VWF
+         /iXT+3j8bCW+yOCtzEI22cTSzPzybBoSnUhf0z59mZ51YbijBL/lHOBjiUWK0ITjLWwT
+         9wrOXe0zexwDArJEH/0Dnfy2MJOwTSrfs51fzTCLcusS26teP1tgjDSpcqFiyuvXqfp+
+         5Z1GFjS3NoWAydtK73+/QgZejTZB01qIRlAB2MP/Hqu2bEH1Uh8Lebckt689riN+iF+e
+         b6jA==
+X-Gm-Message-State: AOAM530VcSJM0gzUdziWRwgYy4D4m4oqvjOnYZHCNZR8Sef4HB3HkpCY
+        43w3A+fXndJS0Bj/hqCh63hs+kFWAXDmW+GB1AM=
+X-Google-Smtp-Source: ABdhPJxkkOVDxbuERF9i4jR5TCXtqrxZ5rwCWEll6LdTdMkoEfROubLpTPP3N7aQfx8GWajudaBidvUufMKqbrPajNs=
+X-Received: by 2002:a50:eacd:: with SMTP id u13mr4303251edp.382.1611343262454;
+ Fri, 22 Jan 2021 11:21:02 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20210105062857.3566-1-yangerkun@huawei.com> <X/+/3ui/TQ9LjtNZ@mit.edu>
+ <CAOQ4uxh2V6LF_t8ZaAOr=CbDrY3A5d0qSR7XWVX8dStR9mME5w@mail.gmail.com> <CAJfpegsVYF2wCiMKfRUzS_MpH9UKPh8g7ucG6w9uOcQodAzRAQ@mail.gmail.com>
+In-Reply-To: <CAJfpegsVYF2wCiMKfRUzS_MpH9UKPh8g7ucG6w9uOcQodAzRAQ@mail.gmail.com>
+From:   harshad shirwadkar <harshadshirwadkar@gmail.com>
+Date:   Fri, 22 Jan 2021 11:20:51 -0800
+Message-ID: <CAD+ocbyEyeAbH1vqKieK9ENmM5k3K-WF1jMuqAzRwPfPC2Np8A@mail.gmail.com>
+Subject: Re: [PATCH v3] ext4: fix bug for rename with RENAME_WHITEOUT
+To:     Miklos Szeredi <miklos@szeredi.hu>
+Cc:     Amir Goldstein <amir73il@gmail.com>,
+        "Theodore Ts'o" <tytso@mit.edu>, yangerkun <yangerkun@huawei.com>,
+        Ext4 <linux-ext4@vger.kernel.org>,
+        Andreas Dilger <adilger.kernel@dilger.ca>,
+        Jan Kara <jack@suse.cz>, "zhangyi (F)" <yi.zhang@huawei.com>,
+        lihaotian <lihaotian9@huawei.com>, lutianxiong@huawei.com,
+        linfeilong <linfeilong@huawei.com>,
+        fstests <fstests@vger.kernel.org>,
+        Vijaychidambaram Velayudhan Pillai <vijay@cs.utexas.edu>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Eric Biggers <ebiggers@google.com>
+Thanks Amir for pointing that out. Yes we are missing fast commit
+tracking in whiteout. I'll send out a fix for that.
 
-Test that when the lazytime mount option is enabled, updates to atime,
-mtime, and ctime get persisted in the cases when they should be.
+> But I must say it would have been very hard to catch missing ext4_fc_track_*
+> without specialized fs fuzzer such as the CrashMonkey generated tests.
 
-This test currently runs on ext4, f2fs, and xfs, since it's limited to
-filesystems that support the shutdown ioctl.
+I agree, it's been on my to-do list to run CrashMonkey tests with fast
+commits. I'm curious what kind of CrashMonkey tests you ran that
+helped you catch this? Were you running Overlayfs on top of Ext4 with
+fast commits?
 
-This test currently passes on ext4 and f2fs.  On xfs, kernel
-commit 1e249cb5b7fc ("fs: fix lazytime expiration handling in
-__writeback_single_inode()") is needed for the test to pass, since xfs
-had a bug where it didn't persist timestamps when it should have.
+Thanks,
+Harshad
 
-Signed-off-by: Eric Biggers <ebiggers@google.com>
----
-
-v2: updated comments and commit message, including to add a mention of a
-    related kernel commit.
-
- tests/generic/900     | 239 ++++++++++++++++++++++++++++++++++++++++++
- tests/generic/900.out |  37 +++++++
- tests/generic/group   |   1 +
- 3 files changed, 277 insertions(+)
- create mode 100755 tests/generic/900
- create mode 100644 tests/generic/900.out
-
-diff --git a/tests/generic/900 b/tests/generic/900
-new file mode 100755
-index 00000000..d9756158
---- /dev/null
-+++ b/tests/generic/900
-@@ -0,0 +1,239 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0-only
-+# Copyright 2021 Google LLC
-+#
-+# FS QA Test No. 900
-+#
-+# Test that when the lazytime mount option is enabled, updates to atime, mtime,
-+# and ctime are persisted in (at least) the four cases when they should be:
-+#
-+# - The inode needs to be updated for some change unrelated to file timestamps
-+# - Userspace calls fsync(), syncfs(), or sync()
-+# - The inode is evicted from memory
-+# - More than dirtytime_expire_seconds have elapsed
-+#
-+# This is in part a regression test for kernel commit 1e249cb5b7fc
-+# ("fs: fix lazytime expiration handling in __writeback_single_inode()").
-+# This test failed on XFS without that commit.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+DIRTY_EXPIRE_CENTISECS_ORIG=$(</proc/sys/vm/dirty_expire_centisecs)
-+DIRTY_WRITEBACK_CENTISECS_ORIG=$(</proc/sys/vm/dirty_writeback_centisecs)
-+DIRTYTIME_EXPIRE_SECONDS_ORIG=$(</proc/sys/vm/dirtytime_expire_seconds)
-+
-+restore_expiration_settings()
-+{
-+	echo "$DIRTY_EXPIRE_CENTISECS_ORIG" > /proc/sys/vm/dirty_expire_centisecs
-+	echo "$DIRTY_WRITEBACK_CENTISECS_ORIG" > /proc/sys/vm/dirty_writeback_centisecs
-+	echo "$DIRTYTIME_EXPIRE_SECONDS_ORIG" > /proc/sys/vm/dirtytime_expire_seconds
-+}
-+
-+# Enable continuous writeback of dirty inodes, so that we don't have to wait
-+# for the typical 30 seconds default.
-+__expire_inodes()
-+{
-+	echo 1 > /proc/sys/vm/dirty_expire_centisecs
-+	echo 1 > /proc/sys/vm/dirty_writeback_centisecs
-+}
-+
-+# Trigger and wait for writeback of any dirty inodes (not dirtytime inodes).
-+expire_inodes()
-+{
-+	__expire_inodes
-+	# Userspace doesn't have direct visibility into when inodes are dirty,
-+	# so the best we can do is sleep for a couple seconds.
-+	sleep 2
-+	restore_expiration_settings
-+}
-+
-+# Trigger and wait for writeback of any dirtytime inodes.
-+expire_timestamps()
-+{
-+	# Enable immediate expiration of lazytime timestamps, so that we don't
-+	# have to wait for the typical 24 hours default.  This should quickly
-+	# turn dirtytime inodes into regular dirty inodes.
-+	echo 1 > /proc/sys/vm/dirtytime_expire_seconds
-+
-+	# Enable continuous writeback of dirty inodes.
-+	__expire_inodes
-+
-+	# Userspace doesn't have direct visibility into when inodes are dirty,
-+	# so the best we can do is sleep for a couple seconds.
-+	sleep 2
-+	restore_expiration_settings
-+}
-+
-+_cleanup()
-+{
-+	restore_expiration_settings
-+	rm -f $tmp.*
-+}
-+
-+. ./common/rc
-+. ./common/filter
-+
-+rm -f $seqres.full
-+
-+_supported_fs generic
-+# This test uses the shutdown command, so it has to use the scratch filesystem
-+# rather than the test filesystem.
-+_require_scratch
-+_require_scratch_shutdown
-+_require_xfs_io_command "pwrite"
-+_require_xfs_io_command "fsync"
-+_require_xfs_io_command "syncfs"
-+# Note that this test doesn't have to check that the filesystem supports
-+# "lazytime", since "lazytime" is a VFS-level option, and at worst it just will
-+# be ignored.  This test will still pass if lazytime is ignored, as it only
-+# tests that timestamp updates are persisted when they should be; it doesn't
-+# test that timestamp updates aren't persisted when they shouldn't be.
-+
-+_scratch_mkfs &>> $seqres.full
-+_scratch_mount
-+
-+# Create the test file for which we'll update and check the timestamps.
-+file=$SCRATCH_MNT/file
-+$XFS_IO_PROG -f $file -c "pwrite 0 100" > /dev/null
-+
-+# Get the specified timestamp of $file in nanoseconds since the epoch.
-+get_timestamp()
-+{
-+	local timestamp_type=$1
-+
-+	local arg
-+	case $timestamp_type in
-+	atime)	arg=X ;;
-+	mtime)	arg=Y ;;
-+	ctime)	arg=Z ;;
-+	*)	_fail "Unhandled timestamp_type: $timestamp_type" ;;
-+	esac
-+	stat -c "%.9${arg}" $file | tr -d '.'
-+}
-+
-+do_test()
-+{
-+	local timestamp_type=$1
-+	local persist_method=$2
-+
-+	echo -e "\n# Testing that lazytime $timestamp_type update is persisted by $persist_method"
-+
-+	# Mount the filesystem with lazytime.  If atime is being tested, then
-+	# also use strictatime, since otherwise the filesystem may default to
-+	# relatime and not do the atime updates.
-+	if [[ $timestamp_type == atime ]]; then
-+		_scratch_cycle_mount lazytime,strictatime
-+	else
-+		_scratch_cycle_mount lazytime
-+	fi
-+
-+	# Update the specified timestamp on the file.
-+	local orig_time=$(get_timestamp $timestamp_type)
-+	sleep 0.1
-+	case $timestamp_type in
-+	atime)
-+		# Read from the file to update its atime.
-+		cat $file > /dev/null
-+		;;
-+	mtime)
-+		# Write to the file to update its mtime.  Make sure to not write
-+		# past the end of the file, as that would change i_size, which
-+		# would be an inode change which would cause the timestamp to
-+		# always be written -- thus making the test not detect bugs
-+		# where the timestamp doesn't get written.
-+		#
-+		# Also do the write twice, since XFS updates i_version the first
-+		# time, which likewise causes mtime to be written.  We want the
-+		# last thing done to just update mtime.
-+		$XFS_IO_PROG -f $file -c "pwrite 0 100" > /dev/null
-+		$XFS_IO_PROG -f $file -c "pwrite 0 100" > /dev/null
-+		;;
-+	ctime)
-+		# It isn't possible to update just ctime, so use 'touch -a'
-+		# to update both atime and ctime.
-+		touch -a $file
-+		;;
-+	esac
-+	local expected_time=$(get_timestamp $timestamp_type)
-+	if (( expected_time <= orig_time )); then
-+		echo "FAIL: $timestamp_type didn't increase after updating it (in-memory)"
-+	fi
-+
-+	# Do something that should cause the timestamp to be persisted.
-+	case $persist_method in
-+	other_inode_change)
-+		# Make a non-timestamp-related change to the inode.
-+		chmod 777 $file
-+		if [[ $timestamp_type == ctime ]]; then
-+			# The inode change will have updated ctime again.
-+			expected_time=$(get_timestamp ctime)
-+		fi
-+		# The inode may have been marked dirty but not actually written
-+		# yet.  Expire it by tweaking the VM settings and waiting.
-+		expire_inodes
-+		;;
-+	sync)
-+		# Execute the sync() system call.
-+		sync
-+		;;
-+	fsync)
-+		# Execute the fsync() system call on the file.
-+		$XFS_IO_PROG -r $file -c fsync
-+		;;
-+	syncfs)
-+		# Execute the syncfs() system call on the filesystem.
-+		$XFS_IO_PROG $SCRATCH_MNT -c syncfs
-+		;;
-+	eviction)
-+		# Evict the inode from memory.  In theory, drop_caches should do
-+		# the trick by itself.  But that actually just dirties the
-+		# inodes that need a lazytime update.  So we still need to wait
-+		# for inode writeback too.
-+		echo 2 > /proc/sys/vm/drop_caches
-+		expire_inodes
-+		;;
-+	expiration)
-+		# Expire the lazy timestamps via dirtytime_expire_seconds.
-+		expire_timestamps
-+		;;
-+	*)
-+		_fail "Unhandled persist_method: $persist_method"
-+	esac
-+
-+	# Use the shutdown ioctl to abort the filesystem.
-+	#
-+	# The timestamp might have just been written to the log and not *fully*
-+	# persisted yet, so use -f to ensure the log gets flushed.
-+	_scratch_shutdown -f
-+
-+	# Now remount the filesystem and verify that the timestamp really got
-+	# updated as expected.
-+	_scratch_cycle_mount
-+	local ondisk_time=$(get_timestamp $timestamp_type)
-+	if (( ondisk_time != expected_time )); then
-+		# Fail the test by printing unexpected output rather than by
-+		# calling _fail(), since we can still run the other test cases.
-+		echo "FAIL: lazytime $timestamp_type wasn't persisted by $persist_method"
-+		echo "ondisk_time ($ondisk_time) != expected_time ($expected_time)"
-+	fi
-+}
-+
-+for timestamp_type in atime mtime ctime; do
-+	do_test $timestamp_type other_inode_change
-+	do_test $timestamp_type sync
-+	do_test $timestamp_type fsync
-+	do_test $timestamp_type syncfs
-+	do_test $timestamp_type eviction
-+	do_test $timestamp_type expiration
-+done
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/900.out b/tests/generic/900.out
-new file mode 100644
-index 00000000..53bd2e29
---- /dev/null
-+++ b/tests/generic/900.out
-@@ -0,0 +1,37 @@
-+QA output created by 900
-+
-+# Testing that lazytime atime update is persisted by other_inode_change
-+
-+# Testing that lazytime atime update is persisted by sync
-+
-+# Testing that lazytime atime update is persisted by fsync
-+
-+# Testing that lazytime atime update is persisted by syncfs
-+
-+# Testing that lazytime atime update is persisted by eviction
-+
-+# Testing that lazytime atime update is persisted by expiration
-+
-+# Testing that lazytime mtime update is persisted by other_inode_change
-+
-+# Testing that lazytime mtime update is persisted by sync
-+
-+# Testing that lazytime mtime update is persisted by fsync
-+
-+# Testing that lazytime mtime update is persisted by syncfs
-+
-+# Testing that lazytime mtime update is persisted by eviction
-+
-+# Testing that lazytime mtime update is persisted by expiration
-+
-+# Testing that lazytime ctime update is persisted by other_inode_change
-+
-+# Testing that lazytime ctime update is persisted by sync
-+
-+# Testing that lazytime ctime update is persisted by fsync
-+
-+# Testing that lazytime ctime update is persisted by syncfs
-+
-+# Testing that lazytime ctime update is persisted by eviction
-+
-+# Testing that lazytime ctime update is persisted by expiration
-diff --git a/tests/generic/group b/tests/generic/group
-index 30a73605..00b75b42 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -624,3 +624,4 @@
- 619 auto rw enospc
- 620 auto mount quick
- 621 auto quick encrypt
-+900 auto
--- 
-2.30.0
-
+On Wed, Jan 20, 2021 at 12:42 AM Miklos Szeredi <miklos@szeredi.hu> wrote:
+>
+> On Wed, Jan 20, 2021 at 7:57 AM Amir Goldstein <amir73il@gmail.com> wrote:
+>
+> > And as long as I am ranting, I'd like to point out that it is a shame
+> > that whiteout
+> > was not implemented as a special (constant) inode whose nlink is irrelevant
+> > (or a special dirent with d_ino 0 and d_type DT_WHT for that matter).
+> > It would have been a rather small RO_COMPAT on-disk change for ext4.
+> > It could also be implemented in slightly more backward compat manner by
+> > maintaining a valid nlink and postpone setting the RO_COMPAT flag until
+> > EXT4_LINK_MAX is reached.
+> >
+> > As things stand now, overlayfs makes an effort to maintain a singleton
+> > hardlinked whiteout inode, without being able to use it with RENAME_WHITEOUT
+> > and filesystems have to take special care to journal the metadata of all
+> > individual whiteout inodes, without any added value to the only user
+> > (overlayfs).
+> >
+> > But I guess that train has left the station long ago...
+>
+> Not so, I believe.  Kernel internal interfaces are easy to change, and
+> adding support for DT_WHT to overlayfs would mostly be a trivial
+> undertaking.
+>
+> The big issue (as always) is userspace API's and not introducing
+> DT_WHT there was a very deliberate choice.  Adding a translation layer
+> from an internal whiteout representation to the userspace API also
+> does not seem to be a very complex problem, but I haven't looked into
+> that deeply.
+>
+> So AFAICS there's really nothing preventing the addition of whiteout
+> objects to filesystems, other than developer dedication.
+>
+> Thanks,
+> Miklos
