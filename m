@@ -2,102 +2,121 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-7.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 83565C433DB
-	for <linux-fstests@archiver.kernel.org>; Fri, 22 Jan 2021 20:36:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CCF0BC433DB
+	for <linux-fstests@archiver.kernel.org>; Sun, 24 Jan 2021 13:34:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2CBD623AFE
-	for <linux-fstests@archiver.kernel.org>; Fri, 22 Jan 2021 20:36:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 97CE1227BF
+	for <linux-fstests@archiver.kernel.org>; Sun, 24 Jan 2021 13:34:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730391AbhAVUf3 (ORCPT
+        id S1726000AbhAXNeV (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 22 Jan 2021 15:35:29 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45946 "EHLO
+        Sun, 24 Jan 2021 08:34:21 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35620 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1731173AbhAVUdl (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 22 Jan 2021 15:33:41 -0500
-Received: from mail-io1-xd2d.google.com (mail-io1-xd2d.google.com [IPv6:2607:f8b0:4864:20::d2d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DE468C0613D6;
-        Fri, 22 Jan 2021 12:33:00 -0800 (PST)
-Received: by mail-io1-xd2d.google.com with SMTP id d81so13858713iof.3;
-        Fri, 22 Jan 2021 12:33:00 -0800 (PST)
+        with ESMTP id S1725788AbhAXNeS (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 24 Jan 2021 08:34:18 -0500
+Received: from mail-pl1-x632.google.com (mail-pl1-x632.google.com [IPv6:2607:f8b0:4864:20::632])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5EF1FC061573;
+        Sun, 24 Jan 2021 05:33:38 -0800 (PST)
+Received: by mail-pl1-x632.google.com with SMTP id e9so5974547plh.3;
+        Sun, 24 Jan 2021 05:33:38 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=2BF/+WC1bYp0JjVV6KmxdUfvQ/+TryiQiWRjN6NPCsg=;
-        b=a4Rqc5gNXuqXv3OZEdcHe5M5XEF4OPKXq4GWyXZJoyk5kpZXdyTql7wlpohSYpe24k
-         B7/M3v1xmcZPyYarCeKbEc+R/cwbgV2zLjRnwXsyOSGL/7JQk59YwZD4TOttBbSll0bL
-         CWSUyUy98as3tyKxDWrR8trmkgZ/1jnK8yzjU6Guo5I/OGLR9zVItOhYtQpL2GreZa79
-         JqjjbLUGF41DR+VqjVeYWQdkUBL4ZxvcsWAK0Fvc5C78RtLlZpasKg4mZRzsxdXpV5F2
-         dmBha86UwJcppPaxx7JZfb3lqUlNYhQxt8cLqsBYSDahbLHYbYZLdMVFsBgRnxmd4OmA
-         7NvA==
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=DhSkzzlJRhDgO5mxl9oCYYdwSsBsir3z/jCswg5X5n4=;
+        b=CMlTgEp+YD4RvJqNPEMLVrxAjlAkk8VaAt6Oghxud6DjhCCXtXIY8FeldnwnZXJy/+
+         MoK5EYOin03NlG8vv+WKI5Myg+E0ojMLiDiUjCDNDL0vHTr5WcN2ERHEzvTJ3IB4MMjh
+         Y5opkIYwWzCoV2w1iykK1QGD5fOYgfYny4/UEOuggFF8abTLsLf5sjzXdVKpy3JT84lw
+         h+ndIEUzqt/Z/V+s6AGooZusm4R0P/nWmJGSjQKfp6xpi6Wn3KTVDW9fhvDjQMQQSsm1
+         NkPX8SDaESWYEaHShxibWVq1gzXD1Fnruu55FtGakYHMRkm7JWY4fIjzecCLYy1PMv+M
+         jBbg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=2BF/+WC1bYp0JjVV6KmxdUfvQ/+TryiQiWRjN6NPCsg=;
-        b=TEwbPxIc0rkuvH5Q2XUnJxM5GkbYzzQCoZNMBt/N7gFvBP1nH7a22HRkYcxHBYJBrG
-         O4X/gQPaDcnVuMm1T2ZReYMVDn+3EfLaKBGBzRb8U/WzTfVkM0YXM116pSNkRQsMMorh
-         yuFk6h6clmPFSEGwbTkwtpjDZ4qnljh29XA0C1M5bjHSBFK92QSjZ9xaGaWpO4LutS8v
-         yGKbxQW+OqwIisfdZqJixy9TM37UipceBppT82c1YdmCXf5vI2jQMQao2LKz5GvAO0o+
-         orwpGrDxYbyZSbDNaZjxa9al3c9KPMEzSHlScAS9tVi0rSoGB/llqGMPDTnW3CPKzZLh
-         G+Kw==
-X-Gm-Message-State: AOAM5332hFi1tDyBRA8oN2C1517S6knveD8qsoBXzI4QsZvV/9I+ZPN+
-        bLErNTtyy8dH2cjgYAXn/vzRX6WJ38joGZ9SHZg=
-X-Google-Smtp-Source: ABdhPJyYn8ObdOTN41iMF20fviR6EuLXOPVPOviwV3WyzBfkM/0Mh5zpPxagnsV4Tfv+edbVaCfrDAKEaxJSbTDb0rI=
-X-Received: by 2002:a5d:938f:: with SMTP id c15mr3006042iol.72.1611347580230;
- Fri, 22 Jan 2021 12:33:00 -0800 (PST)
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=DhSkzzlJRhDgO5mxl9oCYYdwSsBsir3z/jCswg5X5n4=;
+        b=LOibxJpyYpOvtPYHGXDspQvixfzj4VbzQKpar2CH9gPuicf/jFy9QHJ5bW9nX6dvJp
+         CtXO1E6QtlOPeuZcxNT+p8R4m7arHTa/MTfmEx7XzM3yYf/2a10C9/HyHvZ0eEcGDTVr
+         9DSTHr5VC4X+6/m0nqrYO3GglahBtOXjeThr5dqcTWqE1ftMeG9Noi7Lw4Gg3dHsTtKR
+         +T3eSKuMyAQdxcWeceo/AHxEVs0RaldvEZG1ay46PzGGWdU2rrJ8YOVZQDCMws6abnxM
+         4/t4ZTE+ESxWKrQYIfxliGvdfKy6OY+3CZmGB8BRW6bfstk2RechD5D5LiFXel250ZaO
+         7CTQ==
+X-Gm-Message-State: AOAM532olVEed/nk3TJkNVx8dJU5opKqN4IFqT5YyYBca3vMczYLP3Co
+        fmw/QQ+9laLwUjhjKAvoZJP2arh0DnU=
+X-Google-Smtp-Source: ABdhPJxAKM4mkLnlNSgiqZFmgQ+NxkJAABsnk++S2gWP3wBsKS1aiZ+9vWg/zVM1EAZP1tJ4ewEpCA==
+X-Received: by 2002:a17:902:ed8c:b029:de:8484:809 with SMTP id e12-20020a170902ed8cb02900de84840809mr2295591plj.23.1611495217815;
+        Sun, 24 Jan 2021 05:33:37 -0800 (PST)
+Received: from localhost ([47.89.231.86])
+        by smtp.gmail.com with ESMTPSA id o1sm13543718pgq.1.2021.01.24.05.33.30
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 24 Jan 2021 05:33:37 -0800 (PST)
+Date:   Sun, 24 Jan 2021 21:33:15 +0800
+From:   Eryu Guan <guaneryu@gmail.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org,
+        linux-xfs@vger.kernel.org
+Subject: Re: [PATCH] xfs: test mkfs.xfs config files
+Message-ID: <20210124133315.GA2350@desktop>
+References: <20201027205450.2824888-1-david@fromorbit.com>
+ <20201029212713.GF1061260@magnolia>
+ <20210116014607.GE3134581@magnolia>
+ <20210117231848.GB78965@dread.disaster.area>
+ <20210118042704.GG3134581@magnolia>
 MIME-Version: 1.0
-References: <20210105062857.3566-1-yangerkun@huawei.com> <X/+/3ui/TQ9LjtNZ@mit.edu>
- <CAOQ4uxh2V6LF_t8ZaAOr=CbDrY3A5d0qSR7XWVX8dStR9mME5w@mail.gmail.com>
- <CAJfpegsVYF2wCiMKfRUzS_MpH9UKPh8g7ucG6w9uOcQodAzRAQ@mail.gmail.com> <CAD+ocbyEyeAbH1vqKieK9ENmM5k3K-WF1jMuqAzRwPfPC2Np8A@mail.gmail.com>
-In-Reply-To: <CAD+ocbyEyeAbH1vqKieK9ENmM5k3K-WF1jMuqAzRwPfPC2Np8A@mail.gmail.com>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Fri, 22 Jan 2021 22:32:48 +0200
-Message-ID: <CAOQ4uxiDk6t+pNwm31L6eoj5+kq1E8-oX1zL9HzQE4fMjPK4yQ@mail.gmail.com>
-Subject: Re: [PATCH v3] ext4: fix bug for rename with RENAME_WHITEOUT
-To:     harshad shirwadkar <harshadshirwadkar@gmail.com>
-Cc:     Miklos Szeredi <miklos@szeredi.hu>,
-        "Theodore Ts'o" <tytso@mit.edu>, yangerkun <yangerkun@huawei.com>,
-        Ext4 <linux-ext4@vger.kernel.org>,
-        Andreas Dilger <adilger.kernel@dilger.ca>,
-        Jan Kara <jack@suse.cz>, "zhangyi (F)" <yi.zhang@huawei.com>,
-        lihaotian <lihaotian9@huawei.com>, lutianxiong@huawei.com,
-        linfeilong <linfeilong@huawei.com>,
-        fstests <fstests@vger.kernel.org>,
-        Vijaychidambaram Velayudhan Pillai <vijay@cs.utexas.edu>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210118042704.GG3134581@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Jan 22, 2021 at 9:21 PM harshad shirwadkar
-<harshadshirwadkar@gmail.com> wrote:
->
-> Thanks Amir for pointing that out. Yes we are missing fast commit
-> tracking in whiteout. I'll send out a fix for that.
->
-> > But I must say it would have been very hard to catch missing ext4_fc_track_*
-> > without specialized fs fuzzer such as the CrashMonkey generated tests.
->
-> I agree, it's been on my to-do list to run CrashMonkey tests with fast
-> commits. I'm curious what kind of CrashMonkey tests you ran that
-> helped you catch this? Were you running Overlayfs on top of Ext4 with
-> fast commits?
->
+On Sun, Jan 17, 2021 at 08:27:04PM -0800, Darrick J. Wong wrote:
+> On Mon, Jan 18, 2021 at 10:18:48AM +1100, Dave Chinner wrote:
+> > On Fri, Jan 15, 2021 at 05:46:07PM -0800, Darrick J. Wong wrote:
+> > > On Thu, Oct 29, 2020 at 02:27:13PM -0700, Darrick J. Wong wrote:
+> > > > On Wed, Oct 28, 2020 at 07:54:50AM +1100, Dave Chinner wrote:
+> > > > > +echo End of line comment
+> > > > > +test_mkfs_config << ENDL
+> > > > > +[metadata]
+> > > > > +crc = 0 ; This is an eol comment.
+> > > > 
+> > > > Hey, wait a minute, the manpage didn't say I could use semicolon
+> > > > comments! :)
+> > > > 
+> > > > The libinih page https://github.com/benhoyt/inih says you can though.
+> > > > 
+> > > > Would you mind making a note of that in patch 5 above, please?
+> > > 
+> > > Ping?  The mkfs code has been merged upstream; we ought to land the
+> > > functionality tests.
+> > 
+> > Nothing in this patch needs to change, AFAIA, because you were
+> > referring to the xfsprogs mkfs patchset in your comment. So this
+> > is really only waiting on review, right? Do I need to repost it?
+> 
+> Probably, as it's entirely possible that it's gotten lost in Eryu's mail
+> stream.
 
-Neither. I just guessed RENAME_WHITEOUT might be missed as
-developers are rarely aware of it.
-I never ran CrashMonkey tests myself.
-I found a few crash consistency bugs using xfstest generic/455.
-I suggest that you run it with fast commits
-and try using NUM_OPS and NUM_FILES larger than the test defaults
-to let the test run for a longer time.
+You were right, it's lost in my 'to-review' queue.. Thanks for the
+reminder!
+
+I did some minor modifications to the patches, such as update supported
+fs from 'generic' to 'xfs', and change truncate command to $XFS_IO_PROG
+-c "truncate".
 
 Thanks,
-Amir.
+Eryu
+
+> 
+> --D
+> 
+> > -Dave.
+> > -- 
+> > Dave Chinner
+> > david@fromorbit.com
