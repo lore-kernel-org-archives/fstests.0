@@ -4,147 +4,128 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E15DAC433DB
-	for <linux-fstests@archiver.kernel.org>; Sun, 24 Jan 2021 15:24:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CF500C433E0
+	for <linux-fstests@archiver.kernel.org>; Sun, 24 Jan 2021 15:30:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A8A0B230FB
-	for <linux-fstests@archiver.kernel.org>; Sun, 24 Jan 2021 15:24:16 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9647822DFA
+	for <linux-fstests@archiver.kernel.org>; Sun, 24 Jan 2021 15:30:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726374AbhAXPYA (ORCPT
+        id S1726049AbhAXPak (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 24 Jan 2021 10:24:00 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58962 "EHLO
+        Sun, 24 Jan 2021 10:30:40 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60348 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726369AbhAXPX6 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 24 Jan 2021 10:23:58 -0500
-Received: from mail-pj1-x1029.google.com (mail-pj1-x1029.google.com [IPv6:2607:f8b0:4864:20::1029])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F3F80C061573
-        for <fstests@vger.kernel.org>; Sun, 24 Jan 2021 07:23:17 -0800 (PST)
-Received: by mail-pj1-x1029.google.com with SMTP id a20so3807187pjs.1
-        for <fstests@vger.kernel.org>; Sun, 24 Jan 2021 07:23:17 -0800 (PST)
+        with ESMTP id S1726381AbhAXPa0 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 24 Jan 2021 10:30:26 -0500
+Received: from mail-io1-xd2c.google.com (mail-io1-xd2c.google.com [IPv6:2607:f8b0:4864:20::d2c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BCF12C061573;
+        Sun, 24 Jan 2021 07:29:45 -0800 (PST)
+Received: by mail-io1-xd2c.google.com with SMTP id q129so21461783iod.0;
+        Sun, 24 Jan 2021 07:29:45 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=message-id:date:from:to:subject:mime-version:content-disposition;
-        bh=3ebmfNfwg3pcP8A7CovDgAdWyrBDpy58dNTnqJ8fZ8U=;
-        b=Km9xP+xUeENkdq5e/zyUxLAC9Fe4KqfDxsF57yM/gwnrDoN/bqZmJ5CppZNqbqldR9
-         FfSxlPOU1TPPaEVVVSBKBExe0tRK9Je7s0q6zFI290RvfM0jiS1n3s4SlshhwBuQjJxR
-         ljcQbJiPQnHmIscYode1Tf8e7F7UM0jzMVw2jv42eR3cqmxPFyIwBRTxZKcc7NOisE/2
-         JToEY4Q8YEl7tQmdsAnwq4ESzMBhm+dc4H3fiiUpRvDlpmTaHpWhujAKy6YtMpjRoiI9
-         fk1RdMEKJXKY/qA+8QhJCDpVlVbMETpdXD6o8/E9+R64l8C3Qjo0TI5rxHmiO8l3iP05
-         QFjA==
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=RCz/IO50P5yBgxCx7JmnM/Ts8yhXJwNKkuv8s5ESRes=;
+        b=ZmaRzkqs2r1g2ZLOsmTfHksHKdBu1YCfa4mNiqnKgjyQidoNuz31n7aLsiJVR9agLG
+         GlaZimpAMp3v+OA06YU9ytqePr8vlzjIVL0Ex1zge2QCO6ApSfHruQO0GUpthYY9QzeW
+         6X1tvp3hXoxUU+mhDJYrBaPfidT0xRlCGbvfmAf3MBcclgTYjSoaHDGd30oARE/7LsSS
+         83ziBfMVCG5DSJBQaX7JMPsW9Vb/YGp7SwG5e6Jj4pUfpX88tDDp29vdxH736JbdiVBA
+         j/8pKG8QzMLEJFXMObl2ywbg7EElXOPq95POWiLZPD5GTtfR77wKY8mrjURX7ztgWeeH
+         Deig==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:message-id:date:from:to:subject:mime-version
-         :content-disposition;
-        bh=3ebmfNfwg3pcP8A7CovDgAdWyrBDpy58dNTnqJ8fZ8U=;
-        b=LDs7EKFAW1AnefsYwvk17N+8DjMeA65zi6DxenEH43uW1xHEbmNj2aeH9fsknn8UfS
-         W4NqbqrSmykJf4wnC4FV+UzjAqlTZ7JTYM8GIIrRFtLslD9PRzVRxdZ5fm7HuMZK5Ctt
-         4huZWgKTWhr/fjEpETPy+1j7ZetdxIjY6cWss55lnpayKyRg38XOy7RRYF4bvcGv+QGQ
-         Owj//N721cguKIfK1dRyXb/O6OJLJ8EH+dCHtUUHxo+MBk1YR++LA7y1ao032o8F9MlW
-         AUScjbUpGgG/LmGivKsDwcbJtAfDBfpCBkqhBLvcwJ6/7ItLmskGbdysm+QnttPiNXdI
-         mUlw==
-X-Gm-Message-State: AOAM533mQb5n7scgBcz8VBgSq82bvO+0X3h/FXfRlu69LfttvFL0a2IL
-        Z3dwBQxJv3eJNSRv99mSlFnpmxKv8R0=
-X-Google-Smtp-Source: ABdhPJxWjakwBgkGR7b9KCEeYoLGgpcg1x7WOKhTHy7XwKpW1BNzBaqzF3zRkI3Is/Me/1P7r5BF3Q==
-X-Received: by 2002:a17:90a:7e88:: with SMTP id j8mr4674892pjl.217.1611501797061;
-        Sun, 24 Jan 2021 07:23:17 -0800 (PST)
-Received: from localhost ([47.89.231.86])
-        by smtp.gmail.com with ESMTPSA id p64sm13865150pfb.201.2021.01.24.07.23.15
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 24 Jan 2021 07:23:16 -0800 (PST)
-Message-ID: <600d90e4.1c69fb81.3e04.13ca@mx.google.com>
-Date:   Sun, 24 Jan 2021 23:23:11 +0800
-From:   Eryu Guan <guaneryu@gmail.com>
-To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: master branch updated to 44a1fbf786a8
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=RCz/IO50P5yBgxCx7JmnM/Ts8yhXJwNKkuv8s5ESRes=;
+        b=m2nJaRAkdBmkb5HaFyOWIOGF8KgIPuRO7uwOM2ema+K/WuhEVyK+rk5jeSw1NU7Gk2
+         VkP2b4ey4olOpXSMIVTEPahNg161o2hhwvMhM2ys/wIyJ638GBKYf8dfXMWznTwO5yZ2
+         DJJItohWTMI/i7ChbfovO7wVK5Xoj1RrWt0GF9tSNU6SgpYQ3wBOw1DDWaRIYsIQkMuJ
+         8yj90q7xd40GfOVi3RBUNhJ5DG6VjoM96QjCGb3S4Iw6qiNW+oeA36NR/0TL5QZacEf5
+         DaE8kWOgBiFIg36Qtux4vLi6tB1ZKSiuAwVav5GVJ+UOgEgcrUrtjWEBzK6CyqzYuvPw
+         /oCg==
+X-Gm-Message-State: AOAM533rDBrwVrmNKZ2H7g522/BXAc21hYWN46lWK7eL/JL6/3f8uusr
+        6ci/oBhTfMys6H6JO7zUe02gDLS2NjJBimM2M/I=
+X-Google-Smtp-Source: ABdhPJy+rYdrsGi6dn2GJsLaqx+4CcNumuWeE8wbG1T1BMFqOTsanZMItbQkwhcQ/r9PP1o+gZAI60TzTegweZgOayA=
+X-Received: by 2002:a05:6e02:eb0:: with SMTP id u16mr900300ilj.250.1611502184637;
+ Sun, 24 Jan 2021 07:29:44 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="ayfPBDf0PT1O"
-Content-Disposition: inline
+References: <20210116165619.494265-1-amir73il@gmail.com> <20210116165619.494265-3-amir73il@gmail.com>
+ <20210124150918.GB2350@desktop>
+In-Reply-To: <20210124150918.GB2350@desktop>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Sun, 24 Jan 2021 17:29:33 +0200
+Message-ID: <CAOQ4uxgohiok+9FUG_Xw0NWpDczBD1Gn2ApWMiuhB-O6=Tterw@mail.gmail.com>
+Subject: Re: [PATCH 2/4] src/t_immutable: factor out some helpers
+To:     Eryu Guan <guan@eryu.me>
+Cc:     Eryu Guan <guaneryu@gmail.com>, Icenowy Zheng <icenowy@aosc.io>,
+        Chengguang Xu <cgxu519@mykernel.net>,
+        Xiao Yang <yangx.jy@cn.fujitsu.com>,
+        Miklos Szeredi <miklos@szeredi.hu>,
+        overlayfs <linux-unionfs@vger.kernel.org>,
+        fstests <fstests@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+On Sun, Jan 24, 2021 at 5:09 PM Eryu Guan <guan@eryu.me> wrote:
+>
+> On Sat, Jan 16, 2021 at 06:56:17PM +0200, Amir Goldstein wrote:
+> > Reduce boilerplate code.
+> > define _GNU_SOURCE needed for asprintf.
+> >
+> > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> > ---
+> >  src/t_immutable.c | 221 ++++++++++++++++++++++------------------------
+> >  1 file changed, 104 insertions(+), 117 deletions(-)
+> >
+> > diff --git a/src/t_immutable.c b/src/t_immutable.c
+> > index 86c567ed..b6a76af0 100644
+> > --- a/src/t_immutable.c
+> > +++ b/src/t_immutable.c
+> > @@ -8,6 +8,9 @@
+> >
+> >  #define TEST_UTIME
+> >
+> > +#ifndef _GNU_SOURCE
+> > +#define _GNU_SOURCE
+> > +#endif
+> >  #include <stdio.h>
+> >  #include <stdlib.h>
+> >  #include <string.h>
+> > @@ -1895,13 +1898,66 @@ static int check_test_area(const char *dir)
+> >       return 0;
+> >  }
+> >
+> > +static int create_dir(char **ppath, const char *fmt, const char *dir)
+> > +{
+> > +     const char *path;
+> > +     struct stat st;
+> > +
+> > +     if (asprintf(ppath, fmt, dir) == -1) {
+> > +       return -1;
+> > +     }
+> > +     path = *ppath;
+> > +     if (stat(path, &st) == 0) {
+> > +       fprintf(stderr, "%s: Test area directory %s must not exist for test area creation.\n",
+> > +               __progname, path);
+> > +       return 1;
+>
+> Other places return -1 but 1 is returned here, should be -1 as well?
+>
 
---ayfPBDf0PT1O
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+It is a semantically different return value.
 
-Hi all,
-
-The master branch of the xfstests repository at:
-
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-have just been updated. This update mainly pulls in the mkfs.xfs config file
-tests, and they all should pass with latest xfsprogs. There's another new
-regression test for persisting [acm]time when lazytime is enabled, and it
-currently fails with latest v5.11-rc4 kernel.
+-1 are error cases, 1 means already existing, so the caller that requested to
+create the dir could treat this as success.
+I did not end up implementing the 'allow_existing' feature in this way, but I
+see no reason to change the return value, because future implementation
+could make use of this distinction. Unless you insist.
 
 Thanks,
-Eryu
-
-The new head of the master branch is commit:
-
-44a1fbf786a8 generic: test for lazytime timestamp updates
-
-New commits:
-
-Darrick J. Wong (1):
-      [3ba859629de1] xfs: test mkfs.xfs config files
-
-Eric Biggers (1):
-      [44a1fbf786a8] generic: test for lazytime timestamp updates
-
-Yang Xu (1):
-      [e2072f840804] ext4/046: skip test when ext4 doesn't support bs < ps with dioread_nolock
-
-
-Code Diffstat:
-
- common/xfs            |  10 +++
- tests/ext4/046        |  11 ++-
- tests/generic/622     | 239 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/622.out |  37 ++++++++
- tests/generic/group   |   1 +
- tests/xfs/522         | 219 +++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/522.out     |  16 ++++
- tests/xfs/523         | 195 ++++++++++++++++++++++++++++++++++++++++
- tests/xfs/523.out     |  13 +++
- tests/xfs/524         |  65 ++++++++++++++
- tests/xfs/524.out     |   2 +
- tests/xfs/525         |  62 +++++++++++++
- tests/xfs/525.out     |   2 +
- tests/xfs/526         |  64 ++++++++++++++
- tests/xfs/526.out     |   3 +
- tests/xfs/group       |   5 ++
- 16 files changed, 943 insertions(+), 1 deletion(-)
---
-Eryu Guan
-guaneryu@gmail.com
-
---ayfPBDf0PT1O
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAmANkIUACgkQJlKqKVyP
-52P38BAA3cBUFV4hV3e9113R3clgKiXZtamKG+ZBuMLPZKU8rcjCCiQ6ca3uIb2x
-4rQUDh7M5XGIOSRjIXsHmEaSajPh7wNT24MfxJ+7Rr9N6AMJHLu2pL1WXwo1w2Up
-OuEI8I60HcDhEbnBgHuBXpyIgvvb0fsin/VgkFIXwmkyP9PG4v9vpnGW3lvdZa0R
-DxgoVtE0AWcsUe3ubXLEblSz52ZmH/P8IM00JVnjZRzJd9I3BlIqxLJaVoJVUAVc
-Cb4dXEAhsY3cUm8qeRDcRh6UTq5l3YECH5ParLk7TA6Tp/MtF1LII6hlJS5EAdmM
-/pL+E2K5nBYAWDzR9Y/DU3ACzlm8z+AYq2ifdlcxITfRKa/1dz+G9MYfT4q00B0U
-ds+GmwdzBPZJ6HfIIx3WueYrT92e3oo0Sh5XIRACuTXKtwH9oGE/CQsQvIsN/MWx
-TT3p+we4ENEKv7MeCacNAerv9iuY01FV/BU+BldyNcwl20Hfb2S46a5tNYwvQ076
-hyW9a9t0Ua9ioMXgODqEzfwB0EnJWcVTRLuU7j2FmT/eUeAdvlBmy+k0uA0Mk2fr
-pF3jxWAkxFF/4rTs80/lj+5b1syno/evHbloQYTIXo6I0ghyDWta31nps6NkpSlX
-ak7inQQveQpzAq3CpVfAVnuyn/DNSA6CJidP3a4pygavTN3jC80=
-=Z+ci
------END PGP SIGNATURE-----
-
---ayfPBDf0PT1O--
+Amir.
