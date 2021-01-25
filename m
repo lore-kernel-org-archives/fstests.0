@@ -2,66 +2,31 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.2 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,URIBL_BLOCKED,
+	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DDD45C433DB
-	for <linux-fstests@archiver.kernel.org>; Tue, 26 Jan 2021 03:02:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 87E83C433E6
+	for <linux-fstests@archiver.kernel.org>; Tue, 26 Jan 2021 06:02:12 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AD667230FA
-	for <linux-fstests@archiver.kernel.org>; Tue, 26 Jan 2021 03:02:36 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4C97D22ADF
+	for <linux-fstests@archiver.kernel.org>; Tue, 26 Jan 2021 06:02:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728500AbhAYNTN (ORCPT
+        id S1729639AbhAZGCJ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 25 Jan 2021 08:19:13 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57704 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728667AbhAYNSV (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 25 Jan 2021 08:18:21 -0500
-Received: from mail-io1-xd35.google.com (mail-io1-xd35.google.com [IPv6:2607:f8b0:4864:20::d35])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A936FC0613D6;
-        Mon, 25 Jan 2021 05:17:33 -0800 (PST)
-Received: by mail-io1-xd35.google.com with SMTP id h11so26267774ioh.11;
-        Mon, 25 Jan 2021 05:17:33 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=Te8hcmHBuaN7ZbAcxRO0Lcgi/Ips+3kxncyarZEndFs=;
-        b=IqNHfZbC4G44w0vEWP2dqXv6Yc0rbE/ySWKfjPopiR/2yPK0qL4ElfPKGl8x2+PPr+
-         FQw5HNIrOu+E/pLj72owRbSAjX+vIuo+BAin6Dzejc722BdgV6f+RWJHpf7UtitGIWXY
-         Y/v96bnAHweNhOENgbhaGTJT6Bc/lS88tACzvlv3Od40dsYBkIzcELH6fYAI0wZse7kJ
-         ymMr1GIAUcKQhdNVh4w8q+xlbCLL6DKcCgTz/PsY3OjK+BwBejQd1D6LF0wvSov3CygT
-         ld3LtuKYyBFVEImiN7KSQC6TqYhLGGTk5eET0fR17xRIPZAnI6MuscFVFz9u9GmHH2MX
-         Wu4g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=Te8hcmHBuaN7ZbAcxRO0Lcgi/Ips+3kxncyarZEndFs=;
-        b=nyauNzo0+/06f7O1tM5/ZnQgTkbXhCn42MH0MNPeOp6lmzw10FxLA1bRSK6CwiICdi
-         j/lwoccgU39rrDWCRjhATnUp9FqSHkjZ+mTwGWw+W2e8x9fRcSMRo6Oriz4c2mNan/zz
-         rhArWe5MFUpI6GtXf59IaTiHtfqKnxWqJXAT9ZWvYKE+V038of6k/pCoFDP08/vaHxTc
-         nKM4YQ3HMZNnvPkzuBhQIYsoXAnRnijykn342f9F9XWcMROYAd6PcGAEEmXXVLbj/etn
-         BvTAxg9ZQEwpjsa0dk+B93MODmUxr2Ap4LDIRcB4YTgucsw0xk+op3ULrd5oGSzIqRuL
-         CJPw==
-X-Gm-Message-State: AOAM532NY9xFbi2/AXcss/MAsATx3YHUaw4RQMX3Zej8S3pU78LdxOpu
-        RXJlWC6r2NH0OTHQEEj5yZei2wJtjF+jEN3X3qI45PU2I94=
-X-Google-Smtp-Source: ABdhPJzjmauC/RmydA48mzXwi9jBiCZbg9/HWjjYNhXUXQqBL9Jm0JpNq6akNJqtCuySCELz+OpdFEzp5ansr+XVO2A=
-X-Received: by 2002:a6b:6f08:: with SMTP id k8mr347134ioc.186.1611580653045;
- Mon, 25 Jan 2021 05:17:33 -0800 (PST)
-MIME-Version: 1.0
-References: <20210116165619.494265-1-amir73il@gmail.com> <20210116165619.494265-4-amir73il@gmail.com>
- <20210124151411.GC2350@desktop> <CAOQ4uxj8xx7izTV8Sp3FH_Pgv_S0gvCKZtCmfRnDGfo318d86Q@mail.gmail.com>
- <20210125124629.GF58500@e18g06458.et15sqa>
-In-Reply-To: <20210125124629.GF58500@e18g06458.et15sqa>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Mon, 25 Jan 2021 15:17:22 +0200
-Message-ID: <CAOQ4uxgkdtd-Bh-y2urrXSQ6OVYe=ZgiUiELQwYsMPuroPiU8g@mail.gmail.com>
-Subject: Re: [PATCH 3/4] src/t_immutable: Allow setting flags on existing files
-To:     Eryu Guan <eguan@linux.alibaba.com>
+        Tue, 26 Jan 2021 01:02:09 -0500
+Received: from out30-132.freemail.mail.aliyun.com ([115.124.30.132]:43781 "EHLO
+        out30-132.freemail.mail.aliyun.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1728072AbhAYMoL (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 25 Jan 2021 07:44:11 -0500
+X-Alimail-AntiSpam: AC=PASS;BC=-1|-1;BR=01201311R401e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=e01e04426;MF=eguan@linux.alibaba.com;NM=1;PH=DS;RN=10;SR=0;TI=SMTPD_---0UMsJZDg_1611578112;
+Received: from localhost(mailfrom:eguan@linux.alibaba.com fp:SMTPD_---0UMsJZDg_1611578112)
+          by smtp.aliyun-inc.com(127.0.0.1);
+          Mon, 25 Jan 2021 20:35:13 +0800
+Date:   Mon, 25 Jan 2021 20:35:12 +0800
+From:   Eryu Guan <eguan@linux.alibaba.com>
+To:     Amir Goldstein <amir73il@gmail.com>
 Cc:     Eryu Guan <guan@eryu.me>, Eryu Guan <guaneryu@gmail.com>,
         Icenowy Zheng <icenowy@aosc.io>,
         Chengguang Xu <cgxu519@mykernel.net>,
@@ -69,48 +34,78 @@ Cc:     Eryu Guan <guan@eryu.me>, Eryu Guan <guaneryu@gmail.com>,
         Miklos Szeredi <miklos@szeredi.hu>,
         overlayfs <linux-unionfs@vger.kernel.org>,
         fstests <fstests@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Subject: Re: [PATCH 2/4] src/t_immutable: factor out some helpers
+Message-ID: <20210125123512.GE58500@e18g06458.et15sqa>
+References: <20210116165619.494265-1-amir73il@gmail.com>
+ <20210116165619.494265-3-amir73il@gmail.com>
+ <20210124150918.GB2350@desktop>
+ <CAOQ4uxgohiok+9FUG_Xw0NWpDczBD1Gn2ApWMiuhB-O6=Tterw@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAOQ4uxgohiok+9FUG_Xw0NWpDczBD1Gn2ApWMiuhB-O6=Tterw@mail.gmail.com>
+User-Agent: Mutt/1.5.21 (2010-09-15)
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Jan 25, 2021 at 2:46 PM Eryu Guan <eguan@linux.alibaba.com> wrote:
->
-> On Sun, Jan 24, 2021 at 05:32:15PM +0200, Amir Goldstein wrote:
-> > On Sun, Jan 24, 2021 at 5:14 PM Eryu Guan <guan@eryu.me> wrote:
-> > >
-> [snap]
-> > > >
-> > > >       if (create) {
-> > > >         ret = create_test_area(argv[argc-1]);
-> > > > -       if (ret || !runtest) {
-> > > > +       if (ret || allow_existing) {
-> > >
-> > > With this change, compiler warns about 'runtest' is set but not used,
-> > > and 'allow_existing' now indicates '!runtest' implicitly, which seems
-> > > subtle. I think it's better to keep 'runtest' as the indicator to
-> > > actually run the test?
-> > >
+On Sun, Jan 24, 2021 at 05:29:33PM +0200, Amir Goldstein wrote:
+> On Sun, Jan 24, 2021 at 5:09 PM Eryu Guan <guan@eryu.me> wrote:
 > >
-> > Sure, I removed it by mistake.
->
-> Then this is the only place that needs update. I can fix it on commit,
-> no need to resend then.
->
+> > On Sat, Jan 16, 2021 at 06:56:17PM +0200, Amir Goldstein wrote:
+> > > Reduce boilerplate code.
+> > > define _GNU_SOURCE needed for asprintf.
+> > >
+> > > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> > > ---
+> > >  src/t_immutable.c | 221 ++++++++++++++++++++++------------------------
+> > >  1 file changed, 104 insertions(+), 117 deletions(-)
+> > >
+> > > diff --git a/src/t_immutable.c b/src/t_immutable.c
+> > > index 86c567ed..b6a76af0 100644
+> > > --- a/src/t_immutable.c
+> > > +++ b/src/t_immutable.c
+> > > @@ -8,6 +8,9 @@
+> > >
+> > >  #define TEST_UTIME
+> > >
+> > > +#ifndef _GNU_SOURCE
+> > > +#define _GNU_SOURCE
+> > > +#endif
+> > >  #include <stdio.h>
+> > >  #include <stdlib.h>
+> > >  #include <string.h>
+> > > @@ -1895,13 +1898,66 @@ static int check_test_area(const char *dir)
+> > >       return 0;
+> > >  }
+> > >
+> > > +static int create_dir(char **ppath, const char *fmt, const char *dir)
+> > > +{
+> > > +     const char *path;
+> > > +     struct stat st;
+> > > +
+> > > +     if (asprintf(ppath, fmt, dir) == -1) {
+> > > +       return -1;
+> > > +     }
+> > > +     path = *ppath;
+> > > +     if (stat(path, &st) == 0) {
+> > > +       fprintf(stderr, "%s: Test area directory %s must not exist for test area creation.\n",
+> > > +               __progname, path);
+> > > +       return 1;
+> >
+> > Other places return -1 but 1 is returned here, should be -1 as well?
+> >
+> 
+> It is a semantically different return value.
+> 
+> -1 are error cases, 1 means already existing, so the caller that requested to
+> create the dir could treat this as success.
+> I did not end up implementing the 'allow_existing' feature in this way, but I
+> see no reason to change the return value, because future implementation
+> could make use of this distinction. Unless you insist.
 
-Excellent.
-
-Now, about that kernel deadlock mentioned in is commented out line in
-test overlay/075. The fix for that is in overlayfs-next:
-
-147ec02b8705 - ovl: avoid deadlock on directory ioctl
-
-But I am not so happy about adding a test that crashes stable/old kernels.
-If you like I can post another test that is "dangerous" just for the deadlock
-but after the fix is merged to master and 5.10.y so at least people who tests
-the latest kernels will not crash.
-
-Let me know your preference.
+I can live with it :) I'm just curious why the return values are
+different, as I didn't see different values in original code.
 
 Thanks,
-Amir.
+Eryu
