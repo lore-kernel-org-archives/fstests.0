@@ -2,74 +2,79 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.2 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	UNPARSEABLE_RELAY,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6D971C4360C
-	for <linux-fstests@archiver.kernel.org>; Tue, 26 Jan 2021 17:00:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DC20FC43381
+	for <linux-fstests@archiver.kernel.org>; Tue, 26 Jan 2021 18:40:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 56DBF230FC
-	for <linux-fstests@archiver.kernel.org>; Tue, 26 Jan 2021 17:00:36 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B0FFE22286
+	for <linux-fstests@archiver.kernel.org>; Tue, 26 Jan 2021 18:40:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728974AbhAZGCK (ORCPT
+        id S2391120AbhAZRVs (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 26 Jan 2021 01:02:10 -0500
-Received: from out30-133.freemail.mail.aliyun.com ([115.124.30.133]:50879 "EHLO
-        out30-133.freemail.mail.aliyun.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1728307AbhAYMrS (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 25 Jan 2021 07:47:18 -0500
-X-Alimail-AntiSpam: AC=PASS;BC=-1|-1;BR=01201311R391e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=e01e04394;MF=eguan@linux.alibaba.com;NM=1;PH=DS;RN=10;SR=0;TI=SMTPD_---0UMpgW9L_1611578789;
-Received: from localhost(mailfrom:eguan@linux.alibaba.com fp:SMTPD_---0UMpgW9L_1611578789)
-          by smtp.aliyun-inc.com(127.0.0.1);
-          Mon, 25 Jan 2021 20:46:29 +0800
-Date:   Mon, 25 Jan 2021 20:46:29 +0800
-From:   Eryu Guan <eguan@linux.alibaba.com>
+        Tue, 26 Jan 2021 12:21:48 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56002 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2390549AbhAZIsd (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 26 Jan 2021 03:48:33 -0500
+Received: from mail-vs1-xe2d.google.com (mail-vs1-xe2d.google.com [IPv6:2607:f8b0:4864:20::e2d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4BEEDC06174A
+        for <fstests@vger.kernel.org>; Tue, 26 Jan 2021 00:47:51 -0800 (PST)
+Received: by mail-vs1-xe2d.google.com with SMTP id h11so8622167vsa.10
+        for <fstests@vger.kernel.org>; Tue, 26 Jan 2021 00:47:51 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=szeredi.hu; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=eJJVXT7Zm3sSCpG8sNIQkas+aRxWJnV+8pTflNpI0kE=;
+        b=Vs+AYALnh9wAuAwQAOqQKViVTSsS9zXofeAMuo/KhL+SHGC+6ElIBykrEZyZlMW0ef
+         NDrr1BlmHxjI7XnTrTTTdzo5EGaKjcr6N2+e4EFKauBx6Kt4ywtFtM2iuetRgkqSVL3N
+         pATNtykcc84AQLXdnCutOczvC+EM2RuJVFuPU=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=eJJVXT7Zm3sSCpG8sNIQkas+aRxWJnV+8pTflNpI0kE=;
+        b=YdSAZxFvvFxT/D1DPGJyxC1GiGAa5f3WWECanePNPEurusYiMOMLBgl+TO7xhud/88
+         GxYa/O13M2Y/7ObkSfNXr6eJAGr+1IS6aftuK8uktr64NSANesWFa88GNWDsGQFDQ7xy
+         Z8dyzp4LH1TWI2j7Bl+mRgJ0oNDSDylLUcde0MNa493bDyaXXwvLcQ7/txKnWI1+tG6x
+         M1dmO0XoRyJY+mhJ46lzj4n4ZOxlu3nwS9f1CtdeFDc4lhugdm5LkamjOYcUwT0EOANr
+         aPvMF56XbTYrcbzF3JQFWHhUpNDqWmm/CuMjdbRryX3/KNbC0qW4AvctgzcYxxsfNm4V
+         5OBQ==
+X-Gm-Message-State: AOAM531/r/6Uq5VvzGloDWt0/C9hasrdXIFVUvuKiQdAvS0nZHNe5fKy
+        HuwKPZUo2Q/EBmSJzDvOeg6MzqjdbW2v5I2dHvv+aw==
+X-Google-Smtp-Source: ABdhPJzTJTbo0jmbcnLg+/acyVUVHuN4RVsFfiB8gDL/6YB6EXHp1QNRrIyXM7OZEe95WP//ZCgNQDP7wNVVXeoudz8=
+X-Received: by 2002:a67:8844:: with SMTP id k65mr3457158vsd.9.1611650870537;
+ Tue, 26 Jan 2021 00:47:50 -0800 (PST)
+MIME-Version: 1.0
+References: <20210116165619.494265-1-amir73il@gmail.com> <20210116165619.494265-5-amir73il@gmail.com>
+ <CAOQ4uxiXUN7LkzNLZto6iK2YuDdxp7PGoQMGCm89p1kNWUf=YA@mail.gmail.com>
+In-Reply-To: <CAOQ4uxiXUN7LkzNLZto6iK2YuDdxp7PGoQMGCm89p1kNWUf=YA@mail.gmail.com>
+From:   Miklos Szeredi <miklos@szeredi.hu>
+Date:   Tue, 26 Jan 2021 09:47:39 +0100
+Message-ID: <CAJfpegu0igQWqaaq3RT5jHx=GLZ80+4rM6uk8yM0+ri4Ks_0bA@mail.gmail.com>
+Subject: Re: [PATCH 4/4] overlay: Test lost immutable/append-only flags on copy-up
 To:     Amir Goldstein <amir73il@gmail.com>
-Cc:     Eryu Guan <guan@eryu.me>, Eryu Guan <guaneryu@gmail.com>,
-        Icenowy Zheng <icenowy@aosc.io>,
+Cc:     Eryu Guan <guaneryu@gmail.com>, Icenowy Zheng <icenowy@aosc.io>,
         Chengguang Xu <cgxu519@mykernel.net>,
         Xiao Yang <yangx.jy@cn.fujitsu.com>,
-        Miklos Szeredi <miklos@szeredi.hu>,
         overlayfs <linux-unionfs@vger.kernel.org>,
         fstests <fstests@vger.kernel.org>
-Subject: Re: [PATCH 3/4] src/t_immutable: Allow setting flags on existing
- files
-Message-ID: <20210125124629.GF58500@e18g06458.et15sqa>
-References: <20210116165619.494265-1-amir73il@gmail.com>
- <20210116165619.494265-4-amir73il@gmail.com>
- <20210124151411.GC2350@desktop>
- <CAOQ4uxj8xx7izTV8Sp3FH_Pgv_S0gvCKZtCmfRnDGfo318d86Q@mail.gmail.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAOQ4uxj8xx7izTV8Sp3FH_Pgv_S0gvCKZtCmfRnDGfo318d86Q@mail.gmail.com>
-User-Agent: Mutt/1.5.21 (2010-09-15)
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Jan 24, 2021 at 05:32:15PM +0200, Amir Goldstein wrote:
-> On Sun, Jan 24, 2021 at 5:14 PM Eryu Guan <guan@eryu.me> wrote:
-> >
-[snap]
-> > >
-> > >       if (create) {
-> > >         ret = create_test_area(argv[argc-1]);
-> > > -       if (ret || !runtest) {
-> > > +       if (ret || allow_existing) {
-> >
-> > With this change, compiler warns about 'runtest' is set but not used,
-> > and 'allow_existing' now indicates '!runtest' implicitly, which seems
-> > subtle. I think it's better to keep 'runtest' as the indicator to
-> > actually run the test?
-> >
-> 
-> Sure, I removed it by mistake.
+On Mon, Jan 25, 2021 at 2:24 PM Amir Goldstein <amir73il@gmail.com> wrote:
 
-Then this is the only place that needs update. I can fix it on commit,
-no need to resend then.
+> Miklos,
+>
+> Do you plan to followup on your VFS implementation for the
+> {s,g}etxflags methods?
+
+Definitely.  Will try for 5.12, but no garantees.
 
 Thanks,
-Eryu
+Miklos
