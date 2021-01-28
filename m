@@ -7,30 +7,30 @@ X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 05FE0C433E0
-	for <linux-fstests@archiver.kernel.org>; Thu, 28 Jan 2021 04:31:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 02DF1C433DB
+	for <linux-fstests@archiver.kernel.org>; Thu, 28 Jan 2021 06:07:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AA9C864D9D
-	for <linux-fstests@archiver.kernel.org>; Thu, 28 Jan 2021 04:31:46 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B373164DD6
+	for <linux-fstests@archiver.kernel.org>; Thu, 28 Jan 2021 06:07:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229716AbhA1Ebb (ORCPT
+        id S231191AbhA1GG4 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 27 Jan 2021 23:31:31 -0500
-Received: from szxga05-in.huawei.com ([45.249.212.191]:11523 "EHLO
-        szxga05-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229569AbhA1Eba (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 27 Jan 2021 23:31:30 -0500
-Received: from DGGEMS404-HUB.china.huawei.com (unknown [172.30.72.58])
-        by szxga05-in.huawei.com (SkyGuard) with ESMTP id 4DR6v10nDczjFLC
-        for <fstests@vger.kernel.org>; Thu, 28 Jan 2021 12:29:33 +0800 (CST)
-Received: from huawei.com (10.175.127.227) by DGGEMS404-HUB.china.huawei.com
- (10.3.19.204) with Microsoft SMTP Server id 14.3.498.0; Thu, 28 Jan 2021
- 12:30:36 +0800
+        Thu, 28 Jan 2021 01:06:56 -0500
+Received: from szxga04-in.huawei.com ([45.249.212.190]:11210 "EHLO
+        szxga04-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231195AbhA1GGw (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 28 Jan 2021 01:06:52 -0500
+Received: from DGGEMS410-HUB.china.huawei.com (unknown [172.30.72.59])
+        by szxga04-in.huawei.com (SkyGuard) with ESMTP id 4DR90c6tS9zlBMb
+        for <fstests@vger.kernel.org>; Thu, 28 Jan 2021 14:04:32 +0800 (CST)
+Received: from huawei.com (10.175.127.227) by DGGEMS410-HUB.china.huawei.com
+ (10.3.19.210) with Microsoft SMTP Server id 14.3.498.0; Thu, 28 Jan 2021
+ 14:05:57 +0800
 From:   Sun Ke <sunke32@huawei.com>
 To:     <fstests@vger.kernel.org>, <sunke32@huawei.com>
-Subject: [PATCH] ext4: Add a test for rename with RENAME_WHITEOUT
-Date:   Thu, 28 Jan 2021 12:36:41 +0800
-Message-ID: <20210128043641.175138-1-sunke32@huawei.com>
+Subject: [v2] ext4: Add a test for rename with RENAME_WHITEOUT
+Date:   Thu, 28 Jan 2021 14:12:02 +0800
+Message-ID: <20210128061202.210074-1-sunke32@huawei.com>
 X-Mailer: git-send-email 2.25.4
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7BIT
@@ -48,6 +48,10 @@ rename with RENAME_WHITEOUT")
 
 Signed-off-by: Sun Ke <sunke32@huawei.com>
 ---
+v1 -> v3:
+Use the original in src and modify 048.out
+---
+---
  tests/ext4/048     | 76 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
  tests/ext4/048.out |  2 ++
  tests/ext4/group   |  1 +
@@ -57,7 +61,7 @@ Signed-off-by: Sun Ke <sunke32@huawei.com>
 
 diff --git a/tests/ext4/048 b/tests/ext4/048
 new file mode 100755
-index 00000000..321b4eae
+index 00000000..0311d1a2
 --- /dev/null
 +++ b/tests/ext4/048
 @@ -0,0 +1,76 @@
@@ -120,7 +124,7 @@ index 00000000..321b4eae
 +mkdir test/dir
 +cd test/dir
 +for ((i = 0; i < 1000; i++))
-+do 
++do
 +	touch file$i > /dev/null 2>&1
 +done
 +
@@ -130,7 +134,7 @@ index 00000000..321b4eae
 +cd $testdir
 +$UMOUNT_PROG test
 +$MOUNT_PROG img test
-+ls -li test/dir/file1 > /dev/null 2>&1
++ls -l test/dir/file1 > /dev/null 2>&1
 +$UMOUNT_PROG test
 +
 +dmesg -c | grep "deleted inode referenced"
@@ -139,12 +143,12 @@ index 00000000..321b4eae
 +exit
 diff --git a/tests/ext4/048.out b/tests/ext4/048.out
 new file mode 100644
-index 00000000..fea78e8d
+index 00000000..5b3990da
 --- /dev/null
 +++ b/tests/ext4/048.out
 @@ -0,0 +1,2 @@
 +QA output created by 048
-+renameat2: No space left on device
++No space left on device
 diff --git a/tests/ext4/group b/tests/ext4/group
 index ceda2ba6..6140dd7e 100644
 --- a/tests/ext4/group
