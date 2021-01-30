@@ -5,113 +5,210 @@ X-Spam-Level:
 X-Spam-Status: No, score=-17.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DDF3FC433DB
-	for <linux-fstests@archiver.kernel.org>; Sat, 30 Jan 2021 09:07:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3C904C433DB
+	for <linux-fstests@archiver.kernel.org>; Sat, 30 Jan 2021 10:57:19 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A63D264E27
-	for <linux-fstests@archiver.kernel.org>; Sat, 30 Jan 2021 09:07:01 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EC0E164DD9
+	for <linux-fstests@archiver.kernel.org>; Sat, 30 Jan 2021 10:57:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230013AbhA3JGj (ORCPT
+        id S230034AbhA3K5D (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 30 Jan 2021 04:06:39 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:59176 "EHLO
+        Sat, 30 Jan 2021 05:57:03 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:54246 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S233742AbhA3Eqn (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 29 Jan 2021 23:46:43 -0500
+        by vger.kernel.org with ESMTP id S230009AbhA3K5C (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 30 Jan 2021 05:57:02 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1611981917;
+        s=mimecast20190719; t=1612004135;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=YAbl87lClFQvcy6ibxl+KvHSxTXARzf6ymMThUe1Fjg=;
-        b=BA8g1SDmpY/P2KFZFWtS/FNr5IDPouuELI8wotUL1kzYHd/DQ9mLXetWc7MYS0vX2j9uaM
-        LgKF8Io9Rkqivjdg5+IoVsyrB4JUPuFrLwrW+IXPqht0ifcp/AGJTn4KboFmDR519XDGk6
-        ICyimIB7PbcbLsrl+ERgkUuGYgcsd8A=
+        bh=pjQUp4w2SDj63vss3sChppxP2pVqaeXdhKJfhxLU9qo=;
+        b=P56PSutYW5z2LvAEapyGtZaIrfgRWCosNYtJHJ3I2U89bfkwOc2ofKMkWtknMCqt66lxoa
+        XLAehnIV2XtKezTO4mqTlFTUaukvVQr/X21nq8DsjxnauP6b6YfZMFtAqbrzup8PcOu3SJ
+        8m7orALZQl8VgeXn0RjMfIhpxFqav5w=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-41-WLm7LBSLMEuQElSDZAIHZQ-1; Fri, 29 Jan 2021 23:41:21 -0500
-X-MC-Unique: WLm7LBSLMEuQElSDZAIHZQ-1
-Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
+ us-mta-507-zc0nd5eoOkazZe68wq9mQg-1; Sat, 30 Jan 2021 05:55:32 -0500
+X-MC-Unique: zc0nd5eoOkazZe68wq9mQg-1
+Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 98AE4802B44;
-        Sat, 30 Jan 2021 04:41:20 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id B69C059;
+        Sat, 30 Jan 2021 10:55:31 +0000 (UTC)
 Received: from localhost (unknown [10.66.61.36])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 1BBED60BE2;
-        Sat, 30 Jan 2021 04:41:19 +0000 (UTC)
-Date:   Sat, 30 Jan 2021 12:58:18 +0800
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 38B7737A0;
+        Sat, 30 Jan 2021 10:55:30 +0000 (UTC)
+Date:   Sat, 30 Jan 2021 19:12:30 +0800
 From:   Zorro Lang <zlang@redhat.com>
 To:     Sun Ke <sunke32@huawei.com>
 Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] src/swapon.c: initiate p to NULL
-Message-ID: <20210130045817.GV14354@localhost.localdomain>
+Subject: Re: [v2] ext4: Add a test for rename with RENAME_WHITEOUT
+Message-ID: <20210130111229.GW14354@localhost.localdomain>
 Mail-Followup-To: Sun Ke <sunke32@huawei.com>, fstests@vger.kernel.org
-References: <20210128065010.218830-1-sunke32@huawei.com>
+References: <20210128061202.210074-1-sunke32@huawei.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210128065010.218830-1-sunke32@huawei.com>
+In-Reply-To: <20210128061202.210074-1-sunke32@huawei.com>
 User-Agent: Mutt/1.10.1 (2018-07-13)
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.12
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.15
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Jan 28, 2021 at 02:50:10PM +0800, Sun Ke wrote:
-> when run make, show:
-> swapon.c:135:3: warning: 'p' may be used uninitialized in this function
-> [-Wmaybe-uninitialized]
->    memcpy(p, buf, BUF_SIZE);
->       ^~~~~~~~~~~~~~~~~~~~~~~~
-> fix it.
-
-If you don't have a situation to prove this's a real bug, I guess the gcc might
-think the 'p' can be used uninitialized at here when verb is TEST_MWRITE_BEFORE_AND_MWRITE_AFTER:
-
-        case TEST_MWRITE_BEFORE_AND_MWRITE_AFTER:
-                memcpy(p, buf, BUF_SIZE);
-                break;
-
-But from the code logic, if verb is TEST_MWRITE_BEFORE_AND_MWRITE_AFTER, the 'p'
-will be initialized by:
-
-        switch (verb) {
-        case TEST_MWRITE_BEFORE_AND_MWRITE_AFTER:
-        case TEST_MWRITE_BEFORE:
-                p = mmap(NULL, BUF_SIZE, PROT_WRITE | PROT_READ, MAP_SHARED,
-
-
-So I think this's a fake uninitialized warning (Maybe I'm wrong. But if I'm right,
-better to specify that in commit log).
-
-Anyway, I personally don't object to initialize a pointer to NULL at beginning,
-and make a build warning disappear. Leave the decision to maintainer :)
-
-
-Thanks,
-Zorro
-
+On Thu, Jan 28, 2021 at 02:12:02PM +0800, Sun Ke wrote:
+> Fill the disk space, try to create some files and rename a file, mount
+> again, list directory contents and triggers some errors. It is a
+> regression test for kernel commit 6b4b8e6b4ad8 ("ext4: ext4: fix bug for
+> rename with RENAME_WHITEOUT")
 > 
 > Signed-off-by: Sun Ke <sunke32@huawei.com>
 > ---
->  src/swapon.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+> v1 -> v3:
+> Use the original in src and modify 048.out
+> ---
+> ---
+>  tests/ext4/048     | 76 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/ext4/048.out |  2 ++
+>  tests/ext4/group   |  1 +
+>  3 files changed, 79 insertions(+)
+>  create mode 100755 tests/ext4/048
+>  create mode 100644 tests/ext4/048.out
 > 
-> diff --git a/src/swapon.c b/src/swapon.c
-> index afaed405..fe8949a3 100644
-> --- a/src/swapon.c
-> +++ b/src/swapon.c
-> @@ -41,7 +41,7 @@ int main(int argc, char **argv)
->  		.sa_handler	= handle_signal,
->  	};
->  	enum verbs verb = TEST_SWAPON;
-> -	void *p;
-> +	void *p = NULL;
->  	ssize_t sz;
->  	int fd = -1;
->  	int ret, c;
+> diff --git a/tests/ext4/048 b/tests/ext4/048
+> new file mode 100755
+> index 00000000..0311d1a2
+> --- /dev/null
+> +++ b/tests/ext4/048
+> @@ -0,0 +1,76 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2021 HUAWEI.  All Rights Reserved.
+> +#
+> +# FS QA Test 048
+> +#
+> +# This is a regression test for kernel patch:
+> +# commit 6b4b8e6b4ad8 ("ext4: ext4: fix bug for rename with RENAME_WHITEOUT")
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs ext4
+> +_supported_fs generic
+
+ext4 or generic? Tell the truth, according to below testing steps, I think it
+can be a generic test case, not only for ext4.
+
+> +_require_scratch
+> +_require_xfs_io_command "falloc"
+> +
+> +dmesg -c > /dev/null
+> +
+> +_scratch_mkfs > $seqres.full 2>&1
+> +_scratch_mount >> $seqres.full 2>&1
+> +
+> +testdir=$SCRATCH_MNT
+> +cd ${testdir}
+> +
+> +mkdir test
+> +$XFS_IO_PROG -f -c "falloc 0 128M" img >> $seqres.full
+> +$MKFS_EXT4_PROG  img > /dev/null 2>&1
+> +$MOUNT_PROG img test
+
+Can we reproduce this bug by $SCRATCH_DEV directly, not through a loopdev.
+Likes: 
+
+_scratch_mkfs_sized 128M (maybe bigger ?)
+_scratch_mount
+
+> +
+> +# fill the disk space
+> +dd if=/dev/zero of=test/foo bs=1M count=128 > /dev/null 2>&1
+
+Can _fill_fs() helper help you that?
+
+> +
+> +# create 1000 files, not all the files will be created successfully
+> +mkdir test/dir
+> +cd test/dir
+> +for ((i = 0; i < 1000; i++))
+> +do
+> +	touch file$i > /dev/null 2>&1
+> +done
+
+I don't know if it can be 100% sure there's at least 1 file will be created at
+here, after you tried to fill the fs.
+
+So I think maybe you can create a file with known name, then use _fill_fs()
+to fill the whole fs. Then try to rename the file you know its name. Can that
+reproduce the bug?
+
+> +
+> +# try to rename, but now no space left on device
+> +$here/src/renameat2 -w $testdir/test/dir/file1 $testdir/test/dir/dst_file
+> +
+> +cd $testdir
+> +$UMOUNT_PROG test
+> +$MOUNT_PROG img test
+> +ls -l test/dir/file1 > /dev/null 2>&1
+> +$UMOUNT_PROG test
+> +
+> +dmesg -c | grep "deleted inode referenced"
+
+Can _check_dmesg_for() help you?
+
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/ext4/048.out b/tests/ext4/048.out
+> new file mode 100644
+> index 00000000..5b3990da
+> --- /dev/null
+> +++ b/tests/ext4/048.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 048
+> +No space left on device
+> diff --git a/tests/ext4/group b/tests/ext4/group
+> index ceda2ba6..6140dd7e 100644
+> --- a/tests/ext4/group
+> +++ b/tests/ext4/group
+> @@ -50,6 +50,7 @@
+>  045 auto dir
+>  046 auto prealloc quick
+>  047 auto quick dax
+> +048 other
+
+I think your test case is a general test case, "auto"and "rename" groups
+are good to it, if it's quick enough, add "quick" group.
+
+>  271 auto rw quick
+>  301 aio auto ioctl rw stress defrag
+>  302 aio auto ioctl rw stress defrag
 > -- 
 > 2.13.6
 > 
