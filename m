@@ -5,129 +5,114 @@ X-Spam-Level:
 X-Spam-Status: No, score=-17.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3A33FC433E0
-	for <linux-fstests@archiver.kernel.org>; Fri, 29 Jan 2021 07:56:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DDF3FC433DB
+	for <linux-fstests@archiver.kernel.org>; Sat, 30 Jan 2021 09:07:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DE29B64E02
-	for <linux-fstests@archiver.kernel.org>; Fri, 29 Jan 2021 07:56:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A63D264E27
+	for <linux-fstests@archiver.kernel.org>; Sat, 30 Jan 2021 09:07:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232286AbhA2HzD (ORCPT
+        id S230013AbhA3JGj (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 29 Jan 2021 02:55:03 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:58530 "EHLO
+        Sat, 30 Jan 2021 04:06:39 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:59176 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S232019AbhA2HzC (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 29 Jan 2021 02:55:02 -0500
+        by vger.kernel.org with ESMTP id S233742AbhA3Eqn (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 29 Jan 2021 23:46:43 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1611906901;
+        s=mimecast20190719; t=1611981917;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=TXtl7+Gx/FUltUB8wYldP6g/qEvn96DIrjm1Pchp/BE=;
-        b=jV1GpNALohrJ4wPdR3nyTAEVHovmrOxCLtMurwcCu6Hh1oX6YEkgYL/ZCzeYijFoo8XBde
-        fyMke9ld8+k7pWXRxOiFLDtnoK72htm0yCwT92rwL5Xx7F32u+3RxH6EBhYj/u0VC8iFgz
-        2aPTt9FeE+dPL9zYuQJ2aPzl1i88Cwo=
+        bh=YAbl87lClFQvcy6ibxl+KvHSxTXARzf6ymMThUe1Fjg=;
+        b=BA8g1SDmpY/P2KFZFWtS/FNr5IDPouuELI8wotUL1kzYHd/DQ9mLXetWc7MYS0vX2j9uaM
+        LgKF8Io9Rkqivjdg5+IoVsyrB4JUPuFrLwrW+IXPqht0ifcp/AGJTn4KboFmDR519XDGk6
+        ICyimIB7PbcbLsrl+ERgkUuGYgcsd8A=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-602-AmInS0sYPfGHejSnr0X5_g-1; Fri, 29 Jan 2021 02:53:51 -0500
-X-MC-Unique: AmInS0sYPfGHejSnr0X5_g-1
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
+ us-mta-41-WLm7LBSLMEuQElSDZAIHZQ-1; Fri, 29 Jan 2021 23:41:21 -0500
+X-MC-Unique: WLm7LBSLMEuQElSDZAIHZQ-1
+Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id EE07A1005504
-        for <fstests@vger.kernel.org>; Fri, 29 Jan 2021 07:53:50 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 98AE4802B44;
+        Sat, 30 Jan 2021 04:41:20 +0000 (UTC)
 Received: from localhost (unknown [10.66.61.36])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 6F7296A8FC;
-        Fri, 29 Jan 2021 07:53:47 +0000 (UTC)
-Date:   Fri, 29 Jan 2021 16:10:44 +0800
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 1BBED60BE2;
+        Sat, 30 Jan 2021 04:41:19 +0000 (UTC)
+Date:   Sat, 30 Jan 2021 12:58:18 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     Eric Sandeen <sandeen@redhat.com>
+To:     Sun Ke <sunke32@huawei.com>
 Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] ltp/fsstress: don't fail on io_uring ENOSYS
-Message-ID: <20210129081043.GT14354@localhost.localdomain>
-Mail-Followup-To: Eric Sandeen <sandeen@redhat.com>,
-        fstests@vger.kernel.org
-References: <7a7b7128-ba62-59e1-552b-3b1fd6b1eb50@redhat.com>
+Subject: Re: [PATCH] src/swapon.c: initiate p to NULL
+Message-ID: <20210130045817.GV14354@localhost.localdomain>
+Mail-Followup-To: Sun Ke <sunke32@huawei.com>, fstests@vger.kernel.org
+References: <20210128065010.218830-1-sunke32@huawei.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <7a7b7128-ba62-59e1-552b-3b1fd6b1eb50@redhat.com>
+In-Reply-To: <20210128065010.218830-1-sunke32@huawei.com>
 User-Agent: Mutt/1.10.1 (2018-07-13)
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.15
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.12
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Jan 28, 2021 at 03:31:40PM -0600, Eric Sandeen wrote:
-> We might have URING #defined at build time, but be running on a kernel
-> which does not support it.
-> 
-> For that reason, we should not exit with an error if 
-> io_uring_queue_init() fails with ENOSYS. We can just note the lack of
-> support and skip all future io_uring operations.
-> 
-> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
-> ---
-> 
-> diff --git a/ltp/fsstress.c b/ltp/fsstress.c
-> index 22df5e38..73751935 100644
-> --- a/ltp/fsstress.c
-> +++ b/ltp/fsstress.c
-> @@ -35,6 +35,7 @@ io_context_t	io_ctx;
->  #include <liburing.h>
->  #define URING_ENTRIES	1
->  struct io_uring	ring;
-> +bool have_io_uring;			/* to indicate runtime availability */
->  #endif
->  #include <sys/syscall.h>
->  #include <sys/xattr.h>
-> @@ -706,9 +707,15 @@ int main(int argc, char **argv)
->  			}
->  #endif
->  #ifdef URING
-> +			have_io_uring = true;
-> +			/* If ENOSYS, just ignore uring, other errors are fatal. */
+On Thu, Jan 28, 2021 at 02:50:10PM +0800, Sun Ke wrote:
+> when run make, show:
+> swapon.c:135:3: warning: 'p' may be used uninitialized in this function
+> [-Wmaybe-uninitialized]
+>    memcpy(p, buf, BUF_SIZE);
+>       ^~~~~~~~~~~~~~~~~~~~~~~~
+> fix it.
 
-Yes, I thought about if we should do this since rhel8 kernel removed io_uring
-support from kernel, but left userspace liburing. But if we do this for io_uring,
-should we do the same check the others which can be disabled from kernel? Likes: AIO?
+If you don't have a situation to prove this's a real bug, I guess the gcc might
+think the 'p' can be used uninitialized at here when verb is TEST_MWRITE_BEFORE_AND_MWRITE_AFTER:
+
+        case TEST_MWRITE_BEFORE_AND_MWRITE_AFTER:
+                memcpy(p, buf, BUF_SIZE);
+                break;
+
+But from the code logic, if verb is TEST_MWRITE_BEFORE_AND_MWRITE_AFTER, the 'p'
+will be initialized by:
+
+        switch (verb) {
+        case TEST_MWRITE_BEFORE_AND_MWRITE_AFTER:
+        case TEST_MWRITE_BEFORE:
+                p = mmap(NULL, BUF_SIZE, PROT_WRITE | PROT_READ, MAP_SHARED,
+
+
+So I think this's a fake uninitialized warning (Maybe I'm wrong. But if I'm right,
+better to specify that in commit log).
+
+Anyway, I personally don't object to initialize a pointer to NULL at beginning,
+and make a build warning disappear. Leave the decision to maintainer :)
+
 
 Thanks,
 Zorro
 
->  			if (io_uring_queue_init(URING_ENTRIES, &ring, 0)) {
-> -				fprintf(stderr, "io_uring_queue_init failed\n");
-> -				exit(1);
-> +				if (errno == ENOSYS) {
-> +					have_io_uring = false;
-> +				} else {
-> +					fprintf(stderr, "io_uring_queue_init failed\n");
-> +					exit(1);
-> +				}
->  			}
->  #endif
->  			for (i = 0; !loops || (i < loops); i++)
-> @@ -720,7 +727,8 @@ int main(int argc, char **argv)
->  			}
->  #endif
->  #ifdef URING
-> -			io_uring_queue_exit(&ring);
-> +			if (have_io_uring)
-> +				io_uring_queue_exit(&ring);
->  #endif
->  			cleanup_flist();
->  			free(freq_table);
-> @@ -2208,6 +2216,9 @@ do_uring_rw(int opno, long r, int flags)
->  	struct iovec	iovec;
->  	int		iswrite = (flags & (O_WRONLY | O_RDWR)) ? 1 : 0;
->  
-> +	if (!have_io_uring)
-> +		return;
-> +
->  	init_pathname(&f);
->  	if (!get_fname(FT_REGFILE, r, &f, NULL, NULL, &v)) {
->  		if (v)
+> 
+> Signed-off-by: Sun Ke <sunke32@huawei.com>
+> ---
+>  src/swapon.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/src/swapon.c b/src/swapon.c
+> index afaed405..fe8949a3 100644
+> --- a/src/swapon.c
+> +++ b/src/swapon.c
+> @@ -41,7 +41,7 @@ int main(int argc, char **argv)
+>  		.sa_handler	= handle_signal,
+>  	};
+>  	enum verbs verb = TEST_SWAPON;
+> -	void *p;
+> +	void *p = NULL;
+>  	ssize_t sz;
+>  	int fd = -1;
+>  	int ret, c;
+> -- 
+> 2.13.6
 > 
 
