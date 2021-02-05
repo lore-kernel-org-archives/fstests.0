@@ -2,127 +2,108 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-16.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6F9AEC433E0
-	for <linux-fstests@archiver.kernel.org>; Fri,  5 Feb 2021 06:39:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1859EC433E9
+	for <linux-fstests@archiver.kernel.org>; Fri,  5 Feb 2021 22:14:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0A4DA64F9B
-	for <linux-fstests@archiver.kernel.org>; Fri,  5 Feb 2021 06:39:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C015764FE2
+	for <linux-fstests@archiver.kernel.org>; Fri,  5 Feb 2021 22:14:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230373AbhBEGjh (ORCPT
+        id S233112AbhBEWM4 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 5 Feb 2021 01:39:37 -0500
-Received: from out4-smtp.messagingengine.com ([66.111.4.28]:34103 "EHLO
-        out4-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S230191AbhBEGjg (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 5 Feb 2021 01:39:36 -0500
-Received: from compute2.internal (compute2.nyi.internal [10.202.2.42])
-        by mailout.nyi.internal (Postfix) with ESMTP id 723BC5C0187;
-        Fri,  5 Feb 2021 01:38:30 -0500 (EST)
-Received: from mailfrontend2 ([10.202.2.163])
-  by compute2.internal (MEProxy); Fri, 05 Feb 2021 01:38:30 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bur.io; h=date
-        :from:to:cc:subject:message-id:references:mime-version
-        :content-type:in-reply-to; s=fm3; bh=9Qe7wwHaUKVDGesS/xCBgQu4QdU
-        AnFGxd+l8QTGV1p0=; b=T3RmIlclHjPBHUfn1v7epP4y5X3vNwEf9hN99xIsVMV
-        cDd9Kd5bisYukEdrA2oAcIYEL5amJqqsmzKaovRspUD+KI2rXUbqfuqU2NCqgTOm
-        q5bCNxHoKB1g9VRxmOVueloFPAhLpjtdXewATvQkoTBz/5GOt27fnCvZA2CQk1bB
-        ByM0GuCkqiGouNc3a1/D/xN42C5vLuaLuiVhfVPGwMijsOmkBZmMgoDRC6NFbC5k
-        BiDjwxR4jroK87aURNtqjaAoePa9zkVR5joe8slAahAVWv0B5PVP7xa3nf/2uVAe
-        5cMDX0GCAG2k+f/oZjsm2OvduazlvGAt/YyVzhwfM+A==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-        messagingengine.com; h=cc:content-type:date:from:in-reply-to
-        :message-id:mime-version:references:subject:to:x-me-proxy
-        :x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm2; bh=9Qe7ww
-        HaUKVDGesS/xCBgQu4QdUAnFGxd+l8QTGV1p0=; b=XewWKUwl0tjM34dUryfa6f
-        eabmxi/Ihb3aMPLDEqMpQ7oHmIfolIZzIpfT4pSnCeMB0xpxaAOvVY3rNuhHXoFo
-        PeDuE/5Sh9QfS4Cps7ZKYnkbWJ9hkWIIsEVm+4UpZPYHLVbjP0th7VLAVK14sLCx
-        /mQYKY4G2P9QERQHQpsG9e40CnaWBOQncU1HnQtJAz4loNCm8PecohujBtlqvb57
-        xHkwB5GeAwUXDMw6Fc2uqUNsOfSFM3McADgSy5Q7OdHgukARTGrO1dQWqyqmdqaV
-        wzNcMgjk0qeYb4+He+x2WpuLHsSCo0b7P7zGvx27cUCRLOVzYK9QP+86vJNfJGUg
-        ==
-X-ME-Sender: <xms:5uccYChdyjW-ZT19KVYNk6KEGDiMNJ55SPIsbPLhxZNrTujj1V9k6Q>
-    <xme:5uccYDC2sY-1a88E9VDJ3ELlxoZJI2CqFwDJdRIVn_7S9eh4Wb1YAADKdBr66Qaro
-    yDLcXb9c4v2aUxPNBU>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeduledrgeehgdeliecutefuodetggdotefrodftvf
-    curfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfghnecu
-    uegrihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmdenuc
-    fjughrpeffhffvuffkfhggtggujggfsehttdertddtredvnecuhfhrohhmpeeuohhrihhs
-    uceuuhhrkhhovhcuoegsohhrihhssegsuhhrrdhioheqnecuggftrfgrthhtvghrnhepvd
-    fhgffhteeugefgtdegudevudegkeeguedvvdfhudegudfhteekvedtiedtgeeunecukfhp
-    peduieefrdduudegrddufedvrdefnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrg
-    hmpehmrghilhhfrhhomhepsghorhhishessghurhdrihho
-X-ME-Proxy: <xmx:5uccYKEK-mPzrY2mB1RZep_vqjxLi_rkNut0DEtG8cOpawADoz1d4Q>
-    <xmx:5uccYLSYUuZNHmH2eVOCpTUt1BMR-IndCaiT27_WwLN0lLqiJ42TTA>
-    <xmx:5uccYPyAkGCX82WA2WK3n0YFmvB0ux8h3GWcRfg0VQ2kxu-voMxLGg>
-    <xmx:5uccYIqG2Padsl3_4f2KhkxBb5DE0fjm9RW9U-hmxpvBM30mKVJbVg>
-Received: from localhost (unknown [163.114.132.3])
-        by mail.messagingengine.com (Postfix) with ESMTPA id BBE691080057;
-        Fri,  5 Feb 2021 01:38:29 -0500 (EST)
-Date:   Thu, 4 Feb 2021 22:38:23 -0800
-From:   Boris Burkov <boris@bur.io>
-To:     Eric Biggers <ebiggers@kernel.org>
-Cc:     linux-btrfs@vger.kernel.org, kernel-team@fb.com,
-        fstests@vger.kernel.org
-Subject: Re: [PATCH] btrfs: add a test for btrfs fsverity
-Message-ID: <20210205063823.GA2428856@devbig008.ftw2.facebook.com>
-References: <c16cbe8ad5795f059af45bfe7cf673dab58028a2.1612468162.git.boris@bur.io>
- <YBzf1z6EGCAK7JWN@sol.localdomain>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <YBzf1z6EGCAK7JWN@sol.localdomain>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+        Fri, 5 Feb 2021 17:12:56 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:20329 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S232795AbhBEOkt (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 5 Feb 2021 09:40:49 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1612541888;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc; bh=cJblKX678JHha852YlH0fEWJ8TS8dMZeYNCkONBYrLY=;
+        b=azvyP4xhpr6+7MLEAXPGFqmDOaMY34MTHscHDdCJ0abmvBex+vScCAoQxUobnkv23L6zNI
+        RWR99txwYUWbMPfLEdUGxUjMew+TaxHuLXvlzb+cSLotnrbP4YQ9xD6stimC1hdSX0EjUr
+        0h7/Z3FMkizCiR9/qeFeS74GP4EF14o=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-415-_pHzmuNFN_-blpNT0SokOg-1; Fri, 05 Feb 2021 09:17:13 -0500
+X-MC-Unique: _pHzmuNFN_-blpNT0SokOg-1
+Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 3D16F107AD28;
+        Fri,  5 Feb 2021 14:17:12 +0000 (UTC)
+Received: from localhost.localdomain.com (unknown [10.66.60.98])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id B2BF75DEFA;
+        Fri,  5 Feb 2021 14:17:10 +0000 (UTC)
+From:   XiaoLi Feng <xifeng@redhat.com>
+To:     fstests@vger.kernel.org
+Cc:     darrick.wong@oracle.com, yangx.jy@cn.fujitsu.com,
+        Xiaoli Feng <xifeng@redhat.com>
+Subject: [PATCH v1] generic/608: verify S_DAX is active immediately for DONTCACHE
+Date:   Fri,  5 Feb 2021 22:17:08 +0800
+Message-Id: <20210205141708.2558-1-xifeng@redhat.com>
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Thu, Feb 04, 2021 at 10:04:07PM -0800, Eric Biggers wrote:
-> Thanks for writing a test for this!
-> 
-> On Thu, Feb 04, 2021 at 03:24:26PM -0800, Boris Burkov wrote:
-> > There are some btrfs specific fsverity scenarios that don't map
-> > neatly onto the tests in generic/574, like holes, inline extents,
-> > and preallocated extents. Cover those in a btrfs specific test.
-> > 
-> > That test relies on assumptions about how the Merkle tree is stored
-> > by ext4/f2fs which don't apply to btrfs, so we also test Merkle tree
-> > corruption here. This could be merged by some generic abstraction.
-> 
-> The only part of generic/574 that cares where the Merkle tree is stored is
-> _fsv_scratch_corrupt_merkle_tree().  Couldn't that be updated to handle btrfs?
-> 
+From: Xiaoli Feng <xifeng@redhat.com>
 
-I agree that would be an easy enough fix, I'll make it in this patch.
-Until I get 574 fully passing, I think I ought to leave the Merkle
-corruption here as well, though, right?
+After upstream linux patches(77573fa310d, 88149082bb8), if
+FS_XFLAG_DAX is set, DONTCACHE is also set. So S_DAX on the file
+should be active immediately once FS_XFLAG_DAX is set.
 
-> > Finally, that test relies extensively on fiemap, which is currently
-> > broken on btrfs for offsets and sizes that don't align to PAGE_SIZE,
-> > so put a simple regular file case in this test for now, while we fix
-> > fiemap or generalize extent lookup.
-> 
-> fiemap is only used by _fsv_scratch_corrupt_bytes().  It just wants to know the
-> list of extents that intersect the requested byte range.  Does that really not
-> work on btrfs if the range isn't page-aligned?
-> 
+Signed-off-by: Xiaoli Feng <xifeng@redhat.com>
+---
+ tests/generic/608 | 17 +++++++++++++++++
+ 1 file changed, 17 insertions(+)
 
-Unfortunately, fiemap is in fact broken in btrfs in that case, and prints
-silly stuff like [K..K-1]. I wrote up a fix for it, but am still figuring
-out how to test it, and decided to get the verity stuff out ahead of it.
+diff --git a/tests/generic/608 b/tests/generic/608
+index dd89d91c..278fb4d1 100755
+--- a/tests/generic/608
++++ b/tests/generic/608
+@@ -7,6 +7,7 @@
+ # the file can take effect immediately by the following steps:
+ # 1) Stop all applications which are using the file.
+ # 2) Do drop_caches or umount & mount cycle.
++# 3) DONTCACHE is set.
+ 
+ seq=`basename $0`
+ seqres=$RESULT_DIR/$seq
+@@ -91,6 +92,20 @@ test_cycle_mount()
+ 	_check_s_dax $t_file 0
+ }
+ 
++test_nocache()
++{
++	local t_file=$SCRATCH_MNT/testnocache
++
++	rm -f $t_file
++	touch $t_file
++	_check_xflag $t_file 0
++	_check_s_dax $t_file 0
++
++	$XFS_IO_PROG -c 'chattr +x' $t_file
++	_check_xflag $t_file 1
++	_check_s_dax $t_file 1
++}
++
+ do_tests()
+ {
+ 	local mount_option=$1
+@@ -100,6 +115,8 @@ do_tests()
+ 
+ 	test_drop_caches
+ 
++	test_nocache
++
+ 	test_cycle_mount "$cycle_mount_option"
+ 
+ 	_scratch_unmount
+-- 
+2.18.1
 
-However, even if I did get that fix in, it would still not be quite
-right. Btrfs fiemap is in terms of logical block addresses, so
-an additional translation with btrfs-map-logical is needed, and I
-couldn't figure out how to elegantly inject that into
-_fsv_scratch_corrupt_bytes. I do hope to get btrfs to pass generic/574
-soon, though.
-
-> - Eric 
-
-Thanks for the review,
-Boris
