@@ -7,174 +7,106 @@ X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4C6E6C433E9
-	for <linux-fstests@archiver.kernel.org>; Sun,  7 Feb 2021 15:15:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 50C1CC433DB
+	for <linux-fstests@archiver.kernel.org>; Sun,  7 Feb 2021 16:25:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1529D64E2C
-	for <linux-fstests@archiver.kernel.org>; Sun,  7 Feb 2021 15:15:52 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0D4F764DDB
+	for <linux-fstests@archiver.kernel.org>; Sun,  7 Feb 2021 16:25:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229717AbhBGPPi (ORCPT
+        id S229537AbhBGQYu (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 7 Feb 2021 10:15:38 -0500
-Received: from out20-26.mail.aliyun.com ([115.124.20.26]:49851 "EHLO
+        Sun, 7 Feb 2021 11:24:50 -0500
+Received: from out20-26.mail.aliyun.com ([115.124.20.26]:37683 "EHLO
         out20-26.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229564AbhBGPPf (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 7 Feb 2021 10:15:35 -0500
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07472572|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.0371598-0.000497299-0.962343;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047205;MF=guan@eryu.me;NM=1;PH=DS;RN=6;RT=6;SR=0;TI=SMTPD_---.JWS0h7R_1612710879;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.JWS0h7R_1612710879)
-          by smtp.aliyun-inc.com(10.147.41.143);
-          Sun, 07 Feb 2021 23:14:39 +0800
-Date:   Sun, 7 Feb 2021 23:14:39 +0800
+        with ESMTP id S229445AbhBGQYu (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 7 Feb 2021 11:24:50 -0500
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.08367252|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_regular_dialog|0.285691-0.00240914-0.7119;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047198;MF=guan@eryu.me;NM=1;PH=DS;RN=2;RT=2;SR=0;TI=SMTPD_---.JWT4998_1612715016;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.JWT4998_1612715016)
+          by smtp.aliyun-inc.com(10.147.41.137);
+          Mon, 08 Feb 2021 00:23:37 +0800
+Date:   Mon, 8 Feb 2021 00:23:36 +0800
 From:   Eryu Guan <guan@eryu.me>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>,
-        Christoph Hellwig <hch@infradead.org>,
-        Chandan Babu R <chandanrlinux@gmail.com>,
-        Brian Foster <bfoster@redhat.com>
-Subject: Re: [PATCH] xfs: test a regression in dquot type checking
-Message-ID: <20210207151439.GG2350@desktop>
-References: <20210202194158.GR7193@magnolia>
+To:     zlang@redhat.com
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH] generic/233,270: unlimit the max locked memory size for
+ io_uring
+Message-ID: <20210207162336.GH2350@desktop>
+References: <20210127072143.247849-1-zlang@redhat.com>
+ <20210127234340.GD7695@magnolia>
+ <20210128030209.GO14354@localhost.localdomain>
+ <20210131152452.GF2350@desktop>
+ <20210131163412.GZ14354@localhost.localdomain>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210202194158.GR7193@magnolia>
+In-Reply-To: <20210131163412.GZ14354@localhost.localdomain>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Feb 02, 2021 at 11:41:58AM -0800, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
+On Mon, Feb 01, 2021 at 12:34:13AM +0800, Zorro Lang wrote:
+> On Sun, Jan 31, 2021 at 11:24:52PM +0800, Eryu Guan wrote:
+> > On Thu, Jan 28, 2021 at 11:02:09AM +0800, Zorro Lang wrote:
+> > > On Wed, Jan 27, 2021 at 03:43:40PM -0800, Darrick J. Wong wrote:
+> > > > On Wed, Jan 27, 2021 at 03:21:43PM +0800, Zorro Lang wrote:
+> > > > > The ltp/fsstress always fails on io_uring_queue_init() by returnning
+> > > > > ENOMEM. Due to io_uring accounts memory it needs under the rlimit
+> > > > > memlocked option, which can be quite low on some setups, especially
+> > > > > on 64K pagesize machine. root isn't under this restriction, but
+> > > > > regular users are. So only g/233 and g/270 which use $qa_user to run
+> > > > > fsstress are failed.
+> > > > > 
+> > > > > To avoid this failure, set max locked memory to unlimited before doing
+> > > > > fsstress, then restore it after test done.
+> > > > > 
+> > > > > Signed-off-by: Zorro Lang <zlang@redhat.com>
+> > > > > ---
+> > > > >  tests/generic/233 | 8 ++++++++
+> > > > >  tests/generic/270 | 8 ++++++++
+> > > > >  2 files changed, 16 insertions(+)
+> > > > > 
+> > > > > diff --git a/tests/generic/233 b/tests/generic/233
+> > > > > index 7eda5774..342690c2 100755
+> > > > > --- a/tests/generic/233
+> > > > > +++ b/tests/generic/233
+> > > > > @@ -43,6 +43,13 @@ _fsstress()
+> > > > >  -f rename=10 -f fsync=2 -f write=15 -f dwrite=15 \
+> > > > >  -n $count -d $out -p 7`
+> > > > >  
+> > > > > +	# io_uring accounts memory it needs under the rlimit memlocked option,
+> > > > > +	# which can be quite low on some setups (especially 64K pagesize). root
+> > > > > +	# isn't under this restriction, but regular users are. To avoid the
+> > > > > +	# io_uring_queue_init fail on ENOMEM, set max locked memory to unlimited
+> > > > > +	# temporarily.
+> > > > > +	lmem=`ulimit -l`
+> > > > > +	ulimit -l unlimited
+> > > > 
+> > > > Should this apply to all the other tests that run fsstress?
+> > > > 
+> > > > $ grep -l FSSTRESS_PROG tests/ | wc -l
+> > > > 94
+> > > 
+> > > The root user isn't under this restriction, only g/233 and g/270 run fsstress
+> > > with non-root user ($qa_user).
+> > > Hmm... is that possible to run xfstests with a non-root user? Or you'd like to
+> > 
+> > No, fstests is required to be run by root user, there's a check in
+> > 'check' script :)
+> > 
+> > > write a common helper _fsstress() (if run fsx with non-root user, I doubt it's
+> > > needed too)...
+> > 
+> > Perhaps we should raise the limit in fsstress and fsx while setting up
+> > io_uring_queue_init()? So we don't have to add this ulimit settings to
+> > every test that runs fsstress/fsx with regular user.
 > 
-> This is a regression test for incorrect ondisk dquot type checking that
-> was introduced in Linux 5.9.  The bug is that we can no longer switch a
-> V4 filesystem from having group quotas to having project quotas (or vice
-> versa) without logging corruption errors.  That is a valid use case, so
-> add a regression test to ensure this can be done.
+> Hmm... I don't know if it's the best idea, to change a sysconfig in fsstress.
 > 
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> ---
->  tests/xfs/766     |   63 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/766.out |    5 ++++
->  tests/xfs/group   |    1 +
->  3 files changed, 69 insertions(+)
->  create mode 100755 tests/xfs/766
->  create mode 100644 tests/xfs/766.out
-> 
-> diff --git a/tests/xfs/766 b/tests/xfs/766
-> new file mode 100755
-> index 00000000..55bc03af
-> --- /dev/null
-> +++ b/tests/xfs/766
-> @@ -0,0 +1,63 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0-or-later
-> +# Copyright (c) 2021 Oracle.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 766
-> +#
-> +# Regression test for incorrect validation of ondisk dquot type flags when
-> +# we're switching between group and project quotas while mounting a V4
-> +# filesystem.  This test doesn't actually force the creation of a V4 fs because
-> +# even V5 filesystems ought to be able to switch between the two without
-> +# triggering corruption errors.
-> +#
-> +# The appropriate XFS patch is:
-> +# xfs: fix incorrect root dquot corruption error when switching group/project
-> +# quota types
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1    # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/quota
-> +
-> +# real QA test starts here
-> +_supported_fs xfs
-> +_require_xfs_debug
-> +_require_quota
-> +_require_scratch
+> If by any chance, in the future, someone case uses fsstress to test a sysconfig
+> which is changed by fsstress :)
 
-Also need _require_check_dmesg
-
-> +
-> +rm -f $seqres.full
-> +
-> +echo "Format filesystem" | tee -a $seqres.full
-> +_scratch_mkfs > $seqres.full
-> +
-> +echo "Mount with project quota" | tee -a $seqres.full
-> +_qmount_option 'prjquota'
-> +_qmount
-> +_require_prjquota $SCRATCH_DEV
-> +
-> +echo "Mount with group quota" | tee -a $seqres.full
-> +_qmount_option 'grpquota'
-> +_qmount
-> +$here/src/feature -G $SCRATCH_DEV || echo "group quota didn't mount?"
-> +
-> +echo "Check dmesg for corruption"
-> +_check_dmesg_for corruption && \
-> +	echo "should not have seen corruption messages"
-
-I'd do the following to print the dmesg in question as well, so we know
-what is actually failing the test.
-
-_dmesg_since_test_start | grep corruption
-
-A failure will look like
-
-    --- tests/xfs/527.out       2021-02-07 23:00:46.679485872 +0800
-    +++ /root/workspace/xfstests/results//xfs_4k/xfs/527.out.bad        2021-02-07 23:10:16.745371039 +0800
-    @@ -3,3 +3,5 @@
-     Mount with project quota
-     Mount with group quota
-     Check dmesg for corruption
-    +[1211043.882535] XFS (dm-5): Metadata corruption detected at xfs_dquot_from_disk+0x1b4/0x1f0 [xfs], quota 0
-    +[1211043.890173] XFS (dm-5): Metadata corruption detected at xfs_dquot_from_disk+0x1b4/0x1f0 [xfs], quota 0
-    ...
-
-I'll fix both on commit.
+And fsstress is invoked by a regular user, and doesn't have the
+permission to change rlimit..
 
 Thanks,
 Eryu
-
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/766.out b/tests/xfs/766.out
-> new file mode 100644
-> index 00000000..18bd99f0
-> --- /dev/null
-> +++ b/tests/xfs/766.out
-> @@ -0,0 +1,5 @@
-> +QA output created by 766
-> +Format filesystem
-> +Mount with project quota
-> +Mount with group quota
-> +Check dmesg for corruption
-> diff --git a/tests/xfs/group b/tests/xfs/group
-> index fb78b0d7..cdca04b5 100644
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
-> @@ -545,6 +545,7 @@
->  763 auto quick rw realtime
->  764 auto quick repair
->  765 auto quick quota
-> +766 auto quick quota
->  908 auto quick bigtime
->  909 auto quick bigtime quota
->  910 auto quick inobtcount
