@@ -2,108 +2,179 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1859EC433E9
-	for <linux-fstests@archiver.kernel.org>; Fri,  5 Feb 2021 22:14:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4C6E6C433E9
+	for <linux-fstests@archiver.kernel.org>; Sun,  7 Feb 2021 15:15:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C015764FE2
-	for <linux-fstests@archiver.kernel.org>; Fri,  5 Feb 2021 22:14:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1529D64E2C
+	for <linux-fstests@archiver.kernel.org>; Sun,  7 Feb 2021 15:15:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233112AbhBEWM4 (ORCPT
+        id S229717AbhBGPPi (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 5 Feb 2021 17:12:56 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:20329 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S232795AbhBEOkt (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 5 Feb 2021 09:40:49 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1612541888;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc; bh=cJblKX678JHha852YlH0fEWJ8TS8dMZeYNCkONBYrLY=;
-        b=azvyP4xhpr6+7MLEAXPGFqmDOaMY34MTHscHDdCJ0abmvBex+vScCAoQxUobnkv23L6zNI
-        RWR99txwYUWbMPfLEdUGxUjMew+TaxHuLXvlzb+cSLotnrbP4YQ9xD6stimC1hdSX0EjUr
-        0h7/Z3FMkizCiR9/qeFeS74GP4EF14o=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-415-_pHzmuNFN_-blpNT0SokOg-1; Fri, 05 Feb 2021 09:17:13 -0500
-X-MC-Unique: _pHzmuNFN_-blpNT0SokOg-1
-Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 3D16F107AD28;
-        Fri,  5 Feb 2021 14:17:12 +0000 (UTC)
-Received: from localhost.localdomain.com (unknown [10.66.60.98])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id B2BF75DEFA;
-        Fri,  5 Feb 2021 14:17:10 +0000 (UTC)
-From:   XiaoLi Feng <xifeng@redhat.com>
-To:     fstests@vger.kernel.org
-Cc:     darrick.wong@oracle.com, yangx.jy@cn.fujitsu.com,
-        Xiaoli Feng <xifeng@redhat.com>
-Subject: [PATCH v1] generic/608: verify S_DAX is active immediately for DONTCACHE
-Date:   Fri,  5 Feb 2021 22:17:08 +0800
-Message-Id: <20210205141708.2558-1-xifeng@redhat.com>
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
+        Sun, 7 Feb 2021 10:15:38 -0500
+Received: from out20-26.mail.aliyun.com ([115.124.20.26]:49851 "EHLO
+        out20-26.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229564AbhBGPPf (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 7 Feb 2021 10:15:35 -0500
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07472572|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.0371598-0.000497299-0.962343;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047205;MF=guan@eryu.me;NM=1;PH=DS;RN=6;RT=6;SR=0;TI=SMTPD_---.JWS0h7R_1612710879;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.JWS0h7R_1612710879)
+          by smtp.aliyun-inc.com(10.147.41.143);
+          Sun, 07 Feb 2021 23:14:39 +0800
+Date:   Sun, 7 Feb 2021 23:14:39 +0800
+From:   Eryu Guan <guan@eryu.me>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>,
+        Christoph Hellwig <hch@infradead.org>,
+        Chandan Babu R <chandanrlinux@gmail.com>,
+        Brian Foster <bfoster@redhat.com>
+Subject: Re: [PATCH] xfs: test a regression in dquot type checking
+Message-ID: <20210207151439.GG2350@desktop>
+References: <20210202194158.GR7193@magnolia>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210202194158.GR7193@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Xiaoli Feng <xifeng@redhat.com>
+On Tue, Feb 02, 2021 at 11:41:58AM -0800, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
+> 
+> This is a regression test for incorrect ondisk dquot type checking that
+> was introduced in Linux 5.9.  The bug is that we can no longer switch a
+> V4 filesystem from having group quotas to having project quotas (or vice
+> versa) without logging corruption errors.  That is a valid use case, so
+> add a regression test to ensure this can be done.
+> 
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> ---
+>  tests/xfs/766     |   63 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/766.out |    5 ++++
+>  tests/xfs/group   |    1 +
+>  3 files changed, 69 insertions(+)
+>  create mode 100755 tests/xfs/766
+>  create mode 100644 tests/xfs/766.out
+> 
+> diff --git a/tests/xfs/766 b/tests/xfs/766
+> new file mode 100755
+> index 00000000..55bc03af
+> --- /dev/null
+> +++ b/tests/xfs/766
+> @@ -0,0 +1,63 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0-or-later
+> +# Copyright (c) 2021 Oracle.  All Rights Reserved.
+> +#
+> +# FS QA Test No. 766
+> +#
+> +# Regression test for incorrect validation of ondisk dquot type flags when
+> +# we're switching between group and project quotas while mounting a V4
+> +# filesystem.  This test doesn't actually force the creation of a V4 fs because
+> +# even V5 filesystems ought to be able to switch between the two without
+> +# triggering corruption errors.
+> +#
+> +# The appropriate XFS patch is:
+> +# xfs: fix incorrect root dquot corruption error when switching group/project
+> +# quota types
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1    # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/quota
+> +
+> +# real QA test starts here
+> +_supported_fs xfs
+> +_require_xfs_debug
+> +_require_quota
+> +_require_scratch
 
-After upstream linux patches(77573fa310d, 88149082bb8), if
-FS_XFLAG_DAX is set, DONTCACHE is also set. So S_DAX on the file
-should be active immediately once FS_XFLAG_DAX is set.
+Also need _require_check_dmesg
 
-Signed-off-by: Xiaoli Feng <xifeng@redhat.com>
----
- tests/generic/608 | 17 +++++++++++++++++
- 1 file changed, 17 insertions(+)
+> +
+> +rm -f $seqres.full
+> +
+> +echo "Format filesystem" | tee -a $seqres.full
+> +_scratch_mkfs > $seqres.full
+> +
+> +echo "Mount with project quota" | tee -a $seqres.full
+> +_qmount_option 'prjquota'
+> +_qmount
+> +_require_prjquota $SCRATCH_DEV
+> +
+> +echo "Mount with group quota" | tee -a $seqres.full
+> +_qmount_option 'grpquota'
+> +_qmount
+> +$here/src/feature -G $SCRATCH_DEV || echo "group quota didn't mount?"
+> +
+> +echo "Check dmesg for corruption"
+> +_check_dmesg_for corruption && \
+> +	echo "should not have seen corruption messages"
 
-diff --git a/tests/generic/608 b/tests/generic/608
-index dd89d91c..278fb4d1 100755
---- a/tests/generic/608
-+++ b/tests/generic/608
-@@ -7,6 +7,7 @@
- # the file can take effect immediately by the following steps:
- # 1) Stop all applications which are using the file.
- # 2) Do drop_caches or umount & mount cycle.
-+# 3) DONTCACHE is set.
- 
- seq=`basename $0`
- seqres=$RESULT_DIR/$seq
-@@ -91,6 +92,20 @@ test_cycle_mount()
- 	_check_s_dax $t_file 0
- }
- 
-+test_nocache()
-+{
-+	local t_file=$SCRATCH_MNT/testnocache
-+
-+	rm -f $t_file
-+	touch $t_file
-+	_check_xflag $t_file 0
-+	_check_s_dax $t_file 0
-+
-+	$XFS_IO_PROG -c 'chattr +x' $t_file
-+	_check_xflag $t_file 1
-+	_check_s_dax $t_file 1
-+}
-+
- do_tests()
- {
- 	local mount_option=$1
-@@ -100,6 +115,8 @@ do_tests()
- 
- 	test_drop_caches
- 
-+	test_nocache
-+
- 	test_cycle_mount "$cycle_mount_option"
- 
- 	_scratch_unmount
--- 
-2.18.1
+I'd do the following to print the dmesg in question as well, so we know
+what is actually failing the test.
 
+_dmesg_since_test_start | grep corruption
+
+A failure will look like
+
+    --- tests/xfs/527.out       2021-02-07 23:00:46.679485872 +0800
+    +++ /root/workspace/xfstests/results//xfs_4k/xfs/527.out.bad        2021-02-07 23:10:16.745371039 +0800
+    @@ -3,3 +3,5 @@
+     Mount with project quota
+     Mount with group quota
+     Check dmesg for corruption
+    +[1211043.882535] XFS (dm-5): Metadata corruption detected at xfs_dquot_from_disk+0x1b4/0x1f0 [xfs], quota 0
+    +[1211043.890173] XFS (dm-5): Metadata corruption detected at xfs_dquot_from_disk+0x1b4/0x1f0 [xfs], quota 0
+    ...
+
+I'll fix both on commit.
+
+Thanks,
+Eryu
+
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/766.out b/tests/xfs/766.out
+> new file mode 100644
+> index 00000000..18bd99f0
+> --- /dev/null
+> +++ b/tests/xfs/766.out
+> @@ -0,0 +1,5 @@
+> +QA output created by 766
+> +Format filesystem
+> +Mount with project quota
+> +Mount with group quota
+> +Check dmesg for corruption
+> diff --git a/tests/xfs/group b/tests/xfs/group
+> index fb78b0d7..cdca04b5 100644
+> --- a/tests/xfs/group
+> +++ b/tests/xfs/group
+> @@ -545,6 +545,7 @@
+>  763 auto quick rw realtime
+>  764 auto quick repair
+>  765 auto quick quota
+> +766 auto quick quota
+>  908 auto quick bigtime
+>  909 auto quick bigtime quota
+>  910 auto quick inobtcount
