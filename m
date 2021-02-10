@@ -2,182 +2,197 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5EEC4C433E9
-	for <linux-fstests@archiver.kernel.org>; Wed, 10 Feb 2021 19:14:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B8518C433DB
+	for <linux-fstests@archiver.kernel.org>; Wed, 10 Feb 2021 20:59:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 34BA564E66
-	for <linux-fstests@archiver.kernel.org>; Wed, 10 Feb 2021 19:14:34 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7C4B164E02
+	for <linux-fstests@archiver.kernel.org>; Wed, 10 Feb 2021 20:59:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234495AbhBJTOO (ORCPT
+        id S232037AbhBJU7Q (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 10 Feb 2021 14:14:14 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:53288 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S234579AbhBJTOH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 10 Feb 2021 14:14:07 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1612984362;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=4OM9bRFVvC7O968pyl6Nevci5qP2kLB6/s2zBX59EY8=;
-        b=Avix86f8gJ9Hi6vE3FPs4TPbU2YgjWum9aLJ7dCeg99pJhm7YE/zsnzqSdFfzTNli5x8p6
-        yoSxhARktT2BIq61ai7Iy+BSTJuuL/C9ay6zcCCkLSIyAQTamAqEwEHDFSezjK/Xe5rSYU
-        19Jb9kK32C19r5zagC44RV6jockxIos=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-6-_kYLWhQLN-S-lJuSenFgMQ-1; Wed, 10 Feb 2021 14:12:40 -0500
-X-MC-Unique: _kYLWhQLN-S-lJuSenFgMQ-1
-Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 20FC480364B;
-        Wed, 10 Feb 2021 19:12:39 +0000 (UTC)
-Received: from bfoster (ovpn-113-234.rdu2.redhat.com [10.10.113.234])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id AFEFD60936;
-        Wed, 10 Feb 2021 19:12:38 +0000 (UTC)
-Date:   Wed, 10 Feb 2021 14:12:36 -0500
-From:   Brian Foster <bfoster@redhat.com>
-To:     Eric Sandeen <sandeen@sandeen.net>
-Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH] generic: test mapped write after shutdown and failed
- writeback
-Message-ID: <20210210191236.GA90895@bfoster>
-References: <20210210170628.173200-1-bfoster@redhat.com>
- <aeafb8f1-c383-686f-c349-99bf6fef39e8@sandeen.net>
+        Wed, 10 Feb 2021 15:59:16 -0500
+Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:39114 "EHLO
+        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S231193AbhBJU7Q (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 10 Feb 2021 15:59:16 -0500
+Received: from cwcc.thunk.org (pool-72-74-133-215.bstnma.fios.verizon.net [72.74.133.215])
+        (authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 11AKwRqY005015
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Wed, 10 Feb 2021 15:58:28 -0500
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+        id 9718015C3601; Wed, 10 Feb 2021 15:58:27 -0500 (EST)
+From:   "Theodore Ts'o" <tytso@mit.edu>
+To:     fstests@vger.kernel.org
+Cc:     "Theodore Ts'o" <tytso@mit.edu>
+Subject: [PATCH] generic: test which tries to exercise AIO/DIO into unwritten space
+Date:   Wed, 10 Feb 2021 15:58:18 -0500
+Message-Id: <20210210205818.1494305-1-tytso@mit.edu>
+X-Mailer: git-send-email 2.30.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <aeafb8f1-c383-686f-c349-99bf6fef39e8@sandeen.net>
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Feb 10, 2021 at 12:56:28PM -0600, Eric Sandeen wrote:
-> On 2/10/21 11:06 AM, Brian Foster wrote:
-> > XFS has a regression where it failed to check shutdown status in the
-> > write fault path. This produced an iomap warning if the page
-> > happened to recently fail a writeback attempt because writeback
-> > failure can clear Uptodate status on the page. Add a test for this
-> > scenario to help ensure mapped write failures are handled as
-> > expected in the event of filesystem shutdown.
-> > 
-> > Signed-off-by: Brian Foster <bfoster@redhat.com>
-> 
-> This looks reasonable to me, I have run the same xfs_io tests when
-> looking at this behavior and they do provoke it.
-> 
-> This could maybe run on $TEST? But I don't really care much either
-> way.
-> 
+This test verifies that the an unwritten extent is properly marked as
+written after writing into it.
 
-I suppose that would be possible, but I'd prefer not to shut down the
-test device intentionally. I don't _think_ we currently do that
-anywhere. AFAICT, there's only a handful of open-coded shutdowns and
-most others use _scratch_shutdown...
+There was a hard-to-hit bug which would occasionally trigger with ext4
+for which this test was a reproducer.  This has been fixed after
+moving ext4 to use iomap for Direct I/O's, although as of this
+writing, there are still some occasional failures on ext4 when block
+size < page size.
 
-> I spot-checked this on ext4 and it passes.
-> 
-> Reviewed-by: Eric Sandeen <sandeen@redhat.com>
-> 
+Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+---
+ tests/generic/623     | 109 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/623.out |   4 ++
+ tests/generic/group   |   1 +
+ 3 files changed, 114 insertions(+)
+ create mode 100755 tests/generic/623
+ create mode 100644 tests/generic/623.out
 
-Thanks.
-
-Brian
-
-> 
-> > ---
-> > 
-> > Note that this test currently fails on XFS. The fix is posted for review
-> > on linux-xfs:
-> > 
-> > https://lore.kernel.org/linux-xfs/20210210170112.172734-1-bfoster@redhat.com/
-> > 
-> > Brian
-> > 
-> >  tests/generic/999     | 45 +++++++++++++++++++++++++++++++++++++++++++
-> >  tests/generic/999.out |  4 ++++
-> >  tests/generic/group   |  1 +
-> >  3 files changed, 50 insertions(+)
-> >  create mode 100755 tests/generic/999
-> >  create mode 100644 tests/generic/999.out
-> > 
-> > diff --git a/tests/generic/999 b/tests/generic/999
-> > new file mode 100755
-> > index 00000000..5e5408e7
-> > --- /dev/null
-> > +++ b/tests/generic/999
-> > @@ -0,0 +1,45 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0-only
-> > +# Copyright 2021 Red Hat, Inc.
-> > +#
-> > +# FS QA Test No. 999
-> > +#
-> > +# Test a write fault scenario on a shutdown fs.
-> > +#
-> > +seq=`basename $0`
-> > +seqres=$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +
-> > +here=`pwd`
-> > +tmp=/tmp/$$
-> > +status=1	# failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +_cleanup()
-> > +{
-> > +	rm -f $tmp.*
-> > +}
-> > +
-> > +. ./common/rc
-> > +. ./common/filter
-> > +
-> > +rm -f $seqres.full
-> > +
-> > +_supported_fs generic
-> > +_require_scratch_nocheck
-> > +_require_scratch_shutdown
-> > +
-> > +_scratch_mkfs &>> $seqres.full
-> > +_scratch_mount
-> > +
-> > +# XFS had a regression where it failed to check shutdown status in the fault
-> > +# path. This produced an iomap warning because writeback failure clears Uptodate
-> > +# status on the page.
-> > +file=$SCRATCH_MNT/file
-> > +$XFS_IO_PROG -fc "pwrite 0 4k" -c fsync $file | _filter_xfs_io
-> > +$XFS_IO_PROG -x -c "mmap 0 4k" -c "mwrite 0 4k" -c shutdown -c fsync \
-> > +	-c "mwrite 0 4k" $file | _filter_xfs_io
-> > +
-> > +# success, all done
-> > +status=0
-> > +exit
-> > diff --git a/tests/generic/999.out b/tests/generic/999.out
-> > new file mode 100644
-> > index 00000000..f55569ff
-> > --- /dev/null
-> > +++ b/tests/generic/999.out
-> > @@ -0,0 +1,4 @@
-> > +QA output created by 999
-> > +wrote 4096/4096 bytes at offset 0
-> > +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> > +fsync: Input/output error
-> > diff --git a/tests/generic/group b/tests/generic/group
-> > index b10fdea4..edd54ce5 100644
-> > --- a/tests/generic/group
-> > +++ b/tests/generic/group
-> > @@ -625,3 +625,4 @@
-> >  620 auto mount quick
-> >  621 auto quick encrypt
-> >  622 auto shutdown metadata atime
-> > +999 auto quick shutdown
-> > 
-> 
+diff --git a/tests/generic/623 b/tests/generic/623
+new file mode 100755
+index 00000000..74136fef
+--- /dev/null
++++ b/tests/generic/623
+@@ -0,0 +1,109 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++
++#
++# FSQA Test No. 623
++#
++# AIO/DIO stress test
++# Run random AIO/DIO activity on an file system with unwritten regions
++#
++# This test verifies that the an unwritten extent is properly marked
++# as written after writing into it.
++#
++# There was a hard-to-hit bug which would occasionally trigger with
++# ext4 for which this test was a reproducer.  This has been fixed
++# after moving ext4 to use iomap for Direct I/O's, although as of this
++# writing, there are still some occasional failures on ext4 when block
++# size < page size.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++fio_config=$tmp.fio
++status=1	# failure is the default!
++trap "rm -f $tmp.*; exit \$status" 0 1 2 3 15
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++_supported_fs generic
++_require_test
++_require_scratch
++_require_odirect
++_require_block_device $SCRATCH_DEV
++
++NUM_JOBS=$((4*LOAD_FACTOR))
++BLK_DEV_SIZE=`blockdev --getsz $SCRATCH_DEV`
++FILE_SIZE=$(((BLK_DEV_SIZE * 512) * 3 / 4))
++
++max_file_size=$((5 * 1024 * 1024 * 1024))
++if [ $max_file_size -lt $FILE_SIZE ]; then
++	FILE_SIZE=$max_file_size
++fi
++SIZE=$((FILE_SIZE / 2))
++
++cat >$fio_config <<EOF
++###########
++# $seq test fio activity
++# Filenames derived from jobsname and jobid like follows:
++# ${JOB_NAME}.${JOB_ID}.${ITERATION_ID}
++[global]
++ioengine=libaio
++bs=128k
++directory=${SCRATCH_MNT}
++filesize=${FILE_SIZE}
++size=${SIZE}
++iodepth=$((128*$LOAD_FACTOR))
++fallocate=native
++
++# Perform direct aio and verify data
++# This test case should check use-after-free issues
++[aio-dio-verifier]
++numjobs=1
++verify=crc32c-intel
++verify_fatal=1
++verify_dump=1
++verify_backlog=1024
++verify_async=4
++direct=1
++blocksize_range=4100k-8200k
++blockalign=4k
++rw=randwrite
++filename=test-file
++
++EOF
++
++rm -f $seqres.full
++
++_require_fio $fio_config
++_require_xfs_io_command "falloc"
++
++_workout()
++{
++	echo ""
++	echo "Run fio with random aio-dio pattern"
++	echo ""
++	cat $fio_config >>  $seqres.full
++	run_check $FIO_PROG $fio_config
++}
++
++_scratch_mkfs >> $seqres.full 2>&1
++_scratch_mount
++
++if ! _workout; then
++	_scratch_unmount 2>/dev/null
++	exit
++fi
++
++if ! _scratch_unmount; then
++	echo "failed to umount"
++	status=1
++	exit
++fi
++status=0
++exit
+diff --git a/tests/generic/623.out b/tests/generic/623.out
+new file mode 100644
+index 00000000..e10c7fd9
+--- /dev/null
++++ b/tests/generic/623.out
+@@ -0,0 +1,4 @@
++QA output created by 623
++
++Run fio with random aio-dio pattern
++
+diff --git a/tests/generic/group b/tests/generic/group
+index b10fdea4..24f53ed7 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -625,3 +625,4 @@
+ 620 auto mount quick
+ 621 auto quick encrypt
+ 622 auto shutdown metadata atime
++623 aio rw stress
+-- 
+2.30.0
 
