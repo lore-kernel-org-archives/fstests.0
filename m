@@ -2,153 +2,123 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.5 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CC478C433E0
-	for <linux-fstests@archiver.kernel.org>; Wed, 10 Feb 2021 18:59:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9BDCDC433E0
+	for <linux-fstests@archiver.kernel.org>; Wed, 10 Feb 2021 19:05:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 83EF164E35
-	for <linux-fstests@archiver.kernel.org>; Wed, 10 Feb 2021 18:59:43 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6A54264E76
+	for <linux-fstests@archiver.kernel.org>; Wed, 10 Feb 2021 19:05:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234038AbhBJS7R (ORCPT
+        id S234359AbhBJTEl (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 10 Feb 2021 13:59:17 -0500
-Received: from sandeen.net ([63.231.237.45]:40946 "EHLO sandeen.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S234202AbhBJS5J (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 10 Feb 2021 13:57:09 -0500
-Received: from liberator.sandeen.net (liberator.sandeen.net [10.0.0.146])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by sandeen.net (Postfix) with ESMTPSA id 908B917264;
-        Wed, 10 Feb 2021 12:56:28 -0600 (CST)
-To:     Brian Foster <bfoster@redhat.com>, fstests@vger.kernel.org
-Cc:     linux-xfs@vger.kernel.org
-References: <20210210170628.173200-1-bfoster@redhat.com>
-From:   Eric Sandeen <sandeen@sandeen.net>
-Subject: Re: [PATCH] generic: test mapped write after shutdown and failed
- writeback
-Message-ID: <aeafb8f1-c383-686f-c349-99bf6fef39e8@sandeen.net>
-Date:   Wed, 10 Feb 2021 12:56:28 -0600
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0)
- Gecko/20100101 Thunderbird/78.7.1
+        Wed, 10 Feb 2021 14:04:41 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44220 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S233940AbhBJTES (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 10 Feb 2021 14:04:18 -0500
+Received: from mail-ej1-x634.google.com (mail-ej1-x634.google.com [IPv6:2a00:1450:4864:20::634])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8E8B6C061574;
+        Wed, 10 Feb 2021 11:03:38 -0800 (PST)
+Received: by mail-ej1-x634.google.com with SMTP id hs11so6126568ejc.1;
+        Wed, 10 Feb 2021 11:03:38 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=KFfbKaC/1iBgwD3dVuP410DXgW00Uvj9flLaJMQKNDA=;
+        b=R3lfkRs4WmjYM68wc6sg2KI/6n6kS7pulTgwV4Ytm5HrpQw+loCu/11jyNpvR/ILhi
+         9wbyAG3smdcYBveg+PAzCl/HFCcLSLI7CxuWNt2aSOTw6zeWQvS5GAsFmU4YWYzQIbQe
+         rCyg8q4MohXEBU1vGc4iDI/NFQHn3xZhvqxNw1LOsHuU2U4WUDCNEcrFjOBoNDwcIjYh
+         TpX7KwWIs7MVwgflWrandDg8d62+vT6W3sU68cM9bG8SgIVIR0tZ3npV0cjvo5ofgMZc
+         JBh/ysO8o5S9medhZygopBwMerSEyoNbIYPsrOEj0YihrfdpOwO38kHCSj/TWNLjpb5F
+         44kg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=KFfbKaC/1iBgwD3dVuP410DXgW00Uvj9flLaJMQKNDA=;
+        b=cSfK0pwjavzunXPGmujDAdfWmOdFrnv42E+sNV1SW6MD5NWD5s7wpGGHoBb8dO32Ls
+         msG7n867KQF+AHorapXGazfrWC7sgdcH+lm7DIA0uVFjDtKKpE5xygKBdLXvuDZx60mE
+         AlUKGgss9BuiZwWmZL/DRWrbwKUhHTLwe2bTWqCws2SwCklHuJK5KCqZQkpp8XCLWGGv
+         0y7/ngPEOKZNWhLib2iWdmSZk7JW2nKGNee5OCjMC9c+0+nX/dMgCHodLHBH3H7w6g5v
+         06HZCLxyCXTgF9rLLC1t5iioC12Mvp3QWUF7anj4mNnCpuoqbXTYcfuX52ZtVIavQnty
+         VTvw==
+X-Gm-Message-State: AOAM5324zbAdggMpk3WtqId3tUaiBSQFAMdPizOFU1FVIe/im8P/s1rY
+        KOHjLAe9bLyPe0Rxm9Gk0RY=
+X-Google-Smtp-Source: ABdhPJwdv0SCOgZ7ooBnyb2NOKuGkahSJbiE6I2eS3RNPbJDqUNd9Y+I8su/o4EM6Qt+xxgB8FxHkA==
+X-Received: by 2002:a17:906:a246:: with SMTP id bi6mr4440479ejb.267.1612983817244;
+        Wed, 10 Feb 2021 11:03:37 -0800 (PST)
+Received: from localhost.localdomain ([141.226.162.179])
+        by smtp.gmail.com with ESMTPSA id m19sm1743617edq.81.2021.02.10.11.03.35
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 10 Feb 2021 11:03:36 -0800 (PST)
+From:   Amir Goldstein <amir73il@gmail.com>
+To:     Eryu Guan <guaneryu@gmail.com>
+Cc:     Miklos Szeredi <miklos@szeredi.hu>,
+        Icenowy Zheng <icenowy@aosc.io>,
+        Chengguang Xu <cgxu519@mykernel.net>,
+        linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: [PATCH v2 0/5] Tests for overlayfs immutable/append-only files
+Date:   Wed, 10 Feb 2021 21:03:29 +0200
+Message-Id: <20210210190334.1212210-1-amir73il@gmail.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-In-Reply-To: <20210210170628.173200-1-bfoster@redhat.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 2/10/21 11:06 AM, Brian Foster wrote:
-> XFS has a regression where it failed to check shutdown status in the
-> write fault path. This produced an iomap warning if the page
-> happened to recently fail a writeback attempt because writeback
-> failure can clear Uptodate status on the page. Add a test for this
-> scenario to help ensure mapped write failures are handled as
-> expected in the event of filesystem shutdown.
-> 
-> Signed-off-by: Brian Foster <bfoster@redhat.com>
+Eryu,
 
-This looks reasonable to me, I have run the same xfs_io tests when
-looking at this behavior and they do provoke it.
+Overlayfs never had full support for immutable/append-only files.
+Whatever works is covered by generic/079 and overlay/030 tests.
+Both tests cover only upper files and directories.
+generic/079 is notrun on kernel < 5.10 and passes on >= 5.10.
 
-This could maybe run on $TEST? But I don't really care much either
-way.
+This series improves the t_immutable test program and adds two new
+tests.
 
-I spot-checked this on ext4 and it passes.
+overlay/075 tests immutable/append-only lower files and directories -
+the test fails on upstream kernel.  Fixing this requires some VFS API
+changes that Miklos has proposed [1].
 
-Reviewed-by: Eric Sandeen <sandeen@redhat.com>
+overlay/076 is a "dangerous" test that triggers a deadlock.
+The deadlock was fixed in master and in stable kernel v5.10.15.
 
+Thanks,
+Amir. 
 
-> ---
-> 
-> Note that this test currently fails on XFS. The fix is posted for review
-> on linux-xfs:
-> 
-> https://lore.kernel.org/linux-xfs/20210210170112.172734-1-bfoster@redhat.com/
-> 
-> Brian
-> 
->  tests/generic/999     | 45 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/999.out |  4 ++++
->  tests/generic/group   |  1 +
->  3 files changed, 50 insertions(+)
->  create mode 100755 tests/generic/999
->  create mode 100644 tests/generic/999.out
-> 
-> diff --git a/tests/generic/999 b/tests/generic/999
-> new file mode 100755
-> index 00000000..5e5408e7
-> --- /dev/null
-> +++ b/tests/generic/999
-> @@ -0,0 +1,45 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0-only
-> +# Copyright 2021 Red Hat, Inc.
-> +#
-> +# FS QA Test No. 999
-> +#
-> +# Test a write fault scenario on a shutdown fs.
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	rm -f $tmp.*
-> +}
-> +
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +rm -f $seqres.full
-> +
-> +_supported_fs generic
-> +_require_scratch_nocheck
-> +_require_scratch_shutdown
-> +
-> +_scratch_mkfs &>> $seqres.full
-> +_scratch_mount
-> +
-> +# XFS had a regression where it failed to check shutdown status in the fault
-> +# path. This produced an iomap warning because writeback failure clears Uptodate
-> +# status on the page.
-> +file=$SCRATCH_MNT/file
-> +$XFS_IO_PROG -fc "pwrite 0 4k" -c fsync $file | _filter_xfs_io
-> +$XFS_IO_PROG -x -c "mmap 0 4k" -c "mwrite 0 4k" -c shutdown -c fsync \
-> +	-c "mwrite 0 4k" $file | _filter_xfs_io
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/999.out b/tests/generic/999.out
-> new file mode 100644
-> index 00000000..f55569ff
-> --- /dev/null
-> +++ b/tests/generic/999.out
-> @@ -0,0 +1,4 @@
-> +QA output created by 999
-> +wrote 4096/4096 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +fsync: Input/output error
-> diff --git a/tests/generic/group b/tests/generic/group
-> index b10fdea4..edd54ce5 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -625,3 +625,4 @@
->  620 auto mount quick
->  621 auto quick encrypt
->  622 auto shutdown metadata atime
-> +999 auto quick shutdown
-> 
+Changes since v1:
+- Split the dangerous test
+- Document fix commit
+- Fix Eryu's minor review comments on t_immutable
+
+[1] https://lore.kernel.org/linux-fsdevel/20210203124112.1182614-1-mszeredi@redhat.com/
+
+Amir Goldstein (5):
+  overlay/030: Update comment w.r.t upstream kernel
+  src/t_immutable: factor out some helpers
+  src/t_immutable: Allow setting flags on existing files
+  overlay: Test lost immutable/append-only flags on copy-up
+  overlay: Regression test for deadlock on directory ioctl
+
+ src/t_immutable.c     | 241 +++++++++++++++++++++---------------------
+ tests/overlay/030     |   7 +-
+ tests/overlay/075     |  92 ++++++++++++++++
+ tests/overlay/075.out |  11 ++
+ tests/overlay/076     |  66 ++++++++++++
+ tests/overlay/076.out |   2 +
+ tests/overlay/group   |   2 +
+ 7 files changed, 301 insertions(+), 120 deletions(-)
+ create mode 100755 tests/overlay/075
+ create mode 100644 tests/overlay/075.out
+ create mode 100644 tests/overlay/076
+ create mode 100644 tests/overlay/076.out
+
+-- 
+2.25.1
+
