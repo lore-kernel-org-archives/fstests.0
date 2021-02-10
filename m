@@ -2,172 +2,152 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.5 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5AED0C433E9
-	for <linux-fstests@archiver.kernel.org>; Wed, 10 Feb 2021 09:55:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 36F06C4332B
+	for <linux-fstests@archiver.kernel.org>; Wed, 10 Feb 2021 17:08:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 22C4C64E40
-	for <linux-fstests@archiver.kernel.org>; Wed, 10 Feb 2021 09:55:15 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 12D3A64E7C
+	for <linux-fstests@archiver.kernel.org>; Wed, 10 Feb 2021 17:08:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230176AbhBJJyx (ORCPT
+        id S232126AbhBJRIN (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 10 Feb 2021 04:54:53 -0500
-Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:24836 "EHLO
-        mx0b-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S230173AbhBJJws (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 10 Feb 2021 04:52:48 -0500
-Received: from pps.filterd (m0098417.ppops.net [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com (8.16.0.42/8.16.0.42) with SMTP id 11A9XpGV190106;
-        Wed, 10 Feb 2021 04:52:03 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=subject : to : cc :
- references : from : message-id : date : mime-version : in-reply-to :
- content-type : content-transfer-encoding; s=pp1;
- bh=6bXW2xMu83BL0NojNhlD2saWr7KSBhLhUnD/rHD/0Qs=;
- b=XtBRAwUfY01dM1qanp+hW+89piXZuj4wVsM/NAle6ER9U15dg0IWm65vPfhyTWIZl3GO
- EGiyz8XOVcKbZs+W9o7xzbHNTVH4rr4Qca3zVdvlxtB+mUfsm7DtXAgeZxsqHtcmr4fl
- gVH3nUazMpUuDcaiUMuV0YHVK6E7t6lsF+Dz68x845iPoz97gG6BkvPOGym+mBWOZjFB
- HlcRtwN8mPt19i3pUptdPubru64fsDCBjA58Hgg0dq9CgPvDj9Q6XcsGZCVnFmZATE8O
- 8nfsUwfcuY7F+LsNZHhXnrmC8UX4hhBy7+ntLPosYPRkg5lKW1CIYayT3dugWFySq3z6 zg== 
-Received: from ppma06ams.nl.ibm.com (66.31.33a9.ip4.static.sl-reverse.com [169.51.49.102])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 36mbtkaeup-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Wed, 10 Feb 2021 04:52:03 -0500
-Received: from pps.filterd (ppma06ams.nl.ibm.com [127.0.0.1])
-        by ppma06ams.nl.ibm.com (8.16.0.42/8.16.0.42) with SMTP id 11A9hIgL003420;
-        Wed, 10 Feb 2021 09:52:02 GMT
-Received: from b06avi18626390.portsmouth.uk.ibm.com (b06avi18626390.portsmouth.uk.ibm.com [9.149.26.192])
-        by ppma06ams.nl.ibm.com with ESMTP id 36j94wku72-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Wed, 10 Feb 2021 09:52:01 +0000
-Received: from d06av23.portsmouth.uk.ibm.com (d06av23.portsmouth.uk.ibm.com [9.149.105.59])
-        by b06avi18626390.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 11A9pnaV34537924
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Wed, 10 Feb 2021 09:51:49 GMT
-Received: from d06av23.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id CFF67A405B;
-        Wed, 10 Feb 2021 09:51:59 +0000 (GMT)
-Received: from d06av23.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 357DBA4053;
-        Wed, 10 Feb 2021 09:51:59 +0000 (GMT)
-Received: from [9.199.35.2] (unknown [9.199.35.2])
-        by d06av23.portsmouth.uk.ibm.com (Postfix) with ESMTP;
-        Wed, 10 Feb 2021 09:51:59 +0000 (GMT)
-Subject: Re: [PATCH ] check: add CLI option to repeat and stop tests in case
- of failure
-To:     Eryu Guan <guan@eryu.me>
-Cc:     fstests@vger.kernel.org, anju@linux.vnet.ibm.com
-References: <56a687e167af434fa54429558164ff7fee32c67d.1611823132.git.riteshh@linux.ibm.com>
- <20210131150311.GE2350@desktop>
-From:   Ritesh Harjani <riteshh@linux.ibm.com>
-Message-ID: <0566b9ab-6e5d-80b5-070e-33a6de6dca3d@linux.ibm.com>
-Date:   Wed, 10 Feb 2021 15:21:58 +0530
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.6.0
+        Wed, 10 Feb 2021 12:08:13 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:30107 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S232101AbhBJRIF (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 10 Feb 2021 12:08:05 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1612976797;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=wf8zkafown8gQ/K/b9ZcsmxUxUswF899Aa2mZ1SQwwk=;
+        b=SO/CMUIRJv7TziJJV+N1pY+aOsrwxDXP7lnpEBDz2h7+rO3G/YNlULBBdZzPdroU1FINbV
+        d3v1yrnXjCl5FiLoTfvvazdxBBhHfZYOU8mRWV4J5LSRS1CPw60yxoWpHQAffb59F4Wtxb
+        TLwWiJ2oKSRUYwDZyFQzkXKHP5Nq1VE=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-18-J6N-jvOFNP2EG8hMEl3QrQ-1; Wed, 10 Feb 2021 12:06:30 -0500
+X-MC-Unique: J6N-jvOFNP2EG8hMEl3QrQ-1
+Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 9BC4310CE786;
+        Wed, 10 Feb 2021 17:06:29 +0000 (UTC)
+Received: from bfoster.redhat.com (ovpn-113-234.rdu2.redhat.com [10.10.113.234])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 07AD95D9D0;
+        Wed, 10 Feb 2021 17:06:28 +0000 (UTC)
+From:   Brian Foster <bfoster@redhat.com>
+To:     fstests@vger.kernel.org
+Cc:     linux-xfs@vger.kernel.org
+Subject: [PATCH] generic: test mapped write after shutdown and failed writeback
+Date:   Wed, 10 Feb 2021 12:06:28 -0500
+Message-Id: <20210210170628.173200-1-bfoster@redhat.com>
 MIME-Version: 1.0
-In-Reply-To: <20210131150311.GE2350@desktop>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-X-TM-AS-GCONF: 00
-X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.369,18.0.737
- definitions=2021-02-10_02:2021-02-09,2021-02-10 signatures=0
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 lowpriorityscore=0
- adultscore=0 mlxscore=0 malwarescore=0 impostorscore=0 suspectscore=0
- mlxlogscore=999 clxscore=1011 priorityscore=1501 bulkscore=0 spamscore=0
- phishscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2009150000 definitions=main-2102100093
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+XFS has a regression where it failed to check shutdown status in the
+write fault path. This produced an iomap warning if the page
+happened to recently fail a writeback attempt because writeback
+failure can clear Uptodate status on the page. Add a test for this
+scenario to help ensure mapped write failures are handled as
+expected in the event of filesystem shutdown.
 
+Signed-off-by: Brian Foster <bfoster@redhat.com>
+---
 
-On 1/31/21 8:33 PM, Eryu Guan wrote:
-> On Thu, Jan 28, 2021 at 02:19:41PM +0530, Ritesh Harjani wrote:
->> Currently with -i <n> option the test can run for many iterations,
->> but in case if we want to stop the iteration in case of a failure,
->> it is much easier to have such an option which could check the failed
->> status and stop the test from further proceeding.
->>
->> This patch adds such an option thereby extending the -i <n> option
->> functionality.
->>
->> Signed-off-by: Ritesh Harjani <riteshh@linux.ibm.com>
->> ---
->>   check | 9 +++++++++
->>   1 file changed, 9 insertions(+)
->>
->> diff --git a/check b/check
->> index c6ad1d6c0733..6f3a5d47e212 100755
->> --- a/check
->> +++ b/check
->> @@ -15,6 +15,7 @@ sum_bad=0
->>   bad=""
->>   n_notrun=0
->>   notrun=""
->> +tc_status=""
->>   interrupt=true
->>   diff="diff -u"
->>   showme=false
->> @@ -27,6 +28,7 @@ brief_test_summary=false
->>   do_report=false
->>   DUMP_OUTPUT=false
->>   iterations=1
->> +istop=false
->>
->>   # This is a global variable used to pass test failure text to reporting gunk
->>   _err_msg=""
->> @@ -68,6 +70,7 @@ check options
->>       -T			output timestamps
->>       -r			randomize test order
->>       -i <n>		iterate the test list <n> times
->> +    -istop <n>		iterate the test list <n> times, but stops iterating further in case of any test failure
-> 
-> Perhaps '-I' is a better option?
+Note that this test currently fails on XFS. The fix is posted for review
+on linux-xfs:
 
-Sure, will change it.
+https://lore.kernel.org/linux-xfs/20210210170112.172734-1-bfoster@redhat.com/
 
-> 
->>       -d			dump test output to stdout
->>       -b			brief test summary
->>       -R fmt[,fmt]	generate report in formats specified. Supported format: [xunit]
->> @@ -300,6 +303,7 @@ while [ $# -gt 0 ]; do
->>   	-n)	showme=true ;;
->>           -r)	randomize=true ;;
->>   	-i)	iterations=$2; shift ;;
->> +	-istop) iterations=$2; istop=true; shift ;;
-> 
-> Same here.
+Brian
 
-yes.
+ tests/generic/999     | 45 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/999.out |  4 ++++
+ tests/generic/group   |  1 +
+ 3 files changed, 50 insertions(+)
+ create mode 100755 tests/generic/999
+ create mode 100644 tests/generic/999.out
 
-> 
->>   	-T)	timestamp=true ;;
->>   	-d)	DUMP_OUTPUT=true ;;
->>   	-b)	brief_test_summary=true;;
->> @@ -926,6 +930,11 @@ function run_section()
->>   for ((iters = 0; iters < $iterations; iters++)) do
->>   	for section in $HOST_OPTIONS_SECTIONS; do
->>   		run_section $section
->> +		if [ "$tc_status" = "fail" ] && [ "$istop" = true ]; then
-> 
-> $tc_status only records the status of last test in the test list, and if
-> the last test passed, the iteration continues. e.g. I tested
-> generic/00[12], and generic/001 fails while generic/002 passes
-> 
->    ./check -i 2 generic/001 generic/002
-> 
-> check still run 2 iterations as "tc_status" of generic/002 is not
-> "fail".
-> 
-> I think we could check $sum_bad is 0 or not.
+diff --git a/tests/generic/999 b/tests/generic/999
+new file mode 100755
+index 00000000..5e5408e7
+--- /dev/null
++++ b/tests/generic/999
+@@ -0,0 +1,45 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0-only
++# Copyright 2021 Red Hat, Inc.
++#
++# FS QA Test No. 999
++#
++# Test a write fault scenario on a shutdown fs.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	rm -f $tmp.*
++}
++
++. ./common/rc
++. ./common/filter
++
++rm -f $seqres.full
++
++_supported_fs generic
++_require_scratch_nocheck
++_require_scratch_shutdown
++
++_scratch_mkfs &>> $seqres.full
++_scratch_mount
++
++# XFS had a regression where it failed to check shutdown status in the fault
++# path. This produced an iomap warning because writeback failure clears Uptodate
++# status on the page.
++file=$SCRATCH_MNT/file
++$XFS_IO_PROG -fc "pwrite 0 4k" -c fsync $file | _filter_xfs_io
++$XFS_IO_PROG -x -c "mmap 0 4k" -c "mwrite 0 4k" -c shutdown -c fsync \
++	-c "mwrite 0 4k" $file | _filter_xfs_io
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/999.out b/tests/generic/999.out
+new file mode 100644
+index 00000000..f55569ff
+--- /dev/null
++++ b/tests/generic/999.out
+@@ -0,0 +1,4 @@
++QA output created by 999
++wrote 4096/4096 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++fsync: Input/output error
+diff --git a/tests/generic/group b/tests/generic/group
+index b10fdea4..edd54ce5 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -625,3 +625,4 @@
+ 620 auto mount quick
+ 621 auto quick encrypt
+ 622 auto shutdown metadata atime
++999 auto quick shutdown
+-- 
+2.26.2
 
-Yes, right. Thanks for pointing it out.
-
-I will address these comments and spin a v2.
-
--ritesh
