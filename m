@@ -2,191 +2,182 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1131BC433E0
-	for <linux-fstests@archiver.kernel.org>; Wed, 10 Feb 2021 19:05:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5EEC4C433E9
+	for <linux-fstests@archiver.kernel.org>; Wed, 10 Feb 2021 19:14:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E087764E3B
-	for <linux-fstests@archiver.kernel.org>; Wed, 10 Feb 2021 19:05:43 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 34BA564E66
+	for <linux-fstests@archiver.kernel.org>; Wed, 10 Feb 2021 19:14:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234414AbhBJTFW (ORCPT
+        id S234495AbhBJTOO (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 10 Feb 2021 14:05:22 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44432 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234345AbhBJTFQ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 10 Feb 2021 14:05:16 -0500
-Received: from mail-ed1-x536.google.com (mail-ed1-x536.google.com [IPv6:2a00:1450:4864:20::536])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EFCE2C061788;
-        Wed, 10 Feb 2021 11:03:45 -0800 (PST)
-Received: by mail-ed1-x536.google.com with SMTP id s5so4266490edw.8;
-        Wed, 10 Feb 2021 11:03:45 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=Zhs8E2as/K5hxOttBuP4bqtfk2cYGV03BLwkm3GAQwA=;
-        b=XtWQoTXW85A7Q5ogJDKkBpsOx+0RR+6rWkKc7PiNktx69vqCc4bZl7MnOkTcahoVae
-         XfyCDiIWhQnjFZWeJIs63RKVGdJ59arvucBhU+YBX2Hz5dzteYwoXzK/jTYUvV4BfrAa
-         tS/UQnHBYeRw1WIj1Bpy+eU24woALKJPeWM4EuQob1JzZYW19PvsxYP0qCQ/t7iqVLKb
-         e8ZG8AF5RRn0WnmkFH2jtVln4G+h6V88nKYeUfZOWfBkLRy+cehlJrSTgE6u4ODh5KnA
-         jEIIbxy3lUfWQ/QGI/ZZ8jckJdOV0RfPrQrVvD7azodnBqUBjaQUiFCYiZkdi8N3ns7r
-         vvgg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=Zhs8E2as/K5hxOttBuP4bqtfk2cYGV03BLwkm3GAQwA=;
-        b=Ew0Hnu46YULWW/Gk8/+D3Ra10aPSY49zdMBbNYq7C8WUxZiwmYSxX58usDERvwnn1A
-         GkQpoio19LyAdzh28+vFR3HF4xrK48sUQMixlqb4MKipDxZ59t+y1cbgNLCyAGV8eHQx
-         wNi5UWfkLCsQAKFjOd4b3MJAb4rY+riWehpwiEH+kHSL2W9MH1pM9y5/GAojLZRicm5N
-         gJwu8kJYgltFZlKd6JNbfalgODE4tmvtHTJ5fpSb0w9TslIbs7YRgHRHIm5QIvEpDRqN
-         mFHi2Bxfvz4PspQ0Nr6xnBGmF+BC5wGBxUuRKuGznxlw9w9PEGtGhdBiNl+kK2HYXiTU
-         cSHw==
-X-Gm-Message-State: AOAM531ccbiZOGOEubbW4rrke7Lyqzv8+iXOQLBColtOSnBuqOKzbSNp
-        PhryiG3YPRl8ZlJSUowA+rWoYZRbNbo=
-X-Google-Smtp-Source: ABdhPJy2XiNkQrehg5Yd0tTXI4Af2FdHz4yA5d0vA1izNv7B7o6jGwEmu209zyJ4epbtfqA7w/SxSw==
-X-Received: by 2002:aa7:c94c:: with SMTP id h12mr4696939edt.40.1612983824634;
-        Wed, 10 Feb 2021 11:03:44 -0800 (PST)
-Received: from localhost.localdomain ([141.226.162.179])
-        by smtp.gmail.com with ESMTPSA id m19sm1743617edq.81.2021.02.10.11.03.43
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 10 Feb 2021 11:03:44 -0800 (PST)
-From:   Amir Goldstein <amir73il@gmail.com>
-To:     Eryu Guan <guaneryu@gmail.com>
-Cc:     Miklos Szeredi <miklos@szeredi.hu>,
-        Icenowy Zheng <icenowy@aosc.io>,
-        Chengguang Xu <cgxu519@mykernel.net>,
-        linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: [PATCH v2 5/5] overlay: Regression test for deadlock on directory ioctl
-Date:   Wed, 10 Feb 2021 21:03:34 +0200
-Message-Id: <20210210190334.1212210-6-amir73il@gmail.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20210210190334.1212210-1-amir73il@gmail.com>
-References: <20210210190334.1212210-1-amir73il@gmail.com>
+        Wed, 10 Feb 2021 14:14:14 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:53288 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S234579AbhBJTOH (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 10 Feb 2021 14:14:07 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1612984362;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=4OM9bRFVvC7O968pyl6Nevci5qP2kLB6/s2zBX59EY8=;
+        b=Avix86f8gJ9Hi6vE3FPs4TPbU2YgjWum9aLJ7dCeg99pJhm7YE/zsnzqSdFfzTNli5x8p6
+        yoSxhARktT2BIq61ai7Iy+BSTJuuL/C9ay6zcCCkLSIyAQTamAqEwEHDFSezjK/Xe5rSYU
+        19Jb9kK32C19r5zagC44RV6jockxIos=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-6-_kYLWhQLN-S-lJuSenFgMQ-1; Wed, 10 Feb 2021 14:12:40 -0500
+X-MC-Unique: _kYLWhQLN-S-lJuSenFgMQ-1
+Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 20FC480364B;
+        Wed, 10 Feb 2021 19:12:39 +0000 (UTC)
+Received: from bfoster (ovpn-113-234.rdu2.redhat.com [10.10.113.234])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id AFEFD60936;
+        Wed, 10 Feb 2021 19:12:38 +0000 (UTC)
+Date:   Wed, 10 Feb 2021 14:12:36 -0500
+From:   Brian Foster <bfoster@redhat.com>
+To:     Eric Sandeen <sandeen@sandeen.net>
+Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH] generic: test mapped write after shutdown and failed
+ writeback
+Message-ID: <20210210191236.GA90895@bfoster>
+References: <20210210170628.173200-1-bfoster@redhat.com>
+ <aeafb8f1-c383-686f-c349-99bf6fef39e8@sandeen.net>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <aeafb8f1-c383-686f-c349-99bf6fef39e8@sandeen.net>
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Overlayfs added the ability to set inode flags (e.g. chattr +i) in
-kernel 5.10 by commit 61536bed2149 ("ovl: support [S|G]ETFLAGS and
-FS[S|G]ETXATTR ioctls for directories").
-Icenowy Zheng reported [1] a regression in that commit that causes
-a deadlock when setting inode flags on lower dir.
+On Wed, Feb 10, 2021 at 12:56:28PM -0600, Eric Sandeen wrote:
+> On 2/10/21 11:06 AM, Brian Foster wrote:
+> > XFS has a regression where it failed to check shutdown status in the
+> > write fault path. This produced an iomap warning if the page
+> > happened to recently fail a writeback attempt because writeback
+> > failure can clear Uptodate status on the page. Add a test for this
+> > scenario to help ensure mapped write failures are handled as
+> > expected in the event of filesystem shutdown.
+> > 
+> > Signed-off-by: Brian Foster <bfoster@redhat.com>
+> 
+> This looks reasonable to me, I have run the same xfs_io tests when
+> looking at this behavior and they do provoke it.
+> 
+> This could maybe run on $TEST? But I don't really care much either
+> way.
+> 
 
-The regression was fixed by commit b854cc659dcb ("ovl: avoid deadlock
-on directory ioctl") and applied to kernel 5.10.15.
+I suppose that would be possible, but I'd prefer not to shut down the
+test device intentionally. I don't _think_ we currently do that
+anywhere. AFAICT, there's only a handful of open-coded shutdowns and
+most others use _scratch_shutdown...
 
-[1] https://lore.kernel.org/linux-unionfs/20210101201230.768653-1-icenowy@aosc.io/
+> I spot-checked this on ext4 and it passes.
+> 
+> Reviewed-by: Eric Sandeen <sandeen@redhat.com>
+> 
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
- tests/overlay/076     | 66 +++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/076.out |  2 ++
- tests/overlay/group   |  1 +
- 3 files changed, 69 insertions(+)
- create mode 100644 tests/overlay/076
- create mode 100644 tests/overlay/076.out
+Thanks.
 
-diff --git a/tests/overlay/076 b/tests/overlay/076
-new file mode 100644
-index 00000000..07827c0b
---- /dev/null
-+++ b/tests/overlay/076
-@@ -0,0 +1,66 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2021 CTERA Networks. All Rights Reserved.
-+#
-+# FS QA Test 076
-+#
-+# Support for chattr on overlayfs directories was added in kernel v5.10
-+# by commit 61536bed2149 ("ovl: support [S|G]ETFLAGS and FS[S|G]ETXATTR
-+# ioctls for directories").  That commit introduced a deadlock.
-+#
-+# This is a regression test for the fix commit b854cc659dcb ("ovl: avoid
-+# deadlock on directory ioctl")
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1        # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+        cd /
-+        $CHATTR_PROG -i $lowerdir/foo > /dev/null 2>&1
-+        $CHATTR_PROG -i $upperdir/foo > /dev/null 2>&1
-+        rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs overlay
-+_require_scratch
-+_require_chattr i
-+
-+# remove all files from previous runs
-+_scratch_mkfs
-+
-+# prepare lower test file
-+lowerdir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
-+upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
-+workdir=$OVL_BASE_SCRATCH_MNT/$OVL_WORK
-+mkdir -p $lowerdir
-+mkdir $lowerdir/foo
-+
-+# mounting overlay
-+_scratch_mount
-+
-+# Try to add the immutable attributes, it will invoke ioctl() on the directory
-+# The ioctl will fail on kernel < 5.10, succeed on kernel >= 5.10.15 and hang
-+# on kernel v5.10..v5.10.14.  Anything but hang is considered a test success.
-+$CHATTR_PROG +i $SCRATCH_MNT/foo > /dev/null 2>&1
-+
-+$UMOUNT_PROG $SCRATCH_MNT
-+
-+# success, all done
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/overlay/076.out b/tests/overlay/076.out
-new file mode 100644
-index 00000000..248e095d
---- /dev/null
-+++ b/tests/overlay/076.out
-@@ -0,0 +1,2 @@
-+QA output created by 076
-+Silence is golden
-diff --git a/tests/overlay/group b/tests/overlay/group
-index cfc75bb1..ddc355e5 100644
---- a/tests/overlay/group
-+++ b/tests/overlay/group
-@@ -78,6 +78,7 @@
- 073 auto quick whiteout
- 074 auto quick exportfs dangerous
- 075 auto quick perms
-+076 auto quick perms dangerous
- 100 auto quick union samefs
- 101 auto quick union nonsamefs
- 102 auto quick union nonsamefs xino
--- 
-2.25.1
+Brian
+
+> 
+> > ---
+> > 
+> > Note that this test currently fails on XFS. The fix is posted for review
+> > on linux-xfs:
+> > 
+> > https://lore.kernel.org/linux-xfs/20210210170112.172734-1-bfoster@redhat.com/
+> > 
+> > Brian
+> > 
+> >  tests/generic/999     | 45 +++++++++++++++++++++++++++++++++++++++++++
+> >  tests/generic/999.out |  4 ++++
+> >  tests/generic/group   |  1 +
+> >  3 files changed, 50 insertions(+)
+> >  create mode 100755 tests/generic/999
+> >  create mode 100644 tests/generic/999.out
+> > 
+> > diff --git a/tests/generic/999 b/tests/generic/999
+> > new file mode 100755
+> > index 00000000..5e5408e7
+> > --- /dev/null
+> > +++ b/tests/generic/999
+> > @@ -0,0 +1,45 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0-only
+> > +# Copyright 2021 Red Hat, Inc.
+> > +#
+> > +# FS QA Test No. 999
+> > +#
+> > +# Test a write fault scenario on a shutdown fs.
+> > +#
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +
+> > +here=`pwd`
+> > +tmp=/tmp/$$
+> > +status=1	# failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +	rm -f $tmp.*
+> > +}
+> > +
+> > +. ./common/rc
+> > +. ./common/filter
+> > +
+> > +rm -f $seqres.full
+> > +
+> > +_supported_fs generic
+> > +_require_scratch_nocheck
+> > +_require_scratch_shutdown
+> > +
+> > +_scratch_mkfs &>> $seqres.full
+> > +_scratch_mount
+> > +
+> > +# XFS had a regression where it failed to check shutdown status in the fault
+> > +# path. This produced an iomap warning because writeback failure clears Uptodate
+> > +# status on the page.
+> > +file=$SCRATCH_MNT/file
+> > +$XFS_IO_PROG -fc "pwrite 0 4k" -c fsync $file | _filter_xfs_io
+> > +$XFS_IO_PROG -x -c "mmap 0 4k" -c "mwrite 0 4k" -c shutdown -c fsync \
+> > +	-c "mwrite 0 4k" $file | _filter_xfs_io
+> > +
+> > +# success, all done
+> > +status=0
+> > +exit
+> > diff --git a/tests/generic/999.out b/tests/generic/999.out
+> > new file mode 100644
+> > index 00000000..f55569ff
+> > --- /dev/null
+> > +++ b/tests/generic/999.out
+> > @@ -0,0 +1,4 @@
+> > +QA output created by 999
+> > +wrote 4096/4096 bytes at offset 0
+> > +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> > +fsync: Input/output error
+> > diff --git a/tests/generic/group b/tests/generic/group
+> > index b10fdea4..edd54ce5 100644
+> > --- a/tests/generic/group
+> > +++ b/tests/generic/group
+> > @@ -625,3 +625,4 @@
+> >  620 auto mount quick
+> >  621 auto quick encrypt
+> >  622 auto shutdown metadata atime
+> > +999 auto quick shutdown
+> > 
+> 
 
