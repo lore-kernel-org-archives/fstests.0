@@ -7,62 +7,62 @@ X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6D369C433E9
-	for <linux-fstests@archiver.kernel.org>; Thu, 11 Feb 2021 03:32:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1CB35C433E0
+	for <linux-fstests@archiver.kernel.org>; Thu, 11 Feb 2021 03:32:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 373AC64EBB
+	by mail.kernel.org (Postfix) with ESMTP id DA6D764EBB
 	for <linux-fstests@archiver.kernel.org>; Thu, 11 Feb 2021 03:32:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229577AbhBKDcn (ORCPT
+        id S229583AbhBKDcn (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
         Wed, 10 Feb 2021 22:32:43 -0500
-Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:35056 "EHLO
+Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:39760 "EHLO
         mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S229583AbhBKDcl (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 10 Feb 2021 22:32:41 -0500
+        by vger.kernel.org with ESMTP id S229477AbhBKDcm (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 10 Feb 2021 22:32:42 -0500
 Received: from pps.filterd (m0098414.ppops.net [127.0.0.1])
-        by mx0b-001b2d01.pphosted.com (8.16.0.42/8.16.0.42) with SMTP id 11B3N2Je039034;
-        Wed, 10 Feb 2021 22:31:58 -0500
+        by mx0b-001b2d01.pphosted.com (8.16.0.42/8.16.0.42) with SMTP id 11B3MxBh038245;
+        Wed, 10 Feb 2021 22:31:59 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=from : to : cc : subject
  : date : message-id : in-reply-to : references : mime-version :
  content-transfer-encoding; s=pp1;
- bh=47g7px49hFJzZLpEcexvwD48CsL8aW5CvkVkrBZeQp8=;
- b=f9tNVZdqcvDIFyVuhWnjDfrbXrjmhG5RmxYCyD7gH3YTijyNqC9XJgPQesTO2qh1CfdF
- LlYnFd0LJ3vC+zA88xXlJEju7ihpfLf2Uy4caH9T1+zFfUuuj13vE+7ULvZIIlzkK6pV
- etdUwLPRSzJiEsoltFCaV69xZuAprs54qgXNVm7KStkgEBYEULjae3T+khwnXsMWkX6Z
- FHZHMR5ME1LA00n5L3ZX218AaPGDwlTlBBjpxd6fVSC5SOG6Bk5EU1/Lf9RU8ZMdWcFn
- RDsJUesP2VoWAXOHhhCdMEN5McV7XBpMUp4LUE3cQOhHp+a+leYOFfkXHtIS7/bc2g9o YQ== 
-Received: from ppma05fra.de.ibm.com (6c.4a.5195.ip4.static.sl-reverse.com [149.81.74.108])
-        by mx0b-001b2d01.pphosted.com with ESMTP id 36mvmkr4d8-1
+ bh=8LI77rzrP64jLLw5InOpSliq4YITNjGD8Q+F+kBfsUA=;
+ b=ngOSoL4fq5DNzkOKVTTzWuOckHVz/QNNP1O+cS+hMRHjKa2eqcmBQ0EazY6etyoRAZJL
+ v5TYYUFj7r6ZHLzj9j7ad8iWre/+898q3lKoUOazi1O/MGw77w67FlJ7qVImPWDEKYct
+ iM1B9diOPaYZcdPaw1GWS7ddF0+sSLy6J6ohqCIhjJsTiilUf+EzVFu1zjvqgrcWi6Jn
+ v6RsAirThuL/me4ECklDYVoNDt4RU6G3WYniDIzM+vnlancXWUsjlQA0MIF7UOgn45LC
+ xtO8qnEHJEpTtRRx3ai68mE1aawWgEdqIiNxMVkxcqKBnQ528CWoejUaMOGOTLoHm1KR BA== 
+Received: from ppma04ams.nl.ibm.com (63.31.33a9.ip4.static.sl-reverse.com [169.51.49.99])
+        by mx0b-001b2d01.pphosted.com with ESMTP id 36mvmkr4dt-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Wed, 10 Feb 2021 22:31:57 -0500
-Received: from pps.filterd (ppma05fra.de.ibm.com [127.0.0.1])
-        by ppma05fra.de.ibm.com (8.16.0.42/8.16.0.42) with SMTP id 11B3UPcs021104;
-        Thu, 11 Feb 2021 03:31:56 GMT
-Received: from b06cxnps4074.portsmouth.uk.ibm.com (d06relay11.portsmouth.uk.ibm.com [9.149.109.196])
-        by ppma05fra.de.ibm.com with ESMTP id 36hjr7tssv-1
+        Wed, 10 Feb 2021 22:31:59 -0500
+Received: from pps.filterd (ppma04ams.nl.ibm.com [127.0.0.1])
+        by ppma04ams.nl.ibm.com (8.16.0.42/8.16.0.42) with SMTP id 11B3TTYv012866;
+        Thu, 11 Feb 2021 03:31:57 GMT
+Received: from b06cxnps4076.portsmouth.uk.ibm.com (d06relay13.portsmouth.uk.ibm.com [9.149.109.198])
+        by ppma04ams.nl.ibm.com with ESMTP id 36hjr8dcq7-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Thu, 11 Feb 2021 03:31:56 +0000
+        Thu, 11 Feb 2021 03:31:57 +0000
 Received: from d06av23.portsmouth.uk.ibm.com (d06av23.portsmouth.uk.ibm.com [9.149.105.59])
-        by b06cxnps4074.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 11B3VrMT19595602
+        by b06cxnps4076.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 11B3Vtb839453154
         (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Thu, 11 Feb 2021 03:31:54 GMT
+        Thu, 11 Feb 2021 03:31:55 GMT
 Received: from d06av23.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id DC1DCA4051;
-        Thu, 11 Feb 2021 03:31:53 +0000 (GMT)
+        by IMSVA (Postfix) with ESMTP id 20B57A4051;
+        Thu, 11 Feb 2021 03:31:55 +0000 (GMT)
 Received: from d06av23.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id E94C5A4040;
-        Thu, 11 Feb 2021 03:31:52 +0000 (GMT)
+        by IMSVA (Postfix) with ESMTP id 2EAEAA4040;
+        Thu, 11 Feb 2021 03:31:54 +0000 (GMT)
 Received: from riteshh-domain.ibmuc.com (unknown [9.199.35.2])
         by d06av23.portsmouth.uk.ibm.com (Postfix) with ESMTP;
-        Thu, 11 Feb 2021 03:31:52 +0000 (GMT)
+        Thu, 11 Feb 2021 03:31:54 +0000 (GMT)
 From:   Ritesh Harjani <riteshh@linux.ibm.com>
 To:     fstests@vger.kernel.org
 Cc:     guan@eryu.me, anju@linux.vnet.ibm.com,
         Ritesh Harjani <riteshh@linux.ibm.com>
-Subject: [PATCH 2/3] common/rc: Add _require_get_hugepagesize and fix _require_label_get_max
-Date:   Thu, 11 Feb 2021 09:01:45 +0530
-Message-Id: <05dbc4b37d77e03bc288feb07815f737efbf2abd.1612951443.git.riteshh@linux.ibm.com>
+Subject: [PATCH 3/3] generic/{413/605}: Add _require_get_hugepagesize check
+Date:   Thu, 11 Feb 2021 09:01:46 +0530
+Message-Id: <854140625a994b2b38a298c25d26b010c32e9ee0.1612951443.git.riteshh@linux.ibm.com>
 X-Mailer: git-send-email 2.26.2
 In-Reply-To: <cover.1612951443.git.riteshh@linux.ibm.com>
 References: <cover.1612951443.git.riteshh@linux.ibm.com>
@@ -72,7 +72,7 @@ X-TM-AS-GCONF: 00
 X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.369,18.0.737
  definitions=2021-02-11_02:2021-02-10,2021-02-10 signatures=0
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 malwarescore=0 adultscore=0
- impostorscore=0 lowpriorityscore=0 mlxscore=0 mlxlogscore=999
+ impostorscore=0 lowpriorityscore=0 mlxscore=0 mlxlogscore=657
  priorityscore=1501 clxscore=1015 bulkscore=0 phishscore=0 spamscore=0
  suspectscore=0 classifier=spam adjust=0 reason=mlx scancount=1
  engine=8.12.0-2009150000 definitions=main-2102110021
@@ -80,43 +80,40 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-_notrun executed from a subshell $(cmd) won't exit it's parent.
-Hence _require_*** functions shouldn't have below statements.
-	dummy=$(_label_get_max)
-Also add a function _require_get_hugepagesize(), since it seems the
-intention of _get_hugepagesize() is to also '_notrun' when the hugepagesize
-is not a valid number.
+This adds _require_get_hugepagesize() check at the beginning,
+which seems like was the intention earlier behind function
+_get_hugepagesize().
 
 Signed-off-by: Ritesh Harjani <riteshh@linux.ibm.com>
 ---
- common/rc | 8 +++++++-
- 1 file changed, 7 insertions(+), 1 deletion(-)
+ tests/generic/413 | 1 +
+ tests/generic/605 | 1 +
+ 2 files changed, 2 insertions(+)
 
-diff --git a/common/rc b/common/rc
-index 649b1cfd884a..1831714198af 100644
---- a/common/rc
-+++ b/common/rc
-@@ -175,6 +175,12 @@ _get_hugepagesize()
- 	echo $((hugepgsz * 1024))
- }
+diff --git a/tests/generic/413 b/tests/generic/413
+index 503c7c999d4f..7db8d756abc7 100755
+--- a/tests/generic/413
++++ b/tests/generic/413
+@@ -34,6 +34,7 @@ _require_scratch_dax_mountopt "dax"
+ _require_test_program "feature"
+ _require_test_program "t_mmap_dio"
+ _require_xfs_io_command "falloc"
++_require_get_hugepagesize
 
-+_require_get_hugepagesize()
-+{
-+	# Just a dummy for _notrun if hugepagesize is not supported
-+	_get_hugepagesize
-+}
-+
- _mount()
+ prep_files()
  {
-     $MOUNT_PROG `_mount_ops_filter $*`
-@@ -4250,7 +4256,7 @@ _label_get_max()
- _require_label_get_max()
- {
- 	# Just call _label_get_max which will notrun if appropriate
--	dummy=$(_label_get_max)
-+	_label_get_max
- }
+diff --git a/tests/generic/605 b/tests/generic/605
+index 1e2d71882dd0..7620e148e4b3 100755
+--- a/tests/generic/605
++++ b/tests/generic/605
+@@ -34,6 +34,7 @@ _require_test_program "feature"
+ _require_test_program "t_mmap_dio"
+ _require_dax_iflag
+ _require_xfs_io_command "falloc"
++_require_get_hugepagesize
 
- _dmsetup_remove()
+ SRC_DIR=$SCRATCH_MNT/src
+ SRC_FILE=$SRC_DIR/tf_s
 --
+	Ritesh Harjani (signature)
 
