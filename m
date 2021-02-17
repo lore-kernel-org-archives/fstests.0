@@ -2,241 +2,161 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-17.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0F41AC433DB
-	for <linux-fstests@archiver.kernel.org>; Wed, 17 Feb 2021 10:53:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B7CC6C433E0
+	for <linux-fstests@archiver.kernel.org>; Wed, 17 Feb 2021 11:38:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C6FAC64E42
-	for <linux-fstests@archiver.kernel.org>; Wed, 17 Feb 2021 10:53:44 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7476D64DDA
+	for <linux-fstests@archiver.kernel.org>; Wed, 17 Feb 2021 11:38:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229989AbhBQKxn (ORCPT
+        id S231756AbhBQLhF (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 17 Feb 2021 05:53:43 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58622 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229774AbhBQKxm (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 17 Feb 2021 05:53:42 -0500
-Received: from mail-qt1-x830.google.com (mail-qt1-x830.google.com [IPv6:2607:f8b0:4864:20::830])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C2655C061756;
-        Wed, 17 Feb 2021 02:53:01 -0800 (PST)
-Received: by mail-qt1-x830.google.com with SMTP id w5so3771657qts.12;
-        Wed, 17 Feb 2021 02:53:01 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:reply-to:from:date:message-id
-         :subject:to:cc:content-transfer-encoding;
-        bh=NItlTIPpqCDT5onjtk3qqDdmowNGhrYXobYQ0BrkB1w=;
-        b=FDqOcyGKE3xaxyMy+1TPfdE/pup7aMN1qe5H9vKGB3ZbY+bQqVjR6GNTfsinU42bVm
-         WeLEuoHvGuFfrxpwkAxsRsjnX42E7P7HTTPmKsmAgRUSg7ITfIp1Gtt+zySYryTge8Qb
-         ePNC6TOkk22ptFZ0cYgfu8npA2SakbfTp1UGtcRqXfefuFrUhy8qHFg3sZxXz/Sd16tY
-         s4Otlwd1SYWuvWT79awV5c0reHYDenfGtN3DLXQRIPIhauQ2Uw4W1ouo+x6Af1T40zBD
-         vL8oLPKWGOSOBvmX+hlABliKagVRgyubJI1QUnxJfQydrwrEJl4YgwX0Gt9IGb0HLfSO
-         UPVg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:reply-to
-         :from:date:message-id:subject:to:cc:content-transfer-encoding;
-        bh=NItlTIPpqCDT5onjtk3qqDdmowNGhrYXobYQ0BrkB1w=;
-        b=oZhZHUSKJhZu0BeCm2P1Lum3MyBs6QinU5lZn37GrvPHFIzzKSScjlvuVC1T3E1PRn
-         3LjfbdjtuB7cvuWr2+dx0lOM0RrG76w4n83LMZwPWiD2xqvPIcoF4Bqi/Sr8bIEyxahb
-         afW290k+yyCLTVWeVHa6erMVWCy/7SHVQuGoxh7gT2noeraxJINWDZeXhov0MJht89FL
-         zswvRhMjGVRye8PZ9A5E/ugamvVbtCNGUW+n11pjSGBZxpokT45LmCQNOq9QpxbIy3sk
-         sAfniNO6T3kuMl8rIe1vbjEN3bDlFiBbEP0u0RJKskg2V7TcasV+2BUUw+My30miRn2r
-         GDEQ==
-X-Gm-Message-State: AOAM533m1NXndMeZr5onwT+45M1/u+asMml/sp6IJIfZSLaunfdEZmNW
-        h00icSVZKXDGcS++ncBxSYYPFeb6umPRe2c1rLqTRPq0sR4=
-X-Google-Smtp-Source: ABdhPJwzJ18nIb9CFGWOZXqnnhIpkheJxhLsRxBG2Swn+aTF/egHC9UeiPL1EBRCr0I46/QeQBws2zY1nIgzjve7zCM=
-X-Received: by 2002:ac8:72c6:: with SMTP id o6mr22455766qtp.259.1613559181010;
- Wed, 17 Feb 2021 02:53:01 -0800 (PST)
+        Wed, 17 Feb 2021 06:37:05 -0500
+Received: from mx2.suse.de ([195.135.220.15]:50714 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S232286AbhBQLae (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 17 Feb 2021 06:30:34 -0500
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+        t=1613561388; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
+        bh=T0kKDpZtctMgPl8DRGHzhhX5uxjFrPtTKZpdhvp5Kw4=;
+        b=fBmu15Y5ggXm3t2EhcqHTfAwTV9wdg0AAWxLsGFyRNHzOC2C+rAdmZRzLrlpi6eVUeCYAq
+        Fn4g2Q11N8KM+0sD/+XGe2LjfzEpVkzJjzaO41oMUoozW8r7YLq794GuDQqkOohl3nWlUP
+        axxf8nFJouhKE+eKACL5Mb+glKeZxlo=
+Received: from relay2.suse.de (unknown [195.135.221.27])
+        by mx2.suse.de (Postfix) with ESMTP id 307F5B7CB;
+        Wed, 17 Feb 2021 11:29:48 +0000 (UTC)
+Subject: Re: [PATCH] btrfs/220: fix clear_cache and inode_cache option tests
+To:     Boris Burkov <boris@bur.io>, fstests@vger.kernel.org,
+        kernel-team@fb.com, Eryu Guan <guaneryu@gmail.com>
+References: <409e4c73fefce666d151b043d6b2a0d821f8ef85.1610485406.git.boris@bur.io>
+From:   Nikolay Borisov <nborisov@suse.com>
+Autocrypt: addr=nborisov@suse.com; prefer-encrypt=mutual; keydata=
+ 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
+Message-ID: <d34daa78-9287-06c7-e3e8-25e76a7d3aba@suse.com>
+Date:   Wed, 17 Feb 2021 13:29:47 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.10.0
 MIME-Version: 1.0
-References: <5e341bd2e900b2ba6e42109ca20e2ababc6f0873.1613508208.git.josef@toxicpanda.com>
-In-Reply-To: <5e341bd2e900b2ba6e42109ca20e2ababc6f0873.1613508208.git.josef@toxicpanda.com>
-Reply-To: fdmanana@gmail.com
-From:   Filipe Manana <fdmanana@gmail.com>
-Date:   Wed, 17 Feb 2021 10:52:50 +0000
-Message-ID: <CAL3q7H6E08sTRDUcGpYAqb9=HEKub2Sit2p-U0nhDH_d7qmcng@mail.gmail.com>
-Subject: Re: [PATCH] fstests: test a regression with btrfs extent reference collisions
-To:     Josef Bacik <josef@toxicpanda.com>
-Cc:     linux-btrfs <linux-btrfs@vger.kernel.org>, kernel-team@fb.com,
-        fstests <fstests@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+In-Reply-To: <409e4c73fefce666d151b043d6b2a0d821f8ef85.1610485406.git.boris@bur.io>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Feb 16, 2021 at 8:45 PM Josef Bacik <josef@toxicpanda.com> wrote:
->
-> This is a regression test for a problem where we would flip read only if
-> we reflink'ed enough extents to generate key'ed references, and then got
-> a hash collision with those references.  This is a test for the fix
->
->         btrfs: do not error out if the extent ref hash doesn't match
->
-> and is relatively straightforward, simply generate such a file and
-> watch for fireworks.
->
-> Signed-off-by: Josef Bacik <josef@toxicpanda.com>
+
+
+On 12.01.21 г. 23:17 ч., Boris Burkov wrote:
+> I recently changed clear_cache to not appear in mount options, as it has
+> one shot semantics, which was breaking this test. Test explicitly that
+> it _doesn't_ appear, which properly fails on old filesystems and passes
+> on misc-next.
+> 
+> The patch that changed this behavior was:
+> 8b228324a8ce btrfs: clear free space tree on ro->rw remount
+> 
+> Separately, inode_cache is deprecated and will never appear in mount
+> options; remove it entirely.
+> 
+> Signed-off-by: Boris Burkov
+
+
+Reviewed-by: Nikolay Borisov <nborisov@suse.com>
+
+Based on his previous patches to the kernel I guess this line should read:
+    Signed-off-by: Boris Burkov <boris@bur.io>
+
+
+Eryu, would it be possible to merge this or should Boris resend?
+
 > ---
->  tests/btrfs/231     | 81 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/231.out | 11 ++++++
->  tests/btrfs/group   |  1 +
->  3 files changed, 93 insertions(+)
->  create mode 100755 tests/btrfs/231
->  create mode 100644 tests/btrfs/231.out
->
-> diff --git a/tests/btrfs/231 b/tests/btrfs/231
-> new file mode 100755
-> index 00000000..b4787f9f
-> --- /dev/null
-> +++ b/tests/btrfs/231
-> @@ -0,0 +1,81 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2021 Josef Bacik.  All Rights Reserved.
-> +#
-> +# FS QA Test 231
-> +#
-> +# This is a regression test for a problem fixed by
-> +#
-> +#    btrfs: do not error out if the extent ref hash doesn't match
-> +#
-> +# Simply generate a file with a lot of extent references, then reflink i=
-n a few
-> +# offsets that will generate hash collisions, sync and validate we can s=
-till
-> +# write to the file system.
-> +
-> +seq=3D`basename $0`
-> +seqres=3D$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=3D`pwd`
-> +tmp=3D/tmp/$$
-> +status=3D1       # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
+>  tests/btrfs/220 | 10 +++++++---
+>  1 file changed, 7 insertions(+), 3 deletions(-)
+> 
+> diff --git a/tests/btrfs/220 b/tests/btrfs/220
+> index c84c7065..1242460f 100755
+> --- a/tests/btrfs/220
+> +++ b/tests/btrfs/220
+> @@ -215,11 +215,8 @@ test_optional_kernel_features()
+>  
+>  test_non_revertible_options()
+>  {
+> -	test_mount_opt "clear_cache" "clear_cache"
+>  	test_mount_opt "degraded" "degraded"
+>  
+> -	test_mount_opt "inode_cache" "inode_cache"
+> -
+>  	# nologreplay should be used only with
+>  	test_should_fail "nologreplay"
+>  	test_mount_opt "nologreplay,ro" "ro,rescue=nologreplay"
+> @@ -238,6 +235,11 @@ test_non_revertible_options()
+>  	test_mount_opt "rescue=nologreplay,ro" "ro,rescue=nologreplay"
+>  }
+>  
+> +test_one_shot_options()
 > +{
-> +       cd /
-> +       rm -f $tmp.*
+> +	test_mount_opt "clear_cache" ""
 > +}
 > +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/reflink
+>  # All these options can be reverted (with their "no" counterpart), or can have
+>  # their values set to default on remount
+>  test_revertible_options()
+> @@ -321,6 +323,8 @@ test_optional_kernel_features
+>  
+>  test_non_revertible_options
+>  
+> +test_one_shot_options
 > +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +_supported_fs btrfs
-> +_require_test
-> +_require_scratch_reflink
-> +
-> +_scratch_mkfs >>$seqres.full 2>&1
-> +_scratch_mount
-> +
-> +FILE=3D$SCRATCH_MNT/file
-> +
-> +# Create a 1m extent to reflink
-> +$XFS_IO_PROG -f -c "pwrite 0 1M" -c "fsync" $FILE | _filter_xfs_io
-> +
-> +# Generate a bunch of extent references so we're forced to use key'ed ex=
-tent
-> +# references.
-> +offset=3D2
-> +for i in {0..10000}
-
-100 iterations is more than enough to reproduce the bug, and reduces
-the test runtime from about 50 seconds down to 3 seconds here.
-Even 50 iterations is enough.
-
-> +do
-> +       $XFS_IO_PROG -c "reflink ${FILE} 0 ${offset}M 1M" $FILE \
-> +               > /dev/null 2>&1
-
-We can remove 2>&1, so we end up failing if for some unexpected reason
-a reflink fails.
-Might help one day uncover some bug.
-
-> +       offset=3D$(( offset + 2 ))
-> +done
-> +
-> +# Our key is
-> +#
-> +# key.objectid =3D bytenr
-> +# key.type =3D BTRFS_EXTENT_DATA_REF_KEY
-> +# key.offset =3D hash(tree, inode, offset)
-> +#
-> +# The tree id is 5, the inode is 257, and the reflink'ed offset is 0, th=
-e below
-> +# offsets generate a hash collision with that offset.  We only need two =
-to
-> +# collide, but if it's worth doing it's worth overdoing.
-> +$XFS_IO_PROG -c "reflink ${FILE} 0 17999258914816 1M" $FILE | _filter_xf=
-s_io
-> +$XFS_IO_PROG -c "reflink ${FILE} 0 35998517829632 1M" $FILE | _filter_xf=
-s_io
-> +$XFS_IO_PROG -c "reflink ${FILE} 0 53752752058368 1M" $FILE | _filter_xf=
-s_io
-> +
-> +# Sync to make sure this works, it'll error out if we abort the transact=
-ion, but
-> +# write a file just to make sure
-> +$BTRFS_UTIL_PROG filesystem sync $SCRATCH_MNT
-> +$XFS_IO_PROG -f -c "pwrite 0 1M" $SCRATCH_MNT/write | _filter_xfs_io
-> +
-> +# success, all done
-> +status=3D0
-> +exit
-> diff --git a/tests/btrfs/231.out b/tests/btrfs/231.out
-> new file mode 100644
-> index 00000000..f52c71ac
-> --- /dev/null
-> +++ b/tests/btrfs/231.out
-> @@ -0,0 +1,11 @@
-> +QA output created by 231
-> +wrote 1048576/1048576 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +linked 1048576/1048576 bytes at offset 17999258914816
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +linked 1048576/1048576 bytes at offset 35998517829632
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +linked 1048576/1048576 bytes at offset 53752752058368
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +wrote 1048576/1048576 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> diff --git a/tests/btrfs/group b/tests/btrfs/group
-> index a7c65983..65cedf7f 100644
-> --- a/tests/btrfs/group
-> +++ b/tests/btrfs/group
-> @@ -233,3 +233,4 @@
->  228 auto quick volume
->  229 auto quick send clone
->  230 auto quick qgroup limit
-> +231 auto
-
-We can also have it in the group "clone", and with 100 or 50
-iterations the 'quick' group as well.
-
-Other than that it looks good.
-
-Thanks.
-
-> --
-> 2.26.2
->
-
-
---=20
-Filipe David Manana,
-
-=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
- right.=E2=80=9D
+>  test_revertible_options
+>  
+>  test_subvol
+> 
