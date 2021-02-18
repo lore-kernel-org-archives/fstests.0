@@ -2,84 +2,234 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.3 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 21289C433E0
-	for <linux-fstests@archiver.kernel.org>; Thu, 18 Feb 2021 06:39:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 71F65C433E9
+	for <linux-fstests@archiver.kernel.org>; Thu, 18 Feb 2021 07:26:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C255364E7A
-	for <linux-fstests@archiver.kernel.org>; Thu, 18 Feb 2021 06:38:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1DB2D64E3E
+	for <linux-fstests@archiver.kernel.org>; Thu, 18 Feb 2021 07:26:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230353AbhBRGhh (ORCPT
+        id S230420AbhBRHWc (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 18 Feb 2021 01:37:37 -0500
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:51575 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S230356AbhBRGbd (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 18 Feb 2021 01:31:33 -0500
-X-IronPort-AV: E=Sophos;i="5.81,186,1610380800"; 
-   d="scan'208";a="104597204"
-Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
-  by heian.cn.fujitsu.com with ESMTP; 18 Feb 2021 14:30:45 +0800
-Received: from G08CNEXMBPEKD06.g08.fujitsu.local (unknown [10.167.33.206])
-        by cn.fujitsu.com (Postfix) with ESMTP id 134E94CE72EB;
-        Thu, 18 Feb 2021 14:30:45 +0800 (CST)
-Received: from [10.167.220.69] (10.167.220.69) by
- G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206) with Microsoft SMTP Server
- (TLS) id 15.0.1497.2; Thu, 18 Feb 2021 14:30:40 +0800
-Message-ID: <602E098E.9010509@cn.fujitsu.com>
-Date:   Thu, 18 Feb 2021 14:30:38 +0800
-From:   Xiao Yang <yangx.jy@cn.fujitsu.com>
-User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.2; zh-CN; rv:1.9.2.18) Gecko/20110616 Thunderbird/3.1.11
+        Thu, 18 Feb 2021 02:22:32 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:48740 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S231330AbhBRHPE (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 18 Feb 2021 02:15:04 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1613632413;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=DsXxaFmSIY8dERppLdjqfrib0/PA3/hpY+Wbu/fMqtY=;
+        b=aTqMeAAEECceh013QsQOZnlJbug069K1TGSPfygUKTmMdWFOMsX00HLbepbB+EfJQYiFg9
+        uwW5ud1trnGgJgpUi43X4vMc+0+NSFFnjoUVZvYVTqHssfe0yKws14/8oabtEEbB2dqhqW
+        EJLsY5VQ9NoSNPXmPPE2YY8qkNXsz5o=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-436-oAAoU6iJPQ-XkBszyaY7XA-1; Thu, 18 Feb 2021 02:13:30 -0500
+X-MC-Unique: oAAoU6iJPQ-XkBszyaY7XA-1
+Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 754CD195D562;
+        Thu, 18 Feb 2021 07:13:29 +0000 (UTC)
+Received: from zlang-laptop.redhat.com (ovpn-13-99.pek2.redhat.com [10.72.13.99])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 5AE125D9DC;
+        Thu, 18 Feb 2021 07:13:27 +0000 (UTC)
+From:   Zorro Lang <zlang@redhat.com>
+To:     fstests@vger.kernel.org
+Cc:     linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org,
+        sunke32@huawei.com
+Subject: [PATCH] xfstests: rename RENAME_WHITEOUT test on fs no enough sapce
+Date:   Thu, 18 Feb 2021 15:13:24 +0800
+Message-Id: <20210218071324.50413-1-zlang@redhat.com>
 MIME-Version: 1.0
-To:     XiaoLi Feng <xifeng@redhat.com>
-CC:     <fstests@vger.kernel.org>
-Subject: Re: [PATCH v2] common/rc: add filter in _test_inode_flag
-References: <20210210083407.19184-1-xifeng@redhat.com>
-In-Reply-To: <20210210083407.19184-1-xifeng@redhat.com>
-Content-Type: text/plain; charset="GB2312"
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.167.220.69]
-X-ClientProxiedBy: G08CNEXCHPEKD06.g08.fujitsu.local (10.167.33.205) To
- G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206)
-X-yoursite-MailScanner-ID: 134E94CE72EB.AE161
-X-yoursite-MailScanner: Found to be clean
-X-yoursite-MailScanner-From: yangx.jy@cn.fujitsu.com
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 2021/2/10 16:34, XiaoLi Feng wrote:
-> From: Xiaoli Feng <xifeng@redhat.com>
->
-> Add _filter_scratch and _filter_test_dir to avoid _test_inode_flag failed when
-> mount point contains flag string.
-> ---
->  common/rc | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/common/rc b/common/rc
-> index 649b1cfd..f3bb665e 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -3112,7 +3112,7 @@ _test_inode_flag()
->  	local flag=$1
->  	local file=$2
->  
-> -	if $XFS_IO_PROG -r -c 'lsattr -v' "$file" | grep -q "$flag" ; then
-> +	if $XFS_IO_PROG -r -c 'lsattr -v' "$file" | _filter_scratch | _filter_test_dir | grep -q "$flag" ; then
-Hi XiaoLi,
+This's a regression test for linux 6b4b8e6b4ad8 ("ext4: fix bug for
+rename with RENAME_WHITEOUT"). Rename a file with RENAME_WHITEOUT
+flag might cause corruption when there's not enough space to
+complete this renaming operation.
 
-Is it ok to use _filter_testdir_and_scratch directly?
+Signed-off-by: Zorro Lang <zlang@redhat.com>
+Signed-off-by: Sun Ke <sunke32@huawei.com>
+---
 
-Best Regards,
-Xiao Yang
->  		return 0
->  	fi
->  	return 1
+Hi,
 
+As the request of Sun Ke, I rewrite his test case as this patch.
+The history of reviewing as below:
+https://patchwork.kernel.org/project/fstests/patch/20210128061202.210074-1-sunke32@huawei.com/
+https://patchwork.kernel.org/project/fstests/patch/20210202123956.3146761-1-sunke32@huawei.com/
 
+At last, I decide to create several chunks of files to do this testing, help to
+get more chance to trigger ENOSPC when does rename(RENAME_WHITEOUT).
+
+From my testing, it can reproduce this bug on linux 5.10[1], and test passed on
+linux 5.11-rc5+ [2]. And it works on XFS too. Hope to get more review from fs-devel.
+
+[1]
+# ./check generic/623
+FSTYP         -- ext4
+PLATFORM      -- Linux/x86_64 ibm-xxxxxxx-xx 5.10.0-rc5+ #4 SMP Tue Jan 5 20:12:45 CST 2021
+MKFS_OPTIONS  -- /dev/mapper/testvg-scratchdev
+MOUNT_OPTIONS -- -o acl,user_xattr -o context=system_u:object_r:root_t:s0 /dev/mapper/testvg-scratchdev /mnt/scratch
+
+generic/623     _check_generic_filesystem: filesystem on /dev/mapper/testvg-scratchdev is inconsistent                                                                                        
+(see /root/git/xfstests-zlang/results//generic/623.full for details)
+- output mismatch (see /root/git/xfstests-zlang/results//generic/623.out.bad)
+    --- tests/generic/623.out   2021-02-18 13:26:35.953071523 +0800
+    +++ /root/git/xfstests-zlang/results//generic/623.out.bad   2021-02-18 13:28:10.450733088 +0800                                                                                           
+    @@ -1,2 +1,232 @@
+     QA output created by 623
+    +ls: cannot access '/mnt/scratch/srcfile3866': Structure needs cleaning
+    +ls: cannot access '/mnt/scratch/srcfile3867': Structure needs cleaning
+    +ls: cannot access '/mnt/scratch/srcfile3868': Structure needs cleaning
+    +ls: cannot access '/mnt/scratch/srcfile3869': Structure needs cleaning
+    +ls: cannot access '/mnt/scratch/srcfile3870': Structure needs cleaning
+    +ls: cannot access '/mnt/scratch/srcfile3871': Structure needs cleaning
+    ...
+    (Run 'diff -u /root/git/xfstests-zlang/tests/generic/623.out /root/git/xfstests-zlang/results//generic/623.out.bad'  to see the entire diff)                                              
+Ran: generic/623
+Failures: generic/623
+Failed 1 of 1 tests
+
+[2]
+# ./check generic/623
+FSTYP         -- ext4
+PLATFORM      -- Linux/x86_64 localhost 5.11.0-0.rc5.20210128git76c057c84d28.137.fc34.x86_64 #1 SMP Thu Jan 28 21:10:47 UTC 2021
+MKFS_OPTIONS  -- /dev/mapper/testvg-scratchdev
+MOUNT_OPTIONS -- -o acl,user_xattr -o context=system_u:object_r:root_t:s0 /dev/mapper/testvg-scratchdev /mnt/scratch
+
+generic/623 4s ...  86s
+Ran: generic/623
+Passed all 1 tests
+
+[3]
+# ./check generic/623
+FSTYP         -- xfs (non-debug)
+PLATFORM      -- Linux/x86_64 localhost 5.11.0-0.rc5.20210128git76c057c84d28.137.fc34.x86_64 #1 SMP Thu Jan 28 21:10:47 UTC 2021
+MKFS_OPTIONS  -- -f -bsize=4096 /dev/mapper/testvg-scratchdev
+MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/mapper/testvg-scratchdev /mnt/scratch
+
+generic/623 86s ...  99s
+Ran: generic/623
+Passed all 1 tests
+
+Thanks,
+Zorro
+
+ tests/generic/623     | 72 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/623.out |  2 ++
+ tests/generic/group   |  1 +
+ 3 files changed, 75 insertions(+)
+ create mode 100755 tests/generic/623
+ create mode 100644 tests/generic/623.out
+
+diff --git a/tests/generic/623 b/tests/generic/623
+new file mode 100755
+index 00000000..56358ca6
+--- /dev/null
++++ b/tests/generic/623
+@@ -0,0 +1,72 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2021 HUAWEI.  All Rights Reserved.
++# Copyright (c) 2021 Red Hat Inc.  All Rights Reserved.
++#
++# FS QA Test 623
++#
++# Test RENAME_WHITEOUT on filesystem without space to create one more inodes.
++# This is a regression test for kernel commit:
++#   6b4b8e6b4ad8 ("ext4: ext4: fix bug for rename with RENAME_WHITEOUT")
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/populate
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs generic
++_require_scratch
++
++_scratch_mkfs_sized $((256 * 1024 * 1024)) >> $seqres.full 2>&1
++_scratch_mount
++
++# Create several chunks of file, to help to trigger the bug easily
++CHUNKS=$((64 * 64))
++for ((i=0; i<CHUNKS; i++));do
++	touch $SCRATCH_MNT/srcfile$i
++done
++# Try to fill the whole fs
++nr_free=$(stat -f -c '%f' $SCRATCH_MNT)
++blksz="$(_get_block_size $SCRATCH_MNT)"
++_fill_fs $((nr_free * blksz)) $SCRATCH_MNT/fill_space $blksz 0 >> $seqres.full 2>&1
++# Use empty files to fill the rest
++for ((i=0; i<10000; i++));do
++	touch $SCRATCH_MNT/fill_file$i 2>/dev/null
++	# Until no more files can be created
++	if [ $? -ne 0 ];then
++		break
++	fi
++done
++# ENOSPC is expected here
++for ((i=0; i<CHUNKS; i++));do
++	$here/src/renameat2 -w $SCRATCH_MNT/srcfile$i $SCRATCH_MNT/dstfile$i >> $seqres.full 2>&1
++done
++_scratch_cycle_mount
++# Expect no errors at here
++for ((i=0; i<CHUNKS; i++));do
++	ls -l $SCRATCH_MNT/srcfile$i >/dev/null
++done
++
++echo "Silence is golden"
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/623.out b/tests/generic/623.out
+new file mode 100644
+index 00000000..6f774f19
+--- /dev/null
++++ b/tests/generic/623.out
+@@ -0,0 +1,2 @@
++QA output created by 623
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index b10fdea4..72136075 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -625,3 +625,4 @@
+ 620 auto mount quick
+ 621 auto quick encrypt
+ 622 auto shutdown metadata atime
++623 auto rename enospc
+-- 
+2.29.2
 
