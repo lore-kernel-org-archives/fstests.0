@@ -2,161 +2,187 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-17.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.3 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B7CC6C433E0
-	for <linux-fstests@archiver.kernel.org>; Wed, 17 Feb 2021 11:38:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6FD30C433E0
+	for <linux-fstests@archiver.kernel.org>; Thu, 18 Feb 2021 06:16:49 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7476D64DDA
-	for <linux-fstests@archiver.kernel.org>; Wed, 17 Feb 2021 11:38:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1B22D64E2F
+	for <linux-fstests@archiver.kernel.org>; Thu, 18 Feb 2021 06:16:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231756AbhBQLhF (ORCPT
+        id S230489AbhBRGQ3 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 17 Feb 2021 06:37:05 -0500
-Received: from mx2.suse.de ([195.135.220.15]:50714 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S232286AbhBQLae (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 17 Feb 2021 06:30:34 -0500
-X-Virus-Scanned: by amavisd-new at test-mx.suse.de
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-        t=1613561388; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
-        bh=T0kKDpZtctMgPl8DRGHzhhX5uxjFrPtTKZpdhvp5Kw4=;
-        b=fBmu15Y5ggXm3t2EhcqHTfAwTV9wdg0AAWxLsGFyRNHzOC2C+rAdmZRzLrlpi6eVUeCYAq
-        Fn4g2Q11N8KM+0sD/+XGe2LjfzEpVkzJjzaO41oMUoozW8r7YLq794GuDQqkOohl3nWlUP
-        axxf8nFJouhKE+eKACL5Mb+glKeZxlo=
-Received: from relay2.suse.de (unknown [195.135.221.27])
-        by mx2.suse.de (Postfix) with ESMTP id 307F5B7CB;
-        Wed, 17 Feb 2021 11:29:48 +0000 (UTC)
-Subject: Re: [PATCH] btrfs/220: fix clear_cache and inode_cache option tests
-To:     Boris Burkov <boris@bur.io>, fstests@vger.kernel.org,
-        kernel-team@fb.com, Eryu Guan <guaneryu@gmail.com>
-References: <409e4c73fefce666d151b043d6b2a0d821f8ef85.1610485406.git.boris@bur.io>
-From:   Nikolay Borisov <nborisov@suse.com>
-Autocrypt: addr=nborisov@suse.com; prefer-encrypt=mutual; keydata=
- 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
-Message-ID: <d34daa78-9287-06c7-e3e8-25e76a7d3aba@suse.com>
-Date:   Wed, 17 Feb 2021 13:29:47 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.10.0
+        Thu, 18 Feb 2021 01:16:29 -0500
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:55044 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S232005AbhBRGKI (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 18 Feb 2021 01:10:08 -0500
+X-IronPort-AV: E=Sophos;i="5.81,186,1610380800"; 
+   d="scan'208";a="104596658"
+Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
+  by heian.cn.fujitsu.com with ESMTP; 18 Feb 2021 14:09:09 +0800
+Received: from G08CNEXMBPEKD06.g08.fujitsu.local (unknown [10.167.33.206])
+        by cn.fujitsu.com (Postfix) with ESMTP id 818804CE6F85;
+        Thu, 18 Feb 2021 14:09:03 +0800 (CST)
+Received: from [10.167.220.69] (10.167.220.69) by
+ G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.2; Thu, 18 Feb 2021 14:08:59 +0800
+Message-ID: <602E0478.401@cn.fujitsu.com>
+Date:   Thu, 18 Feb 2021 14:08:56 +0800
+From:   Xiao Yang <yangx.jy@cn.fujitsu.com>
+User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.2; zh-CN; rv:1.9.2.18) Gecko/20110616 Thunderbird/3.1.11
 MIME-Version: 1.0
-In-Reply-To: <409e4c73fefce666d151b043d6b2a0d821f8ef85.1610485406.git.boris@bur.io>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+To:     XiaoLi Feng <xifeng@redhat.com>
+CC:     <fstests@vger.kernel.org>, <darrick.wong@oracle.com>
+Subject: Re: [PATCH v2] generic/608: verify S_DAX is active immediately for
+ DONTCACHE
+References: <20210210075815.13958-1-xifeng@redhat.com>
+In-Reply-To: <20210210075815.13958-1-xifeng@redhat.com>
+Content-Type: text/plain; charset="GB2312"
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.167.220.69]
+X-ClientProxiedBy: G08CNEXCHPEKD06.g08.fujitsu.local (10.167.33.205) To
+ G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206)
+X-yoursite-MailScanner-ID: 818804CE6F85.A9842
+X-yoursite-MailScanner: Found to be clean
+X-yoursite-MailScanner-From: yangx.jy@cn.fujitsu.com
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-
-
-On 12.01.21 г. 23:17 ч., Boris Burkov wrote:
-> I recently changed clear_cache to not appear in mount options, as it has
-> one shot semantics, which was breaking this test. Test explicitly that
-> it _doesn't_ appear, which properly fails on old filesystems and passes
-> on misc-next.
-> 
-> The patch that changed this behavior was:
-> 8b228324a8ce btrfs: clear free space tree on ro->rw remount
-> 
-> Separately, inode_cache is deprecated and will never appear in mount
-> options; remove it entirely.
-> 
-> Signed-off-by: Boris Burkov
-
-
-Reviewed-by: Nikolay Borisov <nborisov@suse.com>
-
-Based on his previous patches to the kernel I guess this line should read:
-    Signed-off-by: Boris Burkov <boris@bur.io>
-
-
-Eryu, would it be possible to merge this or should Boris resend?
-
+On 2021/2/10 15:58, XiaoLi Feng wrote:
+> From: Xiaoli Feng <xifeng@redhat.com>
+>
+> After upstream linux patches(77573fa310d, 88149082bb8), if
+> FS_XFLAG_DAX is set, DONTCACHE is also set. So S_DAX on the file
+> should be active immediately once FS_XFLAG_DAX is set.
 > ---
->  tests/btrfs/220 | 10 +++++++---
->  1 file changed, 7 insertions(+), 3 deletions(-)
-> 
-> diff --git a/tests/btrfs/220 b/tests/btrfs/220
-> index c84c7065..1242460f 100755
-> --- a/tests/btrfs/220
-> +++ b/tests/btrfs/220
-> @@ -215,11 +215,8 @@ test_optional_kernel_features()
+>  tests/generic/608 | 38 +++++++++++---------------------------
+>  1 file changed, 11 insertions(+), 27 deletions(-)
+>
+> diff --git a/tests/generic/608 b/tests/generic/608
+> index dd89d91c..92f368e0 100755
+> --- a/tests/generic/608
+> +++ b/tests/generic/608
+> @@ -6,7 +6,7 @@
+>  # Change FS_XFLAG_DAX on an existing file and check if S_DAX on
+>  # the file can take effect immediately by the following steps:
+>  # 1) Stop all applications which are using the file.
+> -# 2) Do drop_caches or umount & mount cycle.
+> +# 2) DONTCACHE is set.
+Hi XiaoLi,
+
+It is better to add the related commits here.
+
 >  
->  test_non_revertible_options()
+>  seq=`basename $0`
+>  seqres=$RESULT_DIR/$seq
+> @@ -36,7 +36,7 @@ _require_dax_iflag
+>  _require_xfs_io_command "lsattr" "-v"
+>  _require_xfs_io_command "statx" "-r"
+>  
+> -test_drop_caches()
+> +test_caches()
 >  {
-> -	test_mount_opt "clear_cache" "clear_cache"
->  	test_mount_opt "degraded" "degraded"
+>  	local t_file=$SCRATCH_MNT/testfile
 >  
-> -	test_mount_opt "inode_cache" "inode_cache"
+> @@ -51,56 +51,40 @@ test_drop_caches()
+>  	_check_xflag $t_file 1
+>  	_check_s_dax $t_file 0
+>  
+> -	# One application is using test file and check if S_DAX on
+> -	# the file doesn't take effect immediately by drop_caches
+> -	echo 2 > /proc/sys/vm/drop_caches
+> -	_check_s_dax $t_file 0
+
+I want to add a similar comment in front of "_check_s_dax $t_file 0":
+-------------------------------------
+50 $XFS_IO_PROG -c 'chattr +x' $t_file
+51 _check_xflag $t_file 1
+52 # One application is using test file and check if S_DAX on
+53 # the file doesn't take effect immediately
+54 _check_s_dax $t_file 0
+-------------------------------------
+
 > -
->  	# nologreplay should be used only with
->  	test_should_fail "nologreplay"
->  	test_mount_opt "nologreplay,ro" "ro,rescue=nologreplay"
-> @@ -238,6 +235,11 @@ test_non_revertible_options()
->  	test_mount_opt "rescue=nologreplay,ro" "ro,rescue=nologreplay"
+>  	exec 3<&-
+>  
+>  	# No application is using test file and check if S_DAX on
+>  	# the file takes effect immediately by drop_caches
+
+Please remove the 'by drop_caches'
+
+> -	echo 2 > /proc/sys/vm/drop_caches
+>  	_check_s_dax $t_file 1
 >  }
 >  
-> +test_one_shot_options()
-> +{
-> +	test_mount_opt "clear_cache" ""
-> +}
+> -test_cycle_mount()
+> +test_nocache()
+>  {
+> -	local option=$1
+> -	local t_dir=$SCRATCH_MNT/testdir
+> -	local t_file=$t_dir/testfile
+> +	local t_file=$SCRATCH_MNT/testnocache
+>  
+> -	mkdir -p $t_dir
+> -	$XFS_IO_PROG -c 'chattr +x' $t_dir
+>  	rm -f $t_file
+>  	touch $t_file
+> +	_check_xflag $t_file 0
+> +	_check_s_dax $t_file 0
+
+Inheriting xflag and S_DAX from the parent directory is a good variety
+so I want to keep the $t_dir which has enabled xflag.
+
+Best Regards,
+Xiao Yang
+
 > +
->  # All these options can be reverted (with their "no" counterpart), or can have
->  # their values set to default on remount
->  test_revertible_options()
-> @@ -321,6 +323,8 @@ test_optional_kernel_features
+> +	$XFS_IO_PROG -c 'chattr +x' $t_file
+>  	_check_xflag $t_file 1
+>  	_check_s_dax $t_file 1
 >  
->  test_non_revertible_options
+> -	exec 3< $t_file
+> -
+>  	$XFS_IO_PROG -c 'chattr -x' $t_file
+>  	_check_xflag $t_file 0
+> -	_check_s_dax $t_file 1
+> -
+> -	exec 3<&-
+> -
+> -	# No application is using test file and check if S_DAX on
+> -	# the file takes effect immediately by umount & mount
+> -	_scratch_cycle_mount "$option"
+>  	_check_s_dax $t_file 0
+>  }
 >  
-> +test_one_shot_options
-> +
->  test_revertible_options
+>  do_tests()
+>  {
+>  	local mount_option=$1
+> -	local cycle_mount_option=$2
 >  
->  test_subvol
-> 
+>  	_scratch_mount "$mount_option"
+>  
+> -	test_drop_caches
+> +	test_caches
+>  
+> -	test_cycle_mount "$cycle_mount_option"
+> +	test_nocache
+>  
+>  	_scratch_unmount
+>  }
+> @@ -108,7 +92,7 @@ do_tests()
+>  _scratch_mkfs >> $seqres.full 2>&1
+>  
+>  # Mount with dax option
+> -do_tests "-o dax=inode" "dax=inode"
+> +do_tests "-o dax=inode"
+>  
+>  # Mount without dax option
+>  export MOUNT_OPTIONS=""
+
+
+
