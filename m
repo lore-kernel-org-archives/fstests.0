@@ -2,137 +2,205 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.3 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 07F6FC433E6
-	for <linux-fstests@archiver.kernel.org>; Wed, 24 Feb 2021 08:11:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2697AC433E0
+	for <linux-fstests@archiver.kernel.org>; Wed, 24 Feb 2021 08:33:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B8BFC64EDB
-	for <linux-fstests@archiver.kernel.org>; Wed, 24 Feb 2021 08:11:46 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C599164EEC
+	for <linux-fstests@archiver.kernel.org>; Wed, 24 Feb 2021 08:33:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234086AbhBXILo (ORCPT
+        id S234469AbhBXIc7 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 24 Feb 2021 03:11:44 -0500
-Received: from eu-shark2.inbox.eu ([195.216.236.82]:42982 "EHLO
-        eu-shark2.inbox.eu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234081AbhBXILg (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 24 Feb 2021 03:11:36 -0500
-Received: from eu-shark2.inbox.eu (localhost [127.0.0.1])
-        by eu-shark2-out.inbox.eu (Postfix) with ESMTP id 8D72645C0A0;
-        Wed, 24 Feb 2021 10:10:47 +0200 (EET)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=inbox.eu; s=20140211;
-        t=1614154247; bh=kvASDQxAmvJquxxVsOeZ/wccwQXzSMqTbokTAUkvNrc=;
-        h=References:From:To:Cc:Subject:In-reply-to:Date;
-        b=SDJAA550PTBomg9QuMi2o09UJHaXY1WUVexEHcXbozwbWDPFhppb2soTMAnAzEJwa
-         9ESMqBx0OSL13jIvYL+7GMepKaORnXgzy93G/9wymkpzOAvLikWhWrtgXIbpkLf8Dy
-         XFyNxiZBkQ2F2xKYvhJfStuircJh1IXlvAMR0DyQ=
-Received: from localhost (localhost [127.0.0.1])
-        by eu-shark2-in.inbox.eu (Postfix) with ESMTP id 7E8BB45C09D;
-        Wed, 24 Feb 2021 10:10:47 +0200 (EET)
-Received: from eu-shark2.inbox.eu ([127.0.0.1])
-        by localhost (eu-shark2.inbox.eu [127.0.0.1]) (spamfilter, port 35)
-        with ESMTP id Q-xn73zAEhZl; Wed, 24 Feb 2021 10:10:47 +0200 (EET)
-Received: from mail.inbox.eu (eu-pop1 [127.0.0.1])
-        by eu-shark2-in.inbox.eu (Postfix) with ESMTP id 264D745C0A5;
-        Wed, 24 Feb 2021 10:10:47 +0200 (EET)
-Received: from nas (unknown [45.87.95.231])
-        (Authenticated sender: l@damenly.su)
-        by mail.inbox.eu (Postfix) with ESMTPA id 75ECD1BE00D9;
-        Wed, 24 Feb 2021 10:10:44 +0200 (EET)
-References: <20210223134042.2212341-1-cgxu519@mykernel.net>
- <4ki1rjgu.fsf@damenly.su>
-User-agent: mu4e 1.4.13; emacs 27.1
-From:   Su Yue <l@damenly.su>
-To:     Chengguang Xu <cgxu519@mykernel.net>
-Cc:     guaneryu@gmail.com, fstests@vger.kernel.org, nborisov@suse.com,
-        linux-xfs@vger.kernel.org
-Subject: Re: [PATCH] generic/473: fix expectation properly in out file
-In-reply-to: <4ki1rjgu.fsf@damenly.su>
-Message-ID: <1rd5rim9.fsf@damenly.su>
-Date:   Wed, 24 Feb 2021 16:10:39 +0800
+        Wed, 24 Feb 2021 03:32:59 -0500
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:44491 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S234189AbhBXIcS (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 24 Feb 2021 03:32:18 -0500
+X-IronPort-AV: E=Sophos;i="5.81,202,1610380800"; 
+   d="scan'208";a="104811855"
+Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
+  by heian.cn.fujitsu.com with ESMTP; 24 Feb 2021 16:31:27 +0800
+Received: from G08CNEXMBPEKD06.g08.fujitsu.local (unknown [10.167.33.206])
+        by cn.fujitsu.com (Postfix) with ESMTP id 1BABD4CE76E3;
+        Wed, 24 Feb 2021 16:31:27 +0800 (CST)
+Received: from [10.167.220.69] (10.167.220.69) by
+ G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.2; Wed, 24 Feb 2021 16:31:18 +0800
+Message-ID: <60360ED3.40709@cn.fujitsu.com>
+Date:   Wed, 24 Feb 2021 16:31:15 +0800
+From:   Xiao Yang <yangx.jy@cn.fujitsu.com>
+User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.2; zh-CN; rv:1.9.2.18) Gecko/20110616 Thunderbird/3.1.11
 MIME-Version: 1.0
-Content-Type: text/plain; format=flowed
-X-Virus-Scanned: OK
-X-ESPOL: +d1m7upSY16pjlu/S3zADAMprSlIQI+R9ua80BxblHj7NSiYDTYAEE/3gQ4FQHmk
+To:     XiaoLi Feng <xifeng@redhat.com>
+CC:     <fstests@vger.kernel.org>
+Subject: Re: [PATCH v3] generic/608: verify S_DAX is active immediately for
+ DONTCACHE
+References: <20210219164438.26747-1-xifeng@redhat.com>
+In-Reply-To: <20210219164438.26747-1-xifeng@redhat.com>
+Content-Type: text/plain; charset="GB2312"
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.167.220.69]
+X-ClientProxiedBy: G08CNEXCHPEKD06.g08.fujitsu.local (10.167.33.205) To
+ G08CNEXMBPEKD06.g08.fujitsu.local (10.167.33.206)
+X-yoursite-MailScanner-ID: 1BABD4CE76E3.ABB84
+X-yoursite-MailScanner: Found to be clean
+X-yoursite-MailScanner-From: yangx.jy@cn.fujitsu.com
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+On 2021/2/20 0:44, XiaoLi Feng wrote:
+> From: Xiaoli Feng <xifeng@redhat.com>
+>
+> After upstream linux patches(77573fa310d, 88149082bb8), if
+> FS_XFLAG_DAX is set, DONTCACHE is also set. So S_DAX on the file
 
-On Wed 24 Feb 2021 at 15:52, Su Yue <l@damenly.su> wrote:
+What do you mean that if FS_XFLAG_DAX is set, DONTCACHE is also set?
+It seems that enabling FS_XFLAG_DAX will set DCACHE_DONTCACHE and
+I_DONTCACHE automatically.
 
-> Cc to the author and linux-xfs, since it's xfsprogs related.
+> should be active immediately once FS_XFLAG_DAX is set.
+> ---
+>  tests/generic/608 | 42 ++++++++++++++++++++----------------------
+>  1 file changed, 20 insertions(+), 22 deletions(-)
 >
-> On Tue 23 Feb 2021 at 21:40, Chengguang Xu 
-> <cgxu519@mykernel.net> wrote:
->
->> It seems the expected result of testcase of "Hole + Data"
->> in generic/473 is not correct, so just fix it properly.
->>
->
-> But it's not proper...
->
->> Signed-off-by: Chengguang Xu <cgxu519@mykernel.net>
->> ---
->>  tests/generic/473.out | 2 +-
->>  1 file changed, 1 insertion(+), 1 deletion(-)
->>
->> diff --git a/tests/generic/473.out b/tests/generic/473.out
->> index 75816388..f1ee5805 100644
->> --- a/tests/generic/473.out
->> +++ b/tests/generic/473.out
->> @@ -6,7 +6,7 @@ Data + Hole
->>  1: [256..287]: hole
->>  Hole + Data
->>  0: [0..127]: hole
->> -1: [128..255]: data
->> +1: [128..135]: data
->>
-> The line is produced by `$XFS_IO_PROG -c "fiemap -v 0 65k" $file 
-> |
-> _filter_fiemap`.
-> 0-64k is a hole and 64k-128k is a data extent.
-> fiemap ioctl always returns *complete* ranges of extents.
->
-And what you want to change is only the filted output.
-Without _filter_fiemap:
+> diff --git a/tests/generic/608 b/tests/generic/608
+> index dd89d91c..b207602e 100755
+> --- a/tests/generic/608
+> +++ b/tests/generic/608
+> @@ -6,7 +6,10 @@
+>  # Change FS_XFLAG_DAX on an existing file and check if S_DAX on
+>  # the file can take effect immediately by the following steps:
+>  # 1) Stop all applications which are using the file.
+> -# 2) Do drop_caches or umount & mount cycle.
+> +# 2) Enable the dax flag on the file that no applications are using. 
 
-/mnt/test/fiemap.473: 
-|
- EXT: FILE-OFFSET      BLOCK-RANGE      TOTAL FLAGS 
- |
-   0: [0..127]:        hole               128 
-   |
-   1: [128..255]:      26792..26919       128   0x0
+How about the following comment:
+1) When no applications are using an existing file, changing FS_XFLAG_DAX
+on the file make S_DAX take effect immediately.
+2) When some applications are using an existing file, changing FS_XFLAG_DAX
+on the file make S_DAX take effect immediately util all applications stop
+using it.
 
-[128..255] corresponds to the BLOCK-RANGE of the extent 
-26792..26919.
+> +# The upstream commit 88149082bb8 make the S_DAX take effect 
+> +# immediately because the inode is no longer cached and will re-read
+> +# from disk.
 
-> You may ask why the ending hole range is not aligned to 128 in 
-> 473.out. Because
-> fiemap ioctl returns nothing of querying holes. xfs_io does the 
-> extra
-> print work for holes.
->
-> xfsprogs-dev/io/fiemap.c:
-> for holes:
-> 153     if (lstart > llast) {
-> 154         print_hole(0, 0, 0, cur_extent, lflag, true, llast, 
-> lstart);
-> 155         cur_extent++;
-> 156         num_printed++;
-> 157     }
->
-> for the ending hole:
->  381     if (cur_extent && last_logical < range_end)
->  382         print_hole(foff_w, boff_w, tot_w, cur_extent, 
->  lflag,   !vflag,
->  383                BTOBBT(last_logical), BTOBBT(range_end));
->
->>  Hole + Data + Hole
->>  0: [0..127]: hole
->>  1: [128..255]: data
+Commit 77573fa310d makes S_DAX take effect immediately(i.e. don't depend
+drop_caches or umount & mount cycle).
+Commit 88149082bb8 is trying to resolve another bug.
+
+>  
+>  seq=`basename $0`
+>  seqres=$RESULT_DIR/$seq
+> @@ -36,7 +39,7 @@ _require_dax_iflag
+>  _require_xfs_io_command "lsattr" "-v"
+>  _require_xfs_io_command "statx" "-r"
+>  
+> -test_drop_caches()
+> +test_caches()
+>  {
+>  	local t_file=$SCRATCH_MNT/testfile
+>  
+> @@ -49,24 +52,19 @@ test_drop_caches()
+>  
+>  	$XFS_IO_PROG -c 'chattr +x' $t_file
+>  	_check_xflag $t_file 1
+> -	_check_s_dax $t_file 0
+> -
+>  	# One application is using test file and check if S_DAX on
+> -	# the file doesn't take effect immediately by drop_caches
+> -	echo 2 > /proc/sys/vm/drop_caches
+> +	# the file doesn't take effect immediately.
+>  	_check_s_dax $t_file 0
+>  
+>  	exec 3<&-
+>  
+>  	# No application is using test file and check if S_DAX on
+> -	# the file takes effect immediately by drop_caches
+> -	echo 2 > /proc/sys/vm/drop_caches
+> +	# the file takes effect immediately
+>  	_check_s_dax $t_file 1
+>  }
+>  
+> -test_cycle_mount()
+> +test_nocache()
+>  {
+> -	local option=$1
+>  	local t_dir=$SCRATCH_MNT/testdir
+>  	local t_file=$t_dir/testfile
+>  
+> @@ -77,30 +75,30 @@ test_cycle_mount()
+>  	_check_xflag $t_file 1
+>  	_check_s_dax $t_file 1
+>  
+> -	exec 3< $t_file
+> -
+> -	$XFS_IO_PROG -c 'chattr -x' $t_file
+> +	$XFS_IO_PROG -c 'chattr -x -R' $t_dir
+>  	_check_xflag $t_file 0
+> -	_check_s_dax $t_file 1
+> +	_check_s_dax $t_file 0
+>  
+> -	exec 3<&-
+> +	$XFS_IO_PROG -c 'chattr +x' $t_file
+> +	# Here S_DAX on the file will take effect immediately
+> +	# because of inode DONTCACHE. 
+> +	_check_xflag $t_file 1
+> +	_check_s_dax $t_file 1
+
+Why do you need the extra steps?
+------------------------------------
+78 $XFS_IO_PROG -c 'chattr -x -R' $t_dir
+79 _check_xflag $t_file 0
+80 _check_s_dax $t_file 0
+81
+82 $XFS_IO_PROG -c 'chattr +x' $t_file
+83 # Here S_DAX on the file will take effect immediately
+84 # because of inode DONTCACHE.
+85 _check_xflag $t_file 1
+86 _check_s_dax $t_file 1
+------------------------------------
+
+Best Regards,
+Xiao Yang
+>  
+> -	# No application is using test file and check if S_DAX on
+> -	# the file takes effect immediately by umount & mount
+> -	_scratch_cycle_mount "$option"
+> +	$XFS_IO_PROG -c 'chattr -x' $t_file
+> +	_check_xflag $t_file 0
+>  	_check_s_dax $t_file 0
+>  }
+>  
+>  do_tests()
+>  {
+>  	local mount_option=$1
+> -	local cycle_mount_option=$2
+>  
+>  	_scratch_mount "$mount_option"
+>  
+> -	test_drop_caches
+> +	test_caches
+>  
+> -	test_cycle_mount "$cycle_mount_option"
+> +	test_nocache
+>  
+>  	_scratch_unmount
+>  }
+> @@ -108,7 +106,7 @@ do_tests()
+>  _scratch_mkfs >> $seqres.full 2>&1
+>  
+>  # Mount with dax option
+> -do_tests "-o dax=inode" "dax=inode"
+> +do_tests "-o dax=inode"
+>  
+>  # Mount without dax option
+>  export MOUNT_OPTIONS=""
+
+
 
