@@ -2,89 +2,75 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.3 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7C5F0C433DB
-	for <linux-fstests@archiver.kernel.org>; Wed, 24 Feb 2021 16:52:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C4AF2C433E0
+	for <linux-fstests@archiver.kernel.org>; Wed, 24 Feb 2021 21:40:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2BDC464F06
-	for <linux-fstests@archiver.kernel.org>; Wed, 24 Feb 2021 16:52:34 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8C52664F08
+	for <linux-fstests@archiver.kernel.org>; Wed, 24 Feb 2021 21:40:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235728AbhBXQwU (ORCPT
+        id S235374AbhBXVkT (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 24 Feb 2021 11:52:20 -0500
-Received: from mail.kernel.org ([198.145.29.99]:40824 "EHLO mail.kernel.org"
+        Wed, 24 Feb 2021 16:40:19 -0500
+Received: from sandeen.net ([63.231.237.45]:40372 "EHLO sandeen.net"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S235738AbhBXQvs (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 24 Feb 2021 11:51:48 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 8303064EBA;
-        Wed, 24 Feb 2021 16:50:58 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1614185458;
-        bh=KWM1ivJqtm1fHlItfbBOhYn0/KJ/mmmhGw0xP60eLdo=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=OdUV2/fUTU8G+uKWxa57hzTvHxVmMo1RUF5JYSMR7j5d8Heguw0P2AeQicP7uq1HM
-         TPT+iND2DnmpV8I/eE2EwohqRa8G2geDqCgHcDM8IHXzwhtOgMf3rIBhIQEP3hx5Eb
-         e9tQrMUuaNtO0O0KU5DOdWOLpfjjLE5JPcZZTR5w71A0LUi0Q/K62JB3nnePJJyUF7
-         BQRIhdiTHivZ+74lqcDwdu2iVxbpFAuX4ogu2oIPmGY35eVZpq2UryPBXE1phEZclu
-         vmXBvkWuuB9gZ7MUsp3SFAdfvFPGiAwcd/tKBSpxY+qhxmILSfXL03wwCtQCoY8v9a
-         LBW6UOk9kRdjQ==
-Date:   Wed, 24 Feb 2021 08:50:57 -0800
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Chengguang Xu <cgxu519@mykernel.net>
-Cc:     guaneryu@gmail.com, fstests@vger.kernel.org
-Subject: Re: [PATCH] generic/473: fix expectation properly in out file
-Message-ID: <20210224165057.GB7269@magnolia>
-References: <20210223134042.2212341-1-cgxu519@mykernel.net>
+        id S235962AbhBXVkR (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 24 Feb 2021 16:40:17 -0500
+Received: from liberator.sandeen.net (liberator.sandeen.net [10.0.0.146])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by sandeen.net (Postfix) with ESMTPSA id 8459617264;
+        Wed, 24 Feb 2021 15:39:20 -0600 (CST)
+Subject: Re: xfstests seems broken on btrfs with multi-dev TEST_DEV
+From:   Eric Sandeen <sandeen@sandeen.net>
+To:     linux-btrfs@vger.kernel.org
+Cc:     fstests@vger.kernel.org
+References: <3e8f846d-e248-52a3-9863-d188f031401e@sandeen.net>
+Message-ID: <5e133067-ec0c-f2c6-7fb6-84620e26881e@sandeen.net>
+Date:   Wed, 24 Feb 2021 15:39:34 -0600
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.16; rv:78.0)
+ Gecko/20100101 Thunderbird/78.7.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210223134042.2212341-1-cgxu519@mykernel.net>
+In-Reply-To: <3e8f846d-e248-52a3-9863-d188f031401e@sandeen.net>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Feb 23, 2021 at 09:40:42PM +0800, Chengguang Xu wrote:
-> It seems the expected result of testcase of "Hole + Data"
-> in generic/473 is not correct, so just fix it properly.
+On 2/24/21 10:12 AM, Eric Sandeen wrote:
+> Last week I was curious to just see how btrfs is faring with RAID5 in
+> xfstests, so I set it up for a quick run with devices configured as:
+
+Whoops this was supposed to cc: fstests, not fsdevel, sorry.
+
+-Eric
+
+> TEST_DEV=/dev/sdb1 # <--- this was a 3-disk "-d raid5" filesystem
+> SCRATCH_DEV_POOL="/dev/sdb2 /dev/sdb3 /dev/sdb4 /dev/sdb5 /dev/sdb6"
 > 
-> Signed-off-by: Chengguang Xu <cgxu519@mykernel.net>
-> ---
->  tests/generic/473.out | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+> and fired off ./check -g auto
 > 
-> diff --git a/tests/generic/473.out b/tests/generic/473.out
-> index 75816388..f1ee5805 100644
-> --- a/tests/generic/473.out
-> +++ b/tests/generic/473.out
-> @@ -6,7 +6,7 @@ Data + Hole
->  1: [256..287]: hole
->  Hole + Data
->  0: [0..127]: hole
-> -1: [128..255]: data
-> +1: [128..135]: data
-
-This again.  While the FIEMAP documentation allows the call to return
-file mapping data outside the requested range, it doesn't require it,
-and neither XFS nor ext4 have ever done so.
-
-This test *enforces* that the FIEMAP implementation provide data outside
-the requested range, which means it has never passed on xfs/ext4.  This
-is no surprise, since it's enforcing one behavior where the spec allows
-for two behaviors.  The only fs I know of where it passes is btrfs.
-
-Delete this test or move it to tests/btrfs/, because it should not have
-been added in the first place.
-
---D
-
->  Hole + Data + Hole
->  0: [0..127]: hole
->  1: [128..255]: data
-> -- 
-> 2.27.0
+> Every test after btrfs/124 fails, because that test btrfs/124 does this:
 > 
+> # un-scan the btrfs devices
+> _btrfs_forget_or_module_reload
+> 
+> and nothing re-scans devices after that, so every attempt to mount TEST_DEV
+> will fail:
+> 
+>> devid 2 uuid e42cd5b8-2de6-4c85-ae51-74b61172051e is missing"
+> 
+> Other btrfs tests seeme to have the same problem.
+> 
+> If xfstest coverage on multi-device btrfs volumes is desired, it might be
+> a good idea for someone who understands the btrfs framework in xfstests
+> to fix this.
+> 
+> Thanks,
+> -Eric
 > 
