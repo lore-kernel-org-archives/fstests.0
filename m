@@ -2,75 +2,89 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.3 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-14.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C4AF2C433E0
-	for <linux-fstests@archiver.kernel.org>; Wed, 24 Feb 2021 21:40:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0DD87C433DB
+	for <linux-fstests@archiver.kernel.org>; Wed, 24 Feb 2021 22:37:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8C52664F08
-	for <linux-fstests@archiver.kernel.org>; Wed, 24 Feb 2021 21:40:20 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C516864F06
+	for <linux-fstests@archiver.kernel.org>; Wed, 24 Feb 2021 22:37:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235374AbhBXVkT (ORCPT
+        id S235342AbhBXWhc (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 24 Feb 2021 16:40:19 -0500
-Received: from sandeen.net ([63.231.237.45]:40372 "EHLO sandeen.net"
+        Wed, 24 Feb 2021 17:37:32 -0500
+Received: from mail.kernel.org ([198.145.29.99]:58036 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S235962AbhBXVkR (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 24 Feb 2021 16:40:17 -0500
-Received: from liberator.sandeen.net (liberator.sandeen.net [10.0.0.146])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by sandeen.net (Postfix) with ESMTPSA id 8459617264;
-        Wed, 24 Feb 2021 15:39:20 -0600 (CST)
-Subject: Re: xfstests seems broken on btrfs with multi-dev TEST_DEV
-From:   Eric Sandeen <sandeen@sandeen.net>
-To:     linux-btrfs@vger.kernel.org
-Cc:     fstests@vger.kernel.org
-References: <3e8f846d-e248-52a3-9863-d188f031401e@sandeen.net>
-Message-ID: <5e133067-ec0c-f2c6-7fb6-84620e26881e@sandeen.net>
-Date:   Wed, 24 Feb 2021 15:39:34 -0600
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.16; rv:78.0)
- Gecko/20100101 Thunderbird/78.7.1
+        id S232923AbhBXWhc (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 24 Feb 2021 17:37:32 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 7BEF064EDD;
+        Wed, 24 Feb 2021 22:36:51 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1614206211;
+        bh=x/nWnbB+3ivlCcgV1cOpuSCQqmW8mE7ylvkwFkL5xN0=;
+        h=From:To:Cc:Subject:Date:From;
+        b=IGEzCV4CeIA6vT4lG2a+/xuBqZSLxGP3QLfmhYZwNrU9rFjuEdfZNiOGENx9OAaQG
+         1sRdDwULVuXeAXIBlzc4VzC9M65HJ6GC0E7qmZ5liJy8s7ArQG2HCpszKLWU/a7DnD
+         VNHq/VUFoVr3U+rUJoCmQUkmx9bf6VVxX03xwasrXKd6IeVEOJZJic9tpMSTTo11Um
+         K3QFS8gpFXH1MH0EFBCY0cHDBTPrBnFpaz0BnK4kwKM4Atp25y5xH7H8cVXLCWUF+l
+         DIMhg1EDm0W+3YmsEDLxYS2Bg+DP3oXLfk8NIMkT2LSesfP+Y/VGj/UQreJYFvtRCA
+         C5xhwpkJx3OYA==
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     fstests@vger.kernel.org
+Cc:     linux-fscrypt@vger.kernel.org, Jaegeuk Kim <jaegeuk@kernel.org>,
+        Theodore Ts'o <tytso@mit.edu>,
+        Victor Hsieh <victorhsieh@google.com>
+Subject: [PATCH v2 0/4] Test the FS_IOC_READ_VERITY_METADATA ioctl
+Date:   Wed, 24 Feb 2021 14:35:33 -0800
+Message-Id: <20210224223537.110491-1-ebiggers@kernel.org>
+X-Mailer: git-send-email 2.30.1
 MIME-Version: 1.0
-In-Reply-To: <3e8f846d-e248-52a3-9863-d188f031401e@sandeen.net>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 2/24/21 10:12 AM, Eric Sandeen wrote:
-> Last week I was curious to just see how btrfs is faring with RAID5 in
-> xfstests, so I set it up for a quick run with devices configured as:
+This patchset adds tests for the FS_IOC_READ_VERITY_METADATA ioctl
+(https://lkml.kernel.org/linux-fscrypt/20210115181819.34732-1-ebiggers@kernel.org/T/#u).
 
-Whoops this was supposed to cc: fstests, not fsdevel, sorry.
+Running these tests requires a kernel at commit f7b36dc5cb37 or later
+for FS_IOC_READ_VERITY_METADATA support, and fsverity-utils at commit
+cf8fa5e5a7ac or later for 'dump_metadata' subcommand support.
 
--Eric
+Like the other fs-verity tests, they also require an ext4 or f2fs
+filesystem, and CONFIG_FS_VERITY=y.  The second test also requires
+CONFIG_FS_VERITY_BUILTIN_SIGNATURES=y.
 
-> TEST_DEV=/dev/sdb1 # <--- this was a 3-disk "-d raid5" filesystem
-> SCRATCH_DEV_POOL="/dev/sdb2 /dev/sdb3 /dev/sdb4 /dev/sdb5 /dev/sdb6"
-> 
-> and fired off ./check -g auto
-> 
-> Every test after btrfs/124 fails, because that test btrfs/124 does this:
-> 
-> # un-scan the btrfs devices
-> _btrfs_forget_or_module_reload
-> 
-> and nothing re-scans devices after that, so every attempt to mount TEST_DEV
-> will fail:
-> 
->> devid 2 uuid e42cd5b8-2de6-4c85-ae51-74b61172051e is missing"
-> 
-> Other btrfs tests seeme to have the same problem.
-> 
-> If xfstest coverage on multi-device btrfs volumes is desired, it might be
-> a good idea for someone who understands the btrfs framework in xfstests
-> to fix this.
-> 
-> Thanks,
-> -Eric
-> 
+As usual the tests will skip themselves if the prerequisites aren't met.
+
+Changed v1 => v2:
+   - Updated cover letter and removed RFC tag, now that the kernel and
+     fsverity-utils patches have been merged.
+   - Added executable bit to generic/902.
+   - Improved some comments in common/verity.
+
+Eric Biggers (4):
+  generic: factor out helpers for fs-verity built-in signatures
+  generic: add helpers for dumping fs-verity metadata
+  generic: test retrieving verity Merkle tree and descriptor
+  generic: test retrieving verity signature
+
+ common/verity         | 73 ++++++++++++++++++++++++++++++++++++++-
+ tests/generic/577     | 15 ++------
+ tests/generic/901     | 79 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/901.out | 16 +++++++++
+ tests/generic/902     | 66 ++++++++++++++++++++++++++++++++++++
+ tests/generic/902.out |  7 ++++
+ tests/generic/group   |  2 ++
+ 7 files changed, 245 insertions(+), 13 deletions(-)
+ create mode 100755 tests/generic/901
+ create mode 100644 tests/generic/901.out
+ create mode 100644 tests/generic/902
+ create mode 100644 tests/generic/902.out
+
+-- 
+2.30.1
+
