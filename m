@@ -2,112 +2,218 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A6D7DC433E0
-	for <linux-fstests@archiver.kernel.org>; Thu, 25 Feb 2021 03:20:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 609DDC433E0
+	for <linux-fstests@archiver.kernel.org>; Thu, 25 Feb 2021 05:58:13 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6B43564ECF
-	for <linux-fstests@archiver.kernel.org>; Thu, 25 Feb 2021 03:20:12 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id F348F64E6C
+	for <linux-fstests@archiver.kernel.org>; Thu, 25 Feb 2021 05:58:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234326AbhBYDUL (ORCPT
+        id S233895AbhBYF6L (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 24 Feb 2021 22:20:11 -0500
-Received: from mout.gmx.net ([212.227.17.20]:38285 "EHLO mout.gmx.net"
+        Thu, 25 Feb 2021 00:58:11 -0500
+Received: from mx2.suse.de ([195.135.220.15]:35568 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S232723AbhBYDUL (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 24 Feb 2021 22:20:11 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net;
-        s=badeba3b8450; t=1614223113;
-        bh=DYXwRtAip5A0U1SG0YLw4mN2fjoxSecntQAAcksTp10=;
-        h=X-UI-Sender-Class:Subject:To:Cc:References:From:Date:In-Reply-To;
-        b=fNWffFf85IcXqWVBxBMF/EImnRLUyoyBOeR8c55/QlJI+oz3OhYWwABeQmghGwDW9
-         jfYGN2dVJSZoDao3tCOGS/Qg2F46RUOFnKcM1AoiqOa+pq5o6RlbUEGrOimEjB/ZAo
-         yQwkXYJVgSo/aCy+JENBGl/1rDT4o2O9FyX9ATB4=
-X-UI-Sender-Class: 01bb95c1-4bf8-414a-932a-4f6e2808ef9c
-Received: from [0.0.0.0] ([149.28.201.231]) by mail.gmx.net (mrgmx105
- [212.227.17.174]) with ESMTPSA (Nemesis) id 1MKsj7-1lXbvQ06g9-00LIa1; Thu, 25
- Feb 2021 04:18:33 +0100
-Subject: Re: xfstests seems broken on btrfs with multi-dev TEST_DEV
-To:     Eric Sandeen <sandeen@sandeen.net>,
-        Anand Jain <anand.jain@oracle.com>, linux-btrfs@vger.kernel.org
-Cc:     fstests@vger.kernel.org
-References: <3e8f846d-e248-52a3-9863-d188f031401e@sandeen.net>
- <5e133067-ec0c-f2c6-7fb6-84620e26881e@sandeen.net>
- <407b5343-4124-2e30-0202-13f42d612b7c@oracle.com>
- <68737772-deb2-6429-2ac6-572e15cffe57@sandeen.net>
- <b119f3a9-bf78-5b09-2054-09a2f583581c@gmx.com>
- <eb0d9c05-2818-fb57-4b2c-75b379d088a5@sandeen.net>
- <74ea7a30-fd25-7ac5-b3ae-98cf7b70e80f@gmx.com>
- <5fb6c496-dc53-662e-1970-9afb9a9dd62d@sandeen.net>
-From:   Qu Wenruo <quwenruo.btrfs@gmx.com>
-Message-ID: <d7183517-95e5-7b75-3909-1b2d30db3a87@gmx.com>
-Date:   Thu, 25 Feb 2021 11:18:29 +0800
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.7.1
+        id S233860AbhBYF6L (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 25 Feb 2021 00:58:11 -0500
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+        t=1614232643; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+        bh=BlYa0M5/rwS6XZJimjdWVKI7S/hsCrurKfM7w6bNeKg=;
+        b=i5av/pNYtUMM8DPFxUKi5wxAFx6EJL67oHWA6HQDH1Rp52hFBOuGwmlZBbSW6KKa+nhJFm
+        pthhUgsrrcS22bUzilcOwoAJMhNEtnwX7LlYF/gjF6QoVJlp0FVQMbrPFaUkhEI3/bENKA
+        Fvf0MFq405QJrn6XYgz9MR2hWEOukPc=
+Received: from relay2.suse.de (unknown [195.135.221.27])
+        by mx2.suse.de (Postfix) with ESMTP id 08B78AE6E;
+        Thu, 25 Feb 2021 05:57:23 +0000 (UTC)
+From:   Qu Wenruo <wqu@suse.com>
+To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Cc:     Eric Sandeen <sandeen@sandeen.net>
+Subject: [PATCH] fstests: make sure we rescan all devices after unregistering
+Date:   Thu, 25 Feb 2021 13:57:17 +0800
+Message-Id: <20210225055717.70679-1-wqu@suse.com>
+X-Mailer: git-send-email 2.30.1
 MIME-Version: 1.0
-In-Reply-To: <5fb6c496-dc53-662e-1970-9afb9a9dd62d@sandeen.net>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:4JT2ncs95nwwSGlUC1NOFtWL8YjqDQY651vyxAeuNlnAppYl4ep
- C80evr06Rw6LeKUDEqPyrDdHzymDIQsiA5dZNOvw3LiJwLjaAd6lOaoqMnnLVFNvXFz+2Dw
- hPluVZPvU9dFoiH5WeMdFGB6eoSGtNF63x78NSnxeEncqZSGe04tZFdTVhD6+l6zT1RRMjr
- qf1j+gcIjo9t86mbBUv0Q==
-X-UI-Out-Filterresults: notjunk:1;V03:K0:wBBJDHp9sDQ=:urlhUD2629H8+kVtdN1pLx
- 6X5n0EMAvbMtkR8quHy6abRAy1mnBNNNcpKH+f5OROm0ih1vLdFuNCsruJ41QbeXOwWDw6RdQ
- aX+H1Q6qRfPzfu48LrGnqmUl1xKOnR3JKtYZmbKxGGGIPPa+q94u6lR3jemmE+Z+KmMlWyFdY
- 0e6AnvZod2jRW81FpzLmqtquJjID4p6RTa/zyYjK7qouxMyVp3qozOOZboV6PJVc1JlxHY/em
- Eonn6CGwcFO9kINSmGFtXitauM2MBHfHpE2bDL6pR4lV2dd1Z5VPcaGlsPQe3Q0vLaUTfWA/q
- LnJGTiaSS+3+TRf6Dew3pQQlZQvjQYCfowYTAb85LGupRtIDYSIXqG8AZQYp9yjZHZQ86zeJX
- AB0CyUFTmhhO7FLEY0j53Pf9Nip01JleF7VebmaCmUFewElsHionDFu+AYcFCbM1zm+2YcOrS
- 8rl4F2UyE7BtJ3iyheEempLyNrfAbgJa6Yd+NrSYO1ShalxaoiVC/Oljsj/ifS7UVJrRoWezj
- qilGC/Orj9WB5udxjc4EnM5bntAr5VyKeo7jhxtmn+tp0xnZ7cAwYUjYFHnIfFK1p9bdD/xt+
- 0hL1R0rt7801jHf71XVRqaHAGdjKKsjZL9zjx+wGjTexCisHvpsAc5kLGOiW4NTnrVE1tMYjq
- H2bnvmOy7ZdQYPv+UTcBsHg9mHrH5t3ik+EW7U4kKWLZw/e9sRcGJgfDN3muGLEFCaKEBDKIQ
- eP2ubd/OBBQaQenc+bvdFunnjz6L8uKbUYobCI60H+rAI1AxZnPOWL3Or1kD+UFbVslvZ9Y5n
- tzkenoqS0bNJMRtw9t+PgH7n5nmb4YbVp99qW2P+MCDq7WAxiROYcEfeYKj9vdpAOHyMPgQML
- +b2jap7hMSCO/udg1E9w==
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+There are some btrfs test cases utilizing
+_btrfs_forget_or_module_reload() to unregister all btrfs devices.
 
+However _btrfs_forget_or_module_reload() will unregister all devices,
+meaning if TEST_DEV is part of a multi-device btrfs, after those test
+cases TEST_DEV will no longer be mountable.
 
-On 2021/2/25 =E4=B8=8A=E5=8D=8811:15, Eric Sandeen wrote:
-> On 2/24/21 9:13 PM, Qu Wenruo wrote:
->
->> Now this makes way more sense,
->
-> Sorry for the earlier mistake.
->
->> as your previous comment on
->> _btrfs_forget_or_module_reload is completely correct.
->>
->> _btrfs_forget_or_module_reload will really forget all devices, while
->> what we really want is just excluding certain devices, and not to affec=
-t
->> the other ones.
->>
->> The proper way to fix it is to only introduce _btrfs_forget to
->> unregister involved devices, not all.
->>
->> I'll take a look into the fix, but I'm afraid that, for systems which
->> don't support forget, they have to skip those tests and reduce the
->> coverage for older kernel/progs.
->
-> Can't you just rescan when the test is done?
+This patch will introduce a new function, btrfs_rescan_devices() to undo
+the unregister, so that all later test cases can mount TEST_DEV without
+any problem.
 
-Oh, that's way more simpler.
+Since we are here, also add a missing
+_require_btrfs_forget_or_module_loadable for btrfs/225.
 
-Thanks for the tip, I just over-engineered.....
+Reported-by: Eric Sandeen <sandeen@sandeen.net>
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+---
+ common/btrfs    | 8 ++++++++
+ tests/btrfs/124 | 2 ++
+ tests/btrfs/125 | 2 ++
+ tests/btrfs/163 | 2 ++
+ tests/btrfs/164 | 2 ++
+ tests/btrfs/219 | 2 ++
+ tests/btrfs/225 | 3 +++
+ 7 files changed, 21 insertions(+)
 
-Thanks,
-Qu
->
->> Thanks,
->> Qu
->>
+diff --git a/common/btrfs b/common/btrfs
+index 6d452d4d..ebe6ce26 100644
+--- a/common/btrfs
++++ b/common/btrfs
+@@ -411,3 +411,11 @@ _btrfs_forget_or_module_reload()
+ 
+ 	_reload_fs_module "btrfs"
+ }
++
++# Test cases which utilized _btrfs_forget_or_module_reload() must call this
++# to make sure TEST_DEV can still be mounted. As TEST_DEV can be part of a
++# multi-device btrfs.
++_btrfs_rescan_devices()
++{
++	$BTRFS_UTIL_PROG device scan &> /dev/null
++}
+diff --git a/tests/btrfs/124 b/tests/btrfs/124
+index c9729cb4..4588264c 100755
+--- a/tests/btrfs/124
++++ b/tests/btrfs/124
+@@ -35,6 +35,7 @@ _cleanup()
+ {
+ 	cd /
+ 	rm -f $tmp.*
++	_btrfs_rescan_devices
+ }
+ 
+ # get standard environment, filters and checks
+@@ -144,6 +145,7 @@ fi
+ 
+ $UMOUNT_PROG $dev2
+ _scratch_dev_pool_put
++_btrfs_rescan_devices
+ _test_mount
+ 
+ status=0
+diff --git a/tests/btrfs/125 b/tests/btrfs/125
+index 41d22d0b..d125b111 100755
+--- a/tests/btrfs/125
++++ b/tests/btrfs/125
+@@ -34,6 +34,7 @@ _cleanup()
+ {
+ 	cd /
+ 	rm -f $tmp.*
++	_btrfs_rescan_devices
+ }
+ 
+ # get standard environment, filters and checks
+@@ -161,6 +162,7 @@ fi
+ 
+ $UMOUNT_PROG $dev2
+ _scratch_dev_pool_put
++_btrfs_rescan_devices
+ _test_mount
+ 
+ status=0
+diff --git a/tests/btrfs/163 b/tests/btrfs/163
+index 735881c6..b6bd6906 100755
+--- a/tests/btrfs/163
++++ b/tests/btrfs/163
+@@ -26,6 +26,7 @@ _cleanup()
+ {
+ 	cd /
+ 	rm -f $tmp.*
++	_btrfs_rescan_devices
+ }
+ 
+ # get standard environment, filters and checks
+@@ -102,6 +103,7 @@ replace_sprout
+ seed_is_mountable
+ 
+ _scratch_dev_pool_put
++_btrfs_rescan_devices
+ 
+ status=0
+ exit
+diff --git a/tests/btrfs/164 b/tests/btrfs/164
+index 55d4a683..ad22b6a4 100755
+--- a/tests/btrfs/164
++++ b/tests/btrfs/164
+@@ -22,6 +22,7 @@ _cleanup()
+ {
+ 	cd /
+ 	rm -f $tmp.*
++	_btrfs_rescan_devices
+ }
+ 
+ # get standard environment, filters and checks
+@@ -90,6 +91,7 @@ delete_seed
+ seed_is_mountable
+ 
+ _scratch_dev_pool_put
++_btrfs_rescan_devices
+ 
+ status=0
+ exit
+diff --git a/tests/btrfs/219 b/tests/btrfs/219
+index 78fca035..bff6003e 100755
+--- a/tests/btrfs/219
++++ b/tests/btrfs/219
+@@ -35,6 +35,7 @@ _cleanup()
+ 	[ ! -z "$fs_img1" ] && rm -rf $fs_img1
+ 	[ ! -z "$fs_img2" ] && rm -rf $fs_img2
+ 	[ ! -z "$loop_dev" ] && _destroy_loop_device $loop_dev
++	_btrfs_rescan_devices
+ }
+ 
+ # get standard environment, filters and checks
+@@ -97,6 +98,7 @@ _mount $loop_dev $loop_mnt > /dev/null 2>&1 || \
+ _mount -o loop $fs_img2 $loop_mnt1 > /dev/null 2>&1 && \
+ 	_fail "We were allowed to mount when we should have failed"
+ 
++_btrfs_rescan_devices
+ # success, all done
+ echo "Silence is golden"
+ status=0
+diff --git a/tests/btrfs/225 b/tests/btrfs/225
+index 730d9645..b745b536 100755
+--- a/tests/btrfs/225
++++ b/tests/btrfs/225
+@@ -25,6 +25,7 @@ _cleanup()
+ {
+ 	cd /
+ 	rm -f $tmp.*
++	_btrfs_rescan_devices
+ }
+ 
+ # get standard environment, filters and checks
+@@ -40,6 +41,7 @@ rm -f $seqres.full
+ _supported_fs btrfs
+ _require_test
+ _require_scratch_dev_pool 2
++_require_btrfs_forget_or_module_loadable
+ 
+ _scratch_dev_pool_get 2
+ 
+@@ -76,6 +78,7 @@ od -x $SCRATCH_MNT/foo
+ od -x $SCRATCH_MNT/bar
+ 
+ _scratch_dev_pool_put
++_btrfs_rescan_devices
+ 
+ # success, all done
+ status=0
+-- 
+2.30.1
+
