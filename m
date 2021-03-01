@@ -2,167 +2,191 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+X-Spam-Status: No, score=-13.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	LOTS_OF_MONEY,MAILING_LIST_MULTI,MONEY_NOHTML,SPF_HELO_NONE,SPF_PASS
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F248AC433E0
-	for <linux-fstests@archiver.kernel.org>; Mon,  1 Mar 2021 08:45:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5BDACC433E0
+	for <linux-fstests@archiver.kernel.org>; Mon,  1 Mar 2021 16:35:55 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B94DA64DF1
-	for <linux-fstests@archiver.kernel.org>; Mon,  1 Mar 2021 08:45:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 12D5664FD3
+	for <linux-fstests@archiver.kernel.org>; Mon,  1 Mar 2021 16:35:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233436AbhCAIpl (ORCPT
+        id S234596AbhCAQfb (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 1 Mar 2021 03:45:41 -0500
-Received: from mx2.suse.de ([195.135.220.15]:43618 "EHLO mx2.suse.de"
+        Mon, 1 Mar 2021 11:35:31 -0500
+Received: from mail.kernel.org ([198.145.29.99]:36326 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S233420AbhCAIpg (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 1 Mar 2021 03:45:36 -0500
-X-Virus-Scanned: by amavisd-new at test-mx.suse.de
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-        t=1614588288; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-        bh=NyXfuLSNkKHCqJkVaQiixSPcqD7Iu3GyJU9jigZIBd4=;
-        b=BFQ391k72h+8d0ILjm/i7p7SMyIaQ3dKUF+1N2Ch7KrplJVX0p9mAe6IGD/Zgx0Y2kxW3c
-        kRShHg8tPqc70b3uf9GqpVRWcO8SskVkcD9a2OHCgs00pNnbcM0VZxyBziXvh59FcS51Yg
-        5kLsb8nFV3Wh+Vk4sY86Trs+uvo0wXY=
-Received: from relay2.suse.de (unknown [195.135.221.27])
-        by mx2.suse.de (Postfix) with ESMTP id 93CD0AF84;
-        Mon,  1 Mar 2021 08:44:48 +0000 (UTC)
-From:   Qu Wenruo <wqu@suse.com>
-To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: [PATCH] btrfs: fix the false data csum mismatch error caused
-Date:   Mon,  1 Mar 2021 16:44:22 +0800
-Message-Id: <20210301084422.103716-1-wqu@suse.com>
-X-Mailer: git-send-email 2.30.1
+        id S234870AbhCAQ3N (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 1 Mar 2021 11:29:13 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id D678464EEC;
+        Mon,  1 Mar 2021 16:22:47 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1614615768;
+        bh=D59geVbGnDL9Lbu0d64oQlUiyGNfkePFkE+kCGJ3uFQ=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=ZfWuaS4Yqi7m6ht5LnSuKhvg3JRIgRH0TnfEix3h0+hyiaoMPwUcj9XNOF9ZWiRDq
+         aiqVMiDnCKE77Jk2X4YSuMNjWDm8CXYNCQ6DTewUrfB17X/XxZ1dCsp1opjjkvuRja
+         ELR3NGxcGw7WLqowDiqLZ7SdV3/lvm4bb08BM2/z5ayGooUghPNtqsDnMZNeSxBMkT
+         sRGHlL+1Lqc0SgCYU1M8Y16kY4xTnhGic4pb+Bx2DlfAMoqs43fT1boixZAPMmMKJn
+         BdP9gZbVNLkSpVqULfXJnrw6cjAtm6yC5TFa5jo6Kmrk9JZci1v5TtAMFqU7P2OdUR
+         q6KoAZth9XPig==
+Date:   Mon, 1 Mar 2021 08:22:47 -0800
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH] xfstests: remove _require_no_rtinherit completely
+Message-ID: <20210301162247.GC7269@magnolia>
+References: <20210301014603.147159-1-zlang@redhat.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210301014603.147159-1-zlang@redhat.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-[BUG]
-When running fstresss, we can hit strange data csum mismatch where the
-on-disk data is in fact correct (passes both scrub and btrfs check
---check-data-csum).
+On Mon, Mar 01, 2021 at 09:46:03AM +0800, Zorro Lang wrote:
+> The _require_no_rtinherit has been removed by:
+>   0ac0d8fb ("common: remove _require_no_rtinherit")
+> 
+> But some cases still remain the _require_no_rtinherit, so remove
+> them all.
+> 
+> Signed-off-by: Zorro Lang <zlang@redhat.com>
 
-With some extra debug info added, we have the following traces:
+Urrrrrrk, I didn't notice that this half of the removal ended up in the
+wrong patch. :(
 
-510482us : btrfs_do_readpage: root=5 ino=284 offset=393216, submit force=0 pgoff=0 iosize=8192
-510494us : btrfs_do_readpage: root=5 ino=284 offset=401408, submit force=0 pgoff=8192 iosize=4096
-510498us : btrfs_submit_data_bio: root=5 ino=284 bio first bvec=393216 len=8192
-510591us : btrfs_do_readpage: root=5 ino=284 offset=405504, submit force=0 pgoff=12288 iosize=36864
-510594us : btrfs_submit_data_bio: root=5 ino=284 bio first bvec=401408 len=4096
-510863us : btrfs_submit_data_bio: root=5 ino=284 bio first bvec=405504 len=36864
-510933us : btrfs_verify_data_csum: root=5 ino=284 offset=393216 len=8192
-510967us : btrfs_do_readpage: root=5 ino=284 offset=442368, skip beyond isize pgoff=49152 iosize=16384
-511047us : btrfs_verify_data_csum: root=5 ino=284 offset=401408 len=4096
-511163us : btrfs_verify_data_csum: root=5 ino=284 offset=405504 len=36864
-511290us : check_data_csum: !!! root=5 ino=284 offset=438272 pg_off=45056 !!!
-517387us : end_bio_extent_readpage: root=5 ino=284 before pending_read_bios=0
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 
-[CAUSE]
-Normally we expect all submitted bio read to only touch the range we
-specified, and under subpage context, it means we should only touch the
-range spcified in each bvec.
+--D
 
-But in data read path, inside end_bio_extent_readpage(), we have page
-zeroing which only takes regular page size into consideration.
-
-This means for subpage if we have an inode whose content looks like below:
-
-  0       16K     32K     48K     64K
-  |///////|       |///////|       |
-
-  |//| = data needs to be read from disk
-  |  | = hole
-
-And i_size is 64K initially.
-
-Then the following race can happen:
-
-		T1		|		T2
---------------------------------+--------------------------------
-btrfs_do_readpage()		|
-|- isize = 64K;			|
-|  At this time, the isize is 	|
-|  64K				|
-|				|
-|- submit_extent_page()		|
-|  submit previous assembled bio|
-|  assemble bio for [0, 16K)	|
-|				|
-|- submit_extent_page()		|
-   submit read bio for [0, 16K) |
-   assemble read bio for	|
-   [32K, 48K)			|
- 				|
-				| btrfs_setsize()
-				| |- i_size_write(, 16K);
-				|    Now i_size is only 16K
-end_io() for [0K, 16K)		|
-|- end_bio_extent_readpage()	|
-   |- btrfs_verify_data_csum()  |
-   |  No csum error		|
-   |- i_size = 16K;		|
-   |- zero_user_segment(16K,	|
-      PAGE_SIZE);		|
-      !!! We zeroed range	|
-      !!! [32K, 48K)		|
-				| end_io for [32K, 48K)
-				| |- end_bio_extent_readpage()
-				|    |- btrfs_verify_data_csum()
-				|       ! CSUM MISMATCH !
-				|       ! As the range is zeroed now !
-
-[FIX]
-To fix the problem, make end_bio_extent_readpage() to only zero the
-range of bvec.
-
-Thankfully the bug only affects subpage read-write support, as for full
-read-only mount we can't change i_size thus won't hit the race
-condition.
-
-Signed-off-by: Qu Wenruo <wqu@suse.com>
----
- fs/btrfs/extent_io.c | 21 ++++++++++++++++-----
- 1 file changed, 16 insertions(+), 5 deletions(-)
-
-diff --git a/fs/btrfs/extent_io.c b/fs/btrfs/extent_io.c
-index 424fc9ae99bc..8479ea84b6d9 100644
---- a/fs/btrfs/extent_io.c
-+++ b/fs/btrfs/extent_io.c
-@@ -3041,12 +3041,23 @@ static void end_bio_extent_readpage(struct bio *bio)
- 		if (likely(uptodate)) {
- 			loff_t i_size = i_size_read(inode);
- 			pgoff_t end_index = i_size >> PAGE_SHIFT;
--			unsigned off;
- 
--			/* Zero out the end if this page straddles i_size */
--			off = offset_in_page(i_size);
--			if (page->index == end_index && off)
--				zero_user_segment(page, off, PAGE_SIZE);
-+			/*
-+			 * Zero out the remaining part if this range straddles
-+			 * i_size.
-+			 *
-+			 * Here we should only zero the range inside the
-+			 * bvec, not touch anything else.
-+			 *
-+			 * NOTE: i_size is exclusive while end is inclusive.
-+			 */
-+			if (page->index == end_index && i_size <= end) {
-+				u32 zero_start = max(offset_in_page(i_size),
-+						     offset_in_page(end));
-+
-+				zero_user_segment(page, zero_start,
-+						  offset_in_page(end) + 1);
-+			}
- 		}
- 		ASSERT(bio_offset + len > bio_offset);
- 		bio_offset += len;
--- 
-2.30.1
-
+> ---
+>  tests/generic/250 | 7 ++++---
+>  tests/generic/252 | 6 +++---
+>  tests/generic/441 | 7 ++++---
+>  tests/generic/484 | 7 ++++---
+>  tests/generic/487 | 7 ++++---
+>  5 files changed, 19 insertions(+), 15 deletions(-)
+> 
+> diff --git a/tests/generic/250 b/tests/generic/250
+> index eaa2f884..102bf500 100755
+> --- a/tests/generic/250
+> +++ b/tests/generic/250
+> @@ -33,12 +33,13 @@ _require_scratch
+>  _require_dm_target error
+>  _require_xfs_io_command "falloc"
+>  _require_odirect
+> -# This test uses "dm" without taking into account the data could be on
+> -# realtime subvolume, thus the test will fail with rtinherit=1
+> -_require_no_rtinherit
+>  
+>  rm -f $seqres.full
+>  
+> +# Disable the scratch rt device to avoid test failures relating to the rt
+> +# bitmap consuming all the free space in our small data device.
+> +unset SCRATCH_RTDEV
+> +
+>  fssize=$((196 * 1048576))
+>  echo "Format and mount"
+>  $XFS_IO_PROG -d -c "pwrite -S 0x69 -b 1048576 0 $fssize" $SCRATCH_DEV >> $seqres.full
+> diff --git a/tests/generic/252 b/tests/generic/252
+> index 61369759..809e8020 100755
+> --- a/tests/generic/252
+> +++ b/tests/generic/252
+> @@ -32,14 +32,14 @@ _cleanup()
+>  _require_scratch
+>  _require_dm_target error
+>  _require_xfs_io_command "falloc"
+> -# This test uses "dm" without taking into account the data could be on
+> -# realtime subvolume, thus the test will fail with rtinherit=1
+> -_require_no_rtinherit
+>  _require_aiodio "aiocp"
+>  AIO_TEST="$here/src/aio-dio-regress/aiocp"
+>  
+>  rm -f $seqres.full
+>  
+> +# Disable the scratch rt device to avoid test failures relating to the rt
+> +# bitmap consuming all the free space in our small data device.
+> +unset SCRATCH_RTDEV
+>  
+>  fssize=$((196 * 1048576))
+>  echo "Format and mount"
+> diff --git a/tests/generic/441 b/tests/generic/441
+> index 6ad449bb..bedbcb08 100755
+> --- a/tests/generic/441
+> +++ b/tests/generic/441
+> @@ -32,9 +32,6 @@ _cleanup()
+>  
+>  # real QA test starts here
+>  _require_scratch
+> -# This test uses "dm" without taking into account the data could be on
+> -# realtime subvolume, thus the test will fail with rtinherit=1
+> -_require_no_rtinherit
+>  
+>  # Generally, we want to avoid journal errors on the extended testcase. Only
+>  # unset the -s flag if we have a logdev
+> @@ -57,6 +54,10 @@ _require_test_program dmerror
+>  
+>  rm -f $seqres.full
+>  
+> +# Disable the scratch rt device to avoid test failures relating to the rt
+> +# bitmap consuming all the free space in our small data device.
+> +unset SCRATCH_RTDEV
+> +
+>  echo "Format and mount"
+>  _scratch_mkfs > $seqres.full 2>&1
+>  _dmerror_init
+> diff --git a/tests/generic/484 b/tests/generic/484
+> index ad39e45b..331cd1ad 100755
+> --- a/tests/generic/484
+> +++ b/tests/generic/484
+> @@ -37,14 +37,15 @@ _cleanup()
+>  
+>  # real QA test starts here
+>  _require_scratch_nocheck
+> -# This test uses "dm" without taking into account the data could be on
+> -# realtime subvolume, thus the test will fail with rtinherit=1
+> -_require_no_rtinherit
+>  _require_dm_target error
+>  _require_xfs_io_command "syncfs"
+>  
+>  rm -f $seqres.full
+>  
+> +# Disable the scratch rt device to avoid test failures relating to the rt
+> +# bitmap consuming all the free space in our small data device.
+> +unset SCRATCH_RTDEV
+> +
+>  echo "Format and mount"
+>  _scratch_mkfs > $seqres.full 2>&1
+>  _dmerror_init
+> diff --git a/tests/generic/487 b/tests/generic/487
+> index 197b2385..1aa97ada 100755
+> --- a/tests/generic/487
+> +++ b/tests/generic/487
+> @@ -32,9 +32,6 @@ _cleanup()
+>  
+>  # real QA test starts here
+>  _require_scratch_nocheck
+> -# This test uses "dm" without taking into account the data could be on
+> -# realtime subvolume, thus the test will fail with rtinherit=1
+> -_require_no_rtinherit
+>  
+>  sflag='-s'
+>  case $FSTYP in
+> @@ -50,6 +47,10 @@ _require_dm_target error
+>  
+>  rm -f $seqres.full
+>  
+> +# Disable the scratch rt device to avoid test failures relating to the rt
+> +# bitmap consuming all the free space in our small data device.
+> +unset SCRATCH_RTDEV
+> +
+>  echo "Format and mount"
+>  _scratch_mkfs > $seqres.full 2>&1
+>  _dmerror_init
+> -- 
+> 2.29.2
+> 
