@@ -2,155 +2,88 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E9EC0C43332
-	for <linux-fstests@archiver.kernel.org>; Wed,  3 Mar 2021 00:12:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7521CC4361A
+	for <linux-fstests@archiver.kernel.org>; Wed,  3 Mar 2021 00:12:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BDD8964FD0
-	for <linux-fstests@archiver.kernel.org>; Wed,  3 Mar 2021 00:12:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3411464FC4
+	for <linux-fstests@archiver.kernel.org>; Wed,  3 Mar 2021 00:12:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232058AbhCCAA1 (ORCPT
+        id S234930AbhCCAB7 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 2 Mar 2021 19:00:27 -0500
-Received: from mail.kernel.org ([198.145.29.99]:38600 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1574440AbhCBDhg (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 1 Mar 2021 22:37:36 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 1DD0B61601;
-        Tue,  2 Mar 2021 03:32:44 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1614655964;
-        bh=fBTTRycpEqDMY530KgFM0faLEhz7cqnXeERkwGA1YI4=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=tebFDnvWOkaomqYSq4U0wr9aHPv7z2SucpZUuMA78KKSVYSBtZ0B4VStiNmn69jzd
-         07DHVQQZSOoFTQFkxrHFwcD25QrEZMQr1HfGfhJorz5k0eUySUCPnr9CqeyC12wTP8
-         o9hIKlJXYW83SaPnezvjTHuok3nE3KPSwCb4ZhEWlSSOnFltTHOwuNeC5a+ShxoIZw
-         1c5r+FCGgxzWk2lnvFNWG8wyqwjS41Ntg0bHQKTVwy9Z+Qs1p1R6IleoWxzf8QMRFC
-         aP0ncfse1YRhloRRl1B3US1GVgH0gN6YGQdpy7BXAisMU+PiEcTqSTrX0vHkhinIqF
-         sl97Gh+mj+rjg==
-Date:   Mon, 1 Mar 2021 19:32:43 -0800
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Brian Foster <bfoster@redhat.com>
-Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH] generic: test mapped write after shutdown and failed
- writeback
-Message-ID: <20210302033243.GN7272@magnolia>
-References: <20210210170628.173200-1-bfoster@redhat.com>
+        Tue, 2 Mar 2021 19:01:59 -0500
+Received: from youngberry.canonical.com ([91.189.89.112]:43827 "EHLO
+        youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1381580AbhCBIFc (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 2 Mar 2021 03:05:32 -0500
+Received: from ip5f5af0a0.dynamic.kabel-deutschland.de ([95.90.240.160] helo=wittgenstein)
+        by youngberry.canonical.com with esmtpsa (TLS1.2:ECDHE_RSA_AES_128_GCM_SHA256:128)
+        (Exim 4.86_2)
+        (envelope-from <christian.brauner@ubuntu.com>)
+        id 1lH01M-0000Ng-MI; Tue, 02 Mar 2021 08:04:44 +0000
+Date:   Tue, 2 Mar 2021 09:04:44 +0100
+From:   Christian Brauner <christian.brauner@ubuntu.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     Christoph Hellwig <hch@lst.de>, fstests@vger.kernel.org
+Subject: Re: [PATCH] generic/624: add fstests for idmapped mounts
+Message-ID: <20210302080444.ggk6lvn4jeelm4gl@wittgenstein>
+References: <20210301151712.1994033-1-christian.brauner@ubuntu.com>
+ <20210301173251.GA5375@lst.de>
+ <20210302014333.GF7269@magnolia>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20210210170628.173200-1-bfoster@redhat.com>
+In-Reply-To: <20210302014333.GF7269@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Feb 10, 2021 at 12:06:28PM -0500, Brian Foster wrote:
-> XFS has a regression where it failed to check shutdown status in the
-> write fault path. This produced an iomap warning if the page
-> happened to recently fail a writeback attempt because writeback
-> failure can clear Uptodate status on the page. Add a test for this
-> scenario to help ensure mapped write failures are handled as
-> expected in the event of filesystem shutdown.
+On Mon, Mar 01, 2021 at 05:43:33PM -0800, Darrick J. Wong wrote:
+> On Mon, Mar 01, 2021 at 06:32:51PM +0100, Christoph Hellwig wrote:
+> > > +# Modify as appropriate.
+> > > +_supported_fs ext4 xfs
+> > 
+> > I think this should be
+> > 
+> > _supported_fs generic
+> > 
+> > now that we do the probing for the actual support, and any file system
+> > not supporting it will just do a _notrun from _require_idmapped_mounts.
+> > 
+> > Also the comment above this line should be dropped.
 > 
-> Signed-off-by: Brian Foster <bfoster@redhat.com>
-> ---
-> 
-> Note that this test currently fails on XFS. The fix is posted for review
-> on linux-xfs:
-> 
-> https://lore.kernel.org/linux-xfs/20210210170112.172734-1-bfoster@redhat.com/
-> 
-> Brian
-> 
->  tests/generic/999     | 45 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/999.out |  4 ++++
->  tests/generic/group   |  1 +
->  3 files changed, 50 insertions(+)
->  create mode 100755 tests/generic/999
->  create mode 100644 tests/generic/999.out
-> 
-> diff --git a/tests/generic/999 b/tests/generic/999
-> new file mode 100755
-> index 00000000..5e5408e7
-> --- /dev/null
-> +++ b/tests/generic/999
-> @@ -0,0 +1,45 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0-only
-> +# Copyright 2021 Red Hat, Inc.
-> +#
-> +# FS QA Test No. 999
-> +#
-> +# Test a write fault scenario on a shutdown fs.
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	rm -f $tmp.*
-> +}
-> +
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +rm -f $seqres.full
-> +
-> +_supported_fs generic
-> +_require_scratch_nocheck
-> +_require_scratch_shutdown
-> +
-> +_scratch_mkfs &>> $seqres.full
-> +_scratch_mount
-> +
-> +# XFS had a regression where it failed to check shutdown status in the fault
-> +# path. This produced an iomap warning because writeback failure clears Uptodate
-> +# status on the page.
-> +file=$SCRATCH_MNT/file
-> +$XFS_IO_PROG -fc "pwrite 0 4k" -c fsync $file | _filter_xfs_io
-> +$XFS_IO_PROG -x -c "mmap 0 4k" -c "mwrite 0 4k" -c shutdown -c fsync \
-> +	-c "mwrite 0 4k" $file | _filter_xfs_io
+> The rest of this series still hasn't shown up in my inbox...
 
-On my fstests (which sets unlimited core dumps) this test generates a
-false negative because ./check trips on the core dump that the dying
-xfs_io creates.  Assuming that we're /supposed/ to segfault here, I'll
-send a patch to ulimit -c0.
+This is probably vger being clogged again due to some gmail crap. I'll
+paste the patch below in case it hasn't made it onto the list until you
+show up but for fwiw the latest version can always found at:
 
---D
+[1]: https://github.com/brauner/xfstests/tree/idmapped_mounts
+[2]: https://gitlab.com/brauner/xfstests/-/tree/idmapped_mounts
+[3]: https://git.kernel.org/pub/scm/linux/kernel/git/brauner/xfstests-dev.git/log/?h=idmapped_mounts
 
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/999.out b/tests/generic/999.out
-> new file mode 100644
-> index 00000000..f55569ff
-> --- /dev/null
-> +++ b/tests/generic/999.out
-> @@ -0,0 +1,4 @@
-> +QA output created by 999
-> +wrote 4096/4096 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +fsync: Input/output error
-> diff --git a/tests/generic/group b/tests/generic/group
-> index b10fdea4..edd54ce5 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -625,3 +625,4 @@
->  620 auto mount quick
->  621 auto quick encrypt
->  622 auto shutdown metadata atime
-> +999 auto quick shutdown
-> -- 
-> 2.26.2
+with the main test suite being located under
+
+src/idmapped_mounts/idmapped_mounts.c
+
 > 
+> ...but I did wonder, have you all tested file creation with idmapped
+> mounts and quotas enabled?  I noticed after the fact (sorry...) that
+> the dqalloc call just prior to creating the inode still uses
+> current_fs[ug]id() and not the fs[ug]id_into_mnt() call that the
+> conversion series uses.
+
+I think I commented on that on the original patch series where that
+question was brought up and we concluded that not using the mapping was
+the correct thing to do in this codepath.
+I'll try to add tests for quotas now and get them back to you by my EOD
+hopefully as part of the patch series.
+
+> 
+> (The fact that xfs access the ids once for quota and again when actually
+> creating the inode is screaming for a cleanup, by the way...)
+
+Yeah. :)
