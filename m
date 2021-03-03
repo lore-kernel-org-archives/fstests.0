@@ -2,204 +2,68 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0072FC433DB
-	for <linux-fstests@archiver.kernel.org>; Thu,  4 Mar 2021 00:24:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 79726C43331
+	for <linux-fstests@archiver.kernel.org>; Thu,  4 Mar 2021 00:24:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C8A3E64E12
-	for <linux-fstests@archiver.kernel.org>; Thu,  4 Mar 2021 00:24:12 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5258664E12
+	for <linux-fstests@archiver.kernel.org>; Thu,  4 Mar 2021 00:24:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1383178AbhCDAYM (ORCPT
+        id S238746AbhCDAYP (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 3 Mar 2021 19:24:12 -0500
-Received: from mail.kernel.org ([198.145.29.99]:42754 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S231989AbhCCSFw (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 3 Mar 2021 13:05:52 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id A981864EBD;
-        Wed,  3 Mar 2021 18:05:09 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1614794709;
-        bh=WDGSbBzTgy9G9AO/iUzjw+YdPBHUioTESYu2e9BbbaM=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=I6biDLuBnIVHGkBtlHKCa1cnu5tGMAZN7FSgJcuqAjdD/fySNocV0acMr3Obsnn8T
-         wF9IvHfOzqWoe5dJ838Fw5O+C3Kv/s23+/KZTQzTuTOXJInwYlzccbB7iN+VbWAHs1
-         iYZ/fdAt+bXDLBxc7Cyg0j0lQ72oR8NW9X9QF8YeRnnLlp4avU24e755JFP4MDQXAh
-         H55Ud1+ZPiPgi9pTx9MuD0QHZbHXT/J5004c4j59BXq1HDbNjhoRWhcuVwBjtoh9EC
-         h6++7/8vgCMxcsqaAS0thRHZb3QfrWWs1GEazbcJFL2gpgUB6zaM3bKqvwjn5XSHaW
-         zfNUl0Z83oEWw==
-Date:   Wed, 3 Mar 2021 10:05:08 -0800
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Chandan Babu R <chandanrlinux@gmail.com>
-Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
-        darrick.wong@oracle.com
-Subject: Re: [PATCH V4 07/11] xfs: Check for extent overflow when writing to
- unwritten extent
-Message-ID: <20210303180508.GO7269@magnolia>
-References: <20210118062022.15069-1-chandanrlinux@gmail.com>
- <20210118062022.15069-8-chandanrlinux@gmail.com>
+        Wed, 3 Mar 2021 19:24:15 -0500
+Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:51306 "EHLO
+        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1387962AbhCCUCv (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 3 Mar 2021 15:02:51 -0500
+Received: from cwcc.thunk.org (pool-72-74-133-215.bstnma.fios.verizon.net [72.74.133.215])
+        (authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 123K20IP011008
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Wed, 3 Mar 2021 15:02:01 -0500
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+        id 7301015C3A88; Wed,  3 Mar 2021 15:02:00 -0500 (EST)
+Date:   Wed, 3 Mar 2021 15:02:00 -0500
+From:   "Theodore Ts'o" <tytso@mit.edu>
+To:     Su Yue <damenly.su@gmail.com>
+Cc:     "Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org
+Subject: Re: [PATCH] generic: test which tries to exercise AIO/DIO into
+ unwritten space
+Message-ID: <YD/rONmSSOgDV644@mit.edu>
+References: <20210210205818.1494305-1-tytso@mit.edu>
+ <20210301171440.GD7269@magnolia>
+ <YD0ssnT0BCnwPXXk@mit.edu>
+ <CABnRu57hdKav3Mi8vQYeowZrQtFToMSzK23h4H2DuqGL0Dea2A@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210118062022.15069-8-chandanrlinux@gmail.com>
+In-Reply-To: <CABnRu57hdKav3Mi8vQYeowZrQtFToMSzK23h4H2DuqGL0Dea2A@mail.gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Jan 18, 2021 at 11:50:18AM +0530, Chandan Babu R wrote:
-> This test verifies that XFS does not cause inode fork's extent count to
-> overflow when writing to an unwritten extent.
-> 
-> Signed-off-by: Chandan Babu R <chandanrlinux@gmail.com>
-> ---
->  tests/xfs/527     | 89 +++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/527.out | 11 ++++++
->  tests/xfs/group   |  1 +
->  3 files changed, 101 insertions(+)
->  create mode 100755 tests/xfs/527
->  create mode 100644 tests/xfs/527.out
-> 
-> diff --git a/tests/xfs/527 b/tests/xfs/527
-> new file mode 100755
-> index 00000000..cd67bce4
-> --- /dev/null
-> +++ b/tests/xfs/527
-> @@ -0,0 +1,89 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2020 Chandan Babu R.  All Rights Reserved.
-> +#
-> +# FS QA Test 527
-> +#
-> +# Verify that XFS does not cause inode fork's extent count to overflow when
-> +# writing to an unwritten extent.
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/inject
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +_supported_fs xfs
-> +_require_scratch
-> +_require_xfs_debug
-> +_require_xfs_io_command "falloc"
-> +_require_xfs_io_error_injection "reduce_max_iextents"
-> +
-> +echo "Format and mount fs"
-> +_scratch_mkfs_sized $((1024 * 1024 * 1024)) >> $seqres.full
-> +_scratch_mount >> $seqres.full
-> +
-> +bsize=$(_get_file_block_size $SCRATCH_MNT)
-> +
-> +testfile=${SCRATCH_MNT}/testfile
-> +
-> +echo "Inject reduce_max_iextents error tag"
-> +_scratch_inject_error reduce_max_iextents 1
-> +
-> +nr_blks=15
-> +
-> +for io in Buffered Direct; do
+On Tue, Mar 02, 2021 at 11:20:06AM +0800, Su Yue wrote:
+> But both xfs and ext4 100% fail in v5.12-rc1 with 4k block size and 4k page
+> size on x86_64. The test itself should be okay because btrfs passes.
+> xfstests-dev version is 8cbc48b460b6 applied this patch. logs are attached.
 
-# First test buffered writes, then direct writes.
-for $xfs_io_flag in "" "-d"; do ?
+Hmm, interesting.  Thanks for the report.  I've been running most of
+my tests on a GCE VVM (using gce-xfstests) with a 100GB PD-SSD as the
+storage device.  I just tried, and it's passing now reliably on both
+4k and 1k for me, both on v5.11 and v5.12-rc1.  (Previously it was
+failing about 30% of the time on the ext4/1k test scenario, and was
+passing 100% on ext4/4k.)
 
-> +	echo "* $io write to unwritten extent"
-> +
-> +	echo "Fallocate $nr_blks blocks"
-> +	$XFS_IO_PROG -f -c "falloc 0 $((nr_blks * bsize))" $testfile >> $seqres.full
-> +
-> +	if [[ $io == "Buffered" ]]; then
-> +		xfs_io_flag=""
-> +	else
-> +		xfs_io_flag="-d"
-> +	fi
+Given your report, I tried running it using KVM (with a NVME ssd as
+the back-end storage device), and it's failing 80% of the time using
+the 4k block size.
 
-...because then you can skip this part.
+So previously I had assumed that it was passing consistently on with
+ext4/4k, but it looks like that it's very much dependent on the
+performance of the TEST_DEV.
 
-> +
-> +	echo "$io write to every other block of fallocated space"
-> +	for i in $(seq 1 2 $((nr_blks - 1))); do
-> +		$XFS_IO_PROG -f -s $xfs_io_flag -c "pwrite $((i * bsize)) $bsize" \
-> +		       $testfile >> $seqres.full 2>&1
-> +		[[ $? != 0 ]] && break
-> +	done
-> +
-> +	echo "Verify \$testfile's extent count"
-> +	nextents=$($XFS_IO_PROG -c 'stat' $testfile | grep nextents)
-> +	nextents=${nextents##fsxattr.nextents = }
-> +	if (( $nextents > 10 )); then
-> +		echo "Extent count overflow check failed: nextents = $nextents"
-> +		exit 1
-> +	fi
-> +
-> +	rm $testfile
-> +done
-> +
-> +# super_block->s_wb_err will have a newer seq value when compared to "/"'s
-> +# file->f_sb_err. Consume it here so that xfs_scrub can does not error out.
-> +$XFS_IO_PROG -c syncfs $SCRATCH_MNT >> $seqres.full 2>&1
-
-I wonder, should _check_xfs_filesystem should syncfs to clear old EIOs
-before running xfs_scrub?  I occasionally see this pop up on
-generic/204.
-
-(Everything else here looks ok.)
-
---D
-
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/527.out b/tests/xfs/527.out
-> new file mode 100644
-> index 00000000..3597ad92
-> --- /dev/null
-> +++ b/tests/xfs/527.out
-> @@ -0,0 +1,11 @@
-> +QA output created by 527
-> +Format and mount fs
-> +Inject reduce_max_iextents error tag
-> +* Buffered write to unwritten extent
-> +Fallocate 15 blocks
-> +Buffered write to every other block of fallocated space
-> +Verify $testfile's extent count
-> +* Direct write to unwritten extent
-> +Fallocate 15 blocks
-> +Direct write to every other block of fallocated space
-> +Verify $testfile's extent count
-> diff --git a/tests/xfs/group b/tests/xfs/group
-> index d089797b..627813fe 100644
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
-> @@ -524,3 +524,4 @@
->  524 auto quick punch zero insert collapse
->  525 auto quick attr
->  526 auto quick dir hardlink symlink
-> +527 auto quick
-> -- 
-> 2.29.2
-> 
+					- Ted
