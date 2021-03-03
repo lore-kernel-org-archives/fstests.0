@@ -2,231 +2,121 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7346BC15502
-	for <linux-fstests@archiver.kernel.org>; Thu,  4 Mar 2021 00:27:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A9E86C15506
+	for <linux-fstests@archiver.kernel.org>; Thu,  4 Mar 2021 00:27:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4282F64E56
-	for <linux-fstests@archiver.kernel.org>; Thu,  4 Mar 2021 00:27:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 52DA564E62
+	for <linux-fstests@archiver.kernel.org>; Thu,  4 Mar 2021 00:27:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1382279AbhCDAYK (ORCPT
+        id S1382094AbhCDAYE (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 3 Mar 2021 19:24:10 -0500
-Received: from mail.kernel.org ([198.145.29.99]:56936 "EHLO mail.kernel.org"
+        Wed, 3 Mar 2021 19:24:04 -0500
+Received: from mx2.suse.de ([195.135.220.15]:40942 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1386041AbhCCRqL (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 3 Mar 2021 12:46:11 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 0D845601FD;
-        Wed,  3 Mar 2021 17:45:30 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1614793530;
-        bh=PbWHaeDfGiz43g3owIYPmSPY7hoY5+mHYc2X18a69Kg=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=IzWWWdCNNbnzPdig/tONKPUF9lllElsED8dEzXlae3ogdODeHd+7n84AhvMUUgFFn
-         SNv592/QgZSIuPQryAuR8PGhTR3iBV/iqPQjcd1VqIh9GfIAp7xin4HOVzazzu3usz
-         eBSMUw6gFnSOmfuejhx4cmB4Ku/GagsNgKx+DrxYfNPglm+9HJ+k0O+1rq+Tmwg7UX
-         8Nqzjlb1Izek7Yb5aCHtn5n17egWxfBKpNO6dDsGI7DBMTfuFCCxe8EZcIQWhTT3P1
-         JzkMWLoPnRU8oCWmD8Tc+a/dTHlZB/uq3A2/q8tP/R3avwL74t8HVS/mWtz8DpMFEN
-         aoJ9kXPq+B2+Q==
-Date:   Wed, 3 Mar 2021 09:45:27 -0800
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Chandan Babu R <chandanrlinux@gmail.com>
-Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
-        darrick.wong@oracle.com
-Subject: Re: [PATCH V4 03/11] xfs: Check for extent overflow when growing
- realtime bitmap/summary inodes
-Message-ID: <20210303174527.GK7269@magnolia>
-References: <20210118062022.15069-1-chandanrlinux@gmail.com>
- <20210118062022.15069-4-chandanrlinux@gmail.com>
+        id S1842785AbhCCINM (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 3 Mar 2021 03:13:12 -0500
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+        t=1614759144; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+        bh=I8MgoPWi0A/DEEHhPBXEgxuH6kqVoUyfUIdsEn236AY=;
+        b=pONt1fdU991V35EOQAVrYaE/KnVnkkuNVpZ4ZEP8BWHB84/oDcChdP06vvoru2S3kdHSgd
+        m3yTSEReuligYKvrn4AgdUpRsr55S8ad+JLDuDH7rJg3wq4sP0RsZ7tC9h7e1DOBUn3SY6
+        pIBD3UX8mH/UAzpRo+1HBfxQK0ZDcFk=
+Received: from relay2.suse.de (unknown [195.135.221.27])
+        by mx2.suse.de (Postfix) with ESMTP id D751DAE88;
+        Wed,  3 Mar 2021 08:12:24 +0000 (UTC)
+From:   Qu Wenruo <wqu@suse.com>
+To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: [PATCH 1/2] btrfs: use a dedicated variable for qgroup released data rsv for insert_prealloc_file_extent()
+Date:   Wed,  3 Mar 2021 16:12:19 +0800
+Message-Id: <20210303081220.80913-1-wqu@suse.com>
+X-Mailer: git-send-email 2.30.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210118062022.15069-4-chandanrlinux@gmail.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Jan 18, 2021 at 11:50:14AM +0530, Chandan Babu R wrote:
-> Verify that XFS does not cause realtime bitmap/summary inode fork's
-> extent count to overflow when growing the realtime volume associated
-> with a filesystem.
-> 
-> Signed-off-by: Chandan Babu R <chandanrlinux@gmail.com>
-> ---
->  tests/xfs/523     | 119 ++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/523.out |  11 +++++
->  tests/xfs/group   |   1 +
->  3 files changed, 131 insertions(+)
->  create mode 100755 tests/xfs/523
->  create mode 100644 tests/xfs/523.out
-> 
-> diff --git a/tests/xfs/523 b/tests/xfs/523
-> new file mode 100755
-> index 00000000..145f0ff6
-> --- /dev/null
-> +++ b/tests/xfs/523
-> @@ -0,0 +1,119 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2020 Chandan Babu R.  All Rights Reserved.
-> +#
-> +# FS QA Test 523
-> +#
-> +# Verify that XFS does not cause bitmap/summary inode fork's extent count to
-> +# overflow when growing an the realtime volume of the filesystem.
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	_scratch_unmount >> $seqres.full 2>&1
-> +	test -e "$rtdev" && losetup -d $rtdev >> $seqres.full 2>&1
-> +	rm -f $tmp.* $TEST_DIR/$seq.rtvol
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/inject
-> +. ./common/populate
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +_supported_fs xfs
-> +_require_test
-> +_require_xfs_debug
-> +_require_test_program "punch-alternating"
-> +_require_xfs_io_error_injection "reduce_max_iextents"
-> +_require_xfs_io_error_injection "bmap_alloc_minlen_extent"
-> +_require_scratch_nocheck
+There is a piece of weird code in insert_prealloc_file_extent(), which
+looks like:
 
-Might want a comment about why this test doesn't _require_realtime.
+	ret = btrfs_qgroup_release_data(inode, file_offset, len);
+	if (ret < 0)
+		return ERR_PTR(ret);
+	if (trans) {
+		ret = insert_reserved_file_extent(trans, inode,
+						  file_offset, &stack_fi,
+						  true, ret);
+	...
+	}
+	extent_info.is_new_extent = true;
+	extent_info.qgroup_reserved = ret;
+	...
 
-Hm.  What /does/ happen if the kernel xfs driver wasn't built with
-realtime support?  I'll investigate and report back.
+Note how the variable @ret is abused here, and if anyone is adding code
+just after btrfs_qgroup_release_data() call, it's super easy to
+overwrite the @ret and cause tons of qgroup related bugs.
 
-> +
-> +echo "* Test extending rt inodes"
-> +
-> +_scratch_mkfs | _filter_mkfs >> $seqres.full 2> $tmp.mkfs
-> +. $tmp.mkfs
-> +
-> +echo "Create fake rt volume"
-> +nr_bitmap_blks=25
-> +nr_bits=$((nr_bitmap_blks * dbsize * 8))
-> +rtextsz=$dbsize
-> +rtdevsz=$((nr_bits * rtextsz))
-> +truncate -s $rtdevsz $TEST_DIR/$seq.rtvol
-> +rtdev=$(_create_loop_device $TEST_DIR/$seq.rtvol)
-> +
-> +echo "Format and mount rt volume"
-> +
-> +export USE_EXTERNAL=yes
-> +export SCRATCH_RTDEV=$rtdev
-> +_scratch_mkfs -d size=$((1024 * 1024 * 1024)) \
-> +	      -r size=2M,extsize=${rtextsz} >> $seqres.full
-> +_scratch_mount >> $seqres.full
-> +
-> +echo "Consume free space"
-> +fillerdir=$SCRATCH_MNT/fillerdir
-> +nr_free_blks=$(stat -f -c '%f' $SCRATCH_MNT)
-> +nr_free_blks=$((nr_free_blks * 90 / 100))
-> +
-> +_fill_fs $((dbsize * nr_free_blks)) $fillerdir $dbsize 0 >> $seqres.full 2>&1
-> +
-> +echo "Create fragmented filesystem"
-> +for dentry in $(ls -1 $fillerdir/); do
-> +	$here/src/punch-alternating $fillerdir/$dentry >> $seqres.full
-> +done
-> +
-> +echo "Inject reduce_max_iextents error tag"
-> +_scratch_inject_error reduce_max_iextents 1
-> +
-> +echo "Inject bmap_alloc_minlen_extent error tag"
-> +_scratch_inject_error bmap_alloc_minlen_extent 1
-> +
-> +echo "Grow realtime volume"
-> +$XFS_GROWFS_PROG -r $SCRATCH_MNT >> $seqres.full 2>&1
-> +if [[ $? == 0 ]]; then
-> +	echo "Growfs succeeded; should have failed."
-> +	exit 1
-> +fi
-> +
-> +_scratch_unmount >> $seqres.full
-> +
-> +echo "Verify rbmino's and rsumino's extent count"
-> +for rtino in rbmino rsumino; do
-> +	ino=$(_scratch_xfs_db -c sb -c "print $rtino")
-> +	ino=${ino##${rtino} = }
-> +	echo "$rtino = $ino" >> $seqres.full
-> +
-> +	nextents=$(_scratch_get_iext_count $ino data || \
-> +			_fail "Unable to obtain inode fork's extent count")
-> +	if (( $nextents > 10 )); then
-> +		echo "Extent count overflow check failed: nextents = $nextents"
-> +		exit 1
-> +	fi
-> +done
-> +
-> +echo "Check filesystem"
-> +_check_xfs_filesystem $SCRATCH_DEV none $rtdev
-> +
-> +losetup -d $rtdev
-> +rm -f $TEST_DIR/$seq.rtvol
-> +
-> +export USE_EXTERNAL=""
-> +export SCRATCH_RTDEV=""
+Fix such abuse by introducing new variable @qgroup_released, so that we
+won't reuse the existing variable @ret.
 
-No need to clear these, but with those two nits fixed, this looks all right.
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+---
+I really want to go back time and slap my face. That damn naming,
+especially that "extent_info.qgroup_reserved = ret", wasted too long
+time.
 
---D
+What the heck I was doing in the past??
+---
+ fs/btrfs/inode.c | 11 ++++++-----
+ 1 file changed, 6 insertions(+), 5 deletions(-)
 
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/523.out b/tests/xfs/523.out
-> new file mode 100644
-> index 00000000..7df02970
-> --- /dev/null
-> +++ b/tests/xfs/523.out
-> @@ -0,0 +1,11 @@
-> +QA output created by 523
-> +* Test extending rt inodes
-> +Create fake rt volume
-> +Format and mount rt volume
-> +Consume free space
-> +Create fragmented filesystem
-> +Inject reduce_max_iextents error tag
-> +Inject bmap_alloc_minlen_extent error tag
-> +Grow realtime volume
-> +Verify rbmino's and rsumino's extent count
-> +Check filesystem
-> diff --git a/tests/xfs/group b/tests/xfs/group
-> index 1831f0b5..018c70ef 100644
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
-> @@ -520,3 +520,4 @@
->  520 auto quick reflink
->  521 auto quick realtime growfs
->  522 auto quick quota
-> +523 auto quick realtime growfs
-> -- 
-> 2.29.2
-> 
+diff --git a/fs/btrfs/inode.c b/fs/btrfs/inode.c
+index 4f2f1e932751..4e9717c29451 100644
+--- a/fs/btrfs/inode.c
++++ b/fs/btrfs/inode.c
+@@ -9873,6 +9873,7 @@ static struct btrfs_trans_handle *insert_prealloc_file_extent(
+ 	struct btrfs_path *path;
+ 	u64 start = ins->objectid;
+ 	u64 len = ins->offset;
++	int qgroup_released;
+ 	int ret;
+ 
+ 	memset(&stack_fi, 0, sizeof(stack_fi));
+@@ -9885,14 +9886,14 @@ static struct btrfs_trans_handle *insert_prealloc_file_extent(
+ 	btrfs_set_stack_file_extent_compression(&stack_fi, BTRFS_COMPRESS_NONE);
+ 	/* Encryption and other encoding is reserved and all 0 */
+ 
+-	ret = btrfs_qgroup_release_data(inode, file_offset, len);
+-	if (ret < 0)
+-		return ERR_PTR(ret);
++	qgroup_released = btrfs_qgroup_release_data(inode, file_offset, len);
++	if (qgroup_released < 0)
++		return ERR_PTR(qgroup_released);
+ 
+ 	if (trans) {
+ 		ret = insert_reserved_file_extent(trans, inode,
+ 						  file_offset, &stack_fi,
+-						  true, ret);
++						  true, qgroup_released);
+ 		if (ret)
+ 			return ERR_PTR(ret);
+ 		return trans;
+@@ -9905,7 +9906,7 @@ static struct btrfs_trans_handle *insert_prealloc_file_extent(
+ 	extent_info.file_offset = file_offset;
+ 	extent_info.extent_buf = (char *)&stack_fi;
+ 	extent_info.is_new_extent = true;
+-	extent_info.qgroup_reserved = ret;
++	extent_info.qgroup_reserved = qgroup_released;
+ 	extent_info.insertions = 0;
+ 
+ 	path = btrfs_alloc_path();
+-- 
+2.30.1
+
