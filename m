@@ -4,95 +4,202 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-16.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 522B7C28D17
-	for <linux-fstests@archiver.kernel.org>; Wed,  3 Mar 2021 00:12:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0072FC433DB
+	for <linux-fstests@archiver.kernel.org>; Thu,  4 Mar 2021 00:24:13 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 07ABF64FC7
-	for <linux-fstests@archiver.kernel.org>; Wed,  3 Mar 2021 00:12:41 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C8A3E64E12
+	for <linux-fstests@archiver.kernel.org>; Thu,  4 Mar 2021 00:24:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235233AbhCCAEg (ORCPT
+        id S1383178AbhCDAYM (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 2 Mar 2021 19:04:36 -0500
-Received: from mail.kernel.org ([198.145.29.99]:38650 "EHLO mail.kernel.org"
+        Wed, 3 Mar 2021 19:24:12 -0500
+Received: from mail.kernel.org ([198.145.29.99]:42754 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2361112AbhCBXXh (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 2 Mar 2021 18:23:37 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 895B264F3C;
-        Tue,  2 Mar 2021 23:22:56 +0000 (UTC)
+        id S231989AbhCCSFw (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 3 Mar 2021 13:05:52 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id A981864EBD;
+        Wed,  3 Mar 2021 18:05:09 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1614727376;
-        bh=697Nb2di+BUNIoecDPwRGI5l1BRr1zPGoqYUfZiiDag=;
-        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=rz1rISzIZI9+2jEpsw2jt7jJPbMHtOJSeuXONj6chUHAZnGed09ps+bSMjQ6l4raf
-         S/MnOES1JOUEOc4mhKJA8vIIWPUYkBYiVreBTNdnoTsJCgKnzHjRRT6Z4OThXaUWPc
-         g7wdGGW08g2xKGFpGwQMotYhS4CsYJxQagOgDIZX/AqCze3FKT3ywehjzz6BGvbWvh
-         eFaSjZO04Ne+pIRuCP8VszFZKECMThMmKTh3Tc6FtIkNxEaow47/TKbiy4XMAv4qCv
-         +HIkQD7vIZK2mkJcmlUuIUIsjTonkGYCSsI45piCbKbDXDMV6MBqNX5gk7XDmd2STB
-         Ou5TeBWufV6bA==
-Subject: [PATCH 4/4] generic/60[78]: ensure the initial DAX file flag state
- before test
+        s=k20201202; t=1614794709;
+        bh=WDGSbBzTgy9G9AO/iUzjw+YdPBHUioTESYu2e9BbbaM=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=I6biDLuBnIVHGkBtlHKCa1cnu5tGMAZN7FSgJcuqAjdD/fySNocV0acMr3Obsnn8T
+         wF9IvHfOzqWoe5dJ838Fw5O+C3Kv/s23+/KZTQzTuTOXJInwYlzccbB7iN+VbWAHs1
+         iYZ/fdAt+bXDLBxc7Cyg0j0lQ72oR8NW9X9QF8YeRnnLlp4avU24e755JFP4MDQXAh
+         H55Ud1+ZPiPgi9pTx9MuD0QHZbHXT/J5004c4j59BXq1HDbNjhoRWhcuVwBjtoh9EC
+         h6++7/8vgCMxcsqaAS0thRHZb3QfrWWs1GEazbcJFL2gpgUB6zaM3bKqvwjn5XSHaW
+         zfNUl0Z83oEWw==
+Date:   Wed, 3 Mar 2021 10:05:08 -0800
 From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     djwong@kernel.org, guaneryu@gmail.com
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me
-Date:   Tue, 02 Mar 2021 15:22:56 -0800
-Message-ID: <161472737624.3478298.18322455058303982173.stgit@magnolia>
-In-Reply-To: <161472735404.3478298.8179031068431918520.stgit@magnolia>
-References: <161472735404.3478298.8179031068431918520.stgit@magnolia>
-User-Agent: StGit/0.19
+To:     Chandan Babu R <chandanrlinux@gmail.com>
+Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
+        darrick.wong@oracle.com
+Subject: Re: [PATCH V4 07/11] xfs: Check for extent overflow when writing to
+ unwritten extent
+Message-ID: <20210303180508.GO7269@magnolia>
+References: <20210118062022.15069-1-chandanrlinux@gmail.com>
+ <20210118062022.15069-8-chandanrlinux@gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210118062022.15069-8-chandanrlinux@gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Darrick J. Wong <djwong@kernel.org>
+On Mon, Jan 18, 2021 at 11:50:18AM +0530, Chandan Babu R wrote:
+> This test verifies that XFS does not cause inode fork's extent count to
+> overflow when writing to an unwritten extent.
+> 
+> Signed-off-by: Chandan Babu R <chandanrlinux@gmail.com>
+> ---
+>  tests/xfs/527     | 89 +++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/527.out | 11 ++++++
+>  tests/xfs/group   |  1 +
+>  3 files changed, 101 insertions(+)
+>  create mode 100755 tests/xfs/527
+>  create mode 100644 tests/xfs/527.out
+> 
+> diff --git a/tests/xfs/527 b/tests/xfs/527
+> new file mode 100755
+> index 00000000..cd67bce4
+> --- /dev/null
+> +++ b/tests/xfs/527
+> @@ -0,0 +1,89 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2020 Chandan Babu R.  All Rights Reserved.
+> +#
+> +# FS QA Test 527
+> +#
+> +# Verify that XFS does not cause inode fork's extent count to overflow when
+> +# writing to an unwritten extent.
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +. ./common/inject
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +_supported_fs xfs
+> +_require_scratch
+> +_require_xfs_debug
+> +_require_xfs_io_command "falloc"
+> +_require_xfs_io_error_injection "reduce_max_iextents"
+> +
+> +echo "Format and mount fs"
+> +_scratch_mkfs_sized $((1024 * 1024 * 1024)) >> $seqres.full
+> +_scratch_mount >> $seqres.full
+> +
+> +bsize=$(_get_file_block_size $SCRATCH_MNT)
+> +
+> +testfile=${SCRATCH_MNT}/testfile
+> +
+> +echo "Inject reduce_max_iextents error tag"
+> +_scratch_inject_error reduce_max_iextents 1
+> +
+> +nr_blks=15
+> +
+> +for io in Buffered Direct; do
 
-Since this test checks the behaviors of both the in-core S_DAX flag and
-the ondisk FS_XFLAG_DAX inode flags, it must be careful about the
-initial state of the filesystem w.r.t. the inode flag.
+# First test buffered writes, then direct writes.
+for $xfs_io_flag in "" "-d"; do ?
 
-Make sure that the root directory does /not/ have the inode flag set
-before we begin testing, so that the initial state doesn't throw off
-inheritance testing.
+> +	echo "* $io write to unwritten extent"
+> +
+> +	echo "Fallocate $nr_blks blocks"
+> +	$XFS_IO_PROG -f -c "falloc 0 $((nr_blks * bsize))" $testfile >> $seqres.full
+> +
+> +	if [[ $io == "Buffered" ]]; then
+> +		xfs_io_flag=""
+> +	else
+> +		xfs_io_flag="-d"
+> +	fi
 
-Signed-off-by: Darrick J. Wong <djwong@kernel.org>
----
- tests/generic/607 |    4 ++++
- tests/generic/608 |    3 +++
- 2 files changed, 7 insertions(+)
+...because then you can skip this part.
 
+> +
+> +	echo "$io write to every other block of fallocated space"
+> +	for i in $(seq 1 2 $((nr_blks - 1))); do
+> +		$XFS_IO_PROG -f -s $xfs_io_flag -c "pwrite $((i * bsize)) $bsize" \
+> +		       $testfile >> $seqres.full 2>&1
+> +		[[ $? != 0 ]] && break
+> +	done
+> +
+> +	echo "Verify \$testfile's extent count"
+> +	nextents=$($XFS_IO_PROG -c 'stat' $testfile | grep nextents)
+> +	nextents=${nextents##fsxattr.nextents = }
+> +	if (( $nextents > 10 )); then
+> +		echo "Extent count overflow check failed: nextents = $nextents"
+> +		exit 1
+> +	fi
+> +
+> +	rm $testfile
+> +done
+> +
+> +# super_block->s_wb_err will have a newer seq value when compared to "/"'s
+> +# file->f_sb_err. Consume it here so that xfs_scrub can does not error out.
+> +$XFS_IO_PROG -c syncfs $SCRATCH_MNT >> $seqres.full 2>&1
 
-diff --git a/tests/generic/607 b/tests/generic/607
-index dd6dbd65..ba7da11b 100755
---- a/tests/generic/607
-+++ b/tests/generic/607
-@@ -156,6 +156,10 @@ do_xflag_tests()
- 	local option=$1
- 
- 	_scratch_mount "$option"
-+
-+	# Make sure the root dir doesn't have FS_XFLAG_DAX set before we start.
-+	chattr -x $SCRATCH_MNT &>> $seqres.full
-+
- 	cd $SCRATCH_MNT
- 
- 	for i in $(seq 1 5); do
-diff --git a/tests/generic/608 b/tests/generic/608
-index dd89d91c..13a751d7 100755
---- a/tests/generic/608
-+++ b/tests/generic/608
-@@ -98,6 +98,9 @@ do_tests()
- 
- 	_scratch_mount "$mount_option"
- 
-+	# Make sure the root dir doesn't have FS_XFLAG_DAX set before we start.
-+	chattr -x $SCRATCH_MNT &>> $seqres.full
-+
- 	test_drop_caches
- 
- 	test_cycle_mount "$cycle_mount_option"
+I wonder, should _check_xfs_filesystem should syncfs to clear old EIOs
+before running xfs_scrub?  I occasionally see this pop up on
+generic/204.
 
+(Everything else here looks ok.)
+
+--D
+
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/527.out b/tests/xfs/527.out
+> new file mode 100644
+> index 00000000..3597ad92
+> --- /dev/null
+> +++ b/tests/xfs/527.out
+> @@ -0,0 +1,11 @@
+> +QA output created by 527
+> +Format and mount fs
+> +Inject reduce_max_iextents error tag
+> +* Buffered write to unwritten extent
+> +Fallocate 15 blocks
+> +Buffered write to every other block of fallocated space
+> +Verify $testfile's extent count
+> +* Direct write to unwritten extent
+> +Fallocate 15 blocks
+> +Direct write to every other block of fallocated space
+> +Verify $testfile's extent count
+> diff --git a/tests/xfs/group b/tests/xfs/group
+> index d089797b..627813fe 100644
+> --- a/tests/xfs/group
+> +++ b/tests/xfs/group
+> @@ -524,3 +524,4 @@
+>  524 auto quick punch zero insert collapse
+>  525 auto quick attr
+>  526 auto quick dir hardlink symlink
+> +527 auto quick
+> -- 
+> 2.29.2
+> 
