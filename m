@@ -5,164 +5,106 @@ X-Spam-Level:
 X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CCDC8C433E0
-	for <linux-fstests@archiver.kernel.org>; Thu,  4 Mar 2021 12:24:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 92CA4C433DB
+	for <linux-fstests@archiver.kernel.org>; Thu,  4 Mar 2021 14:43:15 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9A3366023B
-	for <linux-fstests@archiver.kernel.org>; Thu,  4 Mar 2021 12:24:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5DFF864F44
+	for <linux-fstests@archiver.kernel.org>; Thu,  4 Mar 2021 14:43:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240440AbhCDMXN (ORCPT
+        id S232299AbhCDOm2 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 4 Mar 2021 07:23:13 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35424 "EHLO
+        Thu, 4 Mar 2021 09:42:28 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37160 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240421AbhCDMXH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 4 Mar 2021 07:23:07 -0500
-Received: from mail-pg1-x534.google.com (mail-pg1-x534.google.com [IPv6:2607:f8b0:4864:20::534])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CCCCDC061574;
-        Thu,  4 Mar 2021 04:22:27 -0800 (PST)
-Received: by mail-pg1-x534.google.com with SMTP id o38so18786453pgm.9;
-        Thu, 04 Mar 2021 04:22:27 -0800 (PST)
+        with ESMTP id S232294AbhCDOm1 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 4 Mar 2021 09:42:27 -0500
+Received: from mail-pj1-x1033.google.com (mail-pj1-x1033.google.com [IPv6:2607:f8b0:4864:20::1033])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 44329C061574;
+        Thu,  4 Mar 2021 06:41:47 -0800 (PST)
+Received: by mail-pj1-x1033.google.com with SMTP id l18so7130785pji.3;
+        Thu, 04 Mar 2021 06:41:47 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=references:user-agent:from:to:cc:subject:in-reply-to:date
          :message-id:mime-version;
-        bh=P72hWZ6bxe/qX8KwDrcb7vaiIBeNdBv/gKA9k1NIQrI=;
-        b=pQwD97EeWbH2q0nG2wYdwDdVUhCQtGHSWOmEj1+gyahi1bctfhDkF/G2960iMjGEOm
-         yqLSIYqFkJ7kIgtUZuPhCnH3vr2YCWhi3qvAT5BepM7V+oKauO1Gb/lcFpzRStfNTnup
-         Fss+rovph/nAtiHwN/pNKI/jlelNqFVnYMXsSweiA9PaVbKnGbFuSzq3JwqPUg5uMYZ+
-         pK0RU0iGT4JUgz08q0nQHef41EJUVct5ItA5zzpwvzX8BkXDNMMItK+hXGcB98hBhCfR
-         g9JQT9cZBuKgYsXBJMNnFwunpedSuvCEyWjjPpj/djL7QZqZvWB5BIo4qQKB6OPY5KnD
-         EtYA==
+        bh=iLdrSrR89fZUIl66tJJxjyxwv/A0Dvm9FKzcVfrVOlY=;
+        b=Oi9hEKG4V0qjmi4r9h/CRXk0CdivpcBmREzbbojxkfEXVPk8RHOlHeyBILQnu5Ltfu
+         m7ZZw7AudC6tbYvU4xc0BY592ovjrpMxA6KYBbnUveluT0O4SUvCeZ/xK5nhUoOu9PYF
+         59mkvkIn9dW5qTSTCUmIn2AMYA+AdJx/+KWaRKDnqxV+P5VPYcaRimDW1xxEwXQMdGX6
+         7lt0roXVVAMExqgZPgf5bO3hvBa6lLl1GJclJbp4CJXJKOjjSuqvWkqaFTHQ6gxAPyaB
+         fb1iLkm446UrAoBspDuhRx+pfRbMeE2Z3YXN74LIdlY/9sPiXyoAVm67e4a8OMjkP6+y
+         9ptw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:references:user-agent:from:to:cc:subject
          :in-reply-to:date:message-id:mime-version;
-        bh=P72hWZ6bxe/qX8KwDrcb7vaiIBeNdBv/gKA9k1NIQrI=;
-        b=KjZbSVyqAuzGCdehSwH36mwE2P9uIEpY+fxURqEBnXetIcn8BzrHyHg0K6s82iIp+a
-         ajtGKx69jcPOQ5ttRgFv+FZCB+dqM9TBIahHWhonVuKuVaTX/+CBm83366dJog1RKe77
-         2ilCfFPHkLPU3iAxY6l17u90zXmhoQaJXlrDoKEMdpzQuANf6n7OAasI/kS4jiPeDt6C
-         kY0HiLXm6KfkgYERwlYe/LlBYQ+pwVYbIgD6soyj6p7tKpp3uS4YWBrsLAa6BeojrcYE
-         cfGCLWXptIhSr/Ph7s08htJCI8zUB2FTSsUvmg91r7jmjIh89xLUIeNioB25KuTJzuf2
-         8sLw==
-X-Gm-Message-State: AOAM530q6IwALR5dq+KEyaoUSXsLTDF3CK0EzCcxtkKg/FME+UbRLbCH
-        Hk4C+LBgN4q2ODaynalWZ51T3HzOik4=
-X-Google-Smtp-Source: ABdhPJzkmjRB/VOngXhM/+kJDoUDrpPPRG4bRLsl9m3G86paaI+HgOXiXb/9+ZNISUNRcyeNOtwhiA==
-X-Received: by 2002:a62:2e83:0:b029:1db:8bd9:b8ad with SMTP id u125-20020a622e830000b02901db8bd9b8admr3743255pfu.74.1614860547373;
-        Thu, 04 Mar 2021 04:22:27 -0800 (PST)
+        bh=iLdrSrR89fZUIl66tJJxjyxwv/A0Dvm9FKzcVfrVOlY=;
+        b=sP0tGp2Rx2yWnSO9Bxp38H55ZgImX8n/KAILcM2l/4rFgsnIhZ4a/UQ1nN/HAB/msf
+         Q+h0hn+t8kdgMa3K41i0c0Zym/KAfZYGJaQ5JGzcMkYSaD/MinYIAJeYn90eUN4PYFG0
+         5OnHKi+/U/fczcwH+0x3CVz4Xpx22m6TuXdvqRWYZnbJTmu/YMmmvCAK/GmqTh+eGWCV
+         EsbmRupir7OIfwwU3Sya6b+USaDsEMoLuxBrvsRxkpk6jASOnA3Xx0RxXBn7OGyCbrTG
+         eSLi4zAY4vd3MshZk0cF24qTEaMv/eBXPN2bE6T6znPJbEtedL9Hj/FeOQGFvGvHiAm4
+         kckA==
+X-Gm-Message-State: AOAM531ZJ3/MhyewB30bcqUUtkMrbydCVvlK+1vtHqKb0U+rQFlIJyUg
+        0OZ/9bEYKGU6ClSKVmcI1PA=
+X-Google-Smtp-Source: ABdhPJwx/zKw7yAYFfv2bv9whKBJ2pXqqrk6yoFwrdchZehuUszU4vRncdy+ajK4oEeG34gS8MN21Q==
+X-Received: by 2002:a17:902:d893:b029:e3:f3ce:cc6a with SMTP id b19-20020a170902d893b02900e3f3cecc6amr4296368plz.28.1614868906867;
+        Thu, 04 Mar 2021 06:41:46 -0800 (PST)
 Received: from garuda ([122.179.119.194])
-        by smtp.gmail.com with ESMTPSA id n24sm2826469pgl.27.2021.03.04.04.22.25
+        by smtp.gmail.com with ESMTPSA id b3sm26487127pgd.48.2021.03.04.06.41.44
         (version=TLS1_2 cipher=ECDHE-ECDSA-CHACHA20-POLY1305 bits=256/256);
-        Thu, 04 Mar 2021 04:22:26 -0800 (PST)
-References: <20210118062022.15069-1-chandanrlinux@gmail.com> <20210118062022.15069-7-chandanrlinux@gmail.com> <20210303180154.GN7269@magnolia>
+        Thu, 04 Mar 2021 06:41:46 -0800 (PST)
+References: <161472735404.3478298.8179031068431918520.stgit@magnolia> <161472735969.3478298.17752955323122832118.stgit@magnolia>
 User-agent: mu4e 1.0; emacs 26.1
 From:   Chandan Babu R <chandanrlinux@gmail.com>
 To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
-        darrick.wong@oracle.com
-Subject: Re: [PATCH V4 06/11] xfs: Check for extent overflow when adding/removing dir entries
-In-reply-to: <20210303180154.GN7269@magnolia>
-Date:   Thu, 04 Mar 2021 17:52:23 +0530
-Message-ID: <87pn0fp0qo.fsf@garuda>
+Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org, guan@eryu.me
+Subject: Re: [PATCH 1/4] generic/623: don't fail on core dumps
+In-reply-to: <161472735969.3478298.17752955323122832118.stgit@magnolia>
+Date:   Thu, 04 Mar 2021 20:11:43 +0530
+Message-ID: <87o8fzouag.fsf@garuda>
 MIME-Version: 1.0
 Content-Type: text/plain
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 03 Mar 2021 at 23:31, Darrick J. Wong wrote:
-> On Mon, Jan 18, 2021 at 11:50:17AM +0530, Chandan Babu R wrote:
->> This test verifies that XFS does not cause inode fork's extent count to
->> overflow when adding/removing directory entries.
->>
->> Signed-off-by: Chandan Babu R <chandanrlinux@gmail.com>
->> ---
->>  tests/xfs/526     | 186 ++++++++++++++++++++++++++++++++++++++++++++++
->>  tests/xfs/526.out |  17 +++++
->>  tests/xfs/group   |   1 +
->>  3 files changed, 204 insertions(+)
->>  create mode 100755 tests/xfs/526
->>  create mode 100644 tests/xfs/526.out
->>
->> diff --git a/tests/xfs/526 b/tests/xfs/526
->> new file mode 100755
->> index 00000000..5a789d61
->> --- /dev/null
->> +++ b/tests/xfs/526
->> @@ -0,0 +1,186 @@
->> +#! /bin/bash
->> +# SPDX-License-Identifier: GPL-2.0
->> +# Copyright (c) 2020 Chandan Babu R.  All Rights Reserved.
->> +#
->> +# FS QA Test 526
->> +#
->> +# Verify that XFS does not cause inode fork's extent count to overflow when
->> +# adding/removing directory entries.
->> +seq=`basename $0`
->> +seqres=$RESULT_DIR/$seq
->> +echo "QA output created by $seq"
->> +
->> +here=`pwd`
->> +tmp=/tmp/$$
->> +status=1	# failure is the default!
->> +trap "_cleanup; exit \$status" 0 1 2 3 15
->> +
->> +_cleanup()
->> +{
->> +	cd /
->> +	rm -f $tmp.*
->> +}
->> +
->> +# get standard environment, filters and checks
->> +. ./common/rc
->> +. ./common/filter
->> +. ./common/inject
->> +. ./common/populate
->> +
->> +# remove previous $seqres.full before test
->> +rm -f $seqres.full
->> +
->> +# real QA test starts here
->> +
->> +_supported_fs xfs
->> +_require_scratch
->> +_require_xfs_debug
->> +_require_test_program "punch-alternating"
->> +_require_xfs_io_error_injection "reduce_max_iextents"
->> +_require_xfs_io_error_injection "bmap_alloc_minlen_extent"
->> +
->> +_scratch_mkfs_sized $((1024 * 1024 * 1024)) | _filter_mkfs >> $seqres.full 2> $tmp.mkfs
->> +. $tmp.mkfs
->> +
->> +# Filesystems with directory block size greater than one FSB will not be tested,
->> +# since "7 (i.e. XFS_DA_NODE_MAXDEPTH + 1 data block + 1 free block) * 2 (fsb
->> +# count) = 14" is greater than the pseudo max extent count limit of 10.
->> +# Extending the pseudo max limit won't help either.  Consider the case where 1
->> +# FSB is 1k in size and 1 dir block is 64k in size (i.e. fsb count = 64). In
->> +# this case, the pseudo max limit has to be greater than 7 * 64 = 448 extents.
->> +if (( $dbsize != $dirbsize )); then
->> +	_notrun "FSB size ($dbsize) and directory block size ($dirbsize) do not match"
->> +fi
+On 03 Mar 2021 at 04:52, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
 >
-> But what about the case where fsb is 1k and dirblocks are 4k? :)
+> This test is designed to fail an mmap write and see what happens.
+> Typically this is a segmentation fault.  If the user's computer is
+> configured to capture core dumps, this will cause the test to fail, even
+> though we got the reaction we wanted.
 >
-> I admit I'm reacting to my expectation that we would _notrun here based
-> on the output of a more computation, not just fsb != dirblocksize.  But
-> I dunno, maybe you've already worked that out?
 
-Ok. I will replace the above with the following,
+Looks good to me.
 
-if (( $dirbsize > $dbsize )); then
-        _notrun "Directory block size ($dirbsize) is larger than FSB size ($dbsize)"
-fi
+Reviewed-by: Chandan Babu R <chandanrlinux@gmail.com>
 
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> ---
+>  tests/generic/623 |    1 +
+>  1 file changed, 1 insertion(+)
 >
-> (The rest of the test looks good to me.)
 >
-> --D
+> diff --git a/tests/generic/623 b/tests/generic/623
+> index 7be38955..04411405 100755
+> --- a/tests/generic/623
+> +++ b/tests/generic/623
+> @@ -37,6 +37,7 @@ _scratch_mount
+>  # status on the page.
+>  file=$SCRATCH_MNT/file
+>  $XFS_IO_PROG -fc "pwrite 0 4k" -c fsync $file | _filter_xfs_io
+> +ulimit -c 0
+>  $XFS_IO_PROG -x -c "mmap 0 4k" -c "mwrite 0 4k" -c shutdown -c fsync \
+>  	-c "mwrite 0 4k" $file | _filter_xfs_io
+>  
 
---
+
+-- 
 chandan
