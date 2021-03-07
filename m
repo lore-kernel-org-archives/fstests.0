@@ -7,85 +7,222 @@ X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 03DE5C433E0
-	for <linux-fstests@archiver.kernel.org>; Sun,  7 Mar 2021 16:00:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 13371C433DB
+	for <linux-fstests@archiver.kernel.org>; Sun,  7 Mar 2021 16:25:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BBAE0650D0
-	for <linux-fstests@archiver.kernel.org>; Sun,  7 Mar 2021 16:00:57 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C4887650F5
+	for <linux-fstests@archiver.kernel.org>; Sun,  7 Mar 2021 16:25:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232289AbhCGQAY (ORCPT
+        id S232409AbhCGQZB (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 7 Mar 2021 11:00:24 -0500
-Received: from out20-1.mail.aliyun.com ([115.124.20.1]:44170 "EHLO
-        out20-1.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231228AbhCGQAS (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 7 Mar 2021 11:00:18 -0500
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.101928|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_regular_dialog|0.11404-0.000807312-0.885152;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047201;MF=guan@eryu.me;NM=1;PH=DS;RN=3;RT=3;SR=0;TI=SMTPD_---.JhdlJm-_1615132816;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.JhdlJm-_1615132816)
-          by smtp.aliyun-inc.com(10.147.40.7);
-          Mon, 08 Mar 2021 00:00:16 +0800
-Date:   Mon, 8 Mar 2021 00:00:16 +0800
+        Sun, 7 Mar 2021 11:25:01 -0500
+Received: from out20-109.mail.aliyun.com ([115.124.20.109]:54069 "EHLO
+        out20-109.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231314AbhCGQYh (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 7 Mar 2021 11:24:37 -0500
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07473081|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.0856706-0.000188485-0.914141;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047192;MF=guan@eryu.me;NM=1;PH=DS;RN=2;RT=2;SR=0;TI=SMTPD_---.JheBYah_1615134273;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.JheBYah_1615134273)
+          by smtp.aliyun-inc.com(10.147.40.44);
+          Mon, 08 Mar 2021 00:24:33 +0800
+Date:   Mon, 8 Mar 2021 00:24:33 +0800
 From:   Eryu Guan <guan@eryu.me>
-To:     Ritesh Harjani <riteshh@linux.ibm.com>
-Cc:     fstests@vger.kernel.org, anju@linux.vnet.ibm.com
-Subject: Re: [PATCH 2/3] common/rc: Add _require_get_hugepagesize and fix
- _require_label_get_max
-Message-ID: <YET4kDkPZ+OaAQ4S@desktop>
-References: <cover.1612951443.git.riteshh@linux.ibm.com>
- <05dbc4b37d77e03bc288feb07815f737efbf2abd.1612951443.git.riteshh@linux.ibm.com>
+To:     Theodore Ts'o <tytso@mit.edu>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH] generic: test which tries to exercise AIO/DIO into
+ unwritten space
+Message-ID: <YET+QSgT3e+R/yzO@desktop>
+References: <20210210205818.1494305-1-tytso@mit.edu>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <05dbc4b37d77e03bc288feb07815f737efbf2abd.1612951443.git.riteshh@linux.ibm.com>
+In-Reply-To: <20210210205818.1494305-1-tytso@mit.edu>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Feb 11, 2021 at 09:01:45AM +0530, Ritesh Harjani wrote:
-> _notrun executed from a subshell $(cmd) won't exit it's parent.
-> Hence _require_*** functions shouldn't have below statements.
-> 	dummy=$(_label_get_max)
-> Also add a function _require_get_hugepagesize(), since it seems the
-> intention of _get_hugepagesize() is to also '_notrun' when the hugepagesize
-> is not a valid number.
+On Wed, Feb 10, 2021 at 03:58:18PM -0500, Theodore Ts'o wrote:
+> This test verifies that the an unwritten extent is properly marked as
+> written after writing into it.
 > 
-> Signed-off-by: Ritesh Harjani <riteshh@linux.ibm.com>
+> There was a hard-to-hit bug which would occasionally trigger with ext4
+> for which this test was a reproducer.  This has been fixed after
+> moving ext4 to use iomap for Direct I/O's, although as of this
+> writing, there are still some occasional failures on ext4 when block
+> size < page size.
+> 
+> Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+
+Sorry for the late review, it was in my to-review list and I just got to
+it..
+
 > ---
->  common/rc | 8 +++++++-
->  1 file changed, 7 insertions(+), 1 deletion(-)
+>  tests/generic/623     | 109 ++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/623.out |   4 ++
+>  tests/generic/group   |   1 +
+>  3 files changed, 114 insertions(+)
+>  create mode 100755 tests/generic/623
+>  create mode 100644 tests/generic/623.out
 > 
-> diff --git a/common/rc b/common/rc
-> index 649b1cfd884a..1831714198af 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -175,6 +175,12 @@ _get_hugepagesize()
->  	echo $((hugepgsz * 1024))
->  }
-> 
-> +_require_get_hugepagesize()
+> diff --git a/tests/generic/623 b/tests/generic/623
+> new file mode 100755
+> index 00000000..74136fef
+> --- /dev/null
+> +++ b/tests/generic/623
+> @@ -0,0 +1,109 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +
+> +#
+> +# FSQA Test No. 623
+> +#
+> +# AIO/DIO stress test
+> +# Run random AIO/DIO activity on an file system with unwritten regions
+> +#
+> +# This test verifies that the an unwritten extent is properly marked
+> +# as written after writing into it.
+> +#
+> +# There was a hard-to-hit bug which would occasionally trigger with
+> +# ext4 for which this test was a reproducer.  This has been fixed
+> +# after moving ext4 to use iomap for Direct I/O's, although as of this
+> +# writing, there are still some occasional failures on ext4 when block
+> +# size < page size.
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +fio_config=$tmp.fio
+> +status=1	# failure is the default!
+> +trap "rm -f $tmp.*; exit \$status" 0 1 2 3 15
+
+Better to trap a _cleanup function, even we only do "rm -f $tmp.*" in it,
+so it's consistent to other tests, and it's easier to add more cleanups
+in _cleanup() function in the future if needed.
+
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_fs generic
+> +_require_test
+> +_require_scratch
+> +_require_odirect
+
+_require_aio
+
+> +_require_block_device $SCRATCH_DEV
+> +
+> +NUM_JOBS=$((4*LOAD_FACTOR))
+> +BLK_DEV_SIZE=`blockdev --getsz $SCRATCH_DEV`
+> +FILE_SIZE=$(((BLK_DEV_SIZE * 512) * 3 / 4))
+> +
+> +max_file_size=$((5 * 1024 * 1024 * 1024))
+> +if [ $max_file_size -lt $FILE_SIZE ]; then
+> +	FILE_SIZE=$max_file_size
+> +fi
+> +SIZE=$((FILE_SIZE / 2))
+> +
+> +cat >$fio_config <<EOF
+> +###########
+> +# $seq test fio activity
+> +# Filenames derived from jobsname and jobid like follows:
+> +# ${JOB_NAME}.${JOB_ID}.${ITERATION_ID}
+> +[global]
+> +ioengine=libaio
+> +bs=128k
+> +directory=${SCRATCH_MNT}
+> +filesize=${FILE_SIZE}
+> +size=${SIZE}
+> +iodepth=$((128*$LOAD_FACTOR))
+> +fallocate=native
+> +
+> +# Perform direct aio and verify data
+> +# This test case should check use-after-free issues
+> +[aio-dio-verifier]
+> +numjobs=1
+> +verify=crc32c-intel
+> +verify_fatal=1
+> +verify_dump=1
+> +verify_backlog=1024
+> +verify_async=4
+> +direct=1
+> +blocksize_range=4100k-8200k
+> +blockalign=4k
+> +rw=randwrite
+> +filename=test-file
+> +
+> +EOF
+> +
+> +rm -f $seqres.full
+> +
+> +_require_fio $fio_config
+> +_require_xfs_io_command "falloc"
+> +
+> +_workout()
+
+There's no need to add the leading "_" to local function, it's reserved
+to common functions.
+
 > +{
-> +	# Just a dummy for _notrun if hugepagesize is not supported
-> +	_get_hugepagesize
+> +	echo ""
+> +	echo "Run fio with random aio-dio pattern"
+> +	echo ""
+> +	cat $fio_config >>  $seqres.full
+> +	run_check $FIO_PROG $fio_config
+
+run_check is not recommanded and should be deprecated (maybe I should
+send a patch to document it in comment), as it hides failure in
+$seqres.full and exits if command returns non-zero.
+
+Just call $FIO_PROG command directly and check return value if
+necessary.
+
 > +}
 > +
+> +_scratch_mkfs >> $seqres.full 2>&1
+> +_scratch_mount
+> +
+> +if ! _workout; then
+> +	_scratch_unmount 2>/dev/null
+> +	exit
+> +fi
+> +
+> +if ! _scratch_unmount; then
+> +	echo "failed to umount"
+> +	status=1
+> +	exit
+> +fi
 
-I think this hunk should be moved to patch 3.
+Is above _scratch_unmount check really needed? The test harness would
+umount $SCRATCH_DEV after test anyway.
 
-Otherwise patch looks fine to me. And I applied patch 1 for next update,
-thanks!
-
+Thanks,
 Eryu
 
->  _mount()
->  {
->      $MOUNT_PROG `_mount_ops_filter $*`
-> @@ -4250,7 +4256,7 @@ _label_get_max()
->  _require_label_get_max()
->  {
->  	# Just call _label_get_max which will notrun if appropriate
-> -	dummy=$(_label_get_max)
-> +	_label_get_max
->  }
-> 
->  _dmsetup_remove()
-> --
+> +status=0
+> +exit
+> diff --git a/tests/generic/623.out b/tests/generic/623.out
+> new file mode 100644
+> index 00000000..e10c7fd9
+> --- /dev/null
+> +++ b/tests/generic/623.out
+> @@ -0,0 +1,4 @@
+> +QA output created by 623
+> +
+> +Run fio with random aio-dio pattern
+> +
+> diff --git a/tests/generic/group b/tests/generic/group
+> index b10fdea4..24f53ed7 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -625,3 +625,4 @@
+>  620 auto mount quick
+>  621 auto quick encrypt
+>  622 auto shutdown metadata atime
+> +623 aio rw stress
+> -- 
+> 2.30.0
