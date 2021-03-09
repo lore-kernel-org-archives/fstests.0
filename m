@@ -3,43 +3,41 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
 X-Spam-Status: No, score=-16.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AABE1C433E9
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 57981C433E0
 	for <linux-fstests@archiver.kernel.org>; Tue,  9 Mar 2021 04:40:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7EE0A65299
+	by mail.kernel.org (Postfix) with ESMTP id 1A3E065290
 	for <linux-fstests@archiver.kernel.org>; Tue,  9 Mar 2021 04:40:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229772AbhCIEjg (ORCPT
+        id S229813AbhCIEjg (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
         Mon, 8 Mar 2021 23:39:36 -0500
-Received: from mail.kernel.org ([198.145.29.99]:60788 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.99]:60822 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229775AbhCIEjX (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 8 Mar 2021 23:39:23 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id A36876523B;
-        Tue,  9 Mar 2021 04:39:22 +0000 (UTC)
+        id S229829AbhCIEj3 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 8 Mar 2021 23:39:29 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 6B2676528A;
+        Tue,  9 Mar 2021 04:39:29 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1615264762;
-        bh=ImKUwqcf+R5uzs/wFuEe9XzHY+rIk8zrOXG/BoP6/x0=;
-        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=Y4oWJJZl480FkaRZjy5Vxk0Saff/ACPWhFOHshDPwoMYSlKGplLf9u4dXV77tFuxP
-         OjzgiZrS3m+iF+p04qo3KHPJwOK9KfuEeCEPXCAqtJXQlojda1telGzfOaHcJExQPz
-         CcK3rwgzFIFe2TazCKkEsCdpvGebcubhJBN759lJ8YcVLuK9k8yGLyuk3YUJG1ZkQn
-         +ZfSTwWyoW5+tqGKQLQIfXQJy7Nb0GHFKjVCoWmyjMHRHhW7ZJa6P46CvSkGNe0AQM
-         ZL7hjyF7q9LF0F3m1Mh0Mmd0zZ/xbb2i/jBabqvkW7gevK7p58r8EfBUIzFKGlO5/J
-         Mb2Wi/c48fy+w==
-Subject: [PATCH 3/4] populate: support compressing metadumps
+        s=k20201202; t=1615264769;
+        bh=f4Ni9PvbWfdogvZ+BOvdKrhN9aCTSUGjoD6ZoXEqjZo=;
+        h=Subject:From:To:Cc:Date:From;
+        b=EvQaiMIF/h6Lx1iB67iYT4RFujLp8Rlt+NYwq7f0kH2oQGHeNDgN9BAjg1ahUv5Yq
+         JztGTZVkoaMoEMERRr0sj4Wq0HMQcFf88HUs/+XWtFXzj7Zr+Hyj8itjoB9YE6NU+R
+         +0nzqO+LrpV7lZZCdDPQlg+qjFjGVac6TG08bf+Z5RUXrozOGbJTnpaHBZWmZUCDnK
+         sjuQtwswhU4Jv5iX9gA1ZwLWLXMnxEq66kA6WYSEwr0RO8tMCqlId5TbrAmNj8UFRJ
+         SArIkpuF0EkGkQ7UNZd1NfFJE3z/dNTgfRfMVIxgtvdUEC521wsFJwHXx2ta2Q4IKx
+         zVMiQlEgVV3tQ==
+Subject: [PATCHSET 0/2] fstests: fix compiler warnings with fsx/fsstress
 From:   "Darrick J. Wong" <djwong@kernel.org>
 To:     djwong@kernel.org, guaneryu@gmail.com
 Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me
-Date:   Mon, 08 Mar 2021 20:39:22 -0800
-Message-ID: <161526476250.1212855.18197470277954527515.stgit@magnolia>
-In-Reply-To: <161526474588.1212855.9208390435676413014.stgit@magnolia>
-References: <161526474588.1212855.9208390435676413014.stgit@magnolia>
+Date:   Mon, 08 Mar 2021 20:39:29 -0800
+Message-ID: <161526476928.1212985.15718497220408703599.stgit@magnolia>
 User-Agent: StGit/0.19
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -48,78 +46,29 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Darrick J. Wong <djwong@kernel.org>
+Hi all,
 
-If the test runner passed in a DUMP_COMPRESSOR program, make it so that
-the metadumps we generate are also compressed.
+Fix all the compiler warnings emitted when building fsstress and fsx.
 
-Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+If you're going to start using this mess, you probably ought to just
+pull from my git trees, which are linked below.
+
+This is an extraordinary way to destroy everything.  Enjoy!
+Comments and questions are, as always, welcome.
+
+--D
+
+fstests git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=fix-fsx-and-fsstress-warnings
 ---
- README          |    5 +++++
- common/populate |   21 +++++++++++++++++++--
- 2 files changed, 24 insertions(+), 2 deletions(-)
-
-
-diff --git a/README b/README
-index b00328ac..3d369438 100644
---- a/README
-+++ b/README
-@@ -111,6 +111,11 @@ Preparing system for tests:
-                the module is the same as FSTYP.
-              - Set DUMP_CORRUPT_FS=1 to record metadata dumps of XFS
-                filesystems if a filesystem check fails.
-+             - Set DUMP_COMPRESSOR to a compression program to compress
-+               metadumps of filesystems.  This program must accept '-f' and the
-+               name of a file to compress; and it must accept '-d -f -k' and
-+               the name of a file to decompress.  In other words, it must
-+               emulate gzip.
- 
-         - or add a case to the switch in common/config assigning
-           these variables based on the hostname of your test
-diff --git a/common/populate b/common/populate
-index 4e5b645f..b897922c 100644
---- a/common/populate
-+++ b/common/populate
-@@ -824,6 +824,17 @@ _scratch_populate_cache_tag() {
- _scratch_populate_restore_cached() {
- 	local metadump="$1"
- 
-+	# If we're configured for compressed dumps and there isn't already an
-+	# uncompressed dump, see if we can use DUMP_COMPRESSOR to decompress
-+	# something.
-+	if [ -n "$DUMP_COMPRESSOR" ]; then
-+		for compr in "$metadump".*; do
-+			[ -e "$compr" ] && $DUMP_COMPRESSOR -d -f -k "$compr" && break
-+		done
-+	fi
-+
-+	test -r "$metadump" || return 1
-+
- 	case "${FSTYP}" in
- 	"xfs")
- 		xfs_mdrestore "${metadump}" "${SCRATCH_DEV}" && return 0
-@@ -855,8 +866,7 @@ _scratch_populate_cached() {
- 		rm -rf "${POPULATE_METADUMP}"
- 
- 	# Try to restore from the metadump
--	test -r "${POPULATE_METADUMP}" && \
--		_scratch_populate_restore_cached "${POPULATE_METADUMP}" && \
-+	_scratch_populate_restore_cached "${POPULATE_METADUMP}" && \
- 		return
- 
- 	# Oh well, just create one from scratch
-@@ -867,6 +877,13 @@ _scratch_populate_cached() {
- 		_scratch_xfs_populate $@
- 		_scratch_xfs_populate_check
- 		_scratch_xfs_metadump "${POPULATE_METADUMP}"
-+
-+		local logdev=
-+		[ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ] && \
-+			logdev=$SCRATCH_LOGDEV
-+
-+		_xfs_metadump "$POPULATE_METADUMP" "$SCRATCH_DEV" "$logdev" \
-+			compress
- 		;;
- 	"ext2"|"ext3"|"ext4")
- 		_scratch_ext4_populate $@
+ README                     |    4 +-
+ build/rpm/xfstests.spec.in |    2 +
+ configure.ac               |    4 --
+ include/builddefs.in       |    2 -
+ ltp/Makefile               |    5 ---
+ ltp/fsstress.c             |   86 +++++++++++++++++++-------------------------
+ m4/Makefile                |    1 -
+ m4/package_attrdev.m4      |   54 ----------------------------
+ 8 files changed, 40 insertions(+), 118 deletions(-)
+ delete mode 100644 m4/package_attrdev.m4
 
