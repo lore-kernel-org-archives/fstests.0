@@ -7,37 +7,37 @@ X-Spam-Status: No, score=-16.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 90525C433DB
-	for <linux-fstests@archiver.kernel.org>; Tue,  9 Mar 2021 04:41:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 16456C433E9
+	for <linux-fstests@archiver.kernel.org>; Tue,  9 Mar 2021 04:41:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5C29D6528A
+	by mail.kernel.org (Postfix) with ESMTP id DCE786523B
 	for <linux-fstests@archiver.kernel.org>; Tue,  9 Mar 2021 04:41:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229837AbhCIEkm (ORCPT
+        id S229701AbhCIEkn (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 8 Mar 2021 23:40:42 -0500
-Received: from mail.kernel.org ([198.145.29.99]:32878 "EHLO mail.kernel.org"
+        Mon, 8 Mar 2021 23:40:43 -0500
+Received: from mail.kernel.org ([198.145.29.99]:32936 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S230140AbhCIEkU (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 8 Mar 2021 23:40:20 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 5102065275;
-        Tue,  9 Mar 2021 04:40:20 +0000 (UTC)
+        id S229813AbhCIEkh (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 8 Mar 2021 23:40:37 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id DE12865275;
+        Tue,  9 Mar 2021 04:40:36 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1615264820;
-        bh=/34Q4K6Ae87lq3+BnoM2xICN4SUmvFlYJ9HGAm/kpHg=;
+        s=k20201202; t=1615264837;
+        bh=kxWH7F4brECXLYtjcDpMuJt2/GCOUol5Wd8naC3DfBc=;
         h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=FYvfkGSg0abVCGbbgl6DG5Uvi3UYCR8hzrJtfonQvdeGa+Ydd5T55+G8gIfbFicWn
-         gj+OXuXkJFqvFRACeNg1gRVqeOZzlt+xCllh7zV7QCMEYtV0Y5aosA/o1n6z2QAKAn
-         hYEd7dqXnz4oyIKtvgI9lVjRmFNG8wkA65YyZve+afG2t4wJp26eEiIEZ0hHfcRpIt
-         w1r0EsOY6ZBAAFMUVT5aq+aGzPQkU2RcKEVSlheX7ON5gCKf/3qIgTsgL1BWWfk17F
-         eh4lwZqcf1M37SPBlrlaolMtxEE6SLYkToUkT/fkYFtybYkXf5gShJOf49fiDXenpC
-         knWzlO8TlkaqQ==
-Subject: [PATCH 03/10] xfs: test rtalloc alignment and math errors
+        b=dCst7V+c+g4VD52VSzim5IFGf32Sa9HFnGbzzJjbiUe4DvMzdfRSk0x/344f2LlNt
+         xreqIBroq8hhl4fZ0x/pYm1tAhbNDPUZ/BztYjdlcxTVz0QUV5Spk8d37hjis0Hzs4
+         E6W4YAQ0RTZs5wbJe5zVI74SCG+6vGZIe+Kbe3Lv9v+Q+R+vbaSP5z5GckNhUnqEDM
+         ZMwnsNY2o43x4PfrQKzM3zCYqsC3Ep/r7lDQ7jVq3ACPLZkAKe97v300kUVnJJPb4G
+         rqjuIokEA63MGD/Ta/DxcYl5F9qrlBTEta8yw/D9cIFY1V0GBJmuYkc78AFJ9e11dg
+         yh8iOOgX0Rd5A==
+Subject: [PATCH 06/10] xfs: test quota softlimit warning functionality
 From:   "Darrick J. Wong" <djwong@kernel.org>
 To:     djwong@kernel.org, guaneryu@gmail.com
 Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me
-Date:   Mon, 08 Mar 2021 20:40:20 -0800
-Message-ID: <161526482015.1214319.6227125326960502859.stgit@magnolia>
+Date:   Mon, 08 Mar 2021 20:40:36 -0800
+Message-ID: <161526483668.1214319.17667836667890283825.stgit@magnolia>
 In-Reply-To: <161526480371.1214319.3263690953532787783.stgit@magnolia>
 References: <161526480371.1214319.3263690953532787783.stgit@magnolia>
 User-Agent: StGit/0.19
@@ -50,45 +50,38 @@ X-Mailing-List: fstests@vger.kernel.org
 
 From: Darrick J. Wong <djwong@kernel.org>
 
-Add a couple of regression tests for "xfs: make sure the rt allocator
-doesn't run off the end" and "xfs: ensure that fpunch, fcollapse, and
-finsert operations are aligned to rt extent size".
+Make sure that quota softlimits work, which is to say that one can
+exceed the softlimit up to warnlimit times before it starts enforcing
+that.
 
 Signed-off-by: Darrick J. Wong <djwong@kernel.org>
 ---
- tests/xfs/759     |  100 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/759.out |    2 +
- tests/xfs/760     |   68 ++++++++++++++++++++++++++++++++++++
- tests/xfs/760.out |    9 +++++
- tests/xfs/group   |    2 +
- 5 files changed, 181 insertions(+)
- create mode 100755 tests/xfs/759
- create mode 100644 tests/xfs/759.out
- create mode 100755 tests/xfs/760
- create mode 100644 tests/xfs/760.out
+ tests/xfs/915     |  162 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/915.out |  151 +++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/group   |    1 
+ 3 files changed, 314 insertions(+)
+ create mode 100755 tests/xfs/915
+ create mode 100644 tests/xfs/915.out
 
 
-diff --git a/tests/xfs/759 b/tests/xfs/759
+diff --git a/tests/xfs/915 b/tests/xfs/915
 new file mode 100755
-index 00000000..8558fe30
+index 00000000..a2cdbbb7
 --- /dev/null
-+++ b/tests/xfs/759
-@@ -0,0 +1,100 @@
++++ b/tests/xfs/915
+@@ -0,0 +1,162 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0-or-later
 +# Copyright (c) 2021 Oracle.  All Rights Reserved.
 +#
-+# FS QA Test No. 759
++# FS QA Test No. 915
 +#
-+# This is a regression test for commit 2a6ca4baed62 ("xfs: make sure the rt
-+# allocator doesn't run off the end") which fixes an overflow error in the
-+# _near realtime allocator.  If the rt bitmap ends exactly at the end of a
-+# block and the number of rt extents is large enough to allow an allocation
-+# request larger than the maximum extent size, it's possible that during a
-+# large allocation request, the allocator will fail to constrain maxlen on the
-+# second run through the loop, and the rt bitmap range check will run right off
-+# the end of the rtbitmap file.  When this happens, xfs triggers a verifier
-+# error and returns EFSCORRUPTED.
++# Check that quota softlimit warnings work the way they should.  This means
++# that we can disobey the softlimit up to warnlimit times before it turns into
++# hard(er) enforcement.  This is a functional test for quota warnings, but
++# since the functionality has been broken for decades, this is also a
++# regression test for commit 4b8628d57b72 ("xfs: actually bump warning counts
++# when we send warnings").
 +
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
@@ -108,178 +101,301 @@ index 00000000..8558fe30
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
++. ./common/quota
 +
 +# real QA test starts here
 +_supported_fs xfs
++_require_xfs_quota
 +_require_scratch
-+_require_realtime
-+_require_test_program "punch-alternating"
 +
 +rm -f $seqres.full
 +
-+# Format filesystem to get the block size
++qsetup()
++{
++	opt=$1
++	enforce=0
++	if [ $opt = "u" -o $opt = "uno" ]; then
++		type=u
++		eval `_choose_uid`
++	elif [ $opt = "g" -o $opt = "gno" ]; then
++		type=g
++		eval `_choose_gid`
++	elif [ $opt = "p" -o $opt = "pno" ]; then
++		type=p
++		eval `_choose_prid`
++	fi
++	[ $opt = "u" -o $opt = "g" -o $opt = "p" ] && enforce=1
++
++	echo "Using type=$type id=$id" >> $seqres.full
++}
++
++exercise() {
++	_scratch_mkfs_xfs | _filter_mkfs 2>$tmp.mkfs
++	cat $tmp.mkfs >>$seqres.full
++
++	# keep the blocksize and data size for dd later
++	. $tmp.mkfs
++
++	_qmount
++
++	qsetup $1
++
++	echo "Using type=$type id=$id" >>$seqres.full
++
++	echo
++	echo "*** report initial settings" | tee -a $seqres.full
++	$XFS_QUOTA_PROG -x \
++		-c "limit -$type isoft=3 ihard=500000 $id" \
++		-c "warn -$type -i -d 13" \
++		$SCRATCH_DEV
++	$XFS_QUOTA_PROG -x \
++		-c "state -$type" >> $seqres.full
++	$XFS_QUOTA_PROG -x \
++		-c "repquota -birnN -$type" $SCRATCH_DEV |
++		_filter_quota_report | LC_COLLATE=POSIX sort -ru
++
++	echo
++	echo "*** push past the soft inode limit" | tee -a $seqres.full
++	_file_as_id $SCRATCH_MNT/softok1 $id $type $bsize 0
++	_file_as_id $SCRATCH_MNT/softok2 $id $type $bsize 0
++	_file_as_id $SCRATCH_MNT/softok3 $id $type $bsize 0
++	_file_as_id $SCRATCH_MNT/softwarn1 $id $type $bsize 0
++	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
++		-c "repquota -birnN -$type" $SCRATCH_DEV |
++		_filter_quota_report | LC_COLLATE=POSIX sort -ru
++
++	echo
++	echo "*** push further past the soft inode limit" | tee -a $seqres.full
++	for warn_nr in $(seq 2 5); do
++		_file_as_id $SCRATCH_MNT/softwarn$warn_nr $id $type $bsize 0
++	done
++	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
++		-c "repquota -birnN -$type" $SCRATCH_DEV |
++		_filter_quota_report | LC_COLLATE=POSIX sort -ru
++
++	echo
++	echo "*** push past the soft inode warning limit" | tee -a $seqres.full
++	for warn_nr in $(seq 6 15); do
++		_file_as_id $SCRATCH_MNT/softwarn$warn_nr $id $type $bsize 0
++	done
++	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
++		-c "repquota -birnN -$type" $SCRATCH_DEV |
++		_filter_quota_report | LC_COLLATE=POSIX sort -ru
++
++	echo
++	echo "*** unmount"
++	_scratch_unmount
++}
++
 +_scratch_mkfs > $seqres.full
 +_scratch_mount >> $seqres.full
 +
-+blksz=$(_get_block_size $SCRATCH_MNT)
-+rextsize=$($XFS_INFO_PROG $SCRATCH_MNT | grep realtime.*extsz | sed -e 's/^.*extsz=\([0-9]*\).*$/\1/g')
-+rextblks=$((rextsize / blksz))
-+
-+echo "blksz $blksz rextsize $rextsize rextblks $rextblks" >> $seqres.full
-+
++chmod a+rwx $SCRATCH_MNT $seqres.full	# arbitrary users will write here
++bsize=$(_get_file_block_size $SCRATCH_MNT)
 +_scratch_unmount
 +
-+# Format filesystem with a realtime volume whose size fits the following:
-+# 1. Longer than (XFS MAXEXTLEN * blocksize) bytes.
-+# 2. Exactly a multiple of (NBBY * blksz * rextsize) bytes.
++cat >$tmp.projects <<EOF
++1:$SCRATCH_MNT
++EOF
 +
-+rtsize1=$((2097151 * blksz))
-+rtsize2=$((8 * blksz * rextsize))
-+rtsize=$(( $(blockdev --getsz $SCRATCH_RTDEV) * 512 ))
++cat >$tmp.projid <<EOF
++root:0
++scratch:1
++EOF
 +
-+echo "rtsize1 $rtsize1 rtsize2 $rtsize2 rtsize $rtsize" >> $seqres.full
++projid_file="$tmp.projid"
 +
-+test $rtsize -gt $rtsize1 || \
-+	_notrun "scratch rt device too small, need $rtsize1 bytes"
-+test $rtsize -gt $rtsize2 || \
-+	_notrun "scratch rt device too small, need $rtsize2 bytes"
++echo "*** user"
++_qmount_option "uquota"
++exercise u
 +
-+rtsize=$((rtsize - (rtsize % rtsize2)))
++echo "*** group"
++_qmount_option "gquota"
++exercise g
 +
-+echo "rt size will be $rtsize" >> $seqres.full
++echo "*** uqnoenforce"
++_qmount_option "uqnoenforce"
++exercise uno
 +
-+_scratch_mkfs -r size=$rtsize >> $seqres.full
-+_scratch_mount >> $seqres.full
++echo "*** gqnoenforce"
++_qmount_option "gqnoenforce"
++exercise gno
 +
-+# Make sure the root directory has rtinherit set so our test file will too
-+$XFS_IO_PROG -c 'chattr +t' $SCRATCH_MNT
++echo "*** pquota"
++_qmount_option "pquota"
++exercise p
 +
-+# Allocate some stuff at the start, to force the first falloc of the ouch file
-+# to happen somewhere in the middle of the rt volume
-+$XFS_IO_PROG -f -c 'falloc 0 64m' "$SCRATCH_MNT/b"
-+$here/src/punch-alternating -i $((rextblks * 2)) -s $((rextblks)) "$SCRATCH_MNT/b"
-+
-+avail="$(df -P "$SCRATCH_MNT" | awk 'END {print $4}')"1
-+toobig="$((avail * 2))"
-+
-+# falloc the ouch file in the middle of the rt extent to exercise the near
-+# allocator in the last step.
-+$XFS_IO_PROG -f -c 'falloc 0 1g' "$SCRATCH_MNT/ouch"
-+
-+# Try to get the near allocator to overflow on an allocation that matches
-+# exactly one of the rtsummary size levels.  This should return ENOSPC and
-+# not EFSCORRUPTED.
-+$XFS_IO_PROG -f -c "falloc 0 ${toobig}k" "$SCRATCH_MNT/ouch"
++echo "*** pqnoenforce"
++_qmount_option "pqnoenforce"
++exercise pno
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/xfs/759.out b/tests/xfs/759.out
+diff --git a/tests/xfs/915.out b/tests/xfs/915.out
 new file mode 100644
-index 00000000..df693d50
+index 00000000..c3bb855e
 --- /dev/null
-+++ b/tests/xfs/759.out
-@@ -0,0 +1,2 @@
-+QA output created by 759
-+fallocate: No space left on device
-diff --git a/tests/xfs/760 b/tests/xfs/760
-new file mode 100755
-index 00000000..7f2b52d4
---- /dev/null
-+++ b/tests/xfs/760
-@@ -0,0 +1,68 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0-or-later
-+# Copyright (c) 2021 Oracle.  All Rights Reserved.
-+#
-+# FS QA Test No. 760
-+#
-+# Make sure we validate realtime extent size alignment for fallocate modes.
-+# This is a regression test for fe341eb151ec ("xfs: ensure that fpunch,
-+# fcollapse, and finsert operations are aligned to rt extent size")
++++ b/tests/xfs/915.out
+@@ -0,0 +1,151 @@
++QA output created by 915
++*** user
++meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
++data     = bsize=XXX blocks=XXX, imaxpct=PCT
++         = sunit=XXX swidth=XXX, unwritten=X
++naming   =VERN bsize=XXX
++log      =LDEV bsize=XXX blocks=XXX
++realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
 +
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
++*** report initial settings
++[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
++[NAME] 0 0 0 00 [--------] 0 3 500000 00 [--------] 0 0 0 00 [--------]
 +
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
++*** push past the soft inode limit
++[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
++[NAME] 0 0 0 00 [--------] 4 3 500000 01 [7 days] 0 0 0 00 [--------]
 +
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
++*** push further past the soft inode limit
++[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
++[NAME] 0 0 0 00 [--------] 8 3 500000 05 [7 days] 0 0 0 00 [--------]
 +
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
++*** push past the soft inode warning limit
++[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
++[NAME] 0 0 0 00 [--------] 16 3 500000 13 [7 days] 0 0 0 00 [--------]
 +
-+# real QA test starts here
-+_supported_fs xfs
-+_require_scratch
-+_require_realtime
-+_require_xfs_io_command "fcollapse"
-+_require_xfs_io_command "finsert"
-+_require_xfs_io_command "funshare"
-+_require_xfs_io_command "fzero"
-+_require_xfs_io_command "falloc"
++*** unmount
++*** group
++meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
++data     = bsize=XXX blocks=XXX, imaxpct=PCT
++         = sunit=XXX swidth=XXX, unwritten=X
++naming   =VERN bsize=XXX
++log      =LDEV bsize=XXX blocks=XXX
++realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
 +
-+rm -f $seqres.full
++*** report initial settings
++[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
++[NAME] 0 0 0 00 [--------] 0 3 500000 00 [--------] 0 0 0 00 [--------]
 +
-+# Format filesystem with a 256k realtime extent size
-+_scratch_mkfs -r extsize=256k > $seqres.full
-+_scratch_mount >> $seqres.full
++*** push past the soft inode limit
++[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
++[NAME] 0 0 0 00 [--------] 4 3 500000 01 [7 days] 0 0 0 00 [--------]
 +
-+blksz=$(_get_block_size $SCRATCH_MNT)
-+rextsize=$($XFS_INFO_PROG $SCRATCH_MNT | grep realtime.*extsz | sed -e 's/^.*extsz=\([0-9]*\).*$/\1/g')
-+rextblks=$((rextsize / blksz))
++*** push further past the soft inode limit
++[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
++[NAME] 0 0 0 00 [--------] 8 3 500000 05 [7 days] 0 0 0 00 [--------]
 +
-+echo "blksz $blksz rextsize $rextsize rextblks $rextblks" >> $seqres.full
++*** push past the soft inode warning limit
++[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
++[NAME] 0 0 0 00 [--------] 16 3 500000 13 [7 days] 0 0 0 00 [--------]
 +
-+# Make sure the root directory has rtinherit set so our test file will too
-+$XFS_IO_PROG -c 'chattr +t' $SCRATCH_MNT
++*** unmount
++*** uqnoenforce
++meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
++data     = bsize=XXX blocks=XXX, imaxpct=PCT
++         = sunit=XXX swidth=XXX, unwritten=X
++naming   =VERN bsize=XXX
++log      =LDEV bsize=XXX blocks=XXX
++realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
 +
-+sz=$((rextsize * 100))
-+range="$((blksz * 3)) $blksz"
++*** report initial settings
++[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
++[NAME] 0 0 0 00 [--------] 0 3 500000 00 [--------] 0 0 0 00 [--------]
 +
-+for verb in fpunch finsert fcollapse fzero funshare falloc; do
-+	echo "test $verb"
-+	$XFS_IO_PROG -f -c "falloc 0 $sz" "$SCRATCH_MNT/b"
-+	$XFS_IO_PROG -f -c "$verb $range" "$SCRATCH_MNT/b"
-+	rm -f "$SCRATCH_MNT/b"
-+	_scratch_cycle_mount
-+done
++*** push past the soft inode limit
++[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
++[NAME] 0 0 0 00 [--------] 4 3 500000 00 [--------] 0 0 0 00 [--------]
 +
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/760.out b/tests/xfs/760.out
-new file mode 100644
-index 00000000..3d73c6fa
---- /dev/null
-+++ b/tests/xfs/760.out
-@@ -0,0 +1,9 @@
-+QA output created by 760
-+test fpunch
-+test finsert
-+fallocate: Invalid argument
-+test fcollapse
-+fallocate: Invalid argument
-+test fzero
-+test funshare
-+test falloc
++*** push further past the soft inode limit
++[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
++[NAME] 0 0 0 00 [--------] 8 3 500000 00 [--------] 0 0 0 00 [--------]
++
++*** push past the soft inode warning limit
++[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
++[NAME] 0 0 0 00 [--------] 18 3 500000 00 [--------] 0 0 0 00 [--------]
++
++*** unmount
++*** gqnoenforce
++meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
++data     = bsize=XXX blocks=XXX, imaxpct=PCT
++         = sunit=XXX swidth=XXX, unwritten=X
++naming   =VERN bsize=XXX
++log      =LDEV bsize=XXX blocks=XXX
++realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
++
++*** report initial settings
++[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
++[NAME] 0 0 0 00 [--------] 0 3 500000 00 [--------] 0 0 0 00 [--------]
++
++*** push past the soft inode limit
++[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
++[NAME] 0 0 0 00 [--------] 4 3 500000 00 [--------] 0 0 0 00 [--------]
++
++*** push further past the soft inode limit
++[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
++[NAME] 0 0 0 00 [--------] 8 3 500000 00 [--------] 0 0 0 00 [--------]
++
++*** push past the soft inode warning limit
++[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
++[NAME] 0 0 0 00 [--------] 18 3 500000 00 [--------] 0 0 0 00 [--------]
++
++*** unmount
++*** pquota
++meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
++data     = bsize=XXX blocks=XXX, imaxpct=PCT
++         = sunit=XXX swidth=XXX, unwritten=X
++naming   =VERN bsize=XXX
++log      =LDEV bsize=XXX blocks=XXX
++realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
++
++*** report initial settings
++[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
++[NAME] 0 0 0 00 [--------] 0 3 500000 00 [--------] 0 0 0 00 [--------]
++
++*** push past the soft inode limit
++[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
++[NAME] 0 0 0 00 [--------] 4 3 500000 02 [7 days] 0 0 0 00 [--------]
++
++*** push further past the soft inode limit
++[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
++[NAME] 0 0 0 00 [--------] 8 3 500000 06 [7 days] 0 0 0 00 [--------]
++
++*** push past the soft inode warning limit
++[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
++[NAME] 0 0 0 00 [--------] 15 3 500000 13 [7 days] 0 0 0 00 [--------]
++
++*** unmount
++*** pqnoenforce
++meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
++data     = bsize=XXX blocks=XXX, imaxpct=PCT
++         = sunit=XXX swidth=XXX, unwritten=X
++naming   =VERN bsize=XXX
++log      =LDEV bsize=XXX blocks=XXX
++realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
++
++*** report initial settings
++[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
++[NAME] 0 0 0 00 [--------] 0 3 500000 00 [--------] 0 0 0 00 [--------]
++
++*** push past the soft inode limit
++[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
++[NAME] 0 0 0 00 [--------] 4 3 500000 00 [--------] 0 0 0 00 [--------]
++
++*** push further past the soft inode limit
++[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
++[NAME] 0 0 0 00 [--------] 8 3 500000 00 [--------] 0 0 0 00 [--------]
++
++*** push past the soft inode warning limit
++[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
++[NAME] 0 0 0 00 [--------] 18 3 500000 00 [--------] 0 0 0 00 [--------]
++
++*** unmount
 diff --git a/tests/xfs/group b/tests/xfs/group
-index 4dd9901f..318468b5 100644
+index 87badd56..d7aafc94 100644
 --- a/tests/xfs/group
 +++ b/tests/xfs/group
-@@ -501,4 +501,6 @@
- 526 auto quick mkfs
- 527 auto quick quota
- 758 auto quick rw attr realtime
-+759 auto quick rw realtime
-+760 auto quick rw collapse punch insert zero prealloc
+@@ -505,3 +505,4 @@
+ 760 auto quick rw collapse punch insert zero prealloc
+ 761 auto quick realtime
  763 auto quick rw realtime
++915 auto quick quota
 
