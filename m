@@ -2,62 +2,142 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.2 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,USER_AGENT_SANE_1 autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5683DC433DB
-	for <linux-fstests@archiver.kernel.org>; Tue,  9 Mar 2021 04:02:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 84A78C433DB
+	for <linux-fstests@archiver.kernel.org>; Tue,  9 Mar 2021 04:40:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 228416527D
-	for <linux-fstests@archiver.kernel.org>; Tue,  9 Mar 2021 04:02:36 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5F3BF6528A
+	for <linux-fstests@archiver.kernel.org>; Tue,  9 Mar 2021 04:40:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229697AbhCIECC (ORCPT
+        id S230050AbhCIEjg (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 8 Mar 2021 23:02:02 -0500
-Received: from out4436.biz.mail.alibaba.com ([47.88.44.36]:40646 "EHLO
-        out4436.biz.mail.alibaba.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S229611AbhCIEBb (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 8 Mar 2021 23:01:31 -0500
-X-Alimail-AntiSpam: AC=PASS;BC=-1|-1;BR=01201311R151e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=e01e04420;MF=eguan@linux.alibaba.com;NM=1;PH=DS;RN=3;SR=0;TI=SMTPD_---0UR.n8Jq_1615262479;
-Received: from localhost(mailfrom:eguan@linux.alibaba.com fp:SMTPD_---0UR.n8Jq_1615262479)
-          by smtp.aliyun-inc.com(127.0.0.1);
-          Tue, 09 Mar 2021 12:01:19 +0800
-Date:   Tue, 9 Mar 2021 12:01:19 +0800
-From:   Eryu Guan <eguan@linux.alibaba.com>
-To:     guan@eryu.me, fstests@vger.kernel.org
-Subject: Re: [PATCH v2] xfstests: rename RENAME_WHITEOUT test on fs no enough
- sapce
-Message-ID: <20210309040119.GF96449@e18g06458.et15sqa>
-References: <20210308134327.345579-1-zlang@redhat.com>
- <20210309031129.GD3499219@localhost.localdomain>
+        Mon, 8 Mar 2021 23:39:36 -0500
+Received: from mail.kernel.org ([198.145.29.99]:60804 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S229813AbhCIEj2 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 8 Mar 2021 23:39:28 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 19F7765275;
+        Tue,  9 Mar 2021 04:39:28 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1615264768;
+        bh=9XRsAZ8FAxeuTStWvCNwZLRLqwqJnTLPKMn+T2un58c=;
+        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
+        b=CqWGaSnSdpBNOUwNaL0zT5MvgPSnl6oB/CN2BfAVqBWdqeuY2eWsxawaiptVoG32q
+         BvacSqR/BB4uL3obZY98CTgucR4R5g6NBNqNTxlTrH3/VIY64A7l1WUoOSq28xwUCG
+         goOpXO3kaZp1WMo50Syp5a+MJVcXrsCT6yqYc7FQi7ZFGPn60XPJM6Tidj8EWe4j80
+         URiz2yabpDPqmUvEXSGW4gD9gagSyguuePRQO2ebNT2knMXrVZYzzN+AoYsYJPKhgv
+         vaeeuLk0mYKL6go4cvYNZWzvgUXJJMDiIPv4rCgSYjaFcMCbN76Mh1i6fthmHRpukS
+         FAA4Ndizz2YAQ==
+Subject: [PATCH 4/4] common: capture qcow2 dumps of corrupt ext* filesystems
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     djwong@kernel.org, guaneryu@gmail.com
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me
+Date:   Mon, 08 Mar 2021 20:39:27 -0800
+Message-ID: <161526476796.1212855.15194258148539741251.stgit@magnolia>
+In-Reply-To: <161526474588.1212855.9208390435676413014.stgit@magnolia>
+References: <161526474588.1212855.9208390435676413014.stgit@magnolia>
+User-Agent: StGit/0.19
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210309031129.GD3499219@localhost.localdomain>
-User-Agent: Mutt/1.5.21 (2010-09-15)
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Mar 09, 2021 at 11:11:29AM +0800, Zorro Lang wrote:
-> On Mon, Mar 08, 2021 at 09:43:27PM +0800, Zorro Lang wrote:
-> > This's a regression test for linux 6b4b8e6b4ad8 ("ext4: fix bug for
-> > rename with RENAME_WHITEOUT"). Rename a file with RENAME_WHITEOUT
-> > flag might cause corruption when there's not enough space to
-> > complete this renaming operation.
-> > 
-> > Signed-off-by: Zorro Lang <zlang@redhat.com>
-> > Signed-off-by: Sun Ke <sunke32@huawei.com>
-> > ---
-> 
-> Hi Eryu,
-> 
-> Sorry I made a typo mistake on the patch subject, The 'sapce' should be 'space'.
-> If you don't mind, please help to modify it when you merge this patch. Or feel
+From: Darrick J. Wong <djwong@kernel.org>
 
-Sure, no problem :)
+Create a new helper to use e2image to capture a qcow2 image of an ext*
+filesystem and make _check_generic_filesystem use it to dump corrupt ext
+images.  Refactor the single user of e2image to use the helper.
 
-Thanks,
-Eryu
+Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+---
+ README          |    2 +-
+ common/config   |    1 +
+ common/populate |    2 +-
+ common/rc       |   21 +++++++++++++++++++++
+ 4 files changed, 24 insertions(+), 2 deletions(-)
+
+
+diff --git a/README b/README
+index 3d369438..7a2638af 100644
+--- a/README
++++ b/README
+@@ -109,7 +109,7 @@ Preparing system for tests:
+              - Set TEST_FS_MODULE_RELOAD=1 to unload the module and reload
+                it between test invocations.  This assumes that the name of
+                the module is the same as FSTYP.
+-             - Set DUMP_CORRUPT_FS=1 to record metadata dumps of XFS
++             - Set DUMP_CORRUPT_FS=1 to record metadata dumps of XFS or ext*
+                filesystems if a filesystem check fails.
+              - Set DUMP_COMPRESSOR to a compression program to compress
+                metadumps of filesystems.  This program must accept '-f' and the
+diff --git a/common/config b/common/config
+index d4cf8089..a47e462c 100644
+--- a/common/config
++++ b/common/config
+@@ -225,6 +225,7 @@ export CC_PROG="$(type -P cc)"
+ export FSVERITY_PROG="$(type -P fsverity)"
+ export OPENSSL_PROG="$(type -P openssl)"
+ export ACCTON_PROG="$(type -P accton)"
++export E2IMAGE_PROG="$(type -P e2image)"
+ 
+ # use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
+ # newer systems have udevadm command but older systems like RHEL5 don't.
+diff --git a/common/populate b/common/populate
+index b897922c..4135d89d 100644
+--- a/common/populate
++++ b/common/populate
+@@ -888,7 +888,7 @@ _scratch_populate_cached() {
+ 	"ext2"|"ext3"|"ext4")
+ 		_scratch_ext4_populate $@
+ 		_scratch_ext4_populate_check
+-		e2image -Q "${SCRATCH_DEV}" "${POPULATE_METADUMP}"
++		_ext4_metadump "${SCRATCH_DEV}" "${POPULATE_METADUMP}" compress
+ 		;;
+ 	*)
+ 		_fail "Don't know how to populate a ${FSTYP} filesystem."
+diff --git a/common/rc b/common/rc
+index 835c3c24..a460ec9c 100644
+--- a/common/rc
++++ b/common/rc
+@@ -585,6 +585,18 @@ _scratch_mkfs_ext4()
+ 	return $mkfs_status
+ }
+ 
++_ext4_metadump()
++{
++	local device="$1"
++	local dumpfile="$2"
++	local compressopt="$3"
++
++	test -n "$E2IMAGE_PROG" || _fail "e2image not installed"
++	$E2IMAGE_PROG -Q "$device" "$dumpfile"
++	[ "$compressopt" = "compress" ] && [ -n "$DUMP_COMPRESSOR" ] &&
++		$DUMP_COMPRESSOR "$dumpfile" &>> "$seqres.full"
++}
++
+ _test_mkfs()
+ {
+     case $FSTYP in
+@@ -2730,6 +2742,15 @@ _check_generic_filesystem()
+     fi
+     rm -f $tmp.fsck
+ 
++    if [ $ok -eq 0 ] && [ -n "$DUMP_CORRUPT_FS" ]; then
++        case "$FSTYP" in
++        ext*)
++            local flatdev="$(basename "$device")"
++            _ext4_metadump "$seqres.$flatdev.check.qcow2" "$device" compress
++            ;;
++        esac
++    fi
++
+     if [ $ok -eq 0 ]
+     then
+         echo "*** mount output ***"		>>$seqres.full
+
