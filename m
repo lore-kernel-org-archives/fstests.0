@@ -2,88 +2,92 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-2.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 06FD2C43381
-	for <linux-fstests@archiver.kernel.org>; Tue,  9 Mar 2021 05:05:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 65237C43381
+	for <linux-fstests@archiver.kernel.org>; Tue,  9 Mar 2021 07:31:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C2A606529C
-	for <linux-fstests@archiver.kernel.org>; Tue,  9 Mar 2021 05:05:24 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1FCD7652B5
+	for <linux-fstests@archiver.kernel.org>; Tue,  9 Mar 2021 07:31:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229495AbhCIFEo (ORCPT
+        id S230112AbhCIHbM (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 9 Mar 2021 00:04:44 -0500
-Received: from mail.kernel.org ([198.145.29.99]:36304 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229515AbhCIFEb (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 9 Mar 2021 00:04:31 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id D204B6529C;
-        Tue,  9 Mar 2021 05:04:30 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1615266271;
-        bh=DSVTX0sULXQJLB5Ilz/PObwUY6hhE8+pUmQUEntWUns=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=qN6vMHXja/o7CqZyO+HQWVIrVbgBdetIsHeRrWfeDa19eoWsVOtPFIbiN7t3p9p0b
-         OdRP1hhXVBDAPpOpGF3lT7vFh0qXI/kBCeX25Zx7hu/yYTQAnSTuCZoT8ydaDLrrFw
-         j/OM1NRQQuTjpPYs2a7cwZZH8tFYz7jEc7mZWCYfYUmGVUZscMklbvigjDVxJi6tXm
-         mPkGemMLNzZ/xmfsDDnJpXeHw7ID4D/ZhgBKsAaEX/Xo7oFbxmAMG6aqxPa+ZdDXak
-         Xs01Lb46TWlwUFf/27kI/HCtRnVq3O1iH5WQ9xuv1YEjTjsYpClxinznzYk3BaLG+8
-         AMu83j9oYc+UQ==
-Date:   Mon, 8 Mar 2021 21:04:30 -0800
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Chandan Babu R <chandanrlinux@gmail.com>
-Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH V6 03/13] common/xfs: Add helper to obtain fsxattr field
- value
-Message-ID: <20210309050430.GB7269@magnolia>
-References: <20210309050124.23797-1-chandanrlinux@gmail.com>
- <20210309050124.23797-4-chandanrlinux@gmail.com>
+        Tue, 9 Mar 2021 02:31:12 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52614 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230289AbhCIHbH (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 9 Mar 2021 02:31:07 -0500
+Received: from mail-io1-xd33.google.com (mail-io1-xd33.google.com [IPv6:2607:f8b0:4864:20::d33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 47DECC06174A;
+        Mon,  8 Mar 2021 23:31:07 -0800 (PST)
+Received: by mail-io1-xd33.google.com with SMTP id u20so12849182iot.9;
+        Mon, 08 Mar 2021 23:31:07 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=gJEB67q4wGbs1lwvW2UR1w3WtSUkq1M8L5MbsL95Ca0=;
+        b=eYaUoF5Rfitl0ysE6X9SS4uCbxnJc4nZlDz4+LZG/bJzj3+LSUUU9FlDDoCaFNaLAq
+         Co/lQAJAv1s5A1SH9ziKniwpN3a+av1L8WMLSbAZd5jZvoWUgqvtdgXYxsossZmpJP8/
+         TP1fE4IuykQ9pAVLPKfUVMPHiWtc55u6TkHoNcj8uw3rRdG3iZjQ0cYn7ivyZ8NXI5C+
+         k6A+gpEp5s/oex8Hkm0EQG40VZQlf/Wo06bz1iq6NGfkqkNNnZWj0jWki0NQQXp+9wOd
+         ARuyxFD4EYJjdgMqENJmj4R7qqKp7r+y++qw5q9wy1mfGcLqXA+US36MX+cn9nTY0P7L
+         jL+w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=gJEB67q4wGbs1lwvW2UR1w3WtSUkq1M8L5MbsL95Ca0=;
+        b=U9SNHIK7VUxg66MrlhsHFfXswNZ4jGUsKaufsK/EKAPHkuAYTFKdByJMye8e9HY84o
+         n5opp/rU9nuZ30fAOMkr+LgvfriO3/Tn9HKF5m6Lkmz+yRl9PfgNNpCIALXKNRpcisZ/
+         XpdyClaREkWRhDRWER9PZ8FqTlzf1o4S4Sw2Pansw41QAW/73d7VnsLmoIXQTRppGQxW
+         ePkDCdfPs9/k1O+QDm+UGl+IRVSxwAz0Ggi/X0r6n6oeWCcH1WyUnX6+fosbrRPsRs8o
+         YEDMbBWTycvkKmIXIx/Tv0UAM1pSNFtoPYe2wZuA+6nrc8DqQTpxtlMUY9BFHvvjXxpT
+         SmQQ==
+X-Gm-Message-State: AOAM530yoamVr1jw+S1m7owSi8FgEaynsiOdrRR1rF7TYwNTCxwei370
+        NI4+i4fKyNcRjRtm8zPtJpL8CUtYaohfEps4LFs=
+X-Google-Smtp-Source: ABdhPJwKqt8Pli3eLUo/cAdDE493A7RYnCH6YhcSP2uXzgc0UZ3nMXi/e+zfoURQDu6AXFhjaIIyYXZCWBQ1U58iAEE=
+X-Received: by 2002:a02:9382:: with SMTP id z2mr27838093jah.120.1615275066773;
+ Mon, 08 Mar 2021 23:31:06 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210309050124.23797-4-chandanrlinux@gmail.com>
+References: <20210105062857.3566-1-yangerkun@huawei.com> <X/+/3ui/TQ9LjtNZ@mit.edu>
+ <CAOQ4uxh2V6LF_t8ZaAOr=CbDrY3A5d0qSR7XWVX8dStR9mME5w@mail.gmail.com>
+ <CAJfpegsVYF2wCiMKfRUzS_MpH9UKPh8g7ucG6w9uOcQodAzRAQ@mail.gmail.com> <CAD+ocbyEyeAbH1vqKieK9ENmM5k3K-WF1jMuqAzRwPfPC2Np8A@mail.gmail.com>
+In-Reply-To: <CAD+ocbyEyeAbH1vqKieK9ENmM5k3K-WF1jMuqAzRwPfPC2Np8A@mail.gmail.com>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Tue, 9 Mar 2021 09:30:55 +0200
+Message-ID: <CAOQ4uxi5Pqk=pVQQr7261tdy3FfkBJU32_bTd2zzmsAzythwnw@mail.gmail.com>
+Subject: Re: [PATCH v3] ext4: fix bug for rename with RENAME_WHITEOUT
+To:     harshad shirwadkar <harshadshirwadkar@gmail.com>
+Cc:     Miklos Szeredi <miklos@szeredi.hu>,
+        "Theodore Ts'o" <tytso@mit.edu>, yangerkun <yangerkun@huawei.com>,
+        Ext4 <linux-ext4@vger.kernel.org>,
+        Andreas Dilger <adilger.kernel@dilger.ca>,
+        Jan Kara <jack@suse.cz>, "zhangyi (F)" <yi.zhang@huawei.com>,
+        lihaotian <lihaotian9@huawei.com>, lutianxiong@huawei.com,
+        linfeilong <linfeilong@huawei.com>,
+        fstests <fstests@vger.kernel.org>,
+        Vijaychidambaram Velayudhan Pillai <vijay@cs.utexas.edu>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Mar 09, 2021 at 10:31:14AM +0530, Chandan Babu R wrote:
-> This commit adds a helper function to obtain the value of a particular field
-> of an inode's fsxattr fields.
-> 
-> Signed-off-by: Chandan Babu R <chandanrlinux@gmail.com>
+On Fri, Jan 22, 2021 at 9:21 PM harshad shirwadkar
+<harshadshirwadkar@gmail.com> wrote:
+>
+> Thanks Amir for pointing that out. Yes we are missing fast commit
+> tracking in whiteout. I'll send out a fix for that.
+>
 
-Seems reasonable,
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+Ping.
 
---D
+Harshad,
 
-> ---
->  common/xfs | 9 +++++++++
->  1 file changed, 9 insertions(+)
-> 
-> diff --git a/common/xfs b/common/xfs
-> index 26ae21b9..130b3232 100644
-> --- a/common/xfs
-> +++ b/common/xfs
-> @@ -194,6 +194,15 @@ _xfs_get_file_block_size()
->  	$XFS_INFO_PROG "$path" | grep realtime | sed -e 's/^.*extsz=\([0-9]*\).*$/\1/g'
->  }
->  
-> +_xfs_get_fsxattr()
-> +{
-> +	local field="$1"
-> +	local path="$2"
-> +
-> +	local value=$($XFS_IO_PROG -c "stat" "$path" | grep "$field")
-> +	echo ${value##fsxattr.${field} = }
-> +}
-> +
->  # xfs_check script is planned to be deprecated. But, we want to
->  # be able to invoke "xfs_check" behavior in xfstests in order to
->  # maintain the current verification levels.
-> -- 
-> 2.29.2
-> 
+Did you forget or did I miss the patch?
+
+Thanks,
+Amir.
