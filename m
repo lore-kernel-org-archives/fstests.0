@@ -2,52 +2,80 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-17.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5FF92C433E0
-	for <linux-fstests@archiver.kernel.org>; Wed, 10 Mar 2021 02:10:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2273DC433DB
+	for <linux-fstests@archiver.kernel.org>; Wed, 10 Mar 2021 02:17:32 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0C3E464EA4
-	for <linux-fstests@archiver.kernel.org>; Wed, 10 Mar 2021 02:10:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C6AD264F81
+	for <linux-fstests@archiver.kernel.org>; Wed, 10 Mar 2021 02:17:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231703AbhCJCKO (ORCPT
+        id S231703AbhCJCQ5 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 9 Mar 2021 21:10:14 -0500
-Received: from mail.kernel.org ([198.145.29.99]:34848 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S231228AbhCJCJs (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 9 Mar 2021 21:09:48 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 3091364E68;
-        Wed, 10 Mar 2021 02:09:48 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1615342188;
-        bh=qU9RoGZjaBXY27t9JrsftmnlnAhoZKpJNOMzpz7L624=;
-        h=Date:From:To:Subject:References:In-Reply-To:From;
-        b=meFT0+5RgAiNZ3A71k62Mrbb6njoNxQHHBvCXMAbsfQgnfBJw8dxHRbXhnBqvyXWH
-         3+59kFN9RmU5NNT8UxcpA/hPgTPUJmaH0p0B+0Bj34lqcVA1cgV3+dQ6VQ+j1obLFY
-         n4SzA/Njx4amqzEEcDpuKXKR/KgzZoZH443fPlK6KUpbgFK7cbqU0FzSadfw+oabA7
-         4HD06bx98YsHQZkTNQjIhdm95R4WFPUi8RhFi7V/KllrXOoUSxVwxH2PljSzzlW8ja
-         juW0wSqxhucF+SuPgOqqDNP8pR3A/T5OwO66N/GKRYOfAxO4p7TM34m5W5g6uOow9/
-         fwGAvN/eFH6KA==
-Date:   Tue, 9 Mar 2021 18:09:47 -0800
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Gao Xiang <hsiangkao@redhat.com>, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org
+        Tue, 9 Mar 2021 21:16:57 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:56276 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S231571AbhCJCQd (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 9 Mar 2021 21:16:33 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1615342593;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=DXK3I2SEudLz4KqFKJu+QsVHicwIr1DsfZsJTiugzPA=;
+        b=h4EkHUDtcYWLRp1HKxjkIL6Rdbfy1DTTJQpl2MFgjbdIEMNmDXc9JPvVUIUakxBtxVPIOH
+        s+M4LBxZJ2jEPG4PWTanQIxMxk7bbP1k/KbU230Y4LoCTumojUk1m3hsvSRz95TH5HgLsm
+        QqSeJmqIX6+xhAvHFRvFFms8nDCIwFU=
+Received: from mail-pf1-f197.google.com (mail-pf1-f197.google.com
+ [209.85.210.197]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-366-b4cb3hhKPLWH6lioi5hPXQ-1; Tue, 09 Mar 2021 21:16:31 -0500
+X-MC-Unique: b4cb3hhKPLWH6lioi5hPXQ-1
+Received: by mail-pf1-f197.google.com with SMTP id f17so9601108pfj.3
+        for <fstests@vger.kernel.org>; Tue, 09 Mar 2021 18:16:31 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to:user-agent;
+        bh=DXK3I2SEudLz4KqFKJu+QsVHicwIr1DsfZsJTiugzPA=;
+        b=KQBk4b5tOntGp0yxi0k6U/hPQXKiEvbJHP8asBWHuxcHOqXGY7z0QImT/p76V7eFKt
+         cRnuN9xD3F9+zs1iqXPjhvWbePfle59k2LQQC+oqTS+MA6E8Nj33TaxeU/9PSw6iCwDF
+         SmrKYNd8yP8UPWAx8nwftaF0ufy8ZPOl6Mc8g31RoWtLtTjEEbY2SFR8Dn5UG3FzqX0E
+         cdviOqThCosnWcM2rUgmOW6gxKkUcOlTD7UtZQIdNgyRweatJu/yVBgH1IJTVhtlOe/G
+         rQLUu8hWYJyUL2Qla4S9B+P+bHi/zFNyU9xQEjbUjpkUNXl+g0nnW0DE+YymIOZl8cxf
+         a9rw==
+X-Gm-Message-State: AOAM532/QectQlUQrkXeqdndwBH2GbgkK6YZhr55+sJtDFnPwusyNcLz
+        4bbWT2f4Ix2+Y83yO4WGW/mLf9OwTS13c3ASDUCkpPF3hStXro8BeSRCU4zbWx8WGUkC7J2YER5
+        eUyhexYmVEb/rIcVuUg==
+X-Received: by 2002:a65:6209:: with SMTP id d9mr746566pgv.206.1615342590400;
+        Tue, 09 Mar 2021 18:16:30 -0800 (PST)
+X-Google-Smtp-Source: ABdhPJwDHy8cR3YgDO1oOz+fIpXgSEu6E6B21r9rkqR0aeUKoXH97bwyNjMz4OvdQLjN3Oad8jkvrQ==
+X-Received: by 2002:a65:6209:: with SMTP id d9mr746549pgv.206.1615342590123;
+        Tue, 09 Mar 2021 18:16:30 -0800 (PST)
+Received: from xiangao.remote.csb ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id d19sm3995577pjs.55.2021.03.09.18.16.28
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 09 Mar 2021 18:16:29 -0800 (PST)
+Date:   Wed, 10 Mar 2021 10:16:20 +0800
+From:   Gao Xiang <hsiangkao@redhat.com>
+To:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 Subject: Re: [WIP] [RFC PATCH] xfs: add test on shrinking unused space in the
  last AG
-Message-ID: <20210310020947.GC3419940@magnolia>
+Message-ID: <20210310021620.GB4003044@xiangao.remote.csb>
 References: <20201028230909.639698-1-hsiangkao@redhat.com>
  <20210310004324.GE3499219@localhost.localdomain>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
 In-Reply-To: <20210310004324.GE3499219@localhost.localdomain>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
+
+Hi Zorro,
 
 On Wed, Mar 10, 2021 at 08:43:25AM +0800, Zorro Lang wrote:
 > On Thu, Oct 29, 2020 at 07:09:09AM +0800, Gao Xiang wrote:
@@ -181,11 +209,16 @@ On Wed, Mar 10, 2021 at 08:43:25AM +0800, Zorro Lang wrote:
 > be failed. So maybe we need a _require_* function to check if current xfs
 > support shrinking feature at first?
 
-Also, it's time to send the xfs_growfs patches to the list so I can
-replicate the tests on my own test vms.
+That is a good idea, yet in order to test this, currently it needs
+some image to shrink. and for now it supports shrinking free space
+in last AG, later it might support shrinking free space with no
+limitation. So I'm not sure such require test is stable though.
+what's your perference about this?
 
---D
+Thanks,
+Gao Xiang
 
+> 
 > Thanks,
 > Zorro
 > 
@@ -304,3 +337,4 @@ replicate the tests on my own test vms.
 > > 2.18.1
 > > 
 > 
+
