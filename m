@@ -2,48 +2,61 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-17.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2D573C433E0
-	for <linux-fstests@archiver.kernel.org>; Tue,  9 Mar 2021 18:04:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 61426C433E0
+	for <linux-fstests@archiver.kernel.org>; Wed, 10 Mar 2021 00:26:13 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id EA3D2652C2
-	for <linux-fstests@archiver.kernel.org>; Tue,  9 Mar 2021 18:04:41 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 246BD65009
+	for <linux-fstests@archiver.kernel.org>; Wed, 10 Mar 2021 00:26:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231572AbhCISEI (ORCPT
+        id S230325AbhCJAZh (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 9 Mar 2021 13:04:08 -0500
-Received: from mail.kernel.org ([198.145.29.99]:54904 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S230173AbhCISDu (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 9 Mar 2021 13:03:50 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id A44DA65244;
-        Tue,  9 Mar 2021 18:03:49 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1615313029;
-        bh=eC6dJhgH6QLi/lxSS3FWa0YU3z2pfr4tll33zFGoYRE=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=rh4VftUQjBQx0IXNVDGdJe+ABILvEGb3zNxI4xWlAD7RDKx3IqV1LKxdcJJkwHkDW
-         QZsvrUGlJ38ZxdlY2plAqm5scmeY4kdUnMjgnvUVA16UKg3IrXPSlX228q0FTWSDNw
-         xT+6ZklXjYLFPhYeXGqIspjZEsfOQlPYZsDhXT0MKo1Gg0oa+pVQDsBKK6ewwSEL4E
-         YWa8URarKFY0O7SDCOMVsBhP2+4ZSzT78ip3nkWmsQJg6QZ1IigRXHcCgiOQjSGw3a
-         wvVodeNbqblHPKyrcmfCUU5JVcf8cJ5AAKR8iNYtISHm5k7sc5oZQnEMMv/DOLpWCW
-         RxiZOEo+l/nTw==
-Date:   Tue, 9 Mar 2021 10:03:49 -0800
-From:   "Darrick J. Wong" <djwong@kernel.org>
+        Tue, 9 Mar 2021 19:25:37 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:35643 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S230094AbhCJAZS (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 9 Mar 2021 19:25:18 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1615335917;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=XUzmvT/O2Ggr+lDm9by0RtLX6lQc76Syl1qvrAKkZKo=;
+        b=aThdOydPuNVRWIhPkxkBydkqEqGurG648nwqa1gMdWJPOPNB1KPqoFpXlTnNA6bmDlolUo
+        Gt0ufUt26ZX7x0wH0K+8q3BqqErOg1gG+dp+6AJ7QR6NucMVofu/pIxKkKnixFrhlsr2RR
+        jqzmxqzsBDnSgdf4ZbQKffqLIhgav1w=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-468-GJWk8-IxMKm2jFiIpEjDlw-1; Tue, 09 Mar 2021 19:25:15 -0500
+X-MC-Unique: GJWk8-IxMKm2jFiIpEjDlw-1
+Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id B6FDF881D41;
+        Wed, 10 Mar 2021 00:25:14 +0000 (UTC)
+Received: from localhost (unknown [10.66.61.36])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id DA51D61F38;
+        Wed, 10 Mar 2021 00:25:06 +0000 (UTC)
+Date:   Wed, 10 Mar 2021 08:43:25 +0800
+From:   Zorro Lang <zlang@redhat.com>
 To:     Gao Xiang <hsiangkao@redhat.com>
 Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 Subject: Re: [WIP] [RFC PATCH] xfs: add test on shrinking unused space in the
  last AG
-Message-ID: <20210309180349.GC7269@magnolia>
+Message-ID: <20210310004324.GE3499219@localhost.localdomain>
+Mail-Followup-To: Gao Xiang <hsiangkao@redhat.com>,
+        linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 References: <20201028230909.639698-1-hsiangkao@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 In-Reply-To: <20201028230909.639698-1-hsiangkao@redhat.com>
+User-Agent: Mutt/1.10.1 (2018-07-13)
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.15
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
@@ -95,10 +108,6 @@ On Thu, Oct 29, 2020 at 07:09:09AM +0800, Gao Xiang wrote:
 > +. ./common/filter
 > +
 > +_create_scratch()
-
-Functions in tests do not need to be prefixed with "_" since they're not
-global symbols.
-
 > +{
 > +	echo "*** mkfs"
 > +	_scratch_mkfs_xfs $@ | tee -a $seqres.full | _filter_mkfs 2>$tmp.mkfs
@@ -147,10 +156,6 @@ global symbols.
 > +totalcount=6
 > +
 > +while [ $totalcount -gt 0 ]; do
-
-So we run this six times?  Why six, specifically?  Should it be scaled
-by TIME_FACTOR?
-
 > +	size=`expr 1010 \* 1048576`	# 1010 megabytes initially
 > +	echo "*** creating scratch filesystem"
 > +	logblks=$(_scratch_find_xfs_min_logblocks -dsize=${size} -dagcount=${nags})
@@ -165,14 +170,9 @@ by TIME_FACTOR?
 > +		test -n "${out}" && echo "$out"
 > +		break
 > +	done
-
-_fill_fs ?
-
 > +
 > +	decsize=`expr  42 \* 1048576`	# shrink in chunks of this size at most
-
-This could go outside the loop.
-
+> +
 > +	echo "*** stressing filesystem"
 > +	while [ $size -gt $endsize ]; do
 > +		_stress_scratch
@@ -183,10 +183,18 @@ This could go outside the loop.
 > +			sizeb=`expr $size / $dbsize - $decb`
 > +
 > +			xfs_growfs -D ${sizeb} $SCRATCH_MNT 2>&1 \
-
-Use $XFS_GROWFS_PROG, do not call xfs_growfs directly.
-
 > +				| tee -a $seqres.full | _filter_mkfs 2>$tmp.growfs > /dev/null
+
+As Darrick has reviewed, I have one more question. Looks like we can shrink a
+mounted xfs via giving a smaller size to xfs_growfs.
+
+If xfs_growfs or kernel doesn't support 'shrink', I think the whole test will
+be failed. So maybe we need a _require_* function to check if current xfs
+support shrinking feature at first?
+
+Thanks,
+Zorro
+
 > +
 > +			ret="${PIPESTATUS[0]}"
 > +			. $tmp.growfs
@@ -195,32 +203,12 @@ Use $XFS_GROWFS_PROG, do not call xfs_growfs directly.
 > +
 > +			[ $decb -gt 100 ] && decb=`expr $decb + $RANDOM % 10`
 > +			decb=`expr $decb / 2`
-
-So... uh... what does this decb logic do?  AFAICT we start by removing
-42MB from the end of the filesystem, and then we ... add some random
-quantity to decb, halve it, then shrink by that amount?  And we keep
-doing smaller and smaller pieces until the shrink fails or decb becomes
-zero...
-
 > +		done
 > +
 > +		wait
 > +		[ $decb -eq 0 ] && break
-
-...after which we wait for fsstress to end and then loop back to
-fsstress and shrinking?
-
-I was expecting to see two tests: a basic functionality test, and then a
-second one to race fsstress and shrink to see what happens.
-
 > +
 > +		size=`expr $size - $decb \* $dbsize`
-
-Why don't we query the size of the filesystem instead of calculating it
-and hoping that reflects reality?
-
---D
-
 > +	done
 > +
 > +	_scratch_unmount
@@ -321,3 +309,4 @@ and hoping that reflects reality?
 > -- 
 > 2.18.1
 > 
+
