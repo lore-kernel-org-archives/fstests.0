@@ -8,122 +8,179 @@ X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DBE05C433DB
-	for <linux-fstests@archiver.kernel.org>; Thu, 11 Mar 2021 02:55:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C1245C433E0
+	for <linux-fstests@archiver.kernel.org>; Thu, 11 Mar 2021 07:59:33 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9880A64FB6
-	for <linux-fstests@archiver.kernel.org>; Thu, 11 Mar 2021 02:55:30 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 77FFA64E5F
+	for <linux-fstests@archiver.kernel.org>; Thu, 11 Mar 2021 07:59:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229714AbhCKCy6 (ORCPT
+        id S229889AbhCKH7B (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 10 Mar 2021 21:54:58 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51552 "EHLO
+        Thu, 11 Mar 2021 02:59:01 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60142 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229624AbhCKCy2 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 10 Mar 2021 21:54:28 -0500
-Received: from mail-pf1-x432.google.com (mail-pf1-x432.google.com [IPv6:2607:f8b0:4864:20::432])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 86193C061574;
-        Wed, 10 Mar 2021 18:54:28 -0800 (PST)
-Received: by mail-pf1-x432.google.com with SMTP id t85so8239525pfc.13;
-        Wed, 10 Mar 2021 18:54:28 -0800 (PST)
+        with ESMTP id S229842AbhCKH6g (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 11 Mar 2021 02:58:36 -0500
+Received: from mail-pj1-x1035.google.com (mail-pj1-x1035.google.com [IPv6:2607:f8b0:4864:20::1035])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1FF4FC061574;
+        Wed, 10 Mar 2021 23:58:36 -0800 (PST)
+Received: by mail-pj1-x1035.google.com with SMTP id lr1-20020a17090b4b81b02900ea0a3f38c1so1318371pjb.0;
+        Wed, 10 Mar 2021 23:58:36 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=references:user-agent:from:to:cc:subject:in-reply-to:date
          :message-id:mime-version;
-        bh=1v7GCMTbQVIYexLaeQhCjrZGJ9XTKr3ZQAKaEmI4eGE=;
-        b=Ks0HsErcrZOI7L02ETepT4Z6ai4QTf0EmdyKJ9t2O3lVdQ+a/5kF3u22mKFSrN/Vtc
-         pjOfpoxv5dMuacHUNJ+8+K6gKeHh4PNXicNWsN9niUelRpjoXWi/CBnQyw943NTRdPBv
-         +6x7JHY9iwnE/wFiu6ug0clB28gdwuCL4v6NFxYKLQhAYUtkDe/VaHLoPkaO9OXJeJcp
-         lxRe7VqKJAPzGxTee3LXufd0xz0Lvrqks8TAI6JY7jkjjFqpYs/5DXfOamIPauQ5VYuz
-         kLza35aFK8HUUGSRtv94t36+uNk/uBIJUQ5LtiWkoAxHb2OIz1OyZuuGQ/0rUuU2kfkP
-         CVdg==
+        bh=TD+6E4zSr3bf3+qAx+ehlqCsv3enMzoHz10/eUKDDOA=;
+        b=IM2r6aeUv2taycOcu2FbtCZ8bFIQnTqTlfwU0yNpS3YyVZCAawa2ZhqU+mVZlNMIhj
+         3kUHkGJsowSIqyG8LDUf45OKJIB0S8+ddgnQBWzvsXy+/mlqbqUWOOx6KMFvM+DqZG01
+         F9b1w4HIAxPgM/KoBFQjHVk36eJuSKXVpHNR8oX+rH2dFfKJL4TKYK/uMSjs4iFvX8MD
+         2twn7C1RhrsnRKvkDiXr7OZmTwfLDpj1WSQsaPB6Y9l6vYKpdedTHkZcSMfP+M/NKajk
+         dznHTYXc2i2aSzChtQfnxofw8KrHML4hxuL9ZMSdrTJZlrFPqWLIiXRSb5J31MsGoxBy
+         d+Vw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:references:user-agent:from:to:cc:subject
          :in-reply-to:date:message-id:mime-version;
-        bh=1v7GCMTbQVIYexLaeQhCjrZGJ9XTKr3ZQAKaEmI4eGE=;
-        b=nA+DbN2XogHkKPeQcqDXN7mCw1wFTPE3DrtjnEUhi30p/kl7dbTuX64gw3aRR9uy5g
-         tbolxjwLIboJhAkj0I6lYNB0wLNJQKBYZlWYqd7UXSylqCUdcuZdcOu3fCQm8h5lo9MV
-         MAdLkGO6oFbg5OtpaUBHoEfm4l+f4YUFMFvksHFmgP402r8Fg6ApVE7bt8r3ExjtcQlO
-         9vCPflwp/bHePAI6HMz8DjfPOfahwqQIpAJRHcKoTXqUJ/kXZENEkq2vzHYqYJAxbKwJ
-         vIHwYOIZgBxSoNKoPKLMeegkHBRMlAftRpPhFDVC/XxgJ57J+wxpt7kDa6MKZk4SOX1x
-         ttvA==
-X-Gm-Message-State: AOAM531apoV7AH0noxZzNvoArXs5YPbspyyAfxVsJGAJ7pfJpZPL0zXb
-        W4KuCczvb9Lfpx5a07HqLtc=
-X-Google-Smtp-Source: ABdhPJyMxSPiopdQo227qyajyCCLLVIfPYHrdOWh8BIhDf27lxeg9ql7zMbN8/cK6dx51vrhAJZ4Hw==
-X-Received: by 2002:aa7:820b:0:b029:1f2:3050:cc6 with SMTP id k11-20020aa7820b0000b02901f230500cc6mr5736805pfi.52.1615431268041;
-        Wed, 10 Mar 2021 18:54:28 -0800 (PST)
+        bh=TD+6E4zSr3bf3+qAx+ehlqCsv3enMzoHz10/eUKDDOA=;
+        b=N47kFQnwqblFZ7HrOoZmwc8Xjxa3rGGqkAV2ojcWSngNFZjng7KKqlv656yr1JazPK
+         IyAMNd4by4NX+FoLQEnV7VqRNmj9TfrczMWtII01tXXxZGLFxaPFyqjjsE2q9tDjxXIF
+         864fLZ9inOsR8ZIsXjjQcCNPCoJ6JBox9kw/I07aI8oopxKIIbUg3mCuBq8jFWx4Nl3E
+         ciYL8Q9Gesis2F2WGu4fp2MNK6Un3wj5644HrAxR+coPB11ewk1pPzlq0RBK5nVrcDM5
+         m6YksCfegwllN7kVZ+e0BmPLiP9Ia4Scy6YBXlvjqVn6XdkKrUdxrqsv2UZsh1rWc6AR
+         oY2A==
+X-Gm-Message-State: AOAM531VhmQjam7GpgQ/pyTspcxE8aZPCCv55EDNxYDYbH62RRf8tl52
+        ArB7LjbHUA3ngpokCWtx6Ns=
+X-Google-Smtp-Source: ABdhPJzQE59I/zb4S7X0mAXw9I8/qgZ2nqqfFgWUd5qxvQcCw3QacpWr+qDe6+e7AOkpiSr9w5Kv7w==
+X-Received: by 2002:a17:90a:3ec3:: with SMTP id k61mr7573385pjc.125.1615449515643;
+        Wed, 10 Mar 2021 23:58:35 -0800 (PST)
 Received: from garuda ([122.171.53.181])
-        by smtp.gmail.com with ESMTPSA id j3sm722059pgk.24.2021.03.10.18.54.25
+        by smtp.gmail.com with ESMTPSA id i2sm1465892pgs.82.2021.03.10.23.58.33
         (version=TLS1_2 cipher=ECDHE-ECDSA-CHACHA20-POLY1305 bits=256/256);
-        Wed, 10 Mar 2021 18:54:27 -0800 (PST)
-References: <20210309050124.23797-1-chandanrlinux@gmail.com> <20210309050124.23797-4-chandanrlinux@gmail.com> <148ab249-be7a-2686-7995-a256e34f292a@oracle.com>
+        Wed, 10 Mar 2021 23:58:35 -0800 (PST)
+References: <161526480371.1214319.3263690953532787783.stgit@magnolia> <161526482015.1214319.6227125326960502859.stgit@magnolia>
 User-agent: mu4e 1.0; emacs 26.1
 From:   Chandan Babu R <chandanrlinux@gmail.com>
-To:     Allison Henderson <allison.henderson@oracle.com>
-Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
-        djwong@kernel.org
-Subject: Re: [PATCH V6 03/13] common/xfs: Add helper to obtain fsxattr field value
-In-reply-to: <148ab249-be7a-2686-7995-a256e34f292a@oracle.com>
-Date:   Thu, 11 Mar 2021 08:24:24 +0530
-Message-ID: <871rcm1jtr.fsf@garuda>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org, guan@eryu.me
+Subject: Re: [PATCH 03/10] xfs: test rtalloc alignment and math errors
+In-reply-to: <161526482015.1214319.6227125326960502859.stgit@magnolia>
+Date:   Thu, 11 Mar 2021 13:28:32 +0530
+Message-ID: <87mtvaceaf.fsf@garuda>
 MIME-Version: 1.0
 Content-Type: text/plain
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-
-On 10 Mar 2021 at 11:43, Allison Henderson wrote:
-> On 3/8/21 10:01 PM, Chandan Babu R wrote:
->> This commit adds a helper function to obtain the value of a particular field
->> of an inode's fsxattr fields.
->>
->> Signed-off-by: Chandan Babu R <chandanrlinux@gmail.com>
->> ---
->>   common/xfs | 9 +++++++++
->>   1 file changed, 9 insertions(+)
->>
->> diff --git a/common/xfs b/common/xfs
->> index 26ae21b9..130b3232 100644
->> --- a/common/xfs
->> +++ b/common/xfs
->> @@ -194,6 +194,15 @@ _xfs_get_file_block_size()
->>   	$XFS_INFO_PROG "$path" | grep realtime | sed -e 's/^.*extsz=\([0-9]*\).*$/\1/g'
->>   }
->>   +_xfs_get_fsxattr()
->> +{
->> +	local field="$1"
->> +	local path="$2"
->> +
->> +	local value=$($XFS_IO_PROG -c "stat" "$path" | grep "$field")
->> +	echo ${value##fsxattr.${field} = }
->> +}
->> +
-> In fiddling with the commands here, I think I may have noticed a bug.
-> I think you want to grep whole words only, or you may mistakenly match
-> sub words. Example:
+On 09 Mar 2021 at 10:10, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
 >
-> root@garnet:/home/achender/work_area# field="extsize "
-> root@garnet:/home/achender/work_area# xfs_io -c "stat"
-> /mnt/scratch/test | grep "$field"
-> fsxattr.extsize = 0
-> fsxattr.cowextsize = 0
+> Add a couple of regression tests for "xfs: make sure the rt allocator
+> doesn't run off the end" and "xfs: ensure that fpunch, fcollapse, and
+> finsert operations are aligned to rt extent size".
 >
-> I think if you add the -w to the grep that fixes it:
-> root@garnet:/home/achender/work_area# xfs_io -c "stat"
-> /mnt/scratch/test | grep -w "$field"
-> fsxattr.extsize = 0
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> ---
+>  tests/xfs/759     |  100 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/759.out |    2 +
+>  tests/xfs/760     |   68 ++++++++++++++++++++++++++++++++++++
+>  tests/xfs/760.out |    9 +++++
+>  tests/xfs/group   |    2 +
+>  5 files changed, 181 insertions(+)
+>  create mode 100755 tests/xfs/759
+>  create mode 100644 tests/xfs/759.out
+>  create mode 100755 tests/xfs/760
+>  create mode 100644 tests/xfs/760.out
 >
-> I think that's what you meant to do right?
 >
+> diff --git a/tests/xfs/759 b/tests/xfs/759
+> new file mode 100755
+> index 00000000..8558fe30
+> --- /dev/null
+> +++ b/tests/xfs/759
+> @@ -0,0 +1,100 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0-or-later
+> +# Copyright (c) 2021 Oracle.  All Rights Reserved.
+> +#
+> +# FS QA Test No. 759
+> +#
+> +# This is a regression test for commit 2a6ca4baed62 ("xfs: make sure the rt
+> +# allocator doesn't run off the end") which fixes an overflow error in the
+> +# _near realtime allocator.  If the rt bitmap ends exactly at the end of a
+> +# block and the number of rt extents is large enough to allow an allocation
+> +# request larger than the maximum extent size, it's possible that during a
+> +# large allocation request, the allocator will fail to constrain maxlen on the
+> +# second run through the loop, and the rt bitmap range check will run right off
+> +# the end of the rtbitmap file.  When this happens, xfs triggers a verifier
+> +# error and returns EFSCORRUPTED.
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1    # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_fs xfs
+> +_require_scratch
+> +_require_realtime
+> +_require_test_program "punch-alternating"
+> +
+> +rm -f $seqres.full
+> +
+> +# Format filesystem to get the block size
+> +_scratch_mkfs > $seqres.full
+> +_scratch_mount >> $seqres.full
+> +
+> +blksz=$(_get_block_size $SCRATCH_MNT)
+> +rextsize=$($XFS_INFO_PROG $SCRATCH_MNT | grep realtime.*extsz | sed -e 's/^.*extsz=\([0-9]*\).*$/\1/g')
+> +rextblks=$((rextsize / blksz))
+> +
+> +echo "blksz $blksz rextsize $rextsize rextblks $rextblks" >> $seqres.full
+> +
+> +_scratch_unmount
+> +
+> +# Format filesystem with a realtime volume whose size fits the following:
+> +# 1. Longer than (XFS MAXEXTLEN * blocksize) bytes.
 
-Yes, that was the intended behaviour. Thanks for catching the bug and
-suggesting the appropriate solution.
+Shouldn't the multiplier be RT extent size rather than FS block size?
 
-I will fix this.
+> +# 2. Exactly a multiple of (NBBY * blksz * rextsize) bytes.
 
-Also, Thanks for reviewing the entire patchset.
+i.e The bits in one rt bitmap block map (NBBY * blksz * rextsize) bytes of an
+rt device. Hence to have the bitmap end at a fs block boundary the
+corresponding rt device size should be a multiple of this product. Is my
+understanding correct?
+
+> +
+> +rtsize1=$((2097151 * blksz))
+> +rtsize2=$((8 * blksz * rextsize))
+> +rtsize=$(( $(blockdev --getsz $SCRATCH_RTDEV) * 512 ))
+> +
+> +echo "rtsize1 $rtsize1 rtsize2 $rtsize2 rtsize $rtsize" >> $seqres.full
+> +
+> +test $rtsize -gt $rtsize1 || \
+> +	_notrun "scratch rt device too small, need $rtsize1 bytes"
+> +test $rtsize -gt $rtsize2 || \
+> +	_notrun "scratch rt device too small, need $rtsize2 bytes"
+> +
+> +rtsize=$((rtsize - (rtsize % rtsize2)))
+> +
 
 --
 chandan
