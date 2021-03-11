@@ -2,105 +2,79 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EA7CDC433E6
-	for <linux-fstests@archiver.kernel.org>; Thu, 11 Mar 2021 12:12:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 99517C433E6
+	for <linux-fstests@archiver.kernel.org>; Thu, 11 Mar 2021 12:55:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 917A664FEC
-	for <linux-fstests@archiver.kernel.org>; Thu, 11 Mar 2021 12:12:56 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 51C5564FDF
+	for <linux-fstests@archiver.kernel.org>; Thu, 11 Mar 2021 12:55:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233020AbhCKMM0 (ORCPT
+        id S233116AbhCKMzG (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 11 Mar 2021 07:12:26 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:36916 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S232910AbhCKMMX (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 11 Mar 2021 07:12:23 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1615464742;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=ZaUSzKMQ/91EP85rlhVLcZxuAl+vcIVUe3l14n8yuJ4=;
-        b=Pv7zT+NN9uP+6n5qu41bhoLed0gzGdKl3SNb6op5oGHj2iqr1UBvkl93T/wEWtGgRng+5O
-        MiZY1OJhDcxjOmzbhEpjCb0riPDBJJLdEY/HqtZcGH1tNr3bFnnvB7GiHoIVJinUMIDiYT
-        pkybBurWCiXqJTD9FGynS4zqpYhHNP4=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-249-J3v4SxU_PF6S1o4-NUWWHA-1; Thu, 11 Mar 2021 07:12:19 -0500
-X-MC-Unique: J3v4SxU_PF6S1o4-NUWWHA-1
-Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id C52708015BD
-        for <fstests@vger.kernel.org>; Thu, 11 Mar 2021 12:12:18 +0000 (UTC)
-Received: from zlang-laptop.redhat.com (ovpn-12-77.pek2.redhat.com [10.72.12.77])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id CCF7260853
-        for <fstests@vger.kernel.org>; Thu, 11 Mar 2021 12:12:16 +0000 (UTC)
-From:   Zorro Lang <zlang@redhat.com>
-To:     fstests@vger.kernel.org
-Subject: [PATCH] common/rc: specifically make new xfs in _test_mkfs
-Date:   Thu, 11 Mar 2021 20:12:13 +0800
-Message-Id: <20210311121213.1348303-1-zlang@redhat.com>
+        Thu, 11 Mar 2021 07:55:06 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39026 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S233061AbhCKMyg (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 11 Mar 2021 07:54:36 -0500
+Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EFC06C061574;
+        Thu, 11 Mar 2021 04:54:35 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
+        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=waonfuqDjv6ZLOdd0HuSg3S4ZgUb+QjUP5NKyfRi0PU=; b=p/tHQGoKVXrmJlu+VX55T3a1YK
+        9eKRTwu+HnoyjsdC3m3rTrfVaJ1wPeRLT3Z1UglF9POBhZu4HJRulJJpuaCwSM8Kk7EnOZCpq+aL6
+        WABLbM+Mk1zU+deOnrMVbN1l5+XmgSETc6kY+YAjW92bzdxGJYJTmZ0qZadJTOnuWRW1LcypkmZ6i
+        jx5/vKJqPvg1Nmv30oghEgTb4SnXrn5E1UzIE2bvr3BW8Obs4Ruu5SjUwURO1rMfhO1W64uFbGIcG
+        m7QPAoOto4msHrnWp5QfyY7qZUORg7DQ54u7vQXLgRTUktPpE16kgeblRJ9MxooxKSGcAvIVAMS31
+        e6ONCmmA==;
+Received: from hch by casper.infradead.org with local (Exim 4.94 #2 (Red Hat Linux))
+        id 1lKKpX-007KF1-CB; Thu, 11 Mar 2021 12:54:24 +0000
+Date:   Thu, 11 Mar 2021 12:54:19 +0000
+From:   Christoph Hellwig <hch@infradead.org>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org, guan@eryu.me
+Subject: Re: [PATCH 1/2] fsstress: get rid of attr_list
+Message-ID: <20210311125419.GB1742851@infradead.org>
+References: <161526476928.1212985.15718497220408703599.stgit@magnolia>
+ <161526477474.1212985.14857729520784229723.stgit@magnolia>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <161526477474.1212985.14857729520784229723.stgit@magnolia>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by casper.infradead.org. See http://www.infradead.org/rpr.html
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-When we test different filesystems with different sections in config
-file, always hit below failure:
-   ...
-   our local _test_mkfs routine ...
-   mkfs.xfs: /dev/vdb1 appears to contain an existing filesystem (xfs)
-   mkfs.xfs: Use the -f option to force overwrite.
-   check: failed to mkfs $TEST_DEV using specified options
-   ...
+>  int
+>  attr_list_path(pathname_t *name,
+>  	       char *buffer,
+> +	       const int buffersize)
+>  {
+>  	char		buf[NAME_MAX + 1];
+>  	pathname_t	newname;
+>  	int		rval;
+>  
+> +	rval = llistxattr(name->path, buffer, buffersize);
+>  	if (rval >= 0 || errno != ENAMETOOLONG)
+>  		return rval;
+>  	separate_pathname(name, buf, &newname);
+>  	if (chdir(buf) == 0) {
+> +		rval = attr_list_path(&newname, buffer, buffersize);
 
-To fix this problem, change the _test_mkfs to deal with xfs creation
-properly. Due to xfstests uses _test_mkfs rarely, currently only in
-check program, so I don't intend to write a whole new series of
-_test_mkfs_xfs_* functions likes what _scratch_mkfs_xfs_* does.
+Shouldn't this just call llistxattr directly instead of recursing
+into attr_list_path?
 
-Reported-by: Carlos Maiolino <cmaiolino@redhat.com>
-Signed-off-by: Zorro Lang <zlang@redhat.com>
----
- common/rc | 10 ++++++++++
- 1 file changed, 10 insertions(+)
+That whole separate_pathname business looks weird, but that is for
+another time..
 
-diff --git a/common/rc b/common/rc
-index 0ce3cb0d..c783def7 100644
---- a/common/rc
-+++ b/common/rc
-@@ -258,6 +258,7 @@ _test_options()
- 
-     case $type in
-     mkfs)
-+	TEST_OPTIONS="$TEST_OPTIONS -f"
- 	rt_opt="-r"
-         log_opt="-l"
- 	;;
-@@ -633,6 +634,15 @@ _test_mkfs()
-     ext2|ext3|ext4)
- 	$MKFS_PROG -t $FSTYP -- -F $MKFS_OPTIONS $* $TEST_DEV
- 	;;
-+    xfs)
-+	local mkfs_opts=$*
-+
-+	if [ -n "$XFS_MKFS_HAS_NO_META_SUPPORT" ]; then
-+		mkfs_opts=`echo $mkfs_opts | sed "s/-m\s\+\S\+//g"`
-+	fi
-+	_test_options mkfs
-+	$MKFS_XFS_PROG $TEST_OPTIONS $MKFS_OPTIONS $mkfs_opts $TEST_DEV
-+	;;
-     *)
- 	yes | $MKFS_PROG -t $FSTYP -- $MKFS_OPTIONS $* $TEST_DEV
- 	;;
--- 
-2.29.2
+Otherwise looks good:
 
+Reviewed-by: Christoph Hellwig <hch@lst.de>
