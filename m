@@ -2,128 +2,88 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-8.7 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,URIBL_BLOCKED autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 46761C433E6
-	for <linux-fstests@archiver.kernel.org>; Fri, 12 Mar 2021 04:26:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8C3DAC433E6
+	for <linux-fstests@archiver.kernel.org>; Fri, 12 Mar 2021 06:44:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1C3E564F9E
-	for <linux-fstests@archiver.kernel.org>; Fri, 12 Mar 2021 04:26:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5F49964F93
+	for <linux-fstests@archiver.kernel.org>; Fri, 12 Mar 2021 06:44:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232144AbhCLEZq (ORCPT
+        id S232013AbhCLGoE (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 11 Mar 2021 23:25:46 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41856 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232065AbhCLEZS (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 11 Mar 2021 23:25:18 -0500
-Received: from mail-pg1-x535.google.com (mail-pg1-x535.google.com [IPv6:2607:f8b0:4864:20::535])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EB044C061574;
-        Thu, 11 Mar 2021 20:25:17 -0800 (PST)
-Received: by mail-pg1-x535.google.com with SMTP id p21so15040340pgl.12;
-        Thu, 11 Mar 2021 20:25:17 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=references:user-agent:from:to:cc:subject:in-reply-to:date
-         :message-id:mime-version;
-        bh=j34L6WvUfG4y1tiZKOgfewghT0BSLNLv/xKvpS+TRWI=;
-        b=RpIMnSxsD/bpx+qHyd/jm/T1omBxkQu5n672HQf81rfmJzU0BcxqqBjxIFrvZo7Yjn
-         nSXYyNDPA4Q4ZwpQFsBSVQt1+vhsJE0C0H8V+rWlWgmVYTE+jKENioFjO1RrWbPplIHE
-         HbruVXed0fpBbwbWf66iCXfRW4qndQ+P3fsZRMglhnjvE1V7lGMRDPl7H36SSG7eCRif
-         YKxTG7JHQyovtLRUXnH5Ll6mmoXhFbI00xqpwXggibHedJ02je/SQsVwZ53bK/5zl5u8
-         1tfHCtiqw+uzlyfMekkEf53/2/Oo52O8nyEPbJpU9OvDIMj1xu26E3MVhyDgrXvi13bs
-         lumA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:references:user-agent:from:to:cc:subject
-         :in-reply-to:date:message-id:mime-version;
-        bh=j34L6WvUfG4y1tiZKOgfewghT0BSLNLv/xKvpS+TRWI=;
-        b=BqXn3BtvySa5nDHWy0qK3182Cm09bMA4j8IBWd226gnWHkMMx+L1s9n+XT6oA5PWMh
-         Jb7qi/t4mv1XtnzZQ/VK+xh7D7aFHnvugvaOMPS9gvJLjOZMuO7Q8NSII60N+VFkyCC3
-         rxHeO1KHlO83aiKHVT90bcAhfONye2oRqYLXinCGti/g3XZtaAwcTc03nGMgQXO2wT51
-         loUhvy/dXLpai0TlR/+NSvSaoZqBZwTkJXLpmZImFvV08IexximswcLyPmstCFZoTXBO
-         KsedAjgj9z/KlD5D0UzNz156euDcL7cjs1IxnlJeJgUx8+1MGT+vb6SK6feST1Okzo+R
-         e4jQ==
-X-Gm-Message-State: AOAM531p5STCnpx0H1tBrZlPwpOnwEyUz7FkkJ5M4IFDVV+uTYDCNbEN
-        VSRjAYWV5Cij3EhWmnRiATY=
-X-Google-Smtp-Source: ABdhPJwg6RLuW6jsT5N/UYz4PemGYeQaJFAy3Xe+jsswewSIujYAJ7lNb7BaHVlcURFXdzAK78IDEg==
-X-Received: by 2002:aa7:8681:0:b029:1fd:4dd2:5659 with SMTP id d1-20020aa786810000b02901fd4dd25659mr9645731pfo.8.1615523117415;
-        Thu, 11 Mar 2021 20:25:17 -0800 (PST)
-Received: from garuda ([122.179.18.33])
-        by smtp.gmail.com with ESMTPSA id s19sm3840566pfh.168.2021.03.11.20.25.15
-        (version=TLS1_2 cipher=ECDHE-ECDSA-CHACHA20-POLY1305 bits=256/256);
-        Thu, 11 Mar 2021 20:25:16 -0800 (PST)
-References: <161526480371.1214319.3263690953532787783.stgit@magnolia> <161526483668.1214319.17667836667890283825.stgit@magnolia> <87im5yc5dp.fsf@garuda>
-User-agent: mu4e 1.0; emacs 26.1
-From:   Chandan Babu R <chandanrlinux@gmail.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org, guan@eryu.me
-Subject: Re: [PATCH 06/10] xfs: test quota softlimit warning functionality
-In-reply-to: <87im5yc5dp.fsf@garuda>
-Date:   Fri, 12 Mar 2021 09:55:13 +0530
-Message-ID: <87im5xngly.fsf@garuda>
+        Fri, 12 Mar 2021 01:44:04 -0500
+Received: from out20-97.mail.aliyun.com ([115.124.20.97]:38633 "EHLO
+        out20-97.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S232154AbhCLGnp (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 12 Mar 2021 01:43:45 -0500
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07455471|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.0509842-0.000238033-0.948778;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047201;MF=guan@eryu.me;NM=1;PH=DS;RN=4;RT=4;SR=0;TI=SMTPD_---.JjuYN1N_1615531421;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.JjuYN1N_1615531421)
+          by smtp.aliyun-inc.com(10.147.42.253);
+          Fri, 12 Mar 2021 14:43:41 +0800
+Date:   Fri, 12 Mar 2021 14:43:41 +0800
+From:   Eryu Guan <guan@eryu.me>
+To:     Filipe Manana <fdmanana@kernel.org>
+Cc:     fstests <fstests@vger.kernel.org>,
+        linux-btrfs <linux-btrfs@vger.kernel.org>,
+        Filipe Manana <fdmanana@suse.com>
+Subject: Re: [PATCH] btrfs: add test for cases when a dio write has to
+ fallback to a buffered write
+Message-ID: <YEsNnaCvFPWdbdjm@desktop>
+References: <20210211170118.12551-1-fdmanana@kernel.org>
+ <YETkzeWJTB2C88ON@desktop>
+ <CAL3q7H7=M-OZqF9rbHKZKSdSOjic+=4X70aVeOPpLxGV9nKWZQ@mail.gmail.com>
+ <YETvBOahTAtKvr7U@desktop>
+ <CAL3q7H5WrDkHwQBYGP-1XYY=9r1Vk0MD8HDsGsQJ9tZOxOY5aw@mail.gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAL3q7H5WrDkHwQBYGP-1XYY=9r1Vk0MD8HDsGsQJ9tZOxOY5aw@mail.gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 11 Mar 2021 at 16:40, Chandan Babu R wrote:
-> On 09 Mar 2021 at 10:10, Darrick J. Wong wrote:
->> From: Darrick J. Wong <djwong@kernel.org>
->>
->> Make sure that quota softlimits work, which is to say that one can
->> exceed the softlimit up to warnlimit times before it starts enforcing
->> that.
->>
->> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
->> ---
->>  tests/xfs/915     |  162 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->>  tests/xfs/915.out |  151 +++++++++++++++++++++++++++++++++++++++++++++++++
->>  tests/xfs/group   |    1
->>  3 files changed, 314 insertions(+)
->>  create mode 100755 tests/xfs/915
->>  create mode 100644 tests/xfs/915.out
->>
->>
->> diff --git a/tests/xfs/915 b/tests/xfs/915
+On Wed, Mar 10, 2021 at 10:48:35AM +0000, Filipe Manana wrote:
+> On Sun, Mar 7, 2021 at 3:24 PM Eryu Guan <guan@eryu.me> wrote:
+> >
+> > On Sun, Mar 07, 2021 at 03:07:43PM +0000, Filipe Manana wrote:
+> > > On Sun, Mar 7, 2021 at 2:41 PM Eryu Guan <guan@eryu.me> wrote:
+> > > >
+> > > > On Thu, Feb 11, 2021 at 05:01:18PM +0000, fdmanana@kernel.org wrote:
+> > > > > From: Filipe Manana <fdmanana@suse.com>
+> > > > >
+> > > > > Test cases where a direct IO write, with O_DSYNC, can not be done and has
+> > > > > to fallback to a buffered write.
+> > > > >
+> > > > > This is motivated by a regression that was introduced in kernel 5.10 by
+> > > > > commit 0eb79294dbe328 ("btrfs: dio iomap DSYNC workaround")) and was
+> > > > > fixed in kernel 5.11 by commit ecfdc08b8cc65d ("btrfs: remove dio iomap
+> > > > > DSYNC workaround").
+> > > > >
+> > > > > Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> > > >
+> > > > Sorry for the late review..
+> > > >
+> > > > So this is supposed to fail with v5.10 kernel, right? But I got it
+> > > > passed
+> > >
+> > > Because either you are testing with a patched 5.10.x kernel, or you
+> > > don't have CONFIG_BTRFS_ASSERT=y in your config.
+> > > The fix landed in 5.10.18:
+> >
+> > You're right, I don't have CONFIG_BTRFS_ASSERT=y. As the test dumps the
+> > od output of the file content, so I thought the failure would be a data
+> > corruption, and expected a od output diff failure.
+> 
+> I see the test was not merged yet, do you expect me to update anything
+> in the patch?
 
-[...]
+Sorry, it was lost in my to-review queue.. But I'd be great if you could
+add more descriptions about the CONFIG_BTRFS_ASSERT and the compress
+case either in commit log or in test description.
 
->> +*** report initial settings
->> +[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
->> +[NAME] 0 0 0 00 [--------] 0 3 500000 00 [--------] 0 0 0 00 [--------]
->> +
->> +*** push past the soft inode limit
->> +[ROOT] 0 0 0 00 [--------] 3 0 0 13 [--------] 0 0 0 00 [--------]
->> +[NAME] 0 0 0 00 [--------] 4 3 500000 02 [7 days] 0 0 0 00 [--------]
->
-> At this point in the test we have created 4 files.
-> 1. softok{1,2,3}
-> 2. softwarn1
->
-> So we have exceeded the soft inode limit (i.e. 3) once. But the warning has
-> been issued twice.
->
-> _file_as_id() changes the project id of parent of each of the above files.  In
-> this case all the above listed files have $SCRATCH_MNT as the parent. So by
-> the time softok2 is created we have already reached the soft inode limit of 3
-> (parent and the two softok{1,2} files) and creation of softok3 and softwarn1
-> generates the two warnings listed above. If this explaination is correct,
-> shouldn't 'Used' inode count have a value of 5 (including the inode associated
-> with $SCRATCH_MNT)?
-
-Sorry, I missed the fact that _file_as_id() reverts back the project id of
-$SCRATCH_MNT just before returning.
-
-The patch looks good.
-
-Reviewed-by: Chandan Babu R <chandanrlinux@gmail.com>
-
--- 
-chandan
+Thanks,
+Eryu
