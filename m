@@ -2,136 +2,138 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-17.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2DC28C433DB
-	for <linux-fstests@archiver.kernel.org>; Sun, 14 Mar 2021 14:52:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E9946C433E0
+	for <linux-fstests@archiver.kernel.org>; Sun, 14 Mar 2021 15:31:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E488364EE9
-	for <linux-fstests@archiver.kernel.org>; Sun, 14 Mar 2021 14:52:50 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B847964E75
+	for <linux-fstests@archiver.kernel.org>; Sun, 14 Mar 2021 15:31:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229539AbhCNOwS (ORCPT
+        id S231205AbhCNPbR (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 14 Mar 2021 10:52:18 -0400
-Received: from out20-50.mail.aliyun.com ([115.124.20.50]:35049 "EHLO
-        out20-50.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233220AbhCNOvq (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 14 Mar 2021 10:51:46 -0400
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07462619|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.239364-0.000479785-0.760157;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047212;MF=guan@eryu.me;NM=1;PH=DS;RN=4;RT=4;SR=0;TI=SMTPD_---.JkxEKgH_1615733501;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.JkxEKgH_1615733501)
-          by smtp.aliyun-inc.com(10.147.41.158);
-          Sun, 14 Mar 2021 22:51:42 +0800
-Date:   Sun, 14 Mar 2021 22:51:41 +0800
-From:   Eryu Guan <guan@eryu.me>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org
-Subject: Re: [PATCH 04/10] xfs: test mkfs min log size calculation w/ rt
- volumes
-Message-ID: <YE4i/cxYGi4mGQB5@desktop>
-References: <161526480371.1214319.3263690953532787783.stgit@magnolia>
- <161526482563.1214319.7317631500409765514.stgit@magnolia>
+        Sun, 14 Mar 2021 11:31:17 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:37320 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S233841AbhCNPa4 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 14 Mar 2021 11:30:56 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1615735855;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=vFfjUG3a+M2OD6DVpvhxpcboX6c4yQzbwJRL6s4bW6k=;
+        b=O69HyW6SRKY77NaTBQLqJpa8mZjXmFMDj7tSquO5vNLFTYaSuBkYVrnudE2iwhpf58yDuj
+        jKApYfcmdMR6vT0Ek7a6IZ+Ds28T6+uV0AzBMJlA+Kz/K5oxcRwStX8qfNOnAnBVEJMYtg
+        Zu/zxv+lIpUOYTXpwKcWEJIDVymHx6Y=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-334-UuhOQ0SCPViYsSDcoym-3Q-1; Sun, 14 Mar 2021 11:30:53 -0400
+X-MC-Unique: UuhOQ0SCPViYsSDcoym-3Q-1
+Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id C49F8100C618;
+        Sun, 14 Mar 2021 15:30:52 +0000 (UTC)
+Received: from localhost (unknown [10.66.61.36])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 3A6585C5DF;
+        Sun, 14 Mar 2021 15:30:51 +0000 (UTC)
+Date:   Sun, 14 Mar 2021 23:49:20 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Eryu Guan <guan@eryu.me>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH] generic/095: don't silence fio error output
+Message-ID: <20210314154920.GN3499219@localhost.localdomain>
+Mail-Followup-To: Eryu Guan <guan@eryu.me>, fstests@vger.kernel.org
+References: <20210202062253.24478-1-zlang@redhat.com>
+ <YE31QG7qhHQY2E6S@desktop>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <161526482563.1214319.7317631500409765514.stgit@magnolia>
+In-Reply-To: <YE31QG7qhHQY2E6S@desktop>
+User-Agent: Mutt/1.10.1 (2018-07-13)
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.16
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Mar 08, 2021 at 08:40:25PM -0800, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
+On Sun, Mar 14, 2021 at 07:36:32PM +0800, Eryu Guan wrote:
+> Hi Zorro,
 > 
-> In "mkfs: set required parts of the realtime geometry before computing
-> log geometry" we made sure that mkfs set up enough of the fs geometry to
-> compute the minimum xfs log size correctly when formatting the
-> filesystem.  This is the regression test for that issue.
+> On Tue, Feb 02, 2021 at 02:22:53PM +0800, Zorro Lang wrote:
+> > This case print both fio stdout and stderr to .full file, that cause
+> > we miss some unexpected failures when there's a bug. For example:
+> > 
+> >   file:io_u.c:1803, func=io_u error, error=Block device required
+> > 
+> > This's an regression issue we find on a downstream kernel, not in
+> > upstream. So release unexpected fio error output to find more issues.
+> > 
+> > Signed-off-by: Zorro Lang <zlang@redhat.com>
+> > ---
+> >  tests/generic/095 | 5 ++++-
+> >  1 file changed, 4 insertions(+), 1 deletion(-)
+> > 
+> > diff --git a/tests/generic/095 b/tests/generic/095
+> > index 9afaa761..30fe77a5 100755
+> > --- a/tests/generic/095
+> > +++ b/tests/generic/095
+> > @@ -98,8 +98,11 @@ _require_fio $fio_config
+> >  _scratch_mkfs >>$seqres.full 2>&1
+> >  _scratch_mount
+> >  
+> > +# There's a known EIO failure to report collisions between directio and buffered
+> > +# writes to userspace, refer to upstream linux 5a9d929d6e13. So ignore EIO error
+> > +# at here.
+> > +$FIO_PROG $fio_config --ignore_error=,EIO --output=$seqres.full
 > 
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> ---
->  tests/xfs/761     |   45 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/761.out |    1 +
->  tests/xfs/group   |    1 +
->  3 files changed, 47 insertions(+)
->  create mode 100755 tests/xfs/761
->  create mode 100644 tests/xfs/761.out
+> I found that with this change, EIO is ignored and the return value of
+> fio command is 0 as expected, but the output breaks golden image and
+> fails the test.
 > 
+> [root@fedoravm xfstests]# ./check -s xfs_4k_reflink generic/095
+> SECTION       -- xfs_4k_reflink
+> RECREATING    -- xfs on /dev/mapper/testvg-lv1
+> FSTYP         -- xfs (debug)
+> PLATFORM      -- Linux/x86_64 fedoravm 5.11.0 #5 SMP Sun Feb 28 21:50:24 CST 2021
+> MKFS_OPTIONS  -- -f -f -b size=4k -m reflink=1,rmapbt=1 /dev/mapper/testvg-lv2
+> MOUNT_OPTIONS -- /dev/mapper/testvg-lv2 /mnt/scratch
 > 
-> diff --git a/tests/xfs/761 b/tests/xfs/761
-> new file mode 100755
-> index 00000000..b9770d90
-> --- /dev/null
-> +++ b/tests/xfs/761
-> @@ -0,0 +1,45 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0-or-later
-> +# Copyright (c) 2021 Oracle.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 761
-> +#
-> +# Make sure mkfs sets up enough of the rt geometry that we can compute the
-> +# correct min log size for formatting the fs.
-> +#
-> +# This is a regression test for the xfsprogs commit 31409f48 ("mkfs: set
-> +# required parts of the realtime geometry before computing log geometry").
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1    # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +_supported_fs xfs
-> +_require_scratch
-> +_require_realtime
-> +
-> +rm -f $seqres.full
-> +
-> +# Format a tiny filesystem to force minimum log size, then see if it mounts
-> +_scratch_mkfs -r size=1m -d size=100m > $seqres.full
-> +_scratch_mount >> $seqres.full
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/761.out b/tests/xfs/761.out
-> new file mode 100644
-> index 00000000..8c9d9e90
-> --- /dev/null
-> +++ b/tests/xfs/761.out
-> @@ -0,0 +1 @@
-> +QA output created by 761
+> generic/095 4s ... - output mismatch (see /root/workspace/xfstests/results//xfs_4k_reflink/generic/095.out.bad)
+>     --- tests/generic/095.out   2018-02-25 15:15:00.097388035 +0800
+>     +++ /root/workspace/xfstests/results//xfs_4k_reflink/generic/095.out.bad    2021-03-14 19:32:04.126884255 +0800
+>     @@ -1,2 +1,7 @@
+>      QA output created by 095
+>     +job9: No I/O performed by mmap, perhaps try --debug=io option for details?
+>     +job9: No I/O performed by mmap, perhaps try --debug=io option for details?
+>     +job9: No I/O performed by mmap, perhaps try --debug=io option for details?
+>     +job9: No I/O performed by mmap, perhaps try --debug=io option for details?
+>     +job9: No I/O performed by mmap, perhaps try --debug=io option for details?
+>      Silence is golden
+> 
+> Did you hit the same failure? If so I think we should filter out this
+> message.
 
-Need "Silence is golden" in .out file if you're going to respin it,
-otherwise I can fix it on commit.
+Hmm... I never hit that. I don't think this patch can cause this error, can you
+still reproduce it without this patch? The mmap operation from fio might get
+some unexpected random arguments, you might find a fio bug :-P
 
 Thanks,
-Eryu
+Zorro
 
-> diff --git a/tests/xfs/group b/tests/xfs/group
-> index 318468b5..87badd56 100644
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
-> @@ -503,4 +503,5 @@
->  758 auto quick rw attr realtime
->  759 auto quick rw realtime
->  760 auto quick rw collapse punch insert zero prealloc
-> +761 auto quick realtime
->  763 auto quick rw realtime
+> 
+> Thanks,
+> Eryu
+> 
+> >  echo "Silence is golden"
+> > -$FIO_PROG $fio_config >>$seqres.full 2>&1
+> >  
+> >  # xfs generates WARNINGs on purpose when applications mix buffered/mmap IO with
+> >  # direct IO on the same file. On the other hand, this fio job has been proven
+> > -- 
+> > 2.29.2
+> 
+
