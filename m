@@ -7,101 +7,106 @@ X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B4563C433DB
-	for <linux-fstests@archiver.kernel.org>; Sun, 14 Mar 2021 11:37:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0F500C433E0
+	for <linux-fstests@archiver.kernel.org>; Sun, 14 Mar 2021 11:43:25 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 73EB164EBE
-	for <linux-fstests@archiver.kernel.org>; Sun, 14 Mar 2021 11:37:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D363A64EBD
+	for <linux-fstests@archiver.kernel.org>; Sun, 14 Mar 2021 11:43:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235029AbhCNLhA (ORCPT
+        id S235231AbhCNLmm (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 14 Mar 2021 07:37:00 -0400
-Received: from out20-97.mail.aliyun.com ([115.124.20.97]:44291 "EHLO
-        out20-97.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234904AbhCNLgf (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 14 Mar 2021 07:36:35 -0400
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07526681|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.155349-0.00979337-0.834858;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047190;MF=guan@eryu.me;NM=1;PH=DS;RN=2;RT=2;SR=0;TI=SMTPD_---.JkuYqxp_1615721792;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.JkuYqxp_1615721792)
-          by smtp.aliyun-inc.com(10.147.42.135);
-          Sun, 14 Mar 2021 19:36:33 +0800
-Date:   Sun, 14 Mar 2021 19:36:32 +0800
+        Sun, 14 Mar 2021 07:42:42 -0400
+Received: from out20-3.mail.aliyun.com ([115.124.20.3]:41769 "EHLO
+        out20-3.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229850AbhCNLmJ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 14 Mar 2021 07:42:09 -0400
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07983366|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_alarm|0.213983-0.00137258-0.784644;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047190;MF=guan@eryu.me;NM=1;PH=DS;RN=2;RT=2;SR=0;TI=SMTPD_---.JkulizJ_1615722126;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.JkulizJ_1615722126)
+          by smtp.aliyun-inc.com(10.147.40.26);
+          Sun, 14 Mar 2021 19:42:06 +0800
+Date:   Sun, 14 Mar 2021 19:42:06 +0800
 From:   Eryu Guan <guan@eryu.me>
 To:     Zorro Lang <zlang@redhat.com>
 Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] generic/095: don't silence fio error output
-Message-ID: <YE31QG7qhHQY2E6S@desktop>
-References: <20210202062253.24478-1-zlang@redhat.com>
+Subject: Re: [PATCH] common/rc: specifically make new xfs in _test_mkfs
+Message-ID: <YE32jkUjOxc0pc1Z@desktop>
+References: <20210311121213.1348303-1-zlang@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210202062253.24478-1-zlang@redhat.com>
+In-Reply-To: <20210311121213.1348303-1-zlang@redhat.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Hi Zorro,
-
-On Tue, Feb 02, 2021 at 02:22:53PM +0800, Zorro Lang wrote:
-> This case print both fio stdout and stderr to .full file, that cause
-> we miss some unexpected failures when there's a bug. For example:
+On Thu, Mar 11, 2021 at 08:12:13PM +0800, Zorro Lang wrote:
+> When we test different filesystems with different sections in config
+> file, always hit below failure:
+>    ...
+>    our local _test_mkfs routine ...
+>    mkfs.xfs: /dev/vdb1 appears to contain an existing filesystem (xfs)
+>    mkfs.xfs: Use the -f option to force overwrite.
+>    check: failed to mkfs $TEST_DEV using specified options
+>    ...
 > 
->   file:io_u.c:1803, func=io_u error, error=Block device required
+> To fix this problem, change the _test_mkfs to deal with xfs creation
+> properly. Due to xfstests uses _test_mkfs rarely, currently only in
+> check program, so I don't intend to write a whole new series of
+> _test_mkfs_xfs_* functions likes what _scratch_mkfs_xfs_* does.
 > 
-> This's an regression issue we find on a downstream kernel, not in
-> upstream. So release unexpected fio error output to find more issues.
-> 
+> Reported-by: Carlos Maiolino <cmaiolino@redhat.com>
 > Signed-off-by: Zorro Lang <zlang@redhat.com>
-> ---
->  tests/generic/095 | 5 ++++-
->  1 file changed, 4 insertions(+), 1 deletion(-)
-> 
-> diff --git a/tests/generic/095 b/tests/generic/095
-> index 9afaa761..30fe77a5 100755
-> --- a/tests/generic/095
-> +++ b/tests/generic/095
-> @@ -98,8 +98,11 @@ _require_fio $fio_config
->  _scratch_mkfs >>$seqres.full 2>&1
->  _scratch_mount
->  
-> +# There's a known EIO failure to report collisions between directio and buffered
-> +# writes to userspace, refer to upstream linux 5a9d929d6e13. So ignore EIO error
-> +# at here.
-> +$FIO_PROG $fio_config --ignore_error=,EIO --output=$seqres.full
 
-I found that with this change, EIO is ignored and the return value of
-fio command is 0 as expected, but the output breaks golden image and
-fails the test.
+I also have defined different test sections in config file to test
+different filesysms, but I didn't hit this failure. And it turns out
+that I have "-f" in MKFS_OPTIONS, e.g.
 
-[root@fedoravm xfstests]# ./check -s xfs_4k_reflink generic/095
-SECTION       -- xfs_4k_reflink
-RECREATING    -- xfs on /dev/mapper/testvg-lv1
-FSTYP         -- xfs (debug)
-PLATFORM      -- Linux/x86_64 fedoravm 5.11.0 #5 SMP Sun Feb 28 21:50:24 CST 2021
-MKFS_OPTIONS  -- -f -f -b size=4k -m reflink=1,rmapbt=1 /dev/mapper/testvg-lv2
-MOUNT_OPTIONS -- /dev/mapper/testvg-lv2 /mnt/scratch
+	[xfs_prjquota_crc]
+	FSTYP=xfs
+	MKFS_OPTIONS="-f -b size=4k -m crc=1"
+	MOUNT_OPTIONS="-o prjquota"
 
-generic/095 4s ... - output mismatch (see /root/workspace/xfstests/results//xfs_4k_reflink/generic/095.out.bad)
-    --- tests/generic/095.out   2018-02-25 15:15:00.097388035 +0800
-    +++ /root/workspace/xfstests/results//xfs_4k_reflink/generic/095.out.bad    2021-03-14 19:32:04.126884255 +0800
-    @@ -1,2 +1,7 @@
-     QA output created by 095
-    +job9: No I/O performed by mmap, perhaps try --debug=io option for details?
-    +job9: No I/O performed by mmap, perhaps try --debug=io option for details?
-    +job9: No I/O performed by mmap, perhaps try --debug=io option for details?
-    +job9: No I/O performed by mmap, perhaps try --debug=io option for details?
-    +job9: No I/O performed by mmap, perhaps try --debug=io option for details?
-     Silence is golden
+	[xfs_allquota_reflink]
+	FSTYP=xfs
+	MKFS_OPTIONS="-f -b size=4k -m crc=1,reflink=1,rmapbt=1"
+	MOUNT_OPTIONS="-o usrquota,grpquota,prjquota"
 
-Did you hit the same failure? If so I think we should filter out this
-message.
+And I think that's the way to fix it.
 
 Thanks,
 Eryu
 
->  echo "Silence is golden"
-> -$FIO_PROG $fio_config >>$seqres.full 2>&1
+> ---
+>  common/rc | 10 ++++++++++
+>  1 file changed, 10 insertions(+)
+> 
+> diff --git a/common/rc b/common/rc
+> index 0ce3cb0d..c783def7 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -258,6 +258,7 @@ _test_options()
 >  
->  # xfs generates WARNINGs on purpose when applications mix buffered/mmap IO with
->  # direct IO on the same file. On the other hand, this fio job has been proven
+>      case $type in
+>      mkfs)
+> +	TEST_OPTIONS="$TEST_OPTIONS -f"
+>  	rt_opt="-r"
+>          log_opt="-l"
+>  	;;
+> @@ -633,6 +634,15 @@ _test_mkfs()
+>      ext2|ext3|ext4)
+>  	$MKFS_PROG -t $FSTYP -- -F $MKFS_OPTIONS $* $TEST_DEV
+>  	;;
+> +    xfs)
+> +	local mkfs_opts=$*
+> +
+> +	if [ -n "$XFS_MKFS_HAS_NO_META_SUPPORT" ]; then
+> +		mkfs_opts=`echo $mkfs_opts | sed "s/-m\s\+\S\+//g"`
+> +	fi
+> +	_test_options mkfs
+> +	$MKFS_XFS_PROG $TEST_OPTIONS $MKFS_OPTIONS $mkfs_opts $TEST_DEV
+> +	;;
+>      *)
+>  	yes | $MKFS_PROG -t $FSTYP -- $MKFS_OPTIONS $* $TEST_DEV
+>  	;;
 > -- 
 > 2.29.2
