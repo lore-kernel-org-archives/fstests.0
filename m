@@ -7,65 +7,65 @@ X-Spam-Status: No, score=-19.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 67D82C4332B
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D7942C43333
 	for <linux-fstests@archiver.kernel.org>; Mon, 15 Mar 2021 11:21:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2C99764E90
+	by mail.kernel.org (Postfix) with ESMTP id 984AD64E90
 	for <linux-fstests@archiver.kernel.org>; Mon, 15 Mar 2021 11:21:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229536AbhCOLU2 (ORCPT
+        id S229956AbhCOLU3 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 15 Mar 2021 07:20:28 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:49640 "EHLO
+        Mon, 15 Mar 2021 07:20:29 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:26759 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S229901AbhCOLUI (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 15 Mar 2021 07:20:08 -0400
+        by vger.kernel.org with ESMTP id S229684AbhCOLUR (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 15 Mar 2021 07:20:17 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1615807207;
+        s=mimecast20190719; t=1615807217;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=fP6ROJvol2l8Fh0lbodDcLDfrGd8f0tcuJVWEp5n61E=;
-        b=JIVrG2KlcEXDlp4V7s/wHQomsKi/lEvdkXI2CZ2/qqlbZEG4cYmpibCDu0wjuAiHtOMYcC
-        HiJzOKa2wjsLMlL4UqE4OtudD66hOHWOI8GRGxOW21VqsKXA1h4T36K+EuDPAD7T+/4ogK
-        hvWVf3efcFJ9HmrxTWPxfvpFPAd2+9U=
-Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com
- [209.85.216.71]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-345-WkkRbvC3PdasEkqo5JTEuQ-1; Mon, 15 Mar 2021 07:20:05 -0400
-X-MC-Unique: WkkRbvC3PdasEkqo5JTEuQ-1
-Received: by mail-pj1-f71.google.com with SMTP id r18so13324771pjz.1
-        for <fstests@vger.kernel.org>; Mon, 15 Mar 2021 04:20:05 -0700 (PDT)
+        bh=+qbVrcdtmPe4mZGLdw3S9hgAYqmOPLsAEBr5BVz4L40=;
+        b=Dwo79HJCCh2QDuYr/jngnbyrXgkhsrRsxhSumjDbLVCUDOtSkydEr58t3FWYcZ2UaGzizK
+        ipwdRcOtTX3B7y2hZSz0OyOsaQu136oWqPo+byD8fQhEYr6I2HfjkR5fM1i08emJt673QQ
+        7peAehgyyegR77rfu8F7hmRTccqWrZg=
+Received: from mail-pf1-f199.google.com (mail-pf1-f199.google.com
+ [209.85.210.199]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-96-VgUbCnF5NH2oLLCJvcDO2w-1; Mon, 15 Mar 2021 07:20:13 -0400
+X-MC-Unique: VgUbCnF5NH2oLLCJvcDO2w-1
+Received: by mail-pf1-f199.google.com with SMTP id 71so13095188pfu.8
+        for <fstests@vger.kernel.org>; Mon, 15 Mar 2021 04:20:12 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=fP6ROJvol2l8Fh0lbodDcLDfrGd8f0tcuJVWEp5n61E=;
-        b=UZRHOFyCCeMcIW0sDcV7nL1vrhaAKlscAttPytcsB72Z6QUbl7k8hy3k+/nB2VZyDR
-         RGoqQBKP7XFFCCICXdbRlzBkO8kCN1WsTl6IbHgFur6MF1uRAt905j+s635yIuN1HZp+
-         j1Kitgh58KkjrFmO3RolsiJfICyv06RJ53hwU2siHXjwkpWJrOsljZ+zjo5hcehlifr1
-         XWK3JMx3J+mDPHy6UtmvkwtLrVKFypCCKInE/IKUaD8sIvSUjn8sfXsZtLzWBxFwAG7A
-         4Q4vZuQ68KxtYizFtkfJ/hS306JxQnWEibfnCu3xeTUkeQKymFIcxuK6NRVYHoJDvjsP
-         ibMg==
-X-Gm-Message-State: AOAM5328Wn7GaDBI6HteJaz7l0bpltRMn2iarrVAtq5N2zsYp7vjG1sx
-        WuWTv1JopGX62rak44nNW26qX4AEq+tYwkNCA7e/5Dxs1eQm57bYtThzLcwcQ3ClAWfZmnl0rVz
-        JBlKBcYjimR7gFX6f4w==
-X-Received: by 2002:a17:90b:188:: with SMTP id t8mr1151380pjs.169.1615807204595;
-        Mon, 15 Mar 2021 04:20:04 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJwk24S4eLWwCOdVETeCFw3+wTt3VJ6DGiIGP3ptYCDjEJexgOVu+BR+zYKqsp6AF+KizU7T9Q==
-X-Received: by 2002:a17:90b:188:: with SMTP id t8mr1151366pjs.169.1615807204458;
-        Mon, 15 Mar 2021 04:20:04 -0700 (PDT)
+        bh=+qbVrcdtmPe4mZGLdw3S9hgAYqmOPLsAEBr5BVz4L40=;
+        b=lcQUHjvvl38OEa3jCyIkxQ5NYL8LBSw9sIGXGQSGHxkMcR++JQQHEk+hEx7niLunC4
+         lXYF0mwzPomNykvVuRkDBk4vGNd5I8qaDh+Fq6F+L+NrAiXHe1/xySk67B1wa5f3l2lT
+         5J4ukoymSVLw18cTofQS9BaE0BDjoqjpZnljZ62iYUm5nkwcpSRxIPDE6fEL2irB6j3N
+         r5Qax3MYSt1qhQtshjbbsYgv6rYC0WI9iiBK/aL+q20ILQmP2KyWWFaa6VJAyHWl8g2v
+         w2qtnE0sJM7ATW6aK0ErbwfiFBOGvkisA7c8filINTKtRmQBMpfji/hVLAtuYKo1etzd
+         9HAw==
+X-Gm-Message-State: AOAM531AlpmkdtvxItIFaArWN1d9nfpww+tfP/1vGw4lIZK4/Yne67GT
+        4tLCBwvY4uQFcf49KOK5LZZAoHnszyuODeT4zCqvFCjrj0Z0p4H+uUq0fiK/vj4Ll6jWuxrYeJI
+        FuIcXC6DnUFmWQ5MErg==
+X-Received: by 2002:a62:5e02:0:b029:1ed:8bee:6132 with SMTP id s2-20020a625e020000b02901ed8bee6132mr10053594pfb.48.1615807211993;
+        Mon, 15 Mar 2021 04:20:11 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJxUMmBINRxfxwEg+AcTuoNn0nzk5osUcNmWJLosmGXRAZUNvvxw52jkclMe0t4lWSHfpLx/rw==
+X-Received: by 2002:a62:5e02:0:b029:1ed:8bee:6132 with SMTP id s2-20020a625e020000b02901ed8bee6132mr10053568pfb.48.1615807211752;
+        Mon, 15 Mar 2021 04:20:11 -0700 (PDT)
 Received: from xiangao.remote.csb ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id r23sm11058448pje.38.2021.03.15.04.20.01
+        by smtp.gmail.com with ESMTPSA id r23sm11058448pje.38.2021.03.15.04.20.09
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 15 Mar 2021 04:20:04 -0700 (PDT)
+        Mon, 15 Mar 2021 04:20:11 -0700 (PDT)
 From:   Gao Xiang <hsiangkao@redhat.com>
 To:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 Cc:     "Darrick J. Wong" <djwong@kernel.org>,
         Zorro Lang <zlang@redhat.com>, Gao Xiang <hsiangkao@redhat.com>
-Subject: [RFC PATCH v3 1/3] common/xfs: add a _require_xfs_shrink helper
-Date:   Mon, 15 Mar 2021 19:19:24 +0800
-Message-Id: <20210315111926.837170-2-hsiangkao@redhat.com>
+Subject: [RFC PATCH v3 3/3] xfs: stress test for shrinking free space in the last AG
+Date:   Mon, 15 Mar 2021 19:19:26 +0800
+Message-Id: <20210315111926.837170-4-hsiangkao@redhat.com>
 X-Mailer: git-send-email 2.27.0
 In-Reply-To: <20210315111926.837170-1-hsiangkao@redhat.com>
 References: <20210315111926.837170-1-hsiangkao@redhat.com>
@@ -75,35 +75,171 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-In order to detect whether the current kernel supports XFS shrinking.
+This adds a stress testcase to shrink free space as much as
+possible in the last AG with background fsstress workload.
+
+The expectation is that no crash happens with expected output.
 
 Signed-off-by: Gao Xiang <hsiangkao@redhat.com>
 ---
- common/xfs | 11 +++++++++++
- 1 file changed, 11 insertions(+)
+ tests/xfs/991     | 122 ++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/991.out |   8 +++
+ tests/xfs/group   |   1 +
+ 3 files changed, 131 insertions(+)
+ create mode 100755 tests/xfs/991
+ create mode 100644 tests/xfs/991.out
 
-diff --git a/common/xfs b/common/xfs
-index 2156749d..ea3b6cab 100644
---- a/common/xfs
-+++ b/common/xfs
-@@ -432,6 +432,17 @@ _supports_xfs_scrub()
- 	return 0
- }
- 
-+_require_xfs_shrink()
-+{
-+	_require_scratch
+diff --git a/tests/xfs/991 b/tests/xfs/991
+new file mode 100755
+index 00000000..7e7d318e
+--- /dev/null
++++ b/tests/xfs/991
+@@ -0,0 +1,122 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2020-2021 Red Hat, Inc.  All Rights Reserved.
++#
++# FS QA Test 991
++#
++# XFS online shrinkfs stress test
++#
++# This test attempts to shrink unused space as much as possible with
++# background fsstress workload. It will decrease the shrink size if
++# larger size fails. And totally repeat 2 * TIME_FACTOR times.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
 +
-+	_scratch_mkfs_xfs > /dev/null
-+	_scratch_mount
-+	$XFS_GROWFS_PROG -D1 "$SCRATCH_MNT" 2>&1 | grep -q 'Invalid argument' || \
-+		_notrun "kernel does not support shrinking"
-+	_scratch_unmount
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "rm -f $tmp.*; exit \$status" 0 1 2 3 15
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++create_scratch()
++{
++	_scratch_mkfs_xfs $@ | tee -a $seqres.full | \
++		_filter_mkfs 2>$tmp.mkfs >/dev/null
++	. $tmp.mkfs
++
++	if ! _try_scratch_mount 2>/dev/null; then
++		echo "failed to mount $SCRATCH_DEV"
++		exit 1
++	fi
++
++	# fix the reserve block pool to a known size so that the enospc
++	# calculations work out correctly.
++	_scratch_resvblks 1024 > /dev/null 2>&1
 +}
 +
- # run xfs_check and friends on a FS.
- _check_xfs_filesystem()
- {
++fill_scratch()
++{
++	$XFS_IO_PROG -f -c "falloc -k 0 $1" $SCRATCH_MNT/resvfile
++}
++
++stress_scratch()
++{
++	procs=3
++	nops=$((1000 * LOAD_FACTOR))
++	# -w ensures that the only ops are ones which cause write I/O
++	FSSTRESS_ARGS=`_scale_fsstress_args -d $SCRATCH_MNT -w -p $procs \
++	    -n $nops $FSSTRESS_AVOID`
++	$FSSTRESS_PROG $FSSTRESS_ARGS >> $seqres.full 2>&1 &
++}
++
++# real QA test starts here
++_supported_fs xfs
++_require_xfs_shrink
++_require_xfs_io_command "falloc"
++
++rm -f $seqres.full
++_scratch_mkfs_xfs | tee -a $seqres.full | _filter_mkfs 2>$tmp.mkfs
++. $tmp.mkfs	# extract blocksize and data size for scratch device
++
++decsize=`expr  42 \* 1048576`	# shrink in chunks of this size at most
++endsize=`expr 125 \* 1048576`	# stop after shrinking this big
++[ `expr $endsize / $dbsize` -lt $dblocks ] || _notrun "Scratch device too small"
++
++nags=2
++totalcount=$((2 * TIME_FACTOR))
++
++while [ $totalcount -gt 0 ]; do
++	size=`expr 1010 \* 1048576`	# 1010 megabytes initially
++	logblks=$(_scratch_find_xfs_min_logblocks -dsize=${size} -dagcount=${nags})
++
++	create_scratch -lsize=${logblks}b -dsize=${size} -dagcount=${nags}
++
++	for i in `seq 125 -1 90`; do
++		fillsize=`expr $i \* 1048576`
++		out="$(fill_scratch $fillsize 2>&1)"
++		echo "$out" | grep -q 'No space left on device' && continue
++		test -n "${out}" && echo "$out"
++		break
++	done
++
++	while [ $size -gt $endsize ]; do
++		stress_scratch
++		sleep 1
++
++		decb=`expr $decsize / $dbsize`    # in data blocks
++		while [ $decb -gt 0 ]; do
++			sizeb=`expr $size / $dbsize - $decb`
++
++			$XFS_GROWFS_PROG -D ${sizeb} $SCRATCH_MNT \
++				>> $seqres.full 2>&1 && break
++
++			[ $decb -gt 100 ] && decb=`expr $decb + $RANDOM % 10`
++			decb=`expr $decb / 2`
++		done
++
++		wait
++		[ $decb -eq 0 ] && break
++
++		# get latest dblocks
++		$XFS_INFO_PROG $SCRATCH_MNT 2>&1 | _filter_mkfs 2>$tmp.growfs >/dev/null
++		. $tmp.growfs
++
++		size=`expr $dblocks \* $dbsize`
++		_scratch_unmount
++		_repair_scratch_fs >> $seqres.full
++		_scratch_mount
++	done
++
++	_scratch_unmount
++	_repair_scratch_fs >> $seqres.full
++	totalcount=`expr $totalcount - 1`
++done
++
++echo "*** done"
++status=0
++exit
+diff --git a/tests/xfs/991.out b/tests/xfs/991.out
+new file mode 100644
+index 00000000..e8209672
+--- /dev/null
++++ b/tests/xfs/991.out
+@@ -0,0 +1,8 @@
++QA output created by 991
++meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
++data     = bsize=XXX blocks=XXX, imaxpct=PCT
++         = sunit=XXX swidth=XXX, unwritten=X
++naming   =VERN bsize=XXX
++log      =LDEV bsize=XXX blocks=XXX
++realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
++*** done
+diff --git a/tests/xfs/group b/tests/xfs/group
+index a7981b67..cf190b59 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -526,3 +526,4 @@
+ 526 auto quick mkfs
+ 527 auto quick quota
+ 990 auto quick growfs
++991 auto growfs ioctl prealloc stress
 -- 
 2.27.0
 
