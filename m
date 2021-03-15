@@ -7,220 +7,219 @@ X-Spam-Status: No, score=-16.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8C8A6C433E9
-	for <linux-fstests@archiver.kernel.org>; Mon, 15 Mar 2021 16:54:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D8AF5C433E0
+	for <linux-fstests@archiver.kernel.org>; Mon, 15 Mar 2021 21:11:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5B43364F33
-	for <linux-fstests@archiver.kernel.org>; Mon, 15 Mar 2021 16:54:58 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A377564F0F
+	for <linux-fstests@archiver.kernel.org>; Mon, 15 Mar 2021 21:11:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231491AbhCOQy0 (ORCPT
+        id S231322AbhCOVK4 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 15 Mar 2021 12:54:26 -0400
-Received: from mail.kernel.org ([198.145.29.99]:57424 "EHLO mail.kernel.org"
+        Mon, 15 Mar 2021 17:10:56 -0400
+Received: from mail.kernel.org ([198.145.29.99]:53690 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S230034AbhCOQyT (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 15 Mar 2021 12:54:19 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id EAB5F64F33;
-        Mon, 15 Mar 2021 16:54:18 +0000 (UTC)
+        id S232883AbhCOVKX (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 15 Mar 2021 17:10:23 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 6907164F0F;
+        Mon, 15 Mar 2021 21:10:22 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1615827259;
-        bh=M9IzYyDIuGqykFZa8hLqMh1LVAvUJ7CNfg4HcifHTsM=;
+        s=k20201202; t=1615842622;
+        bh=9IKDXHg2YUVpHNfFHRtc+UDaX2s+lKK+lTtElZJ/Anc=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=Xby26mFKJiwfarGLna122EgO6CLc6y+D/lPAiZ3+6X/n8sJlrgjNYP6ki7vF5K6RG
-         6toEat0LdO9wQa93gt48XmwncV+ny2vuGwqQARrqkJ6N7fUPAuwW2qXB0mKE/HnYVi
-         7lFOzCkLFLrpcKCme8DtGOCyH4kK4t/awRBxKe0qTnECojSsLVx///8sQE/wbi4L2i
-         seXc8mAWGDWoeMNDKZY5p9OqRxBUZdfHmNDeRD3iW4YzRtL3NisKR5eIK7g3i44ToX
-         Zp3j/TNY5xyChAWDprqKWTYbdX3ceSK+8TZXHesvNLUe9l9ibXVAHxi4QCUbmL33qH
-         aBWYD2xlrk8cw==
-Date:   Mon, 15 Mar 2021 09:54:18 -0700
+        b=NPZKbUw4oLoAeBOwrAafM7agpB8nhqUDkeGFHRHqkw1KWMeolnbTcqhRh16itIYsJ
+         3ksNCSd81bFHxdc3XdT6UxCUf8YOUOynOOPrYk5A1XT/sUcqWreLOo4myMiUpRxq25
+         8VBBpPqA96+cBm0IUSkQOlbWnN5Ft8XCTtb09LyXsMzFk+qaUsyo/Jnp8esf04JnQ9
+         LOeZzzxlnZb7ZxtXd0sfbnZktb2tkNtIfHEy14JP3RjzGd19oNEYDv9kmQhI69UeOV
+         Q/aBqsZA2jKmVOMoCPnvq10sB1D6OMYpMDOzhky5/kjdab0HLG5geAf8YJ076zXtFT
+         zYNxdAPVMFYDw==
+Date:   Mon, 15 Mar 2021 14:10:19 -0700
 From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Eryu Guan <guan@eryu.me>
-Cc:     guaneryu@gmail.com, wenli xie <wlxie7296@gmail.com>,
-        linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 09/10] generic: test a deadlock in xfs_rename when
- whiteing out files
-Message-ID: <20210315165418.GB22097@magnolia>
-References: <161526480371.1214319.3263690953532787783.stgit@magnolia>
- <161526485320.1214319.14486851135232825638.stgit@magnolia>
- <YE5Qq83n0Yki47yH@desktop>
+To:     Theodore Ts'o <tytso@mit.edu>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH -v2] generic: test which tries to exercise AIO/DIO into
+ unwritten space
+Message-ID: <20210315211019.GD22097@magnolia>
+References: <YEVdqb9kcOV004ZO@mit.edu>
+ <20210308012247.15250-1-tytso@mit.edu>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <YE5Qq83n0Yki47yH@desktop>
+In-Reply-To: <20210308012247.15250-1-tytso@mit.edu>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Mar 15, 2021 at 02:06:35AM +0800, Eryu Guan wrote:
-> On Mon, Mar 08, 2021 at 08:40:53PM -0800, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <djwong@kernel.org>
-> > 
-> > wenli xie reported a buffer cache deadlock when an overlayfs is mounted
-> > atop xfs and overlayfs tries to replace a single-nlink file with a
-> > whiteout file.  This test reproduces that deadlock.
-> > 
-> > Reported-by: wenli xie <wlxie7296@gmail.com>
-> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > ---
-> >  tests/generic/1300     |  109 ++++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/generic/1300.out |    2 +
-> >  tests/generic/group    |    1 
-> >  3 files changed, 112 insertions(+)
-> >  create mode 100755 tests/generic/1300
-> >  create mode 100644 tests/generic/1300.out
-> > 
-> > 
-> > diff --git a/tests/generic/1300 b/tests/generic/1300
-> > new file mode 100755
-> > index 00000000..10df44e3
-> > --- /dev/null
-> > +++ b/tests/generic/1300
-> > @@ -0,0 +1,109 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0-or-later
-> > +# Copyright (c) 2021 Oracle.  All Rights Reserved.
-> > +#
-> > +# FS QA Test No. 1300
-> > +#
-> > +# Reproducer for a deadlock in xfs_rename reported by Wenli Xie.
-> > +#
-> > +# When overlayfs is running on top of xfs and the user unlinks a file in the
-> > +# overlay, overlayfs will create a whiteout inode and ask us to "rename" the
-> > +# whiteout file atop the one being unlinked.  If the file being unlinked loses
-> > +# its one nlink, we then have to put the inode on the unlinked list.
-> > +#
-> > +# This requires us to grab the AGI buffer of the whiteout inode to take it
-> > +# off the unlinked list (which is where whiteouts are created) and to grab
-> > +# the AGI buffer of the file being deleted.  If the whiteout was created in
-> > +# a higher numbered AG than the file being deleted, we'll lock the AGIs in
-> > +# the wrong order and deadlock.
-> > +#
-> > +# Note that this test doesn't do anything xfs-specific so it's a generic test.
-> > +# This is a regression test for commit 6da1b4b1ab36 ("xfs: fix an ABBA deadlock
-> > +# in xfs_rename").
-> > +
-> > +seq=`basename $0`
-> > +seqres=$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +
-> > +here=`pwd`
-> > +tmp=/tmp/$$
-> > +status=1    # failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +_cleanup()
-> > +{
-> > +	stop_workers
-> > +	cd /
-> > +	rm -f $tmp.*
-> > +}
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +
-> > +# real QA test starts here
-> > +_supported_fs generic
-> > +_require_scratch
-> > +test "$FSTYP" = "overlay" && _notrun "Test does not apply to overlayfs."
-> > +
-> > +modprobe -q overlay
-> > +grep -q overlay /proc/filesystems || _notrun "Test requires overlayfs."
+On Sun, Mar 07, 2021 at 08:22:47PM -0500, Theodore Ts'o wrote:
+> This test verifies that the an unwritten extent is properly marked as
+> written after writing into it.
 > 
-> We have _require_ext2() and _require_tmpfs(), I think it's time to
-> refactor them into a new _require_filesystem() helper?
-
-Yeah, I'll refactor them into a new _require_extra_fs helper.
-
-> > +
-> > +rm -f $seqres.full
-> > +
-> > +_scratch_mkfs >> $seqres.full
-> > +_scratch_mount
+> There was a hard-to-hit bug which would occasionally trigger with ext4
+> for which this test was a reproducer.  This has been fixed after
+> moving ext4 to use iomap for Direct I/O's, although as of this
+> writing, there are still some occasional failures on ext4 when block
+> size < page size.
 > 
-> Also, doing overlay mount requires the underlying to export d_type,
-> perhaps we should do '_supports_filetype $SCRATCH_MNT' here, otherwise
-> filesystems like nfs would fail the test.
-
-Oh!  Thank you for pointing that out.
+> Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+> ---
 > 
-> > +
-> > +mkdir $SCRATCH_MNT/lowerdir
-> > +mkdir $SCRATCH_MNT/lowerdir1
-> > +mkdir $SCRATCH_MNT/lowerdir/etc
-> > +mkdir $SCRATCH_MNT/workers
-> > +echo salts > $SCRATCH_MNT/lowerdir/etc/access.conf
-> > +touch $SCRATCH_MNT/running
-> > +
-> > +stop_workers() {
-> > +	test -e $SCRATCH_MNT/running || return
-> > +	rm -f $SCRATCH_MNT/running
-> > +
-> > +	while [ "$(ls $SCRATCH_MNT/workers/ | wc -l)" -gt 0 ]; do
-> > +		wait
-> > +	done
-> > +}
-> > +
-> > +worker() {
-> > +	local tag="$1"
-> > +	local mergedir="$SCRATCH_MNT/merged$tag"
-> > +	local l="lowerdir=$SCRATCH_MNT/lowerdir:$SCRATCH_MNT/lowerdir1"
-> > +	local u="upperdir=$SCRATCH_MNT/upperdir$tag"
-> > +	local w="workdir=$SCRATCH_MNT/workdir$tag"
-> > +	local i="index=off,nfs_export=off"
-> > +
-> > +	touch $SCRATCH_MNT/workers/$tag
-> > +	while test -e $SCRATCH_MNT/running; do
-> > +		rm -rf $SCRATCH_MNT/merged$tag
-> > +		rm -rf $SCRATCH_MNT/upperdir$tag
-> > +		rm -rf $SCRATCH_MNT/workdir$tag
-> > +		mkdir $SCRATCH_MNT/merged$tag
-> > +		mkdir $SCRATCH_MNT/workdir$tag
-> > +		mkdir $SCRATCH_MNT/upperdir$tag
-> > +
-> > +		mount -t overlay overlay -o "$l,$u,$w,$i" $mergedir
-> > +		mv $mergedir/etc/access.conf $mergedir/etc/access.conf.bak
-> > +		touch $mergedir/etc/access.conf
-> > +		mv $mergedir/etc/access.conf $mergedir/etc/access.conf.bak
-> > +		touch $mergedir/etc/access.conf
-> > +		umount $mergedir
-> > +	done
-> > +	rm -f $SCRATCH_MNT/workers/$tag
-> > +}
-> > +
-> > +for i in $(seq 0 $((4 + LOAD_FACTOR)) ); do
-> > +	worker $i &
-> > +done
-> > +
-> > +sleep $((30 * TIME_FACTOR))
-> > +stop_workers
-> > +
-> > +echo Silence is golden.
-> > +# success, all done
-> > +status=0
-> > +exit
-> > diff --git a/tests/generic/1300.out b/tests/generic/1300.out
-> > new file mode 100644
-> > index 00000000..5805d30d
-> > --- /dev/null
-> > +++ b/tests/generic/1300.out
-> > @@ -0,0 +1,2 @@
-> > +QA output created by 1300
-> > +Silence is golden.
-> > diff --git a/tests/generic/group b/tests/generic/group
-> > index 778aa8c4..2233a59d 100644
-> > --- a/tests/generic/group
-> > +++ b/tests/generic/group
-> > @@ -631,3 +631,4 @@
-> >  947 auto quick rw clone
-> >  948 auto quick rw copy_range
-> >  949 auto quick rw dedupe clone
-> > +1300 auto rw overlay
+> Differences between v1 and v2:
+> * Addressed review comments from Eryu
+> * Renumbered from generic/623 to generic/630 (since 623 has been assigned)
 > 
-> Also add 'rename' group?
+>  tests/generic/630     | 105 ++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/630.out |   4 ++
+>  tests/generic/group   |   1 +
+>  3 files changed, 110 insertions(+)
+>  create mode 100755 tests/generic/630
+>  create mode 100644 tests/generic/630.out
+> 
+> diff --git a/tests/generic/630 b/tests/generic/630
+> new file mode 100755
+> index 00000000..7a04b899
+> --- /dev/null
+> +++ b/tests/generic/630
+> @@ -0,0 +1,105 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +
+> +#
+> +# FSQA Test No. 630
+> +#
+> +# AIO/DIO stress test
+> +# Run random AIO/DIO activity on an file system with unwritten regions
+> +#
+> +# This test verifies that the an unwritten extent is properly marked
+> +# as written after writing into it.
+> +#
+> +# There was a hard-to-hit bug which would occasionally trigger with
+> +# ext4 for which this test was a reproducer.  This has been fixed
+> +# after moving ext4 to use iomap for Direct I/O's, although as of this
+> +# writing, there are still some occasional failures on ext4 when block
+> +# size < page size.
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +fio_config=$tmp.fio
+> +fio_out=$tmp.fio.out
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +    rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_fs generic
+> +_require_test
+> +_require_scratch
+> +_require_odirect
+> +_require_aio
+> +_require_block_device $SCRATCH_DEV
+> +
+> +NUM_JOBS=$((4*LOAD_FACTOR))
+> +BLK_DEV_SIZE=`blockdev --getsz $SCRATCH_DEV`
+> +FILE_SIZE=$(((BLK_DEV_SIZE * 512) * 3 / 4))
+> +
+> +max_file_size=$((5 * 1024 * 1024 * 1024))
+> +if [ $max_file_size -lt $FILE_SIZE ]; then
+> +	FILE_SIZE=$max_file_size
+> +fi
+> +SIZE=$((FILE_SIZE / 2))
+> +
+> +cat >$fio_config <<EOF
+> +###########
+> +# $seq test fio activity
+> +# Filenames derived from jobsname and jobid like follows:
+> +# ${JOB_NAME}.${JOB_ID}.${ITERATION_ID}
+> +[global]
+> +ioengine=libaio
+> +bs=128k
+> +directory=${SCRATCH_MNT}
+> +filesize=${FILE_SIZE}
+> +size=${FILE_SIZE}
+> +io_size=${SIZE}
+> +iodepth=$((128*$LOAD_FACTOR))
+> +fallocate=native
+> +
+> +# Perform direct aio and verify data
+> +# This test case should check use-after-free issues
+> +[aio-dio-verifier]
+> +numjobs=1
+> +verify=crc32c-intel
+> +verify_fatal=1
+> +verify_dump=1
+> +verify_backlog=1024
+> +verify_async=4
+> +direct=1
+> +random_generator=lfsr
+> +blocksize_range=4k-8200k
 
-Done.
+Something I hadn't noticed before this got committed -- setting the
+maximum blocksize to 8200k and the iodepth to a multiple of 128 means
+that fio will allocate an 8200k buffer per iodepth.  Given that the
+iodepth is (128 * LOAD_FACTOR), this test therefore requires (1GB *
+LOAD_FACTOR) memory.  On my testing VMs which have a generous 1200M of
+memory, this causes the oom killer to zap fio, which in turn causes the
+test to fail due to the SIGKILL being reported in the golden output.
+
+Is it necessary to allocate 8MB of memory per io thread?  Given that
+this is a regression test to probe a bug in ext4's unwritten extent
+conversion I'm loath to touch it too much, but it seems to me that a
+smaller blocksize would stress the extent mapping structures harder and
+reduce the memory requirements at the same time.
 
 --D
 
-> Thanks,
-> Eryu
+> +rw=randwrite
+> +filename=test-file
+> +
+> +EOF
+> +
+> +rm -f $seqres.full
+> +
+> +_require_fio $fio_config
+> +_require_xfs_io_command "falloc"
+> +
+> +_scratch_mkfs >> $seqres.full 2>&1
+> +_scratch_mount
+> +
+> +echo ""
+> +echo "Run fio with random aio-dio pattern"
+> +echo ""
+> +cat $fio_config >> $seqres.full
+> +$FIO_PROG $fio_config --output=$fio_out
+> +cat $fio_out >> $seqres.full
+> +
+> +status=0
+> +exit
+> diff --git a/tests/generic/630.out b/tests/generic/630.out
+> new file mode 100644
+> index 00000000..7f3adb50
+> --- /dev/null
+> +++ b/tests/generic/630.out
+> @@ -0,0 +1,4 @@
+> +QA output created by 630
+> +
+> +Run fio with random aio-dio pattern
+> +
+> diff --git a/tests/generic/group b/tests/generic/group
+> index 84db3789..1ff896a1 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -628,3 +628,4 @@
+>  623 auto quick shutdown
+>  624 auto quick verity
+>  625 auto quick verity
+> +630 aio rw stress
+> -- 
+> 2.30.0
+> 
