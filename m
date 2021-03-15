@@ -2,244 +2,225 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-19.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D7942C43333
-	for <linux-fstests@archiver.kernel.org>; Mon, 15 Mar 2021 11:21:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8C8A6C433E9
+	for <linux-fstests@archiver.kernel.org>; Mon, 15 Mar 2021 16:54:58 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 984AD64E90
-	for <linux-fstests@archiver.kernel.org>; Mon, 15 Mar 2021 11:21:01 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5B43364F33
+	for <linux-fstests@archiver.kernel.org>; Mon, 15 Mar 2021 16:54:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229956AbhCOLU3 (ORCPT
+        id S231491AbhCOQy0 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 15 Mar 2021 07:20:29 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:26759 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S229684AbhCOLUR (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 15 Mar 2021 07:20:17 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1615807217;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=+qbVrcdtmPe4mZGLdw3S9hgAYqmOPLsAEBr5BVz4L40=;
-        b=Dwo79HJCCh2QDuYr/jngnbyrXgkhsrRsxhSumjDbLVCUDOtSkydEr58t3FWYcZ2UaGzizK
-        ipwdRcOtTX3B7y2hZSz0OyOsaQu136oWqPo+byD8fQhEYr6I2HfjkR5fM1i08emJt673QQ
-        7peAehgyyegR77rfu8F7hmRTccqWrZg=
-Received: from mail-pf1-f199.google.com (mail-pf1-f199.google.com
- [209.85.210.199]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-96-VgUbCnF5NH2oLLCJvcDO2w-1; Mon, 15 Mar 2021 07:20:13 -0400
-X-MC-Unique: VgUbCnF5NH2oLLCJvcDO2w-1
-Received: by mail-pf1-f199.google.com with SMTP id 71so13095188pfu.8
-        for <fstests@vger.kernel.org>; Mon, 15 Mar 2021 04:20:12 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=+qbVrcdtmPe4mZGLdw3S9hgAYqmOPLsAEBr5BVz4L40=;
-        b=lcQUHjvvl38OEa3jCyIkxQ5NYL8LBSw9sIGXGQSGHxkMcR++JQQHEk+hEx7niLunC4
-         lXYF0mwzPomNykvVuRkDBk4vGNd5I8qaDh+Fq6F+L+NrAiXHe1/xySk67B1wa5f3l2lT
-         5J4ukoymSVLw18cTofQS9BaE0BDjoqjpZnljZ62iYUm5nkwcpSRxIPDE6fEL2irB6j3N
-         r5Qax3MYSt1qhQtshjbbsYgv6rYC0WI9iiBK/aL+q20ILQmP2KyWWFaa6VJAyHWl8g2v
-         w2qtnE0sJM7ATW6aK0ErbwfiFBOGvkisA7c8filINTKtRmQBMpfji/hVLAtuYKo1etzd
-         9HAw==
-X-Gm-Message-State: AOAM531AlpmkdtvxItIFaArWN1d9nfpww+tfP/1vGw4lIZK4/Yne67GT
-        4tLCBwvY4uQFcf49KOK5LZZAoHnszyuODeT4zCqvFCjrj0Z0p4H+uUq0fiK/vj4Ll6jWuxrYeJI
-        FuIcXC6DnUFmWQ5MErg==
-X-Received: by 2002:a62:5e02:0:b029:1ed:8bee:6132 with SMTP id s2-20020a625e020000b02901ed8bee6132mr10053594pfb.48.1615807211993;
-        Mon, 15 Mar 2021 04:20:11 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJxUMmBINRxfxwEg+AcTuoNn0nzk5osUcNmWJLosmGXRAZUNvvxw52jkclMe0t4lWSHfpLx/rw==
-X-Received: by 2002:a62:5e02:0:b029:1ed:8bee:6132 with SMTP id s2-20020a625e020000b02901ed8bee6132mr10053568pfb.48.1615807211752;
-        Mon, 15 Mar 2021 04:20:11 -0700 (PDT)
-Received: from xiangao.remote.csb ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id r23sm11058448pje.38.2021.03.15.04.20.09
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 15 Mar 2021 04:20:11 -0700 (PDT)
-From:   Gao Xiang <hsiangkao@redhat.com>
-To:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Cc:     "Darrick J. Wong" <djwong@kernel.org>,
-        Zorro Lang <zlang@redhat.com>, Gao Xiang <hsiangkao@redhat.com>
-Subject: [RFC PATCH v3 3/3] xfs: stress test for shrinking free space in the last AG
-Date:   Mon, 15 Mar 2021 19:19:26 +0800
-Message-Id: <20210315111926.837170-4-hsiangkao@redhat.com>
-X-Mailer: git-send-email 2.27.0
-In-Reply-To: <20210315111926.837170-1-hsiangkao@redhat.com>
-References: <20210315111926.837170-1-hsiangkao@redhat.com>
+        Mon, 15 Mar 2021 12:54:26 -0400
+Received: from mail.kernel.org ([198.145.29.99]:57424 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S230034AbhCOQyT (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 15 Mar 2021 12:54:19 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id EAB5F64F33;
+        Mon, 15 Mar 2021 16:54:18 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1615827259;
+        bh=M9IzYyDIuGqykFZa8hLqMh1LVAvUJ7CNfg4HcifHTsM=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=Xby26mFKJiwfarGLna122EgO6CLc6y+D/lPAiZ3+6X/n8sJlrgjNYP6ki7vF5K6RG
+         6toEat0LdO9wQa93gt48XmwncV+ny2vuGwqQARrqkJ6N7fUPAuwW2qXB0mKE/HnYVi
+         7lFOzCkLFLrpcKCme8DtGOCyH4kK4t/awRBxKe0qTnECojSsLVx///8sQE/wbi4L2i
+         seXc8mAWGDWoeMNDKZY5p9OqRxBUZdfHmNDeRD3iW4YzRtL3NisKR5eIK7g3i44ToX
+         Zp3j/TNY5xyChAWDprqKWTYbdX3ceSK+8TZXHesvNLUe9l9ibXVAHxi4QCUbmL33qH
+         aBWYD2xlrk8cw==
+Date:   Mon, 15 Mar 2021 09:54:18 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Eryu Guan <guan@eryu.me>
+Cc:     guaneryu@gmail.com, wenli xie <wlxie7296@gmail.com>,
+        linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH 09/10] generic: test a deadlock in xfs_rename when
+ whiteing out files
+Message-ID: <20210315165418.GB22097@magnolia>
+References: <161526480371.1214319.3263690953532787783.stgit@magnolia>
+ <161526485320.1214319.14486851135232825638.stgit@magnolia>
+ <YE5Qq83n0Yki47yH@desktop>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <YE5Qq83n0Yki47yH@desktop>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This adds a stress testcase to shrink free space as much as
-possible in the last AG with background fsstress workload.
+On Mon, Mar 15, 2021 at 02:06:35AM +0800, Eryu Guan wrote:
+> On Mon, Mar 08, 2021 at 08:40:53PM -0800, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <djwong@kernel.org>
+> > 
+> > wenli xie reported a buffer cache deadlock when an overlayfs is mounted
+> > atop xfs and overlayfs tries to replace a single-nlink file with a
+> > whiteout file.  This test reproduces that deadlock.
+> > 
+> > Reported-by: wenli xie <wlxie7296@gmail.com>
+> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> > ---
+> >  tests/generic/1300     |  109 ++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/generic/1300.out |    2 +
+> >  tests/generic/group    |    1 
+> >  3 files changed, 112 insertions(+)
+> >  create mode 100755 tests/generic/1300
+> >  create mode 100644 tests/generic/1300.out
+> > 
+> > 
+> > diff --git a/tests/generic/1300 b/tests/generic/1300
+> > new file mode 100755
+> > index 00000000..10df44e3
+> > --- /dev/null
+> > +++ b/tests/generic/1300
+> > @@ -0,0 +1,109 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0-or-later
+> > +# Copyright (c) 2021 Oracle.  All Rights Reserved.
+> > +#
+> > +# FS QA Test No. 1300
+> > +#
+> > +# Reproducer for a deadlock in xfs_rename reported by Wenli Xie.
+> > +#
+> > +# When overlayfs is running on top of xfs and the user unlinks a file in the
+> > +# overlay, overlayfs will create a whiteout inode and ask us to "rename" the
+> > +# whiteout file atop the one being unlinked.  If the file being unlinked loses
+> > +# its one nlink, we then have to put the inode on the unlinked list.
+> > +#
+> > +# This requires us to grab the AGI buffer of the whiteout inode to take it
+> > +# off the unlinked list (which is where whiteouts are created) and to grab
+> > +# the AGI buffer of the file being deleted.  If the whiteout was created in
+> > +# a higher numbered AG than the file being deleted, we'll lock the AGIs in
+> > +# the wrong order and deadlock.
+> > +#
+> > +# Note that this test doesn't do anything xfs-specific so it's a generic test.
+> > +# This is a regression test for commit 6da1b4b1ab36 ("xfs: fix an ABBA deadlock
+> > +# in xfs_rename").
+> > +
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +
+> > +here=`pwd`
+> > +tmp=/tmp/$$
+> > +status=1    # failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +	stop_workers
+> > +	cd /
+> > +	rm -f $tmp.*
+> > +}
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +
+> > +# real QA test starts here
+> > +_supported_fs generic
+> > +_require_scratch
+> > +test "$FSTYP" = "overlay" && _notrun "Test does not apply to overlayfs."
+> > +
+> > +modprobe -q overlay
+> > +grep -q overlay /proc/filesystems || _notrun "Test requires overlayfs."
+> 
+> We have _require_ext2() and _require_tmpfs(), I think it's time to
+> refactor them into a new _require_filesystem() helper?
 
-The expectation is that no crash happens with expected output.
+Yeah, I'll refactor them into a new _require_extra_fs helper.
 
-Signed-off-by: Gao Xiang <hsiangkao@redhat.com>
----
- tests/xfs/991     | 122 ++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/991.out |   8 +++
- tests/xfs/group   |   1 +
- 3 files changed, 131 insertions(+)
- create mode 100755 tests/xfs/991
- create mode 100644 tests/xfs/991.out
+> > +
+> > +rm -f $seqres.full
+> > +
+> > +_scratch_mkfs >> $seqres.full
+> > +_scratch_mount
+> 
+> Also, doing overlay mount requires the underlying to export d_type,
+> perhaps we should do '_supports_filetype $SCRATCH_MNT' here, otherwise
+> filesystems like nfs would fail the test.
 
-diff --git a/tests/xfs/991 b/tests/xfs/991
-new file mode 100755
-index 00000000..7e7d318e
---- /dev/null
-+++ b/tests/xfs/991
-@@ -0,0 +1,122 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2020-2021 Red Hat, Inc.  All Rights Reserved.
-+#
-+# FS QA Test 991
-+#
-+# XFS online shrinkfs stress test
-+#
-+# This test attempts to shrink unused space as much as possible with
-+# background fsstress workload. It will decrease the shrink size if
-+# larger size fails. And totally repeat 2 * TIME_FACTOR times.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "rm -f $tmp.*; exit \$status" 0 1 2 3 15
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+create_scratch()
-+{
-+	_scratch_mkfs_xfs $@ | tee -a $seqres.full | \
-+		_filter_mkfs 2>$tmp.mkfs >/dev/null
-+	. $tmp.mkfs
-+
-+	if ! _try_scratch_mount 2>/dev/null; then
-+		echo "failed to mount $SCRATCH_DEV"
-+		exit 1
-+	fi
-+
-+	# fix the reserve block pool to a known size so that the enospc
-+	# calculations work out correctly.
-+	_scratch_resvblks 1024 > /dev/null 2>&1
-+}
-+
-+fill_scratch()
-+{
-+	$XFS_IO_PROG -f -c "falloc -k 0 $1" $SCRATCH_MNT/resvfile
-+}
-+
-+stress_scratch()
-+{
-+	procs=3
-+	nops=$((1000 * LOAD_FACTOR))
-+	# -w ensures that the only ops are ones which cause write I/O
-+	FSSTRESS_ARGS=`_scale_fsstress_args -d $SCRATCH_MNT -w -p $procs \
-+	    -n $nops $FSSTRESS_AVOID`
-+	$FSSTRESS_PROG $FSSTRESS_ARGS >> $seqres.full 2>&1 &
-+}
-+
-+# real QA test starts here
-+_supported_fs xfs
-+_require_xfs_shrink
-+_require_xfs_io_command "falloc"
-+
-+rm -f $seqres.full
-+_scratch_mkfs_xfs | tee -a $seqres.full | _filter_mkfs 2>$tmp.mkfs
-+. $tmp.mkfs	# extract blocksize and data size for scratch device
-+
-+decsize=`expr  42 \* 1048576`	# shrink in chunks of this size at most
-+endsize=`expr 125 \* 1048576`	# stop after shrinking this big
-+[ `expr $endsize / $dbsize` -lt $dblocks ] || _notrun "Scratch device too small"
-+
-+nags=2
-+totalcount=$((2 * TIME_FACTOR))
-+
-+while [ $totalcount -gt 0 ]; do
-+	size=`expr 1010 \* 1048576`	# 1010 megabytes initially
-+	logblks=$(_scratch_find_xfs_min_logblocks -dsize=${size} -dagcount=${nags})
-+
-+	create_scratch -lsize=${logblks}b -dsize=${size} -dagcount=${nags}
-+
-+	for i in `seq 125 -1 90`; do
-+		fillsize=`expr $i \* 1048576`
-+		out="$(fill_scratch $fillsize 2>&1)"
-+		echo "$out" | grep -q 'No space left on device' && continue
-+		test -n "${out}" && echo "$out"
-+		break
-+	done
-+
-+	while [ $size -gt $endsize ]; do
-+		stress_scratch
-+		sleep 1
-+
-+		decb=`expr $decsize / $dbsize`    # in data blocks
-+		while [ $decb -gt 0 ]; do
-+			sizeb=`expr $size / $dbsize - $decb`
-+
-+			$XFS_GROWFS_PROG -D ${sizeb} $SCRATCH_MNT \
-+				>> $seqres.full 2>&1 && break
-+
-+			[ $decb -gt 100 ] && decb=`expr $decb + $RANDOM % 10`
-+			decb=`expr $decb / 2`
-+		done
-+
-+		wait
-+		[ $decb -eq 0 ] && break
-+
-+		# get latest dblocks
-+		$XFS_INFO_PROG $SCRATCH_MNT 2>&1 | _filter_mkfs 2>$tmp.growfs >/dev/null
-+		. $tmp.growfs
-+
-+		size=`expr $dblocks \* $dbsize`
-+		_scratch_unmount
-+		_repair_scratch_fs >> $seqres.full
-+		_scratch_mount
-+	done
-+
-+	_scratch_unmount
-+	_repair_scratch_fs >> $seqres.full
-+	totalcount=`expr $totalcount - 1`
-+done
-+
-+echo "*** done"
-+status=0
-+exit
-diff --git a/tests/xfs/991.out b/tests/xfs/991.out
-new file mode 100644
-index 00000000..e8209672
---- /dev/null
-+++ b/tests/xfs/991.out
-@@ -0,0 +1,8 @@
-+QA output created by 991
-+meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
-+data     = bsize=XXX blocks=XXX, imaxpct=PCT
-+         = sunit=XXX swidth=XXX, unwritten=X
-+naming   =VERN bsize=XXX
-+log      =LDEV bsize=XXX blocks=XXX
-+realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
-+*** done
-diff --git a/tests/xfs/group b/tests/xfs/group
-index a7981b67..cf190b59 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -526,3 +526,4 @@
- 526 auto quick mkfs
- 527 auto quick quota
- 990 auto quick growfs
-+991 auto growfs ioctl prealloc stress
--- 
-2.27.0
+Oh!  Thank you for pointing that out.
+> 
+> > +
+> > +mkdir $SCRATCH_MNT/lowerdir
+> > +mkdir $SCRATCH_MNT/lowerdir1
+> > +mkdir $SCRATCH_MNT/lowerdir/etc
+> > +mkdir $SCRATCH_MNT/workers
+> > +echo salts > $SCRATCH_MNT/lowerdir/etc/access.conf
+> > +touch $SCRATCH_MNT/running
+> > +
+> > +stop_workers() {
+> > +	test -e $SCRATCH_MNT/running || return
+> > +	rm -f $SCRATCH_MNT/running
+> > +
+> > +	while [ "$(ls $SCRATCH_MNT/workers/ | wc -l)" -gt 0 ]; do
+> > +		wait
+> > +	done
+> > +}
+> > +
+> > +worker() {
+> > +	local tag="$1"
+> > +	local mergedir="$SCRATCH_MNT/merged$tag"
+> > +	local l="lowerdir=$SCRATCH_MNT/lowerdir:$SCRATCH_MNT/lowerdir1"
+> > +	local u="upperdir=$SCRATCH_MNT/upperdir$tag"
+> > +	local w="workdir=$SCRATCH_MNT/workdir$tag"
+> > +	local i="index=off,nfs_export=off"
+> > +
+> > +	touch $SCRATCH_MNT/workers/$tag
+> > +	while test -e $SCRATCH_MNT/running; do
+> > +		rm -rf $SCRATCH_MNT/merged$tag
+> > +		rm -rf $SCRATCH_MNT/upperdir$tag
+> > +		rm -rf $SCRATCH_MNT/workdir$tag
+> > +		mkdir $SCRATCH_MNT/merged$tag
+> > +		mkdir $SCRATCH_MNT/workdir$tag
+> > +		mkdir $SCRATCH_MNT/upperdir$tag
+> > +
+> > +		mount -t overlay overlay -o "$l,$u,$w,$i" $mergedir
+> > +		mv $mergedir/etc/access.conf $mergedir/etc/access.conf.bak
+> > +		touch $mergedir/etc/access.conf
+> > +		mv $mergedir/etc/access.conf $mergedir/etc/access.conf.bak
+> > +		touch $mergedir/etc/access.conf
+> > +		umount $mergedir
+> > +	done
+> > +	rm -f $SCRATCH_MNT/workers/$tag
+> > +}
+> > +
+> > +for i in $(seq 0 $((4 + LOAD_FACTOR)) ); do
+> > +	worker $i &
+> > +done
+> > +
+> > +sleep $((30 * TIME_FACTOR))
+> > +stop_workers
+> > +
+> > +echo Silence is golden.
+> > +# success, all done
+> > +status=0
+> > +exit
+> > diff --git a/tests/generic/1300.out b/tests/generic/1300.out
+> > new file mode 100644
+> > index 00000000..5805d30d
+> > --- /dev/null
+> > +++ b/tests/generic/1300.out
+> > @@ -0,0 +1,2 @@
+> > +QA output created by 1300
+> > +Silence is golden.
+> > diff --git a/tests/generic/group b/tests/generic/group
+> > index 778aa8c4..2233a59d 100644
+> > --- a/tests/generic/group
+> > +++ b/tests/generic/group
+> > @@ -631,3 +631,4 @@
+> >  947 auto quick rw clone
+> >  948 auto quick rw copy_range
+> >  949 auto quick rw dedupe clone
+> > +1300 auto rw overlay
+> 
+> Also add 'rename' group?
 
+Done.
+
+--D
+
+> Thanks,
+> Eryu
