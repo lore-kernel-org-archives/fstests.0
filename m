@@ -2,188 +2,79 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-19.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+X-Spam-Status: No, score=-16.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DE74AC433DB
-	for <linux-fstests@archiver.kernel.org>; Tue, 16 Mar 2021 12:23:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 75F4CC433DB
+	for <linux-fstests@archiver.kernel.org>; Tue, 16 Mar 2021 13:02:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A842465037
-	for <linux-fstests@archiver.kernel.org>; Tue, 16 Mar 2021 12:23:13 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2CC856505D
+	for <linux-fstests@archiver.kernel.org>; Tue, 16 Mar 2021 13:02:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230393AbhCPMWl (ORCPT
+        id S234509AbhCPNBv (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 16 Mar 2021 08:22:41 -0400
-Received: from mail.kernel.org ([198.145.29.99]:38842 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S230104AbhCPMWY (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 16 Mar 2021 08:22:24 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 1AD8E65010;
-        Tue, 16 Mar 2021 12:22:22 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1615897343;
-        bh=uwktJNovtA5sR4kSBtFhwHbnw/d5XVDrgl3DcjqiNcs=;
-        h=From:To:Cc:Subject:Date:From;
-        b=PILWQJDFwGfl4iF+VwG/pLd9u684l6LQqVVfcyE85hmSCMWZ2FJ/LJ8NoVFdG/RGs
-         5kHlZ3DOIkTb679ckOrybbWerkXuIMmjyUhpneJyNmwai0ioKM0dIZ40Ek43gfV7s2
-         IVqaYJ1q2w3KgBeFgWXMOWwqHMg9ia8lcOK8RmoMRbTj3qSI7gTQGx1Q8dqgbgtCg2
-         DHiEPeRNVe6kN9IdvmBmCpBnYyFpZwyv3jvOVW2S+96BJI1Bez/oh1pgpXCQT4az2i
-         CJR6nF5yKgks//yXu7+hIxbZRr/pbk8rBlDoMWgrct+eEOZzILHi9GjGugI1PFVX73
-         unIycigca7mWg==
-From:   fdmanana@kernel.org
+        Tue, 16 Mar 2021 09:01:51 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:33392 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S233062AbhCPNBh (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 16 Mar 2021 09:01:37 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1615899697;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=/lrR+CywcZ6mrW2xkpIGBO2G01aH1b1hN9LHL9dbdW8=;
+        b=Hu8XYXep1++fadtHfv+QDwtNCNzR3MHOC5sqOJjkoO051k3QRFJ3PrOlX8ptSFUg/1lp+I
+        fwuZEENxKhMomBMVLePXzlG8yHTwH6QE5+n/K4isVVSUsv03zFCuMYVxJx5QfvXiEhTyVT
+        jsGo1i7UtUuyzCJF/xIqY3xlx7mwkPw=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-444-KJKcr3cvPWGbtORpwM5Svw-1; Tue, 16 Mar 2021 09:01:35 -0400
+X-MC-Unique: KJKcr3cvPWGbtORpwM5Svw-1
+Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 90521800C78
+        for <fstests@vger.kernel.org>; Tue, 16 Mar 2021 13:01:33 +0000 (UTC)
+Received: from localhost (ovpn-115-92.ams2.redhat.com [10.36.115.92])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id 32BA35C1A1;
+        Tue, 16 Mar 2021 13:01:33 +0000 (UTC)
+From:   Max Reitz <mreitz@redhat.com>
 To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH v2] btrfs: add test for cases when a dio write has to fallback to a buffered write
-Date:   Tue, 16 Mar 2021 12:22:15 +0000
-Message-Id: <eb23e76e03b0017715e449ff1021d758f0ad98ec.1615897006.git.fdmanana@suse.com>
-X-Mailer: git-send-email 2.28.0
+Cc:     Max Reitz <mreitz@redhat.com>
+Subject: [PATCH] common/rc: virtiofs does not support atime options
+Date:   Tue, 16 Mar 2021 14:01:31 +0100
+Message-Id: <20210316130131.11792-1-mreitz@redhat.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.16
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Filipe Manana <fdmanana@suse.com>
+As documented in Documentation/filesystems/virtiofs.rst (in the Linux
+tree), virtiofs ignores atime-related mount options.
 
-Test cases where a direct IO write, with O_DSYNC, can not be done and has
-to fallback to a buffered write.
-
-This is motivated by the fact we don't have existing tests for these cases
-and in fact we had a regression for one case in the 5.10 kernel. This was
-the case when doing a direct IO write, with O_DSYNC, against a file offset
-that is not aligned to the filesystem's block size, which resulted in
-triggering an assertion failure when btrfs is built with assertions enabled
-(CONFIG_BTRFS_ASSERT=y). One openSUSE Tumbleweed user hit this frequently
-when using Docker and DB2.
-
-The kernel commit in 5.10 that introduced the regression was commit
-0eb79294dbe328 ("btrfs: dio iomap DSYNC workaround")). In kernel 5.11 the
-regression fixed, by pure chance, by commit ecfdc08b8cc65d ("btrfs: remove
-dio iomap DSYNC workaround"). Since the commit that fixed the bug in 5.11
-was dependent on a large patchset, a special and simple fix was added to
-the stable kernel 5.10.18 by commit a6703c71153438 ("btrfs: fix crash after
-non-aligned direct IO write with O_DSYNC").
-
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
+Signed-off-by: Max Reitz <mreitz@redhat.com>
 ---
+ common/rc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-V2: Resend and updated changelog.
-
- tests/btrfs/234     | 64 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/234.out | 21 +++++++++++++++
- tests/btrfs/group   |  1 +
- 3 files changed, 86 insertions(+)
- create mode 100755 tests/btrfs/234
- create mode 100644 tests/btrfs/234.out
-
-diff --git a/tests/btrfs/234 b/tests/btrfs/234
-new file mode 100755
-index 00000000..df64e54e
---- /dev/null
-+++ b/tests/btrfs/234
-@@ -0,0 +1,64 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2021 SUSE Linux Products GmbH. All Rights Reserved.
-+#
-+# FS QA Test No. btrfs/234
-+#
-+# Test cases where a direct IO write, with O_DSYNC, can not be done and has to
-+# fallback to a buffered write.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/attr
-+
-+# real QA test starts here
-+_supported_fs btrfs
-+_require_scratch
-+_require_odirect
-+_require_chattr c
-+
-+rm -f $seqres.full
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+
-+# Create a test file with compression enabled (chattr +c).
-+touch $SCRATCH_MNT/foo
-+$CHATTR_PROG +c $SCRATCH_MNT/foo
-+
-+# Now do a buffered write to create compressed extents.
-+$XFS_IO_PROG -s -c "pwrite -S 0xab -b 1M 0 1M" $SCRATCH_MNT/foo | _filter_xfs_io
-+
-+# Now do the direct IO write with O_DSYNC into a file range that contains
-+# compressed extents. It should fallback to buffered IO and succeed.
-+$XFS_IO_PROG -d -s -c "pwrite -S 0xcd 512K 512K" $SCRATCH_MNT/foo | _filter_xfs_io
-+
-+# Now try doing a direct IO write, with O_DSYNC, for a range that starts with
-+# non-aligned offset. It should also fallback to buffered IO and succeed.
-+$XFS_IO_PROG -f -d -s -c "pwrite -S 0xef 1111 512K" $SCRATCH_MNT/bar | _filter_xfs_io
-+
-+# Unmount, mount again, and verify we have the expected data.
-+_scratch_cycle_mount
-+
-+echo "File foo data:"
-+od -A d -t x1 $SCRATCH_MNT/foo
-+echo "File bar data:"
-+od -A d -t x1 $SCRATCH_MNT/bar
-+
-+status=0
-+exit
-diff --git a/tests/btrfs/234.out b/tests/btrfs/234.out
-new file mode 100644
-index 00000000..4504a193
---- /dev/null
-+++ b/tests/btrfs/234.out
-@@ -0,0 +1,21 @@
-+QA output created by 234
-+wrote 1048576/1048576 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 524288/524288 bytes at offset 524288
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 524288/524288 bytes at offset 1111
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+File foo data:
-+0000000 ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab
-+*
-+0524288 cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd
-+*
-+1048576
-+File bar data:
-+0000000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-+*
-+0001104 00 00 00 00 00 00 00 ef ef ef ef ef ef ef ef ef
-+0001120 ef ef ef ef ef ef ef ef ef ef ef ef ef ef ef ef
-+*
-+0525392 ef ef ef ef ef ef ef
-+0525399
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 5214dbdb..6d0c70c0 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -236,3 +236,4 @@
- 231 auto quick clone log replay
- 232 auto quick qgroup limit
- 233 auto quick subvolume
-+234 auto quick compress rw
+diff --git a/common/rc b/common/rc
+index aea0d076..9fdbcd14 100644
+--- a/common/rc
++++ b/common/rc
+@@ -3572,7 +3572,7 @@ _require_atime()
+ {
+ 	_exclude_scratch_mount_option "noatime"
+ 	case $FSTYP in
+-	nfs|cifs)
++	nfs|cifs|virtiofs)
+ 		_notrun "atime related mount options have no effect on $FSTYP"
+ 		;;
+ 	esac
 -- 
-2.28.0
+2.29.2
 
