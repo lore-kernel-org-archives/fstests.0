@@ -2,224 +2,449 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-21.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D8AF5C433E0
-	for <linux-fstests@archiver.kernel.org>; Mon, 15 Mar 2021 21:11:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D4999C433DB
+	for <linux-fstests@archiver.kernel.org>; Tue, 16 Mar 2021 10:37:32 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A377564F0F
-	for <linux-fstests@archiver.kernel.org>; Mon, 15 Mar 2021 21:11:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 83B9965027
+	for <linux-fstests@archiver.kernel.org>; Tue, 16 Mar 2021 10:37:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231322AbhCOVK4 (ORCPT
+        id S236680AbhCPKhA (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 15 Mar 2021 17:10:56 -0400
-Received: from mail.kernel.org ([198.145.29.99]:53690 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S232883AbhCOVKX (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 15 Mar 2021 17:10:23 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 6907164F0F;
-        Mon, 15 Mar 2021 21:10:22 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1615842622;
-        bh=9IKDXHg2YUVpHNfFHRtc+UDaX2s+lKK+lTtElZJ/Anc=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=NPZKbUw4oLoAeBOwrAafM7agpB8nhqUDkeGFHRHqkw1KWMeolnbTcqhRh16itIYsJ
-         3ksNCSd81bFHxdc3XdT6UxCUf8YOUOynOOPrYk5A1XT/sUcqWreLOo4myMiUpRxq25
-         8VBBpPqA96+cBm0IUSkQOlbWnN5Ft8XCTtb09LyXsMzFk+qaUsyo/Jnp8esf04JnQ9
-         LOeZzzxlnZb7ZxtXd0sfbnZktb2tkNtIfHEy14JP3RjzGd19oNEYDv9kmQhI69UeOV
-         Q/aBqsZA2jKmVOMoCPnvq10sB1D6OMYpMDOzhky5/kjdab0HLG5geAf8YJ076zXtFT
-         zYNxdAPVMFYDw==
-Date:   Mon, 15 Mar 2021 14:10:19 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Theodore Ts'o <tytso@mit.edu>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH -v2] generic: test which tries to exercise AIO/DIO into
- unwritten space
-Message-ID: <20210315211019.GD22097@magnolia>
-References: <YEVdqb9kcOV004ZO@mit.edu>
- <20210308012247.15250-1-tytso@mit.edu>
+        Tue, 16 Mar 2021 06:37:00 -0400
+Received: from youngberry.canonical.com ([91.189.89.112]:42067 "EHLO
+        youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S236692AbhCPKgl (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 16 Mar 2021 06:36:41 -0400
+Received: from ip5f5af0a0.dynamic.kabel-deutschland.de ([95.90.240.160] helo=wittgenstein.fritz.box)
+        by youngberry.canonical.com with esmtpsa (TLS1.2:ECDHE_RSA_AES_128_GCM_SHA256:128)
+        (Exim 4.86_2)
+        (envelope-from <christian.brauner@ubuntu.com>)
+        id 1lM743-0008JF-19; Tue, 16 Mar 2021 10:36:39 +0000
+From:   Christian Brauner <christian.brauner@ubuntu.com>
+To:     Christoph Hellwig <hch@lst.de>,
+        "Darrick J . Wong" <djwong@kernel.org>, fstests@vger.kernel.org
+Cc:     David Howells <dhowells@redhat.com>,
+        Christian Brauner <christian.brauner@ubuntu.com>
+Subject: [PATCH v9 1/4] generic/631: add test for detached mount propagation
+Date:   Tue, 16 Mar 2021 11:36:24 +0100
+Message-Id: <20210316103627.2954121-2-christian.brauner@ubuntu.com>
+X-Mailer: git-send-email 2.27.0
+In-Reply-To: <20210316103627.2954121-1-christian.brauner@ubuntu.com>
+References: <20210316103627.2954121-1-christian.brauner@ubuntu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210308012247.15250-1-tytso@mit.edu>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Mar 07, 2021 at 08:22:47PM -0500, Theodore Ts'o wrote:
-> This test verifies that the an unwritten extent is properly marked as
-> written after writing into it.
-> 
-> There was a hard-to-hit bug which would occasionally trigger with ext4
-> for which this test was a reproducer.  This has been fixed after
-> moving ext4 to use iomap for Direct I/O's, although as of this
-> writing, there are still some occasional failures on ext4 when block
-> size < page size.
-> 
-> Signed-off-by: Theodore Ts'o <tytso@mit.edu>
-> ---
-> 
-> Differences between v1 and v2:
-> * Addressed review comments from Eryu
-> * Renumbered from generic/623 to generic/630 (since 623 has been assigned)
-> 
->  tests/generic/630     | 105 ++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/630.out |   4 ++
->  tests/generic/group   |   1 +
->  3 files changed, 110 insertions(+)
->  create mode 100755 tests/generic/630
->  create mode 100644 tests/generic/630.out
-> 
-> diff --git a/tests/generic/630 b/tests/generic/630
-> new file mode 100755
-> index 00000000..7a04b899
-> --- /dev/null
-> +++ b/tests/generic/630
-> @@ -0,0 +1,105 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +
-> +#
-> +# FSQA Test No. 630
-> +#
-> +# AIO/DIO stress test
-> +# Run random AIO/DIO activity on an file system with unwritten regions
-> +#
-> +# This test verifies that the an unwritten extent is properly marked
-> +# as written after writing into it.
-> +#
-> +# There was a hard-to-hit bug which would occasionally trigger with
-> +# ext4 for which this test was a reproducer.  This has been fixed
-> +# after moving ext4 to use iomap for Direct I/O's, although as of this
-> +# writing, there are still some occasional failures on ext4 when block
-> +# size < page size.
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +fio_config=$tmp.fio
-> +fio_out=$tmp.fio.out
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +    rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +_supported_fs generic
-> +_require_test
-> +_require_scratch
-> +_require_odirect
-> +_require_aio
-> +_require_block_device $SCRATCH_DEV
-> +
-> +NUM_JOBS=$((4*LOAD_FACTOR))
-> +BLK_DEV_SIZE=`blockdev --getsz $SCRATCH_DEV`
-> +FILE_SIZE=$(((BLK_DEV_SIZE * 512) * 3 / 4))
-> +
-> +max_file_size=$((5 * 1024 * 1024 * 1024))
-> +if [ $max_file_size -lt $FILE_SIZE ]; then
-> +	FILE_SIZE=$max_file_size
-> +fi
-> +SIZE=$((FILE_SIZE / 2))
-> +
-> +cat >$fio_config <<EOF
-> +###########
-> +# $seq test fio activity
-> +# Filenames derived from jobsname and jobid like follows:
-> +# ${JOB_NAME}.${JOB_ID}.${ITERATION_ID}
-> +[global]
-> +ioengine=libaio
-> +bs=128k
-> +directory=${SCRATCH_MNT}
-> +filesize=${FILE_SIZE}
-> +size=${FILE_SIZE}
-> +io_size=${SIZE}
-> +iodepth=$((128*$LOAD_FACTOR))
-> +fallocate=native
-> +
-> +# Perform direct aio and verify data
-> +# This test case should check use-after-free issues
-> +[aio-dio-verifier]
-> +numjobs=1
-> +verify=crc32c-intel
-> +verify_fatal=1
-> +verify_dump=1
-> +verify_backlog=1024
-> +verify_async=4
-> +direct=1
-> +random_generator=lfsr
-> +blocksize_range=4k-8200k
+Regression test to verify that creating a series of detached mounts,
+attaching them to the filesystem, and unmounting them does not trigger an
+integer overflow in ns->mounts causing the kernel to block any new mounts in
+count_mounts() and returning ENOSPC because it falsely assumes that the
+maximum number of mounts in the mount namespace has been reached, i.e. it
+thinks it can't fit the new mounts into the mount namespace anymore.
 
-Something I hadn't noticed before this got committed -- setting the
-maximum blocksize to 8200k and the iodepth to a multiple of 128 means
-that fio will allocate an 8200k buffer per iodepth.  Given that the
-iodepth is (128 * LOAD_FACTOR), this test therefore requires (1GB *
-LOAD_FACTOR) memory.  On my testing VMs which have a generous 1200M of
-memory, this causes the oom killer to zap fio, which in turn causes the
-test to fail due to the SIGKILL being reported in the golden output.
+The test is written in a way that it will leave the host's mount
+namespace intact so we are sure to never make the host's mount namespace
+unuseable!
 
-Is it necessary to allocate 8MB of memory per io thread?  Given that
-this is a regression test to probe a bug in ext4's unwritten extent
-conversion I'm loath to touch it too much, but it seems to me that a
-smaller blocksize would stress the extent mapping structures harder and
-reduce the memory requirements at the same time.
+Link: https://git.kernel.org/torvalds/c/ee2e3f50629f17b0752b55b2566c15ce8dafb557
+Cc: Christoph Hellwig <hch@lst.de>
+Cc: David Howells <dhowells@redhat.com>
+Signed-off-by: Christian Brauner <christian.brauner@ubuntu.com>
+---
+/* v1 */
+patch not present
 
---D
+/* v2 */
+patch not present
 
-> +rw=randwrite
-> +filename=test-file
-> +
-> +EOF
-> +
-> +rm -f $seqres.full
-> +
-> +_require_fio $fio_config
-> +_require_xfs_io_command "falloc"
-> +
-> +_scratch_mkfs >> $seqres.full 2>&1
-> +_scratch_mount
-> +
-> +echo ""
-> +echo "Run fio with random aio-dio pattern"
-> +echo ""
-> +cat $fio_config >> $seqres.full
-> +$FIO_PROG $fio_config --output=$fio_out
-> +cat $fio_out >> $seqres.full
-> +
-> +status=0
-> +exit
-> diff --git a/tests/generic/630.out b/tests/generic/630.out
-> new file mode 100644
-> index 00000000..7f3adb50
-> --- /dev/null
-> +++ b/tests/generic/630.out
-> @@ -0,0 +1,4 @@
-> +QA output created by 630
-> +
-> +Run fio with random aio-dio pattern
-> +
-> diff --git a/tests/generic/group b/tests/generic/group
-> index 84db3789..1ff896a1 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -628,3 +628,4 @@
->  623 auto quick shutdown
->  624 auto quick verity
->  625 auto quick verity
-> +630 aio rw stress
-> -- 
-> 2.30.0
-> 
+/* v3 */
+patch not present
+
+/* v4 */
+patch not present
+
+/* v5 */
+patch not present
+
+/* v6 */
+patch not present
+
+/* v7 */
+patch not present
+
+/* v8 */
+patch introduced
+
+/* v9 */
+- Christian Brauner <christian.brauner@ubuntu.com>:
+  - Rebased on current master.
+---
+ .gitignore                        |   1 +
+ src/Makefile                      |   3 +-
+ src/detached_mounts_propagation.c | 252 ++++++++++++++++++++++++++++++
+ tests/generic/631                 |  41 +++++
+ tests/generic/631.out             |   2 +
+ tests/generic/group               |   1 +
+ 6 files changed, 299 insertions(+), 1 deletion(-)
+ create mode 100644 src/detached_mounts_propagation.c
+ create mode 100644 tests/generic/631
+ create mode 100644 tests/generic/631.out
+
+diff --git a/.gitignore b/.gitignore
+index f3bc0a4f..72bd40a0 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -62,6 +62,7 @@
+ /src/cloner
+ /src/dbtest
+ /src/deduperace
++/src/detached_mounts_propagation
+ /src/devzero
+ /src/dio-interleaved
+ /src/dio-invalidate-cache
+diff --git a/src/Makefile b/src/Makefile
+index 3d729a34..99019e6e 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -29,7 +29,8 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+ 	attr-list-by-handle-cursor-test listxattr dio-interleaved t_dir_type \
+ 	dio-invalidate-cache stat_test t_encrypted_d_revalidate \
+ 	attr_replace_test swapon mkswap t_attr_corruption t_open_tmpfiles \
+-	fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail
++	fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail \
++	detached_mounts_propagation
+ 
+ SUBDIRS = log-writes perf
+ 
+diff --git a/src/detached_mounts_propagation.c b/src/detached_mounts_propagation.c
+new file mode 100644
+index 00000000..4a588e46
+--- /dev/null
++++ b/src/detached_mounts_propagation.c
+@@ -0,0 +1,252 @@
++/* SPDX-License-Identifier: LGPL-2.1+ */
++/*
++ * Copyright (c) 2021 Christian Brauner <christian.brauner@ubuntu.com>
++ * All Rights Reserved.
++ *
++ * Regression test to verify that creating a series of detached mounts,
++ * attaching them to the filesystem, and unmounting them does not trigger an
++ * integer overflow in ns->mounts causing the kernel to block any new mounts in
++ * count_mounts() and returning ENOSPC because it falsely assumes that the
++ * maximum number of mounts in the mount namespace has been reached, i.e. it
++ * thinks it can't fit the new mounts into the mount namespace anymore.
++ */
++
++#include <errno.h>
++#include <fcntl.h>
++#include <getopt.h>
++#include <limits.h>
++#include <sched.h>
++#include <stdbool.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <sys/mount.h>
++#include <sys/stat.h>
++#include <sys/syscall.h>
++#include <sys/types.h>
++#include <unistd.h>
++
++/* open_tree() */
++#ifndef OPEN_TREE_CLONE
++#define OPEN_TREE_CLONE 1
++#endif
++
++#ifndef OPEN_TREE_CLOEXEC
++#define OPEN_TREE_CLOEXEC O_CLOEXEC
++#endif
++
++#ifndef __NR_open_tree
++	#if defined __alpha__
++		#define __NR_open_tree 538
++	#elif defined _MIPS_SIM
++		#if _MIPS_SIM == _MIPS_SIM_ABI32	/* o32 */
++			#define __NR_open_tree 4428
++		#endif
++		#if _MIPS_SIM == _MIPS_SIM_NABI32	/* n32 */
++			#define __NR_open_tree 6428
++		#endif
++		#if _MIPS_SIM == _MIPS_SIM_ABI64	/* n64 */
++			#define __NR_open_tree 5428
++		#endif
++	#elif defined __ia64__
++		#define __NR_open_tree (428 + 1024)
++	#else
++		#define __NR_open_tree 428
++	#endif
++#endif
++
++/* move_mount() */
++#ifndef MOVE_MOUNT_F_EMPTY_PATH
++#define MOVE_MOUNT_F_EMPTY_PATH 0x00000004 /* Empty from path permitted */
++#endif
++
++#ifndef __NR_move_mount
++	#if defined __alpha__
++		#define __NR_move_mount 539
++	#elif defined _MIPS_SIM
++		#if _MIPS_SIM == _MIPS_SIM_ABI32	/* o32 */
++			#define __NR_move_mount 4429
++		#endif
++		#if _MIPS_SIM == _MIPS_SIM_NABI32	/* n32 */
++			#define __NR_move_mount 6429
++		#endif
++		#if _MIPS_SIM == _MIPS_SIM_ABI64	/* n64 */
++			#define __NR_move_mount 5429
++		#endif
++	#elif defined __ia64__
++		#define __NR_move_mount (428 + 1024)
++	#else
++		#define __NR_move_mount 429
++	#endif
++#endif
++
++static inline int sys_open_tree(int dfd, const char *filename, unsigned int flags)
++{
++	return syscall(__NR_open_tree, dfd, filename, flags);
++}
++
++static inline int sys_move_mount(int from_dfd, const char *from_pathname, int to_dfd,
++				 const char *to_pathname, unsigned int flags)
++{
++	return syscall(__NR_move_mount, from_dfd, from_pathname, to_dfd, to_pathname, flags);
++}
++
++static bool is_shared_mountpoint(const char *path)
++{
++	bool shared = false;
++	FILE *f = NULL;
++	char *line = NULL;
++	int i;
++	size_t len = 0;
++
++	f = fopen("/proc/self/mountinfo", "re");
++	if (!f)
++		return 0;
++
++	while (getline(&line, &len, f) > 0) {
++		char *slider1, *slider2;
++
++		for (slider1 = line, i = 0; slider1 && i < 4; i++)
++			slider1 = strchr(slider1 + 1, ' ');
++
++		if (!slider1)
++			continue;
++
++		slider2 = strchr(slider1 + 1, ' ');
++		if (!slider2)
++			continue;
++
++		*slider2 = '\0';
++		if (strcmp(slider1 + 1, path) == 0) {
++			/* This is the path. Is it shared? */
++			slider1 = strchr(slider2 + 1, ' ');
++			if (slider1 && strstr(slider1, "shared:")) {
++				shared = true;
++				break;
++			}
++		}
++	}
++	fclose(f);
++	free(line);
++
++	return shared;
++}
++
++static void usage(void)
++{
++	const char *text = "mount-new [--recursive] <base-dir>\n";
++	fprintf(stderr, "%s", text);
++	_exit(EXIT_SUCCESS);
++}
++
++#define exit_usage(format, ...)                              \
++	({                                                   \
++		fprintf(stderr, format "\n", ##__VA_ARGS__); \
++		usage();                                     \
++	})
++
++#define exit_log(format, ...)                                \
++	({                                                   \
++		fprintf(stderr, format "\n", ##__VA_ARGS__); \
++		exit(EXIT_FAILURE);                          \
++	})
++
++static const struct option longopts[] = {
++	{"help",	no_argument,		0,	'a'},
++	{ NULL,		no_argument,		0,	 0 },
++};
++
++int main(int argc, char *argv[])
++{
++	int exit_code = EXIT_SUCCESS, index = 0;
++	int dfd, fd_tree, new_argc, ret;
++	char *base_dir;
++	char *const *new_argv;
++	char target[PATH_MAX];
++
++	while ((ret = getopt_long_only(argc, argv, "", longopts, &index)) != -1) {
++		switch (ret) {
++		case 'a':
++			/* fallthrough */
++		default:
++			usage();
++		}
++	}
++
++	new_argv = &argv[optind];
++	new_argc = argc - optind;
++	if (new_argc < 1)
++		exit_usage("Missing base directory\n");
++	base_dir = new_argv[0];
++
++	if (*base_dir != '/')
++		exit_log("Please specify an absolute path");
++
++	/* Ensure that target is a shared mountpoint. */
++	if (!is_shared_mountpoint(base_dir))
++		exit_log("Please ensure that \"%s\" is a shared mountpoint", base_dir);
++
++	ret = unshare(CLONE_NEWNS);
++	if (ret < 0)
++		exit_log("%m - Failed to create new mount namespace");
++
++	ret = mount(NULL, base_dir, NULL, MS_REC | MS_SHARED, NULL);
++	if (ret < 0)
++		exit_log("%m - Failed to make base_dir shared mountpoint");
++
++	dfd = open(base_dir, O_RDONLY | O_DIRECTORY | O_CLOEXEC);
++	if (dfd < 0)
++		exit_log("%m - Failed to open base directory \"%s\"", base_dir);
++
++	ret = mkdirat(dfd, "detached-move-mount", 0755);
++	if (ret < 0)
++		exit_log("%m - Failed to create required temporary directories");
++
++	ret = snprintf(target, sizeof(target), "%s/detached-move-mount", base_dir);
++	if (ret < 0 || (size_t)ret >= sizeof(target))
++		exit_log("%m - Failed to assemble target path");
++
++	/*
++	 * Having a mount table with 10000 mounts is already quite excessive
++	 * and shoult account even for weird test systems.
++	 */
++	for (size_t i = 0; i < 10000; i++) {
++		fd_tree = sys_open_tree(dfd, "detached-move-mount",
++					OPEN_TREE_CLONE |
++					OPEN_TREE_CLOEXEC |
++					AT_EMPTY_PATH);
++		if (fd_tree < 0) {
++			if (errno == ENOSYS) /* New mount API not (fully) supported. */
++				break;
++
++			fprintf(stderr, "%m - Failed to open %d(detached-move-mount)", dfd);
++			exit_code = EXIT_FAILURE;
++			break;
++		}
++
++		ret = sys_move_mount(fd_tree, "", dfd, "detached-move-mount", MOVE_MOUNT_F_EMPTY_PATH);
++		if (ret < 0) {
++			if (errno == ENOSPC)
++				fprintf(stderr, "%m - Buggy mount counting");
++			else if (errno == ENOSYS) /* New mount API not (fully) supported. */
++				break;
++			else
++				fprintf(stderr, "%m - Failed to attach mount to %d(detached-move-mount)", dfd);
++			exit_code = EXIT_FAILURE;
++			break;
++		}
++		close(fd_tree);
++
++		ret = umount2(target, MNT_DETACH);
++		if (ret < 0) {
++			fprintf(stderr, "%m - Failed to unmount %s", target);
++			exit_code = EXIT_FAILURE;
++			break;
++		}
++	}
++
++	(void)unlinkat(dfd, "detached-move-mount", AT_REMOVEDIR);
++	close(dfd);
++
++	exit(exit_code);
++}
+diff --git a/tests/generic/631 b/tests/generic/631
+new file mode 100644
+index 00000000..e227c448
+--- /dev/null
++++ b/tests/generic/631
+@@ -0,0 +1,41 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0+
++#
++# Copyright (c) 2021 Christian Brauner <christian.brauner@ubuntu.com>
++# All Rights Reserved.
++#
++# FS QA Test No. 631
++#
++# Regression test to verify that creating a series of detached mounts,
++# attaching them to the filesystem, and unmounting them does not trigger an
++# integer overflow in ns->mounts causing the kernel to block any new mounts in
++# count_mounts() and returning ENOSPC because it falsely assumes that the
++# maximum number of mounts in the mount namespace has been reached, i.e. it
++# thinks it can't fit the new mounts into the mount namespace anymore.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++. ./common/rc
++
++rm -f $seqres.full
++
++_supported_fs generic
++
++$here/src/detached_mounts_propagation $TEST_DIR >> $seqres.full
++
++echo silence is golden
++status=$?
++exit
+diff --git a/tests/generic/631.out b/tests/generic/631.out
+new file mode 100644
+index 00000000..ce88f447
+--- /dev/null
++++ b/tests/generic/631.out
+@@ -0,0 +1,2 @@
++QA output created by 631
++silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index 7c7531d1..151f8af2 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -633,3 +633,4 @@
+ 628 auto quick rw clone
+ 629 auto quick rw copy_range
+ 630 auto quick rw dedupe clone
++631 auto quick mount
+-- 
+2.27.0
+
