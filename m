@@ -2,547 +2,200 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 351CEC433DB
-	for <linux-fstests@archiver.kernel.org>; Sun, 21 Mar 2021 14:52:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A7034C433C1
+	for <linux-fstests@archiver.kernel.org>; Sun, 21 Mar 2021 15:05:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E2A9B61494
-	for <linux-fstests@archiver.kernel.org>; Sun, 21 Mar 2021 14:52:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 720F96193A
+	for <linux-fstests@archiver.kernel.org>; Sun, 21 Mar 2021 15:05:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229955AbhCUOwC (ORCPT
+        id S230196AbhCUPFL (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 21 Mar 2021 10:52:02 -0400
-Received: from out20-110.mail.aliyun.com ([115.124.20.110]:36606 "EHLO
-        out20-110.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229815AbhCUOvp (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 21 Mar 2021 10:51:45 -0400
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07436294|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.246389-0.000106208-0.753505;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047202;MF=guan@eryu.me;NM=1;PH=DS;RN=5;RT=5;SR=0;TI=SMTPD_---.Jo2j6T8_1616338299;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.Jo2j6T8_1616338299)
-          by smtp.aliyun-inc.com(10.147.44.145);
-          Sun, 21 Mar 2021 22:51:40 +0800
-Date:   Sun, 21 Mar 2021 22:51:39 +0800
-From:   Eryu Guan <guan@eryu.me>
-To:     Christian Brauner <christian.brauner@ubuntu.com>
-Cc:     Christoph Hellwig <hch@lst.de>,
-        "Darrick J . Wong" <djwong@kernel.org>, fstests@vger.kernel.org,
-        David Howells <dhowells@redhat.com>
-Subject: Re: [PATCH v9 4/4] xfs/530: quotas on idmapped mounts
-Message-ID: <YFdde7kuMpPsd3Om@desktop>
-References: <20210316103627.2954121-1-christian.brauner@ubuntu.com>
- <20210316103627.2954121-5-christian.brauner@ubuntu.com>
+        Sun, 21 Mar 2021 11:05:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56608 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229784AbhCUPEk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 21 Mar 2021 11:04:40 -0400
+Received: from mail-wr1-x42c.google.com (mail-wr1-x42c.google.com [IPv6:2a00:1450:4864:20::42c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CC76EC061574
+        for <fstests@vger.kernel.org>; Sun, 21 Mar 2021 08:04:39 -0700 (PDT)
+Received: by mail-wr1-x42c.google.com with SMTP id k8so14033245wrc.3
+        for <fstests@vger.kernel.org>; Sun, 21 Mar 2021 08:04:39 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=message-id:date:from:to:subject:mime-version:content-disposition;
+        bh=fpKQ/XMp7q0bTBrakjH2LIhYfURY3OMMrGx/bZWNvts=;
+        b=CBRGuXd1fqrlkFmnkpt6tyLSlSE7mJXyEw1CEdo4NYxh86jNQtDm3LYgAOWiumu0bg
+         RZnYCM3yjlKp3IqYy7zj7v/UA+8/9r098XsWI0HfWDrUqtQnueX4vo5e1qiKxoCnu0mI
+         VgQ94xCNovoSAadD2n3UJZy5+EAK8hDebq9N1ulE6HXvC26pVMfy3yrg79AR+6ePqF3w
+         FiKmQpQ9NecpehUHNKt0LYRWv2OawTAikNtfxOmDPaPDzU84CDoF6WWdDWlqo9th9YTZ
+         lpwCB+dgT94eNwxdwQiUZ2ZHt/9ru0MOHPszNmpuaJ9/Yq8SBVDzuwnduFukln40BGt8
+         +NuA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:message-id:date:from:to:subject:mime-version
+         :content-disposition;
+        bh=fpKQ/XMp7q0bTBrakjH2LIhYfURY3OMMrGx/bZWNvts=;
+        b=RTEeNizMIVxpe/YQhsADlQift020xW4wmDrIrtJ/5HSE1d1nJlw32elolbm/IcYzWy
+         KkEFaKiKpF0uWHT3Sg5Oc7f8Iz03KGixSeyCicIPmUp+DplMwRvBN6gK5dcH2u33GXEt
+         43/zyd91a39Xw+zfgTnauYuckg4nPPVk39Gqgm8y+23/2sU84fPCEVBmkoQPIp2xBhEK
+         EpfWEI9n5OI1MY23mfvGTZfcyT+Cw4xl5uN+5QZ4rjtCBbGW/0Hbw9TSwQSO+e9IIoXw
+         nKnYdo6V/HiJ4/k1tMVh0eEoYzA2+5CtZ+xIt8dtvo2N1+/x/ywJ3An5DTJFky7E+8fB
+         wUCQ==
+X-Gm-Message-State: AOAM530hRKbIfsu9UdUfRAj+SoGu9ZqlJZ3GTCKd5kapd0bW0/9LQvrM
+        uJwjEHOKDcOpEPN3nJGgZE1FFZzMShV4Iw==
+X-Google-Smtp-Source: ABdhPJwKkLb0xn02u2ZY4DRXM0vWWjyk/92qG7WKOzBHWH6IrhJuovgxuuq5/SlATLAPYIVnb/xrkA==
+X-Received: by 2002:a5d:64af:: with SMTP id m15mr7435203wrp.231.1616339078087;
+        Sun, 21 Mar 2021 08:04:38 -0700 (PDT)
+Received: from localhost ([8.208.10.148])
+        by smtp.gmail.com with ESMTPSA id y205sm16511508wmc.18.2021.03.21.08.04.36
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 21 Mar 2021 08:04:37 -0700 (PDT)
+Message-ID: <60576085.1c69fb81.01e8.eedc@mx.google.com>
+Date:   Sun, 21 Mar 2021 23:04:32 +0800
+From:   Eryu Guan <guaneryu@gmail.com>
+To:     fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: master branch updated to c68a8f59924e
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="Ni1Ck6VXocGJ"
 Content-Disposition: inline
-In-Reply-To: <20210316103627.2954121-5-christian.brauner@ubuntu.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Mar 16, 2021 at 11:36:27AM +0100, Christian Brauner wrote:
-> This is basically a re-implementation of xfs/050 but each file creation
-> call is done through an idmapped mount which verifies that the semantics
-> are identical even when the mount is idmapped.
-> 
-> Cc: Christoph Hellwig <hch@lst.de>
-> Cc: Darrick J. Wong <djwong@kernel.org>
-> Cc: fstests@vger.kernel.org
-> Signed-off-by: Christian Brauner <christian.brauner@ubuntu.com>
-> ---
-> /* v1 */
-> patch not present
-> 
-> /* v2 */
-> patch not present
-> 
-> /* v3 */
-> patch not present
-> 
-> /* v4 */
-> patch not present
-> 
-> /* v5 */
-> patch not present
-> 
-> /* v6 */
-> patch not present
-> 
-> /* v7 */
-> patch not present
-> 
-> /* v8 */
-> patch introduced
-> 
-> /* v9 */
-> - Christian Brauner <christian.brauner@ubuntu.com>:
->   - Rebased onto current master.
-> ---
->  tests/xfs/530     | 274 ++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/530.out | 129 ++++++++++++++++++++++
->  tests/xfs/group   |   1 +
->  3 files changed, 404 insertions(+)
->  create mode 100644 tests/xfs/530
->  create mode 100644 tests/xfs/530.out
-> 
-> diff --git a/tests/xfs/530 b/tests/xfs/530
-> new file mode 100644
-> index 00000000..9e10c40d
-> --- /dev/null
-> +++ b/tests/xfs/530
-> @@ -0,0 +1,274 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0+
-> +#
-> +# Copyright (c) 2021 Christian Brauner <christian.brauner@ubuntu.com>
-> +# All Rights Reserved.
-> +#
-> +# FS QA Test No. 530
-> +#
-> +# Exercises basic XFS quota functionality
-> +#       uquota, gquota, uqnoenforce, gqnoenforce
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/quota
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	_scratch_unmount 2>/dev/null
-> +	rm -f $tmp.*
-> +}
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +# real QA test starts here
-> +_supported_fs xfs
-> +
-> +cp /dev/null $seqres.full
-> +chmod a+rwx $seqres.full	# arbitrary users will write here
-> +
-> +_require_scratch
-> +_require_xfs_quota
-> +_require_user fsgqa
-> +
-> +_scratch_mkfs >/dev/null 2>&1
-> +_scratch_mount
-> +bsize=$(_get_file_block_size $SCRATCH_MNT)
-> +_scratch_unmount
-> +
-> +bsoft=$(( 200 * $bsize ))
-> +bhard=$(( 1000 * $bsize ))
-> +isoft=4
-> +ihard=10
-> +
-> +_filter_report()
 
-Seems this is mostly copied from _filter_quota_report(), just remove the
-$id and $bsize check in the beginning, is it possible to re-use
-_filter_quota_report?
+--Ni1Ck6VXocGJ
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-> +{
-> +	tr -s '[:space:]' | \
-> +	perl -npe '
-> +		s/^\#'$id' /[NAME] /g;
-> +		s/^\#0 \d+ /[ROOT] 0 /g;
-> +		s/6 days/7 days/g' |
-> +	perl -npe '
-> +		$val = 0;
-> +		if ($ENV{'LARGE_SCRATCH_DEV'}) {
-> +			$val = $ENV{'NUM_SPACE_FILES'};
-> +		}
-> +		s/(^\[ROOT\] \S+ \S+ \S+ \S+ \[--------\] )(\S+)/$1@{[$2 - $val]}/g' |
-> +	sed -e 's/ 65535 \[--------\]/ 00 \[--------\]/g' |
-> +	perl -npe '
-> +		s|^(.*?) (\d+) (\d+) (\d+)|$1 @{[$2 * 1024 /'$bsize']} @{[$3 * 1024 /'$bsize']} @{[$4 * 1024 /'$bsize']}|'
-> +}
-> +
-> +# The actual point at which limit enforcement takes place for the
-> +# hard block limit is variable depending on filesystem blocksize,
-> +# and iosize.  What we want to test is that the limit is enforced
-> +# (ie. blksize less than limit but not unduly less - ~85% is kind)
-> +# nowadays we actually get much closer to the limit before EDQUOT.
-> +#
-> +_filter_and_check_blks()
-> +{
-> +	perl -npe '
-> +		if (/^\#'$id'\s+(\d+)/ && '$enforce') {
-> +			$maximum = '$bhard';
-> +			$minimum = '$bhard' * 85/100;
-> +			$used = $1 * 1024;
-> +			if (($used < $minimum || $used > $maximum) && '$noextsz') {
-> +				printf(" URK %d: %d is out of range! [%d,%d]\n",
-> +					'$id', $used, $minimum, $maximum);
-> +			}
-> +			s/^(\#'$id'\s+)(\d+)/\1 =OK=/g;
-> +		}
-> +	' | _filter_report
-> +}
-> +
-> +_qsetup()
-> +{
-> +	opt=$1
-> +	enforce=0
-> +	if [ $opt = "u" -o $opt = "uno" ]; then
-> +		type=u
-> +		eval `_choose_uid`
-> +	elif [ $opt = "g" -o $opt = "gno" ]; then
-> +		type=g
-> +		eval `_choose_gid`
-> +	elif [ $opt = "p" -o $opt = "pno" ]; then
-> +		type=p
-> +		eval `_choose_prid`
-> +	fi
-> +	[ $opt = "u" -o $opt = "g" -o $opt = "p" ] && enforce=1
-> +
-> +	echo "Using type=$type id=$id" >> $seqres.full
-> +}
+Hi all,
 
-And above two functions are copied from xfs/050 and xfs/299, could you
-please re-factor them into a common helper so they could be shared by
-tests?
+The master branch of the xfstests repository at:
 
-> +
-> +_mount_idmapped()
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-Seems this could be made into a generic _scratch_mount_idmapped()
-helper.
+have just been updated. This update mainly pulls in xfs inode fork extent count
+overflow detection test from Chandan Babu R, also the metadump improvements
+from Darrick J. Wong. Many thanks to Allison Henderson for helping review the
+patches!
 
-> +{
-> +	if [ "$type" == "u" ]; then
-> +		# This means root will be able to create files as uid %id in
-> +		# the underlying filesystem by going through the idmapped mount.
-> +		$here/src/idmapped-mounts/mount-idmapped --map-mount u:0:$id:1 \
-> +							 --map-mount u:$id:0:1 \
-> +							 --map-mount g:0:0:1 \
-> +							 "$SCRATCH_MNT" "$SCRATCH_MNT" || _fail "mount-idmapped failed"
-> +	else
-> +		# This means root will be able to create files as gid %id in
-> +		# the underlying filesystem by going through the idmapped mount.
-> +		$here/src/idmapped-mounts/mount-idmapped --map-mount g:0:$id:1 \
-> +							 --map-mount g:$id:0:1 \
-> +							 --map-mount u:0:0:1 \
-> +							 "$SCRATCH_MNT" "$SCRATCH_MNT" || _fail "mount-idmapped failed"
-> +	fi
-> +}
-> +
-> +_umount_idmapped()
-
-And turn this into _scratch_umount_idmapped()
-
-> +{
-> +	# ls -al "$SCRATCH_MNT"
-
-Could be removed?
-
-> +	umount -l -q "${SCRATCH_MNT}" >/dev/null 2>&1
-
-s/umount/$UMOUNT_PROG/. And it'd be good to add some comments to desribe
-why lazy umount is needed.
-
-> +	# ls -al "$SCRATCH_MNT"
-
-Could be removed?
-
-> +}
-> +
-> +_exercise()
-
-Remove the leading "_" for local functions.
+There're also two new tests for btrfs, and btrfs/233 currently fails with
+latest Linus tree.
 
 Thanks,
 Eryu
 
-> +{
-> +	_scratch_mkfs_xfs | _filter_mkfs 2>$tmp.mkfs
-> +	cat $tmp.mkfs >>$seqres.full
-> +
-> +	# keep the blocksize and data size for dd later
-> +	. $tmp.mkfs
-> +
-> +	_qmount
-> +
-> +	# Figure out whether we're doing large allocations
-> +	# (bail out if they're so large they stuff the test up)
-> +	_test_inode_flag extsz-inherit $SCRATCH_MNT
-> +	noextsz=$?
-> +	extsize=`_test_inode_extsz $SCRATCH_MNT`
-> +	[ $extsize -ge 512000 ] && \
-> +		_notrun "Extent size hint is too large ($extsize bytes)"
-> +
-> +	_qsetup $1
-> +
-> +	echo "Using type=$type id=$id" >>$seqres.full
-> +
-> +	$XFS_QUOTA_PROG -x -c "warn -$type 65535 -d" $SCRATCH_DEV
-> +
-> +	echo
-> +	echo "*** report no quota settings" | tee -a $seqres.full
-> +	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-> +		-c "repquota -birnN -$type" $SCRATCH_DEV |
-> +		_filter_report | LC_COLLATE=POSIX sort -ru
-> +
-> +	echo
-> +	echo "*** report initial settings" | tee -a $seqres.full
-> +	_mount_idmapped
-> +	_file_as_id $SCRATCH_MNT/initme 0 $type 1024 0
-> +	_umount_idmapped
-> +	echo "ls -l $SCRATCH_MNT" >>$seqres.full
-> +	ls -l $SCRATCH_MNT >>$seqres.full
-> +	$XFS_QUOTA_PROG -D $tmp.projects -P $temp.projid -x \
-> +		-c "limit -$type bsoft=${bsoft} bhard=${bhard} $id" \
-> +		-c "limit -$type isoft=$isoft ihard=$ihard $id" \
-> +		$SCRATCH_DEV
-> +	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-> +		-c "repquota -birnN -$type" $SCRATCH_DEV |
-> +		_filter_report | LC_COLLATE=POSIX sort -ru
-> +
-> +	echo
-> +	echo "*** push past the soft inode limit" | tee -a $seqres.full
-> +	_mount_idmapped
-> +	_file_as_id $SCRATCH_MNT/softie1 0 $type 1024 0
-> +	_file_as_id $SCRATCH_MNT/softie2 0 $type 1024 0
-> +	_file_as_id $SCRATCH_MNT/softie3 0 $type 1024 0
-> +	_file_as_id $SCRATCH_MNT/softie4 0 $type 1024 0
-> +	_umount_idmapped
-> +	_qmount
-> +	$XFS_QUOTA_PROG -x -c "warn -i -$type 0 $id" $SCRATCH_DEV
-> +	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-> +		-c "repquota -birnN -$type" $SCRATCH_DEV |
-> +		_filter_report | LC_COLLATE=POSIX sort -ru
-> +
-> +	echo
-> +	echo "*** push past the soft block limit" | tee -a $seqres.full
-> +	_mount_idmapped
-> +	_file_as_id $SCRATCH_MNT/softie 0 $type $bsize 300
-> +	_umount_idmapped
-> +	_qmount
-> +	$XFS_QUOTA_PROG -x -c "warn -i -$type 0 $id" \
-> +		-c "warn -b -$type 0 $id" $SCRATCH_DEV
-> +	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-> +		-c "repquota -birnN -$type" $SCRATCH_DEV |
-> +		_filter_report | LC_COLLATE=POSIX sort -ru
-> +
-> +	echo
-> +	# Note: for quota accounting (not enforcement), EDQUOT is not expected
-> +	echo "*** push past the hard inode limit (expect EDQUOT)" | tee -a $seqres.full
-> +	for i in 1 2 3 4 5 6 7 8 9 10 11 12
-> +	do
-> +		_mount_idmapped
-> +		_file_as_id $SCRATCH_MNT/hard$i 0 $type 1024 0
-> +		_umount_idmapped
-> +	done
-> +	_qmount
-> +	$XFS_QUOTA_PROG -x  -c "warn -b -$type 0 $id" \
-> +		-c "warn -i -$type 0 $id" $SCRATCH_DEV
-> +	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-> +		-c "repquota -birnN -$type" $SCRATCH_DEV |
-> +		_filter_report | LC_COLLATE=POSIX sort -ru
-> +
-> +	echo
-> +	# Note: for quota accounting (not enforcement), EDQUOT is not expected
-> +	echo "*** push past the hard block limit (expect EDQUOT)" | tee -a $seqres.full
-> +	_mount_idmapped
-> +	_file_as_id $SCRATCH_MNT/softie 0 $type $bsize 1200
-> +	_umount_idmapped
-> +	echo "ls -l $SCRATCH_MNT" >>$seqres.full
-> +	ls -l $SCRATCH_MNT >>$seqres.full
-> +	_qmount
-> +	$XFS_QUOTA_PROG -x -c "warn -b -$type 0 $id" $SCRATCH_DEV
-> +	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-> +		-c "repquota -birnN -$type" $SCRATCH_DEV |
-> +		_filter_and_check_blks | LC_COLLATE=POSIX sort -ru
-> +
-> +	echo
-> +	echo "*** unmount"
-> +	_scratch_unmount
-> +
-> +}
-> +
-> +cat >$tmp.projects <<EOF
-> +1:$SCRATCH_MNT
-> +EOF
-> +
-> +cat >$tmp.projid <<EOF
-> +root:0
-> +scrach:1
-> +EOF
-> +
-> +projid_file="$tmp.projid"
-> +
-> +echo "*** user"
-> +_qmount_option "uquota"
-> +_exercise u
-> +
-> +echo "*** group"
-> +_qmount_option "gquota"
-> +_exercise g
-> +
-> +echo "*** uqnoenforce"
-> +_qmount_option "uqnoenforce"
-> +_exercise uno
-> +
-> +echo "*** gqnoenforce"
-> +_qmount_option "gqnoenforce"
-> +_exercise gno
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/530.out b/tests/xfs/530.out
-> new file mode 100644
-> index 00000000..39266b38
-> --- /dev/null
-> +++ b/tests/xfs/530.out
-> @@ -0,0 +1,129 @@
-> +QA output created by 530
-> +*** user
-> +meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
-> +data     = bsize=XXX blocks=XXX, imaxpct=PCT
-> +         = sunit=XXX swidth=XXX, unwritten=X
-> +naming   =VERN bsize=XXX
-> +log      =LDEV bsize=XXX blocks=XXX
-> +realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
-> +
-> +*** report no quota settings
-> +[ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> +
-> +*** report initial settings
-> +[ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> +[NAME] 0 200 1000 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
-> +
-> +*** push past the soft inode limit
-> +[ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> +[NAME] 0 200 1000 00 [--------] 5 4 10 00 [7 days] 0 0 0 00 [--------]
-> +
-> +*** push past the soft block limit
-> +[ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> +[NAME] 300 200 1000 00 [7 days] 6 4 10 00 [7 days] 0 0 0 00 [--------]
-> +
-> +*** push past the hard inode limit (expect EDQUOT)
-> +[ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> +[NAME] 300 200 1000 00 [7 days] 10 4 10 00 [7 days] 0 0 0 00 [--------]
-> +
-> +*** push past the hard block limit (expect EDQUOT)
-> +[ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> +[NAME] =OK= 200 1000 0 [7 days] 10 4 10 00 [7 days] 0 0 0 00 [--------]
-> +
-> +*** unmount
-> +*** group
-> +meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
-> +data     = bsize=XXX blocks=XXX, imaxpct=PCT
-> +         = sunit=XXX swidth=XXX, unwritten=X
-> +naming   =VERN bsize=XXX
-> +log      =LDEV bsize=XXX blocks=XXX
-> +realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
-> +
-> +*** report no quota settings
-> +[ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> +
-> +*** report initial settings
-> +[ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> +[NAME] 0 200 1000 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
-> +
-> +*** push past the soft inode limit
-> +[ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> +[NAME] 0 200 1000 00 [--------] 5 4 10 00 [7 days] 0 0 0 00 [--------]
-> +
-> +*** push past the soft block limit
-> +[ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> +[NAME] 300 200 1000 00 [7 days] 6 4 10 00 [7 days] 0 0 0 00 [--------]
-> +
-> +*** push past the hard inode limit (expect EDQUOT)
-> +[ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> +[NAME] 300 200 1000 00 [7 days] 10 4 10 00 [7 days] 0 0 0 00 [--------]
-> +
-> +*** push past the hard block limit (expect EDQUOT)
-> +[ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> +[NAME] =OK= 200 1000 0 [7 days] 10 4 10 00 [7 days] 0 0 0 00 [--------]
-> +
-> +*** unmount
-> +*** uqnoenforce
-> +meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
-> +data     = bsize=XXX blocks=XXX, imaxpct=PCT
-> +         = sunit=XXX swidth=XXX, unwritten=X
-> +naming   =VERN bsize=XXX
-> +log      =LDEV bsize=XXX blocks=XXX
-> +realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
-> +
-> +*** report no quota settings
-> +[ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> +
-> +*** report initial settings
-> +[ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> +[NAME] 0 200 1000 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
-> +
-> +*** push past the soft inode limit
-> +[ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> +[NAME] 0 200 1000 00 [--------] 5 4 10 00 [--------] 0 0 0 00 [--------]
-> +
-> +*** push past the soft block limit
-> +[ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> +[NAME] 300 200 1000 00 [--------] 6 4 10 00 [--------] 0 0 0 00 [--------]
-> +
-> +*** push past the hard inode limit (expect EDQUOT)
-> +[ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> +[NAME] 300 200 1000 00 [--------] 18 4 10 00 [--none--] 0 0 0 00 [--------]
-> +
-> +*** push past the hard block limit (expect EDQUOT)
-> +[ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> +[NAME] 1200 200 1000 00 [--none--] 18 4 10 00 [--none--] 0 0 0 00 [--------]
-> +
-> +*** unmount
-> +*** gqnoenforce
-> +meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
-> +data     = bsize=XXX blocks=XXX, imaxpct=PCT
-> +         = sunit=XXX swidth=XXX, unwritten=X
-> +naming   =VERN bsize=XXX
-> +log      =LDEV bsize=XXX blocks=XXX
-> +realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
-> +
-> +*** report no quota settings
-> +[ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> +
-> +*** report initial settings
-> +[ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> +[NAME] 0 200 1000 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
-> +
-> +*** push past the soft inode limit
-> +[ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> +[NAME] 0 200 1000 00 [--------] 5 4 10 00 [--------] 0 0 0 00 [--------]
-> +
-> +*** push past the soft block limit
-> +[ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> +[NAME] 300 200 1000 00 [--------] 6 4 10 00 [--------] 0 0 0 00 [--------]
-> +
-> +*** push past the hard inode limit (expect EDQUOT)
-> +[ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> +[NAME] 300 200 1000 00 [--------] 18 4 10 00 [--none--] 0 0 0 00 [--------]
-> +
-> +*** push past the hard block limit (expect EDQUOT)
-> +[ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> +[NAME] 1200 200 1000 00 [--none--] 18 4 10 00 [--none--] 0 0 0 00 [--------]
-> +
-> +*** unmount
-> diff --git a/tests/xfs/group b/tests/xfs/group
-> index fb4599ca..a536d01a 100644
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
-> @@ -506,3 +506,4 @@
->  527 auto quick quota
->  528 auto quick rw realtime
->  529 auto quick quota
-> +530 auto quick quota
-> -- 
-> 2.27.0
+The new head of the master branch is commit:
+
+c68a8f59924e xfs: Stress test with bmap_alloc_minlen_extent error tag enabled
+
+New commits:
+
+Chandan Babu R (13):
+      [1066be0dd6f2] _check_xfs_filesystem: sync fs before running scrub
+      [b0b379e77db7] common/xfs: Add a helper to get an inode fork's extent count
+      [c25df583e373] common/xfs: Add helper to obtain fsxattr field value
+      [9f8584434b58] xfs: Check for extent overflow when trivally adding a new extent
+      [d9d2de11ef48] xfs: Check for extent overflow when growing realtime bitmap/summary inodes
+      [9ffcdd4c7810] xfs: Check for extent overflow when punching a hole
+      [224a6745873e] xfs: Check for extent overflow when adding/removing xattrs
+      [b721a2174344] xfs: Check for extent overflow when adding/removing dir entries
+      [490a8d56fba9] xfs: Check for extent overflow when writing to unwritten extent
+      [7425ee44da99] xfs: Check for extent overflow when moving extent from cow to data fork
+      [3ab311f592f6] xfs: Check for extent overflow when remapping an extent
+      [200ee9e93b84] xfs: Check for extent overflow when swapping extents
+      [c68a8f59924e] xfs: Stress test with bmap_alloc_minlen_extent error tag enabled
+
+Darrick J. Wong (4):
+      [d4811ae1ff90] common: capture metadump output if xfs filesystem check fails
+      [45b9734b9816] common: move _scratch_metadump to common/xfs
+      [b7860b30cee7] populate: support compressing metadumps
+      [9fb30a9500c1] common: capture qcow2 dumps of corrupt ext* filesystems
+
+Filipe Manana (3):
+      [40f8dc416af3] btrfs: test delayed subvolume deletion on mount and remount
+      [4a2683ce3e6d] btrfs: add test for cases when a dio write has to fallback to a buffered write
+      [7c476f1890c5] btrfs/232: fix umount failure due to fsstress still running
+
+Max Reitz (1):
+      [8275832d6782] common/rc: virtiofs does not support atime options
+
+Yang Xu (1):
+      [3d15d3fe85f9] src/chprojid_fail.c: Fix undefined compile error on old kernel
+
+
+Code Diffstat:
+
+ README              |   7 ++
+ common/config       |   1 +
+ common/populate     |  25 ++++++--
+ common/rc           |  35 ++++++----
+ common/xfs          | 103 +++++++++++++++++++++++++++--
+ src/chprojid_fail.c |   1 +
+ tests/btrfs/232     |   4 ++
+ tests/btrfs/233     | 152 +++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/233.out |   5 ++
+ tests/btrfs/234     |  64 ++++++++++++++++++
+ tests/btrfs/234.out |  21 ++++++
+ tests/btrfs/group   |   2 +
+ tests/xfs/129       |   2 +-
+ tests/xfs/234       |   2 +-
+ tests/xfs/253       |   2 +-
+ tests/xfs/284       |   4 +-
+ tests/xfs/291       |   2 +-
+ tests/xfs/336       |   2 +-
+ tests/xfs/432       |   2 +-
+ tests/xfs/503       |   8 +--
+ tests/xfs/529       | 171 ++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/529.out   |  20 ++++++
+ tests/xfs/530       | 124 +++++++++++++++++++++++++++++++++++
+ tests/xfs/530.out   |  11 ++++
+ tests/xfs/531       |  83 ++++++++++++++++++++++++
+ tests/xfs/531.out   |  19 ++++++
+ tests/xfs/532       | 139 +++++++++++++++++++++++++++++++++++++++
+ tests/xfs/532.out   |  18 ++++++
+ tests/xfs/533       | 182 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/533.out   |  17 +++++
+ tests/xfs/534       |  84 ++++++++++++++++++++++++
+ tests/xfs/534.out   |  11 ++++
+ tests/xfs/535       | 104 ++++++++++++++++++++++++++++++
+ tests/xfs/535.out   |  12 ++++
+ tests/xfs/536       |  81 +++++++++++++++++++++++
+ tests/xfs/536.out   |   8 +++
+ tests/xfs/537       | 105 ++++++++++++++++++++++++++++++
+ tests/xfs/537.out   |  13 ++++
+ tests/xfs/538       |  84 ++++++++++++++++++++++++
+ tests/xfs/538.out   |   7 ++
+ tests/xfs/group     |  10 +++
+ 41 files changed, 1712 insertions(+), 35 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
+
+--Ni1Ck6VXocGJ
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAmBXX+UACgkQJlKqKVyP
+52MhKw/+PbIB3IhN9YXKPLT+rOjLEDxqHG5SjJDRBzJ0lqgjTHb4p7jJdZfhZeVo
+yYEFfui6A2uZUg/uBC2R4/lZB9BXiTm9A/dLCndn57Lz7CgFLAujumax/7ToBiK9
+ekYXW98YHD+lR+IXy5WrwSs6Xb4LtRztJ4Ih2kDTaRAFv09XhdWmFbqm4EBijj8w
+XjVCAiPtQKYbKDmOrCsA3yJgiq48RG5p4XhtqlK33Oyhujd7zlYHeY9/C3SrPskS
+GvQfIPvRfIzhtXZkvT9J/fhm1PIQ+yshE+IAIE4AJVZDONB34FVpJ9xEEjXFmhPl
+cuOT4B37QjL4reNDINoblJRZ4KbQG1ssbzWEw0phlpSc4eZ4mRcW03NkU6+9ygXx
+EMuRsn7TPNZwR2MqLwp3LPfhbngckXRcAm9YGn0fE8bQN1faKoUUbUHWvbuv4EsJ
+tgWyYriY4HOGdbu3KKfJEfpCD8kGFM7YXjAR52CsCcG5goyY7PYBLFoNkrDk4uQV
+a5/UZ4Uh36X6q/xKxY+LKxlGZ4OQ8J971oUTkG1JualLPZmxngVBz23M+eFCIbKU
+MggLtpvizY15XSqwKz8R+/IOx2lKcWbknFAp6OQZ6GuL3oP8YSCvYPSzrc0EFBwz
+zc1y9V5DlNF+hZxoGPJWQ82v+tdwtnmQ6y6haLtUXhMdRGNdVtw=
+=Q+s0
+-----END PGP SIGNATURE-----
+
+--Ni1Ck6VXocGJ--
