@@ -2,117 +2,176 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4827AC433C1
-	for <linux-fstests@archiver.kernel.org>; Sun, 21 Mar 2021 13:14:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2C072C433C1
+	for <linux-fstests@archiver.kernel.org>; Sun, 21 Mar 2021 14:27:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id F2BC961946
-	for <linux-fstests@archiver.kernel.org>; Sun, 21 Mar 2021 13:14:08 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D39E161946
+	for <linux-fstests@archiver.kernel.org>; Sun, 21 Mar 2021 14:27:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229834AbhCUNNg (ORCPT
+        id S229993AbhCUO1E (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 21 Mar 2021 09:13:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32880 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229865AbhCUNNJ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 21 Mar 2021 09:13:09 -0400
-Received: from mail-wm1-x331.google.com (mail-wm1-x331.google.com [IPv6:2a00:1450:4864:20::331])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 927B8C061574;
-        Sun, 21 Mar 2021 06:13:08 -0700 (PDT)
-Received: by mail-wm1-x331.google.com with SMTP id g20so7972191wmk.3;
-        Sun, 21 Mar 2021 06:13:08 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=JUDymxwtSFHPVgruXaSnC6jMYF9w1F7+yx2+dobVyZs=;
-        b=HuidxJ+F1Zrw3v0bs0vQRAO11MELb2JwvFwZl8e1ZEO6iNF2Y4o3tqmXxmv1jeeG92
-         bCD3MKJft7Fy54zlIAQ8AA8S8nyBQJT2epRvKjhnPUMKu4uWI1H5khQW/PQ+ERnEgTSA
-         xdgF6aOoShvxB5f8A0xyvTRCS6wIbvu5g+9xieUxi+8XfuNY2FxOvgf9H1nZRGPImpl9
-         FJrKivC87/yBk2LWr3uUjrav+fgXc3k781Jehafo0V/OT+1X6F+MKuJKm9acfoQ5R881
-         xqYapLa+bH0u2VI/tBB2DA0E9iZIqe4z76LpjTvjUZN0TRwDeHQ7npdqI3YAmnGSqpnK
-         rqUg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=JUDymxwtSFHPVgruXaSnC6jMYF9w1F7+yx2+dobVyZs=;
-        b=YWK5yrDklP+zuE/+vMe7pu4rAD6d0DsX3synmwJlkYJwZZi2dAf15rMSKHkn1sdNjJ
-         /2z7EPtdfJIuAV2GCINIOMVTE066PiP/ymFqlHnXQgJECviY5ZQ1J93588c0yjDelrT1
-         x9v2oZZPE59pwnMkkqLmHboU4sMQ+5CSQMEzJJpnZe6Yo1CFFRKS9NCD8kf+tTzTVVKy
-         d0a3fgy14vFSYp0YHTVNnQcgbVa6ZtxfR+pfnkmOiJQDDkjxkTeoDlZ4XNVFsKdT1hBe
-         F7F7/BSOYVBn9zxB/0R+9CR2oXDDfEMe//4Wxkkw4NbHgD0bkwuepn4X5TRxV3IVb3wN
-         h8HA==
-X-Gm-Message-State: AOAM5309VxXi0tjQ8cfqvLuiHNvZVTOJ30lsMMWY8z40MikpvaBPpxDF
-        +AJYmpm3BIEogwhmTjSKsNY=
-X-Google-Smtp-Source: ABdhPJxM8Z9nC3zJlY99KJL6mU3eft1ZqI7Phs+GQt+wk9I95j99/YxnT4q20NB3LLaEO5hFsDRwYg==
-X-Received: by 2002:a1c:b789:: with SMTP id h131mr11907674wmf.106.1616332387306;
-        Sun, 21 Mar 2021 06:13:07 -0700 (PDT)
-Received: from localhost ([8.208.10.148])
-        by smtp.gmail.com with ESMTPSA id 12sm13276817wmw.43.2021.03.21.06.13.04
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 21 Mar 2021 06:13:05 -0700 (PDT)
-Date:   Sun, 21 Mar 2021 21:13:01 +0800
-From:   Eryu Guan <guaneryu@gmail.com>
-To:     fdmanana@kernel.org
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-        Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH] btrfs/232: fix umount failure due to fsstress still
- running
-Message-ID: <YFdGXfemIyoal44X@desktop>
-References: <024df0e67e78e0a77fedef4f6451eab6b26326b6.1616068024.git.fdmanana@suse.com>
+        Sun, 21 Mar 2021 10:27:04 -0400
+Received: from out20-99.mail.aliyun.com ([115.124.20.99]:51598 "EHLO
+        out20-99.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229840AbhCUO0k (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 21 Mar 2021 10:26:40 -0400
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07436641|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.00395815-0.000537027-0.995505;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047208;MF=guan@eryu.me;NM=1;PH=DS;RN=5;RT=5;SR=0;TI=SMTPD_---.Jo2Q.Z._1616336795;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.Jo2Q.Z._1616336795)
+          by smtp.aliyun-inc.com(10.147.42.16);
+          Sun, 21 Mar 2021 22:26:36 +0800
+Date:   Sun, 21 Mar 2021 22:26:35 +0800
+From:   Eryu Guan <guan@eryu.me>
+To:     Christian Brauner <christian.brauner@ubuntu.com>
+Cc:     Christoph Hellwig <hch@lst.de>,
+        "Darrick J . Wong" <djwong@kernel.org>, fstests@vger.kernel.org,
+        David Howells <dhowells@redhat.com>
+Subject: Re: [PATCH v9 0/4 REBASED] fstests: add idmapped mounts tests
+Message-ID: <YFdXmwkoZnN5uEH/@desktop>
+References: <20210316103627.2954121-1-christian.brauner@ubuntu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <024df0e67e78e0a77fedef4f6451eab6b26326b6.1616068024.git.fdmanana@suse.com>
+In-Reply-To: <20210316103627.2954121-1-christian.brauner@ubuntu.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Mar 18, 2021 at 11:48:15AM +0000, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
+On Tue, Mar 16, 2021 at 11:36:23AM +0100, Christian Brauner wrote:
+> Hey everyone,
 > 
-> We start a process that runs fsstress, then kill the process, wait for it
-> to die and then end the test, where we attempt to unmount the fs which
-> often fails because the fsstress subcommand started by the process is
-> still running and using the mount point. This results in a test failure:
-> 
->   btrfs/232 1s ... umount: /home/fdmanana/btrfs-tests/scratch_1: target is busy.
->   _check_btrfs_filesystem: filesystem on /dev/sdc is inconsistent
->   (see /home/fdmanana/git/hub/xfstests/results//btrfs/232.full for details)
-> 
-> Fix that by adding a trap to the writer() function.
-> 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> /* v9 */
+> Rebased onto current master.
+> Hopefully we can merge this soon so we can have regular testing asap and
+> the rebasing is getting a bit tedious too. ;)
 
-Thanks for the fix! I missed that in review..
+Sorry for the late review.. You don't have to rebase on every release if
+updating the test seq number is the only thing changed. Seq number
+conflicts all the time, usually I can fix it on commit.
+
+Patch 2 is missing from the list, maybe it's too big to post, could you
+please provide a git repo so I can pull from there?
+
+Some minor comments go to specific patch.
 
 Thanks,
 Eryu
 
-> ---
->  tests/btrfs/232 | 4 ++++
->  1 file changed, 4 insertions(+)
 > 
-> diff --git a/tests/btrfs/232 b/tests/btrfs/232
-> index b0a04a61..b9841410 100755
-> --- a/tests/btrfs/232
-> +++ b/tests/btrfs/232
-> @@ -32,6 +32,10 @@ _cleanup()
->  
->  writer()
->  {
-> +	# Wait for running fsstress subcommand before exitting so that
-> +	# mountpoint is not busy when we try to unmount it.
-> +	trap "wait; exit" SIGTERM
-> +
->  	while true; do
->  		args=`_scale_fsstress_args -p 20 -n 1000 $FSSTRESS_AVOID -d $SCRATCH_MNT/stressdir`
->  		$FSSTRESS_PROG $args >/dev/null 2>&1
+> ubuntu@f1-vm:~/src/git/xfstests$ sudo ./check generic/631
+> FSTYP         -- xfs (non-debug)
+> PLATFORM      -- Linux/x86_64 f1-vm 5.12.0-rc3-inode-helpers #343 SMP Mon Mar 15 12:57:02 UTC 2021
+> MKFS_OPTIONS  -- -f -bsize=4096 /dev/loop1
+> MOUNT_OPTIONS -- /dev/loop1 /mnt/scratch
+> 
+> generic/631 9s ...  11s
+> Ran: generic/631
+> Passed all 1 tests
+> 
+> ubuntu@f1-vm:~/src/git/xfstests$ sudo ./check generic/632
+> FSTYP         -- xfs (non-debug)
+> PLATFORM      -- Linux/x86_64 f1-vm 5.12.0-rc3-inode-helpers #343 SMP Mon Mar 15 12:57:02 UTC 2021
+> MKFS_OPTIONS  -- -f -bsize=4096 /dev/loop1
+> MOUNT_OPTIONS -- /dev/loop1 /mnt/scratch
+> 
+> generic/632      15s
+> Ran: generic/632
+> Passed all 1 tests
+> 
+> ubuntu@f1-vm:~/src/git/xfstests$ sudo ./check xfs/529
+> FSTYP         -- xfs (non-debug)
+> PLATFORM      -- Linux/x86_64 f1-vm 5.12.0-rc3-inode-helpers #343 SMP Mon Mar 15 12:57:02 UTC 2021
+> MKFS_OPTIONS  -- -f -bsize=4096 /dev/loop1
+> MOUNT_OPTIONS -- /dev/loop1 /mnt/scratch
+> 
+> xfs/529 25s ...  43s
+> Ran: xfs/529
+> Passed all 1 tests
+> 
+> ubuntu@f1-vm:~/src/git/xfstests$ sudo ./check xfs/530
+> FSTYP         -- xfs (non-debug)
+> PLATFORM      -- Linux/x86_64 f1-vm 5.12.0-rc3-inode-helpers #343 SMP Mon Mar 15 12:57:02 UTC 2021
+> MKFS_OPTIONS  -- -f -bsize=4096 /dev/loop1
+> MOUNT_OPTIONS -- /dev/loop1 /mnt/scratch
+> 
+> xfs/530  24s
+> Ran: xfs/530
+> Passed all 1 tests
+> 
+> /* v8 */
+> This adds the testsuite for idmapped mounts. It has been expanded quite
+> a bit too since the last version:
+> - Add a testcase to verify that detached mounts in the new mount api
+>   work correctly.
+> - Add a full testsuite for idmapped mounts.
+> - Add two quota tests verifying xfs behavior.
+> 
+> Sorry that it took so long to resend this testsuite but I had to chase
+> and fix a bug in the new mount API (completely independent of idmapped
+> mounts) before I could add quota tests because they would otherwise run
+> danger to render the host mount namespace unuseable due to that bug
+> (cf.  https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=d3110f256d126b44d34c1f662310cd295877c447)
+> All tests here pass for me on a kernel with idmapped mounts. The xfs
+> specific quota tests should go on top of the fixes that Darrick is
+> currently carrying for 5.12 and which he sent out a little while ago.
+> 
+> Thanks!
+> Christian
+> 
+> Christian Brauner (4):
+>   generic/631: add test for detached mount propagation
+>   generic/632: add fstests for idmapped mounts
+>   xfs/529: quotas and idmapped mounts
+>   xfs/530: quotas on idmapped mounts
+> 
+>  .gitignore                            |    3 +
+>  common/rc                             |   25 +
+>  configure.ac                          |    2 +
+>  include/builddefs.in                  |    1 +
+>  m4/Makefile                           |    1 +
+>  m4/package_libcap.m4                  |    4 +
+>  src/Makefile                          |    8 +-
+>  src/detached_mounts_propagation.c     |  189 +
+>  src/feature.c                         |   40 +-
+>  src/idmapped-mounts/Makefile          |   41 +
+>  src/idmapped-mounts/idmapped-mounts.c | 8627 +++++++++++++++++++++++++
+>  src/idmapped-mounts/missing.h         |  151 +
+>  src/idmapped-mounts/mount-idmapped.c  |  428 ++
+>  src/idmapped-mounts/utils.c           |  134 +
+>  src/idmapped-mounts/utils.h           |   30 +
+>  tests/generic/631                     |   41 +
+>  tests/generic/631.out                 |    2 +
+>  tests/generic/632                     |   42 +
+>  tests/generic/632.out                 |    2 +
+>  tests/generic/group                   |    2 +
+>  tests/xfs/529                         |  373 ++
+>  tests/xfs/529.out                     |  657 ++
+>  tests/xfs/530                         |  274 +
+>  tests/xfs/530.out                     |  129 +
+>  tests/xfs/group                       |    2 +
+>  25 files changed, 11203 insertions(+), 5 deletions(-)
+>  create mode 100644 m4/package_libcap.m4
+>  create mode 100644 src/detached_mounts_propagation.c
+>  create mode 100644 src/idmapped-mounts/Makefile
+>  create mode 100644 src/idmapped-mounts/idmapped-mounts.c
+>  create mode 100644 src/idmapped-mounts/missing.h
+>  create mode 100644 src/idmapped-mounts/mount-idmapped.c
+>  create mode 100644 src/idmapped-mounts/utils.c
+>  create mode 100644 src/idmapped-mounts/utils.h
+>  create mode 100644 tests/generic/631
+>  create mode 100644 tests/generic/631.out
+>  create mode 100644 tests/generic/632
+>  create mode 100644 tests/generic/632.out
+>  create mode 100644 tests/xfs/529
+>  create mode 100644 tests/xfs/529.out
+>  create mode 100644 tests/xfs/530
+>  create mode 100644 tests/xfs/530.out
+> 
+> 
+> base-commit: f6ddaf130d5b0817278afe441fdde52f464f321b
 > -- 
-> 2.28.0
+> 2.27.0
