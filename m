@@ -4,223 +4,146 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-16.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
-	autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CAAA4C433E0
-	for <linux-fstests@archiver.kernel.org>; Mon, 22 Mar 2021 17:57:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C51ECC433DB
+	for <linux-fstests@archiver.kernel.org>; Mon, 22 Mar 2021 18:55:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 91CA761992
-	for <linux-fstests@archiver.kernel.org>; Mon, 22 Mar 2021 17:57:44 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8CBFA619A3
+	for <linux-fstests@archiver.kernel.org>; Mon, 22 Mar 2021 18:55:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230139AbhCVR5M (ORCPT
+        id S229865AbhCVSyk (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 22 Mar 2021 13:57:12 -0400
-Received: from mail.kernel.org ([198.145.29.99]:51422 "EHLO mail.kernel.org"
+        Mon, 22 Mar 2021 14:54:40 -0400
+Received: from mail.kernel.org ([198.145.29.99]:37874 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229590AbhCVR4x (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 22 Mar 2021 13:56:53 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 094BD6196E;
-        Mon, 22 Mar 2021 17:56:53 +0000 (UTC)
+        id S232270AbhCVSyO (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 22 Mar 2021 14:54:14 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id A764B61992;
+        Mon, 22 Mar 2021 18:54:13 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1616435813;
-        bh=tjvSPrg08ec2wbCrKBieeI1VLAYfvCBICZo2EnttIf0=;
+        s=k20201202; t=1616439253;
+        bh=PQ4fnTT9Xwwd/fEE28w2aF8qxLJCzqFxd9Adms//rFw=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=j9740ByHv2QOQioL4OZEnsO/iBG2WWeLi9rvi9zIHuVjQQEwoAvci8hy0zMVE0vZX
-         zh8iQ9qtIK0zFXEeWnAySk0ZOeDMlNCKftUYaN9Lk4MZizoHZjjRwJxVvX6mIcIlsd
-         pdH+WDOSI+HT5YwcqSds8T9Xb11nlMroIrCZkdnmQVRw2wvlxR+mqrH7gi5l4l22fC
-         EOOycTRzvRMXi7MbcKlwAbDJlZaKBc5l/a294Rgi/bCdTpsJhahgURXhMHFzOl7WpT
-         h7tZ+4hKYtTlbaRt9w0LLcztypjk9VvOM8tp0kjE2XrJx8PONSpqttNvOmtztyJf59
-         zfKmXU9QARKYQ==
-Date:   Mon, 22 Mar 2021 10:56:52 -0700
+        b=nsG0+SeG5kL9llfk8AxHwKhxlWMqM9ceT0yHXkNrk88jny6BJkr937Zf7msZOXkDy
+         xo0ZHCdvjoVHtt6ruthBzrDQdMKAqLrXWtSXcc69FRcTx8Zno81/mYwAoxdsGH81ka
+         BRvOJOwPYczykNDMjHqBg1O8wHvMl/GzmS/dU7N01YFF8G1LIW12M3dM5ahqUF92Qr
+         eJKcFj/ccvsiPEf9+T1HDI2TcyrLBTMweBKqH8nSImlHp8sj7stvl7RmTvXuvsBR8f
+         iNZJoQ+PJ6gMZmEJ8Rq02pc6cXlscpXWD7DvP5ZfXA3mFqnDxanWnu4YbnGxJxGWhH
+         77H3zWO7iHiGw==
+Date:   Mon, 22 Mar 2021 11:54:13 -0700
 From:   "Darrick J. Wong" <djwong@kernel.org>
 To:     Chandan Babu R <chandanrlinux@gmail.com>
 Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH V6 05/13] xfs: Check for extent overflow when growing
- realtime bitmap/summary inodes
-Message-ID: <20210322175652.GG1670408@magnolia>
+Subject: Re: [PATCH V6 13/13] xfs: Stress test with bmap_alloc_minlen_extent
+ error tag enabled
+Message-ID: <20210322185413.GH1670408@magnolia>
 References: <20210309050124.23797-1-chandanrlinux@gmail.com>
- <20210309050124.23797-6-chandanrlinux@gmail.com>
+ <20210309050124.23797-14-chandanrlinux@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210309050124.23797-6-chandanrlinux@gmail.com>
+In-Reply-To: <20210309050124.23797-14-chandanrlinux@gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Mar 09, 2021 at 10:31:16AM +0530, Chandan Babu R wrote:
-> Verify that XFS does not cause realtime bitmap/summary inode fork's
-> extent count to overflow when growing the realtime volume associated
-> with a filesystem.
-> 
-> Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-> Signed-off-by: Chandan Babu R <chandanrlinux@gmail.com>
+On Tue, Mar 09, 2021 at 10:31:24AM +0530, Chandan Babu R wrote:
+> This commit adds a stress test that executes fsstress with
+> bmap_alloc_minlen_extent error tag enabled.
 
-Soo... I discovered that this test doesn't pass with multiblock
-directories:
+Continuing along the theme of watching the magic smoke come out when dir
+block size > fs block size, I also observed the following assertion when
+running this test:
 
-FSTYP         -- xfs (debug)
-PLATFORM      -- Linux/x86_64 alder-mtr00 5.12.0-rc4-xfsx #rc4 SMP PREEMPT Mon Mar 22 10:03:45 PDT 2021
-MKFS_OPTIONS  -- -f -b size=1024, /dev/sdf
-MOUNT_OPTIONS -- -o usrquota,grpquota,prjquota, /dev/sdf /opt
+ XFS: Assertion failed: done, file: fs/xfs/libxfs/xfs_dir2.c, line: 687
+ ------------[ cut here ]------------
+ WARNING: CPU: 0 PID: 3892 at fs/xfs/xfs_message.c:112 assfail+0x3c/0x40 [xfs]
+ Modules linked in: xfs(O) libcrc32c ip6t_REJECT nf_reject_ipv6 ipt_REJECT nf_reject_ipv4 ip_set_hash_ip ip_set_hash_net xt_tcpudp xt_set ip_set_hash_mac ip_set nfnetlink ip6table_filter ip6_tables iptable_filter bfq sch_fq_codel ip_tables x_tables overlay nfsv4 af_packet
+ CPU: 0 PID: 3892 Comm: fsstress Tainted: G           O      5.12.0-rc4-xfsx #rc4
+ Hardware name: QEMU Standard PC (Q35 + ICH9, 2009), BIOS 1.13.0-1ubuntu1.1 04/01/2014
+ RIP: 0010:assfail+0x3c/0x40 [xfs]
+ Code: d0 d5 41 a0 e8 81 f9 ff ff 8a 1d 5b 44 0e 00 80 fb 01 76 0f 0f b6 f3 48 c7 c7 b0 d5 4d a0 e8 93 dc fc e0 80 e3 01 74 02 0f 0b <0f> 0b 5b c3 48 8d 45 10 48 89 e2 4c 89 e6 48 89 1c 24 48 89 44 24
+ RSP: 0018:ffffc900035bba38 EFLAGS: 00010246
+ RAX: 0000000000000000 RBX: ffff88804f204100 RCX: 0000000000000000
+ RDX: 00000000ffffffc0 RSI: 0000000000000000 RDI: ffffffffa040c157
+ RBP: 0000000000000000 R08: 0000000000000000 R09: 000000000000000a
+ R10: 000000000000000a R11: f000000000000000 R12: ffff88805920b880
+ R13: ffff888003778bb0 R14: 0000000000000000 R15: ffff88800f0f63c0
+ FS:  00007fe7b5e2f740(0000) GS:ffff88803ec00000(0000) knlGS:0000000000000000
+ CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+ CR2: 00007fe7b6055000 CR3: 0000000053094005 CR4: 00000000001706b0
+ Call Trace:
+  xfs_dir2_shrink_inode+0x22f/0x270 [xfs]
+  xfs_dir2_block_to_sf+0x29a/0x420 [xfs]
+  xfs_dir2_block_removename+0x221/0x290 [xfs]
+  xfs_dir_removename+0x1a0/0x220 [xfs]
+  xfs_dir_rename+0x343/0x3b0 [xfs]
+  xfs_rename+0x79e/0xae0 [xfs]
+  xfs_vn_rename+0xdb/0x150 [xfs]
+  vfs_rename+0x4e2/0x8e0
+  do_renameat2+0x393/0x550
+  __x64_sys_rename+0x40/0x50
+  do_syscall_64+0x2d/0x40
+  entry_SYSCALL_64_after_hwframe+0x44/0xae
+ RIP: 0033:0x7fe7b5e9800b
+ Code: e8 aa ce 0a 00 85 c0 0f 95 c0 0f b6 c0 f7 d8 5d c3 66 0f 1f 44 00 00 b8 ff ff ff ff 5d c3 90 f3 0f 1e fa b8 52 00 00 00 0f 05 <48> 3d 00 f0 ff ff 77 05 c3 0f 1f 40 00 48 8b 15 51 4e 18 00 f7 d8
+ RSP: 002b:00007ffeb526c698 EFLAGS: 00000246 ORIG_RAX: 0000000000000052
+ RAX: ffffffffffffffda RBX: 00007ffeb526c970 RCX: 00007fe7b5e9800b
+ RDX: 0000000000000000 RSI: 000055d6ccdb9250 RDI: 000055d6ccdb9270
+ RBP: 00007ffeb526c980 R08: 0000000000000001 R09: 0000000000000003
+ R10: 000055d6cc3b20dc R11: 0000000000000246 R12: 0000000000000000
+ R13: 0000000000000040 R14: 00007ffeb526c970 R15: 00007ffeb526c980
+ ---[ end trace 98f99784621d65fe ]---
 
-xfs/529 - output mismatch (see /var/tmp/fstests/xfs/529.out.bad)
-    --- tests/xfs/529.out       2021-03-21 11:44:09.383407733 -0700
-    +++ /var/tmp/fstests/xfs/529.out.bad        2021-03-22 10:36:34.000348426 -0700
-    @@ -4,12 +4,21 @@
-     Inject reduce_max_iextents error tag
-     Create fragmented file
-     Verify $testfile's extent count
-    +/opt/testfile: No such file or directory
-    +/tmp/fstests/tests/xfs/529: line 72: ((: > 10 : syntax error: operand expected (error token is "> 10 ")
-    +rm: cannot remove '/opt/testfile': No such file or directory
-     * Fallocate unwritten extents
-    ...
-    (Run 'diff -u /tmp/fstests/tests/xfs/529.out /var/tmp/fstests/xfs/529.out.bad'  to see the entire diff)
-Ran: xfs/529
-Failures: xfs/529
-Failed 1 of 1 tests
+It looks to me as though we return from xfs_bunmapi having not completed
+all the unmapping work, though I can't tell if that's because bunmapi
+returned early because it thought it would overflow the extent count; or
+some other reason.
 
-Test xfs/529 FAILED with code 1 and bad golden output:
---- /tmp/fstests/tests/xfs/529.out      2021-03-21 11:44:09.383407733 -0700
-+++ /var/tmp/fstests/xfs/529.out.bad    2021-03-22 10:36:34.000348426 -0700
-@@ -4,12 +4,21 @@
- Inject reduce_max_iextents error tag
- Create fragmented file
- Verify $testfile's extent count
-+/opt/testfile: No such file or directory
-+/tmp/fstests/tests/xfs/529: line 72: ((: > 10 : syntax error: operand expected (error token is "> 10 ")
-+rm: cannot remove '/opt/testfile': No such file or directory
- * Fallocate unwritten extents
- Fallocate fragmented file
- Verify $testfile's extent count
-+/opt/testfile: No such file or directory
-+/tmp/fstests/tests/xfs/529: line 91: ((: > 10 : syntax error: operand expected (error token is "> 10 ")
-+rm: cannot remove '/opt/testfile': No such file or directory
- * Directio write
- Create fragmented file via directio writes
- Verify $testfile's extent count
-+/opt/testfile: No such file or directory
-+/tmp/fstests/tests/xfs/529: line 110: ((: > 10 : syntax error: operand expected (error token is "> 10 ")
-+rm: cannot remove '/opt/testfile': No such file or directory
- * Extend quota inodes
- Disable reduce_max_iextents error tag
- Consume free space
+OH CRAP, I just realized that xfs_dir2_shrink_inode only calls
+xfs_bunmapi once, which means that if the directory block it's removing
+is a multi-fsb block, it will remove the last extent map.  It then trips
+the assertion, having left the rest of the directory block still mapped.
 
-The test appears to fail because we cannot create even a single file in
-the root directory.  Looking at xfs_create, I see:
+This is also what's going on when xfs_inactive_symlink_rmt trips the
+same ASSERT(done), because the symlink remote block can span multiple
+(two?) fs blocks but we only ever call xfs_bunmapi once.
 
-	error = xfs_iext_count_may_overflow(dp, XFS_DATA_FORK,
-			XFS_IEXT_DIR_MANIP_CNT(mp));
-	if (error)
-		goto out_trans_cancel;
+So, no, there's nothing wrong with this test, but it _did_ shake loose
+a couple of XFS bugs.  Congratulations!
 
-XFS_IEXT_DIR_MANIP_CNT is defined as:
-
-	#define XFS_IEXT_DIR_MANIP_CNT(mp) \
-		((XFS_DA_NODE_MAXDEPTH + 1 + 1) * (mp)->m_dir_geo->fsbcount)
-
-If one formats a filesystem with 1k blocks, the result will be a
-filesystem with 4k directory blocks:
-
-# mkfs.xfs -b size=1024 /dev/sdf -Nf
-meta-data=/dev/sdf               isize=512    agcount=4, agsize=5192704 blks
-         =                       sectsz=512   attr=2, projid32bit=1
-         =                       crc=1        finobt=1, sparse=1, rmapbt=1
-         =                       reflink=1    bigtime=1 inobtcount=1
-         =                       metadir=0   
-data     =                       bsize=1024   blocks=20770816, imaxpct=25
-         =                       sunit=0      swidth=0 blks
-naming   =version 2              bsize=4096   ascii-ci=0, ftype=1
-log      =internal log           bsize=1024   blocks=10240, version=2
-         =                       sectsz=512   sunit=0 blks, lazy-count=1
-realtime =none                   extsz=4096   blocks=0, rtextents=0
-
-Note "data bsize" is 1024, and "naming bsize" is 4096.
-
-In the kernel, we set m_dir_geo->fsbcount = "naming bsize" /
-"data bsize", or 4 in this case.  Since XFS_DA_NODE_MAXDEPTH is always
-5, this macro expands to:
-
-	(5 + 1 + 1) * (4) = 28
-
-The reason for the test failure I think is because of this code in
-xfs_iext_count_may_overflow, which is called from xfs_create on the
-parent directory:
-
-	if (XFS_TEST_ERROR(false, ip->i_mount, XFS_ERRTAG_REDUCE_MAX_IEXTENTS))
-		max_exts = 10;
-
-	nr_exts = ifp->if_nextents + nr_to_add;
-	if (nr_exts < ifp->if_nextents || nr_exts > max_ext)
-		return -EFBIG
-
-The second part of the if statement becomes (28 > 10) which is trivially
-true, so we return -EFBIG for all attempts to create a file in a
-directory.  xfs/529, in turn, cannot create $testfile because nothing
-can create a file in $SCRATCH_MNT, and the test goes off the rails.
-
-I think this can be trivially solved by changing this (and the other
-tests) to ensure that the error injection is only set when we're running
-a command to check if we get EFBIG.  In other words, this code in
-xfs/529:
-
-	rm $testfile
-
-	echo "* Fallocate unwritten extents"
-
-	echo "Fallocate fragmented file"
-	for i in $(seq 0 2 $((nr_blks - 1))); do
-		$XFS_IO_PROG -f -c "falloc $((i * bsize)) $bsize" $testfile \
-		       >> $seqres.full 2>&1
-		[[ $? != 0 ]] && break
-	done
-
-Should become:
-
-	rm -f $testfile
-	touch $testfile
-
-	echo "* Fallocate unwritten extents"
-
-	echo "Fallocate fragmented file"
-	_scratch_inject_error reduce_max_iextents 1
-	for i in $(seq 0 2 $((nr_blks - 1))); do
-		$XFS_IO_PROG -c "falloc $((i * bsize)) $bsize" $testfile \
-		       >> $seqres.full 2>&1
-		[[ $? != 0 ]] && break
-	done
-	_scratch_inject_error reduce_max_iextents 0
-
-With that patched up, xfs/529 passes on 1k block filesystems.  I suspect
-the other tests in this series (xfs/531, 532, 534, and 535) are going to
-need similar patching.
+So... who wants to tackle this one?  This isn't trivial to clean up
+because you'll have to clean up all callers of xfs_dir2_shrink_inode to
+handle rolling of the transaction, and I bet the only way to fix this is
+to use deferred bunmap items to make sure the unmap always completes.
 
 --D
 
+> Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+> Signed-off-by: Chandan Babu R <chandanrlinux@gmail.com>
 > ---
->  tests/xfs/529     | 124 ++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/529.out |  11 ++++
->  tests/xfs/group   |   1 +
->  3 files changed, 136 insertions(+)
->  create mode 100755 tests/xfs/529
->  create mode 100644 tests/xfs/529.out
+>  tests/xfs/537     | 84 +++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/537.out |  7 ++++
+>  tests/xfs/group   |  1 +
+>  3 files changed, 92 insertions(+)
+>  create mode 100755 tests/xfs/537
+>  create mode 100644 tests/xfs/537.out
 > 
-> diff --git a/tests/xfs/529 b/tests/xfs/529
+> diff --git a/tests/xfs/537 b/tests/xfs/537
 > new file mode 100755
-> index 00000000..dd7019f5
+> index 00000000..77fa60d9
 > --- /dev/null
-> +++ b/tests/xfs/529
-> @@ -0,0 +1,124 @@
+> +++ b/tests/xfs/537
+> @@ -0,0 +1,84 @@
 > +#! /bin/bash
 > +# SPDX-License-Identifier: GPL-2.0
 > +# Copyright (c) 2021 Chandan Babu R.  All Rights Reserved.
 > +#
-> +# FS QA Test 529
+> +# FS QA Test 537
 > +#
-> +# Verify that XFS does not cause bitmap/summary inode fork's extent count to
-> +# overflow when growing an the realtime volume of the filesystem.
+> +# Execute fsstress with bmap_alloc_minlen_extent error tag enabled.
 > +#
 > +seq=`basename $0`
 > +seqres=$RESULT_DIR/$seq
@@ -234,9 +157,7 @@ need similar patching.
 > +_cleanup()
 > +{
 > +	cd /
-> +	_scratch_unmount >> $seqres.full 2>&1
-> +	test -e "$rtdev" && losetup -d $rtdev >> $seqres.full 2>&1
-> +	rm -f $tmp.* $TEST_DIR/$seq.rtvol
+> +	rm -f $tmp.*
 > +}
 > +
 > +# get standard environment, filters and checks
@@ -251,118 +172,77 @@ need similar patching.
 > +# real QA test starts here
 > +
 > +_supported_fs xfs
-> +# Note that we don't _require_realtime because we synthesize a rt volume
-> +# below.
-> +_require_test
+> +_require_scratch
 > +_require_xfs_debug
 > +_require_test_program "punch-alternating"
-> +_require_xfs_io_error_injection "reduce_max_iextents"
 > +_require_xfs_io_error_injection "bmap_alloc_minlen_extent"
-> +_require_scratch_nocheck
 > +
-> +echo "* Test extending rt inodes"
+> +echo "Format and mount fs"
+> +_scratch_mkfs_sized $((1024 * 1024 * 1024)) >> $seqres.full
+> +_scratch_mount >> $seqres.full
 > +
-> +_scratch_mkfs | _filter_mkfs >> $seqres.full 2> $tmp.mkfs
-> +. $tmp.mkfs
-> +
-> +echo "Create fake rt volume"
-> +nr_bitmap_blks=25
-> +nr_bits=$((nr_bitmap_blks * dbsize * 8))
-> +
-> +# Realtime extent size has to be atleast 4k in size.
-> +if (( $dbsize < 4096 )); then
-> +	rtextsz=4096
-> +else
-> +	rtextsz=$dbsize
-> +fi
-> +
-> +rtdevsz=$((nr_bits * rtextsz))
-> +truncate -s $rtdevsz $TEST_DIR/$seq.rtvol
-> +rtdev=$(_create_loop_device $TEST_DIR/$seq.rtvol)
-> +
-> +echo "Format and mount rt volume"
-> +
-> +export USE_EXTERNAL=yes
-> +export SCRATCH_RTDEV=$rtdev
-> +_scratch_mkfs -d size=$((1024 * 1024 * 1024)) -b size=${dbsize} \
-> +	      -r size=${rtextsz},extsize=${rtextsz} >> $seqres.full
-> +_try_scratch_mount || _notrun "Couldn't mount fs with synthetic rt volume"
+> +bsize=$(_get_file_block_size $SCRATCH_MNT)
 > +
 > +echo "Consume free space"
 > +fillerdir=$SCRATCH_MNT/fillerdir
 > +nr_free_blks=$(stat -f -c '%f' $SCRATCH_MNT)
 > +nr_free_blks=$((nr_free_blks * 90 / 100))
 > +
-> +_fill_fs $((dbsize * nr_free_blks)) $fillerdir $dbsize 0 >> $seqres.full 2>&1
+> +_fill_fs $((bsize * nr_free_blks)) $fillerdir $bsize 0 >> $seqres.full 2>&1
 > +
 > +echo "Create fragmented filesystem"
 > +for dentry in $(ls -1 $fillerdir/); do
 > +	$here/src/punch-alternating $fillerdir/$dentry >> $seqres.full
 > +done
 > +
-> +echo "Inject reduce_max_iextents error tag"
-> +_scratch_inject_error reduce_max_iextents 1
-> +
 > +echo "Inject bmap_alloc_minlen_extent error tag"
 > +_scratch_inject_error bmap_alloc_minlen_extent 1
 > +
-> +echo "Grow realtime volume"
-> +$XFS_GROWFS_PROG -r $SCRATCH_MNT >> $seqres.full 2>&1
-> +if [[ $? == 0 ]]; then
-> +	echo "Growfs succeeded; should have failed."
-> +	exit 1
-> +fi
+> +echo "Scale fsstress args"
+> +args=$(_scale_fsstress_args -p $((LOAD_FACTOR * 75)) -n $((TIME_FACTOR * 1000)))
 > +
-> +_scratch_unmount >> $seqres.full
-> +
-> +echo "Verify rbmino's and rsumino's extent count"
-> +for rtino in rbmino rsumino; do
-> +	ino=$(_scratch_xfs_get_metadata_field $rtino "sb 0")
-> +	echo "$rtino = $ino" >> $seqres.full
-> +
-> +	nextents=$(_scratch_get_iext_count $ino data || \
-> +			_fail "Unable to obtain inode fork's extent count")
-> +	if (( $nextents > 10 )); then
-> +		echo "Extent count overflow check failed: nextents = $nextents"
-> +		exit 1
-> +	fi
-> +done
-> +
-> +echo "Check filesystem"
-> +_check_xfs_filesystem $SCRATCH_DEV none $rtdev
-> +
-> +losetup -d $rtdev
-> +rm -f $TEST_DIR/$seq.rtvol
+> +echo "Execute fsstress in background"
+> +$FSSTRESS_PROG -d $SCRATCH_MNT $args \
+> +		 -f bulkstat=0 \
+> +		 -f bulkstat1=0 \
+> +		 -f fiemap=0 \
+> +		 -f getattr=0 \
+> +		 -f getdents=0 \
+> +		 -f getfattr=0 \
+> +		 -f listfattr=0 \
+> +		 -f mread=0 \
+> +		 -f read=0 \
+> +		 -f readlink=0 \
+> +		 -f readv=0 \
+> +		 -f stat=0 \
+> +		 -f aread=0 \
+> +		 -f dread=0 > /dev/null 2>&1
 > +
 > +# success, all done
 > +status=0
 > +exit
-> diff --git a/tests/xfs/529.out b/tests/xfs/529.out
+> diff --git a/tests/xfs/537.out b/tests/xfs/537.out
 > new file mode 100644
-> index 00000000..4ee113a4
+> index 00000000..19633a07
 > --- /dev/null
-> +++ b/tests/xfs/529.out
-> @@ -0,0 +1,11 @@
-> +QA output created by 529
-> +* Test extending rt inodes
-> +Create fake rt volume
-> +Format and mount rt volume
+> +++ b/tests/xfs/537.out
+> @@ -0,0 +1,7 @@
+> +QA output created by 537
+> +Format and mount fs
 > +Consume free space
 > +Create fragmented filesystem
-> +Inject reduce_max_iextents error tag
 > +Inject bmap_alloc_minlen_extent error tag
-> +Grow realtime volume
-> +Verify rbmino's and rsumino's extent count
-> +Check filesystem
+> +Scale fsstress args
+> +Execute fsstress in background
 > diff --git a/tests/xfs/group b/tests/xfs/group
-> index 2356c4a9..5dff7acb 100644
+> index ba674a58..5c827727 100644
 > --- a/tests/xfs/group
 > +++ b/tests/xfs/group
-> @@ -526,3 +526,4 @@
->  526 auto quick mkfs
->  527 auto quick quota
->  528 auto quick quota
-> +529 auto quick realtime growfs
+> @@ -534,3 +534,4 @@
+>  534 auto quick reflink
+>  535 auto quick reflink
+>  536 auto quick
+> +537 auto stress
 > -- 
 > 2.29.2
 > 
