@@ -4,245 +4,173 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-16.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C51ECC433DB
-	for <linux-fstests@archiver.kernel.org>; Mon, 22 Mar 2021 18:55:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9C4C8C433C1
+	for <linux-fstests@archiver.kernel.org>; Tue, 23 Mar 2021 04:16:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8CBFA619A3
-	for <linux-fstests@archiver.kernel.org>; Mon, 22 Mar 2021 18:55:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 78A9B619B7
+	for <linux-fstests@archiver.kernel.org>; Tue, 23 Mar 2021 04:16:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229865AbhCVSyk (ORCPT
+        id S229504AbhCWEPz (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 22 Mar 2021 14:54:40 -0400
-Received: from mail.kernel.org ([198.145.29.99]:37874 "EHLO mail.kernel.org"
+        Tue, 23 Mar 2021 00:15:55 -0400
+Received: from mail.kernel.org ([198.145.29.99]:41492 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S232270AbhCVSyO (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 22 Mar 2021 14:54:14 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id A764B61992;
-        Mon, 22 Mar 2021 18:54:13 +0000 (UTC)
+        id S229437AbhCWEPd (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 23 Mar 2021 00:15:33 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id EBD8F619AD;
+        Tue, 23 Mar 2021 04:15:32 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1616439253;
-        bh=PQ4fnTT9Xwwd/fEE28w2aF8qxLJCzqFxd9Adms//rFw=;
+        s=k20201202; t=1616472933;
+        bh=j+WSoMA+MV49RUOb/SgC+Mro94JV8/HEf6DCTrD3wwE=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=nsG0+SeG5kL9llfk8AxHwKhxlWMqM9ceT0yHXkNrk88jny6BJkr937Zf7msZOXkDy
-         xo0ZHCdvjoVHtt6ruthBzrDQdMKAqLrXWtSXcc69FRcTx8Zno81/mYwAoxdsGH81ka
-         BRvOJOwPYczykNDMjHqBg1O8wHvMl/GzmS/dU7N01YFF8G1LIW12M3dM5ahqUF92Qr
-         eJKcFj/ccvsiPEf9+T1HDI2TcyrLBTMweBKqH8nSImlHp8sj7stvl7RmTvXuvsBR8f
-         iNZJoQ+PJ6gMZmEJ8Rq02pc6cXlscpXWD7DvP5ZfXA3mFqnDxanWnu4YbnGxJxGWhH
-         77H3zWO7iHiGw==
-Date:   Mon, 22 Mar 2021 11:54:13 -0700
+        b=uB45lOBF1TIDKD5wuLDQl3zl+DkAACSF7/wcSCDV2s4POuirjiEXpIA8vXUpbjdY8
+         2Oh9jev/SsIwaLU2BTGJ5pNidNojW14VNraeE30nKEHEykIFY8z4Q2q/jZgd3wAry9
+         khfTgNd2W0rJ9q12YH5LJhwqNp2D878tOgJ0IpPMj7xMVT017wgvh2Bz90Mve3bcrW
+         VeH+F2Jnj34nAnMyZE+osGbwIDcOqCv7QQZqx3m4CneESV3apMMqQM0syuYF2pLe9J
+         bAJxRgrlpsD7RjUYnhn6V1nSCh1LmRnK3jTsN+cYa51yR6gplGmN5amIFhPKcy1nD3
+         AnQ0vgINpYY7A==
+Date:   Mon, 22 Mar 2021 21:15:32 -0700
 From:   "Darrick J. Wong" <djwong@kernel.org>
 To:     Chandan Babu R <chandanrlinux@gmail.com>
-Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH V6 13/13] xfs: Stress test with bmap_alloc_minlen_extent
- error tag enabled
-Message-ID: <20210322185413.GH1670408@magnolia>
-References: <20210309050124.23797-1-chandanrlinux@gmail.com>
- <20210309050124.23797-14-chandanrlinux@gmail.com>
+Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org, guan@eryu.me
+Subject: Re: [PATCH 03/10] xfs: test rtalloc alignment and math errors
+Message-ID: <20210323041532.GI1670408@magnolia>
+References: <161526480371.1214319.3263690953532787783.stgit@magnolia>
+ <161526482015.1214319.6227125326960502859.stgit@magnolia>
+ <87mtvaceaf.fsf@garuda>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210309050124.23797-14-chandanrlinux@gmail.com>
+In-Reply-To: <87mtvaceaf.fsf@garuda>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Mar 09, 2021 at 10:31:24AM +0530, Chandan Babu R wrote:
-> This commit adds a stress test that executes fsstress with
-> bmap_alloc_minlen_extent error tag enabled.
+On Thu, Mar 11, 2021 at 01:28:32PM +0530, Chandan Babu R wrote:
+> On 09 Mar 2021 at 10:10, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <djwong@kernel.org>
+> >
+> > Add a couple of regression tests for "xfs: make sure the rt allocator
+> > doesn't run off the end" and "xfs: ensure that fpunch, fcollapse, and
+> > finsert operations are aligned to rt extent size".
+> >
+> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> > ---
+> >  tests/xfs/759     |  100 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/xfs/759.out |    2 +
+> >  tests/xfs/760     |   68 ++++++++++++++++++++++++++++++++++++
+> >  tests/xfs/760.out |    9 +++++
+> >  tests/xfs/group   |    2 +
+> >  5 files changed, 181 insertions(+)
+> >  create mode 100755 tests/xfs/759
+> >  create mode 100644 tests/xfs/759.out
+> >  create mode 100755 tests/xfs/760
+> >  create mode 100644 tests/xfs/760.out
+> >
+> >
+> > diff --git a/tests/xfs/759 b/tests/xfs/759
+> > new file mode 100755
+> > index 00000000..8558fe30
+> > --- /dev/null
+> > +++ b/tests/xfs/759
+> > @@ -0,0 +1,100 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0-or-later
+> > +# Copyright (c) 2021 Oracle.  All Rights Reserved.
+> > +#
+> > +# FS QA Test No. 759
+> > +#
+> > +# This is a regression test for commit 2a6ca4baed62 ("xfs: make sure the rt
+> > +# allocator doesn't run off the end") which fixes an overflow error in the
+> > +# _near realtime allocator.  If the rt bitmap ends exactly at the end of a
+> > +# block and the number of rt extents is large enough to allow an allocation
+> > +# request larger than the maximum extent size, it's possible that during a
+> > +# large allocation request, the allocator will fail to constrain maxlen on the
+> > +# second run through the loop, and the rt bitmap range check will run right off
+> > +# the end of the rtbitmap file.  When this happens, xfs triggers a verifier
+> > +# error and returns EFSCORRUPTED.
+> > +
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +
+> > +here=`pwd`
+> > +tmp=/tmp/$$
+> > +status=1    # failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	rm -f $tmp.*
+> > +}
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/filter
+> > +
+> > +# real QA test starts here
+> > +_supported_fs xfs
+> > +_require_scratch
+> > +_require_realtime
+> > +_require_test_program "punch-alternating"
+> > +
+> > +rm -f $seqres.full
+> > +
+> > +# Format filesystem to get the block size
+> > +_scratch_mkfs > $seqres.full
+> > +_scratch_mount >> $seqres.full
+> > +
+> > +blksz=$(_get_block_size $SCRATCH_MNT)
+> > +rextsize=$($XFS_INFO_PROG $SCRATCH_MNT | grep realtime.*extsz | sed -e 's/^.*extsz=\([0-9]*\).*$/\1/g')
+> > +rextblks=$((rextsize / blksz))
+> > +
+> > +echo "blksz $blksz rextsize $rextsize rextblks $rextblks" >> $seqres.full
+> > +
+> > +_scratch_unmount
+> > +
+> > +# Format filesystem with a realtime volume whose size fits the following:
+> > +# 1. Longer than (XFS MAXEXTLEN * blocksize) bytes.
+> 
+> Shouldn't the multiplier be RT extent size rather than FS block size?
 
-Continuing along the theme of watching the magic smoke come out when dir
-block size > fs block size, I also observed the following assertion when
-running this test:
+No, because reproducing the bug requires a large enough allocation
+request that we can't fit it all in a single data fork extent mapping
+and have to call back into the allocator to get more space.  bmbt
+mappings are always in units of fsblocks, not rt extents.
 
- XFS: Assertion failed: done, file: fs/xfs/libxfs/xfs_dir2.c, line: 687
- ------------[ cut here ]------------
- WARNING: CPU: 0 PID: 3892 at fs/xfs/xfs_message.c:112 assfail+0x3c/0x40 [xfs]
- Modules linked in: xfs(O) libcrc32c ip6t_REJECT nf_reject_ipv6 ipt_REJECT nf_reject_ipv4 ip_set_hash_ip ip_set_hash_net xt_tcpudp xt_set ip_set_hash_mac ip_set nfnetlink ip6table_filter ip6_tables iptable_filter bfq sch_fq_codel ip_tables x_tables overlay nfsv4 af_packet
- CPU: 0 PID: 3892 Comm: fsstress Tainted: G           O      5.12.0-rc4-xfsx #rc4
- Hardware name: QEMU Standard PC (Q35 + ICH9, 2009), BIOS 1.13.0-1ubuntu1.1 04/01/2014
- RIP: 0010:assfail+0x3c/0x40 [xfs]
- Code: d0 d5 41 a0 e8 81 f9 ff ff 8a 1d 5b 44 0e 00 80 fb 01 76 0f 0f b6 f3 48 c7 c7 b0 d5 4d a0 e8 93 dc fc e0 80 e3 01 74 02 0f 0b <0f> 0b 5b c3 48 8d 45 10 48 89 e2 4c 89 e6 48 89 1c 24 48 89 44 24
- RSP: 0018:ffffc900035bba38 EFLAGS: 00010246
- RAX: 0000000000000000 RBX: ffff88804f204100 RCX: 0000000000000000
- RDX: 00000000ffffffc0 RSI: 0000000000000000 RDI: ffffffffa040c157
- RBP: 0000000000000000 R08: 0000000000000000 R09: 000000000000000a
- R10: 000000000000000a R11: f000000000000000 R12: ffff88805920b880
- R13: ffff888003778bb0 R14: 0000000000000000 R15: ffff88800f0f63c0
- FS:  00007fe7b5e2f740(0000) GS:ffff88803ec00000(0000) knlGS:0000000000000000
- CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
- CR2: 00007fe7b6055000 CR3: 0000000053094005 CR4: 00000000001706b0
- Call Trace:
-  xfs_dir2_shrink_inode+0x22f/0x270 [xfs]
-  xfs_dir2_block_to_sf+0x29a/0x420 [xfs]
-  xfs_dir2_block_removename+0x221/0x290 [xfs]
-  xfs_dir_removename+0x1a0/0x220 [xfs]
-  xfs_dir_rename+0x343/0x3b0 [xfs]
-  xfs_rename+0x79e/0xae0 [xfs]
-  xfs_vn_rename+0xdb/0x150 [xfs]
-  vfs_rename+0x4e2/0x8e0
-  do_renameat2+0x393/0x550
-  __x64_sys_rename+0x40/0x50
-  do_syscall_64+0x2d/0x40
-  entry_SYSCALL_64_after_hwframe+0x44/0xae
- RIP: 0033:0x7fe7b5e9800b
- Code: e8 aa ce 0a 00 85 c0 0f 95 c0 0f b6 c0 f7 d8 5d c3 66 0f 1f 44 00 00 b8 ff ff ff ff 5d c3 90 f3 0f 1e fa b8 52 00 00 00 0f 05 <48> 3d 00 f0 ff ff 77 05 c3 0f 1f 40 00 48 8b 15 51 4e 18 00 f7 d8
- RSP: 002b:00007ffeb526c698 EFLAGS: 00000246 ORIG_RAX: 0000000000000052
- RAX: ffffffffffffffda RBX: 00007ffeb526c970 RCX: 00007fe7b5e9800b
- RDX: 0000000000000000 RSI: 000055d6ccdb9250 RDI: 000055d6ccdb9270
- RBP: 00007ffeb526c980 R08: 0000000000000001 R09: 0000000000000003
- R10: 000055d6cc3b20dc R11: 0000000000000246 R12: 0000000000000000
- R13: 0000000000000040 R14: 00007ffeb526c970 R15: 00007ffeb526c980
- ---[ end trace 98f99784621d65fe ]---
+> > +# 2. Exactly a multiple of (NBBY * blksz * rextsize) bytes.
+> 
+> i.e The bits in one rt bitmap block map (NBBY * blksz * rextsize) bytes of an
+> rt device. Hence to have the bitmap end at a fs block boundary the
+> corresponding rt device size should be a multiple of this product. Is my
+> understanding correct?
 
-It looks to me as though we return from xfs_bunmapi having not completed
-all the unmapping work, though I can't tell if that's because bunmapi
-returned early because it thought it would overflow the extent count; or
-some other reason.
+Right.
 
-OH CRAP, I just realized that xfs_dir2_shrink_inode only calls
-xfs_bunmapi once, which means that if the directory block it's removing
-is a multi-fsb block, it will remove the last extent map.  It then trips
-the assertion, having left the rest of the directory block still mapped.
-
-This is also what's going on when xfs_inactive_symlink_rmt trips the
-same ASSERT(done), because the symlink remote block can span multiple
-(two?) fs blocks but we only ever call xfs_bunmapi once.
-
-So, no, there's nothing wrong with this test, but it _did_ shake loose
-a couple of XFS bugs.  Congratulations!
-
-So... who wants to tackle this one?  This isn't trivial to clean up
-because you'll have to clean up all callers of xfs_dir2_shrink_inode to
-handle rolling of the transaction, and I bet the only way to fix this is
-to use deferred bunmap items to make sure the unmap always completes.
+(I swear I responded to this but who knows these days...)
 
 --D
 
-> Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-> Signed-off-by: Chandan Babu R <chandanrlinux@gmail.com>
-> ---
->  tests/xfs/537     | 84 +++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/537.out |  7 ++++
->  tests/xfs/group   |  1 +
->  3 files changed, 92 insertions(+)
->  create mode 100755 tests/xfs/537
->  create mode 100644 tests/xfs/537.out
 > 
-> diff --git a/tests/xfs/537 b/tests/xfs/537
-> new file mode 100755
-> index 00000000..77fa60d9
-> --- /dev/null
-> +++ b/tests/xfs/537
-> @@ -0,0 +1,84 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2021 Chandan Babu R.  All Rights Reserved.
-> +#
-> +# FS QA Test 537
-> +#
-> +# Execute fsstress with bmap_alloc_minlen_extent error tag enabled.
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/inject
-> +. ./common/populate
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +_supported_fs xfs
-> +_require_scratch
-> +_require_xfs_debug
-> +_require_test_program "punch-alternating"
-> +_require_xfs_io_error_injection "bmap_alloc_minlen_extent"
-> +
-> +echo "Format and mount fs"
-> +_scratch_mkfs_sized $((1024 * 1024 * 1024)) >> $seqres.full
-> +_scratch_mount >> $seqres.full
-> +
-> +bsize=$(_get_file_block_size $SCRATCH_MNT)
-> +
-> +echo "Consume free space"
-> +fillerdir=$SCRATCH_MNT/fillerdir
-> +nr_free_blks=$(stat -f -c '%f' $SCRATCH_MNT)
-> +nr_free_blks=$((nr_free_blks * 90 / 100))
-> +
-> +_fill_fs $((bsize * nr_free_blks)) $fillerdir $bsize 0 >> $seqres.full 2>&1
-> +
-> +echo "Create fragmented filesystem"
-> +for dentry in $(ls -1 $fillerdir/); do
-> +	$here/src/punch-alternating $fillerdir/$dentry >> $seqres.full
-> +done
-> +
-> +echo "Inject bmap_alloc_minlen_extent error tag"
-> +_scratch_inject_error bmap_alloc_minlen_extent 1
-> +
-> +echo "Scale fsstress args"
-> +args=$(_scale_fsstress_args -p $((LOAD_FACTOR * 75)) -n $((TIME_FACTOR * 1000)))
-> +
-> +echo "Execute fsstress in background"
-> +$FSSTRESS_PROG -d $SCRATCH_MNT $args \
-> +		 -f bulkstat=0 \
-> +		 -f bulkstat1=0 \
-> +		 -f fiemap=0 \
-> +		 -f getattr=0 \
-> +		 -f getdents=0 \
-> +		 -f getfattr=0 \
-> +		 -f listfattr=0 \
-> +		 -f mread=0 \
-> +		 -f read=0 \
-> +		 -f readlink=0 \
-> +		 -f readv=0 \
-> +		 -f stat=0 \
-> +		 -f aread=0 \
-> +		 -f dread=0 > /dev/null 2>&1
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/537.out b/tests/xfs/537.out
-> new file mode 100644
-> index 00000000..19633a07
-> --- /dev/null
-> +++ b/tests/xfs/537.out
-> @@ -0,0 +1,7 @@
-> +QA output created by 537
-> +Format and mount fs
-> +Consume free space
-> +Create fragmented filesystem
-> +Inject bmap_alloc_minlen_extent error tag
-> +Scale fsstress args
-> +Execute fsstress in background
-> diff --git a/tests/xfs/group b/tests/xfs/group
-> index ba674a58..5c827727 100644
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
-> @@ -534,3 +534,4 @@
->  534 auto quick reflink
->  535 auto quick reflink
->  536 auto quick
-> +537 auto stress
-> -- 
-> 2.29.2
+> > +
+> > +rtsize1=$((2097151 * blksz))
+> > +rtsize2=$((8 * blksz * rextsize))
+> > +rtsize=$(( $(blockdev --getsz $SCRATCH_RTDEV) * 512 ))
+> > +
+> > +echo "rtsize1 $rtsize1 rtsize2 $rtsize2 rtsize $rtsize" >> $seqres.full
+> > +
+> > +test $rtsize -gt $rtsize1 || \
+> > +	_notrun "scratch rt device too small, need $rtsize1 bytes"
+> > +test $rtsize -gt $rtsize2 || \
+> > +	_notrun "scratch rt device too small, need $rtsize2 bytes"
+> > +
+> > +rtsize=$((rtsize - (rtsize % rtsize2)))
+> > +
 > 
+> --
+> chandan
