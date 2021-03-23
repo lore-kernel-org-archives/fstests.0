@@ -4,42 +4,42 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-16.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
-	autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F31F5C433E5
-	for <linux-fstests@archiver.kernel.org>; Tue, 23 Mar 2021 04:21:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0B992C433E9
+	for <linux-fstests@archiver.kernel.org>; Tue, 23 Mar 2021 04:21:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A2B83619B3
+	by mail.kernel.org (Postfix) with ESMTP id E10506198E
 	for <linux-fstests@archiver.kernel.org>; Tue, 23 Mar 2021 04:21:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229482AbhCWEU3 (ORCPT
+        id S229500AbhCWEUa (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 23 Mar 2021 00:20:29 -0400
-Received: from mail.kernel.org ([198.145.29.99]:46280 "EHLO mail.kernel.org"
+        Tue, 23 Mar 2021 00:20:30 -0400
+Received: from mail.kernel.org ([198.145.29.99]:46558 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229504AbhCWEUG (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 23 Mar 2021 00:20:06 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 6BE1161990;
-        Tue, 23 Mar 2021 04:20:06 +0000 (UTC)
+        id S229590AbhCWEUZ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 23 Mar 2021 00:20:25 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 9A07D61990;
+        Tue, 23 Mar 2021 04:20:24 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1616473206;
-        bh=CS4SH8KgPIx8OVy4L/LLCrTlKjbpVjHmTpCCMJgbQ2g=;
+        s=k20201202; t=1616473224;
+        bh=pFl9OAijd0ou2fxUN/iJ0DkrVZXx8h+yEECykGj207I=;
         h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=GE/LtvsADoXRaMj1ZK1nYJ+40klLwl7VJNNmt2ZYsQhjLbRNm6+j68ThR90jkV1aD
-         pv4HVdnnxkXjfSupZEDsuYbt8ARVkvvr+Y7XWWQgJ7xoQ+ZdvW4uCxKyksjtXuwX3R
-         lO/aHp4s0fMMEVwnxFAh4ylxkO/W0tMTivO7tz1jkb2Gpiwq/1MwhFbrsDyG2C1JqG
-         wHwESmbUgJbuBoeSSxsTX2tAYNqz0zSn3wbE+MR+m6eswyYbszR2BSOug0pc8t4PoI
-         z8LsRaH+yEwsxnJ10Om2fHGjjIAKG4q3w1II06+wMOuacKv7l6puGuIBE2baAxf8FE
-         +jg3mYKCyqCAA==
-Subject: [PATCH 1/3] xfs: test rtalloc alignment and math errors
+        b=np57qy+3pY6+8Qv6h185PIKEkHBYtcgvN1BMCP7CaiJD/5uyXIk4QUyDaMka8Oa71
+         5f/SqF2b2AsTqrf6hNPiDP1om3e5A3fxsg733T2pWH6KrED/Gnq6oUcthyBCyxlBvC
+         tjSbobs0kgNDtYFZqxu/g7iH6a8O+oeCGg55k7ttX62TXnU7yUR9pFJrZNG/w/N5qa
+         pbdeuvv/quH2LncA+umOpqkgXs1YXuf0gSnDLwyifdixaEzbDw5UxsQ6JcXjHjgb1v
+         EbaVaTfeE1H0FYokFt7QeAmPT3lfXq0VkfSzOs7sR95WhPr04ay0QevkLtdwFvAWoz
+         z713dQLfTugBA==
+Subject: [PATCH 1/2] xfs: test the xfs_db path command
 From:   "Darrick J. Wong" <djwong@kernel.org>
 To:     djwong@kernel.org, guaneryu@gmail.com
 Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me
-Date:   Mon, 22 Mar 2021 21:20:06 -0700
-Message-ID: <161647320615.3430465.16963127280244500558.stgit@magnolia>
-In-Reply-To: <161647320063.3430465.17720673716578854275.stgit@magnolia>
-References: <161647320063.3430465.17720673716578854275.stgit@magnolia>
+Date:   Mon, 22 Mar 2021 21:20:24 -0700
+Message-ID: <161647322430.3430916.12437291741320143904.stgit@magnolia>
+In-Reply-To: <161647321880.3430916.13415014495565709258.stgit@magnolia>
+References: <161647321880.3430916.13415014495565709258.stgit@magnolia>
 User-Agent: StGit/0.19
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -50,46 +50,35 @@ X-Mailing-List: fstests@vger.kernel.org
 
 From: Darrick J. Wong <djwong@kernel.org>
 
-Add a couple of regression tests for "xfs: make sure the rt allocator
-doesn't run off the end" and "xfs: ensure that fpunch, fcollapse, and
-finsert operations are aligned to rt extent size".
+Add a new test to make sure the xfs_db path command works the way the
+author thinks it should.
 
 Signed-off-by: Darrick J. Wong <djwong@kernel.org>
 ---
- tests/xfs/759     |  102 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/759.out |    2 +
- tests/xfs/760     |   68 +++++++++++++++++++++++++++++++++++
- tests/xfs/760.out |    9 +++++
- tests/xfs/group   |    2 +
- 5 files changed, 183 insertions(+)
- create mode 100755 tests/xfs/759
- create mode 100644 tests/xfs/759.out
- create mode 100755 tests/xfs/760
- create mode 100644 tests/xfs/760.out
+ tests/xfs/917     |   98 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/917.out |   19 ++++++++++
+ tests/xfs/group   |    1 +
+ 3 files changed, 118 insertions(+)
+ create mode 100755 tests/xfs/917
+ create mode 100644 tests/xfs/917.out
 
 
-diff --git a/tests/xfs/759 b/tests/xfs/759
+diff --git a/tests/xfs/917 b/tests/xfs/917
 new file mode 100755
-index 00000000..d9031808
+index 00000000..bf21b290
 --- /dev/null
-+++ b/tests/xfs/759
-@@ -0,0 +1,102 @@
++++ b/tests/xfs/917
+@@ -0,0 +1,98 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0-or-later
 +# Copyright (c) 2021 Oracle.  All Rights Reserved.
 +#
-+# FS QA Test No. 759
++# FS QA Test No. 917
 +#
-+# This is a regression test for commit 2a6ca4baed62 ("xfs: make sure the rt
-+# allocator doesn't run off the end") which fixes an overflow error in the
-+# _near realtime allocator.  If the rt bitmap ends exactly at the end of a
-+# block and the number of rt extents is large enough to allow an allocation
-+# request larger than the maximum extent size, it's possible that during a
-+# large allocation request, the allocator will fail to constrain maxlen on the
-+# second run through the loop, and the rt bitmap range check will run right off
-+# the end of the rtbitmap file.  When this happens, xfs triggers a verifier
-+# error and returns EFSCORRUPTED.
-+
++# Make sure the xfs_db path command works the way the author thinks it does.
++# This means that it can navigate to random inodes, fails on paths that don't
++# resolve.
++#
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
 +echo "QA output created by $seq"
@@ -111,176 +100,105 @@ index 00000000..d9031808
 +
 +# real QA test starts here
 +_supported_fs xfs
++_require_xfs_db_command "path"
 +_require_scratch
-+_require_realtime
-+_require_test_program "punch-alternating"
 +
-+rm -f $seqres.full
-+
-+# Format filesystem to get the block size
++echo "Format filesystem and populate"
 +_scratch_mkfs > $seqres.full
 +_scratch_mount >> $seqres.full
 +
-+blksz=$(_get_block_size $SCRATCH_MNT)
-+rextsize=$($XFS_INFO_PROG $SCRATCH_MNT | grep realtime.*extsz | sed -e 's/^.*extsz=\([0-9]*\).*$/\1/g')
-+rextblks=$((rextsize / blksz))
-+
-+echo "blksz $blksz rextsize $rextsize rextblks $rextblks" >> $seqres.full
++mkdir $SCRATCH_MNT/a
++mkdir $SCRATCH_MNT/a/b
++$XFS_IO_PROG -f -c 'pwrite 0 61' $SCRATCH_MNT/a/c >> $seqres.full
++ln -s -f c $SCRATCH_MNT/a/d
++mknod $SCRATCH_MNT/a/e b 8 0
++ln -s -f b $SCRATCH_MNT/a/f
 +
 +_scratch_unmount
 +
-+# Format filesystem with a realtime volume whose size fits the following:
-+# 1. Longer than (XFS MAXEXTLEN * blocksize) bytes so that a large fallocate
-+#    request can create a maximally sized data fork extent mapping and then
-+#    ask the allocator for even more blocks.
-+# 2. Exactly a multiple of (NBBY * blksz * rextsize) bytes.
++echo "Check xfs_db path on directories"
++_scratch_xfs_db -c 'path /a' -c print | grep -q 'sfdir.*count.* 5$' || \
++	echo "Did not find directory /a"
 +
-+rtsize1=$((2097151 * blksz))
-+rtsize2=$((8 * blksz * rextsize))
-+rtsize=$(( $(blockdev --getsz $SCRATCH_RTDEV) * 512 ))
++_scratch_xfs_db -c 'path /a/b' -c print | grep -q sfdir || \
++	echo "Did not find empty sf directory /a/b"
 +
-+echo "rtsize1 $rtsize1 rtsize2 $rtsize2 rtsize $rtsize" >> $seqres.full
++echo "Check xfs_db path on files"
++_scratch_xfs_db -c 'path /a/c' -c print | grep -q 'core.size.*61' || \
++	echo "Did not find 61-byte file /a/c"
 +
-+test $rtsize -gt $rtsize1 || \
-+	_notrun "scratch rt device too small, need $rtsize1 bytes"
-+test $rtsize -gt $rtsize2 || \
-+	_notrun "scratch rt device too small, need $rtsize2 bytes"
++echo "Check xfs_db path on file symlinks"
++_scratch_xfs_db -c 'path /a/d' -c print | grep -q symlink || \
++	echo "Did not find symlink /a/d"
 +
-+rtsize=$((rtsize - (rtsize % rtsize2)))
++echo "Check xfs_db path on bdevs"
++_scratch_xfs_db -c 'path /a/e' -c print | grep -q 'format.*dev' || \
++	echo "Did not find bdev /a/e"
 +
-+echo "rt size will be $rtsize" >> $seqres.full
++echo "Check xfs_db path on dir symlinks"
++_scratch_xfs_db -c 'path /a/f' -c print | grep -q symlink || \
++	echo "Did not find symlink /a/f"
 +
-+_scratch_mkfs -r size=$rtsize >> $seqres.full
-+_scratch_mount >> $seqres.full
++echo "Check nonexistent path"
++_scratch_xfs_db -c 'path /does/not/exist'
 +
-+# Make sure the root directory has rtinherit set so our test file will too
-+$XFS_IO_PROG -c 'chattr +t' $SCRATCH_MNT
++echo "Check xfs_db path on file path with multiple slashes"
++_scratch_xfs_db -c 'path /a////////c' -c print | grep -q 'core.size.*61' || \
++	echo "Did not find 61-byte file /a////////c"
 +
-+# Allocate some stuff at the start, to force the first falloc of the ouch file
-+# to happen somewhere in the middle of the rt volume
-+$XFS_IO_PROG -f -c 'falloc 0 64m' "$SCRATCH_MNT/b"
-+$here/src/punch-alternating -i $((rextblks * 2)) -s $((rextblks)) "$SCRATCH_MNT/b"
++echo "Check xfs_db path on file path going in and out of /a to get to /a/c"
++_scratch_xfs_db -c 'path /a/.././a/.././a/c' -c print | grep -q 'core.size.*61' || \
++	echo "Did not find 61-byte file /a/.././a/.././a/c"
 +
-+avail="$(df -P "$SCRATCH_MNT" | awk 'END {print $4}')"1
-+toobig="$((avail * 2))"
++echo "Check xfs_db path on file path going above the root to get to /a/c"
++_scratch_xfs_db -c 'path /../../../a/c' -c print | grep -q 'core.size.*61' || \
++	echo "Did not find 61-byte file  /../../../a/c"
 +
-+# falloc the ouch file in the middle of the rt extent to exercise the near
-+# allocator in the last step.
-+$XFS_IO_PROG -f -c 'falloc 0 1g' "$SCRATCH_MNT/ouch"
++echo "Check xfs_db path on file path going to then above the root to get to /a/c"
++_scratch_xfs_db -c 'path /a/../../../a/c' -c print | grep -q 'core.size.*61' || \
++	echo "Did not find 61-byte file  /a/../../../a/c"
 +
-+# Try to get the near allocator to overflow on an allocation that matches
-+# exactly one of the rtsummary size levels.  This should return ENOSPC and
-+# not EFSCORRUPTED.
-+$XFS_IO_PROG -f -c "falloc 0 ${toobig}k" "$SCRATCH_MNT/ouch"
++echo "Check xfs_db path component that isn't a directory"
++_scratch_xfs_db -c 'path /a/c/b' -c print
 +
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/759.out b/tests/xfs/759.out
-new file mode 100644
-index 00000000..df693d50
---- /dev/null
-+++ b/tests/xfs/759.out
-@@ -0,0 +1,2 @@
-+QA output created by 759
-+fallocate: No space left on device
-diff --git a/tests/xfs/760 b/tests/xfs/760
-new file mode 100755
-index 00000000..7f2b52d4
---- /dev/null
-+++ b/tests/xfs/760
-@@ -0,0 +1,68 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0-or-later
-+# Copyright (c) 2021 Oracle.  All Rights Reserved.
-+#
-+# FS QA Test No. 760
-+#
-+# Make sure we validate realtime extent size alignment for fallocate modes.
-+# This is a regression test for fe341eb151ec ("xfs: ensure that fpunch,
-+# fcollapse, and finsert operations are aligned to rt extent size")
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs xfs
-+_require_scratch
-+_require_realtime
-+_require_xfs_io_command "fcollapse"
-+_require_xfs_io_command "finsert"
-+_require_xfs_io_command "funshare"
-+_require_xfs_io_command "fzero"
-+_require_xfs_io_command "falloc"
-+
-+rm -f $seqres.full
-+
-+# Format filesystem with a 256k realtime extent size
-+_scratch_mkfs -r extsize=256k > $seqres.full
-+_scratch_mount >> $seqres.full
-+
-+blksz=$(_get_block_size $SCRATCH_MNT)
-+rextsize=$($XFS_INFO_PROG $SCRATCH_MNT | grep realtime.*extsz | sed -e 's/^.*extsz=\([0-9]*\).*$/\1/g')
-+rextblks=$((rextsize / blksz))
-+
-+echo "blksz $blksz rextsize $rextsize rextblks $rextblks" >> $seqres.full
-+
-+# Make sure the root directory has rtinherit set so our test file will too
-+$XFS_IO_PROG -c 'chattr +t' $SCRATCH_MNT
-+
-+sz=$((rextsize * 100))
-+range="$((blksz * 3)) $blksz"
-+
-+for verb in fpunch finsert fcollapse fzero funshare falloc; do
-+	echo "test $verb"
-+	$XFS_IO_PROG -f -c "falloc 0 $sz" "$SCRATCH_MNT/b"
-+	$XFS_IO_PROG -f -c "$verb $range" "$SCRATCH_MNT/b"
-+	rm -f "$SCRATCH_MNT/b"
-+	_scratch_cycle_mount
-+done
++echo "Check xfs_db path on a dot-dot applied to a non-directory"
++_scratch_xfs_db -c 'path /a/c/../b' -c print
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/xfs/760.out b/tests/xfs/760.out
+diff --git a/tests/xfs/917.out b/tests/xfs/917.out
 new file mode 100644
-index 00000000..3d73c6fa
+index 00000000..7c613c3d
 --- /dev/null
-+++ b/tests/xfs/760.out
-@@ -0,0 +1,9 @@
-+QA output created by 760
-+test fpunch
-+test finsert
-+fallocate: Invalid argument
-+test fcollapse
-+fallocate: Invalid argument
-+test fzero
-+test funshare
-+test falloc
++++ b/tests/xfs/917.out
+@@ -0,0 +1,19 @@
++QA output created by 917
++Format filesystem and populate
++Check xfs_db path on directories
++Check xfs_db path on files
++Check xfs_db path on file symlinks
++Check xfs_db path on bdevs
++Check xfs_db path on dir symlinks
++Check nonexistent path
++/does/not/exist: No such file or directory
++Check xfs_db path on file path with multiple slashes
++Check xfs_db path on file path going in and out of /a to get to /a/c
++Check xfs_db path on file path going above the root to get to /a/c
++Check xfs_db path on file path going to then above the root to get to /a/c
++Check xfs_db path component that isn't a directory
++/a/c/b: Not a directory
++no current type
++Check xfs_db path on a dot-dot applied to a non-directory
++/a/c/../b: Not a directory
++no current type
 diff --git a/tests/xfs/group b/tests/xfs/group
-index 219a4cfe..eebe7dde 100644
+index eebe7dde..daa56787 100644
 --- a/tests/xfs/group
 +++ b/tests/xfs/group
-@@ -515,3 +515,5 @@
- 536 auto quick reflink
- 537 auto quick
+@@ -517,3 +517,4 @@
  538 auto stress
-+759 auto quick rw realtime
-+760 auto quick rw realtime collapse insert unshare zero prealloc
+ 759 auto quick rw realtime
+ 760 auto quick rw realtime collapse insert unshare zero prealloc
++917 auto quick db
 
