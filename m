@@ -2,130 +2,113 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6622DC433E0
-	for <linux-fstests@archiver.kernel.org>; Tue, 23 Mar 2021 20:58:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 057D0C433DB
+	for <linux-fstests@archiver.kernel.org>; Wed, 24 Mar 2021 07:41:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 35E7A619C2
-	for <linux-fstests@archiver.kernel.org>; Tue, 23 Mar 2021 20:58:44 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C26BC619E1
+	for <linux-fstests@archiver.kernel.org>; Wed, 24 Mar 2021 07:41:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233328AbhCWU56 (ORCPT
+        id S235687AbhCXHlU (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 23 Mar 2021 16:57:58 -0400
-Received: from mail.kernel.org ([198.145.29.99]:53224 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S233340AbhCWU5b (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 23 Mar 2021 16:57:31 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 1DA25619C2;
-        Tue, 23 Mar 2021 20:57:31 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1616533051;
-        bh=DwFqB5ZeRcy79Fu2DlrLkcLO++PTFau1DQjBnKJ0wVU=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=axK5mE6SACEBzYlJP1kIJFZVRIhKN5jPQ+GYIOe0yLrUi8r+i2kQ0M5Qq2l1CnDLD
-         QrGa3BUmFlBC0vwKhVUu4bgVuOaOmx8ijvv1mECGLWcHovskKR/TLkD0Ip+DOYb8WN
-         AReKMqBATtREEhHISOSDAvxmDZYwt2Cc0d/PSPG3u/ebxivAN3jEVB973DMl6ykdQx
-         2bNcV859yR5npnVdKDIHO0s0Gf1c59A+F5VNryauFu6M7yDBUA6qCNtKII52o+gRfO
-         9VuJi7AWF258/E3+XVkYdh8B3TiZHjRr9Pb6bdbYYi53F7GSPeXI7HFOf/5pFK2qGl
-         nkc3/Mnb+YDGA==
-Date:   Tue, 23 Mar 2021 13:57:30 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Chandan Babu R <chandanrlinux@gmail.com>
-Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH V6 05/13] xfs: Check for extent overflow when growing
- realtime bitmap/summary inodes
-Message-ID: <20210323205730.GN22100@magnolia>
-References: <20210309050124.23797-1-chandanrlinux@gmail.com>
- <20210309050124.23797-6-chandanrlinux@gmail.com>
- <20210322175652.GG1670408@magnolia>
- <87r1k56f7k.fsf@garuda>
+        Wed, 24 Mar 2021 03:41:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45708 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230177AbhCXHlC (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 24 Mar 2021 03:41:02 -0400
+Received: from mail-io1-xd31.google.com (mail-io1-xd31.google.com [IPv6:2607:f8b0:4864:20::d31])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0F09DC061763
+        for <fstests@vger.kernel.org>; Wed, 24 Mar 2021 00:41:02 -0700 (PDT)
+Received: by mail-io1-xd31.google.com with SMTP id j26so20477911iog.13
+        for <fstests@vger.kernel.org>; Wed, 24 Mar 2021 00:41:02 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=axMLytJvwrMbhFBPSvRtGIf44uvNqB4NlVi0Bt1p2rc=;
+        b=c68/cs+Ooqkei7XoovxP+MRuNAJ79t7M7BvwZGo9Gmb+NQvMnvzx0MJ0Exxlh+O23A
+         zIcqV3NPGbVSP70xMsVF+mTGqC7Uomc18ysuUrezuwxqpuhbXYRF++J8O/lnxCQx1yk9
+         aEUuEjKkgAf/pWwCh3T7dMC/S6dtGw1hQCjRcckrP5q6sdLiPCEsTT1jkvEswW0ZpPo2
+         FE51FFsGx7bYwZW16wlAK442qjWIyUfFXhUv3McfpSx7meyOZxkW0skoUFjaJXN8Qgxi
+         81GwSnF8vN7/PJqEHu/lakQIlDB1yxnuDXca1nmvIg0IWhbbnPL3gGaqoKh+v/ploub2
+         VUkQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=axMLytJvwrMbhFBPSvRtGIf44uvNqB4NlVi0Bt1p2rc=;
+        b=ilqcKCZeycMgWy7ldImytsFEr0KIF8YK9HUnMNwuhNCyOChaPXasZpxEt7NV3HnqyQ
+         L2IjjLQaQ1RneYO2McAwCxcoXaamXLseLalaO5mz0v2ZMEV9QwZ5/PyV/YSn1Yq7rkCA
+         97Mlr2MlBo84c9vg69wecRNBJwRr90kuqlx7OsyjbDrpY+NxcEkgQAgBx0reot30dzIr
+         WcSn8wCb65CU7gLhda+Dt4z57lbeXPQ1V/oARODu27dNwoW2dBh+Xhzx4EyG19zomNkF
+         pkzEAJCwrf+fU3P+Mo8gF4e85n0wTv0B+KG+WfUdN/c5ge3ApkeAVycd8Y7eArFjML3T
+         PGlg==
+X-Gm-Message-State: AOAM533DMugEwe7V6ops3uTwJyN0CAijFdhFPdmdynziL200sm+z8Mq0
+        pMdR8Axe+NY5zct4zBrdKtvfQONRzUzotSjNYdA=
+X-Google-Smtp-Source: ABdhPJxbvBnNlVIyssUrHPWjW93i32plnH7P2gQ7MX2xhkLq1mViOJu0zhjt5lhG4JuTvmKYfBTz+aJSncCpwaY3K6I=
+X-Received: by 2002:a5e:8d01:: with SMTP id m1mr1454106ioj.72.1616571661554;
+ Wed, 24 Mar 2021 00:41:01 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <87r1k56f7k.fsf@garuda>
+References: <20210322134522.916512-1-brauner@kernel.org> <20210322134522.916512-2-brauner@kernel.org>
+In-Reply-To: <20210322134522.916512-2-brauner@kernel.org>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Wed, 24 Mar 2021 09:40:50 +0200
+Message-ID: <CAOQ4uxg6KyJLT9NnxFEnFPAkc02A0mmWSZphEd5to625x1cKxw@mail.gmail.com>
+Subject: Re: [PATCH v10 1/6] generic/631: add test for detached mount propagation
+To:     Christian Brauner <brauner@kernel.org>
+Cc:     Eryu Guan <guan@eryu.me>, fstests <fstests@vger.kernel.org>,
+        Christoph Hellwig <hch@lst.de>,
+        "Darrick J . Wong" <djwong@kernel.org>,
+        David Howells <dhowells@redhat.com>,
+        Christian Brauner <christian.brauner@ubuntu.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Mar 23, 2021 at 09:21:27PM +0530, Chandan Babu R wrote:
-> On 22 Mar 2021 at 23:26, Darrick J. Wong wrote:
-> > On Tue, Mar 09, 2021 at 10:31:16AM +0530, Chandan Babu R wrote:
-> >> Verify that XFS does not cause realtime bitmap/summary inode fork's
-> >> extent count to overflow when growing the realtime volume associated
-> >> with a filesystem.
-> >>
-> >> Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-> >> Signed-off-by: Chandan Babu R <chandanrlinux@gmail.com>
-> >
-> > Soo... I discovered that this test doesn't pass with multiblock
-> > directories:
-> 
-> Thanks for the bug report and the description of the corresponding solution. I
-> am fixing the tests and will soon post corresponding patches to the mailing
-> list.
+On Mon, Mar 22, 2021 at 3:46 PM Christian Brauner <brauner@kernel.org> wrote:
+>
+> From: Christian Brauner <christian.brauner@ubuntu.com>
+>
+> Regression test to verify that creating a series of detached mounts,
+> attaching them to the filesystem, and unmounting them does not trigger an
+> integer overflow in ns->mounts causing the kernel to block any new mounts in
+> count_mounts() and returning ENOSPC because it falsely assumes that the
+> maximum number of mounts in the mount namespace has been reached, i.e. it
+> thinks it can't fit the new mounts into the mount namespace anymore.
+>
+> The test is written in a way that it will leave the host's mount
+> namespace intact so we are sure to never make the host's mount namespace
+> unuseable!
+>
+> Link: https://git.kernel.org/torvalds/c/ee2e3f50629f17b0752b55b2566c15ce8dafb557
+> Cc: Eryu Guan <guan@eryu.me>
+> Cc: David Howells <dhowells@redhat.com>
+> Reviewed-by: Christoph Hellwig <hch@lst.de>
+> Signed-off-by: Christian Brauner <christian.brauner@ubuntu.com>
+> ---
+> /* v1 - v8 */
+> patch not present
+>
+> /* v9 */
+> - Christian Brauner <christian.brauner@ubuntu.com>:
+>   - Rebased on current master.
+>
+> /* v10 */
+> - Eryu Guan <guan@eryu.me>:
+>   - Add missing checks whether test is supported.
+>   - Move status=$? assignment up.
+> ---
 
-Also, I found a problem with xfs/534 when it does the direct write tests
-to a pmem volume with DAX enabled:
+Technical nit: why did you add this extra --- line?
+It causes all the patch changelog to appear in the commit message.
+I don't think that was your intention? and I don't think it adds valuable
+into to git log.
 
---- /tmp/fstests/tests/xfs/534.out      2021-03-21 11:44:09.384407426 -0700
-+++ /var/tmp/fstests/xfs/534.out.bad    2021-03-23 13:32:15.898301839 -0700
-@@ -5,7 +5,4 @@
- Fallocate 15 blocks
- Buffered write to every other block of fallocated space
- Verify $testfile's extent count
--* Direct write to unwritten extent
--Fallocate 15 blocks
--Direct write to every other block of fallocated space
--Verify $testfile's extent count
-+Extent count overflow check failed: nextents = 11
-
-looking at the xfs_bmap output for $testfile shows:
-
-/opt/testfile:
- EXT: FILE-OFFSET      BLOCK-RANGE      AG AG-OFFSET        TOTAL FLAGS
-   0: [0..7]:          208..215          0 (208..215)           8 010000
-   1: [8..15]:         216..223          0 (216..223)           8 000000
-   2: [16..23]:        224..231          0 (224..231)           8 010000
-   3: [24..31]:        232..239          0 (232..239)           8 000000
-   4: [32..39]:        240..247          0 (240..247)           8 010000
-   5: [40..47]:        248..255          0 (248..255)           8 000000
-   6: [48..55]:        256..263          0 (256..263)           8 010000
-   7: [56..63]:        264..271          0 (264..271)           8 000000
-   8: [64..71]:        272..279          0 (272..279)           8 010000
-   9: [72..79]:        280..287          0 (280..287)           8 000000
-  10: [80..119]:       288..327          0 (288..327)          40 010000
-
-Which is ... odd since the same direct write gets cut off after writing
-to block 7 (like you'd expect since it's the same function) when DAX
-isn't enabled...
-
-...OH, I see the problem.  For a non-DAX direct write,
-xfs_iomap_write_direct will allocate an unwritten block into a hole, but
-if the block was already mapped (written or unwritten) it won't do
-anything at all.  For that case, XFS_IEXT_ADD_NOSPLIT_CNT is sufficient,
-because in the worst case we add one extent to the data fork.
-
-For DAX writes, however, the behavior is different:
-
-	if (IS_DAX(VFS_I(ip))) {
-		bmapi_flags = XFS_BMAPI_CONVERT | XFS_BMAPI_ZERO;
-		if (imap->br_state == XFS_EXT_UNWRITTEN) {
-			force = true;
-			dblocks = XFS_DIOSTRAT_SPACE_RES(mp, 0) << 1;
-		}
-	}
-
-This tells xfs_bmapi_write that we want to /convert/ an unwritten extent
-to written, and we want to zero the blocks.  If we're dax-writing into
-the middle of an unwritten range, this will cause a split.  The correct
-parameter there would be XFS_IEXT_WRITE_UNWRITTEN_CNT.  Would you mind
-sending a kernel patch to fix that?
-
---D
-
-> --
-> chandan
+Thanks,
+Amir.
