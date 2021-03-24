@@ -2,161 +2,192 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1DF6BC433C1
-	for <linux-fstests@archiver.kernel.org>; Wed, 24 Mar 2021 10:47:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 01236C433DB
+	for <linux-fstests@archiver.kernel.org>; Wed, 24 Mar 2021 11:25:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D5FEB619FE
-	for <linux-fstests@archiver.kernel.org>; Wed, 24 Mar 2021 10:47:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A9B9861A0B
+	for <linux-fstests@archiver.kernel.org>; Wed, 24 Mar 2021 11:25:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231426AbhCXKrD (ORCPT
+        id S234712AbhCXLZC (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 24 Mar 2021 06:47:03 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57894 "EHLO
+        Wed, 24 Mar 2021 07:25:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37860 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230316AbhCXKqy (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 24 Mar 2021 06:46:54 -0400
-Received: from mail-pl1-x62e.google.com (mail-pl1-x62e.google.com [IPv6:2607:f8b0:4864:20::62e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 46770C061763;
-        Wed, 24 Mar 2021 03:46:53 -0700 (PDT)
-Received: by mail-pl1-x62e.google.com with SMTP id q11so7706153pld.11;
-        Wed, 24 Mar 2021 03:46:53 -0700 (PDT)
+        with ESMTP id S234616AbhCXLYs (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 24 Mar 2021 07:24:48 -0400
+Received: from mail-il1-x129.google.com (mail-il1-x129.google.com [IPv6:2607:f8b0:4864:20::129])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 29CFCC061763
+        for <fstests@vger.kernel.org>; Wed, 24 Mar 2021 04:24:48 -0700 (PDT)
+Received: by mail-il1-x129.google.com with SMTP id y17so9378786ila.6
+        for <fstests@vger.kernel.org>; Wed, 24 Mar 2021 04:24:48 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=references:user-agent:from:to:cc:subject:in-reply-to:date
-         :message-id:mime-version;
-        bh=cRPbWLqsrCVnDSAZCiqDcrV/O58L/L3nAvuvsKRM09k=;
-        b=MNZxKObuZplvjdA4uShIhvxfLASZR3VyMgGYAeeC6D93eC0IEAjr6ibYTDbuaHhPz2
-         Onoo4GpvXgq1G6nUOAazqlBTD8M8MQQUwcTgZplbaDmaJ85ULF7YjTMdhS0VCnPLS3qf
-         C9vlr+JDL1lTzhIDOvgxMiGukFh51w4j++aYuYU6YcYFVMsAFI6SbwvNBl40iCZVfptH
-         5aiaH091jPrOyWT9F83ZWkoh5rcLQ/AGpS1cs0lQ1Wx+3kO9w/d+6DPIGHvqmj1r0ZMZ
-         GUL/eZ2WLrh3raeY1pNE+3Ac7EI6VfdiucC77UxMICYl1Tj+CU0Jc8M6tWEBX7eACzsL
-         XpwA==
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=eQHi/fdhKfbXq7RZ9dlotKK0qV1xLdowqt4c6TLvC4M=;
+        b=pz68fhAajYhcrNLW9SGf0610MsQvzldh8QX7EbesUw0vD9FUewoWq+rDfDPdVFJptI
+         MSCXE++sTQyn+B9LLw3j2Ehaw5cbwoBZ50V3VZnp6PNJmOfUz534QlUPRCRJNYdXGYZK
+         30C/nW7vCdUBFVyX0Xa2fnJ6W80/GjUcztxnuMFB1vT94p903QXYZ54l/JqLvFDjrg+i
+         5GLiYF0f47mpBetGocc8SbHNAj3oZo+WROCWQ8/7P1d2oPL2KIpCgtOVTktkG0+zjAui
+         ozcOM8OQlHDLfS4roerOjoGGlRhSheopd7wWDSlLUs/wAYxmrynsA/hxrbIuPekT/2Tr
+         Mvbg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:references:user-agent:from:to:cc:subject
-         :in-reply-to:date:message-id:mime-version;
-        bh=cRPbWLqsrCVnDSAZCiqDcrV/O58L/L3nAvuvsKRM09k=;
-        b=q1KtGx75cNdIZZ7BYuKwf3CDfWWY3R1eBiUzUub6sCOPjqzzfBvzQcu1ub5eA7/gD6
-         F2jbLezU0xwLoQpE53N8PpRtYdvdVR5lEzXVCE/COToojSj9BLA1QwHDw4I/0D+hX22X
-         Kjjb5Vs1AINVGaGoUgi1KlXQzPMdNYB/YrK6MRzCfv2uDHtf8wfRJIh37Ntuo1VmGMVb
-         KWO2J0lg4c5txttG+1NiR1bPrr7QLxbP2IXHhZ/VYuM07vY1uzMWPRvWjmV3315EpmwV
-         nw/GE8bf5UMC3kFb6VTN+jqnMP3IFQCH9BsuXoOQByi1kQS9PnP8R1d7KUkG0GhBEHQg
-         LpNQ==
-X-Gm-Message-State: AOAM533AQxONv47mtwEEftB/ovEOEjmhWihflmN4MkCdJEIiJ13jUJ2/
-        4y5/OI7CplggKUvkifXSjGgIw6gJvRk=
-X-Google-Smtp-Source: ABdhPJxBHn680TUyI69FPCUZ4lFr0WESaNG9dSt8EaNZw1xQq7ArueVfYBE1i6MCzA0z33JO0XWpxw==
-X-Received: by 2002:a17:90a:df91:: with SMTP id p17mr2837067pjv.23.1616582812388;
-        Wed, 24 Mar 2021 03:46:52 -0700 (PDT)
-Received: from garuda ([171.61.69.55])
-        by smtp.gmail.com with ESMTPSA id f2sm2118752pju.46.2021.03.24.03.46.50
-        (version=TLS1_2 cipher=ECDHE-ECDSA-CHACHA20-POLY1305 bits=256/256);
-        Wed, 24 Mar 2021 03:46:51 -0700 (PDT)
-References: <20210309050124.23797-1-chandanrlinux@gmail.com> <20210309050124.23797-6-chandanrlinux@gmail.com> <20210322175652.GG1670408@magnolia> <87r1k56f7k.fsf@garuda> <20210323205730.GN22100@magnolia>
-User-agent: mu4e 1.0; emacs 26.1
-From:   Chandan Babu R <chandanrlinux@gmail.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH V6 05/13] xfs: Check for extent overflow when growing realtime bitmap/summary inodes
-In-reply-to: <20210323205730.GN22100@magnolia>
-Date:   Wed, 24 Mar 2021 16:16:48 +0530
-Message-ID: <871rc43k2v.fsf@garuda>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=eQHi/fdhKfbXq7RZ9dlotKK0qV1xLdowqt4c6TLvC4M=;
+        b=Sb0l/CXxQu8Aihg8trLOrWi0vEvyHmoeCbY96cAef5gNcLqc7EwHgyKKIagZUATtsy
+         zcJVnMqvQm7ijIIgDH2yO42k+2naXYPGIRZj+XZ4okxwMsm5zzXR7jPmcTZ0lMynrKtO
+         JsRIv5pN2IDedenlp51kA8C+zGWjh7MMpspBn7i9Bq5+P39xdVpFWB+XqPBXkK1qfsaQ
+         J/8mudO8VEz7LTtzTWvFMmv3RX1YOqO1cXUSXU3/uwbGnsw+oqSAatnGmtHRdAPym5RQ
+         uV6Qm4h/oXOde1uNHeI1ZWctaPbJrmT8lgtZEUtFT5NYwtJvfTsr5AW4fQrJrAvMYnAR
+         HZIQ==
+X-Gm-Message-State: AOAM532dpzvAYLg0QjZNgc8VVOmlmyCjh1ReYe7wXwT0UNS0N1gneK8x
+        y8oNSbK2OTosQerUhUp/9r67x6SAlxA3TOCgjIvZPkqnc5I=
+X-Google-Smtp-Source: ABdhPJyYv31NTmwTRsE/F4Xp2igXtTfAd7mP+EV+LSkdCfBUeQKIiDl/7820Fa5j1JMUMA8oGcj+2YJsfM0QyKJZBSQ=
+X-Received: by 2002:a92:50b:: with SMTP id q11mr2306313ile.250.1616585087668;
+ Wed, 24 Mar 2021 04:24:47 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain
+References: <20210322134522.916512-1-brauner@kernel.org> <20210322135002.6tyexslvqfiaari7@wittgenstein>
+ <20210322142115.4ehetdcopvmvs7fl@wittgenstein> <CAOQ4uxjB3aDehSeomAvi-7rUJRZmmR=GQFAqod9SzSoGu5PjnA@mail.gmail.com>
+ <20210324084126.ke7mden2s3a35koa@wittgenstein>
+In-Reply-To: <20210324084126.ke7mden2s3a35koa@wittgenstein>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Wed, 24 Mar 2021 13:24:36 +0200
+Message-ID: <CAOQ4uxjwN+3xAjen5G8pRccYX_4bSCrcQUR5pqi2bFRpGPeSqw@mail.gmail.com>
+Subject: Re: [PATCH v10 0/6] fstests: add idmapped mounts tests
+To:     Christian Brauner <christian.brauner@ubuntu.com>
+Cc:     Christian Brauner <brauner@kernel.org>, Eryu Guan <guan@eryu.me>,
+        fstests <fstests@vger.kernel.org>,
+        Christoph Hellwig <hch@lst.de>,
+        "Darrick J . Wong" <djwong@kernel.org>,
+        David Howells <dhowells@redhat.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 24 Mar 2021 at 02:27, Darrick J. Wong wrote:
-> On Tue, Mar 23, 2021 at 09:21:27PM +0530, Chandan Babu R wrote:
->> On 22 Mar 2021 at 23:26, Darrick J. Wong wrote:
->> > On Tue, Mar 09, 2021 at 10:31:16AM +0530, Chandan Babu R wrote:
->> >> Verify that XFS does not cause realtime bitmap/summary inode fork's
->> >> extent count to overflow when growing the realtime volume associated
->> >> with a filesystem.
->> >>
->> >> Reviewed-by: Darrick J. Wong <djwong@kernel.org>
->> >> Signed-off-by: Chandan Babu R <chandanrlinux@gmail.com>
->> >
->> > Soo... I discovered that this test doesn't pass with multiblock
->> > directories:
->>
->> Thanks for the bug report and the description of the corresponding solution. I
->> am fixing the tests and will soon post corresponding patches to the mailing
->> list.
+On Wed, Mar 24, 2021 at 10:41 AM Christian Brauner
+<christian.brauner@ubuntu.com> wrote:
 >
-> Also, I found a problem with xfs/534 when it does the direct write tests
-> to a pmem volume with DAX enabled:
+> On Wed, Mar 24, 2021 at 10:03:43AM +0200, Amir Goldstein wrote:
+> > On Mon, Mar 22, 2021 at 4:22 PM Christian Brauner
+> > <christian.brauner@ubuntu.com> wrote:
+> > >
+> > > On Mon, Mar 22, 2021 at 02:50:02PM +0100, Christian Brauner wrote:
+> > > > On Mon, Mar 22, 2021 at 02:45:16PM +0100, Christian Brauner wrote:
+> > > > > From: Christian Brauner <christian.brauner@ubuntu.com>
+> > > > >
+> > > > > Hey everyone,
+> > > > >
+> > > > > This series is available from:
+> > > > > https://git.kernel.org/brauner/xfstests-dev/h/idmapped_mounts
+> > > > > https://gitlab.com/brauner/xfstests/-/tree/idmapped_mounts
+> > > > > https://github.com/brauner/xfstests/tree/idmapped_mounts
+> > > >
+> > > > I sent this series from my kernel.org mail address and patch 2/6 hasn't
+> > > > made it through this time too. So it seems that vger is rejecting it due
+> > > > to its size is my guess. I'll go poing the #korg folks to ask what's
+> > > > going on and whether that can be handled.
+> > >
+> > > Ok, Konstantin confirmed that patch 2/6 got dropped because of it's
+> > > size. Nothing to do about this now but just as an fyi.
+> > >
+> >
+> > Since 2/6 got dropped, I'll write a small nit here which is also
 >
-> --- /tmp/fstests/tests/xfs/534.out      2021-03-21 11:44:09.384407426 -0700
-> +++ /var/tmp/fstests/xfs/534.out.bad    2021-03-23 13:32:15.898301839 -0700
-> @@ -5,7 +5,4 @@
->  Fallocate 15 blocks
->  Buffered write to every other block of fallocated space
->  Verify $testfile's extent count
-> -* Direct write to unwritten extent
-> -Fallocate 15 blocks
-> -Direct write to every other block of fallocated space
-> -Verify $testfile's extent count
-> +Extent count overflow check failed: nextents = 11
+> You could still pull it from above. I don't think resending would retain
+> the patch afaict until vger has been ported by Konstantin.
+>
+> > relevant to the rest of the series:
+> >
+> > --- a/tests/generic/group
+> > +++ b/tests/generic/group
+> > @@ -634,3 +634,4 @@
+> >  629 auto quick rw copy_range
+> >  630 auto quick rw dedupe clone
+> >  631 auto quick mount
+> > +632 auto atime attr cap io_uring mount perms quick rw unlink
+> >
+> > This is a mouthful of test tags, but that doesn't hurt.
+> > I would personally not bother with obscure tags like 'unlink' but whatever.
+> >
+> > Two things I would request are:
+> > 1. Keep 'auto quick' before all other tags. There is no strong rule about
+> >     this format, but that's the common practice and it makes sense IMO
+> >     because -g auto and -g quick are the far more commonly used groups of
+> >     tests, so it's convenient to be able to 'eye grep' those tests in
+> > the group file.
+> > 2. Please tags all the idmapped tests with a tag 'idmapped' (or whatever)
+> >     This would be used for running tests with -g idmapped for quick sanity
+> >     when modifiying idmapped mounts related code
+>
+> Ok, I'll wait for Eryu to respond (Since I assume he'll be the one in
+> charge of applying it?)
 
-The inode extent overflow reported above was actually due to the buffered
-write operation. But it does occur with direct write operation as well.
+He will.
 
-I was able to recreate the bug with an emulated pmem device on my qemu guest.
+Meanwhile, found a bug in Makefile:
 
->
-> looking at the xfs_bmap output for $testfile shows:
->
-> /opt/testfile:
->  EXT: FILE-OFFSET      BLOCK-RANGE      AG AG-OFFSET        TOTAL FLAGS
->    0: [0..7]:          208..215          0 (208..215)           8 010000
->    1: [8..15]:         216..223          0 (216..223)           8 000000
->    2: [16..23]:        224..231          0 (224..231)           8 010000
->    3: [24..31]:        232..239          0 (232..239)           8 000000
->    4: [32..39]:        240..247          0 (240..247)           8 010000
->    5: [40..47]:        248..255          0 (248..255)           8 000000
->    6: [48..55]:        256..263          0 (256..263)           8 010000
->    7: [56..63]:        264..271          0 (264..271)           8 000000
->    8: [64..71]:        272..279          0 (272..279)           8 010000
->    9: [72..79]:        280..287          0 (280..287)           8 000000
->   10: [80..119]:       288..327          0 (288..327)          40 010000
->
-> Which is ... odd since the same direct write gets cut off after writing
-> to block 7 (like you'd expect since it's the same function) when DAX
-> isn't enabled...
->
-> ...OH, I see the problem.  For a non-DAX direct write,
-> xfs_iomap_write_direct will allocate an unwritten block into a hole, but
-> if the block was already mapped (written or unwritten) it won't do
-> anything at all.  For that case, XFS_IEXT_ADD_NOSPLIT_CNT is sufficient,
-> because in the worst case we add one extent to the data fork.
->
-> For DAX writes, however, the behavior is different:
->
-> 	if (IS_DAX(VFS_I(ip))) {
-> 		bmapi_flags = XFS_BMAPI_CONVERT | XFS_BMAPI_ZERO;
-> 		if (imap->br_state == XFS_EXT_UNWRITTEN) {
-> 			force = true;
-> 			dblocks = XFS_DIOSTRAT_SPACE_RES(mp, 0) << 1;
-> 		}
-> 	}
->
-> This tells xfs_bmapi_write that we want to /convert/ an unwritten extent
-> to written, and we want to zero the blocks.  If we're dax-writing into
-> the middle of an unwritten range, this will cause a split.  The correct
-> parameter there would be XFS_IEXT_WRITE_UNWRITTEN_CNT.  Would you mind
-> sending a kernel patch to fix that?
+--- a/src/idmapped-mounts/Makefile
++++ b/src/idmapped-mounts/Makefile
+@@ -25,11 +25,11 @@ depend: .dep
 
-Sure, I will work on fixing both the buffered and direct IO extent overflow
-issues.
+ include $(BUILDRULES)
 
-Thanks for reporting the bug.
+-idmapped-mounts:
++idmapped-mounts: $(CFILES_IDMAPPED_MOUNTS)
+        @echo "    [CC]    $@"
+        $(Q)$(LTLINK) $(CFILES_IDMAPPED_MOUNTS) -o $@ $(CFLAGS)
+$(LDFLAGS) $(LDLIBS)
 
---
-chandan
+-mount-idmapped:
++mount-idmapped: $(CFILES_MOUNT_IDMAPPED)
+        @echo "    [CC]    $@"
+        $(Q)$(LTLINK) $(CFILES_MOUNT_IDMAPPED) -o $@ $(CFLAGS)
+$(LDFLAGS) $(LDLIBS)
+ ---
+
+And in parsing of /proc/<pid>/ns/user:
+
+--- a/src/idmapped-mounts/mount-idmapped.c
++++ b/src/idmapped-mounts/mount-idmapped.c
+@@ -175,7 +175,7 @@ static int write_id_mapping(idmap_type_t map_type,
+pid_t pid, const char *buf, s
+        int fd = -EBADF, setgroups_fd = -EBADF;
+        int fret = -1;
+        int ret;
+-       char path[STRLITERALLEN("/proc") + INTTYPE_TO_STRLEN(pid_t) +
++       char path[STRLITERALLEN("/proc/") + INTTYPE_TO_STRLEN(pid_t) +
+                  STRLITERALLEN("/setgroups") + 1];
+
+        if (geteuid() != 0 && map_type == ID_TYPE_GID) {
+@@ -273,7 +273,7 @@ static int get_userns_fd_from_idmap(struct list *idmap)
+ {
+        int ret;
+        pid_t pid;
+-       char path_ns[STRLITERALLEN("/proc") + INTTYPE_TO_STRLEN(pid_t) +
++       char path_ns[STRLITERALLEN("/proc/") + INTTYPE_TO_STRLEN(pid_t) +
+                  STRLITERALLEN("/ns/user") + 1];
+
+        pid = do_clone(get_userns_fd_cb, NULL, CLONE_NEWUSER | CLONE_NEWNS);
+@@ -364,7 +364,7 @@ int main(int argc, char *argv[])
+        while ((ret = getopt_long_only(argc, argv, "", longopts,
+&index)) != -1) {
+                switch (ret) {
+                case 'a':
+-                       if (strnequal(optarg, "/proc",
+STRLITERALLEN("/proc/"))) {
++                       if (strnequal(optarg, "/proc/",
+STRLITERALLEN("/proc/"))) {
+                                fd_userns = open(optarg, O_RDONLY | O_CLOEXEC);
+---
+
+Thanks,
+Amir.
