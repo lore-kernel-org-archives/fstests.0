@@ -2,79 +2,51 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
 	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 45493C433DB
-	for <linux-fstests@archiver.kernel.org>; Wed, 24 Mar 2021 13:34:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2721CC433E0
+	for <linux-fstests@archiver.kernel.org>; Wed, 24 Mar 2021 13:46:51 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id EAA0E61A07
-	for <linux-fstests@archiver.kernel.org>; Wed, 24 Mar 2021 13:34:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0184861A07
+	for <linux-fstests@archiver.kernel.org>; Wed, 24 Mar 2021 13:46:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235397AbhCXNeQ (ORCPT
+        id S235579AbhCXNqS (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 24 Mar 2021 09:34:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37912 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235394AbhCXNeF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 24 Mar 2021 09:34:05 -0400
-Received: from mail-il1-x12e.google.com (mail-il1-x12e.google.com [IPv6:2607:f8b0:4864:20::12e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0A751C061763
-        for <fstests@vger.kernel.org>; Wed, 24 Mar 2021 06:34:05 -0700 (PDT)
-Received: by mail-il1-x12e.google.com with SMTP id d2so21361213ilm.10
-        for <fstests@vger.kernel.org>; Wed, 24 Mar 2021 06:34:05 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=GVYBnF/ZIvHHeDu/Z2fGWTfPyfLqmWcAAv8QPlOQ4uU=;
-        b=KIx8oxNoku2ZREyxos3qmk+2uCUUgo52c5kfSIfDr7I+/alpc+07dHkZQYtx1njzpS
-         6rZmnyW5jYTxxghhNlpmftG8uOpyQFpKUQAbIzoJyLCgFLC1DfVde2jI1EwDhx0YZ04i
-         MLd3injSlHpPMnkDBos03C0vkZJO/ddJSCwVkSczTUBBOEH35UNCAneHnxLo07qNR1zE
-         L0DV21HcP8YBKqOhM7xmamVOlubpolgqZcpVc0aaQZMIFctm7DyE+rmsCq/zK1X0dLZX
-         smhdaDI/rrRM4m7nI3BvaGlf1Xrd8DT17FMZn/SWtLDhl0SjkeTC+Y6TYdwgZPwZJcQe
-         gzAA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=GVYBnF/ZIvHHeDu/Z2fGWTfPyfLqmWcAAv8QPlOQ4uU=;
-        b=APHJueH9c8y9/sOPoBBavWUW84F8DwbKBVPMmvJKi7a6Q97Apv8jU7uiMhDssMfyeL
-         NvVB32+yZatBsj3li+X176AaLsdb5Dn2qFxQ4owr8lNb2URoTMcauscQm2eOprN1pxB1
-         wya2zrjzLBI4pdXhnBFcI+wweXXF779gUaQNZ4xlFGQizTyafpOhXdS9K34NmaRbpKq4
-         6hppeiu5vwPxlFCUBWVF3/aXah67Es7vEajqU6p3XIDZr3m9hL9vjtmH4z3yeRaVQsyc
-         6T60c5xArdvXivUpEiCIhohr5hkUnldAvhVDLJdD934G90x5BHUd33qqpSVcHQRLKo3n
-         B6rA==
-X-Gm-Message-State: AOAM5323W8rwcXp0Sjm7kaWFkdrPudOT6iOxyPa7M3VBRq6HC6LUpAJo
-        +aGExp62ZJhqRhOtADwohqPNkObdgwBiW6BMFsLgOO+Snkg=
-X-Google-Smtp-Source: ABdhPJw8zt10I3PryuEs1ANwXthTW8sQC5wM0MAaN9kSB52hybVAMmWYWtKtCn/LCvg01YBDWpffaSRMJlji0BcK8Fk=
-X-Received: by 2002:a92:da90:: with SMTP id u16mr2700580iln.275.1616592844322;
- Wed, 24 Mar 2021 06:34:04 -0700 (PDT)
-MIME-Version: 1.0
-References: <20210322134522.916512-1-brauner@kernel.org> <20210322135002.6tyexslvqfiaari7@wittgenstein>
- <20210322142115.4ehetdcopvmvs7fl@wittgenstein> <CAOQ4uxjB3aDehSeomAvi-7rUJRZmmR=GQFAqod9SzSoGu5PjnA@mail.gmail.com>
- <20210324084126.ke7mden2s3a35koa@wittgenstein> <CAOQ4uxjwN+3xAjen5G8pRccYX_4bSCrcQUR5pqi2bFRpGPeSqw@mail.gmail.com>
-In-Reply-To: <CAOQ4uxjwN+3xAjen5G8pRccYX_4bSCrcQUR5pqi2bFRpGPeSqw@mail.gmail.com>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Wed, 24 Mar 2021 15:33:53 +0200
-Message-ID: <CAOQ4uxgEkB++O3i12_xa9OTwsudu+Y6COUitJaW=+0FcBiA6oQ@mail.gmail.com>
-Subject: Re: [PATCH v10 0/6] fstests: add idmapped mounts tests
-To:     Christian Brauner <christian.brauner@ubuntu.com>
+        Wed, 24 Mar 2021 09:46:18 -0400
+Received: from mail.kernel.org ([198.145.29.99]:49370 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S235573AbhCXNqB (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 24 Mar 2021 09:46:01 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 81772619E8;
+        Wed, 24 Mar 2021 13:45:58 +0000 (UTC)
+Date:   Wed, 24 Mar 2021 14:45:54 +0100
+From:   Christian Brauner <christian.brauner@ubuntu.com>
+To:     Amir Goldstein <amir73il@gmail.com>
 Cc:     Christian Brauner <brauner@kernel.org>, Eryu Guan <guan@eryu.me>,
         fstests <fstests@vger.kernel.org>,
         Christoph Hellwig <hch@lst.de>,
         "Darrick J . Wong" <djwong@kernel.org>,
         David Howells <dhowells@redhat.com>
-Content-Type: text/plain; charset="UTF-8"
+Subject: Re: [PATCH v10 0/6] fstests: add idmapped mounts tests
+Message-ID: <20210324134554.rio27zsmsfzs6eqa@wittgenstein>
+References: <20210322134522.916512-1-brauner@kernel.org>
+ <20210322135002.6tyexslvqfiaari7@wittgenstein>
+ <20210322142115.4ehetdcopvmvs7fl@wittgenstein>
+ <CAOQ4uxjB3aDehSeomAvi-7rUJRZmmR=GQFAqod9SzSoGu5PjnA@mail.gmail.com>
+ <20210324084126.ke7mden2s3a35koa@wittgenstein>
+ <CAOQ4uxjwN+3xAjen5G8pRccYX_4bSCrcQUR5pqi2bFRpGPeSqw@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <CAOQ4uxjwN+3xAjen5G8pRccYX_4bSCrcQUR5pqi2bFRpGPeSqw@mail.gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Mar 24, 2021 at 1:24 PM Amir Goldstein <amir73il@gmail.com> wrote:
->
+On Wed, Mar 24, 2021 at 01:24:36PM +0200, Amir Goldstein wrote:
 > On Wed, Mar 24, 2021 at 10:41 AM Christian Brauner
 > <christian.brauner@ubuntu.com> wrote:
 > >
@@ -132,32 +104,40 @@ On Wed, Mar 24, 2021 at 1:24 PM Amir Goldstein <amir73il@gmail.com> wrote:
 > >
 > > Ok, I'll wait for Eryu to respond (Since I assume he'll be the one in
 > > charge of applying it?)
->
+> 
 > He will.
->
+> 
 > Meanwhile, found a bug in Makefile:
->
+> 
 > --- a/src/idmapped-mounts/Makefile
 > +++ b/src/idmapped-mounts/Makefile
 > @@ -25,11 +25,11 @@ depend: .dep
->
+> 
 >  include $(BUILDRULES)
->
+> 
 > -idmapped-mounts:
 > +idmapped-mounts: $(CFILES_IDMAPPED_MOUNTS)
 >         @echo "    [CC]    $@"
 >         $(Q)$(LTLINK) $(CFILES_IDMAPPED_MOUNTS) -o $@ $(CFLAGS)
 > $(LDFLAGS) $(LDLIBS)
->
+> 
 > -mount-idmapped:
 > +mount-idmapped: $(CFILES_MOUNT_IDMAPPED)
 >         @echo "    [CC]    $@"
 >         $(Q)$(LTLINK) $(CFILES_MOUNT_IDMAPPED) -o $@ $(CFLAGS)
 > $(LDFLAGS) $(LDLIBS)
+
+Stupid question maybe but what is the reason for this change?
+It builds fine without those lines. 
+
+Building idmapped-mounts
+[CC]    idmapped-mounts
+[CC]    mount-idmapped
+
 >  ---
->
+> 
 > And in parsing of /proc/<pid>/ns/user:
->
+> 
 > --- a/src/idmapped-mounts/mount-idmapped.c
 > +++ b/src/idmapped-mounts/mount-idmapped.c
 > @@ -175,7 +175,7 @@ static int write_id_mapping(idmap_type_t map_type,
@@ -168,7 +148,13 @@ On Wed, Mar 24, 2021 at 1:24 PM Amir Goldstein <amir73il@gmail.com> wrote:
 > -       char path[STRLITERALLEN("/proc") + INTTYPE_TO_STRLEN(pid_t) +
 > +       char path[STRLITERALLEN("/proc/") + INTTYPE_TO_STRLEN(pid_t) +
 >                   STRLITERALLEN("/setgroups") + 1];
->
+
+Thanks. Though it's very unlikely for the kernel to assign a pid that is
+at least 100 billion. Even newest systems only bump the maximum pid
+number to 4m and we would've thankfully caught this in the snprintf()s
+below.
+
+> 
 >         if (geteuid() != 0 && map_type == ID_TYPE_GID) {
 > @@ -273,7 +273,7 @@ static int get_userns_fd_from_idmap(struct list *idmap)
 >  {
@@ -177,7 +163,7 @@ On Wed, Mar 24, 2021 at 1:24 PM Amir Goldstein <amir73il@gmail.com> wrote:
 > -       char path_ns[STRLITERALLEN("/proc") + INTTYPE_TO_STRLEN(pid_t) +
 > +       char path_ns[STRLITERALLEN("/proc/") + INTTYPE_TO_STRLEN(pid_t) +
 >                   STRLITERALLEN("/ns/user") + 1];
->
+> 
 >         pid = do_clone(get_userns_fd_cb, NULL, CLONE_NEWUSER | CLONE_NEWNS);
 > @@ -364,7 +364,7 @@ int main(int argc, char *argv[])
 >         while ((ret = getopt_long_only(argc, argv, "", longopts,
@@ -189,33 +175,10 @@ On Wed, Mar 24, 2021 at 1:24 PM Amir Goldstein <amir73il@gmail.com> wrote:
 > +                       if (strnequal(optarg, "/proc/",
 > STRLITERALLEN("/proc/"))) {
 >                                 fd_userns = open(optarg, O_RDONLY | O_CLOEXEC);
-> ---
->
 
-And also:
+That's currently not used by the code and would've simply meant we
+failed.
 
-@@ -402,12 +402,15 @@ int main(int argc, char *argv[])
-                exit(EXIT_FAILURE);
-        }
-
--       if (!list_empty(&active_map)) {
-+       if (!list_empty(&active_map) || fd_userns > 0) {
-                struct mount_attr attr = {
-                        .attr_set = MOUNT_ATTR_IDMAP,
-                };
-
--               attr.userns_fd = get_userns_fd_from_idmap(&active_map);
-+               if (fd_userns > 0)
-+                       attr.userns_fd = fd_userns;
-+               else
-+                       attr.userns_fd = get_userns_fd_from_idmap(&active_map);
-                if (attr.userns_fd < 0)
-                        exit_log("%m - Failed to create user namespace\n");
----
-
-It's a bug in the test helper program, not a bug in the test per-se because
-the test does not use the
---map-mount=/proc/<pid>/ns/user option.
-
-Thanks,
-Amir.
+Will fix this up and push it to the tree I linked to earlier.
+Thank you!
+Christian
