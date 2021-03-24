@@ -2,86 +2,115 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 841EDC433DB
-	for <linux-fstests@archiver.kernel.org>; Wed, 24 Mar 2021 14:04:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 93D10C433E0
+	for <linux-fstests@archiver.kernel.org>; Wed, 24 Mar 2021 14:18:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 452A7619FF
-	for <linux-fstests@archiver.kernel.org>; Wed, 24 Mar 2021 14:04:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6116C619D5
+	for <linux-fstests@archiver.kernel.org>; Wed, 24 Mar 2021 14:18:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235894AbhCXODr (ORCPT
+        id S236138AbhCXOSS (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 24 Mar 2021 10:03:47 -0400
-Received: from mail.kernel.org ([198.145.29.99]:52998 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S235945AbhCXODg (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 24 Mar 2021 10:03:36 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id BD9B061A05;
-        Wed, 24 Mar 2021 14:03:33 +0000 (UTC)
-Date:   Wed, 24 Mar 2021 15:03:30 +0100
-From:   Christian Brauner <christian.brauner@ubuntu.com>
-To:     Amir Goldstein <amir73il@gmail.com>
-Cc:     Christian Brauner <brauner@kernel.org>, Eryu Guan <guan@eryu.me>,
-        fstests <fstests@vger.kernel.org>,
-        Christoph Hellwig <hch@lst.de>,
-        "Darrick J . Wong" <djwong@kernel.org>,
-        David Howells <dhowells@redhat.com>
-Subject: Re: [PATCH v10 0/6] fstests: add idmapped mounts tests
-Message-ID: <20210324140330.cx35tciq73ruzvrv@wittgenstein>
-References: <20210322134522.916512-1-brauner@kernel.org>
- <20210322135002.6tyexslvqfiaari7@wittgenstein>
- <20210322142115.4ehetdcopvmvs7fl@wittgenstein>
- <CAOQ4uxjB3aDehSeomAvi-7rUJRZmmR=GQFAqod9SzSoGu5PjnA@mail.gmail.com>
- <20210324084126.ke7mden2s3a35koa@wittgenstein>
- <CAOQ4uxjwN+3xAjen5G8pRccYX_4bSCrcQUR5pqi2bFRpGPeSqw@mail.gmail.com>
- <20210324134554.rio27zsmsfzs6eqa@wittgenstein>
- <CAOQ4uxg4hkwgyFX=uq-M+jytEPs64069vn-YyhY_Y+x8jrdBjQ@mail.gmail.com>
+        Wed, 24 Mar 2021 10:18:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47392 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S236131AbhCXORr (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 24 Mar 2021 10:17:47 -0400
+Received: from mail-pf1-x42e.google.com (mail-pf1-x42e.google.com [IPv6:2607:f8b0:4864:20::42e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F3A4BC061763;
+        Wed, 24 Mar 2021 07:17:45 -0700 (PDT)
+Received: by mail-pf1-x42e.google.com with SMTP id y5so17437432pfn.1;
+        Wed, 24 Mar 2021 07:17:45 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=references:user-agent:from:to:cc:subject:in-reply-to:date
+         :message-id:mime-version;
+        bh=NLeQ4HSuiDCUGmTCpTA2SuYcqcrhrG+GT1QujWimeH8=;
+        b=NIcHKQKqY08wxndE+6mqOVvAPu1waxE34jLNEuq3T0/i1Dy54uHRUNDwRkEYyAULya
+         xwMxKILLKtvTY1/n/voOY9PjaVOSzAlCaR4C+9Sge6a+tQT+n6m2PWrUu8AleG3/+BVG
+         B3Xqb87VYhvx/8/LaLJ/xdgLUnIjO3x+81Nl+0MCRqVJsPtYUfU77DsFb4TY4ffTthig
+         NqgH03xyI5TVpZrkBAOb1Actd7iOttdusW5C7hvYuR6z5vXMd69CpGaTVy8/SQPDZw+d
+         1fOHn5o7R3xMWw3BL8LPased98/TYhhCKDdNf3+ATgVX8gm0Gm0EWRn+DheGGDhf7UBJ
+         4Waw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:references:user-agent:from:to:cc:subject
+         :in-reply-to:date:message-id:mime-version;
+        bh=NLeQ4HSuiDCUGmTCpTA2SuYcqcrhrG+GT1QujWimeH8=;
+        b=dMIw8w3hfZyaJgaQz7IcOPBm/bw+a/oTi3MsrOd00jlGpaG4YC7CenvD0U0n6iMWKD
+         ZD5mhZNXoCGUp/BrwrIcUedHLcvoDTIcUnMuJs6qC3IaRTq+zD4YonA+6/o5bWrbl1Cb
+         Vg4J/+3VbRCKfu7EJ+DRz3BZCfc++E4CKtQ8+nJpJoGT0daXKzkalcS0OlN33oS91yar
+         wV25wbUlIeYgFEOSmau4HcfD3+D8FxYHE6WOofrZyWMHb0TqWQj/n4k0/Bfpmi00cHlk
+         J+kIr/6ze4M9pP91cgf8VyNp5tAs32UiHuvOsElxA5TkkM7C22qiOH8xuNUqTZXuqPTu
+         mWDA==
+X-Gm-Message-State: AOAM532TaI0TG7PgR8hO4MrTxDemJqJ/Gl9UcYwVrM3UH4LsW20795WQ
+        MZFRwD0Aov/0VlfcNp2You4UxZtK8I8=
+X-Google-Smtp-Source: ABdhPJwl/fnlAGYKtjIOFowIO7y0ztQ7Vn5Il8CHtSA4WkLSl6LYhCLfe8un45DldYDxJVPBK3uC+g==
+X-Received: by 2002:a62:2a07:0:b029:214:fd95:7f7 with SMTP id q7-20020a622a070000b0290214fd9507f7mr3452427pfq.60.1616595465267;
+        Wed, 24 Mar 2021 07:17:45 -0700 (PDT)
+Received: from garuda ([171.61.69.55])
+        by smtp.gmail.com with ESMTPSA id u17sm2545631pgl.80.2021.03.24.07.17.43
+        (version=TLS1_2 cipher=ECDHE-ECDSA-CHACHA20-POLY1305 bits=256/256);
+        Wed, 24 Mar 2021 07:17:44 -0700 (PDT)
+References: <20210309050124.23797-1-chandanrlinux@gmail.com> <20210309050124.23797-6-chandanrlinux@gmail.com> <20210322175652.GG1670408@magnolia> <87r1k56f7k.fsf@garuda> <20210323205730.GN22100@magnolia> <871rc43k2v.fsf@garuda>
+User-agent: mu4e 1.0; emacs 26.1
+From:   Chandan Babu R <chandanrlinux@gmail.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH V6 05/13] xfs: Check for extent overflow when growing realtime bitmap/summary inodes
+In-reply-to: <871rc43k2v.fsf@garuda>
+Date:   Wed, 24 Mar 2021 19:47:42 +0530
+Message-ID: <87zgys1vqx.fsf@garuda>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <CAOQ4uxg4hkwgyFX=uq-M+jytEPs64069vn-YyhY_Y+x8jrdBjQ@mail.gmail.com>
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Mar 24, 2021 at 04:01:18PM +0200, Amir Goldstein wrote:
-> > > Meanwhile, found a bug in Makefile:
-> > >
-> > > --- a/src/idmapped-mounts/Makefile
-> > > +++ b/src/idmapped-mounts/Makefile
-> > > @@ -25,11 +25,11 @@ depend: .dep
-> > >
-> > >  include $(BUILDRULES)
-> > >
-> > > -idmapped-mounts:
-> > > +idmapped-mounts: $(CFILES_IDMAPPED_MOUNTS)
-> > >         @echo "    [CC]    $@"
-> > >         $(Q)$(LTLINK) $(CFILES_IDMAPPED_MOUNTS) -o $@ $(CFLAGS)
-> > > $(LDFLAGS) $(LDLIBS)
-> > >
-> > > -mount-idmapped:
-> > > +mount-idmapped: $(CFILES_MOUNT_IDMAPPED)
-> > >         @echo "    [CC]    $@"
-> > >         $(Q)$(LTLINK) $(CFILES_MOUNT_IDMAPPED) -o $@ $(CFLAGS)
-> > > $(LDFLAGS) $(LDLIBS)
-> >
-> > Stupid question maybe but what is the reason for this change?
-> > It builds fine without those lines.
-> >
-> > Building idmapped-mounts
-> > [CC]    idmapped-mounts
-> > [CC]    mount-idmapped
-> >
-> 
-> My mistake. You are right. It should be fine as is.
-> I may have messed up something else while building.
-> 
-> You may take the fix or leave it - as you wish.
+On 24 Mar 2021 at 16:16, Chandan Babu R wrote:
+> On 24 Mar 2021 at 02:27, Darrick J. Wong wrote:
+>> On Tue, Mar 23, 2021 at 09:21:27PM +0530, Chandan Babu R wrote:
+>>> On 22 Mar 2021 at 23:26, Darrick J. Wong wrote:
+>>> > On Tue, Mar 09, 2021 at 10:31:16AM +0530, Chandan Babu R wrote:
+>>> >> Verify that XFS does not cause realtime bitmap/summary inode fork's
+>>> >> extent count to overflow when growing the realtime volume associated
+>>> >> with a filesystem.
+>>> >>
+>>> >> Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+>>> >> Signed-off-by: Chandan Babu R <chandanrlinux@gmail.com>
+>>> >
+>>> > Soo... I discovered that this test doesn't pass with multiblock
+>>> > directories:
+>>>
+>>> Thanks for the bug report and the description of the corresponding solution. I
+>>> am fixing the tests and will soon post corresponding patches to the mailing
+>>> list.
+>>
+>> Also, I found a problem with xfs/534 when it does the direct write tests
+>> to a pmem volume with DAX enabled:
+>>
+>> --- /tmp/fstests/tests/xfs/534.out      2021-03-21 11:44:09.384407426 -0700
+>> +++ /var/tmp/fstests/xfs/534.out.bad    2021-03-23 13:32:15.898301839 -0700
+>> @@ -5,7 +5,4 @@
+>>  Fallocate 15 blocks
+>>  Buffered write to every other block of fallocated space
+>>  Verify $testfile's extent count
+>> -* Direct write to unwritten extent
+>> -Fallocate 15 blocks
+>> -Direct write to every other block of fallocated space
+>> -Verify $testfile's extent count
+>> +Extent count overflow check failed: nextents = 11
+>
+> The inode extent overflow reported above was actually due to the buffered
+> write operation. But it does occur with direct write operation as well.
 
-Eh, it kinda makes it more obvious to have the lines there and they
-don't hurt so I've added your change.
+I just found out that xfs_direct_write_iomap_ops is used for both buffered and
+direct IO w.r.t dax devices. Please ignore the above statement.
 
-Christian
+--
+chandan
