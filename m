@@ -2,115 +2,68 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 93D10C433E0
-	for <linux-fstests@archiver.kernel.org>; Wed, 24 Mar 2021 14:18:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8608BC433DB
+	for <linux-fstests@archiver.kernel.org>; Wed, 24 Mar 2021 18:05:16 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6116C619D5
-	for <linux-fstests@archiver.kernel.org>; Wed, 24 Mar 2021 14:18:52 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 422D461A1F
+	for <linux-fstests@archiver.kernel.org>; Wed, 24 Mar 2021 18:05:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236138AbhCXOSS (ORCPT
+        id S237330AbhCXSEo (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 24 Mar 2021 10:18:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47392 "EHLO
+        Wed, 24 Mar 2021 14:04:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40448 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236131AbhCXORr (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 24 Mar 2021 10:17:47 -0400
-Received: from mail-pf1-x42e.google.com (mail-pf1-x42e.google.com [IPv6:2607:f8b0:4864:20::42e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F3A4BC061763;
-        Wed, 24 Mar 2021 07:17:45 -0700 (PDT)
-Received: by mail-pf1-x42e.google.com with SMTP id y5so17437432pfn.1;
-        Wed, 24 Mar 2021 07:17:45 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=references:user-agent:from:to:cc:subject:in-reply-to:date
-         :message-id:mime-version;
-        bh=NLeQ4HSuiDCUGmTCpTA2SuYcqcrhrG+GT1QujWimeH8=;
-        b=NIcHKQKqY08wxndE+6mqOVvAPu1waxE34jLNEuq3T0/i1Dy54uHRUNDwRkEYyAULya
-         xwMxKILLKtvTY1/n/voOY9PjaVOSzAlCaR4C+9Sge6a+tQT+n6m2PWrUu8AleG3/+BVG
-         B3Xqb87VYhvx/8/LaLJ/xdgLUnIjO3x+81Nl+0MCRqVJsPtYUfU77DsFb4TY4ffTthig
-         NqgH03xyI5TVpZrkBAOb1Actd7iOttdusW5C7hvYuR6z5vXMd69CpGaTVy8/SQPDZw+d
-         1fOHn5o7R3xMWw3BL8LPased98/TYhhCKDdNf3+ATgVX8gm0Gm0EWRn+DheGGDhf7UBJ
-         4Waw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:references:user-agent:from:to:cc:subject
-         :in-reply-to:date:message-id:mime-version;
-        bh=NLeQ4HSuiDCUGmTCpTA2SuYcqcrhrG+GT1QujWimeH8=;
-        b=dMIw8w3hfZyaJgaQz7IcOPBm/bw+a/oTi3MsrOd00jlGpaG4YC7CenvD0U0n6iMWKD
-         ZD5mhZNXoCGUp/BrwrIcUedHLcvoDTIcUnMuJs6qC3IaRTq+zD4YonA+6/o5bWrbl1Cb
-         Vg4J/+3VbRCKfu7EJ+DRz3BZCfc++E4CKtQ8+nJpJoGT0daXKzkalcS0OlN33oS91yar
-         wV25wbUlIeYgFEOSmau4HcfD3+D8FxYHE6WOofrZyWMHb0TqWQj/n4k0/Bfpmi00cHlk
-         J+kIr/6ze4M9pP91cgf8VyNp5tAs32UiHuvOsElxA5TkkM7C22qiOH8xuNUqTZXuqPTu
-         mWDA==
-X-Gm-Message-State: AOAM532TaI0TG7PgR8hO4MrTxDemJqJ/Gl9UcYwVrM3UH4LsW20795WQ
-        MZFRwD0Aov/0VlfcNp2You4UxZtK8I8=
-X-Google-Smtp-Source: ABdhPJwl/fnlAGYKtjIOFowIO7y0ztQ7Vn5Il8CHtSA4WkLSl6LYhCLfe8un45DldYDxJVPBK3uC+g==
-X-Received: by 2002:a62:2a07:0:b029:214:fd95:7f7 with SMTP id q7-20020a622a070000b0290214fd9507f7mr3452427pfq.60.1616595465267;
-        Wed, 24 Mar 2021 07:17:45 -0700 (PDT)
-Received: from garuda ([171.61.69.55])
-        by smtp.gmail.com with ESMTPSA id u17sm2545631pgl.80.2021.03.24.07.17.43
-        (version=TLS1_2 cipher=ECDHE-ECDSA-CHACHA20-POLY1305 bits=256/256);
-        Wed, 24 Mar 2021 07:17:44 -0700 (PDT)
-References: <20210309050124.23797-1-chandanrlinux@gmail.com> <20210309050124.23797-6-chandanrlinux@gmail.com> <20210322175652.GG1670408@magnolia> <87r1k56f7k.fsf@garuda> <20210323205730.GN22100@magnolia> <871rc43k2v.fsf@garuda>
-User-agent: mu4e 1.0; emacs 26.1
-From:   Chandan Babu R <chandanrlinux@gmail.com>
+        with ESMTP id S236787AbhCXSEW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 24 Mar 2021 14:04:22 -0400
+Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 79699C061763;
+        Wed, 24 Mar 2021 11:04:22 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
+        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=WBPYLQA7SOu9juQpDa+zV6IvltLlpg8vwWEe/jQRflM=; b=OS8X9g9sFFU75dP3JUPlldE6ul
+        j7Ac6q+guiuyTf7zqE8RjrWYjYsxyM02S+t3GM0T8vOujNA/c/8dGXXlq5SbqZOYRHYoDwg+c/Klo
+        TAO2ArSXL/zIAMQ/p5nWD0vA9gsPPL8mAyNai6OSoVG5NKDEHCN95ghPkEIyPJnmAa5p7ZQs49iLq
+        Ci6zmLTuGvkQYwGSSNNkH9h/JT9NPzXucNeP13cLytcBNqk3EwwyYL+G13uOeb31VrXwCViBpHAqV
+        MgDa6eWG5qscOEMB+L6G83xwhjubl6vfPjQHDbASmLghEcQ+IPJ3GawUyQaTA2oY9cn8RPGloDMvL
+        kP3iFwLA==;
+Received: from hch by casper.infradead.org with local (Exim 4.94 #2 (Red Hat Linux))
+        id 1lP7rH-00BfUL-Nq; Wed, 24 Mar 2021 18:04:05 +0000
+Date:   Wed, 24 Mar 2021 18:03:55 +0000
+From:   Christoph Hellwig <hch@infradead.org>
 To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH V6 05/13] xfs: Check for extent overflow when growing realtime bitmap/summary inodes
-In-reply-to: <871rc43k2v.fsf@garuda>
-Date:   Wed, 24 Mar 2021 19:47:42 +0530
-Message-ID: <87zgys1vqx.fsf@garuda>
+Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org, guan@eryu.me
+Subject: Re: [PATCH 1/3] populate: create block devices when pre-populating
+ filesystems
+Message-ID: <20210324180355.GA2779737@infradead.org>
+References: <161647318241.3429609.1862044070327396092.stgit@magnolia>
+ <161647318806.3429609.966502470186246038.stgit@magnolia>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <161647318806.3429609.966502470186246038.stgit@magnolia>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by casper.infradead.org. See http://www.infradead.org/rpr.html
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 24 Mar 2021 at 16:16, Chandan Babu R wrote:
-> On 24 Mar 2021 at 02:27, Darrick J. Wong wrote:
->> On Tue, Mar 23, 2021 at 09:21:27PM +0530, Chandan Babu R wrote:
->>> On 22 Mar 2021 at 23:26, Darrick J. Wong wrote:
->>> > On Tue, Mar 09, 2021 at 10:31:16AM +0530, Chandan Babu R wrote:
->>> >> Verify that XFS does not cause realtime bitmap/summary inode fork's
->>> >> extent count to overflow when growing the realtime volume associated
->>> >> with a filesystem.
->>> >>
->>> >> Reviewed-by: Darrick J. Wong <djwong@kernel.org>
->>> >> Signed-off-by: Chandan Babu R <chandanrlinux@gmail.com>
->>> >
->>> > Soo... I discovered that this test doesn't pass with multiblock
->>> > directories:
->>>
->>> Thanks for the bug report and the description of the corresponding solution. I
->>> am fixing the tests and will soon post corresponding patches to the mailing
->>> list.
->>
->> Also, I found a problem with xfs/534 when it does the direct write tests
->> to a pmem volume with DAX enabled:
->>
->> --- /tmp/fstests/tests/xfs/534.out      2021-03-21 11:44:09.384407426 -0700
->> +++ /var/tmp/fstests/xfs/534.out.bad    2021-03-23 13:32:15.898301839 -0700
->> @@ -5,7 +5,4 @@
->>  Fallocate 15 blocks
->>  Buffered write to every other block of fallocated space
->>  Verify $testfile's extent count
->> -* Direct write to unwritten extent
->> -Fallocate 15 blocks
->> -Direct write to every other block of fallocated space
->> -Verify $testfile's extent count
->> +Extent count overflow check failed: nextents = 11
->
-> The inode extent overflow reported above was actually due to the buffered
-> write operation. But it does occur with direct write operation as well.
+On Mon, Mar 22, 2021 at 09:19:48PM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
+> 
+> I just noticed that the fs population helper creates a chardev file
+> "S_IFBLK" on the scratch filesystem.  This seems bogus (particularly
+> since we actually also create a chardev named S_IFCHR) so fix up the
+> mknod calls.
+> 
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
 
-I just found out that xfs_direct_write_iomap_ops is used for both buffered and
-direct IO w.r.t dax devices. Please ignore the above statement.
+Looks good,
 
---
-chandan
+Reviewed-by: Christoph Hellwig <hch@lst.de>
