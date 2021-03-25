@@ -2,86 +2,98 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-17.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BBB20C433E0
-	for <linux-fstests@archiver.kernel.org>; Thu, 25 Mar 2021 12:14:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F0519C433C1
+	for <linux-fstests@archiver.kernel.org>; Thu, 25 Mar 2021 14:10:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8E56161A27
-	for <linux-fstests@archiver.kernel.org>; Thu, 25 Mar 2021 12:14:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id ABA5861A26
+	for <linux-fstests@archiver.kernel.org>; Thu, 25 Mar 2021 14:10:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230281AbhCYMN7 (ORCPT
+        id S231316AbhCYOJm (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 25 Mar 2021 08:13:59 -0400
-Received: from mx2.suse.de ([195.135.220.15]:40134 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S230213AbhCYMNc (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 25 Mar 2021 08:13:32 -0400
-X-Virus-Scanned: by amavisd-new at test-mx.suse.de
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-        t=1616674411; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=MM6HuxbqW4GkltDWjuTlSq++GLESMN+4TUbr/xBScqg=;
-        b=iZPZjtda7rDvHd06SrPaDWf+vssB3HHLWryFOFPC+05HO1OTSA9ivgTB8/t555Ibkf0Zxr
-        OE9fnrTh+jjvq3EJXVDkoMzenV+u3c04TRlM5z4j3IbCZwJ+RT7Y/H/f+KjsGzVjNIQNbf
-        6+Gu5/JL+tyrk9goRYEfIZE+cJgxXZ0=
-Received: from relay2.suse.de (unknown [195.135.221.27])
-        by mx2.suse.de (Postfix) with ESMTP id 41296AC16;
-        Thu, 25 Mar 2021 12:13:31 +0000 (UTC)
-Subject: Re: [PATCH] fstests: don't relay on /proc/partitions for device size
-To:     Johannes Thumshirn <johannes.thumshirn@wdc.com>,
-        Eryu Guan <guan@eryu.me>
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-        Naohiro Aota <naohiro.aota@wdc.com>
-References: <20210325112337.35102-1-johannes.thumshirn@wdc.com>
-From:   Nikolay Borisov <nborisov@suse.com>
-Message-ID: <b3cdb9e6-4d30-e9cb-0e49-4d3a0964c807@suse.com>
-Date:   Thu, 25 Mar 2021 14:13:30 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.7.1
+        Thu, 25 Mar 2021 10:09:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46420 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231375AbhCYOJP (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 25 Mar 2021 10:09:15 -0400
+Received: from mail-pj1-x1031.google.com (mail-pj1-x1031.google.com [IPv6:2607:f8b0:4864:20::1031])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 41D7DC06174A;
+        Thu, 25 Mar 2021 07:09:15 -0700 (PDT)
+Received: by mail-pj1-x1031.google.com with SMTP id k23-20020a17090a5917b02901043e35ad4aso2764514pji.3;
+        Thu, 25 Mar 2021 07:09:15 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=eaB90L146PD7SZTq3L/Wa2Uewelu5u0Gwdi2oCaULaA=;
+        b=O9k7vYv8c7NJnq0aY5xMAjUplsbabbMkbhF+Gs4kUIUMFywMn4N76kmNfOCl+bJZYD
+         19Ujl20IVKO46sLL8453B44wS3Knbkq+J/sxbpLsJ6A6cjOgHB/W1janMFIMdb8vnbQE
+         EAaCoztlt83cAdHYOdV90kPerzrSzTxPgHa6+wAI92CGSIfgTW44dubS0TKu9fJNQeuy
+         UY+y7jGxTNHxblitLFIgXLvHXb60lBgRXXeVKk+mJYqAbVFhY4PtecJuZ1x3DmLqJCBW
+         MX71paKFI2qqoysgLNUtBMPPDEYrXun6+mn/T8i2qkS34dLaGFF+Um3veRJvQMjYXJEV
+         bMFg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=eaB90L146PD7SZTq3L/Wa2Uewelu5u0Gwdi2oCaULaA=;
+        b=Pt6yuXlSP9en3rLAyi0wLH3/j5O4loUdppNGAL/qMg2G4zwPhwD7lud2hxrgWrdvfm
+         0gX9tUeFx6TI6m5thpxNx/n0jS6fiCzjT4Up2CLpCfsv2wCTHtpcQe0lWXxNA2wfLOmm
+         7R8qd1FeOkg5+nrlfQQtwEtpCnxGhMN+jaYbJQzsrbpNdbyWrLUH7DjR50X9f03GaZS4
+         0bYbSd3XOOzpCPUSYAmaAhk2gWvVhCnpXl7yyOYnv8xB9z1ltdB4J8J3Dv/SCv34MJMq
+         lRg/iXP4ogmoEqh1pRsLPiOZn7rsBhUluCMjGVdOwJgiKRldyKgymmWdJIf8lSo2RC42
+         KaTw==
+X-Gm-Message-State: AOAM530SvGAIAU9ByEqsbZtNg4hZk1EpvRHB1HfBFs2GzKIpS3dN8qJH
+        Fq0+74sJejIrykPoUFJ33RiwOeK9r5o=
+X-Google-Smtp-Source: ABdhPJw9ns9gKRaelxJMsBX5LSM5svuHRGN2CZMRUhc4J/k2b5xIT7h0we2kxXVPdRA/GUMjy0LUxQ==
+X-Received: by 2002:a17:90a:c096:: with SMTP id o22mr9089149pjs.119.1616681354646;
+        Thu, 25 Mar 2021 07:09:14 -0700 (PDT)
+Received: from localhost.localdomain ([122.171.175.121])
+        by smtp.gmail.com with ESMTPSA id v13sm5673030pfu.54.2021.03.25.07.09.13
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 25 Mar 2021 07:09:14 -0700 (PDT)
+From:   Chandan Babu R <chandanrlinux@gmail.com>
+To:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Cc:     Chandan Babu R <chandanrlinux@gmail.com>
+Subject: [PATCH 1/6] xfs/529: Execute chown on an existing directory entry
+Date:   Thu, 25 Mar 2021 19:38:52 +0530
+Message-Id: <20210325140857.7145-1-chandanrlinux@gmail.com>
+X-Mailer: git-send-email 2.29.2
 MIME-Version: 1.0
-In-Reply-To: <20210325112337.35102-1-johannes.thumshirn@wdc.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+chown command is being executed on $testfile which is actually deleted just
+before the execution of quota inode extent count overflow test. Hence the test
+was not getting exercised at all.
 
+This commit fixes the bug by using $fillerdir as the target of chown command.
 
-On 25.03.21 г. 13:23, Johannes Thumshirn wrote:
-> Non-partitionable devices, like zoned block devices, aren't showing up in in
-> /proc/partitions and therefore we cannot relay on it to get a device's
-> size.
-> 
-> Use sysfs' size attribute to get the block device size.
-> 
-> Cc: Naohiro Aota <naohiro.aota@wdc.com>
-> Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
-> ---
->  common/rc | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/common/rc b/common/rc
-> index 1c814b9aabf1..c99fff824087 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -3778,7 +3778,7 @@ _get_available_space()
->  # return device size in kb
->  _get_device_size()
->  {
-> -	grep -w `_short_dev $1` /proc/partitions | awk '{print $3}'
-> +	echo $(($(cat /sys/block/`_short_dev $1`/size) >> 1))
->  }
+Signed-off-by: Chandan Babu R <chandanrlinux@gmail.com>
+---
+ tests/xfs/529 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-How about simply using 'blockdev --getsz'
+diff --git a/tests/xfs/529 b/tests/xfs/529
+index 778f6142..abe5b1e0 100755
+--- a/tests/xfs/529
++++ b/tests/xfs/529
+@@ -150,7 +150,7 @@ nr_quotas=$((nr_quotas_per_block * nr_blks))
+ 
+ echo "Extend uquota file"
+ for i in $(seq 0 $nr_quotas_per_block $nr_quotas); do
+-	chown $i $testfile >> $seqres.full 2>&1
++	chown $i $fillerdir >> $seqres.full 2>&1
+ 	[[ $? != 0 ]] && break
+ done
+ 
+-- 
+2.29.2
 
->  
->  # Make sure we actually have dmesg checking set up.
-> 
