@@ -8,62 +8,62 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6DC68C433E3
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A25D6C433DB
 	for <linux-fstests@archiver.kernel.org>; Thu, 25 Mar 2021 14:10:15 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 436F661A1D
+	by mail.kernel.org (Postfix) with ESMTP id 644A261A2B
 	for <linux-fstests@archiver.kernel.org>; Thu, 25 Mar 2021 14:10:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230516AbhCYOJm (ORCPT
+        id S231400AbhCYOJo (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 25 Mar 2021 10:09:42 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46428 "EHLO
+        Thu, 25 Mar 2021 10:09:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46452 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231383AbhCYOJR (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 25 Mar 2021 10:09:17 -0400
-Received: from mail-pj1-x1031.google.com (mail-pj1-x1031.google.com [IPv6:2607:f8b0:4864:20::1031])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3E194C06174A;
-        Thu, 25 Mar 2021 07:09:17 -0700 (PDT)
-Received: by mail-pj1-x1031.google.com with SMTP id x7-20020a17090a2b07b02900c0ea793940so2768435pjc.2;
-        Thu, 25 Mar 2021 07:09:17 -0700 (PDT)
+        with ESMTP id S231387AbhCYOJW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 25 Mar 2021 10:09:22 -0400
+Received: from mail-pf1-x42c.google.com (mail-pf1-x42c.google.com [IPv6:2607:f8b0:4864:20::42c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AEFEFC06174A;
+        Thu, 25 Mar 2021 07:09:22 -0700 (PDT)
+Received: by mail-pf1-x42c.google.com with SMTP id c17so2192791pfn.6;
+        Thu, 25 Mar 2021 07:09:22 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=iabgT9xxtg44P7FtEYxw1iFtMX3+KsnLU+bhmLAJjfE=;
-        b=kFZcaqp0HAUp7v+PvOF1uGUnCGg40+z2DXw5WG4ge6QE+Tl2OyYY5KhcCA0u1BmjlG
-         q004TWXAHw6mprlqMBPnwA12Oj1WVxtJ4gM8a4A0W6xn3231AAgNIR2TypHGd9vKucgx
-         FOLPanifDZ1HzsD1VC67Y1568/7FoofHAJZ66cxxdLqyB9jZKw4Xso9U7s2WBv5UfwGw
-         xOIAMixesqJZMgS6ZD6Pumon9SUqgc6JntMlRrCXTaTBoMDLGhxtB+YnAIJL7UqZTkv3
-         pq+f/HSwBRCWmzJS8/IWua7hz9hc7izE9A3Ub77Z+SFhNizkTvlgc/vZlmnTj0TMrxzM
-         xzJQ==
+        bh=pSkPb8AvuKEiKWTkefXQ/u24x/nRRxa8+B+oOFLMDlw=;
+        b=pgUmA36nNByA/PBjoCIdU0RCeyKq6JaUq/kK6/mK+6wKG3FDaVuaDAF2dH/q/YYvrl
+         rd7D50htEqPiHI8fMPM7jxIQcudE06Ca1SxaUWoC60rc0+6plsNbfABs2UrxGCkprvX0
+         QPoN/fABVLi0afqC6ZgFD0QYAKQXNrWIg2wfekwNAC8XES8HZbzim73dJRU7YI2tmrah
+         u8Z4VSv37ClEvS8d520tp0BDU0x8aZem9RR3wo/V0Bi8kWN/X4RcmlM4DpcLZZKEyQT1
+         YKn5Dg2miOELv0uS/EyyFOSDcceRspVGeUvJBYksu7N+kxEXv9Qa/2Zss5d/fYuWWjqf
+         MgFg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=iabgT9xxtg44P7FtEYxw1iFtMX3+KsnLU+bhmLAJjfE=;
-        b=fZIWs18HoRGTGeKzBAnH739thkV//OSD9S4yvvjfsqAEeusBZ8BKiyMdjiN0JgOoaT
-         tveSQVIGnplzDnuPq9sYuPGyrdOvRWHpq85sJoBUtJnyUI/pt7fMM6WDbx3rZCQHgPx9
-         A8nfB6Ic4gQ5byROlWJJOgTRp9A5jsiFh+HXuxULj9frtLFPFdnx/eZpjXj7TqxA6KDK
-         M9yFxxWLVeoOX+ib2jyOaNKCOqobCrQpcWpT2IO641WEijsUJVt0Dl4LdF7Ax3ybQhDr
-         K2sdhoPwYR14xicIMxMY94aWU2qdHEk/76n4QsgzIq8Af5PDTpx5uVe0/Y/HUyePAIc5
-         WfvQ==
-X-Gm-Message-State: AOAM531WBUhBcdB2kqwBbB/5mpxBATGOc/H5L2K/LdnzB1xeNEJH1oJg
-        K3aQchWflOaJwMeGkSkNk7YVN5L3zPY=
-X-Google-Smtp-Source: ABdhPJzlvVDLatkTCQzBEu12X9xLCz/o0KezPq/TW2jgOR83bOHWKTYM5ucHp1BbJqjHaISXHrGrNw==
-X-Received: by 2002:a17:90a:5d14:: with SMTP id s20mr9037480pji.6.1616681356517;
-        Thu, 25 Mar 2021 07:09:16 -0700 (PDT)
+        bh=pSkPb8AvuKEiKWTkefXQ/u24x/nRRxa8+B+oOFLMDlw=;
+        b=Cpt+iciWE+UjIPcrZsfq7nGpPnkjSAIvkYvrTmqygnKMgm7ycyJHhI08MYS32TTk/i
+         dMidmUP5y7l5Gjzu70jT5LjR/y1HTOC6iVT9HGjuF3FL+2FLo7nyX6sgZeNaHsZK9zWL
+         qcoQek3PeZY/X5Kngec7nPzomLu1QWOHlunEQ/PvVsot0ZciWrTWTYN4tTT4E06Uyb8r
+         aMHzCaur7zf9Fqji3MW6Of99gVXsiAHSqHw/d9hLcOpx+/lzhHnT9QHNj+cJDi9BBBWP
+         ioCKZ3LABFpLQY8y/E18ERZvm/P9mZmAWlc6XsTcfyKPGbarcVgswxCKoegq7y4YBDGi
+         3Chg==
+X-Gm-Message-State: AOAM530GLQmBMVaEk3QyzKCoz4+X6tCiIe+OrKgms5xVZypmF7T2NlIv
+        iZya+XYib5mB1CXfeMroExKbh1EdR9U=
+X-Google-Smtp-Source: ABdhPJwS2n1wPieqf37216RwW9Nm3xAq9g3LpqVQt8Mn64cXgRzRL9tdTJgaR2xoMQs0r1elj1UNIw==
+X-Received: by 2002:a62:7c43:0:b029:1ef:20ce:ba36 with SMTP id x64-20020a627c430000b02901ef20ceba36mr8475349pfc.40.1616681362155;
+        Thu, 25 Mar 2021 07:09:22 -0700 (PDT)
 Received: from localhost.localdomain ([122.171.175.121])
-        by smtp.gmail.com with ESMTPSA id v13sm5673030pfu.54.2021.03.25.07.09.14
+        by smtp.gmail.com with ESMTPSA id v13sm5673030pfu.54.2021.03.25.07.09.20
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 25 Mar 2021 07:09:16 -0700 (PDT)
+        Thu, 25 Mar 2021 07:09:21 -0700 (PDT)
 From:   Chandan Babu R <chandanrlinux@gmail.com>
 To:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 Cc:     Chandan Babu R <chandanrlinux@gmail.com>,
         "Darrick J . Wong" <djwong@kernel.org>
-Subject: [PATCH 2/6] xfs/529: Fix test to execute in multi-block directory config
-Date:   Thu, 25 Mar 2021 19:38:53 +0530
-Message-Id: <20210325140857.7145-2-chandanrlinux@gmail.com>
+Subject: [PATCH 5/6] xfs/534: Fix test to execute in multi-block directory config
+Date:   Thu, 25 Mar 2021 19:38:56 +0530
+Message-Id: <20210325140857.7145-5-chandanrlinux@gmail.com>
 X-Mailer: git-send-email 2.29.2
 In-Reply-To: <20210325140857.7145-1-chandanrlinux@gmail.com>
 References: <20210325140857.7145-1-chandanrlinux@gmail.com>
@@ -73,7 +73,7 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-xfs/529 attempts to create $testfile after reduce_max_iextents error tag is
+xfs/534 attempts to create $testfile after reduce_max_iextents error tag is
 injected. Creation of $testfile fails when using a multi-block directory test
 configuration because,
 1. A directory can have a pseudo maximum extent count of 10.
@@ -93,104 +93,64 @@ Reported-by: Darrick J. Wong <djwong@kernel.org>
 Suggested-by: Darrick J. Wong <djwong@kernel.org>
 Signed-off-by: Chandan Babu R <chandanrlinux@gmail.com>
 ---
- tests/xfs/529     | 24 +++++++++++++++++++++---
- tests/xfs/529.out |  6 +++++-
- 2 files changed, 26 insertions(+), 4 deletions(-)
+ tests/xfs/534     | 9 ++++++---
+ tests/xfs/534.out | 5 ++++-
+ 2 files changed, 10 insertions(+), 4 deletions(-)
 
-diff --git a/tests/xfs/529 b/tests/xfs/529
-index abe5b1e0..b4533eba 100755
---- a/tests/xfs/529
-+++ b/tests/xfs/529
-@@ -54,6 +54,8 @@ echo "* Delalloc to written extent conversion"
+diff --git a/tests/xfs/534 b/tests/xfs/534
+index a8348526..338282ef 100755
+--- a/tests/xfs/534
++++ b/tests/xfs/534
+@@ -45,9 +45,6 @@ bsize=$(_get_file_block_size $SCRATCH_MNT)
  
- testfile=$SCRATCH_MNT/testfile
+ testfile=${SCRATCH_MNT}/testfile
  
-+touch $testfile
-+
- echo "Inject reduce_max_iextents error tag"
- _scratch_inject_error reduce_max_iextents 1
- 
-@@ -74,10 +76,18 @@ if (( $nextents > 10 )); then
- 	exit 1
- fi
- 
-+echo "Disable reduce_max_iextents error tag"
-+_scratch_inject_error reduce_max_iextents 0
-+
- rm $testfile
- 
- echo "* Fallocate unwritten extents"
- 
-+touch $testfile
-+
-+echo "Inject reduce_max_iextents error tag"
-+_scratch_inject_error reduce_max_iextents 1
-+
- echo "Fallocate fragmented file"
- for i in $(seq 0 2 $((nr_blks - 1))); do
- 	$XFS_IO_PROG -f -c "falloc $((i * bsize)) $bsize" $testfile \
-@@ -93,10 +103,18 @@ if (( $nextents > 10 )); then
- 	exit 1
- fi
- 
-+echo "Disable reduce_max_iextents error tag"
-+_scratch_inject_error reduce_max_iextents 0
-+
- rm $testfile
- 
- echo "* Directio write"
- 
-+touch $testfile
-+
-+echo "Inject reduce_max_iextents error tag"
-+_scratch_inject_error reduce_max_iextents 1
-+
- echo "Create fragmented file via directio writes"
- for i in $(seq 0 2 $((nr_blks - 1))); do
- 	$XFS_IO_PROG -d -s -f -c "pwrite $((i * bsize)) $bsize" $testfile \
-@@ -112,15 +130,15 @@ if (( $nextents > 10 )); then
- 	exit 1
- fi
- 
-+echo "Disable reduce_max_iextents error tag"
-+_scratch_inject_error reduce_max_iextents 0
-+
- rm $testfile
- 
- # Check if XFS gracefully returns with an error code when we try to increase
- # extent count of user quota inode beyond the pseudo max extent count limit.
- echo "* Extend quota inodes"
- 
--echo "Disable reduce_max_iextents error tag"
--_scratch_inject_error reduce_max_iextents 0
+-echo "Inject reduce_max_iextents error tag"
+-_scratch_inject_error reduce_max_iextents 1
 -
- echo "Consume free space"
- fillerdir=$SCRATCH_MNT/fillerdir
- nr_free_blks=$(stat -f -c '%f' $SCRATCH_MNT)
-diff --git a/tests/xfs/529.out b/tests/xfs/529.out
-index b2ae3f42..13489d34 100644
---- a/tests/xfs/529.out
-+++ b/tests/xfs/529.out
-@@ -4,14 +4,18 @@ Format and mount fs
- Inject reduce_max_iextents error tag
- Create fragmented file
+ nr_blks=15
+ 
+ for io in Buffered Direct; do
+@@ -62,6 +59,9 @@ for io in Buffered Direct; do
+ 		xfs_io_flag="-d"
+ 	fi
+ 
++	echo "Inject reduce_max_iextents error tag"
++	_scratch_inject_error reduce_max_iextents 1
++
+ 	echo "$io write to every other block of fallocated space"
+ 	for i in $(seq 1 2 $((nr_blks - 1))); do
+ 		$XFS_IO_PROG -f -s $xfs_io_flag -c "pwrite $((i * bsize)) $bsize" \
+@@ -76,6 +76,9 @@ for io in Buffered Direct; do
+ 		exit 1
+ 	fi
+ 
++	echo "Disable reduce_max_iextents error tag"
++	_scratch_inject_error reduce_max_iextents 0
++
+ 	rm $testfile
+ done
+ 
+diff --git a/tests/xfs/534.out b/tests/xfs/534.out
+index f7c0821b..0a0cd3a6 100644
+--- a/tests/xfs/534.out
++++ b/tests/xfs/534.out
+@@ -1,11 +1,14 @@
+ QA output created by 534
+ Format and mount fs
+-Inject reduce_max_iextents error tag
+ * Buffered write to unwritten extent
+ Fallocate 15 blocks
++Inject reduce_max_iextents error tag
+ Buffered write to every other block of fallocated space
  Verify $testfile's extent count
 +Disable reduce_max_iextents error tag
- * Fallocate unwritten extents
+ * Direct write to unwritten extent
+ Fallocate 15 blocks
 +Inject reduce_max_iextents error tag
- Fallocate fragmented file
+ Direct write to every other block of fallocated space
  Verify $testfile's extent count
 +Disable reduce_max_iextents error tag
- * Directio write
-+Inject reduce_max_iextents error tag
- Create fragmented file via directio writes
- Verify $testfile's extent count
--* Extend quota inodes
- Disable reduce_max_iextents error tag
-+* Extend quota inodes
- Consume free space
- Create fragmented filesystem
- Inject reduce_max_iextents error tag
 -- 
 2.29.2
 
