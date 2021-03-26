@@ -2,105 +2,107 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2F0DDC433E0
-	for <linux-fstests@archiver.kernel.org>; Fri, 26 Mar 2021 04:22:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 636D2C433E0
+	for <linux-fstests@archiver.kernel.org>; Fri, 26 Mar 2021 07:39:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id EC2F961A38
-	for <linux-fstests@archiver.kernel.org>; Fri, 26 Mar 2021 04:22:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0EEF261A44
+	for <linux-fstests@archiver.kernel.org>; Fri, 26 Mar 2021 07:39:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229474AbhCZEVe (ORCPT
+        id S230026AbhCZHi7 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 26 Mar 2021 00:21:34 -0400
-Received: from mail.kernel.org ([198.145.29.99]:35806 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229446AbhCZEVW (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 26 Mar 2021 00:21:22 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 34C726197C;
-        Fri, 26 Mar 2021 04:21:21 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1616732481;
-        bh=yX7XPDZdKr1lQhAdPmMKLIP11n5P0D32hdsvz9tHU+I=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=iQdPs3ev+3Pn01TB+goL79P5YsG0N1vHgGQ3wY8sg3x6z/7xprTeggHSxzmw76Cgs
-         AS4nMW/9bRqSNRGX/v6QwBTg87xp9yaWoo0NMXvb2wjbpkCa0/jKPhN3MW7rGi8X+6
-         SXk6P8dwvgqbiccFmajsIuBVrblnc2hiPBsN6fo87YcGibv7/JgVR5AcaIZ7V5PhMq
-         AuICR4Qh9b3nd4+Odmrs09Lv0TrebnvXnBVNd7MYWDLhXEwUeINxFpzBHtJGuNq8a8
-         zQ1tb0XVR1Bu9KiKdR2MjjH73PFDRGjNIzgqSfcVO9t0LTLYYEDlbDNNgNmF/wPj0r
-         L3J/FmTzCbpvw==
-Date:   Thu, 25 Mar 2021 21:21:17 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Chandan Babu R <chandanrlinux@gmail.com>
-Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH V6 13/13] xfs: Stress test with bmap_alloc_minlen_extent
- error tag enabled
-Message-ID: <20210326042117.GS4090233@magnolia>
-References: <20210309050124.23797-1-chandanrlinux@gmail.com>
- <20210309050124.23797-14-chandanrlinux@gmail.com>
- <20210322185413.GH1670408@magnolia>
- <877dlyqw0k.fsf@garuda>
- <8735wir242.fsf@garuda>
+        Fri, 26 Mar 2021 03:38:59 -0400
+Received: from esa6.hgst.iphmx.com ([216.71.154.45]:20597 "EHLO
+        esa6.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230308AbhCZHi6 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 26 Mar 2021 03:38:58 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1616744338; x=1648280338;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=JToY7Nv0NvKoBEFe3sERPXIsv4kYueZciz46XwF7fdE=;
+  b=S0VFKnHJd/JQZw3ZGdb/iJaQ1Bq9bajBFwU46DT/Q9hQcr9mwLJVuH/U
+   C0LnYDGUsQhTVaCxRIoebGkFEGmFtEgbJQs9t/WUYVdVlYnRVGMew1MUD
+   hfFzzvljnY38mqpoWCBpLKMdfG42GVI3gazcOoBudNlCY/fbm5ytFz1z6
+   MqW6tUIjaYgzIUO2nST4Fsy4SKzMjcdUMtccPxUwH+HlUkafcdUHpaiPQ
+   fNHgL1Gd4DNMVG9GTN/UjwoSO/iq9HXg4v7bpbttSamCkfnqu5F3vYX1a
+   5Tuos318n3yF8K2mklgdRkVnRGLVrtoXC5JdBSXE2cdlKNf0+9dW1t4it
+   w==;
+IronPort-SDR: /qjy1zC0++q2KpYHyE/VFKw0zkT5fQWX/5ybF0eBG9gdGZAheFjsH/WtBru5ck/stPBSU0YkFm
+ q7P/h5ANFN6jAU3tHZFEGK7IrVlQtDqlaX2jbnwshAWBx/wexYYrlV+kbIm9+1XXbtSatf8N8u
+ /YZwg4JyNM/ECtHZ6wmpqifZH6BAYYba9cce9yqDXJYv0mR9KvizvZxwShTklEQA6uFa7a5sFW
+ XSxKG+ms8LrYE719+Gju2c7mMs8P710qUPvspmgEL1D4SBfPJY0oJtGMT4vE2kfNY3imLaJ807
+ KJI=
+X-IronPort-AV: E=Sophos;i="5.81,279,1610380800"; 
+   d="scan'208";a="164170003"
+Received: from h199-255-45-14.hgst.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
+  by ob1.hgst.iphmx.com with ESMTP; 26 Mar 2021 15:38:54 +0800
+IronPort-SDR: hnP6jLAQPKGYmlhX82O/TGTyPd5Fgti07YPOCfNYqvp4ROXVUsXqKCW54/dZr+xdrhKfZCekB5
+ sbLyT0c/PVckdAsXDM+NCuFKrfqUy47V84C/qf2hdi7SOAFG8S0Ge06gSmAPS84LTdwqWyKqfv
+ +QcDWnZarjtEY9g7c2k5OWYnVjt4KNFO3bDy0I30A8Zz4ZxsCN36X/j3TKUVC2YB225Hiv5EoC
+ eiv9Au7LXjzq60XhXT4+35jm9ufux5d4CMm6DHekp2RYUoTOoJo9xgqbP3Wz81hFxJlzmvMk8B
+ hESX4TN6B3G7GKK+cR2uolO+
+Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
+  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 26 Mar 2021 00:20:55 -0700
+IronPort-SDR: ojn1dJBk3F+c7AdDaDDu9BMLXtaz0Ggu7oLXk4pcp2lm7uZXcVcDnb43SkzycxAxPA30M43uTi
+ eth38K9hLcsNvqlRtREXEtRG05ZszYwki9Bs+t3ltdj5ZhFXGli/1PVB1RloZpH5LJ6YULv0aQ
+ J19ljPdO1RGcNim1wgSQuTgkWzhWXIj7hHBssZjgVe9UElL6pnkXmfC3A3Tkbtw1bhw8gXd56O
+ gWU8IUxl+sCeKkM9vTdieOrZqupHlahuc98gaDoG4ecFPz+4hxmKoKVK6+PsWfmweGhYRrVTcT
+ Lto=
+WDCIronportException: Internal
+Received: from unknown (HELO redsun60.ssa.fujisawa.hgst.com) ([10.149.66.36])
+  by uls-op-cesaip02.wdc.com with ESMTP; 26 Mar 2021 00:38:52 -0700
+From:   Johannes Thumshirn <johannes.thumshirn@wdc.com>
+To:     Eryu Guan <guan@eryu.me>
+Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+        Nikolay Borisov <nborisov@suse.com>,
+        Damien Le Moal <Damien.LeMoal@wdc.com>,
+        Johannes Thumshirn <johannes.thumshirn@wdc.com>,
+        Naohiro Aota <naohiro.aota@wdc.com>
+Subject: [PATCH v2] fstests: don't relay on /proc/partitions for device size
+Date:   Fri, 26 Mar 2021 16:38:46 +0900
+Message-Id: <20210326073846.14520-1-johannes.thumshirn@wdc.com>
+X-Mailer: git-send-email 2.30.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <8735wir242.fsf@garuda>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Mar 26, 2021 at 09:35:33AM +0530, Chandan Babu R wrote:
-> On 23 Mar 2021 at 10:58, Chandan Babu R wrote:
-> > On 23 Mar 2021 at 00:24, Darrick J. Wong wrote:
-> >> On Tue, Mar 09, 2021 at 10:31:24AM +0530, Chandan Babu R wrote:
-> >>> This commit adds a stress test that executes fsstress with
-> >>> bmap_alloc_minlen_extent error tag enabled.
-> >>
-> >> Continuing along the theme of watching the magic smoke come out when dir
-> >> block size > fs block size, I also observed the following assertion when
-> >> running this test:
-> 
-> Apart from "xfs_dir2_shrink_inode only calls xfs_bunmapi once" bug, I
-> noticed that scrub has detected metadata inconsistency,
-> 
-> FSTYP         -- xfs (debug)
-> PLATFORM      -- Linux/x86_64 debian-guest 5.12.0-rc4-chandan #30 SMP Thu Mar 25 11:00:08 IST 2021
-> MKFS_OPTIONS  -- -f -b size=1k -m rmapbt=0,reflink=0 -n size=64k /dev/vdc2
-> MOUNT_OPTIONS -- /dev/vdc2 /mnt/scratch
-> 
-> xfs/538 43s ... _check_xfs_filesystem: filesystem on /dev/vdc2 failed scrub
-> (see /root/repos/xfstests-dev/results//xfs/538.full for details)
-> 
-> Ran: xfs/538
-> Failures: xfs/538
-> Failed 1 of 1 tests
-> 
-> I will work on fixing this one as well.
+Non-partitionable devices, like zoned block devices, aren't showing up in in
+/proc/partitions and therefore we cannot relay on it to get a device's
+size.
 
-Yeah, I noticed that too.  There are two bugs -- the first one is that
-the "Block directories only have a single block at offset 0" check in
-xchk_directory_blocks is wrong -- they can have a single *dir* block at
-offset 0.  The correct check is (I think):
+Use blockdev --getsz to get the block device size.
 
-	if (is_block && got.br_startoff >= args.geo->fsbcount) {
-		xchk_fblock_set_corrupt(...);
-		break;
-	}
+Cc: Naohiro Aota <naohiro.aota@wdc.com>
+Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
 
-The second problem is ... somewhere in the bmbt scrubber.  It looks like
-there's a file with a data fork in btree format; the data fork has a
-single child block; and there are few enough key/ptrs in that child
-block that it /could/ fit in the root.  For some reason the btree code
-didn't promote it, however.  Seeing as nobody's touched that code
-lately, that probably means that scrub is wrong, but OTOH that /does/
-seem like a waste of a block.
+---
+Changes to v1:
+- Use blockdev --getsz instead of sysfs (Nikolay/Damien)
+---
+ common/rc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-But, that's as far as I've gotten on that second one and it's late.
-Thanks for taking a look! :)
+diff --git a/common/rc b/common/rc
+index 1c814b9aabf1..40a9bfac31da 100644
+--- a/common/rc
++++ b/common/rc
+@@ -3778,7 +3778,7 @@ _get_available_space()
+ # return device size in kb
+ _get_device_size()
+ {
+-	grep -w `_short_dev $1` /proc/partitions | awk '{print $3}'
++	blockdev --getsz $1
+ }
+ 
+ # Make sure we actually have dmesg checking set up.
+-- 
+2.30.0
 
---D
-
-> -- 
-> chandan
