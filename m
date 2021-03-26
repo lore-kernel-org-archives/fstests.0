@@ -7,64 +7,64 @@ X-Spam-Status: No, score=-19.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 08770C433E3
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1FBDBC433E5
 	for <linux-fstests@archiver.kernel.org>; Fri, 26 Mar 2021 15:42:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CC6EF61A43
-	for <linux-fstests@archiver.kernel.org>; Fri, 26 Mar 2021 15:42:26 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 098F161A32
+	for <linux-fstests@archiver.kernel.org>; Fri, 26 Mar 2021 15:42:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230192AbhCZPlw (ORCPT
+        id S230225AbhCZPlx (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 26 Mar 2021 11:41:52 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:38328 "EHLO
+        Fri, 26 Mar 2021 11:41:53 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:38005 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S230249AbhCZPll (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 26 Mar 2021 11:41:41 -0400
+        by vger.kernel.org with ESMTP id S230253AbhCZPlr (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 26 Mar 2021 11:41:47 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1616773301;
+        s=mimecast20190719; t=1616773306;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=tBH46VgVsNuhboqNNMvhn70GP7sx1dn9/WV1tz/cZGg=;
-        b=Xx7xcC8fin18ZepB1X6gu9kVEqblfq6CnvHXblddyIDUfYHASvGRJsn3zRt4FwQgNv2yQv
-        ZkDVxBGG4ZTmpnRYOEUL2RabJbCzHENlduI/QIgofUKiFNoalQ5cOfcFZj9J16+FMPGPMN
-        kV2IzBgeeGFSi0awktGHAulDn1A660w=
-Received: from mail-ej1-f69.google.com (mail-ej1-f69.google.com
- [209.85.218.69]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-344-hiTIK22mN1ibluIcdBGq6A-1; Fri, 26 Mar 2021 11:41:39 -0400
-X-MC-Unique: hiTIK22mN1ibluIcdBGq6A-1
-Received: by mail-ej1-f69.google.com with SMTP id kx22so4257614ejc.17
-        for <fstests@vger.kernel.org>; Fri, 26 Mar 2021 08:41:39 -0700 (PDT)
+        bh=LkJ6qWHxSfuxNqvg132bNGuMpPuVn9GLJ8yG6ihh9YQ=;
+        b=bogh1sd2JpSv2ToNLH7hXLITSqB/gXHrfCf03qXCJiC78mDED2BwhKzNgLlZLuFQCOy3QO
+        gs6M+0V42B0wDo1AZv6tu1cfSqrycf7g5uktUjoUyyhrHhrjqT2mHUUNKZ4tI2p8BRM8a7
+        fUaAcT/2O7aS1lB5vSvpHdI2XcnvLv4=
+Received: from mail-ed1-f72.google.com (mail-ed1-f72.google.com
+ [209.85.208.72]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-458-LIagPlV0Mb-30ZBCKAAcUQ-1; Fri, 26 Mar 2021 11:41:43 -0400
+X-MC-Unique: LIagPlV0Mb-30ZBCKAAcUQ-1
+Received: by mail-ed1-f72.google.com with SMTP id h2so4609772edw.10
+        for <fstests@vger.kernel.org>; Fri, 26 Mar 2021 08:41:42 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=tBH46VgVsNuhboqNNMvhn70GP7sx1dn9/WV1tz/cZGg=;
-        b=DrGzYWFpQSGyIs9D6GKdtexpMEQwDGAHaB/wuyuID6Kr6c4wB6Vdbyb59bTjwNKA7/
-         mVsCysxYZ+pntZg60VZYovuFzVuYPPiEmUWgWoyAOh6EZO4M4eFTjd+xx2TOgSntpPGH
-         xU7Uezu1WQZnCWuMWDbpuCQ5P44RkL8blWNZR+2wJtszRTPWJVuA99ghu6v7a8tIZ4t4
-         eF7qjCwG1gNviJVXyaWtSOgPOi8rkqfU5YgaBuLxlsMQwlUzfiJFjGZpbl98Cth/m9nO
-         3QCsFDgxGI/lwQy8l6VNatGHaWNT1G51ePBxHVix9pHenhNoeT1+ny7qx1IQZ+3/vyaZ
-         OE+A==
-X-Gm-Message-State: AOAM530anjvjmlWLIGwL/JnIny+JVfXBp8/Xs0kqN0zHeW3ml4gD/n68
-        g/bfZ5fcVj0Ortcwfd/chYPQ1gOVPon1Q4KquTDuXt4dxFJMtr/f8EanerBI1klzBlhalpZYk0J
-        xo+LBate88/fDobUuTSglu+4WYAB/VayibkBh56ZWMqQWx9d1Fiy3+7REzQDSvhnuu7rg
-X-Received: by 2002:a17:906:f84b:: with SMTP id ks11mr15883459ejb.296.1616773297790;
-        Fri, 26 Mar 2021 08:41:37 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJxkoBqIT9azgy3Skad/Q4EH/6tPODFSaez6ecxseQrbeux7uN3CsR8xXqGKDZB9vWDcOhtBIg==
-X-Received: by 2002:a17:906:f84b:: with SMTP id ks11mr15883442ejb.296.1616773297636;
-        Fri, 26 Mar 2021 08:41:37 -0700 (PDT)
+        bh=LkJ6qWHxSfuxNqvg132bNGuMpPuVn9GLJ8yG6ihh9YQ=;
+        b=JdWqmgacH4BXn9nPXxM//3MVuuwQRPE5qSYqbgRcOKNpxVDC241tEiNUp5wS4XA2CL
+         2UL9xO5qwMNmsGdwKSeP1jPELlxjfwPtM751PfhtZA2tM6/WrkByriTOz54n+dJHB20N
+         AXBNVMmW4o5TRhS2nxuqVRf6uyDYBn6qYlyqMe2E/I7i41RInF8qbrZbZmEy6P6kiodx
+         R/8OMGyYLvFbXI6Y1p3AZ5+SfMuOjt1bgO0jmApbIFMz81wO+WvWE2vL52BN4rDW8WUm
+         YguBSDNJPr5gBV9gprXbqOaSuhnL3bQjXBtSgi9cyaQv5/bsIUm1O1kXOI6uPnonYozx
+         HIqw==
+X-Gm-Message-State: AOAM5326VZ6GLd+yGFKOuaq/IGpUzajIt4JVkvxvMkP4iV2T3iUnuoGc
+        BTD8HXDD4yvjegVn7t9XNuIPb02un2ITYMRTJXUDIF9oDUvMD0xkNuSp2saz6JlEAJbLt4S9HVK
+        7D7j9hhelh53XUTNpWb7BUpxjx8QZMQv3Kt1qzNsyoKvlFT44025EgKWz0Ygpq33K7iop
+X-Received: by 2002:a05:6402:1051:: with SMTP id e17mr15931672edu.42.1616773301745;
+        Fri, 26 Mar 2021 08:41:41 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJxx7vWLjFsd1WEpsh7V5plJI4CqA2p5Czt0YjSI9gzfkGq8XfpnV5kqRzBg95RHHh0bgaRKQA==
+X-Received: by 2002:a05:6402:1051:: with SMTP id e17mr15931660edu.42.1616773301597;
+        Fri, 26 Mar 2021 08:41:41 -0700 (PDT)
 Received: from localhost.localdomain ([84.19.91.9])
-        by smtp.gmail.com with ESMTPSA id p9sm4389791eds.66.2021.03.26.08.41.36
+        by smtp.gmail.com with ESMTPSA id p9sm4389791eds.66.2021.03.26.08.41.39
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 26 Mar 2021 08:41:37 -0700 (PDT)
+        Fri, 26 Mar 2021 08:41:41 -0700 (PDT)
 From:   Pavel Reichl <preichl@redhat.com>
 To:     fstests@vger.kernel.org
 Cc:     zlang@redhat.com, xzhou@redhat.com
-Subject: [PATCH 2/5] g/87,88,125,126,128,193,314,317,355: Add _require_chown/chmod
-Date:   Fri, 26 Mar 2021 16:41:31 +0100
-Message-Id: <20210326154134.309159-3-preichl@redhat.com>
+Subject: [PATCH 5/5] generic/003: Amend the test for exfat
+Date:   Fri, 26 Mar 2021 16:41:34 +0100
+Message-Id: <20210326154134.309159-6-preichl@redhat.com>
 X-Mailer: git-send-email 2.30.2
 In-Reply-To: <20210326154134.309159-1-preichl@redhat.com>
 References: <20210326154134.309159-1-preichl@redhat.com>
@@ -74,127 +74,89 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+Update the test so it can be run even for exfat which has 2 seconds
+granularity for access_time and does not have a timestamp for
+metadata change.
+
 Signed-off-by: Pavel Reichl <preichl@redhat.com>
 ---
- tests/generic/087 | 1 +
- tests/generic/088 | 1 +
- tests/generic/125 | 1 +
- tests/generic/126 | 1 +
- tests/generic/128 | 1 +
- tests/generic/193 | 1 +
- tests/generic/314 | 1 +
- tests/generic/317 | 1 +
- tests/generic/355 | 1 +
- 9 files changed, 9 insertions(+)
+ tests/generic/003 | 29 ++++++++++++++++++++---------
+ 1 file changed, 20 insertions(+), 9 deletions(-)
 
-diff --git a/tests/generic/087 b/tests/generic/087
-index 1f30dbf4..c3576117 100755
---- a/tests/generic/087
-+++ b/tests/generic/087
-@@ -37,6 +37,7 @@ _cleanup()
- # real QA test starts here
- _supported_fs generic
- _require_test
-+_require_chown
+diff --git a/tests/generic/003 b/tests/generic/003
+index ec4fdfc1..39596665 100755
+--- a/tests/generic/003
++++ b/tests/generic/003
+@@ -37,6 +37,13 @@ _require_relatime
  
- QA_FS_PERMS=$here/src/fs_perms
+ rm -f $seqres.full
  
-diff --git a/tests/generic/088 b/tests/generic/088
-index 9388a083..ad99bd7e 100755
---- a/tests/generic/088
-+++ b/tests/generic/088
-@@ -29,6 +29,7 @@ _filter()
- # real QA test starts here
- _supported_fs generic
- _require_test
-+_require_chown
++if [ "$FSTYP" = "exfat" ]; then
++	# exfat's timestamp for access_time has double seconds granularity
++	access_delay=2
++else
++	access_delay=1
++fi
++
+ _stat() {
+ 	stat -c "%x;%y;%z" $1
+ }
+@@ -79,14 +86,14 @@ echo "aaa" > $TPATH/dir1/file1
+ file1_stat_before_first_access=`_stat $TPATH/dir1/file1`
  
- path=$TEST_DIR/t_access
- $here/src/t_access_root $path | tee $seqres.full | _filter
-diff --git a/tests/generic/125 b/tests/generic/125
-index e84248d3..8c8f5cd7 100755
---- a/tests/generic/125
-+++ b/tests/generic/125
-@@ -25,6 +25,7 @@ _supported_fs generic
- _require_test
- _require_user
- _require_odirect
-+_require_chmod
+ # Accessing file1 the first time
+-sleep 1
++sleep $access_delay
+ cat $TPATH/dir1/file1 > /dev/null
+ file1_stat_after_first_access=`_stat $TPATH/dir1/file1`
+ _compare_stat_times YNN "$file1_stat_before_first_access" \
+ 	"$file1_stat_after_first_access" "after accessing file1 first time"
  
- TESTDIR=$TEST_DIR/ftrunc
- TESTFILE=$TESTDIR/ftrunc.tmp
-diff --git a/tests/generic/126 b/tests/generic/126
-index ac25d294..636ca00d 100755
---- a/tests/generic/126
-+++ b/tests/generic/126
-@@ -27,6 +27,7 @@ _cleanup()
- # real QA test starts here
- _supported_fs generic
- _require_test
-+_require_chown
+ # Accessing file1 a second time
+-sleep 1
++sleep $access_delay
+ cat $TPATH/dir1/file1 > /dev/null
+ file1_stat_after_second_access=`_stat $TPATH/dir1/file1`
+ _compare_stat_times NNN "$file1_stat_after_first_access" \
+@@ -109,7 +116,7 @@ _compare_stat_times NYY "$dir2_stat_before_file_creation" \
  
- QA_FS_PERMS=$here/src/fs_perms
+ # Accessing file2
+ file2_stat_before_first_access=`_stat $TPATH/dir2/file2`
+-sleep 1
++sleep $access_delay
+ cat $TPATH/dir2/file2 > /dev/null
+ file2_stat_after_first_access=`_stat $TPATH/dir2/file2`
+ _compare_stat_times YNN "$file2_stat_before_first_access" \
+@@ -135,11 +142,15 @@ echo "xyz" > $TPATH/dir1/file1
+ file1_stat_after_modify=`_stat $TPATH/dir1/file1`
+ _compare_stat_times NYY "$file1_stat_before_modify" \
+ 	"$file1_stat_after_modify" "after modifying file1"
+-sleep 1
+-mv $TPATH/dir1/file1 $TPATH/dir1/file1_renamed
+-file1_stat_after_change=`_stat $TPATH/dir1/file1_renamed`
+-_compare_stat_times NNY "$file1_stat_after_modify" \
+-	"$file1_stat_after_change" "after changing file1"
++
++# exfat does not support last metadata change timestamp
++if [ "$FSTYP" != "exfat" ]; then
++	sleep 1
++	mv $TPATH/dir1/file1 $TPATH/dir1/file1_renamed
++	file1_stat_after_change=`_stat $TPATH/dir1/file1_renamed`
++	_compare_stat_times NNY "$file1_stat_after_modify" \
++		"$file1_stat_after_change" "after changing file1"
++fi
  
-diff --git a/tests/generic/128 b/tests/generic/128
-index b3e49eff..c1eae77a 100755
---- a/tests/generic/128
-+++ b/tests/generic/128
-@@ -24,6 +24,7 @@ _supported_fs generic
- 
- _require_scratch
- _require_user
-+_require_chmod
- 
- _scratch_mkfs >/dev/null 2>&1
- _scratch_mount "-o nosuid"
-diff --git a/tests/generic/193 b/tests/generic/193
-index 3125efdd..fd0ebbf6 100755
---- a/tests/generic/193
-+++ b/tests/generic/193
-@@ -56,6 +56,7 @@ _supported_fs generic
- 
- _require_test
- _require_user
-+_require_chown
- 
- test_root=$TEST_DIR/$seq.$$.root
- test_user=$TEST_DIR/$seq.$$.user
-diff --git a/tests/generic/314 b/tests/generic/314
-index 03df81ce..540f0feb 100755
---- a/tests/generic/314
-+++ b/tests/generic/314
-@@ -29,6 +29,7 @@ _cleanup()
- _supported_fs generic
- _require_test
- _require_user
-+_require_chown
- 
- rm -rf $TEST_DIR/$seq-dir
- 
-diff --git a/tests/generic/317 b/tests/generic/317
-index 29c37a57..289dfabe 100755
---- a/tests/generic/317
-+++ b/tests/generic/317
-@@ -45,6 +45,7 @@ _require_scratch
- _require_user
- _require_ugid_map
- _require_userns
-+_require_chown
- qa_user_id=`id -u $qa_user`
- 
- _filter_output()
-diff --git a/tests/generic/355 b/tests/generic/355
-index 161dd042..74fba0f9 100755
---- a/tests/generic/355
-+++ b/tests/generic/355
-@@ -32,6 +32,7 @@ _supported_fs generic
- _require_test
- _require_user
- _require_odirect
-+_require_chown
- 
- testfile=$TEST_DIR/$seq.test
- rm -f $testfile
+ # Mounting with strictatime option and
+ # accessing a previously created file twice
+@@ -148,7 +159,7 @@ cat $TPATH/dir2/file3 > /dev/null
+ file3_stat_after_second_access=`_stat $TPATH/dir2/file3`
+ _compare_stat_times YNN "$file3_stat_after_first_access" \
+ 	"$file3_stat_after_second_access" "after accessing file3 second time"
+-sleep 1
++sleep $access_delay
+ cat $TPATH/dir2/file3 > /dev/null
+ file3_stat_after_third_access=`_stat $TPATH/dir2/file3`
+ _compare_stat_times YNN "$file3_stat_after_second_access" \
 -- 
 2.30.2
 
