@@ -7,83 +7,71 @@ X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ED405C433DB
-	for <linux-fstests@archiver.kernel.org>; Sun, 28 Mar 2021 15:40:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CD0C4C433DB
+	for <linux-fstests@archiver.kernel.org>; Sun, 28 Mar 2021 15:41:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B4D1C61976
-	for <linux-fstests@archiver.kernel.org>; Sun, 28 Mar 2021 15:40:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9B9F961976
+	for <linux-fstests@archiver.kernel.org>; Sun, 28 Mar 2021 15:41:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230385AbhC1Pjd (ORCPT
+        id S229647AbhC1PlO (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 28 Mar 2021 11:39:33 -0400
-Received: from out20-85.mail.aliyun.com ([115.124.20.85]:60857 "EHLO
-        out20-85.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229538AbhC1PjB (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 28 Mar 2021 11:39:01 -0400
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.09651522|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_regular_dialog|0.0572433-0.00121186-0.941545;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047211;MF=guan@eryu.me;NM=1;PH=DS;RN=4;RT=4;SR=0;TI=SMTPD_---.JrZGd-8_1616945933;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.JrZGd-8_1616945933)
-          by smtp.aliyun-inc.com(10.147.42.135);
-          Sun, 28 Mar 2021 23:38:54 +0800
-Date:   Sun, 28 Mar 2021 23:38:53 +0800
+        Sun, 28 Mar 2021 11:41:14 -0400
+Received: from out20-50.mail.aliyun.com ([115.124.20.50]:47278 "EHLO
+        out20-50.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230347AbhC1PlB (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 28 Mar 2021 11:41:01 -0400
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.1461262|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_regular_dialog|0.0260457-0.000735599-0.973219;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047199;MF=guan@eryu.me;NM=1;PH=DS;RN=4;RT=4;SR=0;TI=SMTPD_---.JrZUze9_1616946058;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.JrZUze9_1616946058)
+          by smtp.aliyun-inc.com(10.147.40.233);
+          Sun, 28 Mar 2021 23:40:59 +0800
+Date:   Sun, 28 Mar 2021 23:40:58 +0800
 From:   Eryu Guan <guan@eryu.me>
 To:     Pavel Reichl <preichl@redhat.com>
 Cc:     fstests@vger.kernel.org, zlang@redhat.com, xzhou@redhat.com
-Subject: Re: [PATCH 1/5] common: Add _require_{chown,chmod}()
-Message-ID: <YGCjDa1NY2aZB9x+@desktop>
+Subject: Re: [PATCH 4/5] generic/554: hide permision warning on exfat
+Message-ID: <YGCjirErrfGsmcGZ@desktop>
 References: <20210326154134.309159-1-preichl@redhat.com>
- <20210326154134.309159-2-preichl@redhat.com>
+ <20210326154134.309159-5-preichl@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210326154134.309159-2-preichl@redhat.com>
+In-Reply-To: <20210326154134.309159-5-preichl@redhat.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Mar 26, 2021 at 04:41:30PM +0100, Pavel Reichl wrote:
-> Add helper function that ensures that test is only executed on file
-> systems that implement chown and chmod.
-> 
+On Fri, Mar 26, 2021 at 04:41:33PM +0100, Pavel Reichl wrote:
 > Signed-off-by: Pavel Reichl <preichl@redhat.com>
+> ---
+>  tests/generic/554 | 10 +++++++++-
+>  1 file changed, 9 insertions(+), 1 deletion(-)
+> 
+> diff --git a/tests/generic/554 b/tests/generic/554
+> index fa4f97d2..365628e2 100755
+> --- a/tests/generic/554
+> +++ b/tests/generic/554
+> @@ -46,7 +46,15 @@ $XFS_IO_PROG -f -c "pwrite -S 0x61 0 128k" $SCRATCH_MNT/file >> $seqres.full 2>&
+>  
+>  echo swap files return ETXTBUSY
+>  _format_swapfile $SCRATCH_MNT/swapfile 16m
+> -swapon $SCRATCH_MNT/swapfile
+> +if [ "$FSTYP" = "exfat" ]; then
+> +	# exfat does not support posix file permisions, so warning is
+> +	# to be expected
+> +	swapon $SCRATCH_MNT/swapfile 2>&1 |\
+> +		grep -v 'insecure permission' >> $seqres.full
+> +else
+> +	swapon $SCRATCH_MNT/swapfile
+> +fi
 
-I think patch 1 and patch 2 could be folded into one patch, introduce
-new helpers and use them in the same patch.
+Introduce a new helper like _format_swapfile and do the check there?
 
 Thanks,
 Eryu
 
-> ---
->  common/rc | 18 ++++++++++++++++++
->  1 file changed, 18 insertions(+)
-> 
-> diff --git a/common/rc b/common/rc
-> index 0ce3cb0d..b18d37fd 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -2129,6 +2129,24 @@ _require_user()
->      [ "$?" == "0" ] || _notrun "$qa_user cannot execute commands."
->  }
+> +
+>  $XFS_IO_PROG -f -c "copy_range -l 32k $SCRATCH_MNT/file" $SCRATCH_MNT/swapfile
+>  swapoff $SCRATCH_MNT/swapfile
 >  
-> +# check for a chown support
-> +#
-> +_require_chown()
-> +{
-> +	if [ "$FSTYP" = "exfat" ]; then
-> +		_notrun "chown is not supported on $FSTYP"
-> +	fi
-> +}
-> +
-> +# check for a chmod support
-> +#
-> +_require_chmod()
-> +{
-> +	if [ "$FSTYP" = "exfat" ]; then
-> +		_notrun "chmod is not supported on $FSTYP"
-> +	fi
-> +}
-> +
->  # check for a group on the machine, fsgqa as default
->  #
->  _require_group()
 > -- 
 > 2.30.2
