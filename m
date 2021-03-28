@@ -2,294 +2,186 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-17.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,PDS_BAD_THREAD_QP_64,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A2867C433E0
-	for <linux-fstests@archiver.kernel.org>; Sun, 28 Mar 2021 20:10:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BA9BFC433C1
+	for <linux-fstests@archiver.kernel.org>; Sun, 28 Mar 2021 21:33:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7C56F61951
-	for <linux-fstests@archiver.kernel.org>; Sun, 28 Mar 2021 20:10:11 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 85C0A6194B
+	for <linux-fstests@archiver.kernel.org>; Sun, 28 Mar 2021 21:33:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229656AbhC1UJj (ORCPT
+        id S231472AbhC1Vcb (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 28 Mar 2021 16:09:39 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:36201 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S231473AbhC1UJ0 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 28 Mar 2021 16:09:26 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1616962166;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=bXbAn5I6K5RTZ3mjK7jSISgKa6cABUfBmvoB+kBx3jc=;
-        b=MfwGfxY+V4IzHzP4djlCuLlbQR2TRZW23A1Lu1RHKcFnLg5d6ICMXM/b4MNSNIzE9aTDWK
-        MaWwAbKrB+Z1My3yFbGSROeZ25gMwu92WVdyLbsEHLBabR6tgCn90Tnx1eWHd26CH7jJnr
-        33/2geCGSRapNbBwGQE2UoAQPenDRUg=
-Received: from mail-pg1-f200.google.com (mail-pg1-f200.google.com
- [209.85.215.200]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-569-gE7MtEe-MhG6TUh6rN5WZQ-1; Sun, 28 Mar 2021 16:09:24 -0400
-X-MC-Unique: gE7MtEe-MhG6TUh6rN5WZQ-1
-Received: by mail-pg1-f200.google.com with SMTP id 83so9104434pgh.4
-        for <fstests@vger.kernel.org>; Sun, 28 Mar 2021 13:09:23 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to:user-agent;
-        bh=bXbAn5I6K5RTZ3mjK7jSISgKa6cABUfBmvoB+kBx3jc=;
-        b=OY1f6EeppzfKR3ROR4LJ1leSRpkL66Fd59L/SNWrbGjWdXf7E0PBOrE3HWt2Tex2RO
-         urnus0+XJOFe4pCfC1PMzzr/Az7NGHZUzHVywCrejYHRaXX+TsmKAAnPvzdNrD4BuTir
-         oELrTu8ivog2C7+XgxnnGKjcpV54v4gHEg1bCp5yiHqosmd0rBd3laVw/TffUoXfcUXz
-         kuyFFfmkgta8y1/vkkStxeyBodRsSMdHfPQSLn2TxDAqjFr55xiu+7FEO3poiXsOaIEz
-         y/2vjg+YYdw6WxKhu69zud5ThpT4A+ElOzkhmR0sOBQucTC6HV7YRRXO+joBhv7bvk8N
-         S7PQ==
-X-Gm-Message-State: AOAM5333xDIyCOSCaPAeMmHpebzS0zMBQtZNHoyKFlgUss8set+iXsjU
-        8zkkSAZk9uwVTGKWU3ClILxxYpKMR0cBmeyYT0ObS0aKaqq1Wxf6BK02hxkhQbEvbeD0jzvmI2N
-        qDOJKLZsato0iLK8wJw==
-X-Received: by 2002:a05:6a00:b86:b029:205:c773:5c69 with SMTP id g6-20020a056a000b86b0290205c7735c69mr22116741pfj.60.1616962162838;
-        Sun, 28 Mar 2021 13:09:22 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJw81E2lxvBvSH4A0GgwZ3zDp6TIQuZITmK6xPKRaRcBhf/DNliEov1mMIwxCSiZ6GwSBDjUcA==
-X-Received: by 2002:a05:6a00:b86:b029:205:c773:5c69 with SMTP id g6-20020a056a000b86b0290205c7735c69mr22116731pfj.60.1616962162579;
-        Sun, 28 Mar 2021 13:09:22 -0700 (PDT)
-Received: from xiangao.remote.csb ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id r10sm13649871pgj.29.2021.03.28.13.09.20
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 28 Mar 2021 13:09:22 -0700 (PDT)
-Date:   Mon, 29 Mar 2021 04:09:12 +0800
-From:   Gao Xiang <hsiangkao@redhat.com>
-To:     Eryu Guan <guan@eryu.me>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org,
-        "Darrick J. Wong" <djwong@kernel.org>,
-        Zorro Lang <zlang@redhat.com>
-Subject: Re: [RFC PATCH v3 3/3] xfs: stress test for shrinking free space in
- the last AG
-Message-ID: <20210328200912.GC3213575@xiangao.remote.csb>
-References: <20210315111926.837170-1-hsiangkao@redhat.com>
- <20210315111926.837170-4-hsiangkao@redhat.com>
- <YGCy5W+4coMuM7y1@desktop>
+        Sun, 28 Mar 2021 17:32:31 -0400
+Received: from esa6.hgst.iphmx.com ([216.71.154.45]:52598 "EHLO
+        esa6.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231489AbhC1VcN (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 28 Mar 2021 17:32:13 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1616967134; x=1648503134;
+  h=from:to:cc:subject:date:message-id:references:
+   content-transfer-encoding:mime-version;
+  bh=7WWxoU4xYMygaAM05kGVrNA7LL/H4W/lnd82OJnkmHE=;
+  b=ou+bkdAR0BIyCa8K8AVoHZkaSg8kPIuWE7XaQWEqdflqERSfMjgzCNbN
+   91D/g/M+DNejkSNOcvAye8kehW1EGhXWjN/rS8AC3VqlQ4yAz1emPIGXv
+   CkfFyEl/XmQFS+FZEada69crYEOhP0Y3h7OJIRcN+VdKOTHZRIMG0Kv8T
+   KxbXif3DXeenmF/x56TLmKxB3QH5topg9FaDn4XxZLJT05gTwu3aXaWv8
+   frTW3zVmnlumZVXF33q1NryCcfBI+6m+Tmv59U00sO7z/5HsviLFyc6PI
+   yDL6wpBRQDD5l++ryfrcvkFi9+wu+IcvY/AoKYeybo0bBMrQod+hZs4FC
+   Q==;
+IronPort-SDR: vRqyDNZ3vGQihhnbbW4E8caeFDzmDEmClakHMMRMkcoMFS1kgEugcNFncEaGSKv0JIfSOuNbxE
+ 7a9FKvr5GczOuouUtcLQmj5qywnoUfTfP8G9esg/I5c3LZAOymEtAOcb9hLdzrNkUVRvfdW4Xd
+ o7oXTkwKbd9p6lUMsieIUYVLmdxRY3D4wAAmUsngcsqHCY8aqbL139sEmhKMc4w5uVxUkf8Doy
+ kV9Xcd84OXjw8VGhW5NrFRpy37QHtAFAFKMZD45O6/hvg8P6/XUnLW9sXEmuQAqtl/jgxWFnPh
+ cgY=
+X-IronPort-AV: E=Sophos;i="5.81,285,1610380800"; 
+   d="scan'208";a="164287814"
+Received: from mail-dm6nam10lp2103.outbound.protection.outlook.com (HELO NAM10-DM6-obe.outbound.protection.outlook.com) ([104.47.58.103])
+  by ob1.hgst.iphmx.com with ESMTP; 29 Mar 2021 05:31:29 +0800
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=nogWDv+a6jH4RVoYtgYrOPjGjAMxBLuMckuL/et6vuzvf2APL4M36lefLiSWAyivT/FbChhLvsnptQgB4btfY2XgAK7mnomiV8IEmrr5MN71DKsuaXkP3H3nIKB7usrYc0cjB7lHyVEUb9YG6fkPmeXglJw0dXVTWy8CnrylQiJlTtrWY8TvcoaE8kKKSfZLx7y2qWp6a1iUe0RN5dMp5Ix1yytEFwnuQug0ERyGZB6V9Aph4iKl4YsOCNRYxswoYNeXc+uKqediZ5WqHsQVhCz060oKEtpps3vygolBLxb0qlM7K/DrF0t4y/EouqJbxPJnaJE4wcaA5hPcQHoP0A==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=+E64wrpXb4RWMgsIH7psmvhW8V31P99yustK/Qqw0Eo=;
+ b=CrJJOGInU1hzQVWkfMZNmWOKLYVJO5bkdzG6Y3pIcd1dvWyDpqWH4CnsddiA6qFYuNHYdbTy6ye8jdIRuPhRZO797zRE02gxtjNsQAOwLvIRpJwSX2UwS/1JFHMtTBYUM2n5QEu2ooTa1UzWdJ0eLo/cfRWG9ST997+PmZS7irDtMkFvRHbmCfne1txOPMTl2v3qUGbVacG/bimKh8UP4LGi/qX4d3V97XzktNcfQ20V1x4wKykcjYlRrf9aE7ENmVfjDFUbECKI0LgyDT/kJ7Epo1lSr7Qirq+IFEHVVhnS1Rci/BOU4/Nf/eGnF6LF6k20RmhXqa5msnTvmTHIxA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
+ header.d=wdc.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=+E64wrpXb4RWMgsIH7psmvhW8V31P99yustK/Qqw0Eo=;
+ b=fJBOWeE707HYLcMOntVHC16rhIZaN/lO1kbQxKJPME69b94RjTl1PUw3NR8d+KURoauUFS9+9QMvgv5/qW7j6M4CTtGjWlKJZVJLalmxAD26CMevqJBGl7uwH3ajcIZ1B0ZHAyfzvh4VUQ7UX0Frh1JnAbAe7x2TsOK1Qz2FJ5Q=
+Received: from BL0PR04MB6514.namprd04.prod.outlook.com (2603:10b6:208:1ca::23)
+ by MN2PR04MB6672.namprd04.prod.outlook.com (2603:10b6:208:1e5::14) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3977.29; Sun, 28 Mar
+ 2021 21:31:14 +0000
+Received: from BL0PR04MB6514.namprd04.prod.outlook.com
+ ([fe80::e9c5:588:89e:6887]) by BL0PR04MB6514.namprd04.prod.outlook.com
+ ([fe80::e9c5:588:89e:6887%3]) with mapi id 15.20.3977.033; Sun, 28 Mar 2021
+ 21:31:14 +0000
+From:   Damien Le Moal <Damien.LeMoal@wdc.com>
+To:     Johannes Thumshirn <Johannes.Thumshirn@wdc.com>,
+        Eryu Guan <guan@eryu.me>
+CC:     "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
+        "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>,
+        Nikolay Borisov <nborisov@suse.com>,
+        Naohiro Aota <Naohiro.Aota@wdc.com>
+Subject: Re: [PATCH v3] fstests: don't rely on /proc/partitions for device
+ size
+Thread-Topic: [PATCH v3] fstests: don't rely on /proc/partitions for device
+ size
+Thread-Index: AQHXIlWOiGR4R5Pko0yyPoTyiEOgvA==
+Date:   Sun, 28 Mar 2021 21:31:14 +0000
+Message-ID: <BL0PR04MB651430651E281B5A150DCAE6E77F9@BL0PR04MB6514.namprd04.prod.outlook.com>
+References: <20210326153437.27840-1-johannes.thumshirn@wdc.com>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: wdc.com; dkim=none (message not signed)
+ header.d=none;wdc.com; dmarc=none action=none header.from=wdc.com;
+x-originating-ip: [2400:2411:43c0:6000:8539:9440:76cc:73ac]
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-ht: Tenant
+x-ms-office365-filtering-correlation-id: 4e800b59-21d7-4758-52f3-08d8f230d0a3
+x-ms-traffictypediagnostic: MN2PR04MB6672:
+x-ms-exchange-transport-forked: True
+x-microsoft-antispam-prvs: <MN2PR04MB667201256E698A093496FE75E77F9@MN2PR04MB6672.namprd04.prod.outlook.com>
+wdcipoutbound: EOP-TRUE
+x-ms-oob-tlc-oobclassifiers: OLM:2958;
+x-ms-exchange-senderadcheck: 1
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: bg0Ke+ST0O+lhcl8ffVtscljpSPOWqp4aUIPHDDwNt1jWZFgMJ8zTTtNfcVZVpwaWzNEAj9jLLnlwTk7NnT7Bpxa+/up7fpijXyMSsONME636L3YvnbaTxYdUlNOmo0oO5AXIeI8dw9qs+VRX3+rimbM9IiXq3xubfIWWSFRmdeZvX2UgEl9ENJiQqA8CjvF/zSAjOEU0nj8td6bTJp4Xl/X588QiV25wzy27d1HyQ+REjNcBcgipiexiQk0HVJQxaM5zcMY1aG4kzzt/9ZHUznQPJMWt7AW6XA4xq6A9tUU+KEUGoP6Ji+PuuuHwDVzF9WlO8YAOf4mMzW8f/OMrJAFsOhmTEsda8t7uckCRY+pJdZctbK1DSS31eaa0L4nrBZDnqNneUcIna77a/+YJVsFyxee3xwhGy0S6KYtVuAe/CsqMjV1AMrlJ7GQZTOJc7tsWnPkZyqECx9xc966wSdLsXSs+vZGyXmzBmpo9Nyc3ASfQFN5JeDVX7y5WittDmGds8BZQjtUWGNX8eyCXKeoT6UPD3tiMdHPjPLZAc79YeDv1oQAq+4WlRaSapdsnFYlVqNz9LZU/Lk50abByDCBfBXl21LIocAAsSmG5fbpDHt9kfz8iAJrt9h6AyoxKjrMCqL52ufvYew/mdTBnABNyuhTQWy/Gyd+V2ppvz0=
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BL0PR04MB6514.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(376002)(39860400002)(136003)(396003)(346002)(366004)(5660300002)(33656002)(71200400001)(9686003)(8936002)(54906003)(316002)(7696005)(83380400001)(86362001)(6506007)(53546011)(38100700001)(66556008)(66476007)(64756008)(66446008)(66946007)(91956017)(52536014)(76116006)(186003)(4326008)(2906002)(110136005)(8676002)(478600001)(55016002);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata: =?us-ascii?Q?1jRg5NHEe3cMXOpq+MXyAcM7RWEV7nvXyRth2go+u15gUKeXxsHJvFffLEVH?=
+ =?us-ascii?Q?aDrj9DM5cYA1PAMNBjXsx1bDvg0V2wanKIwOlGKCYP+Xo5a5QRDN1LdV4TdN?=
+ =?us-ascii?Q?wG8AjaM4Mq5bdQ4pzzVFEHNuYg3pEYjYrxK/o8kyJnD27FZTzIvfaMslUF84?=
+ =?us-ascii?Q?4BjMtXQCMOFqTSfyp0+EVzdxvvvT5f+OhA+BEJPbcHx1QFYIwSPIZ3zRwR0O?=
+ =?us-ascii?Q?7Zo+wEhN5SWPdXuwW/O7Asf3/Ggu/F2FWNeeiUUqy/tSy7PGdQ4wLLqdrgfZ?=
+ =?us-ascii?Q?0VckByE9m5PC6MtEe7tE/sjHjRTVNR7HgtPR/QXQ/IIY94EvfaUP01s1Nt8C?=
+ =?us-ascii?Q?l5GgcWLShN0Me49aA5kgIrFT/1vKS9CUklXIxGiOtOrZd+6gSKVzy/OYBUDe?=
+ =?us-ascii?Q?CI1e7rJjj+Mz7w809NE8nPwCjpQc0AZXOMm7vIDznmDuQ5BUvByMRwq6+J/V?=
+ =?us-ascii?Q?3djAcH3wngXOSVUyqQr+EKGhM9iOhlr9JjZXB7crE3nfrNomrc4DJctjyN6Z?=
+ =?us-ascii?Q?QyK1ni6I0pzPdYssiSVfSMuNA7TaQY/DjZ3IjECMz/X5lzbTNuURpaesasPF?=
+ =?us-ascii?Q?8kQLiZl+169QtcuYGBMkmrZ8EZj61oINX2+v0AyjlE2bW2Q6WugSwHrDwxR+?=
+ =?us-ascii?Q?6C6BBbfa/eUVxZoi4HZjMZYmz1MF9fSoGNkULfwoL4kdobLuSjGkJS/AHJdo?=
+ =?us-ascii?Q?bYfF/jwuxygOg4Oz/g/E43RBXNrWv0Td/mdCaKQVlRNiC3xoSNNROVjP+ybI?=
+ =?us-ascii?Q?Gk2uJlPesXzRclNg2iucRgyqcl4PuFdftMZwQmJJzGMjIhhUFvAAyNyBTphl?=
+ =?us-ascii?Q?C6OZ/er5otYX47P/CxkX1W8WUZ9fpZ66WyQXdxlSt3EC29U5OFccaX5BYFkx?=
+ =?us-ascii?Q?Xk9CEg+Q/vHXfk1rrb3CTEi6j0SVt3ycj8SUFa5L78ooOAJyzYoEKYZC7mP6?=
+ =?us-ascii?Q?wQkcblwamCnlk+ciC8Vzvlh99bpkX2FFQkDMhES6fVdnQNpiO0HrTg8c12rP?=
+ =?us-ascii?Q?k7h51irjvvvquB8mAhJLQmuu7qGL6DzUnS7PCpKJdYIsSK1/x+4cgFghqcZL?=
+ =?us-ascii?Q?N4/5I8DMOKCJBnwxvXtLaZK69+MaYTfdzrq/ahcNIv1ENzeoFUeZBh3LPnaZ?=
+ =?us-ascii?Q?9XwF5IH1V1C/Oq2svohpE0aCtVkZwJ744KEKCWfP3ukGb8AHv0rQpq6ARmI5?=
+ =?us-ascii?Q?ZKCWrLK1HwCfixxRCS65mDTUCdMr0StOAiKpNiUwvo+O1fBly3BflTT8/oLN?=
+ =?us-ascii?Q?mqvpILruJeBMCY8qFb81EJVVE7JJ+RqTAzqJPF8A+33YccD7weFixWtKShsC?=
+ =?us-ascii?Q?9IQIl6Yyn+MpP9ePifZtZilLdejyCiVSXx2Xw2oFX8Dmg2aI9WCBVZgAHt/4?=
+ =?us-ascii?Q?VbAIZk5n8fkQGcFq9rO+o2ndaDEAZCoS9zOtgGVT3GYZ7f/3ow=3D=3D?=
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <YGCy5W+4coMuM7y1@desktop>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+X-OriginatorOrg: wdc.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: BL0PR04MB6514.namprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 4e800b59-21d7-4758-52f3-08d8f230d0a3
+X-MS-Exchange-CrossTenant-originalarrivaltime: 28 Mar 2021 21:31:14.3969
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: WuYn/48LOZeRDuWxJlLelg+D1uiuT5/9o1TQJVHu9jkbH+ybd40N//asVzvNmYD+NH/4+/zJ6EEAOurn4ZbGuw==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MN2PR04MB6672
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Mar 29, 2021 at 12:46:29AM +0800, Eryu Guan wrote:
-> On Mon, Mar 15, 2021 at 07:19:26PM +0800, Gao Xiang wrote:
-> > This adds a stress testcase to shrink free space as much as
-> > possible in the last AG with background fsstress workload.
-> > 
-> > The expectation is that no crash happens with expected output.
-> > 
-> > Signed-off-by: Gao Xiang <hsiangkao@redhat.com>
-> > ---
-> >  tests/xfs/991     | 122 ++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/xfs/991.out |   8 +++
-> >  tests/xfs/group   |   1 +
-> >  3 files changed, 131 insertions(+)
-> >  create mode 100755 tests/xfs/991
-> >  create mode 100644 tests/xfs/991.out
-> > 
-> > diff --git a/tests/xfs/991 b/tests/xfs/991
-> > new file mode 100755
-> > index 00000000..7e7d318e
-> > --- /dev/null
-> > +++ b/tests/xfs/991
-> > @@ -0,0 +1,122 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2020-2021 Red Hat, Inc.  All Rights Reserved.
-> > +#
-> > +# FS QA Test 991
-> > +#
-> > +# XFS online shrinkfs stress test
-> > +#
-> > +# This test attempts to shrink unused space as much as possible with
-> > +# background fsstress workload. It will decrease the shrink size if
-> > +# larger size fails. And totally repeat 2 * TIME_FACTOR times.
-> > +#
-> > +seq=`basename $0`
-> > +seqres=$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +
-> > +here=`pwd`
-> > +tmp=/tmp/$$
-> > +status=1	# failure is the default!
-> > +trap "rm -f $tmp.*; exit \$status" 0 1 2 3 15
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +. ./common/filter
-> > +
-> > +create_scratch()
-> > +{
-> > +	_scratch_mkfs_xfs $@ | tee -a $seqres.full | \
-> > +		_filter_mkfs 2>$tmp.mkfs >/dev/null
-> > +	. $tmp.mkfs
-> > +
-> > +	if ! _try_scratch_mount 2>/dev/null; then
-> > +		echo "failed to mount $SCRATCH_DEV"
-> > +		exit 1
-> > +	fi
-> 
-> _scratch_mount will do the check and _fail the test on mount failure.
-
-It was just copied & pasted from somewhere else rather than wrote from
-scratch.
-
-> 
-> > +
-> > +	# fix the reserve block pool to a known size so that the enospc
-> > +	# calculations work out correctly.
-> > +	_scratch_resvblks 1024 > /dev/null 2>&1
-> > +}
-> > +
-> > +fill_scratch()
-> > +{
-> > +	$XFS_IO_PROG -f -c "falloc -k 0 $1" $SCRATCH_MNT/resvfile
-> > +}
-> > +
-> > +stress_scratch()
-> > +{
-> > +	procs=3
-> > +	nops=$((1000 * LOAD_FACTOR))
-> 
-> Declare procs and nops as local.
-
-Will update, thanks for the suggestion.
-
-> 
-> > +	# -w ensures that the only ops are ones which cause write I/O
-> > +	FSSTRESS_ARGS=`_scale_fsstress_args -d $SCRATCH_MNT -w -p $procs \
-> > +	    -n $nops $FSSTRESS_AVOID`
-> > +	$FSSTRESS_PROG $FSSTRESS_ARGS >> $seqres.full 2>&1 &
-> 
-> I think it's more explicit to run run stress_scratch in background,
-> instead run fsstress in background implicit.
-
-Will update as well.
-
-> 
-> > +}
-> > +
-> > +# real QA test starts here
-> > +_supported_fs xfs
-> 
-> _require_scratch
-
-No, _require_xfs_shrink also checks this.
-
-> 
-> > +_require_xfs_shrink
-> > +_require_xfs_io_command "falloc"
-> > +
-> > +rm -f $seqres.full
-> > +_scratch_mkfs_xfs | tee -a $seqres.full | _filter_mkfs 2>$tmp.mkfs
-> > +. $tmp.mkfs	# extract blocksize and data size for scratch device
-> > +
-> > +decsize=`expr  42 \* 1048576`	# shrink in chunks of this size at most
-> > +endsize=`expr 125 \* 1048576`	# stop after shrinking this big
-> > +[ `expr $endsize / $dbsize` -lt $dblocks ] || _notrun "Scratch device too small"
-> > +
-> > +nags=2
-> > +totalcount=$((2 * TIME_FACTOR))
-> > +
-> > +while [ $totalcount -gt 0 ]; do
-> > +	size=`expr 1010 \* 1048576`	# 1010 megabytes initially
-> > +	logblks=$(_scratch_find_xfs_min_logblocks -dsize=${size} -dagcount=${nags})
-> > +
-> > +	create_scratch -lsize=${logblks}b -dsize=${size} -dagcount=${nags}
-> > +
-> > +	for i in `seq 125 -1 90`; do
-> > +		fillsize=`expr $i \* 1048576`
-> > +		out="$(fill_scratch $fillsize 2>&1)"
-> > +		echo "$out" | grep -q 'No space left on device' && continue
-> > +		test -n "${out}" && echo "$out"
-> > +		break
-> > +	done
-> > +
-> > +	while [ $size -gt $endsize ]; do
-> > +		stress_scratch
-> 
-> So just call
-> 
-> stress_scratch &
-> 
-> here? So it's clear that we put stress_scratch in background, and the
-> 'wait' below is waiting for it.
-
-Will update.
-
-Thanks,
-Gao Xiang
-
-> 
-> Thanks,
-> Eryu
-> 
-> > +		sleep 1
-> > +
-> > +		decb=`expr $decsize / $dbsize`    # in data blocks
-> > +		while [ $decb -gt 0 ]; do
-> > +			sizeb=`expr $size / $dbsize - $decb`
-> > +
-> > +			$XFS_GROWFS_PROG -D ${sizeb} $SCRATCH_MNT \
-> > +				>> $seqres.full 2>&1 && break
-> > +
-> > +			[ $decb -gt 100 ] && decb=`expr $decb + $RANDOM % 10`
-> > +			decb=`expr $decb / 2`
-> > +		done
-> > +
-> > +		wait
-> > +		[ $decb -eq 0 ] && break
-> > +
-> > +		# get latest dblocks
-> > +		$XFS_INFO_PROG $SCRATCH_MNT 2>&1 | _filter_mkfs 2>$tmp.growfs >/dev/null
-> > +		. $tmp.growfs
-> > +
-> > +		size=`expr $dblocks \* $dbsize`
-> > +		_scratch_unmount
-> > +		_repair_scratch_fs >> $seqres.full
-> > +		_scratch_mount
-> > +	done
-> > +
-> > +	_scratch_unmount
-> > +	_repair_scratch_fs >> $seqres.full
-> > +	totalcount=`expr $totalcount - 1`
-> > +done
-> > +
-> > +echo "*** done"
-> > +status=0
-> > +exit
-> > diff --git a/tests/xfs/991.out b/tests/xfs/991.out
-> > new file mode 100644
-> > index 00000000..e8209672
-> > --- /dev/null
-> > +++ b/tests/xfs/991.out
-> > @@ -0,0 +1,8 @@
-> > +QA output created by 991
-> > +meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
-> > +data     = bsize=XXX blocks=XXX, imaxpct=PCT
-> > +         = sunit=XXX swidth=XXX, unwritten=X
-> > +naming   =VERN bsize=XXX
-> > +log      =LDEV bsize=XXX blocks=XXX
-> > +realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
-> > +*** done
-> > diff --git a/tests/xfs/group b/tests/xfs/group
-> > index a7981b67..cf190b59 100644
-> > --- a/tests/xfs/group
-> > +++ b/tests/xfs/group
-> > @@ -526,3 +526,4 @@
-> >  526 auto quick mkfs
-> >  527 auto quick quota
-> >  990 auto quick growfs
-> > +991 auto growfs ioctl prealloc stress
-> > -- 
-> > 2.27.0
-> 
-
+On 2021/03/27 0:34, Johannes Thumshirn wrote:=0A=
+> Non-partitionable devices, like zoned block devices, aren't showing up in=
+ in=0A=
+> /proc/partitions and therefore we cannot rely on it to get a device's siz=
+e.=0A=
+> =0A=
+> Use blockdev --getsz to get the block device size.=0A=
+> =0A=
+> Cc: Naohiro Aota <naohiro.aota@wdc.com>=0A=
+> Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>=0A=
+> =0A=
+> ---=0A=
+> Changes to v2:=0A=
+> - Don't forget the sectors to kb conversion (Damien)=0A=
+> =0A=
+> Changes to v1:=0A=
+> - Use blockdev --getsz instead of sysfs (Nikolay/Damien)=0A=
+> ---=0A=
+>  common/rc | 2 +-=0A=
+>  1 file changed, 1 insertion(+), 1 deletion(-)=0A=
+> =0A=
+> diff --git a/common/rc b/common/rc=0A=
+> index 1c814b9aabf1..2f295fa05484 100644=0A=
+> --- a/common/rc=0A=
+> +++ b/common/rc=0A=
+> @@ -3778,7 +3778,7 @@ _get_available_space()=0A=
+>  # return device size in kb=0A=
+>  _get_device_size()=0A=
+>  {=0A=
+> -	grep -w `_short_dev $1` /proc/partitions | awk '{print $3}'=0A=
+> +	echo $(($(blockdev --getsz $1) >> 1))=0A=
+>  }=0A=
+>  =0A=
+>  # Make sure we actually have dmesg checking set up.=0A=
+> =0A=
+=0A=
+Looks good to me.=0A=
+=0A=
+Reviewed-by: Damien Le Moal <damien.lemoal@wdc.com>=0A=
+=0A=
+-- =0A=
+Damien Le Moal=0A=
+Western Digital Research=0A=
