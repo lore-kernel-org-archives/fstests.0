@@ -2,186 +2,454 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,PDS_BAD_THREAD_QP_64,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-24.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BA9BFC433C1
-	for <linux-fstests@archiver.kernel.org>; Sun, 28 Mar 2021 21:33:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F10BEC433DB
+	for <linux-fstests@archiver.kernel.org>; Sun, 28 Mar 2021 22:35:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 85C0A6194B
-	for <linux-fstests@archiver.kernel.org>; Sun, 28 Mar 2021 21:33:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BB2C761935
+	for <linux-fstests@archiver.kernel.org>; Sun, 28 Mar 2021 22:35:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231472AbhC1Vcb (ORCPT
+        id S229656AbhC1Wed (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 28 Mar 2021 17:32:31 -0400
-Received: from esa6.hgst.iphmx.com ([216.71.154.45]:52598 "EHLO
-        esa6.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231489AbhC1VcN (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 28 Mar 2021 17:32:13 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1616967134; x=1648503134;
-  h=from:to:cc:subject:date:message-id:references:
-   content-transfer-encoding:mime-version;
-  bh=7WWxoU4xYMygaAM05kGVrNA7LL/H4W/lnd82OJnkmHE=;
-  b=ou+bkdAR0BIyCa8K8AVoHZkaSg8kPIuWE7XaQWEqdflqERSfMjgzCNbN
-   91D/g/M+DNejkSNOcvAye8kehW1EGhXWjN/rS8AC3VqlQ4yAz1emPIGXv
-   CkfFyEl/XmQFS+FZEada69crYEOhP0Y3h7OJIRcN+VdKOTHZRIMG0Kv8T
-   KxbXif3DXeenmF/x56TLmKxB3QH5topg9FaDn4XxZLJT05gTwu3aXaWv8
-   frTW3zVmnlumZVXF33q1NryCcfBI+6m+Tmv59U00sO7z/5HsviLFyc6PI
-   yDL6wpBRQDD5l++ryfrcvkFi9+wu+IcvY/AoKYeybo0bBMrQod+hZs4FC
-   Q==;
-IronPort-SDR: vRqyDNZ3vGQihhnbbW4E8caeFDzmDEmClakHMMRMkcoMFS1kgEugcNFncEaGSKv0JIfSOuNbxE
- 7a9FKvr5GczOuouUtcLQmj5qywnoUfTfP8G9esg/I5c3LZAOymEtAOcb9hLdzrNkUVRvfdW4Xd
- o7oXTkwKbd9p6lUMsieIUYVLmdxRY3D4wAAmUsngcsqHCY8aqbL139sEmhKMc4w5uVxUkf8Doy
- kV9Xcd84OXjw8VGhW5NrFRpy37QHtAFAFKMZD45O6/hvg8P6/XUnLW9sXEmuQAqtl/jgxWFnPh
- cgY=
-X-IronPort-AV: E=Sophos;i="5.81,285,1610380800"; 
-   d="scan'208";a="164287814"
-Received: from mail-dm6nam10lp2103.outbound.protection.outlook.com (HELO NAM10-DM6-obe.outbound.protection.outlook.com) ([104.47.58.103])
-  by ob1.hgst.iphmx.com with ESMTP; 29 Mar 2021 05:31:29 +0800
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=nogWDv+a6jH4RVoYtgYrOPjGjAMxBLuMckuL/et6vuzvf2APL4M36lefLiSWAyivT/FbChhLvsnptQgB4btfY2XgAK7mnomiV8IEmrr5MN71DKsuaXkP3H3nIKB7usrYc0cjB7lHyVEUb9YG6fkPmeXglJw0dXVTWy8CnrylQiJlTtrWY8TvcoaE8kKKSfZLx7y2qWp6a1iUe0RN5dMp5Ix1yytEFwnuQug0ERyGZB6V9Aph4iKl4YsOCNRYxswoYNeXc+uKqediZ5WqHsQVhCz060oKEtpps3vygolBLxb0qlM7K/DrF0t4y/EouqJbxPJnaJE4wcaA5hPcQHoP0A==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=+E64wrpXb4RWMgsIH7psmvhW8V31P99yustK/Qqw0Eo=;
- b=CrJJOGInU1hzQVWkfMZNmWOKLYVJO5bkdzG6Y3pIcd1dvWyDpqWH4CnsddiA6qFYuNHYdbTy6ye8jdIRuPhRZO797zRE02gxtjNsQAOwLvIRpJwSX2UwS/1JFHMtTBYUM2n5QEu2ooTa1UzWdJ0eLo/cfRWG9ST997+PmZS7irDtMkFvRHbmCfne1txOPMTl2v3qUGbVacG/bimKh8UP4LGi/qX4d3V97XzktNcfQ20V1x4wKykcjYlRrf9aE7ENmVfjDFUbECKI0LgyDT/kJ7Epo1lSr7Qirq+IFEHVVhnS1Rci/BOU4/Nf/eGnF6LF6k20RmhXqa5msnTvmTHIxA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
- header.d=wdc.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=+E64wrpXb4RWMgsIH7psmvhW8V31P99yustK/Qqw0Eo=;
- b=fJBOWeE707HYLcMOntVHC16rhIZaN/lO1kbQxKJPME69b94RjTl1PUw3NR8d+KURoauUFS9+9QMvgv5/qW7j6M4CTtGjWlKJZVJLalmxAD26CMevqJBGl7uwH3ajcIZ1B0ZHAyfzvh4VUQ7UX0Frh1JnAbAe7x2TsOK1Qz2FJ5Q=
-Received: from BL0PR04MB6514.namprd04.prod.outlook.com (2603:10b6:208:1ca::23)
- by MN2PR04MB6672.namprd04.prod.outlook.com (2603:10b6:208:1e5::14) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3977.29; Sun, 28 Mar
- 2021 21:31:14 +0000
-Received: from BL0PR04MB6514.namprd04.prod.outlook.com
- ([fe80::e9c5:588:89e:6887]) by BL0PR04MB6514.namprd04.prod.outlook.com
- ([fe80::e9c5:588:89e:6887%3]) with mapi id 15.20.3977.033; Sun, 28 Mar 2021
- 21:31:14 +0000
-From:   Damien Le Moal <Damien.LeMoal@wdc.com>
-To:     Johannes Thumshirn <Johannes.Thumshirn@wdc.com>,
-        Eryu Guan <guan@eryu.me>
-CC:     "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-        "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>,
-        Nikolay Borisov <nborisov@suse.com>,
-        Naohiro Aota <Naohiro.Aota@wdc.com>
-Subject: Re: [PATCH v3] fstests: don't rely on /proc/partitions for device
- size
-Thread-Topic: [PATCH v3] fstests: don't rely on /proc/partitions for device
- size
-Thread-Index: AQHXIlWOiGR4R5Pko0yyPoTyiEOgvA==
-Date:   Sun, 28 Mar 2021 21:31:14 +0000
-Message-ID: <BL0PR04MB651430651E281B5A150DCAE6E77F9@BL0PR04MB6514.namprd04.prod.outlook.com>
-References: <20210326153437.27840-1-johannes.thumshirn@wdc.com>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: wdc.com; dkim=none (message not signed)
- header.d=none;wdc.com; dmarc=none action=none header.from=wdc.com;
-x-originating-ip: [2400:2411:43c0:6000:8539:9440:76cc:73ac]
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-ht: Tenant
-x-ms-office365-filtering-correlation-id: 4e800b59-21d7-4758-52f3-08d8f230d0a3
-x-ms-traffictypediagnostic: MN2PR04MB6672:
-x-ms-exchange-transport-forked: True
-x-microsoft-antispam-prvs: <MN2PR04MB667201256E698A093496FE75E77F9@MN2PR04MB6672.namprd04.prod.outlook.com>
-wdcipoutbound: EOP-TRUE
-x-ms-oob-tlc-oobclassifiers: OLM:2958;
-x-ms-exchange-senderadcheck: 1
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: bg0Ke+ST0O+lhcl8ffVtscljpSPOWqp4aUIPHDDwNt1jWZFgMJ8zTTtNfcVZVpwaWzNEAj9jLLnlwTk7NnT7Bpxa+/up7fpijXyMSsONME636L3YvnbaTxYdUlNOmo0oO5AXIeI8dw9qs+VRX3+rimbM9IiXq3xubfIWWSFRmdeZvX2UgEl9ENJiQqA8CjvF/zSAjOEU0nj8td6bTJp4Xl/X588QiV25wzy27d1HyQ+REjNcBcgipiexiQk0HVJQxaM5zcMY1aG4kzzt/9ZHUznQPJMWt7AW6XA4xq6A9tUU+KEUGoP6Ji+PuuuHwDVzF9WlO8YAOf4mMzW8f/OMrJAFsOhmTEsda8t7uckCRY+pJdZctbK1DSS31eaa0L4nrBZDnqNneUcIna77a/+YJVsFyxee3xwhGy0S6KYtVuAe/CsqMjV1AMrlJ7GQZTOJc7tsWnPkZyqECx9xc966wSdLsXSs+vZGyXmzBmpo9Nyc3ASfQFN5JeDVX7y5WittDmGds8BZQjtUWGNX8eyCXKeoT6UPD3tiMdHPjPLZAc79YeDv1oQAq+4WlRaSapdsnFYlVqNz9LZU/Lk50abByDCBfBXl21LIocAAsSmG5fbpDHt9kfz8iAJrt9h6AyoxKjrMCqL52ufvYew/mdTBnABNyuhTQWy/Gyd+V2ppvz0=
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BL0PR04MB6514.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(376002)(39860400002)(136003)(396003)(346002)(366004)(5660300002)(33656002)(71200400001)(9686003)(8936002)(54906003)(316002)(7696005)(83380400001)(86362001)(6506007)(53546011)(38100700001)(66556008)(66476007)(64756008)(66446008)(66946007)(91956017)(52536014)(76116006)(186003)(4326008)(2906002)(110136005)(8676002)(478600001)(55016002);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata: =?us-ascii?Q?1jRg5NHEe3cMXOpq+MXyAcM7RWEV7nvXyRth2go+u15gUKeXxsHJvFffLEVH?=
- =?us-ascii?Q?aDrj9DM5cYA1PAMNBjXsx1bDvg0V2wanKIwOlGKCYP+Xo5a5QRDN1LdV4TdN?=
- =?us-ascii?Q?wG8AjaM4Mq5bdQ4pzzVFEHNuYg3pEYjYrxK/o8kyJnD27FZTzIvfaMslUF84?=
- =?us-ascii?Q?4BjMtXQCMOFqTSfyp0+EVzdxvvvT5f+OhA+BEJPbcHx1QFYIwSPIZ3zRwR0O?=
- =?us-ascii?Q?7Zo+wEhN5SWPdXuwW/O7Asf3/Ggu/F2FWNeeiUUqy/tSy7PGdQ4wLLqdrgfZ?=
- =?us-ascii?Q?0VckByE9m5PC6MtEe7tE/sjHjRTVNR7HgtPR/QXQ/IIY94EvfaUP01s1Nt8C?=
- =?us-ascii?Q?l5GgcWLShN0Me49aA5kgIrFT/1vKS9CUklXIxGiOtOrZd+6gSKVzy/OYBUDe?=
- =?us-ascii?Q?CI1e7rJjj+Mz7w809NE8nPwCjpQc0AZXOMm7vIDznmDuQ5BUvByMRwq6+J/V?=
- =?us-ascii?Q?3djAcH3wngXOSVUyqQr+EKGhM9iOhlr9JjZXB7crE3nfrNomrc4DJctjyN6Z?=
- =?us-ascii?Q?QyK1ni6I0pzPdYssiSVfSMuNA7TaQY/DjZ3IjECMz/X5lzbTNuURpaesasPF?=
- =?us-ascii?Q?8kQLiZl+169QtcuYGBMkmrZ8EZj61oINX2+v0AyjlE2bW2Q6WugSwHrDwxR+?=
- =?us-ascii?Q?6C6BBbfa/eUVxZoi4HZjMZYmz1MF9fSoGNkULfwoL4kdobLuSjGkJS/AHJdo?=
- =?us-ascii?Q?bYfF/jwuxygOg4Oz/g/E43RBXNrWv0Td/mdCaKQVlRNiC3xoSNNROVjP+ybI?=
- =?us-ascii?Q?Gk2uJlPesXzRclNg2iucRgyqcl4PuFdftMZwQmJJzGMjIhhUFvAAyNyBTphl?=
- =?us-ascii?Q?C6OZ/er5otYX47P/CxkX1W8WUZ9fpZ66WyQXdxlSt3EC29U5OFccaX5BYFkx?=
- =?us-ascii?Q?Xk9CEg+Q/vHXfk1rrb3CTEi6j0SVt3ycj8SUFa5L78ooOAJyzYoEKYZC7mP6?=
- =?us-ascii?Q?wQkcblwamCnlk+ciC8Vzvlh99bpkX2FFQkDMhES6fVdnQNpiO0HrTg8c12rP?=
- =?us-ascii?Q?k7h51irjvvvquB8mAhJLQmuu7qGL6DzUnS7PCpKJdYIsSK1/x+4cgFghqcZL?=
- =?us-ascii?Q?N4/5I8DMOKCJBnwxvXtLaZK69+MaYTfdzrq/ahcNIv1ENzeoFUeZBh3LPnaZ?=
- =?us-ascii?Q?9XwF5IH1V1C/Oq2svohpE0aCtVkZwJ744KEKCWfP3ukGb8AHv0rQpq6ARmI5?=
- =?us-ascii?Q?ZKCWrLK1HwCfixxRCS65mDTUCdMr0StOAiKpNiUwvo+O1fBly3BflTT8/oLN?=
- =?us-ascii?Q?mqvpILruJeBMCY8qFb81EJVVE7JJ+RqTAzqJPF8A+33YccD7weFixWtKShsC?=
- =?us-ascii?Q?9IQIl6Yyn+MpP9ePifZtZilLdejyCiVSXx2Xw2oFX8Dmg2aI9WCBVZgAHt/4?=
- =?us-ascii?Q?VbAIZk5n8fkQGcFq9rO+o2ndaDEAZCoS9zOtgGVT3GYZ7f/3ow=3D=3D?=
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+        Sun, 28 Mar 2021 18:34:33 -0400
+Received: from mail.kernel.org ([198.145.29.99]:47932 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S230450AbhC1WeP (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 28 Mar 2021 18:34:15 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 7068E6192F;
+        Sun, 28 Mar 2021 22:34:13 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1616970855;
+        bh=A5yWnyAyeKl3YsQU9X413QMefKct4lOg8CWaTFd7s4U=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=am+NVB2D56GVzXiU1Udzbyx9z0n4YZVNsAenAvGyx/rh2N2zBbXPj60w35TNKUIiL
+         THjBweUO8uHmNJp8I5nZZxhA2P67lkJFr98NYmiW2TDi9Kkzj0Z1tYsiL4HkXlzY2t
+         0CfIi7PX/5dNQSLOmwptmwk58WBYFflLio7rYYqbgPpmaZ6UKwT04I6rg5G+Jgd+6W
+         U3A8Fpy/h9IvA+++a6PBkFsLqp0hDQ9dpEu3PSzq1nj3JQIeE1sXGCqw0n4PbtjLNn
+         RIe1rYePTQW4FSd13vABfG8hIw5Ktyzi239+1CbJKCSOvx8E8dEHRxc6u8KmGHlsgn
+         gSlyorX9pZdgA==
+From:   Christian Brauner <brauner@kernel.org>
+To:     Eryu Guan <guan@eryu.me>, fstests@vger.kernel.org,
+        Christoph Hellwig <hch@lst.de>
+Cc:     "Darrick J . Wong" <djwong@kernel.org>,
+        David Howells <dhowells@redhat.com>,
+        Christian Brauner <christian.brauner@ubuntu.com>
+Subject: [PATCH v12 1/6] generic/631: add test for detached mount propagation
+Date:   Mon, 29 Mar 2021 00:33:55 +0200
+Message-Id: <20210328223400.1800301-2-brauner@kernel.org>
+X-Mailer: git-send-email 2.27.0
+In-Reply-To: <20210328223400.1800301-1-brauner@kernel.org>
+References: <20210328223400.1800301-1-brauner@kernel.org>
 MIME-Version: 1.0
-X-OriginatorOrg: wdc.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: BL0PR04MB6514.namprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 4e800b59-21d7-4758-52f3-08d8f230d0a3
-X-MS-Exchange-CrossTenant-originalarrivaltime: 28 Mar 2021 21:31:14.3969
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: WuYn/48LOZeRDuWxJlLelg+D1uiuT5/9o1TQJVHu9jkbH+ybd40N//asVzvNmYD+NH/4+/zJ6EEAOurn4ZbGuw==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: MN2PR04MB6672
+X-Patch-Hashes: v=1; h=sha256; i=A6fAS7tAPRPONqYTQ9f9cKH6F5OBvRuYVz2qXgEb3AM=; m=8ZQ6bRW98ma4GpDy8UjCocC3BLQm2BLWPAkVXt35HZ0=; p=CcuTBwGrUvb0IHd+hy4yoisbQMzrkHnF1QIGY+4WNrc=; g=863cf7c9129eb2448e6b7b670c2334083ee66dc0
+X-Patch-Sig: m=pgp; i=christian.brauner@ubuntu.com; s=0x0x91C61BC06578DCA2; b=iHUEABYKAB0WIQRAhzRXHqcMeLMyaSiRxhvAZXjcogUCYGEEGgAKCRCRxhvAZXjcogkQAQDafqk vJR9W3M5TR9NddH0C3JaAnmESd+jo/JnvbMvQ1gD8CTAORahMcug+go1FgLTi3k5N4ARv3bmkjUUJ HatNcgE=
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 2021/03/27 0:34, Johannes Thumshirn wrote:=0A=
-> Non-partitionable devices, like zoned block devices, aren't showing up in=
- in=0A=
-> /proc/partitions and therefore we cannot rely on it to get a device's siz=
-e.=0A=
-> =0A=
-> Use blockdev --getsz to get the block device size.=0A=
-> =0A=
-> Cc: Naohiro Aota <naohiro.aota@wdc.com>=0A=
-> Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>=0A=
-> =0A=
-> ---=0A=
-> Changes to v2:=0A=
-> - Don't forget the sectors to kb conversion (Damien)=0A=
-> =0A=
-> Changes to v1:=0A=
-> - Use blockdev --getsz instead of sysfs (Nikolay/Damien)=0A=
-> ---=0A=
->  common/rc | 2 +-=0A=
->  1 file changed, 1 insertion(+), 1 deletion(-)=0A=
-> =0A=
-> diff --git a/common/rc b/common/rc=0A=
-> index 1c814b9aabf1..2f295fa05484 100644=0A=
-> --- a/common/rc=0A=
-> +++ b/common/rc=0A=
-> @@ -3778,7 +3778,7 @@ _get_available_space()=0A=
->  # return device size in kb=0A=
->  _get_device_size()=0A=
->  {=0A=
-> -	grep -w `_short_dev $1` /proc/partitions | awk '{print $3}'=0A=
-> +	echo $(($(blockdev --getsz $1) >> 1))=0A=
->  }=0A=
->  =0A=
->  # Make sure we actually have dmesg checking set up.=0A=
-> =0A=
-=0A=
-Looks good to me.=0A=
-=0A=
-Reviewed-by: Damien Le Moal <damien.lemoal@wdc.com>=0A=
-=0A=
--- =0A=
-Damien Le Moal=0A=
-Western Digital Research=0A=
+From: Christian Brauner <christian.brauner@ubuntu.com>
+
+Regression test to verify that creating a series of detached mounts,
+attaching them to the filesystem, and unmounting them does not trigger an
+integer overflow in ns->mounts causing the kernel to block any new mounts in
+count_mounts() and returning ENOSPC because it falsely assumes that the
+maximum number of mounts in the mount namespace has been reached, i.e. it
+thinks it can't fit the new mounts into the mount namespace anymore.
+
+The test is written in a way that it will leave the host's mount
+namespace intact so we are sure to never make the host's mount namespace
+unuseable!
+
+Link: https://git.kernel.org/torvalds/c/ee2e3f50629f17b0752b55b2566c15ce8dafb557
+Cc: Eryu Guan <guan@eryu.me>
+Cc: David Howells <dhowells@redhat.com>
+Reviewed-by: Christoph Hellwig <hch@lst.de>
+Signed-off-by: Christian Brauner <christian.brauner@ubuntu.com>
+---
+/* v1 - v8 */
+patch not present
+
+/* v9 */
+- Christian Brauner <christian.brauner@ubuntu.com>:
+  - Rebased on current master.
+
+/* v10 */
+- Eryu Guan <guan@eryu.me>:
+  - Add missing checks whether test is supported.
+  - Move status=$? assignment up.
+
+/* v11 */
+unchanged
+
+/* v12 */
+unchanged
+---
+ .gitignore                        |   1 +
+ src/Makefile                      |   3 +-
+ src/detached_mounts_propagation.c | 252 ++++++++++++++++++++++++++++++
+ tests/generic/631                 |  43 +++++
+ tests/generic/631.out             |   2 +
+ tests/generic/group               |   1 +
+ 6 files changed, 301 insertions(+), 1 deletion(-)
+ create mode 100644 src/detached_mounts_propagation.c
+ create mode 100644 tests/generic/631
+ create mode 100644 tests/generic/631.out
+
+diff --git a/.gitignore b/.gitignore
+index f3bc0a4f..72bd40a0 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -62,6 +62,7 @@
+ /src/cloner
+ /src/dbtest
+ /src/deduperace
++/src/detached_mounts_propagation
+ /src/devzero
+ /src/dio-interleaved
+ /src/dio-invalidate-cache
+diff --git a/src/Makefile b/src/Makefile
+index 3d729a34..99019e6e 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -29,7 +29,8 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+ 	attr-list-by-handle-cursor-test listxattr dio-interleaved t_dir_type \
+ 	dio-invalidate-cache stat_test t_encrypted_d_revalidate \
+ 	attr_replace_test swapon mkswap t_attr_corruption t_open_tmpfiles \
+-	fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail
++	fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail \
++	detached_mounts_propagation
+ 
+ SUBDIRS = log-writes perf
+ 
+diff --git a/src/detached_mounts_propagation.c b/src/detached_mounts_propagation.c
+new file mode 100644
+index 00000000..4a588e46
+--- /dev/null
++++ b/src/detached_mounts_propagation.c
+@@ -0,0 +1,252 @@
++/* SPDX-License-Identifier: LGPL-2.1+ */
++/*
++ * Copyright (c) 2021 Christian Brauner <christian.brauner@ubuntu.com>
++ * All Rights Reserved.
++ *
++ * Regression test to verify that creating a series of detached mounts,
++ * attaching them to the filesystem, and unmounting them does not trigger an
++ * integer overflow in ns->mounts causing the kernel to block any new mounts in
++ * count_mounts() and returning ENOSPC because it falsely assumes that the
++ * maximum number of mounts in the mount namespace has been reached, i.e. it
++ * thinks it can't fit the new mounts into the mount namespace anymore.
++ */
++
++#include <errno.h>
++#include <fcntl.h>
++#include <getopt.h>
++#include <limits.h>
++#include <sched.h>
++#include <stdbool.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <sys/mount.h>
++#include <sys/stat.h>
++#include <sys/syscall.h>
++#include <sys/types.h>
++#include <unistd.h>
++
++/* open_tree() */
++#ifndef OPEN_TREE_CLONE
++#define OPEN_TREE_CLONE 1
++#endif
++
++#ifndef OPEN_TREE_CLOEXEC
++#define OPEN_TREE_CLOEXEC O_CLOEXEC
++#endif
++
++#ifndef __NR_open_tree
++	#if defined __alpha__
++		#define __NR_open_tree 538
++	#elif defined _MIPS_SIM
++		#if _MIPS_SIM == _MIPS_SIM_ABI32	/* o32 */
++			#define __NR_open_tree 4428
++		#endif
++		#if _MIPS_SIM == _MIPS_SIM_NABI32	/* n32 */
++			#define __NR_open_tree 6428
++		#endif
++		#if _MIPS_SIM == _MIPS_SIM_ABI64	/* n64 */
++			#define __NR_open_tree 5428
++		#endif
++	#elif defined __ia64__
++		#define __NR_open_tree (428 + 1024)
++	#else
++		#define __NR_open_tree 428
++	#endif
++#endif
++
++/* move_mount() */
++#ifndef MOVE_MOUNT_F_EMPTY_PATH
++#define MOVE_MOUNT_F_EMPTY_PATH 0x00000004 /* Empty from path permitted */
++#endif
++
++#ifndef __NR_move_mount
++	#if defined __alpha__
++		#define __NR_move_mount 539
++	#elif defined _MIPS_SIM
++		#if _MIPS_SIM == _MIPS_SIM_ABI32	/* o32 */
++			#define __NR_move_mount 4429
++		#endif
++		#if _MIPS_SIM == _MIPS_SIM_NABI32	/* n32 */
++			#define __NR_move_mount 6429
++		#endif
++		#if _MIPS_SIM == _MIPS_SIM_ABI64	/* n64 */
++			#define __NR_move_mount 5429
++		#endif
++	#elif defined __ia64__
++		#define __NR_move_mount (428 + 1024)
++	#else
++		#define __NR_move_mount 429
++	#endif
++#endif
++
++static inline int sys_open_tree(int dfd, const char *filename, unsigned int flags)
++{
++	return syscall(__NR_open_tree, dfd, filename, flags);
++}
++
++static inline int sys_move_mount(int from_dfd, const char *from_pathname, int to_dfd,
++				 const char *to_pathname, unsigned int flags)
++{
++	return syscall(__NR_move_mount, from_dfd, from_pathname, to_dfd, to_pathname, flags);
++}
++
++static bool is_shared_mountpoint(const char *path)
++{
++	bool shared = false;
++	FILE *f = NULL;
++	char *line = NULL;
++	int i;
++	size_t len = 0;
++
++	f = fopen("/proc/self/mountinfo", "re");
++	if (!f)
++		return 0;
++
++	while (getline(&line, &len, f) > 0) {
++		char *slider1, *slider2;
++
++		for (slider1 = line, i = 0; slider1 && i < 4; i++)
++			slider1 = strchr(slider1 + 1, ' ');
++
++		if (!slider1)
++			continue;
++
++		slider2 = strchr(slider1 + 1, ' ');
++		if (!slider2)
++			continue;
++
++		*slider2 = '\0';
++		if (strcmp(slider1 + 1, path) == 0) {
++			/* This is the path. Is it shared? */
++			slider1 = strchr(slider2 + 1, ' ');
++			if (slider1 && strstr(slider1, "shared:")) {
++				shared = true;
++				break;
++			}
++		}
++	}
++	fclose(f);
++	free(line);
++
++	return shared;
++}
++
++static void usage(void)
++{
++	const char *text = "mount-new [--recursive] <base-dir>\n";
++	fprintf(stderr, "%s", text);
++	_exit(EXIT_SUCCESS);
++}
++
++#define exit_usage(format, ...)                              \
++	({                                                   \
++		fprintf(stderr, format "\n", ##__VA_ARGS__); \
++		usage();                                     \
++	})
++
++#define exit_log(format, ...)                                \
++	({                                                   \
++		fprintf(stderr, format "\n", ##__VA_ARGS__); \
++		exit(EXIT_FAILURE);                          \
++	})
++
++static const struct option longopts[] = {
++	{"help",	no_argument,		0,	'a'},
++	{ NULL,		no_argument,		0,	 0 },
++};
++
++int main(int argc, char *argv[])
++{
++	int exit_code = EXIT_SUCCESS, index = 0;
++	int dfd, fd_tree, new_argc, ret;
++	char *base_dir;
++	char *const *new_argv;
++	char target[PATH_MAX];
++
++	while ((ret = getopt_long_only(argc, argv, "", longopts, &index)) != -1) {
++		switch (ret) {
++		case 'a':
++			/* fallthrough */
++		default:
++			usage();
++		}
++	}
++
++	new_argv = &argv[optind];
++	new_argc = argc - optind;
++	if (new_argc < 1)
++		exit_usage("Missing base directory\n");
++	base_dir = new_argv[0];
++
++	if (*base_dir != '/')
++		exit_log("Please specify an absolute path");
++
++	/* Ensure that target is a shared mountpoint. */
++	if (!is_shared_mountpoint(base_dir))
++		exit_log("Please ensure that \"%s\" is a shared mountpoint", base_dir);
++
++	ret = unshare(CLONE_NEWNS);
++	if (ret < 0)
++		exit_log("%m - Failed to create new mount namespace");
++
++	ret = mount(NULL, base_dir, NULL, MS_REC | MS_SHARED, NULL);
++	if (ret < 0)
++		exit_log("%m - Failed to make base_dir shared mountpoint");
++
++	dfd = open(base_dir, O_RDONLY | O_DIRECTORY | O_CLOEXEC);
++	if (dfd < 0)
++		exit_log("%m - Failed to open base directory \"%s\"", base_dir);
++
++	ret = mkdirat(dfd, "detached-move-mount", 0755);
++	if (ret < 0)
++		exit_log("%m - Failed to create required temporary directories");
++
++	ret = snprintf(target, sizeof(target), "%s/detached-move-mount", base_dir);
++	if (ret < 0 || (size_t)ret >= sizeof(target))
++		exit_log("%m - Failed to assemble target path");
++
++	/*
++	 * Having a mount table with 10000 mounts is already quite excessive
++	 * and shoult account even for weird test systems.
++	 */
++	for (size_t i = 0; i < 10000; i++) {
++		fd_tree = sys_open_tree(dfd, "detached-move-mount",
++					OPEN_TREE_CLONE |
++					OPEN_TREE_CLOEXEC |
++					AT_EMPTY_PATH);
++		if (fd_tree < 0) {
++			if (errno == ENOSYS) /* New mount API not (fully) supported. */
++				break;
++
++			fprintf(stderr, "%m - Failed to open %d(detached-move-mount)", dfd);
++			exit_code = EXIT_FAILURE;
++			break;
++		}
++
++		ret = sys_move_mount(fd_tree, "", dfd, "detached-move-mount", MOVE_MOUNT_F_EMPTY_PATH);
++		if (ret < 0) {
++			if (errno == ENOSPC)
++				fprintf(stderr, "%m - Buggy mount counting");
++			else if (errno == ENOSYS) /* New mount API not (fully) supported. */
++				break;
++			else
++				fprintf(stderr, "%m - Failed to attach mount to %d(detached-move-mount)", dfd);
++			exit_code = EXIT_FAILURE;
++			break;
++		}
++		close(fd_tree);
++
++		ret = umount2(target, MNT_DETACH);
++		if (ret < 0) {
++			fprintf(stderr, "%m - Failed to unmount %s", target);
++			exit_code = EXIT_FAILURE;
++			break;
++		}
++	}
++
++	(void)unlinkat(dfd, "detached-move-mount", AT_REMOVEDIR);
++	close(dfd);
++
++	exit(exit_code);
++}
+diff --git a/tests/generic/631 b/tests/generic/631
+new file mode 100644
+index 00000000..0b6cac42
+--- /dev/null
++++ b/tests/generic/631
+@@ -0,0 +1,43 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0+
++#
++# Copyright (c) 2021 Christian Brauner <christian.brauner@ubuntu.com>
++# All Rights Reserved.
++#
++# FS QA Test No. 631
++#
++# Regression test to verify that creating a series of detached mounts,
++# attaching them to the filesystem, and unmounting them does not trigger an
++# integer overflow in ns->mounts causing the kernel to block any new mounts in
++# count_mounts() and returning ENOSPC because it falsely assumes that the
++# maximum number of mounts in the mount namespace has been reached, i.e. it
++# thinks it can't fit the new mounts into the mount namespace anymore.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++. ./common/rc
++
++rm -f $seqres.full
++
++_supported_fs generic
++_require_test
++_require_test_program "detached_mounts_propagation"
++
++$here/src/detached_mounts_propagation $TEST_DIR >> $seqres.full
++status=$?
++
++echo silence is golden
++exit
+diff --git a/tests/generic/631.out b/tests/generic/631.out
+new file mode 100644
+index 00000000..ce88f447
+--- /dev/null
++++ b/tests/generic/631.out
+@@ -0,0 +1,2 @@
++QA output created by 631
++silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index 7c7531d1..151f8af2 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -633,3 +633,4 @@
+ 628 auto quick rw clone
+ 629 auto quick rw copy_range
+ 630 auto quick rw dedupe clone
++631 auto quick mount
+-- 
+2.27.0
+
