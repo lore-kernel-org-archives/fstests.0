@@ -2,275 +2,134 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-17.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DF6A3C433C1
-	for <linux-fstests@archiver.kernel.org>; Sun, 28 Mar 2021 19:26:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C9D9BC433DB
+	for <linux-fstests@archiver.kernel.org>; Sun, 28 Mar 2021 19:52:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AD78C6195F
-	for <linux-fstests@archiver.kernel.org>; Sun, 28 Mar 2021 19:26:16 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9954F61929
+	for <linux-fstests@archiver.kernel.org>; Sun, 28 Mar 2021 19:52:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230294AbhC1TZo (ORCPT
+        id S229656AbhC1TwD (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 28 Mar 2021 15:25:44 -0400
-Received: from mail.kernel.org ([198.145.29.99]:52240 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S230184AbhC1TZi (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 28 Mar 2021 15:25:38 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id DA47E6195E;
-        Sun, 28 Mar 2021 19:25:35 +0000 (UTC)
-Date:   Sun, 28 Mar 2021 21:25:32 +0200
-From:   Christian Brauner <christian.brauner@ubuntu.com>
+        Sun, 28 Mar 2021 15:52:03 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:48804 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S229655AbhC1Tvk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 28 Mar 2021 15:51:40 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1616961099;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=HRkAEwUZiWNcfM4p41i7DUasLa0+aHNq1oDfUZcdnMg=;
+        b=TaHPQnDz/GDxvLWVBY77Ww2CCx0WDcCZdLx+9M/7TCAhVTTp6nQHCUMoC4+pTkn6BB/JTC
+        5UqbNkD9j/7/kaT8npVW35LT4JdfcY+VGvcUmm/vMbvL0nQo9ziNs3KvHKY/9MZD42vmwR
+        o5wKZnRghcfTqJk4av5z9Z24iqVUqbc=
+Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com
+ [209.85.216.70]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-167-mg0xbBmGN6uqUoqnw7LhBg-1; Sun, 28 Mar 2021 15:51:37 -0400
+X-MC-Unique: mg0xbBmGN6uqUoqnw7LhBg-1
+Received: by mail-pj1-f70.google.com with SMTP id b11so4037303pjh.4
+        for <fstests@vger.kernel.org>; Sun, 28 Mar 2021 12:51:37 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to:user-agent;
+        bh=HRkAEwUZiWNcfM4p41i7DUasLa0+aHNq1oDfUZcdnMg=;
+        b=gLo8twUgkH10FO7khwsxD6ugla40kQAJ38SvUCe+Hs68DeAaHqCbhwroAJwmBH3trM
+         NKZEBhAh8EtJwIUCvRxtSDwpAb27GxTKSfdRRhfJTF11Nzvh260i76L4euoYiZVggT7Y
+         aLq0yXVJxy8gAX6v5wx8tnjSt3+X4uSBN/NqTwvrdZxGTYUYbzYnzBpueuERg0w+kXlQ
+         FbvkRln8iS76hcuZ+NqTJ+TBQaNOX9lSmzYtaIyON8+FUZkthV7HrwAqSvxXjLgaD+oP
+         oPB2aXI+xM3YtWoyVX0d5xZpwfacrq6/XkZBDT+72xfWft17JoRWz6k/io5PX/sFjMRz
+         w0BA==
+X-Gm-Message-State: AOAM533Ag+x6wqGBKTj/T0PSMf0IvYBde84qxxL9qIUPJ/0BsFGkY3yk
+        TIaSzUhEVVpYsR2wuG6jtUCR59Nx/qn+6BjhEfcE1wCyx9tCOc9QQ5AnPfFA6uycNsj0zTZxqVP
+        mvnpZv6ZtOd3RXu9pcg==
+X-Received: by 2002:a17:902:c389:b029:e7:1029:8ba5 with SMTP id g9-20020a170902c389b02900e710298ba5mr24812751plg.55.1616961096118;
+        Sun, 28 Mar 2021 12:51:36 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJxIB3Sd/MgDSmXIdYj9RWphjzMzNSWtXvuYtyrVkKHipBMhuMTo+7QhCDVjUCwhECR4HrLKaQ==
+X-Received: by 2002:a17:902:c389:b029:e7:1029:8ba5 with SMTP id g9-20020a170902c389b02900e710298ba5mr24812735plg.55.1616961095917;
+        Sun, 28 Mar 2021 12:51:35 -0700 (PDT)
+Received: from xiangao.remote.csb ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id 6sm15110383pfv.179.2021.03.28.12.51.32
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 28 Mar 2021 12:51:35 -0700 (PDT)
+Date:   Mon, 29 Mar 2021 03:51:24 +0800
+From:   Gao Xiang <hsiangkao@redhat.com>
 To:     Eryu Guan <guan@eryu.me>
-Cc:     Christian Brauner <brauner@kernel.org>, fstests@vger.kernel.org,
-        Christoph Hellwig <hch@lst.de>,
-        "Darrick J . Wong" <djwong@kernel.org>,
-        David Howells <dhowells@redhat.com>,
-        Amir Goldstein <amir73il@gmail.com>
-Subject: Re: [PATCH v11 2/6] generic/632: add fstests for idmapped mounts
-Message-ID: <20210328192532.jrw23brihkcrc6ok@wittgenstein>
-References: <20210327111856.1211544-1-brauner@kernel.org>
- <20210327111856.1211544-3-brauner@kernel.org>
- <YGDL9EKPnPIcj6yh@desktop>
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org,
+        "Darrick J. Wong" <djwong@kernel.org>,
+        Zorro Lang <zlang@redhat.com>
+Subject: Re: [RFC PATCH v3 1/3] common/xfs: add a _require_xfs_shrink helper
+Message-ID: <20210328195124.GA3213575@xiangao.remote.csb>
+References: <20210315111926.837170-1-hsiangkao@redhat.com>
+ <20210315111926.837170-2-hsiangkao@redhat.com>
+ <YGCsUXMF+uupaHNV@desktop>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <YGDL9EKPnPIcj6yh@desktop>
+In-Reply-To: <YGCsUXMF+uupaHNV@desktop>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Mar 29, 2021 at 02:33:24AM +0800, Eryu Guan wrote:
-> On Sat, Mar 27, 2021 at 12:18:52PM +0100, Christian Brauner wrote:
-> > From: Christian Brauner <christian.brauner@ubuntu.com>
+On Mon, Mar 29, 2021 at 12:18:25AM +0800, Eryu Guan wrote:
+> On Mon, Mar 15, 2021 at 07:19:24PM +0800, Gao Xiang wrote:
+> > In order to detect whether the current kernel supports XFS shrinking.
 > > 
-> > Add a test suite to verify the behavior of idmapped mounts. The test
-> > suite also includes a range of vfs tests to verify that no regressions
-> > are introduced by idmapped mounts. The following tests are currently
-> > available with more to come in the future:
-> > 
-> > 01. posix acls on regular and idmapped mounts
-> > 02. create operations in user namespace
-> > 03. device node creation in user namespace
-> > 04. expected ownership on idmapped mounts
-> > 05. fscaps on regular mounts
-> > 06. fscaps on idmapped mounts
-> > 07. fscaps on idmapped mounts in user namespace
-> > 08. fscaps on idmapped mounts in user namespace
-> >     with different id mappings
-> > 09. mapped fsids
-> > 10. unmapped fsids
-> > 11. cross mount hardlink
-> > 12. cross idmapped mount hardlink
-> > 13. hardlinks from idmapped mounts
-> > 14. hardlinks from idmapped mounts in user namespace
-> > 15. io_uring
-> > 16. io_uring in user namespace
-> > 17. io_uring from idmapped mounts
-> > 18. io_uring from idmapped mounts in user namespace
-> > 19. io_uring from idmapped mounts with unmapped ids
-> > 20. io_uring from idmapped mounts with unmapped ids in user namespace
-> > 21. following protected symlinks on regular mounts
-> > 22. following protected symlinks on idmapped mounts
-> > 23. following protected symlinks on idmapped mounts in user namespace
-> > 24. cross mount rename
-> > 25. cross idmapped mount rename
-> > 26. rename from idmapped mounts
-> > 27. rename from idmapped mounts in user namespace
-> > 28. symlink from regular mounts
-> > 29. symlink from idmapped mounts
-> > 30. symlink from idmapped mounts in user namespace
-> > 31. setid binaries on regular mounts
-> > 32. setid binaries on idmapped mounts
-> > 33. setid binaries on idmapped mounts in user namespace
-> > 34. setid binaries on idmapped mounts in user namespace
-> >     with different id mappings
-> > 35. sticky bit unlink operations on regular mounts
-> > 36. sticky bit unlink operations on idmapped mounts
-> > 37. sticky bit unlink operations on idmapped mounts in user namespace
-> > 38. sticky bit rename operations on regular mounts
-> > 39. sticky bit rename operations on idmapped mounts
-> > 40. sticky bit rename operations on idmapped mounts in user namespace
-> > 41. create operations in directories with setgid bit set
-> > 42. create operations in directories with setgid bit set
-> >     on idmapped mounts
-> > 43. create operations in directories with setgid bit set
-> >     on idmapped mounts in user namespace
-> > 44. verify create operations and ownership with racing threads idmapping
-> >     a mount
-> > 45. setattr truncate operations on regular mounts
-> > 46. setattr truncate operations on idmapped mounts
-> > 47. setattr truncate operations on idmapped mounts in user namespace
-> > 
-> > Here's some sample output when running with DEBUG_TRACE defined:
-> > 
-> > Cc: Amir Goldstein <amir73il@gmail.com>
-> > Cc: Eryu Guan <guan@eryu.me>
-> > Cc: fstests@vger.kernel.org
-> > Reviewed-by: Christoph Hellwig <hch@lst.de>
-> > Signed-off-by: Christian Brauner <christian.brauner@ubuntu.com>
+> > Signed-off-by: Gao Xiang <hsiangkao@redhat.com>
 > > ---
-> > /* v2 */ (send out alongside idmapped mounts patchset)
-> > test-suite part of the kernel selftest framework
+> >  common/xfs | 11 +++++++++++
+> >  1 file changed, 11 insertions(+)
 > > 
-> > /* v3 */ (send out alongside idmapped mounts patchset)
-> > patch introduced (ported form kernel selftest framework)
-> > 
-> > /* v4 */ (send out alongside idmapped mounts patchset)
-> > - Amir Goldstein <amir73il@gmail.com>:
-> >   - Don't Cc fstests mailing list on the testing patches for now.
-> > 
-> > - Add setgid creation tests.
-> > 
-> > /* v5 */ (send out alongside idmapped mounts patchset)
-> > new base: 2080ad637bbb4d2c24c4d63939799dab178eb407
-> > 
-> > - Christoph Hellwig <hch@lst.de>:
-> >   - Enable xfs testing.
-> >   - Improve idmapped mount testing support.
-> > 
-> > - Christian Brauner <christian.brauner@ubuntu.com>:
-> >   - Fix protected symlink tests.
-> >   - Introduce xfs specific helpers.
-> >   - Expand setgid bit tests to xfs.
-> > 
-> > /* v6 */ (send out alongside idmapped mounts patchset)
-> > - Christian Brauner <christian.brauner@ubuntu.com>:
-> >   - After Christoph fixed setgid handling on xfs remove all xfs specific
-> >     parts apart from irix_sgid_inheritance checking.
-> >   - Add idmapped-mounts binary to .gitignore
-> >   - Fix feature testing.
-> >   - Add truncation tests.
-> > 
-> > /* v7 */ (sent out as a separate patchset)
-> > new base: 011bfb01f7f9f8f37c01d0a1ae0b0ca28e96a4f5
-> > - Christian Brauner <christian.brauner@ubuntu.com>:
-> >   - Expand debugging options.
-> > 
-> > /* v8 */
-> > - Christoph Hellwig <hch@lst.de>:
-> >   - Use __supported_fs generic instead of explicitly listing ext4 and xfs.
-> >   - Remove obsolete comment.
-> > 
-> > /* v9 */
-> > - Christian Brauner <christian.brauner@ubuntu.com>:
-> >   - Rebase on current master.
-> > 
-> > /* v10 */
-> > unchanged
-> > 
-> > /* v11 */
-> > - Amir Goldstein <amir73il@gmail.com>:
-> >   - Place "auto" and "quick" tags first for easier "eye grepping".
-> >   - Add a dedicated "idmapped" tag for idmapped mounts tests.
-> > ---
-> >  .gitignore                            |    1 +
-> >  common/rc                             |   25 +
-> >  configure.ac                          |    2 +
-> >  include/builddefs.in                  |    1 +
-> >  m4/Makefile                           |    1 +
-> >  m4/package_libcap.m4                  |    4 +
-> >  src/Makefile                          |    5 +
-> >  src/detached_mounts_propagation.c     |   65 +-
-> >  src/feature.c                         |   40 +-
-> >  src/idmapped-mounts/Makefile          |   35 +
-> >  src/idmapped-mounts/idmapped-mounts.c | 8761 +++++++++++++++++++++++++
-> >  src/idmapped-mounts/missing.h         |  151 +
-> >  src/idmapped-mounts/utils.c           |  134 +
-> >  src/idmapped-mounts/utils.h           |   29 +
-> >  tests/generic/632                     |   42 +
-> >  tests/generic/632.out                 |    2 +
-> >  tests/generic/group                   |    1 +
-> >  17 files changed, 9231 insertions(+), 68 deletions(-)
-> >  create mode 100644 m4/package_libcap.m4
-> >  create mode 100644 src/idmapped-mounts/Makefile
-> >  create mode 100644 src/idmapped-mounts/idmapped-mounts.c
-> >  create mode 100644 src/idmapped-mounts/missing.h
-> >  create mode 100644 src/idmapped-mounts/utils.c
-> >  create mode 100644 src/idmapped-mounts/utils.h
-> >  create mode 100644 tests/generic/632
-> >  create mode 100644 tests/generic/632.out
-> > 
-> 
-> [snip]
-> 
-> > +
-> > +/* caps_down - lower all effective caps */
-> > +static int caps_down(void)
+> > diff --git a/common/xfs b/common/xfs
+> > index 2156749d..ea3b6cab 100644
+> > --- a/common/xfs
+> > +++ b/common/xfs
+> > @@ -432,6 +432,17 @@ _supports_xfs_scrub()
+> >  	return 0
+> >  }
+> >  
+> > +_require_xfs_shrink()
 > > +{
-> > +	bool fret = false;
+> > +	_require_scratch
 > 
-> When HAVE_SYS_CAPABILITY_H is not defined, i.e. libcap-devel package is
-> not installed, so this causes test fails as
-> 
-> @@ -1,2 +1,7 @@
->  QA output created by 632
->  Silence is golden
-> +idmapped-mounts.c: 419: switch_userns - Success - failure: caps_down
-> +idmapped-mounts.c: 6617: acls - Success - failure: switch_userns
-> +idmapped-mounts.c: 6627: acls - Success - failure: wait_for_pid
-> +failure: posix acls on regular mounts
-> +idmapped-mounts.c: 805: test_cleanup - Directory not empty - failure: rm_r
-> 
-> Also, please update README to add libcap-devel to "install prerequisite
-> packages" list.
-> 
-> And it seems some tests depend on caps_down(), like io_uring tests, it
-> depends on caps_down() to drop caps and expect EPERM. It'd be better to
-> make libcap-devel optional and don't fail other tests if it's not
-> installed.
+> _require_command "$XFS_GROWFS_PROG" xfs_growfs
 
-Ok, fixing this now.
+will update.
 
 > 
-> > +#ifdef HAVE_SYS_CAPABILITY_H
-> > +	cap_t caps = NULL;
-> > +	int ret = -1;
 > > +
-> > +	caps = cap_get_proc();
-> > +	if (!caps)
-> > +		goto out;
-> > +
-> > +	ret = cap_clear_flag(caps, CAP_EFFECTIVE);
-> > +	if (ret)
-> > +		goto out;
-> > +
-> > +	ret = cap_set_proc(caps);
-> > +	if (ret)
-> > +		goto out;
-> > +
-> > +	fret = true;
-> > +
-> > +out:
-> > +	cap_free(caps);
-> > +#endif
-> > +	return fret;
+> > +	_scratch_mkfs_xfs > /dev/null
+> > +	_scratch_mount
+> > +	$XFS_GROWFS_PROG -D1 "$SCRATCH_MNT" 2>&1 | grep -q 'Invalid argument' || \
+> > +		_notrun "kernel does not support shrinking"
+> 
+> Better to describe the behavior here to explain why EINVAL means kernel
+> supports shrink.
+
+hmmm.. I also don't think this check is correct now. Maybe try to shrink
+one fs-block would be better. Will update later.
+
+Thanks,
+Gao Xiang
+
+> 
+> Thanks,
+> Eryu
+> 
+> > +	_scratch_unmount
 > > +}
 > > +
-> > +/* caps_down - raise all permitted caps */
+> >  # run xfs_check and friends on a FS.
+> >  _check_xfs_filesystem()
+> >  {
+> > -- 
+> > 2.27.0
 > 
-> caps_up
 
-Thanks for catching this!
-
-> 
-> > +static int caps_up(void)
-> 
-> [snip]
-> 
-> > +static int print_r(int fd, const char *path)
-> 
-> I saw build warnings:
-> 
-> idmapped-mounts.c:554:12: warning: 'print_r' defined but not used [-Wunused-function]
->   554 | static int print_r(int fd, const char *path)
->       |            ^~~~~~~
-> 
-> because DEBUG_TRACE is not defined.
-
-Fixed.
-
-Christian
