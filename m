@@ -7,71 +7,80 @@ X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CD0C4C433DB
-	for <linux-fstests@archiver.kernel.org>; Sun, 28 Mar 2021 15:41:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 23EBFC433C1
+	for <linux-fstests@archiver.kernel.org>; Sun, 28 Mar 2021 16:19:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9B9F961976
-	for <linux-fstests@archiver.kernel.org>; Sun, 28 Mar 2021 15:41:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BB4F961948
+	for <linux-fstests@archiver.kernel.org>; Sun, 28 Mar 2021 16:19:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229647AbhC1PlO (ORCPT
+        id S230497AbhC1QSc (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 28 Mar 2021 11:41:14 -0400
-Received: from out20-50.mail.aliyun.com ([115.124.20.50]:47278 "EHLO
-        out20-50.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230347AbhC1PlB (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 28 Mar 2021 11:41:01 -0400
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.1461262|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_regular_dialog|0.0260457-0.000735599-0.973219;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047199;MF=guan@eryu.me;NM=1;PH=DS;RN=4;RT=4;SR=0;TI=SMTPD_---.JrZUze9_1616946058;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.JrZUze9_1616946058)
-          by smtp.aliyun-inc.com(10.147.40.233);
-          Sun, 28 Mar 2021 23:40:59 +0800
-Date:   Sun, 28 Mar 2021 23:40:58 +0800
+        Sun, 28 Mar 2021 12:18:32 -0400
+Received: from out20-14.mail.aliyun.com ([115.124.20.14]:45314 "EHLO
+        out20-14.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229647AbhC1QSa (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 28 Mar 2021 12:18:30 -0400
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.1381721|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_regular_dialog|0.00701211-0.000471667-0.992516;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047203;MF=guan@eryu.me;NM=1;PH=DS;RN=5;RT=5;SR=0;TI=SMTPD_---.JraA3sc_1616948305;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.JraA3sc_1616948305)
+          by smtp.aliyun-inc.com(10.147.40.44);
+          Mon, 29 Mar 2021 00:18:26 +0800
+Date:   Mon, 29 Mar 2021 00:18:25 +0800
 From:   Eryu Guan <guan@eryu.me>
-To:     Pavel Reichl <preichl@redhat.com>
-Cc:     fstests@vger.kernel.org, zlang@redhat.com, xzhou@redhat.com
-Subject: Re: [PATCH 4/5] generic/554: hide permision warning on exfat
-Message-ID: <YGCjirErrfGsmcGZ@desktop>
-References: <20210326154134.309159-1-preichl@redhat.com>
- <20210326154134.309159-5-preichl@redhat.com>
+To:     Gao Xiang <hsiangkao@redhat.com>
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org,
+        "Darrick J. Wong" <djwong@kernel.org>,
+        Zorro Lang <zlang@redhat.com>
+Subject: Re: [RFC PATCH v3 1/3] common/xfs: add a _require_xfs_shrink helper
+Message-ID: <YGCsUXMF+uupaHNV@desktop>
+References: <20210315111926.837170-1-hsiangkao@redhat.com>
+ <20210315111926.837170-2-hsiangkao@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210326154134.309159-5-preichl@redhat.com>
+In-Reply-To: <20210315111926.837170-2-hsiangkao@redhat.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Mar 26, 2021 at 04:41:33PM +0100, Pavel Reichl wrote:
-> Signed-off-by: Pavel Reichl <preichl@redhat.com>
-> ---
->  tests/generic/554 | 10 +++++++++-
->  1 file changed, 9 insertions(+), 1 deletion(-)
+On Mon, Mar 15, 2021 at 07:19:24PM +0800, Gao Xiang wrote:
+> In order to detect whether the current kernel supports XFS shrinking.
 > 
-> diff --git a/tests/generic/554 b/tests/generic/554
-> index fa4f97d2..365628e2 100755
-> --- a/tests/generic/554
-> +++ b/tests/generic/554
-> @@ -46,7 +46,15 @@ $XFS_IO_PROG -f -c "pwrite -S 0x61 0 128k" $SCRATCH_MNT/file >> $seqres.full 2>&
+> Signed-off-by: Gao Xiang <hsiangkao@redhat.com>
+> ---
+>  common/xfs | 11 +++++++++++
+>  1 file changed, 11 insertions(+)
+> 
+> diff --git a/common/xfs b/common/xfs
+> index 2156749d..ea3b6cab 100644
+> --- a/common/xfs
+> +++ b/common/xfs
+> @@ -432,6 +432,17 @@ _supports_xfs_scrub()
+>  	return 0
+>  }
 >  
->  echo swap files return ETXTBUSY
->  _format_swapfile $SCRATCH_MNT/swapfile 16m
-> -swapon $SCRATCH_MNT/swapfile
-> +if [ "$FSTYP" = "exfat" ]; then
-> +	# exfat does not support posix file permisions, so warning is
-> +	# to be expected
-> +	swapon $SCRATCH_MNT/swapfile 2>&1 |\
-> +		grep -v 'insecure permission' >> $seqres.full
-> +else
-> +	swapon $SCRATCH_MNT/swapfile
-> +fi
+> +_require_xfs_shrink()
+> +{
+> +	_require_scratch
 
-Introduce a new helper like _format_swapfile and do the check there?
+_require_command "$XFS_GROWFS_PROG" xfs_growfs
+
+> +
+> +	_scratch_mkfs_xfs > /dev/null
+> +	_scratch_mount
+> +	$XFS_GROWFS_PROG -D1 "$SCRATCH_MNT" 2>&1 | grep -q 'Invalid argument' || \
+> +		_notrun "kernel does not support shrinking"
+
+Better to describe the behavior here to explain why EINVAL means kernel
+supports shrink.
 
 Thanks,
 Eryu
 
+> +	_scratch_unmount
+> +}
 > +
->  $XFS_IO_PROG -f -c "copy_range -l 32k $SCRATCH_MNT/file" $SCRATCH_MNT/swapfile
->  swapoff $SCRATCH_MNT/swapfile
->  
+>  # run xfs_check and friends on a FS.
+>  _check_xfs_filesystem()
+>  {
 > -- 
-> 2.30.2
+> 2.27.0
