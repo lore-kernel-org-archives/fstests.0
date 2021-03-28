@@ -7,263 +7,185 @@ X-Spam-Status: No, score=-13.7 required=3.0 tests=BAYES_00,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,URIBL_BLOCKED
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CBE95C433C1
-	for <linux-fstests@archiver.kernel.org>; Sun, 28 Mar 2021 18:34:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8D32BC433DB
+	for <linux-fstests@archiver.kernel.org>; Sun, 28 Mar 2021 18:35:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 933F661966
-	for <linux-fstests@archiver.kernel.org>; Sun, 28 Mar 2021 18:34:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5408B61966
+	for <linux-fstests@archiver.kernel.org>; Sun, 28 Mar 2021 18:35:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230350AbhC1Sds (ORCPT
+        id S231149AbhC1SfX (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 28 Mar 2021 14:33:48 -0400
-Received: from out20-3.mail.aliyun.com ([115.124.20.3]:34855 "EHLO
-        out20-3.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229950AbhC1Sd1 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 28 Mar 2021 14:33:27 -0400
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07436284|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_alarm|0.205938-0.018113-0.775949;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047205;MF=guan@eryu.me;NM=1;PH=DS;RN=7;RT=7;SR=0;TI=SMTPD_---.JrcqFmV_1616956404;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.JrcqFmV_1616956404)
-          by smtp.aliyun-inc.com(10.147.42.253);
-          Mon, 29 Mar 2021 02:33:24 +0800
-Date:   Mon, 29 Mar 2021 02:33:24 +0800
+        Sun, 28 Mar 2021 14:35:23 -0400
+Received: from out20-74.mail.aliyun.com ([115.124.20.74]:44884 "EHLO
+        out20-74.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230514AbhC1SfO (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 28 Mar 2021 14:35:14 -0400
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.0836765|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_alarm|0.278701-0.000775083-0.720524;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047192;MF=guan@eryu.me;NM=1;PH=DS;RN=6;RT=6;SR=0;TI=SMTPD_---.JrchbO8_1616956512;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.JrchbO8_1616956512)
+          by smtp.aliyun-inc.com(10.147.43.230);
+          Mon, 29 Mar 2021 02:35:12 +0800
+Date:   Mon, 29 Mar 2021 02:35:12 +0800
 From:   Eryu Guan <guan@eryu.me>
 To:     Christian Brauner <brauner@kernel.org>
 Cc:     fstests@vger.kernel.org, Christoph Hellwig <hch@lst.de>,
         "Darrick J . Wong" <djwong@kernel.org>,
         David Howells <dhowells@redhat.com>,
-        Christian Brauner <christian.brauner@ubuntu.com>,
-        Amir Goldstein <amir73il@gmail.com>
-Subject: Re: [PATCH v11 2/6] generic/632: add fstests for idmapped mounts
-Message-ID: <YGDL9EKPnPIcj6yh@desktop>
+        Christian Brauner <christian.brauner@ubuntu.com>
+Subject: Re: [PATCH v11 3/6] common/rc: add _scratch_{u}mount_idmapped()
+ helpers
+Message-ID: <YGDMYBu0NGhHR+/f@desktop>
 References: <20210327111856.1211544-1-brauner@kernel.org>
- <20210327111856.1211544-3-brauner@kernel.org>
+ <20210327111856.1211544-4-brauner@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210327111856.1211544-3-brauner@kernel.org>
+In-Reply-To: <20210327111856.1211544-4-brauner@kernel.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sat, Mar 27, 2021 at 12:18:52PM +0100, Christian Brauner wrote:
+On Sat, Mar 27, 2021 at 12:18:53PM +0100, Christian Brauner wrote:
 > From: Christian Brauner <christian.brauner@ubuntu.com>
 > 
-> Add a test suite to verify the behavior of idmapped mounts. The test
-> suite also includes a range of vfs tests to verify that no regressions
-> are introduced by idmapped mounts. The following tests are currently
-> available with more to come in the future:
+> They will be used in follow-up patches for xfs quota tests but might be
+> useful for other tests in the future.
 > 
-> 01. posix acls on regular and idmapped mounts
-> 02. create operations in user namespace
-> 03. device node creation in user namespace
-> 04. expected ownership on idmapped mounts
-> 05. fscaps on regular mounts
-> 06. fscaps on idmapped mounts
-> 07. fscaps on idmapped mounts in user namespace
-> 08. fscaps on idmapped mounts in user namespace
->     with different id mappings
-> 09. mapped fsids
-> 10. unmapped fsids
-> 11. cross mount hardlink
-> 12. cross idmapped mount hardlink
-> 13. hardlinks from idmapped mounts
-> 14. hardlinks from idmapped mounts in user namespace
-> 15. io_uring
-> 16. io_uring in user namespace
-> 17. io_uring from idmapped mounts
-> 18. io_uring from idmapped mounts in user namespace
-> 19. io_uring from idmapped mounts with unmapped ids
-> 20. io_uring from idmapped mounts with unmapped ids in user namespace
-> 21. following protected symlinks on regular mounts
-> 22. following protected symlinks on idmapped mounts
-> 23. following protected symlinks on idmapped mounts in user namespace
-> 24. cross mount rename
-> 25. cross idmapped mount rename
-> 26. rename from idmapped mounts
-> 27. rename from idmapped mounts in user namespace
-> 28. symlink from regular mounts
-> 29. symlink from idmapped mounts
-> 30. symlink from idmapped mounts in user namespace
-> 31. setid binaries on regular mounts
-> 32. setid binaries on idmapped mounts
-> 33. setid binaries on idmapped mounts in user namespace
-> 34. setid binaries on idmapped mounts in user namespace
->     with different id mappings
-> 35. sticky bit unlink operations on regular mounts
-> 36. sticky bit unlink operations on idmapped mounts
-> 37. sticky bit unlink operations on idmapped mounts in user namespace
-> 38. sticky bit rename operations on regular mounts
-> 39. sticky bit rename operations on idmapped mounts
-> 40. sticky bit rename operations on idmapped mounts in user namespace
-> 41. create operations in directories with setgid bit set
-> 42. create operations in directories with setgid bit set
->     on idmapped mounts
-> 43. create operations in directories with setgid bit set
->     on idmapped mounts in user namespace
-> 44. verify create operations and ownership with racing threads idmapping
->     a mount
-> 45. setattr truncate operations on regular mounts
-> 46. setattr truncate operations on idmapped mounts
-> 47. setattr truncate operations on idmapped mounts in user namespace
-> 
-> Here's some sample output when running with DEBUG_TRACE defined:
-> 
-> Cc: Amir Goldstein <amir73il@gmail.com>
 > Cc: Eryu Guan <guan@eryu.me>
+> Cc: Christoph Hellwig <hch@lst.de>
+> Cc: David Howells <dhowells@redhat.com>
 > Cc: fstests@vger.kernel.org
-> Reviewed-by: Christoph Hellwig <hch@lst.de>
 > Signed-off-by: Christian Brauner <christian.brauner@ubuntu.com>
 > ---
-> /* v2 */ (send out alongside idmapped mounts patchset)
-> test-suite part of the kernel selftest framework
-> 
-> /* v3 */ (send out alongside idmapped mounts patchset)
-> patch introduced (ported form kernel selftest framework)
-> 
-> /* v4 */ (send out alongside idmapped mounts patchset)
-> - Amir Goldstein <amir73il@gmail.com>:
->   - Don't Cc fstests mailing list on the testing patches for now.
-> 
-> - Add setgid creation tests.
-> 
-> /* v5 */ (send out alongside idmapped mounts patchset)
-> new base: 2080ad637bbb4d2c24c4d63939799dab178eb407
-> 
-> - Christoph Hellwig <hch@lst.de>:
->   - Enable xfs testing.
->   - Improve idmapped mount testing support.
-> 
-> - Christian Brauner <christian.brauner@ubuntu.com>:
->   - Fix protected symlink tests.
->   - Introduce xfs specific helpers.
->   - Expand setgid bit tests to xfs.
-> 
-> /* v6 */ (send out alongside idmapped mounts patchset)
-> - Christian Brauner <christian.brauner@ubuntu.com>:
->   - After Christoph fixed setgid handling on xfs remove all xfs specific
->     parts apart from irix_sgid_inheritance checking.
->   - Add idmapped-mounts binary to .gitignore
->   - Fix feature testing.
->   - Add truncation tests.
-> 
-> /* v7 */ (sent out as a separate patchset)
-> new base: 011bfb01f7f9f8f37c01d0a1ae0b0ca28e96a4f5
-> - Christian Brauner <christian.brauner@ubuntu.com>:
->   - Expand debugging options.
-> 
-> /* v8 */
-> - Christoph Hellwig <hch@lst.de>:
->   - Use __supported_fs generic instead of explicitly listing ext4 and xfs.
->   - Remove obsolete comment.
-> 
-> /* v9 */
-> - Christian Brauner <christian.brauner@ubuntu.com>:
->   - Rebase on current master.
+> /* v1 - v9 */
+> patch not present
 > 
 > /* v10 */
-> unchanged
+> patch introduced
 > 
 > /* v11 */
 > - Amir Goldstein <amir73il@gmail.com>:
->   - Place "auto" and "quick" tags first for easier "eye grepping".
->   - Add a dedicated "idmapped" tag for idmapped mounts tests.
+>   - Minor Makefile style nit.
+>   - Add missing "/" when calculating maxium path length.
+>   - Handle the case where user gives us a path to userns.
 > ---
->  .gitignore                            |    1 +
->  common/rc                             |   25 +
->  configure.ac                          |    2 +
->  include/builddefs.in                  |    1 +
->  m4/Makefile                           |    1 +
->  m4/package_libcap.m4                  |    4 +
->  src/Makefile                          |    5 +
->  src/detached_mounts_propagation.c     |   65 +-
->  src/feature.c                         |   40 +-
->  src/idmapped-mounts/Makefile          |   35 +
->  src/idmapped-mounts/idmapped-mounts.c | 8761 +++++++++++++++++++++++++
->  src/idmapped-mounts/missing.h         |  151 +
->  src/idmapped-mounts/utils.c           |  134 +
->  src/idmapped-mounts/utils.h           |   29 +
->  tests/generic/632                     |   42 +
->  tests/generic/632.out                 |    2 +
->  tests/generic/group                   |    1 +
->  17 files changed, 9231 insertions(+), 68 deletions(-)
->  create mode 100644 m4/package_libcap.m4
->  create mode 100644 src/idmapped-mounts/Makefile
->  create mode 100644 src/idmapped-mounts/idmapped-mounts.c
->  create mode 100644 src/idmapped-mounts/missing.h
->  create mode 100644 src/idmapped-mounts/utils.c
->  create mode 100644 src/idmapped-mounts/utils.h
->  create mode 100644 tests/generic/632
->  create mode 100644 tests/generic/632.out
+>  .gitignore                           |   1 +
+>  common/rc                            |  35 +++
+>  src/idmapped-mounts/Makefile         |  14 +-
+>  src/idmapped-mounts/mount-idmapped.c | 431 +++++++++++++++++++++++++++
+>  src/idmapped-mounts/utils.c          |   2 +-
+>  src/idmapped-mounts/utils.h          |   1 +
+>  6 files changed, 479 insertions(+), 5 deletions(-)
+>  create mode 100644 src/idmapped-mounts/mount-idmapped.c
 > 
-
-[snip]
-
-> +
-> +/* caps_down - lower all effective caps */
-> +static int caps_down(void)
+> diff --git a/.gitignore b/.gitignore
+> index 3229bb26..4cc9c807 100644
+> --- a/.gitignore
+> +++ b/.gitignore
+> @@ -179,6 +179,7 @@
+>  /src/aio-dio-regress/aiocp
+>  /src/aio-dio-regress/aiodio_sparse2
+>  /src/idmapped-mounts/idmapped-mounts
+> +/src/idmapped-mounts/mount-idmapped
+>  /src/log-writes/replay-log
+>  /src/perf/*.pyc
+>  
+> diff --git a/common/rc b/common/rc
+> index a8b375a2..351996fc 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -342,6 +342,36 @@ _scratch_mount()
+>  	_try_scratch_mount $* || _fail "mount failed"
+>  }
+>  
+> +_scratch_mount_idmapped()
 > +{
-> +	bool fret = false;
-
-When HAVE_SYS_CAPABILITY_H is not defined, i.e. libcap-devel package is
-not installed, so this causes test fails as
-
-@@ -1,2 +1,7 @@
- QA output created by 632
- Silence is golden
-+idmapped-mounts.c: 419: switch_userns - Success - failure: caps_down
-+idmapped-mounts.c: 6617: acls - Success - failure: switch_userns
-+idmapped-mounts.c: 6627: acls - Success - failure: wait_for_pid
-+failure: posix acls on regular mounts
-+idmapped-mounts.c: 805: test_cleanup - Directory not empty - failure: rm_r
-
-Also, please update README to add libcap-devel to "install prerequisite
-packages" list.
-
-And it seems some tests depend on caps_down(), like io_uring tests, it
-depends on caps_down() to drop caps and expect EPERM. It'd be better to
-make libcap-devel optional and don't fail other tests if it's not
-installed.
-
-> +#ifdef HAVE_SYS_CAPABILITY_H
-> +	cap_t caps = NULL;
-> +	int ret = -1;
+> +	local type="$1"
+> +	local id="$2"
 > +
-> +	caps = cap_get_proc();
-> +	if (!caps)
-> +		goto out;
-> +
-> +	ret = cap_clear_flag(caps, CAP_EFFECTIVE);
-> +	if (ret)
-> +		goto out;
-> +
-> +	ret = cap_set_proc(caps);
-> +	if (ret)
-> +		goto out;
-> +
-> +	fret = true;
-> +
-> +out:
-> +	cap_free(caps);
-> +#endif
-> +	return fret;
+> +	if [ "$type" = "u" ]; then
+> +		# This means root will be able to create files as uid %id in
+> +		# the underlying filesystem by going through the idmapped mount.
+> +		$here/src/idmapped-mounts/mount-idmapped --map-mount u:0:$id:1 \
+> +							 --map-mount u:$id:0:1 \
+> +							 --map-mount g:0:0:1 \
+> +							 "$SCRATCH_MNT" "$SCRATCH_MNT" || _fail "mount-idmapped failed"
+> +	elif [ "$type" = "g" ]; then
+> +		# This means root will be able to create files as gid %id in
+> +		# the underlying filesystem by going through the idmapped mount.
+> +		$here/src/idmapped-mounts/mount-idmapped --map-mount g:0:$id:1 \
+> +							 --map-mount g:$id:0:1 \
+> +							 --map-mount u:0:0:1 \
+> +							 "$SCRATCH_MNT" "$SCRATCH_MNT" || _fail "mount-idmapped failed"
+> +	elif [ "$type" = "b" ]; then
+> +		# This means root will be able to create files as uid and gid
+> +		# %id in the underlying filesystem by going through the idmapped mount.
+> +		$here/src/idmapped-mounts/mount-idmapped --map-mount b:0:$id:1 \
+> +							 --map-mount b:$id:0:1 \
+> +							 "$SCRATCH_MNT" "$SCRATCH_MNT" || _fail "mount-idmapped failed"
+> +	else
+> +		_fail "usage: either \"u\" (uid), \"g\" (gid), or \"b\" (uid and gid) must be specified "
+> +	fi
 > +}
 > +
-> +/* caps_down - raise all permitted caps */
+>  _scratch_unmount()
+>  {
+>  	case "$FSTYP" in
+> @@ -357,6 +387,11 @@ _scratch_unmount()
+>  	esac
+>  }
+>  
+> +_scratch_umount_idmapped()
+> +{
+> +	$UMOUNT_PROG $SCRATCH_MNT
+> +}
+> +
+>  _scratch_remount()
+>  {
+>      local opts="$1"
+> diff --git a/src/idmapped-mounts/Makefile b/src/idmapped-mounts/Makefile
+> index 6a934146..b2bff854 100644
+> --- a/src/idmapped-mounts/Makefile
+> +++ b/src/idmapped-mounts/Makefile
+> @@ -3,9 +3,10 @@
+>  TOPDIR = ../..
+>  include $(TOPDIR)/include/builddefs
+>  
+> -TARGETS = idmapped-mounts
+> +TARGETS = idmapped-mounts mount-idmapped
+> +CFILES_IDMAPPED_MOUNTS = idmapped-mounts.c utils.c
+> +CFILES_MOUNT_IDMAPPED = mount-idmapped.c utils.c
+>  
+> -CFILES = idmapped-mounts.c utils.c
+>  HFILES = missing.h utils.h
+>  LLDLIBS += -pthread
+>  LDIRT = $(TARGETS)
+> @@ -24,12 +25,17 @@ depend: .dep
+>  
+>  include $(BUILDRULES)
+>  
+> -$(TARGETS): $(CFILES)
+> +idmapped-mounts: $(CFILES_IDMAPPED_MOUNTS)
+>  	@echo "    [CC]    $@"
+> -	$(Q)$(LTLINK) $(CFILES) -o $@ $(CFLAGS) $(LDFLAGS) $(LDLIBS)
+> +	$(Q)$(LTLINK) $(CFILES_IDMAPPED_MOUNTS) -o $@ $(CFLAGS) $(LDFLAGS) $(LDLIBS)
+> +
+> +mount-idmapped: $(CFILES_MOUNT_IDMAPPED)
+> +	@echo "    [CC]    $@"
+> +	$(Q)$(LTLINK) $(CFILES_MOUNT_IDMAPPED) -o $@ $(CFLAGS) $(LDFLAGS) $(LDLIBS)
+>  
+>  install:
+>  	$(INSTALL) -m 755 -d $(PKG_LIB_DIR)/src/idmapped-mounts
+>  	$(INSTALL) -m 755 $(TARGETS) $(PKG_LIB_DIR)/src/idmapped-mounts
+> +	$(INSTALL) -m 755 $(TARGETS) $(PKG_LIB_DIR)/src/mount-idmapped
 
-caps_up
+This is not needed, and causes 'Make install' failure
 
-> +static int caps_up(void)
-
-[snip]
-
-> +static int print_r(int fd, const char *path)
-
-I saw build warnings:
-
-idmapped-mounts.c:554:12: warning: 'print_r' defined but not used [-Wunused-function]
-  554 | static int print_r(int fd, const char *path)
-      |            ^~~~~~~
-
-because DEBUG_TRACE is not defined.
+/usr/bin/gmake -C idmapped-mounts install
+../../install-sh -o root -g root -m 755 -d /var/lib/xfstests/src/idmapped-mounts
+../../install-sh -o root -g root -m 755 idmapped-mounts mount-idmapped /var/lib/xfstests/src/idmapped-mounts
+../../install-sh -o root -g root -m 755 idmapped-mounts mount-idmapped /var/lib/xfstests/src/mount-idmapped
+chmod: cannot access '//var/lib/xfstests/src/mount-idmapped/idmapped-mounts': Not a directory
+gmake[2]: *** [Makefile:39: install] Error 1
 
 Thanks,
 Eryu
