@@ -7,207 +7,113 @@ X-Spam-Status: No, score=-17.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9EEA1C433C1
-	for <linux-fstests@archiver.kernel.org>; Sun, 28 Mar 2021 11:55:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E467AC433DB
+	for <linux-fstests@archiver.kernel.org>; Sun, 28 Mar 2021 12:50:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7016B6196C
-	for <linux-fstests@archiver.kernel.org>; Sun, 28 Mar 2021 11:55:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B838A6196C
+	for <linux-fstests@archiver.kernel.org>; Sun, 28 Mar 2021 12:50:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229543AbhC1LzK (ORCPT
+        id S231145AbhC1MuY (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 28 Mar 2021 07:55:10 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:57041 "EHLO
+        Sun, 28 Mar 2021 08:50:24 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:40594 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S229503AbhC1Lyt (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 28 Mar 2021 07:54:49 -0400
+        by vger.kernel.org with ESMTP id S229499AbhC1Mty (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 28 Mar 2021 08:49:54 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1616932488;
+        s=mimecast20190719; t=1616935793;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=O7ROAxt8qU7or+hBc4KpkPPIQ85heHqlICPOgRrm4iY=;
-        b=hzoD9w0BA4Cy+HBP2HB5uO7dQmhkqQDI/uPbrSOB3g/LtbDYZO3BHsir38a1nTbLXG2MBe
-        J8ehAVrVByRo4OVBAnrwRzJofV7oKTIP89OHpL9DNS+THxHsRTJPG1s9yRjZad+wWv8RVa
-        ccW5Lfuwf78BdzeIOvj1lGCvDDR+pSc=
+        bh=atFCgJqmf6UFaBxW+KlIPyKhmVAQRURoT7+chGo/4Qo=;
+        b=gxXp9ALtl9VSY+F1qHWQDV8fYi2VTtroRLcZSwtcr/kmP4ousB6N0g4GzfOGaIcMMC9nMt
+        NNTuWlIEAQ54I/4+eDbzbpYiGHJnU+szyyYEHOGglghNKPDqXKAGrT/3DFyPSlErrvqlSt
+        B560LeXlnb1w4iF/C4yG1MsMYPCc+P4=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-445-QvTT0Z9NOty3_7Nr-I8dkw-1; Sun, 28 Mar 2021 07:54:46 -0400
-X-MC-Unique: QvTT0Z9NOty3_7Nr-I8dkw-1
-Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
+ us-mta-219-w0_ATaM9PKGh49XdPm7abw-1; Sun, 28 Mar 2021 08:49:51 -0400
+X-MC-Unique: w0_ATaM9PKGh49XdPm7abw-1
+Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 8A5E6800D53
-        for <fstests@vger.kernel.org>; Sun, 28 Mar 2021 11:54:45 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 9037C800D53
+        for <fstests@vger.kernel.org>; Sun, 28 Mar 2021 12:49:50 +0000 (UTC)
 Received: from localhost (unknown [10.66.61.36])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id F1C4860CCE;
-        Sun, 28 Mar 2021 11:54:44 +0000 (UTC)
-Date:   Sun, 28 Mar 2021 20:11:12 +0800
+        by smtp.corp.redhat.com (Postfix) with ESMTP id EA6005C1D0;
+        Sun, 28 Mar 2021 12:49:49 +0000 (UTC)
+Date:   Sun, 28 Mar 2021 21:06:17 +0800
 From:   Zorro Lang <zlang@redhat.com>
 To:     Pavel Reichl <preichl@redhat.com>
 Cc:     fstests@vger.kernel.org, xzhou@redhat.com
-Subject: Re: [PATCH 2/5] g/87,88,125,126,128,193,314,317,355: Add
- _require_chown/chmod
-Message-ID: <20210328121111.GL13946@localhost.localdomain>
+Subject: Re: [PATCH 4/5] generic/554: hide permision warning on exfat
+Message-ID: <20210328130617.GM13946@localhost.localdomain>
 Mail-Followup-To: Pavel Reichl <preichl@redhat.com>,
         fstests@vger.kernel.org, xzhou@redhat.com
 References: <20210326154134.309159-1-preichl@redhat.com>
- <20210326154134.309159-3-preichl@redhat.com>
+ <20210326154134.309159-5-preichl@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210326154134.309159-3-preichl@redhat.com>
+In-Reply-To: <20210326154134.309159-5-preichl@redhat.com>
 User-Agent: Mutt/1.10.1 (2018-07-13)
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.16
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Mar 26, 2021 at 04:41:31PM +0100, Pavel Reichl wrote:
+On Fri, Mar 26, 2021 at 04:41:33PM +0100, Pavel Reichl wrote:
 > Signed-off-by: Pavel Reichl <preichl@redhat.com>
 > ---
->  tests/generic/087 | 1 +
->  tests/generic/088 | 1 +
->  tests/generic/125 | 1 +
->  tests/generic/126 | 1 +
->  tests/generic/128 | 1 +
->  tests/generic/193 | 1 +
->  tests/generic/314 | 1 +
->  tests/generic/317 | 1 +
->  tests/generic/355 | 1 +
+>  tests/generic/554 | 10 +++++++++-
+>  1 file changed, 9 insertions(+), 1 deletion(-)
+> 
+> diff --git a/tests/generic/554 b/tests/generic/554
 
-From my testing, generic/597[1] and generic/598[2] fails on chown and chmod too.
+If you'd like to filter this warning, besides generic/554, generic/472 [1] and
+generic/495 [2] have this warning too. But g/495 has more failures. I'm wondering
+is that worth testing swap on exfat filesystem ...
 
 Thanks,
 Zorro
 
 [1]
---- /dev/fd/63	2021-03-18 05:06:27.234268437 -0400
-+++ generic/597.out.bad	2021-03-18 05:06:26.964267727 -0400
-@@ -1,14 +1,24 @@
- QA output created by 597
-+chmod: changing permissions of '/mnt/xfstests/test/597/sticky_dir': Operation not permitted
+--- /dev/fd/63	2021-03-18 04:33:53.788956817 -0400
++++ generic/472.out.bad	2021-03-18 04:33:53.608956319 -0400
+@@ -1,4 +1,5 @@
+ QA output created by 472
++mkswap: /mnt/xfstests/scratch/swap: insecure permissions 0755, 0600 suggested.
 ...
 
 [2]
---- /dev/fd/63	2021-03-18 05:06:47.854322650 -0400
-+++ generic/598.out.bad	2021-03-18 05:06:47.614322018 -0400
-@@ -1,12 +1,21 @@
- QA output created by 598
-+chmod: changing permissions of '/mnt/xfstests/test/598/sticky_dir': Operation not permitted
-+chown: changing ownership of '/mnt/xfstests/test/598/sticky_dir': Operation not permitted
+--- /dev/fd/63	2021-03-18 04:53:17.762100589 -0400
++++ generic/495.out.bad	2021-03-18 04:53:17.542100020 -0400
+@@ -1,5 +1,5 @@
+ QA output created by 495
++mkswap: /mnt/xfstests/scratch/swap: insecure permissions 0755, 0600 suggested.
+ File with holes
+-swapon: Invalid argument
 ...
 
-
->  9 files changed, 9 insertions(+)
-> 
-> diff --git a/tests/generic/087 b/tests/generic/087
-> index 1f30dbf4..c3576117 100755
-> --- a/tests/generic/087
-> +++ b/tests/generic/087
-> @@ -37,6 +37,7 @@ _cleanup()
->  # real QA test starts here
->  _supported_fs generic
->  _require_test
-> +_require_chown
+> index fa4f97d2..365628e2 100755
+> --- a/tests/generic/554
+> +++ b/tests/generic/554
+> @@ -46,7 +46,15 @@ $XFS_IO_PROG -f -c "pwrite -S 0x61 0 128k" $SCRATCH_MNT/file >> $seqres.full 2>&
 >  
->  QA_FS_PERMS=$here/src/fs_perms
+>  echo swap files return ETXTBUSY
+>  _format_swapfile $SCRATCH_MNT/swapfile 16m
+> -swapon $SCRATCH_MNT/swapfile
+> +if [ "$FSTYP" = "exfat" ]; then
+> +	# exfat does not support posix file permisions, so warning is
+> +	# to be expected
+> +	swapon $SCRATCH_MNT/swapfile 2>&1 |\
+> +		grep -v 'insecure permission' >> $seqres.full
+> +else
+> +	swapon $SCRATCH_MNT/swapfile
+> +fi
+> +
+>  $XFS_IO_PROG -f -c "copy_range -l 32k $SCRATCH_MNT/file" $SCRATCH_MNT/swapfile
+>  swapoff $SCRATCH_MNT/swapfile
 >  
-> diff --git a/tests/generic/088 b/tests/generic/088
-> index 9388a083..ad99bd7e 100755
-> --- a/tests/generic/088
-> +++ b/tests/generic/088
-> @@ -29,6 +29,7 @@ _filter()
->  # real QA test starts here
->  _supported_fs generic
->  _require_test
-> +_require_chown
->  
->  path=$TEST_DIR/t_access
->  $here/src/t_access_root $path | tee $seqres.full | _filter
-> diff --git a/tests/generic/125 b/tests/generic/125
-> index e84248d3..8c8f5cd7 100755
-> --- a/tests/generic/125
-> +++ b/tests/generic/125
-> @@ -25,6 +25,7 @@ _supported_fs generic
->  _require_test
->  _require_user
->  _require_odirect
-> +_require_chmod
->  
->  TESTDIR=$TEST_DIR/ftrunc
->  TESTFILE=$TESTDIR/ftrunc.tmp
-> diff --git a/tests/generic/126 b/tests/generic/126
-> index ac25d294..636ca00d 100755
-> --- a/tests/generic/126
-> +++ b/tests/generic/126
-> @@ -27,6 +27,7 @@ _cleanup()
->  # real QA test starts here
->  _supported_fs generic
->  _require_test
-> +_require_chown
->  
->  QA_FS_PERMS=$here/src/fs_perms
->  
-> diff --git a/tests/generic/128 b/tests/generic/128
-> index b3e49eff..c1eae77a 100755
-> --- a/tests/generic/128
-> +++ b/tests/generic/128
-> @@ -24,6 +24,7 @@ _supported_fs generic
->  
->  _require_scratch
->  _require_user
-> +_require_chmod
->  
->  _scratch_mkfs >/dev/null 2>&1
->  _scratch_mount "-o nosuid"
-> diff --git a/tests/generic/193 b/tests/generic/193
-> index 3125efdd..fd0ebbf6 100755
-> --- a/tests/generic/193
-> +++ b/tests/generic/193
-> @@ -56,6 +56,7 @@ _supported_fs generic
->  
->  _require_test
->  _require_user
-> +_require_chown
->  
->  test_root=$TEST_DIR/$seq.$$.root
->  test_user=$TEST_DIR/$seq.$$.user
-> diff --git a/tests/generic/314 b/tests/generic/314
-> index 03df81ce..540f0feb 100755
-> --- a/tests/generic/314
-> +++ b/tests/generic/314
-> @@ -29,6 +29,7 @@ _cleanup()
->  _supported_fs generic
->  _require_test
->  _require_user
-> +_require_chown
->  
->  rm -rf $TEST_DIR/$seq-dir
->  
-> diff --git a/tests/generic/317 b/tests/generic/317
-> index 29c37a57..289dfabe 100755
-> --- a/tests/generic/317
-> +++ b/tests/generic/317
-> @@ -45,6 +45,7 @@ _require_scratch
->  _require_user
->  _require_ugid_map
->  _require_userns
-> +_require_chown
->  qa_user_id=`id -u $qa_user`
->  
->  _filter_output()
-> diff --git a/tests/generic/355 b/tests/generic/355
-> index 161dd042..74fba0f9 100755
-> --- a/tests/generic/355
-> +++ b/tests/generic/355
-> @@ -32,6 +32,7 @@ _supported_fs generic
->  _require_test
->  _require_user
->  _require_odirect
-> +_require_chown
->  
->  testfile=$TEST_DIR/$seq.test
->  rm -f $testfile
 > -- 
 > 2.30.2
 > 
