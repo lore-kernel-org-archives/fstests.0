@@ -2,125 +2,168 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-17.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B1C4DC433C1
-	for <linux-fstests@archiver.kernel.org>; Sun, 28 Mar 2021 12:56:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F0870C433C1
+	for <linux-fstests@archiver.kernel.org>; Sun, 28 Mar 2021 14:19:32 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 82FBA6196D
-	for <linux-fstests@archiver.kernel.org>; Sun, 28 Mar 2021 12:56:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C6E036196E
+	for <linux-fstests@archiver.kernel.org>; Sun, 28 Mar 2021 14:19:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229950AbhC1M4A (ORCPT
+        id S230196AbhC1OSt (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 28 Mar 2021 08:56:00 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:32236 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S229577AbhC1Mzm (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 28 Mar 2021 08:55:42 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1616936141;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=EieahCA1lWp7xkcc2ixHlkR3/KU57pahnoSFJxQiKVw=;
-        b=hYovuXUiNv2jLFYt3/ny+3SxlYwYGwl4wP3gO7AxN0b1ouFUfGWVy9u733z9LU2MlLcwrF
-        snmTPOY4Mfx7p9eqgUOITODc5tqWDxpjPzcBqJjhuWWpv/CY6DAxabIaci859BKebsn96W
-        gZKyG/6jpSkhStKC4m+rVy2O1gCw3EU=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-440-Bb3DyjrmMbWrGZFnM8GeDA-1; Sun, 28 Mar 2021 08:55:39 -0400
-X-MC-Unique: Bb3DyjrmMbWrGZFnM8GeDA-1
-Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id E30DF18C89CC
-        for <fstests@vger.kernel.org>; Sun, 28 Mar 2021 12:55:38 +0000 (UTC)
-Received: from localhost (unknown [10.66.61.36])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 57A3A60C21;
-        Sun, 28 Mar 2021 12:55:38 +0000 (UTC)
-Date:   Sun, 28 Mar 2021 21:12:06 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Pavel Reichl <preichl@redhat.com>, fstests@vger.kernel.org,
-        xzhou@redhat.com
-Subject: Re: [PATCH 4/5] generic/554: hide permision warning on exfat
-Message-ID: <20210328131206.GN13946@localhost.localdomain>
-Mail-Followup-To: Pavel Reichl <preichl@redhat.com>,
-        fstests@vger.kernel.org, xzhou@redhat.com
-References: <20210326154134.309159-1-preichl@redhat.com>
- <20210326154134.309159-5-preichl@redhat.com>
- <20210328130617.GM13946@localhost.localdomain>
+        Sun, 28 Mar 2021 10:18:49 -0400
+Received: from out20-25.mail.aliyun.com ([115.124.20.25]:52409 "EHLO
+        out20-25.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229950AbhC1OSa (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 28 Mar 2021 10:18:30 -0400
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07437334|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_alarm|0.0416869-0.00310213-0.955211;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047203;MF=guan@eryu.me;NM=1;PH=DS;RN=3;RT=3;SR=0;TI=SMTPD_---.JrYCtEB_1616941107;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.JrYCtEB_1616941107)
+          by smtp.aliyun-inc.com(10.147.41.231);
+          Sun, 28 Mar 2021 22:18:27 +0800
+Date:   Sun, 28 Mar 2021 22:18:27 +0800
+From:   Eryu Guan <guan@eryu.me>
+To:     Pavel Reichl <preichl@redhat.com>
+Cc:     fstests@vger.kernel.org, zlang@redhat.com
+Subject: Re: [PATCH v2] xfs: Add test for printing deprec. mount options
+Message-ID: <YGCQM+oIgMSKFit8@desktop>
+References: <20210319222019.576377-1-preichl@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210328130617.GM13946@localhost.localdomain>
-User-Agent: Mutt/1.10.1 (2018-07-13)
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
+In-Reply-To: <20210319222019.576377-1-preichl@redhat.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Mar 28, 2021 at 09:06:17PM +0800, Zorro Lang wrote:
-> On Fri, Mar 26, 2021 at 04:41:33PM +0100, Pavel Reichl wrote:
-> > Signed-off-by: Pavel Reichl <preichl@redhat.com>
-> > ---
-> >  tests/generic/554 | 10 +++++++++-
-> >  1 file changed, 9 insertions(+), 1 deletion(-)
-> > 
-> > diff --git a/tests/generic/554 b/tests/generic/554
+On Fri, Mar 19, 2021 at 11:20:19PM +0100, Pavel Reichl wrote:
+> Verify that warnings about deprecated mount options are properly
+> printed.
 > 
-> If you'd like to filter this warning, besides generic/554, generic/472 [1] and
-> generic/495 [2] have this warning too. But g/495 has more failures. I'm wondering
+> Verify that no excessive warnings are printed during remounts.
+> 
+> Signed-off-by: Pavel Reichl <preichl@redhat.com>
+> ---
+>  tests/xfs/539     | 87 +++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/539.out |  2 ++
+>  tests/xfs/group   |  1 +
+>  3 files changed, 90 insertions(+)
+>  create mode 100755 tests/xfs/539
+>  create mode 100644 tests/xfs/539.out
+> 
+> diff --git a/tests/xfs/539 b/tests/xfs/539
+> new file mode 100755
+> index 00000000..f90462c3
+> --- /dev/null
+> +++ b/tests/xfs/539
+> @@ -0,0 +1,87 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2020 Red Hat, Inc.. All Rights Reserved.
+> +#
+> +# FS QA Test 539
+> +#
+> +# https://bugzilla.kernel.org/show_bug.cgi?id=211605
+> +# Verify that the warnings are not printed on remount if the mount option has
+> +# the same value as during the mount
+> +#
+> +# Regression test for commit:
+> +# xfs: Skip repetitive warnings about mount options
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +_require_check_dmesg
+> +_supported_fs xfs
+> +_require_scratch
+> +
+> +log_tag()
+> +{
+> +	echo "fstests $seqnum [tag]" > /dev/kmsg
+> +}
+> +
+> +dmesg_since_test_tag()
+> +{
+> +	dmesg | tac | sed -ne "0,\#fstests $seqnum \[tag\]#p" | \
+> +		tac
+> +}
+> +
+> +check_dmesg_for_since_tag()
+> +{
+> +	dmesg_since_test_tag | egrep -q "$1"
+> +}
+> +
+> +echo "Silence is golden."
+> +
+> +
+> +# Skip old kernels that did not print the warning yet
+> +log_tag
+> +_scratch_mkfs > $seqres.full 2>&1
+> +_scratch_mount -o attr2
+> +_scratch_unmount
+> +check_dmesg_for_since_tag "XFS: attr2 mount option is deprecated" || \
+> +	_notrun "Deprecation warning are not printed at all."
+> +
+> +# Test mount with default options (attr2 and noikeep) and remount with
+> +# 2 groups of options
+> +# 1) the defaults (attr2, noikeep)
+> +# 2) non defaults (noattr2, ikeep)
+> +_scratch_mount
+> +for VAR in {attr2,noikeep}; do
+> +	log_tag
+> +	mount -o $VAR,remount $SCRATCH_MNT
 
-Oh, sorry, I read this patch before [PATCH 3/5]. Ignore this suggestion about
-g/472 and g/495.
+I changed this to _scratch_remount $VAR
 
-> is that worth testing swap on exfat filesystem ...
-> 
-> Thanks,
-> Zorro
-> 
-> [1]
-> --- /dev/fd/63	2021-03-18 04:33:53.788956817 -0400
-> +++ generic/472.out.bad	2021-03-18 04:33:53.608956319 -0400
-> @@ -1,4 +1,5 @@
->  QA output created by 472
-> +mkswap: /mnt/xfstests/scratch/swap: insecure permissions 0755, 0600 suggested.
-> ...
-> 
-> [2]
-> --- /dev/fd/63	2021-03-18 04:53:17.762100589 -0400
-> +++ generic/495.out.bad	2021-03-18 04:53:17.542100020 -0400
-> @@ -1,5 +1,5 @@
->  QA output created by 495
-> +mkswap: /mnt/xfstests/scratch/swap: insecure permissions 0755, 0600 suggested.
->  File with holes
-> -swapon: Invalid argument
-> ...
-> 
-> > index fa4f97d2..365628e2 100755
-> > --- a/tests/generic/554
-> > +++ b/tests/generic/554
-> > @@ -46,7 +46,15 @@ $XFS_IO_PROG -f -c "pwrite -S 0x61 0 128k" $SCRATCH_MNT/file >> $seqres.full 2>&
-> >  
-> >  echo swap files return ETXTBUSY
-> >  _format_swapfile $SCRATCH_MNT/swapfile 16m
-> > -swapon $SCRATCH_MNT/swapfile
-> > +if [ "$FSTYP" = "exfat" ]; then
-> > +	# exfat does not support posix file permisions, so warning is
-> > +	# to be expected
-> > +	swapon $SCRATCH_MNT/swapfile 2>&1 |\
-> > +		grep -v 'insecure permission' >> $seqres.full
-> > +else
-> > +	swapon $SCRATCH_MNT/swapfile
-> > +fi
-> > +
-> >  $XFS_IO_PROG -f -c "copy_range -l 32k $SCRATCH_MNT/file" $SCRATCH_MNT/swapfile
-> >  swapoff $SCRATCH_MNT/swapfile
-> >  
-> > -- 
-> > 2.30.2
-> > 
+> +	check_dmesg_for_since_tag "XFS: $VAR mount option is deprecated." && \
+> +		echo "Should not be able to find deprecation warning for $VAR"
+> +done
+> +for VAR in {noattr2,ikeep}; do
+> +	log_tag
+> +	mount -o $VAR,remount $SCRATCH_MNT
 
+Same here.
+
+Otherwise patch looks fine to me, thanks!
+
+Eryu
+
+> +	check_dmesg_for_since_tag "XFS: $VAR mount option is deprecated" || \
+> +		echo "Could not find deprecation warning for $VAR"
+> +done
+> +_scratch_unmount
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/539.out b/tests/xfs/539.out
+> new file mode 100644
+> index 00000000..1b252fee
+> --- /dev/null
+> +++ b/tests/xfs/539.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 539
+> +Silence is golden.
+> -- 
+> 2.30.2
