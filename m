@@ -2,287 +2,180 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-17.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 34258C433DB
-	for <linux-fstests@archiver.kernel.org>; Mon, 29 Mar 2021 02:43:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C3969C433E0
+	for <linux-fstests@archiver.kernel.org>; Mon, 29 Mar 2021 09:32:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0047A61948
-	for <linux-fstests@archiver.kernel.org>; Mon, 29 Mar 2021 02:43:57 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A130061969
+	for <linux-fstests@archiver.kernel.org>; Mon, 29 Mar 2021 09:32:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229861AbhC2CnZ (ORCPT
+        id S231972AbhC2JcU (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 28 Mar 2021 22:43:25 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:53760 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S229645AbhC2CnX (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 28 Mar 2021 22:43:23 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1616985801;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=Zq+2M5LiNMd+Yr8++Y9fMsAIabQaRc7prb2WtGxFiSs=;
-        b=hHKQHCklajCAKAROpY8Z5QHBsftPT0rvRsdj3eyf7CMlPIQDZXYZJrdB1aERbO37Ra5oCC
-        HYZN4nrMwdpYEtV45UC7BLIDKAslxk3+uClwVIJ9uPfgiB3b5+k/xGZy9RYll4I6/9wohI
-        J9STe5yh/Ihh91jRkvmkWbNvJG8J0NE=
-Received: from mail-pg1-f199.google.com (mail-pg1-f199.google.com
- [209.85.215.199]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-505-NRK5QU-cNxWXpQyX2fFSGg-1; Sun, 28 Mar 2021 22:43:19 -0400
-X-MC-Unique: NRK5QU-cNxWXpQyX2fFSGg-1
-Received: by mail-pg1-f199.google.com with SMTP id w31so9516578pgl.22
-        for <fstests@vger.kernel.org>; Sun, 28 Mar 2021 19:43:19 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to:user-agent;
-        bh=Zq+2M5LiNMd+Yr8++Y9fMsAIabQaRc7prb2WtGxFiSs=;
-        b=nWFNV29fOMtsd3QBKu9yKaCEhGL2fk28N9Au7BbhQwASncA/iccWN1YCzOz5yTJ+HH
-         2q31qnvDyQpoa9lZcXKJIiLAM4We0y/6nOAYqd9rMsLkJVHKBQXBOw4hw+a7A8HIva7N
-         X1zz4aFzd32ytZgdKq8zs4ilptT0KzgSsH9oOvXTsFB9WrPMFXPTbHYGbyC+hxg2dln+
-         nh0u1DWWzuwkDz9IW6I62kAi311PwI1iI8W0Ub0RZhiXO2Yoyg4NGHpwtQy+Yv7JTVQ0
-         lZH8Ict7/Rh/iUFErBWCEvLA3dOMw4yYbgS0u7rPH9PCbYjEDxlqAE8/1v1ctTSDR2va
-         Q3Yg==
-X-Gm-Message-State: AOAM531xU+4cuHrCfjzb9XrLfEgouQTIkOxf2fT4Gq1MrOHkQq8wGbuL
-        wW+R8BwA2Bdgyca1l1x+Jcz25w/kyz3oDZMirnIPe6hm21Cnl7N3VaboASGBfOaOu5652tDHi1a
-        tP+ZkMyGFTONwbQFKhg==
-X-Received: by 2002:a17:90b:1490:: with SMTP id js16mr23751633pjb.131.1616985798383;
-        Sun, 28 Mar 2021 19:43:18 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJzK08zuMA8nDVatFPpF1eyuiCT24tUpwBTjySjp2Hf8naOxjYY8eks1Ft5b87iwQual7l8TaA==
-X-Received: by 2002:a17:90b:1490:: with SMTP id js16mr23751617pjb.131.1616985798072;
-        Sun, 28 Mar 2021 19:43:18 -0700 (PDT)
-Received: from xiangao.remote.csb ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id y20sm15580501pfo.210.2021.03.28.19.43.15
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 28 Mar 2021 19:43:17 -0700 (PDT)
-Date:   Mon, 29 Mar 2021 10:43:07 +0800
-From:   Gao Xiang <hsiangkao@redhat.com>
-To:     Eryu Guan <eguan@linux.alibaba.com>
-Cc:     Eryu Guan <guan@eryu.me>, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org, "Darrick J. Wong" <djwong@kernel.org>,
-        Zorro Lang <zlang@redhat.com>
-Subject: Re: [RFC PATCH v3 2/3] xfs: basic functionality test for shrinking
- free space in the last AG
-Message-ID: <20210329024307.GA3264249@xiangao.remote.csb>
-References: <20210315111926.837170-1-hsiangkao@redhat.com>
- <20210315111926.837170-3-hsiangkao@redhat.com>
- <YGCvp6QJherSSOGk@desktop>
- <20210328200603.GB3213575@xiangao.remote.csb>
- <20210329021426.GK95214@e18g06458.et15sqa>
+        Mon, 29 Mar 2021 05:32:20 -0400
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:25030 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S232349AbhC2JcS (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 29 Mar 2021 05:32:18 -0400
+IronPort-HdrOrdr: =?us-ascii?q?A9a23=3AZwNYYKMJve5aV8BcT63155DYdL4zR+YMi2QD?=
+ =?us-ascii?q?/0p6RQVJNumRkM6zlPoWvCWE7Qo5cltIo7+9EYOHRm7R8oMwxIEXM6urUgWOgh?=
+ =?us-ascii?q?rNEKhJ64z+zzr8XxDv7+I179YaT4FSAMD9ZGIK7vrSzxK/F78breWv1ICNqaPg?=
+ =?us-ascii?q?w2x2TQdsApsQlTtRLgqACEV5SE1nKPMCZfihz/FKrTahZngbB/7TbhJuY8H4u9?=
+ =?us-ascii?q?bJmJj6CCRpOzcb6RKDhT7tyLn2Hwnw5Hcjeg5P2rsr/Cz5lRX47MyY0s2T9xm0?=
+ =?us-ascii?q?7QPuxqUTvOGk5spIBcSKhMRQCjLmjBftX5hlV6fHmTYyuYiUmTAXueiJhy1lHs?=
+ =?us-ascii?q?xor1vNY2m+oHLWqm7d+Qdrz0Wn9Hi1rj/Ip9fjSDczFsxb7LgpCyfx+g4np9Fz?=
+ =?us-ascii?q?0KVCwmKfud5WFHr77VzA2+Q=3D?=
+X-IronPort-AV: E=Sophos;i="5.81,287,1610380800"; 
+   d="scan'208";a="106318797"
+Received: from unknown (HELO cn.fujitsu.com) ([10.167.33.5])
+  by heian.cn.fujitsu.com with ESMTP; 29 Mar 2021 17:32:12 +0800
+Received: from G08CNEXMBPEKD05.g08.fujitsu.local (unknown [10.167.33.204])
+        by cn.fujitsu.com (Postfix) with ESMTP id 7CADB4CF267D;
+        Mon, 29 Mar 2021 17:32:08 +0800 (CST)
+Received: from G08CNEXCHPEKD04.g08.fujitsu.local (10.167.33.200) by
+ G08CNEXMBPEKD05.g08.fujitsu.local (10.167.33.204) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.2; Mon, 29 Mar 2021 17:31:59 +0800
+Received: from Fedora-30.g08.fujitsu.local (10.167.220.106) by
+ G08CNEXCHPEKD04.g08.fujitsu.local (10.167.33.209) with Microsoft SMTP Server
+ id 15.0.1497.2 via Frontend Transport; Mon, 29 Mar 2021 17:31:59 +0800
+From:   Xiao Yang <yangx.jy@fujitsu.com>
+To:     <fstests@vger.kernel.org>
+CC:     <darrick.wong@oracle.com>, <lihao2018.fnst@fujitsu.com>,
+        <david@fromorbit.com>, <xifeng@redhat.com>, <ira.weiny@intel.com>,
+        Xiao Yang <yangx.jy@fujitsu.com>
+Subject: [PATCH v2 1/2] generic/608: Remove drop cache and umount & mount cycle
+Date:   Mon, 29 Mar 2021 17:20:53 +0800
+Message-ID: <20210329092054.5278-1-yangx.jy@fujitsu.com>
+X-Mailer: git-send-email 2.21.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <20210329021426.GK95214@e18g06458.et15sqa>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-yoursite-MailScanner-ID: 7CADB4CF267D.A9CF0
+X-yoursite-MailScanner: Found to be clean
+X-yoursite-MailScanner-From: yangx.jy@fujitsu.com
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Hi Eryu,
+Since commit e7bed0b5bc4b, toggling FS_XFLAG_DAX on an existing file can make
+S_DAX on the file change immediately when all applications close the file.
+As a result, we don't need the redundant drop cache and umount & mount cycle.
 
-On Mon, Mar 29, 2021 at 10:14:26AM +0800, Eryu Guan wrote:
-> On Mon, Mar 29, 2021 at 04:06:03AM +0800, Gao Xiang wrote:
-> > On Mon, Mar 29, 2021 at 12:32:39AM +0800, Eryu Guan wrote:
-> > > On Mon, Mar 15, 2021 at 07:19:25PM +0800, Gao Xiang wrote:
-> > > > Add basic test to make sure the functionality works as expected.
-> > > > 
-> > > > Signed-off-by: Gao Xiang <hsiangkao@redhat.com>
-> > > > ---
-> > > >  tests/xfs/990     | 70 +++++++++++++++++++++++++++++++++++++++++++++++
-> > > >  tests/xfs/990.out | 12 ++++++++
-> > > >  tests/xfs/group   |  1 +
-> > > >  3 files changed, 83 insertions(+)
-> > > >  create mode 100755 tests/xfs/990
-> > > >  create mode 100644 tests/xfs/990.out
-> > > > 
-> > > > diff --git a/tests/xfs/990 b/tests/xfs/990
-> > > > new file mode 100755
-> > > > index 00000000..3c79186e
-> > > > --- /dev/null
-> > > > +++ b/tests/xfs/990
-> > > > @@ -0,0 +1,70 @@
-> > > > +#! /bin/bash
-> > > > +# SPDX-License-Identifier: GPL-2.0
-> > > > +# Copyright (c) 2021 Red Hat, Inc.  All Rights Reserved.
-> > > > +#
-> > > > +# FS QA Test 990
-> > > > +#
-> > > > +# XFS shrinkfs basic functionality test
-> > > > +#
-> > > > +# This test attempts to shrink with a small size (512K), half AG size and
-> > > > +# an out-of-bound size (agsize + 1) to observe if it works as expected.
-> > > > +#
-> > > > +seq=`basename $0`
-> > > > +seqres=$RESULT_DIR/$seq
-> > > > +echo "QA output created by $seq"
-> > > > +
-> > > > +here=`pwd`
-> > > > +tmp=/tmp/$$
-> > > > +status=1    # failure is the default!
-> > > > +trap "rm -f $tmp.*; exit \$status" 0 1 2 3 15
-> > > > +
-> > > > +# get standard environment, filters and checks
-> > > > +. ./common/rc
-> > > > +. ./common/filter
-> > > > +
-> > > > +test_shrink()
-> > > > +{
-> > > > +	$XFS_GROWFS_PROG -D"$1" $SCRATCH_MNT >> $seqres.full 2>&1
-> > > > +	ret=$?
-> > > 
-> > > I'm not sure what's the output of xfs_growfs when shrinking filesystem,
-> > > if it's easy to do filter, but it'd be good if we could just dump the
-> > > output and let .out file match & check the test result.
-> > 
-> > Not quite sure if it's of some use (e.g. also need to update expected output
-> > when output changed), since I think just make sure the shrinked size is as
-> > expected and xfs_repair won't argue anything on the new size, that would be
-> > enough.
-> > 
-> > > 
-> > > > +
-> > > > +	_scratch_unmount
-> > > > +	_repair_scratch_fs >> $seqres.full
-> > > 
-> > > _repair_scratch_fs will fix corruption if there's any, and always return 0 if
-> > > completes without problems. Is _check_scratch_fs() what you want?
-> > 
-> > I didn't notice this, will update.
-> > 
-> > > 
-> > > > +	_scratch_mount >> $seqres.full
-> > > > +
-> > > > +	$XFS_INFO_PROG $SCRATCH_MNT 2>&1 | _filter_mkfs 2>$tmp.growfs >/dev/null
-> > > > +	. $tmp.growfs
-> > > > +	[ $ret -eq 0 -a $1 -eq $dblocks ]
-> > > 
-> > > Just dump the expected size after shrink if possible.
-> > 
-> > er... my idea is that I don't want to continue the test case
-> > if any fails... if dump the expected size to output, I need to
-> > fix blocksize as well, not sure if it's necessary.
-> > 
-> > > 
-> > > > +}
-> > > > +
-> > > > +# real QA test starts here
-> > > > +_supported_fs xfs
-> > > 
-> > > Still missing _require_scratch
-> > 
-> > No, _require_xfs_shrink will include that, just as _require_xfs_scratch_rmapbt.
-> 
-> Then include the "scratch" part in the helper name, so it's clear that
-> it requires the SCRATCH_DEV, i.e. _require_xfs_scratch_shrink
+Signed-off-by: Xiaoli Feng <xifeng@redhat.com>
+Signed-off-by: Xiao Yang <yangx.jy@fujitsu.com>
+---
+ tests/generic/608 | 41 ++++++++++++++++++-----------------------
+ 1 file changed, 18 insertions(+), 23 deletions(-)
 
-ok, will rename this later. I'm working on the other stuff now.
+diff --git a/tests/generic/608 b/tests/generic/608
+index 861bbff5..d81a2488 100755
+--- a/tests/generic/608
++++ b/tests/generic/608
+@@ -3,10 +3,10 @@
+ # Copyright (c) 2020 Fujitsu.  All Rights Reserved.
+ #
+ # FS QA Test 608
+-# Change FS_XFLAG_DAX on an existing file and check if S_DAX on
+-# the file can take effect immediately by the following steps:
+-# 1) Stop all applications which are using the file.
+-# 2) Do drop_caches or umount & mount cycle.
++# Toggling FS_XFLAG_DAX on an existing file can make S_DAX on the
++# file change immediately when all applications close the file.
++# It's a regression test for:
++# 'commit e7bed0b5bc4b ("fs: Kill DCACHE_DONTCACHE dentry even if DCACHE_REFERENCED is set")'
+ 
+ seq=`basename $0`
+ seqres=$RESULT_DIR/$seq
+@@ -36,7 +36,7 @@ _require_dax_iflag
+ _require_xfs_io_command "lsattr" "-v"
+ _require_xfs_io_command "statx" "-r"
+ 
+-test_drop_caches()
++test_enable_dax()
+ {
+ 	local t_file=$SCRATCH_MNT/testfile
+ 
+@@ -49,24 +49,19 @@ test_drop_caches()
+ 
+ 	$XFS_IO_PROG -c 'chattr +x' $t_file
+ 	_check_xflag $t_file 1
+-	_check_s_dax $t_file 0
+-
+-	# One application is using test file and check if S_DAX on
+-	# the file doesn't take effect immediately by drop_caches
+-	echo 2 > /proc/sys/vm/drop_caches
++	# One application is using test file and S_DAX
++	# on the file is not changed immediately
+ 	_check_s_dax $t_file 0
+ 
+ 	exec 3<&-
+ 
+-	# No application is using test file and check if S_DAX on
+-	# the file takes effect immediately by drop_caches
+-	echo 2 > /proc/sys/vm/drop_caches
++	# No application is using test file and S_DAX
++	# on the file is changed immediately
+ 	_check_s_dax $t_file 1
+ }
+ 
+-test_cycle_mount()
++test_disable_dax()
+ {
+-	local option=$1
+ 	local t_dir=$SCRATCH_MNT/testdir
+ 	local t_file=$t_dir/testfile
+ 
+@@ -81,29 +76,29 @@ test_cycle_mount()
+ 
+ 	$XFS_IO_PROG -c 'chattr -x' $t_file
+ 	_check_xflag $t_file 0
++	# One application is using test file and S_DAX
++	# on the file is not changed immediately
+ 	_check_s_dax $t_file 1
+ 
+ 	exec 3<&-
+ 
+-	# No application is using test file and check if S_DAX on
+-	# the file takes effect immediately by umount & mount
+-	_scratch_cycle_mount "$option"
++	# No application is using test file and S_DAX
++	# on the file is changed immediately
+ 	_check_s_dax $t_file 0
+ }
+ 
+ do_tests()
+ {
+ 	local mount_option=$1
+-	local cycle_mount_option=$2
+ 
+ 	_scratch_mount "$mount_option"
+ 
+ 	# Make sure the root dir doesn't have FS_XFLAG_DAX set before we start.
+ 	$XFS_IO_PROG -c "chattr -x" $SCRATCH_MNT &>> $seqres.full
+ 
+-	test_drop_caches
+-
+-	test_cycle_mount "$cycle_mount_option"
++	# Do test for commit e7bed0b5bc4b
++	test_enable_dax
++	test_disable_dax
+ 
+ 	_scratch_unmount
+ }
+@@ -111,7 +106,7 @@ do_tests()
+ _scratch_mkfs >> $seqres.full 2>&1
+ 
+ # Mount with dax option
+-do_tests "-o dax=inode" "dax=inode"
++do_tests "-o dax=inode"
+ 
+ # Mount without dax option
+ export MOUNT_OPTIONS=""
+-- 
+2.21.0
 
-> 
-> > 
-> > > 
-> > > > +_require_xfs_shrink
-> > > > +
-> > > > +rm -f $seqres.full
-> > > > +echo "Format and mount"
-> > > > +_scratch_mkfs -dsize="$((512 * 1024 * 1024))" -dagcount=3 2>&1 | \
-> > > > +	tee -a $seqres.full | _filter_mkfs 2>$tmp.mkfs
-> > > 
-> > > Better to explain why mkfs with agcount=3
-> > 
-> > just because agcount = 1 is forbidden on purpose, and I need to make sure
-> > shrinking to 2 AG is not possible yet. So agcount = 3 is the minimum number.
-> > 
-> > It's just a functionality test, so agcount = 3 also makes the result
-> > determinatively.
-> 
-> Yeah, I'd guess the reason, but it'd be great to make it clear in
-> comments.
 
-ok, will try to add some description.
-
-> 
-> > 
-> > > 
-> > > > +. $tmp.mkfs
-> > > > +t_dblocks=$dblocks
-> > > > +_scratch_mount >> $seqres.full
-> > > > +
-> > > > +echo "Shrink fs (small size)"
-> > > > +test_shrink $((t_dblocks-512*1024/dbsize)) || \
-> > > > +	_fail "Shrink fs (small size) failure"
-> > > 
-> > > If it's possible to turn test_shrink to .out file matching way, _fail is
-> > > not needed and below.
-> > 
-> > The same as above. I could try to fix blocksize if the opinion is strong.
-> > 
-> > > 
-> > > > +
-> > > > +echo "Shrink fs (half AG)"
-> > > > +test_shrink $((t_dblocks-agsize/2)) || \
-> > > > +	_fail "Shrink fs (half AG) failure"
-> > > > +
-> > > > +echo "Shrink fs (out-of-bound)"
-> > > > +test_shrink $((t_dblocks-agsize-1)) && \
-> > > > +	_fail "Shrink fs (out-of-bound) failure"
-> > > > +[ $dblocks -ne $((t_dblocks-agsize/2)) ] && \
-> > > > +	_fail "dblocks changed after shrinking failure"
-> > > > +
-> > > > +$XFS_INFO_PROG $SCRATCH_MNT >> $seqres.full
-> > > > +echo "*** done"
-> > > > +
-> > > > +# success, all done
-> > > > +status=0
-> > > > +exit
-> > > > diff --git a/tests/xfs/990.out b/tests/xfs/990.out
-> > > > new file mode 100644
-> > > > index 00000000..812f89ef
-> > > > --- /dev/null
-> > > > +++ b/tests/xfs/990.out
-> > > > @@ -0,0 +1,12 @@
-> > > > +QA output created by 990
-> > > > +Format and mount
-> > > > +meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
-> > > > +data     = bsize=XXX blocks=XXX, imaxpct=PCT
-> > > > +         = sunit=XXX swidth=XXX, unwritten=X
-> > > > +naming   =VERN bsize=XXX
-> > > > +log      =LDEV bsize=XXX blocks=XXX
-> > > > +realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
-> > > > +Shrink fs (small size)
-> > > > +Shrink fs (half AG)
-> > > > +Shrink fs (out-of-bound)
-> > > > +*** done
-> > > > diff --git a/tests/xfs/group b/tests/xfs/group
-> > > > index e861cec9..a7981b67 100644
-> > > > --- a/tests/xfs/group
-> > > > +++ b/tests/xfs/group
-> > > > @@ -525,3 +525,4 @@
-> > > >  525 auto quick mkfs
-> > > >  526 auto quick mkfs
-> > > >  527 auto quick quota
-> > > > +990 auto quick growfs
-> > > 
-> > > Maybe it's time to add a new 'shrinkfs' group?
-> > 
-> > not sure if it needs, since shrinkfs reuses growfs ioctl.
-> 
-> Ok, I have no strong preference on this, just think it's a bit easier to
-> run only shrink tests by ./check -g shrinkfs.
-
-Currently only 2 test cases are available. ok, if that is needed, I could
-add a new shrinkfs group.
-
-(Also noted that xfsprogs patch haven't been merged yet. So I think the
- testcase needs to be formally merged after xfsprogs side is settled.)
-
-Thanks,
-Gao Xiang
-
-> 
-> Thanks,
-> Eryu
-> 
 
