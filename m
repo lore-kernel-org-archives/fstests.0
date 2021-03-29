@@ -2,165 +2,177 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DCC62C433E4
-	for <linux-fstests@archiver.kernel.org>; Mon, 29 Mar 2021 18:07:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CBF2CC433E0
+	for <linux-fstests@archiver.kernel.org>; Mon, 29 Mar 2021 18:21:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8EFC9619AA
-	for <linux-fstests@archiver.kernel.org>; Mon, 29 Mar 2021 18:07:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 828746193A
+	for <linux-fstests@archiver.kernel.org>; Mon, 29 Mar 2021 18:21:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231246AbhC2SGg (ORCPT
+        id S231477AbhC2SVG (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 29 Mar 2021 14:06:36 -0400
-Received: from mail.kernel.org ([198.145.29.99]:40668 "EHLO mail.kernel.org"
+        Mon, 29 Mar 2021 14:21:06 -0400
+Received: from mga11.intel.com ([192.55.52.93]:63208 "EHLO mga11.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S230258AbhC2SGA (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 29 Mar 2021 14:06:00 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 6348661920;
-        Mon, 29 Mar 2021 18:06:00 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1617041160;
-        bh=Bdqgehq28GilCU3F7Jjl2HZQg1haqUTGwmJmzPKfDmc=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=SI6w2kaFHc5GK9cbD9Jb8T5XLyJ3BxemrcciXsSApj/1cSh09oA85z5JNjgJwy8Lk
-         8s90Z7C6OEAt9IosZORYKSowwHI+Emz+O81yjI1OWikXZXT0XDiugqPGS1JTlcdajP
-         fHQ9QgycVcYQb7W21n101WktlCkkJpY3M7x7OCTVOOElAdHzrtHaKobUlh3MWgaxmV
-         6FHHq/Ki6KdhBySJtN7W9pk8nWug/1QpfI13MjLtWa0RDqNmUkkkwliDqhTUb2GOXW
-         8TTUES4MgIm10lb9eigNVKIZ971CVMM+J3GG3049VjyI6YopPp3AMqVahMHHnTD0J5
-         U4vNOvgyL71VQ==
-Date:   Mon, 29 Mar 2021 11:05:59 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Chandan Babu R <chandanrlinux@gmail.com>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 4/6] xfs/532: Fix test to execute in multi-block
- directory config
-Message-ID: <20210329180559.GD4090233@magnolia>
-References: <20210325140857.7145-1-chandanrlinux@gmail.com>
- <20210325140857.7145-4-chandanrlinux@gmail.com>
+        id S231527AbhC2SU6 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 29 Mar 2021 14:20:58 -0400
+IronPort-SDR: 7sggpyIcD5XabmH2Ib5tJt3BN0ct2QBRrySLDq3lgOIQ/A5MwN8NpfVYaUdGFqi8UnD7yg7G1c
+ RYklvQvFW/bw==
+X-IronPort-AV: E=McAfee;i="6000,8403,9938"; a="188337297"
+X-IronPort-AV: E=Sophos;i="5.81,288,1610438400"; 
+   d="scan'208";a="188337297"
+Received: from fmsmga004.fm.intel.com ([10.253.24.48])
+  by fmsmga102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Mar 2021 11:20:58 -0700
+IronPort-SDR: YdQYC2/+NK8xmblWmdvCOCrjsBhTq+rZKoZ2N5GFBHg06rbdIVGYOiQNwq7dUqZVa/kPc51fJN
+ 0yP4wwSHBhHQ==
+X-IronPort-AV: E=Sophos;i="5.81,288,1610438400"; 
+   d="scan'208";a="437997229"
+Received: from iweiny-desk2.sc.intel.com (HELO localhost) ([10.3.52.147])
+  by fmsmga004-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Mar 2021 11:20:58 -0700
+Date:   Mon, 29 Mar 2021 11:20:58 -0700
+From:   Ira Weiny <ira.weiny@intel.com>
+To:     Xiao Yang <yangx.jy@fujitsu.com>
+Cc:     fstests@vger.kernel.org, darrick.wong@oracle.com,
+        lihao2018.fnst@fujitsu.com, david@fromorbit.com, xifeng@redhat.com
+Subject: Re: [PATCH v2 1/2] generic/608: Remove drop cache and umount & mount
+ cycle
+Message-ID: <20210329182058.GY3014244@iweiny-DESK2.sc.intel.com>
+References: <20210329092054.5278-1-yangx.jy@fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210325140857.7145-4-chandanrlinux@gmail.com>
+In-Reply-To: <20210329092054.5278-1-yangx.jy@fujitsu.com>
+User-Agent: Mutt/1.11.1 (2018-12-01)
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Mar 25, 2021 at 07:38:55PM +0530, Chandan Babu R wrote:
-> xfs/532 attempts to create $testfile after reduce_max_iextents error tag is
-> injected. Creation of $testfile fails when using a multi-block directory test
-> configuration because,
-> 1. A directory can have a pseudo maximum extent count of 10.
-> 2. In the worst case a directory entry creation operation can consume
->    (XFS_DA_NODE_MAXDEPTH + 1 + 1) * (Nr fs blocks in a single directory block)
->    extents.
->    With 1k fs block size and 4k directory block size, this evaluates to,
->    (5 + 1 + 1) * 4
->    = 7 * 4
->    = 28
->    > 10 (Pseudo maximum inode extent count).
+On Mon, Mar 29, 2021 at 05:20:53PM +0800, Xiao Yang wrote:
+> Since commit e7bed0b5bc4b, toggling FS_XFLAG_DAX on an existing file can make
+> S_DAX on the file change immediately when all applications close the file.
+> As a result, we don't need the redundant drop cache and umount & mount cycle.
 > 
-> This commit fixes the issue by creating $testfile before injecting
-> reduce_max_iextents error tag.
-> 
-> Reported-by: Darrick J. Wong <djwong@kernel.org>
-> Suggested-by: Darrick J. Wong <djwong@kernel.org>
-> Signed-off-by: Chandan Babu R <chandanrlinux@gmail.com>
+> Signed-off-by: Xiaoli Feng <xifeng@redhat.com>
+> Signed-off-by: Xiao Yang <yangx.jy@fujitsu.com>
 
-Looks ok (and like Eryu says, this could all have been one large patch),
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+LGTM
 
---D
+Reviewed-by: Ira Weiny <ira.weiny@intel.com>
 
 > ---
->  tests/xfs/532     | 17 ++++++++++-------
->  tests/xfs/532.out |  6 +++---
->  2 files changed, 13 insertions(+), 10 deletions(-)
+>  tests/generic/608 | 41 ++++++++++++++++++-----------------------
+>  1 file changed, 18 insertions(+), 23 deletions(-)
 > 
-> diff --git a/tests/xfs/532 b/tests/xfs/532
-> index 1c789217..2bed574a 100755
-> --- a/tests/xfs/532
-> +++ b/tests/xfs/532
-> @@ -63,9 +63,6 @@ for dentry in $(ls -1 $fillerdir/); do
->  	$here/src/punch-alternating $fillerdir/$dentry >> $seqres.full
->  done
+> diff --git a/tests/generic/608 b/tests/generic/608
+> index 861bbff5..d81a2488 100755
+> --- a/tests/generic/608
+> +++ b/tests/generic/608
+> @@ -3,10 +3,10 @@
+>  # Copyright (c) 2020 Fujitsu.  All Rights Reserved.
+>  #
+>  # FS QA Test 608
+> -# Change FS_XFLAG_DAX on an existing file and check if S_DAX on
+> -# the file can take effect immediately by the following steps:
+> -# 1) Stop all applications which are using the file.
+> -# 2) Do drop_caches or umount & mount cycle.
+> +# Toggling FS_XFLAG_DAX on an existing file can make S_DAX on the
+> +# file change immediately when all applications close the file.
+> +# It's a regression test for:
+> +# 'commit e7bed0b5bc4b ("fs: Kill DCACHE_DONTCACHE dentry even if DCACHE_REFERENCED is set")'
 >  
-> -echo "Inject reduce_max_iextents error tag"
-> -_scratch_inject_error reduce_max_iextents 1
+>  seq=`basename $0`
+>  seqres=$RESULT_DIR/$seq
+> @@ -36,7 +36,7 @@ _require_dax_iflag
+>  _require_xfs_io_command "lsattr" "-v"
+>  _require_xfs_io_command "statx" "-r"
+>  
+> -test_drop_caches()
+> +test_enable_dax()
+>  {
+>  	local t_file=$SCRATCH_MNT/testfile
+>  
+> @@ -49,24 +49,19 @@ test_drop_caches()
+>  
+>  	$XFS_IO_PROG -c 'chattr +x' $t_file
+>  	_check_xflag $t_file 1
+> -	_check_s_dax $t_file 0
 > -
->  echo "Inject bmap_alloc_minlen_extent error tag"
->  _scratch_inject_error bmap_alloc_minlen_extent 1
+> -	# One application is using test file and check if S_DAX on
+> -	# the file doesn't take effect immediately by drop_caches
+> -	echo 2 > /proc/sys/vm/drop_caches
+> +	# One application is using test file and S_DAX
+> +	# on the file is not changed immediately
+>  	_check_s_dax $t_file 0
 >  
-> @@ -74,6 +71,9 @@ echo "* Set xattrs"
->  echo "Create \$testfile"
->  touch $testfile
+>  	exec 3<&-
 >  
-> +echo "Inject reduce_max_iextents error tag"
-> +_scratch_inject_error reduce_max_iextents 1
-> +
->  echo "Create xattrs"
->  nr_attrs=$((bsize * 20 / attr_len))
->  for i in $(seq 1 $nr_attrs); do
-> @@ -90,6 +90,9 @@ if (( $naextents > 10 )); then
->  	exit 1
->  fi
+> -	# No application is using test file and check if S_DAX on
+> -	# the file takes effect immediately by drop_caches
+> -	echo 2 > /proc/sys/vm/drop_caches
+> +	# No application is using test file and S_DAX
+> +	# on the file is changed immediately
+>  	_check_s_dax $t_file 1
+>  }
 >  
-> +echo "Disable reduce_max_iextents error tag"
-> +_scratch_inject_error reduce_max_iextents 0
-> +
->  echo "Remove \$testfile"
->  rm $testfile
+> -test_cycle_mount()
+> +test_disable_dax()
+>  {
+> -	local option=$1
+>  	local t_dir=$SCRATCH_MNT/testdir
+>  	local t_file=$t_dir/testfile
 >  
-> @@ -98,9 +101,6 @@ echo "* Remove xattrs"
->  echo "Create \$testfile"
->  touch $testfile
+> @@ -81,29 +76,29 @@ test_cycle_mount()
 >  
-> -echo "Disable reduce_max_iextents error tag"
-> -_scratch_inject_error reduce_max_iextents 0
+>  	$XFS_IO_PROG -c 'chattr -x' $t_file
+>  	_check_xflag $t_file 0
+> +	# One application is using test file and S_DAX
+> +	# on the file is not changed immediately
+>  	_check_s_dax $t_file 1
+>  
+>  	exec 3<&-
+>  
+> -	# No application is using test file and check if S_DAX on
+> -	# the file takes effect immediately by umount & mount
+> -	_scratch_cycle_mount "$option"
+> +	# No application is using test file and S_DAX
+> +	# on the file is changed immediately
+>  	_check_s_dax $t_file 0
+>  }
+>  
+>  do_tests()
+>  {
+>  	local mount_option=$1
+> -	local cycle_mount_option=$2
+>  
+>  	_scratch_mount "$mount_option"
+>  
+>  	# Make sure the root dir doesn't have FS_XFLAG_DAX set before we start.
+>  	$XFS_IO_PROG -c "chattr -x" $SCRATCH_MNT &>> $seqres.full
+>  
+> -	test_drop_caches
 > -
->  echo "Create initial xattr extents"
+> -	test_cycle_mount "$cycle_mount_option"
+> +	# Do test for commit e7bed0b5bc4b
+> +	test_enable_dax
+> +	test_disable_dax
 >  
->  naextents=0
-> @@ -132,7 +132,10 @@ if [[ $? == 0 ]]; then
->  	exit 1
->  fi
+>  	_scratch_unmount
+>  }
+> @@ -111,7 +106,7 @@ do_tests()
+>  _scratch_mkfs >> $seqres.full 2>&1
 >  
-> -rm $testfile && echo "Successfully removed \$testfile"
-> +echo "Disable reduce_max_iextents error tag"
-> +_scratch_inject_error reduce_max_iextents 0
-> +
-> +rm $testfile
+>  # Mount with dax option
+> -do_tests "-o dax=inode" "dax=inode"
+> +do_tests "-o dax=inode"
 >  
->  # success, all done
->  status=0
-> diff --git a/tests/xfs/532.out b/tests/xfs/532.out
-> index 8e19d7bc..db52108f 100644
-> --- a/tests/xfs/532.out
-> +++ b/tests/xfs/532.out
-> @@ -2,17 +2,17 @@ QA output created by 532
->  Format and mount fs
->  Consume free space
->  Create fragmented filesystem
-> -Inject reduce_max_iextents error tag
->  Inject bmap_alloc_minlen_extent error tag
->  * Set xattrs
->  Create $testfile
-> +Inject reduce_max_iextents error tag
->  Create xattrs
->  Verify $testfile's naextent count
-> +Disable reduce_max_iextents error tag
->  Remove $testfile
->  * Remove xattrs
->  Create $testfile
-> -Disable reduce_max_iextents error tag
->  Create initial xattr extents
->  Inject reduce_max_iextents error tag
->  Remove xattr to trigger -EFBIG
-> -Successfully removed $testfile
-> +Disable reduce_max_iextents error tag
+>  # Mount without dax option
+>  export MOUNT_OPTIONS=""
 > -- 
-> 2.29.2
+> 2.21.0
+> 
+> 
 > 
