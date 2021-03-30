@@ -7,18 +7,18 @@ X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 63DD4C433E3
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4EBE6C433E1
 	for <linux-fstests@archiver.kernel.org>; Tue, 30 Mar 2021 22:01:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 563F1619DE
+	by mail.kernel.org (Postfix) with ESMTP id 25546619CF
 	for <linux-fstests@archiver.kernel.org>; Tue, 30 Mar 2021 22:01:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232882AbhC3WAc (ORCPT
+        id S232821AbhC3WAb (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 30 Mar 2021 18:00:32 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:39420 "EHLO
+        Tue, 30 Mar 2021 18:00:31 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:24618 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S232880AbhC3WAO (ORCPT
+        by vger.kernel.org with ESMTP id S232882AbhC3WAO (ORCPT
         <rfc822;fstests@vger.kernel.org>); Tue, 30 Mar 2021 18:00:14 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
         s=mimecast20190719; t=1617141613;
@@ -26,45 +26,45 @@ DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
          to:to:cc:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=nw5o5wizmXgcbuighDLLe6l7zhsYKiO7skt1BP/rbus=;
-        b=OAtMxlKEdsRmeZCDmrQubtkv9JbIOB7hlzSh12aHfTqmZEroaXlaJ+EtvnQ9clG+bt5fIH
-        ILgUSV6O7fI8dXlatLXoM5Y2zNsA344Tq4xJRFXSMsgIiT4HrmARUIGPzN9zd5oW8VvERB
-        lv5s9P4y2kkqRQieYMG3sBHHFzFx12U=
-Received: from mail-wr1-f72.google.com (mail-wr1-f72.google.com
- [209.85.221.72]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-138-de4VHfa1Pf--_qJj4raC9g-1; Tue, 30 Mar 2021 18:00:11 -0400
-X-MC-Unique: de4VHfa1Pf--_qJj4raC9g-1
-Received: by mail-wr1-f72.google.com with SMTP id a15so9173751wrf.19
-        for <fstests@vger.kernel.org>; Tue, 30 Mar 2021 15:00:11 -0700 (PDT)
+        bh=hp8hQWqoEZuTj5KIJ3Tua6tWI5QWBpoTdPdpekFNQRA=;
+        b=L7EmYGKhDGTTDlyiql3ztjhskX5L6KNwmXxF8jNXhhxm6YvBhbXLYv7y0WiH3wOklCP9Aq
+        CuT3wRwSKJEBWqY01Joc45Au1RrSSuKEdUl8WLpxadHFcAY7kgDm6cB/nLhO9R6xOJlQ6S
+        YrFaDe3gArcMH/TjuZNxccSUSK1jQ1o=
+Received: from mail-wr1-f69.google.com (mail-wr1-f69.google.com
+ [209.85.221.69]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-334-oAa7vDmdOcGB_43iKNgv7g-1; Tue, 30 Mar 2021 18:00:10 -0400
+X-MC-Unique: oAa7vDmdOcGB_43iKNgv7g-1
+Received: by mail-wr1-f69.google.com with SMTP id h5so10914843wrr.17
+        for <fstests@vger.kernel.org>; Tue, 30 Mar 2021 15:00:10 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=nw5o5wizmXgcbuighDLLe6l7zhsYKiO7skt1BP/rbus=;
-        b=siX2QmkFfoiyxJqFbL4dWoQ+YM9iBrhVbL+FlMR1efoBOm9FZZtAOcB00kcIfW1491
-         a7yUMWTdAjBjeCScDFuBdFMFOczrXeB3YdvBtRf4Ft4GJLbKpZ7iBNHaq4h78P9+BSQb
-         Ng0zxdW440A2t3Or8oA9uOOkUr0QC2aOk4eiyH9Yr3i89vcQP81fFwfmxxfVL/Jd+4AN
-         7+5HOQJks/71WhK00CDv4N+IZHkb/OMsR1AaNgjLuNFFRhssqL2lws/ih0mReoO0469n
-         kTmX1r/MzSXuZpGrl2AxX4V1XfXENTen0zWsYIvTOOqSMN8Ng3u9qAqaU+4sIRteqYXk
-         mqAQ==
-X-Gm-Message-State: AOAM533FgzfUW9/vI9y6/PE9An6Z6n2C1qkLCcU/Dp0FxMAvV+E15trm
-        ZnQUE1oDHUXxi1yb+XoW/eUYuuMt21ywfsCezkYWuFM06vr2O7M2jCpOzexyx5oVNNPdMEo7W8H
-        Dx/a2eEOlbgtf3+scYrXg+0tnsvuAQjtlzusIiXK4QFlrfbS/9EktKjvQjgGp+O2wg5+v
-X-Received: by 2002:a5d:68cd:: with SMTP id p13mr103136wrw.247.1617141610349;
-        Tue, 30 Mar 2021 15:00:10 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJz3p4NooMCPuNTzCJZB5ItmfPhb1T3PhcG/kWaeg0BA0qZ/YaMIMZcKSPNVsGtk8RW0H90nDg==
-X-Received: by 2002:a5d:68cd:: with SMTP id p13mr103115wrw.247.1617141610100;
-        Tue, 30 Mar 2021 15:00:10 -0700 (PDT)
-Received: from localhost.localdomain.com ([84.19.91.9])
-        by smtp.gmail.com with ESMTPSA id z2sm522894wrm.0.2021.03.30.15.00.09
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        bh=hp8hQWqoEZuTj5KIJ3Tua6tWI5QWBpoTdPdpekFNQRA=;
+        b=tu10ec1Ti0wjCRTzqDwI87ktAxn0tAwIKv7i4/Uvkdy6THxBAcWSXgShlJbGmnQ5u/
+         YDIuJQp24vHVIZ3qZ7FD9WRpTLXI40YjRp/be72PSIMYucZl3Hn9/9m2hpkGNy8AcuhQ
+         6nwnq3wAIqR5WfTu47P3EpRw0o2JRCeSg0b2vnx0BkWlSEh0LkG+SMDHalRQZX7H4My1
+         c5MSWS3kNf0q4Z/7EIu0K/UdIse7BtOMBFdQ3XwfcsNqlj+etUEE7Bh5YCOa2MOpqQTa
+         8/AV7NRoqQmfVjGC4rBqOxmRWXn2UvO+0yvLXVRlW5kKH1Qsjl/nprjkU5Sev9gJ55uL
+         BoBg==
+X-Gm-Message-State: AOAM533cD0LKN/j88sgy7g3LD+2rdnHEcKYFk4S8wXMxuih82v06ke+m
+        zonoeU8k0OKgLA4yVkme1nprOjQdLfxGy4ixKzpM+BN1AeIhRvrdCQfh6Yi8buPwAXKm58Z5mps
+        6eQCjBHBICjtuxOF3tETZWvcSWtUHbOpOutbU/05oUkgBApsGYvS+X7hebOH74q1pUcXL
+X-Received: by 2002:a1c:23c2:: with SMTP id j185mr134704wmj.54.1617141609260;
         Tue, 30 Mar 2021 15:00:09 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJzsdVO2VASFynOPLAEK8APaJN0ePKE19hLQ3dalQCSyvDySVLqQE3+Je0IJ2p6uWBsBAOay2A==
+X-Received: by 2002:a1c:23c2:: with SMTP id j185mr134692wmj.54.1617141609030;
+        Tue, 30 Mar 2021 15:00:09 -0700 (PDT)
+Received: from localhost.localdomain.com ([84.19.91.9])
+        by smtp.gmail.com with ESMTPSA id z2sm522894wrm.0.2021.03.30.15.00.08
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 30 Mar 2021 15:00:08 -0700 (PDT)
 From:   Pavel Reichl <preichl@redhat.com>
 To:     fstests@vger.kernel.org
 Cc:     zlang@redhat.com, guan@eryu.me
-Subject: [PATCH v2 3/4] generic/554: hide permision warning on exfat
-Date:   Wed, 31 Mar 2021 00:00:04 +0200
-Message-Id: <20210330220005.56019-4-preichl@redhat.com>
+Subject: [PATCH v2 2/4] common: hide permision warning from mkswap for exfat
+Date:   Wed, 31 Mar 2021 00:00:03 +0200
+Message-Id: <20210330220005.56019-3-preichl@redhat.com>
 X-Mailer: git-send-email 2.30.2
 In-Reply-To: <20210330220005.56019-1-preichl@redhat.com>
 References: <20210330220005.56019-1-preichl@redhat.com>
@@ -74,50 +74,33 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+exfat does not support posix file permisions, so warning from mkswap is
+inavitable. This patch hides the warning message so the test won't fail.
+
 Signed-off-by: Pavel Reichl <preichl@redhat.com>
 ---
- common/rc         | 13 +++++++++++++
- tests/generic/554 |  3 ++-
- 2 files changed, 15 insertions(+), 1 deletion(-)
+ common/rc | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
 
 diff --git a/common/rc b/common/rc
-index 2d658711..379140ea 100644
+index 9cdfe21c..2d658711 100644
 --- a/common/rc
 +++ b/common/rc
-@@ -2401,6 +2401,19 @@ _format_swapfile() {
- 	fi
- }
- 
-+_format_swapon_file() {
-+	local fname="$1"
-+
+@@ -2392,7 +2392,13 @@ _format_swapfile() {
+ 	# Swap files must be nocow on Btrfs.
+ 	$CHATTR_PROG +C "$fname" > /dev/null 2>&1
+ 	_pwrite_byte 0x61 0 "$sz" "$fname" >> $seqres.full
+-	$MKSWAP_PROG "$fname" >> $seqres.full
 +	if [ "$FSTYP" = "exfat" ]; then
 +		# exfat does not support posix file permisions, so warning is
 +		# to be expected
-+		swapon "$fname" |& grep -v "insecure permissions"
++		$MKSWAP_PROG "$fname" 2>&1 | grep -v 'insecure permission' >> $seqres.full
 +	else
-+		swapon "$fname"
++		$MKSWAP_PROG "$fname" >> $seqres.full
 +	fi
-+
-+}
-+
+ }
+ 
  # Check that the filesystem supports swapfiles
- _require_scratch_swapfile()
- {
-diff --git a/tests/generic/554 b/tests/generic/554
-index fa4f97d2..c2f9eee8 100755
---- a/tests/generic/554
-+++ b/tests/generic/554
-@@ -46,7 +46,8 @@ $XFS_IO_PROG -f -c "pwrite -S 0x61 0 128k" $SCRATCH_MNT/file >> $seqres.full 2>&
- 
- echo swap files return ETXTBUSY
- _format_swapfile $SCRATCH_MNT/swapfile 16m
--swapon $SCRATCH_MNT/swapfile
-+_format_swapon_file $SCRATCH_MNT/swapfile
-+
- $XFS_IO_PROG -f -c "copy_range -l 32k $SCRATCH_MNT/file" $SCRATCH_MNT/swapfile
- swapoff $SCRATCH_MNT/swapfile
- 
 -- 
 2.30.2
 
