@@ -2,105 +2,119 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6B46EC433E0
-	for <linux-fstests@archiver.kernel.org>; Tue, 30 Mar 2021 03:50:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A9908C433C1
+	for <linux-fstests@archiver.kernel.org>; Tue, 30 Mar 2021 04:55:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3C4A261954
-	for <linux-fstests@archiver.kernel.org>; Tue, 30 Mar 2021 03:50:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 74FDB61580
+	for <linux-fstests@archiver.kernel.org>; Tue, 30 Mar 2021 04:55:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230247AbhC3Dtq (ORCPT
+        id S229755AbhC3EzX (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 29 Mar 2021 23:49:46 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48282 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229483AbhC3DtV (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 29 Mar 2021 23:49:21 -0400
-Received: from mail-pj1-x102d.google.com (mail-pj1-x102d.google.com [IPv6:2607:f8b0:4864:20::102d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8E54AC061762;
-        Mon, 29 Mar 2021 20:49:20 -0700 (PDT)
-Received: by mail-pj1-x102d.google.com with SMTP id q6-20020a17090a4306b02900c42a012202so6965026pjg.5;
-        Mon, 29 Mar 2021 20:49:20 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=references:user-agent:from:to:cc:subject:in-reply-to:date
-         :message-id:mime-version;
-        bh=V8m/um/4qjFcW1pUXm5A1pzJvlUXU4Btq+wdKVMzb+0=;
-        b=nMH6z/whDTyjxV/NdgnguKy9/6a5l9iYAfUQ1LfMr4y1hILGkHH237pAaaVFQznRJx
-         HSbGN8E7agSkya5CSsFePtpK7BhAPs6LxUUHQe2hwVVcWz/cDKmtwXIGCreCKB12eCxj
-         tDoG4GUD/oGbnvzBtCs+qtwvvWpYNNGSD+3edPJvtDg2zQzz0LY4FaHGXUyVt9+m0i5k
-         953PPGzZJm/IAjU9+7d3ugx1eWPTebeLV2QdlAJvFMFRgkgc6GjUynfK3AnFrui2ZPr5
-         /mbEhQPmlVxXFDN+wvkbAV9TPIETsaDVFvTTl+0kpcPEz5f9FZ/n8VIIK1/Nc/WTGyFd
-         5TeA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:references:user-agent:from:to:cc:subject
-         :in-reply-to:date:message-id:mime-version;
-        bh=V8m/um/4qjFcW1pUXm5A1pzJvlUXU4Btq+wdKVMzb+0=;
-        b=d6PV4FQqZyYV7lsRhDiYf4TXTZsxENdbCEqRnWvxrIPyCSLiLzJWdz11/3xFe/fuyL
-         vI6tOoyF5UY0/myQEu8m1/LcC1NQFX4lNrIwTKHFQ0Z9GrVGfoEJ2oJMAQqxDGNqknB/
-         VmvU2AJlY1xPo2naPkOzW9KCv1R9ekFZEraMxC2eSNs68J5qQ69DQL7c3GIduZypp8+A
-         4zLWHFXcAkjw0SsMMBPfLlM85i79tBXSDkoDFsnnRCZntccMP2d2rr/ZF8BqKNaW5x/d
-         BtwVkgfs/rFSWrhPJBHxxIzr6rpDR6sfDME5SsW4+u8RIuIzMku9Kt8zifIBIGEwIVlC
-         hosg==
-X-Gm-Message-State: AOAM533EWdc5Uqg0vWCMFpzD7ndhF+tQLmtF0nfi3rDPzHnMed6JpdOG
-        5NBm+wASDJ41qLt/XMOk7gfhT3MK51c=
-X-Google-Smtp-Source: ABdhPJyaS5XQpSHvt5xbb2BK5TWjkvK9k1wtecCnlbIrMYqJ7n2Zih9ZhTy72yng5uc4y0k47L02Ng==
-X-Received: by 2002:a17:90a:9309:: with SMTP id p9mr2377634pjo.174.1617076160064;
-        Mon, 29 Mar 2021 20:49:20 -0700 (PDT)
-Received: from garuda ([122.172.178.88])
-        by smtp.gmail.com with ESMTPSA id u79sm19539371pfc.207.2021.03.29.20.49.18
-        (version=TLS1_2 cipher=ECDHE-ECDSA-CHACHA20-POLY1305 bits=256/256);
-        Mon, 29 Mar 2021 20:49:19 -0700 (PDT)
-References: <20210325140857.7145-1-chandanrlinux@gmail.com> <20210325140857.7145-6-chandanrlinux@gmail.com> <20210329180627.GF4090233@magnolia>
-User-agent: mu4e 1.0; emacs 26.1
-From:   Chandan Babu R <chandanrlinux@gmail.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 6/6] xfs/535: Fix test to execute in multi-block directory config
-In-reply-to: <20210329180627.GF4090233@magnolia>
-Date:   Tue, 30 Mar 2021 09:19:16 +0530
-Message-ID: <878s65b8sj.fsf@garuda>
+        Tue, 30 Mar 2021 00:55:23 -0400
+Received: from mail.kernel.org ([198.145.29.99]:59558 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S229737AbhC3EzW (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 30 Mar 2021 00:55:22 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id E3EBE61919;
+        Tue, 30 Mar 2021 04:55:21 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1617080122;
+        bh=+fz0CJxxvNknCCyXc5N1GxfBWM39yHSq95kNYCDmZV4=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=Hu7KSZGylP+IuyPQ66gKicRsNSrN4UjGxoWIKVBJg3a1utW8UK2zA5txdPD/D4cbz
+         fGlF2wwt3JVq6O8oxsa+fh62XuSRF1xCLaH1Qves1gBDbVK9WYpRBfP2TuFXDOu1gF
+         D8JRmXr4IBssjcZj7l+WvJtD3RDm7eI+wcQgHNY54OhoMu5OP9+FZ8t+xVnZqfFt6s
+         IEn39HC5qSDHY+ZwYGQI8yuvHMqLAldlTYDNv3mdedc7wU+MIv+UkTun7m1XohGReL
+         w78lQacz/+F5O872Wjv4EZ1BaJruPcYkb1sc8kuTFBZfybaayKfvfn/7UuWmkTWJK8
+         iyiQc2WhE5g6Q==
+Date:   Mon, 29 Mar 2021 21:55:21 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH v2] generic/233,270: unlimit the max locked memory size
+ for io_uring
+Message-ID: <20210330045521.GT1670408@magnolia>
+References: <20210330005942.536259-1-zlang@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210330005942.536259-1-zlang@redhat.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 29 Mar 2021 at 23:36, Darrick J. Wong wrote:
-> On Thu, Mar 25, 2021 at 07:38:57PM +0530, Chandan Babu R wrote:
->> xfs/535 attempts to create $srcfile and $dstfile after reduce_max_iextents
->> error tag is injected. Creation of these files fails when using a multi-block
->> directory test configuration because,
->> 1. A directory can have a pseudo maximum extent count of 10.
->> 2. In the worst case a directory entry creation operation can consume
->>    (XFS_DA_NODE_MAXDEPTH + 1 + 1) * (Nr fs blocks in a single directory block)
->>    extents.
->>    With 1k fs block size and 4k directory block size, this evaluates to,
->>    (5 + 1 + 1) * 4
->>    = 7 * 4
->>    = 28
->>    > 10 (Pseudo maximum inode extent count).
->> 
->> This commit fixes the issue by creating $srcfile and $dstfile before injecting
->> reduce_max_iextents error tag.
->> 
->> Reported-by: Darrick J. Wong <djwong@kernel.org>
->> Suggested-by: Darrick J. Wong <djwong@kernel.org>
->> Signed-off-by: Chandan Babu R <chandanrlinux@gmail.com>
->
-> Now on to the xfs/538 regressions! ;)
+On Tue, Mar 30, 2021 at 08:59:42AM +0800, Zorro Lang wrote:
+> The ltp/fsstress always fails on io_uring_queue_init() by returnning
+> ENOMEM. Due to io_uring accounts memory it needs under the rlimit
+> memlocked option, which can be quite low on some setups, especially
+> on 64K pagesize machine. root isn't under this restriction, but
+> regular users are. So only g/233 and g/270 which use $qa_user to run
+> fsstress are failed.
+> 
+> To avoid this failure, set max locked memory to unlimited before doing
+> fsstress, then restore it after test done.
+> 
+> Signed-off-by: Zorro Lang <zlang@redhat.com>
+> ---
+> 
+> Hi,
+> 
+> V2 removed `ulimit -l $lmem`, due to each case runs in child process, won't
+> affect other testing.
+> 
+> Thanks,
+> Zorro
+> 
+>  tests/generic/233 | 6 ++++++
+>  tests/generic/270 | 6 ++++++
+>  2 files changed, 12 insertions(+)
+> 
+> diff --git a/tests/generic/233 b/tests/generic/233
+> index 7eda5774..cc794c79 100755
+> --- a/tests/generic/233
+> +++ b/tests/generic/233
+> @@ -43,6 +43,12 @@ _fsstress()
+>  -f rename=10 -f fsync=2 -f write=15 -f dwrite=15 \
+>  -n $count -d $out -p 7`
+>  
+> +	# io_uring accounts memory it needs under the rlimit memlocked option,
+> +	# which can be quite low on some setups (especially 64K pagesize). root
+> +	# isn't under this restriction, but regular users are. To avoid the
+> +	# io_uring_queue_init fail on ENOMEM, set max locked memory to unlimited
+> +	# temporarily.
+> +	ulimit -l unlimited
+>  	echo "fsstress $args" >> $seqres.full
+>  	if ! su $qa_user -c "$FSSTRESS_PROG $args" | tee -a $seqres.full | _filter_num
 
-Yup, I am working on them.
+/me kinda feels like this should be refactored into a common helper, but
+somehow when I try to picture that in my head all I can see is a
+screeching nightmare of bash goop so feel free to ignore me. :)
 
-> Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+--D
 
-Thanks for the review! I will fold patches 2 to 6 into a single patch and
-repost.
-
--- 
-chandan
+>  	then
+> diff --git a/tests/generic/270 b/tests/generic/270
+> index 3d8656d4..e93940ef 100755
+> --- a/tests/generic/270
+> +++ b/tests/generic/270
+> @@ -37,6 +37,12 @@ _workout()
+>  	cp $FSSTRESS_PROG  $tmp.fsstress.bin
+>  	$SETCAP_PROG cap_chown=epi  $tmp.fsstress.bin
+>  
+> +	# io_uring accounts memory it needs under the rlimit memlocked option,
+> +	# which can be quite low on some setups (especially 64K pagesize). root
+> +	# isn't under this restriction, but regular users are. To avoid the
+> +	# io_uring_queue_init fail on ENOMEM, set max locked memory to unlimited
+> +	# temporarily.
+> +	ulimit -l unlimited
+>  	(su $qa_user -c "$tmp.fsstress.bin $args" &) > /dev/null 2>&1
+>  
+>  	echo "Run dd writers in parallel"
+> -- 
+> 2.30.2
+> 
