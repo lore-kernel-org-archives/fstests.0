@@ -2,119 +2,128 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-15.2 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A9908C433C1
-	for <linux-fstests@archiver.kernel.org>; Tue, 30 Mar 2021 04:55:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F0342C433DB
+	for <linux-fstests@archiver.kernel.org>; Tue, 30 Mar 2021 04:58:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 74FDB61580
-	for <linux-fstests@archiver.kernel.org>; Tue, 30 Mar 2021 04:55:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B1B4261999
+	for <linux-fstests@archiver.kernel.org>; Tue, 30 Mar 2021 04:58:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229755AbhC3EzX (ORCPT
+        id S229630AbhC3E5l (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 30 Mar 2021 00:55:23 -0400
-Received: from mail.kernel.org ([198.145.29.99]:59558 "EHLO mail.kernel.org"
+        Tue, 30 Mar 2021 00:57:41 -0400
+Received: from mga02.intel.com ([134.134.136.20]:26900 "EHLO mga02.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229737AbhC3EzW (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 30 Mar 2021 00:55:22 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id E3EBE61919;
-        Tue, 30 Mar 2021 04:55:21 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1617080122;
-        bh=+fz0CJxxvNknCCyXc5N1GxfBWM39yHSq95kNYCDmZV4=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=Hu7KSZGylP+IuyPQ66gKicRsNSrN4UjGxoWIKVBJg3a1utW8UK2zA5txdPD/D4cbz
-         fGlF2wwt3JVq6O8oxsa+fh62XuSRF1xCLaH1Qves1gBDbVK9WYpRBfP2TuFXDOu1gF
-         D8JRmXr4IBssjcZj7l+WvJtD3RDm7eI+wcQgHNY54OhoMu5OP9+FZ8t+xVnZqfFt6s
-         IEn39HC5qSDHY+ZwYGQI8yuvHMqLAldlTYDNv3mdedc7wU+MIv+UkTun7m1XohGReL
-         w78lQacz/+F5O872Wjv4EZ1BaJruPcYkb1sc8kuTFBZfybaayKfvfn/7UuWmkTWJK8
-         iyiQc2WhE5g6Q==
-Date:   Mon, 29 Mar 2021 21:55:21 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH v2] generic/233,270: unlimit the max locked memory size
- for io_uring
-Message-ID: <20210330045521.GT1670408@magnolia>
-References: <20210330005942.536259-1-zlang@redhat.com>
+        id S230346AbhC3E5P (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 30 Mar 2021 00:57:15 -0400
+IronPort-SDR: aT6KsJEOKIsnWiypA7wKvBVD/KzxVfDkNAMhsBaupszPWPzQqO4olkWyTVeHI+eBPXXODLS6kw
+ qBNnEfWmgvYQ==
+X-IronPort-AV: E=McAfee;i="6000,8403,9938"; a="178821381"
+X-IronPort-AV: E=Sophos;i="5.81,289,1610438400"; 
+   d="scan'208";a="178821381"
+Received: from fmsmga001.fm.intel.com ([10.253.24.23])
+  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Mar 2021 21:57:14 -0700
+IronPort-SDR: 4LpWujFsvq2hs6VoHf7R2d8Tqv32p0d1o8HhCHml2GqUDNhXySVlhOgHr3n615iitPiUP29f/z
+ YOtsJStdXtZQ==
+X-IronPort-AV: E=Sophos;i="5.81,289,1610438400"; 
+   d="scan'208";a="516284385"
+Received: from iweiny-desk2.sc.intel.com (HELO localhost) ([10.3.52.147])
+  by fmsmga001-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Mar 2021 21:57:13 -0700
+Date:   Mon, 29 Mar 2021 21:57:13 -0700
+From:   Ira Weiny <ira.weiny@intel.com>
+To:     Xiao Yang <yangx.jy@fujitsu.com>
+Cc:     fstests@vger.kernel.org, darrick.wong@oracle.com,
+        lihao2018.fnst@fujitsu.com, david@fromorbit.com, xifeng@redhat.com
+Subject: Re: [PATCH v3 2/2] generic/608: Add new regression test
+Message-ID: <20210330045713.GC3014244@iweiny-DESK2.sc.intel.com>
+References: <20210330020655.7310-1-yangx.jy@fujitsu.com>
+ <20210330020655.7310-2-yangx.jy@fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210330005942.536259-1-zlang@redhat.com>
+In-Reply-To: <20210330020655.7310-2-yangx.jy@fujitsu.com>
+User-Agent: Mutt/1.11.1 (2018-12-01)
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Mar 30, 2021 at 08:59:42AM +0800, Zorro Lang wrote:
-> The ltp/fsstress always fails on io_uring_queue_init() by returnning
-> ENOMEM. Due to io_uring accounts memory it needs under the rlimit
-> memlocked option, which can be quite low on some setups, especially
-> on 64K pagesize machine. root isn't under this restriction, but
-> regular users are. So only g/233 and g/270 which use $qa_user to run
-> fsstress are failed.
+On Tue, Mar 30, 2021 at 10:06:55AM +0800, Xiao Yang wrote:
+> Write data into a file and then enable DAX on the file immediately,
+> the written data which is still in the buffer should be synchronized
+> to disk instead of discarded when the corresponding inode is evicted.
 > 
-> To avoid this failure, set max locked memory to unlimited before doing
-> fsstress, then restore it after test done.
+> It's a regression test for commit 88149082bb8e.
 > 
-> Signed-off-by: Zorro Lang <zlang@redhat.com>
+> Signed-off-by: Xiao Yang <yangx.jy@fujitsu.com>
+
+LGTM
+
+Reviewed-by: Ira Weiny <ira.weiny@intel.com>
+
 > ---
+>  tests/generic/608 | 29 +++++++++++++++++++++++++++++
+>  1 file changed, 29 insertions(+)
 > 
-> Hi,
-> 
-> V2 removed `ulimit -l $lmem`, due to each case runs in child process, won't
-> affect other testing.
-> 
-> Thanks,
-> Zorro
-> 
->  tests/generic/233 | 6 ++++++
->  tests/generic/270 | 6 ++++++
->  2 files changed, 12 insertions(+)
-> 
-> diff --git a/tests/generic/233 b/tests/generic/233
-> index 7eda5774..cc794c79 100755
-> --- a/tests/generic/233
-> +++ b/tests/generic/233
-> @@ -43,6 +43,12 @@ _fsstress()
->  -f rename=10 -f fsync=2 -f write=15 -f dwrite=15 \
->  -n $count -d $out -p 7`
+> diff --git a/tests/generic/608 b/tests/generic/608
+> index 5ca2442f..c5bdac32 100755
+> --- a/tests/generic/608
+> +++ b/tests/generic/608
+> @@ -7,6 +7,12 @@
+>  # file change immediately when all applications close the file.
+>  # It's a regression test for:
+>  # 'commit 77573fa310d9 ("fs: Kill DCACHE_DONTCACHE dentry even if DCACHE_REFERENCED is set")'
+> +#
+> +# Write data into a file and then enable DAX on the file immediately,
+> +# the written data which is still in the buffer should be synchronized
+> +# to disk instead of discarded when the corresponding inode is evicted.
+> +# It's a regression test for:
+> +# 'commit 88149082bb8e ("fs: Handle I_DONTCACHE in iput_final() instead of generic_drop_inode()"'
 >  
-> +	# io_uring accounts memory it needs under the rlimit memlocked option,
-> +	# which can be quite low on some setups (especially 64K pagesize). root
-> +	# isn't under this restriction, but regular users are. To avoid the
-> +	# io_uring_queue_init fail on ENOMEM, set max locked memory to unlimited
-> +	# temporarily.
-> +	ulimit -l unlimited
->  	echo "fsstress $args" >> $seqres.full
->  	if ! su $qa_user -c "$FSSTRESS_PROG $args" | tee -a $seqres.full | _filter_num
-
-/me kinda feels like this should be refactored into a common helper, but
-somehow when I try to picture that in my head all I can see is a
-screeching nightmare of bash goop so feel free to ignore me. :)
-
---D
-
->  	then
-> diff --git a/tests/generic/270 b/tests/generic/270
-> index 3d8656d4..e93940ef 100755
-> --- a/tests/generic/270
-> +++ b/tests/generic/270
-> @@ -37,6 +37,12 @@ _workout()
->  	cp $FSSTRESS_PROG  $tmp.fsstress.bin
->  	$SETCAP_PROG cap_chown=epi  $tmp.fsstress.bin
+>  seq=`basename $0`
+>  seqres=$RESULT_DIR/$seq
+> @@ -87,6 +93,26 @@ test_disable_dax()
+>  	_check_s_dax $t_file 0
+>  }
 >  
-> +	# io_uring accounts memory it needs under the rlimit memlocked option,
-> +	# which can be quite low on some setups (especially 64K pagesize). root
-> +	# isn't under this restriction, but regular users are. To avoid the
-> +	# io_uring_queue_init fail on ENOMEM, set max locked memory to unlimited
-> +	# temporarily.
-> +	ulimit -l unlimited
->  	(su $qa_user -c "$tmp.fsstress.bin $args" &) > /dev/null 2>&1
+> +test_buffered_data_lost()
+> +{
+> +	local t_file=$SCRATCH_MNT/datafile
+> +
+> +	# Write data into a file
+> +	echo "Buffered data" > $t_file
+> +
+> +	# Then enable DAX on the file immediately
+> +	$XFS_IO_PROG -c 'chattr +x' $t_file
+> +
+> +	# Without commit 77573fa310d9, ensure inode can
+> +	# be evicted by drop_caches
+> +	echo 2 > /proc/sys/vm/drop_caches
+> +
+> +	# The written data which is still in the buffer should not be lost
+> +	grep -q "Buffered data" $t_file || echo "Buffered data is lost"
+> +
+> +	rm -f $t_file
+> +}
+> +
+>  do_tests()
+>  {
+>  	local mount_option=$1
+> @@ -100,6 +126,9 @@ do_tests()
+>  	test_enable_dax
+>  	test_disable_dax
 >  
->  	echo "Run dd writers in parallel"
+> +	# Do test for commit 88149082bb8e
+> +	test_buffered_data_lost
+> +
+>  	_scratch_unmount
+>  }
+>  
 > -- 
-> 2.30.2
+> 2.21.0
+> 
+> 
 > 
