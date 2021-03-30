@@ -2,128 +2,109 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.2 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F0342C433DB
-	for <linux-fstests@archiver.kernel.org>; Tue, 30 Mar 2021 04:58:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1FD79C433DB
+	for <linux-fstests@archiver.kernel.org>; Tue, 30 Mar 2021 22:01:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B1B4261999
-	for <linux-fstests@archiver.kernel.org>; Tue, 30 Mar 2021 04:58:18 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E55B761996
+	for <linux-fstests@archiver.kernel.org>; Tue, 30 Mar 2021 22:01:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229630AbhC3E5l (ORCPT
+        id S232825AbhC3WAa (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 30 Mar 2021 00:57:41 -0400
-Received: from mga02.intel.com ([134.134.136.20]:26900 "EHLO mga02.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S230346AbhC3E5P (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 30 Mar 2021 00:57:15 -0400
-IronPort-SDR: aT6KsJEOKIsnWiypA7wKvBVD/KzxVfDkNAMhsBaupszPWPzQqO4olkWyTVeHI+eBPXXODLS6kw
- qBNnEfWmgvYQ==
-X-IronPort-AV: E=McAfee;i="6000,8403,9938"; a="178821381"
-X-IronPort-AV: E=Sophos;i="5.81,289,1610438400"; 
-   d="scan'208";a="178821381"
-Received: from fmsmga001.fm.intel.com ([10.253.24.23])
-  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Mar 2021 21:57:14 -0700
-IronPort-SDR: 4LpWujFsvq2hs6VoHf7R2d8Tqv32p0d1o8HhCHml2GqUDNhXySVlhOgHr3n615iitPiUP29f/z
- YOtsJStdXtZQ==
-X-IronPort-AV: E=Sophos;i="5.81,289,1610438400"; 
-   d="scan'208";a="516284385"
-Received: from iweiny-desk2.sc.intel.com (HELO localhost) ([10.3.52.147])
-  by fmsmga001-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Mar 2021 21:57:13 -0700
-Date:   Mon, 29 Mar 2021 21:57:13 -0700
-From:   Ira Weiny <ira.weiny@intel.com>
-To:     Xiao Yang <yangx.jy@fujitsu.com>
-Cc:     fstests@vger.kernel.org, darrick.wong@oracle.com,
-        lihao2018.fnst@fujitsu.com, david@fromorbit.com, xifeng@redhat.com
-Subject: Re: [PATCH v3 2/2] generic/608: Add new regression test
-Message-ID: <20210330045713.GC3014244@iweiny-DESK2.sc.intel.com>
-References: <20210330020655.7310-1-yangx.jy@fujitsu.com>
- <20210330020655.7310-2-yangx.jy@fujitsu.com>
+        Tue, 30 Mar 2021 18:00:30 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:33439 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S232842AbhC3WAL (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 30 Mar 2021 18:00:11 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1617141610;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=A2MAf3ZxCpGaLy6r3LCZjoqm2+WC8j5lGIvgUIyj4GE=;
+        b=VKWUArdwsC9Oa2Q22JliksFqyzAFCDDMrg/C1imA1IQZqvCccBX6ouQxuUpbnGJS2XyQ3Q
+        eIbDFvYsTVYeULkumnoiKkRyQ789nkgoYWzYSaVqxOOqIx70SpVRwTZSo3e3Hh5C5wkNb+
+        h561d+WOMmOr+Askq9EgZJ1tP3Q+FK0=
+Received: from mail-wr1-f70.google.com (mail-wr1-f70.google.com
+ [209.85.221.70]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-387-hV1PKhiAM4mJp3VZ17bqqQ-1; Tue, 30 Mar 2021 18:00:08 -0400
+X-MC-Unique: hV1PKhiAM4mJp3VZ17bqqQ-1
+Received: by mail-wr1-f70.google.com with SMTP id o11so10961430wrc.4
+        for <fstests@vger.kernel.org>; Tue, 30 Mar 2021 15:00:08 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=A2MAf3ZxCpGaLy6r3LCZjoqm2+WC8j5lGIvgUIyj4GE=;
+        b=mhczCIW01HJ2xnldDGKqn4bXuHU4bUc93KMsp0MEPjxKyWmAoJt9fv0fFMp0aFVPCS
+         tSxn07hfjbKR4mS4Y6FLJ/WwLbM9/7ZCGoTvwPJzh65FLQ0Gb0nQJ85+SY5lYOY7Dn21
+         OhgcSX+pMwk5BeFRDYlQY8Xg8R0xWJnZ1Vy2A+zr9YqAKG67nVHH0rQ6RW3KlcjJaDc9
+         hEQbea0fshPCpgERMMYM16JfPqV31QYJwhQV4uzjjdCWKUJ5PMQn6IcLrkJHHtp7kjOJ
+         D840KZERA453FSJaiSCxbgbxGCCmLL1C0z9DW7Nr6Ma0B0elJaxaNC+mvpvZniCraaxZ
+         SKhg==
+X-Gm-Message-State: AOAM531OUmhuwTBeiFf1ps3fh/RVziWNGWgpVHjwort45pREFO/kUW2o
+        4bJwwLZn1lvAeYh3ia/DvfXmc/bZ/1Vce0yJO3faCbya0ak4S4uZf0VLpp/eGh4KmBNmEH/rt7D
+        Xu31R7VhJchUdb+QqD5JChVFCIazcueqZVNet7K2VlHcUmcdqDC3wxoUzegSRMi9kfKET
+X-Received: by 2002:a5d:4521:: with SMTP id j1mr121003wra.354.1617141607294;
+        Tue, 30 Mar 2021 15:00:07 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJwAjByjsMT/Nb9V18WHvLDhcYHPD/vcGRh1YAJa6nBQsDxSXMqYqOdZ3GGSsw9QF4RBGdM0uw==
+X-Received: by 2002:a5d:4521:: with SMTP id j1mr120990wra.354.1617141607147;
+        Tue, 30 Mar 2021 15:00:07 -0700 (PDT)
+Received: from localhost.localdomain.com ([84.19.91.9])
+        by smtp.gmail.com with ESMTPSA id z2sm522894wrm.0.2021.03.30.15.00.06
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 30 Mar 2021 15:00:06 -0700 (PDT)
+From:   Pavel Reichl <preichl@redhat.com>
+To:     fstests@vger.kernel.org
+Cc:     zlang@redhat.com, guan@eryu.me
+Subject: [PATCH v2 0/4] Fix some tests that fail for exfat FS
+Date:   Wed, 31 Mar 2021 00:00:01 +0200
+Message-Id: <20210330220005.56019-1-preichl@redhat.com>
+X-Mailer: git-send-email 2.30.2
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210330020655.7310-2-yangx.jy@fujitsu.com>
-User-Agent: Mutt/1.11.1 (2018-12-01)
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Mar 30, 2021 at 10:06:55AM +0800, Xiao Yang wrote:
-> Write data into a file and then enable DAX on the file immediately,
-> the written data which is still in the buffer should be synchronized
-> to disk instead of discarded when the corresponding inode is evicted.
-> 
-> It's a regression test for commit 88149082bb8e.
-> 
-> Signed-off-by: Xiao Yang <yangx.jy@fujitsu.com>
+Mostly just do not run test that require posix permissions and ownership.
 
-LGTM
+Changes in V2 (Thank you for comments on version 1)
 
-Reviewed-by: Ira Weiny <ira.weiny@intel.com>
+* Merged patch #1 and #2 (the one introducing the helper and the other actually
+ using them)
+* Fixed generic/597 by introducing _require_symlink
+* Fixed generic/598 by adding _require_chmod
+  ** changes are part of patch #1
+* Introduced _format_swapon_file()
 
-> ---
->  tests/generic/608 | 29 +++++++++++++++++++++++++++++
->  1 file changed, 29 insertions(+)
-> 
-> diff --git a/tests/generic/608 b/tests/generic/608
-> index 5ca2442f..c5bdac32 100755
-> --- a/tests/generic/608
-> +++ b/tests/generic/608
-> @@ -7,6 +7,12 @@
->  # file change immediately when all applications close the file.
->  # It's a regression test for:
->  # 'commit 77573fa310d9 ("fs: Kill DCACHE_DONTCACHE dentry even if DCACHE_REFERENCED is set")'
-> +#
-> +# Write data into a file and then enable DAX on the file immediately,
-> +# the written data which is still in the buffer should be synchronized
-> +# to disk instead of discarded when the corresponding inode is evicted.
-> +# It's a regression test for:
-> +# 'commit 88149082bb8e ("fs: Handle I_DONTCACHE in iput_final() instead of generic_drop_inode()"'
->  
->  seq=`basename $0`
->  seqres=$RESULT_DIR/$seq
-> @@ -87,6 +93,26 @@ test_disable_dax()
->  	_check_s_dax $t_file 0
->  }
->  
-> +test_buffered_data_lost()
-> +{
-> +	local t_file=$SCRATCH_MNT/datafile
-> +
-> +	# Write data into a file
-> +	echo "Buffered data" > $t_file
-> +
-> +	# Then enable DAX on the file immediately
-> +	$XFS_IO_PROG -c 'chattr +x' $t_file
-> +
-> +	# Without commit 77573fa310d9, ensure inode can
-> +	# be evicted by drop_caches
-> +	echo 2 > /proc/sys/vm/drop_caches
-> +
-> +	# The written data which is still in the buffer should not be lost
-> +	grep -q "Buffered data" $t_file || echo "Buffered data is lost"
-> +
-> +	rm -f $t_file
-> +}
-> +
->  do_tests()
->  {
->  	local mount_option=$1
-> @@ -100,6 +126,9 @@ do_tests()
->  	test_enable_dax
->  	test_disable_dax
->  
-> +	# Do test for commit 88149082bb8e
-> +	test_buffered_data_lost
-> +
->  	_scratch_unmount
->  }
->  
-> -- 
-> 2.21.0
-> 
-> 
-> 
+
+Pavel Reichl (4):
+  common/rc: Add _require_{chown,chmod,symlink}()
+  common: hide permision warning from mkswap for exfat
+  generic/554: hide permision warning on exfat
+  generic/003: Amend the test for exfat
+
+ common/rc         | 48 ++++++++++++++++++++++++++++++++++++++++++++++-
+ tests/generic/003 | 29 +++++++++++++++++++---------
+ tests/generic/087 |  1 +
+ tests/generic/088 |  1 +
+ tests/generic/125 |  1 +
+ tests/generic/126 |  1 +
+ tests/generic/128 |  1 +
+ tests/generic/193 |  1 +
+ tests/generic/314 |  1 +
+ tests/generic/317 |  1 +
+ tests/generic/355 |  1 +
+ tests/generic/554 |  3 ++-
+ tests/generic/597 |  1 +
+ tests/generic/598 |  1 +
+ 14 files changed, 80 insertions(+), 11 deletions(-)
+
+-- 
+2.30.2
+
