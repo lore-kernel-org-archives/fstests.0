@@ -2,189 +2,112 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 57D23C433E3
-	for <linux-fstests@archiver.kernel.org>; Wed, 31 Mar 2021 01:09:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2A135C433DB
+	for <linux-fstests@archiver.kernel.org>; Wed, 31 Mar 2021 07:18:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3C033619CF
-	for <linux-fstests@archiver.kernel.org>; Wed, 31 Mar 2021 01:09:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EC578619AB
+	for <linux-fstests@archiver.kernel.org>; Wed, 31 Mar 2021 07:18:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233067AbhCaBJX (ORCPT
+        id S231523AbhCaHRn (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 30 Mar 2021 21:09:23 -0400
-Received: from mail.kernel.org ([198.145.29.99]:42364 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S232892AbhCaBIz (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 30 Mar 2021 21:08:55 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id B3E0361953;
-        Wed, 31 Mar 2021 01:08:54 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1617152934;
-        bh=EUtYJujld5xMWf0YgJU+o1zPR1fKikX1eGVwQtc9oDo=;
-        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=hpUgDeRtJTnws6nQY/tOadOuYQri//sFXcUT+6GQwPKEK+eR53U9j79aD+rvFg5qI
-         jSKw8iu+GWpLsx7/jF4yfaKouvJeDbbFk4pzhaGHodMt2VppcemdjrqEAqO9+zULaa
-         ZN6vOZC7fK3dvUlckKZbia9MshvYLLUijh5+PRlHN+7nD/yiOgHYDKa2dmn0SdSosR
-         mVavGpIJbMmuWGvK+9NEbN31vyApgv+lSfsf69qh2/jzjEl/4sadx1orWK6dUYzYLy
-         /oU4+hvMC8zr5GgAzY/ftqsHM+1UxejIHB0XUZ2aXma2MM9K3YCS2/M2gt/hF0WkuB
-         MLQWN/dEOZLDQ==
-Subject: [PATCH 3/4] xfs: detect time limits from filesystem
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     djwong@kernel.org, guaneryu@gmail.com
-Cc:     Amir Goldstein <amir73il@gmail.com>, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org, guan@eryu.me
-Date:   Tue, 30 Mar 2021 18:08:52 -0700
-Message-ID: <161715293237.2703979.18399191447470372230.stgit@magnolia>
-In-Reply-To: <161715291588.2703979.11541640936666929011.stgit@magnolia>
-References: <161715291588.2703979.11541640936666929011.stgit@magnolia>
-User-Agent: StGit/0.19
+        Wed, 31 Mar 2021 03:17:43 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:54983 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S233830AbhCaHRW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 31 Mar 2021 03:17:22 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1617175041;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=Zb+oOaCKp7a/C/I0b5gBfSBwqJ3Ya/T0OtaeB9z/Akw=;
+        b=NmDfbIYjjxXph9zoQzFkcnkEe0NNqbSUlTbo6ihJ2Wxt2Vjml0ssOiiKBk+z6xdIM8HzPl
+        yLsYrt/Q0wFEsZdz06MZA3A6Sz7BpNSuOZJ2vLLQiZYm5C3+rdlyYXaEkMZuDXh12dy2RM
+        4ygU2rP4F9ZODJAATGaSdOxP2lp5t1s=
+Received: from mail-wm1-f71.google.com (mail-wm1-f71.google.com
+ [209.85.128.71]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-100-oxqW04AiPqmKwrZpxbVRoA-1; Wed, 31 Mar 2021 03:17:19 -0400
+X-MC-Unique: oxqW04AiPqmKwrZpxbVRoA-1
+Received: by mail-wm1-f71.google.com with SMTP id b20so385618wmj.3
+        for <fstests@vger.kernel.org>; Wed, 31 Mar 2021 00:17:19 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:subject:to:references:from:cc:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=Zb+oOaCKp7a/C/I0b5gBfSBwqJ3Ya/T0OtaeB9z/Akw=;
+        b=dvI3Ug4plwa/Vt1SQqCvOvgquPpqSIMy889WbelQnDHVxT5nvdsUNImKJL7Aa6z16e
+         Ue0hfD7A1PIgBIgAYvkcj+GRIjqCjD7Hjr49yq6G0/1ioNag0ehI2qo4hX5jreUDdjq+
+         s7ZrdJrRhi51a0Hu7U6C2+JRrxBjQSpWetPoUubLu99pfazkBeUdY+AiBLK7cr3/PhwD
+         dZNjeyrXX2Rn86nei5J6Evty5bAXNl4tnP66dnUwsj6IFGvxbqr24Zzkn0zEnwdDxK5u
+         Wmvz5hXQvP5tVBkPdTcPJMnRKM/ilHRo9qFBspJ+Be/g56TfPpPbGRicEJkmLD2iw8PW
+         bzKQ==
+X-Gm-Message-State: AOAM5315VLU88OKilg3NUh48c+e4Y7JCY6irHytZlgNcCo750wKKB6H8
+        NteXNnORf/mGSgZsPfCHU2ArgXXVIYQWB+UB5rK4W4JmOERsYuyvBrTuRxMDDbe1Wo7NVTLIrP9
+        6+EcOsjsGCqktSfdUew1MyVr3u1zsTE+o4WpRRDoNBKukVk5ZfW5d9FBmqGTzxUuvSMFY
+X-Received: by 2002:adf:f411:: with SMTP id g17mr1905466wro.22.1617175037814;
+        Wed, 31 Mar 2021 00:17:17 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJxy2QAu0MBkhgj7psjnRMJUukZ4jBO35Ab6YtmgDTo3DG4M3ZLb3VCy5I5mY/3KjopmzciSyg==
+X-Received: by 2002:adf:f411:: with SMTP id g17mr1905449wro.22.1617175037639;
+        Wed, 31 Mar 2021 00:17:17 -0700 (PDT)
+Received: from localhost.localdomain ([84.19.91.9])
+        by smtp.gmail.com with ESMTPSA id n7sm2691874wrv.71.2021.03.31.00.17.16
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 31 Mar 2021 00:17:17 -0700 (PDT)
+Subject: Re: [PATCH v2 1/4] common/rc: Add _require_{chown,chmod,symlink}()
+To:     Zorro Lang <zlang@redhat.com>
+References: <20210330220005.56019-1-preichl@redhat.com>
+ <20210330220005.56019-2-preichl@redhat.com>
+ <20210331002521.GP13946@localhost.localdomain>
+From:   Pavel Reichl <preichl@redhat.com>
+Cc:     Eryu Guan <guan@eryu.me>, fstests@vger.kernel.org
+Message-ID: <00b3414f-4833-f0f3-22de-984ad359a57c@redhat.com>
+Date:   Wed, 31 Mar 2021 09:17:16 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.8.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+In-Reply-To: <20210331002521.GP13946@localhost.localdomain>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Darrick J. Wong <djwong@kernel.org>
-
-Teach fstests to extract timestamp limits of a filesystem using the new
-xfs_db timelimit command.
-
-Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-Reviewed-by: Amir Goldstein <amir73il@gmail.com>
----
- common/rc         |    2 +-
- common/xfs        |   19 +++++++++++++++++++
- tests/xfs/911     |   44 ++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/911.out |   15 +++++++++++++++
- tests/xfs/group   |    1 +
- 5 files changed, 80 insertions(+), 1 deletion(-)
- create mode 100755 tests/xfs/911
- create mode 100644 tests/xfs/911.out
 
 
-diff --git a/common/rc b/common/rc
-index 23f86ce6..21b87557 100644
---- a/common/rc
-+++ b/common/rc
-@@ -2054,7 +2054,7 @@ _filesystem_timestamp_range()
- 		echo "0 $u32max"
- 		;;
- 	xfs)
--		echo "$s32min $s32max"
-+		_xfs_timestamp_range "$device"
- 		;;
- 	btrfs)
- 		echo "$s64min $s64max"
-diff --git a/common/xfs b/common/xfs
-index a65eeb58..37658788 100644
---- a/common/xfs
-+++ b/common/xfs
-@@ -1133,3 +1133,22 @@ _require_xfs_scratch_inobtcount()
- 		_notrun "inobtcount not supported by scratch filesystem type: $FSTYP"
- 	_scratch_unmount
- }
-+
-+_xfs_timestamp_range()
-+{
-+	local device="$1"
-+	local use_db=0
-+	local dbprog="$XFS_DB_PROG $device"
-+	test "$device" = "$SCRATCH_DEV" && dbprog=_scratch_xfs_db
-+
-+	$dbprog -f -c 'help timelimit' | grep -v -q 'not found' && use_db=1
-+	if [ $use_db -eq 0 ]; then
-+		# The "timelimit" command was added to xfs_db at the same time
-+		# that bigtime was added to xfsprogs.  Therefore, we can assume
-+		# the old timestamp range if the command isn't present.
-+		echo "-$((1<<31)) $(((1<<31)-1))"
-+	else
-+		$dbprog -f -c 'timelimit --compact' | \
-+			awk '{printf("%s %s", $1, $2);}'
-+	fi
-+}
-diff --git a/tests/xfs/911 b/tests/xfs/911
-new file mode 100755
-index 00000000..01ddb856
---- /dev/null
-+++ b/tests/xfs/911
-@@ -0,0 +1,44 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0-or-later
-+# Copyright (c) 2021 Oracle.  All Rights Reserved.
-+#
-+# FS QA Test No. 911
-+#
-+# Check that the xfs_db timelimit command prints the ranges that we expect.
-+# This in combination with an xfs_ondisk.h build time check in the kernel
-+# ensures that the kernel agrees with userspace.
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+
-+# real QA test starts here
-+_supported_fs xfs
-+_require_scratch
-+_require_xfs_db_command timelimit
-+
-+rm -f $seqres.full
-+
-+# Format filesystem without bigtime support and populate it
-+_scratch_mkfs > $seqres.full
-+echo classic xfs timelimits
-+_scratch_xfs_db -c 'timelimit --classic'
-+echo bigtime xfs timelimits
-+_scratch_xfs_db -c 'timelimit --bigtime'
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/911.out b/tests/xfs/911.out
-new file mode 100644
-index 00000000..84dc475b
---- /dev/null
-+++ b/tests/xfs/911.out
-@@ -0,0 +1,15 @@
-+QA output created by 911
-+classic xfs timelimits
-+time.min = -2147483648
-+time.max = 2147483647
-+dqtimer.min = 1
-+dqtimer.max = 4294967295
-+dqgrace.min = 0
-+dqgrace.min = 4294967295
-+bigtime xfs timelimits
-+time.min = -2147483648
-+time.max = 16299260424
-+dqtimer.min = 4
-+dqtimer.max = 16299260424
-+dqgrace.min = 0
-+dqgrace.min = 4294967295
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 0dc8038a..e212fd46 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -525,3 +525,4 @@
- 770 auto repair
- 773 auto quick repair
- 910 auto quick inobtcount
-+911 auto quick bigtime
+On 3/31/21 2:25 AM, Zorro Lang wrote:
+> On Wed, Mar 31, 2021 at 12:00:02AM +0200, Pavel Reichl wrote:
+>> Add helper functions that ensure that test is only executed on file
+>> systems that implement chown, chmod and symbolic links.
+>>
+>> +
+>> +# check for a symbolic links support
+>> +#
+>> +_require_symlink()
+>> +{
+>> +	if [ "$FSTYP" = "exfat" ]; then
+>> +		_notrun "symbolic links are not supported on $FSTYP"
+>> +	fi
+>> +}
+> 
+> There's _require_symlinks() in common/rc, I remember Eric used it for some
+> exfat errors before. Does it work for you?
+> 
+
+Hi,
+
+Thanks for the info! Yes, it works. I will fix it in the next version.
+
+I'll just wait for more comments a few days...I guess.
+
+Thanks!
+
+Bye.
 
