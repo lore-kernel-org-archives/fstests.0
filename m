@@ -4,43 +4,43 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-16.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6507FC433E8
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4E15CC433E2
 	for <linux-fstests@archiver.kernel.org>; Wed, 31 Mar 2021 01:09:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 46921619DA
+	by mail.kernel.org (Postfix) with ESMTP id 24C0C619DE
 	for <linux-fstests@archiver.kernel.org>; Wed, 31 Mar 2021 01:09:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232989AbhCaBIw (ORCPT
+        id S232905AbhCaBIu (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 30 Mar 2021 21:08:52 -0400
-Received: from mail.kernel.org ([198.145.29.99]:42272 "EHLO mail.kernel.org"
+        Tue, 30 Mar 2021 21:08:50 -0400
+Received: from mail.kernel.org ([198.145.29.99]:41920 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S232892AbhCaBIt (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 30 Mar 2021 21:08:49 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 33D4261935;
-        Wed, 31 Mar 2021 01:08:49 +0000 (UTC)
+        id S232600AbhCaBIY (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 30 Mar 2021 21:08:24 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 99318619C1;
+        Wed, 31 Mar 2021 01:08:23 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1617152929;
-        bh=/IORSqdy+Ox8dFWvtPo45m+ddaFqcKeIwkSWZfD/B8g=;
+        s=k20201202; t=1617152903;
+        bh=V3Ir2HR9Bqa+4K+Dbkak7Wqr7clwpvD3UDTHG1mTut0=;
         h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=AnLej2B2ZSBmuTUEhZFv94QDxzXRFEPWI1Oj+/ole7lZ05IoTK/9yP7FosliOlTkV
-         9gybZgVWk146xE8yyZR8L2fAnnTo1gWzlJJ3dey8jpv4O+IUUvH3LRYD5zAN/HfCzz
-         OsMCOM4L6OFN5sFqsyS2o64izEbByykIGo9VnrWKtNlc8CgJwfRWInIvG51H55PWr+
-         AxiFiwMinP8DWyGcbeRH4NDu9MI/fpIF5B+eQw+wIgC1qEgcLhdlfW5sePgd2oLoGe
-         eD+CsVNLk/MSWPBAJgx0GlhpQtZg1OdlML36y3mG2473FxEDtuySDbZmFBOfoQ7Xk5
-         ZCTNrZVXI41yQ==
-Subject: [PATCH 2/4] xfs/122: add legacy timestamps to ondisk checker
+        b=Dlx9Lo+LcBFfMXfDhgis/wSdrr7yNS9Z6+qcliQm3Z4tmJjo6a73SJykSpi+HriBo
+         GI/bl1qpaJG6OLwtqYEvoCVLcnVfeh2xcnCdVB5K57O8f2JkX7rgb1ec9ixxlGy9mY
+         OayT3Oo62ZqZrkJbKjhJ0TIRzMt5vJqwgIx14Rr7OqgtgoHIboduOYkp/QODUNvCiE
+         dFy5HjwyAO896oHwlN4Boi6NboaNv50R00tqztH6UdhQXnSSFkn4U+askx6rnSH4Of
+         EF8oyEmYzrCac4Up56T5mDt9BRPUazMAAvEVsuMf1E+2/EfBdKN/IwUyaVyGoB20PH
+         zT1OysFHScuFw==
+Subject: [PATCH 3/3] xfs: test that the needsrepair feature works as
+ advertised
 From:   "Darrick J. Wong" <djwong@kernel.org>
 To:     djwong@kernel.org, guaneryu@gmail.com
-Cc:     Amir Goldstein <amir73il@gmail.com>, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org, guan@eryu.me
-Date:   Tue, 30 Mar 2021 18:08:46 -0700
-Message-ID: <161715292687.2703979.6393758446727428463.stgit@magnolia>
-In-Reply-To: <161715291588.2703979.11541640936666929011.stgit@magnolia>
-References: <161715291588.2703979.11541640936666929011.stgit@magnolia>
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me
+Date:   Tue, 30 Mar 2021 18:08:21 -0700
+Message-ID: <161715290127.2703773.4292037416016401516.stgit@magnolia>
+In-Reply-To: <161715288469.2703773.13448230101596914371.stgit@magnolia>
+References: <161715288469.2703773.13448230101596914371.stgit@magnolia>
 User-Agent: StGit/0.19
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -51,38 +51,274 @@ X-Mailing-List: fstests@vger.kernel.org
 
 From: Darrick J. Wong <djwong@kernel.org>
 
-Add these new ondisk structures.
+Make sure that the needsrepair feature flag can be cleared only by
+repair and that mounts are prohibited when the feature is set.
 
 Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-Reviewed-by: Amir Goldstein <amir73il@gmail.com>
 ---
- tests/xfs/122     |    1 +
- tests/xfs/122.out |    1 +
- 2 files changed, 2 insertions(+)
+ common/xfs        |   21 +++++++++++
+ tests/xfs/768     |   82 +++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/768.out |    4 ++
+ tests/xfs/770     |  101 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/770.out |    2 +
+ tests/xfs/group   |    2 +
+ 6 files changed, 212 insertions(+)
+ create mode 100755 tests/xfs/768
+ create mode 100644 tests/xfs/768.out
+ create mode 100755 tests/xfs/770
+ create mode 100644 tests/xfs/770.out
 
 
-diff --git a/tests/xfs/122 b/tests/xfs/122
-index 322e1d81..c8593315 100755
---- a/tests/xfs/122
-+++ b/tests/xfs/122
-@@ -181,6 +181,7 @@ struct xfs_iext_cursor
- struct xfs_ino_geometry
- struct xfs_attrlist
- struct xfs_attrlist_ent
-+struct xfs_legacy_ictimestamp
- EOF
- 
- echo 'int main(int argc, char *argv[]) {' >>$cprog
-diff --git a/tests/xfs/122.out b/tests/xfs/122.out
-index b0773756..f229465a 100644
---- a/tests/xfs/122.out
-+++ b/tests/xfs/122.out
-@@ -97,6 +97,7 @@ sizeof(struct xfs_inode_log_format) = 56
- sizeof(struct xfs_inode_log_format_32) = 52
- sizeof(struct xfs_inumbers) = 24
- sizeof(struct xfs_inumbers_req) = 64
-+sizeof(struct xfs_legacy_timestamp) = 8
- sizeof(struct xfs_log_dinode) = 176
- sizeof(struct xfs_map_extent) = 32
- sizeof(struct xfs_phys_extent) = 16
+diff --git a/common/xfs b/common/xfs
+index c97e08ba..051e5652 100644
+--- a/common/xfs
++++ b/common/xfs
+@@ -1091,3 +1091,24 @@ _require_xfs_copy()
+ 	[ "$USE_EXTERNAL" = yes ] && \
+ 		_notrun "Cannot xfs_copy with external devices"
+ }
++
++# Print the status of the given features on the scratch filesystem.
++# Returns 0 if all features are found, 1 otherwise.
++_check_scratch_xfs_features()
++{
++	local features="$(_scratch_xfs_db -c 'version')"
++	local output=("FEATURES:")
++	local found=0
++
++	for feature in "$@"; do
++		local status="NO"
++		if echo "${features}" | grep -q -w "${feature}"; then
++			status="YES"
++			found=$((found + 1))
++		fi
++		output+=("${feature}:${status}")
++	done
++
++	echo "${output[@]}"
++	test "${found}" -eq "$#"
++}
+diff --git a/tests/xfs/768 b/tests/xfs/768
+new file mode 100755
+index 00000000..7b909b76
+--- /dev/null
++++ b/tests/xfs/768
+@@ -0,0 +1,82 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0-or-later
++# Copyright (c) 2021 Oracle.  All Rights Reserved.
++#
++# FS QA Test No. 768
++#
++# Make sure that the kernel won't mount a filesystem if repair forcibly sets
++# NEEDSREPAIR while fixing metadata.  Corrupt a directory in such a way as
++# to force repair to write an invalid dirent value as a sentinel to trigger a
++# repair activity in a later phase.  Use a debug knob in xfs_repair to abort
++# the repair immediately after forcing the flag on.
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++_supported_fs xfs
++_require_scratch
++grep -q LIBXFS_DEBUG_WRITE_CRASH $XFS_REPAIR_PROG || \
++		_notrun "libxfs write failure injection hook not detected?"
++
++rm -f $seqres.full
++
++# Set up a real filesystem for our actual test
++_scratch_mkfs -m crc=1 >> $seqres.full
++
++# Create a directory large enough to have a dir data block.  2k worth of
++# dirent names ought to do it.
++_scratch_mount
++mkdir -p $SCRATCH_MNT/fubar
++for i in $(seq 0 256 2048); do
++	fname=$(printf "%0255d" $i)
++	ln -s -f urk $SCRATCH_MNT/fubar/$fname
++done
++inum=$(stat -c '%i' $SCRATCH_MNT/fubar)
++_scratch_unmount
++
++# Fuzz the directory
++_scratch_xfs_db -x -c "inode $inum" -c "dblock 0" \
++	-c "fuzz -d bu[2].inumber add" >> $seqres.full
++
++# Try to repair the directory, force it to crash after setting needsrepair
++LIBXFS_DEBUG_WRITE_CRASH=ddev=2 _scratch_xfs_repair 2>> $seqres.full
++test $? -eq 137 || echo "repair should have been killed??"
++_scratch_xfs_db -c 'version' >> $seqres.full
++
++# We can't mount, right?
++_check_scratch_xfs_features NEEDSREPAIR
++_try_scratch_mount &> $tmp.mount
++res=$?
++_filter_scratch < $tmp.mount
++if [ $res -eq 0 ]; then
++	echo "Should not be able to mount after needsrepair crash"
++	_scratch_unmount
++fi
++
++# Repair properly this time and retry the mount
++_scratch_xfs_repair 2>> $seqres.full
++_scratch_xfs_db -c 'version' >> $seqres.full
++_check_scratch_xfs_features NEEDSREPAIR
++
++_scratch_mount
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/768.out b/tests/xfs/768.out
+new file mode 100644
+index 00000000..1168ba25
+--- /dev/null
++++ b/tests/xfs/768.out
+@@ -0,0 +1,4 @@
++QA output created by 768
++FEATURES: NEEDSREPAIR:YES
++mount: SCRATCH_MNT: mount(2) system call failed: Structure needs cleaning.
++FEATURES: NEEDSREPAIR:NO
+diff --git a/tests/xfs/770 b/tests/xfs/770
+new file mode 100755
+index 00000000..1d0effd9
+--- /dev/null
++++ b/tests/xfs/770
+@@ -0,0 +1,101 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0-or-later
++# Copyright (c) 2021 Oracle.  All Rights Reserved.
++#
++# FS QA Test No. 770
++#
++# Populate a filesystem with all types of metadata, then run repair with the
++# libxfs write failure trigger set to go after a single write.  Check that the
++# injected error trips, causing repair to abort, that needsrepair is set on the
++# fs, the kernel won't mount; and that a non-injecting repair run clears
++# needsrepair and makes the filesystem mountable again.
++#
++# Repeat with the trip point set to successively higher numbers of writes until
++# we hit ~200 writes or repair manages to run to completion without tripping.
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/populate
++. ./common/filter
++
++# real QA test starts here
++_supported_fs xfs
++
++_require_scratch_xfs_crc		# needsrepair only exists for v5
++_require_populate_commands
++
++rm -f ${RESULT_DIR}/require_scratch	# we take care of checking the fs
++rm -f $seqres.full
++
++max_writes=200			# 200 loops should be enough for anyone
++nr_incr=$((13 / TIME_FACTOR))
++test $nr_incr -lt 1 && nr_incr=1
++for ((nr_writes = 1; nr_writes < max_writes; nr_writes += nr_incr)); do
++	test -w /dev/ttyprintk && \
++		echo "fail after $nr_writes writes" >> /dev/ttyprintk
++	echo "fail after $nr_writes writes" >> $seqres.full
++
++	# Populate the filesystem
++	_scratch_populate_cached nofill >> $seqres.full 2>&1
++
++	# Start a repair and force it to abort after some number of writes
++	LIBXFS_DEBUG_WRITE_CRASH=ddev=$nr_writes _scratch_xfs_repair 2>> $seqres.full
++	res=$?
++	if [ $res -ne 0 ] && [ $res -ne 137 ]; then
++		echo "repair failed with $res??"
++		break
++	elif [ $res -eq 0 ]; then
++		[ $nr_writes -eq 1 ] && \
++			echo "ran to completion on the first try?"
++		break
++	fi
++
++	_scratch_xfs_db -c 'version' >> $seqres.full
++	if _check_scratch_xfs_features NEEDSREPAIR > /dev/null; then
++		# NEEDSREPAIR is set, so check that we can't mount.
++		_try_scratch_mount &>> $seqres.full
++		if [ $? -eq 0 ]; then
++			echo "Should not be able to mount after repair crash"
++			_scratch_unmount
++		fi
++	elif _scratch_xfs_repair -n &>> $seqres.full; then
++		# NEEDSREPAIR was not set, but repair -n didn't find problems.
++		# It's possible that the write failure injector triggered on
++		# the write that clears NEEDSREPAIR.
++		true
++	else
++		# NEEDSREPAIR was not set, but there are errors!
++		echo "NEEDSREPAIR should be set on corrupt fs"
++	fi
++
++	# Repair properly this time and retry the mount
++	_scratch_xfs_repair 2>> $seqres.full
++	_scratch_xfs_db -c 'version' >> $seqres.full
++	_check_scratch_xfs_features NEEDSREPAIR > /dev/null && \
++		echo "Repair failed to clear NEEDSREPAIR on the $nr_writes writes test"
++
++	# Make sure all the checking tools think this fs is ok
++	_scratch_mount
++	_check_scratch_fs
++	_scratch_unmount
++done
++
++# success, all done
++echo Silence is golden.
++status=0
++exit
+diff --git a/tests/xfs/770.out b/tests/xfs/770.out
+new file mode 100644
+index 00000000..725d740b
+--- /dev/null
++++ b/tests/xfs/770.out
+@@ -0,0 +1,2 @@
++QA output created by 770
++Silence is golden.
+diff --git a/tests/xfs/group b/tests/xfs/group
+index fe83f82d..09fddb5a 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -520,3 +520,5 @@
+ 537 auto quick
+ 538 auto stress
+ 539 auto quick mount
++768 auto quick repair
++770 auto repair
 
