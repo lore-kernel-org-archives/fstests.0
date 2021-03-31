@@ -7,98 +7,105 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4ADEBC433B4
-	for <linux-fstests@archiver.kernel.org>; Wed, 31 Mar 2021 16:42:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6B58AC433B4
+	for <linux-fstests@archiver.kernel.org>; Wed, 31 Mar 2021 17:37:25 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id F1D346102A
-	for <linux-fstests@archiver.kernel.org>; Wed, 31 Mar 2021 16:42:01 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1940D61029
+	for <linux-fstests@archiver.kernel.org>; Wed, 31 Mar 2021 17:37:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232406AbhCaQl1 (ORCPT
+        id S234047AbhCaRgw (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 31 Mar 2021 12:41:27 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:43610 "EHLO
+        Wed, 31 Mar 2021 13:36:52 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:21701 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S232805AbhCaQlV (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 31 Mar 2021 12:41:21 -0400
+        by vger.kernel.org with ESMTP id S234472AbhCaRgk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 31 Mar 2021 13:36:40 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1617208880;
+        s=mimecast20190719; t=1617212199;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=jJDYmbyK0L2UVdIXjCPk7SkVoe2jfaC5Whlxx3MHjcs=;
-        b=RAYyiKAARfn6XEpYBvcCScjt7BfleYRMrYItuBhn1uNdWyRRsMh97XjC0pGLTsKhHhcFje
-        PMAHn14lfjzPGnwi9kykzABYglG+6kC5Mif2lyVP96P7scsn+fL8GUToUTKIbWljMqQYb3
-        h4VCUq2EohPqqxMs66jPp1VVS/mGTPw=
+        bh=M8X2z8wT/cJTgJML3e89BcPFnkcCKOdzolbiTQTLLm8=;
+        b=MhGiiD1HvAHIdLkdU9zEhn3ZcYyhOgMJHiaYws2F4ozpw2DVrZ+c+xHQu0db/yn7qlgdOK
+        RJuSRKpvEE7zwL4twU7YRsDptkGWkEtbTHu9lktL7CepEhr7gr7xkB3JHSpskz5A/13qBD
+        P3fdfAz1o7al9j31c89uZFc6qoT5wYc=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-420-5mLzdZjhOGCmoWUczFi6cA-1; Wed, 31 Mar 2021 12:41:17 -0400
-X-MC-Unique: 5mLzdZjhOGCmoWUczFi6cA-1
-Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+ us-mta-386-5PvtE8aJO_6IOWZtf9gc7w-1; Wed, 31 Mar 2021 13:36:34 -0400
+X-MC-Unique: 5PvtE8aJO_6IOWZtf9gc7w-1
+Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id C7C3280068;
-        Wed, 31 Mar 2021 16:41:16 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 59E7F501F8;
+        Wed, 31 Mar 2021 17:36:33 +0000 (UTC)
 Received: from bfoster (ovpn-112-117.rdu2.redhat.com [10.10.112.117])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id 1783710023BE;
-        Wed, 31 Mar 2021 16:41:16 +0000 (UTC)
-Date:   Wed, 31 Mar 2021 12:41:14 -0400
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id B114C5C649;
+        Wed, 31 Mar 2021 17:36:29 +0000 (UTC)
+Date:   Wed, 31 Mar 2021 13:36:21 -0400
 From:   Brian Foster <bfoster@redhat.com>
 To:     "Darrick J. Wong" <djwong@kernel.org>
 Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
         fstests@vger.kernel.org, guan@eryu.me
-Subject: Re: [PATCH 3/3] xfs: test that the needsrepair feature works as
- advertised
-Message-ID: <YGSmKk88waono99E@bfoster>
-References: <161715288469.2703773.13448230101596914371.stgit@magnolia>
- <161715290127.2703773.4292037416016401516.stgit@magnolia>
+Subject: Re: [PATCH 1/2] xfs: functional testing of V5-relevant options
+Message-ID: <YGSzFRxcGuu3GR4I@bfoster>
+References: <161715290311.2703879.6182444659830603450.stgit@magnolia>
+ <161715290858.2703879.2364659698245587140.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <161715290127.2703773.4292037416016401516.stgit@magnolia>
-X-Scanned-By: MIMEDefang 2.84 on 10.5.11.22
+In-Reply-To: <161715290858.2703879.2364659698245587140.stgit@magnolia>
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.16
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Mar 30, 2021 at 06:08:21PM -0700, Darrick J. Wong wrote:
+On Tue, Mar 30, 2021 at 06:08:28PM -0700, Darrick J. Wong wrote:
 > From: Darrick J. Wong <djwong@kernel.org>
 > 
-> Make sure that the needsrepair feature flag can be cleared only by
-> repair and that mounts are prohibited when the feature is set.
+> Currently, the only functional testing for xfs_admin is xfs/287, which
+> checks that one can add 32-bit project ids to a V4 filesystem.  This
+> obviously isn't an exhaustive test of all the CLI arguments, and
+> historically there have been xfs configurations that don't even work.
+> 
+> Therefore, introduce a couple of new tests -- one that will test the
+> simple options with the default configuration, and a second test that
+> steps a bit outside of the test run configuration to make sure that we
+> do the right thing for external devices.  The second test already caught
+> a nasty bug in xfsprogs 5.11.
 > 
 > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
 > ---
->  common/xfs        |   21 +++++++++++
->  tests/xfs/768     |   82 +++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/768.out |    4 ++
->  tests/xfs/770     |  101 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/770.out |    2 +
+>  common/xfs        |   21 ++++++++++
+>  tests/xfs/764     |   91 ++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/764.out |   17 ++++++++
+>  tests/xfs/773     |  114 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/773.out |   19 +++++++++
 >  tests/xfs/group   |    2 +
->  6 files changed, 212 insertions(+)
->  create mode 100755 tests/xfs/768
->  create mode 100644 tests/xfs/768.out
->  create mode 100755 tests/xfs/770
->  create mode 100644 tests/xfs/770.out
+>  6 files changed, 264 insertions(+)
+>  create mode 100755 tests/xfs/764
+>  create mode 100644 tests/xfs/764.out
+>  create mode 100755 tests/xfs/773
+>  create mode 100644 tests/xfs/773.out
 > 
 > 
 ...
-> diff --git a/tests/xfs/768 b/tests/xfs/768
+> diff --git a/tests/xfs/764 b/tests/xfs/764
 > new file mode 100755
-> index 00000000..7b909b76
+> index 00000000..c710ad4e
 > --- /dev/null
-> +++ b/tests/xfs/768
-> @@ -0,0 +1,82 @@
+> +++ b/tests/xfs/764
+> @@ -0,0 +1,91 @@
 > +#! /bin/bash
 > +# SPDX-License-Identifier: GPL-2.0-or-later
 > +# Copyright (c) 2021 Oracle.  All Rights Reserved.
 > +#
-> +# FS QA Test No. 768
+> +# FS QA Test No. 764
 > +#
-> +# Make sure that the kernel won't mount a filesystem if repair forcibly sets
-> +# NEEDSREPAIR while fixing metadata.  Corrupt a directory in such a way as
-> +# to force repair to write an invalid dirent value as a sentinel to trigger a
-> +# repair activity in a later phase.  Use a debug knob in xfs_repair to abort
-> +# the repair immediately after forcing the flag on.
+> +# Functional testing for xfs_admin to make sure that it handles option parsing
+> +# correctly, at least for functionality that's relevant to V5 filesystems.
+
+This test doesn't seem to depend on v5..?
+
 > +
 > +seq=`basename $0`
 > +seqres=$RESULT_DIR/$seq
@@ -122,95 +129,120 @@ On Tue, Mar 30, 2021 at 06:08:21PM -0700, Darrick J. Wong wrote:
 > +# real QA test starts here
 > +_supported_fs xfs
 > +_require_scratch
-> +grep -q LIBXFS_DEBUG_WRITE_CRASH $XFS_REPAIR_PROG || \
-> +		_notrun "libxfs write failure injection hook not detected?"
+> +_require_command "$XFS_ADMIN_PROG" "xfs_admin"
 > +
 > +rm -f $seqres.full
 > +
-> +# Set up a real filesystem for our actual test
-> +_scratch_mkfs -m crc=1 >> $seqres.full
+> +note() {
+> +	echo "$@" | tee -a $seqres.full
+> +}
 > +
-> +# Create a directory large enough to have a dir data block.  2k worth of
-> +# dirent names ought to do it.
-> +_scratch_mount
-> +mkdir -p $SCRATCH_MNT/fubar
-> +for i in $(seq 0 256 2048); do
-> +	fname=$(printf "%0255d" $i)
-> +	ln -s -f urk $SCRATCH_MNT/fubar/$fname
-> +done
-> +inum=$(stat -c '%i' $SCRATCH_MNT/fubar)
-> +_scratch_unmount
+> +note "S0: Initialize filesystem"
+> +_scratch_mkfs -L origlabel -m uuid=babababa-baba-baba-baba-babababababa >> $seqres.full
+> +_scratch_xfs_db -c label -c uuid
+> +_scratch_xfs_repair -n &>> $seqres.full || echo "Check failed?"
 > +
-> +# Fuzz the directory
-> +_scratch_xfs_db -x -c "inode $inum" -c "dblock 0" \
-> +	-c "fuzz -d bu[2].inumber add" >> $seqres.full
+> +note "S1: Set a filesystem label"
+> +_scratch_xfs_admin -L newlabel >> $seqres.full
+> +_scratch_xfs_db -c label
+> +_scratch_xfs_repair -n &>> $seqres.full || echo "Check failed?"
 > +
-> +# Try to repair the directory, force it to crash after setting needsrepair
-> +LIBXFS_DEBUG_WRITE_CRASH=ddev=2 _scratch_xfs_repair 2>> $seqres.full
-> +test $? -eq 137 || echo "repair should have been killed??"
-> +_scratch_xfs_db -c 'version' >> $seqres.full
+> +note "S2: Clear filesystem label"
+> +_scratch_xfs_admin -L -- >> $seqres.full
+> +_scratch_xfs_db -c label
+> +_scratch_xfs_repair -n &>> $seqres.full || echo "Check failed?"
 > +
-> +# We can't mount, right?
-> +_check_scratch_xfs_features NEEDSREPAIR
-> +_try_scratch_mount &> $tmp.mount
-> +res=$?
-> +_filter_scratch < $tmp.mount
-> +if [ $res -eq 0 ]; then
-> +	echo "Should not be able to mount after needsrepair crash"
-> +	_scratch_unmount
+> +note "S3: Try to set oversized label"
+> +_scratch_xfs_admin -L thisismuchtoolongforxfstohandle >> $seqres.full
+> +_scratch_xfs_db -c label
+> +_scratch_xfs_repair -n &>> $seqres.full || echo "Check failed?"
+> +
+> +note "S4: Set filesystem UUID"
+> +_scratch_xfs_admin -U deaddead-dead-dead-dead-deaddeaddead >> $seqres.full
+> +_scratch_xfs_db -c uuid
+> +_scratch_xfs_repair -n &>> $seqres.full || echo "Check failed?"
+> +
+> +note "S5: Zero out filesystem UUID"
+> +_scratch_xfs_admin -U nil >> $seqres.full
+> +_scratch_xfs_db -c uuid
+> +_scratch_xfs_repair -n &>> $seqres.full || echo "Check failed?"
+> +
+> +note "S6: Randomize filesystem UUID"
+> +old_uuid="$(_scratch_xfs_db -c uuid)"
+> +_scratch_xfs_admin -U generate >> $seqres.full
+> +new_uuid="$(_scratch_xfs_db -c uuid)"
+> +if [ "$new_uuid" = "$old_uuid" ]; then
+> +	echo "UUID randomization failed? $old_uuid == $new_uuid"
 > +fi
+> +_scratch_xfs_repair -n &>> $seqres.full || echo "Check failed?"
 > +
-> +# Repair properly this time and retry the mount
-> +_scratch_xfs_repair 2>> $seqres.full
-> +_scratch_xfs_db -c 'version' >> $seqres.full
 
-This _scratch_xfs_db() call and the same one a bit earlier both seem
-spurious. Otherwise this test LGTM.
+Can we drop all these intermediate repair invocations and just rely on
+the post-test device check? Otherwise the rest LGTM.
 
-> +_check_scratch_xfs_features NEEDSREPAIR
-> +
-> +_scratch_mount
+Brian
+
+> +note "S7: Restore original filesystem UUID"
+> +if _check_scratch_xfs_features V5 >/dev/null; then
+> +	# Only V5 supports the metauuid feature that enables us to restore the
+> +	# original UUID after a change.
+> +	_scratch_xfs_admin -U restore >> $seqres.full
+> +	_scratch_xfs_db -c uuid
+> +else
+> +	echo "UUID = babababa-baba-baba-baba-babababababa"
+> +fi
 > +
 > +# success, all done
 > +status=0
 > +exit
-> diff --git a/tests/xfs/768.out b/tests/xfs/768.out
+> diff --git a/tests/xfs/764.out b/tests/xfs/764.out
 > new file mode 100644
-> index 00000000..1168ba25
+> index 00000000..8da929ec
 > --- /dev/null
-> +++ b/tests/xfs/768.out
-> @@ -0,0 +1,4 @@
-> +QA output created by 768
-> +FEATURES: NEEDSREPAIR:YES
-> +mount: SCRATCH_MNT: mount(2) system call failed: Structure needs cleaning.
-> +FEATURES: NEEDSREPAIR:NO
-> diff --git a/tests/xfs/770 b/tests/xfs/770
+> +++ b/tests/xfs/764.out
+> @@ -0,0 +1,17 @@
+> +QA output created by 764
+> +S0: Initialize filesystem
+> +label = "origlabel"
+> +UUID = babababa-baba-baba-baba-babababababa
+> +S1: Set a filesystem label
+> +label = "newlabel"
+> +S2: Clear filesystem label
+> +label = ""
+> +S3: Try to set oversized label
+> +label = "thisismuchto"
+> +S4: Set filesystem UUID
+> +UUID = deaddead-dead-dead-dead-deaddeaddead
+> +S5: Zero out filesystem UUID
+> +UUID = 00000000-0000-0000-0000-000000000000
+> +S6: Randomize filesystem UUID
+> +S7: Restore original filesystem UUID
+> +UUID = babababa-baba-baba-baba-babababababa
+> diff --git a/tests/xfs/773 b/tests/xfs/773
 > new file mode 100755
-> index 00000000..1d0effd9
+> index 00000000..f184962a
 > --- /dev/null
-> +++ b/tests/xfs/770
-> @@ -0,0 +1,101 @@
-
-Can we have one test per patch in the future please?
-
+> +++ b/tests/xfs/773
+> @@ -0,0 +1,114 @@
 > +#! /bin/bash
 > +# SPDX-License-Identifier: GPL-2.0-or-later
 > +# Copyright (c) 2021 Oracle.  All Rights Reserved.
 > +#
-> +# FS QA Test No. 770
+> +# FS QA Test No. 773
 > +#
-> +# Populate a filesystem with all types of metadata, then run repair with the
-> +# libxfs write failure trigger set to go after a single write.  Check that the
-> +# injected error trips, causing repair to abort, that needsrepair is set on the
-> +# fs, the kernel won't mount; and that a non-injecting repair run clears
-> +# needsrepair and makes the filesystem mountable again.
+> +# Functional testing for xfs_admin to ensure that it parses arguments correctly
+> +# with regards to data devices that are files, external logs, and realtime
+> +# devices.
 > +#
-> +# Repeat with the trip point set to successively higher numbers of writes until
-> +# we hit ~200 writes or repair manages to run to completion without tripping.
+> +# Because this test synthesizes log and rt devices (by modifying the test run
+> +# configuration), it does /not/ require the ability to mount the scratch
+> +# filesystem.  This increases test coverage while isolating the weird bits to a
+> +# single test.
+> +#
+> +# This is partially a regression test for "xfs_admin: pick up log arguments
+> +# correctly", insofar as the issue fixed by that patch was discovered with an
+> +# earlier revision of this test.
 > +
-
-Nice test..
-
 > +seq=`basename $0`
 > +seqres=$RESULT_DIR/$seq
 > +echo "QA output created by $seq"
@@ -223,137 +255,125 @@ Nice test..
 > +_cleanup()
 > +{
 > +	cd /
-> +	rm -f $tmp.*
+> +	rm -f $tmp.* $fake_logfile $fake_rtfile $fake_datafile
 > +}
 > +
 > +# get standard environment, filters and checks
 > +. ./common/rc
-> +. ./common/populate
 > +. ./common/filter
 > +
 > +# real QA test starts here
 > +_supported_fs xfs
+> +_require_test
+> +_require_scratch_nocheck
+> +_require_command "$XFS_ADMIN_PROG" "xfs_admin"
 > +
-> +_require_scratch_xfs_crc		# needsrepair only exists for v5
-> +_require_populate_commands
-> +
-> +rm -f ${RESULT_DIR}/require_scratch	# we take care of checking the fs
 > +rm -f $seqres.full
 > +
-> +max_writes=200			# 200 loops should be enough for anyone
-> +nr_incr=$((13 / TIME_FACTOR))
-
-I'm not sure how time factor is typically used, but perhaps we should
-sanity check that nr_incr > 0.
-
-Also, could we randomize the increment value a bit to add some variance
-to the test? That could be done here or we could turn this into a min
-increment value or something based on time factor and randomize the
-increment in the loop, which might be a little more effective of a test.
-
-> +test $nr_incr -lt 1 && nr_incr=1
-> +for ((nr_writes = 1; nr_writes < max_writes; nr_writes += nr_incr)); do
-> +	test -w /dev/ttyprintk && \
-> +		echo "fail after $nr_writes writes" >> /dev/ttyprintk
-> +	echo "fail after $nr_writes writes" >> $seqres.full
-
-What is this for?
-
+> +# Create some fake sparse files for testing external devices and whatnot
+> +fake_datafile=$TEST_DIR/scratch.data
+> +rm -f $fake_datafile
+> +truncate -s 500m $fake_datafile
 > +
-> +	# Populate the filesystem
-> +	_scratch_populate_cached nofill >> $seqres.full 2>&1
+> +fake_logfile=$TEST_DIR/scratch.log
+> +rm -f $fake_logfile
+> +truncate -s 500m $fake_logfile
 > +
-
-If I understand this correctly, this will fill up the fs and populate
-some kind of background cache with a metadump to facilitate restoring
-the state on repeated calls. I see this speeds things up a bit from the
-initial run, but I'm also wondering if we really need to reset this
-state on every iteration. Would we expect much difference in behavior if
-we populated once at the start of the test and then just bumped up the
-write count until we get to the max or the repair completes?
-
-FWIW, a quick hack to test that out reduces my (cache cold, cache hot)
-run times of this test from something like (~4m, ~1m) to (~3m, ~12s).
-That's probably not quite quick group territory, but still a decent
-time savings.
-
-> +	# Start a repair and force it to abort after some number of writes
-> +	LIBXFS_DEBUG_WRITE_CRASH=ddev=$nr_writes _scratch_xfs_repair 2>> $seqres.full
-> +	res=$?
-> +	if [ $res -ne 0 ] && [ $res -ne 137 ]; then
-> +		echo "repair failed with $res??"
-> +		break
-> +	elif [ $res -eq 0 ]; then
-> +		[ $nr_writes -eq 1 ] && \
-> +			echo "ran to completion on the first try?"
-> +		break
-> +	fi
+> +fake_rtfile=$TEST_DIR/scratch.rt
+> +rm -f $fake_rtfile
+> +truncate -s 500m $fake_rtfile
 > +
-> +	_scratch_xfs_db -c 'version' >> $seqres.full
-
-Why?
-
-> +	if _check_scratch_xfs_features NEEDSREPAIR > /dev/null; then
-> +		# NEEDSREPAIR is set, so check that we can't mount.
-> +		_try_scratch_mount &>> $seqres.full
-> +		if [ $? -eq 0 ]; then
-> +			echo "Should not be able to mount after repair crash"
-> +			_scratch_unmount
-> +		fi
-
-Didn't the previous test verify that the filesystem doesn't mount if
-NEEDSREPAIR?
-
-> +	elif _scratch_xfs_repair -n &>> $seqres.full; then
-> +		# NEEDSREPAIR was not set, but repair -n didn't find problems.
-> +		# It's possible that the write failure injector triggered on
-> +		# the write that clears NEEDSREPAIR.
-> +		true
-> +	else
-> +		# NEEDSREPAIR was not set, but there are errors!
-> +		echo "NEEDSREPAIR should be set on corrupt fs"
-> +	fi
+> +# Save the original variables
+> +orig_ddev=$SCRATCH_DEV
+> +orig_external=$USE_EXTERNAL
+> +orig_logdev=$SCRATCH_LOGDEV
+> +orig_rtdev=$SCRATCH_RTDEV
 > +
-> +	# Repair properly this time and retry the mount
-> +	_scratch_xfs_repair 2>> $seqres.full
-> +	_scratch_xfs_db -c 'version' >> $seqres.full
-> +	_check_scratch_xfs_features NEEDSREPAIR > /dev/null && \
-> +		echo "Repair failed to clear NEEDSREPAIR on the $nr_writes writes test"
+> +scenario() {
+> +	echo "$@" | tee -a $seqres.full
 > +
-
-Same here. It probably makes sense to test that NEEDSREPAIR remains set
-throughout the test sequence until repair completes cleanly, but I'm not
-sure we need to repeat the mount cycle every go around.
-
-Brian
-
-> +	# Make sure all the checking tools think this fs is ok
-> +	_scratch_mount
-> +	_check_scratch_fs
-> +	_scratch_unmount
-> +done
+> +	SCRATCH_DEV=$orig_ddev
+> +	USE_EXTERNAL=$orig_external
+> +	SCRATCH_LOGDEV=$orig_logdev
+> +	SCRATCH_RTDEV=$orig_rtdev
+> +}
+> +
+> +check_label() {
+> +	_scratch_mkfs -L oldlabel >> $seqres.full
+> +	_scratch_xfs_db -c label
+> +	_scratch_xfs_admin -L newlabel "$@" >> $seqres.full
+> +	_scratch_xfs_db -c label
+> +	_scratch_xfs_repair -n &>> $seqres.full || echo "Check failed?"
+> +}
+> +
+> +scenario "S1: Check that label setting with file image"
+> +SCRATCH_DEV=$fake_datafile
+> +check_label -f
+> +
+> +scenario "S2: Check that setting with logdev works"
+> +USE_EXTERNAL=yes
+> +SCRATCH_LOGDEV=$fake_logfile
+> +check_label
+> +
+> +scenario "S3: Check that setting with rtdev works"
+> +USE_EXTERNAL=yes
+> +SCRATCH_RTDEV=$fake_rtfile
+> +check_label
+> +
+> +scenario "S4: Check that setting with rtdev + logdev works"
+> +USE_EXTERNAL=yes
+> +SCRATCH_LOGDEV=$fake_logfile
+> +SCRATCH_RTDEV=$fake_rtfile
+> +check_label
+> +
+> +scenario "S5: Check that setting with nortdev + nologdev works"
+> +USE_EXTERNAL=
+> +SCRATCH_LOGDEV=
+> +SCRATCH_RTDEV=
+> +check_label
+> +
+> +scenario "S6: Check that setting with bdev incorrectly flagged as file works"
+> +check_label -f
 > +
 > +# success, all done
-> +echo Silence is golden.
 > +status=0
 > +exit
-> diff --git a/tests/xfs/770.out b/tests/xfs/770.out
+> diff --git a/tests/xfs/773.out b/tests/xfs/773.out
 > new file mode 100644
-> index 00000000..725d740b
+> index 00000000..954bfb85
 > --- /dev/null
-> +++ b/tests/xfs/770.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 770
-> +Silence is golden.
+> +++ b/tests/xfs/773.out
+> @@ -0,0 +1,19 @@
+> +QA output created by 773
+> +S1: Check that label setting with file image
+> +label = "oldlabel"
+> +label = "newlabel"
+> +S2: Check that setting with logdev works
+> +label = "oldlabel"
+> +label = "newlabel"
+> +S3: Check that setting with rtdev works
+> +label = "oldlabel"
+> +label = "newlabel"
+> +S4: Check that setting with rtdev + logdev works
+> +label = "oldlabel"
+> +label = "newlabel"
+> +S5: Check that setting with nortdev + nologdev works
+> +label = "oldlabel"
+> +label = "newlabel"
+> +S6: Check that setting with bdev incorrectly flagged as file works
+> +label = "oldlabel"
+> +label = "newlabel"
 > diff --git a/tests/xfs/group b/tests/xfs/group
-> index fe83f82d..09fddb5a 100644
+> index 09fddb5a..5801471b 100644
 > --- a/tests/xfs/group
 > +++ b/tests/xfs/group
-> @@ -520,3 +520,5 @@
+> @@ -520,5 +520,7 @@
 >  537 auto quick
 >  538 auto stress
 >  539 auto quick mount
-> +768 auto quick repair
-> +770 auto repair
+> +764 auto quick repair
+>  768 auto quick repair
+>  770 auto repair
+> +773 auto quick repair
 > 
 
