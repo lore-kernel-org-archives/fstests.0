@@ -7,39 +7,40 @@ X-Spam-Status: No, score=-16.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E09C9C433F1
-	for <linux-fstests@archiver.kernel.org>; Wed, 31 Mar 2021 01:09:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 01748C433C1
+	for <linux-fstests@archiver.kernel.org>; Wed, 31 Mar 2021 01:09:55 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C09FF619DE
-	for <linux-fstests@archiver.kernel.org>; Wed, 31 Mar 2021 01:09:24 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D2F83619CD
+	for <linux-fstests@archiver.kernel.org>; Wed, 31 Mar 2021 01:09:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232979AbhCaBIv (ORCPT
+        id S233005AbhCaBJY (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 30 Mar 2021 21:08:51 -0400
-Received: from mail.kernel.org ([198.145.29.99]:42096 "EHLO mail.kernel.org"
+        Tue, 30 Mar 2021 21:09:24 -0400
+Received: from mail.kernel.org ([198.145.29.99]:42506 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S232401AbhCaBIg (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 30 Mar 2021 21:08:36 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 6A3AC619C1;
-        Wed, 31 Mar 2021 01:08:36 +0000 (UTC)
+        id S233018AbhCaBJH (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 30 Mar 2021 21:09:07 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 6E09661953;
+        Wed, 31 Mar 2021 01:09:07 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1617152916;
-        bh=tNKYNINkwBQFb6YnVmhPWA6Rf7IrRz3Xtm4x7yTZahQ=;
+        s=k20201202; t=1617152947;
+        bh=QbBo63TUrO5vkfeagbc7quVE29dg/RQI44IJK4tIwu4=;
         h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=iWrwpxKyacFtq7fm9ZM357HaJrZW8bEg0W0DZ5AxuNWxD08kGWfdkyc88yIM0IdOM
-         OyRD7tzUbhzkVvNDabAWtvqKPCbR0DHDtVE27gsQnp6/48asaE706D8ELr6Br6noi3
-         WDH8I4bZhUUeB6yNByasNNaxQ5qSd/FrtdVJSzzrWY+Up1KKFRniTVm/horihnlL95
-         bykFO+j1BmyVu5tIObKFm//bFhOkWyrwpwxwqZWAIQ5u3cAYn3DcwPyZ9TzL+HWfoQ
-         y/owidmmgJb4X2w7z0zrEe4SAMu83FpY82Idb/owH0FNJnxnWsIBLYyyFVwBMLMiZQ
-         X/SEOX4Kji4cQ==
-Subject: [PATCH 2/2] xfs: test inobtcount upgrade
+        b=TXtoNdzre6q5qLUL1easOJXPvI7V+OzzuI7X1rdo4hvUud1adaZs+jzo4nGdr8SKV
+         XAdsk5XtpyGBtT/hTrxUZ3WA3u0iPf+l+6PBOM/iTrEz3ACTfI2CTFqiNja+BKny8G
+         FNzPIU3WMpJBYBNI9OynIIBelNmo+cLoTRHWmrfN/q6eqU9+hUNXKSKt+J7XQmpe0y
+         j01LCwtWLA1172fffea4UXTnlSPduxVTWLi9Deo3SQf0qNQ6WSNyOrmJN73d06zzct
+         Y/h2m+SclCc0j3LKOUtxCuc52RPchhZd7ibZBsUxjdlkQ6p555KvykQAFBWIU6ET3v
+         Ojiw8cKJn5fIw==
+Subject: [PATCH 1/1] xfs/23[12]: abstractify the XFS cow prealloc trimming
+ interval
 From:   "Darrick J. Wong" <djwong@kernel.org>
 To:     djwong@kernel.org, guaneryu@gmail.com
 Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me
-Date:   Tue, 30 Mar 2021 18:08:34 -0700
-Message-ID: <161715291407.2703879.12588572306371939752.stgit@magnolia>
-In-Reply-To: <161715290311.2703879.6182444659830603450.stgit@magnolia>
-References: <161715290311.2703879.6182444659830603450.stgit@magnolia>
+Date:   Tue, 30 Mar 2021 18:09:05 -0700
+Message-ID: <161715294506.2704105.18365101912825541162.stgit@magnolia>
+In-Reply-To: <161715293961.2704105.12379656102061134645.stgit@magnolia>
+References: <161715293961.2704105.12379656102061134645.stgit@magnolia>
 User-Agent: StGit/0.19
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -50,173 +51,136 @@ X-Mailing-List: fstests@vger.kernel.org
 
 From: Darrick J. Wong <djwong@kernel.org>
 
-Make sure we can actually upgrade filesystems to support inode btree
-counters.
+Create a couple of helper functions to get and set the XFS copy on write
+preallocation garbage collection interval.
 
 Signed-off-by: Darrick J. Wong <djwong@kernel.org>
 ---
- tests/xfs/910     |  112 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/910.out |   23 +++++++++++
- tests/xfs/group   |    1 
- 3 files changed, 136 insertions(+)
- create mode 100755 tests/xfs/910
- create mode 100644 tests/xfs/910.out
+ common/xfs    |   23 +++++++++++++++++++++++
+ tests/xfs/231 |   13 +++++++------
+ tests/xfs/232 |   13 +++++++------
+ 3 files changed, 37 insertions(+), 12 deletions(-)
 
 
-diff --git a/tests/xfs/910 b/tests/xfs/910
-new file mode 100755
-index 00000000..5f095324
---- /dev/null
-+++ b/tests/xfs/910
-@@ -0,0 +1,112 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0-or-later
-+# Copyright (c) 2021 Oracle.  All Rights Reserved.
-+#
-+# FS QA Test No. 910
-+#
-+# Check that we can upgrade a filesystem to support inobtcount and that
-+# everything works properly after the upgrade.
+diff --git a/common/xfs b/common/xfs
+index c430b3ac..ade76d5a 100644
+--- a/common/xfs
++++ b/common/xfs
+@@ -1165,3 +1165,26 @@ _require_xfs_scratch_bigtime()
+ 		_notrun "bigtime feature not advertised on mount?"
+ 	_scratch_unmount
+ }
 +
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
++__xfs_cowgc_interval_knob1="/proc/sys/fs/xfs/speculative_cow_prealloc_lifetime"
++__xfs_cowgc_interval_knob2="/proc/sys/fs/xfs/speculative_prealloc_lifetime"
 +
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
++_xfs_set_cowgc_interval() {
++	if [ -w $__xfs_cowgc_interval_knob1 ]; then
++		echo "$@" > $__xfs_cowgc_interval_knob1
++	elif [ -w $__xfs_cowgc_interval_knob2 ]; then
++		echo "$@" > $__xfs_cowgc_interval_knob2
++	else
++		_fail "Can't find cowgc interval procfs knob?"
++	fi
 +}
 +
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs xfs
-+_require_xfs_scratch_inobtcount
-+_require_command "$XFS_ADMIN_PROG" "xfs_admin"
-+_require_xfs_repair_upgrade inobtcount
-+
-+rm -f $seqres.full
-+
-+# Make sure we can't format a filesystem with inobtcount and not finobt.
-+_scratch_mkfs -m crc=1,inobtcount=1,finobt=0 &> $seqres.full && \
-+	echo "Should not be able to format with inobtcount but not finobt."
-+
-+# Make sure we can't upgrade a V4 filesystem
-+_scratch_mkfs -m crc=0,inobtcount=0,finobt=0 >> $seqres.full
-+_scratch_xfs_admin -O inobtcount=1 2>> $seqres.full
-+_check_scratch_xfs_features INOBTCNT
-+
-+# Make sure we can't upgrade a filesystem to inobtcount without finobt.
-+_scratch_mkfs -m crc=1,inobtcount=0,finobt=0 >> $seqres.full
-+_scratch_xfs_admin -O inobtcount=1 2>> $seqres.full
-+_check_scratch_xfs_features INOBTCNT
-+
-+# Format V5 filesystem without inode btree counter support and upgrade it.
-+# Inject failure into repair and make sure that the only path forward is
-+# to re-run repair on the filesystem.
-+_scratch_mkfs -m crc=1,inobtcount=0 >> $seqres.full
-+echo "Fail partway through upgrading"
-+XFS_REPAIR_FAIL_AFTER_PHASE=2 _scratch_xfs_repair -c inobtcount=1 2>> $seqres.full
-+test $? -eq 137 || echo "repair should have been killed??"
-+_check_scratch_xfs_features NEEDSREPAIR INOBTCNT
-+_try_scratch_mount &> $tmp.mount
-+res=$?
-+_filter_scratch < $tmp.mount
-+if [ $res -eq 0 ]; then
-+	echo "needsrepair should have prevented mount"
-+	_scratch_unmount
-+fi
-+
-+echo "Re-run repair to finish upgrade"
-+_scratch_xfs_repair 2>> $seqres.full
-+_check_scratch_xfs_features NEEDSREPAIR INOBTCNT
-+
-+echo "Filesystem should be usable again"
-+_try_scratch_mount &> $tmp.mount
-+res=$?
-+_filter_scratch < $tmp.mount
-+if [ $res -eq 0 ]; then
-+	_scratch_unmount
-+else
-+	echo "mount should succeed after second repair"
-+fi
-+_check_scratch_xfs_features NEEDSREPAIR INOBTCNT
-+
-+# Format V5 filesystem without inode btree counter support and upgrade it.
-+_scratch_mkfs -m crc=1,inobtcount=0 >> $seqres.full
-+_scratch_xfs_db -c 'version' -c 'sb 0' -c 'p' >> $seqres.full
-+_scratch_mount >> $seqres.full
-+
-+echo moo > $SCRATCH_MNT/urk
-+
-+_scratch_unmount
-+_check_scratch_fs
-+
-+# Now upgrade to inobtcount support
-+_scratch_xfs_admin -O inobtcount=1 2>> $seqres.full
-+_check_scratch_xfs_features INOBTCNT
-+_check_scratch_fs
-+_scratch_xfs_db -c 'version' -c 'sb 0' -c 'p' -c 'agi 0' -c 'p' >> $seqres.full
-+
-+# Make sure we have nonzero counters
-+_scratch_xfs_db -c 'agi 0' -c 'print ino_blocks fino_blocks' | \
-+	sed -e 's/= [1-9]*/= NONZERO/g'
-+
-+# Mount again, look at our files
-+_scratch_mount >> $seqres.full
-+cat $SCRATCH_MNT/urk
-+
-+# Make sure we can't re-add inobtcount
-+_scratch_unmount
-+_scratch_xfs_admin -O inobtcount=1 2>> $seqres.full
-+_scratch_mount >> $seqres.full
-+
-+status=0
-+exit
-diff --git a/tests/xfs/910.out b/tests/xfs/910.out
-new file mode 100644
-index 00000000..ed78d88f
---- /dev/null
-+++ b/tests/xfs/910.out
-@@ -0,0 +1,23 @@
-+QA output created by 910
-+Running xfs_repair to upgrade filesystem.
-+Inode btree count feature only supported on V5 filesystems.
-+FEATURES: INOBTCNT:NO
-+Running xfs_repair to upgrade filesystem.
-+Inode btree count feature requires free inode btree.
-+FEATURES: INOBTCNT:NO
-+Fail partway through upgrading
-+Adding inode btree counts to filesystem.
-+FEATURES: NEEDSREPAIR:YES INOBTCNT:YES
-+mount: SCRATCH_MNT: mount(2) system call failed: Structure needs cleaning.
-+Re-run repair to finish upgrade
-+FEATURES: NEEDSREPAIR:NO INOBTCNT:YES
-+Filesystem should be usable again
-+FEATURES: NEEDSREPAIR:NO INOBTCNT:YES
-+Running xfs_repair to upgrade filesystem.
-+Adding inode btree counts to filesystem.
-+FEATURES: INOBTCNT:YES
-+ino_blocks = NONZERO
-+fino_blocks = NONZERO
-+moo
-+Running xfs_repair to upgrade filesystem.
-+Filesystem already has inode btree counts.
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 5801471b..0dc8038a 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -524,3 +524,4 @@
- 768 auto quick repair
- 770 auto repair
- 773 auto quick repair
-+910 auto quick inobtcount
++_xfs_get_cowgc_interval() {
++	if [ -w $__xfs_cowgc_interval_knob1 ]; then
++		cat $__xfs_cowgc_interval_knob1
++	elif [ -w $__xfs_cowgc_interval_knob2 ]; then
++		cat $__xfs_cowgc_interval_knob2
++	else
++		_fail "Can't find cowgc interval procfs knob?"
++	fi
++}
+diff --git a/tests/xfs/231 b/tests/xfs/231
+index 5930339d..119a71bb 100755
+--- a/tests/xfs/231
++++ b/tests/xfs/231
+@@ -22,9 +22,10 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+ 
+ _cleanup()
+ {
+-    cd /
+-    echo $old_cow_lifetime > /proc/sys/fs/xfs/speculative_cow_prealloc_lifetime
+-    rm -rf $tmp.*
++	cd /
++	test -n "$old_cowgc_interval" && \
++		_xfs_set_cowgc_interval $old_cowgc_interval
++	rm -rf $tmp.*
+ }
+ 
+ # get standard environment, filters and checks
+@@ -40,7 +41,7 @@ _require_xfs_io_command "cowextsize"
+ _require_xfs_io_command "falloc"
+ _require_xfs_io_command "fiemap"
+ 
+-old_cow_lifetime=$(cat /proc/sys/fs/xfs/speculative_cow_prealloc_lifetime)
++old_cowgc_interval=$(_xfs_get_cowgc_interval)
+ 
+ rm -f $seqres.full
+ 
+@@ -74,7 +75,7 @@ md5sum $testdir/file2 | _filter_scratch
+ md5sum $testdir/file2.chk | _filter_scratch
+ 
+ echo "CoW and leave leftovers"
+-echo 2 > /proc/sys/fs/xfs/speculative_cow_prealloc_lifetime
++_xfs_set_cowgc_interval 2
+ seq 2 2 $((nr - 1)) | while read f; do
+ 	$XFS_IO_PROG -f -c "pwrite -S 0x63 $((blksz * f - 1)) 1" $testdir/file2 >> $seqres.full
+ 	$XFS_IO_PROG -f -c "pwrite -S 0x63 $((blksz * f - 1)) 1" $testdir/file2.chk >> $seqres.full
+@@ -91,7 +92,7 @@ done
+ $XFS_IO_PROG -f -c "falloc 0 $filesize" $testdir/junk >> $seqres.full
+ 
+ echo "CoW and leave leftovers"
+-echo $old_cow_lifetime > /proc/sys/fs/xfs/speculative_cow_prealloc_lifetime
++_xfs_set_cowgc_interval $old_cowgc_interval
+ seq 2 2 $((nr - 1)) | while read f; do
+ 	$XFS_IO_PROG -f -c "pwrite -S 0x63 $((blksz * f)) 1" $testdir/file2 >> $seqres.full
+ 	$XFS_IO_PROG -f -c "pwrite -S 0x63 $((blksz * f)) 1" $testdir/file2.chk >> $seqres.full
+diff --git a/tests/xfs/232 b/tests/xfs/232
+index e56eb3aa..909f921c 100755
+--- a/tests/xfs/232
++++ b/tests/xfs/232
+@@ -23,9 +23,10 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+ 
+ _cleanup()
+ {
+-    cd /
+-    echo $old_cow_lifetime > /proc/sys/fs/xfs/speculative_cow_prealloc_lifetime
+-    rm -rf $tmp.*
++	cd /
++	test -n "$old_cowgc_interval" && \
++		_xfs_set_cowgc_interval $old_cowgc_interval
++	rm -rf $tmp.*
+ }
+ 
+ # get standard environment, filters and checks
+@@ -41,7 +42,7 @@ _require_cp_reflink
+ _require_xfs_io_command "falloc"
+ _require_xfs_io_command "fiemap"
+ 
+-old_cow_lifetime=$(cat /proc/sys/fs/xfs/speculative_cow_prealloc_lifetime)
++old_cowgc_interval=$(_xfs_get_cowgc_interval)
+ 
+ rm -f $seqres.full
+ 
+@@ -75,7 +76,7 @@ md5sum $testdir/file2 | _filter_scratch
+ md5sum $testdir/file2.chk | _filter_scratch
+ 
+ echo "CoW and leave leftovers"
+-echo 2 > /proc/sys/fs/xfs/speculative_cow_prealloc_lifetime
++_xfs_set_cowgc_interval 2
+ seq 2 2 $((nr - 1)) | while read f; do
+ 	$XFS_IO_PROG -f -c "pwrite -S 0x63 $((blksz * f - 1)) 1" $testdir/file2 >> $seqres.full
+ 	$XFS_IO_PROG -f -c "pwrite -S 0x63 $((blksz * f - 1)) 1" $testdir/file2.chk >> $seqres.full
+@@ -93,7 +94,7 @@ done
+ $XFS_IO_PROG -f -c "falloc 0 $filesize" $testdir/junk >> $seqres.full
+ 
+ echo "CoW and leave leftovers"
+-echo $old_cow_lifetime > /proc/sys/fs/xfs/speculative_cow_prealloc_lifetime
++_xfs_set_cowgc_interval $old_cowgc_interval
+ seq 2 2 $((nr - 1)) | while read f; do
+ 	$XFS_IO_PROG -f -c "pwrite -S 0x63 $((blksz * f)) 1" $testdir/file2 >> $seqres.full
+ 	$XFS_IO_PROG -f -c "pwrite -S 0x63 $((blksz * f)) 1" $testdir/file2.chk >> $seqres.full
 
