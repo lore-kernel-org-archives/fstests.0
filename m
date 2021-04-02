@@ -2,162 +2,382 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-17.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-16.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 533D2C43470
-	for <linux-fstests@archiver.kernel.org>; Thu,  1 Apr 2021 09:48:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E97F7C433ED
+	for <linux-fstests@archiver.kernel.org>; Fri,  2 Apr 2021 00:58:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D9FF1610E5
-	for <linux-fstests@archiver.kernel.org>; Thu,  1 Apr 2021 09:48:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id ACE3361106
+	for <linux-fstests@archiver.kernel.org>; Fri,  2 Apr 2021 00:58:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233670AbhDAJrs (ORCPT
+        id S234389AbhDBA6j (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 1 Apr 2021 05:47:48 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:23564 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S233650AbhDAJrj (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 1 Apr 2021 05:47:39 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1617270459;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=qbka1MuHTUaUBgISMmgp3LVors4VvjsFFwC/IHLayjY=;
-        b=dllPIBq22Dha1cGF5Zbd31mXh4P4/klRojqdtXLDClp7zQjb3oyHhVOgeG15WGTMOC0TRW
-        KdwnKiOU8+hSE6OU4LY9WYq7npfdz6OsVcZ5NnLJXh4op9QCBwIKjddSO7H4xDAzDnDq7x
-        Ki3W6RwvrshuC9/+uPq5seu8L7GTiP0=
-Received: from mail-wm1-f69.google.com (mail-wm1-f69.google.com
- [209.85.128.69]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-387-MQu5a5ykMGuslX-qztPSbA-1; Thu, 01 Apr 2021 05:47:37 -0400
-X-MC-Unique: MQu5a5ykMGuslX-qztPSbA-1
-Received: by mail-wm1-f69.google.com with SMTP id w185so757985wmg.4
-        for <fstests@vger.kernel.org>; Thu, 01 Apr 2021 02:47:37 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=qbka1MuHTUaUBgISMmgp3LVors4VvjsFFwC/IHLayjY=;
-        b=HCQgjX9blkhLIdtfsSlEBiiKzToWDiKFAGXRYXq4WcJskB8fU/IDEQ7vyhfvKmyobF
-         YrOJNDyzHguFO9/qDKha7QZ0fx089QFj/XFZYGhjcr+eKFU84S1nN7CM0VJ0/w+gKqMp
-         GEH9CwU6ioPEYt/Vab+glmtntvX4LT0DdTodqG5if1Yc8Kk33wPJ1BHLwqbR3gltfzK1
-         zpbOsc0Fy79oWiDF4HWk43EwQN9q/l4UAGKJp25ckg085AQwjszCbJjDKVm71vYLnr4S
-         DOGFy1u2C0CdSTOkk7vjyU8MesdgILUQQfSS1N80snwBMrX11brZ/qF/SCywtmwo85Ww
-         hzYg==
-X-Gm-Message-State: AOAM531V4ViFcHUxHLmQghfXZBnvte0TLlV6klAgqwGdi5L1QeqKKgPM
-        JEYZNA/GiAZddhqU6i5wj5M36DrIkx/mUgTYgPu/38KRlWwMXqbmwWlhriKuKE16NUs0eB5al2G
-        ni+GqOcJD4UhdjUvHkA==
-X-Received: by 2002:a5d:6384:: with SMTP id p4mr8621328wru.368.1617270456555;
-        Thu, 01 Apr 2021 02:47:36 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJyLdTcLa/yMKMzBOLQqnhNFcVyHcOh0mHxzzLh2KmFbHvjVjW/VoFZxRd7SNr80xOWkn9VcFQ==
-X-Received: by 2002:a5d:6384:: with SMTP id p4mr8621309wru.368.1617270456352;
-        Thu, 01 Apr 2021 02:47:36 -0700 (PDT)
-Received: from localhost.localdomain ([84.19.91.9])
-        by smtp.gmail.com with ESMTPSA id c131sm7934300wma.37.2021.04.01.02.47.35
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 01 Apr 2021 02:47:36 -0700 (PDT)
-Subject: Re: [PATCH v2 1/4] common/rc: Add _require_{chown,chmod,symlink}()
-To:     Eryu Guan <eguan@linux.alibaba.com>
-Cc:     fstests@vger.kernel.org, zlang@redhat.com, guan@eryu.me,
-        Eric Sandeen <sandeen@redhat.com>,
-        Dave Chinner <dchinner@redhat.com>
-References: <20210330220005.56019-1-preichl@redhat.com>
- <20210330220005.56019-2-preichl@redhat.com>
- <20210401033853.GO95214@e18g06458.et15sqa>
-From:   Pavel Reichl <preichl@redhat.com>
-Message-ID: <9f6d45ca-7f96-1cfa-5e66-a355ad4e0c7a@redhat.com>
-Date:   Thu, 1 Apr 2021 11:47:35 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.8.1
+        Thu, 1 Apr 2021 20:58:39 -0400
+Received: from mail.kernel.org ([198.145.29.99]:45068 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S234680AbhDBA6Q (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 1 Apr 2021 20:58:16 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 17441610CB;
+        Fri,  2 Apr 2021 00:58:16 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1617325096;
+        bh=G4s+mPxj3fM/jjHMoONUL8u0D4ZsPTC0glVuX+kuKRw=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=ZZDXW7pMjBlA/B0ULpdNC2dt7JvlACw8RGxorcybjS5aQ4LDTDc4RVY9fa5yD45PU
+         8iqAT3G++KycP6dNNJDkn/xKC0t2Dtew+zbZETs3PrximGdApekbXCKwz9y0fDA6+i
+         ht0IwhUWb/6WuEgw2r/wmwGNN34wp3sLbmmIUdYHyZpaEYen2DjRl8lrmWyJ78R43r
+         2r7sKZBEYwgVdJ9ScdlbU6kA6+iv/Ef/idIekiEa/1vkusbtYT406n//rifmHfHB3D
+         ndoia7l23k+NwlXDUgm3VKzwkTaXjIMGo82dzIePtrwIrxwXvKMpmieMf5LG5jPegP
+         r7YFwFk7wKcqQ==
+Date:   Thu, 1 Apr 2021 17:58:14 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Brian Foster <bfoster@redhat.com>
+Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org, guan@eryu.me
+Subject: Re: [PATCH 1/2] xfs: functional testing of V5-relevant options
+Message-ID: <20210402005814.GU1670408@magnolia>
+References: <161715290311.2703879.6182444659830603450.stgit@magnolia>
+ <161715290858.2703879.2364659698245587140.stgit@magnolia>
+ <YGSzFRxcGuu3GR4I@bfoster>
 MIME-Version: 1.0
-In-Reply-To: <20210401033853.GO95214@e18g06458.et15sqa>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <YGSzFRxcGuu3GR4I@bfoster>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-
-
-On 4/1/21 5:38 AM, Eryu Guan wrote:
-> On Wed, Mar 31, 2021 at 12:00:02AM +0200, Pavel Reichl wrote:
->> Add helper functions that ensure that test is only executed on file
->> systems that implement chown, chmod and symbolic links.
->>
->> Fixed test are: generic/{87,88,125,126,128,193,314,317,355,597,598}
->>
->> Signed-off-by: Pavel Reichl <preichl@redhat.com>
->> ---
->>  common/rc         | 27 +++++++++++++++++++++++++++
->>  tests/generic/087 |  1 +
->>  tests/generic/088 |  1 +
->>  tests/generic/125 |  1 +
->>  tests/generic/126 |  1 +
->>  tests/generic/128 |  1 +
->>  tests/generic/193 |  1 +
->>  tests/generic/314 |  1 +
->>  tests/generic/317 |  1 +
->>  tests/generic/355 |  1 +
->>  tests/generic/597 |  1 +
->>  tests/generic/598 |  1 +
->>  12 files changed, 38 insertions(+)
->>
->> diff --git a/common/rc b/common/rc
->> index 0ce3cb0d..9cdfe21c 100644
->> --- a/common/rc
->> +++ b/common/rc
->> @@ -2129,6 +2129,33 @@ _require_user()
->>      [ "$?" == "0" ] || _notrun "$qa_user cannot execute commands."
->>  }
->>  
->> +# check for a chown support
->> +#
->> +_require_chown()
->> +{
->> +	if [ "$FSTYP" = "exfat" ]; then
->> +		_notrun "chown is not supported on $FSTYP"
->> +	fi
->> +}
->> +
->> +# check for a chmod support
->> +#
->> +_require_chmod()
->> +{
->> +	if [ "$FSTYP" = "exfat" ]; then
->> +		_notrun "chmod is not supported on $FSTYP"
->> +	fi
->> +}
->> +
+On Wed, Mar 31, 2021 at 01:36:21PM -0400, Brian Foster wrote:
+> On Tue, Mar 30, 2021 at 06:08:28PM -0700, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <djwong@kernel.org>
+> > 
+> > Currently, the only functional testing for xfs_admin is xfs/287, which
+> > checks that one can add 32-bit project ids to a V4 filesystem.  This
+> > obviously isn't an exhaustive test of all the CLI arguments, and
+> > historically there have been xfs configurations that don't even work.
+> > 
+> > Therefore, introduce a couple of new tests -- one that will test the
+> > simple options with the default configuration, and a second test that
+> > steps a bit outside of the test run configuration to make sure that we
+> > do the right thing for external devices.  The second test already caught
+> > a nasty bug in xfsprogs 5.11.
+> > 
+> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> > ---
+> >  common/xfs        |   21 ++++++++++
+> >  tests/xfs/764     |   91 ++++++++++++++++++++++++++++++++++++++++++
+> >  tests/xfs/764.out |   17 ++++++++
+> >  tests/xfs/773     |  114 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/xfs/773.out |   19 +++++++++
+> >  tests/xfs/group   |    2 +
+> >  6 files changed, 264 insertions(+)
+> >  create mode 100755 tests/xfs/764
+> >  create mode 100644 tests/xfs/764.out
+> >  create mode 100755 tests/xfs/773
+> >  create mode 100644 tests/xfs/773.out
+> > 
+> > 
+> ...
+> > diff --git a/tests/xfs/764 b/tests/xfs/764
+> > new file mode 100755
+> > index 00000000..c710ad4e
+> > --- /dev/null
+> > +++ b/tests/xfs/764
+> > @@ -0,0 +1,91 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0-or-later
+> > +# Copyright (c) 2021 Oracle.  All Rights Reserved.
+> > +#
+> > +# FS QA Test No. 764
+> > +#
+> > +# Functional testing for xfs_admin to make sure that it handles option parsing
+> > +# correctly, at least for functionality that's relevant to V5 filesystems.
 > 
-> Does chown/chmod fail on exfat? Like the existing _require_symlink()
-> implementation and many other _require rules, we try to actually do the
-> action on $TEST_DIR, and check if command succeeds to see if the action
-> is supported by current $FSTYP. Is it possible for exfat to do the same
-> check?
+> This test doesn't seem to depend on v5..?
+
+Why would it?  You can set labels and uuids for V4 filesystems.
+
+"..relevant to V5 filesystems" means this test doesn't bother with the
+the upgrade options that don't apply to V5, like lazycount, 32bit
+project ids, and v2 logs.
+
+> > +
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +
+> > +here=`pwd`
+> > +tmp=/tmp/$$
+> > +status=1    # failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	rm -f $tmp.*
+> > +}
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/filter
+> > +
+> > +# real QA test starts here
+> > +_supported_fs xfs
+> > +_require_scratch
+> > +_require_command "$XFS_ADMIN_PROG" "xfs_admin"
+> > +
+> > +rm -f $seqres.full
+> > +
+> > +note() {
+> > +	echo "$@" | tee -a $seqres.full
+> > +}
+> > +
+> > +note "S0: Initialize filesystem"
+> > +_scratch_mkfs -L origlabel -m uuid=babababa-baba-baba-baba-babababababa >> $seqres.full
+> > +_scratch_xfs_db -c label -c uuid
+> > +_scratch_xfs_repair -n &>> $seqres.full || echo "Check failed?"
+> > +
+> > +note "S1: Set a filesystem label"
+> > +_scratch_xfs_admin -L newlabel >> $seqres.full
+> > +_scratch_xfs_db -c label
+> > +_scratch_xfs_repair -n &>> $seqres.full || echo "Check failed?"
+> > +
+> > +note "S2: Clear filesystem label"
+> > +_scratch_xfs_admin -L -- >> $seqres.full
+> > +_scratch_xfs_db -c label
+> > +_scratch_xfs_repair -n &>> $seqres.full || echo "Check failed?"
+> > +
+> > +note "S3: Try to set oversized label"
+> > +_scratch_xfs_admin -L thisismuchtoolongforxfstohandle >> $seqres.full
+> > +_scratch_xfs_db -c label
+> > +_scratch_xfs_repair -n &>> $seqres.full || echo "Check failed?"
+> > +
+> > +note "S4: Set filesystem UUID"
+> > +_scratch_xfs_admin -U deaddead-dead-dead-dead-deaddeaddead >> $seqres.full
+> > +_scratch_xfs_db -c uuid
+> > +_scratch_xfs_repair -n &>> $seqres.full || echo "Check failed?"
+> > +
+> > +note "S5: Zero out filesystem UUID"
+> > +_scratch_xfs_admin -U nil >> $seqres.full
+> > +_scratch_xfs_db -c uuid
+> > +_scratch_xfs_repair -n &>> $seqres.full || echo "Check failed?"
+> > +
+> > +note "S6: Randomize filesystem UUID"
+> > +old_uuid="$(_scratch_xfs_db -c uuid)"
+> > +_scratch_xfs_admin -U generate >> $seqres.full
+> > +new_uuid="$(_scratch_xfs_db -c uuid)"
+> > +if [ "$new_uuid" = "$old_uuid" ]; then
+> > +	echo "UUID randomization failed? $old_uuid == $new_uuid"
+> > +fi
+> > +_scratch_xfs_repair -n &>> $seqres.full || echo "Check failed?"
+> > +
 > 
-> We only use whitelist if it's impossible to do such check.
+> Can we drop all these intermediate repair invocations and just rely on
+> the post-test device check? Otherwise the rest LGTM.
+
+I was trying to be thorough, checking at each step that we haven't
+accidentally broken the filesystem.  They could go away, but what's the
+harm in checking an empty filesystem?
+
+--D
+
+> Brian
 > 
-> Thanks,
-> Eryu
+> > +note "S7: Restore original filesystem UUID"
+> > +if _check_scratch_xfs_features V5 >/dev/null; then
+> > +	# Only V5 supports the metauuid feature that enables us to restore the
+> > +	# original UUID after a change.
+> > +	_scratch_xfs_admin -U restore >> $seqres.full
+> > +	_scratch_xfs_db -c uuid
+> > +else
+> > +	echo "UUID = babababa-baba-baba-baba-babababababa"
+> > +fi
+> > +
+> > +# success, all done
+> > +status=0
+> > +exit
+> > diff --git a/tests/xfs/764.out b/tests/xfs/764.out
+> > new file mode 100644
+> > index 00000000..8da929ec
+> > --- /dev/null
+> > +++ b/tests/xfs/764.out
+> > @@ -0,0 +1,17 @@
+> > +QA output created by 764
+> > +S0: Initialize filesystem
+> > +label = "origlabel"
+> > +UUID = babababa-baba-baba-baba-babababababa
+> > +S1: Set a filesystem label
+> > +label = "newlabel"
+> > +S2: Clear filesystem label
+> > +label = ""
+> > +S3: Try to set oversized label
+> > +label = "thisismuchto"
+> > +S4: Set filesystem UUID
+> > +UUID = deaddead-dead-dead-dead-deaddeaddead
+> > +S5: Zero out filesystem UUID
+> > +UUID = 00000000-0000-0000-0000-000000000000
+> > +S6: Randomize filesystem UUID
+> > +S7: Restore original filesystem UUID
+> > +UUID = babababa-baba-baba-baba-babababababa
+> > diff --git a/tests/xfs/773 b/tests/xfs/773
+> > new file mode 100755
+> > index 00000000..f184962a
+> > --- /dev/null
+> > +++ b/tests/xfs/773
+> > @@ -0,0 +1,114 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0-or-later
+> > +# Copyright (c) 2021 Oracle.  All Rights Reserved.
+> > +#
+> > +# FS QA Test No. 773
+> > +#
+> > +# Functional testing for xfs_admin to ensure that it parses arguments correctly
+> > +# with regards to data devices that are files, external logs, and realtime
+> > +# devices.
+> > +#
+> > +# Because this test synthesizes log and rt devices (by modifying the test run
+> > +# configuration), it does /not/ require the ability to mount the scratch
+> > +# filesystem.  This increases test coverage while isolating the weird bits to a
+> > +# single test.
+> > +#
+> > +# This is partially a regression test for "xfs_admin: pick up log arguments
+> > +# correctly", insofar as the issue fixed by that patch was discovered with an
+> > +# earlier revision of this test.
+> > +
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +
+> > +here=`pwd`
+> > +tmp=/tmp/$$
+> > +status=1    # failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	rm -f $tmp.* $fake_logfile $fake_rtfile $fake_datafile
+> > +}
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/filter
+> > +
+> > +# real QA test starts here
+> > +_supported_fs xfs
+> > +_require_test
+> > +_require_scratch_nocheck
+> > +_require_command "$XFS_ADMIN_PROG" "xfs_admin"
+> > +
+> > +rm -f $seqres.full
+> > +
+> > +# Create some fake sparse files for testing external devices and whatnot
+> > +fake_datafile=$TEST_DIR/scratch.data
+> > +rm -f $fake_datafile
+> > +truncate -s 500m $fake_datafile
+> > +
+> > +fake_logfile=$TEST_DIR/scratch.log
+> > +rm -f $fake_logfile
+> > +truncate -s 500m $fake_logfile
+> > +
+> > +fake_rtfile=$TEST_DIR/scratch.rt
+> > +rm -f $fake_rtfile
+> > +truncate -s 500m $fake_rtfile
+> > +
+> > +# Save the original variables
+> > +orig_ddev=$SCRATCH_DEV
+> > +orig_external=$USE_EXTERNAL
+> > +orig_logdev=$SCRATCH_LOGDEV
+> > +orig_rtdev=$SCRATCH_RTDEV
+> > +
+> > +scenario() {
+> > +	echo "$@" | tee -a $seqres.full
+> > +
+> > +	SCRATCH_DEV=$orig_ddev
+> > +	USE_EXTERNAL=$orig_external
+> > +	SCRATCH_LOGDEV=$orig_logdev
+> > +	SCRATCH_RTDEV=$orig_rtdev
+> > +}
+> > +
+> > +check_label() {
+> > +	_scratch_mkfs -L oldlabel >> $seqres.full
+> > +	_scratch_xfs_db -c label
+> > +	_scratch_xfs_admin -L newlabel "$@" >> $seqres.full
+> > +	_scratch_xfs_db -c label
+> > +	_scratch_xfs_repair -n &>> $seqres.full || echo "Check failed?"
+> > +}
+> > +
+> > +scenario "S1: Check that label setting with file image"
+> > +SCRATCH_DEV=$fake_datafile
+> > +check_label -f
+> > +
+> > +scenario "S2: Check that setting with logdev works"
+> > +USE_EXTERNAL=yes
+> > +SCRATCH_LOGDEV=$fake_logfile
+> > +check_label
+> > +
+> > +scenario "S3: Check that setting with rtdev works"
+> > +USE_EXTERNAL=yes
+> > +SCRATCH_RTDEV=$fake_rtfile
+> > +check_label
+> > +
+> > +scenario "S4: Check that setting with rtdev + logdev works"
+> > +USE_EXTERNAL=yes
+> > +SCRATCH_LOGDEV=$fake_logfile
+> > +SCRATCH_RTDEV=$fake_rtfile
+> > +check_label
+> > +
+> > +scenario "S5: Check that setting with nortdev + nologdev works"
+> > +USE_EXTERNAL=
+> > +SCRATCH_LOGDEV=
+> > +SCRATCH_RTDEV=
+> > +check_label
+> > +
+> > +scenario "S6: Check that setting with bdev incorrectly flagged as file works"
+> > +check_label -f
+> > +
+> > +# success, all done
+> > +status=0
+> > +exit
+> > diff --git a/tests/xfs/773.out b/tests/xfs/773.out
+> > new file mode 100644
+> > index 00000000..954bfb85
+> > --- /dev/null
+> > +++ b/tests/xfs/773.out
+> > @@ -0,0 +1,19 @@
+> > +QA output created by 773
+> > +S1: Check that label setting with file image
+> > +label = "oldlabel"
+> > +label = "newlabel"
+> > +S2: Check that setting with logdev works
+> > +label = "oldlabel"
+> > +label = "newlabel"
+> > +S3: Check that setting with rtdev works
+> > +label = "oldlabel"
+> > +label = "newlabel"
+> > +S4: Check that setting with rtdev + logdev works
+> > +label = "oldlabel"
+> > +label = "newlabel"
+> > +S5: Check that setting with nortdev + nologdev works
+> > +label = "oldlabel"
+> > +label = "newlabel"
+> > +S6: Check that setting with bdev incorrectly flagged as file works
+> > +label = "oldlabel"
+> > +label = "newlabel"
+> > diff --git a/tests/xfs/group b/tests/xfs/group
+> > index 09fddb5a..5801471b 100644
+> > --- a/tests/xfs/group
+> > +++ b/tests/xfs/group
+> > @@ -520,5 +520,7 @@
+> >  537 auto quick
+> >  538 auto stress
+> >  539 auto quick mount
+> > +764 auto quick repair
+> >  768 auto quick repair
+> >  770 auto repair
+> > +773 auto quick repair
+> > 
 > 
-
-Hi, 
-
-it does fail. It was actually my original intention to write the _require*() so it would check if the command succeeds as you are suggesting.
-
-However, Eric and Dave were worried that adding more _require*() through the tests would lead to further slowing test execution. This worry actually makes sense to me.
-
-Is there a significant benefit of testing the support vs. maintaining check based on FSTYP variable? I guess doing the check saves us from the need to update the code when new file-system is added, however actually doing the check increases time of test execution (but I haven't done any measurements yet - it's just my guess).
-
-I really don't mind doing it either way and I'm happy to change the code - I'm just trying to explain :-)
-
-Thanks for the comment.
-
-Have a nice day.
-
