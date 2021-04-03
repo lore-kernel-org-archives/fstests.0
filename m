@@ -2,241 +2,260 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 884F0C43460
-	for <linux-fstests@archiver.kernel.org>; Fri,  2 Apr 2021 09:50:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ABA9FC433ED
+	for <linux-fstests@archiver.kernel.org>; Sat,  3 Apr 2021 00:29:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 635E06113C
-	for <linux-fstests@archiver.kernel.org>; Fri,  2 Apr 2021 09:50:52 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7C96A611AF
+	for <linux-fstests@archiver.kernel.org>; Sat,  3 Apr 2021 00:29:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234482AbhDBJuw (ORCPT
+        id S235689AbhDCA3x (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 2 Apr 2021 05:50:52 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:57544 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S234627AbhDBJuv (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 2 Apr 2021 05:50:51 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1617357050;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=lvIaXkfRgYuskgswG5QCMho02/eUmFzyTn6nc4CAmqk=;
-        b=exKO4TZ8px49MyFwn8QKOLm3dSF9Zm/1hN+NuGrapQRFSD2wk9Y/hgTPKLVE6RZ8Tyapvn
-        JgAhuld49HVX4GLIOqwGMfn1hzHJYOzzLHHmUe547975jU4w2GiGRcTMzgS3BfzXluO8a+
-        t7GNQI7P4uWHgZO5gf9PS+np/B46uXA=
-Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com
- [209.85.216.70]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-471-HkSblA4CPRu8LUkSGJY2cA-1; Fri, 02 Apr 2021 05:50:49 -0400
-X-MC-Unique: HkSblA4CPRu8LUkSGJY2cA-1
-Received: by mail-pj1-f70.google.com with SMTP id hi16so1133230pjb.7
-        for <fstests@vger.kernel.org>; Fri, 02 Apr 2021 02:50:48 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=lvIaXkfRgYuskgswG5QCMho02/eUmFzyTn6nc4CAmqk=;
-        b=BcZuchnFjEkam7XwQRwTi0I2mSHmjc2kPA1e1LmVXQRrAPefXSv78LjEQpNQAb/N2r
-         zQXRDiwk1yeo48fwZLCVTfeGAlan6qfWisWSzQgzQnklD4suhTkZmz0/cwVF54H8F0xJ
-         448QGg4TG1Di4yxmJkQlVekHjretayhpuBWbqdfd0HG2588Q34UAiWF3hBZjEoTFqItf
-         vVFBzFzXFSNQttaQmhTvQJRjkQkA/sp4bWPYMor6V+qps5Y3teYmiQkz0oiGnweEdaiM
-         1b6WWnCCXA8L8lpo2zKJ2VTqx1RA+dP6fFO3s2oL6ATQwJfCFudof+/WDTOZZPVbO/Hk
-         VV6A==
-X-Gm-Message-State: AOAM5325zQ8/yjTSewMm2Mb9Qj3y4vEWLpsOzB+DDZ73wKCdkt0moNhP
-        G/3d764QX6/WIT9yc+iX+B0kl0WnCzmdQYBw3DTYbPZFS6H8xyH3E7Q244IOFAqv2SsS46kKbcZ
-        hniPhwT1OIRVDcWAlqQ==
-X-Received: by 2002:a17:902:7246:b029:e6:78c4:48d8 with SMTP id c6-20020a1709027246b02900e678c448d8mr12320281pll.18.1617357047626;
-        Fri, 02 Apr 2021 02:50:47 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJyvSer4Clk48leF8gEUjmKKAGdzHUjfsvB4jideKGUaUEVUGQzk9HR7ADOjvChexk01lzXf/w==
-X-Received: by 2002:a17:902:7246:b029:e6:78c4:48d8 with SMTP id c6-20020a1709027246b02900e678c448d8mr12320264pll.18.1617357047368;
-        Fri, 02 Apr 2021 02:50:47 -0700 (PDT)
-Received: from xiangao.remote.csb ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id l124sm7730354pfl.195.2021.04.02.02.50.44
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 02 Apr 2021 02:50:47 -0700 (PDT)
-From:   Gao Xiang <hsiangkao@redhat.com>
-To:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Cc:     "Darrick J. Wong" <djwong@kernel.org>,
-        Zorro Lang <zlang@redhat.com>, Eryu Guan <guan@eryu.me>,
-        Gao Xiang <hsiangkao@redhat.com>
-Subject: [PATCH v4 3/3] xfs: stress test for shrinking free space in the last AG
-Date:   Fri,  2 Apr 2021 17:49:37 +0800
-Message-Id: <20210402094937.4072606-4-hsiangkao@redhat.com>
-X-Mailer: git-send-email 2.27.0
-In-Reply-To: <20210402094937.4072606-1-hsiangkao@redhat.com>
-References: <20210402094937.4072606-1-hsiangkao@redhat.com>
+        Fri, 2 Apr 2021 20:29:53 -0400
+Received: from mail.kernel.org ([198.145.29.99]:37948 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S235850AbhDCA3w (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 2 Apr 2021 20:29:52 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 6F8AD61185;
+        Sat,  3 Apr 2021 00:29:50 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1617409790;
+        bh=BhKB0N3OAiqPrmueSicmlet9WLngmjoHBHNXnIGsnmE=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=sXIsinyTpGNBF9elzv1TZZ0AxGpeGnIgv3dipRxlzxgvaBx/+1gLa0LUBqY4Yj6gG
+         IWH6tE92wzkWOmD/9pw+y/efIpiCYXFCmvi5+6AXOOv3G9d6I0aInbvv+AiXahFeeN
+         KTthFMtPV08HeYdklUsyojnAfeIi8KCSZ5ZgxgEjGAfcTZ7PiC691sxcM9t2SWxl7P
+         vHX6ifWmj038cx99Jy1IFKj2TTQonXHljKWqqUXwnwVF8o6HIX/L7ZWW5fVID4MNA9
+         DKung9eBohgxAryZNLhx8BIU+f6elQio0bLOUrWmMjS/OnrTHJkq3f3+UA+zlei6HV
+         4oLNXyhC43NvQ==
+Date:   Fri, 2 Apr 2021 17:29:49 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Brian Foster <bfoster@redhat.com>
+Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org, guan@eryu.me
+Subject: Re: [PATCH 2/2] xfs: test inobtcount upgrade
+Message-ID: <20210403002949.GW1670408@magnolia>
+References: <161715290311.2703879.6182444659830603450.stgit@magnolia>
+ <161715291407.2703879.12588572306371939752.stgit@magnolia>
+ <YGSzLxelZoG7IGA9@bfoster>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <YGSzLxelZoG7IGA9@bfoster>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This adds a stress testcase to shrink free space as much as
-possible in the last AG with background fsstress workload.
+On Wed, Mar 31, 2021 at 01:36:47PM -0400, Brian Foster wrote:
+> On Tue, Mar 30, 2021 at 06:08:34PM -0700, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <djwong@kernel.org>
+> > 
+> > Make sure we can actually upgrade filesystems to support inode btree
+> > counters.
+> > 
+> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> > ---
+> >  tests/xfs/910     |  112 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/xfs/910.out |   23 +++++++++++
+> >  tests/xfs/group   |    1 
+> >  3 files changed, 136 insertions(+)
+> >  create mode 100755 tests/xfs/910
+> >  create mode 100644 tests/xfs/910.out
+> > 
+> > 
+> > diff --git a/tests/xfs/910 b/tests/xfs/910
+> > new file mode 100755
+> > index 00000000..5f095324
+> > --- /dev/null
+> > +++ b/tests/xfs/910
+> > @@ -0,0 +1,112 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0-or-later
+> > +# Copyright (c) 2021 Oracle.  All Rights Reserved.
+> > +#
+> > +# FS QA Test No. 910
+> > +#
+> > +# Check that we can upgrade a filesystem to support inobtcount and that
+> > +# everything works properly after the upgrade.
+> > +
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +
+> > +here=`pwd`
+> > +tmp=/tmp/$$
+> > +status=1    # failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	rm -f $tmp.*
+> > +}
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/filter
+> > +
+> > +# real QA test starts here
+> > +_supported_fs xfs
+> > +_require_xfs_scratch_inobtcount
+> > +_require_command "$XFS_ADMIN_PROG" "xfs_admin"
+> > +_require_xfs_repair_upgrade inobtcount
+> > +
+> > +rm -f $seqres.full
+> > +
+> > +# Make sure we can't format a filesystem with inobtcount and not finobt.
+> > +_scratch_mkfs -m crc=1,inobtcount=1,finobt=0 &> $seqres.full && \
+> > +	echo "Should not be able to format with inobtcount but not finobt."
+> > +
+> > +# Make sure we can't upgrade a V4 filesystem
+> > +_scratch_mkfs -m crc=0,inobtcount=0,finobt=0 >> $seqres.full
+> > +_scratch_xfs_admin -O inobtcount=1 2>> $seqres.full
+> > +_check_scratch_xfs_features INOBTCNT
+> > +
+> > +# Make sure we can't upgrade a filesystem to inobtcount without finobt.
+> > +_scratch_mkfs -m crc=1,inobtcount=0,finobt=0 >> $seqres.full
+> > +_scratch_xfs_admin -O inobtcount=1 2>> $seqres.full
+> > +_check_scratch_xfs_features INOBTCNT
+> > +
+> > +# Format V5 filesystem without inode btree counter support and upgrade it.
+> > +# Inject failure into repair and make sure that the only path forward is
+> > +# to re-run repair on the filesystem.
+> > +_scratch_mkfs -m crc=1,inobtcount=0 >> $seqres.full
+> > +echo "Fail partway through upgrading"
+> > +XFS_REPAIR_FAIL_AFTER_PHASE=2 _scratch_xfs_repair -c inobtcount=1 2>> $seqres.full
+> > +test $? -eq 137 || echo "repair should have been killed??"
+> > +_check_scratch_xfs_features NEEDSREPAIR INOBTCNT
+> > +_try_scratch_mount &> $tmp.mount
+> > +res=$?
+> > +_filter_scratch < $tmp.mount
+> > +if [ $res -eq 0 ]; then
+> > +	echo "needsrepair should have prevented mount"
+> > +	_scratch_unmount
+> > +fi
+> > +
+> > +echo "Re-run repair to finish upgrade"
+> > +_scratch_xfs_repair 2>> $seqres.full
+> > +_check_scratch_xfs_features NEEDSREPAIR INOBTCNT
+> > +
+> > +echo "Filesystem should be usable again"
+> > +_try_scratch_mount &> $tmp.mount
+> > +res=$?
+> > +_filter_scratch < $tmp.mount
+> > +if [ $res -eq 0 ]; then
+> > +	_scratch_unmount
+> > +else
+> > +	echo "mount should succeed after second repair"
+> > +fi
+> > +_check_scratch_xfs_features NEEDSREPAIR INOBTCNT
+> > +
+> 
+> As you're probably aware I'm not a huge fan of sprinkling these kind of
+> repair/mount checks throughout the feature level tests. I don't think
+> it's reasonable to expect this to become a consistent pattern, so over
+> time this will likely just obfuscate the purpose of some of these tests.
+> That said, it seems to be harmless here so I'll just note that as my
+> .02.
 
-The expectation is that no crash happens with expected output.
+Ok.  I think inobtcount is the only feature upgrade test that checks it.
 
-Signed-off-by: Gao Xiang <hsiangkao@redhat.com>
----
- tests/xfs/991     | 118 ++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/991.out |   8 ++++
- tests/xfs/group   |   1 +
- 3 files changed, 127 insertions(+)
- create mode 100755 tests/xfs/991
- create mode 100644 tests/xfs/991.out
+> > +# Format V5 filesystem without inode btree counter support and upgrade it.
+> > +_scratch_mkfs -m crc=1,inobtcount=0 >> $seqres.full
+> > +_scratch_xfs_db -c 'version' -c 'sb 0' -c 'p' >> $seqres.full
+> > +_scratch_mount >> $seqres.full
+> > +
+> > +echo moo > $SCRATCH_MNT/urk
+> > +
+> > +_scratch_unmount
+> > +_check_scratch_fs
+> > +
+> > +# Now upgrade to inobtcount support
+> > +_scratch_xfs_admin -O inobtcount=1 2>> $seqres.full
+> > +_check_scratch_xfs_features INOBTCNT
+> > +_check_scratch_fs
+> > +_scratch_xfs_db -c 'version' -c 'sb 0' -c 'p' -c 'agi 0' -c 'p' >> $seqres.full
+> > +
+> 
+> This looks nearly the same as the previous test with the exception of
+> not doing repair failure injection and instead creating a file and
+> checking the resulting counters. Could we combine these two sequences
+> and simultaneously run a slightly more randomized test? E.g., a logical
+> sequence along the lines of:
+> 
+> mkfs inobtcount=0
+> mount
+> run fsstress -n 500 or otherwise (quickly) populate w/ some randomized content
+> umount
+> repair w/ fail injection
+> repair w/o fail injection
+> check resulting counters
+> 
+> Hm?
 
-diff --git a/tests/xfs/991 b/tests/xfs/991
-new file mode 100755
-index 00000000..8ad0b8c7
---- /dev/null
-+++ b/tests/xfs/991
-@@ -0,0 +1,118 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2020-2021 Red Hat, Inc.  All Rights Reserved.
-+#
-+# FS QA Test 991
-+#
-+# XFS online shrinkfs stress test
-+#
-+# This test attempts to shrink unused space as much as possible with
-+# background fsstress workload. It will decrease the shrink size if
-+# larger size fails. And totally repeat 2 * TIME_FACTOR times.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "rm -f $tmp.*; exit \$status" 0 1 2 3 15
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+create_scratch()
-+{
-+	_scratch_mkfs_xfs $@ | tee -a $seqres.full | \
-+		_filter_mkfs 2>$tmp.mkfs >/dev/null
-+	. $tmp.mkfs
-+
-+	_scratch_mount
-+	# fix the reserve block pool to a known size so that the enospc
-+	# calculations work out correctly.
-+	_scratch_resvblks 1024 > /dev/null 2>&1
-+}
-+
-+fill_scratch()
-+{
-+	$XFS_IO_PROG -f -c "falloc 0 $1" $SCRATCH_MNT/resvfile
-+}
-+
-+stress_scratch()
-+{
-+	local procs=3
-+	local nops=$((1000 * LOAD_FACTOR))
-+	# -w ensures that the only ops are ones which cause write I/O
-+	local FSSTRESS_ARGS=`_scale_fsstress_args -d $SCRATCH_MNT -w \
-+		-p $procs -n $nops $FSSTRESS_AVOID`
-+	$FSSTRESS_PROG $FSSTRESS_ARGS >> $seqres.full 2>&1
-+}
-+
-+# real QA test starts here
-+_supported_fs xfs
-+_require_xfs_scratch_shrink
-+_require_xfs_io_command "falloc"
-+
-+rm -f $seqres.full
-+_scratch_mkfs_xfs | tee -a $seqres.full | _filter_mkfs 2>$tmp.mkfs
-+. $tmp.mkfs	# extract blocksize and data size for scratch device
-+
-+decsize=`expr  42 \* 1048576`	# shrink in chunks of this size at most
-+endsize=`expr 125 \* 1048576`	# stop after shrinking this big
-+[ `expr $endsize / $dbsize` -lt $dblocks ] || _notrun "Scratch device too small"
-+
-+nags=2
-+totalcount=$((2 * TIME_FACTOR))
-+
-+while [ $totalcount -gt 0 ]; do
-+	size=`expr 1010 \* 1048576`	# 1010 megabytes initially
-+	logblks=$(_scratch_find_xfs_min_logblocks -dsize=${size} -dagcount=${nags})
-+
-+	create_scratch -lsize=${logblks}b -dsize=${size} -dagcount=${nags}
-+
-+	for i in `seq 125 -1 90`; do
-+		fillsize=`expr $i \* 1048576`
-+		out="$(fill_scratch $fillsize 2>&1)"
-+		echo "$out" | grep -q 'No space left on device' && continue
-+		test -n "${out}" && echo "$out"
-+		break
-+	done
-+
-+	while [ $size -gt $endsize ]; do
-+		stress_scratch &
-+		sleep 1
-+
-+		decb=`expr $decsize / $dbsize`    # in data blocks
-+		while [ $decb -gt 0 ]; do
-+			sizeb=`expr $size / $dbsize - $decb`
-+
-+			$XFS_GROWFS_PROG -D ${sizeb} $SCRATCH_MNT \
-+				>> $seqres.full 2>&1 && break
-+
-+			[ $decb -gt 100 ] && decb=`expr $decb + $RANDOM % 10`
-+			decb=`expr $decb / 2`
-+		done
-+
-+		wait
-+		[ $decb -eq 0 ] && break
-+
-+		# get latest dblocks
-+		$XFS_INFO_PROG $SCRATCH_MNT 2>&1 | _filter_mkfs 2>$tmp.growfs >/dev/null
-+		. $tmp.growfs
-+
-+		size=`expr $dblocks \* $dbsize`
-+		_scratch_unmount
-+		_repair_scratch_fs >> $seqres.full
-+		_scratch_mount
-+	done
-+
-+	_scratch_unmount
-+	_repair_scratch_fs >> $seqres.full
-+	totalcount=`expr $totalcount - 1`
-+done
-+
-+echo "*** done"
-+status=0
-+exit
-diff --git a/tests/xfs/991.out b/tests/xfs/991.out
-new file mode 100644
-index 00000000..e8209672
---- /dev/null
-+++ b/tests/xfs/991.out
-@@ -0,0 +1,8 @@
-+QA output created by 991
-+meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
-+data     = bsize=XXX blocks=XXX, imaxpct=PCT
-+         = sunit=XXX swidth=XXX, unwritten=X
-+naming   =VERN bsize=XXX
-+log      =LDEV bsize=XXX blocks=XXX
-+realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
-+*** done
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 472c8f9a..53e68bea 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -521,3 +521,4 @@
- 538 auto stress
- 539 auto quick mount
- 990 auto quick growfs shrinkfs
-+991 auto growfs shrinkfs ioctl prealloc stress
--- 
-2.27.0
+Yes, the two cases can be combined.  Will do, thanks for the feedback!
 
+--D
+
+> 
+> Brian
+> 
+> > +# Make sure we have nonzero counters
+> > +_scratch_xfs_db -c 'agi 0' -c 'print ino_blocks fino_blocks' | \
+> > +	sed -e 's/= [1-9]*/= NONZERO/g'
+> > +
+> > +# Mount again, look at our files
+> > +_scratch_mount >> $seqres.full
+> > +cat $SCRATCH_MNT/urk
+> > +
+> > +# Make sure we can't re-add inobtcount
+> > +_scratch_unmount
+> > +_scratch_xfs_admin -O inobtcount=1 2>> $seqres.full
+> > +_scratch_mount >> $seqres.full
+> > +
+> > +status=0
+> > +exit
+> > diff --git a/tests/xfs/910.out b/tests/xfs/910.out
+> > new file mode 100644
+> > index 00000000..ed78d88f
+> > --- /dev/null
+> > +++ b/tests/xfs/910.out
+> > @@ -0,0 +1,23 @@
+> > +QA output created by 910
+> > +Running xfs_repair to upgrade filesystem.
+> > +Inode btree count feature only supported on V5 filesystems.
+> > +FEATURES: INOBTCNT:NO
+> > +Running xfs_repair to upgrade filesystem.
+> > +Inode btree count feature requires free inode btree.
+> > +FEATURES: INOBTCNT:NO
+> > +Fail partway through upgrading
+> > +Adding inode btree counts to filesystem.
+> > +FEATURES: NEEDSREPAIR:YES INOBTCNT:YES
+> > +mount: SCRATCH_MNT: mount(2) system call failed: Structure needs cleaning.
+> > +Re-run repair to finish upgrade
+> > +FEATURES: NEEDSREPAIR:NO INOBTCNT:YES
+> > +Filesystem should be usable again
+> > +FEATURES: NEEDSREPAIR:NO INOBTCNT:YES
+> > +Running xfs_repair to upgrade filesystem.
+> > +Adding inode btree counts to filesystem.
+> > +FEATURES: INOBTCNT:YES
+> > +ino_blocks = NONZERO
+> > +fino_blocks = NONZERO
+> > +moo
+> > +Running xfs_repair to upgrade filesystem.
+> > +Filesystem already has inode btree counts.
+> > diff --git a/tests/xfs/group b/tests/xfs/group
+> > index 5801471b..0dc8038a 100644
+> > --- a/tests/xfs/group
+> > +++ b/tests/xfs/group
+> > @@ -524,3 +524,4 @@
+> >  768 auto quick repair
+> >  770 auto repair
+> >  773 auto quick repair
+> > +910 auto quick inobtcount
+> > 
+> 
