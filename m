@@ -2,120 +2,72 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-5.3 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5B273C433ED
-	for <linux-fstests@archiver.kernel.org>; Wed,  7 Apr 2021 16:12:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 56513C433B4
+	for <linux-fstests@archiver.kernel.org>; Wed,  7 Apr 2021 16:47:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 29040610E8
-	for <linux-fstests@archiver.kernel.org>; Wed,  7 Apr 2021 16:12:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 290FD6108B
+	for <linux-fstests@archiver.kernel.org>; Wed,  7 Apr 2021 16:47:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1343508AbhDGQMz (ORCPT
+        id S245564AbhDGQrR (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 7 Apr 2021 12:12:55 -0400
-Received: from mail.kernel.org ([198.145.29.99]:53064 "EHLO mail.kernel.org"
+        Wed, 7 Apr 2021 12:47:17 -0400
+Received: from sandeen.net ([63.231.237.45]:47810 "EHLO sandeen.net"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S234072AbhDGQMy (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 7 Apr 2021 12:12:54 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 44AF2610E8;
-        Wed,  7 Apr 2021 16:12:44 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1617811964;
-        bh=TPhFvUcoNoF9ZE/ZIvqo/LH2zVCYuKU+1ItVgYx6vyE=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=VqxlMmmNvG43BRUNmIwhKSPfcK2PLKbuYBeeEVtVsudIECNsJlqWIxwLjsOWS7S+/
-         r6B1ChRGKlqYlNuYG+NZmToq2b+/FaNM9R21dnC6C7sPGOVpnwR+bRxY2Y6s7dwDk+
-         EV7E1a2vsZ2i792PrJgtvi0oWU7d7qubHvmD+ua+8L6oHsPtrR6rG5OFlNlpEVmWlZ
-         Qh7SI5RC5TT0uMjkyczcbFrPNc++UwqUCAHZEoKuYR8P1vVixoVyneiJautkKjoqks
-         cDqY0/v0/hxElsQBTCW2s9If7egRwcCHnXO/g4scjRb42E4VFcvC3f7KvG4tbdkltl
-         ECTRWT7hwiZTw==
-Date:   Wed, 7 Apr 2021 09:12:43 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Chandan Babu R <chandanrlinux@gmail.com>
-Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH] fstests: Do not execute xfs/{532,533,538} when realtime
- feature is enabled
-Message-ID: <20210407161243.GZ1670408@magnolia>
-References: <20210405074447.22222-1-chandanrlinux@gmail.com>
+        id S234029AbhDGQrQ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 7 Apr 2021 12:47:16 -0400
+Received: from liberator.sandeen.net (liberator.sandeen.net [10.0.0.146])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by sandeen.net (Postfix) with ESMTPSA id 126675EDA8;
+        Wed,  7 Apr 2021 11:46:05 -0500 (CDT)
+To:     Pavel Reichl <preichl@redhat.com>,
+        Eryu Guan <eguan@linux.alibaba.com>
+Cc:     fstests@vger.kernel.org, zlang@redhat.com, guan@eryu.me,
+        Eric Sandeen <sandeen@redhat.com>,
+        Dave Chinner <dchinner@redhat.com>
+References: <20210330220005.56019-1-preichl@redhat.com>
+ <20210330220005.56019-2-preichl@redhat.com>
+ <20210401033853.GO95214@e18g06458.et15sqa>
+ <9f6d45ca-7f96-1cfa-5e66-a355ad4e0c7a@redhat.com>
+From:   Eric Sandeen <sandeen@sandeen.net>
+Subject: Re: [PATCH v2 1/4] common/rc: Add _require_{chown,chmod,symlink}()
+Message-ID: <38e0b763-3d0b-9fdb-7df0-b3c526785364@sandeen.net>
+Date:   Wed, 7 Apr 2021 11:47:04 -0500
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0)
+ Gecko/20100101 Thunderbird/78.9.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210405074447.22222-1-chandanrlinux@gmail.com>
+In-Reply-To: <9f6d45ca-7f96-1cfa-5e66-a355ad4e0c7a@redhat.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Apr 05, 2021 at 01:14:47PM +0530, Chandan Babu R wrote:
-> The minimum length space allocator (i.e. xfs_bmap_exact_minlen_extent_alloc())
-> depends on the underlying filesystem to be fragmented so that there are enough
-> one block sized extents available to satify space allocation requests.
+On 4/1/21 4:47 AM, Pavel Reichl wrote:
+>> We only use whitelist if it's impossible to do such check.
+>>
+>> Thanks,
+>> Eryu
+>>
+> Hi, 
 > 
-> xfs/{532,533,538} tests issue space allocation requests for metadata (e.g. for
-> blocks holding directory and xattr information). With realtime filesystem
-> instances, these tests would end up fragmenting the space on realtime
-> device. Hence minimum length space allocator fails since the regular
-> filesystem space is not fragmented and hence there are no one block sized
-> extents available.
+> it does fail. It was actually my original intention to write the _require*() so it would check if the command succeeds as you are suggesting.
 > 
-> Thus, this commit disables execution of xfs/{532,533,538} when realtime
-> feature is enabled on the filesystem instance.
+> However, Eric and Dave were worried that adding more _require*() through the tests would lead to further slowing test execution. This worry actually makes sense to me.
 > 
-> Reported-by: Darrick J. Wong <djwong@kernel.org>
-> Signed-off-by: Chandan Babu R <chandanrlinux@gmail.com>
-> ---
->  tests/xfs/532 | 1 +
->  tests/xfs/533 | 1 +
->  tests/xfs/538 | 1 +
->  3 files changed, 3 insertions(+)
+> Is there a significant benefit of testing the support vs. maintaining check based on FSTYP variable? I guess doing the check saves us from the need to update the code when new file-system is added, however actually doing the check increases time of test execution (but I haven't done any measurements yet - it's just my guess).
 > 
-> diff --git a/tests/xfs/532 b/tests/xfs/532
-> index 2bed574a..5359add5 100755
-> --- a/tests/xfs/532
-> +++ b/tests/xfs/532
-> @@ -37,6 +37,7 @@ _supported_fs xfs
->  _require_scratch
->  _require_attrs
->  _require_xfs_debug
-> +_require_no_realtime
+> I really don't mind doing it either way and I'm happy to change the code - I'm just trying to explain :-)
 
-Alternately, you could do:
+that's my fault, sorry.  Dave had expressed some concern about exfat changes slowing down testing for every other fs, and we talked about a whitelist.  But now that I think about it, I'm not sure this functiona test takes any real extra time.
 
-	$XFS_IO_PROG -c 'chattr -t' $SCRATCH_MNT
+Pavel, maybe you can just evaluate whether there really is any significant time difference, and if there is not, go back to the functional test.
 
-and not reduce test coverage.
+Sorry for the hassle.
 
---D
-
->  _require_test_program "punch-alternating"
->  _require_xfs_io_error_injection "reduce_max_iextents"
->  _require_xfs_io_error_injection "bmap_alloc_minlen_extent"
-> diff --git a/tests/xfs/533 b/tests/xfs/533
-> index be909fcc..4826cccc 100755
-> --- a/tests/xfs/533
-> +++ b/tests/xfs/533
-> @@ -35,6 +35,7 @@ rm -f $seqres.full
->  _supported_fs xfs
->  _require_scratch
->  _require_xfs_debug
-> +_require_no_realtime
->  _require_test_program "punch-alternating"
->  _require_xfs_io_error_injection "reduce_max_iextents"
->  _require_xfs_io_error_injection "bmap_alloc_minlen_extent"
-> diff --git a/tests/xfs/538 b/tests/xfs/538
-> index 90eb1637..53a2c060 100755
-> --- a/tests/xfs/538
-> +++ b/tests/xfs/538
-> @@ -35,6 +35,7 @@ rm -f $seqres.full
->  _supported_fs xfs
->  _require_scratch
->  _require_xfs_debug
-> +_require_no_realtime
->  _require_test_program "punch-alternating"
->  _require_xfs_io_error_injection "bmap_alloc_minlen_extent"
->  
-> -- 
-> 2.29.2
-> 
+-Eric
