@@ -2,452 +2,150 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3E2C0C433ED
-	for <linux-fstests@archiver.kernel.org>; Mon, 12 Apr 2021 18:07:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2677FC433ED
+	for <linux-fstests@archiver.kernel.org>; Mon, 12 Apr 2021 22:41:36 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id F125461358
-	for <linux-fstests@archiver.kernel.org>; Mon, 12 Apr 2021 18:07:49 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0254761244
+	for <linux-fstests@archiver.kernel.org>; Mon, 12 Apr 2021 22:41:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243463AbhDLSIH (ORCPT
+        id S239338AbhDLWlx (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 12 Apr 2021 14:08:07 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:43844 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S240038AbhDLSIG (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 12 Apr 2021 14:08:06 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1618250868;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=C8RP3PpkfNftEmw4CBQ2phAVjQUDn0hzkeDxiGtnW+Q=;
-        b=D40QiFf0RIa28FnWwnJkFbjwYqSeybxKFsdY+DZ4AkvcotqvjAAJPZYwV2m8BQn7rurFvU
-        x26CAhYD4Sy+qwvq0Imxf+aRn99EhxWhjyD/NEAAD4Sq3NQHAlUColl+c3tS2x4OlZOzh1
-        cGP10V/PcvfCHKxGIPk6o0WMOz/Wtww=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-460-evimxBnqN9iwRHdZ92_--Q-1; Mon, 12 Apr 2021 14:07:46 -0400
-X-MC-Unique: evimxBnqN9iwRHdZ92_--Q-1
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 5579C839A42;
-        Mon, 12 Apr 2021 18:07:45 +0000 (UTC)
-Received: from bfoster (ovpn-112-117.rdu2.redhat.com [10.10.112.117])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id 7264E5D6D1;
-        Mon, 12 Apr 2021 18:07:44 +0000 (UTC)
-Date:   Mon, 12 Apr 2021 14:07:42 -0400
-From:   Brian Foster <bfoster@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     Eryu Guan <guan@eryu.me>, guaneryu@gmail.com,
-        linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 3/3] xfs: test that the needsrepair feature works as
- advertised
-Message-ID: <YHSMbu6llZo0Hlir@bfoster>
-References: <161715288469.2703773.13448230101596914371.stgit@magnolia>
- <161715290127.2703773.4292037416016401516.stgit@magnolia>
- <YGSmKk88waono99E@bfoster>
- <20210402012402.GV1670408@magnolia>
- <YHL4CnofzF9JHcJw@desktop>
- <20210412172758.GK3957620@magnolia>
+        Mon, 12 Apr 2021 18:41:53 -0400
+Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:60424 "EHLO
+        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S238901AbhDLWlx (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 12 Apr 2021 18:41:53 -0400
+Received: from cwcc.thunk.org (pool-72-74-133-215.bstnma.fios.verizon.net [72.74.133.215])
+        (authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 13CMfKRT028603
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 12 Apr 2021 18:41:21 -0400
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+        id 1D03915C3B1E; Mon, 12 Apr 2021 18:41:20 -0400 (EDT)
+Date:   Mon, 12 Apr 2021 18:41:20 -0400
+From:   "Theodore Ts'o" <tytso@mit.edu>
+To:     Christian Brauner <christian.brauner@ubuntu.com>
+Cc:     Eryu Guan <guan@eryu.me>, Christian Brauner <brauner@kernel.org>,
+        fstests@vger.kernel.org, Christoph Hellwig <hch@lst.de>,
+        "Darrick J . Wong" <djwong@kernel.org>,
+        David Howells <dhowells@redhat.com>,
+        Amir Goldstein <amir73il@gmail.com>
+Subject: Re: [PATCH v12 2/6] generic/632: add fstests for idmapped mounts
+Message-ID: <YHTMkBcVTFAGqyks@mit.edu>
+References: <20210328223400.1800301-1-brauner@kernel.org>
+ <20210328223400.1800301-3-brauner@kernel.org>
+ <YHMH/JRmzg3ETcED@desktop>
+ <20210411151249.6y34x7yatqtpcvi6@wittgenstein>
+ <20210411151857.wd6gd46u53vlh2xv@wittgenstein>
+ <YHMUAL/oD4fB3+R7@desktop>
+ <20210411153223.vhcegiklrwoczy55@wittgenstein>
+ <YHOW7DN51YuYgLPM@mit.edu>
+ <20210412115426.a4bzsx4cp7jhx2ou@wittgenstein>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210412172758.GK3957620@magnolia>
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.15
+In-Reply-To: <20210412115426.a4bzsx4cp7jhx2ou@wittgenstein>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Apr 12, 2021 at 10:27:58AM -0700, Darrick J. Wong wrote:
-> On Sun, Apr 11, 2021 at 09:22:18PM +0800, Eryu Guan wrote:
-> > On Thu, Apr 01, 2021 at 06:24:02PM -0700, Darrick J. Wong wrote:
-> > > On Wed, Mar 31, 2021 at 12:41:14PM -0400, Brian Foster wrote:
-> > > > On Tue, Mar 30, 2021 at 06:08:21PM -0700, Darrick J. Wong wrote:
-> > > > > From: Darrick J. Wong <djwong@kernel.org>
-> > > > > 
-> > > > > Make sure that the needsrepair feature flag can be cleared only by
-> > > > > repair and that mounts are prohibited when the feature is set.
-> > > > > 
-> > > > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > > > > ---
-> > > > >  common/xfs        |   21 +++++++++++
-> > > > >  tests/xfs/768     |   82 +++++++++++++++++++++++++++++++++++++++++++
-> > > > >  tests/xfs/768.out |    4 ++
-> > > > >  tests/xfs/770     |  101 +++++++++++++++++++++++++++++++++++++++++++++++++++++
-> > > > >  tests/xfs/770.out |    2 +
-> > > > >  tests/xfs/group   |    2 +
-> > > > >  6 files changed, 212 insertions(+)
-> > > > >  create mode 100755 tests/xfs/768
-> > > > >  create mode 100644 tests/xfs/768.out
-> > > > >  create mode 100755 tests/xfs/770
-> > > > >  create mode 100644 tests/xfs/770.out
-> > > > > 
-> > > > > 
-> > > > ...
-> > > > > diff --git a/tests/xfs/768 b/tests/xfs/768
-> > > > > new file mode 100755
-> > > > > index 00000000..7b909b76
-> > > > > --- /dev/null
-> > > > > +++ b/tests/xfs/768
-> > > > > @@ -0,0 +1,82 @@
-> > > > > +#! /bin/bash
-> > > > > +# SPDX-License-Identifier: GPL-2.0-or-later
-> > > > > +# Copyright (c) 2021 Oracle.  All Rights Reserved.
-> > > > > +#
-> > > > > +# FS QA Test No. 768
-> > > > > +#
-> > > > > +# Make sure that the kernel won't mount a filesystem if repair forcibly sets
-> > > > > +# NEEDSREPAIR while fixing metadata.  Corrupt a directory in such a way as
-> > > > > +# to force repair to write an invalid dirent value as a sentinel to trigger a
-> > > > > +# repair activity in a later phase.  Use a debug knob in xfs_repair to abort
-> > > > > +# the repair immediately after forcing the flag on.
-> > > > > +
-> > > > > +seq=`basename $0`
-> > > > > +seqres=$RESULT_DIR/$seq
-> > > > > +echo "QA output created by $seq"
-> > > > > +
-> > > > > +here=`pwd`
-> > > > > +tmp=/tmp/$$
-> > > > > +status=1    # failure is the default!
-> > > > > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > > > > +
-> > > > > +_cleanup()
-> > > > > +{
-> > > > > +	cd /
-> > > > > +	rm -f $tmp.*
-> > > > > +}
-> > > > > +
-> > > > > +# get standard environment, filters and checks
-> > > > > +. ./common/rc
-> > > > > +. ./common/filter
-> > > > > +
-> > > > > +# real QA test starts here
-> > > > > +_supported_fs xfs
-> > > > > +_require_scratch
-> > > > > +grep -q LIBXFS_DEBUG_WRITE_CRASH $XFS_REPAIR_PROG || \
-> > > > > +		_notrun "libxfs write failure injection hook not detected?"
-> > > > > +
-> > > > > +rm -f $seqres.full
-> > > > > +
-> > > > > +# Set up a real filesystem for our actual test
-> > > > > +_scratch_mkfs -m crc=1 >> $seqres.full
-> > > > > +
-> > > > > +# Create a directory large enough to have a dir data block.  2k worth of
-> > > > > +# dirent names ought to do it.
-> > > > > +_scratch_mount
-> > > > > +mkdir -p $SCRATCH_MNT/fubar
-> > > > > +for i in $(seq 0 256 2048); do
-> > > > > +	fname=$(printf "%0255d" $i)
-> > > > > +	ln -s -f urk $SCRATCH_MNT/fubar/$fname
-> > > > > +done
-> > > > > +inum=$(stat -c '%i' $SCRATCH_MNT/fubar)
-> > > > > +_scratch_unmount
-> > > > > +
-> > > > > +# Fuzz the directory
-> > > > > +_scratch_xfs_db -x -c "inode $inum" -c "dblock 0" \
-> > > > > +	-c "fuzz -d bu[2].inumber add" >> $seqres.full
-> > > > > +
-> > > > > +# Try to repair the directory, force it to crash after setting needsrepair
-> > > > > +LIBXFS_DEBUG_WRITE_CRASH=ddev=2 _scratch_xfs_repair 2>> $seqres.full
-> > > > > +test $? -eq 137 || echo "repair should have been killed??"
-> > > > > +_scratch_xfs_db -c 'version' >> $seqres.full
-> > > > > +
-> > > > > +# We can't mount, right?
-> > > > > +_check_scratch_xfs_features NEEDSREPAIR
-> > > > > +_try_scratch_mount &> $tmp.mount
-> > > > > +res=$?
-> > > > > +_filter_scratch < $tmp.mount
-> > > > > +if [ $res -eq 0 ]; then
-> > > > > +	echo "Should not be able to mount after needsrepair crash"
-> > > > > +	_scratch_unmount
-> > > > > +fi
-> > > > > +
-> > > > > +# Repair properly this time and retry the mount
-> > > > > +_scratch_xfs_repair 2>> $seqres.full
-> > > > > +_scratch_xfs_db -c 'version' >> $seqres.full
-> > > > 
-> > > > This _scratch_xfs_db() call and the same one a bit earlier both seem
-> > > > spurious. Otherwise this test LGTM.
-> > > 
-> > > Ok, I'll get rid of those.
-> > > 
-> > > > 
-> > > > > +_check_scratch_xfs_features NEEDSREPAIR
-> > > > > +
-> > > > > +_scratch_mount
-> > > > > +
-> > > > > +# success, all done
-> > > > > +status=0
-> > > > > +exit
-> > > > > diff --git a/tests/xfs/768.out b/tests/xfs/768.out
-> > > > > new file mode 100644
-> > > > > index 00000000..1168ba25
-> > > > > --- /dev/null
-> > > > > +++ b/tests/xfs/768.out
-> > > > > @@ -0,0 +1,4 @@
-> > > > > +QA output created by 768
-> > > > > +FEATURES: NEEDSREPAIR:YES
-> > > > > +mount: SCRATCH_MNT: mount(2) system call failed: Structure needs cleaning.
-> > > > > +FEATURES: NEEDSREPAIR:NO
-> > > > > diff --git a/tests/xfs/770 b/tests/xfs/770
-> > > > > new file mode 100755
-> > > > > index 00000000..1d0effd9
-> > > > > --- /dev/null
-> > > > > +++ b/tests/xfs/770
-> > > > > @@ -0,0 +1,101 @@
-> > > > 
-> > > > Can we have one test per patch in the future please?
-> > > 
-> > > No.  That will cost me a fortune in wasted time rebasing my fstests tree
-> > > every time someone adds something to tests/*/group.
-> > > 
-> > > $ stg ser | wc -l
-> > > 106
-> > > 
-> > > 106 patches total...
-> > > 
-> > > $ grep -l 'create mode' patches-djwong-dev/ | wc -l
-> > > 29
-> > > 
-> > > 29 of which add a test case of some kind...
-> > > 
-> > > $ grep 'create mode.*out' patches-djwong-dev/* | wc -l
-> > > 119
-> > > 
-> > > ...for a total of 119 new tests.  My fstests dev tree would double in
-> > > size to 196 patches if I implemented that suggestion.  Every Sunday I
-> > > rebase my fstests tree, and if it takes ~1min to resolve each merge
-> > > error in tests/*/group, it'll now take me two hours instead of thirty
-> > 
-> > If the group files are the only confliction source, I think you could
-> > leave that to me, as for these 7xx or 9xx tests, I'll always need to
-> > re-number them and edit group files anyway. Or maybe you could just omit
-> > the group file changes? Just leave a note in patch (after the three
-> > dashes "---") on which groups it belongs to?
-> 
-> That won't help, because I still need working group files for fstests to
-> run properly.
-> 
+On Mon, Apr 12, 2021 at 01:54:26PM +0200, Christian Brauner wrote:
+>So we can detect it pretty reliably at runtime by trying whether we can
+>create an idmapped mount on the given filesystem. That is enough for the
+>idmapped mount tests here but of course has at least two drawbacks:
+>1. there might be scenarios where we get false negatives
+>   (e.g. open_tree() could fail for a lack of permissions or sm else,
+>   kernel might be compiled without userns support etc. pp)
 
-You could always strip the group file updates into a separate, local
-only commit at the top of whatever branch you're managing. If the tests
-are also numbered outside of the current upstream target range, I
-suspect that would turn a rebase into a single (probably trivial)
-conflict resolution.
+In the ideal world, if the kernel wasn't compiled with the necessary
+CONFIG options enabled, it's desirable of the test can detect that
+fact and skip running the test instead failing and forcing the person
+running the test to try to figure out whether this is a legitmate file
+system bug or a just a test setup bug.
 
-Brian
+This is one of the other functions of /sys/fs/ext4/features/...  for
+example:
 
-> In the long run I think a better solution is to move the group tags into
-> the test files themselves and autogenerate the group file as part of the
-> build process, but first I want to merge the ~40 or so patches that are
-> still in my tree.
-> 
-> > BTW, I've applied the first two patches in this patchset.
-> 
-> Thanks!
-> 
-> --D
-> 
-> > Thanks,
-> > Eryu
-> > 
-> > > minutes to do this.
-> > > 
-> > > Please stop making requests of developers that increase their overhead
-> > > while doing absolutely nothing to improve code quality.  The fstests
-> > > maintainers have never required one test per patch, and it doesn't make
-> > > sense to scatter related tests into multiple patches.
-> > > 
-> > > > > +#! /bin/bash
-> > > > > +# SPDX-License-Identifier: GPL-2.0-or-later
-> > > > > +# Copyright (c) 2021 Oracle.  All Rights Reserved.
-> > > > > +#
-> > > > > +# FS QA Test No. 770
-> > > > > +#
-> > > > > +# Populate a filesystem with all types of metadata, then run repair with the
-> > > > > +# libxfs write failure trigger set to go after a single write.  Check that the
-> > > > > +# injected error trips, causing repair to abort, that needsrepair is set on the
-> > > > > +# fs, the kernel won't mount; and that a non-injecting repair run clears
-> > > > > +# needsrepair and makes the filesystem mountable again.
-> > > > > +#
-> > > > > +# Repeat with the trip point set to successively higher numbers of writes until
-> > > > > +# we hit ~200 writes or repair manages to run to completion without tripping.
-> > > > > +
-> > > > 
-> > > > Nice test..
-> > > > 
-> > > > > +seq=`basename $0`
-> > > > > +seqres=$RESULT_DIR/$seq
-> > > > > +echo "QA output created by $seq"
-> > > > > +
-> > > > > +here=`pwd`
-> > > > > +tmp=/tmp/$$
-> > > > > +status=1    # failure is the default!
-> > > > > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > > > > +
-> > > > > +_cleanup()
-> > > > > +{
-> > > > > +	cd /
-> > > > > +	rm -f $tmp.*
-> > > > > +}
-> > > > > +
-> > > > > +# get standard environment, filters and checks
-> > > > > +. ./common/rc
-> > > > > +. ./common/populate
-> > > > > +. ./common/filter
-> > > > > +
-> > > > > +# real QA test starts here
-> > > > > +_supported_fs xfs
-> > > > > +
-> > > > > +_require_scratch_xfs_crc		# needsrepair only exists for v5
-> > > > > +_require_populate_commands
-> > > > > +
-> > > > > +rm -f ${RESULT_DIR}/require_scratch	# we take care of checking the fs
-> > > > > +rm -f $seqres.full
-> > > > > +
-> > > > > +max_writes=200			# 200 loops should be enough for anyone
-> > > > > +nr_incr=$((13 / TIME_FACTOR))
-> > > > 
-> > > > I'm not sure how time factor is typically used, but perhaps we should
-> > > > sanity check that nr_incr > 0.
-> > > 
-> > > Good catch.
-> > > 
-> > > > Also, could we randomize the increment value a bit to add some variance
-> > > > to the test? That could be done here or we could turn this into a min
-> > > > increment value or something based on time factor and randomize the
-> > > > increment in the loop, which might be a little more effective of a test.
-> > > > 
-> > > > > +test $nr_incr -lt 1 && nr_incr=1
-> > > > > +for ((nr_writes = 1; nr_writes < max_writes; nr_writes += nr_incr)); do
-> > > > > +	test -w /dev/ttyprintk && \
-> > > > > +		echo "fail after $nr_writes writes" >> /dev/ttyprintk
-> > > > > +	echo "fail after $nr_writes writes" >> $seqres.full
-> > > > 
-> > > > What is this for?
-> > > 
-> > > This synchronizes the kernel output with whatever step we're on of the
-> > > loop.
-> > > 
-> > > > 
-> > > > > +
-> > > > > +	# Populate the filesystem
-> > > > > +	_scratch_populate_cached nofill >> $seqres.full 2>&1
-> > > > > +
-> > > > 
-> > > > If I understand this correctly, this will fill up the fs and populate
-> > > > some kind of background cache with a metadump to facilitate restoring
-> > > > the state on repeated calls. I see this speeds things up a bit from the
-> > > > initial run, but I'm also wondering if we really need to reset this
-> > > > state on every iteration. Would we expect much difference in behavior if
-> > > > we populated once at the start of the test and then just bumped up the
-> > > > write count until we get to the max or the repair completes?
-> > > 
-> > > Probably not?  You're probably right that there's no need to repopulate
-> > > each time... provided that repair going down doesn't corrupt the fs and
-> > > thereby screw up each further iteration.
-> > > 
-> > > (I noticed that repair can really mess things up if it dies in just the
-> > > wrong places...)
-> > > 
-> > > > FWIW, a quick hack to test that out reduces my (cache cold, cache hot)
-> > > > run times of this test from something like (~4m, ~1m) to (~3m, ~12s).
-> > > > That's probably not quite quick group territory, but still a decent
-> > > > time savings.
-> > > 
-> > > I mean ... I could just run fsstress for ~1000 ops to populate the
-> > > filesystem.
-> > > 
-> > > > 
-> > > > > +	# Start a repair and force it to abort after some number of writes
-> > > > > +	LIBXFS_DEBUG_WRITE_CRASH=ddev=$nr_writes _scratch_xfs_repair 2>> $seqres.full
-> > > > > +	res=$?
-> > > > > +	if [ $res -ne 0 ] && [ $res -ne 137 ]; then
-> > > > > +		echo "repair failed with $res??"
-> > > > > +		break
-> > > > > +	elif [ $res -eq 0 ]; then
-> > > > > +		[ $nr_writes -eq 1 ] && \
-> > > > > +			echo "ran to completion on the first try?"
-> > > > > +		break
-> > > > > +	fi
-> > > > > +
-> > > > > +	_scratch_xfs_db -c 'version' >> $seqres.full
-> > > > 
-> > > > Why?
-> > > > 
-> > > > > +	if _check_scratch_xfs_features NEEDSREPAIR > /dev/null; then
-> > > > > +		# NEEDSREPAIR is set, so check that we can't mount.
-> > > > > +		_try_scratch_mount &>> $seqres.full
-> > > > > +		if [ $? -eq 0 ]; then
-> > > > > +			echo "Should not be able to mount after repair crash"
-> > > > > +			_scratch_unmount
-> > > > > +		fi
-> > > > 
-> > > > Didn't the previous test verify that the filesystem doesn't mount if
-> > > > NEEDSREPAIR?
-> > > 
-> > > Yes.  I'll remove them both.
-> > > 
-> > > --D
-> > > 
-> > > > > +	elif _scratch_xfs_repair -n &>> $seqres.full; then
-> > > > > +		# NEEDSREPAIR was not set, but repair -n didn't find problems.
-> > > > > +		# It's possible that the write failure injector triggered on
-> > > > > +		# the write that clears NEEDSREPAIR.
-> > > > > +		true
-> > > > > +	else
-> > > > > +		# NEEDSREPAIR was not set, but there are errors!
-> > > > > +		echo "NEEDSREPAIR should be set on corrupt fs"
-> > > > > +	fi
-> > > > > +
-> > > > > +	# Repair properly this time and retry the mount
-> > > > > +	_scratch_xfs_repair 2>> $seqres.full
-> > > > > +	_scratch_xfs_db -c 'version' >> $seqres.full
-> > > > > +	_check_scratch_xfs_features NEEDSREPAIR > /dev/null && \
-> > > > > +		echo "Repair failed to clear NEEDSREPAIR on the $nr_writes writes test"
-> > > > > +
-> > > > 
-> > > > Same here. It probably makes sense to test that NEEDSREPAIR remains set
-> > > > throughout the test sequence until repair completes cleanly, but I'm not
-> > > > sure we need to repeat the mount cycle every go around.
-> > > > 
-> > > > Brian
-> > > > 
-> > > > > +	# Make sure all the checking tools think this fs is ok
-> > > > > +	_scratch_mount
-> > > > > +	_check_scratch_fs
-> > > > > +	_scratch_unmount
-> > > > > +done
-> > > > > +
-> > > > > +# success, all done
-> > > > > +echo Silence is golden.
-> > > > > +status=0
-> > > > > +exit
-> > > > > diff --git a/tests/xfs/770.out b/tests/xfs/770.out
-> > > > > new file mode 100644
-> > > > > index 00000000..725d740b
-> > > > > --- /dev/null
-> > > > > +++ b/tests/xfs/770.out
-> > > > > @@ -0,0 +1,2 @@
-> > > > > +QA output created by 770
-> > > > > +Silence is golden.
-> > > > > diff --git a/tests/xfs/group b/tests/xfs/group
-> > > > > index fe83f82d..09fddb5a 100644
-> > > > > --- a/tests/xfs/group
-> > > > > +++ b/tests/xfs/group
-> > > > > @@ -520,3 +520,5 @@
-> > > > >  537 auto quick
-> > > > >  538 auto stress
-> > > > >  539 auto quick mount
-> > > > > +768 auto quick repair
-> > > > > +770 auto repair
-> > > > > 
-> > > > 
-> 
+#ifdef CONFIG_UNICODE
+EXT4_ATTR_FEATURE(casefold);
+#endif
 
+That way, if a particular kernel CONFIG is not compiled in, we can
+prevent the feature from being advertised, without having to rely on
+/proc/config.gz be present.
+
+>2. it's heavy in so far as we have to do the whole exercise of creating
+>   a detached mount
+
+Yeah, there are times when I've added a new feature flag file in
+/sys/fs/ext4/features because it was simpler than being able to doing
+some kind of heavyweight test.
+
+> So having a reliable way to detect whether or not the underlying fs
+> supports it could be worth it (My hope was for the fsinfo() API to grow
+> this "feature check" ability but oh well.).
+> 
+> One possibility might be to extend fstatfs() and steal one u32 from the
+> padding that is currently in there?
+
+That would require mounting a file system in order to do the check,
+which is not necesarily always convenient, but that would certainly
+work.  (See below for an example of where it was much easier for
+mke2fs to be able to test for a file system "capability" without
+needing to mount a test file system.)
+
+> > If you can't do this by checking to see if the file system will
+> > support a particular mount option, or some other run-time test, for
+> > ext4 we can signal this by checking for the existence of a file in
+> > /sys/fs/ext4/features, such as /sys/fs/ext4/features/fast_commit.
+> > (Grep for EXT4_ATTR_FEATURE and ATTR_LIST in fs/ext4/sysfs.c; it
+> > requires adding two lines to advertise a new ext4 feature.)
+> 
+> I wonder if this wouldn't be nice to have independent of whether or not
+> there is another way to detect it?
+> I'm would think that people like to see all new ext4 features listed in
+> there. Even if this is technically a generic vfs feature.
+
+My apologies for the confusion.  There's a bit of overloading in terms
+of the word "features" as used above.  In some cases, there is a
+direct correspondance between bits that show up in the compat,
+ro_compat, and incompat fields in the ext4 superblock.  In other cases
+it might describe a file system behaviour (e.g., lazy_itable_init) and
+this acts as a hint to e2fsprogs about what kind of defaults it should
+use when creating a file system --- or to warn the user about whether
+a particular file system can be mounted using the current kernel.
+
+For example, currently we give the following warning if you create a
+file system with a 64k block size:
+
+% mke2fs -t ext4 -b 65536 /tmp/foo.img 8M
+Warning: blocksize 65536 not usable on most systems.
+mke2fs 1.46.2 (28-Feb-2021)
+Creating regular file /tmp/foo.img
+mke2fs: 65536-byte blocks too big for system (max 4096)
+Proceed anyway? (y,N)
+
+However, suppose at some point, thanks to advances in the MM layer, it
+becomes possible to support file systems where the block size is
+greater than the page size.  We might then advertise that via the
+existing of a file such as /sys/fs/ext4/feature/big_blocks (for
+example), and then newer versions of mke2fs would check for that file
+and suppress the warning on a kernel which would actually allow file
+systems with 64k blocks to be mounted on an x86_64 system.  This is
+also why I designed it via using a file in /sys/fs/ext4/features, so
+that I don't have to do a test mount and use a system call fstatfs(2)
+to check for the existenace of an ext4 feature/capability (all of the
+obvious terms are already overloaded, sigh).
+
+I agree that having some kind of fs-independent way for querying
+whether some feature/capability is present for a particular kernel
+would be convenient.  This wouldn't necessarily need to be implemented
+in the VFS, though, especially if the convention that gets adopted is
+via a file in /sys/fs/<fstype>/features/<capability>.
+
+						- Ted
