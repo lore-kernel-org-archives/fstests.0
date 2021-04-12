@@ -2,65 +2,74 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 30156C433ED
-	for <linux-fstests@archiver.kernel.org>; Mon, 12 Apr 2021 07:29:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 13C81C433B4
+	for <linux-fstests@archiver.kernel.org>; Mon, 12 Apr 2021 07:30:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E9EE361207
-	for <linux-fstests@archiver.kernel.org>; Mon, 12 Apr 2021 07:29:04 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B6D4C6121D
+	for <linux-fstests@archiver.kernel.org>; Mon, 12 Apr 2021 07:30:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236913AbhDLH3V (ORCPT
+        id S230310AbhDLHbJ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 12 Apr 2021 03:29:21 -0400
-Received: from szxga05-in.huawei.com ([45.249.212.191]:16528 "EHLO
-        szxga05-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230034AbhDLH3E (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 12 Apr 2021 03:29:04 -0400
-Received: from DGGEMS403-HUB.china.huawei.com (unknown [172.30.72.58])
-        by szxga05-in.huawei.com (SkyGuard) with ESMTP id 4FJgJL3h4kzPqNg;
-        Mon, 12 Apr 2021 15:25:54 +0800 (CST)
-Received: from huawei.com (10.175.101.6) by DGGEMS403-HUB.china.huawei.com
- (10.3.19.203) with Microsoft SMTP Server id 14.3.498.0; Mon, 12 Apr 2021
- 15:28:36 +0800
-From:   Sun Ke <sunke32@huawei.com>
-To:     <fstests@vger.kernel.org>, <guan@eryu.me>
-CC:     <sunke32@huawei.com>
-Subject: [PATCH] generic/591: add _require_odirect
-Date:   Mon, 12 Apr 2021 03:34:03 -0400
-Message-ID: <20210412073403.393034-1-sunke32@huawei.com>
-X-Mailer: git-send-email 2.25.4
+        Mon, 12 Apr 2021 03:31:09 -0400
+Received: from mail.kernel.org ([198.145.29.99]:37436 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S229771AbhDLHau (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 12 Apr 2021 03:30:50 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 977EE61207;
+        Mon, 12 Apr 2021 07:30:20 +0000 (UTC)
+Date:   Mon, 12 Apr 2021 09:30:17 +0200
+From:   Christian Brauner <christian.brauner@ubuntu.com>
+To:     Christoph Hellwig <hch@lst.de>
+Cc:     Eryu Guan <guan@eryu.me>, Christian Brauner <brauner@kernel.org>,
+        fstests@vger.kernel.org, "Darrick J . Wong" <djwong@kernel.org>,
+        David Howells <dhowells@redhat.com>,
+        Amir Goldstein <amir73il@gmail.com>
+Subject: Re: [PATCH v12 2/6] generic/632: add fstests for idmapped mounts
+Message-ID: <20210412073017.a33i4ksvghmu4pqf@wittgenstein>
+References: <20210328223400.1800301-1-brauner@kernel.org>
+ <20210328223400.1800301-3-brauner@kernel.org>
+ <YHMH/JRmzg3ETcED@desktop>
+ <20210411151249.6y34x7yatqtpcvi6@wittgenstein>
+ <20210411151857.wd6gd46u53vlh2xv@wittgenstein>
+ <YHMUAL/oD4fB3+R7@desktop>
+ <20210411153223.vhcegiklrwoczy55@wittgenstein>
+ <20210412072241.GA3246@lst.de>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7BIT
-Content-Type:   text/plain; charset=US-ASCII
-X-Originating-IP: [10.175.101.6]
-X-CFilter-Loop: Reflected
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <20210412072241.GA3246@lst.de>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-src/splice-test will open a file with O_DIRECT flag, so add _require_odirect.
+On Mon, Apr 12, 2021 at 09:22:41AM +0200, Christoph Hellwig wrote:
+> On Sun, Apr 11, 2021 at 05:32:23PM +0200, Christian Brauner wrote:
+> > > > And it should actually skip the tests on all filesystems that don't
+> > > > support idmapped mounts which is every fs apart from xfs and ext4.
+> > > 
+> > > Yeah, looks like that's the case. So it seems the _require idmapped
+> > 
+> > Ah, ok I didn't know this needed to go in there. I thinke the following
+> > might be enough. Are you able to simply apply it on top?
+> 
+> No, this is broken.  It needs to do feature detection, not some arbitrary
+> whitelists.  And I'm pretty sure we got that right at some point by
 
-Signed-off-by: Sun Ke <sunke32@huawei.com>
----
- tests/generic/591 | 1 +
- 1 file changed, 1 insertion(+)
+I thought so too.
 
-diff --git a/tests/generic/591 b/tests/generic/591
-index d40204636248..e243db10f96c 100755
---- a/tests/generic/591
-+++ b/tests/generic/591
-@@ -27,6 +27,7 @@ _cleanup()
- # real QA test starts here
- _supported_fs generic
- _require_test
-+_require_odirect
- _require_test_program "splice-test"
- 
- rm -f $seqres.full
--- 
-2.25.4
+> doing the _notrun when mounting with the idmap option was not supported.
 
+The thing is we need the fileystem type we're going to be tested on. I
+can place this into src/feature.c if this can get access to the fstype
+the test is going to be run on. It should be but if not we can do this
+in src/idmapped-mounts/idmapped-mounts.c
+directly to test whether the underlying fs we're being tested on
+supports idmapped mounts and then return an error value from the binary
+indicating that it doesn't so we can use _notrun.
+I'll post an updated version of this today with the detection logic.
+
+Christian
