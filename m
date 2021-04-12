@@ -2,107 +2,176 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-19.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 97E10C433ED
-	for <linux-fstests@archiver.kernel.org>; Mon, 12 Apr 2021 11:54:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 842B5C433ED
+	for <linux-fstests@archiver.kernel.org>; Mon, 12 Apr 2021 11:58:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 512466102A
-	for <linux-fstests@archiver.kernel.org>; Mon, 12 Apr 2021 11:54:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 58FC76121E
+	for <linux-fstests@archiver.kernel.org>; Mon, 12 Apr 2021 11:58:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240434AbhDLLyw (ORCPT
+        id S240791AbhDLL6d (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 12 Apr 2021 07:54:52 -0400
-Received: from mail.kernel.org ([198.145.29.99]:38156 "EHLO mail.kernel.org"
+        Mon, 12 Apr 2021 07:58:33 -0400
+Received: from mail.kernel.org ([198.145.29.99]:40284 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S237792AbhDLLyt (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 12 Apr 2021 07:54:49 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id C72CF6102A;
-        Mon, 12 Apr 2021 11:54:29 +0000 (UTC)
-Date:   Mon, 12 Apr 2021 13:54:26 +0200
-From:   Christian Brauner <christian.brauner@ubuntu.com>
-To:     Theodore Ts'o <tytso@mit.edu>
-Cc:     Eryu Guan <guan@eryu.me>, Christian Brauner <brauner@kernel.org>,
-        fstests@vger.kernel.org, Christoph Hellwig <hch@lst.de>,
-        "Darrick J . Wong" <djwong@kernel.org>,
+        id S240788AbhDLL6d (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 12 Apr 2021 07:58:33 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id A0D5D611C9;
+        Mon, 12 Apr 2021 11:58:13 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1618228695;
+        bh=WYxFB1YD+mRL18+z671iou5y8zRHPPmcYE9rIuVewEU=;
+        h=From:To:Cc:Subject:Date:From;
+        b=NoUeQ0uE4uULNiSg+wu+Tr1bXNyafsUNEhFTr0SaBNFJfqmObGP0PwTTx7YFlS9CR
+         hg/r4ds5vfKJZRZcjHWN61WL5OxjkcdJrk4VmIS0O40f7X4VCcOCv2XewNKn/Qtk+6
+         g0uiZwpDdCOLxG9mj2z9y+YGK8TYhlVt5JAnGLMcIHUK7fV4ulfIfHe2Gt2LY4oelC
+         BgNz3LsJTAFkAANAXcUTiLllYPE2yvG3+LdQlJdmdhgscxDcOIHQkm1UxdvBTJJ8Kv
+         W4eO/DN+J9JtG12ThepFDQ5glx1yQBVfS+c/EpfC56gzVGdEswY/W/PpAkBqoRzK2o
+         KMTpXJGGYdoug==
+From:   Christian Brauner <brauner@kernel.org>
+To:     Eryu Guan <guan@eryu.me>, fstests@vger.kernel.org,
+        Christoph Hellwig <hch@lst.de>
+Cc:     "Darrick J . Wong" <djwong@kernel.org>,
         David Howells <dhowells@redhat.com>,
-        Amir Goldstein <amir73il@gmail.com>
-Subject: Re: [PATCH v12 2/6] generic/632: add fstests for idmapped mounts
-Message-ID: <20210412115426.a4bzsx4cp7jhx2ou@wittgenstein>
-References: <20210328223400.1800301-1-brauner@kernel.org>
- <20210328223400.1800301-3-brauner@kernel.org>
- <YHMH/JRmzg3ETcED@desktop>
- <20210411151249.6y34x7yatqtpcvi6@wittgenstein>
- <20210411151857.wd6gd46u53vlh2xv@wittgenstein>
- <YHMUAL/oD4fB3+R7@desktop>
- <20210411153223.vhcegiklrwoczy55@wittgenstein>
- <YHOW7DN51YuYgLPM@mit.edu>
+        Christian Brauner <christian.brauner@ubuntu.com>
+Subject: [PATCH v13 0/6] fstests: add idmapped mounts tests
+Date:   Mon, 12 Apr 2021 13:57:02 +0200
+Message-Id: <20210412115708.1628386-1-brauner@kernel.org>
+X-Mailer: git-send-email 2.27.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <YHOW7DN51YuYgLPM@mit.edu>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Apr 11, 2021 at 08:40:12PM -0400, Theodore Ts'o wrote:
-> On Sun, Apr 11, 2021 at 05:32:23PM +0200, Christian Brauner wrote:
-> > Ah, ok I didn't know this needed to go in there. I thinke the following
-> > might be enough. Are you able to simply apply it on top?
-> > 
-> > diff --git a/common/rc b/common/rc
-> > index 351996fc..bd913d13 100644
-> > --- a/common/rc
-> > +++ b/common/rc
-> > @@ -2047,6 +2047,16 @@ _require_mount_setattr()
-> >  # test whether idmapped mounts are supported
-> >  _require_idmapped_mounts()
-> >  {
-> > +       case "$FSTYP" in
-> > +       xfs)
-> > +               ;;
-> > +       ext4)
-> > +               ;;
-> > +       *)
-> > +               _notrun "Filesystem $FSTYP does not support idmapped mounts yet"
-> > +               ;;
-> > +       esac
-> > +
-> 
-> Is there any way we can ask the kernel which file systems support
-> idmapped mounts?  That way, the tests will do the right thing when run
-> on older LTS kernels, and if a distribution backports idmapped support
-> for some file system into their kernel, again, the right thing can
-> happen automatically.
+From: Christian Brauner <christian.brauner@ubuntu.com>
 
-So we can detect it pretty reliably at runtime by trying whether we can
-create an idmapped mount on the given filesystem. That is enough for the
-idmapped mount tests here but of course has at least two drawbacks:
-1. there might be scenarios where we get false negatives
-   (e.g. open_tree() could fail for a lack of permissions or sm else,
-   kernel might be compiled without userns support etc. pp)
-2. it's heavy in so far as we have to do the whole exercise of creating
-   a detached mount
-So having a reliable way to detect whether or not the underlying fs
-supports it could be worth it (My hope was for the fsinfo() API to grow
-this "feature check" ability but oh well.).
+Hey everyone,
 
-One possibility might be to extend fstatfs() and steal one u32 from the
-padding that is currently in there?
+This series is available from:
+https://git.kernel.org/brauner/xfstests-dev/h/idmapped_mounts
+https://gitlab.com/brauner/xfstests/-/tree/idmapped_mounts
+https://github.com/brauner/xfstests/tree/idmapped_mounts
 
-> 
-> If you can't do this by checking to see if the file system will
-> support a particular mount option, or some other run-time test, for
-> ext4 we can signal this by checking for the existence of a file in
-> /sys/fs/ext4/features, such as /sys/fs/ext4/features/fast_commit.
-> (Grep for EXT4_ATTR_FEATURE and ATTR_LIST in fs/ext4/sysfs.c; it
-> requires adding two lines to advertise a new ext4 feature.)
+#### Unsupported filesystem
+ubuntu@f2-vm:~/src/git/xfstests$ sudo ./check -g idmapped
+FSTYP         -- btrfs
+PLATFORM      -- Linux/x86_64 f2-vm 5.12.0-rc6-ecryptfs-6d82e210b270 #373 SMP PREEMPT Fri Apr 9 13:58:37 UTC 2021
+MKFS_OPTIONS  -- /dev/loop3
+MOUNT_OPTIONS -- /dev/loop3 /mnt/scratch
 
-I wonder if this wouldn't be nice to have independent of whether or not
-there is another way to detect it?
-I'm would think that people like to see all new ext4 features listed in
-there. Even if this is technically a generic vfs feature.
+generic/632 files ... [not run] idmapped-mounts not support by btrfs
+Ran: generic/632
+Not run: generic/632
+Passed all 1 tests
 
+#### xfs
+ubuntu@f2-vm:~/src/git/xfstests$ sudo ./check -g idmapped
+FSTYP         -- xfs (debug)
+PLATFORM      -- Linux/x86_64 f2-vm 5.12.0-rc6-ecryptfs-6d82e210b270 #373 SMP PREEMPT Fri Apr 9 13:58:37 UTC 2021
+MKFS_OPTIONS  -- -f -bsize=4096 /dev/loop1
+MOUNT_OPTIONS -- /dev/loop1 /mnt/scratch
+
+generic/632 files ...  27s
+xfs/529 files ...  64s
+xfs/530 files ...  41s
+Ran: generic/632 xfs/529 xfs/530
+Passed all 3 tests
+
+#### ext4
+ubuntu@f2-vm:~/src/git/xfstests$ sudo ./check -g idmapped
+FSTYP         -- ext4
+PLATFORM      -- Linux/x86_64 f2-vm 5.12.0-rc6-ecryptfs-6d82e210b270 #373 SMP PREEMPT Fri Apr 9 13:58:37 UTC 2021
+MKFS_OPTIONS  -- /dev/loop5
+MOUNT_OPTIONS -- -o acl,user_xattr /dev/loop5 /mnt/scratch
+
+generic/632 files ...  22s
+Ran: generic/632
+Passed all 1 tests
+
+/* v13 */
+- Make sure that idmapped-mount tests are skipped on unsupported
+  filesystems.
+
+/* v12 */
+- Main change is a fix to the io_uring tests. io_uring_wait_cqe()
+  doesn't set errno, it returns a negative errno.
+- Make sure we also run without error when libcap isn't available (That
+  was always the goal but the logic missed a few new tests.)
+
+/* v11 */
+Reworked according to Amir's comments.
+
+/* v10 */
+Reworked according to Eryu's comments.
+
+/* v9 */
+Rebased onto current master.
+
+Thanks!
 Christian
+
+Christian Brauner (6):
+  generic/631: add test for detached mount propagation
+  generic/632: add fstests for idmapped mounts
+  common/rc: add _scratch_{u}mount_idmapped() helpers
+  common/quota: move _qsetup() helper to common code
+  xfs/529: quotas and idmapped mounts
+  xfs/530: quotas on idmapped mounts
+
+ .gitignore                            |    3 +
+ README                                |    5 +-
+ common/quota                          |   20 +
+ common/rc                             |   69 +
+ configure.ac                          |    2 +
+ include/builddefs.in                  |    1 +
+ m4/Makefile                           |    1 +
+ m4/package_libcap.m4                  |    4 +
+ src/Makefile                          |    8 +-
+ src/detached_mounts_propagation.c     |  189 +
+ src/feature.c                         |   40 +-
+ src/idmapped-mounts/Makefile          |   40 +
+ src/idmapped-mounts/idmapped-mounts.c | 8916 +++++++++++++++++++++++++
+ src/idmapped-mounts/missing.h         |  151 +
+ src/idmapped-mounts/mount-idmapped.c  |  431 ++
+ src/idmapped-mounts/utils.c           |  134 +
+ src/idmapped-mounts/utils.h           |   30 +
+ tests/generic/631                     |   43 +
+ tests/generic/631.out                 |    2 +
+ tests/generic/632                     |   42 +
+ tests/generic/632.out                 |    2 +
+ tests/generic/group                   |    2 +
+ tests/xfs/050                         |   19 -
+ tests/xfs/299                         |   19 -
+ tests/xfs/529                         |  377 ++
+ tests/xfs/529.out                     |  657 ++
+ tests/xfs/530                         |  212 +
+ tests/xfs/530.out                     |  129 +
+ tests/xfs/group                       |    2 +
+ 29 files changed, 11505 insertions(+), 45 deletions(-)
+ create mode 100644 m4/package_libcap.m4
+ create mode 100644 src/detached_mounts_propagation.c
+ create mode 100644 src/idmapped-mounts/Makefile
+ create mode 100644 src/idmapped-mounts/idmapped-mounts.c
+ create mode 100644 src/idmapped-mounts/missing.h
+ create mode 100644 src/idmapped-mounts/mount-idmapped.c
+ create mode 100644 src/idmapped-mounts/utils.c
+ create mode 100644 src/idmapped-mounts/utils.h
+ create mode 100755 tests/generic/631
+ create mode 100644 tests/generic/631.out
+ create mode 100755 tests/generic/632
+ create mode 100644 tests/generic/632.out
+ create mode 100755 tests/xfs/529
+ create mode 100644 tests/xfs/529.out
+ create mode 100755 tests/xfs/530
+ create mode 100644 tests/xfs/530.out
+
+
+base-commit: f6ddaf130d5b0817278afe441fdde52f464f321b
+-- 
+2.27.0
+
