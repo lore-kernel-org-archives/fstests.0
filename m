@@ -2,47 +2,51 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-19.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-24.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 842B5C433ED
-	for <linux-fstests@archiver.kernel.org>; Mon, 12 Apr 2021 11:58:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CF165C433ED
+	for <linux-fstests@archiver.kernel.org>; Mon, 12 Apr 2021 11:58:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 58FC76121E
-	for <linux-fstests@archiver.kernel.org>; Mon, 12 Apr 2021 11:58:17 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A31EA6128B
+	for <linux-fstests@archiver.kernel.org>; Mon, 12 Apr 2021 11:58:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240791AbhDLL6d (ORCPT
+        id S239202AbhDLL6g (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 12 Apr 2021 07:58:33 -0400
-Received: from mail.kernel.org ([198.145.29.99]:40284 "EHLO mail.kernel.org"
+        Mon, 12 Apr 2021 07:58:36 -0400
+Received: from mail.kernel.org ([198.145.29.99]:40316 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S240788AbhDLL6d (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 12 Apr 2021 07:58:33 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id A0D5D611C9;
-        Mon, 12 Apr 2021 11:58:13 +0000 (UTC)
+        id S240420AbhDLL6f (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 12 Apr 2021 07:58:35 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id C47A961289;
+        Mon, 12 Apr 2021 11:58:15 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1618228695;
-        bh=WYxFB1YD+mRL18+z671iou5y8zRHPPmcYE9rIuVewEU=;
-        h=From:To:Cc:Subject:Date:From;
-        b=NoUeQ0uE4uULNiSg+wu+Tr1bXNyafsUNEhFTr0SaBNFJfqmObGP0PwTTx7YFlS9CR
-         hg/r4ds5vfKJZRZcjHWN61WL5OxjkcdJrk4VmIS0O40f7X4VCcOCv2XewNKn/Qtk+6
-         g0uiZwpDdCOLxG9mj2z9y+YGK8TYhlVt5JAnGLMcIHUK7fV4ulfIfHe2Gt2LY4oelC
-         BgNz3LsJTAFkAANAXcUTiLllYPE2yvG3+LdQlJdmdhgscxDcOIHQkm1UxdvBTJJ8Kv
-         W4eO/DN+J9JtG12ThepFDQ5glx1yQBVfS+c/EpfC56gzVGdEswY/W/PpAkBqoRzK2o
-         KMTpXJGGYdoug==
+        s=k20201202; t=1618228697;
+        bh=wmG5D6vzSp6waVOz97Io2fp3ZabYx9fR/ZuwgRGLcjE=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=pBj/B+yDlVIx2m1cCTy3aSZUsADJikf/2OQVj1dKa4p4Mc4u5bLZvTjoHzeJpGaWW
+         DUSCTHgDj63PdmuuYx5sbyFZZKZfO+mJh5Ac+0VKKnSOo7mi49tXRE+G0w1+LcGZoD
+         p4Df0NFP/BSjdqvnefYihN7HJ46yBFBbTzqTPUzAZpDFeCpflxbi6JAiFSozU/whMo
+         qU9sSn7dy40Uy0HLfqJcZ2bGri7+gWNStJffeo5ZA+Xeq+lkSaG2+ojBwVvt+AyG8j
+         tRb4dlF4g6M0qunu6XPq+3+3TTjM4InwuRaXrM2sGPwdqMusVJQuqfN7fUaDC08+6U
+         LDNr1V0hiTB0A==
 From:   Christian Brauner <brauner@kernel.org>
 To:     Eryu Guan <guan@eryu.me>, fstests@vger.kernel.org,
         Christoph Hellwig <hch@lst.de>
 Cc:     "Darrick J . Wong" <djwong@kernel.org>,
         David Howells <dhowells@redhat.com>,
         Christian Brauner <christian.brauner@ubuntu.com>
-Subject: [PATCH v13 0/6] fstests: add idmapped mounts tests
-Date:   Mon, 12 Apr 2021 13:57:02 +0200
-Message-Id: <20210412115708.1628386-1-brauner@kernel.org>
+Subject: [PATCH v13 1/6] generic/631: add test for detached mount propagation
+Date:   Mon, 12 Apr 2021 13:57:03 +0200
+Message-Id: <20210412115708.1628386-2-brauner@kernel.org>
 X-Mailer: git-send-email 2.27.0
+In-Reply-To: <20210412115708.1628386-1-brauner@kernel.org>
+References: <20210412115708.1628386-1-brauner@kernel.org>
 MIME-Version: 1.0
+X-Patch-Hashes: v=1; h=sha256; i=A6fAS7tAPRPONqYTQ9f9cKH6F5OBvRuYVz2qXgEb3AM=; m=8ZQ6bRW98ma4GpDy8UjCocC3BLQm2BLWPAkVXt35HZ0=; p=b69Q1HgGlbv6gY2TC4ge85IZt1NyVm0ineSsz43vBao=; g=0d54adfd7a41e33d87cb9ec891a33f027a324689
+X-Patch-Sig: m=pgp; i=christian.brauner@ubuntu.com; s=0x0x91C61BC06578DCA2; b=iHUEABYKAB0WIQRAhzRXHqcMeLMyaSiRxhvAZXjcogUCYHQ1ggAKCRCRxhvAZXjcoqaLAQCSrmw xfer1lm6JBnqatjhTz+SXcnFLvLu1uUPXqNsQ+QD/eJfXzkDBHXIsraHIFMMylPjsWf089XO4ZI8D slm81gs=
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
@@ -50,128 +54,406 @@ X-Mailing-List: fstests@vger.kernel.org
 
 From: Christian Brauner <christian.brauner@ubuntu.com>
 
-Hey everyone,
+Regression test to verify that creating a series of detached mounts,
+attaching them to the filesystem, and unmounting them does not trigger an
+integer overflow in ns->mounts causing the kernel to block any new mounts in
+count_mounts() and returning ENOSPC because it falsely assumes that the
+maximum number of mounts in the mount namespace has been reached, i.e. it
+thinks it can't fit the new mounts into the mount namespace anymore.
 
-This series is available from:
-https://git.kernel.org/brauner/xfstests-dev/h/idmapped_mounts
-https://gitlab.com/brauner/xfstests/-/tree/idmapped_mounts
-https://github.com/brauner/xfstests/tree/idmapped_mounts
+The test is written in a way that it will leave the host's mount
+namespace intact so we are sure to never make the host's mount namespace
+unuseable!
 
-#### Unsupported filesystem
-ubuntu@f2-vm:~/src/git/xfstests$ sudo ./check -g idmapped
-FSTYP         -- btrfs
-PLATFORM      -- Linux/x86_64 f2-vm 5.12.0-rc6-ecryptfs-6d82e210b270 #373 SMP PREEMPT Fri Apr 9 13:58:37 UTC 2021
-MKFS_OPTIONS  -- /dev/loop3
-MOUNT_OPTIONS -- /dev/loop3 /mnt/scratch
-
-generic/632 files ... [not run] idmapped-mounts not support by btrfs
-Ran: generic/632
-Not run: generic/632
-Passed all 1 tests
-
-#### xfs
-ubuntu@f2-vm:~/src/git/xfstests$ sudo ./check -g idmapped
-FSTYP         -- xfs (debug)
-PLATFORM      -- Linux/x86_64 f2-vm 5.12.0-rc6-ecryptfs-6d82e210b270 #373 SMP PREEMPT Fri Apr 9 13:58:37 UTC 2021
-MKFS_OPTIONS  -- -f -bsize=4096 /dev/loop1
-MOUNT_OPTIONS -- /dev/loop1 /mnt/scratch
-
-generic/632 files ...  27s
-xfs/529 files ...  64s
-xfs/530 files ...  41s
-Ran: generic/632 xfs/529 xfs/530
-Passed all 3 tests
-
-#### ext4
-ubuntu@f2-vm:~/src/git/xfstests$ sudo ./check -g idmapped
-FSTYP         -- ext4
-PLATFORM      -- Linux/x86_64 f2-vm 5.12.0-rc6-ecryptfs-6d82e210b270 #373 SMP PREEMPT Fri Apr 9 13:58:37 UTC 2021
-MKFS_OPTIONS  -- /dev/loop5
-MOUNT_OPTIONS -- -o acl,user_xattr /dev/loop5 /mnt/scratch
-
-generic/632 files ...  22s
-Ran: generic/632
-Passed all 1 tests
-
-/* v13 */
-- Make sure that idmapped-mount tests are skipped on unsupported
-  filesystems.
-
-/* v12 */
-- Main change is a fix to the io_uring tests. io_uring_wait_cqe()
-  doesn't set errno, it returns a negative errno.
-- Make sure we also run without error when libcap isn't available (That
-  was always the goal but the logic missed a few new tests.)
-
-/* v11 */
-Reworked according to Amir's comments.
-
-/* v10 */
-Reworked according to Eryu's comments.
+Link: https://git.kernel.org/torvalds/c/ee2e3f50629f17b0752b55b2566c15ce8dafb557
+Cc: Eryu Guan <guan@eryu.me>
+Cc: David Howells <dhowells@redhat.com>
+Reviewed-by: Christoph Hellwig <hch@lst.de>
+Signed-off-by: Christian Brauner <christian.brauner@ubuntu.com>
+---
+/* v1 - v8 */
+patch not present
 
 /* v9 */
-Rebased onto current master.
+- Christian Brauner <christian.brauner@ubuntu.com>:
+  - Rebased on current master.
 
-Thanks!
-Christian
+/* v10 */
+- Eryu Guan <guan@eryu.me>:
+  - Add missing checks whether test is supported.
+  - Move status=$? assignment up.
 
-Christian Brauner (6):
-  generic/631: add test for detached mount propagation
-  generic/632: add fstests for idmapped mounts
-  common/rc: add _scratch_{u}mount_idmapped() helpers
-  common/quota: move _qsetup() helper to common code
-  xfs/529: quotas and idmapped mounts
-  xfs/530: quotas on idmapped mounts
+/* v11 */
+unchanged
 
- .gitignore                            |    3 +
- README                                |    5 +-
- common/quota                          |   20 +
- common/rc                             |   69 +
- configure.ac                          |    2 +
- include/builddefs.in                  |    1 +
- m4/Makefile                           |    1 +
- m4/package_libcap.m4                  |    4 +
- src/Makefile                          |    8 +-
- src/detached_mounts_propagation.c     |  189 +
- src/feature.c                         |   40 +-
- src/idmapped-mounts/Makefile          |   40 +
- src/idmapped-mounts/idmapped-mounts.c | 8916 +++++++++++++++++++++++++
- src/idmapped-mounts/missing.h         |  151 +
- src/idmapped-mounts/mount-idmapped.c  |  431 ++
- src/idmapped-mounts/utils.c           |  134 +
- src/idmapped-mounts/utils.h           |   30 +
- tests/generic/631                     |   43 +
- tests/generic/631.out                 |    2 +
- tests/generic/632                     |   42 +
- tests/generic/632.out                 |    2 +
- tests/generic/group                   |    2 +
- tests/xfs/050                         |   19 -
- tests/xfs/299                         |   19 -
- tests/xfs/529                         |  377 ++
- tests/xfs/529.out                     |  657 ++
- tests/xfs/530                         |  212 +
- tests/xfs/530.out                     |  129 +
- tests/xfs/group                       |    2 +
- 29 files changed, 11505 insertions(+), 45 deletions(-)
- create mode 100644 m4/package_libcap.m4
+/* v12 */
+unchanged
+
+/* v13 */
+- Eryu Guan <guan@eryu.me>:
+  - Change mode of newly created files to match others.
+---
+ .gitignore                        |   1 +
+ src/Makefile                      |   3 +-
+ src/detached_mounts_propagation.c | 252 ++++++++++++++++++++++++++++++
+ tests/generic/631                 |  43 +++++
+ tests/generic/631.out             |   2 +
+ tests/generic/group               |   1 +
+ 6 files changed, 301 insertions(+), 1 deletion(-)
  create mode 100644 src/detached_mounts_propagation.c
- create mode 100644 src/idmapped-mounts/Makefile
- create mode 100644 src/idmapped-mounts/idmapped-mounts.c
- create mode 100644 src/idmapped-mounts/missing.h
- create mode 100644 src/idmapped-mounts/mount-idmapped.c
- create mode 100644 src/idmapped-mounts/utils.c
- create mode 100644 src/idmapped-mounts/utils.h
  create mode 100755 tests/generic/631
  create mode 100644 tests/generic/631.out
- create mode 100755 tests/generic/632
- create mode 100644 tests/generic/632.out
- create mode 100755 tests/xfs/529
- create mode 100644 tests/xfs/529.out
- create mode 100755 tests/xfs/530
- create mode 100644 tests/xfs/530.out
 
-
-base-commit: f6ddaf130d5b0817278afe441fdde52f464f321b
+diff --git a/.gitignore b/.gitignore
+index f3bc0a4f..72bd40a0 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -62,6 +62,7 @@
+ /src/cloner
+ /src/dbtest
+ /src/deduperace
++/src/detached_mounts_propagation
+ /src/devzero
+ /src/dio-interleaved
+ /src/dio-invalidate-cache
+diff --git a/src/Makefile b/src/Makefile
+index 3d729a34..99019e6e 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -29,7 +29,8 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+ 	attr-list-by-handle-cursor-test listxattr dio-interleaved t_dir_type \
+ 	dio-invalidate-cache stat_test t_encrypted_d_revalidate \
+ 	attr_replace_test swapon mkswap t_attr_corruption t_open_tmpfiles \
+-	fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail
++	fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail \
++	detached_mounts_propagation
+ 
+ SUBDIRS = log-writes perf
+ 
+diff --git a/src/detached_mounts_propagation.c b/src/detached_mounts_propagation.c
+new file mode 100644
+index 00000000..4a588e46
+--- /dev/null
++++ b/src/detached_mounts_propagation.c
+@@ -0,0 +1,252 @@
++/* SPDX-License-Identifier: LGPL-2.1+ */
++/*
++ * Copyright (c) 2021 Christian Brauner <christian.brauner@ubuntu.com>
++ * All Rights Reserved.
++ *
++ * Regression test to verify that creating a series of detached mounts,
++ * attaching them to the filesystem, and unmounting them does not trigger an
++ * integer overflow in ns->mounts causing the kernel to block any new mounts in
++ * count_mounts() and returning ENOSPC because it falsely assumes that the
++ * maximum number of mounts in the mount namespace has been reached, i.e. it
++ * thinks it can't fit the new mounts into the mount namespace anymore.
++ */
++
++#include <errno.h>
++#include <fcntl.h>
++#include <getopt.h>
++#include <limits.h>
++#include <sched.h>
++#include <stdbool.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <sys/mount.h>
++#include <sys/stat.h>
++#include <sys/syscall.h>
++#include <sys/types.h>
++#include <unistd.h>
++
++/* open_tree() */
++#ifndef OPEN_TREE_CLONE
++#define OPEN_TREE_CLONE 1
++#endif
++
++#ifndef OPEN_TREE_CLOEXEC
++#define OPEN_TREE_CLOEXEC O_CLOEXEC
++#endif
++
++#ifndef __NR_open_tree
++	#if defined __alpha__
++		#define __NR_open_tree 538
++	#elif defined _MIPS_SIM
++		#if _MIPS_SIM == _MIPS_SIM_ABI32	/* o32 */
++			#define __NR_open_tree 4428
++		#endif
++		#if _MIPS_SIM == _MIPS_SIM_NABI32	/* n32 */
++			#define __NR_open_tree 6428
++		#endif
++		#if _MIPS_SIM == _MIPS_SIM_ABI64	/* n64 */
++			#define __NR_open_tree 5428
++		#endif
++	#elif defined __ia64__
++		#define __NR_open_tree (428 + 1024)
++	#else
++		#define __NR_open_tree 428
++	#endif
++#endif
++
++/* move_mount() */
++#ifndef MOVE_MOUNT_F_EMPTY_PATH
++#define MOVE_MOUNT_F_EMPTY_PATH 0x00000004 /* Empty from path permitted */
++#endif
++
++#ifndef __NR_move_mount
++	#if defined __alpha__
++		#define __NR_move_mount 539
++	#elif defined _MIPS_SIM
++		#if _MIPS_SIM == _MIPS_SIM_ABI32	/* o32 */
++			#define __NR_move_mount 4429
++		#endif
++		#if _MIPS_SIM == _MIPS_SIM_NABI32	/* n32 */
++			#define __NR_move_mount 6429
++		#endif
++		#if _MIPS_SIM == _MIPS_SIM_ABI64	/* n64 */
++			#define __NR_move_mount 5429
++		#endif
++	#elif defined __ia64__
++		#define __NR_move_mount (428 + 1024)
++	#else
++		#define __NR_move_mount 429
++	#endif
++#endif
++
++static inline int sys_open_tree(int dfd, const char *filename, unsigned int flags)
++{
++	return syscall(__NR_open_tree, dfd, filename, flags);
++}
++
++static inline int sys_move_mount(int from_dfd, const char *from_pathname, int to_dfd,
++				 const char *to_pathname, unsigned int flags)
++{
++	return syscall(__NR_move_mount, from_dfd, from_pathname, to_dfd, to_pathname, flags);
++}
++
++static bool is_shared_mountpoint(const char *path)
++{
++	bool shared = false;
++	FILE *f = NULL;
++	char *line = NULL;
++	int i;
++	size_t len = 0;
++
++	f = fopen("/proc/self/mountinfo", "re");
++	if (!f)
++		return 0;
++
++	while (getline(&line, &len, f) > 0) {
++		char *slider1, *slider2;
++
++		for (slider1 = line, i = 0; slider1 && i < 4; i++)
++			slider1 = strchr(slider1 + 1, ' ');
++
++		if (!slider1)
++			continue;
++
++		slider2 = strchr(slider1 + 1, ' ');
++		if (!slider2)
++			continue;
++
++		*slider2 = '\0';
++		if (strcmp(slider1 + 1, path) == 0) {
++			/* This is the path. Is it shared? */
++			slider1 = strchr(slider2 + 1, ' ');
++			if (slider1 && strstr(slider1, "shared:")) {
++				shared = true;
++				break;
++			}
++		}
++	}
++	fclose(f);
++	free(line);
++
++	return shared;
++}
++
++static void usage(void)
++{
++	const char *text = "mount-new [--recursive] <base-dir>\n";
++	fprintf(stderr, "%s", text);
++	_exit(EXIT_SUCCESS);
++}
++
++#define exit_usage(format, ...)                              \
++	({                                                   \
++		fprintf(stderr, format "\n", ##__VA_ARGS__); \
++		usage();                                     \
++	})
++
++#define exit_log(format, ...)                                \
++	({                                                   \
++		fprintf(stderr, format "\n", ##__VA_ARGS__); \
++		exit(EXIT_FAILURE);                          \
++	})
++
++static const struct option longopts[] = {
++	{"help",	no_argument,		0,	'a'},
++	{ NULL,		no_argument,		0,	 0 },
++};
++
++int main(int argc, char *argv[])
++{
++	int exit_code = EXIT_SUCCESS, index = 0;
++	int dfd, fd_tree, new_argc, ret;
++	char *base_dir;
++	char *const *new_argv;
++	char target[PATH_MAX];
++
++	while ((ret = getopt_long_only(argc, argv, "", longopts, &index)) != -1) {
++		switch (ret) {
++		case 'a':
++			/* fallthrough */
++		default:
++			usage();
++		}
++	}
++
++	new_argv = &argv[optind];
++	new_argc = argc - optind;
++	if (new_argc < 1)
++		exit_usage("Missing base directory\n");
++	base_dir = new_argv[0];
++
++	if (*base_dir != '/')
++		exit_log("Please specify an absolute path");
++
++	/* Ensure that target is a shared mountpoint. */
++	if (!is_shared_mountpoint(base_dir))
++		exit_log("Please ensure that \"%s\" is a shared mountpoint", base_dir);
++
++	ret = unshare(CLONE_NEWNS);
++	if (ret < 0)
++		exit_log("%m - Failed to create new mount namespace");
++
++	ret = mount(NULL, base_dir, NULL, MS_REC | MS_SHARED, NULL);
++	if (ret < 0)
++		exit_log("%m - Failed to make base_dir shared mountpoint");
++
++	dfd = open(base_dir, O_RDONLY | O_DIRECTORY | O_CLOEXEC);
++	if (dfd < 0)
++		exit_log("%m - Failed to open base directory \"%s\"", base_dir);
++
++	ret = mkdirat(dfd, "detached-move-mount", 0755);
++	if (ret < 0)
++		exit_log("%m - Failed to create required temporary directories");
++
++	ret = snprintf(target, sizeof(target), "%s/detached-move-mount", base_dir);
++	if (ret < 0 || (size_t)ret >= sizeof(target))
++		exit_log("%m - Failed to assemble target path");
++
++	/*
++	 * Having a mount table with 10000 mounts is already quite excessive
++	 * and shoult account even for weird test systems.
++	 */
++	for (size_t i = 0; i < 10000; i++) {
++		fd_tree = sys_open_tree(dfd, "detached-move-mount",
++					OPEN_TREE_CLONE |
++					OPEN_TREE_CLOEXEC |
++					AT_EMPTY_PATH);
++		if (fd_tree < 0) {
++			if (errno == ENOSYS) /* New mount API not (fully) supported. */
++				break;
++
++			fprintf(stderr, "%m - Failed to open %d(detached-move-mount)", dfd);
++			exit_code = EXIT_FAILURE;
++			break;
++		}
++
++		ret = sys_move_mount(fd_tree, "", dfd, "detached-move-mount", MOVE_MOUNT_F_EMPTY_PATH);
++		if (ret < 0) {
++			if (errno == ENOSPC)
++				fprintf(stderr, "%m - Buggy mount counting");
++			else if (errno == ENOSYS) /* New mount API not (fully) supported. */
++				break;
++			else
++				fprintf(stderr, "%m - Failed to attach mount to %d(detached-move-mount)", dfd);
++			exit_code = EXIT_FAILURE;
++			break;
++		}
++		close(fd_tree);
++
++		ret = umount2(target, MNT_DETACH);
++		if (ret < 0) {
++			fprintf(stderr, "%m - Failed to unmount %s", target);
++			exit_code = EXIT_FAILURE;
++			break;
++		}
++	}
++
++	(void)unlinkat(dfd, "detached-move-mount", AT_REMOVEDIR);
++	close(dfd);
++
++	exit(exit_code);
++}
+diff --git a/tests/generic/631 b/tests/generic/631
+new file mode 100755
+index 00000000..0b6cac42
+--- /dev/null
++++ b/tests/generic/631
+@@ -0,0 +1,43 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0+
++#
++# Copyright (c) 2021 Christian Brauner <christian.brauner@ubuntu.com>
++# All Rights Reserved.
++#
++# FS QA Test No. 631
++#
++# Regression test to verify that creating a series of detached mounts,
++# attaching them to the filesystem, and unmounting them does not trigger an
++# integer overflow in ns->mounts causing the kernel to block any new mounts in
++# count_mounts() and returning ENOSPC because it falsely assumes that the
++# maximum number of mounts in the mount namespace has been reached, i.e. it
++# thinks it can't fit the new mounts into the mount namespace anymore.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++. ./common/rc
++
++rm -f $seqres.full
++
++_supported_fs generic
++_require_test
++_require_test_program "detached_mounts_propagation"
++
++$here/src/detached_mounts_propagation $TEST_DIR >> $seqres.full
++status=$?
++
++echo silence is golden
++exit
+diff --git a/tests/generic/631.out b/tests/generic/631.out
+new file mode 100644
+index 00000000..ce88f447
+--- /dev/null
++++ b/tests/generic/631.out
+@@ -0,0 +1,2 @@
++QA output created by 631
++silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index 7c7531d1..151f8af2 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -633,3 +633,4 @@
+ 628 auto quick rw clone
+ 629 auto quick rw copy_range
+ 630 auto quick rw dedupe clone
++631 auto quick mount
 -- 
 2.27.0
 
