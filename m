@@ -7,64 +7,64 @@ X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E8E77C43462
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 66D34C43461
 	for <linux-fstests@archiver.kernel.org>; Thu, 15 Apr 2021 09:49:15 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CD64F613B0
+	by mail.kernel.org (Postfix) with ESMTP id 49B0C611AB
 	for <linux-fstests@archiver.kernel.org>; Thu, 15 Apr 2021 09:49:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232129AbhDOJth (ORCPT
+        id S232030AbhDOJth (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
         Thu, 15 Apr 2021 05:49:37 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:54651 "EHLO
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:49333 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S231815AbhDOJtf (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 15 Apr 2021 05:49:35 -0400
+        by vger.kernel.org with ESMTP id S231809AbhDOJte (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 15 Apr 2021 05:49:34 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1618480152;
+        s=mimecast20190719; t=1618480151;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=zyDkbOJF+LAXZhVyXOvOwWICcwEeTsYdSwwQvMcPKv0=;
-        b=IB1gPkFPDAQvFhLL4no2DRvhThL1gQPf/poGr6DcOnQYhOBopvzioPHtwT9qIho0wOPBE8
-        eONBN/X459apco45aQT0S5lmNgLOq7zL/sEoV+VW7PSjP/UFRay4ncp3k9nL90khzAb1K7
-        lnB4igMALzA2FWZGV+aBWHulfhtKf0Q=
-Received: from mail-wr1-f69.google.com (mail-wr1-f69.google.com
- [209.85.221.69]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-91-zjKKZ4giPUiivq1xKHLXqg-1; Thu, 15 Apr 2021 05:49:11 -0400
-X-MC-Unique: zjKKZ4giPUiivq1xKHLXqg-1
-Received: by mail-wr1-f69.google.com with SMTP id 33-20020adf80240000b02900f9e2646f9aso2483988wrk.0
-        for <fstests@vger.kernel.org>; Thu, 15 Apr 2021 02:49:10 -0700 (PDT)
+        bh=sdWhtJvl7MC1oD/gW6XMgG8McJ9WGJMyj2oi9yBarHU=;
+        b=JgEsbCbEn1vigWKIq9hZV4hS6dS7kanmP/il/tELPLC6JgdyjlSY0+ELTX6a2l2Zhw9GQV
+        03T7QoM/w3q81iwRtb9FDeWMDjfswb+vfs2YoCuSHWwo17+Z9eSfXiNlKRzjtjsvY8HD9O
+        tEbQ6Nsyr8KEK6sRmDMiglxYRHQFWNY=
+Received: from mail-wr1-f70.google.com (mail-wr1-f70.google.com
+ [209.85.221.70]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-238-KpKI6LfQNySwwA_OBD-yFw-1; Thu, 15 Apr 2021 05:49:10 -0400
+X-MC-Unique: KpKI6LfQNySwwA_OBD-yFw-1
+Received: by mail-wr1-f70.google.com with SMTP id j4-20020adfe5040000b0290102bb319b87so2490017wrm.23
+        for <fstests@vger.kernel.org>; Thu, 15 Apr 2021 02:49:09 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=zyDkbOJF+LAXZhVyXOvOwWICcwEeTsYdSwwQvMcPKv0=;
-        b=tHmMmUNmG6zKv3eZ9gdf8G5slMQTOf783qDRKBYVSb1KEgNFx7yLhtPvo5835MNKcM
-         Kszpf/cCEHO7dn4//xsZD0BIk9kOkQG/QCdU+QRB5kdD25A+VRkOWM5VpRoeQu+UpfNl
-         TNmm8v6zH4GTGnh6U+sEKDA3ncEH1QqH2dXNzVjw9oFaqAmPJQ1JCOvAidfyPXueVbW3
-         qWVjCR591HLWWYc+7XMuR4dIZBgAryqHOAH98oMabE+32kB6rHybK4HfYve3YdcOWe+L
-         bOhvg/7ZoOIuKyFRUrdhSHkh/3JdT4dwEobGdRYQCHnxd6DjYwKHxUEcktCc7StGb5PQ
-         /pmA==
-X-Gm-Message-State: AOAM532UMXknAl+uftjTb/7tJlnHF16BmCct51znskK4zHjB+P8nwQKx
-        gGW3j3A5Z4//7gcbNhqwtVWkuAGxRAYGpCIBhL1LSimj7kmBvEiWPxXGmww6Mc7Q7Jj6TCs44Lt
-        H18uOs29xKwl683dKnzUdLP2f4WnUxsAWoCzpf0hFi2u4DPSxdiFusE7eUyo+sfZj1quA
-X-Received: by 2002:a1c:94:: with SMTP id 142mr2344748wma.31.1618480149595;
-        Thu, 15 Apr 2021 02:49:09 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJxhDChxWY49dUVS2tU0A0bxWSlMCmf44Nsrc+xImHUmwjnFlW4Ud2Z6rJTyyDJFRFiH2Dk4gg==
-X-Received: by 2002:a1c:94:: with SMTP id 142mr2344722wma.31.1618480149285;
-        Thu, 15 Apr 2021 02:49:09 -0700 (PDT)
+        bh=sdWhtJvl7MC1oD/gW6XMgG8McJ9WGJMyj2oi9yBarHU=;
+        b=NBdaA1RtfMp/mmFrKtdrN3L8q68KhneqHYRfGuduyBwhFKKiIWQWqEvGDVK+P6/6KT
+         O1zK8D0K/GOGbziv/nIUsqZHerHTSL9xJdHlbPxBfMrPI0Rwa9WUN45nTujjCGkYi5UN
+         NKt4imJEYa0p7PkeeAVmjNwVT2HXjl7rAWS+Uy1NB0Df4GsaAMhd246Pk5M9jcT/WgWR
+         SpnUJCmv8/MMWHLv4QUrbNecyPe67nSASNWGBN6aKB+XYQkJsr4887LA+AkuoUfCi4JA
+         I2np2FNg6hsLWxnw6R8jW3OLRyccK0d6IFfUghlChKNMl8NZmaf+BG0Wau44Ul730R8L
+         +liw==
+X-Gm-Message-State: AOAM5327mU+cwjr5ZCk8CPMbyNfJnrQ3O8AQ85lN3XHkdDSzsPb2IqZ6
+        ub9DRi/B5XJhQa2Y/2lVwMffwdxK+5It2r2Dmk7JY/ZGruzqP0MQl0qEqRDkVA1hXT3sBiA2sNO
+        UWv3Cs5dShGG7s3q2LR040LJ93+Fd/dvJBFPJG2zVW2AhzhKTFsvt8ip1+AAHYshivN8g
+X-Received: by 2002:a05:6000:184c:: with SMTP id c12mr2526699wri.125.1618480148667;
+        Thu, 15 Apr 2021 02:49:08 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJwUfC1I0psH1pmH7LzmAk7edBqzYXyt+VYxcps2SVsqhB2+UwobP1bLOBkp5+lFb6og1z4DQw==
+X-Received: by 2002:a05:6000:184c:: with SMTP id c12mr2526682wri.125.1618480148544;
+        Thu, 15 Apr 2021 02:49:08 -0700 (PDT)
 Received: from localhost.localdomain ([84.19.91.9])
-        by smtp.gmail.com with ESMTPSA id v4sm2427278wrf.36.2021.04.15.02.49.08
+        by smtp.gmail.com with ESMTPSA id v4sm2427278wrf.36.2021.04.15.02.49.07
         for <fstests@vger.kernel.org>
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
         Thu, 15 Apr 2021 02:49:08 -0700 (PDT)
 From:   Pavel Reichl <preichl@redhat.com>
 To:     fstests@vger.kernel.org
-Subject: [PATCH v3 4/4] generic/003: Amend the test for exfat
-Date:   Thu, 15 Apr 2021 11:49:05 +0200
-Message-Id: <20210415094905.61853-5-preichl@redhat.com>
+Subject: [PATCH v3 3/4] generic/554: hide permision warning on exfat
+Date:   Thu, 15 Apr 2021 11:49:04 +0200
+Message-Id: <20210415094905.61853-4-preichl@redhat.com>
 X-Mailer: git-send-email 2.30.2
 In-Reply-To: <20210415094905.61853-1-preichl@redhat.com>
 References: <20210415094905.61853-1-preichl@redhat.com>
@@ -74,89 +74,44 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Update the test so it can be run even for exfat which has 2 seconds
-granularity for access_time and does not have a timestamp for
-metadata change.
-
 Signed-off-by: Pavel Reichl <preichl@redhat.com>
 ---
- tests/generic/003 | 29 ++++++++++++++++++++---------
- 1 file changed, 20 insertions(+), 9 deletions(-)
+ common/rc         | 7 +++++++
+ tests/generic/554 | 3 ++-
+ 2 files changed, 9 insertions(+), 1 deletion(-)
 
-diff --git a/tests/generic/003 b/tests/generic/003
-index ec4fdfc1..b2a3db39 100755
---- a/tests/generic/003
-+++ b/tests/generic/003
-@@ -37,6 +37,13 @@ _require_relatime
- 
- rm -f $seqres.full
- 
-+if [ "$FSTYP" = "exfat" ]; then
-+	# exfat's timestamp for access_time has double seconds granularity
-+	access_delay=2.1
-+else
-+	access_delay=1
-+fi
-+
- _stat() {
- 	stat -c "%x;%y;%z" $1
+diff --git a/common/rc b/common/rc
+index 47098b55..fb1f7598 100644
+--- a/common/rc
++++ b/common/rc
+@@ -2378,6 +2378,13 @@ _format_swapfile() {
+ 	$MKSWAP_PROG "$fname" 2> >(grep -v 'insecure permission' >&2) >> $seqres.full
  }
-@@ -79,14 +86,14 @@ echo "aaa" > $TPATH/dir1/file1
- file1_stat_before_first_access=`_stat $TPATH/dir1/file1`
  
- # Accessing file1 the first time
--sleep 1
-+sleep $access_delay
- cat $TPATH/dir1/file1 > /dev/null
- file1_stat_after_first_access=`_stat $TPATH/dir1/file1`
- _compare_stat_times YNN "$file1_stat_before_first_access" \
- 	"$file1_stat_after_first_access" "after accessing file1 first time"
- 
- # Accessing file1 a second time
--sleep 1
-+sleep $access_delay
- cat $TPATH/dir1/file1 > /dev/null
- file1_stat_after_second_access=`_stat $TPATH/dir1/file1`
- _compare_stat_times NNN "$file1_stat_after_first_access" \
-@@ -109,7 +116,7 @@ _compare_stat_times NYY "$dir2_stat_before_file_creation" \
- 
- # Accessing file2
- file2_stat_before_first_access=`_stat $TPATH/dir2/file2`
--sleep 1
-+sleep $access_delay
- cat $TPATH/dir2/file2 > /dev/null
- file2_stat_after_first_access=`_stat $TPATH/dir2/file2`
- _compare_stat_times YNN "$file2_stat_before_first_access" \
-@@ -135,11 +142,15 @@ echo "xyz" > $TPATH/dir1/file1
- file1_stat_after_modify=`_stat $TPATH/dir1/file1`
- _compare_stat_times NYY "$file1_stat_before_modify" \
- 	"$file1_stat_after_modify" "after modifying file1"
--sleep 1
--mv $TPATH/dir1/file1 $TPATH/dir1/file1_renamed
--file1_stat_after_change=`_stat $TPATH/dir1/file1_renamed`
--_compare_stat_times NNY "$file1_stat_after_modify" \
--	"$file1_stat_after_change" "after changing file1"
++_swapon_file() {
++	local fname="$1"
 +
-+# exfat does not support last metadata change timestamp
-+if [ "$FSTYP" != "exfat" ]; then
-+	sleep 1
-+	mv $TPATH/dir1/file1 $TPATH/dir1/file1_renamed
-+	file1_stat_after_change=`_stat $TPATH/dir1/file1_renamed`
-+	_compare_stat_times NNY "$file1_stat_after_modify" \
-+		"$file1_stat_after_change" "after changing file1"
-+fi
++	# Ignore permission complaints on filesystems that don't support perms
++	swapon "$fname" 2> >(grep -v "insecure permissions" >&2)
++}
++
+ # Check that the filesystem supports swapfiles
+ _require_scratch_swapfile()
+ {
+diff --git a/tests/generic/554 b/tests/generic/554
+index fa4f97d2..da9bfce5 100755
+--- a/tests/generic/554
++++ b/tests/generic/554
+@@ -46,7 +46,8 @@ $XFS_IO_PROG -f -c "pwrite -S 0x61 0 128k" $SCRATCH_MNT/file >> $seqres.full 2>&
  
- # Mounting with strictatime option and
- # accessing a previously created file twice
-@@ -148,7 +159,7 @@ cat $TPATH/dir2/file3 > /dev/null
- file3_stat_after_second_access=`_stat $TPATH/dir2/file3`
- _compare_stat_times YNN "$file3_stat_after_first_access" \
- 	"$file3_stat_after_second_access" "after accessing file3 second time"
--sleep 1
-+sleep $access_delay
- cat $TPATH/dir2/file3 > /dev/null
- file3_stat_after_third_access=`_stat $TPATH/dir2/file3`
- _compare_stat_times YNN "$file3_stat_after_second_access" \
+ echo swap files return ETXTBUSY
+ _format_swapfile $SCRATCH_MNT/swapfile 16m
+-swapon $SCRATCH_MNT/swapfile
++_swapon_file $SCRATCH_MNT/swapfile
++
+ $XFS_IO_PROG -f -c "copy_range -l 32k $SCRATCH_MNT/file" $SCRATCH_MNT/swapfile
+ swapoff $SCRATCH_MNT/swapfile
+ 
 -- 
 2.30.2
 
