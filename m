@@ -7,64 +7,64 @@ X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 16C1FC433B4
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E8E77C43462
 	for <linux-fstests@archiver.kernel.org>; Thu, 15 Apr 2021 09:49:15 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E47BA61166
-	for <linux-fstests@archiver.kernel.org>; Thu, 15 Apr 2021 09:49:14 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CD64F613B0
+	for <linux-fstests@archiver.kernel.org>; Thu, 15 Apr 2021 09:49:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231531AbhDOJtg (ORCPT
+        id S232129AbhDOJth (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 15 Apr 2021 05:49:36 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:43391 "EHLO
+        Thu, 15 Apr 2021 05:49:37 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:54651 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S231766AbhDOJte (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 15 Apr 2021 05:49:34 -0400
+        by vger.kernel.org with ESMTP id S231815AbhDOJtf (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 15 Apr 2021 05:49:35 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1618480151;
+        s=mimecast20190719; t=1618480152;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=G7ohePm8V3EbpXOSXLfjDWDt4deCIcUZRMbI6KyN1lU=;
-        b=F5Foiaw11iEyYWXNXNGymHiXHxGqOmnbDdMHkhSoMEa9Gr896/iS5M7TBxVWhOv/qenl8n
-        8ARwX0/Z/u4JwkhEq1fhpMmbwG6qWVwqkbhu4U+9+rIooXvbWvrW5/AxSZOu+n5Uu1tAjb
-        SFnLPKy+HKLb6EcNfF/SfWSWgMrqI/w=
-Received: from mail-wr1-f72.google.com (mail-wr1-f72.google.com
- [209.85.221.72]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-70-nmiA2BEfMqaxC_vRFY8g2g-1; Thu, 15 Apr 2021 05:49:09 -0400
-X-MC-Unique: nmiA2BEfMqaxC_vRFY8g2g-1
-Received: by mail-wr1-f72.google.com with SMTP id y13-20020adfdf0d0000b02901029a3bf796so2490479wrl.15
-        for <fstests@vger.kernel.org>; Thu, 15 Apr 2021 02:49:08 -0700 (PDT)
+        bh=zyDkbOJF+LAXZhVyXOvOwWICcwEeTsYdSwwQvMcPKv0=;
+        b=IB1gPkFPDAQvFhLL4no2DRvhThL1gQPf/poGr6DcOnQYhOBopvzioPHtwT9qIho0wOPBE8
+        eONBN/X459apco45aQT0S5lmNgLOq7zL/sEoV+VW7PSjP/UFRay4ncp3k9nL90khzAb1K7
+        lnB4igMALzA2FWZGV+aBWHulfhtKf0Q=
+Received: from mail-wr1-f69.google.com (mail-wr1-f69.google.com
+ [209.85.221.69]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-91-zjKKZ4giPUiivq1xKHLXqg-1; Thu, 15 Apr 2021 05:49:11 -0400
+X-MC-Unique: zjKKZ4giPUiivq1xKHLXqg-1
+Received: by mail-wr1-f69.google.com with SMTP id 33-20020adf80240000b02900f9e2646f9aso2483988wrk.0
+        for <fstests@vger.kernel.org>; Thu, 15 Apr 2021 02:49:10 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=G7ohePm8V3EbpXOSXLfjDWDt4deCIcUZRMbI6KyN1lU=;
-        b=K3m+vQNHqAXLHdSUQwpB1d4L/2gTRT8DydhiSLKadSZ9DQ6/Dac90JTLfgeYauemev
-         tGibIPDHXZ96j+B3XupiK0ODtje09hG0MfTUKDc6F/ldzVMr6FUKBq4vXDA51sCw02Lh
-         oElu3jCHvcfCTaOyhqC3r7lbi06HDlroM8kb8rnORyZGedrVFQUqbtQtsn1TZ4ssoeHz
-         FWT590NlDTDovgonGdR9clvmdT+3XPxykpIYJytxY5LY5+a6DRJFq84qt1Aj8FRnOOi3
-         gBibGwSUkSNgx4poeJig2bqXui9WlX01is7myzTyoCIjaDnJCN8ch0syBqZ5CWhoJC0b
-         T9Sg==
-X-Gm-Message-State: AOAM531m/uPiE/NSjx7Qy5yr1Ni/vpZvHkcd8nn+VDwi5SZkTPXZOk/H
-        UCEmlFe874AT5Id8Z0FfVsO6apm0YNKbqL5qf1+nksia4zbapz1ZPx/lFBmRv3JRsSw9MsIs+xo
-        3XhRNyLIt4PwJU1Zqpz1O5xu8BPi/vJKfVJphmhLAbd+HNGdqkg+GZRU9fzVnzxmFgz2C
-X-Received: by 2002:a1c:c246:: with SMTP id s67mr2217708wmf.86.1618480147860;
-        Thu, 15 Apr 2021 02:49:07 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJzvf8IrGxqqKnZv6SyhscjxcPSq3llsUd8hPufL9Myl9IdjZQaj8D2JM6ZXYFm5A/ckUG9NPg==
-X-Received: by 2002:a1c:c246:: with SMTP id s67mr2217696wmf.86.1618480147732;
-        Thu, 15 Apr 2021 02:49:07 -0700 (PDT)
+        bh=zyDkbOJF+LAXZhVyXOvOwWICcwEeTsYdSwwQvMcPKv0=;
+        b=tHmMmUNmG6zKv3eZ9gdf8G5slMQTOf783qDRKBYVSb1KEgNFx7yLhtPvo5835MNKcM
+         Kszpf/cCEHO7dn4//xsZD0BIk9kOkQG/QCdU+QRB5kdD25A+VRkOWM5VpRoeQu+UpfNl
+         TNmm8v6zH4GTGnh6U+sEKDA3ncEH1QqH2dXNzVjw9oFaqAmPJQ1JCOvAidfyPXueVbW3
+         qWVjCR591HLWWYc+7XMuR4dIZBgAryqHOAH98oMabE+32kB6rHybK4HfYve3YdcOWe+L
+         bOhvg/7ZoOIuKyFRUrdhSHkh/3JdT4dwEobGdRYQCHnxd6DjYwKHxUEcktCc7StGb5PQ
+         /pmA==
+X-Gm-Message-State: AOAM532UMXknAl+uftjTb/7tJlnHF16BmCct51znskK4zHjB+P8nwQKx
+        gGW3j3A5Z4//7gcbNhqwtVWkuAGxRAYGpCIBhL1LSimj7kmBvEiWPxXGmww6Mc7Q7Jj6TCs44Lt
+        H18uOs29xKwl683dKnzUdLP2f4WnUxsAWoCzpf0hFi2u4DPSxdiFusE7eUyo+sfZj1quA
+X-Received: by 2002:a1c:94:: with SMTP id 142mr2344748wma.31.1618480149595;
+        Thu, 15 Apr 2021 02:49:09 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJxhDChxWY49dUVS2tU0A0bxWSlMCmf44Nsrc+xImHUmwjnFlW4Ud2Z6rJTyyDJFRFiH2Dk4gg==
+X-Received: by 2002:a1c:94:: with SMTP id 142mr2344722wma.31.1618480149285;
+        Thu, 15 Apr 2021 02:49:09 -0700 (PDT)
 Received: from localhost.localdomain ([84.19.91.9])
-        by smtp.gmail.com with ESMTPSA id v4sm2427278wrf.36.2021.04.15.02.49.06
+        by smtp.gmail.com with ESMTPSA id v4sm2427278wrf.36.2021.04.15.02.49.08
         for <fstests@vger.kernel.org>
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 15 Apr 2021 02:49:07 -0700 (PDT)
+        Thu, 15 Apr 2021 02:49:08 -0700 (PDT)
 From:   Pavel Reichl <preichl@redhat.com>
 To:     fstests@vger.kernel.org
-Subject: [PATCH v3 2/4] common: hide permision warning from mkswap for exfat
-Date:   Thu, 15 Apr 2021 11:49:03 +0200
-Message-Id: <20210415094905.61853-3-preichl@redhat.com>
+Subject: [PATCH v3 4/4] generic/003: Amend the test for exfat
+Date:   Thu, 15 Apr 2021 11:49:05 +0200
+Message-Id: <20210415094905.61853-5-preichl@redhat.com>
 X-Mailer: git-send-email 2.30.2
 In-Reply-To: <20210415094905.61853-1-preichl@redhat.com>
 References: <20210415094905.61853-1-preichl@redhat.com>
@@ -74,28 +74,89 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-exfat does not support posix file permisions, so warning from mkswap is
-inavitable. This patch hides the warning message so the test won't fail.
+Update the test so it can be run even for exfat which has 2 seconds
+granularity for access_time and does not have a timestamp for
+metadata change.
 
 Signed-off-by: Pavel Reichl <preichl@redhat.com>
 ---
- common/rc | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ tests/generic/003 | 29 ++++++++++++++++++++---------
+ 1 file changed, 20 insertions(+), 9 deletions(-)
 
-diff --git a/common/rc b/common/rc
-index be292aaf..47098b55 100644
---- a/common/rc
-+++ b/common/rc
-@@ -2374,7 +2374,8 @@ _format_swapfile() {
- 	# Swap files must be nocow on Btrfs.
- 	$CHATTR_PROG +C "$fname" > /dev/null 2>&1
- 	_pwrite_byte 0x61 0 "$sz" "$fname" >> $seqres.full
--	$MKSWAP_PROG "$fname" >> $seqres.full
-+	# Ignore permission complaints on filesystems that don't support perms
-+	$MKSWAP_PROG "$fname" 2> >(grep -v 'insecure permission' >&2) >> $seqres.full
- }
+diff --git a/tests/generic/003 b/tests/generic/003
+index ec4fdfc1..b2a3db39 100755
+--- a/tests/generic/003
++++ b/tests/generic/003
+@@ -37,6 +37,13 @@ _require_relatime
  
- # Check that the filesystem supports swapfiles
+ rm -f $seqres.full
+ 
++if [ "$FSTYP" = "exfat" ]; then
++	# exfat's timestamp for access_time has double seconds granularity
++	access_delay=2.1
++else
++	access_delay=1
++fi
++
+ _stat() {
+ 	stat -c "%x;%y;%z" $1
+ }
+@@ -79,14 +86,14 @@ echo "aaa" > $TPATH/dir1/file1
+ file1_stat_before_first_access=`_stat $TPATH/dir1/file1`
+ 
+ # Accessing file1 the first time
+-sleep 1
++sleep $access_delay
+ cat $TPATH/dir1/file1 > /dev/null
+ file1_stat_after_first_access=`_stat $TPATH/dir1/file1`
+ _compare_stat_times YNN "$file1_stat_before_first_access" \
+ 	"$file1_stat_after_first_access" "after accessing file1 first time"
+ 
+ # Accessing file1 a second time
+-sleep 1
++sleep $access_delay
+ cat $TPATH/dir1/file1 > /dev/null
+ file1_stat_after_second_access=`_stat $TPATH/dir1/file1`
+ _compare_stat_times NNN "$file1_stat_after_first_access" \
+@@ -109,7 +116,7 @@ _compare_stat_times NYY "$dir2_stat_before_file_creation" \
+ 
+ # Accessing file2
+ file2_stat_before_first_access=`_stat $TPATH/dir2/file2`
+-sleep 1
++sleep $access_delay
+ cat $TPATH/dir2/file2 > /dev/null
+ file2_stat_after_first_access=`_stat $TPATH/dir2/file2`
+ _compare_stat_times YNN "$file2_stat_before_first_access" \
+@@ -135,11 +142,15 @@ echo "xyz" > $TPATH/dir1/file1
+ file1_stat_after_modify=`_stat $TPATH/dir1/file1`
+ _compare_stat_times NYY "$file1_stat_before_modify" \
+ 	"$file1_stat_after_modify" "after modifying file1"
+-sleep 1
+-mv $TPATH/dir1/file1 $TPATH/dir1/file1_renamed
+-file1_stat_after_change=`_stat $TPATH/dir1/file1_renamed`
+-_compare_stat_times NNY "$file1_stat_after_modify" \
+-	"$file1_stat_after_change" "after changing file1"
++
++# exfat does not support last metadata change timestamp
++if [ "$FSTYP" != "exfat" ]; then
++	sleep 1
++	mv $TPATH/dir1/file1 $TPATH/dir1/file1_renamed
++	file1_stat_after_change=`_stat $TPATH/dir1/file1_renamed`
++	_compare_stat_times NNY "$file1_stat_after_modify" \
++		"$file1_stat_after_change" "after changing file1"
++fi
+ 
+ # Mounting with strictatime option and
+ # accessing a previously created file twice
+@@ -148,7 +159,7 @@ cat $TPATH/dir2/file3 > /dev/null
+ file3_stat_after_second_access=`_stat $TPATH/dir2/file3`
+ _compare_stat_times YNN "$file3_stat_after_first_access" \
+ 	"$file3_stat_after_second_access" "after accessing file3 second time"
+-sleep 1
++sleep $access_delay
+ cat $TPATH/dir2/file3 > /dev/null
+ file3_stat_after_third_access=`_stat $TPATH/dir2/file3`
+ _compare_stat_times YNN "$file3_stat_after_second_access" \
 -- 
 2.30.2
 
