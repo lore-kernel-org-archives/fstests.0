@@ -8,58 +8,58 @@ X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 62CB1C433ED
-	for <linux-fstests@archiver.kernel.org>; Wed, 21 Apr 2021 06:01:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E8772C433B4
+	for <linux-fstests@archiver.kernel.org>; Wed, 21 Apr 2021 06:18:46 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2FCA161420
-	for <linux-fstests@archiver.kernel.org>; Wed, 21 Apr 2021 06:01:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 968BC61425
+	for <linux-fstests@archiver.kernel.org>; Wed, 21 Apr 2021 06:18:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231598AbhDUGBu (ORCPT
+        id S235040AbhDUGTS (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 21 Apr 2021 02:01:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57820 "EHLO
+        Wed, 21 Apr 2021 02:19:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33416 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230343AbhDUGBt (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 21 Apr 2021 02:01:49 -0400
-Received: from mail-io1-xd29.google.com (mail-io1-xd29.google.com [IPv6:2607:f8b0:4864:20::d29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 22B69C06174A;
-        Tue, 20 Apr 2021 23:01:17 -0700 (PDT)
-Received: by mail-io1-xd29.google.com with SMTP id k25so40947264iob.6;
-        Tue, 20 Apr 2021 23:01:17 -0700 (PDT)
+        with ESMTP id S229536AbhDUGTR (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 21 Apr 2021 02:19:17 -0400
+Received: from mail-il1-x12a.google.com (mail-il1-x12a.google.com [IPv6:2607:f8b0:4864:20::12a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 646FCC06174A;
+        Tue, 20 Apr 2021 23:18:45 -0700 (PDT)
+Received: by mail-il1-x12a.google.com with SMTP id j12so20144894ils.4;
+        Tue, 20 Apr 2021 23:18:45 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=TP+Yr/KpCypz005gHM5eLagP4F4fTGKSwecwkHVW+qQ=;
-        b=Isd/R6mG8sCGEb2hD1mYYL6ECYG3H36QvE5LKbTH/VrQ1F0QFdPwxzXg9Ee6kEu4aD
-         Ni9eTD7nfkh8NMQCIdM9zh9VlHUFf1kNVfDPXwZ2iWUsHtD67Fu8kV4itnL7hcjAh6Wt
-         UkxywfzLv8rNNrbG+iDL+ia37k0bPbpuTJZJJb2E16jfagVv/q7Gyf1dHwFqxaA4TD9M
-         l//9jlv/vfXzE8J62RVXrpmA76EodB+c7C3wUOAFXkkMyrQ3MnkNDnojF2YB29kh+Fmk
-         MmJWCyehVYWZxI8BsiFD3C6Ca3AMHP+GAR7oeoL0gop2eyWL2m/bywluybFaBVHa2We0
-         wzmA==
+        bh=JoarQnwiLyzbBVFubYATTbTlrhxjF4WctSTPB+u8NAM=;
+        b=pB4Sa71By8v0wEZ8Tqc8hpn/mY/X3tDPNJqVnWruV1jPNn4X7RZ8VwyhUtFHQAyr8s
+         l6IDL8+DoLEK9jhUh6w0KRPXhSguIhL5SQKuqqZ9946p32Yb4fywroXh+AI+q8HIA5HQ
+         rInpusoAQG7/a9ny3QniP6aJZxNBRSgdWJvdyccmje1eCpiAYmE4UvOrhOp26v5VoGQM
+         vWhkpfqcroHoIMDd3AD8wJeb+m+czXCozkynJEOKi22HdYaJWc4m5C4nicEd0+y7E4Bn
+         8tqvzkLKmyEoTVu44J/zSJKifIOvznAm/DoLxlJ10i5oo+LOaX8N7tI0FzM59mE/GJqj
+         tUAw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=TP+Yr/KpCypz005gHM5eLagP4F4fTGKSwecwkHVW+qQ=;
-        b=jmSoVZZ2pfQOD0DaBVaKvgojf+c6kd2lcHMSWv3YBp3suMPn0L5UxC7y5P7yk1HaVH
-         6+AzhYS/TsJb9rW7zA7c0VXDmotAhSnV0DF2yOZfuywYB4R4PACdtRedYH/kUer/vwZG
-         dGGIyLRbZibl229K+AQ6PUvkUmKIv8zSxwWhHGub6SXDsQqhJgcypt/LG65cDorCD/9A
-         7a2hyM5lVXRDMyzjbjnNtn5QGU66dPcP/a9tAU6AS4qm5L6dnzde/VX/qCTUH7AVOu1Y
-         BaEcurGvHKYIAR1g09Sf9p5DMdkRjWFJ9IRQA7YQ+VTpZ4BBa5owTQkZVq9tm+PMaKCW
-         nS9Q==
-X-Gm-Message-State: AOAM531qO5bVq40TFeB23hCtHApu0LWFKtYvNtnBY2Baenjs3DobXbOC
-        YyxjHDtCwb2lU+qQT3ShPabYT/gvJHUMaQUuBXk=
-X-Google-Smtp-Source: ABdhPJyLsy5r3qihvn6ZWqYb5Kv96FoTt0Pkd70re4PdoWBYyIww0gvJkaXid8ZSNo9piBvvTsjS15GVBMVmyEJpu5c=
-X-Received: by 2002:a6b:d213:: with SMTP id q19mr21663274iob.203.1618984876451;
- Tue, 20 Apr 2021 23:01:16 -0700 (PDT)
+        bh=JoarQnwiLyzbBVFubYATTbTlrhxjF4WctSTPB+u8NAM=;
+        b=JLgh4/1Kgc/bZqrlODWS/ehULLxWDysWMBd92keUA52wmmV8J3/38BLq4BMEsb/rGF
+         Z+fPmTvhdqHS8EDboXTxBXFKqoWBkOwGn4aXeJw2VmfQ1mcoYP52swj/l2SQ98h1qbgM
+         z/DVg2V0nhNyg8V8G0zKtFl9m4azC01U3wTSexJTFIRrM+B+FlHa4zxZRZHxpeGVQN9C
+         Nd9BDBIj5rjvZnO2R3cNMX6bZU3zUTNJaIk5iwta62VrGp1yIfhg6/eUzg/JeBCNsbjz
+         6OY1JItjI6MtcUR5lHyIQ57WKlxF0fa6AgVH2H5M0J7dNdtnCKsH9E0Lq9SFaGGfBh/j
+         kYHQ==
+X-Gm-Message-State: AOAM532UXePZLC49unDWzLobSb3M3I83QHFbTuxzCa41AJMOrA2rDQrw
+        UmCGPih+dQk77tu0t/1m8ckof03QBrWAcUa0Yj8=
+X-Google-Smtp-Source: ABdhPJx6EM3FIvwBJfjp5/qkh3vz7qdr/zYldP6SL1KjiCaA+41Tn5L9wPiBpq6d4W6uE3rJhGQdMd9lDDvKNd/l0ws=
+X-Received: by 2002:a92:de0c:: with SMTP id x12mr25543772ilm.275.1618985924828;
+ Tue, 20 Apr 2021 23:18:44 -0700 (PDT)
 MIME-Version: 1.0
-References: <161896455503.776294.3492113564046201298.stgit@magnolia> <161896456107.776294.13840945585349427098.stgit@magnolia>
-In-Reply-To: <161896456107.776294.13840945585349427098.stgit@magnolia>
+References: <161896458140.776452.9583732658582318883.stgit@magnolia> <161896460627.776452.15178871770338402214.stgit@magnolia>
+In-Reply-To: <161896460627.776452.15178871770338402214.stgit@magnolia>
 From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Wed, 21 Apr 2021 09:01:05 +0300
-Message-ID: <CAOQ4uxhvt0j7r6ZSTiwX8T7uPw5eVH+uMegt+ActLeopmpJy7Q@mail.gmail.com>
-Subject: Re: [PATCH 1/1] xfs: test that the needsrepair feature works as advertised
+Date:   Wed, 21 Apr 2021 09:18:33 +0300
+Message-ID: <CAOQ4uxi8Bh8OYS-D6u=+U=uEdaO3EkoHce_rg6-0dyHQhG-sfw@mail.gmail.com>
+Subject: Re: [PATCH 4/4] xfs: test upgrading filesystem to bigtime
 To:     "Darrick J. Wong" <djwong@kernel.org>
 Cc:     Eryu Guan <guaneryu@gmail.com>,
         linux-xfs <linux-xfs@vger.kernel.org>,
@@ -73,48 +73,212 @@ On Wed, Apr 21, 2021 at 3:23 AM Darrick J. Wong <djwong@kernel.org> wrote:
 >
 > From: Darrick J. Wong <djwong@kernel.org>
 >
-> Make sure that the needsrepair feature flag can be cleared only by
-> repair and that mounts are prohibited when the feature is set.
+> Test that we can upgrade an existing filesystem to use bigtime.
 >
 > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
 > ---
->  common/xfs        |   28 ++++++++++++++++++
->  tests/xfs/768     |   80 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/768.out |    4 +++
->  tests/xfs/770     |   83 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/770.out |    2 +
+>  common/xfs        |   16 ++++++
+>  tests/xfs/908     |  117 ++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/908.out |   29 ++++++++++
+>  tests/xfs/909     |  149 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/909.out |    6 ++
 >  tests/xfs/group   |    2 +
->  6 files changed, 199 insertions(+)
->  create mode 100755 tests/xfs/768
->  create mode 100644 tests/xfs/768.out
->  create mode 100755 tests/xfs/770
->  create mode 100644 tests/xfs/770.out
+>  6 files changed, 319 insertions(+)
+>  create mode 100755 tests/xfs/908
+>  create mode 100644 tests/xfs/908.out
+>  create mode 100755 tests/xfs/909
+>  create mode 100644 tests/xfs/909.out
 >
 >
 > diff --git a/common/xfs b/common/xfs
-> index 887bd001..c2384146 100644
+> index cb6a1978..253a31e5 100644
 > --- a/common/xfs
 > +++ b/common/xfs
-> @@ -312,6 +312,13 @@ _scratch_xfs_check()
->         _xfs_check $SCRATCH_OPTIONS $* $SCRATCH_DEV
+> @@ -1184,3 +1184,19 @@ _xfs_timestamp_range()
+>                         awk '{printf("%s %s", $1, $2);}'
+>         fi
 >  }
->
-> +_require_libxfs_debug_flag() {
-> +       local hook="$1"
 > +
-> +       grep -q LIBXFS_DEBUG_WRITE_CRASH "$(type -P xfs_repair)" || \
-> +               _notrun "libxfs debug hook $hook not detected?"
+> +# Require that the scratch device exists, that mkfs can format with bigtime
+> +# enabled, that the kernel can mount such a filesystem, and that xfs_info
+> +# advertises the presence of that feature.
+> +_require_scratch_xfs_bigtime()
+> +{
+> +       _require_scratch
+> +
+> +       _scratch_mkfs -m bigtime=1 &>/dev/null || \
+> +               _notrun "mkfs.xfs doesn't support bigtime feature"
+> +       _try_scratch_mount || \
+> +               _notrun "kernel doesn't support xfs bigtime feature"
+> +       $XFS_INFO_PROG "$SCRATCH_MNT" | grep -q -w "bigtime=1" || \
+> +               _notrun "bigtime feature not advertised on mount?"
+> +       _scratch_unmount
+> +}
+> diff --git a/tests/xfs/908 b/tests/xfs/908
+> new file mode 100755
+> index 00000000..004a8563
+> --- /dev/null
+> +++ b/tests/xfs/908
+> @@ -0,0 +1,117 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0-or-later
+> +# Copyright (c) 2021 Oracle.  All Rights Reserved.
+> +#
+> +# FS QA Test No. 908
+> +#
+> +# Check that we can upgrade a filesystem to support bigtime and that inode
+> +# timestamps work properly after the upgrade.
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1    # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +       cd /
+> +       rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_fs xfs
+> +_require_command "$XFS_ADMIN_PROG" "xfs_admin"
+> +_require_scratch_xfs_bigtime
+> +_require_xfs_repair_upgrade bigtime
+> +
+> +date --date='Jan 1 00:00:00 UTC 2040' > /dev/null 2>&1 || \
+> +       _notrun "Userspace does not support dates past 2038."
+> +
+> +rm -f $seqres.full
+> +
+> +# Make sure we can't upgrade a V4 filesystem
+> +_scratch_mkfs -m crc=0 >> $seqres.full
+> +_scratch_xfs_admin -O bigtime=1 2>> $seqres.full
+> +_check_scratch_xfs_features BIGTIME
+> +
+> +# Make sure we're required to specify a feature status
+> +_scratch_mkfs -m crc=1,bigtime=0,inobtcount=0 >> $seqres.full
+> +_scratch_xfs_admin -O bigtime 2>> $seqres.full
+> +
+> +# Can we add bigtime and inobtcount at the same time?
+> +_scratch_mkfs -m crc=1,bigtime=0,inobtcount=0 >> $seqres.full
+> +_scratch_xfs_admin -O bigtime=1,inobtcount=1 2>> $seqres.full
+> +
+> +# Format V5 filesystem without bigtime support and populate it
+> +_scratch_mkfs -m crc=1,bigtime=0 >> $seqres.full
+> +_scratch_xfs_db -c 'version' -c 'sb 0' -c 'p' >> $seqres.full
+> +_scratch_mount >> $seqres.full
+> +
+> +touch -d 'Jan 9 19:19:19 UTC 1999' $SCRATCH_MNT/a
+> +touch -d 'Jan 9 19:19:19 UTC 1999' $SCRATCH_MNT/b
+> +ls -la $SCRATCH_MNT/* >> $seqres.full
+> +
+> +echo before upgrade:
+> +TZ=UTC stat -c '%Y' $SCRATCH_MNT/a
+> +TZ=UTC stat -c '%Y' $SCRATCH_MNT/b
+> +
+> +_scratch_unmount
+> +_check_scratch_fs
+> +
+> +# Now upgrade to bigtime support
+> +_scratch_xfs_admin -O bigtime=1 2>> $seqres.full
+> +_check_scratch_xfs_features BIGTIME
+> +_check_scratch_fs
+> +_scratch_xfs_db -c 'version' -c 'sb 0' -c 'p' >> $seqres.full
+> +
+> +# Mount again, look at our files
+> +_scratch_mount >> $seqres.full
+> +ls -la $SCRATCH_MNT/* >> $seqres.full
+> +
+> +echo after upgrade:
+> +TZ=UTC stat -c '%Y' $SCRATCH_MNT/a
+> +TZ=UTC stat -c '%Y' $SCRATCH_MNT/b
+> +
+> +# Bump one of the timestamps but stay under 2038
+> +touch -d 'Jan 10 19:19:19 UTC 1999' $SCRATCH_MNT/a
+> +
+> +echo after upgrade and bump:
+> +TZ=UTC stat -c '%Y' $SCRATCH_MNT/a
+> +TZ=UTC stat -c '%Y' $SCRATCH_MNT/b
+> +
+> +_scratch_cycle_mount
+> +
+> +# Did the bumped timestamp survive the remount?
+> +ls -la $SCRATCH_MNT/* >> $seqres.full
+> +
+> +echo after upgrade, bump, and remount:
+> +TZ=UTC stat -c '%Y' $SCRATCH_MNT/a
+> +TZ=UTC stat -c '%Y' $SCRATCH_MNT/b
+> +
+> +# Modify the other timestamp to stretch beyond 2038
+> +touch -d 'Feb 22 22:22:22 UTC 2222' $SCRATCH_MNT/b
+> +
+> +echo after upgrade and extension:
+> +TZ=UTC stat -c '%Y' $SCRATCH_MNT/a
+> +TZ=UTC stat -c '%Y' $SCRATCH_MNT/b
+> +
+> +_scratch_cycle_mount
+> +
+> +# Did the timestamp survive the remount?
+> +ls -la $SCRATCH_MNT/* >> $seqres.full
+> +
+> +echo after upgrade, extension, and remount:
+> +TZ=UTC stat -c '%Y' $SCRATCH_MNT/a
+> +TZ=UTC stat -c '%Y' $SCRATCH_MNT/b
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/908.out b/tests/xfs/908.out
+> new file mode 100644
+> index 00000000..5e05854d
+> --- /dev/null
+> +++ b/tests/xfs/908.out
+> @@ -0,0 +1,29 @@
+> +QA output created by 908
+> +Running xfs_repair to upgrade filesystem.
+> +Large timestamp feature only supported on V5 filesystems.
+> +FEATURES: BIGTIME:NO
+> +Running xfs_repair to upgrade filesystem.
+> +Running xfs_repair to upgrade filesystem.
+> +Adding inode btree counts to filesystem.
+> +Adding large timestamp support to filesystem.
+> +before upgrade:
+> +915909559
+> +915909559
+> +Running xfs_repair to upgrade filesystem.
+> +Adding large timestamp support to filesystem.
+> +FEATURES: BIGTIME:YES
+> +after upgrade:
+> +915909559
+> +915909559
+> +after upgrade and bump:
+> +915995959
+> +915909559
+> +after upgrade, bump, and remount:
+> +915995959
+> +915909559
 
-You ignored the $hook arg.
-And this is a bit of a strange test.
-In _require_unionmount_testsuite() I also pass env vars to the test utility
-and I made it so the usage message will print the non empty env vars
-passed to the programm.
+Did you design those following days timestamps to look so cool? ;-)
 
-I can understand if nothing like that was done for xfs_repair and you want
-this test to work with an already released version of xfs_repair, but if that
-test is against a pre-released version of xfs_repair, I suggest to make it
-more friendly for _require check.
+> +after upgrade and extension:
+> +915995959
+> +7956915742
+> +after upgrade, extension, and remount:
+> +915995959
+> +7956915742
+
+Consider this test reviewed-by-me
+I'd like more eyes on the quota grace period test, so not providing
+a reviewed-by tag for the entire patch.
 
 Thanks,
 Amir.
