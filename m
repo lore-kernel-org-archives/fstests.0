@@ -5,61 +5,61 @@ X-Spam-Level:
 X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 220B9C433B4
-	for <linux-fstests@archiver.kernel.org>; Wed, 21 Apr 2021 05:53:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 62CB1C433ED
+	for <linux-fstests@archiver.kernel.org>; Wed, 21 Apr 2021 06:01:19 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0167061419
-	for <linux-fstests@archiver.kernel.org>; Wed, 21 Apr 2021 05:52:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2FCA161420
+	for <linux-fstests@archiver.kernel.org>; Wed, 21 Apr 2021 06:01:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235341AbhDUFxa (ORCPT
+        id S231598AbhDUGBu (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 21 Apr 2021 01:53:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56006 "EHLO
+        Wed, 21 Apr 2021 02:01:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57820 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235343AbhDUFx3 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 21 Apr 2021 01:53:29 -0400
-Received: from mail-io1-xd30.google.com (mail-io1-xd30.google.com [IPv6:2607:f8b0:4864:20::d30])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7381AC06174A;
-        Tue, 20 Apr 2021 22:52:51 -0700 (PDT)
-Received: by mail-io1-xd30.google.com with SMTP id a11so38814627ioo.0;
-        Tue, 20 Apr 2021 22:52:51 -0700 (PDT)
+        with ESMTP id S230343AbhDUGBt (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 21 Apr 2021 02:01:49 -0400
+Received: from mail-io1-xd29.google.com (mail-io1-xd29.google.com [IPv6:2607:f8b0:4864:20::d29])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 22B69C06174A;
+        Tue, 20 Apr 2021 23:01:17 -0700 (PDT)
+Received: by mail-io1-xd29.google.com with SMTP id k25so40947264iob.6;
+        Tue, 20 Apr 2021 23:01:17 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=N123Fc1SuZwrwPyaOzy7XEU8sZZaKYIHk3a3YwOlHsI=;
-        b=qaiKqDhMHFMQa6JmmH8Bppk2sF9fKmzPKAGas+/XSXrJ35KLgDOPTmQLJejwklA0tb
-         S1VYOs81pedvZ7aDjXBvSk8PRWRZpxzKRZRIewwePL+xJRlKF/r+2jLDfjgxIWGNhF0U
-         5GP3NvBLR/uLlFBJZEFrfKMAIqXAcCgOQ/7aK49zaVlNr6j0HbMzLXjNT3i8yw0hPfEi
-         paDYKFqsF/R8I0dH0EfjpGMiUY8iFvRfc7+4F8USkCgGXNaw93SCa2HRIPqKMzgV6jOy
-         tO6QhGyllOdKZRbl0HSmnRpA6ML2vJJZd746tTlhnt2nxihzu4v43SXaFeV5to4BLMKH
-         IjaA==
+        bh=TP+Yr/KpCypz005gHM5eLagP4F4fTGKSwecwkHVW+qQ=;
+        b=Isd/R6mG8sCGEb2hD1mYYL6ECYG3H36QvE5LKbTH/VrQ1F0QFdPwxzXg9Ee6kEu4aD
+         Ni9eTD7nfkh8NMQCIdM9zh9VlHUFf1kNVfDPXwZ2iWUsHtD67Fu8kV4itnL7hcjAh6Wt
+         UkxywfzLv8rNNrbG+iDL+ia37k0bPbpuTJZJJb2E16jfagVv/q7Gyf1dHwFqxaA4TD9M
+         l//9jlv/vfXzE8J62RVXrpmA76EodB+c7C3wUOAFXkkMyrQ3MnkNDnojF2YB29kh+Fmk
+         MmJWCyehVYWZxI8BsiFD3C6Ca3AMHP+GAR7oeoL0gop2eyWL2m/bywluybFaBVHa2We0
+         wzmA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=N123Fc1SuZwrwPyaOzy7XEU8sZZaKYIHk3a3YwOlHsI=;
-        b=idiUz8zLuBw1u94vP2m0LlHjiLtUBbILhW1EdvKfj4rfR9fc/yyIqmCEJ5PAxcZODy
-         NM4j+YkiMvmeBfWf4dGm50QMR4DjKQJkpL1T/iEA91MpAgGhr2i3l8OQ+yJ5RfPGskoM
-         im+IP4l679y3McETpUSglAKUjgViYQeU4D+kCPpLvsRERRAY5guFm/2uTgIGCygX8r1u
-         MNVZXgLeWZ5y34d8XOvTZh5t11OeGYHjYMdUz2fiKiTl5tGgO4aW+JieQifKKrm445oG
-         NX63ZBL2lcZwIxnX12XhC+kUIUQclhxpzFY8faIEgbWTUF///wA62v06VUTHREoLmdt8
-         ROGA==
-X-Gm-Message-State: AOAM532fPkZynv89nAkbYLr9yBCsVjEBBE6GOQOIcMgrc7cIXeXCagGp
-        p+Ncy9EKfO6GdTVONbzFpXAC081E12gPt29yf9A=
-X-Google-Smtp-Source: ABdhPJzWHcU98E0a626ij8dBsQ/gt1Q9oDk6gvsGQa4xCPG/VUBf5rly7h63uXq/2itdPbWs1McpmCLLuuwCHg/y4YY=
-X-Received: by 2002:a02:9109:: with SMTP id a9mr22013138jag.93.1618984370609;
- Tue, 20 Apr 2021 22:52:50 -0700 (PDT)
+        bh=TP+Yr/KpCypz005gHM5eLagP4F4fTGKSwecwkHVW+qQ=;
+        b=jmSoVZZ2pfQOD0DaBVaKvgojf+c6kd2lcHMSWv3YBp3suMPn0L5UxC7y5P7yk1HaVH
+         6+AzhYS/TsJb9rW7zA7c0VXDmotAhSnV0DF2yOZfuywYB4R4PACdtRedYH/kUer/vwZG
+         dGGIyLRbZibl229K+AQ6PUvkUmKIv8zSxwWhHGub6SXDsQqhJgcypt/LG65cDorCD/9A
+         7a2hyM5lVXRDMyzjbjnNtn5QGU66dPcP/a9tAU6AS4qm5L6dnzde/VX/qCTUH7AVOu1Y
+         BaEcurGvHKYIAR1g09Sf9p5DMdkRjWFJ9IRQA7YQ+VTpZ4BBa5owTQkZVq9tm+PMaKCW
+         nS9Q==
+X-Gm-Message-State: AOAM531qO5bVq40TFeB23hCtHApu0LWFKtYvNtnBY2Baenjs3DobXbOC
+        YyxjHDtCwb2lU+qQT3ShPabYT/gvJHUMaQUuBXk=
+X-Google-Smtp-Source: ABdhPJyLsy5r3qihvn6ZWqYb5Kv96FoTt0Pkd70re4PdoWBYyIww0gvJkaXid8ZSNo9piBvvTsjS15GVBMVmyEJpu5c=
+X-Received: by 2002:a6b:d213:: with SMTP id q19mr21663274iob.203.1618984876451;
+ Tue, 20 Apr 2021 23:01:16 -0700 (PDT)
 MIME-Version: 1.0
-References: <161896456467.776366.1514131340097986327.stgit@magnolia> <161896457693.776366.7071083307521835427.stgit@magnolia>
-In-Reply-To: <161896457693.776366.7071083307521835427.stgit@magnolia>
+References: <161896455503.776294.3492113564046201298.stgit@magnolia> <161896456107.776294.13840945585349427098.stgit@magnolia>
+In-Reply-To: <161896456107.776294.13840945585349427098.stgit@magnolia>
 From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Wed, 21 Apr 2021 08:52:39 +0300
-Message-ID: <CAOQ4uxh-7JVg-PxkM=i+WGaiEvZ1oF21oC1ct-HHWpYo-1d=TA@mail.gmail.com>
-Subject: Re: [PATCH 2/2] xfs: test inobtcount upgrade
+Date:   Wed, 21 Apr 2021 09:01:05 +0300
+Message-ID: <CAOQ4uxhvt0j7r6ZSTiwX8T7uPw5eVH+uMegt+ActLeopmpJy7Q@mail.gmail.com>
+Subject: Re: [PATCH 1/1] xfs: test that the needsrepair feature works as advertised
 To:     "Darrick J. Wong" <djwong@kernel.org>
 Cc:     Eryu Guan <guaneryu@gmail.com>,
         linux-xfs <linux-xfs@vger.kernel.org>,
@@ -73,194 +73,48 @@ On Wed, Apr 21, 2021 at 3:23 AM Darrick J. Wong <djwong@kernel.org> wrote:
 >
 > From: Darrick J. Wong <djwong@kernel.org>
 >
-> Make sure we can actually upgrade filesystems to support inode btree
-> counters.
+> Make sure that the needsrepair feature flag can be cleared only by
+> repair and that mounts are prohibited when the feature is set.
 >
 > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
 > ---
->  common/xfs        |    8 +++-
->  tests/xfs/910     |   98 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/910.out |   23 ++++++++++++
->  tests/xfs/group   |    1 +
->  4 files changed, 127 insertions(+), 3 deletions(-)
->  create mode 100755 tests/xfs/910
->  create mode 100644 tests/xfs/910.out
+>  common/xfs        |   28 ++++++++++++++++++
+>  tests/xfs/768     |   80 +++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/768.out |    4 +++
+>  tests/xfs/770     |   83 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/770.out |    2 +
+>  tests/xfs/group   |    2 +
+>  6 files changed, 199 insertions(+)
+>  create mode 100755 tests/xfs/768
+>  create mode 100644 tests/xfs/768.out
+>  create mode 100755 tests/xfs/770
+>  create mode 100644 tests/xfs/770.out
 >
 >
 > diff --git a/common/xfs b/common/xfs
-> index 5abc7034..3d660858 100644
+> index 887bd001..c2384146 100644
 > --- a/common/xfs
 > +++ b/common/xfs
-> @@ -1153,13 +1153,15 @@ _require_xfs_repair_upgrade()
->                 _notrun "xfs_repair does not support upgrading fs with $type"
+> @@ -312,6 +312,13 @@ _scratch_xfs_check()
+>         _xfs_check $SCRATCH_OPTIONS $* $SCRATCH_DEV
 >  }
 >
-> -_require_xfs_scratch_inobtcount()
-> +# Require that the scratch device exists, that mkfs can format with inobtcount
-> +# enabled, and that the kernel can mount such a filesystem.
-> +_require_scratch_xfs_inobtcount()
->  {
->         _require_scratch
->
->         _scratch_mkfs -m inobtcount=1 &> /dev/null || \
-> -               _notrun "mkfs.xfs doesn't have inobtcount feature"
-> +               _notrun "mkfs.xfs doesn't support inobtcount feature"
->         _try_scratch_mount || \
-> -               _notrun "inobtcount not supported by scratch filesystem type: $FSTYP"
-> +               _notrun "kernel doesn't support xfs inobtcount feature"
->         _scratch_unmount
->  }
-> diff --git a/tests/xfs/910 b/tests/xfs/910
-> new file mode 100755
-> index 00000000..237d0a35
-> --- /dev/null
-> +++ b/tests/xfs/910
-> @@ -0,0 +1,98 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0-or-later
-> +# Copyright (c) 2021 Oracle.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 910
-> +#
-> +# Check that we can upgrade a filesystem to support inobtcount and that
-> +# everything works properly after the upgrade.
+> +_require_libxfs_debug_flag() {
+> +       local hook="$1"
 > +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1    # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +       cd /
-> +       rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +_supported_fs xfs
-> +_require_scratch_xfs_inobtcount
-> +_require_command "$XFS_ADMIN_PROG" "xfs_admin"
-> +_require_xfs_repair_upgrade inobtcount
-> +
-> +rm -f $seqres.full
-> +
-> +# Make sure we can't format a filesystem with inobtcount and not finobt.
-> +_scratch_mkfs -m crc=1,inobtcount=1,finobt=0 &> $seqres.full && \
-> +       echo "Should not be able to format with inobtcount but not finobt."
-> +
-> +# Make sure we can't upgrade a V4 filesystem
-> +_scratch_mkfs -m crc=0,inobtcount=0,finobt=0 >> $seqres.full
-> +_scratch_xfs_admin -O inobtcount=1 2>> $seqres.full
-> +_check_scratch_xfs_features INOBTCNT
-> +
-> +# Make sure we can't upgrade a filesystem to inobtcount without finobt.
-> +_scratch_mkfs -m crc=1,inobtcount=0,finobt=0 >> $seqres.full
-> +_scratch_xfs_admin -O inobtcount=1 2>> $seqres.full
-> +_check_scratch_xfs_features INOBTCNT
-> +
-> +# Format V5 filesystem without inode btree counter support and populate it.
-> +_scratch_mkfs -m crc=1,inobtcount=0 >> $seqres.full
-> +_scratch_mount
-> +
-> +mkdir $SCRATCH_MNT/stress
-> +$FSSTRESS_PROG -d $SCRATCH_MNT/stress -n 1000 >> $seqres.full
-> +echo moo > $SCRATCH_MNT/urk
-> +
-> +_scratch_unmount
-> +
-> +# Upgrade filesystem to have the counters and inject failure into repair and
-> +# make sure that the only path forward is to re-run repair on the filesystem.
-> +echo "Fail partway through upgrading"
-> +XFS_REPAIR_FAIL_AFTER_PHASE=2 _scratch_xfs_repair -c inobtcount=1 2>> $seqres.full
-> +test $? -eq 137 || echo "repair should have been killed??"
-> +_check_scratch_xfs_features NEEDSREPAIR INOBTCNT
-> +_try_scratch_mount &> $tmp.mount
-> +res=$?
-> +_filter_scratch < $tmp.mount
-> +if [ $res -eq 0 ]; then
-> +       echo "needsrepair should have prevented mount"
-> +       _scratch_unmount
-> +fi
-> +
-> +echo "Re-run repair to finish upgrade"
-> +_scratch_xfs_repair 2>> $seqres.full
-> +_check_scratch_xfs_features NEEDSREPAIR INOBTCNT
-> +
-> +echo "Filesystem should be usable again"
-> +_scratch_mount
-> +$FSSTRESS_PROG -d $SCRATCH_MNT/stress -n 1000 >> $seqres.full
-> +_scratch_unmount
-> +_check_scratch_fs
-> +_check_scratch_xfs_features INOBTCNT
-> +
-> +echo "Make sure we have nonzero counters"
-> +_scratch_xfs_db -c 'agi 0' -c 'print ino_blocks fino_blocks' | \
-> +       sed -e 's/= [1-9]*/= NONZERO/g'
-> +
+> +       grep -q LIBXFS_DEBUG_WRITE_CRASH "$(type -P xfs_repair)" || \
+> +               _notrun "libxfs debug hook $hook not detected?"
 
-I don't think = 100 translates to = NONZERO...
+You ignored the $hook arg.
+And this is a bit of a strange test.
+In _require_unionmount_testsuite() I also pass env vars to the test utility
+and I made it so the usage message will print the non empty env vars
+passed to the programm.
 
-> +echo "Make sure we can't re-add inobtcount"
-> +_scratch_xfs_admin -O inobtcount=1 2>> $seqres.full
-> +
-> +echo "Mount again, look at our files"
-> +_scratch_mount >> $seqres.full
-> +cat $SCRATCH_MNT/urk
-> +
-> +status=0
-> +exit
-> diff --git a/tests/xfs/910.out b/tests/xfs/910.out
-> new file mode 100644
-> index 00000000..1bf040d5
-> --- /dev/null
-> +++ b/tests/xfs/910.out
-> @@ -0,0 +1,23 @@
-> +QA output created by 910
-> +Running xfs_repair to upgrade filesystem.
-> +Inode btree count feature only supported on V5 filesystems.
-> +FEATURES: INOBTCNT:NO
-> +Running xfs_repair to upgrade filesystem.
-> +Inode btree count feature requires free inode btree.
-> +FEATURES: INOBTCNT:NO
-> +Fail partway through upgrading
-> +Adding inode btree counts to filesystem.
-> +FEATURES: NEEDSREPAIR:YES INOBTCNT:YES
-> +mount: SCRATCH_MNT: mount(2) system call failed: Structure needs cleaning.
-> +Re-run repair to finish upgrade
-> +FEATURES: NEEDSREPAIR:NO INOBTCNT:YES
-> +Filesystem should be usable again
-> +FEATURES: INOBTCNT:YES
-> +Make sure we have nonzero counters
-> +ino_blocks = NONZERO
-> +fino_blocks = NONZERO
-> +Make sure we can't re-add inobtcount
-> +Running xfs_repair to upgrade filesystem.
-> +Filesystem already has inode btree counts.
-> +Mount again, look at our files
-> +moo
-
-This test is quite rigid in the format of messages expected from
-xfs_repair. I suppose there is no precedent here...
-
-> diff --git a/tests/xfs/group b/tests/xfs/group
-> index a2309465..bd47333c 100644
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
-> @@ -526,3 +526,4 @@
->  768 auto quick repair
->  770 auto repair
->  773 auto quick repair
-> +910 auto quick inobtcount
->
-+repair?
+I can understand if nothing like that was done for xfs_repair and you want
+this test to work with an already released version of xfs_repair, but if that
+test is against a pre-released version of xfs_repair, I suggest to make it
+more friendly for _require check.
 
 Thanks,
 Amir.
