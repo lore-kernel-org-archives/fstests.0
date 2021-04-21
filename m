@@ -2,258 +2,277 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 13DD8C43460
-	for <linux-fstests@archiver.kernel.org>; Wed, 21 Apr 2021 18:00:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B95A3C433ED
+	for <linux-fstests@archiver.kernel.org>; Wed, 21 Apr 2021 19:13:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D0A6161430
-	for <linux-fstests@archiver.kernel.org>; Wed, 21 Apr 2021 18:00:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7DA1761453
+	for <linux-fstests@archiver.kernel.org>; Wed, 21 Apr 2021 19:13:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240662AbhDUSB2 (ORCPT
+        id S242656AbhDUTOR (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 21 Apr 2021 14:01:28 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:57148 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S240515AbhDUSB2 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 21 Apr 2021 14:01:28 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1619028054;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=P/j3Jn2F3cytz8jZfkGavAZSEU0oy0+zTiePiuHd9YI=;
-        b=RVGAhBjqCt5RIkt1Wu4roQTgiJ6W5RNRs4iuk/88vwP2GyF6FfOIbKeMcAEYttMwMbH6mo
-        GLq8zZyiyqVCY7EQIzRK9l8T1z9/xhItQhmYZ6fxz3KxjsgPxvHlqeIui5haBCY+LaaADx
-        fyiiVqU3jToa4tV8OknHXfyakxUJ7SI=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-535-Hs71L27JPPCwngpcOqIjCA-1; Wed, 21 Apr 2021 14:00:41 -0400
-X-MC-Unique: Hs71L27JPPCwngpcOqIjCA-1
-Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 5BFD91008060;
-        Wed, 21 Apr 2021 18:00:40 +0000 (UTC)
-Received: from bfoster (ovpn-112-25.rdu2.redhat.com [10.10.112.25])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id B5F605D9C0;
-        Wed, 21 Apr 2021 18:00:39 +0000 (UTC)
-Date:   Wed, 21 Apr 2021 14:00:38 -0400
-From:   Brian Foster <bfoster@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org, guan@eryu.me
-Subject: Re: [PATCH 1/2] xfs: functional testing of V5-relevant options
-Message-ID: <YIBoRixSehw0C+Km@bfoster>
-References: <161896456467.776366.1514131340097986327.stgit@magnolia>
- <161896457076.776366.1740320523459442249.stgit@magnolia>
+        Wed, 21 Apr 2021 15:14:17 -0400
+Received: from out5-smtp.messagingengine.com ([66.111.4.29]:54329 "EHLO
+        out5-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S240378AbhDUTOJ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 21 Apr 2021 15:14:09 -0400
+Received: from compute3.internal (compute3.nyi.internal [10.202.2.43])
+        by mailout.nyi.internal (Postfix) with ESMTP id 774985C00E5;
+        Wed, 21 Apr 2021 15:13:35 -0400 (EDT)
+Received: from mailfrontend1 ([10.202.2.162])
+  by compute3.internal (MEProxy); Wed, 21 Apr 2021 15:13:35 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bur.io; h=date
+        :from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=fm3; bh=HaNcDj2Dy45Ew1bbGSpgh9uPCI8
+        reXGG9hVynycGfqU=; b=WPEd/NT3TYSeVIpbA2tQVA1k3Av2XE9hNyfjnt6TMW2
+        wdD7Gf0SRqnZlpe47CkhEHnEW4Q4azcEKUTljD2Rt7p5gki2gNH87gcCmM6kiUHC
+        RwvCRNPwk2/Yh+nIIQ9fL1kkVigAcV4kEoS/HvcpZ9Unv2kmdf9N0LulFmiNQyk3
+        Jyvo/tnXss6RoLLNxM8y7aD4VAAwgEAz37V/sFYMeK9sqTPf69+y4gsU5SSg3SXu
+        rqXgng3mft4u4+osTr9pZZy1v5DQFjBGRNxE3NIM1yD+Ep+KpL1K3MqnMLk1gFdC
+        731f6lBGAVPYKrrVko7Z7NkomTpRBvw/GdQae/rp6Gw==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=cc:content-type:date:from:in-reply-to
+        :message-id:mime-version:references:subject:to:x-me-proxy
+        :x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm2; bh=HaNcDj
+        2Dy45Ew1bbGSpgh9uPCI8reXGG9hVynycGfqU=; b=PfyK0eaVETPxuAZkOzx5hc
+        /JEatK72zBJ1tuX957+xz/CB5YmGAN63JO3S5uGSShG2uudAFutogksCuX7NvLDK
+        acUFFA3gaMeo48r5fzIXwf0Epcu3wLt6RN9ZvlpKcf7BWHwEw7/cS3w1Z+Fg9jd/
+        WqOukwxYw5djAUnTGZpjUB/8Zjp4Ddy0PqzNw96EKEU15pQjsxCUp+rpfkqYt8hi
+        huvoS6OVc089++Pb4z7SSCiNIAEVtHCHfqm/0co6HAhNAinCFTcsSpPGpGvLYZrl
+        hDOUQdnBKBwDH7VPiJwisKZsf3pk1p/yHoL4sV63u6G8S4GrwVz19eWVTC1zC92Q
+        ==
+X-ME-Sender: <xms:X3mAYM3Usm0lXfy6j3tR_gGUuioK7KZTiZR3_cFfOSMZ8nBs7XMrFA>
+    <xme:X3mAYDHHCDS4lkTgTKSyOP08iDVu4C5YVUaLAcMwevIYZjCmH9evchlUdbg8ov4p2
+    SMJO82ASM-2UH-lmJ0>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeduledrvddtkedgudefiecutefuodetggdotefrod
+    ftvfcurfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfgh
+    necuuegrihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmd
+    enucfjughrpeffhffvuffkfhggtggujgesthdtredttddtvdenucfhrhhomhepuehorhhi
+    shcuuehurhhkohhvuceosghorhhishessghurhdrihhoqeenucggtffrrghtthgvrhhnpe
+    dtvdfftddvveduieejtedufeeuudefueefhfdujedutdegtddtffffiefgtefgtdenucff
+    ohhmrghinhepkhgvrhhnvghlrdhorhhgnecukfhppedvtdejrdehfedrvdehfedrjeenuc
+    evlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpegsohhrihhs
+    segsuhhrrdhioh
+X-ME-Proxy: <xmx:X3mAYHEmoqxhDhD136Q6huNTXjV_soASbZQVU99H3IVVsJjpCySoCw>
+    <xmx:X3mAYG7Ec9BCnbWePtE962cOZuu3qWjzENT33sDguWW3u6TNMz0e8w>
+    <xmx:X3mAYMxLS8S7ivRGOvqZEwsmB6voMOEGmIc9ESRxEhP_hvxxoFN5rA>
+    <xmx:X3mAYMjbdND41xEfcLvIvRVqhDByJXPNC25JyJsvuFcCJBe8zvkWJw>
+Received: from localhost (unknown [207.53.253.7])
+        by mail.messagingengine.com (Postfix) with ESMTPA id 0D9BE240067;
+        Wed, 21 Apr 2021 15:13:34 -0400 (EDT)
+Date:   Wed, 21 Apr 2021 12:13:33 -0700
+From:   Boris Burkov <boris@bur.io>
+To:     Eryu Guan <guan@eryu.me>
+Cc:     "Darrick J. Wong" <djwong@kernel.org>, linux-btrfs@vger.kernel.org,
+        kernel-team@fb.com, fstests@vger.kernel.org
+Subject: Re: [PATCH v3] generic: test fiemap offsets and < 512 byte ranges
+Message-ID: <YIB5XbY2PX4J5dlN@zen>
+References: <20210407161046.GY1670408@magnolia>
+ <c2f49fdead29fd7eb979b83028eb9fcf56d2457c.1617826068.git.boris@bur.io>
+ <YHMBzw/9tUVMS66G@desktop>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <161896457076.776366.1740320523459442249.stgit@magnolia>
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
+In-Reply-To: <YHMBzw/9tUVMS66G@desktop>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Apr 20, 2021 at 05:22:50PM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
+On Sun, Apr 11, 2021 at 10:03:59PM +0800, Eryu Guan wrote:
+> On Wed, Apr 07, 2021 at 01:13:26PM -0700, Boris Burkov wrote:
+> > btrfs trims fiemap extents to the inputted offset, which leads to
+> > inconsistent results for most inputs, and downright bizarre outputs like
+> > [7..6] when the trimmed extent is at the end of an extent and shorter
+> > than 512 bytes.
+> > 
+> > The test writes out one extent of the file system's block size and tries
+> > fiemaps at various offsets. It expects that all the fiemaps return the
+> > full single extent.
+> > 
+> > I ran it under the following fs, block size combinations:
+> > ext2: 1024, 2048, 4096
+> > ext3: 1024, 2048, 4096
+> > ext4: 1024, 2048, 4096
+> > xfs: 512, 1024, 2048, 4096
+> > f2fs: 4096
+> > btrfs: 4096
+> > 
+> > This test is fixed for btrfs by:
+> > btrfs: return whole extents in fiemap
+> > (https://lore.kernel.org/linux-btrfs/274e5bcebdb05a8969fc300b4802f33da2fbf218.1617746680.git.boris@bur.io/)
+> > 
+> > Signed-off-by: Boris Burkov <boris@bur.io>
 > 
-> Currently, the only functional testing for xfs_admin is xfs/287, which
-> checks that one can add 32-bit project ids to a V4 filesystem.  This
-> obviously isn't an exhaustive test of all the CLI arguments, and
-> historically there have been xfs configurations that don't even work.
+> generic/473, which tests fiemap, has been marked as broken, as fiemap
+> behavior is not consistent across filesystems, and the specific behavior
+> tested by generic/473 is not defined and filesystems could have
+> different implementations.
 > 
-> Therefore, introduce a couple of new tests -- one that will test the
-> simple options with the default configuration, and a second test that
-> steps a bit outside of the test run configuration to make sure that we
-> do the right thing for external devices.  The second test already caught
-> a nasty bug in xfsprogs 5.11.
-> 
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> ---
->  common/xfs        |   21 ++++++++++
->  tests/xfs/764     |   93 +++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/764.out |   17 ++++++++
->  tests/xfs/773     |  114 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/773.out |   19 +++++++++
->  tests/xfs/group   |    2 +
->  6 files changed, 266 insertions(+)
->  create mode 100755 tests/xfs/764
->  create mode 100644 tests/xfs/764.out
->  create mode 100755 tests/xfs/773
->  create mode 100644 tests/xfs/773.out
-> 
-> 
-...
-> diff --git a/tests/xfs/773 b/tests/xfs/773
-> new file mode 100755
-> index 00000000..f184962a
-> --- /dev/null
-> +++ b/tests/xfs/773
-> @@ -0,0 +1,114 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0-or-later
-> +# Copyright (c) 2021 Oracle.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 773
-> +#
-> +# Functional testing for xfs_admin to ensure that it parses arguments correctly
-> +# with regards to data devices that are files, external logs, and realtime
-> +# devices.
-> +#
-> +# Because this test synthesizes log and rt devices (by modifying the test run
-> +# configuration), it does /not/ require the ability to mount the scratch
-> +# filesystem.  This increases test coverage while isolating the weird bits to a
-> +# single test.
-> +#
-> +# This is partially a regression test for "xfs_admin: pick up log arguments
-> +# correctly", insofar as the issue fixed by that patch was discovered with an
-> +# earlier revision of this test.
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1    # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.* $fake_logfile $fake_rtfile $fake_datafile
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +_supported_fs xfs
-> +_require_test
-> +_require_scratch_nocheck
-> +_require_command "$XFS_ADMIN_PROG" "xfs_admin"
-> +
-> +rm -f $seqres.full
-> +
-> +# Create some fake sparse files for testing external devices and whatnot
-> +fake_datafile=$TEST_DIR/scratch.data
-> +rm -f $fake_datafile
-> +truncate -s 500m $fake_datafile
-> +
-> +fake_logfile=$TEST_DIR/scratch.log
-> +rm -f $fake_logfile
-> +truncate -s 500m $fake_logfile
-> +
-> +fake_rtfile=$TEST_DIR/scratch.rt
-> +rm -f $fake_rtfile
-> +truncate -s 500m $fake_rtfile
-> +
-
-I think it's usually good practice to incorporate $seq into filenames
-created on the test device.
-
-> +# Save the original variables
-> +orig_ddev=$SCRATCH_DEV
-> +orig_external=$USE_EXTERNAL
-> +orig_logdev=$SCRATCH_LOGDEV
-> +orig_rtdev=$SCRATCH_RTDEV
-> +
-> +scenario() {
-> +	echo "$@" | tee -a $seqres.full
-> +
-> +	SCRATCH_DEV=$orig_ddev
-> +	USE_EXTERNAL=$orig_external
-> +	SCRATCH_LOGDEV=$orig_logdev
-> +	SCRATCH_RTDEV=$orig_rtdev
-> +}
-> +
-> +check_label() {
-> +	_scratch_mkfs -L oldlabel >> $seqres.full
-> +	_scratch_xfs_db -c label
-> +	_scratch_xfs_admin -L newlabel "$@" >> $seqres.full
-> +	_scratch_xfs_db -c label
-> +	_scratch_xfs_repair -n &>> $seqres.full || echo "Check failed?"
-> +}
-> +
-> +scenario "S1: Check that label setting with file image"
-> +SCRATCH_DEV=$fake_datafile
-> +check_label -f
-> +
-> +scenario "S2: Check that setting with logdev works"
-> +USE_EXTERNAL=yes
-> +SCRATCH_LOGDEV=$fake_logfile
-> +check_label
-> +
-> +scenario "S3: Check that setting with rtdev works"
-> +USE_EXTERNAL=yes
-> +SCRATCH_RTDEV=$fake_rtfile
-> +check_label
-> +
-> +scenario "S4: Check that setting with rtdev + logdev works"
-> +USE_EXTERNAL=yes
-> +SCRATCH_LOGDEV=$fake_logfile
-> +SCRATCH_RTDEV=$fake_rtfile
-> +check_label
-> +
-> +scenario "S5: Check that setting with nortdev + nologdev works"
-> +USE_EXTERNAL=
-> +SCRATCH_LOGDEV=
-> +SCRATCH_RTDEV=
-> +check_label
-> +
-> +scenario "S6: Check that setting with bdev incorrectly flagged as file works"
-> +check_label -f
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/773.out b/tests/xfs/773.out
-> new file mode 100644
-> index 00000000..954bfb85
-> --- /dev/null
-> +++ b/tests/xfs/773.out
-> @@ -0,0 +1,19 @@
-> +QA output created by 773
-> +S1: Check that label setting with file image
-> +label = "oldlabel"
-> +label = "newlabel"
-> +S2: Check that setting with logdev works
-> +label = "oldlabel"
-> +label = "newlabel"
-> +S3: Check that setting with rtdev works
-> +label = "oldlabel"
-> +label = "newlabel"
-> +S4: Check that setting with rtdev + logdev works
-> +label = "oldlabel"
-> +label = "newlabel"
-> +S5: Check that setting with nortdev + nologdev works
-> +label = "oldlabel"
-> +label = "newlabel"
-> +S6: Check that setting with bdev incorrectly flagged as file works
-> +label = "oldlabel"
-> +label = "newlabel"
-> diff --git a/tests/xfs/group b/tests/xfs/group
-> index 461ae2b2..a2309465 100644
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
-> @@ -522,5 +522,7 @@
->  537 auto quick
->  538 auto stress
->  539 auto quick mount
-> +764 auto quick repair
->  768 auto quick repair
->  770 auto repair
-> +773 auto quick repair
+> I'm not sure if this test fits into the undefined-behavior fiemap
+> categary. I think it's fine if it tests a well-defined & consistent
+> behavior.
 > 
 
-Both of these tests are primarily targeted at xfs_admin, right? If so,
-I'm not sure the repair group makes much sense. With the nits fixed up:
+Interesting, I didn't know about that test being marked as broken.
 
-Reviewed-by: Brian Foster <bfoster@redhat.com>
+I was worried about this problem to some extent and attempted to
+mitigate it by only requiring that all the output be the same, rather
+than matching some specific standard.
 
+Thinking about it further, I think this test is portable only so long as
+the step where it writes a file with one extent is portable.
+
+If "pwrite 0 block-size" ends up as a file with multiple extents, then
+it is possible one of the partial fiemaps will only intersect with a
+subset of the extents and rightly return those. In fact, that was broken
+in the original version of the test which explicitly used 4096 instead of
+being detecting the block size.
+
+I do think it is nice to have this as a regression test for btrfs, since
+we have pretty complicated logic for fiemap and it was so broken in this
+case. If you prefer, I can make this a btrfs specific test.
+
+Thanks for the review,
+Boris
+
+> > ---
+> > v3: make the block size more generic, use test dev instead of scratch,
+> > cleanup style issues.
+> > v2: fill out copyright and test description
+> > ---
+> >  tests/generic/623     | 94 +++++++++++++++++++++++++++++++++++++++++++
+> >  tests/generic/623.out |  2 +
+> >  tests/generic/group   |  1 +
+> >  3 files changed, 97 insertions(+)
+> >  create mode 100755 tests/generic/623
+> >  create mode 100644 tests/generic/623.out
+> > 
+> > diff --git a/tests/generic/623 b/tests/generic/623
+> > new file mode 100755
+> > index 00000000..a5ef369a
+> > --- /dev/null
+> > +++ b/tests/generic/623
+> > @@ -0,0 +1,94 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (c) 2021 Facebook.  All Rights Reserved.
+> > +#
+> > +# FS QA Test 623
+> > +#
+> > +# Test fiemaps with offsets into small parts of extents.
+> > +# Expect to get the whole extent, anyway.
+> > +#
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +
+> > +here=`pwd`
+> > +tmp=/tmp/$$
+> > +status=1	# failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	rm -f $tmp.*
+> > +	rm -f $fiemap_file
+> > +}
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/filter
+> > +
+> > +# remove previous $seqres.full before test
+> > +rm -f $seqres.full
+> > +
+> > +# real QA test starts here
+> > +
+> > +# Modify as appropriate.
+> > +_supported_fs generic
+> > +_require_test
+> > +_require_xfs_io_command "fiemap"
+> > +
+> > +rm -f $seqres.full
+> > +
+> > +fiemap_file=$TEST_DIR/foo.$$
+> > +
+> > +do_fiemap() {
+> > +	off=$1
+> > +	len=$2
+> > +	echo $off $len >> $seqres.full
+> > +	$XFS_IO_PROG -c "fiemap $off $len" $fiemap_file | tee -a $seqres.full
+> > +}
+> > +
+> > +check_fiemap() {
+> > +	off=$1
+> > +	len=$2
+> > +	actual=$(do_fiemap $off $len)
+> > +	[ "$actual" == "$expected" ] || _fail "unexpected fiemap on $off $len"
+> > +}
+> > +
+> > +# write a file with one extent
+> > +block_size=$(_get_block_size $TEST_DIR)
+> > +$XFS_IO_PROG -f -s -c "pwrite -S 0xcf 0 $block_size" $fiemap_file >/dev/null
+> > +
+> > +# since the exact extent location is unpredictable especially when
+> > +# varying file systems, just test that they are all equal, which is
+> > +# what we really expect.
+> > +expected=$(do_fiemap)
+> > +
+> > +mid=$((block_size / 2))
+> > +almost=$((block_size - 5))
+> > +past=$((block_size + 1))
+> > +
+> > +check_fiemap 0 $mid
+> > +check_fiemap 0 $block_size
+> > +check_fiemap 0 $past
+> > +check_fiemap $mid $almost
+> > +check_fiemap $mid $block_size
+> > +check_fiemap $mid $past
+> > +check_fiemap $almost 5
+> > +check_fiemap $almost 6
+> > +
+> > +# fiemap output explicitly deals in 512 byte increments,
+> > +# so exercise some cases where len is 512.
+> > +# Naturally, some of these can't work if block size is 512.
+> > +one_short=$((block_size - 512))
+> > +check_fiemap 0 512
+> > +check_fiemap $one_short 512
+> > +check_fiemap $almost 512
+> > +
+> > +_test_unmount
+> 
+> Any reason to umount TEST_DEV?
+> 
+> Thanks,
+> Eryu
+> 
+> > +
+> > +echo "Silence is golden"
+> > +
+> > +# success, all done
+> > +status=0
+> > +exit
+> > diff --git a/tests/generic/623.out b/tests/generic/623.out
+> > new file mode 100644
+> > index 00000000..6f774f19
+> > --- /dev/null
+> > +++ b/tests/generic/623.out
+> > @@ -0,0 +1,2 @@
+> > +QA output created by 623
+> > +Silence is golden
+> > diff --git a/tests/generic/group b/tests/generic/group
+> > index b10fdea4..39e02383 100644
+> > --- a/tests/generic/group
+> > +++ b/tests/generic/group
+> > @@ -625,3 +625,4 @@
+> >  620 auto mount quick
+> >  621 auto quick encrypt
+> >  622 auto shutdown metadata atime
+> > +623 auto quick
+> > -- 
+> > 2.30.2
