@@ -2,277 +2,366 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B95A3C433ED
-	for <linux-fstests@archiver.kernel.org>; Wed, 21 Apr 2021 19:13:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6C741C433ED
+	for <linux-fstests@archiver.kernel.org>; Wed, 21 Apr 2021 20:37:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7DA1761453
-	for <linux-fstests@archiver.kernel.org>; Wed, 21 Apr 2021 19:13:44 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 36BA061426
+	for <linux-fstests@archiver.kernel.org>; Wed, 21 Apr 2021 20:37:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242656AbhDUTOR (ORCPT
+        id S240021AbhDUUiZ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 21 Apr 2021 15:14:17 -0400
-Received: from out5-smtp.messagingengine.com ([66.111.4.29]:54329 "EHLO
-        out5-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S240378AbhDUTOJ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 21 Apr 2021 15:14:09 -0400
-Received: from compute3.internal (compute3.nyi.internal [10.202.2.43])
-        by mailout.nyi.internal (Postfix) with ESMTP id 774985C00E5;
-        Wed, 21 Apr 2021 15:13:35 -0400 (EDT)
-Received: from mailfrontend1 ([10.202.2.162])
-  by compute3.internal (MEProxy); Wed, 21 Apr 2021 15:13:35 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bur.io; h=date
-        :from:to:cc:subject:message-id:references:mime-version
-        :content-type:in-reply-to; s=fm3; bh=HaNcDj2Dy45Ew1bbGSpgh9uPCI8
-        reXGG9hVynycGfqU=; b=WPEd/NT3TYSeVIpbA2tQVA1k3Av2XE9hNyfjnt6TMW2
-        wdD7Gf0SRqnZlpe47CkhEHnEW4Q4azcEKUTljD2Rt7p5gki2gNH87gcCmM6kiUHC
-        RwvCRNPwk2/Yh+nIIQ9fL1kkVigAcV4kEoS/HvcpZ9Unv2kmdf9N0LulFmiNQyk3
-        Jyvo/tnXss6RoLLNxM8y7aD4VAAwgEAz37V/sFYMeK9sqTPf69+y4gsU5SSg3SXu
-        rqXgng3mft4u4+osTr9pZZy1v5DQFjBGRNxE3NIM1yD+Ep+KpL1K3MqnMLk1gFdC
-        731f6lBGAVPYKrrVko7Z7NkomTpRBvw/GdQae/rp6Gw==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-        messagingengine.com; h=cc:content-type:date:from:in-reply-to
-        :message-id:mime-version:references:subject:to:x-me-proxy
-        :x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm2; bh=HaNcDj
-        2Dy45Ew1bbGSpgh9uPCI8reXGG9hVynycGfqU=; b=PfyK0eaVETPxuAZkOzx5hc
-        /JEatK72zBJ1tuX957+xz/CB5YmGAN63JO3S5uGSShG2uudAFutogksCuX7NvLDK
-        acUFFA3gaMeo48r5fzIXwf0Epcu3wLt6RN9ZvlpKcf7BWHwEw7/cS3w1Z+Fg9jd/
-        WqOukwxYw5djAUnTGZpjUB/8Zjp4Ddy0PqzNw96EKEU15pQjsxCUp+rpfkqYt8hi
-        huvoS6OVc089++Pb4z7SSCiNIAEVtHCHfqm/0co6HAhNAinCFTcsSpPGpGvLYZrl
-        hDOUQdnBKBwDH7VPiJwisKZsf3pk1p/yHoL4sV63u6G8S4GrwVz19eWVTC1zC92Q
-        ==
-X-ME-Sender: <xms:X3mAYM3Usm0lXfy6j3tR_gGUuioK7KZTiZR3_cFfOSMZ8nBs7XMrFA>
-    <xme:X3mAYDHHCDS4lkTgTKSyOP08iDVu4C5YVUaLAcMwevIYZjCmH9evchlUdbg8ov4p2
-    SMJO82ASM-2UH-lmJ0>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeduledrvddtkedgudefiecutefuodetggdotefrod
-    ftvfcurfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfgh
-    necuuegrihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmd
-    enucfjughrpeffhffvuffkfhggtggujgesthdtredttddtvdenucfhrhhomhepuehorhhi
-    shcuuehurhhkohhvuceosghorhhishessghurhdrihhoqeenucggtffrrghtthgvrhhnpe
-    dtvdfftddvveduieejtedufeeuudefueefhfdujedutdegtddtffffiefgtefgtdenucff
-    ohhmrghinhepkhgvrhhnvghlrdhorhhgnecukfhppedvtdejrdehfedrvdehfedrjeenuc
-    evlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpegsohhrihhs
-    segsuhhrrdhioh
-X-ME-Proxy: <xmx:X3mAYHEmoqxhDhD136Q6huNTXjV_soASbZQVU99H3IVVsJjpCySoCw>
-    <xmx:X3mAYG7Ec9BCnbWePtE962cOZuu3qWjzENT33sDguWW3u6TNMz0e8w>
-    <xmx:X3mAYMxLS8S7ivRGOvqZEwsmB6voMOEGmIc9ESRxEhP_hvxxoFN5rA>
-    <xmx:X3mAYMjbdND41xEfcLvIvRVqhDByJXPNC25JyJsvuFcCJBe8zvkWJw>
-Received: from localhost (unknown [207.53.253.7])
-        by mail.messagingengine.com (Postfix) with ESMTPA id 0D9BE240067;
-        Wed, 21 Apr 2021 15:13:34 -0400 (EDT)
-Date:   Wed, 21 Apr 2021 12:13:33 -0700
-From:   Boris Burkov <boris@bur.io>
-To:     Eryu Guan <guan@eryu.me>
-Cc:     "Darrick J. Wong" <djwong@kernel.org>, linux-btrfs@vger.kernel.org,
-        kernel-team@fb.com, fstests@vger.kernel.org
-Subject: Re: [PATCH v3] generic: test fiemap offsets and < 512 byte ranges
-Message-ID: <YIB5XbY2PX4J5dlN@zen>
-References: <20210407161046.GY1670408@magnolia>
- <c2f49fdead29fd7eb979b83028eb9fcf56d2457c.1617826068.git.boris@bur.io>
- <YHMBzw/9tUVMS66G@desktop>
+        Wed, 21 Apr 2021 16:38:25 -0400
+Received: from mail.kernel.org ([198.145.29.99]:53664 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S234550AbhDUUiY (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 21 Apr 2021 16:38:24 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 74EDF61403;
+        Wed, 21 Apr 2021 20:37:50 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1619037470;
+        bh=IzEWw8Ar7nJUyItkVfP9SZd+RieHDCQZUgCRzqq2zZY=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=iPYn3jLP6OBib2JbYtnJy58hH8ujokoToTixR4oFa3zBiWNKxf+iHbWxamQ0kCJtU
+         YNP5nkDI2a9SWbXNjwz6v9tYi9Zf43wg+mKlp2oDaoSYS3tyFK/lyRu8YtFnHU9aUN
+         MDxByTnli5mS6zK6ASJED9EFxjCpP+fUEU9VVp6CILbEyvOfC+XUVR7M/jZ9tvnWdr
+         HJ67531vWNvDFYkmuYhN/5qC0vg/7XZQhvootDVn58O30AaFZCwgV2xGKc2g0Bb6jv
+         U6TKCsxmd0V6kAAI6tEnAYxZIf60AdEGowXCWgTRXgeDkg0YsuqF1dwVYP9y1I8jsp
+         GtQC2DtA5gi/g==
+Date:   Wed, 21 Apr 2021 13:37:46 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Brian Foster <bfoster@redhat.com>
+Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org, guan@eryu.me
+Subject: Re: [PATCH 1/1] xfs: test that the needsrepair feature works as
+ advertised
+Message-ID: <20210421203746.GE3122235@magnolia>
+References: <161896455503.776294.3492113564046201298.stgit@magnolia>
+ <161896456107.776294.13840945585349427098.stgit@magnolia>
+ <YIBhAPo25d9GTAC8@bfoster>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <YHMBzw/9tUVMS66G@desktop>
+In-Reply-To: <YIBhAPo25d9GTAC8@bfoster>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Apr 11, 2021 at 10:03:59PM +0800, Eryu Guan wrote:
-> On Wed, Apr 07, 2021 at 01:13:26PM -0700, Boris Burkov wrote:
-> > btrfs trims fiemap extents to the inputted offset, which leads to
-> > inconsistent results for most inputs, and downright bizarre outputs like
-> > [7..6] when the trimmed extent is at the end of an extent and shorter
-> > than 512 bytes.
+On Wed, Apr 21, 2021 at 01:29:36PM -0400, Brian Foster wrote:
+> On Tue, Apr 20, 2021 at 05:22:41PM -0700, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <djwong@kernel.org>
 > > 
-> > The test writes out one extent of the file system's block size and tries
-> > fiemaps at various offsets. It expects that all the fiemaps return the
-> > full single extent.
+> > Make sure that the needsrepair feature flag can be cleared only by
+> > repair and that mounts are prohibited when the feature is set.
 > > 
-> > I ran it under the following fs, block size combinations:
-> > ext2: 1024, 2048, 4096
-> > ext3: 1024, 2048, 4096
-> > ext4: 1024, 2048, 4096
-> > xfs: 512, 1024, 2048, 4096
-> > f2fs: 4096
-> > btrfs: 4096
-> > 
-> > This test is fixed for btrfs by:
-> > btrfs: return whole extents in fiemap
-> > (https://lore.kernel.org/linux-btrfs/274e5bcebdb05a8969fc300b4802f33da2fbf218.1617746680.git.boris@bur.io/)
-> > 
-> > Signed-off-by: Boris Burkov <boris@bur.io>
-> 
-> generic/473, which tests fiemap, has been marked as broken, as fiemap
-> behavior is not consistent across filesystems, and the specific behavior
-> tested by generic/473 is not defined and filesystems could have
-> different implementations.
-> 
-> I'm not sure if this test fits into the undefined-behavior fiemap
-> categary. I think it's fine if it tests a well-defined & consistent
-> behavior.
-> 
-
-Interesting, I didn't know about that test being marked as broken.
-
-I was worried about this problem to some extent and attempted to
-mitigate it by only requiring that all the output be the same, rather
-than matching some specific standard.
-
-Thinking about it further, I think this test is portable only so long as
-the step where it writes a file with one extent is portable.
-
-If "pwrite 0 block-size" ends up as a file with multiple extents, then
-it is possible one of the partial fiemaps will only intersect with a
-subset of the extents and rightly return those. In fact, that was broken
-in the original version of the test which explicitly used 4096 instead of
-being detecting the block size.
-
-I do think it is nice to have this as a regression test for btrfs, since
-we have pretty complicated logic for fiemap and it was so broken in this
-case. If you prefer, I can make this a btrfs specific test.
-
-Thanks for the review,
-Boris
-
+> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
 > > ---
-> > v3: make the block size more generic, use test dev instead of scratch,
-> > cleanup style issues.
-> > v2: fill out copyright and test description
-> > ---
-> >  tests/generic/623     | 94 +++++++++++++++++++++++++++++++++++++++++++
-> >  tests/generic/623.out |  2 +
-> >  tests/generic/group   |  1 +
-> >  3 files changed, 97 insertions(+)
-> >  create mode 100755 tests/generic/623
-> >  create mode 100644 tests/generic/623.out
+> >  common/xfs        |   28 ++++++++++++++++++
+> >  tests/xfs/768     |   80 +++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/xfs/768.out |    4 +++
+> >  tests/xfs/770     |   83 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/xfs/770.out |    2 +
+> >  tests/xfs/group   |    2 +
+> >  6 files changed, 199 insertions(+)
+> >  create mode 100755 tests/xfs/768
+> >  create mode 100644 tests/xfs/768.out
+> >  create mode 100755 tests/xfs/770
+> >  create mode 100644 tests/xfs/770.out
 > > 
-> > diff --git a/tests/generic/623 b/tests/generic/623
+> > 
+> > diff --git a/common/xfs b/common/xfs
+> > index 887bd001..c2384146 100644
+> > --- a/common/xfs
+> > +++ b/common/xfs
+> > @@ -312,6 +312,13 @@ _scratch_xfs_check()
+> >  	_xfs_check $SCRATCH_OPTIONS $* $SCRATCH_DEV
+> >  }
+> >  
+> > +_require_libxfs_debug_flag() {
+> > +	local hook="$1"
+> > +
+> > +	grep -q LIBXFS_DEBUG_WRITE_CRASH "$(type -P xfs_repair)" || \
+> 
+> Did you mean to use $hook here?
+
+Yes.
+
+> > +		_notrun "libxfs debug hook $hook not detected?"
+> > +}
+> > +
+> >  _scratch_xfs_repair()
+> >  {
+> >  	SCRATCH_OPTIONS=""
+> > @@ -1114,3 +1121,24 @@ _xfs_get_cowgc_interval() {
+> >  		_fail "Can't find cowgc interval procfs knob?"
+> >  	fi
+> >  }
+> > +
+> > +# Print the status of the given features on the scratch filesystem.
+> > +# Returns 0 if all features are found, 1 otherwise.
+> > +_check_scratch_xfs_features()
+> > +{
+> > +	local features="$(_scratch_xfs_db -c 'version')"
+> > +	local output=("FEATURES:")
+> > +	local found=0
+> > +
+> > +	for feature in "$@"; do
+> > +		local status="NO"
+> > +		if echo "${features}" | grep -q -w "${feature}"; then
+> > +			status="YES"
+> > +			found=$((found + 1))
+> > +		fi
+> > +		output+=("${feature}:${status}")
+> > +	done
+> > +
+> > +	echo "${output[@]}"
+> > +	test "${found}" -eq "$#"
+> > +}
+> > diff --git a/tests/xfs/768 b/tests/xfs/768
 > > new file mode 100755
-> > index 00000000..a5ef369a
+> > index 00000000..e6301829
 > > --- /dev/null
-> > +++ b/tests/generic/623
-> > @@ -0,0 +1,94 @@
+> > +++ b/tests/xfs/768
+> > @@ -0,0 +1,80 @@
 > > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2021 Facebook.  All Rights Reserved.
+> > +# SPDX-License-Identifier: GPL-2.0-or-later
+> > +# Copyright (c) 2021 Oracle.  All Rights Reserved.
 > > +#
-> > +# FS QA Test 623
+> > +# FS QA Test No. 768
 > > +#
-> > +# Test fiemaps with offsets into small parts of extents.
-> > +# Expect to get the whole extent, anyway.
-> > +#
+> > +# Make sure that the kernel won't mount a filesystem if repair forcibly sets
+> > +# NEEDSREPAIR while fixing metadata.  Corrupt a directory in such a way as
+> > +# to force repair to write an invalid dirent value as a sentinel to trigger a
+> > +# repair activity in a later phase.  Use a debug knob in xfs_repair to abort
+> > +# the repair immediately after forcing the flag on.
+> > +
 > > +seq=`basename $0`
 > > +seqres=$RESULT_DIR/$seq
 > > +echo "QA output created by $seq"
 > > +
 > > +here=`pwd`
 > > +tmp=/tmp/$$
-> > +status=1	# failure is the default!
+> > +status=1    # failure is the default!
 > > +trap "_cleanup; exit \$status" 0 1 2 3 15
 > > +
 > > +_cleanup()
 > > +{
 > > +	cd /
 > > +	rm -f $tmp.*
-> > +	rm -f $fiemap_file
 > > +}
 > > +
 > > +# get standard environment, filters and checks
 > > +. ./common/rc
 > > +. ./common/filter
 > > +
-> > +# remove previous $seqres.full before test
-> > +rm -f $seqres.full
-> > +
 > > +# real QA test starts here
-> > +
-> > +# Modify as appropriate.
-> > +_supported_fs generic
-> > +_require_test
-> > +_require_xfs_io_command "fiemap"
+> > +_supported_fs xfs
+> > +_require_scratch_nocheck
+> > +_require_scratch_xfs_crc		# needsrepair only exists for v5
+> > +_require_libxfs_debug_flag LIBXFS_DEBUG_WRITE_CRASH
 > > +
 > > +rm -f $seqres.full
 > > +
-> > +fiemap_file=$TEST_DIR/foo.$$
-> > +
-> > +do_fiemap() {
-> > +	off=$1
-> > +	len=$2
-> > +	echo $off $len >> $seqres.full
-> > +	$XFS_IO_PROG -c "fiemap $off $len" $fiemap_file | tee -a $seqres.full
-> > +}
-> > +
-> > +check_fiemap() {
-> > +	off=$1
-> > +	len=$2
-> > +	actual=$(do_fiemap $off $len)
-> > +	[ "$actual" == "$expected" ] || _fail "unexpected fiemap on $off $len"
-> > +}
-> > +
-> > +# write a file with one extent
-> > +block_size=$(_get_block_size $TEST_DIR)
-> > +$XFS_IO_PROG -f -s -c "pwrite -S 0xcf 0 $block_size" $fiemap_file >/dev/null
-> > +
-> > +# since the exact extent location is unpredictable especially when
-> > +# varying file systems, just test that they are all equal, which is
-> > +# what we really expect.
-> > +expected=$(do_fiemap)
-> > +
-> > +mid=$((block_size / 2))
-> > +almost=$((block_size - 5))
-> > +past=$((block_size + 1))
-> > +
-> > +check_fiemap 0 $mid
-> > +check_fiemap 0 $block_size
-> > +check_fiemap 0 $past
-> > +check_fiemap $mid $almost
-> > +check_fiemap $mid $block_size
-> > +check_fiemap $mid $past
-> > +check_fiemap $almost 5
-> > +check_fiemap $almost 6
-> > +
-> > +# fiemap output explicitly deals in 512 byte increments,
-> > +# so exercise some cases where len is 512.
-> > +# Naturally, some of these can't work if block size is 512.
-> > +one_short=$((block_size - 512))
-> > +check_fiemap 0 512
-> > +check_fiemap $one_short 512
-> > +check_fiemap $almost 512
-> > +
-> > +_test_unmount
+> > +# Set up a real filesystem for our actual test
+> > +_scratch_mkfs -m crc=1 >> $seqres.full
 > 
-> Any reason to umount TEST_DEV?
-> 
-> Thanks,
-> Eryu
-> 
+> I don't think there's a need to explicitly format with -mcrc=1 when the
+> require above would filter out the test anyways (which I think is fine
+> since v5 has been default for some time now). Otherwise this test LGTM.
+
+<nod> Fixed.
+
 > > +
-> > +echo "Silence is golden"
+> > +# Create a directory large enough to have a dir data block.  2k worth of
+> > +# dirent names ought to do it.
+> > +_scratch_mount
+> > +mkdir -p $SCRATCH_MNT/fubar
+> > +for i in $(seq 0 256 2048); do
+> > +	fname=$(printf "%0255d" $i)
+> > +	ln -s -f urk $SCRATCH_MNT/fubar/$fname
+> > +done
+> > +inum=$(stat -c '%i' $SCRATCH_MNT/fubar)
+> > +_scratch_unmount
+> > +
+> > +# Fuzz the directory
+> > +_scratch_xfs_db -x -c "inode $inum" -c "dblock 0" \
+> > +	-c "fuzz -d bu[2].inumber add" >> $seqres.full
+> > +
+> > +# Try to repair the directory, force it to crash after setting needsrepair
+> > +LIBXFS_DEBUG_WRITE_CRASH=ddev=2 _scratch_xfs_repair 2>> $seqres.full
+> > +test $? -eq 137 || echo "repair should have been killed??"
+> > +
+> > +# We can't mount, right?
+> > +_check_scratch_xfs_features NEEDSREPAIR
+> > +_try_scratch_mount &> $tmp.mount
+> > +res=$?
+> > +_filter_scratch < $tmp.mount
+> > +if [ $res -eq 0 ]; then
+> > +	echo "Should not be able to mount after needsrepair crash"
+> > +	_scratch_unmount
+> > +fi
+> > +
+> > +# Repair properly this time and retry the mount
+> > +_scratch_xfs_repair 2>> $seqres.full
+> > +_check_scratch_xfs_features NEEDSREPAIR
+> > +
+> > +_scratch_mount
 > > +
 > > +# success, all done
 > > +status=0
 > > +exit
-> > diff --git a/tests/generic/623.out b/tests/generic/623.out
-> > new file mode 100644
-> > index 00000000..6f774f19
+> ...
+> > diff --git a/tests/xfs/770 b/tests/xfs/770
+> > new file mode 100755
+> > index 00000000..40e67ab5
 > > --- /dev/null
-> > +++ b/tests/generic/623.out
+> > +++ b/tests/xfs/770
+> > @@ -0,0 +1,83 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0-or-later
+> > +# Copyright (c) 2021 Oracle.  All Rights Reserved.
+> > +#
+> > +# FS QA Test No. 770
+> > +#
+> > +# Populate a filesystem with all types of metadata, then run repair with the
+> > +# libxfs write failure trigger set to go after a single write.  Check that the
+> > +# injected error trips, causing repair to abort, that needsrepair is set on the
+> > +# fs, the kernel won't mount; and that a non-injecting repair run clears
+> > +# needsrepair and makes the filesystem mountable again.
+> > +#
+> > +# Repeat with the trip point set to successively higher numbers of writes until
+> > +# we hit ~200 writes or repair manages to run to completion without tripping.
+> > +
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +
+> > +here=`pwd`
+> > +tmp=/tmp/$$
+> > +status=1    # failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	rm -f $tmp.*
+> > +}
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/populate
+> > +. ./common/filter
+> > +
+> > +# real QA test starts here
+> > +_supported_fs xfs
+> > +_require_scratch_nocheck
+> > +_require_scratch_xfs_crc		# needsrepair only exists for v5
+> > +_require_populate_commands
+> > +_require_libxfs_debug_flag LIBXFS_DEBUG_WRITE_CRASH
+> > +
+> > +rm -f $seqres.full
+> > +
+> > +# Populate the filesystem
+> > +_scratch_populate_cached nofill >> $seqres.full 2>&1
+> > +
+> > +max_writes=200			# 200 loops should be enough for anyone
+> > +nr_incr=$((13 / TIME_FACTOR))
+> 
+> Could we randomize this increment so we get varying behavior run to run?
+> It might be nice to actually do that on a per-iteration basis as well
+> rather than once at the start of the test.
+
+Ok, I'll add a little bit of randomness to each run.
+
+How about:
+
+	local crash_after=$(( nr_writes + ((RANDOM % 7) - 3) ))
+	LIBXFS_DEBUG_WRITE_CRASH=ddev=$crash_after _scratch_xfs_repair
+
+?
+
+> > +test $nr_incr -lt 1 && nr_incr=1
+> > +for ((nr_writes = 1; nr_writes < max_writes; nr_writes += nr_incr)); do
+> > +	# Start a repair and force it to abort after some number of writes
+> > +	LIBXFS_DEBUG_WRITE_CRASH=ddev=$nr_writes \
+> > +			_scratch_xfs_repair 2>> $seqres.full
+> > +	res=$?
+> > +	if [ $res -ne 0 ] && [ $res -ne 137 ]; then
+> > +		echo "repair failed with $res??"
+> > +		break
+> > +	elif [ $res -eq 0 ]; then
+> > +		[ $nr_writes -eq 1 ] && \
+> > +			echo "ran to completion on the first try?"
+> > +		break
+> > +	fi
+> > +
+> > +	# Check the state of NEEDSREPAIR after repair fails.  If it isn't set
+> > +	# but if repair -n says the fs is clean, then it's possible that the
+> > +	# injected error caused it to abort immediately after the write that
+> > +	# cleared NEEDSREPAIR.
+> > +	if ! _check_scratch_xfs_features NEEDSREPAIR > /dev/null &&
+> > +	   ! _scratch_xfs_repair -n &>> $seqres.full; then
+> > +		echo "NEEDSREPAIR should be set on corrupt fs"
+> > +	fi
+> > +
+> > +	# Repair properly this time and retry the mount
+> 
+> We can probably drop the "retry the mount" bit since we no longer do
+> that.
+
+Oops, yes, good catch.
+
+> > +	_scratch_xfs_repair 2>> $seqres.full
+> > +	_check_scratch_xfs_features NEEDSREPAIR > /dev/null && \
+> > +		echo "Repair failed to clear NEEDSREPAIR on the $nr_writes writes test"
+> 
+> Maybe I'm mistaken, but I thought we were going to let repair run and
+> fail repeatedly/incrementally and then leave the full repair for the
+> end..?
+
+Ah.  Last time you wrote:
+
+"It probably makes sense to test that NEEDSREPAIR remains set throughout
+the test sequence until repair completes cleanly..."
+
+and I interpreted "throughout the test sequence" to mean "until the
+end of the loop body", not the whole test.
+
+But I guess it /would/ be more interesting to study the effects of
+multiple successive write failures. ;)
+
+--D
+
+> 
+> Brian
+> 
+> > +done
+> > +
+> > +# success, all done
+> > +echo Silence is golden.
+> > +status=0
+> > +exit
+> > diff --git a/tests/xfs/770.out b/tests/xfs/770.out
+> > new file mode 100644
+> > index 00000000..725d740b
+> > --- /dev/null
+> > +++ b/tests/xfs/770.out
 > > @@ -0,0 +1,2 @@
-> > +QA output created by 623
-> > +Silence is golden
-> > diff --git a/tests/generic/group b/tests/generic/group
-> > index b10fdea4..39e02383 100644
-> > --- a/tests/generic/group
-> > +++ b/tests/generic/group
-> > @@ -625,3 +625,4 @@
-> >  620 auto mount quick
-> >  621 auto quick encrypt
-> >  622 auto shutdown metadata atime
-> > +623 auto quick
-> > -- 
-> > 2.30.2
+> > +QA output created by 770
+> > +Silence is golden.
+> > diff --git a/tests/xfs/group b/tests/xfs/group
+> > index d1b1456b..461ae2b2 100644
+> > --- a/tests/xfs/group
+> > +++ b/tests/xfs/group
+> > @@ -522,3 +522,5 @@
+> >  537 auto quick
+> >  538 auto stress
+> >  539 auto quick mount
+> > +768 auto quick repair
+> > +770 auto repair
+> > 
+> 
