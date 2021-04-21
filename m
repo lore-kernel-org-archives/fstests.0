@@ -2,430 +2,265 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3269FC433B4
-	for <linux-fstests@archiver.kernel.org>; Wed, 21 Apr 2021 00:23:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 220B9C433B4
+	for <linux-fstests@archiver.kernel.org>; Wed, 21 Apr 2021 05:53:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 06C8D61420
-	for <linux-fstests@archiver.kernel.org>; Wed, 21 Apr 2021 00:23:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0167061419
+	for <linux-fstests@archiver.kernel.org>; Wed, 21 Apr 2021 05:52:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234569AbhDUAYA (ORCPT
+        id S235341AbhDUFxa (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 20 Apr 2021 20:24:00 -0400
-Received: from mail.kernel.org ([198.145.29.99]:36904 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S234442AbhDUAX7 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 20 Apr 2021 20:23:59 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 108D06141F;
-        Wed, 21 Apr 2021 00:23:27 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1618964607;
-        bh=3L50YCeYC5VGtemeh2l+P6EnpBnHXHXcmIqoLkiPYa0=;
-        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=ipH6KX2I64dIZGSXgNe9rU2aCak+HLjFRus8omVgtPoJrEul7hztfwxEtOSwapaDV
-         yVqQK3wgFBbLetEY6nDqnwAToC7OzizSFZVzmIfc+pdQENY0tsddWX58gL97BGBzBw
-         SaazLHbht8QlThia9t/CTopC8420TKgS4GGcE5WihCXpnU4Sw7YOnsV+LEejS2VnyS
-         KF5XeY+SWFuB3l1YQVssvGsRUHEnjVcd7k7VdcaYnuvHtBbRYvaJZNLji2Bc0U+rxR
-         +cLEav/QL5RgISff0GqwGyU2XDLQGhKxqF6tBU1eFeThdb6Iz+BUwB/IF08N5PQmDc
-         aWNAlA2UI+9jw==
-Subject: [PATCH 4/4] xfs: test upgrading filesystem to bigtime
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     djwong@kernel.org, guaneryu@gmail.com
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me
-Date:   Tue, 20 Apr 2021 17:23:26 -0700
-Message-ID: <161896460627.776452.15178871770338402214.stgit@magnolia>
-In-Reply-To: <161896458140.776452.9583732658582318883.stgit@magnolia>
-References: <161896458140.776452.9583732658582318883.stgit@magnolia>
-User-Agent: StGit/0.19
+        Wed, 21 Apr 2021 01:53:30 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56006 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S235343AbhDUFx3 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 21 Apr 2021 01:53:29 -0400
+Received: from mail-io1-xd30.google.com (mail-io1-xd30.google.com [IPv6:2607:f8b0:4864:20::d30])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7381AC06174A;
+        Tue, 20 Apr 2021 22:52:51 -0700 (PDT)
+Received: by mail-io1-xd30.google.com with SMTP id a11so38814627ioo.0;
+        Tue, 20 Apr 2021 22:52:51 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=N123Fc1SuZwrwPyaOzy7XEU8sZZaKYIHk3a3YwOlHsI=;
+        b=qaiKqDhMHFMQa6JmmH8Bppk2sF9fKmzPKAGas+/XSXrJ35KLgDOPTmQLJejwklA0tb
+         S1VYOs81pedvZ7aDjXBvSk8PRWRZpxzKRZRIewwePL+xJRlKF/r+2jLDfjgxIWGNhF0U
+         5GP3NvBLR/uLlFBJZEFrfKMAIqXAcCgOQ/7aK49zaVlNr6j0HbMzLXjNT3i8yw0hPfEi
+         paDYKFqsF/R8I0dH0EfjpGMiUY8iFvRfc7+4F8USkCgGXNaw93SCa2HRIPqKMzgV6jOy
+         tO6QhGyllOdKZRbl0HSmnRpA6ML2vJJZd746tTlhnt2nxihzu4v43SXaFeV5to4BLMKH
+         IjaA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=N123Fc1SuZwrwPyaOzy7XEU8sZZaKYIHk3a3YwOlHsI=;
+        b=idiUz8zLuBw1u94vP2m0LlHjiLtUBbILhW1EdvKfj4rfR9fc/yyIqmCEJ5PAxcZODy
+         NM4j+YkiMvmeBfWf4dGm50QMR4DjKQJkpL1T/iEA91MpAgGhr2i3l8OQ+yJ5RfPGskoM
+         im+IP4l679y3McETpUSglAKUjgViYQeU4D+kCPpLvsRERRAY5guFm/2uTgIGCygX8r1u
+         MNVZXgLeWZ5y34d8XOvTZh5t11OeGYHjYMdUz2fiKiTl5tGgO4aW+JieQifKKrm445oG
+         NX63ZBL2lcZwIxnX12XhC+kUIUQclhxpzFY8faIEgbWTUF///wA62v06VUTHREoLmdt8
+         ROGA==
+X-Gm-Message-State: AOAM532fPkZynv89nAkbYLr9yBCsVjEBBE6GOQOIcMgrc7cIXeXCagGp
+        p+Ncy9EKfO6GdTVONbzFpXAC081E12gPt29yf9A=
+X-Google-Smtp-Source: ABdhPJzWHcU98E0a626ij8dBsQ/gt1Q9oDk6gvsGQa4xCPG/VUBf5rly7h63uXq/2itdPbWs1McpmCLLuuwCHg/y4YY=
+X-Received: by 2002:a02:9109:: with SMTP id a9mr22013138jag.93.1618984370609;
+ Tue, 20 Apr 2021 22:52:50 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+References: <161896456467.776366.1514131340097986327.stgit@magnolia> <161896457693.776366.7071083307521835427.stgit@magnolia>
+In-Reply-To: <161896457693.776366.7071083307521835427.stgit@magnolia>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Wed, 21 Apr 2021 08:52:39 +0300
+Message-ID: <CAOQ4uxh-7JVg-PxkM=i+WGaiEvZ1oF21oC1ct-HHWpYo-1d=TA@mail.gmail.com>
+Subject: Re: [PATCH 2/2] xfs: test inobtcount upgrade
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     Eryu Guan <guaneryu@gmail.com>,
+        linux-xfs <linux-xfs@vger.kernel.org>,
+        fstests <fstests@vger.kernel.org>, Eryu Guan <guan@eryu.me>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Darrick J. Wong <djwong@kernel.org>
+On Wed, Apr 21, 2021 at 3:23 AM Darrick J. Wong <djwong@kernel.org> wrote:
+>
+> From: Darrick J. Wong <djwong@kernel.org>
+>
+> Make sure we can actually upgrade filesystems to support inode btree
+> counters.
+>
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> ---
+>  common/xfs        |    8 +++-
+>  tests/xfs/910     |   98 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/910.out |   23 ++++++++++++
+>  tests/xfs/group   |    1 +
+>  4 files changed, 127 insertions(+), 3 deletions(-)
+>  create mode 100755 tests/xfs/910
+>  create mode 100644 tests/xfs/910.out
+>
+>
+> diff --git a/common/xfs b/common/xfs
+> index 5abc7034..3d660858 100644
+> --- a/common/xfs
+> +++ b/common/xfs
+> @@ -1153,13 +1153,15 @@ _require_xfs_repair_upgrade()
+>                 _notrun "xfs_repair does not support upgrading fs with $type"
+>  }
+>
+> -_require_xfs_scratch_inobtcount()
+> +# Require that the scratch device exists, that mkfs can format with inobtcount
+> +# enabled, and that the kernel can mount such a filesystem.
+> +_require_scratch_xfs_inobtcount()
+>  {
+>         _require_scratch
+>
+>         _scratch_mkfs -m inobtcount=1 &> /dev/null || \
+> -               _notrun "mkfs.xfs doesn't have inobtcount feature"
+> +               _notrun "mkfs.xfs doesn't support inobtcount feature"
+>         _try_scratch_mount || \
+> -               _notrun "inobtcount not supported by scratch filesystem type: $FSTYP"
+> +               _notrun "kernel doesn't support xfs inobtcount feature"
+>         _scratch_unmount
+>  }
+> diff --git a/tests/xfs/910 b/tests/xfs/910
+> new file mode 100755
+> index 00000000..237d0a35
+> --- /dev/null
+> +++ b/tests/xfs/910
+> @@ -0,0 +1,98 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0-or-later
+> +# Copyright (c) 2021 Oracle.  All Rights Reserved.
+> +#
+> +# FS QA Test No. 910
+> +#
+> +# Check that we can upgrade a filesystem to support inobtcount and that
+> +# everything works properly after the upgrade.
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1    # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +       cd /
+> +       rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_fs xfs
+> +_require_scratch_xfs_inobtcount
+> +_require_command "$XFS_ADMIN_PROG" "xfs_admin"
+> +_require_xfs_repair_upgrade inobtcount
+> +
+> +rm -f $seqres.full
+> +
+> +# Make sure we can't format a filesystem with inobtcount and not finobt.
+> +_scratch_mkfs -m crc=1,inobtcount=1,finobt=0 &> $seqres.full && \
+> +       echo "Should not be able to format with inobtcount but not finobt."
+> +
+> +# Make sure we can't upgrade a V4 filesystem
+> +_scratch_mkfs -m crc=0,inobtcount=0,finobt=0 >> $seqres.full
+> +_scratch_xfs_admin -O inobtcount=1 2>> $seqres.full
+> +_check_scratch_xfs_features INOBTCNT
+> +
+> +# Make sure we can't upgrade a filesystem to inobtcount without finobt.
+> +_scratch_mkfs -m crc=1,inobtcount=0,finobt=0 >> $seqres.full
+> +_scratch_xfs_admin -O inobtcount=1 2>> $seqres.full
+> +_check_scratch_xfs_features INOBTCNT
+> +
+> +# Format V5 filesystem without inode btree counter support and populate it.
+> +_scratch_mkfs -m crc=1,inobtcount=0 >> $seqres.full
+> +_scratch_mount
+> +
+> +mkdir $SCRATCH_MNT/stress
+> +$FSSTRESS_PROG -d $SCRATCH_MNT/stress -n 1000 >> $seqres.full
+> +echo moo > $SCRATCH_MNT/urk
+> +
+> +_scratch_unmount
+> +
+> +# Upgrade filesystem to have the counters and inject failure into repair and
+> +# make sure that the only path forward is to re-run repair on the filesystem.
+> +echo "Fail partway through upgrading"
+> +XFS_REPAIR_FAIL_AFTER_PHASE=2 _scratch_xfs_repair -c inobtcount=1 2>> $seqres.full
+> +test $? -eq 137 || echo "repair should have been killed??"
+> +_check_scratch_xfs_features NEEDSREPAIR INOBTCNT
+> +_try_scratch_mount &> $tmp.mount
+> +res=$?
+> +_filter_scratch < $tmp.mount
+> +if [ $res -eq 0 ]; then
+> +       echo "needsrepair should have prevented mount"
+> +       _scratch_unmount
+> +fi
+> +
+> +echo "Re-run repair to finish upgrade"
+> +_scratch_xfs_repair 2>> $seqres.full
+> +_check_scratch_xfs_features NEEDSREPAIR INOBTCNT
+> +
+> +echo "Filesystem should be usable again"
+> +_scratch_mount
+> +$FSSTRESS_PROG -d $SCRATCH_MNT/stress -n 1000 >> $seqres.full
+> +_scratch_unmount
+> +_check_scratch_fs
+> +_check_scratch_xfs_features INOBTCNT
+> +
+> +echo "Make sure we have nonzero counters"
+> +_scratch_xfs_db -c 'agi 0' -c 'print ino_blocks fino_blocks' | \
+> +       sed -e 's/= [1-9]*/= NONZERO/g'
+> +
 
-Test that we can upgrade an existing filesystem to use bigtime.
+I don't think = 100 translates to = NONZERO...
 
-Signed-off-by: Darrick J. Wong <djwong@kernel.org>
----
- common/xfs        |   16 ++++++
- tests/xfs/908     |  117 ++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/908.out |   29 ++++++++++
- tests/xfs/909     |  149 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/909.out |    6 ++
- tests/xfs/group   |    2 +
- 6 files changed, 319 insertions(+)
- create mode 100755 tests/xfs/908
- create mode 100644 tests/xfs/908.out
- create mode 100755 tests/xfs/909
- create mode 100644 tests/xfs/909.out
+> +echo "Make sure we can't re-add inobtcount"
+> +_scratch_xfs_admin -O inobtcount=1 2>> $seqres.full
+> +
+> +echo "Mount again, look at our files"
+> +_scratch_mount >> $seqres.full
+> +cat $SCRATCH_MNT/urk
+> +
+> +status=0
+> +exit
+> diff --git a/tests/xfs/910.out b/tests/xfs/910.out
+> new file mode 100644
+> index 00000000..1bf040d5
+> --- /dev/null
+> +++ b/tests/xfs/910.out
+> @@ -0,0 +1,23 @@
+> +QA output created by 910
+> +Running xfs_repair to upgrade filesystem.
+> +Inode btree count feature only supported on V5 filesystems.
+> +FEATURES: INOBTCNT:NO
+> +Running xfs_repair to upgrade filesystem.
+> +Inode btree count feature requires free inode btree.
+> +FEATURES: INOBTCNT:NO
+> +Fail partway through upgrading
+> +Adding inode btree counts to filesystem.
+> +FEATURES: NEEDSREPAIR:YES INOBTCNT:YES
+> +mount: SCRATCH_MNT: mount(2) system call failed: Structure needs cleaning.
+> +Re-run repair to finish upgrade
+> +FEATURES: NEEDSREPAIR:NO INOBTCNT:YES
+> +Filesystem should be usable again
+> +FEATURES: INOBTCNT:YES
+> +Make sure we have nonzero counters
+> +ino_blocks = NONZERO
+> +fino_blocks = NONZERO
+> +Make sure we can't re-add inobtcount
+> +Running xfs_repair to upgrade filesystem.
+> +Filesystem already has inode btree counts.
+> +Mount again, look at our files
+> +moo
 
+This test is quite rigid in the format of messages expected from
+xfs_repair. I suppose there is no precedent here...
 
-diff --git a/common/xfs b/common/xfs
-index cb6a1978..253a31e5 100644
---- a/common/xfs
-+++ b/common/xfs
-@@ -1184,3 +1184,19 @@ _xfs_timestamp_range()
- 			awk '{printf("%s %s", $1, $2);}'
- 	fi
- }
-+
-+# Require that the scratch device exists, that mkfs can format with bigtime
-+# enabled, that the kernel can mount such a filesystem, and that xfs_info
-+# advertises the presence of that feature.
-+_require_scratch_xfs_bigtime()
-+{
-+	_require_scratch
-+
-+	_scratch_mkfs -m bigtime=1 &>/dev/null || \
-+		_notrun "mkfs.xfs doesn't support bigtime feature"
-+	_try_scratch_mount || \
-+		_notrun "kernel doesn't support xfs bigtime feature"
-+	$XFS_INFO_PROG "$SCRATCH_MNT" | grep -q -w "bigtime=1" || \
-+		_notrun "bigtime feature not advertised on mount?"
-+	_scratch_unmount
-+}
-diff --git a/tests/xfs/908 b/tests/xfs/908
-new file mode 100755
-index 00000000..004a8563
---- /dev/null
-+++ b/tests/xfs/908
-@@ -0,0 +1,117 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0-or-later
-+# Copyright (c) 2021 Oracle.  All Rights Reserved.
-+#
-+# FS QA Test No. 908
-+#
-+# Check that we can upgrade a filesystem to support bigtime and that inode
-+# timestamps work properly after the upgrade.
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs xfs
-+_require_command "$XFS_ADMIN_PROG" "xfs_admin"
-+_require_scratch_xfs_bigtime
-+_require_xfs_repair_upgrade bigtime
-+
-+date --date='Jan 1 00:00:00 UTC 2040' > /dev/null 2>&1 || \
-+	_notrun "Userspace does not support dates past 2038."
-+
-+rm -f $seqres.full
-+
-+# Make sure we can't upgrade a V4 filesystem
-+_scratch_mkfs -m crc=0 >> $seqres.full
-+_scratch_xfs_admin -O bigtime=1 2>> $seqres.full
-+_check_scratch_xfs_features BIGTIME
-+
-+# Make sure we're required to specify a feature status
-+_scratch_mkfs -m crc=1,bigtime=0,inobtcount=0 >> $seqres.full
-+_scratch_xfs_admin -O bigtime 2>> $seqres.full
-+
-+# Can we add bigtime and inobtcount at the same time?
-+_scratch_mkfs -m crc=1,bigtime=0,inobtcount=0 >> $seqres.full
-+_scratch_xfs_admin -O bigtime=1,inobtcount=1 2>> $seqres.full
-+
-+# Format V5 filesystem without bigtime support and populate it
-+_scratch_mkfs -m crc=1,bigtime=0 >> $seqres.full
-+_scratch_xfs_db -c 'version' -c 'sb 0' -c 'p' >> $seqres.full
-+_scratch_mount >> $seqres.full
-+
-+touch -d 'Jan 9 19:19:19 UTC 1999' $SCRATCH_MNT/a
-+touch -d 'Jan 9 19:19:19 UTC 1999' $SCRATCH_MNT/b
-+ls -la $SCRATCH_MNT/* >> $seqres.full
-+
-+echo before upgrade:
-+TZ=UTC stat -c '%Y' $SCRATCH_MNT/a
-+TZ=UTC stat -c '%Y' $SCRATCH_MNT/b
-+
-+_scratch_unmount
-+_check_scratch_fs
-+
-+# Now upgrade to bigtime support
-+_scratch_xfs_admin -O bigtime=1 2>> $seqres.full
-+_check_scratch_xfs_features BIGTIME
-+_check_scratch_fs
-+_scratch_xfs_db -c 'version' -c 'sb 0' -c 'p' >> $seqres.full
-+
-+# Mount again, look at our files
-+_scratch_mount >> $seqres.full
-+ls -la $SCRATCH_MNT/* >> $seqres.full
-+
-+echo after upgrade:
-+TZ=UTC stat -c '%Y' $SCRATCH_MNT/a
-+TZ=UTC stat -c '%Y' $SCRATCH_MNT/b
-+
-+# Bump one of the timestamps but stay under 2038
-+touch -d 'Jan 10 19:19:19 UTC 1999' $SCRATCH_MNT/a
-+
-+echo after upgrade and bump:
-+TZ=UTC stat -c '%Y' $SCRATCH_MNT/a
-+TZ=UTC stat -c '%Y' $SCRATCH_MNT/b
-+
-+_scratch_cycle_mount
-+
-+# Did the bumped timestamp survive the remount?
-+ls -la $SCRATCH_MNT/* >> $seqres.full
-+
-+echo after upgrade, bump, and remount:
-+TZ=UTC stat -c '%Y' $SCRATCH_MNT/a
-+TZ=UTC stat -c '%Y' $SCRATCH_MNT/b
-+
-+# Modify the other timestamp to stretch beyond 2038
-+touch -d 'Feb 22 22:22:22 UTC 2222' $SCRATCH_MNT/b
-+
-+echo after upgrade and extension:
-+TZ=UTC stat -c '%Y' $SCRATCH_MNT/a
-+TZ=UTC stat -c '%Y' $SCRATCH_MNT/b
-+
-+_scratch_cycle_mount
-+
-+# Did the timestamp survive the remount?
-+ls -la $SCRATCH_MNT/* >> $seqres.full
-+
-+echo after upgrade, extension, and remount:
-+TZ=UTC stat -c '%Y' $SCRATCH_MNT/a
-+TZ=UTC stat -c '%Y' $SCRATCH_MNT/b
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/908.out b/tests/xfs/908.out
-new file mode 100644
-index 00000000..5e05854d
---- /dev/null
-+++ b/tests/xfs/908.out
-@@ -0,0 +1,29 @@
-+QA output created by 908
-+Running xfs_repair to upgrade filesystem.
-+Large timestamp feature only supported on V5 filesystems.
-+FEATURES: BIGTIME:NO
-+Running xfs_repair to upgrade filesystem.
-+Running xfs_repair to upgrade filesystem.
-+Adding inode btree counts to filesystem.
-+Adding large timestamp support to filesystem.
-+before upgrade:
-+915909559
-+915909559
-+Running xfs_repair to upgrade filesystem.
-+Adding large timestamp support to filesystem.
-+FEATURES: BIGTIME:YES
-+after upgrade:
-+915909559
-+915909559
-+after upgrade and bump:
-+915995959
-+915909559
-+after upgrade, bump, and remount:
-+915995959
-+915909559
-+after upgrade and extension:
-+915995959
-+7956915742
-+after upgrade, extension, and remount:
-+915995959
-+7956915742
-diff --git a/tests/xfs/909 b/tests/xfs/909
-new file mode 100755
-index 00000000..66587aa7
---- /dev/null
-+++ b/tests/xfs/909
-@@ -0,0 +1,149 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0-or-later
-+# Copyright (c) 2021 Oracle.  All Rights Reserved.
-+#
-+# FS QA Test No. 909
-+#
-+# Check that we can upgrade a filesystem to support bigtime and that quota
-+# timers work properly after the upgrade.
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/quota
-+
-+# real QA test starts here
-+_supported_fs xfs
-+_require_command "$XFS_ADMIN_PROG" "xfs_admin"
-+_require_quota
-+_require_scratch_xfs_bigtime
-+_require_xfs_repair_upgrade bigtime
-+
-+date --date='Jan 1 00:00:00 UTC 2040' > /dev/null 2>&1 || \
-+	_notrun "Userspace does not support dates past 2038."
-+
-+rm -f $seqres.full
-+
-+# Format V5 filesystem without bigtime support and populate it
-+_scratch_mkfs -m crc=1,bigtime=0 >> $seqres.full
-+_qmount_option "usrquota"
-+_scratch_xfs_db -c 'version' -c 'sb 0' -c 'p' >> $seqres.full
-+_scratch_mount >> $seqres.full
-+
-+# Force the block counters for uid 1 and 2 above zero
-+_pwrite_byte 0x61 0 64k $SCRATCH_MNT/a >> $seqres.full
-+_pwrite_byte 0x61 0 64k $SCRATCH_MNT/b >> $seqres.full
-+sync
-+chown 1 $SCRATCH_MNT/a
-+chown 2 $SCRATCH_MNT/b
-+
-+# Set quota limits on uid 1 before upgrading
-+$XFS_QUOTA_PROG -x -c 'limit -u bsoft=12k bhard=1m 1' $SCRATCH_MNT
-+
-+# Make sure the grace period is at /some/ point in the future.  We have to
-+# use bc because not all bashes can handle integer comparisons with 64-bit
-+# numbers.
-+repquota -upn $SCRATCH_MNT > $tmp.repquota
-+cat $tmp.repquota >> $seqres.full
-+grace="$(cat $tmp.repquota | grep '^#1' | awk '{print $6}')"
-+now="$(date +%s)"
-+res="$(echo "${grace} > ${now}" | $BC_PROG)"
-+test $res -eq 1 || echo "Expected timer expiry (${grace}) to be after now (${now})."
-+
-+_scratch_unmount
-+
-+# Now upgrade to bigtime support
-+_scratch_xfs_admin -O bigtime=1 2>> $seqres.full
-+_check_scratch_xfs_features BIGTIME
-+_check_scratch_fs
-+_scratch_xfs_db -c 'version' -c 'sb 0' -c 'p' >> $seqres.full
-+
-+# Mount again, see if our quota timer survived
-+_scratch_mount
-+
-+# Set a very generous grace period and quota limits on uid 2 after upgrading
-+$XFS_QUOTA_PROG -x -c 'timer -u -b -d 2147483647' $SCRATCH_MNT
-+$XFS_QUOTA_PROG -x -c 'limit -u bsoft=10000 bhard=150000 2' $SCRATCH_MNT
-+
-+# Query the grace periods to see if they got set properly after the upgrade.
-+repquota -upn $SCRATCH_MNT > $tmp.repquota
-+cat $tmp.repquota >> $seqres.full
-+grace1="$(repquota -upn $SCRATCH_MNT | grep '^#1' | awk '{print $6}')"
-+grace2="$(repquota -upn $SCRATCH_MNT | grep '^#2' | awk '{print $6}')"
-+now="$(date +%s)"
-+
-+# Make sure that uid 1's expiration is in the future...
-+res1="$(echo "${grace} > ${now}" | $BC_PROG)"
-+test "${res1}" -eq 1 || echo "Expected uid 1 expiry (${grace1}) to be after now (${now})."
-+
-+# ...and that uid 2's expiration is after uid 1's...
-+res2="$(echo "${grace2} > ${grace1}" | $BC_PROG)"
-+test "${res2}" -eq 1 || echo "Expected uid 2 expiry (${grace2}) to be after uid 1 (${grace1})."
-+
-+# ...and that uid 2's expiration is after 2038 if right now is far enough
-+# past 1970 that our generous grace period would provide for that.
-+res3="$(echo "(${now} < 100) || (${grace2} > 2147483648)" | $BC_PROG)"
-+test "${res3}" -eq 1 || echo "Expected uid 2 expiry (${grace2}) to be after 2038."
-+
-+_scratch_cycle_mount
-+
-+# Query the grace periods to see if they survived a remount.
-+repquota -upn $SCRATCH_MNT > $tmp.repquota
-+cat $tmp.repquota >> $seqres.full
-+grace1="$(repquota -upn $SCRATCH_MNT | grep '^#1' | awk '{print $6}')"
-+grace2="$(repquota -upn $SCRATCH_MNT | grep '^#2' | awk '{print $6}')"
-+now="$(date +%s)"
-+
-+# Make sure that uid 1's expiration is in the future...
-+res1="$(echo "${grace} > ${now}" | $BC_PROG)"
-+test "${res1}" -eq 1 || echo "Expected uid 1 expiry (${grace1}) to be after now (${now})."
-+
-+# ...and that uid 2's expiration is after uid 1's...
-+res2="$(echo "${grace2} > ${grace1}" | $BC_PROG)"
-+test "${res2}" -eq 1 || echo "Expected uid 2 expiry (${grace2}) to be after uid 1 (${grace1})."
-+
-+# ...and that uid 2's expiration is after 2038 if right now is far enough
-+# past 1970 that our generous grace period would provide for that.
-+res3="$(echo "(${now} < 100) || (${grace2} > 2147483648)" | $BC_PROG)"
-+test "${res3}" -eq 1 || echo "Expected uid 2 expiry (${grace2}) to be after 2038."
-+
-+# Now try setting uid 2's expiration to Feb 22 22:22:22 UTC 2222
-+new_expiry=$(date -d 'Feb 22 22:22:22 UTC 2222' +%s)
-+now=$(date +%s)
-+test $now -ge $new_expiry && \
-+	echo "Now is after February 2222?  Expect problems."
-+expiry_delta=$((new_expiry - now))
-+
-+echo "setting expiration to $new_expiry - $now = $expiry_delta" >> $seqres.full
-+$XFS_QUOTA_PROG -x -c "timer -u $expiry_delta 2" -c 'report' $SCRATCH_MNT >> $seqres.full
-+
-+# Did we get an expiration within 5s of the target range?
-+grace2="$(repquota -upn $SCRATCH_MNT | grep '^#2' | awk '{print $6}')"
-+echo "grace2 is $grace2" >> $seqres.full
-+_within_tolerance "grace2 expiry" $grace2 $new_expiry 5 -v
-+
-+_scratch_cycle_mount
-+
-+# ...and is it still within 5s after a remount?
-+grace2="$(repquota -upn $SCRATCH_MNT | grep '^#2' | awk '{print $6}')"
-+echo "grace2 is $grace2" >> $seqres.full
-+_within_tolerance "grace2 expiry after remount" $grace2 $new_expiry 5 -v
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/909.out b/tests/xfs/909.out
-new file mode 100644
-index 00000000..72bf2416
---- /dev/null
-+++ b/tests/xfs/909.out
-@@ -0,0 +1,6 @@
-+QA output created by 909
-+Running xfs_repair to upgrade filesystem.
-+Adding large timestamp support to filesystem.
-+FEATURES: BIGTIME:YES
-+grace2 expiry is in range
-+grace2 expiry after remount is in range
-diff --git a/tests/xfs/group b/tests/xfs/group
-index b4e29bab..49bc4016 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -526,5 +526,7 @@
- 768 auto quick repair
- 770 auto repair
- 773 auto quick repair
-+908 auto quick bigtime
-+909 auto quick bigtime quota
- 910 auto quick inobtcount
- 911 auto quick bigtime
+> diff --git a/tests/xfs/group b/tests/xfs/group
+> index a2309465..bd47333c 100644
+> --- a/tests/xfs/group
+> +++ b/tests/xfs/group
+> @@ -526,3 +526,4 @@
+>  768 auto quick repair
+>  770 auto repair
+>  773 auto quick repair
+> +910 auto quick inobtcount
+>
++repair?
 
+Thanks,
+Amir.
