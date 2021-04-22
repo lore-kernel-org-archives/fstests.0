@@ -2,260 +2,276 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CAFD5C433ED
-	for <linux-fstests@archiver.kernel.org>; Thu, 22 Apr 2021 09:03:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 14B53C433B4
+	for <linux-fstests@archiver.kernel.org>; Thu, 22 Apr 2021 09:32:22 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8B56361452
-	for <linux-fstests@archiver.kernel.org>; Thu, 22 Apr 2021 09:03:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C158561422
+	for <linux-fstests@archiver.kernel.org>; Thu, 22 Apr 2021 09:32:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235331AbhDVJEB (ORCPT
+        id S235339AbhDVJcy (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 22 Apr 2021 05:04:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49166 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229938AbhDVJEB (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 22 Apr 2021 05:04:01 -0400
-Received: from mail-vs1-xe29.google.com (mail-vs1-xe29.google.com [IPv6:2607:f8b0:4864:20::e29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EB546C06174A
-        for <fstests@vger.kernel.org>; Thu, 22 Apr 2021 02:03:26 -0700 (PDT)
-Received: by mail-vs1-xe29.google.com with SMTP id k124so22573097vsk.3
-        for <fstests@vger.kernel.org>; Thu, 22 Apr 2021 02:03:26 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=szeredi.hu; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=jkOIvdxq5FpHGptZhXhCv3A+fIf8KDwGus1f56zSjAo=;
-        b=aFZLDkWH4F2K6FRu5HB2i7UIRTLZ0gkGrGtHfyUt7228PJ+dlq12bN2GhdAwE0fucU
-         Z1blO//QhtpdjT3L97gqp3waWG+HrBA/iCOocXcdGEbI6kHNeHc+zmykPZl+LhQbvGjo
-         hxK18brtShk8VicDVZE/EsyXHVDo2Kdik2RXA=
+        Thu, 22 Apr 2021 05:32:54 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:21802 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S230341AbhDVJcv (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 22 Apr 2021 05:32:51 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1619083936;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=81TLple0Tx+u9fKEIlYsaGfArXaYg3zHr8ALFE3L7LM=;
+        b=D0GtTV7Sjh93Vjk/vvyjFCM9L9hjZhKaqyfe9+aLyEw6CWDXjQfHH47/ZUOAeQYCEFKBLk
+        79yPTgPSmxDxMf0+tzQfiwAyui2NPNCl0NO1xK7q3dqaU3CLA0Ct7bhnrDIxBhmB6BpX3T
+        RIE1AeLQX0o3xjCMB/3Oqrxgx11AUnE=
+Received: from mail-wr1-f70.google.com (mail-wr1-f70.google.com
+ [209.85.221.70]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-313-w7BDBDDYMjGvTCV2mXV7_g-1; Thu, 22 Apr 2021 05:31:43 -0400
+X-MC-Unique: w7BDBDDYMjGvTCV2mXV7_g-1
+Received: by mail-wr1-f70.google.com with SMTP id v20-20020a5d59140000b02901028c7a1f7dso13540877wrd.18
+        for <fstests@vger.kernel.org>; Thu, 22 Apr 2021 02:31:43 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=jkOIvdxq5FpHGptZhXhCv3A+fIf8KDwGus1f56zSjAo=;
-        b=a68P2gzZxbyc+y+HGvRR5iH1bcNM5ssQf3HwRoFldD04RiD+2vKjquFUmFqtBxRxqh
-         nmjc3HwwIuli3QQZjBd3lpj8SwTJBeaVUQ0Zo03dd8fjUFS8m4r59k8PRnWJnfN9apk9
-         +1QFgHECBByKI6IES9t3lUyglQLtDbgzAfwuJlm4XnW6eZGatAq6VChK1r0JI+8WrYl0
-         2Fj1HOHBK0rjZLm4MeSMBNBGuwuxLMO899ltLtVlVErM+LBGTZAlkLMh3rhhUhd9dbHd
-         ukSGX8mRn/YC7RiogvAkQxKLZoaZ+BL63OHd2m8RZgUi/YoxtxnR+dXs/vnO72nAvuud
-         ZFhQ==
-X-Gm-Message-State: AOAM5302JX+tcJ/T8o+6ekWK/QiwpkJ8w4d7cDSWGD2qfOkWRTuZusj1
-        +w/m6nhax1dB3Tc1V4pVLoVodSb5g/Jvv1Jm5KKC9CTJfB4=
-X-Google-Smtp-Source: ABdhPJx2hoyiPNujGpck3t+xLYt+bZFhALFQCuDC3DQpdO8AVJOpmi7M8sesjQGMikbR49vd7sC/vVqMM/xxGTc2QYk=
-X-Received: by 2002:a67:b005:: with SMTP id z5mr1559221vse.47.1619082206128;
- Thu, 22 Apr 2021 02:03:26 -0700 (PDT)
+        bh=81TLple0Tx+u9fKEIlYsaGfArXaYg3zHr8ALFE3L7LM=;
+        b=hCcuKWhlp+sy6YpvW+WOxXgzTzMM4/QX2D6nviVGtFI68exSq1WGHB8+dGFwJm6NM+
+         yRxAGJTqMZKTlWjW4CmMVjRHt8B8v+baJ2pFX7zTnks7mRJOfEnR6dU58SI9tcBWv0s+
+         x/08nqpv/0lerVYIlpXBl5CmgSdg0lvZmqF/hcyjOzG3GLco0AZPbdnVuJQBxfBd1kiP
+         SqhmMzaUUGRYS1N1E4RUgjmHf1VjN8kvPUJ94SGwKvWw84ArIekDW5RTjUesSOJaKT56
+         iEtSACXEYpt+bY6CPkLjngakCstaXwXAQTfLsF93Ix1EIeKHEwcM5fC8RRXB4iTvTmj3
+         BPdw==
+X-Gm-Message-State: AOAM533yYGkAbg1KBQZGJDO8+EhCt3paXhnxGax8q0wHdUUgcbaFQmX7
+        elNax3pmptEvJjR/LFKNG4ZCy/68JWK/ZGJGN6YhxWdZh36kzK30CbyADafX6RjMUkkeAejYQuH
+        2yg3mgczjQq0JHDdwUw1xC3hSXppc4D9qXw==
+X-Received: by 2002:adf:e747:: with SMTP id c7mr2920510wrn.220.1619083902029;
+        Thu, 22 Apr 2021 02:31:42 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJxTDZXblAFe5kVfqDR5lGbbIul0JKTgKK4wrWrd484TEu3k2qGuai/8F02ovjDHBixn8CXKfowh3XfgvU19AvA=
+X-Received: by 2002:adf:e747:: with SMTP id c7mr2920494wrn.220.1619083901770;
+ Thu, 22 Apr 2021 02:31:41 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210421092317.68716-1-amir73il@gmail.com> <CAOQ4uxhh305WPZ-puLONej2TLQTe54-FUtrsgp2R8ohdDcNP0A@mail.gmail.com>
- <CAJfpegtoTJRnNQnttVw54pndEqrpzfxttp=NCQ_2za859fWMqA@mail.gmail.com> <CAOQ4uxgZemF+wYzorW8s2+4=1dRds3EKkKBs=bybdhrTC-QMJg@mail.gmail.com>
-In-Reply-To: <CAOQ4uxgZemF+wYzorW8s2+4=1dRds3EKkKBs=bybdhrTC-QMJg@mail.gmail.com>
-From:   Miklos Szeredi <miklos@szeredi.hu>
-Date:   Thu, 22 Apr 2021 11:03:15 +0200
-Message-ID: <CAJfpeguOFM=CKtxH537BhGjMufNK6aVTUfV_opn81vw1m8iaZw@mail.gmail.com>
-Subject: Re: [PATCH 0/2] Test overlayfs readdir cache
-To:     Amir Goldstein <amir73il@gmail.com>
-Cc:     overlayfs <linux-unionfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>, Eryu Guan <guaneryu@gmail.com>
-Content-Type: multipart/mixed; boundary="000000000000c2f54905c08bf388"
+References: <20210415062744.826644-1-bxue@redhat.com> <YIBKawaUlcyiETie@bfoster>
+In-Reply-To: <YIBKawaUlcyiETie@bfoster>
+From:   Boyang Xue <bxue@redhat.com>
+Date:   Thu, 22 Apr 2021 17:31:29 +0800
+Message-ID: <CAHLe9YZcZi-ihhozVy=WEYXg1cy1-b+e7zi0kf6vqsPeSOzYvA@mail.gmail.com>
+Subject: Re: [PATCH v1] generic/563: tolerate small reads in "write ->
+ read/write" sub-test
+To:     Brian Foster <bfoster@redhat.com>
+Cc:     fstests@vger.kernel.org, Ming Lei <minlei@redhat.com>,
+        Lukas Czerner <lczerner@redhat.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
---000000000000c2f54905c08bf388
-Content-Type: text/plain; charset="UTF-8"
+Hi Brian,
 
-On Thu, Apr 22, 2021 at 10:47 AM Amir Goldstein <amir73il@gmail.com> wrote:
+Thanks for the review. Please find my reply inline below.
+
+On Wed, Apr 21, 2021 at 11:53 PM Brian Foster <bfoster@redhat.com> wrote:
 >
-> On Thu, Apr 22, 2021 at 10:53 AM Miklos Szeredi <miklos@szeredi.hu> wrote:
+> On Thu, Apr 15, 2021 at 02:27:44PM +0800, bxue@redhat.com wrote:
+> > From: Boyang Xue <bxue@redhat.com>
 > >
-> > On Thu, Apr 22, 2021 at 8:18 AM Amir Goldstein <amir73il@gmail.com> wrote:
-> > >
-> > > On Wed, Apr 21, 2021 at 12:23 PM Amir Goldstein <amir73il@gmail.com> wrote:
-> > > >
-> > > > Eryu,
-> > > >
-> > > > This extends the generic t_dir_offset2 test to verify
-> > > > some more test cases and adds a new generic test which
-> > > > passes on overlayfs (and other fs) on upstream kernel.
-> > > >
-> > > > The overlayfs specific test fails on upstream kernel
-> > > > and the fix commit is currently in linux-next.
-> > > > As usual, you may want to wait with merging until the fix
-> > > > commit hits upstream.
-> > > >
-> > > > Miklos,
-> > > >
-> > > > I had noticed in the test full logs that readdir of
-> > > > a merged dir behaves strangely - when seeking backwards
-> > > > to offsets > 0, readdir returns unlinked entries in results.
-> > > > The test does not fail on that behavior because the test
-> > > > only asserts that this is not allowed after seek to offset 0.
-> > > >
-> > > > Knowing the implementation of overlayfs readdir cache this is
-> > > > not surprising to me, but I wonder if this behavior is POSIX
-> > > > compliant, and if not, whether we should document it and/or
-> > > > add a failing test for it.
-> > > >
-> > >
-> > > I think the outcome could be worse.
-> > > If a copied up entry is unlinked after populating the dir cache
-> > > but before ovl_cache_update_ino() then ovl_cache_update_ino()
-> > > and subsequently the getdents call will fail with ENOENT.
-> > >
-> > > This test is not smart enough to cover this case (if it really exists).
-> > > I think we need to relax the case of negative lookup result in
-> > > ovl_cache_update_ino() and just set p->whiteout without and
-> > > continue with no error.
-> > >
-> > > This can solve several test cases.
-> > > In principle, we can "semi-reset" the merge dir cache if the dir was
-> > > modified after every seek, not just seek to 0.
-> > > By "semi-reset" I mean use the list, but force ovl_cache_update_ino()
-> > > to all upper entries, similar to ovl_dir_read_impure().
-> > >
-> > > OR.. we can just do that unconditionally in ovl_iterate().
-> > > The ovl dentry cache for the children will be populated after the first
-> > > ovl_iterate() anyway, so maybe the penalty is not so bad?
+> > On ext2/ext3, there're small reads when writing to file in the same cgroup.
+> > Since this sub-test tests that if read/write from 2nd cgroup is both 0 after
+> > writing in 1st cgroup, these small reads from 1st cgroup should not fail the
+> > test. This patch fixes the sub-test in order to tolerate small reads in 1st
+> > cgroup.
 > >
-> > POSIX does allow stale readdir data (not just in case of non-zero seek):
+> > Signed-off-by: Boyang Xue <bxue@redhat.com>
+> > ---
+> > Hi,
 > >
-> > "If a file is removed from or added to the directory after the most
-> > recent call to opendir() or rewinddir(), whether a subsequent call to
-> > readdir() returns an entry for that file is unspecified."
+> > I found generic/563 fails on ext2/ext3 on the latest kernel:
 > >
-> > If you think about the way readdir(3) is implemented by the libc, this
-> > is inevitable.
+> > [root@kvm109 repo_xfstests]# ./check generic/563
+> > FSTYP         -- ext3
+> > PLATFORM      -- Linux/x86_64 kvm109 5.12.0-0.rc3.170.xx.x86_64 #1 SMP Tue Mar
+> > 16 12:02:55 EDT 2021
+> > MKFS_OPTIONS  -- -b 4096 /dev/vda3
+> > MOUNT_OPTIONS -- -o rw,relatime,seclabel -o context=system_u:object_r:root_t:s0
+> > /dev/vda3 /scratch
+> >
+> > generic/563 4s ... - output mismatch (see
+> > /tmp/tmp.hMWbgkavD4/repo_xfstests/results//generic/563.out.bad)
+> >     --- tests/generic/563.out   2021-04-01 02:07:16.303329895 -0400
+> >     +++ /tmp/tmp.hMWbgkavD4/repo_xfstests/results//generic/563.out.bad
+> > 2021-04-01 03:06:19.240329895 -0400
+> >     @@ -3,7 +3,8 @@
+> >      read is in range
+> >      write is in range
+> >      write -> read/write
+> >     -read is in range
+> >     +read has value of 12288
+> >     +read is NOT in range 0 .. 0
+> >      write is in range
+> >     ...
+> >     (Run 'diff -u /tmp/tmp.hMWbgkavD4/repo_xfstests/tests/generic/563.out
+> > /tmp/tmp.hMWbgkavD4/repo_xfstests/results//generic/563.out.bad'  to see the
+> > entire diff)
+> > Ran: generic/563
+> > Failures: generic/563
+> > Failed 1 of 1 tests
+> > ```
+> >
+> > generic/563 code
+> > ```
+> > ...
+> > # Write from one cgroup then read and write from a second. Writes are charged to
+> > # the first group and nothing to the second.
+> > echo "write -> read/write"
+> > reset  <== I have injected commands here for check, it turns out it indeed
+> > resets rbytes and wbytes both to 0.
+> > switch_cg $cgdir/$seq-cg
+> > $XFS_IO_PROG -c "pwrite 0 $iosize" $SCRATCH_MNT/file >> $seqres.full 2>&1
+> > switch_cg $cgdir/$seq-cg-2
+> > $XFS_IO_PROG -c "pread 0 $iosize" -c "pwrite 0 $iosize" $SCRATCH_MNT/file \
+> >       >> $seqres.full 2>&1
+> > switch_cg $cgdir
+> > $XFS_IO_PROG -c fsync $SCRATCH_MNT/file
+> > check_cg $cgdir/$seq-cg 0 $iosize  <== problem here, expected read bytes = 0,
+> > but it's 12288
+> > check_cg $cgdir/$seq-cg-2 0 0
+> > ...
+> > ```
+> >
+> > local.config
+> > ```
+> > FSTYP="ext3"
+> > TEST_DIR="/test"
+> > TEST_DEV="/dev/vda2"
+> > SCRATCH_MNT="/scratch"
+> > SCRATCH_DEV="/dev/vda3"
+> > LOGWRITES_MNT="/logwrites"
+> > LOGWRITES_DEV="/dev/vda6"
+> > MKFS_OPTIONS="-b 4096"
+> > MOUNT_OPTIONS="-o rw,relatime,seclabel"
+> > TEST_FS_MOUNT_OPTS="-o rw,relatime,seclabel"
+> > ```
+> >
+> > I think the "write -> read/write" sub-test should test if the read/write bytes
+> > in 2nd cgroup both are 0, after writing in the 1st cgroup. Given that it writes
+> > 8MB in cgroup, dozens of small reads in service of the write (like read
+> > metadata) is not part of the goal of the sub-test, and should be tolerate,
+> > rather than fail the test.
+> >
+> > Currently, the expected read bytes in the 1st cgroup is strictly 0. This patch
+> > sets a fixed tolerant value, so read bytes in the range of 0-(tolerant value) is
+> > tolerant, doesn't fail the test.
+> >
+> > I have run the original test on ext2/ext3/ext4 with 1k/2k/4k blksize on x86_64,
+> > aarch64, s390x, ppc64le, to determine the tolerant value. It turns out the
+> > maximum read bytes in the tests is 33792. So I think set the tolerant value
+> > to 33800 is adequate.
+> >
+> > Please help review this patch. Thanks.
+> >
+> > -Boyang
+> >
+> >  tests/generic/563 | 16 +++++++++-------
+> >  1 file changed, 9 insertions(+), 7 deletions(-)
+> >
+> > diff --git a/tests/generic/563 b/tests/generic/563
+> > index b113eacf..83146721 100755
+> > --- a/tests/generic/563
+> > +++ b/tests/generic/563
+> > @@ -60,6 +60,8 @@ check_cg()
+> >       cgname=$(basename $cgroot)
+> >       expectedread=$2
+> >       expectedwrite=$3
+> > +     readtol=$4
+> > +     writetol=$5
+> >       rbytes=0
+> >       wbytes=0
+> >
+> > @@ -71,8 +73,8 @@ check_cg()
+> >                       awk -F = '{ print $2 }'`
+> >       fi
+> >
+> > -     _within_tolerance "read" $rbytes $expectedread 5% -v
+> > -     _within_tolerance "write" $wbytes $expectedwrite 5% -v
+> > +     _within_tolerance "read" $rbytes $expectedread $readtol -v
+> > +     _within_tolerance "write" $wbytes $expectedwrite $writetol -v
+> >  }
+> >
+> >  # Move current process to another cgroup.
+> > @@ -113,7 +115,7 @@ $XFS_IO_PROG -c "pread 0 $iosize" -c "pwrite 0 $iosize" -c fsync \
+> >       $SCRATCH_MNT/file >> $seqres.full 2>&1
+> >  switch_cg $cgdir
+> >  $XFS_IO_PROG -c fsync $SCRATCH_MNT/file
+> > -check_cg $cgdir/$seq-cg $iosize $iosize
+> > +check_cg $cgdir/$seq-cg $iosize $iosize 5% 5%
+> >
+> >  # Write from one cgroup then read and write from a second. Writes are charged to
+> >  # the first group and nothing to the second.
+> > @@ -126,8 +128,8 @@ $XFS_IO_PROG -c "pread 0 $iosize" -c "pwrite 0 $iosize" $SCRATCH_MNT/file \
+> >       >> $seqres.full 2>&1
+> >  switch_cg $cgdir
+> >  $XFS_IO_PROG -c fsync $SCRATCH_MNT/file
+> > -check_cg $cgdir/$seq-cg 0 $iosize
+> > -check_cg $cgdir/$seq-cg-2 0 0
+> > +check_cg $cgdir/$seq-cg 0 $iosize 33800 5%
 >
-> I see. In that case, I would defer merging this test as it assumes too much
-> about readdir behavior (even though applications may expect this behavior).
+> Any reason for the 33800 value as opposed to an even 32k? Also a brief
+> comment might be useful:
 
-FWIW, I started writing a readdir stress/validator similar to
-fsx-linux but for directories.
+Test results from ext2/3/4 1k/2k/4k blksize shows the largest possible
+value of the read bytes is 33792, so I chose this a bit larger value.
+In my next version of the patch, I'm thinking fix the value to 33792,
+for accuracy. Does it look better?
 
-It's unfinished and  has performance problem as the directory grows
-due to linear searches.
+>
+> # Use a fixed value tolerance for the expected value of zero here
+> # because filesystems might perform a small number of metadata reads to
+> # complete the write.
 
-Putting it out in case someone wants to continue working on it, or
-just take some ideas.
+Thanks. I'm pasting this comment in the next version.
 
-Thanks,
-Miklos
+>
+> > +check_cg $cgdir/$seq-cg-2 0 0 5% 5%
+> >
+>
+> I'm not sure it ever really makes sense to have a percentage tolerance
+> when the expected values are zero. This is the case with the current
+> implementation simply because the tolerance is hardcoded in the helper
+> function. If we're going to pass the tolerances for each test along with
+> the expected values, it might make a bit more sense to pass along a 0
+> tolerance where that is expected. Otherwise the rest LGTM. Thanks for
+> sending the patch..
 
---000000000000c2f54905c08bf388
-Content-Type: text/x-csrc; charset="US-ASCII"; name="readdir-stress.c"
-Content-Disposition: attachment; filename="readdir-stress.c"
-Content-Transfer-Encoding: base64
-Content-ID: <f_knsnp71v0>
-X-Attachment-Id: f_knsnp71v0
+Good idea. I'll fix the test in this way.
 
-LyoKICogQ29weXJpZ2h0IChDKSAyMDIxIE1pa2xvcyBTemVyZWRpIDxtaWtsb3NAc3plcmVkaS5o
-dT4KICoKICogVGhpcyBwcm9ncmFtIGNhbiBiZSBkaXN0cmlidXRlZCB1bmRlciB0aGUgdGVybXMg
-b2YgdGhlIEdOVSBHUEx2Mi4KICovCgojaW5jbHVkZSA8c3RkaW8uaD4KI2luY2x1ZGUgPHVuaXN0
-ZC5oPgojaW5jbHVkZSA8c3RkaW50Lmg+CiNpbmNsdWRlIDxzdGRsaWIuaD4KI2luY2x1ZGUgPGZj
-bnRsLmg+CiNpbmNsdWRlIDxkaXJlbnQuaD4KI2luY2x1ZGUgPHN0cmluZy5oPgojaW5jbHVkZSA8
-ZXJyLmg+CiNpbmNsdWRlIDxzeXMvc3RhdC5oPgojaW5jbHVkZSA8c3lzL3N5c2NhbGwuaD4KCnN0
-cnVjdCBsaW51eF9kaXJlbnQ2NCB7Cgl1aW50NjRfdAlkX2lubzsKCWludDY0X3QJCWRfb2ZmOwoJ
-dW5zaWduZWQgc2hvcnQJZF9yZWNsZW47Cgl1bnNpZ25lZCBjaGFyCWRfdHlwZTsKCWNoYXIJCWRf
-bmFtZVswXTsKfTsKCnN0cnVjdCBlbnRyeSB7CgljaGFyICpuYW1lOwoJdW5zaWduZWQgY2hhciB0
-eXBlOwoJaW5vX3QgaW5vOwoJaW50IGFkZF92ZXI7CglpbnQgZGVsX3ZlcjsKfTsKCnN0cnVjdCBs
-aXN0X2VudHJ5IHsKCWNoYXIgKm5hbWU7Cgl1aW50NjRfdCBpbm87CglpbnQ2NF90IG9mZjsKCXVu
-c2lnbmVkIGNoYXIgdHlwZTsKCWludCB2ZXJzaW9uOwoKCXN0cnVjdCBsaXN0X2VudHJ5ICpuZXh0
-Owp9OwoKc3RydWN0IGRpciB7CglpbnQgZmQ7CglvZmZfdCBwb3M7CglpbnQgdmVyc2lvbjsKCXN0
-cnVjdCBsaXN0X2VudHJ5ICpsaXN0Owp9OwoKc3RhdGljIHN0cnVjdCBkaXIgZ2xvYmFsX2RpcjsK
-CnN0YXRpYyBpbnQgdmVyc2lvbiA9IDE7CnN0YXRpYyB1bnNpZ25lZCBpbnQgbnVtID0gMDsKc3Rh
-dGljIHVuc2lnbmVkIGludCBudW1fYWN0aXZlID0gMDsKc3RhdGljIHN0cnVjdCBlbnRyeSAqYXJy
-YXkgPSBOVUxMOwoKc3RhdGljIHZvaWQgKm9vbSh2b2lkICpwdHIpCnsKCWlmICghcHRyKQoJCWVy
-cngoMSwgIm91dCBvZiBtZW1vcnkiKTsKCXJldHVybiBwdHI7Cn0KCnN0YXRpYyB2b2lkIGFkZF9l
-bnRyeShjaGFyICpuYW1lLCB1bnNpZ25lZCBjaGFyIHR5cGUpCnsKCXN0cnVjdCBzdGF0IHN0OwoJ
-aW50IHJlczsKCglyZXMgPSBsc3RhdChuYW1lLCAmc3QpOwoJaWYgKHJlcyA9PSAtMSkKCQllcnIo
-MSwgImZhaWxlZCB0byBzdGF0IDwlcz4iLCBuYW1lKTsKCglhcnJheSA9IG9vbShyZWFsbG9jKGFy
-cmF5LCAobnVtICsgMSkgKiBzaXplb2YoKmFycmF5KSkpOwoKCWFycmF5W251bV0ubmFtZSA9IG9v
-bShzdHJkdXAobmFtZSkpOwoKCWFycmF5W251bV0udHlwZSA9IHR5cGU7CglhcnJheVtudW1dLmlu
-byA9IHN0LnN0X2lubzsKCXZlcnNpb24rKzsKCWFycmF5W251bV0uYWRkX3ZlciA9IHZlcnNpb247
-CglhcnJheVtudW1dLmRlbF92ZXIgPSAwOwoJbnVtKys7CgludW1fYWN0aXZlKys7Cn0KCnN0YXRp
-YyBpbnQgY3JlYXRlX2VudHJ5KHZvaWQpCnsKCXVuc2lnbmVkIGNoYXIgdHlwZTsKCXVuc2lnbmVk
-IGludCBuYW1lbGVuOwoJdW5zaWduZWQgaW50IGk7CgljaGFyIG5hbWVbMjU2XTsKCW1vZGVfdCBt
-b2RlOwoJaW50IHJlczsKCgl0eXBlID0gKHJhbmRvbSgpICUgNykgKiAyOwoJaWYgKCF0eXBlKQoJ
-CXR5cGUgPSAxOwoKCWlmICh0eXBlID09IERUX0NIUiB8fCB0eXBlID09IERUX0JMSykKCQl0eXBl
-ID0gRFRfUkVHOwoKCW1vZGUgPSB0eXBlIDw8IDEyIHwgMDY2NjsKCnJldHJ5OgoJbmFtZWxlbiA9
-IChyYW5kb20oKSAlIDEwKSA/IChyYW5kb20oKSAlIDMyICsgMSkgOiAocmFuZG9tKCkgJSAyMjIg
-KyAzMyk7Ci8vCW5hbWVsZW4gPSByYW5kb20oKSAlIDMwICsgMTsKCglmb3IgKGkgPSAwOyBpIDwg
-bmFtZWxlbjsgaSsrKSB7CgkJdW5zaWduZWQgY2hhciBjOwoKCQljID0gcmFuZG9tKCkgJSA5NCAr
-IDMyOwoJCWlmIChjID49ICcvJykKCQkJYysrOwoJCW5hbWVbaV0gPSBjOwoJfQoJbmFtZVtuYW1l
-bGVuXSA9ICdcMCc7CgoJaWYgKHN0cmNtcChuYW1lLCAiLiIpID09IDAgfHwgc3RyY21wKG5hbWUs
-ICIuLiIpID09IDApCgkJZ290byByZXRyeTsKCglmb3IgKGkgPSAwOyBpIDwgbnVtOyBpKyspIHsK
-CQlpZiAoc3RyY21wKG5hbWUsIGFycmF5W2ldLm5hbWUpID09IDApCgkJCWdvdG8gcmV0cnk7Cgl9
-CgoJaWYgKFNfSVNESVIobW9kZSkpCgkJcmVzID0gbWtkaXIobmFtZSwgMDc3Nyk7CgllbHNlIGlm
-IChTX0lTTE5LKG1vZGUpKQoJCXJlcyA9IHN5bWxpbmsoInRhcmdldCIsIG5hbWUpOwoJZWxzZQoJ
-CXJlcyA9IG1rbm9kKG5hbWUsIG1vZGUsIDEpOwoKCWlmIChyZXMgPT0gLTEpCgkJZXJyKDEsICJm
-YWlsZWQgdG8gY3JlYXRlIFwiJXNcIiwgbW9kZSAwJW8iLCBuYW1lLCBtb2RlKTsKCglhZGRfZW50
-cnkobmFtZSwgdHlwZSk7CgoJcmV0dXJuIDA7Cn0KCnN0YXRpYyBpbnQgcmVtb3ZlX2VudHJ5KHZv
-aWQpCnsKCXVuc2lnbmVkIGludCBpOwoJc3RydWN0IGVudHJ5ICp4OwoJaW50IHJlczsKCglpZiAo
-IW51bV9hY3RpdmUpCgkJcmV0dXJuIDA7CnJldHJ5OgoJaSA9IHJhbmRvbSgpICUgbnVtOwoJeCA9
-ICZhcnJheVtpXTsKCWlmICh4LT5kZWxfdmVyKQoJCWdvdG8gcmV0cnk7CgoJaWYgKHgtPnR5cGUg
-PT0gRFRfRElSKQoJCXJlcyA9IHJtZGlyKHgtPm5hbWUpOwoJZWxzZQoJCXJlcyA9IHVubGluayh4
-LT5uYW1lKTsKCWlmIChyZXMgPT0gLTEpCgkJZXJyKDEsICJmYWlsZWQgdG8gcmVtb3ZlIFwiJXNc
-IiIsIHgtPm5hbWUpOwoKCXZlcnNpb24rKzsKCXgtPmRlbF92ZXIgPSB2ZXJzaW9uOwoJbnVtX2Fj
-dGl2ZS0tOwoKCXJldHVybiAwOwp9CgpzdGF0aWMgdm9pZCBhZGRfbGlzdF9lbnRyeShzdHJ1Y3Qg
-ZGlyICpkaXIsIHN0cnVjdCBsaXN0X2VudHJ5ICplbnQpCnsKCXN0cnVjdCBsaXN0X2VudHJ5ICoq
-cHA7CgoJZm9yIChwcCA9ICZkaXItPmxpc3Q7ICpwcCAhPSBOVUxMOyBwcCA9ICYoKnBwKS0+bmV4
-dCkgewoJCXN0cnVjdCBsaXN0X2VudHJ5ICpwID0gKnBwOwoKCQlpZiAoZW50LT5vZmYgPT0gcC0+
-b2ZmKQoJCQllcnJ4KDEsICJ0d28gZW50cmllcyBoYXZlIHRoZSBzYW1lIG9mZnNldDogJWxpIiwK
-CQkJCWVudC0+b2ZmKTsKCQlpZiAoc3RyY21wKGVudC0+bmFtZSwgcC0+bmFtZSkgPT0gMCkKCQkJ
-ZXJyeCgxLCAidHdvIGVudHJpZXMgaGF2ZSB0aGUgc2FtZSBuYW1lIik7Cgl9CgkqcHAgPSBlbnQ7
-Cn0KCnN0YXRpYyB2b2lkIGNoZWNrX2VudHJ5KHN0cnVjdCBkaXIgKmRpciwgc3RydWN0IGxpc3Rf
-ZW50cnkgKmVudCkKewoJdW5zaWduZWQgaW50IGk7CgoJaWYgKHN0cmNtcChlbnQtPm5hbWUsICIu
-IikgPT0gMCB8fCBzdHJjbXAoZW50LT5uYW1lLCAiLi4iKSA9PSAwKQoJCXJldHVybjsKCglmb3Ig
-KGkgPSAwOyBpIDwgbnVtOyBpKyspIHsKCQlzdHJ1Y3QgZW50cnkgKnggPSAmYXJyYXlbaV07CgoJ
-CWlmIChzdHJjbXAoZW50LT5uYW1lLCB4LT5uYW1lKSA9PSAwICYmCgkJICAgICgheC0+ZGVsX3Zl
-ciB8fCB4LT5kZWxfdmVyID4gZGlyLT52ZXJzaW9uKSkgewoJCQlyZXR1cm47CgkJfQoJfQoJZXJy
-eCgxLCAidW5rbm93biBlbnRyeSByZXR1cm5lZCBieSBnZXRkZW50czY0KCkgXCIlc1wiIiwgZW50
-LT5uYW1lKTsKfQoKc3RhdGljIHZvaWQgY2hlY2tfY29tcGxldGUoc3RydWN0IGRpciAqZGlyKQp7
-Cgl1bnNpZ25lZCBpbnQgaTsKCglmb3IgKGkgPSAwOyBpIDwgbnVtOyBpKyspIHsKCQlzdHJ1Y3Qg
-ZW50cnkgKnggPSAmYXJyYXlbaV07CgoJCWlmICh4LT5hZGRfdmVyIDw9IGRpci0+dmVyc2lvbiAm
-JiAheC0+ZGVsX3ZlcikgewoJCQlzdHJ1Y3QgbGlzdF9lbnRyeSAqcDsKCgkJCWZvciAocCA9IGRp
-ci0+bGlzdDsgcDsgcCA9IHAtPm5leHQpIHsKCQkJCWlmIChzdHJjbXAoeC0+bmFtZSwgcC0+bmFt
-ZSkgPT0gMCkKCQkJCQlicmVhazsKCQkJfQoJCQlpZiAoIXApIHsKCQkJCWVycngoMSwgIlwiJXNc
-IiBub3QgZm91bmQgaW4gY29tcGxldGUgbGlzdGluZyIsCgkJCQkgICAgIHgtPm5hbWUpOwoJCQl9
-CgkJfQoJfQp9CgpzdGF0aWMgaW50IHJlYWRfZGlyKHN0cnVjdCBkaXIgKmRpcikKewoJY2hhciBi
-dWZbNjU1MzZdOwoJdW5zaWduZWQgaW50IHNpemUgPSByYW5kb20oKSAlIChzaXplb2YoYnVmKSAt
-IDUxMikgKyA1MTI7CglpbnQgcmVzOwoJaW50IG5yZWFkOwoJc3RydWN0IGxpbnV4X2RpcmVudDY0
-ICpkOwoJc3RydWN0IGxpc3RfZW50cnkgKmVudDsKCWludCBicG9zOwoJaW50IHZlcnNpb24gPSB2
-ZXJzaW9uOwoKCXJlcyA9IHN5c2NhbGwoU1lTX2dldGRlbnRzNjQsIGRpci0+ZmQsIGJ1Ziwgc2l6
-ZSk7CglpZiAocmVzID09IC0xKQoJCWVycigxLCAiZ2V0ZGVudHM2NCglaSwgJXAsICV1KSIsIGRp
-ci0+ZmQsIGJ1Ziwgc2l6ZSk7CglucmVhZCA9IHJlczsKCglpZiAobnJlYWQgPT0gMCkgewoJCWNo
-ZWNrX2NvbXBsZXRlKGRpcik7CgkJcmV0dXJuIDA7Cgl9CgoJZm9yIChicG9zID0gMDsgYnBvcyA8
-IG5yZWFkOyApIHsKCQlkID0gKHN0cnVjdCBsaW51eF9kaXJlbnQ2NCAqKSAoYnVmICsgYnBvcyk7
-CgoJCWVudCA9IG9vbShjYWxsb2MoMSwgc2l6ZW9mKCplbnQpKSk7CgkJZW50LT5uYW1lID0gb29t
-KHN0cmR1cChkLT5kX25hbWUpKTsKCQllbnQtPmlubyA9IGQtPmRfaW5vOwoJCWVudC0+dHlwZSA9
-IGQtPmRfdHlwZTsKCQllbnQtPm9mZiA9IGRpci0+cG9zOwoJCWVudC0+dmVyc2lvbiA9IHZlcnNp
-b247CgkJZGlyLT5wb3MgPSBkLT5kX29mZjsKCgkJY2hlY2tfZW50cnkoZGlyLCBlbnQpOwoKCQlh
-ZGRfbGlzdF9lbnRyeShkaXIsIGVudCk7CgoJCWJwb3MgKz0gZC0+ZF9yZWNsZW47Cgl9CglpZiAo
-YnBvcyAhPSBucmVhZCkKCQllcnJ4KDEsICJpbnZhbGlkIHJlYWRkaXIgbGVuZ3RoIik7CgoJcmV0
-dXJuIDA7Cn0KCnN0YXRpYyBpbnQgc2Vla19kaXIoc3RydWN0IGRpciAqZGlyKQp7CglvZmZfdCBy
-ZXM7CglzdHJ1Y3QgbGlzdF9lbnRyeSAqcCwgKm5leHQ7CgoJZGlyLT52ZXJzaW9uID0gdmVyc2lv
-bjsKCglyZXMgPSBsc2VlayhkaXItPmZkLCAwLCBTRUVLX1NFVCk7CglpZiAocmVzID09IChvZmZf
-dCkgLTEpCgkJZXJyKDEsICJyZXdpbmQiKTsKCglmb3IgKHAgPSBkaXItPmxpc3Q7IHA7IHAgPSBu
-ZXh0KSB7CgkJbmV4dCA9IHAtPm5leHQ7CgkJZnJlZShwLT5uYW1lKTsKCQlmcmVlKHApOwoJfQoJ
-ZGlyLT5saXN0ID0gTlVMTDsKCWRpci0+cG9zID0gMDsKCglyZXR1cm4gMDsKfQoKc3RhdGljIGlu
-dCBvbmUodm9pZCkKewoJc3dpdGNoIChyYW5kb20oKSAlIDEwKSB7CgljYXNlIDA6CgljYXNlIDE6
-CgkJcmV0dXJuIGNyZWF0ZV9lbnRyeSgpOwoJY2FzZSAyOgoJCXJldHVybiByZW1vdmVfZW50cnko
-KTsKCWNhc2UgMzoKCWNhc2UgNDoKCWNhc2UgNToKCWNhc2UgNjoKCWNhc2UgNzoKCWNhc2UgODoK
-CQlyZXR1cm4gcmVhZF9kaXIoJmdsb2JhbF9kaXIpOwoJY2FzZSA5OgoJCXJldHVybiBzZWVrX2Rp
-cigmZ2xvYmFsX2Rpcik7Cgl9CgllcnJ4KDEsICJ1bnJlYWNoYWJsZSIpOwp9CgpzdGF0aWMgaW50
-IHJ1bih1bnNpZ25lZCBpbnQgaXRlcnMpCnsKCXVuc2lnbmVkIGludCBpOwoJaW50IHJlcyA9IDA7
-CgoJc3JhbmRvbSgxKTsKCglnbG9iYWxfZGlyLnZlcnNpb24gPSB2ZXJzaW9uOwoJZ2xvYmFsX2Rp
-ci5mZCA9IG9wZW4oIi4iLCBPX1JET05MWSB8IE9fRElSRUNUT1JZKTsKCWlmIChnbG9iYWxfZGly
-LmZkID09IC0xKQoJCWVycigxLCAiZmFpbGVkIHRvIG9wZW4gXCIuXCIiKTsKCglmb3IgKGkgPSAw
-OyBpIDwgaXRlcnM7IGkrKykgewoJCWlmIChpICUgMTAwID09IDEpCgkJCXByaW50ZigiWyVpXSB0
-b3RhbCBlbnRyaWVzOiAldSBhY3RpdmUgZW50cmllczogJXVcbiIsCgkJCSAgICAgICBpLCBudW0s
-IG51bV9hY3RpdmUpOwoJCXJlcyA9IG9uZSgpOwoJCWlmIChyZXMpCgkJCWJyZWFrOwoJfQoKCWNs
-b3NlKGdsb2JhbF9kaXIuZmQpOwoKCXJldHVybiByZXM7Cn0KCmludCBtYWluKGludCBhcmdjLCBj
-aGFyICphcmd2W10pCnsKCWNoYXIgKnRlc3RkaXIgPSBhcmd2WzFdOwoJaW50IHJlczsKCglpZiAo
-YXJnYyA8IDIpCgkJZXJyeCgxLCAidXNhZ2U6ICVzIHRlc3RfZGlyZWN0b3J5IiwgYXJndlswXSk7
-CgoJcmVzID0gY2hkaXIodGVzdGRpcik7CglpZiAocmVzID09IC0xKQoJCWVycigxLCAiY2hkaXIo
-JXMpIiwgdGVzdGRpcik7CgoKCXJldHVybiBydW4oMTAwMDAwMCk7Cn0K
---000000000000c2f54905c08bf388--
+>
+> Brian
+>
+> >  # Read from one cgroup, read & write from a second. Both reads and writes are
+> >  # charged to the first group and nothing to the second.
+> > @@ -140,8 +142,8 @@ $XFS_IO_PROG -c "pread 0 $iosize" -c "pwrite 0 $iosize" $SCRATCH_MNT/file \
+> >       >> $seqres.full 2>&1
+> >  switch_cg $cgdir
+> >  $XFS_IO_PROG -c fsync $SCRATCH_MNT/file
+> > -check_cg $cgdir/$seq-cg $iosize $iosize
+> > -check_cg $cgdir/$seq-cg-2 0 0
+> > +check_cg $cgdir/$seq-cg $iosize $iosize 5% 5%
+> > +check_cg $cgdir/$seq-cg-2 0 0 5% 5%
+> >
+> >  echo "-io" > $cgdir/cgroup.subtree_control || _fail "subtree control"
+> >
+> > --
+> > 2.27.0
+> >
+>
+
+I will fix all these together with more details in the commit log, and
+post the next version soon.
+
+Thanks!
+-Boyang
+
