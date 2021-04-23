@@ -2,133 +2,118 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-19.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E43AFC433ED
-	for <linux-fstests@archiver.kernel.org>; Fri, 23 Apr 2021 11:15:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EA180C43460
+	for <linux-fstests@archiver.kernel.org>; Fri, 23 Apr 2021 11:26:43 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A097661464
-	for <linux-fstests@archiver.kernel.org>; Fri, 23 Apr 2021 11:15:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A18F2600CC
+	for <linux-fstests@archiver.kernel.org>; Fri, 23 Apr 2021 11:26:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242202AbhDWLQa (ORCPT
+        id S229910AbhDWL1R (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 23 Apr 2021 07:16:30 -0400
-Received: from mail.kernel.org ([198.145.29.99]:38218 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229890AbhDWLQa (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 23 Apr 2021 07:16:30 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 6B0AB61409;
-        Fri, 23 Apr 2021 11:15:52 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1619176554;
-        bh=DB50ijycIwtc7lEHDPD7CMgnGYlwOR2vmEbAQ3dOvAc=;
-        h=From:To:Cc:Subject:Date:From;
-        b=pontJRAFnkmQZcUqoEu6g39dx1R4ii+zpqfss5PUrgIoMpTL/r8ZtlHVaXHcNUjeg
-         7niDh/uXkGNAxcxijyR5Rm7MhuDVbxf4nePOmhCZkyK2EalHYsPFHFpBrPTPvpP9Fl
-         uxFvFTdyplIgOH6r5jopm00Sn8ErQ/iZvWOShk9VHJQ6xIxn4900ATJQGOLjXmDaHb
-         HOjLwAkv7NjAnt8aBFG7fGyGvpVhUJ5Exv81VEyPCQzJWThfwklWo+9+wuglY6aaEu
-         1YPzg6W3cWzSza8z1G+j4SqsTk0Gc/Uv8RB0xudVKq4MwoTWAd/f07kb0WT7SacXF7
-         xgxBDw7oyM03w==
-From:   Christian Brauner <brauner@kernel.org>
-To:     Eryu Guan <guan@eryu.me>, fstests@vger.kernel.org
-Cc:     Christoph Hellwig <hch@lst.de>,
-        Christian Brauner <christian.brauner@ubuntu.com>
-Subject: [PATCH] generic: extend fscaps test
-Date:   Fri, 23 Apr 2021 13:15:39 +0200
-Message-Id: <20210423111539.3591487-1-brauner@kernel.org>
-X-Mailer: git-send-email 2.27.0
+        Fri, 23 Apr 2021 07:27:17 -0400
+Received: from esa4.hgst.iphmx.com ([216.71.154.42]:21581 "EHLO
+        esa4.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229479AbhDWL1Q (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 23 Apr 2021 07:27:16 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1619177200; x=1650713200;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=PnY7VxeJzkWGSF/sas0OXVPr+eFtl33l1V8Wtrbt61s=;
+  b=RY29W4HzcC/20QOOQoGiJ5VKTpettLbUJOuaDRW8dJA7locK0YJUodXr
+   SxhmYNCl68nxNljG6+KmgwdMHbjN/BL4nIk+0ZydxRpm6vQ7KoxYyOGot
+   XZZ5D0/lFzzB7/vx1wTVqeleITErfZuTq9zvWb0PwnGWDyAvtlKurHLtT
+   LWLcN1BR6vxqGmuNYAQTLfZVk37V0wVAeBur6/STRVJ8qYkpV2YLt3uAI
+   RnuVLEIk4VXIfrNJ2GYJh8VYcOhttMev684rFK/Vf373gy+8MOkTIm1Ba
+   UBvbjFiReywiGnWL+0KNHsS0RDRuGZgYNxUZx46bvFvtStbvybAsxMAUC
+   w==;
+IronPort-SDR: ++b3V06eeldfxsI8QsrmF5CxAk6leXzBCWNrBBellwe3L+mgufopIsDXjQMg8qfDiPcqbdF/+j
+ NCLwfTMDoi4l0rCyfp9LsTf6VobJypIYlzjr1F1W/7u0/+Eh9rwgceUG+wzUbJn4Ck4kGdFYH6
+ 53lpI23xj++su7FOCZp+de2/lkiYg3A1q3QUb7goMQOPjLibc5rG/MqMrfy/oSNvHJ+cT3hrVb
+ +7a66iCXcdUbU3q32K4Tx9YEPWSQGnShkUHrS4IqyiNJv59V8o/olE/NlKDYxKq0Zs0LMSJseY
+ 6nw=
+X-IronPort-AV: E=Sophos;i="5.82,245,1613404800"; 
+   d="scan'208";a="165365021"
+Received: from h199-255-45-14.hgst.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
+  by ob1.hgst.iphmx.com with ESMTP; 23 Apr 2021 19:26:40 +0800
+IronPort-SDR: igPmVvqVlDFhiwbH4c0a8xUmfPLFCiAUjwHhIgQsNAZ5z+a6IIzVnjREs2eHYFKPLtaw748wQl
+ 8sUpNJIIrYCb3KSRgiYpPDTa59m+IzPnZnmKUMsxPSxA21LTMSRLdb5WWYNx3idBg6uG103YPB
+ 7czhZhh041vF8krOUzW15TmQnkFXn9cx88ymJKz7gcOjZHGHOux6qQTRe0DIK/2QW1lisN2yWh
+ 7+0RM64NNgXItPH0TahbiMUCcsDX3mZIrIxK4d7my6bbutrh0xufbxfEuzyPRzqO2Voazhx2n3
+ vo/GAoMhT1Ft9h649VXmyaPZ
+Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
+  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 Apr 2021 04:07:14 -0700
+IronPort-SDR: lyp6Oiq75CJ7AsVhwVsTtXK+Gy2rI5LQPUYpx6z0jzhKCM6xyFRkhgXPxVnriX26oqwB7T/1dq
+ 7czE8hcvRKMSs/DwiWByWWe7NHGLz/eB1SYdCatapB3K55PM0wvkMH1NvcyqnZVUXtWnUag95w
+ QbyGqbxF3+GJpeFMfIs08Ry9MIUA8s/ccCZdMUPgjQmphpCqiqU6rxdTPLr9cp3f7d50/0Jc2L
+ C1qa6LZ1Bhbjgvzca/RoFAT27F0M1ZytiY91d3SgA0vagVoo1lvvpK+yCa1CbmHNQzB2xCZqHf
+ wGU=
+WDCIronportException: Internal
+Received: from unknown (HELO redsun60.ssa.fujisawa.hgst.com) ([10.149.66.36])
+  by uls-op-cesaip02.wdc.com with ESMTP; 23 Apr 2021 04:26:39 -0700
+From:   Johannes Thumshirn <johannes.thumshirn@wdc.com>
+To:     Eryu Guan <guan@eryu.me>
+Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+        Naohiro Aota <naohiro.aota@wdc.com>,
+        Johannes Thumshirn <johannes.thumshirn@wdc.com>
+Subject: [PATCH 0/4] fstests: first few support patches for zoned btrfs
+Date:   Fri, 23 Apr 2021 20:26:30 +0900
+Message-Id: <20210423112634.6067-1-johannes.thumshirn@wdc.com>
+X-Mailer: git-send-email 2.30.0
 MIME-Version: 1.0
-X-Patch-Hashes: v=1; h=sha256; i=Q4hz1QAj5g0TE2KsomJ7XZV8yN9DsdlDjS3ZArL1Tkk=; m=j/odPcRidGEQZAEkiENyOY8sH1St1ZZe505UhvfePsU=; p=HBINO88hWRczvVLGLcsGFVoS9pYzubAikPur2rEK06U=; g=d154592e97fd182c151c1ee7720dca6725fbae9c
-X-Patch-Sig: m=pgp; i=christian.brauner@ubuntu.com; s=0x0x91C61BC06578DCA2; b=iHUEABYKAB0WIQRAhzRXHqcMeLMyaSiRxhvAZXjcogUCYIKsUQAKCRCRxhvAZXjcoglUAQDrufk AN1Go5wuL85RDgHqPoYoe7G64PT1VJrDpWTAXhQD/TV4C6k45MujsS+Smj/MuPUt9sRaNk+0JFXWI GUIBkw4=
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Christian Brauner <christian.brauner@ubuntu.com>
+This series adds 3 tests to prepare xfstests for testing on zoned block
+devices and a first test for btrfs' zoned block device support.
 
-Add a test to verify that setting a v3 fscap that is valid in an
-ancestor user namespace works.
+General zoned block device support for btrfs was merged with v5.12 and the
+zone auto reclaim feature is staged to be merged with v5.13.
 
-Cc: fstests@vger.kernel.org
-Cc: Christoph Hellwig <hch@lst.de>
-Signed-off-by: Christian Brauner <christian.brauner@ubuntu.com>
----
- src/idmapped-mounts/idmapped-mounts.c | 56 +++++++++++++++++++++++++++
- 1 file changed, 56 insertions(+)
+Johannes Thumshirn (2):
+  btrfs: require discard functionality from scratch device
+  btrfs: add test for zone auto reclaim
 
-diff --git a/src/idmapped-mounts/idmapped-mounts.c b/src/idmapped-mounts/idmapped-mounts.c
-index 870a8fe7..4e3252ca 100644
---- a/src/idmapped-mounts/idmapped-mounts.c
-+++ b/src/idmapped-mounts/idmapped-mounts.c
-@@ -3193,6 +3193,62 @@ static int fscaps_idmapped_mounts_in_userns(void)
- 		goto out;
- 	}
- 
-+	/*
-+	 * Verify we can set an v3 fscap for real root this was regressed at
-+	 * some point. Make sure this doesn't happen again!
-+	 */
-+	if (fremovexattr(file1_fd, "security.capability")) {
-+		log_stderr("failure: fremovexattr");
-+		goto out;
-+	}
-+	if (expected_dummy_vfs_caps_uid(file1_fd, -1)) {
-+		log_stderr("failure: expected_dummy_vfs_caps_uid");
-+		goto out;
-+	}
-+	if (errno != ENODATA) {
-+		log_stderr("failure: errno");
-+		goto out;
-+	}
-+
-+	pid = fork();
-+	if (pid < 0) {
-+		log_stderr("failure: fork");
-+		goto out;
-+	}
-+	if (pid == 0) {
-+		if (!switch_userns(attr.userns_fd, 0, 0, false))
-+			die("failure: switch_userns");
-+
-+		if (expected_dummy_vfs_caps_uid(file1_fd2, -1))
-+			die("failure: expected_dummy_vfs_caps_uid");
-+		if (errno != ENODATA)
-+			die("failure: errno");
-+
-+		if (set_dummy_vfs_caps(file1_fd2, 0, 0))
-+			die("failure: set_dummy_vfs_caps");
-+
-+		if (!expected_dummy_vfs_caps_uid(file1_fd2, 0))
-+			die("failure: expected_dummy_vfs_caps_uid");
-+
-+		if (!expected_dummy_vfs_caps_uid(file1_fd, 0) && errno != EOVERFLOW)
-+			die("failure: expected_dummy_vfs_caps_uid");
-+
-+		exit(EXIT_SUCCESS);
-+	}
-+
-+	if (wait_for_pid(pid))
-+		goto out;
-+
-+	if (!expected_dummy_vfs_caps_uid(file1_fd2, 10000)) {
-+		log_stderr("failure: expected_dummy_vfs_caps_uid");
-+		goto out;
-+	}
-+
-+	if (!expected_dummy_vfs_caps_uid(file1_fd, 0)) {
-+		log_stderr("failure: expected_dummy_vfs_caps_uid");
-+		goto out;
-+	}
-+
- 	fret = 0;
- 	log_debug("Ran test");
- out:
+Naohiro Aota (2):
+  fstests: add missing checks of fallocate feature
+  common/rc: introduce zone check commands
 
-base-commit: 15510d3a208187e234333f7974580786d54d52dc
+ common/config       |   1 +
+ common/rc           |  52 ++++++++++++++++++++++
+ tests/btrfs/013     |   1 +
+ tests/btrfs/016     |   1 +
+ tests/btrfs/025     |   1 +
+ tests/btrfs/034     |   1 +
+ tests/btrfs/037     |   1 +
+ tests/btrfs/046     |   1 +
+ tests/btrfs/107     |   1 +
+ tests/btrfs/116     |   1 +
+ tests/btrfs/156     |   1 +
+ tests/btrfs/236     | 102 ++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/236.out |   2 +
+ tests/btrfs/group   |   1 +
+ tests/ext4/001      |   1 +
+ tests/f2fs/001      |   1 +
+ tests/generic/456   |   1 +
+ tests/xfs/042       |   1 +
+ tests/xfs/114       |   1 +
+ tests/xfs/118       |   1 +
+ tests/xfs/331       |   1 +
+ tests/xfs/341       |   1 +
+ tests/xfs/342       |   1 +
+ tests/xfs/423       |   1 +
+ 24 files changed, 177 insertions(+)
+ create mode 100755 tests/btrfs/236
+ create mode 100644 tests/btrfs/236.out
+
 -- 
-2.27.0
+2.30.0
 
