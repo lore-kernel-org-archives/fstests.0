@@ -2,403 +2,131 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BDA62C433B4
-	for <linux-fstests@archiver.kernel.org>; Fri, 23 Apr 2021 01:07:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C6ABFC433ED
+	for <linux-fstests@archiver.kernel.org>; Fri, 23 Apr 2021 03:23:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 791F561435
-	for <linux-fstests@archiver.kernel.org>; Fri, 23 Apr 2021 01:07:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 95A8E61445
+	for <linux-fstests@archiver.kernel.org>; Fri, 23 Apr 2021 03:23:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235569AbhDWBI0 (ORCPT
+        id S231261AbhDWDYO (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 22 Apr 2021 21:08:26 -0400
-Received: from mail.kernel.org ([198.145.29.99]:36716 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S230367AbhDWBIZ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 22 Apr 2021 21:08:25 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 9A4796143B;
-        Fri, 23 Apr 2021 01:07:49 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1619140069;
-        bh=JhxG9eAr6Mpihz7qtlDjkxK5wsiSTLNdjCTgfQmHPzA=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=usQa8cE/IBpPNxVSrgcJpxg7tc4KSvzcXFRd/SOKlhxm7dzj0ORvuWa62qYCjzAnK
-         Zq2R6nuL2M3hp9K3ojVkzjQvqHdi0Exb41f8zLxsu8PWpvHQLKpAVCOC3z6Dhu6tq4
-         MurmhFMXft3dZxMQ4HB2Zv9WBAgaOBYTzOBpeLIMI0y2bKFRpv/g414kU78qP6uoro
-         vrFtxrjmNGZEv9aKfzJ+uFbPicfxOj6odVwUiUOCT0Ph4YaD+o/2oc+Rg1cXOtD5tq
-         kizAjp3AGfjoICn0lrNaSiu5zps6VDrVQrnZ7H50ngNQq3JBIF8kP/ej/hBCILNajf
-         sKmxxdLU1gMtg==
-Date:   Thu, 22 Apr 2021 18:07:48 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Allison Henderson <allison.henderson@oracle.com>
-Cc:     guaneryu@gmail.com, Amir Goldstein <amir73il@gmail.com>,
-        linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me
-Subject: Re: [PATCH 1/4] generic: check userspace handling of extreme
- timestamps
-Message-ID: <20210423010748.GB1251862@magnolia>
-References: <161896458140.776452.9583732658582318883.stgit@magnolia>
- <161896458765.776452.776474866675909773.stgit@magnolia>
- <6b503579-cc85-7c5a-bd67-95352401d39a@oracle.com>
+        Thu, 22 Apr 2021 23:24:14 -0400
+Received: from mail3.bemta25.messagelabs.com ([195.245.230.83]:12392 "EHLO
+        mail3.bemta25.messagelabs.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S229943AbhDWDYO (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 22 Apr 2021 23:24:14 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fujitsu.com;
+        s=170520fj; t=1619148217; i=@fujitsu.com;
+        bh=JLqWWBK6E2nIFltx9NYbGnKkT85pdFxTUioe7MXAJoc=;
+        h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type;
+        b=tVVp26iNdT+bPa84KVvDZSBxTKIjM6sTfbVaGkhHHiE/jsO/5I1KZXOOpQcOTmeCO
+         T74u6t0SHee8IV/hbseSmV2blvk4RWqWCUukXC7fC4UhugAT+yoRCMWl1rz72s8cwZ
+         eHRyx0ijXv+W6Le3TOTnPP2Z4S6hqrzsq8slEcsPMxS0b03q+3XPEey55O6C04l5w0
+         bfuE2k+nW2lkJnnzaGzdCA+91csIaujP58f7vHnntAX532yuH6aCBK1fhB0ZWkDxsN
+         TAAEKcWrWj4h+eji5so3Y5ToR8oStNCUQjrZ+77idv4U72t/9pdXs79T6bRAjYx3wx
+         jzv0GapVpF+yw==
+Received: from [100.112.198.228] (using TLSv1.2 with cipher DHE-RSA-AES256-GCM-SHA384 (256 bits))
+        by server-3.bemta.az-b.eu-west-1.aws.symcld.net id A9/39-55620-9BD32806; Fri, 23 Apr 2021 03:23:37 +0000
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFlrIIsWRWlGSWpSXmKPExsViZ8MRorvDtin
+  B4OFdI4vTLXvZHRg9Pm+SC2CMYs3MS8qvSGDN6Lj3jbVgLmfFspmiDYyH2bsYuTiEBDqZJN5c
+  X8kK4exmlJj3aQtTFyMnB5uApsSzzgXMILaIgKzE/xmrweLMAuoSyyf9ArOFBcwlbsydyw5is
+  wioSqw7MZkNxOYV8JSY+PYNWK+EgILElIfvmSHighInZz5hgZgjIXHwxQuoGkWJSx3fGCHsSo
+  nO9QsYJzDyzkLSMgtJywJGplWM5klFmekZJbmJmTm6hgYGuoaGRrqGlma6ZiZ6iVW6SXqppbr
+  lqcUluoZ6ieXFesWVuck5KXp5qSWbGIGhlVJwxGEH4/3XH/QOMUpyMCmJ8kbxNyUI8SXlp1Rm
+  JBZnxBeV5qQWH2KU4eBQkuC9YAOUEyxKTU+tSMvMAYY5TFqCg0dJhHcxSJq3uCAxtzgzHSJ1i
+  lGX4/L1eYuYhVjy8vNSpcR5l4EUCYAUZZTmwY2AxdwlRlkpYV5GBgYGIZ6C1KLczBJU+VeM4h
+  yMSsK8aSBTeDLzSuA2vQI6ggnoiN2djSBHlCQipKQamHaor7te+M+ruicgdfrN7MviaVxv67R
+  1I0IlRTcs+/evO8CmKnZeco5pyeGQFU2Lyt61xXVemcopeGfWu5nmS6xdbmZZzLeq7M90Sd3V
+  VRvyVOi/qpf56TlPLlzaGVN4asOpnYq+rdc72D4Uvl/8W4nhUYvqlt+KbzIyFv+pEOyxubtST
+  bW4PtBeorSzofVqaVKFnNmMnU5/mvfIFs2Ory2Zslc0/27FuvcekwVizh1VDQ9beMRZ1IKz6N
+  fdgw0H9kiYzmPkWX59cSv7gSvhX6zUVvTxZNXIOa5gKfO5fIir5NFkk91zTYVNEqXrTgQ9f9v
+  WtrUniJ2xZbW4hWqFOGdxSlOC9yW+yZ0zGvYqsRRnJBpqMRcVJwIAvev81zQDAAA=
+X-Env-Sender: xuyang2018.jy@fujitsu.com
+X-Msg-Ref: server-7.tower-285.messagelabs.com!1619148216!1718121!1
+X-Originating-IP: [62.60.8.84]
+X-SYMC-ESS-Client-Auth: outbound-route-from=pass
+X-StarScan-Received: 
+X-StarScan-Version: 9.60.3; banners=-,-,-
+X-VirusChecked: Checked
+Received: (qmail 20292 invoked from network); 23 Apr 2021 03:23:36 -0000
+Received: from unknown (HELO mailhost3.uk.fujitsu.com) (62.60.8.84)
+  by server-7.tower-285.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 23 Apr 2021 03:23:36 -0000
+Received: from R01UKEXCASM126.r01.fujitsu.local ([10.183.43.178])
+        by mailhost3.uk.fujitsu.com (8.14.5/8.14.5) with ESMTP id 13N3Na2Q021107
+        (version=TLSv1/SSLv3 cipher=AES256-SHA bits=256 verify=FAIL)
+        for <fstests@vger.kernel.org>; Fri, 23 Apr 2021 04:23:36 +0100
+Received: from localhost.localdomain (10.167.220.84) by
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.2; Fri, 23 Apr 2021 04:23:34 +0100
+From:   Yang Xu <xuyang2018.jy@fujitsu.com>
+To:     <fstests@vger.kernel.org>
+CC:     Yang Xu <xuyang2018.jy@fujitsu.com>
+Subject: [PATCH] xfs/144: Use _qsetup instead of qsetup
+Date:   Fri, 23 Apr 2021 12:23:58 +0800
+Message-ID: <1619151838-22476-1-git-send-email-xuyang2018.jy@fujitsu.com>
+X-Mailer: git-send-email 1.8.3.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <6b503579-cc85-7c5a-bd67-95352401d39a@oracle.com>
+Content-Type: text/plain
+X-Originating-IP: [10.167.220.84]
+X-ClientProxiedBy: G08CNEXCHPEKD06.g08.fujitsu.local (10.167.33.205) To
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178)
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Apr 22, 2021 at 02:16:28PM -0700, Allison Henderson wrote:
-> 
-> 
-> On 4/20/21 5:23 PM, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <djwong@kernel.org>
-> > 
-> > These two tests ensure we can store and retrieve timestamps on the
-> > extremes of the date ranges supported by userspace, and the common
-> > places where overflows can happen.
-> > 
-> > They differ from generic/402 in that they don't constrain the dates
-> > tested to the range that the filesystem claims to support; we attempt
-> > various things that /userspace/ can parse, and then check that the vfs
-> > clamps and persists the values correctly.
-> > 
-> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > Reviewed-by: Amir Goldstein <amir73il@gmail.com>
-> Looks ok to me.  The tests have quite a bit of overlap, but they're pretty
-> small too.
+Since xfstests commit 56908a2eb566c5("common/quota: move _qsetup() helper to common code"),
+we have common _qsetup function. Even this case doesn't use enforce value like xfs/050 and xfs/299,
+using _qsetup is more meaningful. So remove useless qsetup.
 
-Yeah.  The difference between 721 and 722 is that 722 tests that
-timestamp updates work properly if the fs goes down right after an
-update.
+Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
+---
+ tests/xfs/144 | 21 +--------------------
+ 1 file changed, 1 insertion(+), 20 deletions(-)
 
-> I think if we add on any more, probably we should think about a
-> common/bigtime file?  But for now, I think it's fine.
+diff --git a/tests/xfs/144 b/tests/xfs/144
+index c5995cc5..74988090 100755
+--- a/tests/xfs/144
++++ b/tests/xfs/144
+@@ -38,25 +38,6 @@ _require_scratch
+ 
+ rm -f $seqres.full
+ 
+-qsetup()
+-{
+-	opt=$1
+-	enforce=0
+-	if [ $opt = "u" -o $opt = "uno" ]; then
+-		type=u
+-		eval `_choose_uid`
+-	elif [ $opt = "g" -o $opt = "gno" ]; then
+-		type=g
+-		eval `_choose_gid`
+-	elif [ $opt = "p" -o $opt = "pno" ]; then
+-		type=p
+-		eval `_choose_prid`
+-	fi
+-	[ $opt = "u" -o $opt = "g" -o $opt = "p" ] && enforce=1
+-
+-	echo "Using type=$type id=$id" >> $seqres.full
+-}
+-
+ exercise() {
+ 	_scratch_mkfs_xfs | _filter_mkfs 2>$tmp.mkfs
+ 	cat $tmp.mkfs >>$seqres.full
+@@ -66,7 +47,7 @@ exercise() {
+ 
+ 	_qmount
+ 
+-	qsetup $1
++	_qsetup $1
+ 
+ 	echo "Using type=$type id=$id" >>$seqres.full
+ 
+-- 
+2.23.0
 
-Noted.  Thanks for reviewing this series!
-
---D
-
-> 
-> Reviewed-by: Allison Henderson <allison.henderson@oracle.com>
-> 
-> > ---
-> >   tests/generic/721     |  123 ++++++++++++++++++++++++++++++++++++++++++++++++
-> >   tests/generic/721.out |    2 +
-> >   tests/generic/722     |  125 +++++++++++++++++++++++++++++++++++++++++++++++++
-> >   tests/generic/722.out |    1
-> >   tests/generic/group   |    6 ++
-> >   5 files changed, 255 insertions(+), 2 deletions(-)
-> >   create mode 100755 tests/generic/721
-> >   create mode 100644 tests/generic/721.out
-> >   create mode 100755 tests/generic/722
-> >   create mode 100644 tests/generic/722.out
-> > 
-> > 
-> > diff --git a/tests/generic/721 b/tests/generic/721
-> > new file mode 100755
-> > index 00000000..9198b6b4
-> > --- /dev/null
-> > +++ b/tests/generic/721
-> > @@ -0,0 +1,123 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0-or-later
-> > +# Copyright (c) 2021 Oracle.  All Rights Reserved.
-> > +#
-> > +# FS QA Test No. 721
-> > +#
-> > +# Make sure we can store and retrieve timestamps on the extremes of the
-> > +# date ranges supported by userspace, and the common places where overflows
-> > +# can happen.
-> > +#
-> > +# This differs from generic/402 in that we don't constrain ourselves to the
-> > +# range that the filesystem claims to support; we attempt various things that
-> > +# /userspace/ can parse, and then check that the vfs clamps and persists the
-> > +# values correctly.
-> > +#
-> > +# NOTE: Old kernels (pre 5.4) allow filesystems to truncate timestamps silently
-> > +# when writing timestamps to disk!  This test detects this silent truncation
-> > +# and fails.  If you see a failure on such a kernel, contact your distributor
-> > +# for an update.
-> > +
-> > +seq=`basename $0`
-> > +seqres=$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +
-> > +here=`pwd`
-> > +tmp=/tmp/$$
-> > +status=1    # failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +_cleanup()
-> > +{
-> > +	cd /
-> > +	rm -f $tmp.*
-> > +}
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +
-> > +# real QA test starts here
-> > +_supported_fs generic
-> > +_require_scratch
-> > +
-> > +rm -f $seqres.full
-> > +
-> > +_scratch_mkfs > $seqres.full
-> > +_scratch_mount
-> > +
-> > +# Does our userspace even support large dates?
-> > +test_bigdates=1
-> > +touch -d 'May 30 01:53:03 UTC 2514' $SCRATCH_MNT 2>/dev/null || test_bigdates=0
-> > +
-> > +# And can we do statx?
-> > +test_statx=1
-> > +($XFS_IO_PROG -c 'help statx' | grep -q 'Print raw statx' && \
-> > + $XFS_IO_PROG -c 'statx -r' $SCRATCH_MNT 2>/dev/null | grep -q 'stat.mtime') || \
-> > +	test_statx=0
-> > +
-> > +echo "Userspace support of large timestamps: $test_bigdates" >> $seqres.full
-> > +echo "xfs_io support of statx: $test_statx" >> $seqres.full
-> > +
-> > +touchme() {
-> > +	local arg="$1"
-> > +	local name="$2"
-> > +
-> > +	echo "$arg" > $SCRATCH_MNT/t_$name
-> > +	touch -d "$arg" $SCRATCH_MNT/t_$name
-> > +}
-> > +
-> > +report() {
-> > +	local files=($SCRATCH_MNT/t_*)
-> > +	for file in "${files[@]}"; do
-> > +		echo "${file}: $(cat "${file}")"
-> > +		TZ=UTC stat -c '%y %Y %n' "${file}"
-> > +		test $test_statx -gt 0 && \
-> > +			$XFS_IO_PROG -c 'statx -r' "${file}" | grep 'stat.mtime'
-> > +	done
-> > +}
-> > +
-> > +# -2147483648 (S32_MIN, or classic unix min)
-> > +touchme 'Dec 13 20:45:52 UTC 1901' s32_min
-> > +
-> > +# 2147483647 (S32_MAX, or classic unix max)
-> > +touchme 'Jan 19 03:14:07 UTC 2038' s32_max
-> > +
-> > +# 7956915742, all twos
-> > +touchme 'Feb 22 22:22:22 UTC 2222' all_twos
-> > +
-> > +if [ $test_bigdates -gt 0 ]; then
-> > +	# 16299260424 (u64 nsec counter from s32_min, like xfs does)
-> > +	touchme 'Tue Jul  2 20:20:24 UTC 2486' u64ns_from_s32_min
-> > +
-> > +	# 15032385535 (u34 time if you start from s32_min, like ext4 does)
-> > +	touchme 'May 10 22:38:55 UTC 2446' u34_from_s32_min
-> > +
-> > +	# 17179869183 (u34 time if you start from the unix epoch)
-> > +	touchme 'May 30 01:53:03 UTC 2514' u34_max
-> > +
-> > +	# Latest date we can synthesize(?)
-> > +	touchme 'Dec 31 23:59:59 UTC 2147483647' abs_max_time
-> > +
-> > +	# Earliest date we can synthesize(?)
-> > +	touchme 'Jan 1 00:00:00 UTC 0' abs_min_time
-> > +fi
-> > +
-> > +# Query timestamps from incore
-> > +echo before >> $seqres.full
-> > +report > $tmp.before_remount
-> > +cat $tmp.before_remount >> $seqres.full
-> > +
-> > +_scratch_cycle_mount
-> > +
-> > +# Query timestamps from disk
-> > +echo after >> $seqres.full
-> > +report > $tmp.after_remount
-> > +cat $tmp.after_remount >> $seqres.full
-> > +
-> > +# Did they match?
-> > +cmp -s $tmp.before_remount $tmp.after_remount
-> > +
-> > +# success, all done
-> > +echo Silence is golden.
-> > +status=0
-> > +exit
-> > diff --git a/tests/generic/721.out b/tests/generic/721.out
-> > new file mode 100644
-> > index 00000000..b2bc6d58
-> > --- /dev/null
-> > +++ b/tests/generic/721.out
-> > @@ -0,0 +1,2 @@
-> > +QA output created by 721
-> > +Silence is golden.
-> > diff --git a/tests/generic/722 b/tests/generic/722
-> > new file mode 100755
-> > index 00000000..305c3bd6
-> > --- /dev/null
-> > +++ b/tests/generic/722
-> > @@ -0,0 +1,125 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0-or-later
-> > +# Copyright (c) 2021 Oracle.  All Rights Reserved.
-> > +#
-> > +# FS QA Test No. 722
-> > +#
-> > +# Make sure we can store and retrieve timestamps on the extremes of the
-> > +# date ranges supported by userspace, and the common places where overflows
-> > +# can happen.  This test also ensures that the timestamps are persisted
-> > +# correctly after a shutdown.
-> > +#
-> > +# This differs from generic/402 in that we don't constrain ourselves to the
-> > +# range that the filesystem claims to support; we attempt various things that
-> > +# /userspace/ can parse, and then check that the vfs clamps and persists the
-> > +# values correctly.
-> > +#
-> > +# NOTE: Old kernels (pre 5.4) allow filesystems to truncate timestamps silently
-> > +# when writing timestamps to disk!  This test detects this silent truncation
-> > +# and fails.  If you see a failure on such a kernel, contact your distributor
-> > +# for an update.
-> > +
-> > +seq=`basename $0`
-> > +seqres=$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +
-> > +here=`pwd`
-> > +tmp=/tmp/$$
-> > +status=1    # failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +_cleanup()
-> > +{
-> > +	cd /
-> > +	rm -f $tmp.*
-> > +}
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +
-> > +# real QA test starts here
-> > +_supported_fs generic
-> > +_require_scratch
-> > +_require_scratch_shutdown
-> > +
-> > +rm -f $seqres.full
-> > +
-> > +_scratch_mkfs > $seqres.full
-> > +_scratch_mount
-> > +
-> > +# Does our userspace even support large dates?
-> > +test_bigdates=1
-> > +touch -d 'May 30 01:53:03 UTC 2514' $SCRATCH_MNT 2>/dev/null || test_bigdates=0
-> > +
-> > +# And can we do statx?
-> > +test_statx=1
-> > +($XFS_IO_PROG -c 'help statx' | grep -q 'Print raw statx' && \
-> > + $XFS_IO_PROG -c 'statx -r' $SCRATCH_MNT 2>/dev/null | grep -q 'stat.mtime') || \
-> > +	test_statx=0
-> > +
-> > +echo "Userspace support of large timestamps: $test_bigdates" >> $seqres.full
-> > +echo "xfs_io support of statx: $test_statx" >> $seqres.full
-> > +
-> > +touchme() {
-> > +	local arg="$1"
-> > +	local name="$2"
-> > +
-> > +	echo "$arg" > $SCRATCH_MNT/t_$name
-> > +	touch -d "$arg" $SCRATCH_MNT/t_$name
-> > +}
-> > +
-> > +report() {
-> > +	local files=($SCRATCH_MNT/t_*)
-> > +	for file in "${files[@]}"; do
-> > +		echo "${file}: $(cat "${file}")"
-> > +		TZ=UTC stat -c '%y %Y %n' "${file}"
-> > +		test $test_statx -gt 0 && \
-> > +			$XFS_IO_PROG -c 'statx -r' "${file}" | grep 'stat.mtime'
-> > +	done
-> > +}
-> > +
-> > +# -2147483648 (S32_MIN, or classic unix min)
-> > +touchme 'Dec 13 20:45:52 UTC 1901' s32_min
-> > +
-> > +# 2147483647 (S32_MAX, or classic unix max)
-> > +touchme 'Jan 19 03:14:07 UTC 2038' s32_max
-> > +
-> > +# 7956915742, all twos
-> > +touchme 'Feb 22 22:22:22 UTC 2222' all_twos
-> > +
-> > +if [ $test_bigdates -gt 0 ]; then
-> > +	# 16299260424 (u64 nsec counter from s32_min, like xfs does)
-> > +	touchme 'Tue Jul  2 20:20:24 UTC 2486' u64ns_from_s32_min
-> > +
-> > +	# 15032385535 (u34 time if you start from s32_min, like ext4 does)
-> > +	touchme 'May 10 22:38:55 UTC 2446' u34_from_s32_min
-> > +
-> > +	# 17179869183 (u34 time if you start from the unix epoch)
-> > +	touchme 'May 30 01:53:03 UTC 2514' u34_max
-> > +
-> > +	# Latest date we can synthesize(?)
-> > +	touchme 'Dec 31 23:59:59 UTC 2147483647' abs_max_time
-> > +
-> > +	# Earliest date we can synthesize(?)
-> > +	touchme 'Jan 1 00:00:00 UTC 0' abs_min_time
-> > +fi
-> > +
-> > +# Query timestamps from incore
-> > +echo before >> $seqres.full
-> > +report > $tmp.before_crash
-> > +cat $tmp.before_crash >> $seqres.full
-> > +
-> > +_scratch_shutdown -f
-> > +_scratch_cycle_mount
-> > +
-> > +# Query timestamps from disk
-> > +echo after >> $seqres.full
-> > +report > $tmp.after_crash
-> > +cat $tmp.after_crash >> $seqres.full
-> > +
-> > +# Did they match?
-> > +cmp -s $tmp.before_crash $tmp.after_crash
-> > +
-> > +# success, all done
-> > +status=0
-> > +exit
-> > diff --git a/tests/generic/722.out b/tests/generic/722.out
-> > new file mode 100644
-> > index 00000000..83acd5cf
-> > --- /dev/null
-> > +++ b/tests/generic/722.out
-> > @@ -0,0 +1 @@
-> > +QA output created by 722
-> > diff --git a/tests/generic/group b/tests/generic/group
-> > index 033465f1..21ac0c8f 100644
-> > --- a/tests/generic/group
-> > +++ b/tests/generic/group
-> > @@ -260,7 +260,7 @@
-> >   255 auto quick prealloc punch
-> >   256 auto quick punch
-> >   257 dir auto quick
-> > -258 auto quick
-> > +258 auto quick bigtime
-> >   259 auto quick clone zero
-> >   260 auto quick trim
-> >   261 auto quick clone collapse
-> > @@ -404,7 +404,7 @@
-> >   399 auto encrypt
-> >   400 auto quick quota
-> >   401 auto quick
-> > -402 auto quick rw
-> > +402 auto quick rw bigtime
-> >   403 auto quick attr
-> >   404 auto quick insert
-> >   405 auto mkfs thin
-> > @@ -636,3 +636,5 @@
-> >   631 auto rw overlay rename
-> >   632 auto quick mount
-> >   633 auto quick atime attr cap idmapped io_uring mount perms rw unlink
-> > +721 auto quick atime bigtime
-> > +722 auto quick atime bigtime shutdown
-> > 
