@@ -2,114 +2,151 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F24FEC433B4
-	for <linux-fstests@archiver.kernel.org>; Sun, 25 Apr 2021 06:31:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B6F47C433B4
+	for <linux-fstests@archiver.kernel.org>; Sun, 25 Apr 2021 07:14:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BF2BC61483
-	for <linux-fstests@archiver.kernel.org>; Sun, 25 Apr 2021 06:31:17 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 981A761494
+	for <linux-fstests@archiver.kernel.org>; Sun, 25 Apr 2021 07:14:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229588AbhDYGb4 (ORCPT
+        id S230195AbhDYHP3 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 25 Apr 2021 02:31:56 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:30082 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S229567AbhDYGb4 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 25 Apr 2021 02:31:56 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1619332276;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=g76PM57L2+R001d8uGZcGXNPwNRPCvV9zBTPdtUl1qI=;
-        b=LTNUkC9DBd79yTMIjEjoHMnDAuDI7rUsqxVIjQ49TZDzgSwYpBoNUAHrsMgqZlqNvrq6Xa
-        Xr+7daX/pBd8Xbu3c1JOf2fYdgHOfL3u8TPPEmGgpV2wAyLTXNWVWQOeB4xP6fxpELdJs1
-        1KX7+ibKctj/qwT9DO7OYwj1zP0kicA=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-28-4ASlhPbZOx2gCJ3CVA1uHA-1; Sun, 25 Apr 2021 02:31:12 -0400
-X-MC-Unique: 4ASlhPbZOx2gCJ3CVA1uHA-1
-Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id AF35F18397A5;
-        Sun, 25 Apr 2021 06:31:11 +0000 (UTC)
-Received: from localhost (unknown [10.66.61.36])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id DA52B1000358;
-        Sun, 25 Apr 2021 06:31:10 +0000 (UTC)
-Date:   Sun, 25 Apr 2021 14:48:28 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Eryu Guan <guan@eryu.me>
-Cc:     Christoph Hellwig <hch@infradead.org>, fstests@vger.kernel.org
-Subject: Re: generic/095 and generic/300 failures
-Message-ID: <20210425064828.GX13946@localhost.localdomain>
-Mail-Followup-To: Eryu Guan <guan@eryu.me>,
-        Christoph Hellwig <hch@infradead.org>, fstests@vger.kernel.org
-References: <YH5siAMU+6p7iD01@infradead.org>
- <YIT4n/154e/vOm9H@desktop>
+        Sun, 25 Apr 2021 03:15:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33034 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230194AbhDYHP2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 25 Apr 2021 03:15:28 -0400
+Received: from mail-wr1-x434.google.com (mail-wr1-x434.google.com [IPv6:2a00:1450:4864:20::434])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8DA0AC061574;
+        Sun, 25 Apr 2021 00:14:49 -0700 (PDT)
+Received: by mail-wr1-x434.google.com with SMTP id j5so51590655wrn.4;
+        Sun, 25 Apr 2021 00:14:49 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=j9ebeZLhPtpy/4ObvG3aF+B5zxZTmEi/bwnNXqNswBs=;
+        b=OzLExM2KO05Ojsf49Usa0i3pRS4UnGAQdG49SbJdxq7+H6igZA1leWB1MAGWjwA0h9
+         5Dk4Sy0tsD3yPawIyZZIhDkhoBNwcQZR/FgQLAOPFDUv6IHlOFy4bazLkYXwBFD1JOry
+         L1tpZSydONz4LjLMqhK4RMCPJRTnS8urlXClNevwMHvXyO1nijBLD2U9LCoeMrYOn2vu
+         QQ8fzE47SJ6wnmhjNgwSF5gq4+XSmOEPJHcbYM9pUGk8eWh9EXSpNstNozHfp/IYx2WU
+         F0G1fjDRATn5EUL0pXx1yZ0hVs/2+cAKPizICN40Gs83A0vaL5JdrHbz5EEYbmnFzKF+
+         Bdag==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=j9ebeZLhPtpy/4ObvG3aF+B5zxZTmEi/bwnNXqNswBs=;
+        b=fLYWv1GdZt9zTCsaMFdzgj66YCHofUnDW6hJJvr2knaHvAbNA9ihsBBO+jTLFlwKuV
+         9lckf0+jQ4wEonq5Mf73FTkVQ2v3o5pLMzBdAyuudF/sGi43Anms1npmGD2PJ2p8Zl8e
+         NN0OCcC1PgqvPzUVli1FLF/E1wi8BR73wvgimXagYJGKjo6vd7iAOpPEPYS4ZW1Wzeme
+         FWi4E6BbovDeKPubuMIbM2UcVyMZ4TktMYuFhE/8ln1yhgqCatKpwzz8GmGlGonvyyis
+         VUWvXGMkA78JJ62b5XTa1awC7HyTI57FInEMJMFlZ81JvP+LLtb0snZIXE50nhM9oJe1
+         I0dg==
+X-Gm-Message-State: AOAM533nxiEt2rzoCSdzV4LiaM3cRZQ6Rk+bKlKbrzB5/Zg+Jnq0n8W7
+        B/3zdxcfKrym/5kMfN2NZPZ9NHIsSQM=
+X-Google-Smtp-Source: ABdhPJweEi6dsTNN0eCdg88Z4JSEukgpSoo/NPTkWLAQrlNaSurTWcBov4ZUnTOr+YrwFGlyrvp9+w==
+X-Received: by 2002:adf:e60e:: with SMTP id p14mr14831513wrm.427.1619334887486;
+        Sun, 25 Apr 2021 00:14:47 -0700 (PDT)
+Received: from localhost.localdomain ([82.114.44.37])
+        by smtp.gmail.com with ESMTPSA id x189sm15885626wmg.17.2021.04.25.00.14.46
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 25 Apr 2021 00:14:47 -0700 (PDT)
+From:   Amir Goldstein <amir73il@gmail.com>
+To:     Eryu Guan <guaneryu@gmail.com>
+Cc:     Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: [PATCH v2 0/5] Test overlayfs readdir cache
+Date:   Sun, 25 Apr 2021 10:14:40 +0300
+Message-Id: <20210425071445.29547-1-amir73il@gmail.com>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <YIT4n/154e/vOm9H@desktop>
-User-Agent: Mutt/1.10.1 (2018-07-13)
-X-Scanned-By: MIMEDefang 2.84 on 10.5.11.22
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Apr 25, 2021 at 01:05:35PM +0800, Eryu Guan wrote:
-> On Tue, Apr 20, 2021 at 07:54:16AM +0200, Christoph Hellwig wrote:
-> > Hi all,
-> > 
-> > generic/095 and generic/300 have been failing for me with every config
-> > on every file system for a while with the following messages:
-> > 
-> > --- tests/generic/095.out	2016-03-29 13:59:30.405053956 +0000
-> > +++ results/generic/095.out.bad	2021-04-20 05:44:54.432081845 +0000
-> > @@ -1,2 +1,7 @@
-> >  QA output created by 095
-> > +job9: No I/O performed by mmap, perhaps try --debug=io option for details?
-> > +job9: No I/O performed by mmap, perhaps try --debug=io option for details?
-> > +job9: No I/O performed by mmap, perhaps try --debug=io option for details?
-> > +job9: No I/O performed by mmap, perhaps try --debug=io option for details?
-> > +job9: No I/O performed by mmap, perhaps try --debug=io option for details?
-> >  Silence is golden           
-> > 
-> > --- tests/generic/300.out	2016-03-29 13:59:30.431720622 +0000
-> > +++ results/generic/300.out.bad	2021-04-20 05:45:06.324708699 +0000
-> > @@ -2,3 +2,4 @@
-> >  
-> >  Run fio with random aio-dio pattern
-> >    
-> > +falloc_raicer: No I/O performed by falloc, perhaps try --debug=io option for details?
-> > 
-> > 
-> > ----- End forwarded message -----
-> 
-> Yeah, I've noticed these failures as well, and it seems that it's caused
-> by fio behavior change, as Zorro said he never hit such failures[1].
-> 
-> I'm using fio-3.7
+Eryu,
 
-I use fio-3.25-3. I never saw the errors you metioned above.
+This extends the generic t_dir_offset2 helper program to verify
+some cases of missing/stale entries and adds a new generic test which
+passes on overlayfs (and other fs) on upstream kernel.
 
-How about CC axboe@kernel.dk (fio maintainer) if you still can reproduce this
-error on latest fio version?
+The overlayfs specific test fails on upstream kernel and the fix commit
+is currently in linux-next.  As usual, you may want to wait with merging
+until the fix commit hits upstream.
+
+Based on feedback from Miklos, I changed the test to check for the
+missing/stale entries on a new fd, while old fd is kept open, because
+POSIX allows for stale/missing entries in the old fd.
+
+I was looking into another speculated bug in overlayfs which involves
+multiple calls to getdents.  Although it turned out that overlayfs does
+not have the speculated bug, I left both generic and overlay test with
+multiple calls to getdents in order to excersize the relevant code.
+
+The attached patch was used to verify that the overlayfs test excercises
+the call to ovl_cache_update_ino() with stale entries.
+Overlayfs populates the merge dir readdir cache with a list of files in
+the first getdents call, but updates d_ino of files on the list in
+subsequent getdents calls.  By that time, the last entry is stale and the
+following warning is printed (on linux-next with patch below applied):
+[   ] overlayfs: failed to look up (m100) for ino (0)
+[   ] overlayfs: failed to look up (f100) for ino (0)
+
+Miklos,
+
+Do you think it is worth the trouble to set p->is_whiteout and skip
+dir_emit() in this case? and do we need to worry about lookup_one_len()
+returning -ENOENT in this case?
 
 Thanks,
-Zorro
+Amir.
 
-> 
-> # fio --version
-> fio-3.7-66-gedfc
-> 
-> Thanks,
-> Eryu
-> 
-> [1] https://www.spinics.net/lists/fstests/msg15871.html
-> 
+Changes since v1:
+- Use small getdents buffer to force multiple calls
+- Tidy up new command line options for t_dir_offset2
+- Check missing/stale entries on new fd
+- Add impure dir use case to overlay test
+
+Amir Goldstein (5):
+  src/t_dir_offset2: Add an option to limit of buffer size
+  src/t_dir_offset2: Add an option to find file by name
+  src/t_dir_offset2: Add option to create or unlink file
+  generic: Test readdir of modified directrory
+  overlay: Test invalidate of readdir cache
+
+ src/t_dir_offset2.c   | 113 ++++++++++++++++++++++++++++++++++++++--
+ tests/generic/700     |  62 ++++++++++++++++++++++
+ tests/generic/700.out |   2 +
+ tests/generic/group   |   1 +
+ tests/overlay/077     | 117 ++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/077.out |   2 +
+ tests/overlay/group   |   1 +
+ 7 files changed, 293 insertions(+), 5 deletions(-)
+ create mode 100755 tests/generic/700
+ create mode 100644 tests/generic/700.out
+ create mode 100755 tests/overlay/077
+ create mode 100644 tests/overlay/077.out
+
+--
+diff --git a/fs/overlayfs/readdir.c b/fs/overlayfs/readdir.c
+index cc1e80257064..cadcbfafa179 100644
+--- a/fs/overlayfs/readdir.c
++++ b/fs/overlayfs/readdir.c
+@@ -486,7 +486,7 @@ static int ovl_cache_update_ino(struct path *path, struct ovl_cache_entry *p)
+                        this = NULL;
+                        goto fail;
+                }
+-               goto out;
++               goto fail;
+        }
+ 
+ get:
+-- 
+2.31.1
 
