@@ -7,69 +7,73 @@ X-Spam-Status: No, score=-18.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
 	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D96ADC433ED
-	for <linux-fstests@archiver.kernel.org>; Sun, 25 Apr 2021 09:02:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1972EC433B4
+	for <linux-fstests@archiver.kernel.org>; Sun, 25 Apr 2021 09:02:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AD10A61350
+	by mail.kernel.org (Postfix) with ESMTP id E092C6113D
 	for <linux-fstests@archiver.kernel.org>; Sun, 25 Apr 2021 09:02:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229559AbhDYJDh (ORCPT
+        id S229551AbhDYJDh (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
         Sun, 25 Apr 2021 05:03:37 -0400
-Received: from mail1.bemta25.messagelabs.com ([195.245.230.3]:53778 "EHLO
-        mail1.bemta25.messagelabs.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S229551AbhDYJDg (ORCPT
+Received: from mail3.bemta25.messagelabs.com ([195.245.230.83]:11491 "EHLO
+        mail3.bemta25.messagelabs.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S229543AbhDYJDg (ORCPT
         <rfc822;fstests@vger.kernel.org>); Sun, 25 Apr 2021 05:03:36 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fujitsu.com;
         s=170520fj; t=1619341376; i=@fujitsu.com;
-        bh=BUdGkV896coJdUn8UydYAP6ZNDFildR1OV1GC1cTM+g=;
-        h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type;
-        b=eBjf3S8yaisn1A/NULJZJGTAIRfDTDdqhObkmJMjCPp/nXBy6xdUc7y3iPZ3Uqr6s
-         3cWoR5sTu0c4xcDEUQsndl09ccjQFzaCiz29ymEhqy2dKOcp6n0qIg+nf2LhM4H0u6
-         eiFefJfhppr3CB79bUWnGFYnfao/FNB8U9X7d0WVZqjXn5aWtqkS+CfoDRPanK1KWY
-         Dnc5xvN2o2+T0DVX8x8iGBJC8u19HW7h5x+qf4JK+kfvQXpY2zeCRNdYslsrH4oRgQ
-         MIysQ4kHDLmHtA6Xc3FWklaLaJXM+C7OUgGQ7CAvNH+s8J301/8yjEqPhH91HZqWvQ
-         T/59QOO85vu7g==
-Received: from [100.112.192.143] (using TLSv1.2 with cipher DHE-RSA-AES256-GCM-SHA384 (256 bits))
-        by server-3.bemta.az-a.eu-west-1.aws.symcld.net id 43/7D-24644-04035806; Sun, 25 Apr 2021 09:02:56 +0000
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFlrIIsWRWlGSWpSXmKPExsViZ8MxRdfeoDX
-  B4OxsQ4vTLXvZHRg9Pm+SC2CMYs3MS8qvSGDNaDqmVPBcuOJmZydzA+NCgS5GLg4hgU4miePn
-  JrFDOLsZJXZOfw3kcHKwCWhKPOtcwAxiiwjISvyfsZoJxGYWUJdYPukXmC0sECBx8t0TRhCbR
-  UBVomPjBKBeDg5eAQ+JHbvCQcISAgoSUx6+BxvDKyAocXLmExaIMRISB1+8YIaoUZS41PGNEc
-  KulOhcv4BxAiPvLCQts5C0LGBkWsVokVSUmZ5RkpuYmaNraGCga2hopGtoaaprZGiql1ilm6i
-  XWqpbnlpcomuol1herFdcmZuck6KXl1qyiREYWikFh6/vYLz1+oPeIUZJDiYlUd4GxtYEIb6k
-  /JTKjMTijPii0pzU4kOMMhwcShK8NvpAOcGi1PTUirTMHGCYw6QlOHiURHjf6QGleYsLEnOLM
-  9MhUqcYdTl2Hp23iFmIJS8/L1VKnPc6SJEASFFGaR7cCFjMXWKUlRLmZWRgYBDiKUgtys0sQZ
-  V/xSjOwagkzGsJcglPZl4J3KZXQEcwAR2xu7MR5IiSRISUVAOTwv1/863rzE4v1X292E7yyv3
-  1NovUT0z9Npf1/3Sd3S2auYfSXH44neBp/Xq3UX/WUVf3jsW9gj/qzHKuCa7y17CdNJ9X4ryx
-  4r+b676IqL+3eH539eSdbi/ienr7L/24z/yRfZZyyEvx6gO8Pft9nd9vcGJpFm78JG7bof1gl
-  9knPzcOMfXKnbKSX+zPfNrZ18exMNFthX2ozvG9grEXjNpzbywwbs6LivJ5qhi97BSr0fS8S+
-  987b2zHqyIlb+/7wTvi203uE7s85lwrd7K7sv8Z2+in1UJzsjm3LppFpuoK98J8WyGbZZ9quw
-  eU7YkNL08Gu2+cMYhP+vv5i5Lz05fzp7L3GDccmJpkXaYEktxRqKhFnNRcSIAqh9pwDQDAAA=
+        bh=JC4J5QdKpx83bSqvjxKNQxDcgd3A71MVQyEhTIciRIE=;
+        h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
+         MIME-Version:Content-Type;
+        b=N0dm2QjoBxWeplnSL3YgFP5EDexohj68hpGuMVNpQYjFnZjYRJPeOmmlQmgkHxZWJ
+         xfaEyGUglG/iL8iH1SeN7SiT2aubBoK6mU3T4KnS+QPqBsZ3TH29FgdXKxhWc/4LKO
+         npDVk48jOF9XaU7l9j5Fa+DSL+0Oqynzn5S/mNSg96+hopNKyFYM3rZRo3jRQxruG7
+         GocuFMm3pZ3HQ1z00DXWrZEXX0TIYiiTYq/FfBUBQHQgzsfu0VHl+yudG7ldoJ1kn6
+         dfGl91Tdo8wru0zikxyCNdYcNcaUb3xzf/GaI5um4VkRhDWSYJUMEE3N2q4WM0xto1
+         UFAQ5I1LiR2mQ==
+Received: from [100.112.199.60] (using TLSv1.2 with cipher DHE-RSA-AES256-GCM-SHA384 (256 bits))
+        by server-3.bemta.az-b.eu-west-1.aws.symcld.net id C4/7C-55620-04035806; Sun, 25 Apr 2021 09:02:56 +0000
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFlrHIsWRWlGSWpSXmKPExsViZ8MxRdfeoDX
+  BYNNrU4vTLXvZHRg9Pm+SC2CMYs3MS8qvSGDN+LnmBGvBnZqKSStesjcwbszsYuTiEBLoZJJo
+  /3KIHcLZzSgxaekG1i5GTg42AU2JZ50LmEFsEQFZif8zVjOB2MwC6hLLJ/0Cs4UFPCU2PZ4BZ
+  rMIqErM2LKVBcTmFfCQaLn7hR3ElhBQkJjy8D3YHE6g+h/PtoHNFwKqWTbzPxNEvaDEyZlPWC
+  DmS0gcfPGCGaJXUeJSxzdGCLtSonP9AsYJjPyzkLTMQtKygJFpFaN5UlFmekZJbmJmjq6hgYG
+  uoaGRrqGlma6ZiV5ilW6SXmqpbnlqcYmuoV5iebFecWVuck6KXl5qySZGYDCmFBxx2MF4//UH
+  vUOMkhxMSqK8DYytCUJ8SfkplRmJxRnxRaU5qcWHGGU4OJQkeG30gXKCRanpqRVpmTnAyIBJS
+  3DwKInwvtMDSvMWFyTmFmemQ6ROMSpKifNeB0kIgCQySvPg2mDReIlRVkqYl5GBgUGIpyC1KD
+  ezBFX+FaM4B6OSMK8lyHaezLwSuOmvgBYzAS3e3dkIsrgkESEl1cBkGiEh1/eCd3aNSvrc9VI
+  qE6ripMtdftzTjjwsEyNXGvhU0czbk3l9WrgGG0P9d2HZSRmTYiev+anIteePkuWnWTFi09mF
+  /703/MvP5RP8ZaZOgKMauyT7FI6FaTc+eG67wmqlmnZo+/uJUx/MXt/ylWOJ81LxBYKd5j8j/
+  218Na93+7RVNudP/VniL87gvHXuV8vK92LKn+993sdQoLNf+9fkQzKRB90tRWyu8IccjVu58/
+  W1468P3Mnh+j7VzuJuz+qNeSr6Qe83Cx//yLZPhXG7sk/XjtAiaS0tz+tezV9viu8QE6zqO2B
+  6V3mB7/otaWt2LrU4UCNRwnSTN+5/4g05/bm/5l+a26vGdTRFiaU4I9FQi7moOBEAgqVjS0ED
+  AAA=
 X-Env-Sender: xuyang2018.jy@fujitsu.com
-X-Msg-Ref: server-22.tower-271.messagelabs.com!1619341375!1582999!1
+X-Msg-Ref: server-18.tower-285.messagelabs.com!1619341375!1859441!1
 X-Originating-IP: [62.60.8.148]
 X-SYMC-ESS-Client-Auth: outbound-route-from=pass
 X-StarScan-Received: 
 X-StarScan-Version: 9.60.3; banners=-,-,-
 X-VirusChecked: Checked
-Received: (qmail 18913 invoked from network); 25 Apr 2021 09:02:55 -0000
+Received: (qmail 1624 invoked from network); 25 Apr 2021 09:02:55 -0000
 Received: from unknown (HELO mailhost1.uk.fujitsu.com) (62.60.8.148)
-  by server-22.tower-271.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 25 Apr 2021 09:02:55 -0000
+  by server-18.tower-285.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 25 Apr 2021 09:02:55 -0000
 Received: from R01UKEXCASM126.r01.fujitsu.local ([10.183.43.178])
-        by mailhost1.uk.fujitsu.com (8.14.5/8.14.5) with ESMTP id 13P92l8I019512
+        by mailhost1.uk.fujitsu.com (8.14.5/8.14.5) with ESMTP id 13P92l8J019512
         (version=TLSv1/SSLv3 cipher=AES256-SHA bits=256 verify=FAIL)
         for <fstests@vger.kernel.org>; Sun, 25 Apr 2021 10:02:55 +0100
 Received: from localhost.localdomain (10.167.220.84) by
  R01UKEXCASM126.r01.fujitsu.local (10.183.43.178) with Microsoft SMTP Server
- (TLS) id 15.0.1497.2; Sun, 25 Apr 2021 10:02:46 +0100
+ (TLS) id 15.0.1497.2; Sun, 25 Apr 2021 10:02:50 +0100
 From:   Yang Xu <xuyang2018.jy@fujitsu.com>
 To:     <fstests@vger.kernel.org>
 CC:     Yang Xu <xuyang2018.jy@fujitsu.com>
-Subject: [PATCH 1/2] src/*: Fix an error for the loop initialization declaration
-Date:   Sun, 25 Apr 2021 18:02:38 +0800
-Message-ID: <1619344959-3672-1-git-send-email-xuyang2018.jy@fujitsu.com>
+Subject: [PATCH 2/2] idmapped-mounts.c: Use renameat instead of renameat2
+Date:   Sun, 25 Apr 2021 18:02:39 +0800
+Message-ID: <1619344959-3672-2-git-send-email-xuyang2018.jy@fujitsu.com>
 X-Mailer: git-send-email 1.8.3.1
+In-Reply-To: <1619344959-3672-1-git-send-email-xuyang2018.jy@fujitsu.com>
+References: <1619344959-3672-1-git-send-email-xuyang2018.jy@fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain
 X-Originating-IP: [10.167.220.84]
@@ -79,76 +83,449 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-When compile them old gcc, get the following error
-mount-idmapped.c: In function 'parse_map':
-mount-idmapped.c:154:2: error: 'for' loop initial declarations are only allowed in C99 mode
-  for (int i = 0; i < 2; i++) {
+We don't add fallback for renameat2, so it build failed on old kernel.
+Also, renameat2() man-pages said as below:
+"renameat2() has an additional flags argument.  A renameat2() call with
+a zero flags argument is equivalent to renameat()."
 
-Fix them by declaring them at the beggining instead of in loop.
+In this src file, we use zero flag for all renameat2 call. So we use
+renameat directly.
 
 Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
 ---
-Can we add travis-ci(like ltp, include some linux distributions) or other test tool, so we can check xfstests whether have compile error beforce
-weekly announce?
- src/detached_mounts_propagation.c    | 4 ++--
- src/idmapped-mounts/mount-idmapped.c | 7 ++++---
- 2 files changed, 6 insertions(+), 5 deletions(-)
+ src/idmapped-mounts/idmapped-mounts.c | 222 +++++++++++++-------------
+ 1 file changed, 111 insertions(+), 111 deletions(-)
 
-diff --git a/src/detached_mounts_propagation.c b/src/detached_mounts_propagation.c
-index 99b66308..d4bc87f9 100644
---- a/src/detached_mounts_propagation.c
-+++ b/src/detached_mounts_propagation.c
-@@ -96,7 +96,7 @@ static const struct option longopts[] = {
- int main(int argc, char *argv[])
- {
- 	int exit_code = EXIT_SUCCESS, index = 0;
--	int dfd, fd_tree, new_argc, ret;
-+	int dfd, fd_tree, new_argc, ret, i;
- 	char *base_dir;
- 	char *const *new_argv;
- 	char target[PATH_MAX];
-@@ -147,7 +147,7 @@ int main(int argc, char *argv[])
- 	 * Having a mount table with 10000 mounts is already quite excessive
- 	 * and shoult account even for weird test systems.
+diff --git a/src/idmapped-mounts/idmapped-mounts.c b/src/idmapped-mounts/idmapped-mounts.c
+index 870a8fe7..1a02953d 100644
+--- a/src/idmapped-mounts/idmapped-mounts.c
++++ b/src/idmapped-mounts/idmapped-mounts.c
+@@ -874,8 +874,8 @@ static int fsids_unmapped(void)
+ 	}
+ 
+ 	/* try to rename a file */
+-	if (!renameat2(open_tree_fd, FILE1, open_tree_fd, FILE1_RENAME, 0)) {
+-		log_stderr("failure: renameat2");
++	if (!renameat(open_tree_fd, FILE1, open_tree_fd, FILE1_RENAME)) {
++		log_stderr("failure: renameat");
+ 		goto out;
+ 	}
+ 	if (errno != EOVERFLOW) {
+@@ -884,8 +884,8 @@ static int fsids_unmapped(void)
+ 	}
+ 
+ 	/* try to rename a directory */
+-	if (!renameat2(open_tree_fd, DIR1, open_tree_fd, DIR1_RENAME, 0)) {
+-		log_stderr("failure: renameat2");
++	if (!renameat(open_tree_fd, DIR1, open_tree_fd, DIR1_RENAME)) {
++		log_stderr("failure: renameat");
+ 		goto out;
+ 	}
+ 	if (errno != EOVERFLOW) {
+@@ -1048,11 +1048,11 @@ static int fsids_mapped(void)
+ 			die("failure: create hardlink");
+ 
+ 		/* try to rename a file */
+-		if (renameat2(open_tree_fd, FILE1, open_tree_fd, FILE1_RENAME, 0))
++		if (renameat(open_tree_fd, FILE1, open_tree_fd, FILE1_RENAME))
+ 			die("failure: rename");
+ 
+ 		/* try to rename a directory */
+-		if (renameat2(open_tree_fd, DIR1, open_tree_fd, DIR1_RENAME, 0))
++		if (renameat(open_tree_fd, DIR1, open_tree_fd, DIR1_RENAME))
+ 			die("failure: rename");
+ 
+ 		/* remove file */
+@@ -1183,14 +1183,14 @@ static int create_in_userns(void)
+ 			die("failure: check ownership");
+ 
+ 		/* try to rename a file */
+-		if (renameat2(open_tree_fd, FILE1, open_tree_fd, FILE1_RENAME, 0))
++		if (renameat(open_tree_fd, FILE1, open_tree_fd, FILE1_RENAME))
+ 			die("failure: create");
+ 
+ 		if (!expected_uid_gid(open_tree_fd, FILE1_RENAME, 0, 0, 0))
+ 			die("failure: check ownership");
+ 
+ 		/* try to rename a file */
+-		if (renameat2(open_tree_fd, DIR1, open_tree_fd, DIR1_RENAME, 0))
++		if (renameat(open_tree_fd, DIR1, open_tree_fd, DIR1_RENAME))
+ 			die("failure: create");
+ 
+ 		if (!expected_uid_gid(open_tree_fd, DIR1_RENAME, 0, 0, 0))
+@@ -1558,8 +1558,8 @@ static int rename_crossing_mounts(void)
+ 	 * interested in making sure we're not introducing an accidental way to
+ 	 * violate that restriction or that suddenly this becomes possible.
  	 */
--	for (size_t i = 0; i < 10000; i++) {
-+	for (i = 0; i < 10000; i++) {
- 		fd_tree = sys_open_tree(dfd, "detached-move-mount",
- 					OPEN_TREE_CLONE |
- 					OPEN_TREE_CLOEXEC |
-diff --git a/src/idmapped-mounts/mount-idmapped.c b/src/idmapped-mounts/mount-idmapped.c
-index 5f5ba5d2..b3e9e27b 100644
---- a/src/idmapped-mounts/mount-idmapped.c
-+++ b/src/idmapped-mounts/mount-idmapped.c
-@@ -137,7 +137,7 @@ static int add_map_entry(__u32 id_host,
- static int parse_map(char *map)
- {
- 	char types[2] = {'u', 'g'};
--	int ret;
-+	int ret, i;
- 	__u32 id_host, id_ns, range;
- 	char which;
+-	if (!renameat2(open_tree_fd, FILE1, t_dir1_fd, FILE1_RENAME, 0)) {
+-		log_stderr("failure: renameat2");
++	if (!renameat(open_tree_fd, FILE1, t_dir1_fd, FILE1_RENAME)) {
++		log_stderr("failure: renameat");
+ 		goto out;
+ 	}
+ 	if (errno != EXDEV) {
+@@ -1654,8 +1654,8 @@ static int rename_crossing_idmapped_mounts(void)
+ 	 * interested in making sure we're not introducing an accidental way to
+ 	 * violate that restriction or that suddenly this becomes possible.
+ 	 */
+-	if (!renameat2(open_tree_fd1, FILE1, open_tree_fd2, FILE1_RENAME, 0)) {
+-		log_stderr("failure: renameat2");
++	if (!renameat(open_tree_fd1, FILE1, open_tree_fd2, FILE1_RENAME)) {
++		log_stderr("failure: renameat");
+ 		goto out;
+ 	}
+ 	if (errno != EXDEV) {
+@@ -1726,8 +1726,8 @@ static int rename_from_idmapped_mount(void)
+ 	}
  
-@@ -151,7 +151,7 @@ static int parse_map(char *map)
- 	if (which != 'b' && which != 'u' && which != 'g')
- 		return -1;
+ 	/* We're not crossing a mountpoint so this must succeed. */
+-	if (renameat2(open_tree_fd, FILE1, open_tree_fd, FILE1_RENAME, 0)) {
+-		log_stderr("failure: renameat2");
++	if (renameat(open_tree_fd, FILE1, open_tree_fd, FILE1_RENAME)) {
++		log_stderr("failure: renameat");
+ 		goto out;
+ 	}
  
--	for (int i = 0; i < 2; i++) {
-+	for (i = 0; i < 2; i++) {
- 		idmap_type_t map_type;
+@@ -1794,7 +1794,7 @@ static int rename_from_idmapped_mount_in_userns(void)
+ 			die("failure: check ownership");
  
- 		if (which != types[i] && which != 'b')
-@@ -230,8 +230,9 @@ static int map_ids_from_idmap(struct list *idmap, pid_t pid)
- 	int fill, left;
- 	char mapbuf[4096] = {};
- 	bool had_entry = false;
-+	idmap_type_t map_type, u_or_g;
+ 		/* We're not crossing a mountpoint so this must succeed. */
+-		if (renameat2(open_tree_fd, FILE1, open_tree_fd, FILE1_RENAME, 0))
++		if (renameat(open_tree_fd, FILE1, open_tree_fd, FILE1_RENAME))
+ 			die("failure: create");
  
--	for (idmap_type_t map_type = ID_TYPE_UID, u_or_g = 'u';
-+	for (map_type = ID_TYPE_UID, u_or_g = 'u';
- 	     map_type <= ID_TYPE_GID; map_type++, u_or_g = 'g') {
- 		char *pos = mapbuf;
- 		int ret;
+ 		if (!expected_uid_gid(open_tree_fd, FILE1_RENAME, 0, 0, 0))
+@@ -5157,17 +5157,17 @@ static int sticky_bit_rename(void)
+ 		if (!switch_ids(1000, 1000))
+ 			die("failure: switch_ids");
+ 
+-		if (renameat2(dir_fd, FILE1, dir_fd, FILE1_RENAME, 0))
+-			die("failure: renameat2");
++		if (renameat(dir_fd, FILE1, dir_fd, FILE1_RENAME))
++			die("failure: renameat");
+ 
+-		if (renameat2(dir_fd, FILE2, dir_fd, FILE2_RENAME, 0))
+-			die("failure: renameat2");
++		if (renameat(dir_fd, FILE2, dir_fd, FILE2_RENAME))
++			die("failure: renameat");
+ 
+-		if (renameat2(dir_fd, FILE1_RENAME, dir_fd, FILE1, 0))
+-			die("failure: renameat2");
++		if (renameat(dir_fd, FILE1_RENAME, dir_fd, FILE1))
++			die("failure: renameat");
+ 
+-		if (renameat2(dir_fd, FILE2_RENAME, dir_fd, FILE2, 0))
+-			die("failure: renameat2");
++		if (renameat(dir_fd, FILE2_RENAME, dir_fd, FILE2))
++			die("failure: renameat");
+ 
+ 		exit(EXIT_SUCCESS);
+ 	}
+@@ -5200,13 +5200,13 @@ static int sticky_bit_rename(void)
+ 		if (!switch_ids(1000, 1000))
+ 			die("failure: switch_ids");
+ 
+-		if (!renameat2(dir_fd, FILE1, dir_fd, FILE1_RENAME, 0))
+-			die("failure: renameat2");
++		if (!renameat(dir_fd, FILE1, dir_fd, FILE1_RENAME))
++			die("failure: renameat");
+ 		if (errno != EPERM)
+ 			die("failure: errno");
+ 
+-		if (!renameat2(dir_fd, FILE2, dir_fd, FILE2_RENAME, 0))
+-			die("failure: renameat2");
++		if (!renameat(dir_fd, FILE2, dir_fd, FILE2_RENAME))
++			die("failure: renameat");
+ 		if (errno != EPERM)
+ 			die("failure: errno");
+ 
+@@ -5239,17 +5239,17 @@ static int sticky_bit_rename(void)
+ 		if (!switch_ids(1000, 1000))
+ 			die("failure: switch_ids");
+ 
+-		if (renameat2(dir_fd, FILE1, dir_fd, FILE1_RENAME, 0))
+-			die("failure: renameat2");
++		if (renameat(dir_fd, FILE1, dir_fd, FILE1_RENAME))
++			die("failure: renameat");
+ 
+-		if (renameat2(dir_fd, FILE2, dir_fd, FILE2_RENAME, 0))
+-			die("failure: renameat2");
++		if (renameat(dir_fd, FILE2, dir_fd, FILE2_RENAME))
++			die("failure: renameat");
+ 
+-		if (renameat2(dir_fd, FILE1_RENAME, dir_fd, FILE1, 0))
+-			die("failure: renameat2");
++		if (renameat(dir_fd, FILE1_RENAME, dir_fd, FILE1))
++			die("failure: renameat");
+ 
+-		if (renameat2(dir_fd, FILE2_RENAME, dir_fd, FILE2, 0))
+-			die("failure: renameat2");
++		if (renameat(dir_fd, FILE2_RENAME, dir_fd, FILE2))
++			die("failure: renameat");
+ 
+ 		exit(EXIT_SUCCESS);
+ 	}
+@@ -5286,17 +5286,17 @@ static int sticky_bit_rename(void)
+ 		if (!switch_ids(1000, 1000))
+ 			die("failure: switch_ids");
+ 
+-		if (renameat2(dir_fd, FILE1, dir_fd, FILE1_RENAME, 0))
+-			die("failure: renameat2");
++		if (renameat(dir_fd, FILE1, dir_fd, FILE1_RENAME))
++			die("failure: renameat");
+ 
+-		if (renameat2(dir_fd, FILE2, dir_fd, FILE2_RENAME, 0))
+-			die("failure: renameat2");
++		if (renameat(dir_fd, FILE2, dir_fd, FILE2_RENAME))
++			die("failure: renameat");
+ 
+-		if (renameat2(dir_fd, FILE1_RENAME, dir_fd, FILE1, 0))
+-			die("failure: renameat2");
++		if (renameat(dir_fd, FILE1_RENAME, dir_fd, FILE1))
++			die("failure: renameat");
+ 
+-		if (renameat2(dir_fd, FILE2_RENAME, dir_fd, FILE2, 0))
+-			die("failure: renameat2");
++		if (renameat(dir_fd, FILE2_RENAME, dir_fd, FILE2))
++			die("failure: renameat");
+ 
+ 		exit(EXIT_SUCCESS);
+ 	}
+@@ -5410,17 +5410,17 @@ static int sticky_bit_rename_idmapped_mounts(void)
+ 		if (!switch_ids(1000, 1000))
+ 			die("failure: switch_ids");
+ 
+-		if (renameat2(open_tree_fd, FILE1, open_tree_fd, FILE1_RENAME, 0))
+-			die("failure: renameat2");
++		if (renameat(open_tree_fd, FILE1, open_tree_fd, FILE1_RENAME))
++			die("failure: renameat");
+ 
+-		if (renameat2(open_tree_fd, FILE2, open_tree_fd, FILE2_RENAME, 0))
+-			die("failure: renameat2");
++		if (renameat(open_tree_fd, FILE2, open_tree_fd, FILE2_RENAME))
++			die("failure: renameat");
+ 
+-		if (renameat2(open_tree_fd, FILE1_RENAME, open_tree_fd, FILE1, 0))
+-			die("failure: renameat2");
++		if (renameat(open_tree_fd, FILE1_RENAME, open_tree_fd, FILE1))
++			die("failure: renameat");
+ 
+-		if (renameat2(open_tree_fd, FILE2_RENAME, open_tree_fd, FILE2, 0))
+-			die("failure: renameat2");
++		if (renameat(open_tree_fd, FILE2_RENAME, open_tree_fd, FILE2))
++			die("failure: renameat");
+ 
+ 		exit(EXIT_SUCCESS);
+ 	}
+@@ -5453,13 +5453,13 @@ static int sticky_bit_rename_idmapped_mounts(void)
+ 		if (!switch_ids(1000, 1000))
+ 			die("failure: switch_ids");
+ 
+-		if (!renameat2(open_tree_fd, FILE1, open_tree_fd, FILE1_RENAME, 0))
+-			die("failure: renameat2");
++		if (!renameat(open_tree_fd, FILE1, open_tree_fd, FILE1_RENAME))
++			die("failure: renameat");
+ 		if (errno != EPERM)
+ 			die("failure: errno");
+ 
+-		if (!renameat2(open_tree_fd, FILE2, open_tree_fd, FILE2_RENAME, 0))
+-			die("failure: renameat2");
++		if (!renameat(open_tree_fd, FILE2, open_tree_fd, FILE2_RENAME))
++			die("failure: renameat");
+ 		if (errno != EPERM)
+ 			die("failure: errno");
+ 
+@@ -5492,17 +5492,17 @@ static int sticky_bit_rename_idmapped_mounts(void)
+ 		if (!switch_ids(1000, 1000))
+ 			die("failure: switch_ids");
+ 
+-		if (renameat2(open_tree_fd, FILE1, open_tree_fd, FILE1_RENAME, 0))
+-			die("failure: renameat2");
++		if (renameat(open_tree_fd, FILE1, open_tree_fd, FILE1_RENAME))
++			die("failure: renameat");
+ 
+-		if (renameat2(open_tree_fd, FILE2, open_tree_fd, FILE2_RENAME, 0))
+-			die("failure: renameat2");
++		if (renameat(open_tree_fd, FILE2, open_tree_fd, FILE2_RENAME))
++			die("failure: renameat");
+ 
+-		if (renameat2(open_tree_fd, FILE1_RENAME, open_tree_fd, FILE1, 0))
+-			die("failure: renameat2");
++		if (renameat(open_tree_fd, FILE1_RENAME, open_tree_fd, FILE1))
++			die("failure: renameat");
+ 
+-		if (renameat2(open_tree_fd, FILE2_RENAME, open_tree_fd, FILE2, 0))
+-			die("failure: renameat2");
++		if (renameat(open_tree_fd, FILE2_RENAME, open_tree_fd, FILE2))
++			die("failure: renameat");
+ 
+ 		exit(EXIT_SUCCESS);
+ 	}
+@@ -5538,17 +5538,17 @@ static int sticky_bit_rename_idmapped_mounts(void)
+ 		if (!switch_ids(1000, 1000))
+ 			die("failure: switch_ids");
+ 
+-		if (renameat2(open_tree_fd, FILE1, open_tree_fd, FILE1_RENAME, 0))
+-			die("failure: renameat2");
++		if (renameat(open_tree_fd, FILE1, open_tree_fd, FILE1_RENAME))
++			die("failure: renameat");
+ 
+-		if (renameat2(open_tree_fd, FILE2, open_tree_fd, FILE2_RENAME, 0))
+-			die("failure: renameat2");
++		if (renameat(open_tree_fd, FILE2, open_tree_fd, FILE2_RENAME))
++			die("failure: renameat");
+ 
+-		if (renameat2(open_tree_fd, FILE1_RENAME, open_tree_fd, FILE1, 0))
+-			die("failure: renameat2");
++		if (renameat(open_tree_fd, FILE1_RENAME, open_tree_fd, FILE1))
++			die("failure: renameat");
+ 
+-		if (renameat2(open_tree_fd, FILE2_RENAME, open_tree_fd, FILE2, 0))
+-			die("failure: renameat2");
++		if (renameat(open_tree_fd, FILE2_RENAME, open_tree_fd, FILE2))
++			die("failure: renameat");
+ 
+ 		exit(EXIT_SUCCESS);
+ 	}
+@@ -5670,17 +5670,17 @@ static int sticky_bit_rename_idmapped_mounts_in_userns(void)
+ 		if (!switch_userns(attr.userns_fd, 1000, 1000, true))
+ 			die("failure: switch_userns");
+ 
+-		if (renameat2(dir_fd, FILE1, dir_fd, FILE1_RENAME, 0))
+-			die("failure: renameat2");
++		if (renameat(dir_fd, FILE1, dir_fd, FILE1_RENAME))
++			die("failure: renameat");
+ 
+-		if (renameat2(dir_fd, FILE2, dir_fd, FILE2_RENAME, 0))
+-			die("failure: renameat2");
++		if (renameat(dir_fd, FILE2, dir_fd, FILE2_RENAME))
++			die("failure: renameat");
+ 
+-		if (renameat2(dir_fd, FILE1_RENAME, dir_fd, FILE1, 0))
+-			die("failure: renameat2");
++		if (renameat(dir_fd, FILE1_RENAME, dir_fd, FILE1))
++			die("failure: renameat");
+ 
+-		if (renameat2(dir_fd, FILE2_RENAME, dir_fd, FILE2, 0))
+-			die("failure: renameat2");
++		if (renameat(dir_fd, FILE2_RENAME, dir_fd, FILE2))
++			die("failure: renameat");
+ 
+ 		exit(EXIT_SUCCESS);
+ 	}
+@@ -5718,23 +5718,23 @@ static int sticky_bit_rename_idmapped_mounts_in_userns(void)
+ 		if (!switch_userns(attr.userns_fd, 1000, 1000, true))
+ 			die("failure: switch_userns");
+ 
+-		if (!renameat2(dir_fd, FILE1, dir_fd, FILE1_RENAME, 0))
+-			die("failure: renameat2");
++		if (!renameat(dir_fd, FILE1, dir_fd, FILE1_RENAME))
++			die("failure: renameat");
+ 		if (errno != EPERM)
+ 			die("failure: errno");
+ 
+-		if (!renameat2(dir_fd, FILE2, dir_fd, FILE2_RENAME, 0))
+-			die("failure: renameat2");
++		if (!renameat(dir_fd, FILE2, dir_fd, FILE2_RENAME))
++			die("failure: renameat");
+ 		if (errno != EPERM)
+ 			die("failure: errno");
+ 
+-		if (!renameat2(open_tree_fd, FILE1, open_tree_fd, FILE1_RENAME, 0))
+-			die("failure: renameat2");
++		if (!renameat(open_tree_fd, FILE1, open_tree_fd, FILE1_RENAME))
++			die("failure: renameat");
+ 		if (errno != EPERM)
+ 			die("failure: errno");
+ 
+-		if (!renameat2(open_tree_fd, FILE2, open_tree_fd, FILE2_RENAME, 0))
+-			die("failure: renameat2");
++		if (!renameat(open_tree_fd, FILE2, open_tree_fd, FILE2_RENAME))
++			die("failure: renameat");
+ 		if (errno != EPERM)
+ 			die("failure: errno");
+ 
+@@ -5772,27 +5772,27 @@ static int sticky_bit_rename_idmapped_mounts_in_userns(void)
+ 		if (!switch_userns(attr.userns_fd, 1000, 1000, true))
+ 			die("failure: switch_userns");
+ 
+-		if (!renameat2(dir_fd, FILE1, dir_fd, FILE1_RENAME, 0))
+-			die("failure: renameat2");
++		if (!renameat(dir_fd, FILE1, dir_fd, FILE1_RENAME))
++			die("failure: renameat");
+ 		if (errno != EPERM)
+ 			die("failure: errno");
+ 
+-		if (!renameat2(dir_fd, FILE2, dir_fd, FILE2_RENAME, 0))
+-			die("failure: renameat2");
++		if (!renameat(dir_fd, FILE2, dir_fd, FILE2_RENAME))
++			die("failure: renameat");
+ 		if (errno != EPERM)
+ 			die("failure: errno");
+ 
+-		if (renameat2(open_tree_fd, FILE1, open_tree_fd, FILE1_RENAME, 0))
+-			die("failure: renameat2");
++		if (renameat(open_tree_fd, FILE1, open_tree_fd, FILE1_RENAME))
++			die("failure: renameat");
+ 
+-		if (renameat2(open_tree_fd, FILE2, open_tree_fd, FILE2_RENAME, 0))
+-			die("failure: renameat2");
++		if (renameat(open_tree_fd, FILE2, open_tree_fd, FILE2_RENAME))
++			die("failure: renameat");
+ 
+-		if (renameat2(open_tree_fd, FILE1_RENAME, open_tree_fd, FILE1, 0))
+-			die("failure: renameat2");
++		if (renameat(open_tree_fd, FILE1_RENAME, open_tree_fd, FILE1))
++			die("failure: renameat");
+ 
+-		if (renameat2(open_tree_fd, FILE2_RENAME, open_tree_fd, FILE2, 0))
+-			die("failure: renameat2");
++		if (renameat(open_tree_fd, FILE2_RENAME, open_tree_fd, FILE2))
++			die("failure: renameat");
+ 
+ 		exit(EXIT_SUCCESS);
+ 	}
+@@ -5834,28 +5834,28 @@ static int sticky_bit_rename_idmapped_mounts_in_userns(void)
+ 			die("failure: switch_userns");
+ 
+ 		/* we don't own the directory from the original mount */
+-		if (!renameat2(dir_fd, FILE1, dir_fd, FILE1_RENAME, 0))
+-			die("failure: renameat2");
++		if (!renameat(dir_fd, FILE1, dir_fd, FILE1_RENAME))
++			die("failure: renameat");
+ 		if (errno != EPERM)
+ 			die("failure: errno");
+ 
+-		if (!renameat2(dir_fd, FILE2, dir_fd, FILE2_RENAME, 0))
+-			die("failure: renameat2");
++		if (!renameat(dir_fd, FILE2, dir_fd, FILE2_RENAME))
++			die("failure: renameat");
+ 		if (errno != EPERM)
+ 			die("failure: errno");
+ 
+ 		/* we own the file from the idmapped mount */
+-		if (renameat2(open_tree_fd, FILE1, open_tree_fd, FILE1_RENAME, 0))
+-			die("failure: renameat2");
++		if (renameat(open_tree_fd, FILE1, open_tree_fd, FILE1_RENAME))
++			die("failure: renameat");
+ 
+-		if (renameat2(open_tree_fd, FILE2, open_tree_fd, FILE2_RENAME, 0))
+-			die("failure: renameat2");
++		if (renameat(open_tree_fd, FILE2, open_tree_fd, FILE2_RENAME))
++			die("failure: renameat");
+ 
+-		if (renameat2(open_tree_fd, FILE1_RENAME, open_tree_fd, FILE1, 0))
+-			die("failure: renameat2");
++		if (renameat(open_tree_fd, FILE1_RENAME, open_tree_fd, FILE1))
++			die("failure: renameat");
+ 
+-		if (renameat2(open_tree_fd, FILE2_RENAME, open_tree_fd, FILE2, 0))
+-			die("failure: renameat2");
++		if (renameat(open_tree_fd, FILE2_RENAME, open_tree_fd, FILE2))
++			die("failure: renameat");
+ 
+ 		exit(EXIT_SUCCESS);
+ 	}
 -- 
 2.23.0
 
