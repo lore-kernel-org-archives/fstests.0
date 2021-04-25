@@ -2,232 +2,442 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+X-Spam-Status: No, score=-13.7 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1FB4BC433ED
-	for <linux-fstests@archiver.kernel.org>; Sun, 25 Apr 2021 07:14:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 86245C433ED
+	for <linux-fstests@archiver.kernel.org>; Sun, 25 Apr 2021 07:21:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 06BFF610A1
-	for <linux-fstests@archiver.kernel.org>; Sun, 25 Apr 2021 07:14:58 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6340561480
+	for <linux-fstests@archiver.kernel.org>; Sun, 25 Apr 2021 07:21:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230217AbhDYHPg (ORCPT
+        id S229567AbhDYHWH (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 25 Apr 2021 03:15:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33058 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229825AbhDYHPf (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 25 Apr 2021 03:15:35 -0400
-Received: from mail-wr1-x42a.google.com (mail-wr1-x42a.google.com [IPv6:2a00:1450:4864:20::42a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0ED1CC061574;
-        Sun, 25 Apr 2021 00:14:55 -0700 (PDT)
-Received: by mail-wr1-x42a.google.com with SMTP id e5so23903348wrg.7;
-        Sun, 25 Apr 2021 00:14:54 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=vY9pa33hAaQweAU2f1GgzuYkEAL50qzPDAnuDVOks2k=;
-        b=lzAgTVcYw0/kYHhA8bfSI1fg+6a8NNraagklwbCrZtf/Uh76TaHbx0BSAJijI4TvkQ
-         iBChb+d4D5mBtnLWWSdl5XwvdNmwQeJF9zQaNuJTu6LYgHhoxOAbSytiB7yQKjALAmLe
-         51Rc7rssXJ5YtyiyD0DWrJUXvmdbIPUzoTrsGcuHyNX1+QW26a8YUPqy8RyOpchiVheg
-         C3P0g9NRFCghlS1FfxMppwSnCaaR55sJUxRN+ewWQ7b3i5Zo9bm12ADx/Vy4EUrhvW5A
-         9R8JukhCdwqmUDTVUUI69FY49Iz90BVISRuKgpXWCTBQ8rHSVGXXxbFuk9E7rOKR/VNE
-         8n4w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=vY9pa33hAaQweAU2f1GgzuYkEAL50qzPDAnuDVOks2k=;
-        b=ki6wSXywQQ2GP+2kDN2Tnp9pimK/ShAXKvp07CLyQVj1UYxPSDJ41WEa9PHpr7czIz
-         gH3zVOFKFD40WvsvGZ7IXrKyc5PkqcPUUOmzlMK9DBCBW1vLksfncW6i0LT9PPFl2kIp
-         oEGX14W9NmZ6m4/uyMpLWTr/pZtlkVZ8badMxZJFI4MSIiC50qUMNsBDbiiGrBe87vIh
-         hjRnSMCeUuswehOO7tJb0ms53mcvPG0J3hiayzgC/7W/9olHdi+sEVJSGy8bcLzPRPxS
-         LzGqi1zSJ18cB4ZQGKIXzwe/L/JrwW+z4eEFfNBHPaZrforMyUcQ4DIws7NgUhiE3EMD
-         pb5Q==
-X-Gm-Message-State: AOAM531gU2lLS8VEyx/73LQFyxRaJtKgiqnfVEGXwMQgpnJ+mcANHPKR
-        6yhenG5n9ct+TN0/aQeT/t0=
-X-Google-Smtp-Source: ABdhPJxNys0eQFuCgpM13ZoxtfVVriem1NNgKwxBtOGQfBtnK/SajBdprNA6wB3P5KqDjUiei5Kqzw==
-X-Received: by 2002:a5d:5745:: with SMTP id q5mr2110842wrw.250.1619334893804;
-        Sun, 25 Apr 2021 00:14:53 -0700 (PDT)
-Received: from localhost.localdomain ([82.114.44.37])
-        by smtp.gmail.com with ESMTPSA id x189sm15885626wmg.17.2021.04.25.00.14.52
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 25 Apr 2021 00:14:53 -0700 (PDT)
-From:   Amir Goldstein <amir73il@gmail.com>
-To:     Eryu Guan <guaneryu@gmail.com>
-Cc:     Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org,
+        Sun, 25 Apr 2021 03:22:07 -0400
+Received: from out20-49.mail.aliyun.com ([115.124.20.49]:50312 "EHLO
+        out20-49.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229480AbhDYHWG (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 25 Apr 2021 03:22:06 -0400
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07436283|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.141363-0.0039824-0.854655;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047211;MF=guan@eryu.me;NM=1;PH=DS;RN=4;RT=4;SR=0;TI=SMTPD_---.K3jwfV-_1619335283;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.K3jwfV-_1619335283)
+          by smtp.aliyun-inc.com(10.147.42.241);
+          Sun, 25 Apr 2021 15:21:24 +0800
+Date:   Sun, 25 Apr 2021 15:21:23 +0800
+From:   Eryu Guan <guan@eryu.me>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
         fstests@vger.kernel.org
-Subject: [PATCH v2 5/5] overlay: Test invalidate of readdir cache
-Date:   Sun, 25 Apr 2021 10:14:45 +0300
-Message-Id: <20210425071445.29547-6-amir73il@gmail.com>
-X-Mailer: git-send-email 2.31.1
-In-Reply-To: <20210425071445.29547-1-amir73il@gmail.com>
-References: <20210425071445.29547-1-amir73il@gmail.com>
+Subject: Re: [PATCH 4/4] xfs: test upgrading filesystem to bigtime
+Message-ID: <YIUYc2JvFQqlva5U@desktop>
+References: <161896458140.776452.9583732658582318883.stgit@magnolia>
+ <161896460627.776452.15178871770338402214.stgit@magnolia>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <161896460627.776452.15178871770338402214.stgit@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This is a regression test for kernel commit 65cd913ec9d9
-("ovl: invalidate readdir cache on changes to dir with origin")
+On Tue, Apr 20, 2021 at 05:23:26PM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
+> 
+> Test that we can upgrade an existing filesystem to use bigtime.
+> 
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> ---
+>  common/xfs        |   16 ++++++
+>  tests/xfs/908     |  117 ++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/908.out |   29 ++++++++++
+>  tests/xfs/909     |  149 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/909.out |    6 ++
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
- tests/overlay/077     | 117 ++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/077.out |   2 +
- tests/overlay/group   |   1 +
- 3 files changed, 120 insertions(+)
- create mode 100755 tests/overlay/077
- create mode 100644 tests/overlay/077.out
+I saw the quota test failed as below, is that expected? I was testing
+with v5.12-rc7 kernel and latest xfsprogs from for-next branch.
 
-diff --git a/tests/overlay/077 b/tests/overlay/077
-new file mode 100755
-index 00000000..58c0f3b5
---- /dev/null
-+++ b/tests/overlay/077
-@@ -0,0 +1,117 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2021 CTERA Networks. All Rights Reserved.
-+#
-+# FS QA Test 077
-+#
-+# Test invalidate of readdir cache
-+#
-+# This is a regression test for kernel commit 65cd913ec9d9
-+# ("ovl: invalidate readdir cache on changes to dir with origin")
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs overlay
-+_require_scratch_nocheck
-+
-+# Use small getdents bufsize to fit less than 10 entries
-+# stuct linux_dirent64 is 20 bytes not including d_name
-+bufsize=200
-+
-+# Create enough files to be returned in multiple gendents() calls.
-+# At least one of the files that we delete will not be listed in the
-+# first call, so we may encounter stale entries in following calls.
-+create_files() {
-+	for n in {1..100}; do
-+		touch ${1}/${2}${n}
-+	done
-+}
-+
-+# remove all files from previous runs
-+_scratch_mkfs
-+
-+# Create test area with a merge dir, a "former" merge dir,
-+# a pure upper dir and impure upper dir. For each case, overlayfs
-+# readdir cache is used a bit differently.
-+lowerdir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
-+upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
-+
-+mkdir -p $lowerdir/merge $lowerdir/former $upperdir/pure $upperdir/impure
-+# Lower files in merge dir are listed first
-+create_files $lowerdir/merge m
-+# Files to be moved into impure upper dir
-+create_files $lowerdir o
-+# File to be copied up to make former merge dir impure
-+touch $lowerdir/former/f100
-+
-+_scratch_mount
-+
-+create_files $SCRATCH_MNT/pure p
-+create_files $SCRATCH_MNT/former f
-+# Copy up file so readdir will need to lookup its origin d_ino
-+touch $SCRATCH_MNT/merge/m100
-+# Move copied up files so readdir will need to lookup origin d_ino
-+mv $SCRATCH_MNT/o* $SCRATCH_MNT/impure/
-+
-+# Remove the lower directory and mount overlay again to create
-+# a "former merge dir"
-+$UMOUNT_PROG $SCRATCH_MNT
-+rm -rf $lowerdir/former
-+_scratch_mount
-+
-+# Check readdir cache invalidate on pure upper dir
-+echo -e "\nCreate file in pure upper dir:" >> $seqres.full
-+$here/src/t_dir_offset2 $SCRATCH_MNT/pure $bufsize "+p0" 2>&1 >> $seqres.full || \
-+	echo "Missing created file in pure upper dir (see $seqres.full for details)"
-+echo -e "\nRemove file in pure upper dir:" >> $seqres.full
-+$here/src/t_dir_offset2 $SCRATCH_MNT/pure $bufsize "-p100" 2>&1 >> $seqres.full || \
-+	echo "Found unlinked file in pure upper dir (see $seqres.full for details)"
-+
-+# Check readdir cache invalidate on impure upper dir
-+echo -e "\nCreate file in impure upper dir:" >> $seqres.full
-+$here/src/t_dir_offset2 $SCRATCH_MNT/impure $bufsize "+o0" 2>&1 >> $seqres.full || \
-+	echo "Missing created file in impure upper dir (see $seqres.full for details)"
-+echo -e "\nRemove file in impure upper dir:" >> $seqres.full
-+$here/src/t_dir_offset2 $SCRATCH_MNT/impure $bufsize  "-o100" 2>&1 >> $seqres.full || \
-+	echo "Found unlinked file in impure upper dir (see $seqres.full for details)"
-+
-+# Check readdir cache invalidate on merge dir
-+echo -e "\nCreate file in merge dir:" >> $seqres.full
-+$here/src/t_dir_offset2 $SCRATCH_MNT/merge $bufsize "+m0" 2>&1 >> $seqres.full || \
-+	echo "Missing created file in merge dir (see $seqres.full for details)"
-+echo -e "\nRemove file in merge dir:" >> $seqres.full
-+$here/src/t_dir_offset2 $SCRATCH_MNT/merge $bufsize "-m100" 2>&1 >> $seqres.full || \
-+	echo "Found unlinked file in merge dir (see $seqres.full for details)"
-+
-+# Check readdir cache invalidate on former merge dir
-+echo -e "\nCreate file in former merge dir:" >> $seqres.full
-+$here/src/t_dir_offset2 $SCRATCH_MNT/former $bufsize "+f0" 2>&1 >> $seqres.full || \
-+	echo "Missing created file in former merge dir (see $seqres.full for details)"
-+echo -e "\nRemove file in former merge dir:" >> $seqres.full
-+$here/src/t_dir_offset2 $SCRATCH_MNT/former $bufsize "-f100" 2>&1 >> $seqres.full || \
-+	echo "Found unlinked file in former merge dir (see $seqres.full for details)"
-+
-+# success, all done
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/overlay/077.out b/tests/overlay/077.out
-new file mode 100644
-index 00000000..11538276
---- /dev/null
-+++ b/tests/overlay/077.out
-@@ -0,0 +1,2 @@
-+QA output created by 077
-+Silence is golden
-diff --git a/tests/overlay/group b/tests/overlay/group
-index ddc355e5..bd014f20 100644
---- a/tests/overlay/group
-+++ b/tests/overlay/group
-@@ -79,6 +79,7 @@
- 074 auto quick exportfs dangerous
- 075 auto quick perms
- 076 auto quick perms dangerous
-+077 auto quick dir
- 100 auto quick union samefs
- 101 auto quick union nonsamefs
- 102 auto quick union nonsamefs xino
--- 
-2.31.1
 
+ Running xfs_repair to upgrade filesystem.
+ Adding large timestamp support to filesystem.
+ FEATURES: BIGTIME:YES
+-grace2 expiry is in range
+-grace2 expiry after remount is in range
++grace2 expiry has value of 18446744073076532766
++grace2 expiry is NOT in range 7956915737 .. 7956915747
++grace2 expiry after remount has value of 18446744073076532768
++grace2 expiry after remount is NOT in range 7956915737 .. 7956915747
+
+Thanks,
+Eryu
+
+P.S. I've applied the first 3 patches.
+
+>  6 files changed, 319 insertions(+)
+>  create mode 100755 tests/xfs/908
+>  create mode 100644 tests/xfs/908.out
+>  create mode 100755 tests/xfs/909
+>  create mode 100644 tests/xfs/909.out
+> 
+> 
+> diff --git a/common/xfs b/common/xfs
+> index cb6a1978..253a31e5 100644
+> --- a/common/xfs
+> +++ b/common/xfs
+> @@ -1184,3 +1184,19 @@ _xfs_timestamp_range()
+>  			awk '{printf("%s %s", $1, $2);}'
+>  	fi
+>  }
+> +
+> +# Require that the scratch device exists, that mkfs can format with bigtime
+> +# enabled, that the kernel can mount such a filesystem, and that xfs_info
+> +# advertises the presence of that feature.
+> +_require_scratch_xfs_bigtime()
+> +{
+> +	_require_scratch
+> +
+> +	_scratch_mkfs -m bigtime=1 &>/dev/null || \
+> +		_notrun "mkfs.xfs doesn't support bigtime feature"
+> +	_try_scratch_mount || \
+> +		_notrun "kernel doesn't support xfs bigtime feature"
+> +	$XFS_INFO_PROG "$SCRATCH_MNT" | grep -q -w "bigtime=1" || \
+> +		_notrun "bigtime feature not advertised on mount?"
+> +	_scratch_unmount
+> +}
+> diff --git a/tests/xfs/908 b/tests/xfs/908
+> new file mode 100755
+> index 00000000..004a8563
+> --- /dev/null
+> +++ b/tests/xfs/908
+> @@ -0,0 +1,117 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0-or-later
+> +# Copyright (c) 2021 Oracle.  All Rights Reserved.
+> +#
+> +# FS QA Test No. 908
+> +#
+> +# Check that we can upgrade a filesystem to support bigtime and that inode
+> +# timestamps work properly after the upgrade.
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1    # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_fs xfs
+> +_require_command "$XFS_ADMIN_PROG" "xfs_admin"
+> +_require_scratch_xfs_bigtime
+> +_require_xfs_repair_upgrade bigtime
+> +
+> +date --date='Jan 1 00:00:00 UTC 2040' > /dev/null 2>&1 || \
+> +	_notrun "Userspace does not support dates past 2038."
+> +
+> +rm -f $seqres.full
+> +
+> +# Make sure we can't upgrade a V4 filesystem
+> +_scratch_mkfs -m crc=0 >> $seqres.full
+> +_scratch_xfs_admin -O bigtime=1 2>> $seqres.full
+> +_check_scratch_xfs_features BIGTIME
+> +
+> +# Make sure we're required to specify a feature status
+> +_scratch_mkfs -m crc=1,bigtime=0,inobtcount=0 >> $seqres.full
+> +_scratch_xfs_admin -O bigtime 2>> $seqres.full
+> +
+> +# Can we add bigtime and inobtcount at the same time?
+> +_scratch_mkfs -m crc=1,bigtime=0,inobtcount=0 >> $seqres.full
+> +_scratch_xfs_admin -O bigtime=1,inobtcount=1 2>> $seqres.full
+> +
+> +# Format V5 filesystem without bigtime support and populate it
+> +_scratch_mkfs -m crc=1,bigtime=0 >> $seqres.full
+> +_scratch_xfs_db -c 'version' -c 'sb 0' -c 'p' >> $seqres.full
+> +_scratch_mount >> $seqres.full
+> +
+> +touch -d 'Jan 9 19:19:19 UTC 1999' $SCRATCH_MNT/a
+> +touch -d 'Jan 9 19:19:19 UTC 1999' $SCRATCH_MNT/b
+> +ls -la $SCRATCH_MNT/* >> $seqres.full
+> +
+> +echo before upgrade:
+> +TZ=UTC stat -c '%Y' $SCRATCH_MNT/a
+> +TZ=UTC stat -c '%Y' $SCRATCH_MNT/b
+> +
+> +_scratch_unmount
+> +_check_scratch_fs
+> +
+> +# Now upgrade to bigtime support
+> +_scratch_xfs_admin -O bigtime=1 2>> $seqres.full
+> +_check_scratch_xfs_features BIGTIME
+> +_check_scratch_fs
+> +_scratch_xfs_db -c 'version' -c 'sb 0' -c 'p' >> $seqres.full
+> +
+> +# Mount again, look at our files
+> +_scratch_mount >> $seqres.full
+> +ls -la $SCRATCH_MNT/* >> $seqres.full
+> +
+> +echo after upgrade:
+> +TZ=UTC stat -c '%Y' $SCRATCH_MNT/a
+> +TZ=UTC stat -c '%Y' $SCRATCH_MNT/b
+> +
+> +# Bump one of the timestamps but stay under 2038
+> +touch -d 'Jan 10 19:19:19 UTC 1999' $SCRATCH_MNT/a
+> +
+> +echo after upgrade and bump:
+> +TZ=UTC stat -c '%Y' $SCRATCH_MNT/a
+> +TZ=UTC stat -c '%Y' $SCRATCH_MNT/b
+> +
+> +_scratch_cycle_mount
+> +
+> +# Did the bumped timestamp survive the remount?
+> +ls -la $SCRATCH_MNT/* >> $seqres.full
+> +
+> +echo after upgrade, bump, and remount:
+> +TZ=UTC stat -c '%Y' $SCRATCH_MNT/a
+> +TZ=UTC stat -c '%Y' $SCRATCH_MNT/b
+> +
+> +# Modify the other timestamp to stretch beyond 2038
+> +touch -d 'Feb 22 22:22:22 UTC 2222' $SCRATCH_MNT/b
+> +
+> +echo after upgrade and extension:
+> +TZ=UTC stat -c '%Y' $SCRATCH_MNT/a
+> +TZ=UTC stat -c '%Y' $SCRATCH_MNT/b
+> +
+> +_scratch_cycle_mount
+> +
+> +# Did the timestamp survive the remount?
+> +ls -la $SCRATCH_MNT/* >> $seqres.full
+> +
+> +echo after upgrade, extension, and remount:
+> +TZ=UTC stat -c '%Y' $SCRATCH_MNT/a
+> +TZ=UTC stat -c '%Y' $SCRATCH_MNT/b
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/908.out b/tests/xfs/908.out
+> new file mode 100644
+> index 00000000..5e05854d
+> --- /dev/null
+> +++ b/tests/xfs/908.out
+> @@ -0,0 +1,29 @@
+> +QA output created by 908
+> +Running xfs_repair to upgrade filesystem.
+> +Large timestamp feature only supported on V5 filesystems.
+> +FEATURES: BIGTIME:NO
+> +Running xfs_repair to upgrade filesystem.
+> +Running xfs_repair to upgrade filesystem.
+> +Adding inode btree counts to filesystem.
+> +Adding large timestamp support to filesystem.
+> +before upgrade:
+> +915909559
+> +915909559
+> +Running xfs_repair to upgrade filesystem.
+> +Adding large timestamp support to filesystem.
+> +FEATURES: BIGTIME:YES
+> +after upgrade:
+> +915909559
+> +915909559
+> +after upgrade and bump:
+> +915995959
+> +915909559
+> +after upgrade, bump, and remount:
+> +915995959
+> +915909559
+> +after upgrade and extension:
+> +915995959
+> +7956915742
+> +after upgrade, extension, and remount:
+> +915995959
+> +7956915742
+> diff --git a/tests/xfs/909 b/tests/xfs/909
+> new file mode 100755
+> index 00000000..66587aa7
+> --- /dev/null
+> +++ b/tests/xfs/909
+> @@ -0,0 +1,149 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0-or-later
+> +# Copyright (c) 2021 Oracle.  All Rights Reserved.
+> +#
+> +# FS QA Test No. 909
+> +#
+> +# Check that we can upgrade a filesystem to support bigtime and that quota
+> +# timers work properly after the upgrade.
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1    # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +. ./common/quota
+> +
+> +# real QA test starts here
+> +_supported_fs xfs
+> +_require_command "$XFS_ADMIN_PROG" "xfs_admin"
+> +_require_quota
+> +_require_scratch_xfs_bigtime
+> +_require_xfs_repair_upgrade bigtime
+> +
+> +date --date='Jan 1 00:00:00 UTC 2040' > /dev/null 2>&1 || \
+> +	_notrun "Userspace does not support dates past 2038."
+> +
+> +rm -f $seqres.full
+> +
+> +# Format V5 filesystem without bigtime support and populate it
+> +_scratch_mkfs -m crc=1,bigtime=0 >> $seqres.full
+> +_qmount_option "usrquota"
+> +_scratch_xfs_db -c 'version' -c 'sb 0' -c 'p' >> $seqres.full
+> +_scratch_mount >> $seqres.full
+> +
+> +# Force the block counters for uid 1 and 2 above zero
+> +_pwrite_byte 0x61 0 64k $SCRATCH_MNT/a >> $seqres.full
+> +_pwrite_byte 0x61 0 64k $SCRATCH_MNT/b >> $seqres.full
+> +sync
+> +chown 1 $SCRATCH_MNT/a
+> +chown 2 $SCRATCH_MNT/b
+> +
+> +# Set quota limits on uid 1 before upgrading
+> +$XFS_QUOTA_PROG -x -c 'limit -u bsoft=12k bhard=1m 1' $SCRATCH_MNT
+> +
+> +# Make sure the grace period is at /some/ point in the future.  We have to
+> +# use bc because not all bashes can handle integer comparisons with 64-bit
+> +# numbers.
+> +repquota -upn $SCRATCH_MNT > $tmp.repquota
+> +cat $tmp.repquota >> $seqres.full
+> +grace="$(cat $tmp.repquota | grep '^#1' | awk '{print $6}')"
+> +now="$(date +%s)"
+> +res="$(echo "${grace} > ${now}" | $BC_PROG)"
+> +test $res -eq 1 || echo "Expected timer expiry (${grace}) to be after now (${now})."
+> +
+> +_scratch_unmount
+> +
+> +# Now upgrade to bigtime support
+> +_scratch_xfs_admin -O bigtime=1 2>> $seqres.full
+> +_check_scratch_xfs_features BIGTIME
+> +_check_scratch_fs
+> +_scratch_xfs_db -c 'version' -c 'sb 0' -c 'p' >> $seqres.full
+> +
+> +# Mount again, see if our quota timer survived
+> +_scratch_mount
+> +
+> +# Set a very generous grace period and quota limits on uid 2 after upgrading
+> +$XFS_QUOTA_PROG -x -c 'timer -u -b -d 2147483647' $SCRATCH_MNT
+> +$XFS_QUOTA_PROG -x -c 'limit -u bsoft=10000 bhard=150000 2' $SCRATCH_MNT
+> +
+> +# Query the grace periods to see if they got set properly after the upgrade.
+> +repquota -upn $SCRATCH_MNT > $tmp.repquota
+> +cat $tmp.repquota >> $seqres.full
+> +grace1="$(repquota -upn $SCRATCH_MNT | grep '^#1' | awk '{print $6}')"
+> +grace2="$(repquota -upn $SCRATCH_MNT | grep '^#2' | awk '{print $6}')"
+> +now="$(date +%s)"
+> +
+> +# Make sure that uid 1's expiration is in the future...
+> +res1="$(echo "${grace} > ${now}" | $BC_PROG)"
+> +test "${res1}" -eq 1 || echo "Expected uid 1 expiry (${grace1}) to be after now (${now})."
+> +
+> +# ...and that uid 2's expiration is after uid 1's...
+> +res2="$(echo "${grace2} > ${grace1}" | $BC_PROG)"
+> +test "${res2}" -eq 1 || echo "Expected uid 2 expiry (${grace2}) to be after uid 1 (${grace1})."
+> +
+> +# ...and that uid 2's expiration is after 2038 if right now is far enough
+> +# past 1970 that our generous grace period would provide for that.
+> +res3="$(echo "(${now} < 100) || (${grace2} > 2147483648)" | $BC_PROG)"
+> +test "${res3}" -eq 1 || echo "Expected uid 2 expiry (${grace2}) to be after 2038."
+> +
+> +_scratch_cycle_mount
+> +
+> +# Query the grace periods to see if they survived a remount.
+> +repquota -upn $SCRATCH_MNT > $tmp.repquota
+> +cat $tmp.repquota >> $seqres.full
+> +grace1="$(repquota -upn $SCRATCH_MNT | grep '^#1' | awk '{print $6}')"
+> +grace2="$(repquota -upn $SCRATCH_MNT | grep '^#2' | awk '{print $6}')"
+> +now="$(date +%s)"
+> +
+> +# Make sure that uid 1's expiration is in the future...
+> +res1="$(echo "${grace} > ${now}" | $BC_PROG)"
+> +test "${res1}" -eq 1 || echo "Expected uid 1 expiry (${grace1}) to be after now (${now})."
+> +
+> +# ...and that uid 2's expiration is after uid 1's...
+> +res2="$(echo "${grace2} > ${grace1}" | $BC_PROG)"
+> +test "${res2}" -eq 1 || echo "Expected uid 2 expiry (${grace2}) to be after uid 1 (${grace1})."
+> +
+> +# ...and that uid 2's expiration is after 2038 if right now is far enough
+> +# past 1970 that our generous grace period would provide for that.
+> +res3="$(echo "(${now} < 100) || (${grace2} > 2147483648)" | $BC_PROG)"
+> +test "${res3}" -eq 1 || echo "Expected uid 2 expiry (${grace2}) to be after 2038."
+> +
+> +# Now try setting uid 2's expiration to Feb 22 22:22:22 UTC 2222
+> +new_expiry=$(date -d 'Feb 22 22:22:22 UTC 2222' +%s)
+> +now=$(date +%s)
+> +test $now -ge $new_expiry && \
+> +	echo "Now is after February 2222?  Expect problems."
+> +expiry_delta=$((new_expiry - now))
+> +
+> +echo "setting expiration to $new_expiry - $now = $expiry_delta" >> $seqres.full
+> +$XFS_QUOTA_PROG -x -c "timer -u $expiry_delta 2" -c 'report' $SCRATCH_MNT >> $seqres.full
+> +
+> +# Did we get an expiration within 5s of the target range?
+> +grace2="$(repquota -upn $SCRATCH_MNT | grep '^#2' | awk '{print $6}')"
+> +echo "grace2 is $grace2" >> $seqres.full
+> +_within_tolerance "grace2 expiry" $grace2 $new_expiry 5 -v
+> +
+> +_scratch_cycle_mount
+> +
+> +# ...and is it still within 5s after a remount?
+> +grace2="$(repquota -upn $SCRATCH_MNT | grep '^#2' | awk '{print $6}')"
+> +echo "grace2 is $grace2" >> $seqres.full
+> +_within_tolerance "grace2 expiry after remount" $grace2 $new_expiry 5 -v
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/909.out b/tests/xfs/909.out
+> new file mode 100644
+> index 00000000..72bf2416
+> --- /dev/null
+> +++ b/tests/xfs/909.out
+> @@ -0,0 +1,6 @@
+> +QA output created by 909
+> +Running xfs_repair to upgrade filesystem.
+> +Adding large timestamp support to filesystem.
+> +FEATURES: BIGTIME:YES
+> +grace2 expiry is in range
+> +grace2 expiry after remount is in range
+> diff --git a/tests/xfs/group b/tests/xfs/group
+> index b4e29bab..49bc4016 100644
+> --- a/tests/xfs/group
+> +++ b/tests/xfs/group
+> @@ -526,5 +526,7 @@
+>  768 auto quick repair
+>  770 auto repair
+>  773 auto quick repair
+> +908 auto quick bigtime
+> +909 auto quick bigtime quota
+>  910 auto quick inobtcount
+>  911 auto quick bigtime
