@@ -2,211 +2,153 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-18.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 04F7AC433ED
-	for <linux-fstests@archiver.kernel.org>; Sun, 25 Apr 2021 09:01:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D96ADC433ED
+	for <linux-fstests@archiver.kernel.org>; Sun, 25 Apr 2021 09:02:58 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C24D46113D
-	for <linux-fstests@archiver.kernel.org>; Sun, 25 Apr 2021 09:01:50 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AD10A61350
+	for <linux-fstests@archiver.kernel.org>; Sun, 25 Apr 2021 09:02:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229551AbhDYJC3 (ORCPT
+        id S229559AbhDYJDh (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 25 Apr 2021 05:02:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56010 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229543AbhDYJC2 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 25 Apr 2021 05:02:28 -0400
-Received: from mail-wr1-x429.google.com (mail-wr1-x429.google.com [IPv6:2a00:1450:4864:20::429])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 05ECDC061574
-        for <fstests@vger.kernel.org>; Sun, 25 Apr 2021 02:01:47 -0700 (PDT)
-Received: by mail-wr1-x429.google.com with SMTP id l2so347361wrm.9
-        for <fstests@vger.kernel.org>; Sun, 25 Apr 2021 02:01:47 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=message-id:date:from:to:subject:mime-version:content-disposition;
-        bh=WrjWFBDgkF3MR77V/YJd4uzZyD+EcC/8Fip5BTDS50M=;
-        b=WNod8+RqqkKTc6pnKLbi39wmJG0mpBq3CFBPqsp+Csnt+izPmRN+lY8m9XAjM5mDLC
-         XLK5UxxHFwqedKS8hOSMPjVOxZdJeLkgjth/wJYFHWGSs8P7+qbLeabVf9SMss4ADEZ+
-         Z332veOfFgEu9CdFh0JqTUthd2xF9gb+7Ki33Bdahnk8P54C6XY4+fHVLN67l7I4pXzv
-         AXO4mrGP/mSheBNgcBjdJoNDjd5+5+f1HLhhiVqLisNBfAB85bDE8sk6cWehwLjmBjFb
-         tpVEai7d/5B17lxTpcBaHEGuZOj3dUH1G4xUGDoj6oTPKBLPrpIuu1cb7wwz1NEx0ilI
-         34Fw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:message-id:date:from:to:subject:mime-version
-         :content-disposition;
-        bh=WrjWFBDgkF3MR77V/YJd4uzZyD+EcC/8Fip5BTDS50M=;
-        b=KYADcW2/TsIZHUV8KfRyztOz3LAddvckd8bKQVAc+Y0xxbbzKNs7W7xsOjkbMHgQRh
-         7/uglucNQyk5rFduii6e6+L7MfEmqmndly4u2ixQMhStKybkLKLUpeOUMXYJmenY8w1S
-         6d/dWHFiMpnDNrOkDYyq6Fmfqc45ES9NBGk2fvEPvd+VBeMuLhA1iD30xz2/68u587OH
-         e+RRQybkyQ4MzmX6H8P9AIvZfsNUlVl+dIWVmrMRCq73kDvgVefkjBLzyqSqpxSoPO9v
-         uq6msfhPduEHMtWrc2GAL/cZqMGrvT5Yh4zl4q32lQH+8dMoOb1sJG/Xlau9ief3SRbr
-         /TTg==
-X-Gm-Message-State: AOAM533GDTspefQbBuaYpg/aBZCn+sSc1LfGd8cec9XL62stlR/GwH8w
-        RrPS7/WD9viq8U1TK+0Fxt2xBdVrrbphfA==
-X-Google-Smtp-Source: ABdhPJw1mFBAiWoJZ9/mkVmhDTEBXF6N4ozQdFQ7qAUdY+LrAuZ6ADxbq2pSMOm888QKK1jf2HnpIg==
-X-Received: by 2002:a5d:524e:: with SMTP id k14mr15452072wrc.282.1619341306019;
-        Sun, 25 Apr 2021 02:01:46 -0700 (PDT)
-Received: from localhost ([8.208.10.148])
-        by smtp.gmail.com with ESMTPSA id g3sm5026267wrx.78.2021.04.25.02.01.44
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 25 Apr 2021 02:01:44 -0700 (PDT)
-Message-ID: <60852ff8.1c69fb81.8c49d.5dbe@mx.google.com>
-Date:   Sun, 25 Apr 2021 17:01:40 +0800
-From:   Eryu Guan <guaneryu@gmail.com>
-To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: master branch updated to 40818883aecd
+        Sun, 25 Apr 2021 05:03:37 -0400
+Received: from mail1.bemta25.messagelabs.com ([195.245.230.3]:53778 "EHLO
+        mail1.bemta25.messagelabs.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S229551AbhDYJDg (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 25 Apr 2021 05:03:36 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fujitsu.com;
+        s=170520fj; t=1619341376; i=@fujitsu.com;
+        bh=BUdGkV896coJdUn8UydYAP6ZNDFildR1OV1GC1cTM+g=;
+        h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type;
+        b=eBjf3S8yaisn1A/NULJZJGTAIRfDTDdqhObkmJMjCPp/nXBy6xdUc7y3iPZ3Uqr6s
+         3cWoR5sTu0c4xcDEUQsndl09ccjQFzaCiz29ymEhqy2dKOcp6n0qIg+nf2LhM4H0u6
+         eiFefJfhppr3CB79bUWnGFYnfao/FNB8U9X7d0WVZqjXn5aWtqkS+CfoDRPanK1KWY
+         Dnc5xvN2o2+T0DVX8x8iGBJC8u19HW7h5x+qf4JK+kfvQXpY2zeCRNdYslsrH4oRgQ
+         MIysQ4kHDLmHtA6Xc3FWklaLaJXM+C7OUgGQ7CAvNH+s8J301/8yjEqPhH91HZqWvQ
+         T/59QOO85vu7g==
+Received: from [100.112.192.143] (using TLSv1.2 with cipher DHE-RSA-AES256-GCM-SHA384 (256 bits))
+        by server-3.bemta.az-a.eu-west-1.aws.symcld.net id 43/7D-24644-04035806; Sun, 25 Apr 2021 09:02:56 +0000
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFlrIIsWRWlGSWpSXmKPExsViZ8MxRdfeoDX
+  B4OxsQ4vTLXvZHRg9Pm+SC2CMYs3MS8qvSGDNaDqmVPBcuOJmZydzA+NCgS5GLg4hgU4miePn
+  JrFDOLsZJXZOfw3kcHKwCWhKPOtcwAxiiwjISvyfsZoJxGYWUJdYPukXmC0sECBx8t0TRhCbR
+  UBVomPjBKBeDg5eAQ+JHbvCQcISAgoSUx6+BxvDKyAocXLmExaIMRISB1+8YIaoUZS41PGNEc
+  KulOhcv4BxAiPvLCQts5C0LGBkWsVokVSUmZ5RkpuYmaNraGCga2hopGtoaaprZGiql1ilm6i
+  XWqpbnlpcomuol1herFdcmZuck6KXl1qyiREYWikFh6/vYLz1+oPeIUZJDiYlUd4GxtYEIb6k
+  /JTKjMTijPii0pzU4kOMMhwcShK8NvpAOcGi1PTUirTMHGCYw6QlOHiURHjf6QGleYsLEnOLM
+  9MhUqcYdTl2Hp23iFmIJS8/L1VKnPc6SJEASFFGaR7cCFjMXWKUlRLmZWRgYBDiKUgtys0sQZ
+  V/xSjOwagkzGsJcglPZl4J3KZXQEcwAR2xu7MR5IiSRISUVAOTwv1/863rzE4v1X292E7yyv3
+  1NovUT0z9Npf1/3Sd3S2auYfSXH44neBp/Xq3UX/WUVf3jsW9gj/qzHKuCa7y17CdNJ9X4ryx
+  4r+b676IqL+3eH539eSdbi/ienr7L/24z/yRfZZyyEvx6gO8Pft9nd9vcGJpFm78JG7bof1gl
+  9knPzcOMfXKnbKSX+zPfNrZ18exMNFthX2ozvG9grEXjNpzbywwbs6LivJ5qhi97BSr0fS8S+
+  987b2zHqyIlb+/7wTvi203uE7s85lwrd7K7sv8Z2+in1UJzsjm3LppFpuoK98J8WyGbZZ9quw
+  eU7YkNL08Gu2+cMYhP+vv5i5Lz05fzp7L3GDccmJpkXaYEktxRqKhFnNRcSIAqh9pwDQDAAA=
+X-Env-Sender: xuyang2018.jy@fujitsu.com
+X-Msg-Ref: server-22.tower-271.messagelabs.com!1619341375!1582999!1
+X-Originating-IP: [62.60.8.148]
+X-SYMC-ESS-Client-Auth: outbound-route-from=pass
+X-StarScan-Received: 
+X-StarScan-Version: 9.60.3; banners=-,-,-
+X-VirusChecked: Checked
+Received: (qmail 18913 invoked from network); 25 Apr 2021 09:02:55 -0000
+Received: from unknown (HELO mailhost1.uk.fujitsu.com) (62.60.8.148)
+  by server-22.tower-271.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 25 Apr 2021 09:02:55 -0000
+Received: from R01UKEXCASM126.r01.fujitsu.local ([10.183.43.178])
+        by mailhost1.uk.fujitsu.com (8.14.5/8.14.5) with ESMTP id 13P92l8I019512
+        (version=TLSv1/SSLv3 cipher=AES256-SHA bits=256 verify=FAIL)
+        for <fstests@vger.kernel.org>; Sun, 25 Apr 2021 10:02:55 +0100
+Received: from localhost.localdomain (10.167.220.84) by
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.2; Sun, 25 Apr 2021 10:02:46 +0100
+From:   Yang Xu <xuyang2018.jy@fujitsu.com>
+To:     <fstests@vger.kernel.org>
+CC:     Yang Xu <xuyang2018.jy@fujitsu.com>
+Subject: [PATCH 1/2] src/*: Fix an error for the loop initialization declaration
+Date:   Sun, 25 Apr 2021 18:02:38 +0800
+Message-ID: <1619344959-3672-1-git-send-email-xuyang2018.jy@fujitsu.com>
+X-Mailer: git-send-email 1.8.3.1
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="JJGYIFZInLYO"
-Content-Disposition: inline
+Content-Type: text/plain
+X-Originating-IP: [10.167.220.84]
+X-ClientProxiedBy: G08CNEXCHPEKD06.g08.fujitsu.local (10.167.33.205) To
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178)
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+When compile them old gcc, get the following error
+mount-idmapped.c: In function 'parse_map':
+mount-idmapped.c:154:2: error: 'for' loop initial declarations are only allowed in C99 mode
+  for (int i = 0; i < 2; i++) {
 
---JJGYIFZInLYO
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Fix them by declaring them at the beggining instead of in loop.
 
-Hi all,
+Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
+---
+Can we add travis-ci(like ltp, include some linux distributions) or other test tool, so we can check xfstests whether have compile error beforce
+weekly announce?
+ src/detached_mounts_propagation.c    | 4 ++--
+ src/idmapped-mounts/mount-idmapped.c | 7 ++++---
+ 2 files changed, 6 insertions(+), 5 deletions(-)
 
-The master branch of the xfstests repository at:
+diff --git a/src/detached_mounts_propagation.c b/src/detached_mounts_propagation.c
+index 99b66308..d4bc87f9 100644
+--- a/src/detached_mounts_propagation.c
++++ b/src/detached_mounts_propagation.c
+@@ -96,7 +96,7 @@ static const struct option longopts[] = {
+ int main(int argc, char *argv[])
+ {
+ 	int exit_code = EXIT_SUCCESS, index = 0;
+-	int dfd, fd_tree, new_argc, ret;
++	int dfd, fd_tree, new_argc, ret, i;
+ 	char *base_dir;
+ 	char *const *new_argv;
+ 	char target[PATH_MAX];
+@@ -147,7 +147,7 @@ int main(int argc, char *argv[])
+ 	 * Having a mount table with 10000 mounts is already quite excessive
+ 	 * and shoult account even for weird test systems.
+ 	 */
+-	for (size_t i = 0; i < 10000; i++) {
++	for (i = 0; i < 10000; i++) {
+ 		fd_tree = sys_open_tree(dfd, "detached-move-mount",
+ 					OPEN_TREE_CLONE |
+ 					OPEN_TREE_CLOEXEC |
+diff --git a/src/idmapped-mounts/mount-idmapped.c b/src/idmapped-mounts/mount-idmapped.c
+index 5f5ba5d2..b3e9e27b 100644
+--- a/src/idmapped-mounts/mount-idmapped.c
++++ b/src/idmapped-mounts/mount-idmapped.c
+@@ -137,7 +137,7 @@ static int add_map_entry(__u32 id_host,
+ static int parse_map(char *map)
+ {
+ 	char types[2] = {'u', 'g'};
+-	int ret;
++	int ret, i;
+ 	__u32 id_host, id_ns, range;
+ 	char which;
+ 
+@@ -151,7 +151,7 @@ static int parse_map(char *map)
+ 	if (which != 'b' && which != 'u' && which != 'g')
+ 		return -1;
+ 
+-	for (int i = 0; i < 2; i++) {
++	for (i = 0; i < 2; i++) {
+ 		idmap_type_t map_type;
+ 
+ 		if (which != types[i] && which != 'b')
+@@ -230,8 +230,9 @@ static int map_ids_from_idmap(struct list *idmap, pid_t pid)
+ 	int fill, left;
+ 	char mapbuf[4096] = {};
+ 	bool had_entry = false;
++	idmap_type_t map_type, u_or_g;
+ 
+-	for (idmap_type_t map_type = ID_TYPE_UID, u_or_g = 'u';
++	for (map_type = ID_TYPE_UID, u_or_g = 'u';
+ 	     map_type <= ID_TYPE_GID; map_type++, u_or_g = 'g') {
+ 		char *pos = mapbuf;
+ 		int ret;
+-- 
+2.23.0
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-have just been updated. Several xfs new tests from Darrick J. Wong are merged
-in this update, and they all should pass with v5.12-rc7 kernel. There're also
-some random fixes as usual.
-
-Many thanks to Brian Foster and Allison Henderson for helping review most of
-the patches!
-
-Thanks,
-Eryu
-
-The new head of the master branch is commit:
-
-40818883aecd xfs/144: Use _qsetup instead of qsetup
-
-New commits:
-
-Darrick J. Wong (8):
-      [982941cf89f5] generic/223: make sure all files get created on the data device
-      [bec48842284e] common/dmthin: make this work with external log devices
-      [af7ac9448fd6] xfs: test that the needsrepair feature works as advertised
-      [8fb042e54ea0] xfs: functional testing of V5-relevant options
-      [7d20ed3e1fb9] xfs: test inobtcount upgrade
-      [472f957a8cf7] generic: check userspace handling of extreme timestamps
-      [f806708c2c48] xfs/122: add legacy timestamps to ondisk checker
-      [63b6a5644e71] xfs: detect time limits from filesystem
-
-Naohiro Aota (1):
-      [74e99aebdc01] fstests: add missing checks of fallocate feature
-
-Pavel Reichl (2):
-      [ace9db40f929] common/rc: Add _require_{chown,chmod}()
-      [bd5aba84ffdb] generic/495: split the test
-
-Sun Ke (1):
-      [bb2f356f14d7] generic/619: a better way to get tot_avail_size
-
-Yang Xu (2):
-      [a8c09c9e020b] xfs/145: Remove useless -f option for xfs_quota command
-      [40818883aecd] xfs/144: Use _qsetup instead of qsetup
-
-
-Code Diffstat:
-
- common/dmthin         |   9 +++-
- common/rc             |  36 ++++++++++++++-
- common/xfs            |  71 ++++++++++++++++++++++++++++
- tests/btrfs/013       |   1 +
- tests/btrfs/016       |   1 +
- tests/btrfs/025       |   1 +
- tests/btrfs/034       |   1 +
- tests/btrfs/037       |   1 +
- tests/btrfs/046       |   1 +
- tests/btrfs/107       |   1 +
- tests/ext4/001        |   1 +
- tests/f2fs/001        |   1 +
- tests/generic/087     |   1 +
- tests/generic/088     |   1 +
- tests/generic/125     |   1 +
- tests/generic/126     |   1 +
- tests/generic/128     |   1 +
- tests/generic/193     |   1 +
- tests/generic/223     |   5 ++
- tests/generic/314     |   1 +
- tests/generic/317     |   1 +
- tests/generic/347     |   2 +-
- tests/generic/355     |   1 +
- tests/generic/456     |   1 +
- tests/generic/495     |  14 +-----
- tests/generic/495.out |   3 --
- tests/generic/500     |   2 +-
- tests/generic/597     |   1 +
- tests/generic/598     |   1 +
- tests/generic/619     |   2 +-
- tests/generic/634     | 123 +++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/634.out |   2 +
- tests/generic/635     | 125 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/635.out |   1 +
- tests/generic/636     |  49 ++++++++++++++++++++
- tests/generic/636.out |   2 +
- tests/generic/group   |   7 ++-
- tests/xfs/042         |   1 +
- tests/xfs/114         |   1 +
- tests/xfs/118         |   1 +
- tests/xfs/122         |   1 +
- tests/xfs/122.out     |   1 +
- tests/xfs/144         |  21 +--------
- tests/xfs/145         |   4 +-
- tests/xfs/154         |  80 ++++++++++++++++++++++++++++++++
- tests/xfs/154.out     |   4 ++
- tests/xfs/155         |  91 ++++++++++++++++++++++++++++++++++++
- tests/xfs/155.out     |   2 +
- tests/xfs/156         |  93 +++++++++++++++++++++++++++++++++++++
- tests/xfs/156.out     |  17 +++++++
- tests/xfs/157         | 114 +++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/157.out     |  19 ++++++++
- tests/xfs/158         |  98 +++++++++++++++++++++++++++++++++++++++
- tests/xfs/158.out     |  23 ++++++++++
- tests/xfs/159         |  44 ++++++++++++++++++
- tests/xfs/159.out     |  15 ++++++
- tests/xfs/331         |   1 +
- tests/xfs/341         |   1 +
- tests/xfs/342         |   1 +
- tests/xfs/423         |   1 +
- tests/xfs/group       |   6 +++
- 61 files changed, 1070 insertions(+), 44 deletions(-)
---
-Eryu Guan
-guaneryu@gmail.com
-
---JJGYIFZInLYO
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAmCFL1gACgkQJlKqKVyP
-52MCBg/+J57cXQo9wfXtJTs90Jk3u6ujWcG7UI9ScY/Ps+6PZilhuCl5bQZSOKUy
-OkiWblo86LBuKDFv160weQ+EHQeIDhrePLh5H5EI4VXISKM9X+sgeiWxpaWnVua+
-4csDm04g2fLNSKSFx3IfTfpqILWPbSztIp/YPfi4noMK09X18w7J290rlqFQLTis
-+b3yLpbn9ha3fLUyCgZVm2VzLV25KL4FtoguXeBQhwX9JZYW345kLkkbK2xt18JL
-mQa7BBUQAZJIGbbnu8YBqX0Z8S14U1/jSCfE+4bfy1aigsvMvjgDXoNkbAQ9i9nH
-5AuVKPsSsvQfckknyCxVPjNcn5mFZ+Zz4/r6DtYF+h8Ywb0bL525pja/ne+vfSNx
-vvdsGjG1lPdN8LROOs8y3mo3krjyeOhr1EKpNyUmR5mADhXXznp6NA8NR/h4AVXC
-Bzi3RDXOhJGWhjy0VnBnnWlAniF3oVhYVgj4mjcIYoHtQ0f6OSkiQxiDNvfPh+Ee
-qB+j9KpiRt87DVHQ/JKMsI58ox/GG7UPPgWV9fsOuYQJelDqMgCTStWUxvub4z2o
-CudVAQKz8qFQFpBRUVik96kT0pkXH6iZsdrfKCcb5ZBDnv9FmJWNoFm55uWdMcC2
-W/MFLMLZMhdPK8CPmvbkhefS8f7J80qPT7bvNdSAMxdLs3HZ3SQ=
-=rSQB
------END PGP SIGNATURE-----
-
---JJGYIFZInLYO--
