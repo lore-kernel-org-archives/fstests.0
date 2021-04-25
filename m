@@ -2,104 +2,114 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.7 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,URIBL_BLOCKED autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 140D0C433B4
-	for <linux-fstests@archiver.kernel.org>; Sun, 25 Apr 2021 05:14:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F24FEC433B4
+	for <linux-fstests@archiver.kernel.org>; Sun, 25 Apr 2021 06:31:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C533961492
-	for <linux-fstests@archiver.kernel.org>; Sun, 25 Apr 2021 05:14:11 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BF2BC61483
+	for <linux-fstests@archiver.kernel.org>; Sun, 25 Apr 2021 06:31:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229477AbhDYFOt (ORCPT
+        id S229588AbhDYGb4 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 25 Apr 2021 01:14:49 -0400
-Received: from out20-86.mail.aliyun.com ([115.124.20.86]:43079 "EHLO
-        out20-86.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229459AbhDYFOt (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 25 Apr 2021 01:14:49 -0400
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07534295|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_regular_dialog|0.109334-0.0016002-0.889066;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047204;MF=guan@eryu.me;NM=1;PH=DS;RN=5;RT=5;SR=0;TI=SMTPD_---.K3grzdV_1619327647;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.K3grzdV_1619327647)
-          by smtp.aliyun-inc.com(10.147.42.16);
-          Sun, 25 Apr 2021 13:14:08 +0800
-Date:   Sun, 25 Apr 2021 13:14:07 +0800
-From:   Eryu Guan <guan@eryu.me>
-To:     Boris Burkov <boris@bur.io>
-Cc:     "Darrick J. Wong" <djwong@kernel.org>, linux-btrfs@vger.kernel.org,
-        kernel-team@fb.com, fstests@vger.kernel.org
-Subject: Re: [PATCH v3] generic: test fiemap offsets and < 512 byte ranges
-Message-ID: <YIT6n8Y2pmQb5Y5t@desktop>
-References: <20210407161046.GY1670408@magnolia>
- <c2f49fdead29fd7eb979b83028eb9fcf56d2457c.1617826068.git.boris@bur.io>
- <YHMBzw/9tUVMS66G@desktop>
- <YIB5XbY2PX4J5dlN@zen>
+        Sun, 25 Apr 2021 02:31:56 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:30082 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S229567AbhDYGb4 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 25 Apr 2021 02:31:56 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1619332276;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=g76PM57L2+R001d8uGZcGXNPwNRPCvV9zBTPdtUl1qI=;
+        b=LTNUkC9DBd79yTMIjEjoHMnDAuDI7rUsqxVIjQ49TZDzgSwYpBoNUAHrsMgqZlqNvrq6Xa
+        Xr+7daX/pBd8Xbu3c1JOf2fYdgHOfL3u8TPPEmGgpV2wAyLTXNWVWQOeB4xP6fxpELdJs1
+        1KX7+ibKctj/qwT9DO7OYwj1zP0kicA=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-28-4ASlhPbZOx2gCJ3CVA1uHA-1; Sun, 25 Apr 2021 02:31:12 -0400
+X-MC-Unique: 4ASlhPbZOx2gCJ3CVA1uHA-1
+Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id AF35F18397A5;
+        Sun, 25 Apr 2021 06:31:11 +0000 (UTC)
+Received: from localhost (unknown [10.66.61.36])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id DA52B1000358;
+        Sun, 25 Apr 2021 06:31:10 +0000 (UTC)
+Date:   Sun, 25 Apr 2021 14:48:28 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Eryu Guan <guan@eryu.me>
+Cc:     Christoph Hellwig <hch@infradead.org>, fstests@vger.kernel.org
+Subject: Re: generic/095 and generic/300 failures
+Message-ID: <20210425064828.GX13946@localhost.localdomain>
+Mail-Followup-To: Eryu Guan <guan@eryu.me>,
+        Christoph Hellwig <hch@infradead.org>, fstests@vger.kernel.org
+References: <YH5siAMU+6p7iD01@infradead.org>
+ <YIT4n/154e/vOm9H@desktop>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <YIB5XbY2PX4J5dlN@zen>
+In-Reply-To: <YIT4n/154e/vOm9H@desktop>
+User-Agent: Mutt/1.10.1 (2018-07-13)
+X-Scanned-By: MIMEDefang 2.84 on 10.5.11.22
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Apr 21, 2021 at 12:13:33PM -0700, Boris Burkov wrote:
-> On Sun, Apr 11, 2021 at 10:03:59PM +0800, Eryu Guan wrote:
-> > On Wed, Apr 07, 2021 at 01:13:26PM -0700, Boris Burkov wrote:
-> > > btrfs trims fiemap extents to the inputted offset, which leads to
-> > > inconsistent results for most inputs, and downright bizarre outputs like
-> > > [7..6] when the trimmed extent is at the end of an extent and shorter
-> > > than 512 bytes.
-> > > 
-> > > The test writes out one extent of the file system's block size and tries
-> > > fiemaps at various offsets. It expects that all the fiemaps return the
-> > > full single extent.
-> > > 
-> > > I ran it under the following fs, block size combinations:
-> > > ext2: 1024, 2048, 4096
-> > > ext3: 1024, 2048, 4096
-> > > ext4: 1024, 2048, 4096
-> > > xfs: 512, 1024, 2048, 4096
-> > > f2fs: 4096
-> > > btrfs: 4096
-> > > 
-> > > This test is fixed for btrfs by:
-> > > btrfs: return whole extents in fiemap
-> > > (https://lore.kernel.org/linux-btrfs/274e5bcebdb05a8969fc300b4802f33da2fbf218.1617746680.git.boris@bur.io/)
-> > > 
-> > > Signed-off-by: Boris Burkov <boris@bur.io>
+On Sun, Apr 25, 2021 at 01:05:35PM +0800, Eryu Guan wrote:
+> On Tue, Apr 20, 2021 at 07:54:16AM +0200, Christoph Hellwig wrote:
+> > Hi all,
 > > 
-> > generic/473, which tests fiemap, has been marked as broken, as fiemap
-> > behavior is not consistent across filesystems, and the specific behavior
-> > tested by generic/473 is not defined and filesystems could have
-> > different implementations.
+> > generic/095 and generic/300 have been failing for me with every config
+> > on every file system for a while with the following messages:
 > > 
-> > I'm not sure if this test fits into the undefined-behavior fiemap
-> > categary. I think it's fine if it tests a well-defined & consistent
-> > behavior.
+> > --- tests/generic/095.out	2016-03-29 13:59:30.405053956 +0000
+> > +++ results/generic/095.out.bad	2021-04-20 05:44:54.432081845 +0000
+> > @@ -1,2 +1,7 @@
+> >  QA output created by 095
+> > +job9: No I/O performed by mmap, perhaps try --debug=io option for details?
+> > +job9: No I/O performed by mmap, perhaps try --debug=io option for details?
+> > +job9: No I/O performed by mmap, perhaps try --debug=io option for details?
+> > +job9: No I/O performed by mmap, perhaps try --debug=io option for details?
+> > +job9: No I/O performed by mmap, perhaps try --debug=io option for details?
+> >  Silence is golden           
 > > 
+> > --- tests/generic/300.out	2016-03-29 13:59:30.431720622 +0000
+> > +++ results/generic/300.out.bad	2021-04-20 05:45:06.324708699 +0000
+> > @@ -2,3 +2,4 @@
+> >  
+> >  Run fio with random aio-dio pattern
+> >    
+> > +falloc_raicer: No I/O performed by falloc, perhaps try --debug=io option for details?
+> > 
+> > 
+> > ----- End forwarded message -----
 > 
-> Interesting, I didn't know about that test being marked as broken.
+> Yeah, I've noticed these failures as well, and it seems that it's caused
+> by fio behavior change, as Zorro said he never hit such failures[1].
 > 
-> I was worried about this problem to some extent and attempted to
-> mitigate it by only requiring that all the output be the same, rather
-> than matching some specific standard.
-> 
-> Thinking about it further, I think this test is portable only so long as
-> the step where it writes a file with one extent is portable.
-> 
-> If "pwrite 0 block-size" ends up as a file with multiple extents, then
-> it is possible one of the partial fiemaps will only intersect with a
-> subset of the extents and rightly return those. In fact, that was broken
-> in the original version of the test which explicitly used 4096 instead of
-> being detecting the block size.
-> 
-> I do think it is nice to have this as a regression test for btrfs, since
-> we have pretty complicated logic for fiemap and it was so broken in this
-> case. If you prefer, I can make this a btrfs specific test.
+> I'm using fio-3.7
 
-Yeah, a btrfs specific test seems safer, and we could move it to generic
-later if the behavior is well defined.
+I use fio-3.25-3. I never saw the errors you metioned above.
+
+How about CC axboe@kernel.dk (fio maintainer) if you still can reproduce this
+error on latest fio version?
 
 Thanks,
-Eryu
+Zorro
+
+> 
+> # fio --version
+> fio-3.7-66-gedfc
+> 
+> Thanks,
+> Eryu
+> 
+> [1] https://www.spinics.net/lists/fstests/msg15871.html
+> 
+
