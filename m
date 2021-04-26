@@ -2,122 +2,74 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E475AC433ED
-	for <linux-fstests@archiver.kernel.org>; Sun, 25 Apr 2021 22:31:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 263B4C433B4
+	for <linux-fstests@archiver.kernel.org>; Mon, 26 Apr 2021 00:34:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B98ED61363
-	for <linux-fstests@archiver.kernel.org>; Sun, 25 Apr 2021 22:31:26 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0699A6117A
+	for <linux-fstests@archiver.kernel.org>; Mon, 26 Apr 2021 00:34:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231300AbhDYWcG (ORCPT
+        id S231511AbhDZAfU (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 25 Apr 2021 18:32:06 -0400
-Received: from bhuna.collabora.co.uk ([46.235.227.227]:35528 "EHLO
-        bhuna.collabora.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231247AbhDYWcF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 25 Apr 2021 18:32:05 -0400
-Received: from [127.0.0.1] (localhost [127.0.0.1])
-        (Authenticated sender: shreeya)
-        with ESMTPSA id 9AFAA1F41EDD
-From:   Shreeya Patel <shreeya.patel@collabora.com>
-To:     fstests@vger.kernel.org
-Cc:     linux-fsdevel@vger.kernel.org, krisman@collabora.com,
-        preichl@redhat.com, kernel@collabora.com,
-        Shreeya Patel <shreeya.patel@collabora.com>
-Subject: [PATCH] generic/453: Exclude filenames that are not supported by exfat
-Date:   Mon, 26 Apr 2021 04:01:05 +0530
-Message-Id: <20210425223105.1855098-1-shreeya.patel@collabora.com>
-X-Mailer: git-send-email 2.31.1
+        Sun, 25 Apr 2021 20:35:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60704 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231247AbhDZAfT (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 25 Apr 2021 20:35:19 -0400
+Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 996C1C061574;
+        Sun, 25 Apr 2021 17:34:38 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
+        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=VMiGqXM1hH3svRbIPs3VeukCp6tAxDpm9HcvnItH/pU=; b=YkR7OcuFsqoEpSfbF3ygp0PCt2
+        hfmltKfPo17aohZQkfA+lQ+vACHGghFyu4aDneTL2vt0u8SOpwj8QfoR/H6Vyefd1rPzco4wiAl3a
+        m83fKi3NSGfWxxZB6F7iigaobAytz7S67H9FF0acjWSdO9nt0Jpdn1TVg10EJVaHGF+HSfezOPImw
+        DKibv13xNztGPZmtTkkWcMinFinoqV5du2/k5obWWYewnnaWsDkhsPFCLHduS9uI0OyF4hUgSwGcV
+        EGot1a8oUU2TDSKS9Z8SOysypoZrVPXn29Pxzdsjr06PTldhCA/OiddMX1PjMX5t6ZiRNGEBIuipM
+        YP1XRfdw==;
+Received: from willy by casper.infradead.org with local (Exim 4.94 #2 (Red Hat Linux))
+        id 1lapCo-004uCZ-Qv; Mon, 26 Apr 2021 00:34:31 +0000
+Date:   Mon, 26 Apr 2021 01:34:30 +0100
+From:   Matthew Wilcox <willy@infradead.org>
+To:     Shreeya Patel <shreeya.patel@collabora.com>
+Cc:     fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org,
+        krisman@collabora.com, preichl@redhat.com, kernel@collabora.com
+Subject: Re: [PATCH] generic/453: Exclude filenames that are not supported by
+ exfat
+Message-ID: <20210426003430.GH235567@casper.infradead.org>
+References: <20210425223105.1855098-1-shreeya.patel@collabora.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210425223105.1855098-1-shreeya.patel@collabora.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-exFAT filesystem does not support the following character codes
-0x0000 - 0x001F ( Control Codes ), /, ?, :, ", \, *, <, |, >
+On Mon, Apr 26, 2021 at 04:01:05AM +0530, Shreeya Patel wrote:
+> exFAT filesystem does not support the following character codes
+> 0x0000 - 0x001F ( Control Codes ), /, ?, :, ", \, *, <, |, >
 
-Hence, exclude the filenames which creates FAKESLASH and a BOX
-since they are using character codes which are not supported
-by exfat.
+ummm ...
 
-Filename creating a BOX uses a control code '\xa0' which is
-restricted by exfat.
+> -# Fake slash?
+> -setf "urk\xc0\xafmoo" "FAKESLASH"
 
-Signed-off-by: Shreeya Patel <shreeya.patel@collabora.com>
----
- tests/generic/453 | 28 ++++++++++++++++++----------
- 1 file changed, 18 insertions(+), 10 deletions(-)
+That doesn't use any of the explained banned characters.  It uses 0xc0,
+0xaf.
 
-diff --git a/tests/generic/453 b/tests/generic/453
-index d997736c..7fc73b4c 100755
---- a/tests/generic/453
-+++ b/tests/generic/453
-@@ -115,15 +115,9 @@ setf "greek_\xce\xa5\xcc\x81.txt" "GREEK UPSILON WITH ACUTE AND HOOK SYMBOL, NFK
- setf "arabic_\xef\xb7\xba.txt" "ARABIC LIGATURE SALLALLAHOU ALAYHE WASALLAM, NFC"
- setf "arabic_\xd8\xb5\xd9\x84\xd9\x89\x20\xd8\xa7\xd9\x84\xd9\x84\xd9\x87\x20\xd8\xb9\xd9\x84\xd9\x8a\xd9\x87\x20\xd9\x88\xd8\xb3\xd9\x84\xd9\x85.txt" "ARABIC LIGATURE SALLALLAHOU ALAYHE WASALLAM, NFKC"
- 
--# Fake slash?
--setf "urk\xc0\xafmoo" "FAKESLASH"
--
- # Emoji: octopus butterfly owl giraffe
- setf "emoji_\xf0\x9f\xa6\x91\xf0\x9f\xa6\x8b\xf0\x9f\xa6\x89\xf0\x9f\xa6\x92.txt" "octopus butterfly owl giraffe emoji"
- 
--# Line draw characters, because why not?
--setf "\x6c\x69\x6e\x65\x64\x72\x61\x77\x5f\x0a\xe2\x95\x94\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x97\x0a\xe2\x95\x91\x20\x6d\x65\x74\x61\x74\x61\x62\x6c\x65\x20\xe2\x95\x91\x0a\xe2\x95\x9f\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x95\xa2\x0a\xe2\x95\x91\x20\x5f\x5f\x69\x6e\x64\x65\x78\x20\x20\x20\xe2\x95\x91\x0a\xe2\x95\x9a\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x9d\x0a.txt" "ugly box because we can"
--
- # unicode rtl widgets too...
- setf "moo\xe2\x80\xaegnp.txt" "Well say hello,"
- setf "mootxt.png" "Harvey"
-@@ -155,6 +149,16 @@ setf "zerojoin_moo\xe2\x80\x8dcow.txt" "zero width joiners"
- setf "combmark_\xe1\x80\x9c\xe1\x80\xad\xe1\x80\xaf.txt" "combining marks"
- setf "combmark_\xe1\x80\x9c\xe1\x80\xaf\xe1\x80\xad.txt" "combining marks"
- 
-+if [ "$FSTYP" != "exfat" ]; then
-+
-+	# Fake slash?
-+	setf "urk\xc0\xafmoo" "FAKESLASH"
-+
-+	# Line draw characters, because why not?
-+	setf "\x6c\x69\x6e\x65\x64\x72\x61\x77\x5f\x0a\xe2\x95\x94\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x97\x0a\xe2\x95\x91\x20\x6d\x65\x74\x61\x74\x61\x62\x6c\x65\x20\xe2\x95\x91\x0a\xe2\x95\x9f\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x95\xa2\x0a\xe2\x95\x91\x20\x5f\x5f\x69\x6e\x64\x65\x78\x20\x20\x20\xe2\x95\x91\x0a\xe2\x95\x9a\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x9d\x0a.txt" "ugly box because we can"
-+
-+fi
-+
- # fake dotdot entry
- setd ".\xe2\x80\x8d" "zero width joiners in dot entry"
- setd "..\xe2\x80\x8d" "zero width joiners in dotdot entry"
-@@ -176,12 +180,8 @@ testf "greek_\xce\xa5\xcc\x81.txt" "GREEK UPSILON WITH ACUTE AND HOOK SYMBOL, NF
- testf "arabic_\xef\xb7\xba.txt" "ARABIC LIGATURE SALLALLAHOU ALAYHE WASALLAM, NFC"
- testf "arabic_\xd8\xb5\xd9\x84\xd9\x89\x20\xd8\xa7\xd9\x84\xd9\x84\xd9\x87\x20\xd8\xb9\xd9\x84\xd9\x8a\xd9\x87\x20\xd9\x88\xd8\xb3\xd9\x84\xd9\x85.txt" "ARABIC LIGATURE SALLALLAHOU ALAYHE WASALLAM, NFKC"
- 
--testf "urk\xc0\xafmoo" "FAKESLASH"
--
- testf "emoji_\xf0\x9f\xa6\x91\xf0\x9f\xa6\x8b\xf0\x9f\xa6\x89\xf0\x9f\xa6\x92.txt" "octopus butterfly owl giraffe emoji"
- 
--testf "\x6c\x69\x6e\x65\x64\x72\x61\x77\x5f\x0a\xe2\x95\x94\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x97\x0a\xe2\x95\x91\x20\x6d\x65\x74\x61\x74\x61\x62\x6c\x65\x20\xe2\x95\x91\x0a\xe2\x95\x9f\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x95\xa2\x0a\xe2\x95\x91\x20\x5f\x5f\x69\x6e\x64\x65\x78\x20\x20\x20\xe2\x95\x91\x0a\xe2\x95\x9a\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x9d\x0a.txt" "ugly box because we can"
--
- testf "moo\xe2\x80\xaegnp.txt" "Well say hello,"
- testf "mootxt.png" "Harvey"
- 
-@@ -206,6 +206,14 @@ testf "zerojoin_moo\xe2\x80\x8dcow.txt" "zero width joiners"
- testf "combmark_\xe1\x80\x9c\xe1\x80\xad\xe1\x80\xaf.txt" "combining marks"
- testf "combmark_\xe1\x80\x9c\xe1\x80\xaf\xe1\x80\xad.txt" "combining marks"
- 
-+if [ "$FSTYP" != "exfat" ]; then
-+
-+	testf "urk\xc0\xafmoo" "FAKESLASH"
-+
-+	testf "\x6c\x69\x6e\x65\x64\x72\x61\x77\x5f\x0a\xe2\x95\x94\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x97\x0a\xe2\x95\x91\x20\x6d\x65\x74\x61\x74\x61\x62\x6c\x65\x20\xe2\x95\x91\x0a\xe2\x95\x9f\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x95\xa2\x0a\xe2\x95\x91\x20\x5f\x5f\x69\x6e\x64\x65\x78\x20\x20\x20\xe2\x95\x91\x0a\xe2\x95\x9a\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x9d\x0a.txt" "ugly box because we can"
-+
-+fi
-+
- testd ".\xe2\x80\x8d" "zero width joiners in dot entry"
- testd "..\xe2\x80\x8d" "zero width joiners in dotdot entry"
- 
--- 
-2.31.1
+Now, in utf-8, that's an nonconforming sequence.  "The Unicode and UCS
+standards require that producers of UTF-8 shall use the shortest form
+possible, for example, producing a two-byte sequence with first byte 0xc0
+is nonconforming.  Unicode 3.1 has added the requirement that conforming
+programs must not accept non-shortest forms in their input."
+
+So is it that exfat is rejecting nonconforming sequences?  Or is it
+converting the nonconforming sequence from 0xc0 0xaf to the conforming
+sequence 0x2f, and then rejecting it (because it's '/')?
 
