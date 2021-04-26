@@ -2,95 +2,86 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 10711C433B4
-	for <linux-fstests@archiver.kernel.org>; Mon, 26 Apr 2021 12:37:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2CCB8C43460
+	for <linux-fstests@archiver.kernel.org>; Mon, 26 Apr 2021 13:13:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D1F4E6127A
-	for <linux-fstests@archiver.kernel.org>; Mon, 26 Apr 2021 12:37:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EA3306052B
+	for <linux-fstests@archiver.kernel.org>; Mon, 26 Apr 2021 13:13:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233340AbhDZMi2 (ORCPT
+        id S232107AbhDZNNv (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 26 Apr 2021 08:38:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49986 "EHLO
+        Mon, 26 Apr 2021 09:13:51 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58002 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231876AbhDZMi2 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 26 Apr 2021 08:38:28 -0400
-Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D5253C061574;
-        Mon, 26 Apr 2021 05:37:46 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
-        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=kUo++F4hwkkwY/749xSffG2WnD4gDjqWm7WhdYLsTyI=; b=ew/6BNXCyWCJmFwqXt8cRe2QyA
-        1PJ3O4t+37zVM+8mTtaeBdhkL8thLSbd3MfQDy4hmi9S2NRC5ttO6M/bqboQmPSoY8pYUFa2srKDZ
-        iOX2WFHrwys8wJeh4jEjqR0MwiJ0tRekjulLjI+0sZZ0IjjLsQO9XFZaOM2/68EtLW31gWWw9qT99
-        QG6jn2Spoq0xCFIm6oHv92u7HWa2J1NW443HoMm5wkl1wFHCw9Tb3aqAwaiRD09BLLYKqixRThN+Q
-        eHGCqI1TgMPaGhlSemnH0JJkdbOeFzYzyg6ye+ZPGUXN6JD2u7m3NvhiiVxFB5rGfmrYJv1tQoPnq
-        7K7MoXGA==;
-Received: from willy by casper.infradead.org with local (Exim 4.94 #2 (Red Hat Linux))
-        id 1lb0UY-005bnt-Jl; Mon, 26 Apr 2021 12:37:41 +0000
-Date:   Mon, 26 Apr 2021 13:37:34 +0100
-From:   Matthew Wilcox <willy@infradead.org>
-To:     Shreeya Patel <shreeya.patel@collabora.com>
-Cc:     fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org,
-        krisman@collabora.com, preichl@redhat.com, kernel@collabora.com
-Subject: Re: [PATCH] generic/453: Exclude filenames that are not supported by
- exfat
-Message-ID: <20210426123734.GK235567@casper.infradead.org>
-References: <20210425223105.1855098-1-shreeya.patel@collabora.com>
- <20210426003430.GH235567@casper.infradead.org>
- <a49ecbfb-2011-0c7c-4405-b4548d22389d@collabora.com>
+        with ESMTP id S233376AbhDZNNv (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 26 Apr 2021 09:13:51 -0400
+Received: from mail-vs1-xe2a.google.com (mail-vs1-xe2a.google.com [IPv6:2607:f8b0:4864:20::e2a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CED45C061574
+        for <fstests@vger.kernel.org>; Mon, 26 Apr 2021 06:13:08 -0700 (PDT)
+Received: by mail-vs1-xe2a.google.com with SMTP id x16so131336vsq.2
+        for <fstests@vger.kernel.org>; Mon, 26 Apr 2021 06:13:08 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=szeredi.hu; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=6cSCYZMPvFvIIvPWybwb0R74Ie0W9MA3Z010zNhVCzM=;
+        b=hLYVgcjzp33wHE1CeiMD9oTKXb5qrS6pfCIEd4hEnYeyml7yASPJesvNAx4i+K30Dg
+         NrVrYMzgXacp2faVIJpnnyt0N7oMiKEHBhyUYS5iQMYCHgKf809+eE1aejaykZMNuth/
+         eUK9buomMKMzYz7jmZK9gsx43mdIxYDhYW0hE=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=6cSCYZMPvFvIIvPWybwb0R74Ie0W9MA3Z010zNhVCzM=;
+        b=QuEYjOR3+oXRWHCehT/bfpHkeiblSbuip8RKWZLLbJPGWysi4zfm+OkIVKz5n2Vs4Z
+         P9Lq4pmn14G8jN8T9y5+WWXnNP2qXq7GV6RrzkUYeoisCWgfK9vSd73liI32Swj6dsen
+         4s1wfDNWroKN666ZB9SOxaMHaMFPPop8/ojFnJpqNJvFawkE3081PBdVrCYthqpmCVqz
+         7OJotyKmRZOZAo9Cmg/UBlYkqdr3DNX/VFl/Du3Vhy3aroe+uemtcEg42Vwv2HB3TO8D
+         pjrOLtc+DjuZSEYzOYiAIisJ04+enaUb5i94WjYnOAwkTvvsPBEIYWNgZ9d0dT/S4ocf
+         g3aQ==
+X-Gm-Message-State: AOAM531DMHi6mkojXOwypfyYNDF3PmCyqw/V8sYTEWwJUGuWuPvorOz6
+        tlRCIQvQyfxdg3h/hp7fm7c2eCFU9eTTzmQw3Z2wyw==
+X-Google-Smtp-Source: ABdhPJysY4OLj+iCo294Vgr6gM0QVcZNzovLuEIRVUNcf3HSJoGO79yTiAmNxWd1X9Tpi2P/I3ObL+x92ESGI08rjpY=
+X-Received: by 2002:a67:68c5:: with SMTP id d188mr3460068vsc.0.1619442788088;
+ Mon, 26 Apr 2021 06:13:08 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <a49ecbfb-2011-0c7c-4405-b4548d22389d@collabora.com>
+References: <20210425071445.29547-1-amir73il@gmail.com> <CAJfpeguHn32-BJV=986963SCGs8RwBN+fMEfRdwc1d_LFecFxw@mail.gmail.com>
+ <CAOQ4uxiEx-KcMYdfM9yLygvD5eYgs_58kOvr0NabKqgpB0ybug@mail.gmail.com>
+In-Reply-To: <CAOQ4uxiEx-KcMYdfM9yLygvD5eYgs_58kOvr0NabKqgpB0ybug@mail.gmail.com>
+From:   Miklos Szeredi <miklos@szeredi.hu>
+Date:   Mon, 26 Apr 2021 15:12:57 +0200
+Message-ID: <CAJfpegvf=6FPgSBfz73Lu+7DV2T8A+E4CzzsNjfqSbmJccY4VA@mail.gmail.com>
+Subject: Re: [PATCH v2 0/5] Test overlayfs readdir cache
+To:     Amir Goldstein <amir73il@gmail.com>
+Cc:     Eryu Guan <guaneryu@gmail.com>,
+        overlayfs <linux-unionfs@vger.kernel.org>,
+        fstests <fstests@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Apr 26, 2021 at 05:27:51PM +0530, Shreeya Patel wrote:
-> On 26/04/21 6:04 am, Matthew Wilcox wrote:
-> > On Mon, Apr 26, 2021 at 04:01:05AM +0530, Shreeya Patel wrote:
-> > > exFAT filesystem does not support the following character codes
-> > > 0x0000 - 0x001F ( Control Codes ), /, ?, :, ", \, *, <, |, >
-> > ummm ...
-> > 
-> > > -# Fake slash?
-> > > -setf "urk\xc0\xafmoo" "FAKESLASH"
-> > That doesn't use any of the explained banned characters.  It uses 0xc0,
-> > 0xaf.
-> > 
-> > Now, in utf-8, that's an nonconforming sequence.  "The Unicode and UCS
-> > standards require that producers of UTF-8 shall use the shortest form
-> > possible, for example, producing a two-byte sequence with first byte 0xc0
-> > is nonconforming.  Unicode 3.1 has added the requirement that conforming
-> > programs must not accept non-shortest forms in their input."
-> > 
-> > So is it that exfat is rejecting nonconforming sequences?  Or is it
-> > converting the nonconforming sequence from 0xc0 0xaf to the conforming
-> > sequence 0x2f, and then rejecting it (because it's '/')?
-> > 
-> 
-> No, I don't think exfat is not converting nonconforming sequence from 0xc0
-> 0xaf
-> to the conforming sequence 0x2f.
-> Because I get different outputs when tried with both ways.
-> When I create a file with "urk\xc0\xafmoo", I get output as "Operation not
-> permitted"
-> and when I create it as "urk\x2fmoo", it gives "No such file or directory
-> error" or
-> you can consider this error as "Invalid argument"
-> ( because that's what I get when I try for other characters like |, :, ?,
-> etc )
+On Mon, Apr 26, 2021 at 12:15 PM Amir Goldstein <amir73il@gmail.com> wrote:
+>
+> On Mon, Apr 26, 2021 at 1:07 PM Miklos Szeredi <miklos@szeredi.hu> wrote:
 
-I think we need to understand this before skipping the test.  Does it
-also fail, eg, on cifs, vfat, jfs or udf?
+> > The other case you found it that in case of a stale direntry the i_ino
+> > update will be skipped and so it will return an inconsistent result,
+> > right?
+>
+> Right. It returns a stale entry with the old real ino.
+> Not sure if that is an "inconsistent" result.
+> inconsistent w.r.t what?
 
-> Box filename also fails with "Invalid argument" error.
-> 
-> 
+It's inconsistent with previous (before the entry got deleted)
+st_ino/i_ino.  This should actually be testable.
+
+But it was a long time ago that I fully understood the readdir code,
+so I might be missing something.
+
+Thanks,
+Miklos
