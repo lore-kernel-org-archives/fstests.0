@@ -2,147 +2,120 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.2 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
-	SPF_PASS,UNPARSEABLE_RELAY,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-24.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2FC3BC433ED
-	for <linux-fstests@archiver.kernel.org>; Tue, 27 Apr 2021 11:13:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7A374C433B4
+	for <linux-fstests@archiver.kernel.org>; Tue, 27 Apr 2021 15:00:26 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E06E4613CA
-	for <linux-fstests@archiver.kernel.org>; Tue, 27 Apr 2021 11:13:12 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4387F613D1
+	for <linux-fstests@archiver.kernel.org>; Tue, 27 Apr 2021 15:00:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235796AbhD0LNz (ORCPT
+        id S236144AbhD0PBI (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 27 Apr 2021 07:13:55 -0400
-Received: from bhuna.collabora.co.uk ([46.235.227.227]:57850 "EHLO
-        bhuna.collabora.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230270AbhD0LNz (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 27 Apr 2021 07:13:55 -0400
-Received: from [127.0.0.1] (localhost [127.0.0.1])
-        (Authenticated sender: shreeya)
-        with ESMTPSA id ADD7E1F42573
-Subject: Re: [PATCH] generic/453: Exclude filenames that are not supported by
- exfat
-To:     Matthew Wilcox <willy@infradead.org>
-Cc:     fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org,
-        krisman@collabora.com, preichl@redhat.com, kernel@collabora.com
-References: <20210425223105.1855098-1-shreeya.patel@collabora.com>
- <20210426003430.GH235567@casper.infradead.org>
- <a49ecbfb-2011-0c7c-4405-b4548d22389d@collabora.com>
- <20210426123734.GK235567@casper.infradead.org>
-From:   Shreeya Patel <shreeya.patel@collabora.com>
-Message-ID: <bc7a33e8-7e9c-8045-e90e-bb53ec4f2c61@collabora.com>
-Date:   Tue, 27 Apr 2021 16:43:05 +0530
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.9.0
+        Tue, 27 Apr 2021 11:01:08 -0400
+Received: from mail.kernel.org ([198.145.29.99]:35218 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S236074AbhD0PBI (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 27 Apr 2021 11:01:08 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 9C7B6613D8;
+        Tue, 27 Apr 2021 15:00:24 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1619535625;
+        bh=Vxtddy9gYs6muRZA2jdv5xj1sh/30vDF9YtHR+23e5I=;
+        h=From:To:Cc:Subject:Date:From;
+        b=t3weoLX/x1XYvEKX/s0yigYAzIfpyEmjLr9K6mmeZ+6Q0Pas9qA63aHLM0mgyo4uU
+         qHNz7vS7J36VnGArV/Yt7bmevzvJrhckaVcFgY8wRjlGp3mu+BBV+RZ2FHORG2Ddv7
+         qS434oXoW/dyX9Zti0Fy+hKklMLQk5mLAFxqad6Hh/CUkksMMJJxE8ItitVmzKYaBi
+         WicQRsxvAVZoHqGtmMFXwAkzowSUPoqck49oVrhM+kGaCm2hVfUIQRqg5SJk2EI24b
+         MByL6VaGQKtaZ/a/yI7jVFwI92imaFs0huqaSRD7aO9X+YNE/v0crA4d/vhwJ/00Br
+         Bo7EgAqH+kogg==
+From:   fdmanana@kernel.org
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] btrfs/187: fix test failure when using bash 5.0+ with debug enabled
+Date:   Tue, 27 Apr 2021 16:00:09 +0100
+Message-Id: <70ecc4413ac118ac95be3e76b0dabff237d70b8d.1619535331.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.28.0
 MIME-Version: 1.0
-In-Reply-To: <20210426123734.GK235567@casper.infradead.org>
-Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 8bit
-Content-Language: en-US
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+From: Filipe Manana <fdmanana@suse.com>
 
-On 26/04/21 6:07 pm, Matthew Wilcox wrote:
-> On Mon, Apr 26, 2021 at 05:27:51PM +0530, Shreeya Patel wrote:
->> On 26/04/21 6:04 am, Matthew Wilcox wrote:
->>> On Mon, Apr 26, 2021 at 04:01:05AM +0530, Shreeya Patel wrote:
->>>> exFAT filesystem does not support the following character codes
->>>> 0x0000 - 0x001F ( Control Codes ), /, ?, :, ", \, *, <, |, >
->>> ummm ...
->>>
->>>> -# Fake slash?
->>>> -setf "urk\xc0\xafmoo" "FAKESLASH"
->>> That doesn't use any of the explained banned characters.  It uses 0xc0,
->>> 0xaf.
->>>
->>> Now, in utf-8, that's an nonconforming sequence.  "The Unicode and UCS
->>> standards require that producers of UTF-8 shall use the shortest form
->>> possible, for example, producing a two-byte sequence with first byte 0xc0
->>> is nonconforming.  Unicode 3.1 has added the requirement that conforming
->>> programs must not accept non-shortest forms in their input."
->>>
->>> So is it that exfat is rejecting nonconforming sequences?  Or is it
->>> converting the nonconforming sequence from 0xc0 0xaf to the conforming
->>> sequence 0x2f, and then rejecting it (because it's '/')?
->>>
->> No, I don't think exfat is not converting nonconforming sequence from 0xc0
->> 0xaf
->> to the conforming sequence 0x2f.
->> Because I get different outputs when tried with both ways.
->> When I create a file with "urk\xc0\xafmoo", I get output as "Operation not
->> permitted"
->> and when I create it as "urk\x2fmoo", it gives "No such file or directory
->> error" or
->> you can consider this error as "Invalid argument"
->> ( because that's what I get when I try for other characters like |, :, ?,
->> etc )
-> I think we need to understand this before skipping the test.  Does it
-> also fail, eg, on cifs, vfat, jfs or udf?
+When running btrfs/187 with a bash 5.0+ build that has debug enabled, the
+test fails due to an unexpected warning message from bash:
 
+  $ ./check btrfs/187
+  FSTYP         -- btrfs
+  PLATFORM      -- Linux/x86_64 debian9 5.12.0-rc8-btrfs-next-92 #1 SMP PREEMPT Wed Apr 21 10:36:03 WEST 2021
+  MKFS_OPTIONS  -- /dev/sdc
+  MOUNT_OPTIONS -- /dev/sdc /home/fdmanana/btrfs-tests/scratch_1
 
-I tested it for VFAT, UDF and JFS and following are the results.
+  btrfs/187 436s ... - output mismatch (see /xfstests/results//btrfs/187.out.bad)
+      --- tests/btrfs/187.out	2020-10-16 23:13:46.550152492 +0100
+      +++ /xfstests/results//btrfs/187.out.bad	2021-04-27 14:57:02.623941700 +0100
+      @@ -1,3 +1,4 @@
+       QA output created by 187
+       Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/snap1'
+       Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/snap2'
+      +/xfstests/tests/btrfs/187: line 1: warning: wait_for: recursively setting old_sigint_handler to wait_sigint_handler: running_trap = 16
+      ...
+      (Run 'diff -u /xfstests/tests/btrfs/187.out /xfstests/results//btrfs/187.out.bad'  to see the entire diff)
+  Ran: btrfs/187
+  Failures: btrfs/187
+  Failed 1 of 1 tests
 
+This is because the process running dedupe_files_loop() executes the 'wait'
+command in the trap it has setup and very often it receives the SIGTERM
+signal while it is running the 'wait' command in the while loop of that
+function - so executing the trap makes bash run 'wait' while it is already
+running 'wait', triggering the warning message from bash.
 
-1. VFAT ( as per wikipedia 0x00-0x1F 0x7F " * / : < > ? \ | are reserved 
-characters)
+That warning message was added in bash 5.0 by commit 36f89ff1d8b761
+("SIGINT trap handler SIGINT loop fix"):
 
-For \x2f - /var/mnt/scratch/test-453/urk/moo.txt: No such file or directory
+  https://git.savannah.gnu.org/cgit/bash.git/commit/?id=36f89ff1d8b761c815d8993e9833e6357a57fc6b
 
-For \xc0\xaf) - /var/mnt/scratch/test-453/urk��moo.txt: Invalid argument
+So fix this by making the trap set a local variable named 'stop' to the
+value 1 and have the loop exit when the local variable 'stop' is 1.
 
-Also gives error for Box filename
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/btrfs/187 | 16 +++++++++++++---
+ 1 file changed, 13 insertions(+), 3 deletions(-)
 
-( this is very much similar to exfat, the only difference is that I do 
-not get Operation not permitted when
-using \xc0\xaf, instead it gives invalid argument.)
+diff --git a/tests/btrfs/187 b/tests/btrfs/187
+index b2d3e4f0..7da09abd 100755
+--- a/tests/btrfs/187
++++ b/tests/btrfs/187
+@@ -64,9 +64,19 @@ dedupe_two_files()
+ 
+ dedupe_files_loop()
+ {
+-	trap "wait; exit" SIGTERM
+-
+-	while true; do
++	local stop=0
++
++	# Avoid executing 'wait' inside the trap, because when we receive
++	# SIGTERM we might be already executing the wait command in the while
++	# loop below. When that is the case, bash 5.0+ with debug enabled prints
++	# a warning message that makes the test fail due to a mismatch with the
++	# golden output. That warning message is the following:
++	#
++	# warning: wait_for: recursively setting old_sigint_handler to wait_sigint_handler: running_trap = 16
++	#
++	trap "stop=1" SIGTERM
++
++	while [ $stop -eq 0 ]; do
+ 		for ((i = 1; i <= 5; i++)); do
+ 			dedupe_two_files &
+ 		done
+-- 
+2.28.0
 
-
-2. UDF ( as per wikipedia - only NULL cannot be used )
-
-For \x2f - /var/mnt/scratch/test-453/urk/moo.txt: No such file or directory
-
-For \xc0\xaf - creates filename something like this 'urk??moo.txt' and 
-does not throw any error.
-( But this seems to be invalid and should have thrown some error)
-
-Also gives error for dotdot entry.
-
-I am not sure why UDF was giving error for / and dot dot entry but then
-I read the following for UDF in one of the man pages which justifies the 
-above errors I think
-
-"Invalid characters such as "NULL" and "/" and  invalid  file
-names  such  as "." and ".." will be translated according to
-the following rule:
-
-Replace the invalid character with an "_," then  append  the
-file name with # followed by a 4 digit hex representation of
-the 16-bit CRC of the original FileIdentifier. For  example,
-the file name ".." will become "__#4C05" "
-
-Source - http://www-it.desy.de/cgi-bin/man-cgi?udfs+7
-
-
-3. JFS ( as per Wikipedia NULL cannot be used )
-
-For \x2f - /var/mnt/scratch/test-453/urk/moo.txt: No such file or directory
-
-For \xc0\xaf - Works fine
-
-Again not sure why / is failing here. Did not find much resource about 
-the restricted filenames for JFS.
-
-
-So as per above all the results, it seems like using \x2f fails for all 
-but \xc0\xaf does work for JFS.
-
-
->
->> Box filename also fails with "Invalid argument" error.
->>
->>
