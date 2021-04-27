@@ -2,90 +2,175 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
+X-Spam-Status: No, score=-5.2 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
+	SPF_PASS,UNPARSEABLE_RELAY,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=no
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CBE80C433B4
-	for <linux-fstests@archiver.kernel.org>; Tue, 27 Apr 2021 20:43:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C1372C433B4
+	for <linux-fstests@archiver.kernel.org>; Tue, 27 Apr 2021 21:00:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id ACF40613B0
-	for <linux-fstests@archiver.kernel.org>; Tue, 27 Apr 2021 20:43:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 99CFD613F3
+	for <linux-fstests@archiver.kernel.org>; Tue, 27 Apr 2021 21:00:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236965AbhD0Uob (ORCPT
+        id S238928AbhD0VBO (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 27 Apr 2021 16:44:31 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53096 "EHLO
+        Tue, 27 Apr 2021 17:01:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57188 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235416AbhD0Uob (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 27 Apr 2021 16:44:31 -0400
-Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C6799C061574;
-        Tue, 27 Apr 2021 13:43:47 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
-        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=2m3ePEN/b0N6S7FfXEnTbvQ+rj6eA3/8NDXHz1WfGDc=; b=vLyGFxYEG9pHXrRCGL8NP5D2m3
-        DL6FnWLtyJYrL7lduj8SDBojHQ7RAdrLiKT82ajmh189BAzJcWwqG8fKZa7OsjTpTeMlBqeTNPIVx
-        W6aTEhv0NwUzEjEKHimVsgS+/ZG9sKzaNMiKFE/VqXGK32g0nTFNpZJ+1lwczuGyHsHpq0+ht2Ea/
-        +HnEFrLYMrRkK6nRNlpZpxe2GhXz9P5nyKnRRW34lWcBl8WkBb4YRK0t0oYBHZn9R4xjblXcQdjyq
-        RQlZfBYR3cEzq5+PdWqlILFjgBuzL/eXZLuZx8a+SdQ8wzJLbid93pRwMCGjLJBzwy4SIL2G93d+r
-        q5yhmF3Q==;
-Received: from willy by casper.infradead.org with local (Exim 4.94 #2 (Red Hat Linux))
-        id 1lbUYB-007Nog-Uo; Tue, 27 Apr 2021 20:43:21 +0000
-Date:   Tue, 27 Apr 2021 21:43:19 +0100
-From:   Matthew Wilcox <willy@infradead.org>
-To:     Kent Overstreet <kent.overstreet@gmail.com>
-Cc:     Eryu Guan <eguan@linux.alibaba.com>, fstests@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org, linux-bcachefs@vger.kernel.org
-Subject: Re: [PATCH 3/3] Use --yes option to lvcreate
-Message-ID: <20210427204319.GD235567@casper.infradead.org>
-References: <20210427164419.3729180-1-kent.overstreet@gmail.com>
- <20210427164419.3729180-4-kent.overstreet@gmail.com>
- <20210427170339.GA9611@e18g06458.et15sqa>
- <YIh0Iy+BiY4zzhB1@moria.home.lan>
+        with ESMTP id S238829AbhD0VBO (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 27 Apr 2021 17:01:14 -0400
+Received: from bhuna.collabora.co.uk (bhuna.collabora.co.uk [IPv6:2a00:1098:0:82:1000:25:2eeb:e3e3])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5974DC061574;
+        Tue, 27 Apr 2021 14:00:30 -0700 (PDT)
+Received: from [127.0.0.1] (localhost [127.0.0.1])
+        (Authenticated sender: shreeya)
+        with ESMTPSA id CD8901F420C0
+Subject: Re: [PATCH] generic/453: Exclude filenames that are not supported by
+ exfat
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     Matthew Wilcox <willy@infradead.org>, fstests@vger.kernel.org,
+        linux-fsdevel@vger.kernel.org, krisman@collabora.com,
+        preichl@redhat.com, kernel@collabora.com
+References: <20210425223105.1855098-1-shreeya.patel@collabora.com>
+ <20210426003430.GH235567@casper.infradead.org>
+ <a49ecbfb-2011-0c7c-4405-b4548d22389d@collabora.com>
+ <20210426123734.GK235567@casper.infradead.org>
+ <bc7a33e8-7e9c-8045-e90e-bb53ec4f2c61@collabora.com>
+ <20210427181116.GH3122235@magnolia>
+From:   Shreeya Patel <shreeya.patel@collabora.com>
+Message-ID: <bfe0fa5b-c23b-a07f-6ebd-addbff62bae5@collabora.com>
+Date:   Wed, 28 Apr 2021 02:30:21 +0530
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.9.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <YIh0Iy+BiY4zzhB1@moria.home.lan>
+In-Reply-To: <20210427181116.GH3122235@magnolia>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
+Content-Language: en-US
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Apr 27, 2021 at 04:29:23PM -0400, Kent Overstreet wrote:
-> On Wed, Apr 28, 2021 at 01:03:39AM +0800, Eryu Guan wrote:
-> > On Tue, Apr 27, 2021 at 12:44:19PM -0400, Kent Overstreet wrote:
-> > > This fixes spurious test failures caused by broken pipe messages.
-> > > 
-> > > Signed-off-by: Kent Overstreet <kent.overstreet@gmail.com>
-> > > ---
-> > >  tests/generic/081 | 2 +-
-> > >  tests/generic/108 | 2 +-
-> > >  2 files changed, 2 insertions(+), 2 deletions(-)
-> > > 
-> > > diff --git a/tests/generic/081 b/tests/generic/081
-> > > index 5dff079852..26702007ab 100755
-> > > --- a/tests/generic/081
-> > > +++ b/tests/generic/081
-> > > @@ -70,7 +70,7 @@ _scratch_mkfs_sized $((300 * 1024 * 1024)) >>$seqres.full 2>&1
-> > >  $LVM_PROG vgcreate -f $vgname $SCRATCH_DEV >>$seqres.full 2>&1
-> > >  # We use yes pipe instead of 'lvcreate --yes' because old version of lvm
-> > >  # (like 2.02.95 in RHEL6) don't support --yes option
-> > > -yes | $LVM_PROG lvcreate -L 256M -n $lvname $vgname >>$seqres.full 2>&1
-> > > +$LVM_PROG lvcreate --yes -L 256M -n $lvname $vgname >>$seqres.full 2>&1
-> > 
-> > Please see above comments, we use yes pipe intentionally. I don't see
-> > how this would result in broken pipe. Would you please provide more
-> > details? And let's see if we could fix the broken pipe issue.
-> 
-> If lvcreate never ask y/n - never reads from standard input, then echo sees a
-> broken pipe when it tries to write. That's what I get without this patch.
 
-I think it's something in how ktest sets up the environment.  I also see
-the SIGPIPEs when using your ktest scripts, but not when ssh'ing into
-the guest and running the test.
+On 27/04/21 11:41 pm, Darrick J. Wong wrote:
+> On Tue, Apr 27, 2021 at 04:43:05PM +0530, Shreeya Patel wrote:
+>> On 26/04/21 6:07 pm, Matthew Wilcox wrote:
+>>> On Mon, Apr 26, 2021 at 05:27:51PM +0530, Shreeya Patel wrote:
+>>>> On 26/04/21 6:04 am, Matthew Wilcox wrote:
+>>>>> On Mon, Apr 26, 2021 at 04:01:05AM +0530, Shreeya Patel wrote:
+>>>>>> exFAT filesystem does not support the following character codes
+>>>>>> 0x0000 - 0x001F ( Control Codes ), /, ?, :, ", \, *, <, |, >
+>>>>> ummm ...
+>>>>>
+>>>>>> -# Fake slash?
+>>>>>> -setf "urk\xc0\xafmoo" "FAKESLASH"
+>>>>> That doesn't use any of the explained banned characters.  It uses 0xc0,
+>>>>> 0xaf.
+>>>>>
+>>>>> Now, in utf-8, that's an nonconforming sequence.  "The Unicode and UCS
+>>>>> standards require that producers of UTF-8 shall use the shortest form
+>>>>> possible, for example, producing a two-byte sequence with first byte 0xc0
+>>>>> is nonconforming.  Unicode 3.1 has added the requirement that conforming
+>>>>> programs must not accept non-shortest forms in their input."
+>>>>>
+>>>>> So is it that exfat is rejecting nonconforming sequences?  Or is it
+>>>>> converting the nonconforming sequence from 0xc0 0xaf to the conforming
+>>>>> sequence 0x2f, and then rejecting it (because it's '/')?
+>>>>>
+>>>> No, I don't think exfat is not converting nonconforming sequence from 0xc0
+>>>> 0xaf
+>>>> to the conforming sequence 0x2f.
+>>>> Because I get different outputs when tried with both ways.
+>>>> When I create a file with "urk\xc0\xafmoo", I get output as "Operation not
+>>>> permitted"
+>>>> and when I create it as "urk\x2fmoo", it gives "No such file or directory
+>>>> error" or
+>>>> you can consider this error as "Invalid argument"
+>>>> ( because that's what I get when I try for other characters like |, :, ?,
+>>>> etc )
+>>> I think we need to understand this before skipping the test.  Does it
+>>> also fail, eg, on cifs, vfat, jfs or udf?
+>>
+>> I tested it for VFAT, UDF and JFS and following are the results.
+>>
+>>
+>> 1. VFAT ( as per wikipedia 0x00-0x1F 0x7F " * / : < > ? \ | are reserved
+>> characters)
+>>
+>> For \x2f - /var/mnt/scratch/test-453/urk/moo.txt: No such file or directory
+>>
+>> For \xc0\xaf) - /var/mnt/scratch/test-453/urk��moo.txt: Invalid argument
+>>
+>> Also gives error for Box filename
+>>
+>> ( this is very much similar to exfat, the only difference is that I do not
+>> get Operation not permitted when
+>> using \xc0\xaf, instead it gives invalid argument.)
+> vfat checks for those invalid characters, see msdos_format_name() and
+> vfat_is_used_badchars().
+>
+> TBH I think these tests (g/453 and g/454) are probably only useful for
+> filesystems that allow unrestricted byte streams for names.
 
-What that thing is, I don't know.  I'm not tall enough to understand
-signal handling.
+
+So it means I should just not run this test for all the fs that have 
+some restricted characters.
+But what about the other filenames which work fine. Don't we want to 
+test them?
+
+
+>> 2. UDF ( as per wikipedia - only NULL cannot be used )
+>>
+>> For \x2f - /var/mnt/scratch/test-453/urk/moo.txt: No such file or directory
+>>
+>> For \xc0\xaf - creates filename something like this 'urk??moo.txt' and does
+>> not throw any error.
+>> ( But this seems to be invalid and should have thrown some error)
+>>
+>> Also gives error for dotdot entry.
+>>
+>> I am not sure why UDF was giving error for / and dot dot entry but then
+>> I read the following for UDF in one of the man pages which justifies the
+>> above errors I think
+>>
+>> "Invalid characters such as "NULL" and "/" and  invalid  file
+>> names  such  as "." and ".." will be translated according to
+>> the following rule:
+>>
+>> Replace the invalid character with an "_," then  append  the
+>> file name with # followed by a 4 digit hex representation of
+>> the 16-bit CRC of the original FileIdentifier. For  example,
+>> the file name ".." will become "__#4C05" "
+>>
+>> Source - http://www-it.desy.de/cgi-bin/man-cgi?udfs+7
+> That's Solaris.
+Sorry missed that.
+>
+>> 3. JFS ( as per Wikipedia NULL cannot be used )
+>>
+>> For \x2f - /var/mnt/scratch/test-453/urk/moo.txt: No such file or directory
+>>
+>> For \xc0\xaf - Works fine
+>>
+>> Again not sure why / is failing here. Did not find much resource about the
+>> restricted filenames for JFS.
+> "/" is a path separator, it should always return ENOENT (unless you
+> created $SCRATCH_MNT/test-453/urk/moo.txt).  0x2f is the ascii encoding
+> for a slash.
+
+
+Hmmm, makes sense. Myabe that is why we are using \xc0\xaf instead of \x2f.
+
+
+>
+>> So as per above all the results, it seems like using \x2f fails for all but
+>> \xc0\xaf does work for JFS.
+> <nod>
+>
+> --D
+>
+>>
+>>>> Box filename also fails with "Invalid argument" error.
+>>>>
+>>>>
