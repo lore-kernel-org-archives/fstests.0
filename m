@@ -2,82 +2,196 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ECDA8C433B4
-	for <linux-fstests@archiver.kernel.org>; Wed, 28 Apr 2021 13:51:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 91971C433B4
+	for <linux-fstests@archiver.kernel.org>; Wed, 28 Apr 2021 17:39:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B72E761107
-	for <linux-fstests@archiver.kernel.org>; Wed, 28 Apr 2021 13:51:12 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5901361441
+	for <linux-fstests@archiver.kernel.org>; Wed, 28 Apr 2021 17:39:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234161AbhD1Nv4 (ORCPT
+        id S242335AbhD1RkM (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 28 Apr 2021 09:51:56 -0400
-Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:59229 "EHLO
-        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S239013AbhD1Nvz (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 28 Apr 2021 09:51:55 -0400
-Received: from cwcc.thunk.org (pool-72-74-133-215.bstnma.fios.verizon.net [72.74.133.215])
-        (authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 13SDourD012532
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Wed, 28 Apr 2021 09:50:56 -0400
-Received: by cwcc.thunk.org (Postfix, from userid 15806)
-        id 3A78115C3C3D; Wed, 28 Apr 2021 09:50:56 -0400 (EDT)
-Date:   Wed, 28 Apr 2021 09:50:56 -0400
-From:   "Theodore Ts'o" <tytso@mit.edu>
+        Wed, 28 Apr 2021 13:40:12 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:27178 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S242592AbhD1RjT (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 28 Apr 2021 13:39:19 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1619631513;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=rQOZN7IxjSHlv0oOnrka40qKI0FY8ICE6KaNY+o3iY0=;
+        b=SzrI4WRxixN2z5yPzurHs0eHLxkVyYfJ66JTT08RXbZ4IOWrXLmngvPYKLfhjfXodpR23d
+        6+tmcsd+iNlYqndW/v12kUqISi5bJH1TL7cNc6xvhxrsAoQ+XnJ6QrTcuTEOCtKx7/YVgZ
+        rzls1ute4ez/dFaz+N99Q3yALmanrEU=
+Received: from mail-qv1-f70.google.com (mail-qv1-f70.google.com
+ [209.85.219.70]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-208-05pQvFdWMdi9Z7F5Yj2btw-1; Wed, 28 Apr 2021 13:38:31 -0400
+X-MC-Unique: 05pQvFdWMdi9Z7F5Yj2btw-1
+Received: by mail-qv1-f70.google.com with SMTP id g26-20020a0caada0000b02901b93eb92373so7603058qvb.3
+        for <fstests@vger.kernel.org>; Wed, 28 Apr 2021 10:38:31 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=rQOZN7IxjSHlv0oOnrka40qKI0FY8ICE6KaNY+o3iY0=;
+        b=K07yaPN0hk0iLmVLpEIzSBnOigKPFJJ1plHgBhK7+cXh7Pwi0N9YL9O3wF7bq2sm34
+         GoDdGENWnvf/613vj8pp42KX2C8TTOu9Xe5QA41YbWMGzEBzUGu6LVdHQv3FZ2CIlzFa
+         xfZE7SaXMLcwStuM5k2P9V9nXNa10dctEV9MRyiIZh5CFgdF2U11iD29OCTmcfXoc18i
+         fLPvtIn/5eDz6D1sWFtRI9gUgKsXwaDP5pl2PoDTBHR1a/UClRa9RLFD/DkSq4siZb5w
+         1cqX5EL0kLcaS7RwDktiM8ruJS5x9f9FjeYJOEmviwLoRTNTWSOZ3sG+a9pWr+ScsHLH
+         DD4A==
+X-Gm-Message-State: AOAM530FHl5g+HbyW4ii63VLUHu9qsxHiWUQkmeCprLUvSXaPD3zjsbN
+        VVVjpvwBmMa4ZSzMbVLXBdyAqyimWcmbYuJrUUrpsf9OHT1SM6roNkf/a8zAgTHyUu3wNvZBUiN
+        3mtpFMgSDew0Rd9p1xg==
+X-Received: by 2002:ac8:6b05:: with SMTP id w5mr15035425qts.204.1619631511110;
+        Wed, 28 Apr 2021 10:38:31 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJwf/gvo0Tj3PnvBCvo9l1LOCAkqfJcbUQU0I6jOrFPeF8yX2IhIeUfDy/39NEuArTZP0BpPxA==
+X-Received: by 2002:ac8:6b05:: with SMTP id w5mr15035397qts.204.1619631510766;
+        Wed, 28 Apr 2021 10:38:30 -0700 (PDT)
+Received: from bfoster ([98.216.211.229])
+        by smtp.gmail.com with ESMTPSA id n18sm472335qtv.87.2021.04.28.10.38.29
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 28 Apr 2021 10:38:30 -0700 (PDT)
+Date:   Wed, 28 Apr 2021 13:38:27 -0400
+From:   Brian Foster <bfoster@redhat.com>
 To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     Shreeya Patel <shreeya.patel@collabora.com>,
-        Matthew Wilcox <willy@infradead.org>, fstests@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org, krisman@collabora.com,
-        preichl@redhat.com, kernel@collabora.com
-Subject: Re: [PATCH] generic/453: Exclude filenames that are not supported by
- exfat
-Message-ID: <YIloQDGP+0mRQdbP@mit.edu>
-References: <20210425223105.1855098-1-shreeya.patel@collabora.com>
- <20210426003430.GH235567@casper.infradead.org>
- <a49ecbfb-2011-0c7c-4405-b4548d22389d@collabora.com>
- <20210426123734.GK235567@casper.infradead.org>
- <bc7a33e8-7e9c-8045-e90e-bb53ec4f2c61@collabora.com>
- <20210427181116.GH3122235@magnolia>
+Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org, guan@eryu.me
+Subject: Re: [PATCH 1/2] xfs: test what happens when we reset the root dir
+ and it has xattrs
+Message-ID: <YImdkx6ofgQ1t8CD@bfoster>
+References: <161958291787.3452247.15296911612919535588.stgit@magnolia>
+ <161958292387.3452247.4459342156885074164.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210427181116.GH3122235@magnolia>
+In-Reply-To: <161958292387.3452247.4459342156885074164.stgit@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Apr 27, 2021 at 11:11:16AM -0700, Darrick J. Wong wrote:
+On Tue, Apr 27, 2021 at 09:08:43PM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
 > 
-> TBH I think these tests (g/453 and g/454) are probably only useful for
-> filesystems that allow unrestricted byte streams for names.
+> Make sure that we can reset the root directory and the xattrs are erased
+> properly.
+> 
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> ---
+>  tests/xfs/757     |   63 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/757.out |    7 ++++++
+>  tests/xfs/group   |    1 +
+>  3 files changed, 71 insertions(+)
+>  create mode 100755 tests/xfs/757
+>  create mode 100644 tests/xfs/757.out
+> 
+> 
+> diff --git a/tests/xfs/757 b/tests/xfs/757
+> new file mode 100755
+> index 00000000..0b9914f6
+> --- /dev/null
+> +++ b/tests/xfs/757
+> @@ -0,0 +1,63 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0-or-later
+> +# Copyright (c) 2021 Oracle.  All Rights Reserved.
+> +#
+> +# FS QA Test No. 757
+> +#
+> +# Make sure that attrs are handled properly when repair has to reset the root
+> +# directory.
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 7 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -rf $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +. ./common/populate
+> +. ./common/fuzzy
+> +
+> +# real QA test starts here
+> +_supported_fs xfs
+> +_require_scratch_nocheck
+> +
+> +rm -f $seqres.full
+> +
+> +echo "Format and populate btree attr root dir"
+> +_scratch_mkfs > "$seqres.full" 2>&1
+> +_scratch_mount
+> +
+> +blksz="$(stat -f -c '%s' "${SCRATCH_MNT}")"
+> +__populate_create_attr "${SCRATCH_MNT}" "$((64 * blksz / 40))" true
+> +_scratch_unmount
+> +
+> +echo "Break the root directory"
+> +_scratch_xfs_fuzz_metadata_field core.mode zeroes 'sb 0' 'addr rootino' >> $seqres.full 2>&1
+> +
+> +echo "Detect bad root directory"
+> +_scratch_xfs_repair -n >> $seqres.full 2>&1 && \
+> +	echo "Should have detected bad root dir"
+> +
+> +echo "Fix bad root directory"
+> +_scratch_xfs_repair >> $seqres.full 2>&1
+> +
+> +echo "Detect fixed root directory"
+> +_scratch_xfs_repair -n >> $seqres.full 2>&1
+> +
+> +echo "Mount test"
+> +_scratch_mount
+> +
 
-I'm actually a little puzzled about why these tests should exist:
+Is the regression test here that attrs are erased after this sequence
+(as suggested in the commit log), or that the fs mounts, or both? I'm
+basically just wondering if we should also dump the xattrs on the root
+dir as a last step (and expect NULL output)..? That aside:
 
-# Create a directory with multiple filenames that all appear the same
-# (in unicode, anyway) but point to different inodes.  In theory all
-# Linux filesystems should allow this (filenames are a sequence of
-# arbitrary bytes) even if the user implications are horrifying.
+Reviewed-by: Brian Foster <bfoster@redhat.com>
 
-Why do we care about testing this?  The assertion "In all theory all
-Linux filesystems should allow this" is clearly not true --- if you
-enable unicode support for ext4 or f2fs, this will no longer be true,
-and this is considered by some a _feature_ not a bug --- precisely
-_because_ the user implications are horrifying.
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/757.out b/tests/xfs/757.out
+> new file mode 100644
+> index 00000000..9f3aed5a
+> --- /dev/null
+> +++ b/tests/xfs/757.out
+> @@ -0,0 +1,7 @@
+> +QA output created by 757
+> +Format and populate btree attr root dir
+> +Break the root directory
+> +Detect bad root directory
+> +Fix bad root directory
+> +Detect fixed root directory
+> +Mount test
+> diff --git a/tests/xfs/group b/tests/xfs/group
+> index 731f869c..76e31167 100644
+> --- a/tests/xfs/group
+> +++ b/tests/xfs/group
+> @@ -528,5 +528,6 @@
+>  537 auto quick
+>  538 auto stress
+>  539 auto quick mount
+> +757 auto quick attr repair
+>  908 auto quick bigtime
+>  909 auto quick bigtime quota
+> 
 
-So why does these tests exist?  Darrick, I see you added them in 2017
-to test whether or not xfs_scrub will warn about confuable names, if
-_check_xfs_scrub_does_unicode is true.  So we already understand that
-it's possible for a file system checker to complain that these file
-names are bad.
-
-It's not at all clear to me that asserting that all Linux file systems
-_must_ treat file names as "bag of bits" and not apply any kind of
-unicode normalization or strict unicode validation is a valid thing to
-test for in 2021.
-
-					- Ted
