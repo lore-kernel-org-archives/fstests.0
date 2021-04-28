@@ -2,104 +2,101 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4500CC433ED
-	for <linux-fstests@archiver.kernel.org>; Wed, 28 Apr 2021 06:50:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AC85AC433B4
+	for <linux-fstests@archiver.kernel.org>; Wed, 28 Apr 2021 08:46:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1A5B8613D8
-	for <linux-fstests@archiver.kernel.org>; Wed, 28 Apr 2021 06:50:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7636961418
+	for <linux-fstests@archiver.kernel.org>; Wed, 28 Apr 2021 08:46:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231578AbhD1Gva (ORCPT
+        id S229643AbhD1IrB (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 28 Apr 2021 02:51:30 -0400
-Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:38240 "EHLO
-        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S229643AbhD1Gva (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 28 Apr 2021 02:51:30 -0400
-Received: from pps.filterd (m0098404.ppops.net [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com (8.16.0.43/8.16.0.43) with SMTP id 13S6YVMU113317;
-        Wed, 28 Apr 2021 02:50:44 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=subject : to :
- references : from : message-id : date : mime-version : in-reply-to :
- content-type : content-transfer-encoding; s=pp1;
- bh=8d+7Y2R4nSFQ36ArtiYC1U8cbvx5JI51aJ5be9ktRIs=;
- b=omkverR9Eam43+D1V+cDTf0uAUXhcU1qoTcOoFLvcUwLAB/irrffhK97awLYlX8EFqD/
- x01CAvHxPFus3nNws1SlYrnuoLKrL2g2lCiod7ugvPs90jLUzPPa3rb+P2d3nvNBuGL5
- OLtQZFlxNBsHAzSWlWLn40g/us9vUTLkG539U+jH9icgV1UMc+gWGl3McpZZDFNJvWPg
- vLb/+fUXDyvfKYoahd4L/EulbV1ZJLyN/suViTTc2DMTBvyKEYljlTGH+pUPvm4NAzC1
- WZf/J/L7B2Nl7/9J0N+7pJjvtkzedB2Kx7aLc/SEWJmTNa4opmHYC6N6c6Slq/RLNjeV IQ== 
-Received: from ppma01fra.de.ibm.com (46.49.7a9f.ip4.static.sl-reverse.com [159.122.73.70])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 3872dh8ks2-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Wed, 28 Apr 2021 02:50:43 -0400
-Received: from pps.filterd (ppma01fra.de.ibm.com [127.0.0.1])
-        by ppma01fra.de.ibm.com (8.16.0.43/8.16.0.43) with SMTP id 13S6mHtL000742;
-        Wed, 28 Apr 2021 06:50:41 GMT
-Received: from b06cxnps4074.portsmouth.uk.ibm.com (d06relay11.portsmouth.uk.ibm.com [9.149.109.196])
-        by ppma01fra.de.ibm.com with ESMTP id 384ay80y55-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Wed, 28 Apr 2021 06:50:41 +0000
-Received: from d06av24.portsmouth.uk.ibm.com (d06av24.portsmouth.uk.ibm.com [9.149.105.60])
-        by b06cxnps4074.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 13S6ockY45154698
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Wed, 28 Apr 2021 06:50:38 GMT
-Received: from d06av24.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 2C4FC42045;
-        Wed, 28 Apr 2021 06:50:38 +0000 (GMT)
-Received: from d06av24.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 9808F42047;
-        Wed, 28 Apr 2021 06:50:37 +0000 (GMT)
-Received: from li-00db19cc-1f39-11b2-a85c-fed2f2ec2619.ibm.com (unknown [9.85.96.232])
-        by d06av24.portsmouth.uk.ibm.com (Postfix) with ESMTPS;
-        Wed, 28 Apr 2021 06:50:37 +0000 (GMT)
-Subject: Re: [PATCH v2 2/3] idmapped-mounts.c: Use renameat instead of
- renameat2
-To:     Yang Xu <xuyang2018.jy@fujitsu.com>, fstests@vger.kernel.org
-References: <1619418187-19951-1-git-send-email-xuyang2018.jy@fujitsu.com>
- <1619418187-19951-2-git-send-email-xuyang2018.jy@fujitsu.com>
-From:   Anju T Sudhakar <anju@linux.vnet.ibm.com>
-Message-ID: <153ef5a1-a0fe-57c9-c00e-ec1224b2b1d3@linux.vnet.ibm.com>
-Date:   Wed, 28 Apr 2021 12:20:35 +0530
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.8.1
+        Wed, 28 Apr 2021 04:47:01 -0400
+Received: from esa6.hgst.iphmx.com ([216.71.154.45]:48814 "EHLO
+        esa6.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231635AbhD1IrA (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 28 Apr 2021 04:47:00 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1619599576; x=1651135576;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=ZMRNZluHliYRaQm/Ek5AWW77WnH6wwpqF1l5RETKePI=;
+  b=S9YyHMS2LQljtxF28z7XkWkRsdVPIBhiTuBuhYUMk30XzP35wI5Ah5Bs
+   WjU9MSy3Ft4oP2PNoLn/DmSHTAhsoDygH0Bi3mmQ2S8jRkCvJyKvqfnA9
+   bCr2hdnf3OIz4vp4EUfBNAwgdUhXjITHLOyx3pa2B7hh/spqs3cTMrO4I
+   En280spaj6MQ/LVjWsfsGGzPas7Ye5LEBiX8p+w1N0SbMQRXDvVsqSvWo
+   7VAzJgnKl3xHfFjTGbN35tHVQ1cEGGD9Jt5kaGTAkdbrRO5hy5BepIy/j
+   Li2WaEZ1E6G84LYT/YlOOj0gX6fx9JTaggXHf64d4qy2MGvKe9UQGfc4E
+   Q==;
+IronPort-SDR: BKI49OUIyIQ3dIvkT0YRHynOuvcvSNH1mcuvWsjLPPkZjgGkf327ffkddSF9MoXatUNs02sOI5
+ GyBcpW2hB2BvG3qfQJbX1L3+Dd984NjpwcUxhEyZuGlS6Ma57Iz4ZiD/wCjjQKaFUXbd/GDg7E
+ UpzafMcrCIpmy+8khUToZcQVNrISlaWfkpfJQUPB6qZlxHtVCDcE2Sy3sHRLqrDOmxFyfk73Ow
+ zrJyo18EeYU4WegbRGYLHXODLx0jI3QrLgcU21zyzWJjXDldukZBO5rogAxMerVDbRuoJr/Tqv
+ Ee0=
+X-IronPort-AV: E=Sophos;i="5.82,257,1613404800"; 
+   d="scan'208";a="167061144"
+Received: from uls-op-cesaip01.wdc.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
+  by ob1.hgst.iphmx.com with ESMTP; 28 Apr 2021 16:46:16 +0800
+IronPort-SDR: M17NkKZh7ZmoUwCpLEYcRqxZ9z0zR/CfYk9uDxt1da9UHCwJpak4juev6HWexdN1yhuHc9qWiM
+ OusMsLiozYgvYwwUtxKBG+WoZMVx5gw4mpQe8+NVBwtMyoCMgI8VYi3YUY7eFnNkXnbXmTBwen
+ 67cz8HT5Up/b/917iiztSQoHgVQ1RqBPtIGzwdxsr/HbR2FgW57nJyIf3MBjEwkTiTuJ1c4A4U
+ ds+i7ztWnc3IkSuydyFiNofBzemQJnmD1fBN/p9JXWcWs2xc7JGm6jnhIvnDk0xNvg3zueua7Y
+ oaYexVDK7TwoFeXQd6w6mV4z
+Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
+  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 28 Apr 2021 01:26:36 -0700
+IronPort-SDR: xD4i6ogex6DQssHFpzsvYUg6tqWWzXyc2CE/SvTQlrtZNQkOZsHHjpBiyHe9Hmsiswt8+5ko6Z
+ Du3vlhhCtAUMi/3rCwDLkqx8fgDPtYJMqsEEhIyBgIACnHr1PfYZsEwo1s7KOSCTeqZLV5MXMb
+ zULkwkYqsLETX7gK3f8wUh+G4bkxvdzq2c+SWzs923RBoMC8dE8XSOvYvUWtjvIxVqjUkI22FA
+ pQJRX0M2wQq/JPLbJRamNd7NBGmsTJAMPxP8LYo0hbCsrzw2Nq6sFrOLKYCzPEXlpa3KI6ulim
+ xzE=
+WDCIronportException: Internal
+Received: from unknown (HELO redsun60.ssa.fujisawa.hgst.com) ([10.149.66.36])
+  by uls-op-cesaip02.wdc.com with ESMTP; 28 Apr 2021 01:46:16 -0700
+From:   Johannes Thumshirn <johannes.thumshirn@wdc.com>
+To:     Eryu Guan <guan@eryu.me>, linux-btrfs@vger.kernel.org
+Cc:     fstests@vger.kernel.org, Naohiro Aota <naohiro.aota@wdc.com>,
+        Johannes Thumshirn <johannes.thumshirn@wdc.com>
+Subject: [PATCH v2 0/2] fstests: first few support patches for zoned btrfs
+Date:   Wed, 28 Apr 2021 17:46:06 +0900
+Message-Id: <20210428084608.21213-1-johannes.thumshirn@wdc.com>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
-In-Reply-To: <1619418187-19951-2-git-send-email-xuyang2018.jy@fujitsu.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Content-Language: en-US
-X-TM-AS-GCONF: 00
-X-Proofpoint-GUID: XFimGWnnlxWA3xNFcoz4HTZ6435F1woB
-X-Proofpoint-ORIG-GUID: XFimGWnnlxWA3xNFcoz4HTZ6435F1woB
-X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.391,18.0.761
- definitions=2021-04-28_03:2021-04-27,2021-04-28 signatures=0
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 spamscore=0 phishscore=0
- impostorscore=0 adultscore=0 lowpriorityscore=0 clxscore=1011
- mlxlogscore=965 suspectscore=0 mlxscore=0 bulkscore=0 priorityscore=1501
- malwarescore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2104060000 definitions=main-2104280042
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+This series adds preparations for xfstests for testing on zoned block
+devices and a first test for btrfs' zoned block device support.
 
-On 4/26/21 11:53 AM, Yang Xu wrote:
-> We don't add fallback for renameat2, so it build failed on old kernel.
-> Also, renameat2() man-pages said as below:
-> "renameat2() has an additional flags argument.  A renameat2() call with
-> a zero flags argument is equivalent to renameat()."
->
-> In this src file, it uses zero flag for all renameat2 call. So we can use
-> renameat directly.
->
-> Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
-> ---
+General zoned block device support for btrfs was merged with v5.12 and the
+zone auto reclaim feature is staged to be merged with v5.13.
 
+Changes since v1:
+- rebased onto master
+- drop unnecessary patch
+- comment sleep and commit= mount option use
 
-Looks good. This fixes the build error.
+Johannes Thumshirn (1):
+  btrfs: add test for zone auto reclaim
 
-Reviewed-by:Anju T Sudhakar<anju@linux.vnet.ibm.com>
+Naohiro Aota (1):
+  common/rc: introduce zone check commands
+
+ common/config       |   1 +
+ common/rc           |  44 +++++++++++++++++++
+ tests/btrfs/236     | 103 ++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/236.out |   2 +
+ tests/btrfs/group   |   1 +
+ 5 files changed, 151 insertions(+)
+ create mode 100755 tests/btrfs/236
+ create mode 100644 tests/btrfs/236.out
+
+-- 
+2.31.1
 
