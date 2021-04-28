@@ -7,39 +7,39 @@ X-Spam-Status: No, score=-16.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0F7F6C43600
-	for <linux-fstests@archiver.kernel.org>; Wed, 28 Apr 2021 04:09:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9C421C43461
+	for <linux-fstests@archiver.kernel.org>; Wed, 28 Apr 2021 04:09:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E51CA60720
+	by mail.kernel.org (Postfix) with ESMTP id 82C59613ED
 	for <linux-fstests@archiver.kernel.org>; Wed, 28 Apr 2021 04:09:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234376AbhD1EJu (ORCPT
+        id S234436AbhD1EJt (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 28 Apr 2021 00:09:50 -0400
-Received: from mail.kernel.org ([198.145.29.99]:53932 "EHLO mail.kernel.org"
+        Wed, 28 Apr 2021 00:09:49 -0400
+Received: from mail.kernel.org ([198.145.29.99]:53786 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S233960AbhD1EJp (ORCPT <rfc822;fstests@vger.kernel.org>);
+        id S234376AbhD1EJp (ORCPT <rfc822;fstests@vger.kernel.org>);
         Wed, 28 Apr 2021 00:09:45 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 5ABFA613F1;
-        Wed, 28 Apr 2021 04:09:01 +0000 (UTC)
+Received: by mail.kernel.org (Postfix) with ESMTPSA id A4A066140B;
+        Wed, 28 Apr 2021 04:08:50 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1619582941;
-        bh=lW7lFlbmUaXKOOdn5osdf44wOyG07HxU6Aquzssyb0Y=;
+        s=k20201202; t=1619582930;
+        bh=4PwztGnSxWZ/VL6GvbuVYk2rwUt/YXaCyz2ijRT7LHs=;
         h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=rinPTcr2Gyo5N2/sRkW6oMJaQKlnq5FMAqETGXaiE3IIXvEYgsgJpIw0VnkhCChCn
-         W8rSZsyJNNci2A61EUs8hvRkNU2r/GRU1GVVtpsUej5545BlWj2ZFKrhYZVrPzHGpA
-         DxJNjvQLtcqtBr9oogSU5i+oH34KL9E9iUxrt88AWtxcEVNOl7oSO6m7HuwxN80RpP
-         RKBB0VAfN2VTHLIGXGQKRevLewBxXNRHNj3Wn0pLHu/HvYwssli0fIOsKRGx72jgbS
-         BXjYtNIWlHb1k4c5VQtKTTvHklNFhzG3W6tbNVLFYqpCUTPp6HgqoeiIiUo8nG8UlD
-         FIMdRcDabMy4A==
-Subject: [PATCH 1/5] xfs/276: remove unnecessary mkfs golden output
+        b=dlbWci5t2n/UQv3wyarjorqGEDDuUfbknxOrEYI5Bhg2jwk8USDAs3sKntRTEm8lO
+         JcYd8U8z43CVNfJX0XnhKpOSKWQBE9aT7lp18RlPziPZlBthXuIwp+ajGsxnD4jmFk
+         O62pcEw97uMmnlkKZjDjrzbpHGe9Lbor5rCm6oW7JhwQEwF8FNC/rf3Mmo1eLtpCIq
+         la7sS/HCZ46J6ulLmFOvjmCOz28pZ9FcbAdJgzC+XuO7PD++T9KQo7AAXX02V8N8FH
+         pAfigX/xwlg1N6QEAYmE2q8g4LS5mnc/zPWVFJj19QSD/N7U+IflJL08SIHGNpEcEV
+         gDWvIKwF5HKIg==
+Subject: [PATCH 2/2] xfs/010: filter out bad finobt levels complaint
 From:   "Darrick J. Wong" <djwong@kernel.org>
 To:     djwong@kernel.org, guaneryu@gmail.com
 Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me
-Date:   Tue, 27 Apr 2021 21:09:00 -0700
-Message-ID: <161958294062.3452351.18374824154438201788.stgit@magnolia>
-In-Reply-To: <161958293466.3452351.14394620932744162301.stgit@magnolia>
-References: <161958293466.3452351.14394620932744162301.stgit@magnolia>
+Date:   Tue, 27 Apr 2021 21:08:50 -0700
+Message-ID: <161958292995.3452247.16052548384852587095.stgit@magnolia>
+In-Reply-To: <161958291787.3452247.15296911612919535588.stgit@magnolia>
+References: <161958291787.3452247.15296911612919535588.stgit@magnolia>
 User-Agent: StGit/0.19
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -50,28 +50,25 @@ X-Mailing-List: fstests@vger.kernel.org
 
 From: Darrick J. Wong <djwong@kernel.org>
 
-A previous update to this test dropped the clause where the mkfs
-standard output gets sent to /dev/null.  The filtered mkfs output isn't
-needed here and it breaks the test, so fix that.
+Since we're adding to xfs_repair the ability to warn about bad finobt
+levels, filter that out.
 
-Fixes: e97f96e5 ("xfs/27[26]: force realtime on or off as needed")
 Signed-off-by: Darrick J. Wong <djwong@kernel.org>
 ---
- tests/xfs/276 |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ tests/xfs/010 |    1 +
+ 1 file changed, 1 insertion(+)
 
 
-diff --git a/tests/xfs/276 b/tests/xfs/276
-index 6e2b2fb4..afea48ad 100755
---- a/tests/xfs/276
-+++ b/tests/xfs/276
-@@ -35,7 +35,7 @@ _require_test_program "punch-alternating"
- rm -f "$seqres.full"
+diff --git a/tests/xfs/010 b/tests/xfs/010
+index 95cc2555..a9394077 100755
+--- a/tests/xfs/010
++++ b/tests/xfs/010
+@@ -114,6 +114,7 @@ _corrupt_finobt_root $SCRATCH_DEV
  
- echo "Format and mount"
--_scratch_mkfs | _filter_mkfs 2> "$tmp.mkfs"
-+_scratch_mkfs | _filter_mkfs 2> "$tmp.mkfs" >/dev/null
- . $tmp.mkfs
- cat "$tmp.mkfs" > $seqres.full
- _scratch_mount
+ filter_finobt_repair() {
+ 	sed -e '/^agi has bad CRC/d' \
++	    -e '/^bad levels/d' \
+ 	    -e '/^bad finobt block/d' | \
+ 		_filter_repair_lostblocks
+ }
 
