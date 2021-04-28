@@ -7,129 +7,108 @@ X-Spam-Status: No, score=-16.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 20150C433B4
-	for <linux-fstests@archiver.kernel.org>; Wed, 28 Apr 2021 17:48:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BD1FDC433ED
+	for <linux-fstests@archiver.kernel.org>; Wed, 28 Apr 2021 18:04:19 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D445F613DC
-	for <linux-fstests@archiver.kernel.org>; Wed, 28 Apr 2021 17:48:01 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6246161418
+	for <linux-fstests@archiver.kernel.org>; Wed, 28 Apr 2021 18:04:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242462AbhD1Rsp (ORCPT
+        id S241831AbhD1SFD (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 28 Apr 2021 13:48:45 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:60408 "EHLO
+        Wed, 28 Apr 2021 14:05:03 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:43356 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S242778AbhD1Rsn (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 28 Apr 2021 13:48:43 -0400
+        by vger.kernel.org with ESMTP id S239936AbhD1SFC (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 28 Apr 2021 14:05:02 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1619632078;
+        s=mimecast20190719; t=1619633057;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=O6agX5tigvN+5FOe9w4Hj66VlzpPTJCuQDFa6uDYsO4=;
-        b=IdZ4QEHBHPdp+p0RC/4vzkpYRxCuk1AzQj7HuP228JiS9+yiXUWAZLdkhq7jG2tFfVZ2YZ
-        /OIyywXbs3KGBfyZUECEF4s9NOHVQILQElX4KmZI6p3AhBGYOAE7Z9Z2R1+l7C/qpJi9gn
-        jEdykhVmkLsWgbJqA4M4p8uTvHSINHY=
-Received: from mail-qv1-f69.google.com (mail-qv1-f69.google.com
- [209.85.219.69]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-581-BYbq7emYOt2zfSV5jfaOwA-1; Wed, 28 Apr 2021 13:47:55 -0400
-X-MC-Unique: BYbq7emYOt2zfSV5jfaOwA-1
-Received: by mail-qv1-f69.google.com with SMTP id l61-20020a0c84430000b02901a9a7e363edso20427113qva.16
-        for <fstests@vger.kernel.org>; Wed, 28 Apr 2021 10:47:55 -0700 (PDT)
+        bh=xytN0pNzBMfuQW8ZuNkzPJq4Fe6+Yb1JTf4mTX9Mv8w=;
+        b=J13fABeIJFnKn9v8qWYAXQ/0E95V5VEQOJ7Berfv+gdQ3lwNJ++Yts4wWlFPWFMJH1FHr2
+        8zYVPtxXkv3ZnR+9iMkW7RDZJX/c21aVMyCChF3zrYxE4WJiWZxZifM8Oh1qymeXNuJFDr
+        x4gSmvi6udJ7h4ezx0Dv/zphmN6npBs=
+Received: from mail-qk1-f198.google.com (mail-qk1-f198.google.com
+ [209.85.222.198]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-448-T_ulI3gwN5ekUNz2zdVubA-1; Wed, 28 Apr 2021 14:04:15 -0400
+X-MC-Unique: T_ulI3gwN5ekUNz2zdVubA-1
+Received: by mail-qk1-f198.google.com with SMTP id m4-20020a37a3040000b02902e6776757c3so1221713qke.13
+        for <fstests@vger.kernel.org>; Wed, 28 Apr 2021 11:04:14 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to;
-        bh=O6agX5tigvN+5FOe9w4Hj66VlzpPTJCuQDFa6uDYsO4=;
-        b=S9uaSsY/59zh966J07yY9VuntmhfXVNezZMELM6QVx9lI8aVvghGUxLeEbXaq/z6cw
-         UCHkK6YjCEv5WRwdUyg7cBQGsjvlhcmZttfo+MOVaP4aal+Zlo1vbwxumzoAHx9cNzBb
-         KtBNWc7s+QDdcpdbG/YBuznOc/FLzencxv0F+YZ3OkQCHbwj5oDwk8V7qlfBv6ofNIa7
-         AMJ/3VfI3R5ny6dYu3Q4OUSqYyCvFWRuk6cPfvnzs6ym4Yz+EWNHDR0nm59EKa08v/mi
-         Vg15YyotWBkLyQuSV1TessIeKPXu6SKGiFRwc6tjyLWQW34HLXAH843lIwL1cWtTYtKL
-         q4Tw==
-X-Gm-Message-State: AOAM531fhH802CuOtL3qa3+RHdGlrgV+cCg1X4RbCa3hIDXSNgfk9+QI
-        cyF80n/wnG+HIr52VqgN5r12STfQQYG+UA3EWi7tYhm7vOKVXQcBTx/IafWxqFsunOrsw0TVPzk
-        mYe0jr7ha3gfW7wgOsg==
-X-Received: by 2002:ac8:7fc5:: with SMTP id b5mr27806572qtk.41.1619632075454;
-        Wed, 28 Apr 2021 10:47:55 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJwLj0pzM9rDJLLvl6ytN/zxkGHrebWz+iCUltfERJg7QOex6mg1uy6Itus5uN2sT+z+A/rWIw==
-X-Received: by 2002:ac8:7fc5:: with SMTP id b5mr27806551qtk.41.1619632075193;
-        Wed, 28 Apr 2021 10:47:55 -0700 (PDT)
+        bh=xytN0pNzBMfuQW8ZuNkzPJq4Fe6+Yb1JTf4mTX9Mv8w=;
+        b=NeYjDN1nocI4RCDQBQqXD4jsoI+bpcORPdaTEID5axbdeq8WNEkLqD14lEjljAkH6K
+         CFTa6FFxhxtzWnCABxIKNtfBgQ/eaE9GBBo+lFRyorguY0Nsjfu5tlZLoq25+6/CE92T
+         /SKPrRGYuoo2UQi9WHna+nQw0pakGCCE6qmPK8lG+tfS5/Pjzh2qUAoyooSJ7LDEleIo
+         TanLVykMarz8P/bme3WyevTG8/hnyn/SdVLQIdG3ZfPfe51FJ5kmCPZ/CZeWqyNn/0cI
+         xiyDN+gKht+8Cm/p5KGD5LmNXqVNDR6yQNALnvOFCYzln692UfLTKF+AmBmLJomF7CP7
+         gcxw==
+X-Gm-Message-State: AOAM533FGOXGDv+8fsaG4VXjXLXXT/bwpmkz5DajH4q55NHuBLLAM+5U
+        fakjP+91QXeperxE0N5/QUDzpeVL/j5029YGktuUPTOv1C76MSHmsBW43IHtHnJMNZHrPzjcxFa
+        b1OrGVlUxcjnEA4zovA==
+X-Received: by 2002:a05:620a:1085:: with SMTP id g5mr30320203qkk.332.1619633054562;
+        Wed, 28 Apr 2021 11:04:14 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJyXKeAaUkfduPBayguRu8RIZvLZLaGVhRQsgB9+TkVv9QvS5Oj6Xp8ELvgI7qvSxkpJhyTV9Q==
+X-Received: by 2002:a05:620a:1085:: with SMTP id g5mr30320182qkk.332.1619633054380;
+        Wed, 28 Apr 2021 11:04:14 -0700 (PDT)
 Received: from bfoster ([98.216.211.229])
-        by smtp.gmail.com with ESMTPSA id h8sm480883qtp.47.2021.04.28.10.47.54
+        by smtp.gmail.com with ESMTPSA id k18sm328158qkg.53.2021.04.28.11.04.13
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 28 Apr 2021 10:47:54 -0700 (PDT)
-Date:   Wed, 28 Apr 2021 13:47:53 -0400
+        Wed, 28 Apr 2021 11:04:13 -0700 (PDT)
+Date:   Wed, 28 Apr 2021 14:04:11 -0400
 From:   Brian Foster <bfoster@redhat.com>
 To:     "Darrick J. Wong" <djwong@kernel.org>
 Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
         fstests@vger.kernel.org, guan@eryu.me
-Subject: Re: [PATCH 5/5] xfs/49[12]: skip pre-lazysbcount filesystems
-Message-ID: <YImfyecT3zngAioz@bfoster>
-References: <161958293466.3452351.14394620932744162301.stgit@magnolia>
- <161958296475.3452351.7075798777673076839.stgit@magnolia>
+Subject: Re: [PATCH 2/3] rc: check dax mode in _require_scratch_swapfile
+Message-ID: <YImjmxAcZ9u8rvVe@bfoster>
+References: <161958296906.3452499.12678290296714187590.stgit@magnolia>
+ <161958298115.3452499.907986597475080875.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <161958296475.3452351.7075798777673076839.stgit@magnolia>
+In-Reply-To: <161958298115.3452499.907986597475080875.stgit@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Apr 27, 2021 at 09:09:24PM -0700, Darrick J. Wong wrote:
+On Tue, Apr 27, 2021 at 09:09:41PM -0700, Darrick J. Wong wrote:
 > From: Darrick J. Wong <djwong@kernel.org>
 > 
-> Prior to lazysbcount, the xfs mount code blindly trusted the value of
-> the fdblocks counter in the primary super, which means that the kernel
-> doesn't detect the fuzzed fdblocks value at all.  V4 is deprecated and
-> pre-lazysbcount V4 hasn't been the default for ~14 years, so we'll just
-> skip these two tests on those old filesystems.
+> It turns out that the mm refuses to swapon() files that don't have a
+> a_ops->readpage function, because it wants to be able to read the swap
+> header.  S_DAX files don't have a readpage function (though oddly both
+> ext4 and xfs link to a swapfile activation function in their aops) so
+> they fail.  The recent commit 725feeff changed this from a _notrun to
+> _fail on xfs and ext4, so amend this not to fail on pmem test setups.
 > 
+> Fixes: 725feeff ("common/rc: swapon should not fail for given FS in _require_scratch_swapfile()")
 > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
 > ---
->  tests/xfs/491 |    5 +++++
->  tests/xfs/492 |    5 +++++
->  2 files changed, 10 insertions(+)
+
+Reviewed-by: Brian Foster <bfoster@redhat.com>
+
+>  common/rc |    4 ++++
+>  1 file changed, 4 insertions(+)
 > 
 > 
-> diff --git a/tests/xfs/491 b/tests/xfs/491
-> index 6420202b..9fd0ab56 100755
-> --- a/tests/xfs/491
-> +++ b/tests/xfs/491
-> @@ -36,6 +36,11 @@ _require_scratch
+> diff --git a/common/rc b/common/rc
+> index 6752c92d..429cc24d 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -2490,6 +2490,10 @@ _require_scratch_swapfile()
+>  	# Minimum size for mkswap is 10 pages
+>  	_format_swapfile "$SCRATCH_MNT/swap" $(($(get_page_size) * 10))
 >  
->  echo "Format and mount"
->  _scratch_mkfs > $seqres.full 2>&1
+> +	# swapfiles cannot use cpu direct access mode (STATX_ATTR_DAX) for now
+> +	statx_attr="$($XFS_IO_PROG -c 'statx -r' $SCRATCH_MNT/swap 2>/dev/null | grep 'stat.attributes = ' | awk '{print $3}')"
+> +	test "$((statx_attr & 0x200000))" -gt 0 && _notrun "swapfiles not supported on DAX"
 > +
-> +# pre-lazysbcount filesystems blindly trust the primary sb fdblocks
-> +_check_scratch_xfs_features LAZYSBCOUNT &>/dev/null || \
-> +	_notrun "filesystem requires lazysbcount"
-> +
-
-Perhaps we should turn this one into a '_require_scratch_xfs_feature
-<FEATURE>' helper or some such? Probably not that important for
-lazysbcount filtering, but it seems like that might be useful for newer
-features going forward.
-
-Brian
-
->  _scratch_mount >> $seqres.full 2>&1
->  echo "test file" > $SCRATCH_MNT/testfile
->  
-> diff --git a/tests/xfs/492 b/tests/xfs/492
-> index 522def47..c4b087b5 100755
-> --- a/tests/xfs/492
-> +++ b/tests/xfs/492
-> @@ -36,6 +36,11 @@ _require_scratch
->  
->  echo "Format and mount"
->  _scratch_mkfs > $seqres.full 2>&1
-> +
-> +# pre-lazysbcount filesystems blindly trust the primary sb fdblocks
-> +_check_scratch_xfs_features LAZYSBCOUNT &>/dev/null || \
-> +	_notrun "filesystem requires lazysbcount"
-> +
->  _scratch_mount >> $seqres.full 2>&1
->  echo "test file" > $SCRATCH_MNT/testfile
->  
+>  	# ext* and xfs have supported all variants of swap files since their
+>  	# introduction, so swapon should not fail.
+>  	case "$FSTYP" in
 > 
 
