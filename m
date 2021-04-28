@@ -3,124 +3,117 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
 X-Spam-Status: No, score=-16.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1F830C433B4
-	for <linux-fstests@archiver.kernel.org>; Wed, 28 Apr 2021 04:07:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AE7A7C433ED
+	for <linux-fstests@archiver.kernel.org>; Wed, 28 Apr 2021 04:08:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E3369613F4
-	for <linux-fstests@archiver.kernel.org>; Wed, 28 Apr 2021 04:07:46 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9070A6140B
+	for <linux-fstests@archiver.kernel.org>; Wed, 28 Apr 2021 04:08:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229868AbhD1EIa (ORCPT
+        id S231600AbhD1EJM (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 28 Apr 2021 00:08:30 -0400
-Received: from mail.kernel.org ([198.145.29.99]:53036 "EHLO mail.kernel.org"
+        Wed, 28 Apr 2021 00:09:12 -0400
+Received: from mail.kernel.org ([198.145.29.99]:53434 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229451AbhD1EIa (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 28 Apr 2021 00:08:30 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 897CD613ED;
-        Wed, 28 Apr 2021 04:07:45 +0000 (UTC)
+        id S229451AbhD1EJM (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 28 Apr 2021 00:09:12 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 04FA0613ED;
+        Wed, 28 Apr 2021 04:08:27 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1619582865;
-        bh=2maRGlUGnDUaCpfVsFw9z8vOz8I6Fm8VCVjc2SATn6Y=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=iAtb11Ptrz6iErnNOxul3K/MOF8igeLc8Mamnn1Eq68UYPvyCB85jgMF6HY+9ou9Y
-         E65AFri6ldC116bAtcv58IXZYKO0MRB8fi7cXoen+RflOP/S9VW+JTA+l5UYWDBUwC
-         8CEwrEVGKaKlM7K8bHj0g96CxjJ/fnUyYwtMqfL50BanmJs3F66KPVaD51674EWVa7
-         Cgc1/AdEy/OwpYESO+sFYXBhY3uihcDaND/k7gS5omcZ+IjYA8yP6xU8UkTVjeFaCA
-         m4P+mfQP/43LK48yqrp/qgG8N1lRxgOiEsxgSrzvIMpKqRjDHzFORuyW5llGcpZAWn
-         APp1D2g+IkJ9w==
-Date:   Tue, 27 Apr 2021 21:07:44 -0700
+        s=k20201202; t=1619582908;
+        bh=E5t/w9RouMJ1x9U9/4LAvFJLHySKaltObjoHjEuJvmc=;
+        h=Subject:From:To:Cc:Date:From;
+        b=n+ZUM4Qk0mqkA2KhoFTUKokTZ7b4mKuPWDEL5414TGwMgHg1DcaHFIsnnpU6rx0sJ
+         hlpCYsh2jGTnfjeFoLWejHSBN/+Kk1hXZNWURMz5NppGF6lAfV4l2h9+KmfOu/Sxcx
+         542dZVbhZEZ88JH4QM93xtVSJvQsbpnsN+YAT/VgH3fk4tptv1DNlnd5fbbsEVYu/A
+         ntrCwIOsw25g93c/MKFKvVxtmmMy8gE/GENrLQ459aYq7bfVSMOmFZ2nSlHHPPupqE
+         RGTwnhEFYXD34d1fpg3g6Yn48tHgODGsZ0Lf3X1tDt3nvSL2imly8ZWKD7ZXPq+SsP
+         zgkr81SXspxRg==
+Subject: [PATCHSET v5 0/1] fstests: widen timestamps to deal with y2038+
 From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     XiaoLi Feng <xifeng@redhat.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH v2] common/rc: not run swapfile test for DAX
-Message-ID: <20210428040744.GI3122235@magnolia>
-References: <20210424161523.4786-1-xifeng@redhat.com>
+To:     djwong@kernel.org, guaneryu@gmail.com
+Cc:     Amir Goldstein <amir73il@gmail.com>,
+        Allison Henderson <allison.henderson@oracle.com>,
+        linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me
+Date:   Tue, 27 Apr 2021 21:08:27 -0700
+Message-ID: <161958290730.3452177.6561083366863602897.stgit@magnolia>
+User-Agent: StGit/0.19
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210424161523.4786-1-xifeng@redhat.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Apr 25, 2021 at 12:15:23AM +0800, XiaoLi Feng wrote:
-> From: Xiaoli Feng <xifeng@redhat.com>
-> 
-> DAX doesn't support swapfile. Without this patch,
-> _require_scratch_swapfile always returns fail for fsdax. Now
-> change to notrun.
-> 
-> Signed-off-by: Xiaoli Feng <xifeng@redhat.com>
+Hi all,
 
-Sorry about my earlier mutterings, I forgot that I'm (still) so far
-behind on sending fstests patches upstream that I hadn't actually gotten
-to the one that fixes this.  Hence my earlier questions about "can't you
-just use the existing S_DAX check?" make no sense.
+This series performs some refactoring of our timestamp and inode
+encoding functions, then retrofits the timestamp union to handle
+timestamps as a 64-bit nanosecond counter.  Next, it adds bit shifting
+to the non-root dquot timer fields to boost their effective size to 34
+bits.  These two changes enable correct time handling on XFS through the
+year 2486.
 
-> ---
->  common/rc | 13 +++++++++++--
->  1 file changed, 11 insertions(+), 2 deletions(-)
-> 
-> diff --git a/common/rc b/common/rc
-> index 11ff7635..c3c40f30 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -2461,8 +2461,13 @@ _require_scratch_swapfile()
->  	case "$FSTYP" in
->  	ext2|ext3|ext4|xfs)
->  		if ! swapon "$SCRATCH_MNT/swap" >/dev/null 2>&1; then
-> -			_scratch_unmount
-> -			_fail "swapon failed for $FSTYP"
-> +			if _check_s_dax "$SCRATCH_MNT/swap" 1 >/dev/null; then
-> +				_scratch_unmount
-> +				_notrun "swapfiles are not supported"
-> +			else
-> +				_scratch_unmount
-> +				_fail "swapon failed for $FSTYP"
-> +			fi
->  		fi
->  		;;
->  	*)
-> @@ -3326,6 +3331,7 @@ _check_s_dax()
->  {
->  	local target=$1
->  	local exp_s_dax=$2
-> +	local ret=0
->  
->  	local attributes=$($XFS_IO_PROG -c 'statx -r' $target | awk '/stat.attributes / { print $3 }')
->  
-> @@ -3347,9 +3353,12 @@ _check_s_dax()
->  
->  	if [ $exp_s_dax -eq 0 ]; then
->  		(( attributes & 0x00200000 )) && echo "$target has unexpected S_DAX flag"
-> +		(( attributes & 0x00200000 )) && ret=1
->  	else
->  		(( attributes & 0x00200000 )) || echo "$target doesn't have expected S_DAX flag"
-> +		(( attributes & 0x00200000 )) || ret=2
+On a current V5 filesystem, inodes timestamps are a signed 32-bit
+seconds counter, with 0 being the Unix epoch.  Quota timers are an
+unsigned 32-bit seconds counter, with 0 also being the Unix epoch.
 
-Though I suppose if we want to pick nits here, it's kind of silly to
-test this twice:
+This means that inode timestamps can range from:
+-(2^31-1) (13 Dec 1901) through (2^31-1) (19 Jan 2038).
 
-		if (( attributes & 0x00200000 )); then
-			echo "$target doesn't have expected S_DAX_flag"
-			return 2
-		fi
+And quota timers can range from:
+0 (1 Jan 1970) through (2^32-1) (7 Feb 2106).
 
-OTOH, that's fairly minor so:
+With the bigtime encoding turned on, inode timestamps are an unsigned
+64-bit nanoseconds counter, with 0 being the 1901 epoch.  Quota timers
+are a 34-bit unsigned second counter right shifted two bits, with 0
+being the Unix epoch, and capped at the maximum inode timestamp value.
 
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+This means that inode timestamps can range from:
+0 (13 Dec 1901) through (2^64-1 / 1e9) (2 Jul 2486)
+
+Quota timers could theoretically range from:
+0 (1 Jan 1970) through (((2^34-1) + (2^31-1)) & ~3) (16 Jun 2582).
+
+But with the capping in place, the quota timers maximum is:
+max((2^64-1 / 1e9) - (2^31-1), (((2^34-1) + (2^31-1)) & ~3) (2 Jul 2486).
+
+v1: Initial RFC.
+v2: Expand explanations due to questions from Amir.
+v3: Fix a bunch more things that Amir pointed out.
+v4: Fix some review comments from Amir and Eryu.
+v5: Note quota-tools v4.06 requirement and fix the quota grace expiry timer
+    test not to run on old quota-tools.
+
+If you're going to start using this mess, you probably ought to just
+pull from my git trees, which are linked below.
+
+This is an extraordinary way to destroy everything.  Enjoy!
+Comments and questions are, as always, welcome.
 
 --D
 
->  	fi
-> +	return $ret
->  }
->  
->  _check_xflag()
-> -- 
-> 2.18.1
-> 
+kernel git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfs-linux.git/log/?h=bigtime
+
+xfsprogs git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfsprogs-dev.git/log/?h=bigtime
+
+fstests git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=bigtime
+---
+ common/xfs        |   16 +++++
+ tests/xfs/908     |  117 +++++++++++++++++++++++++++++++++++++++
+ tests/xfs/908.out |   29 ++++++++++
+ tests/xfs/909     |  157 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/909.out |    6 ++
+ tests/xfs/group   |    2 +
+ 6 files changed, 327 insertions(+)
+ create mode 100755 tests/xfs/908
+ create mode 100644 tests/xfs/908.out
+ create mode 100755 tests/xfs/909
+ create mode 100644 tests/xfs/909.out
+
