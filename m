@@ -2,155 +2,103 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.7 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	UNPARSEABLE_RELAY autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C79D0C433ED
-	for <linux-fstests@archiver.kernel.org>; Thu, 29 Apr 2021 13:30:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E3D79C433ED
+	for <linux-fstests@archiver.kernel.org>; Thu, 29 Apr 2021 14:32:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 84E3261445
-	for <linux-fstests@archiver.kernel.org>; Thu, 29 Apr 2021 13:30:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9F7B76144B
+	for <linux-fstests@archiver.kernel.org>; Thu, 29 Apr 2021 14:32:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233701AbhD2NbX (ORCPT
+        id S236096AbhD2OdR (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 29 Apr 2021 09:31:23 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:33917 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S233602AbhD2NbW (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 29 Apr 2021 09:31:22 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1619703035;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=4/24EexAK+OHhVfKv5r/+MDcK1hPAxRgK3E6qEC7fzk=;
-        b=bTmbQhaRIwz1X3hwabzbCIYmLNVE56nXTz2mVH6ROFNsuzrfMdXb9C6dl5VfzimwYlm/RA
-        8bnTNDPy2qUYYEGpcPlDmc4yfZmie3MaTZLnLCmPduK/Ve34qXvpPmuWGiX80B8M9x6gvI
-        q28Rpi6LeAqW9gCNRloBP5HdxBSo1bA=
-Received: from mail-qk1-f198.google.com (mail-qk1-f198.google.com
- [209.85.222.198]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-99-nzTm9kzWOKqD3FlGFAwVHw-1; Thu, 29 Apr 2021 09:30:33 -0400
-X-MC-Unique: nzTm9kzWOKqD3FlGFAwVHw-1
-Received: by mail-qk1-f198.google.com with SMTP id t77-20020a37aa500000b02902e49d708227so9208748qke.23
-        for <fstests@vger.kernel.org>; Thu, 29 Apr 2021 06:30:33 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=4/24EexAK+OHhVfKv5r/+MDcK1hPAxRgK3E6qEC7fzk=;
-        b=r/qL5sByKheDrR4AQr2B7dtX5beYk2CN7JdNOVaSdP/DOo7guSUiLUk3YrtjhlBnAL
-         nHpWbUFbAW48N7qtF8DAqNOtMnc6vNtY4X37LjVM5PaPxq65uQ77Sxz7FdOY5IfKpJO9
-         fnNxuW0g6zTGe2Xelb1seWj6G1Y7ORyPaO6APNIlfm7CaZA1rRDHpca6TCkiWlZgF35n
-         p34sl53eHaCDE5+HYrcCC5M+XNdJkHjSWr5CTO5yKd62WOswaoalWJmo9U6zQCBFi/wt
-         YHtCvLii+/jv7CeXOQRIpxT9iae1bBpZtok0gGgnThiiQlXzzFmFzGq3JafWFPj+AYSi
-         DN4A==
-X-Gm-Message-State: AOAM533ngCXxEMWnTONTZA9HOxVaqhcSoP/UlTeww3VKL+uXKRvYcf5i
-        a869hDwZwwkQYhUqyGXY3toDo7wuUBDIHwPhaasFJzNdY/l6McLa2UaU5zkOzBo/CtkuEdUujAv
-        +LpVyQlxjr/U20NmROw==
-X-Received: by 2002:ac8:5655:: with SMTP id 21mr32770757qtt.187.1619703032894;
-        Thu, 29 Apr 2021 06:30:32 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJwEJCEMohk4OevIiLDOHRak6f0BMonNhH/011LaHSS2x6TpsDLzEfrVZTgv5/KuXiQu7bTdTQ==
-X-Received: by 2002:ac8:5655:: with SMTP id 21mr32770731qtt.187.1619703032661;
-        Thu, 29 Apr 2021 06:30:32 -0700 (PDT)
-Received: from bfoster ([98.216.211.229])
-        by smtp.gmail.com with ESMTPSA id a20sm1399117qko.36.2021.04.29.06.30.32
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 29 Apr 2021 06:30:32 -0700 (PDT)
-Date:   Thu, 29 Apr 2021 09:30:30 -0400
-From:   Brian Foster <bfoster@redhat.com>
+        Thu, 29 Apr 2021 10:33:17 -0400
+Received: from bhuna.collabora.co.uk ([46.235.227.227]:35550 "EHLO
+        bhuna.collabora.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S237338AbhD2OdO (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 29 Apr 2021 10:33:14 -0400
+Received: from [127.0.0.1] (localhost [127.0.0.1])
+        (Authenticated sender: krisman)
+        with ESMTPSA id 395D01F432F8
+From:   Gabriel Krisman Bertazi <krisman@collabora.com>
 To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org, guan@eryu.me
-Subject: Re: [PATCH v1.2 5/5] xfs/49[12]: skip pre-lazysbcount filesystems
-Message-ID: <YIq09i9DxCM19NEJ@bfoster>
-References: <161958293466.3452351.14394620932744162301.stgit@magnolia>
- <161958296475.3452351.7075798777673076839.stgit@magnolia>
- <20210429013154.GL3122235@magnolia>
+Cc:     Theodore Ts'o <tytso@mit.edu>,
+        Shreeya Patel <shreeya.patel@collabora.com>,
+        Matthew Wilcox <willy@infradead.org>, fstests@vger.kernel.org,
+        linux-fsdevel@vger.kernel.org, preichl@redhat.com,
+        kernel@collabora.com
+Subject: Re: [PATCH] generic/453: Exclude filenames that are not supported
+ by exfat
+Organization: Collabora
+References: <20210425223105.1855098-1-shreeya.patel@collabora.com>
+        <20210426003430.GH235567@casper.infradead.org>
+        <a49ecbfb-2011-0c7c-4405-b4548d22389d@collabora.com>
+        <20210426123734.GK235567@casper.infradead.org>
+        <bc7a33e8-7e9c-8045-e90e-bb53ec4f2c61@collabora.com>
+        <20210427181116.GH3122235@magnolia> <YIloQDGP+0mRQdbP@mit.edu>
+        <20210429003726.GG1251862@magnolia>
+Date:   Thu, 29 Apr 2021 10:32:23 -0400
+In-Reply-To: <20210429003726.GG1251862@magnolia> (Darrick J. Wong's message of
+        "Wed, 28 Apr 2021 17:37:26 -0700")
+Message-ID: <87eeet6u14.fsf@collabora.com>
+User-Agent: Gnus/5.13 (Gnus v5.13) Emacs/27.1 (gnu/linux)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210429013154.GL3122235@magnolia>
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Apr 28, 2021 at 06:31:54PM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
-> 
-> Prior to lazysbcount, the xfs mount code blindly trusted the value of
-> the fdblocks counter in the primary super, which means that the kernel
-> doesn't detect the fuzzed fdblocks value at all.  V4 is deprecated and
-> pre-lazysbcount V4 hasn't been the default for ~14 years, so we'll just
-> skip these two tests on those old filesystems.
-> 
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> ---
-> v1.2: factor the feature checking into a separate helper
-> ---
+"Darrick J. Wong" <djwong@kernel.org> writes:
 
-Looks good, thanks for the update:
+> On Wed, Apr 28, 2021 at 09:50:56AM -0400, Theodore Ts'o wrote:
+>> On Tue, Apr 27, 2021 at 11:11:16AM -0700, Darrick J. Wong wrote:
+>> > 
+>> > TBH I think these tests (g/453 and g/454) are probably only useful for
+>> > filesystems that allow unrestricted byte streams for names.
+>> 
+>> I'm actually a little puzzled about why these tests should exist:
+>> 
+>> # Create a directory with multiple filenames that all appear the same
+>> # (in unicode, anyway) but point to different inodes.  In theory all
+>> # Linux filesystems should allow this (filenames are a sequence of
+>> # arbitrary bytes) even if the user implications are horrifying.
+>> 
+>> Why do we care about testing this?  The assertion "In all theory all
+>> Linux filesystems should allow this" is clearly not true --- if you
+>> enable unicode support for ext4 or f2fs, this will no longer be true,
+>> and this is considered by some a _feature_ not a bug --- precisely
+>> _because_ the user implications are horrifying.
+>> 
+>> So why does these tests exist?  Darrick, I see you added them in 2017
+>> to test whether or not xfs_scrub will warn about confuable names, if
+>> _check_xfs_scrub_does_unicode is true.  So we already understand that
+>> it's possible for a file system checker to complain that these file
+>> names are bad.
+>
+> Yes, that's exactly why this test (and generic/454) were created -- as a
+> functional test for xfs_scrub's unicode checking.
+>
+>> It's not at all clear to me that asserting that all Linux file systems
+>> _must_ treat file names as "bag of bits" and not apply any kind of
+>> unicode normalization or strict unicode validation is a valid thing to
+>> test for in 2021.
+>
+> Perhaps not.  These two tests do have the interesting side effect of
+> catching filesystems that don't hew to the "names are bytestreams"
+> philosophy.  In 2017, fstests usage seemed like it pretty narrowly
+> included only the big three filesystems, so it amuses me to no end that
+> four years went by before this discussion started. :P
+>
+> Nowadays with wider testing of other filesystems (thanks, Red Hat!) we
+> should hide these behind _require_names_are_bytes or move them to
+> tests/xfs/.
+>
+> Question -- the unicode case folding doesn't apply to xattr names,
+> right?
 
-Reviewed-by: Brian Foster <bfoster@redhat.com>
+No, they don't apply to xattr name in ext4 and f2fs.
 
->  common/xfs    |   12 ++++++++++++
->  tests/xfs/491 |    4 ++++
->  tests/xfs/492 |    4 ++++
->  3 files changed, 20 insertions(+)
-> 
-> diff --git a/common/xfs b/common/xfs
-> index 8501b084..92383061 100644
-> --- a/common/xfs
-> +++ b/common/xfs
-> @@ -1129,6 +1129,18 @@ _check_scratch_xfs_features()
->  	test "${found}" -eq "$#"
->  }
->  
-> +# Skip a test if any of the given fs features aren't present on the scratch
-> +# filesystem.  The scratch fs must have been formatted already.
-> +_require_scratch_xfs_features()
-> +{
-> +	local features="$(_scratch_xfs_db -c 'version' 2>/dev/null)"
-> +
-> +	for feature in "$@"; do
-> +		echo "${features}" | grep -q -w "${feature}" ||
-> +			_notrun "Missing scratch feature: ${feature}"
-> +	done
-> +}
-> +
->  # Decide if xfs_repair knows how to set (or clear) a filesystem feature.
->  _require_xfs_repair_upgrade()
->  {
-> diff --git a/tests/xfs/491 b/tests/xfs/491
-> index 6420202b..7d447ccf 100755
-> --- a/tests/xfs/491
-> +++ b/tests/xfs/491
-> @@ -36,6 +36,10 @@ _require_scratch
->  
->  echo "Format and mount"
->  _scratch_mkfs > $seqres.full 2>&1
-> +
-> +# pre-lazysbcount filesystems blindly trust the primary sb fdblocks
-> +_require_scratch_xfs_features LAZYSBCOUNT
-> +
->  _scratch_mount >> $seqres.full 2>&1
->  echo "test file" > $SCRATCH_MNT/testfile
->  
-> diff --git a/tests/xfs/492 b/tests/xfs/492
-> index 522def47..21c6872f 100755
-> --- a/tests/xfs/492
-> +++ b/tests/xfs/492
-> @@ -36,6 +36,10 @@ _require_scratch
->  
->  echo "Format and mount"
->  _scratch_mkfs > $seqres.full 2>&1
-> +
-> +# pre-lazysbcount filesystems blindly trust the primary sb fdblocks
-> +_require_scratch_xfs_features LAZYSBCOUNT
-> +
->  _scratch_mount >> $seqres.full 2>&1
->  echo "test file" > $SCRATCH_MNT/testfile
->  
-> 
-
+-- 
+Gabriel Krisman Bertazi
