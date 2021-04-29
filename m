@@ -2,107 +2,98 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8D34DC433ED
-	for <linux-fstests@archiver.kernel.org>; Thu, 29 Apr 2021 00:37:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E51C7C433ED
+	for <linux-fstests@archiver.kernel.org>; Thu, 29 Apr 2021 00:39:19 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5BD7761412
-	for <linux-fstests@archiver.kernel.org>; Thu, 29 Apr 2021 00:37:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BF74061412
+	for <linux-fstests@archiver.kernel.org>; Thu, 29 Apr 2021 00:39:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234326AbhD2AiN (ORCPT
+        id S233832AbhD2AkE (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 28 Apr 2021 20:38:13 -0400
-Received: from mail.kernel.org ([198.145.29.99]:40390 "EHLO mail.kernel.org"
+        Wed, 28 Apr 2021 20:40:04 -0400
+Received: from mail.kernel.org ([198.145.29.99]:41500 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S233525AbhD2AiM (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 28 Apr 2021 20:38:12 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id B68B461411;
-        Thu, 29 Apr 2021 00:37:26 +0000 (UTC)
+        id S232095AbhD2AkE (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 28 Apr 2021 20:40:04 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id B7859613F4;
+        Thu, 29 Apr 2021 00:39:18 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1619656646;
-        bh=4+vm561KYXZGHp6HwhpVsFi+J9z9ix618BPaJuvAZTY=;
+        s=k20201202; t=1619656758;
+        bh=7skRQzN0Jg4hxeT/pDKbiRSiLQN+9FjManoMfXXoYeg=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=g1T1eApDT8CY963O5SaoubJoDKqPkndsA3c9Oi/v5BmLq7tdmYA1VH6zqR3GPgcJ3
-         epWSV/Ql/R6GJzAB1Ukt8Pwwl+2XSbtd8LYomLcBZ11obfUTNwpSV4I6AH/B3pD4Mz
-         z8pwclyDtJA1kYuf45jk8JJPxAdixsoSbES1caQEbm41AEa0A5sVACuYMyxUxbS/8C
-         y7XjM0lrxYr2b/tS9XgFpEn8G3wWU/A15rJE9KasCW9gFTnyIu9wNLmi5ICeEU14Gs
-         5D8gniFvKxQHKgWaN/EuW8+h+otc/JRPHsYifpJWPfurhq6bDolrzrJLqTW9MZt1Sc
-         xMGmucvbuwJzw==
-Date:   Wed, 28 Apr 2021 17:37:26 -0700
+        b=Gymfj/fIzcVqrNKXiJ8lNgaGgAtfBo1t7ZbUILZzxPhh/4wedoBTblARE9dhXT+JW
+         H6H56C7mbgMB7VlFWpEGd+sZEq3xwi21Q/zkT15BDzWweqlx1fNc3v8sVwGxtf9+lX
+         AL3lsfwR+nmLzROtQAIHKWWwb2IrBLlCjOg3o7uiOSBnGSP8+RiL5YIc/m0nFvkXr/
+         4ljhzkBN98tPLD1k1BPthSVTXonDtW0tvd8XD2hv+yzQdpMuOeeNTJcULBoR0syw+g
+         USnKD2Ve+wkKuIuf6OXuhcOO8CMoV73JBL5sEvjYr8llDa/L4ZbTZSkCTfBdZ3tej9
+         cpamEpVsKzSQg==
+Date:   Wed, 28 Apr 2021 17:39:18 -0700
 From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Theodore Ts'o <tytso@mit.edu>
-Cc:     Shreeya Patel <shreeya.patel@collabora.com>,
-        Matthew Wilcox <willy@infradead.org>, fstests@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org, krisman@collabora.com,
-        preichl@redhat.com, kernel@collabora.com
-Subject: Re: [PATCH] generic/453: Exclude filenames that are not supported by
- exfat
-Message-ID: <20210429003726.GG1251862@magnolia>
-References: <20210425223105.1855098-1-shreeya.patel@collabora.com>
- <20210426003430.GH235567@casper.infradead.org>
- <a49ecbfb-2011-0c7c-4405-b4548d22389d@collabora.com>
- <20210426123734.GK235567@casper.infradead.org>
- <bc7a33e8-7e9c-8045-e90e-bb53ec4f2c61@collabora.com>
- <20210427181116.GH3122235@magnolia>
- <YIloQDGP+0mRQdbP@mit.edu>
+To:     Brian Foster <bfoster@redhat.com>
+Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org, guan@eryu.me
+Subject: Re: [PATCH 3/5] generic/449: always fill up the data device
+Message-ID: <20210429003918.GJ3122235@magnolia>
+References: <161958293466.3452351.14394620932744162301.stgit@magnolia>
+ <161958295276.3452351.11071488836337123863.stgit@magnolia>
+ <YImftSB+Pa/LRZug@bfoster>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <YIloQDGP+0mRQdbP@mit.edu>
+In-Reply-To: <YImftSB+Pa/LRZug@bfoster>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Apr 28, 2021 at 09:50:56AM -0400, Theodore Ts'o wrote:
-> On Tue, Apr 27, 2021 at 11:11:16AM -0700, Darrick J. Wong wrote:
+On Wed, Apr 28, 2021 at 01:47:33PM -0400, Brian Foster wrote:
+> On Tue, Apr 27, 2021 at 09:09:12PM -0700, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <djwong@kernel.org>
 > > 
-> > TBH I think these tests (g/453 and g/454) are probably only useful for
-> > filesystems that allow unrestricted byte streams for names.
+> > This is yet another one of those tests that looks at what happens when
+> > we run out of space for more metadata (in this case, xattrs).  Make sure
+> > that the 256M we write to the file to try to stimulate ENOSPC gets
+> > written to the same place that xfs puts xattr data -- the data device.
+> > 
+> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> > ---
+> >  tests/generic/449 |    5 +++++
+> >  1 file changed, 5 insertions(+)
+> > 
+> > 
+> > diff --git a/tests/generic/449 b/tests/generic/449
+> > index a2d882df..5fd15367 100755
+> > --- a/tests/generic/449
+> > +++ b/tests/generic/449
+> > @@ -43,6 +43,11 @@ _require_attrs trusted
+> >  _scratch_mkfs_sized $((256 * 1024 * 1024)) >> $seqres.full 2>&1
+> >  _scratch_mount || _fail "mount failed"
+> >  
+> > +# This is a test of xattr behavior when we run out of disk space for xattrs,
+> > +# so make sure the pwrite goes to the data device and not the rt volume.
+> > +test "$FSTYP" = "xfs" && \
+> > +	$XFS_IO_PROG -c 'chattr -t' $SCRATCH_MNT
+> > +
 > 
-> I'm actually a little puzzled about why these tests should exist:
-> 
-> # Create a directory with multiple filenames that all appear the same
-> # (in unicode, anyway) but point to different inodes.  In theory all
-> # Linux filesystems should allow this (filenames are a sequence of
-> # arbitrary bytes) even if the user implications are horrifying.
-> 
-> Why do we care about testing this?  The assertion "In all theory all
-> Linux filesystems should allow this" is clearly not true --- if you
-> enable unicode support for ext4 or f2fs, this will no longer be true,
-> and this is considered by some a _feature_ not a bug --- precisely
-> _because_ the user implications are horrifying.
-> 
-> So why does these tests exist?  Darrick, I see you added them in 2017
-> to test whether or not xfs_scrub will warn about confuable names, if
-> _check_xfs_scrub_does_unicode is true.  So we already understand that
-> it's possible for a file system checker to complain that these file
-> names are bad.
+> This seems like the type of thing we'll consistently be playing
+> whack-a-mole with unless we come up with a better way to manage it. I'm
+> not sure what the solution for that is though, so:
 
-Yes, that's exactly why this test (and generic/454) were created -- as a
-functional test for xfs_scrub's unicode checking.
-
-> It's not at all clear to me that asserting that all Linux file systems
-> _must_ treat file names as "bag of bits" and not apply any kind of
-> unicode normalization or strict unicode validation is a valid thing to
-> test for in 2021.
-
-Perhaps not.  These two tests do have the interesting side effect of
-catching filesystems that don't hew to the "names are bytestreams"
-philosophy.  In 2017, fstests usage seemed like it pretty narrowly
-included only the big three filesystems, so it amuses me to no end that
-four years went by before this discussion started. :P
-
-Nowadays with wider testing of other filesystems (thanks, Red Hat!) we
-should hide these behind _require_names_are_bytes or move them to
-tests/xfs/.
-
-Question -- the unicode case folding doesn't apply to xattr names,
-right?
+I don't know either, sadly.  Most of the culprits are either
+xfs-specific tests that fiddle with the disk format, or ENOSPC testers
+that rely on data writes using the same space manager as metadata, or
+vice versa.
 
 --D
 
+> Reviewed-by: Brian Foster <bfoster@redhat.com>
 > 
-> 					- Ted
+> >  TFILE=$SCRATCH_MNT/testfile.$seq
+> >  
+> >  # Create the test file and choose its permissions
+> > 
+> 
