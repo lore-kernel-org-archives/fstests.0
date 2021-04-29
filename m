@@ -2,111 +2,107 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 758B1C433ED
-	for <linux-fstests@archiver.kernel.org>; Thu, 29 Apr 2021 10:06:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5AD8FC433ED
+	for <linux-fstests@archiver.kernel.org>; Thu, 29 Apr 2021 12:39:32 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2E69361453
-	for <linux-fstests@archiver.kernel.org>; Thu, 29 Apr 2021 10:06:52 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1C8B6613F7
+	for <linux-fstests@archiver.kernel.org>; Thu, 29 Apr 2021 12:39:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232629AbhD2KHh (ORCPT
+        id S236133AbhD2MkR (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 29 Apr 2021 06:07:37 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38778 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231543AbhD2KHg (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 29 Apr 2021 06:07:36 -0400
-Received: from mail-qv1-xf35.google.com (mail-qv1-xf35.google.com [IPv6:2607:f8b0:4864:20::f35])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9AA74C06138B;
-        Thu, 29 Apr 2021 03:06:50 -0700 (PDT)
-Received: by mail-qv1-xf35.google.com with SMTP id t14so2169502qvl.10;
-        Thu, 29 Apr 2021 03:06:50 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:reply-to:from:date:message-id
-         :subject:to:cc:content-transfer-encoding;
-        bh=94YjNA2qREmzFWlsgqo5WOVM76SDdyy2Bntm/hTvb40=;
-        b=DgmTmcFoZVaskKwAHwnwE3AgIInf75M1mj/CmKOf935yPuudVoRXT4xu5SZi6/z0wR
-         pXFCufocK+WevozMnFs+aNliiTDFy3leSobpN30rIrwK4pf3OZZbmysNiJBOC6QCktoQ
-         KYkLnbUYjJ0VQkuB67FPLiEdt1rJFSxHoL6yl1UskQpxi/WSvZRlItzE6ZZOu6VpGJQU
-         dqFHp0KhVHVzQbesBwXQcDCfavFimslMeli358kYvz+deYFb5/DVLi1dAO//YT9KCPg8
-         Ldz2eWYi9QG2hFm+LqUsY+eCeMbpD7IyHYHCoJsXtXbXGY6bobpyb1PLlNH3h1LQBfG+
-         kJ1A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:reply-to
-         :from:date:message-id:subject:to:cc:content-transfer-encoding;
-        bh=94YjNA2qREmzFWlsgqo5WOVM76SDdyy2Bntm/hTvb40=;
-        b=W/NoZufua/hdWdvX7WM9dyAPyawORIa4rNnQL1ItIuNzVP0EAhIfDLedVr51hMrl6N
-         JPZzdGfc42cdmHABrgeEimKNm0pPzDt8aUEGVK8SCbE6soIFAW00WXh3gu7BGziQj26O
-         E8w6m6itKHpqfFmplgGg1IuebSeTGWk7clz7JM3YP9/dYOsH72pTNQgY9T+5CVMtvhb1
-         pP5yfI84d/l+CcA7+tbfjSKpUFhHYh65YC9gQMHBsgRJpjrY6esMZto7mKyic5uDPpQT
-         ehU7wImgKMm57aNNw/dnOKbaGwAKKHMe4VFJSi962VXveD8Ziwsbo+10fGRDzv9+oWSa
-         MEVg==
-X-Gm-Message-State: AOAM531Yzu5yni9Az2qtsiX4aG689ruFF9hLK0hmQp9yQch3RM6W74zZ
-        tkasLbK/8xMDBCxc+IHkanIh1fkqP7JvKvCpE8hlx+qRcCh1Xg==
-X-Google-Smtp-Source: ABdhPJzlUHQ6QRldCBihZxbxdah38QtxckN8PLPi8lDjujBayzbTkXbQBo4V7+pbRX0u6kca6VHMXA14ddiRYG2POqs=
-X-Received: by 2002:a0c:ba1a:: with SMTP id w26mr6267789qvf.27.1619690809927;
- Thu, 29 Apr 2021 03:06:49 -0700 (PDT)
+        Thu, 29 Apr 2021 08:40:17 -0400
+Received: from esa3.hgst.iphmx.com ([216.71.153.141]:45885 "EHLO
+        esa3.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S233731AbhD2MkQ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 29 Apr 2021 08:40:16 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1619699969; x=1651235969;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=Vojb/psOOhQn7UsrOtkRy7i2KwuZNP5uRFzT8+36NcI=;
+  b=DMTBcIpAZp4oUP8k8OKWaUfuEs/tXiK1wEa5ub3TSweW2MypWu/wl9UR
+   UZVLbhGxGrcW2jNzikec4CCqyvIEkJxAkScHQz8GJGS0ouQRJYUuFA48/
+   iVNptLskpUq2987vLf/w1NoZFef6L5MkqG0RXkrJ+k4sS2M8Xf1h8n/Bj
+   l40va4E82jy84ZiaOeGTpDmbeu9urp1xhVTOsXNcfEWmYUhn1Do9OHzEQ
+   RnmcwL3aRYEddKwTY+HvP4Sym/wSgkbCCs8NsZ2Y54eucEU1k+aFkAL5x
+   0kXqV6/mmSqu/3UObmXUJjan7d0Lnc/24tjn9koWO4RdVuCbtU6aj8QMW
+   A==;
+IronPort-SDR: nbKTl0drn5zLaI5dPjBLW6MK5EyxOKJ+Qa1eVn4yhPz8t2aBpCfeb654A3AZTcJIdjL6WwuoRn
+ WHPfvsr6yFwoGQqxaejFldpfe1mDNuO3Tcplq5Sl0uI4Qy2bZVkxJ2T0D2t3rVQBVMxmBH7LqK
+ n0rr3pZz0HJpFZhbM8bIpKaMUeRvnUcMD7XQuHp7S5BmWp76vequZAupxmc2+22+698XAhFql/
+ oSaEWVNxZeO/a8IsGOYYzNScv6j/2BAWTijSClLV4h+XaNSRW5mtdRHU+s9LTi/+DkAjcC1q2m
+ XP8=
+X-IronPort-AV: E=Sophos;i="5.82,259,1613404800"; 
+   d="scan'208";a="171197735"
+Received: from h199-255-45-14.hgst.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
+  by ob1.hgst.iphmx.com with ESMTP; 29 Apr 2021 20:39:29 +0800
+IronPort-SDR: vKY+sxmhy0dTc5w7e9t0w+/9RD6lRhDFDv+SAh5lsXtdsBsJvkM0LPEFRw8nf18KqEFgwtAIum
+ OWWvpDAMjutJDNVVuq/ybghBhRQ2kxA6HuTY3bHk9bsuXLmYpCxujzNkoSbIZ98iT70AyP4ltG
+ +euZ3Cpt5Bd64zcIswANB4Mo+Dm+TSaDqM1Gr0S/Bs19jSr2BDsiiEL4fDRhoqSw5Nz/fF6bWS
+ cy8Yb9Vn4x0sDLjIqYV5HcDu8WeUu4LyNR1avN4bCC/TNq1yyDipl0NQCv5QS5T4tOEh1GICGc
+ 0kDfkpTghV5Jk6yj8G72ijGj
+Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
+  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Apr 2021 05:19:48 -0700
+IronPort-SDR: pOOPXzpepgoRaO0jEjFi7TkhhuD/1z5Gy17CapWnwmpmVevAWC30r9fkF7W8Da4PlJ4mv08XMX
+ N27hws8kAwNVNtpXhVLgbY/tL6NJUne1zCBNWKndmZzcyCf9ZPUdvnU/dZNTbSJd+V+wtDDX+W
+ I09PQff67idieVAt8PJlVDIbeKNsJ8j7FRJRZ8rhcdo5961pi7KCPlT0vpGRxtR2Q+rv4Luk57
+ XCgHcNq074xqTB9eggUMZgaMrP1oaL/BCy5hsy7znbeoTNBIDqVV2Kc795EkVMfXiiDWLETf3V
+ Olg=
+WDCIronportException: Internal
+Received: from unknown (HELO redsun60.ssa.fujisawa.hgst.com) ([10.149.66.36])
+  by uls-op-cesaip01.wdc.com with ESMTP; 29 Apr 2021 05:39:30 -0700
+From:   Johannes Thumshirn <johannes.thumshirn@wdc.com>
+To:     Eryu Guan <guan@eryu.me>, linux-btrfs@vger.kernel.org
+Cc:     fstests@vger.kernel.org, Naohiro Aota <naohiro.aota@wdc.com>,
+        Johannes Thumshirn <johannes.thumshirn@wdc.com>
+Subject: [PATCH v3 0/2] fstests: first few support patches for zoned btrfs
+Date:   Thu, 29 Apr 2021 21:39:25 +0900
+Message-Id: <20210429123927.11778-1-johannes.thumshirn@wdc.com>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
-References: <20210428084608.21213-1-johannes.thumshirn@wdc.com>
- <20210428084608.21213-3-johannes.thumshirn@wdc.com> <CAL3q7H4z=eePUYbOgOVZhMCp+u8m8bbvKfU5nNqq3rd_8YNm1g@mail.gmail.com>
- <PH0PR04MB74165CF0E16A53B38FF4AEEF9B5F9@PH0PR04MB7416.namprd04.prod.outlook.com>
- <CAL3q7H6rQt=ecHN=Q3xh0tGsq5fmrkQaCApeusyvYYj0xDjp7g@mail.gmail.com> <PH0PR04MB74163147612C69B1CD2D1FA39B5F9@PH0PR04MB7416.namprd04.prod.outlook.com>
-In-Reply-To: <PH0PR04MB74163147612C69B1CD2D1FA39B5F9@PH0PR04MB7416.namprd04.prod.outlook.com>
-Reply-To: fdmanana@gmail.com
-From:   Filipe Manana <fdmanana@gmail.com>
-Date:   Thu, 29 Apr 2021 11:06:38 +0100
-Message-ID: <CAL3q7H6=QbqFkefheaKXk_U2KPpukRkAaVWYM3MbKJkvtR5TVQ@mail.gmail.com>
-Subject: Re: [PATCH v2 2/2] btrfs: add test for zone auto reclaim
-To:     Johannes Thumshirn <Johannes.Thumshirn@wdc.com>
-Cc:     Eryu Guan <guan@eryu.me>,
-        linux-btrfs <linux-btrfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>,
-        Naohiro Aota <Naohiro.Aota@wdc.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Apr 29, 2021 at 11:05 AM Johannes Thumshirn
-<Johannes.Thumshirn@wdc.com> wrote:
->
-> On 29/04/2021 11:56, Filipe Manana wrote:
-> > On Thu, Apr 29, 2021 at 10:44 AM Johannes Thumshirn
-> > <Johannes.Thumshirn@wdc.com> wrote:
-> >>
-> >> On 28/04/2021 11:24, Filipe Manana wrote:
-> >>> The use of _fail is usually discouraged. A simple echo would suffice =
-here.
-> >>
-> >>
-> >> Need to do echo + exit here, otherwise there will be errors in the she=
-ll script.
-> >
-> > Errors? I don't understand, what kind of errors?
->
->
-> For instance if the block group isn't removed, the dump-tree call will re=
-turn two
-> block groups and then this calculation will fail:
-> new_data_zone=3D$(get_data_bg)
-> new_data_zone=3D$((new_data_zone >> 9))
+This series adds preparations for xfstests for testing on zoned block
+devices and a first test for btrfs' zoned block device support.
 
-Ok, I now see it, I was only noticing the very last _fail, which is
-not problematic. Sounds good then.
+General zoned block device support for btrfs was merged with v5.12 and the
+zone auto reclaim feature is staged to be merged with v5.13.
 
-Thanks.
+Changes since v2:
+- reduce commit itme to 1s
+- reduce sleeps
+- don't use _fail for last print
+- don't use direct io
 
+Changes since v1:
+- rebased onto master
+- drop unnecessary patch
+- comment sleep and commit= mount option use
 
+Johannes Thumshirn (1):
+  btrfs: add test for zone auto reclaim
 
---=20
-Filipe David Manana,
+Naohiro Aota (1):
+  common/rc: introduce zone check commands
 
-=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
- right.=E2=80=9D
+ common/config       |   1 +
+ common/rc           |  44 +++++++++++++++++++
+ tests/btrfs/236     | 103 ++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/236.out |   2 +
+ tests/btrfs/group   |   1 +
+ 5 files changed, 151 insertions(+)
+ create mode 100755 tests/btrfs/236
+ create mode 100644 tests/btrfs/236.out
+
+-- 
+2.31.1
+
