@@ -2,103 +2,94 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.7 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	UNPARSEABLE_RELAY autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E3D79C433ED
-	for <linux-fstests@archiver.kernel.org>; Thu, 29 Apr 2021 14:32:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3117DC433B4
+	for <linux-fstests@archiver.kernel.org>; Fri, 30 Apr 2021 09:31:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9F7B76144B
-	for <linux-fstests@archiver.kernel.org>; Thu, 29 Apr 2021 14:32:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E1A426145B
+	for <linux-fstests@archiver.kernel.org>; Fri, 30 Apr 2021 09:31:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236096AbhD2OdR (ORCPT
+        id S229522AbhD3JcZ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 29 Apr 2021 10:33:17 -0400
-Received: from bhuna.collabora.co.uk ([46.235.227.227]:35550 "EHLO
-        bhuna.collabora.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237338AbhD2OdO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 29 Apr 2021 10:33:14 -0400
-Received: from [127.0.0.1] (localhost [127.0.0.1])
-        (Authenticated sender: krisman)
-        with ESMTPSA id 395D01F432F8
-From:   Gabriel Krisman Bertazi <krisman@collabora.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     Theodore Ts'o <tytso@mit.edu>,
-        Shreeya Patel <shreeya.patel@collabora.com>,
-        Matthew Wilcox <willy@infradead.org>, fstests@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org, preichl@redhat.com,
-        kernel@collabora.com
-Subject: Re: [PATCH] generic/453: Exclude filenames that are not supported
- by exfat
-Organization: Collabora
-References: <20210425223105.1855098-1-shreeya.patel@collabora.com>
-        <20210426003430.GH235567@casper.infradead.org>
-        <a49ecbfb-2011-0c7c-4405-b4548d22389d@collabora.com>
-        <20210426123734.GK235567@casper.infradead.org>
-        <bc7a33e8-7e9c-8045-e90e-bb53ec4f2c61@collabora.com>
-        <20210427181116.GH3122235@magnolia> <YIloQDGP+0mRQdbP@mit.edu>
-        <20210429003726.GG1251862@magnolia>
-Date:   Thu, 29 Apr 2021 10:32:23 -0400
-In-Reply-To: <20210429003726.GG1251862@magnolia> (Darrick J. Wong's message of
-        "Wed, 28 Apr 2021 17:37:26 -0700")
-Message-ID: <87eeet6u14.fsf@collabora.com>
-User-Agent: Gnus/5.13 (Gnus v5.13) Emacs/27.1 (gnu/linux)
+        Fri, 30 Apr 2021 05:32:25 -0400
+Received: from mail1.bemta25.messagelabs.com ([195.245.230.69]:43182 "EHLO
+        mail1.bemta25.messagelabs.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S229507AbhD3JcY (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 30 Apr 2021 05:32:24 -0400
+Received: from [100.112.199.60] (using TLSv1.2 with cipher DHE-RSA-AES256-GCM-SHA384 (256 bits))
+        by server-5.bemta.az-b.eu-west-1.aws.symcld.net id 32/F5-53303-77ECB806; Fri, 30 Apr 2021 09:31:35 +0000
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFlrEIsWRWlGSWpSXmKPExsViZ8MRolt+rjv
+  BYOsVOYvTLXvZHRg9Pm+SC2CMYs3MS8qvSGDN2PPgIHPBGtaKWXtmMTYwXmTpYuTiEBLoZJLo
+  a/vCDOHsZpQ48OMbYxcjJwebgJ7Ekn97WEFsEQFZif8zVjOB2MwCOhJf7m1hA7GFBWwkJmx9C
+  VbPIqAq8XTqX7A4r4CHxMtTt8DiEgIKElMevmeGiAtKnJz5hAVijoTEwRcvmCFqFCXOTl3HAm
+  FXSnSuX8A4gZF3FpKWWUhaFjAyrWI0TyrKTM8oyU3MzNE1NDDQNTQ00jW0NNM1M9FLrNJN0ks
+  t1S1PLS7RNdRLLC/WK67MTc5J0ctLLdnECAyulIIjDjsY77/+oHeIUZKDSUmUN9GoO0GILyk/
+  pTIjsTgjvqg0J7X4EKMMB4eSBO//M0A5waLU9NSKtMwcYKDDpCU4eJREeLnPAqV5iwsSc4sz0
+  yFSpxh1OS5fn7eIWYglLz8vVUqcdwvIDAGQoozSPLgRsKi7xCgrJczLyMDAIMRTkFqUm1mCKv
+  +KUZyDUUmYVwJkFU9mXgncpldARzABHVF5pAvkiJJEhJRUAxNvJu+qer7iW8L3bhbmbv3nfPJ
+  CgLTA94+H6wwqTjyyb1+3YW35Jv6a6wtNI9n+Gy15M2VOMZP++jxnrepve+wnyCtuX7WEd5I0
+  Y2P53ttFTf8nxez2D1N2iqpN7Wcw+TO34YQ2347uVJeZeVsDfL8xRR7f4PpVpcixdHPTxZsBr
+  l7W1bZ/cpOs/5mecBJ4uufblz87uyqUlxR/KlnrZWb8zox7wiqD469Y+6IyVAVEX+Ranl37Z0
+  PP7vRp8/pKPD+7yk9Orjv0+K9X7Iq1L5nYdsXtaC+z59wQ9dB593UenYX2PM9f13rOerd7z+7
+  nPYlvv/nLBq9n4Dydp22Wm/VUcoJnoGTHiaTSjazsXUosxRmJhlrMRcWJACQl9VE1AwAA
+X-Env-Sender: huangjh.jy@fujitsu.com
+X-Msg-Ref: server-21.tower-291.messagelabs.com!1619775095!55679!1
+X-Originating-IP: [62.60.8.84]
+X-SYMC-ESS-Client-Auth: outbound-route-from=fail
+X-StarScan-Received: 
+X-StarScan-Version: 9.75.3; banners=-,-,-
+X-VirusChecked: Checked
+Received: (qmail 32313 invoked from network); 30 Apr 2021 09:31:35 -0000
+Received: from unknown (HELO mailhost3.uk.fujitsu.com) (62.60.8.84)
+  by server-21.tower-291.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 30 Apr 2021 09:31:35 -0000
+Received: from R01UKEXCASM126.r01.fujitsu.local ([10.183.43.178])
+        by mailhost3.uk.fujitsu.com (8.14.5/8.14.5) with ESMTP id 13U9VZl8025927
+        (version=TLSv1/SSLv3 cipher=AES256-SHA bits=256 verify=FAIL)
+        for <fstests@vger.kernel.org>; Fri, 30 Apr 2021 10:31:35 +0100
+Received: from localhost.localdomain (10.167.220.33) by
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.2; Fri, 30 Apr 2021 10:31:33 +0100
+From:   Jinhui Huang <huangjh.jy@cn.fujitsu.com>
+To:     <fstests@vger.kernel.org>
+CC:     Jinhui Huang <huangjh.jy@cn.fujitsu.com>
+Subject: [PATCH] xfs/153: add _require_idmapped_mounts check
+Date:   Fri, 30 Apr 2021 17:31:21 +0800
+Message-ID: <1619775081-3941-1-git-send-email-huangjh.jy@cn.fujitsu.com>
+X-Mailer: git-send-email 1.8.3.1
 MIME-Version: 1.0
 Content-Type: text/plain
+X-Originating-IP: [10.167.220.33]
+X-ClientProxiedBy: G08CNEXCHPEKD06.g08.fujitsu.local (10.167.33.205) To
+ R01UKEXCASM126.r01.fujitsu.local (10.183.43.178)
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-"Darrick J. Wong" <djwong@kernel.org> writes:
+When this case runs on system without mount_setattr syscall support, it
+will report errors rather than skip. so we add _require_idmapped_mounts
+to check if mount_setattr syscall is supported.
 
-> On Wed, Apr 28, 2021 at 09:50:56AM -0400, Theodore Ts'o wrote:
->> On Tue, Apr 27, 2021 at 11:11:16AM -0700, Darrick J. Wong wrote:
->> > 
->> > TBH I think these tests (g/453 and g/454) are probably only useful for
->> > filesystems that allow unrestricted byte streams for names.
->> 
->> I'm actually a little puzzled about why these tests should exist:
->> 
->> # Create a directory with multiple filenames that all appear the same
->> # (in unicode, anyway) but point to different inodes.  In theory all
->> # Linux filesystems should allow this (filenames are a sequence of
->> # arbitrary bytes) even if the user implications are horrifying.
->> 
->> Why do we care about testing this?  The assertion "In all theory all
->> Linux filesystems should allow this" is clearly not true --- if you
->> enable unicode support for ext4 or f2fs, this will no longer be true,
->> and this is considered by some a _feature_ not a bug --- precisely
->> _because_ the user implications are horrifying.
->> 
->> So why does these tests exist?  Darrick, I see you added them in 2017
->> to test whether or not xfs_scrub will warn about confuable names, if
->> _check_xfs_scrub_does_unicode is true.  So we already understand that
->> it's possible for a file system checker to complain that these file
->> names are bad.
->
-> Yes, that's exactly why this test (and generic/454) were created -- as a
-> functional test for xfs_scrub's unicode checking.
->
->> It's not at all clear to me that asserting that all Linux file systems
->> _must_ treat file names as "bag of bits" and not apply any kind of
->> unicode normalization or strict unicode validation is a valid thing to
->> test for in 2021.
->
-> Perhaps not.  These two tests do have the interesting side effect of
-> catching filesystems that don't hew to the "names are bytestreams"
-> philosophy.  In 2017, fstests usage seemed like it pretty narrowly
-> included only the big three filesystems, so it amuses me to no end that
-> four years went by before this discussion started. :P
->
-> Nowadays with wider testing of other filesystems (thanks, Red Hat!) we
-> should hide these behind _require_names_are_bytes or move them to
-> tests/xfs/.
->
-> Question -- the unicode case folding doesn't apply to xattr names,
-> right?
+Signed-off-by: Jinhui Huang <huangjh.jy@cn.fujitsu.com>
+---
+ tests/xfs/153 | 1 +
+ 1 file changed, 1 insertion(+)
 
-No, they don't apply to xattr name in ext4 and f2fs.
-
+diff --git a/tests/xfs/153 b/tests/xfs/153
+index ab2469d..19cfc46 100755
+--- a/tests/xfs/153
++++ b/tests/xfs/153
+@@ -39,6 +39,7 @@ chmod a+rwx $seqres.full	# arbitrary users will write here
+ _require_scratch
+ _require_xfs_quota
+ _require_user fsgqa
++_require_idmapped_mounts
+ _require_test_program "idmapped-mounts/mount-idmapped"
+ 
+ _scratch_mkfs >/dev/null 2>&1
 -- 
-Gabriel Krisman Bertazi
+1.8.3.1
+
