@@ -2,222 +2,106 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,URIBL_BLOCKED,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5D461C433ED
-	for <linux-fstests@archiver.kernel.org>; Mon,  3 May 2021 09:54:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 504ECC433B4
+	for <linux-fstests@archiver.kernel.org>; Mon,  3 May 2021 10:27:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 219106120E
-	for <linux-fstests@archiver.kernel.org>; Mon,  3 May 2021 09:54:22 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 18D4B611C9
+	for <linux-fstests@archiver.kernel.org>; Mon,  3 May 2021 10:27:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233014AbhECJzO (ORCPT
+        id S233330AbhECK2P (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 3 May 2021 05:55:14 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44950 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232964AbhECJzO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 3 May 2021 05:55:14 -0400
-Received: from mail-qk1-x731.google.com (mail-qk1-x731.google.com [IPv6:2607:f8b0:4864:20::731])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3B734C06174A;
-        Mon,  3 May 2021 02:54:21 -0700 (PDT)
-Received: by mail-qk1-x731.google.com with SMTP id o5so4453128qkb.0;
-        Mon, 03 May 2021 02:54:21 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:reply-to:from:date:message-id
-         :subject:to:cc:content-transfer-encoding;
-        bh=9RpqQfQakx5sccBn/igrW39urW9z+0J3JA5W7+w7hEQ=;
-        b=f63wDXNpYH/vT+N+h88MSOz4O5MhUnIK5yXTmvgg09coOnwCik8Vt+6GagHpB2est0
-         6/wLEltn8Fvld6QzjnKgHuE382lbKZtYNo0s7j6w0VSjcAUigmY4nFXTpdSTiSRvwvpA
-         TE02+mEqnNC69oVKX4rdzhKsiafpsL0xL4spVd9QDxJO/DijJZKGJvFaqLHs3Fhs8YzL
-         rycU2z+M3AM8v2YxxEMyIUTHpipDjxUxDjapP4TsvLxwMNJuC1PHv4rohvmrPsaicnu7
-         z/nnYBqVbjhW6rgjepGhvbOJEFz7EnjXKlpmeh0KioTAvKl4x8QRu78mN2dMqozDeO3/
-         jBBw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:reply-to
-         :from:date:message-id:subject:to:cc:content-transfer-encoding;
-        bh=9RpqQfQakx5sccBn/igrW39urW9z+0J3JA5W7+w7hEQ=;
-        b=Q/UQYzr+laZph1hwgzZfajbZfqzwQWfrOc7Gzo36ofMfIOLDVBp5TgoAvqHV08ZmOn
-         BJDnSSsCEfpr7OfKB3ztGaIX8GZ1FAqRsv4bp3kAmOMJi2fqx/Pt3NB5MDOK0Yg+uq9y
-         UCbmnlH1FbqtJhNvj0RZj+ahjOuOK8Bi3HmRZ1/5pswrlLctS/EHmGpkSlqdQv45AOBZ
-         ld+3+LsdskfTnVMrymbBpfGh9DJLZV1pjz8halJhRB28atbjncFRHWj4BYg8kDXJynFb
-         44/tHUn0dWMa0ybQcwBUtMuw258E/zVaL+d5fXSWB5WbeBbkkHHQMD8csz8i2eR0ZPLK
-         r+2Q==
-X-Gm-Message-State: AOAM532fJLUPQV/dmNYjgJQQazH2u1aMtWwo6QSWLtI7oRPX5rlz0CQa
-        GiBVDzMcuDeh76+hRcFm9TC4YBsum4kU4rAdC6Y=
-X-Google-Smtp-Source: ABdhPJyd16W8BtO8y6twUnQCWKI6AGS57F3JXGwLqGYBp0CEyiG4+UzvN4BCOQDWj7MiJTcvJT4lthYUd+4u5PxBuPk=
-X-Received: by 2002:a05:620a:1326:: with SMTP id p6mr9028183qkj.438.1620035660469;
- Mon, 03 May 2021 02:54:20 -0700 (PDT)
+        Mon, 3 May 2021 06:28:15 -0400
+Received: from bhuna.collabora.co.uk ([46.235.227.227]:48330 "EHLO
+        bhuna.collabora.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S233108AbhECK2N (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 3 May 2021 06:28:13 -0400
+Received: from [127.0.0.1] (localhost [127.0.0.1])
+        (Authenticated sender: shreeya)
+        with ESMTPSA id 723E51F42180
+From:   Shreeya Patel <shreeya.patel@collabora.com>
+To:     fstests@vger.kernel.org
+Cc:     linux-fsdevel@vger.kernel.org, krisman@collabora.com,
+        preichl@redhat.com, kernel@collabora.com, willy@infradead.org,
+        djwong@kernel.org
+Subject: [PATCH v2] generic/631: Add a check for extended attributes
+Date:   Mon,  3 May 2021 15:56:54 +0530
+Message-Id: <20210503102654.196661-1-shreeya.patel@collabora.com>
+X-Mailer: git-send-email 2.30.2
 MIME-Version: 1.0
-References: <96fe1c0c8747d24ad6c45bc3f0a5551b8e1ebbde.1619793258.git.anand.jain@oracle.com>
- <7ff015576992de7e8d6ff554c27c420a9ffa1595.1619800208.git.anand.jain@oracle.com>
-In-Reply-To: <7ff015576992de7e8d6ff554c27c420a9ffa1595.1619800208.git.anand.jain@oracle.com>
-Reply-To: fdmanana@gmail.com
-From:   Filipe Manana <fdmanana@gmail.com>
-Date:   Mon, 3 May 2021 10:54:09 +0100
-Message-ID: <CAL3q7H79zG9rm-kOu7rys=ev0Ja_fuTNoYvdz0q6hwgqyQrhkg@mail.gmail.com>
-Subject: Re: [PATCH v2] btrfs: add fstrim test case on the sprout device
-To:     Anand Jain <anand.jain@oracle.com>
-Cc:     fstests <fstests@vger.kernel.org>,
-        linux-btrfs <linux-btrfs@vger.kernel.org>,
-        Filipe David Borba Manana <fdmanana@suse.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sat, May 1, 2021 at 6:24 AM Anand Jain <anand.jain@oracle.com> wrote:
->
-> Add fstrim test case on the sprout device, verify seed device
-> integrity.
->
->  btrfs: fix unmountable seed device after fstrim
->
-> Signed-off-by: Anand Jain <anand.jain@oracle.com>
-> ---
-> v2:
->   Add _require_fstrim and _require_batched_discard.
->   Use FSTRIM_PROG.
->   Use _filter_ro_mount to handle the difference in output in different
->      mount(8) version.
->   Call _scratch_dev_pool_put.
->   Add _check_btrfs_filesystem $seed to check the whole seed fs.
->   Update in-code comments.
->
->  tests/btrfs/236     | 81 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/236.out |  5 +++
->  tests/btrfs/group   |  1 +
->  3 files changed, 87 insertions(+)
->  create mode 100755 tests/btrfs/236
->  create mode 100644 tests/btrfs/236.out
->
-> diff --git a/tests/btrfs/236 b/tests/btrfs/236
-> new file mode 100755
-> index 000000000000..aac27fac06dd
-> --- /dev/null
-> +++ b/tests/btrfs/236
-> @@ -0,0 +1,81 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2021 Oracle. All Rights Reserved.
-> +#
-> +# FS QA Test 236
-> +#
-> +# Check seed device integrity after fstrim on the sprout device.
-> +#
-> +#  Kernel bug is fixed by the commit:
-> +#    btrfs: fix unmountable seed device after fstrim
-> +
-> +seq=3D`basename $0`
-> +seqres=3D$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=3D`pwd`
-> +tmp=3D/tmp/$$
-> +status=3D1       # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +       cd /
-> +       rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs btrfs
-> +_require_command "$BTRFS_TUNE_PROG" btrfstune
-> +_require_fstrim
-> +_require_scratch_dev_pool 2
-> +_scratch_dev_pool_get 2
-> +
-> +seed=3D$(echo $SCRATCH_DEV_POOL | $AWK_PROG '{print $1}')
-> +sprout=3D$(echo $SCRATCH_DEV_POOL | $AWK_PROG '{print $2}')
-> +
-> +_mkfs_dev $seed
-> +_mount $seed $SCRATCH_MNT
-> +
-> +$XFS_IO_PROG -f -c "pwrite -S 0xab 0 1M" $SCRATCH_MNT/foo > /dev/null
-> +_scratch_unmount
-> +$BTRFS_TUNE_PROG -S 1 $seed
-> +
-> +# Mount the seed device and add the rw device
-> +_mount $seed $SCRATCH_MNT 2>&1 | _filter_ro_mount | _filter_scratch
-> +md5sum $SCRATCH_MNT/foo | _filter_scratch
-> +
-> +$BTRFS_UTIL_PROG device add -f $sprout $SCRATCH_MNT
-> +_scratch_unmount
-> +
-> +# Now remount writeable sprout device, create some data and run fstrim
-> +_mount $sprout $SCRATCH_MNT
-> +_require_batched_discard $SCRATCH_MNT
-> +
-> +$XFS_IO_PROG -f -c "pwrite -S 0xcd 0 1M" $SCRATCH_MNT/bar > /dev/null
+Test case 631 fails for filesystems like exfat or vfat or any other
+which does not support extended attributes.
 
-We aren't doing anything with this file ("bar"). Just remove it.
+The main reason for failure is not being able to mount overlayfs
+with filesystems that do not support extended attributes.
+mount -t overlay overlay -o "$l,$u,$w,$i" $mergedir
 
-Otherwise it passes now with the filter.
+Above command would return an error as -
+/var/mnt/scratch/merged0: wrong fs type, bad option, bad superblock
+on overlay, missing codepage or helper program, or other error.
 
-Thanks.
+dmesg log reports the following -
+overlayfs: filesystem on '/var/mnt/scratch/upperdir1' not supported
 
-> +
-> +$FSTRIM_PROG $SCRATCH_MNT
-> +
-> +_scratch_unmount
-> +
-> +# Verify seed device is all ok
-> +_mount $seed $SCRATCH_MNT 2>&1 | _filter_ro_mount | _filter_scratch
-> +md5sum $SCRATCH_MNT/foo | _filter_scratch
-> +_scratch_unmount
-> +
-> +_check_btrfs_filesystem $seed
-> +
-> +_scratch_dev_pool_put
-> +
-> +# success, all done
-> +status=3D0
-> +exit
-> diff --git a/tests/btrfs/236.out b/tests/btrfs/236.out
-> new file mode 100644
-> index 000000000000..01699b8fc291
-> --- /dev/null
-> +++ b/tests/btrfs/236.out
-> @@ -0,0 +1,5 @@
-> +QA output created by 236
-> +mount: device write-protected, mounting read-only
-> +096003817ad2638000a6836e55866697  SCRATCH_MNT/foo
-> +mount: device write-protected, mounting read-only
-> +096003817ad2638000a6836e55866697  SCRATCH_MNT/foo
-> diff --git a/tests/btrfs/group b/tests/btrfs/group
-> index 331dd432fac3..5032259244e0 100644
-> --- a/tests/btrfs/group
-> +++ b/tests/btrfs/group
-> @@ -238,3 +238,4 @@
->  233 auto quick subvolume
->  234 auto quick compress rw
->  235 auto quick send
-> +236 auto quick seed trim
-> --
-> 2.27.0
->
+As per the overlayfs documentation -
+"A wide range of filesystems supported by Linux can be the lower
+filesystem, but not all filesystems that are mountable by Linux
+have the features needed for OverlayFS to work. The lower filesystem
+does not need to be writable. The lower filesystem can even be another
+overlayfs. The upper filesystem will normally be writable and if it
+is it must support the creation of trusted.* and/or user.* extended
+attributes, and must provide valid d_type in readdir responses,
+so NFS is not suitable. A read-only overlay of two read-only
+filesystems may use any filesystem type."
+
+As per the above statements from the overlayfs documentation,
+it is clear that filesystems that do not support extended
+attributes or d_type would not work with overlayfs.
+This is why we see the error in dmesg log for upperdir1
+which had an exfat filesystem.
+
+This test case already checks for d_type but does not check for
+extended attributes, hence add a check for it which would avoid
+running this tests for filesystems that are not supported.
+
+Signed-off-by: Shreeya Patel <shreeya.patel@collabora.com>
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+---
+
+Changes in v2
+  - Wrap the commit messages at 75 columns.
+  - Improve the commit message to mention about d_type check.
 
 
---=20
-Filipe David Manana,
+ tests/generic/631 | 2 ++
+ 1 file changed, 2 insertions(+)
 
-=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
- right.=E2=80=9D
+diff --git a/tests/generic/631 b/tests/generic/631
+index c43f3de3..c7f0190e 100755
+--- a/tests/generic/631
++++ b/tests/generic/631
+@@ -39,10 +39,12 @@ _cleanup()
+ 
+ # get standard environment, filters and checks
+ . ./common/rc
++. ./common/attr
+ 
+ # real QA test starts here
+ _supported_fs generic
+ _require_scratch
++_require_attrs
+ test "$FSTYP" = "overlay" && _notrun "Test does not apply to overlayfs."
+ _require_extra_fs overlay
+ 
+-- 
+2.30.2
+
