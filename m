@@ -2,207 +2,222 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-19.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A2CFDC433ED
-	for <linux-fstests@archiver.kernel.org>; Sat,  1 May 2021 12:25:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5D461C433ED
+	for <linux-fstests@archiver.kernel.org>; Mon,  3 May 2021 09:54:22 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 73C9F61423
-	for <linux-fstests@archiver.kernel.org>; Sat,  1 May 2021 12:25:57 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 219106120E
+	for <linux-fstests@archiver.kernel.org>; Mon,  3 May 2021 09:54:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232007AbhEAM0q (ORCPT
+        id S233014AbhECJzO (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 1 May 2021 08:26:46 -0400
-Received: from mail.kernel.org ([198.145.29.99]:53336 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S231960AbhEAM0q (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sat, 1 May 2021 08:26:46 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 36CB761406;
-        Sat,  1 May 2021 12:25:55 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1619871956;
-        bh=Xj2RjhlOpeS9x3IVdiwabaHefFE9w2awWv4KGNbbDwk=;
-        h=From:To:Cc:Subject:Date:From;
-        b=W/OvcBGyVhZ1S4eL5MlWDCkbRjswW8Pr5gxDwe95WBY5SCA59Jp2SYWuJ0YUHI+dY
-         LfaQsRqWnP/QZ7iM3omXK0YXa6qDD1a3plwhuq3e80FAA9QV6xzWjog6PxyHRXLFC+
-         FBeDRr6pFlec7pciy1Ngkb3W7xEGON+/EwIvpUxU3cHrLQRYOVWciV04T7kogXMFiD
-         j3c7OAShAscO2fAbzEsSB1FceVqt2tERf434Tydk9akG5UtgDS5hBcTs0VKUh/CWvu
-         nV1dfcOA7tKfB3iEEb+rhRnEo5HdxRFzbSbx/2zFbPfCVSDyJDtlhg0v8fUguR7rOW
-         492Qh7KYSid+g==
-From:   Christian Brauner <brauner@kernel.org>
-To:     Eryu Guan <guan@eryu.me>, fstests@vger.kernel.org
-Cc:     Christoph Hellwig <hch@lst.de>,
-        Christian Brauner <christian.brauner@ubuntu.com>
-Subject: [PATCH v2] generic/633: extend fscaps test
-Date:   Sat,  1 May 2021 14:25:39 +0200
-Message-Id: <20210501122539.2844335-1-brauner@kernel.org>
-X-Mailer: git-send-email 2.27.0
+        Mon, 3 May 2021 05:55:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44950 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S232964AbhECJzO (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 3 May 2021 05:55:14 -0400
+Received: from mail-qk1-x731.google.com (mail-qk1-x731.google.com [IPv6:2607:f8b0:4864:20::731])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3B734C06174A;
+        Mon,  3 May 2021 02:54:21 -0700 (PDT)
+Received: by mail-qk1-x731.google.com with SMTP id o5so4453128qkb.0;
+        Mon, 03 May 2021 02:54:21 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:reply-to:from:date:message-id
+         :subject:to:cc:content-transfer-encoding;
+        bh=9RpqQfQakx5sccBn/igrW39urW9z+0J3JA5W7+w7hEQ=;
+        b=f63wDXNpYH/vT+N+h88MSOz4O5MhUnIK5yXTmvgg09coOnwCik8Vt+6GagHpB2est0
+         6/wLEltn8Fvld6QzjnKgHuE382lbKZtYNo0s7j6w0VSjcAUigmY4nFXTpdSTiSRvwvpA
+         TE02+mEqnNC69oVKX4rdzhKsiafpsL0xL4spVd9QDxJO/DijJZKGJvFaqLHs3Fhs8YzL
+         rycU2z+M3AM8v2YxxEMyIUTHpipDjxUxDjapP4TsvLxwMNJuC1PHv4rohvmrPsaicnu7
+         z/nnYBqVbjhW6rgjepGhvbOJEFz7EnjXKlpmeh0KioTAvKl4x8QRu78mN2dMqozDeO3/
+         jBBw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:reply-to
+         :from:date:message-id:subject:to:cc:content-transfer-encoding;
+        bh=9RpqQfQakx5sccBn/igrW39urW9z+0J3JA5W7+w7hEQ=;
+        b=Q/UQYzr+laZph1hwgzZfajbZfqzwQWfrOc7Gzo36ofMfIOLDVBp5TgoAvqHV08ZmOn
+         BJDnSSsCEfpr7OfKB3ztGaIX8GZ1FAqRsv4bp3kAmOMJi2fqx/Pt3NB5MDOK0Yg+uq9y
+         UCbmnlH1FbqtJhNvj0RZj+ahjOuOK8Bi3HmRZ1/5pswrlLctS/EHmGpkSlqdQv45AOBZ
+         ld+3+LsdskfTnVMrymbBpfGh9DJLZV1pjz8halJhRB28atbjncFRHWj4BYg8kDXJynFb
+         44/tHUn0dWMa0ybQcwBUtMuw258E/zVaL+d5fXSWB5WbeBbkkHHQMD8csz8i2eR0ZPLK
+         r+2Q==
+X-Gm-Message-State: AOAM532fJLUPQV/dmNYjgJQQazH2u1aMtWwo6QSWLtI7oRPX5rlz0CQa
+        GiBVDzMcuDeh76+hRcFm9TC4YBsum4kU4rAdC6Y=
+X-Google-Smtp-Source: ABdhPJyd16W8BtO8y6twUnQCWKI6AGS57F3JXGwLqGYBp0CEyiG4+UzvN4BCOQDWj7MiJTcvJT4lthYUd+4u5PxBuPk=
+X-Received: by 2002:a05:620a:1326:: with SMTP id p6mr9028183qkj.438.1620035660469;
+ Mon, 03 May 2021 02:54:20 -0700 (PDT)
 MIME-Version: 1.0
-X-Patch-Hashes: v=1; h=sha256; i=G7+GAmtHT1fOvWjrHGSYUBzRApj8cxdMrLcBmh7+zR4=; m=EtZEQotKpb6JN8l4G45xBer7S6tIn3vMaU+740ytsuI=; p=Vi/v28YemCmKi3cS9Y6CVdDzlKL1LypX5Ptiei2bCMg=; g=79dd8984001b519e1da5901520f83de1cf52e0a7
-X-Patch-Sig: m=pgp; i=christian.brauner@ubuntu.com; s=0x0x91C61BC06578DCA2; b=iHUEABYKAB0WIQRAhzRXHqcMeLMyaSiRxhvAZXjcogUCYI1IqQAKCRCRxhvAZXjcon6LAQCVaig J99Fa+VgPIJx4oo83yzgJ2vIX9oyyo60vpPAfHQD/Wc0fnJ0iDdwG6Dsi97FMWrVVmjrl7hu3dJdO y3QI0wE=
-Content-Transfer-Encoding: 8bit
+References: <96fe1c0c8747d24ad6c45bc3f0a5551b8e1ebbde.1619793258.git.anand.jain@oracle.com>
+ <7ff015576992de7e8d6ff554c27c420a9ffa1595.1619800208.git.anand.jain@oracle.com>
+In-Reply-To: <7ff015576992de7e8d6ff554c27c420a9ffa1595.1619800208.git.anand.jain@oracle.com>
+Reply-To: fdmanana@gmail.com
+From:   Filipe Manana <fdmanana@gmail.com>
+Date:   Mon, 3 May 2021 10:54:09 +0100
+Message-ID: <CAL3q7H79zG9rm-kOu7rys=ev0Ja_fuTNoYvdz0q6hwgqyQrhkg@mail.gmail.com>
+Subject: Re: [PATCH v2] btrfs: add fstrim test case on the sprout device
+To:     Anand Jain <anand.jain@oracle.com>
+Cc:     fstests <fstests@vger.kernel.org>,
+        linux-btrfs <linux-btrfs@vger.kernel.org>,
+        Filipe David Borba Manana <fdmanana@suse.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Christian Brauner <christian.brauner@ubuntu.com>
+On Sat, May 1, 2021 at 6:24 AM Anand Jain <anand.jain@oracle.com> wrote:
+>
+> Add fstrim test case on the sprout device, verify seed device
+> integrity.
+>
+>  btrfs: fix unmountable seed device after fstrim
+>
+> Signed-off-by: Anand Jain <anand.jain@oracle.com>
+> ---
+> v2:
+>   Add _require_fstrim and _require_batched_discard.
+>   Use FSTRIM_PROG.
+>   Use _filter_ro_mount to handle the difference in output in different
+>      mount(8) version.
+>   Call _scratch_dev_pool_put.
+>   Add _check_btrfs_filesystem $seed to check the whole seed fs.
+>   Update in-code comments.
+>
+>  tests/btrfs/236     | 81 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/236.out |  5 +++
+>  tests/btrfs/group   |  1 +
+>  3 files changed, 87 insertions(+)
+>  create mode 100755 tests/btrfs/236
+>  create mode 100644 tests/btrfs/236.out
+>
+> diff --git a/tests/btrfs/236 b/tests/btrfs/236
+> new file mode 100755
+> index 000000000000..aac27fac06dd
+> --- /dev/null
+> +++ b/tests/btrfs/236
+> @@ -0,0 +1,81 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2021 Oracle. All Rights Reserved.
+> +#
+> +# FS QA Test 236
+> +#
+> +# Check seed device integrity after fstrim on the sprout device.
+> +#
+> +#  Kernel bug is fixed by the commit:
+> +#    btrfs: fix unmountable seed device after fstrim
+> +
+> +seq=3D`basename $0`
+> +seqres=3D$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=3D`pwd`
+> +tmp=3D/tmp/$$
+> +status=3D1       # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +       cd /
+> +       rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs btrfs
+> +_require_command "$BTRFS_TUNE_PROG" btrfstune
+> +_require_fstrim
+> +_require_scratch_dev_pool 2
+> +_scratch_dev_pool_get 2
+> +
+> +seed=3D$(echo $SCRATCH_DEV_POOL | $AWK_PROG '{print $1}')
+> +sprout=3D$(echo $SCRATCH_DEV_POOL | $AWK_PROG '{print $2}')
+> +
+> +_mkfs_dev $seed
+> +_mount $seed $SCRATCH_MNT
+> +
+> +$XFS_IO_PROG -f -c "pwrite -S 0xab 0 1M" $SCRATCH_MNT/foo > /dev/null
+> +_scratch_unmount
+> +$BTRFS_TUNE_PROG -S 1 $seed
+> +
+> +# Mount the seed device and add the rw device
+> +_mount $seed $SCRATCH_MNT 2>&1 | _filter_ro_mount | _filter_scratch
+> +md5sum $SCRATCH_MNT/foo | _filter_scratch
+> +
+> +$BTRFS_UTIL_PROG device add -f $sprout $SCRATCH_MNT
+> +_scratch_unmount
+> +
+> +# Now remount writeable sprout device, create some data and run fstrim
+> +_mount $sprout $SCRATCH_MNT
+> +_require_batched_discard $SCRATCH_MNT
+> +
+> +$XFS_IO_PROG -f -c "pwrite -S 0xcd 0 1M" $SCRATCH_MNT/bar > /dev/null
 
-Add a test to verify that setting a v3 fscap from an idmapped mount
-works as expected. This and other related use-cases were regressed by
-commit [1] which was reverted in [2] and the proper fix merged right
-before v5.12 was released in [3].
+We aren't doing anything with this file ("bar"). Just remove it.
 
-[1]: commit 3b0c2d3eaa83 ("Revert 95ebabde382c ("capabilities: Don't allow writing ambiguous v3 file capabilities")")
-[2]: commit 95ebabde382c ("capabilities: Don't allow writing ambiguous v3 file capabilities")
-[3]: commit db2e718a4798 ("capabilities: require CAP_SETFCAP to map uid 0")
-Cc: fstests@vger.kernel.org
-Cc: Christoph Hellwig <hch@lst.de>
-Signed-off-by: Christian Brauner <christian.brauner@ubuntu.com>
----
- src/idmapped-mounts/idmapped-mounts.c | 118 +++++++++++++++++++++++++-
- 1 file changed, 117 insertions(+), 1 deletion(-)
+Otherwise it passes now with the filter.
 
-diff --git a/src/idmapped-mounts/idmapped-mounts.c b/src/idmapped-mounts/idmapped-mounts.c
-index 870a8fe7..6582f3a2 100644
---- a/src/idmapped-mounts/idmapped-mounts.c
-+++ b/src/idmapped-mounts/idmapped-mounts.c
-@@ -3204,6 +3204,121 @@ out:
- 	return fret;
- }
- 
-+static int fscaps_idmapped_mounts_in_userns_valid_in_ancestor_userns(void)
-+{
-+	int fret = -1;
-+	int file1_fd = -EBADF, file1_fd2 = -EBADF, open_tree_fd = -EBADF;
-+	struct mount_attr attr = {
-+		.attr_set = MOUNT_ATTR_IDMAP,
-+	};
-+	pid_t pid;
-+
-+	file1_fd = openat(t_dir1_fd, FILE1, O_CREAT | O_EXCL | O_CLOEXEC, 0644);
-+	if (file1_fd < 0) {
-+		log_stderr("failure: openat");
-+		goto out;
-+	}
-+
-+	/* Skip if vfs caps are unsupported. */
-+	if (set_dummy_vfs_caps(file1_fd, 0, 1000))
-+		return 0;
-+
-+	if (fremovexattr(file1_fd, "security.capability")) {
-+		log_stderr("failure: fremovexattr");
-+		goto out;
-+	}
-+	if (expected_dummy_vfs_caps_uid(file1_fd, -1)) {
-+		log_stderr("failure: expected_dummy_vfs_caps_uid");
-+		goto out;
-+	}
-+	if (errno != ENODATA) {
-+		log_stderr("failure: errno");
-+		goto out;
-+	}
-+
-+	/* Changing mount properties on a detached mount. */
-+	attr.userns_fd	= get_userns_fd(0, 10000, 10000);
-+	if (attr.userns_fd < 0) {
-+		log_stderr("failure: get_userns_fd");
-+		goto out;
-+	}
-+
-+	open_tree_fd = sys_open_tree(t_dir1_fd, "",
-+				     AT_EMPTY_PATH |
-+				     AT_NO_AUTOMOUNT |
-+				     AT_SYMLINK_NOFOLLOW |
-+				     OPEN_TREE_CLOEXEC |
-+				     OPEN_TREE_CLONE);
-+	if (open_tree_fd < 0) {
-+		log_stderr("failure: sys_open_tree");
-+		goto out;
-+	}
-+
-+	if (sys_mount_setattr(open_tree_fd, "", AT_EMPTY_PATH, &attr, sizeof(attr))) {
-+		log_stderr("failure: sys_mount_setattr");
-+		goto out;
-+	}
-+
-+	file1_fd2 = openat(open_tree_fd, FILE1, O_RDWR | O_CLOEXEC, 0);
-+	if (file1_fd2 < 0) {
-+		log_stderr("failure: openat");
-+		goto out;
-+	}
-+
-+	/*
-+	 * Verify we can set an v3 fscap for real root this was regressed at
-+	 * some point. Make sure this doesn't happen again!
-+	 */
-+	pid = fork();
-+	if (pid < 0) {
-+		log_stderr("failure: fork");
-+		goto out;
-+	}
-+	if (pid == 0) {
-+		if (!switch_userns(attr.userns_fd, 0, 0, false))
-+			die("failure: switch_userns");
-+
-+		if (expected_dummy_vfs_caps_uid(file1_fd2, -1))
-+			die("failure: expected_dummy_vfs_caps_uid");
-+		if (errno != ENODATA)
-+			die("failure: errno");
-+
-+		if (set_dummy_vfs_caps(file1_fd2, 0, 0))
-+			die("failure: set_dummy_vfs_caps");
-+
-+		if (!expected_dummy_vfs_caps_uid(file1_fd2, 0))
-+			die("failure: expected_dummy_vfs_caps_uid");
-+
-+		if (!expected_dummy_vfs_caps_uid(file1_fd, 0) && errno != EOVERFLOW)
-+			die("failure: expected_dummy_vfs_caps_uid");
-+
-+		exit(EXIT_SUCCESS);
-+	}
-+
-+	if (wait_for_pid(pid))
-+		goto out;
-+
-+	if (!expected_dummy_vfs_caps_uid(file1_fd2, 10000)) {
-+		log_stderr("failure: expected_dummy_vfs_caps_uid");
-+		goto out;
-+	}
-+
-+	if (!expected_dummy_vfs_caps_uid(file1_fd, 0)) {
-+		log_stderr("failure: expected_dummy_vfs_caps_uid");
-+		goto out;
-+	}
-+
-+	fret = 0;
-+	log_debug("Ran test");
-+out:
-+	safe_close(attr.userns_fd);
-+	safe_close(file1_fd);
-+	safe_close(file1_fd2);
-+	safe_close(open_tree_fd);
-+
-+	return fret;
-+}
-+
- static int fscaps_idmapped_mounts_in_userns_separate_userns(void)
- {
- 	int fret = -1;
-@@ -8748,7 +8863,8 @@ struct t_idmapped_mounts {
- 	{ fscaps,							"fscaps on regular mounts",									},
- 	{ fscaps_idmapped_mounts,					"fscaps on idmapped mounts",									},
- 	{ fscaps_idmapped_mounts_in_userns,				"fscaps on idmapped mounts in user namespace",							},
--	{ fscaps_idmapped_mounts_in_userns_separate_userns,		"fscaps on idmapped mounts in user namespace with different id mappings ",			},
-+	{ fscaps_idmapped_mounts_in_userns_separate_userns,		"fscaps on idmapped mounts in user namespace with different id mappings",			},
-+	{ fscaps_idmapped_mounts_in_userns_valid_in_ancestor_userns,	"fscaps on idmapped mounts in user namespace writing fscap valid in ancestor userns",		},
- 	{ fsids_mapped,							"mapped fsids",											},
- 	{ fsids_unmapped,						"unmapped fsids",										},
- 	{ hardlink_crossing_mounts,					"cross mount hardlink",										},
+Thanks.
 
-base-commit: 15510d3a208187e234333f7974580786d54d52dc
--- 
-2.27.0
+> +
+> +$FSTRIM_PROG $SCRATCH_MNT
+> +
+> +_scratch_unmount
+> +
+> +# Verify seed device is all ok
+> +_mount $seed $SCRATCH_MNT 2>&1 | _filter_ro_mount | _filter_scratch
+> +md5sum $SCRATCH_MNT/foo | _filter_scratch
+> +_scratch_unmount
+> +
+> +_check_btrfs_filesystem $seed
+> +
+> +_scratch_dev_pool_put
+> +
+> +# success, all done
+> +status=3D0
+> +exit
+> diff --git a/tests/btrfs/236.out b/tests/btrfs/236.out
+> new file mode 100644
+> index 000000000000..01699b8fc291
+> --- /dev/null
+> +++ b/tests/btrfs/236.out
+> @@ -0,0 +1,5 @@
+> +QA output created by 236
+> +mount: device write-protected, mounting read-only
+> +096003817ad2638000a6836e55866697  SCRATCH_MNT/foo
+> +mount: device write-protected, mounting read-only
+> +096003817ad2638000a6836e55866697  SCRATCH_MNT/foo
+> diff --git a/tests/btrfs/group b/tests/btrfs/group
+> index 331dd432fac3..5032259244e0 100644
+> --- a/tests/btrfs/group
+> +++ b/tests/btrfs/group
+> @@ -238,3 +238,4 @@
+>  233 auto quick subvolume
+>  234 auto quick compress rw
+>  235 auto quick send
+> +236 auto quick seed trim
+> --
+> 2.27.0
+>
 
+
+--=20
+Filipe David Manana,
+
+=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
+ right.=E2=80=9D
