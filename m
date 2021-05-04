@@ -2,222 +2,311 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DE764C433ED
-	for <linux-fstests@archiver.kernel.org>; Mon,  3 May 2021 11:16:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C1DDBC433B4
+	for <linux-fstests@archiver.kernel.org>; Tue,  4 May 2021 19:34:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B0787611CB
-	for <linux-fstests@archiver.kernel.org>; Mon,  3 May 2021 11:16:57 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9CDCB613C7
+	for <linux-fstests@archiver.kernel.org>; Tue,  4 May 2021 19:34:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229811AbhECLRt (ORCPT
+        id S232145AbhEDTfm (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 3 May 2021 07:17:49 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34832 "EHLO
+        Tue, 4 May 2021 15:35:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42256 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232960AbhECLRt (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 3 May 2021 07:17:49 -0400
-Received: from mail-qk1-x730.google.com (mail-qk1-x730.google.com [IPv6:2607:f8b0:4864:20::730])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3F8BCC06174A;
-        Mon,  3 May 2021 04:16:56 -0700 (PDT)
-Received: by mail-qk1-x730.google.com with SMTP id 76so2746133qkn.13;
-        Mon, 03 May 2021 04:16:56 -0700 (PDT)
+        with ESMTP id S229542AbhEDTfl (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 4 May 2021 15:35:41 -0400
+Received: from mail-vs1-xe2b.google.com (mail-vs1-xe2b.google.com [IPv6:2607:f8b0:4864:20::e2b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C60C4C061574
+        for <fstests@vger.kernel.org>; Tue,  4 May 2021 12:34:45 -0700 (PDT)
+Received: by mail-vs1-xe2b.google.com with SMTP id j13so5392063vsf.2
+        for <fstests@vger.kernel.org>; Tue, 04 May 2021 12:34:45 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:reply-to:from:date:message-id
-         :subject:to:cc:content-transfer-encoding;
-        bh=vXtH5/T+cx1yIBSw3jM4bteZdlehl1w02KYu9pmCXko=;
-        b=g8gT1+S1diOVUGP5BzwThpFuYBgNr/ANfF1SwB5mlviaFHwUJDSueWSPK9rhADWN/b
-         sKEcZAqUeQeENFDAwqDZV9gCnPXRAIoq+bYM1i913lqsVz+TqXRLGh6DAxkExa/BdsHp
-         K4bsb5s8CqT0yVb9lNFOtrrsALBGcWNHsG8D3AeD3OVngxNfUHfar6oc58R4v/yflxcd
-         whfHzxy/0Ca1LSQp2fbgI9rKNvqYB/8GX2soRgfL6mOpztZLLhiSrDwpq1QJSQNMdhLb
-         1nVouHtLo++l+gh1L/kvnO3jxGRkG2iy4XNQsQbNe2cVhD33raWMeTT1GQYx3ujtlyXc
-         W8fw==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=ZS+N/g8aVmJeO2qN5nrkSs+5r1OhMk1GD3mm4Ejv+gs=;
+        b=ZjTjLHVtnQtBMoaKf5P/xWHseOnEPi89WoGEI4o8/T0c0WhEt03jCR8ko7y/NCn5hJ
+         GgL0y/TyAOWclHJzNnPKHMMS18mhhRxfbbliWgu6lVjf8HNOltgJ+hA3sMfiDFIQQBEP
+         JhWEYjSq+UPm0EEViFzyfUQKTMr0uQUzMgOn02+dZvjxlRSniFNvN/eeecuzXb04T7N0
+         1YnyKtbTfy2LXohaK+wvn4r4weT1Tcs8dp7wwKtZusIISiLfl453B5zYNZph43aWbSKd
+         zLbBDWHA9gqtQ4x5/MJY7ZIjeqyJA97mfsxW9T04TrNMMW/A1Er+Qw8kR7XQfnOynZdM
+         QVUw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:reply-to
-         :from:date:message-id:subject:to:cc:content-transfer-encoding;
-        bh=vXtH5/T+cx1yIBSw3jM4bteZdlehl1w02KYu9pmCXko=;
-        b=pkrAsl9mt0d7Q6Q03aj22pCSw8zJ9V+6LaKeQIWtwCRgOYcbp3XmVTkxFl9f6gG7VP
-         e6CTw4x8FtOIc+zU3RBlDl+dllKbCJply64Gn/a+28DUaoSttvDDMS7S7cYG4D6gOrB4
-         EZdvvmJeXJTBr8mMQDqfBQxmXzjlao2z7yBdT1PL7hM/3X64kOXEiGuMUaILBqeaU+mW
-         uSr1pXmar21ISQv6E2Kiw7ZnVbro3KpDaKzyhE+ZFCbykL14r/m8f1xBVxZ92ZnW6bef
-         +OJaEtMvji6kP9G0OcSHgJpXmguOm83oPk8f/m9HRs7uChdtfpVvkIZ3Ul2ZoRw7ut+X
-         XKJw==
-X-Gm-Message-State: AOAM530/q6/KscDxkkrtlXJlIDn+BE5Z8GLfzJLqnPXvHJ2vT5jLGe8d
-        ej6HiypadOsaJrm4vNOdG1RAuPuAyr9j4qm48o4=
-X-Google-Smtp-Source: ABdhPJxvLq673LyBu593FOh1vj8d29IaSekCoq4elUKZ49Z+GsBgQg4kPIEbk7LGGXBWse6gjiO2gUfIuj64dK8Gj98=
-X-Received: by 2002:a05:620a:2282:: with SMTP id o2mr14334608qkh.479.1620040614907;
- Mon, 03 May 2021 04:16:54 -0700 (PDT)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=ZS+N/g8aVmJeO2qN5nrkSs+5r1OhMk1GD3mm4Ejv+gs=;
+        b=DACEzH//uF38B3MC9ExAk7gfOsTz7pLzMEdyx4i3AO5H6AaDBgWYlVPnkpREzWisWz
+         RTi9AbITAsZPGE2iMPPS6axc4seySeR3Jc2Ygw5Bx4eSRbKhOkI0mfBDHz8jlKfeRyYL
+         f5RSsIij6N35eBVF1pSB4eK6EfFTw6ScoZM96yylPLa9D6P3efTA+E481gSOmtg/KgZ+
+         6FSyv+ZfXYH0IwvSGH1KzuaQDrJX85/VB2mF09ruwNdz8EamiY2GfvRY607wYp+z9PQ1
+         bu6NU5klaSy0iP27fJRhyQSZ90ID19C/czYeRdVM0o3K5vCR1JRSC0xXwTeYKdNlJjMa
+         PZeg==
+X-Gm-Message-State: AOAM533GxUXfveCSEwtIbh3dYVzX02A9OVWp33doQfnrVvmLiHcPhIiP
+        5SvrelH6rv9znLAr/kuX6rSWkklR79DitA==
+X-Google-Smtp-Source: ABdhPJxBKYsIaTiC8OIy6LqHzrKp9UaYTBC25P/OoirNW+XgdXjCWG1TreK6awcWcNYLdpyjFQ9Alg==
+X-Received: by 2002:a67:1ac4:: with SMTP id a187mr24526185vsa.45.1620156884436;
+        Tue, 04 May 2021 12:34:44 -0700 (PDT)
+Received: from leah-cloudtop2.c.googlers.com.com (241.36.196.104.bc.googleusercontent.com. [104.196.36.241])
+        by smtp.googlemail.com with ESMTPSA id p16sm595099uaq.7.2021.05.04.12.34.43
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 04 May 2021 12:34:43 -0700 (PDT)
+From:   Leah Rumancik <leah.rumancik@gmail.com>
+To:     fstests@vger.kernel.org
+Cc:     Leah Rumancik <lrumancik@google.com>,
+        Leah Rumancik <leah.rumancik@gmail.com>
+Subject: [PATCH] ext4/309: add test for ext4_dir_entry2 wipe
+Date:   Tue,  4 May 2021 19:34:25 +0000
+Message-Id: <20210504193425.1642352-1-leah.rumancik@gmail.com>
+X-Mailer: git-send-email 2.31.1.527.g47e6f16901-goog
 MIME-Version: 1.0
-References: <96fe1c0c8747d24ad6c45bc3f0a5551b8e1ebbde.1619793258.git.anand.jain@oracle.com>
- <2426455f382feec9352d48f5912278c30dc06210.1620039369.git.anand.jain@oracle.com>
-In-Reply-To: <2426455f382feec9352d48f5912278c30dc06210.1620039369.git.anand.jain@oracle.com>
-Reply-To: fdmanana@gmail.com
-From:   Filipe Manana <fdmanana@gmail.com>
-Date:   Mon, 3 May 2021 12:16:43 +0100
-Message-ID: <CAL3q7H4HOC8tMvBZHkCtoDpBBSmEV3Zd6Z8f4A_AUTP2v1WJmg@mail.gmail.com>
-Subject: Re: [PATCH v3] btrfs: add fstrim test case on the sprout device
-To:     Anand Jain <anand.jain@oracle.com>
-Cc:     fstests <fstests@vger.kernel.org>,
-        linux-btrfs <linux-btrfs@vger.kernel.org>,
-        Filipe David Borba Manana <fdmanana@suse.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, May 3, 2021 at 12:11 PM Anand Jain <anand.jain@oracle.com> wrote:
->
-> Add fstrim test case on the sprout device, verify seed device
-> integrity.
->
->  btrfs: fix unmountable seed device after fstrim
->
-> Signed-off-by: Anand Jain <anand.jain@oracle.com>
+From: Leah Rumancik <lrumancik@google.com>
 
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
+Check wiping of dir entry data upon removing a file, converting to an
+htree, and splitting htree nodes.
 
-Looks good, thanks.
+Tests commit 6c0912739699d8e4b6a87086401bf3ad3c59502d ("ext4: wipe
+ext4_dir_entry2 upon file deletion").
 
-> ---
-> v3:
->   Drop useless write into the sprout device as we are testing the effect =
-of
->      fstrim run in the sprout on the seed device.
-> v2:
->   Add _require_fstrim and _require_batched_discard.
->   Use FSTRIM_PROG.
->   Use _filter_ro_mount to handle the difference in output in different
->      mount(8) version.
->   Call _scratch_dev_pool_put.
->   Add _check_btrfs_filesystem $seed to check the whole seed fs.
->   Update in-code comments.
->
->  tests/btrfs/236     | 79 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/236.out |  5 +++
->  tests/btrfs/group   |  1 +
->  3 files changed, 85 insertions(+)
->  create mode 100755 tests/btrfs/236
->  create mode 100644 tests/btrfs/236.out
->
-> diff --git a/tests/btrfs/236 b/tests/btrfs/236
-> new file mode 100755
-> index 000000000000..1fcb3aab8c0c
-> --- /dev/null
-> +++ b/tests/btrfs/236
-> @@ -0,0 +1,79 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2021 Oracle. All Rights Reserved.
-> +#
-> +# FS QA Test 236
-> +#
-> +# Check seed device integrity after fstrim on the sprout device.
-> +#
-> +#  Kernel bug is fixed by the commit:
-> +#    btrfs: fix unmountable seed device after fstrim
-> +
-> +seq=3D`basename $0`
-> +seqres=3D$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=3D`pwd`
-> +tmp=3D/tmp/$$
-> +status=3D1       # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +       cd /
-> +       rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs btrfs
-> +_require_command "$BTRFS_TUNE_PROG" btrfstune
-> +_require_fstrim
-> +_require_scratch_dev_pool 2
-> +_scratch_dev_pool_get 2
-> +
-> +seed=3D$(echo $SCRATCH_DEV_POOL | $AWK_PROG '{print $1}')
-> +sprout=3D$(echo $SCRATCH_DEV_POOL | $AWK_PROG '{print $2}')
-> +
-> +_mkfs_dev $seed
-> +_mount $seed $SCRATCH_MNT
-> +
-> +$XFS_IO_PROG -f -c "pwrite -S 0xab 0 1M" $SCRATCH_MNT/foo > /dev/null
-> +_scratch_unmount
-> +$BTRFS_TUNE_PROG -S 1 $seed
-> +
-> +# Mount the seed device and add the rw device
-> +_mount $seed $SCRATCH_MNT 2>&1 | _filter_ro_mount | _filter_scratch
-> +md5sum $SCRATCH_MNT/foo | _filter_scratch
-> +
-> +$BTRFS_UTIL_PROG device add -f $sprout $SCRATCH_MNT
-> +_scratch_unmount
-> +
-> +# Now remount writeable sprout device, create some data and run fstrim
-> +_mount $sprout $SCRATCH_MNT
-> +_require_batched_discard $SCRATCH_MNT
-> +
-> +$FSTRIM_PROG $SCRATCH_MNT
-> +
-> +_scratch_unmount
-> +
-> +# Verify seed device is all ok
-> +_mount $seed $SCRATCH_MNT 2>&1 | _filter_ro_mount | _filter_scratch
-> +md5sum $SCRATCH_MNT/foo | _filter_scratch
-> +_scratch_unmount
-> +
-> +_check_btrfs_filesystem $seed
-> +
-> +_scratch_dev_pool_put
-> +
-> +# success, all done
-> +status=3D0
-> +exit
-> diff --git a/tests/btrfs/236.out b/tests/btrfs/236.out
-> new file mode 100644
-> index 000000000000..01699b8fc291
-> --- /dev/null
-> +++ b/tests/btrfs/236.out
-> @@ -0,0 +1,5 @@
-> +QA output created by 236
-> +mount: device write-protected, mounting read-only
-> +096003817ad2638000a6836e55866697  SCRATCH_MNT/foo
-> +mount: device write-protected, mounting read-only
-> +096003817ad2638000a6836e55866697  SCRATCH_MNT/foo
-> diff --git a/tests/btrfs/group b/tests/btrfs/group
-> index 331dd432fac3..5032259244e0 100644
-> --- a/tests/btrfs/group
-> +++ b/tests/btrfs/group
-> @@ -238,3 +238,4 @@
->  233 auto quick subvolume
->  234 auto quick compress rw
->  235 auto quick send
-> +236 auto quick seed trim
-> --
-> 2.27.0
->
+Signed-off-by: Leah Rumancik <leah.rumancik@gmail.com>
+---
+ tests/ext4/309     | 193 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/ext4/309.out |   5 ++
+ tests/ext4/group   |   1 +
+ 3 files changed, 199 insertions(+)
+ create mode 100755 tests/ext4/309
+ create mode 100644 tests/ext4/309.out
 
+diff --git a/tests/ext4/309 b/tests/ext4/309
+new file mode 100755
+index 00000000..c46db688
+--- /dev/null
++++ b/tests/ext4/309
+@@ -0,0 +1,193 @@
++#!/bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2021 Google, Inc. All Rights Reserved.
++#
++# FS QA Test No. 309
++#
++# Test wiping of ext4_dir_entry2 data upon file removal, conversion
++# to htree, and splitting of htree nodes
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++status=1       # failure is the default!
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs ext4
++
++_require_scratch
++_require_dumpe2fs "$DUMPE2FS_PROG" dumpe2fs
++_require_command "$DEBUGFS_PROG" debugfs
++
++
++SCRATCH_DIR="${SCRATCH_MNT}/scratch_dir"
++
++# get block number filename's dir ent
++# argument 1: filename
++get_block() {
++  echo $($DEBUGFS_PROG $SCRATCH_DEV -R "dirsearch /scratch_dir $1" 2>> $seqres.full | grep -o -m 1 "phys [0-9]\+" | cut -c 6-)
++}
++
++# get offset of filename's dirent within the block
++# argument 1: filename
++get_offset() {
++  echo $($DEBUGFS_PROG $SCRATCH_DEV -R "dirsearch /scratch_dir $1" 2>> $seqres.full | grep -o -m 1 "offset [0-9]\+" | cut -c 8-)
++}
++
++# get record length of dir ent at specified block and offset
++# argument 1: block
++# argument 2: offset
++get_reclen() {
++  echo $(od $SCRATCH_DEV --skip-bytes=$(($1 * $blocksize + $2 + 4)) --read-bytes=2  -d -An  --endian=little | tr -d ' \t\n\r')
++}
++
++# reads portion of dirent that should be zero'd out (starting at offset of name_len = 6)
++# and trims 0s and whitespace
++# argument 1: block num containing dir ent
++# argument 2: offset of dir ent within block
++# argument 3: rec len of dir ent
++read_dir_ent() {
++ echo $(od $SCRATCH_DEV --skip-bytes=$(($1 * $blocksize + $2 + 6)) --read-bytes=$(($3 - 6)) -d -An -v | sed -e 's/[0 \t\n\r]//g')
++}
++
++# forces node split on test directory
++# can be used to convert to htree and to split node on existing htree
++# looks for jump in directory size as indicator of node split
++induce_node_split() {
++  _scratch_mount >> $seqres.full 2>&1
++  dir_size="$(stat --printf="%s" $SCRATCH_DIR)"
++  while [[ "$(stat --printf="%s" $SCRATCH_DIR)" == "$dir_size" ]]; do
++    file_num=$(($file_num + 1))
++    touch $SCRATCH_DIR/test"$(printf "%04d" $file_num)"
++  done
++  _scratch_unmount >> $seqres.full 2>&1
++}
++
++#
++# TEST 1: dir entry fields wiped upon file removal
++#
++
++test_file1="test0001"
++test_file2="test0002"
++test_file3="test0003"
++
++_scratch_mkfs_sized $((128 * 1024 * 1024)) >> $seqres.full 2>&1
++blocksize=$($DUMPE2FS_PROG -h $SCRATCH_DEV 2>> $seqres.full | grep "Block size:" | cut -d ":" -f2 | tr -d " \t\n\r")
++
++# create scratch dir for testing
++# create some files with no name a substr of another name so we can grep later
++_scratch_mount >> $seqres.full 2>&1
++mkdir $SCRATCH_DIR
++file_num=1
++for file_num in {1..10}; do
++  touch $SCRATCH_DIR/test"$(printf "%04d" $file_num)"
++done
++_scratch_unmount >> $seqres.full 2>&1
++
++# get block, offset, and rec_len of two test files
++block1=$(get_block $test_file1)
++offset1=$(get_offset $test_file1)
++rec_len1=$(get_reclen $block1 $offset1)
++
++block2=$(get_block $test_file2)
++offset2=$(get_offset $test_file2)
++rec_len2=$(get_reclen $block2 $offset2)
++
++_scratch_mount >> $seqres.full 2>&1
++rm $SCRATCH_DIR/$test_file1
++_scratch_unmount >> $seqres.full 2>&1
++
++# read name_len field to end of dir entry
++check1=$(read_dir_ent $block1 $offset1 $rec_len1)
++check2=$(read_dir_ent $block2 $offset2 $rec_len2)
++
++# if check is empty, bytes read was all 0's, file data wiped
++# at this point, check1 should be empty, but check 2 should not be
++if [ -z "$check1" ] && [ ! -z "$check2" ]; then
++  echo "Test 1 part 1 passed."
++else
++  _fail "ERROR (test 1 part 1): metadata not wiped upon removing test file 1"
++fi
++
++_scratch_mount >> $seqres.full 2>&1
++rm $SCRATCH_DIR/$test_file2
++_scratch_unmount >> $seqres.full 2>&1
++
++check2=$(read_dir_ent $block2 $offset2 $rec_len2)
++
++# at this point, both should be wiped
++[ -z "$check2" ] && echo "Test 1 part 2 passed." || _fail "ERROR (test 1 part 2): metadata not wiped upon removing test file 2"
++
++#
++# TEST 2: old dir entry fields wiped when directory converted to htree
++#
++
++# get original location
++block1=$(get_block $test_file3)
++offset1=$(get_offset $test_file3)
++rec_len1=$(get_reclen $block1 $offset1)
++
++# sanity check, ensures not an htree yet
++check_htree=$($DEBUGFS_PROG $SCRATCH_DEV -R "htree_dump /scratch_dir" 2>&1)
++if [[ "$check_htree" != *"htree_dump: Not a hash-indexed directory"* ]]; then
++  _fail "ERROR (test 2): already an htree"
++fi
++
++# force conversion to htree
++induce_node_split
++
++# ensure it is now an htree
++check_htree=$($DEBUGFS_PROG $SCRATCH_DEV -R "htree_dump /scratch_dir" 2>&1)
++if [[ "$check_htree" == *"htree_dump: Not a hash-indexed directory"* ]]; then
++  _fail "ERROR (test 2): directory was not converted to an htree after creation of many files"
++fi
++
++# check that old data was wiped
++# (this location is not immediately reused by ext4)
++check1=$(read_dir_ent $block1 $offset1 $rec_len1)
++
++# at this point, check1 should be empty meaning data was wiped
++[ -z "$check1" ] &&  echo "Test 2 passed." || _fail "ERROR (test 2): file metadata not wiped during conversion to htree"
++
++#
++# TEST 3: old dir entries wiped when moved to another block during split_node
++#
++
++# force splitting of a node
++induce_node_split
++# use debugfs to get names of two files from block 3
++hdump=$($DEBUGFS_PROG $SCRATCH_DEV -R "htree_dump /scratch_dir" 2>> $seqres.full)
++
++# get line number of "Reading directory block 3"
++block3_line=$(echo "$hdump" | awk '/Reading directory block 3/{ print NR; exit }')
++
++[ -z "$block3_line" ] && echo "ERROR (test 3): could not find block number 3 after node split"
++
++test_file1=$(echo "$hdump" | sed -n "$(($block3_line + 1))"p | cut -d ' ' -f4)
++test_file2=$(echo "$hdump" | sed -n "$(($block3_line + 2))"p | cut -d ' ' -f4)
++
++# check these filenames don't exist in block 1 or 2
++# get block numbers of first two blocks
++block1=$(echo "$hdump" | grep -o -m 1 "Reading directory block 1, phys [0-9]\+" | cut -c 33-)
++block2=$(echo "$hdump" | grep -o -m 1 "Reading directory block 2, phys [0-9]\+" | cut -c 33-)
++
++# search all of both these blocks for these file names
++check1=$(od $SCRATCH_DEV --skip-bytes=$(($block1 * $blocksize)) --read-bytes=$blocksize -c -An -v | tr -d '\\ \t\n\r\v' | grep -e $test_file1 -e $test_file2)
++check2=$(od $SCRATCH_DEV --skip-bytes=$(($block2 * $blocksize)) --read-bytes=$blocksize -c -An -v | tr -d '\\ \t\n\r\v' | grep -e $test_file1 -e $test_file2)
++
++if [ -z "$check1" ] && [ -z "$check2" ]; then
++  echo "Test 3 passed."
++else
++  _fail "ERROR (test 3): file name not wiped during node split"
++fi
++
++status=0
++exit
+diff --git a/tests/ext4/309.out b/tests/ext4/309.out
+new file mode 100644
+index 00000000..e5febaac
+--- /dev/null
++++ b/tests/ext4/309.out
+@@ -0,0 +1,5 @@
++QA output created by 309
++Test 1 part 1 passed.
++Test 1 part 2 passed.
++Test 2 passed.
++Test 3 passed.
+diff --git a/tests/ext4/group b/tests/ext4/group
+index ceda2ba6..e7ad3c24 100644
+--- a/tests/ext4/group
++++ b/tests/ext4/group
+@@ -59,3 +59,4 @@
+ 306 auto rw resize quick
+ 307 auto ioctl rw defrag
+ 308 auto ioctl rw prealloc quick defrag
++309 auto quick dir
+-- 
+2.31.1.527.g47e6f16901-goog
 
---=20
-Filipe David Manana,
-
-=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
- right.=E2=80=9D
