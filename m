@@ -2,311 +2,121 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C1DDBC433B4
-	for <linux-fstests@archiver.kernel.org>; Tue,  4 May 2021 19:34:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A4951C43461
+	for <linux-fstests@archiver.kernel.org>; Wed,  5 May 2021 21:04:51 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9CDCB613C7
-	for <linux-fstests@archiver.kernel.org>; Tue,  4 May 2021 19:34:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 530BE613ED
+	for <linux-fstests@archiver.kernel.org>; Wed,  5 May 2021 21:04:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232145AbhEDTfm (ORCPT
+        id S232768AbhEEVFq (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 4 May 2021 15:35:42 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42256 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229542AbhEDTfl (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 4 May 2021 15:35:41 -0400
-Received: from mail-vs1-xe2b.google.com (mail-vs1-xe2b.google.com [IPv6:2607:f8b0:4864:20::e2b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C60C4C061574
-        for <fstests@vger.kernel.org>; Tue,  4 May 2021 12:34:45 -0700 (PDT)
-Received: by mail-vs1-xe2b.google.com with SMTP id j13so5392063vsf.2
-        for <fstests@vger.kernel.org>; Tue, 04 May 2021 12:34:45 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=ZS+N/g8aVmJeO2qN5nrkSs+5r1OhMk1GD3mm4Ejv+gs=;
-        b=ZjTjLHVtnQtBMoaKf5P/xWHseOnEPi89WoGEI4o8/T0c0WhEt03jCR8ko7y/NCn5hJ
-         GgL0y/TyAOWclHJzNnPKHMMS18mhhRxfbbliWgu6lVjf8HNOltgJ+hA3sMfiDFIQQBEP
-         JhWEYjSq+UPm0EEViFzyfUQKTMr0uQUzMgOn02+dZvjxlRSniFNvN/eeecuzXb04T7N0
-         1YnyKtbTfy2LXohaK+wvn4r4weT1Tcs8dp7wwKtZusIISiLfl453B5zYNZph43aWbSKd
-         zLbBDWHA9gqtQ4x5/MJY7ZIjeqyJA97mfsxW9T04TrNMMW/A1Er+Qw8kR7XQfnOynZdM
-         QVUw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=ZS+N/g8aVmJeO2qN5nrkSs+5r1OhMk1GD3mm4Ejv+gs=;
-        b=DACEzH//uF38B3MC9ExAk7gfOsTz7pLzMEdyx4i3AO5H6AaDBgWYlVPnkpREzWisWz
-         RTi9AbITAsZPGE2iMPPS6axc4seySeR3Jc2Ygw5Bx4eSRbKhOkI0mfBDHz8jlKfeRyYL
-         f5RSsIij6N35eBVF1pSB4eK6EfFTw6ScoZM96yylPLa9D6P3efTA+E481gSOmtg/KgZ+
-         6FSyv+ZfXYH0IwvSGH1KzuaQDrJX85/VB2mF09ruwNdz8EamiY2GfvRY607wYp+z9PQ1
-         bu6NU5klaSy0iP27fJRhyQSZ90ID19C/czYeRdVM0o3K5vCR1JRSC0xXwTeYKdNlJjMa
-         PZeg==
-X-Gm-Message-State: AOAM533GxUXfveCSEwtIbh3dYVzX02A9OVWp33doQfnrVvmLiHcPhIiP
-        5SvrelH6rv9znLAr/kuX6rSWkklR79DitA==
-X-Google-Smtp-Source: ABdhPJxBKYsIaTiC8OIy6LqHzrKp9UaYTBC25P/OoirNW+XgdXjCWG1TreK6awcWcNYLdpyjFQ9Alg==
-X-Received: by 2002:a67:1ac4:: with SMTP id a187mr24526185vsa.45.1620156884436;
-        Tue, 04 May 2021 12:34:44 -0700 (PDT)
-Received: from leah-cloudtop2.c.googlers.com.com (241.36.196.104.bc.googleusercontent.com. [104.196.36.241])
-        by smtp.googlemail.com with ESMTPSA id p16sm595099uaq.7.2021.05.04.12.34.43
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 04 May 2021 12:34:43 -0700 (PDT)
-From:   Leah Rumancik <leah.rumancik@gmail.com>
-To:     fstests@vger.kernel.org
-Cc:     Leah Rumancik <lrumancik@google.com>,
-        Leah Rumancik <leah.rumancik@gmail.com>
-Subject: [PATCH] ext4/309: add test for ext4_dir_entry2 wipe
-Date:   Tue,  4 May 2021 19:34:25 +0000
-Message-Id: <20210504193425.1642352-1-leah.rumancik@gmail.com>
-X-Mailer: git-send-email 2.31.1.527.g47e6f16901-goog
+        Wed, 5 May 2021 17:05:46 -0400
+Received: from out2-smtp.messagingengine.com ([66.111.4.26]:57169 "EHLO
+        out2-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S230329AbhEEVFp (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 5 May 2021 17:05:45 -0400
+Received: from compute5.internal (compute5.nyi.internal [10.202.2.45])
+        by mailout.nyi.internal (Postfix) with ESMTP id 2F2845C019C;
+        Wed,  5 May 2021 17:04:48 -0400 (EDT)
+Received: from mailfrontend2 ([10.202.2.163])
+  by compute5.internal (MEProxy); Wed, 05 May 2021 17:04:48 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bur.io; h=from
+        :to:subject:date:message-id:mime-version
+        :content-transfer-encoding; s=fm3; bh=oZwoOYJ6HhhmjoAzzBVmVJn1zc
+        uOjbIqKjzEPnYpN28=; b=OqQh+oSXcXPq6xvyqxLWsxLBHxpFKt56+L0fbAu/9A
+        D666m8HW1tUx7ya1zluUpSASLCqN51PgInxuAOAeL6cstkzhQ3jVorDizj2h8d42
+        xVoa4Ad2xEclBBq9p0TmRqDyWUKTOIOpcMJVyg4n23YAcki0EfQ4z+yvaCNS7iYk
+        IbBJDabkJpP/DUK2MStgOhYmd5aUTfBdWSatgtrPw5WWj0MMa6kgbxadephXE+uu
+        v2MSQa2dABlhhGM39dC+UQTJSpFxiWwIAJiV0Pgb3ctKByh7MNE+w43BkhDeLAP7
+        8X6IJH/ydRWzI4CnZadPtYN0f5v8/76yXHgRPCOCbA4A==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=content-transfer-encoding:date:from
+        :message-id:mime-version:subject:to:x-me-proxy:x-me-proxy
+        :x-me-sender:x-me-sender:x-sasl-enc; s=fm2; bh=oZwoOYJ6HhhmjoAzz
+        BVmVJn1zcuOjbIqKjzEPnYpN28=; b=YNCdjble6fcsV9iUWjI4S4Fwgd8hpqvMs
+        FL/NYP0fLNbIIAi/2/Ui5yDtZn+kDL3u0BqFwjfydWMXm7lTciaBAoL0NKonBEUt
+        E062WLaw4XyzupEIBzSoK/ggGLyfyxoU11SQP+VG6PzFsM1DDNMIILXlLnsrn81k
+        4EAc0YbQJIjPFVoxGdl1umWHhc2ixxPSvXzh/pepH6zQYwyqZwMXheR2qCah4fuu
+        q7TX7+z/1U2WqTxMM5XQUs5r3vhYHNTr1ZpMu22sNjmxQlugHtW7Xg2PCQxoGrmZ
+        Rsu45HWvlkyjzTv92V9i/wI0o9fn0LylEDO7uDeJzeSRd0OayX87g==
+X-ME-Sender: <xms:bwiTYNa5M8VKEA1dYxVoDXr0YxJsRNV2pxxQIidvpD--_mk7nJ_SRg>
+    <xme:bwiTYEaAOp1bin_pcaNGgiALlFMF0zt9i_NvMnpJMUEvloVRpMM1BSqHTe2EfFfyC
+    PgNqCf-Td6HiA0Xm84>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeduledrvdefkedgudehfecutefuodetggdotefrod
+    ftvfcurfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfgh
+    necuuegrihhlohhuthemuceftddtnecunecujfgurhephffvufffkffoggfgsedtkeertd
+    ertddtnecuhfhrohhmpeeuohhrihhsuceuuhhrkhhovhcuoegsohhrihhssegsuhhrrdhi
+    oheqnecuggftrfgrthhtvghrnhepudeitdelueeijeefleffveelieefgfejjeeigeekud
+    duteefkefffeethfdvjeevnecukfhppedvtdejrdehfedrvdehfedrjeenucevlhhushht
+    vghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpegsohhrihhssegsuhhrrd
+    hioh
+X-ME-Proxy: <xmx:bwiTYP_ZD234_DLGZvdDLN6xGSbXuGZLeSlSsPI9vUeqIRzMDvW2Nw>
+    <xmx:bwiTYLpXkgvLyUbgInkAwcGNHVD1DsPvAcBojzcqcK1nI0lRqFg0YQ>
+    <xmx:bwiTYIo63M-LBqzQ86mVsE0FJHCuN-FLm53PsBK6rzLTuteVkdVGpQ>
+    <xmx:cAiTYFDgkrF4m_p3kQ2FCMGp1pgNZ1fi9e0y_1kthqC10o79Rs24EA>
+Received: from localhost (unknown [207.53.253.7])
+        by mail.messagingengine.com (Postfix) with ESMTPA;
+        Wed,  5 May 2021 17:04:47 -0400 (EDT)
+From:   Boris Burkov <boris@bur.io>
+To:     fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org,
+        linux-btrfs@vger.kernel.org, kernel-team@fb.com
+Subject: [PATCH v4 0/4] tests for btrfs fsverity
+Date:   Wed,  5 May 2021 14:04:42 -0700
+Message-Id: <cover.1620248200.git.boris@bur.io>
+X-Mailer: git-send-email 2.30.2
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Leah Rumancik <lrumancik@google.com>
+This patchset provides tests for fsverity support in btrfs.
 
-Check wiping of dir entry data upon removing a file, converting to an
-htree, and splitting htree nodes.
+It includes modifications for generic tests to pass with btrfs as well
+as new tests.
 
-Tests commit 6c0912739699d8e4b6a87086401bf3ad3c59502d ("ext4: wipe
-ext4_dir_entry2 upon file deletion").
+--
+v4:
+- mark local variables
+- get rid of redundant mounts and syncs
+- use '_' in function names correctly
+- add a test for the EFBIG case
+- reduce usage of requires_btrfs_corrupt_block
+- handle variable input when corrupting merkle tree
+v3: rebase onto xfstests master branch
+v2: pass generic tests, add logwrites test
 
-Signed-off-by: Leah Rumancik <leah.rumancik@gmail.com>
----
- tests/ext4/309     | 193 +++++++++++++++++++++++++++++++++++++++++++++
- tests/ext4/309.out |   5 ++
- tests/ext4/group   |   1 +
- 3 files changed, 199 insertions(+)
- create mode 100755 tests/ext4/309
- create mode 100644 tests/ext4/309.out
+Boris Burkov (4):
+  btrfs: test btrfs specific fsverity corruption
+  generic/574: corrupt btrfs merkle tree data
+  btrfs: test verity orphans with dmlogwrites
+  generic: test fs-verity EFBIG scenarios
 
-diff --git a/tests/ext4/309 b/tests/ext4/309
-new file mode 100755
-index 00000000..c46db688
---- /dev/null
-+++ b/tests/ext4/309
-@@ -0,0 +1,193 @@
-+#!/bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2021 Google, Inc. All Rights Reserved.
-+#
-+# FS QA Test No. 309
-+#
-+# Test wiping of ext4_dir_entry2 data upon file removal, conversion
-+# to htree, and splitting of htree nodes
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+status=1       # failure is the default!
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs ext4
-+
-+_require_scratch
-+_require_dumpe2fs "$DUMPE2FS_PROG" dumpe2fs
-+_require_command "$DEBUGFS_PROG" debugfs
-+
-+
-+SCRATCH_DIR="${SCRATCH_MNT}/scratch_dir"
-+
-+# get block number filename's dir ent
-+# argument 1: filename
-+get_block() {
-+  echo $($DEBUGFS_PROG $SCRATCH_DEV -R "dirsearch /scratch_dir $1" 2>> $seqres.full | grep -o -m 1 "phys [0-9]\+" | cut -c 6-)
-+}
-+
-+# get offset of filename's dirent within the block
-+# argument 1: filename
-+get_offset() {
-+  echo $($DEBUGFS_PROG $SCRATCH_DEV -R "dirsearch /scratch_dir $1" 2>> $seqres.full | grep -o -m 1 "offset [0-9]\+" | cut -c 8-)
-+}
-+
-+# get record length of dir ent at specified block and offset
-+# argument 1: block
-+# argument 2: offset
-+get_reclen() {
-+  echo $(od $SCRATCH_DEV --skip-bytes=$(($1 * $blocksize + $2 + 4)) --read-bytes=2  -d -An  --endian=little | tr -d ' \t\n\r')
-+}
-+
-+# reads portion of dirent that should be zero'd out (starting at offset of name_len = 6)
-+# and trims 0s and whitespace
-+# argument 1: block num containing dir ent
-+# argument 2: offset of dir ent within block
-+# argument 3: rec len of dir ent
-+read_dir_ent() {
-+ echo $(od $SCRATCH_DEV --skip-bytes=$(($1 * $blocksize + $2 + 6)) --read-bytes=$(($3 - 6)) -d -An -v | sed -e 's/[0 \t\n\r]//g')
-+}
-+
-+# forces node split on test directory
-+# can be used to convert to htree and to split node on existing htree
-+# looks for jump in directory size as indicator of node split
-+induce_node_split() {
-+  _scratch_mount >> $seqres.full 2>&1
-+  dir_size="$(stat --printf="%s" $SCRATCH_DIR)"
-+  while [[ "$(stat --printf="%s" $SCRATCH_DIR)" == "$dir_size" ]]; do
-+    file_num=$(($file_num + 1))
-+    touch $SCRATCH_DIR/test"$(printf "%04d" $file_num)"
-+  done
-+  _scratch_unmount >> $seqres.full 2>&1
-+}
-+
-+#
-+# TEST 1: dir entry fields wiped upon file removal
-+#
-+
-+test_file1="test0001"
-+test_file2="test0002"
-+test_file3="test0003"
-+
-+_scratch_mkfs_sized $((128 * 1024 * 1024)) >> $seqres.full 2>&1
-+blocksize=$($DUMPE2FS_PROG -h $SCRATCH_DEV 2>> $seqres.full | grep "Block size:" | cut -d ":" -f2 | tr -d " \t\n\r")
-+
-+# create scratch dir for testing
-+# create some files with no name a substr of another name so we can grep later
-+_scratch_mount >> $seqres.full 2>&1
-+mkdir $SCRATCH_DIR
-+file_num=1
-+for file_num in {1..10}; do
-+  touch $SCRATCH_DIR/test"$(printf "%04d" $file_num)"
-+done
-+_scratch_unmount >> $seqres.full 2>&1
-+
-+# get block, offset, and rec_len of two test files
-+block1=$(get_block $test_file1)
-+offset1=$(get_offset $test_file1)
-+rec_len1=$(get_reclen $block1 $offset1)
-+
-+block2=$(get_block $test_file2)
-+offset2=$(get_offset $test_file2)
-+rec_len2=$(get_reclen $block2 $offset2)
-+
-+_scratch_mount >> $seqres.full 2>&1
-+rm $SCRATCH_DIR/$test_file1
-+_scratch_unmount >> $seqres.full 2>&1
-+
-+# read name_len field to end of dir entry
-+check1=$(read_dir_ent $block1 $offset1 $rec_len1)
-+check2=$(read_dir_ent $block2 $offset2 $rec_len2)
-+
-+# if check is empty, bytes read was all 0's, file data wiped
-+# at this point, check1 should be empty, but check 2 should not be
-+if [ -z "$check1" ] && [ ! -z "$check2" ]; then
-+  echo "Test 1 part 1 passed."
-+else
-+  _fail "ERROR (test 1 part 1): metadata not wiped upon removing test file 1"
-+fi
-+
-+_scratch_mount >> $seqres.full 2>&1
-+rm $SCRATCH_DIR/$test_file2
-+_scratch_unmount >> $seqres.full 2>&1
-+
-+check2=$(read_dir_ent $block2 $offset2 $rec_len2)
-+
-+# at this point, both should be wiped
-+[ -z "$check2" ] && echo "Test 1 part 2 passed." || _fail "ERROR (test 1 part 2): metadata not wiped upon removing test file 2"
-+
-+#
-+# TEST 2: old dir entry fields wiped when directory converted to htree
-+#
-+
-+# get original location
-+block1=$(get_block $test_file3)
-+offset1=$(get_offset $test_file3)
-+rec_len1=$(get_reclen $block1 $offset1)
-+
-+# sanity check, ensures not an htree yet
-+check_htree=$($DEBUGFS_PROG $SCRATCH_DEV -R "htree_dump /scratch_dir" 2>&1)
-+if [[ "$check_htree" != *"htree_dump: Not a hash-indexed directory"* ]]; then
-+  _fail "ERROR (test 2): already an htree"
-+fi
-+
-+# force conversion to htree
-+induce_node_split
-+
-+# ensure it is now an htree
-+check_htree=$($DEBUGFS_PROG $SCRATCH_DEV -R "htree_dump /scratch_dir" 2>&1)
-+if [[ "$check_htree" == *"htree_dump: Not a hash-indexed directory"* ]]; then
-+  _fail "ERROR (test 2): directory was not converted to an htree after creation of many files"
-+fi
-+
-+# check that old data was wiped
-+# (this location is not immediately reused by ext4)
-+check1=$(read_dir_ent $block1 $offset1 $rec_len1)
-+
-+# at this point, check1 should be empty meaning data was wiped
-+[ -z "$check1" ] &&  echo "Test 2 passed." || _fail "ERROR (test 2): file metadata not wiped during conversion to htree"
-+
-+#
-+# TEST 3: old dir entries wiped when moved to another block during split_node
-+#
-+
-+# force splitting of a node
-+induce_node_split
-+# use debugfs to get names of two files from block 3
-+hdump=$($DEBUGFS_PROG $SCRATCH_DEV -R "htree_dump /scratch_dir" 2>> $seqres.full)
-+
-+# get line number of "Reading directory block 3"
-+block3_line=$(echo "$hdump" | awk '/Reading directory block 3/{ print NR; exit }')
-+
-+[ -z "$block3_line" ] && echo "ERROR (test 3): could not find block number 3 after node split"
-+
-+test_file1=$(echo "$hdump" | sed -n "$(($block3_line + 1))"p | cut -d ' ' -f4)
-+test_file2=$(echo "$hdump" | sed -n "$(($block3_line + 2))"p | cut -d ' ' -f4)
-+
-+# check these filenames don't exist in block 1 or 2
-+# get block numbers of first two blocks
-+block1=$(echo "$hdump" | grep -o -m 1 "Reading directory block 1, phys [0-9]\+" | cut -c 33-)
-+block2=$(echo "$hdump" | grep -o -m 1 "Reading directory block 2, phys [0-9]\+" | cut -c 33-)
-+
-+# search all of both these blocks for these file names
-+check1=$(od $SCRATCH_DEV --skip-bytes=$(($block1 * $blocksize)) --read-bytes=$blocksize -c -An -v | tr -d '\\ \t\n\r\v' | grep -e $test_file1 -e $test_file2)
-+check2=$(od $SCRATCH_DEV --skip-bytes=$(($block2 * $blocksize)) --read-bytes=$blocksize -c -An -v | tr -d '\\ \t\n\r\v' | grep -e $test_file1 -e $test_file2)
-+
-+if [ -z "$check1" ] && [ -z "$check2" ]; then
-+  echo "Test 3 passed."
-+else
-+  _fail "ERROR (test 3): file name not wiped during node split"
-+fi
-+
-+status=0
-+exit
-diff --git a/tests/ext4/309.out b/tests/ext4/309.out
-new file mode 100644
-index 00000000..e5febaac
---- /dev/null
-+++ b/tests/ext4/309.out
-@@ -0,0 +1,5 @@
-+QA output created by 309
-+Test 1 part 1 passed.
-+Test 1 part 2 passed.
-+Test 2 passed.
-+Test 3 passed.
-diff --git a/tests/ext4/group b/tests/ext4/group
-index ceda2ba6..e7ad3c24 100644
---- a/tests/ext4/group
-+++ b/tests/ext4/group
-@@ -59,3 +59,4 @@
- 306 auto rw resize quick
- 307 auto ioctl rw defrag
- 308 auto ioctl rw prealloc quick defrag
-+309 auto quick dir
+ common/btrfs          |   5 ++
+ common/config         |   1 +
+ common/verity         |  25 ++++++
+ tests/btrfs/290       | 180 ++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/290.out   |  25 ++++++
+ tests/btrfs/291       | 157 ++++++++++++++++++++++++++++++++++++
+ tests/btrfs/291.out   |   2 +
+ tests/btrfs/group     |   2 +
+ tests/generic/574     |   5 ++
+ tests/generic/632     |  86 ++++++++++++++++++++
+ tests/generic/632.out |   7 ++
+ tests/generic/group   |   1 +
+ 12 files changed, 496 insertions(+)
+ create mode 100755 tests/btrfs/290
+ create mode 100644 tests/btrfs/290.out
+ create mode 100755 tests/btrfs/291
+ create mode 100644 tests/btrfs/291.out
+ create mode 100755 tests/generic/632
+ create mode 100644 tests/generic/632.out
+
 -- 
-2.31.1.527.g47e6f16901-goog
+2.30.2
 
