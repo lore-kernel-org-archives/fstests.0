@@ -2,268 +2,160 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-20.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4D557C433B4
-	for <linux-fstests@archiver.kernel.org>; Wed,  5 May 2021 21:44:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 70A63C433B4
+	for <linux-fstests@archiver.kernel.org>; Wed,  5 May 2021 23:43:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 12A8A613EA
-	for <linux-fstests@archiver.kernel.org>; Wed,  5 May 2021 21:44:50 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 50799613D8
+	for <linux-fstests@archiver.kernel.org>; Wed,  5 May 2021 23:43:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229893AbhEEVpq (ORCPT
+        id S229796AbhEEXoi (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 5 May 2021 17:45:46 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:23516 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S229968AbhEEVpq (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 5 May 2021 17:45:46 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1620251088;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=AhCiM0I0k0FT3qP3tSTj0hs/D1JShOTXoZ6pb2RKrQM=;
-        b=FdWmy5qQ9WB3++tgBouN9iRrkO8RohGMG4ZjY7dvNH6Vyi6k8CPNJ/nrGnxcnW96IZ8a39
-        PwG+eJupvhlmyqxKUw4HmALhbAF42cGUPOuQh77T7sAGISZhipWUxmk8N5CmHn2n6NvFqJ
-        XHGB4z6X8WH89xSSZhUWzd7na7I9hRU=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-437-OvKFbj5qOCe2zH_L3rEUNQ-1; Wed, 05 May 2021 17:44:46 -0400
-X-MC-Unique: OvKFbj5qOCe2zH_L3rEUNQ-1
-Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id C4ABF1083E94
-        for <fstests@vger.kernel.org>; Wed,  5 May 2021 21:44:45 +0000 (UTC)
-Received: from max.com (unknown [10.40.195.97])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 062105C5B5;
-        Wed,  5 May 2021 21:44:44 +0000 (UTC)
-From:   Andreas Gruenbacher <agruenba@redhat.com>
-To:     fstests@vger.kernel.org
-Cc:     Andreas Gruenbacher <agruenba@redhat.com>
-Subject: [PATCH] generic/637: Test page faults during pread and pwrite
-Date:   Wed,  5 May 2021 23:44:42 +0200
-Message-Id: <20210505214442.1052155-1-agruenba@redhat.com>
+        Wed, 5 May 2021 19:44:38 -0400
+Received: from out5-smtp.messagingengine.com ([66.111.4.29]:44857 "EHLO
+        out5-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S229601AbhEEXoi (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 5 May 2021 19:44:38 -0400
+Received: from compute4.internal (compute4.nyi.internal [10.202.2.44])
+        by mailout.nyi.internal (Postfix) with ESMTP id 03FD45C0148;
+        Wed,  5 May 2021 19:43:41 -0400 (EDT)
+Received: from mailfrontend2 ([10.202.2.163])
+  by compute4.internal (MEProxy); Wed, 05 May 2021 19:43:41 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bur.io; h=date
+        :from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=fm3; bh=nHt1VmzYNgHhKVL92enzmuiy+ew
+        +WnqKaWaZixc8THg=; b=PWw9CKsTcn+fiJu3gMSqQpeKJSBUGnUIMIDS1C6exLf
+        DCljOd5EpFt6WtsnyuDCoU0IRyWVuoXd5zvkZQ74kEy45OhMSW0VO7OhCr2IfMVf
+        cmChc4XOw9d6ZCS+mZL2BSbNudwHzTfrcGe6MFZ8U8A/sdtMsuX0q4LA7ZpmSfil
+        I63RTIvMgBONEGeQEjlyD6PS2doDpnA25pihffkxZAxOuDiYqS1QyINLW/VtqK5i
+        xt68VAAQzPIlRVGtQ7N5KsSZ52hzyC6EhKPGw0IPsPBrSOIkTHqmBCgghmb+8SLP
+        +y1NTcPqZh+kCc/daLFWRHXh/oFeobNq7RaGr8k3yAg==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=cc:content-type:date:from:in-reply-to
+        :message-id:mime-version:references:subject:to:x-me-proxy
+        :x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm2; bh=nHt1Vm
+        zYNgHhKVL92enzmuiy+ew+WnqKaWaZixc8THg=; b=QwwVkYZFVoJNiO9xKAY6tq
+        mpkOUOKENg2MM7CKG65wedwY5EDbpRAP4RFLLtrK4Ggt2135lrqkvuff2jpMMfhW
+        AYr4g9bdOJu2sgJTGmowbxYiZ/sIjCjGky4/arL2ZV+rqv/vs4sEpHc1sXORv0zj
+        OL1t3jCNwOSIa3rLYWlNIiKzhzKbk/bk9pxWwHaUV3B6E83Y+vaY4rde/xNVgznm
+        01SnjTz8ETwpHq4voAlzv+jyLJnBIYdctJ6MeP9/6/nH2A9pLEj/n2FGLYEM30A0
+        U33FPLatspl17pcwKyQe/1CO1LRBG0vFDoWEV0KzSxNsQ9SmLX46E/gWg7wqyOQw
+        ==
+X-ME-Sender: <xms:rC2TYGfKcPPjI-OyGCqzB55K4GaVTz1pePckXP9iK2Jnubl_oamfSQ>
+    <xme:rC2TYAPUyC36QeTy_rCdPWo3UyjgtRGlVwZuOkmvlcQK_vbp_jffLwrbnIpr6Ui6Z
+    sRzq2sV89ckLjDNX4c>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeduledrvdefledgvdduucetufdoteggodetrfdotf
+    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
+    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
+    cujfgurhepfffhvffukfhfgggtuggjsehttdertddttddvnecuhfhrohhmpeeuohhrihhs
+    uceuuhhrkhhovhcuoegsohhrihhssegsuhhrrdhioheqnecuggftrfgrthhtvghrnhepie
+    eitedtieeuteeuleegieehgfduieejuefghedvhfdtffevuddvheehtefhueehnecuffho
+    mhgrihhnpehgnhhurdhorhhgnecukfhppedvtdejrdehfedrvdehfedrjeenucevlhhush
+    htvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpegsohhrihhssegsuhhr
+    rdhioh
+X-ME-Proxy: <xmx:rC2TYHhPIfHrWT5ernwARHsvKJU6hq_DBz8Mp_rNrh-Cuq_G--gHpw>
+    <xmx:rC2TYD8SGDDIM9wA95nR0WDfOOi0Vuhz80gMceHKpwZ9_uG5PrSYhQ>
+    <xmx:rC2TYCsj_Mq3QDyOMtGsb3suMkcnPlRYMYsdwVjSfOe1XStOElYyyQ>
+    <xmx:rC2TYHWG4QXtaFGd1DUiaJseqfZLgXjwXsC59T953ZHCwc-Cn45hoQ>
+Received: from localhost (unknown [207.53.253.7])
+        by mail.messagingengine.com (Postfix) with ESMTPA;
+        Wed,  5 May 2021 19:43:40 -0400 (EDT)
+Date:   Wed, 5 May 2021 16:43:38 -0700
+From:   Boris Burkov <boris@bur.io>
+To:     fdmanana@kernel.org
+Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+        Filipe Manana <fdmanana@suse.com>
+Subject: Re: [PATCH] btrfs/187: fix test failure when using bash 5.0+ with
+ debug enabled
+Message-ID: <YJMtqnzfx5eYCHUd@zen>
+References: <70ecc4413ac118ac95be3e76b0dabff237d70b8d.1619535331.git.fdmanana@suse.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.16
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <70ecc4413ac118ac95be3e76b0dabff237d70b8d.1619535331.git.fdmanana@suse.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Some filesystems have problems when the buffer passed to read or write is
-memory-mapped to the file being read from or written to and the buffer is
-faulted in during the read or write.  (That's probably not a recommended
-use case, but it should work nevertheless.)
+On Tue, Apr 27, 2021 at 04:00:09PM +0100, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
+> 
+> When running btrfs/187 with a bash 5.0+ build that has debug enabled, the
+> test fails due to an unexpected warning message from bash:
+> 
+>   $ ./check btrfs/187
+>   FSTYP         -- btrfs
+>   PLATFORM      -- Linux/x86_64 debian9 5.12.0-rc8-btrfs-next-92 #1 SMP PREEMPT Wed Apr 21 10:36:03 WEST 2021
+>   MKFS_OPTIONS  -- /dev/sdc
+>   MOUNT_OPTIONS -- /dev/sdc /home/fdmanana/btrfs-tests/scratch_1
+> 
+>   btrfs/187 436s ... - output mismatch (see /xfstests/results//btrfs/187.out.bad)
+>       --- tests/btrfs/187.out	2020-10-16 23:13:46.550152492 +0100
+>       +++ /xfstests/results//btrfs/187.out.bad	2021-04-27 14:57:02.623941700 +0100
+>       @@ -1,3 +1,4 @@
+>        QA output created by 187
+>        Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/snap1'
+>        Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/snap2'
+>       +/xfstests/tests/btrfs/187: line 1: warning: wait_for: recursively setting old_sigint_handler to wait_sigint_handler: running_trap = 16
+>       ...
+>       (Run 'diff -u /xfstests/tests/btrfs/187.out /xfstests/results//btrfs/187.out.bad'  to see the entire diff)
+>   Ran: btrfs/187
+>   Failures: btrfs/187
+>   Failed 1 of 1 tests
+> 
+> This is because the process running dedupe_files_loop() executes the 'wait'
+> command in the trap it has setup and very often it receives the SIGTERM
+> signal while it is running the 'wait' command in the while loop of that
+> function - so executing the trap makes bash run 'wait' while it is already
+> running 'wait', triggering the warning message from bash.
+> 
+> That warning message was added in bash 5.0 by commit 36f89ff1d8b761
+> ("SIGINT trap handler SIGINT loop fix"):
+> 
+>   https://git.savannah.gnu.org/cgit/bash.git/commit/?id=36f89ff1d8b761c815d8993e9833e6357a57fc6b
+> 
+> So fix this by making the trap set a local variable named 'stop' to the
+> value 1 and have the loop exit when the local variable 'stop' is 1.
+> 
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
 
-Signed-off-by: Andreas Gruenbacher <agruenba@redhat.com>
----
- src/Makefile          |   3 +-
- src/mmap-rw-fault.c   | 110 ++++++++++++++++++++++++++++++++++++++++++
- tests/generic/637     |  40 +++++++++++++++
- tests/generic/637.out |   2 +
- tests/generic/group   |   1 +
- 5 files changed, 155 insertions(+), 1 deletion(-)
- create mode 100644 src/mmap-rw-fault.c
- create mode 100755 tests/generic/637
- create mode 100644 tests/generic/637.out
+Reviewed-by: Boris Burkov <boris@bur.io>
 
-diff --git a/src/Makefile b/src/Makefile
-index cc0b9579..13cdf19b 100644
---- a/src/Makefile
-+++ b/src/Makefile
-@@ -17,7 +17,8 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
- 	t_mmap_cow_race t_mmap_fallocate fsync-err t_mmap_write_ro \
- 	t_ext4_dax_journal_corruption t_ext4_dax_inline_corruption \
- 	t_ofd_locks t_mmap_collision mmap-write-concurrent \
--	t_get_file_time t_create_short_dirs t_create_long_dirs t_enospc
-+	t_get_file_time t_create_short_dirs t_create_long_dirs t_enospc \
-+	mmap-rw-fault
- 
- LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
- 	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
-diff --git a/src/mmap-rw-fault.c b/src/mmap-rw-fault.c
-new file mode 100644
-index 00000000..f721bf9f
---- /dev/null
-+++ b/src/mmap-rw-fault.c
-@@ -0,0 +1,110 @@
-+/* Trigger mmap page faults in the same file during pread and pwrite. */
-+
-+#ifndef _GNU_SOURCE
-+#define _GNU_SOURCE /* to get definition of O_DIRECT flag. */
-+#endif
-+
-+#include <sys/types.h>
-+#include <sys/stat.h>
-+#include <sys/mman.h>
-+#include <fcntl.h>
-+#include <unistd.h>
-+#include <stdlib.h>
-+#include <stdio.h>
-+#include <string.h>
-+#include <errno.h>
-+#include <err.h>
-+
-+char *filename;
-+unsigned int page_size;
-+void *page;
-+char *addr;
-+int fd;
-+ssize_t ret;
-+
-+/*
-+ * Leave a hole at the beginning of the test file and initialize a block of
-+ * @page_size bytes at offset @page_size to @c.  Then, reopen the file and
-+ * mmap the first two pages.
-+ */
-+void init(char c)
-+{
-+	fd = open(filename, O_CREAT | O_TRUNC | O_WRONLY | O_DIRECT, 0666);
-+	if (fd == -1)
-+		goto fail;
-+	memset(page, c, page_size);
-+	ret = pwrite(fd, page, page_size, page_size);
-+	if (ret != page_size)
-+		goto fail;
-+	if (close(fd))
-+		goto fail;
-+
-+	fd = open(filename, O_RDWR);
-+	if (fd == -1)
-+		goto fail;
-+	addr = mmap(NULL, 2 * page_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
-+	if (addr == MAP_FAILED)
-+		err(1, NULL);
-+
-+fail:
-+	err(1, "%s", filename);
-+}
-+
-+void done(void)
-+{
-+	if (fsync(fd))
-+		goto fail;
-+	if (close(fd))
-+		goto fail;
-+	return;
-+
-+fail:
-+	err(1, "%s", filename);
-+}
-+
-+int main(int argc, char *argv[])
-+{
-+	if (argc != 2)
-+		errx(1, "no test filename argument given");
-+	filename = argv[1];
-+
-+	page_size = ret = sysconf(_SC_PAGE_SIZE);
-+	if (ret == -1)
-+		err(1, NULL);
-+
-+	ret = posix_memalign(&page, page_size, page_size);
-+	if (ret) {
-+		errno = ENOMEM;
-+		err(1, NULL);
-+	}
-+
-+	/*
-+	 * Make sure page faults during pread are handled correctly.
-+	 */
-+	init('x');
-+	ret = pread(fd, addr, page_size, page_size);
-+	if (ret != page_size)
-+		goto fail;
-+	if (memcmp(addr, page, page_size))
-+		errx(1, "pread is broken");
-+	done();
-+
-+	/*
-+	 * Make sure page faults during pwrite are handled correctly.
-+	 */
-+	init('y');
-+	ret = pwrite(fd, addr + page_size, page_size, 0);
-+	if (ret != page_size)
-+		goto fail;
-+	if (memcmp(addr, page, page_size))
-+		errx(1, "pwrite is broken");
-+	done();
-+
-+	if (unlink(filename))
-+		goto fail;
-+
-+	return 0;
-+
-+fail:
-+	err(1, "%s", filename);
-+}
-diff --git a/tests/generic/637 b/tests/generic/637
-new file mode 100755
-index 00000000..d3c3f235
---- /dev/null
-+++ b/tests/generic/637
-@@ -0,0 +1,40 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2021 Red Hat, Inc.  All Rights Reserved.
-+#
-+# FS QA Test 637
-+#
-+# Trigger mmap page faults in the same file during pread and pwrite
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs generic
-+_require_test
-+
-+$here/src/mmap-rw-fault $TEST_DIR/mmap-rw-fault.tmp \
-+|| exit
-+
-+# success, all done
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/generic/637.out b/tests/generic/637.out
-new file mode 100644
-index 00000000..55a3d825
---- /dev/null
-+++ b/tests/generic/637.out
-@@ -0,0 +1,2 @@
-+QA output created by 637
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index 105763c4..01996b48 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -639,3 +639,4 @@
- 634 auto quick atime bigtime
- 635 auto quick atime bigtime shutdown
- 636 auto quick swap
-+637 auto
--- 
-2.26.3
-
+> ---
+>  tests/btrfs/187 | 16 +++++++++++++---
+>  1 file changed, 13 insertions(+), 3 deletions(-)
+> 
+> diff --git a/tests/btrfs/187 b/tests/btrfs/187
+> index b2d3e4f0..7da09abd 100755
+> --- a/tests/btrfs/187
+> +++ b/tests/btrfs/187
+> @@ -64,9 +64,19 @@ dedupe_two_files()
+>  
+>  dedupe_files_loop()
+>  {
+> -	trap "wait; exit" SIGTERM
+> -
+> -	while true; do
+> +	local stop=0
+> +
+> +	# Avoid executing 'wait' inside the trap, because when we receive
+> +	# SIGTERM we might be already executing the wait command in the while
+> +	# loop below. When that is the case, bash 5.0+ with debug enabled prints
+> +	# a warning message that makes the test fail due to a mismatch with the
+> +	# golden output. That warning message is the following:
+> +	#
+> +	# warning: wait_for: recursively setting old_sigint_handler to wait_sigint_handler: running_trap = 16
+> +	#
+> +	trap "stop=1" SIGTERM
+> +
+> +	while [ $stop -eq 0 ]; do
+>  		for ((i = 1; i <= 5; i++)); do
+>  			dedupe_two_files &
+>  		done
+> -- 
+> 2.28.0
+> 
