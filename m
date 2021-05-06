@@ -2,160 +2,120 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-20.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 70A63C433B4
-	for <linux-fstests@archiver.kernel.org>; Wed,  5 May 2021 23:43:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 86DFCC433ED
+	for <linux-fstests@archiver.kernel.org>; Thu,  6 May 2021 14:27:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 50799613D8
-	for <linux-fstests@archiver.kernel.org>; Wed,  5 May 2021 23:43:42 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6D03C613B5
+	for <linux-fstests@archiver.kernel.org>; Thu,  6 May 2021 14:27:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229796AbhEEXoi (ORCPT
+        id S234653AbhEFO2E (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 5 May 2021 19:44:38 -0400
-Received: from out5-smtp.messagingengine.com ([66.111.4.29]:44857 "EHLO
-        out5-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S229601AbhEEXoi (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 5 May 2021 19:44:38 -0400
-Received: from compute4.internal (compute4.nyi.internal [10.202.2.44])
-        by mailout.nyi.internal (Postfix) with ESMTP id 03FD45C0148;
-        Wed,  5 May 2021 19:43:41 -0400 (EDT)
-Received: from mailfrontend2 ([10.202.2.163])
-  by compute4.internal (MEProxy); Wed, 05 May 2021 19:43:41 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bur.io; h=date
-        :from:to:cc:subject:message-id:references:mime-version
-        :content-type:in-reply-to; s=fm3; bh=nHt1VmzYNgHhKVL92enzmuiy+ew
-        +WnqKaWaZixc8THg=; b=PWw9CKsTcn+fiJu3gMSqQpeKJSBUGnUIMIDS1C6exLf
-        DCljOd5EpFt6WtsnyuDCoU0IRyWVuoXd5zvkZQ74kEy45OhMSW0VO7OhCr2IfMVf
-        cmChc4XOw9d6ZCS+mZL2BSbNudwHzTfrcGe6MFZ8U8A/sdtMsuX0q4LA7ZpmSfil
-        I63RTIvMgBONEGeQEjlyD6PS2doDpnA25pihffkxZAxOuDiYqS1QyINLW/VtqK5i
-        xt68VAAQzPIlRVGtQ7N5KsSZ52hzyC6EhKPGw0IPsPBrSOIkTHqmBCgghmb+8SLP
-        +y1NTcPqZh+kCc/daLFWRHXh/oFeobNq7RaGr8k3yAg==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-        messagingengine.com; h=cc:content-type:date:from:in-reply-to
-        :message-id:mime-version:references:subject:to:x-me-proxy
-        :x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm2; bh=nHt1Vm
-        zYNgHhKVL92enzmuiy+ew+WnqKaWaZixc8THg=; b=QwwVkYZFVoJNiO9xKAY6tq
-        mpkOUOKENg2MM7CKG65wedwY5EDbpRAP4RFLLtrK4Ggt2135lrqkvuff2jpMMfhW
-        AYr4g9bdOJu2sgJTGmowbxYiZ/sIjCjGky4/arL2ZV+rqv/vs4sEpHc1sXORv0zj
-        OL1t3jCNwOSIa3rLYWlNIiKzhzKbk/bk9pxWwHaUV3B6E83Y+vaY4rde/xNVgznm
-        01SnjTz8ETwpHq4voAlzv+jyLJnBIYdctJ6MeP9/6/nH2A9pLEj/n2FGLYEM30A0
-        U33FPLatspl17pcwKyQe/1CO1LRBG0vFDoWEV0KzSxNsQ9SmLX46E/gWg7wqyOQw
-        ==
-X-ME-Sender: <xms:rC2TYGfKcPPjI-OyGCqzB55K4GaVTz1pePckXP9iK2Jnubl_oamfSQ>
-    <xme:rC2TYAPUyC36QeTy_rCdPWo3UyjgtRGlVwZuOkmvlcQK_vbp_jffLwrbnIpr6Ui6Z
-    sRzq2sV89ckLjDNX4c>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeduledrvdefledgvdduucetufdoteggodetrfdotf
-    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
-    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
-    cujfgurhepfffhvffukfhfgggtuggjsehttdertddttddvnecuhfhrohhmpeeuohhrihhs
-    uceuuhhrkhhovhcuoegsohhrihhssegsuhhrrdhioheqnecuggftrfgrthhtvghrnhepie
-    eitedtieeuteeuleegieehgfduieejuefghedvhfdtffevuddvheehtefhueehnecuffho
-    mhgrihhnpehgnhhurdhorhhgnecukfhppedvtdejrdehfedrvdehfedrjeenucevlhhush
-    htvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpegsohhrihhssegsuhhr
-    rdhioh
-X-ME-Proxy: <xmx:rC2TYHhPIfHrWT5ernwARHsvKJU6hq_DBz8Mp_rNrh-Cuq_G--gHpw>
-    <xmx:rC2TYD8SGDDIM9wA95nR0WDfOOi0Vuhz80gMceHKpwZ9_uG5PrSYhQ>
-    <xmx:rC2TYCsj_Mq3QDyOMtGsb3suMkcnPlRYMYsdwVjSfOe1XStOElYyyQ>
-    <xmx:rC2TYHWG4QXtaFGd1DUiaJseqfZLgXjwXsC59T953ZHCwc-Cn45hoQ>
-Received: from localhost (unknown [207.53.253.7])
-        by mail.messagingengine.com (Postfix) with ESMTPA;
-        Wed,  5 May 2021 19:43:40 -0400 (EDT)
-Date:   Wed, 5 May 2021 16:43:38 -0700
-From:   Boris Burkov <boris@bur.io>
-To:     fdmanana@kernel.org
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-        Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH] btrfs/187: fix test failure when using bash 5.0+ with
- debug enabled
-Message-ID: <YJMtqnzfx5eYCHUd@zen>
-References: <70ecc4413ac118ac95be3e76b0dabff237d70b8d.1619535331.git.fdmanana@suse.com>
+        Thu, 6 May 2021 10:28:04 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:29011 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S234002AbhEFO2E (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 6 May 2021 10:28:04 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1620311225;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=x3AOZuJBE2nH0EU6wAcRHTGc+AikyM2yp8+U3sVbjOc=;
+        b=He5MN/CHuwW4qlEDrg/Jt2UpqTFy5Fd3Yr87qUVied25/stJQ1l8IVaUWwQq+MoQGcZ7kj
+        BrVKoiJLPHVvFzslvRN7LsCj3puiT+MGsVhQTfgoIMKb1h7LmRr86GBlNmoOFDDIOmV+Z4
+        UjmOJfuAOn3zdylqBVGdZVKVxEvi+0A=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-580-TIgsaXVYMhy1mcM_fdrbPw-1; Thu, 06 May 2021 10:27:02 -0400
+X-MC-Unique: TIgsaXVYMhy1mcM_fdrbPw-1
+Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.phx2.redhat.com [10.5.11.23])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 280B118BA280;
+        Thu,  6 May 2021 14:27:01 +0000 (UTC)
+Received: from max.com (unknown [10.40.195.97])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 0771C19D61;
+        Thu,  6 May 2021 14:26:59 +0000 (UTC)
+From:   Andreas Gruenbacher <agruenba@redhat.com>
+To:     fstests@vger.kernel.org
+Cc:     Andreas Gruenbacher <agruenba@redhat.com>, Jan Kara <jack@suse.cz>,
+        stable@vger.kernel.org
+Subject: [PATCH v2] gfs2: Fix mmap + page fault deadlock
+Date:   Thu,  6 May 2021 16:26:58 +0200
+Message-Id: <20210506142658.1077906-1-agruenba@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <70ecc4413ac118ac95be3e76b0dabff237d70b8d.1619535331.git.fdmanana@suse.com>
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 2.84 on 10.5.11.23
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Apr 27, 2021 at 04:00:09PM +0100, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
-> 
-> When running btrfs/187 with a bash 5.0+ build that has debug enabled, the
-> test fails due to an unexpected warning message from bash:
-> 
->   $ ./check btrfs/187
->   FSTYP         -- btrfs
->   PLATFORM      -- Linux/x86_64 debian9 5.12.0-rc8-btrfs-next-92 #1 SMP PREEMPT Wed Apr 21 10:36:03 WEST 2021
->   MKFS_OPTIONS  -- /dev/sdc
->   MOUNT_OPTIONS -- /dev/sdc /home/fdmanana/btrfs-tests/scratch_1
-> 
->   btrfs/187 436s ... - output mismatch (see /xfstests/results//btrfs/187.out.bad)
->       --- tests/btrfs/187.out	2020-10-16 23:13:46.550152492 +0100
->       +++ /xfstests/results//btrfs/187.out.bad	2021-04-27 14:57:02.623941700 +0100
->       @@ -1,3 +1,4 @@
->        QA output created by 187
->        Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/snap1'
->        Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/snap2'
->       +/xfstests/tests/btrfs/187: line 1: warning: wait_for: recursively setting old_sigint_handler to wait_sigint_handler: running_trap = 16
->       ...
->       (Run 'diff -u /xfstests/tests/btrfs/187.out /xfstests/results//btrfs/187.out.bad'  to see the entire diff)
->   Ran: btrfs/187
->   Failures: btrfs/187
->   Failed 1 of 1 tests
-> 
-> This is because the process running dedupe_files_loop() executes the 'wait'
-> command in the trap it has setup and very often it receives the SIGTERM
-> signal while it is running the 'wait' command in the while loop of that
-> function - so executing the trap makes bash run 'wait' while it is already
-> running 'wait', triggering the warning message from bash.
-> 
-> That warning message was added in bash 5.0 by commit 36f89ff1d8b761
-> ("SIGINT trap handler SIGINT loop fix"):
-> 
->   https://git.savannah.gnu.org/cgit/bash.git/commit/?id=36f89ff1d8b761c815d8993e9833e6357a57fc6b
-> 
-> So fix this by making the trap set a local variable named 'stop' to the
-> value 1 and have the loop exit when the local variable 'stop' is 1.
-> 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+Commit 20f829999c38 has moved the inode glock taking from gfs2_readpage and
+gfs2_readahead into gfs2_file_read_iter and gfs2_fault.  In gfs2_fault, we
+didn't take into account that page faults can occur while holding the inode
+glock, for example,
 
-Reviewed-by: Boris Burkov <boris@bur.io>
+  gfs2_file_read_iter [grabs inode glock] ->
+    generic_file_read_iter ->
+      filemap_read ->
+        copy_page_to_iter ... ->
+          gfs2_fault [tries to grab inode glock again]
 
-> ---
->  tests/btrfs/187 | 16 +++++++++++++---
->  1 file changed, 13 insertions(+), 3 deletions(-)
-> 
-> diff --git a/tests/btrfs/187 b/tests/btrfs/187
-> index b2d3e4f0..7da09abd 100755
-> --- a/tests/btrfs/187
-> +++ b/tests/btrfs/187
-> @@ -64,9 +64,19 @@ dedupe_two_files()
->  
->  dedupe_files_loop()
->  {
-> -	trap "wait; exit" SIGTERM
-> -
-> -	while true; do
-> +	local stop=0
-> +
-> +	# Avoid executing 'wait' inside the trap, because when we receive
-> +	# SIGTERM we might be already executing the wait command in the while
-> +	# loop below. When that is the case, bash 5.0+ with debug enabled prints
-> +	# a warning message that makes the test fail due to a mismatch with the
-> +	# golden output. That warning message is the following:
-> +	#
-> +	# warning: wait_for: recursively setting old_sigint_handler to wait_sigint_handler: running_trap = 16
-> +	#
-> +	trap "stop=1" SIGTERM
-> +
-> +	while [ $stop -eq 0 ]; do
->  		for ((i = 1; i <= 5; i++)); do
->  			dedupe_two_files &
->  		done
-> -- 
-> 2.28.0
-> 
+  gfs2_file_write_iter ->
+    iomap_file_buffered_write ->
+      iomap_apply ->
+        iomap_ops->iomap_begin [grabs inode glock] ->
+        iomap_write_actor ->
+          iov_iter_fault_in_readable ... ->
+            gfs2_fault [tries to grab inode glock again]
+
+Fix that by checking if we're holding the inode glock already.
+
+Reported-by: Jan Kara <jack@suse.cz>
+Fixes: 20f829999c38 ("gfs2: Rework read and page fault locking")
+Cc: stable@vger.kernel.org # v5.8+
+Signed-off-by: Andreas Gruenbacher <agruenba@redhat.com>
+---
+ fs/gfs2/file.c | 14 +++++++++-----
+ 1 file changed, 9 insertions(+), 5 deletions(-)
+
+diff --git a/fs/gfs2/file.c b/fs/gfs2/file.c
+index a0b542d84cd9..95b59763b748 100644
+--- a/fs/gfs2/file.c
++++ b/fs/gfs2/file.c
+@@ -538,18 +538,22 @@ static vm_fault_t gfs2_fault(struct vm_fault *vmf)
+ {
+ 	struct inode *inode = file_inode(vmf->vma->vm_file);
+ 	struct gfs2_inode *ip = GFS2_I(inode);
++	bool recursive = gfs2_glock_is_locked_by_me(ip->i_gl);
+ 	struct gfs2_holder gh;
+ 	vm_fault_t ret;
+ 	int err;
+ 
+ 	gfs2_holder_init(ip->i_gl, LM_ST_SHARED, 0, &gh);
+-	err = gfs2_glock_nq(&gh);
+-	if (err) {
+-		ret = block_page_mkwrite_return(err);
+-		goto out_uninit;
++	if (likely(!recursive)) {
++		err = gfs2_glock_nq(&gh);
++		if (err) {
++			ret = block_page_mkwrite_return(err);
++			goto out_uninit;
++		}
+ 	}
+ 	ret = filemap_fault(vmf);
+-	gfs2_glock_dq(&gh);
++	if (likely(!recursive))
++		gfs2_glock_dq(&gh);
+ out_uninit:
+ 	gfs2_holder_uninit(&gh);
+ 	return ret;
+-- 
+2.26.3
+
