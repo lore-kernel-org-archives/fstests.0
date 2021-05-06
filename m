@@ -2,120 +2,77 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-4.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,PDS_TONAME_EQ_TOLOCAL_SHORT,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 86DFCC433ED
-	for <linux-fstests@archiver.kernel.org>; Thu,  6 May 2021 14:27:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A3DC5C433B4
+	for <linux-fstests@archiver.kernel.org>; Thu,  6 May 2021 14:45:43 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6D03C613B5
-	for <linux-fstests@archiver.kernel.org>; Thu,  6 May 2021 14:27:07 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 769AF61157
+	for <linux-fstests@archiver.kernel.org>; Thu,  6 May 2021 14:45:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234653AbhEFO2E (ORCPT
+        id S234862AbhEFOql (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 6 May 2021 10:28:04 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:29011 "EHLO
+        Thu, 6 May 2021 10:46:41 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:52968 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S234002AbhEFO2E (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 6 May 2021 10:28:04 -0400
+        by vger.kernel.org with ESMTP id S234888AbhEFOqk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 6 May 2021 10:46:40 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1620311225;
+        s=mimecast20190719; t=1620312342;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=x3AOZuJBE2nH0EU6wAcRHTGc+AikyM2yp8+U3sVbjOc=;
-        b=He5MN/CHuwW4qlEDrg/Jt2UpqTFy5Fd3Yr87qUVied25/stJQ1l8IVaUWwQq+MoQGcZ7kj
-        BrVKoiJLPHVvFzslvRN7LsCj3puiT+MGsVhQTfgoIMKb1h7LmRr86GBlNmoOFDDIOmV+Z4
-        UjmOJfuAOn3zdylqBVGdZVKVxEvi+0A=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-580-TIgsaXVYMhy1mcM_fdrbPw-1; Thu, 06 May 2021 10:27:02 -0400
-X-MC-Unique: TIgsaXVYMhy1mcM_fdrbPw-1
-Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 280B118BA280;
-        Thu,  6 May 2021 14:27:01 +0000 (UTC)
-Received: from max.com (unknown [10.40.195.97])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 0771C19D61;
-        Thu,  6 May 2021 14:26:59 +0000 (UTC)
-From:   Andreas Gruenbacher <agruenba@redhat.com>
-To:     fstests@vger.kernel.org
-Cc:     Andreas Gruenbacher <agruenba@redhat.com>, Jan Kara <jack@suse.cz>,
-        stable@vger.kernel.org
-Subject: [PATCH v2] gfs2: Fix mmap + page fault deadlock
-Date:   Thu,  6 May 2021 16:26:58 +0200
-Message-Id: <20210506142658.1077906-1-agruenba@redhat.com>
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=jXu9bu121WPRtwXFS5O/+/gh8Ts+WxkI31oJKaqGVog=;
+        b=MLqwZtXnlOJHCnC/qvUMpz09lR7hlvVEIEST0CpFrgjPQNDpIqFkm8swTD7aAP94Dj8UZY
+        +eRJHMyHMQ98YLVIMteNOSw2C1u7mlFiCKkjz2rT6w3mPQ7dTtNZgISC/UUfHoYcSLxo44
+        QUjRW6pg57BBdyuKBpjyj3YQlLpdn9A=
+Received: from mail-wr1-f72.google.com (mail-wr1-f72.google.com
+ [209.85.221.72]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-154-8C-3uVMlPPeVs3KEn3aJpw-1; Thu, 06 May 2021 10:45:40 -0400
+X-MC-Unique: 8C-3uVMlPPeVs3KEn3aJpw-1
+Received: by mail-wr1-f72.google.com with SMTP id x10-20020adfc18a0000b029010d83c83f2aso2297528wre.8
+        for <fstests@vger.kernel.org>; Thu, 06 May 2021 07:45:40 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=jXu9bu121WPRtwXFS5O/+/gh8Ts+WxkI31oJKaqGVog=;
+        b=ZwQbvB4yVnTh28m3tHEXub2TpUKOSRmz7BU0KFsc10C5xu75140Y6/UafZ3R8c7uvd
+         pj7fdZyn39YNpFeN6AWfItlMlW3Jo7sLDdhaAP56r2c/d1TVRfyfFyQe4dWeZzq4sqWz
+         uYtv1eGt470ZjIHTpiVVyooUAtavfW0LpmgYaSIpTNB+bxypaSCIWGSdfTuP40kiEYEP
+         zyK5YM1tIQfBArKn184SOpU5tXnWJ1iqNwbswRvBATjPFjue+JiSvWovdhPtYQbehJMZ
+         O/CR4OtouaLA378cOx9jyRl0+uKrTQZ2JjQVbxBNkkyBkq1Hll3NVkC5qIhjKer+Nm+r
+         +ybg==
+X-Gm-Message-State: AOAM5304LX0lJ3QDuDbiUMjx6S5ZMOVpqlcO7JCGZtZcBVJu2jVfzt5w
+        nE/MsM1BrFf6f5pvOP822pD88emxLS2c9FMIRti2HEAytZC8fs8R7r22OlzNNWZ/G3spyYxQsgB
+        ZDZEPA5OKyigGpmW8a/6MpOKW2nSj2TzjhQ==
+X-Received: by 2002:a5d:53c3:: with SMTP id a3mr5397975wrw.376.1620312339219;
+        Thu, 06 May 2021 07:45:39 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJxz1PUFDI0zrflRoJEKBAjJxn30dp9qgK2/gEGle0R+/Id5dtgvx0BRwncB67LNeoUzRoadMshVf52wfFOazEI=
+X-Received: by 2002:a5d:53c3:: with SMTP id a3mr5397940wrw.376.1620312338946;
+ Thu, 06 May 2021 07:45:38 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 2.84 on 10.5.11.23
+References: <20210506142658.1077906-1-agruenba@redhat.com>
+In-Reply-To: <20210506142658.1077906-1-agruenba@redhat.com>
+From:   Andreas Gruenbacher <agruenba@redhat.com>
+Date:   Thu, 6 May 2021 16:45:27 +0200
+Message-ID: <CAHc6FU4Wkutsj8Ud-oDnt=4Qu_8Pc5swc0-jx4+N5VP+w9SaPw@mail.gmail.com>
+Subject: Re: [PATCH v2] gfs2: Fix mmap + page fault deadlock
+To:     fstests <fstests@vger.kernel.org>
+Cc:     Jan Kara <jack@suse.cz>, stable <stable@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Commit 20f829999c38 has moved the inode glock taking from gfs2_readpage and
-gfs2_readahead into gfs2_file_read_iter and gfs2_fault.  In gfs2_fault, we
-didn't take into account that page faults can occur while holding the inode
-glock, for example,
+On Thu, May 6, 2021 at 4:27 PM Andreas Gruenbacher <agruenba@redhat.com> wrote:
+> Commit 20f829999c38 has moved the inode glock taking from gfs2_readpage and
+> gfs2_readahead into gfs2_file_read_iter and gfs2_fault.
 
-  gfs2_file_read_iter [grabs inode glock] ->
-    generic_file_read_iter ->
-      filemap_read ->
-        copy_page_to_iter ... ->
-          gfs2_fault [tries to grab inode glock again]
+Oops, sorry for posting this to the wrong list.
 
-  gfs2_file_write_iter ->
-    iomap_file_buffered_write ->
-      iomap_apply ->
-        iomap_ops->iomap_begin [grabs inode glock] ->
-        iomap_write_actor ->
-          iov_iter_fault_in_readable ... ->
-            gfs2_fault [tries to grab inode glock again]
-
-Fix that by checking if we're holding the inode glock already.
-
-Reported-by: Jan Kara <jack@suse.cz>
-Fixes: 20f829999c38 ("gfs2: Rework read and page fault locking")
-Cc: stable@vger.kernel.org # v5.8+
-Signed-off-by: Andreas Gruenbacher <agruenba@redhat.com>
----
- fs/gfs2/file.c | 14 +++++++++-----
- 1 file changed, 9 insertions(+), 5 deletions(-)
-
-diff --git a/fs/gfs2/file.c b/fs/gfs2/file.c
-index a0b542d84cd9..95b59763b748 100644
---- a/fs/gfs2/file.c
-+++ b/fs/gfs2/file.c
-@@ -538,18 +538,22 @@ static vm_fault_t gfs2_fault(struct vm_fault *vmf)
- {
- 	struct inode *inode = file_inode(vmf->vma->vm_file);
- 	struct gfs2_inode *ip = GFS2_I(inode);
-+	bool recursive = gfs2_glock_is_locked_by_me(ip->i_gl);
- 	struct gfs2_holder gh;
- 	vm_fault_t ret;
- 	int err;
- 
- 	gfs2_holder_init(ip->i_gl, LM_ST_SHARED, 0, &gh);
--	err = gfs2_glock_nq(&gh);
--	if (err) {
--		ret = block_page_mkwrite_return(err);
--		goto out_uninit;
-+	if (likely(!recursive)) {
-+		err = gfs2_glock_nq(&gh);
-+		if (err) {
-+			ret = block_page_mkwrite_return(err);
-+			goto out_uninit;
-+		}
- 	}
- 	ret = filemap_fault(vmf);
--	gfs2_glock_dq(&gh);
-+	if (likely(!recursive))
-+		gfs2_glock_dq(&gh);
- out_uninit:
- 	gfs2_holder_uninit(&gh);
- 	return ret;
--- 
-2.26.3
+Andreas
 
