@@ -2,366 +2,210 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.7 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,UNPARSEABLE_RELAY autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6B48CC433ED
-	for <linux-fstests@archiver.kernel.org>; Sun,  9 May 2021 14:36:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ECC97C433B4
+	for <linux-fstests@archiver.kernel.org>; Sun,  9 May 2021 16:07:16 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4FAB2613EE
-	for <linux-fstests@archiver.kernel.org>; Sun,  9 May 2021 14:36:09 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CA5C461006
+	for <linux-fstests@archiver.kernel.org>; Sun,  9 May 2021 16:07:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229640AbhEIOhL (ORCPT
+        id S229647AbhEIQIT (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 9 May 2021 10:37:11 -0400
-Received: from out20-86.mail.aliyun.com ([115.124.20.86]:56583 "EHLO
-        out20-86.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229616AbhEIOhL (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 9 May 2021 10:37:11 -0400
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07436305|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_alarm|0.143236-0.00230577-0.854458;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047203;MF=guan@eryu.me;NM=1;PH=DS;RN=5;RT=5;SR=0;TI=SMTPD_---.KAhWqba_1620570965;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.KAhWqba_1620570965)
-          by smtp.aliyun-inc.com(10.147.41.143);
-          Sun, 09 May 2021 22:36:06 +0800
-Date:   Sun, 9 May 2021 22:36:05 +0800
-From:   Eryu Guan <guan@eryu.me>
-To:     Kent Overstreet <kent.overstreet@gmail.com>
-Cc:     fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org,
-        linux-bcachefs@vger.kernel.org, Kent Overstreet <kmo@daterainc.com>
-Subject: Re: [PATCH 1/3] Initial bcachefs support
-Message-ID: <YJfzVSGu2BbE4oMY@desktop>
-References: <20210427164419.3729180-1-kent.overstreet@gmail.com>
- <20210427164419.3729180-2-kent.overstreet@gmail.com>
+        Sun, 9 May 2021 12:08:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51438 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229528AbhEIQIS (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 9 May 2021 12:08:18 -0400
+Received: from mail-wm1-x336.google.com (mail-wm1-x336.google.com [IPv6:2a00:1450:4864:20::336])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4891BC061573
+        for <fstests@vger.kernel.org>; Sun,  9 May 2021 09:07:14 -0700 (PDT)
+Received: by mail-wm1-x336.google.com with SMTP id o6-20020a05600c4fc6b029015ec06d5269so1107820wmq.0
+        for <fstests@vger.kernel.org>; Sun, 09 May 2021 09:07:14 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=message-id:date:from:to:subject:mime-version:content-disposition;
+        bh=tMA/4c+u+TMK2fVdYY7NoELWKa5ho1Egdz9zB22mVVc=;
+        b=DIe0J7kO3dHGIleKOAwyrj4Tfh8AyYa0yTInP9P779EY2WMCwiXnM23rtpKhC48+ja
+         rG12+UHCpoXCrsd9HybN27+MfJU9KerLSG/PJ7ihToxAkukLpYLv/Z0ovSR0V+t0Nf8W
+         Y+xahYqnJNNWfCFkphtEo4rgphuOBlTqetfZq250OO1nVDWMpioX7j0nEyjTl2BboJLQ
+         CX48AE7rYWcucmxCeOJuZrVH1w2oN7UZqMWrYnkzpDXA71jLcDtXeUFh4rUErWxZVKFP
+         TOFhsDK3ItviIJCrLBOAR5fRw4gLhT6S2LmZ4i6V43dUF1Wdaiy4XHywDh0ibqWyyZHX
+         GDEQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:message-id:date:from:to:subject:mime-version
+         :content-disposition;
+        bh=tMA/4c+u+TMK2fVdYY7NoELWKa5ho1Egdz9zB22mVVc=;
+        b=kL4jKp/nMMsObAfcj5tHlGRjkQk5fDBFg4C6w446/tXG2s5XVdSGpLd1hj7kida+0s
+         FafTW9OLvIDSYt4jLiW8u+lH4lmeeepYou7d9hlRS94kIcFr8oIkmMK/YG0KGOuG41e/
+         WbcSL72lxpQER+4Ypn/pHLnKhsUOHdo8kGEa4X7yEMWkJUmh8Kmf5G3KCpincI+5iIzC
+         axkrgMY1CWtDH7mibFWGDulQ5+YM96KLRsthykqRi+aIznxB19C4XpxlS0chPLO2ODU0
+         JGXF/zHgBhxliWIZOwR1fS2GWb+6HCmnt4BFJKuXZTIvglarzwl1tQp2bISv0V5218T0
+         Pzpg==
+X-Gm-Message-State: AOAM530u540nDZbS+zCWMeHmo7tri30US1jr2H1CRN6MIFcEn5WJh70O
+        03bwZMeAvYW2m/gOrjt31ERkWefhB3U=
+X-Google-Smtp-Source: ABdhPJxZbUmKZxdJc7uEnlBme/VpKiO/QE9ozsifleN4Tw4BsVhYou+9c/ExU3XhNdXyXKtgOByumQ==
+X-Received: by 2002:a05:600c:b54:: with SMTP id k20mr22008753wmr.189.1620576432445;
+        Sun, 09 May 2021 09:07:12 -0700 (PDT)
+Received: from localhost ([8.208.10.148])
+        by smtp.gmail.com with ESMTPSA id n12sm14166218wmq.29.2021.05.09.09.07.06
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 09 May 2021 09:07:07 -0700 (PDT)
+Message-ID: <609808ab.1c69fb81.d5286.17d5@mx.google.com>
+Date:   Mon, 10 May 2021 00:07:02 +0800
+From:   Eryu Guan <guaneryu@gmail.com>
+To:     fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: master branch updated to 1c18b9ec2fcc
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="E2pep4znuEMc"
 Content-Disposition: inline
-In-Reply-To: <20210427164419.3729180-2-kent.overstreet@gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Apr 27, 2021 at 12:44:17PM -0400, Kent Overstreet wrote:
-> From: Kent Overstreet <kmo@daterainc.com>
 
-Better to add commit logs at least to give an example about how to setup
-fstests to test bcachefs.
+--E2pep4znuEMc
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-> 
-> Signed-off-by: Kent Overstreet <kent.overstreet@gmail.com>
-> ---
->  common/attr        |  6 ++++++
->  common/config      |  3 +++
->  common/dmlogwrites |  7 +++++++
->  common/quota       |  4 ++--
->  common/rc          | 31 +++++++++++++++++++++++++++++++
->  tests/generic/042  |  3 ++-
->  tests/generic/425  |  3 +++
->  tests/generic/441  |  2 +-
->  tests/generic/482  | 27 ++++++++++++++++++++-------
->  tests/generic/558  |  2 ++
->  10 files changed, 77 insertions(+), 11 deletions(-)
-> 
-> diff --git a/common/attr b/common/attr
-> index 669909d600..42ceab9233 100644
-> --- a/common/attr
-> +++ b/common/attr
-> @@ -33,6 +33,9 @@ _acl_get_max()
->  			echo 506
->  		fi
->  		;;
-> +	bcachefs)
-> +		echo 251
-> +		;;
->  	*)
->  		echo 0
->  		;;
-> @@ -273,6 +276,9 @@ pvfs2)
->  9p|ceph|nfs)
->  	MAX_ATTRVAL_SIZE=65536
->  	;;
-> +bcachefs)
-> +	MAX_ATTRVAL_SIZE=1024
-> +	;;
->  *)
->  	# Assume max ~1 block of attrs
->  	BLOCK_SIZE=`_get_block_size $TEST_DIR`
-> diff --git a/common/config b/common/config
-> index a47e462c77..8153301483 100644
-> --- a/common/config
-> +++ b/common/config
-> @@ -415,6 +415,9 @@ _mkfs_opts()
->  	btrfs)
->  		export MKFS_OPTIONS="$BTRFS_MKFS_OPTIONS"
->  		;;
-> +	bcachefs)
-> +		export MKFS_OPTIONS="--errors=panic"
+Hi all,
 
-I think this might be useful for bcachefs developers to find bugs
-earlier, but not suitable for people like QA, as this may crash their
-test machines and stop the whole test.
+The master branch of the xfstests repository at:
 
-You could always set MKFS_OPTIONS to "--errors=panic" explicitly when
-needed.
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-> +		;;
->  	*)
->  		;;
->  	esac
-> diff --git a/common/dmlogwrites b/common/dmlogwrites
-> index 573f4b8a56..668d49e995 100644
-> --- a/common/dmlogwrites
-> +++ b/common/dmlogwrites
-> @@ -111,6 +111,13 @@ _log_writes_replay_log()
->  	[ -z "$_blkdev" ] && _fail \
->  	"block dev must be specified for _log_writes_replay_log"
->  
-> +	if [ "$FSTYP" = "bcachefs" ]; then
-> +		# bcachefs gets confused if we're replaying the history out of
-> +		# order, and we see writes on the device from a newer point in
-> +		# time than what the superblock points to:
-> +		dd if=/dev/zero of=$SCRATCH_DEV bs=1M oflag=direct >& /dev/null
+have just been updated. This is another fairly big update that most of the
+updates are bug fixes. There're also new tests for xfs and btrfs, and currently
+btrfs/236 fails with latest mainline kernel. xfs also got one test removed, as
+xfs/419 is no longer valid.
 
-I don't know bcachefs internals, I'm not sure I understand this,
-clearing the first 1M of SCRATCH_DEV seems to clear superblock, but I'm
-still not sure why it's needed. Does wipefs work?
+And again, many thanks to Brian Foster, who helped review more than 10 patches!
 
-> +	fi
-> +
->  	$here/src/log-writes/replay-log --log $LOGWRITES_DEV --find \
->  		--end-mark $_mark >> $seqres.full 2>&1
->  	[ $? -ne 0 ] && _fail "mark '$_mark' does not exist"
-> diff --git a/common/quota b/common/quota
-> index 32a9a55593..883a28a20d 100644
-> --- a/common/quota
-> +++ b/common/quota
-> @@ -17,7 +17,7 @@ _require_quota()
->  	    _notrun "Installed kernel does not support quotas"
->  	fi
->  	;;
-> -    gfs2|ocfs2)
-> +    gfs2|ocfs2|bcachefs)
->  	;;
->      xfs)
->  	if [ ! -f /proc/fs/xfs/xqmstat ]; then
-> @@ -278,7 +278,7 @@ _check_quota_usage()
->  
->  	VFS_QUOTA=0
->  	case $FSTYP in
-> -	ext2|ext3|ext4|ext4dev|f2fs|reiserfs|gfs2)
-> +	ext2|ext3|ext4|ext4dev|f2fs|reiserfs|gfs2|bcachefs)
->  		VFS_QUOTA=1
->  		quotaon -f -u -g $SCRATCH_MNT 2>/dev/null
->  		;;
-> diff --git a/common/rc b/common/rc
-> index 2cf550ec68..0e03846aeb 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -334,6 +334,7 @@ _try_scratch_mount()
->  		return $?
->  	fi
->  	_mount -t $FSTYP `_scratch_mount_options $*`
-> +	return
-
-Seems not necessary.
-
->  }
->  
->  # mount scratch device with given options and _fail if mount fails
-> @@ -667,6 +668,9 @@ _test_mkfs()
->      ext2|ext3|ext4)
->  	$MKFS_PROG -t $FSTYP -- -F $MKFS_OPTIONS $* $TEST_DEV
->  	;;
-> +    bcachefs)
-> +	$MKFS_PROG -t $FSTYP -- $MKFS_OPTIONS $* $TEST_DEV
-> +	;;
-
-I think we could just use the default mkfs command below. The only
-difference is dropping the "yes | " part, but that does nothing if mkfs
-doesn't read "yes" or "no" from stdin.
-
->      *)
->  	yes | $MKFS_PROG -t $FSTYP -- $MKFS_OPTIONS $* $TEST_DEV
->  	;;
-> @@ -706,6 +710,10 @@ _mkfs_dev()
->  	$MKFS_PROG -t $FSTYP -- -f $MKFS_OPTIONS $* \
->  		2>$tmp.mkfserr 1>$tmp.mkfsstd
->  	;;
-> +    bcachefs)
-> +	$MKFS_PROG -t $FSTYP -- $MKFS_OPTIONS $* \
-> +		2>$tmp_dir.mkfserr 1>$tmp_dir.mkfsstd
-> +	;;
-
-Same as above.
-
->      *)
->  	yes | $MKFS_PROG -t $FSTYP -- $MKFS_OPTIONS $* \
->  		2>$tmp.mkfserr 1>$tmp.mkfsstd
-> @@ -803,6 +811,10 @@ _scratch_mkfs()
->  		mkfs_cmd="yes | $MKFS_PROG -t $FSTYP --"
->  		mkfs_filter="grep -v -e ^mkfs\.ocfs2"
->  		;;
-> +	bcachefs)
-> +		mkfs_cmd="$MKFS_PROG -t $FSTYP --"
-> +		mkfs_filter="cat"
-> +		;;
-
-Same here.
-
->  	*)
->  		mkfs_cmd="yes | $MKFS_PROG -t $FSTYP --"
->  		mkfs_filter="cat"
-> @@ -1065,6 +1077,9 @@ _scratch_mkfs_sized()
->  		fi
->  		export MOUNT_OPTIONS="-o size=$fssize $TMPFS_MOUNT_OPTIONS"
->  		;;
-> +	bcachefs)
-> +		$MKFS_PROG -t $FSTYP -- $MKFS_OPTIONS --fs_size=$fssize --block_size=$blocksize $SCRATCH_DEV
-> +		;;
->  	*)
->  		_notrun "Filesystem $FSTYP not supported in _scratch_mkfs_sized"
->  		;;
-> @@ -1133,6 +1148,9 @@ _scratch_mkfs_blocksized()
->      ocfs2)
->  	yes | ${MKFS_PROG} -t $FSTYP -F $MKFS_OPTIONS -b $blocksize -C $blocksize $SCRATCH_DEV
->  	;;
-> +    bcachefs)
-> +	${MKFS_PROG}.$FSTYP $MKFS_OPTIONS --block_size=$blocksize $SCRATCH_DEV
-> +	;;
-
-Better to be consistent and use "${MKFS_PROG} -t $FSTYP ..." instead of
-${MKFS_PROG}.$FSTYP
-
->      *)
->  	_notrun "Filesystem $FSTYP not supported in _scratch_mkfs_blocksized"
->  	;;
-> @@ -1179,6 +1197,19 @@ _repair_scratch_fs()
->  	fi
->  	return $res
->          ;;
-> +    bcachefs)
-> +	fsck -t $FSTYP -n $SCRATCH_DEV 2>&1
-
-_repair_scratch_fs() is supposed to actually fix the errors, does
-"fsck -n" fix errors for bcachefs?
-
-> +	res=$?
-> +	case $res in
-> +	0)
-> +		res=0
-> +		;;
-> +	*)
-> +		_dump_err2 "fsck.$FSTYP failed, err=$res"
-> +		;;
-> +	esac
-> +	return $res
-> +	;;
->      *)
->  	local dev=$SCRATCH_DEV
->  	local fstyp=$FSTYP
-> diff --git a/tests/generic/042 b/tests/generic/042
-> index 35727bcbc6..42919e2313 100755
-> --- a/tests/generic/042
-> +++ b/tests/generic/042
-> @@ -63,7 +63,8 @@ _crashtest()
->  
->  	# We should /never/ see 0xCD in the file, because we wrote that pattern
->  	# to the filesystem image to expose stale data.
-> -	if hexdump -v -e '/1 "%02X "' $file | grep -q "CD"; then
-> +	# The file is not required to exist since we didn't sync before going down:
-> +	if [[ -f $file ]] && hexdump -v -e '/1 "%02X "' $file | grep -q "CD"; then
->  		echo "Saw stale data!!!"
->  		hexdump $file
->  	fi
-
-Updates for individual test should be in a separate patch.
-
-> diff --git a/tests/generic/425 b/tests/generic/425
-> index 51cbe1c67d..be2bc1b02e 100755
-> --- a/tests/generic/425
-> +++ b/tests/generic/425
-> @@ -30,6 +30,9 @@ _cleanup()
->  
->  # real QA test starts here
->  _supported_fs generic
-> +
-> +[ $FSTYP = bcachefs ] && _notrun "bcachefs does not store xattrs in blocks"
-> +
->  _require_scratch
->  _require_attrs
->  _require_xfs_io_command "fiemap" "-a"
-> diff --git a/tests/generic/441 b/tests/generic/441
-> index bedbcb0817..814387b2a9 100755
-> --- a/tests/generic/441
-> +++ b/tests/generic/441
-> @@ -40,7 +40,7 @@ case $FSTYP in
->  	btrfs)
->  		_notrun "btrfs has a specialized test for this"
->  		;;
-> -	ext3|ext4|xfs)
-> +	ext3|ext4|xfs|bcachefs)
->  		# Do the more thorough test if we have a logdev
->  		_has_logdev && sflag=''
->  		;;
-> diff --git a/tests/generic/482 b/tests/generic/482
-> index 86941e8468..3cbe187f2e 100755
-> --- a/tests/generic/482
-> +++ b/tests/generic/482
-> @@ -77,16 +77,29 @@ prev=$(_log_writes_mark_to_entry_number mkfs)
->  cur=$(_log_writes_find_next_fua $prev)
->  [ -z "$cur" ] && _fail "failed to locate next FUA write"
->  
-> +if [ "$FSTYP" = "bcachefs" ]; then
-> +    _dmthin_cleanup
-> +    _dmthin_init $devsize $devsize $csize $lowspace
-> +fi
-> +
->  while [ ! -z "$cur" ]; do
->  	_log_writes_replay_log_range $cur $DMTHIN_VOL_DEV >> $seqres.full
->  
-> -	# Here we need extra mount to replay the log, mainly for journal based
-> -	# fs, as their fsck will report dirty log as error.
-> -	# We don't care to preserve any data on the replay dev, as we can replay
-> -	# back to the point we need, and in fact sometimes creating/deleting
-> -	# snapshots repeatedly can be slower than replaying the log.
-> -	_dmthin_mount
-> -	_dmthin_check_fs
-> +	if [ "$FSTYP" = "bcachefs" ]; then
-> +	    # bcachefs will get confused if fsck does writes to replay the log,
-> +	    # but then we replay writes from an earlier point in time on the
-> +	    # same fs - but  fsck in -n mode won't do any writes:
-> +	    _check_scratch_fs -n $DMTHIN_VOL_DEV
-> +	else
-> +	    # Here we need extra mount to replay the log, mainly for journal based
-> +	    # fs, as their fsck will report dirty log as error.
-> +	    # We don't care to preserve any data on the replay dev, as we can replay
-> +	    # back to the point we need, and in fact sometimes creating/deleting
-> +	    # snapshots repeatedly can be slower than replaying the log.
-> +
-> +	    _dmthin_mount
-> +	    _dmthin_check_fs
-> +	fi
->  
->  	prev=$cur
->  	cur=$(_log_writes_find_next_fua $(($cur + 1)))
-> diff --git a/tests/generic/558 b/tests/generic/558
-> index 4bed90e2a7..2eaa8f7686 100755
-> --- a/tests/generic/558
-> +++ b/tests/generic/558
-> @@ -55,6 +55,8 @@ _scratch_mount
->  i=0
->  free_inode=`_get_free_inode $SCRATCH_MNT`
->  file_per_dir=1000
-> +[ $FSTYP = bcachefs ] && file_per_dir=10000
-> +
-
-Some comments would be good.
+There're still some review backlogs in my to-review queue, as I was absent the
+week before last week, hopefully I could catch up in the comming week.
 
 Thanks,
 Eryu
 
->  loop=$((free_inode / file_per_dir + 1))
->  mkdir -p $SCRATCH_MNT/testdir
->  
-> -- 
-> 2.31.1
+The new head of the master branch is commit:
+
+1c18b9ec2fcc xfs/49[12]: skip pre-lazysbcount filesystems
+
+New commits:
+
+Amir Goldstein (1):
+      [6159ae7faf4c] overlay/065: Adapt test to relaxed rules
+
+Boyang Xue (1):
+      [69db2233f357] generic/563: tolerate small reads in "write -> read/write" sub-test
+
+Darrick J. Wong (10):
+      [2837d7c32d70] xfs: test upgrading filesystem to bigtime
+      [9abb8f44ca6c] xfs/419: remove irrelevant swapfile test
+      [2c70e8f8dd39] common/rc: relax xfs swapfile support checks
+      [7987c994ee5c] xfs/010: filter out bad finobt levels complaint
+      [4da76bfa4b3d] xfs: test what happens when we reset the root dir and it has xattrs
+      [46d917f2e805] xfs/276: remove unnecessary mkfs golden output
+      [e48c1f054f3f] generic/{094,225}: fix argument to _require_file_block_size_equals_fs_block_size
+      [eb8d229ff7da] generic/449: always fill up the data device
+      [d00cc974c777] xfs/004: don't fail test due to realtime files
+      [1c18b9ec2fcc] xfs/49[12]: skip pre-lazysbcount filesystems
+
+Filipe Manana (1):
+      [05dc92277171] btrfs: test fsync after rename and link with cow and nocow writes
+
+Jan Kara (1):
+      [d599c768cb33] common: Fix recovery tests for tmpfs
+
+Jinhui Huang (1):
+      [e3a972a75247] xfs/153: add _require_idmapped_mounts check
+
+Johannes Thumshirn (1):
+      [0a095db5ef77] btrfs: add test for zone auto reclaim
+
+Naohiro Aota (1):
+      [a6dbebcb19e9] common/rc: introduce zone check commands
+
+Pavel Reichl (1):
+      [91c239fae998] generic/192: fix instability on exFAT
+
+Shreeya Patel (1):
+      [2461e8901c9c] generic/631: Add a check for extended attributes
+
+Xiaoli Feng (1):
+      [adf7f3620ca6] common/rc: not run swapfile test for DAX
+
+Yang Xu (4):
+      [51b3e9ece6c8] src: Fix an error for the loop initialization declaration
+      [aea877f8979e] src/idmapped-mounts: use renameat instead of renameat2
+      [b0a58bbe13c9] src/idmapped-mounts: Remove useless header file
+      [6be48523d41b] generic/631: remove useless nfs_export=off
+
+
+Code Diffstat:
+
+ common/config                         |   1 +
+ common/rc                             |  74 +++++++++--
+ common/xfs                            |  28 +++++
+ src/detached_mounts_propagation.c     |   4 +-
+ src/idmapped-mounts/idmapped-mounts.c | 224 +++++++++++++++++-----------------
+ src/idmapped-mounts/mount-idmapped.c  |  11 +-
+ tests/btrfs/236                       | 199 ++++++++++++++++++++++++++++++
+ tests/btrfs/236.out                   |   5 +
+ tests/btrfs/237                       | 103 ++++++++++++++++
+ tests/btrfs/237.out                   |   2 +
+ tests/btrfs/group                     |   2 +
+ tests/generic/094                     |   2 +-
+ tests/generic/192                     |   7 +-
+ tests/generic/225                     |   2 +-
+ tests/generic/449                     |   5 +
+ tests/generic/563                     |  20 +--
+ tests/generic/631                     |   4 +-
+ tests/overlay/065                     |   5 +-
+ tests/xfs/004                         |   4 +
+ tests/xfs/010                         |   1 +
+ tests/xfs/153                         |   1 +
+ tests/xfs/160                         | 117 ++++++++++++++++++
+ tests/xfs/160.out                     |  29 +++++
+ tests/xfs/161                         | 157 ++++++++++++++++++++++++
+ tests/xfs/161.out                     |   6 +
+ tests/xfs/162                         |  63 ++++++++++
+ tests/xfs/162.out                     |   7 ++
+ tests/xfs/276                         |   2 +-
+ tests/xfs/419                         |  58 ---------
+ tests/xfs/419.out                     |   5 -
+ tests/xfs/491                         |   4 +
+ tests/xfs/492                         |   4 +
+ tests/xfs/group                       |   4 +-
+ 33 files changed, 952 insertions(+), 208 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
+
+--E2pep4znuEMc
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAmCYA08ACgkQJlKqKVyP
+52Modg//f2QK/+ttB3Lw8RcfCTGy8QDyKaJfatffa2bGMiU2JF9MCB8shOUIdltK
+XQYkFC2T+ATKOx+9TCoGsv+uuKkOkcIQ69sXv3fg7VyUNhRvf2kdFiZ9A/NqAE2g
+HhQiVtMfeouFpP7xq/+8SjzRfJ52DCPmxgC+jtfJ9U6IUtNkAn113V+1oPjTj48e
+GWqWaMuLVBRRxbGZk45W0bKBl5v8KKspP6EkWMEndDy11fGjrH7WwpXcztO730vc
+bdQ+NshfhNk2AIP42QaQ2uWZRSSQhfcEq4s9DnEgQH3cDaycArOI/E87+u2Bo9JU
+eT5hZiYe9AFgGHEei2cQG+mn/iAEB/h2nBOqetT3Oq5sA0Q58mGoDgniXioWQl5s
+4wi7n+t0sFaec7VWc1D9QqkdfTMEuaRvLFZ6/5sZ2u+JE6GxtVfMwa6qp8NFbvMP
+9/wIljljlZsjvSlM9XWbZLZkeZz0UC4DfUvUkH2zvl35/REp6IqkU/jEkyCsXkTk
+o07jBlKvRZct90ThRVJGwrcnIDZ2gNGsDH5lRI/b0HelSR5yO54Wfxq+Zs4K8rnf
+yVWz0wjLm9jVRwUVjVAVP216G5fA3nvm8tMT1xVx4q+B5aQzzBhQGUvbjmuf890Y
+OfyvzRJ4mMPXPgVtuelcWvajenZHBRfdBuG7GL14b4zbDF2HcCs=
+=hvW2
+-----END PGP SIGNATURE-----
+
+--E2pep4znuEMc--
