@@ -2,232 +2,91 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 00CC1C433ED
-	for <linux-fstests@archiver.kernel.org>; Mon, 10 May 2021 18:08:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F28E9C433ED
+	for <linux-fstests@archiver.kernel.org>; Mon, 10 May 2021 23:38:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CE5C8611BF
-	for <linux-fstests@archiver.kernel.org>; Mon, 10 May 2021 18:08:40 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D37BE6161F
+	for <linux-fstests@archiver.kernel.org>; Mon, 10 May 2021 23:38:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231190AbhEJSJo (ORCPT
+        id S229992AbhEJXjW (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 10 May 2021 14:09:44 -0400
-Received: from mail.kernel.org ([198.145.29.99]:33802 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S230357AbhEJSJn (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 10 May 2021 14:09:43 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 8E582611BF;
-        Mon, 10 May 2021 18:08:38 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1620670118;
-        bh=ekFHxO046+EStxvnakE4IyjlrXc26qirAtfF/RISydk=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=bLFYbTjK0J6V0PpJ5js6xPbYQA32LmZTJV79/+tNHfEI4bLqWISAEf2S0aKYvPWQH
-         JBytUTXjgCED5t37e/CoXiaUzgqABhD23SeRJUaEMExhvNvBTzuqCccFdYj0XB6jbp
-         cilPZMCyHFoqD4z9mrnZ6sUNhnxZFA+uoRWPDJLqrcMbCjvrQ8LeAuwCKIWs/L24kz
-         whSo9N3JaN9CDJ8e4P7aV25DsyG7AVIjAUGcU81svs8h/7tItL1UuvqOc0v3Pv0jVs
-         HPWXeDHnljIjd9rB0SvXnQl0rj+bgKT//H2pcyGuB6bpL5ELZ5c7BTj2ZkDJMUiKQU
-         EjHbs3OjFg3Dg==
-Date:   Mon, 10 May 2021 11:08:36 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Gao Xiang <hsiangkao@redhat.com>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org,
-        Zorro Lang <zlang@redhat.com>, Eryu Guan <guan@eryu.me>
-Subject: Re: [PATCH v4 3/3] xfs: stress test for shrinking free space in the
- last AG
-Message-ID: <20210510180836.GC8558@magnolia>
-References: <20210402094937.4072606-1-hsiangkao@redhat.com>
- <20210402094937.4072606-4-hsiangkao@redhat.com>
+        Mon, 10 May 2021 19:39:22 -0400
+Received: from mail109.syd.optusnet.com.au ([211.29.132.80]:41648 "EHLO
+        mail109.syd.optusnet.com.au" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S229966AbhEJXjW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 10 May 2021 19:39:22 -0400
+X-Greylist: delayed 1407 seconds by postgrey-1.27 at vger.kernel.org; Mon, 10 May 2021 19:39:21 EDT
+Received: from dread.disaster.area (pa49-179-143-157.pa.nsw.optusnet.com.au [49.179.143.157])
+        by mail109.syd.optusnet.com.au (Postfix) with ESMTPS id 5E1B766F4E;
+        Tue, 11 May 2021 09:14:48 +1000 (AEST)
+Received: from dave by dread.disaster.area with local (Exim 4.92.3)
+        (envelope-from <david@fromorbit.com>)
+        id 1lgF6s-00CyeC-E3; Tue, 11 May 2021 09:14:46 +1000
+Date:   Tue, 11 May 2021 09:14:46 +1000
+From:   Dave Chinner <david@fromorbit.com>
+To:     Eryu Guan <guan@eryu.me>
+Cc:     Kent Overstreet <kent.overstreet@gmail.com>,
+        fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org,
+        linux-bcachefs@vger.kernel.org
+Subject: Re: [PATCH 0/3] bcachefs support
+Message-ID: <20210510231446.GO1872259@dread.disaster.area>
+References: <20210427164419.3729180-1-kent.overstreet@gmail.com>
+ <YJfvtvBCqA4zU0xf@desktop>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210402094937.4072606-4-hsiangkao@redhat.com>
+In-Reply-To: <YJfvtvBCqA4zU0xf@desktop>
+X-Optus-CM-Score: 0
+X-Optus-CM-Analysis: v=2.3 cv=F8MpiZpN c=1 sm=1 tr=0
+        a=I9rzhn+0hBG9LkCzAun3+g==:117 a=I9rzhn+0hBG9LkCzAun3+g==:17
+        a=kj9zAlcOel0A:10 a=5FLXtPjwQuUA:10 a=7-415B0cAAAA:8
+        a=JOqBJgaB0zyXXk2ek_AA:9 a=CjuIK1q_8ugA:10 a=biEYGPWJfzWAr4FL6Ov7:22
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Apr 02, 2021 at 05:49:37PM +0800, Gao Xiang wrote:
-> This adds a stress testcase to shrink free space as much as
-> possible in the last AG with background fsstress workload.
+On Sun, May 09, 2021 at 10:20:38PM +0800, Eryu Guan wrote:
+> On Tue, Apr 27, 2021 at 12:44:16PM -0400, Kent Overstreet wrote:
+> > A small patch adding bcachefs support, and two other patches for consideration:
 > 
-> The expectation is that no crash happens with expected output.
-> 
-> Signed-off-by: Gao Xiang <hsiangkao@redhat.com>
-> ---
->  tests/xfs/991     | 118 ++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/991.out |   8 ++++
->  tests/xfs/group   |   1 +
->  3 files changed, 127 insertions(+)
->  create mode 100755 tests/xfs/991
->  create mode 100644 tests/xfs/991.out
-> 
-> diff --git a/tests/xfs/991 b/tests/xfs/991
-> new file mode 100755
-> index 00000000..8ad0b8c7
-> --- /dev/null
-> +++ b/tests/xfs/991
-> @@ -0,0 +1,118 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2020-2021 Red Hat, Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test 991
-> +#
-> +# XFS online shrinkfs stress test
-> +#
-> +# This test attempts to shrink unused space as much as possible with
-> +# background fsstress workload. It will decrease the shrink size if
-> +# larger size fails. And totally repeat 2 * TIME_FACTOR times.
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "rm -f $tmp.*; exit \$status" 0 1 2 3 15
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +create_scratch()
-> +{
-> +	_scratch_mkfs_xfs $@ | tee -a $seqres.full | \
-> +		_filter_mkfs 2>$tmp.mkfs >/dev/null
-> +	. $tmp.mkfs
-> +
-> +	_scratch_mount
-> +	# fix the reserve block pool to a known size so that the enospc
-> +	# calculations work out correctly.
-> +	_scratch_resvblks 1024 > /dev/null 2>&1
-> +}
-> +
-> +fill_scratch()
-> +{
-> +	$XFS_IO_PROG -f -c "falloc 0 $1" $SCRATCH_MNT/resvfile
-> +}
-> +
-> +stress_scratch()
-> +{
-> +	local procs=3
-> +	local nops=$((1000 * LOAD_FACTOR))
+> As bcachefs is not upstream yet, I think we should re-visit bcachefs
+> support after it's in upstream.
 
-Um... _scale_fsstress_args already scales the -p and -n arguments, why
-is it necessary to scale nops by time /and/ load?
+I disagree completely. I've been waiting for this to land for some
+time so I can actually run fstests against bcachefs easily to
+evaluate it's current state of stability and support.  The plans are
+to get bcachefs merged upstream, and so having support already in
+fstests makes it much easier for reviewers and developers to
+actually run tests and find problems prior to merging.
 
-> +	# -w ensures that the only ops are ones which cause write I/O
-> +	local FSSTRESS_ARGS=`_scale_fsstress_args -d $SCRATCH_MNT -w \
-> +		-p $procs -n $nops $FSSTRESS_AVOID`
-> +	$FSSTRESS_PROG $FSSTRESS_ARGS >> $seqres.full 2>&1
-> +}
-> +
-> +# real QA test starts here
-> +_supported_fs xfs
-> +_require_xfs_scratch_shrink
-> +_require_xfs_io_command "falloc"
-> +
-> +rm -f $seqres.full
-> +_scratch_mkfs_xfs | tee -a $seqres.full | _filter_mkfs 2>$tmp.mkfs
-> +. $tmp.mkfs	# extract blocksize and data size for scratch device
-> +
-> +decsize=`expr  42 \* 1048576`	# shrink in chunks of this size at most
+As an upstream developer and someone who will be reviewing bcachefs
+when it is next proposed for merge,  I would much prefer to see
+extensive and long term fstests coverage *before* the code is even
+merged upstream. Given that filesystems take years to develop to the
+point where they are stable and ready for merge, saying "can't
+enable the test environment until it is merged upstream" is not very
+helpful.
 
-Might it be nice to inject a little bit of randomness here?
+As a general principle, we want developers of new filesystems to
+start using fstests early in the development process of their
+filesystem. We should be encouraging new filesystems to be added to
+fstests, not saying "we only support upstream filesystems". If the
+filesystem plans to be merged upstream, then fstests support for
+that filesystem should be there long before the filesytsem is even
+proposed for merge.  We need to help people get new filesystems
+upstream, not place arbitrary "not upstream so not supported"
+catch-22s in their way...
 
-> +endsize=`expr 125 \* 1048576`	# stop after shrinking this big
-> +[ `expr $endsize / $dbsize` -lt $dblocks ] || _notrun "Scratch device too small"
-> +
-> +nags=2
-> +totalcount=$((2 * TIME_FACTOR))
-> +
-> +while [ $totalcount -gt 0 ]; do
-> +	size=`expr 1010 \* 1048576`	# 1010 megabytes initially
-> +	logblks=$(_scratch_find_xfs_min_logblocks -dsize=${size} -dagcount=${nags})
+Hence I ask that you merge bcachefs support to help the process of
+getting bcachefs suport upstream.
 
-(Does all this logic still work if an external log device is present?)
+Cheers,
 
-> +
-> +	create_scratch -lsize=${logblks}b -dsize=${size} -dagcount=${nags}
-> +
-> +	for i in `seq 125 -1 90`; do
-> +		fillsize=`expr $i \* 1048576`
-> +		out="$(fill_scratch $fillsize 2>&1)"
-> +		echo "$out" | grep -q 'No space left on device' && continue
-> +		test -n "${out}" && echo "$out"
-> +		break
-> +	done
-> +
-> +	while [ $size -gt $endsize ]; do
-> +		stress_scratch &
-> +		sleep 1
-> +
-> +		decb=`expr $decsize / $dbsize`    # in data blocks
-> +		while [ $decb -gt 0 ]; do
-> +			sizeb=`expr $size / $dbsize - $decb`
-> +
-> +			$XFS_GROWFS_PROG -D ${sizeb} $SCRATCH_MNT \
-> +				>> $seqres.full 2>&1 && break
-> +
-> +			[ $decb -gt 100 ] && decb=`expr $decb + $RANDOM % 10`
-> +			decb=`expr $decb / 2`
-> +		done
-> +
-> +		wait
-> +		[ $decb -eq 0 ] && break
-> +
-> +		# get latest dblocks
-> +		$XFS_INFO_PROG $SCRATCH_MNT 2>&1 | _filter_mkfs 2>$tmp.growfs >/dev/null
-> +		. $tmp.growfs
-> +
-> +		size=`expr $dblocks \* $dbsize`
-> +		_scratch_unmount
-> +		_repair_scratch_fs >> $seqres.full
-
-Why isn't "_scratch_xfs_repair -n" here sufficient?
-
-> +		_scratch_mount
-> +	done
-> +
-> +	_scratch_unmount
-> +	_repair_scratch_fs >> $seqres.full
-
-...and here?
-
-> +	totalcount=`expr $totalcount - 1`
-> +done
-> +
-> +echo "*** done"
-> +status=0
-> +exit
-> diff --git a/tests/xfs/991.out b/tests/xfs/991.out
-> new file mode 100644
-> index 00000000..e8209672
-> --- /dev/null
-> +++ b/tests/xfs/991.out
-> @@ -0,0 +1,8 @@
-> +QA output created by 991
-> +meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
-> +data     = bsize=XXX blocks=XXX, imaxpct=PCT
-> +         = sunit=XXX swidth=XXX, unwritten=X
-> +naming   =VERN bsize=XXX
-> +log      =LDEV bsize=XXX blocks=XXX
-> +realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
-> +*** done
-> diff --git a/tests/xfs/group b/tests/xfs/group
-> index 472c8f9a..53e68bea 100644
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
-> @@ -521,3 +521,4 @@
->  538 auto stress
->  539 auto quick mount
->  990 auto quick growfs shrinkfs
-> +991 auto growfs shrinkfs ioctl prealloc stress
-> -- 
-> 2.27.0
-> 
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
