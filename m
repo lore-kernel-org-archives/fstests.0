@@ -2,138 +2,112 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-14.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C6E89C433ED
-	for <linux-fstests@archiver.kernel.org>; Tue, 11 May 2021 02:34:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 73E26C433ED
+	for <linux-fstests@archiver.kernel.org>; Tue, 11 May 2021 07:40:12 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 95FBC61622
-	for <linux-fstests@archiver.kernel.org>; Tue, 11 May 2021 02:34:40 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 49DD861360
+	for <linux-fstests@archiver.kernel.org>; Tue, 11 May 2021 07:40:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229736AbhEKCfp (ORCPT
+        id S230202AbhEKHlQ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 10 May 2021 22:35:45 -0400
-Received: from mail.kernel.org ([198.145.29.99]:38534 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229628AbhEKCfp (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 10 May 2021 22:35:45 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 6D7636008E;
-        Tue, 11 May 2021 02:34:39 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1620700479;
-        bh=z1RNdnscfnLJe9wYV2Wx7iWNJkpwGMnDaSFAaC+Fpow=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=QBlnTW+DyQpeWukO7S2hnBRjMpuUKP9JrN+MAqQgnpl1XQN0eqOyRCXfG9hRvRlnp
-         Aq7YAscKrmjouuC/T7bnWCYWdNLeqM9NEkZsMtDoydfFXgJOS70IAnh6qDPUQjUrOR
-         QNKY4fCTpQHJQXTEXyrh1g/1vrRDCZaS12IRLsgy/B2d0IC4BWriqhxFoETyn2RW5f
-         XuuYlFPEuVA88b7wMRQrWbrfJ3Ik2eEAxs1WxWazo3SUFU+4bGHyuLpd6DOyihQ7bC
-         9hEytx65j5qq5M7cBHxv2GP2UTSsSF24gPQWPEGWVi7CvAU4uPFp897n91qyTjiiwk
-         lxhDyOCRYwxzg==
-Date:   Mon, 10 May 2021 19:34:38 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Gao Xiang <hsiangkao@redhat.com>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org,
-        Zorro Lang <zlang@redhat.com>, Eryu Guan <guan@eryu.me>
-Subject: Re: [PATCH v4 1/3] common/xfs: add _require_xfs_scratch_shrink helper
-Message-ID: <20210511023438.GK8582@magnolia>
-References: <20210402094937.4072606-1-hsiangkao@redhat.com>
- <20210402094937.4072606-2-hsiangkao@redhat.com>
- <20210510175952.GA8558@magnolia>
- <20210511020248.GC741809@xiangao.remote.csb>
+        Tue, 11 May 2021 03:41:16 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:31747 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S230248AbhEKHlP (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 11 May 2021 03:41:15 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1620718808;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=ZXNk4UD8OF1oBZnt5Z+7zrrv4N8KpySOEMngJz/TGw4=;
+        b=YBy6ZiFVWAUNxG4lJM3zstXRYmpDZ31IfSFVYljKwQG3qH0Zdg6iAgGUDdcbtRrFblbGFJ
+        PgihRZgaqH9aCSZExPw8Ko3QTYnfLxTbF+qWK11c8F5A6btX0kIi+cNk7b/ymtLzc+FGB6
+        5uirzvRCJOun8DWalOuyWIFFtbqzB0Q=
+Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com
+ [209.85.216.72]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-467-8cragJu-NReduFnjnp5GjQ-1; Tue, 11 May 2021 03:40:07 -0400
+X-MC-Unique: 8cragJu-NReduFnjnp5GjQ-1
+Received: by mail-pj1-f72.google.com with SMTP id f8-20020a17090a9b08b0290153366612f7so11090546pjp.1
+        for <fstests@vger.kernel.org>; Tue, 11 May 2021 00:40:07 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=ZXNk4UD8OF1oBZnt5Z+7zrrv4N8KpySOEMngJz/TGw4=;
+        b=JaZCbGwlQ/yzsT3mTXBQ9O6F5v5/2opYTB9vo0yaneUKmyjN880DRJpkv+NFKVAXNr
+         KxKBqgy28JnOijZDRWyjRTkkb1IXQo3VqSicmOH1gdxSJJdJ0oJfwlZBn8n9Mnt65FIu
+         2jadvNmp8FKeSOfMeXhQp5CG70gmmH4wRFjivPQWqR7a7LeHI3dDhTpTd/BZHZEkTby4
+         4rweqvykYFPz5MEGa/PbkrMDgfC/x8u50kKf2pVU6na2lyvMGklCbP0bCVeZRLVECInw
+         Z4oL5udU+UFgNVd4Yku45Im8OU+psV/BTeIZk4dNDQsHBpegiyVD2Q5Qb64uJgxOflWA
+         7vmw==
+X-Gm-Message-State: AOAM532b+wYHx0gPLGZOHPX+xnA6Rdt24KMPB619o3nDSPpCl19I7UAC
+        vM4RfCmjnKJ++izC5U9hZ77wHJyQF2SOi6kZpKoZRcHbhH/Z2fxDc/dSPu0UH49YUwjaw6tm71f
+        OJlQAoBWJNJwerLQjdw==
+X-Received: by 2002:a63:ae01:: with SMTP id q1mr4609627pgf.216.1620718806296;
+        Tue, 11 May 2021 00:40:06 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJw2Txv5EO0XfxBz9bGiXrmrJ6QRMZ3B+YrxMhgItmHjB91y6WDxZmhu3rQRwQ7bP9xR+SjQ8Q==
+X-Received: by 2002:a63:ae01:: with SMTP id q1mr4609605pgf.216.1620718805997;
+        Tue, 11 May 2021 00:40:05 -0700 (PDT)
+Received: from xiangao.com ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id y3sm10820865pfl.153.2021.05.11.00.40.03
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 11 May 2021 00:40:05 -0700 (PDT)
+From:   Gao Xiang <hsiangkao@redhat.com>
+To:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Cc:     "Darrick J. Wong" <djwong@kernel.org>,
+        Zorro Lang <zlang@redhat.com>, Eryu Guan <guan@eryu.me>,
+        Gao Xiang <hsiangkao@redhat.com>
+Subject: [PATCH v5 0/3] xfs: testcases for shrinking free space in the last AG
+Date:   Tue, 11 May 2021 15:39:42 +0800
+Message-Id: <20210511073945.906127-1-hsiangkao@redhat.com>
+X-Mailer: git-send-email 2.27.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210511020248.GC741809@xiangao.remote.csb>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, May 11, 2021 at 10:02:48AM +0800, Gao Xiang wrote:
-> On Mon, May 10, 2021 at 10:59:52AM -0700, Darrick J. Wong wrote:
-> > On Fri, Apr 02, 2021 at 05:49:35PM +0800, Gao Xiang wrote:
-> > > In order to detect whether the current kernel supports XFS shrinking.
-> > > 
-> > > Signed-off-by: Gao Xiang <hsiangkao@redhat.com>
-> > > ---
-> > >  common/xfs | 14 ++++++++++++++
-> > >  1 file changed, 14 insertions(+)
-> > > 
-> > > diff --git a/common/xfs b/common/xfs
-> > > index 69f76d6e..c6c2e3f5 100644
-> > > --- a/common/xfs
-> > > +++ b/common/xfs
-> > > @@ -766,6 +766,20 @@ _require_xfs_mkfs_without_validation()
-> > >  	fi
-> > >  }
-> > >  
-> > > +_require_xfs_scratch_shrink()
-> > > +{
-> > > +	_require_scratch
-> > > +	_require_command "$XFS_GROWFS_PROG" xfs_growfs
-> > > +
-> > > +	_scratch_mkfs_xfs | _filter_mkfs 2>$tmp.mkfs >/dev/null
-> > > +	. $tmp.mkfs
-> > > +	_scratch_mount
-> > > +	# here just to check if kernel supports, no need do more extra work
-> > > +	$XFS_GROWFS_PROG -D$((dblocks-1)) "$SCRATCH_MNT" > /dev/null 2>&1 || \
-> > > +		_notrun "kernel does not support shrinking"
-> > 
-> > I think isn't sufficiently precise -- if xfs_growfs (userspace) doesn't
-> > support shrinking it'll error out with "data size XXX too small", and if
-> > the kernel doesn't support shrink, it'll return EINVAL.
-> 
-> I'm not sure if we need to identify such 2 cases (xfsprogs doesn't support
-> and/or kernel doesn't support), but if it's really needed I think I could
-> update it. But I've confirmed with testing that both two cases can be
-> handled with the statements above properly.
-> 
-> > 
-> > As written, this code attempts a single-block shrink and disables the
-> > entire test if that fails for any reason, even if that reason is that
-> > the last block in the filesystem isn't free, or we ran out of memory, or
-> > something like that.
-> 
-> hmm... the filesystem here is brandly new, I think at least it'd be
-> considered as "the last block in the new filesystem is free". If we're
-> worried that such promise could be broken, I think some other golden
-> output is unstable as well (although unrelated to this.) By that time,
-> I think the test script should be updated then instead. Or am I missing
-> something?
-> 
-> If we're worried about runing out of memory, I think the whole xfstests
-> could not be predictable. I'm not sure if we need to handle such case.
+Hi,
 
-I'm not specifically worried about running out of memory, I'm mostly
-worried that some /other/ implementation bug (or disk format variation)
-will show up and triggers the _notrun, and nobody will notice that the
-shrink tests quietly stop running.
+This adds testcases for shrinking free space in the last AG in the upstream.
+This version mainly addresses Darrick's previous comments.
+(and I've checked with "512m logdev with USE_EXTERNAL and SCRATCH_LOGDEV
+ without issues)
 
---D
+changes since v4 (Darrick):
+ - [1/3] check xfs_growfs output instead;
+ - [2/3] fix a typo;
+ - [2/3] echo statements rather than fail out;
+ - [3/3] avoid unncessary scale due to _scale_fsstress_args;
+ - [3/3] inject a bit randomness to decsize;
+ - [3/3] use '_scratch_xfs_repair -n' instead.
 
-> > 
-> > I think this needs to check the output of xfs_growfs to make the
-> > decision to _notrun.
-> 
-> I could check some golden output such as "data size XXX too small", yet
-> I still don't think we should check some cases e.g. run out of memory..
-> 
-> Thanks,
-> Gao Xiang
-> 
-> > 
-> > --D
-> > 
-> > > +	_scratch_unmount
-> > > +}
-> > > +
-> > >  # XFS ability to change UUIDs on V5/CRC filesystems
-> > >  #
-> > >  _require_meta_uuid()
-> > > -- 
-> > > 2.27.0
-> > > 
-> > 
-> 
+Thanks,
+Gao Xiang
+
+Gao Xiang (3):
+  common/xfs: add _require_xfs_scratch_shrink helper
+  xfs: basic functionality test for shrinking free space in the last AG
+  xfs: stress test for shrinking free space in the last AG
+
+ common/xfs        |  20 ++++++++
+ tests/xfs/990     |  73 ++++++++++++++++++++++++++++
+ tests/xfs/990.out |  12 +++++
+ tests/xfs/991     | 120 ++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/991.out |   8 ++++
+ tests/xfs/group   |   2 +
+ 6 files changed, 235 insertions(+)
+ create mode 100755 tests/xfs/990
+ create mode 100644 tests/xfs/990.out
+ create mode 100755 tests/xfs/991
+ create mode 100644 tests/xfs/991.out
+
+-- 
+2.27.0
+
