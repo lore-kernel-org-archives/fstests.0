@@ -2,228 +2,109 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-14.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 63318C433B4
-	for <linux-fstests@archiver.kernel.org>; Tue, 11 May 2021 15:25:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4C0DCC433ED
+	for <linux-fstests@archiver.kernel.org>; Tue, 11 May 2021 23:32:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3318761492
-	for <linux-fstests@archiver.kernel.org>; Tue, 11 May 2021 15:25:38 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0F0086162B
+	for <linux-fstests@archiver.kernel.org>; Tue, 11 May 2021 23:32:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231754AbhEKP0k (ORCPT
+        id S229736AbhEKXd7 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 11 May 2021 11:26:40 -0400
-Received: from mail.kernel.org ([198.145.29.99]:56916 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S231609AbhEKP0h (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 11 May 2021 11:26:37 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 66E9361400;
-        Tue, 11 May 2021 15:25:30 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1620746730;
-        bh=y9cLC6rhTC6UaJLcg4FxfkzgR/EJdSxCxRpaRJI72S4=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=PVM14MqI0ezkRwoY2wRjuPADtewZIAnVM1IxW8WX3pcLKQuJv3uUt6vZiAzGJHGtF
-         lLUXu3dXEZoVZ237CwVf4gS33+c7KPXN+v5LqFEsN2hkjZqF7ekt9xKJ8Pi/RCV6Ny
-         V4u4uZLJ8RX6XJy//iaxn/z5y6069+USe6VpJ6ffVBdhsQEJyvN88D+JqDsUiuUTLf
-         gY4AR7sO/mp/F18bNVe91fBLR0WrkDYrCbMRElKBIfpj1kUR7xrIohCmo3Z1h2CcrD
-         BRRUGsAjaqqx5eMXlLz03ursiRuqe/MYjJvs1/6nEKLZlqYa/EdopLAlGrtntvFiIS
-         Ih5YHIFIineDA==
-Date:   Tue, 11 May 2021 08:25:29 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Gao Xiang <hsiangkao@redhat.com>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org,
-        Zorro Lang <zlang@redhat.com>, Eryu Guan <guan@eryu.me>
-Subject: Re: [PATCH v5 3/3] xfs: stress test for shrinking free space in the
- last AG
-Message-ID: <20210511152529.GO8582@magnolia>
-References: <20210511073945.906127-1-hsiangkao@redhat.com>
- <20210511073945.906127-4-hsiangkao@redhat.com>
+        Tue, 11 May 2021 19:33:59 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:37203 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S229637AbhEKXd7 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 11 May 2021 19:33:59 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1620775971;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=sB807XykC81jeo95j8FkXCmMB3IA8Dimcp1b7gtaS5E=;
+        b=KMKz6P7p4C8O89Wj/0mdhYj5WOmtI0grZyCbNomD9pI+2Cpfu0S66pF/W+NOwNCxlkOwXD
+        uhvSiMATfXoZxE/X0qHnFH9ecfbKXi2zDfCp9i9L2PiFUb1tT402ZTiRkivEl43xZLhxwI
+        i9x3tYkajMopkWys3ABZvsc8cOmVQRg=
+Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com
+ [209.85.216.70]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-14-cg44K2JIMyiGL7xNlesilA-1; Tue, 11 May 2021 19:32:49 -0400
+X-MC-Unique: cg44K2JIMyiGL7xNlesilA-1
+Received: by mail-pj1-f70.google.com with SMTP id p8-20020a17090a74c8b02901558c0dbcd5so2463579pjl.2
+        for <fstests@vger.kernel.org>; Tue, 11 May 2021 16:32:49 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=sB807XykC81jeo95j8FkXCmMB3IA8Dimcp1b7gtaS5E=;
+        b=N8eMJ58QFT3QP5Q3xLW+2AfUnXeSXgVaR481eR39OUg1+Z9/dxgiBIRRdk8W5WcKn3
+         vdatJffrnk/iLbudaNf+7hskzyfNFgW0up17yUdLIwcs+z2e4KlJ/CUaWvIOGor5/14N
+         GZ02xVjE7g2Ak+Xm0b9qlcBMEPSPuVhzM83bIrmHL2S0wZXC4s3HkGGAgPnEQPjitvs7
+         4BU9nQ74X+3Rtv+DIW2KDXionmzrvxuCdDBPgzwrB3FmmqXcMuR4XYv6s0slwkJCJMy3
+         4sfb7XG7QNeK5w95yrxlh1DGlFawJIVZYeK3gGHRnXWUDa9O1MW4pGrx9rdWPEL9ebn7
+         ybJg==
+X-Gm-Message-State: AOAM530rMW6LRWpFZECPKyaq5i2YlykLNYKHbDmos5Yy0MacwCg3bRaC
+        3+gQKNmg5onD1AwmkzWiXEO3Lp5Q+udmidWDYWGjPznzbySAIElfZ4a1HsoOuAnCbcbja8rmj66
+        1MQdcgGF5bo6I6qtK0A==
+X-Received: by 2002:a63:4553:: with SMTP id u19mr4264129pgk.323.1620775968330;
+        Tue, 11 May 2021 16:32:48 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJxyoz0uJwOFqtcnM3tqqwuaX6f7dCSl/WUWIxoAazck/KaWDdRzAmDbTV5vSYX1/mqe0dHnvA==
+X-Received: by 2002:a63:4553:: with SMTP id u19mr4264111pgk.323.1620775968016;
+        Tue, 11 May 2021 16:32:48 -0700 (PDT)
+Received: from xiangao.com ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id s3sm15828393pgs.62.2021.05.11.16.32.45
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 11 May 2021 16:32:47 -0700 (PDT)
+From:   Gao Xiang <hsiangkao@redhat.com>
+To:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Cc:     "Darrick J. Wong" <djwong@kernel.org>,
+        Zorro Lang <zlang@redhat.com>, Eryu Guan <guan@eryu.me>,
+        Gao Xiang <hsiangkao@redhat.com>
+Subject: [PATCH v6 0/3] xfs: testcases for shrinking free space in the last AG
+Date:   Wed, 12 May 2021 07:32:25 +0800
+Message-Id: <20210511233228.1018269-1-hsiangkao@redhat.com>
+X-Mailer: git-send-email 2.27.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210511073945.906127-4-hsiangkao@redhat.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, May 11, 2021 at 03:39:45PM +0800, Gao Xiang wrote:
-> This adds a stress testcase to shrink free space as much as
-> possible in the last AG with background fsstress workload.
-> 
-> The expectation is that no crash happens with expected output.
-> 
-> Signed-off-by: Gao Xiang <hsiangkao@redhat.com>
-> ---
->  tests/xfs/991     | 120 ++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/991.out |   8 ++++
->  tests/xfs/group   |   1 +
->  3 files changed, 129 insertions(+)
->  create mode 100755 tests/xfs/991
->  create mode 100644 tests/xfs/991.out
-> 
-> diff --git a/tests/xfs/991 b/tests/xfs/991
-> new file mode 100755
-> index 00000000..3561bfab
-> --- /dev/null
-> +++ b/tests/xfs/991
-> @@ -0,0 +1,120 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2020-2021 Red Hat, Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test 991
-> +#
-> +# XFS online shrinkfs stress test
-> +#
-> +# This test attempts to shrink unused space as much as possible with
-> +# background fsstress workload. It will decrease the shrink size if
-> +# larger size fails. And totally repeat 2 * TIME_FACTOR times.
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "rm -f $tmp.*; exit \$status" 0 1 2 3 15
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +create_scratch()
-> +{
-> +	_scratch_mkfs_xfs $@ | tee -a $seqres.full | \
-> +		_filter_mkfs 2>$tmp.mkfs >/dev/null
-> +	. $tmp.mkfs
-> +
-> +	_scratch_mount
-> +	# fix the reserve block pool to a known size so that the enospc
-> +	# calculations work out correctly.
-> +	_scratch_resvblks 1024 > /dev/null 2>&1
-> +}
-> +
-> +fill_scratch()
-> +{
-> +	$XFS_IO_PROG -f -c "falloc 0 $1" $SCRATCH_MNT/resvfile
-> +}
-> +
-> +stress_scratch()
-> +{
-> +	local procs=3
-> +	local nops=1000
-> +	# -w ensures that the only ops are ones which cause write I/O
-> +	local FSSTRESS_ARGS=`_scale_fsstress_args -d $SCRATCH_MNT -w \
-> +		-p $procs -n $nops $FSSTRESS_AVOID`
-> +	$FSSTRESS_PROG $FSSTRESS_ARGS >> $seqres.full 2>&1
-> +}
-> +
-> +# real QA test starts here
-> +_supported_fs xfs
-> +_require_xfs_scratch_shrink
-> +_require_xfs_io_command "falloc"
-> +
-> +rm -f $seqres.full
-> +_scratch_mkfs_xfs | tee -a $seqres.full | _filter_mkfs 2>$tmp.mkfs
-> +. $tmp.mkfs	# extract blocksize and data size for scratch device
-> +
-> +endsize=`expr 125 \* 1048576`	# stop after shrinking this big
-> +[ `expr $endsize / $dbsize` -lt $dblocks ] || _notrun "Scratch device too small"
-> +
-> +nags=2
-> +totalcount=$((2 * TIME_FACTOR))
-> +
-> +while [ $totalcount -gt 0 ]; do
-> +	size=`expr 1010 \* 1048576`	# 1010 megabytes initially
-> +	logblks=$(_scratch_find_xfs_min_logblocks -dsize=${size} -dagcount=${nags})
-> +
-> +	create_scratch -lsize=${logblks}b -dsize=${size} -dagcount=${nags}
-> +
-> +	for i in `seq 125 -1 90`; do
-> +		fillsize=`expr $i \* 1048576`
-> +		out="$(fill_scratch $fillsize 2>&1)"
-> +		echo "$out" | grep -q 'No space left on device' && continue
-> +		test -n "${out}" && echo "$out"
-> +		break
-> +	done
-> +
-> +	# shrink in chunks of this size at most
-> +	decsize=`expr  41 \* 1048576 + 1 + $RANDOM \* $RANDOM % 1048576`
-> +
-> +	while [ $size -gt $endsize ]; do
-> +		stress_scratch &
-> +		sleep 1
-> +
-> +		decb=`expr $decsize / $dbsize`    # in data blocks
-> +		while [ $decb -gt 0 ]; do
-> +			sizeb=`expr $size / $dbsize - $decb`
-> +
-> +			$XFS_GROWFS_PROG -D ${sizeb} $SCRATCH_MNT \
-> +				>> $seqres.full 2>&1 && break
-> +
-> +			[ $decb -gt 100 ] && decb=`expr $decb + $RANDOM % 10`
-> +			decb=`expr $decb / 2`
-> +		done
-> +
-> +		wait
-> +		[ $decb -eq 0 ] && break
-> +
-> +		# get latest dblocks
-> +		$XFS_INFO_PROG $SCRATCH_MNT 2>&1 | _filter_mkfs 2>$tmp.growfs >/dev/null
-> +		. $tmp.growfs
-> +
-> +		size=`expr $dblocks \* $dbsize`
-> +		_scratch_unmount
-> +		_scratch_xfs_repair -n >> $seqres.full 2>&1 || _fail "xfs_repair failed"
+Hi,
 
-Might be nice to print $sizeb with the error message so that one can
-correlate with tracepoints/growfs output without having to dig through
-$seqres.full...
+v5: https://lore.kernel.org/r/20210511073945.906127-1-hsiangkao@redhat.com
 
-With that changed, I'd say:
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+This adds testcases for shrinking free space in the last AG in the
+upstream. This version mainly addresses Darrick's previous comments
+mentioned in v5.
 
---D
+changes since v5 (Darrick):
+ - [1/3] print $errmsg when _fail;
+ - [3/3] print $sizeb for better debugging.
 
-> +		_scratch_mount
-> +	done
-> +
-> +	_scratch_unmount
-> +	_scratch_xfs_repair -n >> $seqres.full 2>&1 || _fail "xfs_repair failed"
-> +	totalcount=`expr $totalcount - 1`
-> +done
-> +
-> +echo "*** done"
-> +status=0
-> +exit
-> diff --git a/tests/xfs/991.out b/tests/xfs/991.out
-> new file mode 100644
-> index 00000000..e8209672
-> --- /dev/null
-> +++ b/tests/xfs/991.out
-> @@ -0,0 +1,8 @@
-> +QA output created by 991
-> +meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
-> +data     = bsize=XXX blocks=XXX, imaxpct=PCT
-> +         = sunit=XXX swidth=XXX, unwritten=X
-> +naming   =VERN bsize=XXX
-> +log      =LDEV bsize=XXX blocks=XXX
-> +realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
-> +*** done
-> diff --git a/tests/xfs/group b/tests/xfs/group
-> index 472c8f9a..53e68bea 100644
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
-> @@ -521,3 +521,4 @@
->  538 auto stress
->  539 auto quick mount
->  990 auto quick growfs shrinkfs
-> +991 auto growfs shrinkfs ioctl prealloc stress
-> -- 
-> 2.27.0
-> 
+Thanks,
+Gao Xiang
+
+Gao Xiang (3):
+  common/xfs: add _require_xfs_scratch_shrink helper
+  xfs: basic functionality test for shrinking free space in the last AG
+  xfs: stress test for shrinking free space in the last AG
+
+ common/xfs        |  20 ++++++++
+ tests/xfs/990     |  73 +++++++++++++++++++++++++++
+ tests/xfs/990.out |  12 +++++
+ tests/xfs/991     | 122 ++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/991.out |   8 +++
+ tests/xfs/group   |   2 +
+ 6 files changed, 237 insertions(+)
+ create mode 100755 tests/xfs/990
+ create mode 100644 tests/xfs/990.out
+ create mode 100755 tests/xfs/991
+ create mode 100644 tests/xfs/991.out
+
+-- 
+2.27.0
+
