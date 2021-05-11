@@ -7,66 +7,66 @@ X-Spam-Status: No, score=-19.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D4565C433ED
-	for <linux-fstests@archiver.kernel.org>; Tue, 11 May 2021 07:40:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 03B7FC43461
+	for <linux-fstests@archiver.kernel.org>; Tue, 11 May 2021 07:40:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9D44260FDB
-	for <linux-fstests@archiver.kernel.org>; Tue, 11 May 2021 07:40:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C2A0B61360
+	for <linux-fstests@archiver.kernel.org>; Tue, 11 May 2021 07:40:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229917AbhEKHlc (ORCPT
+        id S229892AbhEKHle (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 11 May 2021 03:41:32 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:27223 "EHLO
+        Tue, 11 May 2021 03:41:34 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:51694 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S230386AbhEKHla (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 11 May 2021 03:41:30 -0400
+        by vger.kernel.org with ESMTP id S230355AbhEKHld (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 11 May 2021 03:41:33 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1620718824;
+        s=mimecast20190719; t=1620718827;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=BZgYovHYVMprOpKlke7fnJ9US28+nvTueCAME8/fMeA=;
-        b=N6zVsv7/ZOc03PNjPPIgikvYRYtXWVjNqNhKFW7/qQKRoRTqcFWoh/JZqer20J57iXgHEB
-        ySm7Wr8UvUTtSNQ+XKlGOotQEiE5Jxe0VUaOJXfk8owsh2HdtsdE8XJcu/IfEK4v8iYcl3
-        DSNoXfFSgzOyX/mPV2qDPZb1DJMnPhA=
-Received: from mail-pf1-f197.google.com (mail-pf1-f197.google.com
- [209.85.210.197]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-543-L1VR0ofJO8G7jV7GkbK_NQ-1; Tue, 11 May 2021 03:40:22 -0400
-X-MC-Unique: L1VR0ofJO8G7jV7GkbK_NQ-1
-Received: by mail-pf1-f197.google.com with SMTP id g144-20020a6252960000b029023d959faca6so12388184pfb.9
-        for <fstests@vger.kernel.org>; Tue, 11 May 2021 00:40:22 -0700 (PDT)
+        bh=jLvRpw740uSxpbForp8IGPc68ioJwqeNeRJlNOmJ/oM=;
+        b=Zded/Q/+59ThZWV2YmCx0TJOXeDaNuGnixOt/aI/VkR5Dqy7oMMmCG+WMVpnbK8zewxqq0
+        np+CSAG7PazYr6xQa5DETknf3YS5agcRVztP5GpyV1q/R3jdxC5kagvrc1EXuxX9vRXFT2
+        EfWp3wU7favLjuy0+a1xEX1qN5TrjUk=
+Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com
+ [209.85.210.200]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-358-6DEnVF1IM-OYyMsvJ6-yoA-1; Tue, 11 May 2021 03:40:26 -0400
+X-MC-Unique: 6DEnVF1IM-OYyMsvJ6-yoA-1
+Received: by mail-pf1-f200.google.com with SMTP id h22-20020aa786d60000b029027d0956e914so12356685pfo.23
+        for <fstests@vger.kernel.org>; Tue, 11 May 2021 00:40:26 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=BZgYovHYVMprOpKlke7fnJ9US28+nvTueCAME8/fMeA=;
-        b=NNX098+1dsbs+HHUFl2qt/e091qqh0D2yKajRmntouYtdTOxUIaOlSceQ0wR71d6Er
-         AKn5hvr6llw9xogOrpFrrjnZyLmW8Sru+0rNzM+s53nsG2hG/oOPWCzBAEa6GS5f7Z2F
-         tAUaGj8a7zCY7BSM9gQFjq5BSWUCzK2ltKYVfqgoTzjNmLRVVQ9F7Yz/iCP1/UHwpy23
-         ZM7L32bLjzRqGy0vYkkA1CZF0+uELSAcU/e7uvKl7SdiLSxuTFsyISz3ZREkE/OKsUJ1
-         xMSkzb9khcKvErHabQLIZ2dvhadaFXU4jCjhT66oruTxk1C4D4HHws68j6DTHr6S6lf4
-         UNIw==
-X-Gm-Message-State: AOAM533C28rs0ip1Ny7OzT0hXBMRB3+/5kJ4wvQWfa3TLIIs1OIkZg03
-        fjLXIzQZilxv3FclodfrLjO3AIXbn0qR2bbgbqlFkKF3XY3MTCSXvsTIojftHTHOhyP+xH87p3Y
-        Dmu1ZkyWF0rdmYfEOMw==
-X-Received: by 2002:a05:6a00:c81:b029:2cb:6db9:dfa9 with SMTP id a1-20020a056a000c81b02902cb6db9dfa9mr305510pfv.8.1620718821211;
-        Tue, 11 May 2021 00:40:21 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJy77FF/Yv49Ara22BlO+Kk34GK8NOpLqC9GdbI9/yOgv96OKLxMF5ElsMKBGAbjAX6lZ+bVhQ==
-X-Received: by 2002:a05:6a00:c81:b029:2cb:6db9:dfa9 with SMTP id a1-20020a056a000c81b02902cb6db9dfa9mr305491pfv.8.1620718820949;
-        Tue, 11 May 2021 00:40:20 -0700 (PDT)
+        bh=jLvRpw740uSxpbForp8IGPc68ioJwqeNeRJlNOmJ/oM=;
+        b=BC34CEj0mYBr8FlswKHoJQCt/8s1BTsLtuMtjZDZr+qkh3FbhUb0454m5VtJZFPuCR
+         rZpqz/BzHkJvS2bKizcRisLXU8OJxGxx+r7LtEZ7iXrJGK328aX4AZWWk2WiKJ8OCW5w
+         rNpKNDWD4UxdGQUe+Q8vae+WyoxUxteskKQIB5lAprLmWbpxZg9QM5qqJIWnI2zcOptO
+         3srr5QojR27DuG7J9juKLJ8tIaygnwGing+WPoQkZsLae1vyIYerxX21aihFSWwSt2cN
+         E8I5g60xbk5JV4jUk9jpZjN1ocJ+3aILtkDfNYyU5EwqjME8cfB8SUNkZD44fKko4Qk4
+         DS0w==
+X-Gm-Message-State: AOAM530BUetlgM+ZdHNvFiScscBLAPEjA9uP8IvxWFGAQnrq0rPj/RlE
+        8Jw33zXRFCPQl422YBfP+sIVQyHsJ2ymqphzrnNcL4FIw0kxK1M3G00XYiB7gJ4vH+OYnoJnaOq
+        1sjo5GCSAbAnYyOyV3A==
+X-Received: by 2002:a17:90b:3689:: with SMTP id mj9mr32347285pjb.154.1620718824959;
+        Tue, 11 May 2021 00:40:24 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJzrY736YK5QIBaTq1gzx9/OC6dhNX3S8uXuaws8Q2bB82NrNDgFGo06h2TCc/b/Qm9yKe8oXQ==
+X-Received: by 2002:a17:90b:3689:: with SMTP id mj9mr32347263pjb.154.1620718824708;
+        Tue, 11 May 2021 00:40:24 -0700 (PDT)
 Received: from xiangao.com ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id y3sm10820865pfl.153.2021.05.11.00.40.17
+        by smtp.gmail.com with ESMTPSA id y3sm10820865pfl.153.2021.05.11.00.40.21
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 11 May 2021 00:40:20 -0700 (PDT)
+        Tue, 11 May 2021 00:40:24 -0700 (PDT)
 From:   Gao Xiang <hsiangkao@redhat.com>
 To:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 Cc:     "Darrick J. Wong" <djwong@kernel.org>,
         Zorro Lang <zlang@redhat.com>, Eryu Guan <guan@eryu.me>,
         Gao Xiang <hsiangkao@redhat.com>
-Subject: [PATCH v5 2/3] xfs: basic functionality test for shrinking free space in the last AG
-Date:   Tue, 11 May 2021 15:39:44 +0800
-Message-Id: <20210511073945.906127-3-hsiangkao@redhat.com>
+Subject: [PATCH v5 3/3] xfs: stress test for shrinking free space in the last AG
+Date:   Tue, 11 May 2021 15:39:45 +0800
+Message-Id: <20210511073945.906127-4-hsiangkao@redhat.com>
 X-Mailer: git-send-email 2.27.0
 In-Reply-To: <20210511073945.906127-1-hsiangkao@redhat.com>
 References: <20210511073945.906127-1-hsiangkao@redhat.com>
@@ -76,33 +76,37 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Add basic test to make sure the functionality works as expected.
+This adds a stress testcase to shrink free space as much as
+possible in the last AG with background fsstress workload.
+
+The expectation is that no crash happens with expected output.
 
 Signed-off-by: Gao Xiang <hsiangkao@redhat.com>
 ---
- tests/xfs/990     | 73 +++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/990.out | 12 ++++++++
- tests/xfs/group   |  1 +
- 3 files changed, 86 insertions(+)
- create mode 100755 tests/xfs/990
- create mode 100644 tests/xfs/990.out
+ tests/xfs/991     | 120 ++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/991.out |   8 ++++
+ tests/xfs/group   |   1 +
+ 3 files changed, 129 insertions(+)
+ create mode 100755 tests/xfs/991
+ create mode 100644 tests/xfs/991.out
 
-diff --git a/tests/xfs/990 b/tests/xfs/990
+diff --git a/tests/xfs/991 b/tests/xfs/991
 new file mode 100755
-index 00000000..ec2592f6
+index 00000000..3561bfab
 --- /dev/null
-+++ b/tests/xfs/990
-@@ -0,0 +1,73 @@
++++ b/tests/xfs/991
+@@ -0,0 +1,120 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2021 Red Hat, Inc.  All Rights Reserved.
++# Copyright (c) 2020-2021 Red Hat, Inc.  All Rights Reserved.
 +#
-+# FS QA Test 990
++# FS QA Test 991
 +#
-+# XFS shrinkfs basic functionality test
++# XFS online shrinkfs stress test
 +#
-+# This test attempts to shrink with a small size (512K), half AG size and
-+# an out-of-bound size (agsize + 1) to observe if it works as expected.
++# This test attempts to shrink unused space as much as possible with
++# background fsstress workload. It will decrease the shrink size if
++# larger size fails. And totally repeat 2 * TIME_FACTOR times.
 +#
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
@@ -110,89 +114,131 @@ index 00000000..ec2592f6
 +
 +here=`pwd`
 +tmp=/tmp/$$
-+status=1    # failure is the default!
++status=1	# failure is the default!
 +trap "rm -f $tmp.*; exit \$status" 0 1 2 3 15
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
 +
-+test_shrink()
++create_scratch()
 +{
-+	$XFS_GROWFS_PROG -D"$1" $SCRATCH_MNT >> $seqres.full 2>&1
-+	ret=$?
++	_scratch_mkfs_xfs $@ | tee -a $seqres.full | \
++		_filter_mkfs 2>$tmp.mkfs >/dev/null
++	. $tmp.mkfs
 +
-+	_scratch_unmount
-+	_check_scratch_fs
 +	_scratch_mount
++	# fix the reserve block pool to a known size so that the enospc
++	# calculations work out correctly.
++	_scratch_resvblks 1024 > /dev/null 2>&1
++}
 +
-+	$XFS_INFO_PROG $SCRATCH_MNT 2>&1 | _filter_mkfs 2>$tmp.growfs >/dev/null
-+	. $tmp.growfs
-+	[ $ret -eq 0 -a $1 -eq $dblocks ]
++fill_scratch()
++{
++	$XFS_IO_PROG -f -c "falloc 0 $1" $SCRATCH_MNT/resvfile
++}
++
++stress_scratch()
++{
++	local procs=3
++	local nops=1000
++	# -w ensures that the only ops are ones which cause write I/O
++	local FSSTRESS_ARGS=`_scale_fsstress_args -d $SCRATCH_MNT -w \
++		-p $procs -n $nops $FSSTRESS_AVOID`
++	$FSSTRESS_PROG $FSSTRESS_ARGS >> $seqres.full 2>&1
 +}
 +
 +# real QA test starts here
 +_supported_fs xfs
 +_require_xfs_scratch_shrink
++_require_xfs_io_command "falloc"
 +
 +rm -f $seqres.full
-+echo "Format and mount"
++_scratch_mkfs_xfs | tee -a $seqres.full | _filter_mkfs 2>$tmp.mkfs
++. $tmp.mkfs	# extract blocksize and data size for scratch device
 +
-+# agcount = 1 is forbidden on purpose, and need to ensure shrinking to
-+# 2 AGs isn't feasible yet. So agcount = 3 is the minimum number now.
-+_scratch_mkfs -dsize="$((512 * 1024 * 1024))" -dagcount=3 2>&1 | \
-+	tee -a $seqres.full | _filter_mkfs 2>$tmp.mkfs
-+. $tmp.mkfs
-+t_dblocks=$dblocks
-+_scratch_mount >> $seqres.full
++endsize=`expr 125 \* 1048576`	# stop after shrinking this big
++[ `expr $endsize / $dbsize` -lt $dblocks ] || _notrun "Scratch device too small"
 +
-+echo "Shrink fs (small size)"
-+test_shrink $((t_dblocks-512*1024/dbsize)) || \
-+	echo "Shrink fs (small size) failure"
++nags=2
++totalcount=$((2 * TIME_FACTOR))
 +
-+echo "Shrink fs (half AG)"
-+test_shrink $((t_dblocks-agsize/2)) || \
-+	echo "Shrink fs (half AG) failure"
++while [ $totalcount -gt 0 ]; do
++	size=`expr 1010 \* 1048576`	# 1010 megabytes initially
++	logblks=$(_scratch_find_xfs_min_logblocks -dsize=${size} -dagcount=${nags})
 +
-+echo "Shrink fs (out-of-bound)"
-+test_shrink $((t_dblocks-agsize-1)) && \
-+	echo "Shrink fs (out-of-bound) failure"
-+[ $dblocks -ne $((t_dblocks-agsize/2)) ] && \
-+	echo "dblocks changed after shrinking failure"
++	create_scratch -lsize=${logblks}b -dsize=${size} -dagcount=${nags}
 +
-+$XFS_INFO_PROG $SCRATCH_MNT >> $seqres.full
++	for i in `seq 125 -1 90`; do
++		fillsize=`expr $i \* 1048576`
++		out="$(fill_scratch $fillsize 2>&1)"
++		echo "$out" | grep -q 'No space left on device' && continue
++		test -n "${out}" && echo "$out"
++		break
++	done
++
++	# shrink in chunks of this size at most
++	decsize=`expr  41 \* 1048576 + 1 + $RANDOM \* $RANDOM % 1048576`
++
++	while [ $size -gt $endsize ]; do
++		stress_scratch &
++		sleep 1
++
++		decb=`expr $decsize / $dbsize`    # in data blocks
++		while [ $decb -gt 0 ]; do
++			sizeb=`expr $size / $dbsize - $decb`
++
++			$XFS_GROWFS_PROG -D ${sizeb} $SCRATCH_MNT \
++				>> $seqres.full 2>&1 && break
++
++			[ $decb -gt 100 ] && decb=`expr $decb + $RANDOM % 10`
++			decb=`expr $decb / 2`
++		done
++
++		wait
++		[ $decb -eq 0 ] && break
++
++		# get latest dblocks
++		$XFS_INFO_PROG $SCRATCH_MNT 2>&1 | _filter_mkfs 2>$tmp.growfs >/dev/null
++		. $tmp.growfs
++
++		size=`expr $dblocks \* $dbsize`
++		_scratch_unmount
++		_scratch_xfs_repair -n >> $seqres.full 2>&1 || _fail "xfs_repair failed"
++		_scratch_mount
++	done
++
++	_scratch_unmount
++	_scratch_xfs_repair -n >> $seqres.full 2>&1 || _fail "xfs_repair failed"
++	totalcount=`expr $totalcount - 1`
++done
++
 +echo "*** done"
-+
-+# success, all done
 +status=0
 +exit
-diff --git a/tests/xfs/990.out b/tests/xfs/990.out
+diff --git a/tests/xfs/991.out b/tests/xfs/991.out
 new file mode 100644
-index 00000000..812f89ef
+index 00000000..e8209672
 --- /dev/null
-+++ b/tests/xfs/990.out
-@@ -0,0 +1,12 @@
-+QA output created by 990
-+Format and mount
++++ b/tests/xfs/991.out
+@@ -0,0 +1,8 @@
++QA output created by 991
 +meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
 +data     = bsize=XXX blocks=XXX, imaxpct=PCT
 +         = sunit=XXX swidth=XXX, unwritten=X
 +naming   =VERN bsize=XXX
 +log      =LDEV bsize=XXX blocks=XXX
 +realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
-+Shrink fs (small size)
-+Shrink fs (half AG)
-+Shrink fs (out-of-bound)
 +*** done
 diff --git a/tests/xfs/group b/tests/xfs/group
-index fe83f82d..472c8f9a 100644
+index 472c8f9a..53e68bea 100644
 --- a/tests/xfs/group
 +++ b/tests/xfs/group
-@@ -520,3 +520,4 @@
- 537 auto quick
+@@ -521,3 +521,4 @@
  538 auto stress
  539 auto quick mount
-+990 auto quick growfs shrinkfs
+ 990 auto quick growfs shrinkfs
++991 auto growfs shrinkfs ioctl prealloc stress
 -- 
 2.27.0
 
