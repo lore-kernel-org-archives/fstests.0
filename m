@@ -2,125 +2,149 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-24.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_NONE,USER_AGENT_GIT
+X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C527FC2BA00
-	for <linux-fstests@archiver.kernel.org>; Wed, 12 May 2021 16:20:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7F419C433B4
+	for <linux-fstests@archiver.kernel.org>; Sat, 15 May 2021 11:23:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8C13361D68
-	for <linux-fstests@archiver.kernel.org>; Wed, 12 May 2021 16:20:01 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4C5B6613CE
+	for <linux-fstests@archiver.kernel.org>; Sat, 15 May 2021 11:23:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233826AbhELQUq (ORCPT
+        id S230272AbhEOLYq (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 12 May 2021 12:20:46 -0400
-Received: from mail.kernel.org ([198.145.29.99]:36414 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S237638AbhELP4B (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 12 May 2021 11:56:01 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 2DCEF61C18;
-        Wed, 12 May 2021 15:28:10 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1620833291;
-        bh=l/fKcQPsUXuWfJBoQpVKD3LFQXlnpPitMRmXwvg8tqA=;
-        h=From:To:Cc:Subject:Date:From;
-        b=fIXfddSsvFHBwWG5Uqqx4gJRkW3eiQpfo1hnncSJoRHA3wQv/4G8NLapmEk+dkKCP
-         iDj7t2TYOvH8m6j3uknOqNzBd4KSmp8lDmfotVWDXfL72y9yPuiDNuG+2q9lH1pFlE
-         QusTORPOtc9/qiRD4qRfM1Kuu8C423G1JYH3qzkSZknLikmdyR0lORgAnKjTe/9sud
-         to663zHPcrZ9WwF+AqfFETtUQDlVQgDdNpBVPS6301/Wc8jugmY+b4Fw9nCw/0+a1e
-         m3cMTncz6LLAX9lQ77CuQNXH3DtMBg+ztWvWJBqmnlh3Q1kzpF3lDZJPXZPJn4ICr9
-         Z+Ivp263/M/YQ==
-From:   fdmanana@kernel.org
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>,
-        Boris Burkov <boris@bur.io>
-Subject: [PATCH Resend] btrfs/187: fix test failure when using bash 5.0+ with debug enabled
-Date:   Wed, 12 May 2021 16:28:00 +0100
-Message-Id: <9d0640f23111b8f1c432af2b62191c802265a218.1620833105.git.fdmanana@suse.com>
-X-Mailer: git-send-email 2.28.0
+        Sat, 15 May 2021 07:24:46 -0400
+Received: from szxga07-in.huawei.com ([45.249.212.35]:2932 "EHLO
+        szxga07-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229490AbhEOLYp (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 15 May 2021 07:24:45 -0400
+Received: from DGGEMS411-HUB.china.huawei.com (unknown [172.30.72.58])
+        by szxga07-in.huawei.com (SkyGuard) with ESMTP id 4Fj2y70tlLzCrmp;
+        Sat, 15 May 2021 19:20:47 +0800 (CST)
+Received: from huawei.com (10.175.101.6) by DGGEMS411-HUB.china.huawei.com
+ (10.3.19.211) with Microsoft SMTP Server id 14.3.498.0; Sat, 15 May 2021
+ 19:23:20 +0800
+From:   Sun Ke <sunke32@huawei.com>
+To:     <fstests@vger.kernel.org>, <guan@eryu.me>
+CC:     <sunke32@huawei.com>
+Subject: [PATCH] common/rc: make _mkfs_dev return mkfs_status
+Date:   Sat, 15 May 2021 07:28:20 -0400
+Message-ID: <20210515112820.447767-1-sunke32@huawei.com>
+X-Mailer: git-send-email 2.25.4
 MIME-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 8bit
+X-Originating-IP: [10.175.101.6]
+X-CFilter-Loop: Reflected
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Filipe Manana <fdmanana@suse.com>
+If _mkfs_dev fialed，the test should notrun. _mkfs_dev may need to
+return mkfs_status as _scratch_mkfs_ext4 and _scratch_mkfs_xfs do.
 
-When running btrfs/187 with a bash 5.0+ build that has debug enabled, the
-test fails due to an unexpected warning message from bash:
-
-  $ ./check btrfs/187
-  FSTYP         -- btrfs
-  PLATFORM      -- Linux/x86_64 debian9 5.12.0-rc8-btrfs-next-92 #1 SMP PREEMPT Wed Apr 21 10:36:03 WEST 2021
-  MKFS_OPTIONS  -- /dev/sdc
-  MOUNT_OPTIONS -- /dev/sdc /home/fdmanana/btrfs-tests/scratch_1
-
-  btrfs/187 436s ... - output mismatch (see /xfstests/results//btrfs/187.out.bad)
-      --- tests/btrfs/187.out	2020-10-16 23:13:46.550152492 +0100
-      +++ /xfstests/results//btrfs/187.out.bad	2021-04-27 14:57:02.623941700 +0100
-      @@ -1,3 +1,4 @@
-       QA output created by 187
-       Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/snap1'
-       Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/snap2'
-      +/xfstests/tests/btrfs/187: line 1: warning: wait_for: recursively setting old_sigint_handler to wait_sigint_handler: running_trap = 16
-      ...
-      (Run 'diff -u /xfstests/tests/btrfs/187.out /xfstests/results//btrfs/187.out.bad'  to see the entire diff)
-  Ran: btrfs/187
-  Failures: btrfs/187
-  Failed 1 of 1 tests
-
-This is because the process running dedupe_files_loop() executes the 'wait'
-command in the trap it has setup and very often it receives the SIGTERM
-signal while it is running the 'wait' command in the while loop of that
-function - so executing the trap makes bash run 'wait' while it is already
-running 'wait', triggering the warning message from bash.
-
-That warning message was added in bash 5.0 by commit 36f89ff1d8b761
-("SIGINT trap handler SIGINT loop fix"):
-
-  https://git.savannah.gnu.org/cgit/bash.git/commit/?id=36f89ff1d8b761c815d8993e9833e6357a57fc6b
-
-So fix this by making the trap set a local variable named 'stop' to the
-value 1 and have the loop exit when the local variable 'stop' is 1.
-
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
-Reviewed-by: Boris Burkov <boris@bur.io>
+Signed-off-by: Sun Ke <sunke32@huawei.com>
 ---
+I run generic/test/042 on f2fs, it failed, because the device size is too small：
 
-Resending it because it was not picked in the last merge.
+F2FS-tools: mkfs.f2fs Ver: 1.9.0 (2017-09-21)
 
- tests/btrfs/187 | 16 +++++++++++++---
- 1 file changed, 13 insertions(+), 3 deletions(-)
+Info: Disable heap-based policy
+Info: Debug level = 0 
+Info: Label = 
+Info: Trim is enabled
+Info: Segments per section = 1 
+Info: Sections per zone = 1 
+Info: sector size = 512 
+Info: total sectors = 51200 (25 MB) 
+Info: zone aligned segment0 blkaddr: 512 
+    Error: Device size is not sufficient for F2FS volume
+    Error: Failed to prepare a super block!!!
+    Error: Could not format the device!!!
 
-diff --git a/tests/btrfs/187 b/tests/btrfs/187
-index b2d3e4f0..7da09abd 100755
---- a/tests/btrfs/187
-+++ b/tests/btrfs/187
-@@ -64,9 +64,19 @@ dedupe_two_files()
- 
- dedupe_files_loop()
+Change the device size to 40M, it can pass. But I am not sure if it will change 
+the test's intention. 
+
+[root@localhost xfstests]# ./check tests/generic/042
+FSTYP         -- f2fs
+PLATFORM      -- Linux/x86_64 localhost 5.12.0-rc5-next-20210330 #2 SMP Thu Apr 15 00:58:54 EDT 2021
+MKFS_OPTIONS  -- /dev/sdb
+MOUNT_OPTIONS -- -o acl,user_xattr /dev/sdb /mnt/scratch
+
+generic/042 3s ...  4s
+Ran: generic/042
+Passed all 1 tests
+
+Other tests also use _mkfs_dev(), if making _mkfs_dev return 
+mkfs_status is ok, I will modify them in V2.
+
+[root@localhost xfstests]# ./check tests/generic/042
+FSTYP         -- f2fs
+PLATFORM      -- Linux/x86_64 localhost 5.12.0-rc5-next-20210330 #3 SMP
+Wed Apr 21 22:29:25 EDT 2021
+MKFS_OPTIONS  -- /dev/sdb
+MOUNT_OPTIONS -- -o acl,user_xattr /dev/sdb /mnt/scratch
+
+generic/042 2s ... [not run] mkfs failed!
+Ran: generic/042
+Not run: generic/042
+Passed all 1 tests
+
+
+ common/rc         | 14 ++++++++------
+ tests/generic/042 |  2 +-
+ 2 files changed, 9 insertions(+), 7 deletions(-)
+
+diff --git a/common/rc b/common/rc
+index 0ce3cb0d..4254806a 100644
+--- a/common/rc
++++ b/common/rc
+@@ -642,6 +642,8 @@ _test_mkfs()
+ _mkfs_dev()
  {
--	trap "wait; exit" SIGTERM
--
--	while true; do
-+	local stop=0
+     local tmp=`mktemp -u`
++    local mkfs_status
 +
-+	# Avoid executing 'wait' inside the trap, because when we receive
-+	# SIGTERM we might be already executing the wait command in the while
-+	# loop below. When that is the case, bash 5.0+ with debug enabled prints
-+	# a warning message that makes the test fail due to a mismatch with the
-+	# golden output. That warning message is the following:
-+	#
-+	# warning: wait_for: recursively setting old_sigint_handler to wait_sigint_handler: running_trap = 16
-+	#
-+	trap "stop=1" SIGTERM
-+
-+	while [ $stop -eq 0 ]; do
- 		for ((i = 1; i <= 5; i++)); do
- 			dedupe_two_files &
- 		done
+     case $FSTYP in
+     nfs*)
+ 	# do nothing for nfs
+@@ -677,15 +679,15 @@ _mkfs_dev()
+ 		2>$tmp.mkfserr 1>$tmp.mkfsstd
+ 	;;
+     esac
++    mkfs_status=$?
+ 
+-    if [ $? -ne 0 ]; then
+-	# output stored mkfs output
+-	cat $tmp.mkfserr >&2
+-	cat $tmp.mkfsstd
+-	status=1
+-	exit 1
++    if [ $mkfs_status -ne 0 ]; then
++        # output stored mkfs output
++        cat $tmp.mkfserr >&2
++        cat $tmp.mkfsstd
+     fi
+     rm -f $tmp.mkfserr $tmp.mkfsstd
++    return $mkfs_status
+ }
+ 
+ # remove all files in $SCRATCH_MNT, useful when testing on NFS/CIFS
+diff --git a/tests/generic/042 b/tests/generic/042
+index 35727bcb..68bc15ca 100755
+--- a/tests/generic/042
++++ b/tests/generic/042
+@@ -46,7 +46,7 @@ _crashtest()
+ 	# the image to detect stale data exposure.
+ 	$XFS_IO_PROG -f -c "truncate 0" -c "pwrite -S 0xCD 0 25M" $img \
+ 		>> $seqres.full 2>&1
+-	_mkfs_dev $img >> $seqres.full 2>&1
++	_mkfs_dev $img >> $seqres.full 2>&1 || _notrun "mkfs failed!"
+ 
+ 	mkdir -p $mnt
+ 	_mount $img $mnt
 -- 
-2.28.0
+2.13.6
 
