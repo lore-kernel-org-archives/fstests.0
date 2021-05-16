@@ -2,197 +2,398 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	LOTS_OF_MONEY,MAILING_LIST_MULTI,MONEY_NOHTML,SPF_HELO_NONE,SPF_PASS
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 152C0C433ED
-	for <linux-fstests@archiver.kernel.org>; Sun, 16 May 2021 17:02:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9B6D0C433B4
+	for <linux-fstests@archiver.kernel.org>; Sun, 16 May 2021 20:34:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E9A3961139
-	for <linux-fstests@archiver.kernel.org>; Sun, 16 May 2021 17:02:09 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7A9B861155
+	for <linux-fstests@archiver.kernel.org>; Sun, 16 May 2021 20:34:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231454AbhEPRDX (ORCPT
+        id S233616AbhEPUfy (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 16 May 2021 13:03:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37310 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229459AbhEPRDX (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 16 May 2021 13:03:23 -0400
-Received: from mail-wm1-x334.google.com (mail-wm1-x334.google.com [IPv6:2a00:1450:4864:20::334])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3DC92C061573
-        for <fstests@vger.kernel.org>; Sun, 16 May 2021 10:02:07 -0700 (PDT)
-Received: by mail-wm1-x334.google.com with SMTP id l18-20020a1ced120000b029014c1adff1edso3825832wmh.4
-        for <fstests@vger.kernel.org>; Sun, 16 May 2021 10:02:07 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=message-id:date:from:to:subject:mime-version:content-disposition;
-        bh=9/NsGY3dKwyBFLa7e5HHd+wP+Tf+6Q9UxRHHLTVepxM=;
-        b=r3HZ7WLS95VQtnoUZXTNvje+rOdc/w4+AkMT4HYdBG92M31pNsOGthH82YXgEixNui
-         oYDj39se+L1CLZe6+Gs7ACHKHYsqTP3OGszzbdDlwkysj0w9BFkmHwEtVqkiGGols0Es
-         KsfFW4mWFSBqGluksUSculA16+CiPb6AtQPQDQkd3BMMNQmT7d4YJJ1K2ZyUu9tlrT+Z
-         vh8UBWRQTUEVWGN7030JjXRpLPC/gvRhdtl2D9wgHxbkrUv9zDJyVFFzW/WMy7bRw8lu
-         4sDFm5jE+GBJ6qryeAurs3a86Q32+hAFSWKvNmrgsogSGJA1CQ5urRcUT8K1xUHAMvhI
-         TiuA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:message-id:date:from:to:subject:mime-version
-         :content-disposition;
-        bh=9/NsGY3dKwyBFLa7e5HHd+wP+Tf+6Q9UxRHHLTVepxM=;
-        b=BTtRqRdSErRBAFd8Aghwdm2ineWaQnxx3QUQ1xw0KHSJe9j7vTgSh7tX+Q2D0lAM2H
-         atOpLfMGiD0Ksqbce6I1JyRf2v2lt1B2PaNdswQ+WAoEobLWnrfYMRgbLt5/yClBFYPz
-         QYqwYOAMdm0lV9S3xm2i3cldiCAZWdrYAfmYvA/JxYivoWj7EC1LfZB5gWVIHJA3Rprk
-         IGj5dkZMlwnTBNymkRhlnNcTLF9IA/e2Pd+0AQAvzTFCh6iOSvyBfWwLasR6FDoBjlEG
-         MnlnjCy/rIUz3X9Wa6bkj+WNpyXpZyFVEcASVfOQ12OxEDDQV4ebUuOxsYeLg46TgrK4
-         OSHw==
-X-Gm-Message-State: AOAM530EMO7mniNVMsEqbSymgO5QZd+i7gynn4x2dVOHf4ZAV7TB4Z3D
-        H56Q//7ILCMZWJSBNiCU97TZdZrpWwM=
-X-Google-Smtp-Source: ABdhPJwm8mJBn4fQB9QsA4fLn/uKRaw2UsAH/OLNDVSaYPOV8cze0I4uQUPfyRUTsPPYdleqaQGX3Q==
-X-Received: by 2002:a7b:c4c9:: with SMTP id g9mr18732696wmk.90.1621184525008;
-        Sun, 16 May 2021 10:02:05 -0700 (PDT)
-Received: from localhost ([8.208.10.148])
-        by smtp.gmail.com with ESMTPSA id y5sm14097691wrp.5.2021.05.16.10.02.02
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 16 May 2021 10:02:03 -0700 (PDT)
-Message-ID: <60a1500b.1c69fb81.613c3.983e@mx.google.com>
-Date:   Mon, 17 May 2021 01:01:55 +0800
-From:   Eryu Guan <guaneryu@gmail.com>
-To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: master branch updated to 33bcdb836aeb
+        Sun, 16 May 2021 16:35:54 -0400
+Received: from mail.kernel.org ([198.145.29.99]:37282 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S231145AbhEPUfx (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 16 May 2021 16:35:53 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id E995D61151;
+        Sun, 16 May 2021 20:34:37 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1621197278;
+        bh=qoOcZopHKUyWBQHSdZLOf0Mq94qcr64k4L9bDlJ2wMg=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=rou1W3nyLg1fsE7HEmzjywdZYrieTPR9Hi7JtTjJtYRDHRl44e0qjK21MzSBSfudx
+         Y0UKKZOkuko2YRoLp3hxVU+Iy2EMYD43SlK3+EbL77OJPEWMKpa8PsEHEB0mKYXcpc
+         6RbinFPyZaMC4N37vE1hCBnkFBj11vYUJoaNpP9zKxS6Jx2QAVwRZ/JUq71bm8EYTZ
+         8AkQYpNS3m3xmKm91jprMK1oJGXhZMEbrAK3pYMmx+yVohikno2zq8+Uu8VgEkcW1a
+         DULUlaxmYDGkT/ud2wFE6QtRZzFxDkyCCiDgUX2I+nRJRhpKlE3+z27LtQOBiZC9yZ
+         KCdrgFuFXL+ZQ==
+Date:   Sun, 16 May 2021 13:34:37 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Eryu Guan <guan@eryu.me>
+Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: Re: [PATCH 2/8] common/xfs: refactor commands to select a particular
+ xfs backing device
+Message-ID: <20210516203437.GS9675@magnolia>
+References: <162078489963.3302755.9219127595550889655.stgit@magnolia>
+ <162078491108.3302755.3627499639796540923.stgit@magnolia>
+ <YKE/I0HE+2MNSCCG@desktop>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="kdRStDqZoSEK"
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <YKE/I0HE+2MNSCCG@desktop>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+On Sun, May 16, 2021 at 11:49:55PM +0800, Eryu Guan wrote:
+> On Tue, May 11, 2021 at 07:01:51PM -0700, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <djwong@kernel.org>
+> > 
+> > Refactor all the places where we try to force new file data allocations
+> > to a specific xfs backing device so that we don't end up open-coding the
+> > same xfs_io command lines over and over.
+> > 
+> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> > ---
+> >  common/populate   |    2 +-
+> >  common/xfs        |   25 +++++++++++++++++++++++++
+> >  tests/generic/223 |    3 ++-
+> >  tests/generic/449 |    2 +-
+> >  tests/xfs/004     |    2 +-
+> 
+> >  tests/xfs/088     |    1 +
+> >  tests/xfs/089     |    1 +
+> >  tests/xfs/091     |    1 +
+> >  tests/xfs/120     |    1 +
+> >  tests/xfs/130     |    1 +
+> 
+> I think above updates should be in a separate patch.
 
---kdRStDqZoSEK
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Why?
 
-Hi all,
+--D
 
-The master branch of the xfstests repository at:
-
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-have just been updated. We have new tests and fixes to overlay, xfs and btrfs.
-Notably the xfs shrinkfs tests have been merged. And the only new failure I've
-seen is btrfs/239.
-
-There're still some review backlogs, namely the idmapped mounts patches from
-Christian Brauner, please be patient :)
-
-Thanks,
-Eryu
-
-The new head of the master branch is commit:
-
-33bcdb836aeb btrfs: test log replay after directory fsync and moving a child directory
-
-New commits:
-
-Amir Goldstein (5):
-      [d8772f925f88] src/t_dir_offset2: Add an option to limit of buffer size
-      [2c1329d636f1] src/t_dir_offset2: Add an option to find file by name
-      [54494f02efee] src/t_dir_offset2: Add option to create or unlink file
-      [2fd4a08b9351] generic: Test readdir of modified directrory
-      [18d4e9c7bfdf] overlay: Test invalidate of readdir cache
-
-Anand Jain (1):
-      [fcd74c405bb6] btrfs: add fstrim test case on the sprout device
-
-Darrick J. Wong (4):
-      [3427d07e1f0a] xfs/122: add entries for structures added to 5.13
-      [98dff757fc07] xfs: fix old fuzz test invocations of xfs_repair
-      [0df636ef78dc] common: always pass -f to $DUMP_COMPRESSOR
-      [d80489e7d588] fsx: fix backwards parameters in complaint about overly long copy
-
-Filipe Manana (2):
-      [c4fa3c076797] btrfs/187: fix test failure when using bash 5.0+ with debug enabled
-      [33bcdb836aeb] btrfs: test log replay after directory fsync and moving a child directory
-
-Gao Xiang (3):
-      [8a44508c507a] common/xfs: add _require_scratch_xfs_shrink helper
-      [ebc1ee176db9] xfs: basic functionality test for shrinking free space in the last AG
-      [8cecbd6e7c70] xfs: stress test for shrinking free space in the last AG
-
-
-Code Diffstat:
-
- common/rc             |   2 +-
- common/xfs            |  22 +++++-
- ltp/fsx.c             |   2 +-
- src/t_dir_offset2.c   | 113 ++++++++++++++++++++++++++--
- tests/btrfs/187       |  16 +++-
- tests/btrfs/238       |  79 ++++++++++++++++++++
- tests/btrfs/238.out   |   5 ++
- tests/btrfs/239       | 198 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/239.out   |   5 ++
- tests/btrfs/group     |   2 +
- tests/generic/637     |  62 ++++++++++++++++
- tests/generic/637.out |   2 +
- tests/generic/group   |   1 +
- tests/overlay/077     | 117 +++++++++++++++++++++++++++++
- tests/overlay/077.out |   2 +
- tests/overlay/group   |   1 +
- tests/xfs/083         |   8 +-
- tests/xfs/085         |   2 +-
- tests/xfs/086         |   4 +-
- tests/xfs/087         |   2 +-
- tests/xfs/088         |   4 +-
- tests/xfs/089         |   4 +-
- tests/xfs/091         |   4 +-
- tests/xfs/093         |   2 +-
- tests/xfs/097         |   2 +-
- tests/xfs/099         |   4 +-
- tests/xfs/100         |   4 +-
- tests/xfs/101         |   4 +-
- tests/xfs/102         |   4 +-
- tests/xfs/105         |   4 +-
- tests/xfs/112         |   4 +-
- tests/xfs/113         |   4 +-
- tests/xfs/117         |   2 +-
- tests/xfs/120         |   2 +-
- tests/xfs/122.out     |   1 +
- tests/xfs/123         |   2 +-
- tests/xfs/124         |   4 +-
- tests/xfs/125         |   4 +-
- tests/xfs/126         |   4 +-
- tests/xfs/130         |   2 +-
- tests/xfs/163         |  73 +++++++++++++++++++
- tests/xfs/163.out     |   6 ++
- tests/xfs/168         | 122 +++++++++++++++++++++++++++++++
- tests/xfs/168.out     |   2 +
- tests/xfs/235         |   2 +-
- tests/xfs/group       |   2 +
- 46 files changed, 865 insertions(+), 52 deletions(-)
---
-Eryu Guan
-guaneryu@gmail.com
-
---kdRStDqZoSEK
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAmChT8sACgkQJlKqKVyP
-52MyTQ//X9SlBMGon28wDQPJXyn1JgHXZRzfxZn2UMk6kcD9d+ppGRvblkddy8+j
-iUzQQ8Y7/7rl18IJoH2GBj0TOUAiDYD7EXTr8sSP8888Vm4nLwa1Z/PjrCDOX3Wq
-V+I4N4ZKx09Ho7dhgGmViJw7Of6tfxrp+8q54BEiEfKu0nz0V9/deNvn4CLFeb/s
-aI23h7vootO0IRL4f9BCVJRmc3WjOinJ4mteejKs6MG6gIdvRdLYU+72WD2GA1Sp
-oby5ny0TxwUQ1n/TA2383+VttpL9mVSmGCwYJgOsjppOGc/RstD6s0rE9+/K+6JA
-mtxSm8GtA4X7VexmcOS12bMGQSJC0GOorOzGwQtwVF+H1Dh/B/jvtNBxA59gPX7z
-H6aGLtscKt8ehQJnm2kFKgtAJNOJPqSH/1pwFWPSgsGn3zAW4D1pqNFDN0BAX2bJ
-PVaVHKSNqW9eg3AMpcBsJ/p5WHTVL4gpplNzZMeeuFRK1GXLpwOW+TIyzobywP1N
-oeo85TtILV6ij/jMZX0Uegu5/b1i6SOu7qpF8F7H4RFcGwKyecbWr4XeISHf5hca
-fR3qz2DtrGRLv/ydRsGnQTSGL4Ra/lbArrXmu/7hhX63wq63unNvdaiLTvFGa83q
-iu7G51Oa6Bz0KOT0rhvVZ4XAmPFn7L/x6I3Mu79qU7O2gg0E/T8=
-=ayvO
------END PGP SIGNATURE-----
-
---kdRStDqZoSEK--
+> Thanks,
+> Eryu
+> 
+> >  tests/xfs/146     |    2 +-
+> >  tests/xfs/147     |    2 +-
+> >  tests/xfs/235     |    1 +
+> >  tests/xfs/272     |    2 +-
+> >  tests/xfs/318     |    2 +-
+> >  tests/xfs/431     |    4 ++--
+> >  tests/xfs/521     |    2 +-
+> >  tests/xfs/528     |    2 +-
+> >  tests/xfs/532     |    2 +-
+> >  tests/xfs/533     |    2 +-
+> >  tests/xfs/538     |    2 +-
+> >  21 files changed, 47 insertions(+), 15 deletions(-)
+> > 
+> > 
+> > diff --git a/common/populate b/common/populate
+> > index d484866a..e1704b10 100644
+> > --- a/common/populate
+> > +++ b/common/populate
+> > @@ -162,7 +162,7 @@ _scratch_xfs_populate() {
+> >  	# Clear the rtinherit flag on the root directory so that files are
+> >  	# always created on the data volume regardless of MKFS_OPTIONS.  We can
+> >  	# set the realtime flag when needed.
+> > -	$XFS_IO_PROG -c 'chattr -t' $SCRATCH_MNT
+> > +	_scratch_xfs_force_bdev data $SCRATCH_MNT
+> >  
+> >  	blksz="$(stat -f -c '%s' "${SCRATCH_MNT}")"
+> >  	dblksz="$($XFS_INFO_PROG "${SCRATCH_MNT}" | grep naming.*bsize | sed -e 's/^.*bsize=//g' -e 's/\([0-9]*\).*$/\1/g')"
+> > diff --git a/common/xfs b/common/xfs
+> > index 5cd7b35c..49bd6c31 100644
+> > --- a/common/xfs
+> > +++ b/common/xfs
+> > @@ -194,6 +194,31 @@ _xfs_get_file_block_size()
+> >  	$XFS_INFO_PROG "$path" | grep realtime | sed -e 's/^.*extsz=\([0-9]*\).*$/\1/g'
+> >  }
+> >  
+> > +# Set or clear the realtime status of every supplied path.  The first argument
+> > +# is either 'data' or 'realtime'.  All other arguments should be paths to
+> > +# existing directories or empty regular files.
+> > +#
+> > +# For each directory, each file subsequently created will target the given
+> > +# device for file data allocations.  For each empty regular file, each
+> > +# subsequent file data allocation will be on the given device.
+> > +_scratch_xfs_force_bdev()
+> > +{
+> > +	local device="$1"
+> > +	shift
+> > +	local chattr_arg=""
+> > +
+> > +	case "$device" in
+> > +	"data")		chattr_arg="-t";;
+> > +	"realtime")	chattr_arg="+t";;
+> > +	*)
+> > +		echo "${device}: Don't know what device this is?"
+> > +		return 1
+> > +		;;
+> > +	esac
+> > +
+> > +	$XFS_IO_PROG -c "chattr $chattr_arg" "$@"
+> > +}
+> > +
+> >  _xfs_get_fsxattr()
+> >  {
+> >  	local field="$1"
+> > diff --git a/tests/generic/223 b/tests/generic/223
+> > index f6393293..0df84c2b 100755
+> > --- a/tests/generic/223
+> > +++ b/tests/generic/223
+> > @@ -46,7 +46,8 @@ for SUNIT_K in 8 16 32 64 128; do
+> >  	# This test checks for stripe alignments of space allocations on the
+> >  	# filesystem.  Make sure all files get created on the main device,
+> >  	# which for XFS means no rt files.
+> > -	test "$FSTYP" = "xfs" && $XFS_IO_PROG -c 'chattr -t' $SCRATCH_MNT
+> > +	test "$FSTYP" = "xfs" && \
+> > +		_scratch_xfs_force_bdev data $SCRATCH_MNT
+> >  
+> >  	for SIZE_MULT in 1 2 8 64 256; do
+> >  		let SIZE=$SIZE_MULT*$SUNIT_BYTES
+> > diff --git a/tests/generic/449 b/tests/generic/449
+> > index 5fd15367..9035b705 100755
+> > --- a/tests/generic/449
+> > +++ b/tests/generic/449
+> > @@ -46,7 +46,7 @@ _scratch_mount || _fail "mount failed"
+> >  # This is a test of xattr behavior when we run out of disk space for xattrs,
+> >  # so make sure the pwrite goes to the data device and not the rt volume.
+> >  test "$FSTYP" = "xfs" && \
+> > -	$XFS_IO_PROG -c 'chattr -t' $SCRATCH_MNT
+> > +	_scratch_xfs_force_bdev data $SCRATCH_MNT
+> >  
+> >  TFILE=$SCRATCH_MNT/testfile.$seq
+> >  
+> > diff --git a/tests/xfs/004 b/tests/xfs/004
+> > index 7633071c..b3a00fb6 100755
+> > --- a/tests/xfs/004
+> > +++ b/tests/xfs/004
+> > @@ -31,7 +31,7 @@ _populate_scratch()
+> >  	# This test looks at specific behaviors of the xfs_db freesp command,
+> >  	# which reports on the contents of the free space btrees for the data
+> >  	# device.  Don't let anything get created on the realtime volume.
+> > -	$XFS_IO_PROG -c 'chattr -t' $SCRATCH_MNT
+> > +	_scratch_xfs_force_bdev data $SCRATCH_MNT
+> >  	dd if=/dev/zero of=$SCRATCH_MNT/foo count=200 bs=4096 >/dev/null 2>&1 &
+> >  	dd if=/dev/zero of=$SCRATCH_MNT/goo count=400 bs=4096 >/dev/null 2>&1 &
+> >  	dd if=/dev/zero of=$SCRATCH_MNT/moo count=800 bs=4096 >/dev/null 2>&1 &
+> > diff --git a/tests/xfs/088 b/tests/xfs/088
+> > index fe621d0a..62360ca8 100755
+> > --- a/tests/xfs/088
+> > +++ b/tests/xfs/088
+> > @@ -48,6 +48,7 @@ _scratch_mkfs_xfs > /dev/null
+> >  echo "+ mount fs image"
+> >  _scratch_mount
+> >  blksz="$(stat -f -c '%s' "${SCRATCH_MNT}")"
+> > +_scratch_xfs_force_bdev data $SCRATCH_MNT
+> >  
+> >  echo "+ make some files"
+> >  mkdir -p "${TESTDIR}"
+> > diff --git a/tests/xfs/089 b/tests/xfs/089
+> > index 3339ff63..79167a57 100755
+> > --- a/tests/xfs/089
+> > +++ b/tests/xfs/089
+> > @@ -48,6 +48,7 @@ _scratch_mkfs_xfs > /dev/null
+> >  echo "+ mount fs image"
+> >  _scratch_mount
+> >  blksz="$(stat -f -c '%s' "${SCRATCH_MNT}")"
+> > +_scratch_xfs_force_bdev data $SCRATCH_MNT
+> >  
+> >  echo "+ make some files"
+> >  mkdir -p "${TESTDIR}"
+> > diff --git a/tests/xfs/091 b/tests/xfs/091
+> > index 9304849d..db6bb0b2 100755
+> > --- a/tests/xfs/091
+> > +++ b/tests/xfs/091
+> > @@ -48,6 +48,7 @@ _scratch_mkfs_xfs > /dev/null
+> >  echo "+ mount fs image"
+> >  _scratch_mount
+> >  blksz="$(stat -f -c '%s' "${SCRATCH_MNT}")"
+> > +_scratch_xfs_force_bdev data $SCRATCH_MNT
+> >  
+> >  echo "+ make some files"
+> >  mkdir -p "${TESTDIR}"
+> > diff --git a/tests/xfs/120 b/tests/xfs/120
+> > index 59ac0433..9fcce9ee 100755
+> > --- a/tests/xfs/120
+> > +++ b/tests/xfs/120
+> > @@ -47,6 +47,7 @@ echo "+ mount fs image"
+> >  _scratch_mount
+> >  blksz="$(stat -f -c '%s' "${SCRATCH_MNT}")"
+> >  nr="$((blksz * 2 / 16))"
+> > +_scratch_xfs_force_bdev data $SCRATCH_MNT
+> >  
+> >  echo "+ make some files"
+> >  $XFS_IO_PROG -f -c "pwrite -S 0x62 0 $((blksz * nr))" -c 'fsync' "${SCRATCH_MNT}/bigfile" >> $seqres.full
+> > diff --git a/tests/xfs/130 b/tests/xfs/130
+> > index 9fec009f..b4404c5d 100755
+> > --- a/tests/xfs/130
+> > +++ b/tests/xfs/130
+> > @@ -43,6 +43,7 @@ echo "+ mount fs image"
+> >  _scratch_mount
+> >  blksz="$(stat -f -c '%s' "${SCRATCH_MNT}")"
+> >  agcount="$(_xfs_mount_agcount $SCRATCH_MNT)"
+> > +_scratch_xfs_force_bdev data $SCRATCH_MNT
+> >  
+> >  echo "+ make some files"
+> >  _pwrite_byte 0x62 0 $((blksz * 64)) "${SCRATCH_MNT}/file0" >> "$seqres.full"
+> > diff --git a/tests/xfs/146 b/tests/xfs/146
+> > index 8f85024d..a62b8429 100755
+> > --- a/tests/xfs/146
+> > +++ b/tests/xfs/146
+> > @@ -78,7 +78,7 @@ _scratch_mkfs -r size=$rtsize >> $seqres.full
+> >  _scratch_mount >> $seqres.full
+> >  
+> >  # Make sure the root directory has rtinherit set so our test file will too
+> > -$XFS_IO_PROG -c 'chattr +t' $SCRATCH_MNT
+> > +_scratch_xfs_force_bdev realtime $SCRATCH_MNT
+> >  
+> >  # Allocate some stuff at the start, to force the first falloc of the ouch file
+> >  # to happen somewhere in the middle of the rt volume
+> > diff --git a/tests/xfs/147 b/tests/xfs/147
+> > index da962f96..0071f5c3 100755
+> > --- a/tests/xfs/147
+> > +++ b/tests/xfs/147
+> > @@ -50,7 +50,7 @@ rextblks=$((rextsize / blksz))
+> >  echo "blksz $blksz rextsize $rextsize rextblks $rextblks" >> $seqres.full
+> >  
+> >  # Make sure the root directory has rtinherit set so our test file will too
+> > -$XFS_IO_PROG -c 'chattr +t' $SCRATCH_MNT
+> > +_scratch_xfs_force_bdev realtime $SCRATCH_MNT
+> >  
+> >  sz=$((rextsize * 100))
+> >  range="$((blksz * 3)) $blksz"
+> > diff --git a/tests/xfs/235 b/tests/xfs/235
+> > index 1ed19424..553a3bc8 100755
+> > --- a/tests/xfs/235
+> > +++ b/tests/xfs/235
+> > @@ -41,6 +41,7 @@ echo "+ mount fs image"
+> >  _scratch_mount
+> >  blksz=$(stat -f -c '%s' ${SCRATCH_MNT})
+> >  agcount=$(_xfs_mount_agcount $SCRATCH_MNT)
+> > +_scratch_xfs_force_bdev data $SCRATCH_MNT
+> >  
+> >  echo "+ make some files"
+> >  _pwrite_byte 0x62 0 $((blksz * 64)) ${SCRATCH_MNT}/file0 >> $seqres.full
+> > diff --git a/tests/xfs/272 b/tests/xfs/272
+> > index 6c0fede5..2848848d 100755
+> > --- a/tests/xfs/272
+> > +++ b/tests/xfs/272
+> > @@ -38,7 +38,7 @@ _scratch_mkfs > "$seqres.full" 2>&1
+> >  _scratch_mount
+> >  
+> >  # Make sure everything is on the data device
+> > -$XFS_IO_PROG -c 'chattr -t' $SCRATCH_MNT
+> > +_scratch_xfs_force_bdev data $SCRATCH_MNT
+> >  
+> >  _pwrite_byte 0x80 0 737373 $SCRATCH_MNT/urk >> $seqres.full
+> >  sync
+> > diff --git a/tests/xfs/318 b/tests/xfs/318
+> > index 07375b1f..823f3e6c 100755
+> > --- a/tests/xfs/318
+> > +++ b/tests/xfs/318
+> > @@ -44,7 +44,7 @@ _scratch_mount >> $seqres.full
+> >  
+> >  # This test depends on specific behaviors of the data device, so create all
+> >  # files on it.
+> > -$XFS_IO_PROG -c 'chattr -t' $SCRATCH_MNT
+> > +_scratch_xfs_force_bdev data $SCRATCH_MNT
+> >  
+> >  echo "Create files"
+> >  touch $SCRATCH_MNT/file1
+> > diff --git a/tests/xfs/431 b/tests/xfs/431
+> > index e67906dc..dd634ed6 100755
+> > --- a/tests/xfs/431
+> > +++ b/tests/xfs/431
+> > @@ -47,7 +47,7 @@ _scratch_mount
+> >  
+> >  # Set realtime inherit flag on scratch mount, suppress output
+> >  # as this may simply error out on future kernels
+> > -$XFS_IO_PROG -c 'chattr +t' $SCRATCH_MNT &> /dev/null
+> > +_scratch_xfs_force_bdev realtime $SCRATCH_MNT &> /dev/null
+> >  
+> >  # Check if 't' is actually set, as xfs_io returns 0 even when it fails to set
+> >  # an attribute. And erroring out here is fine, this would be desired behavior
+> > @@ -60,7 +60,7 @@ if $XFS_IO_PROG -c 'lsattr' $SCRATCH_MNT | grep -q 't'; then
+> >  	# Remove the testfile and rt inherit flag after we are done or
+> >  	# xfs_repair will fail.
+> >  	rm -f $SCRATCH_MNT/testfile
+> > -	$XFS_IO_PROG -c 'chattr -t' $SCRATCH_MNT | tee -a $seqres.full 2>&1
+> > +	_scratch_xfs_force_bdev data $SCRATCH_MNT | tee -a $seqres.full 2>&1
+> >  fi
+> >  
+> >  # success, all done
+> > diff --git a/tests/xfs/521 b/tests/xfs/521
+> > index b8026d45..64155662 100755
+> > --- a/tests/xfs/521
+> > +++ b/tests/xfs/521
+> > @@ -55,7 +55,7 @@ testdir=$SCRATCH_MNT/test-$seq
+> >  mkdir $testdir
+> >  
+> >  echo "Check rt volume stats"
+> > -$XFS_IO_PROG -c 'chattr +t' $testdir
+> > +_scratch_xfs_force_bdev realtime $testdir
+> >  $XFS_INFO_PROG $SCRATCH_MNT >> $seqres.full
+> >  before=$(stat -f -c '%b' $testdir)
+> >  
+> > diff --git a/tests/xfs/528 b/tests/xfs/528
+> > index 7f98c5b8..4db4f513 100755
+> > --- a/tests/xfs/528
+> > +++ b/tests/xfs/528
+> > @@ -77,7 +77,7 @@ test_ops() {
+> >  		_notrun "Could not mount rextsize=$rextsize with synthetic rt volume"
+> >  
+> >  	# Force all files to be realtime files
+> > -	$XFS_IO_PROG -c 'chattr +t' $SCRATCH_MNT
+> > +	_scratch_xfs_force_bdev realtime $SCRATCH_MNT
+> >  
+> >  	log "Test regular write, rextsize=$rextsize"
+> >  	mk_file $SCRATCH_MNT/write $rextsize
+> > diff --git a/tests/xfs/532 b/tests/xfs/532
+> > index 560af586..1749d6ac 100755
+> > --- a/tests/xfs/532
+> > +++ b/tests/xfs/532
+> > @@ -47,7 +47,7 @@ _scratch_mount >> $seqres.full
+> >  
+> >  # Disable realtime inherit flag (if any) on root directory so that space on data
+> >  # device gets fragmented rather than realtime device.
+> > -$XFS_IO_PROG -c 'chattr -t' $SCRATCH_MNT
+> > +_scratch_xfs_force_bdev data $SCRATCH_MNT
+> >  
+> >  bsize=$(_get_block_size $SCRATCH_MNT)
+> >  
+> > diff --git a/tests/xfs/533 b/tests/xfs/533
+> > index dd4cb4c4..b73097e1 100755
+> > --- a/tests/xfs/533
+> > +++ b/tests/xfs/533
+> > @@ -58,7 +58,7 @@ _scratch_mount >> $seqres.full
+> >  
+> >  # Disable realtime inherit flag (if any) on root directory so that space on data
+> >  # device gets fragmented rather than realtime device.
+> > -$XFS_IO_PROG -c 'chattr -t' $SCRATCH_MNT
+> > +_scratch_xfs_force_bdev data $SCRATCH_MNT
+> >  
+> >  echo "Consume free space"
+> >  fillerdir=$SCRATCH_MNT/fillerdir
+> > diff --git a/tests/xfs/538 b/tests/xfs/538
+> > index 97273b88..deb43d7c 100755
+> > --- a/tests/xfs/538
+> > +++ b/tests/xfs/538
+> > @@ -44,7 +44,7 @@ _scratch_mount >> $seqres.full
+> >  
+> >  # Disable realtime inherit flag (if any) on root directory so that space on data
+> >  # device gets fragmented rather than realtime device.
+> > -$XFS_IO_PROG -c 'chattr -t' $SCRATCH_MNT
+> > +_scratch_xfs_force_bdev data $SCRATCH_MNT
+> >  
+> >  bsize=$(_get_file_block_size $SCRATCH_MNT)
+> >  
+> > 
