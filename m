@@ -2,190 +2,197 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C8473C433B4
-	for <linux-fstests@archiver.kernel.org>; Sun, 16 May 2021 16:47:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 152C0C433ED
+	for <linux-fstests@archiver.kernel.org>; Sun, 16 May 2021 17:02:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9095C6112D
-	for <linux-fstests@archiver.kernel.org>; Sun, 16 May 2021 16:47:24 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E9A3961139
+	for <linux-fstests@archiver.kernel.org>; Sun, 16 May 2021 17:02:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231508AbhEPQsi (ORCPT
+        id S231454AbhEPRDX (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 16 May 2021 12:48:38 -0400
-Received: from out20-61.mail.aliyun.com ([115.124.20.61]:44968 "EHLO
-        out20-61.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230499AbhEPQsi (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 16 May 2021 12:48:38 -0400
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07488514|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_alarm|0.0430146-0.000721126-0.956264;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047198;MF=guan@eryu.me;NM=1;PH=DS;RN=5;RT=5;SR=0;TI=SMTPD_---.KEG3o1R_1621183641;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.KEG3o1R_1621183641)
-          by smtp.aliyun-inc.com(10.147.40.233);
-          Mon, 17 May 2021 00:47:21 +0800
-Date:   Mon, 17 May 2021 00:47:20 +0800
-From:   Eryu Guan <guan@eryu.me>
-To:     Boris Burkov <boris@bur.io>
-Cc:     fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org,
-        linux-btrfs@vger.kernel.org, kernel-team@fb.com
-Subject: Re: [PATCH v4 4/4] generic: test fs-verity EFBIG scenarios
-Message-ID: <YKFMmGKS2C55wgwY@desktop>
-References: <cover.1620248200.git.boris@bur.io>
- <508058f805a45808764a477e9ad04353a841cf53.1620248200.git.boris@bur.io>
+        Sun, 16 May 2021 13:03:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37310 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229459AbhEPRDX (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 16 May 2021 13:03:23 -0400
+Received: from mail-wm1-x334.google.com (mail-wm1-x334.google.com [IPv6:2a00:1450:4864:20::334])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3DC92C061573
+        for <fstests@vger.kernel.org>; Sun, 16 May 2021 10:02:07 -0700 (PDT)
+Received: by mail-wm1-x334.google.com with SMTP id l18-20020a1ced120000b029014c1adff1edso3825832wmh.4
+        for <fstests@vger.kernel.org>; Sun, 16 May 2021 10:02:07 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=message-id:date:from:to:subject:mime-version:content-disposition;
+        bh=9/NsGY3dKwyBFLa7e5HHd+wP+Tf+6Q9UxRHHLTVepxM=;
+        b=r3HZ7WLS95VQtnoUZXTNvje+rOdc/w4+AkMT4HYdBG92M31pNsOGthH82YXgEixNui
+         oYDj39se+L1CLZe6+Gs7ACHKHYsqTP3OGszzbdDlwkysj0w9BFkmHwEtVqkiGGols0Es
+         KsfFW4mWFSBqGluksUSculA16+CiPb6AtQPQDQkd3BMMNQmT7d4YJJ1K2ZyUu9tlrT+Z
+         vh8UBWRQTUEVWGN7030JjXRpLPC/gvRhdtl2D9wgHxbkrUv9zDJyVFFzW/WMy7bRw8lu
+         4sDFm5jE+GBJ6qryeAurs3a86Q32+hAFSWKvNmrgsogSGJA1CQ5urRcUT8K1xUHAMvhI
+         TiuA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:message-id:date:from:to:subject:mime-version
+         :content-disposition;
+        bh=9/NsGY3dKwyBFLa7e5HHd+wP+Tf+6Q9UxRHHLTVepxM=;
+        b=BTtRqRdSErRBAFd8Aghwdm2ineWaQnxx3QUQ1xw0KHSJe9j7vTgSh7tX+Q2D0lAM2H
+         atOpLfMGiD0Ksqbce6I1JyRf2v2lt1B2PaNdswQ+WAoEobLWnrfYMRgbLt5/yClBFYPz
+         QYqwYOAMdm0lV9S3xm2i3cldiCAZWdrYAfmYvA/JxYivoWj7EC1LfZB5gWVIHJA3Rprk
+         IGj5dkZMlwnTBNymkRhlnNcTLF9IA/e2Pd+0AQAvzTFCh6iOSvyBfWwLasR6FDoBjlEG
+         MnlnjCy/rIUz3X9Wa6bkj+WNpyXpZyFVEcASVfOQ12OxEDDQV4ebUuOxsYeLg46TgrK4
+         OSHw==
+X-Gm-Message-State: AOAM530EMO7mniNVMsEqbSymgO5QZd+i7gynn4x2dVOHf4ZAV7TB4Z3D
+        H56Q//7ILCMZWJSBNiCU97TZdZrpWwM=
+X-Google-Smtp-Source: ABdhPJwm8mJBn4fQB9QsA4fLn/uKRaw2UsAH/OLNDVSaYPOV8cze0I4uQUPfyRUTsPPYdleqaQGX3Q==
+X-Received: by 2002:a7b:c4c9:: with SMTP id g9mr18732696wmk.90.1621184525008;
+        Sun, 16 May 2021 10:02:05 -0700 (PDT)
+Received: from localhost ([8.208.10.148])
+        by smtp.gmail.com with ESMTPSA id y5sm14097691wrp.5.2021.05.16.10.02.02
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 16 May 2021 10:02:03 -0700 (PDT)
+Message-ID: <60a1500b.1c69fb81.613c3.983e@mx.google.com>
+Date:   Mon, 17 May 2021 01:01:55 +0800
+From:   Eryu Guan <guaneryu@gmail.com>
+To:     fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: master branch updated to 33bcdb836aeb
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="kdRStDqZoSEK"
 Content-Disposition: inline
-In-Reply-To: <508058f805a45808764a477e9ad04353a841cf53.1620248200.git.boris@bur.io>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, May 05, 2021 at 02:04:46PM -0700, Boris Burkov wrote:
-> btrfs, ext4, and f2fs cache the Merkle tree past EOF, which restricts
-> the maximum file size beneath the normal maximum. Test the logic in
-> those filesystems against files with sizes near the maximum.
-> 
-> To work properly, this does require some understanding of the practical
-> but not standardized layout of the Merkle tree. This is a bit unpleasant
-> and could make the test incorrect in the future, if the implementation
-> changes. On the other hand, it feels quite useful to test this tricky
-> edge case. It could perhaps be made more generic by adding some ioctls
-> to let the file system communicate the maximum file size for a verity
-> file or some information about the storage of the Merkle tree.
-> 
-> Signed-off-by: Boris Burkov <boris@bur.io>
-> ---
->  tests/generic/632     | 86 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/632.out |  7 ++++
->  tests/generic/group   |  1 +
->  3 files changed, 94 insertions(+)
->  create mode 100755 tests/generic/632
->  create mode 100644 tests/generic/632.out
-> 
-> diff --git a/tests/generic/632 b/tests/generic/632
-> new file mode 100755
-> index 00000000..5a5ed576
-> --- /dev/null
-> +++ b/tests/generic/632
-> @@ -0,0 +1,86 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2021 Facebook, Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test 632
-> +#
-> +# Test some EFBIG scenarios with very large files.
-> +# To create the files, use pwrite with an offset close to the
-> +# file system's max file size.
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/verity
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs btrfs ext4 f2fs
 
-A generic test should '_supported_fs generic', and use proper _require
-rules to filter unsupported filesystems.
+--kdRStDqZoSEK
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-> +_require_test
-> +_require_math
-> +_require_scratch_verity
-> +
-> +_scratch_mkfs_verity &>> $seqres.full
-> +_scratch_mount
-> +
-> +fsv_file=$SCRATCH_MNT/file.fsv
-> +
-> +max_sz=$(_get_max_file_size)
-> +_fsv_scratch_begin_subtest "way too big: fail on first merkle block"
-> +# have to go back by 4096 from max to not hit the fsverity MAX_DEPTH check.
-> +$XFS_IO_PROG -fc "pwrite -q $(($max_sz - 4096)) 1" $fsv_file
-> +_fsv_enable $fsv_file |& _filter_scratch
-> +
-> +# The goal of this second test is to make a big enough file that we trip the
-> +# EFBIG codepath, but not so big that we hit it immediately as soon as we try
-> +# to write a Merkle leaf. Because of the layout of the Merkle tree that
-> +# fs-verity uses, this is a bit complicated to compute dynamically.
-> +
-> +# The layout of the Merkle tree has the leaf nodes last, but writes them first.
-> +# To get an interesting overflow, we need the start of L0 to be < MAX but the
-> +# end of the merkle tree (EOM) to be past MAX. Ideally, the start of L0 is only
-> +# just smaller than MAX, so that we don't have to write many blocks to blow up.
-> +
-> +# 0                        EOF round-to-64k L7L6L5 L4   L3    L2    L1  L0 MAX  EOM
-> +# |-------------------------|               ||-|--|---|----|-----|------|--|!!!!!|
-> +
-> +# Given this structure, we can compute the size of the file that yields the
-> +# desired properties:
-> +# sz + 64k + sz/128^8 + sz/128^7 + ... + sz/128^2 < MAX
-> +# (128^8)sz + (128^8)64k + sz + (128)sz + (128^2)sz + ... + (128^6)sz < (128^8)MAX
-> +# sz(128^8 + 128^6 + 128^5 + 128^4 + 128^3 + 128^2 + 128 + 1) < (128^8)(MAX - 64k)
-> +# sz < (128^8/(128^8 + (128^6 + ... 1))(MAX - 64k)
-> +#
-> +# Do the actual caclulation with 'bc' and 20 digits of precision.
-> +set -f
-> +calc="scale=20; ($max_sz - 65536) * ((128^8) / (1 + 128 + 128^2 + 128^3 + 128^4 + 128^5 + 128^6 + 128^8))"
-> +sz=$(echo $calc | $BC -q | cut -d. -f1)
-> +set +f
+Hi all,
 
-Now sure why set -f is needed here, add some comments about it as well?
+The master branch of the xfstests repository at:
+
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+have just been updated. We have new tests and fixes to overlay, xfs and btrfs.
+Notably the xfs shrinkfs tests have been merged. And the only new failure I've
+seen is btrfs/239.
+
+There're still some review backlogs, namely the idmapped mounts patches from
+Christian Brauner, please be patient :)
 
 Thanks,
 Eryu
 
-> +
-> +
-> +_fsv_scratch_begin_subtest "still too big: fail on first invalid merkle block"
-> +$XFS_IO_PROG -fc "pwrite -q $sz 1" $fsv_file
-> +_fsv_enable $fsv_file |& _filter_scratch
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/632.out b/tests/generic/632.out
-> new file mode 100644
-> index 00000000..59602c24
-> --- /dev/null
-> +++ b/tests/generic/632.out
-> @@ -0,0 +1,7 @@
-> +QA output created by 632
-> +
-> +# way too big: fail on first merkle block
-> +ERROR: FS_IOC_ENABLE_VERITY failed on 'SCRATCH_MNT/file.fsv': File too large
-> +
-> +# still too big: fail on first invalid merkle block
-> +ERROR: FS_IOC_ENABLE_VERITY failed on 'SCRATCH_MNT/file.fsv': File too large
-> diff --git a/tests/generic/group b/tests/generic/group
-> index ab00cc04..76d46e86 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -634,3 +634,4 @@
->  629 auto quick rw copy_range
->  630 auto quick rw dedupe clone
->  631 auto rw overlay rename
-> +632 auto quick verity
-> -- 
-> 2.30.2
+The new head of the master branch is commit:
+
+33bcdb836aeb btrfs: test log replay after directory fsync and moving a child directory
+
+New commits:
+
+Amir Goldstein (5):
+      [d8772f925f88] src/t_dir_offset2: Add an option to limit of buffer size
+      [2c1329d636f1] src/t_dir_offset2: Add an option to find file by name
+      [54494f02efee] src/t_dir_offset2: Add option to create or unlink file
+      [2fd4a08b9351] generic: Test readdir of modified directrory
+      [18d4e9c7bfdf] overlay: Test invalidate of readdir cache
+
+Anand Jain (1):
+      [fcd74c405bb6] btrfs: add fstrim test case on the sprout device
+
+Darrick J. Wong (4):
+      [3427d07e1f0a] xfs/122: add entries for structures added to 5.13
+      [98dff757fc07] xfs: fix old fuzz test invocations of xfs_repair
+      [0df636ef78dc] common: always pass -f to $DUMP_COMPRESSOR
+      [d80489e7d588] fsx: fix backwards parameters in complaint about overly long copy
+
+Filipe Manana (2):
+      [c4fa3c076797] btrfs/187: fix test failure when using bash 5.0+ with debug enabled
+      [33bcdb836aeb] btrfs: test log replay after directory fsync and moving a child directory
+
+Gao Xiang (3):
+      [8a44508c507a] common/xfs: add _require_scratch_xfs_shrink helper
+      [ebc1ee176db9] xfs: basic functionality test for shrinking free space in the last AG
+      [8cecbd6e7c70] xfs: stress test for shrinking free space in the last AG
+
+
+Code Diffstat:
+
+ common/rc             |   2 +-
+ common/xfs            |  22 +++++-
+ ltp/fsx.c             |   2 +-
+ src/t_dir_offset2.c   | 113 ++++++++++++++++++++++++++--
+ tests/btrfs/187       |  16 +++-
+ tests/btrfs/238       |  79 ++++++++++++++++++++
+ tests/btrfs/238.out   |   5 ++
+ tests/btrfs/239       | 198 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/239.out   |   5 ++
+ tests/btrfs/group     |   2 +
+ tests/generic/637     |  62 ++++++++++++++++
+ tests/generic/637.out |   2 +
+ tests/generic/group   |   1 +
+ tests/overlay/077     | 117 +++++++++++++++++++++++++++++
+ tests/overlay/077.out |   2 +
+ tests/overlay/group   |   1 +
+ tests/xfs/083         |   8 +-
+ tests/xfs/085         |   2 +-
+ tests/xfs/086         |   4 +-
+ tests/xfs/087         |   2 +-
+ tests/xfs/088         |   4 +-
+ tests/xfs/089         |   4 +-
+ tests/xfs/091         |   4 +-
+ tests/xfs/093         |   2 +-
+ tests/xfs/097         |   2 +-
+ tests/xfs/099         |   4 +-
+ tests/xfs/100         |   4 +-
+ tests/xfs/101         |   4 +-
+ tests/xfs/102         |   4 +-
+ tests/xfs/105         |   4 +-
+ tests/xfs/112         |   4 +-
+ tests/xfs/113         |   4 +-
+ tests/xfs/117         |   2 +-
+ tests/xfs/120         |   2 +-
+ tests/xfs/122.out     |   1 +
+ tests/xfs/123         |   2 +-
+ tests/xfs/124         |   4 +-
+ tests/xfs/125         |   4 +-
+ tests/xfs/126         |   4 +-
+ tests/xfs/130         |   2 +-
+ tests/xfs/163         |  73 +++++++++++++++++++
+ tests/xfs/163.out     |   6 ++
+ tests/xfs/168         | 122 +++++++++++++++++++++++++++++++
+ tests/xfs/168.out     |   2 +
+ tests/xfs/235         |   2 +-
+ tests/xfs/group       |   2 +
+ 46 files changed, 865 insertions(+), 52 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
+
+--kdRStDqZoSEK
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAmChT8sACgkQJlKqKVyP
+52MyTQ//X9SlBMGon28wDQPJXyn1JgHXZRzfxZn2UMk6kcD9d+ppGRvblkddy8+j
+iUzQQ8Y7/7rl18IJoH2GBj0TOUAiDYD7EXTr8sSP8888Vm4nLwa1Z/PjrCDOX3Wq
+V+I4N4ZKx09Ho7dhgGmViJw7Of6tfxrp+8q54BEiEfKu0nz0V9/deNvn4CLFeb/s
+aI23h7vootO0IRL4f9BCVJRmc3WjOinJ4mteejKs6MG6gIdvRdLYU+72WD2GA1Sp
+oby5ny0TxwUQ1n/TA2383+VttpL9mVSmGCwYJgOsjppOGc/RstD6s0rE9+/K+6JA
+mtxSm8GtA4X7VexmcOS12bMGQSJC0GOorOzGwQtwVF+H1Dh/B/jvtNBxA59gPX7z
+H6aGLtscKt8ehQJnm2kFKgtAJNOJPqSH/1pwFWPSgsGn3zAW4D1pqNFDN0BAX2bJ
+PVaVHKSNqW9eg3AMpcBsJ/p5WHTVL4gpplNzZMeeuFRK1GXLpwOW+TIyzobywP1N
+oeo85TtILV6ij/jMZX0Uegu5/b1i6SOu7qpF8F7H4RFcGwKyecbWr4XeISHf5hca
+fR3qz2DtrGRLv/ydRsGnQTSGL4Ra/lbArrXmu/7hhX63wq63unNvdaiLTvFGa83q
+iu7G51Oa6Bz0KOT0rhvVZ4XAmPFn7L/x6I3Mu79qU7O2gg0E/T8=
+=ayvO
+-----END PGP SIGNATURE-----
+
+--kdRStDqZoSEK--
