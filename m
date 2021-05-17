@@ -2,117 +2,149 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-23.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CAE20C433B4
-	for <linux-fstests@archiver.kernel.org>; Mon, 17 May 2021 03:34:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E8381C433B4
+	for <linux-fstests@archiver.kernel.org>; Mon, 17 May 2021 09:29:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AFB8D61206
-	for <linux-fstests@archiver.kernel.org>; Mon, 17 May 2021 03:34:58 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C85AE611CC
+	for <linux-fstests@archiver.kernel.org>; Mon, 17 May 2021 09:29:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231608AbhEQDgN (ORCPT
+        id S236024AbhEQJao (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 16 May 2021 23:36:13 -0400
-Received: from mail1.bemta26.messagelabs.com ([85.158.142.112]:49221 "EHLO
-        mail1.bemta26.messagelabs.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S231508AbhEQDgN (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 16 May 2021 23:36:13 -0400
-Received: from [100.113.5.30] (using TLSv1.2 with cipher DHE-RSA-AES256-GCM-SHA384 (256 bits))
-        by server-1.bemta.az-b.eu-central-1.aws.symcld.net id A1/43-57985-F54E1A06; Mon, 17 May 2021 03:34:55 +0000
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFlrMIsWRWlGSWpSXmKPExsViZ8MxRTf+ycI
-  Eg6ZOeYvTLXvZHRg9Pm+SC2CMYs3MS8qvSGDN2NM/i62gnbtiboNnA+MWzi5GLg4hgU4miRun
-  zjBDOHsYJXqXr2fvYuTkYBPQk1jybw8riC0iICvxf8ZqJhCbWUBH4su9LWwgtrCApcSqD9fA6
-  lkEVCWWtTwDq+cV8JB43QPRKyGgIDHl4XtmiLigxMmZT1gg5khIHHzxghmiRlHi7NR1LBB2hc
-  SsWW1MExh5ZyFpmYWkZQEj0ypGy6SizPSMktzEzBxdQwMDXUNDY11TXSMTQ73EKt0kvdRS3eT
-  UvJKiRKCsXmJ5sV5xZW5yTopeXmrJJkZgeKUUsn7cwXjo9Qe9Q4ySHExKorz77OYnCPEl5adU
-  ZiQWZ8QXleakFh9ilOHgUJLgvfNoYYKQYFFqempFWmYOMNRh0hIcPEoivI/vAqV5iwsSc4sz0
-  yFSpxh1OS5fn7eIWYglLz8vVUqcV+cxUJEASFFGaR7cCFjcXWKUlRLmZWRgYBDiKUgtys0sQZ
-  V/xSjOwagkzHsHZApPZl4J3KZXQEcwAR2xrWceyBEliQgpqQYmpfvq0+ZJLXrp2et7ieEqQ8H
-  GyWfecMx9vEp5N/9ib59YddFpPwunT1EIF3XLSFv9Om3FrVuXfeRONmhvC3LSbEx+ENs3pWW7
-  HWdgycX0DRFFvzN0zpwOnHKh+enyiQ8XRM8KDF92q6p8YmUa74OYFJ97IsskcnTr9Z/PF4nmt
-  tqySIn/0K2iGptJjAW3fqT6Lf/Hsp3fzGOJ99YvN5cdz/ZcHjhxUvALG2cNocsLJaKb+25Mj/
-  YsCxA32vHZdJmTz2Sf+AZh7t8GjHf6ZuctsjIy/xLl28HqqiSwRPQs85mU7Qe1/y21XyVvebG
-  mWySM95aMz5bzhnHilZpdewtlBOojjqUtLovqOtzQoqLEUpyRaKjFXFScCAD0kNe5NgMAAA==
-X-Env-Sender: huangjh.jy@fujitsu.com
-X-Msg-Ref: server-6.tower-238.messagelabs.com!1621222494!299204!1
-X-Originating-IP: [62.60.8.148]
-X-SYMC-ESS-Client-Auth: outbound-route-from=fail
-X-StarScan-Received: 
-X-StarScan-Version: 9.75.3; banners=-,-,-
-X-VirusChecked: Checked
-Received: (qmail 32732 invoked from network); 17 May 2021 03:34:55 -0000
-Received: from unknown (HELO mailhost1.uk.fujitsu.com) (62.60.8.148)
-  by server-6.tower-238.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 17 May 2021 03:34:55 -0000
-Received: from R01UKEXCASM126.r01.fujitsu.local ([10.183.43.178])
-        by mailhost1.uk.fujitsu.com (8.14.5/8.14.5) with ESMTP id 14H3YlS7003369
-        (version=TLSv1/SSLv3 cipher=AES256-SHA bits=256 verify=FAIL)
-        for <fstests@vger.kernel.org>; Mon, 17 May 2021 04:34:54 +0100
-Received: from localhost.localdomain (10.167.220.33) by
- R01UKEXCASM126.r01.fujitsu.local (10.183.43.178) with Microsoft SMTP Server
- (TLS) id 15.0.1497.18; Mon, 17 May 2021 04:34:45 +0100
-From:   Jinhui Huang <huangjh.jy@cn.fujitsu.com>
-To:     <fstests@vger.kernel.org>
-CC:     Jinhui Huang <huangjh.jy@cn.fujitsu.com>
-Subject: [PATCH] xfs: Add the appropriate _require helper
-Date:   Mon, 17 May 2021 11:34:13 +0800
-Message-ID: <1621222453-2824-1-git-send-email-huangjh.jy@cn.fujitsu.com>
-X-Mailer: git-send-email 1.8.3.1
+        Mon, 17 May 2021 05:30:44 -0400
+Received: from mx2.suse.de ([195.135.220.15]:34306 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S235923AbhEQJan (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 17 May 2021 05:30:43 -0400
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+        t=1621243766; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+        bh=sGLrKExocux94J1SXPj1YujnprTdO+Kbrg6FzhxjLWc=;
+        b=UCwVNUPoesrNGJX7ng9Dfn+XbBM7lSlRxccRFJLwTnwQVax8Z8JdCAY1MGLwVinZc+nOTw
+        +fSKQtaasDxblZuBhEHuYPjaI1P6Cbu10lI9DDKMwUPVlEGyt9iY3raKDje2CIuEQOZM+f
+        Rs9rjTaAK/0/V30RmuZkG90tGc6x62g=
+Received: from relay2.suse.de (unknown [195.135.221.27])
+        by mx2.suse.de (Postfix) with ESMTP id 6AE3AAFE6;
+        Mon, 17 May 2021 09:29:26 +0000 (UTC)
+From:   Qu Wenruo <wqu@suse.com>
+To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: [PATCH] fstests: btrfs/215: avoid false alert for subpage case
+Date:   Mon, 17 May 2021 17:29:22 +0800
+Message-Id: <20210517092922.119788-1-wqu@suse.com>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
-Content-Type: text/plain
-X-Originating-IP: [10.167.220.33]
-X-ClientProxiedBy: G08CNEXCHPEKD07.g08.fujitsu.local (10.167.33.80) To
- R01UKEXCASM126.r01.fujitsu.local (10.183.43.178)
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-1.xfs/162 uses xfs_db -c 'fuzz' but forgets to check if the feature
-is supported. This will cause the case to fail on a system without
-fuzz support. so we add _require to check if the fuzz is supported.
+[BUG]
+When running btrfs/215 with 64K page size, 4K sectorsize (subpage RW
+support), it fails with the following error:
+btrfs/215       [failed, exit status 1]- output mismatch (see ~/xfstests-dev/results//btrfs/215.out.bad)
+    --- tests/btrfs/215.out     2021-03-19 16:34:26.069634953 +0800
+    +++ ~/xfstests-dev/results//btrfs/215.out.bad      2021-05-17 16:52:34.743514224 +0800
+    @@ -1,2 +1,3 @@
+     QA output created by 215
+    -Silence is golden
+    +Errors: 8 expected: 2
+    +(see ~/xfstests-dev/results//btrfs/215.full for details)
+    ...
+    (Run 'diff -u ~/xfstests-dev/tests/btrfs/215.out ~/xfstests-dev/results//btrfs/215.out.bad'  to see the entire diff)
 
-2.xfs/495 use _require_scratch_xfs_fuzz_fields to check the features
-required by field fuzzing, but some of the features are not used in
-this case like xfs_scrub, this will cause the case to skip on a system
-without xfs_scrub support, even if the features being uesd are supported.
-So we just need to use _require to check the features being used.
+[CAUSE]
+For subpage case, btrfs still tries to read the full page, other than
+read just one sector for PAGE_SIZE == sectorsize case.
 
-Signed-off-by: Jinhui Huang <huangjh.jy@cn.fujitsu.com>
+This means for the 2 sectors corrupted case, since they are in the same
+page, all the errors will be reported.
+
+[FIX]
+Change the following values:
+- filesize
+  Now it's 8 * pagesize.
+
+- expected error number
+  Now it's 2 * sectors_per_page or 6 * sectors_per_page.
+
+Signed-off-by: Qu Wenruo <wqu@suse.com>
 ---
- tests/xfs/162 | 2 ++
- tests/xfs/495 | 4 +++-
- 2 files changed, 5 insertions(+), 1 deletion(-)
+Note: The btrfs subpage full data RW support is not yet merged into upstream,
+but most of its preparation patches are already merged, and it can
+already pass most fstests.
 
-diff --git a/tests/xfs/162 b/tests/xfs/162
-index e3257a3..c7c72d1 100755
---- a/tests/xfs/162
-+++ b/tests/xfs/162
-@@ -31,6 +31,8 @@ _cleanup()
- # real QA test starts here
- _supported_fs xfs
- _require_scratch_nocheck
-+_require_populate_commands
-+_require_xfs_db_command "fuzz"
+The out-of-tree branch can be fetched from my git repo:
+https://github.com/adam900710/linux/tree/subpage
+
+Some failures are just false alerts, like btrfs/215 which always
+believes sectorsize == PAGE_SIZE for btrfs, thus it's worthy fixing before
+bothering testers when the RW support get merged.
+---
+ tests/btrfs/215 | 25 +++++++++++++++++++------
+ 1 file changed, 19 insertions(+), 6 deletions(-)
+
+diff --git a/tests/btrfs/215 b/tests/btrfs/215
+index 748287e7..c4959061 100755
+--- a/tests/btrfs/215
++++ b/tests/btrfs/215
+@@ -46,8 +46,21 @@ _scratch_mkfs > /dev/null
+ # blobk group
+ _scratch_mount -o nospace_cache
  
- rm -f $seqres.full
++pagesize=$(get_page_size)
+ blocksize=$(_get_block_size $SCRATCH_MNT)
+-filesize=$((8*$blocksize))
++
++# For subpage case, since we still do read in full page size, if have 8 corrupted
++# sectors in one page, then even we just try to read one sector of that page,
++# all 8 corruption will be reported.
++# So here we chose the filesize using page size.
++filesize=$((8*$pagesize))
++if [ $blocksize -le $pagesize ]; then
++	sectors_per_page=$(($pagesize / $blocksize))
++else
++	# We don't support multi-page sectorsize yet
++	_notrun "this test doesn't support sectorsize $blocksize with page size $pagesize yet"
++fi
++
+ uuid=$(findmnt -n -o UUID "$SCRATCH_MNT")
  
-diff --git a/tests/xfs/495 b/tests/xfs/495
-index 6292b5e..a3b4fb2 100755
---- a/tests/xfs/495
-+++ b/tests/xfs/495
-@@ -32,7 +32,9 @@ _cleanup()
+ if [ ! -e /sys/fs/btrfs/$uuid/bdi ]; then
+@@ -64,24 +77,24 @@ echo "logical = $logical_extent physical=$physical_extent" >> $seqres.full
  
- # real QA test starts here
- _supported_fs xfs
--_require_scratch_xfs_fuzz_fields
-+_require_scratch_nocheck
-+_require_populate_commands
-+_require_xfs_db_command "fuzz"
+ # corrupt first 4 blocks of file
+ _scratch_unmount
+-$XFS_IO_PROG -d -c "pwrite -S 0xaa -b $blocksize $physical_extent $((4*$blocksize))" $SCRATCH_DEV > /dev/null
++$XFS_IO_PROG -d -c "pwrite -S 0xaa -b $pagesize $physical_extent $((4 * $pagesize))" $SCRATCH_DEV > /dev/null
+ _scratch_mount
  
- echo "Format and populate"
- _scratch_populate_cached nofill > $seqres.full 2>&1
+ # disable readahead to avoid skewing the counter
+ echo 0 > /sys/fs/btrfs/$uuid/bdi/read_ahead_kb
+ 
+-# buffered reads whould result in 2 errors since readahead code always submits
+-# at least 1 page worth of IO and it will be counted as an error as well
++# buffered reads whould result in 2 * sectors_per_page errors since readahead code always submits
++# at least 1 page worth of IO and it will be counted as error(s) as well
+ $XFS_IO_PROG -c "pread -b $filesize 0 $filesize" "$SCRATCH_MNT/foobar" > /dev/null 2>&1
+ errs=$($BTRFS_UTIL_PROG device stats $SCRATCH_DEV | awk '/corruption_errs/ { print $2 }')
+-if [ $errs -ne 2 ]; then
++if [ $errs -ne $((2 * $sectors_per_page)) ]; then
+ 	_fail "Errors: $errs expected: 2"
+ fi
+ 
+ # DIO does check every sector
+ $XFS_IO_PROG -d -c "pread -b $filesize 0 $filesize" "$SCRATCH_MNT/foobar" > /dev/null 2>&1
+ errs=$($BTRFS_UTIL_PROG device stats $SCRATCH_DEV | awk '/corruption_errs/ { print $2 }')
+-if [ $errs -ne 6 ]; then
++if [ $errs -ne $((6 * $sectors_per_page)) ]; then
+ 	_fail "Errors: $errs expected: 6"
+ fi
+ 
 -- 
-1.8.3.1
+2.31.1
 
