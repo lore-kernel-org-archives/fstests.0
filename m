@@ -7,331 +7,210 @@ X-Spam-Status: No, score=-16.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ACE10C433ED
-	for <linux-fstests@archiver.kernel.org>; Thu, 20 May 2021 16:32:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BE13BC433B4
+	for <linux-fstests@archiver.kernel.org>; Thu, 20 May 2021 16:34:26 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 824EC6101E
-	for <linux-fstests@archiver.kernel.org>; Thu, 20 May 2021 16:32:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9C88F6101E
+	for <linux-fstests@archiver.kernel.org>; Thu, 20 May 2021 16:34:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231976AbhETQdV (ORCPT
+        id S232690AbhETQfr (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 20 May 2021 12:33:21 -0400
-Received: from mail.kernel.org ([198.145.29.99]:34988 "EHLO mail.kernel.org"
+        Thu, 20 May 2021 12:35:47 -0400
+Received: from mail.kernel.org ([198.145.29.99]:35996 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S231655AbhETQdV (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 20 May 2021 12:33:21 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 9853660FD9;
-        Thu, 20 May 2021 16:31:59 +0000 (UTC)
+        id S231724AbhETQfr (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 20 May 2021 12:35:47 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 7106C61019;
+        Thu, 20 May 2021 16:34:25 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1621528319;
-        bh=1BfX4jy9r4eSs20Qef7bZLw5d6frCG2xaiQo34SeI7g=;
+        s=k20201202; t=1621528465;
+        bh=Iu62Qa2M23sZ2ne+PbPsaQsrgGrdt/39FAvxxijgZF8=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=QpbPc5t2tvceiS4W9vPGDQLz1tIXCw2R+Qis8Q34w1TQLHGWB8cbBbMh6Akjc3Y1l
-         xfi/18f86wPDuJjQN+WPt3olRdiNyrxUzlFUD5Uqd/cQG9Pj6WLwakWuO+WP90K0vd
-         kmK21VIDQyBfq02YR8QZ/d82clKBSVHTRM6kWA4wHz2M0vCMtBPBIql4TpwA++eLC7
-         JzNLL96GZm6oMVszELNYQjueKhex1iHlVysXMdnJJicdXF/H7WBXQOVcuWvRsk1jl6
-         a4rl/ecQaLi/b+KvLq3ZU2XlODtwJZMQuNFnQR3KMg4pR84sHiJKM6eouqtbhGKSRv
-         vr8dPAEyozV2Q==
-Date:   Thu, 20 May 2021 09:31:59 -0700
+        b=IK98cv97f++Cw1zYgY0A3CWNydYqz5Jp6KpKr4pjU2u2hsBtzqKru86BXNnwhEStC
+         mR9DDTwibYob9tgBmDcRr0Pk9OsS1Locl+34gsndO2UaptG96/EIX/pDFwrwOOzWye
+         PLKVXt66qJdJg3VqYaViRbzM871FFUWEO+32QqhWKR1o9oYaW6MggSLIQyKS8N8rZG
+         MqW+049gYyuKGhjuLd8twikVqVx/Zzq9H9Rn0ekzPEQEsCZGqDNp3gxfGm26IdzFHB
+         gr7ZPII884PH6i8O3YzH2O0XqMQvtZft7m2F5itSEsItcQfM8RPFFl/awq4hQ0mD9+
+         jEKnTjiriUlQw==
+Date:   Thu, 20 May 2021 09:34:25 -0700
 From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Andreas Gruenbacher <agruenba@redhat.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH v4] generic/637: Test page faults during read and write
-Message-ID: <20210520163159.GF9648@magnolia>
-References: <20210520114218.1595735-1-agruenba@redhat.com>
+To:     "Chenlong (H)" <chenlongcl.chen@huawei.com>
+Cc:     fstests@vger.kernel.org, guaneryu@gmail.com, tytso@mit.edu
+Subject: Re: [PATCH] ext4/048: Add new regression test
+Message-ID: <20210520163425.GG9648@magnolia>
+References: <20210519031015.14005-1-chenlongcl.chen@huawei.com>
+ <20210519232435.GE9648@magnolia>
+ <7a77fe95-2a4d-9092-9fdf-0a4a4fadd418@huawei.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20210520114218.1595735-1-agruenba@redhat.com>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <7a77fe95-2a4d-9092-9fdf-0a4a4fadd418@huawei.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, May 20, 2021 at 01:42:18PM +0200, Andreas Gruenbacher wrote:
-> Some filesystems have problems when the buffer passed to read or write is
-> memory-mapped to the file being read from or written to and the buffer is
-> faulted in during the read or write.  (That's probably not a recommended
-> use case, but it should work nevertheless.)
+On Thu, May 20, 2021 at 11:41:52AM +0800, Chenlong (H) wrote:
 > 
-> Signed-off-by: Andreas Gruenbacher <agruenba@redhat.com>
-> ---
->  src/Makefile          |   3 +-
->  src/mmap-rw-fault.c   | 164 ++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/637     |  40 +++++++++++
->  tests/generic/637.out |   2 +
->  tests/generic/group   |   1 +
->  5 files changed, 209 insertions(+), 1 deletion(-)
->  create mode 100644 src/mmap-rw-fault.c
->  create mode 100755 tests/generic/637
->  create mode 100644 tests/generic/637.out
 > 
-> diff --git a/src/Makefile b/src/Makefile
-> index cc0b9579..13cdf19b 100644
-> --- a/src/Makefile
-> +++ b/src/Makefile
-> @@ -17,7 +17,8 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
->  	t_mmap_cow_race t_mmap_fallocate fsync-err t_mmap_write_ro \
->  	t_ext4_dax_journal_corruption t_ext4_dax_inline_corruption \
->  	t_ofd_locks t_mmap_collision mmap-write-concurrent \
-> -	t_get_file_time t_create_short_dirs t_create_long_dirs t_enospc
-> +	t_get_file_time t_create_short_dirs t_create_long_dirs t_enospc \
-> +	mmap-rw-fault
->  
->  LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
->  	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
-> diff --git a/src/mmap-rw-fault.c b/src/mmap-rw-fault.c
-> new file mode 100644
-> index 00000000..b9c58af6
-> --- /dev/null
-> +++ b/src/mmap-rw-fault.c
-> @@ -0,0 +1,164 @@
-> +/* Trigger mmap page faults in the same file during pread and pwrite. */
+> On 2021/5/20 7:24:35, Darrick J. Wong wrote:
+> > On Wed, May 19, 2021 at 11:10:15AM +0800, chenlong wrote:
+> > > Check the block group zero and prevent initializing reserved inodes.
+> > > But in some special cases, the reserved inode may not all belong to
+> > > the group zero, it may exist into the second group if we format
+> > > filesystem below.
+> > > mkfs.ext4 -b 4096 -g 8192 -N 1024 -I 4096 /dev/sda
+> > > So, it will end up triggering a false positive report of a corrupted
+> > > file system
+> > > 
+> > > It's a regression test for commit a149d2a5cabb.
+> > > 
+> > > Signed-off-by: Chen Long <chenlongcl.chen@huawei.com>
+> > > ---
+> > >   tests/ext4/048     | 50 ++++++++++++++++++++++++++++++++++++++++++++++
+> > >   tests/ext4/048.out |  5 +++++
+> > >   tests/ext4/group   |  1 +
+> > >   3 files changed, 56 insertions(+)
+> > >   create mode 100755 tests/ext4/048
+> > >   create mode 100644 tests/ext4/048.out
+> > > 
+> > > diff --git a/tests/ext4/048 b/tests/ext4/048
+> > > new file mode 100755
+> > > index 00000000..56801579
+> > > --- /dev/null
+> > > +++ b/tests/ext4/048
+> > > @@ -0,0 +1,50 @@
+> > > +#! /bin/bash
+> > > +# SPDX-License-Identifier: GPL-2.0
+> > > +# Copyright (c) 2021 Huawei.  All Rights Reserved.
+> > > +#
+> > > +# FS QA Test 048
+> > > +#
+> > > +# Regression test for commit:
+> > > +# a149d2a5cabb(ext4: fix check to prevent false positive report of incorrect
+> > > +# used inodes)
+> > > +#
+> > > +seq=`basename $0`
+> > > +seqres=$RESULT_DIR/$seq
+> > > +echo "QA output created by $seq"
+> > > +
+> > > +here=`pwd`
+> > > +tmp=/tmp/$$
+> > > +status=1	# failure is the default!
+> > > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > > +
+> > > +_cleanup()
+> > > +{
+> > > +    cd /
+> > > +    rm -f $tmp.*
+> > > +}
+> > > +
+> > > +# get standard environment, filters and checks
+> > > +. ./common/rc
+> > > +. ./common/filter
+> > > +
+> > > +# remove previous $seqres.full before test
+> > > +rm -f $seqres.full
+> > > +
+> > > +# real QA test starts here
+> > > +_supported_fs ext4
+> > > +_require_scratch
+> > > +
+> > > +echo "+ create scratch fs"
+> > > +_scratch_mkfs_ext4 -b 4096 -g 8192 -N 1024 -I 4096 >> $seqres.full 2>&1
+> > > +
+> > > +echo "+ mount fs"
+> > > +_scratch_mount -o errors=remount-ro
+> > > +sleep 5
+> > 
+> > Why do we need to sleep here?  Won't _scratch_mount return nonzero if
+> > the (buggy) kernel thought the fs was corrupt?
+> > 
+> > Also, won't the grep below catch that the fs didn't mount?
+> > 
+> 
+> The default maximum wake-up delay of the lazy init thread of ext4 is
+> EXT4_DEF_LI_MAX_START_DELAY (5s).
+> 
+> After mounting the file system, the lazy init thread will be awakened to
+> perform group initialization at 0~5s
+> 
+> after the current time. If an error is detected during the initialization
+> process, it will be set to read-only,
+> 
+> so the test case needs to delay a little while waiting for the init thread
+> to execute.
 
-Missing SPDX header.
+Oh, that's why there's a delay.  Could you paste this explanation into
+the test case as a comment right before the 'sleep 5', please?
 
-(Let's not make the implicit license mess in src/ worse, please.)
-
-> +
-> +#ifndef _GNU_SOURCE
-> +#define _GNU_SOURCE /* to get definition of O_DIRECT flag. */
-> +#endif
-> +
-> +#include <sys/types.h>
-> +#include <sys/stat.h>
-> +#include <sys/mman.h>
-> +#include <fcntl.h>
-> +#include <unistd.h>
-> +#include <stdlib.h>
-> +#include <stdio.h>
-> +#include <string.h>
-> +#include <errno.h>
-> +#include <err.h>
-> +
-> +char *filename;
-> +unsigned int page_size;
-> +void *page;
-> +char *addr;
-> +int fd;
-> +ssize_t ret;
-> +
-> +/*
-> + * Leave a hole at the beginning of the test file and initialize a block of
-> + * @page_size bytes at offset @page_size to @c.  Then, reopen the file and
-> + * mmap the first two pages.
-> + */
-> +void init(char c, int flags)
-> +{
-> +	fd = open(filename, O_CREAT | O_TRUNC | O_WRONLY | O_DIRECT, 0666);
-> +	if (fd == -1)
-> +		goto fail;
-> +	memset(page, c, page_size);
-> +	ret = pwrite(fd, page, page_size, page_size);
-> +	if (ret != page_size)
-> +		goto fail;
-> +	if (close(fd))
-> +		goto fail;
-> +
-> +	fd = open(filename, flags);
-> +	if (fd == -1)
-> +		goto fail;
-> +	addr = mmap(NULL, 2 * page_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
-> +	if (addr == MAP_FAILED)
-> +		err(1, NULL);
-> +	return;
-> +
-> +fail:
-> +	err(1, "%s", filename);
-> +}
-> +
-> +void done(void)
-> +{
-> +	if (fsync(fd))
-> +		goto fail;
-> +	if (close(fd))
-> +		goto fail;
-> +	return;
-> +
-> +fail:
-> +	err(1, "%s", filename);
-> +}
-> +
-> +static ssize_t do_read(int fd, void *buf, size_t count, off_t offset)
-> +{
-> +	ssize_t count2 = 0, ret;
-> +
-> +	do {
-> +		ret = pread(fd, buf, count, offset);
-> +		if (ret == -1) {
-> +			if (errno == EINTR)
-> +				continue;
-> +			break;
-> +		}
-> +		if (ret == 0)
-> +			break;
-> +		count2 += ret;
-> +		buf += ret;
-> +		count -= ret;
-> +	} while (count);
-> +	return count2;
-> +}
-> +
-> +static ssize_t do_write(int fd, const void *buf, size_t count, off_t offset)
-> +{
-> +	ssize_t count2 = 0, ret;
-> +
-> +	do {
-> +		ret = pwrite(fd, buf, count, offset);
-> +		if (ret == -1) {
-> +			if (errno == EINTR)
-> +				continue;
-> +			break;
-> +		}
-> +		if (ret == 0)
-> +			break;
-> +		count2 += ret;
-> +		buf += ret;
-> +		count -= ret;
-> +	} while (count);
-> +	return count2;
-> +}
-> +
-> +int main(int argc, char *argv[])
-> +{
-> +	if (argc != 2)
-> +		errx(1, "no test filename argument given");
-> +	filename = argv[1];
-> +
-> +	page_size = ret = sysconf(_SC_PAGE_SIZE);
-> +	if (ret == -1)
-> +		err(1, NULL);
-> +
-> +	ret = posix_memalign(&page, page_size, page_size);
-> +	if (ret) {
-> +		errno = ENOMEM;
-> +		err(1, NULL);
-> +	}
-> +
-> +	/*
-> +	 * Make sure page faults during pread are handled correctly.
-> +	 */
-> +	init('a', O_RDWR);
-> +	ret = do_read(fd, addr, page_size, page_size);
-> +	if (ret != page_size)
-> +		err(1, "pread %s: %ld != %u", filename, ret, page_size);
-> +	if (memcmp(addr, page, page_size))
-> +		errx(1, "pread is broken");
-> +	done();
-> +
-> +	init('b', O_RDWR | O_DIRECT);
-> +	ret = do_read(fd, addr, page_size, page_size);
-> +	if (ret != page_size)
-> +		err(1, "pread %s (O_DIRECT): %ld != %u", filename, ret, page_size);
-> +	if (memcmp(addr, page, page_size))
-> +		errx(1, "pread (D_DIRECT) is broken");
-> +	done();
-> +
-> +	/*
-> +	 * Make sure page faults during pwrite are handled correctly.
-> +	 */
-> +	init('c', O_RDWR);
-> +	ret = do_write(fd, addr + page_size, page_size, 0);
-> +	if (ret != page_size)
-> +		err(1, "pwrite %s: %ld != %u", filename, ret, page_size);
-> +	if (memcmp(addr, page, page_size))
-> +		errx(1, "pwrite is broken");
-> +	done();
-> +
-> +	init('d', O_RDWR | O_DIRECT);
-> +	ret = do_write(fd, addr + page_size, page_size, 0);
-> +	if (ret != page_size)
-> +		err(1, "pwrite %s (O_DIRECT): %ld != %u", filename, ret, page_size);
-> +	if (memcmp(addr, page, page_size))
-> +		errx(1, "pwrite (O_DIRECT) is broken");
-> +	done();
-> +
-> +	if (unlink(filename))
-> +		err(1, "unlink %s", filename);
-> +
-> +	return 0;
-> +}
-> diff --git a/tests/generic/637 b/tests/generic/637
-> new file mode 100755
-> index 00000000..d3c3f235
-> --- /dev/null
-> +++ b/tests/generic/637
-> @@ -0,0 +1,40 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2021 Red Hat, Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test 637
-> +#
-> +# Trigger mmap page faults in the same file during pread and pwrite
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs generic
-> +_require_test
-
-_require_test_program mmap-rw-fault
-
-> +
-> +$here/src/mmap-rw-fault $TEST_DIR/mmap-rw-fault.tmp \
-> +|| exit
-
-If you redirected stderr to stdout then the error messages and whatnot
-will be captured in the golden output, which will automatically cause
-the test to fail if anything happens.  Then you don't need the 'exit'.
-
-$here/src/mmap-rw-fault $TEST_DIR/mmap-rw-fault.tmp 2>&1
-
-By the way, what happens if the fs gets it wrong?  Does the kernel lock
-up or crash or something?
+Also, if the delay is configurable you might want to set it to a known
+value at the start of this test.
 
 --D
 
-> +
-> +# success, all done
-> +echo "Silence is golden"
-> +status=0
-> +exit
-> diff --git a/tests/generic/637.out b/tests/generic/637.out
-> new file mode 100644
-> index 00000000..55a3d825
-> --- /dev/null
-> +++ b/tests/generic/637.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 637
-> +Silence is golden
-> diff --git a/tests/generic/group b/tests/generic/group
-> index 105763c4..01996b48 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -639,3 +639,4 @@
->  634 auto quick atime bigtime
->  635 auto quick atime bigtime shutdown
->  636 auto quick swap
-> +637 auto
-> -- 
-> 2.26.3
+> in this testcase,  _scratch_mount will be return zero, after a short period
+> of time, the file system will be remounted as read-only.
 > 
+> In an environment with this bug,  such as:
+> 
+> [root@testvm ~]# mkfs.ext4 -b 4096 -g 8192 -N 1024 -I 4096 /dev/sda
+> 
+> [root@testvm ~]# mount -o errors=remount-ro /dev/sda /mnt
+> 
+> [root@testvm ~]# mount | grep /dev/sda
+> 
+> /dev/sda on /mnt type ext4 (rw,relatime,errors=remount-ro)
+> 
+> After the file system is mounted，file system status is rw，but a moment
+> later, status will be change to ro.
+> 
+> [root@testvm ~]# mount | grep /dev/sda
+> 
+> /dev/sda on /mnt type ext4 (ro,relatime,errors=remount-ro)
+> 
+> > > +
+> > > +echo "+ check mountpoint status"
+> > > +cat /proc/self/mounts | grep ${SCRATCH_MNT} | \
+> > 
+> > Careful here, if someone sets SCRATCH_MNT=/u, this will match another
+> > mount for /usr.  At the bare minimum you want 'grep -w' here, I think.
+> > 
+> > --D
+> > 
+> 
+> There is a risk here and needs to be fixed.
+> 
+> > > +    $AWK_PROG '{print $4}' | grep -oE '^rw,' | tee -a $seqres.full
+> > > +
+> > > +# success, all done
+> > > +status=0
+> > > +exit
+> > > diff --git a/tests/ext4/048.out b/tests/ext4/048.out
+> > > new file mode 100644
+> > > index 00000000..16e50e86
+> > > --- /dev/null
+> > > +++ b/tests/ext4/048.out
+> > > @@ -0,0 +1,5 @@
+> > > +QA output created by 048
+> > > ++ create scratch fs
+> > > ++ mount fs
+> > > ++ check mountpoint status
+> > > +rw,
+> > > diff --git a/tests/ext4/group b/tests/ext4/group
+> > > index ceda2ba6..82b77efb 100644
+> > > --- a/tests/ext4/group
+> > > +++ b/tests/ext4/group
+> > > @@ -50,6 +50,7 @@
+> > >   045 auto dir
+> > >   046 auto prealloc quick
+> > >   047 auto quick dax
+> > > +048 auto quick
+> > >   271 auto rw quick
+> > >   301 aio auto ioctl rw stress defrag
+> > >   302 aio auto ioctl rw stress defrag
+> > > -- 
+> > > 2.18.0.huawei.25
+> > > 
+> > .
+> > 
