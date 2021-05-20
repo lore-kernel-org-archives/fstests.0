@@ -2,210 +2,322 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+X-Spam-Status: No, score=-16.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5309EC433ED
-	for <linux-fstests@archiver.kernel.org>; Thu, 20 May 2021 03:41:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C2A2DC43460
+	for <linux-fstests@archiver.kernel.org>; Thu, 20 May 2021 11:44:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 30731610A1
-	for <linux-fstests@archiver.kernel.org>; Thu, 20 May 2021 03:41:56 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9FC6F610A1
+	for <linux-fstests@archiver.kernel.org>; Thu, 20 May 2021 11:44:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229554AbhETDnQ (ORCPT
+        id S239319AbhETLpX (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 19 May 2021 23:43:16 -0400
-Received: from szxga05-in.huawei.com ([45.249.212.191]:4548 "EHLO
-        szxga05-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229531AbhETDnQ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 19 May 2021 23:43:16 -0400
-Received: from dggems702-chm.china.huawei.com (unknown [172.30.72.60])
-        by szxga05-in.huawei.com (SkyGuard) with ESMTP id 4FlwT71XsBzkWJk;
-        Thu, 20 May 2021 11:39:07 +0800 (CST)
-Received: from dggpemm500002.china.huawei.com (7.185.36.229) by
- dggems702-chm.china.huawei.com (10.3.19.179) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2176.2; Thu, 20 May 2021 11:41:53 +0800
-Received: from [10.174.179.225] (10.174.179.225) by
- dggpemm500002.china.huawei.com (7.185.36.229) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2176.2; Thu, 20 May 2021 11:41:53 +0800
-Subject: Re: [PATCH] ext4/048: Add new regression test
-To:     "Darrick J. Wong" <djwong@kernel.org>
-CC:     <fstests@vger.kernel.org>, <guaneryu@gmail.com>, <tytso@mit.edu>
-References: <20210519031015.14005-1-chenlongcl.chen@huawei.com>
- <20210519232435.GE9648@magnolia>
-From:   "Chenlong (H)" <chenlongcl.chen@huawei.com>
-Message-ID: <7a77fe95-2a4d-9092-9fdf-0a4a4fadd418@huawei.com>
-Date:   Thu, 20 May 2021 11:41:52 +0800
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
- Thunderbird/78.10.2
+        Thu, 20 May 2021 07:45:23 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:36406 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S242577AbhETLnr (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 20 May 2021 07:43:47 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1621510943;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=ATYNzff35rat8glB3t4CQGIAnOU6fczPe2JUp9Mc1Pk=;
+        b=Xnc7McynyRDZ4E9p3llY5f7LpWgRK1x3sqvls8LRbSOKB1mCht5WFkQTRIO+iOE8yFijHv
+        cIzaBkBw6IVSi+Z9jPYQIR1tEoltQl1k6xdObGDM4dyM+5aqHlHoZKbcRl1dyp+/oypvvc
+        GbHf0bWo4dUdiMiO3zc1Q4950VJhS4E=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-255-BCpoWXVQOg6QENpyZ4Khww-1; Thu, 20 May 2021 07:42:22 -0400
+X-MC-Unique: BCpoWXVQOg6QENpyZ4Khww-1
+Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 295558189C4
+        for <fstests@vger.kernel.org>; Thu, 20 May 2021 11:42:21 +0000 (UTC)
+Received: from max.com (unknown [10.40.195.97])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 621B65D9DC;
+        Thu, 20 May 2021 11:42:20 +0000 (UTC)
+From:   Andreas Gruenbacher <agruenba@redhat.com>
+To:     fstests@vger.kernel.org
+Cc:     Andreas Gruenbacher <agruenba@redhat.com>
+Subject: [PATCH v4] generic/637: Test page faults during read and write
+Date:   Thu, 20 May 2021 13:42:18 +0200
+Message-Id: <20210520114218.1595735-1-agruenba@redhat.com>
 MIME-Version: 1.0
-In-Reply-To: <20210519232435.GE9648@magnolia>
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Language: en-US
 Content-Transfer-Encoding: 8bit
-X-Originating-IP: [10.174.179.225]
-X-ClientProxiedBy: dggems702-chm.china.huawei.com (10.3.19.179) To
- dggpemm500002.china.huawei.com (7.185.36.229)
-X-CFilter-Loop: Reflected
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+Some filesystems have problems when the buffer passed to read or write is
+memory-mapped to the file being read from or written to and the buffer is
+faulted in during the read or write.  (That's probably not a recommended
+use case, but it should work nevertheless.)
 
+Signed-off-by: Andreas Gruenbacher <agruenba@redhat.com>
+---
+ src/Makefile          |   3 +-
+ src/mmap-rw-fault.c   | 164 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/637     |  40 +++++++++++
+ tests/generic/637.out |   2 +
+ tests/generic/group   |   1 +
+ 5 files changed, 209 insertions(+), 1 deletion(-)
+ create mode 100644 src/mmap-rw-fault.c
+ create mode 100755 tests/generic/637
+ create mode 100644 tests/generic/637.out
 
-On 2021/5/20 7:24:35, Darrick J. Wong wrote:
-> On Wed, May 19, 2021 at 11:10:15AM +0800, chenlong wrote:
->> Check the block group zero and prevent initializing reserved inodes.
->> But in some special cases, the reserved inode may not all belong to
->> the group zero, it may exist into the second group if we format
->> filesystem below.
->> mkfs.ext4 -b 4096 -g 8192 -N 1024 -I 4096 /dev/sda
->> So, it will end up triggering a false positive report of a corrupted
->> file system
->>
->> It's a regression test for commit a149d2a5cabb.
->>
->> Signed-off-by: Chen Long <chenlongcl.chen@huawei.com>
->> ---
->>   tests/ext4/048     | 50 ++++++++++++++++++++++++++++++++++++++++++++++
->>   tests/ext4/048.out |  5 +++++
->>   tests/ext4/group   |  1 +
->>   3 files changed, 56 insertions(+)
->>   create mode 100755 tests/ext4/048
->>   create mode 100644 tests/ext4/048.out
->>
->> diff --git a/tests/ext4/048 b/tests/ext4/048
->> new file mode 100755
->> index 00000000..56801579
->> --- /dev/null
->> +++ b/tests/ext4/048
->> @@ -0,0 +1,50 @@
->> +#! /bin/bash
->> +# SPDX-License-Identifier: GPL-2.0
->> +# Copyright (c) 2021 Huawei.  All Rights Reserved.
->> +#
->> +# FS QA Test 048
->> +#
->> +# Regression test for commit:
->> +# a149d2a5cabb(ext4: fix check to prevent false positive report of incorrect
->> +# used inodes)
->> +#
->> +seq=`basename $0`
->> +seqres=$RESULT_DIR/$seq
->> +echo "QA output created by $seq"
->> +
->> +here=`pwd`
->> +tmp=/tmp/$$
->> +status=1	# failure is the default!
->> +trap "_cleanup; exit \$status" 0 1 2 3 15
->> +
->> +_cleanup()
->> +{
->> +    cd /
->> +    rm -f $tmp.*
->> +}
->> +
->> +# get standard environment, filters and checks
->> +. ./common/rc
->> +. ./common/filter
->> +
->> +# remove previous $seqres.full before test
->> +rm -f $seqres.full
->> +
->> +# real QA test starts here
->> +_supported_fs ext4
->> +_require_scratch
->> +
->> +echo "+ create scratch fs"
->> +_scratch_mkfs_ext4 -b 4096 -g 8192 -N 1024 -I 4096 >> $seqres.full 2>&1
->> +
->> +echo "+ mount fs"
->> +_scratch_mount -o errors=remount-ro
->> +sleep 5
-> 
-> Why do we need to sleep here?  Won't _scratch_mount return nonzero if
-> the (buggy) kernel thought the fs was corrupt?
-> 
-> Also, won't the grep below catch that the fs didn't mount?
-> 
+diff --git a/src/Makefile b/src/Makefile
+index cc0b9579..13cdf19b 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -17,7 +17,8 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
+ 	t_mmap_cow_race t_mmap_fallocate fsync-err t_mmap_write_ro \
+ 	t_ext4_dax_journal_corruption t_ext4_dax_inline_corruption \
+ 	t_ofd_locks t_mmap_collision mmap-write-concurrent \
+-	t_get_file_time t_create_short_dirs t_create_long_dirs t_enospc
++	t_get_file_time t_create_short_dirs t_create_long_dirs t_enospc \
++	mmap-rw-fault
+ 
+ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+ 	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
+diff --git a/src/mmap-rw-fault.c b/src/mmap-rw-fault.c
+new file mode 100644
+index 00000000..b9c58af6
+--- /dev/null
++++ b/src/mmap-rw-fault.c
+@@ -0,0 +1,164 @@
++/* Trigger mmap page faults in the same file during pread and pwrite. */
++
++#ifndef _GNU_SOURCE
++#define _GNU_SOURCE /* to get definition of O_DIRECT flag. */
++#endif
++
++#include <sys/types.h>
++#include <sys/stat.h>
++#include <sys/mman.h>
++#include <fcntl.h>
++#include <unistd.h>
++#include <stdlib.h>
++#include <stdio.h>
++#include <string.h>
++#include <errno.h>
++#include <err.h>
++
++char *filename;
++unsigned int page_size;
++void *page;
++char *addr;
++int fd;
++ssize_t ret;
++
++/*
++ * Leave a hole at the beginning of the test file and initialize a block of
++ * @page_size bytes at offset @page_size to @c.  Then, reopen the file and
++ * mmap the first two pages.
++ */
++void init(char c, int flags)
++{
++	fd = open(filename, O_CREAT | O_TRUNC | O_WRONLY | O_DIRECT, 0666);
++	if (fd == -1)
++		goto fail;
++	memset(page, c, page_size);
++	ret = pwrite(fd, page, page_size, page_size);
++	if (ret != page_size)
++		goto fail;
++	if (close(fd))
++		goto fail;
++
++	fd = open(filename, flags);
++	if (fd == -1)
++		goto fail;
++	addr = mmap(NULL, 2 * page_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
++	if (addr == MAP_FAILED)
++		err(1, NULL);
++	return;
++
++fail:
++	err(1, "%s", filename);
++}
++
++void done(void)
++{
++	if (fsync(fd))
++		goto fail;
++	if (close(fd))
++		goto fail;
++	return;
++
++fail:
++	err(1, "%s", filename);
++}
++
++static ssize_t do_read(int fd, void *buf, size_t count, off_t offset)
++{
++	ssize_t count2 = 0, ret;
++
++	do {
++		ret = pread(fd, buf, count, offset);
++		if (ret == -1) {
++			if (errno == EINTR)
++				continue;
++			break;
++		}
++		if (ret == 0)
++			break;
++		count2 += ret;
++		buf += ret;
++		count -= ret;
++	} while (count);
++	return count2;
++}
++
++static ssize_t do_write(int fd, const void *buf, size_t count, off_t offset)
++{
++	ssize_t count2 = 0, ret;
++
++	do {
++		ret = pwrite(fd, buf, count, offset);
++		if (ret == -1) {
++			if (errno == EINTR)
++				continue;
++			break;
++		}
++		if (ret == 0)
++			break;
++		count2 += ret;
++		buf += ret;
++		count -= ret;
++	} while (count);
++	return count2;
++}
++
++int main(int argc, char *argv[])
++{
++	if (argc != 2)
++		errx(1, "no test filename argument given");
++	filename = argv[1];
++
++	page_size = ret = sysconf(_SC_PAGE_SIZE);
++	if (ret == -1)
++		err(1, NULL);
++
++	ret = posix_memalign(&page, page_size, page_size);
++	if (ret) {
++		errno = ENOMEM;
++		err(1, NULL);
++	}
++
++	/*
++	 * Make sure page faults during pread are handled correctly.
++	 */
++	init('a', O_RDWR);
++	ret = do_read(fd, addr, page_size, page_size);
++	if (ret != page_size)
++		err(1, "pread %s: %ld != %u", filename, ret, page_size);
++	if (memcmp(addr, page, page_size))
++		errx(1, "pread is broken");
++	done();
++
++	init('b', O_RDWR | O_DIRECT);
++	ret = do_read(fd, addr, page_size, page_size);
++	if (ret != page_size)
++		err(1, "pread %s (O_DIRECT): %ld != %u", filename, ret, page_size);
++	if (memcmp(addr, page, page_size))
++		errx(1, "pread (D_DIRECT) is broken");
++	done();
++
++	/*
++	 * Make sure page faults during pwrite are handled correctly.
++	 */
++	init('c', O_RDWR);
++	ret = do_write(fd, addr + page_size, page_size, 0);
++	if (ret != page_size)
++		err(1, "pwrite %s: %ld != %u", filename, ret, page_size);
++	if (memcmp(addr, page, page_size))
++		errx(1, "pwrite is broken");
++	done();
++
++	init('d', O_RDWR | O_DIRECT);
++	ret = do_write(fd, addr + page_size, page_size, 0);
++	if (ret != page_size)
++		err(1, "pwrite %s (O_DIRECT): %ld != %u", filename, ret, page_size);
++	if (memcmp(addr, page, page_size))
++		errx(1, "pwrite (O_DIRECT) is broken");
++	done();
++
++	if (unlink(filename))
++		err(1, "unlink %s", filename);
++
++	return 0;
++}
+diff --git a/tests/generic/637 b/tests/generic/637
+new file mode 100755
+index 00000000..d3c3f235
+--- /dev/null
++++ b/tests/generic/637
+@@ -0,0 +1,40 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2021 Red Hat, Inc.  All Rights Reserved.
++#
++# FS QA Test 637
++#
++# Trigger mmap page faults in the same file during pread and pwrite
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs generic
++_require_test
++
++$here/src/mmap-rw-fault $TEST_DIR/mmap-rw-fault.tmp \
++|| exit
++
++# success, all done
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/generic/637.out b/tests/generic/637.out
+new file mode 100644
+index 00000000..55a3d825
+--- /dev/null
++++ b/tests/generic/637.out
+@@ -0,0 +1,2 @@
++QA output created by 637
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index 105763c4..01996b48 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -639,3 +639,4 @@
+ 634 auto quick atime bigtime
+ 635 auto quick atime bigtime shutdown
+ 636 auto quick swap
++637 auto
+-- 
+2.26.3
 
-The default maximum wake-up delay of the lazy init thread of ext4 is 
-EXT4_DEF_LI_MAX_START_DELAY (5s).
-
-After mounting the file system, the lazy init thread will be awakened to 
-perform group initialization at 0~5s
-
-after the current time. If an error is detected during the 
-initialization process, it will be set to read-only,
-
-so the test case needs to delay a little while waiting for the init 
-thread  to execute.
-
-in this testcase,  _scratch_mount will be return zero, after a short 
-period of time, the file system will be remounted as read-only.
-
-In an environment with this bug,  such as:
-
-[root@testvm ~]# mkfs.ext4 -b 4096 -g 8192 -N 1024 -I 4096 /dev/sda
-
-[root@testvm ~]# mount -o errors=remount-ro /dev/sda /mnt
-
-[root@testvm ~]# mount | grep /dev/sda
-
-/dev/sda on /mnt type ext4 (rw,relatime,errors=remount-ro)
-
-After the file system is mounted，file system status is rw，but a moment 
-later, status will be change to ro.
-
-[root@testvm ~]# mount | grep /dev/sda
-
-/dev/sda on /mnt type ext4 (ro,relatime,errors=remount-ro)
-
->> +
->> +echo "+ check mountpoint status"
->> +cat /proc/self/mounts | grep ${SCRATCH_MNT} | \
-> 
-> Careful here, if someone sets SCRATCH_MNT=/u, this will match another
-> mount for /usr.  At the bare minimum you want 'grep -w' here, I think.
-> 
-> --D
-> 
-
-There is a risk here and needs to be fixed.
-
->> +    $AWK_PROG '{print $4}' | grep -oE '^rw,' | tee -a $seqres.full
->> +
->> +# success, all done
->> +status=0
->> +exit
->> diff --git a/tests/ext4/048.out b/tests/ext4/048.out
->> new file mode 100644
->> index 00000000..16e50e86
->> --- /dev/null
->> +++ b/tests/ext4/048.out
->> @@ -0,0 +1,5 @@
->> +QA output created by 048
->> ++ create scratch fs
->> ++ mount fs
->> ++ check mountpoint status
->> +rw,
->> diff --git a/tests/ext4/group b/tests/ext4/group
->> index ceda2ba6..82b77efb 100644
->> --- a/tests/ext4/group
->> +++ b/tests/ext4/group
->> @@ -50,6 +50,7 @@
->>   045 auto dir
->>   046 auto prealloc quick
->>   047 auto quick dax
->> +048 auto quick
->>   271 auto rw quick
->>   301 aio auto ioctl rw stress defrag
->>   302 aio auto ioctl rw stress defrag
->> -- 
->> 2.18.0.huawei.25
->>
-> .
-> 
