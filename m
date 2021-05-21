@@ -2,97 +2,67 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.5 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 32790C433ED
-	for <linux-fstests@archiver.kernel.org>; Fri, 21 May 2021 04:58:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 62A85C433B4
+	for <linux-fstests@archiver.kernel.org>; Fri, 21 May 2021 07:58:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 14D1C6139A
-	for <linux-fstests@archiver.kernel.org>; Fri, 21 May 2021 04:58:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3BC60613B6
+	for <linux-fstests@archiver.kernel.org>; Fri, 21 May 2021 07:58:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232956AbhEUFAE (ORCPT
+        id S229503AbhEUH7f (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 21 May 2021 01:00:04 -0400
-Received: from esa5.hgst.iphmx.com ([216.71.153.144]:33628 "EHLO
-        esa5.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234175AbhEUFAC (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 21 May 2021 01:00:02 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1621573118; x=1653109118;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=SrFjFY56fR+Rp22UAHX43bKEVCdx/FdHUM8fBb3hNus=;
-  b=VPfewvVGpk8Fh9JfThicgvITfwtDxo358mBRjDSNSIbZ3Ey6iAjE7IYq
-   tb0/zOAHOV2HdO+9U9P/RFbvw79FGL5gXCF2LqRDQJeAQNTpPw3Wn4EAt
-   mkUV0KNjAjOxtO4auOe33PGcWOiDvDaiPxvjBmaan0AWBnHnwFu/9Qyfu
-   nkVTv7lxA74qDTx9PAJFWETdRAYnEifPOJ6J2RQPUzrEg7PUAeLI7PGI+
-   bX/S/88ChNSoEJXuMK+D0GYrPO6IYmlfoOLZE9C0AZiMFcVoNIp+89fjb
-   J+WLrNdn/ewfzZGRU9BENZ9jSq2Mvf4gFw28ulug7cPYmpM5rWNZnTCYS
-   g==;
-IronPort-SDR: /xaIB8mAx+oOHh9eldnY6aDZbSz27N7DTC9AVcNt/AdUruUumBiflCa8+zCiVBRZ73a9/dHJjQ
- tkqc47ZtGEILB4UOvoyKmoDD/j88TcrrHCDOOoMhrt2w8v0tB7TNsxvdoehuGqqPwmbFRViU/K
- WnWzkMZPMAHVMmPxtb/18FVhSQnkwX/UZ4h788S/anFrp9sqPMrrrCe93uLbEkJ2ICghsMLfNH
- x+zp+t0TeEaqLwS6sRTg7V2SYGQFcZqdlQpp2LEZBR28xuRltxw7tX8eGkam24Hwy+nS9Y+ro2
- Wpk=
-X-IronPort-AV: E=Sophos;i="5.82,313,1613404800"; 
-   d="scan'208";a="168955592"
-Received: from h199-255-45-15.hgst.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
-  by ob1.hgst.iphmx.com with ESMTP; 21 May 2021 12:58:38 +0800
-IronPort-SDR: edtZB23USbtceAITH6G+RtiVr/J4gUaWmuCBXFnzxZZUxFV6Qad79+cVm3inVStt/y1zfIkadB
- gMW14vlhwxIb7z2CjQWvU0au8ujruNaAsuBvc+i7Sm3fmfTvJB1uksGHAlyiDw3GAG6TtkR/r/
- 2Op9qnSaEVkGp5D12++h+ycN1IlSdV3crEVGnoWb2lViSrE8D9tC6eQlQ+0fBrkHwyZ9cqz0Q6
- UsI1jKA58T8Vtg/+0MuzLKyIH5bfmefA0vgZAO4n6KvqCX1isV9WF2o8ek3zLzdIBYgbwItiNl
- Ncae6KPIZqMqu2lsLiD+uBdJ
-Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
-  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 May 2021 21:37:02 -0700
-IronPort-SDR: 64OVi2vKgFGMYpKgonKeeiu2FblrbDfuAL47mSRxUL374ggoRpwR1nG2qEJxNNsjLf8bC8gvy4
- vjWag2nNU6GSfsV/8C3qgvzWktqiykiNSBl/xnMHSl8ZerppNSD1SySq6SZ7mYCUXlqQ0Z5+cI
- T7yVeLJ2AISWw3M8qfN2HS5BQFzLiy9dlTaV1tTKklP5flEvFoC1+TkY+C05e6uhoikXeyUCtX
- v0zHoFxejpjlA0BKEXNX83JbJbgkftEvivlBB+odh9bCjYHCKOj8uBPt9swYV2ngDMcc9xD3RS
- ODo=
-WDCIronportException: Internal
-Received: from 9rp4l33.ad.shared (HELO naota-xeon.wdc.com) ([10.225.48.75])
-  by uls-op-cesaip02.wdc.com with ESMTP; 20 May 2021 21:58:40 -0700
-From:   Naohiro Aota <naohiro.aota@wdc.com>
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Naohiro Aota <naohiro.aota@wdc.com>
-Subject: [PATCH 5/5] shared/032: add check for zoned block device
-Date:   Fri, 21 May 2021 13:58:25 +0900
-Message-Id: <20210521045825.1720305-6-naohiro.aota@wdc.com>
-X-Mailer: git-send-email 2.31.1
-In-Reply-To: <20210521045825.1720305-1-naohiro.aota@wdc.com>
-References: <20210521045825.1720305-1-naohiro.aota@wdc.com>
+        Fri, 21 May 2021 03:59:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37676 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229455AbhEUH7f (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 21 May 2021 03:59:35 -0400
+Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A3882C061574;
+        Fri, 21 May 2021 00:58:12 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
+        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=PlTD64atGptX252DwWmvXy/Vb8v9vtRUDNU3mTx23jQ=; b=OxqKp7WckjK0fHpfGRO+W8xZez
+        tqhc0uxibnun5R1IfC3Ivau1J+ThD4fWe6ki4DpsKi+9SCUg7NE9tHsyoYHpM1JdcPAuGNimlPc3D
+        SgmwmRIQb7bY129RRkuBr3OF2GTXTr/Qk/cOjgjm54VvBU68mC0LtOI3ufdxvnO5vgcPJbqxE9TFa
+        E6VN74LIOeTEg5Xt6TbLuZ0kUhUB6XHSmg9ng1hZAMrh30+vgxlQcWgQtWAQIgDxVwEZiJLza0uqM
+        3GEz5gMqDy3yptbTl/skFLwrYNszKrBwwDEwdEQydIpVH0MLDQSZ8kLM0hNLv5XP+142l/I+0H2Vo
+        mZSsfzvQ==;
+Received: from hch by casper.infradead.org with local (Exim 4.94 #2 (Red Hat Linux))
+        id 1lk00y-00GlUt-6V; Fri, 21 May 2021 07:57:04 +0000
+Date:   Fri, 21 May 2021 08:56:12 +0100
+From:   Christoph Hellwig <hch@infradead.org>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org, guan@eryu.me
+Subject: Re: [PATCH 2/6] xfs: force file creation to the data device for
+ certain layout tests
+Message-ID: <YKdnnJRQhRrGHpab@infradead.org>
+References: <162146860057.2500122.8732083536936062491.stgit@magnolia>
+ <162146861270.2500122.8499973348974838405.stgit@magnolia>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <162146861270.2500122.8499973348974838405.stgit@magnolia>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by casper.infradead.org. See http://www.infradead.org/rpr.html
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Mkfs on zoned block device won't work on most filesystem. Let's
-disable the test.
+On Wed, May 19, 2021 at 04:56:52PM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
+> 
+> I found a bunch more tests in the xfs/ directory that try to create
+> specific metadata layouts on the data device, either because they're
+> fuzz tests or because they're testing specific edge cases of the code
+> base.  Either way, these test need to override '-d rtinherit' in the
+> MKFS_OPTIONS, so do that with _xfs_force_bdev.
 
-Signed-off-by: Naohiro Aota <naohiro.aota@wdc.com>
----
- tests/shared/032 | 2 ++
- 1 file changed, 2 insertions(+)
+Looks good,
 
-diff --git a/tests/shared/032 b/tests/shared/032
-index 360087ee1fb9..31ac52303dde 100755
---- a/tests/shared/032
-+++ b/tests/shared/032
-@@ -25,6 +25,8 @@ _supported_fs xfs btrfs
- 
- _require_scratch_nocheck
- _require_no_large_scratch_dev
-+# not all the FS support zoned block device
-+_require_non_zoned_device "${SCRATCH_DEV}"
- 
- # mkfs.btrfs did not have overwrite detection at first
- if [ "$FSTYP" == "btrfs" ]; then
--- 
-2.31.1
-
+Reviewed-by: Christoph Hellwig <hch@lst.de>
