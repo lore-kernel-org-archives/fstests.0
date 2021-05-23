@@ -2,96 +2,92 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+X-Spam-Status: No, score=-13.7 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AEB31C47080
-	for <linux-fstests@archiver.kernel.org>; Sun, 23 May 2021 05:09:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C1692C47080
+	for <linux-fstests@archiver.kernel.org>; Sun, 23 May 2021 09:05:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 808E0600D3
-	for <linux-fstests@archiver.kernel.org>; Sun, 23 May 2021 05:09:09 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 97AF86128A
+	for <linux-fstests@archiver.kernel.org>; Sun, 23 May 2021 09:05:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231550AbhEWFKe (ORCPT
+        id S231695AbhEWJHR (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 23 May 2021 01:10:34 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43734 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229895AbhEWFKe (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 23 May 2021 01:10:34 -0400
-Received: from mail-pj1-x1035.google.com (mail-pj1-x1035.google.com [IPv6:2607:f8b0:4864:20::1035])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5D603C061574;
-        Sat, 22 May 2021 22:09:07 -0700 (PDT)
-Received: by mail-pj1-x1035.google.com with SMTP id q6so13020559pjj.2;
-        Sat, 22 May 2021 22:09:07 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=HjoyRwfR4HzDsa3R5xoCql22XqVJsKcofCTHgClE8hs=;
-        b=o7E7cQM/jkN6zCX3JMHD2K5lzCmYnyFKBEogdtXV7OLKSateUqchb7IaHVqUM0XoxB
-         gDJUIp9Xc+bvB9WxP3OPrvGK5GXOTas3FL+QgHFIHmfsfzJz6314os2OE1KL4vvPcKDi
-         EAywv5g1cJg7aT3AjI651eTK/NRZwSzjUkO49gCKL/lBtoiK/wNszKtUS5L1ivsJQabL
-         EuhOoWZ/sDvW7z62Q4tZuiQsZ6/HJ/F/0mJXDPk0GlI1LEl3BbL6Nd4cQ9zgk1QbjD3J
-         GNXTKjaq60pSCSaV/YryRPm5y3eRiQ4HcdVZpxOUlUxPZosvLOhGKKKwRWyR65RIkgLy
-         Rsvg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=HjoyRwfR4HzDsa3R5xoCql22XqVJsKcofCTHgClE8hs=;
-        b=opwUizn5gKhoiJAD9/ZoFnnFdDAJwrzMne3UDWBDKIgD+95QXZwXoJyZykzd6jntn7
-         FCigiC8+UMmyh0Xa8ubdYCHmEBihJpXcSIFEkoMWSZtiSCKQ6BVvmev54Zl+nxMNMmru
-         i3BUeL7EuL+sYj+Z3w1SWvE9lhVxCLda5FF+XXhsrejjcZTqcQRsWGetiEmJ6HrPhTdg
-         a4OFp/K59DgPr6MDTeA+uLYA75E5iEO0TQi4QWtXfZz18vbXEP3eAXyC+nS32lKgLz5q
-         fBG6Ozo4oqkj82FehWBcspvvXJrx5dpQRQ0gGcDv7yuh2YJNO5k8g8Z28drpy6WjMipt
-         bLEA==
-X-Gm-Message-State: AOAM532B7nMy1FkKfr+fyWrSSXOE7tKCjOp3ziLdnZ5+9s+i7KKqPDEb
-        HcQxStdmJOozHPGVyjHdEZxl6IiZgi4MIlMS
-X-Google-Smtp-Source: ABdhPJyg9YrIWPKgJi31YNmpBwoWT77HlcnsQhjyKr1vlppZCNfAG+/GCFgtqXwGO3KGouQMfQTeuQ==
-X-Received: by 2002:a17:902:8c91:b029:ef:aa9a:af35 with SMTP id t17-20020a1709028c91b02900efaa9aaf35mr19688222plo.24.1621746546810;
-        Sat, 22 May 2021 22:09:06 -0700 (PDT)
-Received: from localhost.localdomain ([59.12.165.26])
-        by smtp.gmail.com with ESMTPSA id t19sm7626229pfq.116.2021.05.22.22.09.05
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 22 May 2021 22:09:06 -0700 (PDT)
-From:   Sidong Yang <realwakka@gmail.com>
-To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Cc:     Sidong Yang <realwakka@gmail.com>
-Subject: [PATCH] btrfs/012: check free size of scratch device before copying files
-Date:   Sun, 23 May 2021 05:08:59 +0000
-Message-Id: <20210523050859.1329427-1-realwakka@gmail.com>
-X-Mailer: git-send-email 2.25.1
+        Sun, 23 May 2021 05:07:17 -0400
+Received: from out20-1.mail.aliyun.com ([115.124.20.1]:43068 "EHLO
+        out20-1.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231636AbhEWJHR (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 23 May 2021 05:07:17 -0400
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.09231891|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_alarm|0.0244744-0.000565306-0.97496;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047188;MF=guan@eryu.me;NM=1;PH=DS;RN=2;RT=2;SR=0;TI=SMTPD_---.KHWS5C1_1621760749;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.KHWS5C1_1621760749)
+          by smtp.aliyun-inc.com(10.147.42.197);
+          Sun, 23 May 2021 17:05:49 +0800
+Date:   Sun, 23 May 2021 17:05:49 +0800
+From:   Eryu Guan <guan@eryu.me>
+To:     Jakob Unterwurzacher <jakobunt@gmail.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH] generic/286: fix integer underflow on block sizes != 4096
+Message-ID: <YKoa7dtkdmu8hp+/@desktop>
+References: <20210522184814.95802-1-jakobunt@gmail.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210522184814.95802-1-jakobunt@gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This test failed when scratch device don't have enough space for copying
-files. This patch gets size of files by du command and checks if there
-is enough space in the device.
+On Sat, May 22, 2021 at 08:48:14PM +0200, Jakob Unterwurzacher wrote:
+> The read loop always requested 4096 bytes, which only works
+> when the total read length is a multiple of 4096 bytes.
 
-Signed-off-by: Sidong Yang <realwakka@gmail.com>
----
- tests/btrfs/012 | 2 ++
- 1 file changed, 2 insertions(+)
+The total read length should be
 
-diff --git a/tests/btrfs/012 b/tests/btrfs/012
-index fd43da53..6979d862 100755
---- a/tests/btrfs/012
-+++ b/tests/btrfs/012
-@@ -42,6 +42,8 @@ _require_command "$BTRFS_CONVERT_PROG" btrfs-convert
- _require_command "$MKFS_EXT4_PROG" mkfs.ext4
- _require_command "$E2FSCK_PROG" e2fsck
- 
-+_require_fs_space $SCRATCH_MNT $(du -s /lib/modules/`uname -r` | awk '{print $1}')
-+
- rm -f $seqres.full
- 
- BLOCK_SIZE=`_get_block_size $TEST_DIR`
--- 
-2.25.1
+"The length of this extent is (hole_off - data_off)"
 
+according to the comments above do_extent_copy(). Total read length
+being not a multiple of 4k means 'data_off' or 'hole_off' is not 4k
+aligned.
+
+> 
+> This is not neccessarily true, and when it's not, len wraps
+
+But generic/286 creates source files with lenght of all data extents and
+hole extents being multiple of 4k. So I still don't understand why this
+is valid for gocryptfs. Shouldn't that be a bug in seek_data/seek_hole
+in gocryptfs? Could you please elaborate?
+
+Thanks,
+Eryu
+
+> around to UINT64_MAX and you get a lot of these:
+> 
+> 	ERROR: [error:38] reached EOF:Success
+> 
+> This was caught when running xfstests against gocryptfs,
+> an encrypted overlay file system.
+> 
+> On ext4, the test still passes after this change.
+> 
+> Signed-off-by: Jakob Unterwurzacher <jakobunt@gmail.com>
+> ---
+>  src/seek_copy_test.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/src/seek_copy_test.c b/src/seek_copy_test.c
+> index 0c2c6a3d..28c021e2 100644
+> --- a/src/seek_copy_test.c
+> +++ b/src/seek_copy_test.c
+> @@ -98,7 +98,7 @@ do_extent_copy(int src_fd, int dest_fd, off_t data_off, off_t hole_off)
+>  	}
+>  
+>  	while (len > 0) {
+> -		ssize_t nr_read = read(src_fd, buf, BUF_SIZE);
+> +		ssize_t nr_read = read(src_fd, buf, MIN(len, BUF_SIZE));
+>  		if (nr_read < 0) {
+>  			if (errno == EINTR)
+>  				continue;
+> -- 
+> 2.31.1
