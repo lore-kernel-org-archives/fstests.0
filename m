@@ -4,256 +4,317 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-13.7 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham
-	autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,URIBL_BLOCKED
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DDF8DC47080
-	for <linux-fstests@archiver.kernel.org>; Sun, 23 May 2021 14:56:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D4D88C4707A
+	for <linux-fstests@archiver.kernel.org>; Sun, 23 May 2021 15:07:15 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A3A70611ED
-	for <linux-fstests@archiver.kernel.org>; Sun, 23 May 2021 14:56:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9EB75611ED
+	for <linux-fstests@archiver.kernel.org>; Sun, 23 May 2021 15:07:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231776AbhEWO6Z (ORCPT
+        id S231821AbhEWPIl (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 23 May 2021 10:58:25 -0400
-Received: from out20-14.mail.aliyun.com ([115.124.20.14]:42260 "EHLO
-        out20-14.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231771AbhEWO6Y (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 23 May 2021 10:58:24 -0400
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07436282|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_regular_dialog|0.0540884-0.000342724-0.945569;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047211;MF=guan@eryu.me;NM=1;PH=DS;RN=2;RT=2;SR=0;TI=SMTPD_---.KHc1HGq_1621781816;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.KHc1HGq_1621781816)
-          by smtp.aliyun-inc.com(10.147.43.95);
-          Sun, 23 May 2021 22:56:56 +0800
-Date:   Sun, 23 May 2021 22:56:56 +0800
+        Sun, 23 May 2021 11:08:41 -0400
+Received: from out20-99.mail.aliyun.com ([115.124.20.99]:36077 "EHLO
+        out20-99.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231812AbhEWPIl (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 23 May 2021 11:08:41 -0400
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07436284|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.413562-0.00393565-0.582502;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047205;MF=guan@eryu.me;NM=1;PH=DS;RN=4;RT=4;SR=0;TI=SMTPD_---.KHcBwzY_1621782431;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.KHcBwzY_1621782431)
+          by smtp.aliyun-inc.com(10.147.41.187);
+          Sun, 23 May 2021 23:07:11 +0800
+Date:   Sun, 23 May 2021 23:07:05 +0800
 From:   Eryu Guan <guan@eryu.me>
-To:     Andreas Gruenbacher <agruenba@redhat.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH v5] generic: Test page faults during read and write
-Message-ID: <YKptOEuBHO5rARGp@desktop>
-References: <20210520165741.1607453-1-agruenba@redhat.com>
+To:     Christian Brauner <brauner@kernel.org>
+Cc:     fstests@vger.kernel.org, Christoph Hellwig <hch@lst.de>,
+        Christian Brauner <christian.brauner@ubuntu.com>
+Subject: Re: [PATCH 4/7] generic/637: add fscaps regression test
+Message-ID: <YKpvmcltp8FF8KJR@desktop>
+References: <20210507150100.968659-1-brauner@kernel.org>
+ <20210507150100.968659-5-brauner@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210520165741.1607453-1-agruenba@redhat.com>
+In-Reply-To: <20210507150100.968659-5-brauner@kernel.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, May 20, 2021 at 06:57:41PM +0200, Andreas Gruenbacher wrote:
-> Some filesystems have problems when the buffer passed to read or write is
-> memory-mapped to the file being read from or written to and the buffer is
-> faulted in during the read or write.  (That's probably not a recommended
-> use case, but it should work nevertheless.)
-
-Is there any kernel fixes that this test is targeting at? It'd better to
-mention the coressponding kernel fixes in commit log or test
-description. I noticed that btrfs currently hangs with v5.13-rc1 kernel,
-ext4 and xfs all pass the test.
-
+On Fri, May 07, 2021 at 05:00:57PM +0200, Christian Brauner wrote:
+> From: Christian Brauner <christian.brauner@ubuntu.com>
 > 
-> Signed-off-by: Andreas Gruenbacher <agruenba@redhat.com>
+> Add a test to verify that setting a v3 fscap from an idmapped mount
+> works as expected. This and other related use-cases were regressed by
+> commit [1] which was reverted in [2] and the proper fix merged right
+> before v5.12 was released in [3].
+> 
+> [1]: commit 3b0c2d3eaa83 ("Revert 95ebabde382c ("capabilities: Don't allow writing ambiguous v3 file capabilities")")
+> [2]: commit 95ebabde382c ("capabilities: Don't allow writing ambiguous v3 file capabilities")
+> [3]: commit db2e718a4798 ("capabilities: require CAP_SETFCAP to map uid 0")
+> Cc: fstests@vger.kernel.org
+> Cc: Christoph Hellwig <hch@lst.de>
+> Signed-off-by: Christian Brauner <christian.brauner@ubuntu.com>
+
+Sorry for the late review..
+
 > ---
->  src/Makefile          |   3 +-
->  src/mmap-rw-fault.c   | 169 ++++++++++++++++++++++++++++++++++++++++++
-
-Missing an entry in .gitignore file.
-
->  tests/generic/639     |  40 ++++++++++
->  tests/generic/639.out |   2 +
->  tests/generic/group   |   1 +
->  5 files changed, 214 insertions(+), 1 deletion(-)
->  create mode 100644 src/mmap-rw-fault.c
->  create mode 100755 tests/generic/639
->  create mode 100644 tests/generic/639.out
+>  .gitignore                            |   1 +
+>  src/idmapped-mounts/Makefile          |  12 ++-
+>  src/idmapped-mounts/idmapped-mounts.c | 135 +++++++++++++++++++++++++-
+>  tests/generic/637                     |  42 ++++++++
+>  tests/generic/637.out                 |   2 +
+>  tests/generic/group                   |   1 +
+>  6 files changed, 188 insertions(+), 5 deletions(-)
+>  create mode 100755 tests/generic/637
+>  create mode 100644 tests/generic/637.out
 > 
-> diff --git a/src/mmap-rw-fault.c b/src/mmap-rw-fault.c
-> new file mode 100644
-> index 00000000..31778769
-> --- /dev/null
-> +++ b/src/mmap-rw-fault.c
-> @@ -0,0 +1,169 @@
-> +// SPDX-License-Identifier: GPL-2.0+
-> +/*
-> + * Trigger mmap page faults in the same file during pread and pwrite.
-> + * Copyright (C) 2021 Red Hat, Inc. All Rights Reserved.
-> + * Written by Andreas Gruenbacher <agruenba@redhat.com>
-> + */
+> diff --git a/.gitignore b/.gitignore
+> index 4cc9c807..da48e6f8 100644
+> --- a/.gitignore
+> +++ b/.gitignore
+> @@ -180,6 +180,7 @@
+>  /src/aio-dio-regress/aiodio_sparse2
+>  /src/idmapped-mounts/idmapped-mounts
+>  /src/idmapped-mounts/mount-idmapped
+> +/src/idmapped-mounts/fscaps-in-ancestor-userns
+>  /src/log-writes/replay-log
+>  /src/perf/*.pyc
+>  
+> diff --git a/src/idmapped-mounts/Makefile b/src/idmapped-mounts/Makefile
+> index ad4ddc99..1bab6471 100644
+> --- a/src/idmapped-mounts/Makefile
+> +++ b/src/idmapped-mounts/Makefile
+> @@ -3,7 +3,9 @@
+>  TOPDIR = ../..
+>  include $(TOPDIR)/include/builddefs
+>  
+> -TARGETS = idmapped-mounts mount-idmapped
+> +BINS = idmapped-mounts mount-idmapped
+> +LINKS = fscaps-in-ancestor-userns
+> +TARGETS = $(BINS) $(LINKS)
+>  CFILES_IDMAPPED_MOUNTS = idmapped-mounts.c utils.c
+>  CFILES_MOUNT_IDMAPPED = mount-idmapped.c utils.c
+>  
+> @@ -29,12 +31,18 @@ idmapped-mounts: $(CFILES_IDMAPPED_MOUNTS)
+>  	@echo "    [CC]    $@"
+>  	$(Q)$(LTLINK) $(CFILES_IDMAPPED_MOUNTS) -o $@ $(CFLAGS) $(LDFLAGS) $(LDLIBS)
+>  
+> +fscaps-in-ancestor-userns:
+> +	ln -sf idmapped-mounts fscaps-in-ancestor-userns
 > +
-> +#ifndef _GNU_SOURCE
-> +#define _GNU_SOURCE /* to get definition of O_DIRECT flag. */
-> +#endif
-> +
-> +#include <sys/types.h>
-> +#include <sys/stat.h>
-> +#include <sys/mman.h>
-> +#include <fcntl.h>
-> +#include <unistd.h>
-> +#include <stdlib.h>
-> +#include <stdio.h>
-> +#include <string.h>
-> +#include <errno.h>
-> +#include <err.h>
-> +
-> +char *filename;
-> +unsigned int page_size;
-> +void *page;
-> +char *addr;
-> +int fd;
-> +ssize_t ret;
-> +
-> +/*
-> + * Leave a hole at the beginning of the test file and initialize a block of
-> + * @page_size bytes at offset @page_size to @c.  Then, reopen the file and
-> + * mmap the first two pages.
-> + */
-> +void init(char c, int flags)
+>  mount-idmapped: $(CFILES_MOUNT_IDMAPPED)
+>  	@echo "    [CC]    $@"
+>  	$(Q)$(LTLINK) $(CFILES_MOUNT_IDMAPPED) -o $@ $(CFLAGS) $(LDFLAGS) $(LDLIBS)
+>  
+>  install:
+>  	$(INSTALL) -m 755 -d $(PKG_LIB_DIR)/src/idmapped-mounts
+> -	$(INSTALL) -m 755 $(TARGETS) $(PKG_LIB_DIR)/src/idmapped-mounts
+> +	$(INSTALL) -m 755 $(BINS) $(PKG_LIB_DIR)/src/idmapped-mounts
+> +	cd $(PKG_LIB_DIR)/src/idmapped-mounts && \
+> +		rm -f $(LINKS) && \
+> +		$(LN_S) idmapped-mounts fscaps-in-ancestor-userns
+>  
+>  -include .dep
+> diff --git a/src/idmapped-mounts/idmapped-mounts.c b/src/idmapped-mounts/idmapped-mounts.c
+> index 4d93b721..94b83c01 100644
+> --- a/src/idmapped-mounts/idmapped-mounts.c
+> +++ b/src/idmapped-mounts/idmapped-mounts.c
+> @@ -3201,6 +3201,121 @@ out:
+>  	return fret;
+>  }
+>  
+> +static int fscaps_idmapped_mounts_in_userns_valid_in_ancestor_userns(void)
 > +{
-> +	fd = open(filename, O_CREAT | O_TRUNC | O_WRONLY | O_DIRECT, 0666);
-> +	if (fd == -1)
-> +		goto fail;
-> +	memset(page, c, page_size);
-> +	ret = pwrite(fd, page, page_size, page_size);
-> +	if (ret != page_size)
-> +		goto fail;
-> +	if (close(fd))
-> +		goto fail;
+> +	int fret = -1;
+> +	int file1_fd = -EBADF, file1_fd2 = -EBADF, open_tree_fd = -EBADF;
+> +	struct mount_attr attr = {
+> +		.attr_set = MOUNT_ATTR_IDMAP,
+> +	};
+> +	pid_t pid;
 > +
-> +	fd = open(filename, flags);
-> +	if (fd == -1)
-> +		goto fail;
-> +	addr = mmap(NULL, 2 * page_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
-> +	if (addr == MAP_FAILED)
-> +		err(1, NULL);
-> +	return;
+> +	file1_fd = openat(t_dir1_fd, FILE1, O_CREAT | O_EXCL | O_CLOEXEC, 0644);
+> +	if (file1_fd < 0) {
+> +		log_stderr("failure: openat");
+> +		goto out;
+> +	}
 > +
-> +fail:
-> +	err(1, "%s", filename);
-> +}
+> +	/* Skip if vfs caps are unsupported. */
+> +	if (set_dummy_vfs_caps(file1_fd, 0, 1000))
+> +		return 0;
 > +
-> +void done(void)
-> +{
-> +	if (fsync(fd))
-> +		goto fail;
-> +	if (close(fd))
-> +		goto fail;
-> +	return;
+> +	if (fremovexattr(file1_fd, "security.capability")) {
+> +		log_stderr("failure: fremovexattr");
+> +		goto out;
+> +	}
+> +	if (expected_dummy_vfs_caps_uid(file1_fd, -1)) {
+> +		log_stderr("failure: expected_dummy_vfs_caps_uid");
+> +		goto out;
+> +	}
+> +	if (errno != ENODATA) {
+> +		log_stderr("failure: errno");
+> +		goto out;
+> +	}
 > +
-> +fail:
-> +	err(1, "%s", filename);
-> +}
+> +	/* Changing mount properties on a detached mount. */
+> +	attr.userns_fd	= get_userns_fd(0, 10000, 10000);
+> +	if (attr.userns_fd < 0) {
+> +		log_stderr("failure: get_userns_fd");
+> +		goto out;
+> +	}
 > +
-> +static ssize_t do_read(int fd, void *buf, size_t count, off_t offset)
-> +{
-> +	ssize_t count2 = 0, ret;
+> +	open_tree_fd = sys_open_tree(t_dir1_fd, "",
+> +				     AT_EMPTY_PATH |
+> +				     AT_NO_AUTOMOUNT |
+> +				     AT_SYMLINK_NOFOLLOW |
+> +				     OPEN_TREE_CLOEXEC |
+> +				     OPEN_TREE_CLONE);
+> +	if (open_tree_fd < 0) {
+> +		log_stderr("failure: sys_open_tree");
+> +		goto out;
+> +	}
 > +
-> +	do {
-> +		ret = pread(fd, buf, count, offset);
-> +		if (ret == -1) {
-> +			if (errno == EINTR)
-> +				continue;
-> +			break;
-> +		}
-> +		if (ret == 0)
-> +			break;
-> +		count2 += ret;
-> +		buf += ret;
-> +		count -= ret;
-> +	} while (count);
-> +	return count2;
-> +}
+> +	if (sys_mount_setattr(open_tree_fd, "", AT_EMPTY_PATH, &attr, sizeof(attr))) {
+> +		log_stderr("failure: sys_mount_setattr");
+> +		goto out;
+> +	}
 > +
-> +static ssize_t do_write(int fd, const void *buf, size_t count, off_t offset)
-> +{
-> +	ssize_t count2 = 0, ret;
-> +
-> +	do {
-> +		ret = pwrite(fd, buf, count, offset);
-> +		if (ret == -1) {
-> +			if (errno == EINTR)
-> +				continue;
-> +			break;
-> +		}
-> +		if (ret == 0)
-> +			break;
-> +		count2 += ret;
-> +		buf += ret;
-> +		count -= ret;
-> +	} while (count);
-> +	return count2;
-> +}
-> +
-> +int main(int argc, char *argv[])
-> +{
-> +	if (argc != 2)
-> +		errx(1, "no test filename argument given");
-> +	filename = argv[1];
-> +
-> +	page_size = ret = sysconf(_SC_PAGE_SIZE);
-> +	if (ret == -1)
-> +		err(1, NULL);
-> +
-> +	ret = posix_memalign(&page, page_size, page_size);
-> +	if (ret) {
-> +		errno = ENOMEM;
-> +		err(1, NULL);
+> +	file1_fd2 = openat(open_tree_fd, FILE1, O_RDWR | O_CLOEXEC, 0);
+> +	if (file1_fd2 < 0) {
+> +		log_stderr("failure: openat");
+> +		goto out;
 > +	}
 > +
 > +	/*
-> +	 * Make sure page faults during pread are handled correctly.
+> +	 * Verify we can set an v3 fscap for real root this was regressed at
+> +	 * some point. Make sure this doesn't happen again!
 > +	 */
-> +	init('a', O_RDWR);
-> +	ret = do_read(fd, addr, page_size, page_size);
-> +	if (ret != page_size)
-> +		err(1, "pread %s: %ld != %u", filename, ret, page_size);
-> +	if (memcmp(addr, page, page_size))
-> +		errx(1, "pread is broken");
-> +	done();
+> +	pid = fork();
+> +	if (pid < 0) {
+> +		log_stderr("failure: fork");
+> +		goto out;
+> +	}
+> +	if (pid == 0) {
+> +		if (!switch_userns(attr.userns_fd, 0, 0, false))
+> +			die("failure: switch_userns");
 > +
-> +	init('b', O_RDWR | O_DIRECT);
-> +	ret = do_read(fd, addr, page_size, page_size);
-> +	if (ret != page_size)
-> +		err(1, "pread %s (O_DIRECT): %ld != %u", filename, ret, page_size);
-> +	if (memcmp(addr, page, page_size))
-> +		errx(1, "pread (D_DIRECT) is broken");
-> +	done();
+> +		if (expected_dummy_vfs_caps_uid(file1_fd2, -1))
+> +			die("failure: expected_dummy_vfs_caps_uid");
+> +		if (errno != ENODATA)
+> +			die("failure: errno");
 > +
-> +	/*
-> +	 * Make sure page faults during pwrite are handled correctly.
-> +	 */
-> +	init('c', O_RDWR);
-> +	ret = do_write(fd, addr + page_size, page_size, 0);
-> +	if (ret != page_size)
-> +		err(1, "pwrite %s: %ld != %u", filename, ret, page_size);
-> +	if (memcmp(addr, page, page_size))
-> +		errx(1, "pwrite is broken");
-> +	done();
+> +		if (set_dummy_vfs_caps(file1_fd2, 0, 0))
+> +			die("failure: set_dummy_vfs_caps");
 > +
-> +	init('d', O_RDWR | O_DIRECT);
-> +	ret = do_write(fd, addr + page_size, page_size, 0);
-> +	if (ret != page_size)
-> +		err(1, "pwrite %s (O_DIRECT): %ld != %u", filename, ret, page_size);
-> +	if (memcmp(addr, page, page_size))
-> +		errx(1, "pwrite (O_DIRECT) is broken");
-> +	done();
+> +		if (!expected_dummy_vfs_caps_uid(file1_fd2, 0))
+> +			die("failure: expected_dummy_vfs_caps_uid");
 > +
-> +	if (unlink(filename))
-> +		err(1, "unlink %s", filename);
+> +		if (!expected_dummy_vfs_caps_uid(file1_fd, 0) && errno != EOVERFLOW)
+> +			die("failure: expected_dummy_vfs_caps_uid");
 > +
-> +	return 0;
+> +		exit(EXIT_SUCCESS);
+> +	}
+> +
+> +	if (wait_for_pid(pid))
+> +		goto out;
+> +
+> +	if (!expected_dummy_vfs_caps_uid(file1_fd2, 10000)) {
+> +		log_stderr("failure: expected_dummy_vfs_caps_uid");
+> +		goto out;
+> +	}
+> +
+> +	if (!expected_dummy_vfs_caps_uid(file1_fd, 0)) {
+> +		log_stderr("failure: expected_dummy_vfs_caps_uid");
+> +		goto out;
+> +	}
+> +
+> +	fret = 0;
+> +	log_debug("Ran test");
+> +out:
+> +	safe_close(attr.userns_fd);
+> +	safe_close(file1_fd);
+> +	safe_close(file1_fd2);
+> +	safe_close(open_tree_fd);
+> +
+> +	return fret;
 > +}
-> diff --git a/tests/generic/639 b/tests/generic/639
+> +
+>  static int fscaps_idmapped_mounts_in_userns_separate_userns(void)
+>  {
+>  	int fret = -1;
+> @@ -8745,7 +8860,7 @@ struct t_idmapped_mounts {
+>  	{ fscaps,							"fscaps on regular mounts",									},
+>  	{ fscaps_idmapped_mounts,					"fscaps on idmapped mounts",									},
+>  	{ fscaps_idmapped_mounts_in_userns,				"fscaps on idmapped mounts in user namespace",							},
+> -	{ fscaps_idmapped_mounts_in_userns_separate_userns,		"fscaps on idmapped mounts in user namespace with different id mappings ",			},
+> +	{ fscaps_idmapped_mounts_in_userns_separate_userns,		"fscaps on idmapped mounts in user namespace with different id mappings",			},
+>  	{ fsids_mapped,							"mapped fsids",											},
+>  	{ fsids_unmapped,						"unmapped fsids",										},
+>  	{ hardlink_crossing_mounts,					"cross mount hardlink",										},
+> @@ -8789,6 +8904,10 @@ struct t_idmapped_mounts {
+>  	{ threaded_idmapped_mount_interactions,				"threaded operations on idmapped mounts",							},
+>  };
+>  
+> +struct t_idmapped_mounts fscaps_in_ancestor_userns[] = {
+> +	{ fscaps_idmapped_mounts_in_userns_valid_in_ancestor_userns,	"fscaps on idmapped mounts in user namespace writing fscap valid in ancestor userns",		},
+> +};
+> +
+>  static bool run_test(struct t_idmapped_mounts suite[], size_t suite_size)
+>  {
+>  	int i;
+> @@ -8826,6 +8945,7 @@ static bool run_test(struct t_idmapped_mounts suite[], size_t suite_size)
+>  
+>  int main(int argc, char *argv[])
+>  {
+> +	const char *invocation_name;
+>  	int fret, ret;
+>  	int index = 0;
+>  	bool supported = false;
+> @@ -8913,8 +9033,17 @@ int main(int argc, char *argv[])
+>  
+>  	fret = EXIT_FAILURE;
+>  
+> -	if (!run_test(basic_suite, ARRAY_SIZE(basic_suite)))
+> -		goto out;
+> +	invocation_name = basename(argv[0]);
+> +	if (strcmp(invocation_name, "idmapped-mounts") == 0) {
+> +		if (!run_test(basic_suite, ARRAY_SIZE(basic_suite)))
+> +			goto out;
+> +	} else if (strcmp(invocation_name, "fscaps-in-ancestor-userns") == 0) {
+
+I think there's no need to create symlink for each new test and use
+different invocation name to run the new test. How about always using
+the idmapped-mounts binary, just introduce a new option to specify which
+test group to run? e.g. introduce a "-t" option and run
+
+./idmapped-mounts -t basic_suite # for existing tests, and
+./idmapped-mounts -t fscaps_in_ancester_userns # for this new test
+
+Thanks,
+Eryu
+
+> +		if (!run_test(fscaps_in_ancestor_userns,
+> +			      ARRAY_SIZE(fscaps_in_ancestor_userns)))
+> +			goto out;
+> +	} else {
+> +		die("idmapped mount test suite \"%s\" unknown", invocation_name);
+> +	}
+>  
+>  	fret = EXIT_SUCCESS;
+>  
+> diff --git a/tests/generic/637 b/tests/generic/637
 > new file mode 100755
-> index 00000000..cbb3d119
+> index 00000000..25c601b5
 > --- /dev/null
-> +++ b/tests/generic/639
-> @@ -0,0 +1,40 @@
+> +++ b/tests/generic/637
+> @@ -0,0 +1,42 @@
 > +#! /bin/bash
 > +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2021 Red Hat, Inc.  All Rights Reserved.
+> +# Copyright (c) 2021 Christian Brauner.  All Rights Reserved.
 > +#
-> +# FS QA Test 639
+> +# FS QA Test 637
 > +#
-> +# Trigger mmap page faults in the same file during pread and pwrite
+> +# Test that fscaps on idmapped mounts behave correctly.
 > +#
 > +seq=`basename $0`
 > +seqres=$RESULT_DIR/$seq
@@ -274,37 +335,37 @@ Missing an entry in .gitignore file.
 > +. ./common/rc
 > +. ./common/filter
 > +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
 > +# real QA test starts here
 > +
-> +# Modify as appropriate.
 > +_supported_fs generic
+> +_require_idmapped_mounts
 > +_require_test
-> +_require_test_program mmap-rw-fault
-
-_require_odirect as mmap-rw-fault is doing direct I/O as well.
-
 > +
-> +$here/src/mmap-rw-fault $TEST_DIR/mmap-rw-fault.tmp 2>&1
-
-And better to describe the behavior with comments, as you replied to
-Darrick in previous mail, so people know what's to expect if bug
-reproduced.
-
-Thanks,
-Eryu
-
-> +
-> +# success, all done
 > +echo "Silence is golden"
-> +status=0
+> +
+> +$here/src/idmapped-mounts/fscaps-in-ancestor-userns --device "$TEST_DEV" --mount "$TEST_DIR" --fstype "$FSTYP"
+> +
+> +status=$?
 > +exit
-> diff --git a/tests/generic/639.out b/tests/generic/639.out
+> diff --git a/tests/generic/637.out b/tests/generic/637.out
 > new file mode 100644
 > index 00000000..55a3d825
 > --- /dev/null
-> +++ b/tests/generic/639.out
+> +++ b/tests/generic/637.out
 > @@ -0,0 +1,2 @@
-> +QA output created by 639
+> +QA output created by 637
 > +Silence is golden
+> diff --git a/tests/generic/group b/tests/generic/group
+> index 105763c4..9dfefdf4 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -639,3 +639,4 @@
+>  634 auto quick atime bigtime
+>  635 auto quick atime bigtime shutdown
+>  636 auto quick swap
+> +637 auto quick idmapped
 > -- 
-> 2.26.3
+> 2.27.0
