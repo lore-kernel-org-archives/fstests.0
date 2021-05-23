@@ -7,335 +7,304 @@ X-Spam-Status: No, score=-13.7 required=3.0 tests=BAYES_00,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9A152C47080
-	for <linux-fstests@archiver.kernel.org>; Sun, 23 May 2021 14:11:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DDF8DC47080
+	for <linux-fstests@archiver.kernel.org>; Sun, 23 May 2021 14:56:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6605B610FA
-	for <linux-fstests@archiver.kernel.org>; Sun, 23 May 2021 14:11:53 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A3A70611ED
+	for <linux-fstests@archiver.kernel.org>; Sun, 23 May 2021 14:56:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231786AbhEWONS (ORCPT
+        id S231776AbhEWO6Z (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 23 May 2021 10:13:18 -0400
-Received: from out20-39.mail.aliyun.com ([115.124.20.39]:51236 "EHLO
-        out20-39.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231758AbhEWONS (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 23 May 2021 10:13:18 -0400
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07436283|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.0512656-0.00285802-0.945876;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047211;MF=guan@eryu.me;NM=1;PH=DS;RN=3;RT=3;SR=0;TI=SMTPD_---.KHazXdk_1621779109;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.KHazXdk_1621779109)
-          by smtp.aliyun-inc.com(10.147.41.231);
-          Sun, 23 May 2021 22:11:49 +0800
-Date:   Sun, 23 May 2021 22:11:49 +0800
+        Sun, 23 May 2021 10:58:25 -0400
+Received: from out20-14.mail.aliyun.com ([115.124.20.14]:42260 "EHLO
+        out20-14.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231771AbhEWO6Y (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 23 May 2021 10:58:24 -0400
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07436282|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_regular_dialog|0.0540884-0.000342724-0.945569;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047211;MF=guan@eryu.me;NM=1;PH=DS;RN=2;RT=2;SR=0;TI=SMTPD_---.KHc1HGq_1621781816;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.KHc1HGq_1621781816)
+          by smtp.aliyun-inc.com(10.147.43.95);
+          Sun, 23 May 2021 22:56:56 +0800
+Date:   Sun, 23 May 2021 22:56:56 +0800
 From:   Eryu Guan <guan@eryu.me>
-To:     Leah Rumancik <leah.rumancik@gmail.com>
-Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org
-Subject: Re: [PATCH] ext4/310: test journal checkpoint ioctl
-Message-ID: <YKpipecQz4vSDDtP@desktop>
-References: <20210519144751.466933-1-leah.rumancik@gmail.com>
+To:     Andreas Gruenbacher <agruenba@redhat.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH v5] generic: Test page faults during read and write
+Message-ID: <YKptOEuBHO5rARGp@desktop>
+References: <20210520165741.1607453-1-agruenba@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210519144751.466933-1-leah.rumancik@gmail.com>
+In-Reply-To: <20210520165741.1607453-1-agruenba@redhat.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, May 19, 2021 at 02:47:51PM +0000, Leah Rumancik wrote:
-> Test journal checkpointing and journal erasing via
-> EXT4_IOC_CHECKPOINT with flag EXT4_IOC_CHECKPOINT_FLAG_ZEROOUT set.
+On Thu, May 20, 2021 at 06:57:41PM +0200, Andreas Gruenbacher wrote:
+> Some filesystems have problems when the buffer passed to read or write is
+> memory-mapped to the file being read from or written to and the buffer is
+> faulted in during the read or write.  (That's probably not a recommended
+> use case, but it should work nevertheless.)
 
-It seems that this ioctl is not upstreamed yet, it'd be better to
-mention the titles of related patches, so people could know which kernel
-patches are required to pass this test, and know the backgrounds by
-reading the kernel thread.
+Is there any kernel fixes that this test is targeting at? It'd better to
+mention the coressponding kernel fixes in commit log or test
+description. I noticed that btrfs currently hangs with v5.13-rc1 kernel,
+ext4 and xfs all pass the test.
 
 > 
-> Signed-off-by: Leah Rumancik <leah.rumancik@gmail.com>
+> Signed-off-by: Andreas Gruenbacher <agruenba@redhat.com>
 > ---
->  src/Makefile             |   3 +-
->  src/checkpoint_journal.c |  95 ++++++++++++++++++++++++++++++++
->  tests/ext4/310           | 114 +++++++++++++++++++++++++++++++++++++++
->  tests/ext4/310.out       |   2 +
->  tests/ext4/group         |   1 +
+>  src/Makefile          |   3 +-
+>  src/mmap-rw-fault.c   | 169 ++++++++++++++++++++++++++++++++++++++++++
+
+Missing an entry in .gitignore file.
+
+>  tests/generic/639     |  40 ++++++++++
+>  tests/generic/639.out |   2 +
+>  tests/generic/group   |   1 +
 >  5 files changed, 214 insertions(+), 1 deletion(-)
->  create mode 100644 src/checkpoint_journal.c
->  create mode 100644 tests/ext4/310
-
-New test file is in 0755 mode.
-
->  create mode 100644 tests/ext4/310.out
+>  create mode 100644 src/mmap-rw-fault.c
+>  create mode 100755 tests/generic/639
+>  create mode 100644 tests/generic/639.out
 > 
-> diff --git a/src/Makefile b/src/Makefile
-> index cc0b9579..e0e7006b 100644
-> --- a/src/Makefile
-> +++ b/src/Makefile
-> @@ -17,7 +17,8 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
->  	t_mmap_cow_race t_mmap_fallocate fsync-err t_mmap_write_ro \
->  	t_ext4_dax_journal_corruption t_ext4_dax_inline_corruption \
->  	t_ofd_locks t_mmap_collision mmap-write-concurrent \
-> -	t_get_file_time t_create_short_dirs t_create_long_dirs t_enospc
-> +	t_get_file_time t_create_short_dirs t_create_long_dirs t_enospc \
-> +	checkpoint_journal
-
-Missing an entry in .gitignore
-
->  
->  LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
->  	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
-> diff --git a/src/checkpoint_journal.c b/src/checkpoint_journal.c
+> diff --git a/src/mmap-rw-fault.c b/src/mmap-rw-fault.c
 > new file mode 100644
-> index 00000000..0347e0c0
+> index 00000000..31778769
 > --- /dev/null
-> +++ b/src/checkpoint_journal.c
-> @@ -0,0 +1,95 @@
-> +#include <sys/ioctl.h>
-> +#include <fcntl.h>
-> +#include <stdlib.h>
-> +#include <stdio.h>
-> +#include <unistd.h>
-> +#include <errno.h>
-> +#include <string.h>
-> +#include <linux/fs.h>
-> +#include <getopt.h>
-> +
+> +++ b/src/mmap-rw-fault.c
+> @@ -0,0 +1,169 @@
+> +// SPDX-License-Identifier: GPL-2.0+
 > +/*
-> + * checkpoint_journal.c
-> + *
-> + * Flush journal log and checkpoint journal for ext4 file system and
-> + * optionally, issue discard or zeroout for the journal log blocks.
-> + *
-> + * Arguments:
-> + * 1) mount point for device
-> + * 2) flags (optional)
-> + *	set --erase=discard to enable discarding journal blocks
-> + *	set --erase=zeroout to enable zero-filling journal blocks
-> + *	set --dry-run flag to only perform input checking
+> + * Trigger mmap page faults in the same file during pread and pwrite.
+> + * Copyright (C) 2021 Red Hat, Inc. All Rights Reserved.
+> + * Written by Andreas Gruenbacher <agruenba@redhat.com>
 > + */
 > +
-> +#if defined(__linux__) && !defined(EXT4_IOC_CHECKPOINT)
-> +#define EXT4_IOC_CHECKPOINT	_IOW('f', 43, __u32)
+> +#ifndef _GNU_SOURCE
+> +#define _GNU_SOURCE /* to get definition of O_DIRECT flag. */
 > +#endif
 > +
+> +#include <sys/types.h>
+> +#include <sys/stat.h>
+> +#include <sys/mman.h>
+> +#include <fcntl.h>
+> +#include <unistd.h>
+> +#include <stdlib.h>
+> +#include <stdio.h>
+> +#include <string.h>
+> +#include <errno.h>
+> +#include <err.h>
 > +
-> +#if defined(__linux__) && !defined(EXT4_IOC_CHECKPOINT_FLAG_DISCARD)
-> +#define EXT4_IOC_CHECKPOINT_FLAG_DISCARD		1
-> +#define EXT4_IOC_CHECKPOINT_FLAG_ZEROOUT		2
-> +#define EXT4_IOC_CHECKPOINT_FLAG_DRY_RUN		4
-> +#endif
+> +char *filename;
+> +unsigned int page_size;
+> +void *page;
+> +char *addr;
+> +int fd;
+> +ssize_t ret;
 > +
+> +/*
+> + * Leave a hole at the beginning of the test file and initialize a block of
+> + * @page_size bytes at offset @page_size to @c.  Then, reopen the file and
+> + * mmap the first two pages.
+> + */
+> +void init(char c, int flags)
+> +{
+> +	fd = open(filename, O_CREAT | O_TRUNC | O_WRONLY | O_DIRECT, 0666);
+> +	if (fd == -1)
+> +		goto fail;
+> +	memset(page, c, page_size);
+> +	ret = pwrite(fd, page, page_size, page_size);
+> +	if (ret != page_size)
+> +		goto fail;
+> +	if (close(fd))
+> +		goto fail;
 > +
-> +int main(int argc, char** argv) {
-> +	int fd, c, ret = 0, option_index = 0;
-> +	char* rpath;
-> +	unsigned int flags = 0;
+> +	fd = open(filename, flags);
+> +	if (fd == -1)
+> +		goto fail;
+> +	addr = mmap(NULL, 2 * page_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
+> +	if (addr == MAP_FAILED)
+> +		err(1, NULL);
+> +	return;
 > +
-> +	static struct option long_options[] =
-> +	{
-> +		{"dry-run", no_argument, 0, 'd'},
-> +		{"erase", required_argument, 0, 'e'},
-> +		{0, 0, 0, 0}
-> +	};
-> +
-> +	/* get optional flags */
-> +	while ((c = getopt_long(argc, argv, "de:", long_options,
-> +				&option_index)) != -1) {
-> +		switch (c) {
-> +		case 'd':
-> +			flags |= EXT4_IOC_CHECKPOINT_FLAG_DRY_RUN;
-> +			break;
-> +		case 'e':
-> +			if (strcmp(optarg, "discard") == 0) {
-> +				flags |= EXT4_IOC_CHECKPOINT_FLAG_DISCARD;
-> +			} else if (strcmp(optarg, "zeroout") == 0) {
-> +				flags |= EXT4_IOC_CHECKPOINT_FLAG_ZEROOUT;
-> +			} else {
-> +				fprintf(stderr, "Error: invalid erase option\n");
-> +				return 1;
-> +			}
-> +			break;
-> +		default:
-> +			return 1;
-> +		}
-> +	}
-> +
-> +	if (optind != argc - 1) {
-> +		fprintf(stderr, "Error: invalid number of arguments\n");
-> +		return 1;
-> +	}
-> +
-> +	/* get fd to file system */
-> +	rpath = realpath(argv[optind], NULL);
-> +	fd = open(rpath, O_RDONLY);
-> +	free(rpath);
-> +
-> +	if (fd == -1) {
-> +		fprintf(stderr, "Error: unable to open device %s: %s\n",
-> +			argv[optind], strerror(errno));
-> +		return 1;
-> +	}
-> +
-> +	ret = ioctl(fd, EXT4_IOC_CHECKPOINT, &flags);
-> +
-> +	if (ret)
-> +		fprintf(stderr, "checkpoint ioctl returned error: %s\n", strerror(errno));
-> +
-> +	close(fd);
-> +	return ret;
+> +fail:
+> +	err(1, "%s", filename);
 > +}
 > +
-> diff --git a/tests/ext4/310 b/tests/ext4/310
-> new file mode 100644
-> index 00000000..3693cb29
-> --- /dev/null
-> +++ b/tests/ext4/310
-> @@ -0,0 +1,114 @@
-> +#!/bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2021 Google, Inc. All Rights Reserved.
-> +#
-> +# FS QA Test No. 310
-> +#
-> +# Test checkpoint and zeroout of journal via ioctl EXT4_IOC_CHECKPOINT
-> +#
+> +void done(void)
+> +{
+> +	if (fsync(fd))
+> +		goto fail;
+> +	if (close(fd))
+> +		goto fail;
+> +	return;
 > +
+> +fail:
+> +	err(1, "%s", filename);
+> +}
+> +
+> +static ssize_t do_read(int fd, void *buf, size_t count, off_t offset)
+> +{
+> +	ssize_t count2 = 0, ret;
+> +
+> +	do {
+> +		ret = pread(fd, buf, count, offset);
+> +		if (ret == -1) {
+> +			if (errno == EINTR)
+> +				continue;
+> +			break;
+> +		}
+> +		if (ret == 0)
+> +			break;
+> +		count2 += ret;
+> +		buf += ret;
+> +		count -= ret;
+> +	} while (count);
+> +	return count2;
+> +}
+> +
+> +static ssize_t do_write(int fd, const void *buf, size_t count, off_t offset)
+> +{
+> +	ssize_t count2 = 0, ret;
+> +
+> +	do {
+> +		ret = pwrite(fd, buf, count, offset);
+> +		if (ret == -1) {
+> +			if (errno == EINTR)
+> +				continue;
+> +			break;
+> +		}
+> +		if (ret == 0)
+> +			break;
+> +		count2 += ret;
+> +		buf += ret;
+> +		count -= ret;
+> +	} while (count);
+> +	return count2;
+> +}
+> +
+> +int main(int argc, char *argv[])
+> +{
+> +	if (argc != 2)
+> +		errx(1, "no test filename argument given");
+> +	filename = argv[1];
+> +
+> +	page_size = ret = sysconf(_SC_PAGE_SIZE);
+> +	if (ret == -1)
+> +		err(1, NULL);
+> +
+> +	ret = posix_memalign(&page, page_size, page_size);
+> +	if (ret) {
+> +		errno = ENOMEM;
+> +		err(1, NULL);
+> +	}
+> +
+> +	/*
+> +	 * Make sure page faults during pread are handled correctly.
+> +	 */
+> +	init('a', O_RDWR);
+> +	ret = do_read(fd, addr, page_size, page_size);
+> +	if (ret != page_size)
+> +		err(1, "pread %s: %ld != %u", filename, ret, page_size);
+> +	if (memcmp(addr, page, page_size))
+> +		errx(1, "pread is broken");
+> +	done();
+> +
+> +	init('b', O_RDWR | O_DIRECT);
+> +	ret = do_read(fd, addr, page_size, page_size);
+> +	if (ret != page_size)
+> +		err(1, "pread %s (O_DIRECT): %ld != %u", filename, ret, page_size);
+> +	if (memcmp(addr, page, page_size))
+> +		errx(1, "pread (D_DIRECT) is broken");
+> +	done();
+> +
+> +	/*
+> +	 * Make sure page faults during pwrite are handled correctly.
+> +	 */
+> +	init('c', O_RDWR);
+> +	ret = do_write(fd, addr + page_size, page_size, 0);
+> +	if (ret != page_size)
+> +		err(1, "pwrite %s: %ld != %u", filename, ret, page_size);
+> +	if (memcmp(addr, page, page_size))
+> +		errx(1, "pwrite is broken");
+> +	done();
+> +
+> +	init('d', O_RDWR | O_DIRECT);
+> +	ret = do_write(fd, addr + page_size, page_size, 0);
+> +	if (ret != page_size)
+> +		err(1, "pwrite %s (O_DIRECT): %ld != %u", filename, ret, page_size);
+> +	if (memcmp(addr, page, page_size))
+> +		errx(1, "pwrite (O_DIRECT) is broken");
+> +	done();
+> +
+> +	if (unlink(filename))
+> +		err(1, "unlink %s", filename);
+> +
+> +	return 0;
+> +}
+> diff --git a/tests/generic/639 b/tests/generic/639
+> new file mode 100755
+> index 00000000..cbb3d119
+> --- /dev/null
+> +++ b/tests/generic/639
+> @@ -0,0 +1,40 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2021 Red Hat, Inc.  All Rights Reserved.
+> +#
+> +# FS QA Test 639
+> +#
+> +# Trigger mmap page faults in the same file during pread and pwrite
+> +#
 > +seq=`basename $0`
 > +seqres=$RESULT_DIR/$seq
 > +echo "QA output created by $seq"
 > +
-> +status=1       # failure is the default!
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
 > +
 > +# get standard environment, filters and checks
 > +. ./common/rc
 > +. ./common/filter
 > +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
 > +# real QA test starts here
-> +_supported_fs ext4
 > +
-> +_require_scratch
-> +_require_command "$DEBUGFS_PROG" debugfs
-> +
-> +checkpoint_journal=$here/src/checkpoint_journal
-> +_require_test_program "checkpoint_journal"
-> +
-> +# convert output from stat<journal_inode> to list of block numbers
-> +get_journal_extents() {
-> +	inode_info=$($DEBUGFS_PROG $SCRATCH_DEV -R "stat <8>" 2>> $seqres.full)
-> +	echo -e "\nJournal info:" >> $seqres.full
-> +	echo "$inode_info" >> $seqres.full
-> +
-> +	extents_line=$(echo "$inode_info" | awk '/EXTENTS:/{ print NR; exit }')
-> +	get_extents=$(echo "$inode_info" | sed -n "$(($extents_line + 1))"p)
-> +
-> +	# get just the physical block numbers
-> +	get_extents=$(echo "$get_extents" |  perl -pe 's|\(.*?\):||g' | sed -e 's/, /\n/g' | perl -pe 's|(\d+)-(\d+)|\1 \2|g')
-> +
-> +	echo "$get_extents"
-> +}
-> +
-> +
-> +# checks all extents are zero'd out except for the superblock
-> +# arg 1: extents (output of get_journal_extents())
-> +check_extents() {
-> +	echo -e "\nChecking extents:" >> $seqres.full
-> +	echo "$1" >> $seqres.full
-> +
-> +	super_block="true"
-> +	echo "$1" | while IFS= read line; do
-> +		start_block=$(echo $line | cut -f1 -d' ')
-> +		end_block=$(echo $line | cut -f2 -d' ' -s)
-> +
-> +		# if first block of journal, shouldn't be wiped
-> +		if [ "$super_block" == "true" ]; then
-> +			super_block="false"
-> +
-> +			#if super block only block in this extent, skip extent
-> +			if [ -z "$end_block" ]; then
-> +				continue;
-> +			fi
-> +			start_block=$(($start_block + 1))
-> +		fi
-> +
-> +		if [ ! -z "$end_block" ]; then
-> +			blocks=$(($end_block - $start_block + 1))
-> +		else
-> +			blocks=1
-> +		fi
-> +
-> +		check=$(od $SCRATCH_DEV --skip-bytes=$(($start_block * $blocksize)) --read-bytes=$(($blocks * $blocksize)) -An -v | sed -e 's/[0 \t\n\r]//g')
-> +
-> +		[ ! -z "$check" ] && echo "error" && break
-> +	done
-> +}
-> +
-> +testdir="${SCRATCH_MNT}/testdir"
-> +
-> +_scratch_mkfs_sized $((64 * 1024 * 1024)) >> $seqres.full 2>&1
+> +# Modify as appropriate.
+> +_supported_fs generic
+> +_require_test
+> +_require_test_program mmap-rw-fault
 
-This test requires ext4 is created with a journal, so we need
+_require_odirect as mmap-rw-fault is doing direct I/O as well.
 
-_require_metadata_journaling $SCRATCH_DEV
+> +
+> +$here/src/mmap-rw-fault $TEST_DIR/mmap-rw-fault.tmp 2>&1
 
-here after creating filesystem on $SCRATCH_DEV
-
-> +_scratch_mount >> $seqres.full 2>&1
-> +blocksize=$(_get_block_size $SCRATCH_MNT)
-> +mkdir $testdir
-> +
-> +# check if ioctl present, skip test if not present
-> +$checkpoint_journal $SCRATCH_MNT --dry-run || _notrun "journal checkpoint ioctl not present on device"
-> +
-> +# create some files to add some entries to journal
-> +for i in {1..100}; do
-> +	touch $testdir/$i
-
-	echo > $testdir/$i
-
-might be faster.
-
-> +done
-> +
-> +# make sure these files get to the journal
-> +sync --file-system $testdir/1
-> +
-> +# call ioctl to checkpoint and zero-fill journal blocks
-> +$checkpoint_journal $SCRATCH_MNT --erase=zeroout || _fail "ioctl returned error"
-> +
-> +extents=$(get_journal_extents)
-> +
-> +# check journal blocks zeroed out
-> +ret=$(check_extents "$extents")
-> +[ "$ret" = "error" ] && _fail "Journal was not zero-filled"
-> +
-> +_scratch_unmount >> $seqres.full 2>&1
-> +
-> +echo "Done."
-
-fstests use "Silence is golden" :)
+And better to describe the behavior with comments, as you replied to
+Darrick in previous mail, so people know what's to expect if bug
+reproduced.
 
 Thanks,
 Eryu
 
 > +
+> +# success, all done
+> +echo "Silence is golden"
 > +status=0
 > +exit
-> diff --git a/tests/ext4/310.out b/tests/ext4/310.out
+> diff --git a/tests/generic/639.out b/tests/generic/639.out
 > new file mode 100644
-> index 00000000..e52f7345
+> index 00000000..55a3d825
 > --- /dev/null
-> +++ b/tests/ext4/310.out
+> +++ b/tests/generic/639.out
 > @@ -0,0 +1,2 @@
-> +QA output created by 310
-> +Done.
-> diff --git a/tests/ext4/group b/tests/ext4/group
-> index e7ad3c24..622590a9 100644
-> --- a/tests/ext4/group
-> +++ b/tests/ext4/group
-> @@ -60,3 +60,4 @@
->  307 auto ioctl rw defrag
->  308 auto ioctl rw prealloc quick defrag
->  309 auto quick dir
-> +310 auto ioctl quick
+> +QA output created by 639
+> +Silence is golden
 > -- 
-> 2.31.1.751.gd2f1c929bd-goog
+> 2.26.3
