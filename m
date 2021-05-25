@@ -2,124 +2,96 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 16790C47086
-	for <linux-fstests@archiver.kernel.org>; Tue, 25 May 2021 20:24:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 704CAC47086
+	for <linux-fstests@archiver.kernel.org>; Tue, 25 May 2021 22:20:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id EBD0A6140B
-	for <linux-fstests@archiver.kernel.org>; Tue, 25 May 2021 20:24:14 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 515F161409
+	for <linux-fstests@archiver.kernel.org>; Tue, 25 May 2021 22:20:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233227AbhEYUZn (ORCPT
+        id S230110AbhEYWVg (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 25 May 2021 16:25:43 -0400
-Received: from mail.kernel.org ([198.145.29.99]:59466 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S233048AbhEYUZn (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 25 May 2021 16:25:43 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id EA59E613CD;
-        Tue, 25 May 2021 20:24:12 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1621974253;
-        bh=rI509idxZaXU3p0x4ACjK1JgRUuxZjhnwyX3VTewr4g=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=BOWcYdtYSvlR7jsZ2AuctiKTJcvG25FFZxfCSrEc2PkA/KBrak1/g6sJ6Jhv7HTj4
-         k8LHPamZ9rGgE54KxYGefQhh4aC5UdYq1eHHyI9LCXEawUonvNXkffA02YFIXPUsjn
-         O6UVddaBPpIBjw3NxMy/qID/NJD9z8DtDq6OeZ+R7mLeCkpQwtQCN6PVsm+zeO2Bc6
-         buvoiC/N9Tvg+NaxIRKSxyujTkrhrPtwGrHMVFRp+K9WzRHD5FNHYqxJHQHslhE+F2
-         TwH0azqjJ/WsWROvr8W0tviS7PDqofh1fsb6H5fmot2nRnSP7evjNrid83NVcOb7Q4
-         et1iRUBrkfWFQ==
-Date:   Tue, 25 May 2021 13:24:11 -0700
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     Boris Burkov <boris@bur.io>
-Cc:     fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org,
-        linux-btrfs@vger.kernel.org, kernel-team@fb.com
-Subject: Re: [PATCH v4 4/4] generic: test fs-verity EFBIG scenarios
-Message-ID: <YK1c62bh1WQ/h45O@sol.localdomain>
-References: <cover.1620248200.git.boris@bur.io>
- <508058f805a45808764a477e9ad04353a841cf53.1620248200.git.boris@bur.io>
+        Tue, 25 May 2021 18:21:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40984 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230103AbhEYWVf (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 25 May 2021 18:21:35 -0400
+Received: from mail-qt1-x829.google.com (mail-qt1-x829.google.com [IPv6:2607:f8b0:4864:20::829])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5DE0DC061574;
+        Tue, 25 May 2021 15:20:04 -0700 (PDT)
+Received: by mail-qt1-x829.google.com with SMTP id v4so24326227qtp.1;
+        Tue, 25 May 2021 15:20:04 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=Mn8Q53wlifLTa0WvkY7Jksh0Xjl0mA8Gm4pP8e3OZQI=;
+        b=kv954D00tM6ek/CV5hyl++Pe3kYvM31zUGDlgw+djtqQqz5GqWSwUthM42LfzJ6PCK
+         dsjXhYSeWFOvSf9npa0hf1ZwGsCiiHa+7+asH66OUEdq3df23UC7usxIjzw9L2pNExmy
+         WVm1C7ZyDYzdlOwoNyWHW2myj2FIosn0Y7vQsOz6S5nu9qkb0LpoM7OSzjA9qct7GiJH
+         e1xMPQ29JHBIUUZD/s9K3zSw3ZA49mw1AR4a3dD3H3UiYUoCAaomcMExIqVWhW7yDUbf
+         GrSRZvv8/l2flynbwNWpEzkCHAheGcZYFDTLzGkOQlQaErD2zeejJyxXAzmSvLEqoRjt
+         C57A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=Mn8Q53wlifLTa0WvkY7Jksh0Xjl0mA8Gm4pP8e3OZQI=;
+        b=C80wSqiImR8Batl82E3hYBXWrJRn+lstURQWkzppz8GN2n6o6+1m23GDFdrGcXctDT
+         s9qEJQzxFcDg30P+iNp4u8FL6IxshRMOu+9LVBvcCjoAx2Frd6Pf3PygNVYmUpnvx/mg
+         jYYSMvcnZk0ZwGJmhc9kAthuKV/p1Le3URi6TD5IyX4wLCzfvkS22ulsV3j9xi2ODzuw
+         2WkkWHy6TE+CrhcyWX9LCPl4THAe71AUX6qvJ+09zQPVS2r1ohZcpBMRyjKpDeeztt0s
+         0R4RyrKzHKWDaGtpwwZq408pOU/mCsPtVVyVQDGZVhrOBTdkLx81JUd2XkkU5jvUwwlu
+         ofLg==
+X-Gm-Message-State: AOAM532LIfHqYOHoqai7qOyQQjMnAbpX5Fx6/o+v7BV9mJG/tRT1V9Yz
+        oGHCOxt8ESZ0xTLJPhd4/VyU6wlkCwP7
+X-Google-Smtp-Source: ABdhPJwSTTViOlyf6jZmOmnl7d9rxE6TwqKX1N89bydicuBo7MMOOrlJlXCgaOputn3BvZwrH4c2cQ==
+X-Received: by 2002:ac8:7ed2:: with SMTP id x18mr33538716qtj.26.1621981203430;
+        Tue, 25 May 2021 15:20:03 -0700 (PDT)
+Received: from moria.home.lan (c-73-219-103-14.hsd1.vt.comcast.net. [73.219.103.14])
+        by smtp.gmail.com with ESMTPSA id m10sm333445qkk.113.2021.05.25.15.20.02
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 25 May 2021 15:20:03 -0700 (PDT)
+From:   Kent Overstreet <kent.overstreet@gmail.com>
+To:     fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org,
+        linux-bcachefs@vger.kernel.org
+Cc:     Kent Overstreet <kent.overstreet@gmail.com>
+Subject: [PATCH 1/4] Improved .gitignore
+Date:   Tue, 25 May 2021 18:19:48 -0400
+Message-Id: <20210525221955.265524-1-kent.overstreet@gmail.com>
+X-Mailer: git-send-email 2.32.0.rc0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <508058f805a45808764a477e9ad04353a841cf53.1620248200.git.boris@bur.io>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, May 05, 2021 at 02:04:46PM -0700, Boris Burkov wrote:
-> diff --git a/tests/generic/632 b/tests/generic/632
-> new file mode 100755
-> index 00000000..5a5ed576
-> --- /dev/null
-> +++ b/tests/generic/632
-> @@ -0,0 +1,86 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2021 Facebook, Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test 632
-> +#
-> +# Test some EFBIG scenarios with very large files.
-> +# To create the files, use pwrite with an offset close to the
-> +# file system's max file size.
+Ignore dotfiles, tags, and verifier state.
 
-Can you please make this comment properly describe the purpose of this test?
-As-is it doesn't mention that it is related to fs-verity at all, let alone to
-specific filesystems' implementations of fs-verity.
+Signed-off-by: Kent Overstreet <kent.overstreet@gmail.com>
+---
+ .gitignore | 3 +++
+ 1 file changed, 3 insertions(+)
 
-> +max_sz=$(_get_max_file_size)
-> +_fsv_scratch_begin_subtest "way too big: fail on first merkle block"
-> +# have to go back by 4096 from max to not hit the fsverity MAX_DEPTH check.
+diff --git a/.gitignore b/.gitignore
+index 4cc9c80724..64e4ed253f 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -4,6 +4,9 @@
+ .dep
+ .libs
+ .ltdep
++.*
++*.state
++tags
+ 
+ /local.config
+ /results
+-- 
+2.32.0.rc0
 
-What is meant by the "fsverity MAX_DEPTH" check?
-
-> +$XFS_IO_PROG -fc "pwrite -q $(($max_sz - 4096)) 1" $fsv_file
-> +_fsv_enable $fsv_file |& _filter_scratch
-
-Using the "truncate" xfs_io command instead of "pwrite" would probably make more
-sense here, as the goal is to just create a file of a specific size.
-
-> +
-> +# The goal of this second test is to make a big enough file that we trip the
-> +# EFBIG codepath, but not so big that we hit it immediately as soon as we try
-> +# to write a Merkle leaf. Because of the layout of the Merkle tree that
-> +# fs-verity uses, this is a bit complicated to compute dynamically.
-> +
-> +# The layout of the Merkle tree has the leaf nodes last, but writes them first.
-> +# To get an interesting overflow, we need the start of L0 to be < MAX but the
-> +# end of the merkle tree (EOM) to be past MAX. Ideally, the start of L0 is only
-> +# just smaller than MAX, so that we don't have to write many blocks to blow up.
-> +
-> +# 0                        EOF round-to-64k L7L6L5 L4   L3    L2    L1  L0 MAX  EOM
-> +# |-------------------------|               ||-|--|---|----|-----|------|--|!!!!!|
-> +
-> +# Given this structure, we can compute the size of the file that yields the
-> +# desired properties:
-> +# sz + 64k + sz/128^8 + sz/128^7 + ... + sz/128^2 < MAX
-> +# (128^8)sz + (128^8)64k + sz + (128)sz + (128^2)sz + ... + (128^6)sz < (128^8)MAX
-> +# sz(128^8 + 128^6 + 128^5 + 128^4 + 128^3 + 128^2 + 128 + 1) < (128^8)(MAX - 64k)
-> +# sz < (128^8/(128^8 + (128^6 + ... 1))(MAX - 64k)
-> +#
-> +# Do the actual caclulation with 'bc' and 20 digits of precision.
-
-This calculation isn't completely accurate because it doesn't round the levels
-to a block boundary.  Nor does it consider that the 64K is an alignment rather
-than a fixed amount added.
-
-But for the test you don't need the absolute largest file whose level 1 doesn't
-exceed the limit, but rather just one almost that large.
-
-So it would be okay to add 64K as a fixed amount, along with 4K for every level
-on top of the 'sz/128^(level+1)' you already have, to get an over-estimate of
-the amount of extra space needed to cache the Merkle tree.
-
-But please make it clear that it's an over-estimate, and hence an under-estimate
-of the file size desired for the test.
-
-Also please document that this is all assuming SHA-256 with 4K blocks, and also
-that the maximum file size is assumed to fit in 64 bits; hence the consideration
-of 8 levels is sufficient.
-
-- Eric
