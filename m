@@ -2,135 +2,92 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 58BC0C2B9F8
-	for <linux-fstests@archiver.kernel.org>; Tue, 25 May 2021 13:35:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8B79BC2B9F8
+	for <linux-fstests@archiver.kernel.org>; Tue, 25 May 2021 16:05:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3B97C6108D
-	for <linux-fstests@archiver.kernel.org>; Tue, 25 May 2021 13:35:42 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6C9BE61401
+	for <linux-fstests@archiver.kernel.org>; Tue, 25 May 2021 16:05:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233358AbhEYNhJ (ORCPT
+        id S233008AbhEYQGi (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 25 May 2021 09:37:09 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:38159 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S233351AbhEYNhG (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 25 May 2021 09:37:06 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1621949735;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=8OZkafoH8eLa3Y42DKNphTIE7IUlTjFIQb5ah3cbvjA=;
-        b=UcIMRQsZiHjWY7Qg9GgSAxeI9ARa7LiCc+PAuNzc2anBu7yIXXF3KVCBIuM3S7+SjMtrkH
-        AQR1uAvCrmyE1jSGYA/EBtCoTKPAYkLh5Wr4jVE2aC5SA0YkuqbQcFJ+E3Q95Q/BtnhVxU
-        L1YAerCa9iaXS3Pj6QNTOZ7GNZmdTj8=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-551-tzWezfxaML2teqFgHvmZ2A-1; Tue, 25 May 2021 09:35:32 -0400
-X-MC-Unique: tzWezfxaML2teqFgHvmZ2A-1
-Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id A526B100A86A;
-        Tue, 25 May 2021 13:34:50 +0000 (UTC)
-Received: from warthog.procyon.org.uk (ovpn-112-24.rdu2.redhat.com [10.10.112.24])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 082EC5D9C0;
-        Tue, 25 May 2021 13:34:49 +0000 (UTC)
-Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
-        Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
-        Kingdom.
-        Registered in England and Wales under Company Registration No. 3798903
-Subject: [PATCH 9/9] Fix other posix_memalign() alignment issues
-From:   David Howells <dhowells@redhat.com>
-To:     fstests@vger.kernel.org
-Cc:     dhowells@redhat.com, linux-afs@lists.infradead.org
-Date:   Tue, 25 May 2021 14:34:49 +0100
-Message-ID: <162194968922.4011860.12953203511925579729.stgit@warthog.procyon.org.uk>
-In-Reply-To: <162194962878.4011860.5561077785368723619.stgit@warthog.procyon.org.uk>
-References: <162194962878.4011860.5561077785368723619.stgit@warthog.procyon.org.uk>
-User-Agent: StGit/0.23
+        Tue, 25 May 2021 12:06:38 -0400
+Received: from mail.kernel.org ([198.145.29.99]:41188 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S230422AbhEYQGh (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 25 May 2021 12:06:37 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id A37AC61400;
+        Tue, 25 May 2021 16:05:07 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1621958707;
+        bh=fr4/BQnwum0PGcTBPxeqCHhlYiqm5Yyy2QM88S32yM0=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=OMZoZALivYtN0pyh00mrAVkASXL039CmQZTD7jvXval4KhEsK2E5YkxNOdbd0CZcd
+         /L2Z/UgB4EIaOTsnvGJw8lVaMr+EDXaAK6HEoy5h2z+CXWu9q4aJmuEodded/o5Zhs
+         /JsH6WMo5ZpYXhGX7vM5bEV3FJvOYZTN0zg/34NeYCA3hM3Su/0fHBNcG7p961Yb07
+         wLBY0fc5VYpySHHOAHZn5KylpwFHqfcDJXvDH8vOvffe+0kfEQvzNb9yqm/YcU+6k8
+         SsJaY5K37KBuJDvV+OK4lsXMCQppTfUn8hCPrCzhVKyzN9oI0Hm1f5O4OuWrCpFDdv
+         c0+GqEZNVMFog==
+Date:   Tue, 25 May 2021 09:05:07 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH 1/2] common/config: remove default 4k blocksize from
+ XFS_MKFS_OPTIONS
+Message-ID: <20210525160507.GA202095@locust>
+References: <20210525044642.552682-1-zlang@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210525044642.552682-1-zlang@redhat.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Fix the passing of an alignment that's less than sizeof(long) to
-posix_memalign() in some other places by making sure the minimum is used
-(AFS has a DIO alignment of 1).
+On Tue, May 25, 2021 at 12:46:41PM +0800, Zorro Lang wrote:
+> xfstests set "-bsize=4k" to XFS_MKFS_OPTIONS by default, then give
+> it to MKFS_OPTIOPNS. So MKFS_OPTIOPNS always contains "-bsize=4k"
+> except we set XFS_MKFS_OPTIONS manually.
+> 
+> It's useless to set XFS_MKFS_OPTIONS to "-bsize=4096" by default,
+> especially that will cause all cases with _scratch_mkfs_blocksized()
+> always fail as "-b size option respecified", when test on XFS. For
+> exmaple: generic/222
+> 
+> Signed-off-by: Zorro Lang <zlang@redhat.com>
 
-Note that I haven't altered randholes.c as that has an explicit check for a
-small alignment and gives an error in such a case.  Possibly this should
-just round it up to sizeof(long) instead.
+/me wonders what the historical context is (a) for having an
+$FSTYP-specific MKFS_OPTIONS variable, and (b) for setting bsize=4096
+here.  All I can say is that I've tripped over this numerous times and
+wouldn't really mind if it went away. :P
 
-Another alternative is that rather than using posix_memalign() is to
-allocate a buffer big enough that the base pointer we're going to actually
-use can be cranked forward to the appropriate alignment.
+Acked-by: Darrick J. Wong <djwong@kernel.org>
 
-Signed-off-by: David Howells <dhowells@redhat.com>
----
+(acked in the sense that I'm not /opposed/ but really really wants to
+know the historical reasons)
 
- src/aio-dio-regress/aiocp.c          |    2 ++
- src/aio-dio-regress/aiodio_sparse2.c |    3 ++-
- src/dio-interleaved.c                |    5 ++++-
- 3 files changed, 8 insertions(+), 2 deletions(-)
+--D
 
-diff --git a/src/aio-dio-regress/aiocp.c b/src/aio-dio-regress/aiocp.c
-index 7e71cc5c..880c49d2 100644
---- a/src/aio-dio-regress/aiocp.c
-+++ b/src/aio-dio-regress/aiocp.c
-@@ -81,6 +81,8 @@ int init_iocb(int n, int iosize)
- 	for (i = 0; i < n; i++) {
- 		if (!(iocb_free[i] = (struct iocb *) malloc(sizeof(struct iocb))))
- 			return -1;
-+		if (alignment < sizeof(long))
-+			alignment = sizeof(long);
- 		if (posix_memalign(&buf, alignment, iosize))
- 			return -1;
- 		if (debug > 1) {
-diff --git a/src/aio-dio-regress/aiodio_sparse2.c b/src/aio-dio-regress/aiodio_sparse2.c
-index 51ede5bb..57350e22 100644
---- a/src/aio-dio-regress/aiodio_sparse2.c
-+++ b/src/aio-dio-regress/aiodio_sparse2.c
-@@ -115,9 +115,10 @@ void aiodio_sparse(char *filename, int align, int writesize, int startoffset, in
- 	 */
- 	offset = startoffset;
- 	for (i = 0; i < num_aio; i++) {
-+		unsigned int mem_align = (align >= sizeof(long) ? align : sizeof(long));
- 		void *bufptr;
- 
--		w = posix_memalign(&bufptr, align, writesize);
-+		w = posix_memalign(&bufptr, mem_align, writesize);
- 		if (w) {
- 			fprintf(stderr, "cannot malloc aligned memory: %s\n",
- 				strerror(w));
-diff --git a/src/dio-interleaved.c b/src/dio-interleaved.c
-index 6b04c993..0fa74d3e 100644
---- a/src/dio-interleaved.c
-+++ b/src/dio-interleaved.c
-@@ -24,11 +24,14 @@ struct dio_thread_data {
- static void *dio_thread(void *arg)
- {
- 	struct dio_thread_data *data = arg;
-+	unsigned long mem_align;
- 	off_t off;
- 	ssize_t ret;
- 	void *buf;
- 
--	if ((errno = posix_memalign(&buf, extent_size / 2, extent_size / 2))) {
-+	mem_align = extent_size / 2;
-+	mem_align = (mem_align >= sizeof(long) ? mem_align : sizeof(long));
-+	if ((errno = posix_memalign(&buf, mem_align, extent_size / 2))) {
- 		perror("malloc");
- 		return NULL;
- 	}
-
-
+> ---
+>  common/config | 1 -
+>  1 file changed, 1 deletion(-)
+> 
+> diff --git a/common/config b/common/config
+> index a47e462c..ecd59fae 100644
+> --- a/common/config
+> +++ b/common/config
+> @@ -60,7 +60,6 @@ export EMAIL=root@localhost    # where auto-qa will send its status messages
+>  export HOST_OPTIONS=${HOST_OPTIONS:=local.config}
+>  export CHECK_OPTIONS=${CHECK_OPTIONS:="-g auto"}
+>  export BENCH_PASSES=${BENCH_PASSES:=5}
+> -export XFS_MKFS_OPTIONS=${XFS_MKFS_OPTIONS:=-bsize=4096}
+>  export TIME_FACTOR=${TIME_FACTOR:=1}
+>  export LOAD_FACTOR=${LOAD_FACTOR:=1}
+>  export DEBUGFS_MNT=${DEBUGFS_MNT:="/sys/kernel/debug"}
+> -- 
+> 2.31.1
+> 
