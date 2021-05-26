@@ -2,226 +2,199 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-17.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 202E2C2B9F7
-	for <linux-fstests@archiver.kernel.org>; Wed, 26 May 2021 03:55:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2287EC47089
+	for <linux-fstests@archiver.kernel.org>; Wed, 26 May 2021 08:02:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id EA61861437
-	for <linux-fstests@archiver.kernel.org>; Wed, 26 May 2021 03:55:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 08C876143E
+	for <linux-fstests@archiver.kernel.org>; Wed, 26 May 2021 08:02:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232229AbhEZD5P (ORCPT
+        id S233172AbhEZIEY (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 25 May 2021 23:57:15 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:31495 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S231961AbhEZD5P (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 25 May 2021 23:57:15 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1622001343;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=ZkBB5gkzme5EB+arcYsR/SWZYI8di0oEshP/XIWWqvA=;
-        b=ImWM2FHdSlf8oNLe3ydnIQZubK0WkrQzC0wkTfvYBVKfoNM7x3y48g3K+2RK3DZiPwYRCH
-        jvacOJitCUSnfNH0dLY2GJNbhSOLdm38soaeYwvuZR72pUijLqHI3thcHrzdq/qOtONW5P
-        yN5d65rwnhcEPn6ybiep52dYB2kcwf8=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-357-e8mUfOjiNjaugMrQRNQXTQ-1; Tue, 25 May 2021 23:55:41 -0400
-X-MC-Unique: e8mUfOjiNjaugMrQRNQXTQ-1
-Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id B087D801107;
-        Wed, 26 May 2021 03:55:40 +0000 (UTC)
-Received: from localhost (unknown [10.66.61.36])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 2F2305D9CD;
-        Wed, 26 May 2021 03:55:38 +0000 (UTC)
-Date:   Wed, 26 May 2021 12:13:51 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH 2/2] generic: test small swapfile without page-aligned
- contiguous blocks
-Message-ID: <20210526041351.GE2978781@localhost.localdomain>
-Mail-Followup-To: "Darrick J. Wong" <djwong@kernel.org>,
-        fstests@vger.kernel.org
-References: <20210525044642.552682-1-zlang@redhat.com>
- <20210525044642.552682-2-zlang@redhat.com>
- <20210525160907.GB202095@locust>
+        Wed, 26 May 2021 04:04:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57418 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S233103AbhEZIES (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 26 May 2021 04:04:18 -0400
+Received: from mail-ed1-x532.google.com (mail-ed1-x532.google.com [IPv6:2a00:1450:4864:20::532])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DC5B1C06175F
+        for <fstests@vger.kernel.org>; Wed, 26 May 2021 01:02:46 -0700 (PDT)
+Received: by mail-ed1-x532.google.com with SMTP id j10so200971edw.8
+        for <fstests@vger.kernel.org>; Wed, 26 May 2021 01:02:46 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=W1KMLksfoOETmfA+TFEjfKJxKRe65++yP/OLR847GlU=;
+        b=sZngSuOSe0AHDpb6+buUPlxjgFlTgc1O+YNnzBuTFj8R41tYWgSUlZyVHWYPWtVQEr
+         AHbY2akuDn+65QOY+nCNq3jmwnLJ6x2E7HEhRlHX5AkIKqIlxyoYMGnl5gYK7vOYkEKP
+         LDFMJ55ijPYQLV4e8Tk9Itl2re5S/1+IVrFuG+VRe/RWdbLGi2gQG4djBusstDvj0mzy
+         k3N+mTqC7ENn1g5X2+JRKxesE/mRD4TkdiC2n9pNFHG5LA61fk7HRGI96e2Ba/en3p9W
+         mb+nGeF5Ama1kK7tq8NUS7WR5uK4AdZvpBj195nhiGIgoLoZFMVaSDVFAYV5xepqGA3X
+         qXRA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=W1KMLksfoOETmfA+TFEjfKJxKRe65++yP/OLR847GlU=;
+        b=MLWQi4OlShOuY2oi+YLwYlfpKo354pM7ORwQeubSIH4VhZ8hy1Zyw0Hh1zj9ITXy9Q
+         vgNsZhLYZjDXGUvLm/GyhKIJhDzrtKJoGUJEVsQUndpGJn0UWxitAf2Kw5ZVhIIrK2Rb
+         PwZ7ZdiT+byzxGk8nL6b5CwcYWjQOQS124lX4rQQLcX1w+mf2n6qjQZwAXfqc2oI3nAf
+         uQFm9Yp0a8piudyA0T/CAJ6UapztOzuOvxV5a3Lo2OZMY9v3kgP22RfxfiaP052s6Db4
+         nUTf7MCdFYEQdiXagpjTGw/vfZpmPSkB21TAvKoxaIHwXOdXTbak07xe1KDMDOf0Xrd8
+         w/Qw==
+X-Gm-Message-State: AOAM530fXAC7hBgDg3pxt8TuxVyEtQ3ko25PjMZp0g+n5J3gc4WEPRqk
+        /QKX2puSBK3puWTG7aZbjWLT0p5k4inWtxXSCBk=
+X-Google-Smtp-Source: ABdhPJzEhkQDHMEHTr8dGW87Xji2pqc0YbKBLrCun8M2tRh8YaxzhDQ9G792oUK2rLDOJ0lhwRD6x2CkmhsBVM1wnzU=
+X-Received: by 2002:aa7:d70e:: with SMTP id t14mr36181371edq.377.1622016165430;
+ Wed, 26 May 2021 01:02:45 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210525160907.GB202095@locust>
-User-Agent: Mutt/1.10.1 (2018-07-13)
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
+References: <20210522184814.95802-1-jakobunt@gmail.com> <YKoa7dtkdmu8hp+/@desktop>
+ <CAPv9ZmkirKWThgE7q2oHFFMtk0bQ7A9xG8i+RGqgyLnCkCJJZg@mail.gmail.com>
+ <20210526032037.GF60846@e18g06458.et15sqa> <20210526034139.GL202095@locust>
+In-Reply-To: <20210526034139.GL202095@locust>
+From:   Jakob Unterwurzacher <jakobunt@gmail.com>
+Date:   Wed, 26 May 2021 10:02:34 +0200
+Message-ID: <CAPv9Zmk0sfMM=wPuNPRvHhUmsHC9fxTO-wUiQG_OFXiDpj4cHA@mail.gmail.com>
+Subject: Re: [PATCH] generic/286: fix integer underflow on block sizes != 4096
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     Eryu Guan <eguan@linux.alibaba.com>, Eryu Guan <guan@eryu.me>,
+        fstests@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, May 25, 2021 at 09:09:07AM -0700, Darrick J. Wong wrote:
-> On Tue, May 25, 2021 at 12:46:42PM +0800, Zorro Lang wrote:
-> > If a swapfile doesn't contain even a single page-aligned contiguous
-> > range of blocks, it's an invalid swapfile, and might cause kernel
-> > issue. This case covered commit 5808fecc5723 ("iomap: Fix negative
-> > assignment to unsigned sis->pages in iomap_swapfile_activate").
-> > 
-> > Signed-off-by: Zorro Lang <zlang@redhat.com>
-> > ---
-> >  tests/generic/638     | 79 +++++++++++++++++++++++++++++++++++++++++++
-> >  tests/generic/638.out |  2 ++
-> >  tests/generic/group   |  1 +
-> >  3 files changed, 82 insertions(+)
-> >  create mode 100755 tests/generic/638
-> >  create mode 100644 tests/generic/638.out
-> > 
-> > diff --git a/tests/generic/638 b/tests/generic/638
-> > new file mode 100755
-> > index 00000000..74bc39cb
-> > --- /dev/null
-> > +++ b/tests/generic/638
-> > @@ -0,0 +1,79 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2021 Red Hat Inc.  All Rights Reserved.
-> > +#
-> > +# FS QA Test 638
-> > +#
-> > +# Test small swapfile which doesn't contain even a single page-aligned contiguous
-> > +# range of blocks. This case covered commit 5808fecc5723 ("iomap: Fix negative
-> > +# assignment to unsigned sis->pages in iomap_swapfile_activate").
-> > +#
-> > +seq=`basename $0`
-> > +seqres=$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +
-> > +here=`pwd`
-> > +tmp=/tmp/$$
-> > +status=1	# failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +_cleanup()
-> > +{
-> > +	cd /
-> > +	rm -f $tmp.*
-> > +}
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +. ./common/filter
-> > +
-> > +# remove previous $seqres.full before test
-> > +rm -f $seqres.full
-> > +
-> > +# real QA test starts here
-> > +_supported_fs generic
-> > +_require_scratch
-> > +_require_scratch_swapfile
-> > +_require_test_program mkswap
-> > +_require_test_program swapon
-> > +
-> > +make_unaligned_swapfile()
-> > +{
-> > +	local fname=$1
-> > +	local n=$((psize / bsize - 1))
-> > +
-> > +	# Make sure the swapfile doesn't contain even a single page-aligned
-> > +	# contiguous range of blocks. This's necessary to cover the bug
-> > +	$XFS_IO_PROG -f -t -c "pwrite 0 $(((psize + bsize) * n))" $fname >> $seqres.full 2>&1
-> > +	for((i=1; i<=n; i++));do
-> > +		$XFS_IO_PROG -c "fcollapse $(((psize - bsize) * i)) $bsize" $fname
-> > +	done
-> > +	chmod 0600 $fname
-> > +	$CHATTR_PROG +C $fname > /dev/null 2>&1
-> > +	$here/src/mkswap $fname
-> > +}
-> > +
-> > +_scratch_mkfs >> $seqres.full 2>&1
-> > +_scratch_mount
-> > +psize=`get_page_size`
-> > +bsize=`_get_block_size $SCRATCH_MNT`
-> 
-> _get_file_block_size, since fcollapse requires arguments aligned to the
-> file's allocation unit, which isn't necessarily the same as the fs block
-> size (bigalloc, rt, etc.)...
+> > Ah, that makes sense to me now. Would you please include the detailed
+> > explaination in commit log as well?
+>
+> ...and maybe a sample output of a seek_data/seek_hole scan between a
+> gocryptfs file and the ext4fs underneath it?  I'm still trying to wrap
+> my head around what the problem here is.
+>
+> It might also help to describe where the 32 bytes of overhead goes --
+> are you interleaving the overhead inline with 4k of encrypted content?
 
-You're right.
+Yes, it's all inline, the file format is like this [2]:
 
-> 
-> > +# Due to we need page-unaligned blocks, so blocksize < pagesize is necessary.
-> > +# If not, try to make a smaller enough block size
-> > +if [ $bsize -ge $psize ];then
-> > +	_scratch_unmount
-> > +	_scratch_mkfs_blocksized 1024 >> $seqres.full 2>&1
-> 
-> ...which leads me to the next question, which is: Should the above
-> helper override mkfs options as necessary to enforce that the allocation
-> unit is 1024 bytes?  Or is it time for a new helper?
+file header  ... 18 bytes
+data block 1 ... 16 bytes block header  (IV)
+                 1-4096 bytes user data
+                 16 bytes block trailer (MAC)
+[more data blocks...]
 
-Hmm... the _scratch_mkfs_blocksized() does:
+I am attaching the SEEK_DATA/SEEK_HOLE trace below [1]. One seek goes like this:
+(1) gocryptfs gets a seek() call via FUSE
+(2) translate plaintext to ciphertext offset
+(3) call ext4 seek
+(4) translate back to plaintext offset and return
 
-    xfs)
-        _scratch_mkfs_xfs $MKFS_OPTIONS -b size=$blocksize
+Actually Eryu's first comment had me start thinking about this, and
+what gocryptfs
+does is a little stupid, because the offsets that get returned to userspace may
+point in the middle of a block, but gocryptfs reads or writes in
+blocks of 4128 bytes (= 4096 bytes of user data)
+(*except at EOF), so it may as well round up at seek already.
 
-_scratch_mkfs_xfs() already use $MKFS_OPTIONS internally, don't need to give
-$MKFS_OPTIONS to it again. Although _scratch_mkfs_xfs deals with $MKFS_OPTIONS,
-it just drops whole $MKFS_OPTIONS if there're conflicts.
+This would also mean that the offsets returned to userspace get
+aligned to 4096 bytes,
+and generic/286 would just work as is. Another filesystem not aligning
+to 4096 bytes may hit
+the underflow, but it won't be gocryptfs :)
 
-The _scratch_mkfs_geom() does overwrite, but _scratch_mkfs_sized doesn't (sized
-filesystem is rarely seen in local.config). We might let _scratch_mkfs_blocksized
-learn _scratch_mkfs_geom.
+Thanks, Jakob
 
-> 
-> > +	if [ $? -ne 0 ];then
-> > +		_notrun "Can't make filesystem block size < page size"
-> > +	fi
-> > +	_scratch_mount
-> > +	bsize=1024
-> 
-> You probably want to re-check _get_file_block_size to make sure that you
-> actually got blocksize < pagesize in the format attempt.
+[1]:
+gocryptfs seek(        0, SEEK_DATA) -> translate -> ext4 seek(
+0, SEEK_DATA) =         0 -> translate -> return         0
+gocryptfs seek(        0, SEEK_HOLE) -> translate -> ext4 seek(
+0, SEEK_HOLE) =   1060864 -> translate -> return   1052622
+gocryptfs seek(  1052622, SEEK_DATA) -> translate -> ext4 seek(
+1060864, SEEK_DATA) =   5283840 -> translate -> return   5242862
+gocryptfs seek(  5242862, SEEK_HOLE) -> translate -> ext4 seek(
+5283840, SEEK_HOLE) =   6344704 -> translate -> return   6295502
+gocryptfs seek(  6295502, SEEK_DATA) -> translate -> ext4 seek(
+6344704, SEEK_DATA) =  10567680 -> translate -> return  10485742
+gocryptfs seek( 10485742, SEEK_HOLE) -> translate -> ext4 seek(
+10567680, SEEK_HOLE) =  11628544 -> translate -> return  11538382
+gocryptfs seek( 11538382, SEEK_DATA) -> translate -> ext4 seek(
+11628544, SEEK_DATA) =  15851520 -> translate -> return  15728622
+gocryptfs seek( 15728622, SEEK_HOLE) -> translate -> ext4 seek(
+15851520, SEEK_HOLE) =  16912384 -> translate -> return  16781262
+gocryptfs seek( 16781262, SEEK_DATA) -> translate -> ext4 seek(
+16912384, SEEK_DATA) =  21135360 -> translate -> return  20971502
+gocryptfs seek( 20971502, SEEK_HOLE) -> translate -> ext4 seek(
+21135360, SEEK_HOLE) =  22196224 -> translate -> return  22024142
+gocryptfs seek( 22024142, SEEK_DATA) -> translate -> ext4 seek(
+22196224, SEEK_DATA) =  26419200 -> translate -> return  26214382
+gocryptfs seek( 26214382, SEEK_HOLE) -> translate -> ext4 seek(
+26419200, SEEK_HOLE) =  27480064 -> translate -> return  27267022
+gocryptfs seek( 27267022, SEEK_DATA) -> translate -> ext4 seek(
+27480064, SEEK_DATA) =  31703040 -> translate -> return  31457262
+gocryptfs seek( 31457262, SEEK_HOLE) -> translate -> ext4 seek(
+31703040, SEEK_HOLE) =  32763904 -> translate -> return  32509902
+gocryptfs seek( 32509902, SEEK_DATA) -> translate -> ext4 seek(
+32763904, SEEK_DATA) =  36986880 -> translate -> return  36700142
+gocryptfs seek( 36700142, SEEK_HOLE) -> translate -> ext4 seek(
+36986880, SEEK_HOLE) =  38047744 -> translate -> return  37752782
+gocryptfs seek( 37752782, SEEK_DATA) -> translate -> ext4 seek(
+38047744, SEEK_DATA) =  42270720 -> translate -> return  41943022
+gocryptfs seek( 41943022, SEEK_HOLE) -> translate -> ext4 seek(
+42270720, SEEK_HOLE) =  43331584 -> translate -> return  42995662
+gocryptfs seek( 42995662, SEEK_DATA) -> translate -> ext4 seek(
+43331584, SEEK_DATA) =  47554560 -> translate -> return  47185902
+gocryptfs seek( 47185902, SEEK_HOLE) -> translate -> ext4 seek(
+47554560, SEEK_HOLE) =  48615424 -> translate -> return  48238542
+gocryptfs seek( 48238542, SEEK_DATA) -> translate -> ext4 seek(
+48615424, SEEK_DATA) =  52838400 -> translate -> return  52428782
+gocryptfs seek( 52428782, SEEK_HOLE) -> translate -> ext4 seek(
+52838400, SEEK_HOLE) =  53899264 -> translate -> return  53481422
+gocryptfs seek( 53481422, SEEK_DATA) -> translate -> ext4 seek(
+53899264, SEEK_DATA) =  58122240 -> translate -> return  57671662
+gocryptfs seek( 57671662, SEEK_HOLE) -> translate -> ext4 seek(
+58122240, SEEK_HOLE) =  59183104 -> translate -> return  58724302
+gocryptfs seek( 58724302, SEEK_DATA) -> translate -> ext4 seek(
+59183104, SEEK_DATA) =  63406080 -> translate -> return  62914542
+gocryptfs seek( 62914542, SEEK_HOLE) -> translate -> ext4 seek(
+63406080, SEEK_HOLE) =  64466944 -> translate -> return  63967182
+gocryptfs seek( 63967182, SEEK_DATA) -> translate -> ext4 seek(
+64466944, SEEK_DATA) =  68689920 -> translate -> return  68157422
+gocryptfs seek( 68157422, SEEK_HOLE) -> translate -> ext4 seek(
+68689920, SEEK_HOLE) =  69750784 -> translate -> return  69210062
+gocryptfs seek( 69210062, SEEK_DATA) -> translate -> ext4 seek(
+69750784, SEEK_DATA) =  73973760 -> translate -> return  73400302
+gocryptfs seek( 73400302, SEEK_HOLE) -> translate -> ext4 seek(
+73973760, SEEK_HOLE) =  75034624 -> translate -> return  74452942
+gocryptfs seek( 74452942, SEEK_DATA) -> translate -> ext4 seek(
+75034624, SEEK_DATA) =  79257600 -> translate -> return  78643182
+gocryptfs seek( 78643182, SEEK_HOLE) -> translate -> ext4 seek(
+79257600, SEEK_HOLE) =  80318464 -> translate -> return  79695822
+gocryptfs seek( 79695822, SEEK_DATA) -> translate -> ext4 seek(
+80318464, SEEK_DATA) =  84541440 -> translate -> return  83886062
+gocryptfs seek( 83886062, SEEK_HOLE) -> translate -> ext4 seek(
+84541440, SEEK_HOLE) =  85602304 -> translate -> return  84938702
+gocryptfs seek( 84938702, SEEK_DATA) -> translate -> ext4 seek(
+85602304, SEEK_DATA) =  89825280 -> translate -> return  89128942
+gocryptfs seek( 89128942, SEEK_HOLE) -> translate -> ext4 seek(
+89825280, SEEK_HOLE) =  90886144 -> translate -> return  90181582
+gocryptfs seek( 90181582, SEEK_DATA) -> translate -> ext4 seek(
+90886144, SEEK_DATA) =  95109120 -> translate -> return  94371822
+gocryptfs seek( 94371822, SEEK_HOLE) -> translate -> ext4 seek(
+95109120, SEEK_HOLE) =  96169984 -> translate -> return  95424462
+gocryptfs seek( 95424462, SEEK_DATA) -> translate -> ext4 seek(
+96169984, SEEK_DATA) = 100392960 -> translate -> return  99614702
+gocryptfs seek( 99614702, SEEK_HOLE) -> translate -> ext4
+seek(100392960, SEEK_HOLE) = 101453824 -> translate -> return
+100667342
+gocryptfs seek(100667342, SEEK_DATA) -> translate -> ext4
+seek(101453824, SEEK_DATA) = 105676800 -> translate -> return
+104857582
+gocryptfs seek(104857582, SEEK_HOLE) -> translate -> ext4
+seek(105676800, SEEK_HOLE) = 106733586 -> translate -> return
+105906176
 
-Yes, you're right. _scratch_mkfs_blocksized can't make sure to get that blocksize.
-
-Thanks,
-Zorro
-
-> 
-> --D
-> 
-> > +fi
-> > +swapfile=$SCRATCH_MNT/$seq.swapfile
-> > +make_unaligned_swapfile $swapfile
-> > +$here/src/swapon $swapfile
-> > +swapoff $swapfile
-> > +
-> > +echo "Silence is golden"
-> > +# success, all done
-> > +status=0
-> > +exit
-> > diff --git a/tests/generic/638.out b/tests/generic/638.out
-> > new file mode 100644
-> > index 00000000..3113b1e3
-> > --- /dev/null
-> > +++ b/tests/generic/638.out
-> > @@ -0,0 +1,2 @@
-> > +QA output created by 638
-> > +Silence is golden
-> > diff --git a/tests/generic/group b/tests/generic/group
-> > index b9614c69..5b9b3d1b 100644
-> > --- a/tests/generic/group
-> > +++ b/tests/generic/group
-> > @@ -640,3 +640,4 @@
-> >  635 auto quick atime bigtime shutdown
-> >  636 auto quick swap
-> >  637 auto quick rw
-> > +638 auto quick swap
-> > -- 
-> > 2.31.1
-> > 
-> 
-
+[2]: https://github.com/rfjakob/gocryptfs/blob/master/Documentation/file-format.md
