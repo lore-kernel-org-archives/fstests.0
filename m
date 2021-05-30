@@ -7,195 +7,115 @@ X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5FB9FC47092
-	for <linux-fstests@archiver.kernel.org>; Sun, 30 May 2021 12:50:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D81D7C47091
+	for <linux-fstests@archiver.kernel.org>; Sun, 30 May 2021 12:54:13 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3D5BD611EE
-	for <linux-fstests@archiver.kernel.org>; Sun, 30 May 2021 12:50:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A2452610CB
+	for <linux-fstests@archiver.kernel.org>; Sun, 30 May 2021 12:54:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229550AbhE3Mvj (ORCPT
+        id S229580AbhE3Mzu (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 30 May 2021 08:51:39 -0400
-Received: from out20-75.mail.aliyun.com ([115.124.20.75]:47065 "EHLO
-        out20-75.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229500AbhE3Mvi (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 30 May 2021 08:51:38 -0400
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07437422|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.00605896-0.00117769-0.992763;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047211;MF=guan@eryu.me;NM=1;PH=DS;RN=3;RT=3;SR=0;TI=SMTPD_---.KKvj-BB_1622378998;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.KKvj-BB_1622378998)
-          by smtp.aliyun-inc.com(10.147.43.95);
-          Sun, 30 May 2021 20:49:59 +0800
-Date:   Sun, 30 May 2021 20:49:58 +0800
+        Sun, 30 May 2021 08:55:50 -0400
+Received: from out20-50.mail.aliyun.com ([115.124.20.50]:52819 "EHLO
+        out20-50.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229550AbhE3Mzu (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 30 May 2021 08:55:50 -0400
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.1011759|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.476762-0.00580034-0.517438;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047199;MF=guan@eryu.me;NM=1;PH=DS;RN=3;RT=3;SR=0;TI=SMTPD_---.KKvs3vX_1622379250;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.KKvs3vX_1622379250)
+          by smtp.aliyun-inc.com(10.147.40.233);
+          Sun, 30 May 2021 20:54:11 +0800
+Date:   Sun, 30 May 2021 20:54:10 +0800
 From:   Eryu Guan <guan@eryu.me>
 To:     David Howells <dhowells@redhat.com>
 Cc:     fstests@vger.kernel.org, linux-afs@lists.infradead.org
-Subject: Re: [PATCH 2/9] generic/294, afs: Allow for mknod subtest failing if
- mknod not supported
-Message-ID: <YLOJ9h734bmR140Z@desktop>
+Subject: Re: [PATCH 6/9] Add the ability to require O_TMPFILE to be supported
+ for a test
+Message-ID: <YLOK8qUjF4Pmw+/Z@desktop>
 References: <162194962878.4011860.5561077785368723619.stgit@warthog.procyon.org.uk>
- <162194964249.4011860.17729034205311880257.stgit@warthog.procyon.org.uk>
+ <162194966940.4011860.15702357969023449902.stgit@warthog.procyon.org.uk>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <162194964249.4011860.17729034205311880257.stgit@warthog.procyon.org.uk>
+In-Reply-To: <162194966940.4011860.15702357969023449902.stgit@warthog.procyon.org.uk>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, May 25, 2021 at 02:34:02PM +0100, David Howells wrote:
-> If mknod is not supported, some of generic/294 will fail due to that rather
-> than what's actually being tested - but the other subtests will still work
-> as before.
-> 
-> Add a "_has_mknod" function that can be used to find out if the mknod tests
-> should be skipped.  This is then used to allow the rest of generic/294 to
-> be employed on AFS.
+On Tue, May 25, 2021 at 02:34:29PM +0100, David Howells wrote:
+> Provide a '_require_o_tmpfile' clause so that a test can require than
+> O_TMPFILE be supported by the filesystem being tested.
 > 
 > Signed-off-by: David Howells <dhowells@redhat.com>
 > cc: linux-afs@lists.infradead.org
 > ---
 > 
->  common/rc                     |   10 ++++++++++
->  doc/requirement-checking.txt  |    9 +++++++++
->  tests/generic/294             |    8 ++++++++
->  tests/generic/294.cfg         |    1 +
->  tests/generic/294.out         |    5 -----
->  tests/generic/294.out.mknod   |    6 ++++++
->  tests/generic/294.out.nomknod |    7 +++++++
->  7 files changed, 41 insertions(+), 5 deletions(-)
->  create mode 100644 tests/generic/294.cfg
->  delete mode 100644 tests/generic/294.out
->  create mode 100644 tests/generic/294.out.mknod
->  create mode 100644 tests/generic/294.out.nomknod
+>  common/rc                    |    9 +++++++++
+>  doc/requirement-checking.txt |    7 +++++++
+>  tests/generic/531            |    1 +
+>  3 files changed, 17 insertions(+)
 > 
 > diff --git a/common/rc b/common/rc
-> index f24d0e87..4ffec9a2 100644
+> index e25967d9..c0659215 100644
 > --- a/common/rc
 > +++ b/common/rc
-> @@ -4603,6 +4603,16 @@ _getcap()
->  	return ${PIPESTATUS[0]}
+> @@ -4640,6 +4640,15 @@ _require_unix_perm_checking()
+>  	esac
 >  }
 >  
-> +_has_mknod()
+> +_require_o_tmpfile()
 > +{
 > +	case $FSTYP in
 > +	afs)
-> +		return 1;;
-> +	*)
-> +		return 0;;
+> +		_notrun "O_TMPFILE is not supported on $FSTYP"
+> +		;;
 > +	esac
 > +}
+> +
 
-_require_mknod checks for mknod support by trying to mknod and _notrun
-the test if mknod fails.
-
-So does afs return any failure like EOPNOTSUPP? If so I think we could
-refactor _require_mknod into something like
-
-  _has_mknod || _notrun "xxxx"
-
-and do the mknod check in _has_mknod, isntead of whitelist fs names.
+We could use _require_xfs_io_command "-T" to check if O_TMPFILE is
+supported or not.
 
 Thanks,
 Eryu
 
-> +
 >  init_rc
 >  
 >  ################################################################################
 > diff --git a/doc/requirement-checking.txt b/doc/requirement-checking.txt
-> index 45d2756b..d31ba3fb 100644
+> index 9be7a84c..b708887b 100644
 > --- a/doc/requirement-checking.txt
 > +++ b/doc/requirement-checking.txt
-> @@ -16,6 +16,8 @@ they have.  This is done with _require_<xxx> macros, which may take parameters.
->  
->  	_require_chattr <letters>
->  	_require_exportfs
-> +	_require_mknod
-> +	_has_mknod
+> @@ -21,6 +21,7 @@ they have.  This is done with _require_<xxx> macros, which may take parameters.
+>  	_require_sgid_inheritance
+>  	_require_use_local_uidgid
+>  	_require_unix_perm_checking
+> +	_require_o_tmpfile
 >  
 >   (3) System call requirements.
 >  
-> @@ -97,6 +99,13 @@ _require_exportfs
->       The test also requires the use of the open_by_handle_at() system call and
->       will be skipped if it isn't available in the kernel.
+> @@ -129,6 +130,12 @@ _require_unix_perm_checking
+>       some alternative distributed permissions model involving authentication
+>       tokens rather than the local fsuid/fsgid.
 >  
-> +_require_mknod
-> +_has_mknod
+> +_require_o_tmpfile
 > +
-> +     The test requires that the $TEST_DEV filesystem supports mknod(2).
-> +     _require_mknod will cause the test to be skipped; _has_mknod returns 0 if
-> +     mknod is supported and 1 otherwise.
+> +     The test requires that O_TMPFILE is supported by open() on that
+> +     filesystem, thereby allowing the creation of temporary files to be used or
+> +     tested.
 > +
 >  
 >  ========================
 >  SYSTEM CALL REQUIREMENTS
-> diff --git a/tests/generic/294 b/tests/generic/294
-> index 55b24e12..4fc05082 100755
-> --- a/tests/generic/294
-> +++ b/tests/generic/294
-> @@ -8,6 +8,7 @@
->  # we ask to create an already-existing entity on an RO filesystem
->  #
->  seq=`basename $0`
-> +seqfull=$0
->  seqres=$RESULT_DIR/$seq
->  echo "QA output created by $seq"
+> diff --git a/tests/generic/531 b/tests/generic/531
+> index e76418ca..2f3b1dc6 100755
+> --- a/tests/generic/531
+> +++ b/tests/generic/531
+> @@ -32,6 +32,7 @@ _cleanup()
+>  _supported_fs generic
+>  _require_scratch
+>  _require_test_program "t_open_tmpfiles"
+> +_require_o_tmpfile
 >  
-> @@ -34,6 +35,13 @@ _require_scratch
->  _require_symlinks
->  _require_mknod
->  
-> +features=""
-> +if ! _has_mknod; then
-> +	echo HAS NO MKNOD $?
-> +	features="nomknod"
-> +fi
-> +_link_out_file "$features"
-> +
 >  rm -f $seqres.full
->  _scratch_mkfs > $seqres.full 2>&1 || _fail "Could not mkfs scratch device"
->  
-> diff --git a/tests/generic/294.cfg b/tests/generic/294.cfg
-> new file mode 100644
-> index 00000000..c0466cde
-> --- /dev/null
-> +++ b/tests/generic/294.cfg
-> @@ -0,0 +1 @@
-> +nomknod: nomknod
-> diff --git a/tests/generic/294.out b/tests/generic/294.out
-> deleted file mode 100644
-> index 78024728..00000000
-> --- a/tests/generic/294.out
-> +++ /dev/null
-> @@ -1,5 +0,0 @@
-> -QA output created by 294
-> -mknod: SCRATCH_MNT/294.test/testnode: File exists
-> -mkdir: cannot create directory 'SCRATCH_MNT/294.test/testdir': File exists
-> -touch: cannot touch 'SCRATCH_MNT/294.test/testtarget': Read-only file system
-> -ln: creating symbolic link 'SCRATCH_MNT/294.test/testlink': File exists
-> diff --git a/tests/generic/294.out.mknod b/tests/generic/294.out.mknod
-> new file mode 100644
-> index 00000000..4aea9d82
-> --- /dev/null
-> +++ b/tests/generic/294.out.mknod
-> @@ -0,0 +1,6 @@
-> +QA output created by 294
-> +mknod: SCRATCH_MNT/294.test/testnode: Operation not permitted
-> +mknod: SCRATCH_MNT/294.test/testnode: Read-only file system
-> +mkdir: cannot create directory 'SCRATCH_MNT/294.test/testdir': File exists
-> +touch: cannot touch 'SCRATCH_MNT/294.test/testtarget': Read-only file system
-> +ln: creating symbolic link 'SCRATCH_MNT/294.test/testlink': File exists
-> diff --git a/tests/generic/294.out.nomknod b/tests/generic/294.out.nomknod
-> new file mode 100644
-> index 00000000..43658aa8
-> --- /dev/null
-> +++ b/tests/generic/294.out.nomknod
-> @@ -0,0 +1,7 @@
-> +QA output created by 294
-> +HAS NO MKNOD
-> +mknod: SCRATCH_MNT/294.test/testnode: Operation not permitted
-> +mknod: SCRATCH_MNT/294.test/testnode: Read-only file system
-> +mkdir: cannot create directory 'SCRATCH_MNT/294.test/testdir': File exists
-> +touch: cannot touch 'SCRATCH_MNT/294.test/testtarget': Read-only file system
-> +ln: creating symbolic link 'SCRATCH_MNT/294.test/testlink': File exists
+>  _scratch_mkfs >> $seqres.full 2>&1
 > 
