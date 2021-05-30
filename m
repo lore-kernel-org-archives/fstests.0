@@ -2,200 +2,163 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2DD9FC47092
-	for <linux-fstests@archiver.kernel.org>; Sun, 30 May 2021 13:18:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9A130C47092
+	for <linux-fstests@archiver.kernel.org>; Sun, 30 May 2021 13:58:32 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E9699610A6
-	for <linux-fstests@archiver.kernel.org>; Sun, 30 May 2021 13:18:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7A637611BD
+	for <linux-fstests@archiver.kernel.org>; Sun, 30 May 2021 13:58:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229580AbhE3NUc (ORCPT
+        id S229735AbhE3OAK (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 30 May 2021 09:20:32 -0400
-Received: from out20-98.mail.aliyun.com ([115.124.20.98]:37229 "EHLO
-        out20-98.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229500AbhE3NUb (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 30 May 2021 09:20:31 -0400
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07440292|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_alarm|0.0401097-0.00176082-0.958129;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047199;MF=guan@eryu.me;NM=1;PH=DS;RN=4;RT=4;SR=0;TI=SMTPD_---.KKw8YYQ_1622380730;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.KKw8YYQ_1622380730)
-          by smtp.aliyun-inc.com(10.147.40.7);
-          Sun, 30 May 2021 21:18:51 +0800
-Date:   Sun, 30 May 2021 21:18:49 +0800
-From:   Eryu Guan <guan@eryu.me>
-To:     Kent Overstreet <kent.overstreet@gmail.com>
-Cc:     fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org,
-        linux-bcachefs@vger.kernel.org
-Subject: Re: [PATCH v2 3/4] generic/{455,457,482}: make dmlogwrites tests
- work on bcachefs
-Message-ID: <YLOQuagLB3LhKPOl@desktop>
-References: <20210525221955.265524-1-kent.overstreet@gmail.com>
- <20210525221955.265524-7-kent.overstreet@gmail.com>
+        Sun, 30 May 2021 10:00:10 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59066 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229500AbhE3OAJ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 30 May 2021 10:00:09 -0400
+Received: from mail-wr1-x430.google.com (mail-wr1-x430.google.com [IPv6:2a00:1450:4864:20::430])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D9EC6C061574
+        for <fstests@vger.kernel.org>; Sun, 30 May 2021 06:58:30 -0700 (PDT)
+Received: by mail-wr1-x430.google.com with SMTP id v23so5764855wrd.10
+        for <fstests@vger.kernel.org>; Sun, 30 May 2021 06:58:30 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=message-id:date:from:to:subject:mime-version:content-disposition;
+        bh=CE/6tTX/EJI6rSpuZHNIkFu9jbG1lKCC0LdL5/Q4McY=;
+        b=LFTfkVd8WK8h5Gs+GqrcTbnW705fm0Ny/8SJ4Hb5HbRHvvOHquEueKbkEqWMFg4aS8
+         oyezzmd6HHweocrEEuJCXvHhiH1VhD8yUxlE/JvoeKAt+NII6u5BQBRzqM2XP90QnsXG
+         hQK3h5YqEfuGBpR0qbPidrG6zXLUs5UFVmTA1sINGYYOgEVmPx8yjsiTzqlsOgM5H9Cg
+         mE5NJyeLan54SkC1RBjY0xYWVZsn6rXKkbJSa0ilodt+63aiivzyAM91MsCsyio8TnGw
+         s4Daq0w3/GeXdMdob3PbZCd3TbIuMwj+KqsbwzgR02KD26y9WG3HHDPScJ/HVRfqCPjK
+         0RQA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:message-id:date:from:to:subject:mime-version
+         :content-disposition;
+        bh=CE/6tTX/EJI6rSpuZHNIkFu9jbG1lKCC0LdL5/Q4McY=;
+        b=DXfXoCHrFwtyQtQN1gxpC6lvAmhq96N24H+a8eKNJX9b7Mk1yk4s/Cly6Z3Ixh1qLi
+         wNnaxVMMSYfgGwlhUe+aPOBPheXgG4hLhA9f3+i1Sk4Zkt/BR4ffy+u6ZRXLRqiItsAF
+         fhDK+lS6Zjm+wd5KZ7ZD3uuZaUf0Yybvwuu9VS8Z3dkx+BycwYSkQrYKnUctO9/dFi2U
+         aFTMKZKT0OrVG2pt2sTQBgKck+vlYqN0SEpRdRRvT4pfzgVTiq+uTtyQk7BnInZ1QT8f
+         eQ1SmYlJLJUcYcSxaBfVl9LepM0Freh5EC6P6Q/kNNIbmq9zLICfN1QQXBVYi/XPunM/
+         W7wA==
+X-Gm-Message-State: AOAM532CZkdMfSfRB7d7G5JSnnP9Eax4dKvTGsIslp0C0FtDIvr/HL0F
+        Rvt0bOx60VL/mchTgfYLbwNy5wH1C3M=
+X-Google-Smtp-Source: ABdhPJzedj3BpbSuIx43bDnCFmU4Wgq7p/MG80V7SkBhGxMoHI65bYsx6rNJ9dUceb9LyXU7tFYbOw==
+X-Received: by 2002:adf:fd82:: with SMTP id d2mr18063488wrr.218.1622383108866;
+        Sun, 30 May 2021 06:58:28 -0700 (PDT)
+Received: from localhost ([8.208.10.148])
+        by smtp.gmail.com with ESMTPSA id n12sm831085wrs.19.2021.05.30.06.58.25
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 30 May 2021 06:58:27 -0700 (PDT)
+Message-ID: <60b39a03.1c69fb81.19580.375a@mx.google.com>
+Date:   Sun, 30 May 2021 21:58:21 +0800
+From:   Eryu Guan <guaneryu@gmail.com>
+To:     fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: master branch updated to 37881397f1aa
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="5enEhAYlYMiU"
 Content-Disposition: inline
-In-Reply-To: <20210525221955.265524-7-kent.overstreet@gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, May 25, 2021 at 06:19:54PM -0400, Kent Overstreet wrote:
-> bcachefs has log structured btree nodes, in addition to a regular
-> journal, which means that unless we replay to markers in the log in the
-> same order that they happened and are careful to avoid writing in
-> between replaying to different events - we need to wipe and start fresh
-> each time.
-> 
-> Signed-off-by: Kent Overstreet <kent.overstreet@gmail.com>
-> ---
->  tests/generic/455 | 14 ++++++++++++++
->  tests/generic/457 | 14 ++++++++++++++
->  tests/generic/482 | 27 ++++++++++++++++++++-------
->  3 files changed, 48 insertions(+), 7 deletions(-)
-> 
-> diff --git a/tests/generic/455 b/tests/generic/455
-> index 5b4b242e74..6dc46c3c72 100755
-> --- a/tests/generic/455
-> +++ b/tests/generic/455
-> @@ -35,6 +35,17 @@ _require_dm_target thin-pool
->  
->  rm -f $seqres.full
->  
-> +_reset_dmthin()
-> +{
-> +    # With bcachefs, we need to wipe and start fresh every time we replay to a
-> +    # different point in time - if we see metadata from a future point in time,
-> +    # or an unrelated mount, bcachefs will get confused:
-> +    if [ "$FSTYP" = "bcachefs" ]; then
-> +	_dmthin_cleanup
-> +	_dmthin_init $devsize $devsize $csize $lowspace
-> +    fi
-> +}
 
-I think we probably could make it a common helper, and currently only
-bcachefs needs reset, and more log structured filesystems may be
-supported in the future.
+--5enEhAYlYMiU
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+
+Hi all,
+
+The master branch of the xfstests repository at:
+
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+have just been updated. Notably, initial bcachefs support has been added in
+this update, though bcachefs itself is not upstreamed yet, this will help
+bcachefs being tested widely, and help bcachefs being merged in upstream.
+
+There're also new tests and fixes as usual, and the new btrfs/240 currently
+fails with latest v5.13-rc3 kernel.
+
+The group file re-work patchset from Darrick J. Wong is still in review, and
+may need more eyes and testings.
 
 Thanks,
 Eryu
 
-> +
->  check_files()
->  {
->  	local name=$1
-> @@ -44,6 +55,7 @@ check_files()
->  		local filename=$(basename $i)
->  		local mark="${filename##*.}"
->  		echo "checking $filename" >> $seqres.full
-> +		_reset_dmthin
->  		_log_writes_replay_log $filename $DMTHIN_VOL_DEV
->  		_dmthin_mount
->  		local expected_md5=$(_md5_checksum $i)
-> @@ -101,6 +113,7 @@ _dmthin_check_fs
->  
->  # check pre umount
->  echo "checking pre umount" >> $seqres.full
-> +_reset_dmthin
->  _log_writes_replay_log last $DMTHIN_VOL_DEV
->  _dmthin_mount
->  _dmthin_check_fs
-> @@ -111,6 +124,7 @@ done
->  
->  # Check the end
->  echo "checking post umount" >> $seqres.full
-> +_reset_dmthin
->  _log_writes_replay_log end $DMTHIN_VOL_DEV
->  _dmthin_mount
->  for j in `seq 0 $((NUM_FILES-1))`; do
-> diff --git a/tests/generic/457 b/tests/generic/457
-> index ddbd90cf0c..f17d4e4430 100755
-> --- a/tests/generic/457
-> +++ b/tests/generic/457
-> @@ -37,6 +37,17 @@ _require_dm_target thin-pool
->  
->  rm -f $seqres.full
->  
-> +_reset_dmthin()
-> +{
-> +    # With bcachefs, we need to wipe and start fresh every time we replay to a
-> +    # different point in time - if we see metadata from a future point in time,
-> +    # or an unrelated mount, bcachefs will get confused:
-> +    if [ "$FSTYP" = "bcachefs" ]; then
-> +	_dmthin_cleanup
-> +	_dmthin_init $devsize $devsize $csize $lowspace
-> +    fi
-> +}
-> +
->  check_files()
->  {
->  	local name=$1
-> @@ -46,6 +57,7 @@ check_files()
->  		local filename=$(basename $i)
->  		local mark="${filename##*.}"
->  		echo "checking $filename" >> $seqres.full
-> +		_reset_dmthin
->  		_log_writes_replay_log $filename $DMTHIN_VOL_DEV
->  		_dmthin_mount
->  		local expected_md5=$(_md5_checksum $i)
-> @@ -105,6 +117,7 @@ _dmthin_check_fs
->  
->  # check pre umount
->  echo "checking pre umount" >> $seqres.full
-> +_reset_dmthin
->  _log_writes_replay_log last $DMTHIN_VOL_DEV
->  _dmthin_mount
->  _dmthin_check_fs
-> @@ -115,6 +128,7 @@ done
->  
->  # Check the end
->  echo "checking post umount" >> $seqres.full
-> +_reset_dmthin
->  _log_writes_replay_log end $DMTHIN_VOL_DEV
->  _dmthin_mount
->  for j in `seq 0 $((NUM_FILES-1))`; do
-> diff --git a/tests/generic/482 b/tests/generic/482
-> index 86941e8468..3cbe187f2e 100755
-> --- a/tests/generic/482
-> +++ b/tests/generic/482
-> @@ -77,16 +77,29 @@ prev=$(_log_writes_mark_to_entry_number mkfs)
->  cur=$(_log_writes_find_next_fua $prev)
->  [ -z "$cur" ] && _fail "failed to locate next FUA write"
->  
-> +if [ "$FSTYP" = "bcachefs" ]; then
-> +    _dmthin_cleanup
-> +    _dmthin_init $devsize $devsize $csize $lowspace
-> +fi
-> +
->  while [ ! -z "$cur" ]; do
->  	_log_writes_replay_log_range $cur $DMTHIN_VOL_DEV >> $seqres.full
->  
-> -	# Here we need extra mount to replay the log, mainly for journal based
-> -	# fs, as their fsck will report dirty log as error.
-> -	# We don't care to preserve any data on the replay dev, as we can replay
-> -	# back to the point we need, and in fact sometimes creating/deleting
-> -	# snapshots repeatedly can be slower than replaying the log.
-> -	_dmthin_mount
-> -	_dmthin_check_fs
-> +	if [ "$FSTYP" = "bcachefs" ]; then
-> +	    # bcachefs will get confused if fsck does writes to replay the log,
-> +	    # but then we replay writes from an earlier point in time on the
-> +	    # same fs - but  fsck in -n mode won't do any writes:
-> +	    _check_scratch_fs -n $DMTHIN_VOL_DEV
-> +	else
-> +	    # Here we need extra mount to replay the log, mainly for journal based
-> +	    # fs, as their fsck will report dirty log as error.
-> +	    # We don't care to preserve any data on the replay dev, as we can replay
-> +	    # back to the point we need, and in fact sometimes creating/deleting
-> +	    # snapshots repeatedly can be slower than replaying the log.
-> +
-> +	    _dmthin_mount
-> +	    _dmthin_check_fs
-> +	fi
->  
->  	prev=$cur
->  	cur=$(_log_writes_find_next_fua $(($cur + 1)))
-> -- 
-> 2.32.0.rc0
+The new head of the master branch is commit:
+
+37881397f1aa ext4: prevent initializing reserved inodes
+
+New commits:
+
+Filipe Manana (1):
+      [2605c135e15c] btrfs: add test for multiple fsync with adjacent preallocated extents
+
+Kent Overstreet (2):
+      [5b44709187ce] fstests: improved .gitignore
+      [986733634c61] fstests: initial bcachefs support
+
+Sun Ke (2):
+      [9bc323f334b6] xfs: fix check of whether the mkfs fail
+      [05fafbff9950] generic/042: set size to 38M for f2fs
+
+Yang Xu (1):
+      [ee7383c5f54c] common/xfs: Fix _require_scratch_xfs_shrink bug
+
+chenlong (1):
+      [37881397f1aa] ext4: prevent initializing reserved inodes
+
+
+Code Diffstat:
+
+ .gitignore          |   3 +
+ common/attr         |   6 ++
+ common/config       |   3 +
+ common/quota        |   4 +-
+ common/rc           |  11 ++++
+ common/xfs          |   3 +-
+ tests/btrfs/240     | 173 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/240.out |  29 +++++++++
+ tests/btrfs/group   |   1 +
+ tests/ext4/049      |  67 ++++++++++++++++++++
+ tests/ext4/049.out  |   7 +++
+ tests/ext4/group    |   1 +
+ tests/generic/042   |   8 ++-
+ tests/generic/425   |   3 +
+ tests/generic/441   |   2 +-
+ tests/xfs/070       |   3 +-
+ tests/xfs/448       |   3 +-
+ 17 files changed, 320 insertions(+), 7 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
+
+--5enEhAYlYMiU
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAmCzmbYACgkQJlKqKVyP
+52OXdA//X+MvqOOeuJ6uJniZVjoW6vFdGaT7n148R2sAQojQKPwC5YZ34ksEBwVL
+Fhvfx/TzYBNz1rfSHGZ5K+E+S3JIXP6yxAZHTQiOX+zSgYKSYy9LwXNlvd6/brmu
+EKsgvMx5IXh836EaxLXet3KBiqTkF1XQ/2Q76xFO7IhJVZ7Wk6JHlYPCF2FC1iUX
+pUyvhW1TI/OBhbN1yBHZIUCfdXygg7RyEUmZRYHtOqgbsgNYIMT7a1ZeTwsEYmB/
+ucU/Oic0lGrLs9SXisHAGxvtBd0Xw2+mFrvlahALGRYYq8VmWG/34XTJUUAHvUdf
+AAEfcrmshTJ3M/ajqnnY+g9hksuET5mm4vuxZ0Af0Bqn1/D/u0oz0ZwxsgmjzS9T
+6iIssXDIWyV9wTho06Ne2GOCVbSj25N86ioEZi7YPSrAM5WU216tYL/+XNqqg3ZL
+obJTg0jBeHCO5/nVzMwspFcUO18A3EIgr6tzbsxG5nphBaHXCiJcmJjKo+ewouD4
+VvFiUZEx8FEUjhiV0Kvdd8T3PZ4GF2KhSSEB5LniQnYs9tPE//3FM4sOGQq7oulj
+w95apwaDhhWNK0jP9FMd/BlPNHLppJn5YBlHKHAC25BbPyHI7POV5VAEwYLVHTm6
+vHh6fUL86t4I0tgjEpO6RBunaJ6oSyd2tgG1FFk8VOuEPbr1ZHI=
+=Bj1+
+-----END PGP SIGNATURE-----
+
+--5enEhAYlYMiU--
