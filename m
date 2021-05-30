@@ -2,77 +2,200 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8FE6AC47091
-	for <linux-fstests@archiver.kernel.org>; Sun, 30 May 2021 12:23:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5FB9FC47092
+	for <linux-fstests@archiver.kernel.org>; Sun, 30 May 2021 12:50:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7271E61107
-	for <linux-fstests@archiver.kernel.org>; Sun, 30 May 2021 12:23:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3D5BD611EE
+	for <linux-fstests@archiver.kernel.org>; Sun, 30 May 2021 12:50:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229580AbhE3MYn (ORCPT
+        id S229550AbhE3Mvj (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 30 May 2021 08:24:43 -0400
-Received: from out20-50.mail.aliyun.com ([115.124.20.50]:57432 "EHLO
-        out20-50.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229550AbhE3MYn (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 30 May 2021 08:24:43 -0400
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.1550637|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.029694-0.00405737-0.966249;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047209;MF=guan@eryu.me;NM=1;PH=DS;RN=3;RT=3;SR=0;TI=SMTPD_---.KKv5OPU_1622377383;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.KKv5OPU_1622377383)
-          by smtp.aliyun-inc.com(10.147.42.135);
-          Sun, 30 May 2021 20:23:03 +0800
-Date:   Sun, 30 May 2021 20:23:03 +0800
+        Sun, 30 May 2021 08:51:39 -0400
+Received: from out20-75.mail.aliyun.com ([115.124.20.75]:47065 "EHLO
+        out20-75.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229500AbhE3Mvi (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 30 May 2021 08:51:38 -0400
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07437422|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.00605896-0.00117769-0.992763;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047211;MF=guan@eryu.me;NM=1;PH=DS;RN=3;RT=3;SR=0;TI=SMTPD_---.KKvj-BB_1622378998;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.KKvj-BB_1622378998)
+          by smtp.aliyun-inc.com(10.147.43.95);
+          Sun, 30 May 2021 20:49:59 +0800
+Date:   Sun, 30 May 2021 20:49:58 +0800
 From:   Eryu Guan <guan@eryu.me>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org
-Subject: Re: [PATCH 1/2] common/config: remove default 4k blocksize from
- XFS_MKFS_OPTIONS
-Message-ID: <YLODpzPeFL7WYlnT@desktop>
-References: <20210525044642.552682-1-zlang@redhat.com>
- <20210525160507.GA202095@locust>
+To:     David Howells <dhowells@redhat.com>
+Cc:     fstests@vger.kernel.org, linux-afs@lists.infradead.org
+Subject: Re: [PATCH 2/9] generic/294, afs: Allow for mknod subtest failing if
+ mknod not supported
+Message-ID: <YLOJ9h734bmR140Z@desktop>
+References: <162194962878.4011860.5561077785368723619.stgit@warthog.procyon.org.uk>
+ <162194964249.4011860.17729034205311880257.stgit@warthog.procyon.org.uk>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210525160507.GA202095@locust>
+In-Reply-To: <162194964249.4011860.17729034205311880257.stgit@warthog.procyon.org.uk>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, May 25, 2021 at 09:05:07AM -0700, Darrick J. Wong wrote:
-> On Tue, May 25, 2021 at 12:46:41PM +0800, Zorro Lang wrote:
-> > xfstests set "-bsize=4k" to XFS_MKFS_OPTIONS by default, then give
-> > it to MKFS_OPTIOPNS. So MKFS_OPTIOPNS always contains "-bsize=4k"
-> > except we set XFS_MKFS_OPTIONS manually.
-> > 
-> > It's useless to set XFS_MKFS_OPTIONS to "-bsize=4096" by default,
-> > especially that will cause all cases with _scratch_mkfs_blocksized()
-> > always fail as "-b size option respecified", when test on XFS. For
-> > exmaple: generic/222
-> > 
-> > Signed-off-by: Zorro Lang <zlang@redhat.com>
+On Tue, May 25, 2021 at 02:34:02PM +0100, David Howells wrote:
+> If mknod is not supported, some of generic/294 will fail due to that rather
+> than what's actually being tested - but the other subtests will still work
+> as before.
 > 
-> /me wonders what the historical context is (a) for having an
-> $FSTYP-specific MKFS_OPTIONS variable, and (b) for setting bsize=4096
-> here.  All I can say is that I've tripped over this numerous times and
-> wouldn't really mind if it went away. :P
+> Add a "_has_mknod" function that can be used to find out if the mknod tests
+> should be skipped.  This is then used to allow the rest of generic/294 to
+> be employed on AFS.
 > 
-> Acked-by: Darrick J. Wong <djwong@kernel.org>
+> Signed-off-by: David Howells <dhowells@redhat.com>
+> cc: linux-afs@lists.infradead.org
+> ---
 > 
-> (acked in the sense that I'm not /opposed/ but really really wants to
-> know the historical reasons)
+>  common/rc                     |   10 ++++++++++
+>  doc/requirement-checking.txt  |    9 +++++++++
+>  tests/generic/294             |    8 ++++++++
+>  tests/generic/294.cfg         |    1 +
+>  tests/generic/294.out         |    5 -----
+>  tests/generic/294.out.mknod   |    6 ++++++
+>  tests/generic/294.out.nomknod |    7 +++++++
+>  7 files changed, 41 insertions(+), 5 deletions(-)
+>  create mode 100644 tests/generic/294.cfg
+>  delete mode 100644 tests/generic/294.out
+>  create mode 100644 tests/generic/294.out.mknod
+>  create mode 100644 tests/generic/294.out.nomknod
+> 
+> diff --git a/common/rc b/common/rc
+> index f24d0e87..4ffec9a2 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -4603,6 +4603,16 @@ _getcap()
+>  	return ${PIPESTATUS[0]}
+>  }
+>  
+> +_has_mknod()
+> +{
+> +	case $FSTYP in
+> +	afs)
+> +		return 1;;
+> +	*)
+> +		return 0;;
+> +	esac
+> +}
 
-Looked at the git log, and it was added in 2004 without any
-explaination. I'll let the patch pending for another week, to see if
-anyone knows the history behind this.
+_require_mknod checks for mknod support by trying to mknod and _notrun
+the test if mknod fails.
 
-commit cb6beb975950121f0569c5dede6136fb8ae0b8b8
-Author: ptools <ptools>
-Date:   Tue Jun 15 07:32:36 2004 +0000
+So does afs return any failure like EOPNOTSUPP? If so I think we could
+refactor _require_mknod into something like
 
-    Fixed merge problems
+  _has_mknod || _notrun "xxxx"
+
+and do the mknod check in _has_mknod, isntead of whitelist fs names.
 
 Thanks,
 Eryu
+
+> +
+>  init_rc
+>  
+>  ################################################################################
+> diff --git a/doc/requirement-checking.txt b/doc/requirement-checking.txt
+> index 45d2756b..d31ba3fb 100644
+> --- a/doc/requirement-checking.txt
+> +++ b/doc/requirement-checking.txt
+> @@ -16,6 +16,8 @@ they have.  This is done with _require_<xxx> macros, which may take parameters.
+>  
+>  	_require_chattr <letters>
+>  	_require_exportfs
+> +	_require_mknod
+> +	_has_mknod
+>  
+>   (3) System call requirements.
+>  
+> @@ -97,6 +99,13 @@ _require_exportfs
+>       The test also requires the use of the open_by_handle_at() system call and
+>       will be skipped if it isn't available in the kernel.
+>  
+> +_require_mknod
+> +_has_mknod
+> +
+> +     The test requires that the $TEST_DEV filesystem supports mknod(2).
+> +     _require_mknod will cause the test to be skipped; _has_mknod returns 0 if
+> +     mknod is supported and 1 otherwise.
+> +
+>  
+>  ========================
+>  SYSTEM CALL REQUIREMENTS
+> diff --git a/tests/generic/294 b/tests/generic/294
+> index 55b24e12..4fc05082 100755
+> --- a/tests/generic/294
+> +++ b/tests/generic/294
+> @@ -8,6 +8,7 @@
+>  # we ask to create an already-existing entity on an RO filesystem
+>  #
+>  seq=`basename $0`
+> +seqfull=$0
+>  seqres=$RESULT_DIR/$seq
+>  echo "QA output created by $seq"
+>  
+> @@ -34,6 +35,13 @@ _require_scratch
+>  _require_symlinks
+>  _require_mknod
+>  
+> +features=""
+> +if ! _has_mknod; then
+> +	echo HAS NO MKNOD $?
+> +	features="nomknod"
+> +fi
+> +_link_out_file "$features"
+> +
+>  rm -f $seqres.full
+>  _scratch_mkfs > $seqres.full 2>&1 || _fail "Could not mkfs scratch device"
+>  
+> diff --git a/tests/generic/294.cfg b/tests/generic/294.cfg
+> new file mode 100644
+> index 00000000..c0466cde
+> --- /dev/null
+> +++ b/tests/generic/294.cfg
+> @@ -0,0 +1 @@
+> +nomknod: nomknod
+> diff --git a/tests/generic/294.out b/tests/generic/294.out
+> deleted file mode 100644
+> index 78024728..00000000
+> --- a/tests/generic/294.out
+> +++ /dev/null
+> @@ -1,5 +0,0 @@
+> -QA output created by 294
+> -mknod: SCRATCH_MNT/294.test/testnode: File exists
+> -mkdir: cannot create directory 'SCRATCH_MNT/294.test/testdir': File exists
+> -touch: cannot touch 'SCRATCH_MNT/294.test/testtarget': Read-only file system
+> -ln: creating symbolic link 'SCRATCH_MNT/294.test/testlink': File exists
+> diff --git a/tests/generic/294.out.mknod b/tests/generic/294.out.mknod
+> new file mode 100644
+> index 00000000..4aea9d82
+> --- /dev/null
+> +++ b/tests/generic/294.out.mknod
+> @@ -0,0 +1,6 @@
+> +QA output created by 294
+> +mknod: SCRATCH_MNT/294.test/testnode: Operation not permitted
+> +mknod: SCRATCH_MNT/294.test/testnode: Read-only file system
+> +mkdir: cannot create directory 'SCRATCH_MNT/294.test/testdir': File exists
+> +touch: cannot touch 'SCRATCH_MNT/294.test/testtarget': Read-only file system
+> +ln: creating symbolic link 'SCRATCH_MNT/294.test/testlink': File exists
+> diff --git a/tests/generic/294.out.nomknod b/tests/generic/294.out.nomknod
+> new file mode 100644
+> index 00000000..43658aa8
+> --- /dev/null
+> +++ b/tests/generic/294.out.nomknod
+> @@ -0,0 +1,7 @@
+> +QA output created by 294
+> +HAS NO MKNOD
+> +mknod: SCRATCH_MNT/294.test/testnode: Operation not permitted
+> +mknod: SCRATCH_MNT/294.test/testnode: Read-only file system
+> +mkdir: cannot create directory 'SCRATCH_MNT/294.test/testdir': File exists
+> +touch: cannot touch 'SCRATCH_MNT/294.test/testtarget': Read-only file system
+> +ln: creating symbolic link 'SCRATCH_MNT/294.test/testlink': File exists
+> 
