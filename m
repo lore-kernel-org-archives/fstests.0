@@ -2,163 +2,131 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-15.9 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9A130C47092
-	for <linux-fstests@archiver.kernel.org>; Sun, 30 May 2021 13:58:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AC5A9C47092
+	for <linux-fstests@archiver.kernel.org>; Mon, 31 May 2021 02:11:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7A637611BD
-	for <linux-fstests@archiver.kernel.org>; Sun, 30 May 2021 13:58:32 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 80A5761278
+	for <linux-fstests@archiver.kernel.org>; Mon, 31 May 2021 02:11:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229735AbhE3OAK (ORCPT
+        id S229912AbhEaCNT (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 30 May 2021 10:00:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59066 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229500AbhE3OAJ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 30 May 2021 10:00:09 -0400
-Received: from mail-wr1-x430.google.com (mail-wr1-x430.google.com [IPv6:2a00:1450:4864:20::430])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D9EC6C061574
-        for <fstests@vger.kernel.org>; Sun, 30 May 2021 06:58:30 -0700 (PDT)
-Received: by mail-wr1-x430.google.com with SMTP id v23so5764855wrd.10
-        for <fstests@vger.kernel.org>; Sun, 30 May 2021 06:58:30 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=message-id:date:from:to:subject:mime-version:content-disposition;
-        bh=CE/6tTX/EJI6rSpuZHNIkFu9jbG1lKCC0LdL5/Q4McY=;
-        b=LFTfkVd8WK8h5Gs+GqrcTbnW705fm0Ny/8SJ4Hb5HbRHvvOHquEueKbkEqWMFg4aS8
-         oyezzmd6HHweocrEEuJCXvHhiH1VhD8yUxlE/JvoeKAt+NII6u5BQBRzqM2XP90QnsXG
-         hQK3h5YqEfuGBpR0qbPidrG6zXLUs5UFVmTA1sINGYYOgEVmPx8yjsiTzqlsOgM5H9Cg
-         mE5NJyeLan54SkC1RBjY0xYWVZsn6rXKkbJSa0ilodt+63aiivzyAM91MsCsyio8TnGw
-         s4Daq0w3/GeXdMdob3PbZCd3TbIuMwj+KqsbwzgR02KD26y9WG3HHDPScJ/HVRfqCPjK
-         0RQA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:message-id:date:from:to:subject:mime-version
-         :content-disposition;
-        bh=CE/6tTX/EJI6rSpuZHNIkFu9jbG1lKCC0LdL5/Q4McY=;
-        b=DXfXoCHrFwtyQtQN1gxpC6lvAmhq96N24H+a8eKNJX9b7Mk1yk4s/Cly6Z3Ixh1qLi
-         wNnaxVMMSYfgGwlhUe+aPOBPheXgG4hLhA9f3+i1Sk4Zkt/BR4ffy+u6ZRXLRqiItsAF
-         fhDK+lS6Zjm+wd5KZ7ZD3uuZaUf0Yybvwuu9VS8Z3dkx+BycwYSkQrYKnUctO9/dFi2U
-         aFTMKZKT0OrVG2pt2sTQBgKck+vlYqN0SEpRdRRvT4pfzgVTiq+uTtyQk7BnInZ1QT8f
-         eQ1SmYlJLJUcYcSxaBfVl9LepM0Freh5EC6P6Q/kNNIbmq9zLICfN1QQXBVYi/XPunM/
-         W7wA==
-X-Gm-Message-State: AOAM532CZkdMfSfRB7d7G5JSnnP9Eax4dKvTGsIslp0C0FtDIvr/HL0F
-        Rvt0bOx60VL/mchTgfYLbwNy5wH1C3M=
-X-Google-Smtp-Source: ABdhPJzedj3BpbSuIx43bDnCFmU4Wgq7p/MG80V7SkBhGxMoHI65bYsx6rNJ9dUceb9LyXU7tFYbOw==
-X-Received: by 2002:adf:fd82:: with SMTP id d2mr18063488wrr.218.1622383108866;
-        Sun, 30 May 2021 06:58:28 -0700 (PDT)
-Received: from localhost ([8.208.10.148])
-        by smtp.gmail.com with ESMTPSA id n12sm831085wrs.19.2021.05.30.06.58.25
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 30 May 2021 06:58:27 -0700 (PDT)
-Message-ID: <60b39a03.1c69fb81.19580.375a@mx.google.com>
-Date:   Sun, 30 May 2021 21:58:21 +0800
-From:   Eryu Guan <guaneryu@gmail.com>
-To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: master branch updated to 37881397f1aa
+        Sun, 30 May 2021 22:13:19 -0400
+Received: from szxga08-in.huawei.com ([45.249.212.255]:3294 "EHLO
+        szxga08-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229963AbhEaCNT (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 30 May 2021 22:13:19 -0400
+Received: from dggemx753-chm.china.huawei.com (unknown [172.30.72.56])
+        by szxga08-in.huawei.com (SkyGuard) with ESMTP id 4Ftdvl0JzNz1BFTQ;
+        Mon, 31 May 2021 10:06:59 +0800 (CST)
+Received: from [10.136.110.154] (10.136.110.154) by
+ dggemx753-chm.china.huawei.com (10.0.44.37) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id
+ 15.1.2176.2; Mon, 31 May 2021 10:11:38 +0800
+Subject: Re: [PATCH] generic/042: set size to 38M for f2fs
+To:     Sun Ke <sunke32@huawei.com>, <guan@eryu.me>
+References: <20210518114700.2118225-1-sunke32@huawei.com>
+CC:     <fstests@vger.kernel.org>, <djwong@kernel.org>
+From:   Chao Yu <yuchao0@huawei.com>
+Message-ID: <5876f2b8-1776-0a8c-4d69-71e573810afe@huawei.com>
+Date:   Mon, 31 May 2021 10:11:37 +0800
+User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:52.0) Gecko/20100101
+ Thunderbird/52.9.1
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="5enEhAYlYMiU"
-Content-Disposition: inline
+In-Reply-To: <20210518114700.2118225-1-sunke32@huawei.com>
+Content-Type: text/plain; charset="windows-1252"; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.136.110.154]
+X-ClientProxiedBy: dggemx702-chm.china.huawei.com (10.1.199.49) To
+ dggemx753-chm.china.huawei.com (10.0.44.37)
+X-CFilter-Loop: Reflected
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+On 2021/5/18 19:47, Sun Ke wrote:
+> 25M is too small for f2fs:
+> 
+> Info: Disable heap-based policy
+> Info: Debug level = 0
+> Info: Label =
+> Info: Trim is enabled
+> Info: Segments per section = 1
+> Info: Sections per zone = 1
+> Info: sector size = 512
+> Info: total sectors = 51200 (25 MB)
+> Info: zone aligned segment0 blkaddr: 512
+>      Error: Device size is not sufficient for F2FS volume
+>      Error: Failed to prepare a super block!!!
+>      Error: Could not format the device!!!
+> 
+> So, set size to 38M for f2fs.
 
---5enEhAYlYMiU
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+It looks f2fs-utils 1.14.0 needs at least 52 MB space for f2fs image.
 
-Hi all,
+mkfs.f2fs /dev/zram0 13056 -f
 
-The master branch of the xfstests repository at:
+	F2FS-tools: mkfs.f2fs Ver: 1.14.0 (2021-02-16)
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-have just been updated. Notably, initial bcachefs support has been added in
-this update, though bcachefs itself is not upstreamed yet, this will help
-bcachefs being tested widely, and help bcachefs being merged in upstream.
-
-There're also new tests and fixes as usual, and the new btrfs/240 currently
-fails with latest v5.13-rc3 kernel.
-
-The group file re-work patchset from Darrick J. Wong is still in review, and
-may need more eyes and testings.
+Info: Disable heap-based policy
+Info: Debug level = 0
+Info: Trim is enabled
+Info: wanted sectors = 13056 (in 18446744073709551615 bytes)
+Info: total device sectors = 4194304 (in 4096 bytes)
+Info: Segments per section = 1
+Info: Sections per zone = 1
+Info: sector size = 4096
+Info: total sectors = 13056 (51 MB)
+Info: zone aligned segment0 blkaddr: 512
+	Error: Device size is not sufficient for F2FS volume
+	Error: Failed to prepare a super block!!!
+	Error: Could not format the device!!!
 
 Thanks,
-Eryu
 
-The new head of the master branch is commit:
-
-37881397f1aa ext4: prevent initializing reserved inodes
-
-New commits:
-
-Filipe Manana (1):
-      [2605c135e15c] btrfs: add test for multiple fsync with adjacent preallocated extents
-
-Kent Overstreet (2):
-      [5b44709187ce] fstests: improved .gitignore
-      [986733634c61] fstests: initial bcachefs support
-
-Sun Ke (2):
-      [9bc323f334b6] xfs: fix check of whether the mkfs fail
-      [05fafbff9950] generic/042: set size to 38M for f2fs
-
-Yang Xu (1):
-      [ee7383c5f54c] common/xfs: Fix _require_scratch_xfs_shrink bug
-
-chenlong (1):
-      [37881397f1aa] ext4: prevent initializing reserved inodes
-
-
-Code Diffstat:
-
- .gitignore          |   3 +
- common/attr         |   6 ++
- common/config       |   3 +
- common/quota        |   4 +-
- common/rc           |  11 ++++
- common/xfs          |   3 +-
- tests/btrfs/240     | 173 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/240.out |  29 +++++++++
- tests/btrfs/group   |   1 +
- tests/ext4/049      |  67 ++++++++++++++++++++
- tests/ext4/049.out  |   7 +++
- tests/ext4/group    |   1 +
- tests/generic/042   |   8 ++-
- tests/generic/425   |   3 +
- tests/generic/441   |   2 +-
- tests/xfs/070       |   3 +-
- tests/xfs/448       |   3 +-
- 17 files changed, 320 insertions(+), 7 deletions(-)
---
-Eryu Guan
-guaneryu@gmail.com
-
---5enEhAYlYMiU
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAmCzmbYACgkQJlKqKVyP
-52OXdA//X+MvqOOeuJ6uJniZVjoW6vFdGaT7n148R2sAQojQKPwC5YZ34ksEBwVL
-Fhvfx/TzYBNz1rfSHGZ5K+E+S3JIXP6yxAZHTQiOX+zSgYKSYy9LwXNlvd6/brmu
-EKsgvMx5IXh836EaxLXet3KBiqTkF1XQ/2Q76xFO7IhJVZ7Wk6JHlYPCF2FC1iUX
-pUyvhW1TI/OBhbN1yBHZIUCfdXygg7RyEUmZRYHtOqgbsgNYIMT7a1ZeTwsEYmB/
-ucU/Oic0lGrLs9SXisHAGxvtBd0Xw2+mFrvlahALGRYYq8VmWG/34XTJUUAHvUdf
-AAEfcrmshTJ3M/ajqnnY+g9hksuET5mm4vuxZ0Af0Bqn1/D/u0oz0ZwxsgmjzS9T
-6iIssXDIWyV9wTho06Ne2GOCVbSj25N86ioEZi7YPSrAM5WU216tYL/+XNqqg3ZL
-obJTg0jBeHCO5/nVzMwspFcUO18A3EIgr6tzbsxG5nphBaHXCiJcmJjKo+ewouD4
-VvFiUZEx8FEUjhiV0Kvdd8T3PZ4GF2KhSSEB5LniQnYs9tPE//3FM4sOGQq7oulj
-w95apwaDhhWNK0jP9FMd/BlPNHLppJn5YBlHKHAC25BbPyHI7POV5VAEwYLVHTm6
-vHh6fUL86t4I0tgjEpO6RBunaJ6oSyd2tgG1FFk8VOuEPbr1ZHI=
-=Bj1+
------END PGP SIGNATURE-----
-
---5enEhAYlYMiU--
+> 
+> Signed-off-by: Sun Ke <sunke32@huawei.com>
+> ---
+> I have tried from 25M, until 38M, it passed.
+> 
+> [root@localhost xfstests]# ./check tests/generic/042
+> FSTYP         -- f2fs
+> PLATFORM      -- Linux/x86_64 localhost 5.12.0-rc5-next-20210330 #3 SMP Wed Apr 21 22:29:25 EDT 2021
+> MKFS_OPTIONS  -- /dev/sdb
+> MOUNT_OPTIONS -- -o acl,user_xattr /dev/sdb /mnt/scratch
+> 
+> generic/042 2s ...  2s
+> Ran: generic/042
+> Passed all 1 tests
+> 
+>   tests/generic/042 | 8 +++++++-
+>   1 file changed, 7 insertions(+), 1 deletion(-)
+> 
+> diff --git a/tests/generic/042 b/tests/generic/042
+> index 35727bcb..ee0e4b40 100755
+> --- a/tests/generic/042
+> +++ b/tests/generic/042
+> @@ -41,10 +41,16 @@ _crashtest()
+>   	img=$SCRATCH_MNT/$seq.img
+>   	mnt=$SCRATCH_MNT/$seq.mnt
+>   	file=$mnt/file
+> +	size=25M
+> +
+> +	# 25M is too small for f2fs.
+> +	if [ $FSTYP == "f2fs" ]; then
+> +		size=38M
+> +	fi
+>   
+>   	# Create an fs on a small, initialized image. The pattern is written to
+>   	# the image to detect stale data exposure.
+> -	$XFS_IO_PROG -f -c "truncate 0" -c "pwrite -S 0xCD 0 25M" $img \
+> +	$XFS_IO_PROG -f -c "truncate 0" -c "pwrite -S 0xCD 0 $size" $img \
+>   		>> $seqres.full 2>&1
+>   	_mkfs_dev $img >> $seqres.full 2>&1
+>   
+> 
