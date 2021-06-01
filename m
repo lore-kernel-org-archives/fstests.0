@@ -2,153 +2,217 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 055DCC47080
-	for <linux-fstests@archiver.kernel.org>; Tue,  1 Jun 2021 02:26:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8C0EAC4708F
+	for <linux-fstests@archiver.kernel.org>; Tue,  1 Jun 2021 07:31:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CBD676100B
-	for <linux-fstests@archiver.kernel.org>; Tue,  1 Jun 2021 02:26:22 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6C91260FEB
+	for <linux-fstests@archiver.kernel.org>; Tue,  1 Jun 2021 07:31:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232341AbhFAC16 (ORCPT
+        id S231140AbhFAHdT (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 31 May 2021 22:27:58 -0400
-Received: from szxga03-in.huawei.com ([45.249.212.189]:3360 "EHLO
-        szxga03-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232228AbhFAC15 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 31 May 2021 22:27:57 -0400
-Received: from dggemx753-chm.china.huawei.com (unknown [172.30.72.53])
-        by szxga03-in.huawei.com (SkyGuard) with ESMTP id 4FvGCC2KjRz678r;
-        Tue,  1 Jun 2021 10:22:31 +0800 (CST)
-Received: from [10.136.110.154] (10.136.110.154) by
- dggemx753-chm.china.huawei.com (10.0.44.37) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id
- 15.1.2176.2; Tue, 1 Jun 2021 10:26:13 +0800
-Subject: Re: [PATCH] generic/042: set size to 38M for f2fs
-To:     Sun Ke <sunke32@huawei.com>, <guan@eryu.me>
-CC:     <fstests@vger.kernel.org>, <djwong@kernel.org>
-References: <20210518114700.2118225-1-sunke32@huawei.com>
- <5876f2b8-1776-0a8c-4d69-71e573810afe@huawei.com>
- <c6d71c1c-b242-5a81-2842-bcfb5bbf6296@huawei.com>
-From:   Chao Yu <yuchao0@huawei.com>
-Message-ID: <ef864f81-17ae-6e46-ceda-a2506286f744@huawei.com>
-Date:   Tue, 1 Jun 2021 10:26:13 +0800
-User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:52.0) Gecko/20100101
- Thunderbird/52.9.1
+        Tue, 1 Jun 2021 03:33:19 -0400
+Received: from mx2.suse.de ([195.135.220.15]:46554 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S229984AbhFAHdT (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 1 Jun 2021 03:33:19 -0400
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+        t=1622532697; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+        bh=7qpt9X9UcDEsL58LgXua3JC62aQHvZYwX0dDBIOezfo=;
+        b=QyZbVdecByI4M0C/HsD+/yO1CliyHCdj5e3myBrDYV0/X5KA9l1Iu039TKdnppmzTKeDv/
+        TsSfliLTWiEFil1gKMkC/zJ6/Dhm59UtBQ6O0JvnZiEDM3wAKo+R0fjDzPDqIqAGXi1xBH
+        rkeldh1whVHHCL+pTAK62nmIPEzKeoo=
+Received: from relay2.suse.de (unknown [195.135.221.27])
+        by mx2.suse.de (Postfix) with ESMTP id 50E8FAD2D
+        for <fstests@vger.kernel.org>; Tue,  1 Jun 2021 07:31:37 +0000 (UTC)
+From:   Qu Wenruo <wqu@suse.com>
+To:     fstests@vger.kernel.org
+Subject: [PATCH] fstests: add basic ftrace support
+Date:   Tue,  1 Jun 2021 15:31:33 +0800
+Message-Id: <20210601073133.194598-1-wqu@suse.com>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
-In-Reply-To: <c6d71c1c-b242-5a81-2842-bcfb5bbf6296@huawei.com>
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Language: en-US
 Content-Transfer-Encoding: 8bit
-X-Originating-IP: [10.136.110.154]
-X-ClientProxiedBy: dggemx704-chm.china.huawei.com (10.1.199.51) To
- dggemx753-chm.china.huawei.com (10.0.44.37)
-X-CFilter-Loop: Reflected
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 2021/5/31 11:54, Sun Ke wrote:
-> 
-> 
-> 在 2021/5/31 10:11, Chao Yu 写道:
->> On 2021/5/18 19:47, Sun Ke wrote:
->>> 25M is too small for f2fs:
->>>
->>> Info: Disable heap-based policy
->>> Info: Debug level = 0
->>> Info: Label =
->>> Info: Trim is enabled
->>> Info: Segments per section = 1
->>> Info: Sections per zone = 1
->>> Info: sector size = 512
->>> Info: total sectors = 51200 (25 MB)
->>> Info: zone aligned segment0 blkaddr: 512
->>>       Error: Device size is not sufficient for F2FS volume
->>>       Error: Failed to prepare a super block!!!
->>>       Error: Could not format the device!!!
->>>
->>> So, set size to 38M for f2fs.
->>
->> It looks f2fs-utils 1.14.0 needs at least 52 MB space for f2fs image.
->>
->> mkfs.f2fs /dev/zram0 13056 -f
->>
->>       F2FS-tools: mkfs.f2fs Ver: 1.14.0 (2021-02-16)
->>
->> Info: Disable heap-based policy
->> Info: Debug level = 0
->> Info: Trim is enabled
->> Info: wanted sectors = 13056 (in 18446744073709551615 bytes)
->> Info: total device sectors = 4194304 (in 4096 bytes)
->> Info: Segments per section = 1
->> Info: Sections per zone = 1
->> Info: sector size = 4096
->> Info: total sectors = 13056 (51 MB)
->> Info: zone aligned segment0 blkaddr: 512
->>       Error: Device size is not sufficient for F2FS volume
->>       Error: Failed to prepare a super block!!!
->>       Error: Could not format the device!!!
->>
->> Thanks,
-> 
-> My F2FS-tools is mkfs.f2fs Ver: 1.9.0 (2017-09-21). So, is 52MB  enough?
-> The image size f2fs needed seems growing.
+Sometimes developers want trace dump for certain test cases.
 
-Not sure it may change again, but at least we need to configure mininum
-size of f2fs image to 52MB in xfstest.
+Normally I just add "trace-cmd" calls in "check", but it would be much
+better to let fstests to support ftrace dumping.
 
-Thanks,
+This patchset will add basic ftrace dumping support by:
 
-> 
-> Thanks.
-> Sun Ke
-> 
->>
->>>
->>> Signed-off-by: Sun Ke <sunke32@huawei.com>
->>> ---
->>> I have tried from 25M, until 38M, it passed.
->>>
->>> [root@localhost xfstests]# ./check tests/generic/042
->>> FSTYP         -- f2fs
->>> PLATFORM      -- Linux/x86_64 localhost 5.12.0-rc5-next-20210330 #3
->>> SMP Wed Apr 21 22:29:25 EDT 2021
->>> MKFS_OPTIONS  -- /dev/sdb
->>> MOUNT_OPTIONS -- -o acl,user_xattr /dev/sdb /mnt/scratch
->>>
->>> generic/042 2s ...  2s
->>> Ran: generic/042
->>> Passed all 1 tests
->>>
->>>    tests/generic/042 | 8 +++++++-
->>>    1 file changed, 7 insertions(+), 1 deletion(-)
->>>
->>> diff --git a/tests/generic/042 b/tests/generic/042
->>> index 35727bcb..ee0e4b40 100755
->>> --- a/tests/generic/042
->>> +++ b/tests/generic/042
->>> @@ -41,10 +41,16 @@ _crashtest()
->>>        img=$SCRATCH_MNT/$seq.img
->>>        mnt=$SCRATCH_MNT/$seq.mnt
->>>        file=$mnt/file
->>> +    size=25M
->>> +
->>> +    # 25M is too small for f2fs.
->>> +    if [ $FSTYP == "f2fs" ]; then
->>> +        size=38M
->>> +    fi
->>>        # Create an fs on a small, initialized image. The pattern is
->>> written to
->>>        # the image to detect stale data exposure.
->>> -    $XFS_IO_PROG -f -c "truncate 0" -c "pwrite -S 0xCD 0 25M" $img \
->>> +    $XFS_IO_PROG -f -c "truncate 0" -c "pwrite -S 0xCD 0 $size" $img \
->>>            >> $seqres.full 2>&1
->>>        _mkfs_dev $img >> $seqres.full 2>&1
->>>
->> .
-> .
-> 
+- Clear all buffers before running each test
+- Start tracing before running each test
+- End tracing after test finished
+- Copy the trace to "$seqres.trace" if needed
+  The condition is either:
+  * $KEEP_TRACE environment is set to "yes"
+  * The test case failed
+
+Currently we only support the main ftrace buffer, but all supporting
+functions have support for ftrace instances, for later expansion.
+
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+---
+ check         | 12 +++++++-
+ common/ftrace | 82 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ common/rc     |  1 +
+ 3 files changed, 94 insertions(+), 1 deletion(-)
+ create mode 100644 common/ftrace
+
+diff --git a/check b/check
+index ba192042..0a09dcf9 100755
+--- a/check
++++ b/check
+@@ -801,7 +801,7 @@ function run_section()
+ 		fi
+ 
+ 		# really going to try and run this one
+-		rm -f $seqres.out.bad
++		rm -f $seqres.out.bad $seqres.trace
+ 
+ 		# check if we really should run it
+ 		_expunge_test $seqnum
+@@ -839,6 +839,10 @@ function run_section()
+ 		# to be reported for each test
+ 		(echo 1 > $DEBUGFS_MNT/clear_warn_once) > /dev/null 2>&1
+ 
++		# Clear previous trace and start new trace
++		_clear_trace_buffers
++		_start_trace
++
+ 		if [ "$DUMP_OUTPUT" = true ]; then
+ 			_run_seq 2>&1 | tee $tmp.out
+ 			# Because $? would get tee's return code
+@@ -848,6 +852,11 @@ function run_section()
+ 			sts=$?
+ 		fi
+ 
++		_end_trace
++		if [ "$KEEP_TRACE" == "yes" ]; then
++			_copy_trace "$seqres.trace"
++		fi
++
+ 		if [ -f core ]; then
+ 			_dump_err_cont "[dumped core]"
+ 			mv core $RESULT_BASE/$seqnum.core
+@@ -932,6 +941,7 @@ function run_section()
+ 
+ 	# make sure we record the status of the last test we ran.
+ 	if $err ; then
++		_copy_trace "$seqres.trace"
+ 		bad="$bad $seqnum"
+ 		n_bad=`expr $n_bad + 1`
+ 		tc_status="fail"
+diff --git a/common/ftrace b/common/ftrace
+new file mode 100644
+index 00000000..36886484
+--- /dev/null
++++ b/common/ftrace
+@@ -0,0 +1,82 @@
++#
++# Common ftrace related functions
++#
++
++TRACE_DIR="/sys/kernel/debug/tracing"
++
++_clear_trace_buffers()
++{
++	if [ ! -d "${TRACE_DIR}" ]; then
++		return
++	fi
++
++	# Clear the main buffer
++	echo 0 > "${TRACE_DIR}/trace"
++
++	# Clear each instance buffer
++	for i in $(ls "${TRACE_DIR}/instances"); do
++		echo 0 > "${i}/trace"
++	done
++}
++
++_start_trace()
++{
++	instance=$1
++
++	if [ ! -d "${TRACE_DIR}" ]; then
++		return
++	fi
++
++	if [ -z "${instance}" ]; then
++		echo 1 > "${TRACE_DIR}/tracing_on"
++	else
++		mkdir -p "${TRACE_DIR}/instances/${instance}"
++		echo 1 > "${TRACE_DIR}/instances/${instance}/tracing_on"
++	fi
++}
++
++_end_trace()
++{
++	instance=$1
++
++	if [ ! -d "${TRACE_DIR}" ]; then
++		return
++	fi
++
++	if [ -z "${instance}" ]; then
++		echo 0 > "${TRACE_DIR}/tracing_on"
++	else
++		mkdir -p "${TRACE_DIR}/instances/${instance}"
++		echo 0 > "${TRACE_DIR}/instances/${instance}/tracing_on"
++	fi
++}
++
++_remove_empty_trace()
++{
++	file="$1"
++	if [ ! -f "$file" ]; then
++		return
++	fi
++
++	if [ -z "$(head -n 15 $file | sed '/^#/d')" ]; then
++		rm $file
++	fi
++}
++
++_copy_trace()
++{
++	dest="$1"
++	instance="$2"
++
++	if [ ! -d "${TRACE_DIR}" ]; then
++		return
++	fi
++
++	if [ -z "${instance}" ]; then
++		cp "${TRACE_DIR}/trace" "$dest"
++	elif [ -d "${TRACE_DIR}/instances/${instance}" ]; then
++		cp "${TRACE_DIR}/instances/${instance}/trace" "$dest"
++	fi
++
++	_remove_empty_trace "$dest"
++}
+diff --git a/common/rc b/common/rc
+index 919028ef..f9de1517 100644
+--- a/common/rc
++++ b/common/rc
+@@ -3,6 +3,7 @@
+ # Copyright (c) 2000-2006 Silicon Graphics, Inc.  All Rights Reserved.
+ 
+ . common/config
++. common/ftrace
+ 
+ BC=$(which bc 2> /dev/null) || BC=
+ 
+-- 
+2.31.1
+
