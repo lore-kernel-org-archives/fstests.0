@@ -8,117 +8,374 @@ X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4B069C47080
-	for <linux-fstests@archiver.kernel.org>; Tue,  1 Jun 2021 18:50:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4649AC47080
+	for <linux-fstests@archiver.kernel.org>; Tue,  1 Jun 2021 21:09:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2530A610C8
-	for <linux-fstests@archiver.kernel.org>; Tue,  1 Jun 2021 18:50:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2A5A3613AE
+	for <linux-fstests@archiver.kernel.org>; Tue,  1 Jun 2021 21:09:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234653AbhFASwQ (ORCPT
+        id S234698AbhFAVLH (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 1 Jun 2021 14:52:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57736 "EHLO
+        Tue, 1 Jun 2021 17:11:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60348 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234628AbhFASwP (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 1 Jun 2021 14:52:15 -0400
-Received: from mail-qk1-x729.google.com (mail-qk1-x729.google.com [IPv6:2607:f8b0:4864:20::729])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 36B00C061574;
-        Tue,  1 Jun 2021 11:50:33 -0700 (PDT)
-Received: by mail-qk1-x729.google.com with SMTP id c20so15390791qkm.3;
-        Tue, 01 Jun 2021 11:50:33 -0700 (PDT)
+        with ESMTP id S234513AbhFAVLG (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 1 Jun 2021 17:11:06 -0400
+Received: from mail-pg1-x529.google.com (mail-pg1-x529.google.com [IPv6:2607:f8b0:4864:20::529])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1764AC061574;
+        Tue,  1 Jun 2021 14:09:24 -0700 (PDT)
+Received: by mail-pg1-x529.google.com with SMTP id v14so401750pgi.6;
+        Tue, 01 Jun 2021 14:09:24 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=date:from:to:cc:subject:message-id:references:mime-version
          :content-disposition:in-reply-to;
-        bh=XGHKI8ma4DK7J7qlYbA/NiKeB0z2A5W21OWmsXuND3M=;
-        b=RIclKYcWUb8FOvCG4c2/M+STw5k+Yoy29gyIrXWjuVp7NBtj1aAkUVRdIhvbBT1rb2
-         DSjzbWt+w2ABi7B8hE2IwHN/QLU3J7JYJiRo6L92kSPAQBKRKEgzh1rat5mITZuCb9bE
-         am2MuCMaLPCwX/GfvlgmQM3eu902g64myP6RnVGe2F9H/E/RQJklGw4oSJa6FOhPRVYt
-         RVeCJp/2Xi91FqUlmPrNCNjSUohWVBfrDx5M3di7Sib233ygkuJYf3TX4uujXiIeHJ2d
-         NrYEcKBCPxgOr8c1b6GHxOVAM0CbXsK1Pbg/FV/atu/iWJjfK1IHBfVZOm91gTwNnWtY
-         HAiw==
+        bh=sAu6B5zF65+NpRGYcpqCVOE8ShyTpY5yADU4NigDlmI=;
+        b=YILquaVOv9tWvKCzsMWiG5b1QkR84yq+vdDn/E302KO1JCZ5x4c9gBrqOsen43Bt8n
+         4ie8xHq4BVgfPnWcXZ2neFxBxaCeec2M4jd8MIkmh7LMaSdEjThowsrd/4jQGZQMPg6K
+         VBVIDOX1mPAVvq6NcKfYHGEI2TMJjIXCCttMByvtuaJwNqz/OQPj/P7915RUupedp4ZK
+         1a7GAj8XEMKnDMnnAMjDmTGcNEJTbV56ezfahc+xKW2oeT2QNmB6xq2E2Pl5FUYEAqvY
+         clmk8LrllD9UblPmXB52fmRReIid7Ew7j4byYkmXAaoJMzdbs8QtCn+7DAnDaQY7SJsE
+         RUIQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to;
-        bh=XGHKI8ma4DK7J7qlYbA/NiKeB0z2A5W21OWmsXuND3M=;
-        b=MhxxcVcDxbIwJyzN40QYshNqMS1ZF+u1g+4CwY0xbYI4VzwejN0GFXQo1OXpxwkQZ3
-         RvBJOmskHf7lZxHhCfJMrqIhYVTYnO1KquXZt9tw3IjK41L2W2xJlX2t6167wj4XdgS/
-         zbC7ohyStMcZe5PJHQQlaU/PgwayMItR5DaCbHF1zKcU/kkHzIT7XoHmb23m2f7nUHXU
-         zBaBaRCFHGrMMNZ5lzV2k2oxBcRD0vBdW96zKzqh1PrzAp9RUkrui6GsBcQCGOgo9Auu
-         KSCKHONjSg90S1gUvY1v6mTjB5VERZmgc4EnS0T2wH4j7MXpHaTvIKFnNPLnOGgUQETN
-         U/og==
-X-Gm-Message-State: AOAM532SYH52TRRqI5kW5kDc8fv7LmeY2RAbE36J7ehkgdWWgMrsnrcj
-        +A4wHRrh2RpesDKc4xOhV1ju+JkPiQqe
-X-Google-Smtp-Source: ABdhPJx7SlZPu5N/mzg+OmXO73KStJf/96ORnbQqpYpEWzZpYP5pBO08hJgMtpclq3vD6DfkOdVCGw==
-X-Received: by 2002:a37:b143:: with SMTP id a64mr23850330qkf.492.1622573432410;
-        Tue, 01 Jun 2021 11:50:32 -0700 (PDT)
-Received: from moria.home.lan (c-73-219-103-14.hsd1.vt.comcast.net. [73.219.103.14])
-        by smtp.gmail.com with ESMTPSA id a23sm11689560qkl.6.2021.06.01.11.50.31
+        bh=sAu6B5zF65+NpRGYcpqCVOE8ShyTpY5yADU4NigDlmI=;
+        b=EtL0KghldTu/d5qst0k4w1buDjaBvuT9YRCbI38k4lbxwounL5N2nOvYFMzqu39C5D
+         00EyDLTJJN9ZtgWylRgz9oXcs19Snkvs2Pdcg2FRQ+JjBa7HmtLaL9ejxKuuIdwwENXf
+         w+CHP8tpyfDQEZ34dpff7exhAwAYS2c50ct2WIDwQQVNJYTA8aNDII2Bl/scpU0qQYdC
+         vdt2LblcW5JpdptF7Gy16X+TDpCrzbeiEz/bFWIWEHhLjH4mDO5KkUNkSbFXvltn98jx
+         7cUshjyLDBdA4rbTR3M8uXFGp4TpvdxHAW9y+WfNNVaAjrRA546cjtYJHhnkd9bpP1cf
+         jCvg==
+X-Gm-Message-State: AOAM533sKg8U8l26cXc88QkigoxY+G8SlL0YJq06IOZbn8XVoC5hCwS7
+        EkmMlFUqERLqSvRhGhv209ynMtRplvZqgA==
+X-Google-Smtp-Source: ABdhPJyPSFFty/zLiXtqqVvhiXIc4Cs3CGtKxbHk+Ao/zH3548C7XUG14O8+WpEwzX+FTwwwTACiig==
+X-Received: by 2002:a63:f40d:: with SMTP id g13mr30795317pgi.290.1622581763400;
+        Tue, 01 Jun 2021 14:09:23 -0700 (PDT)
+Received: from google.com ([2601:647:4701:18d0:568:55fd:9ef:aebb])
+        by smtp.gmail.com with ESMTPSA id n9sm14114167pfd.4.2021.06.01.14.09.22
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 01 Jun 2021 11:50:31 -0700 (PDT)
-Date:   Tue, 1 Jun 2021 14:50:28 -0400
-From:   Kent Overstreet <kent.overstreet@gmail.com>
+        Tue, 01 Jun 2021 14:09:22 -0700 (PDT)
+Date:   Tue, 1 Jun 2021 14:09:20 -0700
+From:   Leah Rumancik <leah.rumancik@gmail.com>
 To:     Eryu Guan <guan@eryu.me>
-Cc:     fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org,
-        linux-bcachefs@vger.kernel.org
-Subject: Re: [PATCH v2 3/4] generic/{455,457,482}: make dmlogwrites tests
- work on bcachefs
-Message-ID: <YLaBdAxSrK0s4xEP@moria.home.lan>
-References: <20210525221955.265524-1-kent.overstreet@gmail.com>
- <20210525221955.265524-7-kent.overstreet@gmail.com>
- <YLOQuagLB3LhKPOl@desktop>
+Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org
+Subject: Re: [PATCH] ext4/310: test journal checkpoint ioctl
+Message-ID: <YLaiAN+vKrt9ZUsp@google.com>
+References: <20210519144751.466933-1-leah.rumancik@gmail.com>
+ <YKpipecQz4vSDDtP@desktop>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <YLOQuagLB3LhKPOl@desktop>
+In-Reply-To: <YKpipecQz4vSDDtP@desktop>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, May 30, 2021 at 09:18:49PM +0800, Eryu Guan wrote:
-> On Tue, May 25, 2021 at 06:19:54PM -0400, Kent Overstreet wrote:
-> > bcachefs has log structured btree nodes, in addition to a regular
-> > journal, which means that unless we replay to markers in the log in the
-> > same order that they happened and are careful to avoid writing in
-> > between replaying to different events - we need to wipe and start fresh
-> > each time.
-> > 
-> > Signed-off-by: Kent Overstreet <kent.overstreet@gmail.com>
-> > ---
-> >  tests/generic/455 | 14 ++++++++++++++
-> >  tests/generic/457 | 14 ++++++++++++++
-> >  tests/generic/482 | 27 ++++++++++++++++++++-------
-> >  3 files changed, 48 insertions(+), 7 deletions(-)
-> > 
-> > diff --git a/tests/generic/455 b/tests/generic/455
-> > index 5b4b242e74..6dc46c3c72 100755
-> > --- a/tests/generic/455
-> > +++ b/tests/generic/455
-> > @@ -35,6 +35,17 @@ _require_dm_target thin-pool
-> >  
-> >  rm -f $seqres.full
-> >  
-> > +_reset_dmthin()
-> > +{
-> > +    # With bcachefs, we need to wipe and start fresh every time we replay to a
-> > +    # different point in time - if we see metadata from a future point in time,
-> > +    # or an unrelated mount, bcachefs will get confused:
-> > +    if [ "$FSTYP" = "bcachefs" ]; then
-> > +	_dmthin_cleanup
-> > +	_dmthin_init $devsize $devsize $csize $lowspace
-> > +    fi
-> > +}
+On Sun, May 23, 2021 at 10:11:49PM +0800, Eryu Guan wrote:
+> On Wed, May 19, 2021 at 02:47:51PM +0000, Leah Rumancik wrote:
+> > Test journal checkpointing and journal erasing via
+> > EXT4_IOC_CHECKPOINT with flag EXT4_IOC_CHECKPOINT_FLAG_ZEROOUT set.
 > 
-> I think we probably could make it a common helper, and currently only
-> bcachefs needs reset, and more log structured filesystems may be
-> supported in the future.
+> It seems that this ioctl is not upstreamed yet, it'd be better to
+> mention the titles of related patches, so people could know which kernel
+> patches are required to pass this test, and know the backgrounds by
+> reading the kernel thread.
+> 
+> > 
+> > Signed-off-by: Leah Rumancik <leah.rumancik@gmail.com>
+> > ---
+> >  src/Makefile             |   3 +-
+> >  src/checkpoint_journal.c |  95 ++++++++++++++++++++++++++++++++
+> >  tests/ext4/310           | 114 +++++++++++++++++++++++++++++++++++++++
+> >  tests/ext4/310.out       |   2 +
+> >  tests/ext4/group         |   1 +
+> >  5 files changed, 214 insertions(+), 1 deletion(-)
+> >  create mode 100644 src/checkpoint_journal.c
+> >  create mode 100644 tests/ext4/310
+> 
+> New test file is in 0755 mode.
+> 
+> >  create mode 100644 tests/ext4/310.out
+> > 
+> > diff --git a/src/Makefile b/src/Makefile
+> > index cc0b9579..e0e7006b 100644
+> > --- a/src/Makefile
+> > +++ b/src/Makefile
+> > @@ -17,7 +17,8 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
+> >  	t_mmap_cow_race t_mmap_fallocate fsync-err t_mmap_write_ro \
+> >  	t_ext4_dax_journal_corruption t_ext4_dax_inline_corruption \
+> >  	t_ofd_locks t_mmap_collision mmap-write-concurrent \
+> > -	t_get_file_time t_create_short_dirs t_create_long_dirs t_enospc
+> > +	t_get_file_time t_create_short_dirs t_create_long_dirs t_enospc \
+> > +	checkpoint_journal
+> 
+> Missing an entry in .gitignore
+> 
+> >  
+> >  LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+> >  	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
+> > diff --git a/src/checkpoint_journal.c b/src/checkpoint_journal.c
+> > new file mode 100644
+> > index 00000000..0347e0c0
+> > --- /dev/null
+> > +++ b/src/checkpoint_journal.c
+> > @@ -0,0 +1,95 @@
+> > +#include <sys/ioctl.h>
+> > +#include <fcntl.h>
+> > +#include <stdlib.h>
+> > +#include <stdio.h>
+> > +#include <unistd.h>
+> > +#include <errno.h>
+> > +#include <string.h>
+> > +#include <linux/fs.h>
+> > +#include <getopt.h>
+> > +
+> > +/*
+> > + * checkpoint_journal.c
+> > + *
+> > + * Flush journal log and checkpoint journal for ext4 file system and
+> > + * optionally, issue discard or zeroout for the journal log blocks.
+> > + *
+> > + * Arguments:
+> > + * 1) mount point for device
+> > + * 2) flags (optional)
+> > + *	set --erase=discard to enable discarding journal blocks
+> > + *	set --erase=zeroout to enable zero-filling journal blocks
+> > + *	set --dry-run flag to only perform input checking
+> > + */
+> > +
+> > +#if defined(__linux__) && !defined(EXT4_IOC_CHECKPOINT)
+> > +#define EXT4_IOC_CHECKPOINT	_IOW('f', 43, __u32)
+> > +#endif
+> > +
+> > +
+> > +#if defined(__linux__) && !defined(EXT4_IOC_CHECKPOINT_FLAG_DISCARD)
+> > +#define EXT4_IOC_CHECKPOINT_FLAG_DISCARD		1
+> > +#define EXT4_IOC_CHECKPOINT_FLAG_ZEROOUT		2
+> > +#define EXT4_IOC_CHECKPOINT_FLAG_DRY_RUN		4
+> > +#endif
+> > +
+> > +
+> > +int main(int argc, char** argv) {
+> > +	int fd, c, ret = 0, option_index = 0;
+> > +	char* rpath;
+> > +	unsigned int flags = 0;
+> > +
+> > +	static struct option long_options[] =
+> > +	{
+> > +		{"dry-run", no_argument, 0, 'd'},
+> > +		{"erase", required_argument, 0, 'e'},
+> > +		{0, 0, 0, 0}
+> > +	};
+> > +
+> > +	/* get optional flags */
+> > +	while ((c = getopt_long(argc, argv, "de:", long_options,
+> > +				&option_index)) != -1) {
+> > +		switch (c) {
+> > +		case 'd':
+> > +			flags |= EXT4_IOC_CHECKPOINT_FLAG_DRY_RUN;
+> > +			break;
+> > +		case 'e':
+> > +			if (strcmp(optarg, "discard") == 0) {
+> > +				flags |= EXT4_IOC_CHECKPOINT_FLAG_DISCARD;
+> > +			} else if (strcmp(optarg, "zeroout") == 0) {
+> > +				flags |= EXT4_IOC_CHECKPOINT_FLAG_ZEROOUT;
+> > +			} else {
+> > +				fprintf(stderr, "Error: invalid erase option\n");
+> > +				return 1;
+> > +			}
+> > +			break;
+> > +		default:
+> > +			return 1;
+> > +		}
+> > +	}
+> > +
+> > +	if (optind != argc - 1) {
+> > +		fprintf(stderr, "Error: invalid number of arguments\n");
+> > +		return 1;
+> > +	}
+> > +
+> > +	/* get fd to file system */
+> > +	rpath = realpath(argv[optind], NULL);
+> > +	fd = open(rpath, O_RDONLY);
+> > +	free(rpath);
+> > +
+> > +	if (fd == -1) {
+> > +		fprintf(stderr, "Error: unable to open device %s: %s\n",
+> > +			argv[optind], strerror(errno));
+> > +		return 1;
+> > +	}
+> > +
+> > +	ret = ioctl(fd, EXT4_IOC_CHECKPOINT, &flags);
+> > +
+> > +	if (ret)
+> > +		fprintf(stderr, "checkpoint ioctl returned error: %s\n", strerror(errno));
+> > +
+> > +	close(fd);
+> > +	return ret;
+> > +}
+> > +
+> > diff --git a/tests/ext4/310 b/tests/ext4/310
+> > new file mode 100644
+> > index 00000000..3693cb29
+> > --- /dev/null
+> > +++ b/tests/ext4/310
+> > @@ -0,0 +1,114 @@
+> > +#!/bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (c) 2021 Google, Inc. All Rights Reserved.
+> > +#
+> > +# FS QA Test No. 310
+> > +#
+> > +# Test checkpoint and zeroout of journal via ioctl EXT4_IOC_CHECKPOINT
+> > +#
+> > +
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +
+> > +status=1       # failure is the default!
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/filter
+> > +
+> > +# remove previous $seqres.full before test
+> > +rm -f $seqres.full
+> > +
+> > +# real QA test starts here
+> > +_supported_fs ext4
+> > +
+> > +_require_scratch
+> > +_require_command "$DEBUGFS_PROG" debugfs
+> > +
+> > +checkpoint_journal=$here/src/checkpoint_journal
+> > +_require_test_program "checkpoint_journal"
+> > +
+> > +# convert output from stat<journal_inode> to list of block numbers
+> > +get_journal_extents() {
+> > +	inode_info=$($DEBUGFS_PROG $SCRATCH_DEV -R "stat <8>" 2>> $seqres.full)
+> > +	echo -e "\nJournal info:" >> $seqres.full
+> > +	echo "$inode_info" >> $seqres.full
+> > +
+> > +	extents_line=$(echo "$inode_info" | awk '/EXTENTS:/{ print NR; exit }')
+> > +	get_extents=$(echo "$inode_info" | sed -n "$(($extents_line + 1))"p)
+> > +
+> > +	# get just the physical block numbers
+> > +	get_extents=$(echo "$get_extents" |  perl -pe 's|\(.*?\):||g' | sed -e 's/, /\n/g' | perl -pe 's|(\d+)-(\d+)|\1 \2|g')
+> > +
+> > +	echo "$get_extents"
+> > +}
+> > +
+> > +
+> > +# checks all extents are zero'd out except for the superblock
+> > +# arg 1: extents (output of get_journal_extents())
+> > +check_extents() {
+> > +	echo -e "\nChecking extents:" >> $seqres.full
+> > +	echo "$1" >> $seqres.full
+> > +
+> > +	super_block="true"
+> > +	echo "$1" | while IFS= read line; do
+> > +		start_block=$(echo $line | cut -f1 -d' ')
+> > +		end_block=$(echo $line | cut -f2 -d' ' -s)
+> > +
+> > +		# if first block of journal, shouldn't be wiped
+> > +		if [ "$super_block" == "true" ]; then
+> > +			super_block="false"
+> > +
+> > +			#if super block only block in this extent, skip extent
+> > +			if [ -z "$end_block" ]; then
+> > +				continue;
+> > +			fi
+> > +			start_block=$(($start_block + 1))
+> > +		fi
+> > +
+> > +		if [ ! -z "$end_block" ]; then
+> > +			blocks=$(($end_block - $start_block + 1))
+> > +		else
+> > +			blocks=1
+> > +		fi
+> > +
+> > +		check=$(od $SCRATCH_DEV --skip-bytes=$(($start_block * $blocksize)) --read-bytes=$(($blocks * $blocksize)) -An -v | sed -e 's/[0 \t\n\r]//g')
+> > +
+> > +		[ ! -z "$check" ] && echo "error" && break
+> > +	done
+> > +}
+> > +
+> > +testdir="${SCRATCH_MNT}/testdir"
+> > +
+> > +_scratch_mkfs_sized $((64 * 1024 * 1024)) >> $seqres.full 2>&1
+> 
+> This test requires ext4 is created with a journal, so we need
+> 
+> _require_metadata_journaling $SCRATCH_DEV
+> 
+> here after creating filesystem on $SCRATCH_DEV
+> 
+> > +_scratch_mount >> $seqres.full 2>&1
+> > +blocksize=$(_get_block_size $SCRATCH_MNT)
+> > +mkdir $testdir
+> > +
+> > +# check if ioctl present, skip test if not present
+> > +$checkpoint_journal $SCRATCH_MNT --dry-run || _notrun "journal checkpoint ioctl not present on device"
+> > +
+> > +# create some files to add some entries to journal
+> > +for i in {1..100}; do
+> > +	touch $testdir/$i
+> 
+> 	echo > $testdir/$i
+> 
+> might be faster.
+> 
+> > +done
+> > +
+> > +# make sure these files get to the journal
+> > +sync --file-system $testdir/1
+> > +
+> > +# call ioctl to checkpoint and zero-fill journal blocks
+> > +$checkpoint_journal $SCRATCH_MNT --erase=zeroout || _fail "ioctl returned error"
+> > +
+> > +extents=$(get_journal_extents)
+> > +
+> > +# check journal blocks zeroed out
+> > +ret=$(check_extents "$extents")
+> > +[ "$ret" = "error" ] && _fail "Journal was not zero-filled"
+> > +
+> > +_scratch_unmount >> $seqres.full 2>&1
+> > +
+> > +echo "Done."
+> 
+> fstests use "Silence is golden" :)
+> 
+> Thanks,
+> Eryu
 
-I think it might be better to wait until we have more dmlogwrites tests or
-another filesystem that needs this - I don't think this would be a good common
-helper as is, it's too coupled to what the tests are doing - factoring out
-helpers just because you spot identical code is an anti pattern when there isn't
-a good notion of what you're abstracting
+Thanks for the suggestions. I'll send out an updated version with all
+the changes.
+-Leah
 
-Right now 455 and 457 are basically identical anyways, factoring out a single
-helper and ignoring the rest doesn't make much sense to me.
+> 
+> > +
+> > +status=0
+> > +exit
+> > diff --git a/tests/ext4/310.out b/tests/ext4/310.out
+> > new file mode 100644
+> > index 00000000..e52f7345
+> > --- /dev/null
+> > +++ b/tests/ext4/310.out
+> > @@ -0,0 +1,2 @@
+> > +QA output created by 310
+> > +Done.
+> > diff --git a/tests/ext4/group b/tests/ext4/group
+> > index e7ad3c24..622590a9 100644
+> > --- a/tests/ext4/group
+> > +++ b/tests/ext4/group
+> > @@ -60,3 +60,4 @@
+> >  307 auto ioctl rw defrag
+> >  308 auto ioctl rw prealloc quick defrag
+> >  309 auto quick dir
+> > +310 auto ioctl quick
+> > -- 
+> > 2.31.1.751.gd2f1c929bd-goog
