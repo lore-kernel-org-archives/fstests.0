@@ -2,100 +2,76 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A9034C47082
-	for <linux-fstests@archiver.kernel.org>; Thu,  3 Jun 2021 06:32:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0E4B2C47098
+	for <linux-fstests@archiver.kernel.org>; Thu,  3 Jun 2021 15:23:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 70F01613E4
-	for <linux-fstests@archiver.kernel.org>; Thu,  3 Jun 2021 06:32:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EC2A4613EE
+	for <linux-fstests@archiver.kernel.org>; Thu,  3 Jun 2021 15:23:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229707AbhFCGeL (ORCPT
+        id S231376AbhFCPYs (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 3 Jun 2021 02:34:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52126 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229667AbhFCGeL (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 3 Jun 2021 02:34:11 -0400
-Received: from mail-io1-xd29.google.com (mail-io1-xd29.google.com [IPv6:2607:f8b0:4864:20::d29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9FE8CC06174A;
-        Wed,  2 Jun 2021 23:32:27 -0700 (PDT)
-Received: by mail-io1-xd29.google.com with SMTP id b25so5174747iot.5;
-        Wed, 02 Jun 2021 23:32:27 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=PmhbRvWXjPoary3INhTONOUonfSMmWl8kiQKw20m8pY=;
-        b=nEKiaHd/GDKw63P/jx1qn1impUsfWyAQ1DARvdV4hcKHOC84+a1SYTVRndafhq1aog
-         jFHlWSYkEUsJ6+oU/ibhJgm7N8Wnfi4AZ/atk32i1MTYdhaDLZCx2LnOsgvKHoZ3IIC+
-         Fg6+3cDhcpFPGXxMZp0yxUWolJ2hOUpT9IZK1Sn6Nk0upWP6xiWupAvcYCd+kd2s3U44
-         loYMBT8CSt5XmlhFb/ens7JY/fLegsTloc+S1rnc6TnWyLWMA+JgLeMnUTJln8o7Gxt+
-         hp6E2S96YhceKisMHawSuijKvbH/zbmqZWeE9d+lPjsvA1dcThIaQeZAPl7ofNcUaWEK
-         AoGQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=PmhbRvWXjPoary3INhTONOUonfSMmWl8kiQKw20m8pY=;
-        b=XrhVMYyndpfRZgvqP12XVgn/MXyyfmKosckjjLqeTDqOmfnhVdf/ItB3nRxDIYS1Lr
-         4kN+GebnGaU4T0DzJTrHXMiUIWGz38muK024CgU9dzeL4rHCEFiqL4q3yMtV+AiMiqyC
-         heLEGgtgvqKIAYOSm91/skHTmwJbp5lSebLCUkrS0H3bZbl/ZoGSgqOB/BszcKa+aO//
-         W9HY4hC6B+ND7eHBKB/hJSurWMSz+B+Se8WHt3Qnq/eTnL3+Nx36YjZ2Iozivhv0q2KX
-         SaMmn+4yOOI8dplexNPVEBZgHxQjeMSvgQ5G5mEPk9xH7YVL2yDk6Y7KIRD57Otrz3a4
-         +Qag==
-X-Gm-Message-State: AOAM530JwLdWXAA2EEKA7jUD/X9IkTDet9EHamg1LtCjbUNpoJ4Z3RGJ
-        cNodlHY4goRefQBlqyFdPcXGF8QOMiVfL0okXU1bEroa
-X-Google-Smtp-Source: ABdhPJzEsWFvxknDPwfgUUCGRAmCxjghLwbpoRZnH3XiTZNT9oA28aWNwmMkXWehCHVyOwGehARsbml/ExcOZPrZSVs=
-X-Received: by 2002:a5d:814d:: with SMTP id f13mr27696446ioo.203.1622701947038;
- Wed, 02 Jun 2021 23:32:27 -0700 (PDT)
-MIME-Version: 1.0
+        Thu, 3 Jun 2021 11:24:48 -0400
+Received: from mail.kernel.org ([198.145.29.99]:51002 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S232057AbhFCPYs (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 3 Jun 2021 11:24:48 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id CF136613E3;
+        Thu,  3 Jun 2021 15:23:03 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1622733783;
+        bh=GfrUYIJ9clQgKie4HUv4frK6Q/6WBB9sIL3miPosnDY=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=iptvT3aJhw0OA+yuEehMUdw0BHDhYhFXN1PxY8fwn2Z7YgHxu3HhmQRfcjilQKEJX
+         VQ6luYirx0NaN+zspdcYwRjAtuyi/gturr1UDuxGRaVLnqVo/UNNnVaaAz/uhRX1se
+         w57G0GM7qrYYfafQuERotN8fuky1nkCNneEUyzQ2r6DbSX54oj3DLZj4AxsoC+zt8i
+         lWfkGAZAXTd3Pvr/3ukO7/jIlYJzzom6+xmfSsmtQPZjyEQ8ZeP7UOXYqlKwgsbxIl
+         RbA/Wpd1FsUMTPuT9gnPgpkxkmKUYQkoE6zL2OSVbuaLqh3t76HTfhTC8heo8TG+an
+         lLkTc2h5gsGew==
+Date:   Thu, 3 Jun 2021 08:23:03 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Eric Biggers <ebiggers@kernel.org>
+Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org, guan@eryu.me
+Subject: Re: [PATCH 04/10] fstests: move test group info to test files
+Message-ID: <20210603152303.GE26402@locust>
 References: <162199360248.3744214.17042613373014687643.stgit@locust>
-In-Reply-To: <162199360248.3744214.17042613373014687643.stgit@locust>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Thu, 3 Jun 2021 09:32:16 +0300
-Message-ID: <CAOQ4uxioTzuo5B3kEKX_GY_aDyps1WXHH7OsOw6N0sNyf31+7w@mail.gmail.com>
-Subject: Re: [PATCHSET RFC 00/10] fstests: move test group lists into test files
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     Eryu Guan <guaneryu@gmail.com>,
-        linux-xfs <linux-xfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>, Eryu Guan <guan@eryu.me>
-Content-Type: text/plain; charset="UTF-8"
+ <162199362461.3744214.7536635976092405399.stgit@locust>
+ <YLhhW17x/Kq0Bnq3@sol.localdomain>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <YLhhW17x/Kq0Bnq3@sol.localdomain>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, May 26, 2021 at 5:50 AM Darrick J. Wong <djwong@kernel.org> wrote:
->
-> Hi all,
->
-> Test group files (e.g. tests/generic/group) are a pain to keep up.
-> Every week I rebase on Eryu's latest upstream, and every week I have to
-> slog through dozens of trivial merge conflicts because of the
-> groupfiles.  Moving tests is annoying because we have to maintain all
-> this code to move the group associations from one /group file to
-> another.
->
-> It doesn't need to be this way -- we could move each test's group
-> information into the test itself, and automatically generate the group
-> files as part of the make process.  This series does exactly that.
->
+On Wed, Jun 02, 2021 at 09:58:03PM -0700, Eric Biggers wrote:
+> On Tue, May 25, 2021 at 06:47:04PM -0700, Darrick J. Wong wrote:
+> > diff --git a/tests/btrfs/001 b/tests/btrfs/001
+> > index fb051e8a..2248b6f6 100755
+> > --- a/tests/btrfs/001
+> > +++ b/tests/btrfs/001
+> > @@ -6,13 +6,9 @@
+> >  #
+> >  # Test btrfs's subvolume and snapshot support
+> >  #
+> > -seq=`basename $0`
+> > -seqres=$RESULT_DIR/$seq
+> > -echo "QA output created by $seq"
+> > +. ./common/test_names
+> > +_set_seq_and_groups auto quick subvol snapshot
+> 
+> The naming is a little weird here.  This feels more like a common preamble,
+> especially given that it also sets $here, $tmp, and $status -- not just the test
+> groups.  Maybe it should look like:
+> 
+> . ./common/preamble
+> _begin_fstest quick subvol snapshot
 
-This looks very nice :)
+I like that much better than my current names!  Will fix for v2.
 
-I do have one concern.
-If the auto-generated group files keep the same path as the existing
-source controlled group files, checkout of pre/post this change is
-going to be challenging for developers running make in the source
-directory.
-
-Also .gitignore entries are needed for the auto-generated group files.
-
-I wonder if it wouldn't be easier for everyone if the auto-generated
-groups had a different name.
-
-Thanks,
-Amir.
+--D
