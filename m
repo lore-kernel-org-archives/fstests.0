@@ -2,400 +2,340 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-17.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,MSGID_FROM_MTA_HEADER,NICE_REPLY_A,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 45EB0C47082
-	for <linux-fstests@archiver.kernel.org>; Thu,  3 Jun 2021 23:22:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B94BEC47097
+	for <linux-fstests@archiver.kernel.org>; Fri,  4 Jun 2021 00:14:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2EAF86140A
-	for <linux-fstests@archiver.kernel.org>; Thu,  3 Jun 2021 23:22:56 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9E0576140B
+	for <linux-fstests@archiver.kernel.org>; Fri,  4 Jun 2021 00:14:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229697AbhFCXYk (ORCPT
+        id S229754AbhFDAPr (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 3 Jun 2021 19:24:40 -0400
-Received: from de-smtp-delivery-102.mimecast.com ([194.104.111.102]:52515 "EHLO
-        de-smtp-delivery-102.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S229675AbhFCXYk (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 3 Jun 2021 19:24:40 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=mimecast20200619;
-        t=1622762573;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=b/kka5MotGREXHjc7Ca48M3P2OUcotjWKZriFzYSHg8=;
-        b=gSCa8vVIeJFqMTBIg17IATNPbCNdF01NiGYALeZg+5iNZHj6kHV1xJ+CKUj+qaU7PhjiQV
-        2CUC5+TDdyGIJ8ldACzXQyq/OSaczi4SQk3OQdbAQ7poKMBdJjA1CNDnBjn7awZujRSMNt
-        9oxi5T43dZlq2/bXC+Vv4onvTdl/44c=
-Received: from EUR03-AM5-obe.outbound.protection.outlook.com
- (mail-am5eur03lp2059.outbound.protection.outlook.com [104.47.8.59]) (Using
- TLS) by relay.mimecast.com with ESMTP id
- de-mta-26-HqLp-NeCObKa6Gjz01P5WQ-2; Fri, 04 Jun 2021 01:22:52 +0200
-X-MC-Unique: HqLp-NeCObKa6Gjz01P5WQ-2
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=kelAugW8Cv2AOnqL0wzT0d8lwrWjZje2tsVE7dJtpyPljLAY8q9UxLaWWAa8cQFKPESosOODGNUXFBDHkHuYSrlEd6fsNg6tG0/fxm0NaDI855qxUU8IGxglTN3dxWYapJzmUs88xLwUJvSS0VajAoN5IWZ1wJB+jZ9D+KOu7GCiPdwMMHfz4KjRqEcrNn0cf3gVMaaR7m0TRAhUrTbWUMGwowGFGNTwppGylo5t1r3ve/0B1DD7JPLlKPeisaFjgdjhyfjnOUrTOPOwOnSuw0cf1A8+4NEz9vxVGd7alrqI5tHlfdS2uRGqwVCvrb8at5WTFpE7fr9wAcCvcgPH/g==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=UMKw4WW6ayLtPSYxeK77MKsUX4bjAxWNqHVSGns6RVQ=;
- b=jOFgctqxI/jIu6UKGgIuKqiG1ZDG1pohosudmB1DLHWTdX5vMHyYJ3ayQjKZ2+J4YtleHTDO8KoKmjDRim563MLr9lQN82NvV8njjbXjLRGMgTfSnvfAenDUULIIEAWJFFJ6xtlW8EWi5TmZz4NKq5g4JckP/XHBvMMPQC61buDZwHTAcN/f9X1TMdyE43n5/B3+y+c/Ot8QQVi/PRcQ6aXvId7rY/PdK8C9j7zayycrkX+pKfrodSkguM6A3QMpxEQ2VTJI1Qk7QvnQULaI0tYh/jxFpb7/kGiWgb8WI58oarZfrzardgIizWeWoaD9UTDAkdatFbtWC13AKyhk6w==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=suse.com; dmarc=pass action=none header.from=suse.com;
- dkim=pass header.d=suse.com; arc=none
-Authentication-Results: vger.kernel.org; dkim=none (message not signed)
- header.d=none;vger.kernel.org; dmarc=none action=none header.from=suse.com;
-Received: from AM7PR04MB6821.eurprd04.prod.outlook.com (2603:10a6:20b:105::22)
- by AM7PR04MB7015.eurprd04.prod.outlook.com (2603:10a6:20b:117::19) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4173.24; Thu, 3 Jun
- 2021 23:22:51 +0000
-Received: from AM7PR04MB6821.eurprd04.prod.outlook.com
- ([fe80::b8b1:d726:a3c7:9cb]) by AM7PR04MB6821.eurprd04.prod.outlook.com
- ([fe80::b8b1:d726:a3c7:9cb%9]) with mapi id 15.20.4173.030; Thu, 3 Jun 2021
- 23:22:51 +0000
-Subject: Re: [PATCH] fstests: add basic ftrace support
-To:     "Darrick J. Wong" <djwong@kernel.org>
-CC:     fstests@vger.kernel.org
-References: <20210601073133.194598-1-wqu@suse.com>
- <20210601164232.GA26402@locust>
- <fe305f9d-1583-f9ea-d87e-1522b252806d@suse.com>
- <20210603162603.GF26402@locust>
-From:   Qu Wenruo <wqu@suse.com>
-Message-ID: <f4d956c5-1752-884e-a992-c0e0fbe1ff64@suse.com>
-Date:   Fri, 4 Jun 2021 07:22:42 +0800
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.10.2
-In-Reply-To: <20210603162603.GF26402@locust>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: quoted-printable
-X-Originating-IP: [149.28.201.231]
-X-ClientProxiedBy: BY5PR13CA0001.namprd13.prod.outlook.com
- (2603:10b6:a03:180::14) To AM7PR04MB6821.eurprd04.prod.outlook.com
- (2603:10a6:20b:105::22)
+        Thu, 3 Jun 2021 20:15:47 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58966 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229576AbhFDAPr (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 3 Jun 2021 20:15:47 -0400
+Received: from mail-vs1-xe29.google.com (mail-vs1-xe29.google.com [IPv6:2607:f8b0:4864:20::e29])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EFFAFC06174A;
+        Thu,  3 Jun 2021 17:13:45 -0700 (PDT)
+Received: by mail-vs1-xe29.google.com with SMTP id s22so3955226vsl.10;
+        Thu, 03 Jun 2021 17:13:45 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=ZAKms2kmbabTK2fqj+FDj2u0N9CW88Nbssa/F23fhtk=;
+        b=fMxKi3ghqGCUwP/skFDx4XHuUeSuqdjfG7OEFQI/j3UgJlGpCAly5mP1LPoS1rtHH1
+         M8pK6W0FB7yDnDGML9eBXnIV0Qr2LoGHfQtQ0nrnU/HbbDILKup34miSUAdqY7LNU97c
+         AJo6RWN3zv5Y2TTLiLhHHndlOEJrspheo1IWlep3+CJLBhEV9lCjUgViuZcZrFWL0aeP
+         kVB/Yw6cp/WXYN2KIRjLaNmGmxE+8nVGIHW9YiiXOMyZNFdXiLW9JSfvpbbkSHJCLg2e
+         WZO3pxAMFjJgWLx2ZUUURdQKcf2FRvQZT6eYAxXfkTkzVg/tO97F6FMRgE6nOmw2h71B
+         ERtg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=ZAKms2kmbabTK2fqj+FDj2u0N9CW88Nbssa/F23fhtk=;
+        b=f8z0Iwe6Re0yGImgL+UgqYU4y401t2SZ13vK7ldbqsPlo5SfiohYWrC5iH+V5XsMA9
+         4HlSkpvCzy/8sEa8hiiL19bM5xOoa/M32diwj/CHDZcVHro1BTxF+WSdo8ikhBvIIwOb
+         2yfPhSeRwcOJIrEAGvOqToinrCBCcjIpWBIKk7KF/3G4y496YNEjptmogTe3E6aYTphD
+         /WS+NeCfg85bj99zsIUHq+ezZokfvCQpMDJkifispcH8V+OqFYNQc84NhclrNLhkjdI8
+         ixkVVIupSSTINCowDOjCkj7Rd9RTRqxN+39KdFhsEUDfkvUBTssFAlMRxVu3q3YWlrzH
+         oOoA==
+X-Gm-Message-State: AOAM533Nbf7203S17bPzg/fpSfZvtXgmAvkmc1LrmpkSSVhNzXdCr3sV
+        JCajXgi3ij0fN52ZGrNfDfcEPkCX8zQ=
+X-Google-Smtp-Source: ABdhPJz/xlRsG2CE/DEB926WcpA0fc6N4+bFk67Drbk8V1coo3VZqXDDigInOdiRU18DI29lT8CUfQ==
+X-Received: by 2002:a67:d11d:: with SMTP id u29mr915594vsi.53.1622765624633;
+        Thu, 03 Jun 2021 17:13:44 -0700 (PDT)
+Received: from leah-cloudtop2.c.googlers.com.com (241.36.196.104.bc.googleusercontent.com. [104.196.36.241])
+        by smtp.googlemail.com with ESMTPSA id j20sm608882vsm.20.2021.06.03.17.13.44
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 03 Jun 2021 17:13:44 -0700 (PDT)
+From:   Leah Rumancik <leah.rumancik@gmail.com>
+To:     linux-ext4@vger.kernel.org, fstests@vger.kernel.org
+Cc:     Leah Rumancik <lrumancik@google.com>,
+        Leah Rumancik <leah.rumancik@gmail.com>
+Subject: [PATCH v3] ext4/309: add test for ext4_dir_entry2 wipe
+Date:   Fri,  4 Jun 2021 00:13:41 +0000
+Message-Id: <20210604001341.2700927-1-leah.rumancik@gmail.com>
+X-Mailer: git-send-email 2.32.0.rc1.229.g3e70b5a671-goog
 MIME-Version: 1.0
-X-MS-Exchange-MessageSentRepresentingType: 1
-Received: from [0.0.0.0] (149.28.201.231) by BY5PR13CA0001.namprd13.prod.outlook.com (2603:10b6:a03:180::14) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4219.9 via Frontend Transport; Thu, 3 Jun 2021 23:22:49 +0000
-X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 3979cf41-807d-4565-9c99-08d926e681b6
-X-MS-TrafficTypeDiagnostic: AM7PR04MB7015:
-X-Microsoft-Antispam-PRVS: <AM7PR04MB70156B0573A0AF04EB6B224FD63C9@AM7PR04MB7015.eurprd04.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:4502;
-X-MS-Exchange-SenderADCheck: 1
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: Dzln4szimYdRQCZUQFz0SdabqQ8Xn8lhwvnGU7jvU7LOyi7v7ZD7iqbIDY54jb5201mOaKsw9+k9cWZ5X03IzYN59ouWNACgMfK09i5p0z6gLI0QBcgVItiTI81RWn7q/fC6JtGs2nhrph4iMugoGJK1QpKM2El57EmURUB4x3wm7y7zSIx9Ybi+mfwl7kYyuhUzYYTWGk+eJCrOoCQf926iBaDSAJd0yPo2CjiRoRbm8LlLXU+hWbo+YpJJ1CY/4/BlR3thg+Jnuu4rKiyCwqaNF/rCeZgKevl4WKbjb3al83Y2vjjgzZQ0CHoO7RId5y84Xhyz0/twBYCpXN5L3YddVwCXFkPBOTQdmYl7VN/oL7P9qce5IWtoD1G+4vKW47WdTgk/vXJAHshAWe4Ki6dOvGr1K60UEHYM+VH1/mHP9n4IcMd6EuKi6PCpe5CImM+WE0vSqO4btbFmGFBipyvlNrlFeLZtfsWHEcZVrM7h4GUBWTxZ3tF5/fEIegUP3FSIxNnr2gt/4hzaxU4glOT9EiWgoLkcveVYeJmhlxyLZQw477g0ZhmZs/fa2chonxFPMpZKIgQtk0gA5mvXJpoJYG8nnNxqlbbqRaytu+OcjzdxGSHpdkALFyHraKHQUnTH9VbcBdKFnB8cwBZmRx/00rapeUGMDVZie24i2ArEcD7omLJ876mRML9RI6cXFC4tG/LeZ9kfCalxyn32wg==
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:AM7PR04MB6821.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(39850400004)(396003)(376002)(346002)(136003)(366004)(6666004)(6706004)(31696002)(4326008)(16526019)(26005)(86362001)(186003)(6916009)(2906002)(31686004)(66946007)(66556008)(66476007)(83380400001)(316002)(16576012)(6486002)(5660300002)(956004)(2616005)(38100700002)(478600001)(8936002)(36756003)(8676002)(78286007)(43740500002)(45980500001);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData: =?us-ascii?Q?utGhg9YAL1tJy9pppbYQ0J8+AusHIXmLe7B135EguFZRcGz+RAb6UMsGpLJb?=
- =?us-ascii?Q?VIyvq/DEC7FX0mxS+d3ZGWO5HdFX4ySsOI4ZWU4g6viRShtZb4Myu+nWF2tw?=
- =?us-ascii?Q?J2rqCvzjRSKsHFYxflmjw4Ajqz7jWNmVaIo7IeWltxH6Kk22Q26UA2mxiihn?=
- =?us-ascii?Q?RFcU6o8B7XoBLwrkxaSlbvynjF9TCNBEScPU9hRbtu4VoL92VwmrJ2z5sf0p?=
- =?us-ascii?Q?MmLIgLFq1ddOxZ8rupOGERSNBtVpjmk2jibcGzTLEPFoyPlsU6SXvAABYsl1?=
- =?us-ascii?Q?AQcOdPEL9v/RjpaM8kQdh6B8M4MUiE/PAHUAQFNezMs5PvRroh/HUtQViMPN?=
- =?us-ascii?Q?7pjzgfFlIMt0rb6DRx9xAPUOVa9gcmnlbvTlhqwTcUXUbZ5AuwqeOhcRN6Cn?=
- =?us-ascii?Q?GPCI+HdTD4ShPntopZRjEOcXGG/YA34au9uZfwraj6/0BS/ORyPMz+goiPLq?=
- =?us-ascii?Q?PfJQ7HL1KoM7G/+5eAD7raOrZVI3k9rwq+8GZaL8w2ls1D65QFGvWc31ROU9?=
- =?us-ascii?Q?5KgWm5dAsDjzPSjzJmZfZKAOuyImLLLKFPpWovuPk+8+njb0lSfdHrPscUs0?=
- =?us-ascii?Q?x4clWqWGCDbMLRdsbcPjfNVBo3YF9ztHNkwwC5eXMF7VvRqLKlVhmfJkqVNw?=
- =?us-ascii?Q?HVUhEViwiV0QGMZbEuUYReHRQZcLWCBiCZkTFJ5fvEJipopXfURf2+Oh16QM?=
- =?us-ascii?Q?UvJxrRVHILkEKNS9iJYHRN/lTFR7LdhLs58Ijg2ltDnaD+Vgq5Ew8zHStFr1?=
- =?us-ascii?Q?/6nnqzzQd6m4/eJFNvYAs4IWJPobGt1oQxWaDjbYE5clnbdKg1oYS/ndVaDs?=
- =?us-ascii?Q?6X4WXgZd+PoUawnuy3XJ7Sgnx6BScGOO0YsSXtD0M4vXDaZ6NYzTmoKMK8B6?=
- =?us-ascii?Q?LFlS8GkwjIxRY61KHQQ0wvPFnx3fpDyAOhOrvZpqIuyfSFUcxUCJZZH456ul?=
- =?us-ascii?Q?eB3v8MFsEcihj+NIXXpCjXypZJ5+FODklYbwUZjJAGXFnsvFUKMSVq6egWyr?=
- =?us-ascii?Q?/T/ogYrvbev4Gygg/2z7TLmX/NHlBsJXkGRvKYD0G7IdjgejJ9Z64Q5ZKqkJ?=
- =?us-ascii?Q?FNzev7uARCM3bW4t7s5QMXoz+CK3zuOqD7iPfTsa4Z2OeREg9+ka1VR/rf20?=
- =?us-ascii?Q?9rHCI5FQ1tfblZwJxZt3YPkzwQFTU0Y5EbzQtTs6iKd25UOAmQ/O6pgu/haO?=
- =?us-ascii?Q?pPugpdqIqaQWAv/KHcFz+unt/wq0TxinPpHGIreiEHuGkdrX7KTJYu14171t?=
- =?us-ascii?Q?odyzRK2hh9AhoJT7B2F8iR8EZuDRw6bPvdZjOImoHec1d6U1pT1lTxfVPz3S?=
- =?us-ascii?Q?h/0V2eMC3WMSXK+OgT/mwN6c?=
-X-OriginatorOrg: suse.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 3979cf41-807d-4565-9c99-08d926e681b6
-X-MS-Exchange-CrossTenant-AuthSource: AM7PR04MB6821.eurprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 03 Jun 2021 23:22:51.2448
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: f7a17af6-1c5c-4a36-aa8b-f5be247aa4ba
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: 4uWjpGXGLvTfoHmWIoCHncsfvwH4bhAqKb7bdGhHrMmxwuoDKlCTn3g85bMk9BLp
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: AM7PR04MB7015
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+From: Leah Rumancik <lrumancik@google.com>
 
+Check wiping of dir entry data upon removing a file, converting to an
+htree, and splitting htree nodes.
 
-On 2021/6/4 =E4=B8=8A=E5=8D=8812:26, Darrick J. Wong wrote:
-> On Wed, Jun 02, 2021 at 07:45:22AM +0800, Qu Wenruo wrote:
->>
->>
->> On 2021/6/2 =E4=B8=8A=E5=8D=8812:42, Darrick J. Wong wrote:
->>> On Tue, Jun 01, 2021 at 03:31:33PM +0800, Qu Wenruo wrote:
->>>> Sometimes developers want trace dump for certain test cases.
->>>>
->>>> Normally I just add "trace-cmd" calls in "check", but it would be much
->>>
->>> Heh, so do I!
->>>
->>>> better to let fstests to support ftrace dumping.
->>>>
->>>> This patchset will add basic ftrace dumping support by:
->>>>
->>>> - Clear all buffers before running each test
->>>> - Start tracing before running each test
->>>> - End tracing after test finished
->>>> - Copy the trace to "$seqres.trace" if needed
->>>>     The condition is either:
->>>>     * $KEEP_TRACE environment is set to "yes"
->>>>     * The test case failed
->>>>
->>>> Currently we only support the main ftrace buffer, but all supporting
->>>> functions have support for ftrace instances, for later expansion.
->>>
->>> I... did not know one could /have/ separate instances.
->>
->> So did I, until I checked the code of "trace-cmd clear".
->>
->>>
->>>> Signed-off-by: Qu Wenruo <wqu@suse.com>
->>>> ---
->>>>    check         | 12 +++++++-
->>>>    common/ftrace | 82 ++++++++++++++++++++++++++++++++++++++++++++++++=
-+++
->>>>    common/rc     |  1 +
->>>>    3 files changed, 94 insertions(+), 1 deletion(-)
->>>>    create mode 100644 common/ftrace
->>>>
->>>> diff --git a/check b/check
->>>> index ba192042..0a09dcf9 100755
->>>> --- a/check
->>>> +++ b/check
->>>> @@ -801,7 +801,7 @@ function run_section()
->>>>    		fi
->>>>    		# really going to try and run this one
->>>> -		rm -f $seqres.out.bad
->>>> +		rm -f $seqres.out.bad $seqres.trace
->>>>    		# check if we really should run it
->>>>    		_expunge_test $seqnum
->>>> @@ -839,6 +839,10 @@ function run_section()
->>>>    		# to be reported for each test
->>>>    		(echo 1 > $DEBUGFS_MNT/clear_warn_once) > /dev/null 2>&1
->>>> +		# Clear previous trace and start new trace
->>>> +		_clear_trace_buffers
->>>> +		_start_trace
->>>
->>> How do you actually turn on specific tracepoints?
->>
->> Normally I use trace_printk(), thus no need to enable it manually.
->>
->>>
->>> Or is the idea here to capture trace data for each test in a separate
->>> file, and it's up to the ./check caller to set that up?
->>
->> My idea is, it should be the QA guy to set it up.
->>
->> Either using my stupid trace_printk() way, or enable those events before
->> running the test.
->>
->>>
->>>> +
->>>>    		if [ "$DUMP_OUTPUT" =3D true ]; then
->>>>    			_run_seq 2>&1 | tee $tmp.out
->>>>    			# Because $? would get tee's return code
->>>> @@ -848,6 +852,11 @@ function run_section()
->>>>    			sts=3D$?
->>>>    		fi
->>>> +		_end_trace
->>>> +		if [ "$KEEP_TRACE" =3D=3D "yes" ]; then
->>>> +			_copy_trace "$seqres.trace"
->>>> +		fi
->>>> +
->>>>    		if [ -f core ]; then
->>>>    			_dump_err_cont "[dumped core]"
->>>>    			mv core $RESULT_BASE/$seqnum.core
->>>> @@ -932,6 +941,7 @@ function run_section()
->>>>    	# make sure we record the status of the last test we ran.
->>>>    	if $err ; then
->>>> +		_copy_trace "$seqres.trace"
->>>>    		bad=3D"$bad $seqnum"
->>>>    		n_bad=3D`expr $n_bad + 1`
->>>>    		tc_status=3D"fail"
->>>> diff --git a/common/ftrace b/common/ftrace
->>>> new file mode 100644
->>>> index 00000000..36886484
->>>> --- /dev/null
->>>> +++ b/common/ftrace
->>>> @@ -0,0 +1,82 @@
->>>> +#
->>>> +# Common ftrace related functions
->>>> +#
->>>
->>> New file needs a SPDX header.
->>
->> Oh, forgot that.
->>
->>>
->>>> +
->>>> +TRACE_DIR=3D"/sys/kernel/debug/tracing"
->>>> +
->>>> +_clear_trace_buffers()
->>>> +{
->>>> +	if [ ! -d "${TRACE_DIR}" ]; then
->>>> +		return
->>>> +	fi
->>>> +
->>>> +	# Clear the main buffer
->>>> +	echo 0 > "${TRACE_DIR}/trace"
->>>
->>> If one were already running trace-cmd record, will this mess up its
->>> ability to collect trace data?
->>
->> I guess it may.
->>
->> But that shouldn't be a problem, all existing buffers are before running=
- the
->> tests, thus should be considered as noise.
->=20
-> Yes, that's true for the first test run, but this clears the trace
-> buffers between every test.  If you start trace-cmd and run two tests,
-> isn't it possible that trace buffer content will be lost if trace-cmd
-> hasn't emptied the trace buffer when _clear_trace_buffers runs?
+Tests commit 6c0912739699d8e4b6a87086401bf3ad3c59502d ("ext4: wipe
+ext4_dir_entry2 upon file deletion").
 
-But in that case, we should have buffer saved for each test, no need for=20
-the manual trace-cmd to record.
+Signed-off-by: Leah Rumancik <leah.rumancik@gmail.com>
 
->=20
-> Alternate suggestion: Now that we know about the trace instance
-> functionality, what if the test runner passed a list of tracepoints to
-> ./check?  Then ./check can set up a new tracing instance for itself with
-> the specified tracepoints, and we can clear the buffer before each test
-> and arrange to dump the contents to the trace file while the test runs.
-> That will have the added benefit of not messing with any other tracing
-> tools that might be running.
+Changes in v2:
+- fix formatting
+- use _get_block_size instead of manually finding blocksize
+- change scratch_dir to testdir to avoid confusion
 
-Yeah, that's the planned feature for the future.
+Changes in v3:
+- add _require_od_endian_flag function
+- skip test 309 if od does not support endian flag
+---
+ common/rc          |   9 +++
+ tests/ext4/309     | 192 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/ext4/309.out |   5 ++
+ tests/ext4/group   |   1 +
+ 4 files changed, 207 insertions(+)
+ create mode 100755 tests/ext4/309
+ create mode 100644 tests/ext4/309.out
 
-But my current objective is just to remove the need for manual trace-cmd=20
-calls, so that with my trace_printk() added, I can test certain known=20
-reproducer without messing the fstests code.
-
-So far it works well for my use case.
-
-In the future, we may utilize certain instance, like 'fstests'.
-
-Thanks,
-Qu
-
->=20
-> --D
->=20
->>
->>>
->>>> +
->>>> +	# Clear each instance buffer
->>>> +	for i in $(ls "${TRACE_DIR}/instances"); do
->>>> +		echo 0 > "${i}/trace"
->>>> +	done
->>>> +}
->>>> +
->>>> +_start_trace()
->>>> +{
->>>> +	instance=3D$1
->>>
->>> local instance=3D"$1", please don't pollute the caller's environment.
->>
->> Oh, forgot it again...
->>
->>>
->>>> +
->>>> +	if [ ! -d "${TRACE_DIR}" ]; then
->>>> +		return
->>>> +	fi
->>>> +
->>>> +	if [ -z "${instance}" ]; then
->>>> +		echo 1 > "${TRACE_DIR}/tracing_on"
->>>> +	else
->>>> +		mkdir -p "${TRACE_DIR}/instances/${instance}"
->>>> +		echo 1 > "${TRACE_DIR}/instances/${instance}/tracing_on"
->>>> +	fi
->>>> +}
->>>> +
->>>> +_end_trace()
->>>> +{
->>>> +	instance=3D$1
->>>> +
->>>> +	if [ ! -d "${TRACE_DIR}" ]; then
->>>> +		return
->>>> +	fi
->>>> +
->>>> +	if [ -z "${instance}" ]; then
->>>> +		echo 0 > "${TRACE_DIR}/tracing_on"
->>>> +	else
->>>> +		mkdir -p "${TRACE_DIR}/instances/${instance}"
->>>
->>> Er, what's the logic here?  Ensure that the instance exist so that we
->>> can disable it?
->>
->> Oh, right, we should exit directly...
->>
->> This part is copies from _start_trace() obviously...
->>
->> Thanks,
->> Qu
->>>
->>> --D
->>>
->>>> +		echo 0 > "${TRACE_DIR}/instances/${instance}/tracing_on"
->>>> +	fi
->>>> +}
->>>> +
->>>> +_remove_empty_trace()
->>>> +{
->>>> +	file=3D"$1"
->>>> +	if [ ! -f "$file" ]; then
->>>> +		return
->>>> +	fi
->>>> +
->>>> +	if [ -z "$(head -n 15 $file | sed '/^#/d')" ]; then
->>>> +		rm $file
->>>> +	fi
->>>> +}
->>>> +
->>>> +_copy_trace()
->>>> +{
->>>> +	dest=3D"$1"
->>>> +	instance=3D"$2"
->>>> +
->>>> +	if [ ! -d "${TRACE_DIR}" ]; then
->>>> +		return
->>>> +	fi
->>>> +
->>>> +	if [ -z "${instance}" ]; then
->>>> +		cp "${TRACE_DIR}/trace" "$dest"
->>>> +	elif [ -d "${TRACE_DIR}/instances/${instance}" ]; then
->>>> +		cp "${TRACE_DIR}/instances/${instance}/trace" "$dest"
->>>> +	fi
->>>> +
->>>> +	_remove_empty_trace "$dest"
->>>> +}
->>>> diff --git a/common/rc b/common/rc
->>>> index 919028ef..f9de1517 100644
->>>> --- a/common/rc
->>>> +++ b/common/rc
->>>> @@ -3,6 +3,7 @@
->>>>    # Copyright (c) 2000-2006 Silicon Graphics, Inc.  All Rights Reserv=
-ed.
->>>>    . common/config
->>>> +. common/ftrace
->>>>    BC=3D$(which bc 2> /dev/null) || BC=3D
->>>> --=20
->>>> 2.31.1
->>>>
->>>
->>
->=20
+diff --git a/common/rc b/common/rc
+index 2cf550ec..8b8807d5 100644
+--- a/common/rc
++++ b/common/rc
+@@ -4513,6 +4513,15 @@ _getcap()
+ 	return ${PIPESTATUS[0]}
+ }
+ 
++#od only supports --endian flag in versions 8.23 and later
++_require_od_endian_flag()
++{
++	version="$(od --version | grep -m 1 -o -E '[0-9.]+')"
++	[[ "${version%%.*}" -lt "8" ]] || \
++		[[ "${version%%.*}" -eq "8" && "${version##*.}" -lt "23" ]] && \
++		_notrun "od does not support endian flag"
++}
++
+ init_rc
+ 
+ ################################################################################
+diff --git a/tests/ext4/309 b/tests/ext4/309
+new file mode 100755
+index 00000000..e0497e1a
+--- /dev/null
++++ b/tests/ext4/309
+@@ -0,0 +1,192 @@
++#!/bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2021 Google, Inc. All Rights Reserved.
++#
++# FS QA Test No. 309
++#
++# Test wiping of ext4_dir_entry2 data upon file removal, conversion
++# to htree, and splitting of htree nodes
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++status=1       # failure is the default!
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs ext4
++
++_require_scratch
++_require_command "$DEBUGFS_PROG" debugfs
++_require_od_endian_flag
++
++testdir="${SCRATCH_MNT}/testdir"
++
++# get block number filename's dir ent
++# argument 1: filename
++get_block() {
++	echo $($DEBUGFS_PROG $SCRATCH_DEV -R "dirsearch /testdir $1" 2>> $seqres.full | grep -o -m 1 "phys [0-9]\+" | cut -c 6-)
++}
++
++# get offset of filename's dirent within the block
++# argument 1: filename
++get_offset() {
++	echo $($DEBUGFS_PROG $SCRATCH_DEV -R "dirsearch /testdir $1" 2>> $seqres.full | grep -o -m 1 "offset [0-9]\+" | cut -c 8-)
++}
++
++# get record length of dir ent at specified block and offset
++# argument 1: block
++# argument 2: offset
++get_reclen() {
++	echo $(od $SCRATCH_DEV --skip-bytes=$(($1 * $blocksize + $2 + 4)) --read-bytes=2  -d -An  --endian=little | tr -d ' \t\n\r')
++}
++
++# reads portion of dirent that should be zero'd out (starting at offset of name_len = 6)
++# and trims 0s and whitespace
++# argument 1: block num containing dir ent
++# argument 2: offset of dir ent within block
++# argument 3: rec len of dir ent
++read_dir_ent() {
++	echo $(od $SCRATCH_DEV --skip-bytes=$(($1 * $blocksize + $2 + 6)) --read-bytes=$(($3 - 6)) -d -An -v | sed -e 's/[0 \t\n\r]//g')
++}
++
++# forces node split on test directory
++# can be used to convert to htree and to split node on existing htree
++# looks for jump in directory size as indicator of node split
++induce_node_split() {
++	_scratch_mount >> $seqres.full 2>&1
++	dir_size="$(stat --printf="%s" $testdir)"
++	while [[ "$(stat --printf="%s" $testdir)" == "$dir_size" ]]; do
++		file_num=$(($file_num + 1))
++		touch $testdir/test"$(printf "%04d" $file_num)"
++	done
++	_scratch_unmount >> $seqres.full 2>&1
++}
++
++#
++# TEST 1: dir entry fields wiped upon file removal
++#
++
++test_file1="test0001"
++test_file2="test0002"
++test_file3="test0003"
++
++_scratch_mkfs_sized $((128 * 1024 * 1024)) >> $seqres.full 2>&1
++
++# create scratch dir for testing
++# create some files with no name a substr of another name so we can grep later
++_scratch_mount >> $seqres.full 2>&1
++blocksize="$(_get_block_size $SCRATCH_MNT)"
++mkdir $testdir
++file_num=1
++for file_num in {1..10}; do
++	touch $testdir/test"$(printf "%04d" $file_num)"
++done
++_scratch_unmount >> $seqres.full 2>&1
++
++# get block, offset, and rec_len of two test files
++block1=$(get_block $test_file1)
++offset1=$(get_offset $test_file1)
++rec_len1=$(get_reclen $block1 $offset1)
++
++block2=$(get_block $test_file2)
++offset2=$(get_offset $test_file2)
++rec_len2=$(get_reclen $block2 $offset2)
++
++_scratch_mount >> $seqres.full 2>&1
++rm $testdir/$test_file1
++_scratch_unmount >> $seqres.full 2>&1
++
++# read name_len field to end of dir entry
++check1=$(read_dir_ent $block1 $offset1 $rec_len1)
++check2=$(read_dir_ent $block2 $offset2 $rec_len2)
++
++# if check is empty, bytes read was all 0's, file data wiped
++# at this point, check1 should be empty, but check 2 should not be
++if [ -z "$check1" ] && [ ! -z "$check2" ]; then
++	echo "Test 1 part 1 passed."
++else
++	_fail "ERROR (test 1 part 1): metadata not wiped upon removing test file 1"
++fi
++
++_scratch_mount >> $seqres.full 2>&1
++rm $testdir/$test_file2
++_scratch_unmount >> $seqres.full 2>&1
++
++check2=$(read_dir_ent $block2 $offset2 $rec_len2)
++
++# at this point, both should be wiped
++[ -z "$check2" ] && echo "Test 1 part 2 passed." || _fail "ERROR (test 1 part 2): metadata not wiped upon removing test file 2"
++
++#
++# TEST 2: old dir entry fields wiped when directory converted to htree
++#
++
++# get original location
++block1=$(get_block $test_file3)
++offset1=$(get_offset $test_file3)
++rec_len1=$(get_reclen $block1 $offset1)
++
++# sanity check, ensures not an htree yet
++check_htree=$($DEBUGFS_PROG $SCRATCH_DEV -R "htree_dump /testdir" 2>&1)
++if [[ "$check_htree" != *"htree_dump: Not a hash-indexed directory"* ]]; then
++	_fail "ERROR (test 2): already an htree"
++fi
++
++# force conversion to htree
++induce_node_split
++
++# ensure it is now an htree
++check_htree=$($DEBUGFS_PROG $SCRATCH_DEV -R "htree_dump /testdir" 2>&1)
++if [[ "$check_htree" == *"htree_dump: Not a hash-indexed directory"* ]]; then
++	_fail "ERROR (test 2): directory was not converted to an htree after creation of many files"
++fi
++
++# check that old data was wiped
++# (this location is not immediately reused by ext4)
++check1=$(read_dir_ent $block1 $offset1 $rec_len1)
++
++# at this point, check1 should be empty meaning data was wiped
++[ -z "$check1" ] &&  echo "Test 2 passed." || _fail "ERROR (test 2): file metadata not wiped during conversion to htree"
++
++#
++# TEST 3: old dir entries wiped when moved to another block during split_node
++#
++
++# force splitting of a node
++induce_node_split
++# use debugfs to get names of two files from block 3
++hdump=$($DEBUGFS_PROG $SCRATCH_DEV -R "htree_dump /testdir" 2>> $seqres.full)
++
++# get line number of "Reading directory block 3"
++block3_line=$(echo "$hdump" | awk '/Reading directory block 3/{ print NR; exit }')
++
++[ -z "$block3_line" ] && echo "ERROR (test 3): could not find block number 3 after node split"
++
++test_file1=$(echo "$hdump" | sed -n "$(($block3_line + 1))"p | cut -d ' ' -f4)
++test_file2=$(echo "$hdump" | sed -n "$(($block3_line + 2))"p | cut -d ' ' -f4)
++
++# check these filenames don't exist in block 1 or 2
++# get block numbers of first two blocks
++block1=$(echo "$hdump" | grep -o -m 1 "Reading directory block 1, phys [0-9]\+" | cut -c 33-)
++block2=$(echo "$hdump" | grep -o -m 1 "Reading directory block 2, phys [0-9]\+" | cut -c 33-)
++
++# search all of both these blocks for these file names
++check1=$(od $SCRATCH_DEV --skip-bytes=$(($block1 * $blocksize)) --read-bytes=$blocksize -c -An -v | tr -d '\\ \t\n\r\v' | grep -e $test_file1 -e $test_file2)
++check2=$(od $SCRATCH_DEV --skip-bytes=$(($block2 * $blocksize)) --read-bytes=$blocksize -c -An -v | tr -d '\\ \t\n\r\v' | grep -e $test_file1 -e $test_file2)
++
++if [ -z "$check1" ] && [ -z "$check2" ]; then
++	echo "Test 3 passed."
++else
++	_fail "ERROR (test 3): file name not wiped during node split"
++fi
++
++status=0
++exit
+diff --git a/tests/ext4/309.out b/tests/ext4/309.out
+new file mode 100644
+index 00000000..e5febaac
+--- /dev/null
++++ b/tests/ext4/309.out
+@@ -0,0 +1,5 @@
++QA output created by 309
++Test 1 part 1 passed.
++Test 1 part 2 passed.
++Test 2 passed.
++Test 3 passed.
+diff --git a/tests/ext4/group b/tests/ext4/group
+index ceda2ba6..e7ad3c24 100644
+--- a/tests/ext4/group
++++ b/tests/ext4/group
+@@ -59,3 +59,4 @@
+ 306 auto rw resize quick
+ 307 auto ioctl rw defrag
+ 308 auto ioctl rw prealloc quick defrag
++309 auto quick dir
+-- 
+2.32.0.rc1.229.g3e70b5a671-goog
 
