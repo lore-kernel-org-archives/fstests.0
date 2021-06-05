@@ -2,364 +2,138 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
-	autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0F83CC4743E
-	for <linux-fstests@archiver.kernel.org>; Fri,  4 Jun 2021 23:50:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DF054C4743F
+	for <linux-fstests@archiver.kernel.org>; Sat,  5 Jun 2021 09:43:32 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DB86F613FE
-	for <linux-fstests@archiver.kernel.org>; Fri,  4 Jun 2021 23:50:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BCD71613F9
+	for <linux-fstests@archiver.kernel.org>; Sat,  5 Jun 2021 09:43:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230228AbhFDXwS (ORCPT
+        id S229924AbhFEJpS (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 4 Jun 2021 19:52:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58242 "EHLO
+        Sat, 5 Jun 2021 05:45:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45182 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229847AbhFDXwS (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 4 Jun 2021 19:52:18 -0400
-Received: from mail-pj1-x1031.google.com (mail-pj1-x1031.google.com [IPv6:2607:f8b0:4864:20::1031])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 347EAC061766;
-        Fri,  4 Jun 2021 16:50:31 -0700 (PDT)
-Received: by mail-pj1-x1031.google.com with SMTP id i22so6426568pju.0;
-        Fri, 04 Jun 2021 16:50:31 -0700 (PDT)
+        with ESMTP id S229892AbhFEJpS (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 5 Jun 2021 05:45:18 -0400
+Received: from mail-ej1-x62d.google.com (mail-ej1-x62d.google.com [IPv6:2a00:1450:4864:20::62d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8779FC061766;
+        Sat,  5 Jun 2021 02:43:30 -0700 (PDT)
+Received: by mail-ej1-x62d.google.com with SMTP id g8so18289998ejx.1;
+        Sat, 05 Jun 2021 02:43:30 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=pO1wdINn/dBv2vXdEiFtkP2of/zca4PC3AXnbeSzUCk=;
-        b=CPrXAt30jxVHgERpn7FnwSYKl+F0Ml+L9hlZxlNRQQocWuO5ouoySZihusb/0uYRCb
-         GHEE1DGjGR8GzgXbpEh42lcIgy10LfKprf+HCGrpT70PF4XtXDLN2g4TbLW1leE4PteK
-         f8SVtDhMZeOcZgp+RqtdSyS3qvT1plDrb4cbTFMaBDLzdwb6C18EE1fSHOJAa0+Ija4m
-         BRr+KPT9by0bi83N9FyMUrikbFsImPkmz/mL8f+FZ3G75lsUTp3aGZuOYCB8dvNSBeb2
-         ebhCz7BSRCh48ZwpuijHpvlBdZGmd4ZNkWdH5l3gLicxXLLC38TCs7UoyuQ0gga1QEGq
-         C6BA==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=lyz+wX+8LGlCfdgdqj2aaimDkHm8iFDzgowhNbfZmSs=;
+        b=pia07tSd+jC+6UF83bFPzkmZLXzyzizX5yS/ogd9n4hAQWCw+sC6+2d1YH0h4o8N2m
+         Rf7b9958Z7GOpZgs3PCBWOGEuaFzWLQjXkcV/EmxpGlZqPEnRaE/Ft7XP0Y1BbhxE0Mx
+         qGhISD0+BVkQSrQSpxT/AV9UPKPtJTETkknnxENzhrqLMWx3GYyDAvRbCQJv6qhcVzQJ
+         XeaAip5GGWkwD5YL605AXmE0mCG3kcBniZ4PeSAbnh8kO5iVo98LkT+QeBuzFX9yRag7
+         7D+FO5a7NPkbRMu3TDJ1pOz2tBdyr1z62WajwFGaTUk0Mctxvr23DeAKTAiWxJHRxLh6
+         +twA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=pO1wdINn/dBv2vXdEiFtkP2of/zca4PC3AXnbeSzUCk=;
-        b=HK8h6r5nvyNFuSldYDDx0ZpX+wxSkurHnYERmTzcLGVoIZsebtBp0YJFjMgKObL3zd
-         SpzivBKnlEcoxdEUz6XrzqtBPQW7kgpoI/KtWAHm89YvGyax4257jDQmQvHM6u58RJbo
-         CTuqDMDNL+4DCXrdC6sHyF57c5ZJT+U3wvbBV7r9Kq7AvK+9H3UEbwcfWn0U/GzlF5w6
-         mhVH77GhJwYBdURHcP7sWSeKe5wrNx1KzDMPdrVKICWK+oN0hSpLqflOG7cA2ghWv03G
-         ru10/NcKdKP7hCgEAmQ0FcDBs/Z0AQEOLs/ERcwvP476O5iWJ2nocpP9/+GoDXEP7p5D
-         izwg==
-X-Gm-Message-State: AOAM531zzxlX+OqLhTmYwB9i7e2NBPlYvLgM7RzimOhsLCfiZdwO9QFB
-        7TYmhVX8TdAs+vhEWHTut1hNUG2TVckuPYW1
-X-Google-Smtp-Source: ABdhPJwlR91SgdfujVNISeLtaBrD1cT+V3iQbEWqXa9LNa/qAXBeE2n+MWKwmlo02yB/uqwJZQ5ugw==
-X-Received: by 2002:a17:90b:517:: with SMTP id r23mr3627579pjz.209.1622850630562;
-        Fri, 04 Jun 2021 16:50:30 -0700 (PDT)
-Received: from google.com ([2601:647:4701:18d0:de2f:6ca6:154e:b102])
-        by smtp.gmail.com with ESMTPSA id o16sm2606414pfu.75.2021.06.04.16.50.29
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=lyz+wX+8LGlCfdgdqj2aaimDkHm8iFDzgowhNbfZmSs=;
+        b=UB7itHhYaVNWb+QX42rsVxMp31QzIbY8rv1Y0Vh7ODWQRiL7U6HCo9K1XuSEyk68O/
+         jg8LOmZ5wZiTONGTN8bH/7/5VVIm27anePQx4yXQje+7IB347U5GoK8FkbtlXoYSTTJt
+         3BdAmoZjr5c05l1B5tXzML89vQmjH9oBDjt2IAWcfu9HuUa2v8HWYuGaBggcV5tPpali
+         8ZP7sr/E9harlGxgsogxEGNKZmGwVvAVt+Qe+KpBLgcTipLvYBU4o57eRWX/Qj0KdBs4
+         RmkT30WBZVLNsz3cbah63ikpBXj7Iz/ZFesMjd5L5uytte+8IdigiKLf5WjRYwgZ9lck
+         wqSQ==
+X-Gm-Message-State: AOAM5303lQ1EskR6c0bFTPCwmcicAhFS5dowSoPHf8gwAy0bV5FRsIRp
+        nrv5o2EoQ01JDGQrsTQUQPI=
+X-Google-Smtp-Source: ABdhPJwklGfIEdMc0vofBb/hiWev7GKAPGJ/JooA0crmCcU05V5ZcGMgZ+pdI0IZMTopbPkaDpwM9A==
+X-Received: by 2002:a17:906:cd27:: with SMTP id oz39mr8508007ejb.429.1622886209190;
+        Sat, 05 Jun 2021 02:43:29 -0700 (PDT)
+Received: from localhost.localdomain ([185.240.143.244])
+        by smtp.gmail.com with ESMTPSA id l8sm4503119edt.69.2021.06.05.02.43.27
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 04 Jun 2021 16:50:29 -0700 (PDT)
-Date:   Fri, 4 Jun 2021 16:50:27 -0700
-From:   Leah Rumancik <leah.rumancik@gmail.com>
-To:     "xuyang2018.jy@fujitsu.com" <xuyang2018.jy@fujitsu.com>
-Cc:     "linux-ext4@vger.kernel.org" <linux-ext4@vger.kernel.org>,
-        "fstests@vger.kernel.org" <fstests@vger.kernel.org>
-Subject: Re: [PATCH v3] ext4/309: add test for ext4_dir_entry2 wipe
-Message-ID: <YLq8Q/JsW4LiY+Yz@google.com>
-References: <20210604001341.2700927-1-leah.rumancik@gmail.com>
- <60B97DB7.6010903@fujitsu.com>
+        Sat, 05 Jun 2021 02:43:28 -0700 (PDT)
+From:   Amir Goldstein <amir73il@gmail.com>
+To:     Eryu Guan <guaneryu@gmail.com>
+Cc:     Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: [PATCH] overlay/075: fix wrong invocation of t_immutable
+Date:   Sat,  5 Jun 2021 12:43:26 +0300
+Message-Id: <20210605094326.352107-1-amir73il@gmail.com>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <60B97DB7.6010903@fujitsu.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Jun 04, 2021 at 01:10:41AM +0000, xuyang2018.jy@fujitsu.com wrote:
-> on 2021/6/4 8:13, Leah Rumancik wrote:
-> > From: Leah Rumancik<lrumancik@google.com>
-> > 
-> > Check wiping of dir entry data upon removing a file, converting to an
-> > htree, and splitting htree nodes.
-> > 
-> > Tests commit 6c0912739699d8e4b6a87086401bf3ad3c59502d ("ext4: wipe
-> > ext4_dir_entry2 upon file deletion").
-> > 
-> > Signed-off-by: Leah Rumancik<leah.rumancik@gmail.com>
-> > 
-> > Changes in v2:
-> > - fix formatting
-> > - use _get_block_size instead of manually finding blocksize
-> > - change scratch_dir to testdir to avoid confusion
-> > 
-> > Changes in v3:
-> > - add _require_od_endian_flag function
-> > - skip test 309 if od does not support endian flag
-> If machine is little-endian, we don't need this flag.
-> If machine is big-endian, we just convert the date into little-endian
-> format.
-> I remember we have function to detect whether it is big/litte in
-> common/encrpty _num_to_hex() function.
-> 
-> local big_endian=$(echo -ne '\x11' | od -tx2 | head -1 | \
->                            cut -f2 -d' ' | cut -c1)
-> 
-> If I am wrong, please correct me.
+t_immutable cannot be run twice on the same test directoty, because
+append-only directory tests create files in append-only.d and those
+file already exist from the first run.
 
-Yes sure, I'll update this.
+Use separate test directories for the first and second t_immutable runs.
 
-> 
-> > ---
-> >   common/rc          |   9 +++
-> >   tests/ext4/309     | 192 +++++++++++++++++++++++++++++++++++++++++++++
-> >   tests/ext4/309.out |   5 ++
-> >   tests/ext4/group   |   1 +
-> >   4 files changed, 207 insertions(+)
-> >   create mode 100755 tests/ext4/309
-> >   create mode 100644 tests/ext4/309.out
-> This case has been merged since xfstests commit 466ddbfd ("ext4: add
-> test for ext4_dir_entry2 wipe"). So you need to rebase.
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
 
-Could you give me a link to where you are seeing this merged already?
+Eryu,
+
+While working on the kernel fix, I found this test bug.
+Please merge this test bug fix in preparation of the kernel fix.
 
 Thanks,
-Leah
+Amir.
 
-> > 
-> > diff --git a/common/rc b/common/rc
-> > index 2cf550ec..8b8807d5 100644
-> > --- a/common/rc
-> > +++ b/common/rc
-> > @@ -4513,6 +4513,15 @@ _getcap()
-> >   	return ${PIPESTATUS[0]}
-> >   }
-> > 
-> > +#od only supports --endian flag in versions 8.23 and later
-> > +_require_od_endian_flag()
-> > +{
-> > +	version="$(od --version | grep -m 1 -o -E '[0-9.]+')"
-> > +	[[ "${version%%.*}" -lt "8" ]] || \
-> > +		[[ "${version%%.*}" -eq "8"&&  "${version##*.}" -lt "23" ]]&&  \
-> > +		_notrun "od does not support endian flag"
-> > +}
-> > +
-> >   init_rc
-> > 
-> >   ################################################################################
-> > diff --git a/tests/ext4/309 b/tests/ext4/309
-> > new file mode 100755
-> > index 00000000..e0497e1a
-> > --- /dev/null
-> > +++ b/tests/ext4/309
-> > @@ -0,0 +1,192 @@
-> > +#!/bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2021 Google, Inc. All Rights Reserved.
-> > +#
-> > +# FS QA Test No. 309
-> > +#
-> > +# Test wiping of ext4_dir_entry2 data upon file removal, conversion
-> > +# to htree, and splitting of htree nodes
-> > +#
-> > +seq=`basename $0`
-> > +seqres=$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +
-> > +status=1       # failure is the default!
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +. ./common/filter
-> > +
-> > +# remove previous $seqres.full before test
-> > +rm -f $seqres.full
-> > +
-> > +# real QA test starts here
-> > +_supported_fs ext4
-> > +
-> > +_require_scratch
-> > +_require_command "$DEBUGFS_PROG" debugfs
-> > +_require_od_endian_flag
-> > +
-> > +testdir="${SCRATCH_MNT}/testdir"
-> > +
-> > +# get block number filename's dir ent
-> > +# argument 1: filename
-> > +get_block() {
-> > +	echo $($DEBUGFS_PROG $SCRATCH_DEV -R "dirsearch /testdir $1" 2>>  $seqres.full | grep -o -m 1 "phys [0-9]\+" | cut -c 6-)
-> > +}
-> > +
-> > +# get offset of filename's dirent within the block
-> > +# argument 1: filename
-> > +get_offset() {
-> > +	echo $($DEBUGFS_PROG $SCRATCH_DEV -R "dirsearch /testdir $1" 2>>  $seqres.full | grep -o -m 1 "offset [0-9]\+" | cut -c 8-)
-> > +}
-> > +
-> > +# get record length of dir ent at specified block and offset
-> > +# argument 1: block
-> > +# argument 2: offset
-> > +get_reclen() {
-> > +	echo $(od $SCRATCH_DEV --skip-bytes=$(($1 * $blocksize + $2 + 4)) --read-bytes=2  -d -An  --endian=little | tr -d ' \t\n\r')
-> > +}
-> > +
-> > +# reads portion of dirent that should be zero'd out (starting at offset of name_len = 6)
-> > +# and trims 0s and whitespace
-> > +# argument 1: block num containing dir ent
-> > +# argument 2: offset of dir ent within block
-> > +# argument 3: rec len of dir ent
-> > +read_dir_ent() {
-> > +	echo $(od $SCRATCH_DEV --skip-bytes=$(($1 * $blocksize + $2 + 6)) --read-bytes=$(($3 - 6)) -d -An -v | sed -e 's/[0 \t\n\r]//g')
-> > +}
-> > +
-> > +# forces node split on test directory
-> > +# can be used to convert to htree and to split node on existing htree
-> > +# looks for jump in directory size as indicator of node split
-> > +induce_node_split() {
-> > +	_scratch_mount>>  $seqres.full 2>&1
-> > +	dir_size="$(stat --printf="%s" $testdir)"
-> > +	while [[ "$(stat --printf="%s" $testdir)" == "$dir_size" ]]; do
-> > +		file_num=$(($file_num + 1))
-> > +		touch $testdir/test"$(printf "%04d" $file_num)"
-> > +	done
-> > +	_scratch_unmount>>  $seqres.full 2>&1
-> > +}
-> > +
-> > +#
-> > +# TEST 1: dir entry fields wiped upon file removal
-> > +#
-> > +
-> > +test_file1="test0001"
-> > +test_file2="test0002"
-> > +test_file3="test0003"
-> > +
-> > +_scratch_mkfs_sized $((128 * 1024 * 1024))>>  $seqres.full 2>&1
-> > +
-> > +# create scratch dir for testing
-> > +# create some files with no name a substr of another name so we can grep later
-> > +_scratch_mount>>  $seqres.full 2>&1
-> > +blocksize="$(_get_block_size $SCRATCH_MNT)"
-> > +mkdir $testdir
-> > +file_num=1
-> > +for file_num in {1..10}; do
-> > +	touch $testdir/test"$(printf "%04d" $file_num)"
-> > +done
-> > +_scratch_unmount>>  $seqres.full 2>&1
-> > +
-> > +# get block, offset, and rec_len of two test files
-> > +block1=$(get_block $test_file1)
-> > +offset1=$(get_offset $test_file1)
-> > +rec_len1=$(get_reclen $block1 $offset1)
-> > +
-> > +block2=$(get_block $test_file2)
-> > +offset2=$(get_offset $test_file2)
-> > +rec_len2=$(get_reclen $block2 $offset2)
-> > +
-> > +_scratch_mount>>  $seqres.full 2>&1
-> > +rm $testdir/$test_file1
-> > +_scratch_unmount>>  $seqres.full 2>&1
-> > +
-> > +# read name_len field to end of dir entry
-> > +check1=$(read_dir_ent $block1 $offset1 $rec_len1)
-> > +check2=$(read_dir_ent $block2 $offset2 $rec_len2)
-> > +
-> > +# if check is empty, bytes read was all 0's, file data wiped
-> > +# at this point, check1 should be empty, but check 2 should not be
-> > +if [ -z "$check1" ]&&  [ ! -z "$check2" ]; then
-> > +	echo "Test 1 part 1 passed."
-> > +else
-> > +	_fail "ERROR (test 1 part 1): metadata not wiped upon removing test file 1"
-> > +fi
-> > +
-> > +_scratch_mount>>  $seqres.full 2>&1
-> > +rm $testdir/$test_file2
-> > +_scratch_unmount>>  $seqres.full 2>&1
-> > +
-> > +check2=$(read_dir_ent $block2 $offset2 $rec_len2)
-> > +
-> > +# at this point, both should be wiped
-> > +[ -z "$check2" ]&&  echo "Test 1 part 2 passed." || _fail "ERROR (test 1 part 2): metadata not wiped upon removing test file 2"
-> > +
-> > +#
-> > +# TEST 2: old dir entry fields wiped when directory converted to htree
-> > +#
-> > +
-> > +# get original location
-> > +block1=$(get_block $test_file3)
-> > +offset1=$(get_offset $test_file3)
-> > +rec_len1=$(get_reclen $block1 $offset1)
-> > +
-> > +# sanity check, ensures not an htree yet
-> > +check_htree=$($DEBUGFS_PROG $SCRATCH_DEV -R "htree_dump /testdir" 2>&1)
-> > +if [[ "$check_htree" != *"htree_dump: Not a hash-indexed directory"* ]]; then
-> > +	_fail "ERROR (test 2): already an htree"
-> > +fi
-> > +
-> > +# force conversion to htree
-> > +induce_node_split
-> > +
-> > +# ensure it is now an htree
-> > +check_htree=$($DEBUGFS_PROG $SCRATCH_DEV -R "htree_dump /testdir" 2>&1)
-> > +if [[ "$check_htree" == *"htree_dump: Not a hash-indexed directory"* ]]; then
-> > +	_fail "ERROR (test 2): directory was not converted to an htree after creation of many files"
-> > +fi
-> > +
-> > +# check that old data was wiped
-> > +# (this location is not immediately reused by ext4)
-> > +check1=$(read_dir_ent $block1 $offset1 $rec_len1)
-> > +
-> > +# at this point, check1 should be empty meaning data was wiped
-> > +[ -z "$check1" ]&&   echo "Test 2 passed." || _fail "ERROR (test 2): file metadata not wiped during conversion to htree"
-> > +
-> > +#
-> > +# TEST 3: old dir entries wiped when moved to another block during split_node
-> > +#
-> > +
-> > +# force splitting of a node
-> > +induce_node_split
-> > +# use debugfs to get names of two files from block 3
-> > +hdump=$($DEBUGFS_PROG $SCRATCH_DEV -R "htree_dump /testdir" 2>>  $seqres.full)
-> > +
-> > +# get line number of "Reading directory block 3"
-> > +block3_line=$(echo "$hdump" | awk '/Reading directory block 3/{ print NR; exit }')
-> > +
-> > +[ -z "$block3_line" ]&&  echo "ERROR (test 3): could not find block number 3 after node split"
-> > +
-> > +test_file1=$(echo "$hdump" | sed -n "$(($block3_line + 1))"p | cut -d ' ' -f4)
-> > +test_file2=$(echo "$hdump" | sed -n "$(($block3_line + 2))"p | cut -d ' ' -f4)
-> > +
-> > +# check these filenames don't exist in block 1 or 2
-> > +# get block numbers of first two blocks
-> > +block1=$(echo "$hdump" | grep -o -m 1 "Reading directory block 1, phys [0-9]\+" | cut -c 33-)
-> > +block2=$(echo "$hdump" | grep -o -m 1 "Reading directory block 2, phys [0-9]\+" | cut -c 33-)
-> > +
-> > +# search all of both these blocks for these file names
-> > +check1=$(od $SCRATCH_DEV --skip-bytes=$(($block1 * $blocksize)) --read-bytes=$blocksize -c -An -v | tr -d '\\ \t\n\r\v' | grep -e $test_file1 -e $test_file2)
-> > +check2=$(od $SCRATCH_DEV --skip-bytes=$(($block2 * $blocksize)) --read-bytes=$blocksize -c -An -v | tr -d '\\ \t\n\r\v' | grep -e $test_file1 -e $test_file2)
-> > +
-> > +if [ -z "$check1" ]&&  [ -z "$check2" ]; then
-> > +	echo "Test 3 passed."
-> > +else
-> > +	_fail "ERROR (test 3): file name not wiped during node split"
-> > +fi
-> > +
-> > +status=0
-> > +exit
-> > diff --git a/tests/ext4/309.out b/tests/ext4/309.out
-> > new file mode 100644
-> > index 00000000..e5febaac
-> > --- /dev/null
-> > +++ b/tests/ext4/309.out
-> > @@ -0,0 +1,5 @@
-> > +QA output created by 309
-> > +Test 1 part 1 passed.
-> > +Test 1 part 2 passed.
-> > +Test 2 passed.
-> > +Test 3 passed.
-> > diff --git a/tests/ext4/group b/tests/ext4/group
-> > index ceda2ba6..e7ad3c24 100644
-> > --- a/tests/ext4/group
-> > +++ b/tests/ext4/group
-> > @@ -59,3 +59,4 @@
-> >   306 auto rw resize quick
-> >   307 auto ioctl rw defrag
-> >   308 auto ioctl rw prealloc quick defrag
-> > +309 auto quick dir
+ tests/overlay/075 | 12 ++++++++----
+ 1 file changed, 8 insertions(+), 4 deletions(-)
+
+diff --git a/tests/overlay/075 b/tests/overlay/075
+index 5a6c3be0..02df1599 100755
+--- a/tests/overlay/075
++++ b/tests/overlay/075
+@@ -30,6 +30,7 @@ _cleanup()
+ 	# we just need to remove the flags so use -R
+ 	$timmutable -R $upperdir/testdir &> /dev/null
+ 	$timmutable -R $lowerdir/testdir &> /dev/null
++	$timmutable -R $lowerdir/testdir.before &> /dev/null
+ 	rm -f $tmp.*
+ }
+ 
+@@ -45,13 +46,16 @@ _require_scratch
+ 
+ _scratch_mkfs
+ 
+-# Preparing test area files in lower dir and check chattr support of base fs
++# Check chattr support of base fs
+ mkdir -p $lowerdir
+ mkdir -p $upperdir
+-$timmutable -C $lowerdir/testdir >$tmp.out 2>&1
++$timmutable -C $lowerdir/testdir.before >$tmp.out 2>&1
+ if grep -q -e 'Operation not supported' -e "Inappropriate ioctl" $tmp.out; then
+ 	_notrun "Setting immutable/append flag not supported"
+ fi
++
++# Prepare test area files in lower dir
++$timmutable -C $lowerdir/testdir >$tmp.out 2>&1
+ # Remove the immutable/append-only flags and create subdirs
+ $timmutable -R $lowerdir/testdir >$tmp.out 2>&1
+ for dir in $lowerdir/testdir/*.d; do
+@@ -62,9 +66,9 @@ $timmutable -C $lowerdir/testdir >$tmp.out 2>&1
+ 
+ _scratch_mount
+ 
+-# Test immutability of files in overlay
++# Test immutability of files in overlay before copy up
+ echo "Before directories copy up"
+-$timmutable $SCRATCH_MNT/testdir 2>&1
++$timmutable $SCRATCH_MNT/testdir.before 2>&1
+ 
+ # Trigger copy-up of immutable/append-only dirs by touching their subdirs
+ # inode flags are not copied-up, so immutable/append-only flags are lost
+-- 
+2.31.1
+
