@@ -2,61 +2,101 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	UNPARSEABLE_RELAY,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 242BAC47096
-	for <linux-fstests@archiver.kernel.org>; Sun,  6 Jun 2021 11:58:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5BDB7C47096
+	for <linux-fstests@archiver.kernel.org>; Sun,  6 Jun 2021 13:59:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0B2B36136D
-	for <linux-fstests@archiver.kernel.org>; Sun,  6 Jun 2021 11:58:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3AB8C61422
+	for <linux-fstests@archiver.kernel.org>; Sun,  6 Jun 2021 13:59:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230127AbhFFMAX (ORCPT
+        id S230050AbhFFOAy (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 6 Jun 2021 08:00:23 -0400
-Received: from out20-25.mail.aliyun.com ([115.124.20.25]:60828 "EHLO
-        out20-25.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230112AbhFFMAW (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 6 Jun 2021 08:00:22 -0400
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.1264663|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_news_journal|0.0168349-0.000697045-0.982468;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047208;MF=guan@eryu.me;NM=1;PH=DS;RN=3;RT=3;SR=0;TI=SMTPD_---.KOMyUk0_1622980710;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.KOMyUk0_1622980710)
-          by smtp.aliyun-inc.com(10.147.42.197);
-          Sun, 06 Jun 2021 19:58:30 +0800
-Date:   Sun, 6 Jun 2021 19:58:29 +0800
+        Sun, 6 Jun 2021 10:00:54 -0400
+Received: from out20-74.mail.aliyun.com ([115.124.20.74]:57199 "EHLO
+        out20-74.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230003AbhFFOAy (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 6 Jun 2021 10:00:54 -0400
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.08849365|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_regular_dialog|0.0742867-0.000680708-0.925033;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047188;MF=guan@eryu.me;NM=1;PH=DS;RN=5;RT=5;SR=0;TI=SMTPD_---.KOP4lft_1622987942;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.KOP4lft_1622987942)
+          by smtp.aliyun-inc.com(10.147.40.233);
+          Sun, 06 Jun 2021 21:59:03 +0800
+Date:   Sun, 6 Jun 2021 21:59:02 +0800
 From:   Eryu Guan <guan@eryu.me>
-To:     David Howells <dhowells@redhat.com>
-Cc:     fstests@vger.kernel.org, linux-afs@lists.infradead.org
-Subject: Re: [PATCH 2/9] generic/294, afs: Allow for mknod subtest failing if
- mknod not supported
-Message-ID: <YLy4ZfXQ08542qoW@desktop>
-References: <YLOJ9h734bmR140Z@desktop>
- <162194962878.4011860.5561077785368723619.stgit@warthog.procyon.org.uk>
- <162194964249.4011860.17729034205311880257.stgit@warthog.procyon.org.uk>
- <1448892.1622557912@warthog.procyon.org.uk>
+To:     Anand Jain <anand.jain@oracle.com>
+Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+        g.btrfs@cobb.uk.net, quwenruo.btrfs@gmx.com
+Subject: Re: [PATCH] btrfs: support other sectorsizes in
+ _scratch_mkfs_blocksized
+Message-ID: <YLzUph/ehN12cMCC@desktop>
+References: <d27e3a324f986b5b52d11df7c7bdcde6744fad4b.1622807821.git.anand.jain@oracle.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1448892.1622557912@warthog.procyon.org.uk>
+In-Reply-To: <d27e3a324f986b5b52d11df7c7bdcde6744fad4b.1622807821.git.anand.jain@oracle.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Jun 01, 2021 at 03:31:52PM +0100, David Howells wrote:
-> Eryu Guan <guan@eryu.me> wrote:
+On Fri, Jun 04, 2021 at 08:26:44PM +0800, Anand Jain wrote:
+> When btrfs supports sectorsize != pagesize it can run these test cases
+> now,
+> generic/205 generic/206 generic/216 generic/217 generic/218 generic/220
+> generic/222 generic/227 generic/229 generic/238
 > 
-> > _require_mknod checks for mknod support by trying to mknod and _notrun
-> > the test if mknod fails.
-> > 
-> > So does afs return any failure like EOPNOTSUPP? If so I think we could
-> > refactor _require_mknod into something like
+> This change is backward compatible for kernels without non pagesize
+> sectorsize support.
 > 
-> afs doesn't provide a ->mknod implementation as it doesn't support anything
-> you'd create with it, so you get the VFS default in such an instance - which
-> would be EPERM.
+> Signed-off-by: Anand Jain <anand.jain@oracle.com>
+> ---
+> RFC->v1:
+>   Fix path to the supported_sectorsizes path check if the file exists.
+>   Grep the word.
+> 
+>  common/rc | 9 +++++++++
+>  1 file changed, 9 insertions(+)
+> 
+> diff --git a/common/rc b/common/rc
+> index 919028eff41c..baa994e33553 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -1121,6 +1121,15 @@ _scratch_mkfs_blocksized()
+>      fi
+>  
+>      case $FSTYP in
+> +    btrfs)
+> +	test -f /sys/fs/btrfs/features/supported_sectorsizes || \
+> +		_notrun "Subpage sectorsize support is not found in $FSTYP"
 
-I think that works too. Currently _require_mknod() doesn't depend on the
-errno but just check if mknod succeeds or not.
+As we're updating _scratch_mkf_blocksized, would you please unify the
+indention for the whole function to use tab instead of spaces? They're
+old code, this way we're slowly migrating old/space indention to tab.
+
+> +
+> +	grep -q \\b$blocksize\\b /sys/fs/btrfs/features/supported_sectorsizes || \
+
+I think grep -qw should be fine.
+
+> +		_notrun "$FSTYP does not support sectorsize=$blocksize yet"
+> +
+> +	_scratch_mkfs $MKFS_OPTIONS --sectorsize=$blocksize
+
+No need to specify $MKFS_OPTIONS here, _scratch_mkfs will append
+$MKFS_OPTIONS anyway.
+
+> +	;;
+>      xfs)
+>  	_scratch_mkfs_xfs $MKFS_OPTIONS -b size=$blocksize
+
+So this $MKFS_OPTIONS isn't needed either, but that belongs to another
+patch.
 
 Thanks,
 Eryu
+
+>  	;;
+> -- 
+> 2.18.4
