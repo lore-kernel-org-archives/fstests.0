@@ -2,138 +2,61 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	UNPARSEABLE_RELAY,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DF054C4743F
-	for <linux-fstests@archiver.kernel.org>; Sat,  5 Jun 2021 09:43:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 242BAC47096
+	for <linux-fstests@archiver.kernel.org>; Sun,  6 Jun 2021 11:58:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BCD71613F9
-	for <linux-fstests@archiver.kernel.org>; Sat,  5 Jun 2021 09:43:32 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0B2B36136D
+	for <linux-fstests@archiver.kernel.org>; Sun,  6 Jun 2021 11:58:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229924AbhFEJpS (ORCPT
+        id S230127AbhFFMAX (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 5 Jun 2021 05:45:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45182 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229892AbhFEJpS (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 5 Jun 2021 05:45:18 -0400
-Received: from mail-ej1-x62d.google.com (mail-ej1-x62d.google.com [IPv6:2a00:1450:4864:20::62d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8779FC061766;
-        Sat,  5 Jun 2021 02:43:30 -0700 (PDT)
-Received: by mail-ej1-x62d.google.com with SMTP id g8so18289998ejx.1;
-        Sat, 05 Jun 2021 02:43:30 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=lyz+wX+8LGlCfdgdqj2aaimDkHm8iFDzgowhNbfZmSs=;
-        b=pia07tSd+jC+6UF83bFPzkmZLXzyzizX5yS/ogd9n4hAQWCw+sC6+2d1YH0h4o8N2m
-         Rf7b9958Z7GOpZgs3PCBWOGEuaFzWLQjXkcV/EmxpGlZqPEnRaE/Ft7XP0Y1BbhxE0Mx
-         qGhISD0+BVkQSrQSpxT/AV9UPKPtJTETkknnxENzhrqLMWx3GYyDAvRbCQJv6qhcVzQJ
-         XeaAip5GGWkwD5YL605AXmE0mCG3kcBniZ4PeSAbnh8kO5iVo98LkT+QeBuzFX9yRag7
-         7D+FO5a7NPkbRMu3TDJ1pOz2tBdyr1z62WajwFGaTUk0Mctxvr23DeAKTAiWxJHRxLh6
-         +twA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=lyz+wX+8LGlCfdgdqj2aaimDkHm8iFDzgowhNbfZmSs=;
-        b=UB7itHhYaVNWb+QX42rsVxMp31QzIbY8rv1Y0Vh7ODWQRiL7U6HCo9K1XuSEyk68O/
-         jg8LOmZ5wZiTONGTN8bH/7/5VVIm27anePQx4yXQje+7IB347U5GoK8FkbtlXoYSTTJt
-         3BdAmoZjr5c05l1B5tXzML89vQmjH9oBDjt2IAWcfu9HuUa2v8HWYuGaBggcV5tPpali
-         8ZP7sr/E9harlGxgsogxEGNKZmGwVvAVt+Qe+KpBLgcTipLvYBU4o57eRWX/Qj0KdBs4
-         RmkT30WBZVLNsz3cbah63ikpBXj7Iz/ZFesMjd5L5uytte+8IdigiKLf5WjRYwgZ9lck
-         wqSQ==
-X-Gm-Message-State: AOAM5303lQ1EskR6c0bFTPCwmcicAhFS5dowSoPHf8gwAy0bV5FRsIRp
-        nrv5o2EoQ01JDGQrsTQUQPI=
-X-Google-Smtp-Source: ABdhPJwklGfIEdMc0vofBb/hiWev7GKAPGJ/JooA0crmCcU05V5ZcGMgZ+pdI0IZMTopbPkaDpwM9A==
-X-Received: by 2002:a17:906:cd27:: with SMTP id oz39mr8508007ejb.429.1622886209190;
-        Sat, 05 Jun 2021 02:43:29 -0700 (PDT)
-Received: from localhost.localdomain ([185.240.143.244])
-        by smtp.gmail.com with ESMTPSA id l8sm4503119edt.69.2021.06.05.02.43.27
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 05 Jun 2021 02:43:28 -0700 (PDT)
-From:   Amir Goldstein <amir73il@gmail.com>
-To:     Eryu Guan <guaneryu@gmail.com>
-Cc:     Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org,
-        fstests@vger.kernel.org
-Subject: [PATCH] overlay/075: fix wrong invocation of t_immutable
-Date:   Sat,  5 Jun 2021 12:43:26 +0300
-Message-Id: <20210605094326.352107-1-amir73il@gmail.com>
-X-Mailer: git-send-email 2.31.1
+        Sun, 6 Jun 2021 08:00:23 -0400
+Received: from out20-25.mail.aliyun.com ([115.124.20.25]:60828 "EHLO
+        out20-25.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230112AbhFFMAW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 6 Jun 2021 08:00:22 -0400
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.1264663|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_news_journal|0.0168349-0.000697045-0.982468;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047208;MF=guan@eryu.me;NM=1;PH=DS;RN=3;RT=3;SR=0;TI=SMTPD_---.KOMyUk0_1622980710;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.KOMyUk0_1622980710)
+          by smtp.aliyun-inc.com(10.147.42.197);
+          Sun, 06 Jun 2021 19:58:30 +0800
+Date:   Sun, 6 Jun 2021 19:58:29 +0800
+From:   Eryu Guan <guan@eryu.me>
+To:     David Howells <dhowells@redhat.com>
+Cc:     fstests@vger.kernel.org, linux-afs@lists.infradead.org
+Subject: Re: [PATCH 2/9] generic/294, afs: Allow for mknod subtest failing if
+ mknod not supported
+Message-ID: <YLy4ZfXQ08542qoW@desktop>
+References: <YLOJ9h734bmR140Z@desktop>
+ <162194962878.4011860.5561077785368723619.stgit@warthog.procyon.org.uk>
+ <162194964249.4011860.17729034205311880257.stgit@warthog.procyon.org.uk>
+ <1448892.1622557912@warthog.procyon.org.uk>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1448892.1622557912@warthog.procyon.org.uk>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-t_immutable cannot be run twice on the same test directoty, because
-append-only directory tests create files in append-only.d and those
-file already exist from the first run.
+On Tue, Jun 01, 2021 at 03:31:52PM +0100, David Howells wrote:
+> Eryu Guan <guan@eryu.me> wrote:
+> 
+> > _require_mknod checks for mknod support by trying to mknod and _notrun
+> > the test if mknod fails.
+> > 
+> > So does afs return any failure like EOPNOTSUPP? If so I think we could
+> > refactor _require_mknod into something like
+> 
+> afs doesn't provide a ->mknod implementation as it doesn't support anything
+> you'd create with it, so you get the VFS default in such an instance - which
+> would be EPERM.
 
-Use separate test directories for the first and second t_immutable runs.
-
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
-
-Eryu,
-
-While working on the kernel fix, I found this test bug.
-Please merge this test bug fix in preparation of the kernel fix.
+I think that works too. Currently _require_mknod() doesn't depend on the
+errno but just check if mknod succeeds or not.
 
 Thanks,
-Amir.
-
- tests/overlay/075 | 12 ++++++++----
- 1 file changed, 8 insertions(+), 4 deletions(-)
-
-diff --git a/tests/overlay/075 b/tests/overlay/075
-index 5a6c3be0..02df1599 100755
---- a/tests/overlay/075
-+++ b/tests/overlay/075
-@@ -30,6 +30,7 @@ _cleanup()
- 	# we just need to remove the flags so use -R
- 	$timmutable -R $upperdir/testdir &> /dev/null
- 	$timmutable -R $lowerdir/testdir &> /dev/null
-+	$timmutable -R $lowerdir/testdir.before &> /dev/null
- 	rm -f $tmp.*
- }
- 
-@@ -45,13 +46,16 @@ _require_scratch
- 
- _scratch_mkfs
- 
--# Preparing test area files in lower dir and check chattr support of base fs
-+# Check chattr support of base fs
- mkdir -p $lowerdir
- mkdir -p $upperdir
--$timmutable -C $lowerdir/testdir >$tmp.out 2>&1
-+$timmutable -C $lowerdir/testdir.before >$tmp.out 2>&1
- if grep -q -e 'Operation not supported' -e "Inappropriate ioctl" $tmp.out; then
- 	_notrun "Setting immutable/append flag not supported"
- fi
-+
-+# Prepare test area files in lower dir
-+$timmutable -C $lowerdir/testdir >$tmp.out 2>&1
- # Remove the immutable/append-only flags and create subdirs
- $timmutable -R $lowerdir/testdir >$tmp.out 2>&1
- for dir in $lowerdir/testdir/*.d; do
-@@ -62,9 +66,9 @@ $timmutable -C $lowerdir/testdir >$tmp.out 2>&1
- 
- _scratch_mount
- 
--# Test immutability of files in overlay
-+# Test immutability of files in overlay before copy up
- echo "Before directories copy up"
--$timmutable $SCRATCH_MNT/testdir 2>&1
-+$timmutable $SCRATCH_MNT/testdir.before 2>&1
- 
- # Trigger copy-up of immutable/append-only dirs by touching their subdirs
- # inode flags are not copied-up, so immutable/append-only flags are lost
--- 
-2.31.1
-
+Eryu
