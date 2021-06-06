@@ -4,99 +4,80 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham
-	autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,URIBL_BLOCKED
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5BDB7C47096
-	for <linux-fstests@archiver.kernel.org>; Sun,  6 Jun 2021 13:59:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DE655C47096
+	for <linux-fstests@archiver.kernel.org>; Sun,  6 Jun 2021 14:07:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3AB8C61422
-	for <linux-fstests@archiver.kernel.org>; Sun,  6 Jun 2021 13:59:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B49D161420
+	for <linux-fstests@archiver.kernel.org>; Sun,  6 Jun 2021 14:07:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230050AbhFFOAy (ORCPT
+        id S230011AbhFFOI6 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 6 Jun 2021 10:00:54 -0400
-Received: from out20-74.mail.aliyun.com ([115.124.20.74]:57199 "EHLO
-        out20-74.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230003AbhFFOAy (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 6 Jun 2021 10:00:54 -0400
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.08849365|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_regular_dialog|0.0742867-0.000680708-0.925033;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047188;MF=guan@eryu.me;NM=1;PH=DS;RN=5;RT=5;SR=0;TI=SMTPD_---.KOP4lft_1622987942;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.KOP4lft_1622987942)
-          by smtp.aliyun-inc.com(10.147.40.233);
-          Sun, 06 Jun 2021 21:59:03 +0800
-Date:   Sun, 6 Jun 2021 21:59:02 +0800
+        Sun, 6 Jun 2021 10:08:58 -0400
+Received: from out20-27.mail.aliyun.com ([115.124.20.27]:58237 "EHLO
+        out20-27.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230003AbhFFOI4 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 6 Jun 2021 10:08:56 -0400
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.100074|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_regular_dialog|0.00784735-0.000381769-0.991771;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047188;MF=guan@eryu.me;NM=1;PH=DS;RN=3;RT=3;SR=0;TI=SMTPD_---.KOPSavF_1622988424;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.KOPSavF_1622988424)
+          by smtp.aliyun-inc.com(10.147.41.178);
+          Sun, 06 Jun 2021 22:07:05 +0800
+Date:   Sun, 6 Jun 2021 22:07:04 +0800
 From:   Eryu Guan <guan@eryu.me>
-To:     Anand Jain <anand.jain@oracle.com>
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-        g.btrfs@cobb.uk.net, quwenruo.btrfs@gmx.com
-Subject: Re: [PATCH] btrfs: support other sectorsizes in
- _scratch_mkfs_blocksized
-Message-ID: <YLzUph/ehN12cMCC@desktop>
-References: <d27e3a324f986b5b52d11df7c7bdcde6744fad4b.1622807821.git.anand.jain@oracle.com>
+To:     Sun Ke <sunke32@huawei.com>
+Cc:     fstests@vger.kernel.org, yuchao0@huawei.com
+Subject: Re: [PATCH] generic/042: f2fs-utils 1.14.0 needs at least 52 MB
+Message-ID: <YLzWiH5RwHFdEWIQ@desktop>
+References: <20210601082005.1352814-1-sunke32@huawei.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <d27e3a324f986b5b52d11df7c7bdcde6744fad4b.1622807821.git.anand.jain@oracle.com>
+In-Reply-To: <20210601082005.1352814-1-sunke32@huawei.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Jun 04, 2021 at 08:26:44PM +0800, Anand Jain wrote:
-> When btrfs supports sectorsize != pagesize it can run these test cases
-> now,
-> generic/205 generic/206 generic/216 generic/217 generic/218 generic/220
-> generic/222 generic/227 generic/229 generic/238
+On Tue, Jun 01, 2021 at 04:20:05AM -0400, Sun Ke wrote:
+> f2fs-utils 1.9.0 needs at least 38 MB space for f2fs image. However,
+> f2fs-utils 1.14.0 needs at least 52 MB. Not sure if it will change again.
+> But at least we need to configure mininum size of f2fs image to 52MB now.
 > 
-> This change is backward compatible for kernels without non pagesize
-> sectorsize support.
-> 
-> Signed-off-by: Anand Jain <anand.jain@oracle.com>
+> Suggested-by: Chao Yu <yuchao0@huawei.com>
+> Signed-off-by: Sun Ke <sunke32@huawei.com>
 > ---
-> RFC->v1:
->   Fix path to the supported_sectorsizes path check if the file exists.
->   Grep the word.
+>  tests/generic/042 | 7 +++++--
+>  1 file changed, 5 insertions(+), 2 deletions(-)
 > 
->  common/rc | 9 +++++++++
->  1 file changed, 9 insertions(+)
-> 
-> diff --git a/common/rc b/common/rc
-> index 919028eff41c..baa994e33553 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -1121,6 +1121,15 @@ _scratch_mkfs_blocksized()
->      fi
+> diff --git a/tests/generic/042 b/tests/generic/042
+> index ee0e4b400c71..bf3b4180b1a2 100755
+> --- a/tests/generic/042
+> +++ b/tests/generic/042
+> @@ -43,9 +43,12 @@ _crashtest()
+>  	file=$mnt/file
+>  	size=25M
 >  
->      case $FSTYP in
-> +    btrfs)
-> +	test -f /sys/fs/btrfs/features/supported_sectorsizes || \
-> +		_notrun "Subpage sectorsize support is not found in $FSTYP"
+> -	# 25M is too small for f2fs.
+> +	# f2fs-utils 1.9.0 needs at least 38 MB space for f2fs image. However,
+> +	# f2fs-utils 1.14.0 needs at least 52 MB. Not sure if it will change
+> +	# again. But at least we need to configure mininum size of f2fs image
+> +	# to 52MB now.
 
-As we're updating _scratch_mkf_blocksized, would you please unify the
-indention for the whole function to use tab instead of spaces? They're
-old code, this way we're slowly migrating old/space indention to tab.
+It'd be better to specify a slightly bigger fs size for f2fs then. I
+don't think this test depends on the fs size, just that smaller size
+makes test run faster.
 
-> +
-> +	grep -q \\b$blocksize\\b /sys/fs/btrfs/features/supported_sectorsizes || \
-
-I think grep -qw should be fine.
-
-> +		_notrun "$FSTYP does not support sectorsize=$blocksize yet"
-> +
-> +	_scratch_mkfs $MKFS_OPTIONS --sectorsize=$blocksize
-
-No need to specify $MKFS_OPTIONS here, _scratch_mkfs will append
-$MKFS_OPTIONS anyway.
-
-> +	;;
->      xfs)
->  	_scratch_mkfs_xfs $MKFS_OPTIONS -b size=$blocksize
-
-So this $MKFS_OPTIONS isn't needed either, but that belongs to another
-patch.
+Maybe 64M or 128M, any suggestions from f2fs folks?
 
 Thanks,
 Eryu
 
->  	;;
+>  	if [ $FSTYP == "f2fs" ]; then
+> -		size=38M
+> +		size=52M
+>  	fi
+>  
+>  	# Create an fs on a small, initialized image. The pattern is written to
 > -- 
-> 2.18.4
+> 2.25.4
