@@ -2,109 +2,142 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 21275C47096
-	for <linux-fstests@archiver.kernel.org>; Sun,  6 Jun 2021 16:00:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8CA24C47096
+	for <linux-fstests@archiver.kernel.org>; Sun,  6 Jun 2021 18:05:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id ED528613D4
-	for <linux-fstests@archiver.kernel.org>; Sun,  6 Jun 2021 16:00:44 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5C62C6141D
+	for <linux-fstests@archiver.kernel.org>; Sun,  6 Jun 2021 18:05:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230104AbhFFQCc (ORCPT
+        id S229573AbhFFSG7 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 6 Jun 2021 12:02:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41532 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230090AbhFFQCb (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 6 Jun 2021 12:02:31 -0400
-Received: from mail-il1-x134.google.com (mail-il1-x134.google.com [IPv6:2607:f8b0:4864:20::134])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 90484C061766;
-        Sun,  6 Jun 2021 09:00:28 -0700 (PDT)
-Received: by mail-il1-x134.google.com with SMTP id a8so12616172ilv.9;
-        Sun, 06 Jun 2021 09:00:28 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=FNu0XD+49lQmNxkW8RYXch40uXb65JQSTwY5Xd5wYus=;
-        b=iEFxt4CZB9fxgqCBqGeYe1W8RfVE1tjeSoRCFsY+/pzWMNZ7lnUzEfqaMHjzrGsUUk
-         0nj80/Qvux+RleR7V9WdiFcu7oaEUgmzeq9fmoRToVOv5LWo9MQZFgIiQEf6x3oY349g
-         q6CdXI/hxunJFI8MdYFrunu3ybFmw2hFU93htnTvwthbAMmKXghXb6tU5ngs2sdUDmoK
-         pjoeaoC7cscECuISXLy0xo+CTal5Vy4YtUAguouJZZ6UeC899GKr7kaJSOsa73ktssuq
-         nc5ilMsr2hMSqvUoqW2p+3rmLMcOr6bVaiuu8ljCIlhDmJ03OX6QFtkpMh0yd6InhzfO
-         d0Sg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=FNu0XD+49lQmNxkW8RYXch40uXb65JQSTwY5Xd5wYus=;
-        b=MrDxEYQa3wz76Xk8LSGO7aerIxyCY+EVRAetoO7WLMfk2TfvjEmQl4c7Dx+/TkBdrb
-         MI6vRpmT1bktCfci3HxPXCXTX2ghwYMyK4dVkkWpLbQS/g0FPkc9Vx1VPDUiv3BKdenJ
-         BXWgqcDnvZqv63YVSdA7Wzuc+nNBi3WmkMHk3wtfbLWP2mXyhv71grTBlPrkbOuT6Vd+
-         PepXRRP0HTEcVsUikIcifiGUl1ODEIQgG8poX9tHx1e+h7RnhH//EQdmYi9jwhuRowt7
-         OfnagCQYrqagdawQClMMBvGvSXS8/saRyaVeCuxZmGM2RN6DnFTVsg1eZJhCd7cMPBth
-         SEYg==
-X-Gm-Message-State: AOAM531Fcjfhlpw+ezTRiSXGaMErhdhIf+I3oTDXL2gUtM/lNFqJAVC0
-        pVYiTLFtC93536rYH/CgPTmQenqS9n5ZXHUrXg0=
-X-Google-Smtp-Source: ABdhPJxDRxpinwyESvId2N9x+xJfoSIW79GKlbkQnAcleZKg8T7Cm9MSSndMBiJ8RyZ1p7JU4JRhFHRFQ18AfZRXpb0=
-X-Received: by 2002:a05:6e02:4e:: with SMTP id i14mr11576438ilr.72.1622995227020;
- Sun, 06 Jun 2021 09:00:27 -0700 (PDT)
+        Sun, 6 Jun 2021 14:06:59 -0400
+Received: from mail.kernel.org ([198.145.29.99]:57112 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S229474AbhFFSG7 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 6 Jun 2021 14:06:59 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id B05306139A;
+        Sun,  6 Jun 2021 18:05:09 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1623002709;
+        bh=eA65rCkKZ0o8UvPjxxfm8K5PmUThmbuVaE4s1m3vGz4=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=ZfUTu9BtQLwcZ46dWpfQnUkPtula+CzHAvEUsuBeO/jAakrRqkTCncvf/yC6ddIOX
+         5XO8s6138hXKsb/1RgjP3e3zPTr7xmA5ZaCoyWp1o+goZ8iNkwRPINt093M4lY2wF8
+         BKZAFqzI0oRpdzQHjdi2vZXdQBX4pxgsb7Dcya/mWbgvIza+5rCO9U3N4/eJivOcCv
+         yLuKMc0yr8jmoG1faLrJcomVHOmybyJwg2qX3ub+n+IrXJKg0KG87vdtUAQBv5CxOo
+         yKtj5M7KLzEcIqeLxmfnw0ujZRgggRhZhZZVICJGoFaaUBai+y2FE233jdaO+wSRUU
+         ep43xu0hPZ5Sw==
+Date:   Sun, 6 Jun 2021 11:05:09 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Eryu Guan <guan@eryu.me>
+Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: Re: [PATCHSET RFC 00/10] fstests: move test group lists into test
+ files
+Message-ID: <20210606180509.GE2945738@locust>
+References: <162199360248.3744214.17042613373014687643.stgit@locust>
+ <YLzfV9Xx1ynZQau+@desktop>
 MIME-Version: 1.0
-References: <20210606151811.420788-1-amir73il@gmail.com>
-In-Reply-To: <20210606151811.420788-1-amir73il@gmail.com>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Sun, 6 Jun 2021 19:00:16 +0300
-Message-ID: <CAOQ4uxj=ztE5kyE62dS=UrLzt--E7Gwucab_r+k4Jgg+nEpt1g@mail.gmail.com>
-Subject: Re: [PATCH v2 0/2] Fixes to overlayfs immutable files tests
-To:     Eryu Guan <guaneryu@gmail.com>
-Cc:     Miklos Szeredi <miklos@szeredi.hu>,
-        overlayfs <linux-unionfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <YLzfV9Xx1ynZQau+@desktop>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Jun 6, 2021 at 6:18 PM Amir Goldstein <amir73il@gmail.com> wrote:
->
-> Eryu,
->
-> Test overlay/075 was written and merged to track a known overlayfs issue
-> which exists in current upstream.
->
-> The introduction of fileattr operations in kernel v5.13-rc1 by Miklos
-> has paved the way for the fix patch that I recently posted [1].
->
-> Patch #1 fixes a test bug that was hiding behind the known issue in
-> upstream kernel.
+On Sun, Jun 06, 2021 at 10:44:39PM +0800, Eryu Guan wrote:
+> On Tue, May 25, 2021 at 06:46:42PM -0700, Darrick J. Wong wrote:
+> > Hi all,
+> > 
+> > Test group files (e.g. tests/generic/group) are a pain to keep up.
+> > Every week I rebase on Eryu's latest upstream, and every week I have to
+> > slog through dozens of trivial merge conflicts because of the
+> > groupfiles.  Moving tests is annoying because we have to maintain all
+> > this code to move the group associations from one /group file to
+> > another.
+> 
+> Thanks for doing this! It looks find overall from a quick look. Mind
+> adding some words in README file as well?
 
-Oh, you already merged this one. Great.
-There is no change from v1 to v2, so you may ignore it and review
-patch #2 for next week.
+Ok.
 
-Thanks,
-Amir.
+> > It doesn't need to be this way -- we could move each test's group
+> > information into the test itself, and automatically generate the group
+> > files as part of the make process.  This series does exactly that.
+> > 
+> > The first few patches add some convenient anchors for the new
+> > per-testfile group tagging and a conversion script to migrate existing
+> > test files.  Next there's a huge patch that is the results of running
+> > the conversion script, followed by cleanup of the golden outputs.  After
+> > that comes the build infrastructure to generate group files and other
+> 
+> The group files are auto-generated correctly upon "make", but "make
+> group" printed tons of errors like:
+> 
+> [root@fedoravm xfstests]# make group
+>  [GROUP] /root/workspace/xfstests/group
+> /root/workspace/xfstests/tests/btrfs/001: line 9: ./common/test_names: No such file or directory
+> /root/workspace/xfstests/tests/btrfs/001: line 10: _set_seq_and_groups: command not found
+> /root/workspace/xfstests/tests/btrfs/001: line 21: ./common/rc: No such file or directory
+> /root/workspace/xfstests/tests/btrfs/001: line 22: ./common/filter: No such file or directory
+> /root/workspace/xfstests/tests/btrfs/001: line 23: ./common/filter.btrfs: No such file or directory
+> /root/workspace/xfstests/tests/btrfs/001: line 26: _supported_fs: command not found
+> /root/workspace/xfstests/tests/btrfs/001: line 27: _require_scratch: command not found
+> /root/workspace/xfstests/tests/btrfs/001: line 30: _scratch_mount: command not found
+> /root/workspace/xfstests/tests/btrfs/001: line 38: _filter_scratch: command not found
+> /root/workspace/xfstests/tests/btrfs/001: line 38: subvolume: command not found
+> ls: cannot access '/snap': No such file or directory
+> ls: cannot access '/snap': No such file or directory
+> /root/workspace/xfstests/tests/btrfs/001: line 50: _filter_scratch: command not found
+> /root/workspace/xfstests/tests/btrfs/001: line 50: subvolume: command not found
+> ls: cannot access '/subvol': No such file or directory
+> /root/workspace/xfstests/tests/btrfs/001: line 60: _btrfs_get_subvolid: command not found
+> /root/workspace/xfstests/tests/btrfs/001: line 61: _filter_scratch: command not found
+> /root/workspace/xfstests/tests/btrfs/001: line 61: subvolume: command not found
+> /root/workspace/xfstests/tests/btrfs/001: line 62: _scratch_cycle_mount: command not found
+> /root/workspace/xfstests/tests/btrfs/001: line 65: _scratch_unmount: command not found
+> /root/workspace/xfstests/tests/btrfs/001: line 67: _scratch_mount: command not found
+> /root/workspace/xfstests/tests/btrfs/001: line 71: _filter_scratch: command not found
+> /root/workspace/xfstests/tests/btrfs/001: line 71: subvolume: command not found
+> /root/workspace/xfstests/tests/btrfs/001: line 72: _scratch_cycle_mount: command not found
+> /root/workspace/xfstests/tests/btrfs/001: line 78: subvolume: command not found
+> /root/workspace/xfstests/tests/btrfs/001: line 81: _filter_btrfs_subvol_delete: command not found
+> /root/workspace/xfstests/tests/btrfs/001: line 81: subvolume: command not found
+> /root/workspace/xfstests/tests/btrfs/001: line 84: _scratch_cycle_mount: command not found
+> 
+> I think it's better to let 'make group' work as well, it might be easier
+> to re-generated just group files.
 
->
-> Patch #2 add test coverage to part of the kernel fix patch that is not
-> covered by the current test.
->
+Yikes.  I will investigate this before reposting.
+
+> > tweaks to the existing maintainer scripts to use the new infrastructure.
+> > Finally, remove the group files themselves and the (now unnecessary)
+> > code that maintained them.
+> > 
+> > If you're going to start using this mess, you probably ought to just
+> > pull from my git trees, which are linked below.
+> > 
+> > This is an extraordinary way to destroy everything.  Enjoy!
+> > Comments and questions are, as always, welcome.
+> > 
+> > --D
+> > 
+> > fstests git tree:
+> > https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=autogenerate-groupfiles
+> 
+> I noticed that your patches are based on your internal base, and this
+> branch couldn't be pulled into current master branch. But this is fine
+> for RFC patches I think :)
+
+Yep.  Since this is a treewide change I'll put this in a special branch
+and rebase my dev tree after it lands.
+
+--D
+
+> 
 > Thanks,
-> Amir.
->
-> [1] https://lore.kernel.org/linux-unionfs/20210606144641.419138-1-amir73il@gmail.com/
->
-> Amir Goldstein (2):
->   overlay/075: fix wrong invocation of t_immutable
->   overlay/075: add test coverage for clearing immutable/append-only
->     flags
->
->  tests/overlay/075 | 23 +++++++++++++++++++----
->  1 file changed, 19 insertions(+), 4 deletions(-)
->
-> --
-> 2.31.1
->
+> Eryu
