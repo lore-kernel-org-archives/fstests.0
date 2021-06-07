@@ -2,169 +2,153 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIMWL_WL_MED,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	UNPARSEABLE_RELAY,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-11.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D4034C47082
-	for <linux-fstests@archiver.kernel.org>; Mon,  7 Jun 2021 12:08:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D14AFC47095
+	for <linux-fstests@archiver.kernel.org>; Mon,  7 Jun 2021 17:06:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BC0B061263
-	for <linux-fstests@archiver.kernel.org>; Mon,  7 Jun 2021 12:08:40 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BF4E260C3E
+	for <linux-fstests@archiver.kernel.org>; Mon,  7 Jun 2021 17:06:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230286AbhFGMKb (ORCPT
+        id S231607AbhFGRIo (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 7 Jun 2021 08:10:31 -0400
-Received: from userp2120.oracle.com ([156.151.31.85]:52520 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230227AbhFGMKb (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 7 Jun 2021 08:10:31 -0400
-Received: from pps.filterd (userp2120.oracle.com [127.0.0.1])
-        by userp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 157C0Ltb107502;
-        Mon, 7 Jun 2021 12:08:36 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=from : to : cc :
- subject : date : message-id : in-reply-to : references : mime-version :
- content-transfer-encoding; s=corp-2020-01-29;
- bh=+u+mz5AuEGIdOm39vTlh04JiRbJYai6NC+No0l9XeyE=;
- b=N1eHmYbaMjctigRz8AeUn9XaSoRLGcabNU4FPdYjcxHHtgmFywDedRP2vaijTbQa915S
- /guNqhFsjyHHPb+8qBGLWruBFbv60YlUAJBu7oy7F2lXzVgZmElt7SazcGtjVyj40E40
- kldvgMEvTuOY8FxAJw5C1RfI1mILjYtx2pIp96fR2/0jeAkHJkolbRpp3uI7mVqNtXte
- 1HVI8fNGHFUq6QJJyxryC/ilGCr6sjSQMK9VmO2j/bdk0AFj2mPgsDpfzxmzPSAkqq+l
- tUVJobCCZp63Az85B5KLyRhVkvvZGL2J82+2D4vHbZzhO6el2cuqkXdy7qUNRDWm5IMk 3A== 
-Received: from aserp3020.oracle.com (aserp3020.oracle.com [141.146.126.70])
-        by userp2120.oracle.com with ESMTP id 3914quha34-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Mon, 07 Jun 2021 12:08:36 +0000
-Received: from pps.filterd (aserp3020.oracle.com [127.0.0.1])
-        by aserp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 157BxnRr007550;
-        Mon, 7 Jun 2021 12:08:35 GMT
-Received: from userv0121.oracle.com (userv0121.oracle.com [156.151.31.72])
-        by aserp3020.oracle.com with ESMTP id 3906spjc3h-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Mon, 07 Jun 2021 12:08:35 +0000
-Received: from abhmp0004.oracle.com (abhmp0004.oracle.com [141.146.116.10])
-        by userv0121.oracle.com (8.14.4/8.13.8) with ESMTP id 157C8YH9011190;
-        Mon, 7 Jun 2021 12:08:34 GMT
-Received: from fed2.sg.oracle.com (/39.109.186.25)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Mon, 07 Jun 2021 12:08:34 +0000
-From:   Anand Jain <anand.jain@oracle.com>
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, guan@eryu.me
-Subject: [PATCH 2/2 v2] _scratch_mkfs_blocksized: fix indentation
-Date:   Mon,  7 Jun 2021 20:08:20 +0800
-Message-Id: <0807b564fd7935f4b8a4f03d5242e5ba578ae89b.1623059144.git.anand.jain@oracle.com>
-X-Mailer: git-send-email 2.31.1
-In-Reply-To: <cover.1623059144.git.anand.jain@oracle.com>
-References: <cover.1623059144.git.anand.jain@oracle.com>
+        Mon, 7 Jun 2021 13:08:44 -0400
+Received: from mail.kernel.org ([198.145.29.99]:60556 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S231588AbhFGRIn (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 7 Jun 2021 13:08:43 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 8F18B60BBB;
+        Mon,  7 Jun 2021 17:06:51 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1623085611;
+        bh=DGH8ZihUgWcw65PaF2veCsqQyMZQPKAXcfgknX9nk2U=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=MOz+tGyf3ScYMBJh0GjuBN5TiLUGmd3qkOkZcK6XgU/mmwwxG0OKjrojkOdrcv8h8
+         Gr1kENpXQUqnY19sDIkInRCAUTAG74+kcsEiMaS3XN5GZ0/z6JenOkarSUFCxXhY8u
+         yu/FkHRSeV4hRQ8Bwx7MDgysogbTc/AeqGBAHncfIo0B5u+GZep6+uYq9ZRJk6kokN
+         CNeIrzjHZi13LKc5Gl6p7Ljvtd22R+uc7VU7NYaIs7Bz+IVSj1/Tb8E5YfgNKQUu4r
+         zGE4IVuS3QUmWjG3Wf0G5kfnMnM90sYLUHq70hKLa881/8T3fgGqdbwChstEAuyOMz
+         Ofv8TxlcB5Z7g==
+Date:   Mon, 7 Jun 2021 10:06:51 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Eryu Guan <guan@eryu.me>
+Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: Re: [PATCHSET RFC 00/10] fstests: move test group lists into test
+ files
+Message-ID: <20210607170651.GM2945738@locust>
+References: <162199360248.3744214.17042613373014687643.stgit@locust>
+ <YLzfV9Xx1ynZQau+@desktop>
+ <20210606180509.GE2945738@locust>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=10007 signatures=668682
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 spamscore=0 adultscore=0
- mlxlogscore=999 malwarescore=0 suspectscore=0 phishscore=0 bulkscore=0
- mlxscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2104190000 definitions=main-2106070092
-X-Proofpoint-ORIG-GUID: pWyLPeXicGsimC6DJArC_j71wpqvRzev
-X-Proofpoint-GUID: pWyLPeXicGsimC6DJArC_j71wpqvRzev
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=10007 signatures=668682
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 impostorscore=0 phishscore=0
- spamscore=0 malwarescore=0 clxscore=1015 lowpriorityscore=0
- priorityscore=1501 adultscore=0 mlxscore=0 mlxlogscore=999 bulkscore=0
- suspectscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2104190000 definitions=main-2106070092
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210606180509.GE2945738@locust>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-No function change. Fix indentation.
+On Sun, Jun 06, 2021 at 11:05:09AM -0700, Darrick J. Wong wrote:
+> On Sun, Jun 06, 2021 at 10:44:39PM +0800, Eryu Guan wrote:
+> > On Tue, May 25, 2021 at 06:46:42PM -0700, Darrick J. Wong wrote:
+> > > Hi all,
+> > > 
+> > > Test group files (e.g. tests/generic/group) are a pain to keep up.
+> > > Every week I rebase on Eryu's latest upstream, and every week I have to
+> > > slog through dozens of trivial merge conflicts because of the
+> > > groupfiles.  Moving tests is annoying because we have to maintain all
+> > > this code to move the group associations from one /group file to
+> > > another.
+> > 
+> > Thanks for doing this! It looks find overall from a quick look. Mind
+> > adding some words in README file as well?
+> 
+> Ok.
+> 
+> > > It doesn't need to be this way -- we could move each test's group
+> > > information into the test itself, and automatically generate the group
+> > > files as part of the make process.  This series does exactly that.
+> > > 
+> > > The first few patches add some convenient anchors for the new
+> > > per-testfile group tagging and a conversion script to migrate existing
+> > > test files.  Next there's a huge patch that is the results of running
+> > > the conversion script, followed by cleanup of the golden outputs.  After
+> > > that comes the build infrastructure to generate group files and other
+> > 
+> > The group files are auto-generated correctly upon "make", but "make
+> > group" printed tons of errors like:
+> > 
+> > [root@fedoravm xfstests]# make group
+> >  [GROUP] /root/workspace/xfstests/group
+> > /root/workspace/xfstests/tests/btrfs/001: line 9: ./common/test_names: No such file or directory
+> > /root/workspace/xfstests/tests/btrfs/001: line 10: _set_seq_and_groups: command not found
+> > /root/workspace/xfstests/tests/btrfs/001: line 21: ./common/rc: No such file or directory
+> > /root/workspace/xfstests/tests/btrfs/001: line 22: ./common/filter: No such file or directory
+> > /root/workspace/xfstests/tests/btrfs/001: line 23: ./common/filter.btrfs: No such file or directory
+> > /root/workspace/xfstests/tests/btrfs/001: line 26: _supported_fs: command not found
+> > /root/workspace/xfstests/tests/btrfs/001: line 27: _require_scratch: command not found
+> > /root/workspace/xfstests/tests/btrfs/001: line 30: _scratch_mount: command not found
+> > /root/workspace/xfstests/tests/btrfs/001: line 38: _filter_scratch: command not found
+> > /root/workspace/xfstests/tests/btrfs/001: line 38: subvolume: command not found
+> > ls: cannot access '/snap': No such file or directory
+> > ls: cannot access '/snap': No such file or directory
+> > /root/workspace/xfstests/tests/btrfs/001: line 50: _filter_scratch: command not found
+> > /root/workspace/xfstests/tests/btrfs/001: line 50: subvolume: command not found
+> > ls: cannot access '/subvol': No such file or directory
+> > /root/workspace/xfstests/tests/btrfs/001: line 60: _btrfs_get_subvolid: command not found
+> > /root/workspace/xfstests/tests/btrfs/001: line 61: _filter_scratch: command not found
+> > /root/workspace/xfstests/tests/btrfs/001: line 61: subvolume: command not found
+> > /root/workspace/xfstests/tests/btrfs/001: line 62: _scratch_cycle_mount: command not found
+> > /root/workspace/xfstests/tests/btrfs/001: line 65: _scratch_unmount: command not found
+> > /root/workspace/xfstests/tests/btrfs/001: line 67: _scratch_mount: command not found
+> > /root/workspace/xfstests/tests/btrfs/001: line 71: _filter_scratch: command not found
+> > /root/workspace/xfstests/tests/btrfs/001: line 71: subvolume: command not found
+> > /root/workspace/xfstests/tests/btrfs/001: line 72: _scratch_cycle_mount: command not found
+> > /root/workspace/xfstests/tests/btrfs/001: line 78: subvolume: command not found
+> > /root/workspace/xfstests/tests/btrfs/001: line 81: _filter_btrfs_subvol_delete: command not found
+> > /root/workspace/xfstests/tests/btrfs/001: line 81: subvolume: command not found
+> > /root/workspace/xfstests/tests/btrfs/001: line 84: _scratch_cycle_mount: command not found
+> > 
+> > I think it's better to let 'make group' work as well, it might be easier
+> > to re-generated just group files.
+> 
+> Yikes.  I will investigate this before reposting.
 
-Signed-off-by: Anand Jain <anand.jain@oracle.com>
----
- v2: born
+Ah, that's because I put a recipe for group.list in buildrules, even
+though it is only the tests/xfs/ directories that should ever know about
+that build rule.
 
- common/rc | 60 ++++++++++++++++++++++++++++---------------------------
- 1 file changed, 31 insertions(+), 29 deletions(-)
+I think I can fix it by putting the group.list rule in a separate
+include file and then only include the new file from tests/*/Makefile.
 
-diff --git a/common/rc b/common/rc
-index 601540730b8f..9c42a6aedc8b 100644
---- a/common/rc
-+++ b/common/rc
-@@ -1116,42 +1116,44 @@ _scratch_mkfs_geom()
- # _scratch_mkfs_blocksized blocksize
- _scratch_mkfs_blocksized()
- {
--    local blocksize=$1
-+	local blocksize=$1
- 
--    local re='^[0-9]+$'
--    if ! [[ $blocksize =~ $re ]] ; then
--        _notrun "error: _scratch_mkfs_sized: block size \"$blocksize\" not an integer."
--    fi
-+	local re='^[0-9]+$'
-+	if ! [[ $blocksize =~ $re ]] ; then
-+_notrun "error: _scratch_mkfs_sized: block size \"$blocksize\" not an integer."
-+	fi
- 
--    case $FSTYP in
--    btrfs)
--	test -f /sys/fs/btrfs/features/supported_sectorsizes || \
-+	case $FSTYP in
-+	btrfs)
-+		test -f /sys/fs/btrfs/features/supported_sectorsizes || \
- 		_notrun "Subpage sectorsize support is not found in $FSTYP"
- 
--	grep -wq $blocksize /sys/fs/btrfs/features/supported_sectorsizes || \
-+		grep -wq $blocksize /sys/fs/btrfs/features/supported_sectorsizes || \
- 		_notrun "$FSTYP does not support sectorsize=$blocksize yet"
- 
--	_scratch_mkfs --sectorsize=$blocksize
--	;;
--    xfs)
--	_scratch_mkfs_xfs $MKFS_OPTIONS -b size=$blocksize
--	;;
--    ext2|ext3|ext4)
--	${MKFS_PROG} -t $FSTYP -F $MKFS_OPTIONS -b $blocksize $SCRATCH_DEV
--	;;
--    gfs2)
--	${MKFS_PROG} -t $FSTYP $MKFS_OPTIONS -O -b $blocksize $SCRATCH_DEV
--	;;
--    ocfs2)
--	yes | ${MKFS_PROG} -t $FSTYP -F $MKFS_OPTIONS -b $blocksize -C $blocksize $SCRATCH_DEV
--	;;
--    bcachefs)
--	${MKFS_PROG} -t $FSTYP $MKFS_OPTIONS --block_size=$blocksize $SCRATCH_DEV
--	;;
--    *)
-+		_scratch_mkfs --sectorsize=$blocksize
-+		;;
-+	xfs)
-+		_scratch_mkfs_xfs $MKFS_OPTIONS -b size=$blocksize
-+		;;
-+	ext2|ext3|ext4)
-+		${MKFS_PROG} -t $FSTYP -F $MKFS_OPTIONS -b $blocksize $SCRATCH_DEV
-+		;;
-+	gfs2)
-+		${MKFS_PROG} -t $FSTYP $MKFS_OPTIONS -O -b $blocksize $SCRATCH_DEV
-+		;;
-+	ocfs2)
-+		yes | ${MKFS_PROG} -t $FSTYP -F $MKFS_OPTIONS -b $blocksize \
-+						-C $blocksize $SCRATCH_DEV
-+		;;
-+	bcachefs)
-+		${MKFS_PROG} -t $FSTYP $MKFS_OPTIONS --block_size=$blocksize \
-+								$SCRATCH_DEV
-+		;;
-+	*)
- 	_notrun "Filesystem $FSTYP not supported in _scratch_mkfs_blocksized"
--	;;
--    esac
-+		;;
-+	esac
- }
- 
- _scratch_resvblks()
--- 
-2.27.0
+--D
 
+> > > tweaks to the existing maintainer scripts to use the new infrastructure.
+> > > Finally, remove the group files themselves and the (now unnecessary)
+> > > code that maintained them.
+> > > 
+> > > If you're going to start using this mess, you probably ought to just
+> > > pull from my git trees, which are linked below.
+> > > 
+> > > This is an extraordinary way to destroy everything.  Enjoy!
+> > > Comments and questions are, as always, welcome.
+> > > 
+> > > --D
+> > > 
+> > > fstests git tree:
+> > > https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=autogenerate-groupfiles
+> > 
+> > I noticed that your patches are based on your internal base, and this
+> > branch couldn't be pulled into current master branch. But this is fine
+> > for RFC patches I think :)
+> 
+> Yep.  Since this is a treewide change I'll put this in a special branch
+> and rebase my dev tree after it lands.
+> 
+> --D
+> 
+> > 
+> > Thanks,
+> > Eryu
