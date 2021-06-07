@@ -2,99 +2,136 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CF09AC47094
-	for <linux-fstests@archiver.kernel.org>; Mon,  7 Jun 2021 18:29:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C5AA4C47082
+	for <linux-fstests@archiver.kernel.org>; Mon,  7 Jun 2021 21:36:43 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AFA0D6101A
-	for <linux-fstests@archiver.kernel.org>; Mon,  7 Jun 2021 18:29:02 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9EC0E60720
+	for <linux-fstests@archiver.kernel.org>; Mon,  7 Jun 2021 21:36:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231364AbhFGSax (ORCPT
+        id S230438AbhFGVie (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 7 Jun 2021 14:30:53 -0400
-Received: from mail-il1-f182.google.com ([209.85.166.182]:38581 "EHLO
-        mail-il1-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230253AbhFGSaw (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 7 Jun 2021 14:30:52 -0400
-Received: by mail-il1-f182.google.com with SMTP id d1so14080087ils.5
-        for <fstests@vger.kernel.org>; Mon, 07 Jun 2021 11:29:01 -0700 (PDT)
+        Mon, 7 Jun 2021 17:38:34 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34878 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230359AbhFGVie (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 7 Jun 2021 17:38:34 -0400
+Received: from mail-ua1-x92b.google.com (mail-ua1-x92b.google.com [IPv6:2607:f8b0:4864:20::92b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8E7DFC061574
+        for <fstests@vger.kernel.org>; Mon,  7 Jun 2021 14:36:42 -0700 (PDT)
+Received: by mail-ua1-x92b.google.com with SMTP id z13so5594423uai.12
+        for <fstests@vger.kernel.org>; Mon, 07 Jun 2021 14:36:42 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=mime-version:from:date:message-id:subject:to
+        h=from:to:cc:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=I13EPQneEoG3DSJ4WelSaPf73gcHaWEJIaUOBeAWvV0=;
-        b=cH3ugt6pUl7HaF5zLKvDJm4pLCaoEPdUNR/uZdny5PEbx+h5wEasKxQ5GRPx0HLvAL
-         ONPuH6KCoOTO1dYPUOptN+2DmBvClU7F07YDdT61yoAahwa0ZdCKuGJ6E9qrseI/tYx9
-         khu6d9ag0DWeB4FUhS/Yt2k7t6hiWWmEAf/nr0RSjUM5xmbv5OIFCU382/DcfgTGoll3
-         /rvhxpAu8zzBqysewh0JuJEwagTkHAxopUkGSxeDs0UTyW00PeZ68Fi5OEM7/EAqfRPz
-         nwJbFyNTs0Qet+bH2SDlxfXMoAIzwy8Qrgq6FtVusGfYHmSV/hIdThJTMn2ouzBF0/aW
-         /vfQ==
+        bh=aJIj7uFu8kJv28ecCU2cRtYeZ3b52p1KV2TXq5NuG6g=;
+        b=cBzsQKEmCspbP0O53O+y8VBS+rSh3v5NZVUAsby4A9cOJHVobz9WxH/ZySFSFpTWNV
+         5Jaku0g7QTYXNlJy8rW0NOC0xCABdOlTtnKbVp9x/V5jt7EtFMYkbGlW9AqVEKKXbvZd
+         LBdPwjKJwBQURKs3nO71eetFlt4mC6yx/LY3TfjLoIy+/jOrC/hwtf2qA57p+rhlEget
+         cptDAqvogjOng2R+UOjNZqyLuSWRi1NxhmSQAyahNvI1RWvlaB+nMBwaF0q2mHnynGGo
+         C+SdXYP1i03U12Wd/YY5+ADO4KiDegwyjXMTEBEAO5+6y8otKHRwh6aBvjnBQSceimdZ
+         7rtA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:from:date:message-id:subject:to
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=I13EPQneEoG3DSJ4WelSaPf73gcHaWEJIaUOBeAWvV0=;
-        b=VoUkqgpJfoO/Lxyd3hMspKvTv6yZAd3A66S8RUHYkHZGL4W1YTDAbNhL9zakugUSP0
-         LzlI0bq9SPR9rUFFSwQOliUBo6U0X5ulUWAIf2gJeZj7pPEOCZAMfR3Jl4rdpILToUsH
-         dyyj9s5rIFvtxnrIIa5yyt+F6dWaj4z4ojrohH18j7gHlzyg4hPcXtDbTPWH7Kkjhs4I
-         pUaJfe925r72f0yYEEfJMVbMlcM93CqgqELqf6t8dTY+s1ueo1WrXuxOmFX+ZV8ixltm
-         kKcaikxc6YTQAPaU9dH6S93QB59O2+l1xYxlQF89AVVbwuL3MtdcmAOhyDpU8T1Ajv6b
-         ncsQ==
-X-Gm-Message-State: AOAM53012Tb2/GEGAh6y121aBi954nyhS3+9o879oaWWu6Hv/O+vMJXi
-        g1oXiIpezGOgyXZu5e2mUbJJqKzvpyuyb12E0C3xnvyo81nXVA==
-X-Google-Smtp-Source: ABdhPJyH2oHOkJvEdr2f7hpY5eN0f4A+FXXGUA6OAhko3FFAh9/KWSXHaofkVzfQ/OpbDab5nBjQWtbqQ6UEj/LyR5A=
-X-Received: by 2002:a92:d90c:: with SMTP id s12mr15934733iln.201.1623090480458;
- Mon, 07 Jun 2021 11:28:00 -0700 (PDT)
-MIME-Version: 1.0
-From:   Bhumit Attarde <bhumitattarde1@gmail.com>
-Date:   Mon, 7 Jun 2021 23:57:50 +0530
-Message-ID: <CABKHH71xokLUpxx4QbLh=H1rGhrOJqOwvx8ZtUOtjyLBZeGmsA@mail.gmail.com>
-Subject: Things to look out for while adding FUSE support to XFSTests
+        bh=aJIj7uFu8kJv28ecCU2cRtYeZ3b52p1KV2TXq5NuG6g=;
+        b=DgAEL8RH3IPFv5pFwPk79ExvqyXnXJ9+kjf7RK3VyqzL6cbrvpuHpMtOwI9QwrfSlA
+         n3U4k6bUaQkrXjAyWueaKAOgOaw8xHx8pImim6uYfgMxDSIAmyATrNdSAbN4F3etVSW+
+         jeBPDCtsXhG/peraaQPNbDs3nf6hBwWnGxk93mhbQ+Nwj1r6r/C8cPK2boTzsFZg6AZg
+         hYi7i7fOBpKxwNr6f6aS9Z74mLhQFIXFeLbff+TDi4AmpDjet3wpZ+6wvaXLIQ4BSTB1
+         qmZu+8lWj8Ccwnswwy/IeVa0PGoMtmqDv/n3+HBur4j0vUpolwdjaaK2hnn3SbSo/ec5
+         46Bw==
+X-Gm-Message-State: AOAM532gNLwrG2qli0ieNTGKtYeyuoocfwgxLGBnc+siZ+31Cfj6U2BF
+        9/xSr26wFswWkkp8cFhUL3olk7Oj631LvA==
+X-Google-Smtp-Source: ABdhPJwEW+pyGqhzn8RqnT3oN4Pumczonm5WRr7Ll5bwEkrG1onEm68qm+5MxhG43h8aBsh/3G7VfQ==
+X-Received: by 2002:ab0:3905:: with SMTP id b5mr10918365uaw.26.1623101800989;
+        Mon, 07 Jun 2021 14:36:40 -0700 (PDT)
+Received: from leah-cloudtop2.c.googlers.com.com (241.36.196.104.bc.googleusercontent.com. [104.196.36.241])
+        by smtp.googlemail.com with ESMTPSA id u6sm2582333vku.0.2021.06.07.14.36.40
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 07 Jun 2021 14:36:40 -0700 (PDT)
+From:   Leah Rumancik <leah.rumancik@gmail.com>
 To:     fstests@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Cc:     guaneryu@gmail.com, xuyang2018.jy@fujitsu.com,
+        Leah Rumancik <lrumancik@google.com>,
+        Leah Rumancik <leah.rumancik@gmail.com>
+Subject: [PATCH] ext4/048: add check for od endian flag
+Date:   Mon,  7 Jun 2021 21:36:38 +0000
+Message-Id: <20210607213638.3431530-1-leah.rumancik@gmail.com>
+X-Mailer: git-send-email 2.32.0.rc1.229.g3e70b5a671-goog
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Hello,
+From: Leah Rumancik <lrumancik@google.com>
 
-I=E2=80=99m a Google Summer of Code[1] student developer at KDE working on
-integrating XFSTests with KDE=E2=80=99s KIO-FUSE[2]. KIO is a KDE framework
-that provides and implements abstractions for accessing various types
-of (virtual) filesystems in a cross-platform way. KIO-FUSE is a
-project that lets you mount remote locations on your machine locally
-using FUSE. We=E2=80=99re anticipating that integrating XFSTESTS with KIO-F=
-USE
-would help us uncover previously undetected bugs in KIO-FUSE and
-KIO-slaves[3] (ioslaves) as well as the various protocols themselves.
-You can read a brief summary of the project by visiting the following
-link: Integrating XFSTests with KDE KIO-FUSE[4].
+od --endian=little is used to read bytes in little endian when on a
+big endian machine. Update test ext4/048 to require od endian flag
+support on big endian machines, otherwise, skip test.
 
-As a part of the project, I=E2=80=99ll be adding FUSE support to XFSTests.
-While a patch[5] was submitted for this, it seems to be abandoned. I=E2=80=
-=99m
-aiming to build on the mentioned patch, improve & test it after
-rectifying the errors pointed out by the reviewer. Some main changes
-that I will be making are --
-I] changing $SUBTYP to $FUSE_SUBTYP
-II] removing the added check case in `scratch_cleanup_files()`
+Signed-off-by: Leah Rumancik <leah.rumancik@gmail.com>
+---
+ common/rc      |  6 ++++++
+ tests/ext4/048 | 13 ++++++++++++-
+ 2 files changed, 18 insertions(+), 1 deletion(-)
 
-Is there anything I should keep in mind or need to look out for while
-working on this?
+diff --git a/common/rc b/common/rc
+index a0aa7300..70aa7176 100644
+--- a/common/rc
++++ b/common/rc
+@@ -4582,6 +4582,12 @@ _getcap()
+ 	return ${PIPESTATUS[0]}
+ }
+ 
++_require_od_endian_flag()
++{
++	od --endian=little < /dev/null > /dev/null 2>&1 || \
++		_notrun "od does not support endian flag"
++}
++
+ init_rc
+ 
+ ################################################################################
+diff --git a/tests/ext4/048 b/tests/ext4/048
+index 35d3ece8..51189618 100755
+--- a/tests/ext4/048
++++ b/tests/ext4/048
+@@ -26,6 +26,11 @@ _supported_fs ext4
+ _require_scratch
+ _require_command "$DEBUGFS_PROG" debugfs
+ 
++big_endian=$(echo -ne '\x11' | od -tx2 | head -1 | cut -f2 -d' ' | cut -c1)
++if (( big_endian )); then
++	_require_od_endian_flag
++fi
++
+ testdir="${SCRATCH_MNT}/testdir"
+ 
+ # get block number filename's dir ent
+@@ -44,7 +49,13 @@ get_offset() {
+ # argument 1: block
+ # argument 2: offset
+ get_reclen() {
+-	echo $(od $SCRATCH_DEV --skip-bytes=$(($1 * $blocksize + $2 + 4)) --read-bytes=2  -d -An  --endian=little | tr -d ' \t\n\r')
++	if (( big_endian )); then
++		echo $(od $SCRATCH_DEV --skip-bytes=$(($1 * $blocksize + $2 + 4)) --read-bytes=2  -d -An  --endian=little | \
++			tr -d ' \t\n\r')
++	else
++		echo $(od $SCRATCH_DEV --skip-bytes=$(($1 * $blocksize + $2 + 4)) --read-bytes=2  -d -An | \
++			tr -d ' \t\n\r')
++	fi
+ }
+ 
+ # reads portion of dirent that should be zero'd out (starting at offset of name_len = 6)
+-- 
+2.32.0.rc1.229.g3e70b5a671-goog
 
-Thank you.
-
-Best,
-Bhumit Attarde
-
-[1] https://summerofcode.withgoogle.com/
-[2] https://invent.kde.org/system/kio-fuse
-[3] https://api.kde.org/4.14-api/kdelibs-apidocs/kioslave/html/index.html
-[4] https://summerofcode.withgoogle.com/projects/#6429306361741312
-[5] https://patchwork.kernel.org/project/linux-fsdevel/patch/20200108192504=
-.GA893@miu.piliscsaba.redhat.com/
