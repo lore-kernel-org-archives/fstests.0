@@ -2,246 +2,203 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-19.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1FED8C48BCF
-	for <linux-fstests@archiver.kernel.org>; Wed,  9 Jun 2021 10:25:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D44E2C48BD1
+	for <linux-fstests@archiver.kernel.org>; Thu, 10 Jun 2021 08:44:12 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 08938611BD
-	for <linux-fstests@archiver.kernel.org>; Wed,  9 Jun 2021 10:25:24 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AB96461287
+	for <linux-fstests@archiver.kernel.org>; Thu, 10 Jun 2021 08:44:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234571AbhFIK1Q (ORCPT
+        id S229823AbhFJIqH (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 9 Jun 2021 06:27:16 -0400
-Received: from mail.kernel.org ([198.145.29.99]:38572 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S236353AbhFIK1P (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 9 Jun 2021 06:27:15 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 7102B61181;
-        Wed,  9 Jun 2021 10:25:20 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1623234321;
-        bh=eiEb4gH91Za/lqH6iKzWMw1/pnt+zZii3cfekM5/ExM=;
-        h=From:To:Cc:Subject:Date:From;
-        b=btTNw6Q/21EKDbwrfukYOvvHg0UZiptiEyNYE9fk2q2KZYCmQsCP2U6wymllWEJYY
-         QD7PiSIvKHXxgjnoiNnTcbGXQ7Lfu73QIQ+cyF/bqUSJxtV8hJYo6+nS9/Jbl3GNP0
-         LQcdzpVzqx8u2IcbJRJeWVuRqj2G42l5gkTqU3hRXe5GmeF2wr8uiWWBmoj0R906XY
-         MZvYmunrg1iq8G6SEnHAqFIbYKk9wzbJGQ6wXbIfd1bwHVzMCTzQl5bmskdKp3QWq6
-         cxl/PuakKUdJ0PcrFqVTyzQHTZi8Cm6HLJRC2MgAYtSMSKfyWbzpFMLOEpXCXDpO+n
-         faekvB3zjDg3Q==
-From:   fdmanana@kernel.org
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH] btrfs: test incremental send swapping location of a directory with a file
-Date:   Wed,  9 Jun 2021 11:25:14 +0100
-Message-Id: <64a68b520d170b21c5f72837f32d735a5d5471d8.1623234115.git.fdmanana@suse.com>
-X-Mailer: git-send-email 2.28.0
+        Thu, 10 Jun 2021 04:46:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53766 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229770AbhFJIqG (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 10 Jun 2021 04:46:06 -0400
+Received: from mail-pl1-x62f.google.com (mail-pl1-x62f.google.com [IPv6:2607:f8b0:4864:20::62f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 899EFC061574;
+        Thu, 10 Jun 2021 01:44:04 -0700 (PDT)
+Received: by mail-pl1-x62f.google.com with SMTP id 11so607995plk.12;
+        Thu, 10 Jun 2021 01:44:04 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=references:user-agent:from:to:cc:subject:in-reply-to:date
+         :message-id:mime-version;
+        bh=ALx+Si3czxv+LUCp/D+y31vtK5zKs6u6wL6Wo4SmWcM=;
+        b=rj+RIC9VwqdUtWyhw9lOt1vKbM2bY3O3xqnA+zUMvjMiksC23jA9fkj+5MSdWLlwVC
+         Iosva913tG/j5LTOASMI9dfoAtJ1fBO2EWb+wikWRtM2HE2orN4mfF+G38hzl0Ihxqfh
+         dqBmLz1CkxTCL0IIuwpyVE7f1GzKWA5TniteYTvNkFLbv7XkPxVhXZn6CHO0rsSGGoe7
+         ECEMl/5ytcLpSqXVcNscEJwarO9Ey2IXvXcABy/QgMkUmsC/yr4vBJ0aqJXclZw8xqmg
+         ElrIXHw5jt7T6hQCax592DjDhXX4dBIGRoltHXwDIbeC4mqtkP6Y4b6YJwmoilzAcZ+Y
+         TGwg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:references:user-agent:from:to:cc:subject
+         :in-reply-to:date:message-id:mime-version;
+        bh=ALx+Si3czxv+LUCp/D+y31vtK5zKs6u6wL6Wo4SmWcM=;
+        b=lgBvRZkFlPrDCcc3gfMcpjEbkmSXfB8fWWJRtZ6N+TbwcTukSG1VoAuZr+rLyBlkCv
+         JuG0WN4YMZ66hXg5GLZwMQRuoytV6fldADk/CIUfAxZiYA+4KhlWKVy0rAS2pXlmrhpa
+         LxhkNJ7TIKa9KiOZVBNNBOxl4SgBEdWRgzjvjojuKhH5dVS6Qk7G6VcusQImobs/Zygp
+         7rSaMU/j2Q6c+3JVBsxN5zgNMsxUDsWhsqQ/oacaubvKG+uCQ5xQx+rVoFBhvghnUZtp
+         yxFxwOlOsFn4wOIrbKR7bkf8UDONVdZ40Z6xjomrvicunUlbKUrIx6mITzHJq6R5brlu
+         lHlw==
+X-Gm-Message-State: AOAM531uBoDv833yRM7fowLQWdNYpgCoAVMR6/aBttmty22X5+TbJWM/
+        lzhRvEX10dlfyba3AIB3kk0=
+X-Google-Smtp-Source: ABdhPJzlQPdkI1QTBte1L7ePFdyE7TRSZjhiZlUHqvMWitcOFomQgcRpvWsCVH+0vmknPMzEO1ggVw==
+X-Received: by 2002:a17:902:d4c8:b029:102:715b:e3a5 with SMTP id o8-20020a170902d4c8b0290102715be3a5mr3762919plg.83.1623314644151;
+        Thu, 10 Jun 2021 01:44:04 -0700 (PDT)
+Received: from garuda ([122.171.171.192])
+        by smtp.gmail.com with ESMTPSA id d23sm7088636pjz.15.2021.06.10.01.44.01
+        (version=TLS1_2 cipher=ECDHE-ECDSA-CHACHA20-POLY1305 bits=256/256);
+        Thu, 10 Jun 2021 01:44:03 -0700 (PDT)
+References: <162317276202.653489.13006238543620278716.stgit@locust> <162317277866.653489.1612159248973350500.stgit@locust>
+User-agent: mu4e 1.0; emacs 26.1
+From:   Chandan Babu R <chandanrlinux@gmail.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org, guan@eryu.me, amir73il@gmail.com,
+        ebiggers@kernel.org
+Subject: Re: [PATCH 03/13] fstests: refactor test boilerplate code
+In-reply-to: <162317277866.653489.1612159248973350500.stgit@locust>
+Date:   Thu, 10 Jun 2021 14:14:00 +0530
+Message-ID: <87wnr2p0rz.fsf@garuda>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Filipe Manana <fdmanana@suse.com>
+On 08 Jun 2021 at 22:49, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
+>
+> Create two new helper functions to deal with boilerplate test code:
+>
+> A helper function to set the seq and seqnum variables.  We will expand
+> on this in the next patch so that fstests can autogenerate group files
+> from now on.
+>
+> A helper function to register cleanup code that will run if the test
+> exits or trips over a standard range of signals.
+>
 
-Test that an incremental send operation succeeds, and produces the
-correct results, after renaming and moving around directories and files
-with multiple hardlinks, in such a way that one of the files gets the old
-name and location of a directory and another name (hardlink) with the old
-name and location of another file that was located in that same directory.
+Looks good to me.
 
-This currently fails on btrfs but is fixed by a kernel patch with the
-following subject:
+Reviewed-by: Chandan Babu R <chandanrlinux@gmail.com>
 
-  "btrfs: send: fix invalid path for unlink operations after parent orphanization"
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> ---
+>  common/preamble |   49 +++++++++++++++++++++++++++++++++++++++++++++++++
+>  new             |   33 ++++++++++++---------------------
+>  2 files changed, 61 insertions(+), 21 deletions(-)
+>  create mode 100644 common/preamble
+>
+>
+> diff --git a/common/preamble b/common/preamble
+> new file mode 100644
+> index 00000000..63f66957
+> --- /dev/null
+> +++ b/common/preamble
+> @@ -0,0 +1,49 @@
+> +#!/bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2021 Oracle.  All Rights Reserved.
+> +
+> +# Boilerplate fstests functionality
+> +
+> +# Standard cleanup function.  Individual tests should override this.
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# Install the supplied cleanup code as a signal handler for HUP, INT, QUIT,
+> +# TERM, or when the test exits.  Extra signals can be specified as subsequent
+> +# parameters.
+> +_register_cleanup()
+> +{
+> +	local cleanup="$1"
+> +	shift
+> +
+> +	test -n "$cleanup" && cleanup="${cleanup}; "
+> +	trap "${cleanup}exit \$status" EXIT HUP INT QUIT TERM $*
+> +}
+> +# Initialize the global seq, seqres, here, tmp, and status variables to their
+> +# defaults.  Group memberships are the only arguments to this helper.
+> +_begin_fstest()
+> +{
+> +	if [ -n "$seq" ]; then
+> +		echo "_begin_fstest can only be called once!"
+> +		exit 1
+> +	fi
+> +
+> +	seq=`basename $0`
+> +	seqres=$RESULT_DIR/$seq
+> +	echo "QA output created by $seq"
+> +
+> +	here=`pwd`
+> +	tmp=/tmp/$$
+> +	status=1	# failure is the default!
+> +
+> +	_register_cleanup _cleanup
+> +
+> +	. ./common/rc
+> +
+> +	# remove previous $seqres.full before test
+> +	rm -f $seqres.full
+> +
+> +}
+> diff --git a/new b/new
+> index 357983d9..16e7c782 100755
+> --- a/new
+> +++ b/new
+> @@ -153,27 +153,18 @@ cat <<End-of-File >$tdir/$id
+>  #
+>  # what am I here for?
+>  #
+> -seq=\`basename \$0\`
+> -seqres=\$RESULT_DIR/\$seq
+> -echo "QA output created by \$seq"
+> -
+> -here=\`pwd\`
+> -tmp=/tmp/\$\$
+> -status=1	# failure is the default!
+> -trap "_cleanup; exit \\\$status" 0 1 2 3 15
+> -
+> -_cleanup()
+> -{
+> -	cd /
+> -	rm -f \$tmp.*
+> -}
+> -
+> -# get standard environment, filters and checks
+> -. ./common/rc
+> -. ./common/filter
+> -
+> -# remove previous \$seqres.full before test
+> -rm -f \$seqres.full
+> +. ./common/preamble
+> +_begin_fstest group list here
+> +
+> +# Override the default cleanup function.
+> +# _cleanup()
+> +# {
+> +# 	cd /
+> +# 	rm -f \$tmp.*
+> +# }
+> +
+> +# Import common functions.
+> +# . ./common/filter
+>  
+>  # real QA test starts here
+>  
 
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
- tests/btrfs/241     | 148 ++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/241.out |   6 ++
- tests/btrfs/group   |   1 +
- 3 files changed, 155 insertions(+)
- create mode 100755 tests/btrfs/241
- create mode 100644 tests/btrfs/241.out
 
-diff --git a/tests/btrfs/241 b/tests/btrfs/241
-new file mode 100755
-index 00000000..96f2e190
---- /dev/null
-+++ b/tests/btrfs/241
-@@ -0,0 +1,148 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2021 SUSE Linux Products GmbH. All Rights Reserved.
-+#
-+# FS QA Test No. btrfs/241
-+#
-+# Test that an incremental send operation succeeds, and produces the correct
-+# results, after renaming and moving around directories and files with multiple
-+# hardlinks, in such a way that one of the files gets the old name and location
-+# of a directory and another name (hardlink) with the old name and location of
-+# another file that was located in that same directory.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -fr $send_files_dir
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs btrfs
-+_require_test
-+_require_scratch
-+_require_fssum
-+
-+send_files_dir=$TEST_DIR/btrfs-test-$seq
-+
-+rm -f $seqres.full
-+rm -fr $send_files_dir
-+mkdir $send_files_dir
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+
-+# Create our test files and directory. Inode 259 (file3) has two hard links.
-+touch $SCRATCH_MNT/file1
-+touch $SCRATCH_MNT/file2
-+touch $SCRATCH_MNT/file3
-+
-+mkdir $SCRATCH_MNT/A
-+ln $SCRATCH_MNT/file3 $SCRATCH_MNT/A/hard_link
-+
-+# Filesystem looks like:
-+#
-+# .                                     (ino 256)
-+# |----- file1                          (ino 257)
-+# |----- file2                          (ino 258)
-+# |----- file3                          (ino 259)
-+# |----- A/                             (ino 260)
-+#        |---- hard_link                (ino 259)
-+#
-+
-+# Now create the base snapshot, which is going to be the parent snapshot for
-+# a later incremental send and receive.
-+$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
-+	$SCRATCH_MNT/mysnap1 > /dev/null
-+
-+$BTRFS_UTIL_PROG send -f $send_files_dir/1.snap \
-+	$SCRATCH_MNT/mysnap1 2>&1 1>/dev/null | _filter_scratch
-+
-+# Move inode 257 into directory inode 260. This results in computing the path
-+# for inode 260 as "/A" and caching it.
-+mv $SCRATCH_MNT/file1 $SCRATCH_MNT/A/file1
-+
-+# Move inode 258 (file2) into directory inode 260, with a name of "hard_link",
-+# moving first inode 259 away since it currently has that location and name.
-+mv $SCRATCH_MNT/A/hard_link $SCRATCH_MNT/tmp
-+mv $SCRATCH_MNT/file2 $SCRATCH_MNT/A/hard_link
-+
-+# Now rename inode 260 to something else (B for example) and then create a hard
-+# link for inode 258 that has the old name and location of inode 260 ("/A").
-+mv $SCRATCH_MNT/A $SCRATCH_MNT/B
-+ln $SCRATCH_MNT/B/hard_link $SCRATCH_MNT/A
-+
-+# Filesystem now looks like:
-+#
-+# .                                     (ino 256)
-+# |----- tmp                            (ino 259)
-+# |----- file3                          (ino 259)
-+# |----- B/                             (ino 260)
-+# |      |---- file1                    (ino 257)
-+# |      |---- hard_link                (ino 258)
-+# |
-+# |----- A                              (ino 258)
-+
-+# Create another snapshot of our subvolume and use it for an incremental send.
-+$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
-+		 $SCRATCH_MNT/mysnap2 > /dev/null
-+$BTRFS_UTIL_PROG send -p $SCRATCH_MNT/mysnap1 -f $send_files_dir/2.snap \
-+		 $SCRATCH_MNT/mysnap2 2>&1 1>/dev/null | _filter_scratch
-+
-+$FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
-+$FSSUM_PROG -A -f -w $send_files_dir/2.fssum \
-+	-x $SCRATCH_MNT/mysnap2/mysnap1 $SCRATCH_MNT/mysnap2
-+
-+# Now recreate the filesystem by receiving both send streams and verify we get
-+# the same content that the original filesystem had.
-+_scratch_unmount
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+
-+# First add the first snapshot to the new filesystem by applying the first send
-+# stream.
-+$BTRFS_UTIL_PROG receive -f $send_files_dir/1.snap $SCRATCH_MNT > /dev/null
-+
-+# The incremental receive operation below used to fail with the following error:
-+#
-+#    ERROR: unlink A/hard_link failed: No such file or directory
-+#
-+# This is because when send is processing inode 257, it generates the path for
-+# inode 260 as "/A", since that inode is its parent in the send snapshot, and
-+# caches that path.
-+#
-+# Later when processing inode 258, it first processes its new reference that has
-+# the path of "/A", which results in orphanizing inode 260 because there is a
-+# a path collision. This results in issuing a rename operation from "/A" to
-+# "/o260-6-0".
-+#
-+# Finally when processing the new reference "B/hard_link" for inode 258, it
-+# notices that it collides with inode 259 (not yet processed, because it has a
-+# higher inode number), since that inode has the name "hard_link" under the
-+# directory inode 260. It also checks that inode 259 has two hardlinks, so it
-+# decides to issue a unlink operation for the name "hard_link" for inode 259.
-+# However the path passed to the unlink operation is "/A/hard_link", which is
-+# incorrect since currently "/A" does not exists, due to the orphanization of
-+# inode 260 mentioned before. The path is incorrect because it was computed and
-+# cached before the orphanization. This results in the receiver to fail with the
-+# above error.
-+#
-+$BTRFS_UTIL_PROG receive -f $send_files_dir/2.snap $SCRATCH_MNT > /dev/null
-+
-+$FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
-+$FSSUM_PROG -r $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
-+
-+status=0
-+exit
-diff --git a/tests/btrfs/241.out b/tests/btrfs/241.out
-new file mode 100644
-index 00000000..c47940d7
---- /dev/null
-+++ b/tests/btrfs/241.out
-@@ -0,0 +1,6 @@
-+QA output created by 241
-+At subvol SCRATCH_MNT/mysnap1
-+At subvol SCRATCH_MNT/mysnap2
-+At subvol mysnap1
-+OK
-+OK
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index ad59ed3e..4fdd4d44 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -243,3 +243,4 @@
- 238 auto quick seed trim
- 239 auto quick log
- 240 auto quick prealloc log
-+241 auto quick send
 -- 
-2.28.0
-
+chandan
