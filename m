@@ -2,81 +2,459 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C6717C47094
-	for <linux-fstests@archiver.kernel.org>; Thu, 10 Jun 2021 12:41:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DA4FAC4743D
+	for <linux-fstests@archiver.kernel.org>; Fri, 11 Jun 2021 05:40:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AC87A61359
-	for <linux-fstests@archiver.kernel.org>; Thu, 10 Jun 2021 12:41:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BAED46128A
+	for <linux-fstests@archiver.kernel.org>; Fri, 11 Jun 2021 05:40:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230161AbhFJMnX (ORCPT
+        id S230160AbhFKFmn (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 10 Jun 2021 08:43:23 -0400
-Received: from szxga02-in.huawei.com ([45.249.212.188]:5493 "EHLO
-        szxga02-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230153AbhFJMnW (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 10 Jun 2021 08:43:22 -0400
-Received: from dggemv711-chm.china.huawei.com (unknown [172.30.72.54])
-        by szxga02-in.huawei.com (SkyGuard) with ESMTP id 4G13Rs54jPzZfy8;
-        Thu, 10 Jun 2021 20:38:33 +0800 (CST)
-Received: from dggema759-chm.china.huawei.com (10.1.198.201) by
- dggemv711-chm.china.huawei.com (10.1.198.66) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256) id
- 15.1.2176.2; Thu, 10 Jun 2021 20:41:24 +0800
-Received: from huawei.com (10.175.101.6) by dggema759-chm.china.huawei.com
- (10.1.198.201) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2176.2; Thu, 10
- Jun 2021 20:41:24 +0800
-From:   Sun Ke <sunke32@huawei.com>
-To:     <fstests@vger.kernel.org>, <guan@eryu.me>, <yuchao0@huawei.com>
-CC:     <sunke32@huawei.com>
-Subject: [PATCH v2] generic/042: make a bigger img for f2fs
-Date:   Thu, 10 Jun 2021 20:47:41 +0800
-Message-ID: <20210610124741.313944-1-sunke32@huawei.com>
-X-Mailer: git-send-email 2.25.4
+        Fri, 11 Jun 2021 01:42:43 -0400
+Received: from mail-pf1-f170.google.com ([209.85.210.170]:35565 "EHLO
+        mail-pf1-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230001AbhFKFmn (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 11 Jun 2021 01:42:43 -0400
+Received: by mail-pf1-f170.google.com with SMTP id h12so3542987pfe.2;
+        Thu, 10 Jun 2021 22:40:46 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=references:user-agent:from:to:cc:subject:in-reply-to:date
+         :message-id:mime-version;
+        bh=zCqwQfqD/T+jHHC7e8qOegy+rwTh1pkHb6sB5zA5ljM=;
+        b=Y5dvMoZ6C2bKRpaJVSoepD3mDxWUM95/eDIpRL6joAIn30gUtwkrKgaLqlZpOLt1GV
+         OsfHldamW7QXwy+aNPPn4xRcSWM+lfChLtlbm1AA4kJZduC6tGE2DyWlpeDtR0P+SVfK
+         tqPXaVfoVkzqkfOE7kug0JedLb1/5p02iob+Hd4y8IPkqy0mms3r05+UUBMIEsFgkFW0
+         m5KWdYv3/ndQG6hZ0gxTq+pAZwIx24YlZIfFMYLG7I3Erl3Ilh6VMnxh3mlHMpEF9gKp
+         y+3vsswco8bFmv8DfAxAs7LWxbIkKAcCVffh/6paQ+nChH+KCNw/pLGlVzBo5skz3TXY
+         KR6Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:references:user-agent:from:to:cc:subject
+         :in-reply-to:date:message-id:mime-version;
+        bh=zCqwQfqD/T+jHHC7e8qOegy+rwTh1pkHb6sB5zA5ljM=;
+        b=nDyrYuZ5x6QO8lChz3H3qdVHKeuSi8B6lS3KBm8l9RlQAq/rUwiep5Z3/VI5P7EBJ1
+         Kp6vPvFvoebJu1wcvDZekg9zzxbXjKRXuv+9H6iLYk5YVDc2Qg6Jv2uq1nFn1sS44NZ1
+         1T5UV+nMV1XlEiF5f3BqQikPr+moIi9o58vVAVkHyfTA3MTW7+NbU0Holm2nGhg0hSpP
+         i4iMLT8sgmsE+4QEgowpIUMw4MrvsRDbCUZv2qLKsVz/JhJFGlmSYTKNICcUBwTDCnpR
+         uE5L8WryMPl0Kdh3rNyJumRulWUD2Ck3cKjMIqb8Z1cTDKy+SMgwL2CTP9WLcgO3QRxJ
+         m+Vg==
+X-Gm-Message-State: AOAM530CPs4aChYJNcmTjNWtMLljGoiKFtDyn+48DxWy3LRuKf+UFMj8
+        BSvNj/aZXt2U5wWrTGh3QF0=
+X-Google-Smtp-Source: ABdhPJyxi8g6Wy02Qc58G4wNToj2o2V7Japxv0iZ+EuuYRuQiEpqD3+1KjIwgXRb6MaqyfwzzFCFhw==
+X-Received: by 2002:aa7:96e3:0:b029:2ec:e8a1:3d66 with SMTP id i3-20020aa796e30000b02902ece8a13d66mr6530573pfq.79.1623389985837;
+        Thu, 10 Jun 2021 22:39:45 -0700 (PDT)
+Received: from garuda ([171.61.74.194])
+        by smtp.gmail.com with ESMTPSA id z8sm4436276pgi.94.2021.06.10.22.39.43
+        (version=TLS1_2 cipher=ECDHE-ECDSA-CHACHA20-POLY1305 bits=256/256);
+        Thu, 10 Jun 2021 22:39:45 -0700 (PDT)
+References: <162317276202.653489.13006238543620278716.stgit@locust> <162317280046.653489.3322406175723320960.stgit@locust>
+User-agent: mu4e 1.0; emacs 26.1
+From:   Chandan Babu R <chandanrlinux@gmail.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org, guan@eryu.me, amir73il@gmail.com,
+        ebiggers@kernel.org
+Subject: Re: [PATCH 07/13] fstests: automatically generate group files
+In-reply-to: <162317280046.653489.3322406175723320960.stgit@locust>
+Date:   Fri, 11 Jun 2021 11:09:41 +0530
+Message-ID: <87wnr12c4i.fsf@garuda>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7BIT
-Content-Type:   text/plain; charset=US-ASCII
-X-Originating-IP: [10.175.101.6]
-X-ClientProxiedBy: dggems704-chm.china.huawei.com (10.3.19.181) To
- dggema759-chm.china.huawei.com (10.1.198.201)
-X-CFilter-Loop: Reflected
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-f2fs-utils 1.9.0 needs at least 38 MB space for f2fs image. However,
-f2fs-utils 1.14.0 needs at least 52 MB. Not sure if it will change again.
-So, just set it to 128M.
+On 08 Jun 2021 at 22:50, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
+>
+> Now that we've moved the group membership details into the test case
+> files themselves, automatically generate the group files during build.
+> The autogenerated files are named "group.list" instead of "group" to
+> avoid conflicts between generated and (stale) SCM files as everyone
+> rebases.
 
-Suggested-by: Chao Yu <yuchao0@huawei.com>
-Signed-off-by: Sun Ke <sunke32@huawei.com>
----
- tests/generic/042 | 6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
+Looks good to me.
 
-diff --git a/tests/generic/042 b/tests/generic/042
-index ee0e4b40..6437ef07 100755
---- a/tests/generic/042
-+++ b/tests/generic/042
-@@ -43,9 +43,11 @@ _crashtest()
- 	file=$mnt/file
- 	size=25M
- 
--	# 25M is too small for f2fs.
-+	# f2fs-utils 1.9.0 needs at least 38 MB space for f2fs image. However,
-+	# f2fs-utils 1.14.0 needs at least 52 MB. Not sure if it will change
-+	# again. So just set it 128M.
- 	if [ $FSTYP == "f2fs" ]; then
--		size=38M
-+		size=128M
- 	fi
- 
- 	# Create an fs on a small, initialized image. The pattern is written to
+Reviewed-by: Chandan Babu R <chandanrlinux@gmail.com>
+
+>
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> ---
+>  .gitignore             |    3 +++
+>  common/preamble        |    8 ++++++++
+>  include/buildgrouplist |    8 ++++++++
+>  tests/Makefile         |    4 ++++
+>  tests/btrfs/Makefile   |    4 ++++
+>  tests/ceph/Makefile    |    4 ++++
+>  tests/cifs/Makefile    |    4 ++++
+>  tests/ext4/Makefile    |    4 ++++
+>  tests/f2fs/Makefile    |    4 ++++
+>  tests/generic/Makefile |    4 ++++
+>  tests/nfs/Makefile     |    4 ++++
+>  tests/ocfs2/Makefile   |    4 ++++
+>  tests/overlay/Makefile |    4 ++++
+>  tests/perf/Makefile    |    4 ++++
+>  tests/shared/Makefile  |    4 ++++
+>  tests/udf/Makefile     |    4 ++++
+>  tests/xfs/Makefile     |    4 ++++
+>  tools/mkgroupfile      |   42 ++++++++++++++++++++++++++++++++++++++++++
+>  18 files changed, 117 insertions(+)
+>  create mode 100644 include/buildgrouplist
+>  create mode 100755 tools/mkgroupfile
+>
+>
+> diff --git a/.gitignore b/.gitignore
+> index c62c1556..ab366961 100644
+> --- a/.gitignore
+> +++ b/.gitignore
+> @@ -11,6 +11,9 @@ tags
+>  /local.config
+>  /results
+>  
+> +# autogenerated group files
+> +/tests/*/group.list
+> +
+>  # autoconf generated files
+>  /aclocal.m4
+>  /autom4te.cache
+> diff --git a/common/preamble b/common/preamble
+> index 63f66957..4fe8fd3f 100644
+> --- a/common/preamble
+> +++ b/common/preamble
+> @@ -32,6 +32,14 @@ _begin_fstest()
+>  	fi
+>  
+>  	seq=`basename $0`
+> +
+> +	# If we're only running the test to generate a group.list file,
+> +	# spit out the group data and exit.
+> +	if [ -n "$GENERATE_GROUPS" ]; then
+> +		echo "$seq $@"
+> +		exit 0
+> +	fi
+> +
+>  	seqres=$RESULT_DIR/$seq
+>  	echo "QA output created by $seq"
+>  
+> diff --git a/include/buildgrouplist b/include/buildgrouplist
+> new file mode 100644
+> index 00000000..d898efa3
+> --- /dev/null
+> +++ b/include/buildgrouplist
+> @@ -0,0 +1,8 @@
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2021 Oracle, Inc.  All Rights Reserved.
+> +#
+> +.PHONY: group.list
+> +
+> +group.list:
+> +	@echo " [GROUP] $$PWD/$@"
+> +	$(Q)$(TOPDIR)/tools/mkgroupfile $@
+> diff --git a/tests/Makefile b/tests/Makefile
+> index 8ce8f209..5c8f0b10 100644
+> --- a/tests/Makefile
+> +++ b/tests/Makefile
+> @@ -7,6 +7,10 @@ include $(TOPDIR)/include/builddefs
+>  
+>  TESTS_SUBDIRS = $(sort $(dir $(wildcard $(CURDIR)/[[:lower:]]*/)))
+>  
+> +SUBDIRS = $(wildcard [[:lower:]]*)
+> +
+> +default: $(SUBDIRS)
+> +
+>  include $(BUILDRULES)
+>  
+>  install: $(addsuffix -install,$(TESTS_SUBDIRS))
+> diff --git a/tests/btrfs/Makefile b/tests/btrfs/Makefile
+> index 2d936421..cc2b2fc9 100644
+> --- a/tests/btrfs/Makefile
+> +++ b/tests/btrfs/Makefile
+> @@ -4,9 +4,13 @@
+>  
+>  TOPDIR = ../..
+>  include $(TOPDIR)/include/builddefs
+> +include $(TOPDIR)/include/buildgrouplist
+>  
+>  BTRFS_DIR = btrfs
+>  TARGET_DIR = $(PKG_LIB_DIR)/$(TESTS_DIR)/$(BTRFS_DIR)
+> +DIRT = group.list
+> +
+> +default: $(DIRT)
+>  
+>  include $(BUILDRULES)
+>  
+> diff --git a/tests/ceph/Makefile b/tests/ceph/Makefile
+> index 55e35d77..61ab01d4 100644
+> --- a/tests/ceph/Makefile
+> +++ b/tests/ceph/Makefile
+> @@ -2,9 +2,13 @@
+>  
+>  TOPDIR = ../..
+>  include $(TOPDIR)/include/builddefs
+> +include $(TOPDIR)/include/buildgrouplist
+>  
+>  CEPH_DIR = ceph
+>  TARGET_DIR = $(PKG_LIB_DIR)/$(TESTS_DIR)/$(CEPH_DIR)
+> +DIRT = group.list
+> +
+> +default: $(DIRT)
+>  
+>  include $(BUILDRULES)
+>  
+> diff --git a/tests/cifs/Makefile b/tests/cifs/Makefile
+> index 0c5cf3be..5356a682 100644
+> --- a/tests/cifs/Makefile
+> +++ b/tests/cifs/Makefile
+> @@ -4,9 +4,13 @@
+>  
+>  TOPDIR = ../..
+>  include $(TOPDIR)/include/builddefs
+> +include $(TOPDIR)/include/buildgrouplist
+>  
+>  CIFS_DIR = cifs
+>  TARGET_DIR = $(PKG_LIB_DIR)/$(TESTS_DIR)/$(CIFS_DIR)
+> +DIRT = group.list
+> +
+> +default: $(DIRT)
+>  
+>  include $(BUILDRULES)
+>  
+> diff --git a/tests/ext4/Makefile b/tests/ext4/Makefile
+> index beb1541f..9c765497 100644
+> --- a/tests/ext4/Makefile
+> +++ b/tests/ext4/Makefile
+> @@ -4,9 +4,13 @@
+>  
+>  TOPDIR = ../..
+>  include $(TOPDIR)/include/builddefs
+> +include $(TOPDIR)/include/buildgrouplist
+>  
+>  EXT4_DIR = ext4
+>  TARGET_DIR = $(PKG_LIB_DIR)/$(TESTS_DIR)/$(EXT4_DIR)
+> +DIRT = group.list
+> +
+> +default: $(DIRT)
+>  
+>  include $(BUILDRULES)
+>  
+> diff --git a/tests/f2fs/Makefile b/tests/f2fs/Makefile
+> index d13bca3f..d2374018 100644
+> --- a/tests/f2fs/Makefile
+> +++ b/tests/f2fs/Makefile
+> @@ -5,9 +5,13 @@
+>  
+>  TOPDIR = ../..
+>  include $(TOPDIR)/include/builddefs
+> +include $(TOPDIR)/include/buildgrouplist
+>  
+>  F2FS_DIR = f2fs
+>  TARGET_DIR = $(PKG_LIB_DIR)/$(TESTS_DIR)/$(F2FS_DIR)
+> +DIRT = group.list
+> +
+> +default: $(DIRT)
+>  
+>  include $(BUILDRULES)
+>  
+> diff --git a/tests/generic/Makefile b/tests/generic/Makefile
+> index 3878d05c..95cd403c 100644
+> --- a/tests/generic/Makefile
+> +++ b/tests/generic/Makefile
+> @@ -4,9 +4,13 @@
+>  
+>  TOPDIR = ../..
+>  include $(TOPDIR)/include/builddefs
+> +include $(TOPDIR)/include/buildgrouplist
+>  
+>  GENERIC_DIR = generic
+>  TARGET_DIR = $(PKG_LIB_DIR)/$(TESTS_DIR)/$(GENERIC_DIR)
+> +DIRT = group.list
+> +
+> +default: $(DIRT)
+>  
+>  include $(BUILDRULES)
+>  
+> diff --git a/tests/nfs/Makefile b/tests/nfs/Makefile
+> index 754f2b25..e372b305 100644
+> --- a/tests/nfs/Makefile
+> +++ b/tests/nfs/Makefile
+> @@ -4,9 +4,13 @@
+>  
+>  TOPDIR = ../..
+>  include $(TOPDIR)/include/builddefs
+> +include $(TOPDIR)/include/buildgrouplist
+>  
+>  NFS_DIR = nfs
+>  TARGET_DIR = $(PKG_LIB_DIR)/$(TESTS_DIR)/$(NFS_DIR)
+> +DIRT = group.list
+> +
+> +default: $(DIRT)
+>  
+>  include $(BUILDRULES)
+>  
+> diff --git a/tests/ocfs2/Makefile b/tests/ocfs2/Makefile
+> index e1337908..d85c4fd3 100644
+> --- a/tests/ocfs2/Makefile
+> +++ b/tests/ocfs2/Makefile
+> @@ -4,9 +4,13 @@
+>  
+>  TOPDIR = ../..
+>  include $(TOPDIR)/include/builddefs
+> +include $(TOPDIR)/include/buildgrouplist
+>  
+>  OCFS2_DIR = ocfs2
+>  TARGET_DIR = $(PKG_LIB_DIR)/$(TESTS_DIR)/$(OCFS2_DIR)
+> +DIRT = group.list
+> +
+> +default: $(DIRT)
+>  
+>  include $(BUILDRULES)
+>  
+> diff --git a/tests/overlay/Makefile b/tests/overlay/Makefile
+> index b07f8925..b995a6ec 100644
+> --- a/tests/overlay/Makefile
+> +++ b/tests/overlay/Makefile
+> @@ -4,9 +4,13 @@
+>  
+>  TOPDIR = ../..
+>  include $(TOPDIR)/include/builddefs
+> +include $(TOPDIR)/include/buildgrouplist
+>  
+>  TEST_DIR = overlay
+>  TARGET_DIR = $(PKG_LIB_DIR)/$(TESTS_DIR)/$(TEST_DIR)
+> +DIRT = group.list
+> +
+> +default: $(DIRT)
+>  
+>  include $(BUILDRULES)
+>  
+> diff --git a/tests/perf/Makefile b/tests/perf/Makefile
+> index 620f1dbf..5d82cccc 100644
+> --- a/tests/perf/Makefile
+> +++ b/tests/perf/Makefile
+> @@ -4,9 +4,13 @@
+>  
+>  TOPDIR = ../..
+>  include $(TOPDIR)/include/builddefs
+> +include $(TOPDIR)/include/buildgrouplist
+>  
+>  PERF_DIR = perf
+>  TARGET_DIR = $(PKG_LIB_DIR)/$(TESTS_DIR)/$(PERF_DIR)
+> +DIRT = group.list
+> +
+> +default: $(DIRT)
+>  
+>  include $(BUILDRULES)
+>  
+> diff --git a/tests/shared/Makefile b/tests/shared/Makefile
+> index 8a832782..6c6533c8 100644
+> --- a/tests/shared/Makefile
+> +++ b/tests/shared/Makefile
+> @@ -4,9 +4,13 @@
+>  
+>  TOPDIR = ../..
+>  include $(TOPDIR)/include/builddefs
+> +include $(TOPDIR)/include/buildgrouplist
+>  
+>  SHARED_DIR = shared
+>  TARGET_DIR = $(PKG_LIB_DIR)/$(TESTS_DIR)/$(SHARED_DIR)
+> +DIRT = group.list
+> +
+> +default: $(DIRT)
+>  
+>  include $(BUILDRULES)
+>  
+> diff --git a/tests/udf/Makefile b/tests/udf/Makefile
+> index c9c9f1bd..bfaa1b0e 100644
+> --- a/tests/udf/Makefile
+> +++ b/tests/udf/Makefile
+> @@ -4,9 +4,13 @@
+>  
+>  TOPDIR = ../..
+>  include $(TOPDIR)/include/builddefs
+> +include $(TOPDIR)/include/buildgrouplist
+>  
+>  UDF_DIR = udf
+>  TARGET_DIR = $(PKG_LIB_DIR)/$(TESTS_DIR)/$(UDF_DIR)
+> +DIRT = group.list
+> +
+> +default: $(DIRT)
+>  
+>  include $(BUILDRULES)
+>  
+> diff --git a/tests/xfs/Makefile b/tests/xfs/Makefile
+> index d64800ea..c2f0ba48 100644
+> --- a/tests/xfs/Makefile
+> +++ b/tests/xfs/Makefile
+> @@ -4,9 +4,13 @@
+>  
+>  TOPDIR = ../..
+>  include $(TOPDIR)/include/builddefs
+> +include $(TOPDIR)/include/buildgrouplist
+>  
+>  XFS_DIR = xfs
+>  TARGET_DIR = $(PKG_LIB_DIR)/$(TESTS_DIR)/$(XFS_DIR)
+> +DIRT = group.list
+> +
+> +default: $(DIRT)
+>  
+>  include $(BUILDRULES)
+>  
+> diff --git a/tools/mkgroupfile b/tools/mkgroupfile
+> new file mode 100755
+> index 00000000..0681e5d2
+> --- /dev/null
+> +++ b/tools/mkgroupfile
+> @@ -0,0 +1,42 @@
+> +#!/bin/bash
+> +
+> +# Generate a group file from the _begin_fstest call in each test.
+> +
+> +if [ "$1" = "--help" ]; then
+> +	echo "Usage: (cd tests/XXX/ ; ../../tools/mkgroupfile [output])"
+> +	exit 1
+> +fi
+> +
+> +test_dir="$PWD"
+> +groupfile="$1"
+> +
+> +if [ ! -x ../../check ]; then
+> +	echo "$0: Run this from tests/XXX/."
+> +	exit 1
+> +fi
+> +
+> +generate_groupfile() {
+> +	cat << ENDL
+> +# QA groups control file, automatically generated.
+> +# See _begin_fstest in each test for details.
+> +
+> +ENDL
+> +	cd ../../
+> +	export GENERATE_GROUPS=yes
+> +	grep -R -l "^_begin_fstest" "$test_dir/" 2>/dev/null | while read testfile; do
+> +		test -x "$testfile" && "$testfile"
+> +	done | sort -g
+> +	cd "$test_dir"
+> +}
+> +
+> +if [ -z "$groupfile" ] || [ "$groupfile" = "-" ]; then
+> +	# Dump the group file to stdout and exit
+> +	generate_groupfile
+> +	exit 0
+> +fi
+> +
+> +# Otherwise, write the group file to disk somewhere.
+> +ngroupfile="${groupfile}.new"
+> +rm -f "$ngroupfile"
+> +generate_groupfile >> "$ngroupfile"
+> +mv "$ngroupfile" "$groupfile"
+
+
 -- 
-2.13.6
-
+chandan
