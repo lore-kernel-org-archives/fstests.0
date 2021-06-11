@@ -2,137 +2,122 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 95C13C48BE0
-	for <linux-fstests@archiver.kernel.org>; Fri, 11 Jun 2021 08:24:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 323B5C48BE0
+	for <linux-fstests@archiver.kernel.org>; Fri, 11 Jun 2021 11:16:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 77A4260FD8
-	for <linux-fstests@archiver.kernel.org>; Fri, 11 Jun 2021 08:24:07 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1397A608FE
+	for <linux-fstests@archiver.kernel.org>; Fri, 11 Jun 2021 11:16:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231180AbhFKI0E (ORCPT
+        id S231439AbhFKLR5 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 11 Jun 2021 04:26:04 -0400
-Received: from mail-pg1-f179.google.com ([209.85.215.179]:40837 "EHLO
-        mail-pg1-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231255AbhFKI0D (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 11 Jun 2021 04:26:03 -0400
-Received: by mail-pg1-f179.google.com with SMTP id j12so1852050pgh.7;
-        Fri, 11 Jun 2021 01:24:06 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=references:user-agent:from:to:cc:subject:in-reply-to:date
-         :message-id:mime-version;
-        bh=bvFa7bksGY3g2VLNVghVo/7jkW/QvNZiYzB25sFV/AU=;
-        b=kxYvQHaLa/2FfsDKS9v4A3/wJRaYpa969nXuGUHY7phSaKilp9OEM7Uyuqq1b1Si7J
-         d7t1I+SesP2S5QiimGRuFBm1jHSUF1JaMxuKfUkXLubHHAEmZ4aYHDP2+2Pi97OHH2B+
-         dQdfYL7B5dTqnY6GWyDbiV+Y81et/yVnwJik49ISU7POdcfzIm9Ivewx9OqKEXM/0L20
-         YhjiDT4vSt88FUCXVaG2dARfJ8/25cs85t6mWtrtv6UWxK4MoBTEThs4K3YZq8j7bpVW
-         jHePTVq7YC3kMMLLRsZKiccqtAkydl5YoyWEDX6M/fbaiGmP3fuR3IGurKE4e+zFnPAr
-         Xuig==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:references:user-agent:from:to:cc:subject
-         :in-reply-to:date:message-id:mime-version;
-        bh=bvFa7bksGY3g2VLNVghVo/7jkW/QvNZiYzB25sFV/AU=;
-        b=AioI/8ENA6BUHOvBfodfd4y+E4GXAo71clFCMwdEbAd8F3Q5ZtA0Q1UuZbUhhECm2/
-         RmQkFPMjzmCycy11d6sjrnbpmSww9lCNXOEcwZh5u5jFaA6puxrtKrNh1jNLO03oF1TT
-         bGbEfBuqDM1aZl2bPS5yHbXEuGA7epXBvkA/B+a6zlxV4b2TRqBdIpfMoeVPZNc4BcF+
-         MyDe6lQe2hxL71IlqhMrQMCNYaat5PusS8JmXFcz0m6TwWqOfygbVXsMJKbtBu27yFMD
-         qQ2+Q5wYCAwBv5HaJbgIh4m4uq1BA06mozPRYISH5Ccsgtlmg9/iPjZAID7Efp4DAAjF
-         e+Ig==
-X-Gm-Message-State: AOAM530yZsd+rLEeIplVwDpeWj92+sBGuENW4urgGQU5LVSzIyMRsn6r
-        2wpOaNAaRVaW4Mw3qObDfms=
-X-Google-Smtp-Source: ABdhPJy9T8hkbrdjQOokuFEJkKcHPjfzyCTc0FOw6UEt+/gCvQ7pwXhpHBvnvlyqv1Rz9X0z5j9gHw==
-X-Received: by 2002:a62:1942:0:b029:2e9:debd:d8b1 with SMTP id 63-20020a6219420000b02902e9debdd8b1mr7220294pfz.9.1623399786017;
-        Fri, 11 Jun 2021 01:23:06 -0700 (PDT)
-Received: from garuda ([171.61.74.194])
-        by smtp.gmail.com with ESMTPSA id d127sm4441839pfc.50.2021.06.11.01.23.03
-        (version=TLS1_2 cipher=ECDHE-ECDSA-CHACHA20-POLY1305 bits=256/256);
-        Fri, 11 Jun 2021 01:23:05 -0700 (PDT)
-References: <162317276202.653489.13006238543620278716.stgit@locust> <162317283324.653489.9381968524443830077.stgit@locust>
-User-agent: mu4e 1.0; emacs 26.1
-From:   Chandan Babu R <chandanrlinux@gmail.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org, guan@eryu.me, amir73il@gmail.com,
-        ebiggers@kernel.org
-Subject: Re: [PATCH 13/13] misc: update documentation to reflect auto-generated group files
-In-reply-to: <162317283324.653489.9381968524443830077.stgit@locust>
-Date:   Fri, 11 Jun 2021 13:53:02 +0530
-Message-ID: <87o8cc3j4p.fsf@garuda>
+        Fri, 11 Jun 2021 07:17:57 -0400
+Received: from szxga03-in.huawei.com ([45.249.212.189]:5391 "EHLO
+        szxga03-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231356AbhFKLR4 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 11 Jun 2021 07:17:56 -0400
+Received: from dggemv711-chm.china.huawei.com (unknown [172.30.72.56])
+        by szxga03-in.huawei.com (SkyGuard) with ESMTP id 4G1dTZ67ttz6w8l;
+        Fri, 11 Jun 2021 19:12:02 +0800 (CST)
+Received: from dggema759-chm.china.huawei.com (10.1.198.201) by
+ dggemv711-chm.china.huawei.com (10.1.198.66) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256) id
+ 15.1.2176.2; Fri, 11 Jun 2021 19:15:56 +0800
+Received: from huawei.com (10.175.101.6) by dggema759-chm.china.huawei.com
+ (10.1.198.201) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2176.2; Fri, 11
+ Jun 2021 19:15:55 +0800
+From:   Sun Ke <sunke32@huawei.com>
+To:     <fstests@vger.kernel.org>, <guan@eryu.me>, <yuchao0@huawei.com>
+CC:     <sunke32@huawei.com>
+Subject: [PATCH] common/rc: f2fs do not support metadata journaling
+Date:   Fri, 11 Jun 2021 19:22:09 +0800
+Message-ID: <20210611112211.1408767-1-sunke32@huawei.com>
+X-Mailer: git-send-email 2.25.4
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-Originating-IP: [10.175.101.6]
+X-ClientProxiedBy: dggems701-chm.china.huawei.com (10.3.19.178) To
+ dggema759-chm.china.huawei.com (10.1.198.201)
+X-CFilter-Loop: Reflected
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 08 Jun 2021 at 22:50, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
->
-> Update the documentation to outline the new requirements for test files
-> so that we can generate group files during build.
->
+In generic/50, touch 100 files, go down the fs immediately, Then umount
+and set the disk readi-only. Try to mount it again without \-o
+norecovery\, it should fail, because it can not recovery on a read-only
+device. But f2fs mount successfully and the test fail.
 
-Looks good.
+f2fs seems do not support metadata journaling.
 
-Reviewed-by: Chandan Babu R <chandanrlinux@gmail.com>
+Signed-off-by: Sun Ke <sunke32@huawei.com>
+---
 
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> ---
->  README |   19 ++++++++++++++++---
->  1 file changed, 16 insertions(+), 3 deletions(-)
->
->
-> diff --git a/README b/README
-> index 048491a6..ab298ca9 100644
-> --- a/README
-> +++ b/README
-> @@ -140,7 +140,8 @@ Running tests:
->      - ./check '*/001' '*/002' '*/003'
->      - ./check '*/06?'
->      - Groups of tests maybe ran by: ./check -g [group(s)]
-> -      See the 'group' file for details on groups
-> +      See the tests/*/group.list files after building xfstests to learn about
-> +      each test's group memberships.
->      - If you want to run all tests regardless of what group they are in
->        (including dangerous tests), use the "all" group: ./check -g all
->      - To randomize test order: ./check -r [test(s)]
-> @@ -174,8 +175,8 @@ Test script environment:
->  
->      When developing a new test script keep the following things in
->      mind.  All of the environment variables and shell procedures are
-> -    available to the script once the "common/rc" file has been
-> -    sourced.
-> +    available to the script once the "common/preamble" file has been
-> +    sourced and the "_begin_fstest" function has been called.
->  
->       1. The tests are run from an arbitrary directory.  If you want to
->  	do operations on an XFS filesystem (good idea, eh?), then do
-> @@ -249,6 +250,18 @@ Test script environment:
->  	  in the ./new script. It can contain only alphanumeric characters
->  	  and dash. Note the "NNN-" part is added automatically.
->  
-> +     6. Test group membership: Each test can be associated with any number
-> +	of groups for convenient selection of subsets of tests.  Test names
-> +	can be any sequence of non-whitespace characters.  Test authors
-> +	associate a test with groups by passing the names of those groups as
-> +	arguments to the _begin_fstest function:
-> +
-> +	_begin_fstest auto quick subvol snapshot
-> +
-> +	The build process scans test files for _begin_fstest invocations and
-> +	compiles the group list from that information.  In other words, test
-> +	files must call _begin_fstest or they will not be run.
-> +
->  Verified output:
->  
->      Each test script has a name, e.g. 007, and an associated
+I am not very sure if f2fs do not support metadata journaling.
+
+###
+before change
+###
+[root@localhost xfstests-dev]# ./check tests/generic/050
+FSTYP         -- f2fs
+PLATFORM      -- Linux/x86_64 localhost 5.12.0-rc5-next-20210330 #8 SMP Tue Jun 8 11:09:37 CST 2021
+MKFS_OPTIONS  -- /dev/sdb
+MOUNT_OPTIONS -- -o acl,user_xattr /dev/sdb /tmp/scratch
+
+generic/050 4s ... - output mismatch (see /root/work/xfstests-dev/results//generic/050.out.bad)
+    --- tests/generic/050.out   2021-05-31 15:37:40.000000000 +0800
+    +++ /root/work/xfstests-dev/results//generic/050.out.bad    2021-06-11 16:48:19.993000000 +0800
+    @@ -13,9 +13,7 @@
+     setting device read-only
+     mounting filesystem that needs recovery on a read-only device:
+     mount: device write-protected, mounting read-only
+    -mount: cannot mount device read-only
+     unmounting read-only filesystem
+    -umount: SCRATCH_DEV: not mounted
+     mounting filesystem with -o norecovery on a read-only device:
+    ...
+    (Run 'diff -u /root/work/xfstests-dev/tests/generic/050.out /root/work/xfstests-dev/results//generic/050.out.bad'  to see the entire diff)
+Ran: generic/050
+Failures: generic/050
+Failed 1 of 1 tests
+
+###
+after change
+###
+[root@localhost xfstests-dev]# ./check tests/generic/050
+FSTYP         -- f2fs
+PLATFORM      -- Linux/x86_64 localhost 5.12.0-rc5-next-20210330 #8 SMP Tue Jun 8 11:09:37 CST 2021
+MKFS_OPTIONS  -- /dev/sdb
+MOUNT_OPTIONS -- -o acl,user_xattr /dev/sdb /tmp/scratch
+
+generic/050 4s ...  4s
+Ran: generic/050
+Passed all 1 tests
 
 
+
+ common/rc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/common/rc b/common/rc
+index a0aa7300..428b8b80 100644
+--- a/common/rc
++++ b/common/rc
+@@ -3543,7 +3543,7 @@ _has_metadata_journaling()
+ 	fi
+ 
+ 	case "$FSTYP" in
+-	ext2|vfat|msdos|udf|exfat|tmpfs)
++	ext2|vfat|msdos|udf|exfat|tmpfs|f2fs)
+ 		echo "$FSTYP does not support metadata journaling"
+ 		return 1
+ 		;;
 -- 
-chandan
+2.13.6
+
