@@ -2,139 +2,144 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-19.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7B4F1C48BE6
-	for <linux-fstests@archiver.kernel.org>; Sat, 12 Jun 2021 00:40:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A24EAC48BCF
+	for <linux-fstests@archiver.kernel.org>; Sat, 12 Jun 2021 12:31:58 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 53F2C613CC
-	for <linux-fstests@archiver.kernel.org>; Sat, 12 Jun 2021 00:40:42 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 738DB61156
+	for <linux-fstests@archiver.kernel.org>; Sat, 12 Jun 2021 12:31:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230302AbhFLAmj (ORCPT
+        id S230470AbhFLMd4 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 11 Jun 2021 20:42:39 -0400
-Received: from mail.kernel.org ([198.145.29.99]:45364 "EHLO mail.kernel.org"
+        Sat, 12 Jun 2021 08:33:56 -0400
+Received: from mail.kernel.org ([198.145.29.99]:38012 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229584AbhFLAmj (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 11 Jun 2021 20:42:39 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 06BC961278;
-        Sat, 12 Jun 2021 00:40:40 +0000 (UTC)
+        id S230191AbhFLMdz (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sat, 12 Jun 2021 08:33:55 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 99D3361002;
+        Sat, 12 Jun 2021 12:31:55 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1623458441;
-        bh=9YTsBtyGsfzYK4VN0k8gh+KOqJdjBe+2khFwySXlnAY=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=UlpN9OFHU23x7pjulq+tgArOsSDsvJ2qsISPG2KOImmzxd8ejyJmApei3Bq8ikDpE
-         SPWJ1Yo3x9pLrCx8c60gw7tVrkFF92htquLvbvu2ViBVFK5ba7zNmitYat9fSfXX88
-         rS/3Py8wUgnMiF05SlPYsU4776JC4UOSgnrH+WChFJQ1+j9acuJl9lRzmtXdejE9zg
-         vhuijX8gqmrdsVYDEy88KC1CtSb4CTQyFzfKV1AvSeNm1rvU8u6ksAWwWA8sUfLCPy
-         c8w0CweOoehJ3E60cBE0TczJIr2PuyypB7XTK9JqMYQwX4vcF9mLFuxtMddVbRDc7a
-         eznthj/ZwksKw==
-Date:   Fri, 11 Jun 2021 17:40:40 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Eric Biggers <ebiggers@kernel.org>
-Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org, guan@eryu.me, amir73il@gmail.com
-Subject: Re: [PATCH 08/13] fstests: convert nextid to use automatic group
- generation
-Message-ID: <20210612004040.GI2945738@locust>
-References: <162317276202.653489.13006238543620278716.stgit@locust>
- <162317280590.653489.10114638028601363399.stgit@locust>
- <YMP103PrnZC2QaE3@gmail.com>
+        s=k20201202; t=1623501116;
+        bh=wz5v0ImnA0pHYk6PkAn79QziXlAAml0OVK/ns66FljA=;
+        h=From:To:Cc:Subject:Date:From;
+        b=VFmyJlWV2oILgx46ou5ipjbdRO2sNPSzNHOn0+N4YxCnxMFrWdQZOzVMCRGCl3yvV
+         fPaHB157b8tljj2awf9nMX1ZFJmWNd8/pLu/iLzPvUg6jIxLSJ/4SLVRDDLI3fmwSl
+         xVYl0TblkO7T25+TOHN5AlsUFVqaSD56unaEr386yzJJWuymsAhp0saExVBPH/27+U
+         fNV0O+iKzxN1VXXIkadsxvQONNK8YPCz80JT4FCBJZcrDrODnuHmhmhaGwnsiz9/lE
+         MnSDyYVlSYnzLJaR+RWjyTDguhQPf+MrLsMDg+3dwc06TsryEu5c/teqJgYO4IcE3u
+         J0isYIH7YT+Jw==
+From:   Jeff Layton <jlayton@kernel.org>
+To:     Eryu Guan <guaneryu@gmail.com>
+Cc:     fstests@vger.kernel.org, aweits@rit.edu, dhowells@redhat.com,
+        willy@infradead.org
+Subject: [PATCH] generic: add a test to ensure that page is properly filled before write
+Date:   Sat, 12 Jun 2021 08:31:54 -0400
+Message-Id: <20210612123154.8098-1-jlayton@kernel.org>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <YMP103PrnZC2QaE3@gmail.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Jun 11, 2021 at 04:46:27PM -0700, Eric Biggers wrote:
-> On Tue, Jun 08, 2021 at 10:20:05AM -0700, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <djwong@kernel.org>
-> > 
-> > Convert the nextid script to use the automatic group file generation to
-> > figure out the next available test id.
-> > 
-> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > ---
-> >  tools/nextid |    1 -
-> >  tools/nextid |   39 +++++++++++++++++++++++++++++++++++++++
-> >  2 files changed, 39 insertions(+), 1 deletion(-)
-> >  delete mode 120000 tools/nextid
-> >  create mode 100755 tools/nextid
-> > 
-> > 
-> > diff --git a/tools/nextid b/tools/nextid
-> > deleted file mode 120000
-> > index 5c31d602..00000000
-> > --- a/tools/nextid
-> > +++ /dev/null
-> > @@ -1 +0,0 @@
-> > -sort-group
-> > \ No newline at end of file
-> > diff --git a/tools/nextid b/tools/nextid
-> > new file mode 100755
-> > index 00000000..a65348e8
-> > --- /dev/null
-> > +++ b/tools/nextid
-> > @@ -0,0 +1,39 @@
-> > +#!/bin/bash
-> > +
-> > +# Compute the next available test id in a given test directory.
-> > +
-> > +if [ -z "$1" ] || [ "$1" = "--help" ] || [ -n "$2" ] || [ ! -d "tests/$1/" ]; then
-> > +	echo "Usage: $0 test_dir"
-> > +	exit 1
-> > +fi
-> 
-> [ $# != 1 ] would be simpler than [ -z "$1" ] || [ -n "$2" ].
-> 
-> > +line=0
-> 
-> The 'line' variable isn't needed.
+We had a broken optimization in cephfs and netfs lib that could cause
+part of a page to be improperly zeroed-out when writing to an offset
+that was beyond the EOF but in an existing page.
 
-Both fixed.
+Add a simple test that would have caught this.
 
-> 
-> > +i=0
-> > +eof=1
-> > +
-> > +while read found other_junk;
-> > +do
-> > +	line=$((line+1))
-> > +	if [ -z "$found" ] || [ "$found" == "#" ]; then
-> > +		continue
-> > +	elif ! echo "$found" | grep -q "^$VALID_TEST_NAME$"; then
-> > +		# this one is for tests not named by a number
-> > +		continue
-> > +	fi
-> > +	i=$((i+1))
-> > +	id=`printf "%03d" $i`
-> > +	if [ "$id" != "$found" ]; then
-> > +		eof=0
-> > +		break
-> > +	fi
-> > +done < <(cd "tests/$1/" ; ../../tools/mkgroupfile | tr - ' ')
-> 
-> The first token matching $VALID_TEST_NAME already implies that it is non-empty
-> and not "#".  Also, this could be handled by piping to grep:
-> 
-> while read found other_junk; do
-> 	i=$((i+1))
-> 	id=`printf "%03d" $i`
-> 	if [ "$id" != "$found" ]; then
-> 		eof=0
-> 		break
-> 	fi
-> done < <(cd "tests/$1/" ; ../../tools/mkgroupfile | \
->          grep "^$VALID_TEST_NAME\>" | tr - ' ')
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
+---
+ tests/generic/XXX     | 53 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/XXX.out |  5 ++++
+ tests/generic/group   |  1 +
+ 3 files changed, 59 insertions(+)
+ create mode 100755 tests/generic/XXX
+ create mode 100644 tests/generic/XXX.out
 
-I'm glad your regexfu is higher than mine.  Thanks for the suggestions!
+diff --git a/tests/generic/XXX b/tests/generic/XXX
+new file mode 100755
+index 000000000000..0ddaaa544609
+--- /dev/null
++++ b/tests/generic/XXX
+@@ -0,0 +1,53 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2021, Jeff Layton <jlayton@redhat.com>
++#
++# FS QA Test No. XXX
++#
++# Open a file and write a little data to it. Unmount (to clean out the cache)
++# and then mount again. Then write some data to it beyond the EOF and ensure
++# the result is correct. Prompted by a bug in ceph_write_begin. See:
++#
++# https://lore.kernel.org/ceph-devel/97002.1623448034@warthog.procyon.org.uk/T/#m9f34b328623b493c529505e12f64f4dfdbddfb27
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++
++_cleanup()
++{
++	cd /
++	rm -f $testfile
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++_supported_fs generic
++_require_test
++
++rm -f $seqres.full
++
++testfile="$TEST_DIR/test_write_begin.$$"
++
++# write some data to file and fsync it out
++$XFS_IO_PROG -f -c "pwrite -q 0 32" $testfile
++
++# cycle the mount to clean out the pagecache
++_test_cycle_mount
++
++# now, write to the file (near the end)
++$XFS_IO_PROG -c "pwrite -q 32 32" $testfile
++
++# dump what we think is in there
++echo "The result should be 64 bytes filled with 0xcd:"
++hexdump -C $testfile
++
++status=0
++exit
+diff --git a/tests/generic/XXX.out b/tests/generic/XXX.out
+new file mode 100644
+index 000000000000..4e7653858e51
+--- /dev/null
++++ b/tests/generic/XXX.out
+@@ -0,0 +1,5 @@
++QA output created by XXX
++The result should be 64 bytes filled with 0xcd:
++00000000  cd cd cd cd cd cd cd cd  cd cd cd cd cd cd cd cd  |................|
++*
++00000040
+diff --git a/tests/generic/group b/tests/generic/group
+index 9a636b23f243..204a9b548f78 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -641,3 +641,4 @@
+ 636 auto quick swap
+ 637 auto quick dir
+ 638 auto quick rw
++XXX auto quick rw
+-- 
+2.31.1
 
---D
-
-> 
-> - Eric
