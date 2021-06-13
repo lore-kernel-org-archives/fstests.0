@@ -7,336 +7,140 @@ X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 11896C48BCF
-	for <linux-fstests@archiver.kernel.org>; Sun, 13 Jun 2021 15:35:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0690BC48BCF
+	for <linux-fstests@archiver.kernel.org>; Sun, 13 Jun 2021 15:40:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D1D9F61285
-	for <linux-fstests@archiver.kernel.org>; Sun, 13 Jun 2021 15:35:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BC11861245
+	for <linux-fstests@archiver.kernel.org>; Sun, 13 Jun 2021 15:40:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231844AbhFMPhD (ORCPT
+        id S231951AbhFMPmw (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 13 Jun 2021 11:37:03 -0400
-Received: from out20-38.mail.aliyun.com ([115.124.20.38]:49575 "EHLO
-        out20-38.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231799AbhFMPhD (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 13 Jun 2021 11:37:03 -0400
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07436283|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.090368-0.00479337-0.904839;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047201;MF=guan@eryu.me;NM=1;PH=DS;RN=3;RT=3;SR=0;TI=SMTPD_---.KRnKxgq_1623598497;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.KRnKxgq_1623598497)
-          by smtp.aliyun-inc.com(10.147.40.233);
-          Sun, 13 Jun 2021 23:34:58 +0800
-Date:   Sun, 13 Jun 2021 23:34:57 +0800
+        Sun, 13 Jun 2021 11:42:52 -0400
+Received: from out20-15.mail.aliyun.com ([115.124.20.15]:37518 "EHLO
+        out20-15.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231782AbhFMPmv (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 13 Jun 2021 11:42:51 -0400
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.0946574|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.741023-0.000891746-0.258085;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047213;MF=guan@eryu.me;NM=1;PH=DS;RN=6;RT=6;SR=0;TI=SMTPD_---.KRnd8Pf_1623598847;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.KRnd8Pf_1623598847)
+          by smtp.aliyun-inc.com(10.147.40.7);
+          Sun, 13 Jun 2021 23:40:47 +0800
+Date:   Sun, 13 Jun 2021 23:40:46 +0800
 From:   Eryu Guan <guan@eryu.me>
-To:     Leah Rumancik <leah.rumancik@gmail.com>
-Cc:     fstests@vger.kernel.org, guaneryu@gmail.com
-Subject: Re: [PATCH v3] ext4/309: test journal checkpoint ioctl
-Message-ID: <YMYloXULsvZmIL9W@desktop>
-References: <20210607215509.3432807-1-leah.rumancik@gmail.com>
+To:     Amir Goldstein <amir73il@gmail.com>
+Cc:     Eryu Guan <guaneryu@gmail.com>, Miklos Szeredi <miklos@szeredi.hu>,
+        Chao Yu <yuchao0@huawei.com>,
+        overlayfs <linux-unionfs@vger.kernel.org>,
+        fstests <fstests@vger.kernel.org>
+Subject: Re: [PATCH] generic/507: support more filesystems
+Message-ID: <YMYm/tEuFr7LE8Kh@desktop>
+References: <20210611131029.679307-1-amir73il@gmail.com>
+ <CAOQ4uxgdZqBv6ju+6HLXSPh1N5X+pzBXTB+0uhZw2dFhTs1ESA@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210607215509.3432807-1-leah.rumancik@gmail.com>
+In-Reply-To: <CAOQ4uxgdZqBv6ju+6HLXSPh1N5X+pzBXTB+0uhZw2dFhTs1ESA@mail.gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Jun 07, 2021 at 09:55:09PM +0000, Leah Rumancik wrote:
-> Test for commit "ext4: add ioctl EXT4_IOC_CHECKPOINT". Tests journal
-> checkpointing and journal erasing via EXT4_IOC_CHECKPOINT with flag
-> EXT4_IOC_CHECKPOINT_FLAG_ZEROOUT set.
+On Sun, Jun 13, 2021 at 09:34:11AM +0300, Amir Goldstein wrote:
+> On Fri, Jun 11, 2021 at 4:10 PM Amir Goldstein <amir73il@gmail.com> wrote:
+> >
+> > The commit message introducing the test says:
+> > "We only check below attribute modification which most filesystem
+> >  supports:
+> >     - no atime updates (A)
+> >     - secure deletion (s)
+> >     - synchronous updates (S)
+> >     - undeletable (u)
+> > "
+> > But in fact, very few filesystems support the (s) and (u) flags.
+> > xfs and btrfs do not support them for example.
+> >
+> > The test doesn't need to check those specific flags, so replace those
+> > flags with immutable (i) and append-only (a), which most filesystems
+> > really do support.
+> >
+> > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> > ---
+> >
+> > Eryu,
+> >
+> > This would be a good test to cover the recent fileattr vfs changes
+> > by Miklos that changed the implementation of SETFLAGS ioctl in all the
+> > filesystem, only the test does not run on most of the filesystems...
+> >
+> > Thanks,
+> > Amir.
+> >
+> >  tests/generic/507 | 11 ++++++-----
+> >  1 file changed, 6 insertions(+), 5 deletions(-)
+> >
+> > diff --git a/tests/generic/507 b/tests/generic/507
+> > index b654883a..cc61b3cb 100755
+> > --- a/tests/generic/507
+> > +++ b/tests/generic/507
+> > @@ -9,7 +9,7 @@
+> >  # i_flags can be recovered after sudden power-cuts.
+> >  # 1. touch testfile;
+> >  # 1.1 sync (optional)
+> > -# 2. chattr +[AsSu] testfile
+> > +# 2. chattr +[ASai] testfile
 > 
-> Signed-off-by: Leah Rumancik <leah.rumancik@gmail.com>
-> 
-> Changes in v3:
-> - added SPDX header to new file src/checkpoint_journal.c
-> - updated test number to next available consecutive number (309)
-> - removed check for #defined(__linux__)
+> I missed the same fix that's needed in line 8. below...
 
-The changelog should be under the '---' line, so they're not part of the
-commit log. I removed them on commit.
+Fixed on commit, thanks for the heads-up!
 
-> ---
->  .gitignore               |   1 +
->  src/Makefile             |   2 +-
->  src/checkpoint_journal.c |  97 +++++++++++++++++++++++++++++++++
->  tests/ext4/309           | 115 +++++++++++++++++++++++++++++++++++++++
->  tests/ext4/309.out       |   2 +
->  tests/ext4/group         |   1 +
->  6 files changed, 217 insertions(+), 1 deletion(-)
->  create mode 100644 src/checkpoint_journal.c
->  create mode 100755 tests/ext4/309
->  create mode 100644 tests/ext4/309.out
-> 
-> diff --git a/.gitignore b/.gitignore
-> index c62c1556..4e0220eb 100644
-> --- a/.gitignore
-> +++ b/.gitignore
-> @@ -186,6 +186,7 @@ tags
->  /src/idmapped-mounts/mount-idmapped
->  /src/log-writes/replay-log
->  /src/perf/*.pyc
-> +/src/checkpoint_journal
-
-I re-ordered this entry by alphabetical order on commit.
-
-Thanks,
 Eryu
 
->  
->  # Symlinked files
->  /tests/generic/035.out
-> diff --git a/src/Makefile b/src/Makefile
-> index 1279e4b9..5c76aa93 100644
-> --- a/src/Makefile
-> +++ b/src/Makefile
-> @@ -18,7 +18,7 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
->  	t_ext4_dax_journal_corruption t_ext4_dax_inline_corruption \
->  	t_ofd_locks t_mmap_collision mmap-write-concurrent \
->  	t_get_file_time t_create_short_dirs t_create_long_dirs t_enospc \
-> -	t_mmap_writev_overlap
-> +	t_mmap_writev_overlap checkpoint_journal
->  
->  LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
->  	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
-> diff --git a/src/checkpoint_journal.c b/src/checkpoint_journal.c
-> new file mode 100644
-> index 00000000..a4a6b695
-> --- /dev/null
-> +++ b/src/checkpoint_journal.c
-> @@ -0,0 +1,97 @@
-> +// SPDX-License-Identifier: GPL-2.0
-> +/*
-> + * Copyright (c) 2021 Google
-> + * All Rights Reserved.
-> + *
-> + * checkpoint_journal.c
-> + *
-> + * Flush journal log and checkpoint journal for ext4 file system and
-> + * optionally, issue discard or zeroout for the journal log blocks.
-> + *
-> + * Arguments:
-> + * 1) mount point for device
-> + * 2) flags (optional)
-> + *	set --erase=discard to enable discarding journal blocks
-> + *	set --erase=zeroout to enable zero-filling journal blocks
-> + *	set --dry-run flag to only perform input checking
-> + */
-> +
-> +#include <sys/ioctl.h>
-> +#include <fcntl.h>
-> +#include <stdlib.h>
-> +#include <stdio.h>
-> +#include <unistd.h>
-> +#include <errno.h>
-> +#include <string.h>
-> +#include <linux/fs.h>
-> +#include <getopt.h>
-> +
-> +#if !defined(EXT4_IOC_CHECKPOINT)
-> +#define EXT4_IOC_CHECKPOINT	_IOW('f', 43, __u32)
-> +#endif
-> +
-> +#if !defined(EXT4_IOC_CHECKPOINT_FLAG_DISCARD)
-> +#define EXT4_IOC_CHECKPOINT_FLAG_DISCARD		1
-> +#define EXT4_IOC_CHECKPOINT_FLAG_ZEROOUT		2
-> +#define EXT4_IOC_CHECKPOINT_FLAG_DRY_RUN		4
-> +#endif
-> +
-> +int main(int argc, char** argv) {
-> +	int fd, c, ret = 0, option_index = 0;
-> +	char* rpath;
-> +	unsigned int flags = 0;
-> +
-> +	static struct option long_options[] =
-> +	{
-> +		{"dry-run", no_argument, 0, 'd'},
-> +		{"erase", required_argument, 0, 'e'},
-> +		{0, 0, 0, 0}
-> +	};
-> +
-> +	/* get optional flags */
-> +	while ((c = getopt_long(argc, argv, "de:", long_options,
-> +				&option_index)) != -1) {
-> +		switch (c) {
-> +		case 'd':
-> +			flags |= EXT4_IOC_CHECKPOINT_FLAG_DRY_RUN;
-> +			break;
-> +		case 'e':
-> +			if (strcmp(optarg, "discard") == 0) {
-> +				flags |= EXT4_IOC_CHECKPOINT_FLAG_DISCARD;
-> +			} else if (strcmp(optarg, "zeroout") == 0) {
-> +				flags |= EXT4_IOC_CHECKPOINT_FLAG_ZEROOUT;
-> +			} else {
-> +				fprintf(stderr, "Error: invalid erase option\n");
-> +				return 1;
-> +			}
-> +			break;
-> +		default:
-> +			return 1;
-> +		}
-> +	}
-> +
-> +	if (optind != argc - 1) {
-> +		fprintf(stderr, "Error: invalid number of arguments\n");
-> +		return 1;
-> +	}
-> +
-> +	/* get fd to file system */
-> +	rpath = realpath(argv[optind], NULL);
-> +	fd = open(rpath, O_RDONLY);
-> +	free(rpath);
-> +
-> +	if (fd == -1) {
-> +		fprintf(stderr, "Error: unable to open device %s: %s\n",
-> +			argv[optind], strerror(errno));
-> +		return 1;
-> +	}
-> +
-> +	ret = ioctl(fd, EXT4_IOC_CHECKPOINT, &flags);
-> +
-> +	if (ret)
-> +		fprintf(stderr, "checkpoint ioctl returned error: %s\n", strerror(errno));
-> +
-> +	close(fd);
-> +	return ret;
-> +}
-> +
-> diff --git a/tests/ext4/309 b/tests/ext4/309
-> new file mode 100755
-> index 00000000..4b4a5861
-> --- /dev/null
-> +++ b/tests/ext4/309
-> @@ -0,0 +1,115 @@
-> +#!/bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2021 Google, Inc. All Rights Reserved.
-> +#
-> +# FS QA Test No. 309
-> +#
-> +# Test checkpoint and zeroout of journal via ioctl EXT4_IOC_CHECKPOINT
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +status=1       # failure is the default!
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +_supported_fs ext4
-> +
-> +_require_scratch
-> +_require_command "$DEBUGFS_PROG" debugfs
-> +
-> +checkpoint_journal=$here/src/checkpoint_journal
-> +_require_test_program "checkpoint_journal"
-> +
-> +# convert output from stat<journal_inode> to list of block numbers
-> +get_journal_extents() {
-> +	inode_info=$($DEBUGFS_PROG $SCRATCH_DEV -R "stat <8>" 2>> $seqres.full)
-> +	echo -e "\nJournal info:" >> $seqres.full
-> +	echo "$inode_info" >> $seqres.full
-> +
-> +	extents_line=$(echo "$inode_info" | awk '/EXTENTS:/{ print NR; exit }')
-> +	get_extents=$(echo "$inode_info" | sed -n "$(($extents_line + 1))"p)
-> +
-> +	# get just the physical block numbers
-> +	get_extents=$(echo "$get_extents" |  perl -pe 's|\(.*?\):||g' | sed -e 's/, /\n/g' | perl -pe 's|(\d+)-(\d+)|\1 \2|g')
-> +
-> +	echo "$get_extents"
-> +}
-> +
-> +
-> +# checks all extents are zero'd out except for the superblock
-> +# arg 1: extents (output of get_journal_extents())
-> +check_extents() {
-> +	echo -e "\nChecking extents:" >> $seqres.full
-> +	echo "$1" >> $seqres.full
-> +
-> +	super_block="true"
-> +	echo "$1" | while IFS= read line; do
-> +		start_block=$(echo $line | cut -f1 -d' ')
-> +		end_block=$(echo $line | cut -f2 -d' ' -s)
-> +
-> +		# if first block of journal, shouldn't be wiped
-> +		if [ "$super_block" == "true" ]; then
-> +			super_block="false"
-> +
-> +			#if super block only block in this extent, skip extent
-> +			if [ -z "$end_block" ]; then
-> +				continue;
-> +			fi
-> +			start_block=$(($start_block + 1))
-> +		fi
-> +
-> +		if [ ! -z "$end_block" ]; then
-> +			blocks=$(($end_block - $start_block + 1))
-> +		else
-> +			blocks=1
-> +		fi
-> +
-> +		check=$(od $SCRATCH_DEV --skip-bytes=$(($start_block * $blocksize)) --read-bytes=$(($blocks * $blocksize)) -An -v | sed -e 's/[0 \t\n\r]//g')
-> +
-> +		[ ! -z "$check" ] && echo "error" && break
-> +	done
-> +}
-> +
-> +testdir="${SCRATCH_MNT}/testdir"
-> +
-> +_scratch_mkfs_sized $((64 * 1024 * 1024)) >> $seqres.full 2>&1
-> +_require_metadata_journaling $SCRATCH_DEV
-> +_scratch_mount >> $seqres.full 2>&1
-> +blocksize=$(_get_block_size $SCRATCH_MNT)
-> +mkdir $testdir
-> +
-> +# check if ioctl present, skip test if not present
-> +$checkpoint_journal $SCRATCH_MNT --dry-run || _notrun "journal checkpoint ioctl not present on device"
-> +
-> +# create some files to add some entries to journal
-> +for i in {1..100}; do
-> +	echo > $testdir/$i
-> +done
-> +
-> +# make sure these files get to the journal
-> +sync --file-system $testdir/1
-> +
-> +# call ioctl to checkpoint and zero-fill journal blocks
-> +$checkpoint_journal $SCRATCH_MNT --erase=zeroout || _fail "ioctl returned error"
-> +
-> +extents=$(get_journal_extents)
-> +
-> +# check journal blocks zeroed out
-> +ret=$(check_extents "$extents")
-> +[ "$ret" = "error" ] && _fail "Journal was not zero-filled"
-> +
-> +_scratch_unmount >> $seqres.full 2>&1
-> +
-> +echo "Silence is golden"
-> +
-> +status=0
-> +exit
-> diff --git a/tests/ext4/309.out b/tests/ext4/309.out
-> new file mode 100644
-> index 00000000..56330d65
-> --- /dev/null
-> +++ b/tests/ext4/309.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 309
-> +Silence is golden
-> diff --git a/tests/ext4/group b/tests/ext4/group
-> index c246feb8..a7f70224 100644
-> --- a/tests/ext4/group
-> +++ b/tests/ext4/group
-> @@ -61,3 +61,4 @@
->  306 auto rw resize quick
->  307 auto ioctl rw defrag
->  308 auto ioctl rw prealloc quick defrag
-> +309 auto ioctl quick
-> -- 
-> 2.32.0.rc1.229.g3e70b5a671-goog
+> 
+> >  # 3. xfs_io -f testfile -c "fsync";
+> >  # 4. godown;
+> >  # 5. umount;
+> > @@ -34,6 +34,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+> >  _cleanup()
+> >  {
+> >         cd /
+> > +       $CHATTR_PROG -ai $testfile &> /dev/null
+> >         rm -f $tmp.*
+> >  }
+> >
+> > @@ -49,7 +50,7 @@ _supported_fs generic
+> >
+> >  _require_command "$LSATTR_PROG" lasttr
+> >  _require_command "$CHATTR_PROG" chattr
+> > -_require_chattr AsSu
+> > +_require_chattr ASai
+> >
+> >  _require_scratch
+> >  _require_scratch_shutdown
+> > @@ -79,7 +80,7 @@ do_check()
+> >
+> >         before=`$LSATTR_PROG $testfile`
+> >
+> > -       $XFS_IO_PROG -f $testfile -c "fsync" | _filter_xfs_io
+> > +       $XFS_IO_PROG -r -f $testfile -c "fsync" | _filter_xfs_io
+> >
+> >         _scratch_shutdown | tee -a $seqres.full
+> >         _scratch_cycle_mount
+> > @@ -101,7 +102,7 @@ do_check()
+> >
+> >         before=`$LSATTR_PROG $testfile`
+> >
+> > -       $XFS_IO_PROG -f $testfile -c "fsync" | _filter_xfs_io
+> > +       $XFS_IO_PROG -r -f $testfile -c "fsync" | _filter_xfs_io
+> >
+> >         _scratch_shutdown | tee -a $seqres.full
+> >         _scratch_cycle_mount
+> > @@ -122,7 +123,7 @@ do_check()
+> >
+> >  echo "Silence is golden"
+> >
+> > -opts="A s S u"
+> > +opts="A S a i"
+> >  for i in $opts; do
+> >         do_check $i
+> >         do_check $i sync
+> > --
+> > 2.31.1
+> >
