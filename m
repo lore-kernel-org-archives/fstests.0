@@ -2,144 +2,162 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-19.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A24EAC48BCF
-	for <linux-fstests@archiver.kernel.org>; Sat, 12 Jun 2021 12:31:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BBA51C48BDF
+	for <linux-fstests@archiver.kernel.org>; Sun, 13 Jun 2021 06:35:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 738DB61156
-	for <linux-fstests@archiver.kernel.org>; Sat, 12 Jun 2021 12:31:58 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 909AD61078
+	for <linux-fstests@archiver.kernel.org>; Sun, 13 Jun 2021 06:35:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230470AbhFLMd4 (ORCPT
+        id S230084AbhFMGhY (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 12 Jun 2021 08:33:56 -0400
-Received: from mail.kernel.org ([198.145.29.99]:38012 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S230191AbhFLMdz (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sat, 12 Jun 2021 08:33:55 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 99D3361002;
-        Sat, 12 Jun 2021 12:31:55 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1623501116;
-        bh=wz5v0ImnA0pHYk6PkAn79QziXlAAml0OVK/ns66FljA=;
-        h=From:To:Cc:Subject:Date:From;
-        b=VFmyJlWV2oILgx46ou5ipjbdRO2sNPSzNHOn0+N4YxCnxMFrWdQZOzVMCRGCl3yvV
-         fPaHB157b8tljj2awf9nMX1ZFJmWNd8/pLu/iLzPvUg6jIxLSJ/4SLVRDDLI3fmwSl
-         xVYl0TblkO7T25+TOHN5AlsUFVqaSD56unaEr386yzJJWuymsAhp0saExVBPH/27+U
-         fNV0O+iKzxN1VXXIkadsxvQONNK8YPCz80JT4FCBJZcrDrODnuHmhmhaGwnsiz9/lE
-         MnSDyYVlSYnzLJaR+RWjyTDguhQPf+MrLsMDg+3dwc06TsryEu5c/teqJgYO4IcE3u
-         J0isYIH7YT+Jw==
-From:   Jeff Layton <jlayton@kernel.org>
-To:     Eryu Guan <guaneryu@gmail.com>
-Cc:     fstests@vger.kernel.org, aweits@rit.edu, dhowells@redhat.com,
-        willy@infradead.org
-Subject: [PATCH] generic: add a test to ensure that page is properly filled before write
-Date:   Sat, 12 Jun 2021 08:31:54 -0400
-Message-Id: <20210612123154.8098-1-jlayton@kernel.org>
-X-Mailer: git-send-email 2.31.1
+        Sun, 13 Jun 2021 02:37:24 -0400
+Received: from mail-io1-f41.google.com ([209.85.166.41]:45827 "EHLO
+        mail-io1-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229777AbhFMGhX (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 13 Jun 2021 02:37:23 -0400
+Received: by mail-io1-f41.google.com with SMTP id k5so26372989iow.12;
+        Sat, 12 Jun 2021 23:35:23 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=HQgZ+Rwdgt64BISq5qwkJUIWJGJK6sR3HjdFAk05y+U=;
+        b=ju/D7CKSuEMCF+VLZWlWa0PYeUwIg8NTOp6K1f3bfHjnWRWkA/x5o9IXG8P1T8Hzrs
+         WTJdGjje9Xr1FDec1R8Vl3FMBQ5JABfNKPVLHiZLmJMAg8l/RlzRUcS8RmViugG2zbyp
+         uQKnar2zVfDTe/vvmultQsTpIUcsJjWJ9vdubfue/F/ibvwtiipWuskpy90+oLMWZjA9
+         qt4PBshSvSQS7q4uPqop1DLpv2u5surezuagAVU7WBg3A/V3+wrILGbg8IU8losW/MWF
+         e/yekTcSvljKO79UmjglKcTZ/VtPgad04COl56yFBkYe6EZP2k4NI95Nc6lWRQGIbmFk
+         qYPA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=HQgZ+Rwdgt64BISq5qwkJUIWJGJK6sR3HjdFAk05y+U=;
+        b=BsVS+h7S9zu9DnFkIHQUCz56aHBYEkcmimaVT+Z650jxAR0DoNnibPldcAafBbb3Q4
+         XMZffPRTqgyjD7jfp3CrlkX1ZEeWWKwr1jolAHSkMIx1RIp6ia487zX16sNQuT931GKO
+         FOBv1jNXAXl4xGL9tH8c6yuP7HL0o7i+8+S8DBxF5SQHP6c9LMFn+8/TdVhB9wONs8Lz
+         XaY2ypbqFBEwnCxSxB/Sz8UNX21T+ulQCj4+IaZophpDVFP7r6JCeZ+rDT5dE4t+W/7p
+         M9wNPJBo3o4xvfaw4EVwL9QBB9l51NfdV4YmUxVF2URZ8rWn2miXkEseeheSGsw+2m+k
+         9mJw==
+X-Gm-Message-State: AOAM532itojdtr/3xTYT/x8PmF3THzf5CKI80W7pWyWtOHziWovVXW8/
+        +dFj3ofnfwVVgwDjoG8HtBPmEBO6Cl1YBr6ckwUxrATP
+X-Google-Smtp-Source: ABdhPJz2JKhLk0hjKAjoPekOqQMVI7RUghrGFM9Sxq0EV7pZlfHMTKagR7bupZ7ok2Nwy0hHS8vVIu2taUK4rPJxC54=
+X-Received: by 2002:a6b:7b41:: with SMTP id m1mr9727660iop.186.1623566063047;
+ Sat, 12 Jun 2021 23:34:23 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20210611131029.679307-1-amir73il@gmail.com>
+In-Reply-To: <20210611131029.679307-1-amir73il@gmail.com>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Sun, 13 Jun 2021 09:34:11 +0300
+Message-ID: <CAOQ4uxgdZqBv6ju+6HLXSPh1N5X+pzBXTB+0uhZw2dFhTs1ESA@mail.gmail.com>
+Subject: Re: [PATCH] generic/507: support more filesystems
+To:     Eryu Guan <guaneryu@gmail.com>
+Cc:     Miklos Szeredi <miklos@szeredi.hu>, Chao Yu <yuchao0@huawei.com>,
+        overlayfs <linux-unionfs@vger.kernel.org>,
+        fstests <fstests@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-We had a broken optimization in cephfs and netfs lib that could cause
-part of a page to be improperly zeroed-out when writing to an offset
-that was beyond the EOF but in an existing page.
+On Fri, Jun 11, 2021 at 4:10 PM Amir Goldstein <amir73il@gmail.com> wrote:
+>
+> The commit message introducing the test says:
+> "We only check below attribute modification which most filesystem
+>  supports:
+>     - no atime updates (A)
+>     - secure deletion (s)
+>     - synchronous updates (S)
+>     - undeletable (u)
+> "
+> But in fact, very few filesystems support the (s) and (u) flags.
+> xfs and btrfs do not support them for example.
+>
+> The test doesn't need to check those specific flags, so replace those
+> flags with immutable (i) and append-only (a), which most filesystems
+> really do support.
+>
+> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> ---
+>
+> Eryu,
+>
+> This would be a good test to cover the recent fileattr vfs changes
+> by Miklos that changed the implementation of SETFLAGS ioctl in all the
+> filesystem, only the test does not run on most of the filesystems...
+>
+> Thanks,
+> Amir.
+>
+>  tests/generic/507 | 11 ++++++-----
+>  1 file changed, 6 insertions(+), 5 deletions(-)
+>
+> diff --git a/tests/generic/507 b/tests/generic/507
+> index b654883a..cc61b3cb 100755
+> --- a/tests/generic/507
+> +++ b/tests/generic/507
+> @@ -9,7 +9,7 @@
+>  # i_flags can be recovered after sudden power-cuts.
+>  # 1. touch testfile;
+>  # 1.1 sync (optional)
+> -# 2. chattr +[AsSu] testfile
+> +# 2. chattr +[ASai] testfile
 
-Add a simple test that would have caught this.
+I missed the same fix that's needed in line 8. below...
 
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
----
- tests/generic/XXX     | 53 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/XXX.out |  5 ++++
- tests/generic/group   |  1 +
- 3 files changed, 59 insertions(+)
- create mode 100755 tests/generic/XXX
- create mode 100644 tests/generic/XXX.out
-
-diff --git a/tests/generic/XXX b/tests/generic/XXX
-new file mode 100755
-index 000000000000..0ddaaa544609
---- /dev/null
-+++ b/tests/generic/XXX
-@@ -0,0 +1,53 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2021, Jeff Layton <jlayton@redhat.com>
-+#
-+# FS QA Test No. XXX
-+#
-+# Open a file and write a little data to it. Unmount (to clean out the cache)
-+# and then mount again. Then write some data to it beyond the EOF and ensure
-+# the result is correct. Prompted by a bug in ceph_write_begin. See:
-+#
-+# https://lore.kernel.org/ceph-devel/97002.1623448034@warthog.procyon.org.uk/T/#m9f34b328623b493c529505e12f64f4dfdbddfb27
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $testfile
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+_supported_fs generic
-+_require_test
-+
-+rm -f $seqres.full
-+
-+testfile="$TEST_DIR/test_write_begin.$$"
-+
-+# write some data to file and fsync it out
-+$XFS_IO_PROG -f -c "pwrite -q 0 32" $testfile
-+
-+# cycle the mount to clean out the pagecache
-+_test_cycle_mount
-+
-+# now, write to the file (near the end)
-+$XFS_IO_PROG -c "pwrite -q 32 32" $testfile
-+
-+# dump what we think is in there
-+echo "The result should be 64 bytes filled with 0xcd:"
-+hexdump -C $testfile
-+
-+status=0
-+exit
-diff --git a/tests/generic/XXX.out b/tests/generic/XXX.out
-new file mode 100644
-index 000000000000..4e7653858e51
---- /dev/null
-+++ b/tests/generic/XXX.out
-@@ -0,0 +1,5 @@
-+QA output created by XXX
-+The result should be 64 bytes filled with 0xcd:
-+00000000  cd cd cd cd cd cd cd cd  cd cd cd cd cd cd cd cd  |................|
-+*
-+00000040
-diff --git a/tests/generic/group b/tests/generic/group
-index 9a636b23f243..204a9b548f78 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -641,3 +641,4 @@
- 636 auto quick swap
- 637 auto quick dir
- 638 auto quick rw
-+XXX auto quick rw
--- 
-2.31.1
-
+>  # 3. xfs_io -f testfile -c "fsync";
+>  # 4. godown;
+>  # 5. umount;
+> @@ -34,6 +34,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+>  _cleanup()
+>  {
+>         cd /
+> +       $CHATTR_PROG -ai $testfile &> /dev/null
+>         rm -f $tmp.*
+>  }
+>
+> @@ -49,7 +50,7 @@ _supported_fs generic
+>
+>  _require_command "$LSATTR_PROG" lasttr
+>  _require_command "$CHATTR_PROG" chattr
+> -_require_chattr AsSu
+> +_require_chattr ASai
+>
+>  _require_scratch
+>  _require_scratch_shutdown
+> @@ -79,7 +80,7 @@ do_check()
+>
+>         before=`$LSATTR_PROG $testfile`
+>
+> -       $XFS_IO_PROG -f $testfile -c "fsync" | _filter_xfs_io
+> +       $XFS_IO_PROG -r -f $testfile -c "fsync" | _filter_xfs_io
+>
+>         _scratch_shutdown | tee -a $seqres.full
+>         _scratch_cycle_mount
+> @@ -101,7 +102,7 @@ do_check()
+>
+>         before=`$LSATTR_PROG $testfile`
+>
+> -       $XFS_IO_PROG -f $testfile -c "fsync" | _filter_xfs_io
+> +       $XFS_IO_PROG -r -f $testfile -c "fsync" | _filter_xfs_io
+>
+>         _scratch_shutdown | tee -a $seqres.full
+>         _scratch_cycle_mount
+> @@ -122,7 +123,7 @@ do_check()
+>
+>  echo "Silence is golden"
+>
+> -opts="A s S u"
+> +opts="A S a i"
+>  for i in $opts; do
+>         do_check $i
+>         do_check $i sync
+> --
+> 2.31.1
+>
