@@ -2,149 +2,176 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+X-Spam-Status: No, score=-16.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DA9E5C48BDF
-	for <linux-fstests@archiver.kernel.org>; Sun, 13 Jun 2021 16:12:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EE7ABC48BCF
+	for <linux-fstests@archiver.kernel.org>; Sun, 13 Jun 2021 17:31:43 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A9D22610A0
-	for <linux-fstests@archiver.kernel.org>; Sun, 13 Jun 2021 16:12:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BB44161245
+	for <linux-fstests@archiver.kernel.org>; Sun, 13 Jun 2021 17:31:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231887AbhFMQOK (ORCPT
+        id S231915AbhFMRdo (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 13 Jun 2021 12:14:10 -0400
-Received: from mail-wm1-f48.google.com ([209.85.128.48]:53992 "EHLO
-        mail-wm1-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231782AbhFMQOK (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 13 Jun 2021 12:14:10 -0400
-Received: by mail-wm1-f48.google.com with SMTP id b205so5984161wmb.3
-        for <fstests@vger.kernel.org>; Sun, 13 Jun 2021 09:11:57 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=message-id:date:from:to:subject:mime-version:content-disposition;
-        bh=yTrOsP7nexCJkLWQTZKf1pUNcye7Bd9F2EIIYf9yM98=;
-        b=Zx/bpfRga9R9OH68IWkEUBKADukUCHxeLoophzWANVmDQd1gctCaK20aDNOLjGhBaI
-         YctIkPRE4Maov9JWpCeGuksIB7PgAzXZ0D+LLlleZL+xfQz19gbebsUum+Hd3ScNANrP
-         ChQJHKzqskXdJnMGYECAvgxEZfs5NgJFqRVWeLtgFwn8kSrLbPzKob4VVz32zrDvZSL6
-         uaKEKb2VASB1TG5+qMiCYCdg5ZwOneayg5V/wHzjUkbwYb/79QHi6AgZrDHP3lh+OYD5
-         YbUiObrCRwJKaSEPEFO5Vv5QMoK/VIJ4I9M3yF7Za4F0r7BT96eKTUvwQOFfZ5E31lnc
-         V5aA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:message-id:date:from:to:subject:mime-version
-         :content-disposition;
-        bh=yTrOsP7nexCJkLWQTZKf1pUNcye7Bd9F2EIIYf9yM98=;
-        b=lxg0FAmfB83/aUwMe/gjYhiKULiyYnU+by+ecrJsg5TuMbiJ1QaOU7lngxbk272k7u
-         hOUVzq9ed4WZ8FXwfPG9/c43eco+g38lS7DQrtEYjdt3MoGn/23Z3UUsBSJi1uqjSIz4
-         QgG+jn48lRgcPdSHNRAmD7XhbFDj7ESBKMjoX30YXtN/h2v37PVdqN4lxBV5Rom5qpGr
-         YGhq2KfSQadGTbOYW+mvD5BlSYybDIRewDYQnUbALus2i+e7vWUB0W9jiG/7+oy7iYN2
-         ZPwJZVPY9d8tKgU+2pY7GiBjvRa2P+TuaVwjrYy8qlqybNQeAPLyjdUNxq/Jjup1I21R
-         DcFg==
-X-Gm-Message-State: AOAM533NUkd/fYEkbzWy3xjSu3Mhii/3A2SbvyzPijbCBcTM8I8WzV5T
-        GwfN5rxQ3bCuMKltaSGaPMvdWj7f2J0=
-X-Google-Smtp-Source: ABdhPJxM5P2R9H7RYhPtqjUNg0nb2BEYgPYfv6TekhulQ1ANRZ2CwQEb1j98huHe3GWHcuYPMfeZnw==
-X-Received: by 2002:a7b:c8ce:: with SMTP id f14mr12406868wml.88.1623600656329;
-        Sun, 13 Jun 2021 09:10:56 -0700 (PDT)
-Received: from localhost ([8.208.10.148])
-        by smtp.gmail.com with ESMTPSA id l31sm10955557wms.31.2021.06.13.09.10.54
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 13 Jun 2021 09:10:55 -0700 (PDT)
-Message-ID: <60c62e0f.1c69fb81.8713f.29bf@mx.google.com>
-Date:   Mon, 14 Jun 2021 00:10:51 +0800
-From:   Eryu Guan <guaneryu@gmail.com>
-To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: master branch updated to 1c8b154ab966
+        Sun, 13 Jun 2021 13:33:44 -0400
+Received: from mail.kernel.org ([198.145.29.99]:43204 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S231902AbhFMRdn (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 13 Jun 2021 13:33:43 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 09ADD60FEE;
+        Sun, 13 Jun 2021 17:31:41 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1623605502;
+        bh=hK93ponT0x87SdzzM5uUlX9iZLwx33IzNu/TMS4gQxM=;
+        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
+        b=mgaGqSZko619St6P9J1QGjzwj88OaYNs0L+TcnMvJRi1a5FX3SOLT2qo/IA6Q9QgM
+         vQdhrEKSLYQs80gdERkuDMbq0kPIctksAUywGsksCmiMlwvK71eMPVPG8hR5oCLO2W
+         rh0mmzI1zXMx0BWZ8Ht8OtZrZlqDkWb2+k4YtAI9tSsqFXYi6aHmxByH1BZMWuDDnA
+         XbqtE63VigEcajNe2xZlNadCbsTNT5zqHuZ9Wzdk467gcaufqn2d+GYH7UMYnpa5vC
+         yRyH0KK1A4sC8YrjBg0VRRyEB3kXmdj/65H80SpT/V1QNcqU3AWigUsmMpes1481CF
+         2jgH9sHVeb65Q==
+Message-ID: <705733a48274f5235a76a60fe9b229493e9772de.camel@kernel.org>
+Subject: Re: [PATCH] generic: add a test to ensure that page is properly
+ filled before write
+From:   Jeff Layton <jlayton@kernel.org>
+To:     Eryu Guan <guan@eryu.me>
+Cc:     Eryu Guan <guaneryu@gmail.com>, fstests@vger.kernel.org,
+        aweits@rit.edu, dhowells@redhat.com, willy@infradead.org
+Date:   Sun, 13 Jun 2021 13:31:40 -0400
+In-Reply-To: <YMYbkDgYdkLkA0BW@desktop>
+References: <20210612123154.8098-1-jlayton@kernel.org>
+         <YMYbkDgYdkLkA0BW@desktop>
+Content-Type: text/plain; charset="ISO-8859-15"
+User-Agent: Evolution 3.40.1 (3.40.1-1.fc34) 
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="q9JZYnTrvAuJ"
-Content-Disposition: inline
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+On Sun, 2021-06-13 at 22:52 +0800, Eryu Guan wrote:
+> On Sat, Jun 12, 2021 at 08:31:54AM -0400, Jeff Layton wrote:
+> > We had a broken optimization in cephfs and netfs lib that could cause
+> > part of a page to be improperly zeroed-out when writing to an offset
+> > that was beyond the EOF but in an existing page.
+> > 
+> > Add a simple test that would have caught this.
+> > 
+> > Signed-off-by: Jeff Layton <jlayton@kernel.org>
+> > ---
+> >  tests/generic/XXX     | 53 +++++++++++++++++++++++++++++++++++++++++++
+> >  tests/generic/XXX.out |  5 ++++
+> 
+> Ah, all the 'XXX' in this test should be replaced with proper seq
+> number.
+> 
 
---q9JZYnTrvAuJ
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+I can do that and resend.
 
-Hi all,
+> >  tests/generic/group   |  1 +
+> >  3 files changed, 59 insertions(+)
+> >  create mode 100755 tests/generic/XXX
+> >  create mode 100644 tests/generic/XXX.out
+> > 
+> > diff --git a/tests/generic/XXX b/tests/generic/XXX
+> > new file mode 100755
+> > index 000000000000..0ddaaa544609
+> > --- /dev/null
+> > +++ b/tests/generic/XXX
+> > @@ -0,0 +1,53 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (c) 2021, Jeff Layton <jlayton@redhat.com>
+> > +#
+> > +# FS QA Test No. XXX
+> > +#
+> > +# Open a file and write a little data to it. Unmount (to clean out the cache)
+> > +# and then mount again. Then write some data to it beyond the EOF and ensure
+> > +# the result is correct. Prompted by a bug in ceph_write_begin. See:
+> > +#
+> > +# https://lore.kernel.org/ceph-devel/97002.1623448034@warthog.procyon.org.uk/T/#m9f34b328623b493c529505e12f64f4dfdbddfb27
+> 
+> This looks like a thread 9 months ago. Was the fix merged? If so, it'd
+> be better to reference the kernel commit here.
+> 
+> Otherwise test looks fine to me.
+> 
 
-The master branch of the xfstests repository at:
+Not yet. v5.13 will require a fix in the netfs lib, whereas ceph will
+need a one-off fix in v5.10.z - v5.12.z. We're sorting out both fixes
+now.
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+Thanks!
 
-have just been updated. _scratch_mkfs_blocksized() supports btrfs now, and only
-the sector sizes listed in /sys/fs/btrfs/features/supported_sectorsizes. Also
-there're two new tests, and btrfs/241 currently fails with latest v5.13-rc5
-kernel.
+> 
+> > +#
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +
+> > +here=`pwd`
+> > +status=1    # failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	rm -f $testfile
+> > +}
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/filter
+> > +
+> > +_supported_fs generic
+> > +_require_test
+> > +
+> > +rm -f $seqres.full
+> > +
+> > +testfile="$TEST_DIR/test_write_begin.$$"
+> > +
+> > +# write some data to file and fsync it out
+> > +$XFS_IO_PROG -f -c "pwrite -q 0 32" $testfile
+> > +
+> > +# cycle the mount to clean out the pagecache
+> > +_test_cycle_mount
+> > +
+> > +# now, write to the file (near the end)
+> > +$XFS_IO_PROG -c "pwrite -q 32 32" $testfile
+> > +
+> > +# dump what we think is in there
+> > +echo "The result should be 64 bytes filled with 0xcd:"
+> > +hexdump -C $testfile
+> > +
+> > +status=0
+> > +exit
+> > diff --git a/tests/generic/XXX.out b/tests/generic/XXX.out
+> > new file mode 100644
+> > index 000000000000..4e7653858e51
+> > --- /dev/null
+> > +++ b/tests/generic/XXX.out
+> > @@ -0,0 +1,5 @@
+> > +QA output created by XXX
+> > +The result should be 64 bytes filled with 0xcd:
+> > +00000000  cd cd cd cd cd cd cd cd  cd cd cd cd cd cd cd cd  |................|
+> > +*
+> > +00000040
+> > diff --git a/tests/generic/group b/tests/generic/group
+> > index 9a636b23f243..204a9b548f78 100644
+> > --- a/tests/generic/group
+> > +++ b/tests/generic/group
+> > @@ -641,3 +641,4 @@
+> >  636 auto quick swap
+> >  637 auto quick dir
+> >  638 auto quick rw
+> > +XXX auto quick rw
+> > -- 
+> > 2.31.1
+> > 
 
-Thanks,
-Eryu
+-- 
+Jeff Layton <jlayton@kernel.org>
 
-The new head of the master branch is commit:
-
-1c8b154ab966 btrfs: test incremental send swapping location of a directory with a file
-
-New commits:
-
-Amir Goldstein (2):
-      [a31c9b8d6a30] generic/507: support more filesystems
-      [2ac31add10af] overlay/075: add test coverage for clearing immutable/append-only flags
-
-Anand Jain (2):
-      [559ac446066b] btrfs: support other sectorsizes in _scratch_mkfs_blocksized
-      [811fa6247811] common/rc: fix _scratch_mkfs_blocksized indentation
-
-Filipe Manana (1):
-      [1c8b154ab966] btrfs: test incremental send swapping location of a directory with a file
-
-Leah Rumancik (2):
-      [9ff5f0ccac24] ext4/048: add check for od endian flag
-      [66734233e510] ext4: test journal checkpoint ioctl
-
-
-Code Diffstat:
-
- .gitignore               |   1 +
- common/rc                |  67 +++++++++++++--------
- src/Makefile             |   2 +-
- src/checkpoint_journal.c |  97 +++++++++++++++++++++++++++++++
- tests/btrfs/241          | 148 +++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/241.out      |   6 ++
- tests/btrfs/group        |   1 +
- tests/ext4/048           |  13 ++++-
- tests/ext4/050           | 115 ++++++++++++++++++++++++++++++++++++
- tests/ext4/050.out       |   2 +
- tests/ext4/group         |   1 +
- tests/generic/507        |  13 +++--
- tests/overlay/075        |  11 ++++
- 13 files changed, 444 insertions(+), 33 deletions(-)
---
-Eryu Guan
-guaneryu@gmail.com
-
---q9JZYnTrvAuJ
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAmDGLdkACgkQJlKqKVyP
-52O4BA//UuOw7jzCGGmCNw/fJPmfQzUv37vB1rBqn0G5iRRgz+bS6+61O9CeKiJj
-EBbL8j/PmXcxUjwF4eL1NXlQbbTA9b49zJDTkczH/CBr+WV4SZXLqjK+oIuGXk6O
-fQpVzNTDqZ1HwLi2JY9TETD2S42Z6g1S+nt0hs3ZdMHXJ1zycTui57PmbyeAfxZj
-niJJO9+VQlFUJnJcOjtNkO9Txj8VZMtvM7fmr+Gzn9QyHb2rvO+eaBPck3ajMsw0
-2Vj1PPhFQStvu+FbFzoWI+zumGOtPfg781AU12WVJan2O8s+BF+zfZdfjrINVPnF
-RT8ablVUDUf2RpwY2DYSRqGmwaXNRET16qe8SgJ6m8nRCQvuoMc885pvlRhFVqDf
-qg0tfvKb+hK49wD6s455tr99ESTaVHbnegw6a5QJ8I3WGZIMcBRNVZY+kTtiUxun
-8hXTTAyqNqHRdum8S8EVK3Y8NsaK7N49Yubl1sy7+0Ev62YtOiLTeWR4pvLvZJ5O
-Dvk6uI2kFart8zPxNLI4oiRPwjL9kqmUJVqdIz6xZkExNMqwmvbJfDfnVZTqXPCv
-zDd4BnwuHRvzF6EnTa7HcDd7rT/PRpj6l5tfDznlP+PKVMwh2kP/2vlqjkqTb8wt
-qTLpMtD93JDS7peKJfMqjpuEOcJTeH1YCmOjtOkxW3ge44q0LXM=
-=CI62
------END PGP SIGNATURE-----
-
---q9JZYnTrvAuJ--
