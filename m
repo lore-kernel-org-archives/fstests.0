@@ -7,121 +7,147 @@ X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,
 	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 32B06C48BE5
-	for <linux-fstests@archiver.kernel.org>; Tue, 15 Jun 2021 03:25:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2AC12C48BDF
+	for <linux-fstests@archiver.kernel.org>; Tue, 15 Jun 2021 03:28:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 060E361400
-	for <linux-fstests@archiver.kernel.org>; Tue, 15 Jun 2021 03:25:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id F0BA66140B
+	for <linux-fstests@archiver.kernel.org>; Tue, 15 Jun 2021 03:28:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230040AbhFOD1z (ORCPT
+        id S229869AbhFODab (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 14 Jun 2021 23:27:55 -0400
-Received: from szxga01-in.huawei.com ([45.249.212.187]:4778 "EHLO
-        szxga01-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229609AbhFOD1y (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 14 Jun 2021 23:27:54 -0400
-Received: from dggemv704-chm.china.huawei.com (unknown [172.30.72.54])
-        by szxga01-in.huawei.com (SkyGuard) with ESMTP id 4G3tr216PdzXfyX;
-        Tue, 15 Jun 2021 11:20:50 +0800 (CST)
+        Mon, 14 Jun 2021 23:30:31 -0400
+Received: from szxga02-in.huawei.com ([45.249.212.188]:4910 "EHLO
+        szxga02-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229609AbhFODab (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 14 Jun 2021 23:30:31 -0400
+Received: from dggemv703-chm.china.huawei.com (unknown [172.30.72.53])
+        by szxga02-in.huawei.com (SkyGuard) with ESMTP id 4G3tx94Kd6z6yr1;
+        Tue, 15 Jun 2021 11:25:17 +0800 (CST)
 Received: from dggema759-chm.china.huawei.com (10.1.198.201) by
- dggemv704-chm.china.huawei.com (10.3.19.47) with Microsoft SMTP Server
+ dggemv703-chm.china.huawei.com (10.3.19.46) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256) id
- 15.1.2176.2; Tue, 15 Jun 2021 11:25:49 +0800
+ 15.1.2176.2; Tue, 15 Jun 2021 11:28:26 +0800
 Received: from [10.174.178.31] (10.174.178.31) by
  dggema759-chm.china.huawei.com (10.1.198.201) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id
- 15.1.2176.2; Tue, 15 Jun 2021 11:25:49 +0800
-Subject: Re: [PATCH] common/rc: f2fs do not support metadata journaling
+ 15.1.2176.2; Tue, 15 Jun 2021 11:28:25 +0800
+Subject: Re: [PATCH] generic/103: leave more space for f2fs
 To:     <fstests@vger.kernel.org>, <guan@eryu.me>, <yuchao0@huawei.com>,
         <linux-f2fs-devel@lists.sourceforge.net>
 References: <20210611112211.1408767-1-sunke32@huawei.com>
+ <20210611112211.1408767-2-sunke32@huawei.com>
 From:   Sun Ke <sunke32@huawei.com>
-Message-ID: <d95c4ac2-50a2-4f08-3940-ac0597266280@huawei.com>
-Date:   Tue, 15 Jun 2021 11:25:48 +0800
+Message-ID: <1ea6a853-d892-4c3e-d023-72adc379b803@huawei.com>
+Date:   Tue, 15 Jun 2021 11:28:25 +0800
 User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
  Thunderbird/78.6.1
 MIME-Version: 1.0
-In-Reply-To: <20210611112211.1408767-1-sunke32@huawei.com>
+In-Reply-To: <20210611112211.1408767-2-sunke32@huawei.com>
 Content-Type: text/plain; charset="gbk"; format=flowed
 Content-Transfer-Encoding: 8bit
 X-Originating-IP: [10.174.178.31]
-X-ClientProxiedBy: dggems706-chm.china.huawei.com (10.3.19.183) To
+X-ClientProxiedBy: dggems703-chm.china.huawei.com (10.3.19.180) To
  dggema759-chm.china.huawei.com (10.1.198.201)
 X-CFilter-Loop: Reflected
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-
+to linux-f2fs-devel@lists.sourceforge.net
 
 ÔÚ 2021/6/11 19:22, Sun Ke Ð´µÀ:
-> In generic/50, touch 100 files, go down the fs immediately, Then umount
-> and set the disk readi-only. Try to mount it again without \-o
-> norecovery\, it should fail, because it can not recovery on a read-only
-> device. But f2fs mount successfully and the test fail.
+> It failed on f2fs:
+>       QA output created by 103
+>      +fallocate: No space left on device
+>       Silence is golden.
+>      ...
 > 
-> f2fs seems do not support metadata journaling.
+> Try to leave ~512KB, but during the fallocate, f2fs will be filled.
+> Provide error prompt: "fallocate: No space left on device".
+> 
+> Leave more space for f2fs.
 > 
 > Signed-off-by: Sun Ke <sunke32@huawei.com>
 > ---
+> I add some test code
+> 	+       df
+> 			avail=`_get_available_space $SCRATCH_MNT`
+> 	+       echo "avail = ${avail}"
+> 			filesizekb=$((avail / 1024 - 512))
+> 	+       echo "filesizekb = ${filesizekb}"
+> 			$XFS_IO_PROG -fc "falloc 0 ${filesizekb}k" $file
+> 	+       df
+> 	}
 > 
-> I am not very sure if f2fs do not support metadata journaling.
+> f2fs:
+> 	QA output created by 103
+> 	+Filesystem       1K-blocks       Used   Available Use% Mounted on
+> 	...
+> 	+/dev/sdb          12580864     553292    12027572   5% /mnt/scratch
+> 	+avail = 12316233728
+> 	+filesizekb = 12027060
+> 	+fallocate: No space left on device
+> 	+Filesystem       1K-blocks       Used   Available Use% Mounted on
+> 	...
+> 	+/dev/sdb          12580864   12580864           0 100% /mnt/scratch
+> 	Silence is golden.
 > 
-> ###
-> before change
-> ###
-> [root@localhost xfstests-dev]# ./check tests/generic/050
-> FSTYP         -- f2fs
-> PLATFORM      -- Linux/x86_64 localhost 5.12.0-rc5-next-20210330 #8 SMP Tue Jun 8 11:09:37 CST 2021
-> MKFS_OPTIONS  -- /dev/sdb
-> MOUNT_OPTIONS -- -o acl,user_xattr /dev/sdb /tmp/scratch
+> xfs:
+> 	QA output created by 103
+> 	+Filesystem       1K-blocks       Used   Available Use% Mounted on
+> 	...
+> 	+/dev/sdb          12572672     120828    12451844   1% /mnt/scratch
+> 	+avail = 12750688256
+> 	+filesizekb = 12451332
+> 	+Filesystem       1K-blocks       Used   Available Use% Mounted on
+> 	...
+> 	+/dev/sdb          12572672   12572160         512 100% /mnt/scratch
+> 	Silence is golden.
 > 
-> generic/050 4s ... - output mismatch (see /root/work/xfstests-dev/results//generic/050.out.bad)
->      --- tests/generic/050.out   2021-05-31 15:37:40.000000000 +0800
->      +++ /root/work/xfstests-dev/results//generic/050.out.bad    2021-06-11 16:48:19.993000000 +0800
->      @@ -13,9 +13,7 @@
->       setting device read-only
->       mounting filesystem that needs recovery on a read-only device:
->       mount: device write-protected, mounting read-only
->      -mount: cannot mount device read-only
->       unmounting read-only filesystem
->      -umount: SCRATCH_DEV: not mounted
->       mounting filesystem with -o norecovery on a read-only device:
->      ...
->      (Run 'diff -u /root/work/xfstests-dev/tests/generic/050.out /root/work/xfstests-dev/results//generic/050.out.bad'  to see the entire diff)
-> Ran: generic/050
-> Failures: generic/050
-> Failed 1 of 1 tests
+> ext4:
+> 	QA output created by 103
+> 	+Filesystem       1K-blocks       Used   Available Use% Mounted on
+> 	...
+> 	+/dev/sdb          12319880      41048    11633304   1% /mnt/scratch
+> 	+avail = 11912503296
+> 	+filesizekb = 11632792
+> 	+Filesystem       1K-blocks       Used   Available Use% Mounted on
+> 	...
+> 	+/dev/sdb          12319880   11673844         508 100% /mnt/scratch
+> 	Silence is golden.
 > 
-> ###
-> after change
-> ###
-> [root@localhost xfstests-dev]# ./check tests/generic/050
-> FSTYP         -- f2fs
-> PLATFORM      -- Linux/x86_64 localhost 5.12.0-rc5-next-20210330 #8 SMP Tue Jun 8 11:09:37 CST 2021
-> MKFS_OPTIONS  -- /dev/sdb
-> MOUNT_OPTIONS -- -o acl,user_xattr /dev/sdb /tmp/scratch
+> after change (f2fs)
+> 	QA output created by 103
+> 	Filesystem       1K-blocks       Used   Available Use% Mounted on
+> 	...
+> 	/dev/sdb          12580864   12580396         468 100% /tmp/scratch
+> 	Silence is golden.
 > 
-> generic/050 4s ...  4s
-> Ran: generic/050
-> Passed all 1 tests
+>   tests/generic/103 | 10 +++++++++-
+>   1 file changed, 9 insertions(+), 1 deletion(-)
 > 
-> 
-> 
->   common/rc | 2 +-
->   1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/common/rc b/common/rc
-> index a0aa7300..428b8b80 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -3543,7 +3543,7 @@ _has_metadata_journaling()
->   	fi
+> diff --git a/tests/generic/103 b/tests/generic/103
+> index b22b0159623e..dfce3870781c 100755
+> --- a/tests/generic/103
+> +++ b/tests/generic/103
+> @@ -40,10 +40,18 @@ rm -f $seqres.full
+>   _consume_freesp()
+>   {
+>   	file=$1
+> +	leave=512
+> +
+> +	# Try to leave ~512KB, but during the fallocate, f2fs will be filled.
+> +	# Provide error prompt: "fallocate: No space left on device". Leave
+> +	# more space for f2fs.
+> +	if [ $FSTYP == "f2fs" ]; then
+> +		leave=12288
+> +	fi
 >   
->   	case "$FSTYP" in
-> -	ext2|vfat|msdos|udf|exfat|tmpfs)
-> +	ext2|vfat|msdos|udf|exfat|tmpfs|f2fs)
->   		echo "$FSTYP does not support metadata journaling"
->   		return 1
->   		;;
+>   	# consume nearly all available space (leave ~512kB)
+>   	avail=`_get_available_space $SCRATCH_MNT`
+> -	filesizekb=$((avail / 1024 - 512))
+> +	filesizekb=$((avail / 1024 - $leave))
+>   	$XFS_IO_PROG -fc "falloc 0 ${filesizekb}k" $file
+>   }
+>   
 > 
