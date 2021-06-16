@@ -7,44 +7,45 @@ X-Spam-Status: No, score=-17.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
 	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2DDDEC48BE5
-	for <linux-fstests@archiver.kernel.org>; Wed, 16 Jun 2021 13:15:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 71604C48BE6
+	for <linux-fstests@archiver.kernel.org>; Wed, 16 Jun 2021 13:43:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0263661241
-	for <linux-fstests@archiver.kernel.org>; Wed, 16 Jun 2021 13:15:43 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5B5F761359
+	for <linux-fstests@archiver.kernel.org>; Wed, 16 Jun 2021 13:43:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232199AbhFPNRs (ORCPT
+        id S233514AbhFPNpe (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 16 Jun 2021 09:17:48 -0400
-Received: from mail.kernel.org ([198.145.29.99]:35820 "EHLO mail.kernel.org"
+        Wed, 16 Jun 2021 09:45:34 -0400
+Received: from mail.kernel.org ([198.145.29.99]:43500 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S230087AbhFPNRq (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 16 Jun 2021 09:17:46 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 92CD661164;
-        Wed, 16 Jun 2021 13:15:38 +0000 (UTC)
+        id S233535AbhFPNp1 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 16 Jun 2021 09:45:27 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id BA3A46100A;
+        Wed, 16 Jun 2021 13:43:19 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1623849340;
-        bh=dZGU8gWrVEjcpi8gJBee47OaFc0kjuWd3YMGK0b5FhM=;
+        s=k20201202; t=1623851000;
+        bh=Rj3dRcfjtk6/OoUIlEbiBnXdcPY4Msj49PzbROb3PyQ=;
         h=Subject:To:References:From:Cc:Date:In-Reply-To:From;
-        b=mctm5ccVm1OdUd/+uZQSai00F1OTwsnd1a8s2FV/6RMCyrHUdMld4OKPHG94C+QrO
-         TBiFi7rHw1DL8hzcdDaHEnHypzwAELq8FFJlOMNFc+BcPpN61Ta3pRnH4nocaQoV6I
-         RscLvLMp+NdvlZSE7mxvtzyTSlYYyViGw76CqyvV4aK5rIs0HUv3AhhQK1RTf9eXlm
-         TebUBTI3dmZelnUVpLwzUXjWn0uPioNSezpo2THB3OkTJGJ2KgINkyFQhAvcKbxyeQ
-         VH/b3OLuu0dWxmANAsQ7hundklnI97hWlzuI6JvEthFBbbvvL+6deQXLSYhLiX7b8c
-         d8GHnb4zRGvEg==
-Subject: Re: [f2fs-dev] [PATCH] generic/103: leave more space for f2fs
-To:     Sun Ke <sunke32@huawei.com>, linux-f2fs-devel@lists.sourceforge.net
+        b=AfA6y4Ugyv5rC+LD6iEH/XO+qrLU3nXEal63XPHip0DocfwbcJJyzntFf9XQ5hXuW
+         FuUHyhly5LMYy5cjPCQVXxZoBOiE9vTjScuVrtLlgNA/LS/W3dhfGjls6wCv8Zubn9
+         +45TC6zmFpMbZF/abxqwmzPsPEEVDSy8fCfNNFMyzOtCV6BJoW8Tf0f8v/MiH9lPlJ
+         KzDjXZJG9V8xyWppZ+1+trc4v+aQwCODR7Km5gFAlR0LsokdjWy4KIF/6Pa5sLq1J1
+         4/ZNo7pRFOe1x5gSWj1fvAeIzqALJMfQPUUzF7GfIeS8fwKCk2qZAGySPMGBz/dXPV
+         oB3kycVKF3WSA==
+Subject: Re: [f2fs-dev] [PATCH] generic/260: f2fs is also special
+To:     Sun Ke <sunke32@huawei.com>
 References: <20210611112211.1408767-1-sunke32@huawei.com>
- <20210611112211.1408767-2-sunke32@huawei.com>
- <1ea6a853-d892-4c3e-d023-72adc379b803@huawei.com>
+ <20210611112211.1408767-3-sunke32@huawei.com>
+ <87024647-0ece-929d-8aa6-8dab9609159c@huawei.com>
 From:   Chao Yu <chao@kernel.org>
-Cc:     fstests@vger.kernel.org, guan@eryu.me, yuchao0@huawei.com
-Message-ID: <aa3fef51-5633-800a-1d93-cbfb66453c2a@kernel.org>
-Date:   Wed, 16 Jun 2021 21:15:37 +0800
+Cc:     fstests@vger.kernel.org, guan@eryu.me, yuchao0@huawei.com,
+        linux-f2fs-devel@lists.sourceforge.net
+Message-ID: <6362f24f-35d1-7e5b-c3cc-d6cbb18947fe@kernel.org>
+Date:   Wed, 16 Jun 2021 21:43:19 +0800
 User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
  Thunderbird/78.11.0
 MIME-Version: 1.0
-In-Reply-To: <1ea6a853-d892-4c3e-d023-72adc379b803@huawei.com>
+In-Reply-To: <87024647-0ece-929d-8aa6-8dab9609159c@huawei.com>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Language: en-US
 Content-Transfer-Encoding: 8bit
@@ -52,113 +53,56 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 2021/6/15 11:28, Sun Ke wrote:
+On 2021/6/15 11:29, Sun Ke wrote:
 > to linux-f2fs-devel@lists.sourceforge.net
 > 
 > 在 2021/6/11 19:22, Sun Ke 写道:
->> It failed on f2fs:
->>       QA output created by 103
->>      +fallocate: No space left on device
->>       Silence is golden.
->>      ...
+>> It seem that f2fs also special like btrfs.
 >>
->> Try to leave ~512KB, but during the fallocate, f2fs will be filled.
->> Provide error prompt: "fallocate: No space left on device".
->>
->> Leave more space for f2fs.
->>
->> Signed-off-by: Sun Ke <sunke32@huawei.com>
->> ---
->> I add some test code
->>     +       df
->>             avail=`_get_available_space $SCRATCH_MNT`
->>     +       echo "avail = ${avail}"
->>             filesizekb=$((avail / 1024 - 512))
->>     +       echo "filesizekb = ${filesizekb}"
->>             $XFS_IO_PROG -fc "falloc 0 ${filesizekb}k" $file
->>     +       df
->>     }
->>
->> f2fs:
->>     QA output created by 103
->>     +Filesystem       1K-blocks       Used   Available Use% Mounted on
->>     ...
->>     +/dev/sdb          12580864     553292    12027572   5% /mnt/scratch
->>     +avail = 12316233728
->>     +filesizekb = 12027060
->>     +fallocate: No space left on device
->>     +Filesystem       1K-blocks       Used   Available Use% Mounted on
->>     ...
->>     +/dev/sdb          12580864   12580864           0 100% /mnt/scratch
->>     Silence is golden.
->>
->> xfs:
->>     QA output created by 103
->>     +Filesystem       1K-blocks       Used   Available Use% Mounted on
->>     ...
->>     +/dev/sdb          12572672     120828    12451844   1% /mnt/scratch
->>     +avail = 12750688256
->>     +filesizekb = 12451332
->>     +Filesystem       1K-blocks       Used   Available Use% Mounted on
->>     ...
->>     +/dev/sdb          12572672   12572160         512 100% /mnt/scratch
->>     Silence is golden.
->>
->> ext4:
->>     QA output created by 103
->>     +Filesystem       1K-blocks       Used   Available Use% Mounted on
->>     ...
->>     +/dev/sdb          12319880      41048    11633304   1% /mnt/scratch
->>     +avail = 11912503296
->>     +filesizekb = 11632792
->>     +Filesystem       1K-blocks       Used   Available Use% Mounted on
->>     ...
->>     +/dev/sdb          12319880   11673844         508 100% /mnt/scratch
->>     Silence is golden.
->>
->> after change (f2fs)
->>     QA output created by 103
->>     Filesystem       1K-blocks       Used   Available Use% Mounted on
->>     ...
->>     /dev/sdb          12580864   12580396         468 100% /tmp/scratch
->>     Silence is golden.
->>
->>   tests/generic/103 | 10 +++++++++-
->>   1 file changed, 9 insertions(+), 1 deletion(-)
->>
->> diff --git a/tests/generic/103 b/tests/generic/103
->> index b22b0159623e..dfce3870781c 100755
->> --- a/tests/generic/103
->> +++ b/tests/generic/103
->> @@ -40,10 +40,18 @@ rm -f $seqres.full
->>   _consume_freesp()
->>   {
->>       file=$1
->> +    leave=512
->> +
->> +    # Try to leave ~512KB, but during the fallocate, f2fs will be filled.
->> +    # Provide error prompt: "fallocate: No space left on device". Leave
->> +    # more space for f2fs.
->> +    if [ $FSTYP == "f2fs" ]; then
->> +        leave=12288
->> +    fi
->>       # consume nearly all available space (leave ~512kB)
->>       avail=`_get_available_space $SCRATCH_MNT`
+>>   [+] Default length with start set (should succeed)
+>>   [+] Length beyond the end of fs (should succeed)
+>>   [+] Length beyond the end of fs with start set (should succeed)
+>> +After the full fs discard 0 bytes were discarded however the file system is 12882804736 bytes long.
+>> +It seems that fs logic handling len argument overflows
 
-         if [ $FSTYP == "f2fs" ]; then
-                 left=$((left + avail / 1024000))
-         fi
+Well, the root cause is f2fs can tag a special flag TRIMMED_FLAG to
+indicate the whole filesystem is trimmed, so after mkfs/fstrim(),
+following fstrim() won't trim any block.
 
-f2fs uses index(radix) tree as mapping metadata, its space overhead
-is about one thousandth of the data, so can you please try above
-calculation?
+Can you please update commit message and add comments in script?
 
 Thanks,
 
->> -    filesizekb=$((avail / 1024 - 512))
->> +    filesizekb=$((avail / 1024 - $leave))
->>       $XFS_IO_PROG -fc "falloc 0 ${filesizekb}k" $file
->>   }
+>>
+>> Signed-off-by: Sun Ke <sunke32@huawei.com>
+>> ---
+>> I am not sure about that. o(╯□╰)o
+>>
+>>   tests/generic/260 | 4 ++--
+>>   1 file changed, 2 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/tests/generic/260 b/tests/generic/260
+>> index 8021aa68..6bd861d2 100755
+>> --- a/tests/generic/260
+>> +++ b/tests/generic/260
+>> @@ -100,7 +100,7 @@ fi
+>>   # It is because btrfs does not have not-yet-used parts of the device
+>>   # mapped and since we got here right after the mkfs, there is not
+>>   # enough free extents in the root tree.
+>> -if [ $bytes -le $(_math "$fssize*512") ] && [ $FSTYP != "btrfs" ]; then
+>> +if [ $bytes -le $(_math "$fssize*512") ] && [ $FSTYP != "btrfs" ] && [ $FSTYP != "f2fs" ]; then
+>>       status=1
+>>       echo "After the full fs discard $bytes bytes were discarded"\
+>>            "however the file system is $(_math "$fssize*1024") bytes long."
+>> @@ -160,7 +160,7 @@ _scratch_mount
+>>   # mapped and since we got here right after the mkfs, there is not
+>>   # enough free extents in the root tree.
+>>   bytes=$($FSTRIM_PROG -v -l$len $SCRATCH_MNT | _filter_fstrim)
+>> -if [ $bytes -le $(_math "$fssize*512") ] && [ $FSTYP != "btrfs" ]; then
+>> +if [ $bytes -le $(_math "$fssize*512") ] && [ $FSTYP != "btrfs" ] && [ $FSTYP != "f2fs" ]; then
+>>       status=1
+>>       echo "It seems that fs logic handling len argument overflows"
+>>   fi
 >>
 > 
 > 
