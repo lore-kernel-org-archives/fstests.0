@@ -2,104 +2,66 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 424ACC2B9F4
-	for <linux-fstests@archiver.kernel.org>; Thu, 17 Jun 2021 06:57:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BDFFCC48BE5
+	for <linux-fstests@archiver.kernel.org>; Thu, 17 Jun 2021 07:56:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1CE14613F3
-	for <linux-fstests@archiver.kernel.org>; Thu, 17 Jun 2021 06:57:07 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A19FF61076
+	for <linux-fstests@archiver.kernel.org>; Thu, 17 Jun 2021 07:56:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229683AbhFQG7N (ORCPT
+        id S230269AbhFQH67 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 17 Jun 2021 02:59:13 -0400
-Received: from szxga03-in.huawei.com ([45.249.212.189]:7343 "EHLO
-        szxga03-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229580AbhFQG7N (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 17 Jun 2021 02:59:13 -0400
-Received: from dggemv711-chm.china.huawei.com (unknown [172.30.72.54])
-        by szxga03-in.huawei.com (SkyGuard) with ESMTP id 4G5CS03fLDz6yNJ;
-        Thu, 17 Jun 2021 14:53:04 +0800 (CST)
-Received: from dggema759-chm.china.huawei.com (10.1.198.201) by
- dggemv711-chm.china.huawei.com (10.1.198.66) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256) id
- 15.1.2176.2; Thu, 17 Jun 2021 14:56:59 +0800
-Received: from huawei.com (10.175.101.6) by dggema759-chm.china.huawei.com
- (10.1.198.201) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2176.2; Thu, 17
- Jun 2021 14:56:58 +0800
-From:   Sun Ke <sunke32@huawei.com>
-To:     <fstests@vger.kernel.org>,
-        <linux-f2fs-devel@lists.sourceforge.net>, <guan@eryu.me>,
-        <chao@kernel.org>
-CC:     <sunke32@huawei.com>
-Subject: [PATCH v2] generic/260: f2fs is also special
-Date:   Thu, 17 Jun 2021 15:03:10 +0800
-Message-ID: <20210617070310.3515665-2-sunke32@huawei.com>
-X-Mailer: git-send-email 2.25.4
-In-Reply-To: <20210617070310.3515665-1-sunke32@huawei.com>
-References: <20210617070310.3515665-1-sunke32@huawei.com>
+        Thu, 17 Jun 2021 03:58:59 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60474 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229712AbhFQH6z (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 17 Jun 2021 03:58:55 -0400
+Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 701B5C061574;
+        Thu, 17 Jun 2021 00:56:47 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
+        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=LWx+DPDGY1K+Q0QEXsh2daJdFlaWsWR3pVR94c0rObo=; b=pTrSo4WCFq+fie+r1rE0MnsJd9
+        4Q5Yr2k6N284i9etNBS1a2kZFaK3MYyzIbwy5utdfcOyF6g3LkhNz5Eln8c66jyAE3uehMBuHYwyC
+        fe06CsPfmOgjSAFC3c2hUfMC6SYc/oPmB3tHCjhge3iXFm0sgJeNoGf+f6GNpdivIIpXqulrENXl6
+        uv3MzxTd84ZEACu6QWyKbQfYYix6zqQrJpWs8J6yHbny9Bw7FoADp8Ci/3rXIQzpECVeEaSjUNfJ1
+        bxjLmdTZYMPndU6Bo4Bq5XzNs03JMu1FLemneDqWKINjQIayOpzDcCeBKToz13CC1lzppzLHHNGVB
+        wB4iMJHw==;
+Received: from hch by casper.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
+        id 1ltmsb-008tLO-9h; Thu, 17 Jun 2021 07:56:10 +0000
+Date:   Thu, 17 Jun 2021 08:56:01 +0100
+From:   Christoph Hellwig <hch@infradead.org>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     Christoph Hellwig <hch@infradead.org>, guaneryu@gmail.com,
+        Chandan Babu R <chandanrlinux@gmail.com>,
+        Allison Henderson <allison.henderson@oracle.com>,
+        linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me,
+        amir73il@gmail.com, ebiggers@kernel.org
+Subject: Re: [PATCH 07/13] fstests: automatically generate group files
+Message-ID: <YMsAEQsNhI1Y5JR8@infradead.org>
+References: <162370433910.3800603.9623820748404628250.stgit@locust>
+ <162370437774.3800603.15907676407985880109.stgit@locust>
+ <YMmpDGT9b4dBdSh2@infradead.org>
+ <20210617001320.GK158209@locust>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7BIT
-Content-Type:   text/plain; charset=US-ASCII
-X-Originating-IP: [10.175.101.6]
-X-ClientProxiedBy: dggems702-chm.china.huawei.com (10.3.19.179) To
- dggema759-chm.china.huawei.com (10.1.198.201)
-X-CFilter-Loop: Reflected
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210617001320.GK158209@locust>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by casper.infradead.org. See http://www.infradead.org/rpr.html
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-It fail on f2fs:
+On Wed, Jun 16, 2021 at 05:13:20PM -0700, Darrick J. Wong wrote:
+> <shrug> What's wrong with requiring everyone to run 'make' when they
+> change something in fstests?  I suspect most people already do that as
+> muscle memory for most every other code project on the planet, or as
+> part of `make install' prior to starting it fstests.
 
- [+] Default length with start set (should succeed)
- [+] Length beyond the end of fs (should succeed)
- [+] Length beyond the end of fs with start set (should succeed)
-+After the full fs discard 0 bytes were discarded however the file system is 12882804736 bytes long.
-+It seems that fs logic handling len argument overflows
-
-The root cause is f2fs can tag a special flag TRIMMED_FLAG to indicate
-the whole filesystem is trimmed, so after mkfs/fstrim(), following
-fstrim() won't trim any block.
-
-Suggested-by: Chao Yu <yuchao0@huawei.com>
-Signed-off-by: Sun Ke <sunke32@huawei.com>
----
- tests/generic/260 | 10 ++++++++--
- 1 file changed, 8 insertions(+), 2 deletions(-)
-
-diff --git a/tests/generic/260 b/tests/generic/260
-index 8021aa68..4ab35a56 100755
---- a/tests/generic/260
-+++ b/tests/generic/260
-@@ -100,7 +100,10 @@ fi
- # It is because btrfs does not have not-yet-used parts of the device
- # mapped and since we got here right after the mkfs, there is not
- # enough free extents in the root tree.
--if [ $bytes -le $(_math "$fssize*512") ] && [ $FSTYP != "btrfs" ]; then
-+# F2fs is also special. F2fs can tag a special flag TRIMMED_FLAG to
-+# indicate the whole filesystem is trimmed, so after mkfs/fstrim(),
-+# following fstrim() won't trim any block.
-+if [ $bytes -le $(_math "$fssize*512") ] && [ $FSTYP != "btrfs" ] && [ $FSTYP != "f2fs" ]; then
- 	status=1
- 	echo "After the full fs discard $bytes bytes were discarded"\
- 	     "however the file system is $(_math "$fssize*1024") bytes long."
-@@ -159,8 +162,11 @@ _scratch_mount
- # It is because btrfs does not have not-yet-used parts of the device
- # mapped and since we got here right after the mkfs, there is not
- # enough free extents in the root tree.
-+# F2fs is also special. F2fs can tag a special flag TRIMMED_FLAG to
-+# indicate the whole filesystem is trimmed, so after mkfs/fstrim(),
-+# following fstrim() won't trim any block.
- bytes=$($FSTRIM_PROG -v -l$len $SCRATCH_MNT | _filter_fstrim)
--if [ $bytes -le $(_math "$fssize*512") ] && [ $FSTYP != "btrfs" ]; then
-+if [ $bytes -le $(_math "$fssize*512") ] && [ $FSTYP != "btrfs" ] && [ $FSTYP != "f2fs" ]; then
- 	status=1
- 	echo "It seems that fs logic handling len argument overflows"
- fi
--- 
-2.13.6
-
+I know I keep forgetting it and I know a few other people that do as
+well.
