@@ -2,208 +2,138 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.5 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 024EDC2B9F4
-	for <linux-fstests@archiver.kernel.org>; Fri, 18 Jun 2021 02:04:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8BFA6C48BDF
+	for <linux-fstests@archiver.kernel.org>; Fri, 18 Jun 2021 11:10:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CA54A613B9
-	for <linux-fstests@archiver.kernel.org>; Fri, 18 Jun 2021 02:04:07 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6BAE46128C
+	for <linux-fstests@archiver.kernel.org>; Fri, 18 Jun 2021 11:10:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232046AbhFRCGP (ORCPT
+        id S232255AbhFRLMZ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 17 Jun 2021 22:06:15 -0400
-Received: from szxga02-in.huawei.com ([45.249.212.188]:7481 "EHLO
-        szxga02-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231289AbhFRCGP (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 17 Jun 2021 22:06:15 -0400
-Received: from dggemv703-chm.china.huawei.com (unknown [172.30.72.54])
-        by szxga02-in.huawei.com (SkyGuard) with ESMTP id 4G5hwb5pBWzZjW5;
-        Fri, 18 Jun 2021 10:01:03 +0800 (CST)
-Received: from dggema759-chm.china.huawei.com (10.1.198.201) by
- dggemv703-chm.china.huawei.com (10.3.19.46) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256) id
- 15.1.2176.2; Fri, 18 Jun 2021 10:04:00 +0800
-Received: from [10.174.178.31] (10.174.178.31) by
- dggema759-chm.china.huawei.com (10.1.198.201) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id
- 15.1.2176.2; Fri, 18 Jun 2021 10:03:59 +0800
-Subject: Re: [f2fs-dev] [PATCH] common/rc: f2fs do not support metadata
- journaling
-To:     Chao Yu <chao@kernel.org>
-CC:     <fstests@vger.kernel.org>, <guan@eryu.me>, <yuchao0@huawei.com>,
-        <linux-f2fs-devel@lists.sourceforge.net>
-References: <20210611112211.1408767-1-sunke32@huawei.com>
- <d95c4ac2-50a2-4f08-3940-ac0597266280@huawei.com>
- <258b1228-2a8a-e4c1-cf6c-695f49c0cca0@kernel.org>
- <963534d2-5a42-c4c6-8bc6-013f120ecffd@huawei.com>
- <6d94d6c5-ca25-8c65-7e8a-b4c9c9b851dc@kernel.org>
-From:   Sun Ke <sunke32@huawei.com>
-Message-ID: <63452cce-3225-c0a4-f314-24e11527c8f2@huawei.com>
-Date:   Fri, 18 Jun 2021 10:03:59 +0800
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
- Thunderbird/78.6.1
-MIME-Version: 1.0
-In-Reply-To: <6d94d6c5-ca25-8c65-7e8a-b4c9c9b851dc@kernel.org>
-Content-Type: text/plain; charset="utf-8"; format=flowed
+        Fri, 18 Jun 2021 07:12:25 -0400
+Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:15168 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S229848AbhFRLMZ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 18 Jun 2021 07:12:25 -0400
+Received: from pps.filterd (m0098399.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.0.43/8.16.0.43) with SMTP id 15IB3vkm143066;
+        Fri, 18 Jun 2021 07:10:15 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=from : to : cc : subject
+ : date : message-id : content-transfer-encoding : mime-version; s=pp1;
+ bh=0Q3FRX/7HjKJFmTWKrRE7B7+g8htEoDzqBQ2O+XLxm0=;
+ b=hrU/2bzpSvbAFms1ySDose6xSb80ABNtXvnS7fsPjWaqT3mAFfGAQi4EavPiguyjXuXb
+ 7hysUDS6cOGS3qkYNTgaegDqJfOQ4Ywxp8BXr5f4+jEx6Q+ye79HDoZH2twhuIfM0sUK
+ 1Uf2+hq7HpqzW71jSvwio7VYl2rmi+dBjbB+ZILHSJEEb49wDxNXQKCVaUMZJgDse4fM
+ e1/RF8pLf3xX3DU8cPBJAdkVdoW99KLpFuj6gTBfvjTRunMYn+DcUDhXfXjVj2rzKdRI
+ sR7mbNYgSPKV2XOL0mCfiLVkw6mrE0UvdlnOy0GCzUMO1ywnCRpObs9J0b99NTKgqAKj rQ== 
+Received: from ppma03ams.nl.ibm.com (62.31.33a9.ip4.static.sl-reverse.com [169.51.49.98])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 398sjh9fvk-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Fri, 18 Jun 2021 07:10:14 -0400
+Received: from pps.filterd (ppma03ams.nl.ibm.com [127.0.0.1])
+        by ppma03ams.nl.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 15IB8Zm7028726;
+        Fri, 18 Jun 2021 11:10:12 GMT
+Received: from b06cxnps4075.portsmouth.uk.ibm.com (d06relay12.portsmouth.uk.ibm.com [9.149.109.197])
+        by ppma03ams.nl.ibm.com with ESMTP id 394mj8u8s3-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Fri, 18 Jun 2021 11:10:12 +0000
+Received: from b06wcsmtp001.portsmouth.uk.ibm.com (b06wcsmtp001.portsmouth.uk.ibm.com [9.149.105.160])
+        by b06cxnps4075.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 15IBAAeO9175398
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Fri, 18 Jun 2021 11:10:10 GMT
+Received: from b06wcsmtp001.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id E86C0A4065;
+        Fri, 18 Jun 2021 11:10:09 +0000 (GMT)
+Received: from b06wcsmtp001.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id 93003A4062;
+        Fri, 18 Jun 2021 11:10:09 +0000 (GMT)
+Received: from localhost (unknown [9.85.68.238])
+        by b06wcsmtp001.portsmouth.uk.ibm.com (Postfix) with ESMTP;
+        Fri, 18 Jun 2021 11:10:09 +0000 (GMT)
+From:   Ritesh Harjani <riteshh@linux.ibm.com>
+To:     "Theodore Ts'o" <tytso@mit.edu>
+Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
+        Ritesh Harjani <riteshh@linux.ibm.com>
+Subject: [PATCH 0/9] kvmxfstests: Add 64K related configs for Power
+Date:   Fri, 18 Jun 2021 16:39:51 +0530
+Message-Id: <cover.1624007533.git.riteshh@linux.ibm.com>
+X-Mailer: git-send-email 2.31.1
+X-TM-AS-GCONF: 00
+X-Proofpoint-ORIG-GUID: ABKoUBnxMl0QSeHt9GzuP2UIw5rGIm5z
+X-Proofpoint-GUID: ABKoUBnxMl0QSeHt9GzuP2UIw5rGIm5z
 Content-Transfer-Encoding: 8bit
-X-Originating-IP: [10.174.178.31]
-X-ClientProxiedBy: dggems702-chm.china.huawei.com (10.3.19.179) To
- dggema759-chm.china.huawei.com (10.1.198.201)
-X-CFilter-Loop: Reflected
+X-Proofpoint-UnRewURL: 0 URL was un-rewritten
+MIME-Version: 1.0
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.391,18.0.790
+ definitions=2021-06-18_04:2021-06-18,2021-06-18 signatures=0
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 lowpriorityscore=0
+ priorityscore=1501 phishscore=0 mlxscore=0 mlxlogscore=830 adultscore=0
+ suspectscore=0 malwarescore=0 bulkscore=0 impostorscore=0 spamscore=0
+ clxscore=1015 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2104190000 definitions=main-2106180064
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+Hello,
+
+These patches adds and/or fixes configs for 64K blocksize/pagesize related
+platform (e.g. Power). This series adds some new configs for btrfs and 64K
+related configs for ext4/xfs/btrfs.
+
+There are also some fixes related to dax and related to SCRATCH_DEV_POOL
+env variable is used by btrfs.
+
+Then the last patch adds some extra packages which many a times are useful while
+manual debugging/testing.
 
 
-在 2021/6/18 7:46, Chao Yu 写道:
-> On 2021/6/17 11:45, Sun Ke wrote:
->>
->>
->> 在 2021/6/16 20:36, Chao Yu 写道:
->>> On 2021/6/15 11:25, Sun Ke wrote:
->>>>
->>>>
->>>> 在 2021/6/11 19:22, Sun Ke 写道:
->>>>> In generic/50, touch 100 files, go down the fs immediately, Then 
->>>>> umount
->>>>> and set the disk readi-only. Try to mount it again without \-o
->>>>> norecovery\, it should fail, because it can not recovery on a 
->>>>> read-only
->>>>> device. But f2fs mount successfully and the test fail.
->>>>>
->>>>> f2fs seems do not support metadata journaling.
->>>
->>> It looks not correct.
->>>
->>> FYI,
->>>
->>> https://lkml.org/lkml/2021/3/23/75
->>>
->>> Thanks,
->> Your patch should fix this bug, but it still fail in 5.13.0-rc5.
-> 
-> It's due to that patch was not merged, please check details in that thread.
-> 
-> Thanks,
+Reason for ccing fstests:-
+=========================
+In past I saw kvmxfstests patches going via fstests. One other reason
+for sending it via fstests was to get a feedback on the btrfs & XFS configs.
+We have started using kvmxfstests for filesystem testing of ext4/XFS/btrfs on
+Power platform and are planning to scale it further to tests weekly upstream
+releases too. Thus if there are any suggestions around other configs (mainly for
+btrfs and/or XFS) which must (good to include) be tested as part of filesystem
+testing, then I will be happy to add those into kvmxfstests suite configs.
+For e.g. look at different ext4 configs [1].
 
-CP_UMOUNT_FLAG decide if it need to recovery. Without your patch, it 
-only print the waring message and both goto reset_checkpoint. I think I 
-have got the root reason.
+[1]: https://github.com/tytso/xfstests-bld/tree/master/kvm-xfstests/test-appliance/files/root/fs/ext4/cfg
 
-Thanks,
-Sun Ke
-> 
->>
->> [root@localhost xfstests-dev]# ./check tests/generic/050
->> FSTYP         -- f2fs
->> PLATFORM      -- Linux/x86_64 localhost 5.13.0-rc5 #2 SMP Wed Jun 16 
->> 20:36:54 CST 2021
->> MKFS_OPTIONS  -- /dev/sdb
->> MOUNT_OPTIONS -- -o acl,user_xattr /dev/sdb /tmp/scratch
->>
->> generic/050 3s ... - output mismatch (see 
->> /root/work/xfstests-dev/results//generic/050.out.bad)
->>      --- tests/generic/050.out    2021-05-31 15:37:40.000000000 +0800
->>      +++ /root/work/xfstests-dev/results//generic/050.out.bad    
->> 2021-06-17 11:40:26.107000000 +0800
->>      @@ -13,9 +13,7 @@
->>       setting device read-only
->>       mounting filesystem that needs recovery on a read-only device:
->>       mount: device write-protected, mounting read-only
->>      -mount: cannot mount device read-only
->>       unmounting read-only filesystem
->>      -umount: SCRATCH_DEV: not mounted
->>       mounting filesystem with -o norecovery on a read-only device:
->>      ...
->>      (Run 'diff -u /root/work/xfstests-dev/tests/generic/050.out 
->> /root/work/xfstests-dev/results//generic/050.out.bad'  to see the 
->> entire diff)
->> Ran: generic/050
->> Failures: generic/050
->> Failed 1 of 1 tests
->>
->> Thanks,
->> Sun Ke
->>>
->>>>>
->>>>> Signed-off-by: Sun Ke <sunke32@huawei.com>
->>>>> ---
->>>>>
->>>>> I am not very sure if f2fs do not support metadata journaling.
->>>>>
->>>>> ###
->>>>> before change
->>>>> ###
->>>>> [root@localhost xfstests-dev]# ./check tests/generic/050
->>>>> FSTYP         -- f2fs
->>>>> PLATFORM      -- Linux/x86_64 localhost 5.12.0-rc5-next-20210330 #8 
->>>>> SMP Tue Jun 8 11:09:37 CST 2021
->>>>> MKFS_OPTIONS  -- /dev/sdb
->>>>> MOUNT_OPTIONS -- -o acl,user_xattr /dev/sdb /tmp/scratch
->>>>>
->>>>> generic/050 4s ... - output mismatch (see 
->>>>> /root/work/xfstests-dev/results//generic/050.out.bad)
->>>>>      --- tests/generic/050.out   2021-05-31 15:37:40.000000000 +0800
->>>>>      +++ /root/work/xfstests-dev/results//generic/050.out.bad 
->>>>> 2021-06-11 16:48:19.993000000 +0800
->>>>>      @@ -13,9 +13,7 @@
->>>>>       setting device read-only
->>>>>       mounting filesystem that needs recovery on a read-only device:
->>>>>       mount: device write-protected, mounting read-only
->>>>>      -mount: cannot mount device read-only
->>>>>       unmounting read-only filesystem
->>>>>      -umount: SCRATCH_DEV: not mounted
->>>>>       mounting filesystem with -o norecovery on a read-only device:
->>>>>      ...
->>>>>      (Run 'diff -u /root/work/xfstests-dev/tests/generic/050.out 
->>>>> /root/work/xfstests-dev/results//generic/050.out.bad'  to see the 
->>>>> entire diff)
->>>>> Ran: generic/050
->>>>> Failures: generic/050
->>>>> Failed 1 of 1 tests
->>>>>
->>>>> ###
->>>>> after change
->>>>> ###
->>>>> [root@localhost xfstests-dev]# ./check tests/generic/050
->>>>> FSTYP         -- f2fs
->>>>> PLATFORM      -- Linux/x86_64 localhost 5.12.0-rc5-next-20210330 #8 
->>>>> SMP Tue Jun 8 11:09:37 CST 2021
->>>>> MKFS_OPTIONS  -- /dev/sdb
->>>>> MOUNT_OPTIONS -- -o acl,user_xattr /dev/sdb /tmp/scratch
->>>>>
->>>>> generic/050 4s ...  4s
->>>>> Ran: generic/050
->>>>> Passed all 1 tests
->>>>>
->>>>>
->>>>>
->>>>>   common/rc | 2 +-
->>>>>   1 file changed, 1 insertion(+), 1 deletion(-)
->>>>>
->>>>> diff --git a/common/rc b/common/rc
->>>>> index a0aa7300..428b8b80 100644
->>>>> --- a/common/rc
->>>>> +++ b/common/rc
->>>>> @@ -3543,7 +3543,7 @@ _has_metadata_journaling()
->>>>>       fi
->>>>>       case "$FSTYP" in
->>>>> -    ext2|vfat|msdos|udf|exfat|tmpfs)
->>>>> +    ext2|vfat|msdos|udf|exfat|tmpfs|f2fs)
->>>>>           echo "$FSTYP does not support metadata journaling"
->>>>>           return 1
->>>>>           ;;
->>>>>
->>>>
->>>>
->>>> _______________________________________________
->>>> Linux-f2fs-devel mailing list
->>>> Linux-f2fs-devel@lists.sourceforge.net
->>>> https://lists.sourceforge.net/lists/listinfo/linux-f2fs-devel
->>> .
-> .
+Ritesh Harjani (9):
+  ext4/cfg/dax: Fix for 64K pagesize platform
+  ext4/cfg/64K: Add a 64K related config file
+  ext4/cfg/fast_commit: Add explicit 4k bs option
+  ext4/cfg/fast_commit_64K: Add a config file to test fast_commit with 64K bs
+  xfs/cfg/dax: Fix this config to work on 64K pagesize platform too
+  xfs/cfg/64K: Add a config file with 64K blocksize
+  btrfs/cfg: Add 4k and 64k related configs
+  runtests.sh: Fix when SCRATCH_DEV_POOL is passed
+  xfstests-packages: Add some more packages.
+
+ kvm-xfstests/test-appliance/files/root/fs/btrfs/cfg/4k      | 5 +++++
+ kvm-xfstests/test-appliance/files/root/fs/btrfs/cfg/64k     | 5 +++++
+ kvm-xfstests/test-appliance/files/root/fs/ext4/cfg/64k      | 4 ++++
+ kvm-xfstests/test-appliance/files/root/fs/ext4/cfg/dax      | 4 ++--
+ .../test-appliance/files/root/fs/ext4/cfg/fast_commit       | 2 +-
+ .../test-appliance/files/root/fs/ext4/cfg/fast_commit_64k   | 4 ++++
+ kvm-xfstests/test-appliance/files/root/fs/xfs/cfg/64k       | 3 +++
+ kvm-xfstests/test-appliance/files/root/fs/xfs/cfg/dax       | 2 +-
+ kvm-xfstests/test-appliance/files/root/runtests.sh          | 6 ++++++
+ kvm-xfstests/test-appliance/xfstests-packages               | 4 ++++
+ 10 files changed, 35 insertions(+), 4 deletions(-)
+ create mode 100644 kvm-xfstests/test-appliance/files/root/fs/btrfs/cfg/4k
+ create mode 100644 kvm-xfstests/test-appliance/files/root/fs/btrfs/cfg/64k
+ create mode 100644 kvm-xfstests/test-appliance/files/root/fs/ext4/cfg/64k
+ create mode 100644 kvm-xfstests/test-appliance/files/root/fs/ext4/cfg/fast_commit_64k
+ create mode 100644 kvm-xfstests/test-appliance/files/root/fs/xfs/cfg/64k
+
+--
+2.31.1
+
