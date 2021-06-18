@@ -2,109 +2,68 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A3D51C48BDF
-	for <linux-fstests@archiver.kernel.org>; Fri, 18 Jun 2021 11:31:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3E779C48BE8
+	for <linux-fstests@archiver.kernel.org>; Fri, 18 Jun 2021 13:47:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 76435610CA
-	for <linux-fstests@archiver.kernel.org>; Fri, 18 Jun 2021 11:31:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 21E28613EC
+	for <linux-fstests@archiver.kernel.org>; Fri, 18 Jun 2021 13:47:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232851AbhFRLdy (ORCPT
+        id S234020AbhFRNtd (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 18 Jun 2021 07:33:54 -0400
-Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:18354 "EHLO
-        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S232090AbhFRLdx (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 18 Jun 2021 07:33:53 -0400
-Received: from pps.filterd (m0098419.ppops.net [127.0.0.1])
-        by mx0b-001b2d01.pphosted.com (8.16.0.43/8.16.0.43) with SMTP id 15IB3qaE108345;
-        Fri, 18 Jun 2021 07:31:42 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=from : to : cc : subject
- : date : message-id : in-reply-to : references : mime-version :
- content-transfer-encoding; s=pp1;
- bh=Z5pV4U5jcmPzNryHW53l24ZHOhZpaChlG5/QJvukUp0=;
- b=MWcYsLBAeio+C7whojKMHEw3PfP8mq96mc/8BeQ7zQMYlC3HHHIO7q38i47iD9hng0Ju
- dB467/nFOpaJ+ubxo49tlPodZ3fGnBjTnXR1pt2zu89zcq3q2GhSxL2Gklf/QbU1YtXa
- uX7VQROqfeG1W7sbTE4neYeJ/9HOLrMHlgOcaMzkxIcgaHxMUmcP76WtBALhXpxgwC+G
- XxRRMw+/XJeYwVsMV6l/uaFW7pf6ppG6RhqSrKbZZ1qucyqPHO38rK/7TwYrezWiThSW
- U29UK48iBEBVqY6HSTovCQhiDAo+dpHEQ2J8vaVh/LRKIdyXoyIsgDRYmdkNwIQ9mhfq Jg== 
-Received: from ppma05fra.de.ibm.com (6c.4a.5195.ip4.static.sl-reverse.com [149.81.74.108])
-        by mx0b-001b2d01.pphosted.com with ESMTP id 398sk7sxt1-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Fri, 18 Jun 2021 07:31:42 -0400
-Received: from pps.filterd (ppma05fra.de.ibm.com [127.0.0.1])
-        by ppma05fra.de.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 15IB9SXW010974;
-        Fri, 18 Jun 2021 11:10:24 GMT
-Received: from b06avi18878370.portsmouth.uk.ibm.com (b06avi18878370.portsmouth.uk.ibm.com [9.149.26.194])
-        by ppma05fra.de.ibm.com with ESMTP id 394mj8ht7j-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Fri, 18 Jun 2021 11:10:23 +0000
-Received: from d06av26.portsmouth.uk.ibm.com (d06av26.portsmouth.uk.ibm.com [9.149.105.62])
-        by b06avi18878370.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 15IB9Atb32833926
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Fri, 18 Jun 2021 11:09:10 GMT
-Received: from d06av26.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id AC3B6AE051;
-        Fri, 18 Jun 2021 11:10:21 +0000 (GMT)
-Received: from d06av26.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 56AABAE045;
-        Fri, 18 Jun 2021 11:10:21 +0000 (GMT)
-Received: from localhost (unknown [9.85.68.238])
-        by d06av26.portsmouth.uk.ibm.com (Postfix) with ESMTP;
-        Fri, 18 Jun 2021 11:10:21 +0000 (GMT)
-From:   Ritesh Harjani <riteshh@linux.ibm.com>
-To:     "Theodore Ts'o" <tytso@mit.edu>
-Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
-        Ritesh Harjani <riteshh@linux.ibm.com>
-Subject: [PATCH 9/9] xfstests-packages: Add some more packages.
-Date:   Fri, 18 Jun 2021 16:40:00 +0530
-Message-Id: <553d8fb3aea3ceb46bbc95adf2fd69e7c8045024.1624007533.git.riteshh@linux.ibm.com>
-X-Mailer: git-send-email 2.31.1
-In-Reply-To: <cover.1624007533.git.riteshh@linux.ibm.com>
-References: <cover.1624007533.git.riteshh@linux.ibm.com>
+        Fri, 18 Jun 2021 09:49:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35804 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S233840AbhFRNtc (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 18 Jun 2021 09:49:32 -0400
+Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AB9BCC061574;
+        Fri, 18 Jun 2021 06:47:22 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
+        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=lj5PTg0GsLkU5Wu2Amxu+zuiAqxtHs5LPvKCKNYwLtA=; b=VK5fVdr/0vJiRU55xExlz7w2xO
+        ZfVWp/bVsadseqA08ebqn/saO+P6tseb4W8tFXbAUZMLxWXBrCHFYFHFwGCS2fwdUj3vLR+2SJCGF
+        H0Ey63ReA3RsBdP9++hxs6/4tAyyqCPFdrqqQL7uSezYx6V0qdmKOrvIB7im9nQ7YY5TWyWHFk+mY
+        enuJwXxqvgpVF1tBm6JBGXRF/7n4EfWnBcl6zRfren9DVIZvHvtObcLGBMVjgL7JIJJ1oN2sIvpmD
+        1b6BzFnCO3azlCCzNcgEoNpmCrDx2nARUdP0Q5xn7A7HUnNA+PH8B7XlNSvBrHQ9ChfPKRp3nTeum
+        kVSt0YlQ==;
+Received: from hch by casper.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
+        id 1luEoS-00AJlf-9U; Fri, 18 Jun 2021 13:45:51 +0000
+Date:   Fri, 18 Jun 2021 14:45:36 +0100
+From:   Christoph Hellwig <hch@infradead.org>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     Christoph Hellwig <hch@infradead.org>, guaneryu@gmail.com,
+        Chandan Babu R <chandanrlinux@gmail.com>,
+        Allison Henderson <allison.henderson@oracle.com>,
+        linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me,
+        amir73il@gmail.com, ebiggers@kernel.org
+Subject: Re: [PATCH 07/13] fstests: automatically generate group files
+Message-ID: <YMyjgGEuLLcid9i+@infradead.org>
+References: <162370433910.3800603.9623820748404628250.stgit@locust>
+ <162370437774.3800603.15907676407985880109.stgit@locust>
+ <YMmpDGT9b4dBdSh2@infradead.org>
+ <20210617001320.GK158209@locust>
+ <YMsAEQsNhI1Y5JR8@infradead.org>
+ <20210617171500.GC158186@locust>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-TM-AS-GCONF: 00
-X-Proofpoint-GUID: CtTL84WbcIdcMQeQr4aF7H7V34-lxaC1
-X-Proofpoint-ORIG-GUID: CtTL84WbcIdcMQeQr4aF7H7V34-lxaC1
-X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.391,18.0.790
- definitions=2021-06-18_04:2021-06-18,2021-06-18 signatures=0
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 malwarescore=0 mlxscore=0
- impostorscore=0 mlxlogscore=999 lowpriorityscore=0 bulkscore=0
- phishscore=0 spamscore=0 adultscore=0 suspectscore=0 priorityscore=1501
- clxscore=1015 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2104190000 definitions=main-2106180064
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210617171500.GC158186@locust>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by casper.infradead.org. See http://www.infradead.org/rpr.html
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-libnuma-dev is required otherwise fio complaints and failes to start
-(seen on ppc64el)
-ndctl is required for creating pmem namespaces.
-remaining are good to have packages in case if any editing is required
-when debugging/accessing shell using telnet.
+On Thu, Jun 17, 2021 at 10:15:00AM -0700, Darrick J. Wong wrote:
+> I suppose I could make the '-g' switch call 'make group.list', though
+> that's just going to increase the amount of noise for anyone like me who
+> runs fstests with a mostly readonly rootfs.
 
-Signed-off-by: Ritesh Harjani <riteshh@linux.ibm.com>
----
- kvm-xfstests/test-appliance/xfstests-packages | 4 ++++
- 1 file changed, 4 insertions(+)
-
-diff --git a/kvm-xfstests/test-appliance/xfstests-packages b/kvm-xfstests/test-appliance/xfstests-packages
-index 77dc2a8..85ca6a6 100644
---- a/kvm-xfstests/test-appliance/xfstests-packages
-+++ b/kvm-xfstests/test-appliance/xfstests-packages
-@@ -53,3 +53,7 @@ udftools
- uuid-runtime
- udev
- xz-utils
-+libnuma-dev
-+ndctl
-+git
-+vim
---
-2.31.1
-
+Just stick to the original version and see if anyone screams loud
+enough.  Of course the best long-term plan would be to not even generate
+group files by just calculate the list in-memory.
