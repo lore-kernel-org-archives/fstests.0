@@ -7,47 +7,47 @@ X-Spam-Status: No, score=-17.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3F019C2B9F4
-	for <linux-fstests@archiver.kernel.org>; Sat, 19 Jun 2021 14:30:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C283EC2B9F4
+	for <linux-fstests@archiver.kernel.org>; Sat, 19 Jun 2021 14:40:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 15FCF61264
-	for <linux-fstests@archiver.kernel.org>; Sat, 19 Jun 2021 14:30:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9CEA5611B0
+	for <linux-fstests@archiver.kernel.org>; Sat, 19 Jun 2021 14:40:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233218AbhFSOcU (ORCPT
+        id S234353AbhFSOme (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 19 Jun 2021 10:32:20 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:60443 "EHLO
+        Sat, 19 Jun 2021 10:42:34 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:34901 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S230441AbhFSOcT (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 19 Jun 2021 10:32:19 -0400
+        by vger.kernel.org with ESMTP id S233240AbhFSOme (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 19 Jun 2021 10:42:34 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1624113008;
+        s=mimecast20190719; t=1624113622;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=wE4eLywVcQD0W09b0cmLW30f9rKH3LlQ6ExY8Fjfk+E=;
-        b=DlYRTrD64xYxPS5NOclfAbvu3YFDXweiAlT5nhgOKif8uxgMsbltDmFw3WywDsH30lRrMa
-        /MCUiWI4wEat2sUSqsx0jj/myzy34WsGsVE0T77urlKhEPCI9xemmOBah3P6NfVNlDtYhz
-        A4zGYY3lQDm/q2Fonq6HjCQ2E5C0fpg=
+        bh=AhwC94NU+AooAsiRNaz8xK2ET44sgqkIi2Qnl6l5Sqo=;
+        b=Yjp6SO8/Qa3zNvhUW+fL+Clk0b6P899EAo9wvOmMLmQ1+1L7Ai6FQ4AuqvO7lfTuBXesSS
+        T8svAwhK6DdYLIcQSsmrq/2hEPl3Zd9IEmZ3XNKrjDi50Dd2k1RO5ddNuQ63tgHXNqn/N/
+        Fd4jqSileVlg5zJ3FEDfxVLB6LG8AS4=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-123-UwyhqZc-M9K-DORvVISHDw-1; Sat, 19 Jun 2021 10:30:06 -0400
-X-MC-Unique: UwyhqZc-M9K-DORvVISHDw-1
-Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
+ us-mta-206-lrnq7RJKO_uPOlLXiu0uXQ-1; Sat, 19 Jun 2021 10:40:21 -0400
+X-MC-Unique: lrnq7RJKO_uPOlLXiu0uXQ-1
+Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.phx2.redhat.com [10.5.11.23])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 3668E1835AC2;
-        Sat, 19 Jun 2021 14:30:05 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 9CECA1084F40;
+        Sat, 19 Jun 2021 14:40:20 +0000 (UTC)
 Received: from localhost (unknown [10.66.61.36])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 8D9EB687D5;
-        Sat, 19 Jun 2021 14:30:04 +0000 (UTC)
-Date:   Sat, 19 Jun 2021 22:48:59 +0800
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 1611919C45;
+        Sat, 19 Jun 2021 14:40:19 +0000 (UTC)
+Date:   Sat, 19 Jun 2021 22:59:15 +0800
 From:   Zorro Lang <zlang@redhat.com>
 To:     riteshh <riteshh@linux.ibm.com>
 Cc:     fstests@vger.kernel.org
 Subject: Re: [PATCH v3] generic: test small swapfile without page-aligned
  contiguous blocks
-Message-ID: <20210619144859.GL2978781@localhost.localdomain>
+Message-ID: <20210619145915.GM2978781@localhost.localdomain>
 Mail-Followup-To: riteshh <riteshh@linux.ibm.com>, fstests@vger.kernel.org
 References: <20210617050525.902967-1-zlang@redhat.com>
  <20210619011059.5elo3qtmvlp225oo@riteshh-domain>
@@ -56,7 +56,7 @@ Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 In-Reply-To: <20210619011059.5elo3qtmvlp225oo@riteshh-domain>
 User-Agent: Mutt/1.10.1 (2018-07-13)
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
+X-Scanned-By: MIMEDefang 2.84 on 10.5.11.23
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
@@ -85,20 +85,17 @@ On Sat, Jun 19, 2021 at 06:40:59AM +0530, riteshh wrote:
 > +		status=1
 > +		echo "Allocated swap size($swapsize) cannot be greater than swapfile size($filesize)"
 > +	fi
-> 
-> [1]: https://patchwork.kernel.org/project/fstests/patch/e1f9798462ef60648db24b6291e1b149b114f2f2.1622105066.git.riteshh@linux.ibm.com/
 
-Hi Ritesh,
-
-Thanks for your reviewing, you're right, I didn't test on upstream kernel. I just
-tried to reproduce that panic on old kernel (of RHEL-8).
-
-I'll give upstream kernel a test, then change this case according to your
-suggestion.
+Hmm.. BTW, do we really need to check this? How about we expect to get EINVAL from
+"$here/src/swapon" $SWAPFILE"?  Due to in fixed kernel, this command will print
+"swapon: Invalid argument", and that's your patch does (return -EINVAL). But in
+unfixed kernel, this test won't get "EINVAL" or get panic.
 
 Thanks,
 Zorro
 
+> 
+> [1]: https://patchwork.kernel.org/project/fstests/patch/e1f9798462ef60648db24b6291e1b149b114f2f2.1622105066.git.riteshh@linux.ibm.com/
 > 
 > -ritesh
 > 
