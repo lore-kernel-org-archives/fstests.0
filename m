@@ -2,142 +2,107 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-17.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8F238C48BDF
-	for <linux-fstests@archiver.kernel.org>; Sat, 19 Jun 2021 01:24:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3F019C2B9F4
+	for <linux-fstests@archiver.kernel.org>; Sat, 19 Jun 2021 14:30:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 63F8E61078
-	for <linux-fstests@archiver.kernel.org>; Sat, 19 Jun 2021 01:24:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 15FCF61264
+	for <linux-fstests@archiver.kernel.org>; Sat, 19 Jun 2021 14:30:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235314AbhFSB0y (ORCPT
+        id S233218AbhFSOcU (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 18 Jun 2021 21:26:54 -0400
-Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:41388 "EHLO
-        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S234601AbhFSB0y (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 18 Jun 2021 21:26:54 -0400
-Received: from pps.filterd (m0098419.ppops.net [127.0.0.1])
-        by mx0b-001b2d01.pphosted.com (8.16.0.43/8.16.0.43) with SMTP id 15J13q64162536
-        for <fstests@vger.kernel.org>; Fri, 18 Jun 2021 21:24:43 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=date : from : to : cc :
- subject : message-id : references : content-type : in-reply-to :
- mime-version; s=pp1; bh=vOXPH2ITq5BrWDcjH0zMjCkPFcJ37Ip4JQRMmQOaDSs=;
- b=Ivzn//Pp/+B+YoDd+0hRvem5W5+1DlzXlR8Wb/m5b0TGm2FLAnkG6997C61VV0ALF1Yo
- ACdwiDEyKLcKVSGHGqMtR08ffnDGvNfkwPuSsLh961kG+ZcTzNpCYO7sgFgCIT4/+gTc
- dy210i6tBUudzclYFX/Vgf7llB/SQJyuh/8v6vO0xXqDMVeLyn0qz1hXJFvMFcCeBhGW
- tQkGptwFtamw7a0kDxk/d4PJvAxXZ9TcuZ/g9lwjZdN8ef5eYjytVtENudGMMXTaoW/R
- pg9NGeKN7Q87FllFxHyu4PotTOmujCS61zRSOtBccggG49EjNBJPQFhBuWo/Zy3X2p4i eQ== 
-Received: from pps.reinject (localhost [127.0.0.1])
-        by mx0b-001b2d01.pphosted.com with ESMTP id 3994mdakx6-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT)
-        for <fstests@vger.kernel.org>; Fri, 18 Jun 2021 21:24:43 -0400
-Received: from m0098419.ppops.net (m0098419.ppops.net [127.0.0.1])
-        by pps.reinject (8.16.0.43/8.16.0.43) with SMTP id 15J15EEH167121
-        for <fstests@vger.kernel.org>; Fri, 18 Jun 2021 21:24:43 -0400
-Received: from ppma03fra.de.ibm.com (6b.4a.5195.ip4.static.sl-reverse.com [149.81.74.107])
-        by mx0b-001b2d01.pphosted.com with ESMTP id 3994mdakwk-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Fri, 18 Jun 2021 21:24:43 -0400
-Received: from pps.filterd (ppma03fra.de.ibm.com [127.0.0.1])
-        by ppma03fra.de.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 15J1OT5u008967;
-        Sat, 19 Jun 2021 01:24:41 GMT
-Received: from b06cxnps4076.portsmouth.uk.ibm.com (d06relay13.portsmouth.uk.ibm.com [9.149.109.198])
-        by ppma03fra.de.ibm.com with ESMTP id 394mj91y1w-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Sat, 19 Jun 2021 01:24:41 +0000
-Received: from d06av26.portsmouth.uk.ibm.com (d06av26.portsmouth.uk.ibm.com [9.149.105.62])
-        by b06cxnps4076.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 15J1Ociq31982040
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Sat, 19 Jun 2021 01:24:39 GMT
-Received: from d06av26.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id D86F8AE053;
-        Sat, 19 Jun 2021 01:24:38 +0000 (GMT)
-Received: from d06av26.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 8747EAE045;
-        Sat, 19 Jun 2021 01:24:38 +0000 (GMT)
-Received: from localhost (unknown [9.199.33.55])
-        by d06av26.portsmouth.uk.ibm.com (Postfix) with ESMTP;
-        Sat, 19 Jun 2021 01:24:38 +0000 (GMT)
-Date:   Sat, 19 Jun 2021 06:54:37 +0530
-From:   riteshh <riteshh@linux.ibm.com>
-To:     Zorro Lang <zlang@redhat.com>
+        Sat, 19 Jun 2021 10:32:20 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:60443 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S230441AbhFSOcT (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 19 Jun 2021 10:32:19 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1624113008;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=wE4eLywVcQD0W09b0cmLW30f9rKH3LlQ6ExY8Fjfk+E=;
+        b=DlYRTrD64xYxPS5NOclfAbvu3YFDXweiAlT5nhgOKif8uxgMsbltDmFw3WywDsH30lRrMa
+        /MCUiWI4wEat2sUSqsx0jj/myzy34WsGsVE0T77urlKhEPCI9xemmOBah3P6NfVNlDtYhz
+        A4zGYY3lQDm/q2Fonq6HjCQ2E5C0fpg=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-123-UwyhqZc-M9K-DORvVISHDw-1; Sat, 19 Jun 2021 10:30:06 -0400
+X-MC-Unique: UwyhqZc-M9K-DORvVISHDw-1
+Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 3668E1835AC2;
+        Sat, 19 Jun 2021 14:30:05 +0000 (UTC)
+Received: from localhost (unknown [10.66.61.36])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 8D9EB687D5;
+        Sat, 19 Jun 2021 14:30:04 +0000 (UTC)
+Date:   Sat, 19 Jun 2021 22:48:59 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     riteshh <riteshh@linux.ibm.com>
 Cc:     fstests@vger.kernel.org
 Subject: Re: [PATCH v3] generic: test small swapfile without page-aligned
  contiguous blocks
-Message-ID: <20210619012437.w4n4dkeruypcbzfh@riteshh-domain>
+Message-ID: <20210619144859.GL2978781@localhost.localdomain>
+Mail-Followup-To: riteshh <riteshh@linux.ibm.com>, fstests@vger.kernel.org
 References: <20210617050525.902967-1-zlang@redhat.com>
  <20210619011059.5elo3qtmvlp225oo@riteshh-domain>
+MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 In-Reply-To: <20210619011059.5elo3qtmvlp225oo@riteshh-domain>
-X-TM-AS-GCONF: 00
-X-Proofpoint-GUID: H2k3DFRHh2p8ih1PJLREANukib3JcDLW
-X-Proofpoint-ORIG-GUID: 6m22dwcLvT1UZ4oMNbA2VGA5swklATgK
-X-Proofpoint-UnRewURL: 0 URL was un-rewritten
-MIME-Version: 1.0
-X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.391,18.0.790
- definitions=2021-06-18_13:2021-06-18,2021-06-18 signatures=0
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 adultscore=0
- lowpriorityscore=0 mlxlogscore=999 impostorscore=0 mlxscore=0
- suspectscore=0 priorityscore=1501 spamscore=0 clxscore=1015 bulkscore=0
- phishscore=0 malwarescore=0 classifier=spam adjust=0 reason=mlx
- scancount=1 engine=8.12.0-2104190000 definitions=main-2106190003
+User-Agent: Mutt/1.10.1 (2018-07-13)
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 21/06/19 06:40AM, riteshh wrote:
+On Sat, Jun 19, 2021 at 06:40:59AM +0530, riteshh wrote:
 > On 21/06/17 01:05PM, Zorro Lang wrote:
 > > If a swapfile doesn't contain even a single page-aligned contiguous
 > > range of blocks, it's an invalid swapfile, and might cause kernel
 > > issue. This case covered commit 5808fecc5723 ("iomap: Fix negative
 > > assignment to unsigned sis->pages in iomap_swapfile_activate").
->
+> 
 > Hi Zorro,
->
+> 
 > Sorry for getting late on this. So can you reproduce the issue described in the
 > patch on latest upstream kernel too w/o the above kernel fix with this fstest?
->
+> 
 > So how I remember it, this fix on older kernel prevented a kernel panic.
 > But on latest kernel it prevented from adding a fake hugesize swapfile.
 > In your test, I don't see a test for checking whether the swapfile which was
 > getting added is of the appropriate size or not. Note that this was only
 > happening with a tiny swapfile of 1 blocksize(totalsize) only.
-
-Update -
-tiny swapfile of 2 pages. 1st page is reserved for swap headers I guess.
-So I was using below logic, to fcollapse 1 block at the end of the every page.
-And make sure that we allocated the swapfile with those extra blocks at creation
-time, to get the swapfile size to match exact 2 pages.
-
-Below logic may help make it more clear.
-
-+$XFS_IO_PROG -f -c "pwrite 0 $(($PS + $PS + $BS + $BS))" -c fsync $SWAPFILE >> $seqres.full
-+$XFS_IO_PROG -c "fcollapse $(($PS - $BS)) $BS" $SWAPFILE >> $seqres.full
-+$XFS_IO_PROG -c "fcollapse $(($PS*2 - $BS*2)) $BS" $SWAPFILE >> $seqres.full
-+$CHATTR_PROG +C $SWAPFILE >> $seqres.full 2>&1
-+"$here/src/mkswap" $SWAPFILE
-
-
--ritesh
-
->
+> 
 > If you take a look at [1], we are also checking for
 > +	# error case
 > +	if [ $swapsize -gt $filesize ]; then
 > +		status=1
 > +		echo "Allocated swap size($swapsize) cannot be greater than swapfile size($filesize)"
 > +	fi
->
+> 
 > [1]: https://patchwork.kernel.org/project/fstests/patch/e1f9798462ef60648db24b6291e1b149b114f2f2.1622105066.git.riteshh@linux.ibm.com/
->
+
+Hi Ritesh,
+
+Thanks for your reviewing, you're right, I didn't test on upstream kernel. I just
+tried to reproduce that panic on old kernel (of RHEL-8).
+
+I'll give upstream kernel a test, then change this case according to your
+suggestion.
+
+Thanks,
+Zorro
+
+> 
 > -ritesh
->
->
+> 
+> 
 > >
 > > Signed-off-by: Zorro Lang <zlang@redhat.com>
 > > ---
@@ -265,3 +230,5 @@ Below logic may help make it more clear.
 > > --
 > > 2.31.1
 > >
+> 
+
