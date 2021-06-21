@@ -6,39 +6,39 @@ X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
 	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 00C17C48BE5
-	for <linux-fstests@archiver.kernel.org>; Mon, 21 Jun 2021 05:21:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E788FC48BE5
+	for <linux-fstests@archiver.kernel.org>; Mon, 21 Jun 2021 05:26:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CF9896100A
-	for <linux-fstests@archiver.kernel.org>; Mon, 21 Jun 2021 05:20:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BDE8061156
+	for <linux-fstests@archiver.kernel.org>; Mon, 21 Jun 2021 05:26:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229641AbhFUFXM (ORCPT
+        id S229661AbhFUF2W (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 21 Jun 2021 01:23:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47256 "EHLO
+        Mon, 21 Jun 2021 01:28:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48388 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229486AbhFUFXM (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 21 Jun 2021 01:23:12 -0400
+        with ESMTP id S229486AbhFUF2V (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 21 Jun 2021 01:28:21 -0400
 Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 83671C061574;
-        Sun, 20 Jun 2021 22:20:58 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D8662C061574;
+        Sun, 20 Jun 2021 22:26:07 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
         d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
         References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
         Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=RmnGNYxD0DXeHEZ0u+JkPf/yQlVZ0wR0OQWyNvlyvT0=; b=ra0YgzVxF/qjRM0r7jv9fdpTnJ
-        QFSsbQwOEJPp6ih/EpqW4dvMtzd+ijGq8+hsU3RDNIMH3UXzQ6bWwL/ED0mFWsIVmu0DyO3Cwvrbs
-        FIPCBLvC5ERy8FTUHdsSkUtCFp4WPXSEXZrQP6Mp3LavfCOBuwpA3uWb30kSsaOOg6SuT3Ze6LiAq
-        JxbHE+y7NOj2amFGO1LhZSZYdm10vdlE29HO2N1CqdeqtjicSn9lJ04bJiTvkBaeG9excuJHmTITx
-        qFu3l5RCytbcb+SBpyYoeYzcV1A3u4C7Q0zl0Mne1rSNz/nLnK/dKpGjHE1BDaJOlu963vOX4Wa2B
-        yz7AZhSA==;
+        bh=6T7KfXP3oFEb52sQgAVbd3KwsqUgUH+8ZFfQLlGrDgA=; b=St3U462J50H6LgdS0slzkgXo2S
+        56yO45Wqj/+f86xeKHXx/nb/D9ci4tlMkXEwQpcAE7vHbpQJUZStBpNJqUmYGXbvNhvvagKGDVhbp
+        2+xYq/vEzQ0/oXKJ+zCVgGsIVQS23C6Ivjjev4hGFDDQFN1w5yATsBDAVw6R5Iucqx3KBkIPUCOfJ
+        dP/FqzVtFL3u4zr3T+ZB55B2Q9955/J/o664tSMUYGUyAmR/nFfWtIQRrBAQnzRaWhvWEvDzDcOpa
+        GcxhOF1oIM+MX71g46HC6WUpUqH48wrHFLiIfHwClEgGN/hP0zjbnwKG2idZXtscNGkW9lMZqEC5u
+        bPIeBymA==;
 Received: from hch by casper.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1lvCLy-00CkLs-26; Mon, 21 Jun 2021 05:20:18 +0000
-Date:   Mon, 21 Jun 2021 06:20:10 +0100
+        id 1lvCQs-00CkYh-OJ; Mon, 21 Jun 2021 05:25:20 +0000
+Date:   Mon, 21 Jun 2021 06:25:14 +0100
 From:   Christoph Hellwig <hch@infradead.org>
-To:     Amir Goldstein <amir73il@gmail.com>
-Cc:     Christoph Hellwig <hch@infradead.org>,
-        "Darrick J. Wong" <djwong@kernel.org>,
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     Amir Goldstein <amir73il@gmail.com>,
+        Christoph Hellwig <hch@infradead.org>,
         Eryu Guan <guaneryu@gmail.com>,
         Chandan Babu R <chandanrlinux@gmail.com>,
         Allison Henderson <allison.henderson@oracle.com>,
@@ -46,7 +46,7 @@ Cc:     Christoph Hellwig <hch@infradead.org>,
         fstests <fstests@vger.kernel.org>, Eryu Guan <guan@eryu.me>,
         ebiggers@kernel.org
 Subject: Re: [PATCH 07/13] fstests: automatically generate group files
-Message-ID: <YNAhip+sLWk7B4ZV@infradead.org>
+Message-ID: <YNAiutsL1f/KoBXM@infradead.org>
 References: <162370433910.3800603.9623820748404628250.stgit@locust>
  <162370437774.3800603.15907676407985880109.stgit@locust>
  <YMmpDGT9b4dBdSh2@infradead.org>
@@ -55,19 +55,32 @@ References: <162370433910.3800603.9623820748404628250.stgit@locust>
  <20210617171500.GC158186@locust>
  <YMyjgGEuLLcid9i+@infradead.org>
  <CAOQ4uxjvkJh2XcfDgj7g+JUkFXEc36_6YOKQHJ=pX2hpGfUDhQ@mail.gmail.com>
+ <20210618155630.GE158209@locust>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAOQ4uxjvkJh2XcfDgj7g+JUkFXEc36_6YOKQHJ=pX2hpGfUDhQ@mail.gmail.com>
+In-Reply-To: <20210618155630.GE158209@locust>
 X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by casper.infradead.org. See http://www.infradead.org/rpr.html
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Jun 18, 2021 at 06:32:18PM +0300, Amir Goldstein wrote:
-> > Just stick to the original version and see if anyone screams loud
+On Fri, Jun 18, 2021 at 08:56:30AM -0700, Darrick J. Wong wrote:
+> On Fri, Jun 18, 2021 at 06:32:18PM +0300, Amir Goldstein wrote:
+> > On Fri, Jun 18, 2021 at 4:47 PM Christoph Hellwig <hch@infradead.org> wrote:
+> > >
+> > > On Thu, Jun 17, 2021 at 10:15:00AM -0700, Darrick J. Wong wrote:
+> > > > I suppose I could make the '-g' switch call 'make group.list', though
+> > > > that's just going to increase the amount of noise for anyone like me who
+> > > > runs fstests with a mostly readonly rootfs.
+> > >
+> > > Just stick to the original version and see if anyone screams loud
+> > 
+> > What is the original version?
 > 
-> What is the original version?
+> Assuming the developer is smart enough to run 'make all install' before
+> running fstests.
 
-The patch that Darrick posted, which requires make to be run to
-generatethe group files.
+So install is also required now?  I have never before installed xfstests
+I think.
+
