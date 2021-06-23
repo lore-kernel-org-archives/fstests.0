@@ -2,118 +2,75 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-8.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E669BC2B9F4
-	for <linux-fstests@archiver.kernel.org>; Tue, 22 Jun 2021 18:18:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DB64EC2B9F4
+	for <linux-fstests@archiver.kernel.org>; Wed, 23 Jun 2021 02:02:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C933F6128C
-	for <linux-fstests@archiver.kernel.org>; Tue, 22 Jun 2021 18:18:50 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BB76B6135A
+	for <linux-fstests@archiver.kernel.org>; Wed, 23 Jun 2021 02:02:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230338AbhFVSVF (ORCPT
+        id S230136AbhFWCEo (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 22 Jun 2021 14:21:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42398 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229612AbhFVSVF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 22 Jun 2021 14:21:05 -0400
-Received: from mail-pj1-x102d.google.com (mail-pj1-x102d.google.com [IPv6:2607:f8b0:4864:20::102d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 224F4C061574
-        for <fstests@vger.kernel.org>; Tue, 22 Jun 2021 11:18:48 -0700 (PDT)
-Received: by mail-pj1-x102d.google.com with SMTP id bb20so8395093pjb.3
-        for <fstests@vger.kernel.org>; Tue, 22 Jun 2021 11:18:48 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=1u8CC3QA7jrUZcmb98lKK5u9LYwITi96Hai5lwcXiPs=;
-        b=fQBjoR2y/ANdNBuLFktBzEFPY63uvtShx3yq1Sloxw1meS7tpgz+NqabYFSXq50Rxz
-         jvmradX1JQN2UnEzr8OXFFc3xoVnzMA08htn5zVknFxwxVCNBi4d7Of9anFCwu/WfQhJ
-         kvYluNFdpwf8fU1fzc/RKP0DWHWw9tfsCcUloFfu9+njcINoe+JKiFwH4+CU7b+nJlwC
-         Y7FZ6fTjkEVw9qDhktHshoiEy4KeaoVH18ZTjLyrIYmKIL7KaCIn+7sz/fD8EkIwHfDd
-         3qvAe7+kwCXi+96j+dxYQcZnWvgOOhM7oapEoByVt4bD4BVs+r5pcpavv/NVy821rhxP
-         C7Ng==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=1u8CC3QA7jrUZcmb98lKK5u9LYwITi96Hai5lwcXiPs=;
-        b=VrF0oFKUxKB3HP85BQN/mm9ayO5V7OGLpEQQww4rJPtg017ecxPoH4cxmRUlyI57GX
-         axH2azGEPs1MgDOjU1/f1RQYz/RT5DacZHIipH8TPp5wE7UQ1XXNgIinz5/6KpWb53fy
-         BtbAZ4U3CLFuCS8qB6cXwESSgPcjzLiGaHDKjmmG/KACu95AANSV/YZSQeSrn2UJjo2y
-         8T4R17pmxdZz0CBfTcng2bMPCc7qlCVUcDhoOqHswdQdWOzwRcXLT4sAKFgkvc6e0kja
-         kKBScAzzQIzWdO57eaKdo/tHUXxUjzD3im4yk8+MrwpiwcAmvUqB+soXvzJ07Rv/VvQs
-         XPWQ==
-X-Gm-Message-State: AOAM532BeDg6bBNRqZwX7BNhnawsTxaBd1awmQ7FAtSibpvLJZMgogJ0
-        N5mgYuEPlL3loZbihfdNRcfj6FCdYPsGTw==
-X-Google-Smtp-Source: ABdhPJwkmonRcUlxxyyQBjolkp2Z5L30p2jps3wzYMOI2HNdqxb2VRQcOi2eZGlTt7zxCNm7oz3RRw==
-X-Received: by 2002:a17:90b:789:: with SMTP id l9mr5394380pjz.157.1624385927560;
-        Tue, 22 Jun 2021 11:18:47 -0700 (PDT)
-Received: from google.com ([2601:647:4701:18d0:56fd:b475:56:403a])
-        by smtp.gmail.com with ESMTPSA id s63sm3062660pjj.35.2021.06.22.11.18.46
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 22 Jun 2021 11:18:47 -0700 (PDT)
-Date:   Tue, 22 Jun 2021 11:18:45 -0700
-From:   Leah Rumancik <leah.rumancik@gmail.com>
-To:     Theodore Ts'o <tytso@mit.edu>
+        Tue, 22 Jun 2021 22:04:44 -0400
+Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:52543 "EHLO
+        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S229774AbhFWCEo (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 22 Jun 2021 22:04:44 -0400
+Received: from cwcc.thunk.org (pool-72-74-133-215.bstnma.fios.verizon.net [72.74.133.215])
+        (authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 15N22OhG007894
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 22 Jun 2021 22:02:24 -0400
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+        id 4CBDD15C3CD6; Tue, 22 Jun 2021 22:02:24 -0400 (EDT)
+Date:   Tue, 22 Jun 2021 22:02:24 -0400
+From:   "Theodore Ts'o" <tytso@mit.edu>
+To:     Leah Rumancik <leah.rumancik@gmail.com>
 Cc:     fstests@vger.kernel.org
 Subject: Re: [PATCH] ext4/048: skip test of filename wipe if journal
  checkpoint is not supported
-Message-ID: <YNIphT6xiluxLrOm@google.com>
+Message-ID: <YNKWMO0dY0hrMhqb@mit.edu>
 References: <20210621164851.1808923-1-tytso@mit.edu>
+ <YNIphT6xiluxLrOm@google.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210621164851.1808923-1-tytso@mit.edu>
+In-Reply-To: <YNIphT6xiluxLrOm@google.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Jun 21, 2021 at 12:48:51PM -0400, Theodore Ts'o wrote:
-> ext4/048 will fail when running on older kernels that don't support
-> the filename wipe feature.  The journal checkpoint ioctl is a related
-> feature, and landed just a little bit after filename wipe feature, so
-> use support for the journal checkpoint ioctl as a proxy for support
-> for the filename wipe feature.
+On Tue, Jun 22, 2021 at 11:18:45AM -0700, Leah Rumancik wrote:
+> > diff --git a/tests/ext4/048 b/tests/ext4/048
+> > index 51189618..35e6aa7f 100755
+> > --- a/tests/ext4/048
+> > +++ b/tests/ext4/048
+> > @@ -93,6 +93,14 @@ _scratch_mkfs_sized $((128 * 1024 * 1024)) >> $seqres.full 2>&1
+> >  # create scratch dir for testing
+> >  # create some files with no name a substr of another name so we can grep later
+> >  _scratch_mount >> $seqres.full 2>&1
+> > +
+> > +# Use the presence of the journal checkpoint ioctl as a proxy of filename
+> > +# wipe being supported
+> > +if test -x $here/src/checkpoint_journal && \
+> > +	! $here/src/checkpoint_journal $SCRATCH_MNT --dry-run ; then
+> > +    _notrun "filename wipe not supported"
+> > +fi
 > 
-> Without this change, this test will fail when tesing 5.10, 5.4, and
-> other LTS kernels.
-> 
-> Signed-off-by: Theodore Ts'o <tytso@mit.edu>
-> Cc: Leah Rumancik <leah.rumancik@gmail.com>
-> ---
->  tests/ext4/048 | 8 ++++++++
->  1 file changed, 8 insertions(+)
-> 
-> diff --git a/tests/ext4/048 b/tests/ext4/048
-> index 51189618..35e6aa7f 100755
-> --- a/tests/ext4/048
-> +++ b/tests/ext4/048
-> @@ -93,6 +93,14 @@ _scratch_mkfs_sized $((128 * 1024 * 1024)) >> $seqres.full 2>&1
->  # create scratch dir for testing
->  # create some files with no name a substr of another name so we can grep later
->  _scratch_mount >> $seqres.full 2>&1
-> +
-> +# Use the presence of the journal checkpoint ioctl as a proxy of filename
-> +# wipe being supported
-> +if test -x $here/src/checkpoint_journal && \
-> +	! $here/src/checkpoint_journal $SCRATCH_MNT --dry-run ; then
-> +    _notrun "filename wipe not supported"
-> +fi
+> What if checkpoint_journal is not there? Should the test be
+> skipped in that case as well?
 
-What if checkpoint_journal is not there? Should the test be
-skipped in that case as well? 
+I went back and forth on that one.  In actual practice
+checkpoint_journal should always be built in a valid xfstests
+installation, so the case of it not existing should rarely if ever
+arise.  We don't actually _need_ checkpoint_journal to run the test;
+we're just using it as a hint as to whether the filename wipe feature
+is present.  So I decided to let the test run if we couldn't find it,
+on the theory that in the long run, all future kernels will have the
+feature.   But the case could be made in other direction....
 
--Leah
-
-> +
->  blocksize="$(_get_block_size $SCRATCH_MNT)"
->  mkdir $testdir
->  file_num=1
-> -- 
-> 2.31.0
-> 
+	       	   	      	 - Ted
