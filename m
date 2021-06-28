@@ -2,107 +2,96 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+X-Spam-Status: No, score=-11.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 24BDAC2B9F4
-	for <linux-fstests@archiver.kernel.org>; Mon, 28 Jun 2021 05:01:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C7A3DC2B9F4
+	for <linux-fstests@archiver.kernel.org>; Mon, 28 Jun 2021 08:53:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 03D4D61C34
-	for <linux-fstests@archiver.kernel.org>; Mon, 28 Jun 2021 05:01:24 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 931B161C2E
+	for <linux-fstests@archiver.kernel.org>; Mon, 28 Jun 2021 08:53:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232036AbhF1FDt (ORCPT
+        id S232329AbhF1Izd (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 28 Jun 2021 01:03:49 -0400
-Received: from mail.kernel.org ([198.145.29.99]:48556 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229578AbhF1FDt (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 28 Jun 2021 01:03:49 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id C8750619C5;
-        Mon, 28 Jun 2021 05:01:23 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1624856483;
-        bh=Pz9YVHAQw6WjFV8n5QDGocEIAW3CyN94r2csHUALnPs=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=lv0ytH4RKAgsn602NG/TMMb2uUHztKvQyoFwH07WSPBNDQQ1fi6WQr8SZLKitUS86
-         GcK6NlYrb/l//jNzaUWegBgR82RV59FILCEAhuKoM4Pr2/c//7pKrSX3QaECpgHvHA
-         7T7lLGGFe8cO3UlbpRmFBq5D+ewFN3R7UsXWGw+uGUUdi84hTtIc1e4XtQmIX8C1gf
-         tA4qvdgar7Wweh9fjh2dCfe/r6maTt8YfLntlKyDAd7iv29XrKfopvJeXtkeDCxe4D
-         /0nfK1WDUr3sHoPMmBOzujM7zHU3Lb53u6fkn6Gt3TTwhwwnyEl6PC+S4vywbzzxLU
-         jdmhB/ujvWzYQ==
-Date:   Sun, 27 Jun 2021 22:01:23 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Dave Chinner <david@fromorbit.com>
-Cc:     Eryu Guan <guaneryu@gmail.com>, fstests@vger.kernel.org,
-        Sun Ke <sunke32@huawei.com>,
-        Yang Xu <xuyang2018.jy@fujitsu.com>,
-        Theodore Ts'o <tytso@mit.edu>, Zorro Lang <zlang@redhat.com>,
-        Jeff Layton <jlayton@kernel.org>
-Subject: Re: [ANNOUNCE] fstests: master branch updated to 73030114397b
-Message-ID: <20210628050123.GA13767@locust>
-References: <60d89a67.1c69fb81.86c2c.d6c4@mx.google.com>
- <20210628010240.GN2419729@dread.disaster.area>
+        Mon, 28 Jun 2021 04:55:33 -0400
+Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:32810 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S232282AbhF1Izc (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 28 Jun 2021 04:55:32 -0400
+Received: from pps.filterd (m0098416.ppops.net [127.0.0.1])
+        by mx0b-001b2d01.pphosted.com (8.16.0.43/8.16.0.43) with SMTP id 15S8YnLl003161
+        for <fstests@vger.kernel.org>; Mon, 28 Jun 2021 04:53:07 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=from : to : cc : subject
+ : date : message-id : mime-version : content-transfer-encoding; s=pp1;
+ bh=6XkPNMHLSZzuygJgNQncLdM4nCYIGweCfyDjlt8qFqg=;
+ b=c24ClwxfjqWLZLN80XrZM8TS1WDfxhWvFLj9/rtEOdM5KvQQUD9udSZwLCZ34kjsisOd
+ HhAfrkWO3jbBquj2ZnfAJr4Vw1370djKrPGrWFHiRG+m93/NnVzU5CZvNByRNE0Pjap7
+ oYydSLxzQD3/vg7Zzf6Sp2JX+VvYLbb3igPV3fUTBbscnb5s0W34tlz7lwqSPGPd38Rd
+ VJthumqDHibYUb+UTr99roYrxQOZRjjBq/vgMeDlXJesH9ivGxhOX958lb3mQBuqX0Ey
+ 28ixGeEbqe4BZ8+gx9nnc1cyLkYrWmrAMv2NNMFo1AjX3xNH1J4oO0j+HDgxG5RIOHjq nA== 
+Received: from ppma03ams.nl.ibm.com (62.31.33a9.ip4.static.sl-reverse.com [169.51.49.98])
+        by mx0b-001b2d01.pphosted.com with ESMTP id 39farh0v16-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT)
+        for <fstests@vger.kernel.org>; Mon, 28 Jun 2021 04:53:07 -0400
+Received: from pps.filterd (ppma03ams.nl.ibm.com [127.0.0.1])
+        by ppma03ams.nl.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 15S8gpjR023155
+        for <fstests@vger.kernel.org>; Mon, 28 Jun 2021 08:53:05 GMT
+Received: from b06cxnps3075.portsmouth.uk.ibm.com (d06relay10.portsmouth.uk.ibm.com [9.149.109.195])
+        by ppma03ams.nl.ibm.com with ESMTP id 39duv88p4a-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT)
+        for <fstests@vger.kernel.org>; Mon, 28 Jun 2021 08:53:05 +0000
+Received: from d06av22.portsmouth.uk.ibm.com (d06av22.portsmouth.uk.ibm.com [9.149.105.58])
+        by b06cxnps3075.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 15S8r3X433161490
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Mon, 28 Jun 2021 08:53:03 GMT
+Received: from d06av22.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id 303274C112;
+        Mon, 28 Jun 2021 08:53:03 +0000 (GMT)
+Received: from d06av22.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id 67BCB4C044;
+        Mon, 28 Jun 2021 08:53:02 +0000 (GMT)
+Received: from li-00db19cc-1f39-11b2-a85c-fed2f2ec2619.ibm.com.com (unknown [9.77.195.70])
+        by d06av22.portsmouth.uk.ibm.com (Postfix) with ESMTP;
+        Mon, 28 Jun 2021 08:53:02 +0000 (GMT)
+From:   Anju T Sudhakar <anju@linux.vnet.ibm.com>
+To:     fstests@vger.kernel.org
+Cc:     anju@linux.vnet.ibm.com
+Subject: [PATCH 0/3] xfstest random fixes
+Date:   Mon, 28 Jun 2021 14:22:56 +0530
+Message-Id: <20210628085259.120666-1-anju@linux.vnet.ibm.com>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210628010240.GN2419729@dread.disaster.area>
+Content-Transfer-Encoding: 8bit
+X-TM-AS-GCONF: 00
+X-Proofpoint-ORIG-GUID: Q2adVpp7AbQ5g7S4jxmo2O8LhMuKP2TI
+X-Proofpoint-GUID: Q2adVpp7AbQ5g7S4jxmo2O8LhMuKP2TI
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.391,18.0.790
+ definitions=2021-06-28_07:2021-06-25,2021-06-28 signatures=0
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 adultscore=0 clxscore=1011
+ suspectscore=0 impostorscore=0 mlxlogscore=993 lowpriorityscore=0
+ mlxscore=0 spamscore=0 malwarescore=0 bulkscore=0 priorityscore=1501
+ phishscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2104190000 definitions=main-2106280059
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Jun 28, 2021 at 11:02:40AM +1000, Dave Chinner wrote:
-> On Sun, Jun 27, 2021 at 11:33:54PM +0800, Eryu Guan wrote:
-> > Hi all,
-> > 
-> > The master branch of the xfstests repository at:
-> > 
-> > 	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-> > 
-> > have just been updated. The only thing in this update is the "move test group
-> > lists into test files" patchset from Darrick J. Wong, which moves each test's
-> > group information into the test itself, and automatically generate the group
-> > files as part of the make process. Please refer to the description quated from
-> > Darrick's PR cover letter below [1].
-> > 
-> > This may break some old habits while using fstests, some heads up below
-> ....
-> > And this update probably may introduce regressions and bugs, please help report
-> > and/or fix bugs if you hit any.
-> 
-> Yup, generic/019 is the first regression I've noticed:
-> 
-> generic/019 46s ... - output mismatch (see
-> /home/dave/src/xfstests-dev/results//xfs/generic/019.out.bad)
-> --- tests/generic/019.out   2014-04-08 09:43:28.506999723 +1000
-> +++ /home/dave/src/xfstests-dev/results//xfs/generic/019.out.bad
-> 2021-06-28 10:39:30.653077176 +1000
-> @@ -7,3 +7,5 @@
-> Force SCRATCH_DEV device failure
-> Make SCRATCH_DEV device operable again
-> Disallow global fail_make_request feature
-> +/home/dave/src/xfstests-dev/tests/generic/019: line 56: poweron_scratch_dev: command not found
-> +Disallow global fail_make_request feature
-> ...
-> (Run 'diff -u /home/dave/src/xfstests-dev/tests/generic/019.out /home/dave/src/xfstests-dev/results//xfs/generic/019.out.bad'  to see the entire diff)
-> 
-> I suspect that _cleanup output on EXIT is now being captured to the
-> $seq.out file, because I can't see how this _cleanup function ever
-> worked - poweron_scratch_dev() doesn't exist and AFAICT it never
-> has....
+Below are some of xfstest fixes with 4k blocksize(ppc64) and xfs
+filesystem.
 
-Yeah, I noticed that this test has been busted forever. :(
+Anju T Sudhakar (3):
+  xfs/504: Add scratch_mount before checking for xfs_scrub unicode
+    support.
+  xfs/514: Check xfsprogs version for verifying the xfs_db commands
+  xfs/515: Check xfsprogs version for testing xfs_quota commands
 
-The test also probably needs to ulimit -c 0 so that fstests won't
-complain about corefiles when fio dies after the fs goes down.
+ tests/xfs/504 |  3 +++
+ tests/xfs/514 | 12 +++++++++++-
+ tests/xfs/515 | 15 +++++++++++++--
+ 3 files changed, 27 insertions(+), 3 deletions(-)
 
---D
+-- 
+2.31.1
 
-> 
-> Cheers,
-> 
-> Dave.
-> -- 
-> Dave Chinner
-> david@fromorbit.com
