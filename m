@@ -2,80 +2,77 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C450CC11F65
-	for <linux-fstests@archiver.kernel.org>; Wed, 30 Jun 2021 15:51:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 21212C11F65
+	for <linux-fstests@archiver.kernel.org>; Wed, 30 Jun 2021 16:27:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9FE8F61477
-	for <linux-fstests@archiver.kernel.org>; Wed, 30 Jun 2021 15:51:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0372F61350
+	for <linux-fstests@archiver.kernel.org>; Wed, 30 Jun 2021 16:27:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235822AbhF3PyT (ORCPT
+        id S229529AbhF3Q35 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 30 Jun 2021 11:54:19 -0400
-Received: from mail.kernel.org ([198.145.29.99]:59872 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S235726AbhF3PyT (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 30 Jun 2021 11:54:19 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id AE3D5611CA;
-        Wed, 30 Jun 2021 15:51:50 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1625068310;
-        bh=7fhf6pxUaSFPwZo50RxCo5ZCrh3FKIYAtt1Da5hj71U=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=pUySNyTxHDI1iiQSxUcfoQPYKNDrn8ufSTuTj2Bf93zvp5F0m4wsioKZvLDqXAFcx
-         KuTqdVwo/io0G3CcIfRcIBJ2xZ+MAlxHj19bIgsPJjVpBhbTfz2MXe8PIy/yTy34iG
-         4Srv/tjXZLubB8UIh4Q+VcAVt4nT8ZNGnZXuYo+5C5V2saOagm11lTwFiMRjg6cmfB
-         NEQeMCMcxMgr9CIYr+5uwYzEVACyDBCclAxU42nKg5/gE32IfTP3lFm19QGmmt7qBr
-         ethFX0wR4sTd8Ls6KecTlA6Wjcit18FK9vrYmLKhRRfTB/ucqTEMVfHu2KERWRCI9Q
-         /W4l5NIlol/lA==
-Date:   Wed, 30 Jun 2021 08:51:50 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
+        Wed, 30 Jun 2021 12:29:57 -0400
+Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:34739 "EHLO
+        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S229510AbhF3Q34 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 30 Jun 2021 12:29:56 -0400
+Received: from cwcc.thunk.org (pool-72-74-133-215.bstnma.fios.verizon.net [72.74.133.215])
+        (authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 15UGRLBZ003232
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Wed, 30 Jun 2021 12:27:22 -0400
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+        id 9F8E915C3C8E; Wed, 30 Jun 2021 12:27:21 -0400 (EDT)
+Date:   Wed, 30 Jun 2021 12:27:21 -0400
+From:   "Theodore Ts'o" <tytso@mit.edu>
 To:     Ritesh Harjani <riteshh@linux.ibm.com>
 Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org
-Subject: Re: [PATCH 9/9] common/attr: Reduce MAX_ATTRS to leave some overhead
- for 64K blocksize
-Message-ID: <20210630155150.GC13743@locust>
+Subject: Re: [PATCH 1/9] ext4/003: Fix this test on 64K platform for dax
+ config
+Message-ID: <YNybadzpnZZdwtzR@mit.edu>
 References: <cover.1623651783.git.riteshh@linux.ibm.com>
- <f23e6788b958849ec9c1fb7fed0081e58c02a13a.1623651783.git.riteshh@linux.ibm.com>
+ <fda7d76b27234a46c3e7165fbdfc4154708c227d.1623651783.git.riteshh@linux.ibm.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <f23e6788b958849ec9c1fb7fed0081e58c02a13a.1623651783.git.riteshh@linux.ibm.com>
+In-Reply-To: <fda7d76b27234a46c3e7165fbdfc4154708c227d.1623651783.git.riteshh@linux.ibm.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Jun 14, 2021 at 11:58:13AM +0530, Ritesh Harjani wrote:
-> Test generic/020 fails for ext4 with 64K blocksize. So increase some overhead
-> value to reduce the MAX_ATTRS so that it can accomodate for 64K blocksize.
+On Mon, Jun 14, 2021 at 11:58:05AM +0530, Ritesh Harjani wrote:
+> mkfs.ext4 by default uses 4K blocksize which doesn't mount when testing
+> with dax config and the test fails. This patch fixes it.
 > 
 > Signed-off-by: Ritesh Harjani <riteshh@linux.ibm.com>
 > ---
->  common/attr | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  tests/ext4/003 | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
 > 
-> diff --git a/common/attr b/common/attr
-> index d3902346..e8661d80 100644
-> --- a/common/attr
-> +++ b/common/attr
-> @@ -260,7 +260,7 @@ xfs|udf|pvfs2|9p|ceph|nfs)
->  	# Assume max ~1 block of attrs
->  	BLOCK_SIZE=`_get_block_size $TEST_DIR`
->  	# user.attribute_XXX="value.XXX" is about 32 bytes; leave some overhead
-> -	let MAX_ATTRS=$BLOCK_SIZE/40
-> +	let MAX_ATTRS=$BLOCK_SIZE/48
-
-50% is quite a lot of overhead; maybe we should special-case this?
-
---D
-
->  esac
+> diff --git a/tests/ext4/003 b/tests/ext4/003
+> index 00ea9150..1ddb3063 100755
+> --- a/tests/ext4/003
+> +++ b/tests/ext4/003
+> @@ -31,7 +31,8 @@ _require_scratch_ext4_feature "bigalloc"
 >  
->  export MAX_ATTRS
-> -- 
-> 2.31.1
-> 
+>  rm -f $seqres.full
+>  
+> -$MKFS_EXT4_PROG -F -O bigalloc -C 65536  -g 256 $SCRATCH_DEV 512m \
+> +BLOCK_SIZE=$(get_page_size)
+> +$MKFS_EXT4_PROG -F -b $BLOCK_SIZE -O bigalloc -C 65536  -g 256 $SCRATCH_DEV 512m \
+>  	>> $seqres.full 2>&1
+>  _scratch_mount
+
+Thanks for the patch!
+
+If the block size is 64k, then the cluster_size == block_size at which
+point ext4/003 won't be able to test for the regression its designed
+to test.  So we probably need to scale the cluster size and file
+system size relative to the block size.
+
+					- Ted
