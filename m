@@ -2,118 +2,160 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3B57DC11F6B
-	for <linux-fstests@archiver.kernel.org>; Wed, 30 Jun 2021 13:30:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1583DC11F65
+	for <linux-fstests@archiver.kernel.org>; Wed, 30 Jun 2021 15:50:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 20ACE613F5
-	for <linux-fstests@archiver.kernel.org>; Wed, 30 Jun 2021 13:30:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EE89A61477
+	for <linux-fstests@archiver.kernel.org>; Wed, 30 Jun 2021 15:50:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235151AbhF3NdS (ORCPT
+        id S235828AbhF3Pwb (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 30 Jun 2021 09:33:18 -0400
-Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:52992 "EHLO
-        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S234768AbhF3NdK (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 30 Jun 2021 09:33:10 -0400
-Received: from pps.filterd (m0098409.ppops.net [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com (8.16.0.43/8.16.0.43) with SMTP id 15UD3oDg080522;
-        Wed, 30 Jun 2021 09:30:41 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=date : from : to : cc :
- subject : message-id : references : mime-version : content-type :
- in-reply-to; s=pp1; bh=XaVUdpleEbTVL60NonNBZc+MKpX2ZGVuagZc2BUq4xk=;
- b=rVnfyrmsjitWOPILAigdYpfdP9ftFnY3rdY1t0paBU2h2csXC1Ig1I72lawkq2hnFLzZ
- /8UkXcv2CTPThNKMY7gBOi+tG1l2w/vxpp8E0vbNUlsiCV2mbAfvr30unC9jXYivHx84
- FlRtMfSPUdJ0Pe/fGs6HyQ/tNSpR29u5hNVAIfROsyZxJa+L3KA5vO6UKi1Hyblx2Iyx
- h7NAemWjiHul++2IsFms34T/0TQkLZqiHvZk4SFNZrReGa38WtR2PPsQ9dnGrl/yqgSJ
- R4cwPO59UR1ciMbZj38LKZcZXSuGvnNzQ/Q3+mX2A4Gc2rU7xgsbcOeKnAYocqrnRWLe Ug== 
-Received: from ppma02fra.de.ibm.com (47.49.7a9f.ip4.static.sl-reverse.com [159.122.73.71])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 39gqkhv2xj-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Wed, 30 Jun 2021 09:30:41 -0400
-Received: from pps.filterd (ppma02fra.de.ibm.com [127.0.0.1])
-        by ppma02fra.de.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 15UDNfIJ023886;
-        Wed, 30 Jun 2021 13:30:39 GMT
-Received: from b06cxnps4074.portsmouth.uk.ibm.com (d06relay11.portsmouth.uk.ibm.com [9.149.109.196])
-        by ppma02fra.de.ibm.com with ESMTP id 39duv8gxna-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Wed, 30 Jun 2021 13:30:39 +0000
-Received: from b06wcsmtp001.portsmouth.uk.ibm.com (b06wcsmtp001.portsmouth.uk.ibm.com [9.149.105.160])
-        by b06cxnps4074.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 15UDUbqo33095966
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Wed, 30 Jun 2021 13:30:37 GMT
-Received: from b06wcsmtp001.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id E7DABA405F;
-        Wed, 30 Jun 2021 13:30:36 +0000 (GMT)
-Received: from b06wcsmtp001.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 8F693A4067;
-        Wed, 30 Jun 2021 13:30:36 +0000 (GMT)
-Received: from localhost (unknown [9.85.89.133])
-        by b06wcsmtp001.portsmouth.uk.ibm.com (Postfix) with ESMTP;
-        Wed, 30 Jun 2021 13:30:36 +0000 (GMT)
-Date:   Wed, 30 Jun 2021 19:00:35 +0530
-From:   Ritesh Harjani <riteshh@linux.ibm.com>
-To:     fstests@vger.kernel.org
-Cc:     linux-ext4@vger.kernel.org
-Subject: Re: [PATCH 0/9] 64K blocksize related fixes
-Message-ID: <20210630133035.yzqslqcobgkvfvn3@riteshh-domain>
+        Wed, 30 Jun 2021 11:52:31 -0400
+Received: from mail.kernel.org ([198.145.29.99]:59702 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S235726AbhF3Pwa (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 30 Jun 2021 11:52:30 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 9ADD9613D9;
+        Wed, 30 Jun 2021 15:50:01 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1625068201;
+        bh=5Yzjf8CLoyjvsGOm15lA+iMIUx1+ykzNUDuGH7t93nU=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=jRyP3/Cqq9HRCUeOvLZDY6IbX554ZswmHPl5Mu6cX0emYc+NB3z8CeBAXkxomc0Cb
+         OAHA5f/O+SAij2py/Pjx8ITmuTtGmq0MIN2GNQEEqTZ7ZLaG3oRA5oHVs0g377HAln
+         ZUl96pgUQFKZ7YejOKFlBgVRtC7IjT1xfX2u/oDCW2bBo9mQ89Z/z2DSQUpAg1tf4N
+         PsaAvvKkyPwQHInrqW7UXaj/BtC++REuUt9a+glXWVjBPbga7YRd6LLKAYohTL06v2
+         rxwT+AQTm70SbQQwPG5RMaM3qjA64Ao+MtCzarWUdqbJ29y9mMoxl3+w4/NFzr8IUp
+         ag/HdjRW6U1dQ==
+Date:   Wed, 30 Jun 2021 08:50:01 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Ritesh Harjani <riteshh@linux.ibm.com>
+Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org
+Subject: Re: [PATCH 5/9] generic/031: Fix the test case for 64k blocksize
+ config
+Message-ID: <20210630155001.GA13743@locust>
 References: <cover.1623651783.git.riteshh@linux.ibm.com>
+ <efd1594eeec7b893c47865ce5a94c25dc94dac28.1623651783.git.riteshh@linux.ibm.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <cover.1623651783.git.riteshh@linux.ibm.com>
-X-TM-AS-GCONF: 00
-X-Proofpoint-ORIG-GUID: FH8covjouWMgnmdlVYhINZduElu0Q5-N
-X-Proofpoint-GUID: FH8covjouWMgnmdlVYhINZduElu0Q5-N
-X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.391,18.0.790
- definitions=2021-06-30_05:2021-06-29,2021-06-30 signatures=0
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 spamscore=0
- lowpriorityscore=0 mlxscore=0 bulkscore=0 clxscore=1015 impostorscore=0
- malwarescore=0 adultscore=0 phishscore=0 priorityscore=1501 suspectscore=0
- mlxlogscore=999 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2104190000 definitions=main-2106300079
+In-Reply-To: <efd1594eeec7b893c47865ce5a94c25dc94dac28.1623651783.git.riteshh@linux.ibm.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 21/06/14 11:58AM, Ritesh Harjani wrote:
-> Below are the list of fixes mostly centered around 64K blocksize (on PPC64)
-> and with ext4 filesystem. Tested this with both 64K & 4K blocksize on Power
-> with (ext4/ext3/ext2/xfs/btrfs).
-
-Gentle reminder on this patch series.
-
--ritesh
-
->
-> Ritesh Harjani (9):
->   ext4/003: Fix this test on 64K platform for dax config
->   ext4/027: Correct the right code of block and inode bitmap
->   ext4/306: Add -b blocksize parameter too to avoid failure with DAX config
->   ext4/022: exclude this test for dax config on 64KB pagesize platform
->   generic/031: Fix the test case for 64k blocksize config
->   gitignore: Add 031.out file to .gitignore
->   generic/620: Remove -b blocksize option for ext4
->   common/attr: Cleanup end of line whitespaces issues
->   common/attr: Reduce MAX_ATTRS to leave some overhead for 64K blocksize
->
->  .gitignore                                 |  1 +
->  common/attr                                | 20 ++++++------
->  tests/ext4/003                             |  3 +-
->  tests/ext4/022                             |  7 ++--
->  tests/ext4/027                             |  4 +--
->  tests/ext4/306                             |  5 ++-
+On Mon, Jun 14, 2021 at 11:58:09AM +0530, Ritesh Harjani wrote:
+> This test fails with blocksize 64k since the test assumes 4k blocksize
+> in fcollapse param. This patch fixes that and also tests for 64k
+> blocksize.
+> 
+> Signed-off-by: Ritesh Harjani <riteshh@linux.ibm.com>
+> ---
 >  tests/generic/031                          | 37 ++++++++++++++++++----
 >  tests/generic/031.out.64k                  | 19 +++++++++++
 >  tests/generic/{031.out => 031.out.default} |  0
->  tests/generic/620                          |  7 ++++
->  10 files changed, 80 insertions(+), 23 deletions(-)
+>  3 files changed, 49 insertions(+), 7 deletions(-)
 >  create mode 100644 tests/generic/031.out.64k
 >  rename tests/generic/{031.out => 031.out.default} (100%)
->
-> --
+> 
+> diff --git a/tests/generic/031 b/tests/generic/031
+> index db84031b..40cb23af 100755
+> --- a/tests/generic/031
+> +++ b/tests/generic/031
+> @@ -8,6 +8,7 @@
+>  # correctly written and aren't left behind causing invalidation or data
+>  # corruption issues.
+>  #
+> +seqfull=$0
+>  seq=`basename $0`
+>  seqres=$RESULT_DIR/$seq
+>  echo "QA output created by $seq"
+> @@ -39,12 +40,35 @@ testfile=$SCRATCH_MNT/testfile
+>  _scratch_mkfs > /dev/null 2>&1
+>  _scratch_mount
+>  
+> -$XFS_IO_PROG -f \
+> -	-c "pwrite 185332 55756" \
+> -	-c "fcollapse 28672 40960" \
+> -	-c "pwrite 133228 63394" \
+> -	-c "fcollapse 0 4096" \
+> -$testfile | _filter_xfs_io
+> +# fcollapse need offset and len to be multiple of blocksize for filesystems
+> +# hence make this test work with 64k blocksize as well.
+> +blksz=$(_get_block_size $SCRATCH_MNT)
+> +
+> +rm -f $seqfull.out
+> +if [ "$blksz" -eq 65536 ]; then
+> +	ln -s $seq.out.64k $seqfull.out
+> +else
+> +	ln -s $seq.out.default $seqfull.out
+> +fi
+> +
+> +if [[ $blksz -le 4096 ]]; then
+> +	$XFS_IO_PROG -f \
+> +		-c "pwrite 185332 55756" \
+> +		-c "fcollapse 28672 40960" \
+> +		-c "pwrite 133228 63394" \
+> +		-c "fcollapse 0 4096" \
+> +	$testfile | _filter_xfs_io
+> +elif [[ $blksz -eq 65536 ]]; then
+> +	fact=$blksz/4096
+
+What if the blocksize is 32k?
+
+--D
+
+> +	$XFS_IO_PROG -f \
+> +		-c "pwrite $((185332*fact + 12)) $((55756*fact + 12))" \
+> +		-c "fcollapse $((28672 * fact)) $((40960 * fact))" \
+> +		-c "pwrite $((133228 * fact + 12)) $((63394 * fact + 12))" \
+> +		-c "fcollapse 0 $((4096 * fact))" \
+> +	$testfile | _filter_xfs_io
+> +else
+> +	_notrun "blocksize not supported"
+> +fi
+>  
+>  echo "==== Pre-Remount ==="
+>  hexdump -C $testfile
+> @@ -54,4 +78,3 @@ hexdump -C $testfile
+>  
+>  status=0
+>  exit
+> -
+> diff --git a/tests/generic/031.out.64k b/tests/generic/031.out.64k
+> new file mode 100644
+> index 00000000..7dfcfe41
+> --- /dev/null
+> +++ b/tests/generic/031.out.64k
+> @@ -0,0 +1,19 @@
+> +QA output created by 031
+> +wrote 892108/892108 bytes at offset 2965324
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +wrote 1014316/1014316 bytes at offset 2131660
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +==== Pre-Remount ===
+> +00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+> +*
+> +001f86c0  00 00 00 00 00 00 00 00  00 00 00 00 cd cd cd cd  |................|
+> +001f86d0  cd cd cd cd cd cd cd cd  cd cd cd cd cd cd cd cd  |................|
+> +*
+> +002fdc18
+> +==== Post-Remount ==
+> +00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+> +*
+> +001f86c0  00 00 00 00 00 00 00 00  00 00 00 00 cd cd cd cd  |................|
+> +001f86d0  cd cd cd cd cd cd cd cd  cd cd cd cd cd cd cd cd  |................|
+> +*
+> +002fdc18
+> diff --git a/tests/generic/031.out b/tests/generic/031.out.default
+> similarity index 100%
+> rename from tests/generic/031.out
+> rename to tests/generic/031.out.default
+> -- 
 > 2.31.1
->
+> 
