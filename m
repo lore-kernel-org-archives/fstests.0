@@ -2,52 +2,109 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D48BAC11F68
-	for <linux-fstests@archiver.kernel.org>; Wed, 30 Jun 2021 17:19:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F14EFC11F65
+	for <linux-fstests@archiver.kernel.org>; Wed, 30 Jun 2021 19:20:33 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B36EB61483
-	for <linux-fstests@archiver.kernel.org>; Wed, 30 Jun 2021 17:19:29 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CB7C461463
+	for <linux-fstests@archiver.kernel.org>; Wed, 30 Jun 2021 19:20:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231879AbhF3RV6 (ORCPT
+        id S233583AbhF3TXB (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 30 Jun 2021 13:21:58 -0400
-Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:42376 "EHLO
+        Wed, 30 Jun 2021 15:23:01 -0400
+Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:59419 "EHLO
         outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S229963AbhF3RV5 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 30 Jun 2021 13:21:57 -0400
+        with ESMTP id S233536AbhF3TXA (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 30 Jun 2021 15:23:00 -0400
 Received: from cwcc.thunk.org (pool-72-74-133-215.bstnma.fios.verizon.net [72.74.133.215])
         (authenticated bits=0)
         (User authenticated as tytso@ATHENA.MIT.EDU)
-        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 15UHJO6x024330
+        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 15UJKNdL003140
         (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Wed, 30 Jun 2021 13:19:25 -0400
+        Wed, 30 Jun 2021 15:20:24 -0400
 Received: by cwcc.thunk.org (Postfix, from userid 15806)
-        id 64BEF15C3C8E; Wed, 30 Jun 2021 13:19:24 -0400 (EDT)
-Date:   Wed, 30 Jun 2021 13:19:24 -0400
+        id 75A8715C3C8E; Wed, 30 Jun 2021 15:20:23 -0400 (EDT)
+Date:   Wed, 30 Jun 2021 15:20:23 -0400
 From:   "Theodore Ts'o" <tytso@mit.edu>
-To:     Ritesh Harjani <riteshh@linux.ibm.com>
-Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org
-Subject: Re: [PATCH 8/9] common/attr: Cleanup end of line whitespaces issues
-Message-ID: <YNynnN5NeyQciy6w@mit.edu>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     Ritesh Harjani <riteshh@linux.ibm.com>, fstests@vger.kernel.org,
+        linux-ext4@vger.kernel.org
+Subject: Re: [PATCH 9/9] common/attr: Reduce MAX_ATTRS to leave some overhead
+ for 64K blocksize
+Message-ID: <YNzD90/uocoRveYq@mit.edu>
 References: <cover.1623651783.git.riteshh@linux.ibm.com>
- <9c2d87969d29f34e0939fa3a524886e343fb96bb.1623651783.git.riteshh@linux.ibm.com>
+ <f23e6788b958849ec9c1fb7fed0081e58c02a13a.1623651783.git.riteshh@linux.ibm.com>
+ <20210630155150.GC13743@locust>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <9c2d87969d29f34e0939fa3a524886e343fb96bb.1623651783.git.riteshh@linux.ibm.com>
+In-Reply-To: <20210630155150.GC13743@locust>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Jun 14, 2021 at 11:58:12AM +0530, Ritesh Harjani wrote:
-> This patch clears the end of line whitespace issues in this file.
-> Mostly since many kernel developers also keep this editor config to clear
-> any end of line whitespaces on file save.
+On Wed, Jun 30, 2021 at 08:51:50AM -0700, Darrick J. Wong wrote:
+> On Mon, Jun 14, 2021 at 11:58:13AM +0530, Ritesh Harjani wrote:
+> > Test generic/020 fails for ext4 with 64K blocksize. So increase some overhead
+> > value to reduce the MAX_ATTRS so that it can accomodate for 64K blocksize.
+> > 
+> > Signed-off-by: Ritesh Harjani <riteshh@linux.ibm.com>
+> > ---
+> >  common/attr | 2 +-
+> >  1 file changed, 1 insertion(+), 1 deletion(-)
+> > 
+> > diff --git a/common/attr b/common/attr
+> > index d3902346..e8661d80 100644
+> > --- a/common/attr
+> > +++ b/common/attr
+> > @@ -260,7 +260,7 @@ xfs|udf|pvfs2|9p|ceph|nfs)
+> >  	# Assume max ~1 block of attrs
+> >  	BLOCK_SIZE=`_get_block_size $TEST_DIR`
+> >  	# user.attribute_XXX="value.XXX" is about 32 bytes; leave some overhead
+> > -	let MAX_ATTRS=$BLOCK_SIZE/40
+> > +	let MAX_ATTRS=$BLOCK_SIZE/48
 > 
-> Signed-off-by: Ritesh Harjani <riteshh@linux.ibm.com>
+> 50% is quite a lot of overhead; maybe we should special-case this?
 
-Reviewed-by: Theodore Ts'o <tytso@mit.edu>
+The problem is that 32 bytes is an underestimate when i > 99 for
+user.attribute_$i=value_$i.  And with a 4k blocksize, MAX_ATTRS =
+4096 / 40 = 102.
+
+The exact calculation for ext4 is:
+
+fixed_block_overhead = 32
+fixed_entry_overhead = 16
+max_attr = (block_size - fixed_block_overhead) /
+	(fixed_entry_overhead + round_up(len(attr_name), 4) +
+	 round_up(len(value), 4))
+
+For 4k blocksizes, most of the attributes have an attr_name of
+"attribute_NN" which is 8, and "value_NN" which is 12.
+
+But for larger block sizes, we start having extended attributes of the
+form "attribute_NNN" or "attribute_NNNN", and "value_NNN" and
+"value_NNNN", which causes the round(len(..), 4) to jump up by 4
+bytes.  So round_up(len(attr_name, 4)) becomes 12 instead of 8, and
+round_up(len(value, 4)) becomes 16 instead of 12.  So:
+
+	max_attrs = (block_size - 32) / (16 + 12 + 16)
+or
+	max_attrs = (block_size - 32) / 44
+
+instead of:
+
+	max_attrs = (block_size - 32) / (16 + 8 + 12)
+or
+	max_attrs = (block_size - 32) / 36
+
+So special casing things for block sizes > 4k may very well make
+sense.  Perhaps it's even worth it to put in an ext[234] specific,
+exalc calculation for MAX_ATTRS in common/attr.
+
+Cheers,
+
+						- Ted
