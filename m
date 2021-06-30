@@ -7,74 +7,73 @@ X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
 	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 82510C11F69
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4669CC11F67
 	for <linux-fstests@archiver.kernel.org>; Wed, 30 Jun 2021 01:52:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 69D2D61D85
+	by mail.kernel.org (Postfix) with ESMTP id 22D8961D8A
 	for <linux-fstests@archiver.kernel.org>; Wed, 30 Jun 2021 01:52:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230090AbhF3Byb (ORCPT
+        id S231940AbhF3Byb (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
         Tue, 29 Jun 2021 21:54:31 -0400
-Received: from mail1.bemta26.messagelabs.com ([85.158.142.2]:57706 "EHLO
-        mail1.bemta26.messagelabs.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S231938AbhF3Byb (ORCPT
+Received: from mail1.bemta25.messagelabs.com ([195.245.230.5]:29342 "EHLO
+        mail1.bemta25.messagelabs.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S230090AbhF3Byb (ORCPT
         <rfc822;fstests@vger.kernel.org>); Tue, 29 Jun 2021 21:54:31 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fujitsu.com;
         s=170520fj; t=1625017922; i=@fujitsu.com;
-        bh=Ns4MdJkD7H1YhhCA/74iYi1/XnyhPPlhGwMIGZk6t4M=;
+        bh=O2bZvoLK/XfG69YYRweXvXJ5YZw/Ac8/kGawobWZd/g=;
         h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
          MIME-Version:Content-Type;
-        b=NDJMSMvPYjUumE3G5pUj0MXmIr/sqQkRp0t/1tP6PU33SnHwKqILTy2FHXSXzYGBO
-         B0rjAz8lNkjY7WB79LDOke4ZnC0RQcJ461iTBl1yCyEHOUeA7D+lXDRnNpv7vSXHrb
-         twYtuOmXnsCRnNGFl+6fJ/BNFroEn+1gI8ZHo0agZ06luciiTCX9OVQNubvwjGoolI
-         jznP9dDRZfe8q9+pjMNEa9G2iHud/NVHfYugaaGdbu6Qfr3957ouAB44RDeJKN2QVG
-         IJx68UemLHo5EFdR2M4UrWsAR+Y9Ctl2I1wQokfEAfj7WKrlYpELlPMCLjgjgYbO50
-         MPccRgF3ylEow==
-Received: from [100.113.1.143] (using TLSv1.2 with cipher DHE-RSA-AES256-GCM-SHA384 (256 bits))
-        by server-2.bemta.az-a.eu-central-1.aws.symcld.net id D6/34-07685-14ECBD06; Wed, 30 Jun 2021 01:52:01 +0000
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFjrGIsWRWlGSWpSXmKPExsViZ8MxVdfx3O0
-  Eg91dvBanW/ayW2xfcZTZgclj56y77B6fN8kFMEWxZuYl5VcksGacmzqXteAda8WWexfYGhgn
-  snYxcnEICbxmlJgx+QcLhLOHUeLwua1sXYycHGwCmhLPOhcwg9giAhIS0/YuZQexmQWcJOasO
-  8XUxcjBISzgJbFxVjVImEVAVWL5vVtg5bwCnhK//vaBlUsIKEhMefgeLM4JVL74/CJmiF0djB
-  Lflv5gg2gQlDg58wkLxHwJiYMvXjBDNCtKXOr4xghhV0jMmLGNbQIj/ywkLbOQtCxgZFrFaJl
-  UlJmeUZKbmJmja2hgoGtoaKxrqGtkbKaXWKWbqJdaqpucmldSlAiU1UssL9YrrsxNzknRy0st
-  2cQIDNKUQsY3Oxi/vv6gd4hRkoNJSZQ36+jtBCG+pPyUyozE4oz4otKc1OJDjDIcHEoSvA1ng
-  HKCRanpqRVpmTnAiIFJS3DwKInwFh4HSvMWFyTmFmemQ6ROMepyXL4+bxGzEEtefl6qlDjv/r
-  NARQIgRRmleXAjYNF7iVFWSpiXkYGBQYinILUoN7MEVf4VozgHo5IwLwfIFJ7MvBK4Ta+AjmA
-  COmLRk5sgR5QkIqSkGphas5lO/bA6vdJt4zPhVTcVgsJe8N00tq6U6s4141A+37jtadaeD3l9
-  tzrMIiVYVmhwmR3ZoPbo067DN93m3N11Yu/TmaxbVy53ENpdyH15ZbWc/IrbjyTLzZt31ehdT
-  nD5csT3rTD/oY8y9xi3en68fdFc2+iFuai54sM7r61WzK0+8pFl78x17e1GttIh/XxCrImvLb
-  fZi5yceX0u45yrk87c/7lFOSJpRz3X2vsbJ716nHzDjcXrz8UXJfVfQ9fN2Ru0RvFwS9oB6Tb
-  1LoWnCx4Vacr9kLTqMN9myln7r3YLV/iLVUcOHxbfVHq4QeyGDPPcOTezt8RGs5+uy/JZ27Bz
-  SpTiOwubByLz4n7vU2Ipzkg01GIuKk4EAKcK4ZlZAwAA
+        b=JoJrGr4XHXuZPI1Okh79TLlC/PtRVvR2FLGOqM5kmOeZT4L78q1hgQ5bNjzXCpVbf
+         Vjc8BxMfZOdav1d7JBqc2ePjAOIFPoRbHEjHUtitXqu8YVcZ0w6ZeJjU4hvdkdOrks
+         MpM+8NDl6gHpJoLJfvi8EuDi/o6c3OXXglAeuhlobT7N1nFjLrfKFESI97sgH8RoYm
+         JJSfjlyy6SUcD42Jvioi0GiLZTbLpK3FIbI6VX2Qr7xEAGl0v2VXoE3RaVNHAYugeS
+         mbBs1xeddt0gqves8XZ+gp/v+UiI02e2UixVW50fKJnb0p+SrM0Xn0Y4ApAyOwtKSF
+         ZJoUJKywwopmQ==
+Received: from [100.112.193.7] (using TLSv1.2 with cipher DHE-RSA-AES256-GCM-SHA384 (256 bits))
+        by server-5.bemta.az-a.eu-west-1.aws.symcld.net id 52/91-56066-14ECBD06; Wed, 30 Jun 2021 01:52:01 +0000
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFtrJIsWRWlGSWpSXmKPExsViZ8MxVdfh3O0
+  Eg2sLTSxOt+xlt9i+4iizA5PHzll32T0+b5ILYIpizcxLyq9IYM04cPYYY8Eh7opvb2+zNTAe
+  5uxi5OIQEnjNKPFj7gomCGcPo8THp4dYuhg5OdgENCWedS5gBrFFBCQkpu1dyg5iMws4ScxZd
+  4oJxBYWiJa41XQYLM4ioCpxZNp2NhCbV8BT4u3JJrA5EgIKElMevgebwyngJfH39R+wuBBQzb
+  pJJxgh6gUlTs58wgIxX0Li4IsXzBC9ihKXOr4xQtgVEjNmbGObwMg/C0nLLCQtCxiZVjFaJBV
+  lpmeU5CZm5ugaGhjoGhoa6RpaArGJiV5ilW6iXmqpbnlqcYmuoV5iebFecWVuck6KXl5qySZG
+  YIimFByYsINx/+sPeocYJTmYlER5s47eThDiS8pPqcxILM6ILyrNSS0+xCjDwaEkwdtwBignW
+  JSanlqRlpkDjBeYtAQHj5IIb+FxoDRvcUFibnFmOkTqFKOilDjv/rNACQGQREZpHlwbLEYvMc
+  pKCfMyMjAwCPEUpBblZpagyr9iFOdgVBLm5QCZwpOZVwI3/RXQYiagxYue3ARZXJKIkJJqYBK
+  WmlZ6scb/VOEi0beMVZvq5XryugKem/3vD7NkC+8JVVFzv/zvek7o3eU3w7zPXbaMmp7ZkXNx
+  wavpB4u1hXfw3xOduybyzOVMD/87QYmqZTMeiwv08V+3n7Nkzcq7AuaZASdYvyy63uPnoRMwg
+  8Vj4c4/6RqRKx/Irl+zcUHO4h2Pmw40dMetKp2pdyqgJu2s1paea9PO/7yrcsdi3TGdv3pnd3
+  kyzz3drtHs8tozVSFpH/9jx9NVpbyXnyfsdDP50GSlWRkcfO61s/zthPaEDW/nLdYunKOvKxz
+  Folj0KuBqzS6XZJdLHHkXPTYFbc/7FKL9sjN3V51e/YVJsyL1b+yXUZdLUckrvnKoVomlOCPR
+  UIu5qDgRAKRUozdMAwAA
 X-Env-Sender: xuyang2018.jy@fujitsu.com
-X-Msg-Ref: server-12.tower-226.messagelabs.com!1625017920!25884!1
+X-Msg-Ref: server-9.tower-267.messagelabs.com!1625017920!90683!1
 X-Originating-IP: [62.60.8.149]
 X-SYMC-ESS-Client-Auth: outbound-route-from=pass
 X-StarScan-Received: 
 X-StarScan-Version: 9.81.3; banners=-,-,-
 X-VirusChecked: Checked
-Received: (qmail 3787 invoked from network); 30 Jun 2021 01:52:01 -0000
+Received: (qmail 30055 invoked from network); 30 Jun 2021 01:52:00 -0000
 Received: from unknown (HELO mailhost2.uk.fujitsu.com) (62.60.8.149)
-  by server-12.tower-226.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 30 Jun 2021 01:52:01 -0000
+  by server-9.tower-267.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 30 Jun 2021 01:52:00 -0000
 Received: from R01UKEXCASM126.r01.fujitsu.local ([10.183.43.178])
-        by mailhost2.uk.fujitsu.com (8.14.5/8.14.5) with ESMTP id 15U1ptEc031831
+        by mailhost2.uk.fujitsu.com (8.14.5/8.14.5) with ESMTP id 15U1ptEb031831
         (version=TLSv1/SSLv3 cipher=AES256-SHA bits=256 verify=FAIL);
         Wed, 30 Jun 2021 02:52:00 +0100
 Received: from localhost.localdomain (10.167.220.84) by
  R01UKEXCASM126.r01.fujitsu.local (10.183.43.178) with Microsoft SMTP Server
- (TLS) id 15.0.1497.18; Wed, 30 Jun 2021 02:51:57 +0100
+ (TLS) id 15.0.1497.18; Wed, 30 Jun 2021 02:51:52 +0100
 From:   Yang Xu <xuyang2018.jy@fujitsu.com>
 To:     <guaneryu@gmail.com>
 CC:     <fstests@vger.kernel.org>, Yang Xu <xuyang2018.jy@fujitsu.com>
-Subject: [PATCH v2 2/2] tests/overlay/Makefile: Use the unified name rules
-Date:   Wed, 30 Jun 2021 09:52:06 +0800
-Message-ID: <1625017926-18844-2-git-send-email-xuyang2018.jy@fujitsu.com>
+Subject: [PATCH v2 1/2] Makefile: fix bug when running make install under tests/* directory
+Date:   Wed, 30 Jun 2021 09:52:05 +0800
+Message-ID: <1625017926-18844-1-git-send-email-xuyang2018.jy@fujitsu.com>
 X-Mailer: git-send-email 1.8.3.1
-In-Reply-To: <1625017926-18844-1-git-send-email-xuyang2018.jy@fujitsu.com>
+In-Reply-To: <1624332489-27616-2-git-send-email-xuyang2018.jy@fujitsu.com>
 References: <1624332489-27616-2-git-send-email-xuyang2018.jy@fujitsu.com>
- <1625017926-18844-1-git-send-email-xuyang2018.jy@fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain
 X-Originating-IP: [10.167.220.84]
@@ -84,29 +83,54 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Since xfs/ext4 uses XFS_DIR/EXT4_DIR in Makefile(also for other filesystems),
-I think we don't have any reason not to use OVERLAY_DIR in here.
+The TESTS_DIR value is defined in TOPDIR makefile, it is empty here.
+So running make install on ext4 directory will get the following info:
+
+../../install-sh -o root -g root -m 755 -d /var/lib/xfstests//ext4
+
+We can see they aren't installed under /var/lib/xfstests/tests/ext4 directory.
+Fix this by moving TESTS_DIR definition to include/builddefs.in file.
 
 Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
 ---
- tests/overlay/Makefile | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ Makefile             | 3 ++-
+ include/builddefs.in | 2 +-
+ 2 files changed, 3 insertions(+), 2 deletions(-)
 
-diff --git a/tests/overlay/Makefile b/tests/overlay/Makefile
-index de3203c2..2785b94d 100644
---- a/tests/overlay/Makefile
-+++ b/tests/overlay/Makefile
-@@ -6,8 +6,8 @@ TOPDIR = ../..
+diff --git a/Makefile b/Makefile
+index 86a2d399..f6f91a4d 100644
+--- a/Makefile
++++ b/Makefile
+@@ -21,6 +21,8 @@ HAVE_BUILDDEFS = $(shell test -f $(TOPDIR)/include/builddefs && echo yes || echo
+ 
+ ifeq ($(HAVE_BUILDDEFS), yes)
  include $(TOPDIR)/include/builddefs
- include $(TOPDIR)/include/buildgrouplist
++else
++export TESTS_DIR = tests
+ endif
  
--TEST_DIR = overlay
--TARGET_DIR = $(PKG_LIB_DIR)/$(TESTS_DIR)/$(TEST_DIR)
-+OVERLAY_DIR = overlay
-+TARGET_DIR = $(PKG_LIB_DIR)/$(TESTS_DIR)/$(OVERLAY_DIR)
- DIRT = group.list
+ SRCTAR = $(PKG_NAME)-$(PKG_VERSION).tar.gz
+@@ -40,7 +42,6 @@ endif
+ LIB_SUBDIRS = include lib
+ TOOL_SUBDIRS = ltp src m4 common
  
- default: $(DIRT)
+-export TESTS_DIR = tests
+ SUBDIRS = $(LIB_SUBDIRS) $(TOOL_SUBDIRS) $(TESTS_DIR)
+ 
+ default: include/builddefs
+diff --git a/include/builddefs.in b/include/builddefs.in
+index f762a433..6641209f 100644
+--- a/include/builddefs.in
++++ b/include/builddefs.in
+@@ -35,7 +35,7 @@ PKG_VERSION     = @pkg_version@
+ PKG_PLATFORM    = @pkg_platform@
+ PKG_DISTRIBUTION= @pkg_distribution@
+ PKG_LIB_DIR     = $(DESTDIR)@exec_prefix@/@pkg_name@
+-
++TESTS_DIR	= tests
+ 
+ CC              = @cc@
+ AWK             = @awk@
 -- 
 2.23.0
 
