@@ -2,66 +2,166 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 96836C07E99
-	for <linux-fstests@archiver.kernel.org>; Mon,  5 Jul 2021 07:57:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8F4C1C07E98
+	for <linux-fstests@archiver.kernel.org>; Mon,  5 Jul 2021 08:45:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 75E8F613B2
-	for <linux-fstests@archiver.kernel.org>; Mon,  5 Jul 2021 07:57:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 743CD613C9
+	for <linux-fstests@archiver.kernel.org>; Mon,  5 Jul 2021 08:45:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229993AbhGEH75 (ORCPT
+        id S230127AbhGEIsf (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 5 Jul 2021 03:59:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49046 "EHLO
+        Mon, 5 Jul 2021 04:48:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60340 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229984AbhGEH75 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 5 Jul 2021 03:59:57 -0400
-Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8D47DC061574
-        for <fstests@vger.kernel.org>; Mon,  5 Jul 2021 00:57:20 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
-        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=4CFtrn9sQgZDqsrBXOIpC7K6DRYfw57OL009p3GnXUA=; b=KqfxTsDjZPGjJ6685IFcGHb/1Q
-        S1wTeCyIMRise0rv5FYhXQW3SmwyhMpRjfTNOuSp3w99nXuRodfW5gHBCk212Fi56z8AtAPD6nm00
-        KCxnU4V6tIt0excnDjFIhObif4PghvXr7xhd8+teNS53jGIpm84zG3KVAbhlSScpaTLg19C1o/cyg
-        zKg2ktWRDbCcK6oaw0hy5vRxdN3SR9CqjAEtWO7+ClVYC9zz+kAK9Tkwz/7lQ6XIBixK0dLUSdhCY
-        txvuatm4KKz7G8cqsnSEW65XGi/VWbmMo5QeQ79YolqgqVJxhniW2/8SfFiPbrSC+VqY2Yp9Dvjnq
-        OtW8i/KA==;
-Received: from hch by casper.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1m0JTF-00A0yi-Q8; Mon, 05 Jul 2021 07:56:56 +0000
-Date:   Mon, 5 Jul 2021 08:56:49 +0100
-From:   Christoph Hellwig <hch@infradead.org>
-To:     Theodore Ts'o <tytso@mit.edu>
-Cc:     Eryu Guan <guan@eryu.me>, fstests@vger.kernel.org,
-        Leah Rumancik <leah.rumancik@gmail.com>
-Subject: Re: [PATCH] ext4/048: skip test of filename wipe if journal
- checkpoint is not supported
-Message-ID: <YOK7Qf+1Rv9+ntxT@infradead.org>
-References: <20210621164851.1808923-1-tytso@mit.edu>
- <YOGRukqZFQTb36MS@desktop>
- <YOIwqn1jPBSyXIwd@mit.edu>
+        with ESMTP id S230107AbhGEIsf (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 5 Jul 2021 04:48:35 -0400
+Received: from mail-qk1-x734.google.com (mail-qk1-x734.google.com [IPv6:2607:f8b0:4864:20::734])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C6830C061574;
+        Mon,  5 Jul 2021 01:45:58 -0700 (PDT)
+Received: by mail-qk1-x734.google.com with SMTP id q190so16332267qkd.2;
+        Mon, 05 Jul 2021 01:45:58 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:reply-to:from:date:message-id
+         :subject:to:cc:content-transfer-encoding;
+        bh=jRpeww35YI8f/dxn2qm2ATgBcOzNiQ9//xFsr8uz168=;
+        b=KVyEY+JVCE38czyKYT0UHqwOmRYrDqscxszqrVRku43zGOU+QJSkcnjza/TpW5+ksZ
+         +1aO2ihAFT4h9pY0WxFm/Yt6bVd3VlM9TPfA9f4doKzP9mucrbI+Padc3VCuf/u2MPDQ
+         BbwCp8vw2geR9/5d5DP57yAawY7j3hhbtV2SG49Q+0cD1vNsvKWRzfBnT/sQ5VDYUn7t
+         UJRmv1M9tT1q2c9mFQXNtQRHxMFHXZpC1JswUpj3c5ESeCMjvY+v47xJo/1yK3x7axPW
+         oec4knTHEKKQEjF5U7ck9vlT9H6Iub+HIRVvrqI7laU9CHwkiPel8ekgAvfWKqyTqB/T
+         /0kA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:reply-to
+         :from:date:message-id:subject:to:cc:content-transfer-encoding;
+        bh=jRpeww35YI8f/dxn2qm2ATgBcOzNiQ9//xFsr8uz168=;
+        b=VJuQul2E9eHjgIcSpp5GypvWl1zmFC2H4ndmce11hPy+LbF9N+AKwwqGVopoghrHrV
+         do5e41AXQT+92wAh8T22lHNMk6mMr3lp02TgNt+39XdoTNwz4bArE7BaH1H1ArUn9bjs
+         prEvYKDOx6yQtUJQKCYPDrcw25bPxzv5d1R6UOEWFjJ/1IebUBVFexNtZX6vxT3Qw/VG
+         NSq91Oz6D8VNV2u93h1M8kAFFkShZDdz+3aFuBz2teC2k2MlULE8a1onyqYzUWFTG5R8
+         SCmQcpYCQffC3+kf93XpUc8skFURUGJO5IvaV5HmDxTrigWpYGL0zLDP6VZ33s/15uLO
+         X1LQ==
+X-Gm-Message-State: AOAM530l4zJMKhGfI2/kEJSJAjh7NY49Cfi1QBktCVuDkMA27vaiZnGR
+        wXo/y8qIm6zLxxsTmpEAK6DSYHl9KXoe2ToPAE8=
+X-Google-Smtp-Source: ABdhPJwh+AQ56zVTIUXpg7ysVr9dwCcDXaGH0zwgyfhkDg9A8mP0WZ591eo/LL5FG7fBmVFHz+Zpv67a3ph+QKx55sE=
+X-Received: by 2002:ae9:ec11:: with SMTP id h17mr12928358qkg.438.1625474757981;
+ Mon, 05 Jul 2021 01:45:57 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <YOIwqn1jPBSyXIwd@mit.edu>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by casper.infradead.org. See http://www.infradead.org/rpr.html
+References: <a70c9f6b4e45d9bcdc5c2f19182f89ef8e22c074.1625237782.git.anand.jain@oracle.com>
+In-Reply-To: <a70c9f6b4e45d9bcdc5c2f19182f89ef8e22c074.1625237782.git.anand.jain@oracle.com>
+Reply-To: fdmanana@gmail.com
+From:   Filipe Manana <fdmanana@gmail.com>
+Date:   Mon, 5 Jul 2021 09:45:47 +0100
+Message-ID: <CAL3q7H6YZa6JLFhHbJB_FScD2wdm3NWEEDsE9C3EwVmoKMMkJQ@mail.gmail.com>
+Subject: Re: [PATCH] btrfs/242: test case to fstrim on a degraded filesystem
+To:     Anand Jain <anand.jain@oracle.com>
+Cc:     fstests <fstests@vger.kernel.org>,
+        linux-btrfs <linux-btrfs@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Jul 04, 2021 at 06:05:30PM -0400, Theodore Ts'o wrote:
-> Given the discussion for the patches, I suspect that it will be only
-> the distros that are meant for Cloud environments (e.g., Google's COS,
-> maybe Amazon Linux, etc.) that will be interested at all in the first
-> place --- and if they do, they'll want to take both of them.
+On Sun, Jul 4, 2021 at 12:24 PM Anand Jain <anand.jain@oracle.com> wrote:
+>
+> Create a degraded btrfs filesystem and run fstrim on it.
+>
+> Signed-off-by: Anand Jain <anand.jain@oracle.com>
+> ---
+>  tests/btrfs/242     | 49 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/242.out |  2 ++
+>  2 files changed, 51 insertions(+)
+>  create mode 100755 tests/btrfs/242
+>  create mode 100644 tests/btrfs/242.out
+>
+> diff --git a/tests/btrfs/242 b/tests/btrfs/242
+> new file mode 100755
+> index 000000000000..e946ee6ac7c2
+> --- /dev/null
+> +++ b/tests/btrfs/242
+> @@ -0,0 +1,49 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (C) 2021 Oracle. All Rights Reserved.
+> +#
+> +# FS QA Test 242
+> +#
+> +# Test that fstrim can run on the degraded filesystem
+> +#   Kernel requires fix for the null pointer deref in btrfs_trim_fs()
+> +#     [patch] btrfs: check for missing device in btrfs_trim_fs
+> +
+> +
+> +. ./common/preamble
+> +_begin_fstest auto quick replace trim
+> +
+> +# Import common functions.
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_fs btrfs
+> +_require_btrfs_forget_or_module_loadable
+> +_require_scratch_dev_pool 2
+> +#_require_command "$WIPEFS_PROG" wipefs
+> +
+> +_scratch_dev_pool_get 2
+> +dev1=3D$(echo $SCRATCH_DEV_POOL | $AWK_PROG '{ print $1 }')
+> +
+> +_scratch_pool_mkfs "-m raid1 -d raid1"
+> +_scratch_mount
+> +_require_batched_discard $SCRATCH_MNT
+> +
+> +# Add a test file with some data.
+> +$XFS_IO_PROG -f -c "pwrite -S 0xab 0 10M" $SCRATCH_MNT/foo > /dev/null
 
-FYI, I still think supporting discard at all is a active and dangerous
-mis-service to your users.  Discard must not and often will not
-clear data.  Write smae OTOH does, and with the REQ_UNMAP flag will
-give you the same results as discards for devices that zero on
-discard, while haveing a safe (but slow) fallback if not.
+What's the point of adding this file (which you copied exactly from
+btrfs/223) if it's not needed to trigger the bug and it's not used
+anywhere in the test?
+Or at the very least, check that reading it after the fstrim returns
+the correct data, as it might help prevent some regression in the
+future.
+
+Thanks.
+
+> +
+> +# Unmount the filesystem.
+> +_scratch_unmount
+> +
+> +# Mount the filesystem in degraded mode
+> +_btrfs_forget_or_module_reload
+> +_mount -o degraded $dev1 $SCRATCH_MNT
+> +
+> +# Run fstrim
+> +$FSTRIM_PROG $SCRATCH_MNT
+> +
+> +_scratch_dev_pool_put
+> +
+> +echo Silence is golden
+> +
+> +status=3D0
+> +exit
+> diff --git a/tests/btrfs/242.out b/tests/btrfs/242.out
+> new file mode 100644
+> index 000000000000..a46d77702f23
+> --- /dev/null
+> +++ b/tests/btrfs/242.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 242
+> +Silence is golden
+> --
+> 2.27.0
+>
+
+
+--=20
+Filipe David Manana,
+
+=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
+ right.=E2=80=9D
