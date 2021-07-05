@@ -2,161 +2,221 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-18.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,MSGID_FROM_MTA_HEADER,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9E5D2C07E95
-	for <linux-fstests@archiver.kernel.org>; Mon,  5 Jul 2021 00:17:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7B7C2C07E96
+	for <linux-fstests@archiver.kernel.org>; Mon,  5 Jul 2021 03:41:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 74F9E613F1
-	for <linux-fstests@archiver.kernel.org>; Mon,  5 Jul 2021 00:17:40 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 667D2613DD
+	for <linux-fstests@archiver.kernel.org>; Mon,  5 Jul 2021 03:41:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229715AbhGEAUP (ORCPT
+        id S229722AbhGEDoO (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 4 Jul 2021 20:20:15 -0400
-Received: from mout.gmx.net ([212.227.15.15]:38663 "EHLO mout.gmx.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229681AbhGEAUP (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 4 Jul 2021 20:20:15 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net;
-        s=badeba3b8450; t=1625444254;
-        bh=WANSdCLx2HuMwdY8S7ESrzpHtNrDI830msWiZjqwZyw=;
-        h=X-UI-Sender-Class:Subject:To:Cc:References:From:Date:In-Reply-To;
-        b=AE5oNS0oQSURt+kd7gdjcAM8K+qm0aOUXBxYkdPLesQZ/yvePTAws6UF5AhHkJgAv
-         dNOfUTjbAyYKNZ342TRR+NJDTiNrr4i2mpuzmiuffmwPi86tc2FymMDluxSnU45C4n
-         nETuzyjzAEIejoeICsr33pi8wBS5uygQsMm29otU=
-X-UI-Sender-Class: 01bb95c1-4bf8-414a-932a-4f6e2808ef9c
-Received: from [0.0.0.0] ([149.28.201.231]) by mail.gmx.net (mrgmx004
- [212.227.17.184]) with ESMTPSA (Nemesis) id 1MMGN2-1lj4ci00Lm-00JHJt; Mon, 05
- Jul 2021 02:17:34 +0200
-Subject: Re: [PATCH] btrfs/242: test case to fstrim on a degraded filesystem
-To:     Anand Jain <anand.jain@oracle.com>, fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org
-References: <a70c9f6b4e45d9bcdc5c2f19182f89ef8e22c074.1625237782.git.anand.jain@oracle.com>
-From:   Qu Wenruo <quwenruo.btrfs@gmx.com>
-Message-ID: <bf5ab599-a3e8-b8b8-4131-dfa02aa7d0e4@gmx.com>
-Date:   Mon, 5 Jul 2021 08:17:30 +0800
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.11.0
-MIME-Version: 1.0
+        Sun, 4 Jul 2021 23:44:14 -0400
+Received: from mx0a-00069f02.pphosted.com ([205.220.165.32]:44246 "EHLO
+        mx0a-00069f02.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S229807AbhGEDoN (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 4 Jul 2021 23:44:13 -0400
+Received: from pps.filterd (m0246627.ppops.net [127.0.0.1])
+        by mx0b-00069f02.pphosted.com (8.16.0.43/8.16.0.43) with SMTP id 1653c4Oo011003;
+        Mon, 5 Jul 2021 03:41:34 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=from : to : cc :
+ subject : date : message-id : in-reply-to : references :
+ content-transfer-encoding : content-type : mime-version;
+ s=corp-2020-01-29; bh=jWkHodMgA7ndXyRCRZUcZc/G+zAvML8priGEuDC6c7A=;
+ b=j9Hw4xey/W8LoZidMe2g6vy276RjzHhUUH+VYMl1KhY5jWOkuUqTPKQalG+5mF1hOJkW
+ HxCe4+7qLGj+GjU+5dN//F5yU7K2s75UAwnLDZpD9AB6Inm7/NJx+Lb/MGMJus2+kB46
+ upgD5gPdFsDJUt8bc5/pkfTLrepka80Ihp2ZpD8JZ72Mwft2oUM9SXc0NW7TylyfBbR5
+ BeSNFTry7FeM+1WDhjU8eZKrh9AZQ5qFEPT1mwMcmmqXCifk1Fkc84+BrgUc4a5HshNs
+ nGSZylHRBqpN4hO87OXBhxOGOb/DAb+GCZBiBusAOLf0t9vnjS8esRMv7St9fcytSWXG Og== 
+Received: from aserp3030.oracle.com (aserp3030.oracle.com [141.146.126.71])
+        by mx0b-00069f02.pphosted.com with ESMTP id 39jeg1hm9g-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Mon, 05 Jul 2021 03:41:34 +0000
+Received: from pps.filterd (aserp3030.oracle.com [127.0.0.1])
+        by aserp3030.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 1653aOLS196237;
+        Mon, 5 Jul 2021 03:41:33 GMT
+Received: from nam02-bn1-obe.outbound.protection.outlook.com (mail-bn1nam07lp2048.outbound.protection.outlook.com [104.47.51.48])
+        by aserp3030.oracle.com with ESMTP id 39jdxeg7un-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Mon, 05 Jul 2021 03:41:33 +0000
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=W6Izk99GVeIJoIWk6KxbT8HhQbRIEn0R0Dk7pQQ6pNlcjDSBGpOaczpBpAZXIVnv8uB5l5EvzRO39FCb2r0YEtn19baUeWXpFTiYUHlc9g6y2lZ8CwayTfBHUsNjFKBs00cxehFOwK+cqKTSqmgI5LPzuYGkOXdLLxJ9uDnfbCgMXCKsKV7vBhKinMUFy+HPaAju9BLzkm92u2nFrZUgX29b/ygirfywybvPzU78aTEMcibJ16W6ryAB2fQwBtAuOCfOK3Qb7w8sGt+tPbZhYjuN03MPabXsQa0DNGj5ak+V/940ceLM59DAr6uY+ybsBFvlZ5n/fit1CijB6aKvnA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=jWkHodMgA7ndXyRCRZUcZc/G+zAvML8priGEuDC6c7A=;
+ b=atOTgGSVogx/EOuNyPOnaZ6p/Y9JGsITWQwkanFEQWzCl0B0lx8q3x0Hc9sLkXVR9WywQ5zb3uFM9DPTGxW2A9/x97av6Qo7ybtUKYmVlMl0P1z6RSjekqb9URj7/e2/GPe7v849ltCFRT6YrJrJXUAqLv9PLXIc2FzYxU13P/r/2B11QP1vJFsyVP35iYhDQqfehfJB3JYF/3W/tEzcYPvr0TW5gHKibung08ewOP3E2dBph54VzbNKXL7LWQjqFagmBGqRNHjli13WR2d9bQJS/SkyQXU2AuvR92SwuLSr+NhJtnmEoVzNFXwWj6DWx5VIFSZTRA8w6Sx/ibIlEA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
+ dkim=pass header.d=oracle.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=jWkHodMgA7ndXyRCRZUcZc/G+zAvML8priGEuDC6c7A=;
+ b=F7rMm3iBK5ijJ0Gs7phKQrqJ7Ds0tJpk0n0/wresEwwT4dTRNgWi/NriLCuQ/wiEHH/Z6fAwDBXb9+pPlGAi5aavAnUVwHfTtH9zU3x/XCx2rlgRMFysFfPhoHGoj6De8HLM+5QzkTYgoYQKgea6i7dWWusZpDe0QBb2UzyRoP0=
+Authentication-Results: vger.kernel.org; dkim=none (message not signed)
+ header.d=none;vger.kernel.org; dmarc=none action=none header.from=oracle.com;
+Received: from MN2PR10MB4128.namprd10.prod.outlook.com (2603:10b6:208:1d2::24)
+ by BL0PR10MB3025.namprd10.prod.outlook.com (2603:10b6:208:30::23) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4287.23; Mon, 5 Jul
+ 2021 03:41:31 +0000
+Received: from MN2PR10MB4128.namprd10.prod.outlook.com
+ ([fe80::b10f:7144:1abb:4255]) by MN2PR10MB4128.namprd10.prod.outlook.com
+ ([fe80::b10f:7144:1abb:4255%4]) with mapi id 15.20.4287.033; Mon, 5 Jul 2021
+ 03:41:31 +0000
+From:   Anand Jain <anand.jain@oracle.com>
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, quwenruo.btrfs@gmx.com
+Subject: [PATCH v2] btrfs/242: test case to fstrim on a degraded filesystem
+Date:   Mon,  5 Jul 2021 11:41:15 +0800
+Message-Id: <9de7d17d8bdf0bee98fd7b9ac2961da12664b7a9.1625456115.git.anand.jain@oracle.com>
+X-Mailer: git-send-email 2.31.1
 In-Reply-To: <a70c9f6b4e45d9bcdc5c2f19182f89ef8e22c074.1625237782.git.anand.jain@oracle.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:ZeSPzBNfG3V1oMdYu8uW4yBbt6e7SSD6pzhB+e7j/Gb/Aa5f1FO
- pCGeQjouK4aWVBwVkofNEOnpfu2mb9J650ot26c050oRwp0JYnwbUkDWoe4zzg+t7ouB442
- 8q16WDx0Z68rERyysyBET6yE4dI799accf8VFkPRKGuawH0gq9iDhgIP17Xp7by+j6PkoHG
- QUV8/MKARLM1o+xbDv+FA==
-X-UI-Out-Filterresults: notjunk:1;V03:K0:r9VEYMEztrE=:S/jBJ4lGUiPXkjzbzIC6xr
- lzNXWA0MG+f19Ik9VLc7XZ8GKL+RMoCOXnzaCMPony9pNZwGXyb1PDnjiEoX6j9bu8aKYaU4f
- tiSKP52xkp0ghlw63htOvwucog5TcYoDmnmZLgm/qBDx7ETzpTxsOqrkBpo4Fw/4+hGqMpVE7
- 0RpzMa1L8il/ZrS/Gb6Lbe5cUsSOWYLAb88WltoQsTdLR9o90vyrvexxcs4r060yWeXO3Zn1U
- HlxEN9oFyLsyl6ehsvTrpFdMPEd9YD11FOQC1lNH0floD1La2aeS6SdH7VGQVqGantO4mD9gr
- MeSMLONfggG8TVHk35leclG0ChE/wltTDvZh+DwSNcrEi8cGCAxWfL5/yEu+4V00mhfX4bBAQ
- JTlqJkbEiicFrRLbYVjaZBNRxVHUiruAReSbsCUqjw/pPjxypaqbspRkizSGLDd+Yo+C/IoEH
- zy6iaKD679eAk8VK4+4zeXyJsULdCgwNiueya4IJHaAMWtYwPyyq+XJq6Oa1wHgpHgeUD+5+A
- TnZsnRx0onutmbAkUkN/Fw/7OORsfd1rEzIj5jdWOarROPpOfdtR+VfO8+eLUtNNt4/ewjwZS
- vUIrGt3aTajmGAfYGtml865mWyPVflR8JjEMVN7eRbCglMKJ7TxUtwinB5/A4Qu+OiTdtS68e
- BNOZ0xCKjeN4c0xxgOoLujDnodCGW8skVeufvCj2eo6kME2ubdUXx47u4Q28E5/u+oc5Q+i87
- xk49xckcFKOtr/408N7hU6C3qF4Oc32YXVg5qisx0FIuOMlbQrydi1aivXeyUV8Kxa7CMP9hw
- 1+PLJZx5GsAXM3dmIQYkugsFIGraigs8QwVQSsQah3Y7x6nwn1BZavOeivyxc0x4PC3G+JWbZ
- XnmCvbO3KMK+Gz48ILj9lTuRFDVfAARs6krxjOztza8NPK0qqD2aNrRBPv2qxJw2RXLVBiv7Y
- HIrVYs+b16Civqosz+fSjRUlHBs2gqLNn3XSC3mKljcSWxEQYL5IT4nPmesQxt21R/YG7G95v
- pKyGTty86WNBHlJCGhpvSyayQQMJQWaCWjX3asWzar7/tEjvPdgWiKah5hOiD4gckLcmYTQRN
- 79saF62ODk9muaSlo1hzEpF5KCPFAt0YGSKZwxogikC1JAeprp/8WjNvQ==
+References: <a70c9f6b4e45d9bcdc5c2f19182f89ef8e22c074.1625237782.git.anand.jain@oracle.com>
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-Originating-IP: [39.109.186.25]
+X-ClientProxiedBy: SG2PR06CA0243.apcprd06.prod.outlook.com
+ (2603:1096:4:ac::27) To MN2PR10MB4128.namprd10.prod.outlook.com
+ (2603:10b6:208:1d2::24)
+MIME-Version: 1.0
+X-MS-Exchange-MessageSentRepresentingType: 1
+Received: from localhost.localdomain (39.109.186.25) by SG2PR06CA0243.apcprd06.prod.outlook.com (2603:1096:4:ac::27) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4287.22 via Frontend Transport; Mon, 5 Jul 2021 03:41:29 +0000
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: b7eadb34-d4f3-4b62-dd1d-08d93f66c730
+X-MS-TrafficTypeDiagnostic: BL0PR10MB3025:
+X-Microsoft-Antispam-PRVS: <BL0PR10MB302566FB8AF2DCCD6C003872E51C9@BL0PR10MB3025.namprd10.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:5797;
+X-MS-Exchange-SenderADCheck: 1
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: 5o6Asc5iVCIwIvdKMXz2ey5h14UBYIU5bQgTENQ+XF/jXGmb5yEGfX7ik/kej+FSykroTKbyLbI2cUHkveOQt67fquVCMmbdCV5i+kC7VUy9hcdUBdleKiSKf2XgOGxpeywQEv98dRKmLEkVVxOs8TF2/5L6EtvqidwqU55JjwWR+kLGIF+LxhnL8rT+GM9TPQYHWpIhso5S24TmCBPFnsqmZyGCcGfvuXT2mElvu/1Xg+oqjx3rAJZ3Vr4amZJbyJTF7J1a1Z/2ANlbzYGaM6x/QVB5OOwvf2u+ideNuMstoDYWVRCrasjQAvODlx7dfGk8OtJpKflDxaBxfUADuXJgyZWFs6e3cwzbUrS2WN16sMRmPBCL6EhBYym12RACa85+ynxGXTJLWXUIZJUvb7WvZ9U5kl2f1Fh/ZayzgP4o0JEoTDvjh124FOhYVXOcg0SbVQg5hiNRJQEM9b8t2wLuYIG4mdsDHeiavE9Z3CnJHVWa3wW1jSy9PzwzuOFR4q95ewTFCpfxIGFw/I+m6HpRULHrAz21S+GiKlwxKPqXTWYIgFJWUdq7zk0pE2gDeNR2usg6mf1o+UKpu8f0CIy8L3OXpk/9vbAR4b/vxPKpPvlh3+i+GKUoXo/aImCOyNznhhcf61IwfSPSp4vIOezy3BZe/OlLOe2lLsUVCA3G1Xv5aPKPqsJJNnxYnAhrT5pkdpIYHvcD37EIRMTPhpd2ZZslnTTMabWez+i++ao=
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:MN2PR10MB4128.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(39860400002)(346002)(376002)(366004)(136003)(396003)(6916009)(8936002)(36756003)(316002)(16526019)(186003)(5660300002)(478600001)(38100700002)(38350700002)(86362001)(6486002)(66476007)(66556008)(66946007)(6506007)(6666004)(2616005)(956004)(52116002)(2906002)(44832011)(6512007)(26005)(8676002)(4326008)(69590400013);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?1dUHHPx8rAImBWVeh8BDOZQ4DlrGwFwVztxA3ty0oeXC4NWDvHfAPUCrw/zH?=
+ =?us-ascii?Q?jVXLDgvpqt0J+yX56XuUrWEOgHSefe5giQHpjzpIa4NYKchwmCF5i5qSp8Bh?=
+ =?us-ascii?Q?v6jBh3gMBcZOwX+hf5Uj0/nS0tlSTLca7nVfI5wzlmOey5i53584ycWWv7Xn?=
+ =?us-ascii?Q?e2ajHF3k4SHSBYiVwDRrbxxdOG3pL6tCtSisoqZLsEoHFVqVh2JTcAAjYtQt?=
+ =?us-ascii?Q?y0NehZeDDEcarUIHVRESMybCttEEW4QDadocZS/EAwmhZ953nnNxoyLYJbDF?=
+ =?us-ascii?Q?RwlyZDaQJp8OyfRhFcrB6u59weCtXLnMgyO45bXXezR1knSRKEoZ/24k00Qu?=
+ =?us-ascii?Q?pgqNqONRY9QvQKs/y8AZUOPGc1VdwDwJH0Vyi4FE9fk5bQ+rYdT41MxxbneC?=
+ =?us-ascii?Q?EsxcMvq9BFq2xP+1ULN5pldyp4Xve56VNkF3y4cj9Y5Vf5bgcsEMoYV5/K1/?=
+ =?us-ascii?Q?t5vn3wL8Fwy9xxUO5+9I0WJThhEtQ9VDyAx8Hlu7IyltwJIb5DNtcAIQ3OsK?=
+ =?us-ascii?Q?AFAcLfrAjdAT1yqvYUA8eXXjB3Tec6mNBPQCcl/uddjHfzwAtJY9C/hbhezD?=
+ =?us-ascii?Q?Si0diJMC7SoiIh1bRl5+M7LrggYmtb18AZlJlt0lSS9XJtKQS8k5Tp62gK+p?=
+ =?us-ascii?Q?ipbmUmGPwzmKrUKPU0S7y3DVtpiz6M8HF1Ph5+hEbGc97L3teJhP1fjFeTKg?=
+ =?us-ascii?Q?iquxaHx9FQeJ03bn5Z2qRJPAVS6GEpDqPviJ0XvZzL1mDYGqsG22ctysuszE?=
+ =?us-ascii?Q?f+UcAI9HWYGeyhDGpIMZ8jkRGOBfXzkvX7AYFis2IB4yhtjAJNmkzSAzmOlR?=
+ =?us-ascii?Q?Qp+aGBZcuEirtAP4pCFzPnpCaPS5I7MSZAgnNh6KRN0jkKX0NdzjPswNgulb?=
+ =?us-ascii?Q?ks6ZruFQXc0OOXjiDE9/0dGuiMfxUSpyIK3CnRDScsViTGQpcql5xQ0NJP7d?=
+ =?us-ascii?Q?FZpSPTn2IavvHn9s0zcFzdcbnm2v2M+lepf//0L8P4MNRuPrzca1+dz7C+RU?=
+ =?us-ascii?Q?zVfcmcSdfbZ9CTj8lyoHzBqfP/Xbl7cpUO+wT0+MHXAyQ7ZxPeWMJcmLBp7p?=
+ =?us-ascii?Q?npt2lSaaSMk3WGFRqp/C/2KNIQgqzyFzIaZJgAeT2Fe8SeNQ4MJkvGSGrVO6?=
+ =?us-ascii?Q?KfnlJu23IofKXTiKpZXrcJfIxpO85u/8zGSd23AWHEfTBKAH+ER+X+SqX+h/?=
+ =?us-ascii?Q?TeUVR5iEAF4CU0jEb0iPvsXpZUIE+Kk5zfg3ysgjcqAFUPvZ7rracjI0LTEx?=
+ =?us-ascii?Q?UxlBS/GydnmLTd8pxmogecp8W7iCxCWBLzdmwyH5qXcxJbqaKfJ8qtT0OwNT?=
+ =?us-ascii?Q?DSz6g0E9wwSoiCXZZOPs/gt9?=
+X-OriginatorOrg: oracle.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: b7eadb34-d4f3-4b62-dd1d-08d93f66c730
+X-MS-Exchange-CrossTenant-AuthSource: MN2PR10MB4128.namprd10.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 05 Jul 2021 03:41:31.4043
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: Pj/1ccEowzv12UirPEcWMY/dxKtD2rGrZ50m8IfZfGIZNT/TUtGDDfTIHpyAMZyKNttuxdJZuaC6RJMtKo1dzw==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BL0PR10MB3025
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=10035 signatures=668682
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxlogscore=999 suspectscore=0
+ spamscore=0 adultscore=0 malwarescore=0 mlxscore=0 phishscore=0
+ bulkscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2104190000 definitions=main-2107050017
+X-Proofpoint-GUID: tEd4PEOcNmhAb_MuhMr_I-9WarUuYL3n
+X-Proofpoint-ORIG-GUID: tEd4PEOcNmhAb_MuhMr_I-9WarUuYL3n
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+Create a degraded btrfs filesystem and run fstrim on it.
 
+Signed-off-by: Anand Jain <anand.jain@oracle.com>
+---
+v2: Remove the commented #_require_command "$WIPEFS_PROG" wipefs 
+    which I forgot to remove earlier.
 
-On 2021/7/4 =E4=B8=8B=E5=8D=887:20, Anand Jain wrote:
-> Create a degraded btrfs filesystem and run fstrim on it.
->
-> Signed-off-by: Anand Jain <anand.jain@oracle.com>
-> ---
->   tests/btrfs/242     | 49 +++++++++++++++++++++++++++++++++++++++++++++
->   tests/btrfs/242.out |  2 ++
->   2 files changed, 51 insertions(+)
->   create mode 100755 tests/btrfs/242
->   create mode 100644 tests/btrfs/242.out
->
-> diff --git a/tests/btrfs/242 b/tests/btrfs/242
-> new file mode 100755
-> index 000000000000..e946ee6ac7c2
-> --- /dev/null
-> +++ b/tests/btrfs/242
-> @@ -0,0 +1,49 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (C) 2021 Oracle. All Rights Reserved.
-> +#
-> +# FS QA Test 242
-> +#
-> +# Test that fstrim can run on the degraded filesystem
-> +#   Kernel requires fix for the null pointer deref in btrfs_trim_fs()
-> +#     [patch] btrfs: check for missing device in btrfs_trim_fs
-> +
-> +
-> +. ./common/preamble
-> +_begin_fstest auto quick replace trim
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +_supported_fs btrfs
-> +_require_btrfs_forget_or_module_loadable
+ tests/btrfs/242     | 48 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/242.out |  2 ++
+ 2 files changed, 50 insertions(+)
+ create mode 100755 tests/btrfs/242
+ create mode 100644 tests/btrfs/242.out
 
-Since you have wipefs requirement commented out, I guess you're also
-unsure which is the better way.
+diff --git a/tests/btrfs/242 b/tests/btrfs/242
+new file mode 100755
+index 000000000000..6b632e4abada
+--- /dev/null
++++ b/tests/btrfs/242
+@@ -0,0 +1,48 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2021 Oracle. All Rights Reserved.
++#
++# FS QA Test 242
++#
++# Test that fstrim can run on the degraded filesystem
++#   Kernel requires fix for the null pointer deref in btrfs_trim_fs()
++#     [patch] btrfs: check for missing device in btrfs_trim_fs
++
++
++. ./common/preamble
++_begin_fstest auto quick replace trim
++
++# Import common functions.
++. ./common/filter
++
++# real QA test starts here
++_supported_fs btrfs
++_require_btrfs_forget_or_module_loadable
++_require_scratch_dev_pool 2
++
++_scratch_dev_pool_get 2
++dev1=$(echo $SCRATCH_DEV_POOL | $AWK_PROG '{ print $1 }')
++
++_scratch_pool_mkfs "-m raid1 -d raid1"
++_scratch_mount
++_require_batched_discard $SCRATCH_MNT
++
++# Add a test file with some data.
++$XFS_IO_PROG -f -c "pwrite -S 0xab 0 10M" $SCRATCH_MNT/foo > /dev/null
++
++# Unmount the filesystem.
++_scratch_unmount
++
++# Mount the filesystem in degraded mode 
++_btrfs_forget_or_module_reload
++_mount -o degraded $dev1 $SCRATCH_MNT
++
++# Run fstrim
++$FSTRIM_PROG $SCRATCH_MNT
++
++_scratch_dev_pool_put
++
++echo Silence is golden
++
++status=0
++exit
+diff --git a/tests/btrfs/242.out b/tests/btrfs/242.out
+new file mode 100644
+index 000000000000..a46d77702f23
+--- /dev/null
++++ b/tests/btrfs/242.out
+@@ -0,0 +1,2 @@
++QA output created by 242
++Silence is golden
+-- 
+2.27.0
 
-Personally speaking, I think wipefs is better.
-As it's more generic and needs no kernel support.
-
-Despite that it looks good to me.
-
-Thanks,
-Qu
-
-> +_require_scratch_dev_pool 2
-> +#_require_command "$WIPEFS_PROG" wipefs
-> +
-> +_scratch_dev_pool_get 2
-> +dev1=3D$(echo $SCRATCH_DEV_POOL | $AWK_PROG '{ print $1 }')
-> +
-> +_scratch_pool_mkfs "-m raid1 -d raid1"
-> +_scratch_mount
-> +_require_batched_discard $SCRATCH_MNT
-> +
-> +# Add a test file with some data.
-> +$XFS_IO_PROG -f -c "pwrite -S 0xab 0 10M" $SCRATCH_MNT/foo > /dev/null
-> +
-> +# Unmount the filesystem.
-> +_scratch_unmount
-> +
-> +# Mount the filesystem in degraded mode
-> +_btrfs_forget_or_module_reload
-> +_mount -o degraded $dev1 $SCRATCH_MNT
-> +
-> +# Run fstrim
-> +$FSTRIM_PROG $SCRATCH_MNT
-> +
-> +_scratch_dev_pool_put
-> +
-> +echo Silence is golden
-> +
-> +status=3D0
-> +exit
-> diff --git a/tests/btrfs/242.out b/tests/btrfs/242.out
-> new file mode 100644
-> index 000000000000..a46d77702f23
-> --- /dev/null
-> +++ b/tests/btrfs/242.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 242
-> +Silence is golden
->
