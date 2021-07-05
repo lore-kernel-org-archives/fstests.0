@@ -2,112 +2,66 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.0 required=3.0 tests=BAYES_00,FAKE_REPLY_A1,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,USER_AGENT_SANE_1
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EACF0C07E98
-	for <linux-fstests@archiver.kernel.org>; Mon,  5 Jul 2021 06:58:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 96836C07E99
+	for <linux-fstests@archiver.kernel.org>; Mon,  5 Jul 2021 07:57:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C9E42613DD
-	for <linux-fstests@archiver.kernel.org>; Mon,  5 Jul 2021 06:58:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 75E8F613B2
+	for <linux-fstests@archiver.kernel.org>; Mon,  5 Jul 2021 07:57:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229881AbhGEHBb (ORCPT
+        id S229993AbhGEH75 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 5 Jul 2021 03:01:31 -0400
-Received: from out30-44.freemail.mail.aliyun.com ([115.124.30.44]:46312 "EHLO
-        out30-44.freemail.mail.aliyun.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S229823AbhGEHBb (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 5 Jul 2021 03:01:31 -0400
-X-Alimail-AntiSpam: AC=PASS;BC=-1|-1;BR=01201311R181e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=e01e04423;MF=jefflexu@linux.alibaba.com;NM=1;PH=DS;RN=4;SR=0;TI=SMTPD_---0Uejs0rR_1625468331;
-Received: from admindeMacBook-Pro-2.local(mailfrom:jefflexu@linux.alibaba.com fp:SMTPD_---0Uejs0rR_1625468331)
-          by smtp.aliyun-inc.com(127.0.0.1);
-          Mon, 05 Jul 2021 14:58:52 +0800
-To:     "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
-        linux-xfs@vger.kernel.org
-Reply-To: 20200427173354.GM6740@magnolia
-From:   JeffleXu <jefflexu@linux.alibaba.com>
-Subject: Re: [RFC,2/2] xfstests: common/rc: add cluster size support for ext4
-Message-ID: <0939cdf0-895c-7287-569a-2a9b4269b1ca@linux.alibaba.com>
-Date:   Mon, 5 Jul 2021 14:58:51 +0800
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0)
- Gecko/20100101 Thunderbird/78.11.0
+        Mon, 5 Jul 2021 03:59:57 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49046 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229984AbhGEH75 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 5 Jul 2021 03:59:57 -0400
+Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8D47DC061574
+        for <fstests@vger.kernel.org>; Mon,  5 Jul 2021 00:57:20 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
+        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=4CFtrn9sQgZDqsrBXOIpC7K6DRYfw57OL009p3GnXUA=; b=KqfxTsDjZPGjJ6685IFcGHb/1Q
+        S1wTeCyIMRise0rv5FYhXQW3SmwyhMpRjfTNOuSp3w99nXuRodfW5gHBCk212Fi56z8AtAPD6nm00
+        KCxnU4V6tIt0excnDjFIhObif4PghvXr7xhd8+teNS53jGIpm84zG3KVAbhlSScpaTLg19C1o/cyg
+        zKg2ktWRDbCcK6oaw0hy5vRxdN3SR9CqjAEtWO7+ClVYC9zz+kAK9Tkwz/7lQ6XIBixK0dLUSdhCY
+        txvuatm4KKz7G8cqsnSEW65XGi/VWbmMo5QeQ79YolqgqVJxhniW2/8SfFiPbrSC+VqY2Yp9Dvjnq
+        OtW8i/KA==;
+Received: from hch by casper.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
+        id 1m0JTF-00A0yi-Q8; Mon, 05 Jul 2021 07:56:56 +0000
+Date:   Mon, 5 Jul 2021 08:56:49 +0100
+From:   Christoph Hellwig <hch@infradead.org>
+To:     Theodore Ts'o <tytso@mit.edu>
+Cc:     Eryu Guan <guan@eryu.me>, fstests@vger.kernel.org,
+        Leah Rumancik <leah.rumancik@gmail.com>
+Subject: Re: [PATCH] ext4/048: skip test of filename wipe if journal
+ checkpoint is not supported
+Message-ID: <YOK7Qf+1Rv9+ntxT@infradead.org>
+References: <20210621164851.1808923-1-tytso@mit.edu>
+ <YOGRukqZFQTb36MS@desktop>
+ <YOIwqn1jPBSyXIwd@mit.edu>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <YOIwqn1jPBSyXIwd@mit.edu>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by casper.infradead.org. See http://www.infradead.org/rpr.html
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+On Sun, Jul 04, 2021 at 06:05:30PM -0400, Theodore Ts'o wrote:
+> Given the discussion for the patches, I suspect that it will be only
+> the distros that are meant for Cloud environments (e.g., Google's COS,
+> maybe Amazon Linux, etc.) that will be interested at all in the first
+> place --- and if they do, they'll want to take both of them.
 
-Sorry for digging this really old post [1]. The overall background is
-that, @offset and @len need to be aligned with cluster size when doing
-fallocate(), or several xfstests cases calling fsx will fail if the
-tested filesystem enabling 'bigalloc' feature.
-
-On April 27, 2020, 5:33 p.m. UTC Darrick J. Wong wrote:
-
-> On Fri, Apr 24, 2020 at 05:33:50PM +0800, Jeffle Xu wrote:
->> Inserting and collapsing range on ext4 with 'bigalloc' feature will
->> fail due to the offset and size should be alligned with the cluster
->> size.
->> 
->> The previous patch has add support for cluster size in fsx. Detect and
->> pass the cluster size parameter to fsx if the underlying filesystem
->> is ext4 with bigalloc.
->> 
->> Signed-off-by: Jeffle Xu <jefflexu@linux.alibaba.com>
->> ---
->>  common/rc | 9 +++++++++
->>  1 file changed, 9 insertions(+)
->> 
->> diff --git a/common/rc b/common/rc
->> index 2000bd9..71dde5f 100644
->> --- a/common/rc
->> +++ b/common/rc
->> @@ -3908,6 +3908,15 @@ run_fsx()
->>  {
->>  	echo fsx $@
->>  	local args=`echo $@ | sed -e "s/ BSIZE / $bsize /g" -e "s/ PSIZE / $psize /g"`
->> +
->> +	if [ "$FSTYP" == "ext4" ]; then
->> +		local cluster_size=$(tune2fs -l $TEST_DEV | grep 'Cluster size' | awk '{print $3}')
->> +		if [ -n $cluster_size ]; then
->> +			echo "cluster size: $cluster_size"
->> +			args="$args -u $cluster_size"
->> +		fi
->> +	fi
-> 
-> Computing the file allocation block size ought to be a separate helper.
-> 
-> I wonder if there's a standard way to report cluster sizes, seeing as
-> fat, ext4, ocfs2, and xfs can all have minimum space allocation units
-> that are larger than the base fs block size.
-
-In fact only for insert_range and collapse range of ext4 and xfs (in
-realtime mode), @offset and @len need to be aligned with cluster size.
-
-Though fat and ocfs2 also support cluster size, ocfs2 only supports
-preallocate and punch_hole, and fat only supports preallocate, in which
-case @offset and @len needn't be aligned with cluster size.
-
-
-So we need to align @offset and @len with cluster size only for ext4 and
-xfs (in realtime mode) at a minimum cost, to fix this issue. But the
-question is, there's no standard programming interface exporting cluster
-size. For both ext4 and xfs, it's stored as a binary data in disk
-version superblock, e.g., tune2fs could detect the cluster size of ext4.
-
-
-Any idea on how to query the cluster size?
-
-
-[1]
-https://patchwork.kernel.org/project/fstests/cover/1587720830-11955-1-git-send-email-jefflexu@linux.alibaba.com/
-
--- 
-Thanks,
-Jeffle
+FYI, I still think supporting discard at all is a active and dangerous
+mis-service to your users.  Discard must not and often will not
+clear data.  Write smae OTOH does, and with the REQ_UNMAP flag will
+give you the same results as discards for devices that zero on
+discard, while haveing a safe (but slow) fallback if not.
