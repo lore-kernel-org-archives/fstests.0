@@ -7,33 +7,33 @@ X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ABA40C07E99
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C8FA2C07E9A
 	for <linux-fstests@archiver.kernel.org>; Mon,  5 Jul 2021 04:03:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 84298613D1
+	by mail.kernel.org (Postfix) with ESMTP id A825D61363
 	for <linux-fstests@archiver.kernel.org>; Mon,  5 Jul 2021 04:03:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229515AbhGEEFy (ORCPT
+        id S229495AbhGEEFy (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
         Mon, 5 Jul 2021 00:05:54 -0400
-Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:53454 "EHLO
+Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:53456 "EHLO
         outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S229495AbhGEEFy (ORCPT
+        with ESMTP id S229500AbhGEEFy (ORCPT
         <rfc822;fstests@vger.kernel.org>); Mon, 5 Jul 2021 00:05:54 -0400
 Received: from cwcc.thunk.org (pool-72-74-133-215.bstnma.fios.verizon.net [72.74.133.215])
         (authenticated bits=0)
         (User authenticated as tytso@ATHENA.MIT.EDU)
-        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 16543FsQ017797
+        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 16543Fou017799
         (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
         Mon, 5 Jul 2021 00:03:15 -0400
 Received: by cwcc.thunk.org (Postfix, from userid 15806)
-        id 4919415C3C96; Mon,  5 Jul 2021 00:03:14 -0400 (EDT)
+        id C631715C3C9E; Mon,  5 Jul 2021 00:03:14 -0400 (EDT)
 From:   "Theodore Ts'o" <tytso@mit.edu>
 To:     fstests@vger.kernel.org
 Cc:     "Theodore Ts'o" <tytso@mit.edu>
-Subject: [PATCH 1/2] dmflakey: don't run dmflakey tests with an external log device
-Date:   Mon,  5 Jul 2021 00:03:06 -0400
-Message-Id: <20210705040307.3322709-2-tytso@mit.edu>
+Subject: [PATCH 2/2] generic/475: skip test when using an external log device
+Date:   Mon,  5 Jul 2021 00:03:07 -0400
+Message-Id: <20210705040307.3322709-3-tytso@mit.edu>
 X-Mailer: git-send-email 2.31.0
 In-Reply-To: <20210705040307.3322709-1-tytso@mit.edu>
 References: <20210705040307.3322709-1-tytso@mit.edu>
@@ -43,34 +43,33 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-dmflakey works by dropping all writes before unmounting to similate a
-crash/power loss.  This doesn't work if there is an external log
-device, since we only drop writes to the primary block device, and not
-the external log device.  Fixing this for real would require somehow
-arranging to atomically loading a new dmflakey table for two block
-devices at the same time, so for now, just skip tests using dmflakey
-if the external log device is enabled.
+This test tests log recovery by kicking off fstress on the scratch fs,
+then switch out the underlying the device with dm-error to see what
+happens when the disk goes down.  But when there is an external log
+device writes to the log device still succeed, while writes to the
+rest of the file system fail, and this leads to file system
+corruption.  So skip this test when there is an external log.
 
 Signed-off-by: Theodore Ts'o <tytso@mit.edu>
 ---
- common/dmflakey | 4 ++++
+ tests/generic/475 | 4 ++++
  1 file changed, 4 insertions(+)
 
-diff --git a/common/dmflakey b/common/dmflakey
-index b4e11ae9..3bbf6e2b 100644
---- a/common/dmflakey
-+++ b/common/dmflakey
-@@ -11,6 +11,10 @@ FLAKEY_ERROR_WRITES=2
- _init_flakey()
- {
- 	local BLK_DEV_SIZE=`blockdev --getsz $SCRATCH_DEV`
+diff --git a/tests/generic/475 b/tests/generic/475
+index 62894491..4f230430 100755
+--- a/tests/generic/475
++++ b/tests/generic/475
+@@ -34,6 +34,10 @@ _require_scratch
+ _require_dm_target error
+ _require_command "$KILLALL_PROG" "killall"
+ 
++if test "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ; then
++    _notrun "Cannot have external log device"
++fi
 +
-+	if test "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ; then
-+		_notrun "dmflakey tests don't work with an external log device"
-+	fi
- 	FLAKEY_DEV=/dev/mapper/flakey-test
- 	FLAKEY_TABLE="0 $BLK_DEV_SIZE flakey $SCRATCH_DEV 0 180 0"
- 	FLAKEY_TABLE_DROP="0 $BLK_DEV_SIZE flakey $SCRATCH_DEV 0 0 180 1 drop_writes"
+ echo "Silence is golden."
+ 
+ _scratch_mkfs >> $seqres.full 2>&1
 -- 
 2.31.0
 
