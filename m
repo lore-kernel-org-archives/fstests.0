@@ -2,109 +2,161 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CC2A4C07E95
-	for <linux-fstests@archiver.kernel.org>; Sun,  4 Jul 2021 22:05:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9E5D2C07E95
+	for <linux-fstests@archiver.kernel.org>; Mon,  5 Jul 2021 00:17:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8FB12613E5
-	for <linux-fstests@archiver.kernel.org>; Sun,  4 Jul 2021 22:05:40 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 74F9E613F1
+	for <linux-fstests@archiver.kernel.org>; Mon,  5 Jul 2021 00:17:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229720AbhGDWIO (ORCPT
+        id S229715AbhGEAUP (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 4 Jul 2021 18:08:14 -0400
-Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:47734 "EHLO
-        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S229652AbhGDWIO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 4 Jul 2021 18:08:14 -0400
-Received: from cwcc.thunk.org (pool-72-74-133-215.bstnma.fios.verizon.net [72.74.133.215])
-        (authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 164M5UZR016998
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Sun, 4 Jul 2021 18:05:31 -0400
-Received: by cwcc.thunk.org (Postfix, from userid 15806)
-        id 7C58215C3C91; Sun,  4 Jul 2021 18:05:30 -0400 (EDT)
-Date:   Sun, 4 Jul 2021 18:05:30 -0400
-From:   "Theodore Ts'o" <tytso@mit.edu>
-To:     Eryu Guan <guan@eryu.me>
-Cc:     fstests@vger.kernel.org, Leah Rumancik <leah.rumancik@gmail.com>
-Subject: Re: [PATCH] ext4/048: skip test of filename wipe if journal
- checkpoint is not supported
-Message-ID: <YOIwqn1jPBSyXIwd@mit.edu>
-References: <20210621164851.1808923-1-tytso@mit.edu>
- <YOGRukqZFQTb36MS@desktop>
+        Sun, 4 Jul 2021 20:20:15 -0400
+Received: from mout.gmx.net ([212.227.15.15]:38663 "EHLO mout.gmx.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S229681AbhGEAUP (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 4 Jul 2021 20:20:15 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net;
+        s=badeba3b8450; t=1625444254;
+        bh=WANSdCLx2HuMwdY8S7ESrzpHtNrDI830msWiZjqwZyw=;
+        h=X-UI-Sender-Class:Subject:To:Cc:References:From:Date:In-Reply-To;
+        b=AE5oNS0oQSURt+kd7gdjcAM8K+qm0aOUXBxYkdPLesQZ/yvePTAws6UF5AhHkJgAv
+         dNOfUTjbAyYKNZ342TRR+NJDTiNrr4i2mpuzmiuffmwPi86tc2FymMDluxSnU45C4n
+         nETuzyjzAEIejoeICsr33pi8wBS5uygQsMm29otU=
+X-UI-Sender-Class: 01bb95c1-4bf8-414a-932a-4f6e2808ef9c
+Received: from [0.0.0.0] ([149.28.201.231]) by mail.gmx.net (mrgmx004
+ [212.227.17.184]) with ESMTPSA (Nemesis) id 1MMGN2-1lj4ci00Lm-00JHJt; Mon, 05
+ Jul 2021 02:17:34 +0200
+Subject: Re: [PATCH] btrfs/242: test case to fstrim on a degraded filesystem
+To:     Anand Jain <anand.jain@oracle.com>, fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org
+References: <a70c9f6b4e45d9bcdc5c2f19182f89ef8e22c074.1625237782.git.anand.jain@oracle.com>
+From:   Qu Wenruo <quwenruo.btrfs@gmx.com>
+Message-ID: <bf5ab599-a3e8-b8b8-4131-dfa02aa7d0e4@gmx.com>
+Date:   Mon, 5 Jul 2021 08:17:30 +0800
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.11.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <YOGRukqZFQTb36MS@desktop>
+In-Reply-To: <a70c9f6b4e45d9bcdc5c2f19182f89ef8e22c074.1625237782.git.anand.jain@oracle.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: quoted-printable
+X-Provags-ID: V03:K1:ZeSPzBNfG3V1oMdYu8uW4yBbt6e7SSD6pzhB+e7j/Gb/Aa5f1FO
+ pCGeQjouK4aWVBwVkofNEOnpfu2mb9J650ot26c050oRwp0JYnwbUkDWoe4zzg+t7ouB442
+ 8q16WDx0Z68rERyysyBET6yE4dI799accf8VFkPRKGuawH0gq9iDhgIP17Xp7by+j6PkoHG
+ QUV8/MKARLM1o+xbDv+FA==
+X-UI-Out-Filterresults: notjunk:1;V03:K0:r9VEYMEztrE=:S/jBJ4lGUiPXkjzbzIC6xr
+ lzNXWA0MG+f19Ik9VLc7XZ8GKL+RMoCOXnzaCMPony9pNZwGXyb1PDnjiEoX6j9bu8aKYaU4f
+ tiSKP52xkp0ghlw63htOvwucog5TcYoDmnmZLgm/qBDx7ETzpTxsOqrkBpo4Fw/4+hGqMpVE7
+ 0RpzMa1L8il/ZrS/Gb6Lbe5cUsSOWYLAb88WltoQsTdLR9o90vyrvexxcs4r060yWeXO3Zn1U
+ HlxEN9oFyLsyl6ehsvTrpFdMPEd9YD11FOQC1lNH0floD1La2aeS6SdH7VGQVqGantO4mD9gr
+ MeSMLONfggG8TVHk35leclG0ChE/wltTDvZh+DwSNcrEi8cGCAxWfL5/yEu+4V00mhfX4bBAQ
+ JTlqJkbEiicFrRLbYVjaZBNRxVHUiruAReSbsCUqjw/pPjxypaqbspRkizSGLDd+Yo+C/IoEH
+ zy6iaKD679eAk8VK4+4zeXyJsULdCgwNiueya4IJHaAMWtYwPyyq+XJq6Oa1wHgpHgeUD+5+A
+ TnZsnRx0onutmbAkUkN/Fw/7OORsfd1rEzIj5jdWOarROPpOfdtR+VfO8+eLUtNNt4/ewjwZS
+ vUIrGt3aTajmGAfYGtml865mWyPVflR8JjEMVN7eRbCglMKJ7TxUtwinB5/A4Qu+OiTdtS68e
+ BNOZ0xCKjeN4c0xxgOoLujDnodCGW8skVeufvCj2eo6kME2ubdUXx47u4Q28E5/u+oc5Q+i87
+ xk49xckcFKOtr/408N7hU6C3qF4Oc32YXVg5qisx0FIuOMlbQrydi1aivXeyUV8Kxa7CMP9hw
+ 1+PLJZx5GsAXM3dmIQYkugsFIGraigs8QwVQSsQah3Y7x6nwn1BZavOeivyxc0x4PC3G+JWbZ
+ XnmCvbO3KMK+Gz48ILj9lTuRFDVfAARs6krxjOztza8NPK0qqD2aNrRBPv2qxJw2RXLVBiv7Y
+ HIrVYs+b16Civqosz+fSjRUlHBs2gqLNn3XSC3mKljcSWxEQYL5IT4nPmesQxt21R/YG7G95v
+ pKyGTty86WNBHlJCGhpvSyayQQMJQWaCWjX3asWzar7/tEjvPdgWiKah5hOiD4gckLcmYTQRN
+ 79saF62ODk9muaSlo1hzEpF5KCPFAt0YGSKZwxogikC1JAeprp/8WjNvQ==
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Jul 04, 2021 at 06:47:22PM +0800, Eryu Guan wrote:
-> 
-> I think that depends on if we treat it as a feature or a bugfix. We
-> should let the test fail on old kernels if that's a bugfix, and skip the
-> test if it's a feature. Apparently, we take it as a feature here.
 
-Yes, it's clearly a feature.
 
-> > feature, and landed just a little bit after filename wipe feature, so
-> > use support for the journal checkpoint ioctl as a proxy for support
-> > for the filename wipe feature.
-> 
-> This seems fragile, they're related features but not always bounded
-> together, I think it's possible for distros developers decide to
-> backport only one of the features (though quite unlikely).
+On 2021/7/4 =E4=B8=8B=E5=8D=887:20, Anand Jain wrote:
+> Create a degraded btrfs filesystem and run fstrim on it.
+>
+> Signed-off-by: Anand Jain <anand.jain@oracle.com>
+> ---
+>   tests/btrfs/242     | 49 +++++++++++++++++++++++++++++++++++++++++++++
+>   tests/btrfs/242.out |  2 ++
+>   2 files changed, 51 insertions(+)
+>   create mode 100755 tests/btrfs/242
+>   create mode 100644 tests/btrfs/242.out
+>
+> diff --git a/tests/btrfs/242 b/tests/btrfs/242
+> new file mode 100755
+> index 000000000000..e946ee6ac7c2
+> --- /dev/null
+> +++ b/tests/btrfs/242
+> @@ -0,0 +1,49 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (C) 2021 Oracle. All Rights Reserved.
+> +#
+> +# FS QA Test 242
+> +#
+> +# Test that fstrim can run on the degraded filesystem
+> +#   Kernel requires fix for the null pointer deref in btrfs_trim_fs()
+> +#     [patch] btrfs: check for missing device in btrfs_trim_fs
+> +
+> +
+> +. ./common/preamble
+> +_begin_fstest auto quick replace trim
+> +
+> +# Import common functions.
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_fs btrfs
+> +_require_btrfs_forget_or_module_loadable
 
-Given the discussion for the patches, I suspect that it will be only
-the distros that are meant for Cloud environments (e.g., Google's COS,
-maybe Amazon Linux, etc.) that will be interested at all in the first
-place --- and if they do, they'll want to take both of them.
+Since you have wipefs requirement commented out, I guess you're also
+unsure which is the better way.
 
-That's because it's only in a Cluod environment we can make specific
-guarantees about how discard works, and it's mostly in a Cloud
-environment where you have customers which appear to be the most
-concerned about being able to certify to their auditors that PII can
-be reliably wiped after they "lift and shift" from their private data
-centers to third-party operated hyperscale Cloud providers.
+Personally speaking, I think wipefs is better.
+As it's more generic and needs no kernel support.
 
-> Is it worth to introduce features sysfs entry for journal checkpoint and
-> filename wipe in ext4? In fstests' point of view, it's great to have
-> such entries that could be checked. If it's not worth it, I think the
-> "feature proxy" way is acceptable, given that the two features are
-> closely related and aimed to the same security issue.
+Despite that it looks good to me.
 
-Well, we didn't when the patch first landed, so even if we did add the
-features sysfs file, there's no guarantee that distros doing the
-backport will pick up the patch to add the features file.  The sysfs
-files do take up a few hundred bytes each, and so there is some
-resistance in adding a lot of sysfs features, saving them for major
-features.
+Thanks,
+Qu
 
-For better or for worse, one of the principles of sysfs is to _not_
-require any parsing, such that something like /proc/stat would have to
-be replaced by something like individual 1,000+ sysfs files (try
-running wc -w /proc/stat), depending on how cpu cores and interrupt
-channels the system has.
-
-This is why we are using separate sysfs files for each feature,
-instead of a /proc file containing a list of features which fstests
-could test by checking the exit status of "grep ^feature_name$
-/proc/fs/ext4/feature-list".  But in retrospect, maybe we should have
-gone down that path, since adding features to a feature-list
-pseudo-file is essentially free, and would make life much more
-convenient for fstests --- right now we do a lot of "create a scratch
-file system; try to mount it and see if it succeed or fails, which is
-a lot of needless church and extra write cycles on the test device,
-and takes more time than just running "grep" on a festure-list file.
-
-Alas, sysfs was considered the new hotness, and the superior approach,
-while /proc was considered the legacy, hacky approach.  Ah, well...
-
-Cheers,
-
-						- Ted
+> +_require_scratch_dev_pool 2
+> +#_require_command "$WIPEFS_PROG" wipefs
+> +
+> +_scratch_dev_pool_get 2
+> +dev1=3D$(echo $SCRATCH_DEV_POOL | $AWK_PROG '{ print $1 }')
+> +
+> +_scratch_pool_mkfs "-m raid1 -d raid1"
+> +_scratch_mount
+> +_require_batched_discard $SCRATCH_MNT
+> +
+> +# Add a test file with some data.
+> +$XFS_IO_PROG -f -c "pwrite -S 0xab 0 10M" $SCRATCH_MNT/foo > /dev/null
+> +
+> +# Unmount the filesystem.
+> +_scratch_unmount
+> +
+> +# Mount the filesystem in degraded mode
+> +_btrfs_forget_or_module_reload
+> +_mount -o degraded $dev1 $SCRATCH_MNT
+> +
+> +# Run fstrim
+> +$FSTRIM_PROG $SCRATCH_MNT
+> +
+> +_scratch_dev_pool_put
+> +
+> +echo Silence is golden
+> +
+> +status=3D0
+> +exit
+> diff --git a/tests/btrfs/242.out b/tests/btrfs/242.out
+> new file mode 100644
+> index 000000000000..a46d77702f23
+> --- /dev/null
+> +++ b/tests/btrfs/242.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 242
+> +Silence is golden
+>
