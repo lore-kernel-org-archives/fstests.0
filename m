@@ -2,167 +2,151 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-17.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9922BC07E99
-	for <linux-fstests@archiver.kernel.org>; Mon,  5 Jul 2021 11:51:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0AB54C07E96
+	for <linux-fstests@archiver.kernel.org>; Tue,  6 Jul 2021 10:56:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7C02B61261
-	for <linux-fstests@archiver.kernel.org>; Mon,  5 Jul 2021 11:51:56 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E4D57619D1
+	for <linux-fstests@archiver.kernel.org>; Tue,  6 Jul 2021 10:56:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230367AbhGELyc (ORCPT
+        id S231391AbhGFK7V (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 5 Jul 2021 07:54:32 -0400
-Received: from mout.gmx.net ([212.227.17.22]:58811 "EHLO mout.gmx.net"
+        Tue, 6 Jul 2021 06:59:21 -0400
+Received: from mail.kernel.org ([198.145.29.99]:58684 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S230174AbhGELyc (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 5 Jul 2021 07:54:32 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net;
-        s=badeba3b8450; t=1625485910;
-        bh=EO2m/NuEe3jDGVDa5YMWA5P96siPx6lfK1ls9sZfHq0=;
-        h=X-UI-Sender-Class:Subject:To:Cc:References:From:Date:In-Reply-To;
-        b=ECaF7LJHMVJWoUvD3/60wEg+oeB8TjfxilL37NbDVdm/rX9sH3OLbCUT1Dd/KRHaF
-         BFrCGmN/+6nKQcfVjXGZ/RH3OtEwW+nUpa6ubCp9X8qMXdqdpRZCflI5cQdc00Czue
-         zShu57hOgTfKGp4C5qqYsYdbAftUkUIrWoXAA244=
-X-UI-Sender-Class: 01bb95c1-4bf8-414a-932a-4f6e2808ef9c
-Received: from [0.0.0.0] ([149.28.201.231]) by mail.gmx.net (mrgmx105
- [212.227.17.174]) with ESMTPSA (Nemesis) id 1MkHMP-1lKgk30erp-00kfmk; Mon, 05
- Jul 2021 13:51:50 +0200
-Subject: Re: [PATCH v3] btrfs/242: test case to fstrim on a degraded
- filesystem
-To:     Anand Jain <anand.jain@oracle.com>, fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, fdmanana@gmail.com
-References: <a70c9f6b4e45d9bcdc5c2f19182f89ef8e22c074.1625237782.git.anand.jain@oracle.com>
- <cae6a7e7836949a0407cf6859d7f9102636bab8f.1625481473.git.anand.jain@oracle.com>
-From:   Qu Wenruo <quwenruo.btrfs@gmx.com>
-Message-ID: <d39a3fba-e887-29b5-f577-841a16de49ec@gmx.com>
-Date:   Mon, 5 Jul 2021 19:51:46 +0800
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.11.0
+        id S229907AbhGFK7V (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 6 Jul 2021 06:59:21 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 9C84D619BE;
+        Tue,  6 Jul 2021 10:56:42 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1625569003;
+        bh=l3+QCQtBUbOBtWksvXY35qZwLrAswVJ0X8ca7y+RoFY=;
+        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
+        b=ViPq3tzgAia1mqCfODmUfdtM12uT45F9oKivXWYmLihv2lMB9epuI5LEKOfPDyvvD
+         lfUrf2hemO1wLNR5VUjR2ExkCp567cQ22LwN1aHrp9Z7DD7zNT15ipzxEVrSEY+8d6
+         TrOMknUa3qQrEK45hvfvy2OYAfopslqsB+sC5qSOIYgxkXTBkqCOj2kMk3FVmJQ6zB
+         7UNKNNKfZHaoVjRrimLqD4EY2Lo26BNiR+H5e5+DFvAW9KiakS/xkcHwa2Vcc5oMYs
+         sXhp2D0ANntE220qycjeT/tjqOti6Qhp2asHI/SOX0NKR4v3BDIqEmuZJr3D7WSXMA
+         FSXD1OU+Bl42A==
+Message-ID: <69594288685fdb38fb855345ef43252b6bd4aed3.camel@kernel.org>
+Subject: Re: [PATCH v3] generic: add a test to ensure that page is properly
+ filled before write
+From:   Jeff Layton <jlayton@kernel.org>
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     Eryu Guan <guaneryu@gmail.com>, fstests@vger.kernel.org,
+        aweits@rit.edu, dhowells@redhat.com, willy@infradead.org
+Date:   Tue, 06 Jul 2021 06:56:41 -0400
+In-Reply-To: <20210705110434.wlc2gooeykoc6xcj@fedora>
+References: <20210702134024.24233-1-jlayton@kernel.org>
+         <20210705110434.wlc2gooeykoc6xcj@fedora>
+Content-Type: text/plain; charset="ISO-8859-15"
+User-Agent: Evolution 3.40.2 (3.40.2-1.fc34) 
 MIME-Version: 1.0
-In-Reply-To: <cae6a7e7836949a0407cf6859d7f9102636bab8f.1625481473.git.anand.jain@oracle.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:WiHP4f4QY6zFGXhDn5F3oyQs3r7rOlQizz28LQZD/fy2ZRvsoPd
- BoLfvACVdfwnQQt5OZKpfNcjCnYxkqLfHm7Iz5BVzeTc8tMI/b1p08Vr/3AZXZck1V85NB/
- 3BCa0eHsKpc51/yEBQ+HyuqdrI7eAUeir/KiBLYeFeeBur3Jr/0wEXXBG3KVujtNubXmKTP
- analX1hMig6Z+wtfpgScw==
-X-UI-Out-Filterresults: notjunk:1;V03:K0:+uSrSkuglYQ=:CNbVt065PcXkdAYcc5XP/3
- mm8PQwhPu8ATeWFeHpf++R0xghOqa+UCWLJU2GJpth4/VPWRIKfbsiOICcvMxz2hiIbvlu6vT
- 51DFtygRbicXtx951x0RHQanh19pcigUOysYKz3wOwnMNru68CvMPLai+It9xT8QMOyPJjeCp
- wZ0Oe0owmdIfZteAt1t+E1j/hAUwMaLgRH3UUaUsSqTJ7p1aOjfCMLcaGQ/t5iLCrcG6yOopm
- jhl87qxA+KyqS/6ND3J9SDDACLLs33l1x/gGoD1FF05WM7mv1UvW6iV5WfPJMduWJOKdAaT8F
- BJUs3nzTlDgio7mFpXOZXF+NsfmMGu1SkRwhoKqcYoH3tuNRoFrkZjs8aYC2BC6MDEFjV9kTI
- NqIe6TMsPgc2F05gKGeniK31jVFpMpgcHmErI1RpHm2ocI+YsjQclhBeDHNSLwr/tWfI8iSeB
- 9z8NBoewulAqhW1tVunqWiFHJJQP5WoVrXfpMZwmCMi2lBMmFaIxyi60JLJw4h4BJfvct4GaF
- C0QtvjzRzXzbsegrNCfyn7ersHvPC4w9m35tlXCx5+5bniUrk2sXkmU1O31iUQZEm86IZqxNB
- 8J7uKAVEdl7J/HbPyGce0zzE3RYcCH0xOiDXYPS24TFZh3fCBHZCOixl+jkpkylThuaZZYVKo
- XAsDe8r5OUowmnsNusKsxjski29pvtx50Siy9NComrZZA4A5x/7BAB8NewvbliPPZA8EuvDgG
- BJOJ1gM9RF8s8yTyEXfMtUh+Hss7Svn+ejK7IAzZnscNxnlt/BJcsivV6+9rgQpkAlfRq1fNo
- 0KhwF0aJLb3x0BHEpqVS0CEkk1XZttuHFeQGR4iN84275rwge1rNG4M5d4WXqNhDy6QWgM2JS
- pjQfa64vJWqd1cqy6mrgSebaIfWurcNrvYGHf0rMJmNm6RKundv4tggc56kJQnWTAdd4eWnXu
- CgzxJl2WWnJ2fKdqzxsVWZun/jBi4LU2T9UAjNWuFS0eEF0XRVsx5J78WMZyOiZxlYr1wXNOH
- uchavqyEdi2S2YEEmkFE4pGrwPNyAszKrAP6hCSXVwMac1aNPSJLTuegtsrF043kGn08LJ3E6
- 0y6Zy6T2NvfAq96O/LjjsOW9hQ2tDx2GeRf7ZCQJA5wuZE1bgIM2F9o9w==
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+On Mon, 2021-07-05 at 19:04 +0800, Zorro Lang wrote:
+> On Fri, Jul 02, 2021 at 09:40:24AM -0400, Jeff Layton wrote:
+> > We had a broken optimization in cephfs and netfs lib that could cause
+> > part of a page to be improperly zeroed-out when writing to an offset
+> > that was beyond the EOF but in an existing page.
+> > 
+> > Add a simple test that would have caught this.
+> > 
+> > Signed-off-by: Jeff Layton <jlayton@kernel.org>
+> > ---
+> >  tests/generic/639     | 39 +++++++++++++++++++++++++++++++++++++++
+> >  tests/generic/639.out |  5 +++++
+> >  2 files changed, 44 insertions(+)
+> >  create mode 100755 tests/generic/639
+> >  create mode 100644 tests/generic/639.out
+> > 
+> > v3: adapt to new test template
+> > 
+> > diff --git a/tests/generic/639 b/tests/generic/639
+> > new file mode 100755
+> > index 000000000000..c30f7644a2fc
+> > --- /dev/null
+> > +++ b/tests/generic/639
+> > @@ -0,0 +1,39 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (c) 2021, Jeff Layton <jlayton@redhat.com>
+> > +#
+> > +# FS QA Test No. 639
+> > +#
+> > +# Open a file and write a little data to it. Unmount (to clean out the cache)
+> > +# and then mount again. Then write some data to it beyond the EOF and ensure
+> > +# the result is correct.
+> > +#
+> > +# Prompted by a bug in ceph_write_begin that was fixed by commit 827a746f405d.
+> > +#
+> > +. ./common/preamble
+> > +_begin_fstest auto quick rw
+> > +
+> > +# Import common functions.
+> > +. ./common/filter
+> > +
+> > +# real QA test starts here
+> > +_supported_fs generic
+> > +_require_test
+> > +
+> > +testfile="$TEST_DIR/test_write_begin.$$"
+> > +
+> > +# write some data to file and fsync it out
+> > +$XFS_IO_PROG -f -c "pwrite -q 0 32" $testfile
+> 
+> Looks good to me, if you've used this case to reproduce that issue.
+> 
+> Just one question, the comment says "fsync it out", does that mean we need an
+> explicit "fsync" call (e.g. -c "pwrite -q 0 32" -c "fsync") to reproduce this
+> bug? Or there's an implicit "fsync" somewhere?
+> 
+> 
 
-
-On 2021/7/5 =E4=B8=8B=E5=8D=886:43, Anand Jain wrote:
-> Create a degraded btrfs filesystem and run fstrim on it.
->
-> Signed-off-by: Anand Jain <anand.jain@oracle.com>
-
-Reviewed-by: Qu Wenruo <wqu@suse.com>
+No, there is no implicit fsync. This is holdover from copy/paste that I
+did from another test. The patch is already merged now, but if we expand
+this test to cover other cases, I'll plan to clean up the comment then.
 
 Thanks,
-Qu
-> ---
-> v3: Remove from replace-group.
->      Add to the volume-group.
->      Check for the data integrity.
-> v2: Remove the commented #_require_command "$WIPEFS_PROG" wipefs
->      which I forgot to remove earlier.
->   tests/btrfs/242     | 49 +++++++++++++++++++++++++++++++++++++++++++++
->   tests/btrfs/242.out |  7 +++++++
->   2 files changed, 56 insertions(+)
->   create mode 100755 tests/btrfs/242
->   create mode 100644 tests/btrfs/242.out
->
-> diff --git a/tests/btrfs/242 b/tests/btrfs/242
-> new file mode 100755
-> index 000000000000..da787c1ef91f
-> --- /dev/null
-> +++ b/tests/btrfs/242
-> @@ -0,0 +1,49 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (C) 2021 Oracle. All Rights Reserved.
-> +#
-> +# FS QA Test 242
-> +#
-> +# Test that fstrim can run on the degraded filesystem
-> +#   Kernel requires fix for the null pointer deref in btrfs_trim_fs()
-> +#     [patch] btrfs: check for missing device in btrfs_trim_fs
-> +
-> +. ./common/preamble
-> +_begin_fstest auto quick volume trim
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +_supported_fs btrfs
-> +_require_btrfs_forget_or_module_loadable
-> +_require_scratch_dev_pool 2
-> +
-> +_scratch_dev_pool_get 2
-> +dev1=3D$(echo $SCRATCH_DEV_POOL | $AWK_PROG '{ print $1 }')
-> +
-> +_scratch_pool_mkfs "-m raid1 -d raid1"
-> +_scratch_mount
-> +_require_batched_discard $SCRATCH_MNT
-> +
-> +# Add a test file with some data.
-> +$XFS_IO_PROG -f -c "pwrite -S 0xab 0 10M" $SCRATCH_MNT/foo | _filter_xf=
-s_io
-> +
-> +# Unmount the filesystem.
-> +_scratch_unmount
-> +
-> +# Mount the filesystem in degraded mode
-> +_btrfs_forget_or_module_reload
-> +_mount -o degraded $dev1 $SCRATCH_MNT
-> +
-> +# Run fstrim, it should skip on the missing device.
-> +$FSTRIM_PROG $SCRATCH_MNT
-> +
-> +# Verify data integrity as in the golden output.
-> +echo "File foo data:"
-> +od -A d -t x1 $SCRATCH_MNT/foo
-> +
-> +_scratch_dev_pool_put
-> +
-> +status=3D0
-> +exit
-> diff --git a/tests/btrfs/242.out b/tests/btrfs/242.out
-> new file mode 100644
-> index 000000000000..0f478fc93db7
-> --- /dev/null
-> +++ b/tests/btrfs/242.out
-> @@ -0,0 +1,7 @@
-> +QA output created by 242
-> +wrote 10485760/10485760 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +File foo data:
-> +0000000 ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab
-> +*
-> +10485760
->
+Jeff
+
+> 
+> > +
+> > +# cycle the mount to clean out the pagecache
+> > +_test_cycle_mount
+> > +
+> > +# now, write to the file (near the end)
+> > +$XFS_IO_PROG -c "pwrite -q 32 32" $testfile
+> > +
+> > +# dump what we think is in there
+> > +echo "The result should be 64 bytes filled with 0xcd:"
+> > +hexdump -C $testfile
+> > +
+> > +status=0
+> > +exit
+> > diff --git a/tests/generic/639.out b/tests/generic/639.out
+> > new file mode 100644
+> > index 000000000000..9bf0bac96864
+> > --- /dev/null
+> > +++ b/tests/generic/639.out
+> > @@ -0,0 +1,5 @@
+> > +QA output created by 639
+> > +The result should be 64 bytes filled with 0xcd:
+> > +00000000  cd cd cd cd cd cd cd cd  cd cd cd cd cd cd cd cd  |................|
+> > +*
+> > +00000040
+> > -- 
+> > 2.31.1
+> > 
+> 
+
+-- 
+Jeff Layton <jlayton@kernel.org>
+
