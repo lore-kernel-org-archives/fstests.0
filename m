@@ -2,151 +2,104 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.2 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,USER_AGENT_SANE_1
+X-Spam-Status: No, score=-15.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7AA94C07E9B
-	for <linux-fstests@archiver.kernel.org>; Wed,  7 Jul 2021 05:27:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BACFFC07E95
+	for <linux-fstests@archiver.kernel.org>; Wed,  7 Jul 2021 10:20:13 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4BFAD61CB2
-	for <linux-fstests@archiver.kernel.org>; Wed,  7 Jul 2021 05:27:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 980E86008E
+	for <linux-fstests@archiver.kernel.org>; Wed,  7 Jul 2021 10:20:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230171AbhGGFad (ORCPT
+        id S231285AbhGGKWx (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 7 Jul 2021 01:30:33 -0400
-Received: from out30-43.freemail.mail.aliyun.com ([115.124.30.43]:58926 "EHLO
-        out30-43.freemail.mail.aliyun.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S230108AbhGGFad (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 7 Jul 2021 01:30:33 -0400
-X-Alimail-AntiSpam: AC=PASS;BC=-1|-1;BR=01201311R111e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=e01e04395;MF=eguan@linux.alibaba.com;NM=1;PH=DS;RN=8;SR=0;TI=SMTPD_---0Uf-ZxT4_1625635670;
-Received: from localhost(mailfrom:eguan@linux.alibaba.com fp:SMTPD_---0Uf-ZxT4_1625635670)
-          by smtp.aliyun-inc.com(127.0.0.1);
-          Wed, 07 Jul 2021 13:27:51 +0800
-Date:   Wed, 7 Jul 2021 13:27:50 +0800
-From:   Eryu Guan <eguan@linux.alibaba.com>
-To:     Jeff Layton <jlayton@kernel.org>
-Cc:     Zorro Lang <zlang@redhat.com>, Eryu Guan <guaneryu@gmail.com>,
-        fstests@vger.kernel.org, aweits@rit.edu, dhowells@redhat.com,
-        willy@infradead.org
-Subject: Re: [PATCH v3] generic: add a test to ensure that page is properly
- filled before write
-Message-ID: <20210707052750.GH60846@e18g06458.et15sqa>
-References: <20210702134024.24233-1-jlayton@kernel.org>
- <20210705110434.wlc2gooeykoc6xcj@fedora>
- <69594288685fdb38fb855345ef43252b6bd4aed3.camel@kernel.org>
+        Wed, 7 Jul 2021 06:22:53 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:59344 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S231137AbhGGKWw (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 7 Jul 2021 06:22:52 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1625653212;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=2PizMLT93bnHxr689Gh6JDKbWHviKRcX1FBzT0isb2A=;
+        b=BaBljUdbxstguHNjFcUqr38iFQG+v/Akq4IwmJSOS3l8OhEGvffsp3xgKbL42y7giFK2Aq
+        lsNAOw2/GurhFpIE2pE9UTtc+FZeDGbumkaFLSUAmlMVJv4AUtzSsw5rw9tTJ88wretcmh
+        d/Kn1u+uZyHWpt7JQ09H6sBl82a2FS0=
+Received: from mail-ed1-f72.google.com (mail-ed1-f72.google.com
+ [209.85.208.72]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-23-2NKFTLYmPOGmRsPiq4h-Xg-1; Wed, 07 Jul 2021 06:20:10 -0400
+X-MC-Unique: 2NKFTLYmPOGmRsPiq4h-Xg-1
+Received: by mail-ed1-f72.google.com with SMTP id j25-20020aa7ca590000b029039c88110440so1169582edt.15
+        for <fstests@vger.kernel.org>; Wed, 07 Jul 2021 03:20:10 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=2PizMLT93bnHxr689Gh6JDKbWHviKRcX1FBzT0isb2A=;
+        b=aNL8qbfy1h9Cs9puHtahPDliQPkHhvxJNXO9O8lpb+vHsaopON2Pr2PGwF3LXn0+En
+         ziJ4GPeYi2leTaUjbDE5Zdcv1sigU7eEENdGAZMbNuUwkOZg+F85Arddnr/LHSi3AsPR
+         OsAuzCA7LBHW1CmSx5GFlv0EGAIWJM8l1zip/Kbkk9o/ntKL79XxoE5GwW2gdG9FvHH0
+         0/au7YiJnkbzVVTy05k+OjWAkx9Fp6ZM6aHsnxWhg74jn4KrsKJ4b6yx+8lsf1xxVhrD
+         2/BYRR5PKMywZJkD6DnOXLgXzmJTHTnBgoDp4DrlXUv+jbNwt3ucwnrso4z7He9prkez
+         9HIQ==
+X-Gm-Message-State: AOAM531Z5eDCg3+deZigvBT5IOuCWUhhHkq8Z18eK5bsQH1saNTFAlpS
+        ywwTH1gJRWNFEd4HlG/ECv7FgrrNiYBoe7aw17hGPOf1wd69lge0mMTpNXU+GY5VHk8DAohXb6E
+        rgRj6wJ/vUbvCiUZ7L8e5NuJgQcRMeVVelp2dUFmiqdITJtsT4wheuNO5+VSIrWYsds78
+X-Received: by 2002:a17:907:86a8:: with SMTP id qa40mr22902184ejc.385.1625653209232;
+        Wed, 07 Jul 2021 03:20:09 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJxxVGluUwhxuoWFU9qiqzwbtALEM5t4mczT1T5rIXdEiTpFV1VSM+Abndk+LC29CfgFdmbonQ==
+X-Received: by 2002:a17:907:86a8:: with SMTP id qa40mr22902169ejc.385.1625653209072;
+        Wed, 07 Jul 2021 03:20:09 -0700 (PDT)
+Received: from localhost.localdomain ([84.19.91.9])
+        by smtp.gmail.com with ESMTPSA id t11sm4095087edr.34.2021.07.07.03.20.08
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 07 Jul 2021 03:20:08 -0700 (PDT)
+From:   Pavel Reichl <preichl@redhat.com>
+To:     fstests@vger.kernel.org
+Cc:     shreeya.patel@collabora.com, djwong@kernel.org
+Subject: [PATCH 0/1]: generic/453: Do NOT run for FSs restricting names
+Date:   Wed,  7 Jul 2021 12:20:06 +0200
+Message-Id: <20210707102007.66774-1-preichl@redhat.com>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <69594288685fdb38fb855345ef43252b6bd4aed3.camel@kernel.org>
-User-Agent: Mutt/1.5.21 (2010-09-15)
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Jul 06, 2021 at 06:56:41AM -0400, Jeff Layton wrote:
-> On Mon, 2021-07-05 at 19:04 +0800, Zorro Lang wrote:
-> > On Fri, Jul 02, 2021 at 09:40:24AM -0400, Jeff Layton wrote:
-> > > We had a broken optimization in cephfs and netfs lib that could cause
-> > > part of a page to be improperly zeroed-out when writing to an offset
-> > > that was beyond the EOF but in an existing page.
-> > > 
-> > > Add a simple test that would have caught this.
-> > > 
-> > > Signed-off-by: Jeff Layton <jlayton@kernel.org>
-> > > ---
-> > >  tests/generic/639     | 39 +++++++++++++++++++++++++++++++++++++++
-> > >  tests/generic/639.out |  5 +++++
-> > >  2 files changed, 44 insertions(+)
-> > >  create mode 100755 tests/generic/639
-> > >  create mode 100644 tests/generic/639.out
-> > > 
-> > > v3: adapt to new test template
-> > > 
-> > > diff --git a/tests/generic/639 b/tests/generic/639
-> > > new file mode 100755
-> > > index 000000000000..c30f7644a2fc
-> > > --- /dev/null
-> > > +++ b/tests/generic/639
-> > > @@ -0,0 +1,39 @@
-> > > +#! /bin/bash
-> > > +# SPDX-License-Identifier: GPL-2.0
-> > > +# Copyright (c) 2021, Jeff Layton <jlayton@redhat.com>
-> > > +#
-> > > +# FS QA Test No. 639
-> > > +#
-> > > +# Open a file and write a little data to it. Unmount (to clean out the cache)
-> > > +# and then mount again. Then write some data to it beyond the EOF and ensure
-> > > +# the result is correct.
-> > > +#
-> > > +# Prompted by a bug in ceph_write_begin that was fixed by commit 827a746f405d.
-> > > +#
-> > > +. ./common/preamble
-> > > +_begin_fstest auto quick rw
-> > > +
-> > > +# Import common functions.
-> > > +. ./common/filter
-> > > +
-> > > +# real QA test starts here
-> > > +_supported_fs generic
-> > > +_require_test
-> > > +
-> > > +testfile="$TEST_DIR/test_write_begin.$$"
-> > > +
-> > > +# write some data to file and fsync it out
-> > > +$XFS_IO_PROG -f -c "pwrite -q 0 32" $testfile
-> > 
-> > Looks good to me, if you've used this case to reproduce that issue.
-> > 
-> > Just one question, the comment says "fsync it out", does that mean we need an
-> > explicit "fsync" call (e.g. -c "pwrite -q 0 32" -c "fsync") to reproduce this
-> > bug? Or there's an implicit "fsync" somewhere?
-> > 
-> > 
-> 
-> No, there is no implicit fsync. This is holdover from copy/paste that I
-> did from another test. The patch is already merged now, but if we expand
-> this test to cover other cases, I'll plan to clean up the comment then.
-> 
-> Thanks,
-> Jeff
-> 
-> > 
-> > > +
-> > > +# cycle the mount to clean out the pagecache
-> > > +_test_cycle_mount
+Hello,
 
-I think this cycle mount accounts as an implicit fsync?
+this is a quick attempt to finish what was discussed in thread:
+	generic/453: Exclude filenames that are not supported by exfat
+	https://www.spinics.net/lists/fstests/msg16328.html
 
-Thanks,
-Eryu
+Based on Darrick's comments:
 
-> > > +
-> > > +# now, write to the file (near the end)
-> > > +$XFS_IO_PROG -c "pwrite -q 32 32" $testfile
-> > > +
-> > > +# dump what we think is in there
-> > > +echo "The result should be 64 bytes filled with 0xcd:"
-> > > +hexdump -C $testfile
-> > > +
-> > > +status=0
-> > > +exit
-> > > diff --git a/tests/generic/639.out b/tests/generic/639.out
-> > > new file mode 100644
-> > > index 000000000000..9bf0bac96864
-> > > --- /dev/null
-> > > +++ b/tests/generic/639.out
-> > > @@ -0,0 +1,5 @@
-> > > +QA output created by 639
-> > > +The result should be 64 bytes filled with 0xcd:
-> > > +00000000  cd cd cd cd cd cd cd cd  cd cd cd cd cd cd cd cd  |................|
-> > > +*
-> > > +00000040
-> > > -- 
-> > > 2.31.1
-> > > 
-> > 
-> 
-> -- 
-> Jeff Layton <jlayton@kernel.org>
+"""
+TBH I think these tests (g/453 and g/454) are probably only useful for
+filesystems that allow unrestricted byte streams for names.
+"""
+
+and
+
+"""
+Nowadays with wider testing of other filesystems (thanks, Red Hat!) we
+should hide these behind _require_names_are_bytes or move them to
+tests/xfs/.
+"""
+
+
+Pavel Reichl (1):
+  generic/453: Do NOT run for FSs restricting names
+
+ common/rc         | 11 +++++++++++
+ tests/generic/453 |  1 +
+ 2 files changed, 12 insertions(+)
+
+-- 
+2.31.1
+
