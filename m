@@ -2,122 +2,167 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-20.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-17.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ECB1AC07E9C
-	for <linux-fstests@archiver.kernel.org>; Wed,  7 Jul 2021 10:20:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8F202C07E95
+	for <linux-fstests@archiver.kernel.org>; Wed,  7 Jul 2021 10:46:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CF0F661CBE
-	for <linux-fstests@archiver.kernel.org>; Wed,  7 Jul 2021 10:20:13 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 72FCB61CAA
+	for <linux-fstests@archiver.kernel.org>; Wed,  7 Jul 2021 10:46:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231137AbhGGKWx (ORCPT
+        id S231321AbhGGKti (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 7 Jul 2021 06:22:53 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:48082 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S231194AbhGGKWw (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 7 Jul 2021 06:22:52 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1625653212;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=u2boMp2VdCqkwPnnrA2lHCgYxwA8XXK8IgfXbt4AB3I=;
-        b=dPvrEPfph1C2bYT7Sjx+b7BSJh7m+ilspiH6ohX8OCrhk1XdccpR58FX531uT0lJF0Wp9J
-        gEEW6/A3EimQVZBaci8jf9vM2eX7JnknQTNGCh7Eguln4TKaf1TNrY4Xpwkc5HvB8AwQm5
-        hXOrbW/udfi435OjkxgWAYrJ6FEeSKE=
-Received: from mail-ed1-f72.google.com (mail-ed1-f72.google.com
- [209.85.208.72]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-20-cfdyc_s3MWmVT8E0oOifGg-1; Wed, 07 Jul 2021 06:20:11 -0400
-X-MC-Unique: cfdyc_s3MWmVT8E0oOifGg-1
-Received: by mail-ed1-f72.google.com with SMTP id y18-20020a0564022712b029038ffac1995eso1188875edd.12
-        for <fstests@vger.kernel.org>; Wed, 07 Jul 2021 03:20:11 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=u2boMp2VdCqkwPnnrA2lHCgYxwA8XXK8IgfXbt4AB3I=;
-        b=j+Qvyo13S4UnzTPv0gL+Sk8HDOZEdEVHOx0T761sVMDqhfUJSBrqmGXsQKHqbz+8Ko
-         VuFRCqinuk+TXa/jn9hK2QZ7xqQ726i+sfeDXGl/uWLJcTv7lXXOvS81sDHddQzLQhPX
-         Kfa0ON13aze9YfGyJrxPC3TnNcFFDc5vmUdlIa5/Ytu4rHDBL6Cbv/GvltDe9TPOpAXw
-         fZ9KFj0Q5csqyyZ8uDStPE03o7tw09ODqibUTNvSlC2pSFniZ7LGeFzDxz68dKGfJI15
-         ddt0x/IIdyJTEsKlr6rSuu30Tl9A6vCifzTqCxFM3oWhMhHszI8wHwYUDcNRb5W/7UgR
-         zDUg==
-X-Gm-Message-State: AOAM533C1+g4ofkxIeoBMDMTVZxTcCTh6W/bR8s6khxiwNKQN5kvGJWj
-        88QmoKNzltwIRFmBdTfLFRwNC4H6aCx+bn9C35Ma+1aEgopndPDDjA0YHW7hIEBy8Q4vR7O6mLq
-        8W1+tqRwDl6bx7OGgKtC2s5pRCvQ3Hs1qI8C7r/TrOtf5HgYHYc54/suw4nsHcBhHaDRu
-X-Received: by 2002:a05:6402:2813:: with SMTP id h19mr28691044ede.39.1625653210066;
-        Wed, 07 Jul 2021 03:20:10 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJz3NNSTRGyiUoqHmhYY6yI+kq1S7sMzyDRsjSm6NrA648JvrRqkYdR0TruQ40R8AMnVCJidlA==
-X-Received: by 2002:a05:6402:2813:: with SMTP id h19mr28691033ede.39.1625653209934;
-        Wed, 07 Jul 2021 03:20:09 -0700 (PDT)
-Received: from localhost.localdomain ([84.19.91.9])
-        by smtp.gmail.com with ESMTPSA id t11sm4095087edr.34.2021.07.07.03.20.09
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 07 Jul 2021 03:20:09 -0700 (PDT)
-From:   Pavel Reichl <preichl@redhat.com>
-To:     fstests@vger.kernel.org
-Cc:     shreeya.patel@collabora.com, djwong@kernel.org
-Subject: [PATCH 1/1] generic/453: Do NOT run for FSs restricting names
-Date:   Wed,  7 Jul 2021 12:20:07 +0200
-Message-Id: <20210707102007.66774-2-preichl@redhat.com>
-X-Mailer: git-send-email 2.31.1
-In-Reply-To: <20210707102007.66774-1-preichl@redhat.com>
-References: <20210707102007.66774-1-preichl@redhat.com>
+        Wed, 7 Jul 2021 06:49:38 -0400
+Received: from mail.kernel.org ([198.145.29.99]:34252 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S231345AbhGGKti (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 7 Jul 2021 06:49:38 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 8304760FF0;
+        Wed,  7 Jul 2021 10:46:57 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1625654818;
+        bh=iVfoPLmKFnsvmI/daKmGGDROsq1haTrEtkKhNn7vfq4=;
+        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
+        b=POXwWQRjivmIE/Z64Ej/n3GFrSpXNT+ShtfhBjyIUVtvQuHNyKgecalGJCv3XGjE6
+         VYpxGJ8xa/SzntjpKjUu+hSHe70q5zkEuLCKdPMKm8DSSpnVmO3KHA5nazghd+clmn
+         eJbwQNS9vwk91AWWV5dJtUxBaGynLPQIHVaEYrhFKw1LshQmTg0vtTwaSoDt4300uh
+         CHdnNOgSsFwgVlDUSVb4v5imIyKdlFJ7OsKWhK9XsxyAQPIniriTOYmHueS3+6ElPk
+         1iACgTK1k0nv2ZS3xhORUvDz4toT3whrHx866Me3nI3bUFNITh2CGdJUwxakppRz8b
+         3mzFtdmDTWOag==
+Message-ID: <bf98acb991f0fbf9e44a06d65f40d0a927f653e6.camel@kernel.org>
+Subject: Re: [PATCH v3] generic: add a test to ensure that page is properly
+ filled before write
+From:   Jeff Layton <jlayton@kernel.org>
+To:     Eryu Guan <eguan@linux.alibaba.com>
+Cc:     Zorro Lang <zlang@redhat.com>, Eryu Guan <guaneryu@gmail.com>,
+        fstests@vger.kernel.org, aweits@rit.edu, dhowells@redhat.com,
+        willy@infradead.org
+Date:   Wed, 07 Jul 2021 06:46:56 -0400
+In-Reply-To: <20210707052750.GH60846@e18g06458.et15sqa>
+References: <20210702134024.24233-1-jlayton@kernel.org>
+         <20210705110434.wlc2gooeykoc6xcj@fedora>
+         <69594288685fdb38fb855345ef43252b6bd4aed3.camel@kernel.org>
+         <20210707052750.GH60846@e18g06458.et15sqa>
+Content-Type: text/plain; charset="ISO-8859-15"
+User-Agent: Evolution 3.40.2 (3.40.2-1.fc34) 
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Running generic/453 test is probably only useful for filesystems that
-allow unrestricted byte streams for names.
+On Wed, 2021-07-07 at 13:27 +0800, Eryu Guan wrote:
+> On Tue, Jul 06, 2021 at 06:56:41AM -0400, Jeff Layton wrote:
+> > On Mon, 2021-07-05 at 19:04 +0800, Zorro Lang wrote:
+> > > On Fri, Jul 02, 2021 at 09:40:24AM -0400, Jeff Layton wrote:
+> > > > We had a broken optimization in cephfs and netfs lib that could cause
+> > > > part of a page to be improperly zeroed-out when writing to an offset
+> > > > that was beyond the EOF but in an existing page.
+> > > > 
+> > > > Add a simple test that would have caught this.
+> > > > 
+> > > > Signed-off-by: Jeff Layton <jlayton@kernel.org>
+> > > > ---
+> > > >  tests/generic/639     | 39 +++++++++++++++++++++++++++++++++++++++
+> > > >  tests/generic/639.out |  5 +++++
+> > > >  2 files changed, 44 insertions(+)
+> > > >  create mode 100755 tests/generic/639
+> > > >  create mode 100644 tests/generic/639.out
+> > > > 
+> > > > v3: adapt to new test template
+> > > > 
+> > > > diff --git a/tests/generic/639 b/tests/generic/639
+> > > > new file mode 100755
+> > > > index 000000000000..c30f7644a2fc
+> > > > --- /dev/null
+> > > > +++ b/tests/generic/639
+> > > > @@ -0,0 +1,39 @@
+> > > > +#! /bin/bash
+> > > > +# SPDX-License-Identifier: GPL-2.0
+> > > > +# Copyright (c) 2021, Jeff Layton <jlayton@redhat.com>
+> > > > +#
+> > > > +# FS QA Test No. 639
+> > > > +#
+> > > > +# Open a file and write a little data to it. Unmount (to clean out the cache)
+> > > > +# and then mount again. Then write some data to it beyond the EOF and ensure
+> > > > +# the result is correct.
+> > > > +#
+> > > > +# Prompted by a bug in ceph_write_begin that was fixed by commit 827a746f405d.
+> > > > +#
+> > > > +. ./common/preamble
+> > > > +_begin_fstest auto quick rw
+> > > > +
+> > > > +# Import common functions.
+> > > > +. ./common/filter
+> > > > +
+> > > > +# real QA test starts here
+> > > > +_supported_fs generic
+> > > > +_require_test
+> > > > +
+> > > > +testfile="$TEST_DIR/test_write_begin.$$"
+> > > > +
+> > > > +# write some data to file and fsync it out
+> > > > +$XFS_IO_PROG -f -c "pwrite -q 0 32" $testfile
+> > > 
+> > > Looks good to me, if you've used this case to reproduce that issue.
+> > > 
+> > > Just one question, the comment says "fsync it out", does that mean we need an
+> > > explicit "fsync" call (e.g. -c "pwrite -q 0 32" -c "fsync") to reproduce this
+> > > bug? Or there's an implicit "fsync" somewhere?
+> > > 
+> > > 
+> > 
+> > No, there is no implicit fsync. This is holdover from copy/paste that I
+> > did from another test. The patch is already merged now, but if we expand
+> > this test to cover other cases, I'll plan to clean up the comment then.
+> > 
+> > Thanks,
+> > Jeff
+> > 
+> > > 
+> > > > +
+> > > > +# cycle the mount to clean out the pagecache
+> > > > +_test_cycle_mount
+> 
+> I think this cycle mount accounts as an implicit fsync?
+> 
 
-Signed-off-by: Pavel Reichl <preichl@redhat.com>
-Suggested-by: Darrick J. Wong <djwong@kernel.org>
----
- common/rc         | 11 +++++++++++
- tests/generic/453 |  1 +
- 2 files changed, 12 insertions(+)
+Yes, the data should get synced out naturally during a umount. The
+comment is still a bit misleading though since it may not happen until
+this point.
 
-diff --git a/common/rc b/common/rc
-index d4ad421e..7a352445 100644
---- a/common/rc
-+++ b/common/rc
-@@ -4599,6 +4599,17 @@ _require_od_endian_flag()
- 		_notrun "od does not support endian flag"
- }
- 
-+_require_names_are_bytes() {
-+        case "$FSTYP" in
-+        ext2|ext3|ext4|xfs|btrfs)
-+		# do nothing
-+	        ;;
-+	*)
-+                _notrun "$FSTYP does now allow unrestricted byte streams for names"
-+		;;
-+        esac
-+}
-+
- init_rc
- 
- ################################################################################
-diff --git a/tests/generic/453 b/tests/generic/453
-index 55ddcc01..a0fb802e 100755
---- a/tests/generic/453
-+++ b/tests/generic/453
-@@ -15,6 +15,7 @@ _begin_fstest auto quick dir
- # Import common functions.
- 
- _require_scratch
-+_require_names_are_bytes
- 
- echo "Format and mount"
- _scratch_mkfs > $seqres.full 2>&1
+> > > > +
+> > > > +# now, write to the file (near the end)
+> > > > +$XFS_IO_PROG -c "pwrite -q 32 32" $testfile
+> > > > +
+> > > > +# dump what we think is in there
+> > > > +echo "The result should be 64 bytes filled with 0xcd:"
+> > > > +hexdump -C $testfile
+> > > > +
+> > > > +status=0
+> > > > +exit
+> > > > diff --git a/tests/generic/639.out b/tests/generic/639.out
+> > > > new file mode 100644
+> > > > index 000000000000..9bf0bac96864
+> > > > --- /dev/null
+> > > > +++ b/tests/generic/639.out
+> > > > @@ -0,0 +1,5 @@
+> > > > +QA output created by 639
+> > > > +The result should be 64 bytes filled with 0xcd:
+> > > > +00000000  cd cd cd cd cd cd cd cd  cd cd cd cd cd cd cd cd  |................|
+> > > > +*
+> > > > +00000040
+> > > > -- 
+> > > > 2.31.1
+> > > > 
+> > > 
+> > 
+> > -- 
+> > Jeff Layton <jlayton@kernel.org>
+
 -- 
-2.31.1
+Jeff Layton <jlayton@kernel.org>
 
