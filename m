@@ -2,167 +2,108 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-17.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8F202C07E95
-	for <linux-fstests@archiver.kernel.org>; Wed,  7 Jul 2021 10:46:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E3C49C07E95
+	for <linux-fstests@archiver.kernel.org>; Wed,  7 Jul 2021 10:47:49 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 72FCB61CAA
-	for <linux-fstests@archiver.kernel.org>; Wed,  7 Jul 2021 10:46:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C7D2360FF0
+	for <linux-fstests@archiver.kernel.org>; Wed,  7 Jul 2021 10:47:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231321AbhGGKti (ORCPT
+        id S230354AbhGGKu3 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 7 Jul 2021 06:49:38 -0400
-Received: from mail.kernel.org ([198.145.29.99]:34252 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S231345AbhGGKti (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 7 Jul 2021 06:49:38 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 8304760FF0;
-        Wed,  7 Jul 2021 10:46:57 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1625654818;
-        bh=iVfoPLmKFnsvmI/daKmGGDROsq1haTrEtkKhNn7vfq4=;
-        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=POXwWQRjivmIE/Z64Ej/n3GFrSpXNT+ShtfhBjyIUVtvQuHNyKgecalGJCv3XGjE6
-         VYpxGJ8xa/SzntjpKjUu+hSHe70q5zkEuLCKdPMKm8DSSpnVmO3KHA5nazghd+clmn
-         eJbwQNS9vwk91AWWV5dJtUxBaGynLPQIHVaEYrhFKw1LshQmTg0vtTwaSoDt4300uh
-         CHdnNOgSsFwgVlDUSVb4v5imIyKdlFJ7OsKWhK9XsxyAQPIniriTOYmHueS3+6ElPk
-         1iACgTK1k0nv2ZS3xhORUvDz4toT3whrHx866Me3nI3bUFNITh2CGdJUwxakppRz8b
-         3mzFtdmDTWOag==
-Message-ID: <bf98acb991f0fbf9e44a06d65f40d0a927f653e6.camel@kernel.org>
-Subject: Re: [PATCH v3] generic: add a test to ensure that page is properly
- filled before write
-From:   Jeff Layton <jlayton@kernel.org>
-To:     Eryu Guan <eguan@linux.alibaba.com>
-Cc:     Zorro Lang <zlang@redhat.com>, Eryu Guan <guaneryu@gmail.com>,
-        fstests@vger.kernel.org, aweits@rit.edu, dhowells@redhat.com,
-        willy@infradead.org
-Date:   Wed, 07 Jul 2021 06:46:56 -0400
-In-Reply-To: <20210707052750.GH60846@e18g06458.et15sqa>
-References: <20210702134024.24233-1-jlayton@kernel.org>
-         <20210705110434.wlc2gooeykoc6xcj@fedora>
-         <69594288685fdb38fb855345ef43252b6bd4aed3.camel@kernel.org>
-         <20210707052750.GH60846@e18g06458.et15sqa>
-Content-Type: text/plain; charset="ISO-8859-15"
-User-Agent: Evolution 3.40.2 (3.40.2-1.fc34) 
+        Wed, 7 Jul 2021 06:50:29 -0400
+Received: from out4436.biz.mail.alibaba.com ([47.88.44.36]:45189 "EHLO
+        out4436.biz.mail.alibaba.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S231345AbhGGKu1 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 7 Jul 2021 06:50:27 -0400
+X-Alimail-AntiSpam: AC=PASS;BC=-1|-1;BR=01201311R961e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=e01e04420;MF=jefflexu@linux.alibaba.com;NM=1;PH=DS;RN=3;SR=0;TI=SMTPD_---0Uf0fj9O_1625654865;
+Received: from localhost(mailfrom:jefflexu@linux.alibaba.com fp:SMTPD_---0Uf0fj9O_1625654865)
+          by smtp.aliyun-inc.com(127.0.0.1);
+          Wed, 07 Jul 2021 18:47:45 +0800
+From:   Jeffle Xu <jefflexu@linux.alibaba.com>
+To:     darrick.wong@oracle.com, guan@eryu.me
+Cc:     fstests@vger.kernel.org
+Subject: [RFC PATCH] misc: skip fsx tests when op length not congruent with file allocation unit
+Date:   Wed,  7 Jul 2021 18:47:45 +0800
+Message-Id: <20210707104745.98822-1-jefflexu@linux.alibaba.com>
+X-Mailer: git-send-email 2.27.0
+In-Reply-To: <20210706181452.GB11571@locust>
+References: <20210706181452.GB11571@locust>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, 2021-07-07 at 13:27 +0800, Eryu Guan wrote:
-> On Tue, Jul 06, 2021 at 06:56:41AM -0400, Jeff Layton wrote:
-> > On Mon, 2021-07-05 at 19:04 +0800, Zorro Lang wrote:
-> > > On Fri, Jul 02, 2021 at 09:40:24AM -0400, Jeff Layton wrote:
-> > > > We had a broken optimization in cephfs and netfs lib that could cause
-> > > > part of a page to be improperly zeroed-out when writing to an offset
-> > > > that was beyond the EOF but in an existing page.
-> > > > 
-> > > > Add a simple test that would have caught this.
-> > > > 
-> > > > Signed-off-by: Jeff Layton <jlayton@kernel.org>
-> > > > ---
-> > > >  tests/generic/639     | 39 +++++++++++++++++++++++++++++++++++++++
-> > > >  tests/generic/639.out |  5 +++++
-> > > >  2 files changed, 44 insertions(+)
-> > > >  create mode 100755 tests/generic/639
-> > > >  create mode 100644 tests/generic/639.out
-> > > > 
-> > > > v3: adapt to new test template
-> > > > 
-> > > > diff --git a/tests/generic/639 b/tests/generic/639
-> > > > new file mode 100755
-> > > > index 000000000000..c30f7644a2fc
-> > > > --- /dev/null
-> > > > +++ b/tests/generic/639
-> > > > @@ -0,0 +1,39 @@
-> > > > +#! /bin/bash
-> > > > +# SPDX-License-Identifier: GPL-2.0
-> > > > +# Copyright (c) 2021, Jeff Layton <jlayton@redhat.com>
-> > > > +#
-> > > > +# FS QA Test No. 639
-> > > > +#
-> > > > +# Open a file and write a little data to it. Unmount (to clean out the cache)
-> > > > +# and then mount again. Then write some data to it beyond the EOF and ensure
-> > > > +# the result is correct.
-> > > > +#
-> > > > +# Prompted by a bug in ceph_write_begin that was fixed by commit 827a746f405d.
-> > > > +#
-> > > > +. ./common/preamble
-> > > > +_begin_fstest auto quick rw
-> > > > +
-> > > > +# Import common functions.
-> > > > +. ./common/filter
-> > > > +
-> > > > +# real QA test starts here
-> > > > +_supported_fs generic
-> > > > +_require_test
-> > > > +
-> > > > +testfile="$TEST_DIR/test_write_begin.$$"
-> > > > +
-> > > > +# write some data to file and fsync it out
-> > > > +$XFS_IO_PROG -f -c "pwrite -q 0 32" $testfile
-> > > 
-> > > Looks good to me, if you've used this case to reproduce that issue.
-> > > 
-> > > Just one question, the comment says "fsync it out", does that mean we need an
-> > > explicit "fsync" call (e.g. -c "pwrite -q 0 32" -c "fsync") to reproduce this
-> > > bug? Or there's an implicit "fsync" somewhere?
-> > > 
-> > > 
-> > 
-> > No, there is no implicit fsync. This is holdover from copy/paste that I
-> > did from another test. The patch is already merged now, but if we expand
-> > this test to cover other cases, I'll plan to clean up the comment then.
-> > 
-> > Thanks,
-> > Jeff
-> > 
-> > > 
-> > > > +
-> > > > +# cycle the mount to clean out the pagecache
-> > > > +_test_cycle_mount
-> 
-> I think this cycle mount accounts as an implicit fsync?
-> 
 
-Yes, the data should get synced out naturally during a umount. The
-comment is still a bit misleading though since it may not happen until
-this point.
+Yes it works. For example in this RFC patch, generic/075 could be
+skipped once 'bigalloc' is detected for ext4.
 
-> > > > +
-> > > > +# now, write to the file (near the end)
-> > > > +$XFS_IO_PROG -c "pwrite -q 32 32" $testfile
-> > > > +
-> > > > +# dump what we think is in there
-> > > > +echo "The result should be 64 bytes filled with 0xcd:"
-> > > > +hexdump -C $testfile
-> > > > +
-> > > > +status=0
-> > > > +exit
-> > > > diff --git a/tests/generic/639.out b/tests/generic/639.out
-> > > > new file mode 100644
-> > > > index 000000000000..9bf0bac96864
-> > > > --- /dev/null
-> > > > +++ b/tests/generic/639.out
-> > > > @@ -0,0 +1,5 @@
-> > > > +QA output created by 639
-> > > > +The result should be 64 bytes filled with 0xcd:
-> > > > +00000000  cd cd cd cd cd cd cd cd  cd cd cd cd cd cd cd cd  |................|
-> > > > +*
-> > > > +00000040
-> > > > -- 
-> > > > 2.31.1
-> > > > 
-> > > 
-> > 
-> > -- 
-> > Jeff Layton <jlayton@kernel.org>
+I could fix all related test cases in this way, if it is acceptable to
+the community.
 
+Signed-off-by: Jeffle Xu <jefflexu@linux.alibaba.com>
+---
+ common/rc         | 20 ++++++++++++++++++++
+ tests/generic/075 |  3 +++
+ 2 files changed, 23 insertions(+)
+
+diff --git a/common/rc b/common/rc
+index f58a542..92245e0 100644
+--- a/common/rc
++++ b/common/rc
+@@ -4041,6 +4041,23 @@ _sysfs_dev()
+ 	min=$(echo "ibase=16; $min" | bc)
+ 	echo /sys/dev/block/$maj:$min
+ }
++		
++_ext4_get_file_block_size()
++{
++	local path="$1"
++	path="$(readlink -m "$path")"
++	local dev=`$DF_PROG $dir | tail -1 | $AWK_PROG '{print $1}'`
++	
++	# The alloc unit size equals block size for ext4 without 'bigalloc'.
++	if ! (tune2fs -l $dev | grep -q 'Cluster size'); then
++		_get_block_size "$path"
++		return
++	fi
++
++	# Otherwise, call tune2fs acquiring cluster size.
++	tune2fs -l $dev | sed -n -e 's/^.*Cluster size:\s*\([0-9]*\).*$/\1/p'
++
++}
+ 
+ # Get the minimum block size of a file.  Usually this is the
+ # minimum fs block size, but some filesystems (ocfs2) do block
+@@ -4059,6 +4076,9 @@ _get_file_block_size()
+ 	"xfs")
+ 		_xfs_get_file_block_size $1
+ 		;;
++	"ext4")
++		_ext4_get_file_block_size $1
++		;;
+ 	*)
+ 		_get_block_size $1
+ 		;;
+diff --git a/tests/generic/075 b/tests/generic/075
+index 7467bb7..d269a7c 100755
+--- a/tests/generic/075
++++ b/tests/generic/075
+@@ -109,6 +109,9 @@ _process_args()
+ _supported_fs generic
+ _require_test
+ 
++blksz=$(_get_block_size $TEST_DIR)
++_require_congruent_file_oplen $TEST_DIR $blksz
++
+ size10=`expr 10 \* 1024 \* 1024`	# 10 megabytes
+ filelen=$size10
+ numops1=1000
 -- 
-Jeff Layton <jlayton@kernel.org>
+1.8.3.1
 
