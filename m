@@ -2,61 +2,112 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.0 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-14.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 80DF4C07E96
-	for <linux-fstests@archiver.kernel.org>; Thu,  8 Jul 2021 12:51:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5DA51C07E96
+	for <linux-fstests@archiver.kernel.org>; Thu,  8 Jul 2021 16:35:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5AD4561456
-	for <linux-fstests@archiver.kernel.org>; Thu,  8 Jul 2021 12:51:12 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 359F761874
+	for <linux-fstests@archiver.kernel.org>; Thu,  8 Jul 2021 16:35:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229659AbhGHMxx (ORCPT
+        id S229489AbhGHQiK (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 8 Jul 2021 08:53:53 -0400
-Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:49453 "EHLO
-        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S231716AbhGHMxx (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 8 Jul 2021 08:53:53 -0400
-Received: from cwcc.thunk.org (pool-72-74-133-215.bstnma.fios.verizon.net [72.74.133.215])
-        (authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 168Cp7hR032627
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Thu, 8 Jul 2021 08:51:07 -0400
-Received: by cwcc.thunk.org (Postfix, from userid 15806)
-        id D3EFF15C3CC6; Thu,  8 Jul 2021 08:51:06 -0400 (EDT)
-Date:   Thu, 8 Jul 2021 08:51:06 -0400
-From:   "Theodore Ts'o" <tytso@mit.edu>
-To:     Ritesh Harjani <riteshh@linux.ibm.com>
-Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org
-Subject: Re: [PATCH 1/9] ext4/003: Fix this test on 64K platform for dax
- config
-Message-ID: <YOb0uklBx0NOLKG3@mit.edu>
-References: <cover.1623651783.git.riteshh@linux.ibm.com>
- <fda7d76b27234a46c3e7165fbdfc4154708c227d.1623651783.git.riteshh@linux.ibm.com>
- <YNybadzpnZZdwtzR@mit.edu>
- <20210708062445.xnoij6ya7huedqcv@riteshh-domain>
+        Thu, 8 Jul 2021 12:38:10 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:53420 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S229468AbhGHQiK (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 8 Jul 2021 12:38:10 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1625762127;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=bUhzExGImRWjgeyZN/8X5PubdkDAOV2H7reS635XnaA=;
+        b=fTz1ukNSz1+cN43gfz5aQBBcgGDON1hUSJAO+2ysUE0V1DrdcH/C2AvAbV3LmXqruR9WZ5
+        sCZZ3wW4XHOiRJE4QUw4FEeRpDaOBLP1NsoNpsRPaUF1W7QwKmnbqdSAXsfFNFraTgrFlt
+        Ucdglw4qpmJ2g9NZqE3b95XXWnMZLeE=
+Received: from mail-ej1-f71.google.com (mail-ej1-f71.google.com
+ [209.85.218.71]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-290-uFeg9KpzOVK7ZmY5v99bxA-1; Thu, 08 Jul 2021 12:35:26 -0400
+X-MC-Unique: uFeg9KpzOVK7ZmY5v99bxA-1
+Received: by mail-ej1-f71.google.com with SMTP id p5-20020a17090653c5b02903db1cfa514dso2078670ejo.13
+        for <fstests@vger.kernel.org>; Thu, 08 Jul 2021 09:35:26 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=bUhzExGImRWjgeyZN/8X5PubdkDAOV2H7reS635XnaA=;
+        b=lOEtPNlFO99uTEEnN7PCl99eaycb8RPJymXPvcvYSxb7sb1nJUpYZhkq/wLlYP8qRj
+         n7DoVoKe64WaJyx51466OvZZvnA4lrpgqP3+zrUne4wJNcMlabpPvUmYCXhrmI36xNQu
+         VjKaSATPNQfqLiMS6VMPEi0i1gD7yFkHzqMA1tdT2TpTeDNxwpcCbS/H8ePpkD26dVG1
+         70y/UMmPMEHkyMJq441RHl9RG2H/32RIW8UV+eohtYN9L07VPbZM1ST2vLwOjTF/qFWP
+         BZhfkSwqKe5RMfADMsutls5DVVHpKRW8d2lxxtNMZZ5JqOTkEDwY/OkWAN+MZqrhafsH
+         1Huw==
+X-Gm-Message-State: AOAM532vOWSUdjKRiY+6yxO2A861lDsy4VRcqMsfEi/mSt+lDfq2O5We
+        /7FVm3oNVRMfWIRsdwDAIP+S/wWYkb7PCLkK7C6kZxbD0+OV4EXOEM2TlD/dU9l6Twhx0te5AOO
+        m4KploWGf4uHEvjKNVpqkIePA9h8AMhsJsyLSPbVZwH1kJh88lv83FCZIWm+I5bZ8rDEx
+X-Received: by 2002:a05:6402:40c3:: with SMTP id z3mr38208479edb.375.1625762125300;
+        Thu, 08 Jul 2021 09:35:25 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJzEWUVXRZLtKb2JU1BVUlbmTdNQfw7kJod1Q6Vgty0QNVwjBkO7rdTyNpaSgNMLvgFTkGliDQ==
+X-Received: by 2002:a05:6402:40c3:: with SMTP id z3mr38208451edb.375.1625762125073;
+        Thu, 08 Jul 2021 09:35:25 -0700 (PDT)
+Received: from localhost.localdomain ([84.19.91.9])
+        by smtp.gmail.com with ESMTPSA id v7sm1663491edd.4.2021.07.08.09.35.24
+        for <fstests@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 08 Jul 2021 09:35:24 -0700 (PDT)
+From:   Pavel Reichl <preichl@redhat.com>
+To:     fstests@vger.kernel.org
+Subject: [PATCH v3 0/1] generic/{453,454}: Do NOT run for FSs restricting names
+Date:   Thu,  8 Jul 2021 18:35:17 +0200
+Message-Id: <20210708163518.51386-1-preichl@redhat.com>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210708062445.xnoij6ya7huedqcv@riteshh-domain>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Jul 08, 2021 at 11:54:45AM +0530, Ritesh Harjani wrote:
-> Yes, thanks for catching it. I think if make below change, i.e. scale cluster
-> size, we should be good. Since this will make blocks_per_group = 4096 and
-> clusters_per_group = 256. This is the condition, which I guess the original
-> kernel patch fixed it for. So, we need not increase the filesystem size.
-> 
-> $MKFS_EXT4_PROG -F -b $BLOCK_SIZE -O bigalloc -C $((BLOCK_SIZE * 16))  -g 256 $SCRATCH_DEV 512m \
->
+Hello,
 
-Agreed, it looks like that should work.
+this is a quick attempt to finish what was discussed in thread:
+	generic/453: Exclude filenames that are not supported by exfat
+	https://www.spinics.net/lists/fstests/msg16328.html
 
-Cheers,
+Based on Darrick's comments:
 
-					- Ted
+"""
+TBH I think these tests (g/453 and g/454) are probably only useful for
+filesystems that allow unrestricted byte streams for names.
+"""
+
+and_require_names_are_bytes()
+
+"""
+Nowadays with wider testing of other filesystems (thanks, Red Hat!) we
+should hide these behind _require_names_are_bytes or move them to
+tests/xfs/.
+"""
+
+Changes in V2:
+* Added description for _require_names_are_bytes()
+* Added _require_names_are_bytes() to g/454 as well
+* fixed typo s/now/not/
+
+Changes in V3:
+* Added f2fs to the list of FSs that treat file names as unrestricted byte streams
+
+Pavel Reichl (1):
+  generic/{453,454}: Don't run for FSs restricting names
+
+ common/rc         | 13 +++++++++++++
+ tests/generic/453 |  1 +
+ tests/generic/454 |  1 +
+ 3 files changed, 15 insertions(+)
+
+-- 
+2.31.1
+
