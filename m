@@ -2,83 +2,120 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2C37AC07E96
-	for <linux-fstests@archiver.kernel.org>; Thu,  8 Jul 2021 16:36:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 13532C07E96
+	for <linux-fstests@archiver.kernel.org>; Fri,  9 Jul 2021 01:25:26 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id F15DC61876
-	for <linux-fstests@archiver.kernel.org>; Thu,  8 Jul 2021 16:36:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D9D1B61468
+	for <linux-fstests@archiver.kernel.org>; Fri,  9 Jul 2021 01:25:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229524AbhGHQjN (ORCPT
+        id S229637AbhGIB2G (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 8 Jul 2021 12:39:13 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:59014 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S229468AbhGHQjN (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 8 Jul 2021 12:39:13 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1625762190;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=832mfoVoJ+yA47d9+hU4pvcinumCHFtkU1nrSJigL2Q=;
-        b=c/CBcMk02MT6oqI0pdpGG8Fwx87NV6WuKGylNHWC3I4JXlJuA173gOZzkHlyJqU8APXqSh
-        JIRwdtni1SJbpCxX0eTOdp12aIGjF3w4zW8BcxF2OYIzT06rUNmRtYNUmp0u7s37KvxbaK
-        +9G5DbZI+AP4pbaR5k1Yutn1TtnH+rk=
-Received: from mail-ej1-f72.google.com (mail-ej1-f72.google.com
- [209.85.218.72]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-216-P5t3z_BaMLGfuaFXXUDEgQ-1; Thu, 08 Jul 2021 12:36:29 -0400
-X-MC-Unique: P5t3z_BaMLGfuaFXXUDEgQ-1
-Received: by mail-ej1-f72.google.com with SMTP id q14-20020a1709066aceb029049fa6bee56fso2071254ejs.21
-        for <fstests@vger.kernel.org>; Thu, 08 Jul 2021 09:36:29 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:from:to:references:message-id:date
-         :user-agent:mime-version:in-reply-to:content-transfer-encoding
-         :content-language;
-        bh=832mfoVoJ+yA47d9+hU4pvcinumCHFtkU1nrSJigL2Q=;
-        b=cqpJA1jXIcrnOrkAm1cgcU3iEXhM6O6uv1aBQuCWih/fuHYKqBKdEjXyZsY0tp8ZbT
-         CiCuYRqOnMSA+IqtyUmlg0XsDFUgPbrff4OCYuAhGWdnZLK3t+lu6kxFZ0hs5iUbrKNB
-         lp3LlU0Ksl0AEUy4yKbW3rspiNGWYMsuF9biDP2X+wgj3XNNe2eQ3mNZjoGDV1LIDsUH
-         aHyRkXAK0JcKsuTvV7ub1TGrMfMoZzU4kes1FtV02iiLpfjd6NUPzj1l3y9hi8Bg0rZ5
-         RAEqwidKDF2VOvEtP7B7Sq8LsnkzfBhNTPIyqFdcjux2WNTvLB7CQNX5Rbkp04WVDqqL
-         T8XQ==
-X-Gm-Message-State: AOAM531khdDUBGCqGIbZwk9jfazXVgjI+9VTESsnUKD2vPkRb7HKVk2F
-        SLJ+tUCnhahTJQwHFm2NkjuUzVWl1ivuUCT+pkr5TwpDYdXcfx9YYB/JtFbuIYAMAuTbk/aUnYl
-        dpqkGGmKBlhW6MTkjCtDwImlewU7tPxmuErNS1Uu84aTyE+QXqN0fGGmjF+fHYSrSnDkI
-X-Received: by 2002:a50:85cc:: with SMTP id q12mr39598879edh.182.1625762188105;
-        Thu, 08 Jul 2021 09:36:28 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJxyDxu+LjZcPkMloj/ue4BPXIRAM3KnSlBRoi+ekXpzfLAB0vTlR9muK6fl+eb361hTVOCpXQ==
-X-Received: by 2002:a50:85cc:: with SMTP id q12mr39598862edh.182.1625762187969;
-        Thu, 08 Jul 2021 09:36:27 -0700 (PDT)
-Received: from localhost.localdomain ([84.19.91.9])
-        by smtp.gmail.com with ESMTPSA id b25sm1584584edv.9.2021.07.08.09.36.27
-        for <fstests@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 08 Jul 2021 09:36:27 -0700 (PDT)
-Subject: Re: [PATCH v2 0/1] generic/{453,454}: Do NOT run for FSs restricting
+        Thu, 8 Jul 2021 21:28:06 -0400
+Received: from mail.kernel.org ([198.145.29.99]:40272 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S229631AbhGIB2G (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 8 Jul 2021 21:28:06 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 6248461467;
+        Fri,  9 Jul 2021 01:25:23 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1625793923;
+        bh=0S5RTHBY6Tn7m0hB8C5DQVqIwvDfsBsP7aUEQowh1Us=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=kGECSItLyF9Oqo/SRgAgF6Nn+/4DVfjymToCTPpB6D5UQFqkc3728CA9qdrB3aP4n
+         1t8ROj26D7j+gqnCxHHZ6o617k7oWE13qmbMFnWtFNUMUcYR/pdJuPTIN5OCQMvgf7
+         lSusEL4r8JqKTRQxXhD8CoTUhTjJjpz1cA/Wkf5FqILfmPoM7aEWk4bA3XT5pccvWz
+         Qempm4rmDH1B5CQpHJOFH95fUOCPyDIMR43rzbt1DyZvONFuafxCVDVg7n8TGhTQKs
+         srMvv/k9kJK22SO9p8ybFHFjUCrZSyi3MHxow4/YdKi8CrRvw0CG2YJYt2itLhxmGa
+         sK1tA4aRNSHng==
+Date:   Thu, 8 Jul 2021 18:25:22 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Pavel Reichl <preichl@redhat.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH v3 1/1] generic/{453,454}: Don't run for FSs restricting
  names
-From:   Pavel Reichl <preichl@redhat.com>
-To:     fstests@vger.kernel.org
-References: <20210707223227.32053-1-preichl@redhat.com>
-Message-ID: <d3a80e73-7e4d-47f2-8643-891369230407@redhat.com>
-Date:   Thu, 8 Jul 2021 18:36:26 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.11.0
+Message-ID: <20210709012522.GD11571@locust>
+References: <20210708163518.51386-1-preichl@redhat.com>
+ <20210708163518.51386-2-preichl@redhat.com>
 MIME-Version: 1.0
-In-Reply-To: <20210707223227.32053-1-preichl@redhat.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Content-Language: en-US
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210708163518.51386-2-preichl@redhat.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Hello, please ignore this revision as there's already revision #3 on the 
-list. Thanks.
+On Thu, Jul 08, 2021 at 06:35:18PM +0200, Pavel Reichl wrote:
+> Running generic/{453,454} tests is probably only useful for filesystems
+> that allow unrestricted byte streams for names.
+> 
+> Signed-off-by: Pavel Reichl <preichl@redhat.com>
+> Suggested-by: Darrick J. Wong <djwong@kernel.org>
+> Reviewed-by: Theodore Ts'o <tytso@mit.edu>
+> ---
 
+Looks good to me now,
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+
+--D
+
+>  common/rc         | 13 +++++++++++++
+>  tests/generic/453 |  1 +
+>  tests/generic/454 |  1 +
+>  3 files changed, 15 insertions(+)
+> 
+> diff --git a/common/rc b/common/rc
+> index d4ad421e..d4b1f21f 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -4599,6 +4599,19 @@ _require_od_endian_flag()
+>  		_notrun "od does not support endian flag"
+>  }
+>  
+> +# Skip this test unless the filesystem treats names (directory entries,
+> +# fs labels, and extended attribute names) as raw byte sequences.
+> +_require_names_are_bytes() {
+> +        case "$FSTYP" in
+> +        ext2|ext3|ext4|f2fs|xfs|btrfs)
+> +		# do nothing
+> +	        ;;
+> +	*)
+> +                _notrun "$FSTYP does not allow unrestricted byte streams for names"
+> +		;;
+> +        esac
+> +}
+> +
+>  init_rc
+>  
+>  ################################################################################
+> diff --git a/tests/generic/453 b/tests/generic/453
+> index 55ddcc01..a0fb802e 100755
+> --- a/tests/generic/453
+> +++ b/tests/generic/453
+> @@ -15,6 +15,7 @@ _begin_fstest auto quick dir
+>  # Import common functions.
+>  
+>  _require_scratch
+> +_require_names_are_bytes
+>  
+>  echo "Format and mount"
+>  _scratch_mkfs > $seqres.full 2>&1
+> diff --git a/tests/generic/454 b/tests/generic/454
+> index 3aefa9f0..133e2e9d 100755
+> --- a/tests/generic/454
+> +++ b/tests/generic/454
+> @@ -17,6 +17,7 @@ _begin_fstest auto quick attr
+>  
+>  _require_scratch
+>  _require_attrs
+> +_require_names_are_bytes
+>  
+>  echo "Format and mount"
+>  _scratch_mkfs > $seqres.full 2>&1
+> -- 
+> 2.31.1
+> 
