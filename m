@@ -7,125 +7,86 @@ X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4E651C636C8
-	for <linux-fstests@archiver.kernel.org>; Sun, 18 Jul 2021 13:51:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7E62DC6377A
+	for <linux-fstests@archiver.kernel.org>; Sun, 18 Jul 2021 13:57:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2C7AB61182
-	for <linux-fstests@archiver.kernel.org>; Sun, 18 Jul 2021 13:51:17 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 55B3161183
+	for <linux-fstests@archiver.kernel.org>; Sun, 18 Jul 2021 13:57:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232831AbhGRNyO (ORCPT
+        id S232973AbhGROAY (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 18 Jul 2021 09:54:14 -0400
-Received: from out20-85.mail.aliyun.com ([115.124.20.85]:40484 "EHLO
-        out20-85.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232685AbhGRNyN (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 18 Jul 2021 09:54:13 -0400
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07843886|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.00463065-0.000736642-0.994633;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047192;MF=guan@eryu.me;NM=1;PH=DS;RN=3;RT=3;SR=0;TI=SMTPD_---.Kkr11rn_1626616273;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.Kkr11rn_1626616273)
+        Sun, 18 Jul 2021 10:00:24 -0400
+Received: from out20-73.mail.aliyun.com ([115.124.20.73]:34148 "EHLO
+        out20-73.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S232895AbhGROAP (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 18 Jul 2021 10:00:15 -0400
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.112881|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.290544-0.000469483-0.708987;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047208;MF=guan@eryu.me;NM=1;PH=DS;RN=4;RT=4;SR=0;TI=SMTPD_---.Kkr14Ss_1626616634;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.Kkr14Ss_1626616634)
           by smtp.aliyun-inc.com(10.147.44.129);
-          Sun, 18 Jul 2021 21:51:14 +0800
-Date:   Sun, 18 Jul 2021 21:51:13 +0800
+          Sun, 18 Jul 2021 21:57:14 +0800
+Date:   Sun, 18 Jul 2021 21:57:14 +0800
 From:   Eryu Guan <guan@eryu.me>
-To:     Jeffle Xu <jefflexu@linux.alibaba.com>
-Cc:     darrick.wong@oracle.com, fstests@vger.kernel.org
-Subject: Re: [RFC PATCH] misc: skip fsx tests when op length not congruent
- with file allocation unit
-Message-ID: <YPQx0cXESGzJyu0U@desktop>
-References: <20210706181452.GB11571@locust>
- <20210707104745.98822-1-jefflexu@linux.alibaba.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: Re: [PATCH 1/1] new: allow users to specify a new test id
+Message-ID: <YPQzOiqnugT4MeNq@desktop>
+References: <162561725931.543346.16210906692072836195.stgit@locust>
+ <162561726493.543346.17291318180978776290.stgit@locust>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210707104745.98822-1-jefflexu@linux.alibaba.com>
+In-Reply-To: <162561726493.543346.17291318180978776290.stgit@locust>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Jul 07, 2021 at 06:47:45PM +0800, Jeffle Xu wrote:
+On Tue, Jul 06, 2021 at 05:21:04PM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
 > 
-> Yes it works. For example in this RFC patch, generic/075 could be
-> skipped once 'bigalloc' is detected for ext4.
+> Alter the ./new script so that one can set the test id explicitly.
 > 
-> I could fix all related test cases in this way, if it is acceptable to
-> the community.
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
 
-Looks fine to me.
-
-> 
-> Signed-off-by: Jeffle Xu <jefflexu@linux.alibaba.com>
-> ---
->  common/rc         | 20 ++++++++++++++++++++
->  tests/generic/075 |  3 +++
->  2 files changed, 23 insertions(+)
-> 
-> diff --git a/common/rc b/common/rc
-> index f58a542..92245e0 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -4041,6 +4041,23 @@ _sysfs_dev()
->  	min=$(echo "ibase=16; $min" | bc)
->  	echo /sys/dev/block/$maj:$min
->  }
-> +		
-> +_ext4_get_file_block_size()
-
-Another ext4 specific helper in common/rc, perhaps it's time to create
-its own file for ext4, i.e. common/ext4, and move all ext4 specific
-helpers in common/rc there.
-
-> +{
-> +	local path="$1"
-> +	path="$(readlink -m "$path")"
-> +	local dev=`$DF_PROG $dir | tail -1 | $AWK_PROG '{print $1}'`
-
-$dir is not defined, you mean $path here?
-
-> +	
-> +	# The alloc unit size equals block size for ext4 without 'bigalloc'.
-> +	if ! (tune2fs -l $dev | grep -q 'Cluster size'); then
-
-$TUNE2FS_PROG
-
-Perhaps you could call tune2fs only once and save its "Cluster size"
-line for later use.
+Looks good to me. Mind updating the usage info as well?
 
 Thanks,
 Eryu
 
-> +		_get_block_size "$path"
-> +		return
+> ---
+>  new |   14 ++++++++++++--
+>  1 file changed, 12 insertions(+), 2 deletions(-)
+> 
+> 
+> diff --git a/new b/new
+> index 07144399..51111f08 100755
+> --- a/new
+> +++ b/new
+> @@ -26,7 +26,18 @@ usage()
+>  }
+>  
+>  [ $# -eq 0 ] && usage
+> -tdir=tests/$1
+> +
+> +if echo "$1" | grep -q '/'; then
+> +	if [ -e "tests/$1" ]; then
+> +		echo "$1: test already exists."
+> +		exit 1
 > +	fi
-> +
-> +	# Otherwise, call tune2fs acquiring cluster size.
-> +	tune2fs -l $dev | sed -n -e 's/^.*Cluster size:\s*\([0-9]*\).*$/\1/p'
-> +
-> +}
+> +	tdir="tests/$(echo "$1" | cut -d '/' -f 1)"
+> +	id="$(echo "$1" | cut -d '/' -f 2)"
+> +else
+> +	tdir=tests/$1
+> +	id="$(basename "$(./tools/nextid "$1")")"
+> +fi
 >  
->  # Get the minimum block size of a file.  Usually this is the
->  # minimum fs block size, but some filesystems (ocfs2) do block
-> @@ -4059,6 +4076,9 @@ _get_file_block_size()
->  	"xfs")
->  		_xfs_get_file_block_size $1
->  		;;
-> +	"ext4")
-> +		_ext4_get_file_block_size $1
-> +		;;
->  	*)
->  		_get_block_size $1
->  		;;
-> diff --git a/tests/generic/075 b/tests/generic/075
-> index 7467bb7..d269a7c 100755
-> --- a/tests/generic/075
-> +++ b/tests/generic/075
-> @@ -109,6 +109,9 @@ _process_args()
->  _supported_fs generic
->  _require_test
+>  i=0
+>  line=0
+> @@ -36,7 +47,6 @@ eof=1
+>  export AWK_PROG="$(type -P awk)"
+>  [ "$AWK_PROG" = "" ] && { echo "awk not found"; exit; }
 >  
-> +blksz=$(_get_block_size $TEST_DIR)
-> +_require_congruent_file_oplen $TEST_DIR $blksz
-> +
->  size10=`expr 10 \* 1024 \* 1024`	# 10 megabytes
->  filelen=$size10
->  numops1=1000
-> -- 
-> 1.8.3.1
+> -id="$(basename "$(./tools/nextid "$1")")"
+>  echo "Next test id is $id"
+>  shift
+>  
