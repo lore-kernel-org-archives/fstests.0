@@ -2,270 +2,136 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 495C9C1B08C
-	for <linux-fstests@archiver.kernel.org>; Wed, 14 Jul 2021 23:37:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7D34BC636C8
+	for <linux-fstests@archiver.kernel.org>; Sun, 18 Jul 2021 12:54:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 23D85613D0
-	for <linux-fstests@archiver.kernel.org>; Wed, 14 Jul 2021 23:37:53 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5785C61181
+	for <linux-fstests@archiver.kernel.org>; Sun, 18 Jul 2021 12:54:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237755AbhGNXko (ORCPT
+        id S233704AbhGRM5G (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 14 Jul 2021 19:40:44 -0400
-Received: from mail.kernel.org ([198.145.29.99]:43800 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229535AbhGNXko (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 14 Jul 2021 19:40:44 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 57A87613C8;
-        Wed, 14 Jul 2021 23:37:52 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1626305872;
-        bh=wBaDHe5n/Zjmsx5FQK5yVFcpsGG6f3cVOzkFEEUTfEM=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=OzbnDwKfZ7qmbGEkXoRZFbfVoPW08sshz+haMyEyuD9rzJ35NgjvrueWJJifq7I9V
-         WLh9u425pGhbyTPRI1jxzOzNPrZEZI4WENzXcjIAHn3/AUJ5oqM2lV4nLLVU617AIY
-         i4yEHUU3cPwA8U1Eb3zrfSo7B5VSyOdIebIVAmKZOHDoJwjf1tIAg/gLs6nNbyLTNl
-         njC1Qf39D9Sf9vST9bb9iDguI70SpD2HeCVtPkyQrCOAz86plSp0XZdpvFXatn7GM0
-         IOTGidVFZQHKg0U+g/Rm0ut5cAF74yHKI5Ti3nZSLspG8KZQFwTvnjJz/3q51AKd71
-         j5tKFiytufY6w==
-Date:   Wed, 14 Jul 2021 16:37:52 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Christoph Hellwig <hch@lst.de>
-Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 3/6] xfs/106: don't test disabling quota accounting
-Message-ID: <20210714233752.GR22402@magnolia>
-References: <20210712111146.82734-1-hch@lst.de>
- <20210712111146.82734-4-hch@lst.de>
+        Sun, 18 Jul 2021 08:57:06 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58856 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S233552AbhGRM5G (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 18 Jul 2021 08:57:06 -0400
+Received: from mail-wm1-x32e.google.com (mail-wm1-x32e.google.com [IPv6:2a00:1450:4864:20::32e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1F632C061762
+        for <fstests@vger.kernel.org>; Sun, 18 Jul 2021 05:54:08 -0700 (PDT)
+Received: by mail-wm1-x32e.google.com with SMTP id c17so1571374wmb.5
+        for <fstests@vger.kernel.org>; Sun, 18 Jul 2021 05:54:08 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=XsO73sHAeGsufuMGStA7zzmflJaWpHERkfTgUIiM88o=;
+        b=e1Qan7zXTa4WqWP/6/0BvaJQbDLceRGowQ115FkSLMUW9FPUw9H6OCyaazHsdojQaF
+         ARjGFGyFx7EgB7tGSgeu9QNU2fPnB1M5FD8NedMSLrg8o0BDzh6hIq29rG8faK6GnUea
+         8lQikeBWnuYdnv+fk0FHvL69fKJloYx5RBjFP44Wg6pFKHtp6sQQm7ebfNFi2yZMj5jY
+         LdL+eXunzWmn/V5S7nXiTIwNtY32gJDQrAisIWaClrtoaPH+CD80Ut6iw9JjoCGu59DH
+         noukVBSnhpLZiR1vP1OeiOq7JiUO3pBuvCalRCBRm/vQ9ClPVlJCcLzKpCSZMuWME6zE
+         HKaQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=XsO73sHAeGsufuMGStA7zzmflJaWpHERkfTgUIiM88o=;
+        b=WkOLQeGymYTnsqLQTTnN3qSjh9zezml/Z3LmFua+ctt+nNSUqPWZjMq8Xfe75EouFc
+         n8TVDM/ms0yIHfcPUhhTkACgQeTy19yJG8VDDJlVypuTmDgD+C+lLPbGP60hdkMxbjtY
+         dda1xTIXlT33VTESpWqNBTyVxpyjtZgX5jX0u5xkYmyiEmBD3a4jYCNP3ggsITCoFrpa
+         KO0XIIsWyk5vHEQTNg+ScKGbkN5TZeTJXWfDgVD/9mzmA76xwEGg7N4XwPMS2Hp1YIlc
+         ohSRgaqumjAPW3XXvIX3wFo30tne7Bdjdbu9DDJujDryl5KSg0gWMYzvQGY9tO2ri5u6
+         bdXA==
+X-Gm-Message-State: AOAM530CqS44kM6heEuEYhAvLKNculUcDuuY1gC+vQLeXVe9WWuK21G9
+        F4GBoU1aWYwdG27GV6TZJYI=
+X-Google-Smtp-Source: ABdhPJwCIYotRGc2s3jFCxLuFsWcGn81r48Dv4kKcdG24H8vtHFo1ZgJkhO7NuhL5PJp/1kIteVNjg==
+X-Received: by 2002:a7b:c346:: with SMTP id l6mr21181719wmj.109.1626612846601;
+        Sun, 18 Jul 2021 05:54:06 -0700 (PDT)
+Received: from localhost ([8.208.10.148])
+        by smtp.gmail.com with ESMTPSA id r16sm16923965wmg.11.2021.07.18.05.54.05
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 18 Jul 2021 05:54:05 -0700 (PDT)
+Date:   Sun, 18 Jul 2021 20:54:02 +0800
+From:   Eryu Guan <guaneryu@gmail.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org
+Subject: Re: [PATCH 0/2] skip tests that don't work with an external log
+Message-ID: <YPQkalv0mmLpsSnZ@desktop>
+References: <20210705040307.3322709-1-tytso@mit.edu>
+ <20210706174837.GA11571@locust>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210712111146.82734-4-hch@lst.de>
+In-Reply-To: <20210706174837.GA11571@locust>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Jul 12, 2021 at 01:11:43PM +0200, Christoph Hellwig wrote:
-> Switch the test that removes the quota files to just disable
-> enforcement and then unmount the file system as disabling quota
-> accounting is about to go away.
+On Tue, Jul 06, 2021 at 10:48:37AM -0700, Darrick J. Wong wrote:
+> On Mon, Jul 05, 2021 at 12:03:05AM -0400, Theodore Ts'o wrote:
+> > I recently tried running xfstests with an external log device, and
+> > found a number of failures caused by the fact that we use dmflakey and
+> > dmerror to take down a disk to simulate a power failure or a complete
+> > hard disk failure.  But with an external log device, the tests don't
+> > correctly simulate these scenarios, so skip them.
 > 
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
-> ---
->  tests/xfs/106     | 45 ++++++++++++++++++-------------------
->  tests/xfs/106.out | 57 +++++++++++++++++++++++++++++++++++++++--------
->  2 files changed, 70 insertions(+), 32 deletions(-)
+> Counter-proposal: If I sent out my series to fix all that[1], would you
+> review them?
+
+Yeah, I was going to ask if xfs supports dmflakey tests with external
+log dev. So Ted's proposal will break your work.
+
+And if we want to disable dmflakey/dmerror tests with external log only
+for ext4, I think we could do it in _require_dm_target() not in
+_init_flakey(), something like:
+
+_require_dm_target()
+{
+	local target=$1
+	......
+
+	case "$target" in
+	flakey|error)
+		if [ "$FSTYP" == "ext4" -o "$FSTYP" == "ext3" ] && _has_logdev; then
+			_notrun "dmflakey/dmerror tests don't work with an external log device for $FSTYP"
+		fi
+		;;
+	*)
+		;;
+	esac
+	......
+}
+
+Then generic/475 doesn't need any update.
+
+Thanks,
+Eryu
+
 > 
-> diff --git a/tests/xfs/106 b/tests/xfs/106
-> index f1397f94..5f0512d6 100755
-> --- a/tests/xfs/106
-> +++ b/tests/xfs/106
-> @@ -153,13 +153,6 @@ test_enable()
->  			-c "enable -$type -v" $SCRATCH_MNT | filter_state
->  }
->  
-> -test_off()
-> -{
-> -	echo "checking off command (type=$type)"
-> -	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-> -			-c "off -$type -v" $SCRATCH_MNT | _filter_scratch
-> -}
-> -
->  test_remove()
->  {
->  	echo "checking remove command (type=$type)"
-> @@ -194,6 +187,15 @@ test_restore()
->  
->  test_xfs_quota()
->  {
-> +	_qmount_option $1
-> +	_qmount
-> +
-> +	if [ $type == "p" ]; then
-> +		_require_prjquota $SCRATCH_DEV
-> +		$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-> +			-c "project -s $id" $SCRATCH_MNT > /dev/null
-> +	fi
-> +
->  	# init quota
->  	echo "init quota limit and timer, and dump it"
->  	echo "create_files 1024k 15"; create_files 1024k 15
-> @@ -236,14 +238,21 @@ test_xfs_quota()
->  	echo ; test_report -N
->  
->  	# off and remove test
-> -	echo "off and remove test"
-> +	echo "disable and remove test"
->  	echo ; test_limit 100m 100m 100 100
->  	echo ; test_quota -N
-> -	echo ; test_off
-> +	echo ; test_disable
->  	echo ; test_state
-> +	_scratch_unmount
-> +	_qmount_option ""
-> +	_qmount
-
-Why not make these three lines the method body of test_off() ?
-
---D
-
->  	echo ; test_remove
->  	echo ; test_report -N
-> -	echo "quota remount"; _qmount
-> +	_scratch_unmount
-> +
-> +	echo "quota remount";
-> +	_qmount_option $1
-> +	_qmount
->  	echo ; test_report -N
->  
->  	# restore test
-> @@ -255,33 +264,23 @@ test_xfs_quota()
->  }
->  
->  echo "----------------------- uquota,sync ---------------------------"
-> -_qmount_option "uquota,sync"
-> -_qmount
->  type=u
->  id=$uqid
-> -test_xfs_quota
-> +test_xfs_quota "uquota,sync"
->  
->  echo "----------------------- gquota,sync ---------------------------"
-> -_qmount_option "gquota,sync"
-> -_qmount
->  type=g
->  id=$gqid
-> -test_xfs_quota
-> +test_xfs_quota "gquota,sync"
->  
->  echo "----------------------- pquota,sync ---------------------------"
->  # Need to clean the group quota before test project quota, because
->  # V4 xfs doesn't support separate project inode. So mkfs at here.
->  _scratch_unmount
->  _scratch_mkfs_xfs >>$seqres.full 2>&1
-> -_qmount_option "pquota,sync"
-> -_qmount
->  type=p
->  id=$pqid
-> -_require_prjquota $SCRATCH_DEV
-> -$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
-> -		-c "project -s $id" \
-> -		$SCRATCH_MNT > /dev/null
-> -test_xfs_quota
-> +test_xfs_quota "pquota,sync"
->  
->  _scratch_unmount
->  # success, all done
-> diff --git a/tests/xfs/106.out b/tests/xfs/106.out
-> index e36375d3..2af17bc9 100644
-> --- a/tests/xfs/106.out
-> +++ b/tests/xfs/106.out
-> @@ -124,17 +124,30 @@ Realtime Blocks grace time: [7 days]
->  checking report command (type=u)
->  fsgqa 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
->  
-> -off and remove test
-> +disable and remove test
->  
->  checking limit command (type=u, bsoft=100m, bhard=100m, isoft=100, ihard=100)
->  
->  checking quota command (type=u)
->  SCRATCH_DEV 1024 102400 102400 00 [--------] 15 100 100 00 [--------] SCRATCH_MNT
->  
-> -checking off command (type=u)
-> -User quota are not enabled on SCRATCH_DEV
-> +checking disable command (type=u)
-> +User quota state on SCRATCH_MNT (SCRATCH_DEV)
-> + Accounting: ON
-> + Enforcement: OFF
-> + Inode: #[INO] (X blocks, Y extents)
-> +Blocks grace time: [3 days]
-> +Inodes grace time: [3 days]
-> +Realtime Blocks grace time: [7 days]
->  
->  checking state command (type=u)
-> +User quota state on SCRATCH_MNT (SCRATCH_DEV)
-> + Accounting: ON
-> + Enforcement: OFF
-> + Inode: #[INO] (X blocks, Y extents)
-> +Blocks grace time: [3 days]
-> +Inodes grace time: [3 days]
-> +Realtime Blocks grace time: [7 days]
->  
->  checking remove command (type=u)
->  User quota are not enabled on SCRATCH_DEV
-> @@ -288,17 +301,30 @@ Realtime Blocks grace time: [7 days]
->  checking report command (type=g)
->  fsgqa 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
->  
-> -off and remove test
-> +disable and remove test
->  
->  checking limit command (type=g, bsoft=100m, bhard=100m, isoft=100, ihard=100)
->  
->  checking quota command (type=g)
->  SCRATCH_DEV 1024 102400 102400 00 [--------] 15 100 100 00 [--------] SCRATCH_MNT
->  
-> -checking off command (type=g)
-> -Group quota are not enabled on SCRATCH_DEV
-> +checking disable command (type=g)
-> +Group quota state on SCRATCH_MNT (SCRATCH_DEV)
-> + Accounting: ON
-> + Enforcement: OFF
-> + Inode: #[INO] (X blocks, Y extents)
-> +Blocks grace time: [3 days]
-> +Inodes grace time: [3 days]
-> +Realtime Blocks grace time: [7 days]
->  
->  checking state command (type=g)
-> +Group quota state on SCRATCH_MNT (SCRATCH_DEV)
-> + Accounting: ON
-> + Enforcement: OFF
-> + Inode: #[INO] (X blocks, Y extents)
-> +Blocks grace time: [3 days]
-> +Inodes grace time: [3 days]
-> +Realtime Blocks grace time: [7 days]
->  
->  checking remove command (type=g)
->  Group quota are not enabled on SCRATCH_DEV
-> @@ -452,17 +478,30 @@ Realtime Blocks grace time: [7 days]
->  checking report command (type=p)
->  fsgqa 1024 512 2048 00 [3 days] 15 10 20 00 [3 days]
->  
-> -off and remove test
-> +disable and remove test
->  
->  checking limit command (type=p, bsoft=100m, bhard=100m, isoft=100, ihard=100)
->  
->  checking quota command (type=p)
->  SCRATCH_DEV 1024 102400 102400 00 [--------] 15 100 100 00 [--------] SCRATCH_MNT
->  
-> -checking off command (type=p)
-> -Project quota are not enabled on SCRATCH_DEV
-> +checking disable command (type=p)
-> +Project quota state on SCRATCH_MNT (SCRATCH_DEV)
-> + Accounting: ON
-> + Enforcement: OFF
-> + Inode: #[INO] (X blocks, Y extents)
-> +Blocks grace time: [3 days]
-> +Inodes grace time: [3 days]
-> +Realtime Blocks grace time: [7 days]
->  
->  checking state command (type=p)
-> +Project quota state on SCRATCH_MNT (SCRATCH_DEV)
-> + Accounting: ON
-> + Enforcement: OFF
-> + Inode: #[INO] (X blocks, Y extents)
-> +Blocks grace time: [3 days]
-> +Inodes grace time: [3 days]
-> +Realtime Blocks grace time: [7 days]
->  
->  checking remove command (type=p)
->  Project quota are not enabled on SCRATCH_DEV
-> -- 
-> 2.30.2
+> --D
 > 
+> [1] https://git.kernel.org/pub/scm/linux/kernel/git/djwong/xfstests-dev.git/log/?h=dmerror-on-rt-devices
+> 
+> > 
+> > With these patches, testing with ext4 using an external log is passing
+> > almost all of the auto group tests, with the exception of ext4/028
+> > (which appears to be a genuine ext4 fsmap bug not handling external
+> > log devices correctly).
+> > 
+> > Theodore Ts'o (2):
+> >   dmflakey: don't run dmflakey tests with an external log device
+> >   generic/475: skip test when using an external log device
+> > 
+> >  common/dmflakey   | 4 ++++
+> >  tests/generic/475 | 4 ++++
+> >  2 files changed, 8 insertions(+)
+> > 
+> > -- 
+> > 2.31.0
+> > 
