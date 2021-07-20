@@ -4,40 +4,40 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-17.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 96871C07E95
-	for <linux-fstests@archiver.kernel.org>; Tue, 20 Jul 2021 01:12:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E9D15C636C9
+	for <linux-fstests@archiver.kernel.org>; Tue, 20 Jul 2021 01:13:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 686D460FF3
-	for <linux-fstests@archiver.kernel.org>; Tue, 20 Jul 2021 01:12:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D6A2A61175
+	for <linux-fstests@archiver.kernel.org>; Tue, 20 Jul 2021 01:13:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1381552AbhGTAbm (ORCPT
+        id S1381581AbhGTAcA (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 19 Jul 2021 20:31:42 -0400
-Received: from mail.kernel.org ([198.145.29.99]:41956 "EHLO mail.kernel.org"
+        Mon, 19 Jul 2021 20:32:00 -0400
+Received: from mail.kernel.org ([198.145.29.99]:41654 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1381211AbhGTA3x (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 19 Jul 2021 20:29:53 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 188DF6115B;
-        Tue, 20 Jul 2021 01:08:56 +0000 (UTC)
+        id S1381034AbhGTA2G (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 19 Jul 2021 20:28:06 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 73E7C610D2;
+        Tue, 20 Jul 2021 01:08:43 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1626743336;
-        bh=Qv/Pkid2UJbFphFljIMGBbdCZj2JHF+82EKdXuRxBRU=;
+        s=k20201202; t=1626743323;
+        bh=8ZRxh2vdEVL6nhqh6dzlhr4dW8QPSFm7m8DO33sBWfw=;
         h=Subject:From:To:Cc:Date:From;
-        b=CH7TuWZk3X97Jqh1/m819DKzwdsbIzVu4MxXI2K/pUYTt8EDHx5j6uK+mUxHsEcHH
-         MWN0x8xcWHcQl1aYf2ST7g7cx0ba2C/tJS71wY+PnFRN4IrAa1y2ahzvd0xeGkIl0P
-         BbV7UIDuoAB9YaH3q1D9gzKLPD+T/izAPB7hAT8KXMSkOrNKcG8uQKJXWB5GQuOzwp
-         caB7eKcNkQhMgq2diDot3EzXHbaiUa30Y0RxahJB5US4hAmVU9hMIyNrMP1ksQ4T+D
-         YkBXs/GGOn+4sgPtmckWZkUpLUsheF8UXCjdFyRAO7c1auuztl5GKrhJ115UuYP88B
-         kvfAApJhiqYqQ==
-Subject: [PATCHSET 0/1] fstests: regression tests for 5.14 fixes
+        b=iO777ONrRm8Bkua3wIQdcbSG/q/zhi7/0bgwmCe28Ar4aS4HEc7A1SM89IiHf/cya
+         zAVQl96hmzsbkM47iGEPe01E7W4MOPZNjZg4sragrFTly7WAKYdbb0mAy4OqsaZJmz
+         PSkx/r7WHwtkeUt2GA1NxHU+C1cmc/yLDPIX5KEPaQR1lnacGbLkgl5P8yY+GDUBOD
+         JML/F2lJ27twpyaIPclhojFxzPfzwqw5WUMI3Y7oax+TmoCYGApDvPQicINuoH9esH
+         XXp8BfWUG7+hC5TF4Z3IvQPpN/UlsFSMnJny0c7ELhUYhk/6FZhyy5nazEopppv8G/
+         IprnZWmTlLhWw==
+Subject: [PATCHSET 0/2] fstests: exercise code refactored in 5.14
 From:   "Darrick J. Wong" <djwong@kernel.org>
 To:     djwong@kernel.org, guaneryu@gmail.com
 Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me
-Date:   Mon, 19 Jul 2021 18:08:55 -0700
-Message-ID: <162674333583.2650988.770205039530275517.stgit@magnolia>
+Date:   Mon, 19 Jul 2021 18:08:43 -0700
+Message-ID: <162674332320.2650898.17601790625049494810.stgit@magnolia>
 User-Agent: StGit/0.19
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -48,7 +48,10 @@ X-Mailing-List: fstests@vger.kernel.org
 
 Hi all,
 
-Add a regression test for online shrink fixes that will appear in 5.14.
+Add a few tests to exercise code that got refactored in 5.14.  The xattr
+tests shook out some bugs in the big extended attributes refactoring,
+and the nested shutdown test simulates the process of recovering after a
+VM host filesystem goes down and the guests have to recover.
 
 If you're going to start using this mess, you probably ought to just
 pull from my git trees, which are linked below.
@@ -58,18 +61,16 @@ Comments and questions are, as always, welcome.
 
 --D
 
-kernel git tree:
-https://git.kernel.org/cgit/linux/kernel/git/djwong/xfs-linux.git/log/?h=shrink-fixes
-
-xfsprogs git tree:
-https://git.kernel.org/cgit/linux/kernel/git/djwong/xfsprogs-dev.git/log/?h=shrink-fixes
-
 fstests git tree:
-https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=shrink-fixes
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=new-tests-for-5.14
 ---
- tests/xfs/778     |  190 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/778.out |    2 +
- 2 files changed, 192 insertions(+)
- create mode 100755 tests/xfs/778
- create mode 100644 tests/xfs/778.out
+ tests/generic/724     |   57 +++++++++++++++++++++
+ tests/generic/724.out |    2 +
+ tests/generic/725     |  136 +++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/725.out |    2 +
+ 4 files changed, 197 insertions(+)
+ create mode 100755 tests/generic/724
+ create mode 100644 tests/generic/724.out
+ create mode 100755 tests/generic/725
+ create mode 100644 tests/generic/725.out
 
