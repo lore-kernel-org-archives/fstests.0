@@ -4,42 +4,43 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-17.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E79D6C07E95
-	for <linux-fstests@archiver.kernel.org>; Tue, 20 Jul 2021 01:13:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9EE50C07E9D
+	for <linux-fstests@archiver.kernel.org>; Tue, 20 Jul 2021 01:13:19 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B4F58600D1
-	for <linux-fstests@archiver.kernel.org>; Tue, 20 Jul 2021 01:13:01 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8267561165
+	for <linux-fstests@archiver.kernel.org>; Tue, 20 Jul 2021 01:13:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1381571AbhGTAbt (ORCPT
+        id S1347217AbhGTAcK (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 19 Jul 2021 20:31:49 -0400
-Received: from mail.kernel.org ([198.145.29.99]:41712 "EHLO mail.kernel.org"
+        Mon, 19 Jul 2021 20:32:10 -0400
+Received: from mail.kernel.org ([198.145.29.99]:41636 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1381048AbhGTA2Z (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 19 Jul 2021 20:28:25 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 5D78E6108B;
-        Tue, 20 Jul 2021 01:08:54 +0000 (UTC)
+        id S1381033AbhGTA2G (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 19 Jul 2021 20:28:06 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id EB155600D1;
+        Tue, 20 Jul 2021 01:08:41 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1626743334;
-        bh=CBIT18gkuvwTKxy8Trh1E4RRWCtft6If08tYn+MCewA=;
+        s=k20201202; t=1626743322;
+        bh=AuR85YKR+y31aj11AazCi0U+RStN5jamOKR4SE4U2gk=;
         h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=pmKaa+1C+vRDLX4UZHIuBY+1/qLdiOTcIOCRyKInGdgLa/AZ7W56WFeIRTDBbR5/t
-         WQ+rvPw1/tUbznlY57XLgo6t0bfX8yHhs8w5C6N/3DQhcB3XIih+ZdJ2+LJINVG0EO
-         ISQsaLY5lk72DY/0kOlH/1ly+467KrBlcLeF8rdl4OJM8P6H4kdUN8ZnqKyglKmgYh
-         PQnajsITs2B2A1RAfVkBMAbGCtjamxCpuADzZgNMKCxku/X59DqBUjTyxWa46Y7w0z
-         zhi3+9jbsu7F8G+17Nn6yQnI6uUq0pG1JSczXANrd/HvCT/OClMjgDnobpMO7ZFJjP
-         Qy6WZZEN62hTA==
-Subject: [PATCH 2/2] generic: test shutdowns of a nested filesystem
+        b=LUdVpSBpjdRiePANYP6FF0lq2QE5FM6u4aKrjMUDPBdS3bG/HYg8K6tGLexs8tj/v
+         uqw9ol8NmFavEUh99DH7xly9CGaFKh3RD3rRjZ2JbD62M9NZPHaaNh7hVWAsiXoAHr
+         HbK74D54LEzsGC4GLd1pHwBRxEW+5qf4Ywb8DG2R79sK0yvOpc8vSNjTIZip1FVbNV
+         4twlPCtAyuV4YfQUEFMgGW1/PD2KevQRErXFq0wdQVykpjniHRwWsPhksbhE9q8l34
+         E0wOmXQsBooH8s5xqMveg0/iQ9WJjs9VWtsLCOgLZE+XCTT/qhOCeiSX9/td6ROx2c
+         R5HVmFl+/Ug8Q==
+Subject: [PATCH 2/2] xfs: test correct propagation of rt extent size hints on
+ rtinherit dirs
 From:   "Darrick J. Wong" <djwong@kernel.org>
 To:     djwong@kernel.org, guaneryu@gmail.com
 Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me
-Date:   Mon, 19 Jul 2021 18:08:54 -0700
-Message-ID: <162674333411.2650898.3340623863142038367.stgit@magnolia>
-In-Reply-To: <162674332320.2650898.17601790625049494810.stgit@magnolia>
-References: <162674332320.2650898.17601790625049494810.stgit@magnolia>
+Date:   Mon, 19 Jul 2021 18:08:41 -0700
+Message-ID: <162674332169.2650812.16998526496643123627.stgit@magnolia>
+In-Reply-To: <162674331075.2650812.11935724515971931345.stgit@magnolia>
+References: <162674331075.2650812.11935724515971931345.stgit@magnolia>
 User-Agent: StGit/0.19
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -50,166 +51,196 @@ X-Mailing-List: fstests@vger.kernel.org
 
 From: Darrick J. Wong <djwong@kernel.org>
 
-generic/475, but we're running fsstress on a disk image inside the
-scratch filesystem
+This is a regression test for the following fixes:
+
+ xfs: standardize extent size hint validation
+ xfs: don't propagate invalid extent size hints to new files
+ xfs: validate extsz hints against rt extent size when rtinherit is set
+ mkfs: validate rt extent size hint when rtinherit is set
+
+These patches fix inadequate rtextsize alignment validation of extent
+size hints on directories with the rtinherit and extszinherit flags set.
 
 Signed-off-by: Darrick J. Wong <djwong@kernel.org>
 ---
- tests/generic/725     |  136 +++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/725.out |    2 +
- 2 files changed, 138 insertions(+)
- create mode 100755 tests/generic/725
- create mode 100644 tests/generic/725.out
+ tests/xfs/774     |   78 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/774.out |    5 +++
+ tests/xfs/776     |   57 +++++++++++++++++++++++++++++++++++++++
+ tests/xfs/776.out |    5 +++
+ 4 files changed, 145 insertions(+)
+ create mode 100755 tests/xfs/774
+ create mode 100644 tests/xfs/774.out
+ create mode 100755 tests/xfs/776
+ create mode 100644 tests/xfs/776.out
 
 
-diff --git a/tests/generic/725 b/tests/generic/725
+diff --git a/tests/xfs/774 b/tests/xfs/774
 new file mode 100755
-index 00000000..f4a42d62
+index 00000000..65a26c46
 --- /dev/null
-+++ b/tests/generic/725
-@@ -0,0 +1,136 @@
++++ b/tests/xfs/774
+@@ -0,0 +1,78 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2021 Oracle, Inc.  All Rights Reserved.
++# Copyright (c) 2021 Oracle.  All Rights Reserved.
 +#
-+# FS QA Test No. 725
++# FS QA Test 774
 +#
-+# Test nested log recovery with repeated (simulated) disk failures.  We kick
-+# off fsstress on a loopback filesystem mounted on the scratch fs, then switch
-+# out the underlying scratch device with dm-error to see what happens when the
-+# disk goes down.  Having taken down both fses in this manner, remount them and
-+# repeat.  This test simulates VM hosts crashing to try to shake out CoW bugs
-+# in writeback on the host that cause VM guests to fail to recover.
++# Regression test for:
++#
++# xfs: standardize extent size hint validation
++# xfs: don't propagate invalid extent size hints to new files
++# xfs: validate extsz hints against rt extent size when rtinherit is set
++# mkfs: validate rt extent size hint when rtinherit is set
++#
++# Collectively, these patches ensure that we cannot set the extent size hint on
++# a directory when the directory is configured to propagate its realtime and
++# extent size hint to newly created files when the hint size isn't aligned to
++# the size of a realtime extent.  If the patches aren't applied, the write will
++# fail and xfs_repair will say that the fs is corrupt.
 +#
 +. ./common/preamble
-+_begin_fstest shutdown auto log metadata eio
-+
-+_cleanup()
-+{
-+	cd /
-+	$KILLALL_PROG -9 fsstress > /dev/null 2>&1
-+	wait
-+	if [ -n "$loopmnt" ]; then
-+		umount $loopmnt 2>/dev/null
-+		rm -r -f $loopmnt
-+	fi
-+	rm -f $tmp.*
-+	_dmerror_unmount
-+	_dmerror_cleanup
-+}
++_begin_fstest auto quick realtime
 +
 +# Import common functions.
-+. ./common/dmerror
-+. ./common/reflink
++. ./common/filter
 +
-+# Modify as appropriate.
++# real QA test starts here
 +_supported_fs generic
++_require_realtime
++_require_scratch
 +
-+_require_scratch_reflink
-+_require_cp_reflink
-+_require_dm_target error
-+_require_command "$KILLALL_PROG" "killall"
++# Check mkfs.xfs option parsing with regards to rtinherit.  XFS doesn't require
++# the realtime volume to be present to set rtinherit, so it's safe to call the
++# mkfs binary directly, in dry run mode, with exactly the parameters we want to
++# check.
++mkfs_args=(-f -N -r extsize=7b -d extszinherit=15 $SCRATCH_DEV)
++$MKFS_XFS_PROG -d rtinherit=1 "${mkfs_args[@]}" &>> $seqres.full && \
++	echo "mkfs should not succeed with heritable rtext-unaligned extent hint"
++$MKFS_XFS_PROG -d rtinherit=0 "${mkfs_args[@]}" &>> $seqres.full || \
++	echo "mkfs should succeed with uninheritable rtext-unaligned extent hint"
 +
-+echo "Silence is golden."
++# Move on to checking the kernel's behavior
++_scratch_mkfs -r extsize=7b | _filter_mkfs >> $seqres.full 2> $tmp.mkfs
++cat $tmp.mkfs >> $seqres.full
++. $tmp.mkfs
++_scratch_mount
 +
-+_scratch_mkfs >> $seqres.full 2>&1
-+_require_metadata_journaling $SCRATCH_DEV
-+_dmerror_init
-+_dmerror_mount
++test $rtextsz -ne $dbsize || _notrun "failed to set large rt extent size"
 +
-+# Create a fs image consuming 1/3 of the scratch fs
-+scratch_freesp_bytes=$(stat -f -c '%a * %S' $SCRATCH_MNT | bc)
-+loopimg_bytes=$((scratch_freesp_bytes / 3))
++# Ensure there's no extent size hint set on the directory, then set the
++# rtinherit bit on the directory to test propagation.
++$XFS_IO_PROG -c 'extsize 0' -c 'chattr +t' $SCRATCH_MNT
 +
-+loopimg=$SCRATCH_MNT/testfs
-+truncate -s $loopimg_bytes $loopimg
-+_mkfs_dev $loopimg
++# Now try to set an extent size hint on the directory that isn't aligned to
++# the rt extent size.
++$XFS_IO_PROG -c "extsize $((rtextsz + dbsize))" $SCRATCH_MNT 2>&1 | _filter_scratch
++$XFS_IO_PROG -c 'stat -v' $SCRATCH_MNT > $tmp.stat
++cat $tmp.stat >> $seqres.full
++grep -q 'fsxattr.xflags.*rt-inherit' $tmp.stat || \
++	echo "rtinherit didn't get set on the directory?"
++grep 'fsxattr.extsize' $tmp.stat
 +
-+loopmnt=$tmp.mount
-+mkdir -p $loopmnt
++# Propagate the hint from directory to file
++echo moo > $SCRATCH_MNT/dummy
++$XFS_IO_PROG -c 'stat -v' $SCRATCH_MNT/dummy > $tmp.stat
++cat $tmp.stat >> $seqres.full
++grep -q 'fsxattr.xflags.*realtime' $tmp.stat || \
++	echo "realtime didnt' get set on the file?"
++grep 'fsxattr.extsize' $tmp.stat
 +
-+scratch_aliveflag=$tmp.runsnap
-+snap_aliveflag=$tmp.snapping
++# Cycle the mount to force the inode verifier to run.
++_scratch_cycle_mount
 +
-+snap_loop_fs() {
-+	touch "$snap_aliveflag"
-+	while [ -e "$scratch_aliveflag" ]; do
-+		rm -f $loopimg.a
-+		_cp_reflink $loopimg $loopimg.a
-+		sleep 1
-+	done
-+	rm -f "$snap_aliveflag"
-+}
-+
-+fsstress=($FSSTRESS_PROG $FSSTRESS_AVOID -d "$loopmnt" -n 999999 -p "$((LOAD_FACTOR * 4))")
-+
-+for i in $(seq 1 $((50 * TIME_FACTOR)) ); do
-+	touch $scratch_aliveflag
-+	snap_loop_fs >> $seqres.full 2>&1 &
-+
-+	if ! _mount $loopimg $loopmnt -o loop; then
-+		rm -f $scratch_aliveflag
-+		_fail "loop mount failed"
-+		break
-+	fi
-+
-+	("${fsstress[@]}" >> $seqres.full &) > /dev/null 2>&1
-+
-+	# purposely include 0 second sleeps to test shutdown immediately after
-+	# recovery
-+	sleep $((RANDOM % (3 * TIME_FACTOR) ))
-+	rm -f $scratch_aliveflag
-+
-+	# This test aims to simulate sudden disk failure, which means that we
-+	# do not want to quiesce the filesystem or otherwise give it a chance
-+	# to flush its logs.  Therefore we want to call dmsetup with the
-+	# --nolockfs parameter; to make this happen we must call the load
-+	# error table helper *without* 'lockfs'.
-+	_dmerror_load_error_table
-+
-+	ps -e | grep fsstress > /dev/null 2>&1
-+	while [ $? -eq 0 ]; do
-+		$KILLALL_PROG -9 fsstress > /dev/null 2>&1
-+		wait > /dev/null 2>&1
-+		ps -e | grep fsstress > /dev/null 2>&1
-+	done
-+	for ((i = 0; i < 10; i++)); do
-+		test -e "$snap_aliveflag" || break
-+		sleep 1
-+	done
-+
-+	# Mount again to replay log after loading working table, so we have a
-+	# consistent XFS after test.
-+	$UMOUNT_PROG $loopmnt
-+	_dmerror_unmount || _fail "unmount failed"
-+	_dmerror_load_working_table
-+	if ! _dmerror_mount; then
-+		dmsetup table | tee -a /dev/ttyprintk
-+		lsblk | tee -a /dev/ttyprintk
-+		$XFS_METADUMP_PROG -a -g -o $DMERROR_DEV $seqres.dmfail.md
-+		_fail "mount failed"
-+	fi
-+done
-+
-+# Make sure the fs image file is ok
-+if [ -f "$loopimg" ]; then
-+	if _mount $loopimg $loopmnt -o loop; then
-+		$UMOUNT_PROG $loopmnt &> /dev/null
-+	else
-+		echo "final loop mount failed"
-+	fi
-+	_check_xfs_filesystem $loopimg none none
-+fi
++# Can we still access the dummy file?
++cat $SCRATCH_MNT/dummy
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/generic/725.out b/tests/generic/725.out
+diff --git a/tests/xfs/774.out b/tests/xfs/774.out
 new file mode 100644
-index 00000000..ed73a9fc
+index 00000000..767a504e
 --- /dev/null
-+++ b/tests/generic/725.out
-@@ -0,0 +1,2 @@
-+QA output created by 725
-+Silence is golden.
++++ b/tests/xfs/774.out
+@@ -0,0 +1,5 @@
++QA output created by 774
++xfs_io: FS_IOC_FSSETXATTR SCRATCH_MNT: Invalid argument
++fsxattr.extsize = 0
++fsxattr.extsize = 0
++moo
+diff --git a/tests/xfs/776 b/tests/xfs/776
+new file mode 100755
+index 00000000..b4b98a49
+--- /dev/null
++++ b/tests/xfs/776
+@@ -0,0 +1,57 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2021, Oracle.  All Rights Reserved.
++#
++# FS QA Test No. 776
++#
++# Functional test for:
++#
++# xfs_repair: validate alignment of inherited rt extent hints
++#
++# This xfs_repair patch detects directories that are configured to propagate
++# their realtime and extent size hints to newly created realtime files when the
++# hint size isn't aligned to the size of a realtime extent.
++#
++# Since this is a test of userspace tool functionality, we don't need kernel
++# support, which in turn means that we omit _require_realtime.  Note that XFS
++# allows users to configure realtime extent size geometry and set RTINHERIT
++# flags even if the filesystem itself does not have a realtime volume attached.
++#
++. ./common/preamble
++_begin_fstest auto repair fuzz
++
++# Import common functions.
++. ./common/filter
++
++# real QA test starts here
++_require_scratch
++
++echo "Format and mount"
++_scratch_mkfs -r extsize=7b | _filter_mkfs > $seqres.full 2>$tmp.mkfs
++cat $tmp.mkfs >> $seqres.full
++. $tmp.mkfs
++
++test $rtextsz -ne $dbsize || _notrun "failed to set large rt extent size"
++
++_scratch_mount >> $seqres.full 2>&1
++rootino=$(stat -c '%i' $SCRATCH_MNT)
++_scratch_unmount
++
++echo "Misconfigure the root directory"
++rtextsz_blks=$((rtextsz / dbsize))
++_scratch_xfs_db -x -c "inode $rootino" \
++	-c "write -d core.extsize $((rtextsz_blks + 1))" \
++	-c 'write -d core.rtinherit 1' \
++	-c 'write -d core.extszinherit 1' \
++	-c 'print' >> $seqres.full
++
++echo "Detect misconfigured directory"
++_scratch_xfs_repair -n >> $seqres.full 2>&1 && \
++	echo "repair did not catch error?"
++
++echo "Repair misconfigured directory"
++_scratch_xfs_repair >> $seqres.full 2>&1 || \
++	echo "repair did not fix error?"
++
++status=0
++exit
+diff --git a/tests/xfs/776.out b/tests/xfs/776.out
+new file mode 100644
+index 00000000..05ea73b2
+--- /dev/null
++++ b/tests/xfs/776.out
+@@ -0,0 +1,5 @@
++QA output created by 776
++Format and mount
++Misconfigure the root directory
++Detect misconfigured directory
++Repair misconfigured directory
 
