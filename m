@@ -4,43 +4,42 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-17.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
-	autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 800FEC07E95
-	for <linux-fstests@archiver.kernel.org>; Tue, 20 Jul 2021 01:11:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1ED10C07E95
+	for <linux-fstests@archiver.kernel.org>; Tue, 20 Jul 2021 01:12:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 74FB461181
-	for <linux-fstests@archiver.kernel.org>; Tue, 20 Jul 2021 01:11:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EAA746108B
+	for <linux-fstests@archiver.kernel.org>; Tue, 20 Jul 2021 01:12:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1381444AbhGTAa7 (ORCPT
+        id S1381447AbhGTAbL (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 19 Jul 2021 20:30:59 -0400
-Received: from mail.kernel.org ([198.145.29.99]:41532 "EHLO mail.kernel.org"
+        Mon, 19 Jul 2021 20:31:11 -0400
+Received: from mail.kernel.org ([198.145.29.99]:41680 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1380874AbhGTA1u (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 19 Jul 2021 20:27:50 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 8F197600D1;
-        Tue, 20 Jul 2021 01:08:29 +0000 (UTC)
+        id S1381041AbhGTA2J (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 19 Jul 2021 20:28:09 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id DF78E6113B;
+        Tue, 20 Jul 2021 01:08:48 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1626743309;
-        bh=ltHUv5SYK8uwTC+Kmh832KUqB5N7CIuDox1+NMXQXaE=;
+        s=k20201202; t=1626743329;
+        bh=LjQS5A/LDnGrwWQVSi1zpBbEHF7ZL70/KpjFdaK85/Y=;
         h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=UTKsIiPp6LHRCT1QMjmJ5w0gPznqFFYn/DYOcjdq6lumETKru8l6yKaUZhYlDfZnV
-         UcMC5QCxgBPNTnl6fZkPiaEQ87Wjc+SqMhYllgNOp7FWtMyfsBbr41z70Xvf2fEqEz
-         zZckPFqqlNz+Dj9udB4kBw13d9N83zmYUUXDr2pGgQcg4Rkao5LNDoCR2hz9h1Ia1Q
-         0KfLfGp1SSy3E9VgGTTZQw5pcbOfBi0q24TMNe75ceWNU2fhLS5KzEljd24v5XVw/d
-         oAEYEBcOfH6UzgLkhjgykguR6nxE/Wobcfu+sKd3bCHtEnsZQI6pxnyauAubZRosVa
-         CQw4lAyzEnUoA==
-Subject: [PATCH 1/1] generic/561: hide assertions when duperemove is killed
+        b=a8EyETAn6UK41hZ13VITloqZqg3w40UPyQIMVzJbhmkrXccgb+wUkjXztTJXCQXP3
+         j4A79qZSuoQL6T79N1X9TwyHrNt3MNgx0La00IfTK2kjsS+PrTpkrw4gCcL949k/sf
+         WhPzxa5dVEl4yifuFCpPrpaMy9yRhThNMixIvqFbuP5QJZ5pHnvIJvJgBycihUpVpz
+         TpgHW5o1399/DRES6h9ddY9DF5a7bYZ9RzKbmKPNkz2k1wOqPM+bm/bVwxTMY4Ld3a
+         NSTP3W7luuv5ea2NcyLPXVRf8H9KkDh40jxeckRQxDLiwNeVXPftguVAeS8FT2Q13V
+         Qus4uf+d6pNmA==
+Subject: [PATCH 1/2] generic: test xattr operations only
 From:   "Darrick J. Wong" <djwong@kernel.org>
 To:     djwong@kernel.org, guaneryu@gmail.com
-Cc:     Allison Henderson <allison.henderson@oracle.com>,
-        linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me
-Date:   Mon, 19 Jul 2021 18:08:29 -0700
-Message-ID: <162674330933.2650745.11380233368495712613.stgit@magnolia>
-In-Reply-To: <162674330387.2650745.4586773764795034384.stgit@magnolia>
-References: <162674330387.2650745.4586773764795034384.stgit@magnolia>
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me
+Date:   Mon, 19 Jul 2021 18:08:48 -0700
+Message-ID: <162674332866.2650898.16916837755915187962.stgit@magnolia>
+In-Reply-To: <162674332320.2650898.17601790625049494810.stgit@magnolia>
+References: <162674332320.2650898.17601790625049494810.stgit@magnolia>
 User-Agent: StGit/0.19
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -51,35 +50,86 @@ X-Mailing-List: fstests@vger.kernel.org
 
 From: Darrick J. Wong <djwong@kernel.org>
 
-Use some bash redirection trickery to capture in $seqres.full all of
-bash's warnings about duperemove being killed due to assertions
-triggering.
+Exercise extended attribute operations.
 
 Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-Reviewed-by: Allison Henderson <allison.henderson@oracle.com>
 ---
- tests/generic/561 |    9 +++++++--
- 1 file changed, 7 insertions(+), 2 deletions(-)
+ tests/generic/724     |   57 +++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/724.out |    2 ++
+ 2 files changed, 59 insertions(+)
+ create mode 100755 tests/generic/724
+ create mode 100644 tests/generic/724.out
 
 
-diff --git a/tests/generic/561 b/tests/generic/561
-index bfd4443d..44f07802 100755
---- a/tests/generic/561
-+++ b/tests/generic/561
-@@ -62,8 +62,13 @@ dupe_run=$TEST_DIR/${seq}-running
- touch $dupe_run
- for ((i = 0; i < $((2 * LOAD_FACTOR)); i++)); do
- 	while [ -e $dupe_run ]; do
--		$DUPEREMOVE_PROG -dr --dedupe-options=same $testdir \
--			>>$seqres.full 2>&1
-+		# Run cmd in a subshell so that the golden output does not
-+		# capture assertions that trigger when killall shoots down
-+		# dupremove processes in an arbitrary order, which leaves the
-+		# memory in an inconsistent state long enough for the assert
-+		# to trip.
-+		cmd="$DUPEREMOVE_PROG -dr --dedupe-options=same $testdir"
-+		bash -c "$cmd" >> $seqres.full 2>&1
- 	done 2>&1 | sed -e '/Terminated/d' &
- 	dedup_pids="$! $dedup_pids"
- done
+diff --git a/tests/generic/724 b/tests/generic/724
+new file mode 100755
+index 00000000..f2f4a2ec
+--- /dev/null
++++ b/tests/generic/724
+@@ -0,0 +1,57 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2021 Oracle, Inc.  All Rights Reserved.
++#
++# FS QA Test No. 724
++#
++# Run an extended attributes fsstress run with multiple threads to shake out
++# bugs in the xattr code.
++#
++. ./common/preamble
++_begin_fstest auto attr
++
++_cleanup()
++{
++	$KILLALL_PROG -9 fsstress > /dev/null 2>&1
++	cd /
++	rm -f $tmp.*
++}
++
++# Modify as appropriate.
++_supported_fs generic
++
++_require_scratch
++_require_command "$KILLALL_PROG" "killall"
++
++echo "Silence is golden."
++
++_scratch_mkfs > $seqres.full 2>&1
++_scratch_mount >> $seqres.full 2>&1
++
++nr_cpus=$((LOAD_FACTOR * 4))
++nr_ops=$((700000 * nr_cpus * TIME_FACTOR))
++
++args=('-z' '-S' 'c')
++
++# Do some directory tree modifications, but the bulk of this is geared towards
++# exercising the xattr code, especially attr_set which can do up to 10k values.
++for verb in unlink rmdir; do
++	args+=('-f' "${verb}=1")
++done
++for verb in creat mkdir; do
++	args+=('-f' "${verb}=2")
++done
++for verb in getfattr listfattr; do
++	args+=('-f' "${verb}=3")
++done
++for verb in attr_remove removefattr; do
++	args+=('-f' "${verb}=4")
++done
++args+=('-f' "setfattr=20")
++args+=('-f' "attr_set=60")	# sets larger xattrs
++
++$FSSTRESS_PROG "${args[@]}" $FSSTRESS_AVOID -d $SCRATCH_MNT -n $nr_ops -p $nr_cpus >> $seqres.full
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/724.out b/tests/generic/724.out
+new file mode 100644
+index 00000000..164cfffb
+--- /dev/null
++++ b/tests/generic/724.out
+@@ -0,0 +1,2 @@
++QA output created by 724
++Silence is golden.
 
