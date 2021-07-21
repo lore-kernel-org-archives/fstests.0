@@ -2,180 +2,145 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DAEA7C6377A
-	for <linux-fstests@archiver.kernel.org>; Wed, 21 Jul 2021 21:58:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 971E4C6377B
+	for <linux-fstests@archiver.kernel.org>; Wed, 21 Jul 2021 23:28:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BA44F6120C
-	for <linux-fstests@archiver.kernel.org>; Wed, 21 Jul 2021 21:58:04 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7488B6108B
+	for <linux-fstests@archiver.kernel.org>; Wed, 21 Jul 2021 23:28:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229742AbhGUVR2 (ORCPT
+        id S230109AbhGUWsB (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 21 Jul 2021 17:17:28 -0400
-Received: from mail108.syd.optusnet.com.au ([211.29.132.59]:50197 "EHLO
-        mail108.syd.optusnet.com.au" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S229459AbhGUVR1 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 21 Jul 2021 17:17:27 -0400
+        Wed, 21 Jul 2021 18:48:01 -0400
+Received: from mail104.syd.optusnet.com.au ([211.29.132.246]:50729 "EHLO
+        mail104.syd.optusnet.com.au" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S230091AbhGUWr7 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 21 Jul 2021 18:47:59 -0400
 Received: from dread.disaster.area (pa49-181-34-10.pa.nsw.optusnet.com.au [49.181.34.10])
-        by mail108.syd.optusnet.com.au (Postfix) with ESMTPS id 1F9C01B0F55;
-        Thu, 22 Jul 2021 07:58:01 +1000 (AEST)
+        by mail104.syd.optusnet.com.au (Postfix) with ESMTPS id 3C2DB863A9C;
+        Thu, 22 Jul 2021 09:28:31 +1000 (AEST)
 Received: from dave by dread.disaster.area with local (Exim 4.92.3)
         (envelope-from <david@fromorbit.com>)
-        id 1m6KE4-009Fgj-3F; Thu, 22 Jul 2021 07:58:00 +1000
-Date:   Thu, 22 Jul 2021 07:58:00 +1000
+        id 1m6Lde-009HBN-Q3; Thu, 22 Jul 2021 09:28:30 +1000
+Date:   Thu, 22 Jul 2021 09:28:30 +1000
 From:   Dave Chinner <david@fromorbit.com>
-To:     Amir Goldstein <amir73il@gmail.com>
-Cc:     fstests <fstests@vger.kernel.org>
-Subject: Re: [PATCH] tools: add a dm-logwrites replay tool
-Message-ID: <20210721215800.GB2112234@dread.disaster.area>
-References: <20210721001333.2999103-1-david@fromorbit.com>
- <CAOQ4uxh-rE4Tf7zsdCkaKxTvj47sE8N8g9MyHj1A49H_YMJ3kg@mail.gmail.com>
+To:     Damien Le Moal <Damien.LeMoal@wdc.com>
+Cc:     Qu Wenruo <quwenruo.btrfs@gmx.com>,
+        "Theodore Y. Ts'o" <tytso@mit.edu>,
+        Eryu Guan <eguan@linux.alibaba.com>, Qu Wenruo <wqu@suse.com>,
+        "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
+        "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
+Subject: Re: [PATCH RFC] fstests: allow running custom hooks
+Message-ID: <20210721232830.GC2112234@dread.disaster.area>
+References: <cb2bf09e-91fd-2976-4366-4daf29664890@gmx.com>
+ <20210720064317.GC2031856@dread.disaster.area>
+ <20210720075748.GJ60846@e18g06458.et15sqa>
+ <3fd6494b-8f03-4d97-9d00-21343e0e8152@gmx.com>
+ <6b7699a9-fc5e-32d9-78c5-9c0e3cf92895@gmx.com>
+ <YPbt2ohi62VyWN7e@mit.edu>
+ <f37bec82-85cd-b818-8691-6c047751c4a6@gmx.com>
+ <20210721011105.GA2112234@dread.disaster.area>
+ <ff57f17c-e3f2-14f3-42d8-fefaafd65637@gmx.com>
+ <DM6PR04MB70812AEDDAB6DE7951F4FBBDE7E39@DM6PR04MB7081.namprd04.prod.outlook.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <CAOQ4uxh-rE4Tf7zsdCkaKxTvj47sE8N8g9MyHj1A49H_YMJ3kg@mail.gmail.com>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <DM6PR04MB70812AEDDAB6DE7951F4FBBDE7E39@DM6PR04MB7081.namprd04.prod.outlook.com>
 X-Optus-CM-Score: 0
-X-Optus-CM-Analysis: v=2.3 cv=Tu+Yewfh c=1 sm=1 tr=0
+X-Optus-CM-Analysis: v=2.3 cv=F8MpiZpN c=1 sm=1 tr=0
         a=hdaoRb6WoHYrV466vVKEyw==:117 a=hdaoRb6WoHYrV466vVKEyw==:17
-        a=kj9zAlcOel0A:10 a=e_q4qTt1xDgA:10 a=7-415B0cAAAA:8 a=20KFwNOVAAAA:8
-        a=YwOMOOLzT6LR4LnHHJsA:9 a=CjuIK1q_8ugA:10 a=biEYGPWJfzWAr4FL6Ov7:22
+        a=IkcTkHD0fZMA:10 a=e_q4qTt1xDgA:10 a=7-415B0cAAAA:8
+        a=WWgSXLAHQ0wrzOdU2uYA:9 a=QEXdDO2ut3YA:10 a=biEYGPWJfzWAr4FL6Ov7:22
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Jul 21, 2021 at 09:04:29AM +0300, Amir Goldstein wrote:
-> On Wed, Jul 21, 2021 at 3:14 AM Dave Chinner <david@fromorbit.com> wrote:
-> >
-> > From: Dave Chinner <dchinner@redhat.com>
-> >
-> > Trying to decipher a dm-logwrites replay failure from generic/482 is
-> > difficult. The test destroys all the dm state and devices when the
-> > test fails, leaving nothing behind for post-mortem analysis. This
-> > script is intended to allow replay of the dm-logwrites device one
-> > FUA at a time similar to generic/482, and is used in conjunction
-> > with a modifed g/482 test that does not tear down the dm volumes
-> > or state when the test fails.
-> >
-> > This allows the developer to replay the logwrites up to just prior
-> > to failure to examine just the differences between the last good
-> > state and the first failure state, greatly reducing the complexity
-> > of analysing failures.
-> >
-> > Instructions for use are in the tools/dm-logwrite-replay script
-> > itself.
-> >
+On Wed, Jul 21, 2021 at 02:23:14AM +0000, Damien Le Moal wrote:
+> On 2021/07/21 10:53, Qu Wenruo wrote:
+> > On 2021/7/21 上午9:11, Dave Chinner wrote:
+> > If you believe your philosophy that every test tool should be a complex
+> > mess, you're free to do whatever you always do.
+> > 
+> > And I can always express my objection just like you.
+> > 
+> > So, you want to build a complex framework using the simple hook, I would
+> > just say NO.
 > 
-> This looks very useful!
-> Thanks for sharing :)
+> I think that Dave's opinion is actually the reverse of this: hooks, if well
+> designed, can be useful and facilitate adding functionalities to a complex test
+> framework. And sure, the hook infrastructure implementation can in itself be
+> complex, but if well designed, its use can be, and should be, very simple.
 > 
-> > Signed-off-by: Dave Chinner <dchinner@redhat.com>
-> > ---
-> >  common/dmlogwrites       |   8 +--
-> >  tests/generic/482        |  18 +++++++
-> >  tools/dm-logwrite-replay | 113 +++++++++++++++++++++++++++++++++++++++
-> >  3 files changed, 135 insertions(+), 4 deletions(-)
-> >  create mode 100755 tools/dm-logwrite-replay
-> >
-> > diff --git a/common/dmlogwrites b/common/dmlogwrites
-> > index 573f4b8a..66c57e2b 100644
-> > --- a/common/dmlogwrites
-> > +++ b/common/dmlogwrites
-> > @@ -180,11 +180,11 @@ _log_writes_replay_log_range()
-> >         [ -z "$blkdev" ] && _fail \
-> >         "block dev must be specified for _log_writes_replay_log_range"
-> >
-> > -       # To ensure we replay the last entry,
-> > -       # we need to manually increase the end entry number to ensure
-> > -       # it's played
-> > +       # To ensure we replay the last entry, we need to manually increase the
-> > +       # end entry number to ensure it's played. We also dump all the
-> > +       # operations performed as this helps post-mortem analysis of failures.
-> >         echo "=== replay to $end ===" >> $seqres.full
-> > -       $here/src/log-writes/replay-log --log $LOGWRITES_DEV \
-> > +       $here/src/log-writes/replay-log -vv --log $LOGWRITES_DEV \
-> >                 --replay $blkdev --limit $(($end + 1)) \
-> >                 >> $seqres.full 2>&1
-> >         [ $? -ne 0 ] && _fail "replay failed"
-> > diff --git a/tests/generic/482 b/tests/generic/482
-> > index f26e6fc4..416b929a 100755
-> > --- a/tests/generic/482
-> > +++ b/tests/generic/482
-> > @@ -12,6 +12,10 @@
-> >  _begin_fstest auto metadata replay thin
-> >
-> >  # Override the default cleanup function.
-> > +#
-> > +# If debugging logwrites failures using the tools/dm-logwrite-replay script,
-> > +# switch the cleanup function to the version that is commented out below so that
-> > +# failure leaves the corpse intact for post-mortem failure analysis.
-> 
-> Please let's use KEEP_LOGWRITES=yes envvar for this.
+> Implementation is done once. The complexity at that stage matters much less than
+> the end result usability. As a general principle, the more time one put in
+> design and development, the better the end result. Here, that means hooks being
+> useful, flexible, extensible, and reusable.
 
-Where would that be set? And how would one use it?
+Yup, that's pretty much what I'm advocating for.
 
-FWIW, I won't remember about this or use it - my work-flow is based
-on patches that modify test behaviour in an unchanging test
-environment, rather changing the test environment to modify test
-behaviour. Hence it's much easier for me to select the
-debug-482-switch-cleanup patch from my local library of debug hacks,
-push it onto my fstests stack and then run the test and have it
-behave as I want...
+I'm thinking that it is something relatively simple like this:
 
-> >  _cleanup()
-> >  {
-> >         cd /
-> > @@ -21,6 +25,20 @@ _cleanup()
-> >         rm -f $tmp.*
-> >  }
-> >
-> > +# tools/dm-logwrite-replay _cleanup version
-> > +#_cleanup()
-> > +#{
-> > +#      cd /
-> > +#      $KILLALL_PROG -KILL -q $FSSTRESS_PROG &> /dev/null
-> > +#      if [ $status -eq 0 ]; then
-> > +#              _log_writes_cleanup &> /dev/null
-> > +#              _dmthin_cleanup
-> > +#      else
-> > +#              echo dm-thinvol-dev: $DMTHIN_VOL_DEV >> $seqres.full
-> 
-> In this case, let's print a message to stdout, with a hint to use
-> dm-logwrite-replay tool and reminder to run the cleanup.
+fstests/tests/hooks
+- directory containing library of hook scripts
 
-Sure, but I think the person running it this way is going to know
-that this happens on failure already :/
+fstests/hooks/
+- directory containing symlinks to hook scripts
+- kept under gitignore, as hooks are a runtime configurable state,
+  not a global repository configured state.
+- symlink names indicate run target and order:
+  	$seq.{B,E}.X
+  where:	$seq is the test that the hook runs for
+  			use "global" for a hook that every test runs
+  		{B,E} indicates a test Begin or End hook
+		X is an integer indicating run order,
+			- 0 being the first script
+			- Run in ascending numerical order
 
-> But also, I wonder - we can call _log_writes_cleanup;_dmthin_cleanup
-> from _dmthin_init() as a service for debuggers who forgot to cleanup
-> after forensics just as ./check itself will umount scratch and test leftover
-> mounts.
 
-No, we can't, because we don't even get that far trying to run
-fstests when the devices have not been torn down. i.e. check
-failures to access the scratch device because it's still busy and
-immmediately aborts before it gets to running any tests.
+Now if you want to add a 'trace-cmd clear' command to run before
+the start of a specific test, you do:
 
-Further, I'm actually using that "scratch device busy" check failure
-to terminate the repeated iteration loop when a failure occurs. This
-ensures that the output files from the test failure are not
-overwritten by the next attempt to run the test.
+$ echo trace-cmd clear > tests/hooks/trace-cmd-clear
+$ ln -s tests/hooks/trace-cmd-clear hooks/btrfs-160.B.0
 
-Hence, even if it were possible, having the test auto-cleanup is not
-a useful thing to do from a failure reproducer/debugging point of
-view....
+And now when btrfs/160 starts, the Begin hook that you've set up is
+run....
 
-> We could do that conditional or regardless to KEEP_LOGWRITES envvar.
-> 
-> Does it cost us anything to do that? Any caveats?
+If you want to do this for other tests, too, then just add symlinks
+for those tests. If you want all tests to run this trace hook, link
+global.B.0 to the hook script. Essentially, managing the hooks to
+run becomes an exercise in linking and unlinking external hook
+scripts.
 
-I'm not sure what adding KEEP_LOGWRITES actually gains us other than
-having just another undocumented, largely unused environment
-variable that people will not remember about but we still have to
-maintain.
+This means we can add curated hook scripts such as "use trace-cmd to
+trace all xfs trace points and then dump the report into
+$RESULTS_DIR/$seqres.traces" and hook them into to specific tests.
+The setup also allows stacked hook scripts, so we can have multiple
+monitoring options running at the same time (e.g. blktrace-scratch +
+trace-cmd-xfs) without having to write a custom hook scripts.
+
+> And one of the functionality of the hook setup could be "temporary, external
+> hook" for some very special case debugging as you seem to need that. What you
+> want to do and what Dave is proposing are not mutually exclusive.
+
+Yup, if you want a one-off throwaway hook script, then just add a
+file in to fstests/hooks and either name it as per above or link it
+to the test it should hook.
+
+Note: this just addresses the management side of running and
+curating hook scripts. There's a whole 'nother discussion about
+APIs to be had, but a curated hook library inside fstests is
+definitely a viable solution to that problem, too, because then the
+hook scripts can be changed at the same time the rest of fstests is
+changed to use the modified API....
+
+This isn't a huge amount of work to implement, but we really need to
+decide how these hooks are going to be maintained, managed and
+curated before we go much further...
 
 Cheers,
 
