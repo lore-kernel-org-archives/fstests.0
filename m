@@ -2,132 +2,253 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 772B4C636C8
-	for <linux-fstests@archiver.kernel.org>; Tue, 20 Jul 2021 22:35:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ED744C07E9B
+	for <linux-fstests@archiver.kernel.org>; Wed, 21 Jul 2021 00:13:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 56B1D61186
-	for <linux-fstests@archiver.kernel.org>; Tue, 20 Jul 2021 22:35:26 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CF6CC61106
+	for <linux-fstests@archiver.kernel.org>; Wed, 21 Jul 2021 00:13:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230440AbhGTVyX (ORCPT
+        id S231371AbhGTXdD (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 20 Jul 2021 17:54:23 -0400
-Received: from mout.gmx.net ([212.227.17.20]:37623 "EHLO mout.gmx.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229816AbhGTVyE (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 20 Jul 2021 17:54:04 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net;
-        s=badeba3b8450; t=1626820462;
-        bh=tELGuQdg4/h9VREKGzm9zcDdkAhaGb4w5RNCgORaigk=;
-        h=X-UI-Sender-Class:Subject:To:Cc:References:From:Date:In-Reply-To;
-        b=Pn6ug4vbU5Uup6ga6336z5xH/P1i3JnUYAVHfS+8gaaEr2dkhyaBvHOgYieL1QxNQ
-         dxdisNmKYLNykjrAQU50g8X2GXwxTO3/DX9at/TMgRF1u66L4EH/OFeElrdzmAh+8/
-         wgwmU871dzuiAR7/OUUbCeW/tfPIrXIYQ/RBSOtQ=
-X-UI-Sender-Class: 01bb95c1-4bf8-414a-932a-4f6e2808ef9c
-Received: from [0.0.0.0] ([149.28.201.231]) by mail.gmx.net (mrgmx104
- [212.227.17.174]) with ESMTPSA (Nemesis) id 1MeCtj-1lUyny1VCh-00bLeh; Wed, 21
- Jul 2021 00:34:22 +0200
-Subject: Re: [PATCH RFC] fstests: allow running custom hooks
-To:     "Theodore Y. Ts'o" <tytso@mit.edu>
-Cc:     Eryu Guan <eguan@linux.alibaba.com>,
-        Dave Chinner <david@fromorbit.com>, Qu Wenruo <wqu@suse.com>,
-        fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-References: <20210719071337.217501-1-wqu@suse.com>
- <20210720002536.GA2031856@dread.disaster.area>
- <3f2d4ebd-bf75-b283-45be-3fa81e65d5bf@gmx.com>
- <20210720021437.GB2031856@dread.disaster.area>
- <cb2bf09e-91fd-2976-4366-4daf29664890@gmx.com>
- <20210720064317.GC2031856@dread.disaster.area>
- <20210720075748.GJ60846@e18g06458.et15sqa>
- <3fd6494b-8f03-4d97-9d00-21343e0e8152@gmx.com>
- <6b7699a9-fc5e-32d9-78c5-9c0e3cf92895@gmx.com> <YPbt2ohi62VyWN7e@mit.edu>
-From:   Qu Wenruo <quwenruo.btrfs@gmx.com>
-Message-ID: <f37bec82-85cd-b818-8691-6c047751c4a6@gmx.com>
-Date:   Wed, 21 Jul 2021 06:34:16 +0800
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.12.0
+        Tue, 20 Jul 2021 19:33:03 -0400
+Received: from mail110.syd.optusnet.com.au ([211.29.132.97]:40305 "EHLO
+        mail110.syd.optusnet.com.au" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S231152AbhGTXdD (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 20 Jul 2021 19:33:03 -0400
+Received: from dread.disaster.area (pa49-181-34-10.pa.nsw.optusnet.com.au [49.181.34.10])
+        by mail110.syd.optusnet.com.au (Postfix) with ESMTPS id 1C30910AF6C
+        for <fstests@vger.kernel.org>; Wed, 21 Jul 2021 10:13:38 +1000 (AEST)
+Received: from discord.disaster.area ([192.168.253.110])
+        by dread.disaster.area with esmtp (Exim 4.92.3)
+        (envelope-from <david@fromorbit.com>)
+        id 1m5zrh-008uHQ-IO
+        for fstests@vger.kernel.org; Wed, 21 Jul 2021 10:13:33 +1000
+Received: from dave by discord.disaster.area with local (Exim 4.94)
+        (envelope-from <david@fromorbit.com>)
+        id 1m5zrh-00CaDO-AJ
+        for fstests@vger.kernel.org; Wed, 21 Jul 2021 10:13:33 +1000
+From:   Dave Chinner <david@fromorbit.com>
+To:     fstests@vger.kernel.org
+Subject: [PATCH] tools: add a dm-logwrites replay tool
+Date:   Wed, 21 Jul 2021 10:13:33 +1000
+Message-Id: <20210721001333.2999103-1-david@fromorbit.com>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
-In-Reply-To: <YPbt2ohi62VyWN7e@mit.edu>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:BMigt9LFwlJ9Yd3EqSipFidOpKxxWg1h532AxHCMPwKa5ICXRVq
- pWnXCXO+mqMzceDi8dpxr6EOpJ5Gs9ryP7hXEDGwDAi/hinNGlW9zeXlA7DYmIYkwDn+AbJ
- eUwKSNt5dpYfT04afj9t7Ai6gmcA8tPdBgT9YqK4kHZjrSvBHmT/4a+ks6Bc/KxFyE013xE
- EBraiDhszgTvjxZV29HrQ==
-X-UI-Out-Filterresults: notjunk:1;V03:K0:T2RsIRwNdcI=:mMF1bU+9EwGlEhD8ta0Tw/
- xQcIMPmBJ88mJu2+8bHnJqEqOi+LeOYLpsjAsr3WDg6WrtNB9xUZgN0h972p2aooUyyNbIhqm
- uD3tDHZxKd4mdW3Z7gH0G6HK+WeBIgEt0Y4qc+xtBS1j4N74rWZelH5Rqje+EYBzd8fb69knB
- RdgpRWtpJtLrR+K7ckXDO5lkXcOyHS+Zt+BpAaft4U3WFXEWuEe5GlVwWfEGlBYLxNI8d+vVq
- obj0YciZ2gjWoobCZBSe20dch34gJU4DViVZjvOH3dfyDUqIqNRdWFMtc5u6Ddst45+teJyXL
- jEPwInJVjDHIaGLVb7Ch3yV7U+xLgKUTeDBn4dzR9G3F4AXXRNG4AZiI0WaC/8y6iGe+CqKuU
- V2v5BckMDplNoBEwweVa6Ge5VvJS9QzIfJpJO3KLGWUmV5ijeFQKoJ1nmI5q7HcI13xuqpnQK
- 2j1uhY5ut3+4JyGzYPLcc9/JcV/6f8zTVf9jdW8KxmJ8WFG9wu8hia1LundZlhgvWNA2TmJ9r
- XuZywQ4eRgMiqDmSA9MyIq/LxhyRx/WSW0lCSv1yYqxMD2egCWVSd2yeli5q7al8FeddlU2y2
- B8+JZhARoo1gC/HNWgjnMfkKRsrPrxRHKA++EhzfQ2G4tJzzYe2HoSYrPodvuaqtu4Vh+5Ai0
- dHq8VS/5ooyHqUWntlwy8Xy4QFu9QIA+MyZt9aJ2cuUFCe30gfSroXu3phxj+NPuurvU7F2U5
- xrC3vAkFTn8NiHyCgNHDHHEhgKZmlcOe1efMiMl9UzCzmkAcG+Z+Fv0SC8gCz/4GS1JhzPd5a
- reN0fGXQg/bwl7aPMN76dPU64XQq3f5mQ1pxtc7d91KZ3l/u0cGuHeIHLwPBc0eOgT2sYWIhz
- bkM5SOo5ioUhesb2fMsHrE9qnM76AspxNuiov3xKSc04mZgdkufRbbjHIwjH3BVeJgOi6XPyZ
- cC5LtOBMLMvLyacknR1vLxj17TV9f+Ha7BBUnEmUQ2lC5EPeO9Y7V1CP5YC8fWKX9QMPeJo4x
- oyRUCQxDOCwRl8Og7bEUfd2Ehwus94YVqKmgdz4oKMWS3NyUAUE+U/zbb4ZGL6ph4wMkCJsJK
- QZoKZNqHbNN21S9auYX/cJRXnq4DeXJKp+FrWn4inyIJsInh/jZwKVRCQ==
+Content-Transfer-Encoding: 8bit
+X-Optus-CM-Score: 0
+X-Optus-CM-Analysis: v=2.3 cv=Tu+Yewfh c=1 sm=1 tr=0
+        a=hdaoRb6WoHYrV466vVKEyw==:117 a=hdaoRb6WoHYrV466vVKEyw==:17
+        a=e_q4qTt1xDgA:10 a=20KFwNOVAAAA:8 a=TcVBzKVZuEY3lVG4GoIA:9
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+From: Dave Chinner <dchinner@redhat.com>
 
+Trying to decipher a dm-logwrites replay failure from generic/482 is
+difficult. The test destroys all the dm state and devices when the
+test fails, leaving nothing behind for post-mortem analysis. This
+script is intended to allow replay of the dm-logwrites device one
+FUA at a time similar to generic/482, and is used in conjunction
+with a modifed g/482 test that does not tear down the dm volumes
+or state when the test fails.
 
-On 2021/7/20 =E4=B8=8B=E5=8D=8811:38, Theodore Y. Ts'o wrote:
-> On Tue, Jul 20, 2021 at 04:44:29PM +0800, Qu Wenruo wrote:
->> Anyway, if building a stable and complex API just for hooks, then it's
->> completely against my initial purpose.
->
-> So you said you are only using this for debugging purposes; at least
-> in my workflow, when I'm trying to debug a particular test case, I'm
-> *only* run a single test.
+This allows the developer to replay the logwrites up to just prior
+to failure to examine just the differences between the last good
+state and the first failure state, greatly reducing the complexity
+of analysing failures.
 
-Under most case, yes, and that's also what I usually do.
+Instructions for use are in the tools/dm-logwrite-replay script
+itself.
 
-But I have seen some strange case which doesn't trigger error by itself,
-but needs some other tests to be run before the triggering one.
+Signed-off-by: Dave Chinner <dchinner@redhat.com>
+---
+ common/dmlogwrites       |   8 +--
+ tests/generic/482        |  18 +++++++
+ tools/dm-logwrite-replay | 113 +++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 135 insertions(+), 4 deletions(-)
+ create mode 100755 tools/dm-logwrite-replay
 
->  So today, the way I handle this is to run
-> hook scripts in the gce-xfstests framework before and after running
-> the check script.  It does mean that there is excess work which gets
-> traced from the check script setting up and cleaning up, but it's
-> mainly been good enough for me.
->
-> It would be slightly nicer if there was a way to start and stop
-> various debugging hooks (e.g., starting and stopping traces, clearing
-> and grabing the lock_Stat info), etc.,) jut before and starting the
-> test.  But it was never important to me to propose changes to the
-> upstream xfstests.
+diff --git a/common/dmlogwrites b/common/dmlogwrites
+index 573f4b8a..66c57e2b 100644
+--- a/common/dmlogwrites
++++ b/common/dmlogwrites
+@@ -180,11 +180,11 @@ _log_writes_replay_log_range()
+ 	[ -z "$blkdev" ] && _fail \
+ 	"block dev must be specified for _log_writes_replay_log_range"
+ 
+-	# To ensure we replay the last entry,
+-	# we need to manually increase the end entry number to ensure
+-	# it's played
++	# To ensure we replay the last entry, we need to manually increase the
++	# end entry number to ensure it's played. We also dump all the
++	# operations performed as this helps post-mortem analysis of failures.
+ 	echo "=== replay to $end ===" >> $seqres.full
+-	$here/src/log-writes/replay-log --log $LOGWRITES_DEV \
++	$here/src/log-writes/replay-log -vv --log $LOGWRITES_DEV \
+ 		--replay $blkdev --limit $(($end + 1)) \
+ 		>> $seqres.full 2>&1
+ 	[ $? -ne 0 ] && _fail "replay failed"
+diff --git a/tests/generic/482 b/tests/generic/482
+index f26e6fc4..416b929a 100755
+--- a/tests/generic/482
++++ b/tests/generic/482
+@@ -12,6 +12,10 @@
+ _begin_fstest auto metadata replay thin
+ 
+ # Override the default cleanup function.
++#
++# If debugging logwrites failures using the tools/dm-logwrite-replay script,
++# switch the cleanup function to the version that is commented out below so that
++# failure leaves the corpse intact for post-mortem failure analysis.
+ _cleanup()
+ {
+ 	cd /
+@@ -21,6 +25,20 @@ _cleanup()
+ 	rm -f $tmp.*
+ }
+ 
++# tools/dm-logwrite-replay _cleanup version
++#_cleanup()
++#{
++#	cd /
++#	$KILLALL_PROG -KILL -q $FSSTRESS_PROG &> /dev/null
++#	if [ $status -eq 0 ]; then
++#		_log_writes_cleanup &> /dev/null
++#		_dmthin_cleanup
++#	else
++#		echo dm-thinvol-dev: $DMTHIN_VOL_DEV >> $seqres.full
++#	fi
++#	rm -f $tmp.*
++#}
++
+ # Import common functions.
+ . ./common/filter
+ . ./common/dmthin
+diff --git a/tools/dm-logwrite-replay b/tools/dm-logwrite-replay
+new file mode 100755
+index 00000000..56d0121c
+--- /dev/null
++++ b/tools/dm-logwrite-replay
+@@ -0,0 +1,113 @@
++#!/bin/bash
++# SPDX-License-Identifier: GPL-2.0 Copyright (c) 2021 Red Hat, Inc.  All Rights
++# Reserved.
++#
++# dm-logwrite-replay utility.
++#
++# This is used to replay failures that result from generic/482. Modify the
++# cleanup function in g/482 to the version that does not tear down the dm-thin
++# volume and grab the thin volume name from the the 482.full output file.  Then
++# you can replay the log writes manually with this tool so that the changes
++# between a good replay and a bad replay can be isolated. The 482.full output
++# file has all the FUA write locations recorded - these are what you pass the
++# tool as "PREV_FUA" and "END_FUA".
++#
++# The tool uses the fstests infrastructure and scripts, so it needs to be run
++# from the base fstests directory similar to the check script. RESULT_DIR is
++# pointed at the current directory, which means that debug output from the tool
++# placed in $seqres.full points ends up in ./dm-logwrite-replay.full.
++#
++# For example:
++#	- device name /dev/mapper/thin-vol
++# 	- last good replay @ write 124
++# 	- first bad replay @ write 125
++#
++# Replay from start to 124:
++#
++# cd src/fstests
++# tools/dm-logwrite-replay --dev /dev/mapper/thin-vol --end 124
++# <take image of filesystem /dev/mapper/thin-vol>
++#
++# Replay from 124 to 125:
++#
++# tools/dm-logwrite-replay --dev /dev/mapper/thin-vol --start 124 --end 125
++# <take image of filesystem from /dev/mapper/thin-vol>
++#
++# Now compare images of the filesystem to see the differences and analyse the
++# failure.
++#
++# Often with log recovery failures, you need to see the pre-recovery state of
++# the filesystem. To do this, use the --no-recovery option in conjunction with
++# the above commands.  This allows you to determine if recovery is doing the
++# wrong thing or not.
++#
++# Once finished, teardown the logwrites/thin vol with
++#
++# tools/dm-logwrite-replay --dev /dev/mapper/thin-vol --cleanup
++#
++
++DMTHIN_VOL_DEV=""
++PREV_FUA=""
++END_FUA=""
++CLEANUP=""
++DO_RECOVERY="y"
++
++while [ $# -gt 0 ]; do
++	case "$1" in
++	--dev) DMTHIN_VOL_DEV="$2" ; shift ;;
++	--start) PREV_FUA="$2" ; shift ;;
++	--end) END_FUA="$2" ; shift ;;
++	--cleanup) CLEANUP=y ;;
++	--no-recovery) DO_RECOVERY="" ;;
++	esac
++	shift
++done
++
++[ -z "$DMTHIN_VOL_DEV" ] && _fail "not dmthin vol defined"
++
++RESULT_DIR=`pwd`
++
++. ./common/preamble
++_begin_fstest replay
++
++MOUNT_OPTIONS="-o dax=never"
++
++# Import common functions.
++. ./common/filter
++. ./common/dmthin
++. ./common/dmlogwrites
++
++LOGWRITES_NAME=logwrites-test
++LOGWRITES_DMDEV=/dev/mapper/$LOGWRITES_NAME
++
++if [ -n "$CLEANUP" ]; then
++	_log_writes_cleanup &> /dev/null
++	_dmthin_cleanup
++	exit;
++fi
++
++if [ -z "$PREV_FUA" ]; then
++	prev=$(_log_writes_mark_to_entry_number mkfs)
++	[ -z "$prev" ] && _fail "failed to locate entry mark 'mkfs'"
++else
++	prev="$((PREV_FUA + 1))"
++fi
++cur=$(_log_writes_find_next_fua $prev)
++[ -z "$cur" ] && _fail "failed to locate next FUA write"
++
++while [ ! -z "$cur" ]; do
++	echo "Replay writes from $prev to $cur"
++	_log_writes_replay_log_range $cur $DMTHIN_VOL_DEV
++
++	if [ -n "$DO_RECOVERY" ]; then
++		_dmthin_mount
++		_dmthin_check_fs
++	fi
++
++	[ -n "$END_FUA" -a "$END_FUA" -eq "$cur" ] && break;
++
++	prev=$cur
++	cur=$(_log_writes_find_next_fua $(($cur + 1)))
++	[ -z "$cur" ] && break
++done
++
+-- 
+2.31.1
 
- From the feedback, I guess that's the case.
-I would no longer consider to upstream any simple debug purposed code.
-
-Thanks,
-Qu
->
-> In answer to the question which Darrick and Dave asked, yes, I could
-> do this via the exclude list.  It just seemed that if we're going to
-> add a programmtic hook, maybe it would make sense to do it via the
-> hook script.  It is true that there are ways to do this, though,
-> although there is a difference to a static excldue list that has to
-> get created for all tests that might be run, versus hook script that
-> is run for each test.  <Shrug>  There are other ways of doing things;
-> the question is whether the hook script approach is sufficiently
-> better that it's worth getting something like this upstream.  It may
-> be that keeping things like this in each developer's own private test
-> runner is the right thing.   I have "gce-xfstests --hooks <hookdir>" for
-> my own use, and have had it for years.
->
-> Cheers,
->
-> 					- Ted
->
