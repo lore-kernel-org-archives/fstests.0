@@ -2,100 +2,114 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-17.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A7A57C4338F
-	for <linux-fstests@archiver.kernel.org>; Thu, 22 Jul 2021 22:21:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 21B5EC432BE
+	for <linux-fstests@archiver.kernel.org>; Thu, 22 Jul 2021 23:17:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 82E3B60EB9
-	for <linux-fstests@archiver.kernel.org>; Thu, 22 Jul 2021 22:21:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E97D060EB3
+	for <linux-fstests@archiver.kernel.org>; Thu, 22 Jul 2021 23:17:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231536AbhGVVlU (ORCPT
+        id S232425AbhGVWgd (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 22 Jul 2021 17:41:20 -0400
-Received: from mail109.syd.optusnet.com.au ([211.29.132.80]:37593 "EHLO
-        mail109.syd.optusnet.com.au" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S231320AbhGVVlT (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 22 Jul 2021 17:41:19 -0400
-Received: from dread.disaster.area (pa49-181-34-10.pa.nsw.optusnet.com.au [49.181.34.10])
-        by mail109.syd.optusnet.com.au (Postfix) with ESMTPS id 64FE869F47;
-        Fri, 23 Jul 2021 08:21:51 +1000 (AEST)
-Received: from dave by dread.disaster.area with local (Exim 4.92.3)
-        (envelope-from <david@fromorbit.com>)
-        id 1m6h4g-009dXh-O0; Fri, 23 Jul 2021 08:21:50 +1000
-Date:   Fri, 23 Jul 2021 08:21:50 +1000
-From:   Dave Chinner <david@fromorbit.com>
-To:     Theodore Ts'o <tytso@mit.edu>
-Cc:     Damien Le Moal <Damien.LeMoal@wdc.com>,
-        Qu Wenruo <quwenruo.btrfs@gmx.com>,
-        Eryu Guan <eguan@linux.alibaba.com>, Qu Wenruo <wqu@suse.com>,
-        "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-        "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
-Subject: Re: [PATCH RFC] fstests: allow running custom hooks
-Message-ID: <20210722222150.GE2112234@dread.disaster.area>
-References: <20210720075748.GJ60846@e18g06458.et15sqa>
- <3fd6494b-8f03-4d97-9d00-21343e0e8152@gmx.com>
- <6b7699a9-fc5e-32d9-78c5-9c0e3cf92895@gmx.com>
- <YPbt2ohi62VyWN7e@mit.edu>
- <f37bec82-85cd-b818-8691-6c047751c4a6@gmx.com>
- <20210721011105.GA2112234@dread.disaster.area>
- <ff57f17c-e3f2-14f3-42d8-fefaafd65637@gmx.com>
- <DM6PR04MB70812AEDDAB6DE7951F4FBBDE7E39@DM6PR04MB7081.namprd04.prod.outlook.com>
- <20210721232830.GC2112234@dread.disaster.area>
- <YPmDmZL6oLnGhayx@mit.edu>
+        Thu, 22 Jul 2021 18:36:33 -0400
+Received: from mail.kernel.org ([198.145.29.99]:34016 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S232024AbhGVWgd (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 22 Jul 2021 18:36:33 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 97D9A60E8F;
+        Thu, 22 Jul 2021 23:17:07 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1626995827;
+        bh=VDT6CE/ocFpJnwX/7ZMqhTJy5zy3h3rbipVZOdNkKcI=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=fY71zypO1tX3Put+nV+ROZjv5CxmTRCrEYyokVQExQbPoq45Ynz1LqjD7gfsq6CiV
+         JB51dqmwxwnPi2mCyC4QsD3snvwrTEp2gZ0EHKm6qzyT+MiYDlsJ//eifHY1PFIP6T
+         9jHmxhvz5xyk8JJPHbnqGr7r7+9+/dGDmBLR50OLWrDHQ7nBnmtI9gl2z+60XoaGYx
+         L0suYUpVKRAmWVwz1V5XawRUqwqgSZFbZY/xjIBSISl70TKOK+dShEJbOhzeihHS61
+         j4MBqz5o7x04SOmRcEKZyav1H8BtPE7mjBtNBkQrOj0N0hkepp8Dfs5ldpwlxFl50N
+         j5h4PzulEYx+Q==
+Date:   Thu, 22 Jul 2021 16:17:07 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Christoph Hellwig <hch@lst.de>
+Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 7/7] xfs: use $XFS_QUOTA_PROG instead of hardcoding
+ xfs_quota
+Message-ID: <20210722231707.GQ559212@magnolia>
+References: <20210722073832.976547-1-hch@lst.de>
+ <20210722073832.976547-8-hch@lst.de>
+ <20210722182514.GE559212@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <YPmDmZL6oLnGhayx@mit.edu>
-X-Optus-CM-Score: 0
-X-Optus-CM-Analysis: v=2.3 cv=YKPhNiOx c=1 sm=1 tr=0
-        a=hdaoRb6WoHYrV466vVKEyw==:117 a=hdaoRb6WoHYrV466vVKEyw==:17
-        a=kj9zAlcOel0A:10 a=e_q4qTt1xDgA:10 a=7-415B0cAAAA:8
-        a=nZ5yuoXW5wKvLTnfgwkA:9 a=CjuIK1q_8ugA:10 a=biEYGPWJfzWAr4FL6Ov7:22
+In-Reply-To: <20210722182514.GE559212@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Jul 22, 2021 at 10:41:29AM -0400, Theodore Ts'o wrote:
-> On Thu, Jul 22, 2021 at 09:28:30AM +1000, Dave Chinner wrote:
-> > 
-> > I'm thinking that it is something relatively simple like this:
-> > 
-> > fstests/tests/hooks
-> > - directory containing library of hook scripts
+On Thu, Jul 22, 2021 at 11:25:14AM -0700, Darrick J. Wong wrote:
+> On Thu, Jul 22, 2021 at 09:38:32AM +0200, Christoph Hellwig wrote:
+> > Signed-off-by: Christoph Hellwig <hch@lst.de>
 > 
-> I'd suggest fstests/common/hooks instead, since the hook scripts
-> aren't actually *tests* per so, but rather utility scripts, and common
-> would be a better place for it, I think.
+> Nice!!
+> Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 
-True, but I don't think common/ is the right place, either, because
-that's for common test infrastructure. I only just looked, but
-there's a lib/ directory in fstests.  lib/hooks seems like the right
-place for this, and if I had of looked yesterday I would have put it
-there from the start. :/
+OFC now that I applied it I noticed that you forgot xfs/107.
 
-Is that an acceptible location?
+--D
 
-> > fstests/hooks/
-> > - directory containing symlinks to hook scripts
-> 
-> This might be a good default, but it might be better if the location
-> of the hook directory could be overridden via an environment variable.
-> In some cases, instead of having run-time configuration inside the
-> fstests directtory with .gitignore, it might be more convenient for it
-> if were made available externally (for example, via a 9p file system
-> in a case where tests are being run via KVM using a rootfs test image
-> with qmeu's snapshot mode so the hook directory could be supplied from
-> the host).
-
-Yup, that's easy enough to do. We can do it exactly the same way we
-allow RESULT_BASE to point the results to a user defined directory.
-
-Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+diff --git a/tests/xfs/107 b/tests/xfs/107
+index ce131a77..da052290 100755
+--- a/tests/xfs/107
++++ b/tests/xfs/107
+@@ -85,17 +85,17 @@ $FSSTRESS_PROG -z -s 47806 -m 8 -n 500 -p 4 \
+ QARGS="-x -D $tmp.projects -P /dev/null $SCRATCH_MNT"
+ 
+ echo "### initial report"
+-xfs_quota -c 'quot -p' -c 'quota -ip 6' $QARGS | filter_xfs_quota
++$XFS_QUOTA_PROG -c 'quot -p' -c 'quota -ip 6' $QARGS | filter_xfs_quota
+ 
+ echo "### check the project, should give warnings"
+-xfs_quota -c 'project -c 6' $QARGS | LC_COLLATE=POSIX sort | filter_xfs_quota
++$XFS_QUOTA_PROG -c 'project -c 6' $QARGS | LC_COLLATE=POSIX sort | filter_xfs_quota
+ 
+ echo "### recursively setup the project"
+-xfs_quota -c 'project -s 6' $QARGS | LC_COLLATE=POSIX sort | filter_xfs_quota
+-xfs_quota -c 'quota -ip 6' $QARGS | filter_xfs_quota
++$XFS_QUOTA_PROG -c 'project -s 6' $QARGS | LC_COLLATE=POSIX sort | filter_xfs_quota
++$XFS_QUOTA_PROG -c 'quota -ip 6' $QARGS | filter_xfs_quota
+ 
+ echo "### check the project, should give no warnings now"
+-xfs_quota -c 'project -c 6' $QARGS | LC_COLLATE=POSIX sort | filter_xfs_quota
++$XFS_QUOTA_PROG -c 'project -c 6' $QARGS | LC_COLLATE=POSIX sort | filter_xfs_quota
+ 
+ echo "### deny a hard link - wrong project ID"
+ rm -f $SCRATCH_MNT/outer $target/inner
+@@ -107,7 +107,7 @@ if [ $? -eq 0 ]; then
+ else
+ 	echo hard link failed
+ fi
+-xfs_quota -c 'quota -ip 6' $QARGS | filter_xfs_quota
++$XFS_QUOTA_PROG -c 'quota -ip 6' $QARGS | filter_xfs_quota
+ 
+ echo "### allow a hard link - right project ID"
+ $XFS_IO_PROG -c 'chproj 6' $SCRATCH_MNT/outer
+@@ -118,12 +118,12 @@ else
+ 	echo hard link failed
+ 	ls -ld $SCRATCH_MNT/outer $target/inner
+ fi
+-xfs_quota -c 'quota -ip 6' $QARGS | filter_xfs_quota
++$XFS_QUOTA_PROG -c 'quota -ip 6' $QARGS | filter_xfs_quota
+ 
+ echo "### recursively clear the project"
+-xfs_quota -c 'project -C 6' $QARGS | LC_COLLATE=POSIX sort | filter_xfs_quota
++$XFS_QUOTA_PROG -c 'project -C 6' $QARGS | LC_COLLATE=POSIX sort | filter_xfs_quota
+ #no output...
+-xfs_quota -c 'quota -ip 6' $QARGS | filter_xfs_quota
++$XFS_QUOTA_PROG -c 'quota -ip 6' $QARGS | filter_xfs_quota
+ 
+ status=0
+ exit
