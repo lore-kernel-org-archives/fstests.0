@@ -2,108 +2,169 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.2 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	UNPARSEABLE_RELAY,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-17.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BF221C4338F
-	for <linux-fstests@archiver.kernel.org>; Fri, 23 Jul 2021 04:32:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A93BBC4338F
+	for <linux-fstests@archiver.kernel.org>; Fri, 23 Jul 2021 05:09:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A581860E95
-	for <linux-fstests@archiver.kernel.org>; Fri, 23 Jul 2021 04:32:26 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7A0D560E8E
+	for <linux-fstests@archiver.kernel.org>; Fri, 23 Jul 2021 05:09:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233637AbhGWDvv (ORCPT
+        id S229733AbhGWE20 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 22 Jul 2021 23:51:51 -0400
-Received: from out30-133.freemail.mail.aliyun.com ([115.124.30.133]:39834 "EHLO
-        out30-133.freemail.mail.aliyun.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S231760AbhGWDvv (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 22 Jul 2021 23:51:51 -0400
-X-Alimail-AntiSpam: AC=PASS;BC=-1|-1;BR=01201311R451e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=e01e04400;MF=eguan@linux.alibaba.com;NM=1;PH=DS;RN=8;SR=0;TI=SMTPD_---0UggEgt-_1627014743;
-Received: from localhost(mailfrom:eguan@linux.alibaba.com fp:SMTPD_---0UggEgt-_1627014743)
-          by smtp.aliyun-inc.com(127.0.0.1);
-          Fri, 23 Jul 2021 12:32:23 +0800
-Date:   Fri, 23 Jul 2021 12:32:23 +0800
-From:   Eryu Guan <eguan@linux.alibaba.com>
-To:     Dave Chinner <david@fromorbit.com>
-Cc:     Theodore Ts'o <tytso@mit.edu>,
-        Damien Le Moal <Damien.LeMoal@wdc.com>,
-        Qu Wenruo <quwenruo.btrfs@gmx.com>, Qu Wenruo <wqu@suse.com>,
-        "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-        "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
-Subject: Re: [PATCH RFC] fstests: allow running custom hooks
-Message-ID: <20210723043223.GK60846@e18g06458.et15sqa>
-References: <3fd6494b-8f03-4d97-9d00-21343e0e8152@gmx.com>
- <6b7699a9-fc5e-32d9-78c5-9c0e3cf92895@gmx.com>
- <YPbt2ohi62VyWN7e@mit.edu>
- <f37bec82-85cd-b818-8691-6c047751c4a6@gmx.com>
- <20210721011105.GA2112234@dread.disaster.area>
- <ff57f17c-e3f2-14f3-42d8-fefaafd65637@gmx.com>
- <DM6PR04MB70812AEDDAB6DE7951F4FBBDE7E39@DM6PR04MB7081.namprd04.prod.outlook.com>
- <20210721232830.GC2112234@dread.disaster.area>
- <YPmDmZL6oLnGhayx@mit.edu>
- <20210722222150.GE2112234@dread.disaster.area>
+        Fri, 23 Jul 2021 00:28:26 -0400
+Received: from mail.kernel.org ([198.145.29.99]:59794 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S229698AbhGWE20 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 23 Jul 2021 00:28:26 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 458ED60E96;
+        Fri, 23 Jul 2021 05:09:00 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1627016940;
+        bh=xfc+sBUAHtcS6Hmn+m6yA2+EFrI2h3nmRnx1uI9oOps=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=TMKCgHWMOXP4qXlh58WNpGw6VbtMgZcmDeESYj9iq3DvhnXaDBEodVhfFkCoYVJiv
+         tLctSgm6U8bMCpmy1ZcSUU9DfAjZ5xt1bWqYhxRhKbju6bBEN3Mg+xSzSdHXIGQAre
+         6C6rkkNgyfvq3LEuR/LIOgnZLKR26LGh1l8ZxE5sk7frS3TXbh6FrWuQfzCH5X/7Wt
+         r1DdM3MKVu1Mk0o7EZBmpBLJS9XI+4Lv3L8xQmu8T9Ys/tir7BcmA+G7sFv+9XqPqg
+         VwnwyvwUwd48okqOo3+LE2mZM4lSazM8f57aPLWPydAsPpMAvJYvpV/PgVk9lSRfvd
+         tbaees/sd2CTw==
+Date:   Thu, 22 Jul 2021 22:08:59 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Christoph Hellwig <hch@lst.de>
+Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: [PATCH 8/7] xfs/152: avoid failure when quotaoff is not supported
+Message-ID: <20210723050859.GR559212@magnolia>
+References: <20210722073832.976547-1-hch@lst.de>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210722222150.GE2112234@dread.disaster.area>
-User-Agent: Mutt/1.5.21 (2010-09-15)
+In-Reply-To: <20210722073832.976547-1-hch@lst.de>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Jul 23, 2021 at 08:21:50AM +1000, Dave Chinner wrote:
-> On Thu, Jul 22, 2021 at 10:41:29AM -0400, Theodore Ts'o wrote:
-> > On Thu, Jul 22, 2021 at 09:28:30AM +1000, Dave Chinner wrote:
-> > > 
-> > > I'm thinking that it is something relatively simple like this:
-> > > 
-> > > fstests/tests/hooks
-> > > - directory containing library of hook scripts
-> > 
-> > I'd suggest fstests/common/hooks instead, since the hook scripts
-> > aren't actually *tests* per so, but rather utility scripts, and common
-> > would be a better place for it, I think.
+From: Darrick J. Wong <djwong@kernel.org>
 
-Agreed, then we could avoid naming hooks dir as "Hooks".
+Switch the test that removes the quota files to just disable enforcement
+and then unmount the file system as disabling quota accounting is about
+to go away.
 
-> 
-> True, but I don't think common/ is the right place, either, because
-> that's for common test infrastructure. I only just looked, but
-> there's a lib/ directory in fstests.  lib/hooks seems like the right
-> place for this, and if I had of looked yesterday I would have put it
-> there from the start. :/
-> 
-> Is that an acceptible location?
+Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+---
+ tests/xfs/152     |   20 +++++++++++++-------
+ tests/xfs/152.out |    4 ----
+ 2 files changed, 13 insertions(+), 11 deletions(-)
 
-Right now the lib dir contains mainly c libs used by test binaries, it
-looks like part of the build infrastructure to me. OTOH, I think
-common/hooks is fine, as hooks is part of the test harness to me. Or
-maybe tools/hooks is another choice?
-
-Thanks,
-Eryu
-
-> 
-> > > fstests/hooks/
-> > > - directory containing symlinks to hook scripts
-> > 
-> > This might be a good default, but it might be better if the location
-> > of the hook directory could be overridden via an environment variable.
-> > In some cases, instead of having run-time configuration inside the
-> > fstests directtory with .gitignore, it might be more convenient for it
-> > if were made available externally (for example, via a 9p file system
-> > in a case where tests are being run via KVM using a rootfs test image
-> > with qmeu's snapshot mode so the hook directory could be supplied from
-> > the host).
-> 
-> Yup, that's easy enough to do. We can do it exactly the same way we
-> allow RESULT_BASE to point the results to a user defined directory.
-> 
-> Cheers,
-> 
-> Dave.
-> -- 
-> Dave Chinner
-> david@fromorbit.com
+diff --git a/tests/xfs/152 b/tests/xfs/152
+index de85f48c..129d9c06 100755
+--- a/tests/xfs/152
++++ b/tests/xfs/152
+@@ -195,8 +195,9 @@ test_enable()
+ test_off()
+ {
+ 	echo "checking off command (type=$type)"
+-	$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid -x \
+-			-c "off -$type -v" $SCRATCH_MNT | _filter_scratch
++	_scratch_unmount
++	_qmount_option ""
++	_qmount
+ }
+ 
+ test_remove()
+@@ -257,6 +258,8 @@ qmount_idmapped()
+ 
+ test_xfs_quota()
+ {
++	local quota_options="$1"
++
+ 	# init quota
+ 	echo "init quota limit and timer, and dump it"
+ 	if [ "$idmapped" -eq 1 ]; then
+@@ -310,7 +313,10 @@ test_xfs_quota()
+ 	echo ; test_state
+ 	echo ; test_remove
+ 	echo ; test_report -N
+-	echo "quota remount"; qmount_idmapped
++	echo "quota remount"
++	_qmount_option "$quota_options"
++	_qmount
++	qmount_idmapped
+ 	echo ; test_report -N
+ 
+ 	# restore test
+@@ -329,7 +335,7 @@ id=$uqid
+ id2=$uqid2
+ idmapped=0
+ qmount_idmapped
+-test_xfs_quota
++test_xfs_quota "uquota,sync"
+ 
+ echo "----------------------- uquota,sync,idmapped ---------------------------"
+ wipe_scratch
+@@ -339,7 +345,7 @@ id=$uqid
+ id2=$uqid2
+ idmapped=1
+ qmount_idmapped
+-test_xfs_quota
++test_xfs_quota "uquota,sync"
+ 
+ echo "----------------------- gquota,sync,unmapped ---------------------------"
+ wipe_scratch
+@@ -349,7 +355,7 @@ id=$gqid
+ id2=$gqid2
+ idmapped=0
+ qmount_idmapped
+-test_xfs_quota
++test_xfs_quota "gquota,sync"
+ 
+ echo "----------------------- gquota,sync,idmapped ---------------------------"
+ wipe_scratch
+@@ -359,7 +365,7 @@ id=$gqid
+ id2=$gqid2
+ idmapped=1
+ qmount_idmapped
+-test_xfs_quota
++test_xfs_quota "gquota,sync"
+ 
+ wipe_mounts
+ 
+diff --git a/tests/xfs/152.out b/tests/xfs/152.out
+index 1fc71fb9..b663b096 100644
+--- a/tests/xfs/152.out
++++ b/tests/xfs/152.out
+@@ -132,7 +132,6 @@ checking quota command (type=u)
+ SCRATCH_DEV 1024 102400 102400 00 [--------] 15 100 100 00 [--------] SCRATCH_MNT
+ 
+ checking off command (type=u)
+-User quota are not enabled on SCRATCH_DEV
+ 
+ checking state command (type=u)
+ 
+@@ -296,7 +295,6 @@ checking quota command (type=u)
+ SCRATCH_DEV 1024 102400 102400 00 [--------] 15 100 100 00 [--------] SCRATCH_MNT
+ 
+ checking off command (type=u)
+-User quota are not enabled on SCRATCH_DEV
+ 
+ checking state command (type=u)
+ 
+@@ -460,7 +458,6 @@ checking quota command (type=g)
+ SCRATCH_DEV 1024 102400 102400 00 [--------] 15 100 100 00 [--------] SCRATCH_MNT
+ 
+ checking off command (type=g)
+-Group quota are not enabled on SCRATCH_DEV
+ 
+ checking state command (type=g)
+ 
+@@ -624,7 +621,6 @@ checking quota command (type=g)
+ SCRATCH_DEV 1024 102400 102400 00 [--------] 15 100 100 00 [--------] SCRATCH_MNT
+ 
+ checking off command (type=g)
+-Group quota are not enabled on SCRATCH_DEV
+ 
+ checking state command (type=g)
+ 
