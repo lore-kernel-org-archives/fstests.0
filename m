@@ -4,137 +4,240 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 33EA2C4338F
-	for <linux-fstests@archiver.kernel.org>; Sun, 25 Jul 2021 16:02:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 82AB0C4320A
+	for <linux-fstests@archiver.kernel.org>; Sun, 25 Jul 2021 16:27:43 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0CB4B60F38
-	for <linux-fstests@archiver.kernel.org>; Sun, 25 Jul 2021 16:02:49 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5E87160295
+	for <linux-fstests@archiver.kernel.org>; Sun, 25 Jul 2021 16:27:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231289AbhGYPWS (ORCPT
+        id S230077AbhGYPrM (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 25 Jul 2021 11:22:18 -0400
-Received: from out20-1.mail.aliyun.com ([115.124.20.1]:36929 "EHLO
-        out20-1.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231215AbhGYPWR (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 25 Jul 2021 11:22:17 -0400
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.2117037|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.0157347-0.000326297-0.983939;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047212;MF=guan@eryu.me;NM=1;PH=DS;RN=4;RT=4;SR=0;TI=SMTPD_---.KqkPlcl_1627228965;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.KqkPlcl_1627228965)
-          by smtp.aliyun-inc.com(10.147.41.121);
-          Mon, 26 Jul 2021 00:02:45 +0800
-Date:   Mon, 26 Jul 2021 00:02:45 +0800
+        Sun, 25 Jul 2021 11:47:12 -0400
+Received: from out20-111.mail.aliyun.com ([115.124.20.111]:35707 "EHLO
+        out20-111.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229545AbhGYPrM (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 25 Jul 2021 11:47:12 -0400
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07439385|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.378771-0.00242189-0.618807;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047190;MF=guan@eryu.me;NM=1;PH=DS;RN=5;RT=5;SR=0;TI=SMTPD_---.KqkZOmF_1627230459;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.KqkZOmF_1627230459)
+          by smtp.aliyun-inc.com(10.147.40.7);
+          Mon, 26 Jul 2021 00:27:39 +0800
+Date:   Mon, 26 Jul 2021 00:27:39 +0800
 From:   Eryu Guan <guan@eryu.me>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org
-Subject: Re: [PATCH 1/2] generic: test xattr operations only
-Message-ID: <YP2LJTF7mL9ooKxf@desktop>
-References: <162674332320.2650898.17601790625049494810.stgit@magnolia>
- <162674332866.2650898.16916837755915187962.stgit@magnolia>
+To:     Amir Goldstein <amir73il@gmail.com>
+Cc:     Eryu Guan <guaneryu@gmail.com>, Miklos Szeredi <miklos@szeredi.hu>,
+        linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH] overlay: add test for copy up of lower file attributes
+Message-ID: <YP2Q+xTjGICXfOwl@desktop>
+References: <20210722164634.394499-1-amir73il@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <162674332866.2650898.16916837755915187962.stgit@magnolia>
+In-Reply-To: <20210722164634.394499-1-amir73il@gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Jul 19, 2021 at 06:08:48PM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
+On Thu, Jul 22, 2021 at 07:46:34PM +0300, Amir Goldstein wrote:
+> Overlayfs copies up a subset of lower file attributes since kernel
+> commits:
+> 173ff5c9ec37 ("ovl: consistent behavior for immutable/append-only inodes")
+> 2e3f6e87c2b0 ("ovl: copy up sync/noatime fileattr flags")
 > 
-> Exercise extended attribute operations.
+> This test verifies this functionality works correctly and that it
+> survives power failure and/or mount cycle.
 > 
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+
+Looks good to me overall, just one minor question below.
+
 > ---
->  tests/generic/724     |   57 +++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/724.out |    2 ++
->  2 files changed, 59 insertions(+)
->  create mode 100755 tests/generic/724
->  create mode 100644 tests/generic/724.out
 > 
+> Eryu,
 > 
-> diff --git a/tests/generic/724 b/tests/generic/724
+> This test is failing on master and passes on overlayfs-next.
+> 
+> Thanks,
+> Amir.
+> 
+>  tests/overlay/078     | 145 ++++++++++++++++++++++++++++++++++++++++++
+>  tests/overlay/078.out |   2 +
+>  2 files changed, 147 insertions(+)
+>  create mode 100755 tests/overlay/078
+>  create mode 100644 tests/overlay/078.out
+> 
+> diff --git a/tests/overlay/078 b/tests/overlay/078
 > new file mode 100755
-> index 00000000..f2f4a2ec
+> index 00000000..b43449d1
 > --- /dev/null
-> +++ b/tests/generic/724
-> @@ -0,0 +1,57 @@
+> +++ b/tests/overlay/078
+> @@ -0,0 +1,145 @@
 > +#! /bin/bash
 > +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2021 Oracle, Inc.  All Rights Reserved.
+> +# Copyright (c) 2018 Huawei.  All Rights Reserved.
+> +# Copyright (C) 2021 CTERA Networks. All Rights Reserved.
 > +#
-> +# FS QA Test No. 724
+> +# FS QA Test 078
 > +#
-> +# Run an extended attributes fsstress run with multiple threads to shake out
-> +# bugs in the xattr code.
+> +# Test copy up of lower file attributes.
+> +#
+> +# Overlayfs copies up a subset of lower file attributes since kernel commits:
+> +# 173ff5c9ec37 ("ovl: consistent behavior for immutable/append-only inodes")
+> +# 2e3f6e87c2b0 ("ovl: copy up sync/noatime fileattr flags")
+> +#
+> +# This test is similar and was derived from generic/507, but instead
+> +# of creating new files which are created in upper layer, prepare
+> +# the file with attributes in lower layer and verify that attributes
+> +# are not lost during copy up, (optional) shutdown and mount cycle.
 > +#
 > +. ./common/preamble
-> +_begin_fstest auto attr
+> +_begin_fstest auto quick perms shutdown
+
+I noticed that generic/507 has the same groups defined, but I'm
+wondering if 'perms' is right group, 'attr' seems a better fit to me.
+And we could add 'copyup' group as well.
+
 > +
+> +# Override the default cleanup function.
 > +_cleanup()
 > +{
-> +	$KILLALL_PROG -9 fsstress > /dev/null 2>&1
 > +	cd /
+> +	$CHATTR_PROG -ai $lowertestfile &> /dev/null
 > +	rm -f $tmp.*
 > +}
 > +
-> +# Modify as appropriate.
+> +# Import common functions.
+> +. ./common/filter
+> +
+> +# real QA test starts here
 > +_supported_fs generic
-> +
-> +_require_scratch
-> +_require_command "$KILLALL_PROG" "killall"
-> +
-> +echo "Silence is golden."
-> +
-> +_scratch_mkfs > $seqres.full 2>&1
-> +_scratch_mount >> $seqres.full 2>&1
-> +
-> +nr_cpus=$((LOAD_FACTOR * 4))
-> +nr_ops=$((700000 * nr_cpus * TIME_FACTOR))
 
-This takes too long time to be an 'auto' test, it runs for 20min on my
-test vm and is still running, I think I have to kill it manually.
-
-I noticed that generic/52[12] run long time fsx tests, and they are in
-'soak long_rw' groups, perhaps this one fits there as well? And maybe
-'stress' group too.
+s/generic/overlay/
 
 Thanks,
 Eryu
 
 > +
-> +args=('-z' '-S' 'c')
+> +_require_command "$LSATTR_PROG" lasttr
+> +_require_command "$CHATTR_PROG" chattr
+> +_require_chattr ASai
+> +_require_xfs_io_command "syncfs"
 > +
-> +# Do some directory tree modifications, but the bulk of this is geared towards
-> +# exercising the xattr code, especially attr_set which can do up to 10k values.
-> +for verb in unlink rmdir; do
-> +	args+=('-f' "${verb}=1")
-> +done
-> +for verb in creat mkdir; do
-> +	args+=('-f' "${verb}=2")
-> +done
-> +for verb in getfattr listfattr; do
-> +	args+=('-f' "${verb}=3")
-> +done
-> +for verb in attr_remove removefattr; do
-> +	args+=('-f' "${verb}=4")
-> +done
-> +args+=('-f' "setfattr=20")
-> +args+=('-f' "attr_set=60")	# sets larger xattrs
+> +_require_scratch
+> +_require_scratch_shutdown
 > +
-> +$FSSTRESS_PROG "${args[@]}" $FSSTRESS_AVOID -d $SCRATCH_MNT -n $nr_ops -p $nr_cpus >> $seqres.full
+> +lowerdir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
+> +upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
+> +workdir=$OVL_BASE_SCRATCH_MNT/$OVL_WORK
+> +lowertestfile=$lowerdir/testfile
+> +testfile=$SCRATCH_MNT/testfile
 > +
-> +# success, all done
+> +_scratch_mkfs
+> +mkdir -p $lowerdir
+> +touch $lowertestfile
+> +_scratch_mount
+> +
+> +# Set another flag on lowertestfile and verify all flags
+> +# are kept though copy up (optional shutdown) and mount cycle
+> +do_check()
+> +{
+> +	attr=$1
+> +
+> +	echo "Test chattr +$1 $2" >> $seqres.full
+> +
+> +	$UMOUNT_PROG $SCRATCH_MNT
+> +
+> +	# Add attribute to lower file
+> +	$CHATTR_PROG +$attr $lowertestfile
+> +
+> +	# Re-create upperdir/workdir
+> +	rm -rf $upperdir $workdir
+> +	mkdir -p $upperdir $workdir
+> +
+> +	if [ "$2" == "shutdown" ]; then
+> +		$XFS_IO_PROG -r $lowertestfile -c "fsync" | _filter_xfs_io
+> +	fi
+> +
+> +	_scratch_mount
+> +
+> +	before=`$LSATTR_PROG $testfile`
+> +
+> +	# Write file in append mode to test copy up of append-only attribute
+> +	# Expect failure on write to immutable file
+> +	expect=0
+> +	if [ "$1" == "i" ]; then
+> +		expect=1
+> +	fi
+> +	$XFS_IO_PROG -a -c "pwrite -S 0x61 0 10" $testfile >> $seqres.full 2>&1
+> +	result=$?
+> +	if [ $result != $expect ]; then
+> +		echo "Write unexpectedly returned $result for file with attribute '$attr'"
+> +	fi
+> +
+> +	if [ "$2" == "shutdown" ]; then
+> +		$XFS_IO_PROG -r $testfile -c "fsync" | _filter_xfs_io
+> +		_scratch_shutdown | tee -a $seqres.full
+> +	fi
+> +
+> +	_scratch_cycle_mount
+> +
+> +	after=`$LSATTR_PROG $testfile`
+> +	echo "Before copy up: $before" >> $seqres.full
+> +	echo "After  copy up: $after" >> $seqres.full
+> +
+> +	# Verify attributes were not lost during copy up, shutdown and mount cycle
+> +	if [ "$before" != "$after" ]; then
+> +		echo "Before copy up: $before"
+> +		echo "After  copy up: $after"
+> +	fi
+> +
+> +	echo "Test chattr -$1 $2" >> $seqres.full
+> +
+> +	# Delete attribute from overlay file
+> +	$CHATTR_PROG -$attr $testfile
+> +
+> +	before=`$LSATTR_PROG $testfile`
+> +
+> +	if [ "$2" == "shutdown" ]; then
+> +		$XFS_IO_PROG -r $testfile -c "fsync" | _filter_xfs_io
+> +		_scratch_shutdown | tee -a $seqres.full
+> +	fi
+> +
+> +	_scratch_cycle_mount
+> +
+> +	after=`$LSATTR_PROG $testfile`
+> +	echo "Before mount cycle: $before" >> $seqres.full
+> +	echo "After  mount cycle: $after" >> $seqres.full
+> +
+> +	# Verify attribute deletion was not lost during shutdown or mount cycle
+> +	if [ "$before" != "$after" ]; then
+> +		echo "Before mount cycle: $before"
+> +		echo "After  mount cycle: $after"
+> +	fi
+> +}
+> +
+> +echo "Silence is golden"
+> +
+> +# This is the subset of attributes copied up by overlayfs since kernel
+> +# commit ...
+> +opts="A S a i"
+> +for i in $opts; do
+> +	do_check $i
+> +	do_check $i shutdown
+> +done
+> +
 > +status=0
 > +exit
-> diff --git a/tests/generic/724.out b/tests/generic/724.out
+> diff --git a/tests/overlay/078.out b/tests/overlay/078.out
 > new file mode 100644
-> index 00000000..164cfffb
+> index 00000000..b8acea8c
 > --- /dev/null
-> +++ b/tests/generic/724.out
+> +++ b/tests/overlay/078.out
 > @@ -0,0 +1,2 @@
-> +QA output created by 724
-> +Silence is golden.
+> +QA output created by 078
+> +Silence is golden
+> -- 
+> 2.32.0
 > 
