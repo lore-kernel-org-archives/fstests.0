@@ -7,110 +7,134 @@ X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9EC72C4338F
-	for <linux-fstests@archiver.kernel.org>; Sun, 25 Jul 2021 15:02:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 33EA2C4338F
+	for <linux-fstests@archiver.kernel.org>; Sun, 25 Jul 2021 16:02:49 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7E78660E09
-	for <linux-fstests@archiver.kernel.org>; Sun, 25 Jul 2021 15:02:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0CB4B60F38
+	for <linux-fstests@archiver.kernel.org>; Sun, 25 Jul 2021 16:02:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231250AbhGYOWC (ORCPT
+        id S231289AbhGYPWS (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 25 Jul 2021 10:22:02 -0400
-Received: from out20-1.mail.aliyun.com ([115.124.20.1]:53674 "EHLO
+        Sun, 25 Jul 2021 11:22:18 -0400
+Received: from out20-1.mail.aliyun.com ([115.124.20.1]:36929 "EHLO
         out20-1.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231208AbhGYOWA (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 25 Jul 2021 10:22:00 -0400
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07570033|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.637282-0.000114646-0.362603;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047194;MF=guan@eryu.me;NM=1;PH=DS;RN=4;RT=4;SR=0;TI=SMTPD_---.KqjFUkr_1627225348;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.KqjFUkr_1627225348)
-          by smtp.aliyun-inc.com(10.147.41.199);
-          Sun, 25 Jul 2021 23:02:28 +0800
-Date:   Sun, 25 Jul 2021 23:02:28 +0800
+        with ESMTP id S231215AbhGYPWR (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 25 Jul 2021 11:22:17 -0400
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.2117037|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.0157347-0.000326297-0.983939;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047212;MF=guan@eryu.me;NM=1;PH=DS;RN=4;RT=4;SR=0;TI=SMTPD_---.KqkPlcl_1627228965;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.KqkPlcl_1627228965)
+          by smtp.aliyun-inc.com(10.147.41.121);
+          Mon, 26 Jul 2021 00:02:45 +0800
+Date:   Mon, 26 Jul 2021 00:02:45 +0800
 From:   Eryu Guan <guan@eryu.me>
 To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     Christoph Hellwig <hch@lst.de>, fstests@vger.kernel.org,
-        linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 7/7] xfs: use $XFS_QUOTA_PROG instead of hardcoding
- xfs_quota
-Message-ID: <YP19BK83JkDYI9iv@desktop>
-References: <20210722073832.976547-1-hch@lst.de>
- <20210722073832.976547-8-hch@lst.de>
- <20210722182514.GE559212@magnolia>
- <20210722231707.GQ559212@magnolia>
+Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: Re: [PATCH 1/2] generic: test xattr operations only
+Message-ID: <YP2LJTF7mL9ooKxf@desktop>
+References: <162674332320.2650898.17601790625049494810.stgit@magnolia>
+ <162674332866.2650898.16916837755915187962.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210722231707.GQ559212@magnolia>
+In-Reply-To: <162674332866.2650898.16916837755915187962.stgit@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Jul 22, 2021 at 04:17:07PM -0700, Darrick J. Wong wrote:
-> On Thu, Jul 22, 2021 at 11:25:14AM -0700, Darrick J. Wong wrote:
-> > On Thu, Jul 22, 2021 at 09:38:32AM +0200, Christoph Hellwig wrote:
-> > > Signed-off-by: Christoph Hellwig <hch@lst.de>
-> > 
-> > Nice!!
-> > Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+On Mon, Jul 19, 2021 at 06:08:48PM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
 > 
-> OFC now that I applied it I noticed that you forgot xfs/107.
+> Exercise extended attribute operations.
+> 
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> ---
+>  tests/generic/724     |   57 +++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/724.out |    2 ++
+>  2 files changed, 59 insertions(+)
+>  create mode 100755 tests/generic/724
+>  create mode 100644 tests/generic/724.out
+> 
+> 
+> diff --git a/tests/generic/724 b/tests/generic/724
+> new file mode 100755
+> index 00000000..f2f4a2ec
+> --- /dev/null
+> +++ b/tests/generic/724
+> @@ -0,0 +1,57 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2021 Oracle, Inc.  All Rights Reserved.
+> +#
+> +# FS QA Test No. 724
+> +#
+> +# Run an extended attributes fsstress run with multiple threads to shake out
+> +# bugs in the xattr code.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto attr
+> +
+> +_cleanup()
+> +{
+> +	$KILLALL_PROG -9 fsstress > /dev/null 2>&1
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# Modify as appropriate.
+> +_supported_fs generic
+> +
+> +_require_scratch
+> +_require_command "$KILLALL_PROG" "killall"
+> +
+> +echo "Silence is golden."
+> +
+> +_scratch_mkfs > $seqres.full 2>&1
+> +_scratch_mount >> $seqres.full 2>&1
+> +
+> +nr_cpus=$((LOAD_FACTOR * 4))
+> +nr_ops=$((700000 * nr_cpus * TIME_FACTOR))
 
-I updated xfs/107 and folded it into this patch. Thanks for all the
-reviews!
+This takes too long time to be an 'auto' test, it runs for 20min on my
+test vm and is still running, I think I have to kill it manually.
 
+I noticed that generic/52[12] run long time fsx tests, and they are in
+'soak long_rw' groups, perhaps this one fits there as well? And maybe
+'stress' group too.
+
+Thanks,
 Eryu
 
+> +
+> +args=('-z' '-S' 'c')
+> +
+> +# Do some directory tree modifications, but the bulk of this is geared towards
+> +# exercising the xattr code, especially attr_set which can do up to 10k values.
+> +for verb in unlink rmdir; do
+> +	args+=('-f' "${verb}=1")
+> +done
+> +for verb in creat mkdir; do
+> +	args+=('-f' "${verb}=2")
+> +done
+> +for verb in getfattr listfattr; do
+> +	args+=('-f' "${verb}=3")
+> +done
+> +for verb in attr_remove removefattr; do
+> +	args+=('-f' "${verb}=4")
+> +done
+> +args+=('-f' "setfattr=20")
+> +args+=('-f' "attr_set=60")	# sets larger xattrs
+> +
+> +$FSSTRESS_PROG "${args[@]}" $FSSTRESS_AVOID -d $SCRATCH_MNT -n $nr_ops -p $nr_cpus >> $seqres.full
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/generic/724.out b/tests/generic/724.out
+> new file mode 100644
+> index 00000000..164cfffb
+> --- /dev/null
+> +++ b/tests/generic/724.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 724
+> +Silence is golden.
 > 
-> --D
-> 
-> diff --git a/tests/xfs/107 b/tests/xfs/107
-> index ce131a77..da052290 100755
-> --- a/tests/xfs/107
-> +++ b/tests/xfs/107
-> @@ -85,17 +85,17 @@ $FSSTRESS_PROG -z -s 47806 -m 8 -n 500 -p 4 \
->  QARGS="-x -D $tmp.projects -P /dev/null $SCRATCH_MNT"
->  
->  echo "### initial report"
-> -xfs_quota -c 'quot -p' -c 'quota -ip 6' $QARGS | filter_xfs_quota
-> +$XFS_QUOTA_PROG -c 'quot -p' -c 'quota -ip 6' $QARGS | filter_xfs_quota
->  
->  echo "### check the project, should give warnings"
-> -xfs_quota -c 'project -c 6' $QARGS | LC_COLLATE=POSIX sort | filter_xfs_quota
-> +$XFS_QUOTA_PROG -c 'project -c 6' $QARGS | LC_COLLATE=POSIX sort | filter_xfs_quota
->  
->  echo "### recursively setup the project"
-> -xfs_quota -c 'project -s 6' $QARGS | LC_COLLATE=POSIX sort | filter_xfs_quota
-> -xfs_quota -c 'quota -ip 6' $QARGS | filter_xfs_quota
-> +$XFS_QUOTA_PROG -c 'project -s 6' $QARGS | LC_COLLATE=POSIX sort | filter_xfs_quota
-> +$XFS_QUOTA_PROG -c 'quota -ip 6' $QARGS | filter_xfs_quota
->  
->  echo "### check the project, should give no warnings now"
-> -xfs_quota -c 'project -c 6' $QARGS | LC_COLLATE=POSIX sort | filter_xfs_quota
-> +$XFS_QUOTA_PROG -c 'project -c 6' $QARGS | LC_COLLATE=POSIX sort | filter_xfs_quota
->  
->  echo "### deny a hard link - wrong project ID"
->  rm -f $SCRATCH_MNT/outer $target/inner
-> @@ -107,7 +107,7 @@ if [ $? -eq 0 ]; then
->  else
->  	echo hard link failed
->  fi
-> -xfs_quota -c 'quota -ip 6' $QARGS | filter_xfs_quota
-> +$XFS_QUOTA_PROG -c 'quota -ip 6' $QARGS | filter_xfs_quota
->  
->  echo "### allow a hard link - right project ID"
->  $XFS_IO_PROG -c 'chproj 6' $SCRATCH_MNT/outer
-> @@ -118,12 +118,12 @@ else
->  	echo hard link failed
->  	ls -ld $SCRATCH_MNT/outer $target/inner
->  fi
-> -xfs_quota -c 'quota -ip 6' $QARGS | filter_xfs_quota
-> +$XFS_QUOTA_PROG -c 'quota -ip 6' $QARGS | filter_xfs_quota
->  
->  echo "### recursively clear the project"
-> -xfs_quota -c 'project -C 6' $QARGS | LC_COLLATE=POSIX sort | filter_xfs_quota
-> +$XFS_QUOTA_PROG -c 'project -C 6' $QARGS | LC_COLLATE=POSIX sort | filter_xfs_quota
->  #no output...
-> -xfs_quota -c 'quota -ip 6' $QARGS | filter_xfs_quota
-> +$XFS_QUOTA_PROG -c 'quota -ip 6' $QARGS | filter_xfs_quota
->  
->  status=0
->  exit
