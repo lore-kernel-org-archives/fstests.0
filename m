@@ -2,81 +2,104 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D2208C4338F
-	for <linux-fstests@archiver.kernel.org>; Mon, 26 Jul 2021 19:37:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DF04AC4338F
+	for <linux-fstests@archiver.kernel.org>; Mon, 26 Jul 2021 23:06:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B571F6054F
-	for <linux-fstests@archiver.kernel.org>; Mon, 26 Jul 2021 19:37:42 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AF82860F23
+	for <linux-fstests@archiver.kernel.org>; Mon, 26 Jul 2021 23:06:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231502AbhGZS5N (ORCPT
+        id S233491AbhGZWZl (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 26 Jul 2021 14:57:13 -0400
-Received: from smtp-out1.suse.de ([195.135.220.28]:33210 "EHLO
-        smtp-out1.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230488AbhGZS5N (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 26 Jul 2021 14:57:13 -0400
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by smtp-out1.suse.de (Postfix) with ESMTPS id BAEE22201F;
-        Mon, 26 Jul 2021 19:37:40 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-        t=1627328260; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-        bh=RyirjDJErxWwUf/7C4h7MfWb2FDT34oSt+TKHDehx6c=;
-        b=evvE2zHcIOPr2nKlat01k9DuRvoWEqewviO+eWDbAK8DNAlHIpyGZ+mDYzgxMhVfH42T1B
-        KkBwtOVk7tcDQ4CWKB0yUtTFAaRAVEqfKK3CoJEYDptJQfqJgjr8awCJNqZkgYRA2SsWRe
-        lWUJTC7s9gCJ5TGP+Mjm8P7LkfWD1PY=
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 2D6FF13B58;
-        Mon, 26 Jul 2021 19:37:38 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id Z1o7OQIP/2BkKAAAMHmgww
-        (envelope-from <mpdesouza@suse.com>); Mon, 26 Jul 2021 19:37:38 +0000
-From:   Marcos Paulo de Souza <mpdesouza@suse.com>
-To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Cc:     dsterba@suse.com, guaneryu@gmail.com,
-        Marcos Paulo de Souza <mpdesouza@suse.com>
-Subject: [PATCH] btrfs/177: Adjust resize output message
-Date:   Mon, 26 Jul 2021 16:37:38 -0300
-Message-Id: <20210726193738.14992-1-mpdesouza@suse.com>
-X-Mailer: git-send-email 2.26.2
+        Mon, 26 Jul 2021 18:25:41 -0400
+Received: from mout.gmx.net ([212.227.17.20]:56015 "EHLO mout.gmx.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S233380AbhGZWZk (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 26 Jul 2021 18:25:40 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net;
+        s=badeba3b8450; t=1627340765;
+        bh=VioI7NqYAgN335cCZu8hri0EblGv0CYujKKQw34Mf8M=;
+        h=X-UI-Sender-Class:Subject:To:Cc:References:From:Date:In-Reply-To;
+        b=NLgWyiyBYwG8Ly3QF4QgYQ8M7lM/M4jlj5lV0tr/EqaD8ZCJmeIZqwof4dYpEM0SN
+         0Rc05CwUAhNjtc+uBN/JZXRjf442oIJaLA0SBzsQqBV0aSuZRJ34Kw9DUwyOICJnlA
+         TDO8vFDl5XWB7NK3IkTQ9elhmngw/tZaCfjLOYiI=
+X-UI-Sender-Class: 01bb95c1-4bf8-414a-932a-4f6e2808ef9c
+Received: from [0.0.0.0] ([149.28.201.231]) by mail.gmx.net (mrgmx104
+ [212.227.17.174]) with ESMTPSA (Nemesis) id 1N5mKJ-1l1HCp35Kd-017CtR; Tue, 27
+ Jul 2021 01:06:05 +0200
+Subject: Re: [PATCH] btrfs/177: Adjust resize output message
+To:     Marcos Paulo de Souza <mpdesouza@suse.com>,
+        linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Cc:     dsterba@suse.com, guaneryu@gmail.com
+References: <20210726193738.14992-1-mpdesouza@suse.com>
+From:   Qu Wenruo <quwenruo.btrfs@gmx.com>
+Message-ID: <589a82aa-1a11-f4d2-e9bd-672f1ef21e50@gmx.com>
+Date:   Tue, 27 Jul 2021 07:06:01 +0800
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.12.0
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+In-Reply-To: <20210726193738.14992-1-mpdesouza@suse.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: quoted-printable
+X-Provags-ID: V03:K1:KOwe3UKfJbslyGQJiTKxgchnXxU7cymz3urtNPg2EbEPoh1kvW2
+ LysezHUoXMIW39d1FghGH0ZhQY8hBQ/ZTCbJQ6S6GRtVT5MBoJ7m7lvpOY92polrfpKfxTF
+ 7XyozbFQo+OpYdy66RQ3ZKiY2PdJD4XDUUelpD04NEnSQcMVB0dYL3srs2aiU+i3V1Q9zev
+ +d6rwNOKjHjqP/GTx1dwA==
+X-UI-Out-Filterresults: notjunk:1;V03:K0:pptC9AalOXo=:987MDMn2DLDWj76obH01I/
+ GsgAKkGBaP6mcsiIitFrHYcuCa2Nxj76tk8/RhC8XcNccGJgbtwsKluD1B7ryTJV4VkBKJMDN
+ EJX7lH/3YFkrNbebut8PF6grWVTwjTuwzyrpUyak3eGdrqPk/qdacmUhnM3g1/nOqbw2l40y8
+ /uEEbuIhEpbbG0lRRqWjaVL93ArQ5sbmfjyldPqTDYEI+uwvVDIHMDhcUdp9WkcDLrXyZHxI7
+ ESWtcIrQJHwFHDGxpYBSl/brBKS/uR9UVO+JHqO5mlb9Xk1ohU7oSOWmKZ2zrCb2x4FI4rU4L
+ 6vFRR9KPzzWfnOueSGMHTAw0cvdbnLKxMb8/8HTZ/BfMbAGMW0zSkuc2rMoR+j+Fu3l0HaXPI
+ vlW3/wPFxmpYc5XmUj+NjvzhX+hN90uOTSMCtIsc9URlp4ggHpCjQZL8syTIebW5iwjFkgytK
+ OyFNI3Wj4/ISTQhM318PDA8cktFs1HINXzk9FS3JJ0L/JqdRyAvsfqpMzgkxGfqO4aF2oNMIH
+ WprPHvr52UieLZPEHEjGedLGNitAlwoZVLjKG0nx1DHcYJAVXmJrrFJnXIf1sloqVcU5uh2xT
+ ibiYeU3wJlY0idnB4tkhr3PGROIcdpBURK7Y1yequil8WjIUoCTw6ek2q0dt3rmDsUV5SdIOA
+ 2fKywJTUd3rAydAKjEe5pw7qJz9lY8i2tmGaNL1y2fo17EcaU/A8lwFqrnqsq03ptCV61Td7r
+ NVQ9i5ht4CsNhJmnakkntgWUNwsqyFFxd/juwy1CWLoQHXrYubjPkIngc4I8oZPiSCl5jKSxX
+ NJI40NYgZ8f3upOc+wXLrAO/lavAw0F5FxPyfL5OGf3pxDy1GIx84HQoSOJcsiRlT86OkBEeE
+ a6Rm6Ryi0qN8hvb2jMMZwfdcoxV8OxG9PqxNz3Cr+nDvQihI+2cl7/pSCf8bjcd1TUprVZ7KV
+ AvZJGdBxekSTCUxWyEYgnsRXZBXiIhfw7X2eu5W70w3iWJ4BIjoIl/GWaEFaqu+KBL+IikPjN
+ 1thb1Fden8Ngrl2AKG43wNjzl8uHCfP+HuEq0A95toHLlJ5fnq9G5fRnOts3EwnQLurrRUDbD
+ WSC4nIvDffjaRHKHCGYFh4bSdX2F8RPox+F1R73ZWj26/3Dcwm0x264Vw==
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Commit 78aa1d95dd99 ("btrfs-progs: fi resize: make output more
-readable") added the device id of the resized fs along with a pretty
-printed size. Adjust the expected output of the test.
 
-Signed-off-by: Marcos Paulo de Souza <mpdesouza@suse.com>
----
- tests/btrfs/177.out | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/tests/btrfs/177.out b/tests/btrfs/177.out
-index 63aca0e5..b1cc5db0 100644
---- a/tests/btrfs/177.out
-+++ b/tests/btrfs/177.out
-@@ -1,4 +1,4 @@
- QA output created by 177
--Resize 'SCRATCH_MNT' of '3221225472'
-+Resize device id 1 (SCRATCH_DEV) from 1.00GiB to 3.00GiB
- Text file busy
--Resize 'SCRATCH_MNT' of '1073741824'
-+Resize device id 1 (SCRATCH_DEV) from 3.00GiB to 1.00GiB
--- 
-2.26.2
+On 2021/7/27 =E4=B8=8A=E5=8D=883:37, Marcos Paulo de Souza wrote:
+> Commit 78aa1d95dd99 ("btrfs-progs: fi resize: make output more
+> readable") added the device id of the resized fs along with a pretty
+> printed size. Adjust the expected output of the test.
+>
+> Signed-off-by: Marcos Paulo de Souza <mpdesouza@suse.com>
+> ---
+>   tests/btrfs/177.out | 4 ++--
+>   1 file changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/tests/btrfs/177.out b/tests/btrfs/177.out
+> index 63aca0e5..b1cc5db0 100644
+> --- a/tests/btrfs/177.out
+> +++ b/tests/btrfs/177.out
+> @@ -1,4 +1,4 @@
+>   QA output created by 177
+> -Resize 'SCRATCH_MNT' of '3221225472'
+> +Resize device id 1 (SCRATCH_DEV) from 1.00GiB to 3.00GiB
+>   Text file busy
+> -Resize 'SCRATCH_MNT' of '1073741824'
+> +Resize device id 1 (SCRATCH_DEV) from 3.00GiB to 1.00GiB
 
+This will make older btrfs-progs fail the test.
+
+IMHO the proper way is to introduce a filter to handle both output format.
+
+Thanks,
+Qu
+>
