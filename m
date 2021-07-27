@@ -6,49 +6,49 @@ X-Spam-Status: No, score=-17.0 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 50445C432BE
-	for <linux-fstests@archiver.kernel.org>; Tue, 27 Jul 2021 20:10:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 78B51C432BE
+	for <linux-fstests@archiver.kernel.org>; Tue, 27 Jul 2021 20:10:58 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 38DCC60F9B
-	for <linux-fstests@archiver.kernel.org>; Tue, 27 Jul 2021 20:10:53 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6305560F93
+	for <linux-fstests@archiver.kernel.org>; Tue, 27 Jul 2021 20:10:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231624AbhG0UKx (ORCPT
+        id S232123AbhG0UK5 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 27 Jul 2021 16:10:53 -0400
-Received: from mail-pl1-f175.google.com ([209.85.214.175]:34406 "EHLO
-        mail-pl1-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229681AbhG0UKw (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 27 Jul 2021 16:10:52 -0400
-Received: by mail-pl1-f175.google.com with SMTP id d1so10244944pll.1;
-        Tue, 27 Jul 2021 13:10:51 -0700 (PDT)
+        Tue, 27 Jul 2021 16:10:57 -0400
+Received: from mail-pj1-f41.google.com ([209.85.216.41]:42968 "EHLO
+        mail-pj1-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S232013AbhG0UK4 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 27 Jul 2021 16:10:56 -0400
+Received: by mail-pj1-f41.google.com with SMTP id o44-20020a17090a0a2fb0290176ca3e5a2fso856092pjo.1;
+        Tue, 27 Jul 2021 13:10:55 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=X0wE//9HEqgwixzn3DN6w89is3z00f/t9Uc1uapEcFM=;
-        b=DDghwk55mmd8mk+ce75D55/9nDA/U8F3AhBHDhVbBZDkLTl4N0l8VoAzNfsBLkdyR3
-         amFuFA9YC/vUIXG25x6CxzgvPXFacHsseCekBVLwQ7H3iQgy5EkN3ouPipFUxvRlkX3n
-         CdNW+1dZzuQR7EzI4ib/i7jWnW5a0q1ts8a0hlfUdN6l5HbjRV4TC7UFJfU7BhYKWjdg
-         /0+bpvUrmqxThNI8ebBMNWHfhTjcAgnXUUGFDGxEaQ8d4PdVySymak1Jl1AcD+I7bK+z
-         XJAiefTEK2piDMrsYHr5aobmenj4ojtfNcp0W9A1ixj3b7Mn1CO931zMm4SQxBc8wbdj
-         JBDA==
-X-Gm-Message-State: AOAM530j4Y/ZTDmDkHQnr57K924vXJWv6ZKODYJgijWan6HRMYUiiVbk
-        EOS1xIvERHnwMuXvjE2wejybooojti0=
-X-Google-Smtp-Source: ABdhPJwtH/th0vT1ycklEZcYiTe97opY4s3/d0QLljvKYDRB//7itYCusI6O5h+4brJekhccvDJdug==
-X-Received: by 2002:a17:90a:bd18:: with SMTP id y24mr5955132pjr.83.1627416650857;
-        Tue, 27 Jul 2021 13:10:50 -0700 (PDT)
+        bh=Glu03wx1EO+cRL+474sUvuGcwz/C/1OdSRJGdquxArU=;
+        b=DfY9o1dbKJe7ZcE4nnMeU9nkIxC/EdzhWFRs6rOZbZ713qQuFwctJr+O7IPWNqN3Vp
+         dvlX2ixAYHfC2xgYRN+/YMmLmUQbQwCFrlavDeQWw+0i87cUUOm0il6xoRJpJZ452Aiu
+         hwFPjh7/kw4M7tlIRirgiGEAHyRReGHxRU6XhtDicF7xzS/YOo7UG6a7eVgOItMgOG9G
+         F+5Pow8a59QVCvXqk1vD5S9ZXp8O0FKe/wjHsBXxNR7UnkEHuOmfUNlHAamsNazJOXXu
+         KsxbYb9zmxyUMrLY12fMZMDruFXvyAXpVHgpL9l51pXmRSyOqLurkApaFdJxFns2ZU3J
+         aM5g==
+X-Gm-Message-State: AOAM5313HENKHhErFuDlPhioFloC83hGiZ10F0XoavDDyCmZViRpmHpa
+        xVm2iev101agBwYkIsF+J6LB2XAY5yw=
+X-Google-Smtp-Source: ABdhPJwHAwoc/tK2eDf9255hc8caNkNYgNs84Y0UZ+fINypfg8g46KSUM7llgRPnE2Qm6Fbj91gihQ==
+X-Received: by 2002:a05:6a00:b46:b029:334:54db:af17 with SMTP id p6-20020a056a000b46b029033454dbaf17mr24790725pfo.26.1627416654449;
+        Tue, 27 Jul 2021 13:10:54 -0700 (PDT)
 Received: from localhost ([191.96.121.85])
-        by smtp.gmail.com with ESMTPSA id y4sm3752116pjg.9.2021.07.27.13.10.49
+        by smtp.gmail.com with ESMTPSA id l9sm3622698pjq.40.2021.07.27.13.10.51
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 27 Jul 2021 13:10:49 -0700 (PDT)
+        Tue, 27 Jul 2021 13:10:52 -0700 (PDT)
 From:   Luis Chamberlain <mcgrof@kernel.org>
 To:     fstests@vger.kernel.org
 Cc:     hare@suse.de, dgilbert@interlog.com, jeyu@kernel.org,
         lucas.demarchi@intel.com, linux-kernel@vger.kernel.org,
         Luis Chamberlain <mcgrof@kernel.org>
-Subject: [PATCH 1/4] common/config: disable udevadm settle if CONFIG_NET is disabled
-Date:   Tue, 27 Jul 2021 13:10:42 -0700
-Message-Id: <20210727201045.2540681-2-mcgrof@kernel.org>
+Subject: [PATCH 2/4] common/scsi_debug: use udevadm settle instead of sleeping
+Date:   Tue, 27 Jul 2021 13:10:43 -0700
+Message-Id: <20210727201045.2540681-3-mcgrof@kernel.org>
 X-Mailer: git-send-email 2.30.2
 In-Reply-To: <20210727201045.2540681-1-mcgrof@kernel.org>
 References: <20210727201045.2540681-1-mcgrof@kernel.org>
@@ -58,37 +58,44 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-If CONFIG_NET is disabled kobject_uevent_net_broadcast() will be a no-op
-and so no uevent are sent and so 'udevadm settle' won't really do
-anything for you.
+The variable UDEV_SETTLE_PROG is already defined and used for
+lvm to either use `udevadm settle` in case it is available, and
+if not, use 'sleep 1' otherwise (ancient distros or CONFIG_NET
+is missing).
 
-We check for /proc/net to see if CONFIG_NET was enabled.
+Use it on scsi_debug to replace the sleep calls sprinkled in
+place after module removal. The correct thing to do is to
+just use udevadm settle when available, and only fall back to
+calling sleep when udevadm is not available or CONFIG_NET
+is disabled.
 
 Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
 ---
- common/config | 9 ++++++++-
- 1 file changed, 8 insertions(+), 1 deletion(-)
+ common/scsi_debug | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/common/config b/common/config
-index adc16b59..005fd50a 100644
---- a/common/config
-+++ b/common/config
-@@ -240,7 +240,14 @@ else
- 	UDEV_SETTLE_PROG="$UDEV_SETTLE_PROG settle"
- fi
- # neither command is available, use sleep 1
--if [ "$UDEV_SETTLE_PROG" == "" ]; then
-+#
-+# Udev events are sent via netlink to userspace through
-+# kobject_uevent_net_broadcast(), and udev in userspace is in charge of
-+# handling the events. The command `udevadm settle` just checks if
-+# /run/udev/queue is 0, however, a kernel without CONFIG_NET will have
-+# kobject_uevent_net_broadcast() be a no-op, and so /run/udev/queue may not
-+# exist or always be 0. We check for /proc/net to see CONFIG_NET was enabled.
-+if [[ "$UDEV_SETTLE_PROG" == "" || ! -d /proc/net ]]; then
- 	UDEV_SETTLE_PROG="sleep 1"
- fi
- export UDEV_SETTLE_PROG
+diff --git a/common/scsi_debug b/common/scsi_debug
+index d9aa0bd2..e7988469 100644
+--- a/common/scsi_debug
++++ b/common/scsi_debug
+@@ -36,7 +36,7 @@ _get_scsi_debug_dev()
+ 	echo "scsi_debug options $opts" >> $seqres.full
+ 	modprobe scsi_debug $opts
+ 	[ $? -eq 0 ] || _fail "scsi_debug modprobe failed"
+-	sleep 1
++	$UDEV_SETTLE_PROG
+ 	device=`grep -wl scsi_debug /sys/block/sd*/device/model | awk -F / '{print $4}'`
+ 	echo "/dev/$device"
+ }
+@@ -50,7 +50,7 @@ _put_scsi_debug_dev()
+ 	# modprobe is only quiet when the module is not found, not when the
+ 	# module is in use.
+ 	while [ $n -ge 0 ] && ! modprobe -nr scsi_debug >/dev/null 2>&1; do
+-		sleep 1
++		$UDEV_SETTLE_PROG
+ 		n=$((n-1))
+ 	done
+ 	rmmod scsi_debug || _fail "Could not remove scsi_debug module"
 -- 
 2.29.2
 
