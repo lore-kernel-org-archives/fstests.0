@@ -2,83 +2,93 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.0 required=3.0 tests=BAYES_00,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-17.0 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8A210C4338F
-	for <linux-fstests@archiver.kernel.org>; Tue, 27 Jul 2021 20:10:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 50445C432BE
+	for <linux-fstests@archiver.kernel.org>; Tue, 27 Jul 2021 20:10:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6AFAA60F93
-	for <linux-fstests@archiver.kernel.org>; Tue, 27 Jul 2021 20:10:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 38DCC60F9B
+	for <linux-fstests@archiver.kernel.org>; Tue, 27 Jul 2021 20:10:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230425AbhG0UKv (ORCPT
+        id S231624AbhG0UKx (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 27 Jul 2021 16:10:51 -0400
-Received: from mail-pj1-f46.google.com ([209.85.216.46]:55172 "EHLO
-        mail-pj1-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229681AbhG0UKu (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 27 Jul 2021 16:10:50 -0400
-Received: by mail-pj1-f46.google.com with SMTP id b6so1552402pji.4;
-        Tue, 27 Jul 2021 13:10:49 -0700 (PDT)
+        Tue, 27 Jul 2021 16:10:53 -0400
+Received: from mail-pl1-f175.google.com ([209.85.214.175]:34406 "EHLO
+        mail-pl1-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229681AbhG0UKw (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 27 Jul 2021 16:10:52 -0400
+Received: by mail-pl1-f175.google.com with SMTP id d1so10244944pll.1;
+        Tue, 27 Jul 2021 13:10:51 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=Kg/ju0I1JrG6XeKBzgXboejkxMZ61/+s/UAjeWoiHrc=;
-        b=qmxz9UGAnQSUsMXRYTdSUl4l2l/Fgw3S5NvXA4YYt0yVjwJ1WQJFCoda2dM02c0DK9
-         3wlCGYOSEP3zgn1xyr+YjjwOnutT6+hRejqQHGnxoJHM1Ec5ttXQttLCQLdPKGtofI6A
-         0ygTXv5T+wSPmDV+CJCIgQHzXyvaBEhteLuH/+99MkGt3dRM/2tx7XFnenuKSfOB3WFe
-         zjOdj7j41UGh5zSv3yCKikG5yJX0fMkimGJi0chka74hpwRYSji//O1GKmDLLBWuHL/w
-         2ZGdinXdj0GEsqT5C+aAkKZBjdkoVvt2NYQvHQvx4ILNo/qWAtFyq77EhYQ4d9swIEXo
-         UY2g==
-X-Gm-Message-State: AOAM530IwCmcPMjoO1l/uLD2Erd14Hy93MaY/FL5MHBykA1v2Y1k5qF+
-        7xTv1CRWwpuMM2ApwsiDRqvFiSCUYXo=
-X-Google-Smtp-Source: ABdhPJxtgprv3sRQ1EJ/rLM8TdGkcxhcs2mq6gaiGYqElotkUtOTJlIT9tiTCCMco2e/aC5+ATkIGw==
-X-Received: by 2002:a17:90a:a585:: with SMTP id b5mr18406410pjq.219.1627416648526;
-        Tue, 27 Jul 2021 13:10:48 -0700 (PDT)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=X0wE//9HEqgwixzn3DN6w89is3z00f/t9Uc1uapEcFM=;
+        b=DDghwk55mmd8mk+ce75D55/9nDA/U8F3AhBHDhVbBZDkLTl4N0l8VoAzNfsBLkdyR3
+         amFuFA9YC/vUIXG25x6CxzgvPXFacHsseCekBVLwQ7H3iQgy5EkN3ouPipFUxvRlkX3n
+         CdNW+1dZzuQR7EzI4ib/i7jWnW5a0q1ts8a0hlfUdN6l5HbjRV4TC7UFJfU7BhYKWjdg
+         /0+bpvUrmqxThNI8ebBMNWHfhTjcAgnXUUGFDGxEaQ8d4PdVySymak1Jl1AcD+I7bK+z
+         XJAiefTEK2piDMrsYHr5aobmenj4ojtfNcp0W9A1ixj3b7Mn1CO931zMm4SQxBc8wbdj
+         JBDA==
+X-Gm-Message-State: AOAM530j4Y/ZTDmDkHQnr57K924vXJWv6ZKODYJgijWan6HRMYUiiVbk
+        EOS1xIvERHnwMuXvjE2wejybooojti0=
+X-Google-Smtp-Source: ABdhPJwtH/th0vT1ycklEZcYiTe97opY4s3/d0QLljvKYDRB//7itYCusI6O5h+4brJekhccvDJdug==
+X-Received: by 2002:a17:90a:bd18:: with SMTP id y24mr5955132pjr.83.1627416650857;
+        Tue, 27 Jul 2021 13:10:50 -0700 (PDT)
 Received: from localhost ([191.96.121.85])
-        by smtp.gmail.com with ESMTPSA id 78sm4660358pfw.189.2021.07.27.13.10.47
+        by smtp.gmail.com with ESMTPSA id y4sm3752116pjg.9.2021.07.27.13.10.49
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 27 Jul 2021 13:10:47 -0700 (PDT)
+        Tue, 27 Jul 2021 13:10:49 -0700 (PDT)
 From:   Luis Chamberlain <mcgrof@kernel.org>
 To:     fstests@vger.kernel.org
 Cc:     hare@suse.de, dgilbert@interlog.com, jeyu@kernel.org,
         lucas.demarchi@intel.com, linux-kernel@vger.kernel.org,
         Luis Chamberlain <mcgrof@kernel.org>
-Subject: [PATCH 0/4] scsi_debug: improve failure rates
-Date:   Tue, 27 Jul 2021 13:10:41 -0700
-Message-Id: <20210727201045.2540681-1-mcgrof@kernel.org>
+Subject: [PATCH 1/4] common/config: disable udevadm settle if CONFIG_NET is disabled
+Date:   Tue, 27 Jul 2021 13:10:42 -0700
+Message-Id: <20210727201045.2540681-2-mcgrof@kernel.org>
 X-Mailer: git-send-email 2.30.2
+In-Reply-To: <20210727201045.2540681-1-mcgrof@kernel.org>
+References: <20210727201045.2540681-1-mcgrof@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-When using scsi_debug to create virtual devices we can often run into
-failures which are really just false positives, and the failure was the
-inability to remove the module. Addressing this is not easy. While we
-can learn from what blktests folks do and use udevadm settle, that's
-not sufficient by any means. This addresses the other pieces needed.
+If CONFIG_NET is disabled kobject_uevent_net_broadcast() will be a no-op
+and so no uevent are sent and so 'udevadm settle' won't really do
+anything for you.
 
-More work is also needed on the scsi_debug driver front.
+We check for /proc/net to see if CONFIG_NET was enabled.
 
-Makes me wonder if a patient kmod removal option is then desirable
-upstream on kmod (just the one which waits to refcnt 0), given this sort
-of test case. Lucas?
+Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
+---
+ common/config | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
 
-Luis Chamberlain (4):
-  common/config: disable udevadm settle if CONFIG_NET is disabled
-  common/scsi_debug: use udevadm settle instead of sleeping
-  common/module: add a patient module rmmod
-  common/scsi_debug: use the patient module remover
-
- common/config     |  9 ++++++++-
- common/module     | 48 +++++++++++++++++++++++++++++++++++++++++++++++
- common/scsi_debug | 10 ++++++----
- 3 files changed, 62 insertions(+), 5 deletions(-)
-
+diff --git a/common/config b/common/config
+index adc16b59..005fd50a 100644
+--- a/common/config
++++ b/common/config
+@@ -240,7 +240,14 @@ else
+ 	UDEV_SETTLE_PROG="$UDEV_SETTLE_PROG settle"
+ fi
+ # neither command is available, use sleep 1
+-if [ "$UDEV_SETTLE_PROG" == "" ]; then
++#
++# Udev events are sent via netlink to userspace through
++# kobject_uevent_net_broadcast(), and udev in userspace is in charge of
++# handling the events. The command `udevadm settle` just checks if
++# /run/udev/queue is 0, however, a kernel without CONFIG_NET will have
++# kobject_uevent_net_broadcast() be a no-op, and so /run/udev/queue may not
++# exist or always be 0. We check for /proc/net to see CONFIG_NET was enabled.
++if [[ "$UDEV_SETTLE_PROG" == "" || ! -d /proc/net ]]; then
+ 	UDEV_SETTLE_PROG="sleep 1"
+ fi
+ export UDEV_SETTLE_PROG
 -- 
 2.29.2
 
