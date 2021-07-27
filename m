@@ -2,122 +2,184 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-19.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BF7D9C4338F
-	for <linux-fstests@archiver.kernel.org>; Tue, 27 Jul 2021 04:45:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 17B94C4338F
+	for <linux-fstests@archiver.kernel.org>; Tue, 27 Jul 2021 10:25:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A24CD6109D
-	for <linux-fstests@archiver.kernel.org>; Tue, 27 Jul 2021 04:45:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E6F2A617E5
+	for <linux-fstests@archiver.kernel.org>; Tue, 27 Jul 2021 10:25:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234904AbhG0Epd (ORCPT
+        id S236220AbhG0KZq (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 27 Jul 2021 00:45:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55798 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229563AbhG0Epc (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 27 Jul 2021 00:45:32 -0400
-Received: from mail-pj1-x102f.google.com (mail-pj1-x102f.google.com [IPv6:2607:f8b0:4864:20::102f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 500E0C061757;
-        Mon, 26 Jul 2021 21:45:32 -0700 (PDT)
-Received: by mail-pj1-x102f.google.com with SMTP id l19so16162925pjz.0;
-        Mon, 26 Jul 2021 21:45:32 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=references:user-agent:from:to:cc:subject:in-reply-to:date
-         :message-id:mime-version;
-        bh=MvHn3DsxO6LcgsiELBLzk58v37eYJc5mw2066XWhaL8=;
-        b=Ge6b72aHP8zcJyQ2iKjI+dCp8iSLqVgBnq6yfNLdrxaYKIm+9lU07N+HEdwpAyj2kv
-         fILzXGvDaun+sT6yV3nGt9vaf+Zbi6RUlck4g4e109+X2zmPKdkK2K7P3kaDDBJEI7d4
-         zSDNpyv7akf/RxqHCb0LVEoyqObsg4fsllGz9j0fHtYYE7/0mrf0JBohZEd26Smo+6OX
-         E9nDiK/tGFQxHdB4Mqi27447SGNdqbXPyjpEYkPteWiccEvsgkt+CV18yDsmaJnu8WMo
-         0l6tjHpCPN9XGbiUaYug7RTLZW7JqkQGY1BygjhxgEhZCGuIMGyjwJMW4b1W3RWexiHK
-         6wJQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:references:user-agent:from:to:cc:subject
-         :in-reply-to:date:message-id:mime-version;
-        bh=MvHn3DsxO6LcgsiELBLzk58v37eYJc5mw2066XWhaL8=;
-        b=oSXXyqeenqwXwMXOU/bzTQxkAR3Lf/4O/RMH5wplXCvUXRD6T56VZ5/rr9GB9RD9hP
-         bs7VYWr2/sbHIRk8m18CEklal4hgHe0THqmOvnXQetXWDC6JUl4/2QxzDB8Db0Rrvfd0
-         kzGqSGf5WO1sR1OmmHfAK8yJnpEADzQqo8O3IGC+XPMHCmQgQ5yyjvmV81ntbGy2abRJ
-         0ADHElVSkNJ67Kye8W8IVEYEjeoZP/1FSywICNomtiDLStIcnR/Ea/H+9XlHv3Y2yz3D
-         Z05zktUEem05UvP0xHzhEHx1gWmY3DwmTizV9+zsbE8H0G6bbnHF0Lfobd/aAXRoqrc0
-         qp8w==
-X-Gm-Message-State: AOAM532gMUR+Y4xUc08p+dBgnnd2pk+KqeBJzPSLoat1n59Vbo5lzlRg
-        GX56uNz7R0wGmcyakeklOENDVbT/KTk=
-X-Google-Smtp-Source: ABdhPJx/SkaCIQqP8z411XshysimP5vHI7MX1YIRp2aPkjiPeu2oSooOpqyC6GEJK/3htPVOqHe57w==
-X-Received: by 2002:a17:90b:1645:: with SMTP id il5mr20155428pjb.113.1627361131689;
-        Mon, 26 Jul 2021 21:45:31 -0700 (PDT)
-Received: from garuda ([122.171.185.191])
-        by smtp.gmail.com with ESMTPSA id v10sm1795617pfg.160.2021.07.26.21.45.29
-        (version=TLS1_2 cipher=ECDHE-ECDSA-CHACHA20-POLY1305 bits=256/256);
-        Mon, 26 Jul 2021 21:45:31 -0700 (PDT)
-References: <20210726064313.19153-1-chandanrlinux@gmail.com> <20210726064313.19153-3-chandanrlinux@gmail.com> <20210726171916.GV559212@magnolia>
-User-agent: mu4e 1.0; emacs 26.1
-From:   Chandan Babu R <chandanrlinux@gmail.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     fstests@vger.kernel.org, guaneryu@gmail.com,
-        linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 3/3] xfs/530: Bail out if either of reflink or rmapbt is enabled
-In-reply-to: <20210726171916.GV559212@magnolia>
-Date:   Tue, 27 Jul 2021 10:15:27 +0530
-Message-ID: <87fsw0fjq0.fsf@garuda>
+        Tue, 27 Jul 2021 06:25:46 -0400
+Received: from mail.kernel.org ([198.145.29.99]:47916 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S236186AbhG0KZq (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 27 Jul 2021 06:25:46 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id D2E67617E4;
+        Tue, 27 Jul 2021 10:25:45 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1627381546;
+        bh=vzfJ9FEqcWDsy5agYuNTWuR98wOyWGY4I2rjGKnPBOc=;
+        h=From:To:Cc:Subject:Date:From;
+        b=S/O9eidOutXUeBT45Tb6qY8850jujqUwvlmH4YbaNIw8fJY3e/eUdSboifb3tvNNG
+         338hQ9k86RGyjAbtG71X/Xsm3NaKmwYDP6W92dO6wXMWUFPa7miM1JfCxvS2ctnpRN
+         T1uSgbMYNTVdCLyBBm4TVlL09YNnJKKK3IPyByCuRSvkh7vkjV1P1Es9nqepPyrI4U
+         CmwZkBgqjwZ6jBL1yi1z9P2juWWM8vRqw/mMXSfTDs9nMBLLM6QoGqB4qgv105zQ/r
+         KN21Jhz2+yUJ0/zpmUxzMKwG//zbOkeIvqpRQJe1K26Ar4fr4gXojRG/Ob7vyCbVU4
+         qSXP4d+aqaGCg==
+From:   fdmanana@kernel.org
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] generic: test for file loss after mix of rename, fsync and inode eviction
+Date:   Tue, 27 Jul 2021 11:24:59 +0100
+Message-Id: <bff6929ef4dd5c94df382bd92019388ddce60456.1627380983.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.28.0
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 26 Jul 2021 at 22:49, Darrick J. Wong wrote:
-> On Mon, Jul 26, 2021 at 12:13:13PM +0530, Chandan Babu R wrote:
->> _scratch_do_mkfs constructs a mkfs command line by concatenating the values of
->> 1. $mkfs_cmd
->> 2. $MKFS_OPTIONS
->> 3. $extra_mkfs_options
->>
->> The corresponding mkfs command line fails if $MKFS_OPTIONS enables either
->> reflink or rmapbt feature. The failure occurs because the test tries to create
->> a filesystem with realtime device enabled. In such a case, _scratch_do_mkfs()
->> will construct and invoke an mkfs command line without including the value of
->> $MKFS_OPTIONS.
->>
->> To prevent such silent failures, this commit causes the test to exit if it
->> detects either reflink or rmapbt feature being enabled.
->
-> Er, what combinations of mkfs.xfs and MKFS_OPTIONS cause this result?
-> What kind of fs configuration comes out of that?
+From: Filipe Manana <fdmanana@suse.com>
 
-With MKFS_OPTIONS set as shown below,
+Test that if we fsync a directory A, evict A's inode, move one file from
+directory A to directory B, fsync some other inode that is not directory
+A, B or any inode inside these two directories, and then power fail, the
+file that was moved is not lost.
 
-export MKFS_OPTIONS="-m reflink=1 -b size=1k"
+This currently fails on btrfs and is fixed by a patch that has the
+following subject:
 
-_scratch_do_mkfs() invokes mkfs.xfs with both realtime and reflink options
-enabled. Such an invocation of mkfs.xfs fails causing _scratch_do_mkfs() to
-ignore the contents of $MKFS_OPTIONS while constructing and invoking mkfs.xfs
-once again.
+ "btrfs: fix lost inode on log replay after mix of fsync, rename and inode eviction"
 
-This time, the fs block size will however be set to 4k (the default block
-size). At the beginning of the test we would have obtained the block size of
-the filesystem as 1k and used it to compute the size of the realtime device
-required to overflow realtime bitmap inode's max pseudo extent count.
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/generic/640     | 101 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/640.out |   2 +
+ 2 files changed, 103 insertions(+)
+ create mode 100755 tests/generic/640
+ create mode 100644 tests/generic/640.out
 
-Invocation of xfs_growfs (made later in the test) ends up succeeding since a
-4k fs block can accommodate more bits than a 1k fs block.
+diff --git a/tests/generic/640 b/tests/generic/640
+new file mode 100755
+index 00000000..a9346d5b
+--- /dev/null
++++ b/tests/generic/640
+@@ -0,0 +1,101 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2021 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FSQA Test No. 640
++#
++# Test that if we fsync a directory A, evict A's inode, move one file from
++# directory A to a directory B, fsync some other inode that is not directory A,
++# B or any inode inside these two directories, and then power fail, the file
++# that was moved is not lost.
++#
++. ./common/preamble
++_begin_fstest auto quick log
++
++# Override the default cleanup function.
++_cleanup()
++{
++	_cleanup_flakey
++	cd /
++	rm -f $tmp.*
++}
++
++# Import common functions.
++. ./common/filter
++. ./common/dmflakey
++
++# real QA test starts here
++_supported_fs generic
++_require_scratch
++_require_dm_target flakey
++
++_scratch_mkfs >>$seqres.full 2>&1
++_require_metadata_journaling $SCRATCH_DEV
++_init_flakey
++_mount_flakey
++
++# Create two test directories, one with a file we will rename later.
++mkdir $SCRATCH_MNT/A
++mkdir $SCRATCH_MNT/B
++echo -n "hello world" > $SCRATCH_MNT/A/foo
++
++# Persist everything done so far.
++sync
++
++# Add some new file to directory A and fsync the directory.
++touch $SCRATCH_MNT/A/bar
++$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/A
++
++# Now evict all inodes from memory. To trigger the original problem on btrfs we
++# actually only needed to trigger eviction of A's inode, but there's no simple
++# way to evict a single inode, so evict everything.
++echo 2 > /proc/sys/vm/drop_caches
++
++# Now move file foo from directory A to directory B.
++mv $SCRATCH_MNT/A/foo $SCRATCH_MNT/B/foo
++
++# Now make an fsync to anything except A, B or any file inside them, like for
++# example create a file at the root directory and fsync this new file.
++touch $SCRATCH_MNT/baz
++$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/baz
++
++# Simulate a power failure and then check file foo still exists.
++_flakey_drop_and_remount
++
++# Since file foo was not explicitly fsynced we can not guarantee that, for every
++# filesystem, after replaying the journal/log we have file foo inside directory A
++# or inside directory B. The file must exist however, and can only be found in
++# one of the directories, not on both.
++#
++# At the moment of this writing, on f2fs file foo exists always at A/foo,
++# regardless of the fsync-mode mount option ("-o fsync_mode=posix" or
++# "-o fsync_mode=strict"). On ext4 and xfs it exists at B/foo. It is also
++# supposed to exist at B/foo on btrfs (at the moment it doesn't exist in
++# either directory due to a bug).
++
++foo_in_a=0
++foo_in_b=0
++
++if [ -f $SCRATCH_MNT/A/foo ]; then
++	echo "File foo data: $(cat $SCRATCH_MNT/A/foo)"
++	foo_in_a=1
++fi
++
++if [ -f $SCRATCH_MNT/B/foo ]; then
++	echo "File foo data: $(cat $SCRATCH_MNT/B/foo)"
++	foo_in_b=1
++fi
++
++if [ $foo_in_a -eq 1 ] && [ $foo_in_b -eq 1 ]; then
++	echo "File foo found in A/ and B/"
++elif [ $foo_in_a -eq 0 ] && [ $foo_in_b -eq 0 ]; then
++	echo "File foo is missing"
++fi
++
++# While here, also check that files bar and baz exist.
++[ -f $SCRATCH_MNT/A/bar ] || echo "File A/bar is missing"
++[ -f $SCRATCH_MNT/baz ] || echo "File baz is missing"
++
++_unmount_flakey
++status=0
++exit
+diff --git a/tests/generic/640.out b/tests/generic/640.out
+new file mode 100644
+index 00000000..a19db353
+--- /dev/null
++++ b/tests/generic/640.out
+@@ -0,0 +1,2 @@
++QA output created by 640
++File foo data: hello world
+-- 
+2.28.0
 
->
-> Eventually, the plan is to support rmap[1] and reflink[2] on the
-> realtime device, at which point this will have to be torn out and a
-> better solution found.
->
-> --D
->
-> [1] https://git.kernel.org/pub/scm/linux/kernel/git/djwong/xfs-linux.git/log/?h=realtime-rmap
-> [2] https://git.kernel.org/pub/scm/linux/kernel/git/djwong/xfs-linux.git/log/?h=realtime-reflink
->
-
---
-chandan
