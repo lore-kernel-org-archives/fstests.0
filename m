@@ -2,104 +2,214 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DF04AC4338F
-	for <linux-fstests@archiver.kernel.org>; Mon, 26 Jul 2021 23:06:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AF0E2C4338F
+	for <linux-fstests@archiver.kernel.org>; Tue, 27 Jul 2021 02:36:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AF82860F23
-	for <linux-fstests@archiver.kernel.org>; Mon, 26 Jul 2021 23:06:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8B08260F94
+	for <linux-fstests@archiver.kernel.org>; Tue, 27 Jul 2021 02:36:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233491AbhGZWZl (ORCPT
+        id S233731AbhG0B4C (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 26 Jul 2021 18:25:41 -0400
-Received: from mout.gmx.net ([212.227.17.20]:56015 "EHLO mout.gmx.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S233380AbhGZWZk (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 26 Jul 2021 18:25:40 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net;
-        s=badeba3b8450; t=1627340765;
-        bh=VioI7NqYAgN335cCZu8hri0EblGv0CYujKKQw34Mf8M=;
-        h=X-UI-Sender-Class:Subject:To:Cc:References:From:Date:In-Reply-To;
-        b=NLgWyiyBYwG8Ly3QF4QgYQ8M7lM/M4jlj5lV0tr/EqaD8ZCJmeIZqwof4dYpEM0SN
-         0Rc05CwUAhNjtc+uBN/JZXRjf442oIJaLA0SBzsQqBV0aSuZRJ34Kw9DUwyOICJnlA
-         TDO8vFDl5XWB7NK3IkTQ9elhmngw/tZaCfjLOYiI=
-X-UI-Sender-Class: 01bb95c1-4bf8-414a-932a-4f6e2808ef9c
-Received: from [0.0.0.0] ([149.28.201.231]) by mail.gmx.net (mrgmx104
- [212.227.17.174]) with ESMTPSA (Nemesis) id 1N5mKJ-1l1HCp35Kd-017CtR; Tue, 27
- Jul 2021 01:06:05 +0200
-Subject: Re: [PATCH] btrfs/177: Adjust resize output message
-To:     Marcos Paulo de Souza <mpdesouza@suse.com>,
-        linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Cc:     dsterba@suse.com, guaneryu@gmail.com
-References: <20210726193738.14992-1-mpdesouza@suse.com>
-From:   Qu Wenruo <quwenruo.btrfs@gmx.com>
-Message-ID: <589a82aa-1a11-f4d2-e9bd-672f1ef21e50@gmx.com>
-Date:   Tue, 27 Jul 2021 07:06:01 +0800
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.12.0
+        Mon, 26 Jul 2021 21:56:02 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:22478 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S233727AbhG0B4C (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 26 Jul 2021 21:56:02 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1627353390;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=xhj5yfsn1R2smCFf1WTxvMtxnK2FrVjPs8PHo869m/I=;
+        b=CcUxaQ/4xZPYBb+4IuY7i/SSXykgZ6XTLoHAEqtBgPYlndNrDuUW2UmW6FP4IdnosRTDZS
+        nwO62OnbDoWXjm7e8ta83h20f4dzVdyMjQflpYx+o7jw7iXpolY5SR9sXEd+435Ns7jyYt
+        C02a6raZKHy8CUSHZVhqJ8yWbe66ub0=
+Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com
+ [209.85.216.71]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-36-wmw8Lv8eP9mZaKDzoxvDQQ-1; Mon, 26 Jul 2021 22:36:28 -0400
+X-MC-Unique: wmw8Lv8eP9mZaKDzoxvDQQ-1
+Received: by mail-pj1-f71.google.com with SMTP id f1-20020a17090a8e81b029017720af1cf6so532759pjo.9
+        for <fstests@vger.kernel.org>; Mon, 26 Jul 2021 19:36:28 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id
+         :mail-followup-to:references:mime-version:content-disposition
+         :in-reply-to;
+        bh=xhj5yfsn1R2smCFf1WTxvMtxnK2FrVjPs8PHo869m/I=;
+        b=sXl5qshfT6gxGcS/qOIdXVebawbfEhu0K3hYB9ooNFsiDDvDDhO2Q8R5tt4/5/+WhH
+         7NvnOfKcBg31bvGQtKQmgysLRyKry21NhTfiaIOFoHxnVfzERc328c7rtafhRbYgOExQ
+         5/gg073rBV49JwEjvbDWCHs0FGup4RgX/KFBYQWmwqraYxUJBJd65I35YkGXB1RM9otU
+         y4CYkE7a2k5XG4Ke7nZVctCDjN8yhTMb6v3snxoFZ4mUy/ys054Bky5G1ulO5dG3Xpar
+         43NPx0iJmlmnruXikMYiNAArWpqy17hwmb8cQPZK24IShwjPi7AWY2s4czfnEeH0Vs1F
+         YBHg==
+X-Gm-Message-State: AOAM531lsIbTh5kyaYoD+/kscdcMcGnqyvO4mHdXbxSRxwxHQFFjJlfB
+        lUAc0LlM9WG6QyYBM1a/HkZ+jrL2eEv6nQQWOUmpAaarWkXP25WfMLIVsqmxOtbqa4x6R9NQb7V
+        bLufjAdSZX03IEkwXKQ==
+X-Received: by 2002:a17:902:6509:b029:12b:5175:43b8 with SMTP id b9-20020a1709026509b029012b517543b8mr16967770plk.60.1627353387664;
+        Mon, 26 Jul 2021 19:36:27 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJwihzuVn74sr5PjU67JQUfAYtMGbD5VFwPg3k+jGNbIQq+xlQ0ZXtNmwGM/uopjf97tAm3Myg==
+X-Received: by 2002:a17:902:6509:b029:12b:5175:43b8 with SMTP id b9-20020a1709026509b029012b517543b8mr16967751plk.60.1627353387400;
+        Mon, 26 Jul 2021 19:36:27 -0700 (PDT)
+Received: from fedora ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id d9sm1236220pgm.89.2021.07.26.19.36.26
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 26 Jul 2021 19:36:27 -0700 (PDT)
+Date:   Tue, 27 Jul 2021 10:41:42 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH v5] generic: test small swapfile without page-aligned
+ contiguous blocks
+Message-ID: <20210727024142.4uld5df3akaxw54t@fedora>
+Mail-Followup-To: "Darrick J. Wong" <djwong@kernel.org>,
+        fstests@vger.kernel.org
+References: <20210726094605.513174-1-zlang@redhat.com>
+ <20210726181157.GA8586@magnolia>
 MIME-Version: 1.0
-In-Reply-To: <20210726193738.14992-1-mpdesouza@suse.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:KOwe3UKfJbslyGQJiTKxgchnXxU7cymz3urtNPg2EbEPoh1kvW2
- LysezHUoXMIW39d1FghGH0ZhQY8hBQ/ZTCbJQ6S6GRtVT5MBoJ7m7lvpOY92polrfpKfxTF
- 7XyozbFQo+OpYdy66RQ3ZKiY2PdJD4XDUUelpD04NEnSQcMVB0dYL3srs2aiU+i3V1Q9zev
- +d6rwNOKjHjqP/GTx1dwA==
-X-UI-Out-Filterresults: notjunk:1;V03:K0:pptC9AalOXo=:987MDMn2DLDWj76obH01I/
- GsgAKkGBaP6mcsiIitFrHYcuCa2Nxj76tk8/RhC8XcNccGJgbtwsKluD1B7ryTJV4VkBKJMDN
- EJX7lH/3YFkrNbebut8PF6grWVTwjTuwzyrpUyak3eGdrqPk/qdacmUhnM3g1/nOqbw2l40y8
- /uEEbuIhEpbbG0lRRqWjaVL93ArQ5sbmfjyldPqTDYEI+uwvVDIHMDhcUdp9WkcDLrXyZHxI7
- ESWtcIrQJHwFHDGxpYBSl/brBKS/uR9UVO+JHqO5mlb9Xk1ohU7oSOWmKZ2zrCb2x4FI4rU4L
- 6vFRR9KPzzWfnOueSGMHTAw0cvdbnLKxMb8/8HTZ/BfMbAGMW0zSkuc2rMoR+j+Fu3l0HaXPI
- vlW3/wPFxmpYc5XmUj+NjvzhX+hN90uOTSMCtIsc9URlp4ggHpCjQZL8syTIebW5iwjFkgytK
- OyFNI3Wj4/ISTQhM318PDA8cktFs1HINXzk9FS3JJ0L/JqdRyAvsfqpMzgkxGfqO4aF2oNMIH
- WprPHvr52UieLZPEHEjGedLGNitAlwoZVLjKG0nx1DHcYJAVXmJrrFJnXIf1sloqVcU5uh2xT
- ibiYeU3wJlY0idnB4tkhr3PGROIcdpBURK7Y1yequil8WjIUoCTw6ek2q0dt3rmDsUV5SdIOA
- 2fKywJTUd3rAydAKjEe5pw7qJz9lY8i2tmGaNL1y2fo17EcaU/A8lwFqrnqsq03ptCV61Td7r
- NVQ9i5ht4CsNhJmnakkntgWUNwsqyFFxd/juwy1CWLoQHXrYubjPkIngc4I8oZPiSCl5jKSxX
- NJI40NYgZ8f3upOc+wXLrAO/lavAw0F5FxPyfL5OGf3pxDy1GIx84HQoSOJcsiRlT86OkBEeE
- a6Rm6Ryi0qN8hvb2jMMZwfdcoxV8OxG9PqxNz3Cr+nDvQihI+2cl7/pSCf8bjcd1TUprVZ7KV
- AvZJGdBxekSTCUxWyEYgnsRXZBXiIhfw7X2eu5W70w3iWJ4BIjoIl/GWaEFaqu+KBL+IikPjN
- 1thb1Fden8Ngrl2AKG43wNjzl8uHCfP+HuEq0A95toHLlJ5fnq9G5fRnOts3EwnQLurrRUDbD
- WSC4nIvDffjaRHKHCGYFh4bSdX2F8RPox+F1R73ZWj26/3Dcwm0x264Vw==
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210726181157.GA8586@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+On Mon, Jul 26, 2021 at 11:11:57AM -0700, Darrick J. Wong wrote:
+> On Mon, Jul 26, 2021 at 05:46:05PM +0800, Zorro Lang wrote:
+> > If a swapfile doesn't contain even a single page-aligned contiguous
+> > range of blocks, it's an invalid swapfile, and might cause kernel
+> > issue. This case covered commit 5808fecc5723 ("iomap: Fix negative
+> > assignment to unsigned sis->pages in iomap_swapfile_activate").
+> > 
+> > Reviewed-by: Ritesh Harjani <riteshh@linux.ibm.com>
+> > Signed-off-by: Zorro Lang <zlang@redhat.com>
+> > ---
+> > 
+> > Hi,
+> > 
+> > V5 rebase this case on the latest xfstests, to match the "group info" change:
+> > https://lore.kernel.org/fstests/60d89a67.1c69fb81.86c2c.d6c4@mx.google.com/
+> > 
+> > Thanks,
+> > Zorro
+> > 
+> >  tests/generic/640     | 77 +++++++++++++++++++++++++++++++++++++++++++
+> >  tests/generic/640.out |  2 ++
+> >  2 files changed, 79 insertions(+)
+> >  create mode 100755 tests/generic/640
+> >  create mode 100644 tests/generic/640.out
+> > 
+> > diff --git a/tests/generic/640 b/tests/generic/640
+> > new file mode 100755
+> > index 00000000..494fcc1b
+> > --- /dev/null
+> > +++ b/tests/generic/640
+> > @@ -0,0 +1,77 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (c) 2021 Red Hat Inc.  All Rights Reserved.
+> > +#
+> > +# FS QA Test 640
+> > +#
+> > +# Test small swapfile which doesn't contain even a single page-aligned contiguous
+> > +# range of blocks. This case covered commit 5808fecc5723 ("iomap: Fix negative
+> > +# assignment to unsigned sis->pages in iomap_swapfile_activate").
+> > +#
+> > +. ./common/preamble
+> > +_begin_fstest auto quick swap
+> > +
+> > +# Import common functions
+> > +. ./common/filter
+> > +
+> > +# real QA test starts here
+> > +_supported_fs generic
+> > +_require_scratch
+> > +_require_scratch_swapfile
+> > +_require_test_program mkswap
+> > +_require_test_program swapon
+> > +_require_xfs_io_command fcollapse
+> > +
+> > +make_unaligned_swapfile()
+> > +{
+> > +	local fname=$1
+> > +	local n=$((psize / bsize - 1))
+> > +
+> > +	# Make sure the swapfile doesn't contain even a single page-aligned
+> > +	# contiguous range of blocks. This's necessary to cover the bug
+> > +	$XFS_IO_PROG -f -t -c "pwrite 0 $(((psize + bsize) * n))" $fname >> $seqres.full 2>&1
+> > +	for((i=1; i<=n; i++));do
+> > +		$XFS_IO_PROG -c "fcollapse $(((psize - bsize) * i)) $bsize" $fname
+> > +	done
+> > +	chmod 0600 $fname
+> > +	$CHATTR_PROG +C $fname > /dev/null 2>&1
+> > +	$here/src/mkswap $fname
+> > +}
+> > +
+> > +_scratch_mkfs >> $seqres.full 2>&1
+> > +_scratch_mount
+> > +psize=`get_page_size`
+> > +bsize=`_get_file_block_size $SCRATCH_MNT`
+> > +# Due to we need page-unaligned blocks, so blocksize < pagesize is necessary.
+> > +# If not, try to make a smaller enough block size
+> > +if [ $bsize -ge $psize ];then
+> > +	_scratch_unmount
+> > +	_scratch_mkfs_blocksized 1024 >> $seqres.full 2>&1
+> > +	if [ $? -ne 0 ];then
+> > +		_notrun "Can't make filesystem block size < page size."
+> > +	fi
+> > +	_scratch_mount
+> > +	bsize=`_get_file_block_size $SCRATCH_MNT`
+> > +	if [ $bsize -ne 1024 ];then
+> > +		_notrun "Can't force 1024-byte file block size."
+> > +	fi
+> > +fi
+> > +swapfile=$SCRATCH_MNT/$seq.swapfile
+> > +make_unaligned_swapfile $swapfile
+> > +# Expect EINVAL from swapon. If not, might miss 5808fecc5723 ("iomap: Fix
+> > +# negative assignment to unsigned sis->pages in iomap_swapfile_activate")
+> > +$here/src/swapon $swapfile
+> > +# Further testing, check if swap size <= swapfile size, if swapon passed
+> > +if [ $? -eq 0 ];then
+> > +	swapsize=$(awk -v fname="$swapfile" '{if ($1~fname) print $3}' /proc/swaps)
+> > +	swapsize=$((swapsize * 1024))
+> > +	filesize=$(_get_filesize $swapfile)
+> > +	if [ $swapsize -gt $filesize ]; then
+> > +		echo "Allocated swap size($swapsize) shouldn't be greater than swapfile size($filesize)"
+> > +	fi
+> > +fi
+> > +swapoff $swapfile 2>/dev/null
+> 
+> Do we actually need swapoff if swapon failed?  Or are you merely being
+> cautious?
 
-
-On 2021/7/27 =E4=B8=8A=E5=8D=883:37, Marcos Paulo de Souza wrote:
-> Commit 78aa1d95dd99 ("btrfs-progs: fi resize: make output more
-> readable") added the device id of the resized fs along with a pretty
-> printed size. Adjust the expected output of the test.
->
-> Signed-off-by: Marcos Paulo de Souza <mpdesouza@suse.com>
-> ---
->   tests/btrfs/177.out | 4 ++--
->   1 file changed, 2 insertions(+), 2 deletions(-)
->
-> diff --git a/tests/btrfs/177.out b/tests/btrfs/177.out
-> index 63aca0e5..b1cc5db0 100644
-> --- a/tests/btrfs/177.out
-> +++ b/tests/btrfs/177.out
-> @@ -1,4 +1,4 @@
->   QA output created by 177
-> -Resize 'SCRATCH_MNT' of '3221225472'
-> +Resize device id 1 (SCRATCH_DEV) from 1.00GiB to 3.00GiB
->   Text file busy
-> -Resize 'SCRATCH_MNT' of '1073741824'
-> +Resize device id 1 (SCRATCH_DEV) from 3.00GiB to 1.00GiB
-
-This will make older btrfs-progs fail the test.
-
-IMHO the proper way is to introduce a filter to handle both output format.
+Maybe cautious :) I thought it won't affect this testing even if swapon failed,
+so moving it into above "if [ $? -eq 0 ] ... fi" or just keep it at the end all
+good to me. Is there anything wrong I missed ?
 
 Thanks,
-Qu
->
+Zorro
+
+> 
+> --D
+> 
+> > +
+> > +# success, all done
+> > +status=0
+> > +exit
+> > diff --git a/tests/generic/640.out b/tests/generic/640.out
+> > new file mode 100644
+> > index 00000000..e1ab5390
+> > --- /dev/null
+> > +++ b/tests/generic/640.out
+> > @@ -0,0 +1,2 @@
+> > +QA output created by 640
+> > +swapon: Invalid argument
+> > -- 
+> > 2.31.1
+> > 
+> 
+
