@@ -2,184 +2,108 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-19.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 17B94C4338F
-	for <linux-fstests@archiver.kernel.org>; Tue, 27 Jul 2021 10:25:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 52F90C4338F
+	for <linux-fstests@archiver.kernel.org>; Tue, 27 Jul 2021 18:21:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E6F2A617E5
-	for <linux-fstests@archiver.kernel.org>; Tue, 27 Jul 2021 10:25:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3386160F58
+	for <linux-fstests@archiver.kernel.org>; Tue, 27 Jul 2021 18:21:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236220AbhG0KZq (ORCPT
+        id S229581AbhG0SVj (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 27 Jul 2021 06:25:46 -0400
-Received: from mail.kernel.org ([198.145.29.99]:47916 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S236186AbhG0KZq (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 27 Jul 2021 06:25:46 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id D2E67617E4;
-        Tue, 27 Jul 2021 10:25:45 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1627381546;
-        bh=vzfJ9FEqcWDsy5agYuNTWuR98wOyWGY4I2rjGKnPBOc=;
-        h=From:To:Cc:Subject:Date:From;
-        b=S/O9eidOutXUeBT45Tb6qY8850jujqUwvlmH4YbaNIw8fJY3e/eUdSboifb3tvNNG
-         338hQ9k86RGyjAbtG71X/Xsm3NaKmwYDP6W92dO6wXMWUFPa7miM1JfCxvS2ctnpRN
-         T1uSgbMYNTVdCLyBBm4TVlL09YNnJKKK3IPyByCuRSvkh7vkjV1P1Es9nqepPyrI4U
-         CmwZkBgqjwZ6jBL1yi1z9P2juWWM8vRqw/mMXSfTDs9nMBLLM6QoGqB4qgv105zQ/r
-         KN21Jhz2+yUJ0/zpmUxzMKwG//zbOkeIvqpRQJe1K26Ar4fr4gXojRG/Ob7vyCbVU4
-         qSXP4d+aqaGCg==
-From:   fdmanana@kernel.org
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH] generic: test for file loss after mix of rename, fsync and inode eviction
-Date:   Tue, 27 Jul 2021 11:24:59 +0100
-Message-Id: <bff6929ef4dd5c94df382bd92019388ddce60456.1627380983.git.fdmanana@suse.com>
-X-Mailer: git-send-email 2.28.0
+        Tue, 27 Jul 2021 14:21:39 -0400
+Received: from smtp-out1.suse.de ([195.135.220.28]:57532 "EHLO
+        smtp-out1.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229453AbhG0SVj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 27 Jul 2021 14:21:39 -0400
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by smtp-out1.suse.de (Postfix) with ESMTPS id D9FC022217;
+        Tue, 27 Jul 2021 18:21:37 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+        t=1627410097; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+        bh=qENDo6Bxgyq0eajqdP5MtqStd1UZ7bmz+K83plfcBDg=;
+        b=k73CZdUL7Ur9fp2N54N/S46VX4z8BIqJ/MiQGOYFGlHsUGrwrKbA7cD4v3jrwSFNHbH8cF
+        dYzeLd/ytP3jkufR+H9aQ9IXNifbHs6SnXVleqyypjGXwx8p51mIeEfyT3G+FngyQj10uv
+        0HmlpKHL2wPlTAZXOS/eWKY6MwRxVKc=
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 1C1A913A5D;
+        Tue, 27 Jul 2021 18:21:35 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id h82lNK9OAGFDGAAAMHmgww
+        (envelope-from <mpdesouza@suse.com>); Tue, 27 Jul 2021 18:21:35 +0000
+From:   Marcos Paulo de Souza <mpdesouza@suse.com>
+To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Cc:     dsterba@suse.com, guaneryu@gmail.com, wqu@suse.com,
+        Marcos Paulo de Souza <mpdesouza@suse.com>
+Subject: [PATCH v2] btrfs/177: Ignore resize output message
+Date:   Tue, 27 Jul 2021 15:21:25 -0300
+Message-Id: <20210727182125.29210-1-mpdesouza@suse.com>
+X-Mailer: git-send-email 2.26.2
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Filipe Manana <fdmanana@suse.com>
+Commit 78aa1d95dd99 ("btrfs-progs: fi resize: make output more
+readable") added the device id of the resized fs along with a pretty
+printed size. Remove the resize output message from 117.out.
 
-Test that if we fsync a directory A, evict A's inode, move one file from
-directory A to directory B, fsync some other inode that is not directory
-A, B or any inode inside these two directories, and then power fail, the
-file that was moved is not lost.
-
-This currently fails on btrfs and is fixed by a patch that has the
-following subject:
-
- "btrfs: fix lost inode on log replay after mix of fsync, rename and inode eviction"
-
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
+Signed-off-by: Marcos Paulo de Souza <mpdesouza@suse.com>
 ---
- tests/generic/640     | 101 ++++++++++++++++++++++++++++++++++++++++++
- tests/generic/640.out |   2 +
- 2 files changed, 103 insertions(+)
- create mode 100755 tests/generic/640
- create mode 100644 tests/generic/640.out
 
-diff --git a/tests/generic/640 b/tests/generic/640
-new file mode 100755
-index 00000000..a9346d5b
---- /dev/null
-+++ b/tests/generic/640
-@@ -0,0 +1,101 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2021 SUSE Linux Products GmbH. All Rights Reserved.
-+#
-+# FSQA Test No. 640
-+#
-+# Test that if we fsync a directory A, evict A's inode, move one file from
-+# directory A to a directory B, fsync some other inode that is not directory A,
-+# B or any inode inside these two directories, and then power fail, the file
-+# that was moved is not lost.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick log
-+
-+# Override the default cleanup function.
-+_cleanup()
-+{
-+	_cleanup_flakey
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# Import common functions.
-+. ./common/filter
-+. ./common/dmflakey
-+
-+# real QA test starts here
-+_supported_fs generic
-+_require_scratch
-+_require_dm_target flakey
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+_require_metadata_journaling $SCRATCH_DEV
-+_init_flakey
-+_mount_flakey
-+
-+# Create two test directories, one with a file we will rename later.
-+mkdir $SCRATCH_MNT/A
-+mkdir $SCRATCH_MNT/B
-+echo -n "hello world" > $SCRATCH_MNT/A/foo
-+
-+# Persist everything done so far.
-+sync
-+
-+# Add some new file to directory A and fsync the directory.
-+touch $SCRATCH_MNT/A/bar
-+$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/A
-+
-+# Now evict all inodes from memory. To trigger the original problem on btrfs we
-+# actually only needed to trigger eviction of A's inode, but there's no simple
-+# way to evict a single inode, so evict everything.
-+echo 2 > /proc/sys/vm/drop_caches
-+
-+# Now move file foo from directory A to directory B.
-+mv $SCRATCH_MNT/A/foo $SCRATCH_MNT/B/foo
-+
-+# Now make an fsync to anything except A, B or any file inside them, like for
-+# example create a file at the root directory and fsync this new file.
-+touch $SCRATCH_MNT/baz
-+$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/baz
-+
-+# Simulate a power failure and then check file foo still exists.
-+_flakey_drop_and_remount
-+
-+# Since file foo was not explicitly fsynced we can not guarantee that, for every
-+# filesystem, after replaying the journal/log we have file foo inside directory A
-+# or inside directory B. The file must exist however, and can only be found in
-+# one of the directories, not on both.
-+#
-+# At the moment of this writing, on f2fs file foo exists always at A/foo,
-+# regardless of the fsync-mode mount option ("-o fsync_mode=posix" or
-+# "-o fsync_mode=strict"). On ext4 and xfs it exists at B/foo. It is also
-+# supposed to exist at B/foo on btrfs (at the moment it doesn't exist in
-+# either directory due to a bug).
-+
-+foo_in_a=0
-+foo_in_b=0
-+
-+if [ -f $SCRATCH_MNT/A/foo ]; then
-+	echo "File foo data: $(cat $SCRATCH_MNT/A/foo)"
-+	foo_in_a=1
-+fi
-+
-+if [ -f $SCRATCH_MNT/B/foo ]; then
-+	echo "File foo data: $(cat $SCRATCH_MNT/B/foo)"
-+	foo_in_b=1
-+fi
-+
-+if [ $foo_in_a -eq 1 ] && [ $foo_in_b -eq 1 ]; then
-+	echo "File foo found in A/ and B/"
-+elif [ $foo_in_a -eq 0 ] && [ $foo_in_b -eq 0 ]; then
-+	echo "File foo is missing"
-+fi
-+
-+# While here, also check that files bar and baz exist.
-+[ -f $SCRATCH_MNT/A/bar ] || echo "File A/bar is missing"
-+[ -f $SCRATCH_MNT/baz ] || echo "File baz is missing"
-+
-+_unmount_flakey
-+status=0
-+exit
-diff --git a/tests/generic/640.out b/tests/generic/640.out
-new file mode 100644
-index 00000000..a19db353
---- /dev/null
-+++ b/tests/generic/640.out
-@@ -0,0 +1,2 @@
-+QA output created by 640
-+File foo data: hello world
+ Qu, btrfs/217 is also ignoring the resize output, so I believe it would be
+ easier if we do the same here. We would see other problems if the resize fail,
+ so I think we are safe here.
+
+ tests/btrfs/177     | 5 ++---
+ tests/btrfs/177.out | 2 --
+ 2 files changed, 2 insertions(+), 5 deletions(-)
+
+diff --git a/tests/btrfs/177 b/tests/btrfs/177
+index 966d29d7..f59f54a7 100755
+--- a/tests/btrfs/177
++++ b/tests/btrfs/177
+@@ -36,8 +36,7 @@ dd if=/dev/zero of="$SCRATCH_MNT/refill" bs=4096 >> $seqres.full 2>&1
+ # Now add more space and create a swap file. We know that the first $fssize
+ # of the filesystem was used, so the swap file must be in the new part of the
+ # filesystem.
+-$BTRFS_UTIL_PROG filesystem resize $((3 * fssize)) "$SCRATCH_MNT" | \
+-							_filter_scratch
++$BTRFS_UTIL_PROG filesystem resize $((3 * fssize)) "$SCRATCH_MNT" >>$seqres.full
+ _format_swapfile "$swapfile" $((32 * 1024 * 1024))
+ swapon "$swapfile"
+ 
+@@ -55,7 +54,7 @@ $BTRFS_UTIL_PROG filesystem resize 1G "$SCRATCH_MNT" 2>&1 | grep -o "Text file b
+ swapoff "$swapfile"
+ 
+ # It should work again after swapoff.
+-$BTRFS_UTIL_PROG filesystem resize $fssize "$SCRATCH_MNT" | _filter_scratch
++$BTRFS_UTIL_PROG filesystem resize $fssize "$SCRATCH_MNT" >>$seqres.full
+ 
+ status=0
+ exit
+diff --git a/tests/btrfs/177.out b/tests/btrfs/177.out
+index 63aca0e5..0293ee36 100644
+--- a/tests/btrfs/177.out
++++ b/tests/btrfs/177.out
+@@ -1,4 +1,2 @@
+ QA output created by 177
+-Resize 'SCRATCH_MNT' of '3221225472'
+ Text file busy
+-Resize 'SCRATCH_MNT' of '1073741824'
 -- 
-2.28.0
+2.26.2
 
