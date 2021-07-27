@@ -2,108 +2,153 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 52F90C4338F
-	for <linux-fstests@archiver.kernel.org>; Tue, 27 Jul 2021 18:21:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9169CC4338F
+	for <linux-fstests@archiver.kernel.org>; Tue, 27 Jul 2021 18:37:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3386160F58
-	for <linux-fstests@archiver.kernel.org>; Tue, 27 Jul 2021 18:21:40 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6F73160F9F
+	for <linux-fstests@archiver.kernel.org>; Tue, 27 Jul 2021 18:37:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229581AbhG0SVj (ORCPT
+        id S229716AbhG0Shf (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 27 Jul 2021 14:21:39 -0400
-Received: from smtp-out1.suse.de ([195.135.220.28]:57532 "EHLO
-        smtp-out1.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229453AbhG0SVj (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 27 Jul 2021 14:21:39 -0400
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by smtp-out1.suse.de (Postfix) with ESMTPS id D9FC022217;
-        Tue, 27 Jul 2021 18:21:37 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-        t=1627410097; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-        bh=qENDo6Bxgyq0eajqdP5MtqStd1UZ7bmz+K83plfcBDg=;
-        b=k73CZdUL7Ur9fp2N54N/S46VX4z8BIqJ/MiQGOYFGlHsUGrwrKbA7cD4v3jrwSFNHbH8cF
-        dYzeLd/ytP3jkufR+H9aQ9IXNifbHs6SnXVleqyypjGXwx8p51mIeEfyT3G+FngyQj10uv
-        0HmlpKHL2wPlTAZXOS/eWKY6MwRxVKc=
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 1C1A913A5D;
-        Tue, 27 Jul 2021 18:21:35 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id h82lNK9OAGFDGAAAMHmgww
-        (envelope-from <mpdesouza@suse.com>); Tue, 27 Jul 2021 18:21:35 +0000
-From:   Marcos Paulo de Souza <mpdesouza@suse.com>
-To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Cc:     dsterba@suse.com, guaneryu@gmail.com, wqu@suse.com,
-        Marcos Paulo de Souza <mpdesouza@suse.com>
-Subject: [PATCH v2] btrfs/177: Ignore resize output message
-Date:   Tue, 27 Jul 2021 15:21:25 -0300
-Message-Id: <20210727182125.29210-1-mpdesouza@suse.com>
-X-Mailer: git-send-email 2.26.2
+        Tue, 27 Jul 2021 14:37:35 -0400
+Received: from mail.kernel.org ([198.145.29.99]:36530 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S229581AbhG0She (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 27 Jul 2021 14:37:34 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 7846360F9F;
+        Tue, 27 Jul 2021 18:37:34 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1627411054;
+        bh=5KgL07cUeD9zdSgHT/80N+z7O5y38qmDJWOfnnPbOzM=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=LSacCqgZ8rZhSooG8iVk2j5WC+rYmta0SL8VkNOe+bV4to6jEbIp4M39GWGs0Ia8K
+         vbx6fnfAwHFH2/MDxhZvNvucHPIoLunYGJgCP1P3lRykasU5f+PxfpxbPaKXaoyidR
+         yR30QGqXcQTG9SkkCl/hTAWP4olDr+Hko3ZPaKcxJXstr5uGrlG1ACBCe1oiPZf4NJ
+         QD6WEPLfgVnoa/TiayaDyUWPjlRjdTjJzBsv2HUwkvX83eSclpKgqPn8TR753k3Njj
+         h2TFPoerJGVEkPzSrYGNvQcqMmNk9bAEHMlcedoXc5Jp8bntAcEucfa95IBE5KXFf0
+         1RkFCZEFG33pg==
+Date:   Tue, 27 Jul 2021 11:37:34 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Chandan Babu R <chandanrlinux@gmail.com>
+Cc:     fstests@vger.kernel.org, guaneryu@gmail.com,
+        linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 3/3] xfs/530: Bail out if either of reflink or rmapbt is
+ enabled
+Message-ID: <20210727183734.GD559142@magnolia>
+References: <20210726064313.19153-1-chandanrlinux@gmail.com>
+ <20210726064313.19153-3-chandanrlinux@gmail.com>
+ <20210726171916.GV559212@magnolia>
+ <87fsw0fjq0.fsf@garuda>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <87fsw0fjq0.fsf@garuda>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Commit 78aa1d95dd99 ("btrfs-progs: fi resize: make output more
-readable") added the device id of the resized fs along with a pretty
-printed size. Remove the resize output message from 117.out.
+On Tue, Jul 27, 2021 at 10:15:27AM +0530, Chandan Babu R wrote:
+> On 26 Jul 2021 at 22:49, Darrick J. Wong wrote:
+> > On Mon, Jul 26, 2021 at 12:13:13PM +0530, Chandan Babu R wrote:
+> >> _scratch_do_mkfs constructs a mkfs command line by concatenating the values of
+> >> 1. $mkfs_cmd
+> >> 2. $MKFS_OPTIONS
+> >> 3. $extra_mkfs_options
+> >>
+> >> The corresponding mkfs command line fails if $MKFS_OPTIONS enables either
+> >> reflink or rmapbt feature. The failure occurs because the test tries to create
+> >> a filesystem with realtime device enabled. In such a case, _scratch_do_mkfs()
+> >> will construct and invoke an mkfs command line without including the value of
+> >> $MKFS_OPTIONS.
+> >>
+> >> To prevent such silent failures, this commit causes the test to exit if it
+> >> detects either reflink or rmapbt feature being enabled.
+> >
+> > Er, what combinations of mkfs.xfs and MKFS_OPTIONS cause this result?
+> > What kind of fs configuration comes out of that?
+> 
+> With MKFS_OPTIONS set as shown below,
+> 
+> export MKFS_OPTIONS="-m reflink=1 -b size=1k"
+> 
+> _scratch_do_mkfs() invokes mkfs.xfs with both realtime and reflink options
+> enabled. Such an invocation of mkfs.xfs fails causing _scratch_do_mkfs() to
+> ignore the contents of $MKFS_OPTIONS while constructing and invoking mkfs.xfs
+> once again.
+> 
+> This time, the fs block size will however be set to 4k (the default block
+> size). At the beginning of the test we would have obtained the block size of
+> the filesystem as 1k and used it to compute the size of the realtime device
+> required to overflow realtime bitmap inode's max pseudo extent count.
+> 
+> Invocation of xfs_growfs (made later in the test) ends up succeeding since a
+> 4k fs block can accommodate more bits than a 1k fs block.
 
-Signed-off-by: Marcos Paulo de Souza <mpdesouza@suse.com>
----
+OK, now I think I've finally put all the pieces together.  Both of these
+patches are fixing weirdness when MKFS_OPTIONS="-m reflink=1 -b size=1k".
 
- Qu, btrfs/217 is also ignoring the resize output, so I believe it would be
- easier if we do the same here. We would see other problems if the resize fail,
- so I think we are safe here.
+With current HEAD, we try to mkfs.xfs with double "-b size" arguments.
+That fails with 'option respecified', so fstests tries again without
+MKFS_OPTIONS, which means you don't get the filesystem that you want.
+If, say, MKFS_OPTIONS also contained bigtime=1, you won't get a bigtime
+filesystem.
 
- tests/btrfs/177     | 5 ++---
- tests/btrfs/177.out | 2 --
- 2 files changed, 2 insertions(+), 5 deletions(-)
+So the first patch removes the double -bsize arguments.  But you still
+have the problem that the reflink=1 in MKFS_OPTIONS still causes
+mkfs.xfs to fail (because we don't do rt and reflink yet), so fstests
+again drops MKFS_OPTIONS, and now you're testing the fs without a block
+size option at all.  The test still regresses because the special rt
+geometry depends on the blocksize, and we didn't get all the geometry
+elements that we need to trip the growfs failure.
 
-diff --git a/tests/btrfs/177 b/tests/btrfs/177
-index 966d29d7..f59f54a7 100755
---- a/tests/btrfs/177
-+++ b/tests/btrfs/177
-@@ -36,8 +36,7 @@ dd if=/dev/zero of="$SCRATCH_MNT/refill" bs=4096 >> $seqres.full 2>&1
- # Now add more space and create a swap file. We know that the first $fssize
- # of the filesystem was used, so the swap file must be in the new part of the
- # filesystem.
--$BTRFS_UTIL_PROG filesystem resize $((3 * fssize)) "$SCRATCH_MNT" | \
--							_filter_scratch
-+$BTRFS_UTIL_PROG filesystem resize $((3 * fssize)) "$SCRATCH_MNT" >>$seqres.full
- _format_swapfile "$swapfile" $((32 * 1024 * 1024))
- swapon "$swapfile"
+Does the following patch fix all that for you?
+
+--D
+
+diff --git a/tests/xfs/530 b/tests/xfs/530
+index 4d168ac5..9c6f44d7 100755
+--- a/tests/xfs/530
++++ b/tests/xfs/530
+@@ -60,10 +60,22 @@ echo "Format and mount rt volume"
  
-@@ -55,7 +54,7 @@ $BTRFS_UTIL_PROG filesystem resize 1G "$SCRATCH_MNT" 2>&1 | grep -o "Text file b
- swapoff "$swapfile"
+ export USE_EXTERNAL=yes
+ export SCRATCH_RTDEV=$rtdev
+-_scratch_mkfs -d size=$((1024 * 1024 * 1024)) -b size=${dbsize} \
++_scratch_mkfs -d size=$((1024 * 1024 * 1024)) \
+ 	      -r size=${rtextsz},extsize=${rtextsz} >> $seqres.full
+ _try_scratch_mount || _notrun "Couldn't mount fs with synthetic rt volume"
  
- # It should work again after swapoff.
--$BTRFS_UTIL_PROG filesystem resize $fssize "$SCRATCH_MNT" | _filter_scratch
-+$BTRFS_UTIL_PROG filesystem resize $fssize "$SCRATCH_MNT" >>$seqres.full
- 
- status=0
- exit
-diff --git a/tests/btrfs/177.out b/tests/btrfs/177.out
-index 63aca0e5..0293ee36 100644
---- a/tests/btrfs/177.out
-+++ b/tests/btrfs/177.out
-@@ -1,4 +1,2 @@
- QA output created by 177
--Resize 'SCRATCH_MNT' of '3221225472'
- Text file busy
--Resize 'SCRATCH_MNT' of '1073741824'
--- 
-2.26.2
++# If we didn't get the desired realtime volume and the same blocksize as the
++# first format (which we used to compute a specific rt geometry), skip the
++# test.  This can happen if the MKFS_OPTIONS conflict with the ones we passed
++# to _scratch_mkfs or do not result in a valid rt fs geometry.  In this case,
++# _scratch_mkfs will try to "succeed" at formatting by dropping MKFS_OPTIONS,
++# giving us the wrong geometry.
++formatted_blksz="$(_get_block_size $SCRATCH_MNT)"
++test "$formatted_blksz" -ne "$dbsize" && \
++	_notrun "Tried to format with $dbsize blocksize, got $formatted_blksz."
++$XFS_INFO_PROG $SCRATCH_MNT | egrep -q 'realtime.*blocks=0' && \
++	_notrun "Filesystem should have a realtime volume"
++
+ echo "Consume free space"
+ fillerdir=$SCRATCH_MNT/fillerdir
+ nr_free_blks=$(stat -f -c '%f' $SCRATCH_MNT)
 
+> >
+> > Eventually, the plan is to support rmap[1] and reflink[2] on the
+> > realtime device, at which point this will have to be torn out and a
+> > better solution found.
+> >
+> > --D
+> >
+> > [1] https://git.kernel.org/pub/scm/linux/kernel/git/djwong/xfs-linux.git/log/?h=realtime-rmap
+> > [2] https://git.kernel.org/pub/scm/linux/kernel/git/djwong/xfs-linux.git/log/?h=realtime-reflink
+> >
+> 
+> --
+> chandan
