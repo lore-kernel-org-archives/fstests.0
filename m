@@ -2,188 +2,145 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3AF69C4338F
-	for <linux-fstests@archiver.kernel.org>; Wed, 28 Jul 2021 00:10:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 79FF4C4338F
+	for <linux-fstests@archiver.kernel.org>; Wed, 28 Jul 2021 00:15:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2336160F6B
-	for <linux-fstests@archiver.kernel.org>; Wed, 28 Jul 2021 00:10:44 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 561FA60F9C
+	for <linux-fstests@archiver.kernel.org>; Wed, 28 Jul 2021 00:15:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232926AbhG1AKo (ORCPT
+        id S233081AbhG1APJ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 27 Jul 2021 20:10:44 -0400
-Received: from mail.kernel.org ([198.145.29.99]:56604 "EHLO mail.kernel.org"
+        Tue, 27 Jul 2021 20:15:09 -0400
+Received: from mout.gmx.net ([212.227.15.15]:47867 "EHLO mout.gmx.net"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S232731AbhG1AKn (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 27 Jul 2021 20:10:43 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 2CEAA601FC;
-        Wed, 28 Jul 2021 00:10:43 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1627431043;
-        bh=pzcrRVDACGXFIwCHlnfomQ4hZwsHcRrOKPYvZJUxA8s=;
-        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=W/5RM6fSSdS435utZ+tHvLxqS/KMwaeFOyFJ+or/kxK9vjW5jq+SbvXTVmvyDelJ+
-         FDryP71qh+vCsi+XWUB7v3zzxKjIfoA6UBnoZ+IsQn4m3dUpRr8IPHyMYVplVbxO4Y
-         HUwo/dQFEiEjwfzrSP8lrUj3zSq2mzAEyYzci9YznPPxuWaBJgEbKuyi1NhDMgmBOm
-         eSePD52e7MU/nSwO+4j2+uElWZIys73SvzTf5FSn5OucL9mnNf11syzCEXCM3uYY8x
-         IaQoeQ741kjz90d71oWwiWjXUv3N87Z/verRr+AFJ8TLLkCmfrXMzsEevUtLaYTrzd
-         G3Ezwn2qN9cng==
-Subject: [PATCH 1/1] misc: tag all tests that examine crash recovery in a loop
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     djwong@kernel.org, guaneryu@gmail.com
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me
-Date:   Tue, 27 Jul 2021 17:10:42 -0700
-Message-ID: <162743104288.3429001.18145781236429703996.stgit@magnolia>
-In-Reply-To: <162743103739.3429001.16912087881683869606.stgit@magnolia>
-References: <162743103739.3429001.16912087881683869606.stgit@magnolia>
-User-Agent: StGit/0.19
+        id S232840AbhG1APJ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 27 Jul 2021 20:15:09 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net;
+        s=badeba3b8450; t=1627431305;
+        bh=/Q1pHYjq9f6fntVXnubS6wDn6kbGGg1mIROVHdLgnoE=;
+        h=X-UI-Sender-Class:Subject:To:Cc:References:From:Date:In-Reply-To;
+        b=c/zyUrnsNBO2pWQeJWcYe+50VM3yaSL/jqtFO1oIb4tjTRXNIV+5ed3MBGNqHK9yN
+         WjOh/gsRwkNMbL7ftcngse237RNdaIPsMtKgAzhkgJJx6Q8dWe8/8NXHRDsoEfuJgi
+         rnKA9lizmwMjWIC4Dn5gkpoetvLfz7jPlWsaG1yE=
+X-UI-Sender-Class: 01bb95c1-4bf8-414a-932a-4f6e2808ef9c
+Received: from [0.0.0.0] ([149.28.201.231]) by mail.gmx.net (mrgmx005
+ [212.227.17.184]) with ESMTPSA (Nemesis) id 1MrQEn-1mwhtn0i8N-00oULF; Wed, 28
+ Jul 2021 02:15:04 +0200
+Subject: Re: [PATCH v2] btrfs/177: Ignore resize output message
+To:     Marcos Paulo de Souza <mpdesouza@suse.com>,
+        linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Cc:     dsterba@suse.com, guaneryu@gmail.com, wqu@suse.com
+References: <20210727182125.29210-1-mpdesouza@suse.com>
+From:   Qu Wenruo <quwenruo.btrfs@gmx.com>
+Message-ID: <cc2005f7-605b-2c22-3a9f-1bbb8177888f@gmx.com>
+Date:   Wed, 28 Jul 2021 08:15:00 +0800
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.12.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+In-Reply-To: <20210727182125.29210-1-mpdesouza@suse.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: quoted-printable
+X-Provags-ID: V03:K1:jJTYc4DCuqAthzo0KYc/VDt6DSEm5p2pq4vkTQt//huwCJGMKGz
+ E8YQ3Mkdzarr5yS+84dR7VeMuOolonbcvijr+1Qk8a7fH4L0VeqSpSkqV+WsC4nK9BSFWip
+ RrQSH3VlQ/JAHTeTx+obqAH5I57irbOdvRrSTv55JGr2SzFSBohvBPxokLCME6dQRQW/iMO
+ F9M2a9tGwemr+wIvHpH5A==
+X-UI-Out-Filterresults: notjunk:1;V03:K0:v37CBT6UgR0=:CEAsP89acPfggq+CuDx6jj
+ z30iifhI0IL14ULeigk4jvQ6KoYqsOid//m3BPyWmYXywnWwhMiPKAIUrFy0kJso8r7gnfA6l
+ jKiSWX9vGK9+o9u1/+pKK2s64tXMCRhSkzS1RS5CNNXVFnB0AYaub3sIZ+pQBAoU3p0S0f6+l
+ 6RkSfmBQ95Kv9DWscmt46rSAgtRtm/8VF/SdmknDDAqB5WCBlr9auOT5cYeunmDpwsnmskEPf
+ uXMq+tggJfxOlhj/mdsZwV1uYLC7VQ3EAzJXK3D4jADXYKwZeJhKEnkPla9QJdV5xYKO5TmXM
+ Bqy5b/KPIu3c8xVK8rzD2wsqDqT+7BWufFyEQCgqFXgNQutq+qrygR/7f02hCMIrkng0AoTD8
+ McIPByCZONY8DWsSgiSau1+DbHzqImYUP/6uqkI8gv2JsDBP/WDQDIV8NtqcGAnLgJyqo2V1m
+ JHibeOySy0q/AHesUUuC8XVFvMwBL9sj5v7xymwUy6y5z7cd/Y0UhcC4ylz9pntHm8E9QYo1m
+ 0R2Ga7IWQx2xzS3oiQT4CGTLCKhl2cIiEeeJZf7QAhc8ny9MyiQ1NOw67J+gsvpr9HENuEkUO
+ t8Z/TuRm++AxXPo1odbKeVKDbFOey9g0o1eXOTK2S08kU7k9Rztp8gMSySLdMPmL+4QgLFLjj
+ nGtyhPtWPDn8JDDmLBbPG0vxaiAZf2cEiuFS/w/gfhIb51PQt454w5DPiNVDj123Soc1OPi7X
+ zuYGjOb9XNj/iKOLZEnWtGOcNIgFY+O60HFnvd8pxsxCldZK9O7wpauhOx288gfVpvnCqeyvH
+ 5K9xxNPbumCej2dC/ANwpGFROvF2u/Yd/gk7Xp4EFPH+rNyXuniGcrzoKl7IOhAR2GbHozG8U
+ 5+Uq2uzdYnbkmNhub07E+wZ8OIr1lK5im7a7IE8PrCgcU0o/XyEtqTKqvPYb06WGV9vF00LUq
+ xnnxWjZZEmlNUZe9pqMrxeyxzsvHDFQjVxUd+QJU+lC+2m6jtsCCw7EgYcjIwQQTMPVtiIqht
+ esj+am2t3wyvlJHkY6Pg12Br5QlMVMBFQcxpG+7UgQLjeNBMcEQs2MJOw00jJCs4LyL6nb5uK
+ 2Vqb1G+aqA7FAMyua2fgPksWytso5BGFCEzEH84lR7idN9Mf2joSfaQBg==
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Darrick J. Wong <djwong@kernel.org>
-
-Given all the recent problems that we've been finding with log recovery,
-I think it would be useful to create a 'recoveryloop' group so that
-developers have a convenient way to run every single test that rolls
-around in a fs shutdown loop looking for subtle errors in recovery.
-
-Signed-off-by: Darrick J. Wong <djwong@kernel.org>
----
- tests/btrfs/190   |    2 +-
- tests/generic/019 |    2 +-
- tests/generic/388 |    2 +-
- tests/generic/455 |    2 +-
- tests/generic/457 |    2 +-
- tests/generic/475 |    2 +-
- tests/generic/482 |    2 +-
- tests/generic/725 |    2 +-
- tests/xfs/057     |    2 +-
- 9 files changed, 9 insertions(+), 9 deletions(-)
 
 
-diff --git a/tests/btrfs/190 b/tests/btrfs/190
-index 3aa718e2..974438c1 100755
---- a/tests/btrfs/190
-+++ b/tests/btrfs/190
-@@ -8,7 +8,7 @@
- # balance needs to be resumed on mount.
- #
- . ./common/preamble
--_begin_fstest auto quick replay balance qgroup
-+_begin_fstest auto quick replay balance qgroup recoveryloop
- 
- # Import common functions.
- . ./common/filter
-diff --git a/tests/generic/019 b/tests/generic/019
-index b8d025d6..db56dac1 100755
---- a/tests/generic/019
-+++ b/tests/generic/019
-@@ -8,7 +8,7 @@
- # check filesystem consistency at the end.
- #
- . ./common/preamble
--_begin_fstest aio dangerous enospc rw stress
-+_begin_fstest aio dangerous enospc rw stress recoveryloop
- 
- fio_config=$tmp.fio
- 
-diff --git a/tests/generic/388 b/tests/generic/388
-index e41712af..9cd737e8 100755
---- a/tests/generic/388
-+++ b/tests/generic/388
-@@ -15,7 +15,7 @@
- # spurious corruption reports and/or mount failures.
- #
- . ./common/preamble
--_begin_fstest shutdown auto log metadata
-+_begin_fstest shutdown auto log metadata recoveryloop
- 
- # Override the default cleanup function.
- _cleanup()
-diff --git a/tests/generic/455 b/tests/generic/455
-index 62788798..13d326e7 100755
---- a/tests/generic/455
-+++ b/tests/generic/455
-@@ -7,7 +7,7 @@
- # Run fsx with log writes to verify power fail safeness.
- #
- . ./common/preamble
--_begin_fstest auto log replay
-+_begin_fstest auto log replay recoveryloop
- 
- # Override the default cleanup function.
- _cleanup()
-diff --git a/tests/generic/457 b/tests/generic/457
-index d9e38268..f4fdd81d 100755
---- a/tests/generic/457
-+++ b/tests/generic/457
-@@ -7,7 +7,7 @@
- # Run fsx with log writes on cloned files to verify power fail safeness.
- #
- . ./common/preamble
--_begin_fstest auto log replay clone
-+_begin_fstest auto log replay clone recoveryloop
- 
- # Override the default cleanup function.
- _cleanup()
-diff --git a/tests/generic/475 b/tests/generic/475
-index 62894491..c426402e 100755
---- a/tests/generic/475
-+++ b/tests/generic/475
-@@ -12,7 +12,7 @@
- # testing efforts.
- #
- . ./common/preamble
--_begin_fstest shutdown auto log metadata eio
-+_begin_fstest shutdown auto log metadata eio recoveryloop
- 
- # Override the default cleanup function.
- _cleanup()
-diff --git a/tests/generic/482 b/tests/generic/482
-index f26e6fc4..0fadf795 100755
---- a/tests/generic/482
-+++ b/tests/generic/482
-@@ -9,7 +9,7 @@
- # Will do log replay and check the filesystem.
- #
- . ./common/preamble
--_begin_fstest auto metadata replay thin
-+_begin_fstest auto metadata replay thin recoveryloop
- 
- # Override the default cleanup function.
- _cleanup()
-diff --git a/tests/generic/725 b/tests/generic/725
-index f43bcb37..8bd724e3 100755
---- a/tests/generic/725
-+++ b/tests/generic/725
-@@ -12,7 +12,7 @@
- # in writeback on the host that cause VM guests to fail to recover.
- #
- . ./common/preamble
--_begin_fstest shutdown auto log metadata eio
-+_begin_fstest shutdown auto log metadata eio recoveryloop
- 
- _cleanup()
- {
-diff --git a/tests/xfs/057 b/tests/xfs/057
-index d4cfa8dc..9fb3f406 100755
---- a/tests/xfs/057
-+++ b/tests/xfs/057
-@@ -21,7 +21,7 @@
- # Note that this test requires a DEBUG mode kernel.
- #
- . ./common/preamble
--_begin_fstest auto log
-+_begin_fstest auto log recoveryloop
- 
- # Override the default cleanup function.
- _cleanup()
+On 2021/7/28 =E4=B8=8A=E5=8D=882:21, Marcos Paulo de Souza wrote:
+> Commit 78aa1d95dd99 ("btrfs-progs: fi resize: make output more
+> readable") added the device id of the resized fs along with a pretty
+> printed size. Remove the resize output message from 117.out.
+>
+> Signed-off-by: Marcos Paulo de Souza <mpdesouza@suse.com>
+> ---
+>
+>   Qu, btrfs/217 is also ignoring the resize output, so I believe it woul=
+d be
+>   easier if we do the same here. We would see other problems if the resi=
+ze fail,
+>   so I think we are safe here.
 
+But unfortunately, we have hit case where the output of the resize
+commands is insane.
+
+One recent regression is, resize will always output the resized size as 0.
+
+Thus I believe we may still want to properly check the output value.
+Although I don't think it should be in golden output.
+
+Thanks,
+Qu
+
+>
+>   tests/btrfs/177     | 5 ++---
+>   tests/btrfs/177.out | 2 --
+>   2 files changed, 2 insertions(+), 5 deletions(-)
+>
+> diff --git a/tests/btrfs/177 b/tests/btrfs/177
+> index 966d29d7..f59f54a7 100755
+> --- a/tests/btrfs/177
+> +++ b/tests/btrfs/177
+> @@ -36,8 +36,7 @@ dd if=3D/dev/zero of=3D"$SCRATCH_MNT/refill" bs=3D4096=
+ >> $seqres.full 2>&1
+>   # Now add more space and create a swap file. We know that the first $f=
+ssize
+>   # of the filesystem was used, so the swap file must be in the new part=
+ of the
+>   # filesystem.
+> -$BTRFS_UTIL_PROG filesystem resize $((3 * fssize)) "$SCRATCH_MNT" | \
+> -							_filter_scratch
+> +$BTRFS_UTIL_PROG filesystem resize $((3 * fssize)) "$SCRATCH_MNT" >>$se=
+qres.full
+>   _format_swapfile "$swapfile" $((32 * 1024 * 1024))
+>   swapon "$swapfile"
+>
+> @@ -55,7 +54,7 @@ $BTRFS_UTIL_PROG filesystem resize 1G "$SCRATCH_MNT" 2=
+>&1 | grep -o "Text file b
+>   swapoff "$swapfile"
+>
+>   # It should work again after swapoff.
+> -$BTRFS_UTIL_PROG filesystem resize $fssize "$SCRATCH_MNT" | _filter_scr=
+atch
+> +$BTRFS_UTIL_PROG filesystem resize $fssize "$SCRATCH_MNT" >>$seqres.ful=
+l
+>
+>   status=3D0
+>   exit
+> diff --git a/tests/btrfs/177.out b/tests/btrfs/177.out
+> index 63aca0e5..0293ee36 100644
+> --- a/tests/btrfs/177.out
+> +++ b/tests/btrfs/177.out
+> @@ -1,4 +1,2 @@
+>   QA output created by 177
+> -Resize 'SCRATCH_MNT' of '3221225472'
+>   Text file busy
+> -Resize 'SCRATCH_MNT' of '1073741824'
+>
