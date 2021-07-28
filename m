@@ -2,166 +2,223 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 28E07C4338F
-	for <linux-fstests@archiver.kernel.org>; Wed, 28 Jul 2021 02:35:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 64C22C4338F
+	for <linux-fstests@archiver.kernel.org>; Wed, 28 Jul 2021 09:40:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 01CED60FBF
-	for <linux-fstests@archiver.kernel.org>; Wed, 28 Jul 2021 02:35:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4048D60F9C
+	for <linux-fstests@archiver.kernel.org>; Wed, 28 Jul 2021 09:40:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234048AbhG1CfW (ORCPT
+        id S235230AbhG1Jkn (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 27 Jul 2021 22:35:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45298 "EHLO
+        Wed, 28 Jul 2021 05:40:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56768 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233223AbhG1CfV (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 27 Jul 2021 22:35:21 -0400
-Received: from mail-pl1-x633.google.com (mail-pl1-x633.google.com [IPv6:2607:f8b0:4864:20::633])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0F68DC061757;
-        Tue, 27 Jul 2021 19:35:21 -0700 (PDT)
-Received: by mail-pl1-x633.google.com with SMTP id n10so917158plf.4;
-        Tue, 27 Jul 2021 19:35:21 -0700 (PDT)
+        with ESMTP id S231408AbhG1Jkm (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 28 Jul 2021 05:40:42 -0400
+Received: from mail-qt1-x833.google.com (mail-qt1-x833.google.com [IPv6:2607:f8b0:4864:20::833])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 64879C061757;
+        Wed, 28 Jul 2021 02:40:41 -0700 (PDT)
+Received: by mail-qt1-x833.google.com with SMTP id m11so895757qtx.7;
+        Wed, 28 Jul 2021 02:40:41 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=references:user-agent:from:to:cc:subject:in-reply-to:date
-         :message-id:mime-version;
-        bh=VqM4laUk8B0vv7NXWu6CFBwhOFTp4Kj3GI5pKvXUTng=;
-        b=gC/jXxQrfHZiBdgMK5LqcpMfbLz1e6IWTz7YKKoPKC/0uGMOdu00wTeqXT65nezvOz
-         VlN6pT9mZUcZQs07swu6G98CfvMl5K8XbxzhjLNp34dsCle5mOv1dXp2iBthmnhIrZeR
-         KgL5oqUs5CJ+waHBMXTrvauDH7xGd9x2NfdjURPVbWxrWxyyIh7dl6ZSycbWN/Y96UOY
-         /63tKJU44NwqB8gDA7Kr9iLAgDkmveGIgoc3lQT7h09MPOdHCDZbtyzN77N4VQ6C248i
-         1RogZg0YmsbGb+zUsuoJ1Y4tc+/Sbl0iwOsD0NGMldx4N+E7Xgnsy7eVKF17vdildzZH
-         q/+Q==
+        h=mime-version:references:in-reply-to:reply-to:from:date:message-id
+         :subject:to:cc:content-transfer-encoding;
+        bh=dktCwlTObwFG+2Ta9NrZzHxiFTXSIiqKgkliRATZihc=;
+        b=hC6HIDzS/kMo8HwBoSMfkwBNNGFafrPcaYrK2m1Z7hs6tWPj80j44IDEKRAScQRPdg
+         QysyxqmtA3x/jBjk9/It1kxIpqMjyloTxk0S3WV7NZyJ/a63xGTYf5/RptV+56rQZ6va
+         kh6hscbuIAcxaKzlGScjpNa2Ylf67Sm+Drxn54E0YVj7iFg7pqorUhwJY8S1Cel0KcNB
+         xGWvymH/q+Mn1cWM0kLt7WJyzSIWlrDC4T9XzBDkAmiMtk+789smcOXgDxdBKUqeAeGo
+         5G6T6p5eiQlJe9v8sAFNLKbxz1uilgBqtrnx3aREdn7pSF0cq2A0IfBuZSN3T/VMU1Wp
+         OrLw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:references:user-agent:from:to:cc:subject
-         :in-reply-to:date:message-id:mime-version;
-        bh=VqM4laUk8B0vv7NXWu6CFBwhOFTp4Kj3GI5pKvXUTng=;
-        b=HiwrzoynbFRu8oa3Csxjm+da9kk0iIqeYrFfObTcJkwUIQT4oynOGwPxYlrvxA9ICD
-         epjLev1RxlCgibaMDNRiOoObBJSZihu76JbjHrqZUTUzVTofbld2wH9qUiAmcZmjwFSU
-         ezqVmrVNIa4Tew4Rc3leUvfzUEw8NcXXi2R/MPTOrdiD3Az1CAPKL3tpHzIXeFbknXEU
-         BMf6qOCBT2MJKeZhC9jK9wJ8qGWX4d/TqOnTKVW+2q06ThOrxwRGcWXmjgba880d7Yl2
-         Yb0A2InHWs2rP9LBGeuN/28o2b0Yc7CI9osKYcN4+l1nYHzvpNF4iJdG0iISWof1/zt2
-         ieJA==
-X-Gm-Message-State: AOAM531cQcvuRopgnsswCkBCkB1BqSehtALev2OS0MOf23kPpbtEyBeO
-        87TlTzivR6ARRGxMOSTm6b9MUC7SaxrmWQ==
-X-Google-Smtp-Source: ABdhPJzCYTEKHLb1QHFAF9xyNwVVJXtVV4T+c1k3vF1gvMXlFhbualWs2P24bFv6BfsxzR25jrqZvA==
-X-Received: by 2002:a62:1a4b:0:b029:328:da0b:d83b with SMTP id a72-20020a621a4b0000b0290328da0bd83bmr25736580pfa.59.1627439720428;
-        Tue, 27 Jul 2021 19:35:20 -0700 (PDT)
-Received: from garuda ([122.171.208.125])
-        by smtp.gmail.com with ESMTPSA id r7sm5743672pga.44.2021.07.27.19.35.18
-        (version=TLS1_2 cipher=ECDHE-ECDSA-CHACHA20-POLY1305 bits=256/256);
-        Tue, 27 Jul 2021 19:35:20 -0700 (PDT)
-References: <20210726064313.19153-1-chandanrlinux@gmail.com> <20210726064313.19153-3-chandanrlinux@gmail.com> <20210726171916.GV559212@magnolia> <87fsw0fjq0.fsf@garuda> <20210727183734.GD559142@magnolia>
-User-agent: mu4e 1.0; emacs 26.1
-From:   Chandan Babu R <chandanrlinux@gmail.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     fstests@vger.kernel.org, guaneryu@gmail.com,
-        linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 3/3] xfs/530: Bail out if either of reflink or rmapbt is enabled
-In-reply-to: <20210727183734.GD559142@magnolia>
-Date:   Wed, 28 Jul 2021 08:05:15 +0530
-Message-ID: <87fsvzw4gs.fsf@garuda>
+        h=x-gm-message-state:mime-version:references:in-reply-to:reply-to
+         :from:date:message-id:subject:to:cc:content-transfer-encoding;
+        bh=dktCwlTObwFG+2Ta9NrZzHxiFTXSIiqKgkliRATZihc=;
+        b=tFuGL86R3pcc8OOWgyT2Yai5x78QSwfEERyz2LM/eB82NebhTuiGVhmnsy6oYtDSxb
+         N+UDYezTFW39Ey+By7UFgZm1qlc6JZiBC8sWD2Uw8u88PZYRV4kbGkt8tYxLKNL7WEqZ
+         w+4PAlc5eERB72ruNO2Sc6+ej/OTzu2VJI01ZgXN12b1FbTRS1sHFtBs3gFMHq4WmTk3
+         Mz8PwxoXDOiGFmGHITgOXsxe9CDj5OcWPy8SA+ckx5mZKSyhQURVzO2ojaFiNJHIFLRm
+         mX52LaAkWiR6GmQKSFKTHvs1eXYwNqUnkI8XV+Z+LxBWk9u5ZiikVXVNwrMN40G0LHv3
+         8tRQ==
+X-Gm-Message-State: AOAM530hSycqHL5soVOkXB/yYf9yIsXJ+fGnfbEsfaJzImvENFBCt6LQ
+        SVnP8jqrgTn05jsaSSaOG8ov0GXImEGMFZ5lfZs=
+X-Google-Smtp-Source: ABdhPJxL/VOD6efZw6khhVS5q84iFPfNWK1p0FKu/+OfqLi9cqQsC9bbLugROe4FWdhLYdOCRHCJFK6s/g69hTMC9G8=
+X-Received: by 2002:ac8:76da:: with SMTP id q26mr23074954qtr.183.1627465240571;
+ Wed, 28 Jul 2021 02:40:40 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain
+References: <162743103739.3429001.16912087881683869606.stgit@magnolia> <162743104288.3429001.18145781236429703996.stgit@magnolia>
+In-Reply-To: <162743104288.3429001.18145781236429703996.stgit@magnolia>
+Reply-To: fdmanana@gmail.com
+From:   Filipe Manana <fdmanana@gmail.com>
+Date:   Wed, 28 Jul 2021 10:40:29 +0100
+Message-ID: <CAL3q7H511wY0nHvTuqfnp0ttvvGuFt9Eke2B6cXy_4+JDyJVRw@mail.gmail.com>
+Subject: Re: [PATCH 1/1] misc: tag all tests that examine crash recovery in a loop
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     Eryu Guan <guaneryu@gmail.com>, xfs <linux-xfs@vger.kernel.org>,
+        fstests <fstests@vger.kernel.org>, Eryu Guan <guan@eryu.me>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 28 Jul 2021 at 00:07, Darrick J. Wong wrote:
-> On Tue, Jul 27, 2021 at 10:15:27AM +0530, Chandan Babu R wrote:
->> On 26 Jul 2021 at 22:49, Darrick J. Wong wrote:
->> > On Mon, Jul 26, 2021 at 12:13:13PM +0530, Chandan Babu R wrote:
->> >> _scratch_do_mkfs constructs a mkfs command line by concatenating the values of
->> >> 1. $mkfs_cmd
->> >> 2. $MKFS_OPTIONS
->> >> 3. $extra_mkfs_options
->> >>
->> >> The corresponding mkfs command line fails if $MKFS_OPTIONS enables either
->> >> reflink or rmapbt feature. The failure occurs because the test tries to create
->> >> a filesystem with realtime device enabled. In such a case, _scratch_do_mkfs()
->> >> will construct and invoke an mkfs command line without including the value of
->> >> $MKFS_OPTIONS.
->> >>
->> >> To prevent such silent failures, this commit causes the test to exit if it
->> >> detects either reflink or rmapbt feature being enabled.
->> >
->> > Er, what combinations of mkfs.xfs and MKFS_OPTIONS cause this result?
->> > What kind of fs configuration comes out of that?
->> 
->> With MKFS_OPTIONS set as shown below,
->> 
->> export MKFS_OPTIONS="-m reflink=1 -b size=1k"
->> 
->> _scratch_do_mkfs() invokes mkfs.xfs with both realtime and reflink options
->> enabled. Such an invocation of mkfs.xfs fails causing _scratch_do_mkfs() to
->> ignore the contents of $MKFS_OPTIONS while constructing and invoking mkfs.xfs
->> once again.
->> 
->> This time, the fs block size will however be set to 4k (the default block
->> size). At the beginning of the test we would have obtained the block size of
->> the filesystem as 1k and used it to compute the size of the realtime device
->> required to overflow realtime bitmap inode's max pseudo extent count.
->> 
->> Invocation of xfs_growfs (made later in the test) ends up succeeding since a
->> 4k fs block can accommodate more bits than a 1k fs block.
+On Wed, Jul 28, 2021 at 1:10 AM Darrick J. Wong <djwong@kernel.org> wrote:
 >
-> OK, now I think I've finally put all the pieces together.  Both of these
-> patches are fixing weirdness when MKFS_OPTIONS="-m reflink=1 -b size=1k".
+> From: Darrick J. Wong <djwong@kernel.org>
 >
-> With current HEAD, we try to mkfs.xfs with double "-b size" arguments.
-> That fails with 'option respecified', so fstests tries again without
-> MKFS_OPTIONS, which means you don't get the filesystem that you want.
-> If, say, MKFS_OPTIONS also contained bigtime=1, you won't get a bigtime
-> filesystem.
+> Given all the recent problems that we've been finding with log recovery,
+> I think it would be useful to create a 'recoveryloop' group so that
+> developers have a convenient way to run every single test that rolls
+> around in a fs shutdown loop looking for subtle errors in recovery.
 >
-> So the first patch removes the double -bsize arguments.  But you still
-> have the problem that the reflink=1 in MKFS_OPTIONS still causes
-> mkfs.xfs to fail (because we don't do rt and reflink yet), so fstests
-> again drops MKFS_OPTIONS, and now you're testing the fs without a block
-> size option at all.  The test still regresses because the special rt
-> geometry depends on the blocksize, and we didn't get all the geometry
-> elements that we need to trip the growfs failure.
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> ---
+>  tests/btrfs/190   |    2 +-
+>  tests/generic/019 |    2 +-
+>  tests/generic/388 |    2 +-
+>  tests/generic/455 |    2 +-
+>  tests/generic/457 |    2 +-
+>  tests/generic/475 |    2 +-
+>  tests/generic/482 |    2 +-
+>  tests/generic/725 |    2 +-
+>  tests/xfs/057     |    2 +-
+>  9 files changed, 9 insertions(+), 9 deletions(-)
 >
-> Does the following patch fix all that for you?
 >
-> --D
->
-> diff --git a/tests/xfs/530 b/tests/xfs/530
-> index 4d168ac5..9c6f44d7 100755
-> --- a/tests/xfs/530
-> +++ b/tests/xfs/530
-> @@ -60,10 +60,22 @@ echo "Format and mount rt volume"
->  
->  export USE_EXTERNAL=yes
->  export SCRATCH_RTDEV=$rtdev
-> -_scratch_mkfs -d size=$((1024 * 1024 * 1024)) -b size=${dbsize} \
-> +_scratch_mkfs -d size=$((1024 * 1024 * 1024)) \
->  	      -r size=${rtextsz},extsize=${rtextsz} >> $seqres.full
->  _try_scratch_mount || _notrun "Couldn't mount fs with synthetic rt volume"
->  
-> +# If we didn't get the desired realtime volume and the same blocksize as the
-> +# first format (which we used to compute a specific rt geometry), skip the
-> +# test.  This can happen if the MKFS_OPTIONS conflict with the ones we passed
-> +# to _scratch_mkfs or do not result in a valid rt fs geometry.  In this case,
-> +# _scratch_mkfs will try to "succeed" at formatting by dropping MKFS_OPTIONS,
-> +# giving us the wrong geometry.
-> +formatted_blksz="$(_get_block_size $SCRATCH_MNT)"
-> +test "$formatted_blksz" -ne "$dbsize" && \
-> +	_notrun "Tried to format with $dbsize blocksize, got $formatted_blksz."
-> +$XFS_INFO_PROG $SCRATCH_MNT | egrep -q 'realtime.*blocks=0' && \
-> +	_notrun "Filesystem should have a realtime volume"
-> +
+> diff --git a/tests/btrfs/190 b/tests/btrfs/190
+> index 3aa718e2..974438c1 100755
+> --- a/tests/btrfs/190
+> +++ b/tests/btrfs/190
+> @@ -8,7 +8,7 @@
+>  # balance needs to be resumed on mount.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto quick replay balance qgroup
+> +_begin_fstest auto quick replay balance qgroup recoveryloop
 
-The above solution indeed fixes the problems that patch 2 and 3 were
-attempting to solve. If you plan on posting it, you can add
+For btrfs, there are more tests like this: btrfs/172, btrfs/192 and btrfs/2=
+06.
 
-Reviewed-by: Chandan Babu R <chandanrlinux@gmail.com>
+>
+>  # Import common functions.
+>  . ./common/filter
+> diff --git a/tests/generic/019 b/tests/generic/019
+> index b8d025d6..db56dac1 100755
+> --- a/tests/generic/019
+> +++ b/tests/generic/019
+> @@ -8,7 +8,7 @@
+>  # check filesystem consistency at the end.
+>  #
+>  . ./common/preamble
+> -_begin_fstest aio dangerous enospc rw stress
+> +_begin_fstest aio dangerous enospc rw stress recoveryloop
+>
+>  fio_config=3D$tmp.fio
+>
+> diff --git a/tests/generic/388 b/tests/generic/388
+> index e41712af..9cd737e8 100755
+> --- a/tests/generic/388
+> +++ b/tests/generic/388
+> @@ -15,7 +15,7 @@
+>  # spurious corruption reports and/or mount failures.
+>  #
+>  . ./common/preamble
+> -_begin_fstest shutdown auto log metadata
+> +_begin_fstest shutdown auto log metadata recoveryloop
+>
+>  # Override the default cleanup function.
+>  _cleanup()
+> diff --git a/tests/generic/455 b/tests/generic/455
+> index 62788798..13d326e7 100755
+> --- a/tests/generic/455
+> +++ b/tests/generic/455
+> @@ -7,7 +7,7 @@
+>  # Run fsx with log writes to verify power fail safeness.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto log replay
+> +_begin_fstest auto log replay recoveryloop
+>
+>  # Override the default cleanup function.
+>  _cleanup()
+> diff --git a/tests/generic/457 b/tests/generic/457
+> index d9e38268..f4fdd81d 100755
+> --- a/tests/generic/457
+> +++ b/tests/generic/457
+> @@ -7,7 +7,7 @@
+>  # Run fsx with log writes on cloned files to verify power fail safeness.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto log replay clone
+> +_begin_fstest auto log replay clone recoveryloop
+>
+>  # Override the default cleanup function.
+>  _cleanup()
+> diff --git a/tests/generic/475 b/tests/generic/475
+> index 62894491..c426402e 100755
+> --- a/tests/generic/475
+> +++ b/tests/generic/475
+> @@ -12,7 +12,7 @@
+>  # testing efforts.
+>  #
+>  . ./common/preamble
+> -_begin_fstest shutdown auto log metadata eio
+> +_begin_fstest shutdown auto log metadata eio recoveryloop
+>
+>  # Override the default cleanup function.
+>  _cleanup()
+> diff --git a/tests/generic/482 b/tests/generic/482
+> index f26e6fc4..0fadf795 100755
+> --- a/tests/generic/482
+> +++ b/tests/generic/482
+> @@ -9,7 +9,7 @@
+>  # Will do log replay and check the filesystem.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto metadata replay thin
+> +_begin_fstest auto metadata replay thin recoveryloop
+>
+>  # Override the default cleanup function.
+>  _cleanup()
+> diff --git a/tests/generic/725 b/tests/generic/725
+> index f43bcb37..8bd724e3 100755
+> --- a/tests/generic/725
+> +++ b/tests/generic/725
+> @@ -12,7 +12,7 @@
+>  # in writeback on the host that cause VM guests to fail to recover.
+>  #
+>  . ./common/preamble
+> -_begin_fstest shutdown auto log metadata eio
+> +_begin_fstest shutdown auto log metadata eio recoveryloop
+>
+>  _cleanup()
+>  {
+> diff --git a/tests/xfs/057 b/tests/xfs/057
+> index d4cfa8dc..9fb3f406 100755
+> --- a/tests/xfs/057
+> +++ b/tests/xfs/057
+> @@ -21,7 +21,7 @@
+>  # Note that this test requires a DEBUG mode kernel.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto log
+> +_begin_fstest auto log recoveryloop
+>
+>  # Override the default cleanup function.
+>  _cleanup()
+>
 
--- 
-chandan
+
+--=20
+Filipe David Manana,
+
+=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
+ right.=E2=80=9D
