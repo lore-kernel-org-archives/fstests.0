@@ -2,111 +2,97 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,USER_AGENT_SANE_1
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-14.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 90DC9C432BE
-	for <linux-fstests@archiver.kernel.org>; Fri, 30 Jul 2021 14:01:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C7FF7C4338F
+	for <linux-fstests@archiver.kernel.org>; Sat, 31 Jul 2021 16:58:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7519C60F5E
-	for <linux-fstests@archiver.kernel.org>; Fri, 30 Jul 2021 14:01:38 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 94A5D60F46
+	for <linux-fstests@archiver.kernel.org>; Sat, 31 Jul 2021 16:58:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239013AbhG3OBm (ORCPT
+        id S229449AbhGaQ64 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 30 Jul 2021 10:01:42 -0400
-Received: from out30-42.freemail.mail.aliyun.com ([115.124.30.42]:33153 "EHLO
-        out30-42.freemail.mail.aliyun.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S231247AbhG3OBl (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 30 Jul 2021 10:01:41 -0400
-X-Alimail-AntiSpam: AC=PASS;BC=-1|-1;BR=01201311R181e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=e01e04420;MF=eguan@linux.alibaba.com;NM=1;PH=DS;RN=4;SR=0;TI=SMTPD_---0UhRhdA5_1627653694;
-Received: from localhost(mailfrom:eguan@linux.alibaba.com fp:SMTPD_---0UhRhdA5_1627653694)
-          by smtp.aliyun-inc.com(127.0.0.1);
-          Fri, 30 Jul 2021 22:01:34 +0800
-Date:   Fri, 30 Jul 2021 22:01:34 +0800
-From:   Eryu Guan <eguan@linux.alibaba.com>
-To:     Hao Xu <haoxu@linux.alibaba.com>
-Cc:     fstests@vger.kernel.org, linux-nfs@vger.kernel.org
-Subject: Re: [PATCH] common/attr: fix the MAX_ATTRS and MAX_ATTRVAL_SIZE for
- nfs
-Message-ID: <20210730140134.GM60846@e18g06458.et15sqa>
-References: <20210730124252.113071-1-haoxu@linux.alibaba.com>
+        Sat, 31 Jul 2021 12:58:56 -0400
+Received: from mail.kernel.org ([198.145.29.99]:41656 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S229475AbhGaQ64 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sat, 31 Jul 2021 12:58:56 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 3A0E960F3A;
+        Sat, 31 Jul 2021 16:58:48 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1627750729;
+        bh=iiNx/1yA7yKEMM1x3GuqZ5c01BeXr0981Wqck8c407s=;
+        h=From:To:Cc:Subject:Date:From;
+        b=OwseQjPvvMSBcFBuhReCFfYe8nY9mVeexXcCCnwxUDDtVWWrPdnXzszCULEYbForu
+         jGOJ0S6UVUvg6KJL4ymkDdssVRi8e2xfDPdm02SKO8JBIzsf1wTnaWXEv1TW0TkC4i
+         JHTlGExHZlqPDwJPIB27og6DnRwvygZxDOQjXxDhR7OcCUDkSRMatFiLpQuI7thN/R
+         RZFa58Aiw46DJrBEhhvrSfmTGeYbgH/53vGtCSl5fc2VtNIEeZ+I9rBLwP0dotW95J
+         toEyj9kjJdmu8HZrzcCw/+dJLycRX+15MMD8taCo2jeqCTilw7RMtFF13NdNXQbrS3
+         oyDgFDrmXyuag==
+From:   Christian Brauner <brauner@kernel.org>
+To:     fstests@vger.kernel.org, Eryu Guan <guan@eryu.me>,
+        Christoph Hellwig <hch@lst.de>
+Cc:     Christian Brauner <christian.brauner@ubuntu.com>
+Subject: [PATCH v2 0/6] Extend idmapped mount testsuite
+Date:   Sat, 31 Jul 2021 18:58:28 +0200
+Message-Id: <20210731165834.479633-1-brauner@kernel.org>
+X-Mailer: git-send-email 2.30.2
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210730124252.113071-1-haoxu@linux.alibaba.com>
-User-Agent: Mutt/1.5.21 (2010-09-15)
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1648; h=from:subject; bh=awvKECNsBqPMEtzk6xUNKpEeZiJfSam4GxQQlsFNnmg=; b=owGbwMvMwCU28Zj0gdSKO4sYT6slMSSyNkoIhdheP5HJOUPmcYXMiYfb9OyqY7+uZJyxdVuz1oRc I0OOjlIWBjEuBlkxRRaHdpNwueU8FZuNMjVg5rAygQxh4OIUgIkkaTL84fVzfC92fOFjEf/fCsmbdp +dWOckzrx58vef8m93+K/eaMPIsFR43sL2zFuF2a6T3P6ZnbwUs/dYw9X/vw0+GSa1ntj0mwsA
+X-Developer-Key: i=christian.brauner@ubuntu.com; a=openpgp; fpr=4880B8C9BD0E5106FC070F4F7B3C391EFEA93624
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-[cc linux-nfs for review]
+From: Christian Brauner <christian.brauner@ubuntu.com>
 
-On Fri, Jul 30, 2021 at 08:42:52PM +0800, Hao Xu wrote:
-> The block size of localfs for nfs may be much smaller than nfs itself.
-> So we'd better set MAX_ATTRS and MAX_ATTRVAL_SIZE to 4096 to avoid
-> 'no space' error when we test adding a bunch of xattrs to nfs.
-> 
-> Signed-off-by: Hao Xu <haoxu@linux.alibaba.com>
+Hey,
 
-Since the xattr support is relatively new (merged a year ago for
-NFSv4.2), I'd like nfs folks to take a look as well.
+This adds two new tests:
+- a regression test for vfs capabilities
+- a new test with nested idmapping layouts
 
-> ---
-> 
-> It's better to set BLOCK_SIZE to `_get_block_size $variable`
-> here $variable is the localfs for nfs, since I'm not familiar with
-> xfstests, anyone tell what's the name of it.
+In addition, I've added a new test for btrfs which is on-track to
+support idmapped mounts in v5.15. I leave it to Eryu whether he wants to
+merge the btrfs test already or not. I think there's no harm in doing so
+but I'm also happy to wait.
 
-fstests doesn't know the exported filesystem under NFS, so I don't think
-we could the block size of it.
+Thanks!
+Christian
 
-> 
->  common/attr | 11 +++++++++--
->  1 file changed, 9 insertions(+), 2 deletions(-)
-> 
-> diff --git a/common/attr b/common/attr
-> index 42ceab92335a..a833f00e0884 100644
-> --- a/common/attr
-> +++ b/common/attr
-> @@ -253,9 +253,13 @@ _getfattr()
->  
->  # set maximum total attr space based on fs type
->  case "$FSTYP" in
-> -xfs|udf|pvfs2|9p|ceph|nfs)
-> +xfs|udf|pvfs2|9p|ceph)
->  	MAX_ATTRS=1000
->  	;; 
-> +nfs)
-> +	BLOCK_SIZE=4096
-> +	let MAX_ATTRS=$BLOCK_SIZE/40
-> +	;;
->  *)
->  	# Assume max ~1 block of attrs
->  	BLOCK_SIZE=`_get_block_size $TEST_DIR`
-> @@ -273,12 +277,15 @@ xfs|udf|btrfs)
->  pvfs2)
->  	MAX_ATTRVAL_SIZE=8192
->  	;;
-> -9p|ceph|nfs)
-> +9p|ceph)
->  	MAX_ATTRVAL_SIZE=65536
->  	;;
->  bcachefs)
->  	MAX_ATTRVAL_SIZE=1024
->  	;;
-> +nfs)
-> +	MAX_ATTRVAL_SIZE=3840
-> +	;;
+Christian Brauner (6):
+  idmapped-mounts: prepare for additional tests
+  generic/640: add fscaps regression test
+  idmapped-mounts: refactor helpers
+  idmapped-mounts: add nested userns creation helpers
+  generic/641: add nested user namespace tests
+  btrfs/244: introduce btrfs specific idmapped mounts tests
 
-Where does this value come from?
+ src/idmapped-mounts/idmapped-mounts.c | 4583 ++++++++++++++++++++++++-
+ src/idmapped-mounts/mount-idmapped.c  |  229 +-
+ src/idmapped-mounts/utils.c           |  359 +-
+ src/idmapped-mounts/utils.h           |  102 +-
+ tests/btrfs/244                       |   34 +
+ tests/btrfs/244.out                   |    2 +
+ tests/generic/633                     |    3 +-
+ tests/generic/640                     |   28 +
+ tests/generic/640.out                 |    2 +
+ tests/generic/641                     |   28 +
+ tests/generic/641.out                 |    2 +
+ 11 files changed, 5054 insertions(+), 318 deletions(-)
+ create mode 100755 tests/btrfs/244
+ create mode 100644 tests/btrfs/244.out
+ create mode 100755 tests/generic/640
+ create mode 100644 tests/generic/640.out
+ create mode 100755 tests/generic/641
+ create mode 100644 tests/generic/641.out
 
-Thanks,
-Eryu
 
->  *)
->  	# Assume max ~1 block of attrs
->  	BLOCK_SIZE=`_get_block_size $TEST_DIR`
-> -- 
-> 2.24.4
+base-commit: dad0c0a852d1b10e7da285f29e99397dec0efec1
+-- 
+2.30.2
+
