@@ -4,46 +4,46 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-19.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT,
-	WEIRD_QUOTING autolearn=ham autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 57CCCC4338F
-	for <linux-fstests@archiver.kernel.org>; Sat, 31 Jul 2021 16:58:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0B130C432BE
+	for <linux-fstests@archiver.kernel.org>; Sat, 31 Jul 2021 16:58:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 36CC960EFD
-	for <linux-fstests@archiver.kernel.org>; Sat, 31 Jul 2021 16:58:57 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E23DE61050
+	for <linux-fstests@archiver.kernel.org>; Sat, 31 Jul 2021 16:58:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229970AbhGaQ7D (ORCPT
+        id S229694AbhGaQ7E (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 31 Jul 2021 12:59:03 -0400
-Received: from mail.kernel.org ([198.145.29.99]:41740 "EHLO mail.kernel.org"
+        Sat, 31 Jul 2021 12:59:04 -0400
+Received: from mail.kernel.org ([198.145.29.99]:41754 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229475AbhGaQ7C (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sat, 31 Jul 2021 12:59:02 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 2DC9460F3A;
-        Sat, 31 Jul 2021 16:58:54 +0000 (UTC)
+        id S230284AbhGaQ7E (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sat, 31 Jul 2021 12:59:04 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id C9CCF60F46;
+        Sat, 31 Jul 2021 16:58:56 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1627750736;
-        bh=iONb6AaHsjlk9zPESvQGPymE7iQ2G6gY3VWfDYC1hVM=;
+        s=k20201202; t=1627750738;
+        bh=htgDStzsxT4PJM+65hsMSU7iGhUWYm2k1J0CnrVpPb8=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=OgbncRicyjGRUF6qvGXyYTDVW/jw/k5q/Ximhpfg9IJm4eT7/QX+20XoBAV/egGYg
-         L8JPN3JwCIUQdiqhOi9i60zexol41XqjOkVF0YR3LL9lSdTryXwQsmXLPl+qBUOnlW
-         BbyQE1Xs2gQcc4cPBae1APN0vUKN1KvDKObo3rISjZdmLJ/geBxl0YL44jPKOWN5dB
-         ZU7Tr8vlWVzloElMekG8wtXY56QdpZ8GAR+CZLDzs2iyCq0naqYYCw/abQBxew4D2u
-         di0ZnZ5EZGDck1OCBIAnM4o7egsffyrNzcLYj79W9UNbCfXC7WmohnxZusfINm2pCj
-         bnXke8/m7BUqQ==
+        b=DytGnnYNkUSi+1xAx0mfEkUxrSCFM2dk6sAqRp3GAuSeojKKD2xGVLozLsw0dcV4T
+         rWHJF720AM1pVEiJa57jiwYFvwUzoDAhUubsKxdgtoVoNwuJvCfDedl5+z4tBA2m6h
+         7Can0wqutPxQM6DEdO9CRPO/+WKncqMsX60iJOeMiN6vKv5/INH7D9xJOYu9v7hOoA
+         ayDmP9AJGgCwiHBxpIjOARdMrHcY+9WYnCgrpSBNS9HpWpCqXO4InffjiYNVVYHSv7
+         tSiOLEIWDigPvupVjAQGwigVzt5MDTdvy7nnLygJTkmFnLxbNtqlX8siwvVoTG95DU
+         MS9abL3kZ2mfQ==
 From:   Christian Brauner <brauner@kernel.org>
 To:     fstests@vger.kernel.org, Eryu Guan <guan@eryu.me>,
         Christoph Hellwig <hch@lst.de>
 Cc:     Christian Brauner <christian.brauner@ubuntu.com>
-Subject: [PATCH v2 4/6] idmapped-mounts: add nested userns creation helpers
-Date:   Sat, 31 Jul 2021 18:58:32 +0200
-Message-Id: <20210731165834.479633-5-brauner@kernel.org>
+Subject: [PATCH v2 5/6] generic/641: add nested user namespace tests
+Date:   Sat, 31 Jul 2021 18:58:33 +0200
+Message-Id: <20210731165834.479633-6-brauner@kernel.org>
 X-Mailer: git-send-email 2.30.2
 In-Reply-To: <20210731165834.479633-1-brauner@kernel.org>
 References: <20210731165834.479633-1-brauner@kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=9089; h=from:subject; bh=Bch0vwMgMBv/uz+h7f/gNkW1XyhCI8Le248qkWZRdzA=; b=owGbwMvMwCU28Zj0gdSKO4sYT6slMSSyNkr63l/REvfT9CmH4T8B94X2F72WHj8UEPjXP+vtz4J/ ASKOHaUsDGJcDLJiiiwO7Sbhcst5KjYbZWrAzGFlAhnCwMUpABOZx8bIsET9fgRTw+QsqbiwXS/n1h y0uXeSx6dxt8ob9fz/Irk++YwMPzrMV2Xtb7XQX1pTf81odaR3V7Tyut6cWrtT3FdTX+7mBgA=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=26867; h=from:subject; bh=u019CSWSErOzEY4wtEaSqzU78YK3htNLWtZkqybgGPk=; b=owGbwMvMwCU28Zj0gdSKO4sYT6slMSSyNkruvPPei1PZZrHIjfQpdieO32iQkpugvfShd96fgtkf 31mv7ChlYRDjYpAVU2RxaDcJl1vOU7HZKFMDZg4rE8gQBi5OAZjIHxeG/1UB7FN/Sn9a8j19s6rFS3 WfGql3n2y5nPODGg5HfnhduZjhr8AnhjPWT5admdK2W3Ban2VSYv/KptBpdc9KC1/P3uh6hgMA
 X-Developer-Key: i=christian.brauner@ubuntu.com; a=openpgp; fpr=4880B8C9BD0E5106FC070F4F7B3C391EFEA93624
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
@@ -52,343 +52,852 @@ X-Mailing-List: fstests@vger.kernel.org
 
 From: Christian Brauner <christian.brauner@ubuntu.com>
 
-Add a helper to create a nested userns hierarchy. This will be used in
-follow-up tests.
+Test ownership and ownership changes in a complex user namespace
+hierarchy.
 
 Cc: Christoph Hellwig <hch@lst.de>
 Cc: fstests@vger.kernel.org
 Signed-off-by: Christian Brauner <christian.brauner@ubuntu.com>
 ---
- src/idmapped-mounts/idmapped-mounts.c |  14 ---
- src/idmapped-mounts/mount-idmapped.c  |  32 +-----
- src/idmapped-mounts/utils.c           | 160 +++++++++++++++++++++++++-
- src/idmapped-mounts/utils.h           |  25 ++++
- 4 files changed, 185 insertions(+), 46 deletions(-)
+/* v2 */
+- Eryu Guan <guan@eryu.me>:
+  - Don't create symlinks for each test. Instead, use the same binary
+    and introduce new options to specify which tests to run.
+---
+ src/idmapped-mounts/idmapped-mounts.c | 723 +++++++++++++++++++++++++-
+ src/idmapped-mounts/utils.h           |   4 +
+ tests/generic/641                     |  28 +
+ tests/generic/641.out                 |   2 +
+ 4 files changed, 756 insertions(+), 1 deletion(-)
+ create mode 100755 tests/generic/641
+ create mode 100644 tests/generic/641.out
 
 diff --git a/src/idmapped-mounts/idmapped-mounts.c b/src/idmapped-mounts/idmapped-mounts.c
-index 66411970..c60af942 100644
+index c60af942..f155e0b4 100644
 --- a/src/idmapped-mounts/idmapped-mounts.c
 +++ b/src/idmapped-mounts/idmapped-mounts.c
-@@ -388,20 +388,6 @@ static inline bool switch_fsids(uid_t fsuid, gid_t fsgid)
- 	return true;
+@@ -8812,6 +8812,714 @@ out:
+ 	return fret;
  }
  
--static inline bool switch_ids(uid_t uid, gid_t gid)
--{
--	if (setgroups(0, NULL))
--		return log_errno(false, "failure: setgroups");
--
--	if (setresgid(gid, gid, gid))
--		return log_errno(false, "failure: setresgid");
--
--	if (setresuid(uid, uid, uid))
--		return log_errno(false, "failure: setresuid");
--
--	return true;
--}
--
- static inline bool switch_userns(int fd, uid_t uid, gid_t gid, bool drop_caps)
- {
- 	if (setns(fd, CLONE_NEWUSER))
-diff --git a/src/idmapped-mounts/mount-idmapped.c b/src/idmapped-mounts/mount-idmapped.c
-index b1209057..d8490bed 100644
---- a/src/idmapped-mounts/mount-idmapped.c
-+++ b/src/idmapped-mounts/mount-idmapped.c
-@@ -29,36 +29,6 @@
- 
- static struct list active_map;
- 
--static int add_map_entry(__u32 id_host,
--			 __u32 id_ns,
--			 __u32 range,
--			 idmap_type_t map_type)
--{
--	struct list *new_list = NULL;
--	struct id_map *newmap = NULL;
--
--	newmap = malloc(sizeof(*newmap));
--	if (!newmap)
--		return -ENOMEM;
--
--	new_list = malloc(sizeof(struct list));
--	if (!new_list) {
--		free(newmap);
--		return -ENOMEM;
--	}
--
--	*newmap = (struct id_map){
--		.hostid		= id_host,
--		.nsid		= id_ns,
--		.range		= range,
--		.map_type	= map_type,
--	};
--
--	new_list->elem = newmap;
--	list_add_tail(&active_map, new_list);
--	return 0;
--}
--
- static int parse_map(char *map)
- {
- 	char types[2] = {'u', 'g'};
-@@ -87,7 +57,7 @@ static int parse_map(char *map)
- 		else
- 			map_type = ID_TYPE_GID;
- 
--		ret = add_map_entry(id_host, id_ns, range, map_type);
-+		ret = add_map_entry(&active_map, id_host, id_ns, range, map_type);
- 		if (ret < 0)
- 			return ret;
- 	}
-diff --git a/src/idmapped-mounts/utils.c b/src/idmapped-mounts/utils.c
-index e54f481d..6ffd6a23 100644
---- a/src/idmapped-mounts/utils.c
-+++ b/src/idmapped-mounts/utils.c
-@@ -3,11 +3,15 @@
- #define _GNU_SOURCE
- #endif
- #include <fcntl.h>
-+#include <grp.h>
- #include <linux/limits.h>
-+#include <sched.h>
- #include <stdio.h>
- #include <stdlib.h>
--#include <sched.h>
-+#include <sys/eventfd.h>
- #include <sys/mount.h>
-+#include <sys/prctl.h>
-+#include <sys/socket.h>
- #include <sys/stat.h>
- #include <sys/types.h>
- #include <sys/wait.h>
-@@ -137,6 +141,9 @@ static int map_ids_from_idmap(struct list *idmap, pid_t pid)
- 	char mapbuf[4096] = {};
- 	bool had_entry = false;
- 
-+	if (list_empty(idmap))
-+		return 0;
-+
- 	for (idmap_type_t map_type = ID_TYPE_UID, u_or_g = 'u';
- 	     map_type <= ID_TYPE_GID; map_type++, u_or_g = 'g') {
- 		char *pos = mapbuf;
-@@ -225,3 +232,154 @@ int get_userns_fd(unsigned long nsid, unsigned long hostid, unsigned long range)
- 
- 	return get_userns_fd_from_idmap(&head);
- }
-+
-+bool switch_ids(uid_t uid, gid_t gid)
-+{
-+	if (setgroups(0, NULL))
-+		return syserror("failure: setgroups");
-+
-+	if (setresgid(gid, gid, gid))
-+		return syserror("failure: setresgid");
-+
-+	if (setresuid(uid, uid, uid))
-+		return syserror("failure: setresuid");
-+
-+	return true;
-+}
-+
-+static int userns_fd_cb(void *data)
-+{
-+	struct userns_hierarchy *h = data;
-+	char c;
-+	int ret;
-+
-+	ret = read_nointr(h->fd_event, &c, 1);
-+	if (ret < 0)
-+		return syserror("failure: read from socketpair");
-+
-+	/* Only switch ids if someone actually wrote a mapping for us. */
-+	if (c == '1') {
-+		if (!switch_ids(0, 0))
-+			return syserror("failure: switch ids to 0");
-+
-+		/* Ensure we can access proc files from processes we can ptrace. */
-+		ret = prctl(PR_SET_DUMPABLE, 1, 0, 0, 0);
-+		if (ret < 0)
-+			return syserror("failure: make dumpable");
-+	}
-+
-+	ret = write_nointr(h->fd_event, "1", 1);
-+	if (ret < 0)
-+		return syserror("failure: write to socketpair");
-+
-+	ret = create_userns_hierarchy(++h);
-+	if (ret < 0)
-+		return syserror("failure: userns level %d", h->level);
-+
-+	return 0;
-+}
-+
-+int create_userns_hierarchy(struct userns_hierarchy *h)
++static int nested_userns(void)
 +{
 +	int fret = -1;
-+	char c;
-+	int fd_socket[2];
-+	int fd_userns = -EBADF, ret = -1;
-+	ssize_t bytes;
++	int ret;
 +	pid_t pid;
-+	char path[256];
++	struct list *it, *next;
++	struct userns_hierarchy hierarchy[] = {
++		{ .level = 1, .fd_userns = -EBADF, },
++		{ .level = 2, .fd_userns = -EBADF, },
++		{ .level = 3, .fd_userns = -EBADF, },
++		{ .level = 4, .fd_userns = -EBADF, },
++		/* Dummy entry that marks the end. */
++		{ .level = MAX_USERNS_LEVEL, .fd_userns = -EBADF, },
++	};
++	struct mount_attr attr_level1 = {
++		.attr_set	= MOUNT_ATTR_IDMAP,
++		.userns_fd	= -EBADF,
++	};
++	struct mount_attr attr_level2 = {
++		.attr_set	= MOUNT_ATTR_IDMAP,
++		.userns_fd	= -EBADF,
++	};
++	struct mount_attr attr_level3 = {
++		.attr_set	= MOUNT_ATTR_IDMAP,
++		.userns_fd	= -EBADF,
++	};
++	struct mount_attr attr_level4 = {
++		.attr_set	= MOUNT_ATTR_IDMAP,
++		.userns_fd	= -EBADF,
++	};
++	int fd_dir1 = -EBADF,
++	    fd_open_tree_level1 = -EBADF,
++	    fd_open_tree_level2 = -EBADF,
++	    fd_open_tree_level3 = -EBADF,
++	    fd_open_tree_level4 = -EBADF;
++	const unsigned int id_file_range = 10000;
 +
-+	if (h->level == MAX_USERNS_LEVEL)
-+		return 0;
++	list_init(&hierarchy[0].id_map);
++	list_init(&hierarchy[1].id_map);
++	list_init(&hierarchy[2].id_map);
++	list_init(&hierarchy[3].id_map);
 +
-+	ret = socketpair(AF_LOCAL, SOCK_STREAM | SOCK_CLOEXEC, 0, fd_socket);
-+	if (ret < 0)
-+		return syserror("failure: create socketpair");
++	/*
++	 * Give a large map to the outermost user namespace so we can create
++	 * comfortable nested maps.
++	 */
++	ret = add_map_entry(&hierarchy[0].id_map, 1000000, 0, 1000000000, ID_TYPE_UID);
++	if (ret) {
++		log_stderr("failure: adding uidmap for userns at level 1");
++		goto out;
++	}
 +
-+	/* Note the CLONE_FILES | CLONE_VM when mucking with fds and memory. */
-+	h->fd_event = fd_socket[1];
-+	pid = do_clone(userns_fd_cb, h, CLONE_NEWUSER | CLONE_FILES | CLONE_VM);
++	ret = add_map_entry(&hierarchy[0].id_map, 1000000, 0, 1000000000, ID_TYPE_GID);
++	if (ret) {
++		log_stderr("failure: adding gidmap for userns at level 1");
++		goto out;
++	}
++
++	/* This is uid:0->2000000:100000000 in init userns. */
++	ret = add_map_entry(&hierarchy[1].id_map, 1000000, 0, 100000000, ID_TYPE_UID);
++	if (ret) {
++		log_stderr("failure: adding uidmap for userns at level 2");
++		goto out;
++	}
++
++	/* This is gid:0->2000000:100000000 in init userns. */
++	ret = add_map_entry(&hierarchy[1].id_map, 1000000, 0, 100000000, ID_TYPE_GID);
++	if (ret) {
++		log_stderr("failure: adding gidmap for userns at level 2");
++		goto out;
++	}
++
++	/* This is uid:0->3000000:999 in init userns. */
++	ret = add_map_entry(&hierarchy[2].id_map, 1000000, 0, 999, ID_TYPE_UID);
++	if (ret) {
++		log_stderr("failure: adding uidmap for userns at level 3");
++		goto out;
++	}
++
++	/* This is gid:0->3000000:999 in the init userns. */
++	ret = add_map_entry(&hierarchy[2].id_map, 1000000, 0, 999, ID_TYPE_GID);
++	if (ret) {
++		log_stderr("failure: adding gidmap for userns at level 3");
++		goto out;
++	}
++
++	/* id 999 will remain unmapped. */
++
++	/* This is uid:1000->2001000:1 in init userns. */
++	ret = add_map_entry(&hierarchy[2].id_map, 1000, 1000, 1, ID_TYPE_UID);
++	if (ret) {
++		log_stderr("failure: adding uidmap for userns at level 3");
++		goto out;
++	}
++
++	/* This is gid:1000->2001000:1 in init userns. */
++	ret = add_map_entry(&hierarchy[2].id_map, 1000, 1000, 1, ID_TYPE_GID);
++	if (ret) {
++		log_stderr("failure: adding gidmap for userns at level 3");
++		goto out;
++	}
++
++	/* This is uid:1001->3001001:10000 in init userns. */
++	ret = add_map_entry(&hierarchy[2].id_map, 1001001, 1001, 10000000, ID_TYPE_UID);
++	if (ret) {
++		log_stderr("failure: adding uidmap for userns at level 3");
++		goto out;
++	}
++
++	/* This is gid:1001->3001001:10000 in init userns. */
++	ret = add_map_entry(&hierarchy[2].id_map, 1001001, 1001, 10000000, ID_TYPE_GID);
++	if (ret) {
++		log_stderr("failure: adding gidmap for userns at level 3");
++		goto out;
++	}
++
++	/* Don't write a mapping in the 4th userns. */
++	list_empty(&hierarchy[4].id_map);
++
++	/* Create the actual userns hierarchy. */
++	ret = create_userns_hierarchy(hierarchy);
++	if (ret) {
++		log_stderr("failure: create userns hierarchy");
++		goto out;
++	}
++
++	attr_level1.userns_fd = hierarchy[0].fd_userns;
++	attr_level2.userns_fd = hierarchy[1].fd_userns;
++	attr_level3.userns_fd = hierarchy[2].fd_userns;
++	attr_level4.userns_fd = hierarchy[3].fd_userns;
++
++	/*
++	 * Create one directory where we create files for each uid/gid within
++	 * the first userns.
++	 */
++	if (mkdirat(t_dir1_fd, DIR1, 0777)) {
++		log_stderr("failure: mkdirat");
++		goto out;
++	}
++
++	fd_dir1 = openat(t_dir1_fd, DIR1, O_DIRECTORY | O_CLOEXEC);
++	if (fd_dir1 < 0) {
++		log_stderr("failure: openat");
++		goto out;
++	}
++
++	for (unsigned int id = 0; id <= id_file_range; id++) {
++		char file[256];
++
++		snprintf(file, sizeof(file), DIR1 "/" FILE1 "_%u", id);
++
++		if (mknodat(t_dir1_fd, file, S_IFREG | 0644, 0)) {
++			log_stderr("failure: create %s", file);
++			goto out;
++		}
++
++		if (fchownat(t_dir1_fd, file, id, id, AT_SYMLINK_NOFOLLOW)) {
++			log_stderr("failure: fchownat %s", file);
++			goto out;
++		}
++
++		if (!expected_uid_gid(t_dir1_fd, file, 0, id, id)) {
++			log_stderr("failure: check ownership %s", file);
++			goto out;
++		}
++	}
++
++	/* Create detached mounts for all the user namespaces. */
++	fd_open_tree_level1 = sys_open_tree(t_dir1_fd, DIR1,
++					    AT_NO_AUTOMOUNT |
++					    AT_SYMLINK_NOFOLLOW |
++					    OPEN_TREE_CLOEXEC |
++					    OPEN_TREE_CLONE);
++	if (fd_open_tree_level1 < 0) {
++		log_stderr("failure: sys_open_tree");
++		goto out;
++	}
++
++	fd_open_tree_level2 = sys_open_tree(t_dir1_fd, DIR1,
++					    AT_NO_AUTOMOUNT |
++					    AT_SYMLINK_NOFOLLOW |
++					    OPEN_TREE_CLOEXEC |
++					    OPEN_TREE_CLONE);
++	if (fd_open_tree_level2 < 0) {
++		log_stderr("failure: sys_open_tree");
++		goto out;
++	}
++
++	fd_open_tree_level3 = sys_open_tree(t_dir1_fd, DIR1,
++					    AT_NO_AUTOMOUNT |
++					    AT_SYMLINK_NOFOLLOW |
++					    OPEN_TREE_CLOEXEC |
++					    OPEN_TREE_CLONE);
++	if (fd_open_tree_level3 < 0) {
++		log_stderr("failure: sys_open_tree");
++		goto out;
++	}
++
++	fd_open_tree_level4 = sys_open_tree(t_dir1_fd, DIR1,
++					    AT_NO_AUTOMOUNT |
++					    AT_SYMLINK_NOFOLLOW |
++					    OPEN_TREE_CLOEXEC |
++					    OPEN_TREE_CLONE);
++	if (fd_open_tree_level4 < 0) {
++		log_stderr("failure: sys_open_tree");
++		goto out;
++	}
++
++	/* Turn detached mounts into detached idmapped mounts. */
++	if (sys_mount_setattr(fd_open_tree_level1, "", AT_EMPTY_PATH,
++			      &attr_level1, sizeof(attr_level1))) {
++		log_stderr("failure: sys_mount_setattr");
++		goto out;
++	}
++
++	if (sys_mount_setattr(fd_open_tree_level2, "", AT_EMPTY_PATH,
++			      &attr_level2, sizeof(attr_level2))) {
++		log_stderr("failure: sys_mount_setattr");
++		goto out;
++	}
++
++	if (sys_mount_setattr(fd_open_tree_level3, "", AT_EMPTY_PATH,
++			      &attr_level3, sizeof(attr_level3))) {
++		log_stderr("failure: sys_mount_setattr");
++		goto out;
++	}
++
++	if (sys_mount_setattr(fd_open_tree_level4, "", AT_EMPTY_PATH,
++			      &attr_level4, sizeof(attr_level4))) {
++		log_stderr("failure: sys_mount_setattr");
++		goto out;
++	}
++
++	/* Verify that ownership looks correct for callers in the init userns. */
++	for (unsigned int id = 0; id <= id_file_range; id++) {
++		bool bret;
++		unsigned int id_level1, id_level2, id_level3;
++		char file[256];
++
++		snprintf(file, sizeof(file), FILE1 "_%u", id);
++
++		id_level1 = id + 1000000;
++		if (!expected_uid_gid(fd_open_tree_level1, file, 0, id_level1, id_level1)) {
++			log_stderr("failure: check ownership %s", file);
++			goto out;
++		}
++
++		id_level2 = id + 2000000;
++		if (!expected_uid_gid(fd_open_tree_level2, file, 0, id_level2, id_level2)) {
++			log_stderr("failure: check ownership %s", file);
++			goto out;
++		}
++
++		if (id == 999) {
++			/* This id is unmapped. */
++			bret = expected_uid_gid(fd_open_tree_level3, file, 0, t_overflowuid, t_overflowgid);
++		} else if (id == 1000) {
++			id_level3 = id + 2000000; /* We punched a hole in the map at 1000. */
++			bret = expected_uid_gid(fd_open_tree_level3, file, 0, id_level3, id_level3);
++		} else {
++			id_level3 = id + 3000000; /* Rest is business as usual. */
++			bret = expected_uid_gid(fd_open_tree_level3, file, 0, id_level3, id_level3);
++		}
++		if (!bret) {
++			log_stderr("failure: check ownership %s", file);
++			goto out;
++		}
++
++		if (!expected_uid_gid(fd_open_tree_level4, file, 0, t_overflowuid, t_overflowgid)) {
++			log_stderr("failure: check ownership %s", file);
++			goto out;
++		}
++	}
++
++	/* Verify that ownership looks correct for callers in the first userns. */
++	pid = fork();
 +	if (pid < 0) {
-+		syserror("failure: userns level %d", h->level);
-+		goto out_close;
++		log_stderr("failure: fork");
++		goto out;
 +	}
++	if (pid == 0) {
++		if (!switch_userns(attr_level1.userns_fd, 0, 0, false))
++			die("failure: switch_userns");
 +
-+	ret = map_ids_from_idmap(&h->id_map, pid);
-+	if (ret < 0) {
-+		kill(pid, SIGKILL);
-+		syserror("failure: writing id mapping for userns level %d for %d", h->level, pid);
-+		goto out_wait;
-+	}
++		for (unsigned int id = 0; id <= id_file_range; id++) {
++			bool bret;
++			unsigned int id_level1, id_level2, id_level3;
++			char file[256];
 +
-+	if (!list_empty(&h->id_map))
-+		bytes = write_nointr(fd_socket[0], "1", 1); /* Inform the child we wrote a mapping. */
-+	else
-+		bytes = write_nointr(fd_socket[0], "0", 1); /* Inform the child we didn't write a mapping. */
-+	if (bytes < 0) {
-+		kill(pid, SIGKILL);
-+		syserror("failure: write to socketpair");
-+		goto out_wait;
-+	}
++			snprintf(file, sizeof(file), FILE1 "_%u", id);
 +
-+	/* Wait for child to set*id() and become dumpable. */
-+	bytes = read_nointr(fd_socket[0], &c, 1);
-+	if (bytes < 0) {
-+		kill(pid, SIGKILL);
-+		syserror("failure: read from socketpair");
-+		goto out_wait;
-+	}
++			id_level1 = id;
++			if (!expected_uid_gid(fd_open_tree_level1, file, 0, id_level1, id_level1))
++				die("failure: check ownership %s", file);
 +
-+	snprintf(path, sizeof(path), "/proc/%d/ns/user", pid);
-+	fd_userns = open(path, O_RDONLY | O_CLOEXEC);
-+	if (fd_userns < 0) {
-+		kill(pid, SIGKILL);
-+		syserror("failure: open userns level %d for %d", h->level, pid);
-+		goto out_wait;
++			id_level2 = id + 1000000;
++			if (!expected_uid_gid(fd_open_tree_level2, file, 0, id_level2, id_level2))
++				die("failure: check ownership %s", file);
++
++			if (id == 999) {
++				/* This id is unmapped. */
++				bret = expected_uid_gid(fd_open_tree_level3, file, 0, t_overflowuid, t_overflowgid);
++			} else if (id == 1000) {
++				id_level3 = id + 1000000; /* We punched a hole in the map at 1000. */
++				bret = expected_uid_gid(fd_open_tree_level3, file, 0, id_level3, id_level3);
++			} else {
++				id_level3 = id + 2000000; /* Rest is business as usual. */
++				bret = expected_uid_gid(fd_open_tree_level3, file, 0, id_level3, id_level3);
++			}
++			if (!bret)
++				die("failure: check ownership %s", file);
++
++			if (!expected_uid_gid(fd_open_tree_level4, file, 0, t_overflowuid, t_overflowgid))
++				die("failure: check ownership %s", file);
++		}
++
++		exit(EXIT_SUCCESS);
 +	}
++	if (wait_for_pid(pid))
++		goto out;
++
++	/* Verify that ownership looks correct for callers in the second userns. */
++	pid = fork();
++	if (pid < 0) {
++		log_stderr("failure: fork");
++		goto out;
++	}
++	if (pid == 0) {
++		if (!switch_userns(attr_level2.userns_fd, 0, 0, false))
++			die("failure: switch_userns");
++
++		for (unsigned int id = 0; id <= id_file_range; id++) {
++			bool bret;
++			unsigned int id_level2, id_level3;
++			char file[256];
++
++			snprintf(file, sizeof(file), FILE1 "_%u", id);
++
++			if (!expected_uid_gid(fd_open_tree_level1, file, 0, t_overflowuid, t_overflowgid))
++				die("failure: check ownership %s", file);
++
++			id_level2 = id;
++			if (!expected_uid_gid(fd_open_tree_level2, file, 0, id_level2, id_level2))
++				die("failure: check ownership %s", file);
++
++			if (id == 999) {
++				/* This id is unmapped. */
++				bret = expected_uid_gid(fd_open_tree_level3, file, 0, t_overflowuid, t_overflowgid);
++			} else if (id == 1000) {
++				id_level3 = id; /* We punched a hole in the map at 1000. */
++				bret = expected_uid_gid(fd_open_tree_level3, file, 0, id_level3, id_level3);
++			} else {
++				id_level3 = id + 1000000; /* Rest is business as usual. */
++				bret = expected_uid_gid(fd_open_tree_level3, file, 0, id_level3, id_level3);
++			}
++			if (!bret)
++				die("failure: check ownership %s", file);
++
++			if (!expected_uid_gid(fd_open_tree_level4, file, 0, t_overflowuid, t_overflowgid))
++				die("failure: check ownership %s", file);
++		}
++
++		exit(EXIT_SUCCESS);
++	}
++	if (wait_for_pid(pid))
++		goto out;
++
++	/* Verify that ownership looks correct for callers in the third userns. */
++	pid = fork();
++	if (pid < 0) {
++		log_stderr("failure: fork");
++		goto out;
++	}
++	if (pid == 0) {
++		if (!switch_userns(attr_level3.userns_fd, 0, 0, false))
++			die("failure: switch_userns");
++
++		for (unsigned int id = 0; id <= id_file_range; id++) {
++			bool bret;
++			unsigned int id_level2, id_level3;
++			char file[256];
++
++			snprintf(file, sizeof(file), FILE1 "_%u", id);
++
++			if (!expected_uid_gid(fd_open_tree_level1, file, 0, t_overflowuid, t_overflowgid))
++				die("failure: check ownership %s", file);
++
++			if (id == 1000) {
++				/*
++				 * The idmapping of the third userns has a hole
++				 * at uid/gid 1000. That means:
++				 * - 1000->userns_0(2000000) // init userns
++				 * - 1000->userns_1(2000000) // level 1
++				 * - 1000->userns_2(1000000) // level 2
++				 * - 1000->userns_3(1000)    // level 3 (because level 3 has a hole)
++				 */
++				id_level2 = id;
++				bret = expected_uid_gid(fd_open_tree_level2, file, 0, id_level2, id_level2);
++			} else {
++				bret = expected_uid_gid(fd_open_tree_level2, file, 0, t_overflowuid, t_overflowgid);
++			}
++			if (!bret)
++				die("failure: check ownership %s", file);
++
++
++			if (id == 999) {
++				/* This id is unmapped. */
++				bret = expected_uid_gid(fd_open_tree_level3, file, 0, t_overflowuid, t_overflowgid);
++			} else {
++				id_level3 = id; /* Rest is business as usual. */
++				bret = expected_uid_gid(fd_open_tree_level3, file, 0, id_level3, id_level3);
++			}
++			if (!bret)
++				die("failure: check ownership %s", file);
++
++			if (!expected_uid_gid(fd_open_tree_level4, file, 0, t_overflowuid, t_overflowgid))
++				die("failure: check ownership %s", file);
++		}
++
++		exit(EXIT_SUCCESS);
++	}
++	if (wait_for_pid(pid))
++		goto out;
++
++	/* Verify that ownership looks correct for callers in the fourth userns. */
++	pid = fork();
++	if (pid < 0) {
++		log_stderr("failure: fork");
++		goto out;
++	}
++	if (pid == 0) {
++		if (setns(attr_level4.userns_fd, CLONE_NEWUSER))
++			die("failure: switch_userns");
++
++		for (unsigned int id = 0; id <= id_file_range; id++) {
++			char file[256];
++
++			snprintf(file, sizeof(file), FILE1 "_%u", id);
++
++			if (!expected_uid_gid(fd_open_tree_level1, file, 0, t_overflowuid, t_overflowgid))
++				die("failure: check ownership %s", file);
++
++			if (!expected_uid_gid(fd_open_tree_level2, file, 0, t_overflowuid, t_overflowgid))
++				die("failure: check ownership %s", file);
++
++			if (!expected_uid_gid(fd_open_tree_level3, file, 0, t_overflowuid, t_overflowgid))
++				die("failure: check ownership %s", file);
++
++			if (!expected_uid_gid(fd_open_tree_level4, file, 0, t_overflowuid, t_overflowgid))
++				die("failure: check ownership %s", file);
++		}
++
++		exit(EXIT_SUCCESS);
++	}
++	if (wait_for_pid(pid))
++		goto out;
++
++	/* Verify that chown works correctly for callers in the first userns. */
++	pid = fork();
++	if (pid < 0) {
++		log_stderr("failure: fork");
++		goto out;
++	}
++	if (pid == 0) {
++		if (!switch_userns(attr_level1.userns_fd, 0, 0, false))
++			die("failure: switch_userns");
++
++		for (unsigned int id = 0; id <= id_file_range; id++) {
++			bool bret;
++			unsigned int id_level1, id_level2, id_level3, id_new;
++			char file[256];
++
++			snprintf(file, sizeof(file), FILE1 "_%u", id);
++
++			id_new = id + 1;
++			if (fchownat(fd_open_tree_level1, file, id_new, id_new, AT_SYMLINK_NOFOLLOW))
++				die("failure: fchownat %s", file);
++
++			id_level1 = id_new;
++			if (!expected_uid_gid(fd_open_tree_level1, file, 0, id_level1, id_level1))
++				die("failure: check ownership %s", file);
++
++			id_level2 = id_new + 1000000;
++			if (!expected_uid_gid(fd_open_tree_level2, file, 0, id_level2, id_level2))
++				die("failure: check ownership %s", file);
++
++			if (id_new == 999) {
++				/* This id is unmapped. */
++				bret = expected_uid_gid(fd_open_tree_level3, file, 0, t_overflowuid, t_overflowgid);
++			} else if (id_new == 1000) {
++				id_level3 = id_new + 1000000; /* We punched a hole in the map at 1000. */
++				bret = expected_uid_gid(fd_open_tree_level3, file, 0, id_level3, id_level3);
++			} else {
++				id_level3 = id_new + 2000000; /* Rest is business as usual. */
++				bret = expected_uid_gid(fd_open_tree_level3, file, 0, id_level3, id_level3);
++			}
++			if (!bret)
++				die("failure: check ownership %s", file);
++
++			if (!expected_uid_gid(fd_open_tree_level4, file, 0, t_overflowuid, t_overflowgid))
++				die("failure: check ownership %s", file);
++
++			/* Revert ownership. */
++			if (fchownat(fd_open_tree_level1, file, id, id, AT_SYMLINK_NOFOLLOW))
++				die("failure: fchownat %s", file);
++		}
++
++		exit(EXIT_SUCCESS);
++	}
++	if (wait_for_pid(pid))
++		goto out;
++
++	/* Verify that chown works correctly for callers in the second userns. */
++	pid = fork();
++	if (pid < 0) {
++		log_stderr("failure: fork");
++		goto out;
++	}
++	if (pid == 0) {
++		if (!switch_userns(attr_level2.userns_fd, 0, 0, false))
++			die("failure: switch_userns");
++
++		for (unsigned int id = 0; id <= id_file_range; id++) {
++			bool bret;
++			unsigned int id_level2, id_level3, id_new;
++			char file[256];
++
++			snprintf(file, sizeof(file), FILE1 "_%u", id);
++
++			id_new = id + 1;
++			if (fchownat(fd_open_tree_level2, file, id_new, id_new, AT_SYMLINK_NOFOLLOW))
++				die("failure: fchownat %s", file);
++
++			if (!expected_uid_gid(fd_open_tree_level1, file, 0, t_overflowuid, t_overflowgid))
++				die("failure: check ownership %s", file);
++
++			id_level2 = id_new;
++			if (!expected_uid_gid(fd_open_tree_level2, file, 0, id_level2, id_level2))
++				die("failure: check ownership %s", file);
++
++			if (id_new == 999) {
++				/* This id is unmapped. */
++				bret = expected_uid_gid(fd_open_tree_level3, file, 0, t_overflowuid, t_overflowgid);
++			} else if (id_new == 1000) {
++				id_level3 = id_new; /* We punched a hole in the map at 1000. */
++				bret = expected_uid_gid(fd_open_tree_level3, file, 0, id_level3, id_level3);
++			} else {
++				id_level3 = id_new + 1000000; /* Rest is business as usual. */
++				bret = expected_uid_gid(fd_open_tree_level3, file, 0, id_level3, id_level3);
++			}
++			if (!bret)
++				die("failure: check ownership %s", file);
++
++			if (!expected_uid_gid(fd_open_tree_level4, file, 0, t_overflowuid, t_overflowgid))
++				die("failure: check ownership %s", file);
++
++			/* Revert ownership. */
++			if (fchownat(fd_open_tree_level2, file, id, id, AT_SYMLINK_NOFOLLOW))
++				die("failure: fchownat %s", file);
++		}
++
++		exit(EXIT_SUCCESS);
++	}
++	if (wait_for_pid(pid))
++		goto out;
++
++	/* Verify that chown works correctly for callers in the third userns. */
++	pid = fork();
++	if (pid < 0) {
++		log_stderr("failure: fork");
++		goto out;
++	}
++	if (pid == 0) {
++		if (!switch_userns(attr_level3.userns_fd, 0, 0, false))
++			die("failure: switch_userns");
++
++		for (unsigned int id = 0; id <= id_file_range; id++) {
++			unsigned int id_new;
++			char file[256];
++
++			snprintf(file, sizeof(file), FILE1 "_%u", id);
++
++			id_new = id + 1;
++			if (id_new == 999 || id_new == 1000) {
++				/*
++				 * We can't change ownership as we can't
++				 * chown from or to an unmapped id.
++				 */
++				if (!fchownat(fd_open_tree_level3, file, id_new, id_new, AT_SYMLINK_NOFOLLOW))
++					die("failure: fchownat %s", file);
++			} else {
++				if (fchownat(fd_open_tree_level3, file, id_new, id_new, AT_SYMLINK_NOFOLLOW))
++					die("failure: fchownat %s", file);
++			}
++
++			if (!expected_uid_gid(fd_open_tree_level1, file, 0, t_overflowuid, t_overflowgid))
++				die("failure: check ownership %s", file);
++
++			/* There's no id 1000 anymore as we changed ownership for id 1000 to 1001 above. */
++			if (!expected_uid_gid(fd_open_tree_level2, file, 0, t_overflowuid, t_overflowgid))
++				die("failure: check ownership %s", file);
++
++			if (id_new == 999) {
++				/*
++				 * We did not change ownership as we can't
++				 * chown to an unmapped id.
++				 */
++				if (!expected_uid_gid(fd_open_tree_level3, file, 0, id, id))
++					die("failure: check ownership %s", file);
++			} else if (id_new == 1000) {
++				/*
++				 * We did not change ownership as we can't
++				 * chown from an unmapped id.
++				 */
++				if (!expected_uid_gid(fd_open_tree_level3, file, 0, t_overflowuid, t_overflowgid))
++					die("failure: check ownership %s", file);
++			} else {
++				if (!expected_uid_gid(fd_open_tree_level3, file, 0, id_new, id_new))
++					die("failure: check ownership %s", file);
++			}
++
++			if (!expected_uid_gid(fd_open_tree_level4, file, 0, t_overflowuid, t_overflowgid))
++				die("failure: check ownership %s", file);
++
++			/* Revert ownership. */
++			if (id_new != 999 && id_new != 1000) {
++				if (fchownat(fd_open_tree_level3, file, id, id, AT_SYMLINK_NOFOLLOW))
++					die("failure: fchownat %s", file);
++			}
++		}
++
++		exit(EXIT_SUCCESS);
++	}
++	if (wait_for_pid(pid))
++		goto out;
++
++	/* Verify that chown works correctly for callers in the fourth userns. */
++	pid = fork();
++	if (pid < 0) {
++		log_stderr("failure: fork");
++		goto out;
++	}
++	if (pid == 0) {
++		if (setns(attr_level4.userns_fd, CLONE_NEWUSER))
++			die("failure: switch_userns");
++
++		for (unsigned int id = 0; id <= id_file_range; id++) {
++			char file[256];
++			unsigned long id_new;
++
++			snprintf(file, sizeof(file), FILE1 "_%u", id);
++
++			id_new = id + 1;
++			if (!fchownat(fd_open_tree_level4, file, id_new, id_new, AT_SYMLINK_NOFOLLOW))
++				die("failure: fchownat %s", file);
++
++			if (!expected_uid_gid(fd_open_tree_level1, file, 0, t_overflowuid, t_overflowgid))
++				die("failure: check ownership %s", file);
++
++			if (!expected_uid_gid(fd_open_tree_level2, file, 0, t_overflowuid, t_overflowgid))
++				die("failure: check ownership %s", file);
++
++			if (!expected_uid_gid(fd_open_tree_level3, file, 0, t_overflowuid, t_overflowgid))
++				die("failure: check ownership %s", file);
++
++			if (!expected_uid_gid(fd_open_tree_level4, file, 0, t_overflowuid, t_overflowgid))
++				die("failure: check ownership %s", file);
++
++		}
++
++		exit(EXIT_SUCCESS);
++	}
++	if (wait_for_pid(pid))
++		goto out;
 +
 +	fret = 0;
++	log_debug("Ran test");
 +
-+out_wait:
-+	if (!wait_for_pid(pid) && !fret) {
-+		h->fd_userns = fd_userns;
-+		fd_userns = -EBADF;
++out:
++	list_for_each_safe(it, &hierarchy[0].id_map, next) {
++		list_del(it);
++		free(it->elem);
++		free(it);
 +	}
 +
-+out_close:
-+	if (fd_userns >= 0)
-+		close(fd_userns);
-+	close(fd_socket[0]);
-+	close(fd_socket[1]);
++	list_for_each_safe(it, &hierarchy[1].id_map, next) {
++		list_del(it);
++		free(it->elem);
++		free(it);
++	}
++
++	list_for_each_safe(it, &hierarchy[2].id_map, next) {
++		list_del(it);
++		free(it->elem);
++		free(it);
++	}
++
++	safe_close(hierarchy[0].fd_userns);
++	safe_close(hierarchy[1].fd_userns);
++	safe_close(hierarchy[2].fd_userns);
++	safe_close(fd_dir1);
++	safe_close(fd_open_tree_level1);
++	safe_close(fd_open_tree_level2);
++	safe_close(fd_open_tree_level3);
++	safe_close(fd_open_tree_level4);
 +	return fret;
 +}
 +
-+int add_map_entry(struct list *head,
-+		  __u32 id_host,
-+		  __u32 id_ns,
-+		  __u32 range,
-+		  idmap_type_t map_type)
-+{
-+	struct list *new_list = NULL;
-+	struct id_map *newmap = NULL;
-+
-+	newmap = malloc(sizeof(*newmap));
-+	if (!newmap)
-+		return -ENOMEM;
-+
-+	new_list = malloc(sizeof(struct list));
-+	if (!new_list) {
-+		free(newmap);
-+		return -ENOMEM;
-+	}
-+
-+	*newmap = (struct id_map){
-+		.hostid		= id_host,
-+		.nsid		= id_ns,
-+		.range		= range,
-+		.map_type	= map_type,
-+	};
-+
-+	new_list->elem = newmap;
-+	list_add_tail(head, new_list);
-+	return 0;
-+}
-diff --git a/src/idmapped-mounts/utils.h b/src/idmapped-mounts/utils.h
-index 4f976f9f..9694980e 100644
---- a/src/idmapped-mounts/utils.h
-+++ b/src/idmapped-mounts/utils.h
-@@ -10,6 +10,7 @@
- #include <linux/types.h>
- #include <sched.h>
- #include <signal.h>
-+#include <stdbool.h>
- #include <stdio.h>
- #include <stdlib.h>
- #include <string.h>
-@@ -19,6 +20,9 @@
- 
- #include "missing.h"
- 
-+/* Maximum number of nested user namespaces in the kernel. */
-+#define MAX_USERNS_LEVEL 32
-+
- /* A few helpful macros. */
- #define STRLITERALLEN(x) (sizeof(""x"") - 1)
- 
-@@ -63,6 +67,13 @@ struct list {
- 	struct list *prev;
+ static void usage(void)
+ {
+ 	fprintf(stderr, "Description:\n");
+@@ -8837,6 +9545,7 @@ static const struct option longopts[] = {
+ 	{"help",			no_argument,		0,	5},
+ 	{"test-core",			no_argument,		0,	6},
+ 	{"test-fscaps-regression",	no_argument,		0,	7},
++	{"test-nested-userns",		no_argument,		0,	8},
+ 	{NULL,				0,			0,	0},
  };
  
-+struct userns_hierarchy {
-+	int fd_userns;
-+	int fd_event;
-+	unsigned int level;
-+	struct list id_map;
+@@ -8899,6 +9608,10 @@ struct t_idmapped_mounts fscaps_in_ancestor_userns[] = {
+ 	{ fscaps_idmapped_mounts_in_userns_valid_in_ancestor_userns,	"fscaps on idmapped mounts in user namespace writing fscap valid in ancestor userns",		},
+ };
+ 
++struct t_idmapped_mounts t_nested_userns[] = {
++	{ nested_userns,						"test that nested user namespaces behave correctly when attached to idmapped mounts",		},
 +};
 +
+ static bool run_test(struct t_idmapped_mounts suite[], size_t suite_size)
+ {
+ 	int i;
+@@ -8936,7 +9649,8 @@ int main(int argc, char *argv[])
+ {
+ 	int fret, ret;
+ 	int index = 0;
+-	bool supported = false, test_core = false, test_fscaps_regression = false;
++	bool supported = false, test_core = false,
++	     test_fscaps_regression = false, test_nested_userns = false;
+ 
+ 	while ((ret = getopt_long(argc, argv, "", longopts, &index)) != -1) {
+ 		switch (ret) {
+@@ -8958,6 +9672,9 @@ int main(int argc, char *argv[])
+ 		case 7:
+ 			test_fscaps_regression = true;
+ 			break;
++		case 8:
++			test_nested_userns = true;
++			break;
+ 		case 5:
+ 			/* fallthrough */
+ 		default:
+@@ -9035,6 +9752,10 @@ int main(int argc, char *argv[])
+ 		      ARRAY_SIZE(fscaps_in_ancestor_userns)))
+ 		goto out;
+ 
++	if (test_nested_userns &&
++	    !run_test(t_nested_userns, ARRAY_SIZE(t_nested_userns)))
++		goto out;
++
+ 	fret = EXIT_SUCCESS;
+ 
+ out:
+diff --git a/src/idmapped-mounts/utils.h b/src/idmapped-mounts/utils.h
+index 9694980e..afb3c228 100644
+--- a/src/idmapped-mounts/utils.h
++++ b/src/idmapped-mounts/utils.h
+@@ -77,6 +77,10 @@ struct userns_hierarchy {
  #define list_for_each(__iterator, __list) \
  	for (__iterator = (__list)->next; __iterator != __list; __iterator = __iterator->next)
  
-@@ -90,6 +101,16 @@ static inline void list_add_tail(struct list *head, struct list *list)
- 	__list_add(list, head->prev, head);
- }
- 
-+static inline void list_del(struct list *list)
-+{
-+	struct list *next, *prev;
++#define list_for_each_safe(__iterator, __list, __next)               \
++	for (__iterator = (__list)->next, __next = __iterator->next; \
++	     __iterator != __list; __iterator = __next, __next = __next->next)
 +
-+	next = list->next;
-+	prev = list->prev;
-+	next->prev = prev;
-+	prev->next = next;
-+}
+ static inline void list_init(struct list *list)
+ {
+ 	list->elem = NULL;
+diff --git a/tests/generic/641 b/tests/generic/641
+new file mode 100755
+index 00000000..a3a41f02
+--- /dev/null
++++ b/tests/generic/641
+@@ -0,0 +1,28 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2021 Christian Brauner.  All Rights Reserved.
++#
++# FS QA Test 641
++#
++# Test that idmapped mounts behave correctly with complex user namespaces.
++#
++. ./common/preamble
++_begin_fstest auto quick idmapped mount
 +
- extern pid_t do_clone(int (*fn)(void *), void *arg, int flags);
- extern int get_userns_fd(unsigned long nsid, unsigned long hostid,
- 			 unsigned long range);
-@@ -97,5 +118,9 @@ extern int get_userns_fd_from_idmap(struct list *idmap);
- extern ssize_t read_nointr(int fd, void *buf, size_t count);
- extern int wait_for_pid(pid_t pid);
- extern ssize_t write_nointr(int fd, const void *buf, size_t count);
-+extern bool switch_ids(uid_t uid, gid_t gid);
-+extern int create_userns_hierarchy(struct userns_hierarchy *h);
-+extern int add_map_entry(struct list *head, __u32 id_host, __u32 id_ns,
-+			 __u32 range, idmap_type_t map_type);
- 
- #endif /* __IDMAP_UTILS_H */
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++
++_supported_fs generic
++_require_idmapped_mounts
++_require_test
++
++echo "Silence is golden"
++
++$here/src/idmapped-mounts/idmapped-mounts --test-nested-userns \
++	--device "$TEST_DEV" --mount "$TEST_DIR" --fstype "$FSTYP"
++
++status=$?
++exit
+diff --git a/tests/generic/641.out b/tests/generic/641.out
+new file mode 100644
+index 00000000..216333fd
+--- /dev/null
++++ b/tests/generic/641.out
+@@ -0,0 +1,2 @@
++QA output created by 641
++Silence is golden
 -- 
 2.30.2
 
