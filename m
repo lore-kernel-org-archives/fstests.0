@@ -2,93 +2,130 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A03C6C43214
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B1BA9C4320A
 	for <linux-fstests@archiver.kernel.org>; Sun,  1 Aug 2021 16:00:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 814BA610CE
+	by mail.kernel.org (Postfix) with ESMTP id A1C6D60EC0
 	for <linux-fstests@archiver.kernel.org>; Sun,  1 Aug 2021 16:00:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232129AbhHAQAI (ORCPT
+        id S232265AbhHAQAh (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 1 Aug 2021 12:00:08 -0400
-Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:33116 "EHLO
-        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S232190AbhHAP6e (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 1 Aug 2021 11:58:34 -0400
-Received: from cwcc.thunk.org (pool-72-74-133-215.bstnma.fios.verizon.net [72.74.133.215])
-        (authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 171Fvijf020195
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Sun, 1 Aug 2021 11:57:45 -0400
-Received: by cwcc.thunk.org (Postfix, from userid 15806)
-        id 4940915C3DD2; Sun,  1 Aug 2021 11:57:44 -0400 (EDT)
-Date:   Sun, 1 Aug 2021 11:57:44 -0400
-From:   "Theodore Ts'o" <tytso@mit.edu>
-To:     Eryu Guan <guan@eryu.me>
-Cc:     Josef Bacik <josef@toxicpanda.com>, fstests@vger.kernel.org,
-        linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH] fstests: generic/204: fail if the mkfs fails
-Message-ID: <YQbEeAYqXAAMGn7G@mit.edu>
-References: <fe1cd52ce8954e5aee1fc0a4baf5c75ef7d2635a.1627590942.git.josef@toxicpanda.com>
- <YQaWmtw5/OoXm26Z@desktop>
- <YQaZUK880CRVf6Sn@desktop>
+        Sun, 1 Aug 2021 12:00:37 -0400
+Received: from out20-2.mail.aliyun.com ([115.124.20.2]:43470 "EHLO
+        out20-2.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S232081AbhHAQAZ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 1 Aug 2021 12:00:25 -0400
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07865121|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.427253-0.00360999-0.569137;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047198;MF=guan@eryu.me;NM=1;PH=DS;RN=5;RT=5;SR=0;TI=SMTPD_---.Ktt9fTh_1627833615;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.Ktt9fTh_1627833615)
+          by smtp.aliyun-inc.com(10.147.41.143);
+          Mon, 02 Aug 2021 00:00:15 +0800
+Date:   Mon, 2 Aug 2021 00:00:14 +0800
+From:   Eryu Guan <guan@eryu.me>
+To:     Ritesh Harjani <riteshh@linux.ibm.com>
+Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
+        Theodore Ts'o <tytso@mit.edu>,
+        "Darrick J . Wong" <djwong@kernel.org>
+Subject: Re: [PATCHv2 5/9] generic/031: Fix the test case for 64k blocksize
+ config
+Message-ID: <YQbFDtq9aDA7Ql1j@desktop>
+References: <cover.1626844259.git.riteshh@linux.ibm.com>
+ <c37a4cfb8a50d2df68369d66ef6e1ebf6533e3ea.1626844259.git.riteshh@linux.ibm.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <YQaZUK880CRVf6Sn@desktop>
+In-Reply-To: <c37a4cfb8a50d2df68369d66ef6e1ebf6533e3ea.1626844259.git.riteshh@linux.ibm.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Aug 01, 2021 at 08:53:36PM +0800, Eryu Guan wrote:
-> > So the underlying disk is 1TB in size, and we ended up using this 1T
-> > filesystem when _scratch_mkfs_sized failed?
-> > 
-> > But we have done _try_wipe_scratch_devs before each test to make sure we
-> > don't use previous scratch dev accidently (just like this case), and the
-> > subsesquent _scratch_mount will fail and fail the whole test. So it's
-> > not clear to me what caused the failure you hit.
+On Wed, Jul 21, 2021 at 10:57:58AM +0530, Ritesh Harjani wrote:
+> This test fails with blocksize 64k since the test assumes 4k blocksize
+> in fcollapse param. This patch fixes that and also tests for 64k
+> blocksize.
+> 
+> Signed-off-by: Ritesh Harjani <riteshh@linux.ibm.com>
+> ---
+>  tests/generic/031     | 14 +++++++++-----
+>  tests/generic/031.out | 16 ++++++++--------
+>  2 files changed, 17 insertions(+), 13 deletions(-)
+> 
+> diff --git a/tests/generic/031 b/tests/generic/031
+> index 313ce9ff..11961c54 100755
+> --- a/tests/generic/031
+> +++ b/tests/generic/031
+> @@ -26,11 +26,16 @@ testfile=$SCRATCH_MNT/testfile
+>  _scratch_mkfs > /dev/null 2>&1
+>  _scratch_mount
+>  
+> +# fcollapse need offset and len to be multiple of blocksize for filesystems
+> +# So let's make the offsets and len required for fcollapse multiples of 64K
+> +# so that it works for all configurations (including on dax on 64K page size
+> +# systems)
+> +fact=$((65536/4096))
+>  $XFS_IO_PROG -f \
+> -	-c "pwrite 185332 55756" \
+> -	-c "fcollapse 28672 40960" \
+> -	-c "pwrite 133228 63394" \
+> -	-c "fcollapse 0 4096" \
+> +	-c "pwrite $((185332*fact + 12)) $((55756*fact + 12))" \
 
-The call to _try_wipe_scratch_devs was added in 2019.  My commit to
-add:
+Where does this 12 come from? And I'm wondering if this still reproduces
+the original bug.
 
-	|| _notrun "mkfs.${FSTYP} failed"
+And looks like that the original test setups came from a specific
+fsstress or fsx run, and aimed to the specific bug, perhaps we could
+require the test with <= 4k block size, and _notrun in 64k case.
 
-dates from 2017.  So the reason I was seeing the problem was because
-it was before we started running wipefs between tests.
+Thanks,
+Eryu
 
-That being said, I've checked a recent test run, and the _notrun
-hasn't triggered recently.  Looking at the git history, it looks like
-a large number of tests had their arguments to _scratch_mkfs_sized
-adjusted upwards to avoid failures when running with 64k block sizes
-on powerpc.
-
-Going back to generic/204, I see why Josef ran into issues, however.
-even though we are running wipefs before each test.  In the case of
-generic/204, it runs _scratch_mkfs to determine the blocksize, and
-then it runs _scratch_mkfs_sized --- and if it fails, the file system
-is left at the full size of the scratch file system, and then
-generic/204 takes a vey long time.
-
-So even if we can rely on wipefs causing the tests to fail, maybe we
-should just add a check for mkfs failure to _scratch_mkfs_sized?  I
-think that's a better fix than Josef's proposed patch to generic/204.
-One benefit of adding the check to _scratch_mkfs_sized is we can
-supply a clearer explanation of the failure since the failure would be
-"mkfs failed" as opposed to "mount: /vdc: wrong fs type, bad option,
-bad superblock on /dev/vdc, missing codepage or helper program, or
-other error."
-
-It might also make sense to adjust the size passed to
-_scratch_mkfs_sized in generic/204 to be a something slightly larger,
-since otherwise it's pretty much guaranteed that generic/204 will
-start failing on PowerPC when testing with a 64k block size.
-
-Cheers,
-
-						- Ted
+> +	-c "fcollapse $((28672 * fact)) $((40960 * fact))" \
+> +	-c "pwrite $((133228 * fact + 12)) $((63394 * fact + 12))" \
+> +	-c "fcollapse 0 $((4096 * fact))" \
+>  $testfile | _filter_xfs_io
+>  
+>  echo "==== Pre-Remount ==="
+> @@ -41,4 +46,3 @@ hexdump -C $testfile
+>  
+>  status=0
+>  exit
+> -
+> diff --git a/tests/generic/031.out b/tests/generic/031.out
+> index 194bfa45..7dfcfe41 100644
+> --- a/tests/generic/031.out
+> +++ b/tests/generic/031.out
+> @@ -1,19 +1,19 @@
+>  QA output created by 031
+> -wrote 55756/55756 bytes at offset 185332
+> +wrote 892108/892108 bytes at offset 2965324
+>  XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> -wrote 63394/63394 bytes at offset 133228
+> +wrote 1014316/1014316 bytes at offset 2131660
+>  XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+>  ==== Pre-Remount ===
+>  00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+>  *
+> -0001f860  00 00 00 00 00 00 00 00  00 00 00 00 cd cd cd cd  |................|
+> -0001f870  cd cd cd cd cd cd cd cd  cd cd cd cd cd cd cd cd  |................|
+> +001f86c0  00 00 00 00 00 00 00 00  00 00 00 00 cd cd cd cd  |................|
+> +001f86d0  cd cd cd cd cd cd cd cd  cd cd cd cd cd cd cd cd  |................|
+>  *
+> -0002fdc0
+> +002fdc18
+>  ==== Post-Remount ==
+>  00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+>  *
+> -0001f860  00 00 00 00 00 00 00 00  00 00 00 00 cd cd cd cd  |................|
+> -0001f870  cd cd cd cd cd cd cd cd  cd cd cd cd cd cd cd cd  |................|
+> +001f86c0  00 00 00 00 00 00 00 00  00 00 00 00 cd cd cd cd  |................|
+> +001f86d0  cd cd cd cd cd cd cd cd  cd cd cd cd cd cd cd cd  |................|
+>  *
+> -0002fdc0
+> +002fdc18
+> -- 
+> 2.31.1
