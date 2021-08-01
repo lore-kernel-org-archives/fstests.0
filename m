@@ -7,86 +7,90 @@ X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3873DC4320A
-	for <linux-fstests@archiver.kernel.org>; Sun,  1 Aug 2021 10:42:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A13AAC4338F
+	for <linux-fstests@archiver.kernel.org>; Sun,  1 Aug 2021 10:52:46 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 22AB6610A8
-	for <linux-fstests@archiver.kernel.org>; Sun,  1 Aug 2021 10:42:18 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 81E0560D07
+	for <linux-fstests@archiver.kernel.org>; Sun,  1 Aug 2021 10:52:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231579AbhHAKmW (ORCPT
+        id S231766AbhHAKwx (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 1 Aug 2021 06:42:22 -0400
-Received: from out20-98.mail.aliyun.com ([115.124.20.98]:40906 "EHLO
-        out20-98.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231518AbhHAKmV (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 1 Aug 2021 06:42:21 -0400
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07972568|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.0544785-0.000554709-0.944967;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047203;MF=guan@eryu.me;NM=1;PH=DS;RN=3;RT=3;SR=0;TI=SMTPD_---.Ktose30_1627814532;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.Ktose30_1627814532)
+        Sun, 1 Aug 2021 06:52:53 -0400
+Received: from out20-1.mail.aliyun.com ([115.124.20.1]:60425 "EHLO
+        out20-1.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231803AbhHAKww (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 1 Aug 2021 06:52:52 -0400
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.08332312|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_alarm|0.0651404-0.00151182-0.933348;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047209;MF=guan@eryu.me;NM=1;PH=DS;RN=3;RT=3;SR=0;TI=SMTPD_---.Ktosi2l_1627815163;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.Ktosi2l_1627815163)
           by smtp.aliyun-inc.com(10.147.43.230);
-          Sun, 01 Aug 2021 18:42:12 +0800
-Date:   Sun, 1 Aug 2021 18:42:11 +0800
+          Sun, 01 Aug 2021 18:52:43 +0800
+Date:   Sun, 1 Aug 2021 18:52:43 +0800
 From:   Eryu Guan <guan@eryu.me>
-To:     Jeffle Xu <jefflexu@linux.alibaba.com>
-Cc:     fstests@vger.kernel.org, linux-nfs@vger.kernel.org
-Subject: Re: [PATCH] common/rc: only force nfs4.2 non-default SEEK_HOLE
- behaviour
-Message-ID: <YQZ6g6ZszcMzVlt4@desktop>
-References: <20210729044758.63219-1-jefflexu@linux.alibaba.com>
+To:     Josef Bacik <josef@toxicpanda.com>
+Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Subject: Re: [PATCH] fstests: remove results .dmesg on each run
+Message-ID: <YQZ8+whfXorZo5ZK@desktop>
+References: <d6f40b516a57f9f899e67fad39088e0ddbe087db.1627590729.git.josef@toxicpanda.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210729044758.63219-1-jefflexu@linux.alibaba.com>
+In-Reply-To: <d6f40b516a57f9f899e67fad39088e0ddbe087db.1627590729.git.josef@toxicpanda.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-[cc nfs list]
+On Thu, Jul 29, 2021 at 04:32:20PM -0400, Josef Bacik wrote:
+> I recently added dmesg files to my nightly fstests summary page and
+> noticed I was getting .dmesg files from runs that happened previously.
+> This is because we don't remove the .dmesg file in the results directory
+> when we go to run the test, so fstests results would show a test having
+> failed with dmesg errors when it actually hadn't failed.  Fix this by
+> removing the .dmesg file when we are going to run a test.
 
-On Thu, Jul 29, 2021 at 12:47:58PM +0800, Jeffle Xu wrote:
-> Only NFSv4.2 supports non-defautl SEEK_HOLE behaviour. Thus default
-> SEEK_HOLE behaviour shall be allowed for NFSv4.0/4.1, or it will fail
-> generic/285, generic/448, generic/490 on NFSv4.0/4.1, complaining they
-> should support non-default SEEK_HOLE behaviour.
-> 
-> The *.full log is like:
-> 	File system supports the default behavior.
-> 	Default behavior is not allowed. Aborting.
-> 
-> Signed-off-by: Jeffle Xu <jefflexu@linux.alibaba.com>
+I didn't get it, the $seqres.dmesg file being checked is generated after
+each test, I didn't see how the stale $seqres.dmesg being used.
 
-Looks correct to me, but I'd like nfs folks to take a look as well, to
-conform if only nfsv4.2 supports SEEK_DATA/SEEK_HOLE non-default
-behavior.
+_check_dmesg()
+{
+	......
+        _dmesg_since_test_start | $filter >$seqres.dmesg
+        egrep -q -e "kernel BUG at" \
+             -e "WARNING:" \
+             -e "\bBUG:" \
+             -e "Oops:" \
+             -e "possible recursive locking detected" \
+             -e "Internal error" \
+             -e "(INFO|ERR): suspicious RCU usage" \
+             -e "INFO: possible circular locking dependency detected" \
+             -e "general protection fault:" \
+             -e "BUG .* remaining" \
+             -e "UBSAN:" \
+             $seqres.dmesg
+	......
+}
+
+Did I miss anything?
 
 Thanks,
 Eryu
 
-P.S.
-Please cc the corresponding filesystem list next time if patch affects
-the specific fs.
-
-> ---
->  common/rc | 8 ++++----
->  1 file changed, 4 insertions(+), 4 deletions(-)
 > 
-> diff --git a/common/rc b/common/rc
-> index 25a838a3..9be6f89d 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -2495,10 +2495,10 @@ _fstyp_has_non_default_seek_data_hole()
->  		return 0
->  		;;
->  	nfs*)
-> -		# NFSv2 and NFSv3 only support default behavior of SEEK_HOLE,
-> -		# while NFSv4 supports non-default behavior
-> -		local nfsvers=`_df_device $TEST_DEV | $AWK_PROG '{ print $2 }'`
-> -		[ "$nfsvers" = "nfs4" ]
-> +		# NFSv2, NFSv3, and NFSv4.0/4.1 only support default behavior of SEEK_HOLE,
-> +		# while NFSv4.2 supports non-default behavior
-> +		local nfsvers=`_mount() | grep $TEST_DEV | sed -n 's/^.*vers=\([0-9.]*\).*$/\1/p'`
-> +		[ "$nfsvers" = "4.2" ]
->  		return $?
->  		;;
->  	overlay)
+> Signed-off-by: Josef Bacik <josef@toxicpanda.com>
+> ---
+>  check | 1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/check b/check
+> index bb7e030c..2021cb21 100755
+> --- a/check
+> +++ b/check
+> @@ -809,6 +809,7 @@ function run_section()
+>  
+>  		# really going to try and run this one
+>  		rm -f $seqres.out.bad
+> +		rm -f $seqres.dmesg
+>  
+>  		# check if we really should run it
+>  		_expunge_test $seqnum
 > -- 
-> 2.27.0
+> 2.26.3
