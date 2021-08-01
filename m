@@ -7,90 +7,96 @@ X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A13AAC4338F
-	for <linux-fstests@archiver.kernel.org>; Sun,  1 Aug 2021 10:52:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7034EC4338F
+	for <linux-fstests@archiver.kernel.org>; Sun,  1 Aug 2021 11:18:13 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 81E0560D07
-	for <linux-fstests@archiver.kernel.org>; Sun,  1 Aug 2021 10:52:46 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3F418610C7
+	for <linux-fstests@archiver.kernel.org>; Sun,  1 Aug 2021 11:18:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231766AbhHAKwx (ORCPT
+        id S231462AbhHALSU (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 1 Aug 2021 06:52:53 -0400
-Received: from out20-1.mail.aliyun.com ([115.124.20.1]:60425 "EHLO
-        out20-1.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231803AbhHAKww (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 1 Aug 2021 06:52:52 -0400
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.08332312|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_alarm|0.0651404-0.00151182-0.933348;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047209;MF=guan@eryu.me;NM=1;PH=DS;RN=3;RT=3;SR=0;TI=SMTPD_---.Ktosi2l_1627815163;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.Ktosi2l_1627815163)
-          by smtp.aliyun-inc.com(10.147.43.230);
-          Sun, 01 Aug 2021 18:52:43 +0800
-Date:   Sun, 1 Aug 2021 18:52:43 +0800
+        Sun, 1 Aug 2021 07:18:20 -0400
+Received: from out20-49.mail.aliyun.com ([115.124.20.49]:56753 "EHLO
+        out20-49.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231461AbhHALST (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 1 Aug 2021 07:18:19 -0400
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07652099|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_regular_dialog|0.0589589-0.00576045-0.935281;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047194;MF=guan@eryu.me;NM=1;PH=DS;RN=5;RT=5;SR=0;TI=SMTPD_---.KtpL9V7_1627816690;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.KtpL9V7_1627816690)
+          by smtp.aliyun-inc.com(10.147.40.44);
+          Sun, 01 Aug 2021 19:18:10 +0800
+Date:   Sun, 1 Aug 2021 19:18:09 +0800
 From:   Eryu Guan <guan@eryu.me>
-To:     Josef Bacik <josef@toxicpanda.com>
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH] fstests: remove results .dmesg on each run
-Message-ID: <YQZ8+whfXorZo5ZK@desktop>
-References: <d6f40b516a57f9f899e67fad39088e0ddbe087db.1627590729.git.josef@toxicpanda.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     Chandan Babu R <chandanrlinux@gmail.com>, fstests@vger.kernel.org,
+        guaneryu@gmail.com, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 1/3] xfs/530: Do not pass block size argument to
+ _scratch_mkfs
+Message-ID: <YQaC8SrE/pWwu47O@desktop>
+References: <20210726064313.19153-1-chandanrlinux@gmail.com>
+ <20210726170827.GU559212@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <d6f40b516a57f9f899e67fad39088e0ddbe087db.1627590729.git.josef@toxicpanda.com>
+In-Reply-To: <20210726170827.GU559212@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Jul 29, 2021 at 04:32:20PM -0400, Josef Bacik wrote:
-> I recently added dmesg files to my nightly fstests summary page and
-> noticed I was getting .dmesg files from runs that happened previously.
-> This is because we don't remove the .dmesg file in the results directory
-> when we go to run the test, so fstests results would show a test having
-> failed with dmesg errors when it actually hadn't failed.  Fix this by
-> removing the .dmesg file when we are going to run a test.
+On Mon, Jul 26, 2021 at 10:08:27AM -0700, Darrick J. Wong wrote:
+> On Mon, Jul 26, 2021 at 12:13:11PM +0530, Chandan Babu R wrote:
+> > _scratch_do_mkfs constructs a mkfs command line by concatenating the values of
+> > 1. $mkfs_cmd
+> > 2. $MKFS_OPTIONS
+> > 3. $extra_mkfs_options
+> > 
+> > The block size argument passed by xfs/530 to _scratch_mkfs() will cause
+> > mkfs.xfs to fail if $MKFS_OPTIONS also has a block size specified. In such a
+> > case, _scratch_do_mkfs() will construct and invoke an mkfs command line
+> > without including the value of $MKFS_OPTIONS.
+> > 
+> > To prevent such silent failures, this commit removes the block size option
+> > that was being explicitly passed to _scratch_mkfs().
 
-I didn't get it, the $seqres.dmesg file being checked is generated after
-each test, I didn't see how the stale $seqres.dmesg being used.
+Patch looks fine to me, and queued for update.
 
-_check_dmesg()
-{
-	......
-        _dmesg_since_test_start | $filter >$seqres.dmesg
-        egrep -q -e "kernel BUG at" \
-             -e "WARNING:" \
-             -e "\bBUG:" \
-             -e "Oops:" \
-             -e "possible recursive locking detected" \
-             -e "Internal error" \
-             -e "(INFO|ERR): suspicious RCU usage" \
-             -e "INFO: possible circular locking dependency detected" \
-             -e "general protection fault:" \
-             -e "BUG .* remaining" \
-             -e "UBSAN:" \
-             $seqres.dmesg
-	......
-}
+> 
+> Yes, that makes sense.
+> 
+> Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 
-Did I miss anything?
+I'm wondering if mkfs.xfs could restore the behavior that allows
+re-specified options, and the last specified wins, e.g.
+
+mkfs -t xfs -b 1k -b 2k -f /dev/sda2
+
+and mkfs.xfs didn't report failure but created xfs with 2k blocksize.
+This may cause less problems like this patch resolved.
 
 Thanks,
 Eryu
 
 > 
-> Signed-off-by: Josef Bacik <josef@toxicpanda.com>
-> ---
->  check | 1 +
->  1 file changed, 1 insertion(+)
+> --D
 > 
-> diff --git a/check b/check
-> index bb7e030c..2021cb21 100755
-> --- a/check
-> +++ b/check
-> @@ -809,6 +809,7 @@ function run_section()
->  
->  		# really going to try and run this one
->  		rm -f $seqres.out.bad
-> +		rm -f $seqres.dmesg
->  
->  		# check if we really should run it
->  		_expunge_test $seqnum
-> -- 
-> 2.26.3
+> > 
+> > Signed-off-by: Chandan Babu R <chandanrlinux@gmail.com>
+> > ---
+> >  tests/xfs/530 | 2 +-
+> >  1 file changed, 1 insertion(+), 1 deletion(-)
+> > 
+> > diff --git a/tests/xfs/530 b/tests/xfs/530
+> > index 4d168ac5..16dc426c 100755
+> > --- a/tests/xfs/530
+> > +++ b/tests/xfs/530
+> > @@ -60,7 +60,7 @@ echo "Format and mount rt volume"
+> >  
+> >  export USE_EXTERNAL=yes
+> >  export SCRATCH_RTDEV=$rtdev
+> > -_scratch_mkfs -d size=$((1024 * 1024 * 1024)) -b size=${dbsize} \
+> > +_scratch_mkfs -d size=$((1024 * 1024 * 1024)) \
+> >  	      -r size=${rtextsz},extsize=${rtextsz} >> $seqres.full
+> >  _try_scratch_mount || _notrun "Couldn't mount fs with synthetic rt volume"
+> >  
+> > -- 
+> > 2.30.2
+> > 
