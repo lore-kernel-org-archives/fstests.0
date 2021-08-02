@@ -7,103 +7,268 @@ X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B7C00C4338F
-	for <linux-fstests@archiver.kernel.org>; Mon,  2 Aug 2021 22:15:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6B2D9C4338F
+	for <linux-fstests@archiver.kernel.org>; Mon,  2 Aug 2021 23:07:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9A88760724
-	for <linux-fstests@archiver.kernel.org>; Mon,  2 Aug 2021 22:15:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5169360EBB
+	for <linux-fstests@archiver.kernel.org>; Mon,  2 Aug 2021 23:07:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232037AbhHBWP2 (ORCPT
+        id S232282AbhHBXHi (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 2 Aug 2021 18:15:28 -0400
-Received: from mail.kernel.org ([198.145.29.99]:33102 "EHLO mail.kernel.org"
+        Mon, 2 Aug 2021 19:07:38 -0400
+Received: from mail.kernel.org ([198.145.29.99]:56410 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S231875AbhHBWPY (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 2 Aug 2021 18:15:24 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id A8F566054F;
-        Mon,  2 Aug 2021 22:15:13 +0000 (UTC)
+        id S231126AbhHBXHi (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 2 Aug 2021 19:07:38 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 728AC60EB5;
+        Mon,  2 Aug 2021 23:07:28 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1627942513;
-        bh=2ZvbvWhK+KSmhDEFN3Z0gKZ1OLvE1zEi/p9SVqNGpDw=;
+        s=k20201202; t=1627945648;
+        bh=Pa+RjoJ2mmxyO5qSgFuBHpVo/COkZopkBIiPuX3JAso=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=G3Y6kWeBY4REDACg0Qjpq9qTp7BOsg6tMXtYGvTeo5gdW3IuU9EJN8AAz0SCy+VEc
-         M5u9gzyg0j6w5tu59zJdiTbg+6mufXAXIZpxU6XxSdu5qL6il+pi1B3cnGtM6rxX/A
-         f4UYoBG/7yNX+UdKyFdaiKRci25TQS/Ms799Ved+eoWIfzQYh9vnEI0tI6Am8G8BpL
-         n1OrNIRdDijagqd7Rwcs6OSFnkGDNmkg+BuTYEAdfPcTDKhFKe+SLOdHbok8Sn8MEc
-         zRnlhmdYlpi/a6FxjLWRt6VOBKm2yQ4j4NJugA5sNkxs8nN5MtsnhEMfbKl/TEK2Z9
-         uEiGQWOtJ9CCg==
-Date:   Mon, 2 Aug 2021 15:15:13 -0700
+        b=E1jX9RlXnqaq6Pq6qFs77u7knteoNrgDxfrxDCCZ83rPbaVw0oLWOWYkJEN8VLg3H
+         eK7VDdj7ZIjM6ZE9KIslL8S1s0S6ilxHfawcewWTVMINpP6M8FiULNHb2pX6NtnOVH
+         1dP3QdDLGynAoU1d0m47VRojJ/XD8ZNlD6mUzz3UAyiKukRj/HUlCgSnNVfzNRaIIS
+         dkDddOaENy0K3rmMYPXujhoCi6RlHn1PXvHQN6Y8YPlrFRODfv5MpP9Ppnd+Bl86Gk
+         9TQ07Pvwaz9k7Sxx3kSuMuH7aVN/t21bIX/Gn/QfnXiUx0GYM52v8hdDhdI/WArD5g
+         XYTBG3K9VDjRA==
+Date:   Mon, 2 Aug 2021 16:07:27 -0700
 From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Eryu Guan <guan@eryu.me>
-Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org
-Subject: Re: [PATCH 3/4] generic/570: fix regression when SCRATCH_DEV is
- still formatted
-Message-ID: <20210802221513.GJ3601466@magnolia>
-References: <162743097757.3427426.8734776553736535870.stgit@magnolia>
- <162743099423.3427426.15112820532966726474.stgit@magnolia>
- <YQac0CPbZrVDEjrT@desktop>
+To:     Amir Goldstein <amir73il@gmail.com>
+Cc:     Eryu Guan <guaneryu@gmail.com>, Miklos Szeredi <miklos@szeredi.hu>,
+        linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH] overlay: add test for copy up of lower file attributes
+Message-ID: <20210802230727.GC3601425@magnolia>
+References: <20210722164634.394499-1-amir73il@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <YQac0CPbZrVDEjrT@desktop>
+In-Reply-To: <20210722164634.394499-1-amir73il@gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Aug 01, 2021 at 09:08:32PM +0800, Eryu Guan wrote:
-> On Tue, Jul 27, 2021 at 05:09:54PM -0700, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <djwong@kernel.org>
-> > 
-> > Newer versions of mkswap (or at least the one in util-linux 2.34)
-> > complain to stderr when they're formatting over a device that seems to
-> > contain existing data:
-> > 
-> >     mkswap: /dev/sdf: warning: wiping old btrfs signature.
-> > 
-> > This is harmless (since the swap image does get written!) but the extra
-> > golden output is flagged as a regression.  Update the mkswap usage in
-> > this test to dump the stderr output to $seqres.full, and complain if the
-> > exit code is nonzero.
-> > 
-> > This fixes a regression that the author noticed when testing btrfs and
-> > generic/507 and generic/570 run sequentially.  generic/507 calls
-> > _require_scratch_shutdown to see if the shutdown call is supported.
-> > btrfs does not support that, so the test is _notrun.  This leaves the
-> > scratch filesystem mounted, causing the _try_wipe_scratch_devs between
-> > tests to fail.  When g/570 starts up, the scratch device still contains
+On Thu, Jul 22, 2021 at 07:46:34PM +0300, Amir Goldstein wrote:
+> Overlayfs copies up a subset of lower file attributes since kernel
+> commits:
+> 173ff5c9ec37 ("ovl: consistent behavior for immutable/append-only inodes")
+> 2e3f6e87c2b0 ("ovl: copy up sync/noatime fileattr flags")
 > 
-> Won't your previous patch "check: don't leave the scratch filesystem
-> mounted after _notrun" fix this issue as well? As _notrun won't leaves
-> scratch dev mounted & unwiped after that patch. Would you please confirm?
+> This test verifies this functionality works correctly and that it
+> survives power failure and/or mount cycle.
 
-Yes.  In the end this patch becomes more about failing the test if
-mkswap fails than anything else.
+Just out of curiosity -- is this supposed to succeed with a 5.14-rc4
+kernel?  I noticed a massive regression with this week's fstests,
+probably because something didn't get cleaned up properly:
+
+--- overlay/078.out
++++ overlay/078.out.bad
+@@ -1,2 +1,17 @@
+ QA output created by 078
+ Silence is golden
++Before copy up: -------A-------------- /opt/ovl-mnt/testfile
++After  copy up: ---------------------- /opt/ovl-mnt/testfile
++Before copy up: -------A-------------- /opt/ovl-mnt/testfile
++After  copy up: ---------------------- /opt/ovl-mnt/testfile
++Before copy up: --S----A-------------- /opt/ovl-mnt/testfile
++After  copy up: ---------------------- /opt/ovl-mnt/testfile
++Before copy up: --S----A-------------- /opt/ovl-mnt/testfile
++After  copy up: ---------------------- /opt/ovl-mnt/testfile
++Before copy up: --S--a-A-------------- /opt/ovl-mnt/testfile
++After  copy up: ---------------------- /opt/ovl-mnt/testfile
++Before copy up: --S--a-A-------------- /opt/ovl-mnt/testfile
++After  copy up: ---------------------- /opt/ovl-mnt/testfile
++rm: cannot remove '/opt/ovl-upper/testfile': Operation not permitted
++rm: cannot remove
+'/opt/ovl-work/index/00fb2100812f1a30dc474847dbad5281308293ece9030e00020000000054816fd1':
+Operation not permitted
++Write unexpectedly returned 0 for file with attribute 'i'
+
+and then the tests after it (e.g. generic/030) fail with:
+
++mount: /opt/ovl-mnt: mount(2) system call failed: Stale file handle.
++mount failed
++(see /var/tmp/fstests/generic/030.full for details)
+
 
 --D
 
-> Thanks,
-> Eryu
 > 
-> > leftovers from the failed attempt to run g/507, which is why the mkswap
-> > command outputs the above warning.
-> > 
-> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > ---
-> >  tests/generic/570 |    2 +-
-> >  1 file changed, 1 insertion(+), 1 deletion(-)
-> > 
-> > 
-> > diff --git a/tests/generic/570 b/tests/generic/570
-> > index 7d03acfe..02c1d333 100755
-> > --- a/tests/generic/570
-> > +++ b/tests/generic/570
-> > @@ -27,7 +27,7 @@ _require_scratch_nocheck
-> >  _require_block_device $SCRATCH_DEV
-> >  test -e /dev/snapshot && _notrun "userspace hibernation to swap is enabled"
-> >  
-> > -$MKSWAP_PROG "$SCRATCH_DEV" >> $seqres.full
-> > +$MKSWAP_PROG -f "$SCRATCH_DEV" &>> $seqres.full || echo "mkswap failed?"
-> >  
-> >  # Can you modify the swap dev via previously open file descriptors?
-> >  for verb in 1 2 3 4; do
+> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> ---
+> 
+> Eryu,
+> 
+> This test is failing on master and passes on overlayfs-next.
+> 
+> Thanks,
+> Amir.
+> 
+>  tests/overlay/078     | 145 ++++++++++++++++++++++++++++++++++++++++++
+>  tests/overlay/078.out |   2 +
+>  2 files changed, 147 insertions(+)
+>  create mode 100755 tests/overlay/078
+>  create mode 100644 tests/overlay/078.out
+> 
+> diff --git a/tests/overlay/078 b/tests/overlay/078
+> new file mode 100755
+> index 00000000..b43449d1
+> --- /dev/null
+> +++ b/tests/overlay/078
+> @@ -0,0 +1,145 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2018 Huawei.  All Rights Reserved.
+> +# Copyright (C) 2021 CTERA Networks. All Rights Reserved.
+> +#
+> +# FS QA Test 078
+> +#
+> +# Test copy up of lower file attributes.
+> +#
+> +# Overlayfs copies up a subset of lower file attributes since kernel commits:
+> +# 173ff5c9ec37 ("ovl: consistent behavior for immutable/append-only inodes")
+> +# 2e3f6e87c2b0 ("ovl: copy up sync/noatime fileattr flags")
+> +#
+> +# This test is similar and was derived from generic/507, but instead
+> +# of creating new files which are created in upper layer, prepare
+> +# the file with attributes in lower layer and verify that attributes
+> +# are not lost during copy up, (optional) shutdown and mount cycle.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick perms shutdown
+> +
+> +# Override the default cleanup function.
+> +_cleanup()
+> +{
+> +	cd /
+> +	$CHATTR_PROG -ai $lowertestfile &> /dev/null
+> +	rm -f $tmp.*
+> +}
+> +
+> +# Import common functions.
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_fs generic
+> +
+> +_require_command "$LSATTR_PROG" lasttr
+> +_require_command "$CHATTR_PROG" chattr
+> +_require_chattr ASai
+> +_require_xfs_io_command "syncfs"
+> +
+> +_require_scratch
+> +_require_scratch_shutdown
+> +
+> +lowerdir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
+> +upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
+> +workdir=$OVL_BASE_SCRATCH_MNT/$OVL_WORK
+> +lowertestfile=$lowerdir/testfile
+> +testfile=$SCRATCH_MNT/testfile
+> +
+> +_scratch_mkfs
+> +mkdir -p $lowerdir
+> +touch $lowertestfile
+> +_scratch_mount
+> +
+> +# Set another flag on lowertestfile and verify all flags
+> +# are kept though copy up (optional shutdown) and mount cycle
+> +do_check()
+> +{
+> +	attr=$1
+> +
+> +	echo "Test chattr +$1 $2" >> $seqres.full
+> +
+> +	$UMOUNT_PROG $SCRATCH_MNT
+> +
+> +	# Add attribute to lower file
+> +	$CHATTR_PROG +$attr $lowertestfile
+> +
+> +	# Re-create upperdir/workdir
+> +	rm -rf $upperdir $workdir
+> +	mkdir -p $upperdir $workdir
+> +
+> +	if [ "$2" == "shutdown" ]; then
+> +		$XFS_IO_PROG -r $lowertestfile -c "fsync" | _filter_xfs_io
+> +	fi
+> +
+> +	_scratch_mount
+> +
+> +	before=`$LSATTR_PROG $testfile`
+> +
+> +	# Write file in append mode to test copy up of append-only attribute
+> +	# Expect failure on write to immutable file
+> +	expect=0
+> +	if [ "$1" == "i" ]; then
+> +		expect=1
+> +	fi
+> +	$XFS_IO_PROG -a -c "pwrite -S 0x61 0 10" $testfile >> $seqres.full 2>&1
+> +	result=$?
+> +	if [ $result != $expect ]; then
+> +		echo "Write unexpectedly returned $result for file with attribute '$attr'"
+> +	fi
+> +
+> +	if [ "$2" == "shutdown" ]; then
+> +		$XFS_IO_PROG -r $testfile -c "fsync" | _filter_xfs_io
+> +		_scratch_shutdown | tee -a $seqres.full
+> +	fi
+> +
+> +	_scratch_cycle_mount
+> +
+> +	after=`$LSATTR_PROG $testfile`
+> +	echo "Before copy up: $before" >> $seqres.full
+> +	echo "After  copy up: $after" >> $seqres.full
+> +
+> +	# Verify attributes were not lost during copy up, shutdown and mount cycle
+> +	if [ "$before" != "$after" ]; then
+> +		echo "Before copy up: $before"
+> +		echo "After  copy up: $after"
+> +	fi
+> +
+> +	echo "Test chattr -$1 $2" >> $seqres.full
+> +
+> +	# Delete attribute from overlay file
+> +	$CHATTR_PROG -$attr $testfile
+> +
+> +	before=`$LSATTR_PROG $testfile`
+> +
+> +	if [ "$2" == "shutdown" ]; then
+> +		$XFS_IO_PROG -r $testfile -c "fsync" | _filter_xfs_io
+> +		_scratch_shutdown | tee -a $seqres.full
+> +	fi
+> +
+> +	_scratch_cycle_mount
+> +
+> +	after=`$LSATTR_PROG $testfile`
+> +	echo "Before mount cycle: $before" >> $seqres.full
+> +	echo "After  mount cycle: $after" >> $seqres.full
+> +
+> +	# Verify attribute deletion was not lost during shutdown or mount cycle
+> +	if [ "$before" != "$after" ]; then
+> +		echo "Before mount cycle: $before"
+> +		echo "After  mount cycle: $after"
+> +	fi
+> +}
+> +
+> +echo "Silence is golden"
+> +
+> +# This is the subset of attributes copied up by overlayfs since kernel
+> +# commit ...
+> +opts="A S a i"
+> +for i in $opts; do
+> +	do_check $i
+> +	do_check $i shutdown
+> +done
+> +
+> +status=0
+> +exit
+> diff --git a/tests/overlay/078.out b/tests/overlay/078.out
+> new file mode 100644
+> index 00000000..b8acea8c
+> --- /dev/null
+> +++ b/tests/overlay/078.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 078
+> +Silence is golden
+> -- 
+> 2.32.0
+> 
