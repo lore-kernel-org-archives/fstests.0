@@ -2,116 +2,192 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.2 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
-	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 71C3FC4338F
-	for <linux-fstests@archiver.kernel.org>; Tue,  3 Aug 2021 02:46:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 48FEAC432BE
+	for <linux-fstests@archiver.kernel.org>; Tue,  3 Aug 2021 05:00:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 327CC60E09
-	for <linux-fstests@archiver.kernel.org>; Tue,  3 Aug 2021 02:46:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 11AC360724
+	for <linux-fstests@archiver.kernel.org>; Tue,  3 Aug 2021 05:00:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233197AbhHCCqg (ORCPT
+        id S230024AbhHCFA5 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 2 Aug 2021 22:46:36 -0400
-Received: from out30-133.freemail.mail.aliyun.com ([115.124.30.133]:36293 "EHLO
-        out30-133.freemail.mail.aliyun.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S233356AbhHCCqg (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 2 Aug 2021 22:46:36 -0400
-X-Alimail-AntiSpam: AC=PASS;BC=-1|-1;BR=01201311R211e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=e01e04394;MF=haoxu@linux.alibaba.com;NM=1;PH=DS;RN=3;SR=0;TI=SMTPD_---0UhpfPBS_1627958784;
-Received: from B-25KNML85-0107.local(mailfrom:haoxu@linux.alibaba.com fp:SMTPD_---0UhpfPBS_1627958784)
-          by smtp.aliyun-inc.com(127.0.0.1);
-          Tue, 03 Aug 2021 10:46:24 +0800
-Subject: Re: [PATCH] common/attr: fix the MAX_ATTRS and MAX_ATTRVAL_SIZE for
- nfs
-To:     Eryu Guan <eguan@linux.alibaba.com>
-Cc:     fstests@vger.kernel.org, linux-nfs@vger.kernel.org
-References: <20210730124252.113071-1-haoxu@linux.alibaba.com>
- <20210730140134.GM60846@e18g06458.et15sqa>
-From:   Hao Xu <haoxu@linux.alibaba.com>
-Message-ID: <973941f3-a2c9-1e5d-a8bc-417a955d505e@linux.alibaba.com>
-Date:   Tue, 3 Aug 2021 10:46:24 +0800
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0)
- Gecko/20100101 Thunderbird/78.10.2
+        Tue, 3 Aug 2021 01:00:57 -0400
+Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:46374 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S229753AbhHCFA5 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 3 Aug 2021 01:00:57 -0400
+Received: from pps.filterd (m0098414.ppops.net [127.0.0.1])
+        by mx0b-001b2d01.pphosted.com (8.16.0.43/8.16.0.43) with SMTP id 1734hRTo003205;
+        Tue, 3 Aug 2021 01:00:40 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=date : from : to : cc :
+ subject : message-id : references : content-type : in-reply-to :
+ mime-version; s=pp1; bh=SL6vi5WaHWZaEerF7HQ60qsuzS74lFHTIY3atdMYmtw=;
+ b=TpCjMokSOVkNXJj8jlNtWSchG8dAhETcNAAs+5Sr51xqM+6xcm8H3mzbt8vJcRemThPs
+ mamXuaeD2oauexgadVEMA6xknU6YbxVM/zG260vh4ae1nffNqAHWAszC841F+9UiQE0+
+ UyMteDNPEK8hJoPJuw97ZLBZVc2RzeyvYpF4DGnH7rXSIp+oU5514iSBgbXEWwcGqWuk
+ 1PS2rhmHALlN+APchQk+UPjKLMlupdSBxYBGAI72v6l8Cwqok0zICebuTwuuEuo+wzP1
+ pCAsYRN2oWAcrveDkH4WOXr6jlKk53szX4YjMTq+LlefpA+C0fAcJSUxxnsYnDEUUZqb Qw== 
+Received: from ppma01fra.de.ibm.com (46.49.7a9f.ip4.static.sl-reverse.com [159.122.73.70])
+        by mx0b-001b2d01.pphosted.com with ESMTP id 3a5rkxrb2v-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 03 Aug 2021 01:00:40 -0400
+Received: from pps.filterd (ppma01fra.de.ibm.com [127.0.0.1])
+        by ppma01fra.de.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 1734qcJL027640;
+        Tue, 3 Aug 2021 05:00:38 GMT
+Received: from b06cxnps4074.portsmouth.uk.ibm.com (d06relay11.portsmouth.uk.ibm.com [9.149.109.196])
+        by ppma01fra.de.ibm.com with ESMTP id 3a4x58nn2n-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 03 Aug 2021 05:00:38 +0000
+Received: from b06wcsmtp001.portsmouth.uk.ibm.com (b06wcsmtp001.portsmouth.uk.ibm.com [9.149.105.160])
+        by b06cxnps4074.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 17350ZGL56557920
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Tue, 3 Aug 2021 05:00:35 GMT
+Received: from b06wcsmtp001.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id 54592A409A;
+        Tue,  3 Aug 2021 05:00:35 +0000 (GMT)
+Received: from b06wcsmtp001.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id DFE58A4067;
+        Tue,  3 Aug 2021 05:00:34 +0000 (GMT)
+Received: from localhost (unknown [9.85.100.55])
+        by b06wcsmtp001.portsmouth.uk.ibm.com (Postfix) with ESMTP;
+        Tue,  3 Aug 2021 05:00:34 +0000 (GMT)
+Date:   Tue, 3 Aug 2021 10:30:33 +0530
+From:   Ritesh Harjani <riteshh@linux.ibm.com>
+To:     Eryu Guan <guan@eryu.me>
+Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
+        "Theodore Ts'o" <tytso@mit.edu>,
+        "Darrick J . Wong" <djwong@kernel.org>,
+        Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCHv2 5/9] generic/031: Fix the test case for 64k blocksize
+ config
+Message-ID: <20210803050033.meopotfeooo6n4gu@riteshh-domain>
+References: <cover.1626844259.git.riteshh@linux.ibm.com>
+ <c37a4cfb8a50d2df68369d66ef6e1ebf6533e3ea.1626844259.git.riteshh@linux.ibm.com>
+ <YQbFDtq9aDA7Ql1j@desktop>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <YQbFDtq9aDA7Ql1j@desktop>
+X-TM-AS-GCONF: 00
+X-Proofpoint-GUID: s0zPvSkOjKv2r0BVXgUQNyHdVIl2xWV2
+X-Proofpoint-ORIG-GUID: s0zPvSkOjKv2r0BVXgUQNyHdVIl2xWV2
+X-Proofpoint-UnRewURL: 0 URL was un-rewritten
 MIME-Version: 1.0
-In-Reply-To: <20210730140134.GM60846@e18g06458.et15sqa>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.391,18.0.790
+ definitions=2021-08-02_10:2021-08-02,2021-08-02 signatures=0
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 mlxlogscore=999
+ priorityscore=1501 spamscore=0 suspectscore=0 bulkscore=0 adultscore=0
+ impostorscore=0 clxscore=1011 lowpriorityscore=0 phishscore=0 mlxscore=0
+ malwarescore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2107140000 definitions=main-2108030027
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-在 2021/7/30 下午10:01, Eryu Guan 写道:
-> [cc linux-nfs for review]
-> 
-> On Fri, Jul 30, 2021 at 08:42:52PM +0800, Hao Xu wrote:
->> The block size of localfs for nfs may be much smaller than nfs itself.
->> So we'd better set MAX_ATTRS and MAX_ATTRVAL_SIZE to 4096 to avoid
->> 'no space' error when we test adding a bunch of xattrs to nfs.
->>
->> Signed-off-by: Hao Xu <haoxu@linux.alibaba.com>
-> 
-> Since the xattr support is relatively new (merged a year ago for
-> NFSv4.2), I'd like nfs folks to take a look as well.
-> 
->> ---
->>
->> It's better to set BLOCK_SIZE to `_get_block_size $variable`
->> here $variable is the localfs for nfs, since I'm not familiar with
->> xfstests, anyone tell what's the name of it.
-> 
-> fstests doesn't know the exported filesystem under NFS, so I don't think
-> we could the block size of it.
-> 
->>
->>   common/attr | 11 +++++++++--
->>   1 file changed, 9 insertions(+), 2 deletions(-)
->>
->> diff --git a/common/attr b/common/attr
->> index 42ceab92335a..a833f00e0884 100644
->> --- a/common/attr
->> +++ b/common/attr
->> @@ -253,9 +253,13 @@ _getfattr()
->>   
->>   # set maximum total attr space based on fs type
->>   case "$FSTYP" in
->> -xfs|udf|pvfs2|9p|ceph|nfs)
->> +xfs|udf|pvfs2|9p|ceph)
->>   	MAX_ATTRS=1000
->>   	;;
->> +nfs)
->> +	BLOCK_SIZE=4096
->> +	let MAX_ATTRS=$BLOCK_SIZE/40
->> +	;;
->>   *)
->>   	# Assume max ~1 block of attrs
->>   	BLOCK_SIZE=`_get_block_size $TEST_DIR`
->> @@ -273,12 +277,15 @@ xfs|udf|btrfs)
->>   pvfs2)
->>   	MAX_ATTRVAL_SIZE=8192
->>   	;;
->> -9p|ceph|nfs)
->> +9p|ceph)
->>   	MAX_ATTRVAL_SIZE=65536
->>   	;;
->>   bcachefs)
->>   	MAX_ATTRVAL_SIZE=1024
->>   	;;
->> +nfs)
->> +	MAX_ATTRVAL_SIZE=3840
->> +	;;
-> 
-> Where does this value come from?
-> 
-3840 = 4096 - 256, which is like the case of *)
+On 21/08/02 12:00AM, Eryu Guan wrote:
+> On Wed, Jul 21, 2021 at 10:57:58AM +0530, Ritesh Harjani wrote:
+> > This test fails with blocksize 64k since the test assumes 4k blocksize
+> > in fcollapse param. This patch fixes that and also tests for 64k
+> > blocksize.
+> >
+> > Signed-off-by: Ritesh Harjani <riteshh@linux.ibm.com>
+> > ---
+> >  tests/generic/031     | 14 +++++++++-----
+> >  tests/generic/031.out | 16 ++++++++--------
+> >  2 files changed, 17 insertions(+), 13 deletions(-)
+> >
+> > diff --git a/tests/generic/031 b/tests/generic/031
+> > index 313ce9ff..11961c54 100755
+> > --- a/tests/generic/031
+> > +++ b/tests/generic/031
+> > @@ -26,11 +26,16 @@ testfile=$SCRATCH_MNT/testfile
+> >  _scratch_mkfs > /dev/null 2>&1
+> >  _scratch_mount
+> >
+> > +# fcollapse need offset and len to be multiple of blocksize for filesystems
+> > +# So let's make the offsets and len required for fcollapse multiples of 64K
+> > +# so that it works for all configurations (including on dax on 64K page size
+> > +# systems)
+> > +fact=$((65536/4096))
+> >  $XFS_IO_PROG -f \
+> > -	-c "pwrite 185332 55756" \
+> > -	-c "fcollapse 28672 40960" \
+> > -	-c "pwrite 133228 63394" \
+> > -	-c "fcollapse 0 4096" \
+> > +	-c "pwrite $((185332*fact + 12)) $((55756*fact + 12))" \
+>
+> Where does this 12 come from?
+A random number so that the offset and length are not bocksize aligned.
+If you see the final .out file, you will see the offset of the writes
+remains the same with and before this patch.
+
+> And I'm wondering if this still reproduces the original bug.
+I am not sure how to trigger this. I know that this test was intended for
+bs < ps cases. If someone can help me / point me to the kernel fix for this,
+I can try to reproduce the original bug too.
+
+I found this link for this test patch series. Couldn't find the kernel fixes
+link though.
+https://www.spinics.net/lists/fstests/msg00340.html
+
+
+>
+> And looks like that the original test setups came from a specific
+> fsstress or fsx run, and aimed to the specific bug, perhaps we could
+> require the test with <= 4k block size, and _notrun in 64k case.
+
+It would be good to know whether this code could trigger the original bug or
+not. Then we need not make _notrun for 64k case.
+
+>
 > Thanks,
 > Eryu
-> 
->>   *)
->>   	# Assume max ~1 block of attrs
->>   	BLOCK_SIZE=`_get_block_size $TEST_DIR`
->> -- 
->> 2.24.4
-
+>
+> > +	-c "fcollapse $((28672 * fact)) $((40960 * fact))" \
+> > +	-c "pwrite $((133228 * fact + 12)) $((63394 * fact + 12))" \
+> > +	-c "fcollapse 0 $((4096 * fact))" \
+> >  $testfile | _filter_xfs_io
+> >
+> >  echo "==== Pre-Remount ==="
+> > @@ -41,4 +46,3 @@ hexdump -C $testfile
+> >
+> >  status=0
+> >  exit
+> > -
+> > diff --git a/tests/generic/031.out b/tests/generic/031.out
+> > index 194bfa45..7dfcfe41 100644
+> > --- a/tests/generic/031.out
+> > +++ b/tests/generic/031.out
+> > @@ -1,19 +1,19 @@
+> >  QA output created by 031
+> > -wrote 55756/55756 bytes at offset 185332
+> > +wrote 892108/892108 bytes at offset 2965324
+> >  XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> > -wrote 63394/63394 bytes at offset 133228
+> > +wrote 1014316/1014316 bytes at offset 2131660
+> >  XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> >  ==== Pre-Remount ===
+> >  00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+> >  *
+> > -0001f860  00 00 00 00 00 00 00 00  00 00 00 00 cd cd cd cd  |................|
+> > -0001f870  cd cd cd cd cd cd cd cd  cd cd cd cd cd cd cd cd  |................|
+> > +001f86c0  00 00 00 00 00 00 00 00  00 00 00 00 cd cd cd cd  |................|
+> > +001f86d0  cd cd cd cd cd cd cd cd  cd cd cd cd cd cd cd cd  |................|
+> >  *
+> > -0002fdc0
+> > +002fdc18
+> >  ==== Post-Remount ==
+> >  00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+> >  *
+> > -0001f860  00 00 00 00 00 00 00 00  00 00 00 00 cd cd cd cd  |................|
+> > -0001f870  cd cd cd cd cd cd cd cd  cd cd cd cd cd cd cd cd  |................|
+> > +001f86c0  00 00 00 00 00 00 00 00  00 00 00 00 cd cd cd cd  |................|
+> > +001f86d0  cd cd cd cd cd cd cd cd  cd cd cd cd cd cd cd cd  |................|
+> >  *
+> > -0002fdc0
+> > +002fdc18
+> > --
+> > 2.31.1
