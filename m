@@ -2,133 +2,124 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8F7B9C4320A
-	for <linux-fstests@archiver.kernel.org>; Tue,  3 Aug 2021 05:06:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 90B41C4338F
+	for <linux-fstests@archiver.kernel.org>; Tue,  3 Aug 2021 07:08:15 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 748EC60FC2
-	for <linux-fstests@archiver.kernel.org>; Tue,  3 Aug 2021 05:06:38 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7788E60F70
+	for <linux-fstests@archiver.kernel.org>; Tue,  3 Aug 2021 07:08:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233627AbhHCFGs (ORCPT
+        id S234148AbhHCHIZ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 3 Aug 2021 01:06:48 -0400
-Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:53566 "EHLO
-        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S233647AbhHCFGq (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 3 Aug 2021 01:06:46 -0400
-Received: from pps.filterd (m0187473.ppops.net [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com (8.16.0.43/8.16.0.43) with SMTP id 17354aCM019926;
-        Tue, 3 Aug 2021 01:06:30 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=date : from : to : cc :
- subject : message-id : references : mime-version : content-type :
- in-reply-to; s=pp1; bh=JKnaNnz5NYnoZhmqZRyo+N4Q6un/C+uMKyoUxNEOrjM=;
- b=L6q58r1sa2japnCgnKOzjtRUKeoW0hBTQOMuDNUJCyNvOO04/WR1suEY1pLeDDwECPc4
- 9URxUQ5km1vB/dArpJgnNnN8KoRu+BIGjkKOG3iOm+trt3odEFpGGy4ALIZIC+N9PPOf
- KCc0/mDs0wPkM5TUz7giRP6LyAoyGiqTLcXT8KnKWsNt53aBDardGgQ+Pq+9PRWbP8s8
- a017ePDYGelG/QhHk8ZhUYS3PZyndstuz+CkJVoHAYBOQGJSf8orvf7Gkl+Gnz2gsUSR
- S58jpFdVCvdW7LdalgwVHeJzIar6rWDvDLeSeKif3lYredJKZjZ9c7VtGKDvHfwOGM8s 2A== 
-Received: from ppma03fra.de.ibm.com (6b.4a.5195.ip4.static.sl-reverse.com [149.81.74.107])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 3a5pdn812k-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Tue, 03 Aug 2021 01:06:29 -0400
-Received: from pps.filterd (ppma03fra.de.ibm.com [127.0.0.1])
-        by ppma03fra.de.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 17353AO1019643;
-        Tue, 3 Aug 2021 05:06:27 GMT
-Received: from b06avi18626390.portsmouth.uk.ibm.com (b06avi18626390.portsmouth.uk.ibm.com [9.149.26.192])
-        by ppma03fra.de.ibm.com with ESMTP id 3a4x58nq0f-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Tue, 03 Aug 2021 05:06:27 +0000
-Received: from b06wcsmtp001.portsmouth.uk.ibm.com (b06wcsmtp001.portsmouth.uk.ibm.com [9.149.105.160])
-        by b06avi18626390.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 17353Wf818547186
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Tue, 3 Aug 2021 05:03:32 GMT
-Received: from b06wcsmtp001.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id AA275A4066;
-        Tue,  3 Aug 2021 05:06:24 +0000 (GMT)
-Received: from b06wcsmtp001.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 2E4FCA4065;
-        Tue,  3 Aug 2021 05:06:24 +0000 (GMT)
-Received: from localhost (unknown [9.85.100.55])
-        by b06wcsmtp001.portsmouth.uk.ibm.com (Postfix) with ESMTP;
-        Tue,  3 Aug 2021 05:06:23 +0000 (GMT)
-Date:   Tue, 3 Aug 2021 10:36:22 +0530
-From:   Ritesh Harjani <riteshh@linux.ibm.com>
-To:     Eryu Guan <guan@eryu.me>
-Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
-        "Theodore Ts'o" <tytso@mit.edu>,
+        Tue, 3 Aug 2021 03:08:25 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33846 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S234110AbhHCHIY (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 3 Aug 2021 03:08:24 -0400
+Received: from mail-ej1-x62b.google.com (mail-ej1-x62b.google.com [IPv6:2a00:1450:4864:20::62b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AB868C06175F;
+        Tue,  3 Aug 2021 00:08:13 -0700 (PDT)
+Received: by mail-ej1-x62b.google.com with SMTP id hs10so26183032ejc.0;
+        Tue, 03 Aug 2021 00:08:13 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=XjkMco+XpTsuk27RN7Y1VSQSgnLADRhgZSW/x5g5DpI=;
+        b=L2q68Oni47K1txmPy2rdDjuw9JEFxHndnV9A41Bgvqvf071pr3pjZht0jygvh5+lLe
+         b4jTRLeG7Xf3JQa8726nZILzIi71qzlfSl/m+txy0LXfswurOH7a1TA2V9G7cEIlLY6E
+         /r6yA2vrSlWAreeTgJtIuiDkEm7+pQIzkTnYlOsse1bEtIOVQyQco05qZ2Sa54VNn7cE
+         qOq33qv4l5rILpGwv0m5oHVSNpkOflgo4hTbQRWKkLGjcxFdPhY5VxO8L3a7edeoDIaz
+         xcEh4uvb5KvUYtPIkD6ojo8RPNRyk1wgYgIZZqumbYVb4RmWekhcRbiWKbgnVSn8o0uW
+         uVXQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=XjkMco+XpTsuk27RN7Y1VSQSgnLADRhgZSW/x5g5DpI=;
+        b=OTL2RS9tVPAeneaYoLf5h92zkj2BzgIJOhIeFNDHNCcC+YMHmJVe+0zke8YkLS3JSV
+         Lj3nwVQhYN6DjJPcz9e5XI7Dpx22MygJnE+by3e2Zi24Ic4PpGMplaouKbJUtkdtYYvj
+         FURtcoR4kugp5u2+gEjFMrMFeqhZQnAJ1b3VlHAnDC08NpYxHHf5Neyd5UohRYlmlWf2
+         FSYBjPqhJ4srlcVPFK1pK5c1bEAz8EJTUWCoaC62Louq7VSDJ5jQBjqBX6Q+kdbsecQt
+         tCCA3l1p+HCn5vpcMRlfg/89S4cZwHqNnhgeuaZvcv8eAEk4THPFD9EaZqXUdEVaAug2
+         V7Fw==
+X-Gm-Message-State: AOAM533lyKYHo9ZbAwbfLxM0NmmwZebOheE8hHoe8F3G/dwdgFpCKESM
+        27guVY4UB+VwGhL9EQR0N/o=
+X-Google-Smtp-Source: ABdhPJwexgb8fGywWeW/tltqKABcH21ID+KHtjjaNBDns1vvjFaVXty7LRO5XyjvgIgVUqjPcjjJBg==
+X-Received: by 2002:a17:907:2145:: with SMTP id rk5mr13457978ejb.94.1627974491814;
+        Tue, 03 Aug 2021 00:08:11 -0700 (PDT)
+Received: from localhost.localdomain ([185.110.110.213])
+        by smtp.gmail.com with ESMTPSA id r11sm5757648ejy.71.2021.08.03.00.08.10
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 03 Aug 2021 00:08:11 -0700 (PDT)
+From:   Amir Goldstein <amir73il@gmail.com>
+To:     Eryu Guan <guaneryu@gmail.com>
+Cc:     "Darrick J . Wong" <darrick.wong@oracle.com>,
+        Miklos Szeredi <miklos@szeredi.hu>,
+        linux-unionfs@vger.kernel.org, fstests@vger.kernel.org,
         "Darrick J . Wong" <djwong@kernel.org>
-Subject: Re: [PATCHv2 7/9] generic/620: Use _mkfs_dev_blocksized to use 4k bs
-Message-ID: <20210803050622.yh2wn2fhzxn4jjbv@riteshh-domain>
-References: <cover.1626844259.git.riteshh@linux.ibm.com>
- <a7d863771ec7187a1d89e0e33aa36bb6aaa5a2a7.1626844259.git.riteshh@linux.ibm.com>
- <YQbF38FWSLX+eUm6@desktop>
+Subject: [PATCH] overlay/078: Fix cleanup with unpatched kernel
+Date:   Tue,  3 Aug 2021 10:07:58 +0300
+Message-Id: <20210803070758.2242590-1-amir73il@gmail.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <YQbF38FWSLX+eUm6@desktop>
-X-TM-AS-GCONF: 00
-X-Proofpoint-GUID: beTdnRpjDG7P1Bq0ua9Mi757PECZ9qWT
-X-Proofpoint-ORIG-GUID: beTdnRpjDG7P1Bq0ua9Mi757PECZ9qWT
-X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.391,18.0.790
- definitions=2021-08-02_10:2021-08-02,2021-08-02 signatures=0
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 mlxlogscore=999
- impostorscore=0 priorityscore=1501 bulkscore=0 malwarescore=0
- suspectscore=0 lowpriorityscore=0 adultscore=0 clxscore=1015 spamscore=0
- mlxscore=0 phishscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2107140000 definitions=main-2108030031
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 21/08/02 12:03AM, Eryu Guan wrote:
-> On Wed, Jul 21, 2021 at 10:58:00AM +0530, Ritesh Harjani wrote:
-> > ext4 with 64k blocksize (passed by user config) fails with below error for
-> > this given test which requires dmhugedisk. Since this test anyways only
-> > requires 4k bs, so use _mkfs_dev_blocksized() to fix this.
-> >
-> > <error log with 64k bs>
-> > mkfs.ext4: Input/output error while writing out and closing file system
-> >
-> > Signed-off-by: Ritesh Harjani <riteshh@linux.ibm.com>
-> > ---
-> >  tests/generic/620 | 4 +++-
-> >  1 file changed, 3 insertions(+), 1 deletion(-)
-> >
-> > diff --git a/tests/generic/620 b/tests/generic/620
-> > index b052376f..444e682d 100755
-> > --- a/tests/generic/620
-> > +++ b/tests/generic/620
-> > @@ -42,7 +42,9 @@ sectors=$((2*1024*1024*1024*17))
-> >  chunk_size=128
-> >
-> >  _dmhugedisk_init $sectors $chunk_size
-> > -_mkfs_dev $DMHUGEDISK_DEV
-> > +
-> > +# Use 4k blocksize.
-> > +_mkfs_dev_blocksized 4096 $DMHUGEDISK_DEV
->
-> We run the test by forcing 4k blocksize, which could be tested in 4k
-> blocksize setup. Maybe it's another case that should _notrun in 64k
-> blocksize setup.
+Darrick wrote: "...
+I noticed a massive regression with this week's fstests,
+probably because something didn't get cleaned up properly:
+...
++rm: cannot remove '/opt/ovl-upper/testfile': Operation not permitted
+...
 
-So for testing that, first I should mkfs and mount a scratch device with the
-passed mount/mkfs options and then see if the blocksize passed is 64K, if yes
-I should _notrun this case.
+and then the tests after it (e.g. generic/030) fail with:
 
-Isn't the current approach of (_mkfs_dev_blocksized 4096) is better then above
-approach?
++mount: /opt/ovl-mnt: mount(2) system call failed: Stale file handle.
+..."
 
--ritesh
+Link: https://lore.kernel.org/fstests/20210802230727.GC3601425@magnolia/
+Reported-by: Darrick J. Wong <djwong@kernel.org>
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+ tests/overlay/078 | 3 +++
+ 1 file changed, 3 insertions(+)
 
-> Thanks,
-> Eryu
->
-> >  _mount $DMHUGEDISK_DEV $SCRATCH_MNT || _fail "mount failed for $DMHUGEDISK_DEV $SCRATCH_MNT"
-> >  testfile=$SCRATCH_MNT/testfile-$seq
-> >
-> > --
-> > 2.31.1
+diff --git a/tests/overlay/078 b/tests/overlay/078
+index 522e2e3c..d72faf2c 100755
+--- a/tests/overlay/078
++++ b/tests/overlay/078
+@@ -24,6 +24,7 @@ _cleanup()
+ {
+ 	cd /
+ 	$CHATTR_PROG -ai $lowertestfile &> /dev/null
++	$CHATTR_PROG -ai $uppertestfile &> /dev/null
+ 	rm -f $tmp.*
+ }
+ 
+@@ -45,6 +46,7 @@ lowerdir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
+ upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
+ workdir=$OVL_BASE_SCRATCH_MNT/$OVL_WORK
+ lowertestfile=$lowerdir/testfile
++uppertestfile=$upperdir/testfile
+ testfile=$SCRATCH_MNT/testfile
+ 
+ _scratch_mkfs
+@@ -66,6 +68,7 @@ do_check()
+ 	$CHATTR_PROG +$attr $lowertestfile
+ 
+ 	# Re-create upperdir/workdir
++	$CHATTR_PROG -ai $uppertestfile &> /dev/null
+ 	rm -rf $upperdir $workdir
+ 	mkdir -p $upperdir $workdir
+ 
+-- 
+2.25.1
+
