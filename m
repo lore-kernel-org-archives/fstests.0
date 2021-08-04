@@ -2,113 +2,68 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-17.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.0 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CC4ADC4338F
-	for <linux-fstests@archiver.kernel.org>; Wed,  4 Aug 2021 16:48:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 28D7AC4338F
+	for <linux-fstests@archiver.kernel.org>; Wed,  4 Aug 2021 17:59:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A622A60C41
-	for <linux-fstests@archiver.kernel.org>; Wed,  4 Aug 2021 16:48:40 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 07A3D60F94
+	for <linux-fstests@archiver.kernel.org>; Wed,  4 Aug 2021 17:59:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239632AbhHDQsw (ORCPT
+        id S239983AbhHDR7O (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 4 Aug 2021 12:48:52 -0400
-Received: from smtp-fw-6002.amazon.com ([52.95.49.90]:32412 "EHLO
-        smtp-fw-6002.amazon.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239441AbhHDQsw (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 4 Aug 2021 12:48:52 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-  d=amazon.com; i=@amazon.com; q=dns/txt; s=amazon201209;
-  t=1628095720; x=1659631720;
-  h=date:from:to:cc:message-id:references:mime-version:
-   in-reply-to:subject;
-  bh=GJEhl8NrSKC7AsnGI5BcJJA/vI56xWAbZGPX7Dfev6U=;
-  b=faHDPwT+GfTBoWtvG8ndgq1uEUK7HhoJMYnyoFCFuau3XqMtx72aOGQI
-   qbux0vTfuUJnN3Vh2GFqD0zPvxa9aNJzdaMQGRJ+TmLuCUGeltA15G8Bm
-   h0P3OHBxIybngRr/N/idfwgjjhe8Y1tZi0KMs+HYJrqxTMY0dpJoFNZBX
-   g=;
-X-IronPort-AV: E=Sophos;i="5.84,295,1620691200"; 
-   d="scan'208";a="130161077"
-Subject: Re: [PATCH] common/attr: remove the MAX_ATTRS and MAX_ATTRVAL_SIZE for nfs
-Received: from iad12-co-svc-p1-lb1-vlan2.amazon.com (HELO email-inbound-relay-2b-5bdc5131.us-west-2.amazon.com) ([10.43.8.2])
-  by smtp-border-fw-6002.iad6.amazon.com with ESMTP; 04 Aug 2021 16:48:33 +0000
-Received: from EX13MTAUWB001.ant.amazon.com (pdx1-ws-svc-p6-lb9-vlan3.pdx.amazon.com [10.236.137.198])
-        by email-inbound-relay-2b-5bdc5131.us-west-2.amazon.com (Postfix) with ESMTPS id D5914A1C25;
-        Wed,  4 Aug 2021 16:48:31 +0000 (UTC)
-Received: from EX13D22UWB004.ant.amazon.com (10.43.161.165) by
- EX13MTAUWB001.ant.amazon.com (10.43.161.249) with Microsoft SMTP Server (TLS)
- id 15.0.1497.23; Wed, 4 Aug 2021 16:48:31 +0000
-Received: from EX13MTAUWB001.ant.amazon.com (10.43.161.207) by
- EX13D22UWB004.ant.amazon.com (10.43.161.165) with Microsoft SMTP Server (TLS)
- id 15.0.1497.23; Wed, 4 Aug 2021 16:48:31 +0000
-Received: from dev-dsk-fllinden-2c-d7720709.us-west-2.amazon.com
- (172.19.206.175) by mail-relay.amazon.com (10.43.161.249) with Microsoft SMTP
- Server id 15.0.1497.23 via Frontend Transport; Wed, 4 Aug 2021 16:48:30 +0000
-Received: by dev-dsk-fllinden-2c-d7720709.us-west-2.amazon.com (Postfix, from userid 6262777)
-        id 4D90DDF7; Wed,  4 Aug 2021 16:48:31 +0000 (UTC)
-Date:   Wed, 4 Aug 2021 16:48:31 +0000
-From:   Frank van der Linden <fllinden@amazon.com>
-To:     Hao Xu <haoxu@linux.alibaba.com>
-CC:     <fstests@vger.kernel.org>
-Message-ID: <20210804164831.GA23998@dev-dsk-fllinden-2c-d7720709.us-west-2.amazon.com>
-References: <20210804074148.203065-1-haoxu@linux.alibaba.com>
+        Wed, 4 Aug 2021 13:59:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46988 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S237302AbhHDR7N (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 4 Aug 2021 13:59:13 -0400
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8A080C0613D5;
+        Wed,  4 Aug 2021 10:59:00 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20210309; h=Sender:In-Reply-To:Content-Type:
+        MIME-Version:References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=f05KDrtHywJ7ptgF5rdbcaksmjyPJirEWKVIlatL5dQ=; b=ZyInXTn6AUJn5/Nm0+ZZKIe/dw
+        AIYzDU9oMm85lKCsFXkMZcLEI3tUpqtdDmQEr/f1FLo63q7sSG7yxzHzPHeamw2fd5QEIW+kizVE/
+        fDQroRDkJvmQlIlm10Mc0GOZw/s7LWS4ZxHksbo+s0OelZXS17g/C50ngyawEkK0B32reP/1udCWc
+        vjC/nSD4k/XHMxKDH+TYvkmSc06J3qBTIJYkOnt05eBZag/g4x+hoCcQJznJkvMmO7qxb9WP+ej82
+        1RFeEdQmo8H1frJgEoOI91do5nV5KA2/btmeOW3q7NV3aZ7z3EW2idz/bF5bJUKwE7WWW6KGaxjA2
+        HWFhB1mQ==;
+Received: from mcgrof by bombadil.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
+        id 1mBLAR-00771T-Fk; Wed, 04 Aug 2021 17:58:59 +0000
+Date:   Wed, 4 Aug 2021 10:58:59 -0700
+From:   Luis Chamberlain <mcgrof@kernel.org>
+To:     lucas.demarchi@intel.com, linux-modules@vger.kernel.org
+Cc:     live-patching@vger.kernel.org, fstests@vger.kernel.org,
+        linux-block@vger.kernel.org, hare@suse.de, dgilbert@interlog.com,
+        jeyu@kernel.org, osandov@fb.com, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH] libkmod-module: add support for a patient module removal
+ option
+Message-ID: <YQrVY8Wxb026TDWN@bombadil.infradead.org>
+References: <20210803202417.462197-1-mcgrof@kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210804074148.203065-1-haoxu@linux.alibaba.com>
-User-Agent: Mutt/1.5.21 (2010-09-15)
+In-Reply-To: <20210803202417.462197-1-mcgrof@kernel.org>
+Sender: Luis Chamberlain <mcgrof@infradead.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Aug 04, 2021 at 03:41:48PM +0800, Hao Xu wrote:
-> The block size of localfs for nfs may be different with nfs itself.
-> So it's pointless to test nfs on xattrs size, just remove the special
-> judge code.
-> 
-> Fixes: commit da3cdb3b91ca ("common/attr: set MAX_ATTR values correctly for NFS")
-> Signed-off-by: Hao Xu <haoxu@linux.alibaba.com>
-> ---
->  common/attr | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/common/attr b/common/attr
-> index 42ceab92335a..542dff34bf55 100644
-> --- a/common/attr
-> +++ b/common/attr
-> @@ -253,7 +253,7 @@ _getfattr()
-> 
->  # set maximum total attr space based on fs type
->  case "$FSTYP" in
-> -xfs|udf|pvfs2|9p|ceph|nfs)
-> +xfs|udf|pvfs2|9p|ceph)
->         MAX_ATTRS=1000
->         ;;
->  *)
-> @@ -273,7 +273,7 @@ xfs|udf|btrfs)
->  pvfs2)
->         MAX_ATTRVAL_SIZE=8192
->         ;;
-> -9p|ceph|nfs)
-> +9p|ceph)
->         MAX_ATTRVAL_SIZE=65536
->         ;;
->  bcachefs)
-> --
-> 2.24.4
-> 
+On Tue, Aug 03, 2021 at 01:24:17PM -0700, Luis Chamberlain wrote:
+> + diff --git a/libkmod/libkmod-module.c b/libkmod/libkmod-module.c
+<-- snip -->
+> +		ERR(mod->ctx, "%s refcnt is %ld waiting for it to become 0\n", mod->name, refcnt);
 
-That doesn't quite work either, right? You have now removed the specific
-values set for NFS, but the defaults will still be used (which may also
-be wrong).
+OK after running many tests with this I think we need to just expand
+this so that the error message only applies when -v is passed to
+modprobe, otherwise we get the print message every time, and using
+INFO() doesn't cut it, given the next priority level available to
+the library is LOG_INFO (6) and when modprobe -v is passed we set the
+log level to LOG_NOTICE (5), so we need a new NOTICE(). I'll send a v2
+with that included as a separate patch.
 
-It seems to me that there are two ways that this can be dealt with:
-
-1) Find a way to determine the maximum attribute size over an NFS mount,
-   possibly by trying different sizes. If it doesn't work out, skip the test
-2) Always skip the test.
-
-- Frank
+  Luis
