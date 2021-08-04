@@ -2,126 +2,229 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 66DB2C4338F
-	for <linux-fstests@archiver.kernel.org>; Wed,  4 Aug 2021 03:44:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 71582C432BE
+	for <linux-fstests@archiver.kernel.org>; Wed,  4 Aug 2021 04:19:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 428D061037
-	for <linux-fstests@archiver.kernel.org>; Wed,  4 Aug 2021 03:44:20 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4CD6F60E53
+	for <linux-fstests@archiver.kernel.org>; Wed,  4 Aug 2021 04:19:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234612AbhHDDob (ORCPT
+        id S234023AbhHDET6 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 3 Aug 2021 23:44:31 -0400
-Received: from mail.kernel.org ([198.145.29.99]:38254 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S234462AbhHDDoa (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 3 Aug 2021 23:44:30 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id BB60A60EE9;
-        Wed,  4 Aug 2021 03:44:18 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1628048658;
-        bh=CJp72H1Jw6eXHVOvMJLDrT8zGCAmXCAyWZrb3Ly9rf4=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=TKNk/s7fC/q53Kh6l5t1gdHNXsGdx0iFvTzELqutT+N36wdVfUtFNeIkw7KI1H4Uv
-         kFpnsTPk4NJaxgej3NvBgCBUC/R9nzxBDxfBjsbe6s7HfkaAKXZWQ8qAPM8L+Ic8o2
-         3o8JH38BgiCuROEF908ZFgMNve8ifz/HM8j/oawvsyPjMl4NnHRW5pU+MdOD+laz6Q
-         cPauZfKnHI64sTz38QZ8uNa5JNqXJ0VhF4xzJq3Yodi63QBn/Q9eoBNr9O1dq4zXPl
-         g+020qI4rnDUObCQW7JZU7BJBbb5OngkQZ1raRb7FlqIl7A8slwtreBFAke+lXswNe
-         FPIKoFuJcb+Dw==
-Date:   Tue, 3 Aug 2021 20:44:18 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Amir Goldstein <amir73il@gmail.com>
-Cc:     Eryu Guan <guaneryu@gmail.com>, Miklos Szeredi <miklos@szeredi.hu>,
-        overlayfs <linux-unionfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>
-Subject: Re: [PATCH] overlay: add test for copy up of lower file attributes
-Message-ID: <20210804034418.GD3601425@magnolia>
-References: <20210722164634.394499-1-amir73il@gmail.com>
- <20210802230727.GC3601425@magnolia>
- <CAOQ4uxgC6R9rAEM8YfJ83SN2UN_Z9gKY3_CTdDaYayC7SoNe4Q@mail.gmail.com>
+        Wed, 4 Aug 2021 00:19:58 -0400
+Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:40594 "EHLO
+        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S229562AbhHDET6 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 4 Aug 2021 00:19:58 -0400
+Received: from cwcc.thunk.org (pool-72-74-133-215.bstnma.fios.verizon.net [72.74.133.215])
+        (authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 1744Jfcd012778
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Wed, 4 Aug 2021 00:19:42 -0400
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+        id AC5A415C3DE2; Wed,  4 Aug 2021 00:19:41 -0400 (EDT)
+Date:   Wed, 4 Aug 2021 00:19:41 -0400
+From:   "Theodore Ts'o" <tytso@mit.edu>
+To:     fstests@vger.kernel.org
+Cc:     Konstantin Komarov <almaz.alexandrovich@paragon-software.com>
+Subject: [PATCH RFC] add support for ntfs and ntfs3 file systems
+Message-ID: <YQoVXWRFGeY19onQ@mit.edu>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAOQ4uxgC6R9rAEM8YfJ83SN2UN_Z9gKY3_CTdDaYayC7SoNe4Q@mail.gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Aug 03, 2021 at 10:21:02AM +0300, Amir Goldstein wrote:
-> On Tue, Aug 3, 2021 at 2:07 AM Darrick J. Wong <djwong@kernel.org> wrote:
-> >
-> > On Thu, Jul 22, 2021 at 07:46:34PM +0300, Amir Goldstein wrote:
-> > > Overlayfs copies up a subset of lower file attributes since kernel
-> > > commits:
-> > > 173ff5c9ec37 ("ovl: consistent behavior for immutable/append-only inodes")
-> > > 2e3f6e87c2b0 ("ovl: copy up sync/noatime fileattr flags")
-> > >
-> > > This test verifies this functionality works correctly and that it
-> > > survives power failure and/or mount cycle.
-> >
-> > Just out of curiosity -- is this supposed to succeed with a 5.14-rc4
-> > kernel?
-> 
-> No. The documented fix commits are in linux-next.
-> Looks like they are heading for 5.15-rc1.
-> 
-> > I noticed a massive regression with this week's fstests,
-> > probably because something didn't get cleaned up properly:
-> >
-> > --- overlay/078.out
-> > +++ overlay/078.out.bad
-> > @@ -1,2 +1,17 @@
-> >  QA output created by 078
-> >  Silence is golden
-> > +Before copy up: -------A-------------- /opt/ovl-mnt/testfile
-> > +After  copy up: ---------------------- /opt/ovl-mnt/testfile
-> > +Before copy up: -------A-------------- /opt/ovl-mnt/testfile
-> > +After  copy up: ---------------------- /opt/ovl-mnt/testfile
-> > +Before copy up: --S----A-------------- /opt/ovl-mnt/testfile
-> > +After  copy up: ---------------------- /opt/ovl-mnt/testfile
-> > +Before copy up: --S----A-------------- /opt/ovl-mnt/testfile
-> > +After  copy up: ---------------------- /opt/ovl-mnt/testfile
-> > +Before copy up: --S--a-A-------------- /opt/ovl-mnt/testfile
-> > +After  copy up: ---------------------- /opt/ovl-mnt/testfile
-> > +Before copy up: --S--a-A-------------- /opt/ovl-mnt/testfile
-> > +After  copy up: ---------------------- /opt/ovl-mnt/testfile
-> > +rm: cannot remove '/opt/ovl-upper/testfile': Operation not permitted
-> > +rm: cannot remove
-> > '/opt/ovl-work/index/00fb2100812f1a30dc474847dbad5281308293ece9030e00020000000054816fd1':
-> 
-> I'm curious, are you running with non-default mount/config options
-> on purpose? i.e. index=on or nfs_export=on?
-> 
-> > Operation not permitted
-> > +Write unexpectedly returned 0 for file with attribute 'i'
-> 
-> Oops, sorry. The problem is even sooner than _cleanup().
-> I hadn't noticed it because the head snippet of 078.out.bad was expected
-> and I did not look past it.
+Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+---
 
-./check -r ;)
+Here are some patches which add support for testing the fuse ntfs
+implementation (shipped in the ntfs-3g package) as well as Paragon
+Software's proposed ntfs3 kernel submission.
 
-> 
-> >
-> > and then the tests after it (e.g. generic/030) fail with:
-> >
-> > +mount: /opt/ovl-mnt: mount(2) system call failed: Stale file handle.
-> > +mount failed
-> > +(see /var/tmp/fstests/generic/030.full for details)
-> >
-> 
-> And I hadn't noticed that because overlay/078 is the last test to reuse
-> /opt/ovl-upper/ and kvm-xfstests zaps the base fs before every run.
-> 
-> Posted a fix.
-> Sorry for the trouble.
+Context: https://lore.kernel.org/r/YQnHxIU+EAAxIjZA@mit.edu
+Sample test run: https://www.kernel.org/pub/linux/kernel/people/tytso/fstests-results/results-ntfs3-2021-08-03.tar.xz
 
-I'll give it a spin overnight.
+ common/config |  1 +
+ common/rc     | 51 ++++++++++++++++++++++++++++++++++++++++++++++++---
+ 2 files changed, 49 insertions(+), 3 deletions(-)
 
---D
+diff --git a/common/config b/common/config
+index 005fd50a..80510df2 100644
+--- a/common/config
++++ b/common/config
+@@ -271,6 +271,7 @@ export MKFS_REISER4_PROG=$(type -P mkfs.reiser4)
+ export E2FSCK_PROG=$(type -P e2fsck)
+ export TUNE2FS_PROG=$(type -P tune2fs)
+ export FSCK_OVERLAY_PROG=$(type -P fsck.overlay)
++export MKFS_NTFS_PROG=$(type -P mkfs.ntfs)
+ 
+ # SELinux adds extra xattrs which can mess up our expected output.
+ # So, mount with a context, and they won't be created.
+diff --git a/common/rc b/common/rc
+index 0fabea45..12e94b1c 100644
+--- a/common/rc
++++ b/common/rc
+@@ -140,6 +140,10 @@ case "$FSTYP" in
+ 	 ;;
+     pvfs2)
+ 	;;
++    ntfs)
++	;;
++    ntfs3)
++	;;
+     ubifs)
+ 	[ "$UBIUPDATEVOL_PROG" = "" ] && _fatal "ubiupdatevol not found"
+ 	;;
+@@ -690,6 +694,9 @@ _test_mkfs()
+     ext2|ext3|ext4)
+ 	$MKFS_PROG -t $FSTYP -- -F $MKFS_OPTIONS $* $TEST_DEV
+ 	;;
++    ntfs|ntfs3)
++	$MKFS_NTFS_PROG $MKFS_OPTIONS $* $TEST_DEV > /dev/null
++	;;
+     *)
+ 	yes | $MKFS_PROG -t $FSTYP -- $MKFS_OPTIONS $* $TEST_DEV
+ 	;;
+@@ -729,6 +736,9 @@ _mkfs_dev()
+ 	$MKFS_PROG -t $FSTYP -- -f $MKFS_OPTIONS $* \
+ 		2>$tmp.mkfserr 1>$tmp.mkfsstd
+ 	;;
++    ntfs|ntfs3)
++        $MKFS_NTFS_PROG $MKFS_OPTIONS $* 2>$tmp.mkfserr 1>$tmp.mkfsstd
++	;;
+     *)
+ 	yes | $MKFS_PROG -t $FSTYP -- $MKFS_OPTIONS $* \
+ 		2>$tmp.mkfserr 1>$tmp.mkfsstd
+@@ -826,6 +836,10 @@ _scratch_mkfs()
+ 		mkfs_cmd="yes | $MKFS_PROG -t $FSTYP --"
+ 		mkfs_filter="grep -v -e ^mkfs\.ocfs2"
+ 		;;
++	ntfs|ntfs3)
++		mkfs_cmd="$MKFS_NTFS_PROG"
++		mkfs_filter="cat"
++		;;
+ 	*)
+ 		mkfs_cmd="yes | $MKFS_PROG -t $FSTYP --"
+ 		mkfs_filter="cat"
+@@ -1091,6 +1105,10 @@ _scratch_mkfs_sized()
+ 	bcachefs)
+ 		$MKFS_PROG -t $FSTYP -- $MKFS_OPTIONS --fs_size=$fssize --block_size=$blocksize $SCRATCH_DEV
+ 		;;
++	ntfs|ntfs3)
++		${MKFS_NTFS_PROG} $MKFS_OPTIONS $SCRATCH_DEV \
++			$(expr $blocks / 2)
++		;;
+ 	*)
+ 		_notrun "Filesystem $FSTYP not supported in _scratch_mkfs_sized"
+ 		;;
+@@ -1173,6 +1191,9 @@ _scratch_mkfs_blocksized()
+ 		${MKFS_PROG} -t $FSTYP $MKFS_OPTIONS --block_size=$blocksize \
+ 								$SCRATCH_DEV
+ 		;;
++	ntfs|ntfs3)
++		${MKFS_NTFS_PROG} -F $MKFS_OPTIONS -s $blocksize $SCRATCH_DEV
++		;;
+ 	*)
+ 		_notrun "Filesystem $FSTYP not supported in _scratch_mkfs_blocksized"
+ 		;;
+@@ -1247,6 +1268,10 @@ _repair_scratch_fs()
+ 	# want the test to fail:
+ 	_check_scratch_fs
+ 	;;
++    ntfs|ntfs3)
++	$FSCK_NTFS_PROG $SCRATCH_DEV
++	return $?
++	;;
+     *)
+ 	local dev=$SCRATCH_DEV
+ 	local fstyp=$FSTYP
+@@ -1294,6 +1319,10 @@ _repair_test_fs()
+ 			res=$?
+ 		fi
+ 		;;
++	ntfs|ntfs3)
++		$FSCK_NTFS_PROG $TEST_DEV > $tmp.repair 2>&1
++		return $?
++		;;
+ 	*)
+ 		# Let's hope fsck -y suffices...
+ 		fsck -t $FSTYP -fy $TEST_DEV >$tmp.repair 2>&1
+@@ -1433,8 +1462,11 @@ _fs_type()
+     # Fix the filesystem type up here so that the callers don't
+     # have to bother with this quirk.
+     #
+-    _df_device $1 | $AWK_PROG '{ print $2 }' | \
+-        sed -e 's/nfs4/nfs/' -e 's/fuse.glusterfs/glusterfs/'
++    local sed_prog="-e s/nfs4/nfs/ -e s/fuse.glusterfs/glusterfs/"
++    if [ $FSTYP = ntfs ]; then
++	sed_prog="$sed_prog -e s/fuseblk/ntfs/"
++    fi
++    _df_device $1 | $AWK_PROG '{ print $2 }' | sed $sed_prog
+ }
+ 
+ # return the FS mount options of a mounted device
+@@ -2897,6 +2929,9 @@ _is_dev_mounted()
+ 		exit 1
+ 	fi
+ 
++	if [ $fstype = ntfs ]; then
++	    fstype=fuseblk
++	fi
+ 	findmnt -rncv -S $dev -t $fstype -o TARGET | head -1
+ }
+ 
+@@ -3017,11 +3052,15 @@ _pre_fsck_prepare()
+ _check_generic_filesystem()
+ {
+     local device=$1
++    local fsck_type=$2
+ 
+     # If type is set, we're mounted
+     local type=`_fs_type $device`
+     local ok=1
+ 
++    if [ -z "$fsck_type" ]; then
++       fsck_type="$FSTYP"
++    fi
+     if [ "$type" = "$FSTYP" ]
+     then
+         # mounted ...
+@@ -3029,7 +3068,7 @@ _check_generic_filesystem()
+     fi
+ 
+     _pre_fsck_prepare $device
+-    fsck -t $FSTYP $FSCK_OPTIONS $device >$tmp.fsck 2>&1
++    fsck -t $fsck_type $FSCK_OPTIONS $device >$tmp.fsck 2>&1
+     if [ $? -ne 0 ]
+     then
+ 	_log_err "_check_generic_filesystem: filesystem on $device is inconsistent"
+@@ -3150,6 +3189,9 @@ _check_test_fs()
+     btrfs)
+ 	_check_btrfs_filesystem $TEST_DEV
+ 	;;
++    ntfs|ntfs3)
++	_check_generic_filesystem $TEST_DEV $ntfs
++	;;
+     tmpfs)
+ 	# no way to check consistency for tmpfs
+ 	;;
+@@ -3211,6 +3253,9 @@ _check_scratch_fs()
+     btrfs)
+ 	_check_btrfs_filesystem $device
+ 	;;
++    ntfs|ntfs3)
++	_check_generic_filesystem $device ntfs
++	;;
+     tmpfs)
+ 	# no way to check consistency for tmpfs
+ 	;;
+-- 
+2.31.0
 
-> Thanks,
-> Amir.
