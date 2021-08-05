@@ -2,82 +2,171 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E4D88C432BE
-	for <linux-fstests@archiver.kernel.org>; Wed,  4 Aug 2021 18:47:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DD2C8C4338F
+	for <linux-fstests@archiver.kernel.org>; Thu,  5 Aug 2021 14:40:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D0B9F6105A
-	for <linux-fstests@archiver.kernel.org>; Wed,  4 Aug 2021 18:47:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C4EED61151
+	for <linux-fstests@archiver.kernel.org>; Thu,  5 Aug 2021 14:40:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239332AbhHDSsG (ORCPT
+        id S239096AbhHEOkm (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 4 Aug 2021 14:48:06 -0400
-Received: from mga03.intel.com ([134.134.136.65]:61823 "EHLO mga03.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S240691AbhHDSrf (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 4 Aug 2021 14:47:35 -0400
-X-IronPort-AV: E=McAfee;i="6200,9189,10066"; a="214017524"
-X-IronPort-AV: E=Sophos;i="5.84,295,1620716400"; 
-   d="scan'208";a="214017524"
-Received: from orsmga006.jf.intel.com ([10.7.209.51])
-  by orsmga103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 04 Aug 2021 11:47:20 -0700
-X-IronPort-AV: E=Sophos;i="5.84,295,1620716400"; 
-   d="scan'208";a="419538604"
-Received: from ssyedfar-mobl1.amr.corp.intel.com (HELO ldmartin-desk2) ([10.212.201.224])
-  by orsmga006-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 04 Aug 2021 11:47:20 -0700
-Date:   Wed, 4 Aug 2021 11:47:20 -0700
-From:   Lucas De Marchi <lucas.demarchi@intel.com>
-To:     Luis Chamberlain <mcgrof@kernel.org>
-Cc:     linux-modules@vger.kernel.org, live-patching@vger.kernel.org,
-        fstests@vger.kernel.org, linux-block@vger.kernel.org, hare@suse.de,
-        dgilbert@interlog.com, jeyu@kernel.org, osandov@fb.com,
-        linux-kernel@vger.kernel.org
-Subject: Re: [PATCH] libkmod-module: add support for a patient module removal
- option
-Message-ID: <20210804184720.z27u5aymcl5hzqgh@ldmartin-desk2>
-References: <20210803202417.462197-1-mcgrof@kernel.org>
- <YQrVY8Wxb026TDWN@bombadil.infradead.org>
+        Thu, 5 Aug 2021 10:40:42 -0400
+Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:60365 "EHLO
+        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S234937AbhHEOkl (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 5 Aug 2021 10:40:41 -0400
+Received: from cwcc.thunk.org (pool-72-74-133-215.bstnma.fios.verizon.net [72.74.133.215])
+        (authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 175EeM24003803
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Thu, 5 Aug 2021 10:40:22 -0400
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+        id 3E00415C3DD2; Thu,  5 Aug 2021 10:40:22 -0400 (EDT)
+From:   "Theodore Ts'o" <tytso@mit.edu>
+To:     fstests@vger.kernel.org
+Cc:     artem.blagodarenko@gmail.com, denis@voxelsoft.com,
+        Ext4 Developers List <linux-ext4@vger.kernel.org>,
+        "Theodore Ts'o" <tytso@mit.edu>
+Subject: [PATCH] ext4: add test to validate the large_dir feature
+Date:   Thu,  5 Aug 2021 10:40:16 -0400
+Message-Id: <20210805144016.3556979-1-tytso@mit.edu>
+X-Mailer: git-send-email 2.31.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii; format=flowed
-Content-Disposition: inline
-In-Reply-To: <YQrVY8Wxb026TDWN@bombadil.infradead.org>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Aug 04, 2021 at 10:58:59AM -0700, Luis Chamberlain wrote:
->On Tue, Aug 03, 2021 at 01:24:17PM -0700, Luis Chamberlain wrote:
->> + diff --git a/libkmod/libkmod-module.c b/libkmod/libkmod-module.c
-><-- snip -->
->> +		ERR(mod->ctx, "%s refcnt is %ld waiting for it to become 0\n", mod->name, refcnt);
->
->OK after running many tests with this I think we need to just expand
->this so that the error message only applies when -v is passed to
->modprobe, otherwise we get the print message every time, and using
->INFO() doesn't cut it, given the next priority level available to
->the library is LOG_INFO (6) and when modprobe -v is passed we set the
->log level to LOG_NOTICE (5), so we need a new NOTICE(). I'll send a v2
->with that included as a separate patch.
+Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+---
+ src/dirstress.c    |  7 +++++-
+ tests/ext4/051     | 62 ++++++++++++++++++++++++++++++++++++++++++++++
+ tests/ext4/051.out |  2 ++
+ 3 files changed, 70 insertions(+), 1 deletion(-)
+ create mode 100755 tests/ext4/051
+ create mode 100644 tests/ext4/051.out
 
-Or maybe move the sleep to modprobe instead of doing it in the
-library?  The sleep(1) seems like an arbitrary number to be introduced
-in the lib.
+diff --git a/src/dirstress.c b/src/dirstress.c
+index 615cb6e3..ec28d643 100644
+--- a/src/dirstress.c
++++ b/src/dirstress.c
+@@ -16,6 +16,7 @@ int verbose;
+ int pid;
+ 
+ int checkflag=0;
++int create_only=0;
+ 
+ #define MKNOD_DEV 0
+ 
+@@ -51,7 +52,7 @@ main(
+ 	nprocs_per_dir = 1;
+ 	keep = 0;
+         verbose = 0;
+-	while ((c = getopt(argc, argv, "d:p:f:s:n:kvc")) != EOF) {
++	while ((c = getopt(argc, argv, "d:p:f:s:n:kvcC")) != EOF) {
+ 		switch(c) {
+ 			case 'p':
+ 				nprocs = atoi(optarg);
+@@ -80,6 +81,9 @@ main(
+ 			case 'c':
+                                 checkflag++;
+                                 break;
++			case 'C':
++				create_only++;
++				break;
+ 		}
+ 	}
+ 	if (errflg || (dirname == NULL)) {
+@@ -170,6 +174,7 @@ dirstress(
+ 	if (create_entries(nfiles)) {
+             printf("!! [%d] create failed\n", pid);
+         } else {
++	    if (create_only) return 0;
+             if (verbose) fprintf(stderr,"** [%d] scramble entries\n", pid);
+ 	    if (scramble_entries(nfiles)) {
+                 printf("!! [%d] scramble failed\n", pid);
+diff --git a/tests/ext4/051 b/tests/ext4/051
+new file mode 100755
+index 00000000..387e2518
+--- /dev/null
++++ b/tests/ext4/051
+@@ -0,0 +1,62 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++#
++# FS QA Test 051
++#
++# Test ext4's large_dir feature
++#
++. ./common/preamble
++_begin_fstest auto quick dir
++
++# Override the default cleanup function.
++_cleanup()
++{
++	cd /
++	rm -r -f $tmp.*
++	if [ ! -z "$loop_mnt" ]; then
++		$UMOUNT_PROG $loop_mnt
++		rm -rf $loop_mnt
++	fi
++	[ ! -z "$fs_img" ] && rm -rf $fs_img
++}
++
++# Import common functions.
++# . ./common/filter
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs ext4
++_require_test
++_require_loop
++_require_scratch_ext4_feature "large_dir"
++
++echo "Silence is golden"
++
++loop_mnt=$TEST_DIR/$seq.mnt
++fs_img=$TEST_DIR/$seq.img
++status=0
++
++cp /dev/null $fs_img
++${MKFS_PROG} -t ${FSTYP} -b 1024 -N 600020 -O large_dir,^has_journal \
++	     $fs_img 40G >> $seqres.full 2>&1 || _fail "mkfs failed"
++
++mkdir -p $loop_mnt
++_mount -o loop $fs_img $loop_mnt > /dev/null  2>&1 || \
++	_fail "Couldn't do initial mount"
++
++/root/xfstests/src/dirstress -c -d /tmpmnt -p 1 -f 400000 -C \
++	>> $seqres.full 2>&1
++
++if ! $here/src/dirstress -c -d $loop_mnt -p 1 -f 400000 -C >$tmp.out 2>&1
++then
++    echo "    dirstress failed"
++    cat $tmp.out >> $seqres.full
++    echo "    dirstress failed" >> $seqres.full
++    status=1
++fi
++
++$UMOUNT_PROG $loop_mnt || _fail "umount failed"
++loop_mnt=
++
++$E2FSCK_PROG -fn $fs_img >> $seqres.full 2>&1 || _fail "file system corrupted"
+diff --git a/tests/ext4/051.out b/tests/ext4/051.out
+new file mode 100644
+index 00000000..32f74d89
+--- /dev/null
++++ b/tests/ext4/051.out
+@@ -0,0 +1,2 @@
++QA output created by 051
++Silence is golden
+-- 
+2.31.0
 
-Since kernfs is pollable, maybe we could rather introduce an API to
-return the pid in which the application has to wait for and then the
-application can use whatever it wants to poll, including controlling a
-timeout.
-
-I'm saying this because sleep(1) may be all fine for modprobe, but for
-other applications using libkmod it may not play well with their mainloops
-(and they may want to control both granularity of the sleep and a max
-timeout).
-
-thanks
-Lucas De Marchi
-
->
->  Luis
