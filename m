@@ -2,143 +2,126 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-9.0 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6BE25C4338F
-	for <linux-fstests@archiver.kernel.org>; Fri,  6 Aug 2021 18:59:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BFB83C432BE
+	for <linux-fstests@archiver.kernel.org>; Fri,  6 Aug 2021 21:45:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 49C8A61159
-	for <linux-fstests@archiver.kernel.org>; Fri,  6 Aug 2021 18:59:12 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A0B52600CD
+	for <linux-fstests@archiver.kernel.org>; Fri,  6 Aug 2021 21:45:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233639AbhHFS71 (ORCPT
+        id S244504AbhHFVpn (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 6 Aug 2021 14:59:27 -0400
-Received: from mail.kernel.org ([198.145.29.99]:47724 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S233111AbhHFS71 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 6 Aug 2021 14:59:27 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 2B1C960EE9;
-        Fri,  6 Aug 2021 18:59:11 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1628276351;
-        bh=LRWFieUXNa+lIkNJdPpNh5/6wNc9ewc2rrvGB9J7SMk=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=qtKx9hiZLqSPKpfuEWxIR/HFiiQ/Taz9zYiL2GKreNUqQWK4ryOVWe6R7nq9VqBbD
-         b6r+uB3sPKmD3rlYaGa7ZYeM4QE0cIW/AdcKv+Zi4HQjVmT37UZCRjbiN6YO9RrYXx
-         0fppy82ZFhcl6nlyMEMMCpzMZ+nQBZbZ8cktLR4sWlOXpuu8VnxeolN279gtXZUugf
-         Z9MIy51xFqxpwXngrHvGZiMkpToU/2xfMK4kLkbY1mBmc3ggCR5Fzl8gWZWatduEdb
-         AL38dzFuyz/rc51CW6HqG5nGktwpGsMFJoFLz5kNDcKA8fPV0Xj3pELlmvAWt7G5NJ
-         O8iFEUPxUW3YA==
-Date:   Fri, 6 Aug 2021 11:59:10 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] xfs: quota state command should report upg grace times
- separately
-Message-ID: <20210806185910.GF3601425@magnolia>
-References: <20210806051012.1640342-1-zlang@redhat.com>
+        Fri, 6 Aug 2021 17:45:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43672 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S241587AbhHFVpn (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 6 Aug 2021 17:45:43 -0400
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6BC1CC0613CF;
+        Fri,  6 Aug 2021 14:45:27 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20210309; h=Sender:In-Reply-To:Content-Type:
+        MIME-Version:References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=3yo0Z1DqiPntRlxzgzVM4K1c9ilgCH5IdUhCZZNDe9s=; b=YEcpgCfI59SF9Tug3dbXK91OXX
+        sq9bPtmNl5qPktHwmAAihU+NGy4EI2Wu4qsPOh1YYDsBUr8cB8XertXL4GuKVn5dzjT+2S1FZ3ks2
+        ORtg4pVQ21049fLZZaN+E4/dG2qP3gkRUSMu6HVBgJTI1Z0dMoLe0I09+mcsDE/PnKAall2S/lIq0
+        4OTwMTLqvzUBf40IsuaIbSHTe4FUiD3OaquwRjBJ3LNndLJX1vzhAu32F2tb4kqIa7o0oif1GzujM
+        u/UJbjCcJ96IbwBmsdqgzM0qVc+m5TsYwt9kBS3BqP+RYOiQHBu6DkLVigbaVerIeFBT58rWnyT3O
+        csmQP7Bg==;
+Received: from mcgrof by bombadil.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
+        id 1mC7ee-00DgiI-Nc; Fri, 06 Aug 2021 21:45:24 +0000
+Date:   Fri, 6 Aug 2021 14:45:24 -0700
+From:   Luis Chamberlain <mcgrof@kernel.org>
+To:     Lucas De Marchi <lucas.demarchi@intel.com>
+Cc:     linux-modules@vger.kernel.org, live-patching@vger.kernel.org,
+        fstests@vger.kernel.org, linux-block@vger.kernel.org, hare@suse.de,
+        dgilbert@interlog.com, jeyu@kernel.org, osandov@fb.com,
+        linux-kernel@vger.kernel.org
+Subject: Re: [PATCH] libkmod-module: add support for a patient module removal
+ option
+Message-ID: <YQ2tdCZ5YynHtuHB@bombadil.infradead.org>
+References: <20210803202417.462197-1-mcgrof@kernel.org>
+ <YQrVY8Wxb026TDWN@bombadil.infradead.org>
+ <20210804184720.z27u5aymcl5hzqgh@ldmartin-desk2>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210806051012.1640342-1-zlang@redhat.com>
+In-Reply-To: <20210804184720.z27u5aymcl5hzqgh@ldmartin-desk2>
+Sender: Luis Chamberlain <mcgrof@infradead.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Aug 06, 2021 at 01:10:12PM +0800, Zorro Lang wrote:
-> Regression test for d8a94546 ("xfs_quota: state command should report
-> ugp grace times"). When give "-ugp" or "-a" options to xfs_quota
-> state command, it should report grace times for all three types
-> separately.
+On Wed, Aug 04, 2021 at 11:47:20AM -0700, Lucas De Marchi wrote:
+> On Wed, Aug 04, 2021 at 10:58:59AM -0700, Luis Chamberlain wrote:
+> > On Tue, Aug 03, 2021 at 01:24:17PM -0700, Luis Chamberlain wrote:
+> > > + diff --git a/libkmod/libkmod-module.c b/libkmod/libkmod-module.c
+> > <-- snip -->
+> > > +		ERR(mod->ctx, "%s refcnt is %ld waiting for it to become 0\n", mod->name, refcnt);
+> > 
+> > OK after running many tests with this I think we need to just expand
+> > this so that the error message only applies when -v is passed to
+> > modprobe, otherwise we get the print message every time, and using
+> > INFO() doesn't cut it, given the next priority level available to
+> > the library is LOG_INFO (6) and when modprobe -v is passed we set the
+> > log level to LOG_NOTICE (5), so we need a new NOTICE(). I'll send a v2
+> > with that included as a separate patch.
 > 
-> Signed-off-by: Zorro Lang <zlang@redhat.com>
-> ---
->  tests/xfs/175     | 33 +++++++++++++++++++++++++++++++++
->  tests/xfs/175.out | 21 +++++++++++++++++++++
->  2 files changed, 54 insertions(+)
->  create mode 100755 tests/xfs/175
->  create mode 100644 tests/xfs/175.out
-> 
-> diff --git a/tests/xfs/175 b/tests/xfs/175
-> new file mode 100755
-> index 00000000..0b7d81ec
-> --- /dev/null
-> +++ b/tests/xfs/175
-> @@ -0,0 +1,33 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2021 Red Hat, Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test 175
-> +#
-> +# Regression test for d8a94546 ("xfs_quota: state command should report
+> Or maybe move the sleep to modprobe instead of doing it in the
+> library? 
 
-Might be worth saying explicitly that this is an xfsprogs commit.
+We have a few callers which need to impement the wait, and so having
+a library call is one way to share code. I realized this while first
+open coding this in each call site and realizing I was just
+re-inventing the wheel.
 
-> +# ugp grace times"). When give "-ugp" or "-a" options to xfs_quota state
-> +# command, it should report grace times for all three types separately.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick quota
-> +
-> +# real QA test starts here
-> +_supported_fs xfs
-> +_require_scratch
-> +_require_quota
-> +
-> +# Format filesystem and set up quota limits
-> +_scratch_mkfs > $seqres.full
-> +_qmount_option "grpquota"
-> +_scratch_mount >> $seqres.full
-> +
-> +$XFS_QUOTA_PROG -x -c 'timer -u 5d' $SCRATCH_MNT
-> +# xfs_quota state -ugp or -a should report times for all three types separately.
-> +echo "* state -ugp:"
-> +$XFS_QUOTA_PROG -x -c 'state -ugp' $SCRATCH_MNT | grep 'grace time'
-> +echo "* state -a:"
-> +$XFS_QUOTA_PROG -x -c 'state -a' $SCRATCH_MNT | grep 'grace time'
+> The sleep(1) seems like an arbitrary number to be introduced
+> in the lib.
 
-Logic looks fine to me.
+Indeed, the ideal thing here is to introduce then a timeout, and have
+a default setting, which code can override.
 
-With the comment fixed,
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+> Since kernfs is pollable,
+> maybe we could rather introduce an API to
+> return the pid in which the application has to wait for
 
---D
+The kernel does not have information to provide userspace any
+information for how long it should wait. I mean, in a test case I am
+using its an lvm pvremove and for some reason it seems the removal
+is asynchronously putting the module refcnt (even though I do not believe
+DM_DEFERRED_REMOVE is ever set by default), and I had fixed the kernel's
+own asynchronous removal of the request_queue a little while back so
+I don't think that's the issue either.
 
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/175.out b/tests/xfs/175.out
-> new file mode 100644
-> index 00000000..83247e21
-> --- /dev/null
-> +++ b/tests/xfs/175.out
-> @@ -0,0 +1,21 @@
-> +QA output created by 175
-> +* state -ugp:
-> +Blocks grace time: [--------]
-> +Inodes grace time: [--------]
-> +Realtime Blocks grace time: [--------]
-> +Blocks grace time: [5 days]
-> +Inodes grace time: [5 days]
-> +Realtime Blocks grace time: [5 days]
-> +Blocks grace time: [--------]
-> +Inodes grace time: [--------]
-> +Realtime Blocks grace time: [--------]
-> +* state -a:
-> +Blocks grace time: [--------]
-> +Inodes grace time: [--------]
-> +Realtime Blocks grace time: [--------]
-> +Blocks grace time: [5 days]
-> +Inodes grace time: [5 days]
-> +Realtime Blocks grace time: [5 days]
-> +Blocks grace time: [--------]
-> +Inodes grace time: [--------]
-> +Realtime Blocks grace time: [--------]
-> -- 
-> 2.31.1
-> 
+If you mean to consider adding *more* information to the kernel, as
+a new feature, I'm afraid any PID triggering a bump in the refcnt is
+ephemeral, and so I don't think it would help. It would only be useful
+if userspace *knew* it would trigger a recnt bump, and that seems
+likely a promise we would probaby want to break any time. Unless we
+want to get into the business of granting userspace the ability to
+bump refcnt's with new structural information it promises is legit.
+Then userspace can query for this. However that still seems overkill,
+I can't see a need for it yet.
+
+> and then the
+> application can use whatever it wants to poll, including controlling a
+> timeout.
+
+A dynamic timeout seems sensible indeed.
+
+> I'm saying this because sleep(1) may be all fine for modprobe, but for
+> other applications using libkmod it may not play well with their mainloops
+> (and they may want to control both granularity of the sleep and a max
+> timeout).
+
+Indeed. A default timeout set into the context seem to be the way to go,
+which callers can override. Then modprobe -t <ms_wait> can use this caller to
+update the ctx timeout to a setting.
+
+I'll post a v2 with these changes.
+
+  Luis
