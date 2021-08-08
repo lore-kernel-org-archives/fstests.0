@@ -2,400 +2,159 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 697CDC4338F
-	for <linux-fstests@archiver.kernel.org>; Sun,  8 Aug 2021 15:27:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CA4C8C4338F
+	for <linux-fstests@archiver.kernel.org>; Sun,  8 Aug 2021 15:39:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4736061002
-	for <linux-fstests@archiver.kernel.org>; Sun,  8 Aug 2021 15:27:43 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9F42261004
+	for <linux-fstests@archiver.kernel.org>; Sun,  8 Aug 2021 15:39:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231869AbhHHP2B (ORCPT
+        id S231926AbhHHPjj (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 8 Aug 2021 11:28:01 -0400
-Received: from out20-86.mail.aliyun.com ([115.124.20.86]:35700 "EHLO
-        out20-86.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229923AbhHHP2B (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 8 Aug 2021 11:28:01 -0400
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07436392|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_alarm|0.00868954-0.000254152-0.991056;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047190;MF=guan@eryu.me;NM=1;PH=DS;RN=5;RT=5;SR=0;TI=SMTPD_---.Kx2XgC8_1628436459;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.Kx2XgC8_1628436459)
-          by smtp.aliyun-inc.com(10.147.40.26);
-          Sun, 08 Aug 2021 23:27:40 +0800
-Date:   Sun, 8 Aug 2021 23:27:39 +0800
-From:   Eryu Guan <guan@eryu.me>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org, tytso@mit.edu
-Subject: Re: [PATCH 3/3] dmflakey: support external log and realtime devices
-Message-ID: <YQ/365PeoTI87Tt4@desktop>
-References: <162674334277.2651055.14927938006488444114.stgit@magnolia>
- <162674335915.2651055.17005305530614106697.stgit@magnolia>
+        Sun, 8 Aug 2021 11:39:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51138 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229923AbhHHPji (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 8 Aug 2021 11:39:38 -0400
+Received: from mail-wm1-x32f.google.com (mail-wm1-x32f.google.com [IPv6:2a00:1450:4864:20::32f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8AACEC061760
+        for <fstests@vger.kernel.org>; Sun,  8 Aug 2021 08:39:18 -0700 (PDT)
+Received: by mail-wm1-x32f.google.com with SMTP id l34-20020a05600c1d22b02902573c214807so12670618wms.2
+        for <fstests@vger.kernel.org>; Sun, 08 Aug 2021 08:39:18 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=message-id:date:from:to:subject:mime-version:content-disposition;
+        bh=D1b7Y7YeZ0SH20ddztzsqkNTr+L/T88Xj/6iwqFlNCA=;
+        b=WDssYiZX9xVVKwNSvvqPJsqjn5QE+tpssd4Km6zNGhXjKnV8ptDF5s2aTrZN9gPAQG
+         2rVemMaybZZinIyr0NIITOmYkmV/C8HHIzfaixK/raxZykAnucZvtBJFRSgzT9vSMwLU
+         62I7oZFE9OwvcfDk+ZfvaYq3sxt8Vm5iH2Jo2anPYbZdxY/PuCOXIYShrB0DFE4U1KZr
+         7kOHarWUPfGCR0Cs4/JUAiBoutFiuYyKdz7+3EVkIpGZ/TUejFmqoollX7ejOpZXpR7H
+         swCz0DtdNVDfwY7UjEggz5LF9Jv4RAwTNZE22aUVKrBWgqjf/di6o7C8XCzxQztdxp32
+         Ja0w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:message-id:date:from:to:subject:mime-version
+         :content-disposition;
+        bh=D1b7Y7YeZ0SH20ddztzsqkNTr+L/T88Xj/6iwqFlNCA=;
+        b=ZiqsF01hj2Si1UTZx61MgKS5rT0AR0njp/HyeuEGMAympf6N35qAuqnZ9OT8JlFox9
+         FmDWV/DO1jADNRtyYE34Nb89f51Te38SnN9sp7XlfrfMfpmXHSRB5xvHaR0bHkcDLAF3
+         syhs1D5+9Ztti22yOtJInH3KXV+bushPEIijAZdO2dokurVV/e/ZbXG8fNGGWAwEyrF/
+         VT3QfmUPH1qyV8/NyfmCqeJ1mquJdRD27d1WQg27GHUxAIDAQuaDd7BxK9E43ahvOEXC
+         IzMOrfVKbM64jytt9hxUmD3gIw4RSm2uxENmedzrRYr19CQJf/Ktdd6OprIvtYelPa58
+         yD0g==
+X-Gm-Message-State: AOAM532TGVDBe6yS4woIOW/slfBtcIjkM+wN2oapatEjukIiRKLRWYDJ
+        PorkTA26WeJlvYVk8LAJnWYnMq+kHeE=
+X-Google-Smtp-Source: ABdhPJw9wEQmGK4GnV1QLCrEAVKj/rY9mXwYynA7kEKYPmtxKzKIiaWid968fs2u6kwKT3uW8CaRpw==
+X-Received: by 2002:a7b:c147:: with SMTP id z7mr12487626wmi.10.1628437155993;
+        Sun, 08 Aug 2021 08:39:15 -0700 (PDT)
+Received: from localhost ([8.208.10.148])
+        by smtp.gmail.com with ESMTPSA id x15sm16281617wrs.57.2021.08.08.08.39.14
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 08 Aug 2021 08:39:15 -0700 (PDT)
+Message-ID: <610ffaa3.1c69fb81.bcd0.708c@mx.google.com>
+Date:   Sun, 08 Aug 2021 23:39:11 +0800
+From:   Eryu Guan <guaneryu@gmail.com>
+To:     fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: master branch updated to ab9b671c5549
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="e5Pxl1hVeWap"
 Content-Disposition: inline
-In-Reply-To: <162674335915.2651055.17005305530614106697.stgit@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Jul 19, 2021 at 06:09:19PM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
-> 
-> Upgrade the dmerror code to coordinate making external scratch log and
-> scratch realtime devices error out along with the scratch device.  Note
-> that unlike SCRATCH_DEV, we save the old rt/log devices in a separate
-> variable and overwrite SCRATCH_{RT,LOG}DEV so that all the helper
-> functions continue to work properly.
-> 
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
 
-This patch doesn't apply, seems like it's depending on context that
-isn't upstreamed yet. I checked your branch and found that we're missing
-patch "xfs: test xfs_scrub phase 6 media error reporting"
+--e5Pxl1hVeWap
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-The patch in question has been posted for review in Mar., but it seems
-it has some unresolved comments and has never been merged..
+Hi all,
 
-The first two patches look fine to me, and I'm taking them for this
-update.
+The master branch of the xfstests repository at:
+
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+have just been updated. And thanks to Darrick J. Wong, dmflakey tests now work
+with xfs rt/log devices. dmerror support to rt/log devices is still on the way.
+
+There're also two new tests, btrfs/244 and xfs/175, and btrfs/244 currently may
+crash your v5.14-rc4 kernel, so it's marked as 'dangerous'. There're also two
+bug fixes, one fixes a regression introduced by last update, one fixes
+SEEK_DATA/SEEK_HOLE behavior on NFSv4.2.
+
+And there're still remaining review backlogs:
+
+- new xfs tests from Darrick
+- Extend idmapped mount testsuite from Christian Brauner
+
+It's really appreciated if anyone could help review above patches!
 
 Thanks,
 Eryu
 
->                                                                                                                                                                                                                    
-> Upgrade the dmerror code to coordinate making external scratch log and                                                                                                                                             
-> scratch realtime devices error out along with the scratch device.
-> Note                                                                                                                                            
-> that unlike SCRATCH_DEV, we save the old rt/log devices in a separate                                                                                                                                              
-> variable and overwrite SCRATCH_{RT,LOG}DEV so that all the helper                                                                                                                                                  
-> functions continue to work properly.                                                                                                                                                                               
->                                                          
-> ---
->  common/dmerror    |  186 ++++++++++++++++++++++++++++++++++++++++++++++++++---
->  tests/generic/441 |    2 -
->  tests/generic/487 |    2 -
->  3 files changed, 178 insertions(+), 12 deletions(-)
-> 
-> 
-> diff --git a/common/dmerror b/common/dmerror
-> index 7f6800c0..03f3fd97 100644
-> --- a/common/dmerror
-> +++ b/common/dmerror
-> @@ -4,30 +4,94 @@
->  #
->  # common functions for setting up and tearing down a dmerror device
->  
-> +_dmerror_setup_vars()
-> +{
-> +	local backing_dev="$1"
-> +	local tag="$2"
-> +	local target="$3"
-> +
-> +	test -z "$target" && target=error
-> +	local blk_dev_size=$(blockdev --getsz "$backing_dev")
-> +
-> +	eval export "DMLINEAR_${tag}TABLE=\"0 $blk_dev_size linear $backing_dev 0\""
-> +	eval export "DMERROR_${tag}TABLE=\"0 $blk_dev_size $target $backing_dev 0\""
-> +}
-> +
->  _dmerror_setup()
->  {
-> -	local dm_backing_dev=$SCRATCH_DEV
-> +	local rt_target=
-> +	local linear_target=
->  
-> -	local blk_dev_size=`blockdev --getsz $dm_backing_dev`
-> +	for arg in "$@"; do
-> +		case "${arg}" in
-> +		no_rt)		rt_target=linear;;
-> +		no_log)		log_target=linear;;
-> +		*)		echo "${arg}: Unknown _dmerror_setup arg.";;
-> +		esac
-> +	done
->  
-> +	# Scratch device
->  	export DMERROR_DEV='/dev/mapper/error-test'
-> +	_dmerror_setup_vars $SCRATCH_DEV
->  
-> -	export DMLINEAR_TABLE="0 $blk_dev_size linear $dm_backing_dev 0"
-> +	# Realtime device.  We reassign SCRATCH_RTDEV so that all the scratch
-> +	# helpers continue to work unmodified.
-> +	if [ -n "$SCRATCH_RTDEV" ]; then
-> +		if [ -z "$NON_ERROR_RTDEV" ]; then
-> +			# Set up the device switch
-> +			local dm_backing_dev=$SCRATCH_RTDEV
-> +			export NON_ERROR_RTDEV="$SCRATCH_RTDEV"
-> +			SCRATCH_RTDEV='/dev/mapper/error-rttest'
-> +		else
-> +			# Already set up; recreate tables
-> +			local dm_backing_dev="$NON_ERROR_RTDEV"
-> +		fi
->  
-> -	export DMERROR_TABLE="0 $blk_dev_size error $dm_backing_dev 0"
-> +		_dmerror_setup_vars $dm_backing_dev RT $rt_target
-> +	fi
-> +
-> +	# External log device.  We reassign SCRATCH_LOGDEV so that all the
-> +	# scratch helpers continue to work unmodified.
-> +	if [ -n "$SCRATCH_LOGDEV" ]; then
-> +		if [ -z "$NON_ERROR_LOGDEV" ]; then
-> +			# Set up the device switch
-> +			local dm_backing_dev=$SCRATCH_LOGDEV
-> +			export NON_ERROR_LOGDEV="$SCRATCH_LOGDEV"
-> +			SCRATCH_LOGDEV='/dev/mapper/error-logtest'
-> +		else
-> +			# Already set up; recreate tables
-> +			local dm_backing_dev="$NON_ERROR_LOGDEV"
-> +		fi
-> +
-> +		_dmerror_setup_vars $dm_backing_dev LOG $log_target
-> +	fi
->  }
->  
->  _dmerror_init()
->  {
-> -	_dmerror_setup
-> +	_dmerror_setup "$@"
-> +
->  	_dmsetup_remove error-test
->  	_dmsetup_create error-test --table "$DMLINEAR_TABLE" || \
->  		_fatal "failed to create dm linear device"
-> +
-> +	if [ -n "$NON_ERROR_RTDEV" ]; then
-> +		_dmsetup_remove error-rttest
-> +		_dmsetup_create error-rttest --table "$DMLINEAR_RTTABLE" || \
-> +			_fatal "failed to create dm linear rt device"
-> +	fi
-> +
-> +	if [ -n "$NON_ERROR_LOGDEV" ]; then
-> +		_dmsetup_remove error-logtest
-> +		_dmsetup_create error-logtest --table "$DMLINEAR_LOGTABLE" || \
-> +			_fatal "failed to create dm linear log device"
-> +	fi
->  }
->  
->  _dmerror_mount()
->  {
->  	_scratch_options mount
-> +
->  	$MOUNT_PROG -t $FSTYP `_common_dev_mount_options $*` $SCRATCH_OPTIONS \
->  		$DMERROR_DEV $SCRATCH_MNT
->  }
-> @@ -39,11 +103,23 @@ _dmerror_unmount()
->  
->  _dmerror_cleanup()
->  {
-> +	test -n "$NON_ERROR_LOGDEV" && $DMSETUP_PROG resume error-logtest &>/dev/null
-> +	test -n "$NON_ERROR_RTDEV" && $DMSETUP_PROG resume error-rttest &>/dev/null
->  	$DMSETUP_PROG resume error-test > /dev/null 2>&1
-> +
->  	$UMOUNT_PROG $SCRATCH_MNT > /dev/null 2>&1
-> +
-> +	test -n "$NON_ERROR_LOGDEV" && _dmsetup_remove error-logtest
-> +	test -n "$NON_ERROR_RTDEV" && _dmsetup_remove error-rttest
->  	_dmsetup_remove error-test
->  
->  	unset DMERROR_DEV DMLINEAR_TABLE DMERROR_TABLE
-> +
-> +	SCRATCH_LOGDEV="$NON_ERROR_LOGDEV"
-> +	unset NON_ERROR_LOGDEV DMLINEAR_LOGTABLE DMERROR_LOGTABLE
-> +
-> +	SCRATCH_RTDEV="$NON_ERROR_RTDEV"
-> +	unset NON_ERROR_RTDEV DMLINEAR_RTTABLE DMERROR_RTTABLE
->  }
->  
->  _dmerror_load_error_table()
-> @@ -59,12 +135,47 @@ _dmerror_load_error_table()
->  		suspend_opt="$*"
->  	fi
->  
-> +	# Suspend the scratch device before the log and realtime devices so
-> +	# that the kernel can freeze and flush the filesystem if the caller
-> +	# wanted a freeze.
->  	$DMSETUP_PROG suspend $suspend_opt error-test
->  	[ $? -ne 0 ] && _fail  "dmsetup suspend failed"
->  
-> +	if [ -n "$NON_ERROR_RTDEV" ]; then
-> +		$DMSETUP_PROG suspend $suspend_opt error-rttest
-> +		[ $? -ne 0 ] && _fail "failed to suspend error-rttest"
-> +	fi
-> +
-> +	if [ -n "$NON_ERROR_LOGDEV" ]; then
-> +		$DMSETUP_PROG suspend $suspend_opt error-logtest
-> +		[ $? -ne 0 ] && _fail "failed to suspend error-logtest"
-> +	fi
-> +
-> +	# Load new table
->  	echo "$DMERROR_TABLE" | $DMSETUP_PROG load error-test
->  	load_res=$?
->  
-> +	if [ -n "$NON_ERROR_RTDEV" ]; then
-> +		$DMSETUP_PROG load error-rttest --table "$DMERROR_RTTABLE"
-> +		[ $? -ne 0 ] && _fail "failed to load error table into error-rttest"
-> +	fi
-> +
-> +	if [ -n "$NON_ERROR_LOGDEV" ]; then
-> +		$DMSETUP_PROG load error-logtest --table "$DMERROR_LOGTABLE"
-> +		[ $? -ne 0 ] && _fail "failed to load error table into error-logtest"
-> +	fi
-> +
-> +	# Resume devices in the opposite order that we suspended them.
-> +	if [ -n "$NON_ERROR_LOGDEV" ]; then
-> +		$DMSETUP_PROG resume error-logtest
-> +		[ $? -ne 0 ] && _fail  "failed to resume error-logtest"
-> +	fi
-> +
-> +	if [ -n "$NON_ERROR_RTDEV" ]; then
-> +		$DMSETUP_PROG resume error-rttest
-> +		[ $? -ne 0 ] && _fail  "failed to resume error-rttest"
-> +	fi
-> +
->  	$DMSETUP_PROG resume error-test
->  	resume_res=$?
->  
-> @@ -85,12 +196,47 @@ _dmerror_load_working_table()
->  		suspend_opt="$*"
->  	fi
->  
-> +	# Suspend the scratch device before the log and realtime devices so
-> +	# that the kernel can freeze and flush the filesystem if the caller
-> +	# wanted a freeze.
->  	$DMSETUP_PROG suspend $suspend_opt error-test
->  	[ $? -ne 0 ] && _fail  "dmsetup suspend failed"
->  
-> +	if [ -n "$NON_ERROR_RTDEV" ]; then
-> +		$DMSETUP_PROG suspend $suspend_opt error-rttest
-> +		[ $? -ne 0 ] && _fail "failed to suspend error-rttest"
-> +	fi
-> +
-> +	if [ -n "$NON_ERROR_LOGDEV" ]; then
-> +		$DMSETUP_PROG suspend $suspend_opt error-logtest
-> +		[ $? -ne 0 ] && _fail "failed to suspend error-logtest"
-> +	fi
-> +
-> +	# Load new table
->  	$DMSETUP_PROG load error-test --table "$DMLINEAR_TABLE"
->  	load_res=$?
->  
-> +	if [ -n "$NON_ERROR_RTDEV" ]; then
-> +		$DMSETUP_PROG load error-rttest --table "$DMLINEAR_RTTABLE"
-> +		[ $? -ne 0 ] && _fail "failed to load working table into error-rttest"
-> +	fi
-> +
-> +	if [ -n "$NON_ERROR_LOGDEV" ]; then
-> +		$DMSETUP_PROG load error-logtest --table "$DMLINEAR_LOGTABLE"
-> +		[ $? -ne 0 ] && _fail "failed to load working table into error-logtest"
-> +	fi
-> +
-> +	# Resume devices in the opposite order that we suspended them.
-> +	if [ -n "$NON_ERROR_LOGDEV" ]; then
-> +		$DMSETUP_PROG resume error-logtest
-> +		[ $? -ne 0 ] && _fail  "failed to resume error-logtest"
-> +	fi
-> +
-> +	if [ -n "$NON_ERROR_RTDEV" ]; then
-> +		$DMSETUP_PROG resume error-rttest
-> +		[ $? -ne 0 ] && _fail  "failed to resume error-rttest"
-> +	fi
-> +
->  	$DMSETUP_PROG resume error-test
->  	resume_res=$?
->  
-> @@ -157,20 +303,36 @@ __dmerror_recreate_map()
->  # Update the dm error table so that the range (start, len) maps to the
->  # preferred dm target, overriding anything that maps to the implied dm target.
->  # This assumes that the only desired targets for this dm device are the
-> -# preferred and and implied targets.
-> +# preferred and and implied targets.  The fifth argument is the scratch device
-> +# that we want to change the table for.
->  __dmerror_change()
->  {
->  	local start="$1"
->  	local len="$2"
->  	local preferred_tgt="$3"
->  	local implied_tgt="$4"
-> +	local whichdev="$5"
-> +	test -z "$whichdev" && whichdev="$SCRATCH_DEV"
->  
-> -	DMERROR_TABLE="$( (echo "$DMERROR_TABLE"; echo "$start $len $preferred_tgt") | \
-> +	case "$whichdev" in
-> +	"$SCRATCH_DEV")		old_table="$DMERROR_TABLE";;
-> +	"$NON_ERROR_LOGDEV")	old_table="$DMERROR_LOGTABLE";;
-> +	"$NON_ERROR_RTDEV")	old_table="$DMERROR_RTTABLE";;
-> +	*)			echo "$whichdev: Unknown dmerror device."; return;;
-> +	esac
-> +
-> +	new_table="$( (echo "$old_table"; echo "$start $len $preferred_tgt") | \
->  		awk -v type="$preferred_tgt" '{if ($3 == type) print $0;}' | \
->  		sort -g | \
->  		__dmerror_combine_extents | \
-> -		__dmerror_recreate_map "$SCRATCH_DEV" "$preferred_tgt" \
-> +		__dmerror_recreate_map "$whichdev" "$preferred_tgt" \
->  				"$implied_tgt" )"
-> +
-> +	case "$whichdev" in
-> +	"$SCRATCH_DEV")		DMERROR_TABLE="$new_table";;
-> +	"$NON_ERROR_LOGDEV")	DMERROR_LOGTABLE="$new_table";;
-> +	"$NON_ERROR_RTDEV")	DMERROR_RTTABLE="$new_table";;
-> +	esac
->  }
->  
->  # Reset the dm error table to everything ok.  The dm device itself must be
-> @@ -178,6 +340,8 @@ __dmerror_change()
->  _dmerror_reset_table()
->  {
->  	DMERROR_TABLE="$DMLINEAR_TABLE"
-> +	DMERROR_LOGTABLE="$DMLINEAR_LOGTABLE"
-> +	DMERROR_RTTABLE="$DMLINEAR_RTTABLE"
->  }
->  
->  # Update the dm error table so that IOs to the given range will return EIO.
-> @@ -186,8 +350,9 @@ _dmerror_mark_range_bad()
->  {
->  	local start="$1"
->  	local len="$2"
-> +	local dev="$3"
->  
-> -	__dmerror_change "$start" "$len" error linear
-> +	__dmerror_change "$start" "$len" error linear "$dev"
->  }
->  
->  # Update the dm error table so that IOs to the given range will succeed.
-> @@ -196,6 +361,7 @@ _dmerror_mark_range_good()
->  {
->  	local start="$1"
->  	local len="$2"
-> +	local dev="$3"
->  
-> -	__dmerror_change "$start" "$len" linear error
-> +	__dmerror_change "$start" "$len" linear error "$dev"
->  }
-> diff --git a/tests/generic/441 b/tests/generic/441
-> index 0ec751da..85f29a3a 100755
-> --- a/tests/generic/441
-> +++ b/tests/generic/441
-> @@ -52,7 +52,7 @@ unset SCRATCH_RTDEV
->  
->  echo "Format and mount"
->  _scratch_mkfs > $seqres.full 2>&1
-> -_dmerror_init
-> +_dmerror_init no_log
->  _dmerror_mount
->  
->  _require_fs_space $SCRATCH_MNT 65536
-> diff --git a/tests/generic/487 b/tests/generic/487
-> index fda8828d..3c9b2233 100755
-> --- a/tests/generic/487
-> +++ b/tests/generic/487
-> @@ -45,7 +45,7 @@ unset SCRATCH_RTDEV
->  
->  echo "Format and mount"
->  _scratch_mkfs > $seqres.full 2>&1
-> -_dmerror_init
-> +_dmerror_init no_log
->  _dmerror_mount
->  
->  datalen=65536
+The new head of the master branch is commit:
+
+ab9b671c5549 dmerror: export configuration so that subprograms don't have to reinit
+
+New commits:
+
+Amir Goldstein (1):
+      [de1196dcd9b6] overlay/078: Fix cleanup with unpatched kernel
+
+Darrick J. Wong (2):
+      [9c1f3149271f] dmflakey: support external log and realtime devices
+      [ab9b671c5549] dmerror: export configuration so that subprograms don't have to reinit
+
+Jeffle Xu (1):
+      [4b7ea02dc05b] common/rc: only force nfs4.2 non-default SEEK_HOLE behaviour
+
+Qu Wenruo (1):
+      [da693469b7a1] btrfs: verify the behavior of deleting non-existing device
+
+Zorro Lang (1):
+      [c124d3a3116d] xfs: quota state command should report upg grace times separately
+
+
+Code Diffstat:
+
+ common/dmerror      |   8 ++--
+ common/dmflakey     | 106 ++++++++++++++++++++++++++++++++++++++++++++++++++--
+ common/rc           |   8 ++--
+ src/dmerror         |  13 +++----
+ tests/btrfs/244     |  47 +++++++++++++++++++++++
+ tests/btrfs/244.out |   2 +
+ tests/overlay/078   |   3 ++
+ tests/xfs/175       |  37 ++++++++++++++++++
+ tests/xfs/175.out   |  21 +++++++++++
+ 9 files changed, 227 insertions(+), 18 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
+
+--e5Pxl1hVeWap
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIyBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAmEP+m4ACgkQJlKqKVyP
+52N4Sg/1EcKbaSKV4k7REhMGNTP1iQem3A0FzZlLoheAVIqx+N+B96b68oVBAHvZ
+aiNJ2hjbIj4iLYOeU2Etx+NQdn1HCc14VWFwIgXELQR9hRdP+70+52CVpr6pbEH2
+y1NDk+jKtuTHS8OArTqJCYKGtROHrQ12+/nefwutBpurfS/w7KW42X+Vw2a2tqVj
+hrYx6B9bvMTFRRpnG7XMPYf5iD4at9BR3kbNqg+r0/Wpg0u6ORu6O16sCI3uRJ7P
+O7j4FM5vkVWnpeL9DBPWuKaO3nARpwLXhyoKU8XVkQBY8nMXZy9+qFQ6SU5XhAdF
+S5gUEjNXPC3MW9AXfF5dLB5Dhczen99NQjiEHo+/iHycvtwzkR6705LSDDTBmnCg
+2fO6ayAuxdZahjI6Qnqrr59aEAb1VL+fKV6AIK9SVGTuHo+gZwOGUFTNnBvdfwvX
+6H4xIUfW9IaL6n8KMpog1DLBwWoxcdv+aI4e5s+9JmR9F3ahKNwWW2TWuOcFgVPg
+680eY84ILkOZbhmvkVIs7VbNN45K+I04pt+Pjff39hjJbWJKSzMcPPsQ1VbwdSKl
+Jgaej3OPVQJdf4vSNRDpEWTSlnvVwzI8WOWApPSPlSXt6j0mM417s9dpckL1gRWN
+7yOxJhMa6sf0wGcJI3XdTgDbz70DbvcbrM4165wF6QC1gGKPIw==
+=Cs4V
+-----END PGP SIGNATURE-----
+
+--e5Pxl1hVeWap--
