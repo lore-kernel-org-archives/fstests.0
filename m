@@ -7,111 +7,86 @@ X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 47557C4338F
-	for <linux-fstests@archiver.kernel.org>; Sun,  8 Aug 2021 13:33:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 23A4DC4338F
+	for <linux-fstests@archiver.kernel.org>; Sun,  8 Aug 2021 13:42:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0EDEE60FC1
-	for <linux-fstests@archiver.kernel.org>; Sun,  8 Aug 2021 13:33:09 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id F1A7B61002
+	for <linux-fstests@archiver.kernel.org>; Sun,  8 Aug 2021 13:42:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229923AbhHHNdV (ORCPT
+        id S231169AbhHHNmT (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 8 Aug 2021 09:33:21 -0400
-Received: from out20-73.mail.aliyun.com ([115.124.20.73]:37046 "EHLO
-        out20-73.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230505AbhHHNdL (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 8 Aug 2021 09:33:11 -0400
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07502286|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_regular_dialog|0.265791-0.0208945-0.713315;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047198;MF=guan@eryu.me;NM=1;PH=DS;RN=5;RT=5;SR=0;TI=SMTPD_---.Kx179PM_1628429568;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.Kx179PM_1628429568)
-          by smtp.aliyun-inc.com(10.147.41.158);
-          Sun, 08 Aug 2021 21:32:48 +0800
-Date:   Sun, 8 Aug 2021 21:32:48 +0800
+        Sun, 8 Aug 2021 09:42:19 -0400
+Received: from out20-2.mail.aliyun.com ([115.124.20.2]:35890 "EHLO
+        out20-2.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229923AbhHHNmS (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 8 Aug 2021 09:42:18 -0400
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07772837|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_regular_dialog|0.0699849-0.00302431-0.926991;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047203;MF=guan@eryu.me;NM=1;PH=DS;RN=4;RT=4;SR=0;TI=SMTPD_---.Kx0uTNU_1628430117;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.Kx0uTNU_1628430117)
+          by smtp.aliyun-inc.com(10.147.40.7);
+          Sun, 08 Aug 2021 21:41:58 +0800
+Date:   Sun, 8 Aug 2021 21:41:57 +0800
 From:   Eryu Guan <guan@eryu.me>
-To:     Ritesh Harjani <riteshh@linux.ibm.com>
-Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
-        Theodore Ts'o <tytso@mit.edu>,
-        "Darrick J . Wong" <djwong@kernel.org>
-Subject: Re: [PATCHv2 7/9] generic/620: Use _mkfs_dev_blocksized to use 4k bs
-Message-ID: <YQ/dAFFDLp0edZUl@desktop>
-References: <cover.1626844259.git.riteshh@linux.ibm.com>
- <a7d863771ec7187a1d89e0e33aa36bb6aaa5a2a7.1626844259.git.riteshh@linux.ibm.com>
- <YQbF38FWSLX+eUm6@desktop>
- <20210803050622.yh2wn2fhzxn4jjbv@riteshh-domain>
+To:     Hao Xu <haoxu@linux.alibaba.com>
+Cc:     fstests@vger.kernel.org,
+        Frank van der Linden <fllinden@amazon.com>,
+        linux-nfs@vger.kernel.org
+Subject: Re: [PATCH] common/attr: remove the MAX_ATTRS and MAX_ATTRVAL_SIZE
+ for nfs
+Message-ID: <YQ/fJW/56wW9g0VT@desktop>
+References: <20210804074148.203065-1-haoxu@linux.alibaba.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210803050622.yh2wn2fhzxn4jjbv@riteshh-domain>
+In-Reply-To: <20210804074148.203065-1-haoxu@linux.alibaba.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Aug 03, 2021 at 10:36:22AM +0530, Ritesh Harjani wrote:
-> On 21/08/02 12:03AM, Eryu Guan wrote:
-> > On Wed, Jul 21, 2021 at 10:58:00AM +0530, Ritesh Harjani wrote:
-> > > ext4 with 64k blocksize (passed by user config) fails with below error for
-> > > this given test which requires dmhugedisk. Since this test anyways only
-> > > requires 4k bs, so use _mkfs_dev_blocksized() to fix this.
-
-I don't see how this test always requires 4k blocksize, 1k blocksized
-xfs also passes the test.
-
-> > >
-> > > <error log with 64k bs>
-> > > mkfs.ext4: Input/output error while writing out and closing file system
-
-Is this a bug in mkfs.ext4 or expected error (unsupported config)? If
-it's an expected error, it'd be better to explain it in commit log as
-well.
-
-> > >
-> > > Signed-off-by: Ritesh Harjani <riteshh@linux.ibm.com>
-> > > ---
-> > >  tests/generic/620 | 4 +++-
-> > >  1 file changed, 3 insertions(+), 1 deletion(-)
-> > >
-> > > diff --git a/tests/generic/620 b/tests/generic/620
-> > > index b052376f..444e682d 100755
-> > > --- a/tests/generic/620
-> > > +++ b/tests/generic/620
-> > > @@ -42,7 +42,9 @@ sectors=$((2*1024*1024*1024*17))
-> > >  chunk_size=128
-> > >
-> > >  _dmhugedisk_init $sectors $chunk_size
-> > > -_mkfs_dev $DMHUGEDISK_DEV
-> > > +
-> > > +# Use 4k blocksize.
-> > > +_mkfs_dev_blocksized 4096 $DMHUGEDISK_DEV
-> >
-> > We run the test by forcing 4k blocksize, which could be tested in 4k
-> > blocksize setup. Maybe it's another case that should _notrun in 64k
-> > blocksize setup.
+On Wed, Aug 04, 2021 at 03:41:48PM +0800, Hao Xu wrote:
+> The block size of localfs for nfs may be different with nfs itself.
+> So it's pointless to test nfs on xattrs size, just remove the special
+> judge code.
 > 
-> So for testing that, first I should mkfs and mount a scratch device with the
-> passed mount/mkfs options and then see if the blocksize passed is 64K, if yes
-> I should _notrun this case.
+> Fixes: commit da3cdb3b91ca ("common/attr: set MAX_ATTR values correctly for NFS")
+> Signed-off-by: Hao Xu <haoxu@linux.alibaba.com>
+> ---
+>  common/attr | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
 > 
-> Isn't the current approach of (_mkfs_dev_blocksized 4096) is better then above
-> approach?
+> diff --git a/common/attr b/common/attr
+> index 42ceab92335a..542dff34bf55 100644
+> --- a/common/attr
+> +++ b/common/attr
+> @@ -253,7 +253,7 @@ _getfattr()
+>  
+>  # set maximum total attr space based on fs type
+>  case "$FSTYP" in
+> -xfs|udf|pvfs2|9p|ceph|nfs)
+> +xfs|udf|pvfs2|9p|ceph)
+>  	MAX_ATTRS=1000
 
-If the test always requires 4k blocksize, forcing creating a 4k
-blocksize filesystem doesn't increase any test coverage, I don't see any
-point introducing a new _mkfs_dev_blocksized helper just to do so.
+This makes generic/020 _notrun on nfs, I don't think that's what we
+want.
 
-And even if we decide to force 4k blocksize config, I think it'd be
-better to update _scratch_mkfs_blocksized() to take device as argument,
-like what _check_scratch_fs() does, so we don't duplicate all the code
-to create fs with specified blocksize.
+I think MAX_ATTRS is a best-effort guess based on filesystem block size,
+it's not a accurate hard limit. And if there's no good way to tell the
+fs blocksize on nfs server side, then we could make a conservative
+assumption, e.g. the blocksize is 1k, and colculate MAX_ATTRS and
+MAX_ATTRVAL_SIZE based on that assumption.
 
 Thanks,
 Eryu
 
-> 
-> -ritesh
-> 
-> > Thanks,
-> > Eryu
-> >
-> > >  _mount $DMHUGEDISK_DEV $SCRATCH_MNT || _fail "mount failed for $DMHUGEDISK_DEV $SCRATCH_MNT"
-> > >  testfile=$SCRATCH_MNT/testfile-$seq
-> > >
-> > > --
-> > > 2.31.1
+>  	;;
+>  *)
+> @@ -273,7 +273,7 @@ xfs|udf|btrfs)
+>  pvfs2)
+>  	MAX_ATTRVAL_SIZE=8192
+>  	;;
+> -9p|ceph|nfs)
+> +9p|ceph)
+>  	MAX_ATTRVAL_SIZE=65536
+>  	;;
+>  bcachefs)
+> -- 
+> 2.24.4
