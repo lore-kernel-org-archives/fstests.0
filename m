@@ -2,126 +2,113 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.0 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BFB83C432BE
-	for <linux-fstests@archiver.kernel.org>; Fri,  6 Aug 2021 21:45:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A7037C4338F
+	for <linux-fstests@archiver.kernel.org>; Sun,  8 Aug 2021 12:36:15 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A0B52600CD
-	for <linux-fstests@archiver.kernel.org>; Fri,  6 Aug 2021 21:45:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7A88B60FF2
+	for <linux-fstests@archiver.kernel.org>; Sun,  8 Aug 2021 12:36:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S244504AbhHFVpn (ORCPT
+        id S231270AbhHHMgd (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 6 Aug 2021 17:45:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43672 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241587AbhHFVpn (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 6 Aug 2021 17:45:43 -0400
-Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6BC1CC0613CF;
-        Fri,  6 Aug 2021 14:45:27 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=bombadil.20210309; h=Sender:In-Reply-To:Content-Type:
-        MIME-Version:References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=3yo0Z1DqiPntRlxzgzVM4K1c9ilgCH5IdUhCZZNDe9s=; b=YEcpgCfI59SF9Tug3dbXK91OXX
-        sq9bPtmNl5qPktHwmAAihU+NGy4EI2Wu4qsPOh1YYDsBUr8cB8XertXL4GuKVn5dzjT+2S1FZ3ks2
-        ORtg4pVQ21049fLZZaN+E4/dG2qP3gkRUSMu6HVBgJTI1Z0dMoLe0I09+mcsDE/PnKAall2S/lIq0
-        4OTwMTLqvzUBf40IsuaIbSHTe4FUiD3OaquwRjBJ3LNndLJX1vzhAu32F2tb4kqIa7o0oif1GzujM
-        u/UJbjCcJ96IbwBmsdqgzM0qVc+m5TsYwt9kBS3BqP+RYOiQHBu6DkLVigbaVerIeFBT58rWnyT3O
-        csmQP7Bg==;
-Received: from mcgrof by bombadil.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1mC7ee-00DgiI-Nc; Fri, 06 Aug 2021 21:45:24 +0000
-Date:   Fri, 6 Aug 2021 14:45:24 -0700
-From:   Luis Chamberlain <mcgrof@kernel.org>
-To:     Lucas De Marchi <lucas.demarchi@intel.com>
-Cc:     linux-modules@vger.kernel.org, live-patching@vger.kernel.org,
-        fstests@vger.kernel.org, linux-block@vger.kernel.org, hare@suse.de,
-        dgilbert@interlog.com, jeyu@kernel.org, osandov@fb.com,
-        linux-kernel@vger.kernel.org
-Subject: Re: [PATCH] libkmod-module: add support for a patient module removal
- option
-Message-ID: <YQ2tdCZ5YynHtuHB@bombadil.infradead.org>
-References: <20210803202417.462197-1-mcgrof@kernel.org>
- <YQrVY8Wxb026TDWN@bombadil.infradead.org>
- <20210804184720.z27u5aymcl5hzqgh@ldmartin-desk2>
+        Sun, 8 Aug 2021 08:36:33 -0400
+Received: from out20-109.mail.aliyun.com ([115.124.20.109]:54860 "EHLO
+        out20-109.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229504AbhHHMgd (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 8 Aug 2021 08:36:33 -0400
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07566925|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_regular_dialog|0.177431-0.00443938-0.818129;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047207;MF=guan@eryu.me;NM=1;PH=DS;RN=6;RT=6;SR=0;TI=SMTPD_---.Kx0Oam-_1628426171;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.Kx0Oam-_1628426171)
+          by smtp.aliyun-inc.com(10.147.41.143);
+          Sun, 08 Aug 2021 20:36:12 +0800
+Date:   Sun, 8 Aug 2021 20:36:11 +0800
+From:   Eryu Guan <guan@eryu.me>
+To:     Ritesh Harjani <riteshh@linux.ibm.com>
+Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
+        Theodore Ts'o <tytso@mit.edu>,
+        "Darrick J . Wong" <djwong@kernel.org>,
+        Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCHv2 5/9] generic/031: Fix the test case for 64k blocksize
+ config
+Message-ID: <YQ/PuznWmSgcTQiM@desktop>
+References: <cover.1626844259.git.riteshh@linux.ibm.com>
+ <c37a4cfb8a50d2df68369d66ef6e1ebf6533e3ea.1626844259.git.riteshh@linux.ibm.com>
+ <YQbFDtq9aDA7Ql1j@desktop>
+ <20210803050033.meopotfeooo6n4gu@riteshh-domain>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210804184720.z27u5aymcl5hzqgh@ldmartin-desk2>
-Sender: Luis Chamberlain <mcgrof@infradead.org>
+In-Reply-To: <20210803050033.meopotfeooo6n4gu@riteshh-domain>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Aug 04, 2021 at 11:47:20AM -0700, Lucas De Marchi wrote:
-> On Wed, Aug 04, 2021 at 10:58:59AM -0700, Luis Chamberlain wrote:
-> > On Tue, Aug 03, 2021 at 01:24:17PM -0700, Luis Chamberlain wrote:
-> > > + diff --git a/libkmod/libkmod-module.c b/libkmod/libkmod-module.c
-> > <-- snip -->
-> > > +		ERR(mod->ctx, "%s refcnt is %ld waiting for it to become 0\n", mod->name, refcnt);
-> > 
-> > OK after running many tests with this I think we need to just expand
-> > this so that the error message only applies when -v is passed to
-> > modprobe, otherwise we get the print message every time, and using
-> > INFO() doesn't cut it, given the next priority level available to
-> > the library is LOG_INFO (6) and when modprobe -v is passed we set the
-> > log level to LOG_NOTICE (5), so we need a new NOTICE(). I'll send a v2
-> > with that included as a separate patch.
+On Tue, Aug 03, 2021 at 10:30:33AM +0530, Ritesh Harjani wrote:
+> On 21/08/02 12:00AM, Eryu Guan wrote:
+> > On Wed, Jul 21, 2021 at 10:57:58AM +0530, Ritesh Harjani wrote:
+> > > This test fails with blocksize 64k since the test assumes 4k blocksize
+> > > in fcollapse param. This patch fixes that and also tests for 64k
+> > > blocksize.
+> > >
+> > > Signed-off-by: Ritesh Harjani <riteshh@linux.ibm.com>
+> > > ---
+> > >  tests/generic/031     | 14 +++++++++-----
+> > >  tests/generic/031.out | 16 ++++++++--------
+> > >  2 files changed, 17 insertions(+), 13 deletions(-)
+> > >
+> > > diff --git a/tests/generic/031 b/tests/generic/031
+> > > index 313ce9ff..11961c54 100755
+> > > --- a/tests/generic/031
+> > > +++ b/tests/generic/031
+> > > @@ -26,11 +26,16 @@ testfile=$SCRATCH_MNT/testfile
+> > >  _scratch_mkfs > /dev/null 2>&1
+> > >  _scratch_mount
+> > >
+> > > +# fcollapse need offset and len to be multiple of blocksize for filesystems
+> > > +# So let's make the offsets and len required for fcollapse multiples of 64K
+> > > +# so that it works for all configurations (including on dax on 64K page size
+> > > +# systems)
+> > > +fact=$((65536/4096))
+> > >  $XFS_IO_PROG -f \
+> > > -	-c "pwrite 185332 55756" \
+> > > -	-c "fcollapse 28672 40960" \
+> > > -	-c "pwrite 133228 63394" \
+> > > -	-c "fcollapse 0 4096" \
+> > > +	-c "pwrite $((185332*fact + 12)) $((55756*fact + 12))" \
+> >
+> > Where does this 12 come from?
+> A random number so that the offset and length are not bocksize aligned.
+> If you see the final .out file, you will see the offset of the writes
+> remains the same with and before this patch.
 > 
-> Or maybe move the sleep to modprobe instead of doing it in the
-> library? 
+> > And I'm wondering if this still reproduces the original bug.
+> I am not sure how to trigger this. I know that this test was intended for
+> bs < ps cases. If someone can help me / point me to the kernel fix for this,
+> I can try to reproduce the original bug too.
+> 
+> I found this link for this test patch series. Couldn't find the kernel fixes
+> link though.
+> https://www.spinics.net/lists/fstests/msg00340.html
 
-We have a few callers which need to impement the wait, and so having
-a library call is one way to share code. I realized this while first
-open coding this in each call site and realizing I was just
-re-inventing the wheel.
+I think it's a regression test for this patchset.
 
-> The sleep(1) seems like an arbitrary number to be introduced
-> in the lib.
+https://www.spinics.net/lists/xfs/msg29807.html
 
-Indeed, the ideal thing here is to introduce then a timeout, and have
-a default setting, which code can override.
+> 
+> 
+> >
+> > And looks like that the original test setups came from a specific
+> > fsstress or fsx run, and aimed to the specific bug, perhaps we could
+> > require the test with <= 4k block size, and _notrun in 64k case.
+> 
+> It would be good to know whether this code could trigger the original bug or
+> not. Then we need not make _notrun for 64k case.
 
-> Since kernfs is pollable,
-> maybe we could rather introduce an API to
-> return the pid in which the application has to wait for
+Agreed, if we could make sure that updated test still triggers the
+original bug, there's no reason _notrun for 64k case.
 
-The kernel does not have information to provide userspace any
-information for how long it should wait. I mean, in a test case I am
-using its an lvm pvremove and for some reason it seems the removal
-is asynchronously putting the module refcnt (even though I do not believe
-DM_DEFERRED_REMOVE is ever set by default), and I had fixed the kernel's
-own asynchronous removal of the request_queue a little while back so
-I don't think that's the issue either.
-
-If you mean to consider adding *more* information to the kernel, as
-a new feature, I'm afraid any PID triggering a bump in the refcnt is
-ephemeral, and so I don't think it would help. It would only be useful
-if userspace *knew* it would trigger a recnt bump, and that seems
-likely a promise we would probaby want to break any time. Unless we
-want to get into the business of granting userspace the ability to
-bump refcnt's with new structural information it promises is legit.
-Then userspace can query for this. However that still seems overkill,
-I can't see a need for it yet.
-
-> and then the
-> application can use whatever it wants to poll, including controlling a
-> timeout.
-
-A dynamic timeout seems sensible indeed.
-
-> I'm saying this because sleep(1) may be all fine for modprobe, but for
-> other applications using libkmod it may not play well with their mainloops
-> (and they may want to control both granularity of the sleep and a max
-> timeout).
-
-Indeed. A default timeout set into the context seem to be the way to go,
-which callers can override. Then modprobe -t <ms_wait> can use this caller to
-update the ctx timeout to a setting.
-
-I'll post a v2 with these changes.
-
-  Luis
+Thanks,
+Eryu
