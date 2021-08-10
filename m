@@ -2,83 +2,66 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-6.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B25A6C4338F
-	for <linux-fstests@archiver.kernel.org>; Tue, 10 Aug 2021 14:07:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 63798C4338F
+	for <linux-fstests@archiver.kernel.org>; Tue, 10 Aug 2021 21:31:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7E24D60F41
-	for <linux-fstests@archiver.kernel.org>; Tue, 10 Aug 2021 14:07:25 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 36EED61077
+	for <linux-fstests@archiver.kernel.org>; Tue, 10 Aug 2021 21:31:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238617AbhHJOHq (ORCPT
+        id S233686AbhHJVbt (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 10 Aug 2021 10:07:46 -0400
-Received: from smtp-out2.suse.de ([195.135.220.29]:34852 "EHLO
-        smtp-out2.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237375AbhHJOHq (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 10 Aug 2021 10:07:46 -0400
-Received: from relay2.suse.de (relay2.suse.de [149.44.160.134])
-        by smtp-out2.suse.de (Postfix) with ESMTP id 2D695200B9;
-        Tue, 10 Aug 2021 14:07:23 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-        t=1628604443;
-        h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-         cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=ok+5PZ4Wccz0hdrjClnsxQOONPiU0T6dDCCUsxFO3j8=;
-        b=mLY4XBs/Jo2O3j6m2412n0TZL2Loqn9h2T89v3X1Huu+HJ33kEEsEEqCfBbcpdm2EUbh8F
-        BAkYRUrA3XdNf/bHfrnjNyTDKFsuSkx5pnmq8pwyfVYco2uB8xRZ4vG5Rmkab4LV4gZ87Z
-        Wv3Mdz//fwS6MWAfFRpPXCV5p/Fsgv0=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-        s=susede2_ed25519; t=1628604443;
-        h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-         cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=ok+5PZ4Wccz0hdrjClnsxQOONPiU0T6dDCCUsxFO3j8=;
-        b=CJgslxqRLCzaUehonPi9WY+8ncC257RT3iRB1WwnFy4v4kBv0x26wiydrzF4xLG6XIH1tP
-        hGg4OxjbrvCbbMBg==
-Received: from ds.suse.cz (ds.suse.cz [10.100.12.205])
-        by relay2.suse.de (Postfix) with ESMTP id 23BFEA3B8A;
-        Tue, 10 Aug 2021 14:07:23 +0000 (UTC)
-Received: by ds.suse.cz (Postfix, from userid 10065)
-        id AE002DA880; Tue, 10 Aug 2021 16:04:30 +0200 (CEST)
-Date:   Tue, 10 Aug 2021 16:04:30 +0200
-From:   David Sterba <dsterba@suse.cz>
-To:     Nikolay Borisov <nborisov@suse.com>
-Cc:     Qu Wenruo <wqu@suse.com>, linux-btrfs@vger.kernel.org,
-        fstests@vger.kernel.org
-Subject: Re: [PATCH v2] fstests: btrfs/244: add test case to verify the
- behavior of deleting non-existing device
-Message-ID: <20210810140430.GV5047@twin.jikos.cz>
-Reply-To: dsterba@suse.cz
-Mail-Followup-To: dsterba@suse.cz, Nikolay Borisov <nborisov@suse.com>,
-        Qu Wenruo <wqu@suse.com>, linux-btrfs@vger.kernel.org,
-        fstests@vger.kernel.org
-References: <20210806113333.328261-1-wqu@suse.com>
- <5547039c-2989-e9d7-6126-15877758b3f0@suse.com>
+        Tue, 10 Aug 2021 17:31:49 -0400
+Received: from mail.kernel.org ([198.145.29.99]:45008 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S233625AbhHJVbt (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 10 Aug 2021 17:31:49 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 0542461019;
+        Tue, 10 Aug 2021 21:31:26 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1628631087;
+        bh=UDMwx2q99TfgQbOEjtpB26rCgk+Rsd+p41hRotSTIao=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=fXv4mVXSEqjH2bEBdG5SF20qh3Y4W8zp7EbFFDQEGloJtpxeSZSG27jdb/pDTSrvO
+         X2aGW+PmDVR9rJY6OS7SbmO0iM7xvNmnjyln3rmOVEUxy1L0YHAk2oGlbQj6SwuS1s
+         O6NkLAjAHUQ+9hsnWy6KTyxf7xeRVYk787TAanUWurI4Xdd/rDWtaM40RZ3BXd9B7O
+         OG7tKUHvXOmfO2GzLqOovC/Lo8eCi98g4CvT4surhIP7gAYbRJ885UcjCvVhBnzGmY
+         l0KCTAn922VGYMVmOWOivB0L0Fi0aRLSgn79jimjr8Tqjchw3KYow24ht6Vjne4eUh
+         sg7hWsXRV6aRw==
+Received: by mail-qv1-f41.google.com with SMTP id m12so62703qvt.1;
+        Tue, 10 Aug 2021 14:31:26 -0700 (PDT)
+X-Gm-Message-State: AOAM533ceMWJmzMRoDV6fYFVhDYnsPU/D9Db17Us07ayD09RCrlzYivG
+        gAXtu2LChTbNQvDq+2bfbpSBX65HAWLYVpNEg/k=
+X-Google-Smtp-Source: ABdhPJxOskfCDOWSoSq/GETYRKrlJxVpP30mI6v88L3ZWrcvSduFa4roezd2UW+1ImoP+XQavwTSJMpvRGQpBZEDI0M=
+X-Received: by 2002:ad4:4ea8:: with SMTP id ed8mr19931056qvb.2.1628631086202;
+ Tue, 10 Aug 2021 14:31:26 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <5547039c-2989-e9d7-6126-15877758b3f0@suse.com>
-User-Agent: Mutt/1.5.23.1-rc1 (2014-03-12)
+References: <20210727201045.2540681-1-mcgrof@kernel.org> <20210727201045.2540681-4-mcgrof@kernel.org>
+In-Reply-To: <20210727201045.2540681-4-mcgrof@kernel.org>
+From:   Luis Chamberlain <mcgrof@kernel.org>
+Date:   Tue, 10 Aug 2021 14:31:14 -0700
+X-Gmail-Original-Message-ID: <CAB=NE6U0Evs5mAwvgLBnMNHB0pF+UjTB66R_3r+nu8EHxN5hWg@mail.gmail.com>
+Message-ID: <CAB=NE6U0Evs5mAwvgLBnMNHB0pF+UjTB66R_3r+nu8EHxN5hWg@mail.gmail.com>
+Subject: Re: [PATCH 3/4] common/module: add a patient module rmmod
+To:     fstests <fstests@vger.kernel.org>
+Cc:     Hannes Reinecke <hare@suse.de>,
+        Douglas Gilbert <dgilbert@interlog.com>,
+        Jessica Yu <jeyu@kernel.org>,
+        Lucas De Marchi <lucas.demarchi@intel.com>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Aug 06, 2021 at 02:42:36PM +0300, Nikolay Borisov wrote:
-> > +if [ $ret -ne 1 ]; then
-> > +	echo "Unexpected return value from btrfs command, has $ret expected 1"
-> > +fi
-> 
-> <rant>
-> This just shows how broken progs are w.r.t return values. The generally
-> accepted return value is 0 on success, yet it returns 1 on success since
-> the functions implementing this functionality in progs treat the return
-> value as a boolean.
-> </rant>
+I see the first two patches in this series were applied. Great!
 
-Heh, not following the common convention of 0 for success, !0 for errors
-would be crazy and hardly left unnoticed by users.
+I also see this patch and the next one is not applied yet. Please
+don't apply as I'll resend a new set now with some more enhancements
+after finding out this issue is very generic and requires a kmod
+solution. I'll post these patches soon.
+
+ Luis
