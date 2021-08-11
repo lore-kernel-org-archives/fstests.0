@@ -2,159 +2,135 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A9D16C4338F
-	for <linux-fstests@archiver.kernel.org>; Wed, 11 Aug 2021 14:49:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 45E39C4338F
+	for <linux-fstests@archiver.kernel.org>; Wed, 11 Aug 2021 15:12:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8589260F55
-	for <linux-fstests@archiver.kernel.org>; Wed, 11 Aug 2021 14:49:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2B1F460FC0
+	for <linux-fstests@archiver.kernel.org>; Wed, 11 Aug 2021 15:12:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232646AbhHKOtm (ORCPT
+        id S232934AbhHKPNV (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 11 Aug 2021 10:49:42 -0400
-Received: from smtp-out2.suse.de ([195.135.220.29]:41352 "EHLO
-        smtp-out2.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232645AbhHKOtm (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 11 Aug 2021 10:49:42 -0400
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id 9388120189;
-        Wed, 11 Aug 2021 14:49:17 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-        t=1628693357; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-        bh=eqY6iEglgQKmW4WY04TNf7fYzVRF44pB9MgLhUXwE9k=;
-        b=QhdWTThqft6WvgeE7Z754bsdGioImyDsueW09ED4BWvwUQD+WS5moRDXLHlMTyD/tATZ65
-        ZR3B5JEMv/AUIpoqj5wQG+ahCsFiVljSzW3TNr4BtBVhlAUQ5a5tmlYwjxDyrSV17F9pnK
-        BQA5KJjAkZOwyo5znmqqHUDJIfG5+24=
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 8E8BE13C17;
-        Wed, 11 Aug 2021 14:49:15 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id j4/ZFGvjE2ErSAAAMHmgww
-        (envelope-from <mpdesouza@suse.com>); Wed, 11 Aug 2021 14:49:15 +0000
-From:   Marcos Paulo de Souza <mpdesouza@suse.com>
-To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Cc:     dsterba@suse.com, guaneryu@gmail.com, wqu@suse.com,
-        Marcos Paulo de Souza <mpdesouza@suse.com>
-Subject: [PATCH v3] btrfs/177: Add filesystem resize filter
-Date:   Wed, 11 Aug 2021 11:49:03 -0300
-Message-Id: <20210811144903.1425-1-mpdesouza@suse.com>
-X-Mailer: git-send-email 2.31.1
+        Wed, 11 Aug 2021 11:13:21 -0400
+Received: from esa5.hgst.iphmx.com ([216.71.153.144]:39981 "EHLO
+        esa5.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S232960AbhHKPNT (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 11 Aug 2021 11:13:19 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1628694774; x=1660230774;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=UAJxyvk/jy+U6vgpw3DQptAkGFjcE3AVUBJ403T3DzA=;
+  b=gOfVUaU7sDvlXKoQc74Go1d/53BoVio5+ClwQHFTiYMciQhUD9CvEfWC
+   5ZAGVLCc8TGe6rJBulTtyimjxpfuB6lb+sTn6nEEbmExiBwBlIHT8zkEQ
+   w4hqALv1ZEEtXqzGu1tT1P2e87dghPgiiOOk5Y+sbfYHrL46yoQt5xr2t
+   TYnnXGuEtOzbFhBdy9xdjZU6dvaiX1kS4Bhm/cOb7duM3vSzVIaFbTYqf
+   yxTks3VjIx5c4MoyozPWpNClPPNfGOiT6Q6hpZWPb9AXF/ZGyGL8tEDm+
+   NfOgkD1AWdDzFiVzT+IWyMhHhw9qDPtqSoKpXPitBiQtb9c6p4iZ97X+l
+   Q==;
+X-IronPort-AV: E=Sophos;i="5.84,313,1620662400"; 
+   d="scan'208";a="176942551"
+Received: from h199-255-45-15.hgst.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
+  by ob1.hgst.iphmx.com with ESMTP; 11 Aug 2021 23:12:54 +0800
+IronPort-SDR: EvesHUStSv9OLA3+4p02blHZQkc5h3NMTwn5Ti9kCQnXHsv1qpcyA/JHg+qfKHx1kmOnu3G+Ca
+ Ninx664ry+olBElxvj4qm+T/jM0umhpoHFZRkjeK70ah4qzoDZnSJCDtLY5QrDMIA4L/92I80C
+ jDBA/Zil0yN+JcN2BZARG7NqWJegDDKSJj1NHOMWwpDEWsWZRLha92SBSeJdMB4oUvkPNs0o+e
+ baFd5bn+JDIqVWM3i5liPjvahfSc4y9lXrtESdvNdNa1gyRtc3tCqDUxSdVgjsZN096PFOCtWt
+ N4Oa0DvtiL41Vs6OAwxsjo+f
+Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
+  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Aug 2021 07:48:25 -0700
+IronPort-SDR: YZ54i88+8kiEu1mERhg1SMY/BEYy5jZ3Z/ESME6cIi9tBGjgsj5OxHVXzzoH/M9bkDI0VdQkxM
+ /FgS/n7yF2trvaHKKJxaE0oxVrl8B/57fPfKkNK650s4OOWt7U9KtReUCP+l/sW4s75A3x1xV1
+ 6tjOO5q1ekfT4xYBvxwUm9zOEM45u+ImSYKiYmwef5LHg/62v+UoToVJcOTdimnu3+J7QqbwMu
+ VFOK7PVkcKRCdGo3QkW4GAkwSMy9XIJr8iO8sffGEoOF1/cuX9CETFHKi/ai/vEfZvyOZnGxyL
+ 2Ps=
+WDCIronportException: Internal
+Received: from ffs5zf2.ad.shared (HELO naota-xeon.wdc.com) ([10.225.58.251])
+  by uls-op-cesaip02.wdc.com with ESMTP; 11 Aug 2021 08:12:55 -0700
+From:   Naohiro Aota <naohiro.aota@wdc.com>
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, Naohiro Aota <naohiro.aota@wdc.com>
+Subject: [PATCH v2 0/8] fstests: add checks for testing zoned btrfs
+Date:   Thu, 12 Aug 2021 00:12:24 +0900
+Message-Id: <20210811151232.3713733-1-naohiro.aota@wdc.com>
+X-Mailer: git-send-email 2.32.0
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Commit 78aa1d95dd99 ("btrfs-progs: fi resize: make output more
-readable") added the device id of the resized fs along with a pretty
-printed size. Create a new filter to simplify the output message using
-size in bytes.
+This series revisit my old series to test zoned btrfs [1].
 
-Signed-off-by: Marcos Paulo de Souza <mpdesouza@suse.com>
----
+[1] https://lore.kernel.org/fstests/PH0PR04MB7416870032582BC2A8FC5AD99B299@PH0PR04MB7416.namprd04.prod.outlook.com/T/
 
- Changes since v2:
- * Check the output to verify if the resize really happened (Qu)
+Several tests are failing on zoned btrfs, but actually they are invalid.
+There are two reasons of the failures. One is creating too small
+filesystem. Since zoned btrfs needs at lease 5 zones (= 1.25 GB if zone
+size = 256MB) to create a filesystem, tests creating e.g., 1 GB filesystem
+will fail.
 
- Changes since v1:
- * Do not adapt the output message to the newer format (Qu)
+The other reason is lacking of zone support of some dm targets and loop
+device. So, they need to skip the test if the testing device is zoned.
 
- common/filter.btrfs | 24 ++++++++++++++++++++++++
- tests/btrfs/177     |  8 +++++---
- tests/btrfs/177.out |  4 ++--
- 3 files changed, 31 insertions(+), 5 deletions(-)
+Patches 1 to 4 handle the too small file system failure.
 
-diff --git a/common/filter.btrfs b/common/filter.btrfs
-index d4169cc6..fd422e08 100644
---- a/common/filter.btrfs
-+++ b/common/filter.btrfs
-@@ -72,6 +72,30 @@ _filter_btrfs_compress_property()
- 	sed -e "s/compression=\(lzo\|zlib\|zstd\)/COMPRESSION=XXX/g"
- }
- 
-+# Eliminate the differences between the old and new output formats
-+# Old format:
-+# 	Resize 'SCRATCH_MNT' of '1073741824'
-+# New format:
-+# 	Resize device id 1 (SCRATCH_DEV) from 3.00GiB to 1.00GiB
-+# Convert both outputs to:
-+# 	Resized to 1073741824
-+_filter_btrfs_filesystem_resize()
-+{
-+        local _field
-+        local _val
-+        local _suffix
-+        _field=`$AWK_PROG '{print $NF}' | tr -d "'"`
-+        # remove trailing zeroes
-+        _val=`echo $_field | $AWK_PROG '{print $1 * 1}'`
-+        # get the first unit char, for example return G in case we have GiB
-+        _suffix=`echo $_field | grep -o "[GMB]"`
-+        if [ -z "$_suffix" ]; then
-+                _suffix="B"
-+        fi
-+        _val=`echo "$_val$_suffix" | _filter_size_to_bytes`
-+	echo "Resized to $_val"
-+}
-+
- # filter error messages from btrfs prop, optionally verify against $1
- # recognized message(s):
- #  "object is not compatible with property: label"
-diff --git a/tests/btrfs/177 b/tests/btrfs/177
-index 966d29d7..ff241bed 100755
---- a/tests/btrfs/177
-+++ b/tests/btrfs/177
-@@ -10,6 +10,7 @@
- _begin_fstest auto quick swap balance
- 
- . ./common/filter
-+. ./common/filter.btrfs
- . ./common/btrfs
- 
- # Modify as appropriate.
-@@ -36,8 +37,8 @@ dd if=/dev/zero of="$SCRATCH_MNT/refill" bs=4096 >> $seqres.full 2>&1
- # Now add more space and create a swap file. We know that the first $fssize
- # of the filesystem was used, so the swap file must be in the new part of the
- # filesystem.
--$BTRFS_UTIL_PROG filesystem resize $((3 * fssize)) "$SCRATCH_MNT" | \
--							_filter_scratch
-+$BTRFS_UTIL_PROG filesystem resize $((3 * fssize)) "$SCRATCH_MNT" |
-+						_filter_btrfs_filesystem_resize
- _format_swapfile "$swapfile" $((32 * 1024 * 1024))
- swapon "$swapfile"
- 
-@@ -55,7 +56,8 @@ $BTRFS_UTIL_PROG filesystem resize 1G "$SCRATCH_MNT" 2>&1 | grep -o "Text file b
- swapoff "$swapfile"
- 
- # It should work again after swapoff.
--$BTRFS_UTIL_PROG filesystem resize $fssize "$SCRATCH_MNT" | _filter_scratch
-+$BTRFS_UTIL_PROG filesystem resize $fssize "$SCRATCH_MNT" |
-+						_filter_btrfs_filesystem_resize
- 
- status=0
- exit
-diff --git a/tests/btrfs/177.out b/tests/btrfs/177.out
-index 63aca0e5..eb374d34 100644
---- a/tests/btrfs/177.out
-+++ b/tests/btrfs/177.out
-@@ -1,4 +1,4 @@
- QA output created by 177
--Resize 'SCRATCH_MNT' of '3221225472'
-+Resized to 3221225472
- Text file busy
--Resize 'SCRATCH_MNT' of '1073741824'
-+Resized to 1073741824
+And, patches 5 to 8 add checks for tests requiring non-zoned devices.
+
+Naohiro Aota (8):
+  common/rc: introduce minimal fs size check
+  common/rc: fix blocksize detection for btrfs
+  btrfs/057: use _scratch_mkfs_sized to set filesystem size
+  fstests: btrfs: add minimal file system size check
+  common: add zoned block device checks
+  shared/032: add check for zoned block device
+  fstests: btrfs: add checks for zoned block device
+  fstests: generic: add checks for zoned block device
+
+ README            |  4 ++++
+ common/btrfs      | 18 ++++++++++++++++++
+ common/dmerror    |  3 +++
+ common/dmhugedisk |  3 +++
+ common/rc         | 24 +++++++++++++++++++++++-
+ tests/btrfs/003   | 13 +++++++++----
+ tests/btrfs/011   | 21 ++++++++++++---------
+ tests/btrfs/012   |  2 ++
+ tests/btrfs/023   |  2 ++
+ tests/btrfs/049   |  2 ++
+ tests/btrfs/057   |  2 +-
+ tests/btrfs/116   |  2 ++
+ tests/btrfs/124   |  4 ++++
+ tests/btrfs/125   |  2 ++
+ tests/btrfs/131   |  2 ++
+ tests/btrfs/136   |  2 ++
+ tests/btrfs/140   |  2 ++
+ tests/btrfs/141   |  1 +
+ tests/btrfs/142   |  1 +
+ tests/btrfs/143   |  1 +
+ tests/btrfs/148   |  2 ++
+ tests/btrfs/150   |  1 +
+ tests/btrfs/151   |  1 +
+ tests/btrfs/156   |  1 +
+ tests/btrfs/157   |  3 +++
+ tests/btrfs/158   |  3 +++
+ tests/btrfs/175   |  1 +
+ tests/btrfs/194   |  2 +-
+ tests/btrfs/195   |  8 ++++++++
+ tests/btrfs/197   |  1 +
+ tests/btrfs/198   |  1 +
+ tests/btrfs/215   |  1 +
+ tests/btrfs/236   | 33 ++++++++++++++++++++-------------
+ tests/generic/108 |  1 +
+ tests/generic/471 |  1 +
+ tests/generic/570 |  1 +
+ tests/shared/032  |  2 ++
+ 37 files changed, 145 insertions(+), 29 deletions(-)
+
 -- 
-2.31.1
+2.32.0
 
