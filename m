@@ -2,66 +2,159 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 63798C4338F
-	for <linux-fstests@archiver.kernel.org>; Tue, 10 Aug 2021 21:31:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A9D16C4338F
+	for <linux-fstests@archiver.kernel.org>; Wed, 11 Aug 2021 14:49:19 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 36EED61077
-	for <linux-fstests@archiver.kernel.org>; Tue, 10 Aug 2021 21:31:34 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8589260F55
+	for <linux-fstests@archiver.kernel.org>; Wed, 11 Aug 2021 14:49:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233686AbhHJVbt (ORCPT
+        id S232646AbhHKOtm (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 10 Aug 2021 17:31:49 -0400
-Received: from mail.kernel.org ([198.145.29.99]:45008 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S233625AbhHJVbt (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 10 Aug 2021 17:31:49 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 0542461019;
-        Tue, 10 Aug 2021 21:31:26 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1628631087;
-        bh=UDMwx2q99TfgQbOEjtpB26rCgk+Rsd+p41hRotSTIao=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=fXv4mVXSEqjH2bEBdG5SF20qh3Y4W8zp7EbFFDQEGloJtpxeSZSG27jdb/pDTSrvO
-         X2aGW+PmDVR9rJY6OS7SbmO0iM7xvNmnjyln3rmOVEUxy1L0YHAk2oGlbQj6SwuS1s
-         O6NkLAjAHUQ+9hsnWy6KTyxf7xeRVYk787TAanUWurI4Xdd/rDWtaM40RZ3BXd9B7O
-         OG7tKUHvXOmfO2GzLqOovC/Lo8eCi98g4CvT4surhIP7gAYbRJ885UcjCvVhBnzGmY
-         l0KCTAn922VGYMVmOWOivB0L0Fi0aRLSgn79jimjr8Tqjchw3KYow24ht6Vjne4eUh
-         sg7hWsXRV6aRw==
-Received: by mail-qv1-f41.google.com with SMTP id m12so62703qvt.1;
-        Tue, 10 Aug 2021 14:31:26 -0700 (PDT)
-X-Gm-Message-State: AOAM533ceMWJmzMRoDV6fYFVhDYnsPU/D9Db17Us07ayD09RCrlzYivG
-        gAXtu2LChTbNQvDq+2bfbpSBX65HAWLYVpNEg/k=
-X-Google-Smtp-Source: ABdhPJxOskfCDOWSoSq/GETYRKrlJxVpP30mI6v88L3ZWrcvSduFa4roezd2UW+1ImoP+XQavwTSJMpvRGQpBZEDI0M=
-X-Received: by 2002:ad4:4ea8:: with SMTP id ed8mr19931056qvb.2.1628631086202;
- Tue, 10 Aug 2021 14:31:26 -0700 (PDT)
+        Wed, 11 Aug 2021 10:49:42 -0400
+Received: from smtp-out2.suse.de ([195.135.220.29]:41352 "EHLO
+        smtp-out2.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S232645AbhHKOtm (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 11 Aug 2021 10:49:42 -0400
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by smtp-out2.suse.de (Postfix) with ESMTPS id 9388120189;
+        Wed, 11 Aug 2021 14:49:17 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+        t=1628693357; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+        bh=eqY6iEglgQKmW4WY04TNf7fYzVRF44pB9MgLhUXwE9k=;
+        b=QhdWTThqft6WvgeE7Z754bsdGioImyDsueW09ED4BWvwUQD+WS5moRDXLHlMTyD/tATZ65
+        ZR3B5JEMv/AUIpoqj5wQG+ahCsFiVljSzW3TNr4BtBVhlAUQ5a5tmlYwjxDyrSV17F9pnK
+        BQA5KJjAkZOwyo5znmqqHUDJIfG5+24=
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 8E8BE13C17;
+        Wed, 11 Aug 2021 14:49:15 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id j4/ZFGvjE2ErSAAAMHmgww
+        (envelope-from <mpdesouza@suse.com>); Wed, 11 Aug 2021 14:49:15 +0000
+From:   Marcos Paulo de Souza <mpdesouza@suse.com>
+To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Cc:     dsterba@suse.com, guaneryu@gmail.com, wqu@suse.com,
+        Marcos Paulo de Souza <mpdesouza@suse.com>
+Subject: [PATCH v3] btrfs/177: Add filesystem resize filter
+Date:   Wed, 11 Aug 2021 11:49:03 -0300
+Message-Id: <20210811144903.1425-1-mpdesouza@suse.com>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
-References: <20210727201045.2540681-1-mcgrof@kernel.org> <20210727201045.2540681-4-mcgrof@kernel.org>
-In-Reply-To: <20210727201045.2540681-4-mcgrof@kernel.org>
-From:   Luis Chamberlain <mcgrof@kernel.org>
-Date:   Tue, 10 Aug 2021 14:31:14 -0700
-X-Gmail-Original-Message-ID: <CAB=NE6U0Evs5mAwvgLBnMNHB0pF+UjTB66R_3r+nu8EHxN5hWg@mail.gmail.com>
-Message-ID: <CAB=NE6U0Evs5mAwvgLBnMNHB0pF+UjTB66R_3r+nu8EHxN5hWg@mail.gmail.com>
-Subject: Re: [PATCH 3/4] common/module: add a patient module rmmod
-To:     fstests <fstests@vger.kernel.org>
-Cc:     Hannes Reinecke <hare@suse.de>,
-        Douglas Gilbert <dgilbert@interlog.com>,
-        Jessica Yu <jeyu@kernel.org>,
-        Lucas De Marchi <lucas.demarchi@intel.com>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-I see the first two patches in this series were applied. Great!
+Commit 78aa1d95dd99 ("btrfs-progs: fi resize: make output more
+readable") added the device id of the resized fs along with a pretty
+printed size. Create a new filter to simplify the output message using
+size in bytes.
 
-I also see this patch and the next one is not applied yet. Please
-don't apply as I'll resend a new set now with some more enhancements
-after finding out this issue is very generic and requires a kmod
-solution. I'll post these patches soon.
+Signed-off-by: Marcos Paulo de Souza <mpdesouza@suse.com>
+---
 
- Luis
+ Changes since v2:
+ * Check the output to verify if the resize really happened (Qu)
+
+ Changes since v1:
+ * Do not adapt the output message to the newer format (Qu)
+
+ common/filter.btrfs | 24 ++++++++++++++++++++++++
+ tests/btrfs/177     |  8 +++++---
+ tests/btrfs/177.out |  4 ++--
+ 3 files changed, 31 insertions(+), 5 deletions(-)
+
+diff --git a/common/filter.btrfs b/common/filter.btrfs
+index d4169cc6..fd422e08 100644
+--- a/common/filter.btrfs
++++ b/common/filter.btrfs
+@@ -72,6 +72,30 @@ _filter_btrfs_compress_property()
+ 	sed -e "s/compression=\(lzo\|zlib\|zstd\)/COMPRESSION=XXX/g"
+ }
+ 
++# Eliminate the differences between the old and new output formats
++# Old format:
++# 	Resize 'SCRATCH_MNT' of '1073741824'
++# New format:
++# 	Resize device id 1 (SCRATCH_DEV) from 3.00GiB to 1.00GiB
++# Convert both outputs to:
++# 	Resized to 1073741824
++_filter_btrfs_filesystem_resize()
++{
++        local _field
++        local _val
++        local _suffix
++        _field=`$AWK_PROG '{print $NF}' | tr -d "'"`
++        # remove trailing zeroes
++        _val=`echo $_field | $AWK_PROG '{print $1 * 1}'`
++        # get the first unit char, for example return G in case we have GiB
++        _suffix=`echo $_field | grep -o "[GMB]"`
++        if [ -z "$_suffix" ]; then
++                _suffix="B"
++        fi
++        _val=`echo "$_val$_suffix" | _filter_size_to_bytes`
++	echo "Resized to $_val"
++}
++
+ # filter error messages from btrfs prop, optionally verify against $1
+ # recognized message(s):
+ #  "object is not compatible with property: label"
+diff --git a/tests/btrfs/177 b/tests/btrfs/177
+index 966d29d7..ff241bed 100755
+--- a/tests/btrfs/177
++++ b/tests/btrfs/177
+@@ -10,6 +10,7 @@
+ _begin_fstest auto quick swap balance
+ 
+ . ./common/filter
++. ./common/filter.btrfs
+ . ./common/btrfs
+ 
+ # Modify as appropriate.
+@@ -36,8 +37,8 @@ dd if=/dev/zero of="$SCRATCH_MNT/refill" bs=4096 >> $seqres.full 2>&1
+ # Now add more space and create a swap file. We know that the first $fssize
+ # of the filesystem was used, so the swap file must be in the new part of the
+ # filesystem.
+-$BTRFS_UTIL_PROG filesystem resize $((3 * fssize)) "$SCRATCH_MNT" | \
+-							_filter_scratch
++$BTRFS_UTIL_PROG filesystem resize $((3 * fssize)) "$SCRATCH_MNT" |
++						_filter_btrfs_filesystem_resize
+ _format_swapfile "$swapfile" $((32 * 1024 * 1024))
+ swapon "$swapfile"
+ 
+@@ -55,7 +56,8 @@ $BTRFS_UTIL_PROG filesystem resize 1G "$SCRATCH_MNT" 2>&1 | grep -o "Text file b
+ swapoff "$swapfile"
+ 
+ # It should work again after swapoff.
+-$BTRFS_UTIL_PROG filesystem resize $fssize "$SCRATCH_MNT" | _filter_scratch
++$BTRFS_UTIL_PROG filesystem resize $fssize "$SCRATCH_MNT" |
++						_filter_btrfs_filesystem_resize
+ 
+ status=0
+ exit
+diff --git a/tests/btrfs/177.out b/tests/btrfs/177.out
+index 63aca0e5..eb374d34 100644
+--- a/tests/btrfs/177.out
++++ b/tests/btrfs/177.out
+@@ -1,4 +1,4 @@
+ QA output created by 177
+-Resize 'SCRATCH_MNT' of '3221225472'
++Resized to 3221225472
+ Text file busy
+-Resize 'SCRATCH_MNT' of '1073741824'
++Resized to 1073741824
+-- 
+2.31.1
+
