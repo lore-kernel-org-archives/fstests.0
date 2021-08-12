@@ -2,317 +2,210 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0001DC4338F
-	for <linux-fstests@archiver.kernel.org>; Thu, 12 Aug 2021 05:44:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 294E5C4338F
+	for <linux-fstests@archiver.kernel.org>; Thu, 12 Aug 2021 05:57:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CE2356103E
-	for <linux-fstests@archiver.kernel.org>; Thu, 12 Aug 2021 05:44:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0203260240
+	for <linux-fstests@archiver.kernel.org>; Thu, 12 Aug 2021 05:57:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234367AbhHLFpJ (ORCPT
+        id S234474AbhHLF5r (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 12 Aug 2021 01:45:09 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:40768 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S231382AbhHLFpJ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 12 Aug 2021 01:45:09 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1628747084;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=sfFjUmBD0vah0vR4NJfABF+FTNvaIRzaEBZIfMKiF0w=;
-        b=TgssHCrNQDT6DUQx3C6XE97QypwIZ5vZVQ9Lg82Hhh4aqrrtAFKdQF9p8yN1G2IgSYr6W3
-        EyQ6KB/9mN7avTnI2VvgHjbA5AuCGlVufsfpoiBMj0VikzGdTSPNZW88CLakWdUV7z4fga
-        2Y1oaPnMC/v+uyOyNNUSPPMhbvH1zoE=
-Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com
- [209.85.216.70]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-558-1OhhW2NUNnS1PkdZTONaGQ-1; Thu, 12 Aug 2021 01:44:42 -0400
-X-MC-Unique: 1OhhW2NUNnS1PkdZTONaGQ-1
-Received: by mail-pj1-f70.google.com with SMTP id o13-20020a17090a9f8db0290176ab79fd33so7205913pjp.5
-        for <fstests@vger.kernel.org>; Wed, 11 Aug 2021 22:44:42 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id
-         :mail-followup-to:references:mime-version:content-disposition
-         :in-reply-to;
-        bh=sfFjUmBD0vah0vR4NJfABF+FTNvaIRzaEBZIfMKiF0w=;
-        b=L2lo/Rx+a9GFHVUWPl7jvu0UiNy/a6nPay4YWqGDcI3QySs+CShVG0+38Lm/WVV4Vl
-         F1x+bNk/BU0WDJMnflPneL8kQxCxTQsJ6TomcnXPTUYZQhnsZxeenZMhCY5ktLfRO9xk
-         0efnmMpQGQpYvf1cwS929UVDIDzkCRQa9dPh2y3NL7YsohyXVRE2xKV+MJL83zrLAlNn
-         1EJK1+w9JAYeppRdkOZ92rXh/D0q4/qSEzzv2q+8g1FiVSpibklpkGVbHk6/3K7+JgjC
-         4SGD3ctWA6bYGu4qvDm7h2Erx9125DNaRFEr+ClUHEW+Npc54i3hw62mhPjgQ4dZ7KQU
-         /uXA==
-X-Gm-Message-State: AOAM530nlujKoK1ZgHc3BuYKxsJXLvENXCnRMUR0JXNBpe0K4DYA/oW3
-        RnHWBXE+ipCAz8KwDfBN++vgnmtTHYVLG0G0yXzjDLA/dTJgPnXAA1P+2uadv1MhmhoHWIsRb9N
-        BdpaHmh1sP8Q57AnvZQ==
-X-Received: by 2002:a05:6a00:1626:b029:3e0:99b6:b320 with SMTP id e6-20020a056a001626b02903e099b6b320mr453314pfc.25.1628747081777;
-        Wed, 11 Aug 2021 22:44:41 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJxxGU8c20OElgi+4k5Lz1sO/oPEBOt4S1cEEaeoGKHGVi2sxHyJnFh7FiuRoFcwmmgrAUebsQ==
-X-Received: by 2002:a05:6a00:1626:b029:3e0:99b6:b320 with SMTP id e6-20020a056a001626b02903e099b6b320mr453297pfc.25.1628747081487;
-        Wed, 11 Aug 2021 22:44:41 -0700 (PDT)
-Received: from fedora ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id b128sm1675609pfb.144.2021.08.11.22.44.39
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 11 Aug 2021 22:44:41 -0700 (PDT)
-Date:   Thu, 12 Aug 2021 14:01:31 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org, guan@eryu.me
-Subject: Re: [PATCH 3/3] xfs: test regression in shrink when the new EOFS
- splits a sparse inode cluster
-Message-ID: <20210812060131.dtb2efzohowbmnsd@fedora>
-Mail-Followup-To: "Darrick J. Wong" <djwong@kernel.org>, guaneryu@gmail.com,
-        linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me
-References: <162743101932.3428896.8510279402246446036.stgit@magnolia>
- <162743103574.3428896.5902517991928414065.stgit@magnolia>
+        Thu, 12 Aug 2021 01:57:47 -0400
+Received: from mout.gmx.net ([212.227.15.15]:35891 "EHLO mout.gmx.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S233072AbhHLF5q (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 12 Aug 2021 01:57:46 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net;
+        s=badeba3b8450; t=1628747838;
+        bh=Xfa15CCQoJDmZJDYPBVV7SosU7hM+KgHXTKEdYFilN4=;
+        h=X-UI-Sender-Class:To:Cc:References:From:Subject:Date:In-Reply-To;
+        b=F824ucGJud+Rn7b6E5xCq4UhOKxeMAHZURg58mtTNGq577B3u32Sla3QGLiX/9Xun
+         Jt+pC63NmlFqGM40A4P/rThfhCLOk0IVfydsFfX8uQyxxOan3VMliBCBQrmh9pcvvl
+         zuhCtjPtNrboDp3tdEkc+3ZPHJWerMVgwiuII+hs=
+X-UI-Sender-Class: 01bb95c1-4bf8-414a-932a-4f6e2808ef9c
+Received: from [0.0.0.0] ([149.28.201.231]) by mail.gmx.net (mrgmx005
+ [212.227.17.184]) with ESMTPSA (Nemesis) id 1MTRR0-1mfaTZ3YSq-00TlvB; Thu, 12
+ Aug 2021 07:57:18 +0200
+To:     Marcos Paulo de Souza <mpdesouza@suse.com>,
+        linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Cc:     dsterba@suse.com, guaneryu@gmail.com, wqu@suse.com
+References: <20210811144903.1425-1-mpdesouza@suse.com>
+From:   Qu Wenruo <quwenruo.btrfs@gmx.com>
+Subject: Re: [PATCH v3] btrfs/177: Add filesystem resize filter
+Message-ID: <dae3d33f-c588-9a79-35c0-01cd433f630b@gmx.com>
+Date:   Thu, 12 Aug 2021 13:57:14 +0800
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.12.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <162743103574.3428896.5902517991928414065.stgit@magnolia>
+In-Reply-To: <20210811144903.1425-1-mpdesouza@suse.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: quoted-printable
+X-Provags-ID: V03:K1:qOt3e4Kzu176hRd3+oQAtW4bGTfeKAwAC0RADdnwgYbxteA1o6P
+ M80du6SjRCPcc3GfSOohIrbOmjSVXHyCOeWKYVccmWkXp4eOJS0J1kcyMvG0vbU9cDLUB8N
+ Cw4xkLTQnBbGa9iwAa8SE7ISFN2EqyuhrqjtfGewtqX7RJE/YRT3+98z6smu9i8y/H7uPRo
+ +A49DGXPxfBRt9CM8NX+Q==
+X-UI-Out-Filterresults: notjunk:1;V03:K0:4Uil7cAFbaM=:ZAJ2Si9uoNROhTpOgU0bgh
+ E6GDDldvBIf+ZpVxI2CnWzxV0f6OBEOYXFLSc6aVFMJHHIP2FXL5FMAMrcWoue5C9kXNDApCI
+ nr0Kzh1Yr5nDC+B0ET6ZKMvfqFB4fs0jtHWRJeup/KdQj6fcLLN0K4SzjmpjgTiD8EzxlV5e2
+ bQimCdh9w3OWUjX1SepYqrKxNeR2g1t3then8fWIZEQRVE9zhlMfgleBG1BNcTwdx5pEirjGi
+ fHOdMi0aY5AihBM0jHsqbZ3H+EKL3AmlxnIcMVO4xgeGrBhmUHybn407diKsi08jp1aDAhb/V
+ KuGgqraEDGF+UxVtp6qX+snMdtdaBf4OPwV8y1IBac7dB/HwMMgbGpNPm9d2LwHP9ZO6V3gux
+ kZ5yQdndEDIfsiNYiaq5AmfdXXsaqPXC0s2IlIZnW5NrBAqB5eaOB82PqX83rJFdoMMcbEtla
+ 2cSysBzElxkUUbFKTFbxQZjhTYTaPC1WdEOz1Nr0Wi/cmdsvmeZ/RNTlhFZTzjVtdyLaBCxdj
+ 4b0Xmfr56BDpT1BB09Gu2tuYappdYP27vEt61eyQ5+OcQYwqxU2NYKv1IJwO1LIEiMiSfOt1V
+ GOIRLORs4yvrHNEODw3C3MCV6KFIWAWeNmx31NtKctdM1l8wb3VyY6BkTIxhghlNrkq9T2zwq
+ RUeJMuuvyMyVGJ+xQzWAgkDhJO7C75na4/bvUQJ4FrTMHG7FUnsJSIoHOuhcMInTLEA801QJx
+ /+NnxckmC5J+zRLufZk+fnihLKxl2STVXmeWI/Fdow275os8pDq4lXgJIKBMfjVH/Y9zHviHW
+ LPJUMqmHZjxxQOM/fvPXcgKQ74Kq1h3Jt3NojFLZNn5d9WOJoznbl7fkhLqZttZDStp6bfqaM
+ nx6W+OeUD8C+Q95V3YS3uSu78iYmYUcuXqF6N/CshQGu2wjB8riiQV/bjQy9PO1caqhYYsRvg
+ 7BoDoo28rkthJIwwAFFGEDCnPEUIJQwWkhqjXPztjufXvqNph19uwZIPvCoN89HsFNck8voEV
+ pxLX+8thLV6Nn7Z9P0uOU2qZE93ykqVgnkEHygLAxqfdd0+m6bbMq2QhJQcFUHtWTCA6nct32
+ 6KEhu8DzmYVi+GEfMMmvhvWMKrEhHG8vdV5A00i/8TUgR9/Bhpb/25dog==
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Jul 27, 2021 at 05:10:35PM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
-> 
-> This is a targeted regression test for the patch "xfs: check for sparse
-> inode clusters that cross new EOAG when shrinking", which was found by
-> running the random-loopy shrink stresser xfs/168.
-> 
-> The original shrink implementation assumed that if we could allocate the
-> last free extent in the filesystem, it was ok to proceed with the fs
-> shrink.  Unfortunately, this isn't quite the case -- if there's a sparse
-> inode cluster such that the blocks at the end of the cluster are free,
-> it is not ok to shrink the fs to the point that part of the cluster
-> hangs off the end of the filesystem.  Doing so results in repair and
-> scrub marking the filesystem corrupt, so we must not.
-> 
-> (EOFS == "end of filesystem"; EOAG == "end of allocation group")
-> 
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+
+
+On 2021/8/11 =E4=B8=8B=E5=8D=8810:49, Marcos Paulo de Souza wrote:
+> Commit 78aa1d95dd99 ("btrfs-progs: fi resize: make output more
+> readable") added the device id of the resized fs along with a pretty
+> printed size. Create a new filter to simplify the output message using
+> size in bytes.
+
+Finally we can get rid of the false alert!
+
+>
+> Signed-off-by: Marcos Paulo de Souza <mpdesouza@suse.com>
 > ---
+>
+>   Changes since v2:
+>   * Check the output to verify if the resize really happened (Qu)
+>
+>   Changes since v1:
+>   * Do not adapt the output message to the newer format (Qu)
+>
+>   common/filter.btrfs | 24 ++++++++++++++++++++++++
+>   tests/btrfs/177     |  8 +++++---
+>   tests/btrfs/177.out |  4 ++--
+>   3 files changed, 31 insertions(+), 5 deletions(-)
+>
+> diff --git a/common/filter.btrfs b/common/filter.btrfs
+> index d4169cc6..fd422e08 100644
+> --- a/common/filter.btrfs
+> +++ b/common/filter.btrfs
+> @@ -72,6 +72,30 @@ _filter_btrfs_compress_property()
+>   	sed -e "s/compression=3D\(lzo\|zlib\|zstd\)/COMPRESSION=3DXXX/g"
+>   }
+>
+> +# Eliminate the differences between the old and new output formats
+> +# Old format:
+> +# 	Resize 'SCRATCH_MNT' of '1073741824'
+> +# New format:
+> +# 	Resize device id 1 (SCRATCH_DEV) from 3.00GiB to 1.00GiB
+> +# Convert both outputs to:
+> +# 	Resized to 1073741824
 
-Good to me, and test passed on my system.
+Great comments on the old and new outputs.
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+It's fine for the existing 177 usage, as its size is always fixed and
+always GiB aligned.
 
->  tests/xfs/778     |  190 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/778.out |    2 +
->  2 files changed, 192 insertions(+)
->  create mode 100755 tests/xfs/778
->  create mode 100644 tests/xfs/778.out
-> 
-> 
-> diff --git a/tests/xfs/778 b/tests/xfs/778
-> new file mode 100755
-> index 00000000..73cebaf1
-> --- /dev/null
-> +++ b/tests/xfs/778
-> @@ -0,0 +1,190 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2021 Oracle.  All Rights Reserved.
-> +#
-> +# FS QA Test 778
-> +#
-> +# Ensure that online shrink does not let us shrink the fs such that the end
-> +# of the filesystem is now in the middle of a sparse inode cluster.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick shrink
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs generic
-> +_require_scratch
-> +_require_xfs_sparse_inodes
-> +_require_scratch_xfs_shrink
-> +_require_xfs_io_command "falloc"
-> +_require_xfs_io_command "fpunch"
-> +
-> +_scratch_mkfs "-d size=50m -m crc=1 -i sparse" |
-> +	_filter_mkfs > /dev/null 2> $tmp.mkfs
-> +. $tmp.mkfs	# for isize
-> +cat $tmp.mkfs >> $seqres.full
-> +
-> +daddr_to_fsblocks=$((dbsize / 512))
-> +
-> +convert_units() {
-> +	_scratch_xfs_db -f -c "$@" | sed -e 's/^.*(\([0-9]*\)).*$/\1/g'
-> +}
-> +
-> +# Figure out the next possible inode number after the log, since we can't
-> +# shrink or relocate the log
-> +logstart=$(_scratch_xfs_get_metadata_field 'logstart' 'sb')
-> +if [ $logstart -gt 0 ]; then
-> +	logblocks=$(_scratch_xfs_get_metadata_field 'logblocks' 'sb')
-> +	logend=$((logstart + logblocks))
-> +	logend_agno=$(convert_units "convert fsb $logend agno")
-> +	logend_agino=$(convert_units "convert fsb $logend agino")
-> +else
-> +	logend_agno=0
-> +	logend_agino=0
-> +fi
-> +
-> +_scratch_mount
-> +_xfs_force_bdev data $SCRATCH_MNT
-> +old_dblocks=$($XFS_IO_PROG -c 'statfs' $SCRATCH_MNT | grep geom.datablocks)
-> +
-> +mkdir $SCRATCH_MNT/save/
-> +sino=$(stat -c '%i' $SCRATCH_MNT/save)
-> +
-> +_consume_freesp()
+
+But if the helper is going to be used by other test cases, we need to
+take the accuracy loss into consideration.
+
+For the new output, we only have two digits accuracy, if we convert the
+output to binary, it will cause some inaccuracy.
+
+E.g. if some tests is utilize device size like 4,000,000,000 bytes, the
+pretty output will be 3.72 GiB, and if you convert it back to bytes, it
+will be 3994319585.28 bytes.
+
+Not to mention you also deleted the trailing zeros, which further damage
+the accuracy.
+
+I don't have any better idea to solve it though, thus I guess we'd
+better just add some comment about this problem and call it a day.
+
+Thanks,
+Qu
+
+> +_filter_btrfs_filesystem_resize()
 > +{
-> +	file=$1
-> +
-> +	# consume nearly all available space (leave ~1MB)
-> +	avail=`_get_available_space $SCRATCH_MNT`
-> +	filesizemb=$((avail / 1024 / 1024 - 1))
-> +	$XFS_IO_PROG -fc "falloc 0 ${filesizemb}m" $file
+> +        local _field
+> +        local _val
+> +        local _suffix
+> +        _field=3D`$AWK_PROG '{print $NF}' | tr -d "'"`
+> +        # remove trailing zeroes
+> +        _val=3D`echo $_field | $AWK_PROG '{print $1 * 1}'`
+> +        # get the first unit char, for example return G in case we have=
+ GiB
+> +        _suffix=3D`echo $_field | grep -o "[GMB]"`
+> +        if [ -z "$_suffix" ]; then
+> +                _suffix=3D"B"
+> +        fi
+> +        _val=3D`echo "$_val$_suffix" | _filter_size_to_bytes`
+> +	echo "Resized to $_val"
 > +}
 > +
-> +# Allocate inodes in a directory until failure.
-> +_alloc_inodes()
-> +{
-> +	dir=$1
-> +
-> +	i=0
-> +	while [ true ]; do
-> +		touch $dir/$i 2>> $seqres.full || break
-> +		i=$((i + 1))
-> +	done
-> +}
-> +
-> +# Find a sparse inode cluster after logend_agno/logend_agino.
-> +find_sparse_clusters()
-> +{
-> +	for ((agno = agcount - 1; agno >= logend_agno; agno--)); do
-> +		_scratch_xfs_db -c "agi $agno" -c "addr root" -c "btdump" | \
-> +			tr ':[,]' '    ' | \
-> +			awk -v "agno=$agno" \
-> +			    -v "agino=$logend_agino" \
-> +'{if ($2 >= agino && and(strtonum($3), 0x8000)) {printf("%s %s %s\n", agno, $2, $3);}}' | \
-> +			tac
-> +	done
-> +}
-> +
-> +# Calculate the fs inode chunk size based on the inode size and fixed 64-inode
-> +# record. This value is used as the target level of free space fragmentation
-> +# induced by the test (i.e., max size of free extents). We don't need to go
-> +# smaller than a full chunk because the XFS block allocator tacks on alignment
-> +# requirements to the size of the requested allocation. In other words, a chunk
-> +# sized free chunk is not enough to guarantee a successful chunk sized
-> +# allocation.
-> +XFS_INODES_PER_CHUNK=64
-> +CHUNK_SIZE=$((isize * XFS_INODES_PER_CHUNK))
-> +
-> +_consume_freesp $SCRATCH_MNT/spc
-> +
-> +# Now that the fs is nearly full, punch holes in every other $CHUNK_SIZE range
-> +# of the space consumer file.  The goal here is to end up with a sparse cluster
-> +# at the end of the fs (and past any internal log), where the chunks at the end
-> +# of the cluster are sparse.
-> +
-> +offset=`_get_filesize $SCRATCH_MNT/spc`
-> +offset=$((offset - $CHUNK_SIZE * 2))
-> +nr=0
-> +while [ $offset -ge 0 ]; do
-> +	$XFS_IO_PROG -c "fpunch $offset $CHUNK_SIZE" $SCRATCH_MNT/spc \
-> +		2>> $seqres.full || _fail "fpunch failed"
-> +
-> +	# allocate as many inodes as possible
-> +	mkdir -p $SCRATCH_MNT/urk/offset.$offset > /dev/null 2>&1
-> +	_alloc_inodes $SCRATCH_MNT/urk/offset.$offset
-> +
-> +	offset=$((offset - $CHUNK_SIZE * 2))
-> +
-> +	# Every five times through the loop, see if we got a sparse cluster
-> +	nr=$((nr + 1))
-> +	if [ $((nr % 5)) -eq 4 ]; then
-> +		_scratch_unmount
-> +		find_sparse_clusters > $tmp.clusters
-> +		if [ -s $tmp.clusters ]; then
-> +			break;
-> +		fi
-> +		_scratch_mount
-> +	fi
-> +done
-> +
-> +test -s $tmp.clusters || _notrun "Could not create a sparse inode cluster"
-> +
-> +echo clusters >> $seqres.full
-> +cat $tmp.clusters >> $seqres.full
-> +
-> +# Figure out which inode numbers are in that last cluster.  We need to preserve
-> +# that cluster but delete everything else ahead of shrinking.
-> +icluster_agno=$(head -n 1 $tmp.clusters | cut -d ' ' -f 1)
-> +icluster_agino=$(head -n 1 $tmp.clusters | cut -d ' ' -f 2)
-> +icluster_ino=$(convert_units "convert agno $icluster_agno agino $icluster_agino ino")
-> +
-> +# Check that the save directory isn't going to prevent us from shrinking
-> +test $sino -lt $icluster_ino || \
-> +	echo "/save inode comes after target cluster, test may fail"
-> +
-> +# Save the inodes in the last cluster and delete everything else
-> +_scratch_mount
-> +rm -r $SCRATCH_MNT/spc
-> +for ((ino = icluster_ino; ino < icluster_ino + XFS_INODES_PER_CHUNK; ino++)); do
-> +	find $SCRATCH_MNT/urk/ -inum "$ino" -print0 | xargs -r -0 mv -t $SCRATCH_MNT/save/
-> +done
-> +rm -rf $SCRATCH_MNT/urk/ $SCRATCH_MNT/save/*/*
-> +sync
-> +$XFS_IO_PROG -c 'fsmap -vvvvv' $SCRATCH_MNT &>> $seqres.full
-> +
-> +# Propose shrinking the filesystem such that the end of the fs ends up in the
-> +# sparse part of our sparse cluster.  Remember, the last block of that cluster
-> +# ought to be free.
-> +target_ino=$((icluster_ino + XFS_INODES_PER_CHUNK - 1))
-> +for ((ino = target_ino; ino >= icluster_ino; ino--)); do
-> +	found=$(find $SCRATCH_MNT/save/ -inum "$ino" | wc -l)
-> +	test $found -gt 0 && break
-> +
-> +	ino_daddr=$(convert_units "convert ino $ino daddr")
-> +	new_size=$((ino_daddr / daddr_to_fsblocks))
-> +
-> +	echo "Hope to fail at shrinking to $new_size" >> $seqres.full
-> +	$XFS_GROWFS_PROG -D $new_size $SCRATCH_MNT &>> $seqres.full
-> +	res=$?
-> +
-> +	# Make sure shrink did not work
-> +	new_dblocks=$($XFS_IO_PROG -c 'statfs' $SCRATCH_MNT | grep geom.datablocks)
-> +	if [ "$new_dblocks" != "$old_dblocks" ]; then
-> +		echo "should not have shrank $old_dblocks -> $new_dblocks"
-> +		break
-> +	fi
-> +
-> +	if [ $res -eq 0 ]; then
-> +		echo "shrink to $new_size (ino $ino) should have failed"
-> +		break
-> +	fi
-> +done
-> +
-> +# success, all done
-> +echo Silence is golden
-> +status=0
-> +exit
-> diff --git a/tests/xfs/778.out b/tests/xfs/778.out
-> new file mode 100644
-> index 00000000..e80f72a3
-> --- /dev/null
-> +++ b/tests/xfs/778.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 778
-> +Silence is golden
-> 
-
+>   # filter error messages from btrfs prop, optionally verify against $1
+>   # recognized message(s):
+>   #  "object is not compatible with property: label"
+> diff --git a/tests/btrfs/177 b/tests/btrfs/177
+> index 966d29d7..ff241bed 100755
+> --- a/tests/btrfs/177
+> +++ b/tests/btrfs/177
+> @@ -10,6 +10,7 @@
+>   _begin_fstest auto quick swap balance
+>
+>   . ./common/filter
+> +. ./common/filter.btrfs
+>   . ./common/btrfs
+>
+>   # Modify as appropriate.
+> @@ -36,8 +37,8 @@ dd if=3D/dev/zero of=3D"$SCRATCH_MNT/refill" bs=3D4096=
+ >> $seqres.full 2>&1
+>   # Now add more space and create a swap file. We know that the first $f=
+ssize
+>   # of the filesystem was used, so the swap file must be in the new part=
+ of the
+>   # filesystem.
+> -$BTRFS_UTIL_PROG filesystem resize $((3 * fssize)) "$SCRATCH_MNT" | \
+> -							_filter_scratch
+> +$BTRFS_UTIL_PROG filesystem resize $((3 * fssize)) "$SCRATCH_MNT" |
+> +						_filter_btrfs_filesystem_resize
+>   _format_swapfile "$swapfile" $((32 * 1024 * 1024))
+>   swapon "$swapfile"
+>
+> @@ -55,7 +56,8 @@ $BTRFS_UTIL_PROG filesystem resize 1G "$SCRATCH_MNT" 2=
+>&1 | grep -o "Text file b
+>   swapoff "$swapfile"
+>
+>   # It should work again after swapoff.
+> -$BTRFS_UTIL_PROG filesystem resize $fssize "$SCRATCH_MNT" | _filter_scr=
+atch
+> +$BTRFS_UTIL_PROG filesystem resize $fssize "$SCRATCH_MNT" |
+> +						_filter_btrfs_filesystem_resize
+>
+>   status=3D0
+>   exit
+> diff --git a/tests/btrfs/177.out b/tests/btrfs/177.out
+> index 63aca0e5..eb374d34 100644
+> --- a/tests/btrfs/177.out
+> +++ b/tests/btrfs/177.out
+> @@ -1,4 +1,4 @@
+>   QA output created by 177
+> -Resize 'SCRATCH_MNT' of '3221225472'
+> +Resized to 3221225472
+>   Text file busy
+> -Resize 'SCRATCH_MNT' of '1073741824'
+> +Resized to 1073741824
+>
