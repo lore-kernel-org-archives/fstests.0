@@ -7,43 +7,43 @@ X-Spam-Status: No, score=-19.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 953B8C4320A
-	for <linux-fstests@archiver.kernel.org>; Thu, 12 Aug 2021 16:03:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 04096C4338F
+	for <linux-fstests@archiver.kernel.org>; Thu, 12 Aug 2021 16:04:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7CB726103A
-	for <linux-fstests@archiver.kernel.org>; Thu, 12 Aug 2021 16:03:57 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D8A1A6109F
+	for <linux-fstests@archiver.kernel.org>; Thu, 12 Aug 2021 16:04:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230040AbhHLQEV (ORCPT
+        id S230116AbhHLQE1 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 12 Aug 2021 12:04:21 -0400
-Received: from mail.kernel.org ([198.145.29.99]:49830 "EHLO mail.kernel.org"
+        Thu, 12 Aug 2021 12:04:27 -0400
+Received: from mail.kernel.org ([198.145.29.99]:49906 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229894AbhHLQEV (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 12 Aug 2021 12:04:21 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 8B6BD604AC;
-        Thu, 12 Aug 2021 16:03:54 +0000 (UTC)
+        id S229909AbhHLQE1 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 12 Aug 2021 12:04:27 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 7907E604AC;
+        Thu, 12 Aug 2021 16:04:00 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1628784235;
-        bh=gNC/n+eskzlmrFALDhTHIbR0ofTes7QbvJCkpWOitMw=;
+        s=k20201202; t=1628784241;
+        bh=+ccC6e5yIPt7Zs9zXwtK6d+abeqnyShnxQEC1gbFnMA=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=qkpHF8T/dHHKEbhu7Z5SnBSZ+Qn+eeAO6/d15TB69sfnyqsLTu1WIH6uKGpr54q8R
-         ytj39l6s9pBtr1rOzNMxZrtGe1Gvlm4jZELfarTSnQxuplwDHHoQWq4qeO9vW6rnqx
-         jzgMBwRToVMr9jo8myX+QgENWC3Ij8+Ix3lO3Mz7eN9ak1VMB9BeslSBz/T/L9xXul
-         lfPW43cFRj/Y8Mt1s/RR0mlBks06BlFZ2cm5WFgyusOWnacjOH9oHkQkVHM76q8g/7
-         PHJpe4pbJCA0BUemytVhyTIY4nGsGptEhB5E0jm3RVOu48pTQfxBfBoJPWyLTYUtOQ
-         QMCQgemBXCQjw==
+        b=rCOa/HhCvJWSuuZ36Ru6qjmxvho92aV2gK0zZQqGGTZUXOTZWaWRA0GV7lsIZEfFh
+         /U1YIcy8N8hMNfn9PjRGQFWNcldHzakZy0JF34ajKkBKsg0EovVCUahnMRB0bdxoia
+         Mx4Y9SCsLfDgCtbQaOG2nDiGgYZN3pFMykMuxPXNX3mbd8zmAZckiytmP5qsyldbfR
+         2WD8qv7v1qWfLVoDoefmxA+99odoXE4fzc+tpT2v1FAyIE6OIzbZkF+49XZCkAShaY
+         M8WR45TSSxDrBh82WfqQfMHgIMXz+/3yp0jqmULyRbNt6zJkOGUdzi6CTh6tbjdUKi
+         /zAKuhbULqHgw==
 From:   Christian Brauner <brauner@kernel.org>
 To:     fstests@vger.kernel.org, Eryu Guan <guan@eryu.me>,
         Christoph Hellwig <hch@lst.de>
 Cc:     Christian Brauner <christian.brauner@ubuntu.com>
-Subject: [PATCH v3 3/8] idmapped-mounts: introduce an explicit command line switch for testsuite
-Date:   Thu, 12 Aug 2021 18:01:35 +0200
-Message-Id: <20210812160140.990229-4-brauner@kernel.org>
+Subject: [PATCH v3 4/8] generic/640: add fscaps regression test
+Date:   Thu, 12 Aug 2021 18:01:36 +0200
+Message-Id: <20210812160140.990229-5-brauner@kernel.org>
 X-Mailer: git-send-email 2.30.2
 In-Reply-To: <20210812160140.990229-1-brauner@kernel.org>
 References: <20210812160140.990229-1-brauner@kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=2669; h=from:subject; bh=fpVXkPsVBKZwBBfhISoaIIsnX6MmldyBiCn0RRPshaE=; b=owGbwMvMwCU28Zj0gdSKO4sYT6slMSSKut7fOCVdvuVZU16S3f2PhzquVGaHflEt/pDpo9AfejJv 9e4XHaUsDGJcDLJiiiwO7Sbhcst5KjYbZWrAzGFlAhnCwMUpABM5GsnIsPx86by0xW9dZ6o2KvIGXv 9/x6a5LVxEWjdyomj9fc6pTIwMk1IMn3HPcz18K/Tx2d3L9ua8jyncmXIpcK930ddv+dW/2QE=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=9641; h=from:subject; bh=xTcG9GFmyWCR1V01POSP7YelWGq2nJO/uPBscYSA/9k=; b=owGbwMvMwCU28Zj0gdSKO4sYT6slMSSKut7fsOlxSG7IWtMLi3csKkw+Euw8N6l88gYXS8F8k+xo hf73HaUsDGJcDLJiiiwO7Sbhcst5KjYbZWrAzGFlAhnCwMUpABP518jw3zU8ZWLvlqv610KtKt8tm+ 7SXvZ3q4tHZqzs8v9H70y4o8nI8DH7fswqzgn7pVpOejG0m6wwMGk/PVeYvepJtb3l27ZILgA=
 X-Developer-Key: i=christian.brauner@ubuntu.com; a=openpgp; fpr=4880B8C9BD0E5106FC070F4F7B3C391EFEA93624
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
@@ -52,89 +52,296 @@ X-Mailing-List: fstests@vger.kernel.org
 
 From: Christian Brauner <christian.brauner@ubuntu.com>
 
-Introduce an explicit command line switch to runs the basic test suite.
-This prepares for the introduction of additional command line switches
-to run additional tests.
+Add a test to verify that setting a v3 fscap from an idmapped mount
+works as expected. This and other related use-cases were regressed by
+commit [1] which was reverted in [2] and the proper fix merged right
+before v5.12 was released in [3].
 
-Cc: Christoph Hellwig <hch@lst.de>
+[1]: commit 3b0c2d3eaa83 ("Revert 95ebabde382c ("capabilities: Don't allow writing ambiguous v3 file capabilities")")
+[2]: commit 95ebabde382c ("capabilities: Don't allow writing ambiguous v3 file capabilities")
+[3]: commit db2e718a4798 ("capabilities: require CAP_SETFCAP to map uid 0")
+
 Cc: fstests@vger.kernel.org
+Reviewed-by: Christoph Hellwig <hch@lst.de>
 Signed-off-by: Christian Brauner <christian.brauner@ubuntu.com>
 ---
 /* v2 */
-patch not present
+- Eryu Guan <guan@eryu.me>:
+  - Don't create symlinks for each test. Instead, use the same binary
+    and introduce new options to specify which tests to run.
 
 /* v3 */
-- Christoph Hellwig <hch@lst.de>:
-  - Split into separate patch.
+unchanged
 ---
- src/idmapped-mounts/idmapped-mounts.c | 11 ++++++++---
- tests/generic/633                     |  3 ++-
- 2 files changed, 10 insertions(+), 4 deletions(-)
+ src/idmapped-mounts/idmapped-mounts.c | 161 +++++++++++++++++++++++---
+ tests/generic/640                     |  28 +++++
+ tests/generic/640.out                 |   2 +
+ 3 files changed, 175 insertions(+), 16 deletions(-)
+ create mode 100755 tests/generic/640
+ create mode 100644 tests/generic/640.out
 
 diff --git a/src/idmapped-mounts/idmapped-mounts.c b/src/idmapped-mounts/idmapped-mounts.c
-index e565246e..7723a222 100644
+index 7723a222..0b2d7a52 100644
 --- a/src/idmapped-mounts/idmapped-mounts.c
 +++ b/src/idmapped-mounts/idmapped-mounts.c
-@@ -8722,6 +8722,7 @@ static void usage(void)
- 	fprintf(stderr, "--help          Print help\n");
- 	fprintf(stderr, "--mountpoint    Mountpoint of device\n");
- 	fprintf(stderr, "--supported     Test whether idmapped mounts are supported on this filesystem\n");
-+	fprintf(stderr, "--test-core     Run core idmapped mount testsuite\n");
+@@ -3199,6 +3199,121 @@ out:
+ 	return fret;
+ }
+ 
++static int fscaps_idmapped_mounts_in_userns_valid_in_ancestor_userns(void)
++{
++	int fret = -1;
++	int file1_fd = -EBADF, file1_fd2 = -EBADF, open_tree_fd = -EBADF;
++	struct mount_attr attr = {
++		.attr_set = MOUNT_ATTR_IDMAP,
++	};
++	pid_t pid;
++
++	file1_fd = openat(t_dir1_fd, FILE1, O_CREAT | O_EXCL | O_CLOEXEC, 0644);
++	if (file1_fd < 0) {
++		log_stderr("failure: openat");
++		goto out;
++	}
++
++	/* Skip if vfs caps are unsupported. */
++	if (set_dummy_vfs_caps(file1_fd, 0, 1000))
++		return 0;
++
++	if (fremovexattr(file1_fd, "security.capability")) {
++		log_stderr("failure: fremovexattr");
++		goto out;
++	}
++	if (expected_dummy_vfs_caps_uid(file1_fd, -1)) {
++		log_stderr("failure: expected_dummy_vfs_caps_uid");
++		goto out;
++	}
++	if (errno != ENODATA) {
++		log_stderr("failure: errno");
++		goto out;
++	}
++
++	/* Changing mount properties on a detached mount. */
++	attr.userns_fd	= get_userns_fd(0, 10000, 10000);
++	if (attr.userns_fd < 0) {
++		log_stderr("failure: get_userns_fd");
++		goto out;
++	}
++
++	open_tree_fd = sys_open_tree(t_dir1_fd, "",
++				     AT_EMPTY_PATH |
++				     AT_NO_AUTOMOUNT |
++				     AT_SYMLINK_NOFOLLOW |
++				     OPEN_TREE_CLOEXEC |
++				     OPEN_TREE_CLONE);
++	if (open_tree_fd < 0) {
++		log_stderr("failure: sys_open_tree");
++		goto out;
++	}
++
++	if (sys_mount_setattr(open_tree_fd, "", AT_EMPTY_PATH, &attr, sizeof(attr))) {
++		log_stderr("failure: sys_mount_setattr");
++		goto out;
++	}
++
++	file1_fd2 = openat(open_tree_fd, FILE1, O_RDWR | O_CLOEXEC, 0);
++	if (file1_fd2 < 0) {
++		log_stderr("failure: openat");
++		goto out;
++	}
++
++	/*
++	 * Verify we can set an v3 fscap for real root this was regressed at
++	 * some point. Make sure this doesn't happen again!
++	 */
++	pid = fork();
++	if (pid < 0) {
++		log_stderr("failure: fork");
++		goto out;
++	}
++	if (pid == 0) {
++		if (!switch_userns(attr.userns_fd, 0, 0, false))
++			die("failure: switch_userns");
++
++		if (expected_dummy_vfs_caps_uid(file1_fd2, -1))
++			die("failure: expected_dummy_vfs_caps_uid");
++		if (errno != ENODATA)
++			die("failure: errno");
++
++		if (set_dummy_vfs_caps(file1_fd2, 0, 0))
++			die("failure: set_dummy_vfs_caps");
++
++		if (!expected_dummy_vfs_caps_uid(file1_fd2, 0))
++			die("failure: expected_dummy_vfs_caps_uid");
++
++		if (!expected_dummy_vfs_caps_uid(file1_fd, 0) && errno != EOVERFLOW)
++			die("failure: expected_dummy_vfs_caps_uid");
++
++		exit(EXIT_SUCCESS);
++	}
++
++	if (wait_for_pid(pid))
++		goto out;
++
++	if (!expected_dummy_vfs_caps_uid(file1_fd2, 10000)) {
++		log_stderr("failure: expected_dummy_vfs_caps_uid");
++		goto out;
++	}
++
++	if (!expected_dummy_vfs_caps_uid(file1_fd, 0)) {
++		log_stderr("failure: expected_dummy_vfs_caps_uid");
++		goto out;
++	}
++
++	fret = 0;
++	log_debug("Ran test");
++out:
++	safe_close(attr.userns_fd);
++	safe_close(file1_fd);
++	safe_close(file1_fd2);
++	safe_close(open_tree_fd);
++
++	return fret;
++}
++
+ static int fscaps_idmapped_mounts_in_userns_separate_userns(void)
+ {
+ 	int fret = -1;
+@@ -8717,24 +8832,26 @@ static void usage(void)
+ 	fprintf(stderr, "    Run idmapped mount tests\n\n");
+ 
+ 	fprintf(stderr, "Arguments:\n");
+-	fprintf(stderr, "--device        Device used in the tests\n");
+-	fprintf(stderr, "--fstype        Filesystem type used in the tests\n");
+-	fprintf(stderr, "--help          Print help\n");
+-	fprintf(stderr, "--mountpoint    Mountpoint of device\n");
+-	fprintf(stderr, "--supported     Test whether idmapped mounts are supported on this filesystem\n");
+-	fprintf(stderr, "--test-core     Run core idmapped mount testsuite\n");
++	fprintf(stderr, "--device                     Device used in the tests\n");
++	fprintf(stderr, "--fstype                     Filesystem type used in the tests\n");
++	fprintf(stderr, "--help                       Print help\n");
++	fprintf(stderr, "--mountpoint                 Mountpoint of device\n");
++	fprintf(stderr, "--supported                  Test whether idmapped mounts are supported on this filesystem\n");
++	fprintf(stderr, "--test-core                  Run core idmapped mount testsuite\n");
++	fprintf(stderr, "--test-fscaps-regression     Run fscap regression tests\n");
  
  	_exit(EXIT_SUCCESS);
  }
-@@ -8732,7 +8733,8 @@ static const struct option longopts[] = {
- 	{"mountpoint",	required_argument,	0,	'm'},
- 	{"supported",	no_argument,		0,	's'},
- 	{"help",	no_argument,		0,	'h'},
--	{NULL,		0,			0,	0  },
-+	{"test-core",	no_argument,		0,	'c'},
-+	{NULL,		0,			0,	0},
+ 
+ static const struct option longopts[] = {
+-	{"device",	required_argument,	0,	'd'},
+-	{"fstype",	required_argument,	0,	'f'},
+-	{"mountpoint",	required_argument,	0,	'm'},
+-	{"supported",	no_argument,		0,	's'},
+-	{"help",	no_argument,		0,	'h'},
+-	{"test-core",	no_argument,		0,	'c'},
+-	{NULL,		0,			0,	0},
++	{"device",			required_argument,	0,	'd'},
++	{"fstype",			required_argument,	0,	'f'},
++	{"mountpoint",			required_argument,	0,	'm'},
++	{"supported",			no_argument,		0,	's'},
++	{"help",			no_argument,		0,	'h'},
++	{"test-core",			no_argument,		0,	'c'},
++	{"test-fscaps-regression",	no_argument,		0,	'g'},
++	{NULL,				0,			0,	  0},
  };
  
  struct t_idmapped_mounts {
-@@ -8827,7 +8829,7 @@ int main(int argc, char *argv[])
+@@ -8748,7 +8865,7 @@ struct t_idmapped_mounts {
+ 	{ fscaps,							"fscaps on regular mounts",									},
+ 	{ fscaps_idmapped_mounts,					"fscaps on idmapped mounts",									},
+ 	{ fscaps_idmapped_mounts_in_userns,				"fscaps on idmapped mounts in user namespace",							},
+-	{ fscaps_idmapped_mounts_in_userns_separate_userns,		"fscaps on idmapped mounts in user namespace with different id mappings ",			},
++	{ fscaps_idmapped_mounts_in_userns_separate_userns,		"fscaps on idmapped mounts in user namespace with different id mappings",			},
+ 	{ fsids_mapped,							"mapped fsids",											},
+ 	{ fsids_unmapped,						"unmapped fsids",										},
+ 	{ hardlink_crossing_mounts,					"cross mount hardlink",										},
+@@ -8792,6 +8909,10 @@ struct t_idmapped_mounts {
+ 	{ threaded_idmapped_mount_interactions,				"threaded operations on idmapped mounts",							},
+ };
+ 
++struct t_idmapped_mounts fscaps_in_ancestor_userns[] = {
++	{ fscaps_idmapped_mounts_in_userns_valid_in_ancestor_userns,	"fscaps on idmapped mounts in user namespace writing fscap valid in ancestor userns",		},
++};
++
+ static bool run_test(struct t_idmapped_mounts suite[], size_t suite_size)
+ {
+ 	int i;
+@@ -8829,9 +8950,9 @@ int main(int argc, char *argv[])
  {
  	int fret, ret;
  	int index = 0;
--	bool supported = false;
-+	bool supported = false, test_core = false;
+-	bool supported = false, test_core = false;
++	bool supported = false, test_core = false, test_fscaps_regression = false;
  
- 	while ((ret = getopt_long_only(argc, argv, "d:f:m:sh", longopts, &index)) != -1) {
+-	while ((ret = getopt_long_only(argc, argv, "d:f:m:sh", longopts, &index)) != -1) {
++	while ((ret = getopt_long_only(argc, argv, "d:f:m:g:shcg", longopts, &index)) != -1) {
  		switch (ret) {
-@@ -8843,6 +8845,9 @@ int main(int argc, char *argv[])
- 		case 's':
- 			supported = true;
+ 		case 'd':
+ 			t_device = optarg;
+@@ -8848,6 +8969,9 @@ int main(int argc, char *argv[])
+ 		case 'c':
+ 			test_core = true;
  			break;
-+		case 'c':
-+			test_core = true;
++		case 'g':
++			test_fscaps_regression = true;
 +			break;
  		case 'h':
  			/* fallthrough */
  		default:
-@@ -8912,7 +8917,7 @@ int main(int argc, char *argv[])
- 
- 	fret = EXIT_FAILURE;
- 
--	if (!run_test(basic_suite, ARRAY_SIZE(basic_suite)))
-+	if (test_core && !run_test(basic_suite, ARRAY_SIZE(basic_suite)))
+@@ -8920,6 +9044,11 @@ int main(int argc, char *argv[])
+ 	if (test_core && !run_test(basic_suite, ARRAY_SIZE(basic_suite)))
  		goto out;
  
++	if (test_fscaps_regression &&
++	    !run_test(fscaps_in_ancestor_userns,
++		      ARRAY_SIZE(fscaps_in_ancestor_userns)))
++		goto out;
++
  	fret = EXIT_SUCCESS;
-diff --git a/tests/generic/633 b/tests/generic/633
-index 6be8a69e..67501177 100755
---- a/tests/generic/633
-+++ b/tests/generic/633
-@@ -20,7 +20,8 @@ _require_test
  
- echo "Silence is golden"
- 
--$here/src/idmapped-mounts/idmapped-mounts --device "$TEST_DEV" --mount "$TEST_DIR" --fstype "$FSTYP"
-+$here/src/idmapped-mounts/idmapped-mounts --test-core --device "$TEST_DEV" \
-+	--mount "$TEST_DIR" --fstype "$FSTYP"
- 
- status=$?
- exit
+ out:
+diff --git a/tests/generic/640 b/tests/generic/640
+new file mode 100755
+index 00000000..a3795b2d
+--- /dev/null
++++ b/tests/generic/640
+@@ -0,0 +1,28 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2021 Christian Brauner.  All Rights Reserved.
++#
++# FS QA Test 640
++#
++# Test that fscaps on idmapped mounts behave correctly.
++#
++. ./common/preamble
++_begin_fstest auto quick cap idmapped mount
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++
++_supported_fs generic
++_require_idmapped_mounts
++_require_test
++
++echo "Silence is golden"
++
++$here/src/idmapped-mounts/idmapped-mounts --test-fscaps-regression \
++	--device "$TEST_DEV" --mount "$TEST_DIR" --fstype "$FSTYP"
++
++status=$?
++exit
+diff --git a/tests/generic/640.out b/tests/generic/640.out
+new file mode 100644
+index 00000000..a336a0f5
+--- /dev/null
++++ b/tests/generic/640.out
+@@ -0,0 +1,2 @@
++QA output created by 640
++Silence is golden
 -- 
 2.30.2
 
