@@ -2,185 +2,133 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 22E09C4338F
-	for <linux-fstests@archiver.kernel.org>; Thu, 12 Aug 2021 11:41:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9BE97C4338F
+	for <linux-fstests@archiver.kernel.org>; Thu, 12 Aug 2021 13:22:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0A3526103E
-	for <linux-fstests@archiver.kernel.org>; Thu, 12 Aug 2021 11:41:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7947A61059
+	for <linux-fstests@archiver.kernel.org>; Thu, 12 Aug 2021 13:22:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236896AbhHLLlq (ORCPT
+        id S237620AbhHLNWp (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 12 Aug 2021 07:41:46 -0400
-Received: from mout.gmx.net ([212.227.17.20]:59349 "EHLO mout.gmx.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S236700AbhHLLlp (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 12 Aug 2021 07:41:45 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net;
-        s=badeba3b8450; t=1628768478;
-        bh=U1qX3TpxeG0a3Ol38YslG1Zdv0NsImNb99pcKayvIC0=;
-        h=X-UI-Sender-Class:Subject:To:Cc:References:From:Date:In-Reply-To;
-        b=RNo7+2/RCbNLoQyqYgjHlfGX8qmeLbDToV1xjNPkk3QmLhiZsQRP299Cks/DmT7wE
-         ivWnZ9qeQqtvmE1e5AH4rXL9Z8ngbGgPcrYb5Sk/6b1ryv6h2HCVpQRK06XO7W6MEG
-         /0R2a57iyNtxO3M9qaPhmDPMuCRJHS6WvCJDkVv4=
-X-UI-Sender-Class: 01bb95c1-4bf8-414a-932a-4f6e2808ef9c
-Received: from [0.0.0.0] ([149.28.201.231]) by mail.gmx.net (mrgmx105
- [212.227.17.174]) with ESMTPSA (Nemesis) id 1M1ps8-1mGKwP1Rm4-002EUk; Thu, 12
- Aug 2021 13:41:18 +0200
-Subject: Re: [PATCH v4] btrfs/177: Handle the different fi resize output
- formats
-To:     Marcos Paulo de Souza <mpdesouza@suse.com>,
-        linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Cc:     dsterba@suse.com, guaneryu@gmail.com, wqu@suse.com
-References: <20210812113048.12720-1-mpdesouza@suse.com>
-From:   Qu Wenruo <quwenruo.btrfs@gmx.com>
-Message-ID: <55ce7671-c4c4-64e8-58ad-eac8e4fa5061@gmx.com>
-Date:   Thu, 12 Aug 2021 19:41:13 +0800
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.12.0
+        Thu, 12 Aug 2021 09:22:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60618 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S237658AbhHLNVU (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 12 Aug 2021 09:21:20 -0400
+Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 24E60C00E964;
+        Thu, 12 Aug 2021 06:20:52 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=casper.20170209; h=Content-Type:MIME-Version:Message-ID:
+        Subject:Cc:To:From:Date:Sender:Reply-To:Content-Transfer-Encoding:Content-ID:
+        Content-Description:In-Reply-To:References;
+        bh=lRecdCGM1RFUcnT1sAhOs8RHJa3N3xUDtXn+JyKuSbU=; b=pDg7ezz5U/UUVwW6Qazeq75gE1
+        pwJCxcguM8LnYZryGX8GDfuaadgkHIO+RMP7KFXypz1IjDf7EJv58apcKUgI8lE9ClpKZFBP1uMMT
+        vt+S31JOcFvTLxVPlpqfBX4vGq4KI/F7MYw1YGAjFnovs1OdFEPew8wLvGN5GzAdy3YAsL3JBT3iJ
+        LOS2LEIskgEWzBjIsVSWjT9wq4DleEbhZ75LbYGpmjRDWjITjDGxPpupL+nILMlYHhLHezvxCMpT+
+        zYdYc190NoJe//arjwIpyad+u3SjUwj7/LkZNe1XyvOi8Hzu4Rqo9pHZLXHe5NhoQqfuQ5bF0+NVC
+        fcq7rKdg==;
+Received: from willy by casper.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
+        id 1mEAd3-00Eb45-LN; Thu, 12 Aug 2021 13:20:26 +0000
+Date:   Thu, 12 Aug 2021 14:20:13 +0100
+From:   Matthew Wilcox <willy@infradead.org>
+To:     fstests@vger.kernel.org
+Cc:     sfrench@samba.org, linux-fsdevel@vger.kernel.org
+Subject: Testing swap
+Message-ID: <YRUgDfwHNrcL47xu@casper.infradead.org>
 MIME-Version: 1.0
-In-Reply-To: <20210812113048.12720-1-mpdesouza@suse.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:Pp57yRFfXYasl2EZPH0xSW3ltbQGnCcZM1PnFf83M6y1XYwSsD4
- vRYM3MWISPoXmtPOyn8UhnjKgGdYLtk8kekXdNOH8v6tZK8k6L42sPdEJ38/8Z65gMh8HCG
- bGCtNCG7sDSJiQlHD7rQ2ufoeDmSFU0T62LRmd5K/WyU1EWSvXZZyi/M5Usr58BgoLeZaaY
- tvVEHIHuoUvq0u4OF24cQ==
-X-UI-Out-Filterresults: notjunk:1;V03:K0:FWTiarHW1ck=:we+qdo2G1oXWi4F7trkcio
- igpYDlVkbiE8JV/VsCSBuA0vFeTU/s4Qe5CS4cfcGj6ZLML+cx5ARnaYdZw2WWU7x8xAqwcw0
- aD4H0rivzcGuYuL2cu8gQRMqnNvCk062vvOkmde4AZPR+1L2T40cw+W/M7hrwA7TjZIJW4bTe
- YNA6IW9zIAVmclxry/aaayywPBVRfO34VbpM33amnDfP7aeoy/A6YmmzcV4dmCGB4hQXs7RsX
- xK7Fg2zp45JwiH3LpeTze5Z3EDjGpl5f3ZMNglxB6CHjqKP6zIjEst3MZXFnlx2Xhkqav9vbg
- lZ7bsfo6M5SjFZSJ2dGL5Mbz5R+pSHauKD+uTsOxCKuBpeHPkO3wWrGC9eA69bhsh/tFXvdnK
- R6EFtrhzoQ5F0f/5GanDCSiX6wWvEnp8lorYiQYm6H13AxTMghE4ki/XH7JpGFf+NmROsDafP
- BcTOPCqnurywpTcw6c3oBSgoX/bxXjZFvbhnxSka9T4nQUXzRAWiromE6700vzJu2VXk9WyI8
- uPbAun6223rEglo9P5ZJ1IqUATW3DMT0LPvMIuCmaRbbvxHy3PcLVdok9AdfP2QRdE4+zrkPf
- 6ps+ZRBeXwzoBmfsAzDYzKfCNFb/JpRepds/fXI88HoEZkAERjXSgDYMmLPXemAy//JSE1lT+
- acnS8i9QhP+jgFw3RMjul91pH08mblx3eBqM2FclQUxSRL0XvPZwVqVc0nIdJgIHQIRtFbXUL
- awtaDSGth7FAa+OgsflQtnzJ7aD4CkjTrGrs6LWhCuo5XkiydM+4zkyr6Igmul8WPZJMBX88m
- r4ZhHf9XgKgZRSqAha/yIViTZjWul+1rgri6SGtsXFWELiKMq1N1W2SQP+rI3AU4IIXXSNNAt
- wmwAePbqKw9WN3D7ncnrh0SC553HWWIlfZAOsAVjqiTz5N8di79hDSq3LtPDBoBcPosM74Dfs
- fJMI1YO8pJq/wt9PvIitXGUpirObcZBYphDXgZVRm40LnlYdRyxiZY/o56NW2i5Xp4evqBK+J
- OGbYuCL99x8RrKh5i9XBfFX+UgejctWGVjWtk5l5FT7X92OeyNbnOfbcS1QgGHGdcmoGHbpjT
- XEJe929EwUc+U6w0Z3RyBW5KhJY5WxaqU9JSf4X+UqJhPNhp4XqXjpTAA==
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+All the current xfstests for swap only test setting up a swap partition,
+not actually doing swap to it.  That's why this bug went unnoticed for
+two years and why Steve French is still under the impression that
+swap-over-CIFS works (it doesn't).  Could somebody adapt Dave's test
+into the xfstests framework?
 
+----- Forwarded message from David Howells <dhowells@redhat.com> -----
 
-On 2021/8/12 =E4=B8=8B=E5=8D=887:30, Marcos Paulo de Souza wrote:
-> Commit 78aa1d95dd99 ("btrfs-progs: fi resize: make output more
-> readable") added the device id of the resized fs along with a pretty
-> printed size. Create a new function to simplify the output message using
-> size in bytes.
->
-> Signed-off-by: Marcos Paulo de Souza <mpdesouza@suse.com>
+Date: Thu, 12 Aug 2021 12:57:50 +0100
+From: David Howells <dhowells@redhat.com>
+To: willy@infradead.org
+Cc: dhowells@redhat.com, trond.myklebust@primarydata.com,
+	darrick.wong@oracle.com, hch@lst.de, jlayton@kernel.org,
+	sfrench@samba.org, torvalds@linux-foundation.org,
+	linux-nfs@vger.kernel.org, linux-mm@kvack.org,
+	linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: [PATCH 1/2] nfs: Fix write to swapfile failure due to
+	generic_write_checks()
+User-Agent: StGit/0.23
 
-Now with the filter limited to this test case, and we have full control
-on the resized size, it addressed my biggest concern about the loss of
-accuracy during convert.
+Trying to use a swapfile on NFS results in every DIO write failing with
+ETXTBSY because generic_write_checks(), as called by nfs_direct_write()
+from nfs_direct_IO(), forbids writes to swapfiles.
 
-Reviewed-by: Qu Wenruo <wqu@suse.com>
+Fix this by introducing a new kiocb flag, IOCB_SWAP, that's set by the swap
+code to indicate that the swapper is doing this operation and so overrule
+the check in generic_write_checks().
 
-Thanks,
-Qu
-> ---
->
->   Changes since v3:
->   * Move the new function outside of the btrfs.filter, since it's meant =
-to fix
->     only this problem now. (Qu)
->
->   Changes since v2:
->   * Check the output to verify if the resize really happened (Qu)
->
->   Changes since v1:
->   * Do not adapt the output message to the newer format (Qu)
->
->   tests/btrfs/177     | 33 ++++++++++++++++++++++++++++++---
->   tests/btrfs/177.out |  4 ++--
->   2 files changed, 32 insertions(+), 5 deletions(-)
->
-> diff --git a/tests/btrfs/177 b/tests/btrfs/177
-> index 966d29d7..3c206140 100755
-> --- a/tests/btrfs/177
-> +++ b/tests/btrfs/177
-> @@ -16,6 +16,32 @@ _begin_fstest auto quick swap balance
->   _supported_fs btrfs
->   _require_scratch_swapfile
->
-> +# Eliminate the differences between the old and new output formats
-> +# Old format:
-> +# 	Resize 'SCRATCH_MNT' of '1073741824'
-> +# New format:
-> +# 	Resize device id 1 (SCRATCH_DEV) from 3.00GiB to 1.00GiB
-> +# Convert both outputs to:
-> +# 	Resized to 1073741824
-> +_convert_resize_output()
-> +{
-> +        local _field
-> +        local _val
-> +        local _suffix
-> +        _field=3D`$AWK_PROG '{print $NF}' | tr -d "'"`
-> +        # remove trailing zeroes
-> +        _val=3D`echo $_field | $AWK_PROG '{print $1 * 1}'`
-> +        # get the first unit char, for example return G in case we have=
- GiB
-> +        _suffix=3D`echo $_field | grep -o "[GMB]"`
-> +        if [ -z "$_suffix" ]; then
-> +                _suffix=3D"B"
-> +        fi
-> +        _val=3D`echo "$_val$_suffix" | _filter_size_to_bytes`
-> +	echo "Resized to $_val"
-> +}
-> +
-> +
-> +
->   swapfile=3D"$SCRATCH_MNT/swap"
->
->   _require_scratch_size $((3 * 1024 * 1024)) #kB
-> @@ -36,8 +62,8 @@ dd if=3D/dev/zero of=3D"$SCRATCH_MNT/refill" bs=3D4096=
- >> $seqres.full 2>&1
->   # Now add more space and create a swap file. We know that the first $f=
-ssize
->   # of the filesystem was used, so the swap file must be in the new part=
- of the
->   # filesystem.
-> -$BTRFS_UTIL_PROG filesystem resize $((3 * fssize)) "$SCRATCH_MNT" | \
-> -							_filter_scratch
-> +$BTRFS_UTIL_PROG filesystem resize $((3 * fssize)) "$SCRATCH_MNT" |
-> +						_convert_resize_output
->   _format_swapfile "$swapfile" $((32 * 1024 * 1024))
->   swapon "$swapfile"
->
-> @@ -55,7 +81,8 @@ $BTRFS_UTIL_PROG filesystem resize 1G "$SCRATCH_MNT" 2=
->&1 | grep -o "Text file b
->   swapoff "$swapfile"
->
->   # It should work again after swapoff.
-> -$BTRFS_UTIL_PROG filesystem resize $fssize "$SCRATCH_MNT" | _filter_scr=
-atch
-> +$BTRFS_UTIL_PROG filesystem resize $fssize "$SCRATCH_MNT" |
-> +						_convert_resize_output
->
->   status=3D0
->   exit
-> diff --git a/tests/btrfs/177.out b/tests/btrfs/177.out
-> index 63aca0e5..eb374d34 100644
-> --- a/tests/btrfs/177.out
-> +++ b/tests/btrfs/177.out
-> @@ -1,4 +1,4 @@
->   QA output created by 177
-> -Resize 'SCRATCH_MNT' of '3221225472'
-> +Resized to 3221225472
->   Text file busy
-> -Resize 'SCRATCH_MNT' of '1073741824'
-> +Resized to 1073741824
->
+Without this patch, the following is seen:
+
+	Write error on dio swapfile (3800334336)
+
+Altering __swap_writepage() to show the error shows:
+
+	Write error (-26) on dio swapfile (3800334336)
+
+Tested by swapping off all swap partitions and then swapping on a prepared
+NFS file (CONFIG_NFS_SWAP=y is also needed).  Enough copies of the
+following program then need to be run to force swapping to occur (at least
+one per gigabyte of RAM):
+
+	#include <stdbool.h>
+	#include <stdio.h>
+	#include <stdlib.h>
+	#include <unistd.h>
+	#include <sys/mman.h>
+	int main()
+	{
+		unsigned int pid = getpid(), iterations = 0;
+		size_t i, j, size = 1024 * 1024 * 1024;
+		char *p;
+		bool mismatch;
+		p = malloc(size);
+		if (!p) {
+			perror("malloc");
+			exit(1);
+		}
+		srand(pid);
+		for (i = 0; i < size; i += 4)
+			*(unsigned int *)(p + i) = rand();
+		do {
+			for (j = 0; j < 16; j++) {
+				for (i = 0; i < size; i += 4096)
+					*(unsigned int *)(p + i) += 1;
+				iterations++;
+			}
+			mismatch = false;
+			srand(pid);
+			for (i = 0; i < size; i += 4) {
+				unsigned int r = rand();
+				unsigned int v = *(unsigned int *)(p + i);
+				if (i % 4096 == 0)
+					v -= iterations;
+				if (v != r) {
+					fprintf(stderr, "mismatch %zx: %x != %x (diff %x)\n",
+						i, v, r, v - r);
+					mismatch = true;
+				}
+			}
+		} while (!mismatch);
+		exit(1);
+	}
+
+----- End forwarded message -----
