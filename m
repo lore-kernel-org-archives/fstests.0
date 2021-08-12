@@ -4,46 +4,46 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-19.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT,
+	WEIRD_QUOTING autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 04096C4338F
-	for <linux-fstests@archiver.kernel.org>; Thu, 12 Aug 2021 16:04:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 725A1C4338F
+	for <linux-fstests@archiver.kernel.org>; Thu, 12 Aug 2021 16:04:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D8A1A6109F
-	for <linux-fstests@archiver.kernel.org>; Thu, 12 Aug 2021 16:04:02 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 584D66103E
+	for <linux-fstests@archiver.kernel.org>; Thu, 12 Aug 2021 16:04:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230116AbhHLQE1 (ORCPT
+        id S229894AbhHLQEb (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 12 Aug 2021 12:04:27 -0400
-Received: from mail.kernel.org ([198.145.29.99]:49906 "EHLO mail.kernel.org"
+        Thu, 12 Aug 2021 12:04:31 -0400
+Received: from mail.kernel.org ([198.145.29.99]:49928 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229909AbhHLQE1 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 12 Aug 2021 12:04:27 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 7907E604AC;
-        Thu, 12 Aug 2021 16:04:00 +0000 (UTC)
+        id S229661AbhHLQEa (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 12 Aug 2021 12:04:30 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 44E74604AC;
+        Thu, 12 Aug 2021 16:04:04 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1628784241;
-        bh=+ccC6e5yIPt7Zs9zXwtK6d+abeqnyShnxQEC1gbFnMA=;
+        s=k20201202; t=1628784245;
+        bh=ZFiFIaD37bgoKLwwagHcv3eJeDGhyn+fe0jXWuQPIT8=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=rCOa/HhCvJWSuuZ36Ru6qjmxvho92aV2gK0zZQqGGTZUXOTZWaWRA0GV7lsIZEfFh
-         /U1YIcy8N8hMNfn9PjRGQFWNcldHzakZy0JF34ajKkBKsg0EovVCUahnMRB0bdxoia
-         Mx4Y9SCsLfDgCtbQaOG2nDiGgYZN3pFMykMuxPXNX3mbd8zmAZckiytmP5qsyldbfR
-         2WD8qv7v1qWfLVoDoefmxA+99odoXE4fzc+tpT2v1FAyIE6OIzbZkF+49XZCkAShaY
-         M8WR45TSSxDrBh82WfqQfMHgIMXz+/3yp0jqmULyRbNt6zJkOGUdzi6CTh6tbjdUKi
-         /zAKuhbULqHgw==
+        b=uJXl19smD26d+8XTONfPFv4XLllKYLYJBN2IElPy6hXA22mXrBG5H2NW23yKOaOu9
+         i2PMxhkbjO3t9MQoGuO7Ty6UgXS1StC46r8EkU9t2C5EljrdkQ1Z7mrhkMj9on5Gjv
+         hXA0+jDSTPUH2VLLYAk5+0Qj+anCYFTZboCJAnj8QW7Y7uN8xZxEVpEhYIwSvrcU4j
+         h4lDf6rcifekIev/cwmX609o/fgGrS/zPmdT7CAfIy2jk+99nBjURGY0vbwPA1uJfs
+         tcNOaOkvLFtRXfYKx61el3Eo7jBA/+ETUOHVHK2dklZFDsGNZVO+ihPaf6ttrhGThD
+         7JcIeMmiGsbig==
 From:   Christian Brauner <brauner@kernel.org>
 To:     fstests@vger.kernel.org, Eryu Guan <guan@eryu.me>,
         Christoph Hellwig <hch@lst.de>
 Cc:     Christian Brauner <christian.brauner@ubuntu.com>
-Subject: [PATCH v3 4/8] generic/640: add fscaps regression test
-Date:   Thu, 12 Aug 2021 18:01:36 +0200
-Message-Id: <20210812160140.990229-5-brauner@kernel.org>
+Subject: [PATCH v3 5/8] idmapped-mounts: refactor helpers
+Date:   Thu, 12 Aug 2021 18:01:37 +0200
+Message-Id: <20210812160140.990229-6-brauner@kernel.org>
 X-Mailer: git-send-email 2.30.2
 In-Reply-To: <20210812160140.990229-1-brauner@kernel.org>
 References: <20210812160140.990229-1-brauner@kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=9641; h=from:subject; bh=xTcG9GFmyWCR1V01POSP7YelWGq2nJO/uPBscYSA/9k=; b=owGbwMvMwCU28Zj0gdSKO4sYT6slMSSKut7fsOlxSG7IWtMLi3csKkw+Euw8N6l88gYXS8F8k+xo hf73HaUsDGJcDLJiiiwO7Sbhcst5KjYbZWrAzGFlAhnCwMUpABP518jw3zU8ZWLvlqv610KtKt8tm+ 7SXvZ3q4tHZqzs8v9H70y4o8nI8DH7fswqzgn7pVpOejG0m6wwMGk/PVeYvepJtb3l27ZILgA=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=15668; h=from:subject; bh=bc9NuDZOlwgA4csFL6VM2zmVOKqTu6EUFejrqsqUGVM=; b=owGbwMvMwCU28Zj0gdSKO4sYT6slMSSKut4//eppQeLNhjeJzfUZ1YcNFgZp+yu+uViyU/bd4b5d 9ksrOkpZGMS4GGTFFFkc2k3C5ZbzVGw2ytSAmcPKBDKEgYtTACayT5zhf0ZWgOKupWKXP+4wLPu0ef /SHann2RpYm9OtT+/5oOlyaQvDb5ZZRof9WkQ53tRHX9ZSuuyx4ghr5BT5cJXJityRh7gP8gEA
 X-Developer-Key: i=christian.brauner@ubuntu.com; a=openpgp; fpr=4880B8C9BD0E5106FC070F4F7B3C391EFEA93624
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
@@ -52,296 +52,582 @@ X-Mailing-List: fstests@vger.kernel.org
 
 From: Christian Brauner <christian.brauner@ubuntu.com>
 
-Add a test to verify that setting a v3 fscap from an idmapped mount
-works as expected. This and other related use-cases were regressed by
-commit [1] which was reverted in [2] and the proper fix merged right
-before v5.12 was released in [3].
-
-[1]: commit 3b0c2d3eaa83 ("Revert 95ebabde382c ("capabilities: Don't allow writing ambiguous v3 file capabilities")")
-[2]: commit 95ebabde382c ("capabilities: Don't allow writing ambiguous v3 file capabilities")
-[3]: commit db2e718a4798 ("capabilities: require CAP_SETFCAP to map uid 0")
+Make all userns creation helpers share a commond codebase and move a
+bunch of code into utils.{c,h}. This simplifies a bunch of things and
+makes it easier to create nested user namespaces in follow up patches.
 
 Cc: fstests@vger.kernel.org
 Reviewed-by: Christoph Hellwig <hch@lst.de>
 Signed-off-by: Christian Brauner <christian.brauner@ubuntu.com>
 ---
 /* v2 */
-- Eryu Guan <guan@eryu.me>:
-  - Don't create symlinks for each test. Instead, use the same binary
-    and introduce new options to specify which tests to run.
+unchanged
 
 /* v3 */
 unchanged
 ---
- src/idmapped-mounts/idmapped-mounts.c | 161 +++++++++++++++++++++++---
- tests/generic/640                     |  28 +++++
- tests/generic/640.out                 |   2 +
- 3 files changed, 175 insertions(+), 16 deletions(-)
- create mode 100755 tests/generic/640
- create mode 100644 tests/generic/640.out
+ src/idmapped-mounts/mount-idmapped.c | 197 -------------------------
+ src/idmapped-mounts/utils.c          | 209 +++++++++++++++++++--------
+ src/idmapped-mounts/utils.h          |  73 +++++++++-
+ 3 files changed, 223 insertions(+), 256 deletions(-)
 
-diff --git a/src/idmapped-mounts/idmapped-mounts.c b/src/idmapped-mounts/idmapped-mounts.c
-index 7723a222..0b2d7a52 100644
---- a/src/idmapped-mounts/idmapped-mounts.c
-+++ b/src/idmapped-mounts/idmapped-mounts.c
-@@ -3199,6 +3199,121 @@ out:
- 	return fret;
+diff --git a/src/idmapped-mounts/mount-idmapped.c b/src/idmapped-mounts/mount-idmapped.c
+index 219104e7..b1209057 100644
+--- a/src/idmapped-mounts/mount-idmapped.c
++++ b/src/idmapped-mounts/mount-idmapped.c
+@@ -27,77 +27,6 @@
+ #include "missing.h"
+ #include "utils.h"
+ 
+-/* A few helpful macros. */
+-#define STRLITERALLEN(x) (sizeof(""x"") - 1)
+-
+-#define INTTYPE_TO_STRLEN(type)             \
+-	(2 + (sizeof(type) <= 1             \
+-		  ? 3                       \
+-		  : sizeof(type) <= 2       \
+-			? 5                 \
+-			: sizeof(type) <= 4 \
+-			      ? 10          \
+-			      : sizeof(type) <= 8 ? 20 : sizeof(int[-2 * (sizeof(type) > 8)])))
+-
+-#define syserror(format, ...)                           \
+-	({                                              \
+-		fprintf(stderr, format, ##__VA_ARGS__); \
+-		(-errno);                               \
+-	})
+-
+-#define syserror_set(__ret__, format, ...)                    \
+-	({                                                    \
+-		typeof(__ret__) __internal_ret__ = (__ret__); \
+-		errno = labs(__ret__);                        \
+-		fprintf(stderr, format, ##__VA_ARGS__);       \
+-		__internal_ret__;                             \
+-	})
+-
+-struct list {
+-	void *elem;
+-	struct list *next;
+-	struct list *prev;
+-};
+-
+-#define list_for_each(__iterator, __list) \
+-	for (__iterator = (__list)->next; __iterator != __list; __iterator = __iterator->next)
+-
+-static inline void list_init(struct list *list)
+-{
+-	list->elem = NULL;
+-	list->next = list->prev = list;
+-}
+-
+-static inline int list_empty(const struct list *list)
+-{
+-	return list == list->next;
+-}
+-
+-static inline void __list_add(struct list *new, struct list *prev, struct list *next)
+-{
+-	next->prev = new;
+-	new->next = next;
+-	new->prev = prev;
+-	prev->next = new;
+-}
+-
+-static inline void list_add_tail(struct list *head, struct list *list)
+-{
+-	__list_add(list, head->prev, head);
+-}
+-
+-typedef enum idmap_type_t {
+-	ID_TYPE_UID,
+-	ID_TYPE_GID
+-} idmap_type_t;
+-
+-struct id_map {
+-	idmap_type_t map_type;
+-	__u32 nsid;
+-	__u32 hostid;
+-	__u32 range;
+-};
+-
+ static struct list active_map;
+ 
+ static int add_map_entry(__u32 id_host,
+@@ -166,132 +95,6 @@ static int parse_map(char *map)
+ 	return 0;
  }
  
-+static int fscaps_idmapped_mounts_in_userns_valid_in_ancestor_userns(void)
+-static int write_id_mapping(idmap_type_t map_type, pid_t pid, const char *buf, size_t buf_size)
+-{
+-	int fd = -EBADF, setgroups_fd = -EBADF;
+-	int fret = -1;
+-	int ret;
+-	char path[STRLITERALLEN("/proc/") + INTTYPE_TO_STRLEN(pid_t) +
+-		  STRLITERALLEN("/setgroups") + 1];
+-
+-	if (geteuid() != 0 && map_type == ID_TYPE_GID) {
+-		ret = snprintf(path, sizeof(path), "/proc/%d/setgroups", pid);
+-		if (ret < 0 || ret >= sizeof(path))
+-			goto out;
+-
+-		setgroups_fd = open(path, O_WRONLY | O_CLOEXEC);
+-		if (setgroups_fd < 0 && errno != ENOENT) {
+-			syserror("Failed to open \"%s\"", path);
+-			goto out;
+-		}
+-
+-		if (setgroups_fd >= 0) {
+-			ret = write_nointr(setgroups_fd, "deny\n", STRLITERALLEN("deny\n"));
+-			if (ret != STRLITERALLEN("deny\n")) {
+-				syserror("Failed to write \"deny\" to \"/proc/%d/setgroups\"", pid);
+-				goto out;
+-			}
+-		}
+-	}
+-
+-	ret = snprintf(path, sizeof(path), "/proc/%d/%cid_map", pid, map_type == ID_TYPE_UID ? 'u' : 'g');
+-	if (ret < 0 || ret >= sizeof(path))
+-		goto out;
+-
+-	fd = open(path, O_WRONLY | O_CLOEXEC);
+-	if (fd < 0) {
+-		syserror("Failed to open \"%s\"", path);
+-		goto out;
+-	}
+-
+-	ret = write_nointr(fd, buf, buf_size);
+-	if (ret != buf_size) {
+-		syserror("Failed to write %cid mapping to \"%s\"",
+-			 map_type == ID_TYPE_UID ? 'u' : 'g', path);
+-		goto out;
+-	}
+-
+-	fret = 0;
+-out:
+-	if (fd >= 0)
+-		close(fd);
+-	if (setgroups_fd >= 0)
+-		close(setgroups_fd);
+-
+-	return fret;
+-}
+-
+-static int map_ids_from_idmap(struct list *idmap, pid_t pid)
+-{
+-	int fill, left;
+-	char mapbuf[4096] = {};
+-	bool had_entry = false;
+-	idmap_type_t map_type, u_or_g;
+-
+-	for (map_type = ID_TYPE_UID, u_or_g = 'u';
+-	     map_type <= ID_TYPE_GID; map_type++, u_or_g = 'g') {
+-		char *pos = mapbuf;
+-		int ret;
+-		struct list *iterator;
+-
+-
+-		list_for_each(iterator, idmap) {
+-			struct id_map *map = iterator->elem;
+-			if (map->map_type != map_type)
+-				continue;
+-
+-			had_entry = true;
+-
+-			left = 4096 - (pos - mapbuf);
+-			fill = snprintf(pos, left, "%u %u %u\n", map->nsid, map->hostid, map->range);
+-			/*
+-			 * The kernel only takes <= 4k for writes to
+-			 * /proc/<pid>/{g,u}id_map
+-			 */
+-			if (fill <= 0 || fill >= left)
+-				return syserror_set(-E2BIG, "Too many %cid mappings defined", u_or_g);
+-
+-			pos += fill;
+-		}
+-		if (!had_entry)
+-			continue;
+-
+-		ret = write_id_mapping(map_type, pid, mapbuf, pos - mapbuf);
+-		if (ret < 0)
+-			return syserror("Failed to write mapping: %s", mapbuf);
+-
+-		memset(mapbuf, 0, sizeof(mapbuf));
+-	}
+-
+-	return 0;
+-}
+-
+-static int get_userns_fd_from_idmap(struct list *idmap)
+-{
+-	int ret;
+-	pid_t pid;
+-	char path_ns[STRLITERALLEN("/proc/") + INTTYPE_TO_STRLEN(pid_t) +
+-		  STRLITERALLEN("/ns/user") + 1];
+-
+-	pid = do_clone(get_userns_fd_cb, NULL, CLONE_NEWUSER | CLONE_NEWNS);
+-	if (pid < 0)
+-		return -errno;
+-
+-	ret = map_ids_from_idmap(idmap, pid);
+-	if (ret < 0)
+-		return ret;
+-
+-	ret = snprintf(path_ns, sizeof(path_ns), "/proc/%d/ns/user", pid);
+-	if (ret < 0 || (size_t)ret >= sizeof(path_ns))
+-		ret = -EIO;
+-	else
+-		ret = open(path_ns, O_RDONLY | O_CLOEXEC | O_NOCTTY);
+-
+-	(void)kill(pid, SIGKILL);
+-	(void)wait_for_pid(pid);
+-	return ret;
+-}
+-
+ static inline bool strnequal(const char *str, const char *eq, size_t len)
+ {
+ 	return strncmp(str, eq, len) == 0;
+diff --git a/src/idmapped-mounts/utils.c b/src/idmapped-mounts/utils.c
+index 977443f1..e54f481d 100644
+--- a/src/idmapped-mounts/utils.c
++++ b/src/idmapped-mounts/utils.c
+@@ -36,99 +36,192 @@ ssize_t write_nointr(int fd, const void *buf, size_t count)
+ 	return ret;
+ }
+ 
+-static int write_file(const char *path, const void *buf, size_t count)
++#define __STACK_SIZE (8 * 1024 * 1024)
++pid_t do_clone(int (*fn)(void *), void *arg, int flags)
+ {
+-	int fd;
+-	ssize_t ret;
++	void *stack;
+ 
+-	fd = open(path, O_WRONLY | O_CLOEXEC | O_NOCTTY | O_NOFOLLOW);
+-	if (fd < 0)
+-		return -1;
++	stack = malloc(__STACK_SIZE);
++	if (!stack)
++		return -ENOMEM;
+ 
+-	ret = write_nointr(fd, buf, count);
+-	close(fd);
+-	if (ret < 0 || (size_t)ret != count)
+-		return -1;
++#ifdef __ia64__
++	return __clone2(fn, stack, __STACK_SIZE, flags | SIGCHLD, arg, NULL);
++#else
++	return clone(fn, stack + __STACK_SIZE, flags | SIGCHLD, arg, NULL);
++#endif
++}
+ 
++static int get_userns_fd_cb(void *data)
 +{
+ 	return 0;
+ }
+ 
+-static int map_ids(pid_t pid, unsigned long nsid, unsigned long hostid,
+-		   unsigned long range)
++int wait_for_pid(pid_t pid)
+ {
+-	char map[100], procfile[256];
++	int status, ret;
+ 
+-	snprintf(procfile, sizeof(procfile), "/proc/%d/uid_map", pid);
+-	snprintf(map, sizeof(map), "%lu %lu %lu", nsid, hostid, range);
+-	if (write_file(procfile, map, strlen(map)))
+-		return -1;
++again:
++	ret = waitpid(pid, &status, 0);
++	if (ret == -1) {
++		if (errno == EINTR)
++			goto again;
+ 
++		return -1;
++	}
+ 
+-	snprintf(procfile, sizeof(procfile), "/proc/%d/gid_map", pid);
+-	snprintf(map, sizeof(map), "%lu %lu %lu", nsid, hostid, range);
+-	if (write_file(procfile, map, strlen(map)))
++	if (!WIFEXITED(status))
+ 		return -1;
+ 
+-	return 0;
++	return WEXITSTATUS(status);
+ }
+ 
+-#define __STACK_SIZE (8 * 1024 * 1024)
+-pid_t do_clone(int (*fn)(void *), void *arg, int flags)
++static int write_id_mapping(idmap_type_t map_type, pid_t pid, const char *buf, size_t buf_size)
+ {
+-	void *stack;
++	int fd = -EBADF, setgroups_fd = -EBADF;
 +	int fret = -1;
-+	int file1_fd = -EBADF, file1_fd2 = -EBADF, open_tree_fd = -EBADF;
-+	struct mount_attr attr = {
-+		.attr_set = MOUNT_ATTR_IDMAP,
-+	};
-+	pid_t pid;
++	int ret;
++	char path[STRLITERALLEN("/proc/") + INTTYPE_TO_STRLEN(pid_t) +
++		  STRLITERALLEN("/setgroups") + 1];
 +
-+	file1_fd = openat(t_dir1_fd, FILE1, O_CREAT | O_EXCL | O_CLOEXEC, 0644);
-+	if (file1_fd < 0) {
-+		log_stderr("failure: openat");
++	if (geteuid() != 0 && map_type == ID_TYPE_GID) {
++		ret = snprintf(path, sizeof(path), "/proc/%d/setgroups", pid);
++		if (ret < 0 || ret >= sizeof(path))
++			goto out;
++
++		setgroups_fd = open(path, O_WRONLY | O_CLOEXEC);
++		if (setgroups_fd < 0 && errno != ENOENT) {
++			syserror("Failed to open \"%s\"", path);
++			goto out;
++		}
++
++		if (setgroups_fd >= 0) {
++			ret = write_nointr(setgroups_fd, "deny\n", STRLITERALLEN("deny\n"));
++			if (ret != STRLITERALLEN("deny\n")) {
++				syserror("Failed to write \"deny\" to \"/proc/%d/setgroups\"", pid);
++				goto out;
++			}
++		}
++	}
+ 
+-	stack = malloc(__STACK_SIZE);
+-	if (!stack)
+-		return -ENOMEM;
++	ret = snprintf(path, sizeof(path), "/proc/%d/%cid_map", pid, map_type == ID_TYPE_UID ? 'u' : 'g');
++	if (ret < 0 || ret >= sizeof(path))
++		goto out;
+ 
+-#ifdef __ia64__
+-	return __clone2(fn, stack, __STACK_SIZE, flags | SIGCHLD, arg, NULL);
+-#else
+-	return clone(fn, stack + __STACK_SIZE, flags | SIGCHLD, arg, NULL);
+-#endif
++	fd = open(path, O_WRONLY | O_CLOEXEC);
++	if (fd < 0) {
++		syserror("Failed to open \"%s\"", path);
 +		goto out;
 +	}
 +
-+	/* Skip if vfs caps are unsupported. */
-+	if (set_dummy_vfs_caps(file1_fd, 0, 1000))
-+		return 0;
-+
-+	if (fremovexattr(file1_fd, "security.capability")) {
-+		log_stderr("failure: fremovexattr");
-+		goto out;
-+	}
-+	if (expected_dummy_vfs_caps_uid(file1_fd, -1)) {
-+		log_stderr("failure: expected_dummy_vfs_caps_uid");
-+		goto out;
-+	}
-+	if (errno != ENODATA) {
-+		log_stderr("failure: errno");
-+		goto out;
-+	}
-+
-+	/* Changing mount properties on a detached mount. */
-+	attr.userns_fd	= get_userns_fd(0, 10000, 10000);
-+	if (attr.userns_fd < 0) {
-+		log_stderr("failure: get_userns_fd");
-+		goto out;
-+	}
-+
-+	open_tree_fd = sys_open_tree(t_dir1_fd, "",
-+				     AT_EMPTY_PATH |
-+				     AT_NO_AUTOMOUNT |
-+				     AT_SYMLINK_NOFOLLOW |
-+				     OPEN_TREE_CLOEXEC |
-+				     OPEN_TREE_CLONE);
-+	if (open_tree_fd < 0) {
-+		log_stderr("failure: sys_open_tree");
-+		goto out;
-+	}
-+
-+	if (sys_mount_setattr(open_tree_fd, "", AT_EMPTY_PATH, &attr, sizeof(attr))) {
-+		log_stderr("failure: sys_mount_setattr");
-+		goto out;
-+	}
-+
-+	file1_fd2 = openat(open_tree_fd, FILE1, O_RDWR | O_CLOEXEC, 0);
-+	if (file1_fd2 < 0) {
-+		log_stderr("failure: openat");
-+		goto out;
-+	}
-+
-+	/*
-+	 * Verify we can set an v3 fscap for real root this was regressed at
-+	 * some point. Make sure this doesn't happen again!
-+	 */
-+	pid = fork();
-+	if (pid < 0) {
-+		log_stderr("failure: fork");
-+		goto out;
-+	}
-+	if (pid == 0) {
-+		if (!switch_userns(attr.userns_fd, 0, 0, false))
-+			die("failure: switch_userns");
-+
-+		if (expected_dummy_vfs_caps_uid(file1_fd2, -1))
-+			die("failure: expected_dummy_vfs_caps_uid");
-+		if (errno != ENODATA)
-+			die("failure: errno");
-+
-+		if (set_dummy_vfs_caps(file1_fd2, 0, 0))
-+			die("failure: set_dummy_vfs_caps");
-+
-+		if (!expected_dummy_vfs_caps_uid(file1_fd2, 0))
-+			die("failure: expected_dummy_vfs_caps_uid");
-+
-+		if (!expected_dummy_vfs_caps_uid(file1_fd, 0) && errno != EOVERFLOW)
-+			die("failure: expected_dummy_vfs_caps_uid");
-+
-+		exit(EXIT_SUCCESS);
-+	}
-+
-+	if (wait_for_pid(pid))
-+		goto out;
-+
-+	if (!expected_dummy_vfs_caps_uid(file1_fd2, 10000)) {
-+		log_stderr("failure: expected_dummy_vfs_caps_uid");
-+		goto out;
-+	}
-+
-+	if (!expected_dummy_vfs_caps_uid(file1_fd, 0)) {
-+		log_stderr("failure: expected_dummy_vfs_caps_uid");
++	ret = write_nointr(fd, buf, buf_size);
++	if (ret != buf_size) {
++		syserror("Failed to write %cid mapping to \"%s\"",
++			 map_type == ID_TYPE_UID ? 'u' : 'g', path);
 +		goto out;
 +	}
 +
 +	fret = 0;
-+	log_debug("Ran test");
 +out:
-+	safe_close(attr.userns_fd);
-+	safe_close(file1_fd);
-+	safe_close(file1_fd2);
-+	safe_close(open_tree_fd);
++	if (fd >= 0)
++		close(fd);
++	if (setgroups_fd >= 0)
++		close(setgroups_fd);
 +
 +	return fret;
-+}
-+
- static int fscaps_idmapped_mounts_in_userns_separate_userns(void)
- {
- 	int fret = -1;
-@@ -8717,24 +8832,26 @@ static void usage(void)
- 	fprintf(stderr, "    Run idmapped mount tests\n\n");
- 
- 	fprintf(stderr, "Arguments:\n");
--	fprintf(stderr, "--device        Device used in the tests\n");
--	fprintf(stderr, "--fstype        Filesystem type used in the tests\n");
--	fprintf(stderr, "--help          Print help\n");
--	fprintf(stderr, "--mountpoint    Mountpoint of device\n");
--	fprintf(stderr, "--supported     Test whether idmapped mounts are supported on this filesystem\n");
--	fprintf(stderr, "--test-core     Run core idmapped mount testsuite\n");
-+	fprintf(stderr, "--device                     Device used in the tests\n");
-+	fprintf(stderr, "--fstype                     Filesystem type used in the tests\n");
-+	fprintf(stderr, "--help                       Print help\n");
-+	fprintf(stderr, "--mountpoint                 Mountpoint of device\n");
-+	fprintf(stderr, "--supported                  Test whether idmapped mounts are supported on this filesystem\n");
-+	fprintf(stderr, "--test-core                  Run core idmapped mount testsuite\n");
-+	fprintf(stderr, "--test-fscaps-regression     Run fscap regression tests\n");
- 
- 	_exit(EXIT_SUCCESS);
  }
  
- static const struct option longopts[] = {
--	{"device",	required_argument,	0,	'd'},
--	{"fstype",	required_argument,	0,	'f'},
--	{"mountpoint",	required_argument,	0,	'm'},
--	{"supported",	no_argument,		0,	's'},
--	{"help",	no_argument,		0,	'h'},
--	{"test-core",	no_argument,		0,	'c'},
--	{NULL,		0,			0,	0},
-+	{"device",			required_argument,	0,	'd'},
-+	{"fstype",			required_argument,	0,	'f'},
-+	{"mountpoint",			required_argument,	0,	'm'},
-+	{"supported",			no_argument,		0,	's'},
-+	{"help",			no_argument,		0,	'h'},
-+	{"test-core",			no_argument,		0,	'c'},
-+	{"test-fscaps-regression",	no_argument,		0,	'g'},
-+	{NULL,				0,			0,	  0},
- };
+-int get_userns_fd_cb(void *data)
++static int map_ids_from_idmap(struct list *idmap, pid_t pid)
+ {
+-	return kill(getpid(), SIGSTOP);
++	int fill, left;
++	char mapbuf[4096] = {};
++	bool had_entry = false;
++
++	for (idmap_type_t map_type = ID_TYPE_UID, u_or_g = 'u';
++	     map_type <= ID_TYPE_GID; map_type++, u_or_g = 'g') {
++		char *pos = mapbuf;
++		int ret;
++		struct list *iterator;
++
++
++		list_for_each(iterator, idmap) {
++			struct id_map *map = iterator->elem;
++			if (map->map_type != map_type)
++				continue;
++
++			had_entry = true;
++
++			left = 4096 - (pos - mapbuf);
++			fill = snprintf(pos, left, "%u %u %u\n", map->nsid, map->hostid, map->range);
++			/*
++			 * The kernel only takes <= 4k for writes to
++			 * /proc/<pid>/{g,u}id_map
++			 */
++			if (fill <= 0 || fill >= left)
++				return syserror_set(-E2BIG, "Too many %cid mappings defined", u_or_g);
++
++			pos += fill;
++		}
++		if (!had_entry)
++			continue;
++
++		ret = write_id_mapping(map_type, pid, mapbuf, pos - mapbuf);
++		if (ret < 0)
++			return syserror("Failed to write mapping: %s", mapbuf);
++
++		memset(mapbuf, 0, sizeof(mapbuf));
++	}
++
++	return 0;
+ }
  
- struct t_idmapped_mounts {
-@@ -8748,7 +8865,7 @@ struct t_idmapped_mounts {
- 	{ fscaps,							"fscaps on regular mounts",									},
- 	{ fscaps_idmapped_mounts,					"fscaps on idmapped mounts",									},
- 	{ fscaps_idmapped_mounts_in_userns,				"fscaps on idmapped mounts in user namespace",							},
--	{ fscaps_idmapped_mounts_in_userns_separate_userns,		"fscaps on idmapped mounts in user namespace with different id mappings ",			},
-+	{ fscaps_idmapped_mounts_in_userns_separate_userns,		"fscaps on idmapped mounts in user namespace with different id mappings",			},
- 	{ fsids_mapped,							"mapped fsids",											},
- 	{ fsids_unmapped,						"unmapped fsids",										},
- 	{ hardlink_crossing_mounts,					"cross mount hardlink",										},
-@@ -8792,6 +8909,10 @@ struct t_idmapped_mounts {
- 	{ threaded_idmapped_mount_interactions,				"threaded operations on idmapped mounts",							},
- };
+-int get_userns_fd(unsigned long nsid, unsigned long hostid, unsigned long range)
++int get_userns_fd_from_idmap(struct list *idmap)
+ {
+ 	int ret;
+ 	pid_t pid;
+-	char path[256];
++	char path_ns[STRLITERALLEN("/proc/") + INTTYPE_TO_STRLEN(pid_t) +
++		     STRLITERALLEN("/ns/user") + 1];
  
-+struct t_idmapped_mounts fscaps_in_ancestor_userns[] = {
-+	{ fscaps_idmapped_mounts_in_userns_valid_in_ancestor_userns,	"fscaps on idmapped mounts in user namespace writing fscap valid in ancestor userns",		},
+-	pid = do_clone(get_userns_fd_cb, NULL, CLONE_NEWUSER);
++	pid = do_clone(get_userns_fd_cb, NULL, CLONE_NEWUSER | CLONE_NEWNS);
+ 	if (pid < 0)
+ 		return -errno;
+ 
+-	ret = map_ids(pid, nsid, hostid, range);
++	ret = map_ids_from_idmap(idmap, pid);
+ 	if (ret < 0)
+ 		return ret;
+ 
+-	snprintf(path, sizeof(path), "/proc/%d/ns/user", pid);
+-	ret = open(path, O_RDONLY | O_CLOEXEC);
+-	kill(pid, SIGKILL);
+-	wait_for_pid(pid);
++	ret = snprintf(path_ns, sizeof(path_ns), "/proc/%d/ns/user", pid);
++	if (ret < 0 || (size_t)ret >= sizeof(path_ns))
++		ret = -EIO;
++	else
++		ret = open(path_ns, O_RDONLY | O_CLOEXEC | O_NOCTTY);
++
++	(void)kill(pid, SIGKILL);
++	(void)wait_for_pid(pid);
+ 	return ret;
+ }
+ 
+-int wait_for_pid(pid_t pid)
++int get_userns_fd(unsigned long nsid, unsigned long hostid, unsigned long range)
+ {
+-	int status, ret;
+-
+-again:
+-	ret = waitpid(pid, &status, 0);
+-	if (ret == -1) {
+-		if (errno == EINTR)
+-			goto again;
+-
+-		return -1;
+-	}
+-
+-	if (!WIFEXITED(status))
+-		return -1;
+-
+-	return WEXITSTATUS(status);
++	struct list head, uid_mapl, gid_mapl;
++	struct id_map uid_map = {
++		.map_type	= ID_TYPE_UID,
++		.nsid		= nsid,
++		.hostid		= hostid,
++		.range		= range,
++	};
++	struct id_map gid_map = {
++		.map_type	= ID_TYPE_GID,
++		.nsid		= nsid,
++		.hostid		= hostid,
++		.range		= range,
++	};
++
++	list_init(&head);
++	uid_mapl.elem = &uid_map;
++	gid_mapl.elem = &gid_map;
++	list_add_tail(&head, &uid_mapl);
++	list_add_tail(&head, &gid_mapl);
++
++	return get_userns_fd_from_idmap(&head);
+ }
+diff --git a/src/idmapped-mounts/utils.h b/src/idmapped-mounts/utils.h
+index efbf3bc3..4f976f9f 100644
+--- a/src/idmapped-mounts/utils.h
++++ b/src/idmapped-mounts/utils.h
+@@ -19,10 +19,81 @@
+ 
+ #include "missing.h"
+ 
++/* A few helpful macros. */
++#define STRLITERALLEN(x) (sizeof(""x"") - 1)
++
++#define INTTYPE_TO_STRLEN(type)             \
++	(2 + (sizeof(type) <= 1             \
++		  ? 3                       \
++		  : sizeof(type) <= 2       \
++			? 5                 \
++			: sizeof(type) <= 4 \
++			      ? 10          \
++			      : sizeof(type) <= 8 ? 20 : sizeof(int[-2 * (sizeof(type) > 8)])))
++
++#define syserror(format, ...)                           \
++	({                                              \
++		fprintf(stderr, "%m - " format "\n", ##__VA_ARGS__); \
++		(-errno);                               \
++	})
++
++#define syserror_set(__ret__, format, ...)                    \
++	({                                                    \
++		typeof(__ret__) __internal_ret__ = (__ret__); \
++		errno = labs(__ret__);                        \
++		fprintf(stderr, "%m - " format "\n", ##__VA_ARGS__);       \
++		__internal_ret__;                             \
++	})
++
++typedef enum idmap_type_t {
++	ID_TYPE_UID,
++	ID_TYPE_GID
++} idmap_type_t;
++
++struct id_map {
++	idmap_type_t map_type;
++	__u32 nsid;
++	__u32 hostid;
++	__u32 range;
 +};
 +
- static bool run_test(struct t_idmapped_mounts suite[], size_t suite_size)
- {
- 	int i;
-@@ -8829,9 +8950,9 @@ int main(int argc, char *argv[])
- {
- 	int fret, ret;
- 	int index = 0;
--	bool supported = false, test_core = false;
-+	bool supported = false, test_core = false, test_fscaps_regression = false;
- 
--	while ((ret = getopt_long_only(argc, argv, "d:f:m:sh", longopts, &index)) != -1) {
-+	while ((ret = getopt_long_only(argc, argv, "d:f:m:g:shcg", longopts, &index)) != -1) {
- 		switch (ret) {
- 		case 'd':
- 			t_device = optarg;
-@@ -8848,6 +8969,9 @@ int main(int argc, char *argv[])
- 		case 'c':
- 			test_core = true;
- 			break;
-+		case 'g':
-+			test_fscaps_regression = true;
-+			break;
- 		case 'h':
- 			/* fallthrough */
- 		default:
-@@ -8920,6 +9044,11 @@ int main(int argc, char *argv[])
- 	if (test_core && !run_test(basic_suite, ARRAY_SIZE(basic_suite)))
- 		goto out;
- 
-+	if (test_fscaps_regression &&
-+	    !run_test(fscaps_in_ancestor_userns,
-+		      ARRAY_SIZE(fscaps_in_ancestor_userns)))
-+		goto out;
++struct list {
++	void *elem;
++	struct list *next;
++	struct list *prev;
++};
 +
- 	fret = EXIT_SUCCESS;
- 
- out:
-diff --git a/tests/generic/640 b/tests/generic/640
-new file mode 100755
-index 00000000..a3795b2d
---- /dev/null
-+++ b/tests/generic/640
-@@ -0,0 +1,28 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2021 Christian Brauner.  All Rights Reserved.
-+#
-+# FS QA Test 640
-+#
-+# Test that fscaps on idmapped mounts behave correctly.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick cap idmapped mount
++#define list_for_each(__iterator, __list) \
++	for (__iterator = (__list)->next; __iterator != __list; __iterator = __iterator->next)
 +
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
++static inline void list_init(struct list *list)
++{
++	list->elem = NULL;
++	list->next = list->prev = list;
++}
 +
-+# real QA test starts here
++static inline int list_empty(const struct list *list)
++{
++	return list == list->next;
++}
 +
-+_supported_fs generic
-+_require_idmapped_mounts
-+_require_test
++static inline void __list_add(struct list *new, struct list *prev, struct list *next)
++{
++	next->prev = new;
++	new->next = next;
++	new->prev = prev;
++	prev->next = new;
++}
 +
-+echo "Silence is golden"
++static inline void list_add_tail(struct list *head, struct list *list)
++{
++	__list_add(list, head->prev, head);
++}
 +
-+$here/src/idmapped-mounts/idmapped-mounts --test-fscaps-regression \
-+	--device "$TEST_DEV" --mount "$TEST_DIR" --fstype "$FSTYP"
-+
-+status=$?
-+exit
-diff --git a/tests/generic/640.out b/tests/generic/640.out
-new file mode 100644
-index 00000000..a336a0f5
---- /dev/null
-+++ b/tests/generic/640.out
-@@ -0,0 +1,2 @@
-+QA output created by 640
-+Silence is golden
+ extern pid_t do_clone(int (*fn)(void *), void *arg, int flags);
+-extern int get_userns_fd_cb(void *data);
+ extern int get_userns_fd(unsigned long nsid, unsigned long hostid,
+ 			 unsigned long range);
++extern int get_userns_fd_from_idmap(struct list *idmap);
+ extern ssize_t read_nointr(int fd, void *buf, size_t count);
+ extern int wait_for_pid(pid_t pid);
+ extern ssize_t write_nointr(int fd, const void *buf, size_t count);
 -- 
 2.30.2
 
