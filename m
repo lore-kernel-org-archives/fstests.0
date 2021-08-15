@@ -2,114 +2,160 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,UNPARSEABLE_RELAY autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 84CA6C4338F
-	for <linux-fstests@archiver.kernel.org>; Sun, 15 Aug 2021 15:21:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E7C47C4338F
+	for <linux-fstests@archiver.kernel.org>; Sun, 15 Aug 2021 15:46:26 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 60C0661208
-	for <linux-fstests@archiver.kernel.org>; Sun, 15 Aug 2021 15:21:24 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BC26561214
+	for <linux-fstests@archiver.kernel.org>; Sun, 15 Aug 2021 15:46:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232896AbhHOPVx (ORCPT
+        id S237917AbhHOPq4 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 15 Aug 2021 11:21:53 -0400
-Received: from out20-2.mail.aliyun.com ([115.124.20.2]:47820 "EHLO
-        out20-2.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232412AbhHOPVr (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 15 Aug 2021 11:21:47 -0400
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.08590187|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.0746984-0.00142545-0.923876;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047188;MF=guan@eryu.me;NM=1;PH=DS;RN=3;RT=3;SR=0;TI=SMTPD_---.L.l6UhU_1629040875;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.L.l6UhU_1629040875)
-          by smtp.aliyun-inc.com(10.147.42.198);
-          Sun, 15 Aug 2021 23:21:16 +0800
-Date:   Sun, 15 Aug 2021 23:21:15 +0800
+        Sun, 15 Aug 2021 11:46:56 -0400
+Received: from out20-110.mail.aliyun.com ([115.124.20.110]:54553 "EHLO
+        out20-110.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229603AbhHOPqz (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 15 Aug 2021 11:46:55 -0400
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.09703767|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.0139779-0.000313177-0.985709;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047209;MF=guan@eryu.me;NM=1;PH=DS;RN=5;RT=5;SR=0;TI=SMTPD_---.L.mBWsc_1629042383;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.L.mBWsc_1629042383)
+          by smtp.aliyun-inc.com(10.147.42.135);
+          Sun, 15 Aug 2021 23:46:24 +0800
+Date:   Sun, 15 Aug 2021 23:46:23 +0800
 From:   Eryu Guan <guan@eryu.me>
-To:     Naohiro Aota <naohiro.aota@wdc.com>
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH v2 0/8] fstests: add checks for testing zoned btrfs
-Message-ID: <YRkw67HXU2vtOLAz@desktop>
-References: <20210811151232.3713733-1-naohiro.aota@wdc.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org, zlang@redhat.com
+Subject: Re: [PATCH 1/3] generic: test xattr operations only
+Message-ID: <YRk2zwCZ9YqgeyjG@desktop>
+References: <162743101932.3428896.8510279402246446036.stgit@magnolia>
+ <162743102476.3428896.4543035331031604848.stgit@magnolia>
+ <20210812053452.7bz2qgnuhhgj7gl3@fedora>
+ <20210812170453.GP3601443@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210811151232.3713733-1-naohiro.aota@wdc.com>
+In-Reply-To: <20210812170453.GP3601443@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Aug 12, 2021 at 12:12:24AM +0900, Naohiro Aota wrote:
-> This series revisit my old series to test zoned btrfs [1].
+On Thu, Aug 12, 2021 at 10:04:53AM -0700, Darrick J. Wong wrote:
+> On Thu, Aug 12, 2021 at 01:34:52PM +0800, Zorro Lang wrote:
+> > On Tue, Jul 27, 2021 at 05:10:24PM -0700, Darrick J. Wong wrote:
+> > > From: Darrick J. Wong <djwong@kernel.org>
+> > > 
+> > > Exercise extended attribute operations.
+> > > 
+> > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> > > ---
+> > >  tests/generic/724     |   57 +++++++++++++++++++++++++++++++++++++++++++++++++
+> > >  tests/generic/724.out |    2 ++
+> > >  2 files changed, 59 insertions(+)
+> > >  create mode 100755 tests/generic/724
+> > >  create mode 100644 tests/generic/724.out
+> > > 
+> > > 
+> > > diff --git a/tests/generic/724 b/tests/generic/724
+> > > new file mode 100755
+> > > index 00000000..b19f8f73
+> > > --- /dev/null
+> > > +++ b/tests/generic/724
+> > > @@ -0,0 +1,57 @@
+> > > +#! /bin/bash
+> > > +# SPDX-License-Identifier: GPL-2.0
+> > > +# Copyright (c) 2021 Oracle, Inc.  All Rights Reserved.
+> > > +#
+> > > +# FS QA Test No. 724
+> > > +#
+> > > +# Run an extended attributes fsstress run with multiple threads to shake out
+> > > +# bugs in the xattr code.
+> > > +#
+> > > +. ./common/preamble
+> > > +_begin_fstest soak attr long_rw stress
+> > 
+> > Should we add this test into 'auto' group too?
 > 
-> [1] https://lore.kernel.org/fstests/PH0PR04MB7416870032582BC2A8FC5AD99B299@PH0PR04MB7416.namprd04.prod.outlook.com/T/
-> 
-> Several tests are failing on zoned btrfs, but actually they are invalid.
-> There are two reasons of the failures. One is creating too small
-> filesystem. Since zoned btrfs needs at lease 5 zones (= 1.25 GB if zone
-> size = 256MB) to create a filesystem, tests creating e.g., 1 GB filesystem
-> will fail.
-> 
-> The other reason is lacking of zone support of some dm targets and loop
-> device. So, they need to skip the test if the testing device is zoned.
-> 
-> Patches 1 to 4 handle the too small file system failure.
+> Yes, fixed.
 
-I've applied patch 1-4 and 6.
+I can fix that on commit.
+
+> 
+> > > +
+> > > +_cleanup()
+> > > +{
+> > > +	$KILLALL_PROG -9 fsstress > /dev/null 2>&1
+> > 
+> > Can a "wait" command help more at here?
+
+There's no background process in this test, so it seems 'wait' won't
+do anything.
 
 Thanks,
 Eryu
 
 > 
-> And, patches 5 to 8 add checks for tests requiring non-zoned devices.
+> Ok, I"ll add that.
 > 
-> Naohiro Aota (8):
->   common/rc: introduce minimal fs size check
->   common/rc: fix blocksize detection for btrfs
->   btrfs/057: use _scratch_mkfs_sized to set filesystem size
->   fstests: btrfs: add minimal file system size check
->   common: add zoned block device checks
->   shared/032: add check for zoned block device
->   fstests: btrfs: add checks for zoned block device
->   fstests: generic: add checks for zoned block device
+> --D
 > 
->  README            |  4 ++++
->  common/btrfs      | 18 ++++++++++++++++++
->  common/dmerror    |  3 +++
->  common/dmhugedisk |  3 +++
->  common/rc         | 24 +++++++++++++++++++++++-
->  tests/btrfs/003   | 13 +++++++++----
->  tests/btrfs/011   | 21 ++++++++++++---------
->  tests/btrfs/012   |  2 ++
->  tests/btrfs/023   |  2 ++
->  tests/btrfs/049   |  2 ++
->  tests/btrfs/057   |  2 +-
->  tests/btrfs/116   |  2 ++
->  tests/btrfs/124   |  4 ++++
->  tests/btrfs/125   |  2 ++
->  tests/btrfs/131   |  2 ++
->  tests/btrfs/136   |  2 ++
->  tests/btrfs/140   |  2 ++
->  tests/btrfs/141   |  1 +
->  tests/btrfs/142   |  1 +
->  tests/btrfs/143   |  1 +
->  tests/btrfs/148   |  2 ++
->  tests/btrfs/150   |  1 +
->  tests/btrfs/151   |  1 +
->  tests/btrfs/156   |  1 +
->  tests/btrfs/157   |  3 +++
->  tests/btrfs/158   |  3 +++
->  tests/btrfs/175   |  1 +
->  tests/btrfs/194   |  2 +-
->  tests/btrfs/195   |  8 ++++++++
->  tests/btrfs/197   |  1 +
->  tests/btrfs/198   |  1 +
->  tests/btrfs/215   |  1 +
->  tests/btrfs/236   | 33 ++++++++++++++++++++-------------
->  tests/generic/108 |  1 +
->  tests/generic/471 |  1 +
->  tests/generic/570 |  1 +
->  tests/shared/032  |  2 ++
->  37 files changed, 145 insertions(+), 29 deletions(-)
-> 
-> -- 
-> 2.32.0
+> > Others looks good to me.
+> > 
+> > Thanks,
+> > Zorro
+> > 
+> > > +	cd /
+> > > +	rm -f $tmp.*
+> > > +}
+> > > +
+> > > +# Modify as appropriate.
+> > > +_supported_fs generic
+> > > +
+> > > +_require_scratch
+> > > +_require_command "$KILLALL_PROG" "killall"
+> > > +
+> > > +echo "Silence is golden."
+> > > +
+> > > +_scratch_mkfs > $seqres.full 2>&1
+> > > +_scratch_mount >> $seqres.full 2>&1
+> > > +
+> > > +nr_cpus=$((LOAD_FACTOR * 4))
+> > > +nr_ops=$((70000 * nr_cpus * TIME_FACTOR))
+> > > +
+> > > +args=('-z' '-S' 'c')
+> > > +
+> > > +# Do some directory tree modifications, but the bulk of this is geared towards
+> > > +# exercising the xattr code, especially attr_set which can do up to 10k values.
+> > > +for verb in unlink rmdir; do
+> > > +	args+=('-f' "${verb}=1")
+> > > +done
+> > > +for verb in creat mkdir; do
+> > > +	args+=('-f' "${verb}=2")
+> > > +done
+> > > +for verb in getfattr listfattr; do
+> > > +	args+=('-f' "${verb}=3")
+> > > +done
+> > > +for verb in attr_remove removefattr; do
+> > > +	args+=('-f' "${verb}=4")
+> > > +done
+> > > +args+=('-f' "setfattr=20")
+> > > +args+=('-f' "attr_set=60")	# sets larger xattrs
+> > > +
+> > > +$FSSTRESS_PROG "${args[@]}" $FSSTRESS_AVOID -d $SCRATCH_MNT -n $nr_ops -p $nr_cpus >> $seqres.full
+> > > +
+> > > +# success, all done
+> > > +status=0
+> > > +exit
+> > > diff --git a/tests/generic/724.out b/tests/generic/724.out
+> > > new file mode 100644
+> > > index 00000000..164cfffb
+> > > --- /dev/null
+> > > +++ b/tests/generic/724.out
+> > > @@ -0,0 +1,2 @@
+> > > +QA output created by 724
+> > > +Silence is golden.
+> > > 
+> > 
