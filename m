@@ -2,234 +2,175 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 84BC4C4338F
-	for <linux-fstests@archiver.kernel.org>; Sun, 15 Aug 2021 16:28:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 53169C4338F
+	for <linux-fstests@archiver.kernel.org>; Sun, 15 Aug 2021 16:31:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 62E6F611C4
-	for <linux-fstests@archiver.kernel.org>; Sun, 15 Aug 2021 16:28:24 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2E00E60FD8
+	for <linux-fstests@archiver.kernel.org>; Sun, 15 Aug 2021 16:31:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231321AbhHOQ2x (ORCPT
+        id S229599AbhHOQcA (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 15 Aug 2021 12:28:53 -0400
-Received: from out20-97.mail.aliyun.com ([115.124.20.97]:36005 "EHLO
-        out20-97.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229490AbhHOQ2x (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 15 Aug 2021 12:28:53 -0400
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07515237|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_regular_dialog|0.0639916-0.00287951-0.933129;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047211;MF=guan@eryu.me;NM=1;PH=DS;RN=4;RT=4;SR=0;TI=SMTPD_---.L.n6q-K_1629044900;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.L.n6q-K_1629044900)
-          by smtp.aliyun-inc.com(10.147.42.241);
-          Mon, 16 Aug 2021 00:28:21 +0800
-Date:   Mon, 16 Aug 2021 00:28:20 +0800
-From:   Eryu Guan <guan@eryu.me>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org
-Subject: Re: [PATCH 2/3] generic: test shutdowns of a nested filesystem
-Message-ID: <YRlApOTms4XPbwke@desktop>
-References: <162743101932.3428896.8510279402246446036.stgit@magnolia>
- <162743103024.3428896.8525632218517299015.stgit@magnolia>
+        Sun, 15 Aug 2021 12:32:00 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51818 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229490AbhHOQcA (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 15 Aug 2021 12:32:00 -0400
+Received: from mail-wm1-x330.google.com (mail-wm1-x330.google.com [IPv6:2a00:1450:4864:20::330])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C0177C061764
+        for <fstests@vger.kernel.org>; Sun, 15 Aug 2021 09:31:29 -0700 (PDT)
+Received: by mail-wm1-x330.google.com with SMTP id f9-20020a05600c1549b029025b0f5d8c6cso13237111wmg.4
+        for <fstests@vger.kernel.org>; Sun, 15 Aug 2021 09:31:29 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=message-id:date:from:to:subject:mime-version:content-disposition;
+        bh=r8PX4Osd1Bylr4DCb4mbMBI7+wBcNNp/FAIX99ch9rA=;
+        b=jOpTyhgHaOwS7KCzOAXsmGSVwRgKEWiyIwWPNrJx18K56qWopOiYi67L3My8avpRVZ
+         F1Wqzcy+ylVg+nIkDCiPvgbKibM1Z2pQ388sr78kAEmr7X1vYxYULeAJCp36l+h6MX7w
+         ZcIHH/GuP9oTKl1qYL6cTntPEJ2nFCDUmfC+A77akIX+EXO4b56PDqMICBVz7zcYI39s
+         5pIr9iQVi26oMcGz1emyjm8ULzpD7fYWSRik50CzONYyo0OiOW6Owp0oYOpN22oI0FVP
+         7aOKDeBiPEfvJrx7HzXMz2TbDh5Rt9iAix+66ERY5UaeyGodzR2kvsQQBJqoI0Nt+msU
+         4iiw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:message-id:date:from:to:subject:mime-version
+         :content-disposition;
+        bh=r8PX4Osd1Bylr4DCb4mbMBI7+wBcNNp/FAIX99ch9rA=;
+        b=LXnfBYKGnx81mw1seKWyzGpYVB2oSnl3/5SO4kfg3TWC460+0tjzcwzT87ZF4yepUx
+         2ZGbBeN/wZzfQehdEAsmNKvUPSvIPbf8AQWdz2nyz6mubEQyP5vj0fpg3pgx+88PNUDF
+         rOL4QJ6JbAT9aZ+SgnC1DipQtvJ1kbsNORmUnj13YY4u3LbRXVkIjQU58v31v9RCt759
+         Na7lwH3NY6PvXzTJCrflTu/9xtinoG/mGM3CoCSr6XqXBdIVE20grnW9LegWHUOrnm7D
+         2QD0e3Sf6SG9Z5job8wjUpyitDoT8R8hqayt0gbMA/fY/rMXwGhENcTHHJDsuqBYxkSQ
+         9byw==
+X-Gm-Message-State: AOAM533vgttKSOlskn0WXBDHrRlwG7H6staTvXxCMPVb2/qzmzO2hzKS
+        4fY9mSkxqHZcIh8tnRVQwUo8ffiCa5g=
+X-Google-Smtp-Source: ABdhPJwpCNivk4nxcUXmM8rpiTQJLMTBKfsMFrDyF4whLc8qEBGSa/CHg6K73xG+bwId/azspgC3JA==
+X-Received: by 2002:a7b:cbcb:: with SMTP id n11mr6979667wmi.54.1629045088129;
+        Sun, 15 Aug 2021 09:31:28 -0700 (PDT)
+Received: from localhost ([8.208.10.148])
+        by smtp.gmail.com with ESMTPSA id c6sm4163258wme.45.2021.08.15.09.31.27
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 15 Aug 2021 09:31:27 -0700 (PDT)
+Message-ID: <6119415f.1c69fb81.e068.670f@mx.google.com>
+Date:   Mon, 16 Aug 2021 00:31:24 +0800
+From:   Eryu Guan <guaneryu@gmail.com>
+To:     fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: master branch updated to ae8c30c34c51
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="zCuQUy3n4o3l"
 Content-Disposition: inline
-In-Reply-To: <162743103024.3428896.8525632218517299015.stgit@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Jul 27, 2021 at 05:10:30PM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
-> 
-> generic/475, but we're running fsstress on a disk image inside the
-> scratch filesystem
-> 
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> ---
->  tests/generic/725     |  136 +++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/725.out |    2 +
->  2 files changed, 138 insertions(+)
->  create mode 100755 tests/generic/725
->  create mode 100644 tests/generic/725.out
-> 
-> 
-> diff --git a/tests/generic/725 b/tests/generic/725
-> new file mode 100755
-> index 00000000..f43bcb37
-> --- /dev/null
-> +++ b/tests/generic/725
-> @@ -0,0 +1,136 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2021 Oracle, Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 725
-> +#
-> +# Test nested log recovery with repeated (simulated) disk failures.  We kick
-> +# off fsstress on a loopback filesystem mounted on the scratch fs, then switch
-> +# out the underlying scratch device with dm-error to see what happens when the
-> +# disk goes down.  Having taken down both fses in this manner, remount them and
-> +# repeat.  This test simulates VM hosts crashing to try to shake out CoW bugs
-> +# in writeback on the host that cause VM guests to fail to recover.
 
-It currently fails for me on btrfs, the loop mount failed in 2nd
-iteration, seems like a bug in btrfs.
+--zCuQUy3n4o3l
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-> +#
-> +. ./common/preamble
-> +_begin_fstest shutdown auto log metadata eio
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	$KILLALL_PROG -9 fsstress > /dev/null 2>&1
-> +	wait
-> +	if [ -n "$loopmnt" ]; then
-> +		umount $loopmnt 2>/dev/null
+Hi all,
 
-$UMOUNT_PROG
+The master branch of the xfstests repository at:
 
-> +		rm -r -f $loopmnt
-> +	fi
-> +	rm -f $tmp.*
-> +	_dmerror_unmount
-> +	_dmerror_cleanup
-> +}
-> +
-> +# Import common functions.
-> +. ./common/dmerror
-> +. ./common/reflink
-> +
-> +# Modify as appropriate.
-> +_supported_fs generic
-> +
-> +_require_scratch_reflink
-> +_require_cp_reflink
-> +_require_dm_target error
-> +_require_command "$KILLALL_PROG" "killall"
-> +
-> +echo "Silence is golden."
-> +
-> +_scratch_mkfs >> $seqres.full 2>&1
-> +_require_metadata_journaling $SCRATCH_DEV
-> +_dmerror_init
-> +_dmerror_mount
-> +
-> +# Create a fs image consuming 1/3 of the scratch fs
-> +scratch_freesp_bytes=$(stat -f -c '%a * %S' $SCRATCH_MNT | bc)
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-_get_available_space $SCRATCH_MNT ?
+have just been updated. There're many btrfs related fixes included in this
+update, they're mainly for btrfs zoned device support from Naohiro Aota, and
+some compatability fixes from Anand Jain and Boris Burkov.
 
-> +loopimg_bytes=$((scratch_freesp_bytes / 3))
-> +
-> +loopimg=$SCRATCH_MNT/testfs
-> +truncate -s $loopimg_bytes $loopimg
-> +_mkfs_dev $loopimg
-> +
-> +loopmnt=$tmp.mount
-> +mkdir -p $loopmnt
-> +
-> +scratch_aliveflag=$tmp.runsnap
-> +snap_aliveflag=$tmp.snapping
-> +
-> +snap_loop_fs() {
-> +	touch "$snap_aliveflag"
-> +	while [ -e "$scratch_aliveflag" ]; do
-> +		rm -f $loopimg.a
-> +		_cp_reflink $loopimg $loopimg.a
-> +		sleep 1
-> +	done
-> +	rm -f "$snap_aliveflag"
-> +}
-> +
-> +fsstress=($FSSTRESS_PROG $FSSTRESS_AVOID -d "$loopmnt" -n 999999 -p "$((LOAD_FACTOR * 4))")
-> +
-> +for i in $(seq 1 $((25 * TIME_FACTOR)) ); do
-> +	touch $scratch_aliveflag
-> +	snap_loop_fs >> $seqres.full 2>&1 &
-> +
-> +	if ! _mount $loopimg $loopmnt -o loop; then
-> +		rm -f $scratch_aliveflag
-> +		_fail "loop mount failed"
-
-I found it a bit easier to debug if print $i here.
-
-> +		break
-> +	fi
-> +
-> +	("${fsstress[@]}" >> $seqres.full &) > /dev/null 2>&1
-> +
-> +	# purposely include 0 second sleeps to test shutdown immediately after
-> +	# recovery
-> +	sleep $((RANDOM % (3 * TIME_FACTOR) ))
-> +	rm -f $scratch_aliveflag
-> +
-> +	# This test aims to simulate sudden disk failure, which means that we
-> +	# do not want to quiesce the filesystem or otherwise give it a chance
-> +	# to flush its logs.  Therefore we want to call dmsetup with the
-> +	# --nolockfs parameter; to make this happen we must call the load
-> +	# error table helper *without* 'lockfs'.
-> +	_dmerror_load_error_table
-> +
-> +	ps -e | grep fsstress > /dev/null 2>&1
-> +	while [ $? -eq 0 ]; do
-> +		$KILLALL_PROG -9 fsstress > /dev/null 2>&1
-> +		wait > /dev/null 2>&1
-> +		ps -e | grep fsstress > /dev/null 2>&1
-> +	done
-> +	for ((i = 0; i < 10; i++)); do
-> +		test -e "$snap_aliveflag" || break
-> +		sleep 1
-> +	done
-> +
-> +	# Mount again to replay log after loading working table, so we have a
-> +	# consistent XFS after test.
-
-This is a generic test, fix the XFS specific comments?
-
-> +	$UMOUNT_PROG $loopmnt
-> +	_dmerror_unmount || _fail "unmount failed"
-> +	_dmerror_load_working_table
-> +	if ! _dmerror_mount; then
-> +		dmsetup table | tee -a /dev/ttyprintk
-> +		lsblk | tee -a /dev/ttyprintk
-> +		$XFS_METADUMP_PROG -a -g -o $DMERROR_DEV $seqres.dmfail.md
-
-Above logs all should go to $seqres.full ?
-
-And $XFS_METADUMP_PROG is not suitable for a generic test.
-
-> +		_fail "mount failed"
-> +	fi
-> +done
-> +
-> +# Make sure the fs image file is ok
-> +if [ -f "$loopimg" ]; then
-> +	if _mount $loopimg $loopmnt -o loop; then
-> +		$UMOUNT_PROG $loopmnt &> /dev/null
-> +	else
-> +		echo "final loop mount failed"
-> +	fi
-> +	_check_xfs_filesystem $loopimg none none
-
-Same here, use _check_scratch_fs?
+There're also two new tests and they should all pass on latest v5.14-rc4
+kernel.
 
 Thanks,
 Eryu
 
-> +fi
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/725.out b/tests/generic/725.out
-> new file mode 100644
-> index 00000000..ed73a9fc
-> --- /dev/null
-> +++ b/tests/generic/725.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 725
-> +Silence is golden.
+The new head of the master branch is commit:
+
+ae8c30c34c51 xfs: test regression in shrink when the new EOFS splits a sparse inode cluster
+
+New commits:
+
+Anand Jain (4):
+      [705b0e60bcb7] common/rc: debug add _scratch_mount_options to the _scratch_mount
+      [1f940e6e67f5] btrfs/220: discard=sync support older kernel
+      [52e6b70d4681] btrfs/220: nologreplay support older kernel
+      [389302e73e11] btrfs/220: clear_cache fix for older kernel
+
+Boris Burkov (1):
+      [ca71bde9fd8b] btrfs/220: fix clear_cache and inode_cache option tests
+
+Darrick J. Wong (2):
+      [96d4e404f188] generic: test xattr operations only
+      [ae8c30c34c51] xfs: test regression in shrink when the new EOFS splits a sparse inode cluster
+
+Luis Chamberlain (1):
+      [d26e07ebb6a2] fstests: use udevadm settle after pvremove
+
+Marcos Paulo de Souza (1):
+      [5f883ecb049c] btrfs/177: Handle the different fi resize output formats
+
+Naohiro Aota (5):
+      [72699dc08b1d] common/rc: introduce minimal fs size check
+      [40360a4264d4] common/rc: fix blocksize detection for btrfs
+      [fc5dc62bdd5d] btrfs/057: use _scratch_mkfs_sized to set filesystem size
+      [9ca8d2ac5e02] btrfs: add minimal file system size check
+      [6b96c8995ea2] shared/032: add check for zoned block device
+
+
+Code Diffstat:
+
+ README                |   4 ++
+ common/rc             |  19 ++++-
+ tests/btrfs/057       |   2 +-
+ tests/btrfs/141       |   1 +
+ tests/btrfs/142       |   1 +
+ tests/btrfs/143       |   1 +
+ tests/btrfs/150       |   1 +
+ tests/btrfs/151       |   1 +
+ tests/btrfs/156       |   1 +
+ tests/btrfs/157       |   1 +
+ tests/btrfs/158       |   1 +
+ tests/btrfs/175       |   1 +
+ tests/btrfs/177       |  31 +++++++-
+ tests/btrfs/177.out   |   4 +-
+ tests/btrfs/220       |  65 +++++++++++++----
+ tests/generic/081     |   5 +-
+ tests/generic/108     |   1 +
+ tests/generic/459     |   1 +
+ tests/generic/642     |  57 +++++++++++++++
+ tests/generic/642.out |   2 +
+ tests/shared/032      |   2 +
+ tests/xfs/176         | 190 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/176.out     |   2 +
+ 23 files changed, 372 insertions(+), 22 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
+
+--zCuQUy3n4o3l
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAmEZQRMACgkQJlKqKVyP
+52OxYRAAwWOoznERGMPUosj2CJFY1f+LWgRFzP0X0nraWDvJUh5cpUpw2eVu56wG
+Vzs/KcGlolemEfCBa7BRFxVLyrkYRlOONHvo0UKQ7jck+z3uKsJzphAkzoC3s0Y5
+brdy+sMwDSNRtOfbd+Cwwkgz+0LGXTY/eaUFdgHcwQqUswjR6VpRFXYEsewYK26W
+19FcpMWhRSL3qome3vTaYNQ0QwqqpQBudZN2ps7aZhkhcqZhpezzF1fhCd6qTY87
+VNQoM0G+3Ue3hmnGSZlEC2FsoawmTKKyfzZNzTmWNsXjHsrooelDH+enIGtnLVRd
+FXkfAm3qBe9l2kEIAsyrlu+l/k8CvqMhNEQK/gT1zZEd0HYWbWmBej8n6ah3S7cJ
+6747xjLaqYhbkTAvIoTG3CRUKIw83qBS40RVFJs11I7HmVwpvJ7XGZilyfaA4tgE
+nqv87VdY9t4MPOuEAchW0AKUt7mvazSyd5QUvUslQ+2B2OwjjcCHQ+Ql4iFKi1mi
+PiIwpEk4JvcQF43L6Zeby/rp3R2RyJHdVJIHbKAU5gjT8ejQvSdJ9bxdMSh8ZBTy
+tpPkmk9ki/tZGvyANAxMZ2B9iZyuC5d5x1OFydxT645jyN3nkAKRbL0yZNyT9lkY
+XkuZ7RJ6zYUa85CgbT9xMxdBlWrEfV6hDOvXElFyQgCctyH7t0E=
+=kc+f
+-----END PGP SIGNATURE-----
+
+--zCuQUy3n4o3l--
