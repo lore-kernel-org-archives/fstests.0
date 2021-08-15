@@ -2,126 +2,331 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
+X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham
-	autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,
+	UNPARSEABLE_RELAY autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 758CAC4338F
-	for <linux-fstests@archiver.kernel.org>; Sun, 15 Aug 2021 12:36:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E4CBDC4338F
+	for <linux-fstests@archiver.kernel.org>; Sun, 15 Aug 2021 14:12:55 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4E03060F4B
-	for <linux-fstests@archiver.kernel.org>; Sun, 15 Aug 2021 12:36:17 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C16AA6103A
+	for <linux-fstests@archiver.kernel.org>; Sun, 15 Aug 2021 14:12:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231318AbhHOMgq (ORCPT
+        id S232558AbhHOONY (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 15 Aug 2021 08:36:46 -0400
-Received: from out20-3.mail.aliyun.com ([115.124.20.3]:46522 "EHLO
-        out20-3.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229603AbhHOMgp (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 15 Aug 2021 08:36:45 -0400
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.439681|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_regular_dialog|0.0126859-0.0121226-0.975191;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047212;MF=guan@eryu.me;NM=1;PH=DS;RN=7;RT=7;SR=0;TI=SMTPD_---.L.disp2_1629030973;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.L.disp2_1629030973)
-          by smtp.aliyun-inc.com(10.147.41.178);
-          Sun, 15 Aug 2021 20:36:13 +0800
-Date:   Sun, 15 Aug 2021 20:36:13 +0800
+        Sun, 15 Aug 2021 10:13:24 -0400
+Received: from out20-15.mail.aliyun.com ([115.124.20.15]:49519 "EHLO
+        out20-15.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S233687AbhHOONY (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 15 Aug 2021 10:13:24 -0400
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07436282|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.233319-0.00041998-0.766261;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047213;MF=guan@eryu.me;NM=1;PH=DS;RN=3;RT=3;SR=0;TI=SMTPD_---.L.iIqJP_1629036772;
+Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.L.iIqJP_1629036772)
+          by smtp.aliyun-inc.com(10.147.44.118);
+          Sun, 15 Aug 2021 22:12:52 +0800
+Date:   Sun, 15 Aug 2021 22:12:52 +0800
 From:   Eryu Guan <guan@eryu.me>
-To:     Luis Chamberlain <mcgrof@kernel.org>
-Cc:     fstests@vger.kernel.org, hare@suse.de, dgilbert@interlog.com,
-        jeyu@kernel.org, lucas.demarchi@intel.com,
-        linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v2 1/3] fstests: use udevadm settle after pvremove
-Message-ID: <YRkKPbRX17kiAgz+@desktop>
-References: <20210811154512.1813622-1-mcgrof@kernel.org>
- <20210811154512.1813622-2-mcgrof@kernel.org>
+To:     Bhumit Attarde <bhumitattarde01@gmail.com>
+Cc:     fstests@vger.kernel.org,
+        Bhumit Attarde <bhumit.attarde01@gmail.com>
+Subject: Re: [PATCH 1/1] Added FUSE support
+Message-ID: <YRkg5GrK0XnD1fZZ@desktop>
+References: <20210812045950.3190-1-bhumit.attarde01@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210811154512.1813622-2-mcgrof@kernel.org>
+In-Reply-To: <20210812045950.3190-1-bhumit.attarde01@gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Aug 11, 2021 at 08:45:10AM -0700, Luis Chamberlain wrote:
-> As with creation, we also need to use udevadm settle
-> when removing a pv, otherwise we can trip on races with
-> module removals for the block devices in use.
+On Thu, Aug 12, 2021 at 10:29:50AM +0530, Bhumit Attarde wrote:
+> This allows any FUSE filesystem that can mounted like
+> `mount -t fuse.$FUSE_SUBTYP`
+> to be tested using XFSTESTS.
 > 
-> This reduces the amount of time in which a block device
-> module refcnt for test modules such as scsi_debug spends
-> outside of 0.
+> This patch is an improvment on the patch originally submitted by Miklos
+> Szeredi.
 > 
-> Races with the refcnt being greater than 0 means module
-> removal can fail causing false positives. This helps
-> ensure that the pv is really long gone. These issues
-> are tracked for scsi_debug [0] and later found to be a
-> generic issue regardless of filesystem with pvremove [1].
+> Signed-off-by: Bhumit Attarde <bhumit.attarde01@gmail.com>
+> ---
+>  README.fuse   | 29 +++++++++++++++++++++++++++++
+>  check         |  2 ++
+>  common/attr   |  4 ++--
+>  common/config | 10 ++++++++--
+>  common/rc     | 31 +++++++++++++++++++++++--------
+>  5 files changed, 64 insertions(+), 12 deletions(-)
+>  create mode 100644 README.fuse
 > 
-> Using udevadm settle *helps*, it does not address all
-> possible races with the refcnt as noted in the generic
-> bug entry [1].
-> 
-> [0] https://bugzilla.kernel.org/show_bug.cgi?id=212337
-> [1] https://bugzilla.kernel.org/show_bug.cgi?id=214015
-> Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
+> diff --git a/README.fuse b/README.fuse
+> new file mode 100644
+> index 00000000..839db5dd
+> --- /dev/null
+> +++ b/README.fuse
+> @@ -0,0 +1,29 @@
+> +Make sure you've followed instructions from the principal README.
+> +Instructions to test FUSE using the passthrough_ll example filesystem provided in the libfuse source tree:
+> +
+> +git clone git://github.com/libfuse/libfuse.git
+> +cd libfuse
+> +meson build
+> +cd build
+> +ninja
+> +cp example/passthrough_ll /usr/bin
+> +cd
+> +cat << 'EOF' > /sbin/mount.fuse.passthrough_ll
+> +#!/bin/bash
+> +ulimit -n 1048576
+> +exec /usr/bin/passthrough_ll -ofsname="$@"
+> +EOF
+> +chmod +x /sbin/mount.fuse.passthrough_ll
+> +mkdir -p /mnt/test /mnt/scratch /home/test/test /home/test/scratch
+> +
+> +
+> +Use the following config file:
+> +
+> +export TEST_DEV=passthrough_ll
+> +export TEST_DIR=/mnt/test
+> +export SCRATCH_DEV=passthrough_ll
 
-I applied this patch for this week's update.
+I think we could set different 'dev' for TEST_DEV and SCRATCH_DEV, e.g.
+
+TEST_DEV=fuse_test
+SCRATCH_DEV=fuse_scratch
+
+And the "This check doesn't apply to FUSE since both mounts have the
+same device" check could be removed.
+
+> +export SCRATCH_MNT=/mnt/scratch
+> +export FSTYP=fuse
+> +export FUSE_SUBTYP=.passthrough_ll
+> +export FUSE_MOUNT_OPTIONS="-osource=/home/test/scratch,allow_other,default_permissions"
+
+Set MOUNT_OPTIONS should be fine here.
+
+And we should set "subtype" in options as well, i.e.
+
+MOUNT_OPTIONS="-o source=/home/test/scratch,allow_other, default_permissions,subtype=passthrough_ll"
+
+Otherwise the filesystem type printed by mount of a passthrough_ll mount
+is only "fuse" and doesn't contain the subtype, and _check_mounted_on()
+will fail the check.
+
+> +export TEST_FS_MOUNT_OPTS="-osource=/home/test/test,allow_other,default_permissions"
+> diff --git a/check b/check
+> index a0863121..bae9fddd 100755
+> --- a/check
+> +++ b/check
+> @@ -59,6 +59,7 @@ check options
+>      -glusterfs		test GlusterFS
+>      -cifs		test CIFS
+>      -9p			test 9p
+> +    -fuse		test fuse
+>      -virtiofs		test virtiofs
+>      -overlay		test overlay
+>      -pvfs2		test PVFS2
+> @@ -281,6 +282,7 @@ while [ $# -gt 0 ]; do
+>  	-glusterfs)	FSTYP=glusterfs ;;
+>  	-cifs)		FSTYP=cifs ;;
+>  	-9p)		FSTYP=9p ;;
+> +	-fuse)		FSTYP=fuse ;;
+>  	-virtiofs)	FSTYP=virtiofs ;;
+>  	-overlay)	FSTYP=overlay; export OVERLAY=true ;;
+>  	-pvfs2)		FSTYP=pvfs2 ;;
+> diff --git a/common/attr b/common/attr
+> index 35682d7c..f3342d25 100644
+> --- a/common/attr
+> +++ b/common/attr
+> @@ -253,7 +253,7 @@ _getfattr()
+>  
+>  # set maximum total attr space based on fs type
+>  case "$FSTYP" in
+> -xfs|udf|pvfs2|9p|ceph|nfs)
+> +xfs|udf|pvfs2|9p|ceph|nfs|fuse)
+>  	MAX_ATTRS=1000
+>  	;;
+>  ext2|ext3|ext4)
+> @@ -312,7 +312,7 @@ xfs|udf|btrfs)
+>  pvfs2)
+>  	MAX_ATTRVAL_SIZE=8192
+>  	;;
+> -9p|ceph|nfs)
+> +9p|ceph|nfs|fuse)
+>  	MAX_ATTRVAL_SIZE=65536
+>  	;;
+>  bcachefs)
+> diff --git a/common/config b/common/config
+> index 005fd50a..8203492d 100644
+> --- a/common/config
+> +++ b/common/config
+> @@ -305,6 +305,9 @@ _mount_opts()
+>  	9p)
+>  		export MOUNT_OPTIONS=$PLAN9_MOUNT_OPTIONS
+>  		;;
+> +	fuse)
+> +		export MOUNT_OPTIONS=$FUSE_MOUNT_OPTIONS
+> +		;;
+>  	xfs)
+>  		export MOUNT_OPTIONS=$XFS_MOUNT_OPTIONS
+>  		;;
+> @@ -363,6 +366,9 @@ _test_mount_opts()
+>  	9p)
+>  		export TEST_FS_MOUNT_OPTS=$PLAN9_MOUNT_OPTIONS
+>  		;;
+> +	fuse)
+> +		export TEST_FS_MOUNT_OPTS=$FUSE_MOUNT_OPTIONS
+> +		;;
+>  	cifs)
+>  		export TEST_FS_MOUNT_OPTS=$CIFS_MOUNT_OPTIONS
+>  		;;
+> @@ -501,8 +507,8 @@ _check_device()
+>  	fi
+>  
+>  	case "$FSTYP" in
+> -	9p|tmpfs|virtiofs)
+> -		# 9p and virtiofs mount tags are just plain strings, so anything is allowed
+> +	9p|fuse|tmpfs|virtiofs)
+> +		# 9p, fuse and virtiofs mount tags are just plain strings, so anything is allowed
+>  		# tmpfs doesn't use mount source, ignore
+>  		;;
+>  	overlay)
+> diff --git a/common/rc b/common/rc
+> index d4b1f21f..1ae0746a 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -127,6 +127,8 @@ case "$FSTYP" in
+>  	 ;;
+>      9p)
+>  	 ;;
+> +    fuse)
+> +	 ;;
+>      ceph)
+>  	 . ./common/ceph
+>  	 ;;
+> @@ -333,7 +335,7 @@ _try_scratch_mount()
+>  		_overlay_scratch_mount $*
+>  		return $?
+>  	fi
+> -	_mount -t $FSTYP `_scratch_mount_options $*`
+> +	_mount -t $FSTYP$FUSE_SUBTYP `_scratch_mount_options $*`
+
+Should do the same to _test_mount().
+
+>  }
+>  
+>  # mount scratch device with given options and _fail if mount fails
+> @@ -643,6 +645,9 @@ _test_mkfs()
+>      9p)
+>  	# do nothing for 9p
+>  	;;
+> +    fuse)
+> +    	# do nothing for fuse
+> +    	;;
+>      virtiofs)
+>  	# do nothing for virtiofs
+>  	;;
+> @@ -683,6 +688,9 @@ _mkfs_dev()
+>      9p)
+>  	# do nothing for 9p
+>  	;;
+> +    fuse)
+> +    	# do nothing for fuse
+> +    	;;
+>      virtiofs)
+>  	# do nothing for virtiofs
+>  	;;
+> @@ -750,7 +758,7 @@ _scratch_mkfs()
+>  	local mkfs_status
+>  
+>  	case $FSTYP in
+> -	nfs*|cifs|ceph|overlay|glusterfs|pvfs2|9p|virtiofs)
+> +	nfs*|cifs|ceph|overlay|glusterfs|pvfs2|9p|fuse|virtiofs)
+>  		# unable to re-create this fstyp, just remove all files in
+>  		# $SCRATCH_MNT to avoid EEXIST caused by the leftover files
+>  		# created in previous runs
+> @@ -1271,7 +1279,7 @@ _df_device()
+>  
+>      # Note that we use "==" here so awk doesn't try to interpret an NFS over
+>      # IPv6 server as a regular expression.
+> -    $DF_PROG 2>/dev/null | $AWK_PROG -v what=$1 '
+> +    $DF_PROG -a 2>/dev/null | $AWK_PROG -v what=$1 '
+
+Update DF_PROG definition instead, so all callers of $DF_PROG would
+print fuse mounts correctly.
+
+>          ($1==what) && (NF==1) {
+>              v=$1
+>              getline
+> @@ -1514,14 +1522,15 @@ _check_mounted_on()
+>  	[ -n "$mount_rec" ] || return 1 # 1 = not mounted
+>  
+>  	# if it's mounted, make sure its on $mnt
+> -	if [ "$mount_rec" != "$dev $mnt" ]; then
+> +	# This check doesn't apply to FUSE since both mounts have the same device
+> +	if [[ "$FSTYP" != "fuse" && "$mount_rec" != "$dev $mnt" ]]; then
+
+As stated above, I don't think this check is needed. Any reason to do so?
 
 Thanks,
 Eryu
 
-> ---
->  tests/generic/081 | 5 ++++-
->  tests/generic/108 | 1 +
->  tests/generic/459 | 1 +
->  3 files changed, 6 insertions(+), 1 deletion(-)
-> 
-> diff --git a/tests/generic/081 b/tests/generic/081
-> index f795b2c1..8e552074 100755
-> --- a/tests/generic/081
-> +++ b/tests/generic/081
-> @@ -12,6 +12,7 @@ _begin_fstest auto quick
->  # Override the default cleanup function.
->  _cleanup()
->  {
-> +	local pv_ret
->  	cd /
->  	rm -f $tmp.*
+>  		echo "$devname=$dev is mounted but not on $mntname=$mnt - aborting"
+>  		echo "Already mounted result:"
+>  		echo $mount_rec
+>  		return 2 # 2 = mounted on wrong mnt
+>  	fi
 >  
-> @@ -34,7 +35,9 @@ _cleanup()
->  		$UMOUNT_PROG $mnt >> $seqres.full 2>&1
->  		$LVM_PROG vgremove -f $vgname >>$seqres.full 2>&1
->  		$LVM_PROG pvremove -f $SCRATCH_DEV >>$seqres.full 2>&1
-> -		test $? -eq 0 && break
-> +		pv_ret=$?
-> +		$UDEV_SETTLE_PROG
-> +		test $pv_ret -eq 0 && break
->  		sleep 2
->  	done
->  }
-> diff --git a/tests/generic/108 b/tests/generic/108
-> index 7dd426c1..b7797e8f 100755
-> --- a/tests/generic/108
-> +++ b/tests/generic/108
-> @@ -21,6 +21,7 @@ _cleanup()
->  	$UMOUNT_PROG $SCRATCH_MNT >>$seqres.full 2>&1
->  	$LVM_PROG vgremove -f $vgname >>$seqres.full 2>&1
->  	$LVM_PROG pvremove -f $SCRATCH_DEV $SCSI_DEBUG_DEV >>$seqres.full 2>&1
-> +	$UDEV_SETTLE_PROG
->  	_put_scsi_debug_dev
->  	rm -f $tmp.*
->  }
-> diff --git a/tests/generic/459 b/tests/generic/459
-> index e5e5e9ab..5b44e245 100755
-> --- a/tests/generic/459
-> +++ b/tests/generic/459
-> @@ -29,6 +29,7 @@ _cleanup()
->  	$UMOUNT_PROG $SCRATCH_MNT >>$seqres.full 2>&1
->  	$LVM_PROG vgremove -ff $vgname >>$seqres.full 2>&1
->  	$LVM_PROG pvremove -ff $SCRATCH_DEV >>$seqres.full 2>&1
-> +	$UDEV_SETTLE_PROG
->  }
+> -	if [ -n "$type" -a "`_fs_type $dev`" != "$type" ]; then
+> +	if [ -n "$type" -a "`_fs_type $dev`" != "$type$FUSE_SUBTYP" ]; then
+>  		echo "$devname=$dev is mounted but not a type $type filesystem"
+>  		# raw $DF_PROG cannot handle NFS/CIFS/overlay correctly
+>  		_df_device $dev
+> @@ -1545,7 +1554,7 @@ _require_scratch_nocheck()
+>  			_notrun "this test requires a valid \$SCRATCH_MNT"
+>  		fi
+>  		;;
+> -	9p|virtiofs)
+> +	9p|fuse|virtiofs)
+>  		if [ -z "$SCRATCH_DEV" ]; then
+>  			_notrun "this test requires a valid \$SCRATCH_DEV"
+>  		fi
+> @@ -1701,7 +1710,7 @@ _require_test()
+>  			_notrun "this test requires a valid \$TEST_DIR"
+>  		fi
+>  		;;
+> -	9p|virtiofs)
+> +	9p|fuse|virtiofs)
+>  		if [ -z "$TEST_DEV" ]; then
+>  			_notrun "this test requires a valid \$TEST_DEV"
+>  		fi
+> @@ -2863,7 +2872,7 @@ _mount_or_remount_rw()
 >  
->  # Import common functions.
+>  	if [ $USE_REMOUNT -eq 0 ]; then
+>  		if [ "$FSTYP" != "overlay" ]; then
+> -			_mount -t $FSTYP $mount_opts $device $mountpoint
+> +			_mount -t $FSTYP$FUSE_SUBTYP $mount_opts $device $mountpoint
+>  		else
+>  			_overlay_mount $device $mountpoint
+>  		fi
+> @@ -3000,6 +3009,9 @@ _check_test_fs()
+>      9p)
+>  	# no way to check consistency for 9p
+>  	;;
+> +    fuse)
+> +    	# no way to check consistency for fuse
+> +    	;;
+>      virtiofs)
+>  	# no way to check consistency for virtiofs
+>  	;;
+> @@ -3061,6 +3073,9 @@ _check_scratch_fs()
+>      9p)
+>  	# no way to check consistency for 9p
+>  	;;
+> +    fuse)
+> +    	# no way to check consistency for fuse
+> +    	;;
+>      virtiofs)
+>  	# no way to check consistency for virtiofs
+>  	;;
 > -- 
-> 2.30.2
+> 2.30.1
