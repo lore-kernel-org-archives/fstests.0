@@ -7,158 +7,225 @@ X-Spam-Status: No, score=-16.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6CD8BC4338F
-	for <linux-fstests@archiver.kernel.org>; Wed, 18 Aug 2021 08:41:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A7054C4338F
+	for <linux-fstests@archiver.kernel.org>; Wed, 18 Aug 2021 11:32:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 45F5B6109E
-	for <linux-fstests@archiver.kernel.org>; Wed, 18 Aug 2021 08:41:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8BBB26102A
+	for <linux-fstests@archiver.kernel.org>; Wed, 18 Aug 2021 11:32:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238342AbhHRImc (ORCPT
+        id S235256AbhHRLdP (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 18 Aug 2021 04:42:32 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:49596 "EHLO
+        Wed, 18 Aug 2021 07:33:15 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:58694 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S237883AbhHRImb (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 18 Aug 2021 04:42:31 -0400
+        by vger.kernel.org with ESMTP id S233798AbhHRLdO (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 18 Aug 2021 07:33:14 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1629276117;
+        s=mimecast20190719; t=1629286359;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=hbxRUBryrvJvIYL5r78lzynaZ/k1IbJVZNRv0ToEbQ8=;
-        b=efTqYZGcO2mrteE+kJ+fVFAzAjxaTcJzJM7VuX3/oVpxnWNRre6evb4XfwwsqbgjmgcNS5
-        IYheb31aeNGFftRCUBrEsFIQxPwLmRRjP0/AwieQf9UeT+N0+3sPBU1pkSbFFpgz9pTvEG
-        waCgkyyvIcUArZ4klsNfkvmTkE5CA18=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-499-dcUW8guZOJWJV6zoi9V3_Q-1; Wed, 18 Aug 2021 04:41:55 -0400
-X-MC-Unique: dcUW8guZOJWJV6zoi9V3_Q-1
-Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 8F1F5107ACF5;
-        Wed, 18 Aug 2021 08:41:54 +0000 (UTC)
-Received: from localhost.localdomain (bootp-73-5-251.rhts.eng.pek2.redhat.com [10.73.5.251])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 2D8AE5C1D1;
-        Wed, 18 Aug 2021 08:41:52 +0000 (UTC)
-From:   bxue@redhat.com
-To:     fstests@vger.kernel.org
-Cc:     jack@suse.cz, Boyang Xue <bxue@redhat.com>
-Subject: [PATCH] ext4: regression test for "tune2fs -l" after ext4 shutdown
-Date:   Wed, 18 Aug 2021 16:40:56 +0800
-Message-Id: <20210818084126.4167799-1-bxue@redhat.com>
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=a90v0LtS50KTvFT1pBbw2/t1m8mtp1xmPUXygGE4Kik=;
+        b=fNFM1IcwYIPWq6ZOLNce6zQ4QOap1rFj9wKCBVj29UVnH8X9vNE5Er3N8KKwMCEEKRN9zN
+        CgD+FWBKfBwYlsOG5tJUmDBoZYgFmDUVbZ36G9WooHHwqwBFE7eKTQB/NlINorO/QdyOEI
+        UY10mnaMZkdAnCgW7HIHjraXCu0pX+0=
+Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com
+ [209.85.216.72]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-357-JnL6H-CcN86BiemvB2snmQ-1; Wed, 18 Aug 2021 07:32:38 -0400
+X-MC-Unique: JnL6H-CcN86BiemvB2snmQ-1
+Received: by mail-pj1-f72.google.com with SMTP id e2-20020a17090a3b8200b001791a53ce87so1254011pjc.0
+        for <fstests@vger.kernel.org>; Wed, 18 Aug 2021 04:32:38 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id
+         :mail-followup-to:references:mime-version:content-disposition
+         :in-reply-to;
+        bh=a90v0LtS50KTvFT1pBbw2/t1m8mtp1xmPUXygGE4Kik=;
+        b=Q3IUk1QuHYm4egBxSND2MmqgX7o1CX+jpzAYh5OdSilpxUjx0rbgPsrr7sqTgYBQ6N
+         AL94ZXieCsxRACfMG2MVw0N0T/ERZq7073IDBAXEBWJFuJRzICJDzz9EeuAQEyuu9J0Q
+         1T8IlHHB1LCU16Xrouj0xB7WTE5UwcZsBFnFPnaRpfUKCBMCcCzfj77XCPprHVv3uadl
+         7xmna+W7zAwBamdlG4k1GFar3ZLa9a/tQQD1/1v1pShubCpx0afEwJZFqTL+AYQW22zC
+         nISIHLPA3qIxLlC59C+Xv2CWnJROkIJDqAQIG0YT8c0aSDdoWrqpoYs6O8xR/vPTXP1x
+         Mk+Q==
+X-Gm-Message-State: AOAM531e/9WzLcojMjkhr+Mo3sjDkVE2ihxJ6qE5zAJzRUCxj25bvegw
+        1t88+5+Nl8Vas7KrJH4iys0dqz5XGDMP8WMHLJfyfP3wu4SNyvd0/Ky1kNwjLXPHvIizldKHdRn
+        RenHlTLZydCoA1ds8Qw==
+X-Received: by 2002:a17:90a:7283:: with SMTP id e3mr9038994pjg.65.1629286357861;
+        Wed, 18 Aug 2021 04:32:37 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJymtAvfM+TxenxCGQyyOE7h/xyOk3irlrBNTqkSpFulNm1Ld9DMq1TFvzi7jrG3wXEjNrWTXg==
+X-Received: by 2002:a17:90a:7283:: with SMTP id e3mr9038975pjg.65.1629286357607;
+        Wed, 18 Aug 2021 04:32:37 -0700 (PDT)
+Received: from fedora ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id q3sm7511860pgf.18.2021.08.18.04.32.35
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 18 Aug 2021 04:32:37 -0700 (PDT)
+Date:   Wed, 18 Aug 2021 19:45:17 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     bxue@redhat.com
+Cc:     fstests@vger.kernel.org, jack@suse.cz, linux-ext4@vger.kernel.org
+Subject: Re: [PATCH] ext4: regression test for "tune2fs -l" after ext4
+ shutdown
+Message-ID: <20210818114517.kqvfzu2vd45vuhze@fedora>
+Mail-Followup-To: bxue@redhat.com, fstests@vger.kernel.org, jack@suse.cz,
+        linux-ext4@vger.kernel.org
+References: <20210818084126.4167799-1-bxue@redhat.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.16
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210818084126.4167799-1-bxue@redhat.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Boyang Xue <bxue@redhat.com>
+On Wed, Aug 18, 2021 at 04:40:56PM +0800, bxue@redhat.com wrote:
+> From: Boyang Xue <bxue@redhat.com>
+> 
+> Regression test for:
+> 
+> ext4: Fix tune2fs checksum failure for mounted filesystem
 
-Regression test for:
+Better to specify the commit id number. I saw Ted has applied that patch:
 
-ext4: Fix tune2fs checksum failure for mounted filesystem
+https://lore.kernel.org/linux-ext4/162895105421.460437.8931255765382647790.b4-ty@mit.edu/
 
-Signed-off-by: Boyang Xue <bxue@redhat.com>
----
-Hi,
+And maybe you can describe *a little* more in commit log.
 
-This is a new regression test for the patch
+> 
+> Signed-off-by: Boyang Xue <bxue@redhat.com>
+> ---
+> Hi,
+> 
+> This is a new regression test for the patch
+> 
+> ```
+> ext4: Fix tune2fs checksum failure for mounted filesystem
+> 
+> Commit 81414b4dd48 ("ext4: remove redundant sb checksum recomputation")
+> removed checksum recalculation after updating superblock free space /
+> inode counters in ext4_fill_super() based on the fact that we will
+> recalculate the checksum on superblock writeout. That is correct
+> assumption but until the writeout happens (which can take a long time)
+> the checksum is incorrect in the buffer cache and if tune2fs is called
+> in that time window it will complain. So return back the checksum
+> recalculation and add a comment explaining the tune2fs peculiarity.
+> 
+> Fixes: 81414b4dd48f ("ext4: remove redundant sb checksum recomputation")
+> Reported-by: Boyang Xue <bxue@xxxxxxxxxx>
+> Signed-off-by: Jan Kara <jack@xxxxxxx>
+> ```
+> 
+> It's expected to fail on kernels from the kernel-5.11-rc1 to the latest
+> version, where tune2fs fails with:
+> 
+> ```
+> tune2fs 1.46.2 (28-Feb-2021)
+> tune2fs: Superblock checksum does not match superblock while trying to
+> open /dev/loop0
+> Couldn't find valid filesystem superblock.
+> ```
+> 
+> Please help review this test, Thanks!
+> 
+> -Boyang
+> 
+>  tests/ext4/309     | 42 ++++++++++++++++++++++++++++++++++++++++++
+>  tests/ext4/309.out |  2 ++
+>  2 files changed, 44 insertions(+)
+>  create mode 100755 tests/ext4/309
+>  create mode 100644 tests/ext4/309.out
+> 
+> diff --git a/tests/ext4/309 b/tests/ext4/309
+> new file mode 100755
+> index 00000000..ae335617
+> --- /dev/null
+> +++ b/tests/ext4/309
+> @@ -0,0 +1,42 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2021 YOUR NAME HERE.  All Rights Reserved.
+                        ^^^^^^^^^^^^^^
+                       Write your copyright
 
-```
-ext4: Fix tune2fs checksum failure for mounted filesystem
+> +#
+> +# FS QA Test 309
+> +#
+> +# Test that tune2fs doesn't fail after ext4 shutdown
+> +# Regression test for commit:
+> +# ext4: Fix tune2fs checksum failure for mounted filesystem
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto rw quick
+> +
+> +_cleanup()
+> +{
+> +	_scratch_unmount
+> +}
 
-Commit 81414b4dd48 ("ext4: remove redundant sb checksum recomputation")
-removed checksum recalculation after updating superblock free space /
-inode counters in ext4_fill_super() based on the fact that we will
-recalculate the checksum on superblock writeout. That is correct
-assumption but until the writeout happens (which can take a long time)
-the checksum is incorrect in the buffer cache and if tune2fs is called
-in that time window it will complain. So return back the checksum
-recalculation and add a comment explaining the tune2fs peculiarity.
+I think the umount isn't necessary, so the specific _cleanup isn't
+needed either.
 
-Fixes: 81414b4dd48f ("ext4: remove redundant sb checksum recomputation")
-Reported-by: Boyang Xue <bxue@xxxxxxxxxx>
-Signed-off-by: Jan Kara <jack@xxxxxxx>
-```
+> +
+> +# Import common functions.
+> +. ./common/filter
 
-It's expected to fail on kernels from the kernel-5.11-rc1 to the latest
-version, where tune2fs fails with:
+Do you use any filter helpers below?
 
-```
-tune2fs 1.46.2 (28-Feb-2021)
-tune2fs: Superblock checksum does not match superblock while trying to
-open /dev/loop0
-Couldn't find valid filesystem superblock.
-```
+> +
+> +# real QA test starts here
+> +_supported_fs ext4
 
-Please help review this test, Thanks!
+I'm wondering if this case can be a generic case, there's nothing
+ext4 specified operations, except this line:
 
--Boyang
+"$TUNE2FS_PROG -l $SCRATCH_DEV"
 
- tests/ext4/309     | 42 ++++++++++++++++++++++++++++++++++++++++++
- tests/ext4/309.out |  2 ++
- 2 files changed, 44 insertions(+)
- create mode 100755 tests/ext4/309
- create mode 100644 tests/ext4/309.out
+Hmm... if we can change this line to something likes _get_fs_super(),
+it might help to make this test to be a generic test.
 
-diff --git a/tests/ext4/309 b/tests/ext4/309
-new file mode 100755
-index 00000000..ae335617
---- /dev/null
-+++ b/tests/ext4/309
-@@ -0,0 +1,42 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2021 YOUR NAME HERE.  All Rights Reserved.
-+#
-+# FS QA Test 309
-+#
-+# Test that tune2fs doesn't fail after ext4 shutdown
-+# Regression test for commit:
-+# ext4: Fix tune2fs checksum failure for mounted filesystem
-+#
-+. ./common/preamble
-+_begin_fstest auto rw quick
-+
-+_cleanup()
-+{
-+	_scratch_unmount
-+}
-+
-+# Import common functions.
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs ext4
-+_require_scratch
-+_require_scratch_shutdown
-+_require_command "$TUNE2FS_PROG" tune2fs
-+
-+echo "Silence is golden"
-+
-+_scratch_mkfs >/dev/null 2>&1
-+_scratch_mount
-+echo "ext4/309" > $SCRATCH_MNT/309.tmp
-+_scratch_shutdown
-+_scratch_cycle_mount
-+$TUNE2FS_PROG -l $SCRATCH_DEV >> $seqres.full 2>&1
-+if [ $? -eq 0 ]; then
-+	status=0
-+else
-+	status=1
-+fi
-+
-+exit
-diff --git a/tests/ext4/309.out b/tests/ext4/309.out
-new file mode 100644
-index 00000000..56330d65
---- /dev/null
-+++ b/tests/ext4/309.out
-@@ -0,0 +1,2 @@
-+QA output created by 309
-+Silence is golden
--- 
-2.27.0
+> +_require_scratch
+> +_require_scratch_shutdown
+> +_require_command "$TUNE2FS_PROG" tune2fs
+> +
+> +echo "Silence is golden"
+> +
+> +_scratch_mkfs >/dev/null 2>&1
+> +_scratch_mount
+> +echo "ext4/309" > $SCRATCH_MNT/309.tmp
+
+It's sure this case will be "ext4/309", although you use "309" won't
+affect anything.
+
+> +_scratch_shutdown
+> +_scratch_cycle_mount
+> +$TUNE2FS_PROG -l $SCRATCH_DEV >> $seqres.full 2>&1
+> +if [ $? -eq 0 ]; then
+> +	status=0
+> +else
+> +	status=1
+> +fi
+
+Don't need to change the status value, how about write as:
+
+$TUNE2FS_PROG -l $SCRATCH_DEV >/dev/null
+
+The error output will break the golden image directly.
+
+( cc ext4 mailist, to get more review)
+
+Thanks,
+Zorro
+
+> +
+> +exit
+> diff --git a/tests/ext4/309.out b/tests/ext4/309.out
+> new file mode 100644
+> index 00000000..56330d65
+> --- /dev/null
+> +++ b/tests/ext4/309.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 309
+> +Silence is golden
+> -- 
+> 2.27.0
+> 
 
