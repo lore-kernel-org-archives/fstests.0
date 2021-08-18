@@ -2,128 +2,299 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-16.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
-	autolearn_force=no version=3.4.0
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E5727C4320E
-	for <linux-fstests@archiver.kernel.org>; Wed, 18 Aug 2021 17:04:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 72B87C4338F
+	for <linux-fstests@archiver.kernel.org>; Wed, 18 Aug 2021 17:06:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D04BA6102A
-	for <linux-fstests@archiver.kernel.org>; Wed, 18 Aug 2021 17:04:13 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5699E610A3
+	for <linux-fstests@archiver.kernel.org>; Wed, 18 Aug 2021 17:06:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233110AbhHRREr (ORCPT
+        id S229784AbhHRRGp (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 18 Aug 2021 13:04:47 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:39121 "EHLO
+        Wed, 18 Aug 2021 13:06:45 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:38328 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S231270AbhHRREr (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 18 Aug 2021 13:04:47 -0400
+        by vger.kernel.org with ESMTP id S232344AbhHRRGo (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 18 Aug 2021 13:06:44 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1629306252;
+        s=mimecast20190719; t=1629306369;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=HEJP7HIWBn8mMt7k4XmJIok4RhmUZ7RY4/8EvTqTX6U=;
-        b=BwR9kPemq4yWNXmzRQCXKscW45dKRglyzAF4gWmRSn4vTjdwEFdP1+gBP47ccGr20r1+zk
-        SkF0Fn2ETeTC7Pk7E8awXpsHuTcJfmUWMh8XK7gzWbz2Y/uA5x5guCDbi+Llw2KdFaixoW
-        O+hr/pkxUViEaXaj2QF56mdNKgVmaHk=
-Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com
- [209.85.216.69]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-184-2xiF52F3PiiAQdYeLt4X7g-1; Wed, 18 Aug 2021 13:04:10 -0400
-X-MC-Unique: 2xiF52F3PiiAQdYeLt4X7g-1
-Received: by mail-pj1-f69.google.com with SMTP id j14-20020a17090a318e00b001796382f0caso1510549pjb.5
-        for <fstests@vger.kernel.org>; Wed, 18 Aug 2021 10:04:10 -0700 (PDT)
+        bh=6zMYbqrH9XfBTnMAFqOkBm7ntXqgwxK8x8YmffvuEM8=;
+        b=Fv5dleXFLdF/dsTXsld9lqfw+KcZyXNc0ls7BP43tF75lI29CAYQd+vNjw24SP4IciymOC
+        9uMDwjZ1FwHpTrBN35OVekjp4ZAemTNJ/1CFyFKdkWYXL9/8+XWxdKRG8fwmQ2eq3iSR8X
+        JapRplaSb5QdSis03CXK3oAhndZjSIE=
+Received: from mail-pf1-f199.google.com (mail-pf1-f199.google.com
+ [209.85.210.199]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-358-c9N59zA0NQOoaXdAcrAVdw-1; Wed, 18 Aug 2021 13:06:07 -0400
+X-MC-Unique: c9N59zA0NQOoaXdAcrAVdw-1
+Received: by mail-pf1-f199.google.com with SMTP id b10-20020a056a0002ca00b003e1bfef6c57so1633516pft.13
+        for <fstests@vger.kernel.org>; Wed, 18 Aug 2021 10:06:07 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:date:from:to:cc:subject:message-id
          :mail-followup-to:references:mime-version:content-disposition
          :in-reply-to;
-        bh=HEJP7HIWBn8mMt7k4XmJIok4RhmUZ7RY4/8EvTqTX6U=;
-        b=kORlR/sqLIn7n8+5NIVZy1cLFRv/vON46nbNnP+x1ZFujVBsal75t2K9+tn8xYq8pI
-         eK99PhwBDdwPo1QNJ8U5N7CQZtgza7Bl9hyM227+kxM0Gws7XShJdSEnYYnANPYW4Vz0
-         AwyBNyaSnIOH0Ymd2N2/JdcR4EAhZnVXpin0R+E/iPybHWlwukY6Z6lBYQ6NJLlNpTAE
-         jFZxdW4XjwF9MEdzF/bofTHs2sUvgJFesKtrpivYbjutcFdxmUjVHAtW9oqymA+sqHg3
-         L+GVaXF4g2L01B2Nl/U31yJqCIZNcEI9yV68GnGWggfKLkAZS0Ic4emDgmIs3Iek2g0F
-         PStA==
-X-Gm-Message-State: AOAM532GifgwFPp7CBvbJvHOPnMPYFlGXJkpNAuiMCp4/nDXeM2uyPAl
-        69knoBh0/GG2g4j7rkk5rfam1Lq5XXMtDlsa5Lp0qacvWc9pQvbwh0n3uGimfXcMCnbpd15qSaP
-        Ib/MLurt17od/XAthlw==
-X-Received: by 2002:a63:f154:: with SMTP id o20mr9767020pgk.172.1629306249640;
-        Wed, 18 Aug 2021 10:04:09 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJyiV0B+pxkwgeEv7B1cWz1zMVlwV1ICw0gS5kmdxk3Ssr7n8n+fPJcpBbOHmbzPD5tf1R4m2Q==
-X-Received: by 2002:a63:f154:: with SMTP id o20mr9767001pgk.172.1629306249410;
-        Wed, 18 Aug 2021 10:04:09 -0700 (PDT)
+        bh=6zMYbqrH9XfBTnMAFqOkBm7ntXqgwxK8x8YmffvuEM8=;
+        b=RAaSRvHO2z7tS4BzPYpS6BWeY7pgub00HjP2FOkalZoAa1NZFj9kFGWf6eE92Jvzt0
+         yFVHIRBu9ugUWTQSzQpeMxKnqsniX/fO6ne12tmyEt0ozoAW+XBy9Zpmxct1iq5+SITE
+         ACr7R3CNSE4QkWgG6NJ5/XUrEZbneRDG2BFOOlN7g4gUhLbawZNsGAhBIT3a+sho+stV
+         9ljWPB0qgQxxbmKhNI2rNMG57gklmbXGY21L8/mVFOhnHizqWfPxMYqCIIg2r6/2w5AB
+         JAFuL/13kQtlCLED6/V1usbUUxvbuPH9d1D6iz+jhqAtXvzNaGakHeoEVD6ep79KR922
+         9PWQ==
+X-Gm-Message-State: AOAM530AclQcjL6mLHph3GarWaV5mXy/gGgmXJBzuc5FLrZkF8U7te5A
+        Dk2Ly68nd8bhDqR1m+OmsC6CdbATAhN+syaglrnoO+MNcMmqXv6pfkd36iSHTWYd+xxtpYccQ/Y
+        h5EltI0+B3ogZt+zziA==
+X-Received: by 2002:a17:902:b593:b0:12d:7aa5:de2d with SMTP id a19-20020a170902b59300b0012d7aa5de2dmr8164763pls.31.1629306366758;
+        Wed, 18 Aug 2021 10:06:06 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJx2GF2JspdCJ9qA7UgzPjj1gvn8JSxW9suaApaJ3Bmh6GDaVQNwOaebKgyHxuPcH9NqERCH9w==
+X-Received: by 2002:a17:902:b593:b0:12d:7aa5:de2d with SMTP id a19-20020a170902b59300b0012d7aa5de2dmr8164743pls.31.1629306366517;
+        Wed, 18 Aug 2021 10:06:06 -0700 (PDT)
 Received: from fedora ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id j35sm323274pgm.55.2021.08.18.10.04.07
+        by smtp.gmail.com with ESMTPSA id p3sm323144pfw.152.2021.08.18.10.06.04
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 18 Aug 2021 10:04:09 -0700 (PDT)
-Date:   Thu, 19 Aug 2021 01:16:47 +0800
+        Wed, 18 Aug 2021 10:06:06 -0700 (PDT)
+Date:   Thu, 19 Aug 2021 01:18:44 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     Jan Kara <jack@suse.cz>
-Cc:     Boyang Xue <bxue@redhat.com>, fstests@vger.kernel.org,
-        linux-ext4@vger.kernel.org
-Subject: Re: [PATCH] ext4: regression test for "tune2fs -l" after ext4
- shutdown
-Message-ID: <20210818171647.pllyrawwdl7cppsl@fedora>
-Mail-Followup-To: Jan Kara <jack@suse.cz>, Boyang Xue <bxue@redhat.com>,
-        fstests@vger.kernel.org, linux-ext4@vger.kernel.org
-References: <20210818084126.4167799-1-bxue@redhat.com>
- <20210818114517.kqvfzu2vd45vuhze@fedora>
- <CAHLe9YZcuo2K6ELT0p1c6sfzwkSgikeiyNect4phEoCt8vTPXw@mail.gmail.com>
- <20210818142601.GF28119@quack2.suse.cz>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org, guan@eryu.me
+Subject: Re: [PATCH 2/2] generic: test shutdowns of a nested filesystem
+Message-ID: <20210818171844.zkuwc7etsyd342oo@fedora>
+Mail-Followup-To: "Darrick J. Wong" <djwong@kernel.org>, guaneryu@gmail.com,
+        linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me
+References: <162924439425.779465.16029390956507261795.stgit@magnolia>
+ <162924440518.779465.6907507760500586987.stgit@magnolia>
+ <20210818070654.hmhq7g5t4u3xueaj@fedora>
+ <20210818155526.GH12640@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210818142601.GF28119@quack2.suse.cz>
+In-Reply-To: <20210818155526.GH12640@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Aug 18, 2021 at 04:26:01PM +0200, Jan Kara wrote:
-> On Wed 18-08-21 21:20:44, Boyang Xue wrote:
-> > > > +
-> > > > +# real QA test starts here
-> > > > +_supported_fs ext4
-> > >
-> > > I'm wondering if this case can be a generic case, there's nothing
-> > > ext4 specified operations, except this line:
-> > >
-> > > "$TUNE2FS_PROG -l $SCRATCH_DEV"
-> > >
-> > > Hmm... if we can change this line to something likes _get_fs_super(),
-> > > it might help to make this test to be a generic test.
+On Wed, Aug 18, 2021 at 08:55:26AM -0700, Darrick J. Wong wrote:
+> On Wed, Aug 18, 2021 at 03:06:54PM +0800, Zorro Lang wrote:
+> > On Tue, Aug 17, 2021 at 04:53:25PM -0700, Darrick J. Wong wrote:
+> > > From: Darrick J. Wong <djwong@kernel.org>
+> > > 
+> > > generic/475, but we're running fsstress on a disk image inside the
+> > > scratch filesystem
+> > > 
+> > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> > > ---
 > > 
-> > I think this bug is heavily related to "tune2fs", ext4 only. So I
-> > guess an ext4 only test is enough?
+> > Good to me, thanks for this helpful test case. Just one question,
+> > is it better to use xfs_metadump with "-o" option by default?
 > 
-> FWIW I agree with Boyang here. For this test to make sense for any other
-> filesystem other the filesystem would need to read fs metadata through
-> buffer cache in _get_fs_super(). Furthermore it is somewhat ext2/3/4
-> specific (due to historical reasons) that reading superblock from the
-> buffer cache of a mounted filesystem is expected to result in something
-> sensible. Usually this is plain unsupported use...
+> _xfs_metadump already passes -a and -o.
 
-Thanks for this explanation:) I didn't ask for extending this test to be
-a generic test, just checking others ideas:) Due to although tune2fs is
-special, but the test steps are common:
-1) mkfs
-2) mount
-3) write io
-4) shutdown fs
-5) umount && mount
-6) read sb from a mounted fs (make sure using tune2fs for ext4)
+Oh, sorry, I didn't notice this line:
 
-Anyway, keep this test as ext4 only is fine for me :)
-
-Thanks,
-Zorro
+test -z "$options" && options="-a -o".
 
 > 
-> 								Honza
-> -- 
-> Jan Kara <jack@suse.com>
-> SUSE Labs, CR
+> --D
+> 
+> > Reviewed-by: Zorro Lang <zlang@redhat.com>
+> > 
+> > >  common/rc             |   20 +++++++
+> > >  tests/generic/725     |  136 +++++++++++++++++++++++++++++++++++++++++++++++++
+> > >  tests/generic/725.out |    2 +
+> > >  3 files changed, 158 insertions(+)
+> > >  create mode 100755 tests/generic/725
+> > >  create mode 100644 tests/generic/725.out
+> > > 
+> > > 
+> > > diff --git a/common/rc b/common/rc
+> > > index 84757fc1..473bfb0a 100644
+> > > --- a/common/rc
+> > > +++ b/common/rc
+> > > @@ -631,6 +631,26 @@ _ext4_metadump()
+> > >  		$DUMP_COMPRESSOR -f "$dumpfile" &>> "$seqres.full"
+> > >  }
+> > >  
+> > > +# Capture the metadata of a filesystem in a dump file for offline analysis
+> > > +_metadump_dev() {
+> > > +	local device="$1"
+> > > +	local dumpfile="$2"
+> > > +	local compressopt="$3"
+> > > +
+> > > +	case "$FSTYP" in
+> > > +	ext*)
+> > > +		_ext4_metadump $device $dumpfile $compressopt
+> > > +		;;
+> > > +	xfs)
+> > > +		_xfs_metadump $dumpfile $device none $compressopt
+> > > +		;;
+> > > +	*)
+> > > +		echo "Don't know how to metadump $FSTYP"
+> > > +		return 1
+> > > +		;;
+> > > +	esac
+> > > +}
+> > > +
+> > >  _test_mkfs()
+> > >  {
+> > >      case $FSTYP in
+> > > diff --git a/tests/generic/725 b/tests/generic/725
+> > > new file mode 100755
+> > > index 00000000..ac008fdb
+> > > --- /dev/null
+> > > +++ b/tests/generic/725
+> > > @@ -0,0 +1,136 @@
+> > > +#! /bin/bash
+> > > +# SPDX-License-Identifier: GPL-2.0
+> > > +# Copyright (c) 2021 Oracle, Inc.  All Rights Reserved.
+> > > +#
+> > > +# FS QA Test No. 725
+> > > +#
+> > > +# Test nested log recovery with repeated (simulated) disk failures.  We kick
+> > > +# off fsstress on a loopback filesystem mounted on the scratch fs, then switch
+> > > +# out the underlying scratch device with dm-error to see what happens when the
+> > > +# disk goes down.  Having taken down both fses in this manner, remount them and
+> > > +# repeat.  This test simulates VM hosts crashing to try to shake out CoW bugs
+> > > +# in writeback on the host that cause VM guests to fail to recover.
+> > > +#
+> > > +. ./common/preamble
+> > > +_begin_fstest shutdown auto log metadata eio recoveryloop
+> > > +
+> > > +_cleanup()
+> > > +{
+> > > +	cd /
+> > > +	$KILLALL_PROG -9 fsstress > /dev/null 2>&1
+> > > +	wait
+> > > +	if [ -n "$loopmnt" ]; then
+> > > +		$UMOUNT_PROG $loopmnt 2>/dev/null
+> > > +		rm -r -f $loopmnt
+> > > +	fi
+> > > +	rm -f $tmp.*
+> > > +	_dmerror_unmount
+> > > +	_dmerror_cleanup
+> > > +}
+> > > +
+> > > +# Import common functions.
+> > > +. ./common/dmerror
+> > > +. ./common/reflink
+> > > +
+> > > +# Modify as appropriate.
+> > > +_supported_fs generic
+> > > +
+> > > +_require_scratch_reflink
+> > > +_require_cp_reflink
+> > > +_require_dm_target error
+> > > +_require_command "$KILLALL_PROG" "killall"
+> > > +
+> > > +echo "Silence is golden."
+> > > +
+> > > +_scratch_mkfs >> $seqres.full 2>&1
+> > > +_require_metadata_journaling $SCRATCH_DEV
+> > > +_dmerror_init
+> > > +_dmerror_mount
+> > > +
+> > > +# Create a fs image consuming 1/3 of the scratch fs
+> > > +scratch_freesp_bytes=$(_get_available_space $SCRATCH_MNT)
+> > > +loopimg_bytes=$((scratch_freesp_bytes / 3))
+> > > +
+> > > +loopimg=$SCRATCH_MNT/testfs
+> > > +truncate -s $loopimg_bytes $loopimg
+> > > +_mkfs_dev $loopimg
+> > > +
+> > > +loopmnt=$tmp.mount
+> > > +mkdir -p $loopmnt
+> > > +
+> > > +scratch_aliveflag=$tmp.runsnap
+> > > +snap_aliveflag=$tmp.snapping
+> > > +
+> > > +snap_loop_fs() {
+> > > +	touch "$snap_aliveflag"
+> > > +	while [ -e "$scratch_aliveflag" ]; do
+> > > +		rm -f $loopimg.a
+> > > +		_cp_reflink $loopimg $loopimg.a
+> > > +		sleep 1
+> > > +	done
+> > > +	rm -f "$snap_aliveflag"
+> > > +}
+> > > +
+> > > +fsstress=($FSSTRESS_PROG $FSSTRESS_AVOID -d "$loopmnt" -n 999999 -p "$((LOAD_FACTOR * 4))")
+> > > +
+> > > +for i in $(seq 1 $((25 * TIME_FACTOR)) ); do
+> > > +	touch $scratch_aliveflag
+> > > +	snap_loop_fs >> $seqres.full 2>&1 &
+> > > +
+> > > +	if ! _mount $loopimg $loopmnt -o loop; then
+> > > +		rm -f $scratch_aliveflag
+> > > +		_metadump_dev $loopimg $seqres.loop.$i.md
+> > > +		_fail "iteration $i loopimg mount failed"
+> > > +		break
+> > > +	fi
+> > > +
+> > > +	("${fsstress[@]}" >> $seqres.full &) > /dev/null 2>&1
+> > > +
+> > > +	# purposely include 0 second sleeps to test shutdown immediately after
+> > > +	# recovery
+> > > +	sleep $((RANDOM % (3 * TIME_FACTOR) ))
+> > > +	rm -f $scratch_aliveflag
+> > > +
+> > > +	# This test aims to simulate sudden disk failure, which means that we
+> > > +	# do not want to quiesce the filesystem or otherwise give it a chance
+> > > +	# to flush its logs.  Therefore we want to call dmsetup with the
+> > > +	# --nolockfs parameter; to make this happen we must call the load
+> > > +	# error table helper *without* 'lockfs'.
+> > > +	_dmerror_load_error_table
+> > > +
+> > > +	ps -e | grep fsstress > /dev/null 2>&1
+> > > +	while [ $? -eq 0 ]; do
+> > > +		$KILLALL_PROG -9 fsstress > /dev/null 2>&1
+> > > +		wait > /dev/null 2>&1
+> > > +		ps -e | grep fsstress > /dev/null 2>&1
+> > > +	done
+> > > +	for ((i = 0; i < 10; i++)); do
+> > > +		test -e "$snap_aliveflag" || break
+> > > +		sleep 1
+> > > +	done
+> > > +
+> > > +	# Mount again to replay log after loading working table, so we have a
+> > > +	# consistent fs after test.
+> > > +	$UMOUNT_PROG $loopmnt
+> > > +	_dmerror_unmount || _fail "iteration $i scratch unmount failed"
+> > > +	_dmerror_load_working_table
+> > > +	if ! _dmerror_mount; then
+> > > +		_metadump_dev $DMERROR_DEV $seqres.scratch.$i.md
+> > > +		_fail "iteration $i scratch mount failed"
+> > > +	fi
+> > > +done
+> > > +
+> > > +# Make sure the fs image file is ok
+> > > +if [ -f "$loopimg" ]; then
+> > > +	if _mount $loopimg $loopmnt -o loop; then
+> > > +		$UMOUNT_PROG $loopmnt &> /dev/null
+> > > +	else
+> > > +		_metadump_dev $DMERROR_DEV $seqres.scratch.final.md
+> > > +		echo "final scratch mount failed"
+> > > +	fi
+> > > +	SCRATCH_RTDEV= SCRATCH_LOGDEV= _check_scratch_fs $loopimg
+> > > +fi
+> > > +
+> > > +# success, all done; let the test harness check the scratch fs
+> > > +status=0
+> > > +exit
+> > > diff --git a/tests/generic/725.out b/tests/generic/725.out
+> > > new file mode 100644
+> > > index 00000000..ed73a9fc
+> > > --- /dev/null
+> > > +++ b/tests/generic/725.out
+> > > @@ -0,0 +1,2 @@
+> > > +QA output created by 725
+> > > +Silence is golden.
+> > > 
+> > 
 > 
 
