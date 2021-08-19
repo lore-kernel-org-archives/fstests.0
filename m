@@ -2,299 +2,142 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 72B87C4338F
-	for <linux-fstests@archiver.kernel.org>; Wed, 18 Aug 2021 17:06:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DDFB3C4338F
+	for <linux-fstests@archiver.kernel.org>; Thu, 19 Aug 2021 01:43:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5699E610A3
-	for <linux-fstests@archiver.kernel.org>; Wed, 18 Aug 2021 17:06:11 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B385A610A1
+	for <linux-fstests@archiver.kernel.org>; Thu, 19 Aug 2021 01:43:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229784AbhHRRGp (ORCPT
+        id S235348AbhHSBoD (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 18 Aug 2021 13:06:45 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:38328 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S232344AbhHRRGo (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 18 Aug 2021 13:06:44 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1629306369;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=6zMYbqrH9XfBTnMAFqOkBm7ntXqgwxK8x8YmffvuEM8=;
-        b=Fv5dleXFLdF/dsTXsld9lqfw+KcZyXNc0ls7BP43tF75lI29CAYQd+vNjw24SP4IciymOC
-        9uMDwjZ1FwHpTrBN35OVekjp4ZAemTNJ/1CFyFKdkWYXL9/8+XWxdKRG8fwmQ2eq3iSR8X
-        JapRplaSb5QdSis03CXK3oAhndZjSIE=
-Received: from mail-pf1-f199.google.com (mail-pf1-f199.google.com
- [209.85.210.199]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-358-c9N59zA0NQOoaXdAcrAVdw-1; Wed, 18 Aug 2021 13:06:07 -0400
-X-MC-Unique: c9N59zA0NQOoaXdAcrAVdw-1
-Received: by mail-pf1-f199.google.com with SMTP id b10-20020a056a0002ca00b003e1bfef6c57so1633516pft.13
-        for <fstests@vger.kernel.org>; Wed, 18 Aug 2021 10:06:07 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id
-         :mail-followup-to:references:mime-version:content-disposition
-         :in-reply-to;
-        bh=6zMYbqrH9XfBTnMAFqOkBm7ntXqgwxK8x8YmffvuEM8=;
-        b=RAaSRvHO2z7tS4BzPYpS6BWeY7pgub00HjP2FOkalZoAa1NZFj9kFGWf6eE92Jvzt0
-         yFVHIRBu9ugUWTQSzQpeMxKnqsniX/fO6ne12tmyEt0ozoAW+XBy9Zpmxct1iq5+SITE
-         ACr7R3CNSE4QkWgG6NJ5/XUrEZbneRDG2BFOOlN7g4gUhLbawZNsGAhBIT3a+sho+stV
-         9ljWPB0qgQxxbmKhNI2rNMG57gklmbXGY21L8/mVFOhnHizqWfPxMYqCIIg2r6/2w5AB
-         JAFuL/13kQtlCLED6/V1usbUUxvbuPH9d1D6iz+jhqAtXvzNaGakHeoEVD6ep79KR922
-         9PWQ==
-X-Gm-Message-State: AOAM530AclQcjL6mLHph3GarWaV5mXy/gGgmXJBzuc5FLrZkF8U7te5A
-        Dk2Ly68nd8bhDqR1m+OmsC6CdbATAhN+syaglrnoO+MNcMmqXv6pfkd36iSHTWYd+xxtpYccQ/Y
-        h5EltI0+B3ogZt+zziA==
-X-Received: by 2002:a17:902:b593:b0:12d:7aa5:de2d with SMTP id a19-20020a170902b59300b0012d7aa5de2dmr8164763pls.31.1629306366758;
-        Wed, 18 Aug 2021 10:06:06 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJx2GF2JspdCJ9qA7UgzPjj1gvn8JSxW9suaApaJ3Bmh6GDaVQNwOaebKgyHxuPcH9NqERCH9w==
-X-Received: by 2002:a17:902:b593:b0:12d:7aa5:de2d with SMTP id a19-20020a170902b59300b0012d7aa5de2dmr8164743pls.31.1629306366517;
-        Wed, 18 Aug 2021 10:06:06 -0700 (PDT)
-Received: from fedora ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id p3sm323144pfw.152.2021.08.18.10.06.04
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 18 Aug 2021 10:06:06 -0700 (PDT)
-Date:   Thu, 19 Aug 2021 01:18:44 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org, guan@eryu.me
-Subject: Re: [PATCH 2/2] generic: test shutdowns of a nested filesystem
-Message-ID: <20210818171844.zkuwc7etsyd342oo@fedora>
-Mail-Followup-To: "Darrick J. Wong" <djwong@kernel.org>, guaneryu@gmail.com,
-        linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me
-References: <162924439425.779465.16029390956507261795.stgit@magnolia>
- <162924440518.779465.6907507760500586987.stgit@magnolia>
- <20210818070654.hmhq7g5t4u3xueaj@fedora>
- <20210818155526.GH12640@magnolia>
+        Wed, 18 Aug 2021 21:44:03 -0400
+Received: from mail.kernel.org ([198.145.29.99]:40620 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S234194AbhHSBoC (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 18 Aug 2021 21:44:02 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 257D3610A6;
+        Thu, 19 Aug 2021 01:43:27 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1629337407;
+        bh=GC3zQLwOCTXI1Hy8arlkjDvFnmMVXirkECLD9NWUEK8=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=Bhr/l2gh1DWFy643i6FLr5pk+Lfa1MGvmI3G1CV5wpNoFsP29zKcOoQVo6bz0yetv
+         QOK6EWOvg4y1LgXvpXKj341N2p04UZ6df2EWFj02+0+lpXv29wbWy4Gz3i7qTEKeLt
+         yD4CWmV5Xck5zmkcy8nlMSWyekzFI7gjgDz3ZrEunvLtIjPQzSvPJAL1QuHbzooS0j
+         g7v8ZxrpodgVfmr3y2eIKWmAeQWrjr/VDJtBZ9yaHAieiBF/bzP76ZNnEZL/rdgt3B
+         bWe2USL7Aq7ja1h5jZt9tDT0IjsGzTDDsj28KmbZ6dme8DjPeBtIePW6BP2e8iwN+B
+         z9Lq45wygPGaQ==
+Date:   Wed, 18 Aug 2021 18:43:26 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Xu Yu <xuyu@linux.alibaba.com>
+Cc:     linux-fsdevel@vger.kernel.org, linux-mm@kvack.org,
+        hch@infradead.org, riteshh@linux.ibm.com, tytso@mit.edu,
+        gavin.dg@linux.alibaba.com, fstests <fstests@vger.kernel.org>,
+        linux-btrfs <linux-btrfs@vger.kernel.org>
+Subject: [PATCH] generic: add swapfile maxpages regression test
+Message-ID: <20210819014326.GC12597@magnolia>
+References: <db99c25a8e2a662046e498fd13e5f0c35364164a.1629286473.git.xuyu@linux.alibaba.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210818155526.GH12640@magnolia>
+In-Reply-To: <db99c25a8e2a662046e498fd13e5f0c35364164a.1629286473.git.xuyu@linux.alibaba.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Aug 18, 2021 at 08:55:26AM -0700, Darrick J. Wong wrote:
-> On Wed, Aug 18, 2021 at 03:06:54PM +0800, Zorro Lang wrote:
-> > On Tue, Aug 17, 2021 at 04:53:25PM -0700, Darrick J. Wong wrote:
-> > > From: Darrick J. Wong <djwong@kernel.org>
-> > > 
-> > > generic/475, but we're running fsstress on a disk image inside the
-> > > scratch filesystem
-> > > 
-> > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > > ---
-> > 
-> > Good to me, thanks for this helpful test case. Just one question,
-> > is it better to use xfs_metadump with "-o" option by default?
-> 
-> _xfs_metadump already passes -a and -o.
+From: Darrick J. Wong <djwong@kernel.org>
 
-Oh, sorry, I didn't notice this line:
+Add regression test for "mm/swap: consider max pages in
+iomap_swapfile_add_extent".
 
-test -z "$options" && options="-a -o".
+Cc: Gang Deng <gavin.dg@linux.alibaba.com>
+Cc: Xu Yu <xuyu@linux.alibaba.com>
+Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+---
+ tests/generic/727     |   62 +++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/727.out |    2 ++
+ 2 files changed, 64 insertions(+)
+ create mode 100755 tests/generic/727
+ create mode 100644 tests/generic/727.out
 
-> 
-> --D
-> 
-> > Reviewed-by: Zorro Lang <zlang@redhat.com>
-> > 
-> > >  common/rc             |   20 +++++++
-> > >  tests/generic/725     |  136 +++++++++++++++++++++++++++++++++++++++++++++++++
-> > >  tests/generic/725.out |    2 +
-> > >  3 files changed, 158 insertions(+)
-> > >  create mode 100755 tests/generic/725
-> > >  create mode 100644 tests/generic/725.out
-> > > 
-> > > 
-> > > diff --git a/common/rc b/common/rc
-> > > index 84757fc1..473bfb0a 100644
-> > > --- a/common/rc
-> > > +++ b/common/rc
-> > > @@ -631,6 +631,26 @@ _ext4_metadump()
-> > >  		$DUMP_COMPRESSOR -f "$dumpfile" &>> "$seqres.full"
-> > >  }
-> > >  
-> > > +# Capture the metadata of a filesystem in a dump file for offline analysis
-> > > +_metadump_dev() {
-> > > +	local device="$1"
-> > > +	local dumpfile="$2"
-> > > +	local compressopt="$3"
-> > > +
-> > > +	case "$FSTYP" in
-> > > +	ext*)
-> > > +		_ext4_metadump $device $dumpfile $compressopt
-> > > +		;;
-> > > +	xfs)
-> > > +		_xfs_metadump $dumpfile $device none $compressopt
-> > > +		;;
-> > > +	*)
-> > > +		echo "Don't know how to metadump $FSTYP"
-> > > +		return 1
-> > > +		;;
-> > > +	esac
-> > > +}
-> > > +
-> > >  _test_mkfs()
-> > >  {
-> > >      case $FSTYP in
-> > > diff --git a/tests/generic/725 b/tests/generic/725
-> > > new file mode 100755
-> > > index 00000000..ac008fdb
-> > > --- /dev/null
-> > > +++ b/tests/generic/725
-> > > @@ -0,0 +1,136 @@
-> > > +#! /bin/bash
-> > > +# SPDX-License-Identifier: GPL-2.0
-> > > +# Copyright (c) 2021 Oracle, Inc.  All Rights Reserved.
-> > > +#
-> > > +# FS QA Test No. 725
-> > > +#
-> > > +# Test nested log recovery with repeated (simulated) disk failures.  We kick
-> > > +# off fsstress on a loopback filesystem mounted on the scratch fs, then switch
-> > > +# out the underlying scratch device with dm-error to see what happens when the
-> > > +# disk goes down.  Having taken down both fses in this manner, remount them and
-> > > +# repeat.  This test simulates VM hosts crashing to try to shake out CoW bugs
-> > > +# in writeback on the host that cause VM guests to fail to recover.
-> > > +#
-> > > +. ./common/preamble
-> > > +_begin_fstest shutdown auto log metadata eio recoveryloop
-> > > +
-> > > +_cleanup()
-> > > +{
-> > > +	cd /
-> > > +	$KILLALL_PROG -9 fsstress > /dev/null 2>&1
-> > > +	wait
-> > > +	if [ -n "$loopmnt" ]; then
-> > > +		$UMOUNT_PROG $loopmnt 2>/dev/null
-> > > +		rm -r -f $loopmnt
-> > > +	fi
-> > > +	rm -f $tmp.*
-> > > +	_dmerror_unmount
-> > > +	_dmerror_cleanup
-> > > +}
-> > > +
-> > > +# Import common functions.
-> > > +. ./common/dmerror
-> > > +. ./common/reflink
-> > > +
-> > > +# Modify as appropriate.
-> > > +_supported_fs generic
-> > > +
-> > > +_require_scratch_reflink
-> > > +_require_cp_reflink
-> > > +_require_dm_target error
-> > > +_require_command "$KILLALL_PROG" "killall"
-> > > +
-> > > +echo "Silence is golden."
-> > > +
-> > > +_scratch_mkfs >> $seqres.full 2>&1
-> > > +_require_metadata_journaling $SCRATCH_DEV
-> > > +_dmerror_init
-> > > +_dmerror_mount
-> > > +
-> > > +# Create a fs image consuming 1/3 of the scratch fs
-> > > +scratch_freesp_bytes=$(_get_available_space $SCRATCH_MNT)
-> > > +loopimg_bytes=$((scratch_freesp_bytes / 3))
-> > > +
-> > > +loopimg=$SCRATCH_MNT/testfs
-> > > +truncate -s $loopimg_bytes $loopimg
-> > > +_mkfs_dev $loopimg
-> > > +
-> > > +loopmnt=$tmp.mount
-> > > +mkdir -p $loopmnt
-> > > +
-> > > +scratch_aliveflag=$tmp.runsnap
-> > > +snap_aliveflag=$tmp.snapping
-> > > +
-> > > +snap_loop_fs() {
-> > > +	touch "$snap_aliveflag"
-> > > +	while [ -e "$scratch_aliveflag" ]; do
-> > > +		rm -f $loopimg.a
-> > > +		_cp_reflink $loopimg $loopimg.a
-> > > +		sleep 1
-> > > +	done
-> > > +	rm -f "$snap_aliveflag"
-> > > +}
-> > > +
-> > > +fsstress=($FSSTRESS_PROG $FSSTRESS_AVOID -d "$loopmnt" -n 999999 -p "$((LOAD_FACTOR * 4))")
-> > > +
-> > > +for i in $(seq 1 $((25 * TIME_FACTOR)) ); do
-> > > +	touch $scratch_aliveflag
-> > > +	snap_loop_fs >> $seqres.full 2>&1 &
-> > > +
-> > > +	if ! _mount $loopimg $loopmnt -o loop; then
-> > > +		rm -f $scratch_aliveflag
-> > > +		_metadump_dev $loopimg $seqres.loop.$i.md
-> > > +		_fail "iteration $i loopimg mount failed"
-> > > +		break
-> > > +	fi
-> > > +
-> > > +	("${fsstress[@]}" >> $seqres.full &) > /dev/null 2>&1
-> > > +
-> > > +	# purposely include 0 second sleeps to test shutdown immediately after
-> > > +	# recovery
-> > > +	sleep $((RANDOM % (3 * TIME_FACTOR) ))
-> > > +	rm -f $scratch_aliveflag
-> > > +
-> > > +	# This test aims to simulate sudden disk failure, which means that we
-> > > +	# do not want to quiesce the filesystem or otherwise give it a chance
-> > > +	# to flush its logs.  Therefore we want to call dmsetup with the
-> > > +	# --nolockfs parameter; to make this happen we must call the load
-> > > +	# error table helper *without* 'lockfs'.
-> > > +	_dmerror_load_error_table
-> > > +
-> > > +	ps -e | grep fsstress > /dev/null 2>&1
-> > > +	while [ $? -eq 0 ]; do
-> > > +		$KILLALL_PROG -9 fsstress > /dev/null 2>&1
-> > > +		wait > /dev/null 2>&1
-> > > +		ps -e | grep fsstress > /dev/null 2>&1
-> > > +	done
-> > > +	for ((i = 0; i < 10; i++)); do
-> > > +		test -e "$snap_aliveflag" || break
-> > > +		sleep 1
-> > > +	done
-> > > +
-> > > +	# Mount again to replay log after loading working table, so we have a
-> > > +	# consistent fs after test.
-> > > +	$UMOUNT_PROG $loopmnt
-> > > +	_dmerror_unmount || _fail "iteration $i scratch unmount failed"
-> > > +	_dmerror_load_working_table
-> > > +	if ! _dmerror_mount; then
-> > > +		_metadump_dev $DMERROR_DEV $seqres.scratch.$i.md
-> > > +		_fail "iteration $i scratch mount failed"
-> > > +	fi
-> > > +done
-> > > +
-> > > +# Make sure the fs image file is ok
-> > > +if [ -f "$loopimg" ]; then
-> > > +	if _mount $loopimg $loopmnt -o loop; then
-> > > +		$UMOUNT_PROG $loopmnt &> /dev/null
-> > > +	else
-> > > +		_metadump_dev $DMERROR_DEV $seqres.scratch.final.md
-> > > +		echo "final scratch mount failed"
-> > > +	fi
-> > > +	SCRATCH_RTDEV= SCRATCH_LOGDEV= _check_scratch_fs $loopimg
-> > > +fi
-> > > +
-> > > +# success, all done; let the test harness check the scratch fs
-> > > +status=0
-> > > +exit
-> > > diff --git a/tests/generic/725.out b/tests/generic/725.out
-> > > new file mode 100644
-> > > index 00000000..ed73a9fc
-> > > --- /dev/null
-> > > +++ b/tests/generic/725.out
-> > > @@ -0,0 +1,2 @@
-> > > +QA output created by 725
-> > > +Silence is golden.
-> > > 
-> > 
-> 
-
+diff --git a/tests/generic/727 b/tests/generic/727
+new file mode 100755
+index 00000000..a546ad51
+--- /dev/null
++++ b/tests/generic/727
+@@ -0,0 +1,62 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2021 Oracle.  All Rights Reserved.
++#
++# FS QA Test 727
++#
++# Regression test for "mm/swap: consider max pages in iomap_swapfile_add_extent"
++
++# Xu Yu found that the iomap swapfile activation code failed to constrain
++# itself to activating however many swap pages that the mm asked us for.  This
++# is an deviation in behavior from the classic swapfile code.  It also leads to
++# kernel memory corruption if the swapfile is cleverly constructed.
++#
++. ./common/preamble
++_begin_fstest auto swap
++
++# Override the default cleanup function.
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++	test -n "$swapfile" && swapoff $swapfile &> /dev/null
++}
++
++# real QA test starts here
++_supported_fs generic
++_require_scratch_swapfile
++
++_scratch_mkfs >> $seqres.full
++_scratch_mount >> $seqres.full
++
++# Assuming we're not borrowing a FAT16 partition from Windows 3.1, we need an
++# unlikely enough name that we can grep /proc/swaps for this.
++swapfile=$SCRATCH_MNT/386spart.par
++_format_swapfile $swapfile 1m >> $seqres.full
++
++swapfile_pages() {
++	local swapfile="$1"
++
++	grep "$swapfile" /proc/swaps | awk '{print $3}'
++}
++
++_swapon_file $swapfile
++before_pages=$(swapfile_pages "$swapfile")
++swapoff $swapfile
++
++# Extend the length of the swapfile but do not rewrite the header.
++# The subsequent swapon should set up 1MB worth of pages, not 2MB.
++$XFS_IO_PROG -f -c 'pwrite 1m 1m' $swapfile >> $seqres.full
++
++_swapon_file $swapfile
++after_pages=$(swapfile_pages "$swapfile")
++swapoff $swapfile
++
++# Both swapon attempts should have found the same number of pages.
++test "$before_pages" -eq "$after_pages" || \
++	echo "swapon added $after_pages pages, expected $before_pages"
++
++# success, all done
++echo Silence is golden
++status=0
++exit
+diff --git a/tests/generic/727.out b/tests/generic/727.out
+new file mode 100644
+index 00000000..2de2b4b2
+--- /dev/null
++++ b/tests/generic/727.out
+@@ -0,0 +1,2 @@
++QA output created by 727
++Silence is golden
