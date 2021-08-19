@@ -2,83 +2,74 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-4.0 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4C15EC4338F
-	for <linux-fstests@archiver.kernel.org>; Thu, 19 Aug 2021 19:46:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3E4AFC4338F
+	for <linux-fstests@archiver.kernel.org>; Thu, 19 Aug 2021 23:58:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 21E5E600D3
-	for <linux-fstests@archiver.kernel.org>; Thu, 19 Aug 2021 19:46:18 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2367061028
+	for <linux-fstests@archiver.kernel.org>; Thu, 19 Aug 2021 23:58:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229633AbhHSTqv (ORCPT
+        id S234367AbhHSX7d (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 19 Aug 2021 15:46:51 -0400
-Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:41900 "EHLO
-        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S229514AbhHSTqu (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 19 Aug 2021 15:46:50 -0400
-Received: from cwcc.thunk.org (pool-72-74-133-215.bstnma.fios.verizon.net [72.74.133.215])
-        (authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 17JJk81e019612
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Thu, 19 Aug 2021 15:46:09 -0400
-Received: by cwcc.thunk.org (Postfix, from userid 15806)
-        id 69B0115C3DBB; Thu, 19 Aug 2021 15:46:08 -0400 (EDT)
-Date:   Thu, 19 Aug 2021 15:46:08 -0400
-From:   "Theodore Ts'o" <tytso@mit.edu>
-To:     Nikolay Borisov <nborisov@suse.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] generic/70: Use scratch device instead of test.
-Message-ID: <YR61AOeWnxmyooF4@mit.edu>
-References: <20210819131355.304528-1-nborisov@suse.com>
- <20210819150050.jweulrtgjeh57wac@fedora>
- <0b70908b-9b9f-d606-1d49-45bee40df1ea@suse.com>
+        Thu, 19 Aug 2021 19:59:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34416 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S233370AbhHSX7d (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 19 Aug 2021 19:59:33 -0400
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5024DC061575;
+        Thu, 19 Aug 2021 16:58:56 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20210309; h=Sender:In-Reply-To:Content-Type:
+        MIME-Version:References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=ysAt0qOVkqX0b1YBP0DRQAcUuHGsRwUySI/CHhqjRbo=; b=vd9CEefNBQyCsStldq6Z6g2osU
+        dHrLcAK8of6dQ6aa8VWDCFMuIj0IFZ/czQab0WoVeE9dby0kEcvOsAAViwiLHTj/58fZWSrjsIq6p
+        4odimVrW71Y6eKzNfq+Md18lSM/DraMnP6frgztMO5XzfwmzHcswMyp+wh91AaHlLo7JVoXZAXCsf
+        hPSaLshCNjIxrgw/EPMnBhXS6TzNVwBorfAFloqWiFN99yo0Sl2asKnXniDmdw9xzba+HLhyCedTl
+        6oMp3SPxNCQ1Up+TB6fk53TnOx+eT+BNBw01Si47g9prY9yGynsNZNNkCkN2rUvzh+e39Z8WWg1Ue
+        YvjA2ipw==;
+Received: from mcgrof by bombadil.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
+        id 1mGrvw-009mXO-C3; Thu, 19 Aug 2021 23:58:52 +0000
+Date:   Thu, 19 Aug 2021 16:58:52 -0700
+From:   Luis Chamberlain <mcgrof@kernel.org>
+To:     Eryu Guan <eguan@linux.alibaba.com>
+Cc:     Eryu Guan <guan@eryu.me>, fstests@vger.kernel.org, hare@suse.de,
+        dgilbert@interlog.com, jeyu@kernel.org, lucas.demarchi@intel.com,
+        linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v2 2/3] common/module: add patient module rmmod support
+Message-ID: <YR7wPBGu1Ba/4kzR@bombadil.infradead.org>
+References: <20210811154512.1813622-1-mcgrof@kernel.org>
+ <20210811154512.1813622-3-mcgrof@kernel.org>
+ <YRkIttM75q3gLxpN@desktop>
+ <YR0TEE8lUwo6QlHw@bombadil.infradead.org>
+ <20210819022644.GP60846@e18g06458.et15sqa>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <0b70908b-9b9f-d606-1d49-45bee40df1ea@suse.com>
+In-Reply-To: <20210819022644.GP60846@e18g06458.et15sqa>
+Sender: Luis Chamberlain <mcgrof@infradead.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Aug 19, 2021 at 05:56:31PM +0300, Nikolay Borisov wrote:
-> On 19.08.21 г. 18:00, Zorro Lang wrote:
-> > On Thu, Aug 19, 2021 at 04:13:55PM +0300, Nikolay Borisov wrote:
-> >> At the end of the test the fsstress work dir is deleted, this suggests
-> >> the test really requires a scratch device and not a test device. Change
-> >> it accordingly.
-> >>
-> >> Signed-off-by: Nikolay Borisov <nborisov@suse.com>
-> >> ---
+On Thu, Aug 19, 2021 at 10:26:44AM +0800, Eryu Guan wrote:
+> On Wed, Aug 18, 2021 at 07:02:56AM -0700, Luis Chamberlain wrote:
+> > On Sun, Aug 15, 2021 at 08:29:42PM +0800, Eryu Guan wrote:
+> > > 
+> > > Use "$max_tries -ne 0" to check inters seems better.
 > > 
-> > Hmm... is there any more specific reasons to explain why have to change this
-> > TEST_DIR to SCRATCH_MNT? For example, this test hit ENOSPC in TEST_DIR, or
-> > it takes too much time to remove $TEST_DIR/fsstress in _cleanup, or use
-> > SCRATCH_DEV can cover more things, and so on. I think more specific reason
-> > can help to push this patch be merged. After all there's not a rule says
-> > if a case don't need to keep its work dir, then must use SCRATCH_DEV. Except
-> > the maintainer is more inclined to accept that :)
+> > max_tries can be "forever", in which case this is -eq 0:
+> > 
+> > $ foo="forever"; if [[ $foo -eq 0 ]]; then echo buggy; else echo ok; fi
+> > buggy
 > 
-> None of the reasons above, I just thought that stuff in $TEST_DEV lives
-> there so that it can simulate an 'aging' system. In this case this
-> doesn't seem to be the reason for it as we delete everything.
+> I see, that makes sense. Then perhaps some comments would help.
 
-Using SCRATCH_DEV requires that the file system be reformatted, since
-it doesn't necessarily exist.  So that means extra flash writes, and
-extra time to actually do the file system format.  In addition,
-sometimes SCRATCH_DEV might not be present for some test environments.
+I had sent out a v3 before seeing this request. I'll send a v4 with 
+a comment clarifying this.
 
-Hence, unless you need to use SCRATCH_DEV (because the file system
-needs to be formatted with specific mkfs options, etc.), I think the
-preference should be to use TEST_DIR.  It doesn't *hurt* that we
-create the work directory, in TEST_DIR and then delete it afterwawrds
---- where as using SCRATCH_DEV dosn't actually buy you anything, and
-might actually slow the test down a tiny bit.
-
-Cheers,
-
-					- Ted
+  Luis
