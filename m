@@ -2,153 +2,140 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+X-Spam-Status: No, score=-16.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1C814C432BE
-	for <linux-fstests@archiver.kernel.org>; Thu, 19 Aug 2021 13:15:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 62F67C4338F
+	for <linux-fstests@archiver.kernel.org>; Thu, 19 Aug 2021 14:40:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 001EB6112D
-	for <linux-fstests@archiver.kernel.org>; Thu, 19 Aug 2021 13:15:01 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 447AD6112E
+	for <linux-fstests@archiver.kernel.org>; Thu, 19 Aug 2021 14:40:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239687AbhHSNPf (ORCPT
+        id S240520AbhHSOkw (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 19 Aug 2021 09:15:35 -0400
-Received: from smtp-out1.suse.de ([195.135.220.28]:55048 "EHLO
-        smtp-out1.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239629AbhHSNPf (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 19 Aug 2021 09:15:35 -0400
-Received: from imap1.suse-dmz.suse.de (imap1.suse-dmz.suse.de [192.168.254.73])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by smtp-out1.suse.de (Postfix) with ESMTPS id 0C2AF21FBB;
-        Thu, 19 Aug 2021 13:14:58 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-        t=1629378898; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-        bh=obXqKBThWDb3zDdkdCUjvXDdSe3DjtTr2TkDlkssQng=;
-        b=gC6vHrtaSN+tRCCbolMXKjwbEdOC/c0NIu5QMJO32JKlkCSsEPD9/PI/L7WzEhPPeqhPEL
-        YbjxLzOsmofklP/TrsY8ZEDEfdVZiSq1FPABOFfM/06tTwHlWt5o0/rHoHZWQXr0Mk3cR0
-        5vjhmtkte9cDir3iT6++YvFNkyOIdAc=
-Received: from imap1.suse-dmz.suse.de (imap1.suse-dmz.suse.de [192.168.254.73])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap1.suse-dmz.suse.de (Postfix) with ESMTPS id C2A6F1340C;
-        Thu, 19 Aug 2021 13:14:57 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap1.suse-dmz.suse.de with ESMTPSA
-        id gcPXLFFZHmFvdQAAGKfGzw
-        (envelope-from <nborisov@suse.com>); Thu, 19 Aug 2021 13:14:57 +0000
-From:   Nikolay Borisov <nborisov@suse.com>
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Nikolay Borisov <nborisov@suse.com>
-Subject: [PATCH] btrfs: Add test for rename exchange behavior between subvolumes
-Date:   Thu, 19 Aug 2021 16:14:56 +0300
-Message-Id: <20210819131456.304721-1-nborisov@suse.com>
-X-Mailer: git-send-email 2.25.1
+        Thu, 19 Aug 2021 10:40:52 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:48299 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S240264AbhHSOkw (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 19 Aug 2021 10:40:52 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1629384015;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=Kz6q7Kjh1ew1ZitEOf1YBFFbVPswTpV5ukQSHrYU+Jw=;
+        b=XjerDSJQvM+XJAetJT3ux2JaCaESQnal/Y1VO/1/Q44iAIHJkJGotZGLqumK0rMp1RWg7L
+        /kzAzCN+Xl103kKBWa6J1YeNLDApiRaFDfZJpnrmdWfAcpBe1DEWwxvgVeG5GeN2MsEmjg
+        QzgmRct5rWA62bVBibuHhuE0lcUmVls=
+Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com
+ [209.85.216.71]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-552-_Q-YQbuzNI6rINkwJYwDVA-1; Thu, 19 Aug 2021 10:40:13 -0400
+X-MC-Unique: _Q-YQbuzNI6rINkwJYwDVA-1
+Received: by mail-pj1-f71.google.com with SMTP id o23-20020a17090a4217b02901774c248202so1823241pjg.9
+        for <fstests@vger.kernel.org>; Thu, 19 Aug 2021 07:40:13 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id
+         :mail-followup-to:references:mime-version:content-disposition
+         :in-reply-to;
+        bh=Kz6q7Kjh1ew1ZitEOf1YBFFbVPswTpV5ukQSHrYU+Jw=;
+        b=TtukE84une2YNGBddYJNwRwymh7KbNViG+RNiSP+yYAyiorV1pHtU0b7XngelYm5KX
+         JW2u82B3wvBkaoyDiVgzFidlJRQp31e4/u8tPTXRYy9i1r3OK3Sfyn9r3Jm5vqJV13dQ
+         Ufae+2RY3J+X1TzjKpR9w3kZEM8sSHKJMp+QM1Q/v/oY/Vh0A6M3f23uCmBSXaWwDWd8
+         kfU0Jm/yiSbPYcdrO7C2lWEX8TJLVJAJcxPojEhJEBnWIuvu+QO7NMYCwWffsav7xdZX
+         IIoGI5baQePkyfiS2x/fFVXhXWw8HptHkwBPeleSeAcJkT5ZZTdg2Z+8sUO4qDjByG42
+         f//g==
+X-Gm-Message-State: AOAM530fGURO2wAxVSKTe1sB0BohOGXG4YfnhWJMcloQqQQynSePHIIy
+        89gBZ5WokY7495acF9cnDkgM7wbVuaYQ5ZEc3CSYWldQrGmPDMaYfZ6K+i580rC4h2pdarPyTox
+        3www3VhvaFSsSq1SwyA==
+X-Received: by 2002:a65:494e:: with SMTP id q14mr14334532pgs.314.1629384012459;
+        Thu, 19 Aug 2021 07:40:12 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJyZrkEfmmDlpi8JI4Bu3U0OKmlKQ6QeUW14tgUXbrGgkILgSjzx48Fn3DUfh6qIAnnWV2BM4A==
+X-Received: by 2002:a65:494e:: with SMTP id q14mr14334520pgs.314.1629384012203;
+        Thu, 19 Aug 2021 07:40:12 -0700 (PDT)
+Received: from fedora ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id e8sm4603996pgg.31.2021.08.19.07.40.10
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 19 Aug 2021 07:40:11 -0700 (PDT)
+Date:   Thu, 19 Aug 2021 23:00:50 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Nikolay Borisov <nborisov@suse.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH] generic/70: Use scratch device instead of test.
+Message-ID: <20210819150050.jweulrtgjeh57wac@fedora>
+Mail-Followup-To: Nikolay Borisov <nborisov@suse.com>,
+        fstests@vger.kernel.org
+References: <20210819131355.304528-1-nborisov@suse.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210819131355.304528-1-nborisov@suse.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Signed-off-by: Nikolay Borisov <nborisov@suse.com>
----
- tests/btrfs/246     | 46 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/246.out | 27 ++++++++++++++++++++++++++
- 2 files changed, 73 insertions(+)
- create mode 100755 tests/btrfs/246
- create mode 100644 tests/btrfs/246.out
+On Thu, Aug 19, 2021 at 04:13:55PM +0300, Nikolay Borisov wrote:
+> At the end of the test the fsstress work dir is deleted, this suggests
+> the test really requires a scratch device and not a test device. Change
+> it accordingly.
+> 
+> Signed-off-by: Nikolay Borisov <nborisov@suse.com>
+> ---
 
-diff --git a/tests/btrfs/246 b/tests/btrfs/246
-new file mode 100755
-index 000000000000..0934932d1f22
---- /dev/null
-+++ b/tests/btrfs/246
-@@ -0,0 +1,46 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2021 SUSE Linux Products GmbH.  All Rights Reserved.
-+#
-+# FS QA Test 246
-+#
-+# Tests rename exchange behavior across subvolumes 
-+#
-+. ./common/preamble
-+_begin_fstest auto quick rename
-+
-+# Import common functions.
-+ . ./common/renameat2
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs btrfs
-+_require_renameat2 exchange
-+_require_scratch
-+
-+_scratch_mkfs >> $seqres.full 2>&1
-+_scratch_mount
-+
-+# Create 2 subvols to use as parents for the rename ops
-+$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subvol1 1>/dev/null
-+$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subvol2 1>/dev/null
-+
-+# _rename_tests_source_dest internally expects the flags variable to contain
-+# specific options to rename syscall. Ensure cross subvol ops are forbidden
-+flags="-x"
-+_rename_tests_source_dest $SCRATCH_MNT/subvol1/src $SCRATCH_MNT/subvol2/dst "cross-subvol"
-+
-+# Prepare a subvolume and a directory whose parents are different subvolumes
-+$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subvol1/sub-subvol 1>/dev/null
-+mkdir $SCRATCH_MNT/subvol2/dir
-+
-+# Ensure exchanging a subvol with a dir when both parents are different fails
-+$here/src/renameat2 -x $SCRATCH_MNT/subvol1/sub-subvol $SCRATCH_MNT/subvol2/dir
-+
-+# force transaction commit which runs the tree checker 
-+sync
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/246.out b/tests/btrfs/246.out
-new file mode 100644
-index 000000000000..d50dc28b1b40
---- /dev/null
-+++ b/tests/btrfs/246.out
-@@ -0,0 +1,27 @@
-+QA output created by 246
-+cross-subvol none/none -> No such file or directory
-+cross-subvol none/regu -> No such file or directory
-+cross-subvol none/symb -> No such file or directory
-+cross-subvol none/dire -> No such file or directory
-+cross-subvol none/tree -> No such file or directory
-+cross-subvol regu/none -> No such file or directory
-+cross-subvol regu/regu -> Invalid cross-device link
-+cross-subvol regu/symb -> Invalid cross-device link
-+cross-subvol regu/dire -> Invalid cross-device link
-+cross-subvol regu/tree -> Invalid cross-device link
-+cross-subvol symb/none -> No such file or directory
-+cross-subvol symb/regu -> Invalid cross-device link
-+cross-subvol symb/symb -> Invalid cross-device link
-+cross-subvol symb/dire -> Invalid cross-device link
-+cross-subvol symb/tree -> Invalid cross-device link
-+cross-subvol dire/none -> No such file or directory
-+cross-subvol dire/regu -> Invalid cross-device link
-+cross-subvol dire/symb -> Invalid cross-device link
-+cross-subvol dire/dire -> Invalid cross-device link
-+cross-subvol dire/tree -> Invalid cross-device link
-+cross-subvol tree/none -> No such file or directory
-+cross-subvol tree/regu -> Invalid cross-device link
-+cross-subvol tree/symb -> Invalid cross-device link
-+cross-subvol tree/dire -> Invalid cross-device link
-+cross-subvol tree/tree -> Invalid cross-device link
-+Invalid cross-device link
--- 
-2.17.1
+Hmm... is there any more specific reasons to explain why have to change this
+TEST_DIR to SCRATCH_MNT? For example, this test hit ENOSPC in TEST_DIR, or
+it takes too much time to remove $TEST_DIR/fsstress in _cleanup, or use
+SCRATCH_DEV can cover more things, and so on. I think more specific reason
+can help to push this patch be merged. After all there's not a rule says
+if a case don't need to keep its work dir, then must use SCRATCH_DEV. Except
+the maintainer is more inclined to accept that :)
+
+Thanks,
+Zorro
+
+>  tests/generic/070 | 10 +++++++---
+>  1 file changed, 7 insertions(+), 3 deletions(-)
+> 
+> diff --git a/tests/generic/070 b/tests/generic/070
+> index 678344fa011d..c98f445ae4b8 100755
+> --- a/tests/generic/070
+> +++ b/tests/generic/070
+> @@ -13,7 +13,6 @@ _begin_fstest attr udf auto quick stress
+>  _cleanup()
+>  {
+>      cd /
+> -    rm -rf $TEST_DIR/fsstress
+>      rm -f $tmp.*
+>  }
+>  
+> @@ -24,11 +23,14 @@ _cleanup()
+>  # real QA test starts here
+>  _supported_fs generic
+>  
+> -_require_test
+> +_require_scratch
+>  _require_attrs
+>  
+> +_scratch_mkfs >/dev/null 2>&1
+> +_scratch_mount
+> +
+>  FSSTRESS_ARGS=`_scale_fsstress_args \
+> -	-d $TEST_DIR/fsstress \
+> +	-d $SCRATCH_MNT \
+>  	-f allocsp=0 \
+>  	-f freesp=0 \
+>  	-f bulkstat=0 \
+> @@ -40,5 +42,7 @@ FSSTRESS_ARGS=`_scale_fsstress_args \
+>          -p 1 -n 10000 -S c`
+>  $FSSTRESS_PROG $FSSTRESS_ARGS >$seqres.full 2>&1
+>  
+> +_scratch_unmount
+> +
+>  status=$?
+>  exit
+> -- 
+> 2.17.1
+> 
 
