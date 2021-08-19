@@ -2,212 +2,106 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 97F0DC4320A
-	for <linux-fstests@archiver.kernel.org>; Thu, 19 Aug 2021 08:28:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6097CC4338F
+	for <linux-fstests@archiver.kernel.org>; Thu, 19 Aug 2021 13:13:58 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7627D6112E
-	for <linux-fstests@archiver.kernel.org>; Thu, 19 Aug 2021 08:28:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3830961101
+	for <linux-fstests@archiver.kernel.org>; Thu, 19 Aug 2021 13:13:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236854AbhHSI3K (ORCPT
+        id S233456AbhHSNOd (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 19 Aug 2021 04:29:10 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:43450 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S237043AbhHSI3K (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 19 Aug 2021 04:29:10 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1629361713;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=dg1QHNHEPcnAlUuKvEtgG0f+Yicn4eK2QW74VmzbIiM=;
-        b=JzU89ttEaYzw9KWY9qqJq/hcPaokEcBM7qgj3DP6E6yWf5GXYV4HA0wXjTbbptu2mNUEIU
-        S2F6Z7Ua5S0H6Etr+P138YHshRhSgJ6K0cDv2BsS4QSinL7p7fIVox/m4QuZ8tcZA73fHd
-        UkUMhsqAJitrcTkDJoz/4RWBj/a8LWA=
-Received: from mail-pf1-f198.google.com (mail-pf1-f198.google.com
- [209.85.210.198]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-324-HogSejVoNxGeYe4OuI0qNg-1; Thu, 19 Aug 2021 04:28:32 -0400
-X-MC-Unique: HogSejVoNxGeYe4OuI0qNg-1
-Received: by mail-pf1-f198.google.com with SMTP id h14-20020a62b40e0000b02903131bc4a1acso2712587pfn.4
-        for <fstests@vger.kernel.org>; Thu, 19 Aug 2021 01:28:32 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id
-         :mail-followup-to:references:mime-version:content-disposition
-         :in-reply-to;
-        bh=dg1QHNHEPcnAlUuKvEtgG0f+Yicn4eK2QW74VmzbIiM=;
-        b=uZR9csPMpQXksiU2PiToEThTCM2PYdcWHghM0b2urg8o2ytiAIMom3woPDUb5dW9PW
-         9YP0jkjG/XwxtICYITT1CnCmXOVdMScalhamFW+cZB/Bm6eZX+shkB1NYiWoNRh2WuII
-         4kFAKiudFY6UXfbYmer7fyh7pRh/Npe1jd/46/LhH62RpzkJinoKRGu/oS2f2CSHzmmd
-         zWzpNTPZ1/rBkRHNF7cEVhJ4RPPElsngMJK5PKMaVw0Yd9+Uioh7NsNo1wZeiLCxR7Xb
-         Z5hTl2Vf7N5dJew2OaoGlVXA8JXWzJt95AJBsiXsAGpTbqQ8LGYn4HtOkG7feLA/lFKF
-         oufw==
-X-Gm-Message-State: AOAM533dAbKDPsONm6/J0YG2opnz1P6NkgEaqDFjdKBQwUVxeLwux6N+
-        6rDSm+TfwLCWSvzM5GVrmkS1qHQojpxEAS7hYVh6QjhjiOB0Bq4+kI5hLkwwmpsw4ZQS5Z1VITf
-        0DVaENOvMPK6Ulyuqjw==
-X-Received: by 2002:aa7:9096:0:b0:3e1:72fd:a614 with SMTP id i22-20020aa79096000000b003e172fda614mr13388558pfa.56.1629361711183;
-        Thu, 19 Aug 2021 01:28:31 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJy8a556mppq2hwYTus4MA949CnEZKjrn2tP1ZzDWXTp7tkRgqW8BwlaLGcyE6bdJLFIA/XFkg==
-X-Received: by 2002:aa7:9096:0:b0:3e1:72fd:a614 with SMTP id i22-20020aa79096000000b003e172fda614mr13388539pfa.56.1629361710942;
-        Thu, 19 Aug 2021 01:28:30 -0700 (PDT)
-Received: from fedora ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id v25sm2333750pfm.202.2021.08.19.01.28.29
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 19 Aug 2021 01:28:30 -0700 (PDT)
-Date:   Thu, 19 Aug 2021 16:49:08 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     bxue@redhat.com
-Cc:     fstests@vger.kernel.org, jack@suse.cz, eguan@linux.alibaba.com,
-        linux-ext4@vger.kernel.org
-Subject: Re: [PATCH v2] ext4: regression test for "tune2fs -l" after ext4
- shutdown
-Message-ID: <20210819084908.lxdkn7lu34dzptjv@fedora>
-Mail-Followup-To: bxue@redhat.com, fstests@vger.kernel.org, jack@suse.cz,
-        eguan@linux.alibaba.com, linux-ext4@vger.kernel.org
-References: <20210819080751.4189684-1-bxue@redhat.com>
+        Thu, 19 Aug 2021 09:14:33 -0400
+Received: from smtp-out1.suse.de ([195.135.220.28]:55026 "EHLO
+        smtp-out1.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231826AbhHSNOd (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 19 Aug 2021 09:14:33 -0400
+Received: from imap1.suse-dmz.suse.de (imap1.suse-dmz.suse.de [192.168.254.73])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by smtp-out1.suse.de (Postfix) with ESMTPS id 97D87220B9;
+        Thu, 19 Aug 2021 13:13:56 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+        t=1629378836; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+        bh=LIkK1X92CFU0guH3K26g3TjRZR1pluN2O2IPdzW0u2A=;
+        b=khifoEzjirheXXqdyxFDq2EqsKDq/PMJQ4xFVGbDc2skVdwjr/uUPoaBFr27rytAkUtoPT
+        16IvFtN3l6A27sT31qD6S/IoAkrF/Z63h6ZWGgBngV4WuDbTVkbygNHCX/6kdmNGewzkDz
+        cK8WG9hySXxC01F7G78aY8vJFCcK6NQ=
+Received: from imap1.suse-dmz.suse.de (imap1.suse-dmz.suse.de [192.168.254.73])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap1.suse-dmz.suse.de (Postfix) with ESMTPS id 61E721340C;
+        Thu, 19 Aug 2021 13:13:56 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap1.suse-dmz.suse.de with ESMTPSA
+        id fKLYFBRZHmEqdQAAGKfGzw
+        (envelope-from <nborisov@suse.com>); Thu, 19 Aug 2021 13:13:56 +0000
+From:   Nikolay Borisov <nborisov@suse.com>
+To:     fstests@vger.kernel.org
+Cc:     Nikolay Borisov <nborisov@suse.com>
+Subject: [PATCH] generic/70: Use scratch device instead of test.
+Date:   Thu, 19 Aug 2021 16:13:55 +0300
+Message-Id: <20210819131355.304528-1-nborisov@suse.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210819080751.4189684-1-bxue@redhat.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Aug 19, 2021 at 04:07:51PM +0800, bxue@redhat.com wrote:
-> From: Boyang Xue <bxue@redhat.com>
-> 
-> Regression test for:
-> 
-> e905fbe3fd0f ext4: Fix tune2fs checksum failure for mounted filesystem
-> 
-> This test runs "tune2fs -l" after ext4 shutdown. tune2fs reads superblock
-> checksum from the buffer cache. On unfixed kernels, the checksum is incorrect
-> until the writeout happens, so tune2fs fails with "superblock checksum does not
-> match" in this case.
-> 
-> Signed-off-by: Boyang Xue <bxue@redhat.com>
-> ---
+At the end of the test the fsstress work dir is deleted, this suggests
+the test really requires a scratch device and not a test device. Change
+it accordingly.
 
-Good to me,
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+Signed-off-by: Nikolay Borisov <nborisov@suse.com>
+---
+ tests/generic/070 | 10 +++++++---
+ 1 file changed, 7 insertions(+), 3 deletions(-)
 
-> Hi,
-> 
-> This is the v2 of the test. I have fixed various errors in this version
-> according to comments for v1. Hope I'm not missing anything here. Please help
-> review it. Thanks!
-> 
-> 
-> JFYI, I paste the test log here:
-> 
-> On good kernel
-> ```
-> [root@kvm101 repo_xfstests]# ./check ext4/309
-> FSTYP         -- ext4
-> PLATFORM      -- Linux/x86_64 kvm101 4.18.0-305.el8.x86_64 #1 SMP Mon Aug 16 15:20:14 EDT 2021
-> MKFS_OPTIONS  -- -b 1024 /dev/vda2
-> MOUNT_OPTIONS -- -o rw,relatime,seclabel -o context=system_u:object_r:root_t:s0 /dev/vda2 /scratch
-> 
-> ext4/309 1s ...  1s
-> Ran: ext4/309
-> Passed all 1 tests
-> 
-> [root@kvm101 repo_xfstests]# cat results/ext4/309.out.bad
-> cat: results/ext4/309.out.bad: No such file or directory
-> [root@kvm101 repo_xfstests]# cat results/ext4/309.full
-> tune2fs 1.45.6 (20-Mar-2020)
-> Filesystem volume name:   <none>
-> Last mounted on:          /scratch
-> Filesystem UUID:          f1ffdc35-a925-4007-99ab-b8f3bdec21cd
-> ```
-> 
-> On bad kerenel
-> ```
-> [root@kvm102 repo_xfstests]# ./check ext4/309
-> FSTYP         -- ext4
-> PLATFORM      -- Linux/x86_64 kvm102 5.14.0-0.rc4.35.xx.x86_64 #1 SMP Tue Aug 3 13:02:44 EDT 2021
-> MKFS_OPTIONS  -- -b 1024 /dev/vda3
-> MOUNT_OPTIONS -- -o acl,user_xattr -o context=system_u:object_r:root_t:s0 /dev/vda3 /scratch
-> 
-> ext4/309        - output mismatch (see /root/repo_xfstests/results//ext4/309.out.bad)
->     --- tests/ext4/309.out      2021-08-19 05:02:40.188366781 -0400
->     +++ /root/repo_xfstests/results//ext4/309.out.bad   2021-08-19 08:02:47.902366781 -0400
->     @@ -1,2 +1,4 @@
->      QA output created by 309
->      Silence is golden
->     +/usr/sbin/tune2fs: Superblock checksum does not match superblock while trying to open /dev/vda3
->     +Couldn't find valid filesystem superblock.
->     ...
->     (Run 'diff -u /root/repo_xfstests/tests/ext4/309.out /root/repo_xfstests/results//ext4/309.out.bad'  to see the entire diff)
-> Ran: ext4/309
-> Failures: ext4/309
-> Failed 1 of 1 tests
-> [root@kvm102 repo_xfstests]# cat results/ext4/309.out.bad
-> QA output created by 309
-> Silence is golden
-> /usr/sbin/tune2fs: Superblock checksum does not match superblock while trying to open /dev/vda3
-> Couldn't find valid filesystem superblock.
-> [root@kvm102 repo_xfstests]# cat results/ext4/309.full
-> tune2fs 1.46.2 (28-Feb-2021)
-> ```
-> 
-> -Boyang
-> 
->  tests/ext4/309     | 29 +++++++++++++++++++++++++++++
->  tests/ext4/309.out |  2 ++
->  2 files changed, 31 insertions(+)
->  create mode 100755 tests/ext4/309
->  create mode 100644 tests/ext4/309.out
-> 
-> diff --git a/tests/ext4/309 b/tests/ext4/309
-> new file mode 100755
-> index 00000000..8594d264
-> --- /dev/null
-> +++ b/tests/ext4/309
-> @@ -0,0 +1,29 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2021 Red Hat Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test 309
-> +#
-> +# Test that tune2fs doesn't fail after ext4 shutdown
-> +# Regression test for commit:
-> +# e905fbe3fd0f ext4: Fix tune2fs checksum failure for mounted filesystem
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto rw quick
-> +
-> +# real QA test starts here
-> +_supported_fs ext4
-> +_require_scratch
-> +_require_scratch_shutdown
-> +_require_command "$TUNE2FS_PROG" tune2fs
-> +
-> +echo "Silence is golden"
-> +
-> +_scratch_mkfs >/dev/null 2>&1
-> +_scratch_mount
-> +echo "This is a test" > $SCRATCH_MNT/testfile
-> +_scratch_shutdown
-> +_scratch_cycle_mount
-> +$TUNE2FS_PROG -l $SCRATCH_DEV >> $seqres.full
-> +status=0
-> +exit
-> diff --git a/tests/ext4/309.out b/tests/ext4/309.out
-> new file mode 100644
-> index 00000000..56330d65
-> --- /dev/null
-> +++ b/tests/ext4/309.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 309
-> +Silence is golden
-> -- 
-> 2.27.0
-> 
+diff --git a/tests/generic/070 b/tests/generic/070
+index 678344fa011d..c98f445ae4b8 100755
+--- a/tests/generic/070
++++ b/tests/generic/070
+@@ -13,7 +13,6 @@ _begin_fstest attr udf auto quick stress
+ _cleanup()
+ {
+     cd /
+-    rm -rf $TEST_DIR/fsstress
+     rm -f $tmp.*
+ }
+ 
+@@ -24,11 +23,14 @@ _cleanup()
+ # real QA test starts here
+ _supported_fs generic
+ 
+-_require_test
++_require_scratch
+ _require_attrs
+ 
++_scratch_mkfs >/dev/null 2>&1
++_scratch_mount
++
+ FSSTRESS_ARGS=`_scale_fsstress_args \
+-	-d $TEST_DIR/fsstress \
++	-d $SCRATCH_MNT \
+ 	-f allocsp=0 \
+ 	-f freesp=0 \
+ 	-f bulkstat=0 \
+@@ -40,5 +42,7 @@ FSSTRESS_ARGS=`_scale_fsstress_args \
+         -p 1 -n 10000 -S c`
+ $FSSTRESS_PROG $FSSTRESS_ARGS >$seqres.full 2>&1
+ 
++_scratch_unmount
++
+ status=$?
+ exit
+-- 
+2.17.1
 
