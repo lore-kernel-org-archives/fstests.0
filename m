@@ -7,48 +7,48 @@ X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6097CC4338F
-	for <linux-fstests@archiver.kernel.org>; Thu, 19 Aug 2021 13:13:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1C814C432BE
+	for <linux-fstests@archiver.kernel.org>; Thu, 19 Aug 2021 13:15:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3830961101
-	for <linux-fstests@archiver.kernel.org>; Thu, 19 Aug 2021 13:13:58 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 001EB6112D
+	for <linux-fstests@archiver.kernel.org>; Thu, 19 Aug 2021 13:15:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233456AbhHSNOd (ORCPT
+        id S239687AbhHSNPf (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 19 Aug 2021 09:14:33 -0400
-Received: from smtp-out1.suse.de ([195.135.220.28]:55026 "EHLO
+        Thu, 19 Aug 2021 09:15:35 -0400
+Received: from smtp-out1.suse.de ([195.135.220.28]:55048 "EHLO
         smtp-out1.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231826AbhHSNOd (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 19 Aug 2021 09:14:33 -0400
+        with ESMTP id S239629AbhHSNPf (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 19 Aug 2021 09:15:35 -0400
 Received: from imap1.suse-dmz.suse.de (imap1.suse-dmz.suse.de [192.168.254.73])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by smtp-out1.suse.de (Postfix) with ESMTPS id 97D87220B9;
-        Thu, 19 Aug 2021 13:13:56 +0000 (UTC)
+        by smtp-out1.suse.de (Postfix) with ESMTPS id 0C2AF21FBB;
+        Thu, 19 Aug 2021 13:14:58 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-        t=1629378836; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+        t=1629378898; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
          mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-        bh=LIkK1X92CFU0guH3K26g3TjRZR1pluN2O2IPdzW0u2A=;
-        b=khifoEzjirheXXqdyxFDq2EqsKDq/PMJQ4xFVGbDc2skVdwjr/uUPoaBFr27rytAkUtoPT
-        16IvFtN3l6A27sT31qD6S/IoAkrF/Z63h6ZWGgBngV4WuDbTVkbygNHCX/6kdmNGewzkDz
-        cK8WG9hySXxC01F7G78aY8vJFCcK6NQ=
+        bh=obXqKBThWDb3zDdkdCUjvXDdSe3DjtTr2TkDlkssQng=;
+        b=gC6vHrtaSN+tRCCbolMXKjwbEdOC/c0NIu5QMJO32JKlkCSsEPD9/PI/L7WzEhPPeqhPEL
+        YbjxLzOsmofklP/TrsY8ZEDEfdVZiSq1FPABOFfM/06tTwHlWt5o0/rHoHZWQXr0Mk3cR0
+        5vjhmtkte9cDir3iT6++YvFNkyOIdAc=
 Received: from imap1.suse-dmz.suse.de (imap1.suse-dmz.suse.de [192.168.254.73])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
         (No client certificate requested)
-        by imap1.suse-dmz.suse.de (Postfix) with ESMTPS id 61E721340C;
-        Thu, 19 Aug 2021 13:13:56 +0000 (UTC)
+        by imap1.suse-dmz.suse.de (Postfix) with ESMTPS id C2A6F1340C;
+        Thu, 19 Aug 2021 13:14:57 +0000 (UTC)
 Received: from dovecot-director2.suse.de ([192.168.254.65])
         by imap1.suse-dmz.suse.de with ESMTPSA
-        id fKLYFBRZHmEqdQAAGKfGzw
-        (envelope-from <nborisov@suse.com>); Thu, 19 Aug 2021 13:13:56 +0000
+        id gcPXLFFZHmFvdQAAGKfGzw
+        (envelope-from <nborisov@suse.com>); Thu, 19 Aug 2021 13:14:57 +0000
 From:   Nikolay Borisov <nborisov@suse.com>
 To:     fstests@vger.kernel.org
-Cc:     Nikolay Borisov <nborisov@suse.com>
-Subject: [PATCH] generic/70: Use scratch device instead of test.
-Date:   Thu, 19 Aug 2021 16:13:55 +0300
-Message-Id: <20210819131355.304528-1-nborisov@suse.com>
+Cc:     linux-btrfs@vger.kernel.org, Nikolay Borisov <nborisov@suse.com>
+Subject: [PATCH] btrfs: Add test for rename exchange behavior between subvolumes
+Date:   Thu, 19 Aug 2021 16:14:56 +0300
+Message-Id: <20210819131456.304721-1-nborisov@suse.com>
 X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -56,52 +56,99 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-At the end of the test the fsstress work dir is deleted, this suggests
-the test really requires a scratch device and not a test device. Change
-it accordingly.
-
 Signed-off-by: Nikolay Borisov <nborisov@suse.com>
 ---
- tests/generic/070 | 10 +++++++---
- 1 file changed, 7 insertions(+), 3 deletions(-)
+ tests/btrfs/246     | 46 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/246.out | 27 ++++++++++++++++++++++++++
+ 2 files changed, 73 insertions(+)
+ create mode 100755 tests/btrfs/246
+ create mode 100644 tests/btrfs/246.out
 
-diff --git a/tests/generic/070 b/tests/generic/070
-index 678344fa011d..c98f445ae4b8 100755
---- a/tests/generic/070
-+++ b/tests/generic/070
-@@ -13,7 +13,6 @@ _begin_fstest attr udf auto quick stress
- _cleanup()
- {
-     cd /
--    rm -rf $TEST_DIR/fsstress
-     rm -f $tmp.*
- }
- 
-@@ -24,11 +23,14 @@ _cleanup()
- # real QA test starts here
- _supported_fs generic
- 
--_require_test
+diff --git a/tests/btrfs/246 b/tests/btrfs/246
+new file mode 100755
+index 000000000000..0934932d1f22
+--- /dev/null
++++ b/tests/btrfs/246
+@@ -0,0 +1,46 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2021 SUSE Linux Products GmbH.  All Rights Reserved.
++#
++# FS QA Test 246
++#
++# Tests rename exchange behavior across subvolumes 
++#
++. ./common/preamble
++_begin_fstest auto quick rename
++
++# Import common functions.
++ . ./common/renameat2
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs btrfs
++_require_renameat2 exchange
 +_require_scratch
- _require_attrs
- 
-+_scratch_mkfs >/dev/null 2>&1
++
++_scratch_mkfs >> $seqres.full 2>&1
 +_scratch_mount
 +
- FSSTRESS_ARGS=`_scale_fsstress_args \
--	-d $TEST_DIR/fsstress \
-+	-d $SCRATCH_MNT \
- 	-f allocsp=0 \
- 	-f freesp=0 \
- 	-f bulkstat=0 \
-@@ -40,5 +42,7 @@ FSSTRESS_ARGS=`_scale_fsstress_args \
-         -p 1 -n 10000 -S c`
- $FSSTRESS_PROG $FSSTRESS_ARGS >$seqres.full 2>&1
- 
-+_scratch_unmount
++# Create 2 subvols to use as parents for the rename ops
++$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subvol1 1>/dev/null
++$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subvol2 1>/dev/null
 +
- status=$?
- exit
++# _rename_tests_source_dest internally expects the flags variable to contain
++# specific options to rename syscall. Ensure cross subvol ops are forbidden
++flags="-x"
++_rename_tests_source_dest $SCRATCH_MNT/subvol1/src $SCRATCH_MNT/subvol2/dst "cross-subvol"
++
++# Prepare a subvolume and a directory whose parents are different subvolumes
++$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subvol1/sub-subvol 1>/dev/null
++mkdir $SCRATCH_MNT/subvol2/dir
++
++# Ensure exchanging a subvol with a dir when both parents are different fails
++$here/src/renameat2 -x $SCRATCH_MNT/subvol1/sub-subvol $SCRATCH_MNT/subvol2/dir
++
++# force transaction commit which runs the tree checker 
++sync
++
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/246.out b/tests/btrfs/246.out
+new file mode 100644
+index 000000000000..d50dc28b1b40
+--- /dev/null
++++ b/tests/btrfs/246.out
+@@ -0,0 +1,27 @@
++QA output created by 246
++cross-subvol none/none -> No such file or directory
++cross-subvol none/regu -> No such file or directory
++cross-subvol none/symb -> No such file or directory
++cross-subvol none/dire -> No such file or directory
++cross-subvol none/tree -> No such file or directory
++cross-subvol regu/none -> No such file or directory
++cross-subvol regu/regu -> Invalid cross-device link
++cross-subvol regu/symb -> Invalid cross-device link
++cross-subvol regu/dire -> Invalid cross-device link
++cross-subvol regu/tree -> Invalid cross-device link
++cross-subvol symb/none -> No such file or directory
++cross-subvol symb/regu -> Invalid cross-device link
++cross-subvol symb/symb -> Invalid cross-device link
++cross-subvol symb/dire -> Invalid cross-device link
++cross-subvol symb/tree -> Invalid cross-device link
++cross-subvol dire/none -> No such file or directory
++cross-subvol dire/regu -> Invalid cross-device link
++cross-subvol dire/symb -> Invalid cross-device link
++cross-subvol dire/dire -> Invalid cross-device link
++cross-subvol dire/tree -> Invalid cross-device link
++cross-subvol tree/none -> No such file or directory
++cross-subvol tree/regu -> Invalid cross-device link
++cross-subvol tree/symb -> Invalid cross-device link
++cross-subvol tree/dire -> Invalid cross-device link
++cross-subvol tree/tree -> Invalid cross-device link
++Invalid cross-device link
 -- 
 2.17.1
 
