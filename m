@@ -2,236 +2,338 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
+X-Spam-Status: No, score=-15.2 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,USER_AGENT_SANE_1
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1E676C4320A
-	for <linux-fstests@archiver.kernel.org>; Thu, 19 Aug 2021 06:00:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 20ED6C4338F
+	for <linux-fstests@archiver.kernel.org>; Thu, 19 Aug 2021 06:06:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id F3DFE6112D
-	for <linux-fstests@archiver.kernel.org>; Thu, 19 Aug 2021 06:00:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EE711610FF
+	for <linux-fstests@archiver.kernel.org>; Thu, 19 Aug 2021 06:06:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230390AbhHSGBX (ORCPT
+        id S230016AbhHSGHO (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 19 Aug 2021 02:01:23 -0400
-Received: from mail106.syd.optusnet.com.au ([211.29.132.42]:50994 "EHLO
-        mail106.syd.optusnet.com.au" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S229906AbhHSGBX (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 19 Aug 2021 02:01:23 -0400
-Received: from dread.disaster.area (pa49-195-182-146.pa.nsw.optusnet.com.au [49.195.182.146])
-        by mail106.syd.optusnet.com.au (Postfix) with ESMTPS id C7E0580C516
-        for <fstests@vger.kernel.org>; Thu, 19 Aug 2021 16:00:45 +1000 (AEST)
-Received: from discord.disaster.area ([192.168.253.110])
-        by dread.disaster.area with esmtp (Exim 4.92.3)
-        (envelope-from <david@fromorbit.com>)
-        id 1mGb6a-002PLA-TB
-        for fstests@vger.kernel.org; Thu, 19 Aug 2021 16:00:44 +1000
-Received: from dave by discord.disaster.area with local (Exim 4.94)
-        (envelope-from <david@fromorbit.com>)
-        id 1mGb6a-000kjE-J0
-        for fstests@vger.kernel.org; Thu, 19 Aug 2021 16:00:44 +1000
-From:   Dave Chinner <david@fromorbit.com>
-To:     fstests@vger.kernel.org
-Subject: [PATCH] xfs/187: remove the test
-Date:   Thu, 19 Aug 2021 16:00:44 +1000
-Message-Id: <20210819060044.179581-1-david@fromorbit.com>
-X-Mailer: git-send-email 2.31.1
+        Thu, 19 Aug 2021 02:07:14 -0400
+Received: from out30-56.freemail.mail.aliyun.com ([115.124.30.56]:44730 "EHLO
+        out30-56.freemail.mail.aliyun.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S229782AbhHSGHO (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 19 Aug 2021 02:07:14 -0400
+X-Alimail-AntiSpam: AC=PASS;BC=-1|-1;BR=01201311R201e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=e01e04420;MF=eguan@linux.alibaba.com;NM=1;PH=DS;RN=6;SR=0;TI=SMTPD_---0UjytbX0_1629353196;
+Received: from localhost(mailfrom:eguan@linux.alibaba.com fp:SMTPD_---0UjytbX0_1629353196)
+          by smtp.aliyun-inc.com(127.0.0.1);
+          Thu, 19 Aug 2021 14:06:37 +0800
+Date:   Thu, 19 Aug 2021 14:06:36 +0800
+From:   Eryu Guan <eguan@linux.alibaba.com>
+To:     Boyang Xue <bxue@redhat.com>
+Cc:     fstests@vger.kernel.org, Jan Kara <jack@suse.cz>,
+        linux-ext4@vger.kernel.org, Zirong Lang <zlang@redhat.com>
+Subject: Re: [PATCH] ext4: regression test for "tune2fs -l" after ext4
+ shutdown
+Message-ID: <20210819060636.GQ60846@e18g06458.et15sqa>
+References: <20210818084126.4167799-1-bxue@redhat.com>
+ <20210818114517.kqvfzu2vd45vuhze@fedora>
+ <CAHLe9YZcuo2K6ELT0p1c6sfzwkSgikeiyNect4phEoCt8vTPXw@mail.gmail.com>
+ <20210818165942.cdse6punqcawqmft@fedora>
+ <CAHLe9YbdZrYH3E4U60KufrVKvcDf9O4Ow1ugg2HPgSSw6NvctA@mail.gmail.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Optus-CM-Score: 0
-X-Optus-CM-Analysis: v=2.3 cv=Tu+Yewfh c=1 sm=1 tr=0
-        a=QpfB3wCSrn/dqEBSktpwZQ==:117 a=QpfB3wCSrn/dqEBSktpwZQ==:17
-        a=MhDmnRu9jo8A:10 a=20KFwNOVAAAA:8 a=JV7EYWy2Mp33UQYlHVQA:9
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAHLe9YbdZrYH3E4U60KufrVKvcDf9O4Ow1ugg2HPgSSw6NvctA@mail.gmail.com>
+User-Agent: Mutt/1.5.21 (2010-09-15)
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Dave Chinner <dchinner@redhat.com>
+On Thu, Aug 19, 2021 at 01:48:55PM +0800, Boyang Xue wrote:
+> Zorro,
+> 
+> Please check my reply inline below.
+> 
+> On Thu, Aug 19, 2021 at 12:47 AM Zorro Lang <zlang@redhat.com> wrote:
+> >
+> > On Wed, Aug 18, 2021 at 09:20:44PM +0800, Boyang Xue wrote:
+> > > Hi Zorro,
+> > >
+> > > On Wed, Aug 18, 2021 at 7:32 PM Zorro Lang <zlang@redhat.com> wrote:
+> > > >
+> > > > On Wed, Aug 18, 2021 at 04:40:56PM +0800, bxue@redhat.com wrote:
+> > > > > From: Boyang Xue <bxue@redhat.com>
+> > > > >
+> > > > > Regression test for:
+> > > > >
+> > > > > ext4: Fix tune2fs checksum failure for mounted filesystem
+> > > >
+> > > > Better to specify the commit id number. I saw Ted has applied that patch:
+> > > >
+> > > > https://lore.kernel.org/linux-ext4/162895105421.460437.8931255765382647790.b4-ty@mit.edu/
+> > >
+> > > Thanks. I see the commit id e905fbe3fd0fdb90052f6efdf88f50a78833cfe7
+> > > in the above URL. I didn't add it since I'm not sure if this id will
+> > > be the final id when the commit is finally merged to the mainline
+> > > kernel (Linus tree)?
+> > >
+> > > >
+> > > > And maybe you can describe *a little* more in commit log.
+> > >
+> > > Yes I can add a few words in the commit log, but actually I expect the
+> > > reader of this test reads the commit message of the mentioned commit
+> > > "ext4: Fix tune2fs checksum failure for mounted filesystem", which I
+> > > think is more precise.
+> > >
+> > > >
+> > > > >
+> > > > > Signed-off-by: Boyang Xue <bxue@redhat.com>
+> > > > > ---
+> > > > > Hi,
+> > > > >
+> > > > > This is a new regression test for the patch
+> > > > >
+> > > > > ```
+> > > > > ext4: Fix tune2fs checksum failure for mounted filesystem
+> > > > >
+> > > > > Commit 81414b4dd48 ("ext4: remove redundant sb checksum recomputation")
+> > > > > removed checksum recalculation after updating superblock free space /
+> > > > > inode counters in ext4_fill_super() based on the fact that we will
+> > > > > recalculate the checksum on superblock writeout. That is correct
+> > > > > assumption but until the writeout happens (which can take a long time)
+> > > > > the checksum is incorrect in the buffer cache and if tune2fs is called
+> > > > > in that time window it will complain. So return back the checksum
+> > > > > recalculation and add a comment explaining the tune2fs peculiarity.
+> > > > >
+> > > > > Fixes: 81414b4dd48f ("ext4: remove redundant sb checksum recomputation")
+> > > > > Reported-by: Boyang Xue <bxue@xxxxxxxxxx>
+> > > > > Signed-off-by: Jan Kara <jack@xxxxxxx>
+> > > > > ```
+> > > > >
+> > > > > It's expected to fail on kernels from the kernel-5.11-rc1 to the latest
+> > > > > version, where tune2fs fails with:
+> > > > >
+> > > > > ```
+> > > > > tune2fs 1.46.2 (28-Feb-2021)
+> > > > > tune2fs: Superblock checksum does not match superblock while trying to
+> > > > > open /dev/loop0
+> > > > > Couldn't find valid filesystem superblock.
+> > > > > ```
+> > > > >
+> > > > > Please help review this test, Thanks!
+> > > > >
+> > > > > -Boyang
+> > > > >
+> > > > >  tests/ext4/309     | 42 ++++++++++++++++++++++++++++++++++++++++++
+> > > > >  tests/ext4/309.out |  2 ++
+> > > > >  2 files changed, 44 insertions(+)
+> > > > >  create mode 100755 tests/ext4/309
+> > > > >  create mode 100644 tests/ext4/309.out
+> > > > >
+> > > > > diff --git a/tests/ext4/309 b/tests/ext4/309
+> > > > > new file mode 100755
+> > > > > index 00000000..ae335617
+> > > > > --- /dev/null
+> > > > > +++ b/tests/ext4/309
+> > > > > @@ -0,0 +1,42 @@
+> > > > > +#! /bin/bash
+> > > > > +# SPDX-License-Identifier: GPL-2.0
+> > > > > +# Copyright (c) 2021 YOUR NAME HERE.  All Rights Reserved.
+> > > >                         ^^^^^^^^^^^^^^
+> > > >                        Write your copyright
+> > >
+> > > I will correct it in the next version. Thanks.
+> > >
+> > > >
+> > > > > +#
+> > > > > +# FS QA Test 309
+> > > > > +#
+> > > > > +# Test that tune2fs doesn't fail after ext4 shutdown
+> > > > > +# Regression test for commit:
+> > > > > +# ext4: Fix tune2fs checksum failure for mounted filesystem
+> > > > > +#
+> > > > > +. ./common/preamble
+> > > > > +_begin_fstest auto rw quick
+> > > > > +
+> > > > > +_cleanup()
+> > > > > +{
+> > > > > +     _scratch_unmount
+> > > > > +}
+> > > >
+> > > > I think the umount isn't necessary, so the specific _cleanup isn't
+> > > > needed either.
+> > >
+> > > The $SCRATCH_DEV was still mounted before this _cleanup(), so I'm
+> > > wondering why we shouldn't do _scratch_unmount here? And I see at
+> > > least another similar structured test ext4/306 do _scratch_unmount in
+> > > _cleanup().
+> >
+> > The SCRATCH_DEV will be umounted, don't need to do that in the end of each
+> > test cases, except you need to do something on the unmounted SCRATCH_DEV
+> > in the end.
+> >
+> > I don't know why ext4/306 has that, maybe due to old reason, or we didn't
+> > notice/care that when we reviewed it? And it's not worth sending a patch
+> > just for removing this "not wrong but just redundant" line now. Except a
+> > patch trys to cleanup all _cleanup().
+> 
+> OK. I will remove the _cleanup() in my next version, unless someone
+> else has other opinions.
+> 
+> >
+> > >
+> > > >
+> > > > > +
+> > > > > +# Import common functions.
+> > > > > +. ./common/filter
+> > > >
+> > > > Do you use any filter helpers below?
+> > >
+> > > No. I will remove this line in my next version.
+> > >
+> > > >
+> > > > > +
+> > > > > +# real QA test starts here
+> > > > > +_supported_fs ext4
+> > > >
+> > > > I'm wondering if this case can be a generic case, there's nothing
+> > > > ext4 specified operations, except this line:
+> > > >
+> > > > "$TUNE2FS_PROG -l $SCRATCH_DEV"
+> > > >
+> > > > Hmm... if we can change this line to something likes _get_fs_super(),
+> > > > it might help to make this test to be a generic test.
+> > >
+> > > I think this bug is heavily related to "tune2fs", ext4 only. So I
+> > > guess an ext4 only test is enough?
+> >
+> > Just checking. That's fine for me to keep this case as an ext4 only case.
+> >
+> > >
+> > > >
+> > > > > +_require_scratch
+> > > > > +_require_scratch_shutdown
+> > > > > +_require_command "$TUNE2FS_PROG" tune2fs
+> > > > > +
+> > > > > +echo "Silence is golden"
+> > > > > +
+> > > > > +_scratch_mkfs >/dev/null 2>&1
+> > > > > +_scratch_mount
+> > > > > +echo "ext4/309" > $SCRATCH_MNT/309.tmp
+> > > >
+> > > > It's sure this case will be "ext4/309", although you use "309" won't
+> > > > affect anything.
+> > >
+> > > Yes I can rename it to something like ext4-309.tmp if it looks better.
+> >
+> > I think something likes: echo "This is a test" > $SCRATCH_MNT/testfile
+> > is good enough, don't need the "ext4" or "309" things.
+> 
+> OK. I will modify it to
+> 
+> echo "This is a test" > $SCRATCH_MNT/testfile
+> 
+> Unless someone else has other preferences.
+> 
+> >
+> > >
+> > > >
+> > > > > +_scratch_shutdown
+> > > > > +_scratch_cycle_mount
+> > > > > +$TUNE2FS_PROG -l $SCRATCH_DEV >> $seqres.full 2>&1
+> > > > > +if [ $? -eq 0 ]; then
+> > > > > +     status=0
+> > > > > +else
+> > > > > +     status=1
+> > > > > +fi
+> > > >
+> > > > Don't need to change the status value, how about write as:
+> > > >
+> > > > $TUNE2FS_PROG -l $SCRATCH_DEV >/dev/null
+> > > >
+> > > > The error output will break the golden image directly.
+> > >
+> > > How did you test that? The error output didn't break the "golden
+> > > image" in my test.
+> >
+> > [root@xx-xxxx-xx xfstests-dev]# ./check ext4/309
+> > FSTYP         -- ext4
+> > PLATFORM      -- Linux/x86_64 xx-xxxx-xx 5.14.0-rc4-xfs #14 SMP Thu Aug 12 00:56:07 CST 2021
+> > MKFS_OPTIONS  -- /dev/mapper/testvg-scratchdev
+> > MOUNT_OPTIONS -- -o acl,user_xattr -o context=system_u:object_r:root_t:s0 /dev/mapper/testvg-scratchdev /mnt/scratch
+> >
+> > ext4/309 5s ... - output mismatch (see /root/git/xfstests-dev/results//ext4/309.out.bad)
+> >     --- tests/ext4/309.out      2021-08-18 18:17:15.925427714 +0800
+> >     +++ /root/git/xfstests-dev/results//ext4/309.out.bad        2021-08-19 00:17:57.001648868 +0800
+> >     @@ -1,2 +1,4 @@
+> >      QA output created by 309
+> >      Silence is golden
+> >     +/usr/sbin/tune2fs: Superblock checksum does not match superblock while trying to open /dev/mapper/testvg-scratchdev
+> >     +Couldn't find valid filesystem superblock.
+> >     ...
+> >     (Run 'diff -u /root/git/xfstests-dev/tests/ext4/309.out /root/git/xfstests-dev/results//ext4/309.out.bad'  to see the entire diff)
+> > Ran: ext4/309
+> > Failures: ext4/309
+> > Failed 1 of 1 tests
+> >
+> > [root@xx-xxxx-xx xfstests-dev]# git diff
+> > ...
+> >  _scratch_mkfs >/dev/null 2>&1
+> >  _scratch_mount
+> > -echo "ext4/309" > $SCRATCH_MNT/309.tmp
+> > +echo "This is a test" > $SCRATCH_MNT/testfile
+> >  _scratch_shutdown
+> > -_scratch_cycle_mount
+> > -$TUNE2FS_PROG -l $SCRATCH_DEV >> $seqres.full 2>&1
+> > -if [ $? -eq 0 ]; then
+> > -       status=0
+> > -else
+> > -       status=1
+> > -fi
+> > +_scratch_cycle_mount
+> > +$TUNE2FS_PROG -l $SCRATCH_DEV >/dev/null
+> >
+> > +status=0
+> >  exit
+> 
+> Unless I missed something, I would say that, tune2fs' error output
+> went to .out.bad just because you had modified the tune2fs line from
+> mine:
+> 
+> $TUNE2FS_PROG -l $SCRATCH_DEV >> $seqres.full 2>&1
+> 
+> to yours:
+> 
+> $TUNE2FS_PROG -l $SCRATCH_DEV >/dev/null
 
-Upstream changes mean that "-o noattr2" no longer removes the
-on-disk ATTR2 feature bit from the superblock and so the failure
-case this test exercises is no longer guaranteed to be a failure
-case. Hence the test is now useless as a regression test, so remove
-it.
+I think what Zorro is suggesting is that *when test fails* just dump
+stderr and let the error message break golden image to fail the test, so
+there's no need to set exit status.
 
-Signed-off-by: Dave Chinner <dchinner@redhat.com>
----
- tests/xfs/187     | 117 ----------------------------------------------
- tests/xfs/187.out |  39 ----------------
- 2 files changed, 156 deletions(-)
- delete mode 100755 tests/xfs/187
- delete mode 100644 tests/xfs/187.out
+> 
+> My original version redirecting stderr and stdout both to $seqres.full
+> doesn't break the "golden output". Test log:
+> ```
+> [root@kvm102 repo_xfstests]# ./check ext4/309
+> FSTYP         -- ext4
+> PLATFORM      -- Linux/x86_64 kvm102 5.14.0-0.rc4.35.xx.x86_64 #1 SMP
+> Tue Aug 3 13:02:44 EDT 2021
+> MKFS_OPTIONS  -- -b 1024 /dev/vda3
+> MOUNT_OPTIONS -- -o acl,user_xattr -o
+> context=system_u:object_r:root_t:s0 /dev/vda3 /scratch
+> 
+> ext4/309        [failed, exit status 1]
 
-diff --git a/tests/xfs/187 b/tests/xfs/187
-deleted file mode 100755
-index 3f8c7ef8..00000000
---- a/tests/xfs/187
-+++ /dev/null
-@@ -1,117 +0,0 @@
--#! /bin/bash
--# SPDX-License-Identifier: GPL-2.0
--# Copyright (c) 2008 Silicon Graphics, Inc.  All Rights Reserved.
--#
--# FS QA Test No. 187
--#
--# To test out the noattr2 flag which is broken in pv#980021
--# Given an existing attr2 filesystem, we should be able to mount
--# as noattr2 and go back to an attr1 filesystem.
--#
--# Test the case where there are no more features2 bits on and
--# so the morebitsbit should be off.
--#
--. ./common/preamble
--_begin_fstest attr auto quick
--
--_filter_version()
--{
--	tee -a $seqres.full | tr ',' '\n' | egrep 'ATTR|MORE|LAZY'
--}
--
--# Import common functions.
--. ./common/filter
--. ./common/attr
--
--# real QA test starts here
--_supported_fs xfs
--
--_require_scratch
--_require_attrs
--_require_attr_v1
--_require_projid16bit
--
--# Reset the options so that we can control what is going on here
--export MKFS_OPTIONS=""
--export MOUNT_OPTIONS=""
--
--# lazysb, attr2 and other feature bits are held in features2 and will require
--# morebitsbit on So test with lazysb and without it to see if the morebitsbit is
--# okay etc. If the mkfs defaults change, these need to change as well.
--MKFS_NO_LAZY="-m crc=0 -l lazy-count=0 -i projid32bit=0"
--MKFS_LAZY="-m crc=0 -l lazy-count=1 -i projid32bit=0"
--
--# ftype is also stored in features2, so we have to detect its presence in
--# mkfs and disable it here too.
--if _scratch_mkfs --help 2>&1 | grep -q "ftype="; then
--	MKFS_NO_LAZY="$MKFS_NO_LAZY -n ftype=0"
--	MKFS_LAZY="$MKFS_LAZY -n ftype=0"
--fi
--
--# Make sure that when we think we are testing with morebits off
--# that we really are.
--_scratch_mkfs -i attr=1 $MKFS_NO_LAZY  >/dev/null 2>&1
--_scratch_xfs_db -c version 2>&1 >$tmp.db
--if grep -i morebits $tmp.db
--then
--	echo ""
--	echo "Need to update test $seq so that initial subtests do not use features2"
--	echo ""
--	exit
--fi
--
--echo ""
--echo "*** 1. test attr2 mkfs and then noattr2 mount ***"
--echo ""
--echo "attr2 fs"
--echo ""
--_scratch_mkfs -i attr=2 $MKFS_NO_LAZY >/dev/null 2>&1
--_scratch_xfs_db -r -c version 2>&1 | _filter_version
--echo ""
--echo "noattr2 fs"
--echo ""
--_scratch_mount -o noattr2
--$UMOUNT_PROG $SCRATCH_MNT
--_scratch_xfs_db -r -c version 2>&1 | _filter_version
--
--# adding an EA will ensure the ATTR1 flag is turned on
--echo ""
--echo "*** 2. test attr2 mkfs and then noattr2 mount with 1 EA ***"
--echo ""
--echo "attr2 fs"
--echo ""
--_scratch_mkfs -i attr=2 $MKFS_NO_LAZY >/dev/null 2>&1
--_scratch_xfs_db -r -c version 2>&1 | _filter_version
--echo ""
--echo "noattr2 fs"
--echo ""
--_scratch_mount -o noattr2
--cd $SCRATCH_MNT
--touch testfile
--$SETFATTR_PROG -n user.test -v 0xbabe testfile
--_getfattr testfile
--cd $here
--$UMOUNT_PROG $SCRATCH_MNT
--_scratch_xfs_db -r -c version 2>&1 | _filter_version
--
--echo ""
--echo "*** 3. test noattr2 mount and lazy sb ***"
--echo ""
--echo ""
--echo "attr2 fs"
--echo ""
--_scratch_mkfs -i attr=2 $MKFS_LAZY >/dev/null 2>&1
--_scratch_xfs_db -r -c version 2>&1 | _filter_version
--echo ""
--echo "noattr2 fs"
--echo ""
--_scratch_mount -o noattr2
--cd $SCRATCH_MNT
--touch testfile
--cd $here
--$UMOUNT_PROG $SCRATCH_MNT
--_scratch_xfs_db -r -c version 2>&1 | _filter_version
--
--# success, all done
--status=0
--exit
-diff --git a/tests/xfs/187.out b/tests/xfs/187.out
-deleted file mode 100644
-index e7e20212..00000000
---- a/tests/xfs/187.out
-+++ /dev/null
-@@ -1,39 +0,0 @@
--QA output created by 187
--
--*** 1. test attr2 mkfs and then noattr2 mount ***
--
--attr2 fs
--
--MOREBITS
--ATTR2
--
--noattr2 fs
--
--
--*** 2. test attr2 mkfs and then noattr2 mount with 1 EA ***
--
--attr2 fs
--
--MOREBITS
--ATTR2
--
--noattr2 fs
--
--# file: testfile
--user.test
--
--ATTR
--
--*** 3. test noattr2 mount and lazy sb ***
--
--
--attr2 fs
--
--MOREBITS
--ATTR2
--LAZYSBCOUNT
--
--noattr2 fs
--
--MOREBITS
--LAZYSBCOUNT
--- 
-2.31.1
+And this failure doesn't give any clues why it failed, you must check
+$seqres.full file to find out.
 
+With stderr breaking golden image, you'll see what fails more easily,
+e.g.
+
+
+  QA output created by 309
+  Silence is golden
+ +/usr/sbin/tune2fs: Superblock checksum does not match superblock while trying to open /dev/mapper/testvg-scratchdev
+ +Couldn't find valid filesystem superblock.
+ ...
+ (Run 'diff -u /root/git/xfstests-dev/tests/ext4/309.out /root/git/xfstests-dev/results//ext4/309.out.bad'  to see the entire diff)
+
+Thanks,
+Eryu
