@@ -5,218 +5,449 @@ X-Spam-Level:
 X-Spam-Status: No, score=-16.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=ham autolearn_force=no version=3.4.0
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6E651C4338F
-	for <linux-fstests@archiver.kernel.org>; Thu, 19 Aug 2021 04:53:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 423C7C4338F
+	for <linux-fstests@archiver.kernel.org>; Thu, 19 Aug 2021 05:49:13 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 47411610CF
-	for <linux-fstests@archiver.kernel.org>; Thu, 19 Aug 2021 04:53:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 160016101A
+	for <linux-fstests@archiver.kernel.org>; Thu, 19 Aug 2021 05:49:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229870AbhHSEye (ORCPT
+        id S230016AbhHSFtr (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 19 Aug 2021 00:54:34 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:40023 "EHLO
+        Thu, 19 Aug 2021 01:49:47 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:24912 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S229840AbhHSEyd (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 19 Aug 2021 00:54:33 -0400
+        by vger.kernel.org with ESMTP id S229981AbhHSFtq (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 19 Aug 2021 01:49:46 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1629348837;
+        s=mimecast20190719; t=1629352150;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         to:to:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=DYUR2yrRBDOoqdaGfM0jUoL4Nv+fDfxlMLBm1iQy4og=;
-        b=ObKyEc6UgW1G+YSZbO/Nat8oJr3y7Ey7a8jAN8cH9nj2eZ/8/RQr9RkMhoRmtf16ySQz0d
-        O6/laAwj8JHk1eXQj/rsIRU7mVLiAOezpFlHvXuzi+z8JMRZXo4n+dGgntOKbkbsDDqodF
-        flAGlm4bAaRdg27MkzCIILesG7eQHkM=
+        bh=CDliUIxtA8NI0uOkabpQSEBC+pmEAHkHILaEHG34Qf8=;
+        b=W7+Q7Qiro19Z+6psOssdDPcHrgQox58L+f5EEtnwwf0cFQju/fuUNTCjO1irrHijgVaOLG
+        JTd2ZkhoAcSvc821qpW60Px5lvG+z7VzU6jS8jdpuCBsEotL6RkacgVmLBbKWqukLhTdEf
+        gnWqjiYQf/6aNJCJz1ld540DvJwajtQ=
 Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com
  [209.85.216.69]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-293-uxwaV7PuOeqn2cOljNKB-w-1; Thu, 19 Aug 2021 00:53:56 -0400
-X-MC-Unique: uxwaV7PuOeqn2cOljNKB-w-1
-Received: by mail-pj1-f69.google.com with SMTP id j6-20020a17090ac486b0290178ffdbd20dso2535198pjt.0
-        for <fstests@vger.kernel.org>; Wed, 18 Aug 2021 21:53:56 -0700 (PDT)
+ us-mta-87-VpFgOnahPEizEm0kgZFzJA-1; Thu, 19 Aug 2021 01:49:09 -0400
+X-MC-Unique: VpFgOnahPEizEm0kgZFzJA-1
+Received: by mail-pj1-f69.google.com with SMTP id r13-20020a17090a4dcdb0290176dc35536aso2160377pjl.8
+        for <fstests@vger.kernel.org>; Wed, 18 Aug 2021 22:49:09 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id
-         :mail-followup-to:references:mime-version:content-disposition
-         :in-reply-to;
-        bh=DYUR2yrRBDOoqdaGfM0jUoL4Nv+fDfxlMLBm1iQy4og=;
-        b=MHLvlh7N3pjGZh2mhdaJ22c9JUMylUcl6ewKHQGlrwEVWrXSRer21uZiHUjlWpsLfG
-         FldtJSKNlGX+H21k55q3zeNuRv5XGLC1y234tflcJkO2ScnZu9WIBRdOHQTwpTae8Ksh
-         w8eXWdIlIMwSTpFid/ybNHmpfXvxhIDutUMkNGBipTEg2huGqjcjTpFWKplTJdQ/00TZ
-         9YNGHiXv3QBZu27ojaapV4/MdUZcet4feukQ/GkzEyoGuiZBVHNqCdE3XrBhgoAWp6Cc
-         XHa/dY6Z5zvIc3lcGp9W/Gyj/hMm0rzTikV7hHmEuJ6qr0FK7q3vhUXpAcoYQ+nAs6Av
-         7ViA==
-X-Gm-Message-State: AOAM532bJunVdlivVn7p4efnQ91hl8I0krplf08q3Dh8TdfdsytrXP5p
-        wGks/I3mFADYn6K1fdYsoiExFKjwx0Y+RUIxaIpd1ImsJdFk+EIl5FbKcnnUXZyA7Oj4PssFsDm
-        EQYJPmV2UPVy7JG3jwQ==
-X-Received: by 2002:a17:902:690a:b0:12d:86cf:d981 with SMTP id j10-20020a170902690a00b0012d86cfd981mr10233116plk.39.1629348835425;
-        Wed, 18 Aug 2021 21:53:55 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJxTwlPzBxgGrKGY60dayzMAHDaDEDhpkimgsYFVvJXjtkvG82QRU9WAYTDsbNJJ2qLzpmLh9A==
-X-Received: by 2002:a17:902:690a:b0:12d:86cf:d981 with SMTP id j10-20020a170902690a00b0012d86cfd981mr10233102plk.39.1629348835165;
-        Wed, 18 Aug 2021 21:53:55 -0700 (PDT)
-Received: from fedora ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id r3sm1478297pff.119.2021.08.18.21.53.51
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 18 Aug 2021 21:53:54 -0700 (PDT)
-Date:   Thu, 19 Aug 2021 13:14:31 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     Xu Yu <xuyu@linux.alibaba.com>, linux-fsdevel@vger.kernel.org,
-        linux-mm@kvack.org, hch@infradead.org, riteshh@linux.ibm.com,
-        tytso@mit.edu, gavin.dg@linux.alibaba.com,
-        fstests <fstests@vger.kernel.org>,
-        linux-btrfs <linux-btrfs@vger.kernel.org>
-Subject: Re: [PATCH] generic: add swapfile maxpages regression test
-Message-ID: <20210819051431.z3q46fswvkwnwmgn@fedora>
-Mail-Followup-To: "Darrick J. Wong" <djwong@kernel.org>,
-        Xu Yu <xuyu@linux.alibaba.com>, linux-fsdevel@vger.kernel.org,
-        linux-mm@kvack.org, hch@infradead.org, riteshh@linux.ibm.com,
-        tytso@mit.edu, gavin.dg@linux.alibaba.com,
-        fstests <fstests@vger.kernel.org>,
-        linux-btrfs <linux-btrfs@vger.kernel.org>
-References: <db99c25a8e2a662046e498fd13e5f0c35364164a.1629286473.git.xuyu@linux.alibaba.com>
- <20210819014326.GC12597@magnolia>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to;
+        bh=CDliUIxtA8NI0uOkabpQSEBC+pmEAHkHILaEHG34Qf8=;
+        b=Uzi/nnv6ibD/hCmPDhCnA2vWaedM4/n+pR5wtFDLnX2OvgFsfFVav8XiQeLM0XDczf
+         k3IuCHyJ3mUoENqJsh5JlIpfguV5IrvWffd4Ucz4P5X+hHq+fL8tk/JCHSfwsIJjkgXN
+         IhYk4OgxesZp/hVcrBfNcJ4rkP/P0rKV0vDIQgSKz/1PDR3ndL5K3bmNCZpmASLv1qwZ
+         1HkAGZuc8amh1qHOHnwnutoKMm+/nK6HF018/1z1kZm2hmlI/AXd8lIhDbHN9eXgKaOz
+         ffF/l6dIeZdF9vVHiklfNKt/isAE1SR/p1jX71EQkmjls10Prtks3qylhSZerNR63Trp
+         8pPQ==
+X-Gm-Message-State: AOAM533iwFbwTAvPc+l3yagEwLkUHVHfXBBkX6NXIuKj1cpj/Px9enBO
+        0r1ehbm8Kb2jjphJd8ZowHPmcQW+164b66zOxia9nP6KnUZlFJ10HiHVMBlWh8ule+MgiTPtM+i
+        wiSNCfAccvH59vFZtde9tff4kx8hu9xQkAA==
+X-Received: by 2002:a17:90a:ead5:: with SMTP id ev21mr5607492pjb.3.1629352148208;
+        Wed, 18 Aug 2021 22:49:08 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJwAZM3JqynkhoPHC3iO6EfsZULuceFo3OiAWG3Q02Sa/pULfUhNQ2K63q8DIbUAM1AGqi5nlgkJvmFjF21LrQ0=
+X-Received: by 2002:a17:90a:ead5:: with SMTP id ev21mr5607422pjb.3.1629352147148;
+ Wed, 18 Aug 2021 22:49:07 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210819014326.GC12597@magnolia>
+References: <20210818084126.4167799-1-bxue@redhat.com> <20210818114517.kqvfzu2vd45vuhze@fedora>
+ <CAHLe9YZcuo2K6ELT0p1c6sfzwkSgikeiyNect4phEoCt8vTPXw@mail.gmail.com> <20210818165942.cdse6punqcawqmft@fedora>
+In-Reply-To: <20210818165942.cdse6punqcawqmft@fedora>
+From:   Boyang Xue <bxue@redhat.com>
+Date:   Thu, 19 Aug 2021 13:48:55 +0800
+Message-ID: <CAHLe9YbdZrYH3E4U60KufrVKvcDf9O4Ow1ugg2HPgSSw6NvctA@mail.gmail.com>
+Subject: Re: [PATCH] ext4: regression test for "tune2fs -l" after ext4 shutdown
+To:     Boyang Xue <bxue@redhat.com>, fstests@vger.kernel.org,
+        Jan Kara <jack@suse.cz>, linux-ext4@vger.kernel.org,
+        Zirong Lang <zlang@redhat.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Aug 18, 2021 at 06:43:26PM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
-> 
-> Add regression test for "mm/swap: consider max pages in
-> iomap_swapfile_add_extent".
-> 
-> Cc: Gang Deng <gavin.dg@linux.alibaba.com>
-> Cc: Xu Yu <xuyu@linux.alibaba.com>
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> ---
+Zorro,
 
-The code logic looks good to me. And [1][2]... so I think this test
-is good. But of course, wait for more review points from cc list.
+Please check my reply inline below.
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+On Thu, Aug 19, 2021 at 12:47 AM Zorro Lang <zlang@redhat.com> wrote:
+>
+> On Wed, Aug 18, 2021 at 09:20:44PM +0800, Boyang Xue wrote:
+> > Hi Zorro,
+> >
+> > On Wed, Aug 18, 2021 at 7:32 PM Zorro Lang <zlang@redhat.com> wrote:
+> > >
+> > > On Wed, Aug 18, 2021 at 04:40:56PM +0800, bxue@redhat.com wrote:
+> > > > From: Boyang Xue <bxue@redhat.com>
+> > > >
+> > > > Regression test for:
+> > > >
+> > > > ext4: Fix tune2fs checksum failure for mounted filesystem
+> > >
+> > > Better to specify the commit id number. I saw Ted has applied that patch:
+> > >
+> > > https://lore.kernel.org/linux-ext4/162895105421.460437.8931255765382647790.b4-ty@mit.edu/
+> >
+> > Thanks. I see the commit id e905fbe3fd0fdb90052f6efdf88f50a78833cfe7
+> > in the above URL. I didn't add it since I'm not sure if this id will
+> > be the final id when the commit is finally merged to the mainline
+> > kernel (Linus tree)?
+> >
+> > >
+> > > And maybe you can describe *a little* more in commit log.
+> >
+> > Yes I can add a few words in the commit log, but actually I expect the
+> > reader of this test reads the commit message of the mentioned commit
+> > "ext4: Fix tune2fs checksum failure for mounted filesystem", which I
+> > think is more precise.
+> >
+> > >
+> > > >
+> > > > Signed-off-by: Boyang Xue <bxue@redhat.com>
+> > > > ---
+> > > > Hi,
+> > > >
+> > > > This is a new regression test for the patch
+> > > >
+> > > > ```
+> > > > ext4: Fix tune2fs checksum failure for mounted filesystem
+> > > >
+> > > > Commit 81414b4dd48 ("ext4: remove redundant sb checksum recomputation")
+> > > > removed checksum recalculation after updating superblock free space /
+> > > > inode counters in ext4_fill_super() based on the fact that we will
+> > > > recalculate the checksum on superblock writeout. That is correct
+> > > > assumption but until the writeout happens (which can take a long time)
+> > > > the checksum is incorrect in the buffer cache and if tune2fs is called
+> > > > in that time window it will complain. So return back the checksum
+> > > > recalculation and add a comment explaining the tune2fs peculiarity.
+> > > >
+> > > > Fixes: 81414b4dd48f ("ext4: remove redundant sb checksum recomputation")
+> > > > Reported-by: Boyang Xue <bxue@xxxxxxxxxx>
+> > > > Signed-off-by: Jan Kara <jack@xxxxxxx>
+> > > > ```
+> > > >
+> > > > It's expected to fail on kernels from the kernel-5.11-rc1 to the latest
+> > > > version, where tune2fs fails with:
+> > > >
+> > > > ```
+> > > > tune2fs 1.46.2 (28-Feb-2021)
+> > > > tune2fs: Superblock checksum does not match superblock while trying to
+> > > > open /dev/loop0
+> > > > Couldn't find valid filesystem superblock.
+> > > > ```
+> > > >
+> > > > Please help review this test, Thanks!
+> > > >
+> > > > -Boyang
+> > > >
+> > > >  tests/ext4/309     | 42 ++++++++++++++++++++++++++++++++++++++++++
+> > > >  tests/ext4/309.out |  2 ++
+> > > >  2 files changed, 44 insertions(+)
+> > > >  create mode 100755 tests/ext4/309
+> > > >  create mode 100644 tests/ext4/309.out
+> > > >
+> > > > diff --git a/tests/ext4/309 b/tests/ext4/309
+> > > > new file mode 100755
+> > > > index 00000000..ae335617
+> > > > --- /dev/null
+> > > > +++ b/tests/ext4/309
+> > > > @@ -0,0 +1,42 @@
+> > > > +#! /bin/bash
+> > > > +# SPDX-License-Identifier: GPL-2.0
+> > > > +# Copyright (c) 2021 YOUR NAME HERE.  All Rights Reserved.
+> > >                         ^^^^^^^^^^^^^^
+> > >                        Write your copyright
+> >
+> > I will correct it in the next version. Thanks.
+> >
+> > >
+> > > > +#
+> > > > +# FS QA Test 309
+> > > > +#
+> > > > +# Test that tune2fs doesn't fail after ext4 shutdown
+> > > > +# Regression test for commit:
+> > > > +# ext4: Fix tune2fs checksum failure for mounted filesystem
+> > > > +#
+> > > > +. ./common/preamble
+> > > > +_begin_fstest auto rw quick
+> > > > +
+> > > > +_cleanup()
+> > > > +{
+> > > > +     _scratch_unmount
+> > > > +}
+> > >
+> > > I think the umount isn't necessary, so the specific _cleanup isn't
+> > > needed either.
+> >
+> > The $SCRATCH_DEV was still mounted before this _cleanup(), so I'm
+> > wondering why we shouldn't do _scratch_unmount here? And I see at
+> > least another similar structured test ext4/306 do _scratch_unmount in
+> > _cleanup().
+>
+> The SCRATCH_DEV will be umounted, don't need to do that in the end of each
+> test cases, except you need to do something on the unmounted SCRATCH_DEV
+> in the end.
+>
+> I don't know why ext4/306 has that, maybe due to old reason, or we didn't
+> notice/care that when we reviewed it? And it's not worth sending a patch
+> just for removing this "not wrong but just redundant" line now. Except a
+> patch trys to cleanup all _cleanup().
 
-[1]
-Test passed on old kernel without this regression (xfs fails):
+OK. I will remove the _cleanup() in my next version, unless someone
+else has other opinions.
 
-# ./check generic/727                                                                                                                    
-FSTYP         -- ext4
-PLATFORM      -- Linux/x86_64 xx-xxxx-xx 4.18.0-xxx.el8.x86_64+debug #1 SMP Wed Jul 14 12:35:49 EDT 2021
-MKFS_OPTIONS  -- /dev/mapper/rhel-xx-xxxx-xx-xfscratch
-MOUNT_OPTIONS -- -o acl,user_xattr -o context=system_u:object_r:root_t:s0 /dev/mapper/rhel-xx-xxxx-xx-xfscratch /mnt/scratch
+>
+> >
+> > >
+> > > > +
+> > > > +# Import common functions.
+> > > > +. ./common/filter
+> > >
+> > > Do you use any filter helpers below?
+> >
+> > No. I will remove this line in my next version.
+> >
+> > >
+> > > > +
+> > > > +# real QA test starts here
+> > > > +_supported_fs ext4
+> > >
+> > > I'm wondering if this case can be a generic case, there's nothing
+> > > ext4 specified operations, except this line:
+> > >
+> > > "$TUNE2FS_PROG -l $SCRATCH_DEV"
+> > >
+> > > Hmm... if we can change this line to something likes _get_fs_super(),
+> > > it might help to make this test to be a generic test.
+> >
+> > I think this bug is heavily related to "tune2fs", ext4 only. So I
+> > guess an ext4 only test is enough?
+>
+> Just checking. That's fine for me to keep this case as an ext4 only case.
+>
+> >
+> > >
+> > > > +_require_scratch
+> > > > +_require_scratch_shutdown
+> > > > +_require_command "$TUNE2FS_PROG" tune2fs
+> > > > +
+> > > > +echo "Silence is golden"
+> > > > +
+> > > > +_scratch_mkfs >/dev/null 2>&1
+> > > > +_scratch_mount
+> > > > +echo "ext4/309" > $SCRATCH_MNT/309.tmp
+> > >
+> > > It's sure this case will be "ext4/309", although you use "309" won't
+> > > affect anything.
+> >
+> > Yes I can rename it to something like ext4-309.tmp if it looks better.
+>
+> I think something likes: echo "This is a test" > $SCRATCH_MNT/testfile
+> is good enough, don't need the "ext4" or "309" things.
 
-generic/727      15s
-Ran: generic/727
-Passed all 1 tests
+OK. I will modify it to
 
-[2]
-Reproduced on new kernel with this regression:
+echo "This is a test" > $SCRATCH_MNT/testfile
 
-# ./check generic/727
-FSTYP         -- ext4
-PLATFORM      -- Linux/x86_64 xxx-xxxx-xx 5.14.0-rc4-xfs #14 SMP Thu Aug 12 00:56:07 CST 2021
-MKFS_OPTIONS  -- /dev/mapper/testvg-scratchdev
-MOUNT_OPTIONS -- -o acl,user_xattr -o context=system_u:object_r:root_t:s0 /dev/mapper/testvg-scratchdev /mnt/scratch
+Unless someone else has other preferences.
 
-generic/727     - output mismatch (see /root/git/xfstests-dev/results//generic/727.out.bad)
-    --- tests/generic/727.out   2021-08-19 11:20:14.677794743 +0800
-    +++ /root/git/xfstests-dev/results//generic/727.out.bad     2021-08-19 11:21:46.654450307 +0800
-    @@ -1,2 +1,3 @@
-     QA output created by 727
-    +swapon added 2044 pages, expected 1020
-     Silence is golden
-    ...
-    (Run 'diff -u /root/git/xfstests-dev/tests/generic/727.out /root/git/xfstests-dev/results//generic/727.out.bad'  to see the entire diff)
-Ran: generic/727
-Failures: generic/727
-Failed 1 of 1 tests
-
->  tests/generic/727     |   62 +++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/727.out |    2 ++
->  2 files changed, 64 insertions(+)
->  create mode 100755 tests/generic/727
->  create mode 100644 tests/generic/727.out
-> 
-> diff --git a/tests/generic/727 b/tests/generic/727
-> new file mode 100755
-> index 00000000..a546ad51
-> --- /dev/null
-> +++ b/tests/generic/727
-> @@ -0,0 +1,62 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2021 Oracle.  All Rights Reserved.
-> +#
-> +# FS QA Test 727
-> +#
-> +# Regression test for "mm/swap: consider max pages in iomap_swapfile_add_extent"
-> +
-> +# Xu Yu found that the iomap swapfile activation code failed to constrain
-> +# itself to activating however many swap pages that the mm asked us for.  This
-> +# is an deviation in behavior from the classic swapfile code.  It also leads to
-> +# kernel memory corruption if the swapfile is cleverly constructed.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto swap
-> +
-> +# Override the default cleanup function.
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +	test -n "$swapfile" && swapoff $swapfile &> /dev/null
-> +}
-> +
-> +# real QA test starts here
-> +_supported_fs generic
-> +_require_scratch_swapfile
-> +
-> +_scratch_mkfs >> $seqres.full
-> +_scratch_mount >> $seqres.full
-> +
-> +# Assuming we're not borrowing a FAT16 partition from Windows 3.1, we need an
-> +# unlikely enough name that we can grep /proc/swaps for this.
-> +swapfile=$SCRATCH_MNT/386spart.par
-> +_format_swapfile $swapfile 1m >> $seqres.full
-> +
-> +swapfile_pages() {
-> +	local swapfile="$1"
-> +
-> +	grep "$swapfile" /proc/swaps | awk '{print $3}'
-> +}
-> +
-> +_swapon_file $swapfile
-> +before_pages=$(swapfile_pages "$swapfile")
-> +swapoff $swapfile
-> +
-> +# Extend the length of the swapfile but do not rewrite the header.
-> +# The subsequent swapon should set up 1MB worth of pages, not 2MB.
-> +$XFS_IO_PROG -f -c 'pwrite 1m 1m' $swapfile >> $seqres.full
-> +
-> +_swapon_file $swapfile
-> +after_pages=$(swapfile_pages "$swapfile")
-> +swapoff $swapfile
-> +
-> +# Both swapon attempts should have found the same number of pages.
-> +test "$before_pages" -eq "$after_pages" || \
-> +	echo "swapon added $after_pages pages, expected $before_pages"
-> +
-> +# success, all done
-> +echo Silence is golden
+>
+> >
+> > >
+> > > > +_scratch_shutdown
+> > > > +_scratch_cycle_mount
+> > > > +$TUNE2FS_PROG -l $SCRATCH_DEV >> $seqres.full 2>&1
+> > > > +if [ $? -eq 0 ]; then
+> > > > +     status=0
+> > > > +else
+> > > > +     status=1
+> > > > +fi
+> > >
+> > > Don't need to change the status value, how about write as:
+> > >
+> > > $TUNE2FS_PROG -l $SCRATCH_DEV >/dev/null
+> > >
+> > > The error output will break the golden image directly.
+> >
+> > How did you test that? The error output didn't break the "golden
+> > image" in my test.
+>
+> [root@xx-xxxx-xx xfstests-dev]# ./check ext4/309
+> FSTYP         -- ext4
+> PLATFORM      -- Linux/x86_64 xx-xxxx-xx 5.14.0-rc4-xfs #14 SMP Thu Aug 12 00:56:07 CST 2021
+> MKFS_OPTIONS  -- /dev/mapper/testvg-scratchdev
+> MOUNT_OPTIONS -- -o acl,user_xattr -o context=system_u:object_r:root_t:s0 /dev/mapper/testvg-scratchdev /mnt/scratch
+>
+> ext4/309 5s ... - output mismatch (see /root/git/xfstests-dev/results//ext4/309.out.bad)
+>     --- tests/ext4/309.out      2021-08-18 18:17:15.925427714 +0800
+>     +++ /root/git/xfstests-dev/results//ext4/309.out.bad        2021-08-19 00:17:57.001648868 +0800
+>     @@ -1,2 +1,4 @@
+>      QA output created by 309
+>      Silence is golden
+>     +/usr/sbin/tune2fs: Superblock checksum does not match superblock while trying to open /dev/mapper/testvg-scratchdev
+>     +Couldn't find valid filesystem superblock.
+>     ...
+>     (Run 'diff -u /root/git/xfstests-dev/tests/ext4/309.out /root/git/xfstests-dev/results//ext4/309.out.bad'  to see the entire diff)
+> Ran: ext4/309
+> Failures: ext4/309
+> Failed 1 of 1 tests
+>
+> [root@xx-xxxx-xx xfstests-dev]# git diff
+> ...
+>  _scratch_mkfs >/dev/null 2>&1
+>  _scratch_mount
+> -echo "ext4/309" > $SCRATCH_MNT/309.tmp
+> +echo "This is a test" > $SCRATCH_MNT/testfile
+>  _scratch_shutdown
+> -_scratch_cycle_mount
+> -$TUNE2FS_PROG -l $SCRATCH_DEV >> $seqres.full 2>&1
+> -if [ $? -eq 0 ]; then
+> -       status=0
+> -else
+> -       status=1
+> -fi
+> +_scratch_cycle_mount
+> +$TUNE2FS_PROG -l $SCRATCH_DEV >/dev/null
+>
 > +status=0
-> +exit
-> diff --git a/tests/generic/727.out b/tests/generic/727.out
-> new file mode 100644
-> index 00000000..2de2b4b2
-> --- /dev/null
-> +++ b/tests/generic/727.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 727
-> +Silence is golden
-> 
+>  exit
+
+Unless I missed something, I would say that, tune2fs' error output
+went to .out.bad just because you had modified the tune2fs line from
+mine:
+
+$TUNE2FS_PROG -l $SCRATCH_DEV >> $seqres.full 2>&1
+
+to yours:
+
+$TUNE2FS_PROG -l $SCRATCH_DEV >/dev/null
+
+My original version redirecting stderr and stdout both to $seqres.full
+doesn't break the "golden output". Test log:
+```
+[root@kvm102 repo_xfstests]# ./check ext4/309
+FSTYP         -- ext4
+PLATFORM      -- Linux/x86_64 kvm102 5.14.0-0.rc4.35.xx.x86_64 #1 SMP
+Tue Aug 3 13:02:44 EDT 2021
+MKFS_OPTIONS  -- -b 1024 /dev/vda3
+MOUNT_OPTIONS -- -o acl,user_xattr -o
+context=system_u:object_r:root_t:s0 /dev/vda3 /scratch
+
+ext4/309        [failed, exit status 1]
+Ran: ext4/309
+Failures: ext4/309
+Failed 1 of 1 tests
+[root@kvm102 repo_xfstests]# cat results/ext4/309.full
+/usr/sbin/tune2fs: Superblock checksum does not match superblock while
+trying to open /dev/vda3
+Couldn't find valid filesystem superblock.
+tune2fs 1.46.2 (28-Feb-2021)
+[root@kvm102 repo_xfstests]# ls results/ext4/309.out.bad
+ls: cannot access 'results/ext4/309.out.bad': No such file or directory
+```
+
+As far as I can understand, there're at least two approaches to mark a
+test pass or fail in xfstests:
+1) Compare the output of the test with the "golden output" (i.e.
+309.out), I guess this is the approach you mentioned.
+2) Exit the test with the value of $status (i.e. status=0 - pass,
+status=non-zero - fail)
+
+I'm using the 2) here, not using 1) with the output of tune2fs
+compared with the 309.out, because the output of tune2fs can be
+different in different runs. An example output of a successful tune2fs
+run is like (sorry for this long paste):
+```
+[root@kvm101 repo_xfstests]# cat results/ext4/309.full
+tune2fs 1.45.6 (20-Mar-2020)
+Filesystem volume name:   <none>
+Last mounted on:          /scratch
+Filesystem UUID:          22975090-96d7-49ee-9b4f-ee6afe046219
+Filesystem magic number:  0xEF53
+Filesystem revision #:    1 (dynamic)
+Filesystem features:      has_journal ext_attr resize_inode dir_index
+filetype needs_recovery extent 64bit flex_bg sparse_super large_file
+huge_file dir_nlink extra_isize metadata_csum
+Filesystem flags:         signed_directory_hash
+Default mount options:    user_xattr acl
+Filesystem state:         clean
+Errors behavior:          Continue
+Filesystem OS type:       Linux
+Inode count:              720896
+Block count:              11534336
+Reserved block count:     576716
+Free blocks:              11280570
+Free inodes:              720884
+First block:              1
+Block size:               1024
+Fragment size:            1024
+Group descriptor size:    64
+Reserved GDT blocks:      256
+Blocks per group:         8192
+Fragments per group:      8192
+Inodes per group:         512
+Inode blocks per group:   128
+Flex block group size:    16
+Filesystem created:       Thu Aug 19 05:45:26 2021
+Last mount time:          Thu Aug 19 05:45:26 2021
+Last write time:          Thu Aug 19 05:45:26 2021
+Mount count:              2
+Maximum mount count:      -1
+Last checked:             Thu Aug 19 05:45:26 2021
+Check interval:           0 (<none>)
+Lifetime writes:          462 kB
+Reserved blocks uid:      0 (user root)
+Reserved blocks gid:      0 (group root)
+First inode:              11
+Inode size:               256
+Required extra isize:     32
+Desired extra isize:      32
+Journal inode:            8
+Default directory hash:   half_md4
+Directory Hash Seed:      f5af5862-d415-460b-9a6b-97584578600f
+Journal backup:           inode blocks
+Checksum type:            crc32c
+Checksum:                 0x0f5b9c13
+```
+
+Thanks,
+Boyang
+
+>
+>
+> Thanks,
+> Zorro
+>
+> >
+> > >
+> > > ( cc ext4 mailist, to get more review)
+> > >
+> > > Thanks,
+> > > Zorro
+> >
+> > Thanks for review!
+> >
+> > -Boyang
+> >
+> > >
+> > > > +
+> > > > +exit
+> > > > diff --git a/tests/ext4/309.out b/tests/ext4/309.out
+> > > > new file mode 100644
+> > > > index 00000000..56330d65
+> > > > --- /dev/null
+> > > > +++ b/tests/ext4/309.out
+> > > > @@ -0,0 +1,2 @@
+> > > > +QA output created by 309
+> > > > +Silence is golden
+> > > > --
+> > > > 2.27.0
+> > > >
+> > >
+> >
+>
 
