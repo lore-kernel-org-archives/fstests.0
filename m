@@ -2,104 +2,89 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3F198C4338F
-	for <linux-fstests@archiver.kernel.org>; Fri, 20 Aug 2021 12:11:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AB63FC4338F
+	for <linux-fstests@archiver.kernel.org>; Sat, 21 Aug 2021 22:58:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 24FEB60FDA
-	for <linux-fstests@archiver.kernel.org>; Fri, 20 Aug 2021 12:11:08 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7CA4761268
+	for <linux-fstests@archiver.kernel.org>; Sat, 21 Aug 2021 22:58:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238769AbhHTMLn (ORCPT
+        id S230384AbhHUW7Y (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 20 Aug 2021 08:11:43 -0400
-Received: from mail.synology.com ([211.23.38.101]:52772 "EHLO synology.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S238179AbhHTMLn (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 20 Aug 2021 08:11:43 -0400
-Received: from localhost.localdomain (unknown [10.17.33.24])
-        by synology.com (Postfix) with ESMTPA id D55AF3894A68;
-        Fri, 20 Aug 2021 20:11:04 +0800 (CST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=synology.com; s=123;
-        t=1629461464; bh=Vq7icz+CUDQPjhWaftQs8m0U1ddrvb4nDarhQ6lXHRM=;
-        h=From:To:Cc:Subject:Date;
-        b=kp3c8sKl8foU+xijzkbfenu9ayJ6UCp6PT1FieXq16pjtfWG+Kceb9u88nOKjckrp
-         A+Jfz7NGbkKJjkaqc+XU+yVEHx+r5ZcLC6cLbaPpBgWNWX6KiATppE5Nu2oy3Tltbm
-         Ov2SOv8RIsWW0pWJ2xP+eC2iVnHKVYwqWFfoyCMc=
-From:   Kai-Wen Hu <kevinhu@synology.com>
-To:     fstests@vger.kernel.org
-Cc:     Kai-Wen Hu <kevinhu@synology.com>,
-        Chung-Chiang Cheng <cccheng@synology.com>,
-        Robbie Ko <robbieko@synology.com>
-Subject: [PATCH] generic/457: post-check fs on thin-vol device instead of scratch device
-Date:   Fri, 20 Aug 2021 20:10:31 +0800
-Message-Id: <20210820121031.583298-1-kevinhu@synology.com>
-X-Mailer: git-send-email 2.25.1
+        Sat, 21 Aug 2021 18:59:24 -0400
+Received: from mail106.syd.optusnet.com.au ([211.29.132.42]:52386 "EHLO
+        mail106.syd.optusnet.com.au" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S230343AbhHUW7Y (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 21 Aug 2021 18:59:24 -0400
+Received: from dread.disaster.area (pa49-195-182-146.pa.nsw.optusnet.com.au [49.195.182.146])
+        by mail106.syd.optusnet.com.au (Postfix) with ESMTPS id 142A080BC43;
+        Sun, 22 Aug 2021 08:58:41 +1000 (AEST)
+Received: from dave by dread.disaster.area with local (Exim 4.92.3)
+        (envelope-from <david@fromorbit.com>)
+        id 1mHZwm-003RQm-AJ; Sun, 22 Aug 2021 08:58:40 +1000
+Date:   Sun, 22 Aug 2021 08:58:40 +1000
+From:   Dave Chinner <david@fromorbit.com>
+To:     Nikolay Borisov <nborisov@suse.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH] generic/70: Use scratch device instead of test.
+Message-ID: <20210821225840.GE2566745@dread.disaster.area>
+References: <20210819131355.304528-1-nborisov@suse.com>
+ <20210819150050.jweulrtgjeh57wac@fedora>
+ <0b70908b-9b9f-d606-1d49-45bee40df1ea@suse.com>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-X-Synology-MCP-Status: no
-X-Synology-Spam-Flag: no
-X-Synology-Spam-Status: score=0, required 6, WHITELIST_FROM_ADDRESS 0
-X-Synology-Virus-Status: no
+In-Reply-To: <0b70908b-9b9f-d606-1d49-45bee40df1ea@suse.com>
+X-Optus-CM-Score: 0
+X-Optus-CM-Analysis: v=2.3 cv=Tu+Yewfh c=1 sm=1 tr=0
+        a=QpfB3wCSrn/dqEBSktpwZQ==:117 a=QpfB3wCSrn/dqEBSktpwZQ==:17
+        a=IkcTkHD0fZMA:10 a=MhDmnRu9jo8A:10 a=iox4zFpeAAAA:8 a=7-415B0cAAAA:8
+        a=Ytqn3B1En7xDMI5LrH8A:9 a=QEXdDO2ut3YA:10 a=WzC6qhA0u3u7Ye7llzcV:22
+        a=biEYGPWJfzWAr4FL6Ov7:22
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Recently, we found that this test running with btrfs didn't
-pass the post-check fsck on scratch device.  This issue occured
-due to the commit 5faafc77f ("dm space maps: don't reset space map
-allocation cursor when committing") and the use of SSD as scratch
-device.
+On Thu, Aug 19, 2021 at 05:56:31PM +0300, Nikolay Borisov wrote:
+> 
+> 
+> On 19.08.21 г. 18:00, Zorro Lang wrote:
+> > On Thu, Aug 19, 2021 at 04:13:55PM +0300, Nikolay Borisov wrote:
+> >> At the end of the test the fsstress work dir is deleted, this suggests
+> >> the test really requires a scratch device and not a test device. Change
+> >> it accordingly.
+> >>
+> >> Signed-off-by: Nikolay Borisov <nborisov@suse.com>
+> >> ---
+> > 
+> > Hmm... is there any more specific reasons to explain why have to change this
+> > TEST_DIR to SCRATCH_MNT? For example, this test hit ENOSPC in TEST_DIR, or
+> > it takes too much time to remove $TEST_DIR/fsstress in _cleanup, or use
+> > SCRATCH_DEV can cover more things, and so on. I think more specific reason
+> > can help to push this patch be merged. After all there's not a rule says
+> > if a case don't need to keep its work dir, then must use SCRATCH_DEV. Except
+> > the maintainer is more inclined to accept that :)
+> 
+> None of the reasons above, I just thought that stuff in $TEST_DEV lives
+> there so that it can simulate an 'aging' system. In this case this
+> doesn't seem to be the reason for it as we delete everything.
 
-In this test, it does not directly use the filesystem on scratch
-device. It runs test on dm-thin volume tying two linear-mapping
-devices, and those two linear devices are created from the scratch
-device.  When the test runs, it will write data on dm-thin volume,
-and dirty the underlying scratch device.
+That's most certainly aging the filesystem. Just because the test
+deletes everything it wrote doesn't mean that the filesystem is
+unchanged after the test runs. e.g. log structured or COW filesytems
+can have very different structures at the end of the test, even
+though the current view of the filesystem appears unchanged...
 
-Since the commit (5faafc77f) changes the dm space allocation policy,
-it may cause more dirty blocks on underlying scratch device when we
-write data on thin volume.  So it makes more chance to overwrite the
-position of btrfs-meta on the scratch device.  Besides, our scratch
-device is SSD, so there is only one copy of btrfs meta on the scratch
-device.  Once the btrfs-meta is overwritten, the btrfs volume will
-crash, and cannot pass the fsck check.
+IOWs, tests that don't require a specific filesystem configuration
+should be run on the test device, not the scratch device...
 
-Because, this test won't directly use the fs on scratch device.  We
-just disable the post-check fsck on scratch device, instead, we run
-post-check fsck on thin-vol device.
+Cheers,
 
-Reviewed-by: Chung-Chiang Cheng <cccheng@synology.com>
-Reviewed-by: Robbie Ko <robbieko@synology.com>
-Signed-off-by: Kai-Wen Hu <kevinhu@synology.com>
----
- tests/generic/457 | 3 +++
- 1 file changed, 3 insertions(+)
-
-diff --git a/tests/generic/457 b/tests/generic/457
-index f4fdd81d..7e0a3157 100755
---- a/tests/generic/457
-+++ b/tests/generic/457
-@@ -29,6 +29,8 @@ _require_scratch_reflink
- _require_cp_reflink
- _require_log_writes
- _require_dm_target thin-pool
-+# $SCRATCH_DEV won't be directly created filesystem on, so fsck isn't required
-+rm -f "${RESULT_DIR}/require_scratch"
- 
- check_files()
- {
-@@ -114,6 +116,7 @@ for j in `seq 0 $((NUM_FILES-1))`; do
- 	md5=$(_md5_checksum $SCRATCH_MNT/testfile$j)
- 	[ "${md5}" != "${test_md5[$j]}" ] && _fail "testfile$j end md5sum mismatched"
- done
-+_dmthin_check_fs
- 
- echo "Silence is golden"
- status=0
+Dave.
 -- 
-2.25.1
-
+Dave Chinner
+david@fromorbit.com
