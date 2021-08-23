@@ -2,202 +2,165 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 77A5CC4338F
-	for <linux-fstests@archiver.kernel.org>; Mon, 23 Aug 2021 15:50:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E0C1BC4338F
+	for <linux-fstests@archiver.kernel.org>; Mon, 23 Aug 2021 17:43:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 58CDD613D1
-	for <linux-fstests@archiver.kernel.org>; Mon, 23 Aug 2021 15:50:11 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C81666136F
+	for <linux-fstests@archiver.kernel.org>; Mon, 23 Aug 2021 17:43:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230314AbhHWPux (ORCPT
+        id S230174AbhHWRn7 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 23 Aug 2021 11:50:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48798 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229550AbhHWPux (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 23 Aug 2021 11:50:53 -0400
-Received: from mail-qv1-xf29.google.com (mail-qv1-xf29.google.com [IPv6:2607:f8b0:4864:20::f29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 58F68C061575;
-        Mon, 23 Aug 2021 08:50:10 -0700 (PDT)
-Received: by mail-qv1-xf29.google.com with SMTP id v1so9908156qva.7;
-        Mon, 23 Aug 2021 08:50:10 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:reply-to:from:date:message-id
-         :subject:to:cc:content-transfer-encoding;
-        bh=JedtgEvNKCJoz66nmZsiPaqgelV9E6V0ABmuh1kxb1s=;
-        b=YwJaraYgz8qrHViiQKkazAk4yECf0YtHBlGSjoLG4DiYbWu2S4aZeW2JtzKO9P/CwK
-         O3+hUwwr1juV2t7WzaY5OX3oVxO41Zx29JTyZKGCnSw/3PewyVzA3c0N8HFOfBzpN+Tb
-         e9b5JyAtngkYwhNG9mjQiKm1HVmxAL9pAQrSZfuqf5thoNZMD1v54DCFW/qroL16rWb7
-         CrQ06zUQdeVo3QJIIvdUZ7xZE4vl6KwUH4JWJOxk073QuBnb4c06yvXsLqI/mcBz1apB
-         ENiv0oZU+CA4gDADgmRh6Si7+Tz97/Gf8DPSu19TGyvCYi6p7ttkjqGMcZK8YRpfrIRd
-         z48g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:reply-to
-         :from:date:message-id:subject:to:cc:content-transfer-encoding;
-        bh=JedtgEvNKCJoz66nmZsiPaqgelV9E6V0ABmuh1kxb1s=;
-        b=Q8J1v/3MmvnkZsJmsNXhGKYE7knEusTrdq0wM3DGvhgRTFbOZf735km3H48LF6POSU
-         bhiGZ6nZK7uXopIAh/d2dfpBqEXZNzL5DyyimHNBdB/zT/3ybDobasUXm7RkDFS4s1yK
-         fF0atwtjQIeYCB+UAqi6jAg+Dyv58I75ZdCIQRchCzhqDe6oCjiznf5U+QuO+skYWrDH
-         8cFdaBkss4JLlwzEJWHErymKlsE2svcRVKcwT3tIKniiTmqXBolw8RnaYnyyadK2QK91
-         t1WcK11097XD/hKZ8SCRA/0I+Yd3yCC6YbD4uayKvXdRCQt88eTZ0HTVd/AaHMpoM3P3
-         I/qw==
-X-Gm-Message-State: AOAM532pcjtdHXFw5LgNLZABcLtNUvbEIKP/9870xHAG6FT3IzZkA5ZR
-        GbuHCds/zz63Vq7XogXXRFpj/oKmRXCXi5tOCMw=
-X-Google-Smtp-Source: ABdhPJzybZFyThB3ilr43aHCs3SweCjhX697rbyopLwQeQ6dSI+x8NjNoM6/XuumNYzbfLffD55YKiiJ9W3lByfjp1U=
-X-Received: by 2002:a05:6214:c69:: with SMTP id t9mr34170355qvj.28.1629733809596;
- Mon, 23 Aug 2021 08:50:09 -0700 (PDT)
+        Mon, 23 Aug 2021 13:43:59 -0400
+Received: from mail.kernel.org ([198.145.29.99]:48764 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S230154AbhHWRn7 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 23 Aug 2021 13:43:59 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 9B3D46126A;
+        Mon, 23 Aug 2021 17:43:16 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1629740596;
+        bh=uqQW7fyjdNstyp9yXLvDxRZ9MJ+eukg2M8pRPLYtvf0=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=lm05wudKNf4P9w+AxLOSSGblLHh59yMqLXgLgVBmX+zg0IhrvRBPoJvde1r1epOS4
+         dxqZf0X5OqRDfJIzD7XZErCoTzuzzk4zBa65AkZYOAkO75vl5ocnjBTrjvOQSxIlV3
+         OnzRpSWoiS2RcOQyhzukgFZy7USd2tg7Msh0C0FA8btLJO5eZzrjzCyA1MBwCbRRPg
+         sEle6zKpiL814KuHGd1xbDU4K/79qSwfIsq9YJ78mdgM4LzIPR2CamGNk2kIpY3cLD
+         fsvyw7RUG2XO1cLOV1ns/pOdcdbFeJuRe4vix3u42KouAJHBGWf9B9Jo+rRLRl0ayT
+         +DIlHdBjqrcRw==
+Date:   Mon, 23 Aug 2021 10:43:16 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Murphy Zhou <xzhou@redhat.com>
+Cc:     fstests@vger.kernel.org, ddouwsma@redhat.com
+Subject: Re: [PATCH v2] tests/xfs: check available blocks after log recovery
+ on ro mount
+Message-ID: <20210823174316.GE12612@magnolia>
+References: <20210806014938.npfn2ykyirfrdlra@xzhoux.usersys.redhat.com>
+ <20210806185545.GE3601425@magnolia>
+ <20210823070541.mn2y4pn4256dwnhm@xzhoux.usersys.redhat.com>
 MIME-Version: 1.0
-References: <20210819131456.304721-1-nborisov@suse.com>
-In-Reply-To: <20210819131456.304721-1-nborisov@suse.com>
-Reply-To: fdmanana@gmail.com
-From:   Filipe Manana <fdmanana@gmail.com>
-Date:   Mon, 23 Aug 2021 16:49:58 +0100
-Message-ID: <CAL3q7H57NsQ2WhdsC3=gYftFp_JUKHVxNgCAQuXPwvFzux9CaA@mail.gmail.com>
-Subject: Re: [PATCH] btrfs: Add test for rename exchange behavior between subvolumes
-To:     Nikolay Borisov <nborisov@suse.com>
-Cc:     fstests <fstests@vger.kernel.org>,
-        linux-btrfs <linux-btrfs@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210823070541.mn2y4pn4256dwnhm@xzhoux.usersys.redhat.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Aug 19, 2021 at 2:17 PM Nikolay Borisov <nborisov@suse.com> wrote:
->
-> Signed-off-by: Nikolay Borisov <nborisov@suse.com>
-
-At the very least the change log could mention which patch / commit
-motivated this test.
-
+On Mon, Aug 23, 2021 at 03:05:41PM +0800, Murphy Zhou wrote:
+> And followed by a rw mount.
+> 
+> Suggested-by:  Donald Douwsma <ddouwsma@redhat.com>
+> Signed-off-by: Murphy Zhou <xzhou@redhat.com>
 > ---
->  tests/btrfs/246     | 46 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/246.out | 27 ++++++++++++++++++++++++++
->  2 files changed, 73 insertions(+)
->  create mode 100755 tests/btrfs/246
->  create mode 100644 tests/btrfs/246.out
->
-> diff --git a/tests/btrfs/246 b/tests/btrfs/246
+> v2:
+>    Add explaination of the issue
+>    add xfs_force_bdev data $SCRATCH_MNT
+>    use DF_PROG
+>    Re numbered this test
+> 
+>  tests/xfs/999     | 61 +++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/999.out |  2 ++
+>  2 files changed, 63 insertions(+)
+>  create mode 100755 tests/xfs/999
+>  create mode 100644 tests/xfs/999.out
+> 
+> diff --git a/tests/xfs/999 b/tests/xfs/999
 > new file mode 100755
-> index 000000000000..0934932d1f22
+> index 00000000..c93ed770
 > --- /dev/null
-> +++ b/tests/btrfs/246
-> @@ -0,0 +1,46 @@
+> +++ b/tests/xfs/999
+> @@ -0,0 +1,61 @@
 > +#! /bin/bash
 > +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2021 SUSE Linux Products GmbH.  All Rights Reserved.
+> +# Copyright (c) 2021 RedHat All Rights Reserved.
 > +#
-> +# FS QA Test 246
+> +# FS QA Test 999
 > +#
-> +# Tests rename exchange behavior across subvolumes
+> +# Testcase for kernel commit:
+> +#   50d25484bebe xfs: sync lazy sb accounting on quiesce of read-only mounts
+> +#
+> +# After shutdown and readonly mount, a following read-write mount would
+> +# get wrong number of available blocks. This is caused by unmounting the log
+> +# on a readonly filesystem doesn't log the sb counters.
 > +#
 > +. ./common/preamble
-> +_begin_fstest auto quick rename
-> +
-> +# Import common functions.
-> + . ./common/renameat2
+> +_begin_fstest shutdown auto quick
 > +
 > +# real QA test starts here
 > +
-> +# Modify as appropriate.
-> +_supported_fs btrfs
-> +_require_renameat2 exchange
+> +_supported_fs xfs
 > +_require_scratch
+
+Also needs
+_require_scratch_shutdown
+
 > +
-> +_scratch_mkfs >> $seqres.full 2>&1
+> +_scratch_mkfs > $seqres.full 2>&1
+> +mount $SCRATCH_DEV $SCRATCH_MNT
+
+_scratch_mount?
+
+> +_xfs_force_bdev data $SCRATCH_MNT
+> +
+> +# Write test file
+> +ls > $SCRATCH_MNT/testfile
+> +$DF_PROG $SCRATCH_MNT >> $seqres.full 2>&1
+> +
+> +# Shutdown
+> +$XFS_IO_PROG -x -c "shutdown -f" $SCRATCH_MNT
+> +
+> +# Mount ReadOnly
+> +_scratch_unmount
+> +_scratch_mount -oro
+> +$DF_PROG $SCRATCH_MNT >> $seqres.full 2>&1
+> +# Umount and mount rw
+> +_scratch_unmount
 > +_scratch_mount
 > +
-> +# Create 2 subvols to use as parents for the rename ops
-> +$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subvol1 1>/dev/null
-> +$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subvol2 1>/dev/null
-> +
-> +# _rename_tests_source_dest internally expects the flags variable to con=
-tain
-> +# specific options to rename syscall. Ensure cross subvol ops are forbid=
-den
-> +flags=3D"-x"
-> +_rename_tests_source_dest $SCRATCH_MNT/subvol1/src $SCRATCH_MNT/subvol2/=
-dst "cross-subvol"
-> +
-> +# Prepare a subvolume and a directory whose parents are different subvol=
-umes
-> +$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subvol1/sub-subvol 1>/dev=
-/null
-> +mkdir $SCRATCH_MNT/subvol2/dir
-> +
-> +# Ensure exchanging a subvol with a dir when both parents are different =
-fails
-> +$here/src/renameat2 -x $SCRATCH_MNT/subvol1/sub-subvol $SCRATCH_MNT/subv=
-ol2/dir
-> +
-> +# force transaction commit which runs the tree checker
-> +sync
+> +# Get fdblocks before repair
+> +fdb1=$($DF_PROG $SCRATCH_MNT | tail -1 | $AWK_PROG '{print $4}')
 
-There's no need to invoke sync, when the test unmounts the device, the
-tree checker runs and fstests notices and complains about the error
-message from the tree checker.
-Plus the mismatch between the produced output and the golden output,
-is enough to make the test fail on an unpatched kernel.
+fdb1=$(_get_available_space $SCRATCH_MNT) ?
 
-Finally, this would also be a good opportunity to test regular renames
-with subvolumes too, as we had bugs and regressions in the past like
-in commit 4871c1588f92c6c13f4713a7009f25f217055807 ("Btrfs: use right
-root when checking for hash collision
-"), and never got any test cases for them.
+> +_scratch_unmount
+> +
+> +# Repair
+> +_repair_scratch_fs >> $seqres.full 2>&1
+> +
+> +# Re-mount
+> +_scratch_mount
+> +
+> +# Get fdblocks after repair
+> +fdb2=$($DF_PROG $SCRATCH_MNT | tail -1 | $AWK_PROG '{print $4}')
 
-Thanks.
+Here too.
 
+With those bits fixed, I think this is in good shape for:
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+
+--D
+
+> +
+> +echo fdb1 $fdb1 fdb2 $fdb2 >> $seqres.full 2>&1
+> +
+> +[ $fdb1 -ne $fdb2 ] && echo Wrong fdblocks: $fdb1 and $fdb2
 > +
 > +# success, all done
-> +status=3D0
+> +echo "Silence is golden"
+> +status=0
 > +exit
-> diff --git a/tests/btrfs/246.out b/tests/btrfs/246.out
+> diff --git a/tests/xfs/999.out b/tests/xfs/999.out
 > new file mode 100644
-> index 000000000000..d50dc28b1b40
+> index 00000000..3b276ca8
 > --- /dev/null
-> +++ b/tests/btrfs/246.out
-> @@ -0,0 +1,27 @@
-> +QA output created by 246
-> +cross-subvol none/none -> No such file or directory
-> +cross-subvol none/regu -> No such file or directory
-> +cross-subvol none/symb -> No such file or directory
-> +cross-subvol none/dire -> No such file or directory
-> +cross-subvol none/tree -> No such file or directory
-> +cross-subvol regu/none -> No such file or directory
-> +cross-subvol regu/regu -> Invalid cross-device link
-> +cross-subvol regu/symb -> Invalid cross-device link
-> +cross-subvol regu/dire -> Invalid cross-device link
-> +cross-subvol regu/tree -> Invalid cross-device link
-> +cross-subvol symb/none -> No such file or directory
-> +cross-subvol symb/regu -> Invalid cross-device link
-> +cross-subvol symb/symb -> Invalid cross-device link
-> +cross-subvol symb/dire -> Invalid cross-device link
-> +cross-subvol symb/tree -> Invalid cross-device link
-> +cross-subvol dire/none -> No such file or directory
-> +cross-subvol dire/regu -> Invalid cross-device link
-> +cross-subvol dire/symb -> Invalid cross-device link
-> +cross-subvol dire/dire -> Invalid cross-device link
-> +cross-subvol dire/tree -> Invalid cross-device link
-> +cross-subvol tree/none -> No such file or directory
-> +cross-subvol tree/regu -> Invalid cross-device link
-> +cross-subvol tree/symb -> Invalid cross-device link
-> +cross-subvol tree/dire -> Invalid cross-device link
-> +cross-subvol tree/tree -> Invalid cross-device link
-> +Invalid cross-device link
-> --
-> 2.17.1
->
-
-
---=20
-Filipe David Manana,
-
-=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
- right.=E2=80=9D
+> +++ b/tests/xfs/999.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 999
+> +Silence is golden
+> -- 
+> 2.20.1
+> 
