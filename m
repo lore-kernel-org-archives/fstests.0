@@ -2,190 +2,170 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 107CCC4338F
-	for <linux-fstests@archiver.kernel.org>; Mon, 23 Aug 2021 20:22:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A1DCBC4338F
+	for <linux-fstests@archiver.kernel.org>; Tue, 24 Aug 2021 05:04:43 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D849460C51
-	for <linux-fstests@archiver.kernel.org>; Mon, 23 Aug 2021 20:22:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7B4AF6124B
+	for <linux-fstests@archiver.kernel.org>; Tue, 24 Aug 2021 05:04:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232060AbhHWUX2 (ORCPT
+        id S230232AbhHXFF0 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 23 Aug 2021 16:23:28 -0400
-Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:41096 "EHLO
-        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S232016AbhHWUX1 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 23 Aug 2021 16:23:27 -0400
-Received: from cwcc.thunk.org (pool-72-74-133-215.bstnma.fios.verizon.net [72.74.133.215])
-        (authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 17NKMZP3009496
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 23 Aug 2021 16:22:36 -0400
-Received: by cwcc.thunk.org (Postfix, from userid 15806)
-        id 730A715C3DBB; Mon, 23 Aug 2021 16:22:35 -0400 (EDT)
-From:   "Theodore Ts'o" <tytso@mit.edu>
-To:     fstests@vger.kernel.org
-Cc:     Eryu Guan <guan@eryu.me>, "Theodore Ts'o" <tytso@mit.edu>
-Subject: [PATCH -v2] ext4: add test to validate the large_dir feature
-Date:   Mon, 23 Aug 2021 16:22:31 -0400
-Message-Id: <20210823202231.1776276-1-tytso@mit.edu>
-X-Mailer: git-send-email 2.31.0
-In-Reply-To: <YQ/ixFR3Q4ucAFP3@desktop>
-References: <YQ/ixFR3Q4ucAFP3@desktop>
+        Tue, 24 Aug 2021 01:05:26 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:57633 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S229709AbhHXFFZ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 24 Aug 2021 01:05:25 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1629781481;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=p/ok7xsqxf+BSr2QNXfHMYGwhoJdb3dve7L8zR788MA=;
+        b=MMKgZ4iCYL32giNaza0A187U/4Msg4IqdexJ986wd96BniLnG9B9hX9sz7GH9aYzfnnOA7
+        EE/zBli/bPfE6Q9/vEfWOXXAkkqSpRY4dg5TxT39wgclW20KcK7Ry/QoIgdjuYDtTRCNdO
+        GoJahNzrulxKSR0UDH/zJRfptbkAMXk=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-167-YUbbqmQiPfeQ-opWKyUUYw-1; Tue, 24 Aug 2021 01:04:39 -0400
+X-MC-Unique: YUbbqmQiPfeQ-opWKyUUYw-1
+Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 2B44F802923;
+        Tue, 24 Aug 2021 05:04:38 +0000 (UTC)
+Received: from localhost (unknown [10.66.61.34])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 8FDB85C1D5;
+        Tue, 24 Aug 2021 05:04:37 +0000 (UTC)
+Date:   Tue, 24 Aug 2021 13:04:36 +0800
+From:   Murphy Zhou <xzhou@redhat.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     Murphy Zhou <xzhou@redhat.com>, fstests@vger.kernel.org,
+        ddouwsma@redhat.com
+Subject: [PATCH v3] tests/xfs: check available blocks after log recovery on
+ ro mount
+Message-ID: <20210824050436.3l5jodgjhwt7wqzl@xzhoux.usersys.redhat.com>
+References: <20210806014938.npfn2ykyirfrdlra@xzhoux.usersys.redhat.com>
+ <20210806185545.GE3601425@magnolia>
+ <20210823070541.mn2y4pn4256dwnhm@xzhoux.usersys.redhat.com>
+ <20210823174316.GE12612@magnolia>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210823174316.GE12612@magnolia>
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.16
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-The ext4 large_dir feature supports a directory hash tree with a depth
-greater than 2.  Reuse the dirstress program to create a sufficiently
-large directory in order to exercise the large_dir code paths.
+And followed by a rw mount.
 
-Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+Suggested-by:  Donald Douwsma <ddouwsma@redhat.com>
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+Signed-off-by: Murphy Zhou <xzhou@redhat.com>
 ---
 
-Changes from v1:
-  - Address review comments
-     + Add comments describing how the test works
-     + Remove debugging lines
-  - Rename the test to ext4/052 since ext4/051 has been used
+Thanks Darrick very much for reviewing!
 
- src/dirstress.c    |  7 ++++-
- tests/ext4/052     | 70 ++++++++++++++++++++++++++++++++++++++++++++++
- tests/ext4/052.out |  2 ++
- 3 files changed, 78 insertions(+), 1 deletion(-)
- create mode 100755 tests/ext4/052
- create mode 100644 tests/ext4/052.out
+v2:
+   Add explaination of the issue
+   add xfs_force_bdev data $SCRATCH_MNT
+   use DF_PROG
+   Re numbered this test
+v3:
+   Add _require_scratch_shutdown
+   Use _get_available_space
+   Explain why does not use _scratch_mount
 
-diff --git a/src/dirstress.c b/src/dirstress.c
-index 615cb6e3..ec28d643 100644
---- a/src/dirstress.c
-+++ b/src/dirstress.c
-@@ -16,6 +16,7 @@ int verbose;
- int pid;
- 
- int checkflag=0;
-+int create_only=0;
- 
- #define MKNOD_DEV 0
- 
-@@ -51,7 +52,7 @@ main(
- 	nprocs_per_dir = 1;
- 	keep = 0;
-         verbose = 0;
--	while ((c = getopt(argc, argv, "d:p:f:s:n:kvc")) != EOF) {
-+	while ((c = getopt(argc, argv, "d:p:f:s:n:kvcC")) != EOF) {
- 		switch(c) {
- 			case 'p':
- 				nprocs = atoi(optarg);
-@@ -80,6 +81,9 @@ main(
- 			case 'c':
-                                 checkflag++;
-                                 break;
-+			case 'C':
-+				create_only++;
-+				break;
- 		}
- 	}
- 	if (errflg || (dirname == NULL)) {
-@@ -170,6 +174,7 @@ dirstress(
- 	if (create_entries(nfiles)) {
-             printf("!! [%d] create failed\n", pid);
-         } else {
-+	    if (create_only) return 0;
-             if (verbose) fprintf(stderr,"** [%d] scramble entries\n", pid);
- 	    if (scramble_entries(nfiles)) {
-                 printf("!! [%d] scramble failed\n", pid);
-diff --git a/tests/ext4/052 b/tests/ext4/052
+ tests/xfs/999     | 65 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/999.out |  2 ++
+ 2 files changed, 67 insertions(+)
+ create mode 100755 tests/xfs/999
+ create mode 100644 tests/xfs/999.out
+
+diff --git a/tests/xfs/999 b/tests/xfs/999
 new file mode 100755
-index 00000000..81d5582e
+index 00000000..0ce9989b
 --- /dev/null
-+++ b/tests/ext4/052
-@@ -0,0 +1,70 @@
++++ b/tests/xfs/999
+@@ -0,0 +1,65 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2021 RedHat All Rights Reserved.
 +#
-+# FS QA Test 052
++# FS QA Test 999
 +#
-+# Test ext4's large_dir feature
++# Testcase for kernel commit:
++#   50d25484bebe xfs: sync lazy sb accounting on quiesce of read-only mounts
 +#
-+# Create a directory with enough entries that we can exercise the large_dir
-+# code paths, and then verify that the resulting file system is valid using
-+# e2fsck.
++# After shutdown and readonly mount, a following read-write mount would
++# get wrong number of available blocks. This is caused by unmounting the log
++# on a readonly filesystem doesn't log the sb counters.
 +#
 +. ./common/preamble
-+_begin_fstest auto quick dir
-+
-+# Override the default cleanup function.
-+_cleanup()
-+{
-+	cd /
-+	rm -r -f $tmp.*
-+	if [ ! -z "$loop_mnt" ]; then
-+		$UMOUNT_PROG $loop_mnt
-+		rm -rf $loop_mnt
-+	fi
-+	[ ! -z "$fs_img" ] && rm -rf $fs_img
-+}
-+
-+# Import common functions.
-+# . ./common/filter
++_begin_fstest shutdown auto quick
 +
 +# real QA test starts here
 +
-+# Modify as appropriate.
-+_supported_fs ext4
-+_require_test
-+_require_loop
-+_require_scratch_ext4_feature "large_dir"
++_supported_fs xfs
++_require_scratch
++_require_scratch_shutdown
 +
++_scratch_mkfs > $seqres.full 2>&1
++# Don't use _scratch_mount because we need to mount without SELinux context
++# to reproduce this issue. If we mount with SELinux context, this testcase
++# is not reproducing the original issue.
++mount $SCRATCH_DEV $SCRATCH_MNT
++_xfs_force_bdev data $SCRATCH_MNT
++
++# Write test file
++ls > $SCRATCH_MNT/testfile
++$DF_PROG $SCRATCH_MNT >> $seqres.full 2>&1
++
++# Shutdown
++$XFS_IO_PROG -x -c "shutdown -f" $SCRATCH_MNT
++
++# Mount ReadOnly
++_scratch_unmount
++_scratch_mount -oro
++$DF_PROG $SCRATCH_MNT >> $seqres.full 2>&1
++# Umount and mount rw
++_scratch_unmount
++_scratch_mount
++
++# Get fdblocks before repair
++fdb1=$(_get_available_space $SCRATCH_MNT)
++_scratch_unmount
++
++# Repair
++_repair_scratch_fs >> $seqres.full 2>&1
++
++# Re-mount
++_scratch_mount
++
++# Get fdblocks after repair
++fdb2=$(_get_available_space $SCRATCH_MNT)
++
++echo fdb1 $fdb1 fdb2 $fdb2 >> $seqres.full 2>&1
++
++[ $fdb1 -ne $fdb2 ] && echo Wrong fdblocks: $fdb1 and $fdb2
++
++# success, all done
 +echo "Silence is golden"
-+
-+loop_mnt=$TEST_DIR/$seq.mnt
-+fs_img=$TEST_DIR/$seq.img
 +status=0
-+
-+$XFS_IO_PROG -f -c "truncate 20G" $fs_img >>$seqres.full 2>&1
-+
-+# We need to create enough files (400,000) so that using a file system
-+# with a 1k block size, the hash tree created will have three levels
-+# (which is the distringuishing characteristics of a large_dir versus
-+# non-large_dir).  We use no journal mode to decrease the run time of
-+# the test by 25%.
-+${MKFS_PROG} -t ${FSTYP} -b 1024 -N 400020 -O large_dir,^has_journal \
-+	     $fs_img 20G >> $seqres.full 2>&1 || _fail "mkfs failed"
-+
-+mkdir -p $loop_mnt
-+_mount -o loop $fs_img $loop_mnt > /dev/null  2>&1 || \
-+	_fail "Couldn't do initial mount"
-+
-+if ! $here/src/dirstress -c -d $loop_mnt -p 1 -f 400000 -C >$tmp.out 2>&1
-+then
-+    echo "    dirstress failed"
-+    cat $tmp.out >> $seqres.full
-+    echo "    dirstress failed" >> $seqres.full
-+    status=1
-+fi
-+
-+$UMOUNT_PROG $loop_mnt || _fail "umount failed"
-+loop_mnt=
-+
-+$E2FSCK_PROG -fn $fs_img >> $seqres.full 2>&1 || _fail "file system corrupted"
 +exit
-diff --git a/tests/ext4/052.out b/tests/ext4/052.out
+diff --git a/tests/xfs/999.out b/tests/xfs/999.out
 new file mode 100644
-index 00000000..93f6b038
+index 00000000..3b276ca8
 --- /dev/null
-+++ b/tests/ext4/052.out
++++ b/tests/xfs/999.out
 @@ -0,0 +1,2 @@
-+QA output created by 052
++QA output created by 999
 +Silence is golden
 -- 
-2.31.0
+2.20.1
 
