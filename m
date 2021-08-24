@@ -4,167 +4,174 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DC853C4338F
-	for <linux-fstests@archiver.kernel.org>; Tue, 24 Aug 2021 15:14:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4A455C4338F
+	for <linux-fstests@archiver.kernel.org>; Tue, 24 Aug 2021 15:17:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B2B8561246
-	for <linux-fstests@archiver.kernel.org>; Tue, 24 Aug 2021 15:14:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2EDAE6128A
+	for <linux-fstests@archiver.kernel.org>; Tue, 24 Aug 2021 15:17:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237981AbhHXPPP (ORCPT
+        id S238120AbhHXPRu (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 24 Aug 2021 11:15:15 -0400
-Received: from mail.kernel.org ([198.145.29.99]:36516 "EHLO mail.kernel.org"
+        Tue, 24 Aug 2021 11:17:50 -0400
+Received: from mail.kernel.org ([198.145.29.99]:37734 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S235683AbhHXPPN (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 24 Aug 2021 11:15:13 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 7218761246;
-        Tue, 24 Aug 2021 15:14:29 +0000 (UTC)
+        id S237981AbhHXPRu (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 24 Aug 2021 11:17:50 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 04CB961265;
+        Tue, 24 Aug 2021 15:17:05 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1629818069;
-        bh=4/LpOK85hGHN2CuOr1v3T1ZLNtK0sl/+Uib4Fwonbxc=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=nucNc0QP9vU5f2hV6mst+nGQt+DMYvwsEkNXvXtccT7RVGNFdm4VDgu+pCZjdSpse
-         D8JbsDJBjDvhZ/gla+fK0a+qYIqfMFOs1xH+WJYGZn/ihUs3w6n0EDFrRMc0lvNH4w
-         JyTiEmUFP7XQ0yE0MlB4OC+XQNheSNXzfFDRsU/I20iypjaG7VXtTOJ3CtZ7Tl6UuK
-         wH4C9hpo3lWFPLJs2VbORFiJsZjeOxyFbqfERQoD1u3GXeLr2iq4S4d379OWLvfM9a
-         gVm/9PDsJWsD0Gy9ZHsqzntdMrfVS/jWTW5NhYECvrv95d1VF4r1JzT9WsKJnTExcl
-         dIJXYhs+agVJg==
-Date:   Tue, 24 Aug 2021 08:14:28 -0700
+        s=k20201202; t=1629818226;
+        bh=cg/ogimENg4tW3cTbT87rjVkJOXHU2gU04UU9xhQ1BM=;
+        h=Date:From:To:Subject:References:In-Reply-To:From;
+        b=OWUyMi7O3t13ZVtrxyQK3hOWjJXKrjpRRNdlnTj6SQVkXoGvv60hkCXTaqrgfGWcs
+         9cWC2nM5yM+Zv//srCYzkRfOW+tTHJRN1i1W8GmiMTtYp+qz6Byrg0iTXsCRBztYzA
+         0HIwWjq3+/0xJWewjmq4jYzewyUF46IeuKekG/zSJmoE+QZnTki87QKZUy0vmS88+6
+         eypbvJiELVRpR4D9ihyNxt5tDa2uRK3OvIVnlyx1QC0oXe5LY5tbZF44wdwMRF5FAb
+         zwVuEoNsD8P7xIYV8kspQviqhVEX9ki+ji+43f52ew+s+j5x4hAIclF39JYF5bT2fI
+         26Z0NCi79Mkhg==
+Date:   Tue, 24 Aug 2021 08:17:05 -0700
 From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Murphy Zhou <xzhou@redhat.com>
-Cc:     fstests@vger.kernel.org, ddouwsma@redhat.com
-Subject: Re: [PATCH v3] tests/xfs: check available blocks after log recovery
- on ro mount
-Message-ID: <20210824151428.GG12612@magnolia>
-References: <20210806014938.npfn2ykyirfrdlra@xzhoux.usersys.redhat.com>
- <20210806185545.GE3601425@magnolia>
- <20210823070541.mn2y4pn4256dwnhm@xzhoux.usersys.redhat.com>
- <20210823174316.GE12612@magnolia>
- <20210824050436.3l5jodgjhwt7wqzl@xzhoux.usersys.redhat.com>
+To:     xfs <linux-xfs@vger.kernel.org>, fstests@vger.kernel.org
+Subject: Re: [RFC PATCH] generic: regression test for a FALLOC_FL_UNSHARE bug
+ in XFS
+Message-ID: <20210824151705.GH12612@magnolia>
+References: <20210824003739.GC12640@magnolia>
+ <20210824003835.GD12640@magnolia>
+ <20210824093328.qnpwkp36y4ggah7g@fedora>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210824050436.3l5jodgjhwt7wqzl@xzhoux.usersys.redhat.com>
+In-Reply-To: <20210824093328.qnpwkp36y4ggah7g@fedora>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Aug 24, 2021 at 01:04:36PM +0800, Murphy Zhou wrote:
-> And followed by a rw mount.
+On Tue, Aug 24, 2021 at 05:33:28PM +0800, Zorro Lang wrote:
+> On Mon, Aug 23, 2021 at 05:38:35PM -0700, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <djwong@kernel.org>
+> > 
+> > This is a regression test for "xfs: only set IOMAP_F_SHARED when
+> > providing a srcmap to a write".
+> > 
+> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> > ---
+> >  tests/generic/729     |   73 +++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/generic/729.out |    2 +
+> >  2 files changed, 75 insertions(+)
+> >  create mode 100755 tests/generic/729
+> >  create mode 100644 tests/generic/729.out
+> > 
+> > diff --git a/tests/generic/729 b/tests/generic/729
+> > new file mode 100755
+> > index 00000000..269aed65
+> > --- /dev/null
+> > +++ b/tests/generic/729
+> > @@ -0,0 +1,73 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (c) 2021 Oracle.  All Rights Reserved.
+> > +#
+> > +# FS QA Test 729
+> > +#
+> > +# This is a regression test for "xfs: only set IOMAP_F_SHARED when providing a
+> > +# srcmap to a write".  If a user creates a sparse shared region in a file,
+> > +# convinces XFS to create a copy-on-write delayed allocation reservation
+> > +# spanning both the shared blocks and the holes, and then calls the fallocate
+> > +# unshare command to unshare the entire sparse region, XFS incorrectly tells
+> > +# iomap that the delalloc blocks for the holes are shared, which causes it to
+> > +# error out while trying to unshare a hole.
+> > +#
+> > +. ./common/preamble
+> > +_begin_fstest auto clone unshare
+> > +
+> > +# Override the default cleanup function.
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	rm -r -f $tmp.* $TEST_DIR/$seq
+> > +}
+> > +
+> > +# Import common functions.
+> > +. ./common/reflink
+> > +. ./common/filter
+> > +
+> > +# real QA test starts here
+> > +
+> > +# Modify as appropriate.
+> > +_supported_fs generic
+> > +_require_cp_reflink
+> > +_require_test_reflink
+> > +_require_test_program "punch-alternating"
+> > +_require_xfs_io_command "fpunch"
 > 
-> Suggested-by:  Donald Douwsma <ddouwsma@redhat.com>
-> Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-> Signed-off-by: Murphy Zhou <xzhou@redhat.com>
-> ---
-> 
-> Thanks Darrick very much for reviewing!
-> 
-> v2:
->    Add explaination of the issue
->    add xfs_force_bdev data $SCRATCH_MNT
->    use DF_PROG
->    Re numbered this test
-> v3:
->    Add _require_scratch_shutdown
->    Use _get_available_space
->    Explain why does not use _scratch_mount
-> 
->  tests/xfs/999     | 65 +++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/999.out |  2 ++
->  2 files changed, 67 insertions(+)
->  create mode 100755 tests/xfs/999
->  create mode 100644 tests/xfs/999.out
-> 
-> diff --git a/tests/xfs/999 b/tests/xfs/999
-> new file mode 100755
-> index 00000000..0ce9989b
-> --- /dev/null
-> +++ b/tests/xfs/999
-> @@ -0,0 +1,65 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2021 RedHat All Rights Reserved.
-> +#
-> +# FS QA Test 999
-> +#
-> +# Testcase for kernel commit:
-> +#   50d25484bebe xfs: sync lazy sb accounting on quiesce of read-only mounts
-> +#
-> +# After shutdown and readonly mount, a following read-write mount would
-> +# get wrong number of available blocks. This is caused by unmounting the log
-> +# on a readonly filesystem doesn't log the sb counters.
-> +#
-> +. ./common/preamble
-> +_begin_fstest shutdown auto quick
-> +
-> +# real QA test starts here
-> +
-> +_supported_fs xfs
-> +_require_scratch
-> +_require_scratch_shutdown
-> +
-> +_scratch_mkfs > $seqres.full 2>&1
-> +# Don't use _scratch_mount because we need to mount without SELinux context
-> +# to reproduce this issue. If we mount with SELinux context, this testcase
-> +# is not reproducing the original issue.
-> +mount $SCRATCH_DEV $SCRATCH_MNT
+> I didn't find "fpunch" in this case,
 
-This mount will fail if the test runner configured an external log or a
-realtime device, because you didn't specify those devices to the mount
-call.  Either this needs _require_nonexternal or $(_scratch_options
-mount) needs to be injected into the command line.
+It covers the punch activities in punch-alternating.  I'll add a comment
+pointing out that subtlety.
+
+> but find "cowextsize". Did I miss something?
+
+Oops.  Yes, I'll add that too.
+
+> Others looks good to me.
+> Reviewed-by: Zorro Lang <zlang@redhat.com>
+> 
+> cc fstests@vger.kernel.org, due to it's a patch to xfstests.
+
+<nod> Thanks for reviewing.
 
 --D
 
-> +_xfs_force_bdev data $SCRATCH_MNT
-> +
-> +# Write test file
-> +ls > $SCRATCH_MNT/testfile
-> +$DF_PROG $SCRATCH_MNT >> $seqres.full 2>&1
-> +
-> +# Shutdown
-> +$XFS_IO_PROG -x -c "shutdown -f" $SCRATCH_MNT
-> +
-> +# Mount ReadOnly
-> +_scratch_unmount
-> +_scratch_mount -oro
-> +$DF_PROG $SCRATCH_MNT >> $seqres.full 2>&1
-> +# Umount and mount rw
-> +_scratch_unmount
-> +_scratch_mount
-> +
-> +# Get fdblocks before repair
-> +fdb1=$(_get_available_space $SCRATCH_MNT)
-> +_scratch_unmount
-> +
-> +# Repair
-> +_repair_scratch_fs >> $seqres.full 2>&1
-> +
-> +# Re-mount
-> +_scratch_mount
-> +
-> +# Get fdblocks after repair
-> +fdb2=$(_get_available_space $SCRATCH_MNT)
-> +
-> +echo fdb1 $fdb1 fdb2 $fdb2 >> $seqres.full 2>&1
-> +
-> +[ $fdb1 -ne $fdb2 ] && echo Wrong fdblocks: $fdb1 and $fdb2
-> +
-> +# success, all done
-> +echo "Silence is golden"
-> +status=0
-> +exit
-> diff --git a/tests/xfs/999.out b/tests/xfs/999.out
-> new file mode 100644
-> index 00000000..3b276ca8
-> --- /dev/null
-> +++ b/tests/xfs/999.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 999
-> +Silence is golden
-> -- 
-> 2.20.1
+> Thanks,
+> Zorro
+> 
+> > +_require_xfs_io_command "funshare"
+> > +
+> > +mkdir $TEST_DIR/$seq
+> > +file1=$TEST_DIR/$seq/a
+> > +file2=$TEST_DIR/$seq/b
+> > +
+> > +$XFS_IO_PROG -f -c "pwrite -S 0x58 -b 10m 0 10m" $file1 >> $seqres.full
+> > +
+> > +f1sum0="$(md5sum $file1 | _filter_test_dir)"
+> > +
+> > +_cp_reflink $file1 $file2
+> > +$here/src/punch-alternating -o 1 $file2
+> > +
+> > +f2sum0="$(md5sum $file2 | _filter_test_dir)"
+> > +
+> > +# set cowextsize to the defaults (128k) to force delalloc cow preallocations
+> > +test "$FSTYP" = "xfs" && $XFS_IO_PROG -c 'cowextsize 0' $file2
+> > +$XFS_IO_PROG -c "funshare 0 10m" $file2
+> > +
+> > +f1sum1="$(md5sum $file1 | _filter_test_dir)"
+> > +f2sum1="$(md5sum $file2 | _filter_test_dir)"
+> > +
+> > +test "${f1sum0}" = "${f1sum1}" || echo "file1 should not have changed"
+> > +test "${f2sum0}" = "${f2sum1}" || echo "file2 should not have changed"
+> > +
+> > +_test_cycle_mount
+> > +
+> > +f1sum2="$(md5sum $file1 | _filter_test_dir)"
+> > +f2sum2="$(md5sum $file2 | _filter_test_dir)"
+> > +
+> > +test "${f1sum2}" = "${f1sum1}" || echo "file1 should not have changed ondisk"
+> > +test "${f2sum2}" = "${f2sum1}" || echo "file2 should not have changed ondisk"
+> > +
+> > +# success, all done
+> > +echo Silence is golden
+> > +status=0
+> > +exit
+> > diff --git a/tests/generic/729.out b/tests/generic/729.out
+> > new file mode 100644
+> > index 00000000..0f175ae2
+> > --- /dev/null
+> > +++ b/tests/generic/729.out
+> > @@ -0,0 +1,2 @@
+> > +QA output created by 729
+> > +Silence is golden
+> > 
 > 
