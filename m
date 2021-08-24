@@ -2,159 +2,169 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8C998C4338F
-	for <linux-fstests@archiver.kernel.org>; Tue, 24 Aug 2021 12:50:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DC853C4338F
+	for <linux-fstests@archiver.kernel.org>; Tue, 24 Aug 2021 15:14:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 64EA8604AC
-	for <linux-fstests@archiver.kernel.org>; Tue, 24 Aug 2021 12:50:17 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B2B8561246
+	for <linux-fstests@archiver.kernel.org>; Tue, 24 Aug 2021 15:14:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236931AbhHXMvA (ORCPT
+        id S237981AbhHXPPP (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 24 Aug 2021 08:51:00 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:33346 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S236858AbhHXMvA (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 24 Aug 2021 08:51:00 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1629809416;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=HoNYle1s3bXz8OUyv+jGmEhSjhuHmAmdzIpWY/w5NjM=;
-        b=OLcJo4vdLibR3z1cNIViY+0ugR08Mx7puNOJg4ore/2312jWBvP0nBQq6ugF7Z9uADIHk3
-        NB7QDEdYi/dyJWF3BhviYFA/oiUGmSKyzbYdgOEHjKu9HdLXxjtT5KAWh2ununE7b2sKW4
-        UU9ItZ2M2r+fJSZVyAHuJelXS2UowUI=
-Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
- [209.85.214.199]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-158-vqzaoSeXPoqU2hLAJamwgQ-1; Tue, 24 Aug 2021 08:50:14 -0400
-X-MC-Unique: vqzaoSeXPoqU2hLAJamwgQ-1
-Received: by mail-pl1-f199.google.com with SMTP id n1-20020a170902e54100b0012dbd2c897cso5523390plf.20
-        for <fstests@vger.kernel.org>; Tue, 24 Aug 2021 05:50:14 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id
-         :mail-followup-to:references:mime-version:content-disposition
-         :in-reply-to;
-        bh=HoNYle1s3bXz8OUyv+jGmEhSjhuHmAmdzIpWY/w5NjM=;
-        b=cRqqrv1PnAkTPfG3pel3bFybxs4PON2dttwv1CR528tK3M9vFDcb3wtNdEPr6/Yyq6
-         OLj5CdNG7b9AYBO7h0hdpqhkNiBDAFp0E71neUeFZK9bY6m+OLx0Joe7kk2fkctLiuwG
-         utXycwfoQloh87FiBsf4gltJOHUnqmadVX4rR5OSUUDn+qiQww95rMtygEe2X9kapVvc
-         a7aWnKqPS8RkWKCBMuo9swgiNKGdR5JsohaQNNNp3DqsPnFPCZDTNigCSIIXToonUknE
-         dCdZemm7x1e1P2i96g1iImMGxXKYGmRd2mZe8CTEA3823acU18iFI5xyKyN2LDfyALLC
-         k6tA==
-X-Gm-Message-State: AOAM530jWpq64e43bY7OFdE8SfAHmoRlfAJTDkGV04jv7u6OOunnxiZ9
-        8TDluUUr7fT+fe9fzHXXk6j+PnHL//XiaWBc70rsz5hEL6b00iuhFD4DuNWwQLWKKOhhe9+G8Y8
-        34eiokCe45VcuL6pqyg==
-X-Received: by 2002:a62:1787:0:b0:3eb:29b2:5e9 with SMTP id 129-20020a621787000000b003eb29b205e9mr11585243pfx.64.1629809413649;
-        Tue, 24 Aug 2021 05:50:13 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJw0Gd5gfx1ULF6XSRzEjInTSNEP+0b5/sSfcjXd2HgniaV/4hQ/mAn8mcjZCe5wPIMtYeznzQ==
-X-Received: by 2002:a62:1787:0:b0:3eb:29b2:5e9 with SMTP id 129-20020a621787000000b003eb29b205e9mr11585214pfx.64.1629809413368;
-        Tue, 24 Aug 2021 05:50:13 -0700 (PDT)
-Received: from fedora ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id nk17sm2495732pjb.18.2021.08.24.05.50.12
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 24 Aug 2021 05:50:13 -0700 (PDT)
-Date:   Tue, 24 Aug 2021 21:11:00 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] idmap: override btrfs_ioctl_vol_args_v2 if system header
- doesn't have subvolid
-Message-ID: <20210824131100.i75v7jmcekcfbp3h@fedora>
-Mail-Followup-To: "Darrick J. Wong" <djwong@kernel.org>,
-        fstests@vger.kernel.org
-References: <20210823182138.GF12612@magnolia>
+        Tue, 24 Aug 2021 11:15:15 -0400
+Received: from mail.kernel.org ([198.145.29.99]:36516 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S235683AbhHXPPN (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 24 Aug 2021 11:15:13 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 7218761246;
+        Tue, 24 Aug 2021 15:14:29 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1629818069;
+        bh=4/LpOK85hGHN2CuOr1v3T1ZLNtK0sl/+Uib4Fwonbxc=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=nucNc0QP9vU5f2hV6mst+nGQt+DMYvwsEkNXvXtccT7RVGNFdm4VDgu+pCZjdSpse
+         D8JbsDJBjDvhZ/gla+fK0a+qYIqfMFOs1xH+WJYGZn/ihUs3w6n0EDFrRMc0lvNH4w
+         JyTiEmUFP7XQ0yE0MlB4OC+XQNheSNXzfFDRsU/I20iypjaG7VXtTOJ3CtZ7Tl6UuK
+         wH4C9hpo3lWFPLJs2VbORFiJsZjeOxyFbqfERQoD1u3GXeLr2iq4S4d379OWLvfM9a
+         gVm/9PDsJWsD0Gy9ZHsqzntdMrfVS/jWTW5NhYECvrv95d1VF4r1JzT9WsKJnTExcl
+         dIJXYhs+agVJg==
+Date:   Tue, 24 Aug 2021 08:14:28 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Murphy Zhou <xzhou@redhat.com>
+Cc:     fstests@vger.kernel.org, ddouwsma@redhat.com
+Subject: Re: [PATCH v3] tests/xfs: check available blocks after log recovery
+ on ro mount
+Message-ID: <20210824151428.GG12612@magnolia>
+References: <20210806014938.npfn2ykyirfrdlra@xzhoux.usersys.redhat.com>
+ <20210806185545.GE3601425@magnolia>
+ <20210823070541.mn2y4pn4256dwnhm@xzhoux.usersys.redhat.com>
+ <20210823174316.GE12612@magnolia>
+ <20210824050436.3l5jodgjhwt7wqzl@xzhoux.usersys.redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210823182138.GF12612@magnolia>
+In-Reply-To: <20210824050436.3l5jodgjhwt7wqzl@xzhoux.usersys.redhat.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Aug 23, 2021 at 11:21:38AM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
+On Tue, Aug 24, 2021 at 01:04:36PM +0800, Murphy Zhou wrote:
+> And followed by a rw mount.
 > 
-> The struct btrfs_ioctl_vol_args_v2 in /usr/include/linux/btrfs.h on my
-> system predates the inclusion of the "subvolid" field.  This causes the
-> following build failure:
-> 
-> idmapped-mounts.c: In function 'btrfs_delete_subvolume_id':
-> idmapped-mounts.c:9730:6: error: 'struct btrfs_ioctl_vol_args_v2' has no member named 'subvolid'
->  9730 |  args.subvolid = subvolid;
->       |      ^
-> 
-> Since this source file contains its own more uptodate copy of that
-> structure, add some more autoconf/cpp magic so that we can override the
-> struct definition if the system header doesn't have the desired field.
-> 
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> Suggested-by:  Donald Douwsma <ddouwsma@redhat.com>
+> Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+> Signed-off-by: Murphy Zhou <xzhou@redhat.com>
 > ---
-
-Thanks, I just hit it[1] too. This patch works on my old and new systems,
-so good and helpful to me. I'd like to see it can be merged ASAP.
-
-Reviewed-by: Zorro Lang <zlang@redhat.com>
-
-[1]
-    [CC]    idmapped-mounts
-    [CC]    mount-idmapped
-idmapped-mounts.c: In function 'btrfs_delete_subvolume_id':
-idmapped-mounts.c:9730:6: error: 'struct btrfs_ioctl_vol_args_v2' has no member named 'subvolid'
-  args.subvolid = subvolid;
-      ^
-gmake[3]: *** [Makefile:30: idmapped-mounts] Error 1
-gmake[2]: *** [../include/buildrules:30: idmapped-mounts] Error 2
-gmake[1]: *** [include/buildrules:30: src] Error 2
-
-
-
->  configure.ac                          |    2 +-
->  src/idmapped-mounts/idmapped-mounts.c |    6 +++++-
->  2 files changed, 6 insertions(+), 2 deletions(-)
 > 
-> diff --git a/configure.ac b/configure.ac
-> index 4117a302..36960910 100644
-> --- a/configure.ac
-> +++ b/configure.ac
-> @@ -79,7 +79,7 @@ AC_CHECK_TYPES([struct btrfs_ioctl_ino_lookup_args], [], [], [[#include <linux/b
->  AC_CHECK_TYPES([struct btrfs_ioctl_ino_lookup_user_args], [], [], [[#include <linux/btrfs.h>]])
->  AC_CHECK_TYPES([struct btrfs_ioctl_get_subvol_rootref_args], [], [], [[#include <linux/btrfs.h>]])
->  AC_CHECK_HEADERS([linux/btrfs.h linux/btrfs_tree.h])
-> -
-> +AC_CHECK_MEMBERS([struct btrfs_ioctl_vol_args_v2.subvolid], [], [], [[#include <linux/btrfs.h>]])
->  
->  AC_CONFIG_HEADER(include/config.h)
->  AC_CONFIG_FILES([include/builddefs])
-> diff --git a/src/idmapped-mounts/idmapped-mounts.c b/src/idmapped-mounts/idmapped-mounts.c
-> index 78b7cc09..40eb2cc6 100644
-> --- a/src/idmapped-mounts/idmapped-mounts.c
-> +++ b/src/idmapped-mounts/idmapped-mounts.c
-> @@ -23,7 +23,11 @@
->  #include <unistd.h>
->  
->  #ifdef HAVE_LINUX_BTRFS_H
-> +# ifndef HAVE_STRUCT_BTRFS_IOCTL_VOL_ARGS_V2_SUBVOLID
-> +#  define btrfs_ioctl_vol_args_v2 override_btrfs_ioctl_vol_args_v2
-> +# endif
->  #include <linux/btrfs.h>
-> +# undef btrfs_ioctl_vol_args_v2
->  #endif
->  
->  #ifdef HAVE_LINUX_BTRFS_TREE_H
-> @@ -9570,7 +9574,7 @@ struct btrfs_qgroup_inherit {
->  };
->  #endif
->  
-> -#ifndef HAVE_STRUCT_BTRFS_IOCTL_VOL_ARGS_V2
-> +#if !defined(HAVE_STRUCT_BTRFS_IOCTL_VOL_ARGS_V2) || !defined(HAVE_STRUCT_BTRFS_IOCTL_VOL_ARGS_V2_SUBVOLID)
->  
->  #ifndef BTRFS_SUBVOL_NAME_MAX
->  #define BTRFS_SUBVOL_NAME_MAX 4039
+> Thanks Darrick very much for reviewing!
 > 
+> v2:
+>    Add explaination of the issue
+>    add xfs_force_bdev data $SCRATCH_MNT
+>    use DF_PROG
+>    Re numbered this test
+> v3:
+>    Add _require_scratch_shutdown
+>    Use _get_available_space
+>    Explain why does not use _scratch_mount
+> 
+>  tests/xfs/999     | 65 +++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/999.out |  2 ++
+>  2 files changed, 67 insertions(+)
+>  create mode 100755 tests/xfs/999
+>  create mode 100644 tests/xfs/999.out
+> 
+> diff --git a/tests/xfs/999 b/tests/xfs/999
+> new file mode 100755
+> index 00000000..0ce9989b
+> --- /dev/null
+> +++ b/tests/xfs/999
+> @@ -0,0 +1,65 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2021 RedHat All Rights Reserved.
+> +#
+> +# FS QA Test 999
+> +#
+> +# Testcase for kernel commit:
+> +#   50d25484bebe xfs: sync lazy sb accounting on quiesce of read-only mounts
+> +#
+> +# After shutdown and readonly mount, a following read-write mount would
+> +# get wrong number of available blocks. This is caused by unmounting the log
+> +# on a readonly filesystem doesn't log the sb counters.
+> +#
+> +. ./common/preamble
+> +_begin_fstest shutdown auto quick
+> +
+> +# real QA test starts here
+> +
+> +_supported_fs xfs
+> +_require_scratch
+> +_require_scratch_shutdown
+> +
+> +_scratch_mkfs > $seqres.full 2>&1
+> +# Don't use _scratch_mount because we need to mount without SELinux context
+> +# to reproduce this issue. If we mount with SELinux context, this testcase
+> +# is not reproducing the original issue.
+> +mount $SCRATCH_DEV $SCRATCH_MNT
 
+This mount will fail if the test runner configured an external log or a
+realtime device, because you didn't specify those devices to the mount
+call.  Either this needs _require_nonexternal or $(_scratch_options
+mount) needs to be injected into the command line.
+
+--D
+
+> +_xfs_force_bdev data $SCRATCH_MNT
+> +
+> +# Write test file
+> +ls > $SCRATCH_MNT/testfile
+> +$DF_PROG $SCRATCH_MNT >> $seqres.full 2>&1
+> +
+> +# Shutdown
+> +$XFS_IO_PROG -x -c "shutdown -f" $SCRATCH_MNT
+> +
+> +# Mount ReadOnly
+> +_scratch_unmount
+> +_scratch_mount -oro
+> +$DF_PROG $SCRATCH_MNT >> $seqres.full 2>&1
+> +# Umount and mount rw
+> +_scratch_unmount
+> +_scratch_mount
+> +
+> +# Get fdblocks before repair
+> +fdb1=$(_get_available_space $SCRATCH_MNT)
+> +_scratch_unmount
+> +
+> +# Repair
+> +_repair_scratch_fs >> $seqres.full 2>&1
+> +
+> +# Re-mount
+> +_scratch_mount
+> +
+> +# Get fdblocks after repair
+> +fdb2=$(_get_available_space $SCRATCH_MNT)
+> +
+> +echo fdb1 $fdb1 fdb2 $fdb2 >> $seqres.full 2>&1
+> +
+> +[ $fdb1 -ne $fdb2 ] && echo Wrong fdblocks: $fdb1 and $fdb2
+> +
+> +# success, all done
+> +echo "Silence is golden"
+> +status=0
+> +exit
+> diff --git a/tests/xfs/999.out b/tests/xfs/999.out
+> new file mode 100644
+> index 00000000..3b276ca8
+> --- /dev/null
+> +++ b/tests/xfs/999.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 999
+> +Silence is golden
+> -- 
+> 2.20.1
+> 
