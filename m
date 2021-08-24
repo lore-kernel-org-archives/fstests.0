@@ -2,194 +2,60 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.7 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E4F6EC432BE
-	for <linux-fstests@archiver.kernel.org>; Tue, 24 Aug 2021 09:12:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9D4DFC4338F
+	for <linux-fstests@archiver.kernel.org>; Tue, 24 Aug 2021 11:54:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CD4E961165
-	for <linux-fstests@archiver.kernel.org>; Tue, 24 Aug 2021 09:12:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 838D56128A
+	for <linux-fstests@archiver.kernel.org>; Tue, 24 Aug 2021 11:54:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235604AbhHXJNa (ORCPT
+        id S236622AbhHXLyt (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 24 Aug 2021 05:13:30 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:40450 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S232653AbhHXJN3 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 24 Aug 2021 05:13:29 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1629796365;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=7GZvuXMPWT2bJCRJfFApnNtzxNgwRqXM4t95ZqjjCmY=;
-        b=KUdoNlbFxTB+Ji9LdkQrikXahB4K6Uz35i1J31w1QCVnPaccjwQvJcz7E4fg6H1jMUZYCm
-        DuR3wkoWOdegYdly0EyEPkdCj9u20Mc1Z9KNgu7pmKuE6B8XZDLe23UF+aPll7TuEgOk5y
-        azh9UoeXob8YURZA2mONXWW6tHfMxGk=
-Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com
- [209.85.216.72]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-319-xSxx5AstPXm_ES4xdsWonw-1; Tue, 24 Aug 2021 05:12:43 -0400
-X-MC-Unique: xSxx5AstPXm_ES4xdsWonw-1
-Received: by mail-pj1-f72.google.com with SMTP id v9-20020a17090a7c09b02901778a2a8fd6so1038263pjf.3
-        for <fstests@vger.kernel.org>; Tue, 24 Aug 2021 02:12:42 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id
-         :mail-followup-to:references:mime-version:content-disposition
-         :in-reply-to;
-        bh=7GZvuXMPWT2bJCRJfFApnNtzxNgwRqXM4t95ZqjjCmY=;
-        b=oSINU9xbvEXzdhokjS6j46Dg/1aeRfsQMTaP1auhuWud9H0+RurDUavSHYMzwRK2RM
-         ZLBVsvXx//kGXpXnGWPUuMj44jSE+GLvPCnE6IrL5gIHQeZrtN9WBAI0JE1nTNviGCTr
-         gOLM7y+y6P1LpsU5gBngfjMho8vufZ/K5TvYKZLdRc2AIUzlNttsGtq61uFah+XkEgJX
-         G0awmwEmWNT2NBhB4NcZhCLrp02keS3BV31/JQeRFn0t5rsAAppThWvCFSi1ZoGsKVQv
-         qPT8yuXlmXq9wUDfJCx97SIUKdqSAwnSg/VDo8jxIk4hBguwqyQMRLBnUPPuUVFtb0VT
-         /ZRg==
-X-Gm-Message-State: AOAM532aNiv/FYsFeL6C2CHXXfWNFGHTV/d5IF+Fb6cmHVwiycraSfHH
-        5qev7MdAjJ4hTuAaXc9Xf6ObKurP1XhZLCjCkNtY6MJBNv4XSQgTOpDDhmLmmcqbwQxg8ZgdP2+
-        FKd47LpKHQt0Mgm27iA==
-X-Received: by 2002:a65:5a49:: with SMTP id z9mr35465038pgs.121.1629796362067;
-        Tue, 24 Aug 2021 02:12:42 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJxiGkqhF+dbZ54de0kiPqI04s0281rPWvqo7p576QDzNK5GYig1FmD7f7PQf6KVfgMXpcDzzg==
-X-Received: by 2002:a65:5a49:: with SMTP id z9mr35465006pgs.121.1629796361583;
-        Tue, 24 Aug 2021 02:12:41 -0700 (PDT)
-Received: from fedora ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id 10sm2036190pjc.41.2021.08.24.02.12.39
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 24 Aug 2021 02:12:41 -0700 (PDT)
-Date:   Tue, 24 Aug 2021 17:33:28 +0800
-From:   Zorro Lang <zlang@redhat.com>
+        Tue, 24 Aug 2021 07:54:49 -0400
+Received: from mail.kernel.org ([198.145.29.99]:57208 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S236921AbhHXLyt (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 24 Aug 2021 07:54:49 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 5CC6F61246;
+        Tue, 24 Aug 2021 11:54:04 +0000 (UTC)
+Date:   Tue, 24 Aug 2021 13:54:01 +0200
+From:   Christian Brauner <christian.brauner@ubuntu.com>
 To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     xfs <linux-xfs@vger.kernel.org>, fstests@vger.kernel.org
-Subject: Re: [RFC PATCH] generic: regression test for a FALLOC_FL_UNSHARE bug
- in XFS
-Message-ID: <20210824093328.qnpwkp36y4ggah7g@fedora>
-Mail-Followup-To: "Darrick J. Wong" <djwong@kernel.org>,
-        xfs <linux-xfs@vger.kernel.org>, fstests@vger.kernel.org
-References: <20210824003739.GC12640@magnolia>
- <20210824003835.GD12640@magnolia>
+Cc:     Eryu Guan <guan@eryu.me>, fstests@vger.kernel.org
+Subject: Re: [PATCH] idmap: override btrfs_ioctl_vol_args_v2 if system header
+ doesn't have subvolid
+Message-ID: <20210824115401.qas36hnt2vfsumdx@wittgenstein>
+References: <20210823182138.GF12612@magnolia>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20210824003835.GD12640@magnolia>
+In-Reply-To: <20210823182138.GF12612@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Aug 23, 2021 at 05:38:35PM -0700, Darrick J. Wong wrote:
+On Mon, Aug 23, 2021 at 11:21:38AM -0700, Darrick J. Wong wrote:
 > From: Darrick J. Wong <djwong@kernel.org>
 > 
-> This is a regression test for "xfs: only set IOMAP_F_SHARED when
-> providing a srcmap to a write".
+> The struct btrfs_ioctl_vol_args_v2 in /usr/include/linux/btrfs.h on my
+> system predates the inclusion of the "subvolid" field.  This causes the
+> following build failure:
+> 
+> idmapped-mounts.c: In function 'btrfs_delete_subvolume_id':
+> idmapped-mounts.c:9730:6: error: 'struct btrfs_ioctl_vol_args_v2' has no member named 'subvolid'
+>  9730 |  args.subvolid = subvolid;
+>       |      ^
+> 
+> Since this source file contains its own more uptodate copy of that
+> structure, add some more autoconf/cpp magic so that we can override the
+> struct definition if the system header doesn't have the desired field.
 > 
 > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
 > ---
->  tests/generic/729     |   73 +++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/729.out |    2 +
->  2 files changed, 75 insertions(+)
->  create mode 100755 tests/generic/729
->  create mode 100644 tests/generic/729.out
-> 
-> diff --git a/tests/generic/729 b/tests/generic/729
-> new file mode 100755
-> index 00000000..269aed65
-> --- /dev/null
-> +++ b/tests/generic/729
-> @@ -0,0 +1,73 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2021 Oracle.  All Rights Reserved.
-> +#
-> +# FS QA Test 729
-> +#
-> +# This is a regression test for "xfs: only set IOMAP_F_SHARED when providing a
-> +# srcmap to a write".  If a user creates a sparse shared region in a file,
-> +# convinces XFS to create a copy-on-write delayed allocation reservation
-> +# spanning both the shared blocks and the holes, and then calls the fallocate
-> +# unshare command to unshare the entire sparse region, XFS incorrectly tells
-> +# iomap that the delalloc blocks for the holes are shared, which causes it to
-> +# error out while trying to unshare a hole.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto clone unshare
-> +
-> +# Override the default cleanup function.
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -r -f $tmp.* $TEST_DIR/$seq
-> +}
-> +
-> +# Import common functions.
-> +. ./common/reflink
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs generic
-> +_require_cp_reflink
-> +_require_test_reflink
-> +_require_test_program "punch-alternating"
-> +_require_xfs_io_command "fpunch"
 
-I didn't find "fpunch" in this case, but find "cowextsize". Did I
-miss something?
-
-Others looks good to me.
-Reviewed-by: Zorro Lang <zlang@redhat.com>
-
-cc fstests@vger.kernel.org, due to it's a patch to xfstests.
-
-Thanks,
-Zorro
-
-> +_require_xfs_io_command "funshare"
-> +
-> +mkdir $TEST_DIR/$seq
-> +file1=$TEST_DIR/$seq/a
-> +file2=$TEST_DIR/$seq/b
-> +
-> +$XFS_IO_PROG -f -c "pwrite -S 0x58 -b 10m 0 10m" $file1 >> $seqres.full
-> +
-> +f1sum0="$(md5sum $file1 | _filter_test_dir)"
-> +
-> +_cp_reflink $file1 $file2
-> +$here/src/punch-alternating -o 1 $file2
-> +
-> +f2sum0="$(md5sum $file2 | _filter_test_dir)"
-> +
-> +# set cowextsize to the defaults (128k) to force delalloc cow preallocations
-> +test "$FSTYP" = "xfs" && $XFS_IO_PROG -c 'cowextsize 0' $file2
-> +$XFS_IO_PROG -c "funshare 0 10m" $file2
-> +
-> +f1sum1="$(md5sum $file1 | _filter_test_dir)"
-> +f2sum1="$(md5sum $file2 | _filter_test_dir)"
-> +
-> +test "${f1sum0}" = "${f1sum1}" || echo "file1 should not have changed"
-> +test "${f2sum0}" = "${f2sum1}" || echo "file2 should not have changed"
-> +
-> +_test_cycle_mount
-> +
-> +f1sum2="$(md5sum $file1 | _filter_test_dir)"
-> +f2sum2="$(md5sum $file2 | _filter_test_dir)"
-> +
-> +test "${f1sum2}" = "${f1sum1}" || echo "file1 should not have changed ondisk"
-> +test "${f2sum2}" = "${f2sum1}" || echo "file2 should not have changed ondisk"
-> +
-> +# success, all done
-> +echo Silence is golden
-> +status=0
-> +exit
-> diff --git a/tests/generic/729.out b/tests/generic/729.out
-> new file mode 100644
-> index 00000000..0f175ae2
-> --- /dev/null
-> +++ b/tests/generic/729.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 729
-> +Silence is golden
-> 
-
+Looks good! Thank you for taking the time to fix this!
+Acked-by: Christian Brauner <christian.brauner@ubuntu.com>
