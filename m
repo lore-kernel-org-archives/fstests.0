@@ -2,36 +2,74 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.2 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,USER_AGENT_SANE_1
+X-Spam-Status: No, score=-16.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 21391C4338F
-	for <linux-fstests@archiver.kernel.org>; Tue, 24 Aug 2021 05:42:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 40CCBC4338F
+	for <linux-fstests@archiver.kernel.org>; Tue, 24 Aug 2021 06:03:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E346D6124B
-	for <linux-fstests@archiver.kernel.org>; Tue, 24 Aug 2021 05:42:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 196E161248
+	for <linux-fstests@archiver.kernel.org>; Tue, 24 Aug 2021 06:03:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231296AbhHXFnV (ORCPT
+        id S229454AbhHXGD5 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 24 Aug 2021 01:43:21 -0400
-Received: from out4436.biz.mail.alibaba.com ([47.88.44.36]:57455 "EHLO
-        out4436.biz.mail.alibaba.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S229885AbhHXFnU (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 24 Aug 2021 01:43:20 -0400
-X-Alimail-AntiSpam: AC=PASS;BC=-1|-1;BR=01201311R161e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=alimailimapcm10staff010182156082;MF=eguan@linux.alibaba.com;NM=1;PH=DS;RN=5;SR=0;TI=SMTPD_---0UlThjnF_1629783742;
-Received: from localhost(mailfrom:eguan@linux.alibaba.com fp:SMTPD_---0UlThjnF_1629783742)
-          by smtp.aliyun-inc.com(127.0.0.1);
-          Tue, 24 Aug 2021 13:42:22 +0800
-Date:   Tue, 24 Aug 2021 13:42:22 +0800
-From:   Eryu Guan <eguan@linux.alibaba.com>
+        Tue, 24 Aug 2021 02:03:57 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:60807 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S229623AbhHXGD4 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 24 Aug 2021 02:03:56 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1629784992;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=7Fpb4jlE0VdKSuBL51hjexL6Dqevwgt0IGp30+6nDpg=;
+        b=IJhbTp3AH3UYPLBh1N3kvnEMpH3Q7jgqutbqKCjenYBAOET+crWReTugMHxkgp53ejP7qd
+        etg4JP+BcHUbSyFr2x/05BlrKgwcpccx/FdbHFwwJE+gfUF9y6whjLX86MWH1g/cDbefKE
+        EAoF1m56PCb9FDIil4CAeP+4nE42Ewk=
+Received: from mail-pf1-f199.google.com (mail-pf1-f199.google.com
+ [209.85.210.199]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-6-a72H1kkBN9-HGk00QuAx3g-1; Tue, 24 Aug 2021 02:03:10 -0400
+X-MC-Unique: a72H1kkBN9-HGk00QuAx3g-1
+Received: by mail-pf1-f199.google.com with SMTP id h14-20020a62b40e0000b02903131bc4a1acso9710783pfn.4
+        for <fstests@vger.kernel.org>; Mon, 23 Aug 2021 23:03:09 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id
+         :mail-followup-to:references:mime-version:content-disposition
+         :in-reply-to;
+        bh=7Fpb4jlE0VdKSuBL51hjexL6Dqevwgt0IGp30+6nDpg=;
+        b=X8zpdG4uYCFyU77idPSN2E1shhFomiuFEESoZ8GdxrqEorUDi+iRWUjL/2AZZQRldJ
+         +IpVmGgZmo40mEkHfNqDtD7NYZ2rl09TemygcHdIDJGbejL4fKbY1WRQjIDhcdGCUnf2
+         4RqLZElCxvfbb9UBhv85zpM0j4JiFtarN5Zl+GtXaq5N1MtcdjxSZBJo3uhYMbjVunKJ
+         hxrsybR6iJpYwdHHqxJuznoCgvMJfp7sk71RxLin2g1d3Wm32pmChL0l5QNKTieMuS3T
+         aQmn4jKYOIQdtBiQisgSg8d/4QALT9u5QB7LIVSk6ZVRWmQ+m6o0eyVCEexIwaOPnLjc
+         5eYA==
+X-Gm-Message-State: AOAM533jn5XfuImYfHuWiNsqNql1+EN5h88YDRzqORpm/Eg8Ti6+ug4x
+        hygUAXZQaQM5FpXMXb8NnwPB87RhwfQuW2LmfWaEg8VCaXlqHA8fpY9jzjzuU9Uy1fTAELyKkgR
+        WZVF7OcDlHCrV4l8rBw==
+X-Received: by 2002:a65:4581:: with SMTP id o1mr34995614pgq.349.1629784988945;
+        Mon, 23 Aug 2021 23:03:08 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJybjrjwSmKaToGqXXUnZHWQHpITEuC+XKeGVz6d9tsEZdu6+Qv0+BPdYHkJ9Vc99HEXggcZ6g==
+X-Received: by 2002:a65:4581:: with SMTP id o1mr34995594pgq.349.1629784988685;
+        Mon, 23 Aug 2021 23:03:08 -0700 (PDT)
+Received: from fedora ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id gd20sm1060177pjb.42.2021.08.23.23.03.06
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 23 Aug 2021 23:03:08 -0700 (PDT)
+Date:   Tue, 24 Aug 2021 14:23:54 +0800
+From:   Zorro Lang <zlang@redhat.com>
 To:     Murphy Zhou <xzhou@redhat.com>
 Cc:     "Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org,
         ddouwsma@redhat.com
 Subject: Re: [PATCH v3] tests/xfs: check available blocks after log recovery
  on ro mount
-Message-ID: <20210824054222.GR60846@e18g06458.et15sqa>
+Message-ID: <20210824062354.lcbmbz2r6fv5zowo@fedora>
+Mail-Followup-To: Murphy Zhou <xzhou@redhat.com>,
+        "Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org,
+        ddouwsma@redhat.com
 References: <20210806014938.npfn2ykyirfrdlra@xzhoux.usersys.redhat.com>
  <20210806185545.GE3601425@magnolia>
  <20210823070541.mn2y4pn4256dwnhm@xzhoux.usersys.redhat.com>
@@ -41,7 +79,6 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 In-Reply-To: <20210824050436.3l5jodgjhwt7wqzl@xzhoux.usersys.redhat.com>
-User-Agent: Mutt/1.5.21 (2010-09-15)
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
@@ -93,14 +130,17 @@ On Tue, Aug 24, 2021 at 01:04:36PM +0800, Murphy Zhou wrote:
 > +#
 > +. ./common/preamble
 > +_begin_fstest shutdown auto quick
-
-Is this also a 'recoveryloop' test that excrises shutdown & log
-recovery?
-
 > +
 > +# real QA test starts here
 > +
 > +_supported_fs xfs
+
+I'm wondering what limits this test to be a xfs only test? The test steps looks
+common, right?
+
+Thanks,
+Zorro
+
 > +_require_scratch
 > +_require_scratch_shutdown
 > +
@@ -109,54 +149,28 @@ recovery?
 > +# to reproduce this issue. If we mount with SELinux context, this testcase
 > +# is not reproducing the original issue.
 > +mount $SCRATCH_DEV $SCRATCH_MNT
-
-$MOUNT_PROG
-
 > +_xfs_force_bdev data $SCRATCH_MNT
 > +
 > +# Write test file
 > +ls > $SCRATCH_MNT/testfile
-
-I'd like write something into file explicitly, the output of ls command
-may change in subtle way, e.g. iif we decide to run fstests with an
-empty dir as $PWD in the future, then we write nothing into the file.
-
 > +$DF_PROG $SCRATCH_MNT >> $seqres.full 2>&1
 > +
 > +# Shutdown
 > +$XFS_IO_PROG -x -c "shutdown -f" $SCRATCH_MNT
-
-Does '_scratch_shutdown -f' work here?
-
 > +
 > +# Mount ReadOnly
 > +_scratch_unmount
 > +_scratch_mount -oro
-
-_scratch_cycle_mount ro
-
 > +$DF_PROG $SCRATCH_MNT >> $seqres.full 2>&1
 > +# Umount and mount rw
 > +_scratch_unmount
 > +_scratch_mount
-
-_scratch_cycle_mount
-
 > +
 > +# Get fdblocks before repair
 > +fdb1=$(_get_available_space $SCRATCH_MNT)
 > +_scratch_unmount
 > +
 > +# Repair
-
-I find these "Mount ReadOnly" "Umount and mount rw" "Repair" comments
-don't really help, they just describe what we're doing (which are
-obvious in this test) not why we're doing it. It's better to describe
-the reason of doing this repair.
-
-Thanks,
-Eryu
-
 > +_repair_scratch_fs >> $seqres.full 2>&1
 > +
 > +# Re-mount
@@ -183,3 +197,5 @@ Eryu
 > +Silence is golden
 > -- 
 > 2.20.1
+> 
+
