@@ -2,176 +2,249 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4A455C4338F
-	for <linux-fstests@archiver.kernel.org>; Tue, 24 Aug 2021 15:17:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B8F8AC4338F
+	for <linux-fstests@archiver.kernel.org>; Tue, 24 Aug 2021 16:33:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2EDAE6128A
-	for <linux-fstests@archiver.kernel.org>; Tue, 24 Aug 2021 15:17:07 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8AB8261357
+	for <linux-fstests@archiver.kernel.org>; Tue, 24 Aug 2021 16:33:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238120AbhHXPRu (ORCPT
+        id S229715AbhHXQdo (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 24 Aug 2021 11:17:50 -0400
-Received: from mail.kernel.org ([198.145.29.99]:37734 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S237981AbhHXPRu (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 24 Aug 2021 11:17:50 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 04CB961265;
-        Tue, 24 Aug 2021 15:17:05 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1629818226;
-        bh=cg/ogimENg4tW3cTbT87rjVkJOXHU2gU04UU9xhQ1BM=;
-        h=Date:From:To:Subject:References:In-Reply-To:From;
-        b=OWUyMi7O3t13ZVtrxyQK3hOWjJXKrjpRRNdlnTj6SQVkXoGvv60hkCXTaqrgfGWcs
-         9cWC2nM5yM+Zv//srCYzkRfOW+tTHJRN1i1W8GmiMTtYp+qz6Byrg0iTXsCRBztYzA
-         0HIwWjq3+/0xJWewjmq4jYzewyUF46IeuKekG/zSJmoE+QZnTki87QKZUy0vmS88+6
-         eypbvJiELVRpR4D9ihyNxt5tDa2uRK3OvIVnlyx1QC0oXe5LY5tbZF44wdwMRF5FAb
-         zwVuEoNsD8P7xIYV8kspQviqhVEX9ki+ji+43f52ew+s+j5x4hAIclF39JYF5bT2fI
-         26Z0NCi79Mkhg==
-Date:   Tue, 24 Aug 2021 08:17:05 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     xfs <linux-xfs@vger.kernel.org>, fstests@vger.kernel.org
-Subject: Re: [RFC PATCH] generic: regression test for a FALLOC_FL_UNSHARE bug
- in XFS
-Message-ID: <20210824151705.GH12612@magnolia>
-References: <20210824003739.GC12640@magnolia>
- <20210824003835.GD12640@magnolia>
- <20210824093328.qnpwkp36y4ggah7g@fedora>
+        Tue, 24 Aug 2021 12:33:44 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:31959 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S229596AbhHXQdn (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 24 Aug 2021 12:33:43 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1629822778;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=NkezBopDh4JA1Q9iuD+dOao4YIyYDK0GTQ7IbRsqyb0=;
+        b=a9i/NqltwUnIfUdH/VsrbYxK10JzB+AoxvgW4dr7y4IfGhC2FTs3sRYwNDzz0O4KCzPvVJ
+        eMZlkugkK9AqWFtphI43k9/klcrCbzC18L8ailI/s/m7xBRrJ3MBD3L0Q08qS+Tb/Suh59
+        NxEHzoUiiC3WKYuRWPVx2R2M4F7tQG8=
+Received: from mail-pg1-f198.google.com (mail-pg1-f198.google.com
+ [209.85.215.198]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-224-9l8_rxRZM_uDbhZLuch26g-1; Tue, 24 Aug 2021 12:32:56 -0400
+X-MC-Unique: 9l8_rxRZM_uDbhZLuch26g-1
+Received: by mail-pg1-f198.google.com with SMTP id k28-20020a63ff1c0000b029023b84262596so12387978pgi.1
+        for <fstests@vger.kernel.org>; Tue, 24 Aug 2021 09:32:55 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id
+         :mail-followup-to:references:mime-version:content-disposition
+         :in-reply-to;
+        bh=NkezBopDh4JA1Q9iuD+dOao4YIyYDK0GTQ7IbRsqyb0=;
+        b=fLbRVPfBuNw79FHHG7HHuZqFTxLbjNhIorOvEpMm9W5nN8eCNZcBaXni2PVBR4c5bk
+         v7LxN/L7SbW0kBqz17ift9VSmMXXSXSNmDhVfd3cmIMPayRLd1ws/+Btef2oUE1P/9yX
+         A62sVFdIemWO/4gvs7E/xRA4uwCC9l4IUVTcFHo5Yim8Z4halCj307uDbw1NPfJbSfi7
+         FLdqyQ0w9oL0IF/vuo7IZXhrMl/ocshLIqFHHKoD5KCs9hxXLfweZE2O52PikIVkbrAC
+         PkD/j5Q7iZhNIkOoVw0Vxwea3eNqRBWTmbDp0SsWbDm8WjQYPfRm5sI7qYpaTUdmuTRc
+         sawg==
+X-Gm-Message-State: AOAM532zApxGCrInmGoOkX3GXrhafNFmKKtFu8nJBem0Ff9D6ekQja+Q
+        g6rtDVQ/IcyF2/6DbwPrOQU6PSAJCG3CxHC5QesKFAaI03ob2yaqufOwRd9tL1mUosRLJFfRV24
+        BZMhrHEHDQdPFPzgaxw==
+X-Received: by 2002:a17:902:7b83:b029:12c:2758:1d2d with SMTP id w3-20020a1709027b83b029012c27581d2dmr33803342pll.80.1629822774791;
+        Tue, 24 Aug 2021 09:32:54 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJz2sNqxbYbxzZMs7V96eHJljZFq2ZgNx33gKmb1NFfrp/0eFv1T2BB+zBQnRr2v00jl7CR+FQ==
+X-Received: by 2002:a17:902:7b83:b029:12c:2758:1d2d with SMTP id w3-20020a1709027b83b029012c27581d2dmr33803326pll.80.1629822774486;
+        Tue, 24 Aug 2021 09:32:54 -0700 (PDT)
+Received: from fedora ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id j68sm23975794pgc.44.2021.08.24.09.32.52
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 24 Aug 2021 09:32:54 -0700 (PDT)
+Date:   Wed, 25 Aug 2021 00:53:41 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     Murphy Zhou <xzhou@redhat.com>, fstests@vger.kernel.org,
+        ddouwsma@redhat.com
+Subject: Re: [PATCH v3] tests/xfs: check available blocks after log recovery
+ on ro mount
+Message-ID: <20210824165341.lvo5lwgosgh4n4ir@fedora>
+Mail-Followup-To: "Darrick J. Wong" <djwong@kernel.org>,
+        Murphy Zhou <xzhou@redhat.com>, fstests@vger.kernel.org,
+        ddouwsma@redhat.com
+References: <20210806014938.npfn2ykyirfrdlra@xzhoux.usersys.redhat.com>
+ <20210806185545.GE3601425@magnolia>
+ <20210823070541.mn2y4pn4256dwnhm@xzhoux.usersys.redhat.com>
+ <20210823174316.GE12612@magnolia>
+ <20210824050436.3l5jodgjhwt7wqzl@xzhoux.usersys.redhat.com>
+ <20210824151428.GG12612@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210824093328.qnpwkp36y4ggah7g@fedora>
+In-Reply-To: <20210824151428.GG12612@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Aug 24, 2021 at 05:33:28PM +0800, Zorro Lang wrote:
-> On Mon, Aug 23, 2021 at 05:38:35PM -0700, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <djwong@kernel.org>
+On Tue, Aug 24, 2021 at 08:14:28AM -0700, Darrick J. Wong wrote:
+> On Tue, Aug 24, 2021 at 01:04:36PM +0800, Murphy Zhou wrote:
+> > And followed by a rw mount.
 > > 
-> > This is a regression test for "xfs: only set IOMAP_F_SHARED when
-> > providing a srcmap to a write".
-> > 
-> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> > Suggested-by:  Donald Douwsma <ddouwsma@redhat.com>
+> > Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+> > Signed-off-by: Murphy Zhou <xzhou@redhat.com>
 > > ---
-> >  tests/generic/729     |   73 +++++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/generic/729.out |    2 +
-> >  2 files changed, 75 insertions(+)
-> >  create mode 100755 tests/generic/729
-> >  create mode 100644 tests/generic/729.out
 > > 
-> > diff --git a/tests/generic/729 b/tests/generic/729
+> > Thanks Darrick very much for reviewing!
+> > 
+> > v2:
+> >    Add explaination of the issue
+> >    add xfs_force_bdev data $SCRATCH_MNT
+> >    use DF_PROG
+> >    Re numbered this test
+> > v3:
+> >    Add _require_scratch_shutdown
+> >    Use _get_available_space
+> >    Explain why does not use _scratch_mount
+> > 
+> >  tests/xfs/999     | 65 +++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/xfs/999.out |  2 ++
+> >  2 files changed, 67 insertions(+)
+> >  create mode 100755 tests/xfs/999
+> >  create mode 100644 tests/xfs/999.out
+> > 
+> > diff --git a/tests/xfs/999 b/tests/xfs/999
 > > new file mode 100755
-> > index 00000000..269aed65
+> > index 00000000..0ce9989b
 > > --- /dev/null
-> > +++ b/tests/generic/729
-> > @@ -0,0 +1,73 @@
+> > +++ b/tests/xfs/999
+> > @@ -0,0 +1,65 @@
 > > +#! /bin/bash
 > > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2021 Oracle.  All Rights Reserved.
+> > +# Copyright (c) 2021 RedHat All Rights Reserved.
 > > +#
-> > +# FS QA Test 729
+> > +# FS QA Test 999
 > > +#
-> > +# This is a regression test for "xfs: only set IOMAP_F_SHARED when providing a
-> > +# srcmap to a write".  If a user creates a sparse shared region in a file,
-> > +# convinces XFS to create a copy-on-write delayed allocation reservation
-> > +# spanning both the shared blocks and the holes, and then calls the fallocate
-> > +# unshare command to unshare the entire sparse region, XFS incorrectly tells
-> > +# iomap that the delalloc blocks for the holes are shared, which causes it to
-> > +# error out while trying to unshare a hole.
+> > +# Testcase for kernel commit:
+> > +#   50d25484bebe xfs: sync lazy sb accounting on quiesce of read-only mounts
+> > +#
+> > +# After shutdown and readonly mount, a following read-write mount would
+> > +# get wrong number of available blocks. This is caused by unmounting the log
+> > +# on a readonly filesystem doesn't log the sb counters.
 > > +#
 > > +. ./common/preamble
-> > +_begin_fstest auto clone unshare
-> > +
-> > +# Override the default cleanup function.
-> > +_cleanup()
-> > +{
-> > +	cd /
-> > +	rm -r -f $tmp.* $TEST_DIR/$seq
-> > +}
-> > +
-> > +# Import common functions.
-> > +. ./common/reflink
-> > +. ./common/filter
+> > +_begin_fstest shutdown auto quick
 > > +
 > > +# real QA test starts here
 > > +
-> > +# Modify as appropriate.
-> > +_supported_fs generic
-> > +_require_cp_reflink
-> > +_require_test_reflink
-> > +_require_test_program "punch-alternating"
-> > +_require_xfs_io_command "fpunch"
+> > +_supported_fs xfs
+> > +_require_scratch
+> > +_require_scratch_shutdown
+> > +
+> > +_scratch_mkfs > $seqres.full 2>&1
+> > +# Don't use _scratch_mount because we need to mount without SELinux context
+> > +# to reproduce this issue. If we mount with SELinux context, this testcase
+> > +# is not reproducing the original issue.
+> > +mount $SCRATCH_DEV $SCRATCH_MNT
 > 
-> I didn't find "fpunch" in this case,
+> This mount will fail if the test runner configured an external log or a
+> realtime device, because you didn't specify those devices to the mount
+> call.  Either this needs _require_nonexternal or $(_scratch_options
+> mount) needs to be injected into the command line.
 
-It covers the punch activities in punch-alternating.  I'll add a comment
-pointing out that subtlety.
+I think I know why Xiong said _scratch_mount can't reproduce this bug.
 
-> but find "cowextsize". Did I miss something?
+Before this patch v3, he tried to find the xfs corruption by using $DF_PROG $SCRATCH_MNT
+before&after xfs_repair.
 
-Oops.  Yes, I'll add that too.
+If we use _scratch_mount, new files we create won't contains SELinux label
+in xfs inode attrfork. The corruption comes from sb_ifree (free inodes):
+  Phase 2 - using internal log
+        - zero log...
+        - scan filesystem freespace and inode maps...
+  sb_ifree 61, counted 60
 
-> Others looks good to me.
-> Reviewed-by: Zorro Lang <zlang@redhat.com>
+But if we don't use _scratch_mount, the corruption comes from sb_fdblocks(free blocks):
+  Phase 2 - using internal log
+        - zero log...
+        - scan filesystem freespace and inode maps...
+  sb_fdblocks 130086290, counted 131007896
+
+So if he use _scratch_mount, he can't get different available blocks by
+$DF_PROG $SCRATCH_MNT, before&after xfs_repair. Due to the corrupted thing
+is sb_ifree.
+
+But I still can't understand one thing, even if do *not* use _scratch_mount, the attr(selinux label)
+is local(short) format[1], didn't take more blocks. What takes more blocks, cause later
+sb_fdblocks corruption?
+
+Thanks,
+Zorro
+
+[1]
+...
+core.aformat = 1 (local)
+...
+u3 = (empty)
+a.sfattr.hdr.totsize = 51
+a.sfattr.hdr.count = 1
+a.sfattr.list[0].namelen = 7
+a.sfattr.list[0].valuelen = 37
+a.sfattr.list[0].root = 0
+a.sfattr.list[0].secure = 1
+a.sfattr.list[0].name = "selinux"
+a.sfattr.list[0].value = "unconfined_u:object_r:unlabeled_t:s0\000"
+
+
 > 
-> cc fstests@vger.kernel.org, due to it's a patch to xfstests.
-
-<nod> Thanks for reviewing.
-
---D
-
-> Thanks,
-> Zorro
+> --D
 > 
-> > +_require_xfs_io_command "funshare"
+> > +_xfs_force_bdev data $SCRATCH_MNT
 > > +
-> > +mkdir $TEST_DIR/$seq
-> > +file1=$TEST_DIR/$seq/a
-> > +file2=$TEST_DIR/$seq/b
+> > +# Write test file
+> > +ls > $SCRATCH_MNT/testfile
+> > +$DF_PROG $SCRATCH_MNT >> $seqres.full 2>&1
 > > +
-> > +$XFS_IO_PROG -f -c "pwrite -S 0x58 -b 10m 0 10m" $file1 >> $seqres.full
+> > +# Shutdown
+> > +$XFS_IO_PROG -x -c "shutdown -f" $SCRATCH_MNT
 > > +
-> > +f1sum0="$(md5sum $file1 | _filter_test_dir)"
+> > +# Mount ReadOnly
+> > +_scratch_unmount
+> > +_scratch_mount -oro
+> > +$DF_PROG $SCRATCH_MNT >> $seqres.full 2>&1
+> > +# Umount and mount rw
+> > +_scratch_unmount
+> > +_scratch_mount
 > > +
-> > +_cp_reflink $file1 $file2
-> > +$here/src/punch-alternating -o 1 $file2
+> > +# Get fdblocks before repair
+> > +fdb1=$(_get_available_space $SCRATCH_MNT)
+> > +_scratch_unmount
 > > +
-> > +f2sum0="$(md5sum $file2 | _filter_test_dir)"
+> > +# Repair
+> > +_repair_scratch_fs >> $seqres.full 2>&1
 > > +
-> > +# set cowextsize to the defaults (128k) to force delalloc cow preallocations
-> > +test "$FSTYP" = "xfs" && $XFS_IO_PROG -c 'cowextsize 0' $file2
-> > +$XFS_IO_PROG -c "funshare 0 10m" $file2
+> > +# Re-mount
+> > +_scratch_mount
 > > +
-> > +f1sum1="$(md5sum $file1 | _filter_test_dir)"
-> > +f2sum1="$(md5sum $file2 | _filter_test_dir)"
+> > +# Get fdblocks after repair
+> > +fdb2=$(_get_available_space $SCRATCH_MNT)
 > > +
-> > +test "${f1sum0}" = "${f1sum1}" || echo "file1 should not have changed"
-> > +test "${f2sum0}" = "${f2sum1}" || echo "file2 should not have changed"
+> > +echo fdb1 $fdb1 fdb2 $fdb2 >> $seqres.full 2>&1
 > > +
-> > +_test_cycle_mount
-> > +
-> > +f1sum2="$(md5sum $file1 | _filter_test_dir)"
-> > +f2sum2="$(md5sum $file2 | _filter_test_dir)"
-> > +
-> > +test "${f1sum2}" = "${f1sum1}" || echo "file1 should not have changed ondisk"
-> > +test "${f2sum2}" = "${f2sum1}" || echo "file2 should not have changed ondisk"
+> > +[ $fdb1 -ne $fdb2 ] && echo Wrong fdblocks: $fdb1 and $fdb2
 > > +
 > > +# success, all done
-> > +echo Silence is golden
+> > +echo "Silence is golden"
 > > +status=0
 > > +exit
-> > diff --git a/tests/generic/729.out b/tests/generic/729.out
+> > diff --git a/tests/xfs/999.out b/tests/xfs/999.out
 > > new file mode 100644
-> > index 00000000..0f175ae2
+> > index 00000000..3b276ca8
 > > --- /dev/null
-> > +++ b/tests/generic/729.out
+> > +++ b/tests/xfs/999.out
 > > @@ -0,0 +1,2 @@
-> > +QA output created by 729
+> > +QA output created by 999
 > > +Silence is golden
+> > -- 
+> > 2.20.1
 > > 
 > 
+
