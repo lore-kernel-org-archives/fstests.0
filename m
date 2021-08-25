@@ -2,191 +2,374 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.5 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7EBE8C432BE
-	for <linux-fstests@archiver.kernel.org>; Wed, 25 Aug 2021 22:46:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BB2C2C4320A
+	for <linux-fstests@archiver.kernel.org>; Wed, 25 Aug 2021 23:07:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 55B9260E78
-	for <linux-fstests@archiver.kernel.org>; Wed, 25 Aug 2021 22:46:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8857860F44
+	for <linux-fstests@archiver.kernel.org>; Wed, 25 Aug 2021 23:07:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229786AbhHYWqs (ORCPT
+        id S233129AbhHYXHv (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 25 Aug 2021 18:46:48 -0400
-Received: from mout.gmx.net ([212.227.17.22]:34423 "EHLO mout.gmx.net"
+        Wed, 25 Aug 2021 19:07:51 -0400
+Received: from mail.kernel.org ([198.145.29.99]:39962 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229642AbhHYWqr (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 25 Aug 2021 18:46:47 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net;
-        s=badeba3b8450; t=1629931558;
-        bh=fOpoizv0OMXviuJPooC31IUQhxQOMKE1o4OgchiGGcI=;
-        h=X-UI-Sender-Class:Subject:To:Cc:References:From:Date:In-Reply-To;
-        b=GClca8fV5PPqVQbcx9ZCmOMEVDJcciIwnv41xTr9iIyikiIPJ2Fu0HmlTT6YS18dQ
-         k5dyQ8CiyZX5FrmAugIZ3aX8Lkk4/z8fKaHy/s2u1AiCFW6KgbxqcX3xQo0i018GwF
-         D109IqFGY0ZtMp1ssKJyAi88k5huEgJwZWEO8MOs=
-X-UI-Sender-Class: 01bb95c1-4bf8-414a-932a-4f6e2808ef9c
-Received: from [0.0.0.0] ([149.28.201.231]) by mail.gmx.net (mrgmx105
- [212.227.17.174]) with ESMTPSA (Nemesis) id 1M5wLT-1mPMWD024R-007REV; Thu, 26
- Aug 2021 00:45:58 +0200
-Subject: Re: [PATCH] fstests: btrfs/246: add test case to make sure btrfs can
- create compressed inline extent
-To:     fdmanana@gmail.com, Qu Wenruo <wqu@suse.com>
-Cc:     fstests <fstests@vger.kernel.org>,
-        linux-btrfs <linux-btrfs@vger.kernel.org>
-References: <20210825061923.13770-1-wqu@suse.com>
- <CAL3q7H6eaGgL8e3OPQMOb-E9wKR5JQTV5pzEAsMvbaSCpZY1rA@mail.gmail.com>
-From:   Qu Wenruo <quwenruo.btrfs@gmx.com>
-Message-ID: <83400e51-4271-5140-bddf-ae8eb5cafc13@gmx.com>
-Date:   Thu, 26 Aug 2021 06:45:54 +0800
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.13.0
+        id S231535AbhHYXHu (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 25 Aug 2021 19:07:50 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 4A049610C7;
+        Wed, 25 Aug 2021 23:07:04 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1629932824;
+        bh=mGQ67LM4p4PgUFzhPHjFcZhbot55XXEW3sJuDLcJhaQ=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=eHJpSg+azAfs2VlTDFdqWfCfwcvE81PhfvPYU9ThzX3AB8oWT4FCvKEdRRW7fjHvH
+         sLlOc271YxbcsTui6OAaJ2ShVUGrMnCMAXUoM+nEQrVwewdzSsvX5ZrkDqCfBausK9
+         zQvMpDQA6UqVjXFFLTMBtbQrQ8siJbg2foG3DGUMayKrUOaNdhFoL6Fx5zMouXNfX6
+         dDRvb6Tc5/cdTXEZagZGxvfY8WfVpfUkSLJ7cPGnu4eQJL06kzRXnA/Gzs2IEiuFqi
+         bihBUib8NWQBf2DXWdT8cCl6hXZC64rOLAzg+9jJEWSATjsCFT75d9+/SD58N/UUZr
+         t3BZjZmBI7VOA==
+Date:   Wed, 25 Aug 2021 16:07:03 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Dave Chinner <david@fromorbit.com>
+Cc:     linux-xfs@vger.kernel.org, fstests <fstests@vger.kernel.org>
+Subject: [RFC PATCH] xfs: test DONTCACHE behavior with the inode cache
+Message-ID: <20210825230703.GH12640@magnolia>
+References: <20210824023208.392670-1-david@fromorbit.com>
 MIME-Version: 1.0
-In-Reply-To: <CAL3q7H6eaGgL8e3OPQMOb-E9wKR5JQTV5pzEAsMvbaSCpZY1rA@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:yG8N4qHJ1L4j3f05f60ZLhiIL0mwLodYVYxT6OO16epPsJ+9bzs
- zCWVaYfn48S4N7zfZ3xbJxw8yHZKo2tHvhRmwWYmVgZ8SxjQMthLbgutNXLpl7siK8OsxbB
- rRknGhuuBDljrNgIScYetQkMMclQSjs6AceBlmKVyPvuzwGKlyRSICP1AsuBfJ0HK0aYyz0
- ioN0axP2k8BavhDKLjKlA==
-X-UI-Out-Filterresults: notjunk:1;V03:K0:HjnTdToMk4E=:o3hYwrpup63hsAw61hFD/s
- DZb9feRtuo1+0uQAAbygQ92DE3GLbaHMFxFKAX4l7tNf3c6CmNBb3pgPgaeRBhxmGIOBMHNsk
- 7EcAPC/KyJO0Q64J4UmQNTL6ud5wKBpqEOVu1T1tRDiKyGXuWOaPbe7a8Ukz7rlS9qYB9hjLH
- 64XLzTqWC3UvsU4KMRNqhdA48WBkN7RQfmnakvwf+UP/HFX3AZceqLjUYla9Bmnw67EglLzoK
- ZU3dkzMyDkwWjZYUHnIPFMTWgzoUGeYcdHOdZDd/fm4BSCDau4taBug0tDvJGal4eSsIDDNYc
- AmPQIcYNqWHmFmWRhBWfFAjK2/BrUkGNnQcnoARkQ3+Be2a5ldXkwiJ4RYBoyIatmI+2xbJ3s
- ufVOGIoHRKKQcDs4plbkFu9eGAB1GPyLUzpYbqsFLXH2Y5UnKbNyfpXRQ0d0wSAfokWjtkhk8
- 6n6peJCceaEPnSJ/us9dbamflLtaDNom8qU/Mq7cyy6aNQ0MlEbxXKHaENYg5MFGhtVePp0ov
- EnT4GgZpraqWVJmsF+WOORKjcYDyt4fNoheXT7I7CPR3yM4VQTX6e5VQRy/W+Clw/MjauECKW
- Rplaktf3arrVB0wvyGdJeLNhDxiTuu8S1JCLkkAbJm0DZXMqod8K743hh9ZBIm3z/IidVOKgk
- 74ON4YtcJZZQQ+7Iu3KLw21D55IRSlgTZob6Y7BSASlpRxI2xHvAhx/Cb1GPN+hGC/Nwhp/Dr
- CfJB6Uvyr76ozJwOe+7I0y4WxRRbX13UpO9XF5egvBtPUZBOyusGVRQ1D0d0SHnNJ4P3tPSV/
- yfA99bwpEtASuOgHrqRE9brjHVfRYlDC8YruvaFDfcJub63Yjik2vu2cKbOXp8tQd+GnFlQrh
- IHyQ+G8iBe8MJ7qLh0zrMQX3Q06LG6pUrFkYmHDtgPSXq3O8m7qnR3gTUhG0m9Cc4VL+S9Yuj
- eY4MojGCuxp5s6P7pq3K49miKVhb1tHrpwJMy2r2ahO7naYqwFhzUTd8V4AhUMB9Y0cN6Vb+O
- SE/EJsPB+jXh0Pusb5R0D5xuFntAoeaWyZG+ASxduY9boOVwzf3CMcntMw5cRhkxo3PIqwYAh
- SwIwFw/MALjwlZUu+8lbbe44OxsQou10kgbjYcvdHS73Kzwct6DgXaSKg==
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210824023208.392670-1-david@fromorbit.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+From: Darrick J. Wong <djwong@kernel.org>
 
+Basic testing that DONTCACHE affects the XFS inode cache in the manner
+that we expect.  The only way we can do that (for XFS, anyway) is to
+play around with the BULKSTAT ioctl.
 
-On 2021/8/25 =E4=B8=8B=E5=8D=8810:24, Filipe Manana wrote:
-> On Wed, Aug 25, 2021 at 7:19 AM Qu Wenruo <wqu@suse.com> wrote:
->>
->> Btrfs has the ability to inline small file extents into its metadata,
->> and such inlined extents can be further compressed if needed.
->>
->> The new test case is for a regression caused by commit f2165627319f
->> ("btrfs: compression: don't try to compress if we don't have enough
->> pages").
->>
->> That commit prevents btrfs from creating compressed inline extents, eve=
-n
->> "-o compress,max_inline=3D2048" is specified, only uncompressed inline
->> extents can be created.
->>
->> The test case will use "btrfs inspect dump-tree" to verify the created
->> extent is both inlined and compressed.
->>
->> Signed-off-by: Qu Wenruo <wqu@suse.com>
->> ---
->>   tests/btrfs/246     | 50 ++++++++++++++++++++++++++++++++++++++++++++=
+Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+---
+ tests/xfs/780     |  293 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/780.out |    7 +
+ 2 files changed, 300 insertions(+)
+ create mode 100755 tests/xfs/780
+ create mode 100644 tests/xfs/780.out
+
+diff --git a/tests/xfs/780 b/tests/xfs/780
+new file mode 100755
+index 00000000..9bf1f482
+--- /dev/null
++++ b/tests/xfs/780
+@@ -0,0 +1,293 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2021 Oracle.  All Rights Reserved.
++#
++# FS QA Test 780
++#
++# Functional testing for the I_DONTCACHE inode flag, as set by the BULKSTAT
++# ioctl.  This flag neuters the inode cache's tendency to try to hang on to
++# incore inodes for a while after the last program closes the file, which
++# is helpful for filesystem scanners to avoid trashing the inode cache.
++#
++# However, the inode cache doesn't always honor the DONTCACHE behavior -- the
++# only time it really applies is to cache misses from a bulkstat scan.  If
++# any other threads accessed the inode before or immediately after the scan,
++# the DONTCACHE flag is ignored.  This includes other scans.
++#
++# Regrettably, there is no way to poke /only/ XFS inode reclamation directly,
++# so we're stuck with setting xfssyncd_centisecs to a low value and watching
++# the slab counters.
++#
++. ./common/preamble
++_begin_fstest auto ioctl
 +
->>   tests/btrfs/246.out |  2 ++
->>   2 files changed, 52 insertions(+)
->>   create mode 100755 tests/btrfs/246
->>   create mode 100644 tests/btrfs/246.out
->>
->> diff --git a/tests/btrfs/246 b/tests/btrfs/246
->> new file mode 100755
->> index 00000000..15bb064d
->> --- /dev/null
->> +++ b/tests/btrfs/246
->> @@ -0,0 +1,50 @@
->> +#! /bin/bash
->> +# SPDX-License-Identifier: GPL-2.0
->> +# Copyright (c) 2021 SUSE Linux Products GmbH.  All Rights Reserved.
->> +#
->> +# FS QA Test 246
->> +#
->> +# Make sure btrfs can create compressed inline extents
->> +#
->> +. ./common/preamble
->> +_begin_fstest auto quick compress
->> +
->> +# Override the default cleanup function.
->> +_cleanup()
->> +{
->> +       cd /
->> +       rm -r -f $tmp.*
->> +}
->> +
->> +# Import common functions.
->> +. ./common/filter
->> +# For __populate_find_inode()
->> +. ./common/populate
->> +
->> +# real QA test starts here
->> +
->> +# Modify as appropriate.
->> +_supported_fs btrfs
->> +_require_scratch
->> +
->> +_scratch_mkfs > /dev/null
->> +_scratch_mount -o compress,max_inline=3D2048
->> +
->> +# This should create compressed inline extent
->> +$XFS_IO_PROG -f -c "pwrite 0 2048" $SCRATCH_MNT/foobar > /dev/null
->> +ino=3D$(__populate_find_inode $SCRATCH_MNT/foobar)
->> +_scratch_unmount
->> +
->> +$BTRFS_UTIL_PROG inspect dump-tree -t 5 $SCRATCH_DEV | \
->> +       grep "($ino EXTENT_DATA 0" -A2 > $tmp.dump-tree
->> +echo "dump tree result for ino $ino:" >> $seqres.full
->> +cat $tmp.dump-tree >> $seqres.full
->> +
->> +grep -q "inline extent" $tmp.dump-tree || echo "no inline extent found=
-"
->> +grep -q "compression 1" $tmp.dump-tree || echo "no compressed extent f=
-ound"
->> +
->> +echo "Silence is golden"
->
-> While here, we could also check that we are able to read exactly what
-> we wrote before, after evicting the page (e.g. after a call to
-> _scratch_cycle_mount).
-
-Nice idea.
-
-Will update the test case soon.
-
-Thanks,
-Qu
-> Other than that, it looks ok.
->
-> Thanks.
->
->
->> +
->> +# success, all done
->> +status=3D0
->> +exit
->> diff --git a/tests/btrfs/246.out b/tests/btrfs/246.out
->> new file mode 100644
->> index 00000000..287f7983
->> --- /dev/null
->> +++ b/tests/btrfs/246.out
->> @@ -0,0 +1,2 @@
->> +QA output created by 246
->> +Silence is golden
->> --
->> 2.31.1
->>
->
->
++_cleanup()
++{
++	cd /
++	rm -r -f $tmp.*
++	test -n "$junkdir" && rm -r -f "$junkdir"
++	test -n "$old_centisecs" && echo "$old_centisecs" > "$xfs_centisecs_file"
++}
++
++# Import common functions.
++# . ./common/filter
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs generic
++_require_test
++
++# Either of these need to be available to monitor slab usage
++xfs_ino_objcount_file=/sys/kernel/slab/xfs_inode/objects
++slabinfo_file=/proc/slabinfo
++if [ ! -r "$xfs_ino_objcount_file" ] && [ ! -r "$slabinfo_file" ]; then
++	_notrun "Cannot find xfs_inode slab count?"
++fi
++
++# Background reclamation of disused xfs inodes is scheduled for $xfssyncd
++# centiseconds after the first inode is tagged for reclamation.  It's not great
++# to encode this implementation detail in a test like this, but there isn't
++# any means to trigger *only* inode cache reclaim -- actual memory pressure
++# can trigger the VFS to drop non-DONTCACHE inodes, which is not what we want.
++xfs_centisecs_file=/proc/sys/fs/xfs/xfssyncd_centisecs
++test -w "$xfs_centisecs_file" || _notrun "Cannot find xfssyncd_centisecs?"
++
++# Set the syncd knob to the minimum value 100cs (aka 1s) 
++old_centisecs="$(cat "$xfs_centisecs_file")"
++echo 100 > "$xfs_centisecs_file" || _notrun "Cannot adjust xfssyncd_centisecs?"
++delay_centisecs="$(cat "$xfs_centisecs_file")"
++
++# Sleep one second more than the xfssyncd delay to give background inode
++# reclaim enough time to run.
++sleep_seconds=$(( ( (99 + delay_centisecs) / 100) + 1))
++
++count_xfs_inode_objs() {
++	if [ -r "$xfs_ino_objcount_file" ]; then
++		cat "$xfs_ino_objcount_file" | cut -d ' ' -f 1
++	elif [ -r "$slabinfo_file" ]; then
++		grep -w '^xfs_inode' "$slabinfo_file" | awk '{print $2}'
++	else
++		echo "ERROR"
++	fi
++}
++
++junkdir=$TEST_DIR/$seq.junk
++nr_cpus=$(getconf _NPROCESSORS_ONLN)
++
++# Sample the baseline count of cached inodes after a fresh remount.
++_test_cycle_mount
++baseline_count=$(count_xfs_inode_objs)
++
++# Create a junk directory with about a thousand files.
++nr_files=1024
++mkdir -p $junkdir
++for ((i = 0; i < nr_files; i++)); do
++	touch "$junkdir/$i"
++done
++new_files=$(find $junkdir | wc -l)
++echo "created $new_files files" >> $seqres.full
++test "$new_files" -gt "$nr_files" || \
++	echo "created $new_files files, expected $nr_files"
++
++# Sanity check: Make sure that all those new inodes are still in the cache.
++# We assume that memory limits are not so low that reclaim started for a bunch
++# of empty files.
++work_count=$(count_xfs_inode_objs)
++test "$work_count" -ge "$new_files" || \
++	echo "found $work_count cached inodes after creating $new_files files?"
++
++# Round 1: Check the DONTCACHE behavior when it is invoked once per inode.
++# The inodes should be reclaimed if we wait long enough.
++echo "Round 1"
++
++# Sample again to see if we're still within the baseline.
++_test_cycle_mount
++fresh_count=$(count_xfs_inode_objs)
++
++# Run bulkstat to exercise DONTCACHE behavior, and sample again.
++$here/src/bstat -q $junkdir
++post_count=$(count_xfs_inode_objs)
++
++# Let background reclaim run
++sleep $sleep_seconds
++end_count=$(count_xfs_inode_objs)
++
++# Even with our greatly reduced syncd value, the inodes should still be in
++# memory immediately after the second bulkstat concludes.
++test "$post_count" -ge "$new_files" || \
++	echo "found $post_count cached inodes after bulkstat $new_files files?"
++
++# After we've let memory reclaim run, the inodes should no longer be cached
++# in memory.
++test "$end_count" -le "$new_files" || \
++	echo "found $end_count cached inodes after letting $new_files DONTCACHE files expire?"
++
++# Dump full results for debugging
++cat >> $seqres.full << ENDL
++round1 baseline: $baseline_count
++work: $work_count
++fresh: $fresh_count
++post: $post_count
++end: $end_count
++ENDL
++
++# Round 2: Check the DONTCACHE behavior when it is invoked multiple times per
++# inode in rapid succession.  The inodes should remain in memory even after
++# reclaim because the cache gets wise to repeated scans.
++echo "Round 2"
++
++# Sample again to see if we're still within the baseline.
++_test_cycle_mount
++fresh_count=$(count_xfs_inode_objs)
++
++# Run bulkstat twice in rapid succession to exercise DONTCACHE behavior.
++# The first bulkstat run will bring the inodes into memory (marked DONTCACHE).
++# The second bulkstat causes cache hits before the inodes can reclaimed, which
++# means that they should stay in memory.  Sample again afterwards.
++$here/src/bstat -q $junkdir
++$here/src/bstat -q $junkdir
++post_count=$(count_xfs_inode_objs)
++
++# Let background reclaim run
++sleep $sleep_seconds
++end_count=$(count_xfs_inode_objs)
++
++# Even with our greatly reduced syncd value, the inodes should still be in
++# memory immediately after the second bulkstat concludes.
++test "$post_count" -ge "$new_files" || \
++	echo "found $post_count cached inodes after bulkstat $new_files files?"
++
++# After we've let memory reclaim run and cache hits happen, the inodes should
++# still be cached in memory.
++test "$end_count" -ge "$new_files" || \
++	echo "found $end_count cached inodes after letting $new_files DONTCACHE files expire?"
++
++# Dump full results for debugging
++cat >> $seqres.full << ENDL
++round2 baseline: $baseline_count
++work: $work_count
++fresh: $fresh_count
++post: $post_count
++end: $end_count
++ENDL
++
++# Round 3: Check that DONTCACHE results in inode evictions when it is invoked
++# multiple times per inode but there's enough time between each bulkstat for
++# reclaim to kill the inodes.
++echo "Round 3"
++
++# Sample again to see if we're still within the baseline.
++_test_cycle_mount
++fresh_count=$(count_xfs_inode_objs)
++
++# Run bulkstat twice in slow succession to exercise DONTCACHE behavior.
++# The first bulkstat run will bring the inodes into memory (marked DONTCACHE).
++# Pause long enough for reclaim to tear down the inodes so that the second
++# bulkstat brings them back into memory (again marked DONTCACHE).
++# Sample again afterwards.
++$here/src/bstat -q $junkdir
++sleep $sleep_seconds
++post_count=$(count_xfs_inode_objs)
++
++$here/src/bstat -q $junkdir
++sleep $sleep_seconds
++end_count=$(count_xfs_inode_objs)
++
++# Even with our greatly reduced syncd value, the inodes should still be in
++# memory immediately after the second bulkstat concludes.
++test "$post_count" -le "$new_files" || \
++	echo "found $post_count cached inodes after bulkstat $new_files files?"
++
++# After we've let memory reclaim run, the inodes should no longer be cached
++# in memory.
++test "$end_count" -le "$new_files" || \
++	echo "found $end_count cached inodes after letting $new_files DONTCACHE files expire?"
++
++# Dump full results for debugging
++cat >> $seqres.full << ENDL
++round3 baseline: $baseline_count
++work: $work_count
++fresh: $fresh_count
++post: $post_count
++end: $end_count
++ENDL
++
++# Round 4: Check that DONTCACHE doesn't do much when all the files are accessed
++# immediately after a bulkstat.
++echo "Round 4"
++
++# Sample again to see if we're still within the baseline.
++_test_cycle_mount
++fresh_count=$(count_xfs_inode_objs)
++
++# Run bulkstat and then cat every file in the junkdir so that the new inode
++# grabs will clear DONTCACHE off the inodes.  Sample again afterwards.
++$here/src/bstat -q $junkdir
++find $junkdir -type f -print0 | xargs -0 cat
++post_count=$(count_xfs_inode_objs)
++
++# Let background reclaim run
++sleep $sleep_seconds
++end_count=$(count_xfs_inode_objs)
++
++# Even with our greatly reduced syncd value, the inodes should still be in
++# memory immediately after the second bulkstat concludes.
++test "$post_count" -ge "$new_files" || \
++	echo "found $post_count cached inodes after bulkstat $new_files files?"
++
++# After we've let memory reclaim run, the inodes should stll be cached in
++# memory because we opened everything.
++test "$end_count" -ge "$new_files" || \
++	echo "found $end_count cached inodes after letting $new_files DONTCACHE files expire?"
++
++# Dump full results for debugging
++cat >> $seqres.full << ENDL
++round4 baseline: $baseline_count
++work: $work_count
++fresh: $fresh_count
++post: $post_count
++end: $end_count
++ENDL
++
++# Round 5: Check that DONTCACHE has no effect if the inodes were already in
++# cache due to reader programs.
++echo "Round 5"
++
++# Sample again to see if we're still within the baseline.
++_test_cycle_mount
++fresh_count=$(count_xfs_inode_objs)
++
++# cat every file in the junkdir and then run BULKSTAT so that the DONTCACHE
++# flags passed to iget by bulkstat will be ignored for already-cached inodes.
++# Sample again afterwards.
++find $junkdir -type f -print0 | xargs -0 cat
++$here/src/bstat -q $junkdir
++post_count=$(count_xfs_inode_objs)
++
++# Let background reclaim run
++sleep $sleep_seconds
++end_count=$(count_xfs_inode_objs)
++
++# Even with our greatly reduced syncd value, the inodes should still be in
++# memory immediately after the second bulkstat concludes.
++test "$post_count" -ge "$new_files" || \
++	echo "found $post_count cached inodes after bulkstat $new_files files?"
++
++# After we've let memory reclaim run, the inodes should stll be cached in
++# memory because we opened everything.
++test "$end_count" -ge "$new_files" || \
++	echo "found $end_count cached inodes after letting $new_files DONTCACHE files expire?"
++
++# Dump full results for debugging
++cat >> $seqres.full << ENDL
++round5 baseline: $baseline_count
++work: $work_count
++fresh: $fresh_count
++post: $post_count
++end: $end_count
++ENDL
++
++echo Silence is golden
++status=0
++exit
+diff --git a/tests/xfs/780.out b/tests/xfs/780.out
+new file mode 100644
+index 00000000..7366678c
+--- /dev/null
++++ b/tests/xfs/780.out
+@@ -0,0 +1,7 @@
++QA output created by 780
++Round 1
++Round 2
++Round 3
++Round 4
++Round 5
++Silence is golden
