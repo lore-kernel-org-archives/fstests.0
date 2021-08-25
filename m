@@ -2,163 +2,115 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+X-Spam-Status: No, score=-12.5 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5ECEEC4338F
-	for <linux-fstests@archiver.kernel.org>; Wed, 25 Aug 2021 03:27:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DD23CC4338F
+	for <linux-fstests@archiver.kernel.org>; Wed, 25 Aug 2021 06:16:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 36DAF61247
-	for <linux-fstests@archiver.kernel.org>; Wed, 25 Aug 2021 03:27:02 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B20DF61374
+	for <linux-fstests@archiver.kernel.org>; Wed, 25 Aug 2021 06:16:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235305AbhHYD1q (ORCPT
+        id S238139AbhHYGR1 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 24 Aug 2021 23:27:46 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:40791 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S237168AbhHYD1q (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 24 Aug 2021 23:27:46 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1629861996;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=4gIdoGoOsQeUDwW1YWLqQn2h7kEVMQwGGwyoKRqW0zU=;
-        b=Bn+VQl/pQwwB5eGWclT3K7NX2PIVmOINmtdCIweLnZdc9VvLAF5UpASpKRhbSXxrzhS7O0
-        +ov8/1hC2I1oSqfeRvUpcZlKdWKEoLp2aXTyeG0XsAQjKDRZ/hZ3zAE23jqXksj9LW6HHg
-        QZAvIMmfD5ZQ6RT4LsqcCOuo3cEaVlM=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-572-UlxcEAVVPAymGw3C0IAXDQ-1; Tue, 24 Aug 2021 23:26:33 -0400
-X-MC-Unique: UlxcEAVVPAymGw3C0IAXDQ-1
-Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 7F7AF801A92;
-        Wed, 25 Aug 2021 03:26:32 +0000 (UTC)
-Received: from localhost (unknown [10.66.61.34])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id A73075DF21;
-        Wed, 25 Aug 2021 03:26:31 +0000 (UTC)
-Date:   Wed, 25 Aug 2021 11:26:30 +0800
-From:   Murphy Zhou <xzhou@redhat.com>
-To:     fstests@vger.kernel.org
-Cc:     Donald Douwsma <ddouwsma@redhat.com>,
-        "Darrick J. Wong" <djwong@kernel.org>, zlang@redhat.com,
-        Eryu Guan <eguan@linux.alibaba.com>
-Subject: [PATCH v5] tests/generic: check log recovery with readonly mount
-Message-ID: <20210825032630.gezd2jvkd4oczzsx@xzhoux.usersys.redhat.com>
-References: <20210806014938.npfn2ykyirfrdlra@xzhoux.usersys.redhat.com>
- <20210806185545.GE3601425@magnolia>
- <20210823070541.mn2y4pn4256dwnhm@xzhoux.usersys.redhat.com>
- <20210823174316.GE12612@magnolia>
- <20210824050436.3l5jodgjhwt7wqzl@xzhoux.usersys.redhat.com>
- <20210824062354.lcbmbz2r6fv5zowo@fedora>
- <3628adee-a6f1-6621-2988-786334fb6284@redhat.com>
- <a5d58dab-5f4b-884f-d29e-e531e536fc24@redhat.com>
+        Wed, 25 Aug 2021 02:17:27 -0400
+Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:9628 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S238328AbhHYGR0 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 25 Aug 2021 02:17:26 -0400
+Received: from pps.filterd (m0098394.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.0.43/8.16.0.43) with SMTP id 17P649oC118200;
+        Wed, 25 Aug 2021 02:16:35 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=subject : to : cc :
+ references : from : message-id : date : mime-version : in-reply-to :
+ content-type : content-transfer-encoding; s=pp1;
+ bh=IVsLcRBc0x/H0VPCSaOyqpgePakwOQ7/wrz1tuvWzYM=;
+ b=j0xyowoTzUGQ1XEu7lwms09/Z02FSIVhHeuBLsJd4lI3FpzSbqsLE+suxJMbPOg83d0S
+ jtrdP7Od5aq6J+iuyOPJoCIdI4IKtBNmtcBKOuEC0LNWzGnwkmA+/l5dQI9jtGWy+Ev/
+ /qOh7b0FA5FeihDq6dxrUS7omUQzgORloWPrftlFCm5El5/pZioKENDqGpQGTqyqp/14
+ 0JaB5V2AAB8iBOZ2ZmdlKZ0HvT7KYy7xNjz13t+1xHKZPC52Xzfu/+EnxWwVWF4BKeEo
+ BYrv3mh4rz9r11slAX5piHMwbFbq3HfXkE0KuATGFjCQ4CPeCXKw8s4ouT9XG73WeZti Jw== 
+Received: from ppma06ams.nl.ibm.com (66.31.33a9.ip4.static.sl-reverse.com [169.51.49.102])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 3ane0rufnh-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Wed, 25 Aug 2021 02:16:34 -0400
+Received: from pps.filterd (ppma06ams.nl.ibm.com [127.0.0.1])
+        by ppma06ams.nl.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 17P67s7o009761;
+        Wed, 25 Aug 2021 06:16:32 GMT
+Received: from b06cxnps3074.portsmouth.uk.ibm.com (d06relay09.portsmouth.uk.ibm.com [9.149.109.194])
+        by ppma06ams.nl.ibm.com with ESMTP id 3ajrrheeq6-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Wed, 25 Aug 2021 06:16:32 +0000
+Received: from d06av22.portsmouth.uk.ibm.com (d06av22.portsmouth.uk.ibm.com [9.149.105.58])
+        by b06cxnps3074.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 17P6GUoL36569542
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Wed, 25 Aug 2021 06:16:30 GMT
+Received: from d06av22.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id 3FA814C073;
+        Wed, 25 Aug 2021 06:16:30 +0000 (GMT)
+Received: from d06av22.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id 197334C04A;
+        Wed, 25 Aug 2021 06:16:29 +0000 (GMT)
+Received: from li-00db19cc-1f39-11b2-a85c-fed2f2ec2619.ibm.com (unknown [9.43.109.130])
+        by d06av22.portsmouth.uk.ibm.com (Postfix) with ESMTPS;
+        Wed, 25 Aug 2021 06:16:28 +0000 (GMT)
+Subject: Re: [PATCH] idmap: override btrfs_ioctl_vol_args_v2 if system header
+ doesn't have subvolid
+To:     "Darrick J. Wong" <djwong@kernel.org>,
+        Christian Brauner <christian.brauner@ubuntu.com>,
+        Eryu Guan <guan@eryu.me>
+Cc:     fstests@vger.kernel.org
+References: <20210823182138.GF12612@magnolia>
+From:   Anju T Sudhakar <anju@linux.vnet.ibm.com>
+Message-ID: <35f0a5ad-fa17-d149-28a6-d16bcde0b4ec@linux.vnet.ibm.com>
+Date:   Wed, 25 Aug 2021 11:46:27 +0530
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.11.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <a5d58dab-5f4b-884f-d29e-e531e536fc24@redhat.com>
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
+In-Reply-To: <20210823182138.GF12612@magnolia>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Content-Language: en-US
+X-TM-AS-GCONF: 00
+X-Proofpoint-GUID: gTWYYOZjrPDQQZhLKRxr_0GAy9S6qNlz
+X-Proofpoint-ORIG-GUID: gTWYYOZjrPDQQZhLKRxr_0GAy9S6qNlz
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.391,18.0.790
+ definitions=2021-08-25_02:2021-08-25,2021-08-25 signatures=0
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 mlxscore=0 lowpriorityscore=0
+ adultscore=0 spamscore=0 phishscore=0 clxscore=1011 priorityscore=1501
+ bulkscore=0 mlxlogscore=999 suspectscore=0 impostorscore=0 malwarescore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2107140000
+ definitions=main-2108250033
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-And followed by a rw mount. After log recovery by these 2 mounts, the
-filesystem should be in a consistent state.
 
-Suggested-by:  Donald Douwsma <ddouwsma@redhat.com>
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-Signed-off-by: Murphy Zhou <xzhou@redhat.com>
----
+On 8/23/21 11:51 PM, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
+>
+> The struct btrfs_ioctl_vol_args_v2 in /usr/include/linux/btrfs.h on my
+> system predates the inclusion of the "subvolid" field.  This causes the
+> following build failure:
+>
+> idmapped-mounts.c: In function 'btrfs_delete_subvolume_id':
+> idmapped-mounts.c:9730:6: error: 'struct btrfs_ioctl_vol_args_v2' has no member named 'subvolid'
+>   9730 |  args.subvolid = subvolid;
+>        |      ^
+>
+> Since this source file contains its own more uptodate copy of that
+> structure, add some more autoconf/cpp magic so that we can override the
+> struct definition if the system header doesn't have the desired field.
+>
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> ---
 
-Thanks for reviewing! It seems my last several replies from gmail got
-rejected by the list.
+LGTM. Thanks for fixing this issue. I too hit this issue in my system and
 
-v2:
-   Add explanation of the issue
-   add xfs_force_bdev data $SCRATCH_MNT
-   use DF_PROG
-   Re numbered this test
-v3:
-   Add _require_scratch_shutdown
-   Use _get_available_space
-   Explain why does not use _scratch_mount
-v4:
-   Add to recoveryloop group
-   Move to generic as there is no xfs specific operations
-   Remove all operations after 2 cycle mounts, let the fsck in fstests to check the filesystem consistency
-   Use _scratch_shutdown, MOUNT_PROG
-   Remove unnecessary comments
-v5:
-   Make _xfs_force_bdev xfs only
-   Use _scratch_mount, it's still reproducible
+this patch helped me.
 
+Reviewed-by: Anju T Sudhakar<anju@linux.vnet.ibm.com>
 
- tests/generic/999     | 42 ++++++++++++++++++++++++++++++++++++++++++
- tests/generic/999.out |  2 ++
- 2 files changed, 44 insertions(+)
- create mode 100755 tests/generic/999
- create mode 100644 tests/generic/999.out
-
-diff --git a/tests/generic/999 b/tests/generic/999
-new file mode 100755
-index 00000000..60e0ce59
---- /dev/null
-+++ b/tests/generic/999
-@@ -0,0 +1,42 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2021 RedHat All Rights Reserved.
-+#
-+# FS QA Test 999
-+#
-+# Testcase for kernel commit:
-+#   50d25484bebe xfs: sync lazy sb accounting on quiesce of read-only mounts
-+#
-+# After shutdown and readonly mount, a following read-write mount would
-+# get wrong number of available blocks. This is caused by unmounting the log
-+# on a readonly filesystem doesn't log the sb counters.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick recoveryloop shutdown
-+
-+# real QA test starts here
-+
-+_require_scratch
-+_require_scratch_shutdown
-+_scratch_mkfs > $seqres.full 2>&1
-+
-+_scratch_mount
-+[ "$FSTYP" == "xfs" ] && _xfs_force_bdev data $SCRATCH_MNT
-+
-+echo Testing > $SCRATCH_MNT/testfile
-+
-+# -f is required to reproduce the original issue
-+_scratch_shutdown -f
-+
-+_scratch_cycle_mount ro
-+_scratch_cycle_mount
-+
-+# These two mounts should have the log fully recovered. Exit here and let the
-+# fsck operation of xfstests to check the consistence of the tested filesystem.
-+# On the buggy kernel, this testcase reports filesystem is inconsistent.
-+# On the fixed kernel, testcase pass.
-+
-+# success, all done
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/generic/999.out b/tests/generic/999.out
-new file mode 100644
-index 00000000..3b276ca8
---- /dev/null
-+++ b/tests/generic/999.out
-@@ -0,0 +1,2 @@
-+QA output created by 999
-+Silence is golden
--- 
-2.20.1
 
