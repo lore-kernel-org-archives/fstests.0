@@ -2,159 +2,328 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 33467C432BE
-	for <linux-fstests@archiver.kernel.org>; Thu, 26 Aug 2021 00:17:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E3526C432BE
+	for <linux-fstests@archiver.kernel.org>; Thu, 26 Aug 2021 00:47:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0C903610A7
-	for <linux-fstests@archiver.kernel.org>; Thu, 26 Aug 2021 00:17:20 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C0ABD6102A
+	for <linux-fstests@archiver.kernel.org>; Thu, 26 Aug 2021 00:47:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234599AbhHZASF (ORCPT
+        id S234396AbhHZAsk (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 25 Aug 2021 20:18:05 -0400
-Received: from mail.kernel.org ([198.145.29.99]:50230 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S234533AbhHZASF (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 25 Aug 2021 20:18:05 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id DDDCF60F39;
-        Thu, 26 Aug 2021 00:17:18 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1629937039;
-        bh=mRHUv067yaxvJdOBOHp7ogrZ2Kzhp97bDU0Ds17bUw8=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=iDCnvhVXbIvi+OyDA1CwFBqetTqjBIimxZE1sygO2490WNrxdthyiLnnJyS0njoY8
-         Gb4WYXT2BzK2sd0RHtOwrRAH7bnQWSYgukbmlIJK9u7jKkQfK8Yjq/2boixOf0/3gx
-         QyIdu7irmrMD1sCXhQoL591wGD17x1W5FOEo7j0Cz9r3yGA6RszR8J/zUKay18M09x
-         PBrGuszFbDJrs+Hnj6oXNPL3whKIkAh6BiMwp8BZaUsLuXrtEL+3v9+6+3ICKXBSoQ
-         pLy+dObwyf2MKDsuk3dN1FtPXmFT4R9Hl6nntVx+BvX0qPTWAV5EcGr22RF2tdd53N
-         8DVGSjEqrBp4A==
-Date:   Wed, 25 Aug 2021 17:17:18 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Murphy Zhou <xzhou@redhat.com>
-Cc:     fstests@vger.kernel.org, Donald Douwsma <ddouwsma@redhat.com>,
-        zlang@redhat.com, Eryu Guan <eguan@linux.alibaba.com>
-Subject: Re: [PATCH v5] tests/generic: check log recovery with readonly mount
-Message-ID: <20210826001718.GK12612@magnolia>
-References: <20210806014938.npfn2ykyirfrdlra@xzhoux.usersys.redhat.com>
- <20210806185545.GE3601425@magnolia>
- <20210823070541.mn2y4pn4256dwnhm@xzhoux.usersys.redhat.com>
- <20210823174316.GE12612@magnolia>
- <20210824050436.3l5jodgjhwt7wqzl@xzhoux.usersys.redhat.com>
- <20210824062354.lcbmbz2r6fv5zowo@fedora>
- <3628adee-a6f1-6621-2988-786334fb6284@redhat.com>
- <a5d58dab-5f4b-884f-d29e-e531e536fc24@redhat.com>
- <20210825032630.gezd2jvkd4oczzsx@xzhoux.usersys.redhat.com>
+        Wed, 25 Aug 2021 20:48:40 -0400
+Received: from mail106.syd.optusnet.com.au ([211.29.132.42]:38485 "EHLO
+        mail106.syd.optusnet.com.au" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S232139AbhHZAsk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 25 Aug 2021 20:48:40 -0400
+Received: from dread.disaster.area (pa49-195-182-146.pa.nsw.optusnet.com.au [49.195.182.146])
+        by mail106.syd.optusnet.com.au (Postfix) with ESMTPS id B7E1F80BC68;
+        Thu, 26 Aug 2021 10:47:51 +1000 (AEST)
+Received: from dave by dread.disaster.area with local (Exim 4.92.3)
+        (envelope-from <david@fromorbit.com>)
+        id 1mJ3YZ-004z1w-5r; Thu, 26 Aug 2021 10:47:47 +1000
+Date:   Thu, 26 Aug 2021 10:47:47 +1000
+From:   Dave Chinner <david@fromorbit.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     linux-xfs@vger.kernel.org, fstests <fstests@vger.kernel.org>
+Subject: Re: [RFC PATCH] xfs: test DONTCACHE behavior with the inode cache
+Message-ID: <20210826004747.GF2566745@dread.disaster.area>
+References: <20210824023208.392670-1-david@fromorbit.com>
+ <20210825230703.GH12640@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210825032630.gezd2jvkd4oczzsx@xzhoux.usersys.redhat.com>
+In-Reply-To: <20210825230703.GH12640@magnolia>
+X-Optus-CM-Score: 0
+X-Optus-CM-Analysis: v=2.3 cv=F8MpiZpN c=1 sm=1 tr=0
+        a=QpfB3wCSrn/dqEBSktpwZQ==:117 a=QpfB3wCSrn/dqEBSktpwZQ==:17
+        a=kj9zAlcOel0A:10 a=MhDmnRu9jo8A:10 a=VwQbUJbxAAAA:8 a=7-415B0cAAAA:8
+        a=Xd9sp4hcKj-9Yvhc1GYA:9 a=CjuIK1q_8ugA:10 a=AjGcO6oz07-iQ99wixmX:22
+        a=biEYGPWJfzWAr4FL6Ov7:22
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Aug 25, 2021 at 11:26:30AM +0800, Murphy Zhou wrote:
-> And followed by a rw mount. After log recovery by these 2 mounts, the
-> filesystem should be in a consistent state.
+On Wed, Aug 25, 2021 at 04:07:03PM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
 > 
-> Suggested-by:  Donald Douwsma <ddouwsma@redhat.com>
-> Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-> Signed-off-by: Murphy Zhou <xzhou@redhat.com>
+> Basic testing that DONTCACHE affects the XFS inode cache in the manner
+> that we expect.  The only way we can do that (for XFS, anyway) is to
+> play around with the BULKSTAT ioctl.
+> 
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
 > ---
+>  tests/xfs/780     |  293 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/780.out |    7 +
+>  2 files changed, 300 insertions(+)
+>  create mode 100755 tests/xfs/780
+>  create mode 100644 tests/xfs/780.out
 > 
-> Thanks for reviewing! It seems my last several replies from gmail got
-> rejected by the list.
-> 
-> v2:
->    Add explanation of the issue
->    add xfs_force_bdev data $SCRATCH_MNT
->    use DF_PROG
->    Re numbered this test
-> v3:
->    Add _require_scratch_shutdown
->    Use _get_available_space
->    Explain why does not use _scratch_mount
-> v4:
->    Add to recoveryloop group
->    Move to generic as there is no xfs specific operations
->    Remove all operations after 2 cycle mounts, let the fsck in fstests to check the filesystem consistency
->    Use _scratch_shutdown, MOUNT_PROG
->    Remove unnecessary comments
-> v5:
->    Make _xfs_force_bdev xfs only
->    Use _scratch_mount, it's still reproducible
-
-Ok, seems fine now.
-
---D
-
-> 
-> 
->  tests/generic/999     | 42 ++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/999.out |  2 ++
->  2 files changed, 44 insertions(+)
->  create mode 100755 tests/generic/999
->  create mode 100644 tests/generic/999.out
-> 
-> diff --git a/tests/generic/999 b/tests/generic/999
+> diff --git a/tests/xfs/780 b/tests/xfs/780
 > new file mode 100755
-> index 00000000..60e0ce59
+> index 00000000..9bf1f482
 > --- /dev/null
-> +++ b/tests/generic/999
-> @@ -0,0 +1,42 @@
+> +++ b/tests/xfs/780
+> @@ -0,0 +1,293 @@
 > +#! /bin/bash
 > +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2021 RedHat All Rights Reserved.
+> +# Copyright (c) 2021 Oracle.  All Rights Reserved.
 > +#
-> +# FS QA Test 999
+> +# FS QA Test 780
 > +#
-> +# Testcase for kernel commit:
-> +#   50d25484bebe xfs: sync lazy sb accounting on quiesce of read-only mounts
+> +# Functional testing for the I_DONTCACHE inode flag, as set by the BULKSTAT
+> +# ioctl.  This flag neuters the inode cache's tendency to try to hang on to
+> +# incore inodes for a while after the last program closes the file, which
+> +# is helpful for filesystem scanners to avoid trashing the inode cache.
 > +#
-> +# After shutdown and readonly mount, a following read-write mount would
-> +# get wrong number of available blocks. This is caused by unmounting the log
-> +# on a readonly filesystem doesn't log the sb counters.
+> +# However, the inode cache doesn't always honor the DONTCACHE behavior -- the
+> +# only time it really applies is to cache misses from a bulkstat scan.  If
+> +# any other threads accessed the inode before or immediately after the scan,
+> +# the DONTCACHE flag is ignored.  This includes other scans.
+> +#
+> +# Regrettably, there is no way to poke /only/ XFS inode reclamation directly,
+> +# so we're stuck with setting xfssyncd_centisecs to a low value and watching
+> +# the slab counters.
 > +#
 > +. ./common/preamble
-> +_begin_fstest auto quick recoveryloop shutdown
+> +_begin_fstest auto ioctl
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -r -f $tmp.*
+> +	test -n "$junkdir" && rm -r -f "$junkdir"
+> +	test -n "$old_centisecs" && echo "$old_centisecs" > "$xfs_centisecs_file"
+> +}
+> +
+> +# Import common functions.
+> +# . ./common/filter
 > +
 > +# real QA test starts here
 > +
-> +_require_scratch
-> +_require_scratch_shutdown
-> +_scratch_mkfs > $seqres.full 2>&1
+> +# Modify as appropriate.
+> +_supported_fs generic
+> +_require_test
 > +
-> +_scratch_mount
-> +[ "$FSTYP" == "xfs" ] && _xfs_force_bdev data $SCRATCH_MNT
+> +# Either of these need to be available to monitor slab usage
+> +xfs_ino_objcount_file=/sys/kernel/slab/xfs_inode/objects
+> +slabinfo_file=/proc/slabinfo
+> +if [ ! -r "$xfs_ino_objcount_file" ] && [ ! -r "$slabinfo_file" ]; then
+> +	_notrun "Cannot find xfs_inode slab count?"
+> +fi
+
+WE should use the either /proc/fs/xfs/stat or
+/sys/fs/xfs/<dev>/stats to get this information.
+
+$ awk '/vnodes/ { print $2}' /proc/fs/xfs/stat
+245626
+$ awk '/vnodes/ { print $2}' /sys/fs/xfs/dm-0/stats/stats
+245648
+
+> +# Background reclamation of disused xfs inodes is scheduled for $xfssyncd
+> +# centiseconds after the first inode is tagged for reclamation.  It's not great
+
+Actually, the background inode reclaim period $((xfssyncd / 6)),
+which means it is 5 seconds by default.
+
+> +# to encode this implementation detail in a test like this, but there isn't
+> +# any means to trigger *only* inode cache reclaim -- actual memory pressure
+> +# can trigger the VFS to drop non-DONTCACHE inodes, which is not what we want.
+> +xfs_centisecs_file=/proc/sys/fs/xfs/xfssyncd_centisecs
+> +test -w "$xfs_centisecs_file" || _notrun "Cannot find xfssyncd_centisecs?"
 > +
-> +echo Testing > $SCRATCH_MNT/testfile
+> +# Set the syncd knob to the minimum value 100cs (aka 1s) 
+> +old_centisecs="$(cat "$xfs_centisecs_file")"
+> +echo 100 > "$xfs_centisecs_file" || _notrun "Cannot adjust xfssyncd_centisecs?"
+> +delay_centisecs="$(cat "$xfs_centisecs_file")"
 > +
-> +# -f is required to reproduce the original issue
-> +_scratch_shutdown -f
+> +# Sleep one second more than the xfssyncd delay to give background inode
+> +# reclaim enough time to run.
+> +sleep_seconds=$(( ( (99 + delay_centisecs) / 100) + 1))
+
+I hate centiseconds.
+
 > +
-> +_scratch_cycle_mount ro
-> +_scratch_cycle_mount
+> +count_xfs_inode_objs() {
+> +	if [ -r "$xfs_ino_objcount_file" ]; then
+> +		cat "$xfs_ino_objcount_file" | cut -d ' ' -f 1
+> +	elif [ -r "$slabinfo_file" ]; then
+> +		grep -w '^xfs_inode' "$slabinfo_file" | awk '{print $2}'
+> +	else
+> +		echo "ERROR"
+> +	fi
+> +}
 > +
-> +# These two mounts should have the log fully recovered. Exit here and let the
-> +# fsck operation of xfstests to check the consistence of the tested filesystem.
-> +# On the buggy kernel, this testcase reports filesystem is inconsistent.
-> +# On the fixed kernel, testcase pass.
+> +junkdir=$TEST_DIR/$seq.junk
+> +nr_cpus=$(getconf _NPROCESSORS_ONLN)
+
+This would probably be much easier using the scratch device and
+/sys/fs/xfs/<SCRATCH_DEV>/stats/stats, because then the baseline is
+effectively zero...
+
+> +# Sample the baseline count of cached inodes after a fresh remount.
+> +_test_cycle_mount
+> +baseline_count=$(count_xfs_inode_objs)
 > +
-> +# success, all done
-> +echo "Silence is golden"
-> +status=0
-> +exit
-> diff --git a/tests/generic/999.out b/tests/generic/999.out
-> new file mode 100644
-> index 00000000..3b276ca8
-> --- /dev/null
-> +++ b/tests/generic/999.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 999
-> +Silence is golden
-> -- 
-> 2.20.1
-> 
+> +# Create a junk directory with about a thousand files.
+> +nr_files=1024
+> +mkdir -p $junkdir
+> +for ((i = 0; i < nr_files; i++)); do
+> +	touch "$junkdir/$i"
+> +done
+> +new_files=$(find $junkdir | wc -l)
+> +echo "created $new_files files" >> $seqres.full
+> +test "$new_files" -gt "$nr_files" || \
+> +	echo "created $new_files files, expected $nr_files"
+> +
+> +# Sanity check: Make sure that all those new inodes are still in the cache.
+> +# We assume that memory limits are not so low that reclaim started for a bunch
+> +# of empty files.
+> +work_count=$(count_xfs_inode_objs)
+> +test "$work_count" -ge "$new_files" || \
+> +	echo "found $work_count cached inodes after creating $new_files files?"
+
+Might be better as:
+
+_within_tolerance "Cached inode after creating new files" $work_count $new_files 5
+
+> +
+> +# Round 1: Check the DONTCACHE behavior when it is invoked once per inode.
+> +# The inodes should be reclaimed if we wait long enough.
+> +echo "Round 1"
+> +
+> +# Sample again to see if we're still within the baseline.
+> +_test_cycle_mount
+> +fresh_count=$(count_xfs_inode_objs)
+> +
+> +# Run bulkstat to exercise DONTCACHE behavior, and sample again.
+> +$here/src/bstat -q $junkdir
+> +post_count=$(count_xfs_inode_objs)
+
+Can we use xfs_io -c "bulkstat" here?
+
+I'd like to get rid of $here/src/bstat now that we have bulkstat
+functionality in xfs_io....
+
+> +
+> +# Let background reclaim run
+> +sleep $sleep_seconds
+> +end_count=$(count_xfs_inode_objs)
+> +
+> +# Even with our greatly reduced syncd value, the inodes should still be in
+> +# memory immediately after the second bulkstat concludes.
+> +test "$post_count" -ge "$new_files" || \
+> +	echo "found $post_count cached inodes after bulkstat $new_files files?"
+> +
+> +# After we've let memory reclaim run, the inodes should no longer be cached
+> +# in memory.
+> +test "$end_count" -le "$new_files" || \
+> +	echo "found $end_count cached inodes after letting $new_files DONTCACHE files expire?"
+> +
+> +# Dump full results for debugging
+> +cat >> $seqres.full << ENDL
+> +round1 baseline: $baseline_count
+> +work: $work_count
+> +fresh: $fresh_count
+> +post: $post_count
+> +end: $end_count
+> +ENDL
+
+Wrap this in a function to reduce verbosity?
+
+debug_output()
+{
+	cat >> $seqres.full << ENDL
+round $1 baseline: $2
+work: $3
+fresh: $4
+post: $5
+end: $6
+ENDL
+}
+
+debug_output 1 $baseline_count $work_count $fresh_count $post_count $end_count
+
+> +
+> +# Round 2: Check the DONTCACHE behavior when it is invoked multiple times per
+> +# inode in rapid succession.  The inodes should remain in memory even after
+> +# reclaim because the cache gets wise to repeated scans.
+> +echo "Round 2"
+> +
+> +# Sample again to see if we're still within the baseline.
+> +_test_cycle_mount
+> +fresh_count=$(count_xfs_inode_objs)
+> +
+> +# Run bulkstat twice in rapid succession to exercise DONTCACHE behavior.
+> +# The first bulkstat run will bring the inodes into memory (marked DONTCACHE).
+> +# The second bulkstat causes cache hits before the inodes can reclaimed, which
+> +# means that they should stay in memory.  Sample again afterwards.
+> +$here/src/bstat -q $junkdir
+> +$here/src/bstat -q $junkdir
+> +post_count=$(count_xfs_inode_objs)
+> +
+> +# Let background reclaim run
+> +sleep $sleep_seconds
+> +end_count=$(count_xfs_inode_objs)
+> +
+> +# Even with our greatly reduced syncd value, the inodes should still be in
+> +# memory immediately after the second bulkstat concludes.
+> +test "$post_count" -ge "$new_files" || \
+> +	echo "found $post_count cached inodes after bulkstat $new_files files?"
+> +
+> +# After we've let memory reclaim run and cache hits happen, the inodes should
+> +# still be cached in memory.
+> +test "$end_count" -ge "$new_files" || \
+> +	echo "found $end_count cached inodes after letting $new_files DONTCACHE files expire?"
+> +
+> +# Dump full results for debugging
+> +cat >> $seqres.full << ENDL
+> +round2 baseline: $baseline_count
+> +work: $work_count
+> +fresh: $fresh_count
+> +post: $post_count
+> +end: $end_count
+> +ENDL
+
+I'm struggling to see what is being tested amongst all the comments.
+Can you chop down the comments to a single "round X" comment per
+test?
+
+[...]
+
+> +# Even with our greatly reduced syncd value, the inodes should still be in
+> +# memory immediately after the second bulkstat concludes.
+> +test "$post_count" -ge "$new_files" || \
+> +	echo "found $post_count cached inodes after bulkstat $new_files files?"
+> +
+> +# After we've let memory reclaim run, the inodes should stll be cached in
+> +# memory because we opened everything.
+> +test "$end_count" -ge "$new_files" || \
+> +	echo "found $end_count cached inodes after letting $new_files DONTCACHE files expire?"
+> +
+> +# Dump full results for debugging
+> +cat >> $seqres.full << ENDL
+> +round5 baseline: $baseline_count
+> +work: $work_count
+> +fresh: $fresh_count
+> +post: $post_count
+> +end: $end_count
+> +ENDL
+> +
+> +echo Silence is golden
+
+There is output on success, so no need for this.
+
+But overall it looks like you've captured the behaviour that should
+be occurring with bulkstat and DONTCACHE.
+
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
