@@ -2,157 +2,276 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C8081C432BE
-	for <linux-fstests@archiver.kernel.org>; Thu, 26 Aug 2021 05:34:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EBCEFC432BE
+	for <linux-fstests@archiver.kernel.org>; Thu, 26 Aug 2021 06:38:43 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A5AB8610C8
-	for <linux-fstests@archiver.kernel.org>; Thu, 26 Aug 2021 05:34:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CC7FF610CB
+	for <linux-fstests@archiver.kernel.org>; Thu, 26 Aug 2021 06:38:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232209AbhHZFfZ (ORCPT
+        id S238228AbhHZGj3 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 26 Aug 2021 01:35:25 -0400
-Received: from smtp-out1.suse.de ([195.135.220.28]:52454 "EHLO
-        smtp-out1.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229760AbhHZFfZ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 26 Aug 2021 01:35:25 -0400
-Received: from imap1.suse-dmz.suse.de (imap1.suse-dmz.suse.de [192.168.254.73])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by smtp-out1.suse.de (Postfix) with ESMTPS id 7E93222267;
-        Thu, 26 Aug 2021 05:34:36 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-        t=1629956076; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-        bh=Zh5zTbYrACt4As5TBRGxFZInmHbq6wKinDyVRpBAOg0=;
-        b=A63dc9yqkDzy13MfPOrrshk00vMLKllQ9eHZ6ooFeZ6xUrbXKHJ36XhMjb7E/wVXS6m+TC
-        V6X8zA2vsjdigfEW5L22RPJkVd6dzMv7+9fWzzHjWDO0gkhSCgtqFbPxR9gcpoYGOtHiuz
-        09tWyUIajCjWXSbwYFDyH1gLFBLslDo=
-Received: from imap1.suse-dmz.suse.de (imap1.suse-dmz.suse.de [192.168.254.73])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap1.suse-dmz.suse.de (Postfix) with ESMTPS id 7487E13895;
-        Thu, 26 Aug 2021 05:34:35 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap1.suse-dmz.suse.de with ESMTPSA
-        id 2KTWDOsnJ2EJZwAAGKfGzw
-        (envelope-from <wqu@suse.com>); Thu, 26 Aug 2021 05:34:35 +0000
-From:   Qu Wenruo <wqu@suse.com>
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org
-Subject: [PATCH v2] fstests: btrfs/246: add test case to make sure btrfs can create compressed inline extent
-Date:   Thu, 26 Aug 2021 13:34:32 +0800
-Message-Id: <20210826053432.13146-1-wqu@suse.com>
-X-Mailer: git-send-email 2.32.0
+        Thu, 26 Aug 2021 02:39:29 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:38862 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S234415AbhHZGj3 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 26 Aug 2021 02:39:29 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1629959921;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=fQcKVI8/nx8RhE0xORmtL+S1CTKbygCGyFWc8y3+jfs=;
+        b=XIFddvJy5wbm5awMblwmSqU4Ut+jS5PYZE4WDwfYfCjY8Ctef45qsxI6pCBaFUyl4YaI0c
+        wJXGettM6BXI3g9Ez97zqeJl0Z/xPDd6isoPyX2sM9q8Xd+SSrIJ3w/qy6plCOkWXu9RMi
+        FaV3LW1YRXqHvs2+0TJ2pGTVOihN0NY=
+Received: from mail-pg1-f198.google.com (mail-pg1-f198.google.com
+ [209.85.215.198]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-193-7N7nLIEWM8-PvmM1b3BXgA-1; Thu, 26 Aug 2021 02:38:39 -0400
+X-MC-Unique: 7N7nLIEWM8-PvmM1b3BXgA-1
+Received: by mail-pg1-f198.google.com with SMTP id y9-20020a655b09000000b0025259fdb7e7so971061pgq.6
+        for <fstests@vger.kernel.org>; Wed, 25 Aug 2021 23:38:39 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id
+         :mail-followup-to:references:mime-version:content-disposition
+         :in-reply-to;
+        bh=fQcKVI8/nx8RhE0xORmtL+S1CTKbygCGyFWc8y3+jfs=;
+        b=pFIkIZb2mofZd5YaQI7ztAJHNiJAG7Ldl4cTEK1LHIoPuGxkgQJltlVZsAz6TF3AlH
+         OnUkyM6fHI9N8GFM1+CJmtNgJn3rttlt54PoIvsM8d5M9zmc03evOYpARkrrF2f0g8Dq
+         Xla0S/trc2a/f50KODPXJskjRO7vYgt6vFGexiZIY6Nv6BJYQKotVdzFpdAD0ZCmRSHZ
+         nIOouj1zH3Ys1tORF+lhzIdLIUECiQuCE6xa52ewsWGkOS3LzJI145hixx7Z5WWWkT1E
+         g3COiT6cLGL8hPNcnAahS1hATORHDpm3A3qamA6VnOhscmnwBkPXjsuOvn++Dts6Xz0P
+         s+TQ==
+X-Gm-Message-State: AOAM531ARr4B0+/oD5oA83eM9Nk3podqIHzXZwPqK3ORG5t/hVA3vJLY
+        aBVgLX3i/mbgV6H2KGqBY0XNlWdxkdUOTxmH8Yc5GeaKlNrenqDi22fw0ReEWtgtciTktzUoqsv
+        UXzkhkZ0s3TRIwRHRDg==
+X-Received: by 2002:a17:903:22d0:b0:137:630b:5d7e with SMTP id y16-20020a17090322d000b00137630b5d7emr2075921plg.51.1629959918593;
+        Wed, 25 Aug 2021 23:38:38 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJwMZtQPk3TBXOqBA4n4KWza13JPibAy7Zz2UaQ2m/ByqzDprsA8NT9CI+wK2lVSIaVY2fkSNA==
+X-Received: by 2002:a17:903:22d0:b0:137:630b:5d7e with SMTP id y16-20020a17090322d000b00137630b5d7emr2075891plg.51.1629959918120;
+        Wed, 25 Aug 2021 23:38:38 -0700 (PDT)
+Received: from fedora ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id y23sm1010250pfe.129.2021.08.25.23.38.36
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 25 Aug 2021 23:38:37 -0700 (PDT)
+Date:   Thu, 26 Aug 2021 14:59:28 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH v3] tests/xfs: check available blocks after log recovery
+ on ro mount
+Message-ID: <20210826065928.ir5gwhfvrucgy64l@fedora>
+Mail-Followup-To: "Darrick J. Wong" <djwong@kernel.org>,
+        fstests@vger.kernel.org
+References: <20210806014938.npfn2ykyirfrdlra@xzhoux.usersys.redhat.com>
+ <20210806185545.GE3601425@magnolia>
+ <20210823070541.mn2y4pn4256dwnhm@xzhoux.usersys.redhat.com>
+ <20210823174316.GE12612@magnolia>
+ <20210824050436.3l5jodgjhwt7wqzl@xzhoux.usersys.redhat.com>
+ <20210824151428.GG12612@magnolia>
+ <20210824165341.lvo5lwgosgh4n4ir@fedora>
+ <20210825234337.GI12612@magnolia>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210825234337.GI12612@magnolia>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Btrfs has the ability to inline small file extents into its metadata,
-and such inlined extents can be further compressed if needed.
+On Wed, Aug 25, 2021 at 04:43:37PM -0700, Darrick J. Wong wrote:
+> On Wed, Aug 25, 2021 at 12:53:41AM +0800, Zorro Lang wrote:
+> > On Tue, Aug 24, 2021 at 08:14:28AM -0700, Darrick J. Wong wrote:
+> > > On Tue, Aug 24, 2021 at 01:04:36PM +0800, Murphy Zhou wrote:
+> > > > And followed by a rw mount.
+> > > > 
+> > > > Suggested-by:  Donald Douwsma <ddouwsma@redhat.com>
+> > > > Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+> > > > Signed-off-by: Murphy Zhou <xzhou@redhat.com>
+> > > > ---
+> > > > 
+> > > > Thanks Darrick very much for reviewing!
+> > > > 
+> > > > v2:
+> > > >    Add explaination of the issue
+> > > >    add xfs_force_bdev data $SCRATCH_MNT
+> > > >    use DF_PROG
+> > > >    Re numbered this test
+> > > > v3:
+> > > >    Add _require_scratch_shutdown
+> > > >    Use _get_available_space
+> > > >    Explain why does not use _scratch_mount
+> > > > 
+> > > >  tests/xfs/999     | 65 +++++++++++++++++++++++++++++++++++++++++++++++
+> > > >  tests/xfs/999.out |  2 ++
+> > > >  2 files changed, 67 insertions(+)
+> > > >  create mode 100755 tests/xfs/999
+> > > >  create mode 100644 tests/xfs/999.out
+> > > > 
+> > > > diff --git a/tests/xfs/999 b/tests/xfs/999
+> > > > new file mode 100755
+> > > > index 00000000..0ce9989b
+> > > > --- /dev/null
+> > > > +++ b/tests/xfs/999
+> > > > @@ -0,0 +1,65 @@
+> > > > +#! /bin/bash
+> > > > +# SPDX-License-Identifier: GPL-2.0
+> > > > +# Copyright (c) 2021 RedHat All Rights Reserved.
+> > > > +#
+> > > > +# FS QA Test 999
+> > > > +#
+> > > > +# Testcase for kernel commit:
+> > > > +#   50d25484bebe xfs: sync lazy sb accounting on quiesce of read-only mounts
+> > > > +#
+> > > > +# After shutdown and readonly mount, a following read-write mount would
+> > > > +# get wrong number of available blocks. This is caused by unmounting the log
+> > > > +# on a readonly filesystem doesn't log the sb counters.
+> > > > +#
+> > > > +. ./common/preamble
+> > > > +_begin_fstest shutdown auto quick
+> > > > +
+> > > > +# real QA test starts here
+> > > > +
+> > > > +_supported_fs xfs
+> > > > +_require_scratch
+> > > > +_require_scratch_shutdown
+> > > > +
+> > > > +_scratch_mkfs > $seqres.full 2>&1
+> > > > +# Don't use _scratch_mount because we need to mount without SELinux context
+> > > > +# to reproduce this issue. If we mount with SELinux context, this testcase
+> > > > +# is not reproducing the original issue.
+> > > > +mount $SCRATCH_DEV $SCRATCH_MNT
+> > > 
+> > > This mount will fail if the test runner configured an external log or a
+> > > realtime device, because you didn't specify those devices to the mount
+> > > call.  Either this needs _require_nonexternal or $(_scratch_options
+> > > mount) needs to be injected into the command line.
+> > 
+> > I think I know why Xiong said _scratch_mount can't reproduce this bug.
+> > 
+> > Before this patch v3, he tried to find the xfs corruption by using $DF_PROG $SCRATCH_MNT
+> > before&after xfs_repair.
+> > 
+> > If we use _scratch_mount, new files we create won't contains SELinux label
+> > in xfs inode attrfork. The corruption comes from sb_ifree (free inodes):
+> >   Phase 2 - using internal log
+> >         - zero log...
+> >         - scan filesystem freespace and inode maps...
+> >   sb_ifree 61, counted 60
+> 
+> <shrug> Faulty logging of the superblock can result in any of the
+> summary fields being wrong, so I don't see why this is a problem?
+> As long as at least one of the sb fields has to be corrected, we've
+> successfully found a broken kernel, right?
+> 
+> > But if we don't use _scratch_mount, the corruption comes from sb_fdblocks(free blocks):
+> >   Phase 2 - using internal log
+> >         - zero log...
+> >         - scan filesystem freespace and inode maps...
+> >   sb_fdblocks 130086290, counted 131007896
+> > 
+> > So if he use _scratch_mount, he can't get different available blocks by
+> > $DF_PROG $SCRATCH_MNT, before&after xfs_repair. Due to the corrupted thing
+> > is sb_ifree.
+> > 
+> > But I still can't understand one thing, even if do *not* use _scratch_mount, the attr(selinux label)
+> > is local(short) format[1], didn't take more blocks. What takes more blocks, cause later
+> > sb_fdblocks corruption?
+> 
+> /me has no idea either, other than to suggest
+> 
+> SELINUX_MOUNT_OPTIONS= _scratch_mount
+> 
+> if you don't want the selinux labels to be applied?
 
-The new test case is for a regression caused by commit f2165627319f
-("btrfs: compression: don't try to compress if we don't have enough
-pages").
+Jusk asking, to make sure if you know why with/without SELINUX_MOUNT_OPTIONS
+cause this difference (just curious:)
+As the single _scratch_mount already can reproduce this bug now, I don't think
+we need give it more specific conditions to confuse this simple test :-D
 
-That commit prevents btrfs from creating compressed inline extents, even
-"-o compress,max_inline=2048" is specified, only uncompressed inline
-extents can be created.
+Thanks,
+Zorro
 
-The test case will make sure that the content of the small file is
-consistent between cycle mount, then use "btrfs inspect dump-tree" to
-verify the created extent is both inlined and compressed.
-
-Signed-off-by: Qu Wenruo <wqu@suse.com>
----
-Changelog:
-v2:
-- Also output the sha256sum to make sure the content is consistent
----
- tests/btrfs/246     | 53 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/246.out |  5 +++++
- 2 files changed, 58 insertions(+)
- create mode 100755 tests/btrfs/246
- create mode 100644 tests/btrfs/246.out
-
-diff --git a/tests/btrfs/246 b/tests/btrfs/246
-new file mode 100755
-index 00000000..e0d8016f
---- /dev/null
-+++ b/tests/btrfs/246
-@@ -0,0 +1,53 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2021 SUSE Linux Products GmbH.  All Rights Reserved.
-+#
-+# FS QA Test 246
-+#
-+# Make sure btrfs can create compressed inline extents
-+#
-+. ./common/preamble
-+_begin_fstest auto quick compress
-+
-+# Override the default cleanup function.
-+_cleanup()
-+{
-+	cd /
-+	rm -r -f $tmp.*
-+}
-+
-+# Import common functions.
-+. ./common/filter
-+# For __populate_find_inode()
-+. ./common/populate
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs btrfs
-+_require_scratch
-+
-+_scratch_mkfs > /dev/null
-+_scratch_mount -o compress,max_inline=2048
-+
-+# This should create compressed inline extent
-+$XFS_IO_PROG -f -c "pwrite 0 2048" $SCRATCH_MNT/foobar > /dev/null
-+ino=$(__populate_find_inode $SCRATCH_MNT/foobar)
-+echo "sha256sum before mount cycle"
-+sha256sum $SCRATCH_MNT/foobar | _filter_scratch
-+_scratch_cycle_mount
-+echo "sha256sum after mount cycle"
-+sha256sum $SCRATCH_MNT/foobar | _filter_scratch
-+_scratch_unmount
-+
-+$BTRFS_UTIL_PROG inspect dump-tree -t 5 $SCRATCH_DEV | \
-+	grep "($ino EXTENT_DATA 0" -A2 > $tmp.dump-tree
-+echo "dump tree result for ino $ino:" >> $seqres.full
-+cat $tmp.dump-tree >> $seqres.full
-+
-+grep -q "inline extent" $tmp.dump-tree || echo "no inline extent found"
-+grep -q "compression 1" $tmp.dump-tree || echo "no compressed extent found"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/246.out b/tests/btrfs/246.out
-new file mode 100644
-index 00000000..3908cc50
---- /dev/null
-+++ b/tests/btrfs/246.out
-@@ -0,0 +1,5 @@
-+QA output created by 246
-+sha256sum before mount cycle
-+0ca3bfdeda1ef5036bfa5dad078a9f15724e79cf296bd4388cf786bfaf4195d0  SCRATCH_MNT/foobar
-+sha256sum after mount cycle
-+0ca3bfdeda1ef5036bfa5dad078a9f15724e79cf296bd4388cf786bfaf4195d0  SCRATCH_MNT/foobar
--- 
-2.31.1
+> 
+> --D
+> 
+> > 
+> > Thanks,
+> > Zorro
+> > 
+> > [1]
+> > ...
+> > core.aformat = 1 (local)
+> > ...
+> > u3 = (empty)
+> > a.sfattr.hdr.totsize = 51
+> > a.sfattr.hdr.count = 1
+> > a.sfattr.list[0].namelen = 7
+> > a.sfattr.list[0].valuelen = 37
+> > a.sfattr.list[0].root = 0
+> > a.sfattr.list[0].secure = 1
+> > a.sfattr.list[0].name = "selinux"
+> > a.sfattr.list[0].value = "unconfined_u:object_r:unlabeled_t:s0\000"
+> > 
+> > 
+> > > 
+> > > --D
+> > > 
+> > > > +_xfs_force_bdev data $SCRATCH_MNT
+> > > > +
+> > > > +# Write test file
+> > > > +ls > $SCRATCH_MNT/testfile
+> > > > +$DF_PROG $SCRATCH_MNT >> $seqres.full 2>&1
+> > > > +
+> > > > +# Shutdown
+> > > > +$XFS_IO_PROG -x -c "shutdown -f" $SCRATCH_MNT
+> > > > +
+> > > > +# Mount ReadOnly
+> > > > +_scratch_unmount
+> > > > +_scratch_mount -oro
+> > > > +$DF_PROG $SCRATCH_MNT >> $seqres.full 2>&1
+> > > > +# Umount and mount rw
+> > > > +_scratch_unmount
+> > > > +_scratch_mount
+> > > > +
+> > > > +# Get fdblocks before repair
+> > > > +fdb1=$(_get_available_space $SCRATCH_MNT)
+> > > > +_scratch_unmount
+> > > > +
+> > > > +# Repair
+> > > > +_repair_scratch_fs >> $seqres.full 2>&1
+> > > > +
+> > > > +# Re-mount
+> > > > +_scratch_mount
+> > > > +
+> > > > +# Get fdblocks after repair
+> > > > +fdb2=$(_get_available_space $SCRATCH_MNT)
+> > > > +
+> > > > +echo fdb1 $fdb1 fdb2 $fdb2 >> $seqres.full 2>&1
+> > > > +
+> > > > +[ $fdb1 -ne $fdb2 ] && echo Wrong fdblocks: $fdb1 and $fdb2
+> > > > +
+> > > > +# success, all done
+> > > > +echo "Silence is golden"
+> > > > +status=0
+> > > > +exit
+> > > > diff --git a/tests/xfs/999.out b/tests/xfs/999.out
+> > > > new file mode 100644
+> > > > index 00000000..3b276ca8
+> > > > --- /dev/null
+> > > > +++ b/tests/xfs/999.out
+> > > > @@ -0,0 +1,2 @@
+> > > > +QA output created by 999
+> > > > +Silence is golden
+> > > > -- 
+> > > > 2.20.1
+> > > > 
+> > > 
+> > 
+> 
 
