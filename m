@@ -2,352 +2,320 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3B744C432BE
-	for <linux-fstests@archiver.kernel.org>; Fri, 27 Aug 2021 00:07:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 59B8DC432BE
+	for <linux-fstests@archiver.kernel.org>; Fri, 27 Aug 2021 15:06:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1697060F6F
-	for <linux-fstests@archiver.kernel.org>; Fri, 27 Aug 2021 00:07:14 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3483460EE7
+	for <linux-fstests@archiver.kernel.org>; Fri, 27 Aug 2021 15:06:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231509AbhH0AIB (ORCPT
+        id S233816AbhH0PG6 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 26 Aug 2021 20:08:01 -0400
-Received: from mail.kernel.org ([198.145.29.99]:46694 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S230522AbhH0AIA (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 26 Aug 2021 20:08:00 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 975AF60F4F;
-        Fri, 27 Aug 2021 00:07:12 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1630022832;
-        bh=TgbmkgW/aTXOklGZrpSX6ibSo+SFIuM4ZoCqE5O3318=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=maNVKTGlHIXmAwgF5lI74xJC2UgLpk30lvQG97iHVpDTtVetgxMRsAcvKJg7byxui
-         KnkcJSDaBI0sEyTX64mgNPeDynS27m27nm8kuUapa09UEhRdzZu9t1zzptm6QrqaMI
-         j2xJ6q6f1o7ZKnUt+Ta/e7fw2clZG4HXRiKFDS09/5esUmaPL2JvabFc3fumCAinxS
-         S7IspINSTYNE+WPkQ8EiEGtzJPt4xViULQQpp9ofbrmMrm05WwsnyX1vtrg2DOvPjV
-         mMj9MM2CqWAjjKZPSBsv+vxbFEwdgPHElEWn1OVaSHKyywgrJV406HbYuCzLlbT16f
-         Goa737FWVPcxw==
-Date:   Thu, 26 Aug 2021 17:07:12 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Dave Chinner <david@fromorbit.com>
-Cc:     linux-xfs@vger.kernel.org, fstests <fstests@vger.kernel.org>
-Subject: Re: [RFC PATCH] xfs: test DONTCACHE behavior with the inode cache
-Message-ID: <20210827000712.GO12640@magnolia>
-References: <20210824023208.392670-1-david@fromorbit.com>
- <20210825230703.GH12640@magnolia>
- <20210826004747.GF2566745@dread.disaster.area>
+        Fri, 27 Aug 2021 11:06:58 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:38363 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S233712AbhH0PG5 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 27 Aug 2021 11:06:57 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1630076768;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=Bunrdo8STbPTjRaYBQBuq1FCelM+OGpkGE3gSxh7m2I=;
+        b=AGaQVHJasKYqWBC0phwhnF5c4bGrNdvw9GC7TItaqfb776TD27sGGc5EDrCsffRbwL3n5x
+        fotVCW9pKNrGuK9xF2eTw285UVT+Gw9XtvKngj/fOvjmr2+fJwTP6aWAs8Lnq14+6xHRFL
+        Fjpf+Y0ayuVH+ox2SPwpI1d64xEgXgM=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-532-1ESyG4UwNrew4wToli_P4w-1; Fri, 27 Aug 2021 11:06:06 -0400
+X-MC-Unique: 1ESyG4UwNrew4wToli_P4w-1
+Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 8B376875108
+        for <fstests@vger.kernel.org>; Fri, 27 Aug 2021 15:06:05 +0000 (UTC)
+Received: from max.com (unknown [10.40.194.206])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id BBEA860BD9;
+        Fri, 27 Aug 2021 15:06:04 +0000 (UTC)
+From:   Andreas Gruenbacher <agruenba@redhat.com>
+To:     fstests@vger.kernel.org
+Cc:     Andreas Gruenbacher <agruenba@redhat.com>
+Subject: [PATCH] generic/646: Test page faults during read and write
+Date:   Fri, 27 Aug 2021 17:06:03 +0200
+Message-Id: <20210827150603.1724638-1-agruenba@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210826004747.GF2566745@dread.disaster.area>
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.11
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Aug 26, 2021 at 10:47:47AM +1000, Dave Chinner wrote:
-> On Wed, Aug 25, 2021 at 04:07:03PM -0700, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <djwong@kernel.org>
-> > 
-> > Basic testing that DONTCACHE affects the XFS inode cache in the manner
-> > that we expect.  The only way we can do that (for XFS, anyway) is to
-> > play around with the BULKSTAT ioctl.
-> > 
-> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > ---
-> >  tests/xfs/780     |  293 +++++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/xfs/780.out |    7 +
-> >  2 files changed, 300 insertions(+)
-> >  create mode 100755 tests/xfs/780
-> >  create mode 100644 tests/xfs/780.out
-> > 
-> > diff --git a/tests/xfs/780 b/tests/xfs/780
-> > new file mode 100755
-> > index 00000000..9bf1f482
-> > --- /dev/null
-> > +++ b/tests/xfs/780
-> > @@ -0,0 +1,293 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2021 Oracle.  All Rights Reserved.
-> > +#
-> > +# FS QA Test 780
-> > +#
-> > +# Functional testing for the I_DONTCACHE inode flag, as set by the BULKSTAT
-> > +# ioctl.  This flag neuters the inode cache's tendency to try to hang on to
-> > +# incore inodes for a while after the last program closes the file, which
-> > +# is helpful for filesystem scanners to avoid trashing the inode cache.
-> > +#
-> > +# However, the inode cache doesn't always honor the DONTCACHE behavior -- the
-> > +# only time it really applies is to cache misses from a bulkstat scan.  If
-> > +# any other threads accessed the inode before or immediately after the scan,
-> > +# the DONTCACHE flag is ignored.  This includes other scans.
-> > +#
-> > +# Regrettably, there is no way to poke /only/ XFS inode reclamation directly,
-> > +# so we're stuck with setting xfssyncd_centisecs to a low value and watching
-> > +# the slab counters.
-> > +#
-> > +. ./common/preamble
-> > +_begin_fstest auto ioctl
-> > +
-> > +_cleanup()
-> > +{
-> > +	cd /
-> > +	rm -r -f $tmp.*
-> > +	test -n "$junkdir" && rm -r -f "$junkdir"
-> > +	test -n "$old_centisecs" && echo "$old_centisecs" > "$xfs_centisecs_file"
-> > +}
-> > +
-> > +# Import common functions.
-> > +# . ./common/filter
-> > +
-> > +# real QA test starts here
-> > +
-> > +# Modify as appropriate.
-> > +_supported_fs generic
-> > +_require_test
-> > +
-> > +# Either of these need to be available to monitor slab usage
-> > +xfs_ino_objcount_file=/sys/kernel/slab/xfs_inode/objects
-> > +slabinfo_file=/proc/slabinfo
-> > +if [ ! -r "$xfs_ino_objcount_file" ] && [ ! -r "$slabinfo_file" ]; then
-> > +	_notrun "Cannot find xfs_inode slab count?"
-> > +fi
-> 
-> WE should use the either /proc/fs/xfs/stat or
-> /sys/fs/xfs/<dev>/stats to get this information.
-> 
-> $ awk '/vnodes/ { print $2}' /proc/fs/xfs/stat
-> 245626
-> $ awk '/vnodes/ { print $2}' /sys/fs/xfs/dm-0/stats/stats
-> 245648
+Here's an update of a test case I'm trying to get merged since May.
+Please have a look; I'm tired of dragging this along.
 
-Ok.  I'll grab from /sys/fs/xfs/$dev/stats/stats since it's more
-precise.
+Thanks,
+Andreas
 
-> > +# Background reclamation of disused xfs inodes is scheduled for $xfssyncd
-> > +# centiseconds after the first inode is tagged for reclamation.  It's not great
-> 
-> Actually, the background inode reclaim period $((xfssyncd / 6)),
-> which means it is 5 seconds by default.
+--
 
-Will update the code, though the interval is so small it makes little
-difference. :)
+Some filesystems have problems when the buffer passed to read or write
+is memory-mapped to the file being read from or written to, and the
+buffer needs to be faulted in during the read or write.  That's not
+common, but filesystems are still required to cope with it, and if they
+fail this test, then they will also fail more complex scenarios that
+involve multiple files.
 
-> > +# to encode this implementation detail in a test like this, but there isn't
-> > +# any means to trigger *only* inode cache reclaim -- actual memory pressure
-> > +# can trigger the VFS to drop non-DONTCACHE inodes, which is not what we want.
-> > +xfs_centisecs_file=/proc/sys/fs/xfs/xfssyncd_centisecs
-> > +test -w "$xfs_centisecs_file" || _notrun "Cannot find xfssyncd_centisecs?"
-> > +
-> > +# Set the syncd knob to the minimum value 100cs (aka 1s) 
-> > +old_centisecs="$(cat "$xfs_centisecs_file")"
-> > +echo 100 > "$xfs_centisecs_file" || _notrun "Cannot adjust xfssyncd_centisecs?"
-> > +delay_centisecs="$(cat "$xfs_centisecs_file")"
-> > +
-> > +# Sleep one second more than the xfssyncd delay to give background inode
-> > +# reclaim enough time to run.
-> > +sleep_seconds=$(( ( (99 + delay_centisecs) / 100) + 1))
-> 
-> I hate centiseconds.
+Signed-off-by: Andreas Gruenbacher <agruenba@redhat.com>
+---
+ src/Makefile          |   2 +-
+ src/mmap-rw-fault.c   | 176 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/646     |  27 +++++++
+ tests/generic/646.out |   2 +
+ 4 files changed, 206 insertions(+), 1 deletion(-)
+ create mode 100644 src/mmap-rw-fault.c
+ create mode 100755 tests/generic/646
+ create mode 100644 tests/generic/646.out
 
-Me too.
+diff --git a/src/Makefile b/src/Makefile
+index 884bd86a..25ab061d 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -18,7 +18,7 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
+ 	t_ext4_dax_journal_corruption t_ext4_dax_inline_corruption \
+ 	t_ofd_locks t_mmap_collision mmap-write-concurrent \
+ 	t_get_file_time t_create_short_dirs t_create_long_dirs t_enospc \
+-	t_mmap_writev_overlap checkpoint_journal
++	t_mmap_writev_overlap checkpoint_journal mmap-rw-fault
+ 
+ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+ 	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
+diff --git a/src/mmap-rw-fault.c b/src/mmap-rw-fault.c
+new file mode 100644
+index 00000000..244d2cb6
+--- /dev/null
++++ b/src/mmap-rw-fault.c
+@@ -0,0 +1,176 @@
++/* Trigger mmap page faults in the same file during pread and pwrite. */
++
++#ifndef _GNU_SOURCE
++#define _GNU_SOURCE /* to get definition of O_DIRECT flag. */
++#endif
++
++#include <sys/types.h>
++#include <sys/stat.h>
++#include <sys/mman.h>
++#include <fcntl.h>
++#include <unistd.h>
++#include <stdlib.h>
++#include <stdio.h>
++#include <string.h>
++#include <errno.h>
++#include <err.h>
++
++char *filename;
++unsigned int page_size;
++void *page;
++char *addr;
++int fd;
++ssize_t ret;
++
++/*
++ * Leave a hole at the beginning of the test file and initialize a block of
++ * @page_size bytes at offset @page_size to @c.  Then, reopen the file and
++ * mmap the first two pages.
++ */
++void init(char c, int flags)
++{
++	fd = open(filename, O_CREAT | O_TRUNC | O_WRONLY | O_DIRECT, 0666);
++	if (fd == -1)
++		goto fail;
++	memset(page, c, page_size);
++	ret = pwrite(fd, page, page_size, page_size);
++	if (ret != page_size)
++		goto fail;
++	if (close(fd))
++		goto fail;
++
++	fd = open(filename, flags);
++	if (fd == -1)
++		goto fail;
++	addr = mmap(NULL, 2 * page_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
++	if (addr == MAP_FAILED)
++		err(1, NULL);
++	return;
++
++fail:
++	err(1, "%s", filename);
++}
++
++void done(void)
++{
++	if (fsync(fd))
++		goto fail;
++	if (close(fd))
++		goto fail;
++	return;
++
++fail:
++	err(1, "%s", filename);
++}
++
++static ssize_t do_read(int fd, void *buf, size_t count, off_t offset)
++{
++	ssize_t count2 = 0, ret;
++
++	do {
++		ret = pread(fd, buf, count, offset);
++		if (ret == -1) {
++			if (errno == EINTR)
++				continue;
++			break;
++		}
++		if (ret == 0)
++			break;
++		count2 += ret;
++		buf += ret;
++		count -= ret;
++	} while (count);
++	return count2;
++}
++
++static ssize_t do_write(int fd, const void *buf, size_t count, off_t offset)
++{
++	ssize_t count2 = 0, ret;
++
++	do {
++		ret = pwrite(fd, buf, count, offset);
++		if (ret == -1) {
++			if (errno == EINTR)
++				continue;
++			break;
++		}
++		if (ret == 0)
++			break;
++		count2 += ret;
++		buf += ret;
++		count -= ret;
++	} while (count);
++	return count2;
++}
++
++int main(int argc, char *argv[])
++{
++	if (argc != 2)
++		errx(1, "no test filename argument given");
++	filename = argv[1];
++
++	page_size = ret = sysconf(_SC_PAGE_SIZE);
++	if (ret == -1)
++		err(1, NULL);
++
++	ret = posix_memalign(&page, page_size, page_size);
++	if (ret) {
++		errno = ENOMEM;
++		err(1, NULL);
++	}
++
++	/*
++	 * Make sure page faults during pread are handled correctly.
++	 */
++	init('a', O_RDWR);
++	ret = do_read(fd, addr, page_size, page_size);
++	if (ret != page_size)
++		err(1, "pread %s: %ld != %u", filename, ret, page_size);
++	if (memcmp(addr, page, page_size))
++		errx(1, "pread is broken");
++	done();
++
++	init('b', O_RDWR | O_DIRECT);
++	ret = do_read(fd, addr, page_size, page_size);
++	if (ret != page_size)
++		err(1, "pread %s (O_DIRECT): %ld != %u", filename, ret, page_size);
++	if (memcmp(addr, page, page_size))
++		errx(1, "pread (D_DIRECT) is broken");
++	done();
++
++	/*
++	 * Make sure page faults during pwrite are handled correctly.
++	 */
++	init('c', O_RDWR);
++	ret = do_write(fd, addr + page_size, page_size, 0);
++	if (ret != page_size)
++		err(1, "pwrite %s: %ld != %u", filename, ret, page_size);
++	if (memcmp(addr, page, page_size))
++		errx(1, "pwrite is broken");
++	done();
++
++	init('d', O_RDWR | O_DIRECT);
++	ret = do_write(fd, addr + page_size, page_size, 0);
++	if (ret != page_size)
++		err(1, "pwrite %s (O_DIRECT): %ld != %u", filename, ret, page_size);
++	if (memcmp(addr, page, page_size))
++		errx(1, "pwrite (O_DIRECT) is broken");
++	done();
++
++	/*
++	 * Reading from a hole takes a different code path in the kernel.
++	 */
++	init('e', O_RDWR | O_DIRECT);
++	ret = do_read(fd, addr, page_size, 0);
++	if (ret != page_size)
++		err(1, "pread %s (O_DIRECT) from hole: %ld != %u", filename, ret, page_size);
++	memset(page, 0, page_size);
++	if (memcmp(addr, page, page_size))
++		errx(1, "pread (D_DIRECT) from hole is broken");
++	done();
++
++	if (unlink(filename))
++		err(1, "unlink %s", filename);
++
++	return 0;
++}
+diff --git a/tests/generic/646 b/tests/generic/646
+new file mode 100755
+index 00000000..57d8c13d
+--- /dev/null
++++ b/tests/generic/646
+@@ -0,0 +1,27 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2021 Red Hat, Inc.  All Rights Reserved.
++#
++# FS QA Test 646
++#
++# Trigger mmap page faults in the same file during pread and pwrite
++#
++. ./common/preamble
++_begin_fstest auto quick
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++
++_supported_fs generic
++_require_test
++_require_test_program mmap-rw-fault
++
++echo "Silence is golden"
++
++$here/src/mmap-rw-fault $TEST_DIR/mmap-rw-fault.tmp
++
++status=$?
++exit
+diff --git a/tests/generic/646.out b/tests/generic/646.out
+new file mode 100644
+index 00000000..8357006e
+--- /dev/null
++++ b/tests/generic/646.out
+@@ -0,0 +1,2 @@
++QA output created by 646
++Silence is golden
+-- 
+2.26.3
 
-> > +
-> > +count_xfs_inode_objs() {
-> > +	if [ -r "$xfs_ino_objcount_file" ]; then
-> > +		cat "$xfs_ino_objcount_file" | cut -d ' ' -f 1
-> > +	elif [ -r "$slabinfo_file" ]; then
-> > +		grep -w '^xfs_inode' "$slabinfo_file" | awk '{print $2}'
-> > +	else
-> > +		echo "ERROR"
-> > +	fi
-> > +}
-> > +
-> > +junkdir=$TEST_DIR/$seq.junk
-> > +nr_cpus=$(getconf _NPROCESSORS_ONLN)
-> 
-> This would probably be much easier using the scratch device and
-> /sys/fs/xfs/<SCRATCH_DEV>/stats/stats, because then the baseline is
-> effectively zero...
-
-Yes.
-
-> > +# Sample the baseline count of cached inodes after a fresh remount.
-> > +_test_cycle_mount
-> > +baseline_count=$(count_xfs_inode_objs)
-> > +
-> > +# Create a junk directory with about a thousand files.
-> > +nr_files=1024
-> > +mkdir -p $junkdir
-> > +for ((i = 0; i < nr_files; i++)); do
-> > +	touch "$junkdir/$i"
-> > +done
-> > +new_files=$(find $junkdir | wc -l)
-> > +echo "created $new_files files" >> $seqres.full
-> > +test "$new_files" -gt "$nr_files" || \
-> > +	echo "created $new_files files, expected $nr_files"
-> > +
-> > +# Sanity check: Make sure that all those new inodes are still in the cache.
-> > +# We assume that memory limits are not so low that reclaim started for a bunch
-> > +# of empty files.
-> > +work_count=$(count_xfs_inode_objs)
-> > +test "$work_count" -ge "$new_files" || \
-> > +	echo "found $work_count cached inodes after creating $new_files files?"
-> 
-> Might be better as:
-> 
-> _within_tolerance "Cached inode after creating new files" $work_count $new_files 5
-
-Ooh that's better.  Will change.
-
-> > +
-> > +# Round 1: Check the DONTCACHE behavior when it is invoked once per inode.
-> > +# The inodes should be reclaimed if we wait long enough.
-> > +echo "Round 1"
-> > +
-> > +# Sample again to see if we're still within the baseline.
-> > +_test_cycle_mount
-> > +fresh_count=$(count_xfs_inode_objs)
-> > +
-> > +# Run bulkstat to exercise DONTCACHE behavior, and sample again.
-> > +$here/src/bstat -q $junkdir
-> > +post_count=$(count_xfs_inode_objs)
-> 
-> Can we use xfs_io -c "bulkstat" here?
-> 
-> I'd like to get rid of $here/src/bstat now that we have bulkstat
-> functionality in xfs_io....
-
-Changed.
-
-> > +
-> > +# Let background reclaim run
-> > +sleep $sleep_seconds
-> > +end_count=$(count_xfs_inode_objs)
-> > +
-> > +# Even with our greatly reduced syncd value, the inodes should still be in
-> > +# memory immediately after the second bulkstat concludes.
-> > +test "$post_count" -ge "$new_files" || \
-> > +	echo "found $post_count cached inodes after bulkstat $new_files files?"
-> > +
-> > +# After we've let memory reclaim run, the inodes should no longer be cached
-> > +# in memory.
-> > +test "$end_count" -le "$new_files" || \
-> > +	echo "found $end_count cached inodes after letting $new_files DONTCACHE files expire?"
-> > +
-> > +# Dump full results for debugging
-> > +cat >> $seqres.full << ENDL
-> > +round1 baseline: $baseline_count
-> > +work: $work_count
-> > +fresh: $fresh_count
-> > +post: $post_count
-> > +end: $end_count
-> > +ENDL
-> 
-> Wrap this in a function to reduce verbosity?
-> 
-> debug_output()
-> {
-> 	cat >> $seqres.full << ENDL
-> round $1 baseline: $2
-> work: $3
-> fresh: $4
-> post: $5
-> end: $6
-> ENDL
-> }
-> 
-> debug_output 1 $baseline_count $work_count $fresh_count $post_count $end_count
-
-Changed.
-
-> > +
-> > +# Round 2: Check the DONTCACHE behavior when it is invoked multiple times per
-> > +# inode in rapid succession.  The inodes should remain in memory even after
-> > +# reclaim because the cache gets wise to repeated scans.
-> > +echo "Round 2"
-> > +
-> > +# Sample again to see if we're still within the baseline.
-> > +_test_cycle_mount
-> > +fresh_count=$(count_xfs_inode_objs)
-> > +
-> > +# Run bulkstat twice in rapid succession to exercise DONTCACHE behavior.
-> > +# The first bulkstat run will bring the inodes into memory (marked DONTCACHE).
-> > +# The second bulkstat causes cache hits before the inodes can reclaimed, which
-> > +# means that they should stay in memory.  Sample again afterwards.
-> > +$here/src/bstat -q $junkdir
-> > +$here/src/bstat -q $junkdir
-> > +post_count=$(count_xfs_inode_objs)
-> > +
-> > +# Let background reclaim run
-> > +sleep $sleep_seconds
-> > +end_count=$(count_xfs_inode_objs)
-> > +
-> > +# Even with our greatly reduced syncd value, the inodes should still be in
-> > +# memory immediately after the second bulkstat concludes.
-> > +test "$post_count" -ge "$new_files" || \
-> > +	echo "found $post_count cached inodes after bulkstat $new_files files?"
-> > +
-> > +# After we've let memory reclaim run and cache hits happen, the inodes should
-> > +# still be cached in memory.
-> > +test "$end_count" -ge "$new_files" || \
-> > +	echo "found $end_count cached inodes after letting $new_files DONTCACHE files expire?"
-> > +
-> > +# Dump full results for debugging
-> > +cat >> $seqres.full << ENDL
-> > +round2 baseline: $baseline_count
-> > +work: $work_count
-> > +fresh: $fresh_count
-> > +post: $post_count
-> > +end: $end_count
-> > +ENDL
-> 
-> I'm struggling to see what is being tested amongst all the comments.
-> Can you chop down the comments to a single "round X" comment per
-> test?
-
-Yes.
-
-> [...]
-> 
-> > +# Even with our greatly reduced syncd value, the inodes should still be in
-> > +# memory immediately after the second bulkstat concludes.
-> > +test "$post_count" -ge "$new_files" || \
-> > +	echo "found $post_count cached inodes after bulkstat $new_files files?"
-> > +
-> > +# After we've let memory reclaim run, the inodes should stll be cached in
-> > +# memory because we opened everything.
-> > +test "$end_count" -ge "$new_files" || \
-> > +	echo "found $end_count cached inodes after letting $new_files DONTCACHE files expire?"
-> > +
-> > +# Dump full results for debugging
-> > +cat >> $seqres.full << ENDL
-> > +round5 baseline: $baseline_count
-> > +work: $work_count
-> > +fresh: $fresh_count
-> > +post: $post_count
-> > +end: $end_count
-> > +ENDL
-> > +
-> > +echo Silence is golden
-> 
-> There is output on success, so no need for this.
-> 
-> But overall it looks like you've captured the behaviour that should
-> be occurring with bulkstat and DONTCACHE.
-
-Yay!
-
---D
-
-> Cheers,
-> 
-> Dave.
-> -- 
-> Dave Chinner
-> david@fromorbit.com
