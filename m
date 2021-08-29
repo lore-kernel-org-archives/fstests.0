@@ -2,343 +2,191 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CED33C432BE
-	for <linux-fstests@archiver.kernel.org>; Fri, 27 Aug 2021 23:32:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4D94EC432BE
+	for <linux-fstests@archiver.kernel.org>; Sun, 29 Aug 2021 13:42:16 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AAE7B60FE6
-	for <linux-fstests@archiver.kernel.org>; Fri, 27 Aug 2021 23:32:41 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2747F60C41
+	for <linux-fstests@archiver.kernel.org>; Sun, 29 Aug 2021 13:42:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232465AbhH0Xda (ORCPT
+        id S235408AbhH2NnH (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 27 Aug 2021 19:33:30 -0400
-Received: from mail.kernel.org ([198.145.29.99]:46806 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S232405AbhH0Xda (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 27 Aug 2021 19:33:30 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 9445460560;
-        Fri, 27 Aug 2021 23:32:40 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1630107160;
-        bh=F0+VF2IKkEo+5c2dEPL2T/l636n2p2Kfn38J7r08+zE=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=W2dLTi9vdRqGkbh3cWOFoQnZwx+Rtw295RjWmZT1IGB4GgqlaUAoapo9p1UW9AMK9
-         rRcE+QeN7+Ij1TJNdGd94aEBrUZ/yoFnHzgtcZFoNS0OmSwhwgMfXzrrqYZz1FprZS
-         ZAIoKLKR74rgivXwA0tzKjVXlaPJ9Scoz9MFqXik2+TA4HSOK6xjzz2gwilI5QzJOj
-         LPghAxOxrb6IxxdAyfGDlTd8neDLhBtTKlotsdBrXIcnlj41KrbZLXma4N4wczr13G
-         elDnWfiBzVKMP7gytS+Xe8nvpCwh2un6Z7gOh1ewetzp/cAwGv0gCxjSwsdLadHB4p
-         VlHkq1dinSlaQ==
-Date:   Fri, 27 Aug 2021 16:32:40 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Andreas Gruenbacher <agruenba@redhat.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH v2] generic/646: Test page faults during read and write
-Message-ID: <20210827233240.GM12612@magnolia>
-References: <20210827210209.1730181-1-agruenba@redhat.com>
+        Sun, 29 Aug 2021 09:43:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53638 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229601AbhH2NnF (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 29 Aug 2021 09:43:05 -0400
+Received: from mail-wm1-x334.google.com (mail-wm1-x334.google.com [IPv6:2a00:1450:4864:20::334])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4CEB1C061575;
+        Sun, 29 Aug 2021 06:42:13 -0700 (PDT)
+Received: by mail-wm1-x334.google.com with SMTP id g138so7016143wmg.4;
+        Sun, 29 Aug 2021 06:42:13 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=42k7rPri6WRKbIU/r0i18a/GKhWZ5Qu+f92Ok7uVS4w=;
+        b=XaoHJYo4dTQO5JgIwoj48nj721UCXhtttE0Loy1BBdGnSgHmyT19GUyx4DeyTDahvt
+         feKhPR7Mn4JT6Kn9o1+7EmTOZpixJqQKqEGDi1/eN7fZPrizHeKJYXkde1+iAHlHfq9I
+         VLa0d2EUNitzO2gZNkYVHbtf/mPJha6SRKlxn2/wtqCAL13I5cgY+uwolwohV4RT92Sb
+         46Fy2e3YgALB9+JuENun82CsEHN6B13qYFMj0y4OHALu3TW2NRVDnr8OizCKaUABvNVB
+         FXULtjbOlz7BZP34QiUmw+e5At5WUGzmzHNsEvsl5AN211fNUm8YFk2TCthJIDUNpaWm
+         U1fw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=42k7rPri6WRKbIU/r0i18a/GKhWZ5Qu+f92Ok7uVS4w=;
+        b=et7c0sHaY1RT/cxsLzD3Vi5+gNX2XahmLQhKvIdtuZvLYoc6guQCQCjEZUaF9meJey
+         WM5Qnb/REvJOd0jJZYu8oF4L7mcMZ1FmXvZ044IF94X1e3SFIqiLUPDYe+Wp4t6Mw1cq
+         YhNXKI2Wa7AJ0msTwR0Uk1xl12+Q5SbNkOB4nI+9Fhc2j94CbZ89rtfk+lGBQdUfSk+s
+         CUUJVW6gkJWfS9fQVzz1Wkd0dHCeml2/KdH6ZpPHas215aze3chwNtQ4YdfKJRSU4UjR
+         itSpvy2rOdlHIQ3lciuKZm2bmybkKS8UkF7foZsGp1GGCVLJhGA3ydE+vxRiiaABHxrB
+         RZfw==
+X-Gm-Message-State: AOAM533QDJx//6s7xFcwx58Ju77y3cDTJpUaI9nZPE1KT7oPNGZgDbkl
+        pF0bAyWDalEnNuSDjF5tsOfwQlKFoJE=
+X-Google-Smtp-Source: ABdhPJwXqJMrsOUNDr4v3pKgkoHsBoESSdVSnY5laI4J77NNDTOycGFyUasZGjeCe1F98wrUALtr+w==
+X-Received: by 2002:a05:600c:b46:: with SMTP id k6mr27875477wmr.35.1630244531819;
+        Sun, 29 Aug 2021 06:42:11 -0700 (PDT)
+Received: from localhost ([8.208.10.148])
+        by smtp.gmail.com with ESMTPSA id e2sm14021483wrq.56.2021.08.29.06.42.10
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 29 Aug 2021 06:42:11 -0700 (PDT)
+Date:   Sun, 29 Aug 2021 21:42:07 +0800
+From:   Eryu Guan <guaneryu@gmail.com>
+To:     Qu Wenruo <wqu@suse.com>
+Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Subject: Re: [PATCH v2] fstests: btrfs/246: add test case to make sure btrfs
+ can create compressed inline extent
+Message-ID: <YSuOr0XhCgVBcnc8@desktop>
+References: <20210826053432.13146-1-wqu@suse.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210827210209.1730181-1-agruenba@redhat.com>
+In-Reply-To: <20210826053432.13146-1-wqu@suse.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Aug 27, 2021 at 11:02:09PM +0200, Andreas Gruenbacher wrote:
-> Some filesystems have problems when the buffer passed to read or write
-> is memory-mapped to the file being read from or written to, and the
-> buffer needs to be faulted in during the read or write.  That's not
-> common, but filesystems are still required to cope with it, and if they
-> fail this test, then they will also fail more complex scenarios that
-> involve multiple files.
+On Thu, Aug 26, 2021 at 01:34:32PM +0800, Qu Wenruo wrote:
+> Btrfs has the ability to inline small file extents into its metadata,
+> and such inlined extents can be further compressed if needed.
 > 
-> Signed-off-by: Andreas Gruenbacher <agruenba@redhat.com>
+> The new test case is for a regression caused by commit f2165627319f
+> ("btrfs: compression: don't try to compress if we don't have enough
+> pages").
+> 
+> That commit prevents btrfs from creating compressed inline extents, even
+> "-o compress,max_inline=2048" is specified, only uncompressed inline
+> extents can be created.
+> 
+> The test case will make sure that the content of the small file is
+> consistent between cycle mount, then use "btrfs inspect dump-tree" to
+> verify the created extent is both inlined and compressed.
+> 
+> Signed-off-by: Qu Wenruo <wqu@suse.com>
 
-Looks good to me!
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-
---D
+Is there a proposed fix available that could be referenced in the commit
+log?
 
 > ---
->  .gitignore            |   1 +
->  src/Makefile          |   2 +-
->  src/mmap-rw-fault.c   | 186 ++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/646     |  35 ++++++++
->  tests/generic/646.out |   2 +
->  5 files changed, 225 insertions(+), 1 deletion(-)
->  create mode 100644 src/mmap-rw-fault.c
->  create mode 100755 tests/generic/646
->  create mode 100644 tests/generic/646.out
+> Changelog:
+> v2:
+> - Also output the sha256sum to make sure the content is consistent
+> ---
+>  tests/btrfs/246     | 53 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/246.out |  5 +++++
+>  2 files changed, 58 insertions(+)
+>  create mode 100755 tests/btrfs/246
+>  create mode 100644 tests/btrfs/246.out
 > 
-> diff --git a/.gitignore b/.gitignore
-> index 2d72b064..9e6d2fd5 100644
-> --- a/.gitignore
-> +++ b/.gitignore
-> @@ -105,6 +105,7 @@ tags
->  /src/metaperf
->  /src/mkswap
->  /src/mmapcat
-> +/src/mmap-rw-fault
->  /src/mmap-write-concurrent
->  /src/multi_open_unlink
->  /src/nametest
-> diff --git a/src/Makefile b/src/Makefile
-> index 884bd86a..25ab061d 100644
-> --- a/src/Makefile
-> +++ b/src/Makefile
-> @@ -18,7 +18,7 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
->  	t_ext4_dax_journal_corruption t_ext4_dax_inline_corruption \
->  	t_ofd_locks t_mmap_collision mmap-write-concurrent \
->  	t_get_file_time t_create_short_dirs t_create_long_dirs t_enospc \
-> -	t_mmap_writev_overlap checkpoint_journal
-> +	t_mmap_writev_overlap checkpoint_journal mmap-rw-fault
->  
->  LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
->  	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
-> diff --git a/src/mmap-rw-fault.c b/src/mmap-rw-fault.c
-> new file mode 100644
-> index 00000000..82f9d978
-> --- /dev/null
-> +++ b/src/mmap-rw-fault.c
-> @@ -0,0 +1,186 @@
-> +// SPDX-License-Identifier: GPL-2.0
-> +/*
-> + * Copyright (c) 2021 Red Hat, Inc.  All Rights Reserved.
-> + * Written by Andreas Gruenbacher (agruenba@redhat.com)
-> + */
-> +
-> +/* Trigger page faults in the same file during read and write. */
-> +
-> +#ifndef _GNU_SOURCE
-> +#define _GNU_SOURCE /* to get definition of O_DIRECT flag. */
-> +#endif
-> +
-> +#include <sys/types.h>
-> +#include <sys/stat.h>
-> +#include <sys/mman.h>
-> +#include <fcntl.h>
-> +#include <unistd.h>
-> +#include <stdlib.h>
-> +#include <stdio.h>
-> +#include <string.h>
-> +#include <errno.h>
-> +#include <err.h>
-> +
-> +char *filename;
-> +unsigned int page_size;
-> +void *page;
-> +char *addr;
-> +int fd;
-> +ssize_t ret;
-> +
-> +/*
-> + * Leave a hole at the beginning of the test file and initialize a block of
-> + * @page_size bytes at offset @page_size to @c.  Then, reopen the file and
-> + * mmap the first two pages.
-> + */
-> +void init(char c, int flags)
-> +{
-> +	fd = open(filename, O_CREAT | O_TRUNC | O_WRONLY | O_DIRECT, 0666);
-> +	if (fd == -1)
-> +		goto fail;
-> +	memset(page, c, page_size);
-> +	ret = pwrite(fd, page, page_size, page_size);
-> +	if (ret != page_size)
-> +		goto fail;
-> +	if (close(fd))
-> +		goto fail;
-> +
-> +	fd = open(filename, flags);
-> +	if (fd == -1)
-> +		goto fail;
-> +	addr = mmap(NULL, 2 * page_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
-> +	if (addr == MAP_FAILED)
-> +		err(1, NULL);
-> +	return;
-> +
-> +fail:
-> +	err(1, "%s", filename);
-> +}
-> +
-> +void done(void)
-> +{
-> +	if (fsync(fd))
-> +		goto fail;
-> +	if (close(fd))
-> +		goto fail;
-> +	return;
-> +
-> +fail:
-> +	err(1, "%s", filename);
-> +}
-> +
-> +static ssize_t do_read(int fd, void *buf, size_t count, off_t offset)
-> +{
-> +	ssize_t count2 = 0, ret;
-> +
-> +	do {
-> +		ret = pread(fd, buf, count, offset);
-> +		if (ret == -1) {
-> +			if (errno == EINTR)
-> +				continue;
-> +			break;
-> +		}
-> +		if (ret == 0)
-> +			break;
-> +		count2 += ret;
-> +		buf += ret;
-> +		count -= ret;
-> +	} while (count);
-> +	return count2;
-> +}
-> +
-> +static ssize_t do_write(int fd, const void *buf, size_t count, off_t offset)
-> +{
-> +	ssize_t count2 = 0, ret;
-> +
-> +	do {
-> +		ret = pwrite(fd, buf, count, offset);
-> +		if (ret == -1) {
-> +			if (errno == EINTR)
-> +				continue;
-> +			break;
-> +		}
-> +		if (ret == 0)
-> +			break;
-> +		count2 += ret;
-> +		buf += ret;
-> +		count -= ret;
-> +	} while (count);
-> +	return count2;
-> +}
-> +
-> +int main(int argc, char *argv[])
-> +{
-> +	if (argc != 2)
-> +		errx(1, "no test filename argument given");
-> +	filename = argv[1];
-> +
-> +	page_size = ret = sysconf(_SC_PAGE_SIZE);
-> +	if (ret == -1)
-> +		err(1, NULL);
-> +
-> +	ret = posix_memalign(&page, page_size, page_size);
-> +	if (ret) {
-> +		errno = ENOMEM;
-> +		err(1, NULL);
-> +	}
-> +
-> +	/*
-> +	 * Make sure page faults during pread are handled correctly:
-> +	 * read from an allocated area on disk into page 0.
-> +	 */
-> +	init('a', O_RDWR);
-> +	ret = do_read(fd, addr, page_size, page_size);
-> +	if (ret != page_size)
-> +		err(1, "pread %s: %ld != %u", filename, ret, page_size);
-> +	if (memcmp(addr, page, page_size))
-> +		errx(1, "pread is broken");
-> +	done();
-> +
-> +	init('b', O_RDWR | O_DIRECT);
-> +	ret = do_read(fd, addr, page_size, page_size);
-> +	if (ret != page_size)
-> +		err(1, "pread %s (O_DIRECT): %ld != %u", filename, ret, page_size);
-> +	if (memcmp(addr, page, page_size))
-> +		errx(1, "pread (D_DIRECT) is broken");
-> +	done();
-> +
-> +	/*
-> +	 * Make sure page faults during pwrite are handled correctly:
-> +	 * write from an allocated area on disk into page 0.
-> +	 */
-> +	init('c', O_RDWR);
-> +	ret = do_write(fd, addr + page_size, page_size, 0);
-> +	if (ret != page_size)
-> +		err(1, "pwrite %s: %ld != %u", filename, ret, page_size);
-> +	if (memcmp(addr, page, page_size))
-> +		errx(1, "pwrite is broken");
-> +	done();
-> +
-> +	init('d', O_RDWR | O_DIRECT);
-> +	ret = do_write(fd, addr + page_size, page_size, 0);
-> +	if (ret != page_size)
-> +		err(1, "pwrite %s (O_DIRECT): %ld != %u", filename, ret, page_size);
-> +	if (memcmp(addr, page, page_size))
-> +		errx(1, "pwrite (O_DIRECT) is broken");
-> +	done();
-> +
-> +	/*
-> +	 * Reading from a hole under O_DIRECT takes a different code path in
-> +	 * the kernel.  Read from a hole into page 0 to test that.  (It
-> +	 * shouldn't matter that the hole and page 0 coincide.)
-> +	 */
-> +	init('e', O_RDWR | O_DIRECT);
-> +	ret = do_read(fd, addr, page_size, 0);
-> +	if (ret != page_size)
-> +		err(1, "pread %s (O_DIRECT) from hole: %ld != %u", filename, ret, page_size);
-> +	memset(page, 0, page_size);
-> +	if (memcmp(addr, page, page_size))
-> +		errx(1, "pread (D_DIRECT) from hole is broken");
-> +	done();
-> +
-> +	if (unlink(filename))
-> +		err(1, "unlink %s", filename);
-> +
-> +	return 0;
-> +}
-> diff --git a/tests/generic/646 b/tests/generic/646
+> diff --git a/tests/btrfs/246 b/tests/btrfs/246
 > new file mode 100755
-> index 00000000..a6a4d457
+> index 00000000..e0d8016f
 > --- /dev/null
-> +++ b/tests/generic/646
-> @@ -0,0 +1,35 @@
+> +++ b/tests/btrfs/246
+> @@ -0,0 +1,53 @@
 > +#! /bin/bash
 > +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2021 Red Hat, Inc.  All Rights Reserved.
+> +# Copyright (c) 2021 SUSE Linux Products GmbH.  All Rights Reserved.
 > +#
-> +# FS QA Test 646
+> +# FS QA Test 246
 > +#
-> +# Trigger page faults in the same file during read and write
+> +# Make sure btrfs can create compressed inline extents
 > +#
 > +. ./common/preamble
-> +_begin_fstest auto quick
+> +_begin_fstest auto quick compress
 > +
 > +# Override the default cleanup function.
 > +_cleanup()
 > +{
 > +	cd /
-> +	rm -f $tmp.*
-> +	rm -f $TEST_DIR/mmap-rw-fault.tmp
+> +	rm -r -f $tmp.*
 > +}
 > +
-> +# get standard environment, filters and checks
-> +. ./common/rc
+> +# Import common functions.
 > +. ./common/filter
+> +# For __populate_find_inode()
+> +. ./common/populate
+
+This function starts with double underscore, I take it as a 'private'
+function in common/populate. But all it does is returning the inode
+number of the given file, I think we could just open-code it in this
+test as
+
+ino=$(stat -c %i $SCRATCH_MNT/foobar)
+
+Otherwise test looks fine to me.
+
+Thanks,
+Eryu
+
 > +
 > +# real QA test starts here
 > +
-> +_supported_fs generic
-> +_require_test
-> +_require_test_program mmap-rw-fault
+> +# Modify as appropriate.
+> +_supported_fs btrfs
+> +_require_scratch
 > +
-> +echo "Silence is golden"
+> +_scratch_mkfs > /dev/null
+> +_scratch_mount -o compress,max_inline=2048
 > +
-> +$here/src/mmap-rw-fault $TEST_DIR/mmap-rw-fault.tmp
+> +# This should create compressed inline extent
+> +$XFS_IO_PROG -f -c "pwrite 0 2048" $SCRATCH_MNT/foobar > /dev/null
+> +ino=$(__populate_find_inode $SCRATCH_MNT/foobar)
+> +echo "sha256sum before mount cycle"
+> +sha256sum $SCRATCH_MNT/foobar | _filter_scratch
+> +_scratch_cycle_mount
+> +echo "sha256sum after mount cycle"
+> +sha256sum $SCRATCH_MNT/foobar | _filter_scratch
+> +_scratch_unmount
 > +
-> +status=$?
+> +$BTRFS_UTIL_PROG inspect dump-tree -t 5 $SCRATCH_DEV | \
+> +	grep "($ino EXTENT_DATA 0" -A2 > $tmp.dump-tree
+> +echo "dump tree result for ino $ino:" >> $seqres.full
+> +cat $tmp.dump-tree >> $seqres.full
+> +
+> +grep -q "inline extent" $tmp.dump-tree || echo "no inline extent found"
+> +grep -q "compression 1" $tmp.dump-tree || echo "no compressed extent found"
+> +
+> +# success, all done
+> +status=0
 > +exit
-> diff --git a/tests/generic/646.out b/tests/generic/646.out
+> diff --git a/tests/btrfs/246.out b/tests/btrfs/246.out
 > new file mode 100644
-> index 00000000..8357006e
+> index 00000000..3908cc50
 > --- /dev/null
-> +++ b/tests/generic/646.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 646
-> +Silence is golden
+> +++ b/tests/btrfs/246.out
+> @@ -0,0 +1,5 @@
+> +QA output created by 246
+> +sha256sum before mount cycle
+> +0ca3bfdeda1ef5036bfa5dad078a9f15724e79cf296bd4388cf786bfaf4195d0  SCRATCH_MNT/foobar
+> +sha256sum after mount cycle
+> +0ca3bfdeda1ef5036bfa5dad078a9f15724e79cf296bd4388cf786bfaf4195d0  SCRATCH_MNT/foobar
 > -- 
-> 2.26.3
-> 
+> 2.31.1
