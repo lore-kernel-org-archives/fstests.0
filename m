@@ -2,137 +2,159 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.7 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 951EBC432BE
-	for <linux-fstests@archiver.kernel.org>; Sun, 29 Aug 2021 14:10:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5D150C432BE
+	for <linux-fstests@archiver.kernel.org>; Sun, 29 Aug 2021 14:51:49 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 73F2D60F39
-	for <linux-fstests@archiver.kernel.org>; Sun, 29 Aug 2021 14:10:12 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3456860F36
+	for <linux-fstests@archiver.kernel.org>; Sun, 29 Aug 2021 14:51:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235439AbhH2OLD (ORCPT
+        id S235459AbhH2Owk (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 29 Aug 2021 10:11:03 -0400
-Received: from out20-87.mail.aliyun.com ([115.124.20.87]:55122 "EHLO
-        out20-87.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235398AbhH2OLC (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 29 Aug 2021 10:11:02 -0400
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07598105|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_regular_dialog|0.621035-0.00304223-0.375923;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047192;MF=guan@eryu.me;NM=1;PH=DS;RN=4;RT=4;SR=0;TI=SMTPD_---.LCCfxqt_1630246208;
-Received: from localhost(mailfrom:guan@eryu.me fp:SMTPD_---.LCCfxqt_1630246208)
-          by smtp.aliyun-inc.com(10.147.41.158);
-          Sun, 29 Aug 2021 22:10:09 +0800
-Date:   Sun, 29 Aug 2021 22:10:08 +0800
-From:   Eryu Guan <guan@eryu.me>
-To:     Qu Wenruo <wqu@suse.com>
-Cc:     Eryu Guan <guaneryu@gmail.com>, fstests@vger.kernel.org,
-        linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH v2] fstests: btrfs/246: add test case to make sure btrfs
- can create compressed inline extent
-Message-ID: <YSuVQBEX0WU4NQzv@desktop>
-References: <20210826053432.13146-1-wqu@suse.com>
- <YSuOr0XhCgVBcnc8@desktop>
- <e85d5800-8f4a-5bca-a5a6-e537f2fb998a@suse.com>
+        Sun, 29 Aug 2021 10:52:40 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40728 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S235454AbhH2Owk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 29 Aug 2021 10:52:40 -0400
+Received: from mail-wr1-x430.google.com (mail-wr1-x430.google.com [IPv6:2a00:1450:4864:20::430])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 00CDFC061575
+        for <fstests@vger.kernel.org>; Sun, 29 Aug 2021 07:51:48 -0700 (PDT)
+Received: by mail-wr1-x430.google.com with SMTP id x6so10258727wrv.13
+        for <fstests@vger.kernel.org>; Sun, 29 Aug 2021 07:51:47 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=message-id:date:from:to:subject:mime-version:content-disposition;
+        bh=neoFpnqH85icG1HETPtNf/46P6bmlUMjr+tb2G2hfrI=;
+        b=nK/l4s6pnoDgBHtSHNH8avp3b5IrLNQWsMLW1hrpexenjhPpmxOJoxryAhiaE+vck/
+         2oSsbx07r8lSk0E5JzticWFXChvSYKdcJT1XeG6jUlU47AITiF6yBy2WJ0M5U/jcBMyF
+         kEU92gEUy/b2MhB2Uxs2Pxbodm0pKmrwGR5h4dtswEY0Vh9ggnbBIFVnUdSjpfBJ8pKl
+         iUex2nH0H8ZXm+kaOcLtWBH00w5e3TL6OyfBJEujLJvIlbcPVWFejbC8e+7soT0ef63W
+         H7Anjbyk4DNB41RiT84xknIUiD5Brkj/G75+ROxbS1kcyCtMMS1KsFQTYyU+TUzlLVrR
+         PBSQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:message-id:date:from:to:subject:mime-version
+         :content-disposition;
+        bh=neoFpnqH85icG1HETPtNf/46P6bmlUMjr+tb2G2hfrI=;
+        b=kiLQL69VraByUg0uYhHxgZUutMlldXIZLeuKi2hcFF3GZ4LwuLp+PxtllRaVVF4y4n
+         Re0WpVaqRspYcQSIjflf4HKFl5PhEeH32BvUsLFseIWfKR9q3L6LPGR0RDIM05sUZ5/y
+         P7htrMJnf7V64r8JJtaMiDKtgejZCXoQ3ImQp0kcuOMRFdZvYHbmp4beCBpXU0KbkiU/
+         dM9RZ3Ow1Rpcj3kPD82JY7IwFbWNm5nY9jR2xASBQ7ieprqR93Io125qlwLl6Pym77zW
+         GpK9mEVb+x0l9nAa1Vbg8+AQ9AIR/Xk6tSE36DDfyhOcJHEdD4w5MUlsmWMWmpE7M1fc
+         e/yw==
+X-Gm-Message-State: AOAM530LjA9IvYVL8RSTUGPSs8s507qANLoUHAyIFfOOGdnTZt2uvz4n
+        SQr9bxW3qf7K+9xxvvu54BZFfV0PkEc=
+X-Google-Smtp-Source: ABdhPJx4l0EehM1rEZ47IXfuKiKM5WWGqegu27ORtLU5r4xWQ+c7AT/esVZlVSkdllD2/2LHIQ+TVQ==
+X-Received: by 2002:adf:c381:: with SMTP id p1mr21107845wrf.64.1630248706392;
+        Sun, 29 Aug 2021 07:51:46 -0700 (PDT)
+Received: from localhost ([8.208.10.148])
+        by smtp.gmail.com with ESMTPSA id p13sm12605816wro.8.2021.08.29.07.51.44
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 29 Aug 2021 07:51:45 -0700 (PDT)
+Message-ID: <612b9f01.1c69fb81.5b6b6.e230@mx.google.com>
+Date:   Sun, 29 Aug 2021 22:51:41 +0800
+From:   Eryu Guan <guaneryu@gmail.com>
+To:     fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: master branch updated to ea1962cc9eaa
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="9NSfXeeqQ56Q"
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <e85d5800-8f4a-5bca-a5a6-e537f2fb998a@suse.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Aug 29, 2021 at 09:49:05PM +0800, Qu Wenruo wrote:
-> 
-> 
-> On 2021/8/29 下午9:42, Eryu Guan wrote:
-> > On Thu, Aug 26, 2021 at 01:34:32PM +0800, Qu Wenruo wrote:
-> > > Btrfs has the ability to inline small file extents into its metadata,
-> > > and such inlined extents can be further compressed if needed.
-> > > 
-> > > The new test case is for a regression caused by commit f2165627319f
-> > > ("btrfs: compression: don't try to compress if we don't have enough
-> > > pages").
-> > > 
-> > > That commit prevents btrfs from creating compressed inline extents, even
-> > > "-o compress,max_inline=2048" is specified, only uncompressed inline
-> > > extents can be created.
-> > > 
-> > > The test case will make sure that the content of the small file is
-> > > consistent between cycle mount, then use "btrfs inspect dump-tree" to
-> > > verify the created extent is both inlined and compressed.
-> > > 
-> > > Signed-off-by: Qu Wenruo <wqu@suse.com>
-> > 
-> > Is there a proposed fix available that could be referenced in the commit
-> > log?
-> 
-> The upstream commit is 4e9655763b82 ("Revert "btrfs: compression: don't try
-> to compress if we don't have enough pages""), which is merged after I
-> submitted the patch.
 
-Ok. It also could be helpful to just include the proposed patch title if
-it's not merged yet.
+--9NSfXeeqQ56Q
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-> 
-> > 
-> > > ---
-> > > Changelog:
-> > > v2:
-> > > - Also output the sha256sum to make sure the content is consistent
-> > > ---
-> > >   tests/btrfs/246     | 53 +++++++++++++++++++++++++++++++++++++++++++++
-> > >   tests/btrfs/246.out |  5 +++++
-> > >   2 files changed, 58 insertions(+)
-> > >   create mode 100755 tests/btrfs/246
-> > >   create mode 100644 tests/btrfs/246.out
-> > > 
-> > > diff --git a/tests/btrfs/246 b/tests/btrfs/246
-> > > new file mode 100755
-> > > index 00000000..e0d8016f
-> > > --- /dev/null
-> > > +++ b/tests/btrfs/246
-> > > @@ -0,0 +1,53 @@
-> > > +#! /bin/bash
-> > > +# SPDX-License-Identifier: GPL-2.0
-> > > +# Copyright (c) 2021 SUSE Linux Products GmbH.  All Rights Reserved.
-> > > +#
-> > > +# FS QA Test 246
-> > > +#
-> > > +# Make sure btrfs can create compressed inline extents
-> > > +#
-> > > +. ./common/preamble
-> > > +_begin_fstest auto quick compress
-> > > +
-> > > +# Override the default cleanup function.
-> > > +_cleanup()
-> > > +{
-> > > +	cd /
-> > > +	rm -r -f $tmp.*
-> > > +}
-> > > +
-> > > +# Import common functions.
-> > > +. ./common/filter
-> > > +# For __populate_find_inode()
-> > > +. ./common/populate
-> > 
-> > This function starts with double underscore, I take it as a 'private'
-> > function in common/populate. But all it does is returning the inode
-> > number of the given file, I think we could just open-code it in this
-> > test as
-> > 
-> > ino=$(stat -c %i $SCRATCH_MNT/foobar)
-> > 
-> > Otherwise test looks fine to me.
-> 
-> Mind me to send an update to include the fix in commit message and use the
-> local ino helper?
+Hi all,
 
-You're responding quickly, I haven't finalized this week's update yet,
-so I can add the fix commit info and remove __populate_find_inode on
-commit :)
+The master branch of the xfstests repository at:
+
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+have just been updated. There're 4 new tests and 2 bug fixes. Two of the four
+new tests fail on btrfs with v5.15-rc7 kernel:
+
+- btrfs/246: the fix has been merged but not in Linus tree yet
+- generic/647: test hangs on btrfs, looks like a bug in btrfs, you may want to
+  skip it for now in your automatic test runs
 
 Thanks,
 Eryu
+
+The new head of the master branch is commit:
+
+ea1962cc9eaa btrfs: make sure btrfs can create compressed inline extent
+
+New commits:
+
+Andreas Gruenbacher (1):
+      [d3cbdabffc4c] generic: Test page faults during read and write
+
+Darrick J. Wong (1):
+      [90199d806150] idmap: override btrfs_ioctl_vol_args_v2 if system header doesn't have subvolid
+
+Luis Chamberlain (1):
+      [0e4dd8b9d2c8] common/rc: fix ignoring of errors on
+
+Murphy Zhou (1):
+      [bdaa90aae7fc] generic: check log recovery with readonly mount
+
+Qu Wenruo (1):
+      [ea1962cc9eaa] btrfs: make sure btrfs can create compressed inline extent
+
+Theodore Ts'o (1):
+      [f4660739fedd] ext4: add test to validate the large_dir feature
+
+
+Code Diffstat:
+
+ .gitignore                            |   1 +
+ common/rc                             |   4 +-
+ configure.ac                          |   2 +-
+ src/Makefile                          |   2 +-
+ src/dirstress.c                       |   7 +-
+ src/idmapped-mounts/idmapped-mounts.c |   6 +-
+ src/mmap-rw-fault.c                   | 186 ++++++++++++++++++++++++++++++++++
+ tests/btrfs/246                       |  49 +++++++++
+ tests/btrfs/246.out                   |   5 +
+ tests/ext4/052                        |  71 +++++++++++++
+ tests/ext4/052.out                    |   2 +
+ tests/generic/646                     |  42 ++++++++
+ tests/generic/646.out                 |   2 +
+ tests/generic/647                     |  35 +++++++
+ tests/generic/647.out                 |   2 +
+ 15 files changed, 410 insertions(+), 6 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
+
+--9NSfXeeqQ56Q
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAmErnosACgkQJlKqKVyP
+52M0BQ/8D9d44ZYMohBampjC18KjK0GhF0pZQvinJghbbC1tUfKfV7gEQu/xSX0c
+dONsRlz2nRUlx5r1hhgEoE4+zUwqUUH/PF/4jrrejOTR+P//PpilPjaqNIU7B5E5
+w87Zcm1e/viBX+JQIIJ+m3jNJU52YOOt/qcYAR3lckd1KB2gLwBBNLYFGaIbNYa5
+JH3OmMjcRn7zeOJrcVcY+Nd72hxfSdEF/OoldA6nXHdGtmCz+yMD/7AX9rio6ZBt
+HZxEcVXEv64jPSxf24E5CQPVEZQAI+ORyI9H8/eBWrWJTfcdGHcMAJI+4yZRcHCY
+C6XOScDfebBnGbFeRC4Clkz27CR5gYNnTSiIPsg/lzmxsGya06B8roDO2ERRLjxK
+QIgRno03vP7jqkVr1BOlOiKpBFOG9YMTc+NExmCmUBGPpKYmttj1gIuI2g7ZNBgH
+LEPh62gFa+FLhTZEO/YWs7/lsvJjNxoG7/SPHFdQNwsM/oCtixcgQVF+5pnpX2Uc
+PvEykXEBz3NuhH8zddFb2rSGT1h/EcTn3c/hUN8rkZKBKpfLZ6RE9mZSqBjyVXg/
+MW6YmkwiREynob9yzcMugkq4xTCWR0LhPvPY85MRP+1JGZu7jpQ2PTYXh/LcFQIv
+rov7xymxZ8rPPzBjI69CKXJTxwmBPpmQDMoVPsY1+zF+adCi6dQ=
+=z34d
+-----END PGP SIGNATURE-----
+
+--9NSfXeeqQ56Q--
