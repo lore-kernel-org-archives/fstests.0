@@ -2,181 +2,95 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AE6A2C432BE
-	for <linux-fstests@archiver.kernel.org>; Mon, 30 Aug 2021 11:42:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AC068C432BE
+	for <linux-fstests@archiver.kernel.org>; Mon, 30 Aug 2021 12:23:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9171E61131
-	for <linux-fstests@archiver.kernel.org>; Mon, 30 Aug 2021 11:42:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 82D1361154
+	for <linux-fstests@archiver.kernel.org>; Mon, 30 Aug 2021 12:23:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236475AbhH3Lm7 (ORCPT
+        id S231531AbhH3MYD (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 30 Aug 2021 07:42:59 -0400
-Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:49928 "EHLO
-        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S236430AbhH3Lm6 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 30 Aug 2021 07:42:58 -0400
-Received: from cwcc.thunk.org (pool-72-74-133-215.bstnma.fios.verizon.net [72.74.133.215])
-        (authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 17UBg2Lc025474
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 30 Aug 2021 07:42:02 -0400
-Received: by cwcc.thunk.org (Postfix, from userid 15806)
-        id 110A115C3CE6; Mon, 30 Aug 2021 07:42:02 -0400 (EDT)
-From:   "Theodore Ts'o" <tytso@mit.edu>
+        Mon, 30 Aug 2021 08:24:03 -0400
+Received: from smtp-out2.suse.de ([195.135.220.29]:58754 "EHLO
+        smtp-out2.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229828AbhH3MYC (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 30 Aug 2021 08:24:02 -0400
+Received: from imap1.suse-dmz.suse.de (imap1.suse-dmz.suse.de [192.168.254.73])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by smtp-out2.suse.de (Postfix) with ESMTPS id 45E322009B;
+        Mon, 30 Aug 2021 12:23:08 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+        t=1630326188; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+        bh=Bkj8H6STZ7TlRsKKK76y+kvd6CtJjmzSZPtHTvYc09E=;
+        b=SU+vtYZdrWmQ26UXWdVBLFr9roYa+A9ntTCbWsCyy589AfxoDufsHAudVZKiSx3pOncNAq
+        4QGI65hXoUhaQX4G5xruxci1GHmrux699ZeN3zW7hc69d8LPb/pFg/2Nwg3PEqR3Gb9d8F
+        BGyWrrV3OHsSMvsK0ZWCdnV67DYNW7Y=
+Received: from imap1.suse-dmz.suse.de (imap1.suse-dmz.suse.de [192.168.254.73])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap1.suse-dmz.suse.de (Postfix) with ESMTPS id 094A413738;
+        Mon, 30 Aug 2021 12:23:07 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap1.suse-dmz.suse.de with ESMTPSA
+        id YoPzOqvNLGHOYwAAGKfGzw
+        (envelope-from <nborisov@suse.com>); Mon, 30 Aug 2021 12:23:07 +0000
+From:   Nikolay Borisov <nborisov@suse.com>
 To:     fstests@vger.kernel.org
-Cc:     "Theodore Ts'o" <tytso@mit.edu>
-Subject: [PATCH] common/filter: add _filter_bash()
-Date:   Mon, 30 Aug 2021 07:41:56 -0400
-Message-Id: <20210830114156.1106699-1-tytso@mit.edu>
-X-Mailer: git-send-email 2.31.0
+Cc:     linux-btrfs@vger.kernel.org, Nikolay Borisov <nborisov@suse.com>
+Subject: [PATCH 1/2] common/renameat2: Make _rename_tests_source_dest take flags as 4th arguement
+Date:   Mon, 30 Aug 2021 15:23:05 +0300
+Message-Id: <20210830122306.882081-1-nborisov@suse.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This is needed to account for bash 5.1 adding line number annotation
-when a command like "bash -c /etc/passwd" fails, e.g., with
+Currently this function takes the flags parameter to be passed to the
+renameat program by assuming there exists a 'flags' variable. Instead,
+make the flags being passed as 4th argument to the function.
 
-     bash: line 1: /etc/passwd: Permission denid
-
-instead of:
-
-     bash: /etc/passwd: Permission denid
-
-Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+Signed-off-by: Nikolay Borisov <nborisov@suse.com>
 ---
- common/filter     | 11 +++++++++++
- tests/generic/572 | 33 +++++++++++++++++++--------------
- 2 files changed, 30 insertions(+), 14 deletions(-)
+ common/renameat2 | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
 
-diff --git a/common/filter b/common/filter
-index 2efbbd99..4b250e8b 100644
---- a/common/filter
-+++ b/common/filter
-@@ -661,5 +661,16 @@ _filter_quota_report()
- 		s|^(.*?) (\d+) (\d+) (\d+)|$1 @{[$2 * 1024 /'$bsize']} @{[$3 * 1024 /'$bsize']} @{[$4 * 1024 /'$bsize']}|'
+diff --git a/common/renameat2 b/common/renameat2
+index 4b64eea7824b..4d25d7cebf94 100644
+--- a/common/renameat2
++++ b/common/renameat2
+@@ -61,6 +61,7 @@ _rename_tests_source_dest()
+ 	local source=$1
+ 	local dest=$2
+ 	local options=$3
++	local flags=$4
+ 
+ 	for stype in none regu symb dire tree; do
+ 		for dtype in none regu symb dire tree; do
+@@ -90,11 +91,11 @@ _rename_tests()
+ 	local flags=$2
+ 
+ 	#same directory renames
+-	_rename_tests_source_dest $testdir/src $testdir/dst     "samedir "
++	_rename_tests_source_dest $testdir/src $testdir/dst     "samedir " $flags
+ 
+ 	#cross directory renames
+ 	mkdir $testdir/x $testdir/y
+-	_rename_tests_source_dest $testdir/x/src $testdir/y/dst "crossdir"
++	_rename_tests_source_dest $testdir/x/src $testdir/y/dst "crossdir" $flags
+ 	rmdir $testdir/x $testdir/y
  }
  
-+#
-+# Bash 5.1+ adds "line 1: " when printing an error running an executable
-+# for example, "bash -c /etc/passwd" will result in the error
-+# "bash: line 1: /etc/passwd: Permission denied" where as earlier
-+# versions of bash will omit the "line 1: " annotation.
-+#
-+_filter_bash()
-+{
-+	sed -e "s/^bash: line 1: /bash: /"
-+}
-+
- # make sure this script returns success
- /bin/true
-diff --git a/tests/generic/572 b/tests/generic/572
-index f131c7ed..cded9ac6 100755
---- a/tests/generic/572
-+++ b/tests/generic/572
-@@ -36,6 +36,11 @@ _scratch_mount
- fsv_orig_file=$SCRATCH_MNT/file
- fsv_file=$SCRATCH_MNT/file.fsv
- 
-+filter_output()
-+{
-+    _filter_bash | _filter_scratch
-+}
-+
- verify_data_readable()
- {
- 	local file=$1
-@@ -48,41 +53,41 @@ verify_data_unreadable()
- 	local file=$1
- 
- 	# try both reading just the first data block, and reading until EOF
--	head -c $FSV_BLOCK_SIZE $file 2>&1 >/dev/null | _filter_scratch
--	md5sum $file |& _filter_scratch
-+	head -c $FSV_BLOCK_SIZE $file 2>&1 >/dev/null | filter_output
-+	md5sum $file |& filter_output
- }
- 
- _fsv_scratch_begin_subtest "Enabling verity on file with verity already enabled fails with EEXIST"
- _fsv_create_enable_file $fsv_file
- echo "(trying again)"
--_fsv_enable $fsv_file |& _filter_scratch
-+_fsv_enable $fsv_file |& filter_output
- 
- _fsv_scratch_begin_subtest "Enabling verity with invalid hash algorithm fails with EINVAL"
--_fsv_create_enable_file $fsv_file --hash-alg=257 |& _filter_scratch
-+_fsv_create_enable_file $fsv_file --hash-alg=257 |& filter_output
- verify_data_readable $fsv_file
- 
- _fsv_scratch_begin_subtest "Enabling verity with invalid block size fails with EINVAL"
--_fsv_create_enable_file $fsv_file --block-size=1 |& _filter_scratch
-+_fsv_create_enable_file $fsv_file --block-size=1 |& filter_output
- verify_data_readable $fsv_file
- 
- _fsv_scratch_begin_subtest "Enabling verity on directory fails with EISDIR"
- mkdir $SCRATCH_MNT/dir
--_fsv_enable $SCRATCH_MNT/dir |& _filter_scratch
-+_fsv_enable $SCRATCH_MNT/dir |& filter_output
- 
- _fsv_scratch_begin_subtest "Enabling verity with too-long salt fails with EMSGSIZE"
--_fsv_create_enable_file $fsv_file --salt=$(perl -e 'print "A" x 1000') |& _filter_scratch
-+_fsv_create_enable_file $fsv_file --salt=$(perl -e 'print "A" x 1000') |& filter_output
- verify_data_readable $fsv_file
- 
- _fsv_scratch_begin_subtest "Enabling verity on file on read-only filesystem fails with EROFS"
- echo foo > $fsv_file
- _scratch_remount ro
--_fsv_enable $fsv_file |& _filter_scratch
-+_fsv_enable $fsv_file |& filter_output
- _scratch_remount rw
- 
- _fsv_scratch_begin_subtest "Enabling verity on file open for writing fails with ETXTBSY"
- echo foo > $fsv_file
- exec 3<> $fsv_file
--_fsv_enable $fsv_file |& _filter_scratch
-+_fsv_enable $fsv_file |& filter_output
- exec 3<&-
- verify_data_readable $fsv_file
- 
-@@ -103,7 +108,7 @@ dd if=/dev/zero of=$fsv_file bs=1 count=0 seek=$((1 << 34)) status=none
- start_time=$(date +%s)
- $FSVERITY_PROG enable $fsv_file &
- sleep 0.5
--_fsv_enable $fsv_file |& _filter_scratch
-+_fsv_enable $fsv_file |& filter_output
- kill %1
- wait
- 
-@@ -112,11 +117,11 @@ _fsv_create_enable_file $fsv_file >> $seqres.full
- echo "* reading"
- $XFS_IO_PROG -r $fsv_file -c ''
- echo "* xfs_io writing, should be O_RDWR"
--$XFS_IO_PROG $fsv_file -c '' |& _filter_scratch
-+$XFS_IO_PROG $fsv_file -c '' |& filter_output
- echo "* bash >>, should be O_APPEND"
--bash -c "echo >> $fsv_file" |& _filter_scratch
-+bash -c "echo >> $fsv_file" |& filter_output
- echo "* bash >, should be O_WRONLY|O_CREAT|O_TRUNC"
--bash -c "echo > $fsv_file" |& _filter_scratch
-+bash -c "echo > $fsv_file" |& filter_output
- 
- _fsv_scratch_begin_subtest "verity file can be read"
- _fsv_create_enable_file $fsv_file >> $seqres.full
-@@ -160,7 +165,7 @@ _get_filesize $fsv_file
- 
- _fsv_scratch_begin_subtest "Trying to measure non-verity file fails with ENODATA"
- echo foo > $fsv_file
--_fsv_measure $fsv_file |& _filter_scratch
-+_fsv_measure $fsv_file |& filter_output
- verify_data_readable $fsv_file
- 
- # Test files <= 1 block in size.  These are a bit of a special case since there
 -- 
-2.31.0
+2.17.1
 
