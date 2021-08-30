@@ -2,238 +2,206 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9E3DEC432BE
-	for <linux-fstests@archiver.kernel.org>; Mon, 30 Aug 2021 13:08:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 030F2C432BE
+	for <linux-fstests@archiver.kernel.org>; Mon, 30 Aug 2021 15:01:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 74DBE60FE8
-	for <linux-fstests@archiver.kernel.org>; Mon, 30 Aug 2021 13:08:36 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CDC61600CC
+	for <linux-fstests@archiver.kernel.org>; Mon, 30 Aug 2021 15:01:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231531AbhH3NJ3 (ORCPT
+        id S237286AbhH3PCj (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 30 Aug 2021 09:09:29 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:46450 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S232055AbhH3NJ0 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 30 Aug 2021 09:09:26 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1630328912;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=SSnoiz3fsr0n60rPSK6MyU+7QpJuvIyUd7Mr/xf7eGU=;
-        b=WMVuO7nsfNAmZ++st22vG+xjg+xhLnLZrQQwFLerinreACEM8/zGu9VM7OUeDkofMXmyCq
-        ayOpDdsFSQfU6cHPbnUFXLogM/o4V/nzMCxaZN2ty23ZRqsFgE7FYGKQjhWppD0julPsAC
-        Ha9jwo3x04EZpJvAJVpT7za0yaAB6JA=
-Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com
- [209.85.216.70]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-203-jKLfWoChOhuCGF4jR0HiOA-1; Mon, 30 Aug 2021 09:08:31 -0400
-X-MC-Unique: jKLfWoChOhuCGF4jR0HiOA-1
-Received: by mail-pj1-f70.google.com with SMTP id p7-20020a17090a2c4700b0018d4e028ee6so482598pjm.6
-        for <fstests@vger.kernel.org>; Mon, 30 Aug 2021 06:08:31 -0700 (PDT)
+        Mon, 30 Aug 2021 11:02:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56512 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S237123AbhH3PCj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 30 Aug 2021 11:02:39 -0400
+Received: from mail-qt1-x82f.google.com (mail-qt1-x82f.google.com [IPv6:2607:f8b0:4864:20::82f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 636F8C061575;
+        Mon, 30 Aug 2021 08:01:45 -0700 (PDT)
+Received: by mail-qt1-x82f.google.com with SMTP id c19so11886736qte.7;
+        Mon, 30 Aug 2021 08:01:45 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:reply-to:from:date:message-id
+         :subject:to:cc:content-transfer-encoding;
+        bh=TGM5KPoztdGWIn09bQ9Ii42F5RCnfkHNQpM2VuCOXAA=;
+        b=EKOqzOLqeypK4pONnJjcEuZt/2oxXRPaVTkx32Du+iEZN+MeKz9e/lmmznjW1EZynv
+         iYiLkDoE7vzJdJXUqVQ92fK10Tnme2r55tEpqmHkKvnBJNJjb6jEIANWUm+SPdcV3pix
+         mCI1lHml0DQljUFZHPbxWUU+a+adbIbKusH+xQaFmYFql2ekB6LJ+2WvwCfnni6DSsMu
+         +p+/rTGlvNJQb6ozsQyHJzFOgfpHT/sVa97bFQJmkjBQ+B82+VV989g5irSzeHvtokTZ
+         YFZSDVw9Y5wYTjYnLFZO07wFD0QF2d/POCYR/En/YBGlJOLlg+JzdiVt9sWx0dwicOlt
+         Ihwg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id
-         :mail-followup-to:references:mime-version:content-disposition
-         :in-reply-to;
-        bh=SSnoiz3fsr0n60rPSK6MyU+7QpJuvIyUd7Mr/xf7eGU=;
-        b=tEEZ5Pbmw7/7LpBLz1d4noKe3JJJnuvaTJsoO62g3Vpn4LYfidNjuyoKsGUvnBQuDc
-         EGTl7wM0bXlLhUQNL+2OK1tGirKP0hipa8UzkEk8JvNDN8XqB7rCdu6PQl35s+tEweB+
-         Cef1Dz/EYvVgkoyjjLaDa3iTzf4k4DIVZ8dUg6NB/ycSGVGXVxuSN+F7pA/FfuyfQ1Rg
-         LXzE9iTWrj4NBlzeVIMrMstCwDq/r4fbypkQr8eEUIa/hvkGJIX3kA390GGxtJCBtFAF
-         zyA5tEzl/kCPUCwsdfdgaPcm18J7XNJyKbV/mTbtnLbEOINiWY0q40w3x4Fn4ezbYx+q
-         SRgg==
-X-Gm-Message-State: AOAM531Vgnh+ibNnvu3NXDNLROhMGp+agM5zZlZg+T6BTF712K85h3Tn
-        QrLkJbTauMMwMSbPJ4bXuQMa1vtOoKxyZ+TnMoRhnrWlo/sti0znzaJ6s+vRMZS7W2vdZW3JnHI
-        VlbvGyd4F9xJPCXmyxA==
-X-Received: by 2002:a17:90b:f97:: with SMTP id ft23mr26498189pjb.135.1630328910037;
-        Mon, 30 Aug 2021 06:08:30 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJwxUSUJCll3DV3MnARjKcs63sTg1TcEhxuWJA+XinTRtvV9r1/ULaKyaY21aijh2Gt+F5W07w==
-X-Received: by 2002:a17:90b:f97:: with SMTP id ft23mr26498160pjb.135.1630328909658;
-        Mon, 30 Aug 2021 06:08:29 -0700 (PDT)
-Received: from fedora ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id j16sm15388909pfi.165.2021.08.30.06.08.28
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 30 Aug 2021 06:08:29 -0700 (PDT)
-Date:   Mon, 30 Aug 2021 21:29:27 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Dave Chinner <david@fromorbit.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] fstests: which has been deprecated by Debian
-Message-ID: <20210830132927.7glbrcsgwep6xq4v@fedora>
-Mail-Followup-To: Dave Chinner <david@fromorbit.com>,
-        fstests@vger.kernel.org
-References: <20210830011401.697295-1-david@fromorbit.com>
+        h=x-gm-message-state:mime-version:references:in-reply-to:reply-to
+         :from:date:message-id:subject:to:cc:content-transfer-encoding;
+        bh=TGM5KPoztdGWIn09bQ9Ii42F5RCnfkHNQpM2VuCOXAA=;
+        b=pc9dkDQGtQVZfhBJDf9lK+AWAot1dejoaGkFABs052wWree2ipt1t9FEh7Bx1/JC6W
+         D5p1LxVHT249YRQ3BcGnPMiLAVVnvp9BtCOHcVKI+LPIXvhjd7OIWp8Jlf3cQfyz/cTj
+         gwCJm5SVK4er17nx7VjRL0vKTYa2LHofz+HMCUIrqMk81/0zbCzcDn/kGmqgE2aGeKU7
+         DPAyVkyLgx9ehK/+hfokt2G6c561fWwEaWCcbNRvVAVVJ6g4KnNbqLZjgVv3yPrGpjdk
+         r7QcUHd+KwsR4ndzlgfBUt8bz0UREu8HNbtROBk39hmIzTEGvaBdcmG4XpRl9Uzn7Dht
+         RSPg==
+X-Gm-Message-State: AOAM530D2Q/kw+FWPkY2UMN0TXFp8Ie8F6UtO0qQbs6OJKSaYBBlnd+C
+        ecO2DR2IgDAzYB+kLwVf00TMCUpDoqPPt/JNg2maPKbgmDg=
+X-Google-Smtp-Source: ABdhPJxuCQgq16wPBy7/cPtjvBzkG8xjzFpXaQAdya/WDxlNLmGvw0wprMEKRKX1xLc32BwbicSnzSEkaB1BXIoVZ+U=
+X-Received: by 2002:ac8:424c:: with SMTP id r12mr21237201qtm.183.1630335692208;
+ Mon, 30 Aug 2021 08:01:32 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210830011401.697295-1-david@fromorbit.com>
+References: <20210830122306.882081-1-nborisov@suse.com> <20210830122306.882081-2-nborisov@suse.com>
+In-Reply-To: <20210830122306.882081-2-nborisov@suse.com>
+Reply-To: fdmanana@gmail.com
+From:   Filipe Manana <fdmanana@gmail.com>
+Date:   Mon, 30 Aug 2021 16:01:21 +0100
+Message-ID: <CAL3q7H5Hv4c9z=W4a+NQXfiPUNU3KsTmuanYQ1G_EJrigbsACQ@mail.gmail.com>
+Subject: Re: [PATCH V2 2/2] btrfs: Add test for rename/exchange behavior
+ between subvolumes
+To:     Nikolay Borisov <nborisov@suse.com>
+Cc:     fstests <fstests@vger.kernel.org>,
+        linux-btrfs <linux-btrfs@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Aug 30, 2021 at 11:14:01AM +1000, Dave Chinner wrote:
-> From: Dave Chinner <dchinner@redhat.com>
-> 
-> This patch is brought to you by the Department That Hates Users.
-> 
-> The latest debian unstable release is now causing a bunch of new
-> test failures because they have deprecated the which command.
-> 
-> Rather than make everyone jump through hoops chasing problems with
-> 'which' while debian decides to how to package at least three
-> variants of 'which' - each which will different semantics, behaviour
-> and support - as alternatives users then have to opt into, let's
-> just remove the remaining uses of the shell independent 'which'
-> command and replace them with bash builtin 'type -P' operations.
-> 
-> Signed-off-by: Dave Chinner <dchinner@redhat.com>
+On Mon, Aug 30, 2021 at 1:23 PM Nikolay Borisov <nborisov@suse.com> wrote:
+>
+> This tests ensures that renames/exchanges across subvolumes work only
+> for other subvolumes and are otherwise forbidden and fail.
+>
+> Signed-off-by: Nikolay Borisov <nborisov@suse.com>
 > ---
+> Changes in V2:
+>  * Added cross-subvol rename tests
+>  * Added cross-subvol subvolume rename test
+>  * Added ordinary volume rename test
+>  * Removed explicit sync
+>
+>  tests/btrfs/246     | 43 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/246.out | 27 +++++++++++++++++++++++++++
+>  2 files changed, 70 insertions(+)
+>  create mode 100755 tests/btrfs/246
+>  create mode 100644 tests/btrfs/246.out
+>
+> diff --git a/tests/btrfs/246 b/tests/btrfs/246
+> new file mode 100755
+> index 000000000000..eeb12bb457a8
+> --- /dev/null
+> +++ b/tests/btrfs/246
+> @@ -0,0 +1,43 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2021 SUSE Linux Products GmbH.  All Rights Reserved.
+> +#
+> +# FS QA Test 246
+> +#
+> +# Tests rename exchange behavior when subvolumes are involved. This is a=
+lso a
+> +# regression test for 3f79f6f6247c ("btrfs: prevent rename2 from exchang=
+ing a
+> +# subvol with a directory from different parents").
+
+And it's also a regression test for commit 3f79f6f6247c83 ("btrfs:
+prevent rename2 from exchanging a subvol with a directory from
+different parents"),
+which is actually the fix that motivated v1 of this test case.
+
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick rename subvol
+> +
+> +# Import common functions.
+> + . ./common/renameat2
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs btrfs
+> +_require_renameat2 exchange
+> +_require_scratch
+> +
+> +_scratch_mkfs >> $seqres.full 2>&1
+> +_scratch_mount
+> +
+> +# Create 2 subvols to use as parents for the rename ops
+> +$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subvol1 1>/dev/null
+> +$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subvol2 1>/dev/null
+> +
+> +# Ensure cross subvol ops are forbidden
+> +_rename_tests_source_dest $SCRATCH_MNT/subvol1/src $SCRATCH_MNT/subvol2/=
+dst "cross-subvol" "-x"
+> +
+> +# Prepare a subvolume and a directory whose parents are different subvol=
+umes
+> +$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subvol1/sub-subvol 1>/dev=
+/null
+> +mkdir $SCRATCH_MNT/subvol2/dir
+> +
+> +# Ensure exchanging a subvol with a dir when both parents are different =
+fails
+> +$here/src/renameat2 -x $SCRATCH_MNT/subvol1/sub-subvol $SCRATCH_MNT/subv=
+ol2/dir
+
+Where is the test for renaming a subvolume and the test(s) for regular rena=
+mes?
+The v2 changelog mentions those tests were added, but all the tests I
+see here are doing rename exchanges only.
+
+I must have missed something subtle.
+
+Thanks.
+
+> +
+> +# success, all done
+> +status=3D0
+> +exit
+> diff --git a/tests/btrfs/246.out b/tests/btrfs/246.out
+> new file mode 100644
+> index 000000000000..d50dc28b1b40
+> --- /dev/null
+> +++ b/tests/btrfs/246.out
+> @@ -0,0 +1,27 @@
+> +QA output created by 246
+> +cross-subvol none/none -> No such file or directory
+> +cross-subvol none/regu -> No such file or directory
+> +cross-subvol none/symb -> No such file or directory
+> +cross-subvol none/dire -> No such file or directory
+> +cross-subvol none/tree -> No such file or directory
+> +cross-subvol regu/none -> No such file or directory
+> +cross-subvol regu/regu -> Invalid cross-device link
+> +cross-subvol regu/symb -> Invalid cross-device link
+> +cross-subvol regu/dire -> Invalid cross-device link
+> +cross-subvol regu/tree -> Invalid cross-device link
+> +cross-subvol symb/none -> No such file or directory
+> +cross-subvol symb/regu -> Invalid cross-device link
+> +cross-subvol symb/symb -> Invalid cross-device link
+> +cross-subvol symb/dire -> Invalid cross-device link
+> +cross-subvol symb/tree -> Invalid cross-device link
+> +cross-subvol dire/none -> No such file or directory
+> +cross-subvol dire/regu -> Invalid cross-device link
+> +cross-subvol dire/symb -> Invalid cross-device link
+> +cross-subvol dire/dire -> Invalid cross-device link
+> +cross-subvol dire/tree -> Invalid cross-device link
+> +cross-subvol tree/none -> No such file or directory
+> +cross-subvol tree/regu -> Invalid cross-device link
+> +cross-subvol tree/symb -> Invalid cross-device link
+> +cross-subvol tree/dire -> Invalid cross-device link
+> +cross-subvol tree/tree -> Invalid cross-device link
+> +Invalid cross-device link
+> --
+> 2.17.1
+>
 
 
+--=20
+Filipe David Manana,
 
-
->  common/rc         | 2 +-
->  src/fill2fs       | 2 +-
->  tests/ext4/006    | 2 +-
->  tests/generic/128 | 2 +-
->  tests/generic/452 | 2 +-
->  tests/xfs/293     | 2 +-
->  tests/xfs/505     | 2 +-
->  tests/xfs/514     | 2 +-
->  tests/xfs/515     | 2 +-
->  9 files changed, 9 insertions(+), 9 deletions(-)
-> 
-> diff --git a/common/rc b/common/rc
-> index a7f9ed86..db400c4d 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -4,7 +4,7 @@
->  
->  . common/config
->  
-> -BC=$(which bc 2> /dev/null) || BC=
-> +BC="$(type -P bc)" || BC=
->  
->  _require_math()
->  {
-> diff --git a/src/fill2fs b/src/fill2fs
-> index 1c3383a8..d5e5436b 100755
-> --- a/src/fill2fs
-> +++ b/src/fill2fs
-> @@ -111,7 +111,7 @@ sub normal {
->  #
->  
->  chomp($cwd = `pwd`);
-> -chomp($_ = `which fill2 2>&1 | head -1`);
-> +chomp($_ = `type -P fill2 | head -1`);
->  if (-x $_) {
->    # look in the path
->    $fill2 = fill2;
-> diff --git a/tests/ext4/006 b/tests/ext4/006
-> index 17e77f86..48ed6bee 100755
-> --- a/tests/ext4/006
-> +++ b/tests/ext4/006
-> @@ -24,7 +24,7 @@ _cleanup()
->  . ./common/populate
->  . ./common/fuzzy
->  
-> -if [ ! -x "$(which e2fuzz)" ]; then
-> +if [ ! -x "$(type -P e2fuzz)" ]; then
->  	_notrun "Couldn't find e2fuzz"
->  fi
->  
-> diff --git a/tests/generic/128 b/tests/generic/128
-> index dfc67fd5..dc1d43f4 100755
-> --- a/tests/generic/128
-> +++ b/tests/generic/128
-> @@ -23,7 +23,7 @@ _scratch_mkfs >/dev/null 2>&1
->  _scratch_mount "-o nosuid"
->  
->  mkdir $SCRATCH_MNT/nosuid
-> -cp `which ls` $SCRATCH_MNT
-> +cp "$(type -P ls)" $SCRATCH_MNT
->  chmod 700 $SCRATCH_MNT/nosuid
->  chmod 4755 $SCRATCH_MNT/ls
->  
-> diff --git a/tests/generic/452 b/tests/generic/452
-> index ee4dfe9e..7cbd2dfa 100755
-> --- a/tests/generic/452
-> +++ b/tests/generic/452
-> @@ -26,7 +26,7 @@ _exclude_scratch_mount_option "noexec"
->  _scratch_mkfs > $seqres.full 2>&1
->  _scratch_mount >> $seqres.full 2>&1
->  
-> -LS=$(which ls --skip-alias --skip-functions)
-> +LS="$(type -P ls) --skip-alias --skip-functions)"
-
-I think the "--skip-alias" and "--skip-functions" options are belong to
-the "which" command, so this change might cause fail.
-
-Thanks,
-Zorro
-
-
->  SCRATCH_LS=$SCRATCH_MNT/ls_on_scratch
->  cp $LS $SCRATCH_LS
->  
-> diff --git a/tests/xfs/293 b/tests/xfs/293
-> index fbd26b63..20f8c486 100755
-> --- a/tests/xfs/293
-> +++ b/tests/xfs/293
-> @@ -30,7 +30,7 @@ case "$MANPAGE" in
->  *)		CAT=cat;;
->  esac
->  
-> -_require_command `which $CAT` $CAT
-> +_require_command "$(type -P $CAT)" $CAT
->  
->  for COMMAND in `$XFS_IO_PROG -c help | awk '{print $1}' | grep -v "^Use"`; do
->    $CAT "$MANPAGE" | egrep -q "^\.B.*$COMMAND" || \
-> diff --git a/tests/xfs/505 b/tests/xfs/505
-> index 8a999ff4..71fb6e9d 100755
-> --- a/tests/xfs/505
-> +++ b/tests/xfs/505
-> @@ -26,7 +26,7 @@ case "$MANPAGE" in
->  *.xz)		CAT=xzcat;;
->  *)		CAT=cat;;
->  esac
-> -_require_command `which $CAT` $CAT
-> +_require_command "$(type -P $CAT)" $CAT
->  
->  for COMMAND in `$XFS_SPACEMAN_PROG -c help $TEST_DIR | awk '{print $1}' | grep -v "^Use"`; do
->    $CAT "$MANPAGE" | egrep -q "^\.B.*$COMMAND" || \
-> diff --git a/tests/xfs/514 b/tests/xfs/514
-> index a9c67645..cf5588f2 100755
-> --- a/tests/xfs/514
-> +++ b/tests/xfs/514
-> @@ -34,7 +34,7 @@ case "$MANPAGE" in
->  *.xz)		CAT=xzcat;;
->  *)		CAT=cat;;
->  esac
-> -_require_command `which $CAT` $CAT
-> +_require_command "$(type -P $CAT)" $CAT
->  
->  file=$TEST_DIR/xx.$seq
->  truncate -s 128m $file
-> diff --git a/tests/xfs/515 b/tests/xfs/515
-> index 32216fe6..2d7bbb35 100755
-> --- a/tests/xfs/515
-> +++ b/tests/xfs/515
-> @@ -34,7 +34,7 @@ case "$MANPAGE" in
->  *.xz)		CAT=xzcat;;
->  *)		CAT=cat;;
->  esac
-> -_require_command `which $CAT` $CAT
-> +_require_command "$(type -P $CAT)" $CAT
->  
->  for COMMAND in `$XFS_QUOTA_PROG -x -c help $file | awk '{print $1}' | grep -v "^Use"`; do
->    $CAT "$MANPAGE" | egrep -q "^\.B.*$COMMAND" || \
-> -- 
-> 2.31.1
-> 
-
+=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
+ right.=E2=80=9D
