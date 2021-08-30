@@ -2,210 +2,212 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DE391C432BE
-	for <linux-fstests@archiver.kernel.org>; Mon, 30 Aug 2021 15:36:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E0CD4C432BE
+	for <linux-fstests@archiver.kernel.org>; Mon, 30 Aug 2021 17:19:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BAEC560ED8
-	for <linux-fstests@archiver.kernel.org>; Mon, 30 Aug 2021 15:36:44 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C576E60F57
+	for <linux-fstests@archiver.kernel.org>; Mon, 30 Aug 2021 17:19:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237503AbhH3Phh (ORCPT
+        id S232969AbhH3RUr (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 30 Aug 2021 11:37:37 -0400
-Received: from smtp-out2.suse.de ([195.135.220.29]:37494 "EHLO
-        smtp-out2.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237337AbhH3Phh (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 30 Aug 2021 11:37:37 -0400
-Received: from imap1.suse-dmz.suse.de (imap1.suse-dmz.suse.de [192.168.254.73])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id 8159A200D5;
-        Mon, 30 Aug 2021 15:36:42 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-        t=1630337802; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=AN0f7m6ssa/pOf/g/W6KgPIkYYzGx5+b+JDbYkjTeoE=;
-        b=GO3OwdFf5Xu4g75LvRAG3xW1TmpGoKN1FpwEqxzjzjspdIipzjUQiJIWljPWRpqEfKEVa9
-        2hgWvcoG9YDnHyJldsVR1MYWDHfDmX4ojsNTZctW27hxgOUU4eBxEMSHm1zKjjDoPEdxOv
-        uJV8AxpDk2R212cHRjDsq6eawOjJrOk=
-Received: from imap1.suse-dmz.suse.de (imap1.suse-dmz.suse.de [192.168.254.73])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap1.suse-dmz.suse.de (Postfix) with ESMTPS id 4408F139A5;
-        Mon, 30 Aug 2021 15:36:42 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap1.suse-dmz.suse.de with ESMTPSA
-        id l2TuDQr7LGEcGAAAGKfGzw
-        (envelope-from <nborisov@suse.com>); Mon, 30 Aug 2021 15:36:42 +0000
-From:   Nikolay Borisov <nborisov@suse.com>
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Nikolay Borisov <nborisov@suse.com>
-Subject: [PATCH v2] btrfs: Add test for rename/exchange behavior between subvolumes
-Date:   Mon, 30 Aug 2021 18:36:41 +0300
-Message-Id: <20210830153641.893416-1-nborisov@suse.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20210830122306.882081-2-nborisov@suse.com>
-References: <20210830122306.882081-2-nborisov@suse.com>
+        Mon, 30 Aug 2021 13:20:47 -0400
+Received: from mail.kernel.org ([198.145.29.99]:44878 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S229709AbhH3RUq (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 30 Aug 2021 13:20:46 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id E716060F56;
+        Mon, 30 Aug 2021 17:19:52 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1630343993;
+        bh=piDfDCMdXnX0zeyORIhVCAOcn6Pjp2mevbdc3WWnWSI=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=gqtB71HkpJovtHNHgoPx4zJBCkn4fS0iGFVMq2+A1rLp7TgO/BVknRFgyQpKW35Uh
+         9IhOaqCSC9Qv7E2S8Km32gP2hts0iz8ILMAL6lotKtn3vSmpJGEkOnSLYm08INH7QE
+         o4DkPeiputHR0v9IClCaxi262IgvpEOzQ9WZBeCrhY7T+y771ELcUDb2u/tkLgOJ4X
+         7Rp6AO8FrGNCVC7OoYU7uWtjBHYaqFrwoGqExcc0AcpDRNClcAA2pZcS6CDISo5FSQ
+         TKR6saDYb/TZSquZ6UFYMP/eiGgNdkquznRXkS50BoNBJ4dC3aZcn8aUGs/cKfEdg5
+         lYZpcZecsvklQ==
+Date:   Mon, 30 Aug 2021 10:19:52 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Dave Chinner <david@fromorbit.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH] fstests: which has been deprecated by Debian
+Message-ID: <20210830171952.GA9911@magnolia>
+References: <20210830011401.697295-1-david@fromorbit.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210830011401.697295-1-david@fromorbit.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This tests ensures that renames/exchanges across subvolumes work only
-for other subvolumes and are otherwise forbidden and fail.
+> Subject: [PATCH] fstests: which has been deprecated by Debian
 
-Signed-off-by: Nikolay Borisov <nborisov@suse.com>
----
-This is the real v2.
+fstests has been deprecated by Debian?  daaaang. ;)
 
-Changes in V2:
- * Added cross-subvol rename tests
- * Added cross-subvol subvolume rename test
- * Added ordinary volume rename test
- * Removed explicit sync
+On Mon, Aug 30, 2021 at 11:14:01AM +1000, Dave Chinner wrote:
+> From: Dave Chinner <dchinner@redhat.com>
+> 
+> This patch is brought to you by the Department That Hates Users.
+> 
+> The latest debian unstable release is now causing a bunch of new
+> test failures because they have deprecated the which command.
+> 
+> Rather than make everyone jump through hoops chasing problems with
+> 'which' while debian decides to how to package at least three
+> variants of 'which' - each which will different semantics, behaviour
+> and support - as alternatives users then have to opt into, let's
+> just remove the remaining uses of the shell independent 'which'
+> command and replace them with bash builtin 'type -P' operations.
+> 
+> Signed-off-by: Dave Chinner <dchinner@redhat.com>
+> ---
+>  common/rc         | 2 +-
+>  src/fill2fs       | 2 +-
+>  tests/ext4/006    | 2 +-
+>  tests/generic/128 | 2 +-
+>  tests/generic/452 | 2 +-
+>  tests/xfs/293     | 2 +-
+>  tests/xfs/505     | 2 +-
+>  tests/xfs/514     | 2 +-
+>  tests/xfs/515     | 2 +-
+>  9 files changed, 9 insertions(+), 9 deletions(-)
+> 
+> diff --git a/common/rc b/common/rc
+> index a7f9ed86..db400c4d 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -4,7 +4,7 @@
+>  
+>  . common/config
+>  
+> -BC=$(which bc 2> /dev/null) || BC=
+> +BC="$(type -P bc)" || BC=
+>  
+>  _require_math()
+>  {
+> diff --git a/src/fill2fs b/src/fill2fs
+> index 1c3383a8..d5e5436b 100755
+> --- a/src/fill2fs
+> +++ b/src/fill2fs
+> @@ -111,7 +111,7 @@ sub normal {
+>  #
+>  
+>  chomp($cwd = `pwd`);
+> -chomp($_ = `which fill2 2>&1 | head -1`);
+> +chomp($_ = `type -P fill2 | head -1`);
+>  if (-x $_) {
+>    # look in the path
+>    $fill2 = fill2;
+> diff --git a/tests/ext4/006 b/tests/ext4/006
+> index 17e77f86..48ed6bee 100755
+> --- a/tests/ext4/006
+> +++ b/tests/ext4/006
+> @@ -24,7 +24,7 @@ _cleanup()
+>  . ./common/populate
+>  . ./common/fuzzy
+>  
+> -if [ ! -x "$(which e2fuzz)" ]; then
+> +if [ ! -x "$(type -P e2fuzz)" ]; then
+>  	_notrun "Couldn't find e2fuzz"
+>  fi
+>  
+> diff --git a/tests/generic/128 b/tests/generic/128
+> index dfc67fd5..dc1d43f4 100755
+> --- a/tests/generic/128
+> +++ b/tests/generic/128
+> @@ -23,7 +23,7 @@ _scratch_mkfs >/dev/null 2>&1
+>  _scratch_mount "-o nosuid"
+>  
+>  mkdir $SCRATCH_MNT/nosuid
+> -cp `which ls` $SCRATCH_MNT
+> +cp "$(type -P ls)" $SCRATCH_MNT
 
+Given that FHS 3.0 section 3.4.2 requires ls to be in /bin, can we
+hardcode this into these tests?
 
- tests/btrfs/246     | 60 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/246.out | 54 ++++++++++++++++++++++++++++++++++++++++
- 2 files changed, 114 insertions(+)
- create mode 100755 tests/btrfs/246
- create mode 100644 tests/btrfs/246.out
+Or, if we don't want to require FHS compliant distros, maybe we should
+just make $LS_PROG a general variable set up in common/rc?
 
-diff --git a/tests/btrfs/246 b/tests/btrfs/246
-new file mode 100755
-index 000000000000..53039df38993
---- /dev/null
-+++ b/tests/btrfs/246
-@@ -0,0 +1,60 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2021 SUSE Linux Products GmbH.  All Rights Reserved.
-+#
-+# FS QA Test 246
-+#
-+# Tests rename/exchange behavior when subvolumes are involved. Rename/exchanges
-+# across subvolumes are forbidden. This is also a regression test for
-+# 3f79f6f6247c ("btrfs: prevent rename2 from exchanging a subvol with a
-+# directory from different parents").
-+#
-+. ./common/preamble
-+_begin_fstest auto quick rename subvol
-+
-+# Import common functions.
-+ . ./common/renameat2
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs btrfs
-+_require_renameat2 exchange
-+_require_scratch
-+
-+_scratch_mkfs >> $seqres.full 2>&1
-+_scratch_mount
-+
-+# Create 2 subvols to use as parents for the rename ops
-+$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subvol1 1>/dev/null
-+$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subvol2 1>/dev/null
-+
-+# Ensure cross subvol ops are forbidden
-+_rename_tests_source_dest $SCRATCH_MNT/subvol1/src $SCRATCH_MNT/subvol2/dst "cross-subvol" "-x"
-+
-+# Prepare a subvolume and a directory whose parents are different subvolumes
-+$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subvol1/sub-subvol 1>/dev/null
-+mkdir $SCRATCH_MNT/subvol2/dir
-+
-+# Ensure exchanging a subvol with a dir when both parents are different fails
-+$here/src/renameat2 -x $SCRATCH_MNT/subvol1/sub-subvol $SCRATCH_MNT/subvol2/dir
-+
-+echo "ordinary rename"
-+# Test also ordinary renames
-+_rename_tests_source_dest $SCRATCH_MNT/subvol1/src $SCRATCH_MNT/subvol2/dst "cross-subvol"
-+
-+echo "subvolumes rename"
-+# Rename subvol1/sub-subvol -> subvol2/sub-subvol
-+$here/src/renameat2  $SCRATCH_MNT/subvol1/sub-subvol $SCRATCH_MNT/subvol2/sub-subvol
-+# Now create another subvol under subvol1/
-+$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subvol1/sub-subvol 1>/dev/null
-+# and exchange the two
-+$here/src/renameat2 -x $SCRATCH_MNT/subvol2/sub-subvol $SCRATCH_MNT/subvol1/sub-subvol
-+
-+# simple rename of a subvolume in the same directory, should catch
-+# 4871c1588f92 ("Btrfs: use right root when checking for hash collision")
-+mv $SCRATCH_MNT/subvol2/ $SCRATCH_MNT/subvol2.
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/246.out b/tests/btrfs/246.out
-new file mode 100644
-index 000000000000..5db90cf2bd9a
---- /dev/null
-+++ b/tests/btrfs/246.out
-@@ -0,0 +1,54 @@
-+QA output created by 246
-+cross-subvol none/none -> No such file or directory
-+cross-subvol none/regu -> No such file or directory
-+cross-subvol none/symb -> No such file or directory
-+cross-subvol none/dire -> No such file or directory
-+cross-subvol none/tree -> No such file or directory
-+cross-subvol regu/none -> No such file or directory
-+cross-subvol regu/regu -> Invalid cross-device link
-+cross-subvol regu/symb -> Invalid cross-device link
-+cross-subvol regu/dire -> Invalid cross-device link
-+cross-subvol regu/tree -> Invalid cross-device link
-+cross-subvol symb/none -> No such file or directory
-+cross-subvol symb/regu -> Invalid cross-device link
-+cross-subvol symb/symb -> Invalid cross-device link
-+cross-subvol symb/dire -> Invalid cross-device link
-+cross-subvol symb/tree -> Invalid cross-device link
-+cross-subvol dire/none -> No such file or directory
-+cross-subvol dire/regu -> Invalid cross-device link
-+cross-subvol dire/symb -> Invalid cross-device link
-+cross-subvol dire/dire -> Invalid cross-device link
-+cross-subvol dire/tree -> Invalid cross-device link
-+cross-subvol tree/none -> No such file or directory
-+cross-subvol tree/regu -> Invalid cross-device link
-+cross-subvol tree/symb -> Invalid cross-device link
-+cross-subvol tree/dire -> Invalid cross-device link
-+cross-subvol tree/tree -> Invalid cross-device link
-+Invalid cross-device link
-+ordinary rename
-+cross-subvol none/none -> No such file or directory
-+cross-subvol none/regu -> No such file or directory
-+cross-subvol none/symb -> No such file or directory
-+cross-subvol none/dire -> No such file or directory
-+cross-subvol none/tree -> No such file or directory
-+cross-subvol regu/none -> Invalid cross-device link
-+cross-subvol regu/regu -> Invalid cross-device link
-+cross-subvol regu/symb -> Invalid cross-device link
-+cross-subvol regu/dire -> Is a directory
-+cross-subvol regu/tree -> Is a directory
-+cross-subvol symb/none -> Invalid cross-device link
-+cross-subvol symb/regu -> Invalid cross-device link
-+cross-subvol symb/symb -> Invalid cross-device link
-+cross-subvol symb/dire -> Is a directory
-+cross-subvol symb/tree -> Is a directory
-+cross-subvol dire/none -> Invalid cross-device link
-+cross-subvol dire/regu -> Not a directory
-+cross-subvol dire/symb -> Not a directory
-+cross-subvol dire/dire -> Invalid cross-device link
-+cross-subvol dire/tree -> Invalid cross-device link
-+cross-subvol tree/none -> Invalid cross-device link
-+cross-subvol tree/regu -> Not a directory
-+cross-subvol tree/symb -> Not a directory
-+cross-subvol tree/dire -> Invalid cross-device link
-+cross-subvol tree/tree -> Invalid cross-device link
-+subvolumes rename
---
-2.17.1
+>  chmod 700 $SCRATCH_MNT/nosuid
+>  chmod 4755 $SCRATCH_MNT/ls
+>  
+> diff --git a/tests/generic/452 b/tests/generic/452
+> index ee4dfe9e..7cbd2dfa 100755
+> --- a/tests/generic/452
+> +++ b/tests/generic/452
+> @@ -26,7 +26,7 @@ _exclude_scratch_mount_option "noexec"
+>  _scratch_mkfs > $seqres.full 2>&1
+>  _scratch_mount >> $seqres.full 2>&1
+>  
+> -LS=$(which ls --skip-alias --skip-functions)
+> +LS="$(type -P ls) --skip-alias --skip-functions)"
+>  SCRATCH_LS=$SCRATCH_MNT/ls_on_scratch
+>  cp $LS $SCRATCH_LS
+>  
+> diff --git a/tests/xfs/293 b/tests/xfs/293
+> index fbd26b63..20f8c486 100755
+> --- a/tests/xfs/293
+> +++ b/tests/xfs/293
+> @@ -30,7 +30,7 @@ case "$MANPAGE" in
+>  *)		CAT=cat;;
+>  esac
+>  
+> -_require_command `which $CAT` $CAT
+> +_require_command "$(type -P $CAT)" $CAT
 
+Same thing with cat.
+
+--D
+
+>  
+>  for COMMAND in `$XFS_IO_PROG -c help | awk '{print $1}' | grep -v "^Use"`; do
+>    $CAT "$MANPAGE" | egrep -q "^\.B.*$COMMAND" || \
+> diff --git a/tests/xfs/505 b/tests/xfs/505
+> index 8a999ff4..71fb6e9d 100755
+> --- a/tests/xfs/505
+> +++ b/tests/xfs/505
+> @@ -26,7 +26,7 @@ case "$MANPAGE" in
+>  *.xz)		CAT=xzcat;;
+>  *)		CAT=cat;;
+>  esac
+> -_require_command `which $CAT` $CAT
+> +_require_command "$(type -P $CAT)" $CAT
+>  
+>  for COMMAND in `$XFS_SPACEMAN_PROG -c help $TEST_DIR | awk '{print $1}' | grep -v "^Use"`; do
+>    $CAT "$MANPAGE" | egrep -q "^\.B.*$COMMAND" || \
+> diff --git a/tests/xfs/514 b/tests/xfs/514
+> index a9c67645..cf5588f2 100755
+> --- a/tests/xfs/514
+> +++ b/tests/xfs/514
+> @@ -34,7 +34,7 @@ case "$MANPAGE" in
+>  *.xz)		CAT=xzcat;;
+>  *)		CAT=cat;;
+>  esac
+> -_require_command `which $CAT` $CAT
+> +_require_command "$(type -P $CAT)" $CAT
+>  
+>  file=$TEST_DIR/xx.$seq
+>  truncate -s 128m $file
+> diff --git a/tests/xfs/515 b/tests/xfs/515
+> index 32216fe6..2d7bbb35 100755
+> --- a/tests/xfs/515
+> +++ b/tests/xfs/515
+> @@ -34,7 +34,7 @@ case "$MANPAGE" in
+>  *.xz)		CAT=xzcat;;
+>  *)		CAT=cat;;
+>  esac
+> -_require_command `which $CAT` $CAT
+> +_require_command "$(type -P $CAT)" $CAT
+>  
+>  for COMMAND in `$XFS_QUOTA_PROG -x -c help $file | awk '{print $1}' | grep -v "^Use"`; do
+>    $CAT "$MANPAGE" | egrep -q "^\.B.*$COMMAND" || \
+> -- 
+> 2.31.1
+> 
