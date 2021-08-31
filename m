@@ -7,47 +7,51 @@ X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 917AEC432BE
-	for <linux-fstests@archiver.kernel.org>; Tue, 31 Aug 2021 23:46:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B85C5C432BE
+	for <linux-fstests@archiver.kernel.org>; Tue, 31 Aug 2021 23:49:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 70DE9600CC
-	for <linux-fstests@archiver.kernel.org>; Tue, 31 Aug 2021 23:46:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9397160E98
+	for <linux-fstests@archiver.kernel.org>; Tue, 31 Aug 2021 23:49:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236017AbhHaXrF (ORCPT
+        id S231511AbhHaXuC (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 31 Aug 2021 19:47:05 -0400
-Received: from mail107.syd.optusnet.com.au ([211.29.132.53]:45402 "EHLO
-        mail107.syd.optusnet.com.au" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S231511AbhHaXrF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 31 Aug 2021 19:47:05 -0400
+        Tue, 31 Aug 2021 19:50:02 -0400
+Received: from mail108.syd.optusnet.com.au ([211.29.132.59]:39810 "EHLO
+        mail108.syd.optusnet.com.au" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S234555AbhHaXuB (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 31 Aug 2021 19:50:01 -0400
 Received: from dread.disaster.area (pa49-195-182-146.pa.nsw.optusnet.com.au [49.195.182.146])
-        by mail107.syd.optusnet.com.au (Postfix) with ESMTPS id 31075114557F
-        for <fstests@vger.kernel.org>; Wed,  1 Sep 2021 09:46:08 +1000 (AEST)
+        by mail108.syd.optusnet.com.au (Postfix) with ESMTPS id 1A1BB1B922F;
+        Wed,  1 Sep 2021 09:49:04 +1000 (AEST)
 Received: from dave by dread.disaster.area with local (Exim 4.92.3)
         (envelope-from <david@fromorbit.com>)
-        id 1mLDS5-007FhQ-HY
-        for fstests@vger.kernel.org; Wed, 01 Sep 2021 09:46:01 +1000
-Date:   Wed, 1 Sep 2021 09:46:01 +1000
+        id 1mLDUx-007Fj7-9L; Wed, 01 Sep 2021 09:48:59 +1000
+Date:   Wed, 1 Sep 2021 09:48:59 +1000
 From:   Dave Chinner <david@fromorbit.com>
-To:     fstests@vger.kernel.org
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     fstests@vger.kernel.org
 Subject: Re: [PATCH] fstests: which has been deprecated by Debian
-Message-ID: <20210831234601.GI2566745@dread.disaster.area>
+Message-ID: <20210831234859.GJ2566745@dread.disaster.area>
 References: <20210830011401.697295-1-david@fromorbit.com>
- <20210830132927.7glbrcsgwep6xq4v@fedora>
+ <20210830171952.GA9911@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210830132927.7glbrcsgwep6xq4v@fedora>
+In-Reply-To: <20210830171952.GA9911@magnolia>
 X-Optus-CM-Score: 0
-X-Optus-CM-Analysis: v=2.3 cv=YKPhNiOx c=1 sm=1 tr=0
+X-Optus-CM-Analysis: v=2.3 cv=Tu+Yewfh c=1 sm=1 tr=0
         a=QpfB3wCSrn/dqEBSktpwZQ==:117 a=QpfB3wCSrn/dqEBSktpwZQ==:17
         a=kj9zAlcOel0A:10 a=7QKq2e-ADPsA:10 a=20KFwNOVAAAA:8 a=7-415B0cAAAA:8
-        a=0r-O_0yx9S-6RauDYA4A:9 a=CjuIK1q_8ugA:10 a=biEYGPWJfzWAr4FL6Ov7:22
+        a=M6AA-ViiZXM12Ji9B2sA:9 a=CjuIK1q_8ugA:10 a=biEYGPWJfzWAr4FL6Ov7:22
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Aug 30, 2021 at 09:29:27PM +0800, Zorro Lang wrote:
+On Mon, Aug 30, 2021 at 10:19:52AM -0700, Darrick J. Wong wrote:
+> > Subject: [PATCH] fstests: which has been deprecated by Debian
+> 
+> fstests has been deprecated by Debian?  daaaang. ;)
+> 
 > On Mon, Aug 30, 2021 at 11:14:01AM +1000, Dave Chinner wrote:
 > > From: Dave Chinner <dchinner@redhat.com>
 > > 
@@ -65,10 +69,6 @@ On Mon, Aug 30, 2021 at 09:29:27PM +0800, Zorro Lang wrote:
 > > 
 > > Signed-off-by: Dave Chinner <dchinner@redhat.com>
 > > ---
-> 
-> 
-> 
-> 
 > >  common/rc         | 2 +-
 > >  src/fill2fs       | 2 +-
 > >  tests/ext4/006    | 2 +-
@@ -129,41 +129,41 @@ On Mon, Aug 30, 2021 at 09:29:27PM +0800, Zorro Lang wrote:
 > >  mkdir $SCRATCH_MNT/nosuid
 > > -cp `which ls` $SCRATCH_MNT
 > > +cp "$(type -P ls)" $SCRATCH_MNT
-> >  chmod 700 $SCRATCH_MNT/nosuid
-> >  chmod 4755 $SCRATCH_MNT/ls
-> >  
-> > diff --git a/tests/generic/452 b/tests/generic/452
-> > index ee4dfe9e..7cbd2dfa 100755
-> > --- a/tests/generic/452
-> > +++ b/tests/generic/452
-> > @@ -26,7 +26,7 @@ _exclude_scratch_mount_option "noexec"
-> >  _scratch_mkfs > $seqres.full 2>&1
-> >  _scratch_mount >> $seqres.full 2>&1
-> >  
-> > -LS=$(which ls --skip-alias --skip-functions)
-> > +LS="$(type -P ls) --skip-alias --skip-functions)"
 > 
-> I think the "--skip-alias" and "--skip-functions" options are belong to
-> the "which" command, so this change might cause fail.
+> Given that FHS 3.0 section 3.4.2 requires ls to be in /bin, can we
+> hardcode this into these tests?
 
-Yay for command line parsing - invalid options are silently ignored
-by which on debian, so this actual command does the same thing as
-'which ls'....
+For the binary copying, I'll just leave it like this. For all
+others, I'll just leave the path to find the ls binary.
 
-Really, though, I think I'm just going to allow the path to find ls
-in most cases - the only reason for using `which ls` was for tests
-that use it as a file copy source. If 'ls' is not in the default
-execution path, lots of stuff will not work...
+> > diff --git a/tests/xfs/293 b/tests/xfs/293
+> > index fbd26b63..20f8c486 100755
+> > --- a/tests/xfs/293
+> > +++ b/tests/xfs/293
+> > @@ -30,7 +30,7 @@ case "$MANPAGE" in
+> >  *)		CAT=cat;;
+> >  esac
+> >  
+> > -_require_command `which $CAT` $CAT
+> > +_require_command "$(type -P $CAT)" $CAT
+> 
+> Same thing with cat.
 
-> >  SCRATCH_LS=$SCRATCH_MNT/ls_on_scratch
-> >  cp $LS $SCRATCH_LS
+Except $CAT might be something other than "cat" here. i.e.:
 
-Oh, look, copying the ls binary is exactly what this test is
-doing, so this would result in a cp failure...
+case "$MANPAGE" in
+*.gz|*.z\|*.Z)  CAT=zcat;;
+*.bz2)          CAT=bzcat;;
+*.xz)           CAT=xzcat;;
+*)              CAT=cat;;
+esac
+
+_require_command "$(type -P $CAT)" $CAT
 
 Cheers,
 
 Dave.
+
 -- 
 Dave Chinner
 david@fromorbit.com
