@@ -5,141 +5,117 @@ X-Spam-Level:
 X-Spam-Status: No, score=-16.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B97B2C432BE
-	for <linux-fstests@archiver.kernel.org>; Wed,  1 Sep 2021 09:04:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 86907C432BE
+	for <linux-fstests@archiver.kernel.org>; Wed,  1 Sep 2021 09:40:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9A4BD61054
-	for <linux-fstests@archiver.kernel.org>; Wed,  1 Sep 2021 09:04:12 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 666E661057
+	for <linux-fstests@archiver.kernel.org>; Wed,  1 Sep 2021 09:40:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240770AbhIAJFI (ORCPT
+        id S243021AbhIAJle (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 1 Sep 2021 05:05:08 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:52503 "EHLO
+        Wed, 1 Sep 2021 05:41:34 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:22157 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S243327AbhIAJFH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 1 Sep 2021 05:05:07 -0400
+        by vger.kernel.org with ESMTP id S232817AbhIAJld (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 1 Sep 2021 05:41:33 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1630487050;
+        s=mimecast20190719; t=1630489236;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=Cfro/hBm/nzGtPoQ51nc+mDpagE/EAoScu7Kx0RLdkw=;
-        b=f8t1vLKOIn8wCpALbZ8BLmyUteSuCHPn2B+7eFdCkoxIN0ZQT2hqr04vcy8O8p5+hUFjFE
-        Um7GNKoL5kTLoRVyYvWF6Hqjwce5FsvjFosmLbZ0PFiKn4J2yT/nMuDaUPEIhyqfPy0kgH
-        uFFUoGdf+UWnm1WAZd4yA8qxEb0SiT8=
-Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
- [209.85.214.197]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-266-fBTFDltZN_u6LzAJShoO-Q-1; Wed, 01 Sep 2021 05:04:09 -0400
-X-MC-Unique: fBTFDltZN_u6LzAJShoO-Q-1
-Received: by mail-pl1-f197.google.com with SMTP id z11-20020a170902834b00b00130c1b330bcso706674pln.7
-        for <fstests@vger.kernel.org>; Wed, 01 Sep 2021 02:04:09 -0700 (PDT)
+        bh=I4Vv9FhzpXy4aniAWFdVz1JM+EpzEki0ocz5vOxu/90=;
+        b=EU6v5BMYx1DU08NBVv7rw7CMtj6AdSHZXLq24WK4g/nOAd2Vo1m2pOWBQK+D6atOr4Sln7
+        p4pr+hVGuvTjuCx89svv4itOEszyFbULIYv+a+u+a70uYQd11FUBT1jHLtBcsLoWr14BFk
+        dg0rKffncAfTk0Nl8/c55Yq2FzvEj3k=
+Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com
+ [209.85.214.198]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-345-G7K1hIllOIyappCOQkoaOg-1; Wed, 01 Sep 2021 05:40:35 -0400
+X-MC-Unique: G7K1hIllOIyappCOQkoaOg-1
+Received: by mail-pl1-f198.google.com with SMTP id p5-20020a170902a405b029012cbb4fcc03so738337plq.19
+        for <fstests@vger.kernel.org>; Wed, 01 Sep 2021 02:40:35 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id
-         :mail-followup-to:references:mime-version:content-disposition
-         :in-reply-to;
-        bh=Cfro/hBm/nzGtPoQ51nc+mDpagE/EAoScu7Kx0RLdkw=;
-        b=dTaWGAQjNFUqBD4XuwGvqurw97DOVzm5q+p2FEqMinbv937MZNc8TQUOK8sOq0QGP1
-         LCIFwO6Co8B8snFeiQHrNM8+uG3NWTaJwjlTazZdB70XaaymR9NDGBscXXxkRFWmBzdt
-         fZLN1rwpoN5v8dur8pD6LzWHdiH2HzLWcLdg9cb+diXCMsa0DEOVMT4qBCK+qB/mPMGY
-         OUlz4SVjUCihgh7vHJc+A+t0FzySXPY3fpI5K7HFq6y9uRWwbfAGSzs3q1OtbwoxIIHU
-         OAFj4Bggaug0+b4aEIS2pZjHRi/LYK7wCNf3Hh0MqNOT0sYOFWMJ3AgF/XZ/hV1jCWF5
-         dGEw==
-X-Gm-Message-State: AOAM532EPK2UNBkM4Gusr34MdJX7RvpyDVfU1hD+mSSCfJlLtXgqWigS
-        i0IPm9ZldGiSufmesQ6+G8NO0+YZkS6OR/pzjc5QAm9Nhyf1TixDe6VGKYRM5PtIxLcXEEVyTC9
-        pjk3wLrTx3hgpLBzI3w==
-X-Received: by 2002:a17:902:6f01:b0:138:9aca:efda with SMTP id w1-20020a1709026f0100b001389acaefdamr8813452plk.19.1630487048296;
-        Wed, 01 Sep 2021 02:04:08 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJwxzFVz4Sazd29bWpLJydqUW/UDChS3QQJK9ORalPU5IQqOGo6gVTCXUFT3YTqrhujfpAIImg==
-X-Received: by 2002:a17:902:6f01:b0:138:9aca:efda with SMTP id w1-20020a1709026f0100b001389acaefdamr8813427plk.19.1630487048019;
-        Wed, 01 Sep 2021 02:04:08 -0700 (PDT)
-Received: from fedora ([209.132.188.80])
-        by smtp.gmail.com with ESMTPSA id 17sm17289840pfp.28.2021.09.01.02.04.05
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=I4Vv9FhzpXy4aniAWFdVz1JM+EpzEki0ocz5vOxu/90=;
+        b=kdgaYLOJo54hxmfOe61VWwerR5Fza+ymAYymlNYsOx1xavZ3LaBy64RjlDNSHMD8kr
+         S1Xq+x8iY3dLnLax/lZqNqfFrSi9/Q/K/epakSjRI9/G2R9fx1+kWEBv5A+oRNNZ/H7c
+         i+P9xx6o6D0Mc383NLyuG15ewqdb375oVl1uztRC663twm/9zwVESW94K06xnySKhj1S
+         X6XFTCqtAorR3cyRsu3lenxWeyMVEBFmzO/0m8eMeApxhfsmjs/ZhC0kQe07otf37NVs
+         zzDzXvN4yFBIhJJtaBV6W4exhis+o7x9yZJwxAdd63XSTO8+T0INgcP7ARt/vIdf3qxI
+         3uuA==
+X-Gm-Message-State: AOAM532QbrtRBP3yRVwhKBzKHiDVliHTpU80Di7T1QzYNw+Y/6x/BMa8
+        W7mhFQh1pYjvUwAwGflVVCodZYX+siUg8uQhB+HclPL6PruglpqlwgvxXbFVAP5du7zSDSHWw1S
+        ANIdMKcR8snoGp2pbBQ==
+X-Received: by 2002:a17:90a:8a82:: with SMTP id x2mr5842105pjn.189.1630489234638;
+        Wed, 01 Sep 2021 02:40:34 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJxaWZnidLQ5dIPwJehRocOBxFuChDTZTqmcuR23MGlNeueM9B/f67zIJlMClle4uTxaZFYm3A==
+X-Received: by 2002:a17:90a:8a82:: with SMTP id x2mr5842080pjn.189.1630489234390;
+        Wed, 01 Sep 2021 02:40:34 -0700 (PDT)
+Received: from xzhoux.usersys.redhat.com ([209.132.188.80])
+        by smtp.gmail.com with ESMTPSA id u10sm12905704pfn.147.2021.09.01.02.40.31
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 01 Sep 2021 02:04:07 -0700 (PDT)
-Date:   Wed, 1 Sep 2021 17:24:52 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org, guan@eryu.me
-Subject: Re: [PATCH 1/2] common/xfs: skip xfs_check unless the test runner
- forces us to
-Message-ID: <20210901092452.mqg5nq37fgkraaij@fedora>
-Mail-Followup-To: "Darrick J. Wong" <djwong@kernel.org>, guaneryu@gmail.com,
-        linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me
-References: <163045507051.769821.5924414818977330640.stgit@magnolia>
- <163045507618.769821.3650550873572768945.stgit@magnolia>
+        Wed, 01 Sep 2021 02:40:33 -0700 (PDT)
+Date:   Wed, 1 Sep 2021 17:40:24 +0800
+From:   Xiong Zhou <xzhou@redhat.com>
+To:     Dave Chinner <david@fromorbit.com>
+Cc:     Murphy Zhou <xzhou@redhat.com>, Theodore Ts'o <tytso@mit.edu>,
+        Pavel Reichl <preichl@redhat.com>, fstests@vger.kernel.org,
+        Luis Chamberlain <mcgrof@kernel.org>
+Subject: [PATCH v3] common/rc: fix MKSWAP_PROG quoting
+Message-ID: <20210901094024.424whsgozs5lwyzo@xzhoux.usersys.redhat.com>
+References: <20210831030426.nwcoelcnshq4wrxx@xzhoux.usersys.redhat.com>
+ <20210831052632.p4kaygjeujipo4w5@fedora>
+ <3d064e8a-514d-4a98-3db1-0de490107368@redhat.com>
+ <20210831134207.aa4e26xuyji4npia@fedora>
+ <YS5hRsSXNHYQdUv9@mit.edu>
+ <20210901054822.phzkg5xqoocx3duq@xzhoux.usersys.redhat.com>
+ <20210901071545.GA1756565@dread.disaster.area>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <163045507618.769821.3650550873572768945.stgit@magnolia>
+In-Reply-To: <20210901071545.GA1756565@dread.disaster.area>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Aug 31, 2021 at 05:11:16PM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
-> 
-> At long last I've completed my quest to ensure that every corruption
-> found by xfs_check can also be found by xfs_repair.  Since xfs_check
-> uses more memory than repair and has long been obsolete, let's stop
-> running it automatically from _check_xfs_filesystem unless the test
-> runner makes us do it.
-> 
-> Tests that explicitly want xfs_check can call it via _scratch_xfs_check
-> or _xfs_check; that part doesn't go away.
-> 
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> ---
->  README     |    4 ++++
->  common/xfs |   12 ++++++++----
->  2 files changed, 12 insertions(+), 4 deletions(-)
-> 
-> 
-> diff --git a/README b/README
-> index 84c217ce..63f0641a 100644
-> --- a/README
-> +++ b/README
-> @@ -125,6 +125,10 @@ Preparing system for tests:
->  	       time we should try a patient module remove. The default is 50
->  	       seconds. Set this to "forever" and we'll wait forever until the
->  	       module is gone.
-> +             - Set FORCE_XFS_CHECK_PROG=yes to have _check_xfs_filesystem run
-> +               xfs_check to check the filesystem.  As of August 2021,
-> +               xfs_repair finds all filesystem corruptions found by xfs_check,
-> +               and more, which means that xfs_check is no longer run by default.
->  
->          - or add a case to the switch in common/config assigning
->            these variables based on the hostname of your test
-> diff --git a/common/xfs b/common/xfs
-> index c5e39427..bfb1bf1e 100644
-> --- a/common/xfs
-> +++ b/common/xfs
-> @@ -595,10 +595,14 @@ _check_xfs_filesystem()
->  		ok=0
->  	fi
->  
-> -	# xfs_check runs out of memory on large files, so even providing the test
-> -	# option (-t) to avoid indexing the free space trees doesn't make it pass on
-> -	# large filesystems. Avoid it.
-> -	if [ "$LARGE_SCRATCH_DEV" != yes ]; then
-> +	# xfs_check runs out of memory on large files, so even providing the
-> +	# test option (-t) to avoid indexing the free space trees doesn't make
-> +	# it pass on large filesystems. Avoid it.
-> +	#
-> +	# As of August 2021, xfs_repair completely supersedes xfs_check's
-> +	# ability to find corruptions, so we no longer run xfs_check unless
-> +	# forced to run it.
+After commit
+  0e4dd8b9 common/rc: fix ignoring of errors on
+we are getting this error message when running swapfiles tests:
+  +./common/rc: line 2553: MKSWAP_PROG: command not found
 
-I have to say I've waited for this change long time :-D
+Rewrite the line.
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+Signed-off-by: Murphy Zhou <xzhou@redhat.com>
+---
 
-> +	if [ "$LARGE_SCRATCH_DEV" != yes ] && [ "$FORCE_XFS_CHECK_PROG" = "yes" ]; then
->  		_xfs_check $extra_log_options $device 2>&1 > $tmp.fs_check
->  	fi
->  	if [ -s $tmp.fs_check ]; then
-> 
+Thanks all for the suggestions!
+
+v2:
+  rewrite the line and add a filter
+  source filters for generic/643
+v3:
+  drop the filter, use grep
+
+ common/rc | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/common/rc b/common/rc
+index 46b6b220..00f3023f 100644
+--- a/common/rc
++++ b/common/rc
+@@ -2550,7 +2550,8 @@ _format_swapfile() {
+ 	$CHATTR_PROG +C "$fname" > /dev/null 2>&1
+ 	_pwrite_byte 0x61 0 "$sz" "$fname" >> $seqres.full
+ 	# Ignore permission complaints on filesystems that don't support perms
+-	$(MKSWAP_PROG "$fname" 2> >(grep -v 'insecure permission' >&2)) >> $seqres.full
++	$MKSWAP_PROG "$fname" 2>&1 >> $seqres.full | \
++		grep -v "insecure permission"
+ }
+ 
+ _swapon_file() {
+-- 
+2.20.1
 
