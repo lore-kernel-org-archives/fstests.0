@@ -2,126 +2,255 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 502F7C432BE
-	for <linux-fstests@archiver.kernel.org>; Wed,  1 Sep 2021 12:44:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E4B26C4320A
+	for <linux-fstests@archiver.kernel.org>; Wed,  1 Sep 2021 16:43:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3DBF461131
-	for <linux-fstests@archiver.kernel.org>; Wed,  1 Sep 2021 12:44:56 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C59D261053
+	for <linux-fstests@archiver.kernel.org>; Wed,  1 Sep 2021 16:43:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1345006AbhIAMpv (ORCPT
+        id S1344145AbhIAQoJ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 1 Sep 2021 08:45:51 -0400
-Received: from mail1.bemta26.messagelabs.com ([85.158.142.1]:60054 "EHLO
-        mail1.bemta26.messagelabs.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1345383AbhIAMoL (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 1 Sep 2021 08:44:11 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fujitsu.com;
-        s=170520fj; t=1630500193; i=@fujitsu.com;
-        bh=KL1ud68KQVVQydzZAupKAFJ9Dn+IiZslUE7Mgjoa0xw=;
-        h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
-         MIME-Version:Content-Type;
-        b=rY1Bt+YF51Nf6vCpdMe7hZN6OXZ5jJxrKU9woassg032e7K+M/fAT3+d0dkQxoGn6
-         ABGbIfjR0nmXy8yLfYsDN0voK6Gi2sa5fRZxKrQwuoziyPoe6im9xhylYwc7iKBSh7
-         0ZBnnw9Vqoo+RG8aS7I+MjBDMcOnJSw8Wcg3b2p2I7wvSyDLygduMaIC+WE26n0k1Z
-         UC+GzvkA8mSNKCqmbgo0/CIIt5pMWqZpS07pzEKpj8BYw8kucAmXUqDmG+V11Z9S8h
-         ltJZGi3PUYcQeaDE1miAZnuYMlLkrJ1gg22PDWJ99OWZwFfFP4SVr1SA8Ds2d2jbp5
-         5aOwgvCQRXBuw==
-Received: from [100.113.2.26] (using TLSv1.2 with cipher DHE-RSA-AES256-GCM-SHA384 (256 bits))
-        by server-1.bemta.az-a.eu-central-1.aws.symcld.net id 15/8F-24763-1657F216; Wed, 01 Sep 2021 12:43:13 +0000
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFtrDIsWRWlGSWpSXmKPExsViZ8MRqptYqp9
-  ocO+UgsXplr3sDowenzfJBTBGsWbmJeVXJLBmHDj3mKXgHXfFubO97A2Mi7i6GLk4hAQ6mCRW
-  rJjJCuHsZpR43n+TqYuRk4NNQFPiWecCZhBbREBW4v+M1WBxZgF1ieWTfoHZwgIFEk/WnAWzW
-  QRUJC5c3sIGYvMKeEq8u3EFzJYQUJCY8vA92BxOAS+J36susYDYQkA1E9/+ZYKoF5Q4OfMJC8
-  R8CYmDL14wQ/QqSlzq+MYIYVdIzJrVxjSBkX8WkpZZSFoWMDKtYrRMKspMzyjJTczM0TU0MNA
-  1NDTWNdQ1NDHSS6zSTdRLLdVNTs0rKUoEyuollhfrFVfmJuek6OWllmxiBAZkSiFj3w7GiW8+
-  6B1ilORgUhLlZYnUTxTiS8pPqcxILM6ILyrNSS0+xCjDwaEkwbsrAygnWJSanlqRlpkDjA6Yt
-  AQHj5II75JCoDRvcUFibnFmOkTqFKMux86j8xYxC7Hk5eelSonzrisBKhIAKcoozYMbAYvUS4
-  yyUsK8jAwMDEI8BalFuZklqPKvGMU5GJWEeWcXA03hycwrgdv0CugIJqAjeH7ogBxRkoiQkmp
-  gkt/+vNOy6cIstVTf40cDom4GHmt38Sp0CN6QrbWx/uv31udc91vN7O6pdndIJB3RPLOjOSHu
-  Huup5VquQfti3u5etZ7pwzfRJknt2ntLfrdI7lu0ZJ1C6PqWHas/m11eu5st4r73ogOymnO5j
-  oVuWMR6dIeC5b7ruY4l8YXPmxXfT4iyXjVFJWbSfO8Hjy2W7L65+L5FzhTJ9sbGxXsaGs0EhL
-  +aWjdMfvfk5XbfB67nVQ9pLPLNX2Bz1e+C6+HZutwbPnGc2Wda+utvoED/1R+HrvWIeu/S7Jd
-  JWVm+rUbA41/Cv6UZfzbfm+N5j+/elQ+2XQoOGT65bz/cmOX1ceqs+mMXF9d+zs+Vf/q+8IkS
-  S3FGoqEWc1FxIgAJkp/mTwMAAA==
-X-Env-Sender: xuyang2018.jy@fujitsu.com
-X-Msg-Ref: server-5.tower-232.messagelabs.com!1630500193!46255!1
-X-Originating-IP: [62.60.8.85]
-X-SYMC-ESS-Client-Auth: outbound-route-from=pass
-X-StarScan-Received: 
-X-StarScan-Version: 9.81.4; banners=-,-,-
-X-VirusChecked: Checked
-Received: (qmail 28158 invoked from network); 1 Sep 2021 12:43:13 -0000
-Received: from unknown (HELO mailhost4.uk.fujitsu.com) (62.60.8.85)
-  by server-5.tower-232.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 1 Sep 2021 12:43:13 -0000
-Received: from R01UKEXCASM126.r01.fujitsu.local ([10.183.43.178])
-        by mailhost4.uk.fujitsu.com (8.14.5/8.14.5) with ESMTP id 181ChAfT006407
-        (version=TLSv1/SSLv3 cipher=AES256-SHA bits=256 verify=FAIL)
-        for <fstests@vger.kernel.org>; Wed, 1 Sep 2021 13:43:13 +0100
-Received: from localhost.localdomain (10.167.220.84) by
- R01UKEXCASM126.r01.fujitsu.local (10.183.43.178) with Microsoft SMTP Server
- (TLS) id 15.0.1497.23; Wed, 1 Sep 2021 13:43:11 +0100
-From:   Yang Xu <xuyang2018.jy@fujitsu.com>
-To:     <fstests@vger.kernel.org>
-CC:     Yang Xu <xuyang2018.jy@fujitsu.com>
-Subject: [PATCH v1 4/4] src/idmapped-mounts/idmapped-mounts.c: Fix build error because of undefined reallocarray
-Date:   Wed, 1 Sep 2021 20:43:26 +0800
-Message-ID: <1630500206-15545-4-git-send-email-xuyang2018.jy@fujitsu.com>
-X-Mailer: git-send-email 1.8.3.1
-In-Reply-To: <1630500206-15545-1-git-send-email-xuyang2018.jy@fujitsu.com>
-References: <1630500206-15545-1-git-send-email-xuyang2018.jy@fujitsu.com>
+        Wed, 1 Sep 2021 12:44:09 -0400
+Received: from mail.kernel.org ([198.145.29.99]:60372 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1344156AbhIAQoI (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 1 Sep 2021 12:44:08 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 9E9D161059;
+        Wed,  1 Sep 2021 16:43:11 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1630514591;
+        bh=EsBrb5ltlCJQoHJ8BGbpofVbVtPrr6R36M79JfOPrK8=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=N7kjFSdHHZg9PVmZ3nsio5tELnkj/f0KVXrs0+jCdAzkTDAh8R3MHIxrDFER9XwB3
+         QJIu++rc2Wei2t5/BiNxGmDxtsFfuGbXrUjhEKzyaBLBeCL3/ygzp1aXCDdfVG/u3t
+         Hn4Km8RnHfDSi1vM6588OaEbYy/SgOwAQ21/2klDvGeZV2zyMVumnSupM9FIx/X9z2
+         0/ZTN8C/cHZdqyMaqMtuzvM0upC+zQV0MHIpS5I2BbtTHXTT13X+UwKb1Ppt9Mk+qj
+         xyZsRWjl45pY6eslJJzq1RL9Ah/8qhiXV7ldwRbCgtOciokOeqP2p9dbm7Ks+i0OAv
+         s1YTNIyOGdnuQ==
+Date:   Wed, 1 Sep 2021 09:43:11 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Amir Goldstein <amir73il@gmail.com>
+Cc:     Eryu Guan <guaneryu@gmail.com>,
+        linux-xfs <linux-xfs@vger.kernel.org>,
+        fstests <fstests@vger.kernel.org>, Eryu Guan <guan@eryu.me>
+Subject: Re: [PATCH 4/5] tools: make sure that test groups are described in
+ the documentation
+Message-ID: <20210901164311.GB9911@magnolia>
+References: <163045514980.771564.6282165259140399788.stgit@magnolia>
+ <163045517173.771564.1524162806861567173.stgit@magnolia>
+ <CAOQ4uxi7205Ae+un1w4C4Dzh9-SykL=ogHQSBH=nnVGDkPfkhw@mail.gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain
-X-Originating-IP: [10.167.220.84]
-X-ClientProxiedBy: G08CNEXCHPEKD07.g08.fujitsu.local (10.167.33.80) To
- R01UKEXCASM126.r01.fujitsu.local (10.183.43.178)
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAOQ4uxi7205Ae+un1w4C4Dzh9-SykL=ogHQSBH=nnVGDkPfkhw@mail.gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On old glibc, reallocarray was not introduced, so this case compiles failed.
-We should use reallocarray if glibc supports and use realloc if glibcs doesn't
-support reallocarray.
+On Wed, Sep 01, 2021 at 07:46:01AM +0300, Amir Goldstein wrote:
+> On Wed, Sep 1, 2021 at 3:37 AM Darrick J. Wong <djwong@kernel.org> wrote:
+> >
+> > From: Darrick J. Wong <djwong@kernel.org>
+> >
+> > Create a file to document the purpose of each test group that is
+> > currently defined in fstests, and add a build script to check that every
+> > group mentioned in the tests is also mentioned in the documentation.
+> >
+> 
+> This is awesome and long due.
+> Thanks for doing that!
+> 
+> Minor nits about overlayfs groups below...
 
-Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
----
- configure.ac                          | 1 +
- src/idmapped-mounts/idmapped-mounts.c | 4 ++++
- 2 files changed, 5 insertions(+)
+Heh, yeah, thanks for making corrections. :)
 
-diff --git a/configure.ac b/configure.ac
-index 0b55455a..6e5ab397 100644
---- a/configure.ac
-+++ b/configure.ac
-@@ -68,6 +68,7 @@ AC_PACKAGE_WANT_LIBBTRFSUTIL
- 
- AC_HAVE_COPY_FILE_RANGE
- AC_CHECK_FUNCS([renameat2])
-+AC_CHECK_FUNCS([reallocarray])
- AC_CHECK_TYPES([struct mount_attr], [], [], [[#include <linux/mount.h>]])
- AC_CHECK_TYPES([struct btrfs_qgroup_limit], [], [], [[
- #include <stddef.h>
-diff --git a/src/idmapped-mounts/idmapped-mounts.c b/src/idmapped-mounts/idmapped-mounts.c
-index 4230cb48..83b7c89a 100644
---- a/src/idmapped-mounts/idmapped-mounts.c
-+++ b/src/idmapped-mounts/idmapped-mounts.c
-@@ -9910,8 +9910,12 @@ static int append_stack(struct btrfs_iter *iter, uint64_t tree_id, size_t path_l
- 	if (iter->stack_len >= iter->stack_capacity) {
- 		size_t new_capacity = iter->stack_capacity * 2;
- 		struct btrfs_stack *new_search_stack;
-+#ifdef HAVE_REALLOCARRAY
- 		new_search_stack = reallocarray(iter->search_stack, new_capacity,
- 						sizeof(*iter->search_stack));
-+#else
-+		new_search_stack = realloc(iter->search_stack, new_capacity * sizeof(*iter->search_stack));
-+#endif
- 		if (!new_search_stack)
- 			return -ENOMEM;
- 
--- 
-2.23.0
+> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> > ---
+> >  doc/group-names.txt    |  136 ++++++++++++++++++++++++++++++++++++++++++++++++
+> >  include/buildgrouplist |    1
+> >  tools/check-groups     |   33 ++++++++++++
+> >  3 files changed, 170 insertions(+)
+> >  create mode 100644 doc/group-names.txt
+> >  create mode 100755 tools/check-groups
+> >
+> >
+> > diff --git a/doc/group-names.txt b/doc/group-names.txt
+> > new file mode 100644
+> > index 00000000..ae517328
+> > --- /dev/null
+> > +++ b/doc/group-names.txt
+> > @@ -0,0 +1,136 @@
+> > +======================= =======================================================
+> > +Group Name:            Description:
+> > +======================= =======================================================
+> > +all                    All known tests, automatically generated by ./check at
+> > +                       runtime
+> > +auto                   Tests that should be run automatically.  These should
+> > +                       not require more than ~5 minutes to run.
+> > +quick                  Tests that should run in under 30 seconds.
+> > +deprecated             Old tests that should not be run.
+> > +
+> > +acl                    Access Control Lists
+> > +admin                  xfs_admin functionality
+> > +aio                    general libaio async io tests
+> > +atime                  file access time
+> > +attr                   extended attributes
+> > +attr2                  xfs v2 extended aributes
+> > +balance                        btrfs tree rebalance
+> > +bigtime                        timestamps beyond the year 2038
+> > +blockdev               block device functionality
+> > +broken                 broken tests
+> > +cap                    Linux capabilities
+> > +casefold               directory name casefolding
+> > +ci                     ASCII case-insensitive directory name lookups
+> > +clone                  FICLONE/FICLONERANGE ioctls
+> > +clone_stress           stress testing FICLONE/FICLONERANGE
+> > +collapse               fallocate collapse_range
+> > +compress               file compression
+> > +convert                        btrfs ext[34] conversion tool
+> > +copy                   xfs_copy functionality
+> > +copy_range             copy_file_range syscall
+> > +copyup                 overlayfs copyup support
+> 
+> The tests in this group exercise copy up.
+> There is no such thing as overlayfs without "copyup support",
+> so guess my point is - remove the word "support"
 
+OK.
+
+> > +dangerous              dangerous test that can crash the system
+> > +dangerous_bothrepair   fuzzers to evaluate xfs_scrub + xfs_repair repair
+> > +dangerous_fuzzers      fuzzers that can crash your computer
+> > +dangerous_norepair     fuzzers to evaluate kernel metadata verifiers
+> > +dangerous_online_repair        fuzzers to evaluate xfs_scrub online repair
+> > +dangerous_repair       fuzzers to evaluate xfs_repair offline repair
+> > +dangerous_scrub                fuzzers to evaluate xfs_scrub checking
+> > +data                   data loss checkers
+> > +dax                    direct access mode for persistent memory files
+> > +db                     xfs_db functional tests
+> > +dedupe                 FIEDEDUPERANGE ioctl
+> > +defrag                 filesystem defragmenters
+> > +dir                    directory test functions
+> > +dump                   dump and restore utilities
+> > +eio                    IO error reporting
+> > +encrypt                        encrypted file contents
+> > +enospc                 ENOSPC error reporting
+> > +exportfs               file handles
+> > +filestreams            XFS filestreams allocator
+> > +freeze                 filesystem freeze tests
+> > +fsck                   general fsck tests
+> > +fsmap                  FS_IOC_GETFSMAP ioctl
+> > +fsr                    XFS free space reorganizer
+> > +fuzzers                        filesystem fuzz tests
+> > +growfs                 increasing the size of a filesystem
+> > +hardlink               hardlinks
+> > +health                 XFS health reporting
+> > +idmapped               idmapped mount functionality
+> > +inobtcount             XFS inode btree count tests
+> > +insert                 fallocate insert_range
+> > +ioctl                  general ioctl tests
+> > +io_uring               general io_uring async io tests
+> > +label                  filesystem labelling
+> > +limit                  resource limits
+> > +locks                  file locking
+> > +log                    metadata logging
+> > +logprint               xfs_logprint functional tests
+> > +long_rw                        long-soak read write IO path exercisers
+> > +metacopy               overlayfs metadata-only copy-up
+> > +metadata               filesystem metadata update exercisers
+> > +metadump               xfs_metadump/xfs_mdrestore functionality
+> > +mkfs                   filesystem formatting tools
+> > +mount                  mount option and functionality checks
+> > +nested                 nested overlayfs instances
+> > +nfs4_acl               NFSv4 access control lists
+> > +nonsamefs              overlayfs layers on different filesystems
+> > +online_repair          online repair functionality tests
+> > +other                  dumping ground, do not add more tests to this group
+> > +overlay                        using overlayfs on top of FSTYP
+> 
+> This description is a bit confusing, because the recommended
+> way to run overlayfs tests as described in README.overlay is
+> to set FSTYP=xfs and run ./check -overlay
+> 
+> I'm struggling for a better description but perhaps:
+> "using overlayfs regardless of ./check -overlay flag"?
+
+Hmm.  Since I'm the author of the only test that uses this tag, I guess
+I'm the authority (ha!) on what the name actually means.
+
+That test (generic/631) is a regression test for a XFS whiteout handling
+bug that can only be reproduced by layering overlayfs atop xfs.
+Overlayfs is incidental to reproducing the XFS bug, but AFAIK overlayfs
+is the only in-kernel user of whiteout, which is why it's critical here.
+
+It's not right to make it "_supported_fs overlay" because we're not
+testing overlayfs functionality; we're merely using it as a stick to
+poke another filesystem.
+
+How about: "regression tests that require the use of overlayfs in a
+targetted configuration" ?
+
+> > +pattern                        specific IO pattern tests
+> > +perms                  access control and permission checking
+> > +pipe                   pipe functionality
+> > +pnfs                   PNFS
+> > +posix                  POSIX behavior conformance
+> > +prealloc               fallocate
+> > +preallocrw             fallocate, then read and write
+> > +punch                  fallocate punch_hole
+> > +qgroup                 btrfs qgroup feature
+> > +quota                  filesystem usage quotas
+> > +raid                   btrfs RAID
+> > +realtime               XFS realtime volumes
+> > +recoveryloop           crash recovery loops
+> > +redirect               overlayfs redirect_dir feature
+> > +remote                 dump and restore with a remote tape
+> > +remount                        remounting filesystems
+> > +rename                 rename system call
+> > +repair                 xfs_repair functional tests
+> > +replace                        btrfs device replace
+> > +replay                 dm-logwrites replays
+> > +resize                 resize2fs functionality tests
+> > +richacl                        rich ACL feature
+> > +rmap                   XFS reverse mapping exercisers
+> > +rotate                 overlayfs feature of some sort"
+> 
+> I guess that works :-D
+> but to be accurate, this is actually a unionmount testsuite feature -
+> at selected test points in the workload, a new upper layer is stacked
+> on to overlayfs, so maybe:
+> "upper layer rotate tests from the unionmount test suite"?
+
+I've changed it to 'overlayfs upper layer rotate tests from the
+unionmount test suite'.
+
+> > +rw                     read/write IO tests
+> > +samefs                 overlayfs when all layers are on the same fs
+> > +scrub                  filesystem metadata scrubbers
+> > +seed                   btrfs seeded filesystems
+> > +seek                   llseek functionality
+> > +send                   btrfs send/receive
+> > +shrinkfs               decreasing the size of a filesystem
+> > +shutdown               FS_IOC_SHUTDOWN ioctl
+> > +snapshot               btrfs snapshots
+> > +soak                   long soak tests of any kind
+> > +spaceman               xfs_spaceman functional tests
+> > +splice                 splice system call
+> > +stress                 fsstress filesystem exerciser
+> > +subvol                 btrfs subvolumes
+> > +subvolume              btrfs subvolumes (again?)
+> 
+> A cleanup patch to fix this typo in btrfs/233?
+
+Will do.
+
+--D
+
+> 
+> Thanks,
+> Amir.
