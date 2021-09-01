@@ -7,70 +7,70 @@ X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
 	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4F7AFC19F38
-	for <linux-fstests@archiver.kernel.org>; Wed,  1 Sep 2021 12:44:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 502F7C432BE
+	for <linux-fstests@archiver.kernel.org>; Wed,  1 Sep 2021 12:44:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 360C661131
-	for <linux-fstests@archiver.kernel.org>; Wed,  1 Sep 2021 12:44:53 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3DBF461131
+	for <linux-fstests@archiver.kernel.org>; Wed,  1 Sep 2021 12:44:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344382AbhIAMps (ORCPT
+        id S1345006AbhIAMpv (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 1 Sep 2021 08:45:48 -0400
-Received: from mail1.bemta26.messagelabs.com ([85.158.142.112]:10178 "EHLO
+        Wed, 1 Sep 2021 08:45:51 -0400
+Received: from mail1.bemta26.messagelabs.com ([85.158.142.1]:60054 "EHLO
         mail1.bemta26.messagelabs.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1344934AbhIAMoI (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 1 Sep 2021 08:44:08 -0400
+        by vger.kernel.org with ESMTP id S1345383AbhIAMoL (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 1 Sep 2021 08:44:11 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fujitsu.com;
-        s=170520fj; t=1630500188; i=@fujitsu.com;
-        bh=Xp2G3THIC+Nbq2CoiRpE9dupwCKKJwvwQi/RG4ZFfOQ=;
+        s=170520fj; t=1630500193; i=@fujitsu.com;
+        bh=KL1ud68KQVVQydzZAupKAFJ9Dn+IiZslUE7Mgjoa0xw=;
         h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
          MIME-Version:Content-Type;
-        b=l3SOfLvva8xxg566JuT4OaT5YiFcChUDFhYHWDC+WDvzaP9gImC34Fd1lxdLPBcyg
-         T0Z1rgthtHt2ByM4Tkb7AW6Q8697LUQpSnmWtu1oXRauNRyi3KcEHqEbcufOl0dNGM
-         oUmfgzcDwBFvyxWr6nzK6BfuVLIc2QoTU+sIFnnKV82G/2KAZktItw7NwJ7/3T7cjw
-         qwqPZOk6D+FsBTNuHHLyw0zuyA9IYW/Jn5QnnbGduAcvbw8xHpzSJJZ7AbkRv1djPE
-         /vSGpDFkGf2vVNMiuATmGvm0FYu6yUbJKwEAwE4PmvDlJJEv7R/25KbqPt9/QMF8ih
-         g3A8VOFsfVTqA==
-Received: from [100.113.7.47] (using TLSv1.2 with cipher DHE-RSA-AES256-GCM-SHA384 (256 bits))
-        by server-1.bemta.az-b.eu-central-1.aws.symcld.net id 64/E1-23595-C557F216; Wed, 01 Sep 2021 12:43:08 +0000
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFtrAIsWRWlGSWpSXmKPExsViZ8MRohtTqp9
-  o8OOlnMXplr3sDowenzfJBTBGsWbmJeVXJLBm3N/QxlSwU6Ri09XbzA2Mp4S6GLk4hAQ6mCQe
-  9n1nhXB2M0o8W/SHrYuRk4NNQFPiWecCZhBbREBW4v+M1UwgNrOAusTySb/AbGGBMInr8z+xg
-  NgsAioS3RcfgMV5BTwlpu6eywhiSwgoSEx5+B5sDqeAl8TvVZfA6oWAaia+/QtVLyhxcuYTFo
-  j5EhIHX7xghuhVlLjU8Q1qToXErFltTBMY+WchaZmFpGUBI9MqRsukosz0jJLcxMwcXUMDA11
-  DQ2NdcyDLVC+xSjdJL7VUNzk1r6QoESirl1herFdcmZuck6KXl1qyiREYkCmF7Jk7GCe/+aB3
-  iFGSg0lJlJclUj9RiC8pP6UyI7E4I76oNCe1+BCjDAeHkgTvrgygnGBRanpqRVpmDjA6YNISH
-  DxKIrxLCoHSvMUFibnFmekQqVOMilLivOtKgBICIImM0jy4NlhEXmKUlRLmZWRgYBDiKUgtys
-  0sQZV/xSjOwagkzDu7GGgKT2ZeCdz0V0CLmYAW8/zQAVlckoiQkmpg0pR0kUzumLR/etklgR9
-  rT0n7Cy5S/hD9tulGOItr5cHrrQcs9mffFPOUMtiro5Y3Ucrx0DGXmKpXcjffl3ELPNVyWvZF
-  yiz4yquPW/NmbG5dGPWbwSTodL+M/9QZ/epHrnbbJzwPnnCV8Um9Ys0j9tnNtVUFCrXNfV/vn
-  Shbw/xR5tLj17ph8/U2JHpv5FaOfhjI4Rgp/GfdO37JmSs/8x/sWc5j+c5o+WQTI8faoAQxIe
-  P1XWxOHGt8xIyPPvCNvrZvUVqRwBn/vxuvu8w+w2t81HzlXM51QTnh6+u7/6bf2HP7xmFPe4V
-  3DvP0hR8fqmE2SdX9xXy7JeOUxOsvC1xWfI90y3y8sfds0q5iJZbijERDLeai4kQA8hExt0MD
-  AAA=
+        b=rY1Bt+YF51Nf6vCpdMe7hZN6OXZ5jJxrKU9woassg032e7K+M/fAT3+d0dkQxoGn6
+         ABGbIfjR0nmXy8yLfYsDN0voK6Gi2sa5fRZxKrQwuoziyPoe6im9xhylYwc7iKBSh7
+         0ZBnnw9Vqoo+RG8aS7I+MjBDMcOnJSw8Wcg3b2p2I7wvSyDLygduMaIC+WE26n0k1Z
+         UC+GzvkA8mSNKCqmbgo0/CIIt5pMWqZpS07pzEKpj8BYw8kucAmXUqDmG+V11Z9S8h
+         ltJZGi3PUYcQeaDE1miAZnuYMlLkrJ1gg22PDWJ99OWZwFfFP4SVr1SA8Ds2d2jbp5
+         5aOwgvCQRXBuw==
+Received: from [100.113.2.26] (using TLSv1.2 with cipher DHE-RSA-AES256-GCM-SHA384 (256 bits))
+        by server-1.bemta.az-a.eu-central-1.aws.symcld.net id 15/8F-24763-1657F216; Wed, 01 Sep 2021 12:43:13 +0000
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFtrDIsWRWlGSWpSXmKPExsViZ8MRqptYqp9
+  ocO+UgsXplr3sDowenzfJBTBGsWbmJeVXJLBmHDj3mKXgHXfFubO97A2Mi7i6GLk4hAQ6mCRW
+  rJjJCuHsZpR43n+TqYuRk4NNQFPiWecCZhBbREBW4v+M1WBxZgF1ieWTfoHZwgIFEk/WnAWzW
+  QRUJC5c3sIGYvMKeEq8u3EFzJYQUJCY8vA92BxOAS+J36susYDYQkA1E9/+ZYKoF5Q4OfMJC8
+  R8CYmDL14wQ/QqSlzq+MYIYVdIzJrVxjSBkX8WkpZZSFoWMDKtYrRMKspMzyjJTczM0TU0MNA
+  1NDTWNdQ1NDHSS6zSTdRLLdVNTs0rKUoEyuollhfrFVfmJuek6OWllmxiBAZkSiFj3w7GiW8+
+  6B1ilORgUhLlZYnUTxTiS8pPqcxILM6ILyrNSS0+xCjDwaEkwbsrAygnWJSanlqRlpkDjA6Yt
+  AQHj5II75JCoDRvcUFibnFmOkTqFKMux86j8xYxC7Hk5eelSonzrisBKhIAKcoozYMbAYvUS4
+  yyUsK8jAwMDEI8BalFuZklqPKvGMU5GJWEeWcXA03hycwrgdv0CugIJqAjeH7ogBxRkoiQkmp
+  gkt/+vNOy6cIstVTf40cDom4GHmt38Sp0CN6QrbWx/uv31udc91vN7O6pdndIJB3RPLOjOSHu
+  Huup5VquQfti3u5etZ7pwzfRJknt2ntLfrdI7lu0ZJ1C6PqWHas/m11eu5st4r73ogOymnO5j
+  oVuWMR6dIeC5b7ruY4l8YXPmxXfT4iyXjVFJWbSfO8Hjy2W7L65+L5FzhTJ9sbGxXsaGs0EhL
+  +aWjdMfvfk5XbfB67nVQ9pLPLNX2Bz1e+C6+HZutwbPnGc2Wda+utvoED/1R+HrvWIeu/S7Jd
+  JWVm+rUbA41/Cv6UZfzbfm+N5j+/elQ+2XQoOGT65bz/cmOX1ceqs+mMXF9d+zs+Vf/q+8IkS
+  S3FGoqEWc1FxIgAJkp/mTwMAAA==
 X-Env-Sender: xuyang2018.jy@fujitsu.com
-X-Msg-Ref: server-19.tower-245.messagelabs.com!1630500188!17231!1
-X-Originating-IP: [62.60.8.84]
+X-Msg-Ref: server-5.tower-232.messagelabs.com!1630500193!46255!1
+X-Originating-IP: [62.60.8.85]
 X-SYMC-ESS-Client-Auth: outbound-route-from=pass
 X-StarScan-Received: 
 X-StarScan-Version: 9.81.4; banners=-,-,-
 X-VirusChecked: Checked
-Received: (qmail 26118 invoked from network); 1 Sep 2021 12:43:08 -0000
-Received: from unknown (HELO mailhost3.uk.fujitsu.com) (62.60.8.84)
-  by server-19.tower-245.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 1 Sep 2021 12:43:08 -0000
+Received: (qmail 28158 invoked from network); 1 Sep 2021 12:43:13 -0000
+Received: from unknown (HELO mailhost4.uk.fujitsu.com) (62.60.8.85)
+  by server-5.tower-232.messagelabs.com with ECDHE-RSA-AES256-GCM-SHA384 encrypted SMTP; 1 Sep 2021 12:43:13 -0000
 Received: from R01UKEXCASM126.r01.fujitsu.local ([10.183.43.178])
-        by mailhost3.uk.fujitsu.com (8.14.5/8.14.5) with ESMTP id 181Ch5a9026400
+        by mailhost4.uk.fujitsu.com (8.14.5/8.14.5) with ESMTP id 181ChAfT006407
         (version=TLSv1/SSLv3 cipher=AES256-SHA bits=256 verify=FAIL)
-        for <fstests@vger.kernel.org>; Wed, 1 Sep 2021 13:43:08 +0100
+        for <fstests@vger.kernel.org>; Wed, 1 Sep 2021 13:43:13 +0100
 Received: from localhost.localdomain (10.167.220.84) by
  R01UKEXCASM126.r01.fujitsu.local (10.183.43.178) with Microsoft SMTP Server
- (TLS) id 15.0.1497.23; Wed, 1 Sep 2021 13:43:06 +0100
+ (TLS) id 15.0.1497.23; Wed, 1 Sep 2021 13:43:11 +0100
 From:   Yang Xu <xuyang2018.jy@fujitsu.com>
 To:     <fstests@vger.kernel.org>
 CC:     Yang Xu <xuyang2018.jy@fujitsu.com>
-Subject: [PATCH v1 2/4] configure.ac: Fix uncorrect detection because of linux/btrfs.h
-Date:   Wed, 1 Sep 2021 20:43:24 +0800
-Message-ID: <1630500206-15545-2-git-send-email-xuyang2018.jy@fujitsu.com>
+Subject: [PATCH v1 4/4] src/idmapped-mounts/idmapped-mounts.c: Fix build error because of undefined reallocarray
+Date:   Wed, 1 Sep 2021 20:43:26 +0800
+Message-ID: <1630500206-15545-4-git-send-email-xuyang2018.jy@fujitsu.com>
 X-Mailer: git-send-email 1.8.3.1
 In-Reply-To: <1630500206-15545-1-git-send-email-xuyang2018.jy@fujitsu.com>
 References: <1630500206-15545-1-git-send-email-xuyang2018.jy@fujitsu.com>
@@ -83,70 +83,45 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On old distros, we can't detect some btrfs structs because of undeclared 'NULL' in
-btrfs_err_str function. This function has been removed after kernel
-commit 68598d2ea8863 ("btrfs: remove btrfs_err_str function from uapi/linux/btrfs.h").
-
-Fix this bug in xfstests layer by adding stddef.h because NULL is defined in stddef.h(it is
-in /usr/lib/gcc*/ directory).
+On old glibc, reallocarray was not introduced, so this case compiles failed.
+We should use reallocarray if glibc supports and use realloc if glibcs doesn't
+support reallocarray.
 
 Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
 ---
- configure.ac | 40 ++++++++++++++++++++++++++++++++--------
- 1 file changed, 32 insertions(+), 8 deletions(-)
+ configure.ac                          | 1 +
+ src/idmapped-mounts/idmapped-mounts.c | 4 ++++
+ 2 files changed, 5 insertions(+)
 
 diff --git a/configure.ac b/configure.ac
-index 78e9d945..0b55455a 100644
+index 0b55455a..6e5ab397 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -69,15 +69,39 @@ AC_PACKAGE_WANT_LIBBTRFSUTIL
+@@ -68,6 +68,7 @@ AC_PACKAGE_WANT_LIBBTRFSUTIL
+ 
  AC_HAVE_COPY_FILE_RANGE
  AC_CHECK_FUNCS([renameat2])
++AC_CHECK_FUNCS([reallocarray])
  AC_CHECK_TYPES([struct mount_attr], [], [], [[#include <linux/mount.h>]])
--AC_CHECK_TYPES([struct btrfs_qgroup_limit], [], [], [[#include <linux/btrfs.h>]])
--AC_CHECK_TYPES([struct btrfs_qgroup_inherit], [], [], [[#include <linux/btrfs.h>]])
--AC_CHECK_TYPES([struct btrfs_ioctl_vol_args], [], [], [[#include <linux/btrfs.h>]])
--AC_CHECK_TYPES([struct btrfs_ioctl_vol_args_v2], [], [], [[#include <linux/btrfs.h>]])
--AC_CHECK_TYPES([struct btrfs_ioctl_ino_lookup_args], [], [], [[#include <linux/btrfs.h>]])
--AC_CHECK_TYPES([struct btrfs_ioctl_ino_lookup_user_args], [], [], [[#include <linux/btrfs.h>]])
--AC_CHECK_TYPES([struct btrfs_ioctl_get_subvol_rootref_args], [], [], [[#include <linux/btrfs.h>]])
-+AC_CHECK_TYPES([struct btrfs_qgroup_limit], [], [], [[
-+#include <stddef.h>
-+#include <linux/btrfs.h>
-+]])
-+AC_CHECK_TYPES([struct btrfs_qgroup_inherit], [], [], [[
-+#include <stddef.h>
-+#include <linux/btrfs.h>
-+]])
-+AC_CHECK_TYPES([struct btrfs_ioctl_vol_args], [], [], [[
-+#include <stddef.h>
-+#include <linux/btrfs.h>
-+]])
-+AC_CHECK_TYPES([struct btrfs_ioctl_vol_args_v2], [], [], [[
-+#include <stddef.h>
-+#include <linux/btrfs.h>
-+]])
-+AC_CHECK_TYPES([struct btrfs_ioctl_ino_lookup_args], [], [], [[
-+#include <stddef.h>
-+#include <linux/btrfs.h>
-+]])
-+AC_CHECK_TYPES([struct btrfs_ioctl_ino_lookup_user_args], [], [], [[
-+#include <stddef.h>
-+#include <linux/btrfs.h>
-+]])
-+AC_CHECK_TYPES([struct btrfs_ioctl_get_subvol_rootref_args], [], [], [[
-+#include <stddef.h>
-+#include <linux/btrfs.h>
-+]])
- AC_CHECK_HEADERS([linux/btrfs.h linux/btrfs_tree.h])
--AC_CHECK_MEMBERS([struct btrfs_ioctl_vol_args_v2.subvolid], [], [], [[#include <linux/btrfs.h>]])
-+AC_CHECK_MEMBERS([struct btrfs_ioctl_vol_args_v2.subvolid], [], [], [[
-+#include <stddef.h>
-+#include <linux/btrfs.h>
-+]])
+ AC_CHECK_TYPES([struct btrfs_qgroup_limit], [], [], [[
+ #include <stddef.h>
+diff --git a/src/idmapped-mounts/idmapped-mounts.c b/src/idmapped-mounts/idmapped-mounts.c
+index 4230cb48..83b7c89a 100644
+--- a/src/idmapped-mounts/idmapped-mounts.c
++++ b/src/idmapped-mounts/idmapped-mounts.c
+@@ -9910,8 +9910,12 @@ static int append_stack(struct btrfs_iter *iter, uint64_t tree_id, size_t path_l
+ 	if (iter->stack_len >= iter->stack_capacity) {
+ 		size_t new_capacity = iter->stack_capacity * 2;
+ 		struct btrfs_stack *new_search_stack;
++#ifdef HAVE_REALLOCARRAY
+ 		new_search_stack = reallocarray(iter->search_stack, new_capacity,
+ 						sizeof(*iter->search_stack));
++#else
++		new_search_stack = realloc(iter->search_stack, new_capacity * sizeof(*iter->search_stack));
++#endif
+ 		if (!new_search_stack)
+ 			return -ENOMEM;
  
- AC_CONFIG_HEADER(include/config.h)
- AC_CONFIG_FILES([include/builddefs])
 -- 
 2.23.0
 
