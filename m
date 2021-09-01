@@ -2,123 +2,70 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DACF1C432BE
-	for <linux-fstests@archiver.kernel.org>; Wed,  1 Sep 2021 07:15:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 34181C432BE
+	for <linux-fstests@archiver.kernel.org>; Wed,  1 Sep 2021 08:31:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BD56B6109E
-	for <linux-fstests@archiver.kernel.org>; Wed,  1 Sep 2021 07:15:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 150E060FED
+	for <linux-fstests@archiver.kernel.org>; Wed,  1 Sep 2021 08:31:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242416AbhIAHQo (ORCPT
+        id S243032AbhIAIcp (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 1 Sep 2021 03:16:44 -0400
-Received: from mail104.syd.optusnet.com.au ([211.29.132.246]:48313 "EHLO
-        mail104.syd.optusnet.com.au" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S242513AbhIAHQo (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 1 Sep 2021 03:16:44 -0400
-Received: from dread.disaster.area (pa49-195-182-146.pa.nsw.optusnet.com.au [49.195.182.146])
-        by mail104.syd.optusnet.com.au (Postfix) with ESMTPS id 9274582AE1F;
-        Wed,  1 Sep 2021 17:15:46 +1000 (AEST)
-Received: from dave by dread.disaster.area with local (Exim 4.92.3)
-        (envelope-from <david@fromorbit.com>)
-        id 1mLKTJ-007N0m-B8; Wed, 01 Sep 2021 17:15:45 +1000
-Date:   Wed, 1 Sep 2021 17:15:45 +1000
-From:   Dave Chinner <david@fromorbit.com>
-To:     Murphy Zhou <xzhou@redhat.com>
-Cc:     Theodore Ts'o <tytso@mit.edu>, Pavel Reichl <preichl@redhat.com>,
-        fstests@vger.kernel.org, Luis Chamberlain <mcgrof@kernel.org>
-Subject: Re: [PATCH v2] common/rc: fix MKSWAP_PROG quoting
-Message-ID: <20210901071545.GA1756565@dread.disaster.area>
-References: <20210831030426.nwcoelcnshq4wrxx@xzhoux.usersys.redhat.com>
- <20210831052632.p4kaygjeujipo4w5@fedora>
- <3d064e8a-514d-4a98-3db1-0de490107368@redhat.com>
- <20210831134207.aa4e26xuyji4npia@fedora>
- <YS5hRsSXNHYQdUv9@mit.edu>
- <20210901054822.phzkg5xqoocx3duq@xzhoux.usersys.redhat.com>
+        Wed, 1 Sep 2021 04:32:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58726 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S242943AbhIAIcp (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 1 Sep 2021 04:32:45 -0400
+Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 028E1C061575;
+        Wed,  1 Sep 2021 01:31:49 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
+        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=ZKxlWfYNLkEldS05PXlPWavHryKn5rOh2+PP1UGYNas=; b=E0wVf3XUmo3uEHQaNTRd70NDzL
+        apjHmqT/agbOZ8FzqObHlLG98Qt6Z4xmBSpuxMOMFK4TiU18N6yBLXPuROavmvW+okqB76gt214CZ
+        7f83Q8jxIHBtJXcC6D2HfrSrgyVvRrtQTKXLIh7DRyPIJXVAU7ZR0erkkPGpUTLJ4h1ywFgTzmegj
+        ts2ZC4phNOYovUzPFPCsh1mqNH2fts1ss3t3TUslnnE8yitjIIR+h4UtTGwVoSmkiJ2Y0noaVYdEr
+        QPpyVE3yqog5/Vpwo3fUysQYJ68qD6Q6MP1848bFzvhNlRS47n9P3iBpePCajAOe36rAM6Rit1JR9
+        MPl/c3/w==;
+Received: from hch by casper.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
+        id 1mLLe2-0022pM-Vs; Wed, 01 Sep 2021 08:31:11 +0000
+Date:   Wed, 1 Sep 2021 09:30:54 +0100
+From:   Christoph Hellwig <hch@infradead.org>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     guaneryu@gmail.com, linux-xfs@vger.kernel.org,
+        fstests@vger.kernel.org, guan@eryu.me
+Subject: Re: [PATCH 1/2] common/xfs: skip xfs_check unless the test runner
+ forces us to
+Message-ID: <YS86PmKsItIM6APZ@infradead.org>
+References: <163045507051.769821.5924414818977330640.stgit@magnolia>
+ <163045507618.769821.3650550873572768945.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210901054822.phzkg5xqoocx3duq@xzhoux.usersys.redhat.com>
-X-Optus-CM-Score: 0
-X-Optus-CM-Analysis: v=2.3 cv=F8MpiZpN c=1 sm=1 tr=0
-        a=QpfB3wCSrn/dqEBSktpwZQ==:117 a=QpfB3wCSrn/dqEBSktpwZQ==:17
-        a=kj9zAlcOel0A:10 a=7QKq2e-ADPsA:10 a=20KFwNOVAAAA:8 a=7-415B0cAAAA:8
-        a=V_Uy1zL_bVCsFN1x20YA:9 a=CjuIK1q_8ugA:10 a=biEYGPWJfzWAr4FL6Ov7:22
+In-Reply-To: <163045507618.769821.3650550873572768945.stgit@magnolia>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by casper.infradead.org. See http://www.infradead.org/rpr.html
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Sep 01, 2021 at 02:16:20PM +0800, Murphy Zhou wrote:
-> After commit
->   0e4dd8b9 common/rc: fix ignoring of errors on
-> we are getting this error message when running swapfiles tests:
->   +./common/rc: line 2553: MKSWAP_PROG: command not found
+On Tue, Aug 31, 2021 at 05:11:16PM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
 > 
-> Rewrite the line and add a filter for mkswap.
+> At long last I've completed my quest to ensure that every corruption
+> found by xfs_check can also be found by xfs_repair.  Since xfs_check
+> uses more memory than repair and has long been obsolete, let's stop
+> running it automatically from _check_xfs_filesystem unless the test
+> runner makes us do it.
 > 
-> Signed-off-by: Murphy Zhou <xzhou@redhat.com>
-> ---
-> 
-> Thanks all for the suggestions!
-> 
-> v2:
->   rewrite the line and add a filter
->   source filters for generic/643
-> 
->  common/filter     | 6 ++++++
->  common/rc         | 2 +-
->  tests/generic/643 | 1 +
->  3 files changed, 8 insertions(+), 1 deletion(-)
-> 
-> diff --git a/common/filter b/common/filter
-> index 2efbbd99..0883a3fd 100644
-> --- a/common/filter
-> +++ b/common/filter
-> @@ -661,5 +661,11 @@ _filter_quota_report()
->  		s|^(.*?) (\d+) (\d+) (\d+)|$1 @{[$2 * 1024 /'$bsize']} @{[$3 * 1024 /'$bsize']} @{[$4 * 1024 /'$bsize']}|'
->  }
->  
-> +# Filter mkswap warning about the permissions
-> +_filter_mkswap_stderr()
-> +{
-> +	grep -v "insecure permission"
-> +}
-> +
+> Tests that explicitly want xfs_check can call it via _scratch_xfs_check
+> or _xfs_check; that part doesn't go away.
 
-This is a one-off, specific filter and the "stderr" part of the name
-makes no sense. If you want this to be a generic filter, the name
-is "_filter_insecure_permission()", not it's calling context.
+Awesome!
 
-But that just shows that this does not need to be in the common
-filter code - doing so just makes readers have to go look up what
-the filter is. That is:
-
->  # make sure this script returns success
->  /bin/true
-> diff --git a/common/rc b/common/rc
-> index 46b6b220..0a3933a5 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -2550,7 +2550,7 @@ _format_swapfile() {
->  	$CHATTR_PROG +C "$fname" > /dev/null 2>&1
->  	_pwrite_byte 0x61 0 "$sz" "$fname" >> $seqres.full
->  	# Ignore permission complaints on filesystems that don't support perms
-> -	$(MKSWAP_PROG "$fname" 2> >(grep -v 'insecure permission' >&2)) >> $seqres.full
-> +	$MKSWAP_PROG "$fname" 2>&1 >> $seqres.full | _filter_mkswap_stderr
-
-	$MKSWAP_PROG "$fname" 2>&1 >> $seqres.full | \
-		grep -v "insecure permission"
-
-will do what you want and is much more readable and easier to
-understand.
-
-Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+Reviewed-by: Christoph Hellwig <hch@lst.de>
