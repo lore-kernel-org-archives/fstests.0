@@ -2,212 +2,241 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
+X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 83865C432BE
-	for <linux-fstests@archiver.kernel.org>; Wed,  1 Sep 2021 23:36:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9443EC432BE
+	for <linux-fstests@archiver.kernel.org>; Thu,  2 Sep 2021 04:50:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5CDF161026
-	for <linux-fstests@archiver.kernel.org>; Wed,  1 Sep 2021 23:36:52 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7273C610C8
+	for <linux-fstests@archiver.kernel.org>; Thu,  2 Sep 2021 04:50:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232007AbhIAXht (ORCPT
+        id S229814AbhIBEvB (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 1 Sep 2021 19:37:49 -0400
-Received: from mail107.syd.optusnet.com.au ([211.29.132.53]:60011 "EHLO
-        mail107.syd.optusnet.com.au" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S229989AbhIAXhs (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 1 Sep 2021 19:37:48 -0400
-Received: from dread.disaster.area (pa49-195-182-146.pa.nsw.optusnet.com.au [49.195.182.146])
-        by mail107.syd.optusnet.com.au (Postfix) with ESMTPS id F412B1143DB4;
-        Thu,  2 Sep 2021 09:36:48 +1000 (AEST)
-Received: from dave by dread.disaster.area with local (Exim 4.92.3)
-        (envelope-from <david@fromorbit.com>)
-        id 1mLZmh-007dCQ-Ri; Thu, 02 Sep 2021 09:36:47 +1000
-Date:   Thu, 2 Sep 2021 09:36:47 +1000
-From:   Dave Chinner <david@fromorbit.com>
-To:     Catherine Hoang <catherine.hoang@oracle.com>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH v2 1/1] xfstests: Add Log Attribute Replay test
-Message-ID: <20210901233647.GC1756565@dread.disaster.area>
-References: <20210901221006.125888-1-catherine.hoang@oracle.com>
- <20210901221006.125888-2-catherine.hoang@oracle.com>
+        Thu, 2 Sep 2021 00:51:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57306 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229459AbhIBEvA (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 2 Sep 2021 00:51:00 -0400
+Received: from mail-io1-xd30.google.com (mail-io1-xd30.google.com [IPv6:2607:f8b0:4864:20::d30])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EE83FC061575;
+        Wed,  1 Sep 2021 21:50:02 -0700 (PDT)
+Received: by mail-io1-xd30.google.com with SMTP id m11so873318ioo.6;
+        Wed, 01 Sep 2021 21:50:02 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=cNIoMdZYiagy9AIi4B4/ChydBGoTBfUwV+IH70dcMKw=;
+        b=YkI4TnMIw9CrokfoR9UYZel9RG5aZUlUn5c9sOwAsqWefJU9tswncZQiwzQ1f8FK7n
+         fKdc94ShrgI3Fl2gplWQegsVn16cm2lwH3Ua5L00M3NTc/0R7SikR9gM0wzJl1M/gSh/
+         jx7rgUVsXqD2SW7fAiOOfKaKQREsgTACgN9yjAhJmVjaIp67cNp/VVXywNR78QKL2SwJ
+         bLqvsZ02vUrdMacEGhIIQ+fPZwanWYHyrUvMhCZjLKMDNTEDMbLKWdw2sIZpjf7ctx0c
+         PpMDlmusZgDLMmCsGuXfdv/WJ2tuky+tW4TVCJQtdgOnNQg1plX/4IZp0xi8uxhpjtvX
+         bkjA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=cNIoMdZYiagy9AIi4B4/ChydBGoTBfUwV+IH70dcMKw=;
+        b=dTHtpLbPP4O44KtvEP+/cUna8FNcWDxTnJRn0B4AX7kJ57L6VYacN0EBcZrEeJ4SN1
+         ik1a8wQu4edyKSAJTqF55uT5NR4ZeNF4GgjmkJsKNHUrpdBadbLWRlr1oskY+/8cQUXH
+         9jtxiieZpm2vDMd+Pjvq5o5zPM185fJujl2ECZti13/vo/wHIGnf5G91IsTry+EgEt7p
+         B14pActHA523AsUP+4ixVw1Y8odBhpWXptIzo0jfYR1qJPyRD9WvyFt99V6rQhf/k26W
+         qGqlBn0bOjXDksEEZ7z69ZyUuncz6/UQZpStWmfsflwc/dM5Ik/3jwjt3TGLjRzF+lmz
+         tnDQ==
+X-Gm-Message-State: AOAM532MVxjRzw0a4mewqDVlQqu08RmzUyAvw7BEod6U2xgqhZF0fS+7
+        /fdfxKEoFujCBCfsmpH9n56IQxEBk+LYZr//EZvtdSJ9o/k=
+X-Google-Smtp-Source: ABdhPJyrju3xaeoxyJTkLwqt1a3th4oNhUyH8dSaIHhVc81BwGbuURPThJeS+W8FIRvhjXhyJ4VEpaoFAwGOyqmmEO8=
+X-Received: by 2002:a6b:e712:: with SMTP id b18mr1211926ioh.186.1630558202328;
+ Wed, 01 Sep 2021 21:50:02 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210901221006.125888-2-catherine.hoang@oracle.com>
-X-Optus-CM-Score: 0
-X-Optus-CM-Analysis: v=2.3 cv=Tu+Yewfh c=1 sm=1 tr=0
-        a=QpfB3wCSrn/dqEBSktpwZQ==:117 a=QpfB3wCSrn/dqEBSktpwZQ==:17
-        a=kj9zAlcOel0A:10 a=7QKq2e-ADPsA:10 a=yPCof4ZbAAAA:8 a=7-415B0cAAAA:8
-        a=XTtZIqhqPKlHEzoNpasA:9 a=CjuIK1q_8ugA:10 a=biEYGPWJfzWAr4FL6Ov7:22
+References: <163045514980.771564.6282165259140399788.stgit@magnolia>
+ <163045517173.771564.1524162806861567173.stgit@magnolia> <CAOQ4uxi7205Ae+un1w4C4Dzh9-SykL=ogHQSBH=nnVGDkPfkhw@mail.gmail.com>
+ <20210901164311.GB9911@magnolia>
+In-Reply-To: <20210901164311.GB9911@magnolia>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Thu, 2 Sep 2021 07:49:51 +0300
+Message-ID: <CAOQ4uxgJz6OBmV=SD1fp9tkCAfiAhxjdCr+fxGd4ko4Y6NUscA@mail.gmail.com>
+Subject: Re: [PATCH 4/5] tools: make sure that test groups are described in
+ the documentation
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     Eryu Guan <guaneryu@gmail.com>,
+        linux-xfs <linux-xfs@vger.kernel.org>,
+        fstests <fstests@vger.kernel.org>, Eryu Guan <guan@eryu.me>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Sep 01, 2021 at 10:10:06PM +0000, Catherine Hoang wrote:
-> From: Allison Henderson <allison.henderson@oracle.com>
-> 
-> This patch adds a test to exercise the log attribute error
-> inject and log replay.  Attributes are added in increaseing
-> sizes up to 64k, and the error inject is used to replay them
-> from the log
-> 
-> Signed-off-by: Allison Henderson <allison.henderson@oracle.com>
-> Signed-off-by: Catherine Hoang <catherine.hoang@oracle.com>
-> ---
-> V2: Updated attr sizes
->    Added attr16k test
->    Removed rm -f $seqres.full
->    Added filtering for SCRATCH_MNT
-....
-> +_test_attr_replay()
-> +{
-> +	attr_name=$1
-> +	attr_value=$2
-> +	touch $testfile.1
-> +
-> +	echo "Inject error"
-> +	_scratch_inject_error "larp"
-> +
-> +	echo "Set attribute"
-> +	echo "$attr_value" | ${ATTR_PROG} -s "$attr_name" $testfile.1 2>&1 | \
-> +			    _filter_scratch
-> +
-> +	echo "FS should be shut down, touch will fail"
-> +	touch $testfile.1 2>&1 | _filter_scratch
-> +
-> +	echo "Remount to replay log"
-> +	_scratch_inject_logprint >> $seqres.full
+On Wed, Sep 1, 2021 at 7:43 PM Darrick J. Wong <djwong@kernel.org> wrote:
+>
+> On Wed, Sep 01, 2021 at 07:46:01AM +0300, Amir Goldstein wrote:
+> > On Wed, Sep 1, 2021 at 3:37 AM Darrick J. Wong <djwong@kernel.org> wrote:
+> > >
+> > > From: Darrick J. Wong <djwong@kernel.org>
+> > >
+> > > Create a file to document the purpose of each test group that is
+> > > currently defined in fstests, and add a build script to check that every
+> > > group mentioned in the tests is also mentioned in the documentation.
+> > >
+> >
+> > This is awesome and long due.
+> > Thanks for doing that!
+> >
+> > Minor nits about overlayfs groups below...
+>
+> Heh, yeah, thanks for making corrections. :)
+>
+> > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> > > ---
+> > >  doc/group-names.txt    |  136 ++++++++++++++++++++++++++++++++++++++++++++++++
+> > >  include/buildgrouplist |    1
+> > >  tools/check-groups     |   33 ++++++++++++
+> > >  3 files changed, 170 insertions(+)
+> > >  create mode 100644 doc/group-names.txt
+> > >  create mode 100755 tools/check-groups
+> > >
+> > >
+> > > diff --git a/doc/group-names.txt b/doc/group-names.txt
+> > > new file mode 100644
+> > > index 00000000..ae517328
+> > > --- /dev/null
+> > > +++ b/doc/group-names.txt
+> > > @@ -0,0 +1,136 @@
+> > > +======================= =======================================================
+> > > +Group Name:            Description:
+> > > +======================= =======================================================
+> > > +all                    All known tests, automatically generated by ./check at
+> > > +                       runtime
+> > > +auto                   Tests that should be run automatically.  These should
+> > > +                       not require more than ~5 minutes to run.
+> > > +quick                  Tests that should run in under 30 seconds.
+> > > +deprecated             Old tests that should not be run.
+> > > +
+> > > +acl                    Access Control Lists
+> > > +admin                  xfs_admin functionality
+> > > +aio                    general libaio async io tests
+> > > +atime                  file access time
+> > > +attr                   extended attributes
+> > > +attr2                  xfs v2 extended aributes
+> > > +balance                        btrfs tree rebalance
+> > > +bigtime                        timestamps beyond the year 2038
+> > > +blockdev               block device functionality
+> > > +broken                 broken tests
+> > > +cap                    Linux capabilities
+> > > +casefold               directory name casefolding
+> > > +ci                     ASCII case-insensitive directory name lookups
+> > > +clone                  FICLONE/FICLONERANGE ioctls
+> > > +clone_stress           stress testing FICLONE/FICLONERANGE
+> > > +collapse               fallocate collapse_range
+> > > +compress               file compression
+> > > +convert                        btrfs ext[34] conversion tool
+> > > +copy                   xfs_copy functionality
+> > > +copy_range             copy_file_range syscall
+> > > +copyup                 overlayfs copyup support
+> >
+> > The tests in this group exercise copy up.
+> > There is no such thing as overlayfs without "copyup support",
+> > so guess my point is - remove the word "support"
+>
+> OK.
+>
+> > > +dangerous              dangerous test that can crash the system
+> > > +dangerous_bothrepair   fuzzers to evaluate xfs_scrub + xfs_repair repair
+> > > +dangerous_fuzzers      fuzzers that can crash your computer
+> > > +dangerous_norepair     fuzzers to evaluate kernel metadata verifiers
+> > > +dangerous_online_repair        fuzzers to evaluate xfs_scrub online repair
+> > > +dangerous_repair       fuzzers to evaluate xfs_repair offline repair
+> > > +dangerous_scrub                fuzzers to evaluate xfs_scrub checking
+> > > +data                   data loss checkers
+> > > +dax                    direct access mode for persistent memory files
+> > > +db                     xfs_db functional tests
+> > > +dedupe                 FIEDEDUPERANGE ioctl
+> > > +defrag                 filesystem defragmenters
+> > > +dir                    directory test functions
+> > > +dump                   dump and restore utilities
+> > > +eio                    IO error reporting
+> > > +encrypt                        encrypted file contents
+> > > +enospc                 ENOSPC error reporting
+> > > +exportfs               file handles
+> > > +filestreams            XFS filestreams allocator
+> > > +freeze                 filesystem freeze tests
+> > > +fsck                   general fsck tests
+> > > +fsmap                  FS_IOC_GETFSMAP ioctl
+> > > +fsr                    XFS free space reorganizer
+> > > +fuzzers                        filesystem fuzz tests
+> > > +growfs                 increasing the size of a filesystem
+> > > +hardlink               hardlinks
+> > > +health                 XFS health reporting
+> > > +idmapped               idmapped mount functionality
+> > > +inobtcount             XFS inode btree count tests
+> > > +insert                 fallocate insert_range
+> > > +ioctl                  general ioctl tests
+> > > +io_uring               general io_uring async io tests
+> > > +label                  filesystem labelling
+> > > +limit                  resource limits
+> > > +locks                  file locking
+> > > +log                    metadata logging
+> > > +logprint               xfs_logprint functional tests
+> > > +long_rw                        long-soak read write IO path exercisers
+> > > +metacopy               overlayfs metadata-only copy-up
+> > > +metadata               filesystem metadata update exercisers
+> > > +metadump               xfs_metadump/xfs_mdrestore functionality
+> > > +mkfs                   filesystem formatting tools
+> > > +mount                  mount option and functionality checks
+> > > +nested                 nested overlayfs instances
+> > > +nfs4_acl               NFSv4 access control lists
+> > > +nonsamefs              overlayfs layers on different filesystems
+> > > +online_repair          online repair functionality tests
+> > > +other                  dumping ground, do not add more tests to this group
+> > > +overlay                        using overlayfs on top of FSTYP
+> >
+> > This description is a bit confusing, because the recommended
+> > way to run overlayfs tests as described in README.overlay is
+> > to set FSTYP=xfs and run ./check -overlay
+> >
+> > I'm struggling for a better description but perhaps:
+> > "using overlayfs regardless of ./check -overlay flag"?
+>
+> Hmm.  Since I'm the author of the only test that uses this tag, I guess
+> I'm the authority (ha!) on what the name actually means.
+>
+> That test (generic/631) is a regression test for a XFS whiteout handling
+> bug that can only be reproduced by layering overlayfs atop xfs.
+> Overlayfs is incidental to reproducing the XFS bug, but AFAIK overlayfs
+> is the only in-kernel user of whiteout, which is why it's critical here.
+>
+> It's not right to make it "_supported_fs overlay" because we're not
+> testing overlayfs functionality; we're merely using it as a stick to
+> poke another filesystem.
 
-Huh. That function name has nothing to do with remount or dumping
-the log. _scratch_remount_dump_log() would at least describe what it
-does (indeed, it is just scratch_unmount; scratch_dump_log;
-scratch_mount). Can you follow this up with another patch to
-rename _scratch_inject_logprint() to _scratch_remount_dump_log()
-and also do the same for the equivalent _test_inject_logprint()
-function? They should probably move to common/xfs from
-common/inject, too...
+Yes. I know.
+Note that while this is the only case of _require_extra_fs overaly
+there is another case of _require_extra_fs ext2 (xfs/049)
 
-> +
-> +	echo "FS should be online, touch should succeed"
-> +	touch $testfile.1
-> +
-> +	echo "Verify attr recovery"
-> +	_getfattr --absolute-names $testfile.1 | _filter_scratch
-> +	$ATTR_PROG -g $attr_name $testfile.1 | md5sum
-> +
-> +	echo ""
-> +}
+>
+> How about: "regression tests that require the use of overlayfs in a
+> targetted configuration" ?
+>
 
-Ok, so this tests just the "set" operation.
+TBH, I do not think it is wise to tag the test by the test method
+rather than the tested functionality.
 
-FWIW, there is no need to echo test beahviour descriptions to the
-output file. Each of the "echo" statements here should just be
-comments.
+What is more likely?
+that a tester wants to run all tests that use overlay over FSTYP?
+Or that a tester wants to run all tests to verify whiteout related
+behavior after changing whiteout related code?
 
-> +
-> +
-> +# real QA test starts here
-> +_supported_fs xfs
-> +
-> +_require_scratch
-> +_require_attrs
-> +_require_xfs_io_error_injection "larp"
-> +_require_xfs_sysfs debug/larp
-> +
-> +# turn on log attributes
-> +echo 1 > /sys/fs/xfs/debug/larp
-> +
-> +_scratch_unmount >/dev/null 2>&1
-> +
-> +#attributes of increaseing sizes
-> +attr16="0123456789ABCDEF"
-> +attr64="$attr16$attr16$attr16$attr16"
-> +attr256="$attr64$attr64$attr64$attr64"
-> +attr1k="$attr256$attr256$attr256$attr256"
-> +attr4k="$attr1k$attr1k$attr1k$attr1k"
-> +attr8k="$attr4k$attr4k"
-> +attr16k="$attr8k$attr8k"
-> +attr32k="$attr16k$attr16k"
-> +attr64k="$attr32k$attr32k"
-> +
-> +echo "*** mkfs"
-> +_scratch_mkfs_xfs >/dev/null
-> +
-> +echo "*** mount FS"
-> +_scratch_mount
-> +
-> +testfile=$SCRATCH_MNT/testfile
-> +echo "*** make test file 1"
-> +
-> +_test_attr_replay "attr_name1" $attr16
-> +_test_attr_replay "attr_name2" $attr64
-> +_test_attr_replay "attr_name3" $attr256
-> +_test_attr_replay "attr_name4" $attr1k
-> +_test_attr_replay "attr_name5" $attr4k
-> +_test_attr_replay "attr_name6" $attr8k
-> +_test_attr_replay "attr_name7" $attr16k
-> +_test_attr_replay "attr_name8" $attr32k
-> +_test_attr_replay "attr_name9" $attr64k
+I suggest that you re-tag this test as 'whiteout', which is documented
+already.
 
-Hmmm - all attributes have different names, so this only tests
-the "create new attribute" operation, not the "replace attribute"
-or "remove attribute" operations. 
+If you want to be more specific, you can create a group
+rename_whiteout, because RENAME_WHITEOUT is the vfs
+interface that this test is actually exercising.
 
-Also, why were the given sizes chosen? It seems to me like we should
-be selecting the attribute sizes based on the different operations
-they trigger.
-
-For an empty 512 byte inode on 4kB block size fs, we have ~300 bytes
-available for local attr storage. Hence both attr16 and attr64 will
-be stored inline.  attr256 will trigger sf-to-leaf transition with
-existing entries.  attr1k will do a leaf internal addition. attr4k
-will be stored externally as a remote attr, as will all the
-remaining larger attrs.
-
-Hence this doesn't test the following cases:
-- empty to leaf transition on first attr insert
-- remote xattr insertion when empty
-- leaf split/addition due to filling a leaf block
-- extent format to btree format transistion (i.e. tree level
-  increase)
-
-IOWs, for a 512 byte inode and 4kB block size fs, the tests really
-need to be:
-
-- empty, add inline attr	(64 bytes)
-- empty, add internal attr	(1kB)
-- empty, add remote attr	(64kB)
-- inline, add inline attr	(64 bytes)
-- inline, add internal attr	(1kB)
-- inline, add remote attr	(64kB)
-- extent, add internal attr	(1kB)
-- extent, add multiple internal attr (inject error on split operation)
-- extent, add multiple internal attr (inject error on fork
-				  transition to btree format operation)
-- extent, add remote attr	(64kB)
-- btree, add multiple internal	(1kB)
-- btree, add remote attr	(64kB)
-
-This covers all the different attr fork storage forms and
-transitions between the different forms.
-
-We then need to cover the same cases but in reverse for attr removal
-(e.g. recovery of leaf merge operations, btree to extent form
-conversion, etc).
-
-We also need to have coverage of attr overwrite recovery of all the
-attr formats (shortform, leaf internal and remote) because these
-both add and remove attributes of the same name. We probably want
-different points of error injection for these so that we can force
-it to recover from different points in the replace operation...
-
-Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+Thanks,
+Amir.
