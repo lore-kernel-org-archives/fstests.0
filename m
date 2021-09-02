@@ -2,235 +2,123 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-16.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C546AC432BE
-	for <linux-fstests@archiver.kernel.org>; Thu,  2 Sep 2021 15:03:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4C7A2C4320A
+	for <linux-fstests@archiver.kernel.org>; Thu,  2 Sep 2021 15:47:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A191E6108E
-	for <linux-fstests@archiver.kernel.org>; Thu,  2 Sep 2021 15:03:08 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 340E3610A1
+	for <linux-fstests@archiver.kernel.org>; Thu,  2 Sep 2021 15:47:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235049AbhIBPEG (ORCPT
+        id S1345911AbhIBPsh (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 2 Sep 2021 11:04:06 -0400
-Received: from mail.kernel.org ([198.145.29.99]:48272 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229941AbhIBPEG (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 2 Sep 2021 11:04:06 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 958B060BD3;
-        Thu,  2 Sep 2021 15:03:07 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1630594987;
-        bh=Tjt0PHy0qq37NTeabGyPABBmpSbllYCUDPs9hhZQadU=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=B0t0/qK6WPrqjE/bKYYIOuS2FgpDethbqV3mmXlBkOFm+4etMj5fqNN3rzx+PM6Xj
-         acaMt5KBrREtNOpVlRrnIdVdN12JgGhutFQk9LGBnu0nv5a1UXtq2CUAYF8Z2a1pzP
-         6ARvwsx4soZxLAJtPhCU1WV7S/aLbbUmFDqfzTcR7L7XDjrF+lYmwvHOaO+52ZH+rR
-         ajRx2y0e/w/DdJ1wh/3bu4EtJpuxjMQ2Jfo4WnmlLq7Qn8cT1eIl6y4DOcJqOUEsJH
-         QxaFOprMic/QBm1PXG5885h/8IZZ7o1OJUDmUb+sB7ZuqrtOECRbp0wRHdJMLaIApC
-         Yq2B293x4vWSw==
-Date:   Thu, 2 Sep 2021 08:03:07 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Amir Goldstein <amir73il@gmail.com>
-Cc:     Eryu Guan <guaneryu@gmail.com>,
-        linux-xfs <linux-xfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>, Eryu Guan <guan@eryu.me>
-Subject: Re: [PATCH 4/5] tools: make sure that test groups are described in
- the documentation
-Message-ID: <20210902150307.GF9942@magnolia>
-References: <163045514980.771564.6282165259140399788.stgit@magnolia>
- <163045517173.771564.1524162806861567173.stgit@magnolia>
- <CAOQ4uxi7205Ae+un1w4C4Dzh9-SykL=ogHQSBH=nnVGDkPfkhw@mail.gmail.com>
- <20210901164311.GB9911@magnolia>
- <CAOQ4uxgJz6OBmV=SD1fp9tkCAfiAhxjdCr+fxGd4ko4Y6NUscA@mail.gmail.com>
+        Thu, 2 Sep 2021 11:48:37 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:29291 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1345735AbhIBPsg (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 2 Sep 2021 11:48:36 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1630597657;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=WDx0PcjIEi7aaYT5qenMJpXUhrm6VH0waiqiPfuyEm4=;
+        b=M3IH4uuXgfc44RHpXwZO0oCk19dQrEquY1Es7GhPF1G7iMsaHOcuThBgrvVVkHqzbbtZ4v
+        9zV2aZN2oArWKv3Jjwqrr6fLVju7az+hy9fHivF3BbT6NbwDK8HkjK7OVANUEDZXWu5Yp9
+        JWsn27NfrbPEQfgf8URDhldDJvx0QuM=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-300-WcbQxMzvPqGQVG_21Zq6JA-1; Thu, 02 Sep 2021 11:47:36 -0400
+X-MC-Unique: WcbQxMzvPqGQVG_21Zq6JA-1
+Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.phx2.redhat.com [10.5.11.23])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id F03C0189C454;
+        Thu,  2 Sep 2021 15:47:34 +0000 (UTC)
+Received: from horse.redhat.com (unknown [10.22.8.149])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id A37B719C46;
+        Thu,  2 Sep 2021 15:47:31 +0000 (UTC)
+Received: by horse.redhat.com (Postfix, from userid 10451)
+        id 38BED220257; Thu,  2 Sep 2021 11:47:31 -0400 (EDT)
+Date:   Thu, 2 Sep 2021 11:47:31 -0400
+From:   Vivek Goyal <vgoyal@redhat.com>
+To:     fstests@vger.kernel.org
+Cc:     linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org,
+        virtio-fs@redhat.com, dwalsh@redhat.com, dgilbert@redhat.com,
+        christian.brauner@ubuntu.com, casey.schaufler@intel.com,
+        linux-security-module@vger.kernel.org, selinux@vger.kernel.org,
+        tytso@mit.edu, miklos@szeredi.hu, gscrivan@redhat.com,
+        bfields@redhat.com, stephen.smalley.work@gmail.com,
+        agruenba@redhat.com, david@fromorbit.com, viro@zeniv.linux.org.uk
+Subject: [PATCH 3/1] xfstests: generic/062: Do not run on newer kernels
+Message-ID: <YTDyE9wVQQBxS77r@redhat.com>
+References: <20210902152228.665959-1-vgoyal@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAOQ4uxgJz6OBmV=SD1fp9tkCAfiAhxjdCr+fxGd4ko4Y6NUscA@mail.gmail.com>
+In-Reply-To: <20210902152228.665959-1-vgoyal@redhat.com>
+X-Scanned-By: MIMEDefang 2.84 on 10.5.11.23
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Sep 02, 2021 at 07:49:51AM +0300, Amir Goldstein wrote:
-> On Wed, Sep 1, 2021 at 7:43 PM Darrick J. Wong <djwong@kernel.org> wrote:
-> >
-> > On Wed, Sep 01, 2021 at 07:46:01AM +0300, Amir Goldstein wrote:
-> > > On Wed, Sep 1, 2021 at 3:37 AM Darrick J. Wong <djwong@kernel.org> wrote:
-> > > >
-> > > > From: Darrick J. Wong <djwong@kernel.org>
-> > > >
-> > > > Create a file to document the purpose of each test group that is
-> > > > currently defined in fstests, and add a build script to check that every
-> > > > group mentioned in the tests is also mentioned in the documentation.
-> > > >
-> > >
-> > > This is awesome and long due.
-> > > Thanks for doing that!
-> > >
-> > > Minor nits about overlayfs groups below...
-> >
-> > Heh, yeah, thanks for making corrections. :)
-> >
-> > > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > > > ---
-> > > >  doc/group-names.txt    |  136 ++++++++++++++++++++++++++++++++++++++++++++++++
-> > > >  include/buildgrouplist |    1
-> > > >  tools/check-groups     |   33 ++++++++++++
-> > > >  3 files changed, 170 insertions(+)
-> > > >  create mode 100644 doc/group-names.txt
-> > > >  create mode 100755 tools/check-groups
-> > > >
-> > > >
-> > > > diff --git a/doc/group-names.txt b/doc/group-names.txt
-> > > > new file mode 100644
-> > > > index 00000000..ae517328
-> > > > --- /dev/null
-> > > > +++ b/doc/group-names.txt
-> > > > @@ -0,0 +1,136 @@
-> > > > +======================= =======================================================
-> > > > +Group Name:            Description:
-> > > > +======================= =======================================================
-> > > > +all                    All known tests, automatically generated by ./check at
-> > > > +                       runtime
-> > > > +auto                   Tests that should be run automatically.  These should
-> > > > +                       not require more than ~5 minutes to run.
-> > > > +quick                  Tests that should run in under 30 seconds.
-> > > > +deprecated             Old tests that should not be run.
-> > > > +
-> > > > +acl                    Access Control Lists
-> > > > +admin                  xfs_admin functionality
-> > > > +aio                    general libaio async io tests
-> > > > +atime                  file access time
-> > > > +attr                   extended attributes
-> > > > +attr2                  xfs v2 extended aributes
-> > > > +balance                        btrfs tree rebalance
-> > > > +bigtime                        timestamps beyond the year 2038
-> > > > +blockdev               block device functionality
-> > > > +broken                 broken tests
-> > > > +cap                    Linux capabilities
-> > > > +casefold               directory name casefolding
-> > > > +ci                     ASCII case-insensitive directory name lookups
-> > > > +clone                  FICLONE/FICLONERANGE ioctls
-> > > > +clone_stress           stress testing FICLONE/FICLONERANGE
-> > > > +collapse               fallocate collapse_range
-> > > > +compress               file compression
-> > > > +convert                        btrfs ext[34] conversion tool
-> > > > +copy                   xfs_copy functionality
-> > > > +copy_range             copy_file_range syscall
-> > > > +copyup                 overlayfs copyup support
-> > >
-> > > The tests in this group exercise copy up.
-> > > There is no such thing as overlayfs without "copyup support",
-> > > so guess my point is - remove the word "support"
-> >
-> > OK.
-> >
-> > > > +dangerous              dangerous test that can crash the system
-> > > > +dangerous_bothrepair   fuzzers to evaluate xfs_scrub + xfs_repair repair
-> > > > +dangerous_fuzzers      fuzzers that can crash your computer
-> > > > +dangerous_norepair     fuzzers to evaluate kernel metadata verifiers
-> > > > +dangerous_online_repair        fuzzers to evaluate xfs_scrub online repair
-> > > > +dangerous_repair       fuzzers to evaluate xfs_repair offline repair
-> > > > +dangerous_scrub                fuzzers to evaluate xfs_scrub checking
-> > > > +data                   data loss checkers
-> > > > +dax                    direct access mode for persistent memory files
-> > > > +db                     xfs_db functional tests
-> > > > +dedupe                 FIEDEDUPERANGE ioctl
-> > > > +defrag                 filesystem defragmenters
-> > > > +dir                    directory test functions
-> > > > +dump                   dump and restore utilities
-> > > > +eio                    IO error reporting
-> > > > +encrypt                        encrypted file contents
-> > > > +enospc                 ENOSPC error reporting
-> > > > +exportfs               file handles
-> > > > +filestreams            XFS filestreams allocator
-> > > > +freeze                 filesystem freeze tests
-> > > > +fsck                   general fsck tests
-> > > > +fsmap                  FS_IOC_GETFSMAP ioctl
-> > > > +fsr                    XFS free space reorganizer
-> > > > +fuzzers                        filesystem fuzz tests
-> > > > +growfs                 increasing the size of a filesystem
-> > > > +hardlink               hardlinks
-> > > > +health                 XFS health reporting
-> > > > +idmapped               idmapped mount functionality
-> > > > +inobtcount             XFS inode btree count tests
-> > > > +insert                 fallocate insert_range
-> > > > +ioctl                  general ioctl tests
-> > > > +io_uring               general io_uring async io tests
-> > > > +label                  filesystem labelling
-> > > > +limit                  resource limits
-> > > > +locks                  file locking
-> > > > +log                    metadata logging
-> > > > +logprint               xfs_logprint functional tests
-> > > > +long_rw                        long-soak read write IO path exercisers
-> > > > +metacopy               overlayfs metadata-only copy-up
-> > > > +metadata               filesystem metadata update exercisers
-> > > > +metadump               xfs_metadump/xfs_mdrestore functionality
-> > > > +mkfs                   filesystem formatting tools
-> > > > +mount                  mount option and functionality checks
-> > > > +nested                 nested overlayfs instances
-> > > > +nfs4_acl               NFSv4 access control lists
-> > > > +nonsamefs              overlayfs layers on different filesystems
-> > > > +online_repair          online repair functionality tests
-> > > > +other                  dumping ground, do not add more tests to this group
-> > > > +overlay                        using overlayfs on top of FSTYP
-> > >
-> > > This description is a bit confusing, because the recommended
-> > > way to run overlayfs tests as described in README.overlay is
-> > > to set FSTYP=xfs and run ./check -overlay
-> > >
-> > > I'm struggling for a better description but perhaps:
-> > > "using overlayfs regardless of ./check -overlay flag"?
-> >
-> > Hmm.  Since I'm the author of the only test that uses this tag, I guess
-> > I'm the authority (ha!) on what the name actually means.
-> >
-> > That test (generic/631) is a regression test for a XFS whiteout handling
-> > bug that can only be reproduced by layering overlayfs atop xfs.
-> > Overlayfs is incidental to reproducing the XFS bug, but AFAIK overlayfs
-> > is the only in-kernel user of whiteout, which is why it's critical here.
-> >
-> > It's not right to make it "_supported_fs overlay" because we're not
-> > testing overlayfs functionality; we're merely using it as a stick to
-> > poke another filesystem.
-> 
-> Yes. I know.
-> Note that while this is the only case of _require_extra_fs overaly
-> there is another case of _require_extra_fs ext2 (xfs/049)
-> 
-> >
-> > How about: "regression tests that require the use of overlayfs in a
-> > targetted configuration" ?
-> >
-> 
-> TBH, I do not think it is wise to tag the test by the test method
-> rather than the tested functionality.
 
-<nod> It seemed kinda awkward to me.
+xfstests: generic/062: Do not run on newer kernels
 
-> What is more likely?
-> that a tester wants to run all tests that use overlay over FSTYP?
-> Or that a tester wants to run all tests to verify whiteout related
-> behavior after changing whiteout related code?
-> 
-> I suggest that you re-tag this test as 'whiteout', which is documented
-> already.
+This test has been written with assumption that setting user.* xattrs will
+fail on symlink and special files. When newer kernels support setting
+user.* xattrs on symlink and special files, this test starts failing.
 
-Ooh!  That's a much better suggestion.  I'll do that instead! :)
+Found it hard to change test in such a way that it works on both type of
+kernels. Primary problem is 062.out file which hardcodes the output and
+output will be different on old and new kernels.
 
-> If you want to be more specific, you can create a group
-> rename_whiteout, because RENAME_WHITEOUT is the vfs
-> interface that this test is actually exercising.
+So instead, do not run this test if kernel is new and is expected to
+exhibit new behavior. Next patch will create a new test and run that
+test on new kernel.
 
-Eh, if we want to split the groups someday we can always revisit it.
+IOW, on old kernels run 062 and on new kernels run new test.
 
-Thanks for the suggestion; I'll have a v2 series out shortly.
+This is a proposed patch. Will need to be fixed if corresponding
+kernel changes are merged upstream.
 
---D
+Signed-off-by: Vivek Goyal <vgoyal@redhat.com>
+---
+ tests/generic/062 |   20 ++++++++++++++++++++
+ 1 file changed, 20 insertions(+)
 
-> 
-> Thanks,
-> Amir.
+Index: xfstests-dev/tests/generic/062
+===================================================================
+--- xfstests-dev.orig/tests/generic/062	2021-08-31 15:51:08.160307982 -0400
++++ xfstests-dev/tests/generic/062	2021-08-31 16:27:41.678307982 -0400
+@@ -55,6 +55,26 @@ _require_attrs
+ _require_symlinks
+ _require_mknod
+ 
++user_xattr_allowed()
++{
++	local kernel_version kernel_patchlevel
++
++	kernel_version=`uname -r | awk -F. '{print $1}'`
++	kernel_patchlevel=`uname -r | awk -F. '{print $2}'`
++
++	# Kernel version 5.14 onwards allow user xattr on symlink/special files.
++	[ $kernel_version -lt 5 ] && return 1
++	[ $kernel_patchlevel -lt 14 ] && return 1
++	return 0;
++}
++
++
++# Kernel version 5.14 onwards allow user xattr on symlink/special files.
++# Do not run this test on newer kernels. Instead run the new test
++# which has been written with the assumption that user.* xattr
++# will succeed on symlink and special files.
++user_xattr_allowed && _notrun "Kernel allows user.* xattrs on symlinks and special files. Skipping this test. Run newer test instead."
++
+ rm -f $tmp.backup1 $tmp.backup2 $seqres.full
+ 
+ # real QA test starts here
+
