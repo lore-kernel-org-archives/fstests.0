@@ -2,245 +2,104 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9BF2EC433F5
-	for <linux-fstests@archiver.kernel.org>; Fri,  3 Sep 2021 16:23:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 25A4FC433EF
+	for <linux-fstests@archiver.kernel.org>; Fri,  3 Sep 2021 17:48:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 83A44610CE
-	for <linux-fstests@archiver.kernel.org>; Fri,  3 Sep 2021 16:23:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id F043461057
+	for <linux-fstests@archiver.kernel.org>; Fri,  3 Sep 2021 17:48:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1349686AbhICQYq (ORCPT
+        id S1349828AbhICRte (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 3 Sep 2021 12:24:46 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36928 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235745AbhICQYq (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 3 Sep 2021 12:24:46 -0400
-Received: from mail-qt1-x833.google.com (mail-qt1-x833.google.com [IPv6:2607:f8b0:4864:20::833])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3A264C061575;
-        Fri,  3 Sep 2021 09:23:46 -0700 (PDT)
-Received: by mail-qt1-x833.google.com with SMTP id u21so4957833qtw.8;
-        Fri, 03 Sep 2021 09:23:46 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:reply-to:from:date:message-id
-         :subject:to:cc:content-transfer-encoding;
-        bh=JlR0f9FtNXgJ4F4NabMbkKgfsQNe1xOl1rzU86pM1xs=;
-        b=fA9gzx/fubG4zYdqRgqBNoJxftNYeMjPbw29938biNi2HuRfW0IcRg7fUaat/FEFTv
-         Cyi2Q1Gj8tJDV9fF0ebW6kZ4Z/g3gHiZSTq2TLZ4qH7KbypmmBGAc8D/yDtL93OpyppS
-         BMEiH79fz1BpPDFTYYuIDDS6N2fPNE3Cw7EflbO8d6Ekwlbg8MUHObqwxKArcuXMEaSU
-         JTfnrakl7iSs9TVMx5hlN5b5+ACc1j3+zaJWi+i2WMf2+C68cAC+6acoETe9GTksP16K
-         vgjakUCyRi1hhLX6weXN0BeumjdvuFrH5IcSGRujbKE6Bw43SaxFNGBcW/qeyJtsKu0q
-         BWqQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:reply-to
-         :from:date:message-id:subject:to:cc:content-transfer-encoding;
-        bh=JlR0f9FtNXgJ4F4NabMbkKgfsQNe1xOl1rzU86pM1xs=;
-        b=o4JlI9UK7ZD5npAUiC1amBGvLqrumNe0qhTPRIYKX26RU3VIhRbk1Bg7/bE6EdiAvM
-         P7uGOaJ2ZOKbHSkL9u011qCBH+6fAKWoWKeIvV7zAukk1v9etJlvoqP9nZZjEubUBX9+
-         pkGmdqboL57uSI1qL0hiG7N0kDk+SZr47bUTlds9nf6f+fqNa4NkhL0b9cOXRov50gGw
-         uoc4GVkK8KG0SGb3RbXfPPVAZ6UBj9QxFNXgz7Vbwf80tZQEYiSVOnaJa6E65DL+cS8p
-         bFSIaxpyNSaJqVMUb+QqxUcEzmtVnXLiQyMKlT5+ir3oWkLQwbV3YiJfEkn4daxSRps6
-         OQIw==
-X-Gm-Message-State: AOAM533oARojEtmtQQZiWWaM2H52W8Sy9+vbTmb6AOTnzkDvsHJxXGwD
-        VnKMOWt9PCaDSwqYk16jUydmmP/Ptzz36kcm/ScZCXPf
-X-Google-Smtp-Source: ABdhPJz7lYFg23SpT9VZmTWFqlmIUQtIsM19Ylw8iXRCugCGtSWo84gh7GC8+U+6/SjWSXx0CEO/o01b6k2psyS7Eyo=
-X-Received: by 2002:ac8:5417:: with SMTP id b23mr4706974qtq.140.1630686225379;
- Fri, 03 Sep 2021 09:23:45 -0700 (PDT)
+        Fri, 3 Sep 2021 13:49:34 -0400
+Received: from mail.kernel.org ([198.145.29.99]:44086 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S229929AbhICRtb (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 3 Sep 2021 13:49:31 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 52C4E60E93;
+        Fri,  3 Sep 2021 17:48:31 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1630691311;
+        bh=IJ6MVvZ1eCcFVd0Fr03yXsfICZUWofKGe0iqprdx4BM=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=syRHsNbQDIhf+qgjotThF8C07XnNXepJIyE4Fch9uouiWE0sq4ZKLaNiOeq64AzQi
+         wEOrX1rWlndUDAI3nJD80qDdRWksdSPKwONuzDvFrT85EhTf0+tjRwf8hJO9WUFIXW
+         HPHuoAhp+L7lVblA619sNaFgJH3d9twIXPaUJR40OfMe4M7Ztf7xcpTKLcHoX12TsN
+         ZzKk5ln5dRuxVUpaxLGDNzQmThr9OgXchZ6kb3PsSi5ODUD+fSRBTVssibAu+7h8ce
+         CWhZOBan99RMsiBR4XS3RriPVMIu1c9wKuqCqZh+wV1GRaemy/kmX0uHDV3e7SPa/+
+         ZyABwqX2cqqfw==
+Date:   Fri, 3 Sep 2021 10:48:30 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Xiong Zhou <xzhou@redhat.com>
+Cc:     Dave Chinner <david@fromorbit.com>, Theodore Ts'o <tytso@mit.edu>,
+        Pavel Reichl <preichl@redhat.com>, fstests@vger.kernel.org,
+        Luis Chamberlain <mcgrof@kernel.org>
+Subject: Re: [PATCH v3] common/rc: fix MKSWAP_PROG quoting
+Message-ID: <20210903174830.GC9911@magnolia>
+References: <20210831030426.nwcoelcnshq4wrxx@xzhoux.usersys.redhat.com>
+ <20210831052632.p4kaygjeujipo4w5@fedora>
+ <3d064e8a-514d-4a98-3db1-0de490107368@redhat.com>
+ <20210831134207.aa4e26xuyji4npia@fedora>
+ <YS5hRsSXNHYQdUv9@mit.edu>
+ <20210901054822.phzkg5xqoocx3duq@xzhoux.usersys.redhat.com>
+ <20210901071545.GA1756565@dread.disaster.area>
+ <20210901094024.424whsgozs5lwyzo@xzhoux.usersys.redhat.com>
 MIME-Version: 1.0
-References: <20210830122306.882081-2-nborisov@suse.com> <20210830153641.893416-1-nborisov@suse.com>
-In-Reply-To: <20210830153641.893416-1-nborisov@suse.com>
-Reply-To: fdmanana@gmail.com
-From:   Filipe Manana <fdmanana@gmail.com>
-Date:   Fri, 3 Sep 2021 17:23:09 +0100
-Message-ID: <CAL3q7H6Ww7eU=aXEmOYpcT8Vrbnp=_iU8FBYPd4T4rrp1KCuCQ@mail.gmail.com>
-Subject: Re: [PATCH v2] btrfs: Add test for rename/exchange behavior between subvolumes
-To:     Nikolay Borisov <nborisov@suse.com>
-Cc:     fstests <fstests@vger.kernel.org>,
-        linux-btrfs <linux-btrfs@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210901094024.424whsgozs5lwyzo@xzhoux.usersys.redhat.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Aug 30, 2021 at 4:38 PM Nikolay Borisov <nborisov@suse.com> wrote:
->
-> This tests ensures that renames/exchanges across subvolumes work only
-> for other subvolumes and are otherwise forbidden and fail.
->
-> Signed-off-by: Nikolay Borisov <nborisov@suse.com>
+On Wed, Sep 01, 2021 at 05:40:24PM +0800, Xiong Zhou wrote:
+> After commit
+>   0e4dd8b9 common/rc: fix ignoring of errors on
+> we are getting this error message when running swapfiles tests:
+>   +./common/rc: line 2553: MKSWAP_PROG: command not found
+> 
+> Rewrite the line.
+> 
+> Signed-off-by: Murphy Zhou <xzhou@redhat.com>
 
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
+Aha, I was wondering why the test counts were lower after last Sunday's
+rebase.  Works for me, so:
 
-Looks good, thanks.
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+
+--D
 
 > ---
-> This is the real v2.
->
-> Changes in V2:
->  * Added cross-subvol rename tests
->  * Added cross-subvol subvolume rename test
->  * Added ordinary volume rename test
->  * Removed explicit sync
->
->
->  tests/btrfs/246     | 60 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/246.out | 54 ++++++++++++++++++++++++++++++++++++++++
->  2 files changed, 114 insertions(+)
->  create mode 100755 tests/btrfs/246
->  create mode 100644 tests/btrfs/246.out
->
-> diff --git a/tests/btrfs/246 b/tests/btrfs/246
-> new file mode 100755
-> index 000000000000..53039df38993
-> --- /dev/null
-> +++ b/tests/btrfs/246
-> @@ -0,0 +1,60 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2021 SUSE Linux Products GmbH.  All Rights Reserved.
-> +#
-> +# FS QA Test 246
-> +#
-> +# Tests rename/exchange behavior when subvolumes are involved. Rename/ex=
-changes
-> +# across subvolumes are forbidden. This is also a regression test for
-> +# 3f79f6f6247c ("btrfs: prevent rename2 from exchanging a subvol with a
-> +# directory from different parents").
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick rename subvol
-> +
-> +# Import common functions.
-> + . ./common/renameat2
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs btrfs
-> +_require_renameat2 exchange
-> +_require_scratch
-> +
-> +_scratch_mkfs >> $seqres.full 2>&1
-> +_scratch_mount
-> +
-> +# Create 2 subvols to use as parents for the rename ops
-> +$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subvol1 1>/dev/null
-> +$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subvol2 1>/dev/null
-> +
-> +# Ensure cross subvol ops are forbidden
-> +_rename_tests_source_dest $SCRATCH_MNT/subvol1/src $SCRATCH_MNT/subvol2/=
-dst "cross-subvol" "-x"
-> +
-> +# Prepare a subvolume and a directory whose parents are different subvol=
-umes
-> +$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subvol1/sub-subvol 1>/dev=
-/null
-> +mkdir $SCRATCH_MNT/subvol2/dir
-> +
-> +# Ensure exchanging a subvol with a dir when both parents are different =
-fails
-> +$here/src/renameat2 -x $SCRATCH_MNT/subvol1/sub-subvol $SCRATCH_MNT/subv=
-ol2/dir
-> +
-> +echo "ordinary rename"
-> +# Test also ordinary renames
-> +_rename_tests_source_dest $SCRATCH_MNT/subvol1/src $SCRATCH_MNT/subvol2/=
-dst "cross-subvol"
-> +
-> +echo "subvolumes rename"
-> +# Rename subvol1/sub-subvol -> subvol2/sub-subvol
-> +$here/src/renameat2  $SCRATCH_MNT/subvol1/sub-subvol $SCRATCH_MNT/subvol=
-2/sub-subvol
-> +# Now create another subvol under subvol1/
-> +$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subvol1/sub-subvol 1>/dev=
-/null
-> +# and exchange the two
-> +$here/src/renameat2 -x $SCRATCH_MNT/subvol2/sub-subvol $SCRATCH_MNT/subv=
-ol1/sub-subvol
-> +
-> +# simple rename of a subvolume in the same directory, should catch
-> +# 4871c1588f92 ("Btrfs: use right root when checking for hash collision"=
-)
-> +mv $SCRATCH_MNT/subvol2/ $SCRATCH_MNT/subvol2.
-> +
-> +# success, all done
-> +status=3D0
-> +exit
-> diff --git a/tests/btrfs/246.out b/tests/btrfs/246.out
-> new file mode 100644
-> index 000000000000..5db90cf2bd9a
-> --- /dev/null
-> +++ b/tests/btrfs/246.out
-> @@ -0,0 +1,54 @@
-> +QA output created by 246
-> +cross-subvol none/none -> No such file or directory
-> +cross-subvol none/regu -> No such file or directory
-> +cross-subvol none/symb -> No such file or directory
-> +cross-subvol none/dire -> No such file or directory
-> +cross-subvol none/tree -> No such file or directory
-> +cross-subvol regu/none -> No such file or directory
-> +cross-subvol regu/regu -> Invalid cross-device link
-> +cross-subvol regu/symb -> Invalid cross-device link
-> +cross-subvol regu/dire -> Invalid cross-device link
-> +cross-subvol regu/tree -> Invalid cross-device link
-> +cross-subvol symb/none -> No such file or directory
-> +cross-subvol symb/regu -> Invalid cross-device link
-> +cross-subvol symb/symb -> Invalid cross-device link
-> +cross-subvol symb/dire -> Invalid cross-device link
-> +cross-subvol symb/tree -> Invalid cross-device link
-> +cross-subvol dire/none -> No such file or directory
-> +cross-subvol dire/regu -> Invalid cross-device link
-> +cross-subvol dire/symb -> Invalid cross-device link
-> +cross-subvol dire/dire -> Invalid cross-device link
-> +cross-subvol dire/tree -> Invalid cross-device link
-> +cross-subvol tree/none -> No such file or directory
-> +cross-subvol tree/regu -> Invalid cross-device link
-> +cross-subvol tree/symb -> Invalid cross-device link
-> +cross-subvol tree/dire -> Invalid cross-device link
-> +cross-subvol tree/tree -> Invalid cross-device link
-> +Invalid cross-device link
-> +ordinary rename
-> +cross-subvol none/none -> No such file or directory
-> +cross-subvol none/regu -> No such file or directory
-> +cross-subvol none/symb -> No such file or directory
-> +cross-subvol none/dire -> No such file or directory
-> +cross-subvol none/tree -> No such file or directory
-> +cross-subvol regu/none -> Invalid cross-device link
-> +cross-subvol regu/regu -> Invalid cross-device link
-> +cross-subvol regu/symb -> Invalid cross-device link
-> +cross-subvol regu/dire -> Is a directory
-> +cross-subvol regu/tree -> Is a directory
-> +cross-subvol symb/none -> Invalid cross-device link
-> +cross-subvol symb/regu -> Invalid cross-device link
-> +cross-subvol symb/symb -> Invalid cross-device link
-> +cross-subvol symb/dire -> Is a directory
-> +cross-subvol symb/tree -> Is a directory
-> +cross-subvol dire/none -> Invalid cross-device link
-> +cross-subvol dire/regu -> Not a directory
-> +cross-subvol dire/symb -> Not a directory
-> +cross-subvol dire/dire -> Invalid cross-device link
-> +cross-subvol dire/tree -> Invalid cross-device link
-> +cross-subvol tree/none -> Invalid cross-device link
-> +cross-subvol tree/regu -> Not a directory
-> +cross-subvol tree/symb -> Not a directory
-> +cross-subvol tree/dire -> Invalid cross-device link
-> +cross-subvol tree/tree -> Invalid cross-device link
-> +subvolumes rename
-> --
-> 2.17.1
->
-
-
---=20
-Filipe David Manana,
-
-=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
- right.=E2=80=9D
+> 
+> Thanks all for the suggestions!
+> 
+> v2:
+>   rewrite the line and add a filter
+>   source filters for generic/643
+> v3:
+>   drop the filter, use grep
+> 
+>  common/rc | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
+> 
+> diff --git a/common/rc b/common/rc
+> index 46b6b220..00f3023f 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -2550,7 +2550,8 @@ _format_swapfile() {
+>  	$CHATTR_PROG +C "$fname" > /dev/null 2>&1
+>  	_pwrite_byte 0x61 0 "$sz" "$fname" >> $seqres.full
+>  	# Ignore permission complaints on filesystems that don't support perms
+> -	$(MKSWAP_PROG "$fname" 2> >(grep -v 'insecure permission' >&2)) >> $seqres.full
+> +	$MKSWAP_PROG "$fname" 2>&1 >> $seqres.full | \
+> +		grep -v "insecure permission"
+>  }
+>  
+>  _swapon_file() {
+> -- 
+> 2.20.1
+> 
