@@ -2,136 +2,125 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.7 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3870FC433EF
-	for <linux-fstests@archiver.kernel.org>; Fri,  3 Sep 2021 03:38:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DE786C433EF
+	for <linux-fstests@archiver.kernel.org>; Fri,  3 Sep 2021 04:55:36 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 07BEE61054
-	for <linux-fstests@archiver.kernel.org>; Fri,  3 Sep 2021 03:38:53 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B7B7F61058
+	for <linux-fstests@archiver.kernel.org>; Fri,  3 Sep 2021 04:55:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234277AbhICDjv (ORCPT
+        id S232487AbhICE4f (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 2 Sep 2021 23:39:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60070 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233734AbhICDju (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 2 Sep 2021 23:39:50 -0400
-Received: from mail-il1-x135.google.com (mail-il1-x135.google.com [IPv6:2607:f8b0:4864:20::135])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0008CC061575;
-        Thu,  2 Sep 2021 20:38:50 -0700 (PDT)
-Received: by mail-il1-x135.google.com with SMTP id i13so3978296ilm.4;
-        Thu, 02 Sep 2021 20:38:50 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=zdzoUAonJYu9U4cw8l4yW3yrTM/Nw8zEEc4MWMdvEk8=;
-        b=HEqB4iCkleJm7uMY0KtOlkdBdCwmMf+wJWc6Dic8XXpbNmiAJj8528nAx3FIk+oXDV
-         q/E2vSPTcjxbP3SuIskaVGfO9DDpnVmwWaNwIxU0QcrbvyV6DAK1/5bdj0VPEFWvOfa3
-         GOXg+P0cQwp+JFb3cxWPpfB91s1gPFvpF0NoI02HGitDrpkQ2jZk9lfEtm9jwotL+Y/V
-         JIlRJrnzbN9xWffOx0QhT4G+4MC7vTxwPtMhxtCHyP9cHZuRaioq1JelN7UbdbMHQYnr
-         Y9x4p8F7q8vDuH/PBUuIUV3bVKCUKVnXhgr5x+1QQg3FVLUmmv+OeDxKb0f8V/dKwSep
-         y78A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=zdzoUAonJYu9U4cw8l4yW3yrTM/Nw8zEEc4MWMdvEk8=;
-        b=FzYS1+d9zlX4GjwLwjyuB4S5yDNDtEJiym2dpMlU2POaLEzRhXDieZb//jAkSWuzkg
-         VbtDKH/u7COgzVCmyDEQXSjPD0NAPlcC6tojYJXdQbtb14m4dOEk96mhmMAjGlhFG23K
-         RKLkpCuyCwu39z1PRbnnfcn0OLVRAlp3I3P6hjfsALlOEE7LR2o55BZB+ZxTvhdg3Pu7
-         ZWfOPt1ClyAFR9/KRPPlHESlTG5qM9z/SAi9+uq3NekFLEw3OiZzALM/k6Su+sW4KdF+
-         6sVxsqmhxeMB+/XeXMf1bwC84ClTcYQs5d2xitNqGgw51BcA143E/u0ntvUXGuNWLF5V
-         NGsg==
-X-Gm-Message-State: AOAM530rgz0Q8qeyycWWb6JCkWuByFp1c9KUyFITvzM56OztNorIZZNB
-        byOpto5o47HOoRu2PZeUBp6LkI7wbF3SSLlTNjaBEQJXjho=
-X-Google-Smtp-Source: ABdhPJxcYTh2WiYUY1kujVKPbe1PdQk7iCNavCC5U7StINntIicX9oa6Mbc3wgzrrrCLVXgw6L2tNozvNOtcQWCq2fc=
-X-Received: by 2002:a05:6e02:788:: with SMTP id q8mr1031402ils.137.1630640330439;
- Thu, 02 Sep 2021 20:38:50 -0700 (PDT)
+        Fri, 3 Sep 2021 00:56:35 -0400
+Received: from mail108.syd.optusnet.com.au ([211.29.132.59]:53882 "EHLO
+        mail108.syd.optusnet.com.au" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S229561AbhICE4e (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 3 Sep 2021 00:56:34 -0400
+Received: from dread.disaster.area (pa49-195-182-146.pa.nsw.optusnet.com.au [49.195.182.146])
+        by mail108.syd.optusnet.com.au (Postfix) with ESMTPS id E598E1B70A0;
+        Fri,  3 Sep 2021 14:55:26 +1000 (AEST)
+Received: from dave by dread.disaster.area with local (Exim 4.92.3)
+        (envelope-from <david@fromorbit.com>)
+        id 1mM1EX-0085qb-Da; Fri, 03 Sep 2021 14:55:21 +1000
+Date:   Fri, 3 Sep 2021 14:55:21 +1000
+From:   Dave Chinner <david@fromorbit.com>
+To:     Vivek Goyal <vgoyal@redhat.com>
+Cc:     fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org,
+        linux-kernel@vger.kernel.org, virtio-fs@redhat.com,
+        dwalsh@redhat.com, dgilbert@redhat.com,
+        christian.brauner@ubuntu.com, casey.schaufler@intel.com,
+        linux-security-module@vger.kernel.org, selinux@vger.kernel.org,
+        tytso@mit.edu, miklos@szeredi.hu, gscrivan@redhat.com,
+        bfields@redhat.com, stephen.smalley.work@gmail.com,
+        agruenba@redhat.com, viro@zeniv.linux.org.uk
+Subject: Re: [PATCH 3/1] xfstests: generic/062: Do not run on newer kernels
+Message-ID: <20210903045521.GD1756565@dread.disaster.area>
+References: <20210902152228.665959-1-vgoyal@redhat.com>
+ <YTDyE9wVQQBxS77r@redhat.com>
 MIME-Version: 1.0
-References: <163062674313.1579659.11141504872576317846.stgit@magnolia> <163062677608.1579659.1360826362143203767.stgit@magnolia>
-In-Reply-To: <163062677608.1579659.1360826362143203767.stgit@magnolia>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Fri, 3 Sep 2021 06:38:38 +0300
-Message-ID: <CAOQ4uxit3G=0o3nXVFvW740v6Xi-pSn5uHsgKdOvH4ybc+3jKw@mail.gmail.com>
-Subject: Re: [PATCH 6/8] tools: make sure that test groups are described in
- the documentation
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     Eryu Guan <guaneryu@gmail.com>,
-        linux-xfs <linux-xfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>, Eryu Guan <guan@eryu.me>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <YTDyE9wVQQBxS77r@redhat.com>
+X-Optus-CM-Score: 0
+X-Optus-CM-Analysis: v=2.3 cv=YKPhNiOx c=1 sm=1 tr=0
+        a=QpfB3wCSrn/dqEBSktpwZQ==:117 a=QpfB3wCSrn/dqEBSktpwZQ==:17
+        a=kj9zAlcOel0A:10 a=7QKq2e-ADPsA:10 a=20KFwNOVAAAA:8 a=7-415B0cAAAA:8
+        a=-kbUXcvnShYF-Q782qsA:9 a=CjuIK1q_8ugA:10 a=biEYGPWJfzWAr4FL6Ov7:22
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-> diff --git a/include/buildgrouplist b/include/buildgrouplist
-> index d898efa3..489de965 100644
-> --- a/include/buildgrouplist
-> +++ b/include/buildgrouplist
-> @@ -6,3 +6,4 @@
->  group.list:
->         @echo " [GROUP] $$PWD/$@"
->         $(Q)$(TOPDIR)/tools/mkgroupfile $@
-> +       $(Q)$(TOPDIR)/tools/check-groups $(TOPDIR)/doc/group-names.txt $@
-
-I would like to argue against checking groups post mkgroupfile
-and for checking groups during mkgroupfile
-
-> diff --git a/tools/check-groups b/tools/check-groups
-> new file mode 100755
-> index 00000000..0d193615
-> --- /dev/null
-> +++ b/tools/check-groups
-> @@ -0,0 +1,35 @@
-> +#!/bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2021 Oracle.  All Rights Reserved.
-> +#
-> +# Make sure that all groups listed in a group.list file are mentioned in the
-> +# group description file.
+On Thu, Sep 02, 2021 at 11:47:31AM -0400, Vivek Goyal wrote:
+> 
+> xfstests: generic/062: Do not run on newer kernels
+> 
+> This test has been written with assumption that setting user.* xattrs will
+> fail on symlink and special files. When newer kernels support setting
+> user.* xattrs on symlink and special files, this test starts failing.
+> 
+> Found it hard to change test in such a way that it works on both type of
+> kernels. Primary problem is 062.out file which hardcodes the output and
+> output will be different on old and new kernels.
+> 
+> So instead, do not run this test if kernel is new and is expected to
+> exhibit new behavior. Next patch will create a new test and run that
+> test on new kernel.
+> 
+> IOW, on old kernels run 062 and on new kernels run new test.
+> 
+> This is a proposed patch. Will need to be fixed if corresponding
+> kernel changes are merged upstream.
+> 
+> Signed-off-by: Vivek Goyal <vgoyal@redhat.com>
+> ---
+>  tests/generic/062 |   20 ++++++++++++++++++++
+>  1 file changed, 20 insertions(+)
+> 
+> Index: xfstests-dev/tests/generic/062
+> ===================================================================
+> --- xfstests-dev.orig/tests/generic/062	2021-08-31 15:51:08.160307982 -0400
+> +++ xfstests-dev/tests/generic/062	2021-08-31 16:27:41.678307982 -0400
+> @@ -55,6 +55,26 @@ _require_attrs
+>  _require_symlinks
+>  _require_mknod
+>  
+> +user_xattr_allowed()
+> +{
+> +	local kernel_version kernel_patchlevel
 > +
-> +if [ -z "$1" ] || [ "$1" = "--help" ]; then
-> +       echo "Usage: $0 path_to_group_names [group.list files...]"
-> +       exit 1
-> +fi
+> +	kernel_version=`uname -r | awk -F. '{print $1}'`
+> +	kernel_patchlevel=`uname -r | awk -F. '{print $2}'`
 > +
-> +groups_doc_file="$1"
-> +shift
-> +
-> +get_group_list() {
-> +       for file in "$@"; do
-> +               while read testname groups; do
-> +                       test -z "${testname}" && continue
-> +                       test "${testname:0:1}" = "#" && continue
-> +
-> +                       echo "${groups}" | tr ' ' '\n'
-> +               done < "${file}"
-> +       done | sort | uniq
+> +	# Kernel version 5.14 onwards allow user xattr on symlink/special files.
+> +	[ $kernel_version -lt 5 ] && return 1
+> +	[ $kernel_patchlevel -lt 14 ] && return 1
+> +	return 0;
 > +}
-> +
-> +ret=0
-> +while read group; do
-> +       if ! grep -q "^${group}[[:space:]]" "${groups_doc_file}"; then
-> +               echo "${group}: group not mentioned in documentation." 1>&2
 
-This message would have been more informative with the offending
-test file.
+We don't do this because code changes get backported to random
+kernels and so the kernel release is not a reliable indicator of
+feature support.
 
-Now after you crunched all the test files into group.list files and
-all the group.list files into a unique group set, this is too late.
-But this same check during generate_groupfile() would have
-been trivial and would allow reporting the offending test.
+Probing the functionality is the only way to reliably detect what a
+kernel supports. That's what we don in all the _requires*()
+functions, which is what this should all be wrapped in.
 
-While we are on the subject of generate_groupfile(), can you please
-explain the rationale behind the method of extracting the test file
-groups by executing the test with GENERATE_GROUPS=yes?
-As opposed to just getting the list of groups on the stop from the file
-using grep?
+> +# Kernel version 5.14 onwards allow user xattr on symlink/special files.
+> +# Do not run this test on newer kernels. Instead run the new test
+> +# which has been written with the assumption that user.* xattr
+> +# will succeed on symlink and special files.
+> +user_xattr_allowed && _notrun "Kernel allows user.* xattrs on symlinks and special files. Skipping this test. Run newer test instead."
 
-Thanks,
-Amir.
+"run a newer test instead" is not a useful error message. Nor do you
+need "skipping this test" - that's exactly what "notrun" means.
+
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
