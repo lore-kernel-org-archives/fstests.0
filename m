@@ -2,104 +2,130 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-11.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 25A4FC433EF
-	for <linux-fstests@archiver.kernel.org>; Fri,  3 Sep 2021 17:48:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AFCFCC433F5
+	for <linux-fstests@archiver.kernel.org>; Sat,  4 Sep 2021 01:29:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id F043461057
-	for <linux-fstests@archiver.kernel.org>; Fri,  3 Sep 2021 17:48:34 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8DDB760F4C
+	for <linux-fstests@archiver.kernel.org>; Sat,  4 Sep 2021 01:29:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1349828AbhICRte (ORCPT
+        id S1350766AbhIDBa4 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 3 Sep 2021 13:49:34 -0400
-Received: from mail.kernel.org ([198.145.29.99]:44086 "EHLO mail.kernel.org"
+        Fri, 3 Sep 2021 21:30:56 -0400
+Received: from mail.kernel.org ([198.145.29.99]:37772 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229929AbhICRtb (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 3 Sep 2021 13:49:31 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 52C4E60E93;
-        Fri,  3 Sep 2021 17:48:31 +0000 (UTC)
+        id S236158AbhIDBas (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 3 Sep 2021 21:30:48 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 5C63B60E76;
+        Sat,  4 Sep 2021 01:29:47 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1630691311;
-        bh=IJ6MVvZ1eCcFVd0Fr03yXsfICZUWofKGe0iqprdx4BM=;
+        s=k20201202; t=1630718987;
+        bh=XT5MqXrLe36wNEwISae6YZOlpRO4za3JIcotCx1Jlck=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=syRHsNbQDIhf+qgjotThF8C07XnNXepJIyE4Fch9uouiWE0sq4ZKLaNiOeq64AzQi
-         wEOrX1rWlndUDAI3nJD80qDdRWksdSPKwONuzDvFrT85EhTf0+tjRwf8hJO9WUFIXW
-         HPHuoAhp+L7lVblA619sNaFgJH3d9twIXPaUJR40OfMe4M7Ztf7xcpTKLcHoX12TsN
-         ZzKk5ln5dRuxVUpaxLGDNzQmThr9OgXchZ6kb3PsSi5ODUD+fSRBTVssibAu+7h8ce
-         CWhZOBan99RMsiBR4XS3RriPVMIu1c9wKuqCqZh+wV1GRaemy/kmX0uHDV3e7SPa/+
-         ZyABwqX2cqqfw==
-Date:   Fri, 3 Sep 2021 10:48:30 -0700
+        b=m8ePx9YgI+7lt5Zte/3JFpSO6GQmgj9s+7/0faOz8NYFS08s8MX0I7EShQX+mef/d
+         i2DlERlpVLcdsGlLQC6a9c0W33Y156xXvFR0lcK4t4ZYiU5dFSBOVQ3juDckRIQ4yF
+         kmbAYtqmgR4oIC7AGilu5wOf1Y9pQQwZu3Tqy3qRa2MAMz5eRLvnogHjT35DjcxyIP
+         N44/U3/QiszHgEAtfE1rkBGxFqCKQr4vdfIiZh25oPSESXuNC5t7OpMP2NDQEbRtHi
+         k+L52EPnu7zHYS+RJbALPM3634glDfV6egGUL1+NhsfOL9yqSQwcDHR5EFPRKZXIhT
+         eX8XeXGA417ZQ==
+Date:   Fri, 3 Sep 2021 18:29:46 -0700
 From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Xiong Zhou <xzhou@redhat.com>
-Cc:     Dave Chinner <david@fromorbit.com>, Theodore Ts'o <tytso@mit.edu>,
-        Pavel Reichl <preichl@redhat.com>, fstests@vger.kernel.org,
-        Luis Chamberlain <mcgrof@kernel.org>
-Subject: Re: [PATCH v3] common/rc: fix MKSWAP_PROG quoting
-Message-ID: <20210903174830.GC9911@magnolia>
-References: <20210831030426.nwcoelcnshq4wrxx@xzhoux.usersys.redhat.com>
- <20210831052632.p4kaygjeujipo4w5@fedora>
- <3d064e8a-514d-4a98-3db1-0de490107368@redhat.com>
- <20210831134207.aa4e26xuyji4npia@fedora>
- <YS5hRsSXNHYQdUv9@mit.edu>
- <20210901054822.phzkg5xqoocx3duq@xzhoux.usersys.redhat.com>
- <20210901071545.GA1756565@dread.disaster.area>
- <20210901094024.424whsgozs5lwyzo@xzhoux.usersys.redhat.com>
+To:     Amir Goldstein <amir73il@gmail.com>
+Cc:     Eryu Guan <guaneryu@gmail.com>,
+        linux-xfs <linux-xfs@vger.kernel.org>,
+        fstests <fstests@vger.kernel.org>, Eryu Guan <guan@eryu.me>
+Subject: Re: [PATCH 6/8] tools: make sure that test groups are described in
+ the documentation
+Message-ID: <20210904012946.GD9911@magnolia>
+References: <163062674313.1579659.11141504872576317846.stgit@magnolia>
+ <163062677608.1579659.1360826362143203767.stgit@magnolia>
+ <CAOQ4uxit3G=0o3nXVFvW740v6Xi-pSn5uHsgKdOvH4ybc+3jKw@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210901094024.424whsgozs5lwyzo@xzhoux.usersys.redhat.com>
+In-Reply-To: <CAOQ4uxit3G=0o3nXVFvW740v6Xi-pSn5uHsgKdOvH4ybc+3jKw@mail.gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Sep 01, 2021 at 05:40:24PM +0800, Xiong Zhou wrote:
-> After commit
->   0e4dd8b9 common/rc: fix ignoring of errors on
-> we are getting this error message when running swapfiles tests:
->   +./common/rc: line 2553: MKSWAP_PROG: command not found
+On Fri, Sep 03, 2021 at 06:38:38AM +0300, Amir Goldstein wrote:
+> > diff --git a/include/buildgrouplist b/include/buildgrouplist
+> > index d898efa3..489de965 100644
+> > --- a/include/buildgrouplist
+> > +++ b/include/buildgrouplist
+> > @@ -6,3 +6,4 @@
+> >  group.list:
+> >         @echo " [GROUP] $$PWD/$@"
+> >         $(Q)$(TOPDIR)/tools/mkgroupfile $@
+> > +       $(Q)$(TOPDIR)/tools/check-groups $(TOPDIR)/doc/group-names.txt $@
 > 
-> Rewrite the line.
+> I would like to argue against checking groups post mkgroupfile
+> and for checking groups during mkgroupfile
+
+Done.
+
+> > diff --git a/tools/check-groups b/tools/check-groups
+> > new file mode 100755
+> > index 00000000..0d193615
+> > --- /dev/null
+> > +++ b/tools/check-groups
+> > @@ -0,0 +1,35 @@
+> > +#!/bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (c) 2021 Oracle.  All Rights Reserved.
+> > +#
+> > +# Make sure that all groups listed in a group.list file are mentioned in the
+> > +# group description file.
+> > +
+> > +if [ -z "$1" ] || [ "$1" = "--help" ]; then
+> > +       echo "Usage: $0 path_to_group_names [group.list files...]"
+> > +       exit 1
+> > +fi
+> > +
+> > +groups_doc_file="$1"
+> > +shift
+> > +
+> > +get_group_list() {
+> > +       for file in "$@"; do
+> > +               while read testname groups; do
+> > +                       test -z "${testname}" && continue
+> > +                       test "${testname:0:1}" = "#" && continue
+> > +
+> > +                       echo "${groups}" | tr ' ' '\n'
+> > +               done < "${file}"
+> > +       done | sort | uniq
+> > +}
+> > +
+> > +ret=0
+> > +while read group; do
+> > +       if ! grep -q "^${group}[[:space:]]" "${groups_doc_file}"; then
+> > +               echo "${group}: group not mentioned in documentation." 1>&2
 > 
-> Signed-off-by: Murphy Zhou <xzhou@redhat.com>
+> This message would have been more informative with the offending
+> test file.
 
-Aha, I was wondering why the test counts were lower after last Sunday's
-rebase.  Works for me, so:
+Hm.  This becomes much easier if I make the _begin_fstest helper do the
+checking of the group names.
 
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+> Now after you crunched all the test files into group.list files and
+> all the group.list files into a unique group set, this is too late.
+> But this same check during generate_groupfile() would have
+> been trivial and would allow reporting the offending test.
+> 
+> While we are on the subject of generate_groupfile(), can you please
+> explain the rationale behind the method of extracting the test file
+> groups by executing the test with GENERATE_GROUPS=yes?
+> As opposed to just getting the list of groups on the stop from the file
+> using grep?
+
+Well... now that you point that out, it's so that we can put in custom
+logic like checking group names. ;)
 
 --D
 
-> ---
 > 
-> Thanks all for the suggestions!
-> 
-> v2:
->   rewrite the line and add a filter
->   source filters for generic/643
-> v3:
->   drop the filter, use grep
-> 
->  common/rc | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
-> 
-> diff --git a/common/rc b/common/rc
-> index 46b6b220..00f3023f 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -2550,7 +2550,8 @@ _format_swapfile() {
->  	$CHATTR_PROG +C "$fname" > /dev/null 2>&1
->  	_pwrite_byte 0x61 0 "$sz" "$fname" >> $seqres.full
->  	# Ignore permission complaints on filesystems that don't support perms
-> -	$(MKSWAP_PROG "$fname" 2> >(grep -v 'insecure permission' >&2)) >> $seqres.full
-> +	$MKSWAP_PROG "$fname" 2>&1 >> $seqres.full | \
-> +		grep -v "insecure permission"
->  }
->  
->  _swapon_file() {
-> -- 
-> 2.20.1
-> 
+> Thanks,
+> Amir.
