@@ -2,175 +2,103 @@ Return-Path: <fstests-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 26F67C433F5
-	for <linux-fstests@archiver.kernel.org>; Sun,  5 Sep 2021 15:31:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 22A7CC433F5
+	for <linux-fstests@archiver.kernel.org>; Tue,  7 Sep 2021 07:41:22 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 025C760F51
-	for <linux-fstests@archiver.kernel.org>; Sun,  5 Sep 2021 15:31:44 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id F1690610A3
+	for <linux-fstests@archiver.kernel.org>; Tue,  7 Sep 2021 07:41:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236937AbhIEPcr (ORCPT
+        id S240047AbhIGHm0 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 5 Sep 2021 11:32:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35722 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229566AbhIEPcr (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 5 Sep 2021 11:32:47 -0400
-Received: from mail-wm1-x335.google.com (mail-wm1-x335.google.com [IPv6:2a00:1450:4864:20::335])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B4907C061575
-        for <fstests@vger.kernel.org>; Sun,  5 Sep 2021 08:31:43 -0700 (PDT)
-Received: by mail-wm1-x335.google.com with SMTP id c8-20020a7bc008000000b002e6e462e95fso3166434wmb.2
-        for <fstests@vger.kernel.org>; Sun, 05 Sep 2021 08:31:43 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=message-id:date:from:to:subject:mime-version:content-disposition;
-        bh=KWp1KEvzoysnkVGOESp3Rb0umBg8F9dciL/F0kA8Fq4=;
-        b=WOeGui7DS5ELNK1/0OwUSVp1Lx+OLT05ET7trVWBS2gw8PphPPokUjgJ6E7HpDLUQM
-         3w78AVXLn3GuQaE6gtvRnufoqCdslOFgme6kjuCw28QfQOKR7QYu2TndoRbyv0oyws6V
-         tDKW1u0gFbyjDaMYg5o+6WwjR12mI6TV9FKcb7ZUehen+YzbvV1JpU/RgqNjUkR4WQg3
-         z9KYFLWUk1xsfZGWBnK7suqordrSntUEPzDjfx56L4aAaMYzYK98seLGxIJEmCM5qG0T
-         apOnYTt+1xV4kmjHnBQM3cP/5Pa8XGbJ5gKHongvGrfuI4FX153vP0f9oqKRsjd+dUJv
-         CjPw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:message-id:date:from:to:subject:mime-version
-         :content-disposition;
-        bh=KWp1KEvzoysnkVGOESp3Rb0umBg8F9dciL/F0kA8Fq4=;
-        b=LR5EfUCWe2VO8wcykVKvTu4oMnI/9NHUvdUIuFPuuMOmvoERNKXndvuK5ZMQk+VRRx
-         pxFYVsRZXBwkasjxE/WllAAWs+ZZEDu/HfopTIyVkt0ODaTltYcpEkH1LUWCcq7fKBbG
-         CKt20h4d6yN+izR38SLbE+re/0aec06paIqr6dFYmyahXHplNx4E3PCG8Homjo3y6Gxe
-         DcspwaENn/XXdJKCnYhYkOINQD9L1QD+FJGzAf1seRNxNsFm7ElxLoy1Vl3nBSxLa07z
-         nHbsj8i6P6mUmVAYZIk2TGn7tEt3uw9h5ynUeAOoLQLbECNDvjvfohzEdG+/zTIBu4cY
-         f7fg==
-X-Gm-Message-State: AOAM531TalDmNus5nnlbAuU1+i/KaQFVyJYPq2QQb1Wgsx+3LEckcL6i
-        xVnZIHF4GHcHBhnTLgSMd6/D1QBfQQc=
-X-Google-Smtp-Source: ABdhPJx+g5sp6hyVroOxkuYsW+y8/bUQXCKb2G2A6nvQx+slNqMOcbzG5GyZ6Qg1uTVs11b3KEdPiA==
-X-Received: by 2002:a05:600c:b46:: with SMTP id k6mr7501927wmr.35.1630855902093;
-        Sun, 05 Sep 2021 08:31:42 -0700 (PDT)
-Received: from localhost ([8.208.10.148])
-        by smtp.gmail.com with ESMTPSA id q13sm4798159wmj.46.2021.09.05.08.31.40
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 05 Sep 2021 08:31:41 -0700 (PDT)
-Message-ID: <6134e2dd.1c69fb81.7d410.682f@mx.google.com>
-Date:   Sun, 05 Sep 2021 23:31:37 +0800
-From:   Eryu Guan <guaneryu@gmail.com>
+        Tue, 7 Sep 2021 03:42:26 -0400
+Received: from esa1.hgst.iphmx.com ([68.232.141.245]:17427 "EHLO
+        esa1.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S240073AbhIGHmZ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 7 Sep 2021 03:42:25 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1631000479; x=1662536479;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=3KzcvPdXhnAtt9cPAgowHM5QfbW1GbV8qpnnLu3qQG0=;
+  b=b3aziK6nhGIinMlXSapGq2+WF5yjJKdzfFHtLfk7GHEABXjYaJnUE9NU
+   J9U3oJCTHBgJW/4EKczeAD2UIOWIM0hwqgpoI6s5sxhhWkU748ePfqEs5
+   9dH9dU7SYGWgfQwGmKfhEhtPgtokxYab6SmddVVWGSI6znIc8pOfbFq3z
+   JTC1OFLfD9GjjSNWCkiEqkFh4vw1EPDMHlpFhhOyiJs2j/HKQm5inusTX
+   W2WxeCk0xY/juJHH2RYa6Uy//WCLeNyeKN8FkwNsnebhPqDkzMMXvrRI/
+   1Un6xpO7gADDCjSWC7HxG4mvSzXZxkeo3UMYwbDA/0bE9wa1TvvBpSEKO
+   Q==;
+X-IronPort-AV: E=Sophos;i="5.85,274,1624291200"; 
+   d="scan'208";a="290967932"
+Received: from h199-255-45-14.hgst.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
+  by ob1.hgst.iphmx.com with ESMTP; 07 Sep 2021 15:41:18 +0800
+IronPort-SDR: VwbOWsUeRHis2N5BSD3aeuUXHz0FFX6uz7V8nDgg6vEj5ikzr1+rkvHbcncbKfN0eE9yWrX4S5
+ WHw0xq6SSdzmES7+cq2IE0f89F7w6HfGGy9N+GsLD3shRDB/gt8cwZTwuTxK8Su7goP29+1gSP
+ ImMFad0mZzkHfNPbZGsfAPVoOqgjWh3H9V2aS7CcTl6QKSDYue4QE26tZApBB2mG3oc6Sc1oPd
+ pWz8XIuVUl7Sr9hnqUMnFiShUD3VVW9zw2V7TU8yLFbz1Rtvz0DzMl+2LE6RACYXPpvVyIEd+7
+ q8JZLrZhziK0p62yw+P7oy1s
+Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
+  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Sep 2021 00:17:56 -0700
+IronPort-SDR: EbhXhxoq/oGEmBeSfYnYqZUD4+Mz9nXeqWsjf2t8Okb3lc1CjWrWhIC5lFVWhQdT9mAKp/PA/L
+ SopLR5CCbBo4BL2bu2dc82ZSs5MEpoMMDdQ4Gj13Fhbrt3mleLMuoOOvMMehd8wU8sW2exGWtJ
+ sSxSlHSoPyEEKKtazEw4le69sN3pUoz65fPGcC0VpuJkpDP0dVi+dAfeFWk6ChYB7YoxlmBnaD
+ GCPr6eb1SmUEBxFOw9HaqjREqSEVTaIAKH3fz9MLuVOZiQOrDSYRVBIs63+qzY8eLHNKNFacct
+ OqA=
+WDCIronportException: Internal
+Received: from shindev.dhcp.fujisawa.hgst.com (HELO shindev.fujisawa.hgst.com) ([10.149.52.173])
+  by uls-op-cesaip02.wdc.com with ESMTP; 07 Sep 2021 00:41:17 -0700
+From:   Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
 To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: master branch updated to c6c74bb116bd
+Cc:     Naohiro Aota <naohiro.aota@wdc.com>,
+        Johannes Thumshirn <johannes.thumshirn@wdc.com>,
+        Damien Le Moal <Damien.LeMoal@wdc.com>,
+        Shinichiro Kawasaki <shinichiro.kawasaki@wdc.com>
+Subject: [PATCH] common/rc: Check SCRATCH_DEV in _require_dm_target()
+Date:   Tue,  7 Sep 2021 16:41:16 +0900
+Message-Id: <20210907074116.1799114-1-shinichiro.kawasaki@wdc.com>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="RI9Ly2gDKcwz"
-Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+When SCRATCH_DEV is not set and the test case does not call
+_require_scratch*() before _require_dm_target(), _require_block_device()
+called from _require_dm_target() fails to evaluate SCRATCH_DEV and
+results in the test case failure. This failure was observed with
+generic/628 and generic/629.
 
---RI9Ly2gDKcwz
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+To avoid the failures, check SCRATCH_DEV in _require_dm_target(). With
+this change, test cases do not need to call _require_scratch*() before
+_require_dm_target(). To check SCRATCH_DEV, use simple variable check
+instead of _require_scratch*() helper functions, so that each test case
+can choose an appropriate function from _require_scratch*().
 
-Hi all,
+Signed-off-by: Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
+---
+ common/rc | 3 +++
+ 1 file changed, 3 insertions(+)
 
-The master branch of the xfstests repository at:
+diff --git a/common/rc b/common/rc
+index dda5da06..b4966af7 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1971,6 +1971,9 @@ _require_dm_target()
+ 
+ 	# require SCRATCH_DEV to be a valid block device with sane BLKFLSBUF
+ 	# behaviour
++	if [ -z "$SCRATCH_DEV" ]; then
++		_notrun "This test requires a valid \$SCRATCH_DEV for dm $target"
++	fi
+ 	_require_block_device $SCRATCH_DEV
+ 	_require_sane_bdev_flush $SCRATCH_DEV
+ 	_require_command "$DMSETUP_PROG" dmsetup
+-- 
+2.31.1
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-have just been updated. This is mainly a bug-fix update, and most of the bugs
-were introduced recently, my apology for not catching some of the obvious bugs
-on review..
-
-One notable change is that we finally dropped xfs_check in
-_check_xfs_filesystem, unless you have FORCE_XFS_CHECK_PROG=yes set.
-
-The two new tests are btrfs/247 and generic/648, and currently generic/648
-fails on btrfs with latest v5.14 kernel.
-
-Thanks,
-Eryu
-
-The new head of the master branch is commit:
-
-c6c74bb116bd xfs/449: filter out deprecation warnings from mkfs
-
-New commits:
-
-Darrick J. Wong (4):
-      [591c8fb57d07] common/xfs: skip xfs_check unless the test runner forces us to
-      [a468c7ebc3c0] generic/643: fix weird problems on 64k-page arm systems
-      [0c4a002cf954] generic: test shutdowns of a nested filesystem
-      [c6c74bb116bd] xfs/449: filter out deprecation warnings from mkfs
-
-Dave Chinner (2):
-      [6d2f9108631d] generic/081: clean up snapshot devices correctly
-      [a1b220feba1d] fstests: which has been deprecated by Debian
-
-Nikolay Borisov (2):
-      [83bc5abe4a02] common/renameat2: Make _rename_tests_source_dest take flags as 4th arguement
-      [281b2bd374e2] btrfs: test for rename/exchange behavior between subvolumes
-
-Xiong Zhou (1):
-      [1506607a5c2b] common/rc: fix MKSWAP_PROG quoting
-
-Yang Xu (4):
-      [e5ccb25d0129] src/idmapped-mounts: Fix an error for the loop initialization declaration
-      [feee8000cb94] configure.ac: Fix uncorrect detection because of linux/btrfs.h
-      [94252bca893a] idmapped-mounts: Use renameat instead of renameat2
-      [83f9f983d95a] idmapped-mounts: Fix build error because of undefined reallocarray
-
-
-Code Diffstat:
-
- README                                |   4 +
- common/rc                             |  29 +++++++-
- common/renameat2                      |   5 +-
- common/xfs                            |  12 ++-
- configure.ac                          |  41 ++++++++--
- src/fill2fs                           |   2 +-
- src/idmapped-mounts/idmapped-mounts.c |  58 ++++++++-------
- src/idmapped-mounts/utils.c           |   3 +-
- tests/btrfs/247                       |  60 +++++++++++++++
- tests/btrfs/247.out                   |  54 ++++++++++++++
- tests/ext4/006                        |   2 +-
- tests/generic/081                     |   2 +
- tests/generic/128                     |   2 +-
- tests/generic/452                     |   2 +-
- tests/generic/643                     |  33 ++++++---
- tests/generic/643.out                 |   2 +-
- tests/generic/648                     | 136 ++++++++++++++++++++++++++++++++++
- tests/generic/648.out                 |   2 +
- tests/xfs/293                         |   2 +-
- tests/xfs/449                         |   2 +-
- tests/xfs/505                         |   2 +-
- tests/xfs/514                         |   2 +-
- tests/xfs/515                         |   2 +-
- 23 files changed, 394 insertions(+), 65 deletions(-)
---
-Eryu Guan
-guaneryu@gmail.com
-
---RI9Ly2gDKcwz
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAmE04psACgkQJlKqKVyP
-52OwZRAAo29VWcvClZAwXP2bEjlCnS1ugNnEg3spd+A6fz/8RKSOlnA/1V/D6VC8
-hL5mOwIDO1Rj+veidJfvgmsa9PhDwB5M9Bwvj+l+B7skPsQaC6jG2QRG5GOtJ5n0
-07ftmyQTbiY5B7dlum8PxsPGj9ZhPi4aXx+uK3Fv/ow6vsynyBOu9Tbj5IFU4S/4
-+e+o4DhVdVdvlWoX/vWejJjrSG6IdPislQlCBCzU3NeAuPXWtHJWCczZtGOcVEQP
-aprQEiky/eU3NGR0Xb6nBUNshPq1dYzSVAggpCnJ89uvRfwOnl6QMHAoqnstnYGV
-vtTV/VEGPW0HViGv1kTGESH6PQvcm2/77XCXCaAL+q8xMMFgWLQoQrh7vkqZx71B
-HS7cjpFcG5HL+d5RsGnM16Dgp1creUGKeumd4tcqByvlcB6ZkG0bhUtpooHztdjS
-pb6e1DPqVFNZHgAW50jxifbaWMlzfN1pX8GGAnc9mF+NLDLMM9NwUWivGKcGVe3P
-KHWhMdactEMP7fRAPtkkYDII3Po2pKJTUpIFXil36pb0jyl+CyDnNUGiq+7n7XcY
-Jp5MwmgPXC5ggvbP5WcUmRMNyOIMWuDLknuGuegZdx+9CGQYHtN/3Xldrwhs0cuR
-Vz8TJFo3wuAhKc2kId56BcMnk1yJ7mMv/aGr56FYdbbhnQTb++A=
-=61FW
------END PGP SIGNATURE-----
-
---RI9Ly2gDKcwz--
